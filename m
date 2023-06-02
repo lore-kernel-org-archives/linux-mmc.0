@@ -2,112 +2,171 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FC6FC7EE2A
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 08:26:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC24FC77B7A
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 08:27:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234684AbjFBI0h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 2 Jun 2023 04:26:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37384 "EHLO
+        id S234713AbjFBI1e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Jun 2023 04:27:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37600 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234598AbjFBIZ7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 04:25:59 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BAB6E43;
-        Fri,  2 Jun 2023 01:25:34 -0700 (PDT)
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3528CbSC005337;
-        Fri, 2 Jun 2023 08:25:23 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=qcppdkim1;
- bh=G+/BFNQqbIk4keLcvXHrgHobbYIWEyiZGd+vqYkLm3g=;
- b=myZT/XvJCEiqZtbNmg5Rugrv7HQ7GQizcXf3BPiscebEY5WJSgp2VKCOe/k8IX8jEUDz
- BA14OHbmyq7O/KO3GzTW8aUiBEmzQyJGMSxvsiuYjWH6jO5Ud4CI9mI3zdyTXBeJr8BR
- O1svLuluRlhM7vv8gmHT8Ao60ME9IxV9JTeR0KsVPjPsxFxN0AMeBfZWeywycYl2VD6A
- v/G1HJprk9MvAajA1buJe91+LxOkUotFSTAGjdETuADmtGJ/YpWEiIIjF6a83uf6Xap5
- NXWVcLj5Iuz4k2wfmrLgvG6uTdnpm5kdsMCyZJ0hYDVUU1A9cqgBASjHxndZ7D8UyxYA hQ== 
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qy1bch5de-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 02 Jun 2023 08:25:23 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3528PMQS016585
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 2 Jun 2023 08:25:22 GMT
-Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.42; Fri, 2 Jun 2023 01:25:15 -0700
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-To:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
-        <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>,
-        <quic_srichara@quicinc.com>
-Subject: [PATCH V8 8/8] arm64: defconfig: Enable IPQ5018 SoC base configs
-Date:   Fri, 2 Jun 2023 13:53:25 +0530
-Message-ID: <20230602082325.1445261-9-quic_srichara@quicinc.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230602082325.1445261-1-quic_srichara@quicinc.com>
-References: <20230602082325.1445261-1-quic_srichara@quicinc.com>
+        with ESMTP id S234629AbjFBI1F (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 04:27:05 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A62410DF
+        for <linux-mmc@vger.kernel.org>; Fri,  2 Jun 2023 01:26:24 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id 2adb3069b0e04-4f4bdcde899so2333490e87.0
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Jun 2023 01:26:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1685694382; x=1688286382;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=SH+XgwSwmVykCt6k705IeR4vpGlDvItlRo4YBIrE2zM=;
+        b=aqiWVm4c8Hn8cSRfsEJ/hmI3VoIAlmpI9kl1DqSIqgEaURRaI7eKgth0koicQfVIfe
+         bCG9Lwed6N8mrzvAYua8KP2qCKJjzh164f0siWfvkIYThmwyY0BCLWiqqoq39w88sgua
+         VgPuHyr6sRb5mH03MbTPb4NFu2bPSfIPF4KLIkqCnNBfZRpNcbJUxkoRCuDIWl69UukN
+         QCk29QYHTBnJDtsxX/4Fp1eFcrLQJz5FYcSWvyO3VHWzErfyb9dro5NyUHyJyYj8u/ly
+         CYXn2i6mVLKymc8LiCFVhNufS4gmv927LZgCF0HxxJETkeEi31GEJGQXCAKOiZAQf1ab
+         /dcw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1685694382; x=1688286382;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=SH+XgwSwmVykCt6k705IeR4vpGlDvItlRo4YBIrE2zM=;
+        b=ImAiR7vntTaCasD+FnU0N3z77ZXAgg33CJQdVULPOR8hL0XTfIEPHWfv9YSrUcbPVM
+         gdWfTmW0AziptIX6YXLUj30laKIokzTbmDO0WTlW2jYxp9ZNJZB3Czpp+msqXREm/uxw
+         qFhdyQEVHqdh3kWjeVnL+AZRXDdsiJSSoGta0Vq1ycLYs4eG5eLAym81Kx4NMukPMjoV
+         YShwLtDUm+YINOGKscGnx1nL3U2lcpB1Sc2aYGzDqyVxgaawh5zGNCvqLDSgRWQOmil5
+         nNYWD6z1yCqK/8gS1WyvqH273x2jiurkTWWkzxdCNqs2Ldp369lPJM7FhG7+3FrROoqS
+         u1bQ==
+X-Gm-Message-State: AC+VfDxzfjCjeR1CXyNyAYbEK4s3SKwWADgs+zyer/nQ4VDCq5n5Azr1
+        I3zO4XXNNbAkdJtRWV0Hhgp7DjiXxUVl+XQH6xzIgQ==
+X-Google-Smtp-Source: ACHHUZ4iDMKF9FrTWDJm5SWHKTXyozoTseWA3wZDneLvRJLbLpNAwsdhUZz9tXQvVuNWeiqCEhZWofU8BPErRbMrnZM=
+X-Received: by 2002:a2e:9a8e:0:b0:2b1:b040:b5ff with SMTP id
+ p14-20020a2e9a8e000000b002b1b040b5ffmr465605lji.4.1685694382379; Fri, 02 Jun
+ 2023 01:26:22 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: ZR5OhF4H0v556CG_U2f2XCJKGOk6LBQn
-X-Proofpoint-GUID: ZR5OhF4H0v556CG_U2f2XCJKGOk6LBQn
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-02_05,2023-05-31_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 spamscore=0
- malwarescore=0 bulkscore=0 mlxscore=0 lowpriorityscore=0 suspectscore=0
- mlxlogscore=823 adultscore=0 clxscore=1015 priorityscore=1501 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2304280000
- definitions=main-2306020064
+References: <20220405093759.1126835-1-alex.bennee@linaro.org>
+ <20230531191007.13460-1-shyamsaini@linux.microsoft.com> <SN7PR11MB6850DA4A185E3429B62531CD84499@SN7PR11MB6850.namprd11.prod.outlook.com>
+ <CAC_iWjKAdimEH0SsC_z9QuFS4sGLp2BVzx03s+RKvcLXY25kuQ@mail.gmail.com> <CAFA6WYPKeJYTzvnZkoL_dw6uXSkhAh6uxoEOWHYU7oLNRDRWaA@mail.gmail.com>
+In-Reply-To: <CAFA6WYPKeJYTzvnZkoL_dw6uXSkhAh6uxoEOWHYU7oLNRDRWaA@mail.gmail.com>
+From:   Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date:   Fri, 2 Jun 2023 11:25:46 +0300
+Message-ID: <CAC_iWjLOhUvp5ggCCkHN5MRNfB_h6FZ2Z14yrtR3aqGn0Ovxig@mail.gmail.com>
+Subject: Re: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+To:     Sumit Garg <sumit.garg@linaro.org>
+Cc:     "Zhu, Bing" <bing.zhu@intel.com>,
+        Shyam Saini <shyamsaini@linux.microsoft.com>,
+        "alex.bennee@linaro.org" <alex.bennee@linaro.org>,
+        "code@tyhicks.com" <code@tyhicks.com>,
+        "Matti.Moell@opensynergy.com" <Matti.Moell@opensynergy.com>,
+        "arnd@linaro.org" <arnd@linaro.org>,
+        "hmo@opensynergy.com" <hmo@opensynergy.com>,
+        "joakim.bech@linaro.org" <joakim.bech@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+        "maxim.uvarov@linaro.org" <maxim.uvarov@linaro.org>,
+        "ruchika.gupta@linaro.org" <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "Huang, Yang" <yang.huang@intel.com>,
+        "jens.wiklander@linaro.org" <jens.wiklander@linaro.org>,
+        "op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Enables clk & pinctrl related configs
+On Thu, 1 Jun 2023 at 08:49, Sumit Garg <sumit.garg@linaro.org> wrote:
+>
+> On Thu, 1 Jun 2023 at 11:02, Ilias Apalodimas
+> <ilias.apalodimas@linaro.org> wrote:
+> >
+> > Hi Bing
+> >
+> > On Thu, 1 Jun 2023 at 04:03, Zhu, Bing <bing.zhu@intel.com> wrote:
+> > >
+> > > As an alternative, Is it possible to change ftpm design not to depend=
+ on RPMB access at the earlier/boot stage? Because to my understanding, typ=
+ically PCRs don't require persistent/NV storage (for example, before RPMB o=
+r tee-supplicant is ready, use TEE memory instead as temporary storage)
+> >
+> > I am not entirely sure this will solve our problem here.  You are
+> > right that we shouldn't depend on the supplicant to extend PCRs. But
+> > what happens if an object is sealed against certain PCR values?  We
+> > are back to the same problem
+>
+> +1
+>
+> Temporary storage may be a stop gap solution for some use-cases but
+> having a fast path access to RPMB via kernel should be our final goal.
+> I would suggest we start small with the MMC subsystem to expose RPMB
+> access APIs for OP-TEE driver rather than a complete RPMB subsystem.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
----
- arch/arm64/configs/defconfig | 3 +++
- 1 file changed, 3 insertions(+)
+I discussed with the OP-TEE maintainers about adding parts of the
+supplicant in the kernel.  The supplicant 'just' sends an ioctl to
+store/read stuff anyway.  So it would make sense to have a closer and
+see if that looks reasonable.
+Thanks
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 53fb665078db..58fe82ee5b53 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -556,6 +556,7 @@ CONFIG_PINCTRL_IMX8ULP=y
- CONFIG_PINCTRL_IMX93=y
- CONFIG_PINCTRL_MSM=y
- CONFIG_PINCTRL_IPQ8074=y
-+CONFIG_PINCTRL_IPQ5018=y
- CONFIG_PINCTRL_IPQ5332=y
- CONFIG_PINCTRL_IPQ6018=y
- CONFIG_PINCTRL_IPQ9574=y
-@@ -1165,6 +1166,8 @@ CONFIG_QCOM_CLK_SMD_RPM=y
- CONFIG_QCOM_CLK_RPMH=y
- CONFIG_IPQ_APSS_6018=y
- CONFIG_IPQ_GCC_5332=y
-+CONFIG_IPQ_APSS_5018=y
-+CONFIG_IPQ_GCC_5018=y
- CONFIG_IPQ_GCC_6018=y
- CONFIG_IPQ_GCC_8074=y
- CONFIG_IPQ_GCC_9574=y
--- 
-2.34.1
+/Ilias
 
+>
+> -Sumit
+>
+> >
+> > Thanks
+> > /Ilias
+> > >
+> > > Bing
+> > >
+> > > IPAS Security Brown Belt (https://www.credly.com/badges/69ea809f-3a96=
+-4bc7-bb2f-442c1b17af26)
+> > > System Software Engineering
+> > > Software and Advanced Technology Group
+> > > Zizhu Science Park, Shanghai, China
+> > >
+> > > -----Original Message-----
+> > > From: Shyam Saini <shyamsaini@linux.microsoft.com>
+> > > Sent: Thursday, June 1, 2023 3:10 AM
+> > > To: alex.bennee@linaro.org
+> > > Cc: code@tyhicks.com; Matti.Moell@opensynergy.com; arnd@linaro.org; Z=
+hu, Bing <bing.zhu@intel.com>; hmo@opensynergy.com; ilias.apalodimas@linaro=
+.org; joakim.bech@linaro.org; linux-kernel@vger.kernel.org; linux-mmc@vger.=
+kernel.org; linux-scsi@vger.kernel.org; maxim.uvarov@linaro.org; ruchika.gu=
+pta@linaro.org; Winkler, Tomas <tomas.winkler@intel.com>; ulf.hansson@linar=
+o.org; Huang, Yang <yang.huang@intel.com>; sumit.garg@linaro.org; jens.wikl=
+ander@linaro.org; op-tee@lists.trustedfirmware.org
+> > > Subject: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+> > >
+> > > Hi Alex,
+> > >
+> > > [ Resending, Sorry for the noise ]
+> > >
+> > > Are you still working on it or planning to resubmit it ?
+> > >
+> > > [1] The current optee tee kernel driver implementation doesn't work w=
+hen IMA is used with optee implemented ftpm.
+> > >
+> > > The ftpm has dependency on tee-supplicant which comes once the user s=
+pace is up and running and IMA attestation happens at boot time and it requ=
+ires to extend ftpm PCRs.
+> > >
+> > > But IMA can't use PCRs if ftpm use secure emmc RPMB partition. As opt=
+ee can only access RPMB via tee-supplicant(user space). So, there should be=
+ a fast path to allow optee os to access the RPMB parititon without waiting=
+ for user-space tee supplicant.
+> > >
+> > > To achieve this fast path linux optee driver and mmc driver needs som=
+e work and finally it will need RPMB driver which you posted.
+> > >
+> > > Please let me know what's your plan on this.
+> > >
+> > > [1] https://optee.readthedocs.io/en/latest/architecture/secure_storag=
+e.html
+> > >
+> > > Best Regards,
+> > > Shyam
