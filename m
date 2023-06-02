@@ -2,163 +2,142 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A95F8C7EE32
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 18:26:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6EF9C77B7A
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 03:21:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232506AbjFAS0a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jun 2023 14:26:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59850 "EHLO
+        id S233016AbjFBDVg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jun 2023 23:21:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232222AbjFAS01 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 14:26:27 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDF05193;
-        Thu,  1 Jun 2023 11:26:12 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 57802648CF;
-        Thu,  1 Jun 2023 18:26:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EDE23C433EF;
-        Thu,  1 Jun 2023 18:26:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1685643971;
-        bh=TBbu7osvFBKuf66WBcBQLyIQCCJTf+5qdAP5tofTIaE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=A9cmwW9ZU12QuOvLrFst3R1eecB/8LMV1FSykLyAWafIGCHBHtUxGHDDh+w2tozEN
-         guuJt/TO+te54HWzOFDRDpuYAUmqtNMFaIa/jK1bCdncLCkd2CRSe+EMKrItwoqTdu
-         Ri+VlwuL5pq3ChHAptv2CHRF9T4jNMUpUqOXZSxwrzJ4MfRrQC37bwVgo02bJvSA3a
-         F9uK8PF4RIU1kvZ7oDBgC4kljOq9Ec5nAJlv0W2mX0ZCRPX3XphjJ/uyCiJDBa/PYd
-         cX/uuGz+t6YmYK9/UCGKYH4pidln7BunKPHyJIk79yq3C7vtNGhIexTE9hulS7Ke/k
-         cV3Lr97berdVg==
-Date:   Thu, 1 Jun 2023 19:26:03 +0100
-From:   Conor Dooley <conor@kernel.org>
-To:     Oleksij Rempel <o.rempel@pengutronix.de>
-Cc:     Abel Vesa <abelvesa@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
-        Peng Fan <peng.fan@nxp.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Michael Trimarchi <michael@amarulasolutions.com>,
-        Mark Brown <broonie@kernel.org>,
-        Dario Binacchi <dario.binacchi@amarulasolutions.com>,
-        Anson Huang <Anson.Huang@nxp.com>, Marek Vasut <marex@denx.de>,
-        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v1 4/7] dt-bindings: crypto: fsl-dcp: Add i.MX6SL,
- i.MX6SLL, and i.MX6ULL support
-Message-ID: <20230601-deranged-whole-5f5d5b2b6db1@spud>
-References: <20230601101451.357662-1-o.rempel@pengutronix.de>
- <20230601101451.357662-5-o.rempel@pengutronix.de>
+        with ESMTP id S229598AbjFBDVe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 23:21:34 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3D89107;
+        Thu,  1 Jun 2023 20:21:33 -0700 (PDT)
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3523DM4L010027;
+        Fri, 2 Jun 2023 03:21:19 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=qO4SVk1ZImVpFaqBhVfkmc9Z+Cv6JcVlWb/AZgjdGAY=;
+ b=Rt79VxHm9h/JkhR46fQufr4f3kXh7LYUH/bDRenb4KhS4E0IcOPgI1CpDA8E2Naimr1/
+ W5HJUdwLczufIP6KCkT57h7gU8S/rbAUuJvXliUVajwpDO+OOhtoNEXi8ANDDBvi9OnB
+ sZH+agEqeJ4k6SMHANQh0aG44ZP5jaihxz6bZGmPco2turb22WSknc2OH0DVyuh0cc1r
+ 6bcfkOBBS15bibFT/nFeUlzJ7Y7fP4H+yBdtbT1AojAcmKE+CDWPZhFNpCtvAM8Lvzny
+ /RIQB7P7A1Frqr6VP2pj0vBzgnfvomZQKcCjZbXtWitu+RE2usvv65u2OBfZBMiacDuA Sg== 
+Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qxugr9nyw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 02 Jun 2023 03:21:18 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3523LHgK012273
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 2 Jun 2023 03:21:17 GMT
+Received: from [10.216.26.36] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Thu, 1 Jun 2023
+ 20:21:11 -0700
+Message-ID: <fb95bebd-52ec-eda5-22c3-c3e494e29674@quicinc.com>
+Date:   Fri, 2 Jun 2023 08:51:07 +0530
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="XbJH3SC5GDn8KS5H"
-Content-Disposition: inline
-In-Reply-To: <20230601101451.357662-5-o.rempel@pengutronix.de>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        <andy.shevchenko@gmail.com>
+CC:     <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>
+References: <20230519125409.497439-1-quic_srichara@quicinc.com>
+ <20230519125409.497439-5-quic_srichara@quicinc.com>
+ <CAHp75VfVx+oGYKcija3h9-eWc6jggMx8p5SAQTEHTBEbjTaJKw@mail.gmail.com>
+ <1823419a-6bb4-03f7-d5ae-e32204c5e598@quicinc.com>
+ <ZHTK7uEzO7kcx_cV@surfacebook>
+ <aefd0df1-8dfb-1b69-589b-974dea312845@quicinc.com>
+ <664940c3-9ec1-b4bd-9db5-fa3529e3d1ff@linaro.org>
+ <8146f367-c539-bea5-12b6-424213018488@quicinc.com>
+ <eb109116-94eb-5b6d-0049-7bb31feada36@linaro.org>
+ <33979417-2c0c-5474-23e0-7e72add99873@linaro.org>
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <33979417-2c0c-5474-23e0-7e72add99873@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: vp_2jjG7MS1Kcj8RfbOAJlefqzJHJQEo
+X-Proofpoint-ORIG-GUID: vp_2jjG7MS1Kcj8RfbOAJlefqzJHJQEo
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
+ definitions=2023-06-02_01,2023-05-31_03,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ spamscore=0 mlxscore=0 clxscore=1015 impostorscore=0 adultscore=0
+ malwarescore=0 phishscore=0 bulkscore=0 mlxlogscore=625 suspectscore=0
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2304280000 definitions=main-2306020023
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---XbJH3SC5GDn8KS5H
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jun 01, 2023 at 12:14:48PM +0200, Oleksij Rempel wrote:
-> Add support for i.MX6SL, i.MX6SLL, and i.MX6ULL to the 'fsl-dcp' binding
-> to address the following dtbs_check warning:
->   imx6ull-jozacp.dtb: crypto@2280000: compatible:0: 'fsl,imx6ull-dcp' is
->     not one of ['fsl,imx23-dcp', 'fsl,imx28-dcp']
->   From schema: Documentation/devicetree/bindings/crypto/fsl-dcp.yaml
->=20
->   imx6ull-jozacp.dtb: crypto@2280000: compatible: ['fsl,imx6ull-dcp',
->     'fsl,imx28-dcp'] is too long
->   From schema: Documentation/devicetree/bindings/crypto/fsl-dcp.yaml
->=20
-> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
-> ---
->  .../devicetree/bindings/crypto/fsl-dcp.yaml   | 19 ++++++++++++++++---
->  1 file changed, 16 insertions(+), 3 deletions(-)
->=20
-> diff --git a/Documentation/devicetree/bindings/crypto/fsl-dcp.yaml b/Docu=
-mentation/devicetree/bindings/crypto/fsl-dcp.yaml
-> index 99be01539fcd..8af393b9f3ca 100644
-> --- a/Documentation/devicetree/bindings/crypto/fsl-dcp.yaml
-> +++ b/Documentation/devicetree/bindings/crypto/fsl-dcp.yaml
-> @@ -11,9 +11,22 @@ maintainers:
-> =20
->  properties:
->    compatible:
-> -    enum:
-> -      - fsl,imx23-dcp
-> -      - fsl,imx28-dcp
-> +    oneOf:
-> +      - const: fsl,imx23-dcp
-> +      - const: fsl,imx28-dcp
-> +      - const: fsl,imx6sl-dcp
-> +      - const: fsl,imx6sll-dcp
-> +      - const: fsl,imx6ull-dcp
+On 6/1/2023 6:57 PM, Krzysztof Kozlowski wrote:
+> On 01/06/2023 13:53, Krzysztof Kozlowski wrote:
+>> On 01/06/2023 13:41, Sricharan Ramabadhran wrote:
+>>>
+>>>
+>>> On 6/1/2023 3:21 PM, Krzysztof Kozlowski wrote:
+>>>> On 01/06/2023 11:50, Sricharan Ramabadhran wrote:
+>>>>>
+>>>>>
+>>>>> On 5/29/2023 9:25 PM, andy.shevchenko@gmail.com wrote:
+>>>>>> Mon, May 29, 2023 at 03:58:09PM +0530, Sricharan Ramabadhran kirjoitti:
+>>>>>>> On 5/20/2023 12:17 AM, Andy Shevchenko wrote:
+>>>>>>>> On Fri, May 19, 2023 at 3:55 PM Sricharan Ramabadhran
+>>>>>>>> <quic_srichara@quicinc.com> wrote:
+>>>>>>
+>>>>>> ...
+>>>>>>
+>>>>>>>>       depends on OF || COMPILE_TEST
+>>>>>>>
+>>>>>>>     Yeah sure. COMPILE_TEST could be standalone. Will fix it and repost.
+>>>>>>
+>>>>>> Standalone COMPILE_TEST will give you definitely NOT what you want.
+>>>>>> And actually it's strange to have it standalone.
+>>>>>>
+>>>>>
+>>>>>     Ho ok, i meant like this, "depends on ARM64 || COMPILE_TEST"
+>>>>
+>>>> Don't do it differently than all other drivers. Open the Kconfig and
+>>>> look at existing entries.
+>>>>
+>>>     The latest added has this below, will use this
+>>>
+>>> 	depends on OF || COMPILE_TEST
+>>
+>> I would even drop this... Lemme check, it looks odd. We depend on
+>> ARCH_QCOM which uses OF. We have few drivers which depend on ACPI, but
+>> that also seems wrong. These are platform drivers so they should expect
+>> platform select proper firmware interface. I think none of other
+>> platform drivers do like this (neither Samsung pinctrl nor other
+>> Qualcomm drivers)).
+>>
+>> I will fix this. For your patch I would just skip OF entirely.
+> 
+> Correction: you need OF :(
 
-Confused again here chief, why allow these to appear on their own if
-their are all compatible with the imx28-dcp?
+  yup, will follow the same then.
 
-> +      - items:
-> +          - enum:
-> +              - fsl,imx6sl-dcp
-> +              - fsl,imx6sll-dcp
-> +              - fsl,imx6ull-dcp
-> +          - const: fsl,imx28-dcp
-> +      - items:
-> +          - enum:
-> +              - fsl,imx28-dcp
-> +          - const: fsl,imx23-dcp
-
-I don't get this either. Why set the imx23-dcp as the fallback for the
-imx28-dcp, when the imx28-dcp is being used as the fallback for the imx6
-stuff?
-
-I get the impression that some of the devicetrees should be fixed up,
-rather than adding these sorta odd conditions to the bindings.
-
-To me it'd make sense to swap everything that uses imx28-dcp as a
-fallback to use imx23-dcp instead, since that is the most generic one?
-
-What am I missing?
-
-Cheers,
-Conor.
-
-> =20
->    reg:
->      maxItems: 1
-> --=20
-> 2.39.2
->=20
-
---XbJH3SC5GDn8KS5H
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZHjiuwAKCRB4tDGHoIJi
-0t4oAP4t/nOvAEHSbADUVQoAIkzwjFhYsOKHRpmygBC9qWhAxQEAmbN2h5I3sx6y
-F0mOajZCVnZv5KCYbI53mIwOL2voPAg=
-=iUTA
------END PGP SIGNATURE-----
-
---XbJH3SC5GDn8KS5H--
+Regards,
+  Sricharan
