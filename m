@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F8C3C7EE2A
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 08:25:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FF50C7EE33
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 08:25:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234491AbjFBIZR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 2 Jun 2023 04:25:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36676 "EHLO
+        id S234497AbjFBIZt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Jun 2023 04:25:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37078 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234470AbjFBIZJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 04:25:09 -0400
+        with ESMTP id S234531AbjFBIZd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 04:25:33 -0400
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 759931A1;
-        Fri,  2 Jun 2023 01:25:02 -0700 (PDT)
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3526SeVd031734;
-        Fri, 2 Jun 2023 08:24:49 GMT
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 250F5E6A;
+        Fri,  2 Jun 2023 01:25:13 -0700 (PDT)
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3526jghQ023665;
+        Fri, 2 Jun 2023 08:25:02 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
  : date : message-id : in-reply-to : references : mime-version :
  content-transfer-encoding : content-type; s=qcppdkim1;
- bh=TXEhV36GhBszEk/+foCKC8myvX37KN7pe9SyDfSoYq4=;
- b=pCldk7A/0VVXk12fdKqFvQFUSaW4a1C0N2T/p2SD71X86zQ1T02eazj6hfeovb+ySoJU
- SF9Sio3LGG8idwkOFKx8FaEPZdz6OATrID6XgRO+Qb0xI4szhL2OQJOzcWgin99/iojd
- HJYa5Vv5obU4cvIR7sUa9EpKvUPg7t7dp6Zx8eKLy3ffE0aRah2l1ZQrs7wocqYP8+Z4
- NtfOkJzA6WgX+SAif8WDPpYol99zeguK0I5m3vCpdxG5DPPILmpD+dlnwDOnUydu9P4+
- 0yex1ri2XsLAKnC/IwJz7SDNJ9TI3lYV9WQCfpKx5HyazCBKSHFCojYMB92FL7GDFS73 Rw== 
-Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qyb6f06fd-1
+ bh=tzW2261KTEcnsLPFMy3A1jNNN366YwtbeOm/NhVcE70=;
+ b=S94arT/ZAqhFJsT1ysFS9DlmYl+WZtgdiEWV/BQP3lLQ56A0dE3pKI8ksT2z7v+BGxr6
+ 7anTlEBSilI5ZIVAx4bcjDFBix7F6l3iMvKEiPuAccV8JR9DRG9558hsIL+Y1yZy1hTu
+ LcrYYFA3kitlsbH/XVKpZ11uy3vLwOG0gD+WUDN/uwJNRqrQXtJtziIaAbNCMlSPaZyC
+ 93z6SOzx+bTCgLyARDoRpSYwDvmlOpmwcS+OZQmpvAFBLUUuAoi0QetiGKJMLJXnEkQ+
+ hpt62vAGM25/mqgwt/0OpCHzQJ+CiGAOf4rBWi1W5QEOqnPw1guDqH0w8KrqsvykEZBk ww== 
+Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qxpt72xws-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 02 Jun 2023 08:24:48 +0000
+        Fri, 02 Jun 2023 08:25:01 +0000
 Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3528OlNP032624
+        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3528P1k3016284
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 2 Jun 2023 08:24:47 GMT
+        Fri, 2 Jun 2023 08:25:01 GMT
 Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
  nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.42; Fri, 2 Jun 2023 01:24:40 -0700
+ 15.2.986.42; Fri, 2 Jun 2023 01:24:54 -0700
 From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
 To:     <agross@kernel.org>, <andersson@kernel.org>,
         <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
@@ -51,9 +51,9 @@ To:     <agross@kernel.org>, <andersson@kernel.org>,
         <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
         <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>,
         <quic_srichara@quicinc.com>
-Subject: [PATCH V8 3/8] dt-bindings: pinctrl: qcom: Add support for ipq5018
-Date:   Fri, 2 Jun 2023 13:53:20 +0530
-Message-ID: <20230602082325.1445261-4-quic_srichara@quicinc.com>
+Subject: [PATCH V8 5/8] dt-bindings: qcom: Add ipq5018 bindings
+Date:   Fri, 2 Jun 2023 13:53:22 +0530
+Message-ID: <20230602082325.1445261-6-quic_srichara@quicinc.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230602082325.1445261-1-quic_srichara@quicinc.com>
 References: <20230602082325.1445261-1-quic_srichara@quicinc.com>
@@ -65,167 +65,60 @@ X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
  nalasex01c.na.qualcomm.com (10.47.97.35)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: MRqT7KHVy5xFRUTDDHg4_5n_FYcEbxpp
-X-Proofpoint-ORIG-GUID: MRqT7KHVy5xFRUTDDHg4_5n_FYcEbxpp
+X-Proofpoint-ORIG-GUID: H8QXy5RmP_45qTIYckmRkZH2HNVdb7xK
+X-Proofpoint-GUID: H8QXy5RmP_45qTIYckmRkZH2HNVdb7xK
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
  definitions=2023-06-02_05,2023-05-31_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- mlxlogscore=999 clxscore=1015 bulkscore=0 spamscore=0 mlxscore=0
- malwarescore=0 suspectscore=0 adultscore=0 phishscore=0 lowpriorityscore=0
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0
+ lowpriorityscore=0 impostorscore=0 spamscore=0 malwarescore=0
+ mlxlogscore=999 priorityscore=1501 phishscore=0 mlxscore=0 clxscore=1015
+ bulkscore=0 adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2304280000 definitions=main-2306020064
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add device tree binding Documentation details for ipq5018
-pinctrl driver.
+Document the new ipq5018 SOC/board device tree bindings.
 
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Co-developed-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
-Signed-off-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
-Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
 Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 ---
- .../bindings/pinctrl/qcom,ipq5018-tlmm.yaml   | 127 ++++++++++++++++++
- 1 file changed, 127 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
+ Documentation/devicetree/bindings/arm/qcom.yaml | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml b/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
-new file mode 100644
-index 000000000000..fad0118fd521
---- /dev/null
-+++ b/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
-@@ -0,0 +1,127 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/pinctrl/qcom,ipq5018-tlmm.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/Documentation/devicetree/bindings/arm/qcom.yaml b/Documentation/devicetree/bindings/arm/qcom.yaml
+index 8302d1ee280d..8026a0c40ef9 100644
+--- a/Documentation/devicetree/bindings/arm/qcom.yaml
++++ b/Documentation/devicetree/bindings/arm/qcom.yaml
+@@ -30,6 +30,7 @@ description: |
+         apq8084
+         apq8096
+         ipq4018
++        ipq5018
+         ipq5332
+         ipq6018
+         ipq8074
+@@ -101,6 +102,7 @@ description: |
+         hk10-c2
+         idp
+         liquid
++        rdp432-c2
+         mtp
+         qrd
+         rb2
+@@ -335,6 +337,11 @@ properties:
+               - qcom,ipq4019-dk04.1-c1
+           - const: qcom,ipq4019
+ 
++      - items:
++          - enum:
++              - qcom,ipq5018-rdp432-c2
++          - const: qcom,ipq5018
 +
-+title: Qualcomm IPQ5018 TLMM pin controller
-+
-+maintainers:
-+  - Bjorn Andersson <andersson@kernel.org>
-+  - Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-+
-+description:
-+  Top Level Mode Multiplexer pin controller in Qualcomm IPQ5018 SoC.
-+
-+properties:
-+  compatible:
-+    const: qcom,ipq5018-tlmm
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  interrupt-controller: true
-+  "#interrupt-cells": true
-+  gpio-controller: true
-+  "#gpio-cells": true
-+  gpio-ranges: true
-+  wakeup-parent: true
-+
-+  gpio-reserved-ranges:
-+    minItems: 1
-+    maxItems: 24
-+
-+  gpio-line-names:
-+    maxItems: 47
-+
-+patternProperties:
-+  "-state$":
-+    oneOf:
-+      - $ref: "#/$defs/qcom-ipq5018-tlmm-state"
-+      - patternProperties:
-+          "-pins$":
-+            $ref: "#/$defs/qcom-ipq5018-tlmm-state"
-+        additionalProperties: false
-+
-+$defs:
-+  qcom-ipq5018-tlmm-state:
-+    type: object
-+    description:
-+      Pinctrl node's client devices use subnodes for desired pin configuration.
-+      Client device subnodes use below standard properties.
-+    $ref: qcom,tlmm-common.yaml#/$defs/qcom-tlmm-state
-+    unevaluatedProperties: false
-+
-+    properties:
-+      pins:
-+        description:
-+          List of gpio pins affected by the properties specified in this
-+          subnode.
-+        items:
-+          pattern: "^gpio([0-9]|[1-3][0-9]|4[0-6])$"
-+        minItems: 1
-+        maxItems: 8
-+
-+      function:
-+        description:
-+          Specify the alternative function to be configured for the specified
-+          pins.
-+
-+        enum: [ atest_char, audio_pdm0, audio_pdm1, audio_rxbclk, audio_rxd,
-+                audio_rxfsync, audio_rxmclk, audio_txbclk, audio_txd,
-+                audio_txfsync, audio_txmclk, blsp0_i2c, blsp0_spi, blsp0_uart0,
-+                blsp0_uart1, blsp1_i2c0, blsp1_i2c1, blsp1_spi0, blsp1_spi1,
-+                blsp1_uart0, blsp1_uart1, blsp1_uart2, blsp2_i2c0, blsp2_i2c1,
-+                blsp2_spi, blsp2_spi0, blsp2_spi1, btss, burn0, burn1, cri_trng,
-+                cri_trng0, cri_trng1, cxc_clk, cxc_data, dbg_out, eud_gpio,
-+                gcc_plltest, gcc_tlmm, gpio, led0, led2, mac0, mac1, mdc, mdio,
-+                pcie0_clk, pcie0_wake, pcie1_clk, pcie1_wake, pll_test,
-+                prng_rosc, pwm0, pwm1, pwm2, pwm3, qdss_cti_trig_in_a0,
-+                qdss_cti_trig_in_a1, qdss_cti_trig_in_b0, qdss_cti_trig_in_b1,
-+                qdss_cti_trig_out_a0, qdss_cti_trig_out_a1,
-+                qdss_cti_trig_out_b0, qdss_cti_trig_out_b1, qdss_traceclk_a,
-+                qdss_traceclk_b, qdss_tracectl_a, qdss_tracectl_b,
-+                qdss_tracedata_a, qdss_tracedata_b, qspi_clk, qspi_cs,
-+                qspi_data, reset_out, sdc1_clk, sdc1_cmd, sdc1_data, wci_txd,
-+                wci_rxd, wsa_swrm, wsi_clk3, wsi_data3, wsis_reset, xfem ]
-+
-+    required:
-+      - pins
-+
-+required:
-+  - compatible
-+  - reg
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    tlmm: pinctrl@1000000 {
-+        compatible = "qcom,ipq5018-tlmm";
-+        reg = <0x01000000 0x300000>;
-+        gpio-controller;
-+        #gpio-cells = <2>;
-+        gpio-ranges = <&tlmm 0 0 47>;
-+        interrupt-controller;
-+        #interrupt-cells = <2>;
-+        interrupts = <GIC_SPI 208 IRQ_TYPE_LEVEL_HIGH>;
-+
-+        uart-w-state {
-+            rx-pins {
-+                pins = "gpio33";
-+                function = "blsp1_uart1";
-+                bias-pull-down;
-+            };
-+
-+            tx-pins {
-+                pins = "gpio34";
-+                function = "blsp1_uart1";
-+                bias-pull-down;
-+            };
-+        };
-+    };
-+...
+       - items:
+           - enum:
+               - qcom,ipq5332-ap-mi01.2
 -- 
 2.34.1
 
