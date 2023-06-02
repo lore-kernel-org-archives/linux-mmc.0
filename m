@@ -2,52 +2,44 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6EF9C77B7A
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 03:21:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BFC8C7EE43
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 08:25:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233016AbjFBDVg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jun 2023 23:21:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60154 "EHLO
+        id S234428AbjFBIZB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Jun 2023 04:25:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36346 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229598AbjFBDVe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 23:21:34 -0400
+        with ESMTP id S234451AbjFBIYu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 04:24:50 -0400
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3D89107;
-        Thu,  1 Jun 2023 20:21:33 -0700 (PDT)
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3523DM4L010027;
-        Fri, 2 Jun 2023 03:21:19 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=qO4SVk1ZImVpFaqBhVfkmc9Z+Cv6JcVlWb/AZgjdGAY=;
- b=Rt79VxHm9h/JkhR46fQufr4f3kXh7LYUH/bDRenb4KhS4E0IcOPgI1CpDA8E2Naimr1/
- W5HJUdwLczufIP6KCkT57h7gU8S/rbAUuJvXliUVajwpDO+OOhtoNEXi8ANDDBvi9OnB
- sZH+agEqeJ4k6SMHANQh0aG44ZP5jaihxz6bZGmPco2turb22WSknc2OH0DVyuh0cc1r
- 6bcfkOBBS15bibFT/nFeUlzJ7Y7fP4H+yBdtbT1AojAcmKE+CDWPZhFNpCtvAM8Lvzny
- /RIQB7P7A1Frqr6VP2pj0vBzgnfvomZQKcCjZbXtWitu+RE2usvv65u2OBfZBMiacDuA Sg== 
-Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qxugr9nyw-1
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9545DEB;
+        Fri,  2 Jun 2023 01:24:48 -0700 (PDT)
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3528HAjY031199;
+        Fri, 2 Jun 2023 08:24:33 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
+ : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=qcppdkim1;
+ bh=ujYE9UVAEsBCOXfDhcVdi2YjgJdeI5P1taafG1MPRbE=;
+ b=Ks/6V5xIJLcJbmUVDxIADAOVKuohKOe/PI4ZjqFLfrfRLpfpCFSDNxY0IDpzPOWgB+rF
+ F07NLo8pnekTCXkSEru1bThySenpZG11ijSvz39NKWTZiMEERET82Z6rovUU+W5+rbQc
+ wT+6HNy1I1qKDPWbzM0lQ/k59S9jOwmvMbxVpJbvQD9WHYZR9EYTApgzfPuc/gXO3OaK
+ 8Mb7qjFkCAvlFJjZl53UrbV+csObyEBiDgnKgs3wtGHt/4n4JVWefyN+foJWlK1eH+sf
+ J9a8N97s9k20SwIJtf/3p16xMgYk+26PDD6/a8r7FjRfCAVAIvEMUdyV92R/JuXQwDAb Sg== 
+Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qxpt72xvf-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 02 Jun 2023 03:21:18 +0000
+        Fri, 02 Jun 2023 08:24:33 +0000
 Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3523LHgK012273
+        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3528OQOH015352
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 2 Jun 2023 03:21:17 GMT
-Received: from [10.216.26.36] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Thu, 1 Jun 2023
- 20:21:11 -0700
-Message-ID: <fb95bebd-52ec-eda5-22c3-c3e494e29674@quicinc.com>
-Date:   Fri, 2 Jun 2023 08:51:07 +0530
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
-Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        <andy.shevchenko@gmail.com>
-CC:     <agross@kernel.org>, <andersson@kernel.org>,
+        Fri, 2 Jun 2023 08:24:26 GMT
+Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Fri, 2 Jun 2023 01:24:19 -0700
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+To:     <agross@kernel.org>, <andersson@kernel.org>,
         <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
         <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
         <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
@@ -56,88 +48,107 @@ CC:     <agross@kernel.org>, <andersson@kernel.org>,
         <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
         <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>
-References: <20230519125409.497439-1-quic_srichara@quicinc.com>
- <20230519125409.497439-5-quic_srichara@quicinc.com>
- <CAHp75VfVx+oGYKcija3h9-eWc6jggMx8p5SAQTEHTBEbjTaJKw@mail.gmail.com>
- <1823419a-6bb4-03f7-d5ae-e32204c5e598@quicinc.com>
- <ZHTK7uEzO7kcx_cV@surfacebook>
- <aefd0df1-8dfb-1b69-589b-974dea312845@quicinc.com>
- <664940c3-9ec1-b4bd-9db5-fa3529e3d1ff@linaro.org>
- <8146f367-c539-bea5-12b6-424213018488@quicinc.com>
- <eb109116-94eb-5b6d-0049-7bb31feada36@linaro.org>
- <33979417-2c0c-5474-23e0-7e72add99873@linaro.org>
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <33979417-2c0c-5474-23e0-7e72add99873@linaro.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
+        <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>,
+        <quic_srichara@quicinc.com>
+Subject: [PATCH V8 0/8] Add minimal boot support for IPQ5018
+Date:   Fri, 2 Jun 2023 13:53:17 +0530
+Message-ID: <20230602082325.1445261-1-quic_srichara@quicinc.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
  nalasex01c.na.qualcomm.com (10.47.97.35)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: vp_2jjG7MS1Kcj8RfbOAJlefqzJHJQEo
-X-Proofpoint-ORIG-GUID: vp_2jjG7MS1Kcj8RfbOAJlefqzJHJQEo
+X-Proofpoint-ORIG-GUID: EEsa0AiiLon7HeIHCkGYe2Bfq2jjAb3n
+X-Proofpoint-GUID: EEsa0AiiLon7HeIHCkGYe2Bfq2jjAb3n
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-02_01,2023-05-31_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- spamscore=0 mlxscore=0 clxscore=1015 impostorscore=0 adultscore=0
- malwarescore=0 phishscore=0 bulkscore=0 mlxlogscore=625 suspectscore=0
- lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2306020023
+ definitions=2023-06-02_05,2023-05-31_03,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0
+ lowpriorityscore=0 impostorscore=0 spamscore=0 malwarescore=0
+ mlxlogscore=904 priorityscore=1501 phishscore=0 mlxscore=0 clxscore=1015
+ bulkscore=0 adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2304280000 definitions=main-2306020064
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+The IPQ5018 is Qualcomm's 802.11ax SoC for Routers,
+Gateways and Access Points.
 
+This series adds minimal board boot support for ipq5018-rdp432-c2 board.
 
-On 6/1/2023 6:57 PM, Krzysztof Kozlowski wrote:
-> On 01/06/2023 13:53, Krzysztof Kozlowski wrote:
->> On 01/06/2023 13:41, Sricharan Ramabadhran wrote:
->>>
->>>
->>> On 6/1/2023 3:21 PM, Krzysztof Kozlowski wrote:
->>>> On 01/06/2023 11:50, Sricharan Ramabadhran wrote:
->>>>>
->>>>>
->>>>> On 5/29/2023 9:25 PM, andy.shevchenko@gmail.com wrote:
->>>>>> Mon, May 29, 2023 at 03:58:09PM +0530, Sricharan Ramabadhran kirjoitti:
->>>>>>> On 5/20/2023 12:17 AM, Andy Shevchenko wrote:
->>>>>>>> On Fri, May 19, 2023 at 3:55 PM Sricharan Ramabadhran
->>>>>>>> <quic_srichara@quicinc.com> wrote:
->>>>>>
->>>>>> ...
->>>>>>
->>>>>>>>       depends on OF || COMPILE_TEST
->>>>>>>
->>>>>>>     Yeah sure. COMPILE_TEST could be standalone. Will fix it and repost.
->>>>>>
->>>>>> Standalone COMPILE_TEST will give you definitely NOT what you want.
->>>>>> And actually it's strange to have it standalone.
->>>>>>
->>>>>
->>>>>     Ho ok, i meant like this, "depends on ARM64 || COMPILE_TEST"
->>>>
->>>> Don't do it differently than all other drivers. Open the Kconfig and
->>>> look at existing entries.
->>>>
->>>     The latest added has this below, will use this
->>>
->>> 	depends on OF || COMPILE_TEST
->>
->> I would even drop this... Lemme check, it looks odd. We depend on
->> ARCH_QCOM which uses OF. We have few drivers which depend on ACPI, but
->> that also seems wrong. These are platform drivers so they should expect
->> platform select proper firmware interface. I think none of other
->> platform drivers do like this (neither Samsung pinctrl nor other
->> Qualcomm drivers)).
->>
->> I will fix this. For your patch I would just skip OF entirely.
-> 
-> Correction: you need OF :(
+[v8]   Changed only in patch 4/8
+		Fixed Kconfig to add COMPILE_TEST and removed header of.h.
+	        Instead using mod_devicetable.h. Added Linus reviewed-by
 
-  yup, will follow the same then.
+[v7]   Fixed tz reserved region size in patch 7/8
 
-Regards,
-  Sricharan
+[v6]   Fixed patch [4/8] pinctrl driver for rebase issue.
+
+[v5]
+       Added Reviewed-by tags from Krzysztof Kozlowski.
+       Changed patch [6/8] with [1] since its already Acked
+       Rebased patch [4/8] on top of [2] and fixed other comments
+       Fixed commit log for patch [7/8]
+       Fixed comments for patch [2/8]
+
+[1] https://patchwork.kernel.org/project/linux-arm-msm/patch/1678164097-13247-4-git-send-email-quic_mmanikan@quicinc.com/
+[2] https://lore.kernel.org/r/1683718725-14869-1-git-send-email-quic_rohiagar@quicinc.com
+       
+[v4]
+       Fixed all comments for clocks, schema, dts
+       Added Reviewed-by tags.
+
+[v3]
+	Fixed all comments for clocks, schema fixes
+        Picked up Reviewed-by from Bjorn for pinctrl driver
+
+[v2]
+	Fixed all comments and rebased for TOT.
+
+Manikanta Mylavarapu (1):
+  dt-bindings: scm: Add compatible for IPQ5018
+
+Sricharan Ramabadhran (7):
+  dt-bindings: arm64: Add IPQ5018 clock and reset
+  clk: qcom: Add Global Clock controller (GCC) driver for IPQ5018
+  dt-bindings: pinctrl: qcom: Add support for ipq5018
+  pinctrl: qcom: Add IPQ5018 pinctrl driver
+  dt-bindings: qcom: Add ipq5018 bindings
+  arm64: dts: Add ipq5018 SoC and rdp432-c2 board support
+  arm64: defconfig: Enable IPQ5018 SoC base configs
+
+ .../devicetree/bindings/arm/qcom.yaml         |    7 +
+ .../bindings/clock/qcom,ipq5018-gcc.yaml      |   63 +
+ .../bindings/firmware/qcom,scm.yaml           |    1 +
+ .../bindings/pinctrl/qcom,ipq5018-tlmm.yaml   |  127 +
+ arch/arm64/boot/dts/qcom/Makefile             |    1 +
+ .../arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts |   72 +
+ arch/arm64/boot/dts/qcom/ipq5018.dtsi         |  250 ++
+ arch/arm64/configs/defconfig                  |    3 +
+ drivers/clk/qcom/Kconfig                      |   10 +-
+ drivers/clk/qcom/Makefile                     |    1 +
+ drivers/clk/qcom/gcc-ipq5018.c                | 3731 +++++++++++++++++
+ drivers/pinctrl/qcom/Kconfig                  |   11 +
+ drivers/pinctrl/qcom/Makefile                 |    1 +
+ drivers/pinctrl/qcom/pinctrl-ipq5018.c        |  783 ++++
+ include/dt-bindings/clock/qcom,gcc-ipq5018.h  |  183 +
+ include/dt-bindings/reset/qcom,gcc-ipq5018.h  |  122 +
+ 16 files changed, 5364 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/clock/qcom,ipq5018-gcc.yaml
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018.dtsi
+ create mode 100644 drivers/clk/qcom/gcc-ipq5018.c
+ create mode 100644 drivers/pinctrl/qcom/pinctrl-ipq5018.c
+ create mode 100644 include/dt-bindings/clock/qcom,gcc-ipq5018.h
+ create mode 100644 include/dt-bindings/reset/qcom,gcc-ipq5018.h
+
+-- 
+2.34.1
+
