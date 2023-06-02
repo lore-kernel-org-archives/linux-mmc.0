@@ -2,67 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE73FC7EE29
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 12:37:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ED3DC7EE24
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 13:13:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233986AbjFBMhr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 2 Jun 2023 08:37:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40938 "EHLO
+        id S235202AbjFBNNE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Jun 2023 09:13:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58096 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235563AbjFBMhj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 08:37:39 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BE4713E;
-        Fri,  2 Jun 2023 05:37:38 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E5A8A63F0F;
-        Fri,  2 Jun 2023 12:37:37 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 59E28C433D2;
-        Fri,  2 Jun 2023 12:37:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1685709457;
-        bh=rVXhCE0XtLm83wGAbC+sjEpgKbZehMvJ4jbUFyy87kQ=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=MTueRKOSqo0hbTCa3954/FZAiSE6KftDXBQxyakHVE4uTPVmttKr9NY+2MGoio+4v
-         ++HZecjEhtHytWL7Cqee7qDqdbjYYyb2qdjqsLDiggj0uInubNtv09uf3KYjYN5fHx
-         mQ2Tu4xCsHEgRRt3iKIUTP/1vg2GPhX45ODRNCQeH8F80mVWbrLjeUbYUsTxjn7ChX
-         Yof2EOoJAS16QxtNKAd2GBCZ+4xqt+OZVs6uNTGJ0eM1crk2GpcTCim9ImXKmu7t01
-         5DGGiG9WHwome0vExfKXweNpRquhW5knRuu4rsgSCif30e/Ra2H5HzRZ5YglcRa/vO
-         s8iwhLwxJOmTA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 47C38E52BF5;
-        Fri,  2 Jun 2023 12:37:37 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.4-rc5
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20230602084733.40750-1-ulf.hansson@linaro.org>
-References: <20230602084733.40750-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20230602084733.40750-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.4-rc1-2
-X-PR-Tracked-Commit-Id: 0b5d5c436a5c572a45f976cfd34a6741e143e5d9
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 921bdc72a0d68977092d6a64855a1b8967acc1d9
-Message-Id: <168570945728.3943.9861880926621562600.pr-tracker-bot@kernel.org>
-Date:   Fri, 02 Jun 2023 12:37:37 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S234408AbjFBNNC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 09:13:02 -0400
+Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EC3310E9;
+        Fri,  2 Jun 2023 06:12:26 -0700 (PDT)
+Received: by mail-qv1-xf32.google.com with SMTP id 6a1803df08f44-6260e771419so12441256d6.1;
+        Fri, 02 Jun 2023 06:12:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1685711518; x=1688303518;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ry5f5ak9Sr/bZIbtzTWJKvf8qehHNybuYJDF5N8k3cI=;
+        b=QPHM+5/woE/dOdJELOIwis9yJBOUQoJlPPGRdP02SJqMqHI27rC5crLA6aJ+I+IAyk
+         g8SE/QLLi9KBFI6QVazJnlN1/A75T72fCkc2WD6qXVb+/iEFm8ghzYBFWz00iZ56auMH
+         +Lx304AoJRyE/RsOG8vlL+2XlxxJi8Avc8Gfhbm18Oys/Bbvx+OzVC0gKZo2Is5m1ErA
+         Wx2XlDL+Tn9j7p7GXzEg5NFb5U7eeWBs2cXHHnnWfkA7kTL79BUrztBei2k7C3oKS7Ey
+         3tCQabzh8T47rC/pmtQ45/Xnylb59gvgVMKGQdMLy2VoobHctDpkirlJTdouqsFKEhz4
+         MbRA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1685711518; x=1688303518;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ry5f5ak9Sr/bZIbtzTWJKvf8qehHNybuYJDF5N8k3cI=;
+        b=JEJ4S4m6yVSj4OvZcC0WAjiibqiIGCnqXmt9Kcj2LslpCaZQsn2G3ENnTZ1bJwkuL+
+         XDQ7VzoJDeanAQ5P3wO4Oo06waz7m/9sZk7FPJKEDVaoHWLyN1qknbObKGSXUw3jmD6K
+         edJwVR+/eP9ZjAAOBJemzWCvUD244BS1lvLlff6q6zIQEdFcQaXL73/PxzACkxCq1K03
+         apXGlcw1uPizLPPiRiVx8/QxLTjbjSUeZG3MZuqO5ba8L+Q3vdz0FWaOWEN3zqlR1wot
+         DPHeeIoUL2fhQL/Z7ONRhAYZHGl9hMpC7TO48cQaVQ4wV7SDTb8RKQ+atuedrY2oXdP5
+         2lcA==
+X-Gm-Message-State: AC+VfDym+2Kre7AsobAzAU1qWzefzhXq8fYdLz69XGkxjPFgKju59U2x
+        ctqI+Qi9w60dYPUFrW08qNMzE2Eat4sqY4jyCJe7IjqdIHabOg==
+X-Google-Smtp-Source: ACHHUZ7kMzvAHTkGGwT6hZfhgTh0gjVaS+Sg8f/2ZLTev7/1qspG/QCMLGRPbwovukpVvSzxyIhabkjHVr9LicCFB2s=
+X-Received: by 2002:a05:6214:411b:b0:628:7be8:97b7 with SMTP id
+ kc27-20020a056214411b00b006287be897b7mr2694764qvb.23.1685711518207; Fri, 02
+ Jun 2023 06:11:58 -0700 (PDT)
+MIME-Version: 1.0
+References: <20230602082325.1445261-1-quic_srichara@quicinc.com> <20230602082325.1445261-3-quic_srichara@quicinc.com>
+In-Reply-To: <20230602082325.1445261-3-quic_srichara@quicinc.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Fri, 2 Jun 2023 16:11:21 +0300
+Message-ID: <CAHp75Vcfa2cbACEPROuOptPM7c9SOp_TudK-4Rx45OhWPf=iiw@mail.gmail.com>
+Subject: Re: [PATCH V8 2/8] clk: qcom: Add Global Clock controller (GCC)
+ driver for IPQ5018
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
+        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
+        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, robimarko@gmail.com,
+        krzysztof.kozlowski@linaro.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri,  2 Jun 2023 10:47:33 +0200:
+On Fri, Jun 2, 2023 at 11:24=E2=80=AFAM Sricharan Ramabadhran
+<quic_srichara@quicinc.com> wrote:
+>
+> Add support for the global clock controller found on IPQ5018
+> based devices.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.4-rc1-2
+...
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/921bdc72a0d68977092d6a64855a1b8967acc1d9
+>  config IPQ_GCC_5332
+>         tristate "IPQ5332 Global Clock Controller"
+>         depends on ARM64 || COMPILE_TEST
+>         help
+>           Support for the global clock controller on ipq5332 devices.
+> -         Say Y if you want to use peripheral devices such as UART, SPI,
+> -         i2c, USB, SD/eMMC, etc.
 
-Thank you!
+Nothing in the commit message about this. Please, elaborate.
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+...
+
+> +#include <linux/kernel.h>
+> +#include <linux/err.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/module.h>
+> +#include <linux/of.h>
+> +#include <linux/of_device.h>
+> +#include <linux/clk-provider.h>
+> +#include <linux/regmap.h>
+> +#include <linux/reset-controller.h>
+
+Why not keep this ordered?
+
+Missing bits.h and maybe others, but in an unordered list it's harder to ch=
+eck.
+
+...
+
+> +                       &gpll4_main.clkr.hw
+
+Can we keep trailing comma here and in similar cases, like
+
+> +                       &ubi32_pll_main.clkr.hw
+> +                       &gpll0_main.clkr.hw
+
+(and many others)?
+
+--=20
+With Best Regards,
+Andy Shevchenko
