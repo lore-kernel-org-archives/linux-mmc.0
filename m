@@ -2,120 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ED3DC7EE24
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 13:13:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84DCEC7EE24
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jun 2023 13:17:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235202AbjFBNNE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 2 Jun 2023 09:13:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58096 "EHLO
+        id S235600AbjFBNR3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Jun 2023 09:17:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234408AbjFBNNC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 09:13:02 -0400
-Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EC3310E9;
-        Fri,  2 Jun 2023 06:12:26 -0700 (PDT)
-Received: by mail-qv1-xf32.google.com with SMTP id 6a1803df08f44-6260e771419so12441256d6.1;
-        Fri, 02 Jun 2023 06:12:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1685711518; x=1688303518;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ry5f5ak9Sr/bZIbtzTWJKvf8qehHNybuYJDF5N8k3cI=;
-        b=QPHM+5/woE/dOdJELOIwis9yJBOUQoJlPPGRdP02SJqMqHI27rC5crLA6aJ+I+IAyk
-         g8SE/QLLi9KBFI6QVazJnlN1/A75T72fCkc2WD6qXVb+/iEFm8ghzYBFWz00iZ56auMH
-         +Lx304AoJRyE/RsOG8vlL+2XlxxJi8Avc8Gfhbm18Oys/Bbvx+OzVC0gKZo2Is5m1ErA
-         Wx2XlDL+Tn9j7p7GXzEg5NFb5U7eeWBs2cXHHnnWfkA7kTL79BUrztBei2k7C3oKS7Ey
-         3tCQabzh8T47rC/pmtQ45/Xnylb59gvgVMKGQdMLy2VoobHctDpkirlJTdouqsFKEhz4
-         MbRA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685711518; x=1688303518;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ry5f5ak9Sr/bZIbtzTWJKvf8qehHNybuYJDF5N8k3cI=;
-        b=JEJ4S4m6yVSj4OvZcC0WAjiibqiIGCnqXmt9Kcj2LslpCaZQsn2G3ENnTZ1bJwkuL+
-         XDQ7VzoJDeanAQ5P3wO4Oo06waz7m/9sZk7FPJKEDVaoHWLyN1qknbObKGSXUw3jmD6K
-         edJwVR+/eP9ZjAAOBJemzWCvUD244BS1lvLlff6q6zIQEdFcQaXL73/PxzACkxCq1K03
-         apXGlcw1uPizLPPiRiVx8/QxLTjbjSUeZG3MZuqO5ba8L+Q3vdz0FWaOWEN3zqlR1wot
-         DPHeeIoUL2fhQL/Z7ONRhAYZHGl9hMpC7TO48cQaVQ4wV7SDTb8RKQ+atuedrY2oXdP5
-         2lcA==
-X-Gm-Message-State: AC+VfDym+2Kre7AsobAzAU1qWzefzhXq8fYdLz69XGkxjPFgKju59U2x
-        ctqI+Qi9w60dYPUFrW08qNMzE2Eat4sqY4jyCJe7IjqdIHabOg==
-X-Google-Smtp-Source: ACHHUZ7kMzvAHTkGGwT6hZfhgTh0gjVaS+Sg8f/2ZLTev7/1qspG/QCMLGRPbwovukpVvSzxyIhabkjHVr9LicCFB2s=
-X-Received: by 2002:a05:6214:411b:b0:628:7be8:97b7 with SMTP id
- kc27-20020a056214411b00b006287be897b7mr2694764qvb.23.1685711518207; Fri, 02
- Jun 2023 06:11:58 -0700 (PDT)
+        with ESMTP id S235979AbjFBNR2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jun 2023 09:17:28 -0400
+Received: from wp530.webpack.hosteurope.de (wp530.webpack.hosteurope.de [80.237.130.52])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D700499
+        for <linux-mmc@vger.kernel.org>; Fri,  2 Jun 2023 06:17:19 -0700 (PDT)
+Received: from [2a02:8108:8980:2478:8cde:aa2c:f324:937e]; authenticated
+        by wp530.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.3:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        id 1q54eb-00024q-AR; Fri, 02 Jun 2023 15:17:17 +0200
+Message-ID: <5eb7694f-8c45-bab8-4d4c-2852f125f0eb@leemhuis.info>
+Date:   Fri, 2 Jun 2023 15:17:15 +0200
 MIME-Version: 1.0
-References: <20230602082325.1445261-1-quic_srichara@quicinc.com> <20230602082325.1445261-3-quic_srichara@quicinc.com>
-In-Reply-To: <20230602082325.1445261-3-quic_srichara@quicinc.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Fri, 2 Jun 2023 16:11:21 +0300
-Message-ID: <CAHp75Vcfa2cbACEPROuOptPM7c9SOp_TudK-4Rx45OhWPf=iiw@mail.gmail.com>
-Subject: Re: [PATCH V8 2/8] clk: qcom: Add Global Clock controller (GCC)
- driver for IPQ5018
-To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
-Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
-        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
-        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, robimarko@gmail.com,
-        krzysztof.kozlowski@linaro.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.10.0
+Reply-To: Linux regressions mailing list <regressions@lists.linux.dev>
+Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
+ clock speed before sending HS CMD13")
+Content-Language: en-US, de-DE
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Brian Norris <briannorris@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Luca Weiss <luca@z3ntu.xyz>,
+        Linux kernel regressions list <regressions@lists.linux.dev>
+References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+ <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
+ <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
+ <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
+ <CAFBinCDwgYw3v31hP4AtV3+Z1o+esDqMKugRwMMMLqSX0Acjzw@mail.gmail.com>
+ <CAPDyKFr+hQo+N31r=3f58taf9sYW0UF0ApCJhwz9vRsyNizcvg@mail.gmail.com>
+ <CAFBinCDSv_vdu5887vveotvaOGFrZvaSX4jM+7Q3QvDhTdazzw@mail.gmail.com>
+From:   "Linux regression tracking (Thorsten Leemhuis)" 
+        <regressions@leemhuis.info>
+In-Reply-To: <CAFBinCDSv_vdu5887vveotvaOGFrZvaSX4jM+7Q3QvDhTdazzw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-bounce-key: webpack.hosteurope.de;regressions@leemhuis.info;1685711839;bc681d32;
+X-HE-SMSGID: 1q54eb-00024q-AR
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jun 2, 2023 at 11:24=E2=80=AFAM Sricharan Ramabadhran
-<quic_srichara@quicinc.com> wrote:
->
-> Add support for the global clock controller found on IPQ5018
-> based devices.
+Hi, Thorsten here, the Linux kernel's regression tracker. Top-posting
+for once, to make this easily accessible to everyone.
 
-...
+Ulf, Martin, what happened to this? It looks like we didn't get any
+closer to fixing this regression in the last two weeks. Did it fall
+through the cracks? Or was progress made and I just missed it?
 
->  config IPQ_GCC_5332
->         tristate "IPQ5332 Global Clock Controller"
->         depends on ARM64 || COMPILE_TEST
->         help
->           Support for the global clock controller on ipq5332 devices.
-> -         Say Y if you want to use peripheral devices such as UART, SPI,
-> -         i2c, USB, SD/eMMC, etc.
+Ciao, Thorsten (wearing his 'the Linux kernel's regression tracker' hat)
+--
+Everything you wanna know about Linux kernel regression tracking:
+https://linux-regtracking.leemhuis.info/about/#tldr
+If I did something stupid, please tell me, as explained on that page.
 
-Nothing in the commit message about this. Please, elaborate.
+#regzbot poke
 
-...
-
-> +#include <linux/kernel.h>
-> +#include <linux/err.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/module.h>
-> +#include <linux/of.h>
-> +#include <linux/of_device.h>
-> +#include <linux/clk-provider.h>
-> +#include <linux/regmap.h>
-> +#include <linux/reset-controller.h>
-
-Why not keep this ordered?
-
-Missing bits.h and maybe others, but in an unordered list it's harder to ch=
-eck.
-
-...
-
-> +                       &gpll4_main.clkr.hw
-
-Can we keep trailing comma here and in similar cases, like
-
-> +                       &ubi32_pll_main.clkr.hw
-> +                       &gpll0_main.clkr.hw
-
-(and many others)?
-
---=20
-With Best Regards,
-Andy Shevchenko
+On 16.05.23 22:45, Martin Blumenstingl wrote:
+> On Mon, May 15, 2023 at 11:44 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> [...]
+>>>> 3) If 2) seems to work above, we need to figure out why
+>>>> mmc_switch_status() is hanging. If there is a problem with the eMMC
+>>>> card responding in-correctly, the host driver should return with an
+>>>> error code, right?
+>>> You're right: it's indeed hanging in mmc_switch_status()
+>>> I don't get any interrupts (timeout, CRC error, ...) for it.
+>>> Do you have any suggestions what to check next?
+>>
+>> So the mmc_switch_status() is sending a CMD13. Even if the card
+>> doesn't reply, I would expect that the meson mmc controller would
+>> raise some kind of error condition, probably via a timeout-irq.
+>>
+>> Did you verify that the driver is actually waiting for an IRQ to
+>> happen, which also means waiting for a CMD13 response?
+> register 0x24 is ICTL (interrupt control) and 0x28 is ISTAT (interrupt status)
+> ISTAT is all zeros and ICTL is 0x3067 which translates so:
+> - BIT(0): RESP_OK
+> - BIT(1): RESP_TIMEOUT
+> - BIT(2): RESP_ERR_CRC
+> - BIT(5): DATA_TIMEOUT
+> - BIT(6): DATA_ERR_CRC
+> - BIT(12): RXFIFO_FULL
+> - BIT(13): TXFIFO_EMPTY
+> 
+> I guess in this case BIT(1) RESP_TIMEOUT is the relevant one.
+> 
+> register 0x04 is SEND and reads 0x4d which translates to:
+> - CMD13
+> - MMC_RSP_PRESENT (HAS_RESP, BIT(6))
+> - no other flags (STOP, R1B, ...) are set
+> 
+> Full register dump:
+> # cat /sys/kernel/debug/regmap/c1108e00.mmc/registers
+> 00: 00000900
+> 04: 0000004d
+> 08: e7ffe002
+> 0c: 02f0003f
+> 10: 0003f009
+> 14: 03b81c00
+> 18: 2c43bcf0
+> 1c: e0000150
+> 20: 00000000
+> 24: 00003067
+> 28: 00000000
+> 2c: 00000000
+> 30: 00000000
+> 34: 00fe0cff
+> 38: 0000100b
+> 
+> In case you are curious, the driver is: drivers/mmc/host/meson-mx-sdhc-mmc.c
+> 
+> 
+> Best regards,
+> Martin
