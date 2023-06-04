@@ -2,21 +2,21 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1C09C88C96
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 12:13:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E68BC88C98
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 12:13:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231839AbjFDMNb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jun 2023 08:13:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43632 "EHLO
+        id S231779AbjFDMNc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jun 2023 08:13:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231779AbjFDMN1 (ORCPT
+        with ESMTP id S231788AbjFDMN1 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 08:13:27 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BB0BFA;
-        Sun,  4 Jun 2023 05:13:23 -0700 (PDT)
+Received: from mout.kundenserver.de (mout.kundenserver.de [217.72.192.73])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8FB0120;
+        Sun,  4 Jun 2023 05:13:25 -0700 (PDT)
 Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
  (mreue107 [212.227.15.183]) with ESMTPSA (Nemesis) id
- 1MI4cT-1psFYU0nYt-00F8Q0; Sun, 04 Jun 2023 14:12:49 +0200
+ 1N8X9L-1qATOr2RN3-014UNu; Sun, 04 Jun 2023 14:12:40 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -38,144 +38,91 @@ Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
         linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
         bcm-kernel-feedback-list@broadcom.com,
         Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 09/10] dt-bindings: thermal: convert bcm2835-thermal bindings to YAML
-Date:   Sun,  4 Jun 2023 14:12:22 +0200
-Message-Id: <20230604121223.9625-10-stefan.wahren@i2se.com>
+Subject: [PATCH 00/10] ARM: dts: bcm283x: Improve device-trees and bindings
+Date:   Sun,  4 Jun 2023 14:12:13 +0200
+Message-Id: <20230604121223.9625-1-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230604121223.9625-1-stefan.wahren@i2se.com>
-References: <20230604121223.9625-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:nMYk1gRGD+2AiImzkO6DtPOxKPY+MYA5ImlbZwhx4QpHbydnjwi
- sFqFSyvDUR+sI4OmmfBzssR2ybgas4BCOwvRshfr5mAz4rH/ZPsXIBe0MikVM0aRNTbhgjH
- 34ndg/Gfi2TtUZrqMz9Oo4xR146EK/e1IQY0giLEQggJQAF3ogRwJBrdbNmVVC6W7Tf+CmQ
- 3CEzDZjUQmwU9w6//7x9Q==
-UI-OutboundReport: notjunk:1;M01:P0:AFBIMyp3Zyw=;qMpPxv3dGa4DbTK46rNrQprBpkF
- QHEiLJ3yBaYzi330gDjoYrsdsRzCvZdh0FmRbzELpn0pIJYYsapD6B4cHe9DzYg0ILeSrC2Tv
- d8RJmbv5GjPHsS8agmhchDhBoiEvIPlwZOUIAcCzryUlqx6BryQwNVEMK189HC9mbS5mV/lmZ
- FiqlpO3wwWW/4xZx0aeVN1+Z3PP6uz+riYr3WYjUWP5Go+lsM4SeErLYr4r2dJ2BGPUqhtHv6
- 922VC4V8NroIiB9slXXaetiCnLtRBmcW+3XBA02YxCm7cpcGlqk+SXnWpYZVNaazNzelEKIYh
- MpmY8uQ4bLr9JFDWaSGp2pFRboqey14VyBwG9DemKcMnyy9QvhVumXXUgRcXiD/r4PR2l/f5x
- UcKW8ArZT5Hujnez4FYEv+dHdyipoE6TqONYz95dTJxM8XYWsMWQuqtF57uw/ym1xI1gTxWLr
- 7Nbv89/hElqLUqpz1sLW/+OYS7i0KFgOShHED/V9OWaItxJdl9B4hcBCOIOihedH2Pr4qTe3W
- 0sEyFKnBOY0bK/jHo6rJuZhXyl6Cy2bBOVWVyg+mwL3R2IYsYvZGn+/RlQH5ZGDCneOrE6WLP
- Cw08ETMd+Oa8FceXrFS8a0XDMt1APk/Uxg822co3FGblw0nedjBnB8gHMG/gWiXYkSwQUtNPK
- OH3JR6dpvnD3QBGoSL1Swk9tOF4LxMP7BUdCmfhMkQ==
+X-Provags-ID: V03:K1:InVEfdF7FbcX0KjLtcf4OB5k41Snq4cQeb8Dl3ZMTAcW/5Y7se2
+ e8TraZ1VjDOR9ql4stiw/IB7ANuI+JBbtvUEdREnZZtwDBBgmUbsUl/aQXeBSzrv2yUqqiU
+ cxf46dwxtPGaQvwFle7jdHAYJW+0oFK/zP6Hq5Dr1TC/Cca1XJ3fVG/NwBX6TQfB0i8GNPD
+ 3W4mEiGZbUjwAwZR7oQPg==
+UI-OutboundReport: notjunk:1;M01:P0:CDQ8hyV3H/8=;un1GSPShwLUxKic0L6A8g8PZey8
+ QD/mvQZb1L5BvhZvj95vPc3tHMQc2kisNg2gHaR0nTj4OREOjcfYSp+QBfnSqEDYsJhW9mb/p
+ 5MEjT/yATzTwnekOEc0Qw3AMzkCZE4+gV0FlpLp4dOvWAxpv8ugn9j2wNZsAhCNr8TM5Zut3E
+ n96PWUdoNQpl8XhaGDUQhqzmn3tWWj0w2/uakrLwJNojpAaLdCNMH9OJGncgGal85ERbhJuXg
+ SgWg9Zr/kSbqYqgnl+8/cbfBpETphM0uQrTGg2MSb1Bfi9AWhaWe4ph2R1AO1vLS2ijuGv7ks
+ Wu3iY/gv1lbsL0867HHMdj5gHTPQapyEPtt28MHZ3pCGz7FwtND28d0HbsNhDiR2gSDtuegsW
+ V+yrw4/XF5vjUs6y+iqV7Q1aQXfRiKtH9/EcYLu83tt0q7yHk08395jouKFLdScjpc4QXb1+5
+ 4RbV6xWXAQU2wACUMPVgMP8XK5O8vv1y7+RsZlrnFPgvuq67LL+sKytnuRvbjGXTO/+d2XWTj
+ EZ0Zohats+ZLs+YbF6G6tZGmg1MaP+n06WyBTghAI/IbK1FaKzxowHXYaLHX6c8ixNXRDgRUP
+ tyG7EN/8Q1r9H6BAyB+Ea9TxpGOvKCElf2YDYXVsYTRFpniikIwULiSzeWi+sDantZ8SZ03TF
+ Mpkv2XtRlTAS8lQ4hS/S8SN5f7VURFnuUr1uLd8Sjg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the DT binding document for bcm2835-thermal from .txt to YAML.
+This series fix some dtbs_check warning for the Raspberry Pi boards
+and convert 6 txt DT bindings for BCM2835 to YAML.
 
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
----
- .../bindings/thermal/brcm,bcm2835-thermal.txt | 41 ----------------
- .../thermal/brcm,bcm2835-thermal.yaml         | 48 +++++++++++++++++++
- 2 files changed, 48 insertions(+), 41 deletions(-)
+Please be aware that there is a functional dependency between patch 2
+and 4. So just cherry-picking patch 4 would break boot of BCM2835.
+
+Stefan Wahren (10):
+  ARM: dts: bcm283x: Fix pinctrl groups
+  dmaengine: bcm2835: also support generic dma-channel-mask
+  dt-bindings: dma: convert bcm2835-dma bindings to YAML
+  ARM: dts: bcm2835: adjust DMA nodes
+  dt-bindings: pwm: convert pwm-bcm2835 bindings to YAML
+  ARM: dts: bcm283x: Increase pwm-cells
+  dt-bindings: mailbox: convert bcm2835-mbox bindings to YAML
+  dt-bindings: mmc: convert bcm2835-sdhost bindings to YAML
+  dt-bindings: thermal: convert bcm2835-thermal bindings to YAML
+  dt-bindings: timer: convert bcm2835-system-timer bindings to YAML
+
+ .../bindings/dma/brcm,bcm2835-dma.txt         | 83 ----------------
+ .../bindings/dma/brcm,bcm2835-dma.yaml        | 98 +++++++++++++++++++
+ .../bindings/mailbox/brcm,bcm2835-mbox.txt    | 26 -----
+ .../bindings/mailbox/brcm,bcm2835-mbox.yaml   | 40 ++++++++
+ .../bindings/mmc/brcm,bcm2835-sdhost.txt      | 23 -----
+ .../bindings/mmc/brcm,bcm2835-sdhost.yaml     | 54 ++++++++++
+ .../devicetree/bindings/pwm/pwm-bcm2835.txt   | 30 ------
+ .../devicetree/bindings/pwm/pwm-bcm2835.yaml  | 43 ++++++++
+ .../bindings/thermal/brcm,bcm2835-thermal.txt | 41 --------
+ .../thermal/brcm,bcm2835-thermal.yaml         | 48 +++++++++
+ .../timer/brcm,bcm2835-system-timer.txt       | 22 -----
+ .../timer/brcm,bcm2835-system-timer.yaml      | 44 +++++++++
+ arch/arm/boot/dts/bcm2711.dtsi                |  6 +-
+ arch/arm/boot/dts/bcm2835-common.dtsi         |  4 +-
+ arch/arm/boot/dts/bcm2835-rpi-a-plus.dts      |  1 +
+ arch/arm/boot/dts/bcm2835-rpi-a.dts           |  1 +
+ arch/arm/boot/dts/bcm2835-rpi-b-plus.dts      |  1 +
+ arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts      |  1 +
+ arch/arm/boot/dts/bcm2835-rpi-b.dts           |  1 +
+ arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts     |  1 +
+ arch/arm/boot/dts/bcm2835-rpi-zero-w.dts      |  2 +
+ arch/arm/boot/dts/bcm2835-rpi-zero.dts        |  1 +
+ arch/arm/boot/dts/bcm2835-rpi.dtsi            |  2 -
+ arch/arm/boot/dts/bcm2836-rpi-2-b.dts         |  1 +
+ arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts     |  1 +
+ arch/arm/boot/dts/bcm2837-rpi-zero-2-w.dts    |  2 +
+ arch/arm/boot/dts/bcm283x.dtsi                |  2 +-
+ drivers/dma/bcm2835-dma.c                     | 18 ++--
+ 28 files changed, 358 insertions(+), 239 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt
+ create mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.txt
+ create mode 100644 Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.yaml
+ delete mode 100644 Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt
+ create mode 100644 Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
  delete mode 100644 Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.txt
  create mode 100644 Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.yaml
+ delete mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
+ create mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
 
-diff --git a/Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.txt b/Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.txt
-deleted file mode 100644
-index a3e9ec5dc7ac..000000000000
---- a/Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.txt
-+++ /dev/null
-@@ -1,41 +0,0 @@
--Binding for Thermal Sensor driver for BCM2835 SoCs.
--
--Required parameters:
---------------------
--
--compatible: 		should be one of: "brcm,bcm2835-thermal",
--			"brcm,bcm2836-thermal" or "brcm,bcm2837-thermal"
--reg:			Address range of the thermal registers.
--clocks: 		Phandle of the clock used by the thermal sensor.
--#thermal-sensor-cells:	should be 0 (see Documentation/devicetree/bindings/thermal/thermal-sensor.yaml)
--
--Example:
--
--thermal-zones {
--	cpu_thermal: cpu-thermal {
--		polling-delay-passive = <0>;
--		polling-delay = <1000>;
--
--		thermal-sensors = <&thermal>;
--
--		trips {
--			cpu-crit {
--				temperature	= <80000>;
--				hysteresis	= <0>;
--				type		= "critical";
--			};
--		};
--
--		coefficients = <(-538)	407000>;
--
--		cooling-maps {
--		};
--	};
--};
--
--thermal: thermal@7e212000 {
--	compatible = "brcm,bcm2835-thermal";
--	reg = <0x7e212000 0x8>;
--	clocks = <&clocks BCM2835_CLOCK_TSENS>;
--	#thermal-sensor-cells = <0>;
--};
-diff --git a/Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.yaml b/Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.yaml
-new file mode 100644
-index 000000000000..2b6026d9fbcf
---- /dev/null
-+++ b/Documentation/devicetree/bindings/thermal/brcm,bcm2835-thermal.yaml
-@@ -0,0 +1,48 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/thermal/brcm,bcm2835-thermal.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Broadcom BCM2835 thermal sensor
-+
-+maintainers:
-+  - Stefan Wahren <stefan.wahren@i2se.com>
-+
-+allOf:
-+  - $ref: thermal-sensor.yaml#
-+
-+properties:
-+  compatible:
-+    enum:
-+      - brcm,bcm2835-thermal
-+      - brcm,bcm2836-thermal
-+      - brcm,bcm2837-thermal
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+  "#thermal-sensor-cells":
-+    const: 0
-+
-+unevaluatedProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+  - clocks
-+  - '#thermal-sensor-cells'
-+
-+examples:
-+  - |
-+    #include <dt-bindings/clock/bcm2835.h>
-+
-+    thermal@7e212000 {
-+      compatible = "brcm,bcm2835-thermal";
-+      reg = <0x7e212000 0x8>;
-+      clocks = <&clocks BCM2835_CLOCK_TSENS>;
-+      #thermal-sensor-cells = <0>;
-+    };
 -- 
 2.34.1
 
