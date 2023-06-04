@@ -2,164 +2,186 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32545C88CB2
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 12:13:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AD6EC77B73
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 15:44:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230477AbjFDMNd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jun 2023 08:13:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43644 "EHLO
+        id S230403AbjFDPoy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jun 2023 11:44:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42928 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231833AbjFDMNa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 08:13:30 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [217.72.192.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A2E1E3;
-        Sun,  4 Jun 2023 05:13:29 -0700 (PDT)
-Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
- (mreue107 [212.227.15.183]) with ESMTPSA (Nemesis) id
- 1MBmI6-1ptdVR1w9U-00C7LT; Sun, 04 Jun 2023 14:12:45 +0200
-From:   Stefan Wahren <stefan.wahren@i2se.com>
-To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com,
-        Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 05/10] dt-bindings: pwm: convert pwm-bcm2835 bindings to YAML
-Date:   Sun,  4 Jun 2023 14:12:18 +0200
-Message-Id: <20230604121223.9625-6-stefan.wahren@i2se.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230604121223.9625-1-stefan.wahren@i2se.com>
-References: <20230604121223.9625-1-stefan.wahren@i2se.com>
+        with ESMTP id S231751AbjFDPow (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 11:44:52 -0400
+Received: from smtp.smtpout.orange.fr (smtp-19.smtpout.orange.fr [80.12.242.19])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1517ADB
+        for <linux-mmc@vger.kernel.org>; Sun,  4 Jun 2023 08:44:49 -0700 (PDT)
+Received: from [192.168.1.18] ([86.243.2.178])
+        by smtp.orange.fr with ESMTPA
+        id 5puJqUJl3xbtx5puJqV5WT; Sun, 04 Jun 2023 17:44:48 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
+        s=t20230301; t=1685893488;
+        bh=4MVPujWGEC2Hbr//Xyamq+0YVn6N8CNGZocur4O5qgA=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To;
+        b=WgnLOsZnQ0uUapvPl9OVnQvD2I/zNbKmRWJ1GXclXg7Alpp8751PpITUE4RtsSJiL
+         InZLFVeCEtJkJbUNxjf1E+WS6aLhATHITZHgD3PAp4frjWOlMqrEO53s6Eef8MUuNC
+         wD+Bjg7O6kI76uiHo5rRAy/4pj8zQfBmwVcCK1Css5Sg5Xd5f7Edq4/Ub1k35j7J6T
+         ph8kLyzqzPL+yOukLEJr/PjtMLLpuxjz4JvgWAbivPVrkyET0WPlot4QKe/4B2W/VN
+         Gmxhe28+9GYJ3BjflsZZdPm/Kr5ZWPcMapN6YNjDGe5+VCHdwdITzd9IJT/wPBl5Qp
+         KmTbuW2T35xIQ==
+X-ME-Helo: [192.168.1.18]
+X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
+X-ME-Date: Sun, 04 Jun 2023 17:44:48 +0200
+X-ME-IP: 86.243.2.178
+Message-ID: <ac6ef7f2-0d7a-ba43-4b63-0a23d899230f@wanadoo.fr>
+Date:   Sun, 4 Jun 2023 17:44:39 +0200
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.0
+Subject: Re: [PATCH v4 1/4] Input: ads7846 - Convert to use software nodes
+Content-Language: fr
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-mmc@vger.kernel.org
+References: <20230430-nokia770-regression-v4-0-9b6dc5536b17@linaro.org>
+ <20230430-nokia770-regression-v4-1-9b6dc5536b17@linaro.org>
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+In-Reply-To: <20230430-nokia770-regression-v4-1-9b6dc5536b17@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:yEqjFtXc/3vGmTSJ7Dy2Z8p775o68ILE0NDuwSUWovXrpTHthm4
- FKr5gNBh7xasgmosXf5YxVHhdkWm9XJLb/gjD/NCM93yHuAn2oc+MbZn36mQEOhyiyYVp5b
- 8he2l2knb/bZlBQMolO6Nc2WJqnUIl9OgzIyJ84oR++6vQEA0K2SiW/HCxcstvBUV/QE6Fo
- A7TZp7Q7AdvNk5Gm6fQWQ==
-UI-OutboundReport: notjunk:1;M01:P0:H0tTJbhnCxM=;5C7Ip//JOF9H88HOGXhCQghs37M
- +2AOYrTihZ9ogAa1Ld5EC4aM/ovwSFqOt3HWhh1WE6Y/4rFyQEnL6JBzbE+d2Fnx2HJr7DtpM
- zgRnuJdbtDrX+EKVIHG8WZ/j6COsghNMrJCK8YjaONRDPjSrlnDpOy4Ge+zWRXlKiokW8gOdG
- kAKkWECaBUYN75zKL/rOcJvH4jhrPIivMWD3UG1UkLCaYb9mLSKTz772MIqmzcHrlX5kXbl5q
- PLm5K49yHrVqAm+/0grw0cdAk5WC4UDDSVPY5UUU+LSWBV+vLxf6NrrUEtOrlImJd56X6K8In
- ruldsRb13XcA5MscluhQfHzFbY5ts0RaPxuh1NRNy1MHbwCAT2H689XX4DCLkgCYvNaWy8GUG
- moD29tyADPmIX7hd6x42HsnC6wQLOraKaqqM0FojfHnZOxQLSabAPgmcJqA3LyymN/Q3cs+qg
- i/m7rTpcqiDPjP+4nocPwLq+iRSolvb1dDQSrAzgjVmLZkYCAtbcngL1VoyVYdMVonmjqLcUN
- 9MtNipE9vkwJEGkgeuwm6WIoO41dnB9wBAmZ5KRBRG9P4Ss2iqlWCWKfM6gejwKnH6jZ2dBIf
- WxAJKepGsIHkGpESWOqN6fFV5ypOiPfiSrCRXeDYFeXgs7a6cFH0QxblcwZs4+fs/UMqjRwFM
- Rr684lCeLd9artVpCgO9t/ReWce0Ls2xbzr9Kg1JCw==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the DT binding document for pwm-bcm2835 from .txt to YAML.
+Le 08/05/2023 à 23:20, Linus Walleij a écrit :
+> The Nokia 770 is using GPIOs from the global numberspace on the
+> CBUS node to pass down to the LCD controller. This regresses when we
+> let the OMAP GPIO driver use dynamic GPIO base.
+> 
+> The Nokia 770 now has dynamic allocation of IRQ numbers, so this
+> needs to be fixed for it to work.
+> 
+> As this is the only user of LCD MIPID we can easily augment the
+> driver to use a GPIO descriptor instead and resolve the issue.
+> 
+> The platform data .shutdown() callback wasn't even used in the
+> code, but we encode a shutdown asserting RESET in the remove()
+> callback for completeness sake.
+> 
+> The CBUS also has the ADS7846 touchscreen attached.
+> 
+> Populate the devices on the Nokia 770 CBUS I2C using software
+> nodes instead of platform data quirks. This includes the LCD
+> and the ADS7846 touchscreen so the conversion just brings the LCD
+> along with it as software nodes is an all-or-nothing design
+> pattern.
+> 
+> The ADS7846 has some limited support for using GPIO descriptors,
+> let's convert it over completely to using device properties and then
+> fix all remaining boardfile users to provide all platform data using
+> software nodes.
+> 
+> Dump the of includes and of_match_ptr() in the ADS7846 driver as part
+> of the job.
+> 
+> Since we have to move ADS7846 over to obtaining the GPIOs it is
+> using exclusively from descriptors, we provide descriptor tables
+> for the two remaining in-kernel boardfiles using ADS7846:
+> 
+> - PXA Spitz
+> - MIPS Alchemy DB1000 development board
+> 
+> It was too hard for me to include software node conversion of
+> these two remaining users at this time: the spitz is using a
+> hscync callback in the platform data that would require further
+> GPIO descriptor conversion of the Spitz, and moving the hsync
+> callback down into the driver: it will just become too big of
+> a job, but it can be done separately.
+> 
+> The MIPS Alchemy DB1000 is simply something I cannot test, so take
+> the easier approach of just providing some GPIO descriptors in
+> this case as I don't want the patch to grow too intrusive.
+> 
+> As we see that several device trees have incorrect polarity flags
+> and just expect to bypass the gpiolib polarity handling, fix up
+> all device trees too, in a separate patch.
+> 
+> Suggested-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+> Fixes: 92bf78b33b0b ("gpio: omap: use dynamic allocation of base")
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
 
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
----
- .../devicetree/bindings/pwm/pwm-bcm2835.txt   | 30 -------------
- .../devicetree/bindings/pwm/pwm-bcm2835.yaml  | 43 +++++++++++++++++++
- 2 files changed, 43 insertions(+), 30 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt
- create mode 100644 Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
+[...]
 
-diff --git a/Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt b/Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt
-deleted file mode 100644
-index f5753b3f79df..000000000000
---- a/Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt
-+++ /dev/null
-@@ -1,30 +0,0 @@
--BCM2835 PWM controller (Raspberry Pi controller)
--
--Required properties:
--- compatible: should be "brcm,bcm2835-pwm"
--- reg: physical base address and length of the controller's registers
--- clocks: This clock defines the base clock frequency of the PWM hardware
--  system, the period and the duty_cycle of the PWM signal is a multiple of
--  the base period.
--- #pwm-cells: Should be 3. See pwm.yaml in this directory for a description of
--  the cells format.
--
--Examples:
--
--pwm@2020c000 {
--	compatible = "brcm,bcm2835-pwm";
--	reg = <0x2020c000 0x28>;
--	clocks = <&clk_pwm>;
--	#pwm-cells = <3>;
--};
--
--clocks {
--	....
--		clk_pwm: pwm {
--			compatible = "fixed-clock";
--			reg = <3>;
--			#clock-cells = <0>;
--			clock-frequency = <9200000>;
--		};
--	....
--};
-diff --git a/Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml b/Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
-new file mode 100644
-index 000000000000..15e7fd98defc
---- /dev/null
-+++ b/Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
-@@ -0,0 +1,43 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/pwm/pwm-bcm2835.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: BCM2835 PWM controller (Raspberry Pi controller)
-+
-+maintainers:
-+  - Stefan Wahren <stefan.wahren@i2se.com>
-+
-+allOf:
-+  - $ref: pwm.yaml#
-+
-+properties:
-+  compatible:
-+    const: brcm,bcm2835-pwm
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+  "#pwm-cells":
-+    const: 3
-+
-+required:
-+  - compatible
-+  - reg
-+  - clocks
-+  - "#pwm-cells"
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    pwm@2020c000 {
-+      compatible = "brcm,bcm2835-pwm";
-+      reg = <0x2020c000 0x28>;
-+      clocks = <&clk_pwm>;
-+      #pwm-cells = <3>;
-+    };
--- 
-2.34.1
+> diff --git a/drivers/video/fbdev/omap/lcd_mipid.c b/drivers/video/fbdev/omap/lcd_mipid.c
+> index 03cff39d392d..e4a7f0b824ff 100644
+> --- a/drivers/video/fbdev/omap/lcd_mipid.c
+> +++ b/drivers/video/fbdev/omap/lcd_mipid.c
+> @@ -7,6 +7,7 @@
+>    */
+>   #include <linux/device.h>
+>   #include <linux/delay.h>
+> +#include <linux/gpio/consumer.h>
+>   #include <linux/slab.h>
+>   #include <linux/workqueue.h>
+>   #include <linux/spi/spi.h>
+> @@ -41,6 +42,7 @@ struct mipid_device {
+>   						   when we can issue the
+>   						   next sleep in/out command */
+>   	unsigned long	hw_guard_wait;		/* max guard time in jiffies */
+> +	struct gpio_desc	*reset;
+>   
+>   	struct omapfb_device	*fbdev;
+>   	struct spi_device	*spi;
+> @@ -556,6 +558,12 @@ static int mipid_spi_probe(struct spi_device *spi)
+>   		return -ENOMEM;
+>   	}
+>   
+> +	/* This will de-assert RESET if active */
+> +	md->reset = gpiod_get(&spi->dev, "reset", GPIOD_OUT_LOW);
+> +	if (IS_ERR(md->reset))
+> +		return dev_err_probe(&spi->dev, PTR_ERR(md->reset),
+> +				     "no reset GPIO line\n");
+> +
+>   	spi->mode = SPI_MODE_0;
+>   	md->spi = spi;
+>   	dev_set_drvdata(&spi->dev, md);
+> @@ -574,6 +582,8 @@ static void mipid_spi_remove(struct spi_device *spi)
+>   {
+>   	struct mipid_device *md = dev_get_drvdata(&spi->dev);
+>   
+> +	/* Asserts RESET */
+> +	gpiod_set_value(md->reset, 1);
 
+Hi,
+
+should this also be done in the probe if mipid_detect() fails?
+
+If yes, please also look at [1], that I've just sent, which introduces 
+an error handling path in the probe.
+
+CJ
+
+[1]: 
+https://lore.kernel.org/all/8b82e34724755b69f34f15dddb288cd373080390.1620505229.git.christophe.jaillet@wanadoo.fr/
+
+>   	mipid_disable(&md->panel);
+>   	kfree(md);
+>   }
+
+[...]
