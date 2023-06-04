@@ -2,21 +2,21 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08026C87FF2
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 12:13:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16660C7EE2E
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 12:13:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231821AbjFDMNa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jun 2023 08:13:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43642 "EHLO
+        id S231809AbjFDMN3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jun 2023 08:13:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231282AbjFDMN1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 08:13:27 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [217.72.192.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3547DB;
-        Sun,  4 Jun 2023 05:13:25 -0700 (PDT)
+        with ESMTP id S231768AbjFDMN0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 08:13:26 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.13])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AD9ADF;
+        Sun,  4 Jun 2023 05:13:22 -0700 (PDT)
 Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
  (mreue107 [212.227.15.183]) with ESMTPSA (Nemesis) id
- 1MLhwM-1po7By0Ya0-00HjUJ; Sun, 04 Jun 2023 14:12:50 +0200
+ 1MORVA-1pgvvi1H4g-00PxEL; Sun, 04 Jun 2023 14:12:48 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -38,121 +38,131 @@ Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
         linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
         bcm-kernel-feedback-list@broadcom.com,
         Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 10/10] dt-bindings: timer: convert bcm2835-system-timer bindings to YAML
-Date:   Sun,  4 Jun 2023 14:12:23 +0200
-Message-Id: <20230604121223.9625-11-stefan.wahren@i2se.com>
+Subject: [PATCH 08/10] dt-bindings: mmc: convert bcm2835-sdhost bindings to YAML
+Date:   Sun,  4 Jun 2023 14:12:21 +0200
+Message-Id: <20230604121223.9625-9-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230604121223.9625-1-stefan.wahren@i2se.com>
 References: <20230604121223.9625-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:oMr1lTfefQ7XSyP/6XiPy6FpM+TVqfrRR0B16B0MUjm0fmnsWJ9
- tXpqm4A8tBbCHLxJpHHVJam+o9XaRneH/yvew6r3hok0Oln6lu/xjV0oeAZYuwvBmg6Q3Og
- Yw9s7SjyFl5sAsxTyW4l2GJOER0A/jGMj13s2Bk2a7BkPNysFRc5ADTze+J+SR6UijgLaUJ
- CjXVFOYus+JCSVK6Zickg==
-UI-OutboundReport: notjunk:1;M01:P0:3fgNAr6VTfc=;0X5GpLSO88Vwv0T2LGOU/vv/rFC
- apzcUSG1Umg593oEieEHm1Cspgd9S2BGndtOWJ8jTS0udRb9zbiQCt93rT/oSFv2ZB8hWhoP1
- ligzgL35FqamqGJ14zITAFDkWmcUycEEVrnArVkPhuBES+WFA+tgETzWWor6Ty1yyIoqAmKgD
- 5EW1UqzI4FPaDy5jo0tCkyYdq+aCymSDTTQQl48XNCYAHyXfCRs75CFUTvo4cGD0QqvI8OoZS
- ZzBff+wrS2TknYHK6tzbvW4GJ0Uh7fV0Nq+qe1UjzXgzsIPyivRw5E6rBaxLEyp7Evmkc0sIA
- NyCVuy1qyb7KaUNe2mZos5GryPirvuceUjgPCItg6wddGxjLu7M94nLFeieq4kJ/1Ee27dLRA
- GvHKCS6bZhyynA0E8ncn8SY0ob+jl6eMIezQmRmOhygA/z9RHHVbH983iFygs2PYs9AGUwZ+P
- 5M7SojbIWflmDMzpdySxIhBNDJPdPQDRDX4+s1iLY7AXbsGYqYL6/MVMBx96g5aWqOBgmxpOV
- dPf0qedK+gt2kotQCeZovS0651yTOYDdnTdiJDTuSahcz623FkV0jxemZMmiWqP7jEw90k7kC
- dkmjYL52sgz0rvWJs4PtAoNQpdYPK+E/Ky46ya+CTTQk+4+ngH41L0pkfQa+1deo+4LZ1A1ZZ
- pJ0nrEH15l2gen6cxgH0vco6jBe1pJEBRCSNEl+GPA==
+X-Provags-ID: V03:K1:foogFTxftYvxx0yiHrFE16uks19QrCnC8HH3ae90EqYe99lsUrJ
+ 0V1Ex5ERGkktRr5VKMfruARlqiTli4OCKIgdmgyyKGDyMDGmtiNRqvsC7zh4v1lCkeDzOgg
+ dRL0KiBp28PmlWQX0cK9C12X7tVsj5Wr8UIBmSH04Z0w+QtkfZmiRRd0MplQX6P6GvxiOmC
+ skP4ftc3f1GmijzExRr8w==
+UI-OutboundReport: notjunk:1;M01:P0:FYmh3L5uoWE=;+L6An8kNOoyMWyRK1uZ2fyOwVVi
+ x7rg4AZbBz/oFY77feJ0cDnQeVECPvGSZzRyuOCoAWPnLPKXNkV1TlfOY7hQYjJxb1v1gJgzl
+ Wc+V4OUWocJbyzyXP/lon16MVPCRyiveYvONFVv3lnBGGxFjnRhVY2929AHRImEt2AbPh6fBz
+ 9AcSjJ/Ah0+Liec7qhp4Ae7noFbuiDsOiDN0jOmcw+mReRxl/1lUhzYohGFFtX3eGN0tE1cAX
+ h6POHKSN5HuyAO/tn7c3LpwU1kkLfC7XmWMEWVRJNJAaWo2NXKQkM1h3pxISJWlwqnNjwiQmF
+ IeFBcHQRB38SWTJ1yTGyh1UBajqWUydyszbQq4BeyNffHeJ7xO1VhxnOpvRIkqE/W041TAA+H
+ 5VEEMIbRH1SWiso/urkCdPVft1dKpze8WjefqWcOwUhdNFuCv/kk0u1D342KErklWJIJB/Uls
+ s6WwzOg7VU/VI3RqErSL4RuVOVXt3nXRf9v0HcQIgIAAp2hnD0Lkykd8RIGkyPM0uyKaNmFVM
+ yBkjifKX7JtvMh+qxt+iXqsmvk/hmHo6tPv7FuVma2lnwlH1HZJZ9Ibn3oEFbo1SRfKPk8Sqx
+ 1Ew2DhLHjExfWKYDeCLXzUWhACCucwjJcsCDzmKzugkwvuWZm5DfK6B0qKMCyL3MMSbP7xCO0
+ A0LUSpgVXoUPhrg+Ph/PhCcYwwpegDySaeEkiX/Lsg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the DT binding document for bcm2835-system-timer from .txt
-to YAML.
+Convert the DT binding document for bcm2835-sdhost from .txt to YAML.
 
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 ---
- .../timer/brcm,bcm2835-system-timer.txt       | 22 ----------
- .../timer/brcm,bcm2835-system-timer.yaml      | 44 +++++++++++++++++++
- 2 files changed, 44 insertions(+), 22 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
- create mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
+ .../bindings/mmc/brcm,bcm2835-sdhost.txt      | 23 --------
+ .../bindings/mmc/brcm,bcm2835-sdhost.yaml     | 54 +++++++++++++++++++
+ 2 files changed, 54 insertions(+), 23 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.yaml
 
-diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
 deleted file mode 100644
-index 844bd5fbd04c..000000000000
---- a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
+index d876580ae3b8..000000000000
+--- a/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
 +++ /dev/null
-@@ -1,22 +0,0 @@
--BCM2835 System Timer
+@@ -1,23 +0,0 @@
+-Broadcom BCM2835 SDHOST controller
 -
--The System Timer peripheral provides four 32-bit timer channels and a
--single 64-bit free running counter. Each channel has an output compare
--register, which is compared against the 32 least significant bits of the
--free running counter values, and generates an interrupt.
+-This file documents differences between the core properties described
+-by mmc.txt and the properties that represent the BCM2835 controller.
 -
 -Required properties:
+-- compatible: Should be "brcm,bcm2835-sdhost".
+-- clocks: The clock feeding the SDHOST controller.
 -
--- compatible : should be "brcm,bcm2835-system-timer"
--- reg : Specifies base physical address and size of the registers.
--- interrupts : A list of 4 interrupt sinks; one per timer channel.
--- clock-frequency : The frequency of the clock that drives the counter, in Hz.
+-Optional properties:
+-- dmas: DMA channel for read and write.
+-          See Documentation/devicetree/bindings/dma/dma.txt for details
 -
 -Example:
 -
--timer {
--	compatible = "brcm,bcm2835-system-timer";
--	reg = <0x7e003000 0x1000>;
--	interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
--	clock-frequency = <1000000>;
+-sdhost: mmc@7e202000 {
+-	compatible = "brcm,bcm2835-sdhost";
+-	reg = <0x7e202000 0x100>;
+-	interrupts = <2 24>;
+-	clocks = <&clocks BCM2835_CLOCK_VPU>;
+-	dmas = <&dma 13>;
+-	dma-names = "rx-tx";
 -};
-diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.yaml b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.yaml
 new file mode 100644
-index 000000000000..555fca4897e7
+index 000000000000..3a5a44800675
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
-@@ -0,0 +1,44 @@
++++ b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.yaml
+@@ -0,0 +1,54 @@
 +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 +%YAML 1.2
 +---
-+$id: http://devicetree.org/schemas/timer/brcm,bcm2835-system-timer.yaml#
++$id: http://devicetree.org/schemas/mmc/brcm,bcm2835-sdhost.yaml#
 +$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+title: BCM2835 System Timer
++title: Broadcom BCM2835 SDHOST controller
 +
 +maintainers:
 +  - Stefan Wahren <stefan.wahren@i2se.com>
 +
-+description:
-+  The System Timer peripheral provides four 32-bit timer channels and a
-+  single 64-bit free running counter. Each channel has an output compare
-+  register, which is compared against the 32 least significant bits of the
-+  free running counter values, and generates an interrupt.
++allOf:
++  - $ref: mmc-controller.yaml
 +
 +properties:
 +  compatible:
-+    const: brcm,bcm2835-system-timer
++    const: brcm,bcm2835-sdhost
 +
 +  reg:
 +    maxItems: 1
 +
 +  interrupts:
-+    maxItems: 4
++    maxItems: 1
 +
-+  clock-frequency: true
++  clocks:
++    maxItems: 1
++
++  dmas:
++    maxItems: 1
++
++  dma-names:
++    const: rx-tx
 +
 +required:
 +  - compatible
 +  - reg
 +  - interrupts
++  - clocks
 +
-+additionalProperties: false
++unevaluatedProperties: false
 +
 +examples:
 +  - |
-+    timer@7e003000 {
-+      compatible = "brcm,bcm2835-system-timer";
-+      reg = <0x7e003000 0x1000>;
-+      interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
-+      clock-frequency = <1000000>;
++    #include <dt-bindings/clock/bcm2835.h>
++
++    sdhost: mmc@7e202000 {
++      compatible = "brcm,bcm2835-sdhost";
++      reg = <0x7e202000 0x100>;
++      interrupts = <2 24>;
++      clocks = <&clocks BCM2835_CLOCK_VPU>;
++      dmas = <&dma 13>;
++      dma-names = "rx-tx";
++      bus-width = <4>;
 +    };
 -- 
 2.34.1
