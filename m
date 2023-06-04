@@ -2,63 +2,113 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BB74C77B73
-	for <linux-mmc@archiver.kernel.org>; Sat,  3 Jun 2023 10:30:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E618C7EE2E
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 12:13:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231710AbjFCK37 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 3 Jun 2023 06:29:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47798 "EHLO
+        id S231738AbjFDMNZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jun 2023 08:13:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43576 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230015AbjFCK36 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 3 Jun 2023 06:29:58 -0400
-X-Greylist: delayed 4202 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 03 Jun 2023 03:29:56 PDT
-Received: from mail.webtopbits.pl (mail.webtopbits.pl [195.231.64.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7461D1A4
-        for <linux-mmc@vger.kernel.org>; Sat,  3 Jun 2023 03:29:56 -0700 (PDT)
-Received: by mail.webtopbits.pl (Postfix, from userid 1001)
-        id 4A439A38CB; Fri,  2 Jun 2023 09:40:55 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=webtopbits.pl;
-        s=mail; t=1685695260;
-        bh=Eh8ECMiYd4baGAwPAzhz8mhJACXX7NSRkYjh+plaY18=;
-        h=Date:From:To:Subject:From;
-        b=eTmqdqpdDZ5ifN/eKzZf43CzHF8yYnsLIT4nY0o6iXt8seeSqWwtESk/lT/rwT7+0
-         xjhYWYZ5PLJQ5HlRlBwmFWe0wsS8pzJWd+3aP/QfF9U/g4ggF1I6jBd0MDYgHFOOFH
-         gPovtAf1zou/3qHAnVLZqTwKmQT5+9Isu1p6/3u0rZvi4RqmRup9aNcvJAW1rbKBNo
-         kPdfRHs8nWqWSqMKhwoKa1QE5hm5jyuXGQd+s5Zo20d5Rec4H04wwxcIEM++kKgVYl
-         dgHtZNbPr/46l1ubPGT5Lp4OGmP6f/ceBIvqjNYpLub0QV387zwy8GjlIh1SmQyiZn
-         ZXt3ONAXuU6mw==
-Received: by mail.webtopbits.pl for <linux-mmc@vger.kernel.org>; Fri,  2 Jun 2023 08:40:50 GMT
-Message-ID: <20230602085530-0.1.8w.5kb8.0.22r28dkbiq@webtopbits.pl>
-Date:   Fri,  2 Jun 2023 08:40:50 GMT
-From:   "Kamil Durjasz" <kamil.durjasz@webtopbits.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: =?UTF-8?Q?Wy=C5=BCsza_konwersja_w_e-sklepie_?=
-X-Mailer: mail.webtopbits.pl
+        with ESMTP id S229903AbjFDMNY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 08:13:24 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98484CA;
+        Sun,  4 Jun 2023 05:13:21 -0700 (PDT)
+Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
+ (mreue107 [212.227.15.183]) with ESMTPSA (Nemesis) id
+ 1Mcp7M-1qffJY2DxK-00Zx5t; Sun, 04 Jun 2023 14:12:42 +0200
+From:   Stefan Wahren <stefan.wahren@i2se.com>
+To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Thomas Gleixner <tglx@linutronix.de>
+Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
+        bcm-kernel-feedback-list@broadcom.com,
+        Stefan Wahren <stefan.wahren@i2se.com>,
+        John Stultz <john.stultz@linaro.org>
+Subject: [PATCH 02/10] dmaengine: bcm2835: also support generic dma-channel-mask
+Date:   Sun,  4 Jun 2023 14:12:15 +0200
+Message-Id: <20230604121223.9625-3-stefan.wahren@i2se.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230604121223.9625-1-stefan.wahren@i2se.com>
+References: <20230604121223.9625-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Provags-ID: V03:K1:KxozCg8oOnQt3q5mPq0HbQmy7gi7fAIS5EtgBua5Q0tEKepPwM4
+ ThwXX6hVibrvtiDk4KSOo1i5qFwNGWAgDBCECMdgx99Cz2gDbAB22klR7Ok4sC5IRkIUeEM
+ mmTaqvDKrjvtDo4JxaeHOtZaxmXJKxbDLbNa1x5uRrtE11Qm5okqHnknE4MvezqO+3byol4
+ tHPvCKsEZCFDD4h+F4nDA==
+UI-OutboundReport: notjunk:1;M01:P0:+kYEE+ZQyz4=;RtH81khKORI85HByj5ZYkPReo/I
+ STW/PQS3ERuAkrJh/N2ZQABRkZDVuLch7HQ6MCtKykWAxd1wELzuk9EplU7RFQ58M59EnCaSu
+ ZEAggFm5MO6eIRKXEekcgRwRJz9Ncsw0z5OKIIlI/LBCAKwezdC3g6mzfR8RdBu/5m3/0Lece
+ kmdPP5dvwhEGlrYO4HfH5z1Fj+qqsnYNZHJohJbVXBGVFOAo9chTmQeR0L0ST3vTYLRFQ+S5J
+ WDkI2UKcbc2wrw1eJ32v+47ub0Y2N5wIuh1U94q5ulMP+wLYO8G/fxWc/tzl3grAdal93CwKZ
+ Ote7f5Jvx9TjWNiJjYMNrPN7wdjy3EjWSAlf6yXXpEYhlmOnHW7CwI/Ob/VX5cgFqmXFEkCbr
+ aPU3w2z7vy/rPYLJ4QEGqThrxQFABDZwn4Ld+MiyrhMlJ/lvFzaN36owiksOSGlOvEzZJvG5h
+ pTLqv36TvzWaxLSndGSbuICmbdHw1wtcDPkvxvUEqklUkPhutcQQTGIyvC9vXTQ//IBgO3Tnb
+ Wi8CX4+LaqRpcEUeYbwp9/UvsRV8UZuZXjWUwOlq/yBqMPzfJ7Nkp1vGah+kDKi1T0Ea8sLNn
+ +cZ2rio0AAizNtEACKzu2NC5Pg3SEJvNpSGXkmm5rxf0u//UcAfndWokWSk2GqprNrWyKdbIL
+ Ry+CFeqzsNb1afwQbjZr2jLgFaHlMkaqS2QSgtxP3g==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,
+Since commit e2d896c08ca3 ("Documentation: bindings: dma: Add
+binding for dma-channel-mask") there is a generic property to list
+available DMA channels for the kernel to use. The generic property
+has been implemented by some other platforms.
+So implement support for the generic one and consider the
+vendor specific one as deprecated. This also simplifies the YAML
+conversion of the BCM2835 DMA DT bindings a little bit.
 
-w jaki spos=C3=B3b docieraj=C4=85 Pa=C5=84stwo do odbiorc=C3=B3w?
+Cc: John Stultz <john.stultz@linaro.org>
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+---
+ drivers/dma/bcm2835-dma.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-Tworzymy pot=C4=99=C5=BCne narz=C4=99dzia sprzeda=C5=BCy, kt=C3=B3re pozw=
-alaj=C4=85 kompleksowo rozwi=C4=85za=C4=87 problemy potencjalnych klient=C3=
-=B3w i skutecznie wp=C5=82yn=C4=85=C4=87 na ich decyzje zakupowe.=20
+diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
+index 0807fb9eb262..a0573977a373 100644
+--- a/drivers/dma/bcm2835-dma.c
++++ b/drivers/dma/bcm2835-dma.c
+@@ -941,12 +941,18 @@ static int bcm2835_dma_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	/* Request DMA channel mask from device tree */
+-	if (of_property_read_u32(pdev->dev.of_node,
+-			"brcm,dma-channel-mask",
+-			&chans_available)) {
+-		dev_err(&pdev->dev, "Failed to get channel mask\n");
+-		rc = -EINVAL;
+-		goto err_no_dma;
++	if (of_property_read_u32(pdev->dev.of_node, "dma-channel-mask",
++				 &chans_available)) {
++		if (of_property_read_u32(pdev->dev.of_node,
++					 "brcm,dma-channel-mask",
++					 &chans_available)) {
++			dev_err(&pdev->dev, "Failed to get channel mask\n");
++			rc = -EINVAL;
++			goto err_no_dma;
++		} else {
++			dev_warn(&pdev->dev,
++				 "brcm,dma-channel-mask is deprecated, update your device-tree\n");
++		}
+ 	}
+ 
+ 	/* get irqs for each channel that we support */
+-- 
+2.34.1
 
-Skupiamy si=C4=99 na Pa=C5=84stwa potrzebach zwi=C4=85zanych z obs=C5=82u=
-g=C4=85 sklepu, oczekiwaniach i planach sprzeda=C5=BCowych. Szczeg=C3=B3=C5=
-=82owo dopasowujemy grafik=C4=99, funkcjonalno=C5=9Bci, struktur=C4=99 i =
-mikrointerakcje do Pa=C5=84stwa grupy docelowej, co przek=C5=82ada si=C4=99=
- na oczekiwane rezultaty.
-
-Ch=C4=99tnie przedstawi=C4=99 dotychczasowe realizacje, aby mogli Pa=C5=84=
-stwo przekona=C4=87 si=C4=99 o naszych mo=C5=BCliwo=C5=9Bciach. Mog=C4=99=
- si=C4=99 skontaktowa=C4=87?
-
-
-Pozdrawiam
-Kamil Durjasz
