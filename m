@@ -2,401 +2,346 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E2BCC7EE29
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jun 2023 16:30:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F6C3C77B73
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Jun 2023 01:38:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229904AbjFDQac (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jun 2023 12:30:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51262 "EHLO
+        id S230193AbjFEBi2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jun 2023 21:38:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229879AbjFDQab (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 12:30:31 -0400
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 225C9B3
-        for <linux-mmc@vger.kernel.org>; Sun,  4 Jun 2023 09:30:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1685896229; x=1717432229;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=0AH7+o1zGzs1QtV/5gTrxKMMAoUDh6lG7GrH2XlguB8=;
-  b=Q3MIKF7AeLcmrSVi3Td1HXNlj1+MjiYdZq/LCq6MVqiAVhdXO2pZvJMf
-   QWwHM6exk8KnTDduBXSP2yRcmYX9iKWcrKvY8tvXFOeh/oeFduZ7Jhm0Y
-   v3hWc8VjjU0BaAuCaoa93nR8DfFi23sSlsTziWKKZM0BeVin6rNVucfPM
-   oUBwpErVnYqXP1g7t6dGmTp721QR0hEld4MnZda1AzM7PJ/TllASITwTG
-   4cBh4GZSJO69Qnp7U5BpEiga2mt0CrqaIztWmPRA0CEYrNYqSffDW/9Hk
-   tc78eZbECJnBI6EoK4UcdfVRL6lIoFeWCK72ZFO9DYM2HcFR6U6zcqodi
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10731"; a="384499058"
-X-IronPort-AV: E=Sophos;i="6.00,217,1681196400"; 
-   d="scan'208";a="384499058"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jun 2023 09:30:28 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10731"; a="1038516665"
-X-IronPort-AV: E=Sophos;i="6.00,217,1681196400"; 
-   d="scan'208";a="1038516665"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.209.188])
-  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jun 2023 09:30:25 -0700
-Message-ID: <75ab27e9-9203-f59b-c720-99bfa992bb9b@intel.com>
-Date:   Sun, 4 Jun 2023 19:30:21 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.11.2
-Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
- writeback-cache for eMMC and SD"
+        with ESMTP id S229670AbjFEBi1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jun 2023 21:38:27 -0400
+Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DC07DA;
+        Sun,  4 Jun 2023 18:38:18 -0700 (PDT)
+X-UUID: a1f8a6e4034111ee9cb5633481061a41-20230605
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=MIME-Version:Content-Transfer-Encoding:Content-ID:Content-Type:In-Reply-To:References:Message-ID:Date:Subject:CC:To:From; bh=ZTFmvjcxnSPWL4V8BU/zxLQ8v4e1t3DoznPIVPHHRuE=;
+        b=X56g9sSFC+QimP9TltLJsQ7ZUw+dVluoZyJDycYdd/P+Aj9WaT9iff7n1gau+fag3S6OoS80xpa5gMtv9ZeigjGXHMPOJWE27HCY4IVbVyKUi2I3oQPNxWOTRoIa4wvPjal2TMOZCgKsXg1HItxNqzcf8M8WP6nvuoIOuZjRtHw=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.25,REQID:ebee8a99-0de1-4fe2-89e6-0001fd510884,IP:0,U
+        RL:0,TC:0,Content:0,EDM:0,RT:0,SF:-5,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+        :release,TS:-5
+X-CID-INFO: VERSION:1.1.25,REQID:ebee8a99-0de1-4fe2-89e6-0001fd510884,IP:0,URL
+        :0,TC:0,Content:0,EDM:0,RT:0,SF:-5,FILE:0,BULK:0,RULE:Release_Ham,ACTION:r
+        elease,TS:-5
+X-CID-META: VersionHash:d5b0ae3,CLOUDID:939afd6d-2f20-4998-991c-3b78627e4938,B
+        ulkID:230605093813B5CG5SKO,BulkQuantity:0,Recheck:0,SF:19|38|17|102,TC:nil
+        ,Content:0,EDM:-3,IP:nil,URL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:
+        0,OSA:0,AV:0
+X-CID-BVR: 0
+X-CID-BAS: 0,_,0,_
+X-UUID: a1f8a6e4034111ee9cb5633481061a41-20230605
+Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw01.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 771284861; Mon, 05 Jun 2023 09:38:12 +0800
+Received: from mtkmbs10n1.mediatek.inc (172.21.101.34) by
+ mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.26; Mon, 5 Jun 2023 09:38:10 +0800
+Received: from APC01-PSA-obe.outbound.protection.outlook.com (172.21.101.237)
+ by mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Mon, 5 Jun 2023 09:38:10 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=ASVptu84OIxV+9RZNj3hR21CAQwGGz2L2WPKpVQKy9N5AlhMW7q+6ZWd+Kl4LfBADvddKbZKpDSkTzFAlfcn6T4rjJv8D7kbevDCW1a7dxX4R12ercZmYYJH7IM70zw7fg+IzN8FzMC+YKXtrINvriHU3msCAntTwZEGOOiJnk3W3F0HmS49BbMRJ9UiAP+2PQn8BrFR3jiPzoD3Mn3UbL/jgpuY7aHSKQbMdWHxzNjePju1DweoGoXPKATCEp9lxXQsauG7WJMXpr0V9N9kAkD86q3i1BF1K/hAVTij7AzgDxwyKv+RHNdk/K5mm85SroLJv1x8BHdBPkJTm3Hheg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ZTFmvjcxnSPWL4V8BU/zxLQ8v4e1t3DoznPIVPHHRuE=;
+ b=dCWTxT/ApWZ3kGpG8lNFW3z3knMqGWY5cI5KitJ/2XEOvMSL9Up9/o7Gbb0NfXYoAtzmysJ9oXjy/yhSAGRpmCAjAuIxM2Z8Ts+xrZALEFJjdRs9VQ2gWPbe9VoF9Jdlws4KQwBYWsVYw5QW/3lmZENH99s1vR+pgTv1q80HdEWfE1FyYSAxH4Cz2sc2lEMSUwPxLqYphPm+2ytTYMAfMOUIoJEOWFN54DQXKEmTHf/y0F+Pno8f6awon8ssffZ5eO1NQG6frSTTtU5pG2VqFQdFvFQlsiu3ipe65WFXn0iL34mgiXlFYlY5jxLTLNArte11XPeaNpOtJhESAQJnqg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=mediatek.com; dmarc=pass action=none header.from=mediatek.com;
+ dkim=pass header.d=mediatek.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=mediateko365.onmicrosoft.com; s=selector2-mediateko365-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ZTFmvjcxnSPWL4V8BU/zxLQ8v4e1t3DoznPIVPHHRuE=;
+ b=sOibSEZrrPi/YpTU4zyzP1tUJeav4ch0IQKghioE9DPuryic1wA0yHMKJUitdI3b61epTFSQ7piRiArAGIK8QlKmBn91tVbFBMsvWPooxYpjTQBIPFTmWUoLwbv7aN+4waz1XyRAJDCENmsFMQzMo9QXSZtk0/NXbipglmbgqP8=
+Received: from SG2PR03MB6279.apcprd03.prod.outlook.com (2603:1096:4:17d::11)
+ by PSAPR03MB5286.apcprd03.prod.outlook.com (2603:1096:301:47::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6455.32; Mon, 5 Jun
+ 2023 01:38:08 +0000
+Received: from SG2PR03MB6279.apcprd03.prod.outlook.com
+ ([fe80::e205:4140:7b24:3147]) by SG2PR03MB6279.apcprd03.prod.outlook.com
+ ([fe80::e205:4140:7b24:3147%9]) with mapi id 15.20.6455.030; Mon, 5 Jun 2023
+ 01:38:08 +0000
+From:   =?utf-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= 
+        <Wenbin.Mei@mediatek.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "angelogioacchino.delregno@collabora.com" 
+        <angelogioacchino.delregno@collabora.com>
+CC:     "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-mediatek@lists.infradead.org" 
+        <linux-mediatek@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        =?utf-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
+        <Chaotian.Jing@mediatek.com>
+Subject: Re: [PATCH v2] mmc: mtk-sd: reduce CIT for better performance
+Thread-Topic: [PATCH v2] mmc: mtk-sd: reduce CIT for better performance
+Thread-Index: AQHZguL8DXJ4wwqPNE+3vDjAEU6xMa9fzDYAgBRRdwCAAA2JgIABPfCAgABw3wCAACPbAIAAA3kAgAWVooA=
+Date:   Mon, 5 Jun 2023 01:38:08 +0000
+Message-ID: <c4f5a6a8784dac7013884ae0fa85cd66f683b108.camel@mediatek.com>
+References: <20230510015851.11830-1-wenbin.mei@mediatek.com>
+         <0df3968e-da34-b36c-4cb4-92d66508a46a@collabora.com>
+         <e682b8b66261a71601707a4e74af2829f86800dc.camel@mediatek.com>
+         <7f5e14e5-a814-efd7-6082-c4eff697c536@collabora.com>
+         <59568b9e6d50135787932cf8e92624914f29e27b.camel@mediatek.com>
+         <c26f8cab-9509-1e8a-600f-4f61f38c8b17@collabora.com>
+         <5844a9f47e4f9e23185da856cb24085a234cd7dd.camel@mediatek.com>
+         <8ad982ba-f8c0-4d15-3740-1883a5aefd29@collabora.com>
+In-Reply-To: <8ad982ba-f8c0-4d15-3740-1883a5aefd29@collabora.com>
+Accept-Language: en-US
 Content-Language: en-US
-To:     Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org
-Cc:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Michael Wu <michael@allwinnertech.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-References: <20230531002740.1235620-1-marex@denx.de>
- <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
- <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
- <f41e1546-f6d3-7f4d-7662-3b7eca291178@intel.com>
- <29a5f24d-2b8c-8387-8c11-601af8e13940@denx.de>
- <4c8d84ae-c8d0-fa12-81c6-a47382684d73@intel.com>
- <3bd65a30-756d-e7ee-ce77-e5ebfe6b6e30@denx.de>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <3bd65a30-756d-e7ee-ce77-e5ebfe6b6e30@denx.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=mediatek.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SG2PR03MB6279:EE_|PSAPR03MB5286:EE_
+x-ms-office365-filtering-correlation-id: e9fa780c-c3a5-437f-3373-08db65658417
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: UxBUVNTMqhtd4kNXHW8zn3xEz44jUQ6Wk58AYKLIpooNnfdB5brVJG+rdYrdvxMYxQev5hu6yMdl+Z2HsA0iEbzXqP7mepdVFh+AzYPCrFT6KAIRwwvxGfyJXdUUmhtFHmkRdU+Gh5kxB6AlhMw+vuV4mP7fsVZ+ULwtcxLeI99lY1G0pRmMP7kScgyfvFtwc3rnzCIMAUcUdJKoR/patG5k8pn9AsGtuyr9xYjoewbN7GuddkdxuqMSbuY01ca+u57C7Dj+hTCl6phPovYi8n5QDZntgiGm+ZCPtL6rT632ICE/RsOrVsOsbJlAyzpJWU2H1pHpCXnkMXScPw9eeFdWK8+lW7xbfoeesMuI18IvcuEl9/y2yN192p5mE1/vxS3WlCXZPyn58uojUsjNFmeXjWZhC0AmdVSJC7N45i73B7OFNOFYLilaA/dB6I3fYKFGZLd1KGWo2+PUex9CbuEfgH0A7v4c73SvEhbPo7bQI8CtDG8dXxiTosEz92Q/p7edsSZwZOch06jCtNiMoVKHw1uw5msWLnNonbXIqr3Rh3BVc7nmF7hqUximKDSD2NR+9WIr+74sfhP3tOmuNIVVWbIPlzmmiQEk/hmjyCdid0j6FbLwP0zwGMu9f2un
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SG2PR03MB6279.apcprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(346002)(39850400004)(376002)(366004)(136003)(396003)(451199021)(41300700001)(316002)(54906003)(110136005)(122000001)(5660300002)(2906002)(4326008)(64756008)(66446008)(66946007)(66556008)(66476007)(76116006)(8676002)(8936002)(478600001)(71200400001)(38070700005)(6486002)(86362001)(186003)(36756003)(85182001)(2616005)(38100700002)(107886003)(26005)(6506007)(6512007)(83380400001);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?STNlYWNxWmV1d0lVVU5BRStEMkQva1BIUS9FQzRJUm9INWVBcXJOYVhsdlJB?=
+ =?utf-8?B?cXgyckEzUGhhL0JpTDlqd2p0UnlKTTlzY0N6aHBTejN6QWlibW44ZTF3MjVV?=
+ =?utf-8?B?TzcvMmxFZ1AzeFdVZ1ROVTgzQ1N5aFAxQ2Fzcnkxc29vQUxqMUgvMDhzVlB0?=
+ =?utf-8?B?Q3UyQkd1ak9qcmpaZzFwUVZWaVdxQk96L3o3UmI4MjlWZElKRUh2TWprOGNJ?=
+ =?utf-8?B?Y2oyNSsvNmZVUDdOWUZTZjFRWGVMMDJZdkQzOW5vMHo3NUh3dWtqMy9TTUdS?=
+ =?utf-8?B?aXpNS2tmbnVmYlJ3b0s1QzUvbTdDaGJkSXBnUlZoZ1VFZU16S2V4V09TMWx3?=
+ =?utf-8?B?Zmc0dGk5bG5abmEzMFkxREZKWWRuNUFCQis5YTAxTkJza2Jxb0FVVWZVN2ZC?=
+ =?utf-8?B?a0hnK1NQSkJGbjNPK0hBQUtlcCtucnEvaDFoeExOK1NleGRYaDUwRVNXSWdK?=
+ =?utf-8?B?RE43cDJkTERJK2pDV05tdFhIalF4ZkEvdlVRdVBnUFo2Um0rdVNocjE3WlI1?=
+ =?utf-8?B?RE43dmdPcFFmRmhBNnBwcnBKaElpLzNXZy9lR3BPSEJISnVqNCtYbTc1dmhp?=
+ =?utf-8?B?Y2ovamtNNzkxMk9IRjFid2ZZdFRRajBIaHQ5dmtvanhhWmdjUUtkUTRBUHF4?=
+ =?utf-8?B?UkFZK05EN0pVbmY1eDMwZlE2c3ZOTmF0WnpPVXhaQm5nRCtZZlB5KzJlY0Jl?=
+ =?utf-8?B?Z1NaWFFJM1k4L3pSaE04aHBwd2NwQU9TL2p0SkZuWFpCRkhSRTVWRmlZVmFo?=
+ =?utf-8?B?ekZIdlZxWmtZUDAyNVVSOWRLcHBRdWRBbDRkMUxodVdhemxIMmQ4Q2FvNDdD?=
+ =?utf-8?B?OG5iRm5KZk9EVE9wQ0l6ZEdxTWZ1eForOUpRNFVER1g1UzZWU21lOVR6L3Q2?=
+ =?utf-8?B?aGR0aTNFeWpNMmRYR0E0Q21HWkI4QUFmb0s3RGRaOWUxOVB5VFdEN2ZuN1ZJ?=
+ =?utf-8?B?bUh6emU3Z2diYWdkbVNLVEtQY2Z0bU1vWHp4Q1l1blVCU1U3NUFld0ZybG5t?=
+ =?utf-8?B?NW5Db3BTZFJENlRQRnFkcjVFR3dsU3A2QmJyWXdzRTk4OGQwZCsvMVkwUVdj?=
+ =?utf-8?B?Y2lDc2srQ3RLSTlOWEJHejhscVkyVnpMM1pCY0FBdHJUS2k5Y2doU01BSDF2?=
+ =?utf-8?B?VXhLYW9nd1JiVVIyS29rUTZlZzQzek1uSlVUblg3SUIzK2J1RUYyOHVwSzN3?=
+ =?utf-8?B?TmhEN0lQL3o3L3d0U1NsTVZqd09lOGd1VVdxdFlNaXFsQjFqWDF3MTNWTDgz?=
+ =?utf-8?B?Z3Zjc25JdENSS28wSC9kVHFhY3R3ZkJmWVN2OFZFMERjUExZY01Ma25JamI5?=
+ =?utf-8?B?Vk93c3BjaWQ0VVBabHljb0dyM3M3dm1URjl1dk5LSURiRjJQU2xoRVRHK1Jk?=
+ =?utf-8?B?NG5wb0sxMjdGQnArZ3FBZnNDVnRXYkRXeVFFODRjZUJJVmtKYldXb0RBWFZW?=
+ =?utf-8?B?NE9mY21MdWlKVEVCejBYZ3diUGd4UFd6akpNQk5pQjd2ckFBdFlWY1BxOXIr?=
+ =?utf-8?B?MFFmTXVKWWxBNHlvYVJQQUJ2RzQ3OW5KUmhJQVYwV3BwUkp6UEM1WUtNRndH?=
+ =?utf-8?B?ZHd3RVpZa0NkbzRzUjYxUEN5S1A5QzN1OUsrTmJ3TVpPSWorVkhycTlpT3kx?=
+ =?utf-8?B?elZTT2xtWUhVYlJ3aUkrK1M2M0NueXFZY0lOMWc1YjdZaEhXMm1wZWxjMjRV?=
+ =?utf-8?B?KzJrcFNSWXJWamhkVGVuMlIrSm40WTFwaGdEbHlUdWFMTENkL1ljVVRPcVlq?=
+ =?utf-8?B?eDAzZkFJS2t4Wndyai9ONTkvV2podjB4QTJMTFZsUysrQnZCUXpub2xIYkk4?=
+ =?utf-8?B?S21KL3Z0TG8yclBQR0crVlRub01yaWZuYTM3MVUyYm9QMHRob3B5c09IRWtm?=
+ =?utf-8?B?SnhtY3dGSS9XWkVzUk90RHEwNWRZQUtZNENaV29LL1d3WEN1ZkxhMlorWWhk?=
+ =?utf-8?B?Ulc0MmphL0RPb2hIczl2cVVLUW4zKzRJZVBINHFzWFNubDR3cm4xMXFtb1ZC?=
+ =?utf-8?B?WjBCaVlUbWk5amRPRnZST0t1bnRORGFsK3NLQmxkWnJZK0R2Q2xYUy9OSzl1?=
+ =?utf-8?B?bU5XWTZEQk1rZUNpVjFQT3ZpOE81MytlYUtzVVMvMzI2VmxUTUF0Sk13LzZU?=
+ =?utf-8?B?Nyt1ZWFQZDRYRG05Ni9aN094QjB2aXRZeURZYlVTVE9Id2R5YXNlY1Z1SFN6?=
+ =?utf-8?B?bHc9PQ==?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <E46628B178E3AA408A5D00C22598CA49@apcprd03.prod.outlook.com>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SG2PR03MB6279.apcprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: e9fa780c-c3a5-437f-3373-08db65658417
+X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Jun 2023 01:38:08.5015
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: a7687ede-7a6b-4ef6-bace-642f677fbe31
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: OT/vkh/FAZnXCYRx7QL0iYPXHEp/PyJhx+XJMwXJzWb1BhK8/RipXTqhq+7CnwiADQYVBY0LhdcB15x3NL959Q==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PSAPR03MB5286
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/06/23 00:46, Marek Vasut wrote:
-> On 6/1/23 08:20, Adrian Hunter wrote:
->> On 1/06/23 00:31, Marek Vasut wrote:
->>> On 5/31/23 15:13, Adrian Hunter wrote:
->>>> On 31/05/23 14:34, Marek Vasut wrote:
->>>>> On 5/31/23 07:46, Adrian Hunter wrote:
->>>>>> On 31/05/23 03:27, Marek Vasut wrote:
->>>>>>> This reverts commit 08ebf903af57cda6d773f3dd1671b64f73b432b8.
->>>>>>>
->>>>>>> On STM32MP153C DHCOR DRC Compact with microSD card
->>>>>>> Kingston Canvas Go! Plus MicroSDXC I 64 GiB U3/V30/A2 SDCG3/64GB
->>>>>>> it is no longer possible to mount ext4 filesystem.
->>>>>>>
->>>>>>> Git bisect points to this commit which is being reverted here. A bit of
->>>>>>> investigation shows that for non-working microSD cards
->>>>>>>      cache_enabled=TRUE fua_enabled=false
->>>>>>> For working microSD card (Kingston Canvas React Plus, MicroSDXC II
->>>>>>> 64 GiB U3/V90/A1 SDCR2/64GB)
->>>>>>>      cache_enabled=FALSE fua_enabled=false
->>>>>>>
->>>>>>> It seems enabling the cache for SD cards causes the issue. Before the
->>>>>>> reverted commit, the cache was not reported enabled for SD cards. I am
->>>>>>> not sure whether such blunt revert is the correct solution however, any
->>>>>>> ideas ?
->>>>>>
->>>>>> This does not disable the cache, it disables the block layer from issuing
->>>>>> cache flushes (by telling it there is no cache being used).
->>>>>>
->>>>>> It would be good to know what commands are failing, which should be visible
->>>>>> in the kernel messages if dynamic debug is enabled:
->>>>>>
->>>>>> Dynamic debug for mmc
->>>>>> ---------------------
->>>>>>
->>>>>>        Kernel must be configured:
->>>>>>
->>>>>>            CONFIG_DYNAMIC_DEBUG=y
->>>>>>
->>>>>>        To enable mmc debug via sysfs:
->>>>>>
->>>>>>            echo 'file drivers/mmc/core/* +p' > /sys/kernel/debug/dynamic_debug/control
->>>>>>            echo 'file drivers/mmc/host/* +p' > /sys/kernel/debug/dynamic_debug/control
->>>>>>
->>>>>>        To enable mmc debug via kernel command line:
->>>>>>
->>>>>>            dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
->>>>>>
->>>>>>        To disable mmc debug:
->>>>>>
->>>>>>            echo 'file drivers/mmc/core/* -p' > /sys/kernel/debug/dynamic_debug/control
->>>>>>            echo 'file drivers/mmc/host/* -p' > /sys/kernel/debug/dynamic_debug/control
->>>>>>
->>>>>>        More general information in kernel documentation in kernel tree:
->>>>>>
->>>>>>            Documentation/admin-guide/dynamic-debug-howto.rst
->>>>>
->>>>> Log is below, I added newlines around the mount failure.
->>>>> Do you see anything problematic there ?
->>>>>
->>>>> $ echo 'file drivers/mmc/core/* +p' > /sys/kernel/debug/dynamic_debug/control ; echo 'file drivers/mmc/host/* +p' > /sys/kernel/debug/dynamic_debug/control ; echo 8 > /proc/sys/kernel/printk ; mount /dev/mmcblk1p4 /mnt
->>>>> [   61.061029] <mmc1: starting CMD23 arg 00000002 flags 00000015>
->>>>> [   61.065637] mmc1: starting CMD18 arg 00002002 flags 000000b5
->>>>> [   61.071144] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.078096] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.083302] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
->>>>> [   61.090012] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
->>>>> [   61.096531] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.102332] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
->>>>> [   61.108836] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.114575] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.120371] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.127178] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.134084] mmc1:     1024 bytes transferred: 0
->>>>> [   61.138658] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.145533] <mmc1: starting CMD23 arg 00000008 flags 00000015>
->>>>> [   61.150946] mmc1: starting CMD18 arg 00002000 flags 000000b5
->>>>> [   61.156609] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.163426] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.168759] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
->>>>> [   61.175368] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
->>>>> [   61.181985] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.187682] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
->>>>> [   61.194185] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.199979] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.205769] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.212574] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.219478] mmc1:     4096 bytes transferred: 0
->>>>> [   61.224050] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.231166] <mmc1: starting CMD23 arg 00000002 flags 00000015>
->>>>> [   61.236378] mmc1: starting CMD18 arg 00002002 flags 000000b5
->>>>> [   61.241983] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.248940] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.254169] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
->>>>> [   61.260779] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
->>>>> [   61.267405] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.273101] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
->>>>> [   61.279603] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.285431] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.291125] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.298032] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.304937] mmc1:     1024 bytes transferred: 0
->>>>> [   61.309409] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.316256] <mmc1: starting CMD23 arg 00000008 flags 00000015>
->>>>> [   61.321768] mmc1: starting CMD18 arg 00002000 flags 000000b5
->>>>> [   61.327459] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.334360] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.339459] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
->>>>> [   61.346167] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
->>>>> [   61.352782] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.358478] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
->>>>> [   61.365082] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.370776] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.376565] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.383371] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.390275] mmc1:     4096 bytes transferred: 0
->>>>> [   61.394848] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.401885] <mmc1: starting CMD23 arg 00000002 flags 00000015>
->>>>> [   61.407193] mmc1: starting CMD18 arg 00002002 flags 000000b5
->>>>> [   61.412794] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.419748] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.424973] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
->>>>> [   61.431582] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
->>>>> [   61.438204] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.443901] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
->>>>> [   61.450404] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.456232] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.461927] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.468834] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.475739] mmc1:     1024 bytes transferred: 0
->>>>> [   61.480210] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.487054] <mmc1: starting CMD23 arg 00000008 flags 00000015>
->>>>> [   61.492462] mmc1: starting CMD18 arg 00002000 flags 000000b5
->>>>> [   61.498251] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.505160] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.510260] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
->>>>> [   61.516969] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
->>>>> [   61.523592] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.529288] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
->>>>> [   61.535789] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.541583] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.547271] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.554177] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.561082] mmc1:     4096 bytes transferred: 0
->>>>> [   61.565654] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.572440] <mmc1: starting CMD23 arg 00000008 flags 00000015>
->>>>> [   61.578017] mmc1: starting CMD18 arg 00002008 flags 000000b5
->>>>> [   61.583653] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.590465] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.595686] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
->>>>> [   61.602396] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
->>>>> [   61.608915] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.614712] mmci-pl18x 58005000.mmc: op 12 arg 00002008 flags 000000b5
->>>>> [   61.621215] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.627034] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.632727] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.639633] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.646437] mmc1:     4096 bytes transferred: 0
->>>>> [   61.651010] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.658908] <mmc1: starting CMD23 arg 00000108 flags 00000015>
->>>>> [   61.663421] mmc1: starting CMD18 arg 00003be8 flags 000000b5
->>>>> [   61.669102] mmc1:     blksz 512 blocks 264 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.676155] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.681355] mmci-pl18x 58005000.mmc: blksz 0200 blks 0108 flags 00000200
->>>>> [   61.688064] mmci-pl18x 58005000.mmc: op 17 arg 00000108 flags 00000015
->>>>> [   61.694589] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.700284] mmci-pl18x 58005000.mmc: op 12 arg 00003be8 flags 000000b5
->>>>> [   61.706887] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.712581] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.718372] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
->>>>> [   61.724060] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.730965] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.737870] mmc1:     135168 bytes transferred: 0
->>>>> [   61.742544] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.749064] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.755336] <mmc1: starting CMD23 arg 00000008 flags 00000015>
->>>>> [   61.760649] mmc1: starting CMD18 arg 00442000 flags 000000b5
->>>>> [   61.766327] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
->>>>> [   61.773144] mmc1:     CMD12 arg 00000000 flags 00000095
->>>>> [   61.778489] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
->>>>> [   61.785100] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
->>>>> [   61.791616] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.797414] mmci-pl18x 58005000.mmc: op 12 arg 00442000 flags 000000b5
->>>>> [   61.803916] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.809710] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.815399] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.822306] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.829211] mmc1:     4096 bytes transferred: 0
->>>>> [   61.833683] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.833952] mmc0: starting CMD7 arg fffd0000 flags 00000015
->>>>> [   61.840205] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.845820] mmci-pl18x 48004000.mmc: op 07 arg fffd0000 flags 00000015
->>>>> [   61.853036] <mmc1: starting CMD23 arg 00000008 flags 00000015>
->>>>> [   61.858074] mmci-pl18x 48004000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.858098] mmc0: req done (CMD7): 0: 00001ed7 00000000 00000000 00000000
->>>>> [   61.876506] mmc1: starting CMD25 arg 00002000 flags 000000b5
->>>>> [   61.882106] mmc1:     blksz 512 blocks 8 flags 00000100 tsac 3000 ms nsac 0
->>>>> [   61.889107] mmc1:     CMD12 arg 00000000 flags 0000049d
->>>>> [   61.894346] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000100
->>>>> [   61.900957] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
->>>>> [   61.907588] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.913283] mmci-pl18x 58005000.mmc: op 19 arg 00002000 flags 000000b5
->>>>> [   61.919786] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.925612] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
->>>>> [   61.931309] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
->>>>> [   61.938219] mmc1: req done (CMD25): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.945125] mmc1:     4096 bytes transferred: 0
->>>>> [   61.949598] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
->>>>> [   61.956107] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.961888] mmc1: starting CMD13 arg 50480000 flags 00000195
->>>>> [   61.967581] mmci-pl18x 58005000.mmc: op 0d arg 50480000 flags 00000195
->>>>> [   61.974026] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   61.979718] mmc1: req done (CMD13): 0: 00000900 00000000 00000000 00000000
->>>>> [   61.986630] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   61.992588] mmc1: starting CMD49 arg 10020a00 flags 00000035
->>>>> [   61.998152] mmc1:     blksz 512 blocks 1 flags 00000100 tsac 3000 ms nsac 0
->>>>> [   62.005158] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000100
->>>>> [   62.011778] mmci-pl18x 58005000.mmc: op 31 arg 10020a00 flags 00000035
->>>>> [   62.018317] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   62.024011] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
->>>>> [   62.029801] mmc1: req done (CMD49): 0: 00000900 00000000 00000000 00000000
->>>>> [   62.036708] mmc1:     512 bytes transferred: 0
->>>>> [   62.041083] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>> [   62.046988] mmc1: starting CMD48 arg 10020a00 flags 000000b5
->>>>> [   62.052487] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
->>>>> [   62.059443] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000200
->>>>> [   62.066154] mmci-pl18x 58005000.mmc: op 30 arg 10020a00 flags 000000b5
->>>>> [   62.072688] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
->>>>> [   62.078382] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
->>>>> [   62.084173] mmc1: req done (CMD48): 0: 00000900 00000000 00000000 00000000
->>>>> [   62.091081] mmc1:     512 bytes transferred: 0
->>>>> [   62.095455] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
->>>>
->>>> CMD48 was successful but it still became an error, which must have
->>>> been because it indicated the flush had not completed.  We do not
->>>> allow for mmc_poll_for_busy() being too quick i.e. card has not
->>>> had a chance to indicate busy yet.
->>>>
->>>> Please try this:
->>>>
->>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->>>> index 72b664ed90cf..9c3123867a99 100644
->>>> --- a/drivers/mmc/core/sd.c
->>>> +++ b/drivers/mmc/core/sd.c
->>>> @@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>    {
->>>>        struct mmc_card *card = host->card;
->>>>        u8 *reg_buf, fno, page;
->>>> +    unsigned long timeout;
->>>> +    bool expired;
->>>>        u16 offset;
->>>>        int err;
->>>>    @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>            goto out;
->>>>        }
->>>>    +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
->>>> +again:
->>>>        err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
->>>>                    MMC_BUSY_EXTR_SINGLE);
->>>>        if (err)
->>>>            goto out;
->>>>    +    expired = time_after(jiffies, timeout);
->>>> +
->>>>        /*
->>>>         * Read the Flush Cache bit. The card shall reset it, to confirm that
->>>>         * it's has completed the flushing of the cache.
->>>> @@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>            goto out;
->>>>        }
->>>>    -    if (reg_buf[0] & BIT(0))
->>>> -        err = -ETIMEDOUT;
->>>> +    if (reg_buf[0] & BIT(0)) {
->>>
->>> I am getting here, multiple times, with expired=0 .
->>
->> So either the host controller's busy detection does not work, or the
->> card is not indicating busy by pulling down DAT0.
->>
->> Can you try to figure out which it is?
-> 
-> The byte 261 bit 0 is never cleared, I had this looping for an hour and the 'Flush Cache' bit just never got cleared. The SD spec 6.00 and 9.00 both indicate the bit should be cleared by the card once cache flush is completed.
-> 
-> I tried three different controllers now -- STM32MP15xx ARM MMCI, i.MX6Q uSDHC, laptop rtsx_pci_sdmmc , they all fail.
-> 
-> I tried to find another card which also has cache, I cannot find any other card, all the rest report no cache. The kingston card SSR (see the 2ff in 6th field, the last f bit 2 is cache supported indication, SSR bit 330):
-> 
-> 00000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-> 
-> So either this card is weird, or the cards with cache are so rare that nobody noticed the problem yet.
-
-The patch set cover letter says it was tested with 64GB Sandisk Extreme PRO UHS-I A2 card
-
-	https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
-
-I ordered a Kingston Canvas Go Plus card as you described but it won't arrive for a week.
-
-Currently I am thinking we could do a cache flush after enabling the cache, just
-to see if it works.  If not, then disable the cache.
-
-It would also be interesting to read back the extended register to see if the
-enable bit has actually been set.
-
-> 
->>> After that, once, I get here with expired=1 and then the ext4 mount failure occurs.
->>>
->>>> +        if (expired)
->>>> +            err = -ETIMEDOUT;
->>>> +        else
->>>> +            goto again;
->>>> +    }
->>>>    out:
->>>>        kfree(reg_buf);
->>>>        return err;
->>>
->>> Also, I made another observation -- if I reduce the SD bus clock frequency to 10 MHz (current is 50 MHz), then I don't observe this problem.
->>
->> The lower frequency might just be making the commands take a bit longer
->> so the flush just completes before the timeout.
->>
->> It can also be that the card has less time to work on flushing if it is
->> being hammered by commands.
->>
->> I imagine you can hack some debugging prints as well as I can,
->> but here is an example (untested) to try to find out how long
->> the flush takes and decrease the rate at which commands are sent.
-> 
-> Discard this information about the 10 MHz, this must've been a fluke. I can reproduce the error even at 10 MHz now.
-> 
-> [...]
-
+T24gVGh1LCAyMDIzLTA2LTAxIGF0IDE0OjIxICswMjAwLCBBbmdlbG9HaW9hY2NoaW5vIERlbCBS
+ZWdubyB3cm90ZToNCj4gIAkgDQo+IEV4dGVybmFsIGVtYWlsIDogUGxlYXNlIGRvIG5vdCBjbGlj
+ayBsaW5rcyBvciBvcGVuIGF0dGFjaG1lbnRzIHVudGlsDQo+IHlvdSBoYXZlIHZlcmlmaWVkIHRo
+ZSBzZW5kZXIgb3IgdGhlIGNvbnRlbnQuDQo+ICBJbCAwMS8wNi8yMyAxNDowOCwgV2VuYmluIE1l
+aSAo5qKF5paH5b2sKSBoYSBzY3JpdHRvOg0KPiA+IE9uIFRodSwgMjAyMy0wNi0wMSBhdCAxMjow
+MCArMDIwMCwgQW5nZWxvR2lvYWNjaGlubyBEZWwgUmVnbm8NCj4gd3JvdGU6DQo+ID4+ICAgDQo+
+ID4+IEV4dGVybmFsIGVtYWlsIDogUGxlYXNlIGRvIG5vdCBjbGljayBsaW5rcyBvciBvcGVuIGF0
+dGFjaG1lbnRzDQo+IHVudGlsDQo+ID4+IHlvdSBoYXZlIHZlcmlmaWVkIHRoZSBzZW5kZXIgb3Ig
+dGhlIGNvbnRlbnQuDQo+ID4+ICAgSWwgMDEvMDYvMjMgMDU6MTYsIFdlbmJpbiBNZWkgKOaiheaW
+h+W9rCkgaGEgc2NyaXR0bzoNCj4gPj4+IE9uIFdlZCwgMjAyMy0wNS0zMSBhdCAxMDoxOCArMDIw
+MCwgQW5nZWxvR2lvYWNjaGlubyBEZWwgUmVnbm8NCj4gPj4gd3JvdGU6DQo+ID4+PiBFeHRlcm5h
+bCBlbWFpbCA6IFBsZWFzZSBkbyBub3QgY2xpY2sgbGlua3Mgb3Igb3BlbiBhdHRhY2htZW50cw0K
+PiA+PiB1bnRpbCB5b3UgaGF2ZSB2ZXJpZmllZCB0aGUgc2VuZGVyIG9yIHRoZSBjb250ZW50Lg0K
+PiA+Pj4NCj4gPj4+IElsIDMxLzA1LzIzIDA5OjMyLCBXZW5iaW4gTWVpICjmooXmloflvawpIGhh
+IHNjcml0dG86DQo+ID4+Pg0KPiA+Pj4+IE9uIFRodSwgMjAyMy0wNS0xOCBhdCAxMToxMyArMDIw
+MCwgQW5nZWxvR2lvYWNjaGlubyBEZWwgUmVnbm8NCj4gPj4gd3JvdGU6DQo+ID4+Pg0KPiA+Pj4+
+PiBFeHRlcm5hbCBlbWFpbCA6IFBsZWFzZSBkbyBub3QgY2xpY2sgbGlua3Mgb3Igb3BlbiBhdHRh
+Y2htZW50cw0KPiA+PiB1bnRpbA0KPiA+Pj4NCj4gPj4+Pj4geW91IGhhdmUgdmVyaWZpZWQgdGhl
+IHNlbmRlciBvciB0aGUgY29udGVudC4NCj4gPj4+DQo+ID4+Pj4+DQo+ID4+Pg0KPiA+Pj4+Pg0K
+PiA+Pj4NCj4gPj4+Pj4gSWwgMTAvMDUvMjMgMDM6NTgsIFdlbmJpbiBNZWkgaGEgc2NyaXR0bzoN
+Cj4gPj4+DQo+ID4+Pj4+PiBDUUhDSV9TU0MxIGluZGljYXRlcyB0byBDUUUgdGhlIHBvbGxpbmcg
+cGVyaW9kIHRvIHVzZSB3aGVuDQo+IHVzaW5nDQo+ID4+Pg0KPiA+Pj4+Pj4gcGVyaW9kaWMNCj4g
+Pj4+DQo+ID4+Pj4+PiBTRU5EX1FVRVVFX1NUQVRVUyhDTUQxMykgcG9sbGluZy4NCj4gPj4+DQo+
+ID4+Pj4+PiBUaGUgZGVmYXVsdCB2YWx1ZSAweDEwMDAgdGhhdCBjb3JyZXNwb25kcyB0byAxNTB1
+cywgbGV0J3MNCj4gPj4gZGVjcmVhc2UNCj4gPj4+DQo+ID4+Pj4+PiBpdCB0bw0KPiA+Pj4NCj4g
+Pj4+Pj4NCj4gPj4+DQo+ID4+Pj4+IFRoZSBkZWZhdWx0IHZhbHVlIDB4MTAwMCAoNDA5NikgY29y
+cmVzcG9uZHMgdG8gNDA5NiAqIDUyLjA4dVMgPQ0KPiA+Pj4NCj4gPj4+Pj4gMjMxLjMzdVMNCj4g
+Pj4+DQo+ID4+Pj4+IC4uLnNvIHRoZSBkZWZhdWx0IGlzIG5vdCAxNTB1Uy4NCj4gPj4+DQo+ID4+
+Pj4+DQo+ID4+Pg0KPiA+Pj4+PiBJZiBJJ20gd3JvbmcsIHRoaXMgbWVhbnMgdGhhdCB0aGUgQ1FD
+QVAgZmllbGQgaXMgbm90IDAsIHdoaWNoDQo+ID4+IHdvdWxkDQo+ID4+Pg0KPiA+Pj4+PiBtZWFu
+DQo+ID4+Pg0KPiA+Pj4+PiB0aGF0IHRoZSBleHBlY3RlZCAzdVMgd291bGQgYmUgd3JvbmcuDQo+
+ID4+Pg0KPiA+Pj4+Pg0KPiA+Pj4NCj4gPj4+Pj4gQWxzbywgc2luY2UgdGhlIGNhbGN1bGF0aW9u
+IGNhbiBiZSBkb25lIGR5bmFtaWNhbGx5LCB0aGlzIGlzDQo+IHdoYXQNCj4gPj4gd2UNCj4gPj4+
+DQo+ID4+Pj4+IHNob3VsZA0KPiA+Pj4NCj4gPj4+Pj4gYWN0dWFsbHkgZG8gaW4gdGhlIGRyaXZl
+ciwgYXMgdGhpcyBnaXZlcyBpbmZvcm1hdGlvbiB0byB0aGUNCj4gbmV4dA0KPiA+Pj4NCj4gPj4+
+Pj4gZW5naW5lZXINCj4gPj4+DQo+ID4+Pj4+IGNoZWNraW5nIHRoaXMgcGllY2Ugb2YgY29kZS4N
+Cj4gPj4+DQo+ID4+Pj4+DQo+ID4+Pg0KPiA+Pj4+PiBBcGFydCBmcm9tIHRoaXMsIGJ5IGp1c3Qg
+d3JpdGluZyAweDQwIHRvIHRoZSBDUUhDSV9TU0MxDQo+IHJlZ2lzdGVyLA0KPiA+PiB5b3UNCj4g
+Pj4+DQo+ID4+Pj4+IGFyZQ0KPiA+Pj4NCj4gPj4+Pj4gYXNzdW1pbmcgdGhhdCB0aGUgQ1FDQVAg
+dmFsdWUgcmVxdWlyZW1lbnQgaXMgZnVsbGZpbGxlZCwgYnV0DQo+IHlvdQ0KPiA+Pj4NCj4gPj4+
+Pj4gY2Fubm90DQo+ID4+Pg0KPiA+Pj4+PiBhc3N1bWUgdGhhdCB0aGUgYm9vdGxvYWRlciBoYXMg
+c2V0IHRoZSBDUUNBUCdzIElUQ0ZWQUwgYW5kDQo+ID4+IElUQ0ZNVUwNCj4gPj4+DQo+ID4+Pj4+
+IGZpZWxkcw0KPiA+Pj4NCj4gPj4+Pj4gYXMgeW91IGV4cGVjdCBvbiBhbGwgcGxhdGZvcm1zOiB0
+aGlzIG1lYW5zIHRoYXQgaW1wbGVtZW50aW5nDQo+IHRoaXMNCj4gPj4+DQo+ID4+Pj4+IHRha2Vz
+DQo+ID4+Pg0KPiA+Pj4+PiBhIGxpdHRsZSBtb3JlIGVmZm9ydC4NCj4gPj4+DQo+ID4+Pj4+DQo+
+ID4+Pg0KPiA+Pj4+PiBZb3UgaGF2ZSB0d28gd2F5cyB0byBpbXBsZW1lbnQgdGhpczoNCj4gPj4+
+DQo+ID4+Pj4+ICAgICAgKioqIEZpcnN0ICoqKg0KPiA+Pj4NCj4gPj4+Pj4gICAgICAxLiBSZWFk
+IElUQ0ZNVUwgYW5kIElUQ0ZWQUwsIHRoZW46DQo+ID4+Pg0KPiA+Pj4+PiAgICAgICAgIHRjbGtf
+bXVsID0gaXRjZm11bF90b19taHooSVRDRk1VTCk7IC8qIHBzZXVkbyBmdW5jdGlvbg0KPiA+Pj4N
+Cj4gPj4+Pj4gaW50ZXJwcmV0cyByZWcgdmFsdWUqLw0KPiA+Pj4NCj4gPj4+Pj4gICAgICAgICB0
+Y2xrID0gSVRDRlZBTCAqIHRjbGtfbXVsOw0KPiA+Pj4NCj4gPj4+Pj4NCj4gPj4+DQo+ID4+Pj4+
+ICAgICAgMi4gU2V0IFNTQzEgc28gdGhhdCB3ZSBnZXQgM25TOg0KPiA+Pj4NCj4gPj4+Pj4gICAg
+ICAgICAjZGVmaW5lIENRSENJX1NTQzFfQ0lUIEdFTk1BU0soMTUsIDApDQo+ID4+Pg0KPiA+Pj4+
+PiAgICAgICAgIHBvbGxfdGltZSA9IGNpdF90aW1lX25zX3RvX3JlZ3ZhbCgzKTsNCj4gPj4+DQo+
+ID4+Pj4+ICAgICAgICAgc3NjaXQgPSBGSUVMRF9QUkVQKENRSENJX1NTQzFfQ0lULCBwb2xsX3Rp
+bWUpDQo+ID4+Pg0KPiA+Pj4+PiAgICAgICAgIGNxaGNpX3dyaXRlbCggLi4uICkNCj4gPj4+DQo+
+ID4+Pj4+DQo+ID4+Pg0KPiA+Pj4+PiAgICAgICoqKiBTZWNvbmQgKioNCj4gPj4+DQo+ID4+Pj4+
+DQo+ID4+Pg0KPiA+Pj4+PiAgICAgIDEuIFByZS1zZXQgSVRDRk1VTCBhbmQgSVRDRlZBTCB0bw0K
+PiA+Pj4NCj4gPj4+Pj4gICAgICAgICBJVENGVkFMID0gMTkyIChkZWNpbWFsKQ0KPiA+Pj4NCj4g
+Pj4+Pj4gICAgICAgICBJVENGTVVMID0gMiAod2hlcmUgMiA9PSAwLjFNSHopDQo+ID4+Pg0KPiA+
+Pj4+Pg0KPiA+Pj4NCj4gPj4+Pj4gICAgICAyLiBTZXQgU1NDMSBzbyB0aGF0IHdlIGdldCAzblM6
+DQo+ID4+Pg0KPiA+Pj4+PiAgICAgICAgICNkZWZpbmUgQ1FIQ0lfU1NDMV9DSVQgR0VOTUFTSygx
+NSwgMCkNCj4gPj4+DQo+ID4+Pj4+ICAgICAgICAgcG9sbF90aW1lID0gY2l0X3RpbWVfbnNfdG9f
+cmVndmFsKDMpOw0KPiA+Pj4NCj4gPj4+Pj4gICAgICAgICBzc2NpdCA9IEZJRUxEX1BSRVAoQ1FI
+Q0lfU1NDMV9DSVQsIHBvbGxfdGltZSkNCj4gPj4+DQo+ID4+Pj4+ICAgICAgICAgY3FoY2lfd3Jp
+dGVsKCAuLi4gKQ0KPiA+Pj4NCj4gPj4+Pj4NCj4gPj4+DQo+ID4+Pj4+IEkgd291bGQgaW1wbGVt
+ZW50IHRoZSBmaXJzdCB3YXksIGFzIGl0IHBhdmVzIHRoZSB3YXkgdG8gZXh0ZW5kDQo+ID4+IHRo
+aXMNCj4gPj4+DQo+ID4+Pj4+IHRvIGRpZmZlcmVudA0KPiA+Pj4NCj4gPj4+Pj4gdGNsayB2YWx1
+ZXMgaWYgbmVlZGVkIGluIHRoZSBmdXR1cmUuDQo+ID4+Pg0KPiA+Pj4+Pg0KPiA+Pj4NCj4gPj4+
+Pj4gUmVnYXJkcywNCj4gPj4+DQo+ID4+Pj4+IEFuZ2Vsbw0KPiA+Pj4NCj4gPj4+PiBIaSBBbmdl
+bG8sDQo+ID4+Pg0KPiA+Pj4+DQo+ID4+Pg0KPiA+Pj4+IFNvcnJ5IGZvciBsYXRlbHkgcmVwbHku
+DQo+ID4+Pg0KPiA+Pj4+DQo+ID4+Pg0KPiA+Pj4+IEZvciBNZWRpYXRlayBtbWMgaG9zdCBJUCwg
+SVRDRk1VTCBpcyAweDIoMHgxTUh6KSwgSVRWRlZBTA0KPiByZXBvcnRzDQo+ID4+IDE4MiwNCj4g
+Pj4+DQo+ID4+Pj4gYW5kIHRoZXNlIGZpZWxkcyBhcmUgdGhlIHNhbWUgYW5kIGFyZSByZWFkb25s
+eSBmb3IgYWxsIElDLCBidXQNCj4gPj4gc2luY2UNCj4gPj4+DQo+ID4+Pj4gTWVkaWF0ZWsgQ1FF
+IHVzZXMgbXNkY19oY2xrKDI3M01IeiksIENNRDEzJ2ludGVydmFsIGNhbGN1bGF0aW9uDQo+ID4+
+IGRyaXZlcg0KPiA+Pj4NCj4gPj4+PiBzaG91bGQgdXNlIDI3M01IeiB0byBnZXQgdGhlIGFjdHVh
+bCB0aW1lLCBzbyB0aGUgYWN0dWFsIGNsb2NrIGlzDQo+ID4+Pg0KPiA+Pj4+IDI3LjNNSHouDQo+
+ID4+Pg0KPiA+Pj4+DQo+ID4+Pg0KPiA+Pj4NCj4gPj4+IFlvdSdyZSByaWdodCwgSSd2ZSBtaXNy
+ZWFkIHRoZSBkYXRhc2hlZXQsIGp1c3QgcmVjaGVja2VkIGFuZCBpdA0KPiA+PiByZXBvcnRzIFJP
+Lg0KPiA+Pj4NCj4gPj4+DQo+ID4+Pj4gSWYgQ0lUIGlzIDB4MTAwMCBieSBkZWZhdWx0LCBDTUQg
+aWRsZSB0aW1lOiAweDEwMDAgKiAxIC8gMjcuM01Ieg0KPiA9DQo+ID4+Pg0KPiA+Pj4+IGFyb3Vu
+ZCAxNTB1cy4NCj4gPj4+DQo+ID4+Pj4NCj4gPj4+DQo+ID4+Pj4gSW4gYWRkaXRpb24gdGhlIGJv
+b3Rsb2FkZXIgd2lsbCBub3Qgc2V0IHRoZSBDUUNBUCdzIElUQ0ZWQUwgYW5kDQo+ID4+IElUQ0ZN
+VUwNCj4gPj4+DQo+ID4+Pj4gZmllbGRzLCBiZWNhdXNlIHRoZXNlIGZpZWxkcyBvZiBDUUNBUCBy
+ZWdpc3RlciBpcyBSTyhyZWFkb25seSksDQo+IHNvDQo+ID4+IHdlDQo+ID4+Pg0KPiA+Pj4+IGNh
+biBpZ25vcmUgdGhlIGNoYW5nZSBmb3IgdGhlIENRQ0FQJ3MgSVRDRlZBTCBhbmQgSVRDRk1VTA0K
+PiBmaWVsZHMuDQo+ID4+Pg0KPiA+Pj4+DQo+ID4+Pg0KPiA+Pj4NCj4gPj4+IFllcywgdGhhdCdz
+IHJpZ2h0LCBhZ2FpbiAtIHRoaXMgbWVhbnMgdGhhdCB5b3Ugc2hvdWxkIGdvIGZvciB0aGUNCj4g
+Pj4gZmlyc3QNCj4gPj4+DQo+ID4+PiBwcm9wb3NlZCBpbXBsZW1lbnRhdGlvbiwgYXMgZnV0dXJl
+IE1lZGlhVGVrIFNvQ3MgbWF5IChvciBtYXkgbm90KQ0KPiA+PiBjaGFuZ2UNCj4gPj4+DQo+ID4+
+PiB0aGF0OiBpZiB5b3UgaW1wbGVtZW50IGFzIHByb3Bvc2VkLCB0aGlzIGlzIGdvaW5nIHRvIGJl
+IGEgb25lLQ0KPiB0aW1lDQo+ID4+IHRoaW5nDQo+ID4+Pg0KPiA+Pj4gYW5kIGZ1dHVyZSBTb0Nz
+IHdvbid0IG5lZWQgc3BlY2lmaWMgY2hhbmdlcy4NCj4gPj4+DQo+ID4+Pg0KPiA+Pj4gVGhhdCBp
+bXBsZW1lbnRhdGlvbiBhbHNvIGRvY3VtZW50cyB0aGUgZmxvdyBhYm91dCBob3cgd2UncmUNCj4g
+Z2V0dGluZw0KPiA+PiB0bw0KPiA+Pj4NCj4gPj4+IHRoZSBhY3R1YWwgdmFsdWUsIHdoaWNoIGlz
+IGltcG9ydGFudCBmb3IgY29tbXVuaXR5IHBlb3BsZSByZWFkaW5nDQo+ID4+IHRoaXMNCj4gPj4+
+DQo+ID4+PiBkcml2ZXIgaW4gdGhlIGZ1dHVyZSBmb3IgZGVidWdnaW5nIHB1cnBvc2VzLg0KPiA+
+Pj4NCj4gPj4+DQo+ID4+PiBSZWdhcmRzLA0KPiA+Pj4NCj4gPj4+IEFuZ2Vsbw0KPiA+Pj4NCj4g
+Pj4+DQo+ID4+Pg0KPiA+Pj4gVGhhbmtzIGZvciB5b3VyIHByb3Bvc2FsLg0KPiA+Pj4NCj4gPj4+
+DQo+ID4+PiBJIGhhdmUgZGlzY3Vzc2VkIHdpdGggb3VyIGRlc2lnbmVyLCBhbmQgdGhpcyBmaWVs
+ZHMgb2YgQ1FDQVAncw0KPiA+PiBJVENGVkFMIGFuZCBJVENGTVVMIHdpbGwgbm90IGNoYW5nZS4N
+Cj4gPj4+IElmIHdlIGFkZCBtb3JlIGNvZGUgZm9yIGl0LCB0aGVzZSBjb2RlcyB3aWxsIGFsc28g
+YWZmZWN0IHRoZQ0KPiA+PiBleGVjdXRpb24gZWZmaWNpZW5jeSwgZXZlbiBpZiBpdCBoYXMgYSB2
+ZXJ5DQo+ID4+PiBzbWFsbCBlZmZlY3QuDQo+ID4+PiBJIHRoaW5rIGlmIGl0J3MganVzdCBmb3Ig
+cmVhZGluZyBjb252ZW5pZW5jZSwgd2UgY2FuIGFkZCBtb2RlDQo+ID4+IGNvbW1lbnRzIHRvIG1h
+a2UgaXQgZWFzaWVyIHRvIHJlYWQgdGhlIGNvZGUuDQo+ID4+PiBEbyB5b3UgdGhpbmsgaXQncyBv
+a2F5IHRvIGFkZCBtb3JlIGNvbW1lbnRzPw0KPiA+Pj4NCj4gPj4NCj4gPj4gVGhpcyBpc24ndCBh
+IHBlcmZvcm1hbmNlIHBhdGgsIGJ1dCBhbnl3YXksIGlmIHlvdSB0aGluayB0aGF0IGl0DQo+IHdp
+bGwNCj4gPj4gYmUgYXQgc29tZQ0KPiA+PiBwb2ludCwgeW91IGNhbiByZWFkIHRoZSB0d28gcmVn
+aXN0ZXJzIGF0IHByb2JlIHRpbWUgYXMgcGFydCBvZiB0aGUNCj4gPj4gTU1DX0NBUDJfQ1FFDQo+
+ID4+IGlmIGJyYW5jaCwgYW5kIHRoZW4gY2FjaGUgdGhlIGludmFyaWFibGUgdmFsdWVzIHRvIGBz
+dHJ1Y3QNCj4gPj4gbXNkY19ob3N0YDogdGhpcw0KPiA+PiB3aWxsIG1ha2UgeW91IGFibGUgdG8g
+bmV2ZXIgcGVyZm9ybSByZWdpc3RlciByZWFkcyBmb3INCj4gSVRDRlZBTC9GTVVMDQo+ID4+IGlu
+DQo+ID4+IG1zZGNfY3FlX2VuYWJsZSgpLCByZXNvbHZpbmcgdGhlIGVmZmljaWVuY3kgaXNzdWUu
+DQo+ID4+DQo+ID4+IEV2ZW4gYmV0dGVyLCBpbnN0ZWFkIG9mIGNhY2hpbmcgSVRDRlZBTC9GTVVM
+IHRvIHR3byB2YXJpYWJsZXMsDQo+IHNpbmNlDQo+ID4+IHRoZSBpZGxlDQo+ID4+IHRpbWVyIHZh
+bHVlIGxpa2VseSB3b24ndCBldmVyIGNoYW5nZSBkdXJpbmcgcnVudGltZSwgeW91IGNhbg0KPiBk
+aXJlY3RseQ0KPiA+PiBwZXJmb3JtDQo+ID4+IHRoZSBjYWxjdWxhdGlvbiBmb3IgU1NDMSBhdCBw
+cm9iZSB0aW1lIGFuZCBjYWNoZSB0aGF0IHZhbHVlDQo+IGluc3RlYWQsDQo+ID4+IHNvIHRoYXQN
+Cj4gPj4gaW4gbXNkY19jcWVfZW5hYmxlKCkgeW91IHdpbGwgaGF2ZSBzb21ldGhpbmcgbGlrZS4u
+Lg0KPiA+Pg0KPiA+PiAvKiBTZXQgdGhlIHNlbmQgc3RhdHVzIGNvbW1hbmQgaWRsZSB0aW1lciAq
+Lw0KPiA+PiBjcWhjaV93cml0ZWwoY3FfaG9zdCwgaG9zdC0+Y3Ffc3NjMV90aW1lLCBDUUhDSV9T
+U0MxKTsNCj4gPj4NCj4gPj4gd2hlcmUgY3Ffc3NjMV90aW1lIGlzDQo+ID4+IHN0cnVjdCBtc2Rj
+X2hvc3Qgew0KPiA+PiAuLi4uLi4uDQo+ID4+IHUzMiBjcV9zc2MxX3RpbWU7DQo+ID4+IC4uLi4N
+Cj4gPj4gfQ0KPiA+Pg0KPiA+PiBhbmQgd2hlcmUgeW91ciBwcm9iZSBmdW5jdGlvbiBpcw0KPiA+
+Pg0KPiA+PiBzdGF0aWMgaW50IG1zZGNfZHJ2X3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
+KnBkZXYpDQo+ID4+IHsNCj4gPj4gLi4uLi4uDQo+ID4+DQo+ID4+IGlmIChtbWMtPmNhcHMyICYg
+TU1DX0NBUDJfQ1FFKSB7DQo+ID4+IGhvc3QtPmNxX2hvc3QgPSAuLi4uLi4NCj4gPj4gLi4uLi4u
+Li4NCj4gPj4gcmVhZCBpdGNmdmFsOw0KPiA+PiByZWFkIGl0Y2ZtdWw7DQo+ID4+IGhvc3QtPmNx
+X3NzYzFfdGltZSA9IGNhbGN1bGF0ZWQtdmFsdWU7DQo+ID4+IC4uLi4uLi4uDQo+ID4+IH0NCj4g
+Pj4NCj4gPj4gLi4uLi4uLg0KPiA+PiB9DQo+ID4+DQo+ID4gWWVzLCBJIHRoaW5rIGl0J3Mgb2th
+eSBmb3IgbWUuDQo+ID4gQW5vdGhlciBwcm9ibGVtLCBJVENGVkFMIHJlcG9ydHMgMTgyIGZvciBN
+ZWRpYVRlayBTb0NzLCBidXQgd2UgY2FuDQo+IG5vdA0KPiA+IHVzZSBpdCB0byBjYWxjdWxhdGUs
+IGFzIGkgc2FpZCBlYXJsaWVyLCBzaW5jZSBvdXIgQ1FFIHVzZXMNCj4gPiBtc2RjX2hjbGsoMjcz
+TUh6KSwgQ01EMTMnIGludGVydmFsIGNhbGN1bGF0aW9uIGRyaXZlcnMgc2hvdWxkIHVzZQ0KPiA+
+IDI3M01IeiB0byBnZXQgdGhlIGFjdHVhbCB0aW1lLCBub3QgMTgyTUh6Lg0KPiA+IElmIHdlIHVz
+ZSBJVENGVkFMLCB3ZSB3aWxsIGdldCBhIHdyb25nIHZhbHVlLg0KPiA+IFNvIEkgdGhpbmsgaXQn
+cyBtZWFuaW5nbGVzcy4NCj4gDQo+IGNsa19nZXRfcmF0ZShtc2RjX2hjbGspIGdpdmVzIHlvdSB0
+aGUgY3VycmVudCBtc2RjX2hjbGsgY2xvY2sgcmF0ZToNCj4gdXNlIGl0DQo+IGluIHBsYWNlIG9m
+IHJlYWRpbmcgSVRDRlZBTCwgdGhhdCdzIHlvdXIgc29sdXRpb24uDQo+IA0KPiBJIHdvdWxkIGlt
+YWdpbmUgdGhhdCAqYXQgbGVhc3QqIElUQ0ZNVUwgaXMgY29ycmVjdCBvbiBNZWRpYVRlayBTb0Nz
+LA0KPiBzbyB5b3UNCj4gY2FuIHVzZSB0aGF0IG9uZSBhcyBpdCBpcy4NClRoYW5rcyBmb3IgeW91
+ciByZXZpZXcuDQpJIHdpbGwgaW1wbGVtZW50IGl0IGluIHRoZSBuZXh0IHZlcnNpb24uDQoNCkJl
+Z2FyZHMsDQpXZW5iaW4NCj4gDQo+IFJlZ2FyZHMsDQo+IEFuZ2Vsbw0KPiANCj4gPiANCj4gPiBC
+ZWdhcmRzLA0KPiA+IFdlbmJpbg0KPiA+PiBSZWdhcmRzLA0KPiA+PiBBbmdlbG8NCj4gPj4NCj4g
+Pj4NCj4gPj4+IEJlZ2FyZHMsDQo+ID4+PiBXZW5iaW4NCj4gPj4+DQo+ID4+Pj4gVGhhbmtzDQo+
+ID4+Pg0KPiA+Pj4+IFdlbmJpbg0KPiA+Pj4NCj4gPj4+Pj4NCj4gPj4+DQo+ID4+Pj4+PiAweDQw
+IHRoYXQgY29ycmVzcG9uZHMgdG8gM3VzLCB3aGljaCBjYW4gaW1wcm92ZSB0aGUNCj4gcGVyZm9y
+bWFuY2UNCj4gPj4gb2YNCj4gPj4+DQo+ID4+Pj4+PiBzb21lDQo+ID4+Pg0KPiA+Pj4+Pj4gZU1N
+QyBkZXZpY2VzLg0KPiA+Pj4NCj4gPj4+Pj4+DQo+ID4+Pg0KPiA+Pj4+Pj4gU2lnbmVkLW9mZi1i
+eTogV2VuYmluIE1laSA8d2VuYmluLm1laUBtZWRpYXRlay5jb20+DQo+ID4+Pg0KPiA+Pj4+Pj4g
+LS0tDQo+ID4+Pg0KPiA+Pj4+Pj4gICAgICBkcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIHwgNCAr
+KysrDQo+ID4+Pg0KPiA+Pj4+Pj4gICAgICAxIGZpbGUgY2hhbmdlZCwgNCBpbnNlcnRpb25zKCsp
+DQo+ID4+Pg0KPiA+Pj4+Pj4NCj4gPj4+DQo+ID4+Pj4+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
+bWMvaG9zdC9tdGstc2QuYyBiL2RyaXZlcnMvbW1jL2hvc3QvbXRrLQ0KPiA+PiBzZC5jDQo+ID4+
+Pg0KPiA+Pj4+Pj4gaW5kZXggZWRhZGUwZTU0YTBjLi5mZmVjY2RkY2QwMjggMTAwNjQ0DQo+ID4+
+Pg0KPiA+Pj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYw0KPiA+Pj4NCj4gPj4+
+Pj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMNCj4gPj4+DQo+ID4+Pj4+PiBAQCAt
+MjQ1Myw2ICsyNDUzLDcgQEAgc3RhdGljIHZvaWQNCj4gPj4gbXNkY19oczQwMF9lbmhhbmNlZF9z
+dHJvYmUoc3RydWN0DQo+ID4+Pg0KPiA+Pj4+Pj4gbW1jX2hvc3QgKm1tYywNCj4gPj4+DQo+ID4+
+Pj4+PiAgICAgIHN0YXRpYyB2b2lkIG1zZGNfY3FlX2VuYWJsZShzdHJ1Y3QgbW1jX2hvc3QgKm1t
+YykNCj4gPj4+DQo+ID4+Pj4+PiAgICAgIHsNCj4gPj4+DQo+ID4+Pj4+PiAgICAgICAgICBzdHJ1
+Y3QgbXNkY19ob3N0ICpob3N0ID0gbW1jX3ByaXYobW1jKTsNCj4gPj4+DQo+ID4+Pj4+PiArICAg
+ICBzdHJ1Y3QgY3FoY2lfaG9zdCAqY3FfaG9zdCA9IG1tYy0+Y3FlX3ByaXZhdGU7DQo+ID4+Pg0K
+PiA+Pj4+Pj4NCj4gPj4+DQo+ID4+Pj4+PiAgICAgICAgICAvKiBlbmFibGUgY21kcSBpcnEgKi8N
+Cj4gPj4+DQo+ID4+Pj4+PiAgICAgICAgICB3cml0ZWwoTVNEQ19JTlRfQ01EUSwgaG9zdC0+YmFz
+ZSArIE1TRENfSU5URU4pOw0KPiA+Pj4NCj4gPj4+Pj4+IEBAIC0yNDYyLDYgKzI0NjMsOSBAQCBz
+dGF0aWMgdm9pZCBtc2RjX2NxZV9lbmFibGUoc3RydWN0DQo+ID4+IG1tY19ob3N0DQo+ID4+Pg0K
+PiA+Pj4+Pj4gKm1tYykNCj4gPj4+DQo+ID4+Pj4+PiAgICAgICAgICBtc2RjX3NldF9idXN5X3Rp
+bWVvdXQoaG9zdCwgMjAgKiAxMDAwMDAwMDAwVUxMLCAwKTsNCj4gPj4+DQo+ID4+Pj4+PiAgICAg
+ICAgICAvKiBkZWZhdWx0IHJlYWQgZGF0YSB0aW1lb3V0IDFzICovDQo+ID4+Pg0KPiA+Pj4+Pj4g
+ICAgICAgICAgbXNkY19zZXRfdGltZW91dChob3N0LCAxMDAwMDAwMDAwVUxMLCAwKTsNCj4gPj4+
+DQo+ID4+Pj4+PiArDQo+ID4+Pg0KPiA+Pj4+Pj4gKyAgICAgLyogZGVjcmVhc2UgdGhlIHNlbmQg
+c3RhdHVzIGNvbW1hbmQgaWRsZSB0aW1lciB0byAzdXMgKi8NCj4gPj4+DQo+ID4+Pj4+PiArICAg
+ICBjcWhjaV93cml0ZWwoY3FfaG9zdCwgMHg0MCwgQ1FIQ0lfU1NDMSk7DQo+ID4+Pg0KPiA+Pj4+
+Pj4gICAgICB9DQo+ID4+Pg0KPiA+Pj4+Pj4NCj4gPj4+DQo+ID4+Pj4+PiAgICAgIHN0YXRpYyB2
+b2lkIG1zZGNfY3FlX2Rpc2FibGUoc3RydWN0IG1tY19ob3N0ICptbWMsIGJvb2wNCj4gPj4gcmVj
+b3ZlcnkpDQo+ID4+Pg0KPiA+Pj4+Pg0KPiA+Pj4NCj4gPj4+Pj4NCj4gPj4+DQo+ID4+Pg0KPiA+
+Pj4NCj4gPj4NCj4gDQo=
