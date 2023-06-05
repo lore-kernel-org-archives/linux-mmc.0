@@ -2,306 +2,209 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 845B4C7EE2A
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Jun 2023 08:44:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3C91C7EE23
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Jun 2023 08:48:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230229AbjFEIoC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Jun 2023 04:44:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36042 "EHLO
+        id S229570AbjFEIsS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Jun 2023 04:48:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230204AbjFEIoB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2023 04:44:01 -0400
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C22B8CD;
-        Mon,  5 Jun 2023 01:43:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1685954639; x=1717490639;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=ZKd1hojcEofK8WgGk5N5pRnS4q4s9sbyMNImCRd9UFk=;
-  b=No7eyxf1TBfHbNvYBLrWeXeFa7NGZMCPqMnYhcZhieyb9xnjGVEZ3Ai9
-   lEKYD8qBoRV1reOjfh7E0byobdHwfuxrTx0FCPmVhY+yyemoF+Rjv2ZL+
-   aMBwDSzjj6FGnTD4mY5dmBMR26spboF9UB7g6WAr+7KZtk7evwjkdGB1g
-   zq+dsDFkK/iHmNI8mzK7eT/ZhHY+v/x5qsdQL5u/HlmYp46NaKp2W63GW
-   2yMBTSn+QXTWkI3wvh18a0PPdaXD+/sViufmXCo0xz5sSgx1obwBSn2Uh
-   Ldqejq3OC0QTDk1S14g76lJ2TCE9/svMar7A3tUBnQL2LBL/oHyBII98j
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10731"; a="356327448"
-X-IronPort-AV: E=Sophos;i="6.00,217,1681196400"; 
-   d="scan'208";a="356327448"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jun 2023 01:43:57 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10731"; a="798340337"
-X-IronPort-AV: E=Sophos;i="6.00,217,1681196400"; 
-   d="scan'208";a="798340337"
-Received: from lkp-server01.sh.intel.com (HELO 15ab08e44a81) ([10.239.97.150])
-  by FMSMGA003.fm.intel.com with ESMTP; 05 Jun 2023 01:43:54 -0700
-Received: from kbuild by 15ab08e44a81 with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1q65of-00042B-25;
-        Mon, 05 Jun 2023 08:43:53 +0000
-Date:   Mon, 5 Jun 2023 16:43:07 +0800
-From:   kernel test robot <lkp@intel.com>
+        with ESMTP id S229459AbjFEIsR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2023 04:48:17 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E06CBC7;
+        Mon,  5 Jun 2023 01:48:15 -0700 (PDT)
+Received: from [IPV6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab] (unknown [IPv6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id A8DE76606E61;
+        Mon,  5 Jun 2023 09:48:13 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1685954894;
+        bh=W1Z9FGWYRPJybJJB4em5oiN/dt3EmYO8rUIMWewNKe8=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=XAXDy3Hf6YkO4xBypwkj8hbqyAHfMiLoidvn7Qpmhi/ss6ns/tlnYYpmJM3EfAAAP
+         C4COz69z1wYfKKxse/fUSoofgd3SPCU+C1diMshTruXTkkA3XNSZWjxMw6p9xTnrUR
+         BoTdBkYIHQTzyplLrUiNUm06j5l/e57IG875OR5/kuSLBD+/uKQb7X2PXGGjFxDo8u
+         s+VWlBrgiocqBnS25Cruf5NpqwvfqXSxJLYIIuQRZk6k+cG+N3HFkYHjXs3kE3q/lJ
+         6ECGcIiarzQrs4sy+i/l7pCDezvJduiEa/bQyyOaYR38qlKHAg2cugJA74K/N+KgUC
+         pkhlsYwQKdq1w==
+Message-ID: <47ee4c8b-dedf-d69a-dceb-dcaa34ddd0e1@collabora.com>
+Date:   Mon, 5 Jun 2023 10:48:10 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.2
+Subject: Re: [PATCH v3] mmc: mtk-sd: reduce CIT for better performance
+Content-Language: en-US
 To:     Wenbin Mei <wenbin.mei@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ritesh Harjani <riteshh@codeaurora.org>,
         Asutosh Das <asutoshd@codeaurora.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-Subject: Re: [PATCH v3] mmc: mtk-sd: reduce CIT for better performance
-Message-ID: <202306051634.orHLaQ9t-lkp@intel.com>
+        linux-mediatek@lists.infradead.org
 References: <20230605060107.22044-1-wenbin.mei@mediatek.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
 In-Reply-To: <20230605060107.22044-1-wenbin.mei@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wenbin,
+Il 05/06/23 08:01, Wenbin Mei ha scritto:
+> CQHCI_SSC1 indicates to CQE the polling period to use when using periodic
+> SEND_QUEUE_STATUS(CMD13) polling.
+> Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
+> frequency to get the actual time.
+> The default value 0x1000 that corresponds to 150us for MediaTek SoCs, let's
+> decrease it to 0x40 that corresponds to 2.35us, which can improve the
+> performance of some eMMC devices.
+> 
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
 
-kernel test robot noticed the following build errors:
+OK! That's almost good now. There's only one consideration here: if MediaTek
+SoCs *require* msdc_hclk to calculate the CIT time, this means that this clock
+is critical for CQHCI functionality.
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on ulf-hansson-mmc-mirror/next v6.4-rc5 next-20230605]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+If msdc_hclk is not present, CQHCI cannot work correctly... so you don't have
+to cover the case in which there's no msdc_hclk clock: if that's not present,
+either fail probing, or disable CQHCI.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Wenbin-Mei/mmc-mtk-sd-reduce-CIT-for-better-performance/20230605-140238
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20230605060107.22044-1-wenbin.mei%40mediatek.com
-patch subject: [PATCH v3] mmc: mtk-sd: reduce CIT for better performance
-config: x86_64-randconfig-a004-20230605 (https://download.01.org/0day-ci/archive/20230605/202306051634.orHLaQ9t-lkp@intel.com/config)
-compiler: clang version 15.0.7 (https://github.com/llvm/llvm-project.git 8dfdcc7b7bf66834a761bd8de445840ef68e4d1a)
-reproduce (this is a W=1 build):
-        mkdir -p ~/bin
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/225e46f420d48f7ad73253636a0553bd5f986435
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Wenbin-Mei/mmc-mtk-sd-reduce-CIT-for-better-performance/20230605-140238
-        git checkout 225e46f420d48f7ad73253636a0553bd5f986435
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang ~/bin/make.cross W=1 O=build_dir ARCH=x86_64 olddefconfig
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang ~/bin/make.cross W=1 O=build_dir ARCH=x86_64 SHELL=/bin/bash drivers/mmc/host/
+> ---
+>   drivers/mmc/host/cqhci.h  |  1 +
+>   drivers/mmc/host/mtk-sd.c | 47 +++++++++++++++++++++++++++++++++++++++
+>   2 files changed, 48 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index ba9387ed90eb..292b89ebd978 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -23,6 +23,7 @@
+>   /* capabilities */
+>   #define CQHCI_CAP			0x04
+>   #define CQHCI_CAP_CS			0x10000000 /* Crypto Support */
+> +#define CQHCI_CAP_ITCFMUL(x)		(((x) & GENMASK(15, 12)) >> 12)
+>   
+>   /* configuration */
+>   #define CQHCI_CFG			0x08
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index edade0e54a0c..c221ef8a6992 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -473,6 +473,7 @@ struct msdc_host {
+>   	struct msdc_tune_para def_tune_para; /* default tune setting */
+>   	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+>   	struct cqhci_host *cq_host;
+> +	u32 cq_ssc1_time;
+>   };
+>   
+>   static const struct mtk_mmc_compatible mt2701_compat = {
+> @@ -2450,9 +2451,50 @@ static void msdc_hs400_enhanced_strobe(struct mmc_host *mmc,
+>   	}
+>   }
+>   
+> +static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
 
-If you fix the issue, kindly add following tag where applicable
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202306051634.orHLaQ9t-lkp@intel.com/
+static int msdc_cqe_cit_cal(....)
 
-All errors (new ones prefixed by >>):
+> +{
+> +	struct mmc_host *mmc = mmc_from_priv(host);
+> +	struct cqhci_host *cq_host = mmc->cqe_private;
+> +	u8 itcfmul;
+> +	u32 hclk_freq;
 
->> drivers/mmc/host/mtk-sd.c:2489:4: error: expected expression
-           } else {
-             ^
->> drivers/mmc/host/mtk-sd.c:2495:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2513:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2539:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2549:1: error: function definition is not allowed here
-   {
-   ^
->> drivers/mmc/host/mtk-sd.c:2577:20: error: use of undeclared identifier 'msdc_cqe_enable'
-           .enable         = msdc_cqe_enable,
-                             ^
->> drivers/mmc/host/mtk-sd.c:2578:20: error: use of undeclared identifier 'msdc_cqe_disable'
-           .disable        = msdc_cqe_disable,
-                             ^
->> drivers/mmc/host/mtk-sd.c:2579:16: error: use of undeclared identifier 'msdc_cqe_pre_enable'; did you mean 'msdc_cqe_cit_cal'?
-           .pre_enable = msdc_cqe_pre_enable,
-                         ^~~~~~~~~~~~~~~~~~~
-                         msdc_cqe_cit_cal
-   drivers/mmc/host/mtk-sd.c:2454:13: note: 'msdc_cqe_cit_cal' declared here
-   static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
-               ^
->> drivers/mmc/host/mtk-sd.c:2580:18: error: use of undeclared identifier 'msdc_cqe_post_disable'
-           .post_disable = msdc_cqe_post_disable,
-                           ^
-   drivers/mmc/host/mtk-sd.c:2585:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2616:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2668:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2892:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2920:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2947:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2978:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:2997:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:3016:1: error: function definition is not allowed here
-   {
-   ^
-   drivers/mmc/host/mtk-sd.c:3041:1: error: function definition is not allowed here
-   {
-   ^
-   fatal error: too many errors emitted, stopping now [-ferror-limit=]
-   20 errors generated.
+hclk_freq should be `unsigned long`, as that's what clk_get_rate() returns.
 
+> +	u64 value;
+> +
+> +	/* Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
+> +	 * frequency to get the actual time for CIT.
+> +	 */
 
-vim +2489 drivers/mmc/host/mtk-sd.c
+	/*
+	 * On MediaTek SoCs the MSDC controller's CQE uses msdc_hclk as ITCFVAL
+	 * so we multiply/divide the HCLK frequency by ITCFMUL to calculate the
+	 * Send Status Command Idle Timer (CIT) value.
+	 */
+	if (!host->h_clk)
+		return -EINVAL;
 
-  2453	
-  2454	static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
-  2455	{
-  2456		struct mmc_host *mmc = mmc_from_priv(host);
-  2457		struct cqhci_host *cq_host = mmc->cqe_private;
-  2458		u8 itcfmul;
-  2459		u32 hclk_freq;
-  2460		u64 value;
-  2461	
-  2462		/* Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
-  2463		 * frequency to get the actual time for CIT.
-  2464		 */
-  2465		if (host->h_clk) {
-  2466			hclk_freq = clk_get_rate(host->h_clk);
-  2467			itcfmul = CQHCI_CAP_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
-  2468			switch (itcfmul) {
-  2469			case 0x0:
-  2470				do_div(hclk_freq, 1000);
-  2471				break;
-  2472			case 0x1:
-  2473				do_div(hclk_freq, 100);
-  2474				break;
-  2475			case 0x2:
-  2476				do_div(hclk_freq, 10);
-  2477				break;
-  2478			case 0x3:
-  2479				break;
-  2480			case 0x4:
-  2481				hclk_freq = hclk_freq * 10;
-  2482				break;
-  2483			default:
-  2484				host->cq_ssc1_time = 0x40;
-  2485				return;
-  2486			value = hclk_freq * timer_ns;
-  2487			do_div(value, 1000000000ULL);
-  2488			host->cq_ssc1_time = value;
-> 2489		} else {
-  2490			host->cq_ssc1_time = 0x40;
-  2491		}
-  2492	}
-  2493	
-  2494	static void msdc_cqe_enable(struct mmc_host *mmc)
-> 2495	{
-  2496		struct msdc_host *host = mmc_priv(mmc);
-  2497		struct cqhci_host *cq_host = mmc->cqe_private;
-  2498	
-  2499		/* enable cmdq irq */
-  2500		writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
-  2501		/* enable busy check */
-  2502		sdr_set_bits(host->base + MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
-  2503		/* default write data / busy timeout 20s */
-  2504		msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
-  2505		/* default read data timeout 1s */
-  2506		msdc_set_timeout(host, 1000000000ULL, 0);
-  2507	
-  2508		/* Set the send status command idle timer */
-  2509		cqhci_writel(cq_host, host->cq_ssc1_time, CQHCI_SSC1);
-  2510	}
-  2511	
-  2512	static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
-  2513	{
-  2514		struct msdc_host *host = mmc_priv(mmc);
-  2515		unsigned int val = 0;
-  2516	
-  2517		/* disable cmdq irq */
-  2518		sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INT_CMDQ);
-  2519		/* disable busy check */
-  2520		sdr_clr_bits(host->base + MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
-  2521	
-  2522		val = readl(host->base + MSDC_INT);
-  2523		writel(val, host->base + MSDC_INT);
-  2524	
-  2525		if (recovery) {
-  2526			sdr_set_field(host->base + MSDC_DMA_CTRL,
-  2527				      MSDC_DMA_CTRL_STOP, 1);
-  2528			if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CTRL, val,
-  2529				!(val & MSDC_DMA_CTRL_STOP), 1, 3000)))
-  2530				return;
-  2531			if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CFG, val,
-  2532				!(val & MSDC_DMA_CFG_STS), 1, 3000)))
-  2533				return;
-  2534			msdc_reset_hw(host);
-  2535		}
-  2536	}
-  2537	
-  2538	static void msdc_cqe_pre_enable(struct mmc_host *mmc)
-  2539	{
-  2540		struct cqhci_host *cq_host = mmc->cqe_private;
-  2541		u32 reg;
-  2542	
-  2543		reg = cqhci_readl(cq_host, CQHCI_CFG);
-  2544		reg |= CQHCI_ENABLE;
-  2545		cqhci_writel(cq_host, reg, CQHCI_CFG);
-  2546	}
-  2547	
-  2548	static void msdc_cqe_post_disable(struct mmc_host *mmc)
-  2549	{
-  2550		struct cqhci_host *cq_host = mmc->cqe_private;
-  2551		u32 reg;
-  2552	
-  2553		reg = cqhci_readl(cq_host, CQHCI_CFG);
-  2554		reg &= ~CQHCI_ENABLE;
-  2555		cqhci_writel(cq_host, reg, CQHCI_CFG);
-  2556	}
-  2557	
-  2558	static const struct mmc_host_ops mt_msdc_ops = {
-  2559		.post_req = msdc_post_req,
-  2560		.pre_req = msdc_pre_req,
-  2561		.request = msdc_ops_request,
-  2562		.set_ios = msdc_ops_set_ios,
-  2563		.get_ro = mmc_gpio_get_ro,
-  2564		.get_cd = msdc_get_cd,
-  2565		.hs400_enhanced_strobe = msdc_hs400_enhanced_strobe,
-  2566		.enable_sdio_irq = msdc_enable_sdio_irq,
-  2567		.ack_sdio_irq = msdc_ack_sdio_irq,
-  2568		.start_signal_voltage_switch = msdc_ops_switch_volt,
-  2569		.card_busy = msdc_card_busy,
-  2570		.execute_tuning = msdc_execute_tuning,
-  2571		.prepare_hs400_tuning = msdc_prepare_hs400_tuning,
-  2572		.execute_hs400_tuning = msdc_execute_hs400_tuning,
-  2573		.card_hw_reset = msdc_hw_reset,
-  2574	};
-  2575	
-  2576	static const struct cqhci_host_ops msdc_cmdq_ops = {
-> 2577		.enable         = msdc_cqe_enable,
-> 2578		.disable        = msdc_cqe_disable,
-> 2579		.pre_enable = msdc_cqe_pre_enable,
-> 2580		.post_disable = msdc_cqe_post_disable,
-  2581	};
-  2582	
+	hclk_freq = clk_get_rate(host->h_clk);
+	itcfmul = CQHCI_CAP_ITFCMUL(cqhci_readl(cq_host, CQHCI_CAP));
+	switch (itcfmul) {
+		....
+	}
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+> +	if (host->h_clk) {
+> +		hclk_freq = clk_get_rate(host->h_clk);
+> +		itcfmul = CQHCI_CAP_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
+> +		switch (itcfmul) {
+> +		case 0x0:
+> +			do_div(hclk_freq, 1000);
+> +			break;
+> +		case 0x1:
+> +			do_div(hclk_freq, 100);
+> +			break;
+> +		case 0x2:
+> +			do_div(hclk_freq, 10);
+> +			break;
+> +		case 0x3:
+> +			break;
+> +		case 0x4:
+> +			hclk_freq = hclk_freq * 10;
+> +			break;
+> +		default:
+> +			host->cq_ssc1_time = 0x40;
+> +			return;
+> +		value = hclk_freq * timer_ns;
+> +		do_div(value, 1000000000ULL);
+> +		host->cq_ssc1_time = value;
+> +	} else {
+> +		host->cq_ssc1_time = 0x40;
+> +	}
+> +}
+> +
+>   static void msdc_cqe_enable(struct mmc_host *mmc)
+>   {
+>   	struct msdc_host *host = mmc_priv(mmc);
+> +	struct cqhci_host *cq_host = mmc->cqe_private;
+>   
+>   	/* enable cmdq irq */
+>   	writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
+> @@ -2462,6 +2504,9 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
+>   	msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
+>   	/* default read data timeout 1s */
+>   	msdc_set_timeout(host, 1000000000ULL, 0);
+> +
+> +	/* Set the send status command idle timer */
+> +	cqhci_writel(cq_host, host->cq_ssc1_time, CQHCI_SSC1);
+>   }
+>   
+>   static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
+> @@ -2803,6 +2848,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>   		/* cqhci 16bit length */
+>   		/* 0 size, means 65536 so we don't have to -1 here */
+>   		mmc->max_seg_size = 64 * 1024;
+> +		/* Reduce CIT to 0x40 that corresponds to 2.35us */
+> +		msdc_cqe_cit_cal(host, 2350);
+
+		ret = msdc_cqe_cit_cal(...)
+		if (ret)
+			goto release;
+
+^^^^ either fail probe, or use the eMMC/SD without CQHCI support.
+
+Regards,
+Angelo
+
+>   	}
+>   
+>   	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+
