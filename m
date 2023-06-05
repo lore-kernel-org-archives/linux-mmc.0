@@ -2,180 +2,248 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1CA1C7EE2A
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Jun 2023 06:01:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34A5BC77B73
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Jun 2023 08:44:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229446AbjFEGBZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Jun 2023 02:01:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39506 "EHLO
+        id S229584AbjFEIoA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Jun 2023 04:44:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36030 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229441AbjFEGBY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2023 02:01:24 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 728B0CA;
-        Sun,  4 Jun 2023 23:01:17 -0700 (PDT)
-X-UUID: 5ed2b33a036611ee9cb5633481061a41-20230605
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=ZWZFr/18qkTzkN+m8S3/zs4o4uIe3CpN4mxCWBr/BzU=;
-        b=m5vbC2+6McGRKKDyuFPfCEZjrnb2f1UOrdguzXEg7USZrci+Hb2e+GPfugBbnfZ8wIQF2s9JpawIMrwmjxgVWa7KNP8YPf4+bPPwniiOvVUtHGQ6B7y0orM/424H39WiSETNrxkhvbRnMDz+ZlxzTrovf8bBuEjG7QXvpq/9+yk=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.25,REQID:acdd7724-f194-42a4-824a-04e700831a06,IP:0,U
-        RL:0,TC:0,Content:-25,EDM:0,RT:0,SF:95,FILE:0,BULK:0,RULE:Release_Ham,ACTI
-        ON:release,TS:70
-X-CID-INFO: VERSION:1.1.25,REQID:acdd7724-f194-42a4-824a-04e700831a06,IP:0,URL
-        :0,TC:0,Content:-25,EDM:0,RT:0,SF:95,FILE:0,BULK:0,RULE:Spam_GS981B3D,ACTI
-        ON:quarantine,TS:70
-X-CID-META: VersionHash:d5b0ae3,CLOUDID:9f5e066e-2f20-4998-991c-3b78627e4938,B
-        ulkID:230605140111FP2VMDKM,BulkQuantity:1,Recheck:0,SF:29|28|17|19|48,TC:n
-        il,Content:0,EDM:-3,IP:nil,URL:0,File:nil,Bulk:40,QS:nil,BEC:nil,COL:0,OSI
-        :0,OSA:0,AV:0
-X-CID-BVR: 0
-X-CID-BAS: 0,_,0,_
-X-UUID: 5ed2b33a036611ee9cb5633481061a41-20230605
-Received: from mtkmbs13n1.mediatek.inc [(172.21.101.193)] by mailgw01.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 507589308; Mon, 05 Jun 2023 14:01:10 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Mon, 5 Jun 2023 14:01:09 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Mon, 5 Jun 2023 14:01:08 +0800
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        with ESMTP id S229473AbjFEIn7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jun 2023 04:43:59 -0400
+Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FDAAC7;
+        Mon,  5 Jun 2023 01:43:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1685954638; x=1717490638;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=9MY3WW6CqLpJTMPf39zMocMMeYKlKyXJGNQjClqE0hA=;
+  b=VxDpYgC3/+iFw++CxM8R8TYtTnBXZAR49flPH6bCMf0oPuW9cITIAyoh
+   4utrBXnZWH1jygb1ADtNlJBpJOqWeQJMYZA+TpUc0vIbGQRaMi6hfJFqL
+   MrK//CjtoqTb1Umeq2Of956cttKrRh9u00jY+r/Hz9H4ERDy6PtVlAoD/
+   o9m1gWPhZxGGG3/HlwQKiRdWBhdWCSeRc55b2o6ba51rIRh6yKqvgVXPX
+   S+YirKenOGJN1m112I8PcdHbGWC4/aS8CrpqGYnUISahSQtbm5IODaAwb
+   IhYRyHxMNyrcs2wQi3InweE4eyysuNgK1jm2KgMTBCWlQ1+oe6MXn1+eZ
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10731"; a="356327456"
+X-IronPort-AV: E=Sophos;i="6.00,217,1681196400"; 
+   d="scan'208";a="356327456"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jun 2023 01:43:57 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10731"; a="798340339"
+X-IronPort-AV: E=Sophos;i="6.00,217,1681196400"; 
+   d="scan'208";a="798340339"
+Received: from lkp-server01.sh.intel.com (HELO 15ab08e44a81) ([10.239.97.150])
+  by FMSMGA003.fm.intel.com with ESMTP; 05 Jun 2023 01:43:54 -0700
+Received: from kbuild by 15ab08e44a81 with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1q65of-00042D-2E;
+        Mon, 05 Jun 2023 08:43:53 +0000
+Date:   Mon, 5 Jun 2023 16:43:05 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     oe-kbuild-all@lists.linux.dev,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
         AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ritesh Harjani <riteshh@codeaurora.org>,
         Asutosh Das <asutoshd@codeaurora.org>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
         Wenbin Mei <wenbin.mei@mediatek.com>
-Subject: [PATCH v3] mmc: mtk-sd: reduce CIT for better performance
-Date:   Mon, 5 Jun 2023 14:01:07 +0800
-Message-ID: <20230605060107.22044-1-wenbin.mei@mediatek.com>
-X-Mailer: git-send-email 2.25.1
+Subject: Re: [PATCH v3] mmc: mtk-sd: reduce CIT for better performance
+Message-ID: <202306051648.vkycL2Do-lkp@intel.com>
+References: <20230605060107.22044-1-wenbin.mei@mediatek.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-MTK:  N
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230605060107.22044-1-wenbin.mei@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-CQHCI_SSC1 indicates to CQE the polling period to use when using periodic
-SEND_QUEUE_STATUS(CMD13) polling.
-Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
-frequency to get the actual time.
-The default value 0x1000 that corresponds to 150us for MediaTek SoCs, let's
-decrease it to 0x40 that corresponds to 2.35us, which can improve the
-performance of some eMMC devices.
+Hi Wenbin,
 
-Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
----
- drivers/mmc/host/cqhci.h  |  1 +
- drivers/mmc/host/mtk-sd.c | 47 +++++++++++++++++++++++++++++++++++++++
- 2 files changed, 48 insertions(+)
+kernel test robot noticed the following build errors:
 
-diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-index ba9387ed90eb..292b89ebd978 100644
---- a/drivers/mmc/host/cqhci.h
-+++ b/drivers/mmc/host/cqhci.h
-@@ -23,6 +23,7 @@
- /* capabilities */
- #define CQHCI_CAP			0x04
- #define CQHCI_CAP_CS			0x10000000 /* Crypto Support */
-+#define CQHCI_CAP_ITCFMUL(x)		(((x) & GENMASK(15, 12)) >> 12)
- 
- /* configuration */
- #define CQHCI_CFG			0x08
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index edade0e54a0c..c221ef8a6992 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -473,6 +473,7 @@ struct msdc_host {
- 	struct msdc_tune_para def_tune_para; /* default tune setting */
- 	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
- 	struct cqhci_host *cq_host;
-+	u32 cq_ssc1_time;
- };
- 
- static const struct mtk_mmc_compatible mt2701_compat = {
-@@ -2450,9 +2451,50 @@ static void msdc_hs400_enhanced_strobe(struct mmc_host *mmc,
- 	}
- }
- 
-+static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
-+{
-+	struct mmc_host *mmc = mmc_from_priv(host);
-+	struct cqhci_host *cq_host = mmc->cqe_private;
-+	u8 itcfmul;
-+	u32 hclk_freq;
-+	u64 value;
-+
-+	/* Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
-+	 * frequency to get the actual time for CIT.
-+	 */
-+	if (host->h_clk) {
-+		hclk_freq = clk_get_rate(host->h_clk);
-+		itcfmul = CQHCI_CAP_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
-+		switch (itcfmul) {
-+		case 0x0:
-+			do_div(hclk_freq, 1000);
-+			break;
-+		case 0x1:
-+			do_div(hclk_freq, 100);
-+			break;
-+		case 0x2:
-+			do_div(hclk_freq, 10);
-+			break;
-+		case 0x3:
-+			break;
-+		case 0x4:
-+			hclk_freq = hclk_freq * 10;
-+			break;
-+		default:
-+			host->cq_ssc1_time = 0x40;
-+			return;
-+		value = hclk_freq * timer_ns;
-+		do_div(value, 1000000000ULL);
-+		host->cq_ssc1_time = value;
-+	} else {
-+		host->cq_ssc1_time = 0x40;
-+	}
-+}
-+
- static void msdc_cqe_enable(struct mmc_host *mmc)
- {
- 	struct msdc_host *host = mmc_priv(mmc);
-+	struct cqhci_host *cq_host = mmc->cqe_private;
- 
- 	/* enable cmdq irq */
- 	writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
-@@ -2462,6 +2504,9 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
- 	msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
- 	/* default read data timeout 1s */
- 	msdc_set_timeout(host, 1000000000ULL, 0);
-+
-+	/* Set the send status command idle timer */
-+	cqhci_writel(cq_host, host->cq_ssc1_time, CQHCI_SSC1);
- }
- 
- static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
-@@ -2803,6 +2848,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 		/* cqhci 16bit length */
- 		/* 0 size, means 65536 so we don't have to -1 here */
- 		mmc->max_seg_size = 64 * 1024;
-+		/* Reduce CIT to 0x40 that corresponds to 2.35us */
-+		msdc_cqe_cit_cal(host, 2350);
- 	}
- 
- 	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+[auto build test ERROR on linus/master]
+[also build test ERROR on ulf-hansson-mmc-mirror/next v6.4-rc5 next-20230605]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Wenbin-Mei/mmc-mtk-sd-reduce-CIT-for-better-performance/20230605-140238
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20230605060107.22044-1-wenbin.mei%40mediatek.com
+patch subject: [PATCH v3] mmc: mtk-sd: reduce CIT for better performance
+config: powerpc-buildonly-randconfig-r006-20230605 (https://download.01.org/0day-ci/archive/20230605/202306051648.vkycL2Do-lkp@intel.com/config)
+compiler: powerpc-linux-gcc (GCC) 12.3.0
+reproduce (this is a W=1 build):
+        mkdir -p ~/bin
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # https://github.com/intel-lab-lkp/linux/commit/225e46f420d48f7ad73253636a0553bd5f986435
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Wenbin-Mei/mmc-mtk-sd-reduce-CIT-for-better-performance/20230605-140238
+        git checkout 225e46f420d48f7ad73253636a0553bd5f986435
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.3.0 ~/bin/make.cross W=1 O=build_dir ARCH=powerpc olddefconfig
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.3.0 ~/bin/make.cross W=1 O=build_dir ARCH=powerpc SHELL=/bin/bash drivers/mmc/host/
+
+If you fix the issue, kindly add following tag where applicable
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202306051648.vkycL2Do-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+   In file included from ./arch/powerpc/include/generated/asm/div64.h:1,
+                    from include/linux/math.h:6,
+                    from include/linux/math64.h:6,
+                    from include/linux/time.h:6,
+                    from include/linux/stat.h:19,
+                    from include/linux/module.h:13,
+                    from drivers/mmc/host/mtk-sd.c:7:
+   drivers/mmc/host/mtk-sd.c: In function 'msdc_cqe_cit_cal':
+   include/asm-generic/div64.h:222:35: warning: comparison of distinct pointer types lacks a cast
+     222 |         (void)(((typeof((n)) *)0) == ((uint64_t *)0));  \
+         |                                   ^~
+   drivers/mmc/host/mtk-sd.c:2470:25: note: in expansion of macro 'do_div'
+    2470 |                         do_div(hclk_freq, 1000);
+         |                         ^~~~~~
+   In file included from include/linux/build_bug.h:5,
+                    from include/linux/container_of.h:5,
+                    from include/linux/list.h:5,
+                    from include/linux/module.h:12:
+   include/asm-generic/div64.h:234:32: warning: right shift count >= width of type [-Wshift-count-overflow]
+     234 |         } else if (likely(((n) >> 32) == 0)) {          \
+         |                                ^~
+   include/linux/compiler.h:76:45: note: in definition of macro 'likely'
+      76 | # define likely(x)      __builtin_expect(!!(x), 1)
+         |                                             ^
+   drivers/mmc/host/mtk-sd.c:2470:25: note: in expansion of macro 'do_div'
+    2470 |                         do_div(hclk_freq, 1000);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:238:36: error: passing argument 1 of '__div64_32' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     238 |                 __rem = __div64_32(&(n), __base);       \
+         |                                    ^~~~
+         |                                    |
+         |                                    u32 * {aka unsigned int *}
+   drivers/mmc/host/mtk-sd.c:2470:25: note: in expansion of macro 'do_div'
+    2470 |                         do_div(hclk_freq, 1000);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:213:38: note: expected 'uint64_t *' {aka 'long long unsigned int *'} but argument is of type 'u32 *' {aka 'unsigned int *'}
+     213 | extern uint32_t __div64_32(uint64_t *dividend, uint32_t divisor);
+         |                            ~~~~~~~~~~^~~~~~~~
+   include/asm-generic/div64.h:222:35: warning: comparison of distinct pointer types lacks a cast
+     222 |         (void)(((typeof((n)) *)0) == ((uint64_t *)0));  \
+         |                                   ^~
+   drivers/mmc/host/mtk-sd.c:2473:25: note: in expansion of macro 'do_div'
+    2473 |                         do_div(hclk_freq, 100);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:234:32: warning: right shift count >= width of type [-Wshift-count-overflow]
+     234 |         } else if (likely(((n) >> 32) == 0)) {          \
+         |                                ^~
+   include/linux/compiler.h:76:45: note: in definition of macro 'likely'
+      76 | # define likely(x)      __builtin_expect(!!(x), 1)
+         |                                             ^
+   drivers/mmc/host/mtk-sd.c:2473:25: note: in expansion of macro 'do_div'
+    2473 |                         do_div(hclk_freq, 100);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:238:36: error: passing argument 1 of '__div64_32' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     238 |                 __rem = __div64_32(&(n), __base);       \
+         |                                    ^~~~
+         |                                    |
+         |                                    u32 * {aka unsigned int *}
+   drivers/mmc/host/mtk-sd.c:2473:25: note: in expansion of macro 'do_div'
+    2473 |                         do_div(hclk_freq, 100);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:213:38: note: expected 'uint64_t *' {aka 'long long unsigned int *'} but argument is of type 'u32 *' {aka 'unsigned int *'}
+     213 | extern uint32_t __div64_32(uint64_t *dividend, uint32_t divisor);
+         |                            ~~~~~~~~~~^~~~~~~~
+   include/asm-generic/div64.h:222:35: warning: comparison of distinct pointer types lacks a cast
+     222 |         (void)(((typeof((n)) *)0) == ((uint64_t *)0));  \
+         |                                   ^~
+   drivers/mmc/host/mtk-sd.c:2476:25: note: in expansion of macro 'do_div'
+    2476 |                         do_div(hclk_freq, 10);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:234:32: warning: right shift count >= width of type [-Wshift-count-overflow]
+     234 |         } else if (likely(((n) >> 32) == 0)) {          \
+         |                                ^~
+   include/linux/compiler.h:76:45: note: in definition of macro 'likely'
+      76 | # define likely(x)      __builtin_expect(!!(x), 1)
+         |                                             ^
+   drivers/mmc/host/mtk-sd.c:2476:25: note: in expansion of macro 'do_div'
+    2476 |                         do_div(hclk_freq, 10);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:238:36: error: passing argument 1 of '__div64_32' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     238 |                 __rem = __div64_32(&(n), __base);       \
+         |                                    ^~~~
+         |                                    |
+         |                                    u32 * {aka unsigned int *}
+   drivers/mmc/host/mtk-sd.c:2476:25: note: in expansion of macro 'do_div'
+    2476 |                         do_div(hclk_freq, 10);
+         |                         ^~~~~~
+   include/asm-generic/div64.h:213:38: note: expected 'uint64_t *' {aka 'long long unsigned int *'} but argument is of type 'u32 *' {aka 'unsigned int *'}
+     213 | extern uint32_t __div64_32(uint64_t *dividend, uint32_t divisor);
+         |                            ~~~~~~~~~~^~~~~~~~
+>> drivers/mmc/host/mtk-sd.c:2489:11: error: expected '}' before 'else'
+    2489 |         } else {
+         |           ^~~~
+   cc1: some warnings being treated as errors
+
+
+vim +2489 drivers/mmc/host/mtk-sd.c
+
+  2453	
+  2454	static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
+  2455	{
+  2456		struct mmc_host *mmc = mmc_from_priv(host);
+  2457		struct cqhci_host *cq_host = mmc->cqe_private;
+  2458		u8 itcfmul;
+  2459		u32 hclk_freq;
+  2460		u64 value;
+  2461	
+  2462		/* Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
+  2463		 * frequency to get the actual time for CIT.
+  2464		 */
+  2465		if (host->h_clk) {
+  2466			hclk_freq = clk_get_rate(host->h_clk);
+  2467			itcfmul = CQHCI_CAP_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
+  2468			switch (itcfmul) {
+  2469			case 0x0:
+  2470				do_div(hclk_freq, 1000);
+  2471				break;
+  2472			case 0x1:
+  2473				do_div(hclk_freq, 100);
+  2474				break;
+  2475			case 0x2:
+  2476				do_div(hclk_freq, 10);
+  2477				break;
+  2478			case 0x3:
+  2479				break;
+  2480			case 0x4:
+  2481				hclk_freq = hclk_freq * 10;
+  2482				break;
+  2483			default:
+  2484				host->cq_ssc1_time = 0x40;
+  2485				return;
+  2486			value = hclk_freq * timer_ns;
+  2487			do_div(value, 1000000000ULL);
+  2488			host->cq_ssc1_time = value;
+> 2489		} else {
+  2490			host->cq_ssc1_time = 0x40;
+  2491		}
+  2492	}
+  2493	
+
 -- 
-2.25.1
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
