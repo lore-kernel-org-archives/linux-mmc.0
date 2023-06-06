@@ -2,101 +2,118 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23A52C7EE45
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jun 2023 19:15:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E27CC7EE2A
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jun 2023 19:22:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239156AbjFFTP1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Jun 2023 15:15:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48524 "EHLO
+        id S238845AbjFFTWe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Jun 2023 15:22:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239793AbjFFTPV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 15:15:21 -0400
-Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99B83E60
-        for <linux-mmc@vger.kernel.org>; Tue,  6 Jun 2023 12:15:19 -0700 (PDT)
-Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-565e8d575cbso60565437b3.3
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Jun 2023 12:15:19 -0700 (PDT)
+        with ESMTP id S238761AbjFFTWd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 15:22:33 -0400
+Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BB10E7E;
+        Tue,  6 Jun 2023 12:22:31 -0700 (PDT)
+Received: by mail-ej1-x635.google.com with SMTP id a640c23a62f3a-977d6aa3758so477064566b.0;
+        Tue, 06 Jun 2023 12:22:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686078919; x=1688670919;
+        d=googlemail.com; s=20221208; t=1686079349; x=1688671349;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Z5L89tB8wkQBFqziHGie36QGbrdPo8qwmA+HXjQV+vM=;
-        b=Oubagn6lNYCvFolZHgBbvAxTse+fxYO7QOc8PsA9iZP9e2t8ETUtUWYpW1X4aol5Pp
-         py6kevZaycKSmSBo4Z6ISBISiqD/7iIAwBWyBerIW3RreJJ9HEAvuTJFC1L1gIxClE8B
-         Zo1Jho7S8zqD4w+aESDk8wwKPZczPNjCqaahODZegcGR0bAXcfGkhfpy0GiU9nZoxYH5
-         3tSmdOg9aItl0cd9p5EIa1kuQY2vPS7IZIU1+jsUKFLETbT+lwkEGP2w54vB26myg4Sn
-         aFZsKajhIoQKKCk8+V/q1rcIuw5atboBqOS6WM8DoES2EgCSQ+vS7fzVbSeDtG9bQjao
-         +WFw==
+        bh=2GE52NOk0UypxP33bn8g4+XP8hmFg4c3opJesoY7LCg=;
+        b=RFAg5LWJjkkZe0dQsr1JwstrCVaWo4VB47+fT3XZHOlWFBCkiIg1LETlrqMLYtgOsg
+         5BDL43io2FCmpcFXE3l3+F4n66dXRDgEf8xfcxFAcdT+jznLUopgEfAvZ4GzL6SoX1da
+         aoTg6k53fM94uXRiYbd5YxPCqOTK237dGA+saV3hjqJu4jF7dMwZEz+S3DD6kYhza7UE
+         cQBOTuJiaDyPDGRJZwE+HyNAUqeEmCvkiwr16iMCYifHf/kQt3t5EckJoLJApR2EjiX0
+         cut7EtiN7NbTHz4MfZe4TXtHdnX/LX65QcE520c2AaV9D22C7RCZtGc5YdpPoQ1Wpp/2
+         296w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686078919; x=1688670919;
+        d=1e100.net; s=20221208; t=1686079349; x=1688671349;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Z5L89tB8wkQBFqziHGie36QGbrdPo8qwmA+HXjQV+vM=;
-        b=RlSRPHIyHcqK7klDOFyG1NYATeW0GknbPpdpkp8xgVpzpbrnwREJ0oyDwq8LL0Jh8e
-         /6Es2UxYCQkfOpyk15TqACMcRNuegt0INR+rK8mUTUahSr7iyYMP/hVzzjtm7fvUer9N
-         0hWSsAzcpsQUvIgJ70vz2oU8OJomd5YLRQ65adimvviEYUHOI7hHoC2IV9lFA4wNNF49
-         NF/MozV8Qe0GXhWUVia/cJBpSWlgFIesp+iY+C3Zw4d+SaRTPv4UovSpJjQjAETQibRL
-         Pgk7HX4oCgRY6De8Rbzv61FuSAqr5O2u/kctjX5uL73GX7MknJpPUqMxobrUFTah4ooQ
-         5XQg==
-X-Gm-Message-State: AC+VfDwkT1sBZJNpIH4Vt7TOh/MoM8ZDQtXjHLi1oJNx2VI/4Mop89Es
-        OuVp/CznZPDxRMYIL8nIfh5bfTL9QfSjz3VLmox9xw==
-X-Google-Smtp-Source: ACHHUZ7lY+3AI76qpzpoSr0j2ZD5ERQQbLahw7zOYjKWi6Cuk/Te9kSx2WMaK6q/Ss77uvK92hSSK8RRBBpnLOmJ/uE=
-X-Received: by 2002:a81:52d3:0:b0:561:e565:3678 with SMTP id
- g202-20020a8152d3000000b00561e5653678mr2718930ywb.11.1686078918837; Tue, 06
- Jun 2023 12:15:18 -0700 (PDT)
+        bh=2GE52NOk0UypxP33bn8g4+XP8hmFg4c3opJesoY7LCg=;
+        b=FDBAS9Wox610Bm0nx3VaEPAtnazk2/gg8jppyNsKAjYUkddSDDnL7rS0Ny8EfhVYPH
+         VbIQJpNlUa/lp1eXYQehT4xn3j85LxumdUbkbAPqI/gKXLXOVWzU4mRYhD0MOhvAmwwb
+         frYYGa0BE1kcuuCl51NfaHr6HCizDXIOgTOj9aETu0kI2nG4OHyaAppSSRjwK4zw8fS8
+         sdnArOAetvV5YPamhy4qh15snqtBDxCDsVuCU/MyIlno9nRn46CsW9S16FBHlILTMNa2
+         I1XlAAv4esjzkWBTGY6vN7LD9GkB9rUfU7dVjHLzEa6sKMQPoh9ggVmsa7YGK9i2VRfS
+         nvZA==
+X-Gm-Message-State: AC+VfDzKBYFd3neEyfIcNuTERvYsChca0r6bZ3bE2C2I6g6Bso1cWifg
+        WHUCYngcvPW45erkeDeihzq0biEBgRNtNN4h2hQ=
+X-Google-Smtp-Source: ACHHUZ5GUK/RF+eP4+MP5mNutQoh4cmUk9elSAwK6vWVlKbZiNz4TheLnToyRGeGcDtMLD6jZrkuCVoNOoQUQ2MDOyU=
+X-Received: by 2002:a17:907:6e08:b0:978:6a95:512d with SMTP id
+ sd8-20020a1709076e0800b009786a95512dmr4124880ejc.11.1686079349273; Tue, 06
+ Jun 2023 12:22:29 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230430-nokia770-regression-v4-0-9b6dc5536b17@linaro.org>
- <20230430-nokia770-regression-v4-1-9b6dc5536b17@linaro.org> <ac6ef7f2-0d7a-ba43-4b63-0a23d899230f@wanadoo.fr>
-In-Reply-To: <ac6ef7f2-0d7a-ba43-4b63-0a23d899230f@wanadoo.fr>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Tue, 6 Jun 2023 21:15:07 +0200
-Message-ID: <CACRpkdYObM_rv2xDhvfNs9Wn-iZoZjY7HpB1hWdc15XgtkA-HA@mail.gmail.com>
-Subject: Re: [PATCH v4 1/4] Input: ads7846 - Convert to use software nodes
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Tony Lindgren <tony@atomide.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-        Andreas Kemnade <andreas@kemnade.info>,
-        Helge Deller <deller@gmx.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-mmc@vger.kernel.org
+References: <20230606065918.460866-1-martin@geanix.com>
+In-Reply-To: <20230606065918.460866-1-martin@geanix.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Tue, 6 Jun 2023 21:22:18 +0200
+Message-ID: <CAFBinCB4sv4Fk_VNEPFaPz384XF9CfXGemSqaH9YJnEh7QNnPg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson: move mmc_request_done() call to irq thread
+To:     =?UTF-8?Q?Martin_Hundeb=C3=B8ll?= <martin@geanix.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        =?UTF-8?Q?Martin_Hundeb=C3=B8ll?= <mhu@rtx.dk>,
+        stable@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Jun 4, 2023 at 5:44=E2=80=AFPM Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
+Hi Martin,
 
-> > +     /* Asserts RESET */
-> > +     gpiod_set_value(md->reset, 1);
+On Tue, Jun 6, 2023 at 8:59=E2=80=AFAM Martin Hundeb=C3=B8ll <martin@geanix=
+.com> wrote:
+[...]
+> @@ -1040,6 +1034,13 @@ static irqreturn_t meson_mmc_irq_thread(int irq, v=
+oid *dev_id)
+>         if (WARN_ON(!cmd))
+>                 return IRQ_NONE;
 >
-> Hi,
->
-> should this also be done in the probe if mipid_detect() fails?
+> +       if (!meson_mmc_bounce_buf_read(cmd->data) &&
+> +           !meson_mmc_get_next_command(cmd)) {
+> +               meson_mmc_request_done(host->mmc, cmd->mrq);
+> +
+> +               return IRQ_HANDLED;
+> +       }
+> +
+I'm wondering if this is changing the behavior when cmd->error is non-zero.
 
-It's a nice bonus but surely not urgent or necessary.
+Let's take the "status & IRQ_CRC_ERR" case from meson_mmc_irq() - previousl=
+y:
+- cmd->error is set
+- regmap_update_bits(host->regmap, SD_EMMC_START, START_DESC_BUSY, 0);
+- IRQ_WAKE_THREAD
+- then inside meson_mmc_irq_thread():
+-- meson_mmc_wait_desc_stop(host);
+-- meson_mmc_request_done(host->mmc, cmd->mrq);
 
-> If yes, please also look at [1], that I've just sent, which introduces
-> an error handling path in the probe.
+With this patch:
+- cmd->error is set
+- regmap_update_bits(host->regmap, SD_EMMC_START, START_DESC_BUSY, 0);
+- IRQ_WAKE_THREAD
+- then inside meson_mmc_irq_thread():
+-- !meson_mmc_bounce_buf_read(cmd->data) &&
+!meson_mmc_get_next_command(cmd) can be true, which means we only
+call:
+--- meson_mmc_request_done(host->mmc, cmd->mrq);
+--- (note the missing meson_mmc_wait_desc_stop() call before
+meson_mmc_request_done())
 
-Looks good to me.
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+What do you think?
+Maybe we just need to remove the code from meson_mmc_irq() and just
+omit any modifications to meson_mmc_irq_thread() (as it seems all
+checks that you're adding are already present in that function below
+the cmd->error case).
 
-Yours,
-Linus Walleij
+
+Best regards,
+Martin
