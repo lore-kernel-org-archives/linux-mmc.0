@@ -2,159 +2,125 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C55CBC77B7A
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jun 2023 07:05:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDC09C7EE24
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jun 2023 07:51:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231416AbjFFHFe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Jun 2023 03:05:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58100 "EHLO
+        id S235679AbjFFHvb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Jun 2023 03:51:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56322 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235681AbjFFHFd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 03:05:33 -0400
-X-Greylist: delayed 340 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 06 Jun 2023 00:05:32 PDT
-Received: from first.geanix.com (first.geanix.com [116.203.34.67])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7B97E42
-        for <linux-mmc@vger.kernel.org>; Tue,  6 Jun 2023 00:05:32 -0700 (PDT)
-Received: from xps.geanix.com (unknown [87.54.11.140])
-        by first.geanix.com (Postfix) with ESMTPSA id D467D4E2838;
-        Tue,  6 Jun 2023 06:59:49 +0000 (UTC)
-Authentication-Results: ORIGINATING;
-        auth=pass smtp.auth=martin@geanix.com smtp.mailfrom=martin@geanix.com
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=geanix.com; s=first;
-        t=1686034790; bh=PWNQ09ijoe1DVvYJBNyrmhSiGQflwUabh55Y0/h4L1c=;
-        h=From:To:Cc:Subject:Date;
-        b=f8lJ5bAdZwyI7auhIQ7ItkEZ4qysN5Dl+emu2B7RywGiKcr3FFMQWPvER1ZA6ScK7
-         2tnmbKnDC4/vRbcWkRmz6ShT3zFghuRUp/vVvrlQieZz53HFdVO/U5IodZsBQHxaeS
-         QMdeEw4GhEDmKcLejFIS3OK7LVxg/Ktc/i/6uqiMK7J4eSK+Eucv8TVLBuKuOyhGLW
-         XhI/n7LDvTcC0xsV/OGLZfJE6gAd3BZ+g0Q6oSJEyo9yDsSaaxmxzQWvv5BVHb3u2A
-         qMKeQEPbvZaUoXKmzN1nWqrbZQqztvBhga7Z+jgyaTuKRbIDVMUJkMOi6sw+V2ctXI
-         6DUSHPVs5Naeg==
-From:   =?UTF-8?q?Martin=20Hundeb=C3=B8ll?= <martin@geanix.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     =?UTF-8?q?Martin=20Hundeb=C3=B8ll?= <mhu@rtx.dk>,
-        stable@vger.kernel.org,
-        =?UTF-8?q?Martin=20Hundeb=C3=B8ll?= <martin@geanix.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: meson: move mmc_request_done() call to irq thread
-Date:   Tue,  6 Jun 2023 08:59:17 +0200
-Message-Id: <20230606065918.460866-1-martin@geanix.com>
-X-Mailer: git-send-email 2.40.1
+        with ESMTP id S237200AbjFFHuO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 03:50:14 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B104A171C;
+        Tue,  6 Jun 2023 00:46:05 -0700 (PDT)
+Received: from [IPV6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab] (unknown [IPv6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id CDA906602242;
+        Tue,  6 Jun 2023 08:46:03 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1686037564;
+        bh=Xj/YzqlcIkt3jhCkHHErOm6l0WDZaX4f/CZ5gHWORZg=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=Xt81lzTgfOicvnysLgvfrBou5Y5prRstHiVOjJ/6J8bUw05nnx3VFtrovb9OIHG8B
+         eslHTzO5k1qepn4SHZUKpS/xkhqkcNlJ3cgjhfqR2MU3uzARHeYbzmxWNVu2RG23Ce
+         f+vl5Oco8TiYjgxJFPFosusLXqyvvNlY+oGQik+gblphHMTr+WK4m94IL8tgxu6tvz
+         vzDmRMmvTH3gh/d0BRi6llCwliLXVmykgbdixm70U1AtGaVEyCsU4eyo2GdfaUPtV7
+         QdKiXOFM3Gg1+0HViiqBTNEd5c4ttforhUk4pLMDAKYpm3qdTmu64eGJmqJMYQtXBg
+         3HiM3uDkGv6Xw==
+Message-ID: <d9f506ff-d088-98d0-7f4b-d1f9db93d3e6@collabora.com>
+Date:   Tue, 6 Jun 2023 09:46:01 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.2
+Subject: Re: [PATCH v4] mmc: mtk-sd: reduce CIT for better performance
+Content-Language: en-US
+To:     Wenbin Mei <wenbin.mei@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
+References: <20230605121442.23622-1-wenbin.mei@mediatek.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <20230605121442.23622-1-wenbin.mei@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Martin Hundebøll <mhu@rtx.dk>
+Il 05/06/23 14:14, Wenbin Mei ha scritto:
+> CQHCI_SSC1 indicates to CQE the polling period to use when using periodic
+> SEND_QUEUE_STATUS(CMD13) polling.
+> Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
+> frequency to get the actual time.
+> The default value 0x1000 that corresponds to 150us for MediaTek SoCs, let's
+> decrease it to 0x40 that corresponds to 2.35us, which can improve the
+> performance of some eMMC devices.
+> 
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> ---
+>   drivers/mmc/host/cqhci.h  |  1 +
+>   drivers/mmc/host/mtk-sd.c | 45 +++++++++++++++++++++++++++++++++++++++
+>   2 files changed, 46 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index ba9387ed90eb..292b89ebd978 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -23,6 +23,7 @@
+>   /* capabilities */
+>   #define CQHCI_CAP			0x04
+>   #define CQHCI_CAP_CS			0x10000000 /* Crypto Support */
+> +#define CQHCI_CAP_ITCFMUL(x)		(((x) & GENMASK(15, 12)) >> 12)
+>   
+>   /* configuration */
+>   #define CQHCI_CFG			0x08
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index edade0e54a0c..9f540973caff 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -473,6 +473,7 @@ struct msdc_host {
+>   	struct msdc_tune_para def_tune_para; /* default tune setting */
+>   	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+>   	struct cqhci_host *cq_host;
+> +	u32 cq_ssc1_time;
+>   };
+>   
+>   static const struct mtk_mmc_compatible mt2701_compat = {
+> @@ -2450,9 +2451,48 @@ static void msdc_hs400_enhanced_strobe(struct mmc_host *mmc,
+>   	}
+>   }
+>   
+> +static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
+> +{
+> +	struct mmc_host *mmc = mmc_from_priv(host);
+> +	struct cqhci_host *cq_host = mmc->cqe_private;
+> +	u8 itcfmul;
+> +	u64 hclk_freq;
+> +	u64 value;
+> +
+> +	/* Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
+> +	 * frequency to get the actual time for CIT.
+> +	 */
 
-The call to mmc_request_done() can schedule, so it cannot be called from
-irq context. Wake the irq thread if it needs to be called, and call it
-from there instead.
 
-Fixes the following kernel bug, which appears when running an RT patched
-kernel on the AmLogic Meson AXG A113X SoC:
-[   11.111407] BUG: scheduling while atomic: kworker/0:1H/75/0x00010001
-[   11.111438] Modules linked in:
-[   11.111451] CPU: 0 PID: 75 Comm: kworker/0:1H Not tainted 6.4.0-rc3-rt2-rtx-00081-gfd07f41ed6b4-dirty #1
-[   11.111461] Hardware name: RTX AXG A113X Linux Platform Board (DT)
-[   11.111469] Workqueue: kblockd blk_mq_run_work_fn
-[   11.111492] Call trace:
-[   11.111497]  dump_backtrace+0xac/0xe8
-[   11.111510]  show_stack+0x18/0x28
-[   11.111518]  dump_stack_lvl+0x48/0x60
-[   11.111530]  dump_stack+0x18/0x24
-[   11.111537]  __schedule_bug+0x4c/0x68
-[   11.111548]  __schedule+0x80/0x574
-[   11.111558]  schedule_loop+0x2c/0x50
-[   11.111567]  schedule_rtlock+0x14/0x20
-[   11.111576]  rtlock_slowlock_locked+0x468/0x730
-[   11.111587]  rt_spin_lock+0x40/0x64
-[   11.111596]  __wake_up_common_lock+0x5c/0xc4
-[   11.111610]  __wake_up+0x18/0x24
-[   11.111620]  mmc_blk_mq_req_done+0x68/0x138
-[   11.111633]  mmc_request_done+0x104/0x118
-[   11.111644]  meson_mmc_request_done+0x38/0x48
-[   11.111654]  meson_mmc_irq+0x128/0x1f0
-[   11.111663]  __handle_irq_event_percpu+0x70/0x114
-[   11.111674]  handle_irq_event_percpu+0x18/0x4c
-[   11.111683]  handle_irq_event+0x80/0xb8
-[   11.111691]  handle_fasteoi_irq+0xa4/0x120
-[   11.111704]  handle_irq_desc+0x20/0x38
-[   11.111712]  generic_handle_domain_irq+0x1c/0x28
-[   11.111721]  gic_handle_irq+0x8c/0xa8
-[   11.111735]  call_on_irq_stack+0x24/0x4c
-[   11.111746]  do_interrupt_handler+0x88/0x94
-[   11.111757]  el1_interrupt+0x34/0x64
-[   11.111769]  el1h_64_irq_handler+0x18/0x24
-[   11.111779]  el1h_64_irq+0x64/0x68
-[   11.111786]  __add_wait_queue+0x0/0x4c
-[   11.111795]  mmc_blk_rw_wait+0x84/0x118
-[   11.111804]  mmc_blk_mq_issue_rq+0x5c4/0x654
-[   11.111814]  mmc_mq_queue_rq+0x194/0x214
-[   11.111822]  blk_mq_dispatch_rq_list+0x3ac/0x528
-[   11.111834]  __blk_mq_sched_dispatch_requests+0x340/0x4d0
-[   11.111847]  blk_mq_sched_dispatch_requests+0x38/0x70
-[   11.111858]  blk_mq_run_work_fn+0x3c/0x70
-[   11.111865]  process_one_work+0x17c/0x1f0
-[   11.111876]  worker_thread+0x1d4/0x26c
-[   11.111885]  kthread+0xe4/0xf4
-[   11.111894]  ret_from_fork+0x10/0x20
+     /*
+      * On MediaTek SoCs the MSDC controller's CQE uses msdc_hclk as ITCFVAL
+      * so we multiply/divide the HCLK frequency by ITCFMUL to calculate the
+      * Send Status Command Idle Timer (CIT) value.
+      */
 
-Fixes: 51c5d8447bd71b ("MMC: meson: initial support for GX platforms")
-Cc: stable@vger.kernel.org
-Signed-off-by: Martin Hundebøll <martin@geanix.com>
----
- drivers/mmc/host/meson-gx-mmc.c | 17 +++++++++--------
- 1 file changed, 9 insertions(+), 8 deletions(-)
+The proposed comment increases readability.
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index b8514d9d5e736..77b2c23084566 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -991,11 +991,8 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 
- 		if (data && !cmd->error)
- 			data->bytes_xfered = data->blksz * data->blocks;
--		if (meson_mmc_bounce_buf_read(data) ||
--		    meson_mmc_get_next_command(cmd))
--			ret = IRQ_WAKE_THREAD;
--		else
--			ret = IRQ_HANDLED;
-+
-+		ret = IRQ_WAKE_THREAD;
- 	}
- 
- out:
-@@ -1007,9 +1004,6 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 		writel(start, host->regs + SD_EMMC_START);
- 	}
- 
--	if (ret == IRQ_HANDLED)
--		meson_mmc_request_done(host->mmc, cmd->mrq);
--
- 	return ret;
- }
- 
-@@ -1040,6 +1034,13 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
- 	if (WARN_ON(!cmd))
- 		return IRQ_NONE;
- 
-+	if (!meson_mmc_bounce_buf_read(cmd->data) &&
-+	    !meson_mmc_get_next_command(cmd)) {
-+		meson_mmc_request_done(host->mmc, cmd->mrq);
-+
-+		return IRQ_HANDLED;
-+	}
-+
- 	if (cmd->error) {
- 		meson_mmc_wait_desc_stop(host);
- 		meson_mmc_request_done(host->mmc, cmd->mrq);
--- 
-2.40.1
-
+Cheers,
+Angelo
