@@ -2,75 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09560C77B7A
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jun 2023 11:42:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23A52C7EE45
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jun 2023 19:15:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236704AbjFFLmV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Jun 2023 07:42:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35232 "EHLO
+        id S239156AbjFFTP1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Jun 2023 15:15:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236784AbjFFLmU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 07:42:20 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A92BF10C8;
-        Tue,  6 Jun 2023 04:41:59 -0700 (PDT)
-Received: from [IPV6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab] (unknown [IPv6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 9CEAA6606E97;
-        Tue,  6 Jun 2023 12:41:57 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1686051718;
-        bh=GW+DvE4vtnoebxP8kfMeV8thnfGpbViwiHIrEXXP98s=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=JeAuN3ekhZhjUz9QB+rbJxCDecQl3k3FnM8P7dW/awY/UiUugXjx4E6/veOnZMJsz
-         ZTmjDHuzoWFzCh3a+0EGYcLDv6pacglXfwiD4DO0PlLqW5HnbKKH52HwqDa5KAIu6S
-         9a6sFzAfJ9YW3IDzk9dEAC3BML384bLfGA11IBP5LLMydJJYdR+WTVKuhDzpq8nBxR
-         nn0U9NEiZXl9y+e4+NRmKaoeSI3yAmR2qpVfHmbB68bSGQc4sJyhKw0iKIuLH1NfTv
-         LjYWCfYICF03k0OEVTHeQvMxHCAgqS0IZ1/bcx5RlIzdZ6SJ+JqOSHQZSXhcmGf2ki
-         P6TP7jTBWO4eA==
-Message-ID: <a8d1f20c-9ff0-2796-d31f-7ef6f11ee6a4@collabora.com>
-Date:   Tue, 6 Jun 2023 13:41:54 +0200
+        with ESMTP id S239793AbjFFTPV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 15:15:21 -0400
+Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99B83E60
+        for <linux-mmc@vger.kernel.org>; Tue,  6 Jun 2023 12:15:19 -0700 (PDT)
+Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-565e8d575cbso60565437b3.3
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Jun 2023 12:15:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686078919; x=1688670919;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Z5L89tB8wkQBFqziHGie36QGbrdPo8qwmA+HXjQV+vM=;
+        b=Oubagn6lNYCvFolZHgBbvAxTse+fxYO7QOc8PsA9iZP9e2t8ETUtUWYpW1X4aol5Pp
+         py6kevZaycKSmSBo4Z6ISBISiqD/7iIAwBWyBerIW3RreJJ9HEAvuTJFC1L1gIxClE8B
+         Zo1Jho7S8zqD4w+aESDk8wwKPZczPNjCqaahODZegcGR0bAXcfGkhfpy0GiU9nZoxYH5
+         3tSmdOg9aItl0cd9p5EIa1kuQY2vPS7IZIU1+jsUKFLETbT+lwkEGP2w54vB26myg4Sn
+         aFZsKajhIoQKKCk8+V/q1rcIuw5atboBqOS6WM8DoES2EgCSQ+vS7fzVbSeDtG9bQjao
+         +WFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686078919; x=1688670919;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Z5L89tB8wkQBFqziHGie36QGbrdPo8qwmA+HXjQV+vM=;
+        b=RlSRPHIyHcqK7klDOFyG1NYATeW0GknbPpdpkp8xgVpzpbrnwREJ0oyDwq8LL0Jh8e
+         /6Es2UxYCQkfOpyk15TqACMcRNuegt0INR+rK8mUTUahSr7iyYMP/hVzzjtm7fvUer9N
+         0hWSsAzcpsQUvIgJ70vz2oU8OJomd5YLRQ65adimvviEYUHOI7hHoC2IV9lFA4wNNF49
+         NF/MozV8Qe0GXhWUVia/cJBpSWlgFIesp+iY+C3Zw4d+SaRTPv4UovSpJjQjAETQibRL
+         Pgk7HX4oCgRY6De8Rbzv61FuSAqr5O2u/kctjX5uL73GX7MknJpPUqMxobrUFTah4ooQ
+         5XQg==
+X-Gm-Message-State: AC+VfDwkT1sBZJNpIH4Vt7TOh/MoM8ZDQtXjHLi1oJNx2VI/4Mop89Es
+        OuVp/CznZPDxRMYIL8nIfh5bfTL9QfSjz3VLmox9xw==
+X-Google-Smtp-Source: ACHHUZ7lY+3AI76qpzpoSr0j2ZD5ERQQbLahw7zOYjKWi6Cuk/Te9kSx2WMaK6q/Ss77uvK92hSSK8RRBBpnLOmJ/uE=
+X-Received: by 2002:a81:52d3:0:b0:561:e565:3678 with SMTP id
+ g202-20020a8152d3000000b00561e5653678mr2718930ywb.11.1686078918837; Tue, 06
+ Jun 2023 12:15:18 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.2
-Subject: Re: [PATCH v5 1/1] mmc: mtk-sd: reduce CIT for better performance
-Content-Language: en-US
-To:     Wenbin Mei <wenbin.mei@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        kernel test robot <lkp@intel.com>
-References: <20230606113249.28057-1-wenbin.mei@mediatek.com>
- <20230606113249.28057-2-wenbin.mei@mediatek.com>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20230606113249.28057-2-wenbin.mei@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20230430-nokia770-regression-v4-0-9b6dc5536b17@linaro.org>
+ <20230430-nokia770-regression-v4-1-9b6dc5536b17@linaro.org> <ac6ef7f2-0d7a-ba43-4b63-0a23d899230f@wanadoo.fr>
+In-Reply-To: <ac6ef7f2-0d7a-ba43-4b63-0a23d899230f@wanadoo.fr>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 6 Jun 2023 21:15:07 +0200
+Message-ID: <CACRpkdYObM_rv2xDhvfNs9Wn-iZoZjY7HpB1hWdc15XgtkA-HA@mail.gmail.com>
+Subject: Re: [PATCH v4 1/4] Input: ads7846 - Convert to use software nodes
+To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 06/06/23 13:32, Wenbin Mei ha scritto:
-> CQHCI_SSC1 indicates to CQE the polling period to use when using periodic
-> SEND_QUEUE_STATUS(CMD13) polling.
-> Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
-> frequency to get the actual time.
-> The default value 0x1000 that corresponds to 150us for MediaTek SoCs, let's
-> decrease it to 0x40 that corresponds to 2.35us, which can improve the
-> performance of some eMMC devices.
-> 
-> Reported-by: kernel test robot <lkp@intel.com>
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+On Sun, Jun 4, 2023 at 5:44=E2=80=AFPM Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+> > +     /* Asserts RESET */
+> > +     gpiod_set_value(md->reset, 1);
+>
+> Hi,
+>
+> should this also be done in the probe if mipid_detect() fails?
 
+It's a nice bonus but surely not urgent or necessary.
+
+> If yes, please also look at [1], that I've just sent, which introduces
+> an error handling path in the probe.
+
+Looks good to me.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+
+Yours,
+Linus Walleij
