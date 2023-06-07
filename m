@@ -2,118 +2,152 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E27CC7EE2A
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jun 2023 19:22:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E1FFC7EE2F
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jun 2023 01:52:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238845AbjFFTWe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Jun 2023 15:22:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52384 "EHLO
+        id S240593AbjFGBwH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Jun 2023 21:52:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238761AbjFFTWd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 15:22:33 -0400
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BB10E7E;
-        Tue,  6 Jun 2023 12:22:31 -0700 (PDT)
-Received: by mail-ej1-x635.google.com with SMTP id a640c23a62f3a-977d6aa3758so477064566b.0;
-        Tue, 06 Jun 2023 12:22:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1686079349; x=1688671349;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2GE52NOk0UypxP33bn8g4+XP8hmFg4c3opJesoY7LCg=;
-        b=RFAg5LWJjkkZe0dQsr1JwstrCVaWo4VB47+fT3XZHOlWFBCkiIg1LETlrqMLYtgOsg
-         5BDL43io2FCmpcFXE3l3+F4n66dXRDgEf8xfcxFAcdT+jznLUopgEfAvZ4GzL6SoX1da
-         aoTg6k53fM94uXRiYbd5YxPCqOTK237dGA+saV3hjqJu4jF7dMwZEz+S3DD6kYhza7UE
-         cQBOTuJiaDyPDGRJZwE+HyNAUqeEmCvkiwr16iMCYifHf/kQt3t5EckJoLJApR2EjiX0
-         cut7EtiN7NbTHz4MfZe4TXtHdnX/LX65QcE520c2AaV9D22C7RCZtGc5YdpPoQ1Wpp/2
-         296w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686079349; x=1688671349;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2GE52NOk0UypxP33bn8g4+XP8hmFg4c3opJesoY7LCg=;
-        b=FDBAS9Wox610Bm0nx3VaEPAtnazk2/gg8jppyNsKAjYUkddSDDnL7rS0Ny8EfhVYPH
-         VbIQJpNlUa/lp1eXYQehT4xn3j85LxumdUbkbAPqI/gKXLXOVWzU4mRYhD0MOhvAmwwb
-         frYYGa0BE1kcuuCl51NfaHr6HCizDXIOgTOj9aETu0kI2nG4OHyaAppSSRjwK4zw8fS8
-         sdnArOAetvV5YPamhy4qh15snqtBDxCDsVuCU/MyIlno9nRn46CsW9S16FBHlILTMNa2
-         I1XlAAv4esjzkWBTGY6vN7LD9GkB9rUfU7dVjHLzEa6sKMQPoh9ggVmsa7YGK9i2VRfS
-         nvZA==
-X-Gm-Message-State: AC+VfDzKBYFd3neEyfIcNuTERvYsChca0r6bZ3bE2C2I6g6Bso1cWifg
-        WHUCYngcvPW45erkeDeihzq0biEBgRNtNN4h2hQ=
-X-Google-Smtp-Source: ACHHUZ5GUK/RF+eP4+MP5mNutQoh4cmUk9elSAwK6vWVlKbZiNz4TheLnToyRGeGcDtMLD6jZrkuCVoNOoQUQ2MDOyU=
-X-Received: by 2002:a17:907:6e08:b0:978:6a95:512d with SMTP id
- sd8-20020a1709076e0800b009786a95512dmr4124880ejc.11.1686079349273; Tue, 06
- Jun 2023 12:22:29 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230606065918.460866-1-martin@geanix.com>
-In-Reply-To: <20230606065918.460866-1-martin@geanix.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Tue, 6 Jun 2023 21:22:18 +0200
-Message-ID: <CAFBinCB4sv4Fk_VNEPFaPz384XF9CfXGemSqaH9YJnEh7QNnPg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson: move mmc_request_done() call to irq thread
-To:     =?UTF-8?Q?Martin_Hundeb=C3=B8ll?= <martin@geanix.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        =?UTF-8?Q?Martin_Hundeb=C3=B8ll?= <mhu@rtx.dk>,
-        stable@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S240640AbjFGBvx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jun 2023 21:51:53 -0400
+Received: from m126.mail.126.com (m126.mail.126.com [220.181.12.26])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 703FA19AB;
+        Tue,  6 Jun 2023 18:50:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=126.com;
+        s=s110527; h=From:Subject:Date:Message-Id; bh=rL1HLDDH3DxRNYdCLi
+        8SStgCPzr3ccNzmCjay25S1pI=; b=JhSJATmsxmhweNciXU4nx0M4bWnxbGMAPj
+        hnc3z+n2qnVCThplNvPr1AsL13BZ7yrgJm1bOMaFNJsE5M6CwLH2EN1CjHbXkRal
+        Uocr0fQJF7aKyXP4xtjXvnJ5OkzZekpuDFNNC4nvdTQkg4Nl8pwaIrQ3P86p+Ns0
+        9stvxSbqI=
+Received: from wh-chevronli-w10.bayhubtech.com (unknown [58.48.115.170])
+        by zwqz-smtp-mta-g1-1 (Coremail) with SMTP id _____wDnPj374X9k3iQtAw--.54119S3;
+        Wed, 07 Jun 2023 09:48:44 +0800 (CST)
+From:   Chevron Li <chevron_li@126.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     shaper.liu@bayhubtech.com, xiaoguang.yu@bayhubtech.com,
+        shirley.her@bayhubtech.com, chevron.li@bayhubtech.com
+Subject: [PATCH V1 2/2] mmc: sdhci-pci-o2micro: add Bayhub new chip GG8 support
+Date:   Wed,  7 Jun 2023 09:48:12 +0800
+Message-Id: <20230607014812.30104-2-chevron_li@126.com>
+X-Mailer: git-send-email 2.18.0.windows.1
+In-Reply-To: <20230607014812.30104-1-chevron_li@126.com>
+References: <20230607014812.30104-1-chevron_li@126.com>
+X-CM-TRANSID: _____wDnPj374X9k3iQtAw--.54119S3
+X-Coremail-Antispam: 1Uf129KBjvJXoWxGw47Jw4fJF1kCryUtw1rXrb_yoW5tFyfpF
+        4Fvas8Gr4rKFW3Z39xGw4vvr1S9r1vvrWqkF43Jw4Fvw1jkF4rWr97CFy5XryUXrZaqw1f
+        Xa1vqFyUGFyUAwUanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07UCjgcUUUUU=
+X-Originating-IP: [58.48.115.170]
+X-CM-SenderInfo: hfkh42xrqbzxa6rslhhfrp/1tbiFwCHAVpEGcH9fQAAsX
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Martin,
+From: Chevron Li <chevron.li@bayhubtech.com>
 
-On Tue, Jun 6, 2023 at 8:59=E2=80=AFAM Martin Hundeb=C3=B8ll <martin@geanix=
-.com> wrote:
-[...]
-> @@ -1040,6 +1034,13 @@ static irqreturn_t meson_mmc_irq_thread(int irq, v=
-oid *dev_id)
->         if (WARN_ON(!cmd))
->                 return IRQ_NONE;
->
-> +       if (!meson_mmc_bounce_buf_read(cmd->data) &&
-> +           !meson_mmc_get_next_command(cmd)) {
-> +               meson_mmc_request_done(host->mmc, cmd->mrq);
-> +
-> +               return IRQ_HANDLED;
-> +       }
-> +
-I'm wondering if this is changing the behavior when cmd->error is non-zero.
+Add Bayhub new chip GG8 support for SD express card.
+This patch depends on patch 1/2.
 
-Let's take the "status & IRQ_CRC_ERR" case from meson_mmc_irq() - previousl=
-y:
-- cmd->error is set
-- regmap_update_bits(host->regmap, SD_EMMC_START, START_DESC_BUSY, 0);
-- IRQ_WAKE_THREAD
-- then inside meson_mmc_irq_thread():
--- meson_mmc_wait_desc_stop(host);
--- meson_mmc_request_done(host->mmc, cmd->mrq);
+Signed-off-by: Chevron Li <chevron.li@bayhubtech.com>
+---
+Change in V1:
+1.Implement the SD express card callback routine.
+2.Add SD express card support for Bayhub GG8 chip.
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 61 +++++++++++++++++++++++++++-
+ 1 file changed, 60 insertions(+), 1 deletion(-)
 
-With this patch:
-- cmd->error is set
-- regmap_update_bits(host->regmap, SD_EMMC_START, START_DESC_BUSY, 0);
-- IRQ_WAKE_THREAD
-- then inside meson_mmc_irq_thread():
--- !meson_mmc_bounce_buf_read(cmd->data) &&
-!meson_mmc_get_next_command(cmd) can be true, which means we only
-call:
---- meson_mmc_request_done(host->mmc, cmd->mrq);
---- (note the missing meson_mmc_wait_desc_stop() call before
-meson_mmc_request_done())
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index 8243a63b3c81..b2d8ddbb4095 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -21,6 +21,7 @@
+  * O2Micro device registers
+  */
+ 
++#define O2_SD_PCIE_SWITCH	0x54
+ #define O2_SD_MISC_REG5		0x64
+ #define O2_SD_LD0_CTRL		0x68
+ #define O2_SD_DEV_CTRL		0x88
+@@ -631,6 +632,63 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	sdhci_o2_enable_clk(host, clk);
+ }
+ 
++static u8 sdhci_o2_sd_express_clkq_assert(struct sdhci_host *host)
++{
++	return sdhci_readb(host, O2_SD_EXP_INT_REG);
++}
++
++static int sdhci_pci_o2_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct sdhci_pci_chip *chip = slot->chip;
++	u8 scratch8 = 0;
++	u16 scratch16 = 0;
++	bool ret = false;
++
++	/* Disable clock */
++	sdhci_writeb(host, 0, SDHCI_CLOCK_CONTROL);
++
++	/* Set VDD2 voltage*/
++	scratch8 = sdhci_readb(host, SDHCI_POWER_CONTROL);
++	scratch8 &= 0x0F;
++	if ((host->mmc->ios.timing == MMC_TIMING_SD_EXP_1_2V) &&
++		(host->mmc->caps2 & MMC_CAP2_SD_EXP_1_2V)) {
++		scratch8 |= BIT(4) | BIT(7);
++	} else
++		scratch8 |= BIT(4) | BIT(5) | BIT(7);
++	sdhci_writeb(host, scratch8, SDHCI_POWER_CONTROL);
++
++	/* UnLock WP */
++	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch8);
++	scratch8 &= 0x7f;
++	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch8);
++
++	ret = readx_poll_timeout(sdhci_o2_sd_express_clkq_assert, host,
++		scratch8, !(scratch8 & BIT(0)), 1, 30000) == 0 ? 0 : 1;
++
++	if (!ret) {
++		/* switch to PCIe mode */
++		scratch16 = sdhci_readw(host, O2_SD_PCIE_SWITCH);
++		scratch16 |= BIT(8);
++		sdhci_writew(host, scratch16, O2_SD_PCIE_SWITCH);
++	} else {
++		/* keep mode as USHI */
++		pci_read_config_word(chip->pdev,
++						O2_SD_PARA_SET_REG1, &scratch16);
++		scratch16 &= ~BIT(11);
++		pci_write_config_word(chip->pdev,
++						O2_SD_PARA_SET_REG1, scratch16);
++	}
++	/* Lock WP */
++	pci_read_config_byte(chip->pdev,
++					O2_SD_LOCK_WP, &scratch8);
++	scratch8 |= 0x80;
++	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch8);
++
++	return ret;
++}
++
+ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	struct sdhci_pci_chip *chip;
+@@ -703,10 +761,11 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 	case PCI_DEVICE_ID_O2_GG8_9861:
+ 	case PCI_DEVICE_ID_O2_GG8_9862:
+ 	case PCI_DEVICE_ID_O2_GG8_9863:
+-		host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
++		host->mmc->caps2 |= MMC_CAP2_NO_SDIO | MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V;
+ 		host->mmc->caps |= MMC_CAP_HW_RESET;
+ 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ 		slot->host->mmc_host_ops.get_cd = sdhci_o2_get_cd;
++		host->mmc_host_ops.init_sd_express = sdhci_pci_o2_init_sd_express;
+ 		break;
+ 	default:
+ 		break;
+-- 
+2.25.1
 
-What do you think?
-Maybe we just need to remove the code from meson_mmc_irq() and just
-omit any modifications to meson_mmc_irq_thread() (as it seems all
-checks that you're adding are already present in that function below
-the cmd->error case).
-
-
-Best regards,
-Martin
