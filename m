@@ -2,193 +2,113 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C687C77B7A
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jun 2023 06:06:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30181C83003
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jun 2023 07:56:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234168AbjFGGGs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Jun 2023 02:06:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44706 "EHLO
+        id S235396AbjFGH43 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Jun 2023 03:56:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbjFGGGq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jun 2023 02:06:46 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D540919BC;
-        Tue,  6 Jun 2023 23:06:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1686118005; x=1717654005;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=F2dblgq0/jqWKrEBIBiR9lrvjHI50eHV+ew7tXhlMBI=;
-  b=aOG1JEdEp5UxDYxvXWWUu6sUiG0kN6b7KAvhTOG6BxkLKON0CmUnjY8T
-   n2MiD72+uaQnyge+BEWM8K14djfLpkJUYnF1juSLNLKRIu1nftT85Dkiw
-   hpqrgAOatRMlKr95AyzvMVPUEAzJ43YOQBLBIJXg5HEMOOV1tniR2xCgL
-   ycKDsdbLbFzcVk/2bbNBIxE1W7bp5brbe7ysGsDW3Uiawmga4kzdYyjiQ
-   SzvpoQGtqUiza6IO0aMpw9tuWF6uwvbl3m3KmZROY920eMniztOhgZuhM
-   pQf69SZtQFgb0j2pGG4fFxLT/5jEf+odxXlTNmj5jcDZqWc8/UT40XPeR
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10733"; a="346506618"
-X-IronPort-AV: E=Sophos;i="6.00,223,1681196400"; 
-   d="scan'208";a="346506618"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jun 2023 23:06:44 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10733"; a="956073288"
-X-IronPort-AV: E=Sophos;i="6.00,223,1681196400"; 
-   d="scan'208";a="956073288"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.47.234])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jun 2023 23:06:41 -0700
-Message-ID: <60054ec8-43d4-059c-0128-68815340c631@intel.com>
-Date:   Wed, 7 Jun 2023 09:06:36 +0300
+        with ESMTP id S233661AbjFGH42 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jun 2023 03:56:28 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC60CE6B
+        for <linux-mmc@vger.kernel.org>; Wed,  7 Jun 2023 00:56:27 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1q6o1V-000699-Pn; Wed, 07 Jun 2023 09:56:05 +0200
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1q6o1T-005gwG-6s; Wed, 07 Jun 2023 09:56:03 +0200
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1q6o1S-00Bwh7-GJ; Wed, 07 Jun 2023 09:56:02 +0200
+Date:   Wed, 7 Jun 2023 09:56:02 +0200
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Stefan Wahren <stefan.wahren@i2se.com>
+Cc:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
+        bcm-kernel-feedback-list@broadcom.com
+Subject: Re: [PATCH 05/10] dt-bindings: pwm: convert pwm-bcm2835 bindings to
+ YAML
+Message-ID: <20230607075602.s2pfs7dl7fwkyevm@pengutronix.de>
+References: <20230604121223.9625-1-stefan.wahren@i2se.com>
+ <20230604121223.9625-6-stefan.wahren@i2se.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.12.0
-Subject: Re: [PATCH v5 1/1] mmc: mtk-sd: reduce CIT for better performance
-Content-Language: en-US
-To:     Wenbin Mei <wenbin.mei@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        kernel test robot <lkp@intel.com>
-References: <20230606113249.28057-1-wenbin.mei@mediatek.com>
- <20230606113249.28057-2-wenbin.mei@mediatek.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230606113249.28057-2-wenbin.mei@mediatek.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="lyuxia23pum2phqj"
+Content-Disposition: inline
+In-Reply-To: <20230604121223.9625-6-stefan.wahren@i2se.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/06/23 14:32, Wenbin Mei wrote:
-> CQHCI_SSC1 indicates to CQE the polling period to use when using periodic
-> SEND_QUEUE_STATUS(CMD13) polling.
-> Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
-> frequency to get the actual time.
-> The default value 0x1000 that corresponds to 150us for MediaTek SoCs, let's
-> decrease it to 0x40 that corresponds to 2.35us, which can improve the
-> performance of some eMMC devices.
-> 
-> Reported-by: kernel test robot <lkp@intel.com>
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
 
-For cqhci:
+--lyuxia23pum2phqj
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Hello,
 
-> ---
-> the previous patche link:
-> v4: https://patchwork.kernel.org/project/linux-mediatek/patch/20230605121442.23622-1-wenbin.mei@mediatek.com/
-> v3: https://patchwork.kernel.org/project/linux-mediatek/patch/20230605060107.22044-1-wenbin.mei@mediatek.com/
-> v2: https://patchwork.kernel.org/project/linux-mediatek/patch/20230510015851.11830-1-wenbin.mei@mediatek.com/
-> v1: https://patchwork.kernel.org/project/linux-mediatek/patch/20230419063048.10516-1-wenbin.mei@mediatek.com/
-> ---
->  drivers/mmc/host/cqhci.h  |  2 ++
->  drivers/mmc/host/mtk-sd.c | 47 +++++++++++++++++++++++++++++++++++++++
->  2 files changed, 49 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-> index ba9387ed90eb..e35c655edefc 100644
-> --- a/drivers/mmc/host/cqhci.h
-> +++ b/drivers/mmc/host/cqhci.h
-> @@ -23,6 +23,8 @@
->  /* capabilities */
->  #define CQHCI_CAP			0x04
->  #define CQHCI_CAP_CS			0x10000000 /* Crypto Support */
-> +#define CQHCI_CAP_ITCFMUL		GENMASK(15, 12)
-> +#define CQHCI_ITCFMUL(x)		FIELD_GET(CQHCI_CAP_ITCFMUL, (x))
->  
->  /* configuration */
->  #define CQHCI_CFG			0x08
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 8ce864169986..b582f19f82f2 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -473,6 +473,7 @@ struct msdc_host {
->  	struct msdc_tune_para def_tune_para; /* default tune setting */
->  	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
->  	struct cqhci_host *cq_host;
-> +	u32 cq_ssc1_time;
->  };
->  
->  static const struct mtk_mmc_compatible mt2701_compat = {
-> @@ -2450,9 +2451,50 @@ static void msdc_hs400_enhanced_strobe(struct mmc_host *mmc,
->  	}
->  }
->  
-> +static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
-> +{
-> +	struct mmc_host *mmc = mmc_from_priv(host);
-> +	struct cqhci_host *cq_host = mmc->cqe_private;
-> +	u8 itcfmul;
-> +	unsigned long hclk_freq;
-> +	u64 value;
-> +
-> +	/*
-> +	 * On MediaTek SoCs the MSDC controller's CQE uses msdc_hclk as ITCFVAL
-> +	 * so we multiply/divide the HCLK frequency by ITCFMUL to calculate the
-> +	 * Send Status Command Idle Timer (CIT) value.
-> +	 */
-> +	hclk_freq = clk_get_rate(host->h_clk);
-> +	itcfmul = CQHCI_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
-> +	switch (itcfmul) {
-> +	case 0x0:
-> +		do_div(hclk_freq, 1000);
-> +		break;
-> +	case 0x1:
-> +		do_div(hclk_freq, 100);
-> +		break;
-> +	case 0x2:
-> +		do_div(hclk_freq, 10);
-> +		break;
-> +	case 0x3:
-> +		break;
-> +	case 0x4:
-> +		hclk_freq = hclk_freq * 10;
-> +		break;
-> +	default:
-> +		host->cq_ssc1_time = 0x40;
-> +		return;
-> +	}
-> +
-> +	value = hclk_freq * timer_ns;
-> +	do_div(value, 1000000000);
-> +	host->cq_ssc1_time = value;
-> +}
-> +
->  static void msdc_cqe_enable(struct mmc_host *mmc)
->  {
->  	struct msdc_host *host = mmc_priv(mmc);
-> +	struct cqhci_host *cq_host = mmc->cqe_private;
->  
->  	/* enable cmdq irq */
->  	writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
-> @@ -2462,6 +2504,9 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
->  	msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
->  	/* default read data timeout 1s */
->  	msdc_set_timeout(host, 1000000000ULL, 0);
-> +
-> +	/* Set the send status command idle timer */
-> +	cqhci_writel(cq_host, host->cq_ssc1_time, CQHCI_SSC1);
->  }
->  
->  static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
-> @@ -2803,6 +2848,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  		/* cqhci 16bit length */
->  		/* 0 size, means 65536 so we don't have to -1 here */
->  		mmc->max_seg_size = 64 * 1024;
-> +		/* Reduce CIT to 0x40 that corresponds to 2.35us */
-> +		msdc_cqe_cit_cal(host, 2350);
->  	}
->  
->  	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+On Sun, Jun 04, 2023 at 02:12:18PM +0200, Stefan Wahren wrote:
+> Convert the DT binding document for pwm-bcm2835 from .txt to YAML.
 
+Both dt_binding_check and dtbs_check (for ARCH=3Darm) are happy, apart
+=66rom errors like:
+
+arch/arm/boot/dts/bcm2711-rpi-4-b.dtb: pwm@7e20c000: #pwm-cells:0:0: 3 was =
+expected
+        From schema: Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
+
+which is fixed in patch #6. So:
+
+Reviewed-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+
+Who will pick up this patch? Is it supposed to go in via pwm or
+arm/broadcom? (I suggest the latter.)
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--lyuxia23pum2phqj
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmSAOBEACgkQj4D7WH0S
+/k4w2Qf/THJ6pslrb8HwoYlT3z4Xn2MagNVHuNgc00ChJFQ2ZijLk5hnXxwVOXVg
+hIj81DGnNyr+INajGYLHCxPIxwzV1wXJpdI2rj2nysvZB3d74v95qhibjiiUQz5P
+GOy4EQrbYBAx/UZLGv+qoOf1xIzoUnYmgRZr2LcNBbW2o1ttHOMMjK6wh8ov4ARo
+a9livwubMJDy/L00KdyVZ/BfZ0UN+qi8X5fF9PjP19OUgQCTnjYCJBsm0NIFdX0E
+ta3UQwJngoKQ3z2kvRc5ouyq3lVCIi5xZ+4dXJB5KO5ZglOTNgS+IM2DybJt9u5D
+AAGPigBN9yAoSJpaDGdylqO8ktDP/w==
+=nlpC
+-----END PGP SIGNATURE-----
+
+--lyuxia23pum2phqj--
