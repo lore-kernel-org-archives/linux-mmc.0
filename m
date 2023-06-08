@@ -2,34 +2,33 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65635C7EE29
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:45:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD48AC7EE25
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:45:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232369AbjFHTpm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 15:45:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54154 "EHLO
+        id S230459AbjFHTpo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 15:45:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234096AbjFHTpj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:45:39 -0400
+        with ESMTP id S230125AbjFHTpo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:45:44 -0400
 Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D11F2733
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:45:38 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20D0F210D
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:45:43 -0700 (PDT)
 Received: from localhost.localdomain (31.173.86.116) by msexch01.omp.ru
  (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Thu, 8 Jun 2023
- 22:45:31 +0300
+ 22:45:35 +0300
 From:   Sergey Shtylyov <s.shtylyov@omp.ru>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     Florian Fainelli <f.fainelli@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        <bcm-kernel-feedback-list@broadcom.com>,
-        <linux-rpi-kernel@lists.infradead.org>,
+CC:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        <linux-amlogic@lists.infradead.org>,
         <linux-arm-kernel@lists.infradead.org>
-Subject: [PATCH v2 01/12] mmc: bcm2835: fix deferred probing
-Date:   Thu, 8 Jun 2023 22:45:08 +0300
-Message-ID: <20230608194519.10665-2-s.shtylyov@omp.ru>
+Subject: [PATCH v2 02/12] mmc: meson-gx: fix deferred probing
+Date:   Thu, 8 Jun 2023 22:45:09 +0300
+Message-ID: <20230608194519.10665-3-s.shtylyov@omp.ru>
 X-Mailer: git-send-email 2.26.3
 In-Reply-To: <20230608194519.10665-1-s.shtylyov@omp.ru>
 References: <20230608194519.10665-1-s.shtylyov@omp.ru>
@@ -58,13 +57,12 @@ X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
 X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
  dbl.spamhaus.org}
 X-KSE-AntiSpam-Info: 31.173.86.116:7.1.2;127.0.0.199:7.1.2;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;omp.ru:7.1.1
-X-KSE-AntiSpam-Info: {fromrtbl complete}
 X-KSE-AntiSpam-Info: ApMailHostAddress: 31.173.86.116
 X-KSE-AntiSpam-Info: {DNS response errors}
 X-KSE-AntiSpam-Info: Rate: 19
 X-KSE-AntiSpam-Info: Status: not_detected
 X-KSE-AntiSpam-Info: Method: none
-X-KSE-AntiSpam-Info: Auth:dmarc=none header.from=omp.ru;spf=none
+X-KSE-AntiSpam-Info: Auth:dmarc=temperror header.from=omp.ru;spf=temperror
  smtp.mailfrom=omp.ru;dkim=none
 X-KSE-Antiphishing-Info: Clean
 X-KSE-Antiphishing-ScanningType: Heuristic
@@ -85,31 +83,33 @@ permanently instead of the deferred probing. Switch to propagating the error
 codes upstream.  IRQ0 is no longer returned by platform_get_irq(), so we now
 can safely ignore it...
 
-Fixes: 660fc733bd74 ("mmc: bcm2835: Add new driver for the sdhost controller.")
+Fixes: cbcaac6d7dd2 ("mmc: meson-gx-mmc: Fix platform_get_irq's error checking")
 Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 ---
 Changes in version 2:
+- updated the fix due to the surrounding code change;
 - refreshed the patch;
+- removed stray newline in the Fixes: tag;
 - slightly reformatted the patch description.
 
- drivers/mmc/host/bcm2835.c | 4 ++--
+ drivers/mmc/host/meson-gx-mmc.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 8648f7e63ca1..eea208856ce0 100644
---- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -1403,8 +1403,8 @@ static int bcm2835_probe(struct platform_device *pdev)
- 	host->max_clk = clk_get_rate(clk);
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index b8514d9d5e73..75f97dce7ef3 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1192,8 +1192,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 		return PTR_ERR(host->regs);
  
  	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq <= 0) {
--		ret = -EINVAL;
-+	if (host->irq < 0) {
-+		ret = host->irq;
- 		goto err;
- 	}
+-	if (host->irq <= 0)
+-		return -EINVAL;
++	if (host->irq < 0)
++		return host->irq;
  
+ 	cd_irq = platform_get_irq_optional(pdev, 1);
+ 	mmc_gpio_set_cd_irq(mmc, cd_irq);
 -- 
 2.26.3
 
