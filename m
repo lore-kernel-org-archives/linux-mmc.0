@@ -2,79 +2,85 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58D6EC7EE23
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 23:10:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2383C7EE23
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 23:10:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236952AbjFHXKy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 19:10:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40018 "EHLO
+        id S236935AbjFHXK5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 19:10:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236258AbjFHXKu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 19:10:50 -0400
-Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42CE030C3
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 16:10:49 -0700 (PDT)
-Received: by mail-yb1-xb2f.google.com with SMTP id 3f1490d57ef6-ba86ea269e0so1209749276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2023 16:10:49 -0700 (PDT)
+        with ESMTP id S236923AbjFHXK4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 19:10:56 -0400
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2B1630C5
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 16:10:54 -0700 (PDT)
+Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-ba8afcc82c0so1141203276.2
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2023 16:10:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686265848; x=1688857848;
+        d=linaro.org; s=google; t=1686265854; x=1688857854;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=tSEQet0GKrnr4pMn8FjH5AOgQ3B0lsZ20KBmXO0sWPo=;
-        b=pnntPWqoyFjiGEPsSDDJOsjSPKnhtAxqJr8hxCAp1oOStZsydaau/YdYtp2YxnXEin
-         57IbGlgMrR8BCsBFwlbsOj8UiQdZ5WVAJmACsn25rKAdFNjJ3M4bhztM5jRZRLT1XAfu
-         KRTbCPky2JTZamkrOJ3D2WqGwSK/KRWCMXW34pFLYPE9fUdCaX4gQy7Mx1IuusYwvv2p
-         W2+ZgfB5K4aaLt4DHAnIDEkx8zFIl2iB99zEqAq9t5AeQ4ErDwdAp2hvTstLNkXQXTiF
-         XWZi1ZF6VC4ezSwoOUZ+ptMGUeRGo0GrcqU+CHeMyceq096STKNZOKeAVdeMLEARWvNf
-         Yj2w==
+        bh=SN0ge3MI/0IeqRc4N5LmJFP892MgbxzN2dbFaINJp+g=;
+        b=KCZTqmKJ+VJzOc9KKA8TdTIL+V67qW3YIPBb333hwaSl95weyBcaEOrdzBdrF3kxOt
+         03oci5v6cJVwIL3Av8EXMgkBonynnmFa7JnghjySfHmsuBn+o77q1MzXbQj/7DcqGAft
+         jJZ3qN+oW/akenO9XzoDbSgI/tgDK6d+uSCZvJVjYJKH5p5BMB4T+wvzmExywYspNrfy
+         tyMsammujvyeJ7hjQC3ZrKTepcFjtsW6EW6rJ/22wpDCuc44eHe0gAjKxGLMlayqCYaL
+         7R+agmogDqFnFWd3ev/dwL/lSNQ763vJZjHwLPfsZ3wASnYpEDskWHzHeNLR4TMc1tmK
+         9xTg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686265848; x=1688857848;
+        d=1e100.net; s=20221208; t=1686265854; x=1688857854;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=tSEQet0GKrnr4pMn8FjH5AOgQ3B0lsZ20KBmXO0sWPo=;
-        b=TpJ94oYzS7GZ/l9SCoLe5NnQ+P8iNlUybVpbV928sH+Vdr66K+4vDbn+X0doCrwWFq
-         J3AFYfPYnfYfbgmhmsYgV4/KI+51nog69OaKDoxr//QK+PsPvhqpQ/7myJAe3rdmWVaM
-         5hHVWt8RALc7UYDzt4MkZ6V0TsGkexgSsYig+QApGyVL3j1eoTVayLHzbq46oAcxWaMD
-         1JBB/kPVcyKiGAPRM3yz6OIdB5E4IBsNZv3pe21Ah4+rbzpB56jwC2iEheeeuUx3L5VZ
-         EzSKXhMLPF17rQi4Q5AEMazYeO/bPoOg9+9p7AhHb7g40+ErDjhCZqUwpqtjKdRlqO/m
-         5Ydg==
-X-Gm-Message-State: AC+VfDxg+Os0BTKXiO/XRmaNXvub7LoxS2gJdjDP8iuUR+quZN76NrSc
-        /UjipcnEqDkTHeb5FBlyRd97vDfICbHtLdRj4WBLVg==
-X-Google-Smtp-Source: ACHHUZ5ieHiWUe0+jCkKqPgwkmhjEiQMZfXdZn7EsyrfeetzBu0F5vssZk1uzJeDBX3CkFb7uI2m4RiqK+KMbMEwKbs=
-X-Received: by 2002:a25:b44:0:b0:bac:5d73:7f04 with SMTP id
- 65-20020a250b44000000b00bac5d737f04mr1078129ybl.10.1686265848459; Thu, 08 Jun
- 2023 16:10:48 -0700 (PDT)
+        bh=SN0ge3MI/0IeqRc4N5LmJFP892MgbxzN2dbFaINJp+g=;
+        b=htg9d8y96OGJoZ1rOY+pPN7vVQBgon9NDiDza0VXHlQ3knaAtffaTcxpW0f3zBR4OF
+         bwQSdAovYTjIA3q6/lJVExaLTcchryZ8fg8FQpc83XdY+nxyV7QjOVqHPKsCixhOSb4j
+         cIK0vOsQ79c2C8daV6zLLcEkfEwxxKGBZBKEfMORD6J0JlyqrNPE4/hFf8FvneVrYTu8
+         zX7lggY+2ad39k+Q1/auX+73ZvrWWq6BypWafQM+G9ykNBvQkPYQdVrNrmDdss4H2KLG
+         wZQtrU9kvsNjMKKV+mgR9gpsd41Obncm1hLbPOQhvEjSJPahBipAKoyDthPPf02wKAr6
+         31fA==
+X-Gm-Message-State: AC+VfDzj5bB/ddAQFXLr1L+Db9uEVpy2OVGirLzOHbcDN0A2Wp4HMcaH
+        1Jz8/Xt5EyOOp3oplHsw+0Zs/N6wrL7hDi3Quada4g==
+X-Google-Smtp-Source: ACHHUZ4E9RVn5dOQXszUyb0/CmvdkGdz1gQ5GkEnozd1DWeFgjXKVXrU07bXYk/k93aNeBLxNomjZnRyF31Pn36Vknk=
+X-Received: by 2002:a0d:d84b:0:b0:569:e868:fd7f with SMTP id
+ a72-20020a0dd84b000000b00569e868fd7fmr1147264ywe.7.1686265853979; Thu, 08 Jun
+ 2023 16:10:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230601111128.19562-1-quic_kbajaj@quicinc.com> <20230601111128.19562-2-quic_kbajaj@quicinc.com>
-In-Reply-To: <20230601111128.19562-2-quic_kbajaj@quicinc.com>
+References: <20230606113249.28057-1-wenbin.mei@mediatek.com> <20230606113249.28057-2-wenbin.mei@mediatek.com>
+In-Reply-To: <20230606113249.28057-2-wenbin.mei@mediatek.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 9 Jun 2023 01:10:12 +0200
-Message-ID: <CAPDyKFpDKgdZtxtsuRSR7rfQwpXZO9LAL_AtcQ6BuRaA_-S2HQ@mail.gmail.com>
-Subject: Re: [PATCH v5 1/3] dt-bindings: mmc: sdhci-msm: Document the
- QDU1000/QRU1000 compatible
-To:     Komal Bajaj <quic_kbajaj@quicinc.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Date:   Fri, 9 Jun 2023 01:10:18 +0200
+Message-ID: <CAPDyKFoR+0xtmjESCfk5-aUYhsjcc6ATevRoRpw+atCjmz5yrQ@mail.gmail.com>
+Subject: Re: [PATCH v5 1/1] mmc: mtk-sd: reduce CIT for better performance
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        kernel test robot <lkp@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 1 Jun 2023 at 13:11, Komal Bajaj <quic_kbajaj@quicinc.com> wrote:
+On Tue, 6 Jun 2023 at 13:32, Wenbin Mei <wenbin.mei@mediatek.com> wrote:
 >
-> Document the compatible for SDHCI on QDU1000 and QRU1000 SoCs.
+> CQHCI_SSC1 indicates to CQE the polling period to use when using periodic
+> SEND_QUEUE_STATUS(CMD13) polling.
+> Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
+> frequency to get the actual time.
+> The default value 0x1000 that corresponds to 150us for MediaTek SoCs, let's
+> decrease it to 0x40 that corresponds to 2.35us, which can improve the
+> performance of some eMMC devices.
 >
-> Acked-by: Conor Dooley <conor.dooley@microchip.com>
-> Reviewed-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
 
 Applied for next, thanks!
 
@@ -83,21 +89,111 @@ Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
+> the previous patche link:
+> v4: https://patchwork.kernel.org/project/linux-mediatek/patch/20230605121442.23622-1-wenbin.mei@mediatek.com/
+> v3: https://patchwork.kernel.org/project/linux-mediatek/patch/20230605060107.22044-1-wenbin.mei@mediatek.com/
+> v2: https://patchwork.kernel.org/project/linux-mediatek/patch/20230510015851.11830-1-wenbin.mei@mediatek.com/
+> v1: https://patchwork.kernel.org/project/linux-mediatek/patch/20230419063048.10516-1-wenbin.mei@mediatek.com/
+> ---
+>  drivers/mmc/host/cqhci.h  |  2 ++
+>  drivers/mmc/host/mtk-sd.c | 47 +++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 49 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 4f2d9e8127dd..af29d60ff0d6 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -39,6 +39,7 @@ properties:
->                - qcom,ipq9574-sdhci
->                - qcom,qcm2290-sdhci
->                - qcom,qcs404-sdhci
-> +              - qcom,qdu1000-sdhci
->                - qcom,sc7180-sdhci
->                - qcom,sc7280-sdhci
->                - qcom,sdm630-sdhci
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index ba9387ed90eb..e35c655edefc 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -23,6 +23,8 @@
+>  /* capabilities */
+>  #define CQHCI_CAP                      0x04
+>  #define CQHCI_CAP_CS                   0x10000000 /* Crypto Support */
+> +#define CQHCI_CAP_ITCFMUL              GENMASK(15, 12)
+> +#define CQHCI_ITCFMUL(x)               FIELD_GET(CQHCI_CAP_ITCFMUL, (x))
+>
+>  /* configuration */
+>  #define CQHCI_CFG                      0x08
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 8ce864169986..b582f19f82f2 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -473,6 +473,7 @@ struct msdc_host {
+>         struct msdc_tune_para def_tune_para; /* default tune setting */
+>         struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+>         struct cqhci_host *cq_host;
+> +       u32 cq_ssc1_time;
+>  };
+>
+>  static const struct mtk_mmc_compatible mt2701_compat = {
+> @@ -2450,9 +2451,50 @@ static void msdc_hs400_enhanced_strobe(struct mmc_host *mmc,
+>         }
+>  }
+>
+> +static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
+> +{
+> +       struct mmc_host *mmc = mmc_from_priv(host);
+> +       struct cqhci_host *cq_host = mmc->cqe_private;
+> +       u8 itcfmul;
+> +       unsigned long hclk_freq;
+> +       u64 value;
+> +
+> +       /*
+> +        * On MediaTek SoCs the MSDC controller's CQE uses msdc_hclk as ITCFVAL
+> +        * so we multiply/divide the HCLK frequency by ITCFMUL to calculate the
+> +        * Send Status Command Idle Timer (CIT) value.
+> +        */
+> +       hclk_freq = clk_get_rate(host->h_clk);
+> +       itcfmul = CQHCI_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
+> +       switch (itcfmul) {
+> +       case 0x0:
+> +               do_div(hclk_freq, 1000);
+> +               break;
+> +       case 0x1:
+> +               do_div(hclk_freq, 100);
+> +               break;
+> +       case 0x2:
+> +               do_div(hclk_freq, 10);
+> +               break;
+> +       case 0x3:
+> +               break;
+> +       case 0x4:
+> +               hclk_freq = hclk_freq * 10;
+> +               break;
+> +       default:
+> +               host->cq_ssc1_time = 0x40;
+> +               return;
+> +       }
+> +
+> +       value = hclk_freq * timer_ns;
+> +       do_div(value, 1000000000);
+> +       host->cq_ssc1_time = value;
+> +}
+> +
+>  static void msdc_cqe_enable(struct mmc_host *mmc)
+>  {
+>         struct msdc_host *host = mmc_priv(mmc);
+> +       struct cqhci_host *cq_host = mmc->cqe_private;
+>
+>         /* enable cmdq irq */
+>         writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
+> @@ -2462,6 +2504,9 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
+>         msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
+>         /* default read data timeout 1s */
+>         msdc_set_timeout(host, 1000000000ULL, 0);
+> +
+> +       /* Set the send status command idle timer */
+> +       cqhci_writel(cq_host, host->cq_ssc1_time, CQHCI_SSC1);
+>  }
+>
+>  static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
+> @@ -2803,6 +2848,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 /* cqhci 16bit length */
+>                 /* 0 size, means 65536 so we don't have to -1 here */
+>                 mmc->max_seg_size = 64 * 1024;
+> +               /* Reduce CIT to 0x40 that corresponds to 2.35us */
+> +               msdc_cqe_cit_cal(host, 2350);
+>         }
+>
+>         ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
 > --
-> 2.17.1
+> 2.25.1
 >
