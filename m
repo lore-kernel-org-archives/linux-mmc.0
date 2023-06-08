@@ -2,29 +2,27 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ACBAEC7EE29
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:46:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E0E1C7EE25
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:46:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235582AbjFHTqI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 15:46:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54442 "EHLO
+        id S235558AbjFHTqL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 15:46:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54360 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236417AbjFHTqF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:46:05 -0400
+        with ESMTP id S230290AbjFHTqK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:46:10 -0400
 Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A1C22D77
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:46:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D0B92D4F
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:46:05 -0700 (PDT)
 Received: from localhost.localdomain (31.173.86.116) by msexch01.omp.ru
  (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Thu, 8 Jun 2023
  22:45:55 +0300
 From:   Sergey Shtylyov <s.shtylyov@omp.ru>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     Adrian Hunter <adrian.hunter@intel.com>,
-        Viresh Kumar <vireshk@kernel.org>
-Subject: [PATCH v2 09/12] mmc: sdhci-spear: fix deferred probing
-Date:   Thu, 8 Jun 2023 22:45:16 +0300
-Message-ID: <20230608194519.10665-10-s.shtylyov@omp.ru>
+Subject: [PATCH v2 10/12] mmc: sh_mmcif: fix deferred probing
+Date:   Thu, 8 Jun 2023 22:45:17 +0300
+Message-ID: <20230608194519.10665-11-s.shtylyov@omp.ru>
 X-Mailer: git-send-email 2.26.3
 In-Reply-To: <20230608194519.10665-1-s.shtylyov@omp.ru>
 References: <20230608194519.10665-1-s.shtylyov@omp.ru>
@@ -67,36 +65,33 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The driver overrides the error codes and IRQ0 returned by platform_get_irq()
-to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
-permanently instead of the deferred probing. Switch to propagating the error
-codes upstream.  IRQ0 is no longer returned by platform_get_irq(), so we now
-can safely ignore it...
+The driver overrides the error codes returned by platform_get_irq() to
+-ENXIO, so if it returns -EPROBE_DEFER, the driver will fail the probe
+permanently instead of the deferred probing. Switch to propagating the
+error codes upstream.
 
-Fixes: 682798a596a6 ("mmc: sdhci-spear: Handle return value of platform_get_irq")
+Fixes: 9ec36cafe43b ("of/irq: do irq resolution in platform_get_irq")
 Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 ---
 Changes in version 2:
-- slightly reformatted the patch description.
+- refreshed the patch.
 
- drivers/mmc/host/sdhci-spear.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index d463e2fd5b1a..c79035727b20 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -65,8 +65,8 @@ static int sdhci_probe(struct platform_device *pdev)
- 	host->hw_name = "sdhci";
- 	host->ops = &sdhci_pltfm_ops;
- 	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq <= 0) {
--		ret = -EINVAL;
-+	if (host->irq < 0) {
-+		ret = host->irq;
- 		goto err_host;
- 	}
- 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 0fd4c9d644dd..5cf53348372a 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1400,7 +1400,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	irq[0] = platform_get_irq(pdev, 0);
+ 	irq[1] = platform_get_irq_optional(pdev, 1);
+ 	if (irq[0] < 0)
+-		return -ENXIO;
++		return irq[0];
+ 
+ 	reg = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(reg))
 -- 
 2.26.3
 
