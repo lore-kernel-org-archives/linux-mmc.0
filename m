@@ -2,87 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9872C7EE29
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 17:44:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 029AEC7EE25
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:45:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235413AbjFHRoo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 13:44:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56850 "EHLO
+        id S230100AbjFHTpk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 15:45:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54184 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234623AbjFHRoi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 13:44:38 -0400
-Received: from mail-il1-f182.google.com (mail-il1-f182.google.com [209.85.166.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9C562D56;
-        Thu,  8 Jun 2023 10:44:35 -0700 (PDT)
-Received: by mail-il1-f182.google.com with SMTP id e9e14a558f8ab-33dae9244a1so9588975ab.0;
-        Thu, 08 Jun 2023 10:44:35 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686246275; x=1688838275;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ovjq9ac+9Nx5rYGUxnFyT5CxYnERjUk28SaOLV692qI=;
-        b=C0yIuq5bUoNga+E/bHgAE4jTFMY6CsDMVzayU9VsL88C378lFei+BltSOckss45J79
-         6cpa/U8V7UnHRwuVLJScrg/GzJ2ZUBcBPXVDLGSkO+Hno1ha5yYc6quK2tzWHOwKWvqI
-         FRp7y58Cr2MK+MABRRjRgu3Ij5i3E5vK6RQDBUvU5d/J8KBMM6nE21FxwZsEqm3tgoNF
-         OxG4c52QV8FtMwBmcen6sYQXY3q+fPLiLZr4DUv9Hwm6Onef24XIaS+JmnRMpXkGX47/
-         0Wor3k1bhgCCBiATLymrxGDRRcvIKu8LA2utGGzlhq2enYKAhwnCbak0YPLPGQ6czSAx
-         U08g==
-X-Gm-Message-State: AC+VfDwagy0zPsTQmeYXb5hYPSG2C8Dq8vSMJW74W6j0FwDUXLiPP1TI
-        GIdsLDLQV+qID/emA6x1qg==
-X-Google-Smtp-Source: ACHHUZ42fitQIzTfE7o2gQtXBs6JDleBPfB35sMO7jYvJt2sNMhYEga796RuBgdUqcd1XRBOWIFqGA==
-X-Received: by 2002:a92:d445:0:b0:33d:cf66:7a0b with SMTP id r5-20020a92d445000000b0033dcf667a0bmr1794865ilm.13.1686246274891;
-        Thu, 08 Jun 2023 10:44:34 -0700 (PDT)
-Received: from robh_at_kernel.org ([64.188.179.250])
-        by smtp.gmail.com with ESMTPSA id q18-20020a920512000000b0033b2c178254sm546343ile.22.2023.06.08.10.44.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 08 Jun 2023 10:44:34 -0700 (PDT)
-Received: (nullmailer pid 3080900 invoked by uid 1000);
-        Thu, 08 Jun 2023 17:44:32 -0000
-Date:   Thu, 8 Jun 2023 11:44:32 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Peng Fan <peng.fan@oss.nxp.com>
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        haibo.chen@nxp.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, linux-imx@nxp.com, kernel@pengutronix.de,
-        festevam@gmail.com, cniedermaier@dh-electronics.com,
-        devicetree@vger.kernel.org, kernel@dh-electronics.com
-Subject: Re: [PATCH v2 3/4] dt-bindings: mmc: fsl-imx-esdhc: remove property
- "fsl,wp-controller"
-Message-ID: <20230608174432.GA3079839-robh@kernel.org>
-References: <20230506074037.522961-1-haibo.chen@nxp.com>
- <20230506074037.522961-4-haibo.chen@nxp.com>
- <d0329227-b579-5557-b449-7961ec0a1463@linaro.org>
- <9ef80685-3ef7-ac59-05a6-0c46e0ecf57e@oss.nxp.com>
+        with ESMTP id S230125AbjFHTpi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:45:38 -0400
+Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60B032132
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:45:36 -0700 (PDT)
+Received: from localhost.localdomain (31.173.86.116) by msexch01.omp.ru
+ (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Thu, 8 Jun 2023
+ 22:45:25 +0300
+From:   Sergey Shtylyov <s.shtylyov@omp.ru>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
+Subject: [PATCH v2 00/12] Fix deferred probing in the MMC/SD drivers
+Date:   Thu, 8 Jun 2023 22:45:07 +0300
+Message-ID: <20230608194519.10665-1-s.shtylyov@omp.ru>
+X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <9ef80685-3ef7-ac59-05a6-0c46e0ecf57e@oss.nxp.com>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [31.173.86.116]
+X-ClientProxiedBy: msexch01.omp.ru (10.188.4.12) To msexch01.omp.ru
+ (10.188.4.12)
+X-KSE-ServerInfo: msexch01.omp.ru, 9
+X-KSE-AntiSpam-Interceptor-Info: scan successful
+X-KSE-AntiSpam-Version: 5.9.59, Database issued on: 06/08/2023 19:29:53
+X-KSE-AntiSpam-Status: KAS_STATUS_NOT_DETECTED
+X-KSE-AntiSpam-Method: none
+X-KSE-AntiSpam-Rate: 19
+X-KSE-AntiSpam-Info: Lua profiles 177946 [Jun 08 2023]
+X-KSE-AntiSpam-Info: Version: 5.9.59.0
+X-KSE-AntiSpam-Info: Envelope from: s.shtylyov@omp.ru
+X-KSE-AntiSpam-Info: LuaCore: 516 516 efd4d74ff4b68f90ca62ae34a19f27bf46d81db5
+X-KSE-AntiSpam-Info: {rep_avail}
+X-KSE-AntiSpam-Info: {Tracking_no_received}
+X-KSE-AntiSpam-Info: {Tracking_from_domain_doesnt_match_to}
+X-KSE-AntiSpam-Info: {SMTP from is not routable}
+X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
+ b.barracudacentral.org}
+X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
+ dbl.spamhaus.org}
+X-KSE-AntiSpam-Info: 31.173.86.116:7.1.2;127.0.0.199:7.1.2;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;omp.ru:7.1.1
+X-KSE-AntiSpam-Info: ApMailHostAddress: 31.173.86.116
+X-KSE-AntiSpam-Info: {DNS response errors}
+X-KSE-AntiSpam-Info: Rate: 19
+X-KSE-AntiSpam-Info: Status: not_detected
+X-KSE-AntiSpam-Info: Method: none
+X-KSE-AntiSpam-Info: Auth:dmarc=temperror header.from=omp.ru;spf=temperror
+ smtp.mailfrom=omp.ru;dkim=none
+X-KSE-Antiphishing-Info: Clean
+X-KSE-Antiphishing-ScanningType: Heuristic
+X-KSE-Antiphishing-Method: None
+X-KSE-Antiphishing-Bases: 06/08/2023 19:36:00
+X-KSE-Antivirus-Interceptor-Info: scan successful
+X-KSE-Antivirus-Info: Clean, bases: 6/8/2023 5:02:00 PM
+X-KSE-Attachment-Filter-Triggered-Rules: Clean
+X-KSE-Attachment-Filter-Triggered-Filters: Clean
+X-KSE-BulkMessagesFiltering-Scan-Result: InTheLimit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, May 23, 2023 at 10:03:08AM +0800, Peng Fan wrote:
-> 
-> 
-> On 5/6/2023 6:59 PM, Krzysztof Kozlowski wrote:
-> > Caution: This is an external email. Please take care when clicking links or opening attachments. When in doubt, report the message using the 'Report this email' button
-> > 
-> > 
-> > On 06/05/2023 09:40, haibo.chen@nxp.com wrote:
-> > > From: Haibo Chen <haibo.chen@nxp.com>
-> > > 
-> > > Driver do not use this property, so remove it here.
-> > 
-> > You still need to expand the commit msg and justify why this property is
-> > being removed. "Driver" is vague, as it can be BSD driver which also
-> > might use this binding. Instead describe why this property should be
-> > removed, so we can understand also ABI implications.
-> 
-> The better approach would be mark it as deprecated.
+Here are 12 patches against the 'fixes' branch of Ulf Hansson's 'mmc.git' repo.
+The affected MMC/SD drivers call platform_get_irq[_byname]() but override its
+result in case of error which prevents the deferred probing from working. Some
+of these patches logically depend on commit ce753ad1549c ("platform: finally
+disallow IRQ0 in platform_get_irq() and its ilk")...
 
-Sure, but still need to say why.
+Sergey Shtylyov (12):
+  mmc: bcm2835: fix deferred probing
+  mmc: meson-gx: fix deferred probing
+  mmc: mtk-sd: fix deferred probing
+  mmc: mvsdio: fix deferred probing
+  mmc: omap: fix deferred probing
+  mmc: omap_hsmmc: fix deferred probing
+  mmc: owl: fix deferred probing
+  mmc: sdhci-acpi: fix deferred probing
+  mmc: sdhci-spear: fix deferred probing
+  mmc: sh_mmcif: fix deferred probing
+  mmc: sunxi: fix deferred probing
+  mmc: usdhi60rol0: fix deferred probing
 
-Rob
+ drivers/mmc/host/bcm2835.c      | 4 ++--
+ drivers/mmc/host/meson-gx-mmc.c | 4 ++--
+ drivers/mmc/host/mtk-sd.c       | 2 +-
+ drivers/mmc/host/mvsdio.c       | 2 +-
+ drivers/mmc/host/omap.c         | 2 +-
+ drivers/mmc/host/omap_hsmmc.c   | 6 ++++--
+ drivers/mmc/host/owl-mmc.c      | 2 +-
+ drivers/mmc/host/sdhci-acpi.c   | 2 +-
+ drivers/mmc/host/sdhci-spear.c  | 4 ++--
+ drivers/mmc/host/sh_mmcif.c     | 2 +-
+ drivers/mmc/host/sunxi-mmc.c    | 4 ++--
+ drivers/mmc/host/usdhi6rol0.c   | 6 ++++--
+ 12 files changed, 22 insertions(+), 18 deletions(-)
+
+-- 
+2.26.3
+
