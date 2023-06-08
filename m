@@ -2,159 +2,158 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12140C7EE25
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jun 2023 20:44:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BAB4DC7EE29
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 12:23:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234645AbjFGUok (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Jun 2023 16:44:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45050 "EHLO
+        id S236311AbjFHMXO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 08:23:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234655AbjFGUof (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jun 2023 16:44:35 -0400
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A51311FF0
-        for <linux-mmc@vger.kernel.org>; Wed,  7 Jun 2023 13:44:17 -0700 (PDT)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id AE0D885D4E;
-        Wed,  7 Jun 2023 22:43:38 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1686170620;
-        bh=et/O1Q7n3B6o0Josn7Q/8nFOfo94H7iA/4ihvH+RRgA=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=0SjwAbvhjBHLtB2HTXR1N1eixxGJAan3i/PE89PZ9bs31Cz3jGTlcjxGYJ3u2rplz
-         dj8BkJuAcnFtRoSYqKUHzzb6JUE2lMdd3zrWejCOLdXW2zkxqgQvBN3lWpWNl3cGw8
-         AVBDkrn1S5xZJQi0KXUZKdvMhy0giqyKM0tMwpeg2tVfTLqwoUMy+ZZpKj/2IerD+E
-         rTEBppGA/rZ7JOLk6LOOd0Cb31XbJf57RzyUFsve3UrG5bmbn47quB8a8uoLeXhPoZ
-         C+tC/3+DsNe2xxK1nObGlBLTnOekDQYuB8w0T9NPnlar9Rh+jDkIzg0MfBlGWxZa6y
-         NYcCg7OaDukNw==
-Message-ID: <b494062c-7e9e-24ba-ef0a-13faf0fe7706@denx.de>
-Date:   Wed, 7 Jun 2023 22:43:38 +0200
+        with ESMTP id S236385AbjFHMXN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 08:23:13 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 494FA2709;
+        Thu,  8 Jun 2023 05:23:11 -0700 (PDT)
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 358BmcYK025325;
+        Thu, 8 Jun 2023 12:22:55 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
+ : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=qcppdkim1;
+ bh=Z3dtTpcLrKlX9a6O3bdPA6tBkwCgqW/PWM0vugx9GK4=;
+ b=DcWsioU3oJyO0SplO5KgeYmA0+T3bYRdS0Cn1HlOf5i93amP5poOMxQyAvpoox9SuUc2
+ 4R+kUug2PkUYYBYWWE0eRofGuzIsd1CUMMfOVYdDmPFWw+I4utzBKzftVwn0Ts7UINkk
+ RHxjrrqYx11tdtIf8gAWeGMSZppDPpsFNKSl3cmZy15OTPzD2H/UhLc7ilcqcbpJJLl9
+ zBNjvFkzn/7/nciTyPXSXOeDJ7My9eC7cFDZmAW2cTHVr3EEo7ojODGb+4rmxqUVymwq
+ CqVygCeKBMXVDgzjjK7dYZsEyK5GsGBfo9/yBqiNoWm9h77sXbU19ieKPI3ZZQ6hymaG Nw== 
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3r38rbrrrf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 08 Jun 2023 12:22:54 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 358CMriT023508
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 8 Jun 2023 12:22:53 GMT
+Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Thu, 8 Jun 2023 05:22:45 -0700
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+To:     <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
+        <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>,
+        <quic_srichara@quicinc.com>
+Subject: [v9 0/8] Add minimal boot support for IPQ5018
+Date:   Thu, 8 Jun 2023 17:51:44 +0530
+Message-ID: <20230608122152.3930377-1-quic_srichara@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
- writeback-cache for eMMC and SD"
-Content-Language: en-US
-To:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Cc:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Michael Wu <michael@allwinnertech.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-References: <20230531002740.1235620-1-marex@denx.de>
- <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
- <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
- <f41e1546-f6d3-7f4d-7662-3b7eca291178@intel.com>
- <29a5f24d-2b8c-8387-8c11-601af8e13940@denx.de>
- <4c8d84ae-c8d0-fa12-81c6-a47382684d73@intel.com>
- <3bd65a30-756d-e7ee-ce77-e5ebfe6b6e30@denx.de>
- <75ab27e9-9203-f59b-c720-99bfa992bb9b@intel.com>
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <75ab27e9-9203-f59b-c720-99bfa992bb9b@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
-X-Virus-Status: Clean
+Content-Type: text/plain
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: vCb5KSgza61xVw0Hm-Kd5Xh5uSMRTbu_
+X-Proofpoint-ORIG-GUID: vCb5KSgza61xVw0Hm-Kd5Xh5uSMRTbu_
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
+ definitions=2023-06-08_08,2023-06-08_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 mlxscore=0
+ clxscore=1015 mlxlogscore=728 priorityscore=1501 lowpriorityscore=0
+ spamscore=0 bulkscore=0 impostorscore=0 adultscore=0 phishscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2305260000 definitions=main-2306080107
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/4/23 18:30, Adrian Hunter wrote:
+The IPQ5018 is Qualcomm's 802.11ax SoC for Routers,
+Gateways and Access Points.
 
-[...]
+This series adds minimal board boot support for ipq5018-rdp432-c2 board.
 
->>>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->>>>> index 72b664ed90cf..9c3123867a99 100644
->>>>> --- a/drivers/mmc/core/sd.c
->>>>> +++ b/drivers/mmc/core/sd.c
->>>>> @@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>     {
->>>>>         struct mmc_card *card = host->card;
->>>>>         u8 *reg_buf, fno, page;
->>>>> +    unsigned long timeout;
->>>>> +    bool expired;
->>>>>         u16 offset;
->>>>>         int err;
->>>>>     @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>             goto out;
->>>>>         }
->>>>>     +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
->>>>> +again:
->>>>>         err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
->>>>>                     MMC_BUSY_EXTR_SINGLE);
->>>>>         if (err)
->>>>>             goto out;
->>>>>     +    expired = time_after(jiffies, timeout);
->>>>> +
->>>>>         /*
->>>>>          * Read the Flush Cache bit. The card shall reset it, to confirm that
->>>>>          * it's has completed the flushing of the cache.
->>>>> @@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>             goto out;
->>>>>         }
->>>>>     -    if (reg_buf[0] & BIT(0))
->>>>> -        err = -ETIMEDOUT;
->>>>> +    if (reg_buf[0] & BIT(0)) {
->>>>
->>>> I am getting here, multiple times, with expired=0 .
->>>
->>> So either the host controller's busy detection does not work, or the
->>> card is not indicating busy by pulling down DAT0.
->>>
->>> Can you try to figure out which it is?
->>
->> The byte 261 bit 0 is never cleared, I had this looping for an hour and the 'Flush Cache' bit just never got cleared. The SD spec 6.00 and 9.00 both indicate the bit should be cleared by the card once cache flush is completed.
->>
->> I tried three different controllers now -- STM32MP15xx ARM MMCI, i.MX6Q uSDHC, laptop rtsx_pci_sdmmc , they all fail.
->>
->> I tried to find another card which also has cache, I cannot find any other card, all the rest report no cache. The kingston card SSR (see the 2ff in 6th field, the last f bit 2 is cache supported indication, SSR bit 330):
->>
->> 00000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>
->> So either this card is weird, or the cards with cache are so rare that nobody noticed the problem yet.
-> 
-> The patch set cover letter says it was tested with 64GB Sandisk Extreme PRO UHS-I A2 card
-> 
-> 	https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
+[v9]   Change only in patch 2/8
+	   Sorted the headers and cleaned the unwanted ones
+ 	   Added trailing comma for .parent_hws member
+	   Removed the hunk touching ipq5332 kconfig  (unintentionally)
 
-I got that one now, tested it, the cache bit is being cleared correctly. 
-I also tested a few more cards and dumped their SSR too:
+[v8]   Changed only in patch 4/8
+                Fixed Kconfig to add COMPILE_TEST and removed header of.h.
+                Instead using mod_devicetable.h. Added Linus reviewed-by
 
-Kingston Canvas Go! Plus:
-80000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-Flush never finishes
+[v7]   Fixed tz reserved region size in patch 7/8
 
-Sandisk Extreme PRO A2 64GiB:
-80000000:08000000:04009000:0f05391e:00080000:0002fc00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-mmc0: flushing cache took 5 ms, 1 iterations, error 0
+[v6]   Fixed patch [4/8] pinctrl driver for rebase issue.
 
-Goodram IRDM V30 A2 64GiB:
-80000000:08000000:0400a001:00fd3a1e:00080000:00023c00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-mmc0: flushing cache took 5 ms, 1 iterations, error 0
+[v5]
+       Added Reviewed-by tags from Krzysztof Kozlowski.
+       Changed patch [6/8] with [1] since its already Acked
+       Rebased patch [4/8] on top of [2] and fixed other comments
+       Fixed commit log for patch [7/8]
+       Fixed comments for patch [2/8]
 
-Samsung Pro Plus 512GiB V30 A2 (ext reg general info is all zeroes, 
-cache not enabled):
-80000000:08000000:04009000:0811391e:00080000:0002fc00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
+[1] https://patchwork.kernel.org/project/linux-arm-msm/patch/1678164097-13247-4-git-send-email-quic_mmanikan@quicinc.com/
+[2] https://lore.kernel.org/r/1683718725-14869-1-git-send-email-quic_rohiagar@quicinc.com
 
-> I ordered a Kingston Canvas Go Plus card as you described but it won't arrive for a week.
+[v4]
+       Fixed all comments for clocks, schema, dts
+       Added Reviewed-by tags.
 
-I'm really interested in what you would find with that one.
+[v3]
+        Fixed all comments for clocks, schema fixes
+        Picked up Reviewed-by from Bjorn for pinctrl driver
 
-Maybe the card I have here is defective, although I would expect not 
-just the cache functionality to fail in such a case.
+[v2]
+        Fixed all comments and rebased for TOT.
 
-Is there anyone at kingston we could ask about the cache specifics on 
-that card ?
+Manikanta Mylavarapu (1):
+  dt-bindings: scm: Add compatible for IPQ5018
 
-> Currently I am thinking we could do a cache flush after enabling the cache, just
-> to see if it works.  If not, then disable the cache.
-> 
-> It would also be interesting to read back the extended register to see if the
-> enable bit has actually been set.
+Sricharan Ramabadhran (7):
+  dt-bindings: arm64: Add IPQ5018 clock and reset
+  clk: qcom: Add Global Clock controller (GCC) driver for IPQ5018
+  dt-bindings: pinctrl: qcom: Add support for ipq5018
+  pinctrl: qcom: Add IPQ5018 pinctrl driver
+  dt-bindings: qcom: Add ipq5018 bindings
+  arm64: dts: Add ipq5018 SoC and rdp432-c2 board support
+  arm64: defconfig: Enable IPQ5018 SoC base configs
 
-Both offset 260 and 261 read back as 0x01 during the endless flush.
+ .../devicetree/bindings/arm/qcom.yaml         |    7 +
+ .../bindings/clock/qcom,ipq5018-gcc.yaml      |   63 +
+ .../bindings/firmware/qcom,scm.yaml           |    1 +
+ .../bindings/pinctrl/qcom,ipq5018-tlmm.yaml   |  127 +
+ arch/arm64/boot/dts/qcom/Makefile             |    1 +
+ .../arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts |   72 +
+ arch/arm64/boot/dts/qcom/ipq5018.dtsi         |  250 ++
+ arch/arm64/configs/defconfig                  |    3 +
+ drivers/clk/qcom/Kconfig                      |    8 +
+ drivers/clk/qcom/Makefile                     |    1 +
+ drivers/clk/qcom/gcc-ipq5018.c                | 3724 +++++++++++++++++
+ drivers/pinctrl/qcom/Kconfig                  |   11 +
+ drivers/pinctrl/qcom/Makefile                 |    1 +
+ drivers/pinctrl/qcom/pinctrl-ipq5018.c        |  783 ++++
+ include/dt-bindings/clock/qcom,gcc-ipq5018.h  |  183 +
+ include/dt-bindings/reset/qcom,gcc-ipq5018.h  |  122 +
+ 16 files changed, 5357 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/qcom,ipq5018-gcc.yaml
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018.dtsi
+ create mode 100644 drivers/clk/qcom/gcc-ipq5018.c
+ create mode 100644 drivers/pinctrl/qcom/pinctrl-ipq5018.c
+ create mode 100644 include/dt-bindings/clock/qcom,gcc-ipq5018.h
+ create mode 100644 include/dt-bindings/reset/qcom,gcc-ipq5018.h
+
+-- 
+2.34.1
+
