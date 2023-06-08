@@ -2,28 +2,28 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E41BAC7EE25
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:45:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91582C7EE45
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:45:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236296AbjFHTp5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 15:45:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54272 "EHLO
+        id S235943AbjFHTp6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 15:45:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236125AbjFHTpz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:45:55 -0400
+        with ESMTP id S236240AbjFHTp4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:45:56 -0400
 Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEDE22121
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:45:53 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 539792134;
+        Thu,  8 Jun 2023 12:45:55 -0700 (PDT)
 Received: from localhost.localdomain (31.173.86.116) by msexch01.omp.ru
  (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Thu, 8 Jun 2023
- 22:45:47 +0300
+ 22:45:52 +0300
 From:   Sergey Shtylyov <s.shtylyov@omp.ru>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     Nicolas Pitre <nico@fluxnic.net>
-Subject: [PATCH v2 04/12] mmc: mvsdio: fix deferred probing
-Date:   Thu, 8 Jun 2023 22:45:11 +0300
-Message-ID: <20230608194519.10665-5-s.shtylyov@omp.ru>
+CC:     Aaro Koskinen <aaro.koskinen@iki.fi>, <linux-omap@vger.kernel.org>
+Subject: [PATCH v2 05/12] mmc: omap: fix deferred probing
+Date:   Thu, 8 Jun 2023 22:45:12 +0300
+Message-ID: <20230608194519.10665-6-s.shtylyov@omp.ru>
 X-Mailer: git-send-email 2.26.3
 In-Reply-To: <20230608194519.10665-1-s.shtylyov@omp.ru>
 References: <20230608194519.10665-1-s.shtylyov@omp.ru>
@@ -38,7 +38,7 @@ X-KSE-AntiSpam-Interceptor-Info: scan successful
 X-KSE-AntiSpam-Version: 5.9.59, Database issued on: 06/08/2023 19:29:53
 X-KSE-AntiSpam-Status: KAS_STATUS_NOT_DETECTED
 X-KSE-AntiSpam-Method: none
-X-KSE-AntiSpam-Rate: 19
+X-KSE-AntiSpam-Rate: 0
 X-KSE-AntiSpam-Info: Lua profiles 177946 [Jun 08 2023]
 X-KSE-AntiSpam-Info: Version: 5.9.59.0
 X-KSE-AntiSpam-Info: Envelope from: s.shtylyov@omp.ru
@@ -46,15 +46,9 @@ X-KSE-AntiSpam-Info: LuaCore: 516 516 efd4d74ff4b68f90ca62ae34a19f27bf46d81db5
 X-KSE-AntiSpam-Info: {rep_avail}
 X-KSE-AntiSpam-Info: {Tracking_no_received}
 X-KSE-AntiSpam-Info: {Tracking_from_domain_doesnt_match_to}
-X-KSE-AntiSpam-Info: {SMTP from is not routable}
-X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
- b.barracudacentral.org}
-X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
- dbl.spamhaus.org}
 X-KSE-AntiSpam-Info: 31.173.86.116:7.1.2;127.0.0.199:7.1.2;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;omp.ru:7.1.1
 X-KSE-AntiSpam-Info: ApMailHostAddress: 31.173.86.116
-X-KSE-AntiSpam-Info: {DNS response errors}
-X-KSE-AntiSpam-Info: Rate: 19
+X-KSE-AntiSpam-Info: Rate: 0
 X-KSE-AntiSpam-Info: Status: not_detected
 X-KSE-AntiSpam-Info: Method: none
 X-KSE-AntiSpam-Info: Auth:dmarc=temperror header.from=omp.ru;spf=temperror
@@ -80,22 +74,25 @@ error codes upstream.
 Fixes: 9ec36cafe43b ("of/irq: do irq resolution in platform_get_irq")
 Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 ---
- drivers/mmc/host/mvsdio.c | 2 +-
+Changes in version 2:
+- updated the fix due to the surrounding code change.
+
+ drivers/mmc/host/omap.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 629efbe639c4..b4f6a0a2fcb5 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -704,7 +704,7 @@ static int mvsd_probe(struct platform_device *pdev)
- 	}
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index ce78edfb402b..86454f1182bb 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1343,7 +1343,7 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 
  	irq = platform_get_irq(pdev, 0);
  	if (irq < 0)
 -		return -ENXIO;
 +		return irq;
  
- 	mmc = mmc_alloc_host(sizeof(struct mvsd_host), &pdev->dev);
- 	if (!mmc) {
+ 	host->virt_base = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
+ 	if (IS_ERR(host->virt_base))
 -- 
 2.26.3
 
