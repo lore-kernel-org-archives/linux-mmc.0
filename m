@@ -2,32 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35C35C7EE25
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:46:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4CF6C7EE25
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:46:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233577AbjFHTqW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 15:46:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54738 "EHLO
+        id S233801AbjFHTqc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 15:46:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54856 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233586AbjFHTqV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:46:21 -0400
+        with ESMTP id S234086AbjFHTqb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:46:31 -0400
 Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4B442D4B
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:46:10 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EE862D75
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:46:21 -0700 (PDT)
 Received: from localhost.localdomain (31.173.86.116) by msexch01.omp.ru
  (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Thu, 8 Jun 2023
  22:45:56 +0300
 From:   Sergey Shtylyov <s.shtylyov@omp.ru>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Samuel Holland <samuel@sholland.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-sunxi@lists.linux.dev>
-Subject: [PATCH v2 11/12] mmc: sunxi: fix deferred probing
-Date:   Thu, 8 Jun 2023 22:45:18 +0300
-Message-ID: <20230608194519.10665-12-s.shtylyov@omp.ru>
+CC:     Jesper Nilsson <jesper.nilsson@axis.com>,
+        Lars Persson <lars.persson@axis.com>,
+        <linux-arm-kernel@axis.com>
+Subject: [PATCH v2 12/12] mmc: usdhi60rol0: fix deferred probing
+Date:   Thu, 8 Jun 2023 22:45:19 +0300
+Message-ID: <20230608194519.10665-13-s.shtylyov@omp.ru>
 X-Mailer: git-send-email 2.26.3
 In-Reply-To: <20230608194519.10665-1-s.shtylyov@omp.ru>
 References: <20230608194519.10665-1-s.shtylyov@omp.ru>
@@ -70,36 +68,37 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The driver overrides the error codes and IRQ0 returned by platform_get_irq()
-to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
-permanently instead of the deferred probing. Switch to propagating the error
-codes upstream.  IRQ0 is no longer returned by platform_get_irq(), so we now
-can safely ignore it...
+The driver overrides the error codes returned by platform_get_irq_byname()
+to -ENODEV, so if it returns -EPROBE_DEFER, the driver will fail the probe
+permanently instead of the deferred probing.  Switch to propagating error
+codes upstream.
 
-Fixes: 2408a08583d ("mmc: sunxi-mmc: Handle return value of platform_get_irq")
+Fixes: 9ec36cafe43b ("of/irq: do irq resolution in platform_get_irq")
 Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 ---
 Changes in version 2:
-- slightly reformatted the patch description.
+- fixed up the function name in the patch description and reformatted it.
 
- drivers/mmc/host/sunxi-mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/usdhi6rol0.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 3db9f32d6a7b..69dcb8805e05 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1350,8 +1350,8 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 		return ret;
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index 2f59917b105e..2e17903658fc 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -1757,8 +1757,10 @@ static int usdhi6_probe(struct platform_device *pdev)
+ 	irq_cd = platform_get_irq_byname(pdev, "card detect");
+ 	irq_sd = platform_get_irq_byname(pdev, "data");
+ 	irq_sdio = platform_get_irq_byname(pdev, "SDIO");
+-	if (irq_sd < 0 || irq_sdio < 0)
+-		return -ENODEV;
++	if (irq_sd < 0)
++		return irq_sd;
++	if (irq_sdio < 0)
++		return irq_sdio;
  
- 	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq <= 0) {
--		ret = -EINVAL;
-+	if (host->irq < 0) {
-+		ret = host->irq;
- 		goto error_disable_mmc;
- 	}
- 
+ 	mmc = mmc_alloc_host(sizeof(struct usdhi6_host), dev);
+ 	if (!mmc)
 -- 
 2.26.3
 
