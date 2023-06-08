@@ -2,143 +2,131 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E3FEC7EE23
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 15:54:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E7DBC7EE45
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 15:54:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236987AbjFHPyK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 11:54:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42618 "EHLO
+        id S237503AbjFHPyL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 11:54:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42676 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236629AbjFHPyJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 11:54:09 -0400
-Received: from mail-oi1-x231.google.com (mail-oi1-x231.google.com [IPv6:2607:f8b0:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7030F30D2
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 08:53:42 -0700 (PDT)
-Received: by mail-oi1-x231.google.com with SMTP id 5614622812f47-3909756b8b1so439271b6e.1
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2023 08:53:42 -0700 (PDT)
+        with ESMTP id S236629AbjFHPyK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 11:54:10 -0400
+Received: from mail-oi1-x233.google.com (mail-oi1-x233.google.com [IPv6:2607:f8b0:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3677030FB
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 08:53:46 -0700 (PDT)
+Received: by mail-oi1-x233.google.com with SMTP id 5614622812f47-392116ae103so577368b6e.0
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jun 2023 08:53:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686239617; x=1688831617;
+        d=linaro.org; s=google; t=1686239620; x=1688831620;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=i3MkbyEQhd9XzAzL+T/IkEeTSb88Nr2kPqCfa3UMTGA=;
-        b=irMhvMTvNMqSNRq8QdWr4K3wwDf4Ivwnp4zM+LRHgAvpHsEH/2aaT3wAyLhHctpLcQ
-         Nbzfo5LTIoHTEj0DA/ozKoDsVo7EaddHDS25/FOsqgs2U90RqWigZn8p8CdXfaOvrXPc
-         kAf7iP7L3eLEhCxdOFTvA09dXgAcKRmj/8Cb4DhUSlnfVt5hMc9Gua7f3FoiMaZl/IyV
-         2zJpzMYc/0Yk2V/uo6+VZ6qK1rCf+CRDP0Ufy5yJz1X5yPmVyHykTaO+XD6eDM+vvwZt
-         ShT5mjjMZyOATsZwmhrzjzFD3PAFUwT+7Ieq30Y5QQluSOzT39FsDoBjd5Dbe2xLVYev
-         tVEA==
+        bh=pxePCXhbkXDkGLZszuq4c29muOAB+INqMiCN3qHM0SM=;
+        b=WzaTNE+2AyDdAiv4hIj6pu6kIJRvQQbxLsvHBdBrMu2hTP3olWmRJ0STyfyIrPLcrK
+         w1lhJJOaseGCvxWcn3GGjbXfSP16U6dolkqAjc1qMxEDa7Rnvnz31cbV6B93vxXVTwFX
+         ALijgHlJexuCb7j46KfX14okNdAXqpqlUHfvswzpjD/Y3ql+EWBPpu+s+WbDJJDMyfWy
+         wXHeSeD9pt930/YbmuOPRq4lIpsb5iA6FMQ39SyCQXL18PbumCSEeoSIR8nLhdA7axbh
+         w1cnbvu9EXw5mRghXN7VecD5YEBZOOuWcC/km75GQr1IaxmcsbWX2qB7gkUbTkXjB5P0
+         f/vQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686239617; x=1688831617;
+        d=1e100.net; s=20221208; t=1686239620; x=1688831620;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=i3MkbyEQhd9XzAzL+T/IkEeTSb88Nr2kPqCfa3UMTGA=;
-        b=RIeVefNWpBZWh9BoHlBlemEDG+YDj8xqknG4qdEYER253MPoOXaW+KH02JPpIe74Fj
-         1zVq4S9DebWcpRlSrufOO1g2YkwxzCfkb3zAogplRkaT0fRa817AT919ujo2oGdbWiGI
-         HBJ275Kojyn4DEO9yyyN/AYQGQtvLK85570dxgGAUbci+9gqhAWz27ZeL2HO4jIjiG8D
-         LmRJIhfEoEFrqZZqOHqLCci1s9inmwkFOCZebQGztW3Kev3AGJO9Oao1oi3FSGZM/lPj
-         e8+8vgiH1VBdFC/q3JetYjKM/EJJl3mwmM9AiA3ues0XfaIut5xTCNjuhcVm2n1izUzr
-         mhYQ==
-X-Gm-Message-State: AC+VfDxTAT+kIhKrAjxhtxPifyzQytpSvEHasbrDO9bAL3/LkMduNe8N
-        PGmpORvZG9NPSAtuj4cwZtqGVRkpMw7lp/5whT2Igg==
-X-Google-Smtp-Source: ACHHUZ67b0A6vEqzzfatB0AWylvHrVFokSygfhaIN9VTYUNCYumwZInyoKyuq2SHD85W7890zFDW3fB3H9QgwVyDaUA=
-X-Received: by 2002:a54:4502:0:b0:398:84:de1c with SMTP id l2-20020a544502000000b003980084de1cmr4934080oil.2.1686239617005;
- Thu, 08 Jun 2023 08:53:37 -0700 (PDT)
+        bh=pxePCXhbkXDkGLZszuq4c29muOAB+INqMiCN3qHM0SM=;
+        b=FicSU+JgZ1vTtrasBpGS58m+eptGLW6lSi/SnueTK/LMhBJEBLH1BT4qmGLUVVVLsg
+         OTuUeXJSIcocJAA76YPGRGA16gNnaokgnCzxaPVpCm1xrKHfwCf173mdVPeJOiTFbLI3
+         gWThO0SacyEY7Lb0eswhOG4pOkhZ9J8plLJY33coQFRSD6G72RVKe0NvYxi0rpG1yXc+
+         YutO7xjJ0R7Xw7JQzg7bMlr8H3gbUBTvJyJwkKSAnTF2r6M1ZjIUnzFg7HGIQIhIkD67
+         Z8e3qvdpSGXR15U9BqsHeHXzqtAcvjENwVf1oOFE5Bg2aOA2j1LBVXWda+hh+gQJ6+Y1
+         yq3w==
+X-Gm-Message-State: AC+VfDxGQOXZ3c0iyvclfhpKpzXltFn0azNl+vnMPgKVoPXtmJEeob4s
+        MU5Rqqgftd5rE9fNmgieL0cbbqXjW5vLdi1IZOdmfw==
+X-Google-Smtp-Source: ACHHUZ5YF3Ao/7acozgV6L51hJxYa/6ScWl1+FQJ9Sv8c4ZIP5hX4Xekiyrud6NhTqgG7h4SrXBaT/cTIprI5VqwTls=
+X-Received: by 2002:a54:480e:0:b0:39a:bcbd:d0d5 with SMTP id
+ j14-20020a54480e000000b0039abcbdd0d5mr6349007oij.51.1686239620304; Thu, 08
+ Jun 2023 08:53:40 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230518-msm8916-64bit-v1-1-5694b0f35211@gerhold.net>
-In-Reply-To: <20230518-msm8916-64bit-v1-1-5694b0f35211@gerhold.net>
+References: <20230523111114.18124-1-chevron_li@126.com>
+In-Reply-To: <20230523111114.18124-1-chevron_li@126.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 8 Jun 2023 17:53:01 +0200
-Message-ID: <CAPDyKFqGdC9y9UAknREfT_TCsJH6pPG7UqL1EXET2_=j9PSCbQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: Disable broken 64-bit DMA on MSM8916
-To:     Stephan Gerhold <stephan@gerhold.net>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Thu, 8 Jun 2023 17:53:04 +0200
+Message-ID: <CAPDyKFrAi04_4d-F+kNncE183ZZuD9ERL2qTb+M-nj_dNfojGA@mail.gmail.com>
+Subject: Re: [PATCH V1 1/1] mmc: sdhci: fix DMA configure compatibility issue
+ when 64bit DMA mode is used.
+To:     Chevron Li <chevron_li@126.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, shirley.her@bayhubtech.com,
+        xiaoguang.yu@bayhubtech.com, shaper.liu@bayhubtech.com,
+        justin.wang@bayhubtech.com, Chevron Li <chevron.li@bayhubtech.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 18 May 2023 at 11:39, Stephan Gerhold <stephan@gerhold.net> wrote:
+On Tue, 23 May 2023 at 13:12, Chevron Li <chevron_li@126.com> wrote:
 >
-> While SDHCI claims to support 64-bit DMA on MSM8916 it does not seem to
-> be properly functional. It is not immediately obvious because SDHCI is
-> usually used with IOMMU bypassed on this SoC, and all physical memory
-> has 32-bit addresses. But when trying to enable the IOMMU it quickly
-> fails with an error such as the following:
+> From: Chevron Li <chevron.li@bayhubtech.com>
 >
->   arm-smmu 1e00000.iommu: Unhandled context fault:
->     fsr=0x402, iova=0xfffff200, fsynr=0xe0000, cbfrsynra=0x140, cb=3
->   mmc1: ADMA error: 0x02000000
->   mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
->   mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00002e02
->   mmc1: sdhci: Blk size:  0x00000008 | Blk cnt:  0x00000000
->   mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
->   mmc1: sdhci: Present:   0x03f80206 | Host ctl: 0x00000019
->   mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
->   mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
->   mmc1: sdhci: Timeout:   0x0000000a | Int stat: 0x00000001
->   mmc1: sdhci: Int enab:  0x03ff900b | Sig enab: 0x03ff100b
->   mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
->   mmc1: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x00008007
->   mmc1: sdhci: Cmd:       0x0000333a | Max curr: 0x00000000
->   mmc1: sdhci: Resp[0]:   0x00000920 | Resp[1]:  0x5b590000
->   mmc1: sdhci: Resp[2]:   0xe6487f80 | Resp[3]:  0x0a404094
->   mmc1: sdhci: Host ctl2: 0x00000008
->   mmc1: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x0000000ffffff224
->   mmc1: sdhci_msm: ----------- VENDOR REGISTER DUMP -----------
->   mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:  0x60006400 | DLL cfg2: 0x00000000
->   mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:  0x00000000 | DDR cfg: 0x00000000
->   mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 : 0xf88018a8 Vndr func3: 0x00000000
->   mmc1: sdhci: ============================================
->   mmc1: sdhci: fffffffff200: DMA 0x0000ffffffffe100, LEN 0x0008, Attr=0x21
->   mmc1: sdhci: fffffffff20c: DMA 0x0000000000000000, LEN 0x0000, Attr=0x03
+> Bayhub SD host has hardware limitation:
+> 1.The upper 32bit address is inhibited to be written at SD Host Register
+>   [03E][13]=0 (32bits addressing) mode, is admitted to be written only at
+>   SD Host Register [03E][13]=1 (64bits addressing) mode.
+> 2.Because of above item#1, need to configure SD Host Register [03E][13] to
+>   1(64bits addressing mode) before set 64bit ADMA system address's higher
+>   32bits SD Host Register [05F~05C] if 64 bits addressing mode is used.
 >
-> Looking closely it's obvious that only the 32-bit part of the address
-> (0xfffff200) arrives at the SMMU, the higher 16-bit (0xffff...) get
-> lost somewhere. This might not be a limitation of the SDHCI itself but
-> perhaps the bus/interconnect it is connected to, or even the connection
-> to the SMMU.
+> The hardware limitation is reasonable for below reasons:
+> 1.Normal flow should set DMA working mode first, then do
+>   DMA-transfer-related configuration, such as system address.
+> 2.The hardware limitation may avoid the software to configure wrong higher
+>   32bit address at 32bits addressing mode although it is redundant.
 >
-> Work around this by setting SDHCI_QUIRK2_BROKEN_64_BIT_DMA to avoid
-> using 64-bit addresses.
+> The change that set 32bits/64bits addressing mode before set ADMA address,
+>   has no side-effect to other host IPs for below reason:
+> The setting order is reasonable and standard: DMA Mode setting first and
+>   then DMA address setting. It meets all DMA setting sequence.
 >
-> Signed-off-by: Stephan Gerhold <stephan@gerhold.net>
+> Signed-off-by: Chevron Li <chevron.li@bayhubtech.com>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
+
+Is this material for stable kernels too, as it fixes a real problem, no?
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-msm.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 8ac81d57a3df..1877d583fe8c 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2479,6 +2479,9 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
->                 msm_host->ddr_config = DDR_CONFIG_POR_VAL;
->
->         of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
-> +
-> +       if (of_device_is_compatible(node, "qcom,msm8916-sdhci"))
-> +               host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
->  }
->
->  static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
->
+> Change in V1:
+> Set dma mode configure before set dma address
 > ---
-> base-commit: d4ebc9419afbac330e9ec0d2936108742aa4d97a
-> change-id: 20230518-msm8916-64bit-f5bcf6af7679
+>  drivers/mmc/host/sdhci.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> Best regards,
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3241916141d7..ff41aa56564e 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1167,6 +1167,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>                 }
+>         }
+>
+> +       sdhci_config_dma(host);
+> +
+>         if (host->flags & SDHCI_REQ_USE_DMA) {
+>                 int sg_cnt = sdhci_pre_dma_transfer(host, data, COOKIE_MAPPED);
+>
+> @@ -1186,8 +1188,6 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>                 }
+>         }
+>
+> -       sdhci_config_dma(host);
+> -
+>         if (!(host->flags & SDHCI_REQ_USE_DMA)) {
+>                 int flags;
+>
+>
+> base-commit: cc3c44c9fda264c6d401be04e95449a57c1231c6
 > --
-> Stephan Gerhold <stephan@gerhold.net>
+> 2.25.1
 >
