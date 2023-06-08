@@ -2,28 +2,31 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D88D8C7EE45
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:46:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92388C7EE25
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 19:46:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236671AbjFHTqD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 15:46:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54366 "EHLO
+        id S236714AbjFHTqG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 15:46:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54444 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236623AbjFHTp7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:45:59 -0400
+        with ESMTP id S236863AbjFHTqD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 15:46:03 -0400
 Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D56A2113;
-        Thu,  8 Jun 2023 12:45:56 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 685282D4F
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 12:45:59 -0700 (PDT)
 Received: from localhost.localdomain (31.173.86.116) by msexch01.omp.ru
  (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Thu, 8 Jun 2023
  22:45:53 +0300
 From:   Sergey Shtylyov <s.shtylyov@omp.ru>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     <linux-omap@vger.kernel.org>
-Subject: [PATCH v2 06/12] mmc: omap_hsmmc: fix deferred probing
-Date:   Thu, 8 Jun 2023 22:45:13 +0300
-Message-ID: <20230608194519.10665-7-s.shtylyov@omp.ru>
+CC:     =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        <linux-actions@lists.infradead.org>,
+        <linux-arm-kernel@lists.infradead.org>
+Subject: [PATCH v2 07/12] mmc: owl: fix deferred probing
+Date:   Thu, 8 Jun 2023 22:45:14 +0300
+Message-ID: <20230608194519.10665-8-s.shtylyov@omp.ru>
 X-Mailer: git-send-email 2.26.3
 In-Reply-To: <20230608194519.10665-1-s.shtylyov@omp.ru>
 References: <20230608194519.10665-1-s.shtylyov@omp.ru>
@@ -67,37 +70,32 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 The driver overrides the error codes returned by platform_get_irq() to
--ENXIO, so if it returns -EPROBE_DEFER, the driver will fail the probe
+-EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
 permanently instead of the deferred probing. Switch to propagating the
 error codes upstream.
 
-Fixes: 9ec36cafe43b ("of/irq: do irq resolution in platform_get_irq")
+Fixes: ff65ffe46d28 ("mmc: Add Actions Semi Owl SoCs SD/MMC driver")
 Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 ---
 Changes in version 2:
 - refreshed the patch.
 
- drivers/mmc/host/omap_hsmmc.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/owl-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 517dde777413..1e0f2d7774bd 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1791,9 +1791,11 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+index 6f9d31a886ba..1bf22b08b373 100644
+--- a/drivers/mmc/host/owl-mmc.c
++++ b/drivers/mmc/host/owl-mmc.c
+@@ -637,7 +637,7 @@ static int owl_mmc_probe(struct platform_device *pdev)
+ 
+ 	owl_host->irq = platform_get_irq(pdev, 0);
+ 	if (owl_host->irq < 0) {
+-		ret = -EINVAL;
++		ret = owl_host->irq;
+ 		goto err_release_channel;
  	}
  
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	irq = platform_get_irq(pdev, 0);
--	if (res == NULL || irq < 0)
-+	if (!res)
- 		return -ENXIO;
-+	irq = platform_get_irq(pdev, 0);
-+	if (irq < 0)
-+		return irq;
- 
- 	base = devm_ioremap_resource(&pdev->dev, res);
- 	if (IS_ERR(base))
 -- 
 2.26.3
 
