@@ -2,156 +2,247 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15B49C7EE25
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 20:07:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3DFDC7EE25
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jun 2023 20:49:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235413AbjFHUH5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jun 2023 16:07:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60714 "EHLO
+        id S234125AbjFHUtJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jun 2023 16:49:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48448 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233746AbjFHUHz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 16:07:55 -0400
-Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 602682D7C
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 13:07:47 -0700 (PDT)
-Received: from [192.168.1.103] (31.173.86.116) by msexch01.omp.ru
- (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Thu, 8 Jun 2023
- 23:07:39 +0300
-Subject: Re: [PATCH RFC 02/13] mmc: meson-gx: fix deferred probing
-From:   Sergey Shtylyov <s.shtylyov@omp.ru>
-To:     Christian Hewitt <christianshewitt@gmail.com>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        MMC <linux-mmc@vger.kernel.org>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        AML <linux-amlogic@lists.infradead.org>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20211223171202.8224-1-s.shtylyov@omp.ru>
- <20211223171202.8224-3-s.shtylyov@omp.ru>
- <2E930ABF-DA2A-4BB0-A2A2-56495305118D@gmail.com>
- <cc2f4e45-497b-7c2c-3fdd-1591903813cf@omp.ru>
-Organization: Open Mobile Platform
-Message-ID: <16b74882-d65b-93c9-f72b-1d53bfefa22f@omp.ru>
-Date:   Thu, 8 Jun 2023 23:07:39 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S233454AbjFHUtG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jun 2023 16:49:06 -0400
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EAA2E57;
+        Thu,  8 Jun 2023 13:49:05 -0700 (PDT)
+Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-1b24eba185cso1124395ad.2;
+        Thu, 08 Jun 2023 13:49:05 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686257344; x=1688849344;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rvOXB4VYTqBeUiEfGmKG+QMXIJjFECkp1pGauC3vLRc=;
+        b=RvmvdReu3Pstr01hOS4Ta1U4TCGJ6zWpW9ofcYSO75pC8e4fD6fMckSRkz2pVmD6c0
+         pXTt3oP5Bb70EzPu7jlZ5WpXvYWfa3hlrU3GTFwbWu4SlGndFcPy8uAy2Usi+X4I72EL
+         YrHFo8cexg2M2lB3j8ItKanQ7CVOLVWxnWPC5htB4FfQLFW4atS98ffDxYICBjJh4wHI
+         AkwjWiotRA3JpdZFBxyFX3Nf/NvBXWu589gJC1iismsewaZyAOHGbloUP8QkWJLAr8mE
+         wj2XL+I89ER0jy2wC0SY+WL+JrUShrG6Fpg/pq8ZORYW6Yn0UsEWmq48Ke5itfwOo8Ob
+         iNag==
+X-Gm-Message-State: AC+VfDxjcBz0NB9n0vY8AAG0bmhWjSR1KkdXglAzJmXgu15netm1e9V2
+        /chWoHcoIo9CZR3IpyLktno=
+X-Google-Smtp-Source: ACHHUZ4qxNT4Wizr9Jsae90S6xcGysoeA6uHndRDnLL+kNur0mjLoJGlotTlngeYr5NVjlfhGl4cwQ==
+X-Received: by 2002:a17:902:db0e:b0:1ad:fc06:d7c0 with SMTP id m14-20020a170902db0e00b001adfc06d7c0mr6289273plx.1.1686257344278;
+        Thu, 08 Jun 2023 13:49:04 -0700 (PDT)
+Received: from V92F7Y9K0C.corp.robot.car ([199.73.127.2])
+        by smtp.gmail.com with ESMTPSA id d12-20020a170902654c00b001ac4d3d3f72sm1823872pln.296.2023.06.08.13.49.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 08 Jun 2023 13:49:03 -0700 (PDT)
+Date:   Thu, 8 Jun 2023 13:49:00 -0700
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Greg KH <gregkh@linuxfoundation.org>
+Cc:     Dennis Zhou <dennis@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <ZII-vJWGb7F97S_A@V92F7Y9K0C.corp.robot.car>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+ <ZCclEE6Qw3on7/eO@snowbird>
+ <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
+ <CAPDyKFos3i60U0g0vJstetvLMyouiTpUP8-Jop_LMB9T-ZNU=w@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <cc2f4e45-497b-7c2c-3fdd-1591903813cf@omp.ru>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [31.173.86.116]
-X-ClientProxiedBy: msexch01.omp.ru (10.188.4.12) To msexch01.omp.ru
- (10.188.4.12)
-X-KSE-ServerInfo: msexch01.omp.ru, 9
-X-KSE-AntiSpam-Interceptor-Info: scan successful
-X-KSE-AntiSpam-Version: 5.9.59, Database issued on: 06/08/2023 19:38:57
-X-KSE-AntiSpam-Status: KAS_STATUS_NOT_DETECTED
-X-KSE-AntiSpam-Method: none
-X-KSE-AntiSpam-Rate: 19
-X-KSE-AntiSpam-Info: Lua profiles 177946 [Jun 08 2023]
-X-KSE-AntiSpam-Info: Version: 5.9.59.0
-X-KSE-AntiSpam-Info: Envelope from: s.shtylyov@omp.ru
-X-KSE-AntiSpam-Info: LuaCore: 516 516 efd4d74ff4b68f90ca62ae34a19f27bf46d81db5
-X-KSE-AntiSpam-Info: {rep_avail}
-X-KSE-AntiSpam-Info: {Tracking_no_received}
-X-KSE-AntiSpam-Info: {Tracking_uf_ne_domains}
-X-KSE-AntiSpam-Info: {Tracking_from_domain_doesnt_match_to}
-X-KSE-AntiSpam-Info: {SMTP from is not routable}
-X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
- b.barracudacentral.org}
-X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.86.116 in (user)
- dbl.spamhaus.org}
-X-KSE-AntiSpam-Info: omp.ru:7.1.1;lore.kernel.org:7.1.1;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;31.173.86.116:7.1.2;127.0.0.199:7.1.2
-X-KSE-AntiSpam-Info: ApMailHostAddress: 31.173.86.116
-X-KSE-AntiSpam-Info: {DNS response errors}
-X-KSE-AntiSpam-Info: Rate: 19
-X-KSE-AntiSpam-Info: Status: not_detected
-X-KSE-AntiSpam-Info: Method: none
-X-KSE-AntiSpam-Info: Auth:dmarc=temperror header.from=omp.ru;spf=temperror
- smtp.mailfrom=omp.ru;dkim=none
-X-KSE-Antiphishing-Info: Clean
-X-KSE-Antiphishing-ScanningType: Heuristic
-X-KSE-Antiphishing-Method: None
-X-KSE-Antiphishing-Bases: 06/08/2023 19:47:00
-X-KSE-Antivirus-Interceptor-Info: scan successful
-X-KSE-Antivirus-Info: Clean, bases: 6/8/2023 5:02:00 PM
-X-KSE-Attachment-Filter-Triggered-Rules: Clean
-X-KSE-Attachment-Filter-Triggered-Filters: Clean
-X-KSE-BulkMessagesFiltering-Scan-Result: InTheLimit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFos3i60U0g0vJstetvLMyouiTpUP8-Jop_LMB9T-ZNU=w@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello!
+On Fri, May 12, 2023 at 01:42:51PM +0200, Ulf Hansson wrote:
+> + Linus,
+> 
+> Hi Dennis,
+> 
+> On Mon, 3 Apr 2023 at 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
+> > >
+> > > Hi Ulf,
+> > >
+> > > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
+> > > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
+> > > > >
+> > > > > When using dm-verity with a data partition on an emmc device, dm-verity
+> > > > > races with the discovery of attached emmc devices. This is because mmc's
+> > > > > probing code sets up the host data structure then a work item is
+> > > > > scheduled to do discovery afterwards. To prevent this race on init,
+> > > > > let's inline the first call to detection, __mm_scan(), and let
+> > > > > subsequent detect calls be handled via the workqueue.
+> > > >
+> > > > In principle, I don't mind the changes in $subject patch, as long as
+> > > > it doesn't hurt the overall initialization/boot time. Especially, we
+> > > > may have more than one mmc-slot being used, so this needs to be well
+> > > > tested.
+> > > >
+> > >
+> > > I unfortunately don't have a device with multiple mmcs available. Is
+> > > this something you could help me with?
+> >
+> > Yes, I can help to test. Allow me a few days to see what I can do.
+> >
+> > Note that, just having one eMMC and one SD card should work too. It
+> > doesn't have to be multiple eMMCs.
+> >
+> > >
+> > > > Although, more importantly, I fail to understand how this is going to
+> > > > solve the race condition. Any I/O request to an eMMC or SD requires
+> > > > the mmc block device driver to be up and running too, which is getting
+> > > > probed from a separate module/driver that's not part of mmc_rescan().
+> > >
+> > > I believe the call chain is something like this:
+> > >
+> > > __mmc_rescan()
+> > >     mmc_rescan_try_freq()
+> > >         mmc_attach_mmc()
+> > >             mmc_add_card()
+> > >                 device_add()
+> > >                     bus_probe_device()
+> > >                         mmc_blk_probe()
+> > >
+> > > The initial calling of this is the host probe. So effectively if there
+> > > is a card attached, we're inlining the device_add() call for the card
+> > > attached rather than waiting for the workqueue item to kick off.
+> > >
+> > > dm is a part of late_initcall() while mmc is a module_init(), when built
+> > > in becoming a device_initcall(). So this solves a race via the initcall
+> > > chain. In the current state, device_initcall() finishes and we move onto
+> > > the late_initcall() phase. But now, dm is racing with the workqueue to
+> > > init the attached emmc device.
+> >
+> > You certainly have a point!
+> >
+> > This should work when the mmc blk module is built-in. Even if that
+> > doesn't solve the entire problem, it should be a step in the right
+> > direction.
+> >
+> > I will give it some more thinking and run some tests at my side, then
+> > I will get back to you again.
+> >
+> > Kind regards
+> > Uffe
+> >
+> > > >
+> > > > >
+> > > > > Signed-off-by: Dennis Zhou <dennis@kernel.org>
+> > > > > ---
+> > > > > Sigh.. fix missing static declaration.
+> > > > >
+> > > > >  drivers/mmc/core/core.c | 15 +++++++++++----
+> > > > >  1 file changed, 11 insertions(+), 4 deletions(-)
+> > > > >
+> > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > > > index 368f10405e13..fda7ee57dee3 100644
+> > > > > --- a/drivers/mmc/core/core.c
+> > > > > +++ b/drivers/mmc/core/core.c
+> > > > > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+> > > > >  }
+> > > > >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> > > > >
+> > > > > -void mmc_rescan(struct work_struct *work)
+> > > > > +static void __mmc_rescan(struct mmc_host *host)
+> > > > >  {
+> > > > > -       struct mmc_host *host =
+> > > > > -               container_of(work, struct mmc_host, detect.work);
+> > > > >         int i;
+> > > > >
+> > > > >         if (host->rescan_disable)
+> > > > > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> > > > >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> > > > >  }
+> > > > >
+> > > > > +void mmc_rescan(struct work_struct *work)
+> > > > > +{
+> > > > > +       struct mmc_host *host =
+> > > > > +               container_of(work, struct mmc_host, detect.work);
+> > > > > +
+> > > > > +       __mmc_rescan(host);
+> > > > > +}
+> > > > > +
+> > > > >  void mmc_start_host(struct mmc_host *host)
+> > > > >  {
+> > > > >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> > > > > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> > > > >         }
+> > > > >
+> > > > >         mmc_gpiod_request_cd_irq(host);
+> > > > > -       _mmc_detect_change(host, 0, false);
+> > > > > +       host->detect_change = 1;
+> > > > > +       __mmc_rescan(host);
+> > > > >  }
+> > > > >
+> > > > >  void __mmc_stop_host(struct mmc_host *host)
+> > > > > --
+> > > > > 2.40.0
+> > > > >
+> 
+> My apologies for the long delay. I finally managed to test this.
+> 
+> I decided to pick an old arm32 based platform. An ST-Ericsson HREF,
+> based upon the ux500 SoC. It's quite good to use for these types of
+> tests as it has two eMMCs soldered, an embedded SDIO (for WiFi) and an
+> SD-card slot. So in total there are 4 devices that get probed.
+> 
+> The SDIO card isn't detected properly, but always fails in the similar
+> way (thus I left it out from the below data). I tested both with and
+> without an SD card inserted during boot, to get some more data to
+> compare. These are the summary from my tests:
+> 
+> v6.4-rc1 without SD card:
+> ~2.18s - MMC1 (eMMC)
+> ~3.33s - MMC3 (eMMC)
+> ~5.91s - kernel boot complete
+> 
+> v6.4-rc1 with an SD card:
+> ~2.18s - MMC1 (eMMC)
+> ~3.45s - MMC3 (eMMC)
+> ~3.57s - MMC2 (SD)
+> ~5.76s - kernel boot complete
+> 
+> v6.4-rc1 + patch without SD card:
+> ~2.24s - MMC1 (eMMC)
+> ~3.58s - MMC3 (eMMC)
+> ~5.96s - kernel boot complete
+> 
+> v6.4-rc1 + patch with an SD card:
+> ~2.24s - MMC1 (eMMC)
+> ~3.73s - MMC2 (SD)
+> ~3.98s - MMC3 (eMMC)
+> ~6.73s - kernel boot complete
+> 
+> By looking at these results, I was kind of surprised. I was thinking
+> that the asynchronous probe should address the parallelism problem.
+> Then I discovered that it in fact, hasn't been enabled for the mmci
+> driver that is being used for this platform. Huh, I was under the
+> assumption that it has been enabled for all mmc hosts by now. :-)
+> 
+> Okay, so I am going to run another round of tests, with async probe
+> enabled for the mmci driver too. I will let you know the results as
+> soon as I can.
+> 
+> Kind regards
+> Uffe
 
-On 4/2/23 8:58 PM, Sergey Shtylyov wrote:
+Hi Uffe,
 
-[...]
- 
->>> The driver overrides the error codes and IRQ0 returned by platform_get_irq()
->>> to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
->>> permanently instead of the deferred probing. Switch to propagating the error
->>> codes upstream. IRQ0 is no longer returned by platform_get_irq(), so we now
->>> can safely ignore it...
->>>
->>> Fixes: cbcaac6d7dd2 ("mmc: meson-gx-mmc: Fix platform_get_irq's error checking
->>> ")
->>> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
->>> Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
->>> ---
->>> drivers/mmc/host/meson-gx-mmc.c | 4 ++--
->>> 1 file changed, 2 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->>> index 8f36536cb1b6..c765653ee4d0 100644
->>> --- a/drivers/mmc/host/meson-gx-mmc.c
->>> +++ b/drivers/mmc/host/meson-gx-mmc.c
->>> @@ -1182,8 +1182,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
->>> 	}
->>>
->>> 	host->irq = platform_get_irq(pdev, 0);
->>> -	if (host->irq <= 0) {
->>> -		ret = -EINVAL;
->>> +	if (host->irq < 0) {
->>> +		ret = host->irq;
->>> 		goto free_host;
->>> 	}
->>
->> Can I ask if this patch/series [0] has been superseded or forgotten or ??
-> 
->    I'm sorry, I actually did forget to re-post this series, as asked by Ulf.
-> Partly because the patch that this series depended on took about 4 months to
-> hit the kernel and partly because I suspended my platform_get_irq() related
-> work as I got into PATA development and struggling with a static analyzer's
-> reports...
->    Also, the series doesn't seem superseded as all the patches still apply,
-> sometimes with small offsets...
-> 
->> The series it depended upon [1]
-> 
->    That was a single patch. :-)
-> 
->> appears to have been merged a year ago as I
->> can see ce753ad1549c ("platform: finally disallow IRQ0 in platform_get_irq()
->> and its ilk”) in upstream code.
-> 
->    Not a whole year yet but 11 months surely... :-/
-> 
->> I’ve had this patch in my testing kernel for
->> 12+ months now with no observable negative impacts so am wondering if it can
->> be resent and merged or I should drop the patch from my tree?
-> 
->    It? You mean my fix patches, surely? Or you mean you care about patch #2
-> only? Anyway, I need to find the time to refresh/repost it...
+Kindly this has been way too long for review. It's been over 3 months.
+What's going on here?
 
-  Now that I'm on vacation, I have found the time -- see the v2 series here:
+I think there's a misunderstanding too. Without this fix, the machine
+doesn't even boot. I'm not sure why perf is the blocking question here.
 
-https://lore.kernel.org/all/20230608194519.10665-1-s.shtylyov@omp.ru/
+Greg, is there another tree I can run this through?
 
-[...]
-
-MBR, Sergey
+Thanks,
+Dennis
