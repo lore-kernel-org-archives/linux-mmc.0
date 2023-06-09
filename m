@@ -2,129 +2,288 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98B3FC7EE2E
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 08:35:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 780EBC7EE2E
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 08:54:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241411AbjFIIfm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 04:35:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39306 "EHLO
+        id S236923AbjFIIx2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 04:53:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240625AbjFIIej (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 04:34:39 -0400
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62D9CE2
-        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 01:34:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1686299675; x=1717835675;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=o5n4MgIrIiRyTdJPIwyM67pw4uDI4CDCkKlyG6hFQfY=;
-  b=Lct7OgCa0+3jFGOkcuSmfYcOdxfYIXAuEtACBq4r5EtQzIAB+nl5AAzJ
-   cE9ueXSWlDl/zsEcbN1UszYd/vPJWlpVd8UI7oaGVQQt+4eVoxSun5Qvp
-   u6/774lygZRY7jDQb6xziQgjF+vyYvdJ4s2q9GyOW7I9Uc6a/oeeYkMTJ
-   cV6jqY6cDQz774N0hSxCWss3f1+vdbocVwyyeWD87Zn5TNpGLvzFsPa5X
-   jLK0Fis0X6vnrLavCT3gWPuNdWdvjtFS2zxtnIv9lLBNV8I90EHD4LjYE
-   Gbw5GVDzIWC4EtZmyVK2jpn2NZ4DocUmrvMRUx3OboBhZG4fGoqhyN/sJ
-   Q==;
-X-IronPort-AV: E=Sophos;i="6.00,228,1681142400"; 
-   d="scan'208";a="234504439"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 09 Jun 2023 16:34:34 +0800
-IronPort-SDR: mFXoNALG+CoUdq+1M6O8P5DOzFHDoSIfzG2DXerlIqHd27RLal2ZoPVBkekjiUUWcneKvaYOle
- zp/F3CLYhJ8anFXckVAGJ2p4YpDM3ZP3vamFh3+wfR1bAT9d+GtS5C+twihUYoyPSRNN12jRWW
- AwaQLxJ9eIRZ2AFhQUjaNQtwI9W0puyhRdDapcblqhrjUnY7HzpN8BJHDqGtWU1CxAh3A6N6kP
- YqYIgwwc7ONTw+tD4Tw997T/AmOrpwIEQG2HBXlBv2luq/+eJJcUPCLiMJWv91jk8J+6NKYygj
- HcM=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 09 Jun 2023 00:49:15 -0700
-IronPort-SDR: MLx2yOTaiTrPNe43hZmldEdZxfoFE1Rzl64JtFNBHXmfeTgQ367gktFUwDkxMqvs8ev5UbRtyy
- NobcMaimwWV0MgBoAdg6wuC+OFbKFy4qZJq3NZM/pLrGmszm912J3/IaGFmkCqeZv8S5wD+3g7
- Rs+fyhDr9ggf4Himy94A+weYwPqmp28tok8qEI+JjSyOSeRoW1YPJ9AA8OUrMi3IU83lAdyAST
- JxSUWo7diAhn1CS7WtWNwSJbvOrdP69w2bZfUxxBmDiNzi20A5poNp2Me/eBSf+tHBLdewJYsF
- Qvs=
-WDCIronportException: Internal
-Received: from 5cg9473214.ad.shared (HELO BXYGM33.ad.shared) ([10.225.33.249])
-  by uls-op-cesaip01.wdc.com with ESMTP; 09 Jun 2023 01:34:33 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v2] mmc-utils: Assert MMC_IOC_MULTI_CMD in compile time
-Date:   Fri,  9 Jun 2023 11:34:25 +0300
-Message-Id: <20230609083425.765-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.40.0
+        with ESMTP id S241144AbjFIIxR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 04:53:17 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0813E173A;
+        Fri,  9 Jun 2023 01:53:14 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7442865525;
+        Fri,  9 Jun 2023 08:53:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 86B8AC433D2;
+        Fri,  9 Jun 2023 08:53:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1686300793;
+        bh=hDhJ5dTiTEaQ5xhEJqEwqqr0ZAnInuphMXzURUlqGdY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=PBRG4/1XnRSuEnnyFHuoAj3qpcW/L4Fm6QInBRP+IKfWfWtEeQ+Tmd2JRDMYF3E59
+         5FzbAuu6ER3CiqXz7yahcO5b9oY57hkiYSyo5DuHz9FwWZJ95rXl/b/fSnqLXgQ229
+         nDLCypHq37e5UNs3P5A1uSntrJDnv80jw3dMY+aM=
+Date:   Fri, 9 Jun 2023 10:53:11 +0200
+From:   Greg KH <gregkh@linuxfoundation.org>
+To:     Dennis Zhou <dennis@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <2023060922-nimbly-emblaze-bd6b@gregkh>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+ <ZCclEE6Qw3on7/eO@snowbird>
+ <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
+ <CAPDyKFos3i60U0g0vJstetvLMyouiTpUP8-Jop_LMB9T-ZNU=w@mail.gmail.com>
+ <ZII-vJWGb7F97S_A@V92F7Y9K0C.corp.robot.car>
+ <2023060930-uphold-collie-3ec5@gregkh>
+ <ZILRw9MBGNwH9NsG@V92F7Y9K0C.lan>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZILRw9MBGNwH9NsG@V92F7Y9K0C.lan>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-v1 -> v2: Address Ulf's suggestions
+On Fri, Jun 09, 2023 at 12:16:19AM -0700, Dennis Zhou wrote:
+> Hi Greg,
+> 
+> On Fri, Jun 09, 2023 at 08:19:51AM +0200, Greg KH wrote:
+> > On Thu, Jun 08, 2023 at 01:49:00PM -0700, Dennis Zhou wrote:
+> > > On Fri, May 12, 2023 at 01:42:51PM +0200, Ulf Hansson wrote:
+> > > > + Linus,
+> > > > 
+> > > > Hi Dennis,
+> > > > 
+> > > > On Mon, 3 Apr 2023 at 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > > > >
+> > > > > On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
+> > > > > >
+> > > > > > Hi Ulf,
+> > > > > >
+> > > > > > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
+> > > > > > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
+> > > > > > > >
+> > > > > > > > When using dm-verity with a data partition on an emmc device, dm-verity
+> > > > > > > > races with the discovery of attached emmc devices. This is because mmc's
+> > > > > > > > probing code sets up the host data structure then a work item is
+> > > > > > > > scheduled to do discovery afterwards. To prevent this race on init,
+> > > > > > > > let's inline the first call to detection, __mm_scan(), and let
+> > > > > > > > subsequent detect calls be handled via the workqueue.
+> > > > > > >
+> > > > > > > In principle, I don't mind the changes in $subject patch, as long as
+> > > > > > > it doesn't hurt the overall initialization/boot time. Especially, we
+> > > > > > > may have more than one mmc-slot being used, so this needs to be well
+> > > > > > > tested.
+> > > > > > >
+> > > > > >
+> > > > > > I unfortunately don't have a device with multiple mmcs available. Is
+> > > > > > this something you could help me with?
+> > > > >
+> > > > > Yes, I can help to test. Allow me a few days to see what I can do.
+> > > > >
+> > > > > Note that, just having one eMMC and one SD card should work too. It
+> > > > > doesn't have to be multiple eMMCs.
+> > > > >
+> > > > > >
+> > > > > > > Although, more importantly, I fail to understand how this is going to
+> > > > > > > solve the race condition. Any I/O request to an eMMC or SD requires
+> > > > > > > the mmc block device driver to be up and running too, which is getting
+> > > > > > > probed from a separate module/driver that's not part of mmc_rescan().
+> > > > > >
+> > > > > > I believe the call chain is something like this:
+> > > > > >
+> > > > > > __mmc_rescan()
+> > > > > >     mmc_rescan_try_freq()
+> > > > > >         mmc_attach_mmc()
+> > > > > >             mmc_add_card()
+> > > > > >                 device_add()
+> > > > > >                     bus_probe_device()
+> > > > > >                         mmc_blk_probe()
+> > > > > >
+> > > > > > The initial calling of this is the host probe. So effectively if there
+> > > > > > is a card attached, we're inlining the device_add() call for the card
+> > > > > > attached rather than waiting for the workqueue item to kick off.
+> > > > > >
+> > > > > > dm is a part of late_initcall() while mmc is a module_init(), when built
+> > > > > > in becoming a device_initcall(). So this solves a race via the initcall
+> > > > > > chain. In the current state, device_initcall() finishes and we move onto
+> > > > > > the late_initcall() phase. But now, dm is racing with the workqueue to
+> > > > > > init the attached emmc device.
+> > > > >
+> > > > > You certainly have a point!
+> > > > >
+> > > > > This should work when the mmc blk module is built-in. Even if that
+> > > > > doesn't solve the entire problem, it should be a step in the right
+> > > > > direction.
+> > > > >
+> > > > > I will give it some more thinking and run some tests at my side, then
+> > > > > I will get back to you again.
+> > > > >
+> > > > > Kind regards
+> > > > > Uffe
+> > > > >
+> > > > > > >
+> > > > > > > >
+> > > > > > > > Signed-off-by: Dennis Zhou <dennis@kernel.org>
+> > > > > > > > ---
+> > > > > > > > Sigh.. fix missing static declaration.
+> > > > > > > >
+> > > > > > > >  drivers/mmc/core/core.c | 15 +++++++++++----
+> > > > > > > >  1 file changed, 11 insertions(+), 4 deletions(-)
+> > > > > > > >
+> > > > > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > > > > > > index 368f10405e13..fda7ee57dee3 100644
+> > > > > > > > --- a/drivers/mmc/core/core.c
+> > > > > > > > +++ b/drivers/mmc/core/core.c
+> > > > > > > > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+> > > > > > > >  }
+> > > > > > > >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> > > > > > > >
+> > > > > > > > -void mmc_rescan(struct work_struct *work)
+> > > > > > > > +static void __mmc_rescan(struct mmc_host *host)
+> > > > > > > >  {
+> > > > > > > > -       struct mmc_host *host =
+> > > > > > > > -               container_of(work, struct mmc_host, detect.work);
+> > > > > > > >         int i;
+> > > > > > > >
+> > > > > > > >         if (host->rescan_disable)
+> > > > > > > > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> > > > > > > >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> > > > > > > >  }
+> > > > > > > >
+> > > > > > > > +void mmc_rescan(struct work_struct *work)
+> > > > > > > > +{
+> > > > > > > > +       struct mmc_host *host =
+> > > > > > > > +               container_of(work, struct mmc_host, detect.work);
+> > > > > > > > +
+> > > > > > > > +       __mmc_rescan(host);
+> > > > > > > > +}
+> > > > > > > > +
+> > > > > > > >  void mmc_start_host(struct mmc_host *host)
+> > > > > > > >  {
+> > > > > > > >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> > > > > > > > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> > > > > > > >         }
+> > > > > > > >
+> > > > > > > >         mmc_gpiod_request_cd_irq(host);
+> > > > > > > > -       _mmc_detect_change(host, 0, false);
+> > > > > > > > +       host->detect_change = 1;
+> > > > > > > > +       __mmc_rescan(host);
+> > > > > > > >  }
+> > > > > > > >
+> > > > > > > >  void __mmc_stop_host(struct mmc_host *host)
+> > > > > > > > --
+> > > > > > > > 2.40.0
+> > > > > > > >
+> > > > 
+> > > > My apologies for the long delay. I finally managed to test this.
+> > > > 
+> > > > I decided to pick an old arm32 based platform. An ST-Ericsson HREF,
+> > > > based upon the ux500 SoC. It's quite good to use for these types of
+> > > > tests as it has two eMMCs soldered, an embedded SDIO (for WiFi) and an
+> > > > SD-card slot. So in total there are 4 devices that get probed.
+> > > > 
+> > > > The SDIO card isn't detected properly, but always fails in the similar
+> > > > way (thus I left it out from the below data). I tested both with and
+> > > > without an SD card inserted during boot, to get some more data to
+> > > > compare. These are the summary from my tests:
+> > > > 
+> > > > v6.4-rc1 without SD card:
+> > > > ~2.18s - MMC1 (eMMC)
+> > > > ~3.33s - MMC3 (eMMC)
+> > > > ~5.91s - kernel boot complete
+> > > > 
+> > > > v6.4-rc1 with an SD card:
+> > > > ~2.18s - MMC1 (eMMC)
+> > > > ~3.45s - MMC3 (eMMC)
+> > > > ~3.57s - MMC2 (SD)
+> > > > ~5.76s - kernel boot complete
+> > > > 
+> > > > v6.4-rc1 + patch without SD card:
+> > > > ~2.24s - MMC1 (eMMC)
+> > > > ~3.58s - MMC3 (eMMC)
+> > > > ~5.96s - kernel boot complete
+> > > > 
+> > > > v6.4-rc1 + patch with an SD card:
+> > > > ~2.24s - MMC1 (eMMC)
+> > > > ~3.73s - MMC2 (SD)
+> > > > ~3.98s - MMC3 (eMMC)
+> > > > ~6.73s - kernel boot complete
+> > > > 
+> > > > By looking at these results, I was kind of surprised. I was thinking
+> > > > that the asynchronous probe should address the parallelism problem.
+> > > > Then I discovered that it in fact, hasn't been enabled for the mmci
+> > > > driver that is being used for this platform. Huh, I was under the
+> > > > assumption that it has been enabled for all mmc hosts by now. :-)
+> > > > 
+> > > > Okay, so I am going to run another round of tests, with async probe
+> > > > enabled for the mmci driver too. I will let you know the results as
+> > > > soon as I can.
+> > > > 
+> > > > Kind regards
+> > > > Uffe
+> > > 
+> > > Hi Uffe,
+> > > 
+> > > Kindly this has been way too long for review. It's been over 3 months.
+> > > What's going on here?
+> > > 
+> > > I think there's a misunderstanding too. Without this fix, the machine
+> > > doesn't even boot. I'm not sure why perf is the blocking question here.
+> > 
+> > Well you can not degrade performance of existing machines that work
+> > today, right?  That would be a regression and it seems that you are
+> > doing that if I read the numbers above correctly.
+> > 
+> 
+> I agree that we shouldn't degrade performance of existing machines, but
+> this is a timing bug on existing platforms that have a slow enough cpu
+> such that emmc doesn't finish probing before dm-verity progresses to
+> trying to read off the device. In my opinion it's a bit unfair to trade
+> performance in the common case for not supporting all use cases. I'm
+> just trying to get my machines to boot without having to carry my own
+> patch here.
 
-Notify of mult-ioctl violation during preprocessing instead of bailing
-out in runtime.  Would not even allow bogus copies of mmc-utils binaries
-wondering about out there.
+I think the users of the systems you are going to slow down will take
+objection to you slowing them down.  What if you were them, what would
+you want to see here?
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- mmc_cmds.c | 16 ++++------------
- 1 file changed, 4 insertions(+), 12 deletions(-)
+> As a path forward I can add a command line flag as a bool to handle this
+> and that should hopefully take care of the regresion aspect to this.
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index df66986..26bdc38 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -34,6 +34,10 @@
- #include "mmc_cmds.h"
- #include "3rdparty/hmac_sha/hmac_sha2.h"
- 
-+#ifndef MMC_IOC_MULTI_CMD
-+#error "mmc-utils needs MMC_IOC_MULTI_CMD support (added in kernel v4.4)"
-+#endif
-+
- #ifndef offsetof
- #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
- #endif
-@@ -2112,11 +2116,6 @@ static int do_rpmb_op(int fd,
- 					  struct rpmb_frame *frame_out,
- 					  unsigned int out_cnt)
- {
--#ifndef MMC_IOC_MULTI_CMD
--	fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
--		" support, needed by RPMB operation.\n");
--	exit(1);
--#else
- 	int err;
- 	u_int16_t rpmb_type;
- 	struct mmc_ioc_multi_cmd *mioc;
-@@ -2196,7 +2195,6 @@ static int do_rpmb_op(int fd,
- out:
- 	free(mioc);
- 	return err;
--#endif /* !MMC_IOC_MULTI_CMD */
- }
- 
- int do_rpmb_write_key(int nargs, char **argv)
-@@ -2804,11 +2802,6 @@ out:
- 
- int do_ffu(int nargs, char **argv)
- {
--#ifndef MMC_IOC_MULTI_CMD
--	fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
--			" support, needed by FFU.\n");
--	exit(1);
--#else
- 	int dev_fd, img_fd;
- 	int sect_done = 0, retry = 3, ret = -EINVAL;
- 	unsigned int sect_size;
-@@ -3034,7 +3027,6 @@ out:
- 	close(img_fd);
- 	close(dev_fd);
- 	return ret;
--#endif
- }
- 
- int do_general_cmd_read(int nargs, char **argv)
--- 
-2.40.0
+command line flags are horrible and should never be used.  Why can't you
+dynamically detect this type of thing and handle it that way?
 
+And yes, we do hold off in supporting new hardware (and configurations)
+to prevent existing working ones from breaking or slowing down.
+
+What is forcing you to use dm-verity on this odd hardware?  Can you not
+use other configurations instead?
+
+> > > Greg, is there another tree I can run this through?
+> > 
+> > Why would you want to route around a maintainer just to get a patch that
+> > would have to be reverted applied?  :)
+> > 
+> 
+> What's your advice here as I don't feel like I'm getting adequate
+> traction with Ulf. I think I've generally been quite patient here
+> waiting > 3 months for this patch to be reviewed.
+
+Maintainers are overworked, that's normal.  I suggest helping out in
+reviewing other patches in the subsystem to reduce that burden.  After
+all, you are asking someone to do something for you without much in
+return, is that fair?
+
+thanks,
+
+greg k-h
