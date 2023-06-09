@@ -2,107 +2,130 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8C23C7EE29
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:41:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6763FC7EE2F
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:50:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238922AbjFIHlP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 03:41:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51402 "EHLO
+        id S239115AbjFIHuJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 03:50:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239032AbjFIHk7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:40:59 -0400
-Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE49D1BD6;
-        Fri,  9 Jun 2023 00:40:55 -0700 (PDT)
-Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-561b7729a12so38188677b3.1;
-        Fri, 09 Jun 2023 00:40:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1686296455; x=1688888455;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=HS9HfMRZUkDStDN5JY5KxLgcjCDDdIlBwC3TmRA3bJw=;
-        b=r34X8x8BLSknL6F3UY74ewf40Zm/zXjzVgt21bAHsKY8ei3MI7dY01oiqZIgOeBVze
-         DPFB4ATjnyeL2sCGBM7oYkUt5vT9VHA4NR1daGaYlEoE43CokfHwqfMFKWPEPecfLgBC
-         nM31pnyZV+N9n1mwmaWQmlM+D7aV7MzvpEhnJ5YKADYq4nmn/xVbG/6zzRUbGdiy2Zh8
-         CVxQFa86JWersfJBMs7zwxOSgw+yVj4/oy50Cu8gfu+0e/sYLI7TRzGqhtPG7467HRPu
-         dDxzOYRhFrorDqtB09Rv+OELKQ5P/uA/TFgix0MubRKiV+Ko8AivwGMFE8kioWz05cCS
-         1TbQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686296455; x=1688888455;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=HS9HfMRZUkDStDN5JY5KxLgcjCDDdIlBwC3TmRA3bJw=;
-        b=j6orl2VphcicKCzDsru0u8crvF6PPpNZ9MOWA91bq58Db6p4KkzBfd3yl9LJNyjR5C
-         nv4KjxROad4RKv0E04cORNBJvg9cuPF835gLsh5/J3sO+QhyGWUco/31KTj89JfgGNQb
-         rmSsuqo6Kk4LqCWYm3KBJsyQUVUGOBoL9q3eQ6PHmjwaaU6o23IRZ/sn0ON/wYY8itEp
-         yMYnHVSmJ4ZH8Uu2lmYDG0PyDg1YW+2XH2H/Iz1iXRyR7H9dCX9tZgsJNaq3makeqeCw
-         OzbtzKcvgKssKXIEXi/qst5TH+tl9W6rC39/HnoaePgd19sUaRVEEJEDpThNt7V2Rq5H
-         Ta+A==
-X-Gm-Message-State: AC+VfDzZnMwD6K0fPuIRUUDr5vihQBiNARdmi36X5Y1tRTWG2ctxkKEk
-        6qXsNU1axk7X6jE7vOmZMT/8NLOgpUy5AQlyx01acX8j
-X-Google-Smtp-Source: ACHHUZ430BiBoaZyvqE/c2j+l6kshdfRFgKwhYGArqu4S5PsTpawZJCBiIJAy9/jnBc8ZufqFatpYnGE01XOYMIJTBk=
-X-Received: by 2002:a5b:a44:0:b0:bac:fc30:3913 with SMTP id
- z4-20020a5b0a44000000b00bacfc303913mr956135ybq.21.1686296454969; Fri, 09 Jun
- 2023 00:40:54 -0700 (PDT)
+        with ESMTP id S239295AbjFIHtb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:49:31 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DBD630E3;
+        Fri,  9 Jun 2023 00:48:51 -0700 (PDT)
+X-UUID: 0ee72a36069a11eeb20a276fd37b9834-20230609
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=8bgwt3YTtRPzBW10jkkA2PfSeU8Lw8ibSj4SfdROJGs=;
+        b=eTLWnOMmJHfkR7xzPaNcK0P2kM2zmyETKQl0Z8M35iK0YNmv/VWCUp8JAs7EdWyBOi3KJ/ScBcneyaFd83N7LhtSMwwCQYj7Ddx3SKksun6RWnJBVY1DkvpHlkECl2qYTJFwYmGfv6uA4E5m1ATeJWBTffMg9Vj61peov9fKSM0=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.26,REQID:c04f3271-59bb-4866-88c5-f5f664e7a456,IP:0,U
+        RL:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
+        N:release,TS:-25
+X-CID-META: VersionHash:cb9a4e1,CLOUDID:7699193e-7aa7-41f3-a6bd-0433bee822f3,B
+        ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
+        RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO
+X-CID-BVR: 0,NGT
+X-CID-BAS: 0,NGT,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-UUID: 0ee72a36069a11eeb20a276fd37b9834-20230609
+Received: from mtkmbs11n1.mediatek.inc [(172.21.101.185)] by mailgw02.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 348101938; Fri, 09 Jun 2023 15:48:43 +0800
+Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
+ mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.26; Fri, 9 Jun 2023 15:48:42 +0800
+Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
+ mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Fri, 9 Jun 2023 15:48:42 +0800
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Alexandre Mergnat <amergnat@baylibre.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        kernel test robot <lkp@intel.com>
+Subject: [PATCH] mmc: mtk-sd: include bitfield header and fix incompatible pointer types
+Date:   Fri, 9 Jun 2023 15:48:40 +0800
+Message-ID: <20230609074840.4520-1-wenbin.mei@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20230609071441.451464-1-victorshihgli@gmail.com> <20230609071441.451464-4-victorshihgli@gmail.com>
-In-Reply-To: <20230609071441.451464-4-victorshihgli@gmail.com>
-From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Fri, 9 Jun 2023 15:40:43 +0800
-Message-ID: <CAK00qKDkZ1wbxO+iyryrWv2KeXoZ6DMMrip215A2rds494hkGQ@mail.gmail.com>
-Subject: Re: [PATCH V6 3/4] mmc: sdhci: Add VDD2 definition for power control register
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Ulf
+The following error appeared due to the patch:
+364dae3e80a4 "mmc: mtk-sd: reduce CIT for better performance"
 
-      This patch has been acked by Adrian in patch v5, but I forgot to
-add in this patch version, sorry.
+drivers/mmc/host/mtk-sd.c: In function 'msdc_cqe_cit_cal':
+drivers/mmc/host/cqhci.h:27:41: error: implicit declaration of function 'FIELD_GET' [-Werror=implicit-function-declaration]
 
-Thanks, Victor Shih
+drivers/mmc/host/mtk-sd.c:2471:3: error: incompatible pointer types passing 'unsigned long *' to parameter of type 'uint64_t *' (aka 'unsigned long long *') [-Werror,-Wincompatible-pointer-types]
+    2471 |                 do_div(hclk_freq, 1000);
+         |                 ^~~~~~~~~~~~~~~~~~~~~~~
+include/asm-generic/div64.h:238:22: note: expanded from macro 'do_div'
+     238 |                 __rem = __div64_32(&(n), __base);       \
+include/asm-generic/div64.h:213:38: note: passing argument to parameter 'dividend' here
+     213 | extern uint32_t __div64_32(uint64_t *dividend, uint32_t divisor);
+...
 
-On Fri, Jun 9, 2023 at 3:14=E2=80=AFPM Victor Shih <victorshihgli@gmail.com=
-> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> Add new definition for VDD2 - UHS2 or PCIe/NVMe.
->
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> ---
->  drivers/mmc/host/sdhci.h | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index f4f2085c274c..f219bdea8f28 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -99,6 +99,13 @@
->  #define  SDHCI_POWER_180       0x0A
->  #define  SDHCI_POWER_300       0x0C
->  #define  SDHCI_POWER_330       0x0E
-> +/*
-> + * VDD2 - UHS2 or PCIe/NVMe
-> + * VDD2 power on/off and voltage select
-> + */
-> +#define  SDHCI_VDD2_POWER_ON   0x10
-> +#define  SDHCI_VDD2_POWER_120  0x80
-> +#define  SDHCI_VDD2_POWER_180  0xA0
->
->  #define SDHCI_BLOCK_GAP_CONTROL        0x2A
->
-> --
-> 2.25.1
->
+This patch corrects the issue.
+
+Reported-by: kernel test robot <lkp@intel.com>
+Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+Fixes: 364dae3e80a4 ("mmc: mtk-sd: reduce CIT for better performance")
+---
+ drivers/mmc/host/cqhci.h  | 1 +
+ drivers/mmc/host/mtk-sd.c | 5 ++---
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index e35c655edefc..1a12e40a02e6 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -5,6 +5,7 @@
+ #define LINUX_MMC_CQHCI_H
+ 
+ #include <linux/compiler.h>
++#include <linux/bitfield.h>
+ #include <linux/bitops.h>
+ #include <linux/spinlock_types.h>
+ #include <linux/types.h>
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index b582f19f82f2..99317fd9f084 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -2456,15 +2456,14 @@ static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
+ 	struct mmc_host *mmc = mmc_from_priv(host);
+ 	struct cqhci_host *cq_host = mmc->cqe_private;
+ 	u8 itcfmul;
+-	unsigned long hclk_freq;
+-	u64 value;
++	u64 hclk_freq, value;
+ 
+ 	/*
+ 	 * On MediaTek SoCs the MSDC controller's CQE uses msdc_hclk as ITCFVAL
+ 	 * so we multiply/divide the HCLK frequency by ITCFMUL to calculate the
+ 	 * Send Status Command Idle Timer (CIT) value.
+ 	 */
+-	hclk_freq = clk_get_rate(host->h_clk);
++	hclk_freq = (u64)clk_get_rate(host->h_clk);
+ 	itcfmul = CQHCI_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
+ 	switch (itcfmul) {
+ 	case 0x0:
+-- 
+2.25.1
+
