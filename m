@@ -2,87 +2,149 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44E59C7EE25
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:01:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 911A3C7EE2E
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:14:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237546AbjFIHBc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 03:01:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60908 "EHLO
+        id S238011AbjFIHOv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 03:14:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36202 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237614AbjFIHB3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:01:29 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A9AF2D48
-        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 00:01:26 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-bacf5b89da7so1491592276.2
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2023 00:01:26 -0700 (PDT)
+        with ESMTP id S230316AbjFIHOs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:14:48 -0400
+Received: from mail-ot1-x32a.google.com (mail-ot1-x32a.google.com [IPv6:2607:f8b0:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2F39273A;
+        Fri,  9 Jun 2023 00:14:47 -0700 (PDT)
+Received: by mail-ot1-x32a.google.com with SMTP id 46e09a7af769-6b162127472so408868a34.0;
+        Fri, 09 Jun 2023 00:14:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686294085; x=1688886085;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=elu6bJKcJHNxiVwiE626QNNoqTsS0jjzoZTRm9E1Psw=;
-        b=FDGqKf8HvvgYs4qwcwy0tK/fGpaKJsSb0KyUJPa1yB2yPkyoRRWzeaYYGbEzmE7Q9b
-         7eIeNvMenEsLwG6QvM0hQHeqY1h5tE8pGxs2NLAYzRh5GJbiNX0z2b/6AfsrU9oxu03U
-         HWuJ+WN6+dRJ5rx/V3FjJ3FX4osakNajOVEY9YuZLe/NtvfLaZZBwqFWd8SZAcSQeCUx
-         d7Mi5aXfx3x1qjZXFDu05RUUYQG7fyb4v6Nl1EJxKlTRZNThKMtBH0DV0O1jw3AlCFp3
-         3oazKu029mHUU/b5JKQaCjNNSliWUWtakkclw0EkVS30TR+eI3xhFzTwJIr2eFpO1Bj+
-         Q0rg==
+        d=gmail.com; s=20221208; t=1686294887; x=1688886887;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Yj+I/Z078bQFH9XJY9DtKo6v8eFiX2booMeshYQ82pY=;
+        b=LrrM5LABjmgulWhc+P2jC16Pz1Hvb5PDpEhoa/Vhr2qcu1wEdMsipsNCHaktK0ulKb
+         MNyGZgH5U6hCvZ5pdvBIZ3pqPJPgbFifjEd72ss72elZJ/33JDq3o4p2FKO2KsJLx6/D
+         2LdJWl6KeqmI3hVhogPaue2NNbf1uPB26arntK46+l8xdQM13pqj93ouneMnfAjcbCYs
+         qBF3GFO6ZMMbCvGeIAbEhK72YK4U3jCuJxqFNf9w5y6VsCQ92e6xqonpF7bkcGo5ZCDd
+         aGmYwD7mt6vSKSlnrbbtpTJwtUEwQCCN/xhYJAw2nYbyY3VUENCL8AzK0AC187NmP7sH
+         jcqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686294085; x=1688886085;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=elu6bJKcJHNxiVwiE626QNNoqTsS0jjzoZTRm9E1Psw=;
-        b=VCKFZQGd0BbgWmAOV1o0ackQLr9DIgihT/WwF9LHZi7gLpAk4SjBBTvASini08Ix+M
-         cXV8VJcRLhWwKp26qFKNpJkXnpWC6j2XYJ6dVkXxV7cAf7pFRul8cj7eDgERl+wYhVQl
-         4DWuIjmyZrcBLbbYJEX5KEwip0hUfDRbak3Q63hziEjFZsgzIRruBdg81nX/8D1tp1Ur
-         kwmz45xOGB1rhBzqEPpYOCUAGnI/zdh1kIsvdpjmWpQZrJPJF3ED2D7fd5Gk2YSV0gfP
-         M+m5Lo4YI+iXy7YTRc1egBBgjMChgYig8ozaTrWpO5kyYpCfddvlfDoq4wP/2eO/IPc5
-         ofvg==
-X-Gm-Message-State: AC+VfDyNJH7QE5RRE6SuMFdxGsJTRDUwoPjt0HJQE/r/1APmG/6+A81V
-        oQQ2m3SqlOiggyR83qiTQMe2op+g9Dbm2qMLvB2G7w==
-X-Google-Smtp-Source: ACHHUZ5Jjnhl+b0jxcL7O9IVlDv0/+vbbJgsljEc1FFMBJXHJjgxmzOvbTiIbnBsXLYFE26tNkplg1JcwLHcfI9hO+A=
-X-Received: by 2002:a5b:512:0:b0:bac:f684:89f0 with SMTP id
- o18-20020a5b0512000000b00bacf68489f0mr308763ybp.51.1686294085532; Fri, 09 Jun
- 2023 00:01:25 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1686294887; x=1688886887;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Yj+I/Z078bQFH9XJY9DtKo6v8eFiX2booMeshYQ82pY=;
+        b=gqEh75Svj5lWwffmGOtycC8JioF95aeO3SeWVajtQKaIV9h8lTochK5cclluTCtGe8
+         FEmeXtOoFYTz6TIBdOVtBPssPDbrCszhwY6JMSuOyJPUah5PWsF8KYJ0KwG0X37wmBkM
+         O1bQh43s55vJY60+xc9Jmb2OtGqOGTuk25iW2dKWlMpBkiPSyTF4hW3IlsnhD7xR7Gz9
+         gF8onNeReLbmUAxIAzCymfOqXdDwq/HechfsnZ/tMKt6ljdKqbEyOoH0Sy6UPiiXbfB7
+         xGuWorxa3zesBCUTnuvgbgHvT9F0mLgxyw76JCJT3HIUpQYZihqlRSjwTF+Zt1qiSL+D
+         Npsg==
+X-Gm-Message-State: AC+VfDywUZJegfTrn2xkgKhc8Fg4wFABuJGpjHy6/OebFHXJ6WOl6eF9
+        1k+GO+5+g8rxcXWO2s7AAsU=
+X-Google-Smtp-Source: ACHHUZ5iTxPB2V2Uervt0cQoqR/babM8rB56SsgMpRcNL22NDg3rd4x5Tue8UHARwrQjw7wQ5FgAtw==
+X-Received: by 2002:a05:6359:a02:b0:127:f5d3:b6f9 with SMTP id el2-20020a0563590a0200b00127f5d3b6f9mr619332rwb.18.1686294886835;
+        Fri, 09 Jun 2023 00:14:46 -0700 (PDT)
+Received: from localhost.localdomain (2001-b400-e282-07a7-2523-0b40-49e4-7cbb.emome-ip6.hinet.net. [2001:b400:e282:7a7:2523:b40:49e4:7cbb])
+        by smtp.gmail.com with ESMTPSA id f3-20020a656283000000b005308b255502sm2085196pgv.68.2023.06.09.00.14.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 09 Jun 2023 00:14:46 -0700 (PDT)
+From:   Victor Shih <victorshihgli@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V6 0/4] Add Genesys Logic GL9767 support
+Date:   Fri,  9 Jun 2023 15:14:37 +0800
+Message-Id: <20230609071441.451464-1-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20230608122152.3930377-1-quic_srichara@quicinc.com> <20230608122152.3930377-5-quic_srichara@quicinc.com>
-In-Reply-To: <20230608122152.3930377-5-quic_srichara@quicinc.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 9 Jun 2023 09:01:14 +0200
-Message-ID: <CACRpkdbaNPyLr9322FKA506oBXwc2zPk8yvYCrw9J6VR1hmi=g@mail.gmail.com>
-Subject: Re: [v9 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
-To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
-Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
-        catalin.marinas@arm.com, will@kernel.org, p.zabel@pengutronix.de,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        robimarko@gmail.com, krzysztof.kozlowski@linaro.org,
-        andy.shevchenko@gmail.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jun 8, 2023 at 2:23=E2=80=AFPM Sricharan Ramabadhran
-<quic_srichara@quicinc.com> wrote:
+From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-> Add pinctrl definitions for the TLMM of IPQ5018.
->
-> Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> Co-developed-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
-> Signed-off-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
-> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
 
-Patch applied to the pinctrl tree for v6.5.
+Changes in v6 (June. 9, 2023)
+* rebased to the linux-kernel-v6.4.0-rc5 in Ulf Hansson next branch.
+* Patch#2: use usleep_range() to instead msleep() in
+           gl9767_set_pll() function.
+* Patch#4: use usleep_range() to instead msleep() in
+           gl9767_init_sd_express() function.
 
-Yours,
-Linus Walleij
+----------------- original cover letter from v5 -----------------
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
+
+Changes in v5 (June. 1, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* Patch#3: adjust the alignment of definitions.
+
+----------------- original cover letter from v4 -----------------
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
+
+Changes in v4 (May. 31, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* add VDD2 definition for power control-register.
+* Patch#4: use SDHCI_VDD2_POWER_ON to instead SDHCI_POWER_ON in
+           gl9767_init_sd_express() function.
+           use SDHCI_VDD2_POWER_180 to instead SDHCI_POWER_180 in
+           gl9767_init_sd_express() function.
+
+----------------- original cover letter from v3 -----------------
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
+
+Changes in v3 (May. 31, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* Patch#2: use msleep() to instead mdelay().
+* Patch#3: modify the if-else condition and content in
+           gl9767_init_sd_express() function.
+           adjust the order of definitions.
+
+----------------- original cover letter from v2 -----------------
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
+
+Changes in v2 (May. 30, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* Add set SDR104's clock to 205MHz and enable SSC for GL9767.
+* drop export sdhci_check_ro() function.
+* Patch#1: add gl9767_vhs_read() and gl9767_vhs_write().
+* Patch#3: use mmc->ops->get_ro() to instead sdhci_check_ro().
+           use msleep() to instead mdelay().
+           modify the wait time for Power valid to CLKREQ.
+           drop unused definitions.
+
+----------------- original cover letter from v1 -----------------
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
+
+Changes in v1 (May. 12, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* enable MSI interrupt for the GL9767.
+* add support SDR mode for the GL9767.
+* export sdhci_check_ro() function.
+* add support SD Express mode for the GL9767.
+
+Victor Shih (4):
+  mmc: sdhci-pci-gli: Add Genesys Logic GL9767 support
+  mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and enable SSC for
+    GL9767
+  mmc: sdhci: Add VDD2 definition for power control register
+  mmc: sdhci-pci-gli: Add support SD Express card for GL9767
+
+ drivers/mmc/host/sdhci-pci-core.c |   1 +
+ drivers/mmc/host/sdhci-pci-gli.c  | 406 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h      |   2 +
+ drivers/mmc/host/sdhci.h          |   7 +
+ 4 files changed, 416 insertions(+)
+
+-- 
+2.25.1
+
