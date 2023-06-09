@@ -2,210 +2,151 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99D25C7EE25
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 11:26:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BC26C7EE43
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 11:26:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231172AbjFIL0W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 07:26:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34370 "EHLO
+        id S238680AbjFIL0X (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 07:26:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230128AbjFIL0J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 07:26:09 -0400
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55F0630C1
-        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 04:26:07 -0700 (PDT)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-565c9109167so15680267b3.2
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2023 04:26:07 -0700 (PDT)
+        with ESMTP id S231245AbjFIL0M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 07:26:12 -0400
+Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2ED6430CB
+        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 04:26:11 -0700 (PDT)
+Received: by mail-yb1-xb2b.google.com with SMTP id 3f1490d57ef6-ba81ded8d3eso1659109276.3
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2023 04:26:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686309966; x=1688901966;
+        d=linaro.org; s=google; t=1686309970; x=1688901970;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=QZXll2p6QZbov35TIhSw5cTUwAtSmPgNFTPxS/Tfy1g=;
-        b=ZOFLugWS4WDEBvyJpIL8RKZRU4WTqyWZWVLi6Bwhzw8GBxURqbAlQNTX8gzjUAT0ox
-         /dpd8SFYA5MdsTdNZUapdAB3KHBNoQ56Xl8wqUKHmpl6iXBeAfCAiZq0JxT00xMTO0PY
-         1l+28K3MSohUoWRpYTgQl/twHlyr7nrnlworbd98eniKBIQk1dinDmNuOhtLg9HOjq6m
-         rPUbP3OUFOZ6YCx4mXbBDtziSXWQ5I2+mWePD4+9ZmWWVOdlJKSIadDeFHapK7J3huKv
-         Hp2sUeRGvewP6S6KI74QGXjHtV6nL3V5MMxAbxPMFuZVip8zxsqFzklG4kkQDFKrD6fb
-         Jg2A==
+        bh=gMW1YaKatM97etS/62dnKFcc8It58SI65TwJ47R3Y4o=;
+        b=BO0w/ofKCQMHsNTepcQnUX69bnO6fBXlCxNv1fQpNcQNuo7w7zpPUkiBZIspnZ3WY6
+         SgolR/q65spqEKZuxL30ZYJxBT5pFHzO+Jdlse4utU06WPqgNpsJ6FPdaHzt2zTuBDDV
+         EKSocS68wpfxjRqICYV35Mqy9cbpY8VZ2oRtz5OBQZ1tEUD3+UoTmWLQna5jGSgWoIw/
+         6HcmobL+kHWCEKCPFoTQ2Ee0tSc0ZICDRuKv6QEkYPAbbVcWpin8PcDiRnYd8rextou2
+         JoafI3NIbm2NOaVsmGpYOSxocgKCCLu9C1YGlPswru7/PPdFeOqJ2Z3reJguWxZMsjuD
+         Uzyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686309966; x=1688901966;
+        d=1e100.net; s=20221208; t=1686309970; x=1688901970;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=QZXll2p6QZbov35TIhSw5cTUwAtSmPgNFTPxS/Tfy1g=;
-        b=QoL1P9k2Mj9WbBEn7LSVlptHy/NUtCcWnXEh6xtq5Djm9sFSvWGlcj0ZfqkLRNl08Y
-         DmXuMMtJSEVTmkTBjvAjMddHzLh06JuCals7TQmF78J0qlzO0kRkAlJF0bhyuIgMukew
-         EpfL4BlPuHGq+DN4DWriBN9ApDz/yMM1M0lBjjwmXS8MMvKWs05/FlyiCBuWraFWae1R
-         TYixriySKODbXI6gHW2O2b7R8Imy6gD4Iy4hQTmUUWZJwt+uFNR0c1jqfDpEBQMdArIF
-         s4KAoY1cteck5kJocgZqvo0yWoHHpRR8starI45cfGfXW5hxiXFXVg3FR00+nbVnUEf7
-         hYpA==
-X-Gm-Message-State: AC+VfDzhIBJbCkTMF8Jc88VSHvdJ5hc494WnmAr4lBRN8Xpf3GiVKM8T
-        0M4dYYeqte/Y31dgJeg3SZ2yhn5JTIKyErmG3NC0bQ==
-X-Google-Smtp-Source: ACHHUZ7bp1ysdJMaMEi+eLtrGGAq1r8TEKctNxRIp5F2IxkCdI5JO2+zvf2/RVEDGhXRTX2bB0WMRC3r66YKEJzuyl8=
-X-Received: by 2002:a81:52d7:0:b0:561:f6eb:d18a with SMTP id
- g206-20020a8152d7000000b00561f6ebd18amr1049606ywb.13.1686309966417; Fri, 09
- Jun 2023 04:26:06 -0700 (PDT)
+        bh=gMW1YaKatM97etS/62dnKFcc8It58SI65TwJ47R3Y4o=;
+        b=N+tt1ossBkgEBN5M/K7qTjGn2yNhiBBMj3LppUO+y1G1gIf46Ec9K0D1CgHa26zkyk
+         L3N2xMfIrctFMb2t++9GApDTZFpSL6W41gQYg2OFXInGk4KtgFCg0Gx36F4YVAKVVMJ7
+         n9rjzKp+kNY3aw4Wai8Jb1VXEeA8UcD96DkUk/WbCoMMSI+LvBvC9sssVAh73gmFcNE7
+         J8cmcUGM4ndnAMQ5LDJVKiLdk95K7VvVnwgIzuoGUj55rDyqBYHiUxaMOh4nWIEKKmRJ
+         CsXpR1o11t6cIn0hjw1SwOGZCCWB2rnCpAHdYsue98Tek/OJLizjzsPB+sLCFaETwxn3
+         WobQ==
+X-Gm-Message-State: AC+VfDyuJmG8Mv0ZhQwmHX7dV3wYpv9plH8GSVnsXJj9mn6zyQSE92s/
+        QsdZUCvjTatCe7miHAvl8TtXQW3/nthotC/3YHhMAw==
+X-Google-Smtp-Source: ACHHUZ51iWeIcI4UtOC/BFc9wvIIBQstrVDQzsYAqpQDk7l/XUvwqCw2/bTGyHLqwvPF7feAcCjDc2JQ7nKG5uWE++0=
+X-Received: by 2002:a25:ac19:0:b0:ba8:620b:38a7 with SMTP id
+ w25-20020a25ac19000000b00ba8620b38a7mr711573ybi.53.1686309970382; Fri, 09 Jun
+ 2023 04:26:10 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230609101355.5220-1-wenbin.mei@mediatek.com> <20230609101355.5220-2-wenbin.mei@mediatek.com>
-In-Reply-To: <20230609101355.5220-2-wenbin.mei@mediatek.com>
+References: <20230609071441.451464-1-victorshihgli@gmail.com>
+In-Reply-To: <20230609071441.451464-1-victorshihgli@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 9 Jun 2023 13:25:30 +0200
-Message-ID: <CAPDyKFrdLdQakpcMAp8ehZZu27xdPQL_cb12tOkjN0-vPT0F-A@mail.gmail.com>
-Subject: Re: [PATCH v6 1/1] mmc: mtk-sd: reduce CIT for better performance
-To:     Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Alexandre Mergnat <amergnat@baylibre.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        kernel test robot <lkp@intel.com>
+Date:   Fri, 9 Jun 2023 13:25:34 +0200
+Message-ID: <CAPDyKFqQBXeAGS=RmV6HgNetCeJLw0hjFarr28p2m-3MU6N+JQ@mail.gmail.com>
+Subject: Re: [PATCH V6 0/4] Add Genesys Logic GL9767 support
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 9 Jun 2023 at 12:14, Wenbin Mei <wenbin.mei@mediatek.com> wrote:
+On Fri, 9 Jun 2023 at 09:14, Victor Shih <victorshihgli@gmail.com> wrote:
 >
-> CQHCI_SSC1 indicates to CQE the polling period to use when using periodic
-> SEND_QUEUE_STATUS(CMD13) polling.
-> Since MSDC CQE uses msdc_hclk as ITCFVAL, so driver should use hclk
-> frequency to get the actual time.
-> The default value 0x1000 that corresponds to 150us for MediaTek SoCs, let's
-> decrease it to 0x40 that corresponds to 2.35us, which can improve the
-> performance of some eMMC devices.
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
 >
-> Reported-by: kernel test robot <lkp@intel.com>
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-> Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> Reviewed-by: Alexandre Mergnat <amergnat@baylibre.com>
+> These patches support for the GL9767 chipset and add support SD3/SD Express
+> mode for the GL9767.
+>
+> Changes in v6 (June. 9, 2023)
+> * rebased to the linux-kernel-v6.4.0-rc5 in Ulf Hansson next branch.
+> * Patch#2: use usleep_range() to instead msleep() in
+>            gl9767_set_pll() function.
+> * Patch#4: use usleep_range() to instead msleep() in
+>            gl9767_init_sd_express() function.
+>
+> ----------------- original cover letter from v5 -----------------
+> These patches support for the GL9767 chipset and add support SD3/SD Express
+> mode for the GL9767.
+>
+> Changes in v5 (June. 1, 2023)
+> * rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+> * Patch#3: adjust the alignment of definitions.
+>
+> ----------------- original cover letter from v4 -----------------
+> These patches support for the GL9767 chipset and add support SD3/SD Express
+> mode for the GL9767.
+>
+> Changes in v4 (May. 31, 2023)
+> * rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+> * add VDD2 definition for power control-register.
+> * Patch#4: use SDHCI_VDD2_POWER_ON to instead SDHCI_POWER_ON in
+>            gl9767_init_sd_express() function.
+>            use SDHCI_VDD2_POWER_180 to instead SDHCI_POWER_180 in
+>            gl9767_init_sd_express() function.
+>
+> ----------------- original cover letter from v3 -----------------
+> These patches support for the GL9767 chipset and add support SD3/SD Express
+> mode for the GL9767.
+>
+> Changes in v3 (May. 31, 2023)
+> * rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+> * Patch#2: use msleep() to instead mdelay().
+> * Patch#3: modify the if-else condition and content in
+>            gl9767_init_sd_express() function.
+>            adjust the order of definitions.
+>
+> ----------------- original cover letter from v2 -----------------
+> These patches support for the GL9767 chipset and add support SD3/SD Express
+> mode for the GL9767.
+>
+> Changes in v2 (May. 30, 2023)
+> * rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+> * Add set SDR104's clock to 205MHz and enable SSC for GL9767.
+> * drop export sdhci_check_ro() function.
+> * Patch#1: add gl9767_vhs_read() and gl9767_vhs_write().
+> * Patch#3: use mmc->ops->get_ro() to instead sdhci_check_ro().
+>            use msleep() to instead mdelay().
+>            modify the wait time for Power valid to CLKREQ.
+>            drop unused definitions.
+>
+> ----------------- original cover letter from v1 -----------------
+> These patches support for the GL9767 chipset and add support SD3/SD Express
+> mode for the GL9767.
+>
+> Changes in v1 (May. 12, 2023)
+> * rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+> * enable MSI interrupt for the GL9767.
+> * add support SDR mode for the GL9767.
+> * export sdhci_check_ro() function.
+> * add support SD Express mode for the GL9767.
+>
+> Victor Shih (4):
+>   mmc: sdhci-pci-gli: Add Genesys Logic GL9767 support
+>   mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and enable SSC for
+>     GL9767
+>   mmc: sdhci: Add VDD2 definition for power control register
+>   mmc: sdhci-pci-gli: Add support SD Express card for GL9767
+>
+>  drivers/mmc/host/sdhci-pci-core.c |   1 +
+>  drivers/mmc/host/sdhci-pci-gli.c  | 406 ++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pci.h      |   2 +
+>  drivers/mmc/host/sdhci.h          |   7 +
+>  4 files changed, 416 insertions(+)
+>
 
-I have now replaced the v5 with v6, thanks! Applied for next.
+Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
-> the previous patche link:
-> v5: https://patchwork.kernel.org/project/linux-mediatek/patch/20230606113249.28057-2-wenbin.mei@mediatek.com/
-> v4: https://patchwork.kernel.org/project/linux-mediatek/patch/20230605121442.23622-1-wenbin.mei@mediatek.com/
-> v3: https://patchwork.kernel.org/project/linux-mediatek/patch/20230605060107.22044-1-wenbin.mei@mediatek.com/
-> v2: https://patchwork.kernel.org/project/linux-mediatek/patch/20230510015851.11830-1-wenbin.mei@mediatek.com/
-> v1: https://patchwork.kernel.org/project/linux-mediatek/patch/20230419063048.10516-1-wenbin.mei@mediatek.com/
-> ---
->  drivers/mmc/host/cqhci.h  |  3 +++
->  drivers/mmc/host/mtk-sd.c | 46 +++++++++++++++++++++++++++++++++++++++
->  2 files changed, 49 insertions(+)
->
-> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-> index ba9387ed90eb..1a12e40a02e6 100644
-> --- a/drivers/mmc/host/cqhci.h
-> +++ b/drivers/mmc/host/cqhci.h
-> @@ -5,6 +5,7 @@
->  #define LINUX_MMC_CQHCI_H
->
->  #include <linux/compiler.h>
-> +#include <linux/bitfield.h>
->  #include <linux/bitops.h>
->  #include <linux/spinlock_types.h>
->  #include <linux/types.h>
-> @@ -23,6 +24,8 @@
->  /* capabilities */
->  #define CQHCI_CAP                      0x04
->  #define CQHCI_CAP_CS                   0x10000000 /* Crypto Support */
-> +#define CQHCI_CAP_ITCFMUL              GENMASK(15, 12)
-> +#define CQHCI_ITCFMUL(x)               FIELD_GET(CQHCI_CAP_ITCFMUL, (x))
->
->  /* configuration */
->  #define CQHCI_CFG                      0x08
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 8ce864169986..99317fd9f084 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -473,6 +473,7 @@ struct msdc_host {
->         struct msdc_tune_para def_tune_para; /* default tune setting */
->         struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
->         struct cqhci_host *cq_host;
-> +       u32 cq_ssc1_time;
->  };
->
->  static const struct mtk_mmc_compatible mt2701_compat = {
-> @@ -2450,9 +2451,49 @@ static void msdc_hs400_enhanced_strobe(struct mmc_host *mmc,
->         }
->  }
->
-> +static void msdc_cqe_cit_cal(struct msdc_host *host, u64 timer_ns)
-> +{
-> +       struct mmc_host *mmc = mmc_from_priv(host);
-> +       struct cqhci_host *cq_host = mmc->cqe_private;
-> +       u8 itcfmul;
-> +       u64 hclk_freq, value;
-> +
-> +       /*
-> +        * On MediaTek SoCs the MSDC controller's CQE uses msdc_hclk as ITCFVAL
-> +        * so we multiply/divide the HCLK frequency by ITCFMUL to calculate the
-> +        * Send Status Command Idle Timer (CIT) value.
-> +        */
-> +       hclk_freq = (u64)clk_get_rate(host->h_clk);
-> +       itcfmul = CQHCI_ITCFMUL(cqhci_readl(cq_host, CQHCI_CAP));
-> +       switch (itcfmul) {
-> +       case 0x0:
-> +               do_div(hclk_freq, 1000);
-> +               break;
-> +       case 0x1:
-> +               do_div(hclk_freq, 100);
-> +               break;
-> +       case 0x2:
-> +               do_div(hclk_freq, 10);
-> +               break;
-> +       case 0x3:
-> +               break;
-> +       case 0x4:
-> +               hclk_freq = hclk_freq * 10;
-> +               break;
-> +       default:
-> +               host->cq_ssc1_time = 0x40;
-> +               return;
-> +       }
-> +
-> +       value = hclk_freq * timer_ns;
-> +       do_div(value, 1000000000);
-> +       host->cq_ssc1_time = value;
-> +}
-> +
->  static void msdc_cqe_enable(struct mmc_host *mmc)
->  {
->         struct msdc_host *host = mmc_priv(mmc);
-> +       struct cqhci_host *cq_host = mmc->cqe_private;
->
->         /* enable cmdq irq */
->         writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
-> @@ -2462,6 +2503,9 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
->         msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
->         /* default read data timeout 1s */
->         msdc_set_timeout(host, 1000000000ULL, 0);
-> +
-> +       /* Set the send status command idle timer */
-> +       cqhci_writel(cq_host, host->cq_ssc1_time, CQHCI_SSC1);
->  }
->
->  static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
-> @@ -2803,6 +2847,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
->                 /* cqhci 16bit length */
->                 /* 0 size, means 65536 so we don't have to -1 here */
->                 mmc->max_seg_size = 64 * 1024;
-> +               /* Reduce CIT to 0x40 that corresponds to 2.35us */
-> +               msdc_cqe_cit_cal(host, 2350);
->         }
->
->         ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
-> --
-> 2.25.1
->
