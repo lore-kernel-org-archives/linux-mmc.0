@@ -2,78 +2,89 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB9FBC7EE25
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 11:29:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0AC0C7EE29
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 20:48:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230523AbjFIL3R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 07:29:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35978 "EHLO
+        id S229523AbjFIUsW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 16:48:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47586 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231168AbjFIL2s (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 07:28:48 -0400
-Received: from mail-oa1-x2b.google.com (mail-oa1-x2b.google.com [IPv6:2001:4860:4864:20::2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D2512712
-        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 04:28:46 -0700 (PDT)
-Received: by mail-oa1-x2b.google.com with SMTP id 586e51a60fabf-1a1b95cc10eso599375fac.0
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2023 04:28:46 -0700 (PDT)
+        with ESMTP id S232562AbjFIUsP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 16:48:15 -0400
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2F9D30FB
+        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 13:48:11 -0700 (PDT)
+Received: by mail-wm1-x330.google.com with SMTP id 5b1f17b1804b1-3f7a8089709so22737055e9.1
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2023 13:48:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686310125; x=1688902125;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=h+xlmvh6V5XUTOvaVdo2oTM812lLj1/E/Gtn582Obak=;
-        b=uTs0VD/ITW7mLUURZ5Ak/QYqWcuuDnloinfJm3WFEXFYd3//u2zGnKOP6Ts/OZZvYI
-         8vpIl1qtvPyUlt/+7r6OBL4/WprFUavnChMrZ185PWXpYSub7nSxc0QBgTjmlQGJ0Xaa
-         01CdDKIGtMzpD27tl5dRiXvrrj79EKn2rmtTxgwCqjf/dpyqZjYCim9yIb0EyltJl2gZ
-         PtxALFR4gCZFmziUVp4YY3BaH35EaFo8y3Xnk0cl/gIneGoik4TxFgimCzHbnAf54J1Q
-         3c78ZDeJrV3zbswcbZeoYEFViUC+4V0jj5VoAZgou183e2shSkU3CqXC0Iq/vL8JIKbJ
-         ofCQ==
+        d=gmail.com; s=20221208; t=1686343690; x=1688935690;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Qkw6POg+UiSa/tDDN/c67pcevto53fUQ+msTiW09Vyc=;
+        b=hbJNMmJxwNI/MtOmJJLuvJcbvUD1wSww24GFjyFd7F+tT+wq5z10JucO/gEqLhRNN5
+         Be6AS1Crl9jK4eDeJAa0g9fyTAOiu8deDoVM1uPK250EhBz8nuvr5lvFcY8SnV0vnaQ+
+         pEHA+1d0f8TVU9/JPpM9CwdsTEdWX/QwRvnvbSGL0tkyl8LsW6lQ3rvluFbv8XwO4ChY
+         6RPDJTuVIacvjUv+1TGEbeEWKckyHQh8zpavfbuO2ndnUOknBV9IxMz65+YfkLv0eisM
+         FXooCa5j8OYXhKuJJIKC4h621kELPhQ9fGjkgBNoGfRW6Hrr4bJL0B3YdeUrIbTxvWzd
+         kwYw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686310125; x=1688902125;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=h+xlmvh6V5XUTOvaVdo2oTM812lLj1/E/Gtn582Obak=;
-        b=ZHIDx1yjtz6S68obZf4mP8XSUxrYbWqeC3A5uwOk/YYsftJD1/lXYlgv2ddqkfBbdQ
-         9gUx+5y6TxtJiLSmk8Ps9To+2X58OLzIvBrdcJveZEnZwnBnufaJOAdlBAO0rblpW/+1
-         Tp6iZZQxrZrF0Mc26eV16aH3aLeC/HZdGDpeEydYQOS6wPqZ+Dxxl9s0hB/kqf69yGim
-         eEhFRAHKthMD4/1f/pEjaiq9EKyHwBD2lQPDdUO31+urY1I8lBJzadfvrGpeMldJn8vW
-         gFHiQCyJofwLUKtYvtunHXfbNyVxwTxSVuN3XbDkNUNjGIAD9ytBSfwFNWfnKUshpf0y
-         y+6Q==
-X-Gm-Message-State: AC+VfDwCrQcs1XqEbTj0VzpfForRuwCV66rHHSf6ZxsdyvtnYzTBrWjE
-        /BCnw5RYYW+Ow4x7PdUn9Bb4LZjmPFQ2RlJpVsDnTQ==
-X-Google-Smtp-Source: ACHHUZ5bvJWQ2B+G0u8EMiVWzaEFYIgGCw5RRiYPOkFWx/IaFZ885mQfPKSIdWEuuVd3xOp55Qqn1oA9kXRygQ2mMjs=
-X-Received: by 2002:a05:6870:e14b:b0:19d:6f68:c3f with SMTP id
- z11-20020a056870e14b00b0019d6f680c3fmr958102oaa.33.1686310125565; Fri, 09 Jun
- 2023 04:28:45 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1686343690; x=1688935690;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Qkw6POg+UiSa/tDDN/c67pcevto53fUQ+msTiW09Vyc=;
+        b=h+/92W4qHvC0rGU4dzPbooBMX/ouAi8RmquwAhDBNXR+t19UyArSneNwgncd08kO2O
+         KUPotTugF2MWmcURyFvvgZlvL3BCNwIDUMDTELNtyA8g8JSakPgdGKn22blFAlUAESIF
+         CZty5NRintcisyIPgE/Hjw2Y5jnTCWhK0zrFImL6DMpdfNMUKFztn/RHTmEXn7j/DovY
+         rmFuWCEivAgj5MzwLEBCYNsaeuzQ6zxDSeELDF9W1EI9u1hKFazBGgydw0f54+GgHwMw
+         dMjCi7Q4gC/H1Bw1CvIwZ2/a6fbEMY8K9WYaRr0O4PCH1uhwUnrIRrZxEydXbPrpVhMJ
+         a+AA==
+X-Gm-Message-State: AC+VfDw0oDTZBeQpzxIErF29vsQM11rLRjzDCzT6edQkvZGu1IRMVdtQ
+        n8043jyKwEGsQFvZDJVBxGIUQ1lzWoyshPVL
+X-Google-Smtp-Source: ACHHUZ79pHXyNg/GeZcnO8Z13MoKQknwF39Km8lFfNBOCfmvqyiHEyYX/MvE3nyh4hxv029fo3gK6Q==
+X-Received: by 2002:a1c:750a:0:b0:3f8:651:e640 with SMTP id o10-20020a1c750a000000b003f80651e640mr2008273wmc.33.1686343690282;
+        Fri, 09 Jun 2023 13:48:10 -0700 (PDT)
+Received: from jernej-laptop.localnet (89-212-118-115.static.t-2.net. [89.212.118.115])
+        by smtp.gmail.com with ESMTPSA id y19-20020a05600c365300b003f7f60203ffsm3646448wmq.25.2023.06.09.13.48.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 09 Jun 2023 13:48:09 -0700 (PDT)
+From:   Jernej =?utf-8?B?xaBrcmFiZWM=?= <jernej.skrabec@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        Sergey Shtylyov <s.shtylyov@omp.ru>
+Cc:     Chen-Yu Tsai <wens@csie.org>, Samuel Holland <samuel@sholland.org>,
+        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev
+Subject: Re: [PATCH v2 11/12] mmc: sunxi: fix deferred probing
+Date:   Fri, 09 Jun 2023 22:48:08 +0200
+Message-ID: <8272212.NyiUUSuA9g@jernej-laptop>
+In-Reply-To: <20230608194519.10665-12-s.shtylyov@omp.ru>
+References: <20230608194519.10665-1-s.shtylyov@omp.ru>
+ <20230608194519.10665-12-s.shtylyov@omp.ru>
 MIME-Version: 1.0
-References: <20230609071441.451464-1-victorshihgli@gmail.com>
- <20230609071441.451464-4-victorshihgli@gmail.com> <CAK00qKDkZ1wbxO+iyryrWv2KeXoZ6DMMrip215A2rds494hkGQ@mail.gmail.com>
-In-Reply-To: <CAK00qKDkZ1wbxO+iyryrWv2KeXoZ6DMMrip215A2rds494hkGQ@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 9 Jun 2023 13:28:09 +0200
-Message-ID: <CAPDyKFoe8jjTseeqS8532jgjMj28A80WW4U7YdStVgxtOqcq1g@mail.gmail.com>
-Subject: Re: [PATCH V6 3/4] mmc: sdhci: Add VDD2 definition for power control register
-To:     Victor Shih <victorshihgli@gmail.com>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Transfer-Encoding: quoted-printable
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 9 Jun 2023 at 09:40, Victor Shih <victorshihgli@gmail.com> wrote:
->
-> Hi, Ulf
->
->       This patch has been acked by Adrian in patch v5, but I forgot to
-> add in this patch version, sorry.
+Dne =C4=8Detrtek, 08. junij 2023 ob 21:45:18 CEST je Sergey Shtylyov napisa=
+l(a):
+> The driver overrides the error codes and IRQ0 returned by platform_get_ir=
+q()
+> to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
+> permanently instead of the deferred probing. Switch to propagating the er=
+ror
+> codes upstream.  IRQ0 is no longer returned by platform_get_irq(), so we =
+now
+> can safely ignore it...
+>=20
+> Fixes: 2408a08583d ("mmc: sunxi-mmc: Handle return value of platform_get_=
+irq")
+> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 
-Thanks for letting me know, I have added Adrian's ack.
+Reviewed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
 
-[...]
+Best regards,
+Jernej
 
-Kind regards
-Uffe
+
