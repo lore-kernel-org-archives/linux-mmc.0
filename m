@@ -2,96 +2,247 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D728C7EE29
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 05:44:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25CCCC7EE2E
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 06:20:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230131AbjFIFos (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 01:44:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58850 "EHLO
+        id S230272AbjFIGUA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 02:20:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41170 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229537AbjFIFor (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 01:44:47 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1182926B9
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jun 2023 22:44:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1686289486; x=1717825486;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=x2FUYSdN6Y63ATkUg2OnfBrFXj8JYi8enB1fWifzzt0=;
-  b=Tm9gyRNjSgKkHCpJeBpbI0TAsosomByiteQUd3WT1u7rb1PUGY+H7Wau
-   NYaqej+I1/Dmqw9HYHeXBobjkjsHcCTzW1acufBEZQsFB3vk4q67HC47U
-   JmTRRCkNI3uhGi3PdKeW4KmGDClybrn6Oac5OufoA205J3ypNB6BjP1BG
-   h9uVhagEbfDwX4cGaCygDE64SdSLPTyLKETFf+sfZk3eQa9D4ze8pM2LG
-   AXOsftlcm1wvZBMfb6O25ju8yv0NqFwR9w7Xe+UTVvpz/tBeXv8bmZV/N
-   CmqTHgaV3XGkU+tA1R1+P9KeFyM3HUFw/2alfENkGfq2ikIeSB+Wf80Av
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10735"; a="342195586"
-X-IronPort-AV: E=Sophos;i="6.00,228,1681196400"; 
-   d="scan'208";a="342195586"
-Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jun 2023 22:44:41 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10735"; a="710243068"
-X-IronPort-AV: E=Sophos;i="6.00,228,1681196400"; 
-   d="scan'208";a="710243068"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.211.96])
-  by orsmga002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jun 2023 22:44:39 -0700
-Message-ID: <f41d0260-ae0b-1862-c2b5-245b917714b4@intel.com>
-Date:   Fri, 9 Jun 2023 08:44:37 +0300
+        with ESMTP id S237714AbjFIGT5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 02:19:57 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B31201FE6;
+        Thu,  8 Jun 2023 23:19:55 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 39FEC61F4D;
+        Fri,  9 Jun 2023 06:19:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 22F74C433D2;
+        Fri,  9 Jun 2023 06:19:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1686291594;
+        bh=rYenQZcJ00i17NHmowq8OR4nZ3oLcojXfyMw7FepXj0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=tTlMUimOBD6RM7QFRTDo/wB8rf6G9d8Z/wZ42CaPO3yJMTu6HX5uZjb6ghGSdpGSf
+         WH927+9XmwqtpCrBvTzTrerP84U+dPjAPisC1I6jMW6cWRvve+3vMe5Zd9EnGAzzST
+         p7IisharJdAwvl6Fc35v1W+wHzZaS/5EVYeDrt/g=
+Date:   Fri, 9 Jun 2023 08:19:51 +0200
+From:   Greg KH <gregkh@linuxfoundation.org>
+To:     Dennis Zhou <dennis@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <2023060930-uphold-collie-3ec5@gregkh>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+ <ZCclEE6Qw3on7/eO@snowbird>
+ <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
+ <CAPDyKFos3i60U0g0vJstetvLMyouiTpUP8-Jop_LMB9T-ZNU=w@mail.gmail.com>
+ <ZII-vJWGb7F97S_A@V92F7Y9K0C.corp.robot.car>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.12.0
-Subject: Re: [PATCH v2 09/12] mmc: sdhci-spear: fix deferred probing
-Content-Language: en-US
-To:     Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Viresh Kumar <vireshk@kernel.org>
-References: <20230608194519.10665-1-s.shtylyov@omp.ru>
- <20230608194519.10665-10-s.shtylyov@omp.ru>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230608194519.10665-10-s.shtylyov@omp.ru>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZII-vJWGb7F97S_A@V92F7Y9K0C.corp.robot.car>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/06/23 22:45, Sergey Shtylyov wrote:
-> The driver overrides the error codes and IRQ0 returned by platform_get_irq()
-> to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
-> permanently instead of the deferred probing. Switch to propagating the error
-> codes upstream.  IRQ0 is no longer returned by platform_get_irq(), so we now
-> can safely ignore it...
+On Thu, Jun 08, 2023 at 01:49:00PM -0700, Dennis Zhou wrote:
+> On Fri, May 12, 2023 at 01:42:51PM +0200, Ulf Hansson wrote:
+> > + Linus,
+> > 
+> > Hi Dennis,
+> > 
+> > On Mon, 3 Apr 2023 at 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > >
+> > > On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
+> > > >
+> > > > Hi Ulf,
+> > > >
+> > > > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
+> > > > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
+> > > > > >
+> > > > > > When using dm-verity with a data partition on an emmc device, dm-verity
+> > > > > > races with the discovery of attached emmc devices. This is because mmc's
+> > > > > > probing code sets up the host data structure then a work item is
+> > > > > > scheduled to do discovery afterwards. To prevent this race on init,
+> > > > > > let's inline the first call to detection, __mm_scan(), and let
+> > > > > > subsequent detect calls be handled via the workqueue.
+> > > > >
+> > > > > In principle, I don't mind the changes in $subject patch, as long as
+> > > > > it doesn't hurt the overall initialization/boot time. Especially, we
+> > > > > may have more than one mmc-slot being used, so this needs to be well
+> > > > > tested.
+> > > > >
+> > > >
+> > > > I unfortunately don't have a device with multiple mmcs available. Is
+> > > > this something you could help me with?
+> > >
+> > > Yes, I can help to test. Allow me a few days to see what I can do.
+> > >
+> > > Note that, just having one eMMC and one SD card should work too. It
+> > > doesn't have to be multiple eMMCs.
+> > >
+> > > >
+> > > > > Although, more importantly, I fail to understand how this is going to
+> > > > > solve the race condition. Any I/O request to an eMMC or SD requires
+> > > > > the mmc block device driver to be up and running too, which is getting
+> > > > > probed from a separate module/driver that's not part of mmc_rescan().
+> > > >
+> > > > I believe the call chain is something like this:
+> > > >
+> > > > __mmc_rescan()
+> > > >     mmc_rescan_try_freq()
+> > > >         mmc_attach_mmc()
+> > > >             mmc_add_card()
+> > > >                 device_add()
+> > > >                     bus_probe_device()
+> > > >                         mmc_blk_probe()
+> > > >
+> > > > The initial calling of this is the host probe. So effectively if there
+> > > > is a card attached, we're inlining the device_add() call for the card
+> > > > attached rather than waiting for the workqueue item to kick off.
+> > > >
+> > > > dm is a part of late_initcall() while mmc is a module_init(), when built
+> > > > in becoming a device_initcall(). So this solves a race via the initcall
+> > > > chain. In the current state, device_initcall() finishes and we move onto
+> > > > the late_initcall() phase. But now, dm is racing with the workqueue to
+> > > > init the attached emmc device.
+> > >
+> > > You certainly have a point!
+> > >
+> > > This should work when the mmc blk module is built-in. Even if that
+> > > doesn't solve the entire problem, it should be a step in the right
+> > > direction.
+> > >
+> > > I will give it some more thinking and run some tests at my side, then
+> > > I will get back to you again.
+> > >
+> > > Kind regards
+> > > Uffe
+> > >
+> > > > >
+> > > > > >
+> > > > > > Signed-off-by: Dennis Zhou <dennis@kernel.org>
+> > > > > > ---
+> > > > > > Sigh.. fix missing static declaration.
+> > > > > >
+> > > > > >  drivers/mmc/core/core.c | 15 +++++++++++----
+> > > > > >  1 file changed, 11 insertions(+), 4 deletions(-)
+> > > > > >
+> > > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > > > > index 368f10405e13..fda7ee57dee3 100644
+> > > > > > --- a/drivers/mmc/core/core.c
+> > > > > > +++ b/drivers/mmc/core/core.c
+> > > > > > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+> > > > > >  }
+> > > > > >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> > > > > >
+> > > > > > -void mmc_rescan(struct work_struct *work)
+> > > > > > +static void __mmc_rescan(struct mmc_host *host)
+> > > > > >  {
+> > > > > > -       struct mmc_host *host =
+> > > > > > -               container_of(work, struct mmc_host, detect.work);
+> > > > > >         int i;
+> > > > > >
+> > > > > >         if (host->rescan_disable)
+> > > > > > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> > > > > >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> > > > > >  }
+> > > > > >
+> > > > > > +void mmc_rescan(struct work_struct *work)
+> > > > > > +{
+> > > > > > +       struct mmc_host *host =
+> > > > > > +               container_of(work, struct mmc_host, detect.work);
+> > > > > > +
+> > > > > > +       __mmc_rescan(host);
+> > > > > > +}
+> > > > > > +
+> > > > > >  void mmc_start_host(struct mmc_host *host)
+> > > > > >  {
+> > > > > >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> > > > > > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> > > > > >         }
+> > > > > >
+> > > > > >         mmc_gpiod_request_cd_irq(host);
+> > > > > > -       _mmc_detect_change(host, 0, false);
+> > > > > > +       host->detect_change = 1;
+> > > > > > +       __mmc_rescan(host);
+> > > > > >  }
+> > > > > >
+> > > > > >  void __mmc_stop_host(struct mmc_host *host)
+> > > > > > --
+> > > > > > 2.40.0
+> > > > > >
+> > 
+> > My apologies for the long delay. I finally managed to test this.
+> > 
+> > I decided to pick an old arm32 based platform. An ST-Ericsson HREF,
+> > based upon the ux500 SoC. It's quite good to use for these types of
+> > tests as it has two eMMCs soldered, an embedded SDIO (for WiFi) and an
+> > SD-card slot. So in total there are 4 devices that get probed.
+> > 
+> > The SDIO card isn't detected properly, but always fails in the similar
+> > way (thus I left it out from the below data). I tested both with and
+> > without an SD card inserted during boot, to get some more data to
+> > compare. These are the summary from my tests:
+> > 
+> > v6.4-rc1 without SD card:
+> > ~2.18s - MMC1 (eMMC)
+> > ~3.33s - MMC3 (eMMC)
+> > ~5.91s - kernel boot complete
+> > 
+> > v6.4-rc1 with an SD card:
+> > ~2.18s - MMC1 (eMMC)
+> > ~3.45s - MMC3 (eMMC)
+> > ~3.57s - MMC2 (SD)
+> > ~5.76s - kernel boot complete
+> > 
+> > v6.4-rc1 + patch without SD card:
+> > ~2.24s - MMC1 (eMMC)
+> > ~3.58s - MMC3 (eMMC)
+> > ~5.96s - kernel boot complete
+> > 
+> > v6.4-rc1 + patch with an SD card:
+> > ~2.24s - MMC1 (eMMC)
+> > ~3.73s - MMC2 (SD)
+> > ~3.98s - MMC3 (eMMC)
+> > ~6.73s - kernel boot complete
+> > 
+> > By looking at these results, I was kind of surprised. I was thinking
+> > that the asynchronous probe should address the parallelism problem.
+> > Then I discovered that it in fact, hasn't been enabled for the mmci
+> > driver that is being used for this platform. Huh, I was under the
+> > assumption that it has been enabled for all mmc hosts by now. :-)
+> > 
+> > Okay, so I am going to run another round of tests, with async probe
+> > enabled for the mmci driver too. I will let you know the results as
+> > soon as I can.
+> > 
+> > Kind regards
+> > Uffe
 > 
-> Fixes: 682798a596a6 ("mmc: sdhci-spear: Handle return value of platform_get_irq")
-> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
-> Changes in version 2:
-> - slightly reformatted the patch description.
+> Hi Uffe,
 > 
->  drivers/mmc/host/sdhci-spear.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> Kindly this has been way too long for review. It's been over 3 months.
+> What's going on here?
 > 
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-> index d463e2fd5b1a..c79035727b20 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -65,8 +65,8 @@ static int sdhci_probe(struct platform_device *pdev)
->  	host->hw_name = "sdhci";
->  	host->ops = &sdhci_pltfm_ops;
->  	host->irq = platform_get_irq(pdev, 0);
-> -	if (host->irq <= 0) {
-> -		ret = -EINVAL;
-> +	if (host->irq < 0) {
-> +		ret = host->irq;
->  		goto err_host;
->  	}
->  	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
+> I think there's a misunderstanding too. Without this fix, the machine
+> doesn't even boot. I'm not sure why perf is the blocking question here.
 
+Well you can not degrade performance of existing machines that work
+today, right?  That would be a regression and it seems that you are
+doing that if I read the numbers above correctly.
+
+> Greg, is there another tree I can run this through?
+
+Why would you want to route around a maintainer just to get a patch that
+would have to be reverted applied?  :)
+
+thanks,
+
+greg k-h
