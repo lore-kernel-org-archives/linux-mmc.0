@@ -2,248 +2,278 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8A44C7EE25
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:15:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A98CDC7EE25
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:17:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230249AbjFIHPD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 03:15:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36482 "EHLO
+        id S230255AbjFIHRS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 03:17:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37138 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236735AbjFIHO7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:14:59 -0400
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FEE8272A;
-        Fri,  9 Jun 2023 00:14:58 -0700 (PDT)
-Received: by mail-pf1-x42e.google.com with SMTP id d2e1a72fcca58-652328c18d5so1114555b3a.1;
-        Fri, 09 Jun 2023 00:14:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1686294898; x=1688886898;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KT0A5bV8ZYXawSlOJrCHBHsTa040z+BQD92gFxV4MLs=;
-        b=f+Gzb/O9ONy4V3craqn1xqfoBmwxFm/9/D8pFW113pDkD7+cFd2oYAxzmAupiz1qdz
-         DTGPcOgLTq/Z5YLHjFiNWjeMwz9HLYuG3Bo5+N3zxJhbEXKwmAvz3bhFI4Qfi1BrvzKP
-         gzjqWSCMyQ1PC2vjjYhKlqmJaDnH3JifqBPXAPmzu/ZBzLgr5JiNAiAHfxXTExM+Uelz
-         B62I//NCXnyKlZcKQhwM+bsxp37yB9BX6uIk/n6af1oNBHoN+7CTj8rtnci5hoNLjYW/
-         XzkyueDiasEz+Os0EPkN2dVHIUhNmEhm78n160/mvjatDWdX9VY2h+ob85ERF3Pt+S83
-         6cYw==
+        with ESMTP id S238363AbjFIHQv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:16:51 -0400
+Received: from mail-oo1-f49.google.com (mail-oo1-f49.google.com [209.85.161.49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBED33C0C;
+        Fri,  9 Jun 2023 00:16:25 -0700 (PDT)
+Received: by mail-oo1-f49.google.com with SMTP id 006d021491bc7-55a35e2a430so955141eaf.0;
+        Fri, 09 Jun 2023 00:16:24 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686294898; x=1688886898;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=KT0A5bV8ZYXawSlOJrCHBHsTa040z+BQD92gFxV4MLs=;
-        b=dtNl1UfKCgRFNEchPvkICs1bEKyVD7ge0JG8kzeWIqrMe2GHpu86Iswv+iv/MYYqYm
-         rCPPb22fNNF6syEnsAabqq3n8S9tEreHroSIl+6qmEOJE/43U8Ve4A/oJ3gmOF7OtQeN
-         4PiSbhx8xjwLrHAXOT64VUmCEfJsXngDECe13zf6G6T5GDfp3W2tQMyk4ceqwTAF2jxA
-         cVRZ87+imhhCgZiZ3zYoUKULwcDEfmnXDJ/YNn6AmEnNt5S9vwTVMWBY8mSs7T1+bfme
-         fS+DcCG/BNnVxCAfXoDUQtoXE2KpLZOb22n4Kr7Ai+DPso3bF/8hkgLD7AKKjMGL2yc3
-         k0qQ==
-X-Gm-Message-State: AC+VfDw9m/OeuIsiS6/BCpZPkjHmiLPo5JFpNFUIkDXB2EImv4gdchYL
-        YX40/aXfBKtXsK9YQ2RbhyM=
-X-Google-Smtp-Source: ACHHUZ453IOo9d0ruz+N+SvHUFLXaRPKHO6jrIKhAWnIqDkMmZRg92Ijo2cm0JujRdHo87JawBhdRw==
-X-Received: by 2002:a05:6a21:170e:b0:112:bdd3:9b81 with SMTP id nv14-20020a056a21170e00b00112bdd39b81mr329825pzb.15.1686294897666;
-        Fri, 09 Jun 2023 00:14:57 -0700 (PDT)
-Received: from localhost.localdomain (2001-b400-e282-07a7-2523-0b40-49e4-7cbb.emome-ip6.hinet.net. [2001:b400:e282:7a7:2523:b40:49e4:7cbb])
-        by smtp.gmail.com with ESMTPSA id f3-20020a656283000000b005308b255502sm2085196pgv.68.2023.06.09.00.14.55
+        d=1e100.net; s=20221208; t=1686294983; x=1688886983;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qlEnrejP306tfhpMplsX5giHdTZA+I7y4O+BUMi+2Nw=;
+        b=VsLIa+FZlxfaW8jJvHxPTGu0P/JYnE0mk8da2ZXD3OXnjGHLjJARU1WYN3DGa2kbIX
+         zvO7/Mdekam4de1DfRY8hBsUwLLDRFcz5oQS/ENWPR5DwSLnXNmEnY9dQmeWPWxBLaWf
+         GjWy0WIGoBb4v+YDcVm5cjWJ4UG+TF0R1ynTCDEfwwiuSCca5lmohWnVwQLKzze1egVc
+         B4GdCygzoj+jnjH1boRZDf2Nini/keFXkzhVas6eqIehrNHHjssiwpFztBVik3E5ILM4
+         QueX0ImthS+6/ffbStYwPcYeJjrm7VYHzpWXM27pPaq3YzZsDphIEV6vWkOiyMKYxDIv
+         /SNw==
+X-Gm-Message-State: AC+VfDywfrzNJhrFJLMUXevSqLnCEnX3oLHvVRG/7XWWQhIHbVvfqDHo
+        s3Be8oeNZU7eWERzVb6PZVi/fcRtPBTpO6/u
+X-Google-Smtp-Source: ACHHUZ7SrNSlU2WosgDGI7REMShGdA6SZ0kmck6mCg91omwKNXMJ7aMVd6n1aKUIlqz4pakbhb4MFw==
+X-Received: by 2002:a05:6808:1803:b0:39c:73b1:ac0 with SMTP id bh3-20020a056808180300b0039c73b10ac0mr959697oib.5.1686294982719;
+        Fri, 09 Jun 2023 00:16:22 -0700 (PDT)
+Received: from V92F7Y9K0C.lan ([136.25.84.107])
+        by smtp.gmail.com with ESMTPSA id g3-20020a17090a3c8300b0024e33c69ee5sm2264883pjc.5.2023.06.09.00.16.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Jun 2023 00:14:57 -0700 (PDT)
-From:   Victor Shih <victorshihgli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, Victor Shih <victorshihgli@gmail.com>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V6 4/4] mmc: sdhci-pci-gli: Add support SD Express card for GL9767
-Date:   Fri,  9 Jun 2023 15:14:41 +0800
-Message-Id: <20230609071441.451464-5-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230609071441.451464-1-victorshihgli@gmail.com>
-References: <20230609071441.451464-1-victorshihgli@gmail.com>
+        Fri, 09 Jun 2023 00:16:22 -0700 (PDT)
+Date:   Fri, 9 Jun 2023 00:16:19 -0700
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Greg KH <gregkh@linuxfoundation.org>
+Cc:     Dennis Zhou <dennis@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <ZILRw9MBGNwH9NsG@V92F7Y9K0C.lan>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+ <ZCclEE6Qw3on7/eO@snowbird>
+ <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
+ <CAPDyKFos3i60U0g0vJstetvLMyouiTpUP8-Jop_LMB9T-ZNU=w@mail.gmail.com>
+ <ZII-vJWGb7F97S_A@V92F7Y9K0C.corp.robot.car>
+ <2023060930-uphold-collie-3ec5@gregkh>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2023060930-uphold-collie-3ec5@gregkh>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+Hi Greg,
 
-Add support SD Express card for GL9767. The workflow of the
-SD Express card in GL9767 is as below.
-1. GL9767 operates in SD mode and set MMC_CAP2_SD_EXP flag.
-2. If card is inserted, Host send CMD8 to ask the capabilities
-   of the card.
-3. If the card has PCIe capability, then init_sd_express()
-   will be invoked.
-4. If the card has been put in write protect state then the
-   SD features supported by SD mode but not supported by
-   PCIe mode, therefore GL9767 switch to SD mode.
-5. If the card has not been put in write protect state then
-   GL9767 switch from SD mode to PCIe/NVMe mode and mmc driver
-   handover control to NVMe driver.
-6. If card is removed, GL9767 will return to SD mode.
+On Fri, Jun 09, 2023 at 08:19:51AM +0200, Greg KH wrote:
+> On Thu, Jun 08, 2023 at 01:49:00PM -0700, Dennis Zhou wrote:
+> > On Fri, May 12, 2023 at 01:42:51PM +0200, Ulf Hansson wrote:
+> > > + Linus,
+> > > 
+> > > Hi Dennis,
+> > > 
+> > > On Mon, 3 Apr 2023 at 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > > >
+> > > > On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
+> > > > >
+> > > > > Hi Ulf,
+> > > > >
+> > > > > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
+> > > > > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
+> > > > > > >
+> > > > > > > When using dm-verity with a data partition on an emmc device, dm-verity
+> > > > > > > races with the discovery of attached emmc devices. This is because mmc's
+> > > > > > > probing code sets up the host data structure then a work item is
+> > > > > > > scheduled to do discovery afterwards. To prevent this race on init,
+> > > > > > > let's inline the first call to detection, __mm_scan(), and let
+> > > > > > > subsequent detect calls be handled via the workqueue.
+> > > > > >
+> > > > > > In principle, I don't mind the changes in $subject patch, as long as
+> > > > > > it doesn't hurt the overall initialization/boot time. Especially, we
+> > > > > > may have more than one mmc-slot being used, so this needs to be well
+> > > > > > tested.
+> > > > > >
+> > > > >
+> > > > > I unfortunately don't have a device with multiple mmcs available. Is
+> > > > > this something you could help me with?
+> > > >
+> > > > Yes, I can help to test. Allow me a few days to see what I can do.
+> > > >
+> > > > Note that, just having one eMMC and one SD card should work too. It
+> > > > doesn't have to be multiple eMMCs.
+> > > >
+> > > > >
+> > > > > > Although, more importantly, I fail to understand how this is going to
+> > > > > > solve the race condition. Any I/O request to an eMMC or SD requires
+> > > > > > the mmc block device driver to be up and running too, which is getting
+> > > > > > probed from a separate module/driver that's not part of mmc_rescan().
+> > > > >
+> > > > > I believe the call chain is something like this:
+> > > > >
+> > > > > __mmc_rescan()
+> > > > >     mmc_rescan_try_freq()
+> > > > >         mmc_attach_mmc()
+> > > > >             mmc_add_card()
+> > > > >                 device_add()
+> > > > >                     bus_probe_device()
+> > > > >                         mmc_blk_probe()
+> > > > >
+> > > > > The initial calling of this is the host probe. So effectively if there
+> > > > > is a card attached, we're inlining the device_add() call for the card
+> > > > > attached rather than waiting for the workqueue item to kick off.
+> > > > >
+> > > > > dm is a part of late_initcall() while mmc is a module_init(), when built
+> > > > > in becoming a device_initcall(). So this solves a race via the initcall
+> > > > > chain. In the current state, device_initcall() finishes and we move onto
+> > > > > the late_initcall() phase. But now, dm is racing with the workqueue to
+> > > > > init the attached emmc device.
+> > > >
+> > > > You certainly have a point!
+> > > >
+> > > > This should work when the mmc blk module is built-in. Even if that
+> > > > doesn't solve the entire problem, it should be a step in the right
+> > > > direction.
+> > > >
+> > > > I will give it some more thinking and run some tests at my side, then
+> > > > I will get back to you again.
+> > > >
+> > > > Kind regards
+> > > > Uffe
+> > > >
+> > > > > >
+> > > > > > >
+> > > > > > > Signed-off-by: Dennis Zhou <dennis@kernel.org>
+> > > > > > > ---
+> > > > > > > Sigh.. fix missing static declaration.
+> > > > > > >
+> > > > > > >  drivers/mmc/core/core.c | 15 +++++++++++----
+> > > > > > >  1 file changed, 11 insertions(+), 4 deletions(-)
+> > > > > > >
+> > > > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > > > > > index 368f10405e13..fda7ee57dee3 100644
+> > > > > > > --- a/drivers/mmc/core/core.c
+> > > > > > > +++ b/drivers/mmc/core/core.c
+> > > > > > > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+> > > > > > >  }
+> > > > > > >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> > > > > > >
+> > > > > > > -void mmc_rescan(struct work_struct *work)
+> > > > > > > +static void __mmc_rescan(struct mmc_host *host)
+> > > > > > >  {
+> > > > > > > -       struct mmc_host *host =
+> > > > > > > -               container_of(work, struct mmc_host, detect.work);
+> > > > > > >         int i;
+> > > > > > >
+> > > > > > >         if (host->rescan_disable)
+> > > > > > > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> > > > > > >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> > > > > > >  }
+> > > > > > >
+> > > > > > > +void mmc_rescan(struct work_struct *work)
+> > > > > > > +{
+> > > > > > > +       struct mmc_host *host =
+> > > > > > > +               container_of(work, struct mmc_host, detect.work);
+> > > > > > > +
+> > > > > > > +       __mmc_rescan(host);
+> > > > > > > +}
+> > > > > > > +
+> > > > > > >  void mmc_start_host(struct mmc_host *host)
+> > > > > > >  {
+> > > > > > >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> > > > > > > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> > > > > > >         }
+> > > > > > >
+> > > > > > >         mmc_gpiod_request_cd_irq(host);
+> > > > > > > -       _mmc_detect_change(host, 0, false);
+> > > > > > > +       host->detect_change = 1;
+> > > > > > > +       __mmc_rescan(host);
+> > > > > > >  }
+> > > > > > >
+> > > > > > >  void __mmc_stop_host(struct mmc_host *host)
+> > > > > > > --
+> > > > > > > 2.40.0
+> > > > > > >
+> > > 
+> > > My apologies for the long delay. I finally managed to test this.
+> > > 
+> > > I decided to pick an old arm32 based platform. An ST-Ericsson HREF,
+> > > based upon the ux500 SoC. It's quite good to use for these types of
+> > > tests as it has two eMMCs soldered, an embedded SDIO (for WiFi) and an
+> > > SD-card slot. So in total there are 4 devices that get probed.
+> > > 
+> > > The SDIO card isn't detected properly, but always fails in the similar
+> > > way (thus I left it out from the below data). I tested both with and
+> > > without an SD card inserted during boot, to get some more data to
+> > > compare. These are the summary from my tests:
+> > > 
+> > > v6.4-rc1 without SD card:
+> > > ~2.18s - MMC1 (eMMC)
+> > > ~3.33s - MMC3 (eMMC)
+> > > ~5.91s - kernel boot complete
+> > > 
+> > > v6.4-rc1 with an SD card:
+> > > ~2.18s - MMC1 (eMMC)
+> > > ~3.45s - MMC3 (eMMC)
+> > > ~3.57s - MMC2 (SD)
+> > > ~5.76s - kernel boot complete
+> > > 
+> > > v6.4-rc1 + patch without SD card:
+> > > ~2.24s - MMC1 (eMMC)
+> > > ~3.58s - MMC3 (eMMC)
+> > > ~5.96s - kernel boot complete
+> > > 
+> > > v6.4-rc1 + patch with an SD card:
+> > > ~2.24s - MMC1 (eMMC)
+> > > ~3.73s - MMC2 (SD)
+> > > ~3.98s - MMC3 (eMMC)
+> > > ~6.73s - kernel boot complete
+> > > 
+> > > By looking at these results, I was kind of surprised. I was thinking
+> > > that the asynchronous probe should address the parallelism problem.
+> > > Then I discovered that it in fact, hasn't been enabled for the mmci
+> > > driver that is being used for this platform. Huh, I was under the
+> > > assumption that it has been enabled for all mmc hosts by now. :-)
+> > > 
+> > > Okay, so I am going to run another round of tests, with async probe
+> > > enabled for the mmci driver too. I will let you know the results as
+> > > soon as I can.
+> > > 
+> > > Kind regards
+> > > Uffe
+> > 
+> > Hi Uffe,
+> > 
+> > Kindly this has been way too long for review. It's been over 3 months.
+> > What's going on here?
+> > 
+> > I think there's a misunderstanding too. Without this fix, the machine
+> > doesn't even boot. I'm not sure why perf is the blocking question here.
+> 
+> Well you can not degrade performance of existing machines that work
+> today, right?  That would be a regression and it seems that you are
+> doing that if I read the numbers above correctly.
+> 
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci-gli.c | 113 +++++++++++++++++++++++++++++++
- 1 file changed, 113 insertions(+)
+I agree that we shouldn't degrade performance of existing machines, but
+this is a timing bug on existing platforms that have a slow enough cpu
+such that emmc doesn't finish probing before dm-verity progresses to
+trying to read off the device. In my opinion it's a bit unfair to trade
+performance in the common case for not supporting all use cases. I'm
+just trying to get my machines to boot without having to carry my own
+patch here.
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 7a5ebd0fefe7..ae8c307b7aa7 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -164,6 +164,10 @@
- #define PCIE_GLI_9767_CFG		0x8A0
- #define   PCIE_GLI_9767_CFG_LOW_PWR_OFF	  BIT(12)
- 
-+#define PCIE_GLI_9767_COMBO_MUX_CTL			0x8C8
-+#define   PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN		  BIT(6)
-+#define   PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN	  BIT(10)
-+
- #define PCIE_GLI_9767_PWR_MACRO_CTL					0x8D0
- #define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE			  GENMASK(3, 0)
- #define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE		  GENMASK(15, 12)
-@@ -181,6 +185,9 @@
- #define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF		  BIT(21)
- #define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN	  BIT(30)
- 
-+#define PCIE_GLI_9767_SDHC_CAP			0x91C
-+#define   PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT	  BIT(5)
-+
- #define PCIE_GLI_9767_SD_PLL_CTL			0x938
- #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_LDIV		  GENMASK(9, 0)
- #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_PDIV		  GENMASK(15, 12)
-@@ -191,6 +198,23 @@
- #define PCIE_GLI_9767_SD_PLL_CTL2		0x93C
- #define   PCIE_GLI_9767_SD_PLL_CTL2_PLLSSC_PPM	  GENMASK(31, 16)
- 
-+#define PCIE_GLI_9767_SD_EXPRESS_CTL			0x940
-+#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE		  BIT(0)
-+#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE	  BIT(1)
-+
-+#define PCIE_GLI_9767_SD_DATA_MULTI_CTL				0x944
-+#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME	  GENMASK(23, 16)
-+#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE	  0x64
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2			0x950
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE	  BIT(0)
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2				0x954
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_STATUS_EN	  BIT(0)
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2				0x958
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SIGNAL_EN	  BIT(0)
-+
- #define GLI_MAX_TUNING_LOOP 40
- 
- /* Genesys Logic chipset */
-@@ -935,6 +959,93 @@ static void sdhci_gl9767_reset(struct sdhci_host *host, u8 mask)
- 	gli_set_9767(host);
- }
- 
-+static int gl9767_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev;
-+	u32 value;
-+	int i;
-+
-+	pdev = slot->chip->pdev;
-+
-+	if (mmc->ops->get_ro(mmc)) {
-+		mmc->ios.timing &= ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_EXP_1_2V);
-+		return 0;
-+	}
-+
-+	gl9767_vhs_write(pdev);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, &value);
-+	value &= ~(PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN | PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN);
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, &value);
-+	value &= ~PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME;
-+	value |= FIELD_PREP(PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME,
-+			    PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE);
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_STATUS_EN;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SIGNAL_EN;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
-+	value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
-+
-+	value = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	value &= ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
-+	sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
-+
-+	value = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+	value |= (SDHCI_VDD2_POWER_180 | SDHCI_VDD2_POWER_ON);
-+	sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value);
-+	value |= PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value);
-+
-+	for (i = 0; i < 2; i++) {
-+		usleep_range(10000, 10100);
-+		pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, &value);
-+		if (value & PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE) {
-+			pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2,
-+					       value);
-+			break;
-+		}
-+	}
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SDHC_CAP, &value);
-+	if (value & PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT) {
-+		pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value);
-+		value |= PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE;
-+		pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value);
-+	} else {
-+		mmc->ios.timing &= ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_EXP_1_2V);
-+
-+		value = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+		value &= ~(SDHCI_VDD2_POWER_180 | SDHCI_VDD2_POWER_ON);
-+		sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
-+
-+		value = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		value |= (SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
-+		sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
-+	}
-+
-+	gl9767_vhs_read(pdev);
-+
-+	return 0;
-+}
-+
- static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
- {
- 	struct sdhci_host *host = slot->host;
-@@ -967,6 +1078,8 @@ static int gli_probe_slot_gl9767(struct sdhci_pci_slot *slot)
- 	gl9767_hw_setting(slot);
- 	gli_pcie_enable_msi(slot);
- 	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-+	host->mmc->caps2 |= MMC_CAP2_SD_EXP;
-+	host->mmc_host_ops.init_sd_express = gl9767_init_sd_express;
- 	sdhci_enable_v4_mode(host);
- 
- 	return 0;
--- 
-2.25.1
+As a path forward I can add a command line flag as a bool to handle this
+and that should hopefully take care of the regresion aspect to this.
 
+
+> > Greg, is there another tree I can run this through?
+> 
+> Why would you want to route around a maintainer just to get a patch that
+> would have to be reverted applied?  :)
+> 
+
+What's your advice here as I don't feel like I'm getting adequate
+traction with Ulf. I think I've generally been quite patient here
+waiting > 3 months for this patch to be reviewed.
+
+Thanks,
+Dennis
