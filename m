@@ -2,57 +2,57 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA478C7EE25
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:01:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44E59C7EE25
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 07:01:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236269AbjFIHBK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 03:01:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60714 "EHLO
+        id S237546AbjFIHBc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 03:01:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60908 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234257AbjFIHBJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:01:09 -0400
-Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 331D026B9
-        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 00:01:07 -0700 (PDT)
-Received: by mail-yb1-xb2c.google.com with SMTP id 3f1490d57ef6-bad97da58adso1398381276.1
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2023 00:01:07 -0700 (PDT)
+        with ESMTP id S237614AbjFIHB3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 03:01:29 -0400
+Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A9AF2D48
+        for <linux-mmc@vger.kernel.org>; Fri,  9 Jun 2023 00:01:26 -0700 (PDT)
+Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-bacf5b89da7so1491592276.2
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Jun 2023 00:01:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686294066; x=1688886066;
+        d=linaro.org; s=google; t=1686294085; x=1688886085;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=jcmQrMMdS3jdVT7c4/E9jCpJX5xSmfuKaEf61OJrc0s=;
-        b=w6g8VdrBXNCr55eww/tkDfFzgbugHuEIpAMJrISRTtjZyI0LsCN963pVlB4IL22CkY
-         agl40c3PVq5KH2D1FFqdIxqmQ4Pzqz955NHrzBYgEBWoDFiyRvwXjXYBtJKWom7Gantp
-         6WI2chAkG/H91wRtFa4PH8gWWB/iHF7QSr5/xRR7JVO8K+11CkjZPitYh2rN73NjKfJL
-         MM05QfClwGKOrJjYq/hi4uRVbfGbuWRfS+kBozwIjwycoITKtvvDAnFB/qdRg6i2OAO6
-         986Bl1Rk/O4dRF43SzPS5sHpvRN+KtkAnQg9zu4kr4PEw9RgUL0sU8Y5clZFd6S5Dlan
-         43Vg==
+        bh=elu6bJKcJHNxiVwiE626QNNoqTsS0jjzoZTRm9E1Psw=;
+        b=FDGqKf8HvvgYs4qwcwy0tK/fGpaKJsSb0KyUJPa1yB2yPkyoRRWzeaYYGbEzmE7Q9b
+         7eIeNvMenEsLwG6QvM0hQHeqY1h5tE8pGxs2NLAYzRh5GJbiNX0z2b/6AfsrU9oxu03U
+         HWuJ+WN6+dRJ5rx/V3FjJ3FX4osakNajOVEY9YuZLe/NtvfLaZZBwqFWd8SZAcSQeCUx
+         d7Mi5aXfx3x1qjZXFDu05RUUYQG7fyb4v6Nl1EJxKlTRZNThKMtBH0DV0O1jw3AlCFp3
+         3oazKu029mHUU/b5JKQaCjNNSliWUWtakkclw0EkVS30TR+eI3xhFzTwJIr2eFpO1Bj+
+         Q0rg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686294066; x=1688886066;
+        d=1e100.net; s=20221208; t=1686294085; x=1688886085;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=jcmQrMMdS3jdVT7c4/E9jCpJX5xSmfuKaEf61OJrc0s=;
-        b=Zz2xiXfFlerGBLQL25X3jUDlA8bA/jzsjiHCJO/bM/769oaFOC4Jfyd9ANO7Uk0+TG
-         t4FKurJ1s5jKiTn7P0kKhIYdzx06o/UbWoV8jgSQoniF+MsVydJmLXE1cNi9CbGO0pRu
-         sOQ9Ubv4KW4BEzxXZ4H6GthJTHc1ovDfr180WL9bD2kBuueSaiF2tYuG9iNstkllyBsI
-         +lnuh47NzkR6uYa154/SIUwattvfvli/TCGaOQuW/pq19phcdb7vxylyMHm65dyxeC3S
-         mvpJqR91ILZyWQ8llyeEeM5ZUSYYLB6HCWs0pSHQEJGbqIEK6TTVWUCFOhqz4cKOawim
-         6Y4A==
-X-Gm-Message-State: AC+VfDyiyW4RJDP3BvW7HJgKyCtqmgUzwhDxZTkv4XWAp+wUuWTwrQsC
-        7yTFxCM6oMpWCTnhkC0w7MyCZWWL10J9SO+GqIm8eA==
-X-Google-Smtp-Source: ACHHUZ7rTy6awtUQMyfPhaGWBaSda8vwZxqW0IXTdzwX+XwJhxx3v+1m03iYtsMU4EemfVrVkKFXLo0HEn+t03KFPz4=
-X-Received: by 2002:a5b:20c:0:b0:bac:7294:4faf with SMTP id
- z12-20020a5b020c000000b00bac72944fafmr343225ybl.27.1686294066359; Fri, 09 Jun
- 2023 00:01:06 -0700 (PDT)
+        bh=elu6bJKcJHNxiVwiE626QNNoqTsS0jjzoZTRm9E1Psw=;
+        b=VCKFZQGd0BbgWmAOV1o0ackQLr9DIgihT/WwF9LHZi7gLpAk4SjBBTvASini08Ix+M
+         cXV8VJcRLhWwKp26qFKNpJkXnpWC6j2XYJ6dVkXxV7cAf7pFRul8cj7eDgERl+wYhVQl
+         4DWuIjmyZrcBLbbYJEX5KEwip0hUfDRbak3Q63hziEjFZsgzIRruBdg81nX/8D1tp1Ur
+         kwmz45xOGB1rhBzqEPpYOCUAGnI/zdh1kIsvdpjmWpQZrJPJF3ED2D7fd5Gk2YSV0gfP
+         M+m5Lo4YI+iXy7YTRc1egBBgjMChgYig8ozaTrWpO5kyYpCfddvlfDoq4wP/2eO/IPc5
+         ofvg==
+X-Gm-Message-State: AC+VfDyNJH7QE5RRE6SuMFdxGsJTRDUwoPjt0HJQE/r/1APmG/6+A81V
+        oQQ2m3SqlOiggyR83qiTQMe2op+g9Dbm2qMLvB2G7w==
+X-Google-Smtp-Source: ACHHUZ5Jjnhl+b0jxcL7O9IVlDv0/+vbbJgsljEc1FFMBJXHJjgxmzOvbTiIbnBsXLYFE26tNkplg1JcwLHcfI9hO+A=
+X-Received: by 2002:a5b:512:0:b0:bac:f684:89f0 with SMTP id
+ o18-20020a5b0512000000b00bacf68489f0mr308763ybp.51.1686294085532; Fri, 09 Jun
+ 2023 00:01:25 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230608122152.3930377-1-quic_srichara@quicinc.com> <20230608122152.3930377-4-quic_srichara@quicinc.com>
-In-Reply-To: <20230608122152.3930377-4-quic_srichara@quicinc.com>
+References: <20230608122152.3930377-1-quic_srichara@quicinc.com> <20230608122152.3930377-5-quic_srichara@quicinc.com>
+In-Reply-To: <20230608122152.3930377-5-quic_srichara@quicinc.com>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 9 Jun 2023 09:00:55 +0200
-Message-ID: <CACRpkdbmtQXNH0xXyJKS0=nTETrKJVYmR2PxoERGM4e6qZqhyQ@mail.gmail.com>
-Subject: Re: [v9 3/8] dt-bindings: pinctrl: qcom: Add support for ipq5018
+Date:   Fri, 9 Jun 2023 09:01:14 +0200
+Message-ID: <CACRpkdbaNPyLr9322FKA506oBXwc2zPk8yvYCrw9J6VR1hmi=g@mail.gmail.com>
+Subject: Re: [v9 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
 To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
 Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
         robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
@@ -72,10 +72,10 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On Thu, Jun 8, 2023 at 2:23=E2=80=AFPM Sricharan Ramabadhran
 <quic_srichara@quicinc.com> wrote:
 
-> Add device tree binding Documentation details for ipq5018
-> pinctrl driver.
+> Add pinctrl definitions for the TLMM of IPQ5018.
 >
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 > Co-developed-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
 > Signed-off-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
 > Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
