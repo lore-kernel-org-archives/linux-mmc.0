@@ -2,91 +2,87 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 560ACC7EE2F
-	for <linux-mmc@archiver.kernel.org>; Sat, 10 Jun 2023 03:31:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBC15C7EE45
+	for <linux-mmc@archiver.kernel.org>; Sat, 10 Jun 2023 10:53:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231765AbjFJDb5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 23:31:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34382 "EHLO
+        id S229827AbjFJKxG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 10 Jun 2023 06:53:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50674 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229471AbjFJDby (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 23:31:54 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B2AE10EA;
-        Fri,  9 Jun 2023 20:31:53 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9FDFA63D18;
-        Sat, 10 Jun 2023 03:31:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48EA5C433D2;
-        Sat, 10 Jun 2023 03:31:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686367912;
-        bh=M2d5ZNsKDh43dcGKfm/+a42qhKgFtvwzkwCZa/pYhGY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Y+Y3dx2WbNFRh59OQWYi/ZB17i80nJePzherajKIkzcIWuPhUGWoyxkzBtv4uLstc
-         +qX1f8oMAR99wrkzvk+wlmCwX4xPHX+TV8eKMtbc1ZDbxt8tOYV7OHZGmBGbPuCwMv
-         eYYtuFy22/UrRTewPPiv4pRSoB+wyOiSlrCAzt15ojm8qRVstUufmRP6XzrRldL2hN
-         PgLJNT/g7+xaTbH2YfMcH7yyJMPCvbGbKJK8JxsdcxZa1UhD4kVEC+xIqpj3V639a/
-         0UwnbIGQuUue0HuZOAWj4oq1EuKoxULvdSBhQ/fV4Mvf/7Ds/eGpia7dmz1e4Vk4kl
-         EGteTnBzi7Oeg==
-Date:   Fri, 9 Jun 2023 20:31:49 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
-Message-ID: <20230610033149.GD872@sol.localdomain>
-References: <20230408214041.533749-1-abel.vesa@linaro.org>
- <20230408214041.533749-3-abel.vesa@linaro.org>
+        with ESMTP id S229639AbjFJKxF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 10 Jun 2023 06:53:05 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.13])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C63E135B6;
+        Sat, 10 Jun 2023 03:53:00 -0700 (PDT)
+Received: from [192.168.1.141] ([37.4.248.58]) by mrelayeu.kundenserver.de
+ (mreue108 [212.227.15.183]) with ESMTPSA (Nemesis) id
+ 1M9ntb-1qBURf2Fev-005sX6; Sat, 10 Jun 2023 12:52:22 +0200
+Message-ID: <b136fa0f-90da-7b9e-0063-5cc5c707c56e@i2se.com>
+Date:   Sat, 10 Jun 2023 12:52:20 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230408214041.533749-3-abel.vesa@linaro.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.0
+Subject: Re: [PATCH 02/10] dmaengine: bcm2835: also support generic
+ dma-channel-mask
+To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Thomas Gleixner <tglx@linutronix.de>
+Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
+        bcm-kernel-feedback-list@broadcom.com,
+        John Stultz <john.stultz@linaro.org>
+References: <20230604121223.9625-1-stefan.wahren@i2se.com>
+ <20230604121223.9625-3-stefan.wahren@i2se.com>
+Content-Language: en-US
+From:   Stefan Wahren <stefan.wahren@i2se.com>
+In-Reply-To: <20230604121223.9625-3-stefan.wahren@i2se.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Provags-ID: V03:K1:Q5Jl6qU2SK4Kqc08MDj83Q7VeHPW2oH+F42r9Ja3i8Jt2NqFTEp
+ 207dBZCODTkNl3CYbpCOvoMMo5OVa1EwJSHHxA+MiyONRLQYPjrTpYtx0koJftZzZqQB9pz
+ tpJmtrj3EdJK7v3HwazwkZgQtvOhyfnvyemqm+XO23D9+zasmE4chm0bpq8Dx/7brFgPLct
+ eozFezWhXCmaVFGi3YFbg==
+UI-OutboundReport: notjunk:1;M01:P0:Mgi3m5CEhpY=;pAB4tqu0X+HRn9qkD6Qk0S6B4yQ
+ fVw6KEV+sH/nAvcRIssO9+JmPDoDtpPGWDbP5vQydxeGQEWW7VhLbFp2nU+vOg+KX1QEIAn2j
+ ZNp3CQk3NHM9WlFE6jDdRI6xTs/5rqtTnHG9zldrygHabK0G8MJULCsMUK6c0pX9xnh8wNq70
+ FnPPLMFC/tLCMMI1ZkNZxA24zgmsSj1erwgG7vtjcJLnTLuzroDX5bMHL2xLrCP2E6q93f3H1
+ iGh78sxppBN4wHylBVUed5H38QbVL0+uuTWA9M1pbunVVrtwWTqlPHmkbsephS+OvlTrjYzWs
+ VLTObe6TpI5Y8ieg3HtmhVU4qznOD5qOcUoiAvo36GmcovMdp7TM7emm68ZuExYSpY20RFYlX
+ tSdLg2/nFP2QIPZpDfOyG7VY7lbprVluI49g2H4XiOSHIbmYNJ/o2vm2GIH2rTph2t015cMih
+ gB0ACmCfJ2Itnmup9ZP1kpssLcopE+HPmB1/0cukffAIEA1oi3s4GJ46M+pzrAB59bYme46m3
+ YPF8PcCGkAQ4pt4WnVbJB5dimutfVU7SQisSgdCWHBaWi+oMztLGIIwab2Xh8/paUoXuXYb7+
+ umLdbOuABJz4oGVrzq+Dh5qUxHRkfybyCjy03NgR5mt0apOSXQMRb2mA+OY8PHlVmh2ZUvVAQ
+ a7cFg5LTvrtixx+5+4HhtaSL21r+xztdB8+AqOgucg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Abel,
+Hi,
 
-On Sun, Apr 09, 2023 at 12:40:40AM +0300, Abel Vesa wrote:
-> Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
-> use the new ICE api provided by the Qualcomm soc driver ice. The platforms
-> that already have ICE support will use the API as library since there will
-> not be a devicetree node, but instead they have reg range. In this case,
-> the of_qcom_ice_get will return an ICE instance created for the consumer's
-> device. But if there are platforms that do not have ice reg in the
-> consumer devicetree node and instead provide a dedicated ICE devicetree
-> node, the of_qcom_ice_get will look up the device based on qcom,ice
-> property and will get the ICE instance registered by the probe function
-> of the ice driver.
+Am 04.06.23 um 14:12 schrieb Stefan Wahren:
+> Since commit e2d896c08ca3 ("Documentation: bindings: dma: Add
+> binding for dma-channel-mask") there is a generic property to list
+> available DMA channels for the kernel to use. The generic property
+> has been implemented by some other platforms.
+> So implement support for the generic one and consider the
+> vendor specific one as deprecated. This also simplifies the YAML
+> conversion of the BCM2835 DMA DT bindings a little bit.
 > 
-> The ICE clock is now handle by the new driver. This is done by enabling
-> it on the creation of the ICE instance and then enabling/disabling it on
-> UFS runtime resume/suspend.
-> 
-> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+> Cc: John Stultz <john.stultz@linaro.org>
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 
-Are you planning to resend this now that its prerequisites are upstream?
-
-Thanks!
-
-- Eric
+as Rob Herring pointed out that the matching DTS change (patch 4) breaks 
+ABI compatibility, i will drop this patch and rework patch 4 in V2 of 
+this series. This should make everything smoother ...
