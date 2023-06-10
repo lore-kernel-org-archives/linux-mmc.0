@@ -2,171 +2,91 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79E13C7EE25
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jun 2023 22:00:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 560ACC7EE2F
+	for <linux-mmc@archiver.kernel.org>; Sat, 10 Jun 2023 03:31:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232709AbjFIWAp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jun 2023 18:00:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38924 "EHLO
+        id S231765AbjFJDb5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jun 2023 23:31:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34382 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229561AbjFIWAo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 18:00:44 -0400
-Received: from mail-il1-f179.google.com (mail-il1-f179.google.com [209.85.166.179])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ABBF32D44;
-        Fri,  9 Jun 2023 15:00:43 -0700 (PDT)
-Received: by mail-il1-f179.google.com with SMTP id e9e14a558f8ab-33b5dba8c6cso9204675ab.2;
-        Fri, 09 Jun 2023 15:00:43 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686348043; x=1688940043;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=FIih7yq7zItAjcdW9h/PAWrVlJSne2a8QKAirSRbadc=;
-        b=JDZXQrtlxmBvRR5olb6sbbGBizUQ9L6mlCEOTtw/ypVitVLk8xXn9rhRrI/zK06TJg
-         FVGQztY+1pLhQxz6QB/oH1d1exIPv8wiIJcMZP1suChyr4MwsYVhvymosR4dSfcCOF2o
-         Rk301QWEKTy85jLf6eUS8L4EQimP349FPVC/BvjUeYDfezLcxIvpOJRY4Xibyn2QAw9z
-         sUxRubA/EpxVd7CPB/xj54lzJE01ee5V0yDTH/FdF+XwvTE5FsCk9EkvbmoFY890c6Nx
-         2tYC+YrIp39tb+kJGcNw6e6p5CltwUH7SuKQP3zveRdQ+PEtIU5lFCQEc1T+Uj0vcPB2
-         4VsQ==
-X-Gm-Message-State: AC+VfDwgamMdpxUkYJafnVgKGpLQaqfZ7fWjwyBZOOQn0ztrDce4mKuD
-        iVLl42+/Co1dczKuTqxYdw==
-X-Google-Smtp-Source: ACHHUZ6EIvz7xkXcCIMVLaEMaFls8RRHQT6zRXOjUpuAp+4pwiacrjCaBEGCDgGRimwZHpHRLmeeaQ==
-X-Received: by 2002:a92:d901:0:b0:33e:7552:3fd5 with SMTP id s1-20020a92d901000000b0033e75523fd5mr2391225iln.4.1686348042854;
-        Fri, 09 Jun 2023 15:00:42 -0700 (PDT)
-Received: from robh_at_kernel.org ([64.188.179.250])
-        by smtp.gmail.com with ESMTPSA id w8-20020a92d2c8000000b0033b2f5fe9bdsm1336911ilg.36.2023.06.09.15.00.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Jun 2023 15:00:42 -0700 (PDT)
-Received: (nullmailer pid 2535655 invoked by uid 1000);
-        Fri, 09 Jun 2023 22:00:39 -0000
-Date:   Fri, 9 Jun 2023 16:00:39 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Stefan Wahren <stefan.wahren@i2se.com>
-Cc:     Vinod Koul <vkoul@kernel.org>,
+        with ESMTP id S229471AbjFJDby (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Jun 2023 23:31:54 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B2AE10EA;
+        Fri,  9 Jun 2023 20:31:53 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 9FDFA63D18;
+        Sat, 10 Jun 2023 03:31:52 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48EA5C433D2;
+        Sat, 10 Jun 2023 03:31:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1686367912;
+        bh=M2d5ZNsKDh43dcGKfm/+a42qhKgFtvwzkwCZa/pYhGY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Y+Y3dx2WbNFRh59OQWYi/ZB17i80nJePzherajKIkzcIWuPhUGWoyxkzBtv4uLstc
+         +qX1f8oMAR99wrkzvk+wlmCwX4xPHX+TV8eKMtbc1ZDbxt8tOYV7OHZGmBGbPuCwMv
+         eYYtuFy22/UrRTewPPiv4pRSoB+wyOiSlrCAzt15ojm8qRVstUufmRP6XzrRldL2hN
+         PgLJNT/g7+xaTbH2YfMcH7yyJMPCvbGbKJK8JxsdcxZa1UhD4kVEC+xIqpj3V639a/
+         0UwnbIGQuUue0HuZOAWj4oq1EuKoxULvdSBhQ/fV4Mvf/7Ds/eGpia7dmz1e4Vk4kl
+         EGteTnBzi7Oeg==
+Date:   Fri, 9 Jun 2023 20:31:49 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Abel Vesa <abel.vesa@linaro.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com
-Subject: Re: [PATCH 10/10] dt-bindings: timer: convert bcm2835-system-timer
- bindings to YAML
-Message-ID: <20230609220039.GA2534871-robh@kernel.org>
-References: <20230604121223.9625-1-stefan.wahren@i2se.com>
- <20230604121223.9625-11-stefan.wahren@i2se.com>
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
+Message-ID: <20230610033149.GD872@sol.localdomain>
+References: <20230408214041.533749-1-abel.vesa@linaro.org>
+ <20230408214041.533749-3-abel.vesa@linaro.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230604121223.9625-11-stefan.wahren@i2se.com>
+In-Reply-To: <20230408214041.533749-3-abel.vesa@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Jun 04, 2023 at 02:12:23PM +0200, Stefan Wahren wrote:
-> Convert the DT binding document for bcm2835-system-timer from .txt
-> to YAML.
-> 
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-> ---
->  .../timer/brcm,bcm2835-system-timer.txt       | 22 ----------
->  .../timer/brcm,bcm2835-system-timer.yaml      | 44 +++++++++++++++++++
->  2 files changed, 44 insertions(+), 22 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
->  create mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
-> deleted file mode 100644
-> index 844bd5fbd04c..000000000000
-> --- a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
-> +++ /dev/null
-> @@ -1,22 +0,0 @@
-> -BCM2835 System Timer
-> -
-> -The System Timer peripheral provides four 32-bit timer channels and a
-> -single 64-bit free running counter. Each channel has an output compare
-> -register, which is compared against the 32 least significant bits of the
-> -free running counter values, and generates an interrupt.
-> -
-> -Required properties:
-> -
-> -- compatible : should be "brcm,bcm2835-system-timer"
-> -- reg : Specifies base physical address and size of the registers.
-> -- interrupts : A list of 4 interrupt sinks; one per timer channel.
-> -- clock-frequency : The frequency of the clock that drives the counter, in Hz.
-> -
-> -Example:
-> -
-> -timer {
-> -	compatible = "brcm,bcm2835-system-timer";
-> -	reg = <0x7e003000 0x1000>;
-> -	interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
-> -	clock-frequency = <1000000>;
-> -};
-> diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
-> new file mode 100644
-> index 000000000000..555fca4897e7
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
-> @@ -0,0 +1,44 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/timer/brcm,bcm2835-system-timer.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: BCM2835 System Timer
-> +
-> +maintainers:
-> +  - Stefan Wahren <stefan.wahren@i2se.com>
-> +
-> +description:
-> +  The System Timer peripheral provides four 32-bit timer channels and a
-> +  single 64-bit free running counter. Each channel has an output compare
-> +  register, which is compared against the 32 least significant bits of the
-> +  free running counter values, and generates an interrupt.
-> +
-> +properties:
-> +  compatible:
-> +    const: brcm,bcm2835-system-timer
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 4
+Hi Abel,
 
-Should list what each entry is.
-
-> +
-> +  clock-frequency: true
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    timer@7e003000 {
-> +      compatible = "brcm,bcm2835-system-timer";
-> +      reg = <0x7e003000 0x1000>;
-> +      interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
-> +      clock-frequency = <1000000>;
-> +    };
-> -- 
-> 2.34.1
+On Sun, Apr 09, 2023 at 12:40:40AM +0300, Abel Vesa wrote:
+> Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
+> use the new ICE api provided by the Qualcomm soc driver ice. The platforms
+> that already have ICE support will use the API as library since there will
+> not be a devicetree node, but instead they have reg range. In this case,
+> the of_qcom_ice_get will return an ICE instance created for the consumer's
+> device. But if there are platforms that do not have ice reg in the
+> consumer devicetree node and instead provide a dedicated ICE devicetree
+> node, the of_qcom_ice_get will look up the device based on qcom,ice
+> property and will get the ICE instance registered by the probe function
+> of the ice driver.
 > 
+> The ICE clock is now handle by the new driver. This is done by enabling
+> it on the creation of the ICE instance and then enabling/disabling it on
+> UFS runtime resume/suspend.
+> 
+> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+
+Are you planning to resend this now that its prerequisites are upstream?
+
+Thanks!
+
+- Eric
