@@ -2,111 +2,146 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84B5BC7EE45
-	for <linux-mmc@archiver.kernel.org>; Sun, 11 Jun 2023 04:50:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 857E3C7EE2E
+	for <linux-mmc@archiver.kernel.org>; Sun, 11 Jun 2023 19:41:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231403AbjFKEuo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 11 Jun 2023 00:50:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44356 "EHLO
+        id S232513AbjFKTlq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 11 Jun 2023 15:41:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44098 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229500AbjFKEun (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Jun 2023 00:50:43 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 980A426AD;
-        Sat, 10 Jun 2023 21:50:40 -0700 (PDT)
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35B4h4KM009524;
-        Sun, 11 Jun 2023 04:50:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=0CNloHrquHQMvmc+4hDQ+f1JhsN0G1wIV9bJDTOOqQs=;
- b=HayVU8gJor39utzAXsJYRHY1iPVlDbuo3ddgqxLXYYCX3Ql8cWmPedcoltOFDhptXlg+
- vjuqREoCk23Rs7gPdMcJWfkj4O2ZTpdYoMvfsza2c7Ahu2bW6jKGbdNr+gLIuT+E2dGi
- eGAZJdh4rWEnokwDidi8mgGUctGux1B8UDdO8f7yoHnru8uZjgUzmgSNQ1x2Dx2IyWOM
- B5XkoGk0BMEGgCvoK1fiYB9yXvI4iyr9muPJopZHT7U5+MJ8OA/6Dkp8XgLWGUORPohL
- DqtIxeBeW4+yhH84sJO4Zqv/N7UhDpwnfFbiw0leOQDcn8D7Ef2fquRbFWuKpX+VhB+4 bQ== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3r4hxns6mw-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 11 Jun 2023 04:50:07 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 35B4o6OJ005158
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 11 Jun 2023 04:50:06 GMT
-Received: from [10.216.24.161] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Sat, 10 Jun
- 2023 21:49:59 -0700
-Message-ID: <d073f2de-559e-7e76-2c38-114cda2d9948@quicinc.com>
-Date:   Sun, 11 Jun 2023 10:19:56 +0530
+        with ESMTP id S229750AbjFKTlp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Jun 2023 15:41:45 -0400
+Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E6D1D2
+        for <linux-mmc@vger.kernel.org>; Sun, 11 Jun 2023 12:41:42 -0700 (PDT)
+Received: by mail-lf1-x12c.google.com with SMTP id 2adb3069b0e04-4f61b45ee0dso4160068e87.0
+        for <linux-mmc@vger.kernel.org>; Sun, 11 Jun 2023 12:41:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686512501; x=1689104501;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=0dCXyL73MENjnJLZrDVn/k8iJuoy5Z0Z1mdSZ8sB38w=;
+        b=XK8sREUjk0GSyAhNQDJzl+5DxmiNPghVE+wm+pq45QHd9vbbPhYyj++UEZkAqUSr/N
+         5DF3NS3l/6v/lgR0dFp41C5Hteew8/t89nhA8DXxBM4ZIYztriwQP0Zc6qu7MvHSUovM
+         36VDk+RUA4HRYOYmt1IJcit+lCvWz+Mzk5vGfJ92dRzZYXZN96ieQtZSXpU7OGI/buOT
+         meALOAlqSYQEq/jiGwDtoBxyS6GB6+F7oYAKaogR36mo9kvNDSnUcuLh0VOA4Y0R5ZUf
+         uv7Y5RZlKAvkQRAvZE+GavJMw/mkqBol0o0d7QOYe/gTkRbYH6dp9CrS+VTaGd1hKpJk
+         bixw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686512501; x=1689104501;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=0dCXyL73MENjnJLZrDVn/k8iJuoy5Z0Z1mdSZ8sB38w=;
+        b=SdoaDAA+uUYYMSBBiGCbBYNX0Y8fajO7mKrqR9y9Ogtyy3jJzALpVXJk2wjgXvveA7
+         g8WbxLXVxYKcxXKbS41Q9YtHi3H1uqFX8+J8Z9g+7c98jdgBIk2zIWEgW++oqis5tm3U
+         RlM6Ylm3CrzJD8g8yRGOGR3bvAb5wdcT//JQ7V1bo2l8xzfOthZlqPI9ZfScRdw2eO+x
+         +Nn1MRNtRq12xrMNh9OXORxJfTzonkvFXVwdH+UWX5jleMabwv5Dn3oYCwgFF/dkNPAe
+         gWxgtNxWhzpyj8xOH/axBhjptA410HVTPPkmKUMH5vqACfmEXiLSek8CZh45qWAO6R0Z
+         3mNQ==
+X-Gm-Message-State: AC+VfDx6f9oItQuzZKMHB25ds0Oqq/hhW0e4xO5nrQDWc8jECu92FoDf
+        oN3mTKUZCOFwoyxz3Q+yDnggCStWGKo2D0hihhA=
+X-Google-Smtp-Source: ACHHUZ4dB6la9H99qaKDz3r4JiemAkTGYy9i0eOq6GbEuFY6SpCRtu6IimVSrhSiCXfIZ59y+lLbiQ==
+X-Received: by 2002:a19:4359:0:b0:4f3:b4a9:a619 with SMTP id m25-20020a194359000000b004f3b4a9a619mr2622572lfj.40.1686512500535;
+        Sun, 11 Jun 2023 12:41:40 -0700 (PDT)
+Received: from [192.168.1.2] (c-05d8225c.014-348-6c756e10.bbcust.telenor.se. [92.34.216.5])
+        by smtp.gmail.com with ESMTPSA id u24-20020ac243d8000000b004f14ae5ded8sm1246960lfl.28.2023.06.11.12.41.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 11 Jun 2023 12:41:39 -0700 (PDT)
+From:   Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH v3 00/10] Fix busydetect on Ux500 PL180/MMCI
+Date:   Sun, 11 Jun 2023 21:41:26 +0200
+Message-Id: <20230405-pl180-busydetect-fix-v3-0-cd3d5925ae64@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [v9 2/8] clk: qcom: Add Global Clock controller (GCC) driver for
- IPQ5018
-Content-Language: en-US
-To:     Konrad Dybcio <konrad.dybcio@linaro.org>, <agross@kernel.org>,
-        <andersson@kernel.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
-        <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>
-References: <20230608122152.3930377-1-quic_srichara@quicinc.com>
- <20230608122152.3930377-3-quic_srichara@quicinc.com>
- <7e915a4b-d2e8-c162-2e45-d08aced5a5d1@linaro.org>
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <7e915a4b-d2e8-c162-2e45-d08aced5a5d1@linaro.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: SFyXHq_2eFwcKahelHTQytglkQvjhxIw
-X-Proofpoint-GUID: SFyXHq_2eFwcKahelHTQytglkQvjhxIw
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-11_02,2023-06-09_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0
- malwarescore=0 adultscore=0 suspectscore=0 mlxscore=0 bulkscore=0
- mlxlogscore=455 priorityscore=1501 spamscore=0 clxscore=1015
- lowpriorityscore=0 phishscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2305260000 definitions=main-2306110044
+X-B4-Tracking: v=1; b=H4sIAGYjhmQC/42Nyw7CIBBFf8WwFsOjxdaV/2FcDHRsSWppAIlN0
+ 38XunOlyztz7zkrCegtBnI5rMRjssG6KQd5PBAzwNQjtV3ORDAhWcVqOo+8YVS/wtJhRBPpw76
+ pUsCkYp1sGyB5qiEg1R4mM5TxE0JEXx6zx9zffbd7zoMN0fll1yderj9MiVNGRQOGt3CusMbra
+ Cfw7uR8TwoxiX8oIlMQNWdSSF1X6ouybdsHVYBB6BgBAAA=
+To:     Yann Gautier <yann.gautier@foss.st.com>,
+        Stefan Hansson <newbyte@disroot.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>
+Cc:     linux-mmc@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Linus Walleij <linus.walleij@linaro.org>
+X-Mailer: b4 0.12.2
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+This series fixes a pretty serious problem in the MMCI
+busy detect handling, discovered only after going up and
+down a ladder of refactorings.
 
+The code is written expecting the Ux500 busy detect
+to fire two interrupts: one at the start of the busy
+signalling and one at the end of the busy signalling.
 
-On 6/9/2023 7:22 PM, Konrad Dybcio wrote:
-> 
-> 
-> On 8.06.2023 14:21, Sricharan Ramabadhran wrote:
->> Add support for the global clock controller found on IPQ5018
->> based devices.
->>
->> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Co-developed-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
->> Signed-off-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
->> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
->> ---
->> [v9]       Sorted the headers and cleaned the unwanted ones
->>             Added trailing comma for .parent_hws member
->>             Removed the hunk touching ipq5332 kconfig  (unintentionally)
->>
-> You did not address the comments I made in v4.
-> 
-> https://lore.kernel.org/linux-arm-msm/21a5642c-e6e5-9323-7db1-383a18616ac0@linaro.org/
+The root cause of the problem seen on some devices
+is that only the first IRQ arrives, and then the device
+hangs, waiting perpetually for the next IRQ to arrive.
 
-  oops, sorry, i guess, missed it, will send with fixed.
+This is eventually solved by adding a timeout using
+a delayed work that fire after 10 ms if the busy detect
+has not stopped at this point. (Other delay spans can
+be suggested.) This is the last patch in the series.
 
-Regards,
-  Sricharan
+I included the rewrite of the entire busy detect logic
+to use a state machine as this makes it way easier to
+debug and will print messages about other error
+conditions as well.
+
+The problem affects especially the Skomer
+(Samsung GT-I9070) and Kyle (Samsung SGH-I407).
+
+It is fine to just apply this for the -next kernel,
+despite it fixes the busy detect that has been broken
+for these devices for a while, we can think about
+backporting a simpler version of the timeout for
+stable kernels if we want.
+
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+Changes in v3:
+- Unconditionally assign busy_status = 0
+- Rewrite state machine states to just three
+- Drop a patch that gets absorbed into another patch
+- Drop patch to get busy state from the state machine, it was
+  fishy, based on a misunderstanding and not needed
+- Link to v2: https://lore.kernel.org/r/20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org
+
+Changes in v2:
+- Drop pointless patch nr 1
+- Unconditionally intialize some state variables
+- Use a less fragile method to look for busy status when
+  using busy detect, should fix Yann's problem
+- Link to v1: https://lore.kernel.org/r/20230405-pl180-busydetect-fix-v1-0-28ac19a74e5e@linaro.org
+
+---
+Linus Walleij (10):
+      mmc: mmci: Clear busy_status when starting command
+      mmc: mmci: Unwind big if() clause
+      mmc: mmci: Stash status while waiting for busy
+      mmc: mmci: Break out error check in busy detect
+      mmc: mmci: Make busy complete state machine explicit
+      mmc: mmci: Retry the busy start condition
+      mmc: mmci: Use state machine state as exit condition
+      mmc: mmci: Use a switch statement machine
+      mmc: mmci: Break out a helper function
+      mmc: mmci: Add busydetect timeout
+
+ drivers/mmc/host/mmci.c             | 139 ++++++++++++++++++++++++++++--------
+ drivers/mmc/host/mmci.h             |  15 ++++
+ drivers/mmc/host/mmci_stm32_sdmmc.c |   6 +-
+ 3 files changed, 130 insertions(+), 30 deletions(-)
+---
+base-commit: ac9a78681b921877518763ba0e89202254349d1b
+change-id: 20230405-pl180-busydetect-fix-66a0360d398a
+
+Best regards,
+-- 
+Linus Walleij <linus.walleij@linaro.org>
+
