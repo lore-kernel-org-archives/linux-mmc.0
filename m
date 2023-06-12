@@ -2,223 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38FC7C88CB2
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Jun 2023 17:07:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94616C7EE2E
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Jun 2023 19:29:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236989AbjFLRHC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Jun 2023 13:07:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52534 "EHLO
+        id S236807AbjFLT3E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Jun 2023 15:29:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54042 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234805AbjFLRHB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2023 13:07:01 -0400
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92A7410C2
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 10:06:57 -0700 (PDT)
-Received: by mail-wm1-x329.google.com with SMTP id 5b1f17b1804b1-3f7e7fc9fe6so45933475e9.3
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 10:06:57 -0700 (PDT)
+        with ESMTP id S235149AbjFLT3C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2023 15:29:02 -0400
+Received: from mail-wm1-x331.google.com (mail-wm1-x331.google.com [IPv6:2a00:1450:4864:20::331])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21F4D1727
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 12:28:53 -0700 (PDT)
+Received: by mail-wm1-x331.google.com with SMTP id 5b1f17b1804b1-3f6dfc4dffaso35880785e9.0
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 12:28:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686589616; x=1689181616;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=oZ/IrEjFcCV2x/CivdwBWaEryH9Wc7q/asiFBrPanUc=;
-        b=pdd96pl8DNCim3cK0vMZGWh18h572HgJCXrkFdWt47XV6bDajZB8GjYgHMFtouiwja
-         gsjhT1WKucS/dsrwPMLnv4yPJDf8uIdgHCSSfnY90fafkGvFhdOM8T6wLeGl1bli/UB6
-         HyrplWjoYLAfnzNCJRitiRQRxllL/aeLhXkAuyEfthBfO2xVnlS8umjMZqCpq9As6dYK
-         wIIxPlOeFmNnc2z37nfX00WvtrwEEaTJwMg432e8f9QZ8p8qkmuQR/+joF/cxkipwIwQ
-         FF57GYv1kDM4xxNPUUp2q3fOsFqH2eYZ2Wu4foCZmOwGWjGeN3Qw55saAkl+Eldzltxp
-         6QNQ==
+        d=linaro.org; s=google; t=1686598131; x=1689190131;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=nJZJSaEZDg70TXbshUH3X07m1qzGMFDczgD0hVDQgVw=;
+        b=cp7o0HoGkxtGnWAvfPLUcigk1NXL22/mysLv2Xtu+BWI9J/YI7aKTBLHbf+4S4De4b
+         IJ3Qtv7wM6Mp4sN/lKa+Fo/8ldPIx23PT7wxeeBbZdZ+LJx8ULV8nTuWoKAiq3aGtWtB
+         cU5KBL+/AIJrdiRDrHJDK2+uHxSx/QePtYDhRp76VSJ/XozzWlcYGOkk5JahdeJRXLgD
+         RAdHnAFdjI4UjLTBzCLQqrbZzWasP271gPYWjPH35aaZ84rXWbqFi8RtsYKlAos/VRLl
+         yFN+YFWqZvuwtb/hvdK6GH/hNSHC6SrR/3Wn32b1FK10iZDlyfHUZljdNjgegR9bT+6S
+         HdoA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686589616; x=1689181616;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=oZ/IrEjFcCV2x/CivdwBWaEryH9Wc7q/asiFBrPanUc=;
-        b=UyfOPaEEGH8e/wtl3jVAeB2iHGO6kvVFzSZH8JJVi3vAP5f6FnXTNRPNs3UlgYov19
-         QFak1MH48VtKP07llTdWNuNPnwSYuOL/on6A0Ca61hF/M2yqhn8dhuCdwXOoCnCTLlEr
-         E1/fTWY8pdMA2K4DSNx5em1fpH+LkEO/qeHwKRtQimYgHlo+36TmGLap/jnTNlCFiaWe
-         W4zGHfZWqO8jdBQUEKJ0O/kaGFUlPnNeXVwgad2/98LQTD5x0TplHvkghT8nzzQ/piZG
-         NSvNGZlsmLIOwM3kaGSyjrAw50+hWLUxDw6zYtYDtaUWhJklYSSAnm5sMH9iG4hhb6ud
-         M3/g==
-X-Gm-Message-State: AC+VfDweq4y8nJaMae5kIib5WoxWzdI9sg5uWdqlfkuf8fpaw0+5Knsy
-        L1bPHeJY/uSB9WREHEzvTfNa+uZPGbKOWxqrQlOnUA==
-X-Google-Smtp-Source: ACHHUZ4Oo+5RtePTqbz4//Obk2Tzr5QhfB4BXojrvhaU0n42oTkH3RDF/7ND8Bi5A+eFFTdIdZzuw980EwBm84enBe0=
-X-Received: by 2002:a7b:c8c4:0:b0:3f6:6da:3ad1 with SMTP id
- f4-20020a7bc8c4000000b003f606da3ad1mr7776351wml.34.1686589615908; Mon, 12 Jun
- 2023 10:06:55 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1686598131; x=1689190131;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=nJZJSaEZDg70TXbshUH3X07m1qzGMFDczgD0hVDQgVw=;
+        b=AJuA65Tfx/a9mmhvm5Cwg9H+1WjrQmosXC8mBcUH7CLrNaWB1u9rHQ1EwaX7duaFIF
+         oeUDK3mHa/zX/zzGOUvHOTfro+zW+ulv0fSI4YMhegnJxAZnQJ4rdzD++vDMPp/T5oYA
+         XQRHL3Op3mcZSojGCrYz2DntbzYMdLmtgwye73vSnp7m6Okn+N8nvq4IjHgcbkuHWKP8
+         H620AoHpJb1H/zNqtnSSFuuJac/YXAoCJpcCqIg9DLNTMLNUv00rnzilj/mAnaDFpsUo
+         Q0SYcu/IuWMMHCBDJ3XaqmZGUg3S/YWaRwUdfJz2scPCBd+qOuWNUk+n8phmX7GFP3FU
+         LKjw==
+X-Gm-Message-State: AC+VfDyvUukUW9RKazfvPXzgYXZCtlJbXYmUWm9yqsqCpQW9C83hRlXX
+        qre+3LpfBUF5HH3XiSrnmR2RcQ==
+X-Google-Smtp-Source: ACHHUZ5OzKiW3U57XN0Htaa50N2NhdLd5CFniE1NlCW4kDpPPcqYy2HPZOQKXayyvEEZJhY+ya0Wwg==
+X-Received: by 2002:a05:600c:2190:b0:3f7:395e:46a2 with SMTP id e16-20020a05600c219000b003f7395e46a2mr6389324wme.16.1686598131498;
+        Mon, 12 Jun 2023 12:28:51 -0700 (PDT)
+Received: from hackbox.lan ([86.121.163.20])
+        by smtp.gmail.com with ESMTPSA id a7-20020a05600c224700b003f60a9ccd34sm12286861wmm.37.2023.06.12.12.28.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 Jun 2023 12:28:50 -0700 (PDT)
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: [RESEND v7 0/3] Add dedicated Qcom ICE driver
+Date:   Mon, 12 Jun 2023 22:28:44 +0300
+Message-Id: <20230612192847.1599416-1-abel.vesa@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20220405093759.1126835-1-alex.bennee@linaro.org>
- <20230531191007.13460-1-shyamsaini@linux.microsoft.com> <SN7PR11MB6850DA4A185E3429B62531CD84499@SN7PR11MB6850.namprd11.prod.outlook.com>
- <CAC_iWjKAdimEH0SsC_z9QuFS4sGLp2BVzx03s+RKvcLXY25kuQ@mail.gmail.com>
- <CAFA6WYPKeJYTzvnZkoL_dw6uXSkhAh6uxoEOWHYU7oLNRDRWaA@mail.gmail.com> <CAC_iWjLOhUvp5ggCCkHN5MRNfB_h6FZ2Z14yrtR3aqGn0Ovxig@mail.gmail.com>
-In-Reply-To: <CAC_iWjLOhUvp5ggCCkHN5MRNfB_h6FZ2Z14yrtR3aqGn0Ovxig@mail.gmail.com>
-From:   Jens Wiklander <jens.wiklander@linaro.org>
-Date:   Mon, 12 Jun 2023 19:06:45 +0200
-Message-ID: <CAHUa44F4CRM7zr8EevejPcCiGOjNgg7AtPy20L4h5S68SL9-_g@mail.gmail.com>
-Subject: Re: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
-To:     "alex.bennee@linaro.org" <alex.bennee@linaro.org>
-Cc:     Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Sumit Garg <sumit.garg@linaro.org>,
-        "Zhu, Bing" <bing.zhu@intel.com>,
-        Shyam Saini <shyamsaini@linux.microsoft.com>,
-        "code@tyhicks.com" <code@tyhicks.com>,
-        "Matti.Moell@opensynergy.com" <Matti.Moell@opensynergy.com>,
-        "arnd@linaro.org" <arnd@linaro.org>,
-        "hmo@opensynergy.com" <hmo@opensynergy.com>,
-        "joakim.bech@linaro.org" <joakim.bech@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
-        "maxim.uvarov@linaro.org" <maxim.uvarov@linaro.org>,
-        "ruchika.gupta@linaro.org" <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "Huang, Yang" <yang.huang@intel.com>,
-        "op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Alex,
+As both SDCC and UFS drivers use the ICE with duplicated implementation,
+while none of the currently supported platforms make use concomitantly
+of the same ICE IP block instance, the new SM8550 allows both UFS and
+SDCC to do so. In order to support such scenario, there is a need for
+a unified implementation and a devicetree node to be shared between
+both types of storage devices. So lets drop the duplicate implementation
+of the ICE from both SDCC and UFS and make it a dedicated (soc) driver.
 
-On Fri, Jun 2, 2023 at 10:26=E2=80=AFAM Ilias Apalodimas
-<ilias.apalodimas@linaro.org> wrote:
->
-> On Thu, 1 Jun 2023 at 08:49, Sumit Garg <sumit.garg@linaro.org> wrote:
-> >
-> > On Thu, 1 Jun 2023 at 11:02, Ilias Apalodimas
-> > <ilias.apalodimas@linaro.org> wrote:
-> > >
-> > > Hi Bing
-> > >
-> > > On Thu, 1 Jun 2023 at 04:03, Zhu, Bing <bing.zhu@intel.com> wrote:
-> > > >
-> > > > As an alternative, Is it possible to change ftpm design not to depe=
-nd on RPMB access at the earlier/boot stage? Because to my understanding, t=
-ypically PCRs don't require persistent/NV storage (for example, before RPMB=
- or tee-supplicant is ready, use TEE memory instead as temporary storage)
-> > >
-> > > I am not entirely sure this will solve our problem here.  You are
-> > > right that we shouldn't depend on the supplicant to extend PCRs. But
-> > > what happens if an object is sealed against certain PCR values?  We
-> > > are back to the same problem
-> >
-> > +1
-> >
-> > Temporary storage may be a stop gap solution for some use-cases but
-> > having a fast path access to RPMB via kernel should be our final goal.
-> > I would suggest we start small with the MMC subsystem to expose RPMB
-> > access APIs for OP-TEE driver rather than a complete RPMB subsystem.
->
-> I discussed with the OP-TEE maintainers about adding parts of the
-> supplicant in the kernel.  The supplicant 'just' sends an ioctl to
-> store/read stuff anyway.  So it would make sense to have a closer and
-> see if that looks reasonable.
-> Thanks
+The v7 is here:
+https://lore.kernel.org/all/20230408214041.533749-1-abel.vesa@linaro.org/
 
-I was trying to create a setup to test this. I've added the kernel
-patches on top of https://github.com/linaro-swg/linux/tree/optee. The
-QEMU branch is a bit dated and I had to add
-3a845a214b42 target/arm: allow setting SCR_EL3.EnTP2 when FEAT_SME is
-implemented
-d4a7b0ef1a03 hw/arm/boot: set CPTR_EL3.ESM and SCR_EL3.EnTP2 when
-booting Linux with EL3
-9745a003f878 hw/intc/arm_gicv3: fix prio masking on pmr write
-beeec926d24a target/arm: mark SP_EL1 with ARM_CP_EL3_NO_EL2_KEEP
-on top of that branch to be able to boot to the Linux kernel.
+Changes since v7:
+ * rebased on next-20230609
 
-I have the vhost-user-rpmb process running and connected with QEMU,
-but around (guessing really) when the RPMB subsystem is initializing
-the process dies with:
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D Vhost user message =3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-Request: VHOST_USER_SET_VRING_ADDR (9)
-Flags:   0x1
-Size:    40
-vhost-user-rpmb-INFO: 18:58:08.312: vrpmb_process_msg: msg
-VHOST_USER_SET_VRING_ADDR(9)
-vhost_vring_addr:
-    index:  0
-    flags:  0
-    desc_user_addr:   0x00007ff15fa91000
-    used_user_addr:   0x00007ff15fa91080
-    avail_user_addr:  0x00007ff15fa91040
-    log_guest_addr:   0x0000000041c91080
-Setting virtq addresses:
-    vring_desc  at (nil)
-    vring_used  at (nil)
-    vring_avail at (nil)
+Changes since v6:
+ * Dropped the patches 1, 3 and 6 as they are already in Bjorn's tree.
+ * Dropped the minItems for both the qcom,ice and the reg in the
+   qcom,ice compatile subschema, in the ufs schema file,
+   like Krzysztof suggested
 
-(vhost-user-rpmb:3236474): vhost-user-rpmb-CRITICAL **: 18:58:08.312:
-Invalid vring_addr message
+Changes since v5:
+ * See each individual patch for changelogs.
 
-Among other options, I'm starting QEMU with -machine
-virt,secure=3Don,mte=3Doff,gic-version=3D3,virtualization=3Dfalse to enable
-the secure world.
+Changes since v4:
+ * dropped the SDHCI dt-bindings patch as it will be added along
+   with the first use of qcom,ice property from an SDHCI DT node
 
-Do you have an idea of what might be wrong? Where should I start looking?
+Abel Vesa (3):
+  dt-bindings: ufs: qcom: Add ICE phandle
+  scsi: ufs: ufs-qcom: Switch to the new ICE API
+  mmc: sdhci-msm: Switch to the new ICE API
 
-Thanks,
-Jens
+ .../devicetree/bindings/ufs/qcom,ufs.yaml     |  24 ++
+ drivers/mmc/host/Kconfig                      |   2 +-
+ drivers/mmc/host/sdhci-msm.c                  | 223 ++++------------
+ drivers/ufs/host/Kconfig                      |   2 +-
+ drivers/ufs/host/Makefile                     |   4 +-
+ drivers/ufs/host/ufs-qcom-ice.c               | 244 ------------------
+ drivers/ufs/host/ufs-qcom.c                   |  99 ++++++-
+ drivers/ufs/host/ufs-qcom.h                   |  32 +--
+ 8 files changed, 176 insertions(+), 454 deletions(-)
+ delete mode 100644 drivers/ufs/host/ufs-qcom-ice.c
 
->
-> /Ilias
->
-> >
-> > -Sumit
-> >
-> > >
-> > > Thanks
-> > > /Ilias
-> > > >
-> > > > Bing
-> > > >
-> > > > IPAS Security Brown Belt (https://www.credly.com/badges/69ea809f-3a=
-96-4bc7-bb2f-442c1b17af26)
-> > > > System Software Engineering
-> > > > Software and Advanced Technology Group
-> > > > Zizhu Science Park, Shanghai, China
-> > > >
-> > > > -----Original Message-----
-> > > > From: Shyam Saini <shyamsaini@linux.microsoft.com>
-> > > > Sent: Thursday, June 1, 2023 3:10 AM
-> > > > To: alex.bennee@linaro.org
-> > > > Cc: code@tyhicks.com; Matti.Moell@opensynergy.com; arnd@linaro.org;=
- Zhu, Bing <bing.zhu@intel.com>; hmo@opensynergy.com; ilias.apalodimas@lina=
-ro.org; joakim.bech@linaro.org; linux-kernel@vger.kernel.org; linux-mmc@vge=
-r.kernel.org; linux-scsi@vger.kernel.org; maxim.uvarov@linaro.org; ruchika.=
-gupta@linaro.org; Winkler, Tomas <tomas.winkler@intel.com>; ulf.hansson@lin=
-aro.org; Huang, Yang <yang.huang@intel.com>; sumit.garg@linaro.org; jens.wi=
-klander@linaro.org; op-tee@lists.trustedfirmware.org
-> > > > Subject: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
-> > > >
-> > > > Hi Alex,
-> > > >
-> > > > [ Resending, Sorry for the noise ]
-> > > >
-> > > > Are you still working on it or planning to resubmit it ?
-> > > >
-> > > > [1] The current optee tee kernel driver implementation doesn't work=
- when IMA is used with optee implemented ftpm.
-> > > >
-> > > > The ftpm has dependency on tee-supplicant which comes once the user=
- space is up and running and IMA attestation happens at boot time and it re=
-quires to extend ftpm PCRs.
-> > > >
-> > > > But IMA can't use PCRs if ftpm use secure emmc RPMB partition. As o=
-ptee can only access RPMB via tee-supplicant(user space). So, there should =
-be a fast path to allow optee os to access the RPMB parititon without waiti=
-ng for user-space tee supplicant.
-> > > >
-> > > > To achieve this fast path linux optee driver and mmc driver needs s=
-ome work and finally it will need RPMB driver which you posted.
-> > > >
-> > > > Please let me know what's your plan on this.
-> > > >
-> > > > [1] https://optee.readthedocs.io/en/latest/architecture/secure_stor=
-age.html
-> > > >
-> > > > Best Regards,
-> > > > Shyam
+-- 
+2.34.1
+
