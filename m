@@ -2,111 +2,141 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E2EFC88CB8
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Jun 2023 14:20:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E957C88CB4
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Jun 2023 14:21:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237649AbjFLOU5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Jun 2023 10:20:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33308 "EHLO
+        id S237635AbjFLOU6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Jun 2023 10:20:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60836 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239415AbjFLOU1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2023 10:20:27 -0400
-Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCE4F3A9B
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 07:18:02 -0700 (PDT)
-Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-56cfce8862aso22216567b3.1
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 07:18:02 -0700 (PDT)
+        with ESMTP id S239631AbjFLOUf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2023 10:20:35 -0400
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDB0F1BF4
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 07:18:09 -0700 (PDT)
+Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-bcc50a23645so814424276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 07:18:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686579419; x=1689171419;
+        d=linaro.org; s=google; t=1686579424; x=1689171424;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=xd4ej52fz5tHOz0Tu2r6rHvX83QZvuCMy5qicdFt3g8=;
-        b=bXpzU59KX9yyYF3IpRFIYUvXOQDT0Rtn4HQ0A1fSe0m79+Vi0O/iefWiMhhiUokGBN
-         TX8BGksnigSHrpU6Xk7YZSPp4ipKDTCt6pgjyfz3+9ck1VX2rqezNk6fE0NSS9T0sVPu
-         VRy6ubSSFxSdbqDSDwc/DFtY40BhcQH3QBYHmdXS0gl3eMKAoLMr9ubOKvApSluZBPRX
-         iZdrjy6m59Yw6ZNvZVHONfeu2AZqdbS8U75+aLTuteru3tuNdZA0cHJy6JWu1aRgGyD6
-         wbfJxHiHoJn4ayqjpxblqdosCesJB/I3m8g+tw8Z45mn5fNGXBAqP+FVeY9VOVgEi21F
-         FrPw==
+        bh=thz1rU6TqUqhP4hqV/tPAC8YgYdbM3d8oNqdBfG0TWQ=;
+        b=FGx93jm5DHcCzgbJrMTqyqyHC9ByolTmytgHxNDUmpvCli+E2RzMDi44n3dxKLCUFq
+         4C1l/+nIZufZsQSrTKb5oUbQeytNLgjpXH2zXlTJPch+CBQwpX5n/kn9mlsbqjGefAnK
+         4qvf9as7rESZKXHEKNZ/0tSc8Oqq5BNGK38aHMNNXn2K/hISubGTH3Vh7O7I1Q+k9GkO
+         Cs5ixA+audCWEfpQf1hF/6pJlXe7vkakxSpMlTm6UoOL5hdGo5oJSh/+zOEinEoB+ECw
+         e1WL+QIMgqWoiQeI6VYxYgKrYG5xS0z3yPFuWgqWPRIZTXgGc1xJnZA7QSZ11SiH4Ix+
+         OyXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686579419; x=1689171419;
+        d=1e100.net; s=20221208; t=1686579424; x=1689171424;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=xd4ej52fz5tHOz0Tu2r6rHvX83QZvuCMy5qicdFt3g8=;
-        b=W4EHq7Mxv8pMEMwXVtcjPlORUuOdc6L5csXdmbSpM9GiCiCOPd+IIzE7kWZgl9PI6T
-         Qpih+FJeDnUsY1cIUzeJRenviKL1qcsS+bE7C3RZnzMyeuAncD9/99RSJ7OsP2Tn01Wg
-         bRsZGKeoVXF1JjXGwdpEr49sKipVFc5k3g+qPPQV7Exe8bvUAtvToiG+xhhtvUGjxgnN
-         0fjhzW/uDqDIKPSBXKU5g6LnCtquSt3eVVlJNRiVrl7v2qveyhH1JBpTRJzOm515/gEE
-         LeVOC+2Fvt9uZ0ay/BKRI4XwHz4cD1qcBhoUcILiKPdvCzqMbiPVcVBy/mp8xmupz9dD
-         m1mg==
-X-Gm-Message-State: AC+VfDx02SpEEHmJKsKhOyhwKaokJeO1bLD1AezBao751+AhZSho+lm2
-        O5TjWrQ5mZqzBgmD//mZXX46my8+h76FKFE+AvijRaHN2IemHRJB
-X-Google-Smtp-Source: ACHHUZ4AqsS9LkY9waaI57crFjubk8bELBxu1KgZO9jdfcj2HPyWE4lRx3uFSH3LRqfYMB5hgr4N4bUMgjKIFZ58/CQ=
-X-Received: by 2002:a25:160a:0:b0:ba7:c03c:518d with SMTP id
- 10-20020a25160a000000b00ba7c03c518dmr7618205ybw.63.1686579419253; Mon, 12 Jun
- 2023 07:16:59 -0700 (PDT)
+        bh=thz1rU6TqUqhP4hqV/tPAC8YgYdbM3d8oNqdBfG0TWQ=;
+        b=TE7gZuodq4TO1Yu5KwZ5Tm9IbS6//R6LPHNwE/0B/3BnTunqy/UnGFDbXJ4QgVsakh
+         o0Bt/sAY4A5gi0fsk0VNAHX2x9ehI7t55MUv0Nrz3/EnMI/Hn3vlSU8tlNCnN0lab1mn
+         CphzLilBsAsFZTTA6dOje2n964DGr4ij9xh4aTheQ5kY6L3Za1oQ02h58Q1P6zthcliv
+         tPUDnYfo8c5Tfk3oqVb7xcf6O8jxPqK1jzLyAHRj8fnERhvAMeIfIn2JMTjbgYPx29vY
+         aUS3ydpWniiXRv3O7cOMub+5kUR+sFIOOb1nHH1aYF85w6K4KizzPKTuuHG/+/unT+Rf
+         2e0A==
+X-Gm-Message-State: AC+VfDxW27WLDEkGJGbUZ7axo7YXhi5lmFHGIbbbgzo8J/c/67ueQ+nw
+        lyZvgC3yNu83zRoyyXIxKbqrg6PCMJMBBuItISjR1MNXW3Z1TeBe
+X-Google-Smtp-Source: ACHHUZ68HLDX2HorpUfXt3blRkWbGvexBKPyOy7XyHFyo1/vgq9/OZpwRZTCSuXG4Fu+Jo4tLUVDouLpmzkDB5rLyK8=
+X-Received: by 2002:a25:69c8:0:b0:bc8:833d:c41e with SMTP id
+ e191-20020a2569c8000000b00bc8833dc41emr4142099ybc.6.1686579424216; Mon, 12
+ Jun 2023 07:17:04 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230608194519.10665-1-s.shtylyov@omp.ru>
-In-Reply-To: <20230608194519.10665-1-s.shtylyov@omp.ru>
+References: <20230609083425.765-1-avri.altman@wdc.com>
+In-Reply-To: <20230609083425.765-1-avri.altman@wdc.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 12 Jun 2023 16:16:23 +0200
-Message-ID: <CAPDyKFqHXqs7rcJQgBzGh_k-9023vopjcxowMLaHsFd7TykS5w@mail.gmail.com>
-Subject: Re: [PATCH v2 00/12] Fix deferred probing in the MMC/SD drivers
-To:     Sergey Shtylyov <s.shtylyov@omp.ru>
+Date:   Mon, 12 Jun 2023 16:16:28 +0200
+Message-ID: <CAPDyKFpHNYmre7Y6Ut0MqpJAAngZZx9Ra6ofzsjrNzbdwZ_itA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc-utils: Assert MMC_IOC_MULTI_CMD in compile time
+To:     Avri Altman <avri.altman@wdc.com>
 Cc:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 8 Jun 2023 at 21:45, Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
+On Fri, 9 Jun 2023 at 10:34, Avri Altman <avri.altman@wdc.com> wrote:
 >
-> Here are 12 patches against the 'fixes' branch of Ulf Hansson's 'mmc.git' repo.
-> The affected MMC/SD drivers call platform_get_irq[_byname]() but override its
-> result in case of error which prevents the deferred probing from working. Some
-> of these patches logically depend on commit ce753ad1549c ("platform: finally
-> disallow IRQ0 in platform_get_irq() and its ilk")...
+> v1 -> v2: Address Ulf's suggestions
 
-The above patch is available in v5.19. If someone wants any of the
-patches in $subject series to be backported to an older kernel
-version, the commit above needs backporting too.
-
-Therefore I am adding the tag below for the series and leaving
-anything that older to be managed separately.
-
-Cc: stable@vger.kernel.org # v5.19+
+Next time, please put this as patch version information, below the "---".
 
 >
-> Sergey Shtylyov (12):
->   mmc: bcm2835: fix deferred probing
->   mmc: meson-gx: fix deferred probing
->   mmc: mtk-sd: fix deferred probing
->   mmc: mvsdio: fix deferred probing
->   mmc: omap: fix deferred probing
->   mmc: omap_hsmmc: fix deferred probing
->   mmc: owl: fix deferred probing
->   mmc: sdhci-acpi: fix deferred probing
->   mmc: sdhci-spear: fix deferred probing
->   mmc: sh_mmcif: fix deferred probing
->   mmc: sunxi: fix deferred probing
->   mmc: usdhi60rol0: fix deferred probing
+> Notify of mult-ioctl violation during preprocessing instead of bailing
+> out in runtime.  Would not even allow bogus copies of mmc-utils binaries
+> wondering about out there.
 >
->  drivers/mmc/host/bcm2835.c      | 4 ++--
->  drivers/mmc/host/meson-gx-mmc.c | 4 ++--
->  drivers/mmc/host/mtk-sd.c       | 2 +-
->  drivers/mmc/host/mvsdio.c       | 2 +-
->  drivers/mmc/host/omap.c         | 2 +-
->  drivers/mmc/host/omap_hsmmc.c   | 6 ++++--
->  drivers/mmc/host/owl-mmc.c      | 2 +-
->  drivers/mmc/host/sdhci-acpi.c   | 2 +-
->  drivers/mmc/host/sdhci-spear.c  | 4 ++--
->  drivers/mmc/host/sh_mmcif.c     | 2 +-
->  drivers/mmc/host/sunxi-mmc.c    | 4 ++--
->  drivers/mmc/host/usdhi6rol0.c   | 6 ++++--
->  12 files changed, 22 insertions(+), 18 deletions(-)
->
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-Applied for fixes, thanks!
+Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  mmc_cmds.c | 16 ++++------------
+>  1 file changed, 4 insertions(+), 12 deletions(-)
+>
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index df66986..26bdc38 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -34,6 +34,10 @@
+>  #include "mmc_cmds.h"
+>  #include "3rdparty/hmac_sha/hmac_sha2.h"
+>
+> +#ifndef MMC_IOC_MULTI_CMD
+> +#error "mmc-utils needs MMC_IOC_MULTI_CMD support (added in kernel v4.4)"
+> +#endif
+> +
+>  #ifndef offsetof
+>  #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+>  #endif
+> @@ -2112,11 +2116,6 @@ static int do_rpmb_op(int fd,
+>                                           struct rpmb_frame *frame_out,
+>                                           unsigned int out_cnt)
+>  {
+> -#ifndef MMC_IOC_MULTI_CMD
+> -       fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
+> -               " support, needed by RPMB operation.\n");
+> -       exit(1);
+> -#else
+>         int err;
+>         u_int16_t rpmb_type;
+>         struct mmc_ioc_multi_cmd *mioc;
+> @@ -2196,7 +2195,6 @@ static int do_rpmb_op(int fd,
+>  out:
+>         free(mioc);
+>         return err;
+> -#endif /* !MMC_IOC_MULTI_CMD */
+>  }
+>
+>  int do_rpmb_write_key(int nargs, char **argv)
+> @@ -2804,11 +2802,6 @@ out:
+>
+>  int do_ffu(int nargs, char **argv)
+>  {
+> -#ifndef MMC_IOC_MULTI_CMD
+> -       fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
+> -                       " support, needed by FFU.\n");
+> -       exit(1);
+> -#else
+>         int dev_fd, img_fd;
+>         int sect_done = 0, retry = 3, ret = -EINVAL;
+>         unsigned int sect_size;
+> @@ -3034,7 +3027,6 @@ out:
+>         close(img_fd);
+>         close(dev_fd);
+>         return ret;
+> -#endif
+>  }
+>
+>  int do_general_cmd_read(int nargs, char **argv)
+> --
+> 2.40.0
+>
