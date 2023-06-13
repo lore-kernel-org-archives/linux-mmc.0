@@ -2,60 +2,60 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA5E5EB64DA
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 20:34:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F268EB64DD
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 20:34:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231209AbjFMUee (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S230433AbjFMUee (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 13 Jun 2023 16:34:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42508 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42498 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230433AbjFMUec (ORCPT
+        with ESMTP id S230496AbjFMUec (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 16:34:32 -0400
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D06DD199C
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 13:34:29 -0700 (PDT)
-Received: by mail-lf1-x12a.google.com with SMTP id 2adb3069b0e04-4f62b552751so7453450e87.3
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 13:34:29 -0700 (PDT)
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8A69DC
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 13:34:30 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id 2adb3069b0e04-4f658a17aa4so6691550e87.0
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 13:34:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686688468; x=1689280468;
+        d=linaro.org; s=google; t=1686688469; x=1689280469;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=HEWZ3mk4O5IbHesXExTqQF3woZXVOofkrFDb7Wvq9pM=;
-        b=O3GqsVFjd8mTLVD5WMmFXeH/dZGabEKtmTTLdPUlcbL6BI4/+J3hsqPTuDlIz9BAzg
-         +cg7hXy+74KOIH8eCT2LGEieWXtZCLlQGgVtf81BgpZljJ/Mq4hlGUn1fFDWvPQ9qkAU
-         UfJBeXE7AJl/Mq+Xl6WWc4TNju3HUX04vcK6G/Q6MFXEDqXvnpC1pfB+xamyJOY1D3/x
-         RIUwjQZe9Smvndk1o1K5kKJH09osYlWsc+2PBcT4FsMJsKbLcGJkNCib+LeE9cwNANNP
-         FmH75hPPyCgE/cW4lesnquNjqourWLSiHJ9XsP1ucIOkA4WFNH3YVWYrTMmmk5ubewj3
-         tmDQ==
+        bh=Y2Xs3XgGJttCT2952b8M8V6pJJgNj+V+JW7LJwfPkUM=;
+        b=YZZUMljVoLCRehekqNwUr42thbxpLbBIH/2jnNJqY5Y7DE0SwxpGZACVeYsMb8oqOV
+         lQsLn4YYLs2fEREGsIw0gUkUMwxAenDkeFX4PGlNSCA4n4y6x8hiJ8Y+jP/KxH1lE6fX
+         wa591VIA/MtLG9q3olyAeD4ZxMCROoMKrH8MCUdSAU0vByfD3FO74QMSQ+PCkNih26bq
+         7bR1ThZ5hJdF6gkb3Q6HL4kH1NCwg+yW60pW7PKoGVWSAzGvNu6aAkQsCxMBTVQkQLeT
+         z4J0Xshd9xMPVuJZi2O26CMTArz0PI709LYWoU8qqPIuGHBEZ14c3fGb3KTT0oDWutVK
+         LONQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686688468; x=1689280468;
+        d=1e100.net; s=20221208; t=1686688469; x=1689280469;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=HEWZ3mk4O5IbHesXExTqQF3woZXVOofkrFDb7Wvq9pM=;
-        b=bx140xYdwKSWIlk8P5VuKD2foeRFq9KFe9FoHhDjOTsq9d1i9TP+0EmjxeM0FzPldV
-         6G6icJZl02VWAALu1jrHbuobXUs8A17cTYAjnTdgx2pikDU/7mkfTyoO8UCk13rHzPTK
-         uCLvGuKu92Nlr8Vxy/eve5gmYJQGVWc1S63954ngrBvZMF43WEf1y84wBXjz5Lnw/q4J
-         +W6xeVRj3fP1yTEn5E0zLAVrwR6IdiiXXfw3KafmD8RGZF7E6MY15ZSxhRTLTlPAY+UX
-         6sR9Z0rrhr64Illl5xtdA0M3qCY6hu/Crqg/gUbzrCD9Q48euJzMXuEV2bNGvxv2PV5s
-         4BPg==
-X-Gm-Message-State: AC+VfDzYsqihvI7aeYfyNhcmSWfoOwA4XAcg9siNGY7R8hn39QgAZ/AZ
-        sN8+3d3G+DgXQH8cexJyu3kK8Q==
-X-Google-Smtp-Source: ACHHUZ4MJ1g+3kaOn/hlXnU8wnvFYa+Alm2v+9RG63pXCADxF8i/SEE0xuvW94dag0BU0pXA4yYBfw==
-X-Received: by 2002:ac2:5b5b:0:b0:4f3:a9d3:4893 with SMTP id i27-20020ac25b5b000000b004f3a9d34893mr7278345lfp.35.1686688468189;
-        Tue, 13 Jun 2023 13:34:28 -0700 (PDT)
+        bh=Y2Xs3XgGJttCT2952b8M8V6pJJgNj+V+JW7LJwfPkUM=;
+        b=A/BqY0UjkD9ZrFyX2wh0ZPxTJWNM8MPAUcKhYhmmvl2Ul6GbcHXLci+fCOYS0FiZHo
+         /nbTj+KCpFMWvK/aPU4ygrCAa5yQ0z7IUKdDFxOIqeDBmScpyCsAeIzoo5goVgYXxpfm
+         pjrGdQbXVP1FhPExiKd+YFzRMRtpWVyT1BSsAVZzlgM0HrrCr6wvEGE3fbfeW6NbsEnS
+         BLEgWIXpXq6xeQ9nTASBsgvDd+BGM/tVbED+gnunGrrnbVAbjqih85LLpDCUDaMWyKi9
+         0PnBlPq6aXoQ6GNBhBlPqIaonEtRDPbk97n/5AqtEjxW2s6E1dTLT2EUIocM8MmtR9y5
+         3heQ==
+X-Gm-Message-State: AC+VfDySgjl8QAglZtEybUHRctOZi8HwOezAWrh1IyBi9zwouzkRq4L8
+        4N3DeJhd4KuzTL780+Q4E8UX7w==
+X-Google-Smtp-Source: ACHHUZ6fZm7YQd7MlaNDN8uljS3Hdj3RBXwGZEnl6OMQ0T50GRRu2flWt5GAGuE0HYaEU9gJ6Q7y9Q==
+X-Received: by 2002:a19:8c0d:0:b0:4f4:c973:c97f with SMTP id o13-20020a198c0d000000b004f4c973c97fmr5921646lfd.49.1686688469107;
+        Tue, 13 Jun 2023 13:34:29 -0700 (PDT)
 Received: from [192.168.1.2] (c-05d8225c.014-348-6c756e10.bbcust.telenor.se. [92.34.216.5])
-        by smtp.gmail.com with ESMTPSA id l12-20020a19c20c000000b004f26f699e9dsm1897813lfc.184.2023.06.13.13.34.27
+        by smtp.gmail.com with ESMTPSA id l12-20020a19c20c000000b004f26f699e9dsm1897813lfc.184.2023.06.13.13.34.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Jun 2023 13:34:27 -0700 (PDT)
+        Tue, 13 Jun 2023 13:34:28 -0700 (PDT)
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Tue, 13 Jun 2023 22:34:19 +0200
-Subject: [PATCH v4 03/10] mmc: mmci: Stash status while waiting for busy
+Date:   Tue, 13 Jun 2023 22:34:20 +0200
+Subject: [PATCH v4 04/10] mmc: mmci: Break out error check in busy detect
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230405-pl180-busydetect-fix-v4-3-df9c8c504353@linaro.org>
+Message-Id: <20230405-pl180-busydetect-fix-v4-4-df9c8c504353@linaro.org>
 References: <20230405-pl180-busydetect-fix-v4-0-df9c8c504353@linaro.org>
 In-Reply-To: <20230405-pl180-busydetect-fix-v4-0-df9c8c504353@linaro.org>
 To:     Yann Gautier <yann.gautier@foss.st.com>,
@@ -71,9 +71,13 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some interesting flags can arrive while we are waiting for
-the first busy detect IRQ so OR then onto the stashed
-flags so they are not missed.
+The busy detect callback for Ux500 checks for an error
+in the status in the first if() clause. The only practical
+reason is that if an error occurs, the if()-clause is not
+executed, and the code falls through to the last
+if()-clause if (host->busy_status) which will clear and
+disable the irq. Make this explicit instead: it is easier
+to read.
 
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
@@ -84,21 +88,38 @@ ChangeLog v2->v3:
 ChangeLog v1->v2:
 - No changes
 ---
- drivers/mmc/host/mmci.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/mmci.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index eee449f90915..47b306e45f78 100644
+index 47b306e45f78..d632658d9d20 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -703,6 +703,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+@@ -665,6 +665,15 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+ {
+ 	void __iomem *base = host->base;
+ 
++	if (status & err_msk) {
++		/* Stop any ongoing busy detection if an error occurs */
++		writel(host->variant->busy_detect_mask, base + MMCICLEAR);
++		writel(readl(base + MMCIMASK0) &
++		       ~host->variant->busy_detect_mask, base + MMCIMASK0);
++		host->busy_status = 0;
++		return true;
++	}
++
+ 	/*
+ 	 * Before unmasking for the busy end IRQ, confirm that the
+ 	 * command was sent successfully. To keep track of having a
+@@ -678,7 +687,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+ 	 * while, to allow it to be set, but tests indicates that it
+ 	 * isn't needed.
  	 */
- 	if (host->busy_status &&
- 	    (status & host->variant->busy_detect_flag)) {
-+		host->busy_status |= status & (MCI_CMDSENT | MCI_CMDRESPEND);
- 		writel(host->variant->busy_detect_mask, base + MMCICLEAR);
- 		return false;
- 	}
+-	if (!host->busy_status && !(status & err_msk)) {
++	if (!host->busy_status) {
+ 		status = readl(base + MMCISTATUS);
+ 		if (status & host->variant->busy_detect_flag) {
+ 			writel(readl(base + MMCIMASK0) |
 
 -- 
 2.40.1
