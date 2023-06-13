@@ -2,100 +2,82 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 668FFC7EE2F
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 02:50:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EAECBC7EE2E
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 06:29:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238410AbjFMCu3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Jun 2023 22:50:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47198 "EHLO
+        id S233274AbjFMG3M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Jun 2023 02:29:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238036AbjFMCu3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2023 22:50:29 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A7BC1726;
-        Mon, 12 Jun 2023 19:50:28 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2311C62F76;
-        Tue, 13 Jun 2023 02:50:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD5EAC4339B;
-        Tue, 13 Jun 2023 02:50:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686624627;
-        bh=7W9U+eKYl0KSlX2mWiw+hamipckUREqq7kenoM24PBc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=USvaVPPMj4eUpgKrLBEkNAhkOXLxlspXcqZaOvAcwlgQ933qCwlDYnkFQ2pTDXktO
-         1nABQ65OaVzLQrsi3iLwGX2BShh62BS/OcBa1JJSs3Cj287HbGiE/3HeZ80C7wu9nK
-         3xbd5RaChtKf2XVBY2frx6BDcBx7XD20cBLUdFptJBaNcBQKzJ2cORiEjnOqjmtRpk
-         M9EVHi78n9Y0AFjlEuTpK+LqfOmf3eN82hPk6ITGImCTTa3l+mnWYNH+0tziqykjEY
-         sNXcfFHutsGkx1DNhfotKHyRytzUp14mV56u7oSuQBvagncHINrfCxKKLpHuZ2AF3y
-         oo0S9YLHgGyTA==
-Date:   Mon, 12 Jun 2023 19:50:25 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [RESEND v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
-Message-ID: <20230613025025.GB883@sol.localdomain>
-References: <20230612192847.1599416-1-abel.vesa@linaro.org>
- <20230612192847.1599416-3-abel.vesa@linaro.org>
+        with ESMTP id S232063AbjFMG3L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 02:29:11 -0400
+Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 500FC183
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 23:29:10 -0700 (PDT)
+Received: by mail-yb1-xb32.google.com with SMTP id 3f1490d57ef6-bc5566538fdso3057410276.0
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jun 2023 23:29:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686637749; x=1689229749;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=FtXnfqbUClqS5WlWWSWJJSXAag1DuivP2vgqQcYQFEg=;
+        b=X1KPp/8Vz3dGrJCMcgdEDKY6Dca3FRT+SS05CZNaFCr8BJm5ej+OjpdjRJmZerYMgM
+         bzpIXXFFDK6bDpiIWvKuo5xzfqZx7Ao1DmMCir6ottRAKsqlLDEO+dKM6RHvmLBhgGyD
+         3Kvd4FGcJ5XTPE3wYsLFZPENlgdh+7aLNHNvqI14F9z5zj8rbOAWbRzDNEx/grVgQ6m6
+         yAypBL+6rqYMyWm7I2pr4RCi3ULD3ktNDdKh1KGyV1fYfmNoBjUzl3FQARLCNTQWFUND
+         y4uIdh6Z9SbV1onvhWSwfDTwIdfnx4QKA1INq0d49WNraAYNGDMtVFpWgO1d2LSMsSLe
+         dGYg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686637749; x=1689229749;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=FtXnfqbUClqS5WlWWSWJJSXAag1DuivP2vgqQcYQFEg=;
+        b=Wit+9uC0BSRLl8gxq+nhyO++daSzk4R5MN68rJpkUhNP5BR+AibUBWSRsgqGb+S+f4
+         veTfdgDJc3TwIQwOq3dC+xyCMuVME87JIyMdnJtd5zXV/YKUAfR+qK98/T2To0OjD4bU
+         1Ecl0xknmEcwkrc40O/RWpVxU8mp5ig6mcl9tJnwJws6D+gPDKGwSmQxJFT+duAOjGV6
+         F7Mmcl7HjiPzO4eiaIlhb1ZnByRNZw+3YYYGbOPmRgZNUhyYKoHICRpZ5KZDrIM0uBF2
+         5EV6x5N3iTAVZT+0jnUNN3VJRmZeI6fjWPBMp3o4iNHkFXc4b/no3UjGxbUDVEGRwHAj
+         uf4w==
+X-Gm-Message-State: AC+VfDwYUzHpLYr8n2Dd92HZ8ZSZrS7qbzvNcdZKzZLFB4XMSAb2ZbxH
+        3fXRI/Fa8/b+5FVay7/vLh7mxIfK99iY/ne0/osvOgb/71gOX99v
+X-Google-Smtp-Source: ACHHUZ7Sy7pbiuZjXDqk3JnRmV338jlZH12ywUqRe28RY/58qEbA/cWUcpI+PknUGlOW+uG1ER/RJ0ILeLdNG3d/MpE=
+X-Received: by 2002:a25:dacf:0:b0:bb8:2eb4:4f10 with SMTP id
+ n198-20020a25dacf000000b00bb82eb44f10mr931636ybf.22.1686637749518; Mon, 12
+ Jun 2023 23:29:09 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230612192847.1599416-3-abel.vesa@linaro.org>
+References: <20230612143730.210390-1-ulf.hansson@linaro.org>
+In-Reply-To: <20230612143730.210390-1-ulf.hansson@linaro.org>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 13 Jun 2023 08:28:58 +0200
+Message-ID: <CACRpkdafRdxZKsHMvS868ya_3mAnUan_iRq24idRLOTsVYzOcA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: Set PROBE_PREFER_ASYNCHRONOUS
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        Dennis Zhou <dennis@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 12, 2023 at 10:28:46PM +0300, Abel Vesa wrote:
-> Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
-> use the new ICE api provided by the Qualcomm soc driver ice. The platforms
-> that already have ICE support will use the API as library since there will
-> not be a devicetree node, but instead they have reg range. In this case,
-> the of_qcom_ice_get will return an ICE instance created for the consumer's
-> device. But if there are platforms that do not have ice reg in the
-> consumer devicetree node and instead provide a dedicated ICE devicetree
-> node, the of_qcom_ice_get will look up the device based on qcom,ice
-> property and will get the ICE instance registered by the probe function
-> of the ice driver.
-> 
-> The ICE clock is now handle by the new driver. This is done by enabling
-> it on the creation of the ICE instance and then enabling/disabling it on
-> UFS runtime resume/suspend.
-> 
-> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> ---
->  drivers/ufs/host/Kconfig        |   2 +-
->  drivers/ufs/host/Makefile       |   4 +-
->  drivers/ufs/host/ufs-qcom-ice.c | 244 --------------------------------
->  drivers/ufs/host/ufs-qcom.c     |  99 ++++++++++++-
->  drivers/ufs/host/ufs-qcom.h     |  32 +----
->  5 files changed, 104 insertions(+), 277 deletions(-)
->  delete mode 100644 drivers/ufs/host/ufs-qcom-ice.c
+On Mon, Jun 12, 2023 at 4:37=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
 
-My concern about this patch removing the ICE clock from UFS clock gating
-(https://lore.kernel.org/linux-scsi/ZDBSvVIIq6cMTf1Y@gmail.com) was not
-addressed.  But I guess this is good enough.  Maybe someone can do a fixup patch
-on top of this if they really care about the UFS clock gating.  You can add:
+> All mmc host driver should have enabled the asynchronous probe option, bu=
+t
+> it seems like we missed to set it for mmci, so let's do that now.
+>
+> Fixes: 21b2cec61c04 ("mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that=
+ existed in v4.4")
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Reviewed-by: Eric Biggers <ebiggers@google.com>
+As I had the test system up I applied this on top of the busydetect
+fixes and tested on Samsung Skomer, works fine!
+Tested-by: Linus Walleij <linus.walleij@linaro.org>
 
-- Eric
+Yours,
+Linus Walleij
