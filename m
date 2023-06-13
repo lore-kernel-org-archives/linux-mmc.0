@@ -2,117 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 865F8C7EE2E
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 12:13:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7587FC88CB4
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 13:16:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236391AbjFMMNd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Jun 2023 08:13:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55008 "EHLO
+        id S242373AbjFMNQy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Jun 2023 09:16:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240140AbjFMMNc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 08:13:32 -0400
-Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33336CE
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 05:13:31 -0700 (PDT)
-Received: by mail-yb1-xb2f.google.com with SMTP id 3f1490d57ef6-bc4114d44a8so3520615276.2
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 05:13:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686658410; x=1689250410;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=9TP9yVbXYrWbM9qiIbP7E6bmeYF95/za+6yxa/EUie0=;
-        b=HTGCAMk9XvnDW+PLeQoW1zebFPqJjEr6sJiboeyA9JwL3z2266O8X7wCsW+XJmTGrk
-         8O7Kz83tTBh+eAJfBWW2oP3lOzQ6msp2ajDE7yLexioTSfhFJ5jSwszXz+8/TZJAjiaF
-         U63Hi5iGuVevTjHL3KVYc6CtMDiTK0iKvuoNPOABNST725CB/FMiMF4+1Vq+JnPTdkCL
-         Mr3iH/UrK9Dqn/0mnFz6YZymY1p2O0KQl6Oiigw5qVH+Y6dP7bWSGczUwopkkKU4CJMJ
-         GtDGsMNxFSGLPCKLZDLkZsKa4n6i0vW9/u+B/svDXxVWWXJlXhJDtZfFNZvIX4/YGNlm
-         0Eow==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686658410; x=1689250410;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=9TP9yVbXYrWbM9qiIbP7E6bmeYF95/za+6yxa/EUie0=;
-        b=dx5N4QNLiEWu8d4fRt7iPPy69Cw9G+6gTl0xKB3Lu2yxZMkZr7WKaGdlKgjDB9+zXp
-         6PMXtkksFmI+eMv7Ga/EVTRegclApi2AxnYE7y8B6gsS42FKz6K42SiT2QmJ50Q82b7C
-         HZtYA+PB5N7o5lca5RVJF46OX9JbY/7kdVfQhomcvi+T4PMUOZW5K+tISJjdDMG3Ge4d
-         WCZBYG+FMlCrPLrcFZhVWFpbrBxsvBma6+grN740VUcHim8eZeZj7420M0OA+Lrt/YgA
-         KGTthObaXZhMvpzSBqttykhOG796p6oq+IFfk3f5/XraXl5eI+soeGMaN/3aFmSxYTJH
-         3Few==
-X-Gm-Message-State: AC+VfDyY5MYHtMu1G/ElpFZCBdr2YAwqB/yqsGAPiy+QZqsKX53LnK11
-        30tvyk1XFTFmjU2BsHT8Qif3/xJY324Hcmit79pMkw==
-X-Google-Smtp-Source: ACHHUZ6WCI15IGB0NY3kTubXSVzuNUUjrrS8z1t+kakxDoYryk6lKbhtbQQHoY1hW8MOyJ+x+0XbDbp5OStKvRjLZ/k=
-X-Received: by 2002:a25:a148:0:b0:bb3:9255:33e9 with SMTP id
- z66-20020a25a148000000b00bb3925533e9mr1125606ybh.53.1686658410228; Tue, 13
- Jun 2023 05:13:30 -0700 (PDT)
+        with ESMTP id S241000AbjFMNQx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 09:16:53 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5CAFF196;
+        Tue, 13 Jun 2023 06:16:52 -0700 (PDT)
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35DAbVHs016390;
+        Tue, 13 Jun 2023 13:16:28 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=UhBYNPuW8adCTT9Igi1jCTMV9lLl1u6981Zie5OLaOI=;
+ b=J2nX+Lo1BgT9z0OCqNCrbCoGaYJJjGStqn5/M5aJpPairm3BdCcGyEMeCW/+HHkIfZls
+ s7OBMMlN9YEWtfulcg4TcX/xOKCreD51N0xydR2LmL6OAHFzpADpA83IO1Qkh2/MUOXF
+ i6RVzBu5pWUJF72noLCr7+UvuhNtoBjzSvC7sfLASvDfRqK5D6ePMAWQQvVebPA46Vr9
+ ItTlv7LXotFoSw/LGYq9c6lhU/4uGAkFn1JWwEtP/YLMr1Nrw1KTgNxR0gnAT+XZL5QS
+ Xwcr4u+njWnnFHXZJ010SUrV1TiyA5P/wzQuR31fi267g1xJDT+m6DKAi+rQ0Yjv1sN9 1w== 
+Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3r6n0cgjs2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 13 Jun 2023 13:16:28 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 35DDGRua031912
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 13 Jun 2023 13:16:27 GMT
+Received: from [10.201.3.182] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Tue, 13 Jun
+ 2023 06:16:22 -0700
+Message-ID: <410b0991-30b6-c87d-9b25-5f51f6c08671@quicinc.com>
+Date:   Tue, 13 Jun 2023 18:46:18 +0530
 MIME-Version: 1.0
-References: <20230612143730.210390-1-ulf.hansson@linaro.org> <1b1edc4e-a318-4d55-c99e-eb9a47f9833f@foss.st.com>
-In-Reply-To: <1b1edc4e-a318-4d55-c99e-eb9a47f9833f@foss.st.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 13 Jun 2023 14:12:54 +0200
-Message-ID: <CAPDyKFpS3PCD5VBmBYN0fy_HqVGMWc-w2A8z_ciDABF9x4oK5g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci: Set PROBE_PREFER_ASYNCHRONOUS
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Marek Vasut <marex@denx.de>, Dennis Zhou <dennis@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [PATCH v4 2/8] clk: qcom: Add Global Clock controller (GCC)
+ driver for IPQ5018
+Content-Language: en-US
+To:     Konrad Dybcio <konrad.dybcio@linaro.org>, <agross@kernel.org>,
+        <andersson@kernel.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>
+References: <20230510134121.1232286-1-quic_srichara@quicinc.com>
+ <20230510134121.1232286-3-quic_srichara@quicinc.com>
+ <21a5642c-e6e5-9323-7db1-383a18616ac0@linaro.org>
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <21a5642c-e6e5-9323-7db1-383a18616ac0@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: foWbv2MnEtUydER2G_D9pmII8xoZErGo
+X-Proofpoint-ORIG-GUID: foWbv2MnEtUydER2G_D9pmII8xoZErGo
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
+ definitions=2023-06-13_04,2023-06-12_02,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0
+ lowpriorityscore=0 phishscore=0 spamscore=0 bulkscore=0 suspectscore=0
+ clxscore=1015 malwarescore=0 impostorscore=0 mlxscore=0 priorityscore=1501
+ mlxlogscore=962 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2305260000 definitions=main-2306130116
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 13 Jun 2023 at 13:43, Yann Gautier <yann.gautier@foss.st.com> wrote:
->
-> On 6/12/23 16:37, Ulf Hansson wrote:
-> > All mmc host driver should have enabled the asynchronous probe option, but
-> > it seems like we missed to set it for mmci, so let's do that now.
-> >
-> > Fixes: 21b2cec61c04 ("mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.4")
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > ---
-> >   drivers/mmc/host/mmci.c | 1 +
-> >   1 file changed, 1 insertion(+)
-> >
-> > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> > index f2b2e8b0574e..97a77eefb11a 100644
-> > --- a/drivers/mmc/host/mmci.c
-> > +++ b/drivers/mmc/host/mmci.c
-> > @@ -2455,6 +2455,7 @@ static struct amba_driver mmci_driver = {
-> >       .drv            = {
-> >               .name   = DRIVER_NAME,
-> >               .pm     = &mmci_dev_pm_ops,
-> > +             .probe_type = PROBE_PREFER_ASYNCHRONOUS,
-> >       },
-> >       .probe          = mmci_probe,
-> >       .remove         = mmci_remove,
->
-> Hi Ulf,
->
-> I've tested that on a STM32MP eval board.
-> It boots OK.
->
-> Just a warning for other users of this updated driver: if there are
-> several MMC devices on the board, we can no more rely on the order of probe.
-> For example, this board has an SD-card and an eMMC. Before this patch
-> mmc0 was the SD-card, mmc1 the eMMC. Now the order has changed on the
-> boot I've tested.
-> It shouldn't be an issue, as filesystems use UUIDs. Maybe for some tools
-> or tests.
+Hi Konrad,
 
-Note that the order was not guaranteed even before. It was mostly due
-to luck, in that case.
+On 5/27/2023 12:47 AM, Konrad Dybcio wrote:
+> 
+> 
+> On 10.05.2023 15:41, Sricharan Ramabadhran wrote:
+>> Add support for the global clock controller found on IPQ5018
+>> based devices.
+>>
+>> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>> Co-developed-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
+>> Signed-off-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
+>> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>> ---
+>>   [v4] Fixed to use ARRAY_SIZE() wherever parent_data was used
+>>        Changed GPL v2 to GPL as per comments
+>>
+>>   drivers/clk/qcom/Kconfig       |   10 +-
+>>   drivers/clk/qcom/Makefile      |    1 +
+>>   drivers/clk/qcom/gcc-ipq5018.c | 3731 ++++++++++++++++++++++++++++++++
+>>   3 files changed, 3740 insertions(+), 2 deletions(-)
+>>   create mode 100644 drivers/clk/qcom/gcc-ipq5018.c
+>>
+> [...]
+> 
+>> +struct clk_rcg2 lpass_axim_clk_src = {
+>> +	.cmd_rcgr = 0x2E028,
+> Please use lowercase hex for non-macro-defines, all throughout the file.
+> 
 
-UUIDs is preferred, but we also have the mmc aliases that can be used
-in DT. This allows us to specify a specific index for the mmc-host
-(which always becomes the same id for the later detected block
-device).
+  ok. Will fix this in V10.
 
->
-> Anyway, the patch is OK for me.
-> You can add my:
-> Tested-by: Yann Gautier <yann.gautier@foss.st.com>
+> [...]
+> 
+>> +static struct clk_rcg2 system_noc_bfdcd_clk_src = {
+> Drop clocks that are managed in RPM, they will conflict.
+> 
 
-Thanks a lot!
+   IPQ5018 does not have RPM.
 
-Kind regards
-Uffe
+Regards,
+  Sricharan
