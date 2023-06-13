@@ -2,100 +2,131 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCA29EB64D7
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 13:42:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C36FEB64D0
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 14:25:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242373AbjFMNma (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Jun 2023 09:42:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46116 "EHLO
+        id S242774AbjFMOZw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Jun 2023 10:25:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45856 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238289AbjFMNm3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 09:42:29 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C43010E9;
-        Tue, 13 Jun 2023 06:42:28 -0700 (PDT)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35DBOJRi009309;
-        Tue, 13 Jun 2023 15:42:00 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=selector1;
- bh=1a+OE8g+HLElK2FOpBWytDVRk0d3UkmYF7USr1krSEY=;
- b=z+AF5Kqune0n0F6zrTtUiTaX9mFyk4bvhXviEkOIutaD3EpAkYDVHac3ZhF61ETXFwFs
- 5UkHmEOpmeqrCFtKd9IDHkBzY9LvNihlSz1ip6HLseQjfdST5KTSK3OSfkB02AFGGfuo
- 1/t0BNMNam6bApRpoDbaK8xQZ1qGo0DJzANZLDg6Jo2A+fPhHzl0P5ocn0Mgg88tm/2b
- zJ/MbS321CyFBkeQf+jisCrULWnbJ//RzefPMZ2sFK10OcqqCxer8mXdbyDnwIYLsYY2
- 4TnAnISq8rpBIcOwJTjVN31IzwSGD7NMHOyGsfsNLrm4obA+sdT8iVyi9C9bcxgbSeHC /w== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3r6mrba8me-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 13 Jun 2023 15:42:00 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 3F0AC10002A;
-        Tue, 13 Jun 2023 15:41:52 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 38A82228A48;
-        Tue, 13 Jun 2023 15:41:52 +0200 (CEST)
-Received: from localhost (10.201.21.210) by SHFDAG1NODE2.st.com (10.75.129.70)
- with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Tue, 13 Jun
- 2023 15:41:51 +0200
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     Russell King <linux@armlinux.org.uk>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Rob Herring <robh@kernel.org>,
-        Xiang wangx <wangxiang@cdjrlc.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Dennis Zhou <dennis@kernel.org>,
-        Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH] mmc: mmci: stm32: fix max busy timeout calculation
-Date:   Tue, 13 Jun 2023 15:41:46 +0200
-Message-ID: <20230613134146.418016-1-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S242897AbjFMOZv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 10:25:51 -0400
+Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D986E1B2
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 07:25:47 -0700 (PDT)
+Received: by mail-yb1-xb2f.google.com with SMTP id 3f1490d57ef6-bc7ebb912dcso3019683276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 07:25:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686666347; x=1689258347;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=X94bKUv1M/Inu/XN1ifqHmKL/+Q4WPqhv8WNjOapxf0=;
+        b=OwBzeUYJFPZNoWS/K7NNXfa4wHYGTeLHpzbYzACsXX411U6MsVaA2d+USzjcPRrD+U
+         nVeUiqgWgIvGA116XqyHDaVy+rnUnER20hUpmqxg2X3/cMBlogilvT5NQ3OF3qr2IGg0
+         m2K9yi0mvoEsQ9ddAhQH6ESEUNYBtYY8ztVKBxmlp7E3tS7qNb39Wl8bauBrrAojY3i9
+         6d4J+WtIsYGh+mxxH2/TSSMgexlpZk+f2BrkSXVOX/Febwk10dd1gi1CDRSZGy+59wh6
+         kjvsaBYzpGfSP9quYmnmvQ+vxO2lKWiRLh8iM7be5bSZZvsVhIonPRjM3Y4sqihwYG1n
+         hbBg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686666347; x=1689258347;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=X94bKUv1M/Inu/XN1ifqHmKL/+Q4WPqhv8WNjOapxf0=;
+        b=axZAfRRZoqXyf9LfBz+uu06fSZm+sf62NUgqa4ku3z8eN8ZJGZ4+rIJgL4lihZnQ2c
+         woDNhYr8vaKzDuSYodhOg1IgAOAN6oEVwb1ctYCkpZUj/+fo2KTjmDNg/5bRYRXmJKma
+         7v69jnQm/Wf52yzLXS0OpJ8LbA2WXFFCM3JMjJu9CsPhvf3Gjg+QZ9ZItgM+7uuyDycO
+         97PIol35IAxowUV5eRio4tOpQB9UHwN4RqjNsbu7vBSCVSwgCsxzTmU+gecZPNnJMiNA
+         TVRT6lPdv/6Lme5rFSg4tCKPflTrESkcBusIhlMvrT7gQ8wazmMiz3ZoI4abx7TMBRIB
+         7bHA==
+X-Gm-Message-State: AC+VfDwGO71E9uU6DNY+JBF5OUh+gG6kvx+fIch50tLdd7DTWAKp+qPr
+        prCwjAiEH+dOzaZKDbxTuT7C8YTUPCko9K+tbZmEddvIjzveVzF+
+X-Google-Smtp-Source: ACHHUZ4nfn5fXKPLkVPdIFaBTff3OnOuc93W0l6Vm+OqbL1rQradCBXVg8Ejhu4aWla7TnbyV+pim/v5TGSRCEP8xuA=
+X-Received: by 2002:a25:8305:0:b0:b99:9335:87f6 with SMTP id
+ s5-20020a258305000000b00b99933587f6mr1830093ybk.27.1686666346927; Tue, 13 Jun
+ 2023 07:25:46 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.201.21.210]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-13_04,2023-06-12_02,2023-05-22_02
+References: <20230329202148.71107-1-dennis@kernel.org>
+In-Reply-To: <20230329202148.71107-1-dennis@kernel.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 13 Jun 2023 16:25:11 +0200
+Message-ID: <CAPDyKFoKmWAC0V_t7WL-5OauxS-iiLxW+KhqC6RzJXD_szjPCA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: inline the first mmc_scan() on mmc_start_host()
+To:     Dennis Zhou <dennis@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Christophe Kerello <christophe.kerello@foss.st.com>
+On Wed, 29 Mar 2023 at 22:21, Dennis Zhou <dennis@kernel.org> wrote:
+>
+> When using dm-verity with a data partition on an emmc device, dm-verity
+> races with the discovery of attached emmc devices. This is because mmc's
+> probing code sets up the host data structure then a work item is
+> scheduled to do discovery afterwards. To prevent this race on init,
+> let's inline the first call to detection, __mm_scan(), and let
+> subsequent detect calls be handled via the workqueue.
+>
+> Signed-off-by: Dennis Zhou <dennis@kernel.org>
 
-The way that the timeout is currently calculated could lead to a u64
-timeout value in mmci_start_command(). This value is then cast in a u32
-register that leads to mmc erase failed issue with some SD cards.
+Along with the patch for the mmci driver, this one applied too, for
+next, thanks!
 
-Fixes: 8266c585f489 ("mmc: mmci: add hardware busy timeout feature")
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
-Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
----
- drivers/mmc/host/mmci.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Note also that I took the liberty to clarify the commit message a bit.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index f2b2e8b0574e8..696cbef3ff7de 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1735,7 +1735,8 @@ static void mmci_set_max_busy_timeout(struct mmc_host *mmc)
- 		return;
- 
- 	if (host->variant->busy_timeout && mmc->actual_clock)
--		max_busy_timeout = ~0UL / (mmc->actual_clock / MSEC_PER_SEC);
-+		max_busy_timeout = U32_MAX / DIV_ROUND_UP(mmc->actual_clock,
-+							  MSEC_PER_SEC);
- 
- 	mmc->max_busy_timeout = max_busy_timeout;
- }
--- 
-2.25.1
+Moreover, if we want this to be applied for stable kernels, we need to
+manage that separately, as then the mmci patch is needed too. Please
+ping if you need some pointers in regards to this.
 
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/core/core.c | 15 +++++++++++----
+>  1 file changed, 11 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 368f10405e13..c0fdc438c882 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+>  }
+>  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+>
+> -void mmc_rescan(struct work_struct *work)
+> +void __mmc_rescan(struct mmc_host *host)
+>  {
+> -       struct mmc_host *host =
+> -               container_of(work, struct mmc_host, detect.work);
+>         int i;
+>
+>         if (host->rescan_disable)
+> @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+>                 mmc_schedule_delayed_work(&host->detect, HZ);
+>  }
+>
+> +void mmc_rescan(struct work_struct *work)
+> +{
+> +       struct mmc_host *host =
+> +               container_of(work, struct mmc_host, detect.work);
+> +
+> +       __mmc_rescan(host);
+> +}
+> +
+>  void mmc_start_host(struct mmc_host *host)
+>  {
+>         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+>         }
+>
+>         mmc_gpiod_request_cd_irq(host);
+> -       _mmc_detect_change(host, 0, false);
+> +       host->detect_change = 1;
+> +       __mmc_rescan(host);
+>  }
+>
+>  void __mmc_stop_host(struct mmc_host *host)
+> --
+> 2.40.0
+>
