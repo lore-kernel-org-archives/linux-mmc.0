@@ -2,136 +2,128 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFAC6EB64D0
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 15:02:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D871EB64D0
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 15:23:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242398AbjFMPCd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Jun 2023 11:02:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36014 "EHLO
+        id S242640AbjFMPXi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Jun 2023 11:23:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240003AbjFMPCc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 11:02:32 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD1A6E56;
-        Tue, 13 Jun 2023 08:02:31 -0700 (PDT)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35DBOJmV009309;
-        Tue, 13 Jun 2023 17:02:16 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=selector1;
- bh=M3tGgFzyIbq6fkGiTXuKC9NDSoCAc7aHujKmK7QtJD8=;
- b=tCSaiGnGMu1E5JSh9D8rgOl4GZexer1qKfFtzX6B4o+1gY3ASw3A5p9KUdzzrTQhqUpR
- NWosLNXPauIc+TgeBg2S+h0oaJJyuGU0DKsQM5zj1S3NbS4IUyHBfp/FeqLmzyMgtmRI
- 0HEVSBBZYAt/HpUYtM8S4hHL+lXE7+tZpEQ99Dla863Iv60kTDc+eYGDADGhRxQz5Os2
- lE/+whfehFzjYuM2tALUGHHA5z0Nle6j7yiToNvfyRu2GJJEb+qZd81aK0JKd0XykJmB
- i6AKhfFX/UUZUQIttKBKcVvREIxJBtSMyXKTOxjfqjB+9gUyMDIM38FXEc/MC6ZVfcun Tg== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3r6mrbarh0-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 13 Jun 2023 17:02:16 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 84BE110002A;
-        Tue, 13 Jun 2023 17:01:52 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id F41E522D19A;
-        Tue, 13 Jun 2023 17:01:51 +0200 (CEST)
-Received: from localhost (10.201.21.210) by SHFDAG1NODE2.st.com (10.75.129.70)
- with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Tue, 13 Jun
- 2023 17:01:51 +0200
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     Philipp Zabel <p.zabel@pengutronix.de>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH] mmc: mmci: stm32: set feedback clock when using delay block
-Date:   Tue, 13 Jun 2023 17:01:48 +0200
-Message-ID: <20230613150148.429828-1-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S239102AbjFMPXi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 11:23:38 -0400
+Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F397119B4
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 08:23:13 -0700 (PDT)
+Received: by mail-lf1-x130.google.com with SMTP id 2adb3069b0e04-4f61735676fso7118982e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 08:23:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686669792; x=1689261792;
+        h=content-transfer-encoding:in-reply-to:from:references:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=ZObq3QdQreREeU4NfsEue/+eYyb1HX3Nq35VP0wnSHk=;
+        b=O5I1KTQM9ahis2CVWCWapMP4B1w+V782LooA28aPXu+f8RIsABsAEG6HoMaXraby7g
+         HdDN1qziUtNinucVrcJwTyTcagUZEjEtlexo+8OnfziVbDulrBUnbj57VWTQ4d+L5ock
+         oQWQTGvpQ45Mo6I0heqUBJee7CgGQKuWJcd21ToX04OGSr3pIsy5fFoJsrGIL4GlVH6B
+         jDKNaixXYaNX/BSg+6fNh0NUDzkhC5NRZ7mbGe+fZxJPb5JkvWT/wArUzro3LFWPjgeu
+         RRUrLjCF6+45XGPMzKXCQ0Who0jYHmOH0H5ZC6BRaoe0ZG4Spgrr53phfK1cSjPWEzAQ
+         JhIg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686669792; x=1689261792;
+        h=content-transfer-encoding:in-reply-to:from:references:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZObq3QdQreREeU4NfsEue/+eYyb1HX3Nq35VP0wnSHk=;
+        b=FxRo79aAnP93URlv+bvjyZr5ubcG6lvzs2rLj819KTyuTFBiy3zhL+cTJEwzgddRZu
+         ddQYvy3yrbN0Uk33OlLigszknSlAi91HmpULSLRHP4L5Trys3xLHM/vno+XC95u6qepO
+         nWIGsMUoyhK73yLQyK+K0CwwipOAaAQFIWkFt1yquIq3iFRML1Kmvx5dgJzFcumOYx8C
+         zzXeD+Clkgb/8aUW02O5QNp1fNokhFSMyy86rHKmAFxFoOCj0OxpbAFyG6hXKWVr/Bbl
+         hh6T7hE5e2xHfF29/8cez6+n6NZivKk83zhPq5q8pdmgTPgavsAAsC3vGUquqe+TYn0q
+         gsWg==
+X-Gm-Message-State: AC+VfDy/oUAEzkOE5LqCip0UIT5gztTW5h8+icKhI69+gNJfMho9J+bL
+        WOGt7I5k5J9ARnpNVAKLp5SVeg==
+X-Google-Smtp-Source: ACHHUZ5MGoSPdfOcevVLsn6Xp9mNELJ81EH8SncxQ2LkVo3Gx9bg3gEgGWSOLoOA3+r4muPayrH13w==
+X-Received: by 2002:a19:6601:0:b0:4f6:5bf2:63bc with SMTP id a1-20020a196601000000b004f65bf263bcmr5593106lfc.3.1686669792155;
+        Tue, 13 Jun 2023 08:23:12 -0700 (PDT)
+Received: from [192.168.1.101] (abyj190.neoplus.adsl.tpnet.pl. [83.9.29.190])
+        by smtp.gmail.com with ESMTPSA id 7-20020ac24847000000b004f60be0c685sm1809673lfy.123.2023.06.13.08.23.09
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 13 Jun 2023 08:23:11 -0700 (PDT)
+Message-ID: <1631b3cd-dc24-0024-5291-fa9bdacc82bc@linaro.org>
+Date:   Tue, 13 Jun 2023 17:23:06 +0200
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.2
+Subject: Re: [PATCH v4 2/8] clk: qcom: Add Global Clock controller (GCC)
+ driver for IPQ5018
+Content-Language: en-US
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>,
+        agross@kernel.org, andersson@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
+        sboyd@kernel.org, ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        catalin.marinas@arm.com, will@kernel.org, p.zabel@pengutronix.de,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+References: <20230510134121.1232286-1-quic_srichara@quicinc.com>
+ <20230510134121.1232286-3-quic_srichara@quicinc.com>
+ <21a5642c-e6e5-9323-7db1-383a18616ac0@linaro.org>
+ <410b0991-30b6-c87d-9b25-5f51f6c08671@quicinc.com>
+From:   Konrad Dybcio <konrad.dybcio@linaro.org>
+In-Reply-To: <410b0991-30b6-c87d-9b25-5f51f6c08671@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.201.21.210]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-13_17,2023-06-12_02,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The feedback clock is used only for SDR104 & HS200 modes, and when
-delay block is used (frequency is higher than 50 MHz). The tuning
-procedure is then only required for those modes. Skip the procedure
-for other modes.
-The setting of this feedback clock is done just after enabling delay
-block, and before configuring it.
 
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
-Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
----
- drivers/mmc/host/mmci_stm32_sdmmc.c | 29 ++++++++++++++++++-----------
- 1 file changed, 18 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index 60bca78a72b19..953d1be4e379c 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -293,18 +293,8 @@ static void mmci_sdmmc_set_clkreg(struct mmci_host *host, unsigned int desired)
- 	clk |= host->clk_reg_add;
- 	clk |= ddr;
- 
--	/*
--	 * SDMMC_FBCK is selected when an external Delay Block is needed
--	 * with SDR104 or HS200.
--	 */
--	if (host->mmc->ios.timing >= MMC_TIMING_UHS_SDR50) {
-+	if (host->mmc->ios.timing >= MMC_TIMING_UHS_SDR50)
- 		clk |= MCI_STM32_CLK_BUSSPEED;
--		if (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104 ||
--		    host->mmc->ios.timing == MMC_TIMING_MMC_HS200) {
--			clk &= ~MCI_STM32_CLK_SEL_MSK;
--			clk |= MCI_STM32_CLK_SELFBCK;
--		}
--	}
- 
- 	mmci_write_clkreg(host, clk);
- }
-@@ -511,10 +501,27 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct mmci_host *host = mmc_priv(mmc);
- 	struct sdmmc_dlyb *dlyb = host->variant_priv;
-+	u32 clk;
-+
-+	if ((host->mmc->ios.timing != MMC_TIMING_UHS_SDR104 &&
-+	     host->mmc->ios.timing != MMC_TIMING_MMC_HS200) ||
-+	    host->mmc->actual_clock <= 50000000)
-+		return 0;
- 
- 	if (!dlyb || !dlyb->base)
- 		return -EINVAL;
- 
-+	writel_relaxed(DLYB_CR_DEN, dlyb->base + DLYB_CR);
-+
-+	/*
-+	 * SDMMC_FBCK is selected when an external Delay Block is needed
-+	 * with SDR104 or HS200.
-+	 */
-+	clk = host->clk_reg;
-+	clk &= ~MCI_STM32_CLK_SEL_MSK;
-+	clk |= MCI_STM32_CLK_SELFBCK;
-+	mmci_write_clkreg(host, clk);
-+
- 	if (sdmmc_dlyb_lng_tuning(host))
- 		return -EINVAL;
- 
--- 
-2.25.1
+On 13.06.2023 15:16, Sricharan Ramabadhran wrote:
+> Hi Konrad,
+> 
+> On 5/27/2023 12:47 AM, Konrad Dybcio wrote:
+>>
+>>
+>> On 10.05.2023 15:41, Sricharan Ramabadhran wrote:
+>>> Add support for the global clock controller found on IPQ5018
+>>> based devices.
+>>>
+>>> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>>> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>>> Co-developed-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
+>>> Signed-off-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
+>>> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>>> ---
+>>>   [v4] Fixed to use ARRAY_SIZE() wherever parent_data was used
+>>>        Changed GPL v2 to GPL as per comments
+>>>
+>>>   drivers/clk/qcom/Kconfig       |   10 +-
+>>>   drivers/clk/qcom/Makefile      |    1 +
+>>>   drivers/clk/qcom/gcc-ipq5018.c | 3731 ++++++++++++++++++++++++++++++++
+>>>   3 files changed, 3740 insertions(+), 2 deletions(-)
+>>>   create mode 100644 drivers/clk/qcom/gcc-ipq5018.c
+>>>
+>> [...]
+>>
+>>> +struct clk_rcg2 lpass_axim_clk_src = {
+>>> +    .cmd_rcgr = 0x2E028,
+>> Please use lowercase hex for non-macro-defines, all throughout the file.
+>>
+> 
+>  ok. Will fix this in V10.
+> 
+>> [...]
+>>
+>>> +static struct clk_rcg2 system_noc_bfdcd_clk_src = {
+>> Drop clocks that are managed in RPM, they will conflict.
+>>
+> 
+>   IPQ5018 does not have RPM.
+Oh that's new. I suppose you'll be interested in clk-interconnect for
+voting on bus resources then.
 
+Konrad
+> 
+> Regards,
+>  Sricharan
