@@ -2,140 +2,100 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D94F5C7EE2F
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 00:49:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 668FFC7EE2F
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 02:50:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232574AbjFMAtV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Jun 2023 20:49:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44196 "EHLO
+        id S238410AbjFMCu3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Jun 2023 22:50:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229480AbjFMAtT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2023 20:49:19 -0400
-Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4464210D3;
-        Mon, 12 Jun 2023 17:49:18 -0700 (PDT)
-Received: by linux.microsoft.com (Postfix, from userid 1152)
-        id ACDC420FE86C; Mon, 12 Jun 2023 17:49:17 -0700 (PDT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com ACDC420FE86C
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-        s=default; t=1686617357;
-        bh=Tp1WzQdcx12W1fzBArAndkSd8SuQkzZ/5ksg+tQwJqs=;
-        h=Date:From:To:cc:Subject:In-Reply-To:References:From;
-        b=Cz69bezj1h7WpyniLbBF79JtEUf+PZyKWL//KV4CS0zag0E+zewbtPPKGhuM5DCPR
-         I+T8kVYutZi3ZltH+cHOdLHJ0D4KYmjQlRfeWhIbRcXSaN8jeQM86TZc/KySzKPMGs
-         zhv8/1LsPyC+ovVB6Fd1J8TdQGwTmrqCghYEDXKs=
-Received: from localhost (localhost [127.0.0.1])
-        by linux.microsoft.com (Postfix) with ESMTP id A98CB307032D;
-        Mon, 12 Jun 2023 17:49:17 -0700 (PDT)
-Date:   Mon, 12 Jun 2023 17:49:17 -0700 (PDT)
-From:   Shyam Saini <shyamsaini@linux.microsoft.com>
-To:     alex.bennee@linaro.org
-cc:     Sumit Garg <sumit.garg@linaro.org>,
-        "Zhu, Bing" <bing.zhu@intel.com>,
-        "alex.bennee@linaro.org" <alex.bennee@linaro.org>,
-        "code@tyhicks.com" <code@tyhicks.com>,
-        "Matti.Moell@opensynergy.com" <Matti.Moell@opensynergy.com>,
-        "arnd@linaro.org" <arnd@linaro.org>,
-        "hmo@opensynergy.com" <hmo@opensynergy.com>,
-        "joakim.bech@linaro.org" <joakim.bech@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
-        "maxim.uvarov@linaro.org" <maxim.uvarov@linaro.org>,
-        "ruchika.gupta@linaro.org" <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "Huang, Yang" <yang.huang@intel.com>,
-        "jens.wiklander@linaro.org" <jens.wiklander@linaro.org>,
-        "op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>,
-        ilias.apalodimas@linaro.org
-Subject: Re: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
-In-Reply-To: <CAC_iWjLOhUvp5ggCCkHN5MRNfB_h6FZ2Z14yrtR3aqGn0Ovxig@mail.gmail.com>
-Message-ID: <f078ddef-8654-4e18-fd1f-8b81f8f2aabd@linux.microsoft.com>
-References: <20220405093759.1126835-1-alex.bennee@linaro.org> <20230531191007.13460-1-shyamsaini@linux.microsoft.com> <SN7PR11MB6850DA4A185E3429B62531CD84499@SN7PR11MB6850.namprd11.prod.outlook.com> <CAC_iWjKAdimEH0SsC_z9QuFS4sGLp2BVzx03s+RKvcLXY25kuQ@mail.gmail.com>
- <CAFA6WYPKeJYTzvnZkoL_dw6uXSkhAh6uxoEOWHYU7oLNRDRWaA@mail.gmail.com> <CAC_iWjLOhUvp5ggCCkHN5MRNfB_h6FZ2Z14yrtR3aqGn0Ovxig@mail.gmail.com>
+        with ESMTP id S238036AbjFMCu3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jun 2023 22:50:29 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A7BC1726;
+        Mon, 12 Jun 2023 19:50:28 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2311C62F76;
+        Tue, 13 Jun 2023 02:50:28 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD5EAC4339B;
+        Tue, 13 Jun 2023 02:50:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1686624627;
+        bh=7W9U+eKYl0KSlX2mWiw+hamipckUREqq7kenoM24PBc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=USvaVPPMj4eUpgKrLBEkNAhkOXLxlspXcqZaOvAcwlgQ933qCwlDYnkFQ2pTDXktO
+         1nABQ65OaVzLQrsi3iLwGX2BShh62BS/OcBa1JJSs3Cj287HbGiE/3HeZ80C7wu9nK
+         3xbd5RaChtKf2XVBY2frx6BDcBx7XD20cBLUdFptJBaNcBQKzJ2cORiEjnOqjmtRpk
+         M9EVHi78n9Y0AFjlEuTpK+LqfOmf3eN82hPk6ITGImCTTa3l+mnWYNH+0tziqykjEY
+         sNXcfFHutsGkx1DNhfotKHyRytzUp14mV56u7oSuQBvagncHINrfCxKKLpHuZ2AF3y
+         oo0S9YLHgGyTA==
+Date:   Mon, 12 Jun 2023 19:50:25 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Abel Vesa <abel.vesa@linaro.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [RESEND v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
+Message-ID: <20230613025025.GB883@sol.localdomain>
+References: <20230612192847.1599416-1-abel.vesa@linaro.org>
+ <20230612192847.1599416-3-abel.vesa@linaro.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230612192847.1599416-3-abel.vesa@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Mon, Jun 12, 2023 at 10:28:46PM +0300, Abel Vesa wrote:
+> Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
+> use the new ICE api provided by the Qualcomm soc driver ice. The platforms
+> that already have ICE support will use the API as library since there will
+> not be a devicetree node, but instead they have reg range. In this case,
+> the of_qcom_ice_get will return an ICE instance created for the consumer's
+> device. But if there are platforms that do not have ice reg in the
+> consumer devicetree node and instead provide a dedicated ICE devicetree
+> node, the of_qcom_ice_get will look up the device based on qcom,ice
+> property and will get the ICE instance registered by the probe function
+> of the ice driver.
+> 
+> The ICE clock is now handle by the new driver. This is done by enabling
+> it on the creation of the ICE instance and then enabling/disabling it on
+> UFS runtime resume/suspend.
+> 
+> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+> ---
+>  drivers/ufs/host/Kconfig        |   2 +-
+>  drivers/ufs/host/Makefile       |   4 +-
+>  drivers/ufs/host/ufs-qcom-ice.c | 244 --------------------------------
+>  drivers/ufs/host/ufs-qcom.c     |  99 ++++++++++++-
+>  drivers/ufs/host/ufs-qcom.h     |  32 +----
+>  5 files changed, 104 insertions(+), 277 deletions(-)
+>  delete mode 100644 drivers/ufs/host/ufs-qcom-ice.c
 
-Thank you everyone for your valueable feedback.
+My concern about this patch removing the ICE clock from UFS clock gating
+(https://lore.kernel.org/linux-scsi/ZDBSvVIIq6cMTf1Y@gmail.com) was not
+addressed.  But I guess this is good enough.  Maybe someone can do a fixup patch
+on top of this if they really care about the UFS clock gating.  You can add:
 
-Alex, are you planning submit this patch series ?
-Please let me know.
+Reviewed-by: Eric Biggers <ebiggers@google.com>
 
-> On Thu, 1 Jun 2023 at 08:49, Sumit Garg <sumit.garg@linaro.org> wrote:
->>
->> On Thu, 1 Jun 2023 at 11:02, Ilias Apalodimas
->> <ilias.apalodimas@linaro.org> wrote:
->>>
->>> Hi Bing
->>>
->>> On Thu, 1 Jun 2023 at 04:03, Zhu, Bing <bing.zhu@intel.com> wrote:
->>>>
->>>> As an alternative, Is it possible to change ftpm design not to depend on RPMB access at the earlier/boot stage? Because to my understanding, typically PCRs don't require persistent/NV storage (for example, before RPMB or tee-supplicant is ready, use TEE memory instead as temporary storage)
->>>
->>> I am not entirely sure this will solve our problem here.  You are
->>> right that we shouldn't depend on the supplicant to extend PCRs. But
->>> what happens if an object is sealed against certain PCR values?  We
->>> are back to the same problem
->>
->> +1
->>
->> Temporary storage may be a stop gap solution for some use-cases but
->> having a fast path access to RPMB via kernel should be our final goal.
->> I would suggest we start small with the MMC subsystem to expose RPMB
->> access APIs for OP-TEE driver rather than a complete RPMB subsystem.
->
-> I discussed with the OP-TEE maintainers about adding parts of the
-> supplicant in the kernel.  The supplicant 'just' sends an ioctl to
-> store/read stuff anyway.  So it would make sense to have a closer and
-> see if that looks reasonable.
-> Thanks
->
-> /Ilias
->
->>
->> -Sumit
->>
->>>
->>> Thanks
->>> /Ilias
->>>>
->>>> Bing
->>>>
->>>> IPAS Security Brown Belt (https://www.credly.com/badges/69ea809f-3a96-4bc7-bb2f-442c1b17af26)
->>>> System Software Engineering
->>>> Software and Advanced Technology Group
->>>> Zizhu Science Park, Shanghai, China
->>>>
->>>> -----Original Message-----
->>>> From: Shyam Saini <shyamsaini@linux.microsoft.com>
->>>> Sent: Thursday, June 1, 2023 3:10 AM
->>>> To: alex.bennee@linaro.org
->>>> Cc: code@tyhicks.com; Matti.Moell@opensynergy.com; arnd@linaro.org; Zhu, Bing <bing.zhu@intel.com>; hmo@opensynergy.com; ilias.apalodimas@linaro.org; joakim.bech@linaro.org; linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; linux-scsi@vger.kernel.org; maxim.uvarov@linaro.org; ruchika.gupta@linaro.org; Winkler, Tomas <tomas.winkler@intel.com>; ulf.hansson@linaro.org; Huang, Yang <yang.huang@intel.com>; sumit.garg@linaro.org; jens.wiklander@linaro.org; op-tee@lists.trustedfirmware.org
->>>> Subject: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
->>>>
->>>> Hi Alex,
->>>>
->>>> [ Resending, Sorry for the noise ]
->>>>
->>>> Are you still working on it or planning to resubmit it ?
->>>>
->>>> [1] The current optee tee kernel driver implementation doesn't work when IMA is used with optee implemented ftpm.
->>>>
->>>> The ftpm has dependency on tee-supplicant which comes once the user space is up and running and IMA attestation happens at boot time and it requires to extend ftpm PCRs.
->>>>
->>>> But IMA can't use PCRs if ftpm use secure emmc RPMB partition. As optee can only access RPMB via tee-supplicant(user space). So, there should be a fast path to allow optee os to access the RPMB parititon without waiting for user-space tee supplicant.
->>>>
->>>> To achieve this fast path linux optee driver and mmc driver needs some work and finally it will need RPMB driver which you posted.
->>>>
->>>> Please let me know what's your plan on this.
->>>>
->>>> [1] https://optee.readthedocs.io/en/latest/architecture/secure_storage.html
->>>>
->>>> Best Regards,
->>>> Shyam
->
+- Eric
