@@ -2,135 +2,110 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A421C7EE2E
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 09:30:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59D16C7EE2E
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 11:43:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239933AbjFMJau (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Jun 2023 05:30:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51432 "EHLO
+        id S239265AbjFMLnN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Jun 2023 07:43:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233791AbjFMJas (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 05:30:48 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 447AA18E
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 02:30:47 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1q90Lx-0003DC-Vz; Tue, 13 Jun 2023 11:30:18 +0200
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1q90Lw-0075fp-Ff; Tue, 13 Jun 2023 11:30:16 +0200
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1q90Lv-00DpVq-G7; Tue, 13 Jun 2023 11:30:15 +0200
-Date:   Tue, 13 Jun 2023 11:30:14 +0200
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Stefan Wahren <stefan.wahren@i2se.com>
-Cc:     Rob Herring <robh@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com
-Subject: Re: [PATCH 05/10] dt-bindings: pwm: convert pwm-bcm2835 bindings to
- YAML
-Message-ID: <20230613093014.sot4l2kihnkkx3o5@pengutronix.de>
-References: <20230604121223.9625-1-stefan.wahren@i2se.com>
- <20230604121223.9625-6-stefan.wahren@i2se.com>
- <20230607075602.s2pfs7dl7fwkyevm@pengutronix.de>
- <20230609215932.GA2531610-robh@kernel.org>
- <3b868924-9d9c-ae0a-a7b8-0afbd01c4a4b@i2se.com>
+        with ESMTP id S235301AbjFMLnM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 07:43:12 -0400
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4894ABA
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 04:43:11 -0700 (PDT)
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35DBReds009287;
+        Tue, 13 Jun 2023 13:42:58 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=ITgi4pkDblajKjAIIWZ17h8Io7d3MmLl/BcZpqJkPkg=;
+ b=HWssvMINJxfDXXX3UQutCWaAvAprSjY3OA3kxdBp3WUZt1XC8Y5cP6UoWXdc0gDd2gr/
+ TlYnPKKSA87NoKGbvWSHWjaMf1sQ4zMPPessBxsXGDc5jSlM0SHMnxtGCM6Z1HT+JsXj
+ fAFi2ZPUqfzvjveA+QcJsWcrmfLcPjuD2VaGTB/8kSKjbIKYZsTAq/L5k6rBm8HHlAEZ
+ Yksk6LVIpHVmcdOornTcj0CTLPE2E5QQZSbKgnY/rsKDMaawVqfi0qnbIqBjXkJg3X7B
+ FNRxeqqpEpfXAajPCwEWpxNt/zAt6SN06Ndp+9/mlxkE2k58tkK/gpIDyJ4OfcMptGWn mw== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3r6mrb9g66-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 13 Jun 2023 13:42:58 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id BE497100045;
+        Tue, 13 Jun 2023 13:42:56 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id AC3F9222C93;
+        Tue, 13 Jun 2023 13:42:56 +0200 (CEST)
+Received: from [10.201.21.210] (10.201.21.210) by SHFDAG1NODE2.st.com
+ (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Tue, 13 Jun
+ 2023 13:42:55 +0200
+Message-ID: <1b1edc4e-a318-4d55-c99e-eb9a47f9833f@foss.st.com>
+Date:   Tue, 13 Jun 2023 13:42:55 +0200
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="q34rb5xucwxwl2gk"
-Content-Disposition: inline
-In-Reply-To: <3b868924-9d9c-ae0a-a7b8-0afbd01c4a4b@i2se.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.0
+Subject: Re: [PATCH] mmc: mmci: Set PROBE_PREFER_ASYNCHRONOUS
+To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
+CC:     Russell King <linux@armlinux.org.uk>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Marek Vasut <marex@denx.de>, Dennis Zhou <dennis@kernel.org>
+References: <20230612143730.210390-1-ulf.hansson@linaro.org>
+Content-Language: en-US
+From:   Yann Gautier <yann.gautier@foss.st.com>
+In-Reply-To: <20230612143730.210390-1-ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.201.21.210]
+X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
+ (10.75.129.70)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
+ definitions=2023-06-13_04,2023-06-12_02,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 6/12/23 16:37, Ulf Hansson wrote:
+> All mmc host driver should have enabled the asynchronous probe option, but
+> it seems like we missed to set it for mmci, so let's do that now.
+> 
+> Fixes: 21b2cec61c04 ("mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.4")
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>   drivers/mmc/host/mmci.c | 1 +
+>   1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index f2b2e8b0574e..97a77eefb11a 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -2455,6 +2455,7 @@ static struct amba_driver mmci_driver = {
+>   	.drv		= {
+>   		.name	= DRIVER_NAME,
+>   		.pm	= &mmci_dev_pm_ops,
+> +		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+>   	},
+>   	.probe		= mmci_probe,
+>   	.remove		= mmci_remove,
 
---q34rb5xucwxwl2gk
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Ulf,
 
-On Tue, Jun 13, 2023 at 11:02:40AM +0200, Stefan Wahren wrote:
-> Hi,
->=20
-> Am 09.06.23 um 23:59 schrieb Rob Herring:
-> > On Wed, Jun 07, 2023 at 09:56:02AM +0200, Uwe Kleine-K=F6nig wrote:
-> > > Hello,
-> > >=20
-> > > On Sun, Jun 04, 2023 at 02:12:18PM +0200, Stefan Wahren wrote:
-> > > > Convert the DT binding document for pwm-bcm2835 from .txt to YAML.
-> > >=20
-> > > Both dt_binding_check and dtbs_check (for ARCH=3Darm) are happy, apart
-> > > from errors like:
-> > >=20
-> > > arch/arm/boot/dts/bcm2711-rpi-4-b.dtb: pwm@7e20c000: #pwm-cells:0:0: =
-3 was expected
-> > >          From schema: Documentation/devicetree/bindings/pwm/pwm-bcm28=
-35.yaml
-> > >=20
-> > > which is fixed in patch #6. So:
-> > >=20
-> > > Reviewed-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-> > >=20
-> > > Who will pick up this patch? Is it supposed to go in via pwm or
-> > > arm/broadcom? (I suggest the latter.)
-> >=20
-> > The default is the subsystem (pwm). Why not here?
->=20
-> i think Uwe's concern is about the fact, that the series is late in cycle.
-> So the chance that the fixing DTS patch 6 miss Linux 6.5 is very high.
+I've tested that on a STM32MP eval board.
+It boots OK.
 
-My concern is only that nobody might feel responsible and think the
-other party will pick up. Thierry didn't pick up patches yet for the
-next merge window (or I missed it), so I guess it's not yet to late for
-going in via pwm.
+Just a warning for other users of this updated driver: if there are 
+several MMC devices on the board, we can no more rely on the order of probe.
+For example, this board has an SD-card and an eMMC. Before this patch 
+mmc0 was the SD-card, mmc1 the eMMC. Now the order has changed on the 
+boot I've tested.
+It shouldn't be an issue, as filesystems use UUIDs. Maybe for some tools 
+or tests.
 
-I suggest to let it go in via the arm/broadcom tree, to have the whole
-series together.
+Anyway, the patch is OK for me.
+You can add my:
+Tested-by: Yann Gautier <yann.gautier@foss.st.com>
 
-Best regards
-Uwe
 
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---q34rb5xucwxwl2gk
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmSINyUACgkQj4D7WH0S
-/k7ZDQf/cfElfv6yePm9EHQQdztYHh3IO4c1+a3mYiV4paMsOf7dNK8samM5rkwG
-qR+VEGxcdHYUgNLhqwu4KLj8WqQrk9myA9/WKZIAlL8fOhfuFYwEBTbunRG12ocC
-8zMfwPNwLa/15vEcQjYNcJqUOxxt3LTIfJwQI/rbycLrjUy7uhx/zz1nL0vhR4PN
-75KD5ihTsHVxDRQM7RSNjZ/GjXl/9AC+amWFKoUJ9DGGmrx8/eQDkipqAtgPHeGu
-DxsSWmBqlodiGo6mr8BdLJFaGqYGGIJBAhvXgfFOqpObxy6xS6S1YSUzeMY/ztm7
-DaJyM4EnXxL2LWbTGlBz4IrAf49BNA==
-=jtkA
------END PGP SIGNATURE-----
-
---q34rb5xucwxwl2gk--
+Best regards,
+Yann
