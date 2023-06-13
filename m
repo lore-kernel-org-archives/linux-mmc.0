@@ -2,114 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 384A4EB64D7
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 20:04:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1ACAEB64D7
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jun 2023 20:33:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232062AbjFMUEM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Jun 2023 16:04:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51564 "EHLO
+        id S229472AbjFMUdK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Jun 2023 16:33:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41204 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230221AbjFMUEL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 16:04:11 -0400
-Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBEDE1732
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 13:04:09 -0700 (PDT)
-Received: from [192.168.1.103] (31.173.84.45) by msexch01.omp.ru (10.188.4.12)
- with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Tue, 13 Jun
- 2023 23:04:02 +0300
-Subject: Re: [PATCH v2 00/12] Fix deferred probing in the MMC/SD drivers
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>
-References: <20230608194519.10665-1-s.shtylyov@omp.ru>
- <CAPDyKFqHXqs7rcJQgBzGh_k-9023vopjcxowMLaHsFd7TykS5w@mail.gmail.com>
- <c03bfce0-64b2-02b8-3679-85a682000c8e@omp.ru>
- <CAPDyKFokbAB6G6=3cEe0nVq8CD2jqbRStOhiJdkRSPjTX5tGfQ@mail.gmail.com>
-From:   Sergey Shtylyov <s.shtylyov@omp.ru>
-Organization: Open Mobile Platform
-Message-ID: <30305485-f816-f321-bb8c-c6b29b2a4951@omp.ru>
-Date:   Tue, 13 Jun 2023 23:04:01 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S230029AbjFMUdC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jun 2023 16:33:02 -0400
+Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF7421FC8
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 13:32:55 -0700 (PDT)
+Received: by mail-yb1-xb33.google.com with SMTP id 3f1490d57ef6-bd729434fa0so383869276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jun 2023 13:32:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686688375; x=1689280375;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=dvJUa63SYtpqln5w0oMr9sRT2OZaa51HeQdSCgfliM0=;
+        b=ahUth5LJeQaubKUs26hW0k3imv9oTxzJURnn2OsEM8iaQhJzPzGNwBYsNzpjTXXavT
+         P+0P8W/1a8sABIoBxuK0jSyuHrxmjNABaJ+VwgtLJTJpluK8p5iq1MSaPUIIgTi2Tkg2
+         HOUkRiXc5tcU6fze3UCaO9E9iaVmk7LyGePmJLppFzJqlOPWu9sW6IvhiYbDRCLt92Ay
+         Xy7dcwigL99F+6BC+mFBY0yeUXcaUbXZ91CfPlbBTM1SxK7m8FVyqgaGvqylcHkUjJeO
+         Llp+nInmtJeKBTju/jdf2nEQwgNQFgYgjqluFcjKqa0kN2h/34OSH892Y00H+tz07sXH
+         RB3A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686688375; x=1689280375;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=dvJUa63SYtpqln5w0oMr9sRT2OZaa51HeQdSCgfliM0=;
+        b=OpZUwJdQrCGFzZft+0eKsWiL0mAiC/1+TXgm8MGhJVmc/EPSxLcFqX9/d/5mau6fSx
+         GVUry0+/HjabDyhWkETNEzkst5P0y9mwU4ZJRBwRmXZPfiEgca6H9WXTwD5SpH1SaqIe
+         FFO+rr9bP8x1peBRvMUyhxLOhxTB8GQPJBWWbXqWQODmIAN6IihOlmGrCF1AGdAmkcyk
+         sE9PvXvJ+7T+H2CwM+QUFqLVQ2edPeW8CLLGglWPU5vx7sVvrgBmfv6wLywriY5pU78x
+         m4B++0u8H7OSwa4GeotkRspf7NEksxOn5Z7dzASAiOsvdVc9gQQbTJOmHG8QBUQdnf1X
+         dnZw==
+X-Gm-Message-State: AC+VfDzhqU2EYs50EmSQ2SmFHqJ1aGTUd95hWVDylpWvY8FxUPI8hObp
+        glIzKmqCeb2IfiCw0wNCd8fITbTDxlJDwjYG+6BPHw==
+X-Google-Smtp-Source: ACHHUZ4Q0zl75kxgo29sxb7h3KaImD0S7jPsix+2MlhAl2bVKHBTEAWt8S40lqMUM8ZoqbDP+nyyA+qYJtQErDEhFc4=
+X-Received: by 2002:a25:b096:0:b0:bac:69be:9494 with SMTP id
+ f22-20020a25b096000000b00bac69be9494mr266028ybj.36.1686688375119; Tue, 13 Jun
+ 2023 13:32:55 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFokbAB6G6=3cEe0nVq8CD2jqbRStOhiJdkRSPjTX5tGfQ@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [31.173.84.45]
-X-ClientProxiedBy: msexch01.omp.ru (10.188.4.12) To msexch01.omp.ru
- (10.188.4.12)
-X-KSE-ServerInfo: msexch01.omp.ru, 9
-X-KSE-AntiSpam-Interceptor-Info: scan successful
-X-KSE-AntiSpam-Version: 5.9.59, Database issued on: 06/13/2023 19:39:15
-X-KSE-AntiSpam-Status: KAS_STATUS_NOT_DETECTED
-X-KSE-AntiSpam-Method: none
-X-KSE-AntiSpam-Rate: 59
-X-KSE-AntiSpam-Info: Lua profiles 178009 [Jun 13 2023]
-X-KSE-AntiSpam-Info: Version: 5.9.59.0
-X-KSE-AntiSpam-Info: Envelope from: s.shtylyov@omp.ru
-X-KSE-AntiSpam-Info: LuaCore: 517 517 b0056c19d8e10afbb16cb7aad7258dedb0179a79
-X-KSE-AntiSpam-Info: {rep_avail}
-X-KSE-AntiSpam-Info: {Tracking_no_received}
-X-KSE-AntiSpam-Info: {Tracking_from_domain_doesnt_match_to}
-X-KSE-AntiSpam-Info: {relay has no DNS name}
-X-KSE-AntiSpam-Info: {SMTP from is not routable}
-X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.84.45 in (user)
- b.barracudacentral.org}
-X-KSE-AntiSpam-Info: d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;omp.ru:7.1.1;31.173.84.45:7.7.3,7.4.1;127.0.0.199:7.1.2
-X-KSE-AntiSpam-Info: {iprep_blacklist}
-X-KSE-AntiSpam-Info: ApMailHostAddress: 31.173.84.45
-X-KSE-AntiSpam-Info: {DNS response errors}
-X-KSE-AntiSpam-Info: Rate: 59
-X-KSE-AntiSpam-Info: Status: not_detected
-X-KSE-AntiSpam-Info: Method: none
-X-KSE-AntiSpam-Info: Auth:dmarc=temperror header.from=omp.ru;spf=temperror
- smtp.mailfrom=omp.ru;dkim=none
-X-KSE-Antiphishing-Info: Clean
-X-KSE-Antiphishing-ScanningType: Heuristic
-X-KSE-Antiphishing-Method: None
-X-KSE-Antiphishing-Bases: 06/13/2023 19:46:00
-X-KSE-Antivirus-Interceptor-Info: scan successful
-X-KSE-Antivirus-Info: Clean, bases: 6/13/2023 6:42:00 PM
-X-KSE-Attachment-Filter-Triggered-Rules: Clean
-X-KSE-Attachment-Filter-Triggered-Filters: Clean
-X-KSE-BulkMessagesFiltering-Scan-Result: InTheLimit
+References: <20230405-pl180-busydetect-fix-v3-0-cd3d5925ae64@linaro.org>
+ <20230405-pl180-busydetect-fix-v3-10-cd3d5925ae64@linaro.org> <CAPDyKFqxvNxFqLdpj15Gz+zDNT04YzxEAh-svKvRuaM52dCV3g@mail.gmail.com>
+In-Reply-To: <CAPDyKFqxvNxFqLdpj15Gz+zDNT04YzxEAh-svKvRuaM52dCV3g@mail.gmail.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 13 Jun 2023 22:32:43 +0200
+Message-ID: <CACRpkdbg5UXnU=WcQa2HoGH54UK-C8+vU8t+7iLChvd__iJiMg@mail.gmail.com>
+Subject: Re: [PATCH v3 10/10] mmc: mmci: Add busydetect timeout
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Yann Gautier <yann.gautier@foss.st.com>,
+        Stefan Hansson <newbyte@disroot.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/12/23 11:18 PM, Ulf Hansson wrote:
+On Tue, Jun 13, 2023 at 2:08=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
 
->> [...]
->>>> Here are 12 patches against the 'fixes' branch of Ulf Hansson's 'mmc.git' repo.
->>>> The affected MMC/SD drivers call platform_get_irq[_byname]() but override its
->>>> result in case of error which prevents the deferred probing from working. Some
->>>> of these patches logically depend on commit ce753ad1549c ("platform: finally
->>>> disallow IRQ0 in platform_get_irq() and its ilk")...
->>>
->>> The above patch is available in v5.19. If someone wants any of the
->>> patches in $subject series to be backported to an older kernel
->>> version, the commit above needs backporting too.
->>
->>    Mmm... not quite correct: the abovementioned commit matters only when
->> the IRQ check in the driver is changed from <= 0 to < 0 (there's an extra
->> passage about IRQ0 at the end of the patch description).
->>
->>> Therefore I am adding the tag below for the series and leaving
->>> anything that older to be managed separately.
->>>
->>> Cc: stable@vger.kernel.org # v5.19+
->>
->>    Please only add such tag where it is _actually_ needed. TIA!
-> 
-> Seems reasonable to me!
-> 
-> Perhaps it's best if you can resend the series with the correct stable
-> tags then, so I don't screw up?
+> Typically, the cmd->busy_timeout contains the current value of the
+> timeout that should be used for the commands that have the flags
+> MMC_RSP_BUSY set for it.
+>
+> The stm variant already uses cmd->busy_timeout, but also assigns a
+> default timeout, just to make sure if the core has failed to set
+> cmd->busy_timeout (it shouldn't but who knows).
 
-   OK, it was my fault anyways... :-)
+I generalized the STM32 solution with the core-specified timeout
+and default and used that.
 
-> Kind regards
-> Uffe
+If we know the core will always provide correct timeouts we should
+probably delete hacks like this though (but that would be a separate
+patch).
 
-MBR, Sergey
+> > +static void busy_timeout_work(struct work_struct *work)
+> > +{
+> > +       struct mmci_host *host =3D
+> > +               container_of(work, struct mmci_host, busy_timeout_work.=
+work);
+> > +       u32 status;
+> > +
+> > +       dev_dbg(mmc_dev(host->mmc), "timeout waiting for busy IRQ\n");
+> > +       status =3D readl(host->base + MMCISTATUS);
+> > +       mmci_cmd_irq(host, host->cmd, status);
+>
+> There's no locking here. I assume that's because we call
+> cancel_delayed_work_sync() from an atomic context and we don't want
+> that to hang.
+>
+> However, can't the call to mmci_cmd_irq() race with a proper irq being
+> managed in parallel?
+
+It will not be a problem AFAIC: the MMCI is using level IRQs, meaning it
+will handle all flags that are set for command or data IRQs before exiting
+the IRQ handler, the order of the IRQ handling if several fire at the same
+time is actually dependent on the order the IRQ flags are checked in the
+code.
+
+When the interrupt handler exits, all IRQs should be handled and the
+respective IRQ lines and thus the IRQ from the MMCI should be
+de-asserted.
+
+In this case, our problem is that an interrupt is not fired at all, but if
+the actual IRQ (that should have been fired) or a totally different IRQ
+(such as an error) is fired at the same time doesn't matter: the pending
+IRQs will be handled, and if the timer then fires an additional IRQ
+the IRQ handler will check if there are any IRQs to handle and then
+conclude there isn't and then just return.
+
+At least the way I read it.
+
+I made a v4, sending it out so you can check!
+
+Yours,
+Linus Walleij
