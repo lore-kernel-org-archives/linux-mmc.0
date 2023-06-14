@@ -2,142 +2,91 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63F4DC0015E
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jun 2023 19:18:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C81DEB64D8
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jun 2023 19:20:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235887AbjFNTSP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Jun 2023 15:18:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45830 "EHLO
+        id S231438AbjFNTUW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Jun 2023 15:20:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47022 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229703AbjFNTSN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2023 15:18:13 -0400
-Received: from mail-io1-f51.google.com (mail-io1-f51.google.com [209.85.166.51])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F4DF2682;
-        Wed, 14 Jun 2023 12:18:12 -0700 (PDT)
-Received: by mail-io1-f51.google.com with SMTP id ca18e2360f4ac-777a78739ccso387408039f.3;
-        Wed, 14 Jun 2023 12:18:12 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686770292; x=1689362292;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        with ESMTP id S231963AbjFNTUV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2023 15:20:21 -0400
+Received: from mail-yb1-xb30.google.com (mail-yb1-xb30.google.com [IPv6:2607:f8b0:4864:20::b30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FA7F2137
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 12:20:20 -0700 (PDT)
+Received: by mail-yb1-xb30.google.com with SMTP id 3f1490d57ef6-bd790f26791so966762276.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 12:20:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686770419; x=1689362419;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=YBpMMsjcbe1wo6wOZhJlr/oSYFVntydqWqDrNGep1l0=;
-        b=BqhS7xA7T6RbrmqgQMKjBoqmWZ1RQwQxUcJ1HwbrBIQpo7J1Ech+GIvw3+nrmKux5x
-         b2sWZ0FLaTadYyaKIC/J74/XRpuABvGw09cQ5gCzKp1P132FBzjblYON6ZBSa9l4rQNn
-         qCHRO3oe3fjXsYxs7yI6Jtwh7ZxkTsjrbCstJybrhFYYHMNOlinL9VN+iRWJ8kq6HLZ1
-         /Qa3DAhtPWA0pDV7E0LE5Zy6Sy7LcN3oC1U9rCUJwn+Pot7LiF18d4v/RsJ4cODUznkv
-         3g3ZzIHgGA5MuboJ/DhHQRrniU01/bcVmdO9hf5AUcoCwgDc17ccvtzOFr5oA82o8Qu8
-         8w1g==
-X-Gm-Message-State: AC+VfDzlPpeV70SVe2a8G2hR976hUdWxw3Mx7as+UNOaFLR25cHIPJv0
-        Bgw1mSnTZ0GQAExvwttTFQ==
-X-Google-Smtp-Source: ACHHUZ5c57N/o0GzC8aXwuQsvNktRZIXbCA+u83AThjFLnR3buYrBFGMs/uzsSp0OtJJ2l8Rq3rG3w==
-X-Received: by 2002:a05:6602:299a:b0:776:cfd8:b44a with SMTP id o26-20020a056602299a00b00776cfd8b44amr16111912ior.8.1686770291867;
-        Wed, 14 Jun 2023 12:18:11 -0700 (PDT)
-Received: from robh_at_kernel.org ([64.188.179.250])
-        by smtp.gmail.com with ESMTPSA id b8-20020a02c988000000b0041f5ff08660sm5160476jap.141.2023.06.14.12.18.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 14 Jun 2023 12:18:11 -0700 (PDT)
-Received: (nullmailer pid 2587113 invoked by uid 1000);
-        Wed, 14 Jun 2023 19:18:08 -0000
-Date:   Wed, 14 Jun 2023 13:18:08 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Oleksij Rempel <o.rempel@pengutronix.de>
-Cc:     Abel Vesa <abelvesa@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
-        Peng Fan <peng.fan@nxp.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Michael Trimarchi <michael@amarulasolutions.com>,
-        Mark Brown <broonie@kernel.org>,
-        Dario Binacchi <dario.binacchi@amarulasolutions.com>,
-        Anson Huang <Anson.Huang@nxp.com>, Marek Vasut <marex@denx.de>,
-        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v1 6/7] dt-bindings: clock: imx6q: Allow single optional
- clock and add enet_ref_pad
-Message-ID: <20230614191808.GA2581397-robh@kernel.org>
-References: <20230601101451.357662-1-o.rempel@pengutronix.de>
- <20230601101451.357662-7-o.rempel@pengutronix.de>
+        bh=62GFc6AuISXXvkcrUuDGzwht+jOhfItCB1t9KaG7ZR8=;
+        b=E05X0deXcZmNEBaFD+iQrEPds6MnAFDwmL+RWQK6d6ohII72LuUWoByHkrC17dcMGR
+         WLa1QT41qPMBUxbbJs9/jAnZWBpw/byejQuH+HUDKpL3PA4SjnGLiFKY7HY/VIASnxbk
+         cZ91bIIY/6ctPO7G+JvGtzVadzRUjw48LIXofN2cbKanxkwPlFNU1pFxY8+ZhmIvx88y
+         ty3arKnYRDX/XSEUcKpGcw0nu/DCNK1NLJt9XwFu6MbcNQZsPG/71gtHAhGO1dYhmgrL
+         JO9VaILTaTNVoZAHhBsqyWb/GrCAsfsRtmDc0KAcobEarjQBBLJyENjD6GZkJvfpGaUe
+         zBFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686770419; x=1689362419;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=62GFc6AuISXXvkcrUuDGzwht+jOhfItCB1t9KaG7ZR8=;
+        b=fKA7E9BACtqG9uPBP9tpiIRx4TH+/0bP3+O1Yd8r7YYXPrF7nVmY+7an1YQijQjweE
+         hOFi3oHc5MGx/ywRNPHkBVu94skpi9PG/s0IGHB3gp9MRe3i0k9LpbkktoZZQbpXJU13
+         Dez0OCA489/K4Y8Tao1nkZntzNyuJkM/tUlbummqD5/8HK4erLAlwhdKKtZRIN14rSjD
+         BhTPCoCWs2lCsMaSscdjDLHk2ExiK79Z0vuY9/mQID8LfLzi24fL5z+VEKJB54dW/d9T
+         aH7s0XPRe1x08tWPdiw1ivgHSnlm7peZpg9T0KvO0nvoPesMx0NMp5lf8cvr4NTfnKzV
+         sS7A==
+X-Gm-Message-State: AC+VfDyP1vUb2aHSOQZGWUa1SM9r8O3MtXFLNkYlvBiXpZQPcReNO7qm
+        Z0m3oHDVnFhoC/HIJlJsSv44e4LBSUdPzv165AEfgg==
+X-Google-Smtp-Source: ACHHUZ7XahJk1hXaPJNxEreyTt5vCy4LzZhRlq/ge2nEmlCnEb/xmxNddg1oJpQIgjnlhO14CHtDFUrt/ScznOeVRVg=
+X-Received: by 2002:a25:2515:0:b0:bac:1522:f870 with SMTP id
+ l21-20020a252515000000b00bac1522f870mr2609764ybl.52.1686770419378; Wed, 14
+ Jun 2023 12:20:19 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230601101451.357662-7-o.rempel@pengutronix.de>
+References: <20230405-pl180-busydetect-fix-v4-0-df9c8c504353@linaro.org>
+ <20230405-pl180-busydetect-fix-v4-10-df9c8c504353@linaro.org> <CAPDyKFrq2doTP-7Pdi3cAUtGy9fhqi9mjDZDEhSAdaEd_y+YpA@mail.gmail.com>
+In-Reply-To: <CAPDyKFrq2doTP-7Pdi3cAUtGy9fhqi9mjDZDEhSAdaEd_y+YpA@mail.gmail.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Wed, 14 Jun 2023 21:20:08 +0200
+Message-ID: <CACRpkdaXS+N+O0PPeFrZ-_h3wztiAe5QtEoDhJgT4kVYganu7Q@mail.gmail.com>
+Subject: Re: [PATCH v4 10/10] mmc: mmci: Add busydetect timeout
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Yann Gautier <yann.gautier@foss.st.com>,
+        Stefan Hansson <newbyte@disroot.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jun 01, 2023 at 12:14:50PM +0200, Oleksij Rempel wrote:
-> All clocks for this driver are optional, so this change allows the
+On Wed, Jun 14, 2023 at 2:17=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
 
-It's not about what the driver supports, but the h/w. You are saying 
-this SoC can operate with only 1 of any of the clock inputs?
+> Shouldn't we schedule the work at the point when we move to
+> MMCI_BUSY_WAITING_FOR_START_IRQ instead?
 
-> 'clocks' and 'clock-names' properties to accept a single clock.
-> Additionally, 'enet_ref_pad' clock is added. This resolves the following
-> dtbs_check warning:
->   imx6dl-alti6p.dtb: clock-controller@20c4000: clocks: [[24]] is too short
->   From schema: Documentation/devicetree/bindings/clock/imx6q-clock.yaml
-> 
->   imx6dl-alti6p.dtb: clock-controller@20c4000: clock-names:0: 'osc' was
->     expected
->   From schema: Documentation/devicetree/bindings/clock/imx6q-clock.yaml
-> 
->   imx6dl-alti6p.dtb: clock-controller@20c4000: clock-names:
->     ['enet_ref_pad'] is too short
->   From schema: Documentation/devicetree/bindings/clock/imx6q-clock.yaml
-> 
-> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
-> ---
->  .../devicetree/bindings/clock/imx6q-clock.yaml    | 15 +++++++++------
->  1 file changed, 9 insertions(+), 6 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/clock/imx6q-clock.yaml b/Documentation/devicetree/bindings/clock/imx6q-clock.yaml
-> index bae4fcb3aacc..ed65d19c2e0e 100644
-> --- a/Documentation/devicetree/bindings/clock/imx6q-clock.yaml
-> +++ b/Documentation/devicetree/bindings/clock/imx6q-clock.yaml
-> @@ -28,20 +28,23 @@ properties:
->      const: 1
->  
->    clocks:
-> +    minItems: 1
->      items:
->        - description: 24m osc
->        - description: 32k osc
->        - description: ckih1 clock input
->        - description: anaclk1 clock input
->        - description: anaclk2 clock input
-> +      - description: enet_ref_pad
->  
->    clock-names:
-> -    items:
-> -      - const: osc
-> -      - const: ckil
-> -      - const: ckih1
-> -      - const: anaclk1
-> -      - const: anaclk2
-> +    enum:
-> +      - osc
-> +      - ckil
-> +      - ckih1
-> +      - anaclk1
-> +      - anaclk2
-> +      - enet_ref_pad
->  
->    fsl,pmic-stby-poweroff:
->      $ref: /schemas/types.yaml#/definitions/flag
-> -- 
-> 2.39.2
-> 
+Yup
+
+> > +/*
+> > + * This busy timeout worker is used to "kick" the command IRQ if a
+> > + * busy detect IRQ fails to appear in reasonable time. Only used on
+> > + * variants with busy detection IRQ delivery.
+> > + */
+> > +static void busy_timeout_work(struct work_struct *work)
+>
+> In a way to try to be consistent with naming functions, perhaps add
+> the prefix "ux500_*?
+
+I thought to actually propose a patch for STM32 to use this too, as an
+extra fallback timeout. But I don't know if it's useful to them, so I'll
+rename it.
+
+Yours,
+Linus Walleij
