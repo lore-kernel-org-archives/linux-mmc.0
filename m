@@ -2,59 +2,56 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F945EB64DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jun 2023 10:05:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A602DEB64D9
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jun 2023 10:33:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243553AbjFNKF6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Jun 2023 06:05:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57584 "EHLO
+        id S242891AbjFNKdB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Jun 2023 06:33:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44252 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243620AbjFNKFl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2023 06:05:41 -0400
-Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 789F41BF9
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 03:05:27 -0700 (PDT)
-Received: by mail-yb1-xb33.google.com with SMTP id 3f1490d57ef6-bc4f89f0f2fso470890276.3
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 03:05:27 -0700 (PDT)
+        with ESMTP id S243949AbjFNKcr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2023 06:32:47 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71B042107
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 03:32:01 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-57016aa67a8so1632947b3.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 03:32:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686737126; x=1689329126;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=9Ae9OtuHFGy8oX3kZN3aX8TWXzvhsHlOVNH6KwSyYBM=;
-        b=Us3KLmpNbztLlFCIjBK6FlhIA/8GqQHlxb2CJAzLSQRLPgKDI+kNEqXTXp8Xuj5653
-         QZJv3UO+4NuEwpZGrkib9IyooWgmoU/mlyZna2WXaGCcmjg8wEZbzKw4X5XpPICcZuMf
-         Suya2xCPWOHXf2HhsicifeUAwPeSJ4oFAQosGda/vbIzPeoXH6edMBZMWN6Qc6119Bn3
-         6KDgmUIVNRvg4DQWDLJgLNVkFQjS5Db9O05GcSlvRw6xoMjAcHCgq3BjI3NcVCd1JJud
-         FshL4YgjrfGQrAJhGXVfsEl+8OYoOp6zaipUwmTqFjIaUwi64ma1tN/eURV296E0K8ew
-         LqqA==
+        d=linaro.org; s=google; t=1686738720; x=1689330720;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=I9/uJWt/ZuvpPe3D5swX3KpfwGEqFuE4FpM5RCSL7dg=;
+        b=MCgedgP9Okz69NLPetN7JTzxnS1NBAn9qU/oH5pHi8LmO0PBDavduC+CJ/WmA3pY/W
+         Q2jNlVMbpgZdRVCvHc/1qyZ1DuICb8uCnkCgGa3yE23FzCRbO8w9bO0kxsd07EyTz3Ny
+         ii8qIVTop0XINd2XsVi8BJd07BcbyR34qlMqq7Z0RvIIbF8Y5IcYlyU0P1yu2A/3NvYE
+         RVEhqCqZVSI+uv9jkl6/eWaALmdVdHK/lZPacobowCiXZs1unk8c+vDMZw/4obC3w9s1
+         c7nC19ofZomtg3SQSzlPo9jvZk6yOVyvowNUfPQmASBU3wKBllpc05WUV7Bi2JvXBdpI
+         ryOQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686737126; x=1689329126;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=9Ae9OtuHFGy8oX3kZN3aX8TWXzvhsHlOVNH6KwSyYBM=;
-        b=h675XXPM2P/tvIeVat2DyMOLE6yd/0SdfQuqW6TFBFAzWA8WEfoBzhf4DUoFczA18J
-         3YFWw7I9XU/S5Sea5vY45/sHUlLo5vCv0Fg/SyzLHyGKt71/T+Hs5IOD9bLPzT1gIS/0
-         sqZS6RHAb/ROYDRL4AWRr9RIA4IhVwwM+mAsCylq4YNO+wrh0iCb4a+pPxx8HPkwyY2c
-         zTV5ehqT3b1RCb9fPAy9oynoBKp6LvuwD96QHlqQJ2M+6dz25tgZz22qwpzcLok94jRT
-         6VjqTli/6flaZE7UVcGLTK43BSDO9ACO16YLW/19Wr8xkHMIBokOD5H4uTytuJh1W+Cg
-         6Pgg==
-X-Gm-Message-State: AC+VfDxjoTZIN/ZEfdF5jbNo3ShIOTaOKvlD7MefWMRiU4T3PKKsWqDQ
-        EHMocGJFZ1N3TPa/SfzAU988qaF2Ag1v94AeHfaczQ==
-X-Google-Smtp-Source: ACHHUZ5ad4U15u9oHllT+swudTjsUEgS/M1+l81Mj6ke6PqhJHG8wnH1wdeT3A7kGOBvquZXrkoAPtmpbErc66rd6hQ=
-X-Received: by 2002:a25:acd3:0:b0:bcd:3379:11b2 with SMTP id
- x19-20020a25acd3000000b00bcd337911b2mr1443925ybd.52.1686737126656; Wed, 14
- Jun 2023 03:05:26 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1686738720; x=1689330720;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=I9/uJWt/ZuvpPe3D5swX3KpfwGEqFuE4FpM5RCSL7dg=;
+        b=GS+9lSZde0+ujGjMH05mpluxanFY6mFXT/BKFeLfZ9g71IhX/6N03EThAKVww11Y64
+         B6q8CT9ebHea9Oenrt/3AUuhzN3E6f7K2bsvUyyvssXR9ubZWgai1fQODSf1mVWJj+Sm
+         zdTiUOabW3SfwLcHMDxotuAshgc/PkpNVd89B8EpLwK1zak41IkyVg9WtNYpHazg7XER
+         AnEKN5IWMSqmx5Nli31eH356mRwuO+CAttsJvNHhLAfde191Rau7aVrsnT5C+u8txNOM
+         YSQBc1wOLwkrIiHyl94tzzBPM5Q2qQI49ShkqpwGMSjINCwY+Timgxgnt/1BupTiHFy3
+         Wy+Q==
+X-Gm-Message-State: AC+VfDy4a3aI7yjWSXVFpeTtI84x/pLl724vyE2kgYsz2w6TBQRwd3a/
+        vrjuOvv88gnayjJ+lxjzHYlDoIvU2r33pCp40TRLZQ==
+X-Google-Smtp-Source: ACHHUZ7gC+7dlFTTQUBB98VwtkJQOcb9XZ09VT14Ld/fIPuh52WdHcHgb9e4SwQzIlYb8VFK9kWWWaTBfzN7vPnHEJ8=
+X-Received: by 2002:a81:7204:0:b0:55a:574f:327c with SMTP id
+ n4-20020a817204000000b0055a574f327cmr1355540ywc.13.1686738720466; Wed, 14 Jun
+ 2023 03:32:00 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230405-pl180-busydetect-fix-v3-0-cd3d5925ae64@linaro.org>
- <20230405-pl180-busydetect-fix-v3-10-cd3d5925ae64@linaro.org>
- <CAPDyKFqxvNxFqLdpj15Gz+zDNT04YzxEAh-svKvRuaM52dCV3g@mail.gmail.com> <CACRpkdbg5UXnU=WcQa2HoGH54UK-C8+vU8t+7iLChvd__iJiMg@mail.gmail.com>
-In-Reply-To: <CACRpkdbg5UXnU=WcQa2HoGH54UK-C8+vU8t+7iLChvd__iJiMg@mail.gmail.com>
+References: <20230405-pl180-busydetect-fix-v4-0-df9c8c504353@linaro.org>
+In-Reply-To: <20230405-pl180-busydetect-fix-v4-0-df9c8c504353@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 14 Jun 2023 12:04:50 +0200
-Message-ID: <CAPDyKFoMNPHs3td-UBnqDdEK4i7aHybWfsba796BEXPQC-bzUQ@mail.gmail.com>
-Subject: Re: [PATCH v3 10/10] mmc: mmci: Add busydetect timeout
+Date:   Wed, 14 Jun 2023 12:31:24 +0200
+Message-ID: <CAPDyKFpP=G6vs-VLoTF4BhVgxDyBLZ4DqWsXy1qvH1tV_SC53A@mail.gmail.com>
+Subject: Re: [PATCH v4 00/10] Fix busydetect on Ux500 PL180/MMCI
 To:     Linus Walleij <linus.walleij@linaro.org>
 Cc:     Yann Gautier <yann.gautier@foss.st.com>,
         Stefan Hansson <newbyte@disroot.org>,
@@ -62,82 +59,95 @@ Cc:     Yann Gautier <yann.gautier@foss.st.com>,
         Alexandre Torgue <alexandre.torgue@foss.st.com>,
         linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 13 Jun 2023 at 22:32, Linus Walleij <linus.walleij@linaro.org> wrot=
-e:
+On Tue, 13 Jun 2023 at 22:34, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> On Tue, Jun 13, 2023 at 2:08=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
+> This series fixes a pretty serious problem in the MMCI
+> busy detect handling, discovered only after going up and
+> down a ladder of refactorings.
 >
-> > Typically, the cmd->busy_timeout contains the current value of the
-> > timeout that should be used for the commands that have the flags
-> > MMC_RSP_BUSY set for it.
-> >
-> > The stm variant already uses cmd->busy_timeout, but also assigns a
-> > default timeout, just to make sure if the core has failed to set
-> > cmd->busy_timeout (it shouldn't but who knows).
+> The code is written expecting the Ux500 busy detect
+> to fire two interrupts: one at the start of the busy
+> signalling and one at the end of the busy signalling.
 >
-> I generalized the STM32 solution with the core-specified timeout
-> and default and used that.
+> The root cause of the problem seen on some devices
+> is that only the first IRQ arrives, and then the device
+> hangs, waiting perpetually for the next IRQ to arrive.
 >
-> If we know the core will always provide correct timeouts we should
-> probably delete hacks like this though (but that would be a separate
-> patch).
+> This is eventually solved by adding a timeout using
+> a delayed work that fire after a timeout if the busy detect
+> has not stopped. This is the last patch in the series.
 >
-> > > +static void busy_timeout_work(struct work_struct *work)
-> > > +{
-> > > +       struct mmci_host *host =3D
-> > > +               container_of(work, struct mmci_host, busy_timeout_wor=
-k.work);
-> > > +       u32 status;
-> > > +
-> > > +       dev_dbg(mmc_dev(host->mmc), "timeout waiting for busy IRQ\n")=
-;
-> > > +       status =3D readl(host->base + MMCISTATUS);
-> > > +       mmci_cmd_irq(host, host->cmd, status);
-> >
-> > There's no locking here. I assume that's because we call
-> > cancel_delayed_work_sync() from an atomic context and we don't want
-> > that to hang.
-> >
-> > However, can't the call to mmci_cmd_irq() race with a proper irq being
-> > managed in parallel?
+> I included the rewrite of the entire busy detect logic
+> to use a state machine as this makes it way easier to
+> debug and will print messages about other error
+> conditions as well.
 >
-> It will not be a problem AFAIC: the MMCI is using level IRQs, meaning it
-> will handle all flags that are set for command or data IRQs before exitin=
-g
-> the IRQ handler, the order of the IRQ handling if several fire at the sam=
-e
-> time is actually dependent on the order the IRQ flags are checked in the
-> code.
+> The problem affects especially the Skomer
+> (Samsung GT-I9070) and Kyle (Samsung SGH-I407).
 >
-> When the interrupt handler exits, all IRQs should be handled and the
-> respective IRQ lines and thus the IRQ from the MMCI should be
-> de-asserted.
+> It is fine to just apply this for the -next kernel,
+> despite it fixes the busy detect that has been broken
+> for these devices for a while, we can think about
+> backporting a simpler version of the timeout for
+> stable kernels if we want.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> Changes in v4:
+> - Fix an unrelated change in patch 1
+> - Move MMCI_BUSY_DONE initialization outside the if()-clause
+>   for busy detection.
+> - Use the per-command ->busy_timeout as calculated by the
+>   core.
+> - Link to v3: https://lore.kernel.org/r/20230405-pl180-busydetect-fix-v3-0-cd3d5925ae64@linaro.org
+>
+> Changes in v3:
+> - Unconditionally assign busy_status = 0
+> - Rewrite state machine states to just three
+> - Drop a patch that gets absorbed into another patch
+> - Drop patch to get busy state from the state machine, it was
+>   fishy, based on a misunderstanding and not needed
+> - Link to v2: https://lore.kernel.org/r/20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org
+>
+> Changes in v2:
+> - Drop pointless patch nr 1
+> - Unconditionally intialize some state variables
+> - Use a less fragile method to look for busy status when
+>   using busy detect, should fix Yann's problem
+> - Link to v1: https://lore.kernel.org/r/20230405-pl180-busydetect-fix-v1-0-28ac19a74e5e@linaro.org
+>
+> ---
+> Linus Walleij (10):
+>       mmc: mmci: Clear busy_status when starting command
+>       mmc: mmci: Unwind big if() clause
+>       mmc: mmci: Stash status while waiting for busy
+>       mmc: mmci: Break out error check in busy detect
+>       mmc: mmci: Make busy complete state machine explicit
+>       mmc: mmci: Retry the busy start condition
+>       mmc: mmci: Use state machine state as exit condition
+>       mmc: mmci: Use a switch statement machine
+>       mmc: mmci: Break out a helper function
+>       mmc: mmci: Add busydetect timeout
+>
+>  drivers/mmc/host/mmci.c             | 143 ++++++++++++++++++++++++++++--------
+>  drivers/mmc/host/mmci.h             |  15 ++++
+>  drivers/mmc/host/mmci_stm32_sdmmc.c |   6 +-
+>  3 files changed, 132 insertions(+), 32 deletions(-)
+> ---
+> base-commit: 3dff3b32d4752f4a0655fad3c8669978c291ae59
+> change-id: 20230405-pl180-busydetect-fix-66a0360d398a
+>
+> Best regards,
+> --
+> Linus Walleij <linus.walleij@linaro.org>
 
-Right, I think I follow.
+Applied patch1->patch9 for next, thanks!
 
->
-> In this case, our problem is that an interrupt is not fired at all, but i=
-f
-> the actual IRQ (that should have been fired) or a totally different IRQ
-> (such as an error) is fired at the same time doesn't matter: the pending
-> IRQs will be handled, and if the timer then fires an additional IRQ
-> the IRQ handler will check if there are any IRQs to handle and then
-> conclude there isn't and then just return.
-
-To clarify, I am not worried about the IRQ handling as such.
-
-However, we use the spin_lock to protect some members in the struct
-mmci_host. In this case, the mmci_cmd_irq() is using "host->cmd" to
-understand whether there is an active command to manage. When the
-command has been completed, we set host->cmd to NULL.
-
-[...]
+Let's continue to chat a bit more about patch10, to conclude.
 
 Kind regards
 Uffe
