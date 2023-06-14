@@ -2,91 +2,99 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C81DEB64D8
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jun 2023 19:20:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5F80C0015E
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jun 2023 19:21:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231438AbjFNTUW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Jun 2023 15:20:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47022 "EHLO
+        id S230017AbjFNTVh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Jun 2023 15:21:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231963AbjFNTUV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2023 15:20:21 -0400
-Received: from mail-yb1-xb30.google.com (mail-yb1-xb30.google.com [IPv6:2607:f8b0:4864:20::b30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FA7F2137
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 12:20:20 -0700 (PDT)
-Received: by mail-yb1-xb30.google.com with SMTP id 3f1490d57ef6-bd790f26791so966762276.1
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jun 2023 12:20:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686770419; x=1689362419;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=62GFc6AuISXXvkcrUuDGzwht+jOhfItCB1t9KaG7ZR8=;
-        b=E05X0deXcZmNEBaFD+iQrEPds6MnAFDwmL+RWQK6d6ohII72LuUWoByHkrC17dcMGR
-         WLa1QT41qPMBUxbbJs9/jAnZWBpw/byejQuH+HUDKpL3PA4SjnGLiFKY7HY/VIASnxbk
-         cZ91bIIY/6ctPO7G+JvGtzVadzRUjw48LIXofN2cbKanxkwPlFNU1pFxY8+ZhmIvx88y
-         ty3arKnYRDX/XSEUcKpGcw0nu/DCNK1NLJt9XwFu6MbcNQZsPG/71gtHAhGO1dYhmgrL
-         JO9VaILTaTNVoZAHhBsqyWb/GrCAsfsRtmDc0KAcobEarjQBBLJyENjD6GZkJvfpGaUe
-         zBFw==
+        with ESMTP id S229496AbjFNTVf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jun 2023 15:21:35 -0400
+Received: from mail-il1-f171.google.com (mail-il1-f171.google.com [209.85.166.171])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4A0426B7;
+        Wed, 14 Jun 2023 12:21:16 -0700 (PDT)
+Received: by mail-il1-f171.google.com with SMTP id e9e14a558f8ab-33cb82122c7so29528265ab.1;
+        Wed, 14 Jun 2023 12:21:16 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686770419; x=1689362419;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=62GFc6AuISXXvkcrUuDGzwht+jOhfItCB1t9KaG7ZR8=;
-        b=fKA7E9BACtqG9uPBP9tpiIRx4TH+/0bP3+O1Yd8r7YYXPrF7nVmY+7an1YQijQjweE
-         hOFi3oHc5MGx/ywRNPHkBVu94skpi9PG/s0IGHB3gp9MRe3i0k9LpbkktoZZQbpXJU13
-         Dez0OCA489/K4Y8Tao1nkZntzNyuJkM/tUlbummqD5/8HK4erLAlwhdKKtZRIN14rSjD
-         BhTPCoCWs2lCsMaSscdjDLHk2ExiK79Z0vuY9/mQID8LfLzi24fL5z+VEKJB54dW/d9T
-         aH7s0XPRe1x08tWPdiw1ivgHSnlm7peZpg9T0KvO0nvoPesMx0NMp5lf8cvr4NTfnKzV
-         sS7A==
-X-Gm-Message-State: AC+VfDyP1vUb2aHSOQZGWUa1SM9r8O3MtXFLNkYlvBiXpZQPcReNO7qm
-        Z0m3oHDVnFhoC/HIJlJsSv44e4LBSUdPzv165AEfgg==
-X-Google-Smtp-Source: ACHHUZ7XahJk1hXaPJNxEreyTt5vCy4LzZhRlq/ge2nEmlCnEb/xmxNddg1oJpQIgjnlhO14CHtDFUrt/ScznOeVRVg=
-X-Received: by 2002:a25:2515:0:b0:bac:1522:f870 with SMTP id
- l21-20020a252515000000b00bac1522f870mr2609764ybl.52.1686770419378; Wed, 14
- Jun 2023 12:20:19 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1686770476; x=1689362476;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=sHiFqUH8Ns99cL4Q7Lgq6jxmGIJl/IBWeuGMsrbyXnU=;
+        b=bT5p3MIEHc53heYTrW6QWDnCa9Cf7EIJhU2CgyPBAP0G4M0EkSQxVi3bKErCD1g4cm
+         wV0oG8rlU+2mXrDq0rnZ8Y5YBiFq6pJkfrgJoSuW2oM1PuW1UyRztjqlg5G2UqcqIJAk
+         RHcZBvFOjUaKwiFlwo3aJva9HBsPElWmV//mR+qlnWvnAL3XdlLCi+NDtl99udyccLps
+         hJAy88cQOMozWCqqBJEmAcSqFzll4JR5z0Er43VfQYmg8Yo+7avQtGEPmEy3npUqMfSp
+         sqqNjD+emKSqhG/1zYLswm0aHR9HHgV0LuM0UOW0PXemC1IWtcx/PwujEJ7VJt7xwspp
+         KOXw==
+X-Gm-Message-State: AC+VfDyNPR+wwOL5pHMHIY8INXAhgqn7pJu8ep7mskZjynw3YwMdBUqM
+        XaTuvkXUA79deL1cOeCldg==
+X-Google-Smtp-Source: ACHHUZ4+oCaDJAL2TyNKe9N2ZuahMJpTVt2MjofPkLtQyNt9QOfQlpzr2x39gYaMHbPNmmJx9oNtlQ==
+X-Received: by 2002:a05:6e02:5c7:b0:33f:dfd1:fe49 with SMTP id l7-20020a056e0205c700b0033fdfd1fe49mr10449290ils.6.1686770475971;
+        Wed, 14 Jun 2023 12:21:15 -0700 (PDT)
+Received: from robh_at_kernel.org ([64.188.179.250])
+        by smtp.gmail.com with ESMTPSA id i18-20020a02c612000000b004230e6377f3sm190722jan.177.2023.06.14.12.21.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 14 Jun 2023 12:21:15 -0700 (PDT)
+Received: (nullmailer pid 2591199 invoked by uid 1000);
+        Wed, 14 Jun 2023 19:21:12 -0000
+Date:   Wed, 14 Jun 2023 13:21:12 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Oleksij Rempel <o.rempel@pengutronix.de>
+Cc:     linux-arm-kernel@lists.infradead.org,
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-mmc@vger.kernel.org, Abel Vesa <abelvesa@kernel.org>,
+        devicetree@vger.kernel.org, linux-crypto@vger.kernel.org,
+        "David S. Miller" <davem@davemloft.net>,
+        Fabio Estevam <festevam@gmail.com>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>, linux-input@vger.kernel.org,
+        Stephen Boyd <sboyd@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        linux-clk@vger.kernel.org, Anson Huang <Anson.Huang@nxp.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Mark Brown <broonie@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        linux-kernel@vger.kernel.org, kernel@pengutronix.de,
+        Thomas Gleixner <tglx@linutronix.de>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Dario Binacchi <dario.binacchi@amarulasolutions.com>,
+        Peng Fan <peng.fan@nxp.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Michael Trimarchi <michael@amarulasolutions.com>,
+        Marek Vasut <marex@denx.de>
+Subject: Re: [PATCH v1 7/7] dt-bindings: input: touchscreen: edt-ft5x06: Add
+ 'threshold' property
+Message-ID: <168677047226.2591141.8223363796946763544.robh@kernel.org>
+References: <20230601101451.357662-1-o.rempel@pengutronix.de>
+ <20230601101451.357662-8-o.rempel@pengutronix.de>
 MIME-Version: 1.0
-References: <20230405-pl180-busydetect-fix-v4-0-df9c8c504353@linaro.org>
- <20230405-pl180-busydetect-fix-v4-10-df9c8c504353@linaro.org> <CAPDyKFrq2doTP-7Pdi3cAUtGy9fhqi9mjDZDEhSAdaEd_y+YpA@mail.gmail.com>
-In-Reply-To: <CAPDyKFrq2doTP-7Pdi3cAUtGy9fhqi9mjDZDEhSAdaEd_y+YpA@mail.gmail.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 14 Jun 2023 21:20:08 +0200
-Message-ID: <CACRpkdaXS+N+O0PPeFrZ-_h3wztiAe5QtEoDhJgT4kVYganu7Q@mail.gmail.com>
-Subject: Re: [PATCH v4 10/10] mmc: mmci: Add busydetect timeout
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Yann Gautier <yann.gautier@foss.st.com>,
-        Stefan Hansson <newbyte@disroot.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230601101451.357662-8-o.rempel@pengutronix.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jun 14, 2023 at 2:17=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
-> wrote:
 
-> Shouldn't we schedule the work at the point when we move to
-> MMCI_BUSY_WAITING_FOR_START_IRQ instead?
+On Thu, 01 Jun 2023 12:14:51 +0200, Oleksij Rempel wrote:
+> Add a new property 'threshold' to the edt-ft5x06 touchscreen binding.
+> This property allows setting the "click"-threshold in the range from 0
+> to 255. This change addresses the following dtbs_check warning:
+>   imx6dl-lanmcu.dtb: touchscreen@38: 'threshold' does not match any of the
+>     regexes: 'pinctrl-[0-9]+'
+>   From schema:
+>     Documentation/devicetree/bindings/input/touchscreen/edt-ft5x06.yaml
+> 
+> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+> ---
+>  .../devicetree/bindings/input/touchscreen/edt-ft5x06.yaml   | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
 
-Yup
+Reviewed-by: Rob Herring <robh@kernel.org>
 
-> > +/*
-> > + * This busy timeout worker is used to "kick" the command IRQ if a
-> > + * busy detect IRQ fails to appear in reasonable time. Only used on
-> > + * variants with busy detection IRQ delivery.
-> > + */
-> > +static void busy_timeout_work(struct work_struct *work)
->
-> In a way to try to be consistent with naming functions, perhaps add
-> the prefix "ux500_*?
-
-I thought to actually propose a patch for STM32 to use this too, as an
-extra fallback timeout. But I don't know if it's useful to them, so I'll
-rename it.
-
-Yours,
-Linus Walleij
