@@ -2,225 +2,132 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8FC7EB64D9
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 15:37:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11F4CEB64D9
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 16:06:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240622AbjFOPhF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Jun 2023 11:37:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36804 "EHLO
+        id S229727AbjFOQGv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Jun 2023 12:06:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241289AbjFOPhD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 11:37:03 -0400
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52E27189
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2023 08:37:02 -0700 (PDT)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 9DEFA8633D;
-        Thu, 15 Jun 2023 17:36:59 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1686843420;
-        bh=lJve0MDazvs50ZxHZCO/2tuXZCynOiInl0M+qxhdTxA=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=yBeQJkn5IvuYveUQs0Zhy+elapHEkuZSiWYpAs1j8L8Q05Jvo9TFFy4R4Sr4mlwp9
-         uHJyks5ks5Pf9enRlETmH0MuTe6z6hmnDBPfCf3LQVljYzzxA/f2lJP5f9i5nLTlMy
-         iZbisAJ/aU018I2KCuqPkroqt0KGm70ZmnKdsT7vwnuNjZdZnsET2a69csxqOo00hS
-         bgXIMRDmz/Y7z1VvBG/poQOiN3Qy1cF24PO0IaF6MTb/C16a2gASXiSexScKUNn2Q1
-         PH+nXMpN7BOAv+ZOfIb02foswnKb5fPE3epsopDBoPYlnATpjOgdadvPLLpfa6ngdp
-         KBymFCJPu+Osw==
-Message-ID: <6423ae91-7585-b141-960a-f8cfd4b23538@denx.de>
-Date:   Thu, 15 Jun 2023 17:36:59 +0200
+        with ESMTP id S229651AbjFOQGu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 12:06:50 -0400
+Received: from mail-qv1-f46.google.com (mail-qv1-f46.google.com [209.85.219.46])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F81CEC;
+        Thu, 15 Jun 2023 09:06:49 -0700 (PDT)
+Received: by mail-qv1-f46.google.com with SMTP id 6a1803df08f44-62ff12ba965so6837986d6.3;
+        Thu, 15 Jun 2023 09:06:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686845208; x=1689437208;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=om/3rexWstZ0S91L+gEIlLHFrjZY2axSUrZtEHSrgPw=;
+        b=ZZQL4xqfGZ3YLUTqzQn49CKVqPvpjrVqFazPlRVc1ueFt5k+LJsgRJOAi64aV/oT6x
+         6NtO4H78XWGqXqSfEYo/sN4zDpvSxx0j+WNIQAiylReKW+WpXqZhV5zgIen8/+Qa/Qx9
+         GYExjb6DOm1V0GGci2OMqQGe8pqGQHvzqthy+JKZTAxG4I0iepi7UBTQhHYnogAsEGHL
+         S0L9q96OKiN191tOO9b9kTbPJE6lCVlpDSzblYic2+uR14ZK1Sqh5DK+0fjxyfdsqogJ
+         3+Q+t0yn+Cr+13EDlXugxhOMcOstITWtyhCUVbq54/Hv7PZaS1OgrgF1xXe6LPc1v0+X
+         iZcg==
+X-Gm-Message-State: AC+VfDy+6zsg9cyeyOlPadUXxw8DzixtFbMsQdn9YVfTHOmvCL6LCyGX
+        kN+gVplIIb2cnkZL8gBqxeV1ISNqhqY=
+X-Google-Smtp-Source: ACHHUZ6R9f7ZOwUs11BR3qFTpaQS/APHWFr0N/VDKoHBD955SpblUzKKuZKmRKgHavagfOfZazrQmg==
+X-Received: by 2002:ad4:5b88:0:b0:5e0:3825:9ad9 with SMTP id 8-20020ad45b88000000b005e038259ad9mr12265018qvp.2.1686845208016;
+        Thu, 15 Jun 2023 09:06:48 -0700 (PDT)
+Received: from snowbird ([2600:4041:5505:2302:25d5:bdf3:65da:2bb9])
+        by smtp.gmail.com with ESMTPSA id c11-20020a0ce14b000000b0062382e1e228sm5926310qvl.49.2023.06.15.09.06.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 15 Jun 2023 09:06:47 -0700 (PDT)
+Date:   Thu, 15 Jun 2023 09:06:45 -0700
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <ZIs3FQMiU75EhT6S@snowbird>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <CAPDyKFoKmWAC0V_t7WL-5OauxS-iiLxW+KhqC6RzJXD_szjPCA@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
- writeback-cache for eMMC and SD"
-Content-Language: en-US
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org,
-        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Michael Wu <michael@allwinnertech.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>, xander_li@kingston.com.tw
-References: <20230531002740.1235620-1-marex@denx.de>
- <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
- <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
- <f41e1546-f6d3-7f4d-7662-3b7eca291178@intel.com>
- <29a5f24d-2b8c-8387-8c11-601af8e13940@denx.de>
- <4c8d84ae-c8d0-fa12-81c6-a47382684d73@intel.com>
- <3bd65a30-756d-e7ee-ce77-e5ebfe6b6e30@denx.de>
- <75ab27e9-9203-f59b-c720-99bfa992bb9b@intel.com>
- <b494062c-7e9e-24ba-ef0a-13faf0fe7706@denx.de>
- <a316b98e-fe56-23a3-7d58-13fcd5d9abb5@intel.com>
- <0029620e-4d22-d8f9-5566-4b1ea7f05bae@denx.de>
- <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
- <e6243501-908d-dec9-36ef-206c20ccf8cc@intel.com>
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <e6243501-908d-dec9-36ef-206c20ccf8cc@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
-X-Virus-Status: Clean
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoKmWAC0V_t7WL-5OauxS-iiLxW+KhqC6RzJXD_szjPCA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/15/23 17:35, Adrian Hunter wrote:
-> On 15/06/23 18:14, Ulf Hansson wrote:
->> On Mon, 12 Jun 2023 at 10:59, Marek Vasut <marex@denx.de> wrote:
->>>
->>> On 6/12/23 06:59, Adrian Hunter wrote:
->>>> On 7/06/23 23:43, Marek Vasut wrote:
->>>>> On 6/4/23 18:30, Adrian Hunter wrote:
->>>>>
->>>>> [...]
->>>>>
->>>>>>>>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->>>>>>>>>> index 72b664ed90cf..9c3123867a99 100644
->>>>>>>>>> --- a/drivers/mmc/core/sd.c
->>>>>>>>>> +++ b/drivers/mmc/core/sd.c
->>>>>>>>>> @@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>>       {
->>>>>>>>>>           struct mmc_card *card = host->card;
->>>>>>>>>>           u8 *reg_buf, fno, page;
->>>>>>>>>> +    unsigned long timeout;
->>>>>>>>>> +    bool expired;
->>>>>>>>>>           u16 offset;
->>>>>>>>>>           int err;
->>>>>>>>>>       @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>>               goto out;
->>>>>>>>>>           }
->>>>>>>>>>       +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
->>>>>>>>>> +again:
->>>>>>>>>>           err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
->>>>>>>>>>                       MMC_BUSY_EXTR_SINGLE);
->>>>>>>>>>           if (err)
->>>>>>>>>>               goto out;
->>>>>>>>>>       +    expired = time_after(jiffies, timeout);
->>>>>>>>>> +
->>>>>>>>>>           /*
->>>>>>>>>>            * Read the Flush Cache bit. The card shall reset it, to confirm that
->>>>>>>>>>            * it's has completed the flushing of the cache.
->>>>>>>>>> @@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>>               goto out;
->>>>>>>>>>           }
->>>>>>>>>>       -    if (reg_buf[0] & BIT(0))
->>>>>>>>>> -        err = -ETIMEDOUT;
->>>>>>>>>> +    if (reg_buf[0] & BIT(0)) {
->>>>>>>>>
->>>>>>>>> I am getting here, multiple times, with expired=0 .
->>>>>>>>
->>>>>>>> So either the host controller's busy detection does not work, or the
->>>>>>>> card is not indicating busy by pulling down DAT0.
->>>>>>>>
->>>>>>>> Can you try to figure out which it is?
->>>>>>>
->>>>>>> The byte 261 bit 0 is never cleared, I had this looping for an hour and the 'Flush Cache' bit just never got cleared. The SD spec 6.00 and 9.00 both indicate the bit should be cleared by the card once cache flush is completed.
->>>>>>>
->>>>>>> I tried three different controllers now -- STM32MP15xx ARM MMCI, i.MX6Q uSDHC, laptop rtsx_pci_sdmmc , they all fail.
->>>>>>>
->>>>>>> I tried to find another card which also has cache, I cannot find any other card, all the rest report no cache. The kingston card SSR (see the 2ff in 6th field, the last f bit 2 is cache supported indication, SSR bit 330):
->>>>>>>
->>>>>>> 00000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>>>>
->>>>>>> So either this card is weird, or the cards with cache are so rare that nobody noticed the problem yet.
->>>>>>
->>>>>> The patch set cover letter says it was tested with 64GB Sandisk Extreme PRO UHS-I A2 card
->>>>>>
->>>>>>       https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
->>>>>
->>>>> I got that one now, tested it, the cache bit is being cleared correctly. I also tested a few more cards and dumped their SSR too:
->>>>>
->>>>> Kingston Canvas Go! Plus:
->>>>> 80000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>> Flush never finishes
->>>>>
->>>>> Sandisk Extreme PRO A2 64GiB:
->>>>> 80000000:08000000:04009000:0f05391e:00080000:0002fc00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
->>>>>
->>>>> Goodram IRDM V30 A2 64GiB:
->>>>> 80000000:08000000:0400a001:00fd3a1e:00080000:00023c00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
->>>>>
->>>>> Samsung Pro Plus 512GiB V30 A2 (ext reg general info is all zeroes, cache not enabled):
->>>>> 80000000:08000000:04009000:0811391e:00080000:0002fc00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>>
->>>>>> I ordered a Kingston Canvas Go Plus card as you described but it won't arrive for a week.
->>>>>
->>>>> I'm really interested in what you would find with that one.
->>>>
->>>> It worked just fine, but maybe it is a newer version of hw / firmware - the date is 04/2023
->>>>
->>>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
->>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/block: Is a directory
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f54495344363447614b1004af017400
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cf9f7f800a400000
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/date:04/2023
->>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/driver: Is a directory
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00200000
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
->>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/power: Is a directory
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x4b1004af
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
->>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/subsystem: Is a directory
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
->>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
->>>
->>> This one I have here is certainly older (this time tested on STM32MP135F):
->>>
->>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
->>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f544953443634476136980065013b7e
->>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cfff7f800a4000fa
->>> /sys/class/mmc_host/mmc0/mmc0:5048/date:11/2019
->>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
->>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
->>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
->>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
->>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
->>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
->>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00300000
->>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
->>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
->>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
->>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
->>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x36980065
->>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
->>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
->>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
->>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
->>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
->>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
->>>
->>> cid, csr, date, ocr, serial differ.
->>
->> I have been trying to follow the progress around this matter. If I
->> understand correctly we are leaning towards making a card quirk for
->> this particular SD, to avoid us from turning on and using a broken
->> cache feature.
->>
->> Or what are you thinking?
+On Tue, Jun 13, 2023 at 04:25:11PM +0200, Ulf Hansson wrote:
+> On Wed, 29 Mar 2023 at 22:21, Dennis Zhou <dennis@kernel.org> wrote:
+> >
+> > When using dm-verity with a data partition on an emmc device, dm-verity
+> > races with the discovery of attached emmc devices. This is because mmc's
+> > probing code sets up the host data structure then a work item is
+> > scheduled to do discovery afterwards. To prevent this race on init,
+> > let's inline the first call to detection, __mm_scan(), and let
+> > subsequent detect calls be handled via the workqueue.
+> >
+> > Signed-off-by: Dennis Zhou <dennis@kernel.org>
 > 
-> That is probably the simplest option.
+> Along with the patch for the mmci driver, this one applied too, for
+> next, thanks!
+> 
 
-Just give me a day or two to test the other newer card.
+Thank you Ulf! I'm good with this just being applied to for-next.
 
-What would you base that quirk off of ? Date ? We don't know when the 
-"fixed" cards started to be produced .
+Thanks,
+Dennis
+
+> Note also that I took the liberty to clarify the commit message a bit.
+> 
+> Moreover, if we want this to be applied for stable kernels, we need to
+> manage that separately, as then the mmci patch is needed too. Please
+> ping if you need some pointers in regards to this.
+> 
+> Kind regards
+> Uffe
+> 
+> > ---
+> >  drivers/mmc/core/core.c | 15 +++++++++++----
+> >  1 file changed, 11 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 368f10405e13..c0fdc438c882 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+> >  }
+> >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> >
+> > -void mmc_rescan(struct work_struct *work)
+> > +void __mmc_rescan(struct mmc_host *host)
+> >  {
+> > -       struct mmc_host *host =
+> > -               container_of(work, struct mmc_host, detect.work);
+> >         int i;
+> >
+> >         if (host->rescan_disable)
+> > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> >  }
+> >
+> > +void mmc_rescan(struct work_struct *work)
+> > +{
+> > +       struct mmc_host *host =
+> > +               container_of(work, struct mmc_host, detect.work);
+> > +
+> > +       __mmc_rescan(host);
+> > +}
+> > +
+> >  void mmc_start_host(struct mmc_host *host)
+> >  {
+> >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> >         }
+> >
+> >         mmc_gpiod_request_cd_irq(host);
+> > -       _mmc_detect_change(host, 0, false);
+> > +       host->detect_change = 1;
+> > +       __mmc_rescan(host);
+> >  }
+> >
+> >  void __mmc_stop_host(struct mmc_host *host)
+> > --
+> > 2.40.0
+> >
