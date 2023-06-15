@@ -2,112 +2,110 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA75EEB64DC
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 09:08:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7011EB64DC
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 09:20:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245438AbjFOJI0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Jun 2023 05:08:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46698 "EHLO
+        id S244858AbjFOJUu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Jun 2023 05:20:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245455AbjFOJIV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 05:08:21 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A216273F;
-        Thu, 15 Jun 2023 02:08:09 -0700 (PDT)
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35F8x8sO018686;
-        Thu, 15 Jun 2023 09:07:59 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=qcppdkim1;
- bh=4/O20YBgTkoVlsk082BfVWNGW0SZtdAgY1OLJ8YrguQ=;
- b=DuvmeSHa4vmSFU7kQSvGLUUr6Yuv34ZmtipEk7pBqQOHrc81SUGaQs/J+BZ4J/Y2S3Zh
- Fbn3WL6mc5R6EbFH62vKj6nB7mCUw9Qo3PoeWTHurHD++TS5/Oos60yF7+aQgySv7NjX
- qImmM8f5Tfuy9ZRv9gwG2S33IIdqQzrycM+3Na+qNHIQehWAEKBvsXit62HzctDzNwRw
- 1wzcyV3wbOTx27kXC/EFoIry+Or8NHNG4fn74N6noXAFt2Xqwx6teZYSnVLoOVnP18xS
- nxQIeNVAxz3kuOyj5wAns+5gFGoC+WnCuGVyUrOQHbL/h/jyDGKcK5TEHQ0CRvSfJkW7 GQ== 
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3r7ebta3pq-1
+        with ESMTP id S239276AbjFOJUq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 05:20:46 -0400
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFF671BC3;
+        Thu, 15 Jun 2023 02:20:44 -0700 (PDT)
+Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35F7tDqF022612;
+        Thu, 15 Jun 2023 11:20:09 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=selector1;
+ bh=fV+MUTfMQZ55uq32Wxz0qSm4NPFewZXzm6azDpLbunA=;
+ b=d5BrOOap237y2IVKM1DsnNHEdGbytRp34z96fcvZ1wj/lBTH2wUneTU+XxmbBnebqGxa
+ Du7fWNtpHN2orZJHljU4Ztu1HqT8uwodqf98NiDlRq+7/gTugrbUnDXPUsLENY5He6JM
+ uoTGN9AlzuttVyr/d/ocBJ5Lp+bVWdlg44UVTZH1Bs/vsdBpZip7Uv8Zp5o/CRjfwx0v
+ 8eWIvNa3WAI8qeQR/s8Ky294KDQwg2z/RlanR3WLkE7oU90LYWrKbMfF4OnhKE+KOu/b
+ lxZEM0ub8cVCYd5DIK6PqPQP7oaXdru0Q9mdH7BS9MPj54/V8dNIsuVx4Jghf9/1Vllf 3w== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3r7vkfsqb8-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 15 Jun 2023 09:07:59 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 35F97wgD031840
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 15 Jun 2023 09:07:58 GMT
-Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.42; Thu, 15 Jun 2023 02:07:48 -0700
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-To:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
-        <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>,
-        <quic_srichara@quicinc.com>
-Subject: [v10 6/6] arm64: defconfig: Enable IPQ5018 SoC base configs
-Date:   Thu, 15 Jun 2023 14:36:38 +0530
-Message-ID: <20230615090638.1771245-7-quic_srichara@quicinc.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230615090638.1771245-1-quic_srichara@quicinc.com>
-References: <20230615090638.1771245-1-quic_srichara@quicinc.com>
+        Thu, 15 Jun 2023 11:20:09 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id D7DB510004A;
+        Thu, 15 Jun 2023 11:20:07 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id C8CF121A231;
+        Thu, 15 Jun 2023 11:20:07 +0200 (CEST)
+Received: from localhost (10.201.21.210) by SHFDAG1NODE2.st.com (10.75.129.70)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Thu, 15 Jun
+ 2023 11:20:06 +0200
+From:   Yann Gautier <yann.gautier@foss.st.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
+CC:     Conor Dooley <conor+dt@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Yang Yingliang <yangyingliang@huawei.com>,
+        Xiang wangx <wangxiang@cdjrlc.com>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        Yann Gautier <yann.gautier@foss.st.com>
+Subject: [PATCH 0/6] Update MMCI driver for STM32MP25
+Date:   Thu, 15 Jun 2023 11:19:55 +0200
+Message-ID: <20230615092001.1213132-1-yann.gautier@foss.st.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 3RmNPHa-JzSdfRB9BdRhaTrrI1ffl8_G
-X-Proofpoint-ORIG-GUID: 3RmNPHa-JzSdfRB9BdRhaTrrI1ffl8_G
+X-Originating-IP: [10.201.21.210]
+X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
+ (10.75.129.70)
 X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-15_05,2023-06-14_02,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 spamscore=0
- mlxscore=0 suspectscore=0 lowpriorityscore=0 adultscore=0
- priorityscore=1501 bulkscore=0 mlxlogscore=752 impostorscore=0
- phishscore=0 malwarescore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2305260000 definitions=main-2306150077
+ engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
+ definitions=2023-06-15_06,2023-06-14_02,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Enables clk & pinctrl related configs
+STM32MP25 is a new SoC from STMicroelectronics. The machine was
+pushed by Alexandre [1] in his tree.
+On this new SoC, the SDMMC peripheral, using PL18x/MMCI driver
+has been updated to v3.
+The driver has been updated to manage this new version, and the new
+features it supports:
+* FIFO size increased from 64B to 1kB
+* IDMA size alignment/mask updated
+* New block gap hardware flow control
+* Delay block updated and dependent on SoC
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
----
- arch/arm64/configs/defconfig | 3 +++
- 1 file changed, 3 insertions(+)
+This series was pushed on top of next branch in Ulf's mmc tree, as it
+requires feedback clock update patch [2].
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 8d850be05835..5b5a4ea51373 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -560,6 +560,7 @@ CONFIG_PINCTRL_IMX8ULP=y
- CONFIG_PINCTRL_IMX93=y
- CONFIG_PINCTRL_MSM=y
- CONFIG_PINCTRL_IPQ8074=y
-+CONFIG_PINCTRL_IPQ5018=y
- CONFIG_PINCTRL_IPQ5332=y
- CONFIG_PINCTRL_IPQ6018=y
- CONFIG_PINCTRL_IPQ9574=y
-@@ -1171,6 +1172,8 @@ CONFIG_QCOM_CLK_SMD_RPM=y
- CONFIG_QCOM_CLK_RPMH=y
- CONFIG_IPQ_APSS_6018=y
- CONFIG_IPQ_GCC_5332=y
-+CONFIG_IPQ_APSS_5018=y
-+CONFIG_IPQ_GCC_5018=y
- CONFIG_IPQ_GCC_6018=y
- CONFIG_IPQ_GCC_8074=y
- CONFIG_IPQ_GCC_9574=y
+[1] https://lore.kernel.org/lkml/59f4a900-34ee-d991-c350-265d38e7c862@foss.st.com/T/
+[2] https://lore.kernel.org/r/20230613150148.429828-1-yann.gautier@foss.st.com
+
+Yann Gautier (6):
+  dt-bindings: mmc: mmci: Add st,stm32mp25-sdmmc2 compatible
+  mmc: mmci: add stm32_idmabsize_align parameter
+  mmc: mmci: Add support for sdmmc variant revision v3.0
+  mmc: mmci: stm32: manage block gap hardware flow control
+  mmc: mmci: stm32: prepare other delay block support
+  mmc: mmci: stm32: add delay block support for STM32MP25
+
+ .../devicetree/bindings/mmc/arm,pl18x.yaml    |   6 +
+ drivers/mmc/host/mmci.c                       |  35 ++++
+ drivers/mmc/host/mmci.h                       |   8 +-
+ drivers/mmc/host/mmci_stm32_sdmmc.c           | 149 ++++++++++++++++--
+ 4 files changed, 181 insertions(+), 17 deletions(-)
+
 -- 
-2.34.1
+2.25.1
 
