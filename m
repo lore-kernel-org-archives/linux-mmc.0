@@ -2,188 +2,56 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71616EB64DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 09:22:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2324EC00528
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 09:28:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245365AbjFOJWS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Jun 2023 05:22:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55374 "EHLO
+        id S241214AbjFOJ2w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Jun 2023 05:28:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59000 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237138AbjFOJWP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 05:22:15 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFF522715;
-        Thu, 15 Jun 2023 02:22:09 -0700 (PDT)
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35F82d54022646;
-        Thu, 15 Jun 2023 11:21:50 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=selector1;
- bh=i1KQomgbTCKKL1jhfJcq7MepijYGukr9j+2PCgWp/oI=;
- b=Vubs1l+rfvAQc9+HOllCIuWdAGDSInzCAuLZaGX1KwvqS7OEx8Sw+SniB9W2TB2sWa9X
- 7F702keig91HWbGFRRbnXLlsGvpJxamz6656v4gbYoEywi8YDW7m+boMRZF1FX6wMHLx
- HeKwkn9GK7jpiQ/JUkNn9g7bH9jh6scgFETkm8elxZWAm5uNOZiPBC1i+8adg56gq9x8
- Q7guEhFM9rWwWVmOchf+RBPujLkrLsNpmCL+pLFj5g481LHrplajBak4/CwIvoV1J11W
- ju7tRR6YHKEQw/+ek9BwlZ2EUVLXWV7rrVp+K8QtN4x0TvuUKnjdLUVBXUKWYQM8zp93 Gw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3r7vkfsqsp-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 15 Jun 2023 11:21:50 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id C245610002A;
-        Thu, 15 Jun 2023 11:21:49 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id B894521A235;
-        Thu, 15 Jun 2023 11:21:49 +0200 (CEST)
-Received: from localhost (10.201.21.210) by SHFDAG1NODE2.st.com (10.75.129.70)
- with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Thu, 15 Jun
- 2023 11:21:48 +0200
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
-CC:     Conor Dooley <conor+dt@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        Xiang wangx <wangxiang@cdjrlc.com>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH 6/6] mmc: mmci: stm32: add delay block support for STM32MP25
-Date:   Thu, 15 Jun 2023 11:20:01 +0200
-Message-ID: <20230615092001.1213132-7-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230615092001.1213132-1-yann.gautier@foss.st.com>
-References: <20230615092001.1213132-1-yann.gautier@foss.st.com>
+        with ESMTP id S241527AbjFOJ2Z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 05:28:25 -0400
+Received: from mail.lokoho.com (mail.lokoho.com [217.61.105.98])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B29331BE5
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2023 02:28:24 -0700 (PDT)
+Received: by mail.lokoho.com (Postfix, from userid 1001)
+        id B45BA87082; Thu, 15 Jun 2023 10:26:04 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=lokoho.com; s=mail;
+        t=1686821164; bh=Z0N5VlX9/JlryGOL5I747Le9USomZJCRNNGRT3LbbKc=;
+        h=Date:From:To:Subject:From;
+        b=n2JSjb2j931sd2U2Evm1CBYXdP1VB+RN6Kln0Kdwb3MvhjyU57cTWP+1uDYLOrDJ5
+         VeZmZdt+L/bjEB5sHCUbkV5+gzUTJufDmwsFYXsBMvX1fWNM9iSKULaqhO5RX+4B9Z
+         KkWbyiRwkxihly260aPyzm4X1wHck6MT6sMr3ULlzHGhMdrikso0OCK3p52WcjcYqK
+         LGNUAlaJpXpMu4zLNzWmR2uE2LlaemiGnuUGLlwP3CNoeu8rGiKS0oqWc5aFuRh/Mc
+         WQDsJlMSCKdS5rXKN0nyQqiYm+8qzz6wILwT5EFKis67jTOCzIY8b4fPKLqqHYVmIe
+         +lhcRYaoqbYFw==
+Received: by mail.lokoho.com for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2023 09:26:02 GMT
+Message-ID: <20230615094301-0.1.6n.2mcz4.0.n7l6i6em7e@lokoho.com>
+Date:   Thu, 15 Jun 2023 09:26:02 GMT
+From:   "Adam Charachuta" <adam.charachuta@lokoho.com>
+To:     <linux-mmc@vger.kernel.org>
+Subject: =?UTF-8?Q?S=C5=82owa_kluczowe_do_wypozycjonowania?=
+X-Mailer: mail.lokoho.com
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.201.21.210]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-15_06,2023-06-14_02,2023-05-22_02
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On STM32MP25, the delay block is inside the SoC, and configured through
-the SYSCFG registers. The algorithm is also different from what was in
-STM32MP1 chip.
+Dzie=C5=84 dobry,
 
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
----
- drivers/mmc/host/mmci_stm32_sdmmc.c | 66 ++++++++++++++++++++++++++++-
- 1 file changed, 65 insertions(+), 1 deletion(-)
+zapozna=C5=82em si=C4=99 z Pa=C5=84stwa ofert=C4=85 i z przyjemno=C5=9Bci=
+=C4=85 przyznaj=C4=99, =C5=BCe przyci=C4=85ga uwag=C4=99 i zach=C4=99ca d=
+o dalszych rozm=C3=B3w.=20
 
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index c51c85ca24917..d6112a8dacf8b 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -33,6 +33,20 @@
- #define DLYB_LNG_TIMEOUT_US	1000
- #define SDMMC_VSWEND_TIMEOUT_US 10000
- 
-+#define SYSCFG_DLYBSD_CR	0x0
-+#define DLYBSD_CR_EN		BIT(0)
-+#define DLYBSD_CR_RXTAPSEL_MASK	GENMASK(6, 1)
-+#define DLYBSD_TAPSEL_NB	32
-+#define DLYBSD_BYP_EN		BIT(16)
-+#define DLYBSD_BYP_CMD		GENMASK(21, 17)
-+#define DLYBSD_ANTIGLITCH_EN	BIT(22)
-+
-+#define SYSCFG_DLYBSD_SR	0x4
-+#define DLYBSD_SR_LOCK		BIT(0)
-+#define DLYBSD_SR_RXTAPSEL_ACK	BIT(1)
-+
-+#define DLYBSD_TIMEOUT_1S_IN_US	1000000
-+
- struct sdmmc_lli_desc {
- 	u32 idmalar;
- 	u32 idmabase;
-@@ -499,6 +513,46 @@ static int sdmmc_dlyb_mp15_prepare(struct mmci_host *host)
- 	return 0;
- }
- 
-+static int sdmmc_dlyb_mp25_enable(struct sdmmc_dlyb *dlyb)
-+{
-+	u32 cr, sr;
-+
-+	cr = readl_relaxed(dlyb->base + SYSCFG_DLYBSD_CR);
-+	cr |= DLYBSD_CR_EN;
-+
-+	writel_relaxed(cr, dlyb->base + SYSCFG_DLYBSD_CR);
-+
-+	return readl_relaxed_poll_timeout(dlyb->base + SYSCFG_DLYBSD_SR,
-+					   sr, sr & DLYBSD_SR_LOCK, 1,
-+					   DLYBSD_TIMEOUT_1S_IN_US);
-+}
-+
-+static int sdmmc_dlyb_mp25_set_cfg(struct sdmmc_dlyb *dlyb,
-+				   int unit __maybe_unused, int phase,
-+				   bool sampler __maybe_unused)
-+{
-+	u32 cr, sr;
-+
-+	cr = readl_relaxed(dlyb->base + SYSCFG_DLYBSD_CR);
-+	cr &= ~DLYBSD_CR_RXTAPSEL_MASK;
-+	cr |= FIELD_PREP(DLYBSD_CR_RXTAPSEL_MASK, phase);
-+
-+	writel_relaxed(cr, dlyb->base + SYSCFG_DLYBSD_CR);
-+
-+	return readl_relaxed_poll_timeout(dlyb->base + SYSCFG_DLYBSD_SR,
-+					  sr, sr & DLYBSD_SR_RXTAPSEL_ACK, 1,
-+					  DLYBSD_TIMEOUT_1S_IN_US);
-+}
-+
-+static int sdmmc_dlyb_mp25_prepare(struct mmci_host *host)
-+{
-+	struct sdmmc_dlyb *dlyb = host->variant_priv;
-+
-+	dlyb->max = DLYBSD_TAPSEL_NB;
-+
-+	return 0;
-+}
-+
- static int sdmmc_dlyb_phase_tuning(struct mmci_host *host, u32 opcode)
- {
- 	struct sdmmc_dlyb *dlyb = host->variant_priv;
-@@ -639,6 +693,12 @@ static struct sdmmc_tuning_ops dlyb_tuning_mp15_ops = {
- 	.set_cfg = sdmmc_dlyb_mp15_set_cfg,
- };
- 
-+static struct sdmmc_tuning_ops dlyb_tuning_mp25_ops = {
-+	.dlyb_enable = sdmmc_dlyb_mp25_enable,
-+	.tuning_prepare = sdmmc_dlyb_mp25_prepare,
-+	.set_cfg = sdmmc_dlyb_mp25_set_cfg,
-+};
-+
- void sdmmc_variant_init(struct mmci_host *host)
- {
- 	struct device_node *np = host->mmc->parent->of_node;
-@@ -657,7 +717,11 @@ void sdmmc_variant_init(struct mmci_host *host)
- 		return;
- 
- 	dlyb->base = base_dlyb;
--	dlyb->ops = &dlyb_tuning_mp15_ops;
-+	if (of_device_is_compatible(np, "st,stm32mp25-sdmmc2"))
-+		dlyb->ops = &dlyb_tuning_mp25_ops;
-+	else
-+		dlyb->ops = &dlyb_tuning_mp15_ops;
-+
- 	host->variant_priv = dlyb;
- 	host->mmc_ops->execute_tuning = sdmmc_execute_tuning;
- }
--- 
-2.25.1
+Pomy=C5=9Bla=C5=82em, =C5=BCe mo=C5=BCe m=C3=B3g=C5=82bym mie=C4=87 sw=C3=
+=B3j wk=C5=82ad w Pa=C5=84stwa rozw=C3=B3j i pom=C3=B3c dotrze=C4=87 z t=C4=
+=85 ofert=C4=85 do wi=C4=99kszego grona odbiorc=C3=B3w. Pozycjonuj=C4=99 =
+strony www, dzi=C4=99ki czemu generuj=C4=85 =C5=9Bwietny ruch w sieci.
 
+Mo=C5=BCemy porozmawia=C4=87 w najbli=C5=BCszym czasie?
+
+
+Pozdrawiam
+Adam Charachuta
