@@ -2,51 +2,57 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E15BEB64D9
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 15:33:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AD17EB64DA
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jun 2023 15:35:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240087AbjFOPdK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Jun 2023 11:33:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34448 "EHLO
+        id S240387AbjFOPfk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Jun 2023 11:35:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36302 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238807AbjFOPdI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 11:33:08 -0400
-Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8198C26B1
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2023 08:33:06 -0700 (PDT)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 4FD9C862F7;
-        Thu, 15 Jun 2023 17:32:52 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1686843174;
-        bh=c47UGcLHil/E+c/0WYvbP+9jqIvBk1jlxiud52Dn0gM=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=zdlBsiZVboaDdjYugJ9E9QcfYtG69ni+XxHKxWS37t9atXtN32hPZ7ME2ITjG55u1
-         INVgZHVMefHf5yw0oHG6ODMo1nWzwpBMZFVWJ8SFH968tePsAMwvonPpabDybRX/jC
-         +L0cAXy1e7CiiG4ILaKQu5T5hWYW6QvSqRRpkoojFFgUeFQ7+wgInWBlC6yBv4DOTs
-         F3TDsFwhez+e/eKoJduwQ8jh8O12jrJGmbx/8PjTOu6/LIZ4qnbC9JawmJGGQB4cqw
-         VvdMuAbcwkduSn561OTt5v4iU/m/Fjir3G7E0Oz/HA9nyAH/iF71b/jMES/nrXCgtG
-         iIBg4KI6fTotw==
-Message-ID: <4f65c517-fda6-8fed-8037-247e7a687e8d@denx.de>
-Date:   Thu, 15 Jun 2023 17:32:51 +0200
+        with ESMTP id S241289AbjFOPfj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jun 2023 11:35:39 -0400
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C50F26A2
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Jun 2023 08:35:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1686843338; x=1718379338;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=gSSuxJE7uYtaaN8M7KUNxajuP9oLorOpS5JddZZmFWI=;
+  b=Hio3MJvIfG3FBDAsueA0nuYpwTJws6F15s4GUM+NjhVcwD+Vj7aky55D
+   wfXmij3KvgA2oZNzBrPgUeQ6jfxvp3ELGL1TtT7EQpI0eFQha6uOtqYNo
+   eHYtZ7HDb9HhuhVlZEX6YQGbx7pG2TdumVpqzJaaH0CUViGGhwfG6NJIY
+   sIQLc6h4JpR86tG4R6QIZx941IBNmlnfC7uCKFxh+fsL3dfmdgy4jAZLY
+   zVAzUSHW7gDgCYZMoZLxP8U0TYGKf1lu3fXs8BD1iyLR7AhClNkk/qgKj
+   0JfUeYW7seMan8USA6DLq1CHK9dz3lUYJdq4gL4B5ZsN7aMYHOzTuzuh4
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10742"; a="387462475"
+X-IronPort-AV: E=Sophos;i="6.00,245,1681196400"; 
+   d="scan'208";a="387462475"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Jun 2023 08:35:37 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10742"; a="715671073"
+X-IronPort-AV: E=Sophos;i="6.00,245,1681196400"; 
+   d="scan'208";a="715671073"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.211.81])
+  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Jun 2023 08:35:34 -0700
+Message-ID: <e6243501-908d-dec9-36ef-206c20ccf8cc@intel.com>
+Date:   Thu, 15 Jun 2023 18:35:29 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
+ Firefox/102.0 Thunderbird/102.12.0
 Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
  writeback-cache for eMMC and SD"
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, Marek Vasut <marex@denx.de>
 Cc:     linux-mmc@vger.kernel.org,
         =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
         Avri Altman <avri.altman@wdc.com>,
         Jens Axboe <axboe@kernel.dk>,
         Michael Wu <michael@allwinnertech.com>,
         Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>, xander_li@kingston.com.tw
+        Seunghui Lee <sh043.lee@samsung.com>
 References: <20230531002740.1235620-1-marex@denx.de>
  <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
  <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
@@ -59,17 +65,18 @@ References: <20230531002740.1235620-1-marex@denx.de>
  <a316b98e-fe56-23a3-7d58-13fcd5d9abb5@intel.com>
  <0029620e-4d22-d8f9-5566-4b1ea7f05bae@denx.de>
  <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
-From:   Marek Vasut <marex@denx.de>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 In-Reply-To: <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
-X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/15/23 17:14, Ulf Hansson wrote:
+On 15/06/23 18:14, Ulf Hansson wrote:
 > On Mon, 12 Jun 2023 at 10:59, Marek Vasut <marex@denx.de> wrote:
 >>
 >> On 6/12/23 06:59, Adrian Hunter wrote:
@@ -83,31 +90,31 @@ On 6/15/23 17:14, Ulf Hansson wrote:
 >>>>>>>>> --- a/drivers/mmc/core/sd.c
 >>>>>>>>> +++ b/drivers/mmc/core/sd.c
 >>>>>>>>> @@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>       {
->>>>>>>>>           struct mmc_card *card = host->card;
->>>>>>>>>           u8 *reg_buf, fno, page;
+>>>>>>>>>      {
+>>>>>>>>>          struct mmc_card *card = host->card;
+>>>>>>>>>          u8 *reg_buf, fno, page;
 >>>>>>>>> +    unsigned long timeout;
 >>>>>>>>> +    bool expired;
->>>>>>>>>           u16 offset;
->>>>>>>>>           int err;
->>>>>>>>>       @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>               goto out;
->>>>>>>>>           }
->>>>>>>>>       +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
+>>>>>>>>>          u16 offset;
+>>>>>>>>>          int err;
+>>>>>>>>>      @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
+>>>>>>>>>              goto out;
+>>>>>>>>>          }
+>>>>>>>>>      +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
 >>>>>>>>> +again:
->>>>>>>>>           err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
->>>>>>>>>                       MMC_BUSY_EXTR_SINGLE);
->>>>>>>>>           if (err)
->>>>>>>>>               goto out;
->>>>>>>>>       +    expired = time_after(jiffies, timeout);
+>>>>>>>>>          err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
+>>>>>>>>>                      MMC_BUSY_EXTR_SINGLE);
+>>>>>>>>>          if (err)
+>>>>>>>>>              goto out;
+>>>>>>>>>      +    expired = time_after(jiffies, timeout);
 >>>>>>>>> +
->>>>>>>>>           /*
->>>>>>>>>            * Read the Flush Cache bit. The card shall reset it, to confirm that
->>>>>>>>>            * it's has completed the flushing of the cache.
+>>>>>>>>>          /*
+>>>>>>>>>           * Read the Flush Cache bit. The card shall reset it, to confirm that
+>>>>>>>>>           * it's has completed the flushing of the cache.
 >>>>>>>>> @@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>               goto out;
->>>>>>>>>           }
->>>>>>>>>       -    if (reg_buf[0] & BIT(0))
+>>>>>>>>>              goto out;
+>>>>>>>>>          }
+>>>>>>>>>      -    if (reg_buf[0] & BIT(0))
 >>>>>>>>> -        err = -ETIMEDOUT;
 >>>>>>>>> +    if (reg_buf[0] & BIT(0)) {
 >>>>>>>>
@@ -130,7 +137,7 @@ On 6/15/23 17:14, Ulf Hansson wrote:
 >>>>>
 >>>>> The patch set cover letter says it was tested with 64GB Sandisk Extreme PRO UHS-I A2 card
 >>>>>
->>>>>       https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
+>>>>>      https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
 >>>>
 >>>> I got that one now, tested it, the cache bit is being cleared correctly. I also tested a few more cards and dumped their SSR too:
 >>>>
@@ -216,7 +223,5 @@ On 6/15/23 17:14, Ulf Hansson wrote:
 > 
 > Or what are you thinking?
 
-Today I received another of those Canvas Go Plus cards, I'll test it and 
-see whether that one is newer and behaves right. I'll keep you posted.
+That is probably the simplest option.
 
-Maybe the old card is indeed buggy and they fixed it in newer revision ?
