@@ -2,235 +2,157 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 328D5EB64DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 10:03:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34347EB64D7
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 10:19:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233756AbjFPKDm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Jun 2023 06:03:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36068 "EHLO
+        id S1343764AbjFPKTl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 16 Jun 2023 06:19:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241493AbjFPKDj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 06:03:39 -0400
-Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A4592137
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 03:03:34 -0700 (PDT)
-Received: by mail-yb1-xb32.google.com with SMTP id 3f1490d57ef6-bc492cb6475so411494276.2
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 03:03:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1686909813; x=1689501813;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZalAiwx5INs4sTs2rezAac4qLbCIGtdPtEafE9t5JwM=;
-        b=EeFUEI2t7jobknZ8zv/bHZpwxgzBFMZORO5HozJEtFAGH9XAotfx4vDLnlgM2MWbAM
-         HVm5VHmLeJ77b9St0CmMpfUDkDdxuD5SsnVpBU8ExPsUca/YZbEwFhQM9WzYg4fSHfvU
-         y+tE9VdYSHFFq2kGCQLwOEFbS4oLOQya3jum2y0bwPh8qoN40qeWKyzZ8DE2D6whXwdu
-         FlJKNE8wJm7QHeSm/jMGg1law2g2+tA0KbFkorzhGgCBnUkJcejamJkDUNN8RZXHcCjB
-         rmhRfMIipQwBSoDxGdlF5EZ9IHiJtDOUzZbmsAaQOK+YD/NcIvZsNnIirEFDz4qUeDfR
-         MceA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686909813; x=1689501813;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ZalAiwx5INs4sTs2rezAac4qLbCIGtdPtEafE9t5JwM=;
-        b=EdfLbOOJ1HENjloVjGwkkPiWIGjrLCJPXHrlm9igsrKcGNQQ+W0rtWft1d+J0GNJom
-         1o/9CAx3/0eYCYpGro0gpysWuynUkznQyN1ygSjw5Krps4vU8Hm8hS5MHrEPFtcq0s/u
-         rqDU6lvlpZ2jkugfrANBw0ykSjhVvXeu3TYlb7L/LF11ki2VBKJRIUce+Ko+vMzsMNfF
-         tejTYayclFPG/cTC5qPuj0pn+SaIHIukDv5wKoQ8W963IWypFjT+TnE5uKWb59g9wOTJ
-         gKGcYTTHl0AP+AS38H3xVhY+/87/isEDcC8hr8iruwtaySy8L8XCVJYnSd5j1jRi2SIK
-         8vpg==
-X-Gm-Message-State: AC+VfDzjYeLmDq+kkhI4ayoYl3epjXSo4fr4fCbjBa/CNmyyTVB0H9VA
-        N5YgfUwUYKImBGbzOvfNqVQJH1Ac48Fv+DnN/S/zpgsgrdsoitXd
-X-Google-Smtp-Source: ACHHUZ4l5BTCqkVdQmmBBWQPscMhro1y2lUjuRWkpikUnbZ2LKvZ6iJzAlmxL0kCuuEBYyelrsuSSJtGk2Osd6HfZTw=
-X-Received: by 2002:a25:f43:0:b0:bc6:de82:fa22 with SMTP id
- 64-20020a250f43000000b00bc6de82fa22mr1032844ybp.51.1686909813275; Fri, 16 Jun
- 2023 03:03:33 -0700 (PDT)
+        with ESMTP id S1343509AbjFPKTT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 06:19:19 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC90830EB;
+        Fri, 16 Jun 2023 03:18:43 -0700 (PDT)
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35G9Oss6024993;
+        Fri, 16 Jun 2023 10:18:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
+ : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=qcppdkim1;
+ bh=m8kPc9d9jNfYMEBZ5M2e7hd+7edRZABBkT3WcDYBIdU=;
+ b=G3DGAO9hY619zGD1xFB3izaJhOay19E81JB/Dw74bFhR13V6TPyVX2EcAgEGEWOa1Tgy
+ XDr9TlSOTSSjh0sz/ZCOK6N7tHN9HaNFdPxhVMadYIhZDKK/iLwGEylewsJV+oFIVApM
+ m/4KU8ZmiVXh2ou2ZnrgNAS2oT/8BY6iXsZ2CwNYZ78TTsMqKvof42y8vkyujaNlFjA7
+ UEbsP3Rs8ZJEN5+KDIYFqRSyI/uH0u6EJsjwxCAseGywyhAujlRs91LSxQ83oS6f5P5a
+ JLbgjVQfqwUPjz4Sh4JUPZvu498udzqYOiDmxB803Sq+YEVjHbF8LsLSQRVf/T7nsQw1 HQ== 
+Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3r8n09g3my-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 16 Jun 2023 10:18:20 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 35GAIIZd025395
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 16 Jun 2023 10:18:18 GMT
+Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Fri, 16 Jun 2023 03:18:10 -0700
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+To:     <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
+        <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>,
+        <quic_srichara@quicinc.com>
+Subject: [v11 0/6] Add minimal boot support for IPQ5018
+Date:   Fri, 16 Jun 2023 15:47:43 +0530
+Message-ID: <20230616101749.2083974-1-quic_srichara@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20230531002740.1235620-1-marex@denx.de> <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
- <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de> <f41e1546-f6d3-7f4d-7662-3b7eca291178@intel.com>
- <29a5f24d-2b8c-8387-8c11-601af8e13940@denx.de> <4c8d84ae-c8d0-fa12-81c6-a47382684d73@intel.com>
- <3bd65a30-756d-e7ee-ce77-e5ebfe6b6e30@denx.de> <75ab27e9-9203-f59b-c720-99bfa992bb9b@intel.com>
- <b494062c-7e9e-24ba-ef0a-13faf0fe7706@denx.de> <a316b98e-fe56-23a3-7d58-13fcd5d9abb5@intel.com>
- <0029620e-4d22-d8f9-5566-4b1ea7f05bae@denx.de> <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
- <e6243501-908d-dec9-36ef-206c20ccf8cc@intel.com> <6423ae91-7585-b141-960a-f8cfd4b23538@denx.de>
-In-Reply-To: <6423ae91-7585-b141-960a-f8cfd4b23538@denx.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 16 Jun 2023 12:02:55 +0200
-Message-ID: <CAPDyKFo5PfSWfZdyq25P87hvpZd4=GC54zp-SbjRZE1EZNoFxQ@mail.gmail.com>
-Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
- writeback-cache for eMMC and SD"
-To:     Marek Vasut <marex@denx.de>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Michael Wu <michael@allwinnertech.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>, xander_li@kingston.com.tw
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: n9BIRPl3_X1BtaxgPYgMOaK0ttFNG2Qf
+X-Proofpoint-ORIG-GUID: n9BIRPl3_X1BtaxgPYgMOaK0ttFNG2Qf
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-06-16_06,2023-06-16_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 bulkscore=0
+ clxscore=1015 impostorscore=0 lowpriorityscore=0 suspectscore=0
+ phishscore=0 mlxlogscore=867 spamscore=0 priorityscore=1501 malwarescore=0
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2305260000 definitions=main-2306160092
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 15 Jun 2023 at 17:37, Marek Vasut <marex@denx.de> wrote:
->
-> On 6/15/23 17:35, Adrian Hunter wrote:
-> > On 15/06/23 18:14, Ulf Hansson wrote:
-> >> On Mon, 12 Jun 2023 at 10:59, Marek Vasut <marex@denx.de> wrote:
-> >>>
-> >>> On 6/12/23 06:59, Adrian Hunter wrote:
-> >>>> On 7/06/23 23:43, Marek Vasut wrote:
-> >>>>> On 6/4/23 18:30, Adrian Hunter wrote:
-> >>>>>
-> >>>>> [...]
-> >>>>>
-> >>>>>>>>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> >>>>>>>>>> index 72b664ed90cf..9c3123867a99 100644
-> >>>>>>>>>> --- a/drivers/mmc/core/sd.c
-> >>>>>>>>>> +++ b/drivers/mmc/core/sd.c
-> >>>>>>>>>> @@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
-> >>>>>>>>>>       {
-> >>>>>>>>>>           struct mmc_card *card = host->card;
-> >>>>>>>>>>           u8 *reg_buf, fno, page;
-> >>>>>>>>>> +    unsigned long timeout;
-> >>>>>>>>>> +    bool expired;
-> >>>>>>>>>>           u16 offset;
-> >>>>>>>>>>           int err;
-> >>>>>>>>>>       @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
-> >>>>>>>>>>               goto out;
-> >>>>>>>>>>           }
-> >>>>>>>>>>       +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
-> >>>>>>>>>> +again:
-> >>>>>>>>>>           err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
-> >>>>>>>>>>                       MMC_BUSY_EXTR_SINGLE);
-> >>>>>>>>>>           if (err)
-> >>>>>>>>>>               goto out;
-> >>>>>>>>>>       +    expired = time_after(jiffies, timeout);
-> >>>>>>>>>> +
-> >>>>>>>>>>           /*
-> >>>>>>>>>>            * Read the Flush Cache bit. The card shall reset it, to confirm that
-> >>>>>>>>>>            * it's has completed the flushing of the cache.
-> >>>>>>>>>> @@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
-> >>>>>>>>>>               goto out;
-> >>>>>>>>>>           }
-> >>>>>>>>>>       -    if (reg_buf[0] & BIT(0))
-> >>>>>>>>>> -        err = -ETIMEDOUT;
-> >>>>>>>>>> +    if (reg_buf[0] & BIT(0)) {
-> >>>>>>>>>
-> >>>>>>>>> I am getting here, multiple times, with expired=0 .
-> >>>>>>>>
-> >>>>>>>> So either the host controller's busy detection does not work, or the
-> >>>>>>>> card is not indicating busy by pulling down DAT0.
-> >>>>>>>>
-> >>>>>>>> Can you try to figure out which it is?
-> >>>>>>>
-> >>>>>>> The byte 261 bit 0 is never cleared, I had this looping for an hour and the 'Flush Cache' bit just never got cleared. The SD spec 6.00 and 9.00 both indicate the bit should be cleared by the card once cache flush is completed.
-> >>>>>>>
-> >>>>>>> I tried three different controllers now -- STM32MP15xx ARM MMCI, i.MX6Q uSDHC, laptop rtsx_pci_sdmmc , they all fail.
-> >>>>>>>
-> >>>>>>> I tried to find another card which also has cache, I cannot find any other card, all the rest report no cache. The kingston card SSR (see the 2ff in 6th field, the last f bit 2 is cache supported indication, SSR bit 330):
-> >>>>>>>
-> >>>>>>> 00000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-> >>>>>>>
-> >>>>>>> So either this card is weird, or the cards with cache are so rare that nobody noticed the problem yet.
-> >>>>>>
-> >>>>>> The patch set cover letter says it was tested with 64GB Sandisk Extreme PRO UHS-I A2 card
-> >>>>>>
-> >>>>>>       https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
-> >>>>>
-> >>>>> I got that one now, tested it, the cache bit is being cleared correctly. I also tested a few more cards and dumped their SSR too:
-> >>>>>
-> >>>>> Kingston Canvas Go! Plus:
-> >>>>> 80000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-> >>>>> Flush never finishes
-> >>>>>
-> >>>>> Sandisk Extreme PRO A2 64GiB:
-> >>>>> 80000000:08000000:04009000:0f05391e:00080000:0002fc00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-> >>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
-> >>>>>
-> >>>>> Goodram IRDM V30 A2 64GiB:
-> >>>>> 80000000:08000000:0400a001:00fd3a1e:00080000:00023c00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-> >>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
-> >>>>>
-> >>>>> Samsung Pro Plus 512GiB V30 A2 (ext reg general info is all zeroes, cache not enabled):
-> >>>>> 80000000:08000000:04009000:0811391e:00080000:0002fc00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
-> >>>>>
-> >>>>>> I ordered a Kingston Canvas Go Plus card as you described but it won't arrive for a week.
-> >>>>>
-> >>>>> I'm really interested in what you would find with that one.
-> >>>>
-> >>>> It worked just fine, but maybe it is a newer version of hw / firmware - the date is 04/2023
-> >>>>
-> >>>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
-> >>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/block: Is a directory
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f54495344363447614b1004af017400
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cf9f7f800a400000
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/date:04/2023
-> >>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/driver: Is a directory
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00200000
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
-> >>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/power: Is a directory
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x4b1004af
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
-> >>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/subsystem: Is a directory
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
-> >>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
-> >>>
-> >>> This one I have here is certainly older (this time tested on STM32MP135F):
-> >>>
-> >>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f544953443634476136980065013b7e
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cfff7f800a4000fa
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/date:11/2019
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00300000
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x36980065
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
-> >>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
-> >>>
-> >>> cid, csr, date, ocr, serial differ.
-> >>
-> >> I have been trying to follow the progress around this matter. If I
-> >> understand correctly we are leaning towards making a card quirk for
-> >> this particular SD, to avoid us from turning on and using a broken
-> >> cache feature.
-> >>
-> >> Or what are you thinking?
-> >
-> > That is probably the simplest option.
->
-> Just give me a day or two to test the other newer card.
->
-> What would you base that quirk off of ? Date ? We don't know when the
-> "fixed" cards started to be produced .
+The IPQ5018 is Qualcomm's 802.11ax SoC for Routers,
+Gateways and Access Points.
 
-Right. It seems like the best we can do is to make a quirk for that
-particular version of card that you proved to have failed.
+This series adds minimal board boot support for ipq5018-rdp432-c2 board.
 
-Kind regards
-Uffe
+[v11]
+	Fixed patch 2/6 , just to move ftbl_apss_axi_clk_src to user
+	Picked up 'Acked-by: Konrad Dybcio <konrad.dybcio@linaro.org>'
+
+[v10]  Dropped patches 3,4 for pinctrl (was picked by Linus)
+       Fixed hex number style in patch 2 as per Konrad's comments.
+
+[v9]   Change only in patch 2/8
+	   Sorted the headers and cleaned the unwanted ones
+ 	   Added trailing comma for .parent_hws member
+	   Removed the hunk touching ipq5332 kconfig  (unintentionally)
+
+[v8]   Changed only in patch 4/8
+                Fixed Kconfig to add COMPILE_TEST and removed header of.h.
+                Instead using mod_devicetable.h. Added Linus reviewed-by
+
+[v7]   Fixed tz reserved region size in patch 7/8
+
+[v6]   Fixed patch [4/8] pinctrl driver for rebase issue.
+
+[v5]
+       Added Reviewed-by tags from Krzysztof Kozlowski.
+       Changed patch [6/8] with [1] since its already Acked
+       Rebased patch [4/8] on top of [2] and fixed other comments
+       Fixed commit log for patch [7/8]
+       Fixed comments for patch [2/8]
+
+[1] https://patchwork.kernel.org/project/linux-arm-msm/patch/1678164097-13247-4-git-send-email-quic_mmanikan@quicinc.com/
+[2] https://lore.kernel.org/r/1683718725-14869-1-git-send-email-quic_rohiagar@quicinc.com
+
+[v4]
+       Fixed all comments for clocks, schema, dts
+       Added Reviewed-by tags.
+
+[v3]
+        Fixed all comments for clocks, schema fixes
+        Picked up Reviewed-by from Bjorn for pinctrl driver
+
+[v2]
+        Fixed all comments and rebased for TOT.
+
+Manikanta Mylavarapu (1):
+  dt-bindings: scm: Add compatible for IPQ5018
+
+Sricharan Ramabadhran (5):
+  dt-bindings: arm64: Add IPQ5018 clock and reset
+  clk: qcom: Add Global Clock controller (GCC) driver for IPQ5018
+  dt-bindings: qcom: Add ipq5018 bindings
+  arm64: dts: Add ipq5018 SoC and rdp432-c2 board support
+  arm64: defconfig: Enable IPQ5018 SoC base configs
+
+ .../devicetree/bindings/arm/qcom.yaml         |    7 +
+ .../bindings/clock/qcom,ipq5018-gcc.yaml      |   63 +
+ .../bindings/firmware/qcom,scm.yaml           |    1 +
+ arch/arm64/boot/dts/qcom/Makefile             |    1 +
+ .../arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts |   72 +
+ arch/arm64/boot/dts/qcom/ipq5018.dtsi         |  250 ++
+ arch/arm64/configs/defconfig                  |    3 +
+ drivers/clk/qcom/Kconfig                      |    8 +
+ drivers/clk/qcom/Makefile                     |    1 +
+ drivers/clk/qcom/gcc-ipq5018.c                | 3724 +++++++++++++++++
+ include/dt-bindings/clock/qcom,gcc-ipq5018.h  |  183 +
+ include/dt-bindings/reset/qcom,gcc-ipq5018.h  |  122 +
+ 12 files changed, 4435 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/qcom,ipq5018-gcc.yaml
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018.dtsi
+ create mode 100644 drivers/clk/qcom/gcc-ipq5018.c
+ create mode 100644 include/dt-bindings/clock/qcom,gcc-ipq5018.h
+ create mode 100644 include/dt-bindings/reset/qcom,gcc-ipq5018.h
+
+-- 
+2.34.1
+
