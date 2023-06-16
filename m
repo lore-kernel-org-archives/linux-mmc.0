@@ -2,45 +2,44 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DBACEB64D8
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 10:22:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C5CCEB64D7
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 10:26:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344017AbjFPKWp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Jun 2023 06:22:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48208 "EHLO
+        id S232488AbjFPK0s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 16 Jun 2023 06:26:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48812 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344028AbjFPKWX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 06:22:23 -0400
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC8414699
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 03:20:56 -0700 (PDT)
+        with ESMTP id S245688AbjFPKYp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 06:24:45 -0400
+Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5EEE213B
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 03:24:43 -0700 (PDT)
 Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
         (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id B004C847B6;
-        Fri, 16 Jun 2023 12:20:51 +0200 (CEST)
+        by phobos.denx.de (Postfix) with ESMTPSA id 2615D80EB1;
+        Fri, 16 Jun 2023 12:24:41 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1686910854;
-        bh=JH+sBGHyFnxhNIvZkEdfTbqOQkpVn2WDNdWKOJV3Kq4=;
+        s=phobos-20191101; t=1686911081;
+        bh=sV0fO6JgQP9R8uxKQr6LauWxPSMMC6CpkQQJO8yS2Y0=;
         h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=lyfISihPOrn62UVJsPrjNvo9ftZWgfjOGLoYiIk7ESFwEjvFq+3z+0gWH6MQ+EMWf
-         PFlYpNCncut6XzzTjtcTfR2MOEzBSWTCIZGDnQJRcaowpy0kC3fCup4sVDH+9UOxkr
-         21XqYIGb4t9gu1euSUI9VWUqczv/T7uQpB9MsnHAh73svZMRPSroDg+PW35mJ1rWnt
-         mL/PH+CynCYbCoP8PRyR26f4dXAdAE8c+kW6Fqz0EbwY6HUH2Q0TL/Jwp0a/BBTcRw
-         I3bTmX/FnI7zhIhwxFW1FDopgQtvPhYTBW0ZR4PF5GNVzvCaNvafZkf283ViNCPcdt
-         5ZCVM8SYOWW7A==
-Message-ID: <4a8ae652-b930-3cd3-00df-c6dd1dd2a31d@denx.de>
-Date:   Fri, 16 Jun 2023 12:20:51 +0200
+        b=TqpLf9XTLB8DAFF79qxjZgkP1JC9S2pTnTcc/IQ5DgONGCBjnR307djLPR+1+zeUu
+         8pDi9FUe0Gg85MXYr7PFdFh2YGIYdEGeEY3q+y971OInbYh90Q/qemF4CHpxDU7b43
+         CdRUJ5MDfizzaEsZ9nqI0/jSK+WTkpipC5Tm3jT7LcQAVISK/uSf0y5b30GCTlq18V
+         LXMfMpQ3xzaZbSuVqIwTm09D98mGjQyewASRqEm1ptRSBdjhVvjW2EobJoPnfObhCf
+         VoCq7vHTDyAV117OibWV1bWp3Tn3rr4Mpiue5b6O6ms9EFFPXT4NM+6vSqr2xDbivK
+         lXmGVQ07ZARvw==
+Message-ID: <3a660f13-5397-cb7e-49d3-b464ec677e69@denx.de>
+Date:   Fri, 16 Jun 2023 12:24:40 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.12.0
 Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
  writeback-cache for eMMC and SD"
 Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc@vger.kernel.org,
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
         =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
         Avri Altman <avri.altman@wdc.com>,
         Jens Axboe <axboe@kernel.dk>,
@@ -59,8 +58,11 @@ References: <20230531002740.1235620-1-marex@denx.de>
  <a316b98e-fe56-23a3-7d58-13fcd5d9abb5@intel.com>
  <0029620e-4d22-d8f9-5566-4b1ea7f05bae@denx.de>
  <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
+ <e6243501-908d-dec9-36ef-206c20ccf8cc@intel.com>
+ <6423ae91-7585-b141-960a-f8cfd4b23538@denx.de>
+ <CAPDyKFo5PfSWfZdyq25P87hvpZd4=GC54zp-SbjRZE1EZNoFxQ@mail.gmail.com>
 From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
+In-Reply-To: <CAPDyKFo5PfSWfZdyq25P87hvpZd4=GC54zp-SbjRZE1EZNoFxQ@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
@@ -69,102 +71,169 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/15/23 17:14, Ulf Hansson wrote:
+On 6/16/23 12:02, Ulf Hansson wrote:
+> On Thu, 15 Jun 2023 at 17:37, Marek Vasut <marex@denx.de> wrote:
+>>
+>> On 6/15/23 17:35, Adrian Hunter wrote:
+>>> On 15/06/23 18:14, Ulf Hansson wrote:
+>>>> On Mon, 12 Jun 2023 at 10:59, Marek Vasut <marex@denx.de> wrote:
+>>>>>
+>>>>> On 6/12/23 06:59, Adrian Hunter wrote:
+>>>>>> On 7/06/23 23:43, Marek Vasut wrote:
+>>>>>>> On 6/4/23 18:30, Adrian Hunter wrote:
+>>>>>>>
+>>>>>>> [...]
+>>>>>>>
+>>>>>>>>>>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>>>>>>>>>>>> index 72b664ed90cf..9c3123867a99 100644
+>>>>>>>>>>>> --- a/drivers/mmc/core/sd.c
+>>>>>>>>>>>> +++ b/drivers/mmc/core/sd.c
+>>>>>>>>>>>> @@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
+>>>>>>>>>>>>        {
+>>>>>>>>>>>>            struct mmc_card *card = host->card;
+>>>>>>>>>>>>            u8 *reg_buf, fno, page;
+>>>>>>>>>>>> +    unsigned long timeout;
+>>>>>>>>>>>> +    bool expired;
+>>>>>>>>>>>>            u16 offset;
+>>>>>>>>>>>>            int err;
+>>>>>>>>>>>>        @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
+>>>>>>>>>>>>                goto out;
+>>>>>>>>>>>>            }
+>>>>>>>>>>>>        +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
+>>>>>>>>>>>> +again:
+>>>>>>>>>>>>            err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
+>>>>>>>>>>>>                        MMC_BUSY_EXTR_SINGLE);
+>>>>>>>>>>>>            if (err)
+>>>>>>>>>>>>                goto out;
+>>>>>>>>>>>>        +    expired = time_after(jiffies, timeout);
+>>>>>>>>>>>> +
+>>>>>>>>>>>>            /*
+>>>>>>>>>>>>             * Read the Flush Cache bit. The card shall reset it, to confirm that
+>>>>>>>>>>>>             * it's has completed the flushing of the cache.
+>>>>>>>>>>>> @@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
+>>>>>>>>>>>>                goto out;
+>>>>>>>>>>>>            }
+>>>>>>>>>>>>        -    if (reg_buf[0] & BIT(0))
+>>>>>>>>>>>> -        err = -ETIMEDOUT;
+>>>>>>>>>>>> +    if (reg_buf[0] & BIT(0)) {
+>>>>>>>>>>>
+>>>>>>>>>>> I am getting here, multiple times, with expired=0 .
+>>>>>>>>>>
+>>>>>>>>>> So either the host controller's busy detection does not work, or the
+>>>>>>>>>> card is not indicating busy by pulling down DAT0.
+>>>>>>>>>>
+>>>>>>>>>> Can you try to figure out which it is?
+>>>>>>>>>
+>>>>>>>>> The byte 261 bit 0 is never cleared, I had this looping for an hour and the 'Flush Cache' bit just never got cleared. The SD spec 6.00 and 9.00 both indicate the bit should be cleared by the card once cache flush is completed.
+>>>>>>>>>
+>>>>>>>>> I tried three different controllers now -- STM32MP15xx ARM MMCI, i.MX6Q uSDHC, laptop rtsx_pci_sdmmc , they all fail.
+>>>>>>>>>
+>>>>>>>>> I tried to find another card which also has cache, I cannot find any other card, all the rest report no cache. The kingston card SSR (see the 2ff in 6th field, the last f bit 2 is cache supported indication, SSR bit 330):
+>>>>>>>>>
+>>>>>>>>> 00000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
+>>>>>>>>>
+>>>>>>>>> So either this card is weird, or the cards with cache are so rare that nobody noticed the problem yet.
+>>>>>>>>
+>>>>>>>> The patch set cover letter says it was tested with 64GB Sandisk Extreme PRO UHS-I A2 card
+>>>>>>>>
+>>>>>>>>        https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
+>>>>>>>
+>>>>>>> I got that one now, tested it, the cache bit is being cleared correctly. I also tested a few more cards and dumped their SSR too:
+>>>>>>>
+>>>>>>> Kingston Canvas Go! Plus:
+>>>>>>> 80000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
+>>>>>>> Flush never finishes
+>>>>>>>
+>>>>>>> Sandisk Extreme PRO A2 64GiB:
+>>>>>>> 80000000:08000000:04009000:0f05391e:00080000:0002fc00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
+>>>>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
+>>>>>>>
+>>>>>>> Goodram IRDM V30 A2 64GiB:
+>>>>>>> 80000000:08000000:0400a001:00fd3a1e:00080000:00023c00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
+>>>>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
+>>>>>>>
+>>>>>>> Samsung Pro Plus 512GiB V30 A2 (ext reg general info is all zeroes, cache not enabled):
+>>>>>>> 80000000:08000000:04009000:0811391e:00080000:0002fc00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
+>>>>>>>
+>>>>>>>> I ordered a Kingston Canvas Go Plus card as you described but it won't arrive for a week.
+>>>>>>>
+>>>>>>> I'm really interested in what you would find with that one.
+>>>>>>
+>>>>>> It worked just fine, but maybe it is a newer version of hw / firmware - the date is 04/2023
+>>>>>>
+>>>>>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
+>>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/block: Is a directory
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f54495344363447614b1004af017400
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cf9f7f800a400000
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/date:04/2023
+>>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/driver: Is a directory
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00200000
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
+>>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/power: Is a directory
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x4b1004af
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
+>>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/subsystem: Is a directory
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
+>>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
+>>>>>
+>>>>> This one I have here is certainly older (this time tested on STM32MP135F):
+>>>>>
+>>>>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f544953443634476136980065013b7e
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cfff7f800a4000fa
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/date:11/2019
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00300000
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x36980065
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
+>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
+>>>>>
+>>>>> cid, csr, date, ocr, serial differ.
+>>>>
+>>>> I have been trying to follow the progress around this matter. If I
+>>>> understand correctly we are leaning towards making a card quirk for
+>>>> this particular SD, to avoid us from turning on and using a broken
+>>>> cache feature.
+>>>>
+>>>> Or what are you thinking?
+>>>
+>>> That is probably the simplest option.
+>>
+>> Just give me a day or two to test the other newer card.
+>>
+>> What would you base that quirk off of ? Date ? We don't know when the
+>> "fixed" cards started to be produced .
+> 
+> Right. It seems like the best we can do is to make a quirk for that
+> particular version of card that you proved to have failed.
 
-I finally got around testing the other card, there are changes in CSD 
-and SSR which indicate there was a HW change, but nothing significant. 
-Considering we still have a non-working card sample size 1, I wonder 
-whether I should just consider this card defective and archive it. Or 
-would you prefer a quirk based on manufacturing date ? I am also CCing 
-Xander, maybe they can check internally at Kingston .
-
-Old 2019 card:
---------------
-mmc1: host does not support reading read-only switch, assuming write-enable
-mmc1: new ultra high speed SDR104 SDXC card at address 5048
-mmcblk1: mmc1:5048 SD64G 58.0 GiB
-  mmcblk1: p1
-
-~ # grep -H . /sys/class/mmc_host/mmc1/mmc1\:5048/*
-/sys/class/mmc_host/mmc1/mmc1:5048/cid:9f544953443634476136980065013b00
-/sys/class/mmc_host/mmc1/mmc1:5048/csd:400e00325b590001cfff7f800a400000
-/sys/class/mmc_host/mmc1/mmc1:5048/date:11/2019
-/sys/class/mmc_host/mmc1/mmc1:5048/dsr:0x404
-/sys/class/mmc_host/mmc1/mmc1:5048/erase_size:512
-/sys/class/mmc_host/mmc1/mmc1:5048/fwrev:0x1
-/sys/class/mmc_host/mmc1/mmc1:5048/hwrev:0x6
-/sys/class/mmc_host/mmc1/mmc1:5048/manfid:0x00009f
-/sys/class/mmc_host/mmc1/mmc1:5048/name:SD64G
-/sys/class/mmc_host/mmc1/mmc1:5048/ocr:0x00300000
-/sys/class/mmc_host/mmc1/mmc1:5048/oemid:0x5449
-/sys/class/mmc_host/mmc1/mmc1:5048/preferred_erase_size:4194304
-/sys/class/mmc_host/mmc1/mmc1:5048/rca:0x5048
-/sys/class/mmc_host/mmc1/mmc1:5048/scr:0205848701006432
-/sys/class/mmc_host/mmc1/mmc1:5048/serial:0x36980065
-/sys/class/mmc_host/mmc1/mmc1:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
-/sys/class/mmc_host/mmc1/mmc1:5048/type:SD
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:DRIVER=mmcblk
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:MMC_TYPE=SD
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:MMC_NAME=SD64G
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:MODALIAS=mmc:block
-
-New 2023 card:
---------------
-mmc1: host does not support reading read-only switch, assuming write-enable
-mmc1: new ultra high speed SDR104 SDXC card at address 5048
-mmcblk1: mmc1:5048 SD64G 58.0 GiB
-  mmcblk1: p1
-
-~ # grep -H . /sys/class/mmc_host/mmc1/mmc1\:5048/*
-/sys/class/mmc_host/mmc1/mmc1:5048/cid:9f54495344363447614890060a017500
-/sys/class/mmc_host/mmc1/mmc1:5048/csd:400e00325b590001cf9f7f800a400000
-/sys/class/mmc_host/mmc1/mmc1:5048/date:05/2023
-/sys/class/mmc_host/mmc1/mmc1:5048/dsr:0x404
-/sys/class/mmc_host/mmc1/mmc1:5048/erase_size:512
-/sys/class/mmc_host/mmc1/mmc1:5048/fwrev:0x1
-/sys/class/mmc_host/mmc1/mmc1:5048/hwrev:0x6
-/sys/class/mmc_host/mmc1/mmc1:5048/manfid:0x00009f
-/sys/class/mmc_host/mmc1/mmc1:5048/name:SD64G
-/sys/class/mmc_host/mmc1/mmc1:5048/ocr:0x00300000
-/sys/class/mmc_host/mmc1/mmc1:5048/oemid:0x5449
-/sys/class/mmc_host/mmc1/mmc1:5048/preferred_erase_size:4194304
-/sys/class/mmc_host/mmc1/mmc1:5048/rca:0x5048
-/sys/class/mmc_host/mmc1/mmc1:5048/scr:0205848701006432
-/sys/class/mmc_host/mmc1/mmc1:5048/serial:0x4890060a
-/sys/class/mmc_host/mmc1/mmc1:5048/ssr:000000000800000004009000010f391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
-/sys/class/mmc_host/mmc1/mmc1:5048/type:SD
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:DRIVER=mmcblk
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:MMC_TYPE=SD
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:MMC_NAME=SD64G
-/sys/class/mmc_host/mmc1/mmc1:5048/uevent:MODALIAS=mmc:block
-
-diff (-old 2019, +new 2023):
-----------------------------
--/sys/class/mmc_host/mmc1/mmc1:5048/cid:9f544953443634476136980065013b00
--/sys/class/mmc_host/mmc1/mmc1:5048/csd:400e00325b590001cfff7f800a400000
--/sys/class/mmc_host/mmc1/mmc1:5048/date:11/2019
-+/sys/class/mmc_host/mmc1/mmc1:5048/cid:9f54495344363447614890060a017500
-+/sys/class/mmc_host/mmc1/mmc1:5048/csd:400e00325b590001cf9f7f800a400000
-+/sys/class/mmc_host/mmc1/mmc1:5048/date:05/2023
-  /sys/class/mmc_host/mmc1/mmc1:5048/dsr:0x404
-  /sys/class/mmc_host/mmc1/mmc1:5048/erase_size:512
-  /sys/class/mmc_host/mmc1/mmc1:5048/fwrev:0x1
-@@ -18,10 +18,15 @@
-  /sys/class/mmc_host/mmc1/mmc1:5048/preferred_erase_size:4194304
-  /sys/class/mmc_host/mmc1/mmc1:5048/rca:0x5048
-  /sys/class/mmc_host/mmc1/mmc1:5048/scr:0205848701006432
--/sys/class/mmc_host/mmc1/mmc1:5048/serial:0x36980065
--/sys/class/mmc_host/mmc1/mmc1:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
-+/sys/class/mmc_host/mmc1/mmc1:5048/serial:0x4890060a
-+/sys/class/mmc_host/mmc1/mmc1:5048/ssr:000000000800000004009000010f391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
-  /sys/class/mmc_host/mmc1/mmc1:5048/type:SD
-  /sys/class/mmc_host/mmc1/mmc1:5048/uevent:DRIVER=mmcblk
-  /sys/class/mmc_host/mmc1/mmc1:5048/uevent:MMC_TYPE=SD
-  /sys/class/mmc_host/mmc1/mmc1:5048/uevent:MMC_NAME=SD64G
-  /sys/class/mmc_host/mmc1/mmc1:5048/uevent:MODALIAS=mmc:block
-
-Changes:
---------
-CID: PSN (serial number), MDT (manufacturing date)
-CSD: C_SIZE: 0x1cfff -> 0x1cf9f
-SSR: ERASE_TIMEOUT: 6 -> 3
+I just sent a few more data points . It is either date, or C_SIZE, or 
+ERASE_TIMEOUT (if I decode it right). I can also just archive the card, 
+since we have sample size of the defective card equal 1 . It could just 
+be a defective card after all, although the fact that only cache would 
+be defective is unusual.
