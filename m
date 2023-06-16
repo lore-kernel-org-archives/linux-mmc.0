@@ -2,238 +2,270 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C5CCEB64D7
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 10:26:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6D0CC0015E
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 10:37:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232488AbjFPK0s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Jun 2023 06:26:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48812 "EHLO
+        id S1345274AbjFPKhY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 16 Jun 2023 06:37:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58146 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245688AbjFPKYp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 06:24:45 -0400
-Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5EEE213B
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 03:24:43 -0700 (PDT)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 2615D80EB1;
-        Fri, 16 Jun 2023 12:24:41 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1686911081;
-        bh=sV0fO6JgQP9R8uxKQr6LauWxPSMMC6CpkQQJO8yS2Y0=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=TqpLf9XTLB8DAFF79qxjZgkP1JC9S2pTnTcc/IQ5DgONGCBjnR307djLPR+1+zeUu
-         8pDi9FUe0Gg85MXYr7PFdFh2YGIYdEGeEY3q+y971OInbYh90Q/qemF4CHpxDU7b43
-         CdRUJ5MDfizzaEsZ9nqI0/jSK+WTkpipC5Tm3jT7LcQAVISK/uSf0y5b30GCTlq18V
-         LXMfMpQ3xzaZbSuVqIwTm09D98mGjQyewASRqEm1ptRSBdjhVvjW2EobJoPnfObhCf
-         VoCq7vHTDyAV117OibWV1bWp3Tn3rr4Mpiue5b6O6ms9EFFPXT4NM+6vSqr2xDbivK
-         lXmGVQ07ZARvw==
-Message-ID: <3a660f13-5397-cb7e-49d3-b464ec677e69@denx.de>
-Date:   Fri, 16 Jun 2023 12:24:40 +0200
+        with ESMTP id S1345357AbjFPKer (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 06:34:47 -0400
+Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D4445BB7
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 03:28:55 -0700 (PDT)
+Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-5701e8f2b79so6516667b3.0
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 03:28:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686911312; x=1689503312;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=UFBKZNxqmuX+Sqe1P30p47ITzse6yIuxpmhDkKOdXE4=;
+        b=sxQDW85XdEH3/LFYNzD0ZN2NWReezT26FBDJdLs79BZ+oeCDtW1mlW6Mw4WpMZ8rxg
+         ZXuvbvAYCO4+iqxeC1TKLOigeanG85elCuP/mwTVOOOF+aZ/WfwTeLLop5yUV5N//S9Z
+         0ggvNX22b9iWAuFLOtE3JcdmTRHNZsOZg6VC/dxX/7cQXT4JM6q8dVFJzoue3Ky8hB9z
+         mhYx50aP9c13LzkR/yqhZGIS1kRe9ep9eVTEfDwiEA8H66YaDZ9u1JDNZnkAzgVw8kx0
+         DLz1s+6bPoJ8X7XuEQPrHRx7NPT2SMTsalauSL683ICimTk0tJQstHBBEnAcjPTk9RhZ
+         Itow==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686911312; x=1689503312;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=UFBKZNxqmuX+Sqe1P30p47ITzse6yIuxpmhDkKOdXE4=;
+        b=gad+r/UsZjh0nXwhRwdL+21tlZHYDHaeSdSg7ZECtK8pbZYm80LgVrzpHfIyQswucT
+         XnobEEfkMjRIJ0X7/3Lc7fKOTcvOdA7Q2WDZWfy2VjAb8EBLw1OyJUi5ZluINQx5rq+/
+         lFb3kj/gdvkTVlH6gY+0gZQzWyFZUsRCCYuQmxI4P37ybcW1YlGIbg+MpOC1m9ZPEE3V
+         n01GvdRM8quNIfWXizyI6irjFrLRPo/2Bgr1mLIgf51rOP1Endi2TRasgAoAxGBvLGr7
+         4mdNIqKX9qYYLSQo6Lks0w3usFyyjYpy/Som6JTokTxDUPqaA04HZH1+rQhnZObsAMxh
+         JuiA==
+X-Gm-Message-State: AC+VfDxqNIbjAnIve763riwNPT2Nkzi2TOvwPXcSv8+amKQF31VZr8p+
+        rsXVSC8FwZYVKuCKUyeHzmHKZACrdWL+xPq7liiRHzgaojvGW4A0yK8=
+X-Google-Smtp-Source: ACHHUZ4P/5sZJt2zbkTX5cSoYxr4bfTHJBpJM3KirHpdpQg2/Bg3bGdh+F0r2+3tPlzmjG8XxmjePstXWpLbjGLxSWw=
+X-Received: by 2002:a81:c201:0:b0:569:e7cb:cd4e with SMTP id
+ z1-20020a81c201000000b00569e7cbcd4emr1383942ywc.48.1686911311664; Fri, 16 Jun
+ 2023 03:28:31 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
- writeback-cache for eMMC and SD"
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Michael Wu <michael@allwinnertech.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>, xander_li@kingston.com.tw
-References: <20230531002740.1235620-1-marex@denx.de>
- <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
- <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
- <f41e1546-f6d3-7f4d-7662-3b7eca291178@intel.com>
- <29a5f24d-2b8c-8387-8c11-601af8e13940@denx.de>
- <4c8d84ae-c8d0-fa12-81c6-a47382684d73@intel.com>
- <3bd65a30-756d-e7ee-ce77-e5ebfe6b6e30@denx.de>
- <75ab27e9-9203-f59b-c720-99bfa992bb9b@intel.com>
- <b494062c-7e9e-24ba-ef0a-13faf0fe7706@denx.de>
- <a316b98e-fe56-23a3-7d58-13fcd5d9abb5@intel.com>
- <0029620e-4d22-d8f9-5566-4b1ea7f05bae@denx.de>
- <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
- <e6243501-908d-dec9-36ef-206c20ccf8cc@intel.com>
- <6423ae91-7585-b141-960a-f8cfd4b23538@denx.de>
- <CAPDyKFo5PfSWfZdyq25P87hvpZd4=GC54zp-SbjRZE1EZNoFxQ@mail.gmail.com>
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <CAPDyKFo5PfSWfZdyq25P87hvpZd4=GC54zp-SbjRZE1EZNoFxQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
-X-Virus-Status: Clean
+References: <20230405-pl180-busydetect-fix-v6-0-b850ec8019f3@linaro.org> <20230405-pl180-busydetect-fix-v6-5-b850ec8019f3@linaro.org>
+In-Reply-To: <20230405-pl180-busydetect-fix-v6-5-b850ec8019f3@linaro.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 16 Jun 2023 12:27:55 +0200
+Message-ID: <CAPDyKFp=W2wzoQZFVRFfqKmPdMHsoOK-Virp9FhqMj+TxbO9Gw@mail.gmail.com>
+Subject: Re: [PATCH v6 5/9] mmc: mmci: Make busy complete state machine explicit
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Yann Gautier <yann.gautier@foss.st.com>,
+        Stefan Hansson <newbyte@disroot.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/16/23 12:02, Ulf Hansson wrote:
-> On Thu, 15 Jun 2023 at 17:37, Marek Vasut <marex@denx.de> wrote:
->>
->> On 6/15/23 17:35, Adrian Hunter wrote:
->>> On 15/06/23 18:14, Ulf Hansson wrote:
->>>> On Mon, 12 Jun 2023 at 10:59, Marek Vasut <marex@denx.de> wrote:
->>>>>
->>>>> On 6/12/23 06:59, Adrian Hunter wrote:
->>>>>> On 7/06/23 23:43, Marek Vasut wrote:
->>>>>>> On 6/4/23 18:30, Adrian Hunter wrote:
->>>>>>>
->>>>>>> [...]
->>>>>>>
->>>>>>>>>>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->>>>>>>>>>>> index 72b664ed90cf..9c3123867a99 100644
->>>>>>>>>>>> --- a/drivers/mmc/core/sd.c
->>>>>>>>>>>> +++ b/drivers/mmc/core/sd.c
->>>>>>>>>>>> @@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>>>>        {
->>>>>>>>>>>>            struct mmc_card *card = host->card;
->>>>>>>>>>>>            u8 *reg_buf, fno, page;
->>>>>>>>>>>> +    unsigned long timeout;
->>>>>>>>>>>> +    bool expired;
->>>>>>>>>>>>            u16 offset;
->>>>>>>>>>>>            int err;
->>>>>>>>>>>>        @@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>>>>                goto out;
->>>>>>>>>>>>            }
->>>>>>>>>>>>        +    timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
->>>>>>>>>>>> +again:
->>>>>>>>>>>>            err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
->>>>>>>>>>>>                        MMC_BUSY_EXTR_SINGLE);
->>>>>>>>>>>>            if (err)
->>>>>>>>>>>>                goto out;
->>>>>>>>>>>>        +    expired = time_after(jiffies, timeout);
->>>>>>>>>>>> +
->>>>>>>>>>>>            /*
->>>>>>>>>>>>             * Read the Flush Cache bit. The card shall reset it, to confirm that
->>>>>>>>>>>>             * it's has completed the flushing of the cache.
->>>>>>>>>>>> @@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
->>>>>>>>>>>>                goto out;
->>>>>>>>>>>>            }
->>>>>>>>>>>>        -    if (reg_buf[0] & BIT(0))
->>>>>>>>>>>> -        err = -ETIMEDOUT;
->>>>>>>>>>>> +    if (reg_buf[0] & BIT(0)) {
->>>>>>>>>>>
->>>>>>>>>>> I am getting here, multiple times, with expired=0 .
->>>>>>>>>>
->>>>>>>>>> So either the host controller's busy detection does not work, or the
->>>>>>>>>> card is not indicating busy by pulling down DAT0.
->>>>>>>>>>
->>>>>>>>>> Can you try to figure out which it is?
->>>>>>>>>
->>>>>>>>> The byte 261 bit 0 is never cleared, I had this looping for an hour and the 'Flush Cache' bit just never got cleared. The SD spec 6.00 and 9.00 both indicate the bit should be cleared by the card once cache flush is completed.
->>>>>>>>>
->>>>>>>>> I tried three different controllers now -- STM32MP15xx ARM MMCI, i.MX6Q uSDHC, laptop rtsx_pci_sdmmc , they all fail.
->>>>>>>>>
->>>>>>>>> I tried to find another card which also has cache, I cannot find any other card, all the rest report no cache. The kingston card SSR (see the 2ff in 6th field, the last f bit 2 is cache supported indication, SSR bit 330):
->>>>>>>>>
->>>>>>>>> 00000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>>>>>>
->>>>>>>>> So either this card is weird, or the cards with cache are so rare that nobody noticed the problem yet.
->>>>>>>>
->>>>>>>> The patch set cover letter says it was tested with 64GB Sandisk Extreme PRO UHS-I A2 card
->>>>>>>>
->>>>>>>>        https://lore.kernel.org/linux-mmc/20210506145829.198823-1-ulf.hansson@linaro.org/
->>>>>>>
->>>>>>> I got that one now, tested it, the cache bit is being cleared correctly. I also tested a few more cards and dumped their SSR too:
->>>>>>>
->>>>>>> Kingston Canvas Go! Plus:
->>>>>>> 80000000:08000000:04009000:011b391e:00080000:0002ff00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>>>> Flush never finishes
->>>>>>>
->>>>>>> Sandisk Extreme PRO A2 64GiB:
->>>>>>> 80000000:08000000:04009000:0f05391e:00080000:0002fc00:03000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
->>>>>>>
->>>>>>> Goodram IRDM V30 A2 64GiB:
->>>>>>> 80000000:08000000:0400a001:00fd3a1e:00080000:00023c00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>>>> mmc0: flushing cache took 5 ms, 1 iterations, error 0
->>>>>>>
->>>>>>> Samsung Pro Plus 512GiB V30 A2 (ext reg general info is all zeroes, cache not enabled):
->>>>>>> 80000000:08000000:04009000:0811391e:00080000:0002fc00:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:00000000:
->>>>>>>
->>>>>>>> I ordered a Kingston Canvas Go Plus card as you described but it won't arrive for a week.
->>>>>>>
->>>>>>> I'm really interested in what you would find with that one.
->>>>>>
->>>>>> It worked just fine, but maybe it is a newer version of hw / firmware - the date is 04/2023
->>>>>>
->>>>>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
->>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/block: Is a directory
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f54495344363447614b1004af017400
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cf9f7f800a400000
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/date:04/2023
->>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/driver: Is a directory
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00200000
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
->>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/power: Is a directory
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x4b1004af
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
->>>>>> grep: /sys/class/mmc_host/mmc0/mmc0:5048/subsystem: Is a directory
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
->>>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
->>>>>
->>>>> This one I have here is certainly older (this time tested on STM32MP135F):
->>>>>
->>>>> $ grep -H . /sys/class/mmc_host/mmc0/mmc0\:5048/*
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/cid:9f544953443634476136980065013b7e
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/csd:400e00325b590001cfff7f800a4000fa
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/date:11/2019
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/dsr:0x404
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/erase_size:512
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/fwrev:0x1
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/hwrev:0x6
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/manfid:0x00009f
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/name:SD64G
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ocr:0x00300000
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/oemid:0x5449
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/preferred_erase_size:4194304
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/rca:0x5048
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/scr:0205848701006432
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/serial:0x36980065
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/ssr:000000000800000004009000011b391e000800000002ff0003000000000000000000000000000000000000000000000000000000000000000000000000000000
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/type:SD
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:DRIVER=mmcblk
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_TYPE=SD
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MMC_NAME=SD64G
->>>>> /sys/class/mmc_host/mmc0/mmc0:5048/uevent:MODALIAS=mmc:block
->>>>>
->>>>> cid, csr, date, ocr, serial differ.
->>>>
->>>> I have been trying to follow the progress around this matter. If I
->>>> understand correctly we are leaning towards making a card quirk for
->>>> this particular SD, to avoid us from turning on and using a broken
->>>> cache feature.
->>>>
->>>> Or what are you thinking?
->>>
->>> That is probably the simplest option.
->>
->> Just give me a day or two to test the other newer card.
->>
->> What would you base that quirk off of ? Date ? We don't know when the
->> "fixed" cards started to be produced .
-> 
-> Right. It seems like the best we can do is to make a quirk for that
-> particular version of card that you proved to have failed.
+On Fri, 16 Jun 2023 at 10:30, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> This refactors the ->busy_complete() callback currently
+> only used by Ux500 and STM32 to handle busy detection on
+> hardware where one and the same IRQ is fired whether we get
+> a start or an end signal on busy detect.
+>
+> The code is currently using the cached status from the
+> command IRQ in ->busy_status as a state to select what to
+> do next: if this state is non-zero we are waiting for
+> IRQs and if it is zero we treat the state as the starting
+> point for a busy detect wait cycle.
+>
+> Make this explicit by creating a state machine where the
+> ->busy_complete callback moves between three states.
+>
+> The Ux500 busy detect code currently assumes this order:
+> we enable the busy detect IRQ, get a busy start IRQ, then a
+> busy end IRQ, and then we clear and mask this IRQ and
+> proceed.
+>
+> We insert debug prints for unexpected states.
+>
+> Augment the STM32 driver with similar states for
+> completeness.
+>
+> This works as before on most cards, however on a
+> problematic card that is not working with busy detect, and
+> which I have been debugging, this happens:
+>
+> [127220.662719] mmci-pl18x 80005000.mmc: lost busy status
+>                 when waiting for busy end IRQ
+>
+> This probably means that the busy detect start IRQ has
+> already occurred when we start executing the
+> ->busy_complete() callbacks, and the busy detect end IRQ
+> is counted as the start IRQ, and this is what is causing
+> the card to not be detected properly.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> ChangeLog v4->v6:
+> - When waiting for the busy end IRQ, what we expect is that
+>   the IRQ should trigger right after the busy signal ends, and
+>   thus thes busy indication should be de-asserted (low). We
+>   invert the logic such that this is what we expect, and
+>   the error case is if the busy detect status is still high
+>   when we get the busy end IRQ.
+> ChangeLog v3->v4:
+> - Assign state MMCI_BUSY_DONE outside the if()-clause for
+>   the busy detect initialization.
+> ChangeLog v2->v3:
+> - Drop surplus states and merge IDLE and DONE states into one,
+>   we start out DONE. Name states *_WAITING_FOR_* so it is clear
+>   what is going on.
+> - Rebase on other changes.
+> - Reword commit message.
+> ChangeLog v1->v2:
+> - No changes
+> ---
+>  drivers/mmc/host/mmci.c             | 55 +++++++++++++++++++++++++------------
+>  drivers/mmc/host/mmci.h             | 14 ++++++++++
+>  drivers/mmc/host/mmci_stm32_sdmmc.c |  6 +++-
+>  3 files changed, 56 insertions(+), 19 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index d632658d9d20..ccfca055f9a1 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -670,6 +670,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>                 writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+>                 writel(readl(base + MMCIMASK0) &
+>                        ~host->variant->busy_detect_mask, base + MMCIMASK0);
+> +               host->busy_state = MMCI_BUSY_DONE;
+>                 host->busy_status = 0;
+>                 return true;
+>         }
+> @@ -687,7 +688,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>          * while, to allow it to be set, but tests indicates that it
+>          * isn't needed.
+>          */
+> -       if (!host->busy_status) {
+> +       if (host->busy_state == MMCI_BUSY_DONE) {
+>                 status = readl(base + MMCISTATUS);
+>                 if (status & host->variant->busy_detect_flag) {
+>                         writel(readl(base + MMCIMASK0) |
+> @@ -695,6 +696,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>                                base + MMCIMASK0);
+>
+>                         host->busy_status = status & (MCI_CMDSENT | MCI_CMDRESPEND);
+> +                       host->busy_state = MMCI_BUSY_WAITING_FOR_START_IRQ;
+>                         return false;
+>                 }
+>         }
+> @@ -710,25 +712,40 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>          * both the start and the end interrupts needs to be cleared,
+>          * one after the other. So, clear the busy start IRQ here.
+>          */
+> -       if (host->busy_status &&
+> -           (status & host->variant->busy_detect_flag)) {
+> -               host->busy_status |= status & (MCI_CMDSENT | MCI_CMDRESPEND);
+> -               writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+> -               return false;
+> +       if (host->busy_state == MMCI_BUSY_WAITING_FOR_START_IRQ) {
+> +               if (status & host->variant->busy_detect_flag) {
+> +                       host->busy_status |= status & (MCI_CMDSENT | MCI_CMDRESPEND);
+> +                       writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+> +                       host->busy_state = MMCI_BUSY_WAITING_FOR_END_IRQ;
+> +                       return false;
+> +               } else {
+> +                       dev_dbg(mmc_dev(host->mmc),
+> +                               "lost busy status when waiting for busy start IRQ\n");
+> +                       writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+> +                       writel(readl(base + MMCIMASK0) &
+> +                              ~host->variant->busy_detect_mask, base + MMCIMASK0);
+> +                       host->busy_state = MMCI_BUSY_DONE;
+> +                       host->busy_status = 0;
+> +                       return true;
+> +               }
+>         }
+>
+> -       /*
+> -        * If there is a command in-progress that has been successfully
+> -        * sent and the busy bit isn't set, it means we have received
+> -        * the busy end IRQ. Clear and mask the IRQ, then continue to
+> -        * process the command.
+> -        */
+> -       if (host->busy_status) {
+> -               writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+> -
+> -               writel(readl(base + MMCIMASK0) &
+> -                      ~host->variant->busy_detect_mask, base + MMCIMASK0);
+> -               host->busy_status = 0;
+> +       if (host->busy_state == MMCI_BUSY_WAITING_FOR_END_IRQ) {
+> +               if (!(status & host->variant->busy_detect_flag)) {
+> +                       host->busy_status |= status & (MCI_CMDSENT | MCI_CMDRESPEND);
+> +                       host->busy_state = MMCI_BUSY_DONE;
+> +                       return false;
+> +               } else {
+> +                       dev_dbg(mmc_dev(host->mmc),
+> +                               "busy status still asserted when handling busy end IRQ\n");
+> +                       /* Force clear the spurious IRQ */
 
-I just sent a few more data points . It is either date, or C_SIZE, or 
-ERASE_TIMEOUT (if I decode it right). I can also just archive the card, 
-since we have sample size of the defective card equal 1 . It could just 
-be a defective card after all, although the fact that only cache would 
-be defective is unusual.
+It may certainly be a spurious IRQ, but I am not sure that the below
+is the correct thing to do in this case. I think it would be better to
+continue to wait for another IRQ that could be the busy end IRQ.
+
+Note that, the ->busy_detect_flag-bit in the status register can not
+be trusted to be the root cause of the spurious IRQ. In fact, that bit
+may not be linked to an IRQ at all, as it's dynamically updated and
+can be polled too. See mmci_card_busy().
+
+> +                       writel(host->variant->busy_detect_mask, base + MMCICLEAR);
+> +                       writel(readl(base + MMCIMASK0) &
+> +                              ~host->variant->busy_detect_mask, base + MMCIMASK0);
+> +                       host->busy_state = MMCI_BUSY_DONE;
+> +                       host->busy_status = 0;
+> +                       return true;
+> +               }
+>         }
+>
+
+[...]
+
+> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+> index 60bca78a72b1..a805647b6664 100644
+> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
+> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+
+After a second thought, I think we should leave mmci_stm32_sdmmc as
+is. There is no point in assigning the ->busy_state, unless we really
+make use of it.
+
+Moreover, I think sdmmc_busy_complete() is already quite simple to follow.
+
+> @@ -393,8 +393,10 @@ static bool sdmmc_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>         busy_d0 = sdmmc_status & MCI_STM32_BUSYD0;
+>
+>         /* complete if there is an error or busy_d0end */
+> -       if ((status & err_msk) || busy_d0end)
+> +       if ((status & err_msk) || busy_d0end) {
+> +               host->busy_state = MMCI_BUSY_DONE;
+>                 goto complete;
+> +       }
+>
+>         /*
+>          * On response the busy signaling is reflected in the BUSYD0 flag.
+> @@ -408,6 +410,7 @@ static bool sdmmc_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>                         host->busy_status = status &
+>                                 (MCI_CMDSENT | MCI_CMDRESPEND);
+>                 }
+> +               host->busy_state = MMCI_BUSY_WAITING_FOR_END_IRQ;
+>                 return false;
+>         }
+>
+> @@ -416,6 +419,7 @@ static bool sdmmc_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+>                 writel_relaxed(mask & ~host->variant->busy_detect_mask,
+>                                base + MMCIMASK0);
+>                 host->busy_status = 0;
+> +               host->busy_state = MMCI_BUSY_DONE;
+>         }
+>
+>         writel_relaxed(host->variant->busy_detect_mask, base + MMCICLEAR);
+
+Kind regards
+Uffe
