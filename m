@@ -2,132 +2,114 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AA31EB64DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 14:58:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31F8DEB64DA
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Jun 2023 20:42:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345751AbjFPO6A (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Jun 2023 10:58:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55876 "EHLO
+        id S233200AbjFPUmf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 16 Jun 2023 16:42:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59320 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231265AbjFPO57 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 10:57:59 -0400
-Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C085330C7;
-        Fri, 16 Jun 2023 07:57:58 -0700 (PDT)
-Received: by mail-pf1-x430.google.com with SMTP id d2e1a72fcca58-666e916b880so163492b3a.2;
-        Fri, 16 Jun 2023 07:57:58 -0700 (PDT)
+        with ESMTP id S232085AbjFPUme (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jun 2023 16:42:34 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C9203A91
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 13:42:33 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id 2adb3069b0e04-4f76a4c211dso1647024e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Jun 2023 13:42:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1686927478; x=1689519478;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fTZ7esj0quOcI/RkGvFMgSJ1PhuA/Z0zduLKH5w94HI=;
-        b=c+Wbra0FFZPz4iDzr3CVPszMrGJUmkmJ5Zq4H+FY9wk8Fzrxm4J5LP2haSr7WWQIU+
-         jMIMVpfjC+UliNsRCSCztuI5mNZ+nO7wGhT9av+kVo81xhuHDPmrJ2TUVTaZGaM9/ZZQ
-         +9wEqHcGEd88LsZZaJR8JDQr3C8N31ntwV9gNQvKq0bo2nv6n/b6I1wcLahBfZK+oXnM
-         o+FFY3LRpHWj1n0Bi2XOMODFcLMilsP5Rr8CFBNo5n3mbaElURP6O4UjsLKreXJdZGLn
-         Mqf2ReHVTG0l8+XyIsZH2O7/Tw8BQBilYEcSyNOyLrNufpzrPyPD9P8TaInCRwXKxZgA
-         WGUA==
+        d=linaro.org; s=google; t=1686948151; x=1689540151;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=9t6pgncZlYopzh3WmgICbr64f7ZfnkyzvZkpH3TsLrY=;
+        b=joNZ39NmzIwO0y7dgE/UoRyr2pCDbczmTjtEenUcQYNFut+RFfugo7RFrfXYtn1z22
+         2iC8EtKicSQVU45V61HhmR6Zr3KMkRRJCegZXu4VojgHJSfiR0CRSUXeKu1obT7Lhj98
+         RUaB6oxmf+dhdvd1B6jkFPeBH3x8dU8qQT0b3v3zwxJksRD3q9zNyr+8bxn0arKiVNE1
+         CaoX7KHLssNQyFaNhCsyZxOlEsIw0vbYPByAHS0NbpgTKEcPFwPBCOopBmZtCejBNL2e
+         fqxfHnOXmNxEuIEKNuKrCtGMJiNSvpm/YkeFrrZrjfb2w46Z4sLH431kl4k6pWCDfOd8
+         uKag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1686927478; x=1689519478;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20221208; t=1686948151; x=1689540151;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=fTZ7esj0quOcI/RkGvFMgSJ1PhuA/Z0zduLKH5w94HI=;
-        b=Mugh3Oa9lJt0fpQfy7hApFKKNtRQM4y05VE8HUgzFFxaJD5qSpFQ6Pd7KEtUMjSRE4
-         raw8dIFtj44PzYc/V/2wIAzIl/j5AEPYoUR5/QAJEPa9JlYhUbnZsATqK2NVFFWbW+Ys
-         8wCpcfKhM98i83Yw+EFz/Bc5ylgwzXFsoaBstr9oWk8QNJL+BwbLJrDdxjGeQSDiyBLm
-         IVlXbihncXyx4U9GWlg7btjq4tK1ECGtQTbfcbHk5mfknilmu6522+6FeFN8RoOdPOC3
-         VC2K1/h6qz2H1bd31iAHV0aoVvTswgedT6hLCWigtUEG7YzvqfhhCrZd2DqwCU6hBRto
-         1taQ==
-X-Gm-Message-State: AC+VfDzh3GwSJXR7ezyLjEmOkxsV2+07bPqWrd5Mggvm9tTyaySdddhL
-        kXatLT+5tZJ0+86Qn2Y2ETjo3W1iGFciKxJ0cSA=
-X-Google-Smtp-Source: ACHHUZ4WJMej/QDPeO2J0h3IBJ/Zxu3jN2pk40J0mcJWKMd73mmyAhw9KYDdtJf6vOqs/O/3fB4s18/aJngpJTDczII=
-X-Received: by 2002:a17:902:ea01:b0:1ad:f407:37d1 with SMTP id
- s1-20020a170902ea0100b001adf40737d1mr1910027plg.52.1686927477979; Fri, 16 Jun
- 2023 07:57:57 -0700 (PDT)
+        bh=9t6pgncZlYopzh3WmgICbr64f7ZfnkyzvZkpH3TsLrY=;
+        b=cyl64kTRfGhx5HkYsmQiLubFklfMrvkh4+rrR3FPE2aqskMhYsPLYE1NBeQgSeAB/o
+         zNiqfg3B3XxiX0N8KqZM4nT+AuJN+1iKcQinxqRip5PG8ZCXxZ1oabDzyD/4AxIp0lUN
+         2ZO7g2pIbM0QPXP7qQC7godsx7BWmfuI5wtstxY3HPMeEXtqQCn6Fo0AEKDmlECfk5sY
+         DjH38IZb2GPhsHg6B/5ItWmuh0pjbVbkazYpN/kjyZWMVSKwKT/oCyEET5K0Dq0TRy76
+         RePiNTKELSAdXpU2XngPThTahPcB799OYeP4oF37ryPK1FmDkTcnHwnJiY3BTfWtajG2
+         8sjw==
+X-Gm-Message-State: AC+VfDz1jV9WfxrIMjPMjTSqt8Zj2AfSdPfFEdh3Je/uY65aUzilYlx5
+        06AiiTwDnvZoOKP/3GzKZFlqQA==
+X-Google-Smtp-Source: ACHHUZ5wuDlFmsGGNMNksjY0h2w+P+KhrCvN7EqX361uupuau7Bm/InRm2H3RKVU6ZFB93vboNtPRQ==
+X-Received: by 2002:a19:4419:0:b0:4e9:cfd2:e2d with SMTP id r25-20020a194419000000b004e9cfd20e2dmr2293131lfa.65.1686948151542;
+        Fri, 16 Jun 2023 13:42:31 -0700 (PDT)
+Received: from [192.168.1.2] (c-05d8225c.014-348-6c756e10.bbcust.telenor.se. [92.34.216.5])
+        by smtp.gmail.com with ESMTPSA id d22-20020ac244d6000000b004f845907454sm770981lfm.232.2023.06.16.13.42.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 16 Jun 2023 13:42:31 -0700 (PDT)
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Fri, 16 Jun 2023 22:42:19 +0200
+Subject: [PATCH v7 1/9] mmc: mmci: Clear busy_status when starting command
 MIME-Version: 1.0
-References: <20230531070049.11806-1-wsa+renesas@sang-engineering.com>
- <CAHCN7xJxROk6RU66PjbGH4M-R7PbUG-4y_2BHyCeGx_hTeUprw@mail.gmail.com>
- <ZHeHx/rUE7ORf3V2@shikoro> <CAHCN7x+hVSC=uCtaQx0tLZ6UdkYvf8B0DGQJ52Xr8WjWU=jGpA@mail.gmail.com>
- <OS0PR01MB5922D0CDBE265AE59695B8428658A@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-In-Reply-To: <OS0PR01MB5922D0CDBE265AE59695B8428658A@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Fri, 16 Jun 2023 09:57:46 -0500
-Message-ID: <CAHCN7xJ=wtH5Een9_M3fynweH7Mkre0nHWH3gtmW=dps30zgMQ@mail.gmail.com>
-Subject: Re: [RFC/RFT PATCH] mmc: renesas_sdhi: add delay between tuning cmds
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20230405-pl180-busydetect-fix-v7-1-69a7164f2a61@linaro.org>
+References: <20230405-pl180-busydetect-fix-v7-0-69a7164f2a61@linaro.org>
+In-Reply-To: <20230405-pl180-busydetect-fix-v7-0-69a7164f2a61@linaro.org>
+To:     Stefan Hansson <newbyte@disroot.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+X-Mailer: b4 0.12.2
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jun 16, 2023 at 9:39=E2=80=AFAM Biju Das <biju.das.jz@bp.renesas.co=
-m> wrote:
->
-> Hi Adam,
->
-> > -----Original Message-----
-> > From: Adam Ford <aford173@gmail.com>
-> > Sent: Friday, June 16, 2023 3:35 PM
-> > To: Wolfram Sang <wsa+renesas@sang-engineering.com>; Adam Ford
-> > <aford173@gmail.com>; linux-mmc@vger.kernel.org; linux-renesas-
-> > soc@vger.kernel.org; Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.co=
-m>
-> > Subject: Re: [RFC/RFT PATCH] mmc: renesas_sdhi: add delay between tunin=
-g
-> > cmds
-> >
-> > On Wed, May 31, 2023 at 12:45=E2=80=AFPM Wolfram Sang <wsa+renesas@sang=
--
-> > engineering.com> wrote:
-> > >
-> > >
-> > > > I am testing this on a 5.10 kernel based on the Renesas RZ linux
-> > > > kernel branch.  The good news is that the card doesn't hang like it
-> > > > used to on the older 4.19 kernel, but it still does not enumerate t=
-o
-> > > > SDR104 speeds.
-> > >
-> > > U-Boot has a 1ms delay. Could you increase the delay to 1ms, please?
-> >
-> > Sorry for the delay, but I increased this to  usleep_range(1000, 2500) =
-and
-> > it still hangs.
-> >
-> > I don't know if the issue is dependent on the variant.  For what it's
-> > worth, I am testing an RZ/G2M, but I can do the same thing on an RZ/G2N=
- or
-> > RZ/G2H if you want.
->
-> I am doing 6.1.y testing[1] with all RZ board variants,
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/cip/linux-cip.git/log=
-/?h=3Dlinux-6.1.y-cip
->
-> I have done SDHI testing with RZ/G2M 1.3 HiHope board and I didn't face t=
-his issue.
->
-> Can you please let me know how to reproduce this issue?
+If we are starting a command which can generate a busy
+response, then clear the variable host->busy_status
+if the variant is using a ->busy_complete callback.
 
-It's not easy to reproduce, and it only happens on a small subset of
-cards.  I sent one to Wolfram sometime last year.  I can also  take
-these same cards that hang when booting Linux, and they enumerate just
-fine in U-Boot at SRD104 speeds.  I can use the same RZ/G2 board with
-other cards, and other cards work fine.  I then tested these same
-'failing' cards on other platforms and they work fine, so it seems
-like there is a tuning combination in Linux that is different from
-U-Boot that is unique to these certain cards which prevents them from
-working.
+We are lucky that the member is zero by default and
+hopefully always gets cleared in the ->busy_complete
+callback even on errors, but it's just fragile so
+make sure it is always initialized to zero.
 
-adam
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ChangeLog v6->v7:
+- No changes.
+ChangeLog v4->v6:
+- No changes.
+ChangeLog v3->v4:
+- Fix the oneline stray change to semantic order of busy
+  flag so the patch is the oneliner it's supposed to be.
+ChangeLog v2->v3:
+- Clear host->busy_status no matter if the MMC_RSP_BUSY flag
+  is set or not.
+- Now we have an if inside an if left, so combine these into
+  one singel conditional.
+- Resulting re-flow the if-clause.
+ChangeLog v1->v2:
+- Unconditionally clear host->busy_status if we get a
+  busy response.
+---
+ drivers/mmc/host/mmci.c | 1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 97a77eefb11a..0a4b6b6e0f03 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1238,6 +1238,7 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+ 			c |= host->variant->cmdreg_srsp;
+ 	}
+ 
++	host->busy_status = 0;
+ 	if (host->variant->busy_timeout && cmd->flags & MMC_RSP_BUSY) {
+ 		if (!cmd->busy_timeout)
+ 			cmd->busy_timeout = 10 * MSEC_PER_SEC;
 
->
-> Cheers,
-> Biju
+-- 
+2.40.1
+
