@@ -2,28 +2,37 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D347EB64D9
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 20:36:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 478A5EB64DC
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 20:36:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233003AbjFQUgl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Jun 2023 16:36:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41698 "EHLO
+        id S1346340AbjFQUgm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Jun 2023 16:36:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232284AbjFQUgk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 16:36:40 -0400
+        with ESMTP id S1346317AbjFQUgl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 16:36:41 -0400
 Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CADCB1723
-        for <linux-mmc@vger.kernel.org>; Sat, 17 Jun 2023 13:36:38 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90AE5172C;
+        Sat, 17 Jun 2023 13:36:40 -0700 (PDT)
 Received: from localhost.localdomain (178.176.79.248) by msexch01.omp.ru
  (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Sat, 17 Jun
- 2023 23:36:29 +0300
+ 2023 23:36:34 +0300
 From:   Sergey Shtylyov <s.shtylyov@omp.ru>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-Subject: [PATCH v3 00/12] Fix deferred probing in the MMC/SD drivers
-Date:   Sat, 17 Jun 2023 23:36:10 +0300
-Message-ID: <20230617203622.6812-1-s.shtylyov@omp.ru>
+CC:     Florian Fainelli <f.fainelli@gmail.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        <bcm-kernel-feedback-list@broadcom.com>,
+        <linux-rpi-kernel@lists.infradead.org>,
+        <linux-arm-kernel@lists.infradead.org>, <stable@vger.kernel.org>
+Subject: [PATCH v3 01/12] mmc: bcm2835: fix deferred probing
+Date:   Sat, 17 Jun 2023 23:36:11 +0300
+Message-ID: <20230617203622.6812-2-s.shtylyov@omp.ru>
 X-Mailer: git-send-email 2.26.3
+In-Reply-To: <20230617203622.6812-1-s.shtylyov@omp.ru>
+References: <20230617203622.6812-1-s.shtylyov@omp.ru>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
@@ -47,14 +56,17 @@ X-KSE-AntiSpam-Info: {relay has no DNS name}
 X-KSE-AntiSpam-Info: {SMTP from is not routable}
 X-KSE-AntiSpam-Info: {Found in DNSBL: 178.176.79.248 in (user)
  dbl.spamhaus.org}
-X-KSE-AntiSpam-Info: omp.ru:7.1.1;178.176.79.248:7.4.1;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;127.0.0.199:7.1.2
+X-KSE-AntiSpam-Info: omp.ru:7.1.1;178.176.79.248:7.1.2,7.4.1;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;127.0.0.199:7.1.2
 X-KSE-AntiSpam-Info: {iprep_blacklist}
+X-KSE-AntiSpam-Info: FromAlignment: s
+X-KSE-AntiSpam-Info: {rdns complete}
+X-KSE-AntiSpam-Info: {fromrtbl complete}
 X-KSE-AntiSpam-Info: ApMailHostAddress: 178.176.79.248
 X-KSE-AntiSpam-Info: {DNS response errors}
 X-KSE-AntiSpam-Info: Rate: 59
 X-KSE-AntiSpam-Info: Status: not_detected
 X-KSE-AntiSpam-Info: Method: none
-X-KSE-AntiSpam-Info: Auth:dmarc=temperror header.from=omp.ru;spf=temperror
+X-KSE-AntiSpam-Info: Auth:dmarc=none header.from=omp.ru;spf=none
  smtp.mailfrom=omp.ru;dkim=none
 X-KSE-Antiphishing-Info: Clean
 X-KSE-Antiphishing-ScanningType: Heuristic
@@ -69,41 +81,43 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Here are 12 patches against the 'fixes' branch of Ulf Hansson's 'mmc.git' repo.
+The driver overrides the error codes and IRQ0 returned by platform_get_irq()
+to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
+permanently instead of the deferred probing. Switch to propagating the error
+codes upstream.  Since commit ce753ad1549c ("platform: finally disallow IRQ0
+in platform_get_irq() and its ilk") IRQ0 is no longer returned by those APIs,
+so we now can safely ignore it...
 
-The affected MMC/SD drivers call platform_get_irq[_byname]() but override its
-result in case of error which prevents the deferred probing from working. Some
-of these patches logically depend on commit ce753ad1549c ("platform: finally
-disallow IRQ0 in platform_get_irq() and its ilk")...
+Fixes: 660fc733bd74 ("mmc: bcm2835: Add new driver for the sdhost controller.")
+Cc: stable@vger.kernel.org # v5.19+
+Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
+---
+Changes in version 3:
+- added the platform_get_irq() commit reference to the  patch description and
+  the Cc: tag marking the 1st kernel version containing it.
 
-Sergey Shtylyov (12):
-  mmc: bcm2835: fix deferred probing
-  mmc: meson-gx: fix deferred probing
-  mmc: mtk-sd: fix deferred probing
-  mmc: mvsdio: fix deferred probing
-  mmc: omap: fix deferred probing
-  mmc: omap_hsmmc: fix deferred probing
-  mmc: owl: fix deferred probing
-  mmc: sdhci-acpi: fix deferred probing
-  mmc: sdhci-spear: fix deferred probing
-  mmc: sh_mmcif: fix deferred probing
-  mmc: sunxi: fix deferred probing
-  mmc: usdhi60rol0: fix deferred probing
+Changes in version 2:
+- refreshed the patch;
+- slightly reformatted the patch description.
 
- drivers/mmc/host/bcm2835.c      | 4 ++--
- drivers/mmc/host/meson-gx-mmc.c | 4 ++--
- drivers/mmc/host/mtk-sd.c       | 2 +-
- drivers/mmc/host/mvsdio.c       | 2 +-
- drivers/mmc/host/omap.c         | 2 +-
- drivers/mmc/host/omap_hsmmc.c   | 6 ++++--
- drivers/mmc/host/owl-mmc.c      | 2 +-
- drivers/mmc/host/sdhci-acpi.c   | 2 +-
- drivers/mmc/host/sdhci-spear.c  | 4 ++--
- drivers/mmc/host/sh_mmcif.c     | 2 +-
- drivers/mmc/host/sunxi-mmc.c    | 4 ++--
- drivers/mmc/host/usdhi6rol0.c   | 6 ++++--
- 12 files changed, 22 insertions(+), 18 deletions(-)
+ drivers/mmc/host/bcm2835.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index 8648f7e63ca1..eea208856ce0 100644
+--- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -1403,8 +1403,8 @@ static int bcm2835_probe(struct platform_device *pdev)
+ 	host->max_clk = clk_get_rate(clk);
+ 
+ 	host->irq = platform_get_irq(pdev, 0);
+-	if (host->irq <= 0) {
+-		ret = -EINVAL;
++	if (host->irq < 0) {
++		ret = host->irq;
+ 		goto err;
+ 	}
+ 
 -- 
 2.26.3
 
