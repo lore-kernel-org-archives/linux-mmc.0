@@ -2,22 +2,21 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD7D0EB64DB
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:42:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D97CBC001DF
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:42:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234174AbjFQNm2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Jun 2023 09:42:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42910 "EHLO
+        id S1345967AbjFQNm3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Jun 2023 09:42:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235937AbjFQNmZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:42:25 -0400
-X-Greylist: delayed 313 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 17 Jun 2023 06:42:21 PDT
+        with ESMTP id S236309AbjFQNm1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:42:27 -0400
 Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10A8A1FCC;
-        Sat, 17 Jun 2023 06:42:20 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 262232120;
+        Sat, 17 Jun 2023 06:42:23 -0700 (PDT)
 Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
  (mreue009 [212.227.15.167]) with ESMTPSA (Nemesis) id
- 1MF39M-1qLTON09jk-00FRDF; Sat, 17 Jun 2023 15:36:43 +0200
+ 1M42fA-1qAW6b2WIq-0001w1; Sat, 17 Jun 2023 15:36:41 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -36,72 +35,72 @@ Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
         linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
         bcm-kernel-feedback-list@broadcom.com,
         Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 5/7] ARM: dts: bcm283x: Increase pwm-cells
-Date:   Sat, 17 Jun 2023 15:36:18 +0200
-Message-Id: <20230617133620.53129-6-stefan.wahren@i2se.com>
+Subject: [PATCH V2 3/7] ARM: dts: bcm2835: adjust DMA node names
+Date:   Sat, 17 Jun 2023 15:36:16 +0200
+Message-Id: <20230617133620.53129-4-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230617133620.53129-1-stefan.wahren@i2se.com>
 References: <20230617133620.53129-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:HwZ2By+DqYznZAq+JpbxaECqFpuhlzYBGthEdyq3eKs4ULiL2QJ
- DwzNWFpWI3tiEeJ8J97YVaRX4ByZbuCwPFymzrPyobGGP7Zke7QoCE8ayY+q9JkfrfD/tfR
- T8BIyqDhqidMQ+fCsEBYY93A9mfvRMJ9fH4x4gI2EzgIzgnGEWDu9ilUF54zbqPBqX0GtjI
- WlzJwV1owq8KPemtsNcuQ==
-UI-OutboundReport: notjunk:1;M01:P0:pq1CVBGtzM8=;t3dZ2HxvYVosjVMGjhJNVPg/oIO
- C3l1kw5VGkIWydv60GC5iYnt42COx6iNCH7xsSy2jRi8NcTTpVBg3aM1S/bIr11FWt02wgNDM
- wVp7/i4KG9Z53Tl77AG3F7PiVTYacSs1wZogEVpdwORUpRLU/LAa4C7ecrxCAYpovnfqOmAD+
- rvxNFR43c9T/HM4CYwmIDfBWwGGRex09uehxYkMJoa/1AoBf7sN9iTvHTtUpDbH88kgKZnpnV
- FvRSFPaTnH6fg98Qy3yA3k7UvISFlRFT4rb1FImD/ZLmorLdF+VNiJpSVU1HLzzVs7uncoIX/
- aMQh1qkxLo0DW1RLtFBQcb3q8hkx0s3VS0AUnB0I0JcVXSkgFh5l+3ro6WYjYbfAZvwL12mXe
- CWp8NH/X/fd2pXKITcmNRy34e84Aj3F+vkOtGOGpQ7Fri19EvOCrd1zmmaXLNrTRJ2/zeBjJh
- 4fOWLLYGgtdgLHX2LgRQye69F+9oO/sH8kyxqj0uCoaS5F2tnY2C0i8pz8pyrfH4ERRt0p6zI
- FB/D8i2NsNHCeq4Caea7S9wM3VL/5oVUQ1bfYbpcFPJnkmuPUdWKbduxAxchZ4H7xemBVxL3c
- gKmtV7WWU2dIWHyVLXTRPuSVAKxHFPawzt4Sc9T0I0XJOE6SRIxcAbpkm9NAw9kopj/MepM9T
- K03W6ixIZpUj6FqYAwoK2ZhMkWeBgR+twnxpV1MeOA==
+X-Provags-ID: V03:K1:Ct2vBejHpGEGdHWq2oaC2eYfFCkFI6GTVSpPBo78VNWnC4tGPu8
+ IxLyyDIobwqnC488ZrvNjJxWx93U4lqZZ5gv/Hlty/Yfpgcdcr2E6R9u9qXX0KMXfNVUDCS
+ 0+I0eprUqEJnxgud62582/pX/S9dfV0Y01G9x4+8e1SswtQaldOhTY1KNFpZ2UIFtgdvWO0
+ Jsd8sWLXbNnQyssP06jaw==
+UI-OutboundReport: notjunk:1;M01:P0:FH94jq5umt8=;GO7QMgAUpFwd63iY3T32s3mv1Nh
+ 02BXvgrmy55DhZKOwlQgCjEpwoi1lA5XBvrADOyhcJKRprbUOxHDYUW7HkBIqQLbzA4mpc9oV
+ jQM9mHKMd/FA9TDqDN5Zj9yQlpGiarhYX22BSaSMjCwAePPpLbh/H82iYumk3mCLnwe7nkOJr
+ RSI2IqZI5jaM10hsDB5GtRkYd7fDm9bplaQhN2zBp86hlS9NjLxJQgoobotP3gmyfkUve6cPD
+ Fkv305Ci4vnNG+ZouKozm70s1P1gZAN2W610RE5A3hhaX45dKBJ5KJK0M3rqnLzjxqd4lgi8y
+ EYcc492aIptbpdR+fIpBOzlgCYWXOGxul7g1qKTRkNlf6VTXZODNLs2spCAgGUHidqBxksc/I
+ bPbgf7I0xU+QVBFZXOCRP+oec0C4myy38kUxkHGKEyZ1khGBaWrG9N/IMuWe/ZUBI1pQCbbl5
+ 9+zSHg+INSWUHMguUzN9emNi+E64Fxzmpzbqel+0xxGhLpGD3spKcUM4Foh1YtxR74dj8L323
+ EQ9aCsTENW19rcaY/gUn/ksaWNuAMSiem/ubIBA7BOgk0iK/CQs54/7tyXqZnmrPxzqAALgGR
+ tPIeOBqUzZ/cCdF5AUMIhaH+8qLfGLNe0crR2VMAXkuVVlT1F6SUicyJ+jzi2+MEyrDwWE8SK
+ nS7BwtEt+fFHRwYB8Uvr7Mbvmv1Uvqd7xfzMGhSJ8Q==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pwm-bcm2835 supports PWM polarity, so adjust the affected dtsi
-files accordingly and fix the dtbs_check warning:
+After converting the bcm2835-dma DT binding to YAML, the DT schema
+checks gave warnings like:
 
-pwm@7e20c000: #pwm-cells:0:0: 3 was expected
+$nodename:0: 'dma@7e007000' does not match '^dma-controller(@.*)?$'
+
+So fix them accordingly.
 
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-Reviewed-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
 ---
- arch/arm/boot/dts/bcm2711.dtsi | 2 +-
- arch/arm/boot/dts/bcm283x.dtsi | 2 +-
+ arch/arm/boot/dts/bcm2711.dtsi        | 2 +-
+ arch/arm/boot/dts/bcm2835-common.dtsi | 2 +-
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/bcm2711.dtsi b/arch/arm/boot/dts/bcm2711.dtsi
-index d30c19311145..4a379a14966d 100644
+index 097e9f252235..d30c19311145 100644
 --- a/arch/arm/boot/dts/bcm2711.dtsi
 +++ b/arch/arm/boot/dts/bcm2711.dtsi
-@@ -278,7 +278,7 @@ pwm1: pwm@7e20c800 {
- 			clocks = <&clocks BCM2835_CLOCK_PWM>;
- 			assigned-clocks = <&clocks BCM2835_CLOCK_PWM>;
- 			assigned-clock-rates = <10000000>;
--			#pwm-cells = <2>;
-+			#pwm-cells = <3>;
- 			status = "disabled";
+@@ -76,7 +76,7 @@ thermal: thermal {
+ 			};
  		};
  
-diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
-index c9c52a19ef3b..2ca8a2505a4d 100644
---- a/arch/arm/boot/dts/bcm283x.dtsi
-+++ b/arch/arm/boot/dts/bcm283x.dtsi
-@@ -416,7 +416,7 @@ pwm: pwm@7e20c000 {
- 			clocks = <&clocks BCM2835_CLOCK_PWM>;
- 			assigned-clocks = <&clocks BCM2835_CLOCK_PWM>;
- 			assigned-clock-rates = <10000000>;
--			#pwm-cells = <2>;
-+			#pwm-cells = <3>;
- 			status = "disabled";
- 		};
+-		dma: dma@7e007000 {
++		dma: dma-controller@7e007000 {
+ 			compatible = "brcm,bcm2835-dma";
+ 			reg = <0x7e007000 0xb00>;
+ 			interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
+diff --git a/arch/arm/boot/dts/bcm2835-common.dtsi b/arch/arm/boot/dts/bcm2835-common.dtsi
+index bb7e8f7facaf..9261b67dbee1 100644
+--- a/arch/arm/boot/dts/bcm2835-common.dtsi
++++ b/arch/arm/boot/dts/bcm2835-common.dtsi
+@@ -8,7 +8,7 @@ / {
+ 	interrupt-parent = <&intc>;
  
+ 	soc {
+-		dma: dma@7e007000 {
++		dma: dma-controller@7e007000 {
+ 			compatible = "brcm,bcm2835-dma";
+ 			reg = <0x7e007000 0xf00>;
+ 			interrupts = <1 16>,
 -- 
 2.34.1
 
