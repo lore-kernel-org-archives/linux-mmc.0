@@ -2,21 +2,21 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 627E0C04FE0
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:37:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A27E0EB64DB
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:37:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236162AbjFQNhL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Jun 2023 09:37:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40698 "EHLO
+        id S236199AbjFQNhO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Jun 2023 09:37:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235937AbjFQNhJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:37:09 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07CE7E76;
-        Sat, 17 Jun 2023 06:37:07 -0700 (PDT)
+        with ESMTP id S234607AbjFQNhM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:37:12 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C5B7DA;
+        Sat, 17 Jun 2023 06:37:11 -0700 (PDT)
 Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
  (mreue009 [212.227.15.167]) with ESMTPSA (Nemesis) id
- 1MDyoW-1qIB4O3sYe-009xZN; Sat, 17 Jun 2023 15:36:41 +0200
+ 1N7zJj-1q6GnA2pc3-0154nC; Sat, 17 Jun 2023 15:36:43 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -35,240 +35,121 @@ Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
         linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
         bcm-kernel-feedback-list@broadcom.com,
         Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 2/7] dt-bindings: dma: convert bcm2835-dma bindings to YAML
-Date:   Sat, 17 Jun 2023 15:36:15 +0200
-Message-Id: <20230617133620.53129-3-stefan.wahren@i2se.com>
+Subject: [PATCH V2 6/7] dt-bindings: mailbox: convert bcm2835-mbox bindings to YAML
+Date:   Sat, 17 Jun 2023 15:36:19 +0200
+Message-Id: <20230617133620.53129-7-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230617133620.53129-1-stefan.wahren@i2se.com>
 References: <20230617133620.53129-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:SMCweP7CjBUg9TJaFmx+JT9DWEI9Cf+A5pEvrkXawHTf0lH2NoL
- FN5znBD2IZjkeXfhCMa9FqAvBtUQKBJoy2OHIIaNEGluQqVUyuNQE26P1+5jt1Dt1gCpsp6
- fH+DE3zFHPZ5cSLCsCR3rsIupTId3E0McqcfRfPI8+N1Mw8cfncOdEfD8Uo1ezk7xAanyBh
- 1m36rVaLFqzBsXDRth//Q==
-UI-OutboundReport: notjunk:1;M01:P0:24tRoCPrR4M=;SSDp+KJP5S/XIQSmZ3YQgK4YNhv
- zwyuH4sekOJqZ/V1wStyGKJ03QV+vVXLNxPn9bee5aakudOHRvKgG3PhT/mWyA3tPUJHvHDCg
- 5u8FJRyrqqGGd0AYwY5iaiiNDZu3B9lbE4UNsKAhyURjEjEQiU88VDkNnVwiuD3RSYnuKlx8o
- /eexGj7VH99/ox73oSaI6sFmrWD/xjkoiuAE+Gu0i2mW4xVRlJL+7bCg385HjkcBqhFkqpoFG
- VsmTB4zccV8b8h6XWl1SoosOnn9wXddavVp9XyRnwNLR7TIsAYTSHExpI/U27pOavKMfzVQi9
- pNlUnqPAuM6mxEm9uk2ZW7hk3okOtDwYY0dIt2xoRJ14/Ffm/WygFXQQV+ogO8rs0yDQq1EYK
- aRSkH/EmoFgZND3WxYu7IcGu01TZ3Z3vB5F+lfLfgJyAPeo7NM/oZS8Z39Nv153RSmVZxN11g
- sTcnTnYyo0tYeUbDFJI1u2TuYlF8nsOV+QW/Mtu4I/4Z2ChgCf6tmOejDhLUESRHkAeg5I07D
- 68Lc87k0TYvqZqoWN659OhG5nbD0AMjdlP5NZ5KHyEL5zhwHu9qjMbvCAQE7tPgYsbH2vr1cj
- I0fDdlkUacH5IaOi8gizE1wOiSP+1pLFLlyBZiCraS92s5XiPrPe9IHXuIEvUWB+WVAS1H2Zm
- +O3nPXHByHABzIDbL2YIGAwD+Pryoif+iXHv7ZZ4EQ==
+X-Provags-ID: V03:K1:BN/G7vW9/+OwrOJf64TGPnwW5YzRRIk27PgTlhcRzCSfc0brUlW
+ ksBPxIXOOflP29UVRJOMrUXLvyz7paYxVQKtRebHImuLSZEQYMhW4HLut1gLnlP0nZjTlrz
+ J+KXcOrxBNo2L2+aSHOU6bcKtRLFcb92XLDnjMNjC7c1k85gf2Xv4UwY4xK3kbWGxpBo7US
+ o7UJRe9alQqQ9hyQfgzGw==
+UI-OutboundReport: notjunk:1;M01:P0:EUvzvJRXwIs=;PHI27EI6rgPYtu1TJFYQ9ZkqTdl
+ jmu3db43i6TwbJSn+BV2022WjElLQab0IsbgYi/5OE2HeCPbmSYa719xd8tI5287nZs8Xmmpg
+ INyL2p7d8pYBzhiEhL0QP5mU32yfIP/oPPmrwGnX5nKjkeFftEcbSCjdeVDCh2sxUAbqOSkHN
+ pf58TnJp+yI0WrF8Cfnv4kKqJhKnRTuAEtVVkc/Jo8+v1vhND1G074AXJ0tkA7qH/1ZuAHWto
+ +JSnUBSZIf80+8iQ5R8RlIF0WqABRic2ZEFia4Sk2JqQHMmAw3b/5/47wL0lQhalyZd1BrKbs
+ F4ctHvm7Z+eTESeRsX2FEocXdHK2Tx4kKlCL3FQhsDtlHPL+Z3JxTRZ+Mac5zk6oIhXxkwyfw
+ tLmlHCftHDGZoN2+uezOeKNrnaackdD7N79BEzbGeiC01yFqY/B5f+C0hvyDnADhGVeFa8pWA
+ VwtwRKcX8cajG5sfLVpuy0DlI5ZDAEIs3m2Bvogp41oIi/pOH1nNnho7a9f9Lg9bk9N10DceD
+ ox2cTsAB2Fdkgdp//EEe64n0ZkIfMOhrlS54sSUzhjuxTLgwq0ab2i4Rpy4LGNhYAnB2a/San
+ FkcvHTT/fimrd+ptx2z7SFkN5+8VNGFTKnpoJ3XqxowHBdzcBP+y6KhkhlSgwMNbd7i3uiTSg
+ 0Qvuqhj0b+AiDbWjvLRzK/8Lxolqe8ooJ5VklVoLpg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the DT binding document for bcm2835-dma from .txt to YAML.
+Convert the DT binding document for bcm2835-mbox from .txt to YAML.
 
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 ---
- .../bindings/dma/brcm,bcm2835-dma.txt         |  83 --------------
- .../bindings/dma/brcm,bcm2835-dma.yaml        | 102 ++++++++++++++++++
- 2 files changed, 102 insertions(+), 83 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt
- create mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml
+ .../bindings/mailbox/brcm,bcm2835-mbox.txt    | 26 ------------
+ .../bindings/mailbox/brcm,bcm2835-mbox.yaml   | 40 +++++++++++++++++++
+ 2 files changed, 40 insertions(+), 26 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.txt
+ create mode 100644 Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.yaml
 
-diff --git a/Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt b/Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt
+diff --git a/Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.txt b/Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.txt
 deleted file mode 100644
-index b6a8cc0978cd..000000000000
---- a/Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt
+index b48d7d30012c..000000000000
+--- a/Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.txt
 +++ /dev/null
-@@ -1,83 +0,0 @@
--* BCM2835 DMA controller
--
--The BCM2835 DMA controller has 16 channels in total.
--Only the lower 13 channels have an associated IRQ.
--Some arbitrary channels are used by the firmware
--(1,3,6,7 in the current firmware version).
--The channels 0,2 and 3 have special functionality
--and should not be used by the driver.
+@@ -1,26 +0,0 @@
+-Broadcom BCM2835 VideoCore mailbox IPC
 -
 -Required properties:
--- compatible: Should be "brcm,bcm2835-dma".
--- reg: Should contain DMA registers location and length.
--- interrupts: Should contain the DMA interrupts associated
--		to the DMA channels in ascending order.
--- interrupt-names: Should contain the names of the interrupt
--		   in the form "dmaXX".
--		   Use "dma-shared-all" for the common interrupt line
--		   that is shared by all dma channels.
--- #dma-cells: Must be <1>, the cell in the dmas property of the
--		client device represents the DREQ number.
--- brcm,dma-channel-mask: Bit mask representing the channels
--			 not used by the firmware in ascending order,
--			 i.e. first channel corresponds to LSB.
+-
+-- compatible:	Should be "brcm,bcm2835-mbox"
+-- reg:		Specifies base physical address and size of the registers
+-- interrupts:	The interrupt number
+-		  See bindings/interrupt-controller/brcm,bcm2835-armctrl-ic.txt
+-- #mbox-cells:	Specifies the number of cells needed to encode a mailbox
+-		  channel. The value shall be 0, since there is only one
+-		  mailbox channel implemented by the device.
 -
 -Example:
 -
--dma: dma@7e007000 {
--	compatible = "brcm,bcm2835-dma";
--	reg = <0x7e007000 0xf00>;
--	interrupts = <1 16>,
--		     <1 17>,
--		     <1 18>,
--		     <1 19>,
--		     <1 20>,
--		     <1 21>,
--		     <1 22>,
--		     <1 23>,
--		     <1 24>,
--		     <1 25>,
--		     <1 26>,
--		     /* dma channel 11-14 share one irq */
--		     <1 27>,
--		     <1 27>,
--		     <1 27>,
--		     <1 27>,
--		     /* unused shared irq for all channels */
--		     <1 28>;
--	interrupt-names = "dma0",
--			  "dma1",
--			  "dma2",
--			  "dma3",
--			  "dma4",
--			  "dma5",
--			  "dma6",
--			  "dma7",
--			  "dma8",
--			  "dma9",
--			  "dma10",
--			  "dma11",
--			  "dma12",
--			  "dma13",
--			  "dma14",
--			  "dma-shared-all";
--
--	#dma-cells = <1>;
--	brcm,dma-channel-mask = <0x7f35>;
+-mailbox: mailbox@7e00b880 {
+-	compatible = "brcm,bcm2835-mbox";
+-	reg = <0x7e00b880 0x40>;
+-	interrupts = <0 1>;
+-	#mbox-cells = <0>;
 -};
 -
--
--DMA clients connected to the BCM2835 DMA controller must use the format
--described in the dma.txt file, using a two-cell specifier for each channel.
--
--Example:
--
--bcm2835_i2s: i2s@7e203000 {
--	compatible = "brcm,bcm2835-i2s";
--	reg = <	0x7e203000 0x24>;
--	clocks = <&clocks BCM2835_CLOCK_PCM>;
--
--	dmas = <&dma 2>,
--	       <&dma 3>;
--	dma-names = "tx", "rx";
+-firmware: firmware {
+-	compatible = "raspberrypi,firmware";
+-	mboxes = <&mailbox>;
+-	#power-domain-cells = <1>;
 -};
-diff --git a/Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml b/Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml
+diff --git a/Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.yaml b/Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.yaml
 new file mode 100644
-index 000000000000..5de8421e933a
+index 000000000000..9588817f4511
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml
-@@ -0,0 +1,102 @@
++++ b/Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.yaml
+@@ -0,0 +1,40 @@
 +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 +%YAML 1.2
 +---
-+$id: http://devicetree.org/schemas/dma/brcm,bcm2835-dma.yaml#
++$id: http://devicetree.org/schemas/mailbox/brcm,bcm2835-mbox.yaml#
 +$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+title: BCM2835 DMA controller
++title: Broadcom BCM2835 VideoCore mailbox IPC
 +
 +maintainers:
-+  - Nicolas Saenz Julienne <nsaenz@kernel.org>
-+
-+description:
-+  The BCM2835 DMA controller has 16 channels in total. Only the lower
-+  13 channels have an associated IRQ. Some arbitrary channels are used by the
-+  VideoCore firmware (1,3,6,7 in the current firmware version). The channels
-+  0, 2 and 3 have special functionality and should not be used by the driver.
-+
-+allOf:
-+  - $ref: dma-controller.yaml#
++  - Stefan Wahren <stefan.wahren@i2se.com>
 +
 +properties:
 +  compatible:
-+    const: brcm,bcm2835-dma
++    const: brcm,bcm2835-mbox
 +
 +  reg:
 +    maxItems: 1
 +
 +  interrupts:
-+    description:
-+      Should contain the DMA interrupts associated to the DMA channels in
-+      ascending order.
-+    minItems: 1
-+    maxItems: 16
++    maxItems: 1
 +
-+  interrupt-names:
-+    minItems: 1
-+    maxItems: 16
-+
-+  '#dma-cells':
-+    description: The single cell represents the DREQ number.
-+    const: 1
-+
-+  brcm,dma-channel-mask:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description:
-+      Bitmask of available DMA channels in ascending order that are
-+      not reserved by firmware and are available to the
-+      kernel. i.e. first channel corresponds to LSB.
-+
-+unevaluatedProperties: false
++  "#mbox-cells":
++    const: 0
 +
 +required:
 +  - compatible
 +  - reg
 +  - interrupts
-+  - "#dma-cells"
-+  - brcm,dma-channel-mask
++  - "#mbox-cells"
++
++additionalProperties: false
 +
 +examples:
 +  - |
-+    dma-controller@7e007000 {
-+      compatible = "brcm,bcm2835-dma";
-+      reg = <0x7e007000 0xf00>;
-+      interrupts = <1 16>,
-+                   <1 17>,
-+                   <1 18>,
-+                   <1 19>,
-+                   <1 20>,
-+                   <1 21>,
-+                   <1 22>,
-+                   <1 23>,
-+                   <1 24>,
-+                   <1 25>,
-+                   <1 26>,
-+                   /* dma channel 11-14 share one irq */
-+                   <1 27>,
-+                   <1 27>,
-+                   <1 27>,
-+                   <1 27>,
-+                   /* unused shared irq for all channels */
-+                   <1 28>;
-+      interrupt-names = "dma0",
-+                        "dma1",
-+                        "dma2",
-+                        "dma3",
-+                        "dma4",
-+                        "dma5",
-+                        "dma6",
-+                        "dma7",
-+                        "dma8",
-+                        "dma9",
-+                        "dma10",
-+                        "dma11",
-+                        "dma12",
-+                        "dma13",
-+                        "dma14",
-+                        "dma-shared-all";
-+        #dma-cells = <1>;
-+        brcm,dma-channel-mask = <0x7f35>;
++    mailbox@7e00b880 {
++      compatible = "brcm,bcm2835-mbox";
++      reg = <0x7e00b880 0x40>;
++      interrupts = <0 1>;
++      #mbox-cells = <0>;
 +    };
-+
-+...
 -- 
 2.34.1
 
