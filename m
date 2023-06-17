@@ -2,21 +2,21 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D97CBC001DF
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:42:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8A37C04A94
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:42:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345967AbjFQNm3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Jun 2023 09:42:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42906 "EHLO
+        id S234453AbjFQNma (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Jun 2023 09:42:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236309AbjFQNm1 (ORCPT
+        with ESMTP id S236455AbjFQNm1 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:42:27 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 262232120;
-        Sat, 17 Jun 2023 06:42:23 -0700 (PDT)
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA1E819A2;
+        Sat, 17 Jun 2023 06:42:22 -0700 (PDT)
 Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
  (mreue009 [212.227.15.167]) with ESMTPSA (Nemesis) id
- 1M42fA-1qAW6b2WIq-0001w1; Sat, 17 Jun 2023 15:36:41 +0200
+ 1M2fDr-1q7UlX1Vhn-0048wI; Sat, 17 Jun 2023 15:36:44 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -34,73 +34,129 @@ Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
         devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
         bcm-kernel-feedback-list@broadcom.com,
-        Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 3/7] ARM: dts: bcm2835: adjust DMA node names
-Date:   Sat, 17 Jun 2023 15:36:16 +0200
-Message-Id: <20230617133620.53129-4-stefan.wahren@i2se.com>
+        Stefan Wahren <stefan.wahren@i2se.com>,
+        Rob Herring <robh@kernel.org>
+Subject: [PATCH V2 7/7] dt-bindings: timer: convert bcm2835-system-timer bindings to YAML
+Date:   Sat, 17 Jun 2023 15:36:20 +0200
+Message-Id: <20230617133620.53129-8-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230617133620.53129-1-stefan.wahren@i2se.com>
 References: <20230617133620.53129-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:Ct2vBejHpGEGdHWq2oaC2eYfFCkFI6GTVSpPBo78VNWnC4tGPu8
- IxLyyDIobwqnC488ZrvNjJxWx93U4lqZZ5gv/Hlty/Yfpgcdcr2E6R9u9qXX0KMXfNVUDCS
- 0+I0eprUqEJnxgud62582/pX/S9dfV0Y01G9x4+8e1SswtQaldOhTY1KNFpZ2UIFtgdvWO0
- Jsd8sWLXbNnQyssP06jaw==
-UI-OutboundReport: notjunk:1;M01:P0:FH94jq5umt8=;GO7QMgAUpFwd63iY3T32s3mv1Nh
- 02BXvgrmy55DhZKOwlQgCjEpwoi1lA5XBvrADOyhcJKRprbUOxHDYUW7HkBIqQLbzA4mpc9oV
- jQM9mHKMd/FA9TDqDN5Zj9yQlpGiarhYX22BSaSMjCwAePPpLbh/H82iYumk3mCLnwe7nkOJr
- RSI2IqZI5jaM10hsDB5GtRkYd7fDm9bplaQhN2zBp86hlS9NjLxJQgoobotP3gmyfkUve6cPD
- Fkv305Ci4vnNG+ZouKozm70s1P1gZAN2W610RE5A3hhaX45dKBJ5KJK0M3rqnLzjxqd4lgi8y
- EYcc492aIptbpdR+fIpBOzlgCYWXOGxul7g1qKTRkNlf6VTXZODNLs2spCAgGUHidqBxksc/I
- bPbgf7I0xU+QVBFZXOCRP+oec0C4myy38kUxkHGKEyZ1khGBaWrG9N/IMuWe/ZUBI1pQCbbl5
- 9+zSHg+INSWUHMguUzN9emNi+E64Fxzmpzbqel+0xxGhLpGD3spKcUM4Foh1YtxR74dj8L323
- EQ9aCsTENW19rcaY/gUn/ksaWNuAMSiem/ubIBA7BOgk0iK/CQs54/7tyXqZnmrPxzqAALgGR
- tPIeOBqUzZ/cCdF5AUMIhaH+8qLfGLNe0crR2VMAXkuVVlT1F6SUicyJ+jzi2+MEyrDwWE8SK
- nS7BwtEt+fFHRwYB8Uvr7Mbvmv1Uvqd7xfzMGhSJ8Q==
+X-Provags-ID: V03:K1:mVFiliFboW4LEd+X1TQBa6vvRmi7USdo/RW69BmRyNa/pJtjGzS
+ tVQ6dwdnHEHr/ZHHezkQhqcYQeI6DcMTENVHZf6OczxoEATjvn8NKf1lIAxB1OpX4zWvY08
+ 1sP8GK5j5nAf4xocAOTABS5MDo/6bn++VaK84cFyxqD07Z80Bj2+pOq//rMnClwhW6nUT7s
+ OL/kAvNBJ4QbODLW9ofkQ==
+UI-OutboundReport: notjunk:1;M01:P0:inw7a/j3P4k=;k+yIdptIj0BhoNOoxCn068igPV4
+ pOdv6vS4XPRfjQPY+0tiABzI5rL/li6o7aLPUKu0+vnm8sELegztndB4AWp6kSatbYEMVl/Rl
+ dmofJCZDR+0nNYJ9IA2zvBFjwmKZJ5OuZfKbMf54zg4R6piKdgtKxhXpc5dm4pPql2k58PHVZ
+ MMits6+0gfWFcw8fFgH6aKYjupSOMbvR491t7i7m5SQqtlS5Cj7eb6vcdFO06EFOo3w55uVVO
+ 8J5z1G5S+4GfED4nhRqqf94urrlTa5f+FqLnLMHF73PYePsrxL2WpIFbsVgYrTDYQk+4JUKH/
+ 9M19uFHpSDk96dBA8DOV9ktUAn1r5dnO/wH9Z+3ttGfXf/6pTlmhutwTuRH2t6D2r/5gm1TmX
+ JoS8p5nbkFSJI659bjrpCLQZWTYSYA1/+BYsXm6R65xipi9S0hggFPy5ZwP+5cVo11d1XiZg9
+ 3onxo7vKD4LHGnh4XO6ErFtxx0pWJcOd81KBgamDmYK4mDiQCSMj6VdrEn0qCu0HsG70DNuly
+ jIh1kUSbQQI5+fc+DT6/0cXStqt92tYgZ3JtJULUALmWsLBTcP4wlLXecp4zzsacdr26kbmYb
+ nVYOgJAc/+f9OSjjr/h1Mb9pKaMbM6hvj/W/PhoGLVZyjdaR5RscxMlAxqEVlZNj8q59uUy5V
+ A8XOBwuZyW1K2+/+sN8OspHzNhiHDiJMZdxhjJjkhQ==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-After converting the bcm2835-dma DT binding to YAML, the DT schema
-checks gave warnings like:
-
-$nodename:0: 'dma@7e007000' does not match '^dma-controller(@.*)?$'
-
-So fix them accordingly.
+Convert the DT binding document for bcm2835-system-timer from .txt
+to YAML.
 
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Reviewed-by: Rob Herring <robh@kernel.org>
 ---
- arch/arm/boot/dts/bcm2711.dtsi        | 2 +-
- arch/arm/boot/dts/bcm2835-common.dtsi | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ .../timer/brcm,bcm2835-system-timer.txt       | 22 ---------
+ .../timer/brcm,bcm2835-system-timer.yaml      | 48 +++++++++++++++++++
+ 2 files changed, 48 insertions(+), 22 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
+ create mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
 
-diff --git a/arch/arm/boot/dts/bcm2711.dtsi b/arch/arm/boot/dts/bcm2711.dtsi
-index 097e9f252235..d30c19311145 100644
---- a/arch/arm/boot/dts/bcm2711.dtsi
-+++ b/arch/arm/boot/dts/bcm2711.dtsi
-@@ -76,7 +76,7 @@ thermal: thermal {
- 			};
- 		};
- 
--		dma: dma@7e007000 {
-+		dma: dma-controller@7e007000 {
- 			compatible = "brcm,bcm2835-dma";
- 			reg = <0x7e007000 0xb00>;
- 			interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
-diff --git a/arch/arm/boot/dts/bcm2835-common.dtsi b/arch/arm/boot/dts/bcm2835-common.dtsi
-index bb7e8f7facaf..9261b67dbee1 100644
---- a/arch/arm/boot/dts/bcm2835-common.dtsi
-+++ b/arch/arm/boot/dts/bcm2835-common.dtsi
-@@ -8,7 +8,7 @@ / {
- 	interrupt-parent = <&intc>;
- 
- 	soc {
--		dma: dma@7e007000 {
-+		dma: dma-controller@7e007000 {
- 			compatible = "brcm,bcm2835-dma";
- 			reg = <0x7e007000 0xf00>;
- 			interrupts = <1 16>,
+diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
+deleted file mode 100644
+index 844bd5fbd04c..000000000000
+--- a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
++++ /dev/null
+@@ -1,22 +0,0 @@
+-BCM2835 System Timer
+-
+-The System Timer peripheral provides four 32-bit timer channels and a
+-single 64-bit free running counter. Each channel has an output compare
+-register, which is compared against the 32 least significant bits of the
+-free running counter values, and generates an interrupt.
+-
+-Required properties:
+-
+-- compatible : should be "brcm,bcm2835-system-timer"
+-- reg : Specifies base physical address and size of the registers.
+-- interrupts : A list of 4 interrupt sinks; one per timer channel.
+-- clock-frequency : The frequency of the clock that drives the counter, in Hz.
+-
+-Example:
+-
+-timer {
+-	compatible = "brcm,bcm2835-system-timer";
+-	reg = <0x7e003000 0x1000>;
+-	interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
+-	clock-frequency = <1000000>;
+-};
+diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
+new file mode 100644
+index 000000000000..227b44788a48
+--- /dev/null
++++ b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
+@@ -0,0 +1,48 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/timer/brcm,bcm2835-system-timer.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: BCM2835 System Timer
++
++maintainers:
++  - Stefan Wahren <stefan.wahren@i2se.com>
++
++description:
++  The System Timer peripheral provides four 32-bit timer channels and a
++  single 64-bit free running counter. Each channel has an output compare
++  register, which is compared against the 32 least significant bits of the
++  free running counter values, and generates an interrupt.
++
++properties:
++  compatible:
++    const: brcm,bcm2835-system-timer
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    items:
++      - description: System Timer Compare 0 match (used by VideoCore GPU)
++      - description: System Timer Compare 1 match (usable for ARM core)
++      - description: System Timer Compare 2 match (used by VideoCore GPU)
++      - description: System Timer Compare 3 match (usable for ARM core)
++
++  clock-frequency: true
++
++required:
++  - compatible
++  - reg
++  - interrupts
++
++additionalProperties: false
++
++examples:
++  - |
++    timer@7e003000 {
++      compatible = "brcm,bcm2835-system-timer";
++      reg = <0x7e003000 0x1000>;
++      interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
++      clock-frequency = <1000000>;
++    };
 -- 
 2.34.1
 
