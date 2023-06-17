@@ -2,21 +2,21 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A985C001DF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76C34C04A94
 	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:37:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235893AbjFQNhJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S235911AbjFQNhJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Sat, 17 Jun 2023 09:37:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40690 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40692 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233241AbjFQNhH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:37:07 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9170DA;
-        Sat, 17 Jun 2023 06:37:05 -0700 (PDT)
+        with ESMTP id S234012AbjFQNhI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:37:08 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B270AE72;
+        Sat, 17 Jun 2023 06:37:06 -0700 (PDT)
 Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
  (mreue009 [212.227.15.167]) with ESMTPSA (Nemesis) id
- 1M3DBd-1q6wnn1KRx-003ahw; Sat, 17 Jun 2023 15:36:42 +0200
+ 1MCsLo-1qJHWx2N3Q-008rdh; Sat, 17 Jun 2023 15:36:39 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -34,133 +34,87 @@ Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
         devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
         bcm-kernel-feedback-list@broadcom.com,
-        Stefan Wahren <stefan.wahren@i2se.com>,
-        Rob Herring <robh@kernel.org>
-Subject: [PATCH V2 4/7] dt-bindings: pwm: convert pwm-bcm2835 bindings to YAML
-Date:   Sat, 17 Jun 2023 15:36:17 +0200
-Message-Id: <20230617133620.53129-5-stefan.wahren@i2se.com>
+        Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH V2 0/7] ARM: dts: bcm283x: Improve device-trees and bindings
+Date:   Sat, 17 Jun 2023 15:36:13 +0200
+Message-Id: <20230617133620.53129-1-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230617133620.53129-1-stefan.wahren@i2se.com>
-References: <20230617133620.53129-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:TYFuVqZD3jYtkk6+GD5UzcN2416fgXqjUg2mFaGJe6WHPTO7HPH
- 7oEIfw5baV63U/v7VUx0ZmLTD0Boi51cYj9b962jzufJE4xE1lZo4v1mbPRcQh9zIacH8aJ
- R/2TXdcQ4FysRSsCfwbESdTPDpsgF23mqfQ1evY3a8f525ge+36+OejV6xoKw1gyLxDpxWk
- ujo9SJDRLTvDUnzCt4GAg==
-UI-OutboundReport: notjunk:1;M01:P0:fhUkDUnOG2A=;JiD8inveuTdBC4Sifc1wUqYzewa
- sOlxnFzOJblh67R7ZAyUU9QH3YDDo13rT9JFwxqPnzNxhtbrjlqWUDxk2JHrjBZ/t8eLd4J7v
- GRMj9DveSXPwqCX9kL2jiEt02+TxxU5+alKcvDBfJKVFIw/UPVjwQpj+TG12xM2gQCxaTpTaS
- JM5pEwkWav2fxGs16tA1cHPbEX92yP1pC48dYYNPojyCCKyPuMd4mO+jAsTkATtHDC7eq0Yqv
- kZC+2s7VK+rl4n5eHRjurOR5ez5OZ9OX0VNUJ+Hwh/ES4KIe/OU1VLDBlpOFlLB0PArNn4FtX
- CePmKtKR6WdubRjWyjmP7bc5GLLhGkYntG7qGdKnwKrE3N2jZntzkJgVitrxCvMeMBewQxok6
- s3GUA0b8QS0Zd5g0vIYcDF497nRtFaXP9gNkxGM1ixYysWPtVMuRoqf/49YQkPGx6wxADHmBc
- jAPMtd6nJlsuNJ+F6+aYagEeU4TOivc0k3xiLh6cLYBk2v6BC2j7LLlFsVP4ZD2dQqNPpqDmJ
- uBjOP4aOybwCLlHAL521YHob6/rZb7aGDvY1FTqX8rHduN6f4+472cuPgJxN3vFviTahQSCmu
- HsOfqfdrpsBa/Zg0mvi5XcVuxddGhmB/0BzW9lE6PsDhdWO+4fdsStwgpi0KdTKyF/iCqcs91
- znVOcWSQ8FUpcMBO6NG+J1HobKqWg9vwEJa6uWqgDQ==
+X-Provags-ID: V03:K1:YcK/WR3T6hRaLw1AnRYEOWbBdCZO9EhCjZdqdqs73nVdKHWNmCZ
+ 20NQGWbCY/hqlHi3SeaUojIUqSFa4Zp6DkL7MTtmuyaro5Z0MGjEd2SOK7KkLRSUl+pJQVo
+ vhKkfgNjXl56DrXFxTBMKAF0aaqicxN8CLwL/u+Afz89D8nChAO6OTEK1sMlQEs/Tbiz6IV
+ HfyVn1YxUq8qCgMf71InA==
+UI-OutboundReport: notjunk:1;M01:P0:WRpEgt448HQ=;Jrx4hK3B7Q3em0TSzh5wtA+CGrh
+ x5IVkZUABea9X6Ymu3965wxvZwVk6bzg5CJC3GpRtVdZs0yAJvJJuRmLQgb6RdBgY7u9yftA3
+ JadzRKSiEIcXX7DZGHN8YbxhU2tWn+k6vugMS+kRF9Y2M1wVdd68wT4igPjydHir0pDkT3FgR
+ FnimddScYqvul10fN05NYrjQuNbZ+Izd5Z7pSjX3nPlWpi+a1PdLu+piSUXMXu4+8qMfcPXIm
+ PvkmsEkhM48Nef7MObzLGcKVzAtgdy3dwqu+1uGiz/5guJM5zY6Ju6XDNat2EjGwW45vKjp/7
+ lm2yMqXiedbMX38XwhfRcJqyfuAoGmE1PwyJDeZE8migVNlC4Iv0ZFay86jd+oyZ+gQo26Rjy
+ rCwKbjat3YcvZlfX1AYjK5IlPPpk+JOvuZeAerP7K5VyLprj3J7wj1Uym+SyImJZ9/809uv1G
+ UCnTWrgqHUN3deThwTuR1t1rh+qkwBtkLjrhDKdF41TpHvyWePcZzGOgcxan+SOczFDZ+DtOG
+ u27BWXSESaUJdxvGSTw0Hh41bJwqvxVY986XgzkVTIRal2SV1cTOPcd9oCR+RoVUD0xpuDflt
+ eDUkzlY3f8W1qdkMwO22qRZlBcGewAeeum+ryOFpy0vtYdssiHWNsYsCdm0i0QLwssiVscG4W
+ u0CfwhSWbkgnmfwXUKcpxJKUodnNmNriu5vxZ1X1eA==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the DT binding document for pwm-bcm2835 from .txt to YAML.
+This series fix some dtbs_check warning for the Raspberry Pi boards
+and convert 4 txt DT bindings for BCM2835 to YAML.
 
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-Reviewed-by: Rob Herring <robh@kernel.org>
-Reviewed-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
----
- .../devicetree/bindings/pwm/pwm-bcm2835.txt   | 30 -------------
- .../devicetree/bindings/pwm/pwm-bcm2835.yaml  | 43 +++++++++++++++++++
- 2 files changed, 43 insertions(+), 30 deletions(-)
+Changes in V2:
+- drop already applied patches (bcm2835-sdhost, bcm2835-thermal)
+- drop patch "dmaengine: bcm2835: also support generic dma-channel-mask"
+- keep brcm,bcm2835-dma for ABI compatibility which also resolve
+  dependency between patch 2 and 3
+- drop quotes in patch 2 as noted by Rob Herring
+- add interrupt description as suggested by Rob
+- add Rob's and Uwe's Reviewed-by
+
+
+Stefan Wahren (7):
+  ARM: dts: bcm283x: Fix pinctrl groups
+  dt-bindings: dma: convert bcm2835-dma bindings to YAML
+  ARM: dts: bcm2835: adjust DMA node names
+  dt-bindings: pwm: convert pwm-bcm2835 bindings to YAML
+  ARM: dts: bcm283x: Increase pwm-cells
+  dt-bindings: mailbox: convert bcm2835-mbox bindings to YAML
+  dt-bindings: timer: convert bcm2835-system-timer bindings to YAML
+
+ .../bindings/dma/brcm,bcm2835-dma.txt         |  83 --------------
+ .../bindings/dma/brcm,bcm2835-dma.yaml        | 102 ++++++++++++++++++
+ .../bindings/mailbox/brcm,bcm2835-mbox.txt    |  26 -----
+ .../bindings/mailbox/brcm,bcm2835-mbox.yaml   |  40 +++++++
+ .../devicetree/bindings/pwm/pwm-bcm2835.txt   |  30 ------
+ .../devicetree/bindings/pwm/pwm-bcm2835.yaml  |  43 ++++++++
+ .../timer/brcm,bcm2835-system-timer.txt       |  22 ----
+ .../timer/brcm,bcm2835-system-timer.yaml      |  48 +++++++++
+ arch/arm/boot/dts/bcm2711.dtsi                |   4 +-
+ arch/arm/boot/dts/bcm2835-common.dtsi         |   2 +-
+ arch/arm/boot/dts/bcm2835-rpi-a-plus.dts      |   1 +
+ arch/arm/boot/dts/bcm2835-rpi-a.dts           |   1 +
+ arch/arm/boot/dts/bcm2835-rpi-b-plus.dts      |   1 +
+ arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts      |   1 +
+ arch/arm/boot/dts/bcm2835-rpi-b.dts           |   1 +
+ arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts     |   1 +
+ arch/arm/boot/dts/bcm2835-rpi-zero-w.dts      |   2 +
+ arch/arm/boot/dts/bcm2835-rpi-zero.dts        |   1 +
+ arch/arm/boot/dts/bcm2835-rpi.dtsi            |   2 -
+ arch/arm/boot/dts/bcm2836-rpi-2-b.dts         |   1 +
+ arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts     |   1 +
+ arch/arm/boot/dts/bcm2837-rpi-zero-2-w.dts    |   2 +
+ arch/arm/boot/dts/bcm283x.dtsi                |   2 +-
+ 23 files changed, 250 insertions(+), 167 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt
+ create mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.txt
+ create mode 100644 Documentation/devicetree/bindings/mailbox/brcm,bcm2835-mbox.yaml
  delete mode 100644 Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt
  create mode 100644 Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
+ delete mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
+ create mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
 
-diff --git a/Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt b/Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt
-deleted file mode 100644
-index f5753b3f79df..000000000000
---- a/Documentation/devicetree/bindings/pwm/pwm-bcm2835.txt
-+++ /dev/null
-@@ -1,30 +0,0 @@
--BCM2835 PWM controller (Raspberry Pi controller)
--
--Required properties:
--- compatible: should be "brcm,bcm2835-pwm"
--- reg: physical base address and length of the controller's registers
--- clocks: This clock defines the base clock frequency of the PWM hardware
--  system, the period and the duty_cycle of the PWM signal is a multiple of
--  the base period.
--- #pwm-cells: Should be 3. See pwm.yaml in this directory for a description of
--  the cells format.
--
--Examples:
--
--pwm@2020c000 {
--	compatible = "brcm,bcm2835-pwm";
--	reg = <0x2020c000 0x28>;
--	clocks = <&clk_pwm>;
--	#pwm-cells = <3>;
--};
--
--clocks {
--	....
--		clk_pwm: pwm {
--			compatible = "fixed-clock";
--			reg = <3>;
--			#clock-cells = <0>;
--			clock-frequency = <9200000>;
--		};
--	....
--};
-diff --git a/Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml b/Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
-new file mode 100644
-index 000000000000..15e7fd98defc
---- /dev/null
-+++ b/Documentation/devicetree/bindings/pwm/pwm-bcm2835.yaml
-@@ -0,0 +1,43 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/pwm/pwm-bcm2835.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: BCM2835 PWM controller (Raspberry Pi controller)
-+
-+maintainers:
-+  - Stefan Wahren <stefan.wahren@i2se.com>
-+
-+allOf:
-+  - $ref: pwm.yaml#
-+
-+properties:
-+  compatible:
-+    const: brcm,bcm2835-pwm
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+  "#pwm-cells":
-+    const: 3
-+
-+required:
-+  - compatible
-+  - reg
-+  - clocks
-+  - "#pwm-cells"
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    pwm@2020c000 {
-+      compatible = "brcm,bcm2835-pwm";
-+      reg = <0x2020c000 0x28>;
-+      clocks = <&clk_pwm>;
-+      #pwm-cells = <3>;
-+    };
 -- 
 2.34.1
 
