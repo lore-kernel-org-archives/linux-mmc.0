@@ -2,75 +2,251 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63F07EB64D9
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 09:04:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A266EB64DA
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:37:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231889AbjFQJEn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Jun 2023 05:04:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42166 "EHLO
+        id S235436AbjFQNhI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Jun 2023 09:37:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40688 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232319AbjFQJEm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 05:04:42 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 732DD2688;
-        Sat, 17 Jun 2023 02:04:41 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0776C61164;
-        Sat, 17 Jun 2023 09:04:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B979DC433CA;
-        Sat, 17 Jun 2023 09:04:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686992680;
-        bh=dN0u2j1tR/l904xOI1ryxBqN0KJIfbBjlVN87fe2ubQ=;
-        h=From:To:Cc:Subject:Date:From;
-        b=F8fqGm0oqCFZoLyRTgi3y37lY0GB6NwMie2dQRm/QrOUuD3nIjrDVFtGdzOZ9BtIi
-         0WYS5ie6cdvD8+pzyA1bASQBQZZcPO9jpSa2wJzh43+KbCfUcfjSjmqBNwIUuftRvR
-         d843ihXLpKrbxW/BZNKP9zXuFgAX6KeQBPr4AWB+6Vc59+In728+mefpPlgkZkuP3r
-         LPuI9o/e5868FRBWqfqd/TZ1n0wH/kg09TQy2n7FmQzTHCV35IZ1zQv+9+mXEdmAKo
-         HBu53DdcxfQaUEIXiq6p6wBXSslHM1ad8szd9+uGiAcZ9IxreIu6PIn5Y9849oAwh2
-         /EpmtcL02QICQ==
-From:   Jisheng Zhang <jszhang@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>,
-        Gabriel Somlo <gsomlo@gmail.com>, Joel Stanley <joel@jms.id.au>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: litex_mmc: set PROBE_PREFER_ASYNCHRONOUS
-Date:   Sat, 17 Jun 2023 16:53:19 +0800
-Message-Id: <20230617085319.2139-1-jszhang@kernel.org>
-X-Mailer: git-send-email 2.40.0
+        with ESMTP id S232091AbjFQNhH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:37:07 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9067B5;
+        Sat, 17 Jun 2023 06:37:05 -0700 (PDT)
+Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
+ (mreue009 [212.227.15.167]) with ESMTPSA (Nemesis) id
+ 1N49Yn-1q1L6f0zC5-0108qe; Sat, 17 Jun 2023 15:36:40 +0200
+From:   Stefan Wahren <stefan.wahren@i2se.com>
+To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>
+Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
+        bcm-kernel-feedback-list@broadcom.com,
+        Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH V2 1/7] ARM: dts: bcm283x: Fix pinctrl groups
+Date:   Sat, 17 Jun 2023 15:36:14 +0200
+Message-Id: <20230617133620.53129-2-stefan.wahren@i2se.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230617133620.53129-1-stefan.wahren@i2se.com>
+References: <20230617133620.53129-1-stefan.wahren@i2se.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Provags-ID: V03:K1:IY3M0xwlJcn1MHHWzufLssN2h75OOWkxST7zRVe3Aze71fo0TWI
+ AizeCsOGFtCvGGHrVqALKQoNzZh067DQ1DvzT1zXzcOkvCHzqSXS2n3CZov4nF+NF2J+YRB
+ Lf9MvTXQnWdMhfolPqD34KHbxjxPBsyXT27TiMBlPm1XXMc/5R0VQwoA2YocbR6BZ1m9CbU
+ p9IlT0LhX6SryE7po8d6g==
+UI-OutboundReport: notjunk:1;M01:P0:X6pAvDBu4OQ=;zyoofsDWMG++GvPo1YfB/u8FFOH
+ HlE1XYcUeGzAusqDKVYGThsSfTkS9xjxIQcRw50iNYNdDN/kwNgK2pmuUhNIQCs1AsMtM7BXz
+ +7uddUuEklqA6gG5ok3rvcgyHV2Nl+XDIjdSvXc8P3pPZyodcYgsIrLD/7ZvzG91wYRcWIM9q
+ p3QIDfbwcgwNJeNnActWD8MNfDfA8bqTmAm7kNlwvw39dzUagkymZ9ciqwbmUKZxssGLO5Doj
+ r++nwI2Wti96Mcaphs9bU9ry9SaEkGCD9kgvgOPvSkmkwHjSJ0wtLQNhqhL6UTT5/ghM5ehK+
+ KwoEw+FmgJ+vsbRiMX+KbA8D8aeSXMMIWhyX1Kbwiy4c9Khswwd99NmKutPeCUcXoCvNX8If6
+ YcUOadgz665HIVmLER4kbYCIb7m6p/Td2vLGydxLC4z7GGQl/EVVnbFeKTq+QHy/2Wa2ZFQve
+ Er4vqaRHGKiB/SflZvVw/8zyF+C3PKA7dcmb4fcNIyQd3VFYBm4hqRWOV2UrO2YAqj9ksBUSn
+ JMsREY2bMHUBW1LqNIC36cVy9yesGlJISGFcCG2ljK7/VFDaWTEoGDY82pmGnOSzE3aWZWGni
+ BXq62Uj36JM2AMtYwEizaK/fkowddq20TUfJEwBguWREi8PClZjJuvUYU0SjC+a/MIqznRsys
+ +Na6/QOos0m7OL5wWRAUvkpYsTtyh6E61nUks5YQ1A==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-mmc host drivers should have enabled the asynchronous probe option, but
-it seems like we didn't set it for litex_mmc when introducing litex mmc
-support, so let's set it now.
+Currently the dtbs_check for bcm2837 generates warnings like this:
 
-Tested with linux-on-litex-vexriscv on sipeed tang nano 20K fpga.
+gpio@7e200000: 'pinctrl-0' is a dependency of 'pinctrl-names'
 
-Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+This is caused by the definition of pinctrl-names without matching
+pinctrl group and vice versa. So defining both at the same place
+make the dts files easier to review.
+
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 ---
- drivers/mmc/host/litex_mmc.c | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm/boot/dts/bcm2835-rpi-a-plus.dts   | 1 +
+ arch/arm/boot/dts/bcm2835-rpi-a.dts        | 1 +
+ arch/arm/boot/dts/bcm2835-rpi-b-plus.dts   | 1 +
+ arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts   | 1 +
+ arch/arm/boot/dts/bcm2835-rpi-b.dts        | 1 +
+ arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts  | 1 +
+ arch/arm/boot/dts/bcm2835-rpi-zero-w.dts   | 2 ++
+ arch/arm/boot/dts/bcm2835-rpi-zero.dts     | 1 +
+ arch/arm/boot/dts/bcm2835-rpi.dtsi         | 2 --
+ arch/arm/boot/dts/bcm2836-rpi-2-b.dts      | 1 +
+ arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts  | 1 +
+ arch/arm/boot/dts/bcm2837-rpi-zero-2-w.dts | 2 ++
+ 12 files changed, 13 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
-index 39c6707fdfdb..9af6b0902efe 100644
---- a/drivers/mmc/host/litex_mmc.c
-+++ b/drivers/mmc/host/litex_mmc.c
-@@ -649,6 +649,7 @@ static struct platform_driver litex_mmc_driver = {
- 	.driver = {
- 		.name = "litex-mmc",
- 		.of_match_table = litex_match,
-+		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
- 	},
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts b/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts
+index 02ce817868ba..069b48272aa5 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-a-plus.dts
+@@ -81,6 +81,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0 &i2s_alt0>;
+ 
+ 	/* I2S interface */
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-a.dts b/arch/arm/boot/dts/bcm2835-rpi-a.dts
+index 3fdf60eb11dc..2726c00431e8 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-a.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-a.dts
+@@ -83,6 +83,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0 &i2s_alt2>;
+ 
+ 	/* I2S interface */
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts b/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts
+index 9956fd06a4b6..c57b999a4520 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-b-plus.dts
+@@ -83,6 +83,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0 &i2s_alt0>;
+ 
+ 	/* I2S interface */
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts b/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts
+index 4e1770afb145..ae6d3a9586ab 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-b-rev2.dts
+@@ -83,6 +83,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0 &i2s_alt2>;
+ 
+ 	/* I2S interface */
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-b.dts b/arch/arm/boot/dts/bcm2835-rpi-b.dts
+index eec1d0892d33..72764be75a79 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-b.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-b.dts
+@@ -83,6 +83,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0>;
  };
- module_platform_driver(litex_mmc_driver);
+ 
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts b/arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts
+index 87958a96c3e0..3f9d198ac3ab 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-cm1-io1.dts
+@@ -73,6 +73,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0>;
+ };
+ 
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts b/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts
+index dbf825985ec0..1f0b163e400c 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-zero-w.dts
+@@ -97,6 +97,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0>;
+ };
+ 
+@@ -111,6 +112,7 @@ &led_act {
+ };
+ 
+ &sdhci {
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&emmc_gpio34 &gpclk2_gpio43>;
+ };
+ 
+diff --git a/arch/arm/boot/dts/bcm2835-rpi-zero.dts b/arch/arm/boot/dts/bcm2835-rpi-zero.dts
+index f80e65a825fd..539c19c10946 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi-zero.dts
++++ b/arch/arm/boot/dts/bcm2835-rpi-zero.dts
+@@ -85,6 +85,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0 &i2s_alt0>;
+ 
+ 	/* I2S interface */
+diff --git a/arch/arm/boot/dts/bcm2835-rpi.dtsi b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+index ee9ee9d1fe65..f0acc9390f31 100644
+--- a/arch/arm/boot/dts/bcm2835-rpi.dtsi
++++ b/arch/arm/boot/dts/bcm2835-rpi.dtsi
+@@ -26,8 +26,6 @@ vchiq: mailbox@7e00b840 {
+ };
+ 
+ &gpio {
+-	pinctrl-names = "default";
+-
+ 	gpioout: gpioout {
+ 		brcm,pins = <6>;
+ 		brcm,function = <BCM2835_FSEL_GPIO_OUT>;
+diff --git a/arch/arm/boot/dts/bcm2836-rpi-2-b.dts b/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
+index 6068ec390081..79918033750e 100644
+--- a/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
++++ b/arch/arm/boot/dts/bcm2836-rpi-2-b.dts
+@@ -82,6 +82,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0 &i2s_alt0>;
+ 
+ 	/* I2S interface */
+diff --git a/arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts b/arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts
+index cf84e69fced8..72d26d130efa 100644
+--- a/arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts
++++ b/arch/arm/boot/dts/bcm2837-rpi-cm3-io3.dts
+@@ -72,6 +72,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0>;
+ };
+ 
+diff --git a/arch/arm/boot/dts/bcm2837-rpi-zero-2-w.dts b/arch/arm/boot/dts/bcm2837-rpi-zero-2-w.dts
+index b9cc4594398b..85cf594724ef 100644
+--- a/arch/arm/boot/dts/bcm2837-rpi-zero-2-w.dts
++++ b/arch/arm/boot/dts/bcm2837-rpi-zero-2-w.dts
+@@ -95,6 +95,7 @@ &gpio {
+ 			  "SD_DATA2_R",
+ 			  "SD_DATA3_R";
+ 
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&gpioout &alt0>;
+ };
+ 
+@@ -109,6 +110,7 @@ &led_act {
+ };
+ 
+ &sdhci {
++	pinctrl-names = "default";
+ 	pinctrl-0 = <&emmc_gpio34 &gpclk2_gpio43>;
+ };
+ 
 -- 
-2.40.1
+2.34.1
 
