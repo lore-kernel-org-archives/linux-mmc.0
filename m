@@ -2,27 +2,32 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08D14EB64DC
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 20:37:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B49AC0015E
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 20:37:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346504AbjFQUhM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Jun 2023 16:37:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41964 "EHLO
+        id S234603AbjFQUhQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Jun 2023 16:37:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346521AbjFQUhG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 16:37:06 -0400
+        with ESMTP id S1346529AbjFQUhJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 16:37:09 -0400
 Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 589E61BDF
-        for <linux-mmc@vger.kernel.org>; Sat, 17 Jun 2023 13:36:59 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4701211D;
+        Sat, 17 Jun 2023 13:37:02 -0700 (PDT)
 Received: from localhost.localdomain (178.176.79.248) by msexch01.omp.ru
  (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Sat, 17 Jun
  2023 23:36:51 +0300
 From:   Sergey Shtylyov <s.shtylyov@omp.ru>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-Subject: [PATCH v3 10/12] mmc: sh_mmcif: fix deferred probing
-Date:   Sat, 17 Jun 2023 23:36:20 +0300
-Message-ID: <20230617203622.6812-11-s.shtylyov@omp.ru>
+CC:     Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Samuel Holland <samuel@sholland.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-sunxi@lists.linux.dev>, <stable@vger.kernel.org>
+Subject: [PATCH v3 11/12] mmc: sunxi: fix deferred probing
+Date:   Sat, 17 Jun 2023 23:36:21 +0300
+Message-ID: <20230617203622.6812-12-s.shtylyov@omp.ru>
 X-Mailer: git-send-email 2.26.3
 In-Reply-To: <20230617203622.6812-1-s.shtylyov@omp.ru>
 References: <20230617203622.6812-1-s.shtylyov@omp.ru>
@@ -65,33 +70,44 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The driver overrides the error codes returned by platform_get_irq() to
--ENXIO, so if it returns -EPROBE_DEFER, the driver will fail the probe
-permanently instead of the deferred probing. Switch to propagating the
-error codes upstream.
+The driver overrides the error codes and IRQ0 returned by platform_get_irq()
+to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
+permanently instead of the deferred probing. Switch to propagating the error
+codes upstream.  Since commit ce753ad1549c ("platform: finally disallow IRQ0
+in platform_get_irq() and its ilk") IRQ0 is no longer returned by those APIs,
+so we now can safely ignore it...
 
-Fixes: 9ec36cafe43b ("of/irq: do irq resolution in platform_get_irq")
+Fixes: 2408a08583d ("mmc: sunxi-mmc: Handle return value of platform_get_irq")
+Cc: stable@vger.kernel.org # v5.19+
 Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
+Reviewed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
 ---
+Changes in version 3:
+- added the platform_get_irq() commit reference to the  patch description and
+  the Cc: tag marking the 1st kernel version containing it;
+- added Jernej's tag.
+
 Changes in version 2:
-- refreshed the patch.
+- slightly reformatted the patch description.
 
- drivers/mmc/host/sh_mmcif.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sunxi-mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 0fd4c9d644dd..5cf53348372a 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1400,7 +1400,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	irq[0] = platform_get_irq(pdev, 0);
- 	irq[1] = platform_get_irq_optional(pdev, 1);
- 	if (irq[0] < 0)
--		return -ENXIO;
-+		return irq[0];
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 3db9f32d6a7b..69dcb8805e05 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1350,8 +1350,8 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 		return ret;
  
- 	reg = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(reg))
+ 	host->irq = platform_get_irq(pdev, 0);
+-	if (host->irq <= 0) {
+-		ret = -EINVAL;
++	if (host->irq < 0) {
++		ret = host->irq;
+ 		goto error_disable_mmc;
+ 	}
+ 
 -- 
 2.26.3
 
