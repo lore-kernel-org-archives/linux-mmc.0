@@ -2,161 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8A37C04A94
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 13:42:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83483EB64D9
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Jun 2023 18:14:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234453AbjFQNma (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Jun 2023 09:42:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42912 "EHLO
+        id S230339AbjFQSOi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Jun 2023 14:14:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42908 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236455AbjFQNm1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 09:42:27 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA1E819A2;
-        Sat, 17 Jun 2023 06:42:22 -0700 (PDT)
-Received: from stefanw-SCHENKER ([37.4.248.58]) by mrelayeu.kundenserver.de
- (mreue009 [212.227.15.167]) with ESMTPSA (Nemesis) id
- 1M2fDr-1q7UlX1Vhn-0048wI; Sat, 17 Jun 2023 15:36:44 +0200
-From:   Stefan Wahren <stefan.wahren@i2se.com>
-To:     Vinod Koul <vkoul@kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com,
-        Stefan Wahren <stefan.wahren@i2se.com>,
-        Rob Herring <robh@kernel.org>
-Subject: [PATCH V2 7/7] dt-bindings: timer: convert bcm2835-system-timer bindings to YAML
-Date:   Sat, 17 Jun 2023 15:36:20 +0200
-Message-Id: <20230617133620.53129-8-stefan.wahren@i2se.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230617133620.53129-1-stefan.wahren@i2se.com>
-References: <20230617133620.53129-1-stefan.wahren@i2se.com>
+        with ESMTP id S229745AbjFQSOh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jun 2023 14:14:37 -0400
+Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3A8AB9;
+        Sat, 17 Jun 2023 11:14:36 -0700 (PDT)
+Received: by mail-qv1-xf2a.google.com with SMTP id 6a1803df08f44-62ff4f06b3cso18418426d6.1;
+        Sat, 17 Jun 2023 11:14:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1687025676; x=1689617676;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=ITEoI0GfprmKSy6yT2L8mv5Xf8y2ioJT/R5QvHkoK9A=;
+        b=XsPvwiWJEUN4qNlVOl9D6l+1K8/8xi9KCAWhuK2fTLOJGrnSNxEx7FptZgfvIQnrS4
+         Ka8DA11VnjAahPPCwK08+hlD2ua2xAQU+5CjM2G+rSm1amQdUGPQR0USD5qbtT79L4sf
+         9aBaPwHWjcVdogfrv3XtyUxdVqUATRtqsY3eK3w9F9wHnBVj+gaNKzH3kdsWzjZyxfrz
+         lsKKhYXQnJJColKa60tJi+CI5IrnKi81TEF79FixdhiLR8Um5Di9eZqa1ovoZHzzct3P
+         7V7/FLcw4QmLQUgZypgqcJDSzHcTruYtVAEKRid+Fht3VGlCDvUYJNOf5ShLK/YfUBy9
+         xKkA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687025676; x=1689617676;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ITEoI0GfprmKSy6yT2L8mv5Xf8y2ioJT/R5QvHkoK9A=;
+        b=EbHALx4s8yYJ9IH6GcfttaZyWSahnMjQW8fg5BVsFeLm9M7S1xOhyIgR9UClYJ+OTI
+         y6Va7Kd7+Q+Hqbrer14d8vNfMT0ZqPKA0Um1mExbUayWgdKwggeQlczqTTbw94Iqtf15
+         sGYQ9QPdjiV9kNdQaLFKfYti4XrL/MgOZkmHsi9IQuMKsMljBijt7WZikBQImeQwfPSE
+         AZPjXhe8ZMoRQeU/ieLNSaBa0gmCBHG8/Kw3QVr4+TuNwjlBrGtm0KkojtzCwhuXp4Eh
+         s6/BYD5iRwmGXpegcBNcoIlREKF18OxXS3EPlgJPZKqmpn6Wgwa27C4CKHhXeXLyjrwZ
+         07Pg==
+X-Gm-Message-State: AC+VfDwAhanmSOW1R/pv4Y0Q8sMITrMYNKz1KMBz4p2C1pzjZJnSW8jz
+        sJKvQIgQiA5A0vlHb2djGVdVQadAAvw=
+X-Google-Smtp-Source: ACHHUZ6PkiWxEYa7Ywq5Sp44xTa7+d+48UQf+qZWsIwV2axAsSY0vKmk3QyWBEt9RR6wi/L56ZrSNw==
+X-Received: by 2002:a05:6214:d4f:b0:62d:e09c:fd73 with SMTP id 15-20020a0562140d4f00b0062de09cfd73mr7785730qvr.59.1687025675976;
+        Sat, 17 Jun 2023 11:14:35 -0700 (PDT)
+Received: from errol.ini.cmu.edu ([72.95.245.133])
+        by smtp.gmail.com with ESMTPSA id i18-20020a0cf112000000b0062df126ca11sm5414346qvl.21.2023.06.17.11.14.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 17 Jun 2023 11:14:35 -0700 (PDT)
+Date:   Sat, 17 Jun 2023 14:14:33 -0400
+From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
+To:     Jisheng Zhang <jszhang@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Karol Gugala <kgugala@antmicro.com>,
+        Mateusz Holenko <mholenko@antmicro.com>,
+        Joel Stanley <joel@jms.id.au>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: litex_mmc: set PROBE_PREFER_ASYNCHRONOUS
+Message-ID: <ZI34CQzkDBKpv48n@errol.ini.cmu.edu>
+References: <20230617085319.2139-1-jszhang@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:mVFiliFboW4LEd+X1TQBa6vvRmi7USdo/RW69BmRyNa/pJtjGzS
- tVQ6dwdnHEHr/ZHHezkQhqcYQeI6DcMTENVHZf6OczxoEATjvn8NKf1lIAxB1OpX4zWvY08
- 1sP8GK5j5nAf4xocAOTABS5MDo/6bn++VaK84cFyxqD07Z80Bj2+pOq//rMnClwhW6nUT7s
- OL/kAvNBJ4QbODLW9ofkQ==
-UI-OutboundReport: notjunk:1;M01:P0:inw7a/j3P4k=;k+yIdptIj0BhoNOoxCn068igPV4
- pOdv6vS4XPRfjQPY+0tiABzI5rL/li6o7aLPUKu0+vnm8sELegztndB4AWp6kSatbYEMVl/Rl
- dmofJCZDR+0nNYJ9IA2zvBFjwmKZJ5OuZfKbMf54zg4R6piKdgtKxhXpc5dm4pPql2k58PHVZ
- MMits6+0gfWFcw8fFgH6aKYjupSOMbvR491t7i7m5SQqtlS5Cj7eb6vcdFO06EFOo3w55uVVO
- 8J5z1G5S+4GfED4nhRqqf94urrlTa5f+FqLnLMHF73PYePsrxL2WpIFbsVgYrTDYQk+4JUKH/
- 9M19uFHpSDk96dBA8DOV9ktUAn1r5dnO/wH9Z+3ttGfXf/6pTlmhutwTuRH2t6D2r/5gm1TmX
- JoS8p5nbkFSJI659bjrpCLQZWTYSYA1/+BYsXm6R65xipi9S0hggFPy5ZwP+5cVo11d1XiZg9
- 3onxo7vKD4LHGnh4XO6ErFtxx0pWJcOd81KBgamDmYK4mDiQCSMj6VdrEn0qCu0HsG70DNuly
- jIh1kUSbQQI5+fc+DT6/0cXStqt92tYgZ3JtJULUALmWsLBTcP4wlLXecp4zzsacdr26kbmYb
- nVYOgJAc/+f9OSjjr/h1Mb9pKaMbM6hvj/W/PhoGLVZyjdaR5RscxMlAxqEVlZNj8q59uUy5V
- A8XOBwuZyW1K2+/+sN8OspHzNhiHDiJMZdxhjJjkhQ==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230617085319.2139-1-jszhang@kernel.org>
+X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the DT binding document for bcm2835-system-timer from .txt
-to YAML.
+On Sat, Jun 17, 2023 at 04:53:19PM +0800, Jisheng Zhang wrote:
+> mmc host drivers should have enabled the asynchronous probe option, but
+> it seems like we didn't set it for litex_mmc when introducing litex mmc
+> support, so let's set it now.
+> 
+> Tested with linux-on-litex-vexriscv on sipeed tang nano 20K fpga.
+> 
+> Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+> ---
 
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-Reviewed-by: Rob Herring <robh@kernel.org>
----
- .../timer/brcm,bcm2835-system-timer.txt       | 22 ---------
- .../timer/brcm,bcm2835-system-timer.yaml      | 48 +++++++++++++++++++
- 2 files changed, 48 insertions(+), 22 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
- create mode 100644 Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
+Acked-by: Gabriel Somlo <gsomlo@gmail.com>
 
-diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
-deleted file mode 100644
-index 844bd5fbd04c..000000000000
---- a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
-+++ /dev/null
-@@ -1,22 +0,0 @@
--BCM2835 System Timer
--
--The System Timer peripheral provides four 32-bit timer channels and a
--single 64-bit free running counter. Each channel has an output compare
--register, which is compared against the 32 least significant bits of the
--free running counter values, and generates an interrupt.
--
--Required properties:
--
--- compatible : should be "brcm,bcm2835-system-timer"
--- reg : Specifies base physical address and size of the registers.
--- interrupts : A list of 4 interrupt sinks; one per timer channel.
--- clock-frequency : The frequency of the clock that drives the counter, in Hz.
--
--Example:
--
--timer {
--	compatible = "brcm,bcm2835-system-timer";
--	reg = <0x7e003000 0x1000>;
--	interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
--	clock-frequency = <1000000>;
--};
-diff --git a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
-new file mode 100644
-index 000000000000..227b44788a48
---- /dev/null
-+++ b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
-@@ -0,0 +1,48 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/timer/brcm,bcm2835-system-timer.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: BCM2835 System Timer
-+
-+maintainers:
-+  - Stefan Wahren <stefan.wahren@i2se.com>
-+
-+description:
-+  The System Timer peripheral provides four 32-bit timer channels and a
-+  single 64-bit free running counter. Each channel has an output compare
-+  register, which is compared against the 32 least significant bits of the
-+  free running counter values, and generates an interrupt.
-+
-+properties:
-+  compatible:
-+    const: brcm,bcm2835-system-timer
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    items:
-+      - description: System Timer Compare 0 match (used by VideoCore GPU)
-+      - description: System Timer Compare 1 match (usable for ARM core)
-+      - description: System Timer Compare 2 match (used by VideoCore GPU)
-+      - description: System Timer Compare 3 match (usable for ARM core)
-+
-+  clock-frequency: true
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    timer@7e003000 {
-+      compatible = "brcm,bcm2835-system-timer";
-+      reg = <0x7e003000 0x1000>;
-+      interrupts = <1 0>, <1 1>, <1 2>, <1 3>;
-+      clock-frequency = <1000000>;
-+    };
--- 
-2.34.1
+Thanks!
 
+>  drivers/mmc/host/litex_mmc.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
+> index 39c6707fdfdb..9af6b0902efe 100644
+> --- a/drivers/mmc/host/litex_mmc.c
+> +++ b/drivers/mmc/host/litex_mmc.c
+> @@ -649,6 +649,7 @@ static struct platform_driver litex_mmc_driver = {
+>  	.driver = {
+>  		.name = "litex-mmc",
+>  		.of_match_table = litex_match,
+> +		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+>  	},
+>  };
+>  module_platform_driver(litex_mmc_driver);
+> -- 
+> 2.40.1
+> 
