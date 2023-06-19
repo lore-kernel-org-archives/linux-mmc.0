@@ -2,104 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 425F4C0015E
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 18:58:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98C91EB64D9
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 19:36:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231517AbjFSS6U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 14:58:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60180 "EHLO
+        id S229649AbjFSTg2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 15:36:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43936 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230090AbjFSS6T (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 14:58:19 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11295198;
-        Mon, 19 Jun 2023 11:58:17 -0700 (PDT)
-Received: from [192.168.1.141] ([37.4.248.58]) by mrelayeu.kundenserver.de
- (mreue010 [212.227.15.167]) with ESMTPSA (Nemesis) id
- 1MhDIw-1pY9pj0HLu-00eNvT; Mon, 19 Jun 2023 20:58:01 +0200
-Message-ID: <543ca0c5-0051-3968-63cd-7982f95c06c6@i2se.com>
-Date:   Mon, 19 Jun 2023 20:57:59 +0200
+        with ESMTP id S229518AbjFSTg1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 15:36:27 -0400
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7AD1E55;
+        Mon, 19 Jun 2023 12:36:25 -0700 (PDT)
+Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-51a4088c4ebso3459158a12.1;
+        Mon, 19 Jun 2023 12:36:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1687203384; x=1689795384;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=zQeLBbtBDqCJz2o5WSped30NPmSNwJA9YdQ5+YrIsjk=;
+        b=oQ95idFkaTuzYgonNR/5tWxVTPbn8InGjLCI2QogNPyAbUXwK/uKtGheeB7enSHgVT
+         MvHds7YH8ACbqYtkVaXWtUKPeI5djOJ3CsNohnZx3g/0Ki6TLgVfulo4SvgEIwdmG7tk
+         XM2NY1Nol62rDHofMP/ob4ivDFvOBI24wwsyylPAhwEV9G1K3NFENScKP097+KZowkgU
+         65u/9eXvtIOdyZ88kAss4g8P7nGtYQDOP9cxjOlGl/C+ud7+6vvnPiWXcaBgIQ2nlYnR
+         6tCA2SBw45s/MBSdOr+ocnGv6hRWDxqcEz+g8/ggIdirHrNxh1CL8hol4AuK3I68nwS3
+         pSoQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687203384; x=1689795384;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=zQeLBbtBDqCJz2o5WSped30NPmSNwJA9YdQ5+YrIsjk=;
+        b=ltHvoFfs0QQFnTwmk8tGHYutpZIIl1UbYnPz/HZXO5qDr/gMMwieWcH1eawU/e8jib
+         cjsjOFHoigJpglI+dSV1g88quZtj3egsiC7NzwmUsGNTHhlR2wfc3riwax/hCY1Al/mI
+         EGekL0cQeorlqVKifE8Yn/jH7PKwIx7TddQsG8CIG8VwJsvPPNepSsPWm8QsJdG9CaTJ
+         LtsJ+VSj7RQlpAk4yUaNIZz5ddvQQXefaB7i+sgTdHncHGE9eJ0IDBhGeIV6aLZUpURV
+         DMfk+tUl7xnFkqqTrRMueoXiAGOQPv+mfIHQNIVXW8AbAG5rzLxBNhX1GZGUHeKZrbyW
+         6XuQ==
+X-Gm-Message-State: AC+VfDzXGTchkn2lzxqkOLEHYJ80D9sTBfsLN7mjQaImgGXA4fQO+O5L
+        s5+CJXzXRAhILZ1+WcJEJf8=
+X-Google-Smtp-Source: ACHHUZ7f6E9g8HqEpaKOWKYAlnw3K4xZeQJHpyTffUdlw1FJbMb9xfnH0BLn++8BujqtPQXiLOzIGA==
+X-Received: by 2002:aa7:db89:0:b0:51a:265a:8fca with SMTP id u9-20020aa7db89000000b0051a265a8fcamr5494015edt.27.1687203384038;
+        Mon, 19 Jun 2023 12:36:24 -0700 (PDT)
+Received: from fedora.. (dh207-97-59.xnet.hr. [88.207.97.59])
+        by smtp.googlemail.com with ESMTPSA id q26-20020aa7cc1a000000b005184165f1fasm109895edt.5.2023.06.19.12.36.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 19 Jun 2023 12:36:23 -0700 (PDT)
+From:   Robert Marko <robimarko@gmail.com>
+To:     ulf.hansson@linaro.org, windhl@126.com, avri.altman@wdc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Robert Marko <robimarko@gmail.com>
+Subject: [PATCH] mmc: core: disable TRIM on Kingston EMMC04G-M627
+Date:   Mon, 19 Jun 2023 21:35:58 +0200
+Message-ID: <20230619193621.437358-1-robimarko@gmail.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH V2 7/7] dt-bindings: timer: convert bcm2835-system-timer
- bindings to YAML
-To:     Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com,
-        Rob Herring <robh@kernel.org>
-References: <20230617133620.53129-1-stefan.wahren@i2se.com>
- <20230617133620.53129-8-stefan.wahren@i2se.com>
- <02d1d74a-1476-41c8-6d94-3eb477352309@linaro.org>
-Content-Language: en-US
-From:   Stefan Wahren <stefan.wahren@i2se.com>
-In-Reply-To: <02d1d74a-1476-41c8-6d94-3eb477352309@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-Provags-ID: V03:K1:kyqNE6onSUIAGhdWOX7TEcOYSR9nJY4ipIuWMVmuruSxsIhOzwG
- q2igMagosSZnA+2D5Kel9Loe+7DhBLxfTmKCiPEihrjZqP2wLmOQ4mPwN8xV7sNi50MwTkE
- prt3SUqEjQqTNM5Gv1SwnMq/Qy5ogyoddMH60xBORXDxz2cmavEarrQxgtg/L84b8IzSe+N
- /SAGdh+B88crbEZ0Lo0hg==
-UI-OutboundReport: notjunk:1;M01:P0:4sXSGuBBSEU=;YtGjuqafvYp7ClZgbhTSoPOUjgV
- a/BjjruTJSMjPW/mkG/kLTZG/sWk/ZwWo5AhYl6tYh0ApfaIjZLbzpWFZLU4q9pYkp2c+8YuU
- GppZRT9AkClPW1oWYArwQxkgjb8canfsk26sGIhAnGOxvOs4daBZ8C3lxCR7yaTd/rLqvwFwj
- SWTe1+57XzDTElV16gVqXBRlMiM2qhq2TP1i7L9uQgK425FJ6CgWiknkFRBgtAVgWTNBhg0z6
- BTRRho+o4YNXh7suwDbJDgpOeAN3ylI/nDv4LQt/kI6Zk2eyF1vGSO8cnK1WhUR7tT7WO0pke
- yMXXX1gPPOR4NK/ejqR3cC8vkmdmcyuz7FvK1xej+tKL/1lPvrisSS1gW2tPIB5Uy5+YmBE1p
- 8bzoLYC/0/qb3x/PWSowRD2OwilFpZyHjrlW5Nd7hi81IGeUuoZehaxZDOuxHDE7b7md/F0HV
- 8Cdlx6G/H/xsXby+zZk2uP77/I6e+Rv0JgF7y+tIMOFgIr0a94ELeRZhKro+KKKh5+bYjbp2C
- PkK98bQw6d1X//miCxqfr+cN4V2+/S20RsuQHUVSbl+UypNO/82PnjpG4WQaZRyPl22C1hp6l
- pqpRgWcu/0sVPW2julRijjaSfZvZxLf/el6nGCmURE3kBcUhsCqZgpTE04JYAE72FhQlw5+e0
- ru/vMoB5yxRtM/Puu0qhzzBHOjVU6O1JMIEC4hpOhQ==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Daniel,
+It seems that Kingston EMMC04G-M627 despite advertising TRIM support does
+not work when the core is trying to use REQ_OP_WRITE_ZEROES.
 
-Am 19.06.23 um 19:00 schrieb Daniel Lezcano:
-> On 17/06/2023 15:36, Stefan Wahren wrote:
->> Convert the DT binding document for bcm2835-system-timer from .txt
->> to YAML.
->>
->> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
->> Reviewed-by: Rob Herring <robh@kernel.org>
->> ---
->>   .../timer/brcm,bcm2835-system-timer.txt       | 22 ---------
->>   .../timer/brcm,bcm2835-system-timer.yaml      | 48 +++++++++++++++++++
->>   2 files changed, 48 insertions(+), 22 deletions(-)
->>   delete mode 100644 
->> Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
->>   create mode 100644 
->> Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.yaml
->>
->> diff --git 
->> a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt b/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
->> deleted file mode 100644
->> index 844bd5fbd04c..000000000000
->> --- 
->> a/Documentation/devicetree/bindings/timer/brcm,bcm2835-system-timer.txt
-> 
-> Appliedp patch #7
+We are seeing I/O errors in OpenWrt under 6.1 on Zyxel NBG7815 that we did
+not previously have and tracked it down to REQ_OP_WRITE_ZEROES.
 
-i'm so sorry but i accidentially added a Reviewed-by from Rob, which is 
-wrong here. I should have added to the patch 6 :-(
+Trying to use fstrim seems to also throw errors like:
+[93010.835112] I/O error, dev loop0, sector 16902 op 0x3:(DISCARD) flags 0x800 phys_seg 1 prio class 2
 
-Regards Stefan
+Disabling TRIM makes the error go away, so lets add a quirk for this eMMC
+to disable TRIM.
 
-> 
-> Thanks
-> 
+Signed-off-by: Robert Marko <robimarko@gmail.com>
+---
+ drivers/mmc/core/quirks.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 77caa0c903f8..8decb788a3db 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -107,6 +107,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 	MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
++	/*
++	 * Kingston EMMC04G-M627 advertises TRIM but it does not seems to
++	 * support being used to offload WRITE_ZEROES.
++	 */
++	MMC_FIXUP("M62704", CID_MANFID_KINGSTON, 0x0100, add_quirk_mmc,
++		  MMC_QUIRK_TRIM_BROKEN),
++
+ 	/*
+ 	 * Some SD cards reports discard support while they don't
+ 	 */
+-- 
+2.41.0
+
