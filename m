@@ -2,188 +2,125 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C77D5EB64DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 11:54:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA9D4EB64DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 12:24:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230041AbjFSLyB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 07:54:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34710 "EHLO
+        id S229929AbjFSMYT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 08:24:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230267AbjFSLyA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 07:54:00 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB757134;
-        Mon, 19 Jun 2023 04:53:53 -0700 (PDT)
-Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35JAiTNw032603;
-        Mon, 19 Jun 2023 13:53:33 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=selector1;
- bh=i1KQomgbTCKKL1jhfJcq7MepijYGukr9j+2PCgWp/oI=;
- b=bwJlV/8jzyl4tx7faoHfBVBavw5NOIOv2tj28Ki+HhhAiR/YH19CT5WQhGFt8rwG2qhL
- ZWnoM8Nt9n7/xthDGTeQ8n8zUxifWYNc3FC6A4QReMRRN//OPCZITDvVW6NLYdWEaNgT
- AlCK+tsMsOW1l5mV/6fYVe9txZzdKgQHFAJXeBhIJrpC+6Kqzu4d4wBgKdqEgL+N3zVh
- E27JN4aV6BpRq0AGs0x7XYc4s1jPOKYBVOZFPj6vxp8wzGumVOAPLB2bLlxHL7zFRHuI
- 2kNVOYq1Cu+z8OCkxjp/7xOQVTwYwv69etBb0OWX6ZtHOTEBW0Tnyf/eS7447fljkGt3 Rg== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ramu5rnqg-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 19 Jun 2023 13:53:33 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 2581E10002A;
-        Mon, 19 Jun 2023 13:53:33 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 1C0BE228A33;
-        Mon, 19 Jun 2023 13:53:33 +0200 (CEST)
-Received: from localhost (10.201.21.210) by SHFDAG1NODE2.st.com (10.75.129.70)
- with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Mon, 19 Jun
- 2023 13:53:32 +0200
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        with ESMTP id S230188AbjFSMYN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 08:24:13 -0400
+Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CF6FE64
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 05:23:35 -0700 (PDT)
+Received: by mail-lj1-x22b.google.com with SMTP id 38308e7fff4ca-2b4790ff688so13344561fa.1
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 05:23:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1687177409; x=1689769409;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=TSP20PRjLfEjEczhmjfYNlia/vcSKNLRdUGUz9NHLWk=;
+        b=yo+Z+f5JTD4zf+O3aNYVki4aAyWmqo9AGYDhyQXjeCuyotDVx5sjiU3lNnxu5dNF4r
+         gWi9toGSJ0qggbyNgYt83JM5CmBlAoJk5Na/Rxh8xLCneHmgrQHJfo4EZMKUq4J4gT8m
+         vbfLwDA9/sMvcAtiqOLpM/80FvrFBsls1lOpQ92tmXK1Q5X0Z/fsxjv7zSQ2OAoLAvNq
+         1q8VrWtJYjZ/Qt4qyeuEQd6R2iNvsUpfKcPYu1ed0Yrlpxl6aP5/5XC3ABwl0vH3UMRz
+         6dyS1XvJNUMU1084BqEMdAcA04kzQS4pxZc79NCW3EtIZoZ7rL1l4XfIBUMcJEUtdO5z
+         R7Cg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687177409; x=1689769409;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=TSP20PRjLfEjEczhmjfYNlia/vcSKNLRdUGUz9NHLWk=;
+        b=XEEwv8rTe21KZYrC0MqqEvxeMsOl5rG8rxfnm97iEWZWp/RGA9Ivfj85qTuisYwokx
+         Rl5EBRbIRe/u/d9cYesSFowy5uydD24q7iFLKTKdzNBnPblW9fxtW5eQe9VyctfCHs5o
+         9QtR68yXVaYkLjtPo6a1NZfcZwVdm0OKPtrwK5kVF2UD4ViRKjA4EIP/r1i6Dx0OqDC3
+         flGYdWNE4/TQSMNRS3y/HjgorB8tBpIaHITywKsdD0G5xMAfEEdB21tRL5aFcxtLumYx
+         Oqg1xZFQvOYBZHzh96aZMnr9+O9z+ZnQazHfQOphIIT3v5tc7/fawSQP5UMZQykfvDaH
+         Yw4g==
+X-Gm-Message-State: AC+VfDyAoI8V1S2uONglonGCEDRypr+fzdoHgMkepH9gkRc4q4LsdQwv
+        q4e8ejbJNe0KWMo/kEpIL8wx5A==
+X-Google-Smtp-Source: ACHHUZ55Tp1NaWXP5nJ6mewhwTdXY+WArg4PWOHSlyIXMGE3IKFjWZen5h93Q5FJPTwyw1f8IXcyAA==
+X-Received: by 2002:a2e:a401:0:b0:2b4:809a:1c7c with SMTP id p1-20020a2ea401000000b002b4809a1c7cmr933619ljn.19.1687177408953;
+        Mon, 19 Jun 2023 05:23:28 -0700 (PDT)
+Received: from [192.168.1.20] ([178.197.219.26])
+        by smtp.gmail.com with ESMTPSA id k27-20020a17090646db00b00988be3c1d87sm1123119ejs.116.2023.06.19.05.23.26
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 19 Jun 2023 05:23:28 -0700 (PDT)
+Message-ID: <598c14f9-395c-d218-4af9-31bba022dcf6@linaro.org>
+Date:   Mon, 19 Jun 2023 14:23:25 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.12.0
+Subject: Re: [PATCH v2 1/6] dt-bindings: mmc: mmci: Add st,stm32mp25-sdmmc2
+ compatible
+Content-Language: en-US
+To:     Yann Gautier <yann.gautier@foss.st.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
-CC:     Conor Dooley <conor+dt@kernel.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc:     Conor Dooley <conor+dt@kernel.org>,
         Russell King <linux@armlinux.org.uk>,
         Philipp Zabel <p.zabel@pengutronix.de>,
         Christophe Kerello <christophe.kerello@foss.st.com>,
-        <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>,
+        linux-kernel@vger.kernel.org, Marek Vasut <marex@denx.de>,
         Alexandre Torgue <alexandre.torgue@foss.st.com>,
         Maxime Coquelin <mcoquelin.stm32@gmail.com>,
         Linus Walleij <linus.walleij@linaro.org>,
         Yang Yingliang <yangyingliang@huawei.com>,
         Xiang wangx <wangxiang@cdjrlc.com>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH v2 6/6] mmc: mmci: stm32: add delay block support for STM32MP25
-Date:   Mon, 19 Jun 2023 13:51:20 +0200
-Message-ID: <20230619115120.64474-7-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230619115120.64474-1-yann.gautier@foss.st.com>
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org
 References: <20230619115120.64474-1-yann.gautier@foss.st.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.201.21.210]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-06-19_08,2023-06-16_01,2023-05-22_02
+ <20230619115120.64474-2-yann.gautier@foss.st.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230619115120.64474-2-yann.gautier@foss.st.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On STM32MP25, the delay block is inside the SoC, and configured through
-the SYSCFG registers. The algorithm is also different from what was in
-STM32MP1 chip.
+On 19/06/2023 13:51, Yann Gautier wrote:
+> For STM32MP25, we'll need to distinguish how is managed the delay block.
+> This is done through a new comptible dedicated for this SoC, as the
+> delay block registers are located in SYSCFG peripheral.
+> 
+> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+> ---
+> Changes in v2:
+> - update dt-bindings file (remove bootloader reference and use enum)
+> 
+>  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> index 1c96da04f0e53..2459a55ed540b 100644
+> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> @@ -53,10 +53,11 @@ properties:
+>          items:
+>            - const: arm,pl18x
+>            - const: arm,primecell
+> -      - description: Entry for STMicroelectronics variant of PL18x.
+> -          This dedicated compatible is used by bootloaders.
+> +      - description: Entries for STMicroelectronics variant of PL18x.
+>          items:
+> -          - const: st,stm32-sdmmc2
+> +          - enum:
+> +              - st,stm32-sdmmc2
+> +              - st,stm32mp25-sdmmc2
 
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
----
- drivers/mmc/host/mmci_stm32_sdmmc.c | 66 ++++++++++++++++++++++++++++-
- 1 file changed, 65 insertions(+), 1 deletion(-)
+It's nicely visible that old stm32 entry was family-generic, not
+device-specific, thus not really correct. :( I hope we can learn from
+this for future stm submissions.
 
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index c51c85ca24917..d6112a8dacf8b 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -33,6 +33,20 @@
- #define DLYB_LNG_TIMEOUT_US	1000
- #define SDMMC_VSWEND_TIMEOUT_US 10000
- 
-+#define SYSCFG_DLYBSD_CR	0x0
-+#define DLYBSD_CR_EN		BIT(0)
-+#define DLYBSD_CR_RXTAPSEL_MASK	GENMASK(6, 1)
-+#define DLYBSD_TAPSEL_NB	32
-+#define DLYBSD_BYP_EN		BIT(16)
-+#define DLYBSD_BYP_CMD		GENMASK(21, 17)
-+#define DLYBSD_ANTIGLITCH_EN	BIT(22)
-+
-+#define SYSCFG_DLYBSD_SR	0x4
-+#define DLYBSD_SR_LOCK		BIT(0)
-+#define DLYBSD_SR_RXTAPSEL_ACK	BIT(1)
-+
-+#define DLYBSD_TIMEOUT_1S_IN_US	1000000
-+
- struct sdmmc_lli_desc {
- 	u32 idmalar;
- 	u32 idmabase;
-@@ -499,6 +513,46 @@ static int sdmmc_dlyb_mp15_prepare(struct mmci_host *host)
- 	return 0;
- }
- 
-+static int sdmmc_dlyb_mp25_enable(struct sdmmc_dlyb *dlyb)
-+{
-+	u32 cr, sr;
-+
-+	cr = readl_relaxed(dlyb->base + SYSCFG_DLYBSD_CR);
-+	cr |= DLYBSD_CR_EN;
-+
-+	writel_relaxed(cr, dlyb->base + SYSCFG_DLYBSD_CR);
-+
-+	return readl_relaxed_poll_timeout(dlyb->base + SYSCFG_DLYBSD_SR,
-+					   sr, sr & DLYBSD_SR_LOCK, 1,
-+					   DLYBSD_TIMEOUT_1S_IN_US);
-+}
-+
-+static int sdmmc_dlyb_mp25_set_cfg(struct sdmmc_dlyb *dlyb,
-+				   int unit __maybe_unused, int phase,
-+				   bool sampler __maybe_unused)
-+{
-+	u32 cr, sr;
-+
-+	cr = readl_relaxed(dlyb->base + SYSCFG_DLYBSD_CR);
-+	cr &= ~DLYBSD_CR_RXTAPSEL_MASK;
-+	cr |= FIELD_PREP(DLYBSD_CR_RXTAPSEL_MASK, phase);
-+
-+	writel_relaxed(cr, dlyb->base + SYSCFG_DLYBSD_CR);
-+
-+	return readl_relaxed_poll_timeout(dlyb->base + SYSCFG_DLYBSD_SR,
-+					  sr, sr & DLYBSD_SR_RXTAPSEL_ACK, 1,
-+					  DLYBSD_TIMEOUT_1S_IN_US);
-+}
-+
-+static int sdmmc_dlyb_mp25_prepare(struct mmci_host *host)
-+{
-+	struct sdmmc_dlyb *dlyb = host->variant_priv;
-+
-+	dlyb->max = DLYBSD_TAPSEL_NB;
-+
-+	return 0;
-+}
-+
- static int sdmmc_dlyb_phase_tuning(struct mmci_host *host, u32 opcode)
- {
- 	struct sdmmc_dlyb *dlyb = host->variant_priv;
-@@ -639,6 +693,12 @@ static struct sdmmc_tuning_ops dlyb_tuning_mp15_ops = {
- 	.set_cfg = sdmmc_dlyb_mp15_set_cfg,
- };
- 
-+static struct sdmmc_tuning_ops dlyb_tuning_mp25_ops = {
-+	.dlyb_enable = sdmmc_dlyb_mp25_enable,
-+	.tuning_prepare = sdmmc_dlyb_mp25_prepare,
-+	.set_cfg = sdmmc_dlyb_mp25_set_cfg,
-+};
-+
- void sdmmc_variant_init(struct mmci_host *host)
- {
- 	struct device_node *np = host->mmc->parent->of_node;
-@@ -657,7 +717,11 @@ void sdmmc_variant_init(struct mmci_host *host)
- 		return;
- 
- 	dlyb->base = base_dlyb;
--	dlyb->ops = &dlyb_tuning_mp15_ops;
-+	if (of_device_is_compatible(np, "st,stm32mp25-sdmmc2"))
-+		dlyb->ops = &dlyb_tuning_mp25_ops;
-+	else
-+		dlyb->ops = &dlyb_tuning_mp15_ops;
-+
- 	host->variant_priv = dlyb;
- 	host->mmc_ops->execute_tuning = sdmmc_execute_tuning;
- }
--- 
-2.25.1
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+
+Best regards,
+Krzysztof
 
