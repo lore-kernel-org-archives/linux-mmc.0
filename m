@@ -2,126 +2,113 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82489EB64D9
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 19:37:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE9F6EB64D9
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 19:51:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229518AbjFSThI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 15:37:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44482 "EHLO
+        id S229682AbjFSTvX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 15:51:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230036AbjFSThH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 15:37:07 -0400
-Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E8D7E4A;
-        Mon, 19 Jun 2023 12:37:05 -0700 (PDT)
-Received: by mail-pg1-x52c.google.com with SMTP id 41be03b00d2f7-54f87d5f1abso1548552a12.0;
-        Mon, 19 Jun 2023 12:37:05 -0700 (PDT)
+        with ESMTP id S229632AbjFSTvW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 15:51:22 -0400
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30364106;
+        Mon, 19 Jun 2023 12:51:21 -0700 (PDT)
+Received: by mail-ej1-x630.google.com with SMTP id a640c23a62f3a-987accb4349so427209566b.0;
+        Mon, 19 Jun 2023 12:51:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1687203425; x=1689795425;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=cCiCGDxwMd4WhpJ0lDsOjZu5jiOFyiINH2AXPJn8g98=;
-        b=mazydBsOJ61iVOeYzcKkFUdSpcT0CZINW60Bd2tz9IMi4xIBK3nySdwi812xi5Uci6
-         khkBbk0so2TEJCr6wSu0rUU2Y30y4fES6Ia1cIPoJfol6RsZr1gVm3nR0h455tR+4ydG
-         mEZshXipTnCkwT3+8LMIVB56w4PxbOPJ/njZZ29+rPdgdLlpY84PonJ9yDLTOjY1YEh5
-         7zrYsRWfz5+8J/a8sWU2AsouhWn4uQV+pIQq661CHst3llbti3bbiIiOd1VPcfAwn6QD
-         l78Wy1umH7r7TYqHtTS7FQGEkIlKvTqJYVwieBfCygw6dbtZ8yDP5ULgHdHRMyIGsfzv
-         fldQ==
+        d=googlemail.com; s=20221208; t=1687204279; x=1689796279;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Sd0Z4QXfggzwHtnXjPLZAClg5L7keAUm3VKoUQTaD/E=;
+        b=EJ4G6ji/n65WTVFd+8fUKpKE/pPADTSbANE84/FVL/5xaqN9lrz6hUYxCruKjB00T3
+         A+PzuCjKDLHT/NHQBzW77tyuTB/iOEdzUo5QQoHANdWUOMYd80KyJtTl8KnusjARFyRY
+         P2Dq86RDh4y69k3YOc4/sWJMnCzw3f6PBs+45PAHWzERKRIuN0osGyfLtDbjMFYffkNL
+         y16PhKmWZm42f2MUP9VOa+W2O3RPpB7FkwOFxbxbG2lw2CDrtIRT8xLrVvOWI4kv0nOf
+         ag7kxQF7Tfqx9QJWbEq6cfwBXoU/ZfvRMu27Y9+ttAESU2F7kuB0gnH4TL1efzIPyEFL
+         9SIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687203425; x=1689795425;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=cCiCGDxwMd4WhpJ0lDsOjZu5jiOFyiINH2AXPJn8g98=;
-        b=UJT+qJNGHEBXxsu8veEN9NWKr20e+MxTLIG3FsEJYf3rrvujKOQQCjAcI96uyR+gBl
-         XojO4iIaQS9EINtHHHRZv2gMsP0OV1RcWLmxVYGsoa/E6WIsq7JbJDZGVYpzUmrww7OS
-         WgNk+3KaGFL/SfKUddJFqSbTDzIq5KDoaR53TtrXGnr4+gJO6ErXjJ1+CdUAl6tBdgKo
-         tN9LeHkJxGmF3vrNNLSp9P+bJF2GWK1Shj5Z3szUZ3soMZqTlNd60zbDNV96LjhaSwpP
-         kAWxo50QWlNMNwWqWhw62+3TW3nk+SXiNfd3+P5MuR7b6MK6DdE1VZjGk1QNbDOc0DWw
-         M9LQ==
-X-Gm-Message-State: AC+VfDwQIUidpWQ75atD9b/2ibdO1WfXTownx3Sfrz7i3PYNpszbaqu7
-        VeXnNKsAxF3sy3rdGFAeBcaxGJ4iyW19OI4JfjM=
-X-Google-Smtp-Source: ACHHUZ6PgQI0YWBvwKEoR+LcYOrOSEz8AY2kbvq0r/sSmxusIBdj5mWaqQxyYSdICImLKtVM0XtSU3UduPPuU86kJM4=
-X-Received: by 2002:a05:6a20:3d1c:b0:10d:f812:e4b5 with SMTP id
- y28-20020a056a203d1c00b0010df812e4b5mr7441916pzi.35.1687203424890; Mon, 19
- Jun 2023 12:37:04 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1687204279; x=1689796279;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Sd0Z4QXfggzwHtnXjPLZAClg5L7keAUm3VKoUQTaD/E=;
+        b=BnJeWnixcRVcn2mMc06wavPfo6yVOxbwPYzrO7oCdGzVV7FGcnxblNf1DEnG9egIOQ
+         VLV5ztodqPIQKf/XTemURLMDayNDhqIrJxn5z+r4ystufPOt4+olD7yHVwVCTV1fn3uc
+         +LH2RBtvVQ8A854nUCR0ivZN+VrXTXu0LVSGOt3a2upOUkHKzboxm5eMF4+y2u62vHyg
+         7bGGGyUwc06FqUVanwB3ZwDLMhZYMIPgRCcEPRwk9hBLLPK1r7bytAdJZzX7PDAoXqO/
+         sLiOg8ULSPL87awZh6EhZ4Pn2j+zwWpY51JgAcJUbtYWp2L8EMcJlFBxLoBkW1TF0sYT
+         OJeg==
+X-Gm-Message-State: AC+VfDxQKWrn6aWIL8gmYlVFhjqQIRMYHCoROO7Hg2f60LOIEmUez71x
+        hKbGI0+FANkTkPj1cuc4mKzCc6InYC5Im2a49NyYe4vaSv4=
+X-Google-Smtp-Source: ACHHUZ63TBsrxqGLzHLhPqGvnsA2IbglzQC0C14yaOFsZ83BWmNwv/AKD9ZicJVSWO/8KUat6yXXiS0uTl+xZQU81/M=
+X-Received: by 2002:a17:907:7faa:b0:988:2111:bb2d with SMTP id
+ qk42-20020a1709077faa00b009882111bb2dmr7590179ejc.7.1687204279367; Mon, 19
+ Jun 2023 12:51:19 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230530213259.1776512-1-robimarko@gmail.com> <CAPDyKForsVQ_inZG9+8mWdWM6-_T6O23AiwndLg33Yh7rPYTpA@mail.gmail.com>
- <CAPDyKFrOG=mCW3WBr=n081EBDkKobSK_w+b6AnVAhcp_8gC5nQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFrOG=mCW3WBr=n081EBDkKobSK_w+b6AnVAhcp_8gC5nQ@mail.gmail.com>
-From:   Robert Marko <robimarko@gmail.com>
-Date:   Mon, 19 Jun 2023 21:36:54 +0200
-Message-ID: <CAOX2RU5s9EPuwZM0T08HKjpr1TPn=Yvs9xAoJT41+PPRWTMYNw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: disable TRIM on Micron MTFC4GACAJCN-1M
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "Luca Porzio (lporzio)" <lporzio@micron.com>, windhl@126.com,
-        avri.altman@wdc.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+References: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
+In-Reply-To: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Mon, 19 Jun 2023 21:51:08 +0200
+Message-ID: <CAFBinCAJ1E6JKmFTuaJwGpd_MBzHMZ0mMj-1AE3TNeB2_72nZA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-mx-sdhc: Fix initialization frozen issue
+To:     Ziyang Huang <hzyitc@outlook.com>
+Cc:     ulf.hansson@linaro.org, neil.armstrong@linaro.org,
+        khilman@baylibre.com, jbrunet@baylibre.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 19 Jun 2023 at 13:43, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Fri, 9 Jun 2023 at 00:18, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > + Luca (Bean was added by Avri in another thread)
-> >
-> > On Tue, 30 May 2023 at 23:33, Robert Marko <robimarko@gmail.com> wrote:
-> > >
-> > > It seems that Micron MTFC4GACAJCN-1M despite advertising TRIM support does
-> > > not work when the core is trying to use REQ_OP_WRITE_ZEROES.
-> > >
-> > > We are seeing the following errors in OpenWrt under 6.1 on Qnap Qhora 301W
-> > > that we did not previously have and tracked it down to REQ_OP_WRITE_ZEROES:
-> > > [   18.085950] I/O error, dev loop0, sector 596 op 0x9:(WRITE_ZEROES) flags 0x800 phys_seg 0 prio class 2
-> > >
-> > > Disabling TRIM makes the error go away, so lets add a quirk for this eMMC
-> > > to disable TRIM.
-> >
-> > Let's leave this another week or so, to allow Micron folkz to confirm
-> > before applying.
-> >
-> > >
-> > > Signed-off-by: Robert Marko <robimarko@gmail.com>
->
-> Applied for next and by adding a stable tag, thanks!
+Hello,
 
-Thanks, I have sent the patch for one of Kingstom eMMC as well that
-seems to have TRIM broken
-as well.
+first of all: thank you for this patch!
 
-Regards,
-Robert
+On Mon, Jun 19, 2023 at 7:36=E2=80=AFPM Ziyang Huang <hzyitc@outlook.com> w=
+rote:
 >
->
-> Kind regards
-> Uffe
->
-> >
-> > > ---
-> > >  drivers/mmc/core/quirks.h | 7 +++++++
-> > >  1 file changed, 7 insertions(+)
-> > >
-> > > diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> > > index 29b9497936df..77caa0c903f8 100644
-> > > --- a/drivers/mmc/core/quirks.h
-> > > +++ b/drivers/mmc/core/quirks.h
-> > > @@ -100,6 +100,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
-> > >         MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
-> > >                   MMC_QUIRK_TRIM_BROKEN),
-> > >
-> > > +       /*
-> > > +        * Micron MTFC4GACAJCN-1M advertises TRIM but it does not seems to
-> > > +        * support being used to offload WRITE_ZEROES.
-> > > +        */
-> > > +       MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
-> > > +                 MMC_QUIRK_TRIM_BROKEN),
-> > > +
-> > >         /*
-> > >          * Some SD cards reports discard support while they don't
-> > >          */
-> > > --
-> > > 2.40.1
-> > >
+> Commit 4bc31edebde5 ("mmc: core: Set HS clock speed before sending
+> HS CMD13") set HS clock (52MHz) before switching to HS mode. For this
+> freq, FCLK_DIV5 will be selected and div value is 10 (reg value is 9).
+> Then we set rx_clk_phase to 11 or 15 which is out of range and make
+> hardware frozen. After we send command request, no irq will be
+> interrupted and the mmc driver will keep to wait for request finished,
+> even durning rebooting.
+I think this is the exact same problem I reported some days ago: [0]
+Ulf is questioning whether we properly support 52MHz clocks correctly,
+so I think you're onto something!
+
+So this is an excellent finding! I can confirm that using rx_clk_phase
+of 1 makes my Odroid-C1 eMMC work again :-)
+
+> So let's set a common value - 1 just for initialization. Then let
+> meson_mx_sdhc_execute_tuning() to find the accurate value for data
+> transfer.
+As far as I know unconditionally using value 1 can negatively affect
+other devices.
+I'm assuming that you're testing on an Odroid-C1 or similar board with
+HS200 eMMC:
+On those SoC + eMMC combinations we do support. But on other boards
+(for example Meson8b EC-100 / Endless Mini) there's no HS200 support
+because the eMMC is connected with 3.3V IO lines. So tuning is not
+executed there (if I recall correctly).
+
+What do you think about adding a special case for the 51MHz "actual
+clock rate" and adding a comment that it was found by manual testing?
+For some reason (that I don't understand) Amlogic's vendor driver
+maxes out at 47.22MHz (presumably because they limit themselves to
+using FCLK_DIV3 as input only - but I don't get why...).
+
+
+Best regards,
+Martin
+
+
+[0] https://lore.kernel.org/linux-amlogic/CAFBinCD0RT0p-jk86W0JuMT3ufohRh1R=
+qWCcM35DKZJpuc10HQ@mail.gmail.com/
+[1] https://lore.kernel.org/linux-amlogic/CAPDyKFpS-UwiaRPMqSpX0mNPrS5p=3Dy=
+Jzu3g0=3DpGyCkWHSYyqWg@mail.gmail.com/
