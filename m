@@ -2,91 +2,130 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68C03EB64D9
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 10:41:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B5B1EB64DD
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 11:03:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231789AbjFSKk2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 06:40:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45998 "EHLO
+        id S232620AbjFSLDH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 07:03:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34136 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232080AbjFSKkP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 06:40:15 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B98510C;
-        Mon, 19 Jun 2023 03:40:01 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id 98e67ed59e1d1-2553663f71eso1318353a91.3;
-        Mon, 19 Jun 2023 03:40:01 -0700 (PDT)
+        with ESMTP id S232573AbjFSLCn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 07:02:43 -0400
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DCE1F9
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 04:01:45 -0700 (PDT)
+Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-bd6446528dcso3554587276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 04:01:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1687171200; x=1689763200;
-        h=content-transfer-encoding:to:subject:message-id:date:from
+        d=linaro.org; s=google; t=1687172504; x=1689764504;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=csWkZ+3rEO5iESfqoXX46lFqWTpd14+bhReleYuntBQ=;
-        b=siEu+MpaxpXWr1xJ86DiNClLQdE/64Cdr2FvUh/oTf40G6vCor394HZX43AfZRexDz
-         rbPAZTIeU+5C2Xd5wWZTdukicNkPDkR4YfVBjtSzW9KbfTo13wchy8uwmFuQ1UevQAh/
-         Ml2MVxX/X2oNQtQV5W9uTbOQxNFjOBhpbmnoVmXujjLye3whs2En3WVO2dWnkjekbQcP
-         IomT3Z5mrhf6XanWppDXPQ9qlRgHgHIruddIRUI9e1/8+Cge5MfFVSN+OUrH5xOxyQmx
-         nWwk2NJNJ9tedp4LGPstbqvO1wvvisK9RMDI/wPytfpStJ9nB3GANh3hJSkUg2DXvQjq
-         PmEA==
+        bh=JFefUUpn1s6a7sJJBpPvKuxmZjNogUs0xOa+QZnqFw4=;
+        b=SdRHTtBPelSA/gTKMa772eDiMFG1SNghdBlsxSp2Rs3hhMmvMPa5E9v+esTAq1QdY9
+         K+406rprsK8aqTaDcp4fuD4yp7bRyTcDqvMkluqA25WjKVctNPcDX1Dki7Pxn2HNvoN+
+         eLUXkp/PNCHCRtCB46RVh05uT/QqpmBM9ulnIPwM2kbhjNeZOSubJROQl6QaPGQcLsdh
+         Umo2XYB6sEotu+XeeQR0tOLvaQOPTdGXyLGUFYRm3W/swUNF4R4fuTOH97GOd/snVCfZ
+         kccZU4FM4PRr7biN4qCdp1Fh26xz386blriwRdYO+rOtPaK8vTFudKLF6UTxcqSLR5av
+         GXYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687171200; x=1689763200;
-        h=content-transfer-encoding:to:subject:message-id:date:from
+        d=1e100.net; s=20221208; t=1687172504; x=1689764504;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=csWkZ+3rEO5iESfqoXX46lFqWTpd14+bhReleYuntBQ=;
-        b=FNLWH0RmyIFgzWsPuwZj8s+VWCE4mHt0Avgqm1oU9TYeESrcjicI+8vFaPLKSsA18t
-         +7ovJPYU2pI/OdAJDSaU3BaP4zj1sE0gl2Rf+pFYrNay5yfsLyq5s1Vl4SNd0MBZJn+k
-         MCQk+5qtCBqAFzmO1oTBDVV94/8nYZUIPbj+Hyyaus8PrzSDCZea3jJEKYWpmlCQRglD
-         5NW4H3rtD+nht7GM9HlW7yTGoQAr74WgJlkEH6C4SjFb7IUNGgXkbjUS8d5qphF7wlGn
-         tMci1WYxmIEwJlwzLOyesuboipsXhjz0g47UivSaJI9pjkLI71LbGeLFjXIors3qyNb1
-         fH8g==
-X-Gm-Message-State: AC+VfDwtOVEJ+l5vKINreCid/aXlDodb9M0nmHH2xlOIgXW4vrnl60UW
-        cdcihyurQQ8uJfPOTW6qN7GnGJB4vs/hOr7yoJM=
-X-Google-Smtp-Source: ACHHUZ4pAJdTUQRwhN2roVPqnDowxnWFZfOULnwajFjlTLiyM7RbSSnkqTEjVJfyUzD/MUZVI2YCriaa0r1TEShTY2E=
-X-Received: by 2002:a17:90a:b895:b0:25e:8169:1b44 with SMTP id
- o21-20020a17090ab89500b0025e81691b44mr4717606pjr.15.1687171200341; Mon, 19
- Jun 2023 03:40:00 -0700 (PDT)
+        bh=JFefUUpn1s6a7sJJBpPvKuxmZjNogUs0xOa+QZnqFw4=;
+        b=h76t6QntvKAVUwvNLUyzb0hSzVHiNEO3aXUqNUAp8n1sQI+lkqMCCiP8gylr/79wNG
+         z2g20uR51CwwU70DfEf7x/+jneh8ha/eUKNuAqkicjgtDK6RyN2K9c1dtRbl7pHYh6WU
+         39mZJGZzTmfu1GsHOZwrLiT1wVJo1RdU3jXvbUtJgMiuuYLnvCw0VJl2yKK4ZwrgjPlH
+         fVrAgOZNiC8uXsYGrG3x8iTMbMvsXKUdNwH1m3lZvlCiLTGXlk9anxd8mff73DGws+H4
+         pA7OgOhzUiIvOvPaKdWD3x0XETyk266UNYHUaO8wNB4WTJvguUPdVcZF4MxY11baVmLI
+         ikjQ==
+X-Gm-Message-State: AC+VfDzNZlEzemunCvBF8d6BytRr6pHmijoYN3jumMRJynAFmOAlu3ao
+        vVPECiuw44u7+Tv/QSjwXmDl5MqCrmGwUbos9EIXkw==
+X-Google-Smtp-Source: ACHHUZ6yXD1YVYZsgvEzYDtnMbGbh5qM6C4D1UWyOOsBUjPqOujWNbk15CRXAKCKjGRyVYZdQo7HBjCr2cb2DJnTlZA=
+X-Received: by 2002:a25:d4b:0:b0:bc7:21f:4ef6 with SMTP id 72-20020a250d4b000000b00bc7021f4ef6mr6804080ybn.52.1687172504171;
+ Mon, 19 Jun 2023 04:01:44 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230531070049.11806-1-wsa+renesas@sang-engineering.com>
- <CAHCN7xJxROk6RU66PjbGH4M-R7PbUG-4y_2BHyCeGx_hTeUprw@mail.gmail.com>
- <ZHeHx/rUE7ORf3V2@shikoro> <CAHCN7x+hVSC=uCtaQx0tLZ6UdkYvf8B0DGQJ52Xr8WjWU=jGpA@mail.gmail.com>
- <ZI/viJ52TttqFveH@ninjato>
-In-Reply-To: <ZI/viJ52TttqFveH@ninjato>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Mon, 19 Jun 2023 05:39:48 -0500
-Message-ID: <CAHCN7xL6Xskd_5qcgtWbVw42reP2Z4o7+KyTPD64=8AO_fCxvw@mail.gmail.com>
-Subject: Re: [RFC/RFT PATCH] mmc: renesas_sdhi: add delay between tuning cmds
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adam Ford <aford173@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20230615092001.1213132-1-yann.gautier@foss.st.com>
+ <20230615092001.1213132-2-yann.gautier@foss.st.com> <CAPDyKFqJsqmNzeRg8hj55yUEMSycOWsmKVKsMWk4Qu7Y8_dNzg@mail.gmail.com>
+ <3b6781cb-8f59-e70a-bcf8-9fb48fa47cbf@foss.st.com> <266de9f5-826a-c1bf-be8d-11f5e27c87dc@foss.st.com>
+ <CACRpkdZLtCwPQsPw_Lp3Ppw2ed6gOo+-82_y2WPVJ_oZUHbLoQ@mail.gmail.com> <78f8bd3d-c4a7-7383-441d-69cd8f5c30fb@foss.st.com>
+In-Reply-To: <78f8bd3d-c4a7-7383-441d-69cd8f5c30fb@foss.st.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 19 Jun 2023 13:01:07 +0200
+Message-ID: <CAPDyKFp5NwzyYJrX6zt9Gm0uNDy=YE3wuYR6dwq4mo1EncNwJQ@mail.gmail.com>
+Subject: Re: [PATCH 1/6] dt-bindings: mmc: mmci: Add st,stm32mp25-sdmmc2 compatible
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Conor Dooley <conor+dt@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        linux-kernel@vger.kernel.org, Marek Vasut <marex@denx.de>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Yang Yingliang <yangyingliang@huawei.com>,
+        Xiang wangx <wangxiang@cdjrlc.com>,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 19, 2023 at 1:02=E2=80=AFAM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Mon, 19 Jun 2023 at 09:29, Yann Gautier <yann.gautier@foss.st.com> wrote=
+:
 >
-> Hi Adam,
->
-> > > U-Boot has a 1ms delay. Could you increase the delay to 1ms, please?
+> On 6/15/23 20:51, Linus Walleij wrote:
+> > On Thu, Jun 15, 2023 at 5:19=E2=80=AFPM Yann Gautier <yann.gautier@foss=
+.st.com> wrote:
 > >
-> > Sorry for the delay, but I increased this to  usleep_range(1000, 2500)
-> > and it still hangs.
+> >>>         - description: Entry for STMicroelectronics variant of PL18x.
+> >>>             This dedicated compatible is used by bootloaders.
+> > (...)
+> >>>         - description: Entry for STMicroelectronics variant of PL18x =
+for
+> >>>             STM32MP25. This dedicated compatible is used by bootloade=
+rs.
+> > (...)
+> >>> Should I remove (or adapt) both descriptions?
+> >>>
+> >>>
+> >>
+> >> At the time the patch was done it was really just used by bootloaders.
+> >> But as it is now used in the driver for delay block, I should remove t=
+he
+> >> second sentence.
+> >
+> > Remove both.
+> >
+> > After "This dedicated compatible is used by bootloaders" there is
+> > an implicit "in the SDK provided by ST Microelectronics", and that
+> > is of no concern for DT bindings, which are (well, in theory) used by
+> > e.g. BSD or other operating systems and who knows what they will
+> > use and not, we don't put Linux specifics in there, neither Boot
+> > loader specifics nor ST SDK specifics.
+> >
+> > At least that is the little bureaucratic ambition we have.
+> >
+> > Yours,
+> > Linus Walleij
 >
-> Sigh, back to the drawing board... But still thanks for trying! I'll try
-> to come up with something better after EOSS in Prague (will you be there
-> by any chance?)
+> Hi,
+>
+> Thanks for all the reviews.
+> I'll update this patch in the v2, removing bootloader line and using enum=
+.
+>
+> Ulf, should I send the new series now, or do you prefer to review the
+> whole series before?
 
-I really tried to go, but my employer declined this time.  I was going
-to go on my own, butI didn't have enough personal time off available
-to fly out there.
+Actually I have already looked through the series and it looks good to
+me! Please submit a new version so we can get this queued up for v6.5.
 
-adam
->
-> Happy hacking,
->
->    Wolfram
->
+Kind regards
+Uffe
