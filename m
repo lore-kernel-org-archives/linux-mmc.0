@@ -2,126 +2,91 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65A7CEB64D9
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 07:30:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68C03EB64D9
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 10:41:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229492AbjFSHaF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 03:30:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34344 "EHLO
+        id S231789AbjFSKk2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 06:40:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45998 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229458AbjFSHaE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 03:30:04 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22DB6121;
-        Mon, 19 Jun 2023 00:30:02 -0700 (PDT)
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35J54gIU016274;
-        Mon, 19 Jun 2023 09:29:21 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=WQGm1bnbcsMFKMHxBrg1wg70iXAEPal+ehfuwX2lwpw=;
- b=Nq2GjWQcY1art4ot8AmwMxDr+4p5P0fpvZtFS3RDbb/GO9bPhhBbHtRRolv09aw++2Yc
- FW9qyW2yngBDFfnKpJywcK7NjEQ3/fZ+qAAbQ1g9dFXLb4lHubXy8/+57cnJGr6bKIUP
- ZmDIVwIL3TrEQHpiyB5m4VXzKfZ3mqmM0F70xwBYb/69au+F48i9vjSVJ8spYu0a72MX
- YvemOYEFphDb6oiKiOG7m8lOR183KsXk5vR/S2jzRCjLszmzXCoF2l684DscwCzL3MT/
- uEFmW+cdAMHDxK7dJmjeNCXnwV94zN0365jx64W5d0/b7uX2tNQgkUXjh4na+gdcX1ao 8Q== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ragj9rqej-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 19 Jun 2023 09:29:21 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 93F0610002A;
-        Mon, 19 Jun 2023 09:29:19 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 7F6462138E6;
-        Mon, 19 Jun 2023 09:29:19 +0200 (CEST)
-Received: from [10.201.21.210] (10.201.21.210) by SHFDAG1NODE2.st.com
- (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Mon, 19 Jun
- 2023 09:29:17 +0200
-Message-ID: <78f8bd3d-c4a7-7383-441d-69cd8f5c30fb@foss.st.com>
-Date:   Mon, 19 Jun 2023 09:29:16 +0200
+        with ESMTP id S232080AbjFSKkP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 06:40:15 -0400
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B98510C;
+        Mon, 19 Jun 2023 03:40:01 -0700 (PDT)
+Received: by mail-pj1-x102f.google.com with SMTP id 98e67ed59e1d1-2553663f71eso1318353a91.3;
+        Mon, 19 Jun 2023 03:40:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1687171200; x=1689763200;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=csWkZ+3rEO5iESfqoXX46lFqWTpd14+bhReleYuntBQ=;
+        b=siEu+MpaxpXWr1xJ86DiNClLQdE/64Cdr2FvUh/oTf40G6vCor394HZX43AfZRexDz
+         rbPAZTIeU+5C2Xd5wWZTdukicNkPDkR4YfVBjtSzW9KbfTo13wchy8uwmFuQ1UevQAh/
+         Ml2MVxX/X2oNQtQV5W9uTbOQxNFjOBhpbmnoVmXujjLye3whs2En3WVO2dWnkjekbQcP
+         IomT3Z5mrhf6XanWppDXPQ9qlRgHgHIruddIRUI9e1/8+Cge5MfFVSN+OUrH5xOxyQmx
+         nWwk2NJNJ9tedp4LGPstbqvO1wvvisK9RMDI/wPytfpStJ9nB3GANh3hJSkUg2DXvQjq
+         PmEA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687171200; x=1689763200;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=csWkZ+3rEO5iESfqoXX46lFqWTpd14+bhReleYuntBQ=;
+        b=FNLWH0RmyIFgzWsPuwZj8s+VWCE4mHt0Avgqm1oU9TYeESrcjicI+8vFaPLKSsA18t
+         +7ovJPYU2pI/OdAJDSaU3BaP4zj1sE0gl2Rf+pFYrNay5yfsLyq5s1Vl4SNd0MBZJn+k
+         MCQk+5qtCBqAFzmO1oTBDVV94/8nYZUIPbj+Hyyaus8PrzSDCZea3jJEKYWpmlCQRglD
+         5NW4H3rtD+nht7GM9HlW7yTGoQAr74WgJlkEH6C4SjFb7IUNGgXkbjUS8d5qphF7wlGn
+         tMci1WYxmIEwJlwzLOyesuboipsXhjz0g47UivSaJI9pjkLI71LbGeLFjXIors3qyNb1
+         fH8g==
+X-Gm-Message-State: AC+VfDwtOVEJ+l5vKINreCid/aXlDodb9M0nmHH2xlOIgXW4vrnl60UW
+        cdcihyurQQ8uJfPOTW6qN7GnGJB4vs/hOr7yoJM=
+X-Google-Smtp-Source: ACHHUZ4pAJdTUQRwhN2roVPqnDowxnWFZfOULnwajFjlTLiyM7RbSSnkqTEjVJfyUzD/MUZVI2YCriaa0r1TEShTY2E=
+X-Received: by 2002:a17:90a:b895:b0:25e:8169:1b44 with SMTP id
+ o21-20020a17090ab89500b0025e81691b44mr4717606pjr.15.1687171200341; Mon, 19
+ Jun 2023 03:40:00 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH 1/6] dt-bindings: mmc: mmci: Add st,stm32mp25-sdmmc2
- compatible
-To:     Linus Walleij <linus.walleij@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        Xiang wangx <wangxiang@cdjrlc.com>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230615092001.1213132-1-yann.gautier@foss.st.com>
- <20230615092001.1213132-2-yann.gautier@foss.st.com>
- <CAPDyKFqJsqmNzeRg8hj55yUEMSycOWsmKVKsMWk4Qu7Y8_dNzg@mail.gmail.com>
- <3b6781cb-8f59-e70a-bcf8-9fb48fa47cbf@foss.st.com>
- <266de9f5-826a-c1bf-be8d-11f5e27c87dc@foss.st.com>
- <CACRpkdZLtCwPQsPw_Lp3Ppw2ed6gOo+-82_y2WPVJ_oZUHbLoQ@mail.gmail.com>
-Content-Language: en-US
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CACRpkdZLtCwPQsPw_Lp3Ppw2ed6gOo+-82_y2WPVJ_oZUHbLoQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.201.21.210]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-06-19_04,2023-06-16_01,2023-05-22_02
+References: <20230531070049.11806-1-wsa+renesas@sang-engineering.com>
+ <CAHCN7xJxROk6RU66PjbGH4M-R7PbUG-4y_2BHyCeGx_hTeUprw@mail.gmail.com>
+ <ZHeHx/rUE7ORf3V2@shikoro> <CAHCN7x+hVSC=uCtaQx0tLZ6UdkYvf8B0DGQJ52Xr8WjWU=jGpA@mail.gmail.com>
+ <ZI/viJ52TttqFveH@ninjato>
+In-Reply-To: <ZI/viJ52TttqFveH@ninjato>
+From:   Adam Ford <aford173@gmail.com>
+Date:   Mon, 19 Jun 2023 05:39:48 -0500
+Message-ID: <CAHCN7xL6Xskd_5qcgtWbVw42reP2Z4o7+KyTPD64=8AO_fCxvw@mail.gmail.com>
+Subject: Re: [RFC/RFT PATCH] mmc: renesas_sdhi: add delay between tuning cmds
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adam Ford <aford173@gmail.com>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/15/23 20:51, Linus Walleij wrote:
-> On Thu, Jun 15, 2023 at 5:19 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
-> 
->>>         - description: Entry for STMicroelectronics variant of PL18x.
->>>             This dedicated compatible is used by bootloaders.
-> (...)
->>>         - description: Entry for STMicroelectronics variant of PL18x for
->>>             STM32MP25. This dedicated compatible is used by bootloaders.
-> (...)
->>> Should I remove (or adapt) both descriptions?
->>>
->>>
->>
->> At the time the patch was done it was really just used by bootloaders.
->> But as it is now used in the driver for delay block, I should remove the
->> second sentence.
-> 
-> Remove both.
-> 
-> After "This dedicated compatible is used by bootloaders" there is
-> an implicit "in the SDK provided by ST Microelectronics", and that
-> is of no concern for DT bindings, which are (well, in theory) used by
-> e.g. BSD or other operating systems and who knows what they will
-> use and not, we don't put Linux specifics in there, neither Boot
-> loader specifics nor ST SDK specifics.
-> 
-> At least that is the little bureaucratic ambition we have.
-> 
-> Yours,
-> Linus Walleij
+On Mon, Jun 19, 2023 at 1:02=E2=80=AFAM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+> Hi Adam,
+>
+> > > U-Boot has a 1ms delay. Could you increase the delay to 1ms, please?
+> >
+> > Sorry for the delay, but I increased this to  usleep_range(1000, 2500)
+> > and it still hangs.
+>
+> Sigh, back to the drawing board... But still thanks for trying! I'll try
+> to come up with something better after EOSS in Prague (will you be there
+> by any chance?)
 
-Hi,
+I really tried to go, but my employer declined this time.  I was going
+to go on my own, butI didn't have enough personal time off available
+to fly out there.
 
-Thanks for all the reviews.
-I'll update this patch in the v2, removing bootloader line and using enum.
-
-Ulf, should I send the new series now, or do you prefer to review the 
-whole series before?
-
-
-Yann
+adam
+>
+> Happy hacking,
+>
+>    Wolfram
+>
