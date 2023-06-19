@@ -2,116 +2,112 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E6FFEB64DA
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 11:43:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07708EB64D9
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 11:52:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231261AbjFSLn4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 07:43:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56278 "EHLO
+        id S229526AbjFSLwF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 07:52:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32818 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229735AbjFSLny (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 07:43:54 -0400
-Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2744100
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 04:43:53 -0700 (PDT)
-Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-bf5f41a87ceso351310276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 04:43:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687175033; x=1689767033;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=D6pgkQ/5PXRzxsuylEdJsCT9j/BHNO7E/gSHcNIn62E=;
-        b=Ea5Y8qHZ+nfPwjAWkAYWcVkjXNEZR7CQOu9DWVoygkp96GrkCA1ynrqYV8ArDnEEY4
-         sfOXsGkICTpQahzunIs6P80Oa2ZDIIfkldz23sYi/jlCiNKhqN4z0mDGdr7q0lE/qayC
-         8fdu4kp2XNNrh8XLDJ31czxjb/wrIblHnlSJ8m2349IH29ws7zCZ4pHCfZCZ6X2TVmsx
-         e10LW/OTKACjf5KWmSf2xvQLvaF2Yx1LRa2RBQ+MKQ4kqUldw8Msy10z+y3BeKx128Rb
-         BYM4lynQqCvD3JBOJIKASaKP+D+1sOqfada0FoDF3FUHX8B7guJi79YJNHSlaEP1842y
-         LvDQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687175033; x=1689767033;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=D6pgkQ/5PXRzxsuylEdJsCT9j/BHNO7E/gSHcNIn62E=;
-        b=Nv9OIOD47EmAmLaQ3f3g55XFTcJRh/evQiB4CiBYaC/3kq9z5a8YqnmxiqnencR3Ew
-         zFJcOMchTPtLH4g5xZQ2RfFZdx06KehPFjOBQm6uvVp1L38g7tEtsnZ/waU5rLjrMfoR
-         SM+pz9w199ivgYvXWBkFP+WTU+XVhgpkvktaVKD0vq6FWnoGKFPoU+xhL5htpS0EM1kD
-         IHD4nt+QvO4dUZD0YWrFuJ9JGrXxNsP7VpOaMVD8zGU42QEH4caenwnVXSGDJyEqeQ9G
-         bKI6TtNY11N0ki4PmffCQ0sOj9ndVNDFMuvQghQCGVx6rbbh/Eay6J3vhZSld9WQh8AN
-         8NmA==
-X-Gm-Message-State: AC+VfDzeVkhZ74mKepMYcJ1Q2r55nEyfJEQMlNCbSjOrKXT1P0n99NWv
-        t4w9LsYc8JGt17HYj7riLJB3efK52Xrq3/xPd0HHlg==
-X-Google-Smtp-Source: ACHHUZ5MR50EWahOJ022groEhKxwLnWOODDAnn5He66zXrkpBRzd25nwAIBXEBkyHtM8luqJ8KiqHJ+ep44wyMePZ64=
-X-Received: by 2002:a25:824d:0:b0:ba8:6643:81e2 with SMTP id
- d13-20020a25824d000000b00ba8664381e2mr5817247ybn.54.1687175033013; Mon, 19
- Jun 2023 04:43:53 -0700 (PDT)
+        with ESMTP id S229521AbjFSLwE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 07:52:04 -0400
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3EBD5106;
+        Mon, 19 Jun 2023 04:52:03 -0700 (PDT)
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35JAiV1h017510;
+        Mon, 19 Jun 2023 13:51:43 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding : content-type; s=selector1;
+ bh=Zg7+vsy6uVMMMttExr1UyrGtSbJa9wdNY7n7qAIFW80=;
+ b=Y3vjtCZvipWojlyeUOi/8oyRNjCYndyhWz8jcIsd//587N3PnUuWfkd4gCWkRXEFgCjy
+ 5oS8rAeNThFTreyrqwDoHqYDEN9ZxgY/NXc8EseRF2XGQCjfIS8jaglg4PwJUfHQJ5sZ
+ WoT8GYlcwvb0WnYiD0HlZBwUvDOAGxWHsil7Mfd5P0ZTJCIhq4UgSp7FJ7h0GRH9GrXx
+ uk/day86G3lOSaHjNVabwxbgNTEOOQNrXJx1NnR4rEExVqJuQPFEN8uv3tZ1jG8PtkDR
+ ZzmDiB6khRYNiq4V9cQA9koldPo8w2jOVMegH+ot3MBDWDCa974fhQTd4f60ZFlurkqY Kg== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3rah6bt9kx-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 19 Jun 2023 13:51:43 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 1D90010002A;
+        Mon, 19 Jun 2023 13:51:43 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 1252E228A33;
+        Mon, 19 Jun 2023 13:51:43 +0200 (CEST)
+Received: from localhost (10.201.21.210) by SHFDAG1NODE2.st.com (10.75.129.70)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Mon, 19 Jun
+ 2023 13:51:40 +0200
+From:   Yann Gautier <yann.gautier@foss.st.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
+CC:     Conor Dooley <conor+dt@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Yang Yingliang <yangyingliang@huawei.com>,
+        Xiang wangx <wangxiang@cdjrlc.com>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        Yann Gautier <yann.gautier@foss.st.com>
+Subject: [PATCH v2 1/6] dt-bindings: mmc: mmci: Add st,stm32mp25-sdmmc2 compatible
+Date:   Mon, 19 Jun 2023 13:51:15 +0200
+Message-ID: <20230619115120.64474-2-yann.gautier@foss.st.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20230619115120.64474-1-yann.gautier@foss.st.com>
+References: <20230619115120.64474-1-yann.gautier@foss.st.com>
 MIME-Version: 1.0
-References: <20230530213259.1776512-1-robimarko@gmail.com> <CAPDyKForsVQ_inZG9+8mWdWM6-_T6O23AiwndLg33Yh7rPYTpA@mail.gmail.com>
-In-Reply-To: <CAPDyKForsVQ_inZG9+8mWdWM6-_T6O23AiwndLg33Yh7rPYTpA@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 19 Jun 2023 13:43:17 +0200
-Message-ID: <CAPDyKFrOG=mCW3WBr=n081EBDkKobSK_w+b6AnVAhcp_8gC5nQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: disable TRIM on Micron MTFC4GACAJCN-1M
-To:     Robert Marko <robimarko@gmail.com>
-Cc:     "Luca Porzio (lporzio)" <lporzio@micron.com>, windhl@126.com,
-        avri.altman@wdc.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.201.21.210]
+X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
+ (10.75.129.70)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-06-19_08,2023-06-16_01,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 9 Jun 2023 at 00:18, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> + Luca (Bean was added by Avri in another thread)
->
-> On Tue, 30 May 2023 at 23:33, Robert Marko <robimarko@gmail.com> wrote:
-> >
-> > It seems that Micron MTFC4GACAJCN-1M despite advertising TRIM support does
-> > not work when the core is trying to use REQ_OP_WRITE_ZEROES.
-> >
-> > We are seeing the following errors in OpenWrt under 6.1 on Qnap Qhora 301W
-> > that we did not previously have and tracked it down to REQ_OP_WRITE_ZEROES:
-> > [   18.085950] I/O error, dev loop0, sector 596 op 0x9:(WRITE_ZEROES) flags 0x800 phys_seg 0 prio class 2
-> >
-> > Disabling TRIM makes the error go away, so lets add a quirk for this eMMC
-> > to disable TRIM.
->
-> Let's leave this another week or so, to allow Micron folkz to confirm
-> before applying.
->
-> >
-> > Signed-off-by: Robert Marko <robimarko@gmail.com>
+For STM32MP25, we'll need to distinguish how is managed the delay block.
+This is done through a new comptible dedicated for this SoC, as the
+delay block registers are located in SYSCFG peripheral.
 
-Applied for next and by adding a stable tag, thanks!
+Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+---
+Changes in v2:
+- update dt-bindings file (remove bootloader reference and use enum)
 
+ Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+index 1c96da04f0e53..2459a55ed540b 100644
+--- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
++++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+@@ -53,10 +53,11 @@ properties:
+         items:
+           - const: arm,pl18x
+           - const: arm,primecell
+-      - description: Entry for STMicroelectronics variant of PL18x.
+-          This dedicated compatible is used by bootloaders.
++      - description: Entries for STMicroelectronics variant of PL18x.
+         items:
+-          - const: st,stm32-sdmmc2
++          - enum:
++              - st,stm32-sdmmc2
++              - st,stm32mp25-sdmmc2
+           - const: arm,pl18x
+           - const: arm,primecell
+ 
+-- 
+2.25.1
 
->
-> > ---
-> >  drivers/mmc/core/quirks.h | 7 +++++++
-> >  1 file changed, 7 insertions(+)
-> >
-> > diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> > index 29b9497936df..77caa0c903f8 100644
-> > --- a/drivers/mmc/core/quirks.h
-> > +++ b/drivers/mmc/core/quirks.h
-> > @@ -100,6 +100,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
-> >         MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
-> >                   MMC_QUIRK_TRIM_BROKEN),
-> >
-> > +       /*
-> > +        * Micron MTFC4GACAJCN-1M advertises TRIM but it does not seems to
-> > +        * support being used to offload WRITE_ZEROES.
-> > +        */
-> > +       MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
-> > +                 MMC_QUIRK_TRIM_BROKEN),
-> > +
-> >         /*
-> >          * Some SD cards reports discard support while they don't
-> >          */
-> > --
-> > 2.40.1
-> >
