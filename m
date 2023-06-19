@@ -2,113 +2,127 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE9F6EB64D9
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 19:51:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FED4EB64D9
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 19:54:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229682AbjFSTvX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 15:51:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50814 "EHLO
+        id S229656AbjFSTyl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 15:54:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51898 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229632AbjFSTvW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 15:51:22 -0400
-Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30364106;
-        Mon, 19 Jun 2023 12:51:21 -0700 (PDT)
-Received: by mail-ej1-x630.google.com with SMTP id a640c23a62f3a-987accb4349so427209566b.0;
-        Mon, 19 Jun 2023 12:51:21 -0700 (PDT)
+        with ESMTP id S229547AbjFSTyk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 15:54:40 -0400
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C215106
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 12:54:39 -0700 (PDT)
+Received: by mail-ed1-x533.google.com with SMTP id 4fb4d7f45d1cf-51a3e6a952aso4615400a12.3
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 12:54:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1687204279; x=1689796279;
+        d=googlemail.com; s=20221208; t=1687204478; x=1689796478;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Sd0Z4QXfggzwHtnXjPLZAClg5L7keAUm3VKoUQTaD/E=;
-        b=EJ4G6ji/n65WTVFd+8fUKpKE/pPADTSbANE84/FVL/5xaqN9lrz6hUYxCruKjB00T3
-         A+PzuCjKDLHT/NHQBzW77tyuTB/iOEdzUo5QQoHANdWUOMYd80KyJtTl8KnusjARFyRY
-         P2Dq86RDh4y69k3YOc4/sWJMnCzw3f6PBs+45PAHWzERKRIuN0osGyfLtDbjMFYffkNL
-         y16PhKmWZm42f2MUP9VOa+W2O3RPpB7FkwOFxbxbG2lw2CDrtIRT8xLrVvOWI4kv0nOf
-         ag7kxQF7Tfqx9QJWbEq6cfwBXoU/ZfvRMu27Y9+ttAESU2F7kuB0gnH4TL1efzIPyEFL
-         9SIw==
+        bh=RyRSVfrJOL+bwgeDq4PIh5Rzl57vR7EHanbiiiTR8wg=;
+        b=NdU4cZf3o/Slw0OTT0Gkj4kXxTKxGNmHJGYPORt2EYMWK5iXe7DO8O1LCMqXG/ES7B
+         hCqJrja0F2Rb6FUdthfgH86ZBv9JQS5RTB9oVpmp3u7Xqi8xsTecpmP9kxXxJ83hhVQ+
+         Yy0WiRDPjAobfzucFS/a/YNBAIDXOvEEBCfC5WKJs1Nixgo2ZhI8PFAhL/+ZbmmQTKkt
+         DmCUn6vBedA3NJQzlSNnD53HP0VXfXEtob8G+HaXAtPN2U0357taEr8fTaM2HxQ9qYAc
+         f1bASkWnbfoWeAhj5d67zNVlCiUu3JQ4uMx37g112b3UEK9cIpccSBm7k8+3GD5+C8EG
+         PxGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687204279; x=1689796279;
+        d=1e100.net; s=20221208; t=1687204478; x=1689796478;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Sd0Z4QXfggzwHtnXjPLZAClg5L7keAUm3VKoUQTaD/E=;
-        b=BnJeWnixcRVcn2mMc06wavPfo6yVOxbwPYzrO7oCdGzVV7FGcnxblNf1DEnG9egIOQ
-         VLV5ztodqPIQKf/XTemURLMDayNDhqIrJxn5z+r4ystufPOt4+olD7yHVwVCTV1fn3uc
-         +LH2RBtvVQ8A854nUCR0ivZN+VrXTXu0LVSGOt3a2upOUkHKzboxm5eMF4+y2u62vHyg
-         7bGGGyUwc06FqUVanwB3ZwDLMhZYMIPgRCcEPRwk9hBLLPK1r7bytAdJZzX7PDAoXqO/
-         sLiOg8ULSPL87awZh6EhZ4Pn2j+zwWpY51JgAcJUbtYWp2L8EMcJlFBxLoBkW1TF0sYT
-         OJeg==
-X-Gm-Message-State: AC+VfDxQKWrn6aWIL8gmYlVFhjqQIRMYHCoROO7Hg2f60LOIEmUez71x
-        hKbGI0+FANkTkPj1cuc4mKzCc6InYC5Im2a49NyYe4vaSv4=
-X-Google-Smtp-Source: ACHHUZ63TBsrxqGLzHLhPqGvnsA2IbglzQC0C14yaOFsZ83BWmNwv/AKD9ZicJVSWO/8KUat6yXXiS0uTl+xZQU81/M=
-X-Received: by 2002:a17:907:7faa:b0:988:2111:bb2d with SMTP id
- qk42-20020a1709077faa00b009882111bb2dmr7590179ejc.7.1687204279367; Mon, 19
- Jun 2023 12:51:19 -0700 (PDT)
+        bh=RyRSVfrJOL+bwgeDq4PIh5Rzl57vR7EHanbiiiTR8wg=;
+        b=GUm4ZilDAUt+iCnqy0o9isXKknHuEng/TAckFuiLCAx9jdkHcF3PPd8H937rImd510
+         aJKQquOt70p8PgE3XZg/SLZS9sf6DBgnAkScC+kABfhEfuBj9ynvkjmLNr4SgGdL1fiQ
+         x70ngmWeMCtecS15/A/xwXe7Mm8tT9ECfMeZLUWwIR7HSybvqr79NDAfwIjS9hXmdIeu
+         11TOKNIXPapRciAzaEKS4iJB4uHxRdseOHy4WvXNfBzHX8ZzslQSzcs8w6OeMIrYG/Ad
+         efFj1h1hZdzUuNlxkShky4rtABsp4XLApd6M/r58H9oq3W/mpkyCd4HDAaZ3EKTVOq5F
+         IQ5A==
+X-Gm-Message-State: AC+VfDzZ1u1U3H/GGNa0njpe8LN7suPp7kh6eR8Wwn7Ucftiu9gSB5fP
+        evshorZY+u64H4TtS6Hk7ewWzWfIxCphUAsAyTs=
+X-Google-Smtp-Source: ACHHUZ4oQOwBKmQqjEJKI8Xyl7E8lAKnYccshQEse6MTexFIRWVjUn0WWitQsU7gg5VXUNmU/apcOwiFcKuZmG66m8Y=
+X-Received: by 2002:a17:907:a42:b0:96f:afe9:25c7 with SMTP id
+ be2-20020a1709070a4200b0096fafe925c7mr10751771ejc.10.1687204477606; Mon, 19
+ Jun 2023 12:54:37 -0700 (PDT)
 MIME-Version: 1.0
-References: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
-In-Reply-To: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
+References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+ <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
+ <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
+ <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
+ <CAFBinCDwgYw3v31hP4AtV3+Z1o+esDqMKugRwMMMLqSX0Acjzw@mail.gmail.com>
+ <CAPDyKFr+hQo+N31r=3f58taf9sYW0UF0ApCJhwz9vRsyNizcvg@mail.gmail.com>
+ <CAFBinCDSv_vdu5887vveotvaOGFrZvaSX4jM+7Q3QvDhTdazzw@mail.gmail.com> <CAPDyKFpS-UwiaRPMqSpX0mNPrS5p=yJzu3g0=pGyCkWHSYyqWg@mail.gmail.com>
+In-Reply-To: <CAPDyKFpS-UwiaRPMqSpX0mNPrS5p=yJzu3g0=pGyCkWHSYyqWg@mail.gmail.com>
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Mon, 19 Jun 2023 21:51:08 +0200
-Message-ID: <CAFBinCAJ1E6JKmFTuaJwGpd_MBzHMZ0mMj-1AE3TNeB2_72nZA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-mx-sdhc: Fix initialization frozen issue
-To:     Ziyang Huang <hzyitc@outlook.com>
-Cc:     ulf.hansson@linaro.org, neil.armstrong@linaro.org,
-        khilman@baylibre.com, jbrunet@baylibre.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Date:   Mon, 19 Jun 2023 21:54:26 +0200
+Message-ID: <CAFBinCCnB=po9x6tsxCzRM99ZqgV9=5jBxS9LaoJqLPGZYSH6g@mail.gmail.com>
+Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
+ clock speed before sending HS CMD13")
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Brian Norris <briannorris@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Luca Weiss <luca@z3ntu.xyz>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+Hi Ulf,
 
-first of all: thank you for this patch!
-
-On Mon, Jun 19, 2023 at 7:36=E2=80=AFPM Ziyang Huang <hzyitc@outlook.com> w=
-rote:
+On Wed, Jun 14, 2023 at 5:49=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+[...]
+> > Full register dump:
+> > # cat /sys/kernel/debug/regmap/c1108e00.mmc/registers
+> > 00: 00000900
+> > 04: 0000004d
+> > 08: e7ffe002
+> > 0c: 02f0003f
+> > 10: 0003f009
+> > 14: 03b81c00
+> > 18: 2c43bcf0
+> > 1c: e0000150
+> > 20: 00000000
+> > 24: 00003067
+> > 28: 00000000
+> > 2c: 00000000
+> > 30: 00000000
+> > 34: 00fe0cff
+> > 38: 0000100b
+> >
+> > In case you are curious, the driver is: drivers/mmc/host/meson-mx-sdhc-=
+mmc.c
 >
-> Commit 4bc31edebde5 ("mmc: core: Set HS clock speed before sending
-> HS CMD13") set HS clock (52MHz) before switching to HS mode. For this
-> freq, FCLK_DIV5 will be selected and div value is 10 (reg value is 9).
-> Then we set rx_clk_phase to 11 or 15 which is out of range and make
-> hardware frozen. After we send command request, no irq will be
-> interrupted and the mmc driver will keep to wait for request finished,
-> even durning rebooting.
-I think this is the exact same problem I reported some days ago: [0]
-Ulf is questioning whether we properly support 52MHz clocks correctly,
-so I think you're onto something!
-
-So this is an excellent finding! I can confirm that using rx_clk_phase
-of 1 makes my Odroid-C1 eMMC work again :-)
-
-> So let's set a common value - 1 just for initialization. Then let
-> meson_mx_sdhc_execute_tuning() to find the accurate value for data
-> transfer.
-As far as I know unconditionally using value 1 can negatively affect
-other devices.
-I'm assuming that you're testing on an Odroid-C1 or similar board with
-HS200 eMMC:
-On those SoC + eMMC combinations we do support. But on other boards
-(for example Meson8b EC-100 / Endless Mini) there's no HS200 support
-because the eMMC is connected with 3.3V IO lines. So tuning is not
-executed there (if I recall correctly).
-
-What do you think about adding a special case for the 51MHz "actual
-clock rate" and adding a comment that it was found by manual testing?
-For some reason (that I don't understand) Amlogic's vendor driver
-maxes out at 47.22MHz (presumably because they limit themselves to
-using FCLK_DIV3 as input only - but I don't get why...).
+> Thanks for sharing this data!
+>
+> I assume the above registers indicate that we have sent the command
+> and are now waiting for an IRQ for a response/error, but we never
+> receive one.
+>
+> To really figure out what is going on, I think we need to do some
+> additional low level debugging/testing.
+>
+> I was looking at the commit message from e4bf1b0970ef ("mmc: host:
+> meson-mx-sdhc: new driver for the Amlogic Meson SDHC host"), which
+> indicates that the clock management is quite limited for this HW. For
+> example, the 51000000Hz isn't one of the supported frequencies. Could
+> that be the reason for the problem? Perhaps if we play with changing
+> the frequency to something that is considered supported - then can we
+> make this work?
+You seem to be more familiar with this Amlogic MMC controller than I am ;-)
+Today I finally had some time for testing and when I started Ziyang
+Huang provided a patch [0] (admittedly: I think it needs to be
+improved, but finally we know that it's a MMC controller driver
+limitation and not an MMC core bug)
 
 
 Best regards,
 Martin
 
 
-[0] https://lore.kernel.org/linux-amlogic/CAFBinCD0RT0p-jk86W0JuMT3ufohRh1R=
-qWCcM35DKZJpuc10HQ@mail.gmail.com/
-[1] https://lore.kernel.org/linux-amlogic/CAPDyKFpS-UwiaRPMqSpX0mNPrS5p=3Dy=
-Jzu3g0=3DpGyCkWHSYyqWg@mail.gmail.com/
+[0] https://lore.kernel.org/linux-amlogic/TYZPR01MB5556B56D834E02F41C44D81D=
+C95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com/
