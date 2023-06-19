@@ -2,156 +2,91 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1F62EB64DB
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Jun 2023 08:54:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3BEFEB64DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 06:02:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229610AbjFRIx7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 18 Jun 2023 04:53:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40134 "EHLO
+        id S229559AbjFSGCz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 02:02:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229529AbjFRIx6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Jun 2023 04:53:58 -0400
-Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3D9710E7
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Jun 2023 01:53:55 -0700 (PDT)
-Received: by mail-ed1-x533.google.com with SMTP id 4fb4d7f45d1cf-5169f614977so3384686a12.3
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Jun 2023 01:53:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687078434; x=1689670434;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=YOqV3rtDI0CEwXVVct5W5QTJ26AQRGV9DPKnHoyoIyQ=;
-        b=Zj+V58GInMfbtKYprzCSYWjBjv7MENDx3liQ1mLiiPKRVC0M87JHlg52gJlVfOKyIh
-         ZWa6SH3qB8nijzClxj1aD9iwcNqO8ar4GRB1gRd04tCMxTOASO4lZwGD+T3mbmb0BJG1
-         ZPHNtIX5xLZMNmYqAy1pFIsantKEsbI6WA1BV74JL6dWs6fFia2n5GpFiqifAS11ABFD
-         3JI+0FuSgBNyqDmUVbmZfjWKa7LGBkior3iAT1J795YWg1i8otdJtkpKE7xOVnnXROOD
-         yhcLJJi47PnyNTjLDAtBWTtW24DKuNUcod8sJq8Q9G2LJjN9IWFE/dKAUI4CWJv1HsaY
-         FY6A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687078434; x=1689670434;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=YOqV3rtDI0CEwXVVct5W5QTJ26AQRGV9DPKnHoyoIyQ=;
-        b=hRQgrG1tlurwhSaQbXBErVBrk5yMsObN9gq5TdS+cmlBW4QH/svRCwgjGOPfyKs5MW
-         1vuYv/A87Su8hGdNhV/ilnf+IQqnvp9YTXFAVyw8md0rXZNnvI8YnyYf/KHzw9AWWoV8
-         hQ64k1qt5xGn/sylKdHfu3IUBEfAto19eG0fp363ry83tML7/DD5GX+lDkVgz9ovBy/3
-         N8Xo9di4a5wVBquGSi2V+FsmKn7pH16rAUEwk0ZrF5+/5fRx7BvHwgi1YC4tS+xjBIm3
-         c0fCGtFs+aSDbVadIKXORCq+nsL/B/7atnovqpJ+Rj7yvGH2yFEEBLVZn9eNFTDH3TeZ
-         j7wQ==
-X-Gm-Message-State: AC+VfDy+uwRUw3fIAg9lIt24HlQHTkvsm6dAGBTaBYReWNeeHMbJs/Iv
-        pkTY9b8iAFUMHOJm2FCGQ2K0PA==
-X-Google-Smtp-Source: ACHHUZ5XJfX3/rCW8fWgqzmOnFENO/jS3uPJQ7JC93XERneKvBVIK4hcgep9HTEjZOoGKJW1VKUthQ==
-X-Received: by 2002:a17:907:a0c:b0:978:8e8c:1bcb with SMTP id bb12-20020a1709070a0c00b009788e8c1bcbmr6364791ejc.43.1687078434141;
-        Sun, 18 Jun 2023 01:53:54 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.219.26])
-        by smtp.gmail.com with ESMTPSA id w19-20020a1709064a1300b00988955f7b5esm152722eju.157.2023.06.18.01.53.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 18 Jun 2023 01:53:53 -0700 (PDT)
-Message-ID: <4aadaf24-11f6-5cc1-4fbd-addbef4f891b@linaro.org>
-Date:   Sun, 18 Jun 2023 10:53:50 +0200
+        with ESMTP id S229518AbjFSGCy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 02:02:54 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4018683
+        for <linux-mmc@vger.kernel.org>; Sun, 18 Jun 2023 23:02:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=De+hE92NkWN0DUN6bx9lnQQllZlE
+        +OZa3n4a/8fajUw=; b=t9NDZaQAAeTPcUNRe99QzcCePTI9Xz1r1jZR9tz5pZ5g
+        CWahLOr1FzSeIua77n6tbspw65nF5LzNbntuQubD+7vsQlbu2A7bTs2lXkH7GnCs
+        PpDOS3kr+KZNGaX4S+71m9OvAwBhkX0pb1YdrimfD9BvhgkysX5D/hkZqVi/0r0=
+Received: (qmail 115329 invoked from network); 19 Jun 2023 08:02:49 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 19 Jun 2023 08:02:49 +0200
+X-UD-Smtp-Session: l3s3148p1@z1DESHX+Moxehh9k
+Date:   Mon, 19 Jun 2023 08:02:48 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Adam Ford <aford173@gmail.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [RFC/RFT PATCH] mmc: renesas_sdhi: add delay between tuning cmds
+Message-ID: <ZI/viJ52TttqFveH@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adam Ford <aford173@gmail.com>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20230531070049.11806-1-wsa+renesas@sang-engineering.com>
+ <CAHCN7xJxROk6RU66PjbGH4M-R7PbUG-4y_2BHyCeGx_hTeUprw@mail.gmail.com>
+ <ZHeHx/rUE7ORf3V2@shikoro>
+ <CAHCN7x+hVSC=uCtaQx0tLZ6UdkYvf8B0DGQJ52Xr8WjWU=jGpA@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH v7 1/3] dt-bindings: ufs: qcom: Add ICE phandle
-Content-Language: en-US
-To:     Abel Vesa <abel.vesa@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-References: <20230408214041.533749-1-abel.vesa@linaro.org>
- <20230408214041.533749-2-abel.vesa@linaro.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230408214041.533749-2-abel.vesa@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="elkU6498MGZX5dRp"
+Content-Disposition: inline
+In-Reply-To: <CAHCN7x+hVSC=uCtaQx0tLZ6UdkYvf8B0DGQJ52Xr8WjWU=jGpA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 08/04/2023 23:40, Abel Vesa wrote:
-> Starting with SM8550, the ICE will have its own devicetree node
-> so add the qcom,ice property to reference it.
-> 
-> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> ---
-> 
-> The v6 is here:
-> https://lore.kernel.org/all/20230407105029.2274111-3-abel.vesa@linaro.org/
-> 
-> Changes since v6:
->  * Dropped the minItems for both the qcom,ice and the reg in the
->    qcom,ice compatile subschema, like Krzysztof suggested
-> 
-> Changes since v5:
->  * dropped the sm8550 specific subschema and replaced it with one that
->    mutually excludes the qcom,ice vs both the ICE specific reg range
->    and the ICE clock
-> 
-> Changes since v4:
->  * Added check for sm8550 compatible w.r.t. qcom,ice in order to enforce
->    it while making sure none of the other platforms are allowed to use it
-> 
-> Changes since v3:
->  * dropped the "and drop core clock" part from subject line
-> 
-> Changes since v2:
->  * dropped all changes except the qcom,ice property
-> 
-> 
->  .../devicetree/bindings/ufs/qcom,ufs.yaml     | 24 +++++++++++++++++++
->  1 file changed, 24 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml b/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
-> index c5a06c048389..10d426ba1959 100644
-> --- a/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
-> +++ b/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
-> @@ -70,6 +70,10 @@ properties:
->    power-domains:
->      maxItems: 1
->  
-> +  qcom,ice:
-> +    $ref: /schemas/types.yaml#/definitions/phandle
-> +    description: phandle to the Inline Crypto Engine node
-> +
->    reg:
->      minItems: 1
->      maxItems: 2
-> @@ -187,6 +191,26 @@ allOf:
->  
->      # TODO: define clock bindings for qcom,msm8994-ufshc
->  
-> +  - if:
-> +      properties:
-> +        qcom,ice:
 
-Un-reviewed. This is broken and was never tested. After applying this
-patch, I can see many new warnings in all DTBs (so it is easy to spot
-that it was not actually tested).
+--elkU6498MGZX5dRp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Your probably meant here:
-  if:
-    required:
+Hi Adam,
+
+> > U-Boot has a 1ms delay. Could you increase the delay to 1ms, please?
+>=20
+> Sorry for the delay, but I increased this to  usleep_range(1000, 2500)
+> and it still hangs.
+
+Sigh, back to the drawing board... But still thanks for trying! I'll try
+to come up with something better after EOSS in Prague (will you be there
+by any chance?)
+
+Happy hacking,
+
+   Wolfram
 
 
-Best regards,
-Krzysztof
+--elkU6498MGZX5dRp
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmSP74QACgkQFA3kzBSg
+Kbbyhg/9HiYSS/xz0PvfeSyV56MWG/CCuGrp9r31AbEJsgS4XQL1UfCpWgMWpoe2
+abQyGJCwuK7UvGlMj9ujeZtCjG0aeJIQIDCqydzEtnEG4wBnF54tkc3nPZ37T84G
+GelQagpjEFgwzJMS3rt+MCEF6AqRXaTGpn8sCBMFEhIrZXc9tPQ5hFNASqEpTnFb
+OYSHotc1GN1oQTKG6VCaVXZvbYsaT6If3we+vnJewIRB5xxl31zRPl7siuvNtcfn
+hfPudhLQuawF3vhBguVK7zcZ6EK1Q1aWwNE0NSvTFaVn0VLjFVVhhvNId0lrAbV+
+S08gRZcWQ8xPmPP+NPe55yDqco9zYmoYGUnHSYWh+NsmF2D8OivR2t+sMoaXml9v
+cuoRdCOR8WKW42+tvZImQLb8FkGHA6EKfZEvrTZbjAOyxgBS16RQYJoI+LIJxfg4
+ZOmx08ssz5LJQ3ZgJqbQJv7zbfJzgf+y3RIw34yvZRhgxKrL9PGa1CHOGwcraiSH
+3dghlcOqpNRiSbLkvOwPtazhre5njGb1CeU4bkRFYrUK0G9rasKl+6dHkDcfWj5Z
+HZVN5e0a/daY2jJV9dUOloHEB1Cz9IqIo8d/2mygjQAGSzGFOo01+R1DVGvSniIR
+DjourzFidKPBQdc5kcC6e/rAJZGFyraEMbtukejd9fNVFfZpE7o=
+=VO8E
+-----END PGP SIGNATURE-----
+
+--elkU6498MGZX5dRp--
