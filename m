@@ -2,44 +2,44 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A892EEB64DC
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 11:52:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB309EB64D9
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 11:52:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229752AbjFSLwF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 07:52:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32822 "EHLO
+        id S230029AbjFSLwq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 07:52:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229573AbjFSLwE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 07:52:04 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3EE4610B;
-        Mon, 19 Jun 2023 04:52:03 -0700 (PDT)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35JAiV8x017493;
-        Mon, 19 Jun 2023 13:51:31 +0200
+        with ESMTP id S230083AbjFSLwm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 07:52:42 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 026A9197;
+        Mon, 19 Jun 2023 04:52:40 -0700 (PDT)
+Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35JAiSwU006656;
+        Mon, 19 Jun 2023 13:52:00 +0200
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=selector1;
- bh=XMJnVSv0T7nCBxS+9vu0ogPkCSj//pIU8jGy+wxMdT8=;
- b=ZfJvzNYMtTbmpVrR74XAneE3UGXw5Gf9oAO8KxboaGR0xkIwHT44QYDAqo+lTx3YKFrA
- jsvGLydrY12uhjQFG0bkADarU0ydU7kOZ0H7WwCdCq2UTbfYZPePIHHbhy+lmQqfKa8S
- RmqSqev5ny8e8s3V/HCfiHmqGnlNcAn9cOlFkCoyBSr5V8RNu6qh3iY/gfX0sEeLFWMx
- wvMHe2o2cp+yv8B0TTgPJPWujIxdNSL/1rgvyjBNzJcMaH6UOYSxsVxsonRO5pfip0l5
- hB9y8g7JNQXh9iK14njmxcTpxvvksGliK4rBrOUzuxFZkvO8wENRbBl+o3O3rFq+bkel og== 
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding : content-type; s=selector1;
+ bh=5EhAdfqRxv12KVPD6eaexHq1m9nURohDH2wpSyU/l+A=;
+ b=bo9PMscGCSIUOZR6kP4pPNRAs7IQEDAiI58uvq7i726QNfsZPiIuLCxQNR16tefNHJ1+
+ nBHTc7I/NxZnFjbkB3BmVx2yLX0hY81zKhorkgeB/Sf6do9W6UwGx3dva41+OmQS0bif
+ Hu+JItVJLhE74BHulZeG15xCLK7t2Oesb8Dwa+iFqgeOyrEwWC86svVWZ972uupQwC7E
+ xigkl6Yj3/mLDviaQv8J/ih9RHLyNK+3Sf0KvrSikEVoegNGhPA7/u1oQbEB1+VOmi2G
+ blqaFwRpT08X2SBQtRvmLzbMU14lJDZWvI4ABqfa9khTMKbMlGBuYfA2r8RvEloHAWVx 5A== 
 Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3rah6bt9jd-1
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3raka81ctw-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 19 Jun 2023 13:51:31 +0200
+        Mon, 19 Jun 2023 13:52:00 +0200
 Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id E14F810002A;
-        Mon, 19 Jun 2023 13:51:28 +0200 (CEST)
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 0726610002A;
+        Mon, 19 Jun 2023 13:52:00 +0200 (CEST)
 Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id D34CC228A33;
-        Mon, 19 Jun 2023 13:51:28 +0200 (CEST)
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id EF0D62128D2;
+        Mon, 19 Jun 2023 13:51:59 +0200 (CEST)
 Received: from localhost (10.201.21.210) by SHFDAG1NODE2.st.com (10.75.129.70)
  with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Mon, 19 Jun
- 2023 13:51:28 +0200
+ 2023 13:51:57 +0200
 From:   Yann Gautier <yann.gautier@foss.st.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -58,10 +58,12 @@ CC:     Conor Dooley <conor+dt@kernel.org>,
         <linux-stm32@st-md-mailman.stormreply.com>,
         <linux-arm-kernel@lists.infradead.org>,
         Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH v2 0/6] Update MMCI driver for STM32MP25
-Date:   Mon, 19 Jun 2023 13:51:14 +0200
-Message-ID: <20230619115120.64474-1-yann.gautier@foss.st.com>
+Subject: [PATCH v2 2/6] mmc: mmci: add stm32_idmabsize_align parameter
+Date:   Mon, 19 Jun 2023 13:51:16 +0200
+Message-ID: <20230619115120.64474-3-yann.gautier@foss.st.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20230619115120.64474-1-yann.gautier@foss.st.com>
+References: <20230619115120.64474-1-yann.gautier@foss.st.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
@@ -75,40 +77,81 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-STM32MP25 is a new SoC from STMicroelectronics. The machine was
-pushed by Alexandre [1] in his tree.
-On this new SoC, the SDMMC peripheral, using PL18x/MMCI driver
-has been updated to v3.
-The driver has been updated to manage this new version, and the new
-features it supports:
-* FIFO size increased from 64B to 1kB
-* IDMA size alignment/mask updated
-* New block gap hardware flow control
-* Delay block updated and dependent on SoC
+The alignment for the IDMA size depends on the peripheral version, it
+should then be configurable. Add stm32_idmabsize_align in the variant
+structure.
+And remove now unused (and wrong) MMCI_STM32_IDMABNDT_* macros.
 
-This series was pushed on top of next branch in Ulf's mmc tree, as it
-requires feedback clock update patch [2].
+Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+---
+ drivers/mmc/host/mmci.c             | 2 ++
+ drivers/mmc/host/mmci.h             | 3 +--
+ drivers/mmc/host/mmci_stm32_sdmmc.c | 4 ++--
+ 3 files changed, 5 insertions(+), 4 deletions(-)
 
-[1] https://lore.kernel.org/lkml/59f4a900-34ee-d991-c350-265d38e7c862@foss.st.com/T/
-[2] https://lore.kernel.org/r/20230613150148.429828-1-yann.gautier@foss.st.com
-
-Changes in v2:
-- update dt-bindings file (remove bootloader reference and use enum)
-
-Yann Gautier (6):
-  dt-bindings: mmc: mmci: Add st,stm32mp25-sdmmc2 compatible
-  mmc: mmci: add stm32_idmabsize_align parameter
-  mmc: mmci: Add support for sdmmc variant revision v3.0
-  mmc: mmci: stm32: manage block gap hardware flow control
-  mmc: mmci: stm32: prepare other delay block support
-  mmc: mmci: stm32: add delay block support for STM32MP25
-
- .../devicetree/bindings/mmc/arm,pl18x.yaml    |   7 +-
- drivers/mmc/host/mmci.c                       |  35 ++++
- drivers/mmc/host/mmci.h                       |   8 +-
- drivers/mmc/host/mmci_stm32_sdmmc.c           | 149 ++++++++++++++++--
- 4 files changed, 179 insertions(+), 20 deletions(-)
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 726bf772b2e2d..eae3d1c8934cb 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -270,6 +270,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datactrl_any_blocksz	= true,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
++	.stm32_idmabsize_align	= BIT(5),
+ 	.busy_timeout		= true,
+ 	.busy_detect		= true,
+ 	.busy_detect_flag	= MCI_STM32_BUSYD0,
+@@ -296,6 +297,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
+ 	.datactrl_any_blocksz	= true,
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.stm32_idmabsize_mask	= GENMASK(16, 5),
++	.stm32_idmabsize_align	= BIT(5),
+ 	.dma_lli		= true,
+ 	.busy_timeout		= true,
+ 	.busy_detect		= true,
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 12a7bbd3ce263..b1968cafc58bb 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -227,8 +227,6 @@
+ #define MMCI_STM32_IDMALLIEN	BIT(1)
+ 
+ #define MMCI_STM32_IDMABSIZER		0x054
+-#define MMCI_STM32_IDMABNDT_SHIFT	5
+-#define MMCI_STM32_IDMABNDT_MASK	GENMASK(12, 5)
+ 
+ #define MMCI_STM32_IDMABASE0R	0x058
+ 
+@@ -374,6 +372,7 @@ struct variant_data {
+ 	u32			opendrain;
+ 	u8			dma_lli:1;
+ 	u32			stm32_idmabsize_mask;
++	u32			stm32_idmabsize_align;
+ 	void (*init)(struct mmci_host *host);
+ };
+ 
+diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+index 50292f9c69046..7f43506b9bb08 100644
+--- a/drivers/mmc/host/mmci_stm32_sdmmc.c
++++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+@@ -15,7 +15,6 @@
+ #include "mmci.h"
+ 
+ #define SDMMC_LLI_BUF_LEN	PAGE_SIZE
+-#define SDMMC_IDMA_BURST	BIT(MMCI_STM32_IDMABNDT_SHIFT)
+ 
+ #define DLYB_CR			0x0
+ #define DLYB_CR_DEN		BIT(0)
+@@ -69,7 +68,8 @@ static int sdmmc_idma_validate_data(struct mmci_host *host,
+ 	idma->use_bounce_buffer = false;
+ 	for_each_sg(data->sg, sg, data->sg_len - 1, i) {
+ 		if (!IS_ALIGNED(sg->offset, sizeof(u32)) ||
+-		    !IS_ALIGNED(sg->length, SDMMC_IDMA_BURST)) {
++		    !IS_ALIGNED(sg->length,
++				host->variant->stm32_idmabsize_align)) {
+ 			dev_dbg(mmc_dev(host->mmc),
+ 				"unaligned scatterlist: ofst:%x length:%d\n",
+ 				data->sg->offset, data->sg->length);
 -- 
 2.25.1
 
