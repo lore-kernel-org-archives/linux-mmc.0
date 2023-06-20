@@ -2,174 +2,146 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59B29EB64D8
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 15:50:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CE60EB64D7
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 19:27:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232191AbjFTPuM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Jun 2023 11:50:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38524 "EHLO
+        id S229549AbjFTT1W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Jun 2023 15:27:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233212AbjFTPuA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2023 11:50:00 -0400
-Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8862FE72
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 08:49:33 -0700 (PDT)
-Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-bcc29cdcdc9so4901972276.0
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 08:49:33 -0700 (PDT)
+        with ESMTP id S229478AbjFTT1W (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2023 15:27:22 -0400
+Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DEB9C1704
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 12:27:20 -0700 (PDT)
+Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-570877f7838so43226287b3.0
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 12:27:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687276172; x=1689868172;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=7hSwWr4ilbhNVRAbZ4VQSJviq6a2rgWHoZh27c9gZiM=;
-        b=BsRT4IKL1+abd2TIQLoG3oZy7f74BTePBHX5gGyvOK/V//QFzEWc3ZRhCG5b+ZsBPS
-         u19EJ1GGmXNj9WNdhG9MD0QvsHUjH9QohfzIXtZOJXuQzQ02vMuPQVEas3nRm3w0XT0n
-         iu1pXNYPFv07C7b+NNMl25E1VtM4ipS1cQOaagdUhBQFtDhv38qbQJNXmOWN800uhRfZ
-         tJVFugYtU86OgqSRnLo0lMP+wCCicS8G3f/7+ExGtyeJRC5hDlJ//bhZlyVdQaEq/xw0
-         YahNIp6njhAIa5e7yU5RdU2XrIEfNMf76ZOAZ8fnYxu0qewSlAjByLTQiaZFBEU9gYya
-         BD/A==
+        d=linaro.org; s=google; t=1687289240; x=1689881240;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=l8Gg6Tb/6UJioUHDZTn18LvDCaiO2bRr0FMtQ/jPY/U=;
+        b=ZgLbPEj/RIZ3jh0DghONFB0y2S0fQhq92DlZEVzhz9yopU0HoASN4OJUyf2EKzO3de
+         CrRxGVwzd/qHCYqVVZVaoSOf+jf9xJuRdrX02R33I3jcteJ+JtrSvCaPnEqswpU2Eiig
+         8S2inivNH2O3FTwwWHg+NmBRc562+9gBIgYSgU+NiyV3vIBfOdOBs1HBVGrxcS5ZZvaA
+         jJ8MEbEkjyTSG7l1Q97VUCml/BNNoLITBgVzahDleAikMbv/cgvF0AtfRaco8i0GOccx
+         ungMXbU0W9egd3X60FDPldDhm8xXbuGz+bPqrMxKAPU31KifKqts/D7+PYi+7uxjjPG4
+         a8rA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687276172; x=1689868172;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=7hSwWr4ilbhNVRAbZ4VQSJviq6a2rgWHoZh27c9gZiM=;
-        b=FwzzdySvSLeBLpra+5tp5laX7KvH4qnAJKHiyPMbFQBD8cUJKhWxCFPdKCKLW3t8CM
-         fVGTBwQq+e7+oNUIFR+bjNXcZe4t6qGUGzqg9ztM2efLYl4r2w/pjY+kCPMFrVOzXzQe
-         RZBIAL85N++/wVJYABMY+Jj/fryameX7wNguj1GITw7cIHQ+ao7kTYRTELa0n0tQkZNV
-         J3/dMiUOR8fm1Rfd7gec0FKNBq5edK0XuNvIxq7iWfLB6gvLOMtVp9qQbe0LP5LL/Wpg
-         3R8zVGCcnnTCPHdbfjHYzY5xtS3aS7+C2RldYiK2WJBFmgIeULBUAizvolu9n32Gxh+f
-         cTqA==
-X-Gm-Message-State: AC+VfDxVeJDcJOJI6KhG46isnPEjsPFJIYv5MFY5nOdkQs+3fTVdSoqf
-        d+tRpbyYyF7WfHq0mepL6doyhPEjOEvoCuPUMJZW6Q==
-X-Google-Smtp-Source: ACHHUZ65UwmZUZ02+o6V2mSvQ1sXOCKh789ZbmRzYwoK0LX0SaJAmg4+EimQIu1LAouSz0leUPYNQNWCFRNjtXM+w98=
-X-Received: by 2002:a25:a2cb:0:b0:bf5:76c:d654 with SMTP id
- c11-20020a25a2cb000000b00bf5076cd654mr4012673ybn.14.1687276172420; Tue, 20
- Jun 2023 08:49:32 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1687289240; x=1689881240;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=l8Gg6Tb/6UJioUHDZTn18LvDCaiO2bRr0FMtQ/jPY/U=;
+        b=JbTeli2QrsBfSr45PWJunazXc555NFFl7/Ai2NicwNIvZIY5tExyeFIC3sQ5GpWZFP
+         urbHJqbsoCfCiqNL10UMJolwqNvUz+Qs7DopYizZvWW5qHOouOvXLZHX2pReHDMRceRg
+         ZTA/sfUmzqn5u3HZ+RYZSzZ/zG2zB3uBl1s5t9pg8fmOLu/Viikb98oXNhDm1YPdVaPX
+         OCXqa50ltjm6jNz6Z25Ik2GKI/TZMrO0zYC/COWWaw+HlGu9SJB++5HVGH87uhT5o18+
+         061AHoGZ0cUf7+tTRToosxwSqUy2rmJlDUWTH5B1wGNsnXjXESVovnTogXnK1WuFdBDn
+         NZvw==
+X-Gm-Message-State: AC+VfDzmpIJORmfJcJvL3Iwky3LskMK2wzXLdMMeL05Go+SZIcyqOwU8
+        Ao8PX3ge+qPl3eAgMB8qor+Z3Jg8DABCmfBbipe97Cnxx4tBEJ83TDU=
+X-Google-Smtp-Source: ACHHUZ6b2wy/GO7XLt9Y2s1E+Ow4N903Q1/ZMIgdhXljyCq5pX/F4CtHWUHENHsFEDDHlTqUROH3AusfydIgLakRi0k=
+X-Received: by 2002:a25:3486:0:b0:bcb:9b43:5a89 with SMTP id
+ b128-20020a253486000000b00bcb9b435a89mr9835727yba.61.1687289240057; Tue, 20
+ Jun 2023 12:27:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <461dba105f644867a6687858d51324e8@hyperstone.com>
- <CAPDyKFr7=z5RyeOOBiSaGrtHRxCrTHqwYvMsUjgGmn7cvLa3ZA@mail.gmail.com> <0bb75439f50b4e3e99b31956a6f43c45@hyperstone.com>
-In-Reply-To: <0bb75439f50b4e3e99b31956a6f43c45@hyperstone.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 20 Jun 2023 17:48:56 +0200
-Message-ID: <CAPDyKFq=x4M1o6dVr-op_zZuiJB00TOCMsUcwFoz0Y6e4DJL5Q@mail.gmail.com>
-Subject: Re: [PATCHv2 2/2] mmc: block: ioctl: Add PROG-error aggregation
-To:     Christian Loehle <CLoehle@hyperstone.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Avri Altman <avri.altman@wdc.com>
+References: <20230620091113.33393-1-ulf.hansson@linaro.org>
+In-Reply-To: <20230620091113.33393-1-ulf.hansson@linaro.org>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 20 Jun 2023 21:27:08 +0200
+Message-ID: <CACRpkdZfhPxFZhjiU9k5fjM9v9VOuZwu16eyn_qHL4Jm+CyhBg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: Add support for SW busy-end timeouts
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>,
+        Yann Gautier <yann.gautier@foss.st.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 20 Jun 2023 at 13:23, Christian Loehle <CLoehle@hyperstone.com> wrote:
+On Tue, Jun 20, 2023 at 11:11=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.or=
+g> wrote:
+
+> The ux500 variant doesn't have a HW based timeout to use for busy-end IRQ=
+s.
+> To avoid hanging and waiting for the card to stop signaling busy, let's
+> schedule a delayed work, according to the corresponding cmd->busy_timeout
+> for the command. If work gets to run, let's kick the IRQ handler to
+> completed the currently running request/command.
 >
-> >>
-> >> Userspace currently has no way of checking for error bits of detection
-> >> mode X. These are error bits that are only detected by the card when
-> >> executing the command. For e.g. a sanitize operation this may be
-> >> minutes after the RSP was seen by the host.
-> >>
-> >> Currently userspace programs cannot see these error bits reliably.
-> >> They could issue a multi ioctl cmd with a CMD13 immediately following
-> >> it, but since errors of detection mode X are automatically cleared
-> >> (they are all clear condition B).
-> >> mmc_poll_for_busy of the first ioctl may have already hidden such an
-> >> error flag.
-> >>
-> >> In case of the security operations: sanitize, secure erases and RPMB
-> >> writes, this could lead to the operation not being performed
-> >> successfully by the card with the user not knowing.
-> >> If the user trusts that this operation is completed (e.g. their data
-> >> is sanitized), this could be a security issue.
-> >> An attacker could e.g. provoke a eMMC (VCC) flash fail, where a
-> >> successful sanitize of a card is not possible. A card may move out of
-> >> PROG state but issue a bit 19 R1 error.
-> >>
-> >> This patch therefore will also have the consequence of a mmc-utils
-> >> patch, which enables the bit for the security-sensitive operations.
-> >>
-> >> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
-> >> ---
-> >>  drivers/mmc/core/block.c   | 17 ++++++-----------
-> >>  drivers/mmc/core/mmc_ops.c | 25 ++++++++++++++++++++++++-
-> >> drivers/mmc/core/mmc_ops.h |  3 +++
-> >>  3 files changed, 33 insertions(+), 12 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index
-> >> e46330815484..44c1b2825032 100644
-> >> --- a/drivers/mmc/core/block.c
-> >> +++ b/drivers/mmc/core/block.c
-> >> @@ -470,7 +470,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
-> >>         struct mmc_data data = {};
-> >>         struct mmc_request mrq = {};
-> >>         struct scatterlist sg;
-> >> -       bool r1b_resp, use_r1b_resp = false;
-> >> +       bool r1b_resp;
-> >>         unsigned int busy_timeout_ms;
-> >>         int err;
-> >>         unsigned int target_part;
-> >> @@ -551,8 +551,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
-> >>         busy_timeout_ms = idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS;
-> >>         r1b_resp = (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B;
-> >>         if (r1b_resp)
-> >> -               use_r1b_resp = mmc_prepare_busy_cmd(card->host, &cmd,
-> >> -                                                   busy_timeout_ms);
-> >> +               mmc_prepare_busy_cmd(card->host, &cmd,
-> >> + busy_timeout_ms);
-> >>
-> >>         mmc_wait_for_req(card->host, &mrq);
-> >>         memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp)); @@
-> >> -605,19 +604,15 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
-> >>         if (idata->ic.postsleep_min_us)
-> >>                 usleep_range(idata->ic.postsleep_min_us,
-> >> idata->ic.postsleep_max_us);
-> >>
-> >> -       /* No need to poll when using HW busy detection. */
-> >> -       if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
-> >> -               return 0;
-> >> -
-> >>         if (mmc_host_is_spi(card->host)) {
-> >>                 if (idata->ic.write_flag || r1b_resp || cmd.flags & MMC_RSP_SPI_BUSY)
-> >>                         return mmc_spi_err_check(card);
-> >>                 return err;
-> >>         }
-> >> -       /* Ensure RPMB/R1B command has completed by polling with CMD13. */
-> >> -       if (idata->rpmb || r1b_resp)
-> >> -               err = mmc_poll_for_busy(card, busy_timeout_ms, false,
-> >> -                                       MMC_BUSY_IO);
-> >> +       /* Poll for write/R1B execution errors */
-> >> +       if (idata->ic.write_flag || r1b_resp)
-> >
-> > Earlier we polled for requests that were targeted to rpmb, no matter if they were write or reads. Are you intentionally changing this? If so, can you explain why?
-> >
-> Will re-introduce. I cant really think of a reason right now to do this after rpmb reads, but thats a different story.
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> Tested-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Okay, good.
+Some experiments: I added a patch to print the offending command and
+dev_err() all the timing bugs. The resulting log:
 
-My main point is, if we want to change that, let's do that as a separate patch.
+/home/linus # dmesg |grep '80005000\|mmcblk2'
+[    2.684814] mmci-pl18x 80005000.mmc: mmc2: PL180 manf 80 rev4 at
+0x80005000 irq 81,0 (pio)
+[    2.695831] mmci-pl18x 80005000.mmc: DMA channels RX dma0chan4, TX dma0c=
+han5
+[    3.410400] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[    3.434936] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[    3.451721] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[    3.489379] mmcblk2: mmc2:0001 M4G1YC 3.69 GiB
+[    3.569000]  mmcblk2: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13
+p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25
+[    3.583526] mmcblk2boot0: mmc2:0001 M4G1YC 2.00 MiB
+[    3.594726] mmcblk2boot1: mmc2:0001 M4G1YC 2.00 MiB
+[    3.602233] mmcblk2rpmb: mmc2:0001 M4G1YC 128 KiB, chardev (246:0)
+[    4.103057] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[    8.074188] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[    8.084350] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[    8.451446] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[    8.757934] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   10.211883] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   10.587646] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[   10.913604] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   10.924072] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   10.931671] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   12.023345] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[   12.357757] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[   14.087677] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   14.096191] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   15.124114] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   15.153411] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[   15.525024] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[   15.850036] mmci-pl18x 80005000.mmc: timeout waiting for busy IRQ (op 06=
+)
+[   18.250122] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[   18.988983] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   19.302612] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   19.320953] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06)
+[   19.333251] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
+[   21.851715] mmci-pl18x 80005000.mmc: lost busy status when waiting
+for busy start IRQ (op 06)
 
->
-> >> +               err = mmc_poll_for_busy_err_flags(card, busy_timeout_ms, false,
-> >> +                                       MMC_BUSY_IO,
-> >> + &idata->ic.response[0]);
-> >
-> > I think it's better to extend the mmc_blk_busy_cb, rather than introducing an entirely new polling function.
-> >
-> > Then you can call __mmc_poll_for_busy() here instead.
->
-> Not sure if I understood you right, but I will send a new version with __mmc_poll_for_busy call directly.
-> It does feel a bit more awkward, at least to me, because both mmc_blk_busy_cb nor mmc_busy_data are currently only in mmc_ops.c
->
-> Anyway, both versions "extend the mmc_blk_busy_cb", so I'm not sure if I understood you correctly, we will see.
-> I may also just send both and you pick whichever you prefer.
+Always command 0x06, MMC_SWITCH. But this is also the *only*
+command that resturns MMC_RSP_BUSY so it doesn't say very
+much about the card in general.
 
-I was thinking that mmc_blk_card_busy() calls __mmc_poll_for_busy().
-While doing that, it uses the mmc_blk_busy_cb() - which seems to be
-almost what we want to do here too.
+We have speculated that the card is maybe operating out of spec, such as
+holding DAT0 high for too short time (not across enough MCLK cycles)
+or similar when indicating busy for short timespans.
 
-Did that make sense?
+I tested on the other problematic phone, Kyle, and the log is identical
+(it has the same eMMC card, M4G1YC.)
 
-Kind regards
-Uffe
+Yours,
+Linus Walleij
