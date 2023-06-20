@@ -2,96 +2,241 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33DCEEB64DC
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jun 2023 22:49:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 011BFEB64D9
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 01:40:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229585AbjFSWtV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 18:49:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38268 "EHLO
+        id S229453AbjFTBkO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Jun 2023 21:40:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58740 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229462AbjFSWtU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 18:49:20 -0400
-Received: from mail-io1-f47.google.com (mail-io1-f47.google.com [209.85.166.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E68B2E55;
-        Mon, 19 Jun 2023 15:49:19 -0700 (PDT)
-Received: by mail-io1-f47.google.com with SMTP id ca18e2360f4ac-77797beb42dso143980439f.2;
-        Mon, 19 Jun 2023 15:49:19 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687214959; x=1689806959;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=XC5lpbRInQ/+5gWZrsaA+KqscUlYl6sjL8GyEzFCglg=;
-        b=AdZhKelKh/g8u40VH6vVJymf5NCG1IzEnDiO/6+7Mj3/7jtrUaGxjjHChsMsFrciJ2
-         754nOfGunzAV+VwT7DPwNofUlztqoPSTheUYHw2vV4RINONZjBlY9z23e7M9+Br/HiBD
-         DJN17atoa7YKyO6KRPYiK9XOGJXdeGQR5mIpEuX9m4R7msx13m2fZxqe51Uz2hb+YYpz
-         IQnqcjWBiaVwehHSh9w/PhDnJJhn3jCh8fmiuBg8iJrqQ2yF0H63JNYppdhDxmPkIFmH
-         FiMkqEdofW/acAsuom520r/W8IEdqAc8lpZiRQ+q0dN1IKRlEdi/Helr7RivhjttZR3z
-         2dgg==
-X-Gm-Message-State: AC+VfDzFOuWJv/fx6eEwcrlqHHtkf2rLtsXhJOmK3mygt9AP5A5RB5ad
-        8iALzJw4URet3sbl1CIx4Q==
-X-Google-Smtp-Source: ACHHUZ6aHzKiHI6j0pGyABhICGpFbZYq4LbWxeN/Z7bW9EdQkXxO4vMuOqgS+UoLXk9bYuI+u4Zypw==
-X-Received: by 2002:a5e:9802:0:b0:77a:c315:75b6 with SMTP id s2-20020a5e9802000000b0077ac31575b6mr2055139ioj.5.1687214959178;
-        Mon, 19 Jun 2023 15:49:19 -0700 (PDT)
-Received: from robh_at_kernel.org ([64.188.179.250])
-        by smtp.gmail.com with ESMTPSA id y22-20020a5ec816000000b0077ac32a5de8sm213979iol.26.2023.06.19.15.49.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 19 Jun 2023 15:49:18 -0700 (PDT)
-Received: (nullmailer pid 1675447 invoked by uid 1000);
-        Mon, 19 Jun 2023 22:49:16 -0000
-Date:   Mon, 19 Jun 2023 16:49:16 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Stefan Wahren <stefan.wahren@i2se.com>
-Cc:     Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        bcm-kernel-feedback-list@broadcom.com, dmaengine@vger.kernel.org,
-        Thomas Gleixner <tglx@linutronix.de>, linux-pm@vger.kernel.org,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        devicetree@vger.kernel.org,
-        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Vinod Koul <vkoul@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-arm-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>,
-        linux-pwm@vger.kernel.org
-Subject: Re: [PATCH V2 2/7] dt-bindings: dma: convert bcm2835-dma bindings to
- YAML
-Message-ID: <168721491312.1673983.7120570846265839418.robh@kernel.org>
-References: <20230617133620.53129-1-stefan.wahren@i2se.com>
- <20230617133620.53129-3-stefan.wahren@i2se.com>
+        with ESMTP id S229448AbjFTBkN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 21:40:13 -0400
+Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 933A9124
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 18:40:11 -0700 (PDT)
+Received: from tr.lan (ip-86-49-120-218.bb.vodafone.cz [86.49.120.218])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id 6109B846E6;
+        Tue, 20 Jun 2023 03:40:06 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1687225209;
+        bh=mGFylNXmBgS3Ansdp/xJADFx5JACPSvHXx1so6QPs08=;
+        h=From:To:Cc:Subject:Date:From;
+        b=uhZFOYU+BDEiJ847MsQSCYsSXWP765JBjjv32DTxtzR5JTcxgD/YS9deJgZygV2YV
+         D/98MOT2Kxa6LmwENNzxPfZ+YIdLopM+BBwFckShQdzdb6mYdyonV9NlivE/IftBtU
+         GqNDqd1Ztjg7lFFji7Fx9AM4oPRJvXetPBS0P8qhbGoGJkPXnMMe0z37PxGXzaBAbV
+         uQltceHcMtSeAvW8IbpgbDPR4ppQOZw6zcmcjS8DyC5T5sT0h+GW+A+fDGZR6TH6Pv
+         IkOBveLTEj9tjcMI722UcgVufyp20SYmyEBUh9oogu4JJ/WCPh5EdqvTT8TDneVj7v
+         BIxOPYtq8nerQ==
+From:   Marek Vasut <marex@denx.de>
+To:     linux-mmc@vger.kernel.org
+Cc:     Marek Vasut <marex@denx.de>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Brian Norris <briannorris@chromium.org>,
+        ChanWoo Lee <cw9316.lee@samsung.com>,
+        Liang He <windhl@126.com>,
+        Seunghui Lee <sh043.lee@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Xander Li <xander_li@kingston.com.tw>,
+        Zhen Lei <thunder.leizhen@huawei.com>
+Subject: [PATCH] mmc: Add MMC_QUIRK_BROKEN_SD_CACHE for Kingston Canvas Go Plus from 11/2019
+Date:   Tue, 20 Jun 2023 03:39:56 +0200
+Message-Id: <20230620013956.111275-1-marex@denx.de>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230617133620.53129-3-stefan.wahren@i2se.com>
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 17 Jun 2023 15:36:15 +0200, Stefan Wahren wrote:
-> Convert the DT binding document for bcm2835-dma from .txt to YAML.
-> 
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-> ---
->  .../bindings/dma/brcm,bcm2835-dma.txt         |  83 --------------
->  .../bindings/dma/brcm,bcm2835-dma.yaml        | 102 ++++++++++++++++++
->  2 files changed, 102 insertions(+), 83 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt
->  create mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml
-> 
+This microSD card never clears Flush Cache bit after cache flush has
+been started in sd_flush_cache(). This leads e.g. to failure to mount
+file system. Add a quirk which disables the SD cache for this specific
+card from specific manufacturing date of 11/2019, since on newer dated
+cards from 05/2023 the cache flush works correctly.
 
+Fixes: 08ebf903af57 ("mmc: core: Fixup support for writeback-cache for eMMC and SD")
+Signed-off-by: Marek Vasut <marex@denx.de>
+---
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Avri Altman <avri.altman@wdc.com>
+Cc: Brian Norris <briannorris@chromium.org>
+Cc: ChanWoo Lee <cw9316.lee@samsung.com>
+Cc: Liang He <windhl@126.com>
+Cc: Seunghui Lee <sh043.lee@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Xander Li <xander_li@kingston.com.tw>
+Cc: Zhen Lei <thunder.leizhen@huawei.com>
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/core/card.h   | 30 +++++++++++++++++++++++-------
+ drivers/mmc/core/quirks.h | 13 +++++++++++++
+ drivers/mmc/core/sd.c     |  7 ++++++-
+ include/linux/mmc/card.h  |  1 +
+ 4 files changed, 43 insertions(+), 8 deletions(-)
 
-Please add Acked-by/Reviewed-by tags when posting new versions. However,
-there's no need to repost patches *only* to add the tags. The upstream
-maintainer will do that for acks received on the version they apply.
-
-If a tag was not added on purpose, please state why and what changed.
-
-Missing tags:
-
-Reviewed-by: Rob Herring <robh@kernel.org>
-
-
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index cfdd1ff40b865..4edf9057fa79d 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -53,6 +53,10 @@ struct mmc_fixup {
+ 	unsigned int manfid;
+ 	unsigned short oemid;
+ 
++	/* Manufacturing date */
++	unsigned short year;
++	unsigned char month;
++
+ 	/* SDIO-specific fields. You can use SDIO_ANY_ID here of course */
+ 	u16 cis_vendor, cis_device;
+ 
+@@ -68,6 +72,8 @@ struct mmc_fixup {
+ 
+ #define CID_MANFID_ANY (-1u)
+ #define CID_OEMID_ANY ((unsigned short) -1)
++#define CID_YEAR_ANY ((unsigned short) -1)
++#define CID_MONTH_ANY ((unsigned char) -1)
+ #define CID_NAME_ANY (NULL)
+ 
+ #define EXT_CSD_REV_ANY (-1u)
+@@ -81,17 +87,21 @@ struct mmc_fixup {
+ #define CID_MANFID_APACER       0x27
+ #define CID_MANFID_KINGSTON     0x70
+ #define CID_MANFID_HYNIX	0x90
++#define CID_MANFID_KINGSTON_SD	0x9F
+ #define CID_MANFID_NUMONYX	0xFE
+ 
+ #define END_FIXUP { NULL }
+ 
+-#define _FIXUP_EXT(_name, _manfid, _oemid, _rev_start, _rev_end,	\
+-		   _cis_vendor, _cis_device,				\
+-		   _fixup, _data, _ext_csd_rev)				\
++#define _FIXUP_EXT(_name, _manfid, _oemid, _year, _month,	\
++		   _rev_start, _rev_end,			\
++		   _cis_vendor, _cis_device,			\
++		   _fixup, _data, _ext_csd_rev)			\
+ 	{						\
+ 		.name = (_name),			\
+ 		.manfid = (_manfid),			\
+ 		.oemid = (_oemid),			\
++		.year = (_year),			\
++		.month = (_month),			\
+ 		.rev_start = (_rev_start),		\
+ 		.rev_end = (_rev_end),			\
+ 		.cis_vendor = (_cis_vendor),		\
+@@ -103,8 +113,8 @@ struct mmc_fixup {
+ 
+ #define MMC_FIXUP_REV(_name, _manfid, _oemid, _rev_start, _rev_end,	\
+ 		      _fixup, _data, _ext_csd_rev)			\
+-	_FIXUP_EXT(_name, _manfid,					\
+-		   _oemid, _rev_start, _rev_end,			\
++	_FIXUP_EXT(_name, _manfid, _oemid, CID_YEAR_ANY, CID_MONTH_ANY,	\
++		   _rev_start, _rev_end,				\
+ 		   SDIO_ANY_ID, SDIO_ANY_ID,				\
+ 		   _fixup, _data, _ext_csd_rev)				\
+ 
+@@ -118,8 +128,9 @@ struct mmc_fixup {
+ 		      _ext_csd_rev)
+ 
+ #define SDIO_FIXUP(_vendor, _device, _fixup, _data)			\
+-	_FIXUP_EXT(CID_NAME_ANY, CID_MANFID_ANY,			\
+-		    CID_OEMID_ANY, 0, -1ull,				\
++	_FIXUP_EXT(CID_NAME_ANY, CID_MANFID_ANY, CID_OEMID_ANY,		\
++		   CID_YEAR_ANY, CID_MONTH_ANY,				\
++		   0, -1ull,						\
+ 		   _vendor, _device,					\
+ 		   _fixup, _data, EXT_CSD_REV_ANY)			\
+ 
+@@ -264,4 +275,9 @@ static inline int mmc_card_broken_sd_discard(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BROKEN_SD_DISCARD;
+ }
+ 
++static inline int mmc_card_broken_sd_cache(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_BROKEN_SD_CACHE;
++}
++
+ #endif
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 29b9497936df9..bf7fb72ab8b57 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -100,6 +100,15 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
++	/*
++	 * Kingston Canvas Go! Plus microSD cards never finish SD cache flush.
++	 * This has so far only been observed on cards from 11/2019, while new
++	 * cards from 2023/05 do not exhibit this behavior.
++	 */
++	_FIXUP_EXT("SD64G", CID_MANFID_KINGSTON_SD, 0x5449, 2019, 11,
++		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
++		   MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
++
+ 	/*
+ 	 * Some SD cards reports discard support while they don't
+ 	 */
+@@ -209,6 +218,10 @@ static inline void mmc_fixup_device(struct mmc_card *card,
+ 		if (f->of_compatible &&
+ 		    !mmc_fixup_of_compatible_match(card, f->of_compatible))
+ 			continue;
++		if (f->year != CID_YEAR_ANY && f->year != card->cid.year)
++			continue;
++		if (f->month != CID_MONTH_ANY && f->month != card->cid.month)
++			continue;
+ 
+ 		dev_dbg(&card->dev, "calling %ps\n", f->vendor_fixup);
+ 		f->vendor_fixup(card, f->data);
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 72b664ed90cf6..99ff6e754017a 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1170,7 +1170,7 @@ static int sd_parse_ext_reg_perf(struct mmc_card *card, u8 fno, u8 page,
+ 		card->ext_perf.feature_support |= SD_EXT_PERF_HOST_MAINT;
+ 
+ 	/* Cache support at bit 0. */
+-	if (reg_buf[4] & BIT(0))
++	if ((reg_buf[4] & BIT(0)) && !mmc_card_broken_sd_cache(card))
+ 		card->ext_perf.feature_support |= SD_EXT_PERF_CACHE;
+ 
+ 	/* Command queue support indicated via queue depth bits (0 to 4). */
+@@ -1306,6 +1306,8 @@ static int sd_read_ext_regs(struct mmc_card *card)
+ 
+ static bool sd_cache_enabled(struct mmc_host *host)
+ {
++	if (mmc_card_broken_sd_cache(host->card))
++		return 0;
+ 	return host->card->ext_perf.feature_enabled & SD_EXT_PERF_CACHE;
+ }
+ 
+@@ -1366,6 +1368,9 @@ static int sd_enable_cache(struct mmc_card *card)
+ 	u8 *reg_buf;
+ 	int err;
+ 
++	if (mmc_card_broken_sd_cache(card))
++		return 0;
++
+ 	card->ext_perf.feature_enabled &= ~SD_EXT_PERF_CACHE;
+ 
+ 	reg_buf = kzalloc(512, GFP_KERNEL);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index c726ea7812552..daa2f40d9ce65 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -294,6 +294,7 @@ struct mmc_card {
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ #define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
++#define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
+ 
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+-- 
+2.39.2
 
