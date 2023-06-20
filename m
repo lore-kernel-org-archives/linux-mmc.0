@@ -2,112 +2,102 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 937C3EB64D9
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 01:44:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F30F0EB64DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 04:51:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229453AbjFTBob (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jun 2023 21:44:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59742 "EHLO
+        id S229693AbjFTEv0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Jun 2023 00:51:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46804 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229707AbjFTBoa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jun 2023 21:44:30 -0400
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC8A3E6C
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jun 2023 18:44:28 -0700 (PDT)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id C7F43861F6;
-        Tue, 20 Jun 2023 03:44:25 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1687225466;
-        bh=TzcnGnaD/AWvHkTiIiS9YoEXARz6/aQ6X/vVH/KbKLM=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=phzMKChivizlPUDd/txi7j+2P5p8xL2Gj+DCsBsDF/llPpaH1krCpIrT0gzLhwQqg
-         Fpsch154iBo9LNVxFW56Rxkau5675yi45SfF+ordaTe35XEYMCvvJJ10hmUz9e3eKR
-         BTPXlU+jOX1o6HEnH0MbfTBZJfLOFebb7+PRY8x1Rz4DwetFDY/P9MmJBviUC4OjW9
-         4Cuv7/UH4NRS9npXM23hqjiQzVDrmgVBNuIOQH2N92Ewh4DUGzlAUjdxT7OMKO3VOG
-         qzDx+CqsHQTKWV4GQD5gk9QTAaUhh9Ce30lSlM+cXGae8NnB4d0285b4+ro+zkwKQ0
-         eICEc3w25oQVw==
-Message-ID: <a0115a9d-90b1-81ac-3a57-c7939a8367b7@denx.de>
-Date:   Tue, 20 Jun 2023 03:44:25 +0200
+        with ESMTP id S229522AbjFTEvZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2023 00:51:25 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80F6710C8;
+        Mon, 19 Jun 2023 21:51:24 -0700 (PDT)
+Received: from [192.168.1.141] ([37.4.248.58]) by mrelayeu.kundenserver.de
+ (mreue010 [212.227.15.167]) with ESMTPSA (Nemesis) id
+ 1M42zo-1qBTKN2n5M-00054G; Tue, 20 Jun 2023 06:50:51 +0200
+Message-ID: <10083068-fab1-3e51-c183-e2a435167ad2@i2se.com>
+Date:   Tue, 20 Jun 2023 06:50:50 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
- writeback-cache for eMMC and SD"
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Michael Wu <michael@allwinnertech.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>, xander_li@kingston.com.tw
-References: <20230531002740.1235620-1-marex@denx.de>
- <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
- <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
- <f41e1546-f6d3-7f4d-7662-3b7eca291178@intel.com>
- <29a5f24d-2b8c-8387-8c11-601af8e13940@denx.de>
- <4c8d84ae-c8d0-fa12-81c6-a47382684d73@intel.com>
- <3bd65a30-756d-e7ee-ce77-e5ebfe6b6e30@denx.de>
- <75ab27e9-9203-f59b-c720-99bfa992bb9b@intel.com>
- <b494062c-7e9e-24ba-ef0a-13faf0fe7706@denx.de>
- <a316b98e-fe56-23a3-7d58-13fcd5d9abb5@intel.com>
- <0029620e-4d22-d8f9-5566-4b1ea7f05bae@denx.de>
- <CAPDyKFoe0WWs2-wSETMZR5shjmWnLfD4GPwOXJNhyKd8xntq8A@mail.gmail.com>
- <e6243501-908d-dec9-36ef-206c20ccf8cc@intel.com>
- <6423ae91-7585-b141-960a-f8cfd4b23538@denx.de>
- <CAPDyKFo5PfSWfZdyq25P87hvpZd4=GC54zp-SbjRZE1EZNoFxQ@mail.gmail.com>
- <3a660f13-5397-cb7e-49d3-b464ec677e69@denx.de>
- <CAPDyKFrY84vairXcWo3hRo26nV8=7KZmEaDua-pna6pj5LLRyw@mail.gmail.com>
+ Thunderbird/102.11.0
+Subject: Re: [PATCH V2 2/7] dt-bindings: dma: convert bcm2835-dma bindings to
+ YAML
+To:     Rob Herring <robh@kernel.org>
+Cc:     Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        bcm-kernel-feedback-list@broadcom.com, dmaengine@vger.kernel.org,
+        Thomas Gleixner <tglx@linutronix.de>, linux-pm@vger.kernel.org,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        devicetree@vger.kernel.org,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Vinod Koul <vkoul@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>,
+        linux-pwm@vger.kernel.org
+References: <20230617133620.53129-1-stefan.wahren@i2se.com>
+ <20230617133620.53129-3-stefan.wahren@i2se.com>
+ <168721491312.1673983.7120570846265839418.robh@kernel.org>
 Content-Language: en-US
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <CAPDyKFrY84vairXcWo3hRo26nV8=7KZmEaDua-pna6pj5LLRyw@mail.gmail.com>
+From:   Stefan Wahren <stefan.wahren@i2se.com>
+In-Reply-To: <168721491312.1673983.7120570846265839418.robh@kernel.org>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
-X-Virus-Status: Clean
+X-Provags-ID: V03:K1:VKWLyx96kIFaTCi0ZFhPdTmk8Mv0uYKT8yyjMylyRQeFhlZr2zB
+ 0SCgVtkvHlqNX7+3pwohYn9u37nMq1Neu3hbSFJdFXTGn00hKvkjGmIMtuaI9oKbuW6Gapm
+ kqOyY/9XwgQbUwizhQ246lxUDN3QoYy8Cicxk2jbmIh4mBtM9/5b4qPtkqK6hY/8pgND1zd
+ bUoIpNdIQzmSLZ3gp1fWA==
+UI-OutboundReport: notjunk:1;M01:P0:CaJX/oWs7lE=;ECsu5Sz0cJwgPABRHlq1vITW5Mm
+ 3DACX5F/VSYi31OW6WeGpAEnh96lvJkX1jmZcd2fk3RtAa9Uutck52w1MotLWaerWqbr8fzik
+ Nk8bZkcZKvZ6MUYYFwrkin5agUBRJ5E0stwYpmmnBj5Zc+SeyhqbNXC35AZXooaXC7SsyeCOx
+ r6oJ55aJ01aNd2dVFY1Gz6Xp6jOKzIjS7fap7tLoOsdWbINDlOtQBbvN4Z7sozc1yJDsiPcDV
+ WyeZkTPUmJIehNZKtXqSATVun+rNfhYTWfMjNjf3PK+mc5wO9sw2/IcRK0GdwVSdTvtsu01gR
+ Lc4V6Vvvh5Zix95nWcpORzEFFSt5B69XWHMtyeOW9cQqrv1CP/mp4lWqRnZ2m1sWkhCLR+ii8
+ dK9+PK0yfnZLVABtcMcpSaN551ZFerUrng+1mCLYXLCn60SxOW3fDHA76gPG+h20M7vrjiVLD
+ tHgrPDWwmwfqAci4gOGbey+ZfLawGB0lBB3Jpouu83v2GNsx/R7obysGh78yeWFcZ9SzyL05O
+ cNrWbsVOtiRJfBLGPkDLqFpnUf72FB+pZHteBQjI99CCkdJy9caK1r3n0P0V9RBNpgGulx2pT
+ lq8pVtUPwbc8/6lnhlVMYQr1w4PIuQLT1cSJoNzxWrYSnLzAv8/tWZtpG2nFsK6ZsIEHicweR
+ x9+nW1i7/sG9KszDVxVdV6l5yW0N75AgiemyMBONsg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/16/23 12:33, Ulf Hansson wrote:
+Hi Rob,
 
-Hi,
-
-[...]
-
->>>>>> I have been trying to follow the progress around this matter. If I
->>>>>> understand correctly we are leaning towards making a card quirk for
->>>>>> this particular SD, to avoid us from turning on and using a broken
->>>>>> cache feature.
->>>>>>
->>>>>> Or what are you thinking?
->>>>>
->>>>> That is probably the simplest option.
->>>>
->>>> Just give me a day or two to test the other newer card.
->>>>
->>>> What would you base that quirk off of ? Date ? We don't know when the
->>>> "fixed" cards started to be produced .
->>>
->>> Right. It seems like the best we can do is to make a quirk for that
->>> particular version of card that you proved to have failed.
+Am 20.06.23 um 00:49 schrieb Rob Herring:
+> On Sat, 17 Jun 2023 15:36:15 +0200, Stefan Wahren wrote:
+>> Convert the DT binding document for bcm2835-dma from .txt to YAML.
 >>
->> I just sent a few more data points . It is either date, or C_SIZE, or
->> ERASE_TIMEOUT (if I decode it right). I can also just archive the card,
->> since we have sample size of the defective card equal 1 . It could just
->> be a defective card after all, although the fact that only cache would
->> be defective is unusual.
+>> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+>> ---
+>>   .../bindings/dma/brcm,bcm2835-dma.txt         |  83 --------------
+>>   .../bindings/dma/brcm,bcm2835-dma.yaml        | 102 ++++++++++++++++++
+>>   2 files changed, 102 insertions(+), 83 deletions(-)
+>>   delete mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.txt
+>>   create mode 100644 Documentation/devicetree/bindings/dma/brcm,bcm2835-dma.yaml
+>>
 > 
-> I wouldn't mind having a card quirk and to use "date". But it looks
-> like it's your call to make. :-)
+> 
+> Please add Acked-by/Reviewed-by tags when posting new versions. However,
+> there's no need to repost patches *only* to add the tags. The upstream
+> maintainer will do that for acks received on the version they apply.
+> 
+> If a tag was not added on purpose, please state why and what changed.
 
-I sent the quirk patch:
+i was uncertain after replacing the generic dma-channel-mask with the 
+vendor ones. So i decided to drop the reviewed-by.
 
-[PATCH] mmc: Add MMC_QUIRK_BROKEN_SD_CACHE for Kingston Canvas Go Plus 
-from 11/2019
+Best regards
 
-It seems it is a bit bigger than I though it would originally be.
+> 
+> Missing tags:
+> 
+> Reviewed-by: Rob Herring <robh@kernel.org>
+> 
+> 
+> 
