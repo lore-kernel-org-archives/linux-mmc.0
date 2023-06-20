@@ -2,108 +2,115 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01677EB64D8
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 10:15:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51AE2EB64DC
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 10:15:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231739AbjFTKO7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Jun 2023 06:14:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44346 "EHLO
+        id S231735AbjFTKPB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Jun 2023 06:15:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44506 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231735AbjFTKOm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2023 06:14:42 -0400
-Received: from mail-qt1-x82d.google.com (mail-qt1-x82d.google.com [IPv6:2607:f8b0:4864:20::82d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB9361B0
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 03:14:39 -0700 (PDT)
-Received: by mail-qt1-x82d.google.com with SMTP id d75a77b69052e-3fdec2ed972so20986571cf.1
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 03:14:39 -0700 (PDT)
+        with ESMTP id S231873AbjFTKOi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2023 06:14:38 -0400
+Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E56C0E71
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 03:14:35 -0700 (PDT)
+Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-be3e2d172cbso3361793276.3
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Jun 2023 03:14:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687256079; x=1689848079;
+        d=linaro.org; s=google; t=1687256075; x=1689848075;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=vOsoVhAS5zcveo7bpV9oedUbfz6CmPMgIriAPmX3UMM=;
-        b=dqSZd1k0m2oMqHAG5Kzcyhv59o5mUYzUHTdE4QROXsi6T3LMjk/EkEpWxKM7TOuoC9
-         0TuLHd8mRSE5jN4Dvq/8N1lm84uzlLdY9u1NpyqZsc1hRInuc/FuAf6Utl9+7KUq3jLz
-         /nd3jZOrXQUqyht2rFwePB26kXkCAbaCBx2G5Y/NYc+Izt6yASDdyY/Z1Yp7qwVWjQSo
-         RAaeNhYX1E8PVlxLsdCZuc/yX6Ee7f/iY4etJUQXgGHap8929IHDYrv/c/YGBX6uXfOb
-         Tc7u5U94N+3TGbTLVxx08kvc8XE3+ZfEHET9796DPQUeNHMJwgRAuOguB9teGjj37QCU
-         txIQ==
+        bh=NJJmgVmTa9f7iC7uetyObrO68r9W6Xg4F51QYpcRfPM=;
+        b=KnoTmyXWN5md3fERuYS0Dm1jkxj7MOSAMZonVdYOgYkrdxFKHgtTDDuTuK8KUTyj9F
+         ez9ntj+NgYS95fgZWQPJruaiSIYe6DmuXCqTZQamUic/P9E35BVDJiSd5vsyEyaM16Bf
+         wR7r7uhN3GgiQOopbgClgUByAhApfqvyZiHfIyx+REd7jzadhjy2+7y5PDGqudOU1rso
+         HZPvU8QWJkIZAib7qlTYb56ZiOVD/k7bfSdUgw3xVD682z9SxYylNhf2o0v/tn0e3OAH
+         TL9ffDVzjAWeQR5L6BktCyIelKExgehj76tEmDiT/DeraQ/v0MKdX9v8kXJhXq7XI5GI
+         I/fw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687256079; x=1689848079;
+        d=1e100.net; s=20221208; t=1687256075; x=1689848075;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=vOsoVhAS5zcveo7bpV9oedUbfz6CmPMgIriAPmX3UMM=;
-        b=VNVZQpMnBmQl+WtfjUlPqEEyTpNShKpyEORKlIrs430d5DMUn6WfmE+FNo7Ultew+N
-         3HP++/Xnzv7MtoB9XrFvhrAFm5jtp9YKfVkg4pGP8EAxZCHiPKzOLFon6KEEq4B1KOiI
-         yX84bVTvPL/VY0NGVAByhbaJeuGyrSws2mBNz/BT9yLrjSXwMAZ+8HsnYZNdklrGQe58
-         jPACSyVrUcVWjuNTPItR0e9jB7C0tmfEY54/LUWPg16To+EZMqLtdCPcWpUJge1yrY1m
-         eHQLMnfDGeN9UtlYnKl1iIB6Q2yuWY3IXuU1Zlw9xN1tSfibA3aQ0wwZkm0ml4Ux2n/d
-         +lRw==
-X-Gm-Message-State: AC+VfDxGCP2tIaECzGE5Xu23c1SK1KAdfk8+RtPhxw5g2vJQMTHObr2B
-        oWlSxLVicMmQ47QWHxk3I6N4qTxw7biGII8qumqegQ==
-X-Google-Smtp-Source: ACHHUZ5IdkRPnclg6EB+h7WL8/vvt+mm1fTCydySHl7y0/n0aNxeAA7WUuzTsnGWS3VG771j3zA6UJOWsYsr1NA1KC8=
-X-Received: by 2002:a05:622a:d5:b0:3f6:af57:e707 with SMTP id
- p21-20020a05622a00d500b003f6af57e707mr15370974qtw.51.1687256079058; Tue, 20
- Jun 2023 03:14:39 -0700 (PDT)
+        bh=NJJmgVmTa9f7iC7uetyObrO68r9W6Xg4F51QYpcRfPM=;
+        b=OKbA/oXFAvLXr6HqGiJFTMZPF3CH9YLsUYtRCNWqSrPP2KKrlQIkeEB6t6jMik6R6+
+         vdLaa97elFKSWz+e83zpt3nK0RsZ5p+JIvW3XRRB7lqo97uAurc+pZVmZmGq3BiCX0nu
+         1bk9yfRKgIxSwh/ez1HtatnijJXLhVoMTn08g5/0E2qtlae/45b3SH9j5ks2Zb8PflgE
+         3g4ypxXVHNXfb09xZ6kJbAXkCSmwZagMgJiRdftA+2HCqb8ppfehsfgUQstPsFk9af5j
+         pwK1LCXzR0gW3HFqIRvKsMX+AjyJzAaG9JW8Snkx/E8pjU3tRjUGC3JMiIGNMF1FrdMH
+         oWPQ==
+X-Gm-Message-State: AC+VfDw6JBLReOuwyCaATgZOXcXyR+apdOZn8ca2AY4Vtna5XJg7QUVN
+        b+Wf3kj/DrHrl07+FaX1iOaHC0sBE07K6trywVawTA==
+X-Google-Smtp-Source: ACHHUZ6iVAXtSlfEagdTRkw6Q+YSAN1J8b9rGKXips/cn5kKkmDKHU27IPuCLZFV6BZvBtFEqfel4P+d3RXAqP/kWDA=
+X-Received: by 2002:a25:d310:0:b0:bc8:f082:2301 with SMTP id
+ e16-20020a25d310000000b00bc8f0822301mr2837948ybf.6.1687256075120; Tue, 20 Jun
+ 2023 03:14:35 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230619193621.437358-1-robimarko@gmail.com>
-In-Reply-To: <20230619193621.437358-1-robimarko@gmail.com>
+References: <20230619115120.64474-1-yann.gautier@foss.st.com>
+In-Reply-To: <20230619115120.64474-1-yann.gautier@foss.st.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 20 Jun 2023 12:14:03 +0200
-Message-ID: <CAPDyKFq1ez9NpTGZMLEody4TtWM=hjGbpETdqnw=7aLFTtcvZg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: disable TRIM on Kingston EMMC04G-M627
-To:     Robert Marko <robimarko@gmail.com>
-Cc:     windhl@126.com, avri.altman@wdc.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Tue, 20 Jun 2023 12:13:59 +0200
+Message-ID: <CAPDyKFrYfZHovci0ekTi3WWUrQDWv60MACEe0A_Sd0RmOdW=oQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/6] Update MMCI driver for STM32MP25
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Conor Dooley <conor+dt@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        linux-kernel@vger.kernel.org, Marek Vasut <marex@denx.de>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Yang Yingliang <yangyingliang@huawei.com>,
+        Xiang wangx <wangxiang@cdjrlc.com>,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 19 Jun 2023 at 21:36, Robert Marko <robimarko@gmail.com> wrote:
+On Mon, 19 Jun 2023 at 13:51, Yann Gautier <yann.gautier@foss.st.com> wrote:
 >
-> It seems that Kingston EMMC04G-M627 despite advertising TRIM support does
-> not work when the core is trying to use REQ_OP_WRITE_ZEROES.
+> STM32MP25 is a new SoC from STMicroelectronics. The machine was
+> pushed by Alexandre [1] in his tree.
+> On this new SoC, the SDMMC peripheral, using PL18x/MMCI driver
+> has been updated to v3.
+> The driver has been updated to manage this new version, and the new
+> features it supports:
+> * FIFO size increased from 64B to 1kB
+> * IDMA size alignment/mask updated
+> * New block gap hardware flow control
+> * Delay block updated and dependent on SoC
 >
-> We are seeing I/O errors in OpenWrt under 6.1 on Zyxel NBG7815 that we did
-> not previously have and tracked it down to REQ_OP_WRITE_ZEROES.
+> This series was pushed on top of next branch in Ulf's mmc tree, as it
+> requires feedback clock update patch [2].
 >
-> Trying to use fstrim seems to also throw errors like:
-> [93010.835112] I/O error, dev loop0, sector 16902 op 0x3:(DISCARD) flags 0x800 phys_seg 1 prio class 2
+> [1] https://lore.kernel.org/lkml/59f4a900-34ee-d991-c350-265d38e7c862@foss.st.com/T/
+> [2] https://lore.kernel.org/r/20230613150148.429828-1-yann.gautier@foss.st.com
 >
-> Disabling TRIM makes the error go away, so lets add a quirk for this eMMC
-> to disable TRIM.
+> Changes in v2:
+> - update dt-bindings file (remove bootloader reference and use enum)
 >
-> Signed-off-by: Robert Marko <robimarko@gmail.com>
+> Yann Gautier (6):
+>   dt-bindings: mmc: mmci: Add st,stm32mp25-sdmmc2 compatible
+>   mmc: mmci: add stm32_idmabsize_align parameter
+>   mmc: mmci: Add support for sdmmc variant revision v3.0
+>   mmc: mmci: stm32: manage block gap hardware flow control
+>   mmc: mmci: stm32: prepare other delay block support
+>   mmc: mmci: stm32: add delay block support for STM32MP25
+>
+>  .../devicetree/bindings/mmc/arm,pl18x.yaml    |   7 +-
+>  drivers/mmc/host/mmci.c                       |  35 ++++
+>  drivers/mmc/host/mmci.h                       |   8 +-
+>  drivers/mmc/host/mmci_stm32_sdmmc.c           | 149 ++++++++++++++++--
+>  4 files changed, 179 insertions(+), 20 deletions(-)
+>
 
-Applied for next and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/core/quirks.h | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index 77caa0c903f8..8decb788a3db 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -107,6 +107,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
->         MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
->                   MMC_QUIRK_TRIM_BROKEN),
->
-> +       /*
-> +        * Kingston EMMC04G-M627 advertises TRIM but it does not seems to
-> +        * support being used to offload WRITE_ZEROES.
-> +        */
-> +       MMC_FIXUP("M62704", CID_MANFID_KINGSTON, 0x0100, add_quirk_mmc,
-> +                 MMC_QUIRK_TRIM_BROKEN),
-> +
->         /*
->          * Some SD cards reports discard support while they don't
->          */
-> --
-> 2.41.0
->
