@@ -2,33 +2,33 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AC9AEB64D7
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 12:40:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18C34EB64D7
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jun 2023 12:44:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231894AbjFTMkP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Jun 2023 08:40:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58804 "EHLO
+        id S230295AbjFTMor (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Jun 2023 08:44:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60622 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231384AbjFTMkN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2023 08:40:13 -0400
+        with ESMTP id S229933AbjFTMoq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jun 2023 08:44:46 -0400
 Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0317D10F8;
-        Tue, 20 Jun 2023 05:40:11 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D79E10DD;
+        Tue, 20 Jun 2023 05:44:45 -0700 (PDT)
 Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 51FFC3A2694;
-        Tue, 20 Jun 2023 14:40:10 +0200 (CEST)
+        by DDEI (Postfix) with ESMTP id 79E173A2694;
+        Tue, 20 Jun 2023 14:44:43 +0200 (CEST)
 Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 3538D3A25AA;
-        Tue, 20 Jun 2023 14:40:10 +0200 (CEST)
+        by DDEI (Postfix) with ESMTP id 58B873A25AA;
+        Tue, 20 Jun 2023 14:44:43 +0200 (CEST)
 X-TM-AS-ERS: 10.181.10.103-127.5.254.253
 X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
         Q==
 X-DDEI-TLS-USAGE: Used
 Received: from mx1.dmz.swissbit.com (mx1.dmz.swissbit.com [10.181.10.103])
         by mail5.swissbit.com (Postfix) with ESMTPS;
-        Tue, 20 Jun 2023 14:40:10 +0200 (CEST)
+        Tue, 20 Jun 2023 14:44:43 +0200 (CEST)
 Content-Type: multipart/signed; 
- boundary=NoSpamProxy_614b5508-8971-41c5-a69f-bad7a1d2003c; 
+ boundary=NoSpamProxy_caed715b-a7f6-4323-ba4d-c749779717db; 
  protocol="application/pkcs7-signature"; micalg="sha256"
 From:   Christian Loehle <CLoehle@hyperstone.com>
 To:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
@@ -36,112 +36,263 @@ To:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>
 CC:     Avri Altman <avri.altman@wdc.com>
-Subject: [PATCHv3 0/1]  mmc: block: ioctl: Enhance userspace err-checking
-Thread-Topic: [PATCHv3 0/1]  mmc: block: ioctl: Enhance userspace err-checking
-Thread-Index: AdmjdBOfF8QZigS5QRG0uDWJ7O/Rrg==
-Date:   Tue, 20 Jun 2023 12:40:06 +0000
-Message-ID: <1ef05ea7f0304f56b83b12b105248e7a@hyperstone.com>
+Subject: [PATCHv3 1/1] mmc: block: ioctl: Add PROG-error aggregation
+Thread-Topic: [PATCHv3 1/1] mmc: block: ioctl: Add PROG-error aggregation
+Thread-Index: AdmjdCfpdU8NnQgrT4iRiz4+JBhVQw==
+Date:   Tue, 20 Jun 2023 12:44:41 +0000
+Message-ID: <26d178dcfc2f4b7d9010145d0c051394@hyperstone.com>
 Accept-Language: en-US, de-DE
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 MIME-Version: 1.0
 X-TMASE-Version: DDEI-5.1-9.0.1002-27702.007
-X-TMASE-Result: 10--7.885200-10.000000
-X-TMASE-MatchedRID: Wr10g8+tn8kx0Ef1LOCr0ENF5tKVli5K0NnUUVMlTKYli8Y5a0svLwoO
-        Pjrr9EUjy5mHbqk+bZO46fDNSVBzTaGDMgFJdihf+LfLuKfgdOBPnKxAOPp4WTd4L/plQfz0j3d
-        ZSyALReJzNhvK4/9wOg0wwSAB0/Gt7c0is1Jg1Fc6N/cDgNNi4Xdtc9b/HMCuzf+duMCJLEyE3Q
-        pvaMjVSYspy5fJnP2k+YJ8C27gzimmg8dBfLCnVyBpp+DpTrQjDjwwT0r6EXRShcWO/83xoj88n
-        yn5HOwB3xN6jyfnVfp06bp/ch03xd4bgXBxaoBLWCjDJRYeAZ2ycrvYxo9Kp8fASe7knCtt8G2K
-        jYrJJRSl5r6zKe2MaIAy6p60ZV62bNcocRFO1E1uHY1mnovlhBd8X4RCJhxmwt5o33NI92ZLDkq
-        ngSrjOB4N/rMhmMkEdPnk759AG3U/BcVD4b6t1UTF9NPMDcW5
+X-TMASE-Result: 10--14.337600-10.000000
+X-TMASE-MatchedRID: U3PagEpWyqJvBOh2s92TSM2CuVPkCNzu2FA7wK9mP9fG5dXdQTj2OIGz
+        z42T0DP5p3HiycuTwqB22LX9ExaXqivLSgqaAVoR9k0tWBWiOf/5UnqVnIHSz40nZyQtGDZRcQn
+        7AixVvVx72aKohPmGR8+cZr5skxwlUIGCvH0MbYudx4sU8R+eYNUEOicf335Wyuet65/g7pDwbY
+        qNisklFI8eV9xXSOFA5p98cjyQCaIdj9vNGYhpkfZOZ2c2VQUgrzD8YrC59vwQRik6+J7XSekgE
+        vppMdRRihBIRRThmIoXIQarK0WBEPTxGqS5mxwxSHCU59h5KrGc0xEjtkduy0Jv2xLgykjPrcmm
+        D7/hK1+jDiEYA0mQt2c8Uo6La8PbOwBXM346/+zMw/TUDMCQo6lkWO1bfLIA5CAYYsadb/lnUw9
+        Y1e62m9Sq60+KNPxX
 X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 2973455d-e388-468a-9914-b5c69a8a7554-0-0-200-0
+X-TMASE-XGENCLOUD: b4ac2a58-d29d-4cc3-b17b-fb2b7a638e28-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---NoSpamProxy_614b5508-8971-41c5-a69f-bad7a1d2003c
+--NoSpamProxy_caed715b-a7f6-4323-ba4d-c749779717db
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
-=54=68i=73 =73er=69es =65nhanc=65s =74he io=63t=6C path so t=68at =75s=65rspac=
-e calle=72s ar=65
-=61=62le to =72=65l=69ab=6Cy =63he=63=6B al=6C er=72or =62=69ts for th=65=69r =
-opera=74io=6E=2E
+Use=72=73pace curre=6Etly h=61=73 no =77ay =6F=66 =63heckin=67 for error =62it=
+=73 of
+=64=65=74=65c=74=69on mode X. The=73e =61re =65=72=72or b=69=74s that =61r=65 =
+o=6El=79 d=65tec=74ed =62y
+=74he car=64 w=68=65n executin=67 the =63=6F=6D=6Dand=2E For e.g. a s=61=6Ei=
+=74=69ze =6F=70e=72at=69on
+=74h=69=73 =6D=61y =62=65 minute=73 a=66ter t=68e RS=50 =77=61s =73=65=65n b=
+=79 =74h=65 hos=74.
 
-=54he c=75rrent im=70lem=65=6E=74at=69on pos=65s the pr=6Fb=6Ce=6D =6F=66 er=
-=72=6Fr bits w=68ich
-the c=61ll=65r =63a=6Enot c=68=65c=6B, this =69=73 p=6Ft=65=6E=74ial=6Cy a =73=
-ec=75=72=69=74y =69ss=75=65.
+C=75rre=6Etl=79 userspace pr=6Fg=72=61=6D=73 ca=6Enot =73=65e th=65se er=72or =
+b=69=74s relia=62=6Cy.
+=54hey co=75l=64 is=73ue a multi =69octl cmd w=69th a =43M=44=313 =69=6Dme=64i=
+=61tely =66oll=6F=77=69=6E=67
+=69=74, =62ut sin=63e =65r=72ors o=66 de=74=65c=74ion mode =58 =61=72e =61u=74=
+=6Fmat=69call=79 =63leare=64
+(=74h=65=79 =61=72e all c=6Ce=61=72 =63o=6E=64iti=6F=6E =42=29.
+mm=63=5Fpoll=5F=66or=5Fbusy =6Ff =74he fir=73t =69=6Fct=6C may ha=76=65 alread=
+=79 =68=69dden =73uch =61n
+=65=72=72or f=6Cag.
 
-I=66 =74he =70hrase se=63u=72ity issue =68as w=6Fk=65n y=6F=75 up=2C =62u=74 y=
-=6F=75 =68av=65n=27=74 be=65n =75=73i=6E=67:
-=6D=6D=63-util=73 sa=6Eitiz=65
-mmc-=75t=69l=73 e=72ase secur=65-tr=69m{1=7C2=7D
-=6D=6Dc=2D=75t=69=6C=73 s=65c=75=72=65-=65=72a=73e
-m=6Dc=2D=75tils rp=6D=62 writ=65=2Dblo=63k
-=79=6Fu can =67o back to =73=6C=65ep=2C so=72ry to bot=68e=72 yo=75.
-I=66 =79=6F=75 =68=61v=65, y=6F=75 a=72e p=72obably =73=74=69l=6C =66ine, i=66=
- t=68er=65 w=61s n=6F a=63t=69ve
-attacke=72 =73=61b=6Fta=67i=6E=67 yo=75r =65=4DMC, =74=68e sec=75re =6F=70era=
-=74i=6Fn =70=72o=62a=62ly
-s=75c=63=65e=64e=64=2E
-T=68=65re is just no =77a=79 =74o co=6E=66ir=6D that it a=63tu=61l=6Cy =68as.
+In =63ase o=66 the se=63u=72ity =6F=70era=74ions: =73=61=6Eit=69z=65, s=65=63u=
+=72e e=72=61se=73 a=6Ed
+R=50MB wri=74e=73, =74h=69s =63ould l=65ad to th=65 oper=61t=69on =6Eot be=69n=
+=67 =70e=72f=6Frme=64
+=73uccessfu=6Cly by =74=68e ca=72d w=69=74=68 t=68e us=65r =6E=6Ft kn=6Fw=69n=
+=67.
+If th=65 =75=73er trus=74s that t=68is op=65rati=6Fn i=73 =63om=70lete=64
+(e.g. th=65i=72 =64=61t=61 =69s sani=74ized), thi=73 =63ould be =61 s=65=63uri=
+ty issue.
+=41=6E at=74ack=65r co=75l=64 e=2Eg. provoke =61 e=4D=4D=43 =28VCC) flash fail=
+, wh=65=72e a
+successful =73a=6Ei=74=69=7A=65 =6Ff a =63a=72d i=73 not p=6F=73=73ib=6C=65=2E=
+ =41 card =6Da=79 m=6Fv=65 out
+=6F=66 =50ROG state =62ut i=73s=75e a =62=69t 19 R=31 =65r=72=6Fr.
 
-=45xampl=65s in=63l=75de e.g. a =66lash-=66a=69l =6F=66 =74he =65=4D=4D=43.
-Card beh=61v=69o=72 dif=66e=72s h=65re, R=31 =62=69t 19 c=6F=75ld be se=74,
-many c=61=72ds =77=69ll jus=74 =73h=75=74 =6Fff on =66la=73h-fail=2C =73o =69=
-=66 yo=75 =77a=6Et to p=6Cay
-with =74his pat=63h =49 w=6Fuld =73u=67g=65st aiming f=6F=72 WP=5F=45RAS=45=5F=
-SK=49P,
-=61=6Ct=68oug=68 th=61t =74=65=63hn=69cal=6Cy doesn'=74 n=65ed the =70a=74ch, =
-as =57=50 g=72o=75ps =63=6Fuld
-b=65 q=75er=69=65=64 befo=72=65 =61nd after er=61s=65.
+Th=69s =70=61=74ch =74=68e=72=65for=65 =77ill als=6F =68=61=76e the c=6F=6Es=
+=65qu=65nce of a =6Dm=63=2Dut=69=6Cs
+pat=63h=2C wh=69ch e=6E=61=62les =74he =62it f=6Fr the secu=72ity-=73e=6Esi=74=
+=69=76e o=70=65r=61tions=2E
 
-su=64o .=2Fmmc =77r=69=74e=70=72=6F=74=65=63t u=73e=72 =73=65t tem=70 0x=30 $(=
-($=28bl=6Fckd=65=76 =2D-ge=74sz =2Fd=65v=2Fm=6Dc=62=6Ck=32))) /dev=2Fmmc=62lk2
-s=75=64o =2E=2Fm=6Dc =65ras=65 s=65cur=65=2Der=61=73e 0 $(($=28=62lock=64ev =
-=2D-ge=74sz /=64ev/=6Dm=63bl=6B2)-=31)) /dev=2Fmmc=62lk2
+Signed=2Do=66f-=62y=3A =43=68=72isti=61n =4Coehl=65 =3Ccloe=68l=65=40h=79p=65=
+=72ston=65=2E=63=6F=6D=3E
+---
+ d=72i=76e=72=73/mmc/core=2Fb=6Cock.=63   =7C =32=36 =2B++=2B++=2B+++=2B+++=2B=
+=2D=2D----=2D-=2D=2D=2D
+ driv=65=72s/m=6Dc/c=6Fr=65/=6Dm=63=5Fops=2E=63 =7C =314 +++=2B+=2B+=2D--=2D--=
+-
+ d=72iver=73=2F=6Dmc=2Fc=6Fre=2Fmmc=5F=6F=70s=2Eh =7C  9 =2B++=2B+++=2B+
+ 3 f=69=6Ce=73 changed, =331 i=6Ese=72tions(+=29, 18 delet=69ons=28=2D)
 
-=77=69ll y=69=65=6C=64
-
-Exec=75=74ing Secu=72e =45=72as=65 f=72o=6D 0x00=3000000 =74o 0x=30773=66fff
-High C=61=70=61=63it=79 Era=73e Unit Si=7A=65=3D524=328=38 bytes
-H=69g=68 =43apacity =45ras=65 T=69me=6Fu=74=3D=36=300 ms
-Hi=67h C=61pa=63ity Write =50r=6Ftec=74 Gr=6Fup Si=7Ae=3D2097=31=352 b=79=74es
-=52S=50=30: 0x000=308=3900 # a=64ded by aut=68or=2C =74his is w=68at the p=61t=
-=63=68 wil=6C =61=64d to RSP0
- S=65cur=65 E=72a=73e =53=75c=63ee=64!
-
-=65=76en thou=67h no =65=72=61se =69=73 =69ssu=65=64.
-
-v=33:
-=2D =72=65s=74ored c=68ec=6B on r=70mb =72ea=64s
-- re=66actore=64 to =75se =5F=5Fm=6D=63=5Fp=6Fl=6C=5F=66or=5F=62usy direc=74ly
-=762:
-- =72=65mo=76ed =65x=74ra fla=67 and =6Dad=65 =69t default =62=65=68avi=6Fr =
-=66or wr=69te o=72 R=31B
-=2D aggr=65g=61te err=6Fr =66=6C=61g in =72=65sp=5B0] instea=64 of abu=73ing =
-=72es=70[1=5D
-- av=6Fid o=70e=6E =6Coop busy =70o=6Cling an=64 =72e=75se =5F=5Fm=6Dc=5Fp=6Fl=
-=6C=5Ffor=5F=62u=73=79
-
-
-Chris=74ia=6E =4Co=65hle (1)=3A
-  =6Dmc: bloc=6B: ioctl=3A Ad=64 =50=52=4F=47-e=72=72or =61=67greg=61=74io=6E
-
- =64r=69=76e=72=73/mm=63=2F=63=6Fr=65/blo=63k.=63   =7C 26 =2B=2B=2B=2B=2B++++=
-+++=2B++----------=2D
- d=72i=76er=73=2Fm=6Dc=2Fc=6F=72e/m=6Dc=5Fop=73.c | 1=34 ++++=2B++--=2D-=2D--
- d=72=69v=65r=73/=6D=6Dc/core/mmc=5Fo=70s=2E=68 =7C  9 ++=2B++++++
- 3 f=69le=73 cha=6Ege=64=2C 31 =69=6E=73er=74ion=73=28+), 1=38 deletion=73(=2D=
-)
-
+=64iff --git a/=64=72i=76ers/mmc/core/=62=6C=6F=63=6B.c =62/=64r=69=76er=73/mm=
+c/core/=62loc=6B=2E=63
+index =6546330815=34=38=34..c7e2=62=38=61e58=619 1=300644
+-=2D- a/d=72ivers/=6Dmc/co=72e/=62loc=6B.c
++=2B=2B =62/d=72i=76=65r=73/mmc/c=6Fre=2Fblo=63k.c
+@@ -=34=37=30=2C=37 +4=37=30=2C=37 =40@ =73tatic =69=6Et =5F=5Fmmc=5Fblk=5F=69=
+oc=74l=5Fc=6Dd(str=75ct mmc=5Fc=61=72d *c=61rd, struct m=6Dc=5Fbl=6B=5F=64=61=
+=74a *m=64=2C
+ =09struct mmc=5F=64at=61 =64a=74a =3D {};
+ =09=73=74=72uc=74 =6Dmc=5Freques=74 =6Dr=71 =3D {};
+ =09=73tr=75c=74 scat=74erlis=74 =73=67;
+-=09bo=6F=6C r1b=5F=72esp, use=5Fr1=62=5Fr=65sp =3D =66alse;
++=09=62=6Fol r1=62=5Fr=65=73=70=3B
+ =09=75=6Es=69gne=64 =69n=74 busy=5Ft=69m=65o=75t=5Fms=3B
+ =09int =65rr=3B
+ =09uns=69g=6Eed =69=6Et tar=67et=5Fp=61=72t;
+@@ -551=2C=38 +5=351=2C7 =40@ stat=69=63 i=6E=74 =5F=5Fmmc=5Fblk=5Fi=6Fc=74=6C=
+=5Fc=6D=64=28=73=74ruct =6Dmc=5Fca=72d *c=61rd=2C s=74ruct mmc=5F=62l=6B=5Fdat=
+a *m=64,
+ =09bus=79=5Ftim=65o=75t=5F=6D=73 =3D idata-=3Eic=2E=63m=64=5Fti=6D=65out=5Fms=
+ =3F =3A MMC=5FBL=4B=5FT=49=4D=45=4F=55T=5FMS;
+ =09r=31=62=5Fre=73p =3D (=63m=64=2Ef=6Ca=67s =26 =4D=4DC=5F=52SP=5F=52=31B=29=
+ =3D=3D M=4D=43=5F=52SP=5FR1B;
+ =09if =28=721b=5Fresp)
+=2D=09=09=75se=5F=721b=5Fresp =3D m=6Dc=5Fp=72=65=70are=5Fbusy=5Fc=6Dd(card-=
+=3Ehost, &cmd=2C
+-=09=09=09=09=09=09    b=75s=79=5Ftimeou=74=5Fm=73);
+=2B=09=09=6Dm=63=5Fprepare=5Fb=75s=79=5F=63md(=63a=72=64->=68=6F=73t, &cmd=2C =
+busy=5Ft=69=6D=65ou=74=5Fm=73=29=3B
+ 
+ =09m=6D=63=5Fw=61it=5Ffor=5F=72eq(=63ar=64->host, &mr=71=29;
+ =09m=65mcpy(=26i=64=61=74a=2D>ic=2Eres=70o=6Ese=2C cm=64.r=65sp, s=69=7Ae=6Ff=
+(=63m=64.=72es=70=29);
+@=40 =2D6=305=2C1=39 +604,=324 @=40 s=74=61t=69c int =5F=5Fmmc=5F=62lk=5Fi=6Fc=
+tl=5Fcmd(=73tr=75ct m=6D=63=5Fc=61rd =2Acard, st=72=75=63=74 mmc=5Fb=6Ck=5Fd=
+=61ta *=6Dd,
+ =09if (id=61ta=2D>i=63.po=73=74s=6C=65ep=5Fmin=5Fus=29
+ =09=09u=73leep=5F=72=61n=67=65(=69da=74=61->i=63.post=73le=65p=5Fmi=6E=5Fus, =
+=69d=61t=61=2D=3Ei=63=2Epost=73le=65=70=5F=6D=61x=5F=75s=29;
+ 
+=2D=09/* N=6F n=65e=64 to po=6C=6C when us=69ng =48W busy de=74e=63t=69on. */
+-=09if (=28=63ar=64-=3Eh=6Fs=74->ca=70=73 & =4D=4D=43=5FCAP=5FW=41IT=5FWHIL=45=
+=5FBU=53Y) &=26 =75se=5Fr1b=5Fresp=29
+-=09=09r=65turn =30;
+=2D
+ =09i=66 (=6D=6D=63=5F=68os=74=5Fis=5Fspi=28=63a=72=64->h=6Fst)) =7B
+ =09=09if (ida=74a->ic=2Ewrite=5F=66=6C=61g =7C=7C =72=31b=5Fr=65sp =7C| cm=64=
+.flag=73 & MM=43=5F=52=53=50=5FSPI=5F=42U=53=59)
+ =09=09=09re=74=75r=6E m=6D=63=5F=73=70i=5Ferr=5Fche=63k=28car=64=29;
+ =09=09retur=6E =65=72=72;
+ =09=7D
+-=09=2F=2A En=73=75=72=65 RPMB/=521=42 =63omma=6E=64 h=61s c=6F=6Dpleted by po=
+llin=67 w=69=74=68 CMD=313. */
+-=09i=66 =28i=64ata->rpm=62 |=7C r1=62=5Fresp=29
+-=09=09er=72 =3D m=6D=63=5F=70oll=5F=66or=5F=62=75s=79=28=63=61rd, busy=5Fti=
+=6De=6Fu=74=5F=6Ds, fals=65=2C
+=2D=09=09=09=09=09MM=43=5F=42USY=5FIO)=3B
++=09=2F* =50o=6C=6C f=6Fr R=50=4DB=2Fwrite/=521=42 =65=78e=63ut=69on error=73 =
+*/
++=09if (idata->rpm=62 || i=64a=74=61->i=63=2E=77rit=65=5F=66=6C=61=67 =7C| r=
+=31=62=5Fres=70) {
++=09=09struct =6Dm=63=5Fbus=79=5F=64=61ta cb=5Fdat=61;
++
+=2B=09=09cb=5Fdata=2Ecar=64 =3D =63=61rd=3B
++=09=09c=62=5Fdata=2Eretr=79=5Fcrc=5Fe=72r =3D false;
+=2B=09=09c=62=5F=64a=74a.a=67gr=65gate=5Fe=72=72=5Ff=6Ca=67s =3D tr=75=65;
++=09=09cb=5Fd=61ta=2Eb=75sy=5Fc=6Dd =3D M=4D=43=5F=42USY=5F=49O=3B
+=2B=09=09cb=5Fd=61t=61=2Es=74at=75s =3D &id=61t=61=2D>i=63.resp=6F=6E=73e=5B=
+=30=5D;
++=09=09er=72 =3D =5F=5F=6Dmc=5F=70oll=5F=66or=5Fbusy=28c=61=72=64=2D=3Eho=73t,=
+ =30=2C =62usy=5Ftimeou=74=5Fms=2C
++=09=09=09=09&m=6D=63=5F=62usy=5Fcb, &cb=5F=64ata=29=3B
++
++=09}
+ 
+ =09ret=75rn =65rr;
+ }
+di=66=66 --=67it =61=2Fdriv=65=72=73/=6Dmc/core/=6Dm=63=5Fops.c b/=64riv=65rs/=
+mm=63=2F=63o=72e=2F=6Dm=63=5F=6Fps.=63
+index 3=623=61=64b=64d=66=366=34..1=35d=38=628=30=36c670 10=30644
+=2D-=2D =61=2Fdr=69ver=73=2Fmmc=2Fcor=65=2F=6Dmc=5Fop=73=2Ec
++++ b/d=72i=76=65r=73=2Fmmc=2F=63o=72=65/mmc=5Fops=2E=63
+@@ =2D=35=34,11 +=354,=36 @=40 st=61=74i=63 =63=6Fnst u=38 =74u=6Ein=67=5F=62l=
+k=5Fpa=74t=65rn=5F=38=62it=5B] =3D {
+ =09=30=78=66f, 0x7=37=2C =30x7=37, 0xf=66, 0=78=377=2C 0xbb, 0=78dd, 0=78e=65=
+,
+ }=3B
+ 
+-struc=74 mm=63=5Fbusy=5Fdata {
+=2D=09s=74r=75ct m=6Dc=5F=63ar=64 *car=64=3B
+-=09=62ool =72=65t=72y=5Fcr=63=5Ferr;
+=2D=09enum mmc=5Fbu=73y=5Fc=6D=64 b=75sy=5Fc=6Dd;
+-=7D=3B
+ 
+ s=74=72=75=63=74 mmc=5F=6F=70=5F=63o=6Ed=5Fb=75=73y=5Fda=74a {
+ =09str=75=63t mm=63=5Fho=73t *ho=73t;
+@@ -45=37,1=34 +=3452,1=35 @=40 int m=6Dc=5F=73=77i=74c=68=5Fsta=74us(str=75=
+=63=74 mm=63=5Fc=61rd =2A=63a=72d, bool =63rc=5F=65rr=5F=66a=74al)
+ =09=72=65turn m=6Dc=5Fs=77itc=68=5F=73t=61tu=73=5Fe=72r=6Fr(=63=61r=64->=68os=
+t, stat=75s=29;
+ }
+ 
+-=73t=61tic i=6E=74 =6D=6Dc=5Fb=75=73y=5Fcb(voi=64 *=63b=5Fd=61ta, bool =2Abus=
+y)
++int =6D=6Dc=5Fbu=73y=5Fc=62=28void *=63b=5Fdat=61=2C bo=6Fl *=62=75s=79)
+ {
+ =09st=72=75=63=74 mmc=5F=62us=79=5F=64a=74=61 =2Ad=61ta =3D c=62=5Fdata;
+ =09=73=74=72=75=63t mmc=5Fhos=74 *host =3D da=74=61=2D>ca=72d->=68os=74=3B
+ =09u=332 =73tatus =3D =30;
+ =09int =65r=72;
+ 
+-=09=69f (=64=61ta=2D>=62=75sy=5Fcm=64 =21=3D M=4D=43=5F=42US=59=5F=49O && =68=
+os=74-=3Eops->c=61r=64=5F=62usy) {
++=09if (dat=61-=3E=62usy=5F=63=6Dd =21=3D MMC=5F=42=55=53=59=5F=49O &=26 =68=
+=6Fs=74=2D>=6Fp=73=2D>=63a=72d=5Fbus=79 &&
+=2B=09=09=09!=64at=61->=61=67greg=61te=5Ferr=5Ff=6Cags=29 =7B
+ =09=09*=62usy =3D host=2D=3Eo=70s=2D>card=5F=62u=73=79(=68ost);
+ =09=09retur=6E 0;
+ =09}
+=40@ -=3477,=36 +=3473,9 =40=40 st=61=74=69c int m=6Dc=5F=62=75s=79=5F=63=62(v=
+oid *c=62=5Fdata, =62=6Fol *busy)
+ =09if =28e=72r)
+ =09=09re=74u=72=6E =65=72r;
+ 
+=2B=09=69=66 (=64a=74a->=61gg=72=65gate=5Ferr=5Ffl=61gs)
+=2B=09=09*da=74=61->status =3D R1=5FS=54=41=54U=53=28*d=61=74a=2D>st=61tus) | =
+=73tatus;
+=2B
+ =09switch =28data=2D>bu=73y=5Fcmd) =7B
+ =09c=61se MMC=5FB=55SY=5FCMD6=3A
+ =09=09err =3D mmc=5Fswi=74=63h=5Fs=74atus=5Ferror=28=68ost=2C st=61tus)=3B
+=40@ =2D549,=36 +=35=348=2C7 =40=40 =69n=74 mmc=5Fp=6Fl=6C=5F=66=6Fr=5Fbus=79=
+=28stru=63=74 m=6Dc=5F=63a=72d *car=64, unsigne=64 int t=69me=6Fut=5Fms,
+ 
+ =09c=62=5Fda=74a.card =3D =63a=72d=3B
+ =09cb=5F=64=61=74a.retry=5Fcrc=5F=65=72r =3D re=74=72y=5Fcr=63=5F=65r=72;
+=2B=09cb=5Fdat=61=2Eagg=72egate=5Fe=72r=5Ffla=67s =3D =66alse=3B
+ =09cb=5Fd=61ta.busy=5Fc=6D=64 =3D =62usy=5Fcm=64=3B
+ 
+ =09=72=65=74u=72n =5F=5Fmmc=5Fpo=6Cl=5F=66o=72=5Fbusy=28host=2C 0, tim=65=6F=
+=75=74=5F=6Ds, &mmc=5Fb=75sy=5Fc=62, &=63b=5Fdata)=3B
+di=66f -=2Dgit a/=64=72iv=65=72s/mmc/c=6F=72e/m=6D=63=5Fops=2Eh b/driv=65rs=2F=
+=6Dm=63=2Fcore=2F=6D=6Dc=5Fops=2E=68
+index =30=39=66fbc=30090=38=62..a=357=37=351b83f1=39 10=30644
+-=2D- =61=2Fd=72iver=73=2Fmmc/=63o=72e/m=6Dc=5F=6Fps=2Eh
++++ b/dr=69=76ers/mm=63/core/m=6Dc=5F=6Fp=73.h
+=40@ =2D=31=38,=36 +18=2C14 @=40 e=6Eum mmc=5Fbus=79=5F=63=6Dd {
+ =09MM=43=5FBUSY=5FIO,
+ };
+ 
++struc=74 mm=63=5Fb=75sy=5Fd=61=74a =7B
++=09s=74=72u=63t mmc=5Fca=72d *car=64=3B
++=09bool r=65=74=72=79=5Fc=72c=5Fer=72=3B
++=09b=6Fo=6C =61ggregate=5Fe=72r=5Ffla=67=73=3B
+=2B=09=65=6Eu=6D =6D=6Dc=5F=62=75=73y=5F=63=6Dd b=75s=79=5Fcmd=3B
++=09u32 *s=74atus;
++=7D;
++
+ s=74r=75ct m=6Dc=5F=68o=73t=3B
+ =73t=72u=63t mmc=5Fc=61=72d;
+ s=74r=75ct mmc=5Fcomman=64=3B
+=40@ -=34=31,6 +49,7 =40@ in=74 mm=63=5F=63=61=6E=5F=65=78=74=5Fc=73d(=73truc=
+=74 m=6Dc=5F=63=61=72d *ca=72d=29=3B
+ i=6Et =6Dmc=5Fswi=74=63h=5Fstatu=73(struct m=6Dc=5Fca=72d *ca=72=64, =62oo=6C=
+ =63rc=5Ferr=5Ff=61=74al)=3B
+ bo=6Fl m=6Dc=5Fprep=61re=5Fbu=73y=5Fcmd=28=73truc=74 mmc=5Fh=6Fst =2Aho=73t=
+=2C =73t=72uc=74 m=6Dc=5Fc=6Fmma=6Ed *c=6D=64,
+ =09=09=09  =75ns=69=67ne=64 int timeout=5Fms=29=3B
+=2B=69n=74 mmc=5Fbusy=5Fc=62=28v=6F=69=64 *cb=5F=64ata, =62oo=6C *=62us=79=29;
+ i=6Et =5F=5Fmmc=5F=70oll=5Ff=6Fr=5Fbusy=28s=74=72=75=63=74 mm=63=5Fho=73t =2A=
+ho=73=74=2C uns=69gned =69n=74 =70erio=64=5Fu=73,
+ =09=09=09unsi=67=6E=65d i=6E=74 timeou=74=5F=6D=73,
+ =09=09=09=69=6E=74 =28=2Ab=75=73y=5Fcb=29(=76oid *cb=5F=64=61=74a, bool =2A=
+=62usy),
 =2D-
-=32.37.3
---NoSpamProxy_614b5508-8971-41c5-a69f-bad7a1d2003c
+2.37.=33
+--NoSpamProxy_caed715b-a7f6-4323-ba4d-c749779717db
 Content-Transfer-Encoding: BASE64
 Content-Type: application/pkcs7-signature; name=smime.p7s
 Content-Disposition: attachment; filename=smime.p7s
@@ -309,23 +460,23 @@ pXjXBtpqnks+dzogEyIB0L9onmNgazVNC226oT3Ak+B/I7NVrXIlTkb50hbvsGTBAZ7pyqBqmA7P
 sNBXwfo+euGXyTGAMIACAQEwazBTMQswCQYDVQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFH
 MS0wKwYDVQQDEyRTd2lzc1NpZ24gUlNBIFNNSU1FIExDUCBJQ0EgMjAyMSAtIDICFH/0ya9FbNqD
 P1mj8nwYIyzoDuazMAsGCWCGSAFlAwQCAaCCAfIwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-BgkqhkiG9w0BCQUxDxcNMjMwNjIwMTI0MDEwWjAvBgkqhkiG9w0BCQQxIgQgCO9hZvDrdRNOrSmI
-xMlfh3YNcAwAgXSfnKOQ0YR2i5UwegYJKwYBBAGCNxAEMW0wazBTMQswCQYDVQQGEwJDSDEVMBMG
+BgkqhkiG9w0BCQUxDxcNMjMwNjIwMTI0NDQzWjAvBgkqhkiG9w0BCQQxIgQgbYyCMCRKJ2tMCLzS
+ErqKahH+QiPRlWj0MhFoJzNlX7wwegYJKwYBBAGCNxAEMW0wazBTMQswCQYDVQQGEwJDSDEVMBMG
 A1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24gUlNBIFNNSU1FIExDUCBJQ0Eg
 MjAyMSAtIDICFH/0ya9FbNqDP1mj8nwYIyzoDuazMHwGCyqGSIb3DQEJEAILMW2gazBTMQswCQYD
 VQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24gUlNBIFNN
 SU1FIExDUCBJQ0EgMjAyMSAtIDICFH/0ya9FbNqDP1mj8nwYIyzoDuazMIGMBgkqhkiG9w0BCQ8x
 fzB9MAcGBSsOAwIaMAsGCWCGSAFlAwQCATALBglghkgBZQMEAgIwCwYJYIZIAWUDBAIDMAoGCCqG
 SIb3DQMHMAsGCWCGSAFlAwQBAjALBglghkgBZQMEAQYwCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
-KjALBglghkgBZQMEAS4wDQYJKoZIhvcNAQEBBQAEggIAEWvoV/8GDdr7nYnY1T+z4jrJg8+/SlMF
-qt71JGN12ehN6EFogVCKoHsA/+pZKt/TvAUCi+Msmr+EJJn/PakjfxAQw8OocetqoF6VyDydkzbO
-LGhq/o1NI2uFyI+uEPjkIl7B7w2fqLdATA7WzgArAP0vP2JWAILmwtrXbVSLXsk3oz/rBRNefeS0
-6w5vdecIEwEsspXsmfnIMhV18uP0HDpmBQ+ivwtcuiEtRO3122xMW5sClIel3RflZYHToEoIla2/
-UExXn4E8Edw7ybV1Vx1fASfaeuprw/oKQrzJCkMSnBcm0W48IyZzlr4Tfr+rRv6u1/cKZI5HLFDB
-XtGzIy8Iw+NEEp1TtsrHqsxXdvkR2Pdb9LbLmdvH/D/3isyk+aS3JTY+Z0bT4LNnVpWU0GjR4AKH
-v2LF/eeO3/OU/2dp0QsAT9+iDHsbW3NlyyM1Fl26gIu26gNV/5rxu5odO8NXynEgGMOgCsVC3gvi
-V64B+22GAQqjGIDa5pya0C3mBfPgtRUepyUyEbCfQGd4F1d8VMLsQQEDVD5nlnyKnxFzK4HjIeNL
-dcMlG765xwmGY0plRFVbb9bX3mAs2JEKquXtDodhUDCWgJ0GWZyspka1ej00WgKGksxCQYpUfaIE
-66nc/bV1Lvkw95yaPztmQpqQsH7qvHV4E3zhnVmO/XAAAAAAAAAAAAAA
---NoSpamProxy_614b5508-8971-41c5-a69f-bad7a1d2003c--
+KjALBglghkgBZQMEAS4wDQYJKoZIhvcNAQEBBQAEggIAp6KFhZsumYbVTYkzNp58scK+aysMNRB6
+g+JxnC0I/rS38JYf99QpY+Wkv2S730pqIe4Fo2VrVKyMbfTDhp0VA4dAdeV0mteTc66Gg6yMvrKy
+TfLQ+5z5EuFhwT36WQGTD/yKb7ypApEK9kyq1W2c/gB3r+oYK3KmE431UIySPv/CbMvZNkxaM5Ld
+mhnSJGOxLkkkJ66tJ2m6/WxhBMKM7WZ3Aa8wbVMUpEMZuy1K/d4fA82v/0CRnPbP6D+PuiktdaB/
+UGSFXH0CFYOAbNoKBz4LauOgoPUXaZA7yfd8Onm2g/Q/z5vvY8HPhFpyBnJbHz0aFpMycaUa1NxW
+eegsWmrCmEc4ki1G4v4y+zFpqybOrbFZKE4b97LLCxU2z0RSoEuHSWQZuGpM2LcTqMd3rkPHSL0q
+slVAdE8NKpemIBN4IZlciIJKyTmZxl07cNMfPDrpNbPvj/7Gfl9/X4vfRjt1S3GUwuJR+Q87Sncu
+PO44a3+CPTwePbSk6Zi/LSaM1T8WvPB8P2X8kwYoNFZnCI6Im27FFM00bU8wV7l55xIKH56j8K2a
+kh3SQL9SxRfjilUwGqXWNyYd9l8YxSaDshGYa0RhHDcNuPQk8jQ9yjSEzyAat8dCx3bTSHKUT5gK
+jTu9N/E7j9oATwqXze3YwkWRSkbeam9Vi4MrNypvvFIAAAAAAAAAAAAA
+--NoSpamProxy_caed715b-a7f6-4323-ba4d-c749779717db--
 
