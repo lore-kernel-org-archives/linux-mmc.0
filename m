@@ -2,586 +2,303 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CDBBEB64D8
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 10:36:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1730EB64D7
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 11:24:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231732AbjFUKgo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jun 2023 06:36:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49932 "EHLO
+        id S232679AbjFULYM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jun 2023 07:24:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48744 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231740AbjFUKgR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 06:36:17 -0400
-Received: from mail-ua1-x929.google.com (mail-ua1-x929.google.com [IPv6:2607:f8b0:4864:20::929])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 959501989;
-        Wed, 21 Jun 2023 03:33:34 -0700 (PDT)
-Received: by mail-ua1-x929.google.com with SMTP id a1e0cc1a2514c-78f1210e27fso1630302241.1;
-        Wed, 21 Jun 2023 03:33:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1687343613; x=1689935613;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Kf4U52Z6WaUWRriTpM2eTOikOU1HW3VSKEtuU9cILY0=;
-        b=Fr+ZW7eQFY8qBVEvy+z33zKhl2to/RoVhG1k/uennxfzp0rGUsS/jLbpteQWRRWWnD
-         N5Tsu2+LiGOKFoFNTIrRi14i45z6f99SKagxGBb3Fd5nN5MWPZdU2eZz8A2BMapcHVhk
-         fbQDb53LAWUurNNseiyCWVnkVgp55iM+xFtq+GHY9vJXJMhK5ZRGm23c026Ipw8DXxkr
-         XHRh8Gb1NDWnJDDKpCbzdCfQztab5bQwBL3EPmxIipIfeL+idamA2fVGUwy4LSxZ6T1R
-         0JHFpx07ibiXxu1DTMu870KVfB/KVr/yfNqzU7zRk1O6wb6AT/2pgI7rf24sZUslK8Yg
-         /ACg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687343613; x=1689935613;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Kf4U52Z6WaUWRriTpM2eTOikOU1HW3VSKEtuU9cILY0=;
-        b=PUIiFxci5gkhVDmEcwUaE8jS+vXzS9tjcOkLD0Zv2XeI6crdV8BHhWuVHImHYwU4af
-         A85vQRz9gH2L4QhyPO0a870Ii8X/LqgKcTKGK2u1mqz/a+1bW5m+pv+uZB67x6Lt+g9/
-         qdQYWaA5Zg8g9gheONETf+DPEXEzXFhdjvqmxBuoO4fgbqv9X5Dx6sEKe874MUCrtMT4
-         zjy/8exry94c+BhEHTCABadIQLxhGZTfLd/DcGU6XYsxPu8Y6Fnt9SyY7xEyDYPaXSpm
-         A2kENmuL0hHuV/uIqpP43csYcBvxRlPgNg2qt+UH3J0c+lUR9cfcWiYof5lUTQhX+j67
-         RSiQ==
-X-Gm-Message-State: AC+VfDz6YIoFQHoOlWiQPtBuRxYM0q39GabrExuNUofBmAIB3d//Axg9
-        wxCPkPFUNL/BBp7KGBtYdGQeztz32YrYHkHpMJfgQK3w
-X-Google-Smtp-Source: ACHHUZ65XrSo8uVKIbIUxufdue8FOxD1Q0RsmUzT7+9v082nGCuChhRQmiIKNffUi/vk4hf7wHj+V3UVNmh2Skmz/2U=
-X-Received: by 2002:a05:6102:2453:b0:440:d2f5:e36d with SMTP id
- g19-20020a056102245300b00440d2f5e36dmr758707vss.14.1687343613495; Wed, 21 Jun
- 2023 03:33:33 -0700 (PDT)
+        with ESMTP id S232753AbjFULYC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 07:24:02 -0400
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6FAE71721;
+        Wed, 21 Jun 2023 04:23:59 -0700 (PDT)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 900BC3A2AEE;
+        Wed, 21 Jun 2023 13:23:57 +0200 (CEST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 7D6AA3A2A97;
+        Wed, 21 Jun 2023 13:23:57 +0200 (CEST)
+X-TM-AS-ERS: 10.181.10.102-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgyLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx2.dmz.swissbit.com (mx2.dmz.swissbit.com [10.181.10.102])
+        by mail5.swissbit.com (Postfix) with ESMTPS;
+        Wed, 21 Jun 2023 13:23:57 +0200 (CEST)
+Content-Type: multipart/signed; 
+ boundary=NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e; 
+ protocol="application/pkcs7-signature"; micalg="sha256"
+From:   Christian Loehle <CLoehle@hyperstone.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Marek Vasut <marex@denx.de>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH 01/11] mmc: core: Use BIT() macro
+Thread-Topic: [PATCH 01/11] mmc: core: Use BIT() macro
+Thread-Index: AQHZo2SocUiFxoozMkOzCUFdpaBskq+TaKaAgAEBWICAAHCAAIAAQJtQ
+Date:   Wed, 21 Jun 2023 11:23:54 +0000
+Message-ID: <da39a415784e4bbabfa99596ffd5b565@hyperstone.com>
+References: <20230620104722.16465-1-marex@denx.de>
+ <CAPDyKFqZ_r=gjpRm833ax4LwASCTGAuO0a0ABXo-kN8dtYje-Q@mail.gmail.com>
+ <289cd876-e6e1-8610-bcb6-b0259c68fd89@denx.de>
+ <CAPDyKFoLaYegCxw35XPNWuzg_F4M-UPho=+XweB+V4oCXaMxGA@mail.gmail.com>
+In-Reply-To: <CAPDyKFoLaYegCxw35XPNWuzg_F4M-UPho=+XweB+V4oCXaMxGA@mail.gmail.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
 MIME-Version: 1.0
-References: <20230331105546.13607-1-victor.shih@genesyslogic.com.tw>
- <CAK00qKBjk5MraajKhOKNozZ5VVVfyOLJxoZ5qPYjV+pYUE0Amg@mail.gmail.com> <CAPDyKFrUt+CJpTooePHAEv4WsoWtiw=d3CFjZvj9z2t5mUV+Rw@mail.gmail.com>
-In-Reply-To: <CAPDyKFrUt+CJpTooePHAEv4WsoWtiw=d3CFjZvj9z2t5mUV+Rw@mail.gmail.com>
-From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Wed, 21 Jun 2023 18:33:21 +0800
-Message-ID: <CAK00qKDh7=moLDO1X2bxG4y1YVLjfS97Rk+mD+VJNibLW1c0Nw@mail.gmail.com>
-Subject: Re: [PATCH V7 00/23] Add support UHS-II for GL9755
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-TMASE-Version: DDEI-5.1-9.0.1002-27704.007
+X-TMASE-Result: 10--16.571200-10.000000
+X-TMASE-MatchedRID: UuaOI1zLN1joSitJVour/fHkpkyUphL9t7k6BDMlB1j+MGGu4g4Dva8X
+        I0sh2cEOvlI+Zzj6VqK5oEpue1AetQx6TQKWelWnmlaAItiONP1xXefgn/TNQ9bZhgeyVPQjVEb
+        W2lpTuVQ4TZp9PdZBMb6Um2sWRaGefmpY4OvTCPIvun/+8u/hs6++Humppw/G1F6O1lfh5suipF
+        NLeO72SCA/w+swsUFqpgolEZSL3/xlSYhlh8RfcvSG/+sPtZVkTSz0JdEAJbSY5nVpihxiwzcpX
+        pPCV0E3x3zfzJOsFTlhWlVNvgpQIjWYHgPBpNXWs/Hes76OTZAsvqYk4iz+9q5fd95aO5tJoOaQ
+        vO0H0Bat1kt6UTrAWz2Xsf5MVCB1t7DW3B48kkESMbwGTAneLwU5rQ/jDZbqhx0Lb8oFs7SUTGV
+        AhB5EbQ==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 60eeb6a1-e1f0-41fb-ab79-e630ab24b7dd-5-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Ulf
+--NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 
-I will add a version history for each of the patches in the V8 version.
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gPHVs
+Zi5oYW5zc29uQGxpbmFyby5vcmc+DQo+IFNlbnQ6IE1pdHR3b2NoLCAyMS4gSnVuaSAyMDIzIDEx
+OjE5DQo+IFRvOiBNYXJlayBWYXN1dCA8bWFyZXhAZGVueC5kZT4NCj4gQ2M6IGxpbnV4LW1tY0B2
+Z2VyLmtlcm5lbC5vcmc7IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsN
+Cj4gQXZyaSBBbHRtYW4gPGF2cmkuYWx0bWFuQHdkYy5jb20+OyBCbyBMaXUgPGxpdWJvMDNAaW5z
+cHVyLmNvbT47IERlcmVuDQo+IFd1IDxkZXJlbi53dUBtZWRpYXRlay5jb20+OyBQaGlsaXBwIFph
+YmVsIDxwLnphYmVsQHBlbmd1dHJvbml4LmRlPjsNCj4gUGllcnJlIE9zc21hbiA8cGllcnJlQG9z
+c21hbi5ldT47IFJ1c3NlbGwgS2luZyA8bGludXhAYXJtbGludXgub3JnLnVrPjsNCj4gWWFuZyBZ
+aW5nbGlhbmcgPHlhbmd5aW5nbGlhbmdAaHVhd2VpLmNvbT4NCj4gU3ViamVjdDogUmU6IFtQQVRD
+SCAwMS8xMV0gbW1jOiBjb3JlOiBVc2UgQklUKCkgbWFjcm8NCj4gDQo+IENBVVRJT046IHRoaXMg
+bWFpbCBjb21lcyBmcm9tIGV4dGVybmFsIS9BQ0hUVU5HOiBEaWVzZSBNYWlsIGtvbW10IHZvbg0K
+PiBleHRlcm4hDQo+IA0KPiBPbiBXZWQsIDIxIEp1biAyMDIzIGF0IDA0OjM2LCBNYXJlayBWYXN1
+dCA8bWFyZXhAZGVueC5kZT4gd3JvdGU6DQo+ID4NCj4gPiBPbiA2LzIwLzIzIDEzOjE1LCBVbGYg
+SGFuc3NvbiB3cm90ZToNCj4gPiA+IE9uIFR1ZSwgMjAgSnVuIDIwMjMgYXQgMTI6NDcsIE1hcmVr
+IFZhc3V0IDxtYXJleEBkZW54LmRlPiB3cm90ZToNCj4gPiA+Pg0KPiA+ID4+IFVzZSB0aGUgQklU
+KG4pIG1hY3JvIGluc3RlYWQgb2YgKDE8PG4pLCBubyBmdW5jdGlvbmFsIGNoYW5nZS4NCj4gPiA+
+PiBSZWdleCAnc0AoMSBcPzw8IFw/XChbMC05QS1aX11cK1wpKUBCSVQoXDEpJyAuDQo+ID4gPj4N
+Cj4gPiA+PiBTaWduZWQtb2ZmLWJ5OiBNYXJlayBWYXN1dCA8bWFyZXhAZGVueC5kZT4NCj4gPiA+
+DQo+ID4gPiBJIGRvbid0IHRoaW5rIHRoZSBiZW5lZml0IG9mIHRoaXMgY2hhbmdlIGlzIHdvcnRo
+IGl0LiBGb3IgZXhhbXBsZSwNCj4gPiA+IGl0J3MgcXVpdGUgdXNlZnVsIHRvIHJ1biBhIGdpdCBi
+bGFtZSB0byBzZWUgdGhlIGhpc3Rvcnkgb2Ygd2hhdCBoYXMNCj4gPiA+IGhhcHBlbmVkLg0KPiA+
+DQo+ID4gVW5kZXJzdG9vZC4NCj4gPg0KPiA+IGdpdCBibGFtZSBkb2VzIGFsbG93IHlvdSB0byBz
+cGVjaWZ5IGVpdGhlciAtLXNpbmNlIG9yIHJldmlzaW9uIHJhbmdlIHRob3VnaC4NCj4gDQo+IFll
+cywgYnV0IEkgdGhpbmsgeW91IGdldCBteSBwb2ludC4NCj4gDQo+ID4NCj4gPiA+IFNvLCBzb3Jy
+eSwgYnV0IEkgYW0gbm90IGdvaW5nIHRvIHBpY2sgdGhpcyB1cCAtIG9yIGFueSBvdGhlciBzaW1p
+bGFyDQo+ID4gPiBjaGFuZ2VzLCBhdCBsZWFzdCBmb3IgdGhlIGNvcmUgbGF5ZXIuDQo+ID4NCj4g
+PiBJcyB0aGlzIGEgcG9saWN5IG9mIHRoZSBtbWMgc3Vic3lzdGVtIHRvIHJlamVjdCBhbGwgY29k
+ZSBjbGVhbiB1cHMgdGhlbiA/DQo+IA0KPiBPZiBjb3Vyc2UgaXQgaXNuJ3QsIEkgcmVndWxhcmx5
+IHBpY2sgdXAgY2xlYW4gdXBzLg0KPiANCj4gTXkgcG9pbnQgaGVyZSBpcyB0aGF0IHRoZSBjbGVh
+bi11cCBzaG91bGQgbWFrZSB0aGUgY29kZSBiZXR0ZXIsIGluIHNvbWUNCj4gd2F5LiBJIGRvbid0
+IHRoaW5rIGNvbnZlcnRpbmcgdG8gdGhlIEJJVCBtYWNybyBoZWxwcyBpbiB0aGlzIHJlZ2FyZC4g
+SXQgbWF5IGJlDQo+IHByZWZlcnJlZCB0byB1c2UgdGhlIEJJVCBtYWNybyBieSBzb21lIGFuZCBi
+eSBvdGhlcnMgbm90Lg0KDQpGV0lXIEkgYWdyZWUgd2l0aCBVZmZlIGhlcmUuDQpGb3IgaG9zdC8g
+ZmlsZXMsIHdoaWNoIGFyZSBtb3N0bHkgd3JpdHRlbiBieSBhIGhhbmRmdWwgZWFjaCwgaXQncyBz
+dGlsbCBhIG51aXNhbmNlLiAoT25lIGNvdWxkIGFyZ3VlIHRoYXQgdGhleSBhcmUgb2Z0ZW4gZ2l0
+IGJsYW1lZCBieSBwZW9wbGUgbm90IGZhbWlsaWFyIHdpdGggbW1jIHN1YnN5c3RlbSwgdGh1cyBn
+aXZpbmcgb2ZmIHRoZSB3cm9uZyBwaWN0dXJlKS4NCkZvciBtdWNoIG9mIHRoZSBjb3JlIGNvZGUg
+eW91IGFscmVhZHkgaGF2ZSB0byBnbyBtYW55IHJldmlzaW9ucyBiYWNrLCBJJ20gZ3JhdGVmdWwg
+Zm9yIGVhY2ggSSBkb24ndCBoYXZlIHRvLg0KU29tZXRoaW5nIGxpa2UgdGhlIG1xIHJld29yayB3
+b3VsZCBoYXZlIGJlZW4gYSBnb29kIG1vbWVudCB0byBkbyB0aGVzZSBtaW5vciBuaXRwaWNrcywg
+aWYgc29tZXRoaW5nIGxpa2UgdGhhdCBldmVyIGhhcHBlbnMgYWdhaW4sIGJ1dCBldmVuIHRoZW4g
+SSAgd291bGQgcHJlZmVyIGp1c3Qgb25lIGNvbW1pdCBpbmNsdWRpbmcgZXZlcnl0aGluZy4NCg0K
+DQpSZWdhcmRzLA0KQ2hyaXN0aWFuDQo=
 
-Thanks, Victor Shih
+--NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e
+Content-Transfer-Encoding: BASE64
+Content-Type: application/pkcs7-signature; name=smime.p7s
+Content-Disposition: attachment; filename=smime.p7s
 
-On Thu, Jun 15, 2023 at 12:06=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.or=
-g> wrote:
->
-> On Wed, 7 Jun 2023 at 12:17, Victor Shih <victorshihgli@gmail.com> wrote:
-> >
-> > Hi, Ulf
-> >
-> > Excuse me, if you already have a closer look at a paragraph in the seri=
-es,
-> > could you let me know your comments first, let me check it first.
->
-> Hi Victor,
->
-> My apologies for the long delay. It looks like the series could
-> benefit from a re-base, which is probably my fault because of the late
-> review. There are also plenty of comments/questions from Adrian that
-> you can address before sending a new version.
->
-> Moreover it's getting too heavy to review this for me, as I am lacking
-> a version history for each of the patches in the series. Just putting
-> a version history in the cover-letter isn't sufficient when coming
-> back to review this. Please fix that too and when sending a new
-> version.
->
-> Kind regards
-> Uffe
->
-> >
-> > Thanks, Victor Shih
-> >
-> > On Fri, Mar 31, 2023 at 6:55=E2=80=AFPM Victor Shih <victorshihgli@gmai=
-l.com> wrote:
-> > >
-> > > Summary
-> > > =3D=3D=3D=3D=3D=3D=3D
-> > > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
-> > >
-> > > About UHS-II, roughly deal with the following three parts:
-> > > 1) A UHS-II detection and initialization:
-> > > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup =
-Sequence
-> > >   [2]).
-> > > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequen=
-ce[2]).
-> > > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is inclu=
-de Section
-> > >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting=
- Register
-> > >   Setup Sequence.
-> > >
-> > > 2) Send Legacy SD command through SD-TRAN
-> > > - Encapsulated SD packets are defined in SD-TRAN in order to ensure L=
-egacy SD
-> > >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1=
- Packet
-> > >   Types and Format Overview[3]).
-> > > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UH=
-S-II
-> > >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2=
-]).
-> > >
-> > > 3) UHS-II Interrupt
-> > > - Except for UHS-II error interrupts, most interrupts share the origi=
-nal
-> > >   interrupt registers.
-> > >
-> > > Patch structure
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > patch#1-#6:  for core
-> > > patch#7-#22: for sdhci
-> > > patch#23:    for GL9755
-> > >
-> > > Changes in v7 (Mar. 31, 2023)
-> > > * rebased to the linux-kernel-v6.3.0-rc3 in Ulf Hansson next branch.
-> > > * according to the guidance and overall architecture provided
-> > >   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
-> > >   UHS-2 Core function based on the patches of the [V4,0/6]
-> > >   Preparations to support SD UHS-II cards[5].
-> > > * according to the guidance and comments provided by
-> > >   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
-> > >   the UHS-2 Host function based on the patches of the
-> > >   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
-> > > * implement the necessary function to let the UHS-2 Core/Host
-> > >   work properly.
-> > > * fix most of checkpatch warnings/errors.
-> > > * according to the guidance and comments provided by
-> > >   Adrian Hunter, Ben Chuang to implement the UHS-2
-> > >   Host function based on the patches of the
-> > >   [V5,00/26] Add support UHS-II for GL9755[6].
-> > > * according to the guidance and comments provided by
-> > >   Ulf Hanssion, Adrian Hunter, Ben Chuang to implement the UHS-2
-> > >   Host function based on the patches of the
-> > >   [V6,00/24] Add support UHS-II for GL9755[7].
-> > > * The uhs2_post_attach_sd() function is no longer needed so drop
-> > >   the V6 version of the Patch#22.
-> > > * Modifies the usage of the flags used by the sdhci host for
-> > >   MMC_UHS2_INITIALIZED.
-> > > * Patch#1: Drop unnecessary bracket.
-> > > * Patch#2: Drop sd_uhs2_set_ios function.
-> > >            Used ->uhs2_control() callback for uhs2_set_ios
-> > >            in sd_uhs2_power_up().
-> > >            Used ->uhs2_control() callback for uhs2_set_ios
-> > >            in sd_uhs2_power_off().
-> > >            Drop MMC_TIMING_SD_UHS2 in favor of MMC_TIMING_UHS2_SPEED_=
-A.
-> > >            Modify sd_uhs2_legacy_init to avoid the
-> > >            sd_uhs2_reinit cycle issue.
-> > > * Patch#5: Drop unnecessary definitions.
-> > > * Patch#6: Drop unnecessary function.
-> > >            Drop uhs2_state in favor of ios->timing.
-> > > * Patch#7: Reorder values and positions of definitions.
-> > > * Patch#9: Used sdhci_uhs2_mode function to simplify.
-> > > * Patch#11: Drop pwr variable in sdhci_uhs2_set_power function.
-> > > * Patch#14: Modify some descriptions.
-> > >             Drop unnecessary function.
-> > > * Patch#15: Drop using uhs2_reset ops and use sdhci_uhs2_reset functi=
-on
-> > >             in the sdhci_do_detect_init function.
-> > > * Patch#17: Drop unnecessary function.
-> > > * Patch#18: Drop unnecessary whitespace changes.
-> > >             Cancel the export state of some functions.
-> > > * Patch#19: Drop unnecessary function.
-> > >             Used sdhci_uhs2_mode function to simplify.
-> > >             Modify some descriptions.
-> > >             Cancel the export state of some functions.
-> > > * Patch#20: Drop using __sdhci_uhs2_host function and use
-> > >             __sdhci_add_host function in sdhci_uhs2_add_host function=
-.
-> > >             Cancel the export state of some functions.
-> > > * Patch#23: Drop using uhs2_post_attach_sd function.
-> > >
-> > > Reference
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
-> > > [2] SD Host Controller Simplified Specification 4.20
-> > > [3] UHS-II Simplified Addendum 1.02
-> > > [4] https://patchwork.kernel.org/project/linux-mmc/cover/202011060227=
-26.19831-1-takahiro.akashi@linaro.org/
-> > > [5] https://patchwork.kernel.org/project/linux-mmc/cover/202204181158=
-33.10738-1-jasonlai.genesyslogic@gmail.com/
-> > > [6] https://patchwork.kernel.org/project/linux-mmc/cover/202210191106=
-47.11076-1-victor.shih@genesyslogic.com.tw/
-> > > [7] https://patchwork.kernel.org/project/linux-mmc/cover/202212130900=
-47.3805-1-victor.shih@genesyslogic.com.tw/
-> > >
-> > > ----------------- original cover letter from v6 -----------------
-> > > Summary
-> > > =3D=3D=3D=3D=3D=3D=3D
-> > > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
-> > >
-> > > About UHS-II, roughly deal with the following three parts:
-> > > 1) A UHS-II detection and initialization:
-> > > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup =
-Sequence
-> > >   [2]).
-> > > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequen=
-ce[2]).
-> > > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is inclu=
-de Section
-> > >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting=
- Register
-> > >   Setup Sequence.
-> > >
-> > > 2) Send Legacy SD command through SD-TRAN
-> > > - Encapsulated SD packets are defined in SD-TRAN in order to ensure L=
-egacy SD
-> > >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1=
- Packet
-> > >   Types and Format Overview[3]).
-> > > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UH=
-S-II
-> > >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2=
-]).
-> > >
-> > > 3) UHS-II Interrupt
-> > > - Except for UHS-II error interrupts, most interrupts share the origi=
-nal
-> > >   interrupt registers.
-> > >
-> > > Patch structure
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > patch#1-#6:  for core
-> > > patch#7-#23: for sdhci
-> > > patch#24:    for GL9755
-> > >
-> > > Changes in v6 (Dec. 12, 2022)
-> > > * rebased to the linux-kernel-v6.1.0-rc8 in Ulf Hansson next branch.
-> > > * according to the guidance and overall architecture provided
-> > >   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
-> > >   UHS-2 Core function based on the patches of the [V4,0/6]
-> > >   Preparations to support SD UHS-II cards[5].
-> > > * according to the guidance and comments provided by
-> > >   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
-> > >   the UHS-2 Host function based on the patches of the
-> > >   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
-> > > * implement the necessary function to let the UHS-2 Core/Host
-> > >   work properly.
-> > > * fix most of checkpatch warnings/errors.
-> > > * according to the guidance and comments provided by
-> > >   Adrian Hunter, Ben Chuang to implement the UHS-2
-> > >   Host function based on the patches of the
-> > >   [V5,00/26] Add support UHS-II for GL9755[6].
-> > > * The uhs2_post_attach_sd() has implemented in Patch#6 and
-> > >   Patch#17 so drop the V5 version of the Patch#23.
-> > > * Modifies the usage of the flags used by the sdhci host for
-> > >   MMC_UHS2_INITIALIZED.
-> > > * Patch#5: Drop unused definitions and functions.
-> > > * Patch#7: Rename definitions.
-> > >            Use BIT() GENMASK() in some cases.
-> > > * Patch#8: Merge V5 version of Patch[7] and Patch[9] into
-> > >            V6 version of Patch[8].
-> > > * Patch#9: Drop unnecessary function.
-> > >            Rename used definitions.
-> > > * Patch#10: Drop unnecessary function and simplify some code.
-> > > * Patch#11: Drop unnecessary function.
-> > >             Add new mmc_opt_regulator_set_ocr function.
-> > > * Patch#13: Drop unnecessary function.
-> > >             Use GENMASK() and FIELD_PREP() in some cases.
-> > > * Patch#14: Drop unnecessary function.
-> > >             Modify return value in some function.
-> > >             Use GENMASK() and FIELD_PREP() in some cases.
-> > > * Patch#15: Drop unnecessary function.
-> > >             Rename used definitions.
-> > >             Use GENMASK() and FIELD_GET() in some cases.
-> > >             Wrap at 100 columns in some functions.
-> > > * Patch#16: Drop unnecessary function.
-> > > * Patch#17: Drop unnecessary function.
-> > >             Drop the unnecessary parameter when call the DBG()
-> > >             function.
-> > >             Rename used definitions.
-> > >             Cancel the export state of some functions.
-> > >             Use GENMASK() and FIELD_PREP() in some cases.
-> > > * Patch#18: Drop unnecessary function.
-> > >             Add uhs2_dev_cmd function to simplify some functions.
-> > >             Rename used definitions.
-> > >             Cancel the export state of some functions.
-> > >             Use GENMASK() and FIELD_PREP() in some cases.
-> > > * Patch#19: Drop unnecessary function.
-> > >             Add sdhci_uhs2_mode() in some functions.
-> > >             Rename used definitions.
-> > >             Cancel the export state of some functions.
-> > > * Patch#20: Add new complete_work_fn/thread_irq_fn variables in
-> > >             struct sdhci_host.
-> > >             Use complete_work_fn/thread_irq_fn variables in
-> > >             sdhci_alloc_host()/sdhci_uhs2_add_host().
-> > >             Rename used definitions.
-> > > * Patch[24]: Rename used definitions.
-> > >
-> > > Reference
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
-> > > [2] SD Host Controller Simplified Specification 4.20
-> > > [3] UHS-II Simplified Addendum 1.02
-> > > [4] https://patchwork.kernel.org/project/linux-mmc/cover/202011060227=
-26.19831-1-takahiro.akashi@linaro.org/
-> > > [5] https://patchwork.kernel.org/project/linux-mmc/cover/202204181158=
-33.10738-1-jasonlai.genesyslogic@gmail.com/
-> > > [6] https://patchwork.kernel.org/project/linux-mmc/cover/202210191106=
-47.11076-1-victor.shih@genesyslogic.com.tw/
-> > >
-> > > ----------------- original cover letter from v5 -----------------
-> > > Summary
-> > > =3D=3D=3D=3D=3D=3D=3D
-> > > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
-> > >
-> > > About UHS-II, roughly deal with the following three parts:
-> > > 1) A UHS-II detection and initialization:
-> > > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup =
-Sequence
-> > >   [2]).
-> > > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequen=
-ce[2]).
-> > > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is inclu=
-de Section
-> > >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting=
- Register
-> > >   Setup Sequence.
-> > >
-> > > 2) Send Legacy SD command through SD-TRAN
-> > > - Encapsulated SD packets are defined in SD-TRAN in order to ensure L=
-egacy SD
-> > >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1=
- Packet
-> > >   Types and Format Overview[3]).
-> > > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UH=
-S-II
-> > >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2=
-]).
-> > >
-> > > 3) UHS-II Interrupt
-> > > - Except for UHS-II error interrupts, most interrupts share the origi=
-nal
-> > >   interrupt registers.
-> > >
-> > > Patch structure
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > patch#1-#6:  for core
-> > > patch#7-#25: for sdhci
-> > > patch#26:    for GL9755
-> > >
-> > > Changes in v5 (Oct. 19, 2022)
-> > > * rebased to the linux-kernel-v6.1-rc1 in Ulf Hansson next branch.
-> > > * according to the guidance and overall architecture provided
-> > >   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
-> > >   UHS-2 Core function based on the patches of the [V4,0/6]
-> > >   Preparations to support SD UHS-II cards[5].
-> > > * according to the guidance and comments provided by
-> > >   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
-> > >   the UHS-2 Host function based on the patches of the
-> > >   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
-> > > * implement the necessary function to let the UHS-2 Core/Host
-> > >   work properly.
-> > > * fix most of checkpatch warnings/errors
-> > >
-> > > Reference
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
-> > > [2] SD Host Controller Simplified Specification 4.20
-> > > [3] UHS-II Simplified Addendum 1.02
-> > > [4] https://patchwork.kernel.org/project/linux-mmc/cover/202011060227=
-26.19831-1-takahiro.akashi@linaro.org/
-> > > [5] https://patchwork.kernel.org/project/linux-mmc/cover/202204181158=
-33.10738-1-jasonlai.genesyslogic@gmail.com/
-> > >
-> > > ----------------- original cover letter from v3.1 -----------------
-> > > This is an interim snapshot of our next version, v4, for enabling
-> > > UHS-II on MMC/SD.
-> > >
-> > > It is focused on 'sdhci' side to address Adrian's comments regarding
-> > > "modularising" sdhci-uhs2.c.
-> > > The whole aim of this version is to get early feedback from Adrian (a=
-nd
-> > > others) on this issue. Without any consensus about the code structure=
-,
-> > > it would make little sense to go further ahead on sdhci side.
-> > > (Actually, Adrian has made no comments other than "modularising" so f=
-ar.)
-> > >
-> > > I heavily reworked/refactored sdhci-uhs2.c and re-organised the patch
-> > > set to meet what I believe Adrian expects; no UHS-II related code in
-> > > Legacy (UHS-I) code or sdhci.c.
-> > >
-> > > Nevertheless, almost of all changes I made are trivial and straightfo=
-rward
-> > > in this direction, and I believe that there is no logic changed since=
- v3
-> > > except sdhci_uhs2_irq(), as ops->irq hook, where we must deal with UH=
-S-II
-> > > command sequences in addition to UHS-II errors. So I added extra hand=
-lings.
-> > >
-> > > I admit that there is plenty of room for improvements (for example,
-> > > handling host->flags), but again the focal point here is how sdhci-uh=
-s2.c
-> > > should be built as a module.
-> > >
-> > > Please review this series (particularly Patch#8-#26 and #27) from thi=
-s
-> > > viewpoint in the first place.
-> > > (Ben is working on 'host' side but there is no change on 'host' side
-> > > in this submission except a minor tweak.)
-> > >
-> > > Thanks,
-> > > -Takahiro Akashi
-> > >
-> > > ------ original cover letter from v3 ------
-> > > Summary
-> > > =3D=3D=3D=3D=3D=3D=3D
-> > > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
-> > >
-> > > About UHS-II, roughly deal with the following three parts:
-> > > 1) A UHS-II detection and initialization:
-> > > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup =
-Sequence
-> > >   [2]).
-> > > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequen=
-ce[2]).
-> > > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is inclu=
-de Section
-> > >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting=
- Register
-> > >   Setup Sequence.
-> > >
-> > > 2) Send Legacy SD command through SD-TRAN
-> > > - Encapsulated SD packets are defined in SD-TRAN in order to ensure L=
-egacy SD
-> > >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1=
- Packet
-> > >   Types and Format Overview[3]).
-> > > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UH=
-S-II
-> > >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2=
-]).
-> > >
-> > > 3) UHS-II Interrupt
-> > > - Except for UHS-II error interrupts, most interrupts share the origi=
-nal
-> > >   interrupt registers.
-> > >
-> > > Patch structure
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > patch#1-#7: for core
-> > > patch#8-#17: for sdhci
-> > > patch#18-#21: for GL9755
-> > >
-> > > Tests
-> > > =3D=3D=3D=3D=3D
-> > > Ran 'dd' command to evaluate the performance:
-> > > (SanDisk UHS-II card on GL9755 controller)
-> > >                              Read    Write
-> > > UHS-II disabled (UHS-I): 88.3MB/s 60.7MB/s
-> > > UHS-II enabled         :  206MB/s   80MB/s
-> > >
-> > > TODO
-> > > =3D=3D=3D=3D
-> > > - replace some define with BIT macro
-> > >
-> > > Reference
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
-> > > [2] SD Host Controller Simplified Specification 4.20
-> > > [3] UHS-II Simplified Addendum 1.02
-> > >
-> > > Changes in v3 (Jul. 10, 2020)
-> > > * rebased to v5.8-rc4
-> > > * add copyright notice
-> > > * reorganize the patch set and split some commits into smaller ones
-> > > * separate uhs-2 headers from others
-> > > * correct wrong spellings
-> > > * fix most of checkpatch warnings/errors
-> > > * remove all k[cz]alloc() from the code
-> > > * guard sdhci-uhs2 specific code with
-> > >       'if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2))'
-> > > * make sdhci-uhs2.c as a module
-> > > * trivial changes, including
-> > >   - rename back sdhci-core.c to sdhci.c
-> > >   - allow vendor code to disable uhs2 if v4_mode =3D=3D 0
-> > >       in __sdhci_add_host()
-> > >   - merge uhs2_power_up() into mmc_power_up()
-> > >   - remove flag_uhs2 from mmc_attach_sd()
-> > >   - add function descriptions to EXPORT'ed functions
-> > >   - other minor code optimization
-> > >
-> > > Changes in v2 (Jan. 9, 2020)
-> > > * rebased to v5.5-rc5
-> > >
-> > > AKASHI Takahiro (1):
-> > >   mmc: sdhci-pci: add UHS-II support framework
-> > >
-> > > Ulf Hansson (1):
-> > >   mmc: core: Extend support for mmc regulators with a vqmmc2
-> > >
-> > > Victor Shih (21):
-> > >   mmc: core: Cleanup printing of speed mode at card insertion
-> > >   mmc: core: Prepare to support SD UHS-II cards
-> > >   mmc: core: Announce successful insertion of an SD UHS-II card
-> > >   mmc: core: Add definitions for SD UHS-II cards
-> > >   mmc: core: Support UHS-II card control and access
-> > >   mmc: sdhci: add UHS-II related definitions in headers
-> > >   mmc: sdhci: add UHS-II module and add a kernel configuration
-> > >   mmc: sdhci-uhs2: dump UHS-II registers
-> > >   mmc: sdhci-uhs2: add reset function and uhs2_mode function
-> > >   mmc: sdhci-uhs2: add set_power() to support vdd2
-> > >   mmc: sdhci-uhs2: skip signal_voltage_switch()
-> > >   mmc: sdhci-uhs2: add set_timeout()
-> > >   mmc: sdhci-uhs2: add set_ios()
-> > >   mmc: sdhci-uhs2: add detect_init() to detect the interface
-> > >   mmc: sdhci-uhs2: add clock operations
-> > >   mmc: sdhci-uhs2: add uhs2_control() to initialise the interface
-> > >   mmc: sdhci-uhs2: add request() and others
-> > >   mmc: sdhci-uhs2: add irq() and others
-> > >   mmc: sdhci-uhs2: add add_host() and others to set up the driver
-> > >   mmc: sdhci-uhs2: add pre-detect_init hook
-> > >   mmc: sdhci-pci-gli: enable UHS-II mode for GL9755
-> > >
-> > >  drivers/mmc/core/Makefile         |    2 +-
-> > >  drivers/mmc/core/block.c          |   18 +-
-> > >  drivers/mmc/core/bus.c            |   38 +-
-> > >  drivers/mmc/core/core.c           |   25 +-
-> > >  drivers/mmc/core/core.h           |    1 +
-> > >  drivers/mmc/core/host.h           |    7 +
-> > >  drivers/mmc/core/mmc_ops.c        |   25 +-
-> > >  drivers/mmc/core/mmc_ops.h        |    1 +
-> > >  drivers/mmc/core/regulator.c      |   34 +
-> > >  drivers/mmc/core/sd.c             |   13 +-
-> > >  drivers/mmc/core/sd.h             |    4 +
-> > >  drivers/mmc/core/sd_ops.c         |   11 +
-> > >  drivers/mmc/core/sd_ops.h         |   18 +
-> > >  drivers/mmc/core/sd_uhs2.c        | 1366 +++++++++++++++++++++++++++=
-++
-> > >  drivers/mmc/host/Kconfig          |   10 +
-> > >  drivers/mmc/host/Makefile         |    1 +
-> > >  drivers/mmc/host/sdhci-pci-core.c |   16 +-
-> > >  drivers/mmc/host/sdhci-pci-gli.c  |  276 +++++-
-> > >  drivers/mmc/host/sdhci-pci.h      |    3 +
-> > >  drivers/mmc/host/sdhci-uhs2.c     | 1350 +++++++++++++++++++++++++++=
-+
-> > >  drivers/mmc/host/sdhci-uhs2.h     |  191 ++++
-> > >  drivers/mmc/host/sdhci.c          |  277 +++---
-> > >  drivers/mmc/host/sdhci.h          |   83 +-
-> > >  include/linux/mmc/card.h          |   36 +
-> > >  include/linux/mmc/core.h          |   13 +
-> > >  include/linux/mmc/host.h          |   89 ++
-> > >  include/linux/mmc/sd_uhs2.h       |  240 +++++
-> > >  27 files changed, 3988 insertions(+), 160 deletions(-)
-> > >  create mode 100644 drivers/mmc/core/sd_uhs2.c
-> > >  create mode 100644 drivers/mmc/host/sdhci-uhs2.c
-> > >  create mode 100644 drivers/mmc/host/sdhci-uhs2.h
-> > >  create mode 100644 include/linux/mmc/sd_uhs2.h
-> > >
-> > > --
-> > > 2.25.1
-> > >
+MIAGCSqGSIb3DQEHAqCAMIACAQExDTALBglghkgBZQMEAgEwCwYJKoZIhvcNAQcBoIIjdjCCB+sw
+ggXToAMCAQICFH/0ya9FbNqDP1mj8nwYIyzoDuazMA0GCSqGSIb3DQEBCwUAMFMxCzAJBgNVBAYT
+AkNIMRUwEwYDVQQKEwxTd2lzc1NpZ24gQUcxLTArBgNVBAMTJFN3aXNzU2lnbiBSU0EgU01JTUUg
+TENQIElDQSAyMDIxIC0gMjAeFw0yMjEyMTUxMDIwNTJaFw0yMzEyMTUxMDIwNTJaMEgxJTAjBgkq
+hkiG9w0BCQEWFmNsb2VobGVAaHlwZXJzdG9uZS5jb20xHzAdBgNVBAMMFmNsb2VobGVAaHlwZXJz
+dG9uZS5jb20wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDbQs7vFtBkf7fsjeH5TOTl
+4BCMTLaVKnaZGJ79z62g8ZSuOWg45uUJ6ti+RfIaS/gp8bAnHxrFDcYANbU2S/S19bwpqvKlOcV9
+3mKFefUB7SVTnhD1EDsk3I2SCG7Bz61gflKcRnalJG74AXn4E4MAaRlrWCoLkZIeCSY4lNrQD1pw
+70nmNRY41ICYzAVAb0RiP60audx4UP29YDXLUkrki5cpf3yt/eHS/KRjHiadq2uDnkGQI1oadBXa
+u4B0nCVmN68LKWb8Ak5aSROJarWOPHLQ+wuL78NS11Yer5Mnngad5/pccQY0MjkC7e80HBNaOAOt
+vrf2a7i8fFs278So63WAMt+XUM2rHMyIKsOEWqAHBY1GoAKT81NZ+5YMqfvUbK8SucXAy+UWZlzY
+VXLCtxrqHcxNbTApkjDtxalDMn9bm4qyQE/qxbkuGSPdqIj8v7AOCgb1K4I8hzwOIiCpEJMhbIvp
+bZK1GQ3BxE61FG599xyVZNf29aYdoUDIp4MwG3hcLHvYsRvSo6eHPYk8mr9SM+OhexuEdj3+St+Y
+5MSdDdkvRdspx0gXwmffJ6iCBjChXDHa/W1uSBvM5SlKKsYH7ufOC31CptKkEdM8lGi0PPlevh7U
+25ZI0QVH3EiLgBymsdqPc/7LifBKmp+xamIZAUVcfJqvdvTt+EkgEQIDAQABo4ICwDCCArwwIQYD
+VR0RBBowGIEWY2xvZWhsZUBoeXBlcnN0b25lLmNvbTAOBgNVHQ8BAf8EBAMCBLAwEwYDVR0lBAww
+CgYIKwYBBQUHAwQwHQYDVR0OBBYEFA+H5eoYx7aaS0slW7G0+hgo1ZqlMB8GA1UdIwQYMBaAFPpU
+wIKm/pa9BMdfn1+CDD3DlU9HMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwuc3dpc3Nz
+aWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MIGooIGloIGi
+hoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPUZBNTRDMDgyQTZGRTk2QkQwNEM3
+NUY5RjVGODIwQzNEQzM5NTRGNDclMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNhdGVSZXZv
+Y2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MGcGA1UdIARg
+MF4wUgYIYIV0AVkCAQswRjBEBggrBgEFBQcCARY4aHR0cHM6Ly9yZXBvc2l0b3J5LnN3aXNzc2ln
+bi5jb20vU3dpc3NTaWduX0NQU19TTUlNRS5wZGYwCAYGBACPegEDMIHGBggrBgEFBQcBAQSBuTCB
+tjBkBggrBgEFBQcwAoZYaHR0cDovL3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93
+bmxvYWQvRkE1NEMwODJBNkZFOTZCRDA0Qzc1RjlGNUY4MjBDM0RDMzk1NEY0NzBOBggrBgEFBQcw
+AYZCaHR0cDovL29jc3Auc3dpc3NzaWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1Rjgy
+MEMzREMzOTU0RjQ3MA0GCSqGSIb3DQEBCwUAA4ICAQCm+EvZobQCGMXgo2yeAD2ztkKXLEUmp7sp
+to3Unk6h7xNT0k1XsLxQAyF+Ny/Ftd6GAnq02cWyupmU8OfcSbWIi91QT13TUUholbqV1ELlgMpa
+slZ6qBAJLWLXQ8p/BWaGzpRBgJEsg4fc3XC5FRjysoZNOxZIwblQrQDD/cCTUAM43Ar086iZoM1B
+5mqNZil+LoCaXR4q8KS2jV3cTseKK/yIHpOl3NNAU7tC10pO9PNkJ9Dd6W/ghKBvhNiSUucEmm4e
+70b5cP3M0qJ1xdBkRhZ5BDFBPTNWq0pecXdRWILG0xz6neB8VCClW3tYYAriroYjXDZzBMVGfXKo
+0pxnwg2B/+ppYGaji2Sf3IBZKFVS5hRFolcsRAqfxmDYfmVJA1lQqOfr0f1jURksb/+IEG7aZNyG
+4iMIMFmDptXeEysz5ntJw5KAf0i6mJ2y/sEU9pzImRlvQc5kHV3GT9BdYs8GmSmdD8CI0S+/y/no
+Ny4l2SzVjkc+3d+fdWSJV6y4gR+3FmG8B5dTvJBHNs0YSsG2rQSEzDxcZNzhjKA9c70FS1U3m3n6
+bU2mErdOPQ4KtTu5v3D5RBKB2cgbdBI4B8gEHJhqxOdBO5E+Z8+FMqIWCITb1fN2NrgenRDYy4Bj
+tax6L8HT5mEY+mS8Lx08gqY01qcfbiD8uD+qTtmsLjCCB+swggXToAMCAQICFH/0ya9FbNqDP1mj
+8nwYIyzoDuazMA0GCSqGSIb3DQEBCwUAMFMxCzAJBgNVBAYTAkNIMRUwEwYDVQQKEwxTd2lzc1Np
+Z24gQUcxLTArBgNVBAMTJFN3aXNzU2lnbiBSU0EgU01JTUUgTENQIElDQSAyMDIxIC0gMjAeFw0y
+MjEyMTUxMDIwNTJaFw0yMzEyMTUxMDIwNTJaMEgxJTAjBgkqhkiG9w0BCQEWFmNsb2VobGVAaHlw
+ZXJzdG9uZS5jb20xHzAdBgNVBAMMFmNsb2VobGVAaHlwZXJzdG9uZS5jb20wggIiMA0GCSqGSIb3
+DQEBAQUAA4ICDwAwggIKAoICAQDbQs7vFtBkf7fsjeH5TOTl4BCMTLaVKnaZGJ79z62g8ZSuOWg4
+5uUJ6ti+RfIaS/gp8bAnHxrFDcYANbU2S/S19bwpqvKlOcV93mKFefUB7SVTnhD1EDsk3I2SCG7B
+z61gflKcRnalJG74AXn4E4MAaRlrWCoLkZIeCSY4lNrQD1pw70nmNRY41ICYzAVAb0RiP60audx4
+UP29YDXLUkrki5cpf3yt/eHS/KRjHiadq2uDnkGQI1oadBXau4B0nCVmN68LKWb8Ak5aSROJarWO
+PHLQ+wuL78NS11Yer5Mnngad5/pccQY0MjkC7e80HBNaOAOtvrf2a7i8fFs278So63WAMt+XUM2r
+HMyIKsOEWqAHBY1GoAKT81NZ+5YMqfvUbK8SucXAy+UWZlzYVXLCtxrqHcxNbTApkjDtxalDMn9b
+m4qyQE/qxbkuGSPdqIj8v7AOCgb1K4I8hzwOIiCpEJMhbIvpbZK1GQ3BxE61FG599xyVZNf29aYd
+oUDIp4MwG3hcLHvYsRvSo6eHPYk8mr9SM+OhexuEdj3+St+Y5MSdDdkvRdspx0gXwmffJ6iCBjCh
+XDHa/W1uSBvM5SlKKsYH7ufOC31CptKkEdM8lGi0PPlevh7U25ZI0QVH3EiLgBymsdqPc/7LifBK
+mp+xamIZAUVcfJqvdvTt+EkgEQIDAQABo4ICwDCCArwwIQYDVR0RBBowGIEWY2xvZWhsZUBoeXBl
+cnN0b25lLmNvbTAOBgNVHQ8BAf8EBAMCBLAwEwYDVR0lBAwwCgYIKwYBBQUHAwQwHQYDVR0OBBYE
+FA+H5eoYx7aaS0slW7G0+hgo1ZqlMB8GA1UdIwQYMBaAFPpUwIKm/pa9BMdfn1+CDD3DlU9HMIH/
+BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwuc3dpc3NzaWduLm5ldC9GQTU0QzA4MkE2RkU5
+NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MIGooIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5z
+d2lzc3NpZ24ubmV0L0NOPUZBNTRDMDgyQTZGRTk2QkQwNEM3NUY5RjVGODIwQzNEQzM5NTRGNDcl
+MkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVj
+dENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MGcGA1UdIARgMF4wUgYIYIV0AVkCAQswRjBEBggr
+BgEFBQcCARY4aHR0cHM6Ly9yZXBvc2l0b3J5LnN3aXNzc2lnbi5jb20vU3dpc3NTaWduX0NQU19T
+TUlNRS5wZGYwCAYGBACPegEDMIHGBggrBgEFBQcBAQSBuTCBtjBkBggrBgEFBQcwAoZYaHR0cDov
+L3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93bmxvYWQvRkE1NEMwODJBNkZFOTZC
+RDA0Qzc1RjlGNUY4MjBDM0RDMzk1NEY0NzBOBggrBgEFBQcwAYZCaHR0cDovL29jc3Auc3dpc3Nz
+aWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MA0GCSqGSIb3
+DQEBCwUAA4ICAQCm+EvZobQCGMXgo2yeAD2ztkKXLEUmp7spto3Unk6h7xNT0k1XsLxQAyF+Ny/F
+td6GAnq02cWyupmU8OfcSbWIi91QT13TUUholbqV1ELlgMpaslZ6qBAJLWLXQ8p/BWaGzpRBgJEs
+g4fc3XC5FRjysoZNOxZIwblQrQDD/cCTUAM43Ar086iZoM1B5mqNZil+LoCaXR4q8KS2jV3cTseK
+K/yIHpOl3NNAU7tC10pO9PNkJ9Dd6W/ghKBvhNiSUucEmm4e70b5cP3M0qJ1xdBkRhZ5BDFBPTNW
+q0pecXdRWILG0xz6neB8VCClW3tYYAriroYjXDZzBMVGfXKo0pxnwg2B/+ppYGaji2Sf3IBZKFVS
+5hRFolcsRAqfxmDYfmVJA1lQqOfr0f1jURksb/+IEG7aZNyG4iMIMFmDptXeEysz5ntJw5KAf0i6
+mJ2y/sEU9pzImRlvQc5kHV3GT9BdYs8GmSmdD8CI0S+/y/noNy4l2SzVjkc+3d+fdWSJV6y4gR+3
+FmG8B5dTvJBHNs0YSsG2rQSEzDxcZNzhjKA9c70FS1U3m3n6bU2mErdOPQ4KtTu5v3D5RBKB2cgb
+dBI4B8gEHJhqxOdBO5E+Z8+FMqIWCITb1fN2NrgenRDYy4Bjtax6L8HT5mEY+mS8Lx08gqY01qcf
+biD8uD+qTtmsLjCCB0cwggUvoAMCAQICDyxaqdlU/bKrlq0Xtl+M9DANBgkqhkiG9w0BAQsFADBT
+MQswCQYDVQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24g
+UlNBIFNNSU1FIFJvb3QgQ0EgMjAyMSAtIDEwHhcNMjEwODA0MTIxMjU5WhcNMzYwNzMxMTIxMjU5
+WjBTMQswCQYDVQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1Np
+Z24gUlNBIFNNSU1FIExDUCBJQ0EgMjAyMSAtIDIwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIK
+AoICAQC9BRnI1A1xPgMDELSTFgDrzyPawAcju1E8OBLTQHXDcmN46wsneV+NVoip2X1ZQ9GIF3bj
+x0aLq9/iiKo9EsCdCO1BENfc70ngvzFS1oOdmfzymiKAZlWsEJSQocyLldDWSF03KN8a7Rgl30PD
+IURBvBWlpIOCxiCAUgKogGYBvm7ZRZZ10BcgfGU/ga19jlhGI9xSJ9pCPjvcWPJKpiSbG+s0CR/M
+4cXaQPO9ZEFYxIn7g4rNIYBYZwhsIjcPn5OtC9/7p/3F/2qKA9gfvK/CyQ14fPVOPVJaPECufMs4
++tRhh2edpGx4irQTaVV85iVU3wjPpi84TIgUlRwqUWloj158A5r7pGVMcI++Slyq3rudu319WjiC
+57kAikVHryC+gwC4SUAYn0CqX//cApx+99nmLWAmWnGdeaRmHMJCmJfXy3Dji8SnVuggcXbErnkr
+5sms1kyp5wiDR7YVIkdTuiJHpF2d7WZ/d5EOT7KBdS/k67/XgTrUwkWwKR2Vm/00b0Zpz3N4Hg9F
+TrBP53A2uci2e7Lf3vR8hFJijhu08zGuClY7Khn+0BBU50YSOE2BnYWsBOe36ddw2470cM/iGtMM
+aTXnA0rg4MsX9TP0vX4iQpWZMwqNwqcYk0ewMqy4RDAY7xH4GXNkRGT2nJngURbQS1wgScF1NMzR
+W+rRrQIDAQABo4ICFjCCAhIwDgYDVR0PAQH/BAQDAgEGMBMGA1UdJQQMMAoGCCsGAQUFBwMEMBIG
+A1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFPpUwIKm/pa9BMdfn1+CDD3DlU9HMB8GA1UdIwQY
+MBaAFAkMvyqiHQQkDLL5QApBws9acqqAMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwu
+c3dpc3NzaWduLm5ldC8wOTBDQkYyQUEyMUQwNDI0MENCMkY5NDAwQTQxQzJDRjVBNzJBQTgwMIGo
+oIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPTA5MENCRjJBQTIxRDA0
+MjQwQ0IyRjk0MDBBNDFDMkNGNUE3MkFBODAlMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNh
+dGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MB8G
+A1UdIAQYMBYwCgYIYIV0AVkCAQswCAYGBACPegEDMHQGCCsGAQUFBwEBBGgwZjBkBggrBgEFBQcw
+AoZYaHR0cDovL3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93bmxvYWQvMDkwQ0JG
+MkFBMjFEMDQyNDBDQjJGOTQwMEE0MUMyQ0Y1QTcyQUE4MDANBgkqhkiG9w0BAQsFAAOCAgEABw8e
+lwSFegmW7IGpGTOPwtOC2tzTwCQiRA2VC/EWGKckk8A3F9Q+M2A8lUYVlRKJt31pAezcXaP6OFW0
+3IPiiXU70QA598nGqUxzzjn8rpFhZgCj6bi8MJd5MH5C2RRYFrhiRefx6pp42LLc0AFIF1ZqkaYa
+1vz0EgTOL9XE3inXe39twPLoe3rc/f8gfpem/s1NIJk2azwyxZn226YSrSedvxhe7LiN6gOqvU7h
+xpC8bXaiIYVy7DISXwEt902Gc+M4QbhUf8yQ+PiK3QexGIWiusOO46cn673dG/1KCzma/1Llp9Dx
+aeUHlxjjeeer/2WtWWZNFhoInrxpcK58odaJZRMZQJwNljMb66gGb5OpeanN0su93/S9GrZgJqN6
+spp171azfMuQzVqj9gxFy66yIdlrhZcba/QixC2eAJxm5fM/PZg9WXZ737G8jAbsuoREH1bxsglL
+zxAIwboY7uVwIim6ZcieKb6Yy4n6TzperNmhU5UHiUZSJzIQ/qu9B14cfh0CAJo19p7fRvyeF/p7
+INDH0ceTVTq5sF8kFtMM1bz+0/sWOTNqdi8kGO7I7iouC3+V4DDx4F1sGcaigFXtUpLmol5Lss+i
+9NXGgWFcPFreexoLaBdckDJgBk6zOHKVYwZdnrg2CovIev/uumK0WyCa7ix1+SDcsd2PXxIwggaL
+MIIEc6ADAgECAhAA3kxVIPbc9AIbDxFU940QMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNVBAYTAkNI
+MRUwEwYDVQQKEwxTd2lzc1NpZ24gQUcxHzAdBgNVBAMTFlN3aXNzU2lnbiBHb2xkIENBIC0gRzIw
+HhcNMjEwODAzMTMxNDU1WhcNMzYxMDIzMTMxNDU1WjBTMQswCQYDVQQGEwJDSDEVMBMGA1UEChMM
+U3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24gUlNBIFNNSU1FIFJvb3QgQ0EgMjAyMSAt
+IDEwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDWsri0OI8mujfIASNFFn6+ZDiGcmZh
+WI0kilmzDKEqq367hXxlZnCn6SLb7rsy+quxhj+rSIG4q/Mq3TfHLgv2q99VrVQgFDq3iURt5+g/
+roghGI5HVpUAyexlblZHFE2tLibS1ItsyvMzLfnwm463hiaB5wueiwx8Bac8evnwhZCciWc5dRGx
+Y7DUIyx93B8rdu0ErboRyQdJDeMoDy4RFNK2sv94uP5aU4AkrAtIuk4yMVHsqv67RCwL1/l9q43a
+bKsI3fNBPY/1QUFcxsxRyg5EH7dqgHZVaVHmTP0XgPuzVO6wSh0zkwZ5uWERrOQOW7Pd4LElXLfU
+0830e54BVCuCkKHhykON8EGkHAfA1jMWo0VGj4RMaf2TV53T5W/LJAwxLQOYwgA5RHkigW3k6vwL
+ZCZu/MqeGgNE7X9NTekRsna9hn17u1Q/UZBHx4v4/04s8ggwjBnBLEc1nr2rU6Qirp8MIRkpvZ6b
+z4TcjtE1SyIQgRti7cBL0yuQIkkfLSGukcXf8dZBVHIO3so0EPXJmp3VXBbkzSWxx6hxRqz4U4UX
+iaskGjgYMiRz6VWu+IBjA2+EsN+glLWpU/CLavVUeeX/W5yibyLh/0ApZWxvjkhpMT6BGzuLWPpb
+LztrfWsk8LzyjeWa5qx4y9iCKwAXHXlqCS7WbnbPMPvbWQIDAQABo4IBZzCCAWMwDwYDVR0TAQH/
+BAUwAwEB/zAdBgNVHQ4EFgQUCQy/KqIdBCQMsvlACkHCz1pyqoAwHwYDVR0jBBgwFoAUWyV7lqRl
+UX64OfPAeGZe6Drn8O4wDgYDVR0PAQH/BAQDAgEGMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6
+Ly9jcmwuc3dpc3NzaWduLm5ldC81QjI1N0I5NkE0NjU1MTdFQjgzOUYzQzA3ODY2NUVFODNBRTdG
+MEVFMIGooIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPTVCMjU3Qjk2
+QTQ2NTUxN0VCODM5RjNDMDc4NjY1RUU4M0FFN0YwRUUlMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2Vy
+dGlmaWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBv
+aW50MA0GCSqGSIb3DQEBCwUAA4ICAQAC+Opd0IrMrAgDNlRm/wophuFUgywz6MdsrhCpVIF/Ki2I
+Jq2mqDQoDxkGqZ3iApUEMmRMC8r5433DE1vol0COd+PjgoGHrQFgB8PF4SD9tzCXProccXSLX02n
+sf5OfAl4eodf8ayhJRGXxywRnJDqchY9AjWpu+Uj2B9SQLfQjl3aI7wz6TL9uHWfQ749V0uHYd7t
+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
+--NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e--
+
