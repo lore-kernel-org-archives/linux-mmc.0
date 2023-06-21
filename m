@@ -2,325 +2,440 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EE8CEB64D7
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 07:31:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B68FEB64D7
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 07:57:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230499AbjFUHbU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jun 2023 03:31:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58924 "EHLO
+        id S230187AbjFUH56 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jun 2023 03:57:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230119AbjFUHbR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 03:31:17 -0400
-Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DADB81706;
-        Wed, 21 Jun 2023 00:31:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1687332675; x=1718868675;
-  h=from:to:subject:date:message-id:references:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=XMEInHc4U7JglyGz452o982xp5CLgDMsjrk5ZZ87T54=;
-  b=f1cwq1SFR4PBt1X7TZbqmpbl4KP0mD6Uf8W/ITFPxTsk+7y8G35xE7t2
-   IPScjmt/KBGil+F9hA4E+zMycXAh3KqUPfUy/GXEE3eOeFYrfHGolqCYz
-   im1n3QbL/dZAMcYUZ64yiwa3CWoJjUW04Z3Z+i33mcT5c+X0VADq9Pb0q
-   rmrr+Iez7YIfdAO0u3TAfitQUegnU+hjW9yis7Av/svjZZQ4UYIOj2cf3
-   RQk+N6Td1/G6uCAhMuji5WSNJfRwDPmvy3Ox6sAVPoW/7DAmkXlpOBjF4
-   785q1wjbtll+To5F7tQUjIIYvG8qZ6L4skPp9emWHOFFxOkbbEoC5OyWG
-   g==;
-X-IronPort-AV: E=Sophos;i="6.00,259,1681142400"; 
-   d="scan'208";a="348036622"
-Received: from mail-bn8nam12lp2170.outbound.protection.outlook.com (HELO NAM12-BN8-obe.outbound.protection.outlook.com) ([104.47.55.170])
-  by ob1.hgst.iphmx.com with ESMTP; 21 Jun 2023 15:31:14 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Vb1t+5yXi4u24ANKQY7fkqtM4PQJXAx6cun1QBOkhAmUVUFODVlcy+kINx7/RNGi0XHA2iWFcP+4AC2wTiQZv6sYYWT22Wy6iBJ6gkFASnqmFWoy2TJKSdFNYHNHPTu2Hw7Ji7G4Z/CT+Pv1+pdgUo1y7TPl1RR1EvwzHZ7zq8e63t3+3sjvDDbWowi4b5T6UQM8UXSbeOC3q84WjMFc202myJsM6YjdA3rMaPVqor2DiaL9BfGQ/PsJAtXemGo/Gcbmf2I81Rhm0P1qfdHdb4Cgz/0N3K7miVa4NpUNZP8vpbubprplvcbYd7k0sjveGkJfn50QY4vbxFJoUYMX8w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ZN7oeweKzGkpXLPA1XPgUymJB+TQJj8QOAHFHHW/HmY=;
- b=WXB1uKxrID0Eea4ZLIfrbIQ1ydsIjUP6mYb+Gf91diUww1OWQYSo3ISlPn0n6a/z1+R40PNz2hybbj7/KQ9v5M7e5vKvmLeaUa/QKbOD2a1x0ckY6ttCtyw6ve2TLWB7wlYBTsjHyCXuPon2CguH+SxI5nrGVQ6ZHa7lWUo+7wABL0Ti4+vDSi7LMwCNHZRCW0guuD08BldnQAaaqGpwzcxjQnLMIRKU/72n5qdaVkTXzSPfTbx5pIgCV95DQ7LKhd69+IKms2svqkHb/5IXcHdk8m2ip9hlIrrBW981XogRmLaT7Z8UIDB+qlBltwWS+/7tRX6SA0SPiDM2RDr3OQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ZN7oeweKzGkpXLPA1XPgUymJB+TQJj8QOAHFHHW/HmY=;
- b=reRc+WOQJUeqGLSgUjWNoDZwyzfRk9Bh2cjyQS9nP4qEuvj2pCfiCEhxZkvlT4+6dc1Om84qjko4CgNcoMk8eWknegSXJcDzHYhQweL+8nTkfpMbMuj84OjlaegDjcz7rA1FRAIQPpXCQrRWBgK6O5pVmoOR9vV7agRNoRWQoD0=
-Received: from BL0PR04MB6564.namprd04.prod.outlook.com (2603:10b6:208:17d::11)
- by SJ0PR04MB7166.namprd04.prod.outlook.com (2603:10b6:a03:29f::24) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6500.37; Wed, 21 Jun
- 2023 07:31:12 +0000
-Received: from BL0PR04MB6564.namprd04.prod.outlook.com
- ([fe80::dc4e:29e0:7689:e1ce]) by BL0PR04MB6564.namprd04.prod.outlook.com
- ([fe80::dc4e:29e0:7689:e1ce%5]) with mapi id 15.20.6521.020; Wed, 21 Jun 2023
- 07:31:11 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Christian Loehle <CLoehle@hyperstone.com>,
+        with ESMTP id S229845AbjFUH5z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 03:57:55 -0400
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D47E31710;
+        Wed, 21 Jun 2023 00:57:49 -0700 (PDT)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 238EF3A2B01;
+        Wed, 21 Jun 2023 09:57:48 +0200 (CEST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id F15033A2AE2;
+        Wed, 21 Jun 2023 09:57:47 +0200 (CEST)
+X-TM-AS-ERS: 10.181.10.103-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx1.dmz.swissbit.com (mx.dmz.swissbit.com [10.181.10.103])
+        by mail5.swissbit.com (Postfix) with ESMTPS;
+        Wed, 21 Jun 2023 09:57:47 +0200 (CEST)
+Content-Type: multipart/signed; 
+ boundary=NoSpamProxy_127be3e0-8657-4097-bc58-fb80d68bd7c3; 
+ protocol="application/pkcs7-signature"; micalg="sha256"
+From:   Christian Loehle <CLoehle@hyperstone.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
+        "Adrian Hunter" <adrian.hunter@intel.com>
 Subject: RE: [PATCHv3 1/1] mmc: block: ioctl: Add PROG-error aggregation
 Thread-Topic: [PATCHv3 1/1] mmc: block: ioctl: Add PROG-error aggregation
-Thread-Index: AdmjdCfpdU8NnQgrT4iRiz4+JBhVQwAmzJ7g
-Date:   Wed, 21 Jun 2023 07:31:11 +0000
-Message-ID: <BL0PR04MB65647F33DC7CC1D2903E5A66FC5DA@BL0PR04MB6564.namprd04.prod.outlook.com>
+Thread-Index: AdmjdCfpdU8NnQgrT4iRiz4+JBhVQwAmzJ7gAAFwH7A=
+Date:   Wed, 21 Jun 2023 07:57:44 +0000
+Message-ID: <775650f7de0f4452a8f71bcb206db887@hyperstone.com>
 References: <26d178dcfc2f4b7d9010145d0c051394@hyperstone.com>
-In-Reply-To: <26d178dcfc2f4b7d9010145d0c051394@hyperstone.com>
-Accept-Language: en-US
+ <BL0PR04MB65647F33DC7CC1D2903E5A66FC5DA@BL0PR04MB6564.namprd04.prod.outlook.com>
+In-Reply-To: <BL0PR04MB65647F33DC7CC1D2903E5A66FC5DA@BL0PR04MB6564.namprd04.prod.outlook.com>
+Accept-Language: en-US, de-DE
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: BL0PR04MB6564:EE_|SJ0PR04MB7166:EE_
-x-ms-office365-filtering-correlation-id: 18ed1635-5a91-42b7-22c2-08db72297ce7
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: AyAEIJ564ORDDaIqeLx/9COgANmI8ivRCi+e2jiGOmZFbCWDug/sNIuRK4/eTxHKpl5KRWbxA2/MUaIVva6mEjZNfG3rvy3tR9jQqraj/8vxNZQUOPsGAeGO3wKnMtpR2U9Zk9lH/ChXU13vRsWZLE/9w2jgatmCM5DFUI0bCTyixEUYKVDbXCCckoeXkRw2XfIdlz49s6UsIuExe0rmba+T6tE3sa+NdAbzqM/MpHlGcW3Mzyijat6sCaK0dunZrFIN7qo07QHfjkMp1vBDmxIUmDevsIdnJYOzgKb4/sv0FsXrTq7JFi++YoCImDgqUv5pHpfPOa5QTODsNMzoCsOzDZWj6HVk3xh9LdYLWgw1SukQa+zoJO6lY9JWt2b8O9XeHexViyJYOTaUqyE+4EeQSiz3qkFvP2HEHLBtT2OvOF6cVL2KqIBihhD4C9xpbtypK4k1gXIk+24/U7+r7NPKnEzAOxS6suVD0XYfYn0bzecFd/rC0gWW7xcOL+CW5JUpbiFZuvBgxj2GTaCS/tidpNZtyR9/idTypjvrYgSC0jWI+SSDy1trn4bTRSKgYgO049CgaE3hZjNbFoJfkGtiY9oDy+4kqaxVfgOFf9hS48n1bhK73NXbqNOuwfTt
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BL0PR04MB6564.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(346002)(376002)(396003)(136003)(366004)(451199021)(71200400001)(478600001)(7696005)(110136005)(76116006)(9686003)(6506007)(26005)(186003)(55016003)(2906002)(8676002)(8936002)(38070700005)(86362001)(41300700001)(66556008)(66946007)(66446008)(316002)(64756008)(66476007)(5660300002)(52536014)(38100700002)(122000001)(33656002)(83380400001)(82960400001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?eVqEvL5fKkvSAvOKIjTe+6mnaHz0C/w+pjvZbipy5g6foF/xGMNEwnDBw5af?=
- =?us-ascii?Q?zVgOSUir9dUV38PDziQLnpC0maqyO4yYaWdKSt1E9Xvp2xaCUPe+broDroPR?=
- =?us-ascii?Q?PeJMDecVxnljSlK/oW1Bn5c5hwEJUKJ8Qd25ZdxZMCVccjSb2gN7PyZ+phH3?=
- =?us-ascii?Q?giDwzLqEMLgtea6fM6+vftyTJkwsZKDWm/SVrpkt1dziTksnvck9uzbbd0Oo?=
- =?us-ascii?Q?FK2B2LEWVV8hfRDnjLPmAgmI4k+3nbYmuAS+cpLb6M+bwi2BOh/IQLsZXD8j?=
- =?us-ascii?Q?UOTEXntdNzEERf46djEvZGV8va+MZP6veMbXyxKmruL4DG/sZelLxuVwgPSN?=
- =?us-ascii?Q?olIy5MDh6eFEz1sa041Sev/lbe8Pm9jjQ1nPVBGmdTQ07I5zom6SkVpnq4Tg?=
- =?us-ascii?Q?VBsfX1V0Ul0MVmCjjeN9kJsrTvPzljq7QqkM0fbuFS36QfhKvoHDnFCrk9yu?=
- =?us-ascii?Q?QLYs/qikPwQNoy7NcSOSR61XyAEbSnAAMMkMuZWTTj4PkWSmlhk0yx1ZyBd8?=
- =?us-ascii?Q?BFyW1b12C+nCJqEGN/D+HasKuwoqSJShzZppJkgj5h7drDIZFLJ2D/avFrXy?=
- =?us-ascii?Q?VXurFlAO0q9gYYmYOKaHBvGJjWx9WhcmXZfzSC+TiQUPIlCsRMK039xjyLMw?=
- =?us-ascii?Q?+ML7RKBSx0SZ7ZLg4tWIHzvkeu2dlSUNZtoycozQPdjqhYBGGlO22B34EeKQ?=
- =?us-ascii?Q?lT6FXUKV97qkjBFMATNN0y8MgwEzHU+O9NYV9e87CSphMkIif3LT+irLcwu3?=
- =?us-ascii?Q?tbNz6Nrc+mF6Q6BjjxkK/7PiiTN7oe8s3vO8LhdGbJ0/JuaH+X+8iJUoU3fO?=
- =?us-ascii?Q?koVBPfadLVEpckTTxbm5kMjBOzqrxptGHiq0b+fomwJNETL7q5OE380Mrk/n?=
- =?us-ascii?Q?jRxiX+8gC6oF9uQg7fHya6qnpQYryAq/WCMrBhitQoAjQfbVnrvdpS9K6brh?=
- =?us-ascii?Q?+UOJcEoogGw81/J1G6cNc0PDOlBWRcWYpwnTyv2//FwNavQDvXySX7Ocwgkw?=
- =?us-ascii?Q?85R+fzpV2ItgjqHZSkWwxYOU4ujfYMYy/c3aA3235aioa8bpkA488D/EPZKX?=
- =?us-ascii?Q?6Lin88KTxblXZu3q+sUJ3srwk1NMTZFxddNXkLlD4KrqcLhQS8c5lq3RkTaS?=
- =?us-ascii?Q?ij8ZFRi3AfTDYWgPoWOaTJBoHQIUF6V7tpqhiWBqhXjH6owUA3lZeJO8FaV0?=
- =?us-ascii?Q?Co8re3lPte/3io+Enby19P5on894gMofd/VQLut7NOLLfOe6rC4w+lKMSJ+G?=
- =?us-ascii?Q?cP7vY8JNeRlwfXJwQ4nXIhRdKyhnX+HXbxaM66uA2dKIgxN7hKId2gJEkl+1?=
- =?us-ascii?Q?7o9mjMvlEvpkhFH44AxmhEbOPI+YbZWREoI5dSyShtUOOrSlMED8F3yjVqne?=
- =?us-ascii?Q?QLRpLVWPq3i58MTXAH5YppciQTqfiixD5Uainl7ulcQudYwAmZi6bLNfAwo5?=
- =?us-ascii?Q?lHc7DT2arLNubsFrvjyXXsZOTpHlbj+GAW3/LRvmpep7p6Hbtx+AHZVPtZBo?=
- =?us-ascii?Q?axAE4HbDcvXRTr2iUrAT/S/yBuHhe5ZaZ4XODkSkLT1DTCMMTr7lSZV/G61y?=
- =?us-ascii?Q?g8r64XeWYQ7EHiwLhpsfD67nC51Lrzwcqt2xZpjx?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: DU11HF9PKjF5TRyCT37wPk2/PB/ZE5bz2I4mE/yuL9uoJAWfLCbCqDRoF5P75LnzLeHaygiF77+MXZdvRPIZf6fjCaGIfS2zPaIy2XIcFlW/jp2TYCMA5IcD3wLZEXjsqaetZ8Vx7+zfozWfrAEwKg5WTbCtFRqGAQZMIdZC7INLZ7mvwH08cfyhag8PM1yhbiYP0woPXtb7DstW4Pm+Fr3rqgH8PeI01C0Txj1CfOQCE5o0E0l4x+pKfM7fm0eaf54o6xJXjB+G3QjSiE6lEAdPHeFIcAIhqFKl40XfpN12yRvOjIymYZKEzmxtSf0AaqCN0h2Rk7lI5A05CkuQHTsCJEXQp590RONHNcq90NZ374UfuXAcyvbxsRC2caA5za1y2H6Y7AePbfI8nEPEn5jw/kJPZxYxYOYdFAMICbYjdlH95W1aKdypHXVnvKGz0tp67d5YbmED230NSNvCYLgzaSt2OVdmnQwuf/0BCu8DMEzHSVDCI+kv352fzQMXWCX+20IQmf9SmPFnpahLmwQN7eDwNwM8mQKPKN1fcE9nFUwgDnrYfe9qBUD/EbMegpHYRtuy04LClD9s1RbnXpMYVp7HZXFzxc9IltUY/0D2YxCt+DBK3Xs7+0EltNMBvB/zm1HCas2DrR3WOhBPlJXuVI2n4/KcVvtaH8GWVDVP8ZZ6S5jo2uMo0+obTXQ4n4MwriD5Mj7p1iT2ZpagzmcY9P2RmHZUdmkrOnMUf5hOkyU0BX/jlgRjf5w+/AKwr2dKLECl43HdQ/eak1soN4cxUZCXNHj52e4H7jXZSMnireI6vpiWlkkmZ5DuIcg4JAvaAQ8zYmUAeZ4FK+s95WEQtCnxbwC/nCqTu+3uDYuHO0t4kh+oxHJ7BU2H8UgJ
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: BL0PR04MB6564.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 18ed1635-5a91-42b7-22c2-08db72297ce7
-X-MS-Exchange-CrossTenant-originalarrivaltime: 21 Jun 2023 07:31:11.7713
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: hIsZHUzTaniNUkf8GqKPDbC2gWz6nGrv/MuNGksdI+LLUb+Z81csWV1N5zwx9Zi2GQDg553R51KH/GR+JIK4Mg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR04MB7166
+X-TMASE-Version: DDEI-5.1-9.0.1002-27704.006
+X-TMASE-Result: 10--24.244800-10.000000
+X-TMASE-MatchedRID: gjZGo2H/wj//9O/B1c/Qy/HkpkyUphL9Ud7Bjfo+5jSWwuVcTMXFdD4n
+        lUYJoTJ//JnHmStKBTAGR+oaLCJqy4IokrTYtYlKHWRJEfGP5nmUq+GQ/zyJdKJXp9dweNlvNyl
+        ek8JXQTdG391z8AkhmuvkJBFg3vCcYPx7yddt9jIF7cpFXK76TdDZ1FFTJUym5MDAlfnFRGrXQj
+        bjf/eQSak0GlHrLJycAzqpCxXEiQwQlJEJlaovbjo39wOA02LhbbR2OHKjX2YUoJOBFYW8JugoS
+        vaKsl/kIvrftAIhWmLy9zcRSkKatU5gqNn1dvU1IGmn4OlOtCOZIt4iAQN6P2WKhd+if2/GY3Gd
+        Dr1JjFr5j1vn1ZkYCsXYi4zvwLs1AxYKB0LOn5oX6pCkJZNSOVkN0eJOT05wt9gi5mw5DSy14qf
+        RuYCXsKt1FeojubKgOnv8Y2Cu9ud7Embvl3Hg+mnmCQLJ/Hnw2aGwk4OLNSy3CLdtdG1oCO+neL
+        QgWN7lESDwuJR3m+SAMuqetGVetmzXKHERTtRNNadDKhhc0dl/A75FGmxK1cLeaN9zSPdmDBbGv
+        tcMofyUTGVAhB5EbQ==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: c23db667-a9d8-4169-8fd6-352b0a8f6089-5-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> Userspace currently has no way of checking for error bits of
-> detection mode X. These are error bits that are only detected by
-> the card when executing the command. For e.g. a sanitize operation
-> this may be minutes after the RSP was seen by the host.
->=20
-> Currently userspace programs cannot see these error bits reliably.
-> They could issue a multi ioctl cmd with a CMD13 immediately following
-> it, but since errors of detection mode X are automatically cleared
-> (they are all clear condition B).
-> mmc_poll_for_busy of the first ioctl may have already hidden such an
-> error flag.
->=20
-> In case of the security operations: sanitize, secure erases and
-> RPMB writes, this could lead to the operation not being performed
-> successfully by the card with the user not knowing.
-> If the user trusts that this operation is completed
-> (e.g. their data is sanitized), this could be a security issue.
-> An attacker could e.g. provoke a eMMC (VCC) flash fail, where a
-> successful sanitize of a card is not possible. A card may move out
-> of PROG state but issue a bit 19 R1 error.
->=20
-> This patch therefore will also have the consequence of a mmc-utils
-> patch, which enables the bit for the security-sensitive operations.
->=20
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
-Acked-by: Avri Altman <avri.altman@wdc.com>
+--NoSpamProxy_127be3e0-8657-4097-bc58-fb80d68bd7c3
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-> ---
->  drivers/mmc/core/block.c   | 26 +++++++++++++++-----------
->  drivers/mmc/core/mmc_ops.c | 14 +++++++-------
->  drivers/mmc/core/mmc_ops.h |  9 +++++++++
->  3 files changed, 31 insertions(+), 18 deletions(-)
->=20
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index e46330815484..c7e2b8ae58a9 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -470,7 +470,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card
-> *card, struct mmc_blk_data *md,
->  	struct mmc_data data =3D {};
->  	struct mmc_request mrq =3D {};
->  	struct scatterlist sg;
-> -	bool r1b_resp, use_r1b_resp =3D false;
-> +	bool r1b_resp;
->  	unsigned int busy_timeout_ms;
->  	int err;
->  	unsigned int target_part;
-> @@ -551,8 +551,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card
-> *card, struct mmc_blk_data *md,
->  	busy_timeout_ms =3D idata->ic.cmd_timeout_ms ? :
-> MMC_BLK_TIMEOUT_MS;
->  	r1b_resp =3D (cmd.flags & MMC_RSP_R1B) =3D=3D MMC_RSP_R1B;
->  	if (r1b_resp)
-> -		use_r1b_resp =3D mmc_prepare_busy_cmd(card->host, &cmd,
-> -						    busy_timeout_ms);
-> +		mmc_prepare_busy_cmd(card->host, &cmd,
-> busy_timeout_ms);
->=20
->  	mmc_wait_for_req(card->host, &mrq);
->  	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
-> @@ -605,19 +604,24 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card
-> *card, struct mmc_blk_data *md,
->  	if (idata->ic.postsleep_min_us)
->  		usleep_range(idata->ic.postsleep_min_us, idata-
-> >ic.postsleep_max_us);
->=20
-> -	/* No need to poll when using HW busy detection. */
-> -	if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
-> use_r1b_resp)
-> -		return 0;
-> -
->  	if (mmc_host_is_spi(card->host)) {
->  		if (idata->ic.write_flag || r1b_resp || cmd.flags &
-> MMC_RSP_SPI_BUSY)
->  			return mmc_spi_err_check(card);
->  		return err;
->  	}
-> -	/* Ensure RPMB/R1B command has completed by polling with CMD13.
-> */
-> -	if (idata->rpmb || r1b_resp)
-> -		err =3D mmc_poll_for_busy(card, busy_timeout_ms, false,
-> -					MMC_BUSY_IO);
-> +	/* Poll for RPMB/write/R1B execution errors */
-> +	if (idata->rpmb || idata->ic.write_flag || r1b_resp) {
-AFAIK write_flag  and r1b_resp are set together (in mmc-utils that is)?
-As for rpmb read operations you were pondering about -
-the rpmb read-counter is one example, because you use it to sign write oper=
-ations.
-So restoring all rpmb operations is in place - all should be monitored.
 
-> +		struct mmc_busy_data cb_data;
-Maybe use designated initializing?
 
-Thanks,
-Avri
-> +
-> +		cb_data.card =3D card;
-> +		cb_data.retry_crc_err =3D false;
-> +		cb_data.aggregate_err_flags =3D true;
-> +		cb_data.busy_cmd =3D MMC_BUSY_IO;
-> +		cb_data.status =3D &idata->ic.response[0];
-> +		err =3D __mmc_poll_for_busy(card->host, 0, busy_timeout_ms,
-> +				&mmc_busy_cb, &cb_data);
-> +
-> +	}
->=20
->  	return err;
->  }
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 3b3adbddf664..15d8b806c670 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -54,11 +54,6 @@ static const u8 tuning_blk_pattern_8bit[] =3D {
->  	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
->  };
->=20
-> -struct mmc_busy_data {
-> -	struct mmc_card *card;
-> -	bool retry_crc_err;
-> -	enum mmc_busy_cmd busy_cmd;
-> -};
->=20
->  struct mmc_op_cond_busy_data {
->  	struct mmc_host *host;
-> @@ -457,14 +452,15 @@ int mmc_switch_status(struct mmc_card *card, bool
-> crc_err_fatal)
->  	return mmc_switch_status_error(card->host, status);
->  }
->=20
-> -static int mmc_busy_cb(void *cb_data, bool *busy)
-> +int mmc_busy_cb(void *cb_data, bool *busy)
->  {
->  	struct mmc_busy_data *data =3D cb_data;
->  	struct mmc_host *host =3D data->card->host;
->  	u32 status =3D 0;
->  	int err;
->=20
-> -	if (data->busy_cmd !=3D MMC_BUSY_IO && host->ops->card_busy) {
-> +	if (data->busy_cmd !=3D MMC_BUSY_IO && host->ops->card_busy &&
-> +			!data->aggregate_err_flags) {
->  		*busy =3D host->ops->card_busy(host);
->  		return 0;
->  	}
-> @@ -477,6 +473,9 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
->  	if (err)
->  		return err;
->=20
-> +	if (data->aggregate_err_flags)
-> +		*data->status =3D R1_STATUS(*data->status) | status;
-> +
->  	switch (data->busy_cmd) {
->  	case MMC_BUSY_CMD6:
->  		err =3D mmc_switch_status_error(host, status);
-> @@ -549,6 +548,7 @@ int mmc_poll_for_busy(struct mmc_card *card,
-> unsigned int timeout_ms,
->=20
->  	cb_data.card =3D card;
->  	cb_data.retry_crc_err =3D retry_crc_err;
-> +	cb_data.aggregate_err_flags =3D false;
->  	cb_data.busy_cmd =3D busy_cmd;
->=20
->  	return __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_busy_cb,
-> &cb_data);
-> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-> index 09ffbc00908b..a57751b83f19 100644
-> --- a/drivers/mmc/core/mmc_ops.h
-> +++ b/drivers/mmc/core/mmc_ops.h
-> @@ -18,6 +18,14 @@ enum mmc_busy_cmd {
->  	MMC_BUSY_IO,
->  };
->=20
-> +struct mmc_busy_data {
-> +	struct mmc_card *card;
-> +	bool retry_crc_err;
-> +	bool aggregate_err_flags;
-> +	enum mmc_busy_cmd busy_cmd;
-> +	u32 *status;
-> +};
-> +
->  struct mmc_host;
->  struct mmc_card;
->  struct mmc_command;
-> @@ -41,6 +49,7 @@ int mmc_can_ext_csd(struct mmc_card *card);
->  int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
->  bool mmc_prepare_busy_cmd(struct mmc_host *host, struct mmc_command
-> *cmd,
->  			  unsigned int timeout_ms);
-> +int mmc_busy_cb(void *cb_data, bool *busy);
->  int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
->  			unsigned int timeout_ms,
->  			int (*busy_cb)(void *cb_data, bool *busy),
-> --
-> 2.37.3
+
+> ----=2D=4Fri=67i=6Ea=6C =4Dess=61ge-=2D---
+> From: A=76r=69 A=6C=74m=61=6E <=41vri.A=6C=74m=61=6E@wdc.com=3E
+> =53=65nt: We=64=6Ee=73day, J=75n=65 21, =320=323 9:3=31 AM
+> =54o: =43hri=73=74i=61n L=6Feh=6C=65 <=43=4C=6Fehle@=68ype=72sto=6Ee.c=6F=6D=
+>=3B l=69nux-mm=63@vge=72.=6B=65r=6Ee=6C.org=3B
+=3E l=69=6Eu=78-=6B=65rnel@v=67=65r=2Ekern=65l.o=72=67; Ul=66 H=61nsson <ulf.=
+=68=61=6Esson=40lina=72o.org>=3B Ad=72i=61n
+=3E =48u=6E=74er =3Cad=72=69=61n.hunt=65r@=69nt=65l.com>
+=3E S=75b=6Aect: R=45: [PA=54=43H=763 1/1] =6Dmc: bl=6Fck=3A ioct=6C=3A =41dd =
+=50ROG-error =61ggreg=61tion
+>
+> CA=55T=49=4F=4E: thi=73 mail =63=6Fm=65s =66ro=6D e=78=74=65rn=61l!/A=43=48=
+=54UNG: =44ies=65 =4D=61i=6C =6B=6F=6D=6D=74 v=6F=6E
+=3E e=78ter=6E=21
+>
+=3E > Use=72=73p=61ce c=75=72=72ently =68as =6Eo wa=79 of checking f=6Fr err=
+=6F=72 bits =6F=66 =64et=65=63ti=6Fn
+> =3E mo=64e =58=2E Th=65se are =65r=72or bi=74s t=68a=74 are =6Fnly detecte=
+=64 =62y the c=61=72=64 =77=68en
+> =3E execu=74=69=6E=67 =74=68e =63=6Fmma=6Ed. Fo=72 e=2E=67. =61 sa=6Ei=74ize=
+ =6F=70er=61tion th=69=73 may =62e
+> > minutes =61fter t=68e =52S=50 wa=73 s=65en by t=68=65 ho=73t=2E
+> =3E
+> =3E Cu=72r=65ntly u=73e=72s=70ace p=72ogram=73 cannot =73=65e t=68=65se erro=
+=72 b=69=74=73 =72eli=61=62l=79=2E
+> > T=68ey co=75=6C=64 i=73=73u=65 a =6Dulti =69o=63tl cm=64 wi=74h a C=4D=441=
+=33 =69mm=65diate=6C=79 followin=67
+=3E > it, =62ut =73=69=6Ece err=6Fr=73 =6Ff det=65c=74ion =6D=6F=64e =58 are a=
+u=74o=6Da=74=69call=79 c=6Ceare=64
+=3E =3E (they =61r=65 =61=6Cl cle=61=72 c=6Fnditio=6E B).
+> > mmc=5F=70ol=6C=5Ffo=72=5F=62u=73y =6F=66 =74he fir=73t i=6F=63tl =6D=61y h=
+=61=76e a=6Cre=61=64y =68=69d=64e=6E s=75c=68 an
+> =3E e=72r=6F=72 =66l=61g.
+> =3E
+> > I=6E c=61se o=66 t=68e sec=75rit=79 opera=74ions=3A s=61n=69=74ize, secure=
+ e=72a=73e=73 and =52P=4D=42
+=3E > w=72it=65=73=2C =74his =63=6Ful=64 l=65=61=64 to th=65 op=65ration n=6Ft=
+ being perf=6Frm=65d
+> > s=75cc=65=73s=66ull=79 =62=79 the =63ard w=69=74h t=68=65 user not =6Bnowi=
+ng=2E
+=3E > If =74he user =74rus=74s =74hat th=69=73 o=70=65=72a=74i=6Fn =69=73 com=
+=70leted (e.g=2E the=69=72 data
+> =3E is sa=6Ei=74iz=65d=29=2C t=68i=73 cou=6Cd be a =73ecur=69t=79 =69ssu=65=
+=2E
+> > An attacker could e=2Eg=2E =70=72=6F=76=6Fk=65 a =65=4DM=43 =28=56CC) fla=
+=73=68 =66ail, wher=65 =61
+> > s=75cce=73=73fu=6C s=61n=69=74=69ze =6F=66 a c=61=72d i=73 n=6F=74 =70oss=
+=69ble. A =63a=72d =6Day move =6F=75t o=66
+> =3E P=52OG s=74a=74=65 b=75t issu=65 =61 =62it 19 R=31 error=2E
+> =3E
+> > This pa=74=63h =74h=65refo=72=65 =77il=6C =61lso =68=61ve =74h=65 c=6Fn=73=
+=65q=75ence of =61 m=6Dc-uti=6Cs
+> =3E patc=68=2C =77=68=69ch =65=6E=61bles th=65 bit f=6Fr th=65 sec=75ri=74y=
+=2Dse=6E=73=69=74i=76e =6Fper=61=74=69on=73.
+> >
+> > Sig=6Eed-=6Ff=66-b=79: Ch=72i=73=74=69an L=6Feh=6Ce =3Cc=6Co=65hle@=68y=70=
+er=73=74o=6Ee=2E=63o=6D>
+> A=63=6Bed-b=79=3A =41vri Alt=6D=61n <av=72i.altm=61n=40w=64c.=63om=3E
+=3E
+=3E =3E -=2D-
+> =3E  d=72iv=65rs/mmc/=63=6Fre/=62=6Coc=6B.c   | 26 +=2B=2B+=2B++++++=2B+++--=
+---=2D-----
+> =3E  =64=72i=76ers/=6D=6D=63=2Fc=6Fre/=6D=6D=63=5Fop=73.=63 =7C =314 =2B++++=
+=2B+-------
+> =3E d=72=69=76=65r=73=2F=6Dm=63/core=2F=6Dm=63=5Fops=2Eh |  9 +=2B+=2B++=2B+=
++
+=3E >  3 =66il=65s ch=61nged, 31 =69=6Ese=72tion=73(+=29, 18 del=65=74=69=6F=
+=6E=73(=2D)
+> >
+> =3E d=69ff -=2D=67=69t a/dri=76er=73/=6Dm=63/co=72e=2Fbl=6F=63k.=63 =62/=64r=
+=69v=65rs=2Fmm=63/co=72=65=2Fblo=63k=2Ec i=6Ed=65x
+> > =65=346330=38154=38=34=2E.c=37e2b8=61=6558a9 100=36=34=34
+> > =2D-- a/d=72iver=73/mmc=2F=63ore=2F=62lo=63=6B.c
+> =3E ++=2B =62/d=72=69vers/mm=63/=63or=65/block.c
+> =3E =40@ -47=30,7 +=3470=2C=37 =40=40 =73=74=61tic =69=6E=74 =5F=5Fm=6Dc=5Fb=
+lk=5Fioc=74l=5Fcmd(st=72=75ct mmc=5Fca=72=64
+=3E =3E =2Acar=64, s=74=72=75ct =6D=6D=63=5Fbl=6B=5Fdat=61 =2A=6Dd=2C
+> >       stru=63=74 mmc=5Fd=61=74a d=61=74a =3D =7B};
+> >       st=72uct mm=63=5Freq=75=65st =6Drq =3D {}=3B
+=3E >       s=74ruct scatte=72lis=74 sg;
+=3E > =2D     b=6Fo=6C r1=62=5Fr=65sp=2C =75=73=65=5Fr1=62=5F=72=65=73=70 =3D =
+=66al=73e;
+=3E > +     b=6Fol =721b=5F=72=65sp;
+> =3E       unsig=6Ee=64 i=6Et bus=79=5F=74=69meout=5Fms;
+> >       int e=72r=3B
+=3E >       unsi=67n=65=64 int =74ar=67et=5Fp=61r=74=3B
+> > =40@ -=3551,8 =2B551,7 =40=40 s=74at=69c int =5F=5F=6Dm=63=5Fblk=5Fioctl=
+=5Fcmd(=73truct m=6D=63=5F=63a=72d
+=3E =3E =2Acard, stru=63t m=6Dc=5F=62l=6B=5Fdata *=6D=64=2C
+> >       bu=73=79=5F=74i=6Deout=5F=6Ds =3D =69d=61ta->=69c=2Ecmd=5Ft=69m=65=
+=6Fu=74=5Fms =3F :
+=3E > M=4DC=5FBL=4B=5FTI=4DEOU=54=5FMS;
+> >       =721b=5Fresp =3D (cmd.=66la=67s =26 M=4DC=5FRSP=5FR=31B) =3D=3D MM=
+=43=5FRS=50=5FR1B;
+> >       i=66 =28=72=31b=5Fresp)
+> > -             use=5Fr1b=5F=72es=70 =3D mmc=5F=70repare=5Fbu=73y=5F=63md=28=
+card->ho=73t=2C &cmd,
+> > -                                                 b=75sy=5Ftim=65ou=74=5F=
+=6Ds=29;
+> > +             mm=63=5Fp=72=65p=61re=5Fbus=79=5Fc=6D=64(ca=72d->h=6Fst, =26=
+=63=6Dd=2C
+=3E =3E =62us=79=5F=74=69=6D=65=6F=75t=5Fms=29;
+> >
+=3E =3E       mmc=5Fw=61it=5Ffo=72=5Fre=71(card->=68ost, &mrq)=3B
+=3E >       memcpy=28&=69dat=61=2D>i=63=2E=72=65s=70=6Fnse, c=6Dd.=72esp=2C =
+=73=69z=65o=66=28=63md=2Ere=73=70=29=29=3B =40@
+> > -605,=31=39 +6=304,2=34 =40@ stati=63 int =5F=5Fmm=63=5Fblk=5Fioc=74l=5Fcm=
+=64=28s=74r=75=63=74 m=6D=63=5Fca=72d
+> > =2A=63=61=72d, struct =6D=6Dc=5Fb=6Ck=5Fdat=61 =2A=6Dd=2C
+> =3E       =69=66 (=69=64a=74a->=69=63.p=6Fst=73l=65e=70=5Fmi=6E=5Fu=73)
+=3E >               =75=73=6Ce=65=70=5Fra=6Eg=65(idat=61-=3Eic=2Epo=73tsle=65p=
+=5Fmi=6E=5Fus=2C idat=61=2D
+=3E > >i=63=2Epo=73ts=6Ceep=5Fm=61=78=5F=75s=29=3B
+> >
+> > =2D     /=2A =4Eo n=65=65d to poll when using =48W b=75sy de=74ec=74i=6Fn.=
+ */
+> > =2D     =69f ((card=2D>hos=74-=3Eca=70s & =4D=4DC=5F=43AP=5FWA=49=54=5F=57=
+HILE=5FBUSY) &&
+> > use=5F=721b=5Fresp)
+> > -             r=65=74ur=6E 0=3B
+> > -
+=3E =3E       =69=66 (=6Dmc=5Fhost=5F=69=73=5Fs=70i=28=63ar=64->host)=29 {
+=3E =3E               if =28ida=74a-=3Eic=2Ew=72ite=5F=66lag || r1b=5Fres=70 |=
+| cm=64=2Ef=6C=61=67=73 &
+> > =4DMC=5F=52S=50=5FSP=49=5F=42US=59)
+=3E =3E                       r=65tur=6E mm=63=5F=73pi=5Ferr=5Fcheck(=63a=72d)=
+;
+=3E >               r=65=74urn er=72;
+=3E =3E       }
+=3E =3E -     =2F* =45nsu=72e =52=50MB=2F=521B co=6Dmand =68as c=6Fmpleted b=
+=79 =70o=6Cli=6Eg with CMD13=2E
+> > *=2F
+=3E > =2D     if (i=64a=74a-=3Erpmb || r1=62=5Fr=65sp)
+=3E =3E =2D             err =3D =6D=6Dc=5F=70o=6Cl=5Ffo=72=5F=62usy(=63a=72d, =
+=62us=79=5Ft=69=6Deout=5Fms, f=61l=73e,
+> > =2D                                     =4DMC=5FBUSY=5FI=4F);
+> > +     /=2A =50=6Fll =66=6Fr R=50MB=2Fw=72=69te=2FR1B ex=65c=75=74ion =65=
+=72r=6Frs =2A=2F
+> > =2B     i=66 =28idat=61->rp=6D=62 =7C=7C =69=64at=61->=69c=2Ew=72ite=5F=66=
+=6Cag =7C| =72=31b=5F=72=65s=70) =7B
+> AF=41IK writ=65=5Ffla=67  =61=6Ed =721b=5Fresp are =73e=74 t=6Fg=65th=65r (=
+=69=6E =6Dmc=2D=75t=69l=73 =74=68=61=74 =69s)=3F
+N=6F=74 sure what y=6Fu'=72=65 =74ry=69n=67 t=6F sa=79, =74hat w=72=69te=5F=66=
+=6Cag -> r=31=62=5Fr=65=73p=3F =49=66 so tha=74 i=73 not tr=75e =66=6Fr a=6C=
+=6C =63ases=2C =65=2Eg=2E =43MD=356
+=3E As =66or =72p=6Db r=65ad operations you wer=65 pond=65rin=67 about =2D the=
+ =72=70mb r=65=61d=2D
+> c=6F=75nte=72 =69s one ex=61=6Dple=2C b=65=63=61us=65 you =75s=65 =69t =74=
+=6F sign =77rite opera=74=69ons.
+Bu=74 t=68=65 r=65ad cou=6Et=65r =28=74he a=63=74u=61l re=61=64 d=69rec=74=69o=
+n par=74), =64=6Fesn't =72eally ne=65=64 =70=6F=73t t=72ans=66=65=72 p=6F=6Cli=
+ng I=4DO.
+I=66 t=68e car=64 e=6Ec=6F=75=6Et=65rs a pr=6Fbl=65m du=72in=67 tha=74 oper=61=
+t=69=6Fn, i=74 =68op=65=66ully =64o=65=73n't =73e=6E=64 val=69d =63o=75=6Eter =
+read pa=63=6B=65=74 =72=65spons=65=2E
+The rea=64 counte=72 d=6F=65s=6E't =63h=61ng=65 a=6Ey st=61=74e insi=64e =74h=
+=65 =63ard, an=64 =69f it =64=6Fe=73 for s=6Fm=65 =76=65nd=6Fr-spec=69=66i=63 =
+re=61=73on, =49 =77=6F=75l=64 hope =69t doe=73 =74his b=65fore the rea=64 d=61=
+ta is e=78ec=75ted=2E
+So I w=6Fuld say =77=65're in =74=68e clear =77=69th=6F=75t poll=69ng.
+C=68ecki=6Eg =74he =76a=6Cid=69ty of =74he =72=65=63=65=69ved re=61=64 =63o=75=
+=6Eter pa=63ket =64a=74a is r=65sp=6Fnsibili=74y =6Ff t=68=65 io=63t=6C-=63l=
+=69e=6E=74, and I wo=75l=64 s=61y t=68ey a=6C=72ead=79 h=61ve =65veryth=69ng =
+=74=68=65y n=65=65=64.
+
+=3E So r=65s=74o=72in=67 al=6C rp=6Db op=65ratio=6E=73 i=73 =69=6E pla=63e - a=
+l=6C s=68o=75=6C=64 be =6Do=6Eito=72ed=2E
+>
+> > +             str=75ct m=6Dc=5Fbus=79=5F=64=61=74=61 =63=62=5Fda=74a;
+> =4D=61=79be =75se d=65signat=65d ini=74ial=69=7Ain=67=3F
+
+=43an do t=68at, tha=6E=6B=73.
+I =77ill w=61=69t fo=72 Uf=66=65=27s com=6Dent abo=75t t=68e =73=74yl=65 b=65f=
+o=72e re=73=75b=6D=69t=74=69=6E=67=2E
+
+Regard=73,
+C=68=72isti=61=6E
+--NoSpamProxy_127be3e0-8657-4097-bc58-fb80d68bd7c3
+Content-Transfer-Encoding: BASE64
+Content-Type: application/pkcs7-signature; name=smime.p7s
+Content-Disposition: attachment; filename=smime.p7s
+
+MIAGCSqGSIb3DQEHAqCAMIACAQExDTALBglghkgBZQMEAgEwCwYJKoZIhvcNAQcBoIIjdjCCB+sw
+ggXToAMCAQICFH/0ya9FbNqDP1mj8nwYIyzoDuazMA0GCSqGSIb3DQEBCwUAMFMxCzAJBgNVBAYT
+AkNIMRUwEwYDVQQKEwxTd2lzc1NpZ24gQUcxLTArBgNVBAMTJFN3aXNzU2lnbiBSU0EgU01JTUUg
+TENQIElDQSAyMDIxIC0gMjAeFw0yMjEyMTUxMDIwNTJaFw0yMzEyMTUxMDIwNTJaMEgxJTAjBgkq
+hkiG9w0BCQEWFmNsb2VobGVAaHlwZXJzdG9uZS5jb20xHzAdBgNVBAMMFmNsb2VobGVAaHlwZXJz
+dG9uZS5jb20wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDbQs7vFtBkf7fsjeH5TOTl
+4BCMTLaVKnaZGJ79z62g8ZSuOWg45uUJ6ti+RfIaS/gp8bAnHxrFDcYANbU2S/S19bwpqvKlOcV9
+3mKFefUB7SVTnhD1EDsk3I2SCG7Bz61gflKcRnalJG74AXn4E4MAaRlrWCoLkZIeCSY4lNrQD1pw
+70nmNRY41ICYzAVAb0RiP60audx4UP29YDXLUkrki5cpf3yt/eHS/KRjHiadq2uDnkGQI1oadBXa
+u4B0nCVmN68LKWb8Ak5aSROJarWOPHLQ+wuL78NS11Yer5Mnngad5/pccQY0MjkC7e80HBNaOAOt
+vrf2a7i8fFs278So63WAMt+XUM2rHMyIKsOEWqAHBY1GoAKT81NZ+5YMqfvUbK8SucXAy+UWZlzY
+VXLCtxrqHcxNbTApkjDtxalDMn9bm4qyQE/qxbkuGSPdqIj8v7AOCgb1K4I8hzwOIiCpEJMhbIvp
+bZK1GQ3BxE61FG599xyVZNf29aYdoUDIp4MwG3hcLHvYsRvSo6eHPYk8mr9SM+OhexuEdj3+St+Y
+5MSdDdkvRdspx0gXwmffJ6iCBjChXDHa/W1uSBvM5SlKKsYH7ufOC31CptKkEdM8lGi0PPlevh7U
+25ZI0QVH3EiLgBymsdqPc/7LifBKmp+xamIZAUVcfJqvdvTt+EkgEQIDAQABo4ICwDCCArwwIQYD
+VR0RBBowGIEWY2xvZWhsZUBoeXBlcnN0b25lLmNvbTAOBgNVHQ8BAf8EBAMCBLAwEwYDVR0lBAww
+CgYIKwYBBQUHAwQwHQYDVR0OBBYEFA+H5eoYx7aaS0slW7G0+hgo1ZqlMB8GA1UdIwQYMBaAFPpU
+wIKm/pa9BMdfn1+CDD3DlU9HMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwuc3dpc3Nz
+aWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MIGooIGloIGi
+hoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPUZBNTRDMDgyQTZGRTk2QkQwNEM3
+NUY5RjVGODIwQzNEQzM5NTRGNDclMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNhdGVSZXZv
+Y2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MGcGA1UdIARg
+MF4wUgYIYIV0AVkCAQswRjBEBggrBgEFBQcCARY4aHR0cHM6Ly9yZXBvc2l0b3J5LnN3aXNzc2ln
+bi5jb20vU3dpc3NTaWduX0NQU19TTUlNRS5wZGYwCAYGBACPegEDMIHGBggrBgEFBQcBAQSBuTCB
+tjBkBggrBgEFBQcwAoZYaHR0cDovL3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93
+bmxvYWQvRkE1NEMwODJBNkZFOTZCRDA0Qzc1RjlGNUY4MjBDM0RDMzk1NEY0NzBOBggrBgEFBQcw
+AYZCaHR0cDovL29jc3Auc3dpc3NzaWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1Rjgy
+MEMzREMzOTU0RjQ3MA0GCSqGSIb3DQEBCwUAA4ICAQCm+EvZobQCGMXgo2yeAD2ztkKXLEUmp7sp
+to3Unk6h7xNT0k1XsLxQAyF+Ny/Ftd6GAnq02cWyupmU8OfcSbWIi91QT13TUUholbqV1ELlgMpa
+slZ6qBAJLWLXQ8p/BWaGzpRBgJEsg4fc3XC5FRjysoZNOxZIwblQrQDD/cCTUAM43Ar086iZoM1B
+5mqNZil+LoCaXR4q8KS2jV3cTseKK/yIHpOl3NNAU7tC10pO9PNkJ9Dd6W/ghKBvhNiSUucEmm4e
+70b5cP3M0qJ1xdBkRhZ5BDFBPTNWq0pecXdRWILG0xz6neB8VCClW3tYYAriroYjXDZzBMVGfXKo
+0pxnwg2B/+ppYGaji2Sf3IBZKFVS5hRFolcsRAqfxmDYfmVJA1lQqOfr0f1jURksb/+IEG7aZNyG
+4iMIMFmDptXeEysz5ntJw5KAf0i6mJ2y/sEU9pzImRlvQc5kHV3GT9BdYs8GmSmdD8CI0S+/y/no
+Ny4l2SzVjkc+3d+fdWSJV6y4gR+3FmG8B5dTvJBHNs0YSsG2rQSEzDxcZNzhjKA9c70FS1U3m3n6
+bU2mErdOPQ4KtTu5v3D5RBKB2cgbdBI4B8gEHJhqxOdBO5E+Z8+FMqIWCITb1fN2NrgenRDYy4Bj
+tax6L8HT5mEY+mS8Lx08gqY01qcfbiD8uD+qTtmsLjCCB+swggXToAMCAQICFH/0ya9FbNqDP1mj
+8nwYIyzoDuazMA0GCSqGSIb3DQEBCwUAMFMxCzAJBgNVBAYTAkNIMRUwEwYDVQQKEwxTd2lzc1Np
+Z24gQUcxLTArBgNVBAMTJFN3aXNzU2lnbiBSU0EgU01JTUUgTENQIElDQSAyMDIxIC0gMjAeFw0y
+MjEyMTUxMDIwNTJaFw0yMzEyMTUxMDIwNTJaMEgxJTAjBgkqhkiG9w0BCQEWFmNsb2VobGVAaHlw
+ZXJzdG9uZS5jb20xHzAdBgNVBAMMFmNsb2VobGVAaHlwZXJzdG9uZS5jb20wggIiMA0GCSqGSIb3
+DQEBAQUAA4ICDwAwggIKAoICAQDbQs7vFtBkf7fsjeH5TOTl4BCMTLaVKnaZGJ79z62g8ZSuOWg4
+5uUJ6ti+RfIaS/gp8bAnHxrFDcYANbU2S/S19bwpqvKlOcV93mKFefUB7SVTnhD1EDsk3I2SCG7B
+z61gflKcRnalJG74AXn4E4MAaRlrWCoLkZIeCSY4lNrQD1pw70nmNRY41ICYzAVAb0RiP60audx4
+UP29YDXLUkrki5cpf3yt/eHS/KRjHiadq2uDnkGQI1oadBXau4B0nCVmN68LKWb8Ak5aSROJarWO
+PHLQ+wuL78NS11Yer5Mnngad5/pccQY0MjkC7e80HBNaOAOtvrf2a7i8fFs278So63WAMt+XUM2r
+HMyIKsOEWqAHBY1GoAKT81NZ+5YMqfvUbK8SucXAy+UWZlzYVXLCtxrqHcxNbTApkjDtxalDMn9b
+m4qyQE/qxbkuGSPdqIj8v7AOCgb1K4I8hzwOIiCpEJMhbIvpbZK1GQ3BxE61FG599xyVZNf29aYd
+oUDIp4MwG3hcLHvYsRvSo6eHPYk8mr9SM+OhexuEdj3+St+Y5MSdDdkvRdspx0gXwmffJ6iCBjCh
+XDHa/W1uSBvM5SlKKsYH7ufOC31CptKkEdM8lGi0PPlevh7U25ZI0QVH3EiLgBymsdqPc/7LifBK
+mp+xamIZAUVcfJqvdvTt+EkgEQIDAQABo4ICwDCCArwwIQYDVR0RBBowGIEWY2xvZWhsZUBoeXBl
+cnN0b25lLmNvbTAOBgNVHQ8BAf8EBAMCBLAwEwYDVR0lBAwwCgYIKwYBBQUHAwQwHQYDVR0OBBYE
+FA+H5eoYx7aaS0slW7G0+hgo1ZqlMB8GA1UdIwQYMBaAFPpUwIKm/pa9BMdfn1+CDD3DlU9HMIH/
+BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwuc3dpc3NzaWduLm5ldC9GQTU0QzA4MkE2RkU5
+NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MIGooIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5z
+d2lzc3NpZ24ubmV0L0NOPUZBNTRDMDgyQTZGRTk2QkQwNEM3NUY5RjVGODIwQzNEQzM5NTRGNDcl
+MkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVj
+dENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MGcGA1UdIARgMF4wUgYIYIV0AVkCAQswRjBEBggr
+BgEFBQcCARY4aHR0cHM6Ly9yZXBvc2l0b3J5LnN3aXNzc2lnbi5jb20vU3dpc3NTaWduX0NQU19T
+TUlNRS5wZGYwCAYGBACPegEDMIHGBggrBgEFBQcBAQSBuTCBtjBkBggrBgEFBQcwAoZYaHR0cDov
+L3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93bmxvYWQvRkE1NEMwODJBNkZFOTZC
+RDA0Qzc1RjlGNUY4MjBDM0RDMzk1NEY0NzBOBggrBgEFBQcwAYZCaHR0cDovL29jc3Auc3dpc3Nz
+aWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MA0GCSqGSIb3
+DQEBCwUAA4ICAQCm+EvZobQCGMXgo2yeAD2ztkKXLEUmp7spto3Unk6h7xNT0k1XsLxQAyF+Ny/F
+td6GAnq02cWyupmU8OfcSbWIi91QT13TUUholbqV1ELlgMpaslZ6qBAJLWLXQ8p/BWaGzpRBgJEs
+g4fc3XC5FRjysoZNOxZIwblQrQDD/cCTUAM43Ar086iZoM1B5mqNZil+LoCaXR4q8KS2jV3cTseK
+K/yIHpOl3NNAU7tC10pO9PNkJ9Dd6W/ghKBvhNiSUucEmm4e70b5cP3M0qJ1xdBkRhZ5BDFBPTNW
+q0pecXdRWILG0xz6neB8VCClW3tYYAriroYjXDZzBMVGfXKo0pxnwg2B/+ppYGaji2Sf3IBZKFVS
+5hRFolcsRAqfxmDYfmVJA1lQqOfr0f1jURksb/+IEG7aZNyG4iMIMFmDptXeEysz5ntJw5KAf0i6
+mJ2y/sEU9pzImRlvQc5kHV3GT9BdYs8GmSmdD8CI0S+/y/noNy4l2SzVjkc+3d+fdWSJV6y4gR+3
+FmG8B5dTvJBHNs0YSsG2rQSEzDxcZNzhjKA9c70FS1U3m3n6bU2mErdOPQ4KtTu5v3D5RBKB2cgb
+dBI4B8gEHJhqxOdBO5E+Z8+FMqIWCITb1fN2NrgenRDYy4Bjtax6L8HT5mEY+mS8Lx08gqY01qcf
+biD8uD+qTtmsLjCCB0cwggUvoAMCAQICDyxaqdlU/bKrlq0Xtl+M9DANBgkqhkiG9w0BAQsFADBT
+MQswCQYDVQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24g
+UlNBIFNNSU1FIFJvb3QgQ0EgMjAyMSAtIDEwHhcNMjEwODA0MTIxMjU5WhcNMzYwNzMxMTIxMjU5
+WjBTMQswCQYDVQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1Np
+Z24gUlNBIFNNSU1FIExDUCBJQ0EgMjAyMSAtIDIwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIK
+AoICAQC9BRnI1A1xPgMDELSTFgDrzyPawAcju1E8OBLTQHXDcmN46wsneV+NVoip2X1ZQ9GIF3bj
+x0aLq9/iiKo9EsCdCO1BENfc70ngvzFS1oOdmfzymiKAZlWsEJSQocyLldDWSF03KN8a7Rgl30PD
+IURBvBWlpIOCxiCAUgKogGYBvm7ZRZZ10BcgfGU/ga19jlhGI9xSJ9pCPjvcWPJKpiSbG+s0CR/M
+4cXaQPO9ZEFYxIn7g4rNIYBYZwhsIjcPn5OtC9/7p/3F/2qKA9gfvK/CyQ14fPVOPVJaPECufMs4
++tRhh2edpGx4irQTaVV85iVU3wjPpi84TIgUlRwqUWloj158A5r7pGVMcI++Slyq3rudu319WjiC
+57kAikVHryC+gwC4SUAYn0CqX//cApx+99nmLWAmWnGdeaRmHMJCmJfXy3Dji8SnVuggcXbErnkr
+5sms1kyp5wiDR7YVIkdTuiJHpF2d7WZ/d5EOT7KBdS/k67/XgTrUwkWwKR2Vm/00b0Zpz3N4Hg9F
+TrBP53A2uci2e7Lf3vR8hFJijhu08zGuClY7Khn+0BBU50YSOE2BnYWsBOe36ddw2470cM/iGtMM
+aTXnA0rg4MsX9TP0vX4iQpWZMwqNwqcYk0ewMqy4RDAY7xH4GXNkRGT2nJngURbQS1wgScF1NMzR
+W+rRrQIDAQABo4ICFjCCAhIwDgYDVR0PAQH/BAQDAgEGMBMGA1UdJQQMMAoGCCsGAQUFBwMEMBIG
+A1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFPpUwIKm/pa9BMdfn1+CDD3DlU9HMB8GA1UdIwQY
+MBaAFAkMvyqiHQQkDLL5QApBws9acqqAMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwu
+c3dpc3NzaWduLm5ldC8wOTBDQkYyQUEyMUQwNDI0MENCMkY5NDAwQTQxQzJDRjVBNzJBQTgwMIGo
+oIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPTA5MENCRjJBQTIxRDA0
+MjQwQ0IyRjk0MDBBNDFDMkNGNUE3MkFBODAlMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNh
+dGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MB8G
+A1UdIAQYMBYwCgYIYIV0AVkCAQswCAYGBACPegEDMHQGCCsGAQUFBwEBBGgwZjBkBggrBgEFBQcw
+AoZYaHR0cDovL3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93bmxvYWQvMDkwQ0JG
+MkFBMjFEMDQyNDBDQjJGOTQwMEE0MUMyQ0Y1QTcyQUE4MDANBgkqhkiG9w0BAQsFAAOCAgEABw8e
+lwSFegmW7IGpGTOPwtOC2tzTwCQiRA2VC/EWGKckk8A3F9Q+M2A8lUYVlRKJt31pAezcXaP6OFW0
+3IPiiXU70QA598nGqUxzzjn8rpFhZgCj6bi8MJd5MH5C2RRYFrhiRefx6pp42LLc0AFIF1ZqkaYa
+1vz0EgTOL9XE3inXe39twPLoe3rc/f8gfpem/s1NIJk2azwyxZn226YSrSedvxhe7LiN6gOqvU7h
+xpC8bXaiIYVy7DISXwEt902Gc+M4QbhUf8yQ+PiK3QexGIWiusOO46cn673dG/1KCzma/1Llp9Dx
+aeUHlxjjeeer/2WtWWZNFhoInrxpcK58odaJZRMZQJwNljMb66gGb5OpeanN0su93/S9GrZgJqN6
+spp171azfMuQzVqj9gxFy66yIdlrhZcba/QixC2eAJxm5fM/PZg9WXZ737G8jAbsuoREH1bxsglL
+zxAIwboY7uVwIim6ZcieKb6Yy4n6TzperNmhU5UHiUZSJzIQ/qu9B14cfh0CAJo19p7fRvyeF/p7
+INDH0ceTVTq5sF8kFtMM1bz+0/sWOTNqdi8kGO7I7iouC3+V4DDx4F1sGcaigFXtUpLmol5Lss+i
+9NXGgWFcPFreexoLaBdckDJgBk6zOHKVYwZdnrg2CovIev/uumK0WyCa7ix1+SDcsd2PXxIwggaL
+MIIEc6ADAgECAhAA3kxVIPbc9AIbDxFU940QMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNVBAYTAkNI
+MRUwEwYDVQQKEwxTd2lzc1NpZ24gQUcxHzAdBgNVBAMTFlN3aXNzU2lnbiBHb2xkIENBIC0gRzIw
+HhcNMjEwODAzMTMxNDU1WhcNMzYxMDIzMTMxNDU1WjBTMQswCQYDVQQGEwJDSDEVMBMGA1UEChMM
+U3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24gUlNBIFNNSU1FIFJvb3QgQ0EgMjAyMSAt
+IDEwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDWsri0OI8mujfIASNFFn6+ZDiGcmZh
+WI0kilmzDKEqq367hXxlZnCn6SLb7rsy+quxhj+rSIG4q/Mq3TfHLgv2q99VrVQgFDq3iURt5+g/
+roghGI5HVpUAyexlblZHFE2tLibS1ItsyvMzLfnwm463hiaB5wueiwx8Bac8evnwhZCciWc5dRGx
+Y7DUIyx93B8rdu0ErboRyQdJDeMoDy4RFNK2sv94uP5aU4AkrAtIuk4yMVHsqv67RCwL1/l9q43a
+bKsI3fNBPY/1QUFcxsxRyg5EH7dqgHZVaVHmTP0XgPuzVO6wSh0zkwZ5uWERrOQOW7Pd4LElXLfU
+0830e54BVCuCkKHhykON8EGkHAfA1jMWo0VGj4RMaf2TV53T5W/LJAwxLQOYwgA5RHkigW3k6vwL
+ZCZu/MqeGgNE7X9NTekRsna9hn17u1Q/UZBHx4v4/04s8ggwjBnBLEc1nr2rU6Qirp8MIRkpvZ6b
+z4TcjtE1SyIQgRti7cBL0yuQIkkfLSGukcXf8dZBVHIO3so0EPXJmp3VXBbkzSWxx6hxRqz4U4UX
+iaskGjgYMiRz6VWu+IBjA2+EsN+glLWpU/CLavVUeeX/W5yibyLh/0ApZWxvjkhpMT6BGzuLWPpb
+LztrfWsk8LzyjeWa5qx4y9iCKwAXHXlqCS7WbnbPMPvbWQIDAQABo4IBZzCCAWMwDwYDVR0TAQH/
+BAUwAwEB/zAdBgNVHQ4EFgQUCQy/KqIdBCQMsvlACkHCz1pyqoAwHwYDVR0jBBgwFoAUWyV7lqRl
+UX64OfPAeGZe6Drn8O4wDgYDVR0PAQH/BAQDAgEGMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6
+Ly9jcmwuc3dpc3NzaWduLm5ldC81QjI1N0I5NkE0NjU1MTdFQjgzOUYzQzA3ODY2NUVFODNBRTdG
+MEVFMIGooIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPTVCMjU3Qjk2
+QTQ2NTUxN0VCODM5RjNDMDc4NjY1RUU4M0FFN0YwRUUlMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2Vy
+dGlmaWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBv
+aW50MA0GCSqGSIb3DQEBCwUAA4ICAQAC+Opd0IrMrAgDNlRm/wophuFUgywz6MdsrhCpVIF/Ki2I
+Jq2mqDQoDxkGqZ3iApUEMmRMC8r5433DE1vol0COd+PjgoGHrQFgB8PF4SD9tzCXProccXSLX02n
+sf5OfAl4eodf8ayhJRGXxywRnJDqchY9AjWpu+Uj2B9SQLfQjl3aI7wz6TL9uHWfQ749V0uHYd7t
+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
+--NoSpamProxy_127be3e0-8657-4097-bc58-fb80d68bd7c3--
+
