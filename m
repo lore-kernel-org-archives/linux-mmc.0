@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9952AC001DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 09:38:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F601EB64D7
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 09:38:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231964AbjFUJic (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jun 2023 05:38:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38842 "EHLO
+        id S230460AbjFUJik (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jun 2023 05:38:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231987AbjFUJiR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 05:38:17 -0400
+        with ESMTP id S231694AbjFUJiW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 05:38:22 -0400
 Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1224E1704
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jun 2023 02:36:29 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F5F2296B
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jun 2023 02:36:36 -0700 (PDT)
 Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
         by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
         (Exim 4.92)
         (envelope-from <ore@pengutronix.de>)
-        id 1qBuCp-0006Qb-Su; Wed, 21 Jun 2023 11:32:52 +0200
+        id 1qBuCp-0006Qg-Sp; Wed, 21 Jun 2023 11:32:51 +0200
 Received: from [2a0a:edc0:0:1101:1d::ac] (helo=dude04.red.stw.pengutronix.de)
         by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
         (envelope-from <ore@pengutronix.de>)
-        id 1qBuCl-00906Q-Nl; Wed, 21 Jun 2023 11:32:47 +0200
+        id 1qBuCm-00906c-DY; Wed, 21 Jun 2023 11:32:48 +0200
 Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.94.2)
         (envelope-from <ore@pengutronix.de>)
-        id 1qBuCk-000KKp-Oq; Wed, 21 Jun 2023 11:32:46 +0200
+        id 1qBuCk-000KLJ-RE; Wed, 21 Jun 2023 11:32:46 +0200
 From:   Oleksij Rempel <o.rempel@pengutronix.de>
 To:     Abel Vesa <abelvesa@kernel.org>,
         Michael Turquette <mturquette@baylibre.com>,
@@ -52,10 +52,12 @@ Cc:     Oleksij Rempel <o.rempel@pengutronix.de>, kernel@pengutronix.de,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v1 0/7] Add support for various features to i.MX6 bindings
-Date:   Wed, 21 Jun 2023 11:32:40 +0200
-Message-Id: <20230621093245.78130-1-o.rempel@pengutronix.de>
+Subject: [PATCH v2 3/5] dt-bindings: timer: gpt: Support 3rd clock for i.MX6DL
+Date:   Wed, 21 Jun 2023 11:32:43 +0200
+Message-Id: <20230621093245.78130-4-o.rempel@pengutronix.de>
 X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230621093245.78130-1-o.rempel@pengutronix.de>
+References: <20230621093245.78130-1-o.rempel@pengutronix.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
@@ -66,30 +68,39 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-changes v2:
-- fix warning samples in the commit messages
-- drop patches which needs more work
-- address requested changes 
+Add support for a 3rd clock, 'osc_per', for i.MX6DL to the 'fsl,imxgpt'
+binding to resolve the following dtbs_check warning:
+imx6dl-alti6p.dtb: timer@2098000: clocks: [[2, 119], [2, 120], [2, 237]] is too long
+imx6dl-alti6p.dtb: timer@2098000: clock-names: ['ipg', 'per', 'osc_per'] is too long
 
-This patch series is aimed at addressing several dtbs_check warnings by
-introducing additional support in the device tree bindings for i.MX6
-series SoCs. The warnings surfaced while validating some i.MX6 boards.
-The issues were predominantly around unrecognized compatibility strings
-and missing properties in the device trees.
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ Documentation/devicetree/bindings/timer/fsl,imxgpt.yaml | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Oleksij Rempel (5):
-  dt-bindings: mmc: fsl-imx-esdhc: Add imx6ul support
-  dt-bindings: timer: gpt: Add i.MX6UL support
-  dt-bindings: timer: gpt: Support 3rd clock for i.MX6DL
-  dt-bindings: clock: imx6ul: Support optional enet*_ref_pad clocks
-  dt-bindings: input: touchscreen: edt-ft5x06: Add 'threshold' property
-
- Documentation/devicetree/bindings/clock/imx6ul-clock.yaml  | 6 ++++++
- .../devicetree/bindings/input/touchscreen/edt-ft5x06.yaml  | 6 ++++++
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml   | 1 +
- Documentation/devicetree/bindings/timer/fsl,imxgpt.yaml    | 7 +++++++
- 4 files changed, 20 insertions(+)
-
+diff --git a/Documentation/devicetree/bindings/timer/fsl,imxgpt.yaml b/Documentation/devicetree/bindings/timer/fsl,imxgpt.yaml
+index 685137338ac99..34c62d152be81 100644
+--- a/Documentation/devicetree/bindings/timer/fsl,imxgpt.yaml
++++ b/Documentation/devicetree/bindings/timer/fsl,imxgpt.yaml
+@@ -45,14 +45,18 @@ properties:
+     maxItems: 1
+ 
+   clocks:
++    minItems: 2
+     items:
+       - description: SoC GPT ipg clock
+       - description: SoC GPT per clock
++      - description: SoC GPT osc_per clock
+ 
+   clock-names:
++    minItems: 2
+     items:
+       - const: ipg
+       - const: per
++      - const: osc_per
+ 
+ required:
+   - compatible
 -- 
 2.39.2
 
