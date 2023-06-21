@@ -2,303 +2,202 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1730EB64D7
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 11:24:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 862AEEB64DC
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 12:29:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232679AbjFULYM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jun 2023 07:24:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48744 "EHLO
+        id S231750AbjFUM3G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jun 2023 08:29:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51058 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232753AbjFULYC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 07:24:02 -0400
-Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6FAE71721;
-        Wed, 21 Jun 2023 04:23:59 -0700 (PDT)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 900BC3A2AEE;
-        Wed, 21 Jun 2023 13:23:57 +0200 (CEST)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 7D6AA3A2A97;
-        Wed, 21 Jun 2023 13:23:57 +0200 (CEST)
-X-TM-AS-ERS: 10.181.10.102-127.5.254.253
-X-TM-AS-SMTP: 1.0 bXgyLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
-        Q==
-X-DDEI-TLS-USAGE: Used
-Received: from mx2.dmz.swissbit.com (mx2.dmz.swissbit.com [10.181.10.102])
-        by mail5.swissbit.com (Postfix) with ESMTPS;
-        Wed, 21 Jun 2023 13:23:57 +0200 (CEST)
-Content-Type: multipart/signed; 
- boundary=NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e; 
- protocol="application/pkcs7-signature"; micalg="sha256"
-From:   Christian Loehle <CLoehle@hyperstone.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Marek Vasut <marex@denx.de>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH 01/11] mmc: core: Use BIT() macro
-Thread-Topic: [PATCH 01/11] mmc: core: Use BIT() macro
-Thread-Index: AQHZo2SocUiFxoozMkOzCUFdpaBskq+TaKaAgAEBWICAAHCAAIAAQJtQ
-Date:   Wed, 21 Jun 2023 11:23:54 +0000
-Message-ID: <da39a415784e4bbabfa99596ffd5b565@hyperstone.com>
-References: <20230620104722.16465-1-marex@denx.de>
- <CAPDyKFqZ_r=gjpRm833ax4LwASCTGAuO0a0ABXo-kN8dtYje-Q@mail.gmail.com>
- <289cd876-e6e1-8610-bcb6-b0259c68fd89@denx.de>
- <CAPDyKFoLaYegCxw35XPNWuzg_F4M-UPho=+XweB+V4oCXaMxGA@mail.gmail.com>
-In-Reply-To: <CAPDyKFoLaYegCxw35XPNWuzg_F4M-UPho=+XweB+V4oCXaMxGA@mail.gmail.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
+        with ESMTP id S231952AbjFUM3C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 08:29:02 -0400
+Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FE671BE7
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jun 2023 05:28:55 -0700 (PDT)
+Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-57338656a8aso29803277b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jun 2023 05:28:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1687350534; x=1689942534;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1Q39nMGnI3Z37o9/PGFx4SVzWpw7yzYSmkHPJyL3xHU=;
+        b=Uhmb9Br1azo7QoDtlcTwn9KCsZ44d0QG41ZTdmvLBlS1PF1xVvIrp26SNUxqJGmRzX
+         ZZsX040v2YNqqwUvNIoQosYdaO1uyeRfqpg6sYuE/ZbCddAJeE2MXATsKNKCRSj5vcmw
+         EEIhMAw7C7vWbzb0eFzT5yjb2xZ4Z6dE48tU9f+RJkoYZMnuikTRFWSQME6AkqG9L5xP
+         CnMWAhOCob4wzjlONGCfgYh6K+2gOoNJLLP4birENUsHWoafIjGG8JVlS5ZRDWSrsEcS
+         IGBSyZONX6PequXjrgusDHmhJlfEyTicDyedtV8vathXI5bgXvPxWch63YEoAat/jUPg
+         f1Rw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687350534; x=1689942534;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=1Q39nMGnI3Z37o9/PGFx4SVzWpw7yzYSmkHPJyL3xHU=;
+        b=b8au5y/6BCO3484kpqata8DN6dj4GaReZXGQRkO/oOh6gyfV/ESRjcJsRtYIVFXHT3
+         eEDiswxyeIz2gwof4h0DWMVkjWr+zHM9kJvEuWR/HyPCLmn4qjSjtyDxl3zpyvr8MYYm
+         5KMIDUy9pIORy6xww8OqIVGOFP73zaknSo35g4dAaU72M/IlhSzxJ9CjCzGjASLtmI48
+         CYH0zhyUUzXszHl3/xfTYZQ4xy6+688qNHU+Mg7fr4D8HkKYBSsdUFVcEq0mEm8WSuKP
+         UI7LNIEyNsRBrS0s74VZckaoJxlMW3KEyzXVAlFq8Xt5sbhj7IVVVVvp2y/wAEf319U4
+         6/qg==
+X-Gm-Message-State: AC+VfDy5xG6obUke8B8fjfDx0/ea/KzcgrnwNwN7qiTFr4ZO50IkxJr7
+        CMUX58lDxNN+HJ6ec8gJo+Oj6WANYJWbHfuIS1Vfd8x4L5s4ovx9sXU=
+X-Google-Smtp-Source: ACHHUZ5vKZFGta92rFbLzBGUuYwkHuO3UCiZOlkyy+XKYb0kdqH0ckisrZ0NCLGHy6p4+jibqW0Ou74sufIvLLYIH2E=
+X-Received: by 2002:a25:bccf:0:b0:bc3:aa95:aedb with SMTP id
+ l15-20020a25bccf000000b00bc3aa95aedbmr10248004ybm.7.1687350534361; Wed, 21
+ Jun 2023 05:28:54 -0700 (PDT)
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27704.007
-X-TMASE-Result: 10--16.571200-10.000000
-X-TMASE-MatchedRID: UuaOI1zLN1joSitJVour/fHkpkyUphL9t7k6BDMlB1j+MGGu4g4Dva8X
-        I0sh2cEOvlI+Zzj6VqK5oEpue1AetQx6TQKWelWnmlaAItiONP1xXefgn/TNQ9bZhgeyVPQjVEb
-        W2lpTuVQ4TZp9PdZBMb6Um2sWRaGefmpY4OvTCPIvun/+8u/hs6++Humppw/G1F6O1lfh5suipF
-        NLeO72SCA/w+swsUFqpgolEZSL3/xlSYhlh8RfcvSG/+sPtZVkTSz0JdEAJbSY5nVpihxiwzcpX
-        pPCV0E3x3zfzJOsFTlhWlVNvgpQIjWYHgPBpNXWs/Hes76OTZAsvqYk4iz+9q5fd95aO5tJoOaQ
-        vO0H0Bat1kt6UTrAWz2Xsf5MVCB1t7DW3B48kkESMbwGTAneLwU5rQ/jDZbqhx0Lb8oFs7SUTGV
-        AhB5EbQ==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 60eeb6a1-e1f0-41fb-ab79-e630ab24b7dd-5-0-200-0
+References: <20230620091113.33393-1-ulf.hansson@linaro.org> <CACRpkdZfhPxFZhjiU9k5fjM9v9VOuZwu16eyn_qHL4Jm+CyhBg@mail.gmail.com>
+In-Reply-To: <CACRpkdZfhPxFZhjiU9k5fjM9v9VOuZwu16eyn_qHL4Jm+CyhBg@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 21 Jun 2023 14:28:18 +0200
+Message-ID: <CAPDyKFqXu9R=+281Ovt=ZR6VHYAv96LEvP+DgaZo2aHJB8_dgw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: Add support for SW busy-end timeouts
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>,
+        Yann Gautier <yann.gautier@foss.st.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+On Tue, 20 Jun 2023 at 21:27, Linus Walleij <linus.walleij@linaro.org> wrot=
+e:
+>
+> On Tue, Jun 20, 2023 at 11:11=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.=
+org> wrote:
+>
+> > The ux500 variant doesn't have a HW based timeout to use for busy-end I=
+RQs.
+> > To avoid hanging and waiting for the card to stop signaling busy, let's
+> > schedule a delayed work, according to the corresponding cmd->busy_timeo=
+ut
+> > for the command. If work gets to run, let's kick the IRQ handler to
+> > completed the currently running request/command.
+> >
+> > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> > Tested-by: Linus Walleij <linus.walleij@linaro.org>
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> Some experiments: I added a patch to print the offending command and
+> dev_err() all the timing bugs. The resulting log:
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gPHVs
-Zi5oYW5zc29uQGxpbmFyby5vcmc+DQo+IFNlbnQ6IE1pdHR3b2NoLCAyMS4gSnVuaSAyMDIzIDEx
-OjE5DQo+IFRvOiBNYXJlayBWYXN1dCA8bWFyZXhAZGVueC5kZT4NCj4gQ2M6IGxpbnV4LW1tY0B2
-Z2VyLmtlcm5lbC5vcmc7IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsN
-Cj4gQXZyaSBBbHRtYW4gPGF2cmkuYWx0bWFuQHdkYy5jb20+OyBCbyBMaXUgPGxpdWJvMDNAaW5z
-cHVyLmNvbT47IERlcmVuDQo+IFd1IDxkZXJlbi53dUBtZWRpYXRlay5jb20+OyBQaGlsaXBwIFph
-YmVsIDxwLnphYmVsQHBlbmd1dHJvbml4LmRlPjsNCj4gUGllcnJlIE9zc21hbiA8cGllcnJlQG9z
-c21hbi5ldT47IFJ1c3NlbGwgS2luZyA8bGludXhAYXJtbGludXgub3JnLnVrPjsNCj4gWWFuZyBZ
-aW5nbGlhbmcgPHlhbmd5aW5nbGlhbmdAaHVhd2VpLmNvbT4NCj4gU3ViamVjdDogUmU6IFtQQVRD
-SCAwMS8xMV0gbW1jOiBjb3JlOiBVc2UgQklUKCkgbWFjcm8NCj4gDQo+IENBVVRJT046IHRoaXMg
-bWFpbCBjb21lcyBmcm9tIGV4dGVybmFsIS9BQ0hUVU5HOiBEaWVzZSBNYWlsIGtvbW10IHZvbg0K
-PiBleHRlcm4hDQo+IA0KPiBPbiBXZWQsIDIxIEp1biAyMDIzIGF0IDA0OjM2LCBNYXJlayBWYXN1
-dCA8bWFyZXhAZGVueC5kZT4gd3JvdGU6DQo+ID4NCj4gPiBPbiA2LzIwLzIzIDEzOjE1LCBVbGYg
-SGFuc3NvbiB3cm90ZToNCj4gPiA+IE9uIFR1ZSwgMjAgSnVuIDIwMjMgYXQgMTI6NDcsIE1hcmVr
-IFZhc3V0IDxtYXJleEBkZW54LmRlPiB3cm90ZToNCj4gPiA+Pg0KPiA+ID4+IFVzZSB0aGUgQklU
-KG4pIG1hY3JvIGluc3RlYWQgb2YgKDE8PG4pLCBubyBmdW5jdGlvbmFsIGNoYW5nZS4NCj4gPiA+
-PiBSZWdleCAnc0AoMSBcPzw8IFw/XChbMC05QS1aX11cK1wpKUBCSVQoXDEpJyAuDQo+ID4gPj4N
-Cj4gPiA+PiBTaWduZWQtb2ZmLWJ5OiBNYXJlayBWYXN1dCA8bWFyZXhAZGVueC5kZT4NCj4gPiA+
-DQo+ID4gPiBJIGRvbid0IHRoaW5rIHRoZSBiZW5lZml0IG9mIHRoaXMgY2hhbmdlIGlzIHdvcnRo
-IGl0LiBGb3IgZXhhbXBsZSwNCj4gPiA+IGl0J3MgcXVpdGUgdXNlZnVsIHRvIHJ1biBhIGdpdCBi
-bGFtZSB0byBzZWUgdGhlIGhpc3Rvcnkgb2Ygd2hhdCBoYXMNCj4gPiA+IGhhcHBlbmVkLg0KPiA+
-DQo+ID4gVW5kZXJzdG9vZC4NCj4gPg0KPiA+IGdpdCBibGFtZSBkb2VzIGFsbG93IHlvdSB0byBz
-cGVjaWZ5IGVpdGhlciAtLXNpbmNlIG9yIHJldmlzaW9uIHJhbmdlIHRob3VnaC4NCj4gDQo+IFll
-cywgYnV0IEkgdGhpbmsgeW91IGdldCBteSBwb2ludC4NCj4gDQo+ID4NCj4gPiA+IFNvLCBzb3Jy
-eSwgYnV0IEkgYW0gbm90IGdvaW5nIHRvIHBpY2sgdGhpcyB1cCAtIG9yIGFueSBvdGhlciBzaW1p
-bGFyDQo+ID4gPiBjaGFuZ2VzLCBhdCBsZWFzdCBmb3IgdGhlIGNvcmUgbGF5ZXIuDQo+ID4NCj4g
-PiBJcyB0aGlzIGEgcG9saWN5IG9mIHRoZSBtbWMgc3Vic3lzdGVtIHRvIHJlamVjdCBhbGwgY29k
-ZSBjbGVhbiB1cHMgdGhlbiA/DQo+IA0KPiBPZiBjb3Vyc2UgaXQgaXNuJ3QsIEkgcmVndWxhcmx5
-IHBpY2sgdXAgY2xlYW4gdXBzLg0KPiANCj4gTXkgcG9pbnQgaGVyZSBpcyB0aGF0IHRoZSBjbGVh
-bi11cCBzaG91bGQgbWFrZSB0aGUgY29kZSBiZXR0ZXIsIGluIHNvbWUNCj4gd2F5LiBJIGRvbid0
-IHRoaW5rIGNvbnZlcnRpbmcgdG8gdGhlIEJJVCBtYWNybyBoZWxwcyBpbiB0aGlzIHJlZ2FyZC4g
-SXQgbWF5IGJlDQo+IHByZWZlcnJlZCB0byB1c2UgdGhlIEJJVCBtYWNybyBieSBzb21lIGFuZCBi
-eSBvdGhlcnMgbm90Lg0KDQpGV0lXIEkgYWdyZWUgd2l0aCBVZmZlIGhlcmUuDQpGb3IgaG9zdC8g
-ZmlsZXMsIHdoaWNoIGFyZSBtb3N0bHkgd3JpdHRlbiBieSBhIGhhbmRmdWwgZWFjaCwgaXQncyBz
-dGlsbCBhIG51aXNhbmNlLiAoT25lIGNvdWxkIGFyZ3VlIHRoYXQgdGhleSBhcmUgb2Z0ZW4gZ2l0
-IGJsYW1lZCBieSBwZW9wbGUgbm90IGZhbWlsaWFyIHdpdGggbW1jIHN1YnN5c3RlbSwgdGh1cyBn
-aXZpbmcgb2ZmIHRoZSB3cm9uZyBwaWN0dXJlKS4NCkZvciBtdWNoIG9mIHRoZSBjb3JlIGNvZGUg
-eW91IGFscmVhZHkgaGF2ZSB0byBnbyBtYW55IHJldmlzaW9ucyBiYWNrLCBJJ20gZ3JhdGVmdWwg
-Zm9yIGVhY2ggSSBkb24ndCBoYXZlIHRvLg0KU29tZXRoaW5nIGxpa2UgdGhlIG1xIHJld29yayB3
-b3VsZCBoYXZlIGJlZW4gYSBnb29kIG1vbWVudCB0byBkbyB0aGVzZSBtaW5vciBuaXRwaWNrcywg
-aWYgc29tZXRoaW5nIGxpa2UgdGhhdCBldmVyIGhhcHBlbnMgYWdhaW4sIGJ1dCBldmVuIHRoZW4g
-SSAgd291bGQgcHJlZmVyIGp1c3Qgb25lIGNvbW1pdCBpbmNsdWRpbmcgZXZlcnl0aGluZy4NCg0K
-DQpSZWdhcmRzLA0KQ2hyaXN0aWFuDQo=
+Interesting!
 
---NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e
-Content-Transfer-Encoding: BASE64
-Content-Type: application/pkcs7-signature; name=smime.p7s
-Content-Disposition: attachment; filename=smime.p7s
+>
+> /home/linus # dmesg |grep '80005000\|mmcblk2'
+> [    2.684814] mmci-pl18x 80005000.mmc: mmc2: PL180 manf 80 rev4 at
+> 0x80005000 irq 81,0 (pio)
+> [    2.695831] mmci-pl18x 80005000.mmc: DMA channels RX dma0chan4, TX dma=
+0chan5
+> [    3.410400] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [    3.434936] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [    3.451721] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [    3.489379] mmcblk2: mmc2:0001 M4G1YC 3.69 GiB
+> [    3.569000]  mmcblk2: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13
+> p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25
+> [    3.583526] mmcblk2boot0: mmc2:0001 M4G1YC 2.00 MiB
+> [    3.594726] mmcblk2boot1: mmc2:0001 M4G1YC 2.00 MiB
+> [    3.602233] mmcblk2rpmb: mmc2:0001 M4G1YC 128 KiB, chardev (246:0)
+> [    4.103057] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [    8.074188] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [    8.084350] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [    8.451446] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [    8.757934] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   10.211883] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   10.587646] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [   10.913604] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   10.924072] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   10.931671] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   12.023345] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [   12.357757] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [   14.087677] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   14.096191] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   15.124114] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   15.153411] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [   15.525024] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [   15.850036] mmci-pl18x 80005000.mmc: timeout waiting for busy IRQ (op =
+06)
+> [   18.250122] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [   18.988983] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   19.302612] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   19.320953] mmci-pl18x 80005000.mmc: no busy signalling in time (OP 06=
+)
+> [   19.333251] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+> [   21.851715] mmci-pl18x 80005000.mmc: lost busy status when waiting
+> for busy start IRQ (op 06)
+>
+> Always command 0x06, MMC_SWITCH. But this is also the *only*
+> command that resturns MMC_RSP_BUSY so it doesn't say very
+> much about the card in general.
 
-MIAGCSqGSIb3DQEHAqCAMIACAQExDTALBglghkgBZQMEAgEwCwYJKoZIhvcNAQcBoIIjdjCCB+sw
-ggXToAMCAQICFH/0ya9FbNqDP1mj8nwYIyzoDuazMA0GCSqGSIb3DQEBCwUAMFMxCzAJBgNVBAYT
-AkNIMRUwEwYDVQQKEwxTd2lzc1NpZ24gQUcxLTArBgNVBAMTJFN3aXNzU2lnbiBSU0EgU01JTUUg
-TENQIElDQSAyMDIxIC0gMjAeFw0yMjEyMTUxMDIwNTJaFw0yMzEyMTUxMDIwNTJaMEgxJTAjBgkq
-hkiG9w0BCQEWFmNsb2VobGVAaHlwZXJzdG9uZS5jb20xHzAdBgNVBAMMFmNsb2VobGVAaHlwZXJz
-dG9uZS5jb20wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDbQs7vFtBkf7fsjeH5TOTl
-4BCMTLaVKnaZGJ79z62g8ZSuOWg45uUJ6ti+RfIaS/gp8bAnHxrFDcYANbU2S/S19bwpqvKlOcV9
-3mKFefUB7SVTnhD1EDsk3I2SCG7Bz61gflKcRnalJG74AXn4E4MAaRlrWCoLkZIeCSY4lNrQD1pw
-70nmNRY41ICYzAVAb0RiP60audx4UP29YDXLUkrki5cpf3yt/eHS/KRjHiadq2uDnkGQI1oadBXa
-u4B0nCVmN68LKWb8Ak5aSROJarWOPHLQ+wuL78NS11Yer5Mnngad5/pccQY0MjkC7e80HBNaOAOt
-vrf2a7i8fFs278So63WAMt+XUM2rHMyIKsOEWqAHBY1GoAKT81NZ+5YMqfvUbK8SucXAy+UWZlzY
-VXLCtxrqHcxNbTApkjDtxalDMn9bm4qyQE/qxbkuGSPdqIj8v7AOCgb1K4I8hzwOIiCpEJMhbIvp
-bZK1GQ3BxE61FG599xyVZNf29aYdoUDIp4MwG3hcLHvYsRvSo6eHPYk8mr9SM+OhexuEdj3+St+Y
-5MSdDdkvRdspx0gXwmffJ6iCBjChXDHa/W1uSBvM5SlKKsYH7ufOC31CptKkEdM8lGi0PPlevh7U
-25ZI0QVH3EiLgBymsdqPc/7LifBKmp+xamIZAUVcfJqvdvTt+EkgEQIDAQABo4ICwDCCArwwIQYD
-VR0RBBowGIEWY2xvZWhsZUBoeXBlcnN0b25lLmNvbTAOBgNVHQ8BAf8EBAMCBLAwEwYDVR0lBAww
-CgYIKwYBBQUHAwQwHQYDVR0OBBYEFA+H5eoYx7aaS0slW7G0+hgo1ZqlMB8GA1UdIwQYMBaAFPpU
-wIKm/pa9BMdfn1+CDD3DlU9HMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwuc3dpc3Nz
-aWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MIGooIGloIGi
-hoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPUZBNTRDMDgyQTZGRTk2QkQwNEM3
-NUY5RjVGODIwQzNEQzM5NTRGNDclMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNhdGVSZXZv
-Y2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MGcGA1UdIARg
-MF4wUgYIYIV0AVkCAQswRjBEBggrBgEFBQcCARY4aHR0cHM6Ly9yZXBvc2l0b3J5LnN3aXNzc2ln
-bi5jb20vU3dpc3NTaWduX0NQU19TTUlNRS5wZGYwCAYGBACPegEDMIHGBggrBgEFBQcBAQSBuTCB
-tjBkBggrBgEFBQcwAoZYaHR0cDovL3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93
-bmxvYWQvRkE1NEMwODJBNkZFOTZCRDA0Qzc1RjlGNUY4MjBDM0RDMzk1NEY0NzBOBggrBgEFBQcw
-AYZCaHR0cDovL29jc3Auc3dpc3NzaWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1Rjgy
-MEMzREMzOTU0RjQ3MA0GCSqGSIb3DQEBCwUAA4ICAQCm+EvZobQCGMXgo2yeAD2ztkKXLEUmp7sp
-to3Unk6h7xNT0k1XsLxQAyF+Ny/Ftd6GAnq02cWyupmU8OfcSbWIi91QT13TUUholbqV1ELlgMpa
-slZ6qBAJLWLXQ8p/BWaGzpRBgJEsg4fc3XC5FRjysoZNOxZIwblQrQDD/cCTUAM43Ar086iZoM1B
-5mqNZil+LoCaXR4q8KS2jV3cTseKK/yIHpOl3NNAU7tC10pO9PNkJ9Dd6W/ghKBvhNiSUucEmm4e
-70b5cP3M0qJ1xdBkRhZ5BDFBPTNWq0pecXdRWILG0xz6neB8VCClW3tYYAriroYjXDZzBMVGfXKo
-0pxnwg2B/+ppYGaji2Sf3IBZKFVS5hRFolcsRAqfxmDYfmVJA1lQqOfr0f1jURksb/+IEG7aZNyG
-4iMIMFmDptXeEysz5ntJw5KAf0i6mJ2y/sEU9pzImRlvQc5kHV3GT9BdYs8GmSmdD8CI0S+/y/no
-Ny4l2SzVjkc+3d+fdWSJV6y4gR+3FmG8B5dTvJBHNs0YSsG2rQSEzDxcZNzhjKA9c70FS1U3m3n6
-bU2mErdOPQ4KtTu5v3D5RBKB2cgbdBI4B8gEHJhqxOdBO5E+Z8+FMqIWCITb1fN2NrgenRDYy4Bj
-tax6L8HT5mEY+mS8Lx08gqY01qcfbiD8uD+qTtmsLjCCB+swggXToAMCAQICFH/0ya9FbNqDP1mj
-8nwYIyzoDuazMA0GCSqGSIb3DQEBCwUAMFMxCzAJBgNVBAYTAkNIMRUwEwYDVQQKEwxTd2lzc1Np
-Z24gQUcxLTArBgNVBAMTJFN3aXNzU2lnbiBSU0EgU01JTUUgTENQIElDQSAyMDIxIC0gMjAeFw0y
-MjEyMTUxMDIwNTJaFw0yMzEyMTUxMDIwNTJaMEgxJTAjBgkqhkiG9w0BCQEWFmNsb2VobGVAaHlw
-ZXJzdG9uZS5jb20xHzAdBgNVBAMMFmNsb2VobGVAaHlwZXJzdG9uZS5jb20wggIiMA0GCSqGSIb3
-DQEBAQUAA4ICDwAwggIKAoICAQDbQs7vFtBkf7fsjeH5TOTl4BCMTLaVKnaZGJ79z62g8ZSuOWg4
-5uUJ6ti+RfIaS/gp8bAnHxrFDcYANbU2S/S19bwpqvKlOcV93mKFefUB7SVTnhD1EDsk3I2SCG7B
-z61gflKcRnalJG74AXn4E4MAaRlrWCoLkZIeCSY4lNrQD1pw70nmNRY41ICYzAVAb0RiP60audx4
-UP29YDXLUkrki5cpf3yt/eHS/KRjHiadq2uDnkGQI1oadBXau4B0nCVmN68LKWb8Ak5aSROJarWO
-PHLQ+wuL78NS11Yer5Mnngad5/pccQY0MjkC7e80HBNaOAOtvrf2a7i8fFs278So63WAMt+XUM2r
-HMyIKsOEWqAHBY1GoAKT81NZ+5YMqfvUbK8SucXAy+UWZlzYVXLCtxrqHcxNbTApkjDtxalDMn9b
-m4qyQE/qxbkuGSPdqIj8v7AOCgb1K4I8hzwOIiCpEJMhbIvpbZK1GQ3BxE61FG599xyVZNf29aYd
-oUDIp4MwG3hcLHvYsRvSo6eHPYk8mr9SM+OhexuEdj3+St+Y5MSdDdkvRdspx0gXwmffJ6iCBjCh
-XDHa/W1uSBvM5SlKKsYH7ufOC31CptKkEdM8lGi0PPlevh7U25ZI0QVH3EiLgBymsdqPc/7LifBK
-mp+xamIZAUVcfJqvdvTt+EkgEQIDAQABo4ICwDCCArwwIQYDVR0RBBowGIEWY2xvZWhsZUBoeXBl
-cnN0b25lLmNvbTAOBgNVHQ8BAf8EBAMCBLAwEwYDVR0lBAwwCgYIKwYBBQUHAwQwHQYDVR0OBBYE
-FA+H5eoYx7aaS0slW7G0+hgo1ZqlMB8GA1UdIwQYMBaAFPpUwIKm/pa9BMdfn1+CDD3DlU9HMIH/
-BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwuc3dpc3NzaWduLm5ldC9GQTU0QzA4MkE2RkU5
-NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MIGooIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5z
-d2lzc3NpZ24ubmV0L0NOPUZBNTRDMDgyQTZGRTk2QkQwNEM3NUY5RjVGODIwQzNEQzM5NTRGNDcl
-MkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVj
-dENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MGcGA1UdIARgMF4wUgYIYIV0AVkCAQswRjBEBggr
-BgEFBQcCARY4aHR0cHM6Ly9yZXBvc2l0b3J5LnN3aXNzc2lnbi5jb20vU3dpc3NTaWduX0NQU19T
-TUlNRS5wZGYwCAYGBACPegEDMIHGBggrBgEFBQcBAQSBuTCBtjBkBggrBgEFBQcwAoZYaHR0cDov
-L3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93bmxvYWQvRkE1NEMwODJBNkZFOTZC
-RDA0Qzc1RjlGNUY4MjBDM0RDMzk1NEY0NzBOBggrBgEFBQcwAYZCaHR0cDovL29jc3Auc3dpc3Nz
-aWduLm5ldC9GQTU0QzA4MkE2RkU5NkJEMDRDNzVGOUY1RjgyMEMzREMzOTU0RjQ3MA0GCSqGSIb3
-DQEBCwUAA4ICAQCm+EvZobQCGMXgo2yeAD2ztkKXLEUmp7spto3Unk6h7xNT0k1XsLxQAyF+Ny/F
-td6GAnq02cWyupmU8OfcSbWIi91QT13TUUholbqV1ELlgMpaslZ6qBAJLWLXQ8p/BWaGzpRBgJEs
-g4fc3XC5FRjysoZNOxZIwblQrQDD/cCTUAM43Ar086iZoM1B5mqNZil+LoCaXR4q8KS2jV3cTseK
-K/yIHpOl3NNAU7tC10pO9PNkJ9Dd6W/ghKBvhNiSUucEmm4e70b5cP3M0qJ1xdBkRhZ5BDFBPTNW
-q0pecXdRWILG0xz6neB8VCClW3tYYAriroYjXDZzBMVGfXKo0pxnwg2B/+ppYGaji2Sf3IBZKFVS
-5hRFolcsRAqfxmDYfmVJA1lQqOfr0f1jURksb/+IEG7aZNyG4iMIMFmDptXeEysz5ntJw5KAf0i6
-mJ2y/sEU9pzImRlvQc5kHV3GT9BdYs8GmSmdD8CI0S+/y/noNy4l2SzVjkc+3d+fdWSJV6y4gR+3
-FmG8B5dTvJBHNs0YSsG2rQSEzDxcZNzhjKA9c70FS1U3m3n6bU2mErdOPQ4KtTu5v3D5RBKB2cgb
-dBI4B8gEHJhqxOdBO5E+Z8+FMqIWCITb1fN2NrgenRDYy4Bjtax6L8HT5mEY+mS8Lx08gqY01qcf
-biD8uD+qTtmsLjCCB0cwggUvoAMCAQICDyxaqdlU/bKrlq0Xtl+M9DANBgkqhkiG9w0BAQsFADBT
-MQswCQYDVQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24g
-UlNBIFNNSU1FIFJvb3QgQ0EgMjAyMSAtIDEwHhcNMjEwODA0MTIxMjU5WhcNMzYwNzMxMTIxMjU5
-WjBTMQswCQYDVQQGEwJDSDEVMBMGA1UEChMMU3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1Np
-Z24gUlNBIFNNSU1FIExDUCBJQ0EgMjAyMSAtIDIwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIK
-AoICAQC9BRnI1A1xPgMDELSTFgDrzyPawAcju1E8OBLTQHXDcmN46wsneV+NVoip2X1ZQ9GIF3bj
-x0aLq9/iiKo9EsCdCO1BENfc70ngvzFS1oOdmfzymiKAZlWsEJSQocyLldDWSF03KN8a7Rgl30PD
-IURBvBWlpIOCxiCAUgKogGYBvm7ZRZZ10BcgfGU/ga19jlhGI9xSJ9pCPjvcWPJKpiSbG+s0CR/M
-4cXaQPO9ZEFYxIn7g4rNIYBYZwhsIjcPn5OtC9/7p/3F/2qKA9gfvK/CyQ14fPVOPVJaPECufMs4
-+tRhh2edpGx4irQTaVV85iVU3wjPpi84TIgUlRwqUWloj158A5r7pGVMcI++Slyq3rudu319WjiC
-57kAikVHryC+gwC4SUAYn0CqX//cApx+99nmLWAmWnGdeaRmHMJCmJfXy3Dji8SnVuggcXbErnkr
-5sms1kyp5wiDR7YVIkdTuiJHpF2d7WZ/d5EOT7KBdS/k67/XgTrUwkWwKR2Vm/00b0Zpz3N4Hg9F
-TrBP53A2uci2e7Lf3vR8hFJijhu08zGuClY7Khn+0BBU50YSOE2BnYWsBOe36ddw2470cM/iGtMM
-aTXnA0rg4MsX9TP0vX4iQpWZMwqNwqcYk0ewMqy4RDAY7xH4GXNkRGT2nJngURbQS1wgScF1NMzR
-W+rRrQIDAQABo4ICFjCCAhIwDgYDVR0PAQH/BAQDAgEGMBMGA1UdJQQMMAoGCCsGAQUFBwMEMBIG
-A1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFPpUwIKm/pa9BMdfn1+CDD3DlU9HMB8GA1UdIwQY
-MBaAFAkMvyqiHQQkDLL5QApBws9acqqAMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6Ly9jcmwu
-c3dpc3NzaWduLm5ldC8wOTBDQkYyQUEyMUQwNDI0MENCMkY5NDAwQTQxQzJDRjVBNzJBQTgwMIGo
-oIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPTA5MENCRjJBQTIxRDA0
-MjQwQ0IyRjk0MDBBNDFDMkNGNUE3MkFBODAlMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2VydGlmaWNh
-dGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBvaW50MB8G
-A1UdIAQYMBYwCgYIYIV0AVkCAQswCAYGBACPegEDMHQGCCsGAQUFBwEBBGgwZjBkBggrBgEFBQcw
-AoZYaHR0cDovL3N3aXNzc2lnbi5uZXQvY2dpLWJpbi9hdXRob3JpdHkvZG93bmxvYWQvMDkwQ0JG
-MkFBMjFEMDQyNDBDQjJGOTQwMEE0MUMyQ0Y1QTcyQUE4MDANBgkqhkiG9w0BAQsFAAOCAgEABw8e
-lwSFegmW7IGpGTOPwtOC2tzTwCQiRA2VC/EWGKckk8A3F9Q+M2A8lUYVlRKJt31pAezcXaP6OFW0
-3IPiiXU70QA598nGqUxzzjn8rpFhZgCj6bi8MJd5MH5C2RRYFrhiRefx6pp42LLc0AFIF1ZqkaYa
-1vz0EgTOL9XE3inXe39twPLoe3rc/f8gfpem/s1NIJk2azwyxZn226YSrSedvxhe7LiN6gOqvU7h
-xpC8bXaiIYVy7DISXwEt902Gc+M4QbhUf8yQ+PiK3QexGIWiusOO46cn673dG/1KCzma/1Llp9Dx
-aeUHlxjjeeer/2WtWWZNFhoInrxpcK58odaJZRMZQJwNljMb66gGb5OpeanN0su93/S9GrZgJqN6
-spp171azfMuQzVqj9gxFy66yIdlrhZcba/QixC2eAJxm5fM/PZg9WXZ737G8jAbsuoREH1bxsglL
-zxAIwboY7uVwIim6ZcieKb6Yy4n6TzperNmhU5UHiUZSJzIQ/qu9B14cfh0CAJo19p7fRvyeF/p7
-INDH0ceTVTq5sF8kFtMM1bz+0/sWOTNqdi8kGO7I7iouC3+V4DDx4F1sGcaigFXtUpLmol5Lss+i
-9NXGgWFcPFreexoLaBdckDJgBk6zOHKVYwZdnrg2CovIev/uumK0WyCa7ix1+SDcsd2PXxIwggaL
-MIIEc6ADAgECAhAA3kxVIPbc9AIbDxFU940QMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNVBAYTAkNI
-MRUwEwYDVQQKEwxTd2lzc1NpZ24gQUcxHzAdBgNVBAMTFlN3aXNzU2lnbiBHb2xkIENBIC0gRzIw
-HhcNMjEwODAzMTMxNDU1WhcNMzYxMDIzMTMxNDU1WjBTMQswCQYDVQQGEwJDSDEVMBMGA1UEChMM
-U3dpc3NTaWduIEFHMS0wKwYDVQQDEyRTd2lzc1NpZ24gUlNBIFNNSU1FIFJvb3QgQ0EgMjAyMSAt
-IDEwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDWsri0OI8mujfIASNFFn6+ZDiGcmZh
-WI0kilmzDKEqq367hXxlZnCn6SLb7rsy+quxhj+rSIG4q/Mq3TfHLgv2q99VrVQgFDq3iURt5+g/
-roghGI5HVpUAyexlblZHFE2tLibS1ItsyvMzLfnwm463hiaB5wueiwx8Bac8evnwhZCciWc5dRGx
-Y7DUIyx93B8rdu0ErboRyQdJDeMoDy4RFNK2sv94uP5aU4AkrAtIuk4yMVHsqv67RCwL1/l9q43a
-bKsI3fNBPY/1QUFcxsxRyg5EH7dqgHZVaVHmTP0XgPuzVO6wSh0zkwZ5uWERrOQOW7Pd4LElXLfU
-0830e54BVCuCkKHhykON8EGkHAfA1jMWo0VGj4RMaf2TV53T5W/LJAwxLQOYwgA5RHkigW3k6vwL
-ZCZu/MqeGgNE7X9NTekRsna9hn17u1Q/UZBHx4v4/04s8ggwjBnBLEc1nr2rU6Qirp8MIRkpvZ6b
-z4TcjtE1SyIQgRti7cBL0yuQIkkfLSGukcXf8dZBVHIO3so0EPXJmp3VXBbkzSWxx6hxRqz4U4UX
-iaskGjgYMiRz6VWu+IBjA2+EsN+glLWpU/CLavVUeeX/W5yibyLh/0ApZWxvjkhpMT6BGzuLWPpb
-LztrfWsk8LzyjeWa5qx4y9iCKwAXHXlqCS7WbnbPMPvbWQIDAQABo4IBZzCCAWMwDwYDVR0TAQH/
-BAUwAwEB/zAdBgNVHQ4EFgQUCQy/KqIdBCQMsvlACkHCz1pyqoAwHwYDVR0jBBgwFoAUWyV7lqRl
-UX64OfPAeGZe6Drn8O4wDgYDVR0PAQH/BAQDAgEGMIH/BgNVHR8EgfcwgfQwR6BFoEOGQWh0dHA6
-Ly9jcmwuc3dpc3NzaWduLm5ldC81QjI1N0I5NkE0NjU1MTdFQjgzOUYzQzA3ODY2NUVFODNBRTdG
-MEVFMIGooIGloIGihoGfbGRhcDovL2RpcmVjdG9yeS5zd2lzc3NpZ24ubmV0L0NOPTVCMjU3Qjk2
-QTQ2NTUxN0VCODM5RjNDMDc4NjY1RUU4M0FFN0YwRUUlMkNPPVN3aXNzU2lnbiUyQ0M9Q0g/Y2Vy
-dGlmaWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1dGlvblBv
-aW50MA0GCSqGSIb3DQEBCwUAA4ICAQAC+Opd0IrMrAgDNlRm/wophuFUgywz6MdsrhCpVIF/Ki2I
-Jq2mqDQoDxkGqZ3iApUEMmRMC8r5433DE1vol0COd+PjgoGHrQFgB8PF4SD9tzCXProccXSLX02n
-sf5OfAl4eodf8ayhJRGXxywRnJDqchY9AjWpu+Uj2B9SQLfQjl3aI7wz6TL9uHWfQ749V0uHYd7t
-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
---NoSpamProxy_32349cd5-7480-4d97-99c6-9d900ada1c9e--
+We have other commands that have R1B responses.
 
+For example, open-ended I/O writes that are completed with CMD12 or
+the erase/discard command. Not sure which ones that are easiest for
+you to test with, we can chat more about this offlist.
+
+>
+> We have speculated that the card is maybe operating out of spec, such as
+> holding DAT0 high for too short time (not across enough MCLK cycles)
+> or similar when indicating busy for short timespans.
+
+By looking at the above log, it seems like the card does signal busy,
+at least occasionally.
+
+1) The print "no busy signalling in time", isn't so worrying to me. It
+probably means that the card doesn't need to signal busy, as it's
+internal operation is completed. To be absolutely sure, we could
+extend the polling loop to more retries, just to test.
+
+2) The print "lost busy status when waiting for busy start IRQ" is a
+bit harder to understand. However, my guess is that the mmci
+controller does raise an IRQ, to signal a *changed* busy signal state,
+which is the most important thing. When we end up reading the busy
+status bit to manage the IRQ, we find that the card has stopped
+signalling busy. That seems perfectly fine to me. So, maybe we don't
+get the start IRQ (as that state wasn't discovered) but only the end
+IRQ, so to say.
+
+More importantly, the busy timeout work never gets to run, which
+indicates that we are no longer hanging and waiting for an IRQ to be
+raised. Is that correct?
+
+>
+> I tested on the other problematic phone, Kyle, and the log is identical
+> (it has the same eMMC card, M4G1YC.)
+
+Okay!
+
+>
+> Yours,
+> Linus Walleij
+
+Kind regards
+Uffe
