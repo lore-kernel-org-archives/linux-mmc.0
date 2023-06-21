@@ -2,178 +2,129 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BD80EB64D7
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 13:45:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 917B7EB64DC
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jun 2023 20:42:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229839AbjFUNpO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jun 2023 09:45:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40626 "EHLO
+        id S230074AbjFUUmy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jun 2023 16:42:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229854AbjFUNpN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 09:45:13 -0400
-Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6C8C1BC7
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jun 2023 06:44:51 -0700 (PDT)
-Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-57338656a8aso30639747b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jun 2023 06:44:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687355091; x=1689947091;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=B6Y+4x5cfJFeIyV3JmtXZ9y2zrl5ML3C/rCwWA5caOA=;
-        b=egdBV8LQg30eFKc8nDXoPtkM8vpl5u/HOezAyIlTH8Kgdw6eIF9bb+XX7B1l+KMkw5
-         66PfVhRzyg2JqQTxfJ4sj3wZ+rM1Ge3ff0Br2EQ5dumFuqfdG0bJpO581spXvyquFOsa
-         pgLjpKGUDhjXTJSY03B9uki8EdQSZxGJD8A/fyxo0kgb46FBJ/VG1I/K3sGtNWA8atMA
-         knPZUXgzarYZ6e/eBb6bbbPohJk1W7BJydabVjYWhFQzxQ5PBfDenqfQdjzH/xaIfsPk
-         tdntz2GI38GREB+mWQzG2O2s7Y1ZlIdpj9XjEruZ1Q2EZV7VMqqg8pzKoDQFBaPVUfWH
-         yB4g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687355091; x=1689947091;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=B6Y+4x5cfJFeIyV3JmtXZ9y2zrl5ML3C/rCwWA5caOA=;
-        b=VSjOqx4eedXPW3edq7hN/h2M6Qa5AK2hdF+DXf1Td7/DMHzGqULjwnIwXSEexdJ1LP
-         ySgp/caUwqj48xo2X65H/H0pX349j77knoAaB50uG4X65aA3S3ZPmIutaNS0v5gEv2cd
-         bJff5Mwnb1Ulq8Ent4TCcKHWQ0a1CZ4TXPtunc7/Lbi7IvkefxbLVTqepXXWFsy9JQes
-         kcxmahd1K+51RFMvPgWND64c4SsxyvHf08X903SQk+WifrpCd8kaTxVcHh1DA2uJOVe3
-         hjL55WqsYSOeDxhLmAIm0kNPjiRUpfT5KeS0fqatFN9NBCWu9li+dvxKPkLHAE+h2dfP
-         KgQA==
-X-Gm-Message-State: AC+VfDztBGtiKF0bgvoMdGFCi3K+4l9A4ZRECBYBS2yiPNlH/x3fwth0
-        WjcTzgq4aVOWhzfS4RuafDK/FTPyCDvpr3qTZ0S1cQ==
-X-Google-Smtp-Source: ACHHUZ7eXgV2xsNLYgHzVckH9o2+oO+AFIWHMnFeLSgvSgMwWGHhRSVEfq8l+dVXwrRUx/EinzNi2nm33U55N8+Cm7c=
-X-Received: by 2002:a81:4e11:0:b0:56c:f38a:163d with SMTP id
- c17-20020a814e11000000b0056cf38a163dmr13751743ywb.8.1687355090812; Wed, 21
- Jun 2023 06:44:50 -0700 (PDT)
+        with ESMTP id S229521AbjFUUmx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jun 2023 16:42:53 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2898B10D2;
+        Wed, 21 Jun 2023 13:42:52 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 9BC796152D;
+        Wed, 21 Jun 2023 20:42:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 76AD5C433C0;
+        Wed, 21 Jun 2023 20:42:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1687380171;
+        bh=6mOvkf1tp0MaXc78Yx6yn5b2RwNgMbnASYqk7mMraHY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=oHsypfLla1qIozwVaf6pPL0hFaTxPr2r08Af/ATLBEFwIkLbb3itX5nmgUuQhbeJv
+         OTSTwEEUkdUIMZb+9uiXI5Emjr6BtAWYPLakMixJWhLffDBqYXJ791CQG3UUhrm/5y
+         UZ64WWzHjHE9RefbopX4YrwBD2E0qvXWGwDv7xrR8l9ksERieQ568NgJaIS/5gh2GW
+         XSXTSBh+pWS3TZPuNaw08r8fVipvUrhtB+PewlTA2IUYSq97IoqfufVasnVHOZ7j/6
+         RKElVCwr9XwkeRv4w97pBJ8UXvybN6BWn7RLyzr56B+YWrrJYOgDOn7ByXvnsRCm+v
+         Vfjqb/GBHjWKg==
+Date:   Wed, 21 Jun 2023 21:42:43 +0100
+From:   Conor Dooley <conor@kernel.org>
+To:     Oleksij Rempel <o.rempel@pengutronix.de>
+Cc:     Abel Vesa <abelvesa@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
+        Peng Fan <peng.fan@nxp.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Michael Trimarchi <michael@amarulasolutions.com>,
+        Mark Brown <broonie@kernel.org>,
+        Dario Binacchi <dario.binacchi@amarulasolutions.com>,
+        Marek Vasut <marex@denx.de>, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v2 1/5] dt-bindings: mmc: fsl-imx-esdhc: Add imx6ul
+ support
+Message-ID: <20230621-data-smirk-36bba6f815ad@spud>
+References: <20230621093245.78130-1-o.rempel@pengutronix.de>
+ <20230621093245.78130-2-o.rempel@pengutronix.de>
 MIME-Version: 1.0
-References: <20230621100151.6329-1-victorshihgli@gmail.com> <20230621100151.6329-2-victorshihgli@gmail.com>
-In-Reply-To: <20230621100151.6329-2-victorshihgli@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 21 Jun 2023 15:44:14 +0200
-Message-ID: <CAPDyKFq5YzwAGGKi_4=MVrQad9kM-i0xoQ5XhijDNuWDPOVFFA@mail.gmail.com>
-Subject: Re: [PATCH V8 01/23] mmc: core: Cleanup printing of speed mode at
- card insertion
-To:     Victor Shih <victorshihgli@gmail.com>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="J8TbsuUfMTbP6whp"
+Content-Disposition: inline
+In-Reply-To: <20230621093245.78130-2-o.rempel@pengutronix.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 21 Jun 2023 at 12:02, Victor Shih <victorshihgli@gmail.com> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Please do not claim authorship of patches that haven't been authored
-by you. Of course, there is a balance, if you need to make bigger
-modifications, then you deserve to claim the authorship, but that
-isn't the case here I think.
+--J8TbsuUfMTbP6whp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This applies to a couple of more patches in the series, I will not
-comment on them in this regard, but leave that to you to look over at
-the next submission.
+On Wed, Jun 21, 2023 at 11:32:41AM +0200, Oleksij Rempel wrote:
+> Add the 'fsl,imx6ul-usdhc' value to the compatible properties list in
+> the fsl-imx-esdhc.yaml file. This is required to match the compatible
+> strings present in the 'mmc@2190000' node of 'imx6ul-prti6g.dtb'. This
+> commit addresses the following dtbs_check warning:
+> imx6ul-prti6g.dtb:0:0: /soc/bus@2100000/mmc@2190000: failed to match any =
+schema with compatible: ['fsl,imx6ul-usdhc', 'fsl,imx6sx-usdhc']
+>=20
+> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 
->
-> The current print of the bus speed mode in mmc_add_card() has grown over
-> the years and is now difficult to parse. Let's clean up the code and also
-> take the opportunity to properly announce "DDR" for eMMCs as
-> "high speed DDR", which is according to the eMMC spec.
->
-> Updates in V8:
->  - Modify commit message.
->
-> Updates in V7:
->  - Remove unnecessary parentheses.
->
-> Updates in V6:
->  - Adjust the position of matching brackets.
+Seems harmless...
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
 
-I appreciate the version history per patch. However, this doesn't
-belong in the commit message.
+Cheers,
+Conor.
 
-Instead you have to manually edit each formatted patch to add this,
-exactly where see below.
-
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 > ---
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/D=
+ocumentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index fbfd822b92707..82eb7a24c8578 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -42,6 +42,7 @@ properties:
+>            - enum:
+>                - fsl,imx6sll-usdhc
+>                - fsl,imx6ull-usdhc
+> +              - fsl,imx6ul-usdhc
+>            - const: fsl,imx6sx-usdhc
+>        - items:
+>            - const: fsl,imx7d-usdhc
+> --=20
+> 2.39.2
+>=20
 
-After this line you can add comments and version history for the
-patch. In this way, it will not be a part of the commit message when
-applying.
+--J8TbsuUfMTbP6whp
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Complete the section by adding three new dashes and a newline - this
-keeps the patch format correct.
+-----BEGIN PGP SIGNATURE-----
 
----
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZJNgwwAKCRB4tDGHoIJi
+0i1RAQCBFDAYqoL3pPW8t2IB/dJd8QozfffhqAJ1rwSqKOZ1OAD9GX1AAM2VhBky
+PxulAKMfPnn876al0CLlGePgEVXE+AI=
+=ouzy
+-----END PGP SIGNATURE-----
 
->  drivers/mmc/core/bus.c | 36 ++++++++++++++++++++----------------
->  1 file changed, 20 insertions(+), 16 deletions(-)
->
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 2c3074a605fc..cf32cf135781 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -299,6 +299,7 @@ int mmc_add_card(struct mmc_card *card)
->  {
->         int ret;
->         const char *type;
-> +       const char *speed_mode = "";
->         const char *uhs_bus_speed_mode = "";
->         static const char *const uhs_speeds[] = {
->                 [UHS_SDR12_BUS_SPEED] = "SDR12 ",
-> @@ -337,27 +338,30 @@ int mmc_add_card(struct mmc_card *card)
->                 break;
->         }
->
-> +       if (mmc_card_hs(card))
-> +               speed_mode = "high speed ";
-> +       else if (mmc_card_uhs(card))
-> +               speed_mode = "ultra high speed ";
-> +       else if (mmc_card_ddr52(card))
-> +               speed_mode = "high speed DDR ";
-> +       else if (mmc_card_hs200(card))
-> +               speed_mode = "HS200 ";
-> +       else if (mmc_card_hs400es(card))
-> +               speed_mode = "HS400 Enhanced strobe ";
-> +       else if (mmc_card_hs400(card))
-> +               speed_mode = "HS400 ";
-> +
->         if (mmc_card_uhs(card) &&
->                 (card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
->                 uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
->
-> -       if (mmc_host_is_spi(card->host)) {
-> -               pr_info("%s: new %s%s%s card on SPI\n",
-> -                       mmc_hostname(card->host),
-> -                       mmc_card_hs(card) ? "high speed " : "",
-> -                       mmc_card_ddr52(card) ? "DDR " : "",
-> -                       type);
-> -       } else {
-> -               pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
-> -                       mmc_hostname(card->host),
-> -                       mmc_card_uhs(card) ? "ultra high speed " :
-> -                       (mmc_card_hs(card) ? "high speed " : ""),
-> -                       mmc_card_hs400(card) ? "HS400 " :
-> -                       (mmc_card_hs200(card) ? "HS200 " : ""),
-> -                       mmc_card_hs400es(card) ? "Enhanced strobe " : "",
-> -                       mmc_card_ddr52(card) ? "DDR " : "",
-> +       if (mmc_host_is_spi(card->host))
-> +               pr_info("%s: new %s%s card on SPI\n",
-> +                       mmc_hostname(card->host), speed_mode, type);
-> +       else
-> +               pr_info("%s: new %s%s%s card at address %04x\n",
-> +                       mmc_hostname(card->host), speed_mode,
->                         uhs_bus_speed_mode, type, card->rca);
-> -       }
->
->         mmc_add_card_debugfs(card);
->         card->dev.of_node = mmc_of_find_child_device(card->host, 0);
-> --
-> 2.25.1
->
+--J8TbsuUfMTbP6whp--
