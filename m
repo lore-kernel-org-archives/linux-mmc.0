@@ -2,117 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C631EEB64DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 09:22:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECC35EB64D8
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 09:36:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232285AbjFVJWO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Jun 2023 05:22:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60912 "EHLO
+        id S230456AbjFVJgj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Jun 2023 05:36:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229908AbjFVJVn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 05:21:43 -0400
-Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A09365B3
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:12:11 -0700 (PDT)
-Received: by mail-vk1-xa29.google.com with SMTP id 71dfb90a1353d-4717a1d07fdso1786025e0c.1
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:12:11 -0700 (PDT)
+        with ESMTP id S230379AbjFVJfo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 05:35:44 -0400
+Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECB1E2D46
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:28:52 -0700 (PDT)
+Received: by mail-wr1-x432.google.com with SMTP id ffacd0b85a97d-3113675d582so4457534f8f.3
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:28:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687425130; x=1690017130;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=LAUOQODzdCeUTcrDvoPMBORZt9+ufR2Q6MlQ8V9HqcA=;
-        b=mXPKXfCQ5AqfGGN7eLis7zio/LUO4dolZMn9tGoBWo9lQ/0YSYOantIpV+5Aknn1uh
-         3J4AAW5FwrtrCjPqExngKvRZGdsEMMnXiWLjxSlxcZ4Z4hrIKAqnf3JGXGjDgW9P3bL1
-         pFNgcMjEIcXauA2TF31JXquLUpbL+xqhM2fQ9hmTnukCcFG1Mle2eakMHU8X4YmkO6LO
-         bAhMo5m/gWYLFCsmeuIdoTLd4aVKzBQXkX6znVpbHzzsNtQEyUyVQaAV7jfwZ4Hpde4C
-         pcPlmHg9x/K3XVnBI0Byou5ihxHLvg+InoKTxxb2YQ/iI8WDHTP84M7mjcSJauXDobPV
-         PPNA==
+        d=linaro.org; s=google; t=1687426131; x=1690018131;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=a8I/X4DIkumE0o217fuyqlb4csZOvMDW/UlSifsV2GU=;
+        b=bYzxCtFqXPloCjCKlMFQWGOz34JRH3wCnPD3AX38cFSLTi6Cm/moRaAzr/P9UvW8yK
+         T1UlfaUEMwKRoiHsYP2AP1eNfAXLJpOw6fuiK9KovJ6TTbshtiNVn6qpKJwQbplR7OOg
+         cx6Tisg37W53vmqv5m1Z8lPI4korclfp1prU7mkLZhjPR9+rdDrp6MRwgW2Ncm7RM0tH
+         EKlfS2nMwEz3mW4p3CO9SV7SgitOCSSmw0Hb3yAyfNuhyh4ElkPZLngym63CKrx/nmnW
+         QWcMXIrvh+PraUYucMC8xzhBhv0/T9lnF2rJXI9ik824sFmQmQnBhTTJQeTPzfNemHg1
+         WgqA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687425130; x=1690017130;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=LAUOQODzdCeUTcrDvoPMBORZt9+ufR2Q6MlQ8V9HqcA=;
-        b=PWV8nvlzBW35NC0XL2fLb5XQyeyyJTRbxF8LT/lXtKJr9BPXoEI2eIvUlwngvsLC6F
-         fg0qSTAut5/7vw8fe90VXBd2i4qUi19bPYrsBe78I0NC/vl3HN9x+GK2mlnmZO6WSALO
-         JqTyTn3vdv9Akew3nlF3N9TLt3opr0469huv/gPWEyoLKurxP/BUWPk3OzPr6Nn8w1PG
-         m5OygSHmZu8BHzwPXPKPCdgsfhvDEv41g5R/pVDBSR7QQr16H+koWZLdZVZAzAapaMyK
-         tikUBDLiR5H7LFGoac0516RGVha53eLpJ450b8bxtN2DEAlzbNVYodvbMj1UmexMUhQJ
-         jIpQ==
-X-Gm-Message-State: AC+VfDwWqRFyUzBTKUOVXhRYaS//yE9akRlFoG8GB9niDCCsN25nnGXQ
-        YPwWDVGG6ub9DXAYJZvETq3Cg3y9aj8t7loHdosGmg==
-X-Google-Smtp-Source: ACHHUZ7Jjoae1j3de5QaDkn+NVntLKV6op75KhbpCaUpXW852Raha07Xg8nXWZ9iLhTkIRdAW16BPNsvDSHUyHVrFYM=
-X-Received: by 2002:a1f:4801:0:b0:471:cfa1:5065 with SMTP id
- v1-20020a1f4801000000b00471cfa15065mr4808788vka.3.1687425130628; Thu, 22 Jun
- 2023 02:12:10 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1687426131; x=1690018131;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=a8I/X4DIkumE0o217fuyqlb4csZOvMDW/UlSifsV2GU=;
+        b=Jby5X767ZtCltXGTTXogn8R+dehCj6YoMLee9S3mgf+dDyaTC2osprtGZ84R+ShrGm
+         mSTc/S1j89izgK/7FzZaPEthH1yYLD/vS1pwOmq4Xb4LeRc+OSaH/pL4zXIguT4LgK4j
+         vBz7XY3UUsmMX6seVM+V3wSCtczay1+g+zaxA0yZIs2v+QeXlHoATmS4IptRqxal6+z9
+         JJznSWeZiPtoWHxgKRyDYNuSSKKBE5Fq4L4xLgXe/AIoIm2J53UQ++eRqHenT9gAEx5K
+         NY6FLm++f8BRXfGPdMhIaSYVFsnglJTuwbmRldD0cmZeiDWyCoO1P3ZDvuWu3LbL7Ryz
+         Clyg==
+X-Gm-Message-State: AC+VfDw/opAvgCZVv656MkWogf94q2xWQ402110kg55OaDgdVAVvhg/w
+        h1eJ4CeGKyv+75q4U6joxDlfwA==
+X-Google-Smtp-Source: ACHHUZ4T77alv8uvZQD/zqnC6VfvSZmzxDS+DYzTGDKhKFLEX9r7QGKfu+W2jacagsaCQjaDDoaMnw==
+X-Received: by 2002:a5d:591c:0:b0:311:1a9d:98e with SMTP id v28-20020a5d591c000000b003111a9d098emr11415672wrd.58.1687426131213;
+        Thu, 22 Jun 2023 02:28:51 -0700 (PDT)
+Received: from [192.168.1.20] ([178.197.219.26])
+        by smtp.gmail.com with ESMTPSA id c11-20020a056000104b00b003063a92bbf5sm6641190wrx.70.2023.06.22.02.28.48
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 22 Jun 2023 02:28:50 -0700 (PDT)
+Message-ID: <35253eaa-78b0-8976-aaf4-8917331e7823@linaro.org>
+Date:   Thu, 22 Jun 2023 11:28:47 +0200
 MIME-Version: 1.0
-References: <20230621093245.78130-1-o.rempel@pengutronix.de> <20230621093245.78130-2-o.rempel@pengutronix.de>
-In-Reply-To: <20230621093245.78130-2-o.rempel@pengutronix.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 22 Jun 2023 11:11:33 +0200
-Message-ID: <CAPDyKFqYfuQNCTPiEM56jrzUBe2jevY+MuTOj6K-7OkpO0_daA@mail.gmail.com>
-Subject: Re: [PATCH v2 1/5] dt-bindings: mmc: fsl-imx-esdhc: Add imx6ul support
-To:     Oleksij Rempel <o.rempel@pengutronix.de>
-Cc:     Abel Vesa <abelvesa@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.12.0
+Subject: Re: [PATCH v7 1/3] dt-bindings: ufs: qcom: Add ICE phandle
+Content-Language: en-US
+To:     Abel Vesa <abel.vesa@linaro.org>
+Cc:     "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
         Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        kernel@pengutronix.de, Peng Fan <peng.fan@nxp.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Michael Trimarchi <michael@amarulasolutions.com>,
-        Mark Brown <broonie@kernel.org>,
-        Dario Binacchi <dario.binacchi@amarulasolutions.com>,
-        Marek Vasut <marex@denx.de>, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+References: <20230408214041.533749-1-abel.vesa@linaro.org>
+ <20230408214041.533749-2-abel.vesa@linaro.org>
+ <4aadaf24-11f6-5cc1-4fbd-addbef4f891b@linaro.org>
+ <yq1ilbgqoq6.fsf@ca-mkp.ca.oracle.com>
+ <80ca0da4-5243-9771-0c4c-62b956e97b2f@linaro.org>
+ <ZJPyGW2I4fHqFMRV@linaro.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <ZJPyGW2I4fHqFMRV@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 21 Jun 2023 at 11:32, Oleksij Rempel <o.rempel@pengutronix.de> wrote:
->
-> Add the 'fsl,imx6ul-usdhc' value to the compatible properties list in
-> the fsl-imx-esdhc.yaml file. This is required to match the compatible
-> strings present in the 'mmc@2190000' node of 'imx6ul-prti6g.dtb'. This
-> commit addresses the following dtbs_check warning:
-> imx6ul-prti6g.dtb:0:0: /soc/bus@2100000/mmc@2190000: failed to match any schema with compatible: ['fsl,imx6ul-usdhc', 'fsl,imx6sx-usdhc']
->
-> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+On 22/06/2023 09:02, Abel Vesa wrote:
+> On 23-06-22 08:07:51, Krzysztof Kozlowski wrote:
+>> On 22/06/2023 03:19, Martin K. Petersen wrote:
+>>>
+>>> Abel,
+>>>
+>>>> Un-reviewed. This is broken and was never tested. After applying this
+>>>> patch, I can see many new warnings in all DTBs (so it is easy to spot
+>>>> that it was not actually tested).
+>>>>
+>>>> Your probably meant here:
+>>>>   if:
+>>>>     required:
+>>>
+>>> Please provide a fix for this. I don't want to rebase this late in the
+>>> cycle.
+>>
+>> AFAIK, this was not applied. At least as of next 20210621 and I
+>> commented on this few days ago. Anything changed here?
+> 
+> Check this one:
+> https://lore.kernel.org/all/yq1a5x1wl4g.fsf@ca-mkp.ca.oracle.com/
+> 
 
-Applied for next, thanks!
+So staging tree is not in next? If it cannot be rebased "that late in
+the cycle", this means it should be in the next. :/
 
-Kind regards
-Uffe
+Best regards,
+Krzysztof
 
-
-> ---
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> index fbfd822b92707..82eb7a24c8578 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> @@ -42,6 +42,7 @@ properties:
->            - enum:
->                - fsl,imx6sll-usdhc
->                - fsl,imx6ull-usdhc
-> +              - fsl,imx6ul-usdhc
->            - const: fsl,imx6sx-usdhc
->        - items:
->            - const: fsl,imx7d-usdhc
-> --
-> 2.39.2
->
