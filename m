@@ -2,123 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C0DC0EB64DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 09:12:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 865CFEB64D8
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 09:22:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231947AbjFVJMT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Jun 2023 05:12:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52976 "EHLO
+        id S232158AbjFVJWH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Jun 2023 05:22:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60828 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230421AbjFVJL5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 05:11:57 -0400
-Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE0AC421D;
-        Thu, 22 Jun 2023 02:02:40 -0700 (PDT)
-Received: by mail-pf1-x434.google.com with SMTP id d2e1a72fcca58-666683eb028so4137691b3a.0;
-        Thu, 22 Jun 2023 02:02:40 -0700 (PDT)
+        with ESMTP id S231992AbjFVJVh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 05:21:37 -0400
+Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A85D4209
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:12:08 -0700 (PDT)
+Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-5702116762fso73826777b3.3
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:12:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1687424560; x=1690016560;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=d6zDpm6SD0RxKjfR478ABKL+HYLdKnnccJQGQalujl4=;
-        b=g6onHDg9F0lEFx/R2IRBdwp6L8NUCjELS+bgfsk/By0fR2WkH3iL2Xvw6PDOj5vPGf
-         DLMQ95UwluXPLqmbLmx1t0B0WZ+y/zcoSbOQvaOD3ZC+rtEOtl7ooFrUvS4UgZbwgFFl
-         ceHYSAXXfqMFT2TZvMZgcmRE4XmoiCfSnopXfFWH11ZAdV17zsIN+eMsTAjjfTOj6BdB
-         h3gPmeXwdhTg+xB1qpy7oH/zlmDCKQTtR3LH6t7XPNWzrf3u0w8cvoqa9eCDBWNQ6Qwr
-         Wy/v1TH6JQmcYHFf3yam22eWMnvnc4far8rEAkoVibEpjOkyeKdxW48KER0V7tug8Oye
-         zVjA==
+        d=linaro.org; s=google; t=1687425127; x=1690017127;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=8wgQ5NZ37+lO0vpak9yIlryZrXj8cUqWlWgr+TXC62Q=;
+        b=opHjtYthU4vBRbRd1kGwIYIZa17pmdsYcYeZvhDm/63Pmy/kYJhLzilfcAI9zDPisF
+         J4x4QDW66vDzXjzgE05+/oJDZqPkDBxmU6dYZrQpWp5wma8gmc71G1Q5J1jT8s+qJ8Jb
+         BXnTH7PaErMrPABvHITfKStNy+V/nvkYc6ns6jQTzczAchrsftItiCFhOGJi1+2BKlvN
+         5exNUUcU9fXZLVVaFuaUh3z4y5BAYc+gMLWUcM3uoiR8WIPq8g15i+1G+LvEetkj2loN
+         fBz+YRlf1ujFCZ6CCm7Xe6ChMB7vMLn+DKjFqYk9Pk61HkEEhIDXUs0HocnYoXTFev+m
+         VfGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687424560; x=1690016560;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=d6zDpm6SD0RxKjfR478ABKL+HYLdKnnccJQGQalujl4=;
-        b=PYmbU0AFIRcruJGfqkMe5XDSJVuQT4XCwfMgolDI+Cxya/uvsc7fWuSo7yEE9CAERN
-         GNR+KZh/Zs8vwVAC/EiKqhTtSNicFaqrRBEunZMIEc7mkUNucjg8bvxAfS4NTfAVzWPr
-         p9M8JLVT/w/A8aNMJx+fHI+fDFMyOih/exCjul98Tj+suoMtwWNG4vL1vwkHJBYfOeFz
-         d8y1pzLX58Em8MXFAHHrtiDaxaY8RQI0/+HFZ5knKVjK5sKuK+WljhWkOimdcpBEgGfU
-         BuXNXD+Kg2e5At0dhUn63flp6Z0AX614pXi4p603IKjHtVlWC4j258vHasCXksh83vs2
-         x1dw==
-X-Gm-Message-State: AC+VfDy6L6d47572I02uNFIsofzeezPm5W9WA5GTWeCRGBhbBCCLgAwo
-        3L65deyThEzkfej7hmBdGKM=
-X-Google-Smtp-Source: ACHHUZ7/YeU8hZPjv85Errxr+74DQRBJc4FlkRd2uCXZ8gqyASlBT4K+/rmK5nuMdES9y2SDeiKPFg==
-X-Received: by 2002:a05:6a00:1995:b0:668:95c1:ec9d with SMTP id d21-20020a056a00199500b0066895c1ec9dmr7261032pfl.28.1687424560173;
-        Thu, 22 Jun 2023 02:02:40 -0700 (PDT)
-Received: from chcpu13.cse.ust.hk (191host119.mobilenet.cse.ust.hk. [143.89.191.119])
-        by smtp.gmail.com with ESMTPSA id j25-20020a62e919000000b00662610cf7a8sm4239614pfh.172.2023.06.22.02.02.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 22 Jun 2023 02:02:39 -0700 (PDT)
-From:   Wei Chen <harperchen1110@gmail.com>
-To:     tonyhuang.sunplus@gmail.com
-Cc:     lhjeff911@gmail.com, ulf.hansson@linaro.org,
-        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Wei Chen <harperchen1110@gmail.com>
-Subject: [PATCH] mmc: sunplus: fix return value check of mmc_add_host()
-Date:   Thu, 22 Jun 2023 09:02:33 +0000
-Message-Id: <20230622090233.188539-1-harperchen1110@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        d=1e100.net; s=20221208; t=1687425127; x=1690017127;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=8wgQ5NZ37+lO0vpak9yIlryZrXj8cUqWlWgr+TXC62Q=;
+        b=PWWhCA97+sFNaPXG7KYgZ9cSnnFXIK5zP0rmjqPD+GktQWpThA3dmwsGJHdfVMJy1j
+         W7cHVI0Xa2Jq5z6HVzBKj1EMJZJmAgKlFPsT6V18sDA6GsnH7ge+o+YeBE69737WddkA
+         Uk8Sf8/6z7JOL7a6yYq54XwuJ+sDda17NkLdVNqcuaoyyrzwYLy1q1pb4sYhdA8DpUx+
+         fq+aztajMjz5PIfwWOpIutJ7khiNIVcA+bI8tQV/RFKfTqk3/QQBOCpKcRkV1ve3MfnS
+         LOgRYZV5UzncfJKtCMqPYMpDFxIqtylRRzKD/n8ah/TaIr3YmJ4SnRtI0T2KNA6loBXg
+         AC9A==
+X-Gm-Message-State: AC+VfDzhDU1KxizZ5meOjVONIEZtnwS0IjHVPVmzJnOdkhSgU+7921+P
+        7ZLfXOVxIdMfwgFuRqxMVfPahHEJ+/uz5fsV6hj1Lc1amKGpU1Of
+X-Google-Smtp-Source: ACHHUZ5czDqSg3nWq1jTHyHs0WhmJlv6yntqWA6UyY91hesVVFgY58NxJsPmyYbC7HJx6jCUL6AojMnKhTYMswAVdrw=
+X-Received: by 2002:a25:b199:0:b0:bcc:a9b4:c1f8 with SMTP id
+ h25-20020a25b199000000b00bcca9b4c1f8mr13689030ybj.33.1687425127628; Thu, 22
+ Jun 2023 02:12:07 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230620091113.33393-1-ulf.hansson@linaro.org>
+ <CACRpkdZfhPxFZhjiU9k5fjM9v9VOuZwu16eyn_qHL4Jm+CyhBg@mail.gmail.com>
+ <CAPDyKFqXu9R=+281Ovt=ZR6VHYAv96LEvP+DgaZo2aHJB8_dgw@mail.gmail.com>
+ <CAPDyKFrwBWrdMmwqJeTothwmLFiPmZy0+CreZu5cUMKpxiuXjQ@mail.gmail.com> <CACRpkdYMjwnBv9kGxMcUpx0-Ogpc6E2jcqBaZbwj195c5mtUxQ@mail.gmail.com>
+In-Reply-To: <CACRpkdYMjwnBv9kGxMcUpx0-Ogpc6E2jcqBaZbwj195c5mtUxQ@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 22 Jun 2023 11:11:30 +0200
+Message-ID: <CAPDyKFr-eVXAtwu1h0iSORO-cmRwH1v1ceZq3psw1KKB55xX2Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: Add support for SW busy-end timeouts
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>,
+        Yann Gautier <yann.gautier@foss.st.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-mmc_add_host() may return error, if we ignore its return value,
-1. the memory allocated in mmc_alloc_host() will be leaked
-2. null-ptr-deref will happen when calling mmc_remove_host()
-in remove function spmmc_drv_remove() because deleting not
-added device.
+On Wed, 21 Jun 2023 at 23:13, Linus Walleij <linus.walleij@linaro.org> wrot=
+e:
+>
+> On Wed, Jun 21, 2023 at 2:33=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
+rg> wrote:
+>
+> > > More importantly, the busy timeout work never gets to run, which
+> > > indicates that we are no longer hanging and waiting for an IRQ to be
+> > > raised. Is that correct?
+> >
+> > Ehh, I should have looked more closely at the log. Indeed there is one
+> > case where the timeout work kicks in.
+>
+> Yeah...
+>
+> It wasn't until I added the timeout that I could get the whole
+> thing to work, both are needed: handling lost IRQs and then
+> an occasional timeout.
+>
+> > Maybe we should log the information about the current ->busy_state at
+> > that point too, so understand under what condition we are hanging? I
+> > think we should also log the actual used timeout in this case.
+>
+> Sure thing, please merge this patch as-is (solves a problem!) and I try
+> to make a debug improvement patch on top with what I have (like
+> printing the command) and add in the busy state as well.
 
-Fix this by checking the return value of mmc_add_host(). Moreover,
-I fixed the error handling path of spmmc_drv_probe() to clean up.
+Okay, I have applied the patch for next, thanks!
 
-Signed-off-by: Wei Chen <harperchen1110@gmail.com>
----
- drivers/mmc/host/sunplus-mmc.c | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
+Yann, feel free to provide your tested-by tag too, I can amend the
+patch after I have applied it.
 
-diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
-index db5e0dcdfa7f..a96e90ea6541 100644
---- a/drivers/mmc/host/sunplus-mmc.c
-+++ b/drivers/mmc/host/sunplus-mmc.c
-@@ -902,7 +902,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
- 
- 	ret = mmc_of_parse(mmc);
- 	if (ret)
--		goto probe_free_host;
-+		goto clk_disable;
- 
- 	mmc->ops = &spmmc_ops;
- 	mmc->f_min = SPMMC_MIN_CLK;
-@@ -911,7 +911,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
- 
- 	ret = mmc_regulator_get_supply(mmc);
- 	if (ret)
--		goto probe_free_host;
-+		goto clk_disable;
- 
- 	if (!mmc->ocr_avail)
- 		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-@@ -927,9 +927,17 @@ static int spmmc_drv_probe(struct platform_device *pdev)
- 	host->tuning_info.enable_tuning = 1;
- 	pm_runtime_set_active(&pdev->dev);
- 	pm_runtime_enable(&pdev->dev);
--	mmc_add_host(mmc);
-+	ret = mmc_add_host(mmc);
-+	if (ret)
-+		goto pm_disable;
- 
--	return ret;
-+	return 0;
-+
-+pm_disable:
-+	pm_runtime_disable(&pdev->dev);
-+
-+clk_disable:
-+	clk_disable_unprepare(host->clk);
- 
- probe_free_host:
- 	if (mmc)
--- 
-2.25.1
-
+Kind regards
+Uffe
