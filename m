@@ -2,122 +2,165 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECC35EB64D8
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 09:36:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2261DEB64DA
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 09:52:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230456AbjFVJgj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Jun 2023 05:36:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42664 "EHLO
+        id S230452AbjFVJww (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Jun 2023 05:52:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230379AbjFVJfo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 05:35:44 -0400
-Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECB1E2D46
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:28:52 -0700 (PDT)
-Received: by mail-wr1-x432.google.com with SMTP id ffacd0b85a97d-3113675d582so4457534f8f.3
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:28:52 -0700 (PDT)
+        with ESMTP id S231189AbjFVJwh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 05:52:37 -0400
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28B34269D
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:46:08 -0700 (PDT)
+Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-bfe6ea01ff5so1755240276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 02:46:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687426131; x=1690018131;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=a8I/X4DIkumE0o217fuyqlb4csZOvMDW/UlSifsV2GU=;
-        b=bYzxCtFqXPloCjCKlMFQWGOz34JRH3wCnPD3AX38cFSLTi6Cm/moRaAzr/P9UvW8yK
-         T1UlfaUEMwKRoiHsYP2AP1eNfAXLJpOw6fuiK9KovJ6TTbshtiNVn6qpKJwQbplR7OOg
-         cx6Tisg37W53vmqv5m1Z8lPI4korclfp1prU7mkLZhjPR9+rdDrp6MRwgW2Ncm7RM0tH
-         EKlfS2nMwEz3mW4p3CO9SV7SgitOCSSmw0Hb3yAyfNuhyh4ElkPZLngym63CKrx/nmnW
-         QWcMXIrvh+PraUYucMC8xzhBhv0/T9lnF2rJXI9ik824sFmQmQnBhTTJQeTPzfNemHg1
-         WgqA==
+        d=linaro.org; s=google; t=1687427167; x=1690019167;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=UlnbDp30fbsCZunDNViKkSr3RUZrIcXF5g+Y8OUYLQ4=;
+        b=j8dpGPN7O5knjDGolUGT3QuiKvRDqIRaEUMUMY3zfDbnm9LL61MKivqdx0riyQ46ur
+         Mi9d5OJKP4CzqgSffA9jH921irZfps+y8tD67zN9E5wyXAbNmRCjYN/3K7j4J56n1M2A
+         /l0rorEq1BTTqhU2kIGmC/enbRReu9Wm2y+V5BL4aOJtz0C/AcGlI9AHIjzgkWROjsmA
+         hvjaMezHQHRAgFnkOzmQchyJk4LfkdoOaUaCYVOfgV3A7N4JC57+6SXoAuhh/IrPrFOa
+         J0CE/5rlc6RTX1IlZVbG6IbehlJg5q1xiubA2+eMfpNj8p9DWonHYw2zUItK0VNpiC45
+         rSJA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687426131; x=1690018131;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=a8I/X4DIkumE0o217fuyqlb4csZOvMDW/UlSifsV2GU=;
-        b=Jby5X767ZtCltXGTTXogn8R+dehCj6YoMLee9S3mgf+dDyaTC2osprtGZ84R+ShrGm
-         mSTc/S1j89izgK/7FzZaPEthH1yYLD/vS1pwOmq4Xb4LeRc+OSaH/pL4zXIguT4LgK4j
-         vBz7XY3UUsmMX6seVM+V3wSCtczay1+g+zaxA0yZIs2v+QeXlHoATmS4IptRqxal6+z9
-         JJznSWeZiPtoWHxgKRyDYNuSSKKBE5Fq4L4xLgXe/AIoIm2J53UQ++eRqHenT9gAEx5K
-         NY6FLm++f8BRXfGPdMhIaSYVFsnglJTuwbmRldD0cmZeiDWyCoO1P3ZDvuWu3LbL7Ryz
-         Clyg==
-X-Gm-Message-State: AC+VfDw/opAvgCZVv656MkWogf94q2xWQ402110kg55OaDgdVAVvhg/w
-        h1eJ4CeGKyv+75q4U6joxDlfwA==
-X-Google-Smtp-Source: ACHHUZ4T77alv8uvZQD/zqnC6VfvSZmzxDS+DYzTGDKhKFLEX9r7QGKfu+W2jacagsaCQjaDDoaMnw==
-X-Received: by 2002:a5d:591c:0:b0:311:1a9d:98e with SMTP id v28-20020a5d591c000000b003111a9d098emr11415672wrd.58.1687426131213;
-        Thu, 22 Jun 2023 02:28:51 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.219.26])
-        by smtp.gmail.com with ESMTPSA id c11-20020a056000104b00b003063a92bbf5sm6641190wrx.70.2023.06.22.02.28.48
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 22 Jun 2023 02:28:50 -0700 (PDT)
-Message-ID: <35253eaa-78b0-8976-aaf4-8917331e7823@linaro.org>
-Date:   Thu, 22 Jun 2023 11:28:47 +0200
+        d=1e100.net; s=20221208; t=1687427167; x=1690019167;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=UlnbDp30fbsCZunDNViKkSr3RUZrIcXF5g+Y8OUYLQ4=;
+        b=XbNjgEbrKQjtcQ/gtddOUVdRhUmFqsNLtl/FxRgy+5p9EosnuXXYEqelE2FkMyXYVY
+         sbfT6Gzw5bvOIwtTcztsbeMk5gCnajsQpaMdtIyrslNEk6yzK72Yg05/2EzvrC0+Vq+/
+         pgjr0JLc5UqnDbxfU4Z0MlQeX0XentV8mYA84gnnfjZ8TVUimHaSvzTMwaEhVtjsuSlo
+         Q1kDL/1VtlN2ZzFP9dnEjz++QVL17uTN2uPM2R1ytOfzBveQa+ytubvJuN2UD6WGAXCL
+         yl91LPJN0Xs/58vGPEiTKM1xON4TEJbM/KgeHqjXuIK4stwyRHaZsssXmsbQ13ho7rGQ
+         FHyQ==
+X-Gm-Message-State: AC+VfDxqHOksNpb8wH/I5576lE3hBy3yQ2mbL12ZGbUzK4EKfnY05/Ru
+        HR+xqR6ZCJAeRTHL/lYrVRDdI2eLB6Z7ZAhevU6Rrw==
+X-Google-Smtp-Source: ACHHUZ5ti/HPvYEAMyru3gz1BtwbdTceWYGO5J0/rNr+3mdOrwxuIT+Ux5kzCuuFeZWKbi+zI/H1fLdmTUILeuW5d1s=
+X-Received: by 2002:a25:d897:0:b0:c00:737e:9387 with SMTP id
+ p145-20020a25d897000000b00c00737e9387mr2887026ybg.13.1687427167209; Thu, 22
+ Jun 2023 02:46:07 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH v7 1/3] dt-bindings: ufs: qcom: Add ICE phandle
-Content-Language: en-US
-To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
+References: <26d178dcfc2f4b7d9010145d0c051394@hyperstone.com>
+In-Reply-To: <26d178dcfc2f4b7d9010145d0c051394@hyperstone.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 22 Jun 2023 11:45:31 +0200
+Message-ID: <CAPDyKFrvE6Ur3ASXOmq-2QQxRF37XK+6GzRAJZ-1mGh5hWQE3w@mail.gmail.com>
+Subject: Re: [PATCHv3 1/1] mmc: block: ioctl: Add PROG-error aggregation
+To:     Christian Loehle <CLoehle@hyperstone.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Biggers <ebiggers@kernel.org>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-References: <20230408214041.533749-1-abel.vesa@linaro.org>
- <20230408214041.533749-2-abel.vesa@linaro.org>
- <4aadaf24-11f6-5cc1-4fbd-addbef4f891b@linaro.org>
- <yq1ilbgqoq6.fsf@ca-mkp.ca.oracle.com>
- <80ca0da4-5243-9771-0c4c-62b956e97b2f@linaro.org>
- <ZJPyGW2I4fHqFMRV@linaro.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <ZJPyGW2I4fHqFMRV@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        Avri Altman <avri.altman@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 22/06/2023 09:02, Abel Vesa wrote:
-> On 23-06-22 08:07:51, Krzysztof Kozlowski wrote:
->> On 22/06/2023 03:19, Martin K. Petersen wrote:
->>>
->>> Abel,
->>>
->>>> Un-reviewed. This is broken and was never tested. After applying this
->>>> patch, I can see many new warnings in all DTBs (so it is easy to spot
->>>> that it was not actually tested).
->>>>
->>>> Your probably meant here:
->>>>   if:
->>>>     required:
->>>
->>> Please provide a fix for this. I don't want to rebase this late in the
->>> cycle.
->>
->> AFAIK, this was not applied. At least as of next 20210621 and I
->> commented on this few days ago. Anything changed here?
-> 
-> Check this one:
-> https://lore.kernel.org/all/yq1a5x1wl4g.fsf@ca-mkp.ca.oracle.com/
-> 
+On Tue, 20 Jun 2023 at 14:44, Christian Loehle <CLoehle@hyperstone.com> wrote:
+>
+> Userspace currently has no way of checking for error bits of
+> detection mode X. These are error bits that are only detected by
+> the card when executing the command. For e.g. a sanitize operation
+> this may be minutes after the RSP was seen by the host.
+>
+> Currently userspace programs cannot see these error bits reliably.
+> They could issue a multi ioctl cmd with a CMD13 immediately following
+> it, but since errors of detection mode X are automatically cleared
+> (they are all clear condition B).
+> mmc_poll_for_busy of the first ioctl may have already hidden such an
+> error flag.
+>
+> In case of the security operations: sanitize, secure erases and
+> RPMB writes, this could lead to the operation not being performed
+> successfully by the card with the user not knowing.
+> If the user trusts that this operation is completed
+> (e.g. their data is sanitized), this could be a security issue.
+> An attacker could e.g. provoke a eMMC (VCC) flash fail, where a
+> successful sanitize of a card is not possible. A card may move out
+> of PROG state but issue a bit 19 R1 error.
+>
+> This patch therefore will also have the consequence of a mmc-utils
+> patch, which enables the bit for the security-sensitive operations.
+>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/core/block.c   | 26 +++++++++++++++-----------
+>  drivers/mmc/core/mmc_ops.c | 14 +++++++-------
+>  drivers/mmc/core/mmc_ops.h |  9 +++++++++
+>  3 files changed, 31 insertions(+), 18 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index e46330815484..c7e2b8ae58a9 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -470,7 +470,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>         struct mmc_data data = {};
+>         struct mmc_request mrq = {};
+>         struct scatterlist sg;
+> -       bool r1b_resp, use_r1b_resp = false;
+> +       bool r1b_resp;
+>         unsigned int busy_timeout_ms;
+>         int err;
+>         unsigned int target_part;
+> @@ -551,8 +551,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>         busy_timeout_ms = idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS;
+>         r1b_resp = (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B;
+>         if (r1b_resp)
+> -               use_r1b_resp = mmc_prepare_busy_cmd(card->host, &cmd,
+> -                                                   busy_timeout_ms);
+> +               mmc_prepare_busy_cmd(card->host, &cmd, busy_timeout_ms);
+>
+>         mmc_wait_for_req(card->host, &mrq);
+>         memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
+> @@ -605,19 +604,24 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>         if (idata->ic.postsleep_min_us)
+>                 usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
+>
+> -       /* No need to poll when using HW busy detection. */
+> -       if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
+> -               return 0;
+> -
+>         if (mmc_host_is_spi(card->host)) {
+>                 if (idata->ic.write_flag || r1b_resp || cmd.flags & MMC_RSP_SPI_BUSY)
+>                         return mmc_spi_err_check(card);
+>                 return err;
+>         }
+> -       /* Ensure RPMB/R1B command has completed by polling with CMD13. */
+> -       if (idata->rpmb || r1b_resp)
+> -               err = mmc_poll_for_busy(card, busy_timeout_ms, false,
+> -                                       MMC_BUSY_IO);
+> +       /* Poll for RPMB/write/R1B execution errors */
 
-So staging tree is not in next? If it cannot be rebased "that late in
-the cycle", this means it should be in the next. :/
+Except for the other comments that I had on v2 (which isn't addressed
+in v3), I would like this comment to be extended a bit.
 
-Best regards,
-Krzysztof
+More precisely, we somehow need to state that even if the host
+supports HW busy signaling (MMC_CAP_WAIT_WHILE_BUSY) we need to send a
+CMD13 to get the internal error status of the card.
 
+> +       if (idata->rpmb || idata->ic.write_flag || r1b_resp) {
+> +               struct mmc_busy_data cb_data;
+> +
+> +               cb_data.card = card;
+> +               cb_data.retry_crc_err = false;
+> +               cb_data.aggregate_err_flags = true;
+> +               cb_data.busy_cmd = MMC_BUSY_IO;
+> +               cb_data.status = &idata->ic.response[0];
+> +               err = __mmc_poll_for_busy(card->host, 0, busy_timeout_ms,
+> +                               &mmc_busy_cb, &cb_data);
+> +
+> +       }
+>
+>         return err;
+>  }
+
+[...]
+
+Kind regards
+Uffe
