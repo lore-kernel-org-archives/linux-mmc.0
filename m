@@ -2,61 +2,123 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76502EB64D8
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 07:56:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0DC0EB64DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jun 2023 09:12:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229891AbjFVH46 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Jun 2023 03:56:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54862 "EHLO
+        id S231947AbjFVJMT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Jun 2023 05:12:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230330AbjFVH45 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 03:56:57 -0400
-Received: from mail.mahavavy.com (mail.mahavavy.com [92.222.170.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A6E5199F
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 00:56:55 -0700 (PDT)
-Received: by mail.mahavavy.com (Postfix, from userid 1002)
-        id 39B0D23854; Thu, 22 Jun 2023 07:56:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=mahavavy.com; s=mail;
-        t=1687420613; bh=IfqQW79nVX/qUpmHcJiWDpV9BQnOf/s+Zcq9ON74QJY=;
-        h=Date:From:To:Subject:From;
-        b=WQ3/Zbp7Li70wWtWtncgJEI1GhM6PKrssnYfIThYWMPSlSMQynyQ1tQAaDc/TdMze
-         be21VWpG/VjugS+IYbPVDUncAIkpgLqOWYkdhATkK/T5A+8mvrU6a6WrsVM7vigqwm
-         uyiuK0MOSfwWptWJ1QettSLsiWbY2Mjw4sxaxaAxY0dzhG4pFgTBAK/DYdif7NNBZq
-         0KFyZ6d4oqhqQXYHl6aQkcoQNSq2FbaBF44ZVzAeafp1yzflRbMpmlnzQQp5imu32s
-         qLe4AQH4cb1oJr4mKaK8hc9fEcyG2zeyKQ3pKJcKd/pDdLjiqVpDKwfZR0uJQK4IG+
-         GAmtLjcF29oPA==
-Received: by mail.mahavavy.com for <linux-mmc@vger.kernel.org>; Thu, 22 Jun 2023 07:56:19 GMT
-Message-ID: <20230622064500-0.1.3a.7b81.0.llfp4lv0j6@mahavavy.com>
-Date:   Thu, 22 Jun 2023 07:56:19 GMT
-From:   =?UTF-8?Q? "Kristi=C3=A1n_Plet=C3=A1nek" ?= 
-        <kristian.pletanek@mahavavy.com>
-To:     <linux-mmc@vger.kernel.org>
-Subject: =?UTF-8?Q?Tlakov=C4=9B_lit=C3=BD?=
-X-Mailer: mail.mahavavy.com
+        with ESMTP id S230421AbjFVJL5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jun 2023 05:11:57 -0400
+Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE0AC421D;
+        Thu, 22 Jun 2023 02:02:40 -0700 (PDT)
+Received: by mail-pf1-x434.google.com with SMTP id d2e1a72fcca58-666683eb028so4137691b3a.0;
+        Thu, 22 Jun 2023 02:02:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1687424560; x=1690016560;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=d6zDpm6SD0RxKjfR478ABKL+HYLdKnnccJQGQalujl4=;
+        b=g6onHDg9F0lEFx/R2IRBdwp6L8NUCjELS+bgfsk/By0fR2WkH3iL2Xvw6PDOj5vPGf
+         DLMQ95UwluXPLqmbLmx1t0B0WZ+y/zcoSbOQvaOD3ZC+rtEOtl7ooFrUvS4UgZbwgFFl
+         ceHYSAXXfqMFT2TZvMZgcmRE4XmoiCfSnopXfFWH11ZAdV17zsIN+eMsTAjjfTOj6BdB
+         h3gPmeXwdhTg+xB1qpy7oH/zlmDCKQTtR3LH6t7XPNWzrf3u0w8cvoqa9eCDBWNQ6Qwr
+         Wy/v1TH6JQmcYHFf3yam22eWMnvnc4far8rEAkoVibEpjOkyeKdxW48KER0V7tug8Oye
+         zVjA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687424560; x=1690016560;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=d6zDpm6SD0RxKjfR478ABKL+HYLdKnnccJQGQalujl4=;
+        b=PYmbU0AFIRcruJGfqkMe5XDSJVuQT4XCwfMgolDI+Cxya/uvsc7fWuSo7yEE9CAERN
+         GNR+KZh/Zs8vwVAC/EiKqhTtSNicFaqrRBEunZMIEc7mkUNucjg8bvxAfS4NTfAVzWPr
+         p9M8JLVT/w/A8aNMJx+fHI+fDFMyOih/exCjul98Tj+suoMtwWNG4vL1vwkHJBYfOeFz
+         d8y1pzLX58Em8MXFAHHrtiDaxaY8RQI0/+HFZ5knKVjK5sKuK+WljhWkOimdcpBEgGfU
+         BuXNXD+Kg2e5At0dhUn63flp6Z0AX614pXi4p603IKjHtVlWC4j258vHasCXksh83vs2
+         x1dw==
+X-Gm-Message-State: AC+VfDy6L6d47572I02uNFIsofzeezPm5W9WA5GTWeCRGBhbBCCLgAwo
+        3L65deyThEzkfej7hmBdGKM=
+X-Google-Smtp-Source: ACHHUZ7/YeU8hZPjv85Errxr+74DQRBJc4FlkRd2uCXZ8gqyASlBT4K+/rmK5nuMdES9y2SDeiKPFg==
+X-Received: by 2002:a05:6a00:1995:b0:668:95c1:ec9d with SMTP id d21-20020a056a00199500b0066895c1ec9dmr7261032pfl.28.1687424560173;
+        Thu, 22 Jun 2023 02:02:40 -0700 (PDT)
+Received: from chcpu13.cse.ust.hk (191host119.mobilenet.cse.ust.hk. [143.89.191.119])
+        by smtp.gmail.com with ESMTPSA id j25-20020a62e919000000b00662610cf7a8sm4239614pfh.172.2023.06.22.02.02.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 22 Jun 2023 02:02:39 -0700 (PDT)
+From:   Wei Chen <harperchen1110@gmail.com>
+To:     tonyhuang.sunplus@gmail.com
+Cc:     lhjeff911@gmail.com, ulf.hansson@linaro.org,
+        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Wei Chen <harperchen1110@gmail.com>
+Subject: [PATCH] mmc: sunplus: fix return value check of mmc_add_host()
+Date:   Thu, 22 Jun 2023 09:02:33 +0000
+Message-Id: <20230622090233.188539-1-harperchen1110@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dobr=C3=A9 r=C3=A1no,
+mmc_add_host() may return error, if we ignore its return value,
+1. the memory allocated in mmc_alloc_host() will be leaked
+2. null-ptr-deref will happen when calling mmc_remove_host()
+in remove function spmmc_drv_remove() because deleting not
+added device.
 
-zaji=C5=A1=C5=A5ujeme technologii tlakov=C3=A9ho lit=C3=AD hlin=C3=ADku.
+Fix this by checking the return value of mmc_add_host(). Moreover,
+I fixed the error handling path of spmmc_drv_probe() to clean up.
 
-M=C3=A1me v=C3=BDrobn=C3=AD z=C3=A1vody v Polsku, =C5=A0v=C3=A9dsku a =C4=
-=8C=C3=ADn=C4=9B se schopnost=C3=AD flexibiln=C4=9B p=C5=99esouvat v=C3=BD=
-robu mezi lokalitami.
+Signed-off-by: Wei Chen <harperchen1110@gmail.com>
+---
+ drivers/mmc/host/sunplus-mmc.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
 
-Na=C5=A1e lic=C3=AD bu=C5=88ky jsou v=C4=9Bt=C5=A1inou automatick=C3=A9 n=
-ebo poloautomatick=C3=A9, co=C5=BE umo=C5=BE=C5=88uje v=C3=BDrobu velk=C3=
-=BDch v=C3=BDrobn=C3=ADch s=C3=A9ri=C3=AD s vysokou flexibilitou detail=C5=
-=AF.
-=20
-Poskytujeme podporu v ka=C5=BEd=C3=A9 f=C3=A1zi v=C3=BDvoje projektu, vyv=
-=C3=ADj=C3=ADme strukturu detailu.
+diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
+index db5e0dcdfa7f..a96e90ea6541 100644
+--- a/drivers/mmc/host/sunplus-mmc.c
++++ b/drivers/mmc/host/sunplus-mmc.c
+@@ -902,7 +902,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+ 
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
+-		goto probe_free_host;
++		goto clk_disable;
+ 
+ 	mmc->ops = &spmmc_ops;
+ 	mmc->f_min = SPMMC_MIN_CLK;
+@@ -911,7 +911,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+ 
+ 	ret = mmc_regulator_get_supply(mmc);
+ 	if (ret)
+-		goto probe_free_host;
++		goto clk_disable;
+ 
+ 	if (!mmc->ocr_avail)
+ 		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+@@ -927,9 +927,17 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+ 	host->tuning_info.enable_tuning = 1;
+ 	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_enable(&pdev->dev);
+-	mmc_add_host(mmc);
++	ret = mmc_add_host(mmc);
++	if (ret)
++		goto pm_disable;
+ 
+-	return ret;
++	return 0;
++
++pm_disable:
++	pm_runtime_disable(&pdev->dev);
++
++clk_disable:
++	clk_disable_unprepare(host->clk);
+ 
+ probe_free_host:
+ 	if (mmc)
+-- 
+2.25.1
 
-Cht=C4=9Bli byste mluvit o spolupr=C3=A1ci v t=C3=A9to oblasti?
-
-Pozdravy
-Kristi=C3=A1n Plet=C3=A1nek
