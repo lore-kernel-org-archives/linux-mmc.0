@@ -2,111 +2,127 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82DC7C001E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jun 2023 22:00:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D037C001DE
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jun 2023 23:43:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231214AbjFWWAd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Jun 2023 18:00:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43952 "EHLO
+        id S231736AbjFWXnT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Jun 2023 19:43:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55270 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231272AbjFWWA2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jun 2023 18:00:28 -0400
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3BD726B8;
-        Fri, 23 Jun 2023 15:00:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1687557627; x=1719093627;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=JkG4wlz8/Al/l8T/H4VQ/7CYKvbmuJHYqTaJPf15ZYw=;
-  b=rfT4xqtorlL1E+38Yr4NX9jLkzINmCmo1joTNiRNY/6HPF0LAdhqAj40
-   EXO3bp/PHzCIyECrDgOA9lyk9SS+MK4jm29zTYWjV7C31gw8o/835iS/E
-   iqT95zMf5IFZdGd1sat/6uDFckQo3DOymjbppmiUAR1fIB0DQ2QtR4N/x
-   gV9+q6p5XCxOWaU5ZXqWpMWtDYt33NP2jIUeHmfCbiquRiRAS/S6z+4IM
-   rtJILhI9+TTrIJMFzuTm4oD7q80Tkq6ew7O7yx825U20c1sL8XcBNmDkv
-   SpY3nlTjW0Gw9H3PchQ71dB99kV/63q22v2NQ9eiNlOjMx5WllrJdzl8m
-   g==;
-X-IronPort-AV: E=Sophos;i="6.01,153,1684825200"; 
-   d="scan'208";a="231900759"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 23 Jun 2023 15:00:26 -0700
-Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.21; Fri, 23 Jun 2023 13:44:37 -0700
-Received: from che-lt-i67070.amer.actel.com (10.10.115.15) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.21 via Frontend Transport; Fri, 23 Jun 2023 13:44:08 -0700
-From:   Varshini Rajendran <varshini.rajendran@microchip.com>
-To:     <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <conor+dt@kernel.org>, <nicolas.ferre@microchip.com>,
-        <alexandre.belloni@bootlin.com>, <claudiu.beznea@microchip.com>,
-        <mturquette@baylibre.com>, <sboyd@kernel.org>,
-        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
-        <vkoul@kernel.org>, <tglx@linutronix.de>, <maz@kernel.org>,
-        <lee@kernel.org>, <ulf.hansson@linaro.org>,
-        <tudor.ambarus@linaro.org>, <miquel.raynal@bootlin.com>,
-        <richard@nod.at>, <vigneshr@ti.com>, <edumazet@google.com>,
-        <kuba@kernel.org>, <pabeni@redhat.com>, <linus.walleij@linaro.org>,
-        <p.zabel@pengutronix.de>, <olivia@selenic.com>,
-        <a.zummo@towertech.it>, <radu_nicolae.pirea@upb.ro>,
-        <richard.genoud@gmail.com>, <gregkh@linuxfoundation.org>,
-        <lgirdwood@gmail.com>, <broonie@kernel.org>,
-        <wim@linux-watchdog.org>, <linux@roeck-us.net>, <arnd@arndb.de>,
-        <olof@lixom.net>, <soc@kernel.org>, <linux@armlinux.org.uk>,
-        <sre@kernel.org>, <jerry.ray@microchip.com>,
-        <horatiu.vultur@microchip.com>, <durai.manickamkr@microchip.com>,
-        <varshini.rajendran@microchip.com>, <andrew@lunn.ch>,
-        <alain.volmat@foss.st.com>, <neil.armstrong@linaro.org>,
-        <mihai.sain@microchip.com>, <eugen.hristev@collabora.com>,
-        <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
-        <linux-crypto@vger.kernel.org>, <dmaengine@vger.kernel.org>,
-        <linux-i2c@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-mtd@lists.infradead.org>, <netdev@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>, <linux-rtc@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <linux-serial@vger.kernel.org>,
-        <alsa-devel@alsa-project.org>, <linux-usb@vger.kernel.org>,
-        <linux-watchdog@vger.kernel.org>, <linux-pm@vger.kernel.org>
-CC:     <Hari.PrasathGE@microchip.com>, <cristian.birsan@microchip.com>,
-        <balamanikandan.gunasundar@microchip.com>,
-        <manikandan.m@microchip.com>, <dharma.b@microchip.com>,
-        <nayabbasha.sayed@microchip.com>, <balakrishnan.s@microchip.com>
-Subject: [PATCH v2 27/45] dt-bindings: rng: atmel,at91-trng: document sam9x7 TRNG
-Date:   Sat, 24 Jun 2023 02:00:38 +0530
-Message-ID: <20230623203056.689705-28-varshini.rajendran@microchip.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230623203056.689705-1-varshini.rajendran@microchip.com>
-References: <20230623203056.689705-1-varshini.rajendran@microchip.com>
-MIME-Version: 1.0
+        with ESMTP id S230010AbjFWXnS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jun 2023 19:43:18 -0400
+Received: from mail-io1-f46.google.com (mail-io1-f46.google.com [209.85.166.46])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34EF02703;
+        Fri, 23 Jun 2023 16:43:17 -0700 (PDT)
+Received: by mail-io1-f46.google.com with SMTP id ca18e2360f4ac-78333585d28so32790139f.1;
+        Fri, 23 Jun 2023 16:43:17 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687563796; x=1690155796;
+        h=date:subject:message-id:references:in-reply-to:cc:to:from
+         :mime-version:content-transfer-encoding:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=fTiyezCl+ncjMsIOOS0sUB9bYyrGCDjIJOvndxohyZs=;
+        b=JsAIoLHPQR83cIFWCg7WWq9dOFpHwbGPHK2yoY125gC8xVqx2+ttlxJX+sxoETmQlV
+         0nzPjnhz39qU6o87QsXUo3XE8rc8xVe1tCFq0v/HUv/SqKNKfCrP1E1R7lgXcGuOx6y2
+         Ye3G6ypunxQdjQzz2ukdGGZuVQNU006TpPpL8MAHc+uIiGpnV85+2gp/WvADNQ/2sRCU
+         AoLsbcQUu6qTlfBlobD2G6x4CJs0P6/7LAU5AFlr+R6jVOZVLv1PoQKKkeOqS1a/I5G5
+         iHh6o5EBG3JC2u0sVTRVWCc72uLnf7/POT8WGjwChV0ytJvnTeM9K3NQ4zI7JypbiFa8
+         xFfg==
+X-Gm-Message-State: AC+VfDw5DExrdMCkSqQcgXx602OXDOFT2Gsg8bbCY0m4jzAMeRS+bMz2
+        HjkFdCKixSxi9ODyQ8CMJA==
+X-Google-Smtp-Source: ACHHUZ704nUo/Qe+1L5BBq/vh9K03eeZluxsw6d51akGW3mbLVGxB1UGHdSEiXEdc5xMZV7l5fDOHg==
+X-Received: by 2002:a5d:9483:0:b0:760:e308:107e with SMTP id v3-20020a5d9483000000b00760e308107emr15001057ioj.0.1687563796356;
+        Fri, 23 Jun 2023 16:43:16 -0700 (PDT)
+Received: from robh_at_kernel.org ([64.188.179.250])
+        by smtp.gmail.com with ESMTPSA id r27-20020a02c85b000000b0041407c67451sm72416jao.165.2023.06.23.16.43.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 23 Jun 2023 16:43:15 -0700 (PDT)
+Received: (nullmailer pid 1606691 invoked by uid 1000);
+        Fri, 23 Jun 2023 23:43:09 -0000
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+MIME-Version: 1.0
+From:   Rob Herring <robh@kernel.org>
+To:     Varshini Rajendran <varshini.rajendran@microchip.com>
+Cc:     ulf.hansson@linaro.org, krzysztof.kozlowski+dt@linaro.org,
+        edumazet@google.com, broonie@kernel.org, arnd@arndb.de,
+        maz@kernel.org, lgirdwood@gmail.com, alexandre.belloni@bootlin.com,
+        alain.volmat@foss.st.com, p.zabel@pengutronix.de,
+        mihai.sain@microchip.com, soc@kernel.org,
+        linux-mtd@lists.infradead.org, cristian.birsan@microchip.com,
+        jerry.ray@microchip.com, tudor.ambarus@linaro.org,
+        miquel.raynal@bootlin.com, richard@nod.at,
+        gregkh@linuxfoundation.org, linux-usb@vger.kernel.org,
+        balamanikandan.gunasundar@microchip.com, lee@kernel.org,
+        olivia@selenic.com, sboyd@kernel.org, mturquette@baylibre.com,
+        kuba@kernel.org, Hari.PrasathGE@microchip.com,
+        linux-kernel@vger.kernel.org, balakrishnan.s@microchip.com,
+        alsa-devel@alsa-project.org, durai.manickamkr@microchip.com,
+        sre@kernel.org, vkoul@kernel.org, linux-rtc@vger.kernel.org,
+        linux-serial@vger.kernel.org, andrew@lunn.ch,
+        devicetree@vger.kernel.org, nayabbasha.sayed@microchip.com,
+        linux-gpio@vger.kernel.org, nicolas.ferre@microchip.com,
+        davem@davemloft.net, pabeni@redhat.com,
+        linux-arm-kernel@lists.infradead.org, linux@roeck-us.net,
+        wim@linux-watchdog.org, tglx@linutronix.de,
+        horatiu.vultur@microchip.com, radu_nicolae.pirea@upb.ro,
+        dharma.b@microchip.com, a.zummo@towertech.it,
+        linux-mmc@vger.kernel.org, richard.genoud@gmail.com,
+        claudiu.beznea@microchip.com, linus.walleij@linaro.org,
+        conor+dt@kernel.org, herbert@gondor.apana.org.au,
+        eugen.hristev@collabora.com, dmaengine@vger.kernel.org,
+        netdev@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux@armlinux.org.uk, linux-watchdog@vger.kernel.org,
+        linux-pm@vger.kernel.org, robh+dt@kernel.org,
+        linux-i2c@vger.kernel.org, linux-crypto@vger.kernel.org,
+        neil.armstrong@linaro.org, vigneshr@ti.com,
+        manikandan.m@microchip.com, linux-clk@vger.kernel.org,
+        olof@lixom.net
+In-Reply-To: <20230623203056.689705-32-varshini.rajendran@microchip.com>
+References: <20230623203056.689705-1-varshini.rajendran@microchip.com>
+ <20230623203056.689705-32-varshini.rajendran@microchip.com>
+Message-Id: <168756378936.1606652.14221929175769628362.robh@kernel.org>
+Subject: Re: [PATCH v2 31/45] dt-bindings: atmel-classd: add sam9x7
+ compatible
+Date:   Fri, 23 Jun 2023 17:43:09 -0600
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add compatbile for Microchip sam9x7 TRNG.
 
-Signed-off-by: Varshini Rajendran <varshini.rajendran@microchip.com>
----
- Documentation/devicetree/bindings/rng/atmel,at91-trng.yaml | 1 +
- 1 file changed, 1 insertion(+)
+On Sat, 24 Jun 2023 02:00:42 +0530, Varshini Rajendran wrote:
+> Add sam9x7 compatible to DT bindings documentation.
+> 
+> Signed-off-by: Varshini Rajendran <varshini.rajendran@microchip.com>
+> ---
+>  .../devicetree/bindings/sound/atmel,sama5d2-classd.yaml      | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
 
-diff --git a/Documentation/devicetree/bindings/rng/atmel,at91-trng.yaml b/Documentation/devicetree/bindings/rng/atmel,at91-trng.yaml
-index 3ce45456d867..7e4dbf5e22b4 100644
---- a/Documentation/devicetree/bindings/rng/atmel,at91-trng.yaml
-+++ b/Documentation/devicetree/bindings/rng/atmel,at91-trng.yaml
-@@ -17,6 +17,7 @@ properties:
-       - enum:
-           - atmel,at91sam9g45-trng
-           - microchip,sam9x60-trng
-+          - microchip,sam9x7-trng
-       - items:
-           - enum:
-               - microchip,sama7g5-trng
--- 
-2.25.1
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
+
+yamllint warnings/errors:
+
+dtschema/dtc warnings/errors:
+/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/sound/atmel,sama5d2-classd.example.dtb: sound@fc048000: compatible: 'oneOf' conditional failed, one must be fixed:
+	['atmel,sama5d2-classd'] is too short
+	from schema $id: http://devicetree.org/schemas/sound/atmel,sama5d2-classd.yaml#
+
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20230623203056.689705-32-varshini.rajendran@microchip.com
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
 
