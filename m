@@ -2,43 +2,43 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22E46C001DE
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jun 2023 20:39:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3F15C04A94
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jun 2023 20:40:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232424AbjFWUjX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Jun 2023 16:39:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55782 "EHLO
+        id S232469AbjFWUkL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Jun 2023 16:40:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56406 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232112AbjFWUjC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jun 2023 16:39:02 -0400
+        with ESMTP id S232532AbjFWUj5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jun 2023 16:39:57 -0400
 Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3EE29273A;
-        Fri, 23 Jun 2023 13:38:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E58D2273D;
+        Fri, 23 Jun 2023 13:39:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1687552714; x=1719088714;
+  t=1687552763; x=1719088763;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=tH9AVaAcxd+GcHe2T8xuzXdIyuaeVxCclQ1y7YkWXOM=;
-  b=ANyD+EOTkNJLlMnWKmA4MyQIgEy+rfU+vUQOCQLiR2V30ldTuE04EQPW
-   BYYJwIxmsZI+h5G30viNKTj/LqYbWbqVj5tWnXa7q1PV1sUWcdEophCgH
-   PTr6/D9FupqE6F/VsEtu3lWF455xdfAdJu2LF0vUtThQJT8TTR6YurcIK
-   51MuQ6sXz8lQAyR2xfuFSxOgzqvlrDgtoRUwzSpJ5gY4oJdLSkjuzqlDO
-   PFHTTeT3OivI+pH0asFiwiAJNltoaOSqVN500p05xjqx3wAHmBC0MPy3K
-   DQpTkM5sK1siz4u52RXJiqyv6lCVCvJHHXzZEixbcj2ZyqbQNb06oVenl
-   A==;
+  bh=F245Y4hpUx+ISvR3soqJuf3ObWy94NJWlvbD3Ok4KYI=;
+  b=KZhoCd4wgPkXqZGYO/fVvCQ7zIpQwQf9HdKvZczCsoEFe2+tk6rgEHCe
+   A47jhP7vAGf/1TdFEHlGve2tTKQWpbW3XzMVcvHb7CKhwp173t9t/vVTH
+   7xaLXe3/fBh/5ZLIkBXoVDMM8BeDvzdS8N5Sls5pf3jgL4YCOev3WhVxi
+   X+ezfeiFhyoi04AL8n/TR+u6AunAboL0uk/U7poWI1B9KOPU1fpCvXECl
+   sN81vehvLp4skjGlGtFXG53xkR09xQphUlsJs59Dsy1jqSVKNE3NvPFow
+   yIGuLG1ULx6ZK6JrQvgzpUj+vcgbeWDNuTrXTovx5dvFiopVRAY6o9XtP
+   Q==;
 X-IronPort-AV: E=Sophos;i="6.01,153,1684825200"; 
-   d="scan'208";a="219550882"
+   d="scan'208";a="220216714"
 X-Amp-Result: SKIPPED(no attachment in message)
 Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa3.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 23 Jun 2023 13:37:22 -0700
+  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 23 Jun 2023 13:38:30 -0700
 Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.21; Fri, 23 Jun 2023 13:37:20 -0700
+ 15.1.2507.21; Fri, 23 Jun 2023 13:38:19 -0700
 Received: from che-lt-i67070.amer.actel.com (10.10.115.15) by
  chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.21 via Frontend Transport; Fri, 23 Jun 2023 13:36:51 -0700
+ 15.1.2507.21 via Frontend Transport; Fri, 23 Jun 2023 13:37:49 -0700
 From:   Varshini Rajendran <varshini.rajendran@microchip.com>
 To:     <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
         <conor+dt@kernel.org>, <nicolas.ferre@microchip.com>,
@@ -75,9 +75,9 @@ CC:     <Hari.PrasathGE@microchip.com>, <cristian.birsan@microchip.com>,
         <balamanikandan.gunasundar@microchip.com>,
         <manikandan.m@microchip.com>, <dharma.b@microchip.com>,
         <nayabbasha.sayed@microchip.com>, <balakrishnan.s@microchip.com>
-Subject: [PATCH v2 12/45] dt-bindings: reset: atmel,at91sam9260-reset: add sam9x7 binding
-Date:   Sat, 24 Jun 2023 02:00:23 +0530
-Message-ID: <20230623203056.689705-13-varshini.rajendran@microchip.com>
+Subject: [PATCH v2 14/45] dt-bindings: crypto: add bindings for sam9x7 in Atmel AES
+Date:   Sat, 24 Jun 2023 02:00:25 +0530
+Message-ID: <20230623203056.689705-15-varshini.rajendran@microchip.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230623203056.689705-1-varshini.rajendran@microchip.com>
 References: <20230623203056.689705-1-varshini.rajendran@microchip.com>
@@ -88,25 +88,29 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add documentation for SAM9X7 reset controller.
+Add DT bindings for atmel AES.
 
 Signed-off-by: Varshini Rajendran <varshini.rajendran@microchip.com>
 ---
- .../devicetree/bindings/reset/atmel,at91sam9260-reset.yaml       | 1 +
- 1 file changed, 1 insertion(+)
+ .../devicetree/bindings/crypto/atmel,at91sam9g46-aes.yaml    | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/reset/atmel,at91sam9260-reset.yaml b/Documentation/devicetree/bindings/reset/atmel,at91sam9260-reset.yaml
-index 98465d26949e..593a13c277ab 100644
---- a/Documentation/devicetree/bindings/reset/atmel,at91sam9260-reset.yaml
-+++ b/Documentation/devicetree/bindings/reset/atmel,at91sam9260-reset.yaml
-@@ -22,6 +22,7 @@ properties:
-               - atmel,at91sam9g45-rstc
-               - atmel,sama5d3-rstc
-               - microchip,sam9x60-rstc
-+              - microchip,sam9x7-rstc
-               - microchip,sama7g5-rstc
-       - items:
-           - const: atmel,sama5d3-rstc
+diff --git a/Documentation/devicetree/bindings/crypto/atmel,at91sam9g46-aes.yaml b/Documentation/devicetree/bindings/crypto/atmel,at91sam9g46-aes.yaml
+index 0b7383b3106b..f0736696c883 100644
+--- a/Documentation/devicetree/bindings/crypto/atmel,at91sam9g46-aes.yaml
++++ b/Documentation/devicetree/bindings/crypto/atmel,at91sam9g46-aes.yaml
+@@ -12,7 +12,10 @@ maintainers:
+ 
+ properties:
+   compatible:
+-    const: atmel,at91sam9g46-aes
++    oneOf:
++      - items:
++          - const: atmel,at91sam9g46-aes
++          - const: microchip,sam9x7-aes
+ 
+   reg:
+     maxItems: 1
 -- 
 2.25.1
 
