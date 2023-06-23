@@ -2,48 +2,48 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D243EB64DD
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jun 2023 21:00:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22B07C001DD
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jun 2023 21:00:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232169AbjFWVAE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Jun 2023 17:00:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42500 "EHLO
+        id S231462AbjFWVAc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Jun 2023 17:00:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42694 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232391AbjFWVAC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jun 2023 17:00:02 -0400
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECA722693
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Jun 2023 14:00:00 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id 98e67ed59e1d1-25ea33087aaso798851a91.3
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Jun 2023 14:00:00 -0700 (PDT)
+        with ESMTP id S231856AbjFWVAb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jun 2023 17:00:31 -0400
+Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A21F2130
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Jun 2023 14:00:29 -0700 (PDT)
+Received: by mail-pf1-x432.google.com with SMTP id d2e1a72fcca58-6686c74183cso869039b3a.1
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Jun 2023 14:00:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1687554000; x=1690146000;
+        d=broadcom.com; s=google; t=1687554029; x=1690146029;
         h=mime-version:references:in-reply-to:message-id:date:subject:cc:to
          :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=iTacmodBWisbkiO/yEsKBH0zDhotzsxiC1Las/8bd9c=;
-        b=LW7vYFX9QWe1rR/0qeSNfTFTvc3OsqqQc5x8KeyXLFU7s93dnlcfp9m75+fva/x8am
-         Akm3PmQpQIup+idk7qTtByxN9qxE5UrfBeE7AP0a4wsPUvgGIximdJ+AAl0l0UpQtx8i
-         9LB+FI7S6Xa3xq5wH6EDPGrVVglJS2dfxCgYU=
+        bh=4XwK8tqgHhSJj1ZnaSoVPxrMeKspduE1OJzKMydWcP8=;
+        b=M1dadlhmdhO6qj1X3gQGLf04eyjwwKZbS8dnRz5cjpp8fuhyQMLEexBH6tHUsGXKyW
+         ZgsStTOo39Ey1oNOlM1e53e9zcyRvn5U13hod0SdroakyQqZgiNqMVaBQ9HjlSuKI1H8
+         AoR/p18HJy07lV0/1c7oqNwZjDZVkfAyI2MMY=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687554000; x=1690146000;
+        d=1e100.net; s=20221208; t=1687554029; x=1690146029;
         h=mime-version:references:in-reply-to:message-id:date:subject:cc:to
          :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=iTacmodBWisbkiO/yEsKBH0zDhotzsxiC1Las/8bd9c=;
-        b=EWzvxCs8Y+ljryriKPaLTkeilp/iq7JqW7VVgXc5TU47umwFdx3GHRA/yza/J3yiZs
-         i3fuYaYu3h81RWVha6yAFK/DnQ3P+XFxy20j4ATD7dWjZyQV/IDZYx3iM8OLBI+xW8bA
-         YUmtjuYr9x151n65EOIA3g/mnP4Rw/mbzLptCoabW9uXzp3Fo701IlYnS3FbB4YH3R0b
-         hG6cDfRHtoNSClvS5qulQZ12IEj8Dx83UIXbVPTkvZvlkEUHDVaYYoEAtpRODNlXbLl5
-         7bmhZ01QcekCaqiDK90Dp1M/DVjwM6f7/3MRel7OSTnXb7hlJuJQ+G+f4Eq+Sl+wA5dD
-         pOYA==
-X-Gm-Message-State: AC+VfDyTw2KfkScI84Fp9dTI1QN100RyFA00EFMKFWcWu/MO79JUTiz7
-        DK+HZscnf9i1wEYfzNOEAF+glw==
-X-Google-Smtp-Source: ACHHUZ75bDNV0FRIYQwlm+WOTpi96R7anxqNnckV3CW60J4eocLK1oQjw15bEzsduJ2UtS2//3LH4A==
-X-Received: by 2002:a17:90a:1d48:b0:25b:ba0c:ab7c with SMTP id u8-20020a17090a1d4800b0025bba0cab7cmr19928359pju.27.1687554000102;
-        Fri, 23 Jun 2023 14:00:00 -0700 (PDT)
+        bh=4XwK8tqgHhSJj1ZnaSoVPxrMeKspduE1OJzKMydWcP8=;
+        b=eb/6l8+zr6GekK5ix7CYJVne6r8Wa4WeiddCBGDhYL/q5392mFN+pEL5SNkDpp2Pum
+         uqXkUdu4e6r74tuaR68YVQ/1BSDRUPxgPRE1Fv6dIpUViDvZEdBzHWDDT5HNlGIkkNi4
+         cwntey/1oC/n7B62Mtyt3uqzp1GkeIKFwdVuGyLVku/tumfkeVY0gO7mOTponGf3L2ME
+         eStdEDgOXLpzE3P0NZryisZBQUY0tiDJ08FAeS2wQPYH2spkAEij/lpjUawiapKD5Ao3
+         Fat2f4qahroPFSSJWnKYXEx7gbPtKngHIxoJ6OzTgEPsc0UG14qyYN4jW6fv2CafDyce
+         AAzg==
+X-Gm-Message-State: AC+VfDzwTW6HB9de04ZRQiO7vEXnTPOixzautUzROHmfUbO9ECtaI28x
+        28DmbqmkD/FStlO7NjB3mOk4rw==
+X-Google-Smtp-Source: ACHHUZ55sej1Xeohc8V1u+gdnFl5cnQCkmV5ln+qw1Yj+U+Kl9ZU/jXeA90vhl9lrFPH2B/GyZK4xg==
+X-Received: by 2002:a05:6a20:7d8b:b0:122:7e50:f71b with SMTP id v11-20020a056a207d8b00b001227e50f71bmr15559943pzj.34.1687554028819;
+        Fri, 23 Jun 2023 14:00:28 -0700 (PDT)
 Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id q9-20020a17090a2e0900b00261139fd67asm1878352pjd.36.2023.06.23.13.59.58
+        by smtp.gmail.com with ESMTPSA id l15-20020a62be0f000000b006668f004420sm6614701pff.148.2023.06.23.14.00.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 Jun 2023 13:59:59 -0700 (PDT)
+        Fri, 23 Jun 2023 14:00:28 -0700 (PDT)
 From:   Florian Fainelli <florian.fainelli@broadcom.com>
 To:     bcm-kernel-feedback-list@broadcom.com,
         Stefan Wahren <stefan.wahren@i2se.com>,
@@ -64,40 +64,40 @@ Cc:     Florian Fainelli <f.fainelli@gmail.com>,
         linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
         devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org
-Subject: Re: [PATCH V2 3/7] ARM: dts: bcm2835: adjust DMA node names
-Date:   Fri, 23 Jun 2023 13:59:57 -0700
-Message-Id: <20230623205957.2011830-1-florian.fainelli@broadcom.com>
+Subject: Re: [PATCH V2 5/7] ARM: dts: bcm283x: Increase pwm-cells
+Date:   Fri, 23 Jun 2023 14:00:26 -0700
+Message-Id: <20230623210026.2011917-1-florian.fainelli@broadcom.com>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230617133620.53129-4-stefan.wahren@i2se.com>
-References: <20230617133620.53129-1-stefan.wahren@i2se.com> <20230617133620.53129-4-stefan.wahren@i2se.com>
+In-Reply-To: <20230617133620.53129-6-stefan.wahren@i2se.com>
+References: <20230617133620.53129-1-stefan.wahren@i2se.com> <20230617133620.53129-6-stefan.wahren@i2se.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="000000000000bc3e5905fed24858"
+        boundary="00000000000071b17905fed24ae3"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---000000000000bc3e5905fed24858
+--00000000000071b17905fed24ae3
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 From: Florian Fainelli <f.fainelli@gmail.com>
 
-On Sat, 17 Jun 2023 15:36:16 +0200, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> After converting the bcm2835-dma DT binding to YAML, the DT schema
-> checks gave warnings like:
+On Sat, 17 Jun 2023 15:36:18 +0200, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+> The pwm-bcm2835 supports PWM polarity, so adjust the affected dtsi
+> files accordingly and fix the dtbs_check warning:
 > 
-> $nodename:0: 'dma@7e007000' does not match '^dma-controller(@.*)?$'
-> 
-> So fix them accordingly.
+> pwm@7e20c000: #pwm-cells:0:0: 3 was expected
 > 
 > Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+> Reviewed-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
 > ---
 
 Applied to https://github.com/Broadcom/stblinux/commits/devicetree/next, thanks!
 --
 Florian
 
---000000000000bc3e5905fed24858
+--00000000000071b17905fed24ae3
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -168,14 +168,14 @@ kNGap1mHJ+JngGzZCz+dDiHRQKGpXLxkHX0BvEDZLW6LGOJ83ImrW38YMOo3ZYnCYNHA9qDOakiw
 NxADYvcRBA0ySL6sZpj8BIIhWiXiuusuBmt2Mak2eEv0xDbovE6Z6hYyl/ZnRadbgK/ClgbY3w+O
 AfUXEZ0xggJtMIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52
 LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgwT
-/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIJfUNoPea78UdGGF
-PIKHTTkxSdolH4Ce5Z7kX71Tz++SMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
-AQkFMQ8XDTIzMDYyMzIxMDAwMFowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
+/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIJJAa/APeu8tS/ss
+cgo40Vy3E/LjrSZxRm3UBS155IGSMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
+AQkFMQ8XDTIzMDYyMzIxMDAyOVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
 AWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEH
-MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQBvtSg2zGpTzkjbB+vYlfv3u+15feCLNgDE
-ZoU50aaht0/NkaW8bBmy0v+gtFtbmzQ45ZdMlWg4JIzuN4XzAPN5jUbVIKQjzjcH9lvZ2GMQPcX1
-mAbamOhfcCy8frT8eP1S5Rqiz+wAb1sZpzZl9vHQBrnUClNay268+8q8GR+1BUhQNG1N6uy0KOEE
-kBG2psnGMty+7rbGB4RN14bMgI92ycJ4OGV3hHbA6QC7jqB6fxyK7RoH1ZQrLfg0KqfT4a2rW7Dn
-18DFBIgo0KIaMKIa/XtdgWb9lQwl+NkBtoPj4g/9OvC9PBFJRTGE9YOteY7D2sKxRmNwZjP+3f3y
-dG7u
---000000000000bc3e5905fed24858--
+MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQCCCaVjBcAitrba8NHfzZmuug993RVdWsMK
+Pa0pRx7Hfhf/f2LC1b8ikNR0FvJm525IsPIy4VNaHbGtPYkXd1NhsB+BsLu/ycxpCxWbHz0t2IdJ
+7Xbf3K/kKhuHhZkktTA6FeaOfvYexORuKM2pCgAnvYoCXe4j1zsVv9oOBE/vwPFfX7qQ/8PK0zAx
+/3PTl/aD+bXWGdAe2St11jCt8VC8C02kBoZDnyHywu5mjs54ZiUfpJVthBI8VOh9H7vy8akLjTGF
+7lhn8VY1f7JN039bLX29EdF3J49LRM+gPmT6yalk89NRVB0dI3EJjXxZavXhlbGISOPwV2EBCRTO
+rwu7
+--00000000000071b17905fed24ae3--
