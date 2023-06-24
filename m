@@ -2,60 +2,62 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EC1CEB64DA
-	for <linux-mmc@archiver.kernel.org>; Sat, 24 Jun 2023 08:33:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8BF2C001E0
+	for <linux-mmc@archiver.kernel.org>; Sat, 24 Jun 2023 09:20:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229476AbjFXIdA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 24 Jun 2023 04:33:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39314 "EHLO
+        id S232554AbjFXJUE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 24 Jun 2023 05:20:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233116AbjFXIcV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Jun 2023 04:32:21 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39F2249FC
-        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 01:28:16 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id 4fb4d7f45d1cf-5149aafef44so1530206a12.0
-        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 01:28:16 -0700 (PDT)
+        with ESMTP id S232967AbjFXJUA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Jun 2023 05:20:00 -0400
+Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 456B41BF7
+        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 02:19:58 -0700 (PDT)
+Received: by mail-ej1-x62d.google.com with SMTP id a640c23a62f3a-9889952ed18so185874966b.3
+        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 02:19:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687595293; x=1690187293;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+        d=linaro.org; s=google; t=1687598396; x=1690190396;
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=/GIkG+tRxlPhRtm7YOpXeJRcJeLkXqLt09OeZ1Nh1Q4=;
-        b=DkiglpMjfjZCyxhWBqFcrR4RkmF6xYeIJhZq2bOE8/tpFTboyhHRBzqMweLVJwZdse
-         Po5v9VUAlVpzETIWlBeTSQ/MOOvNBADP10/6rUf8cTK/xsSxgq1hO5ZM9vc4292Kwd83
-         VTdWBdvUwwEOS+VqFVyBMZUM6hlNddUzTKFQc1w5NukZTFWumAXPj6zYaXxUMWoU/DSy
-         XQel7bucUiZ+Ngsaptd6xqTY94Y066kVJS9WhWDC0jZ5rzUsfBkGryZ36kc7qmVLWyeh
-         wthERO5PoF7uGlAF2OMarb6r+LyNXoKbb+5cj2mZ36KhHU2OJG0uneADkVzgtHgvzaZM
-         aiVA==
+        bh=KfAcGT4J8pUoMJBGxBaLszgHGiS6c9l8JOpUoHeAAOA=;
+        b=yQVzjTKSXVmVV9dLLVhjlfW4hSkCHaHSkFp8XKDuppCzQpGHvyVttjnWT3sZWadL6G
+         Aptg8K8aHU9euO2VsKWw8w5GNb7iZUmQN6s980dsKNw8bDt/Gg0mjyG+1qbTOWHueIrY
+         /Q6bxSUkrx10KI9Bk3ImA6gPyy5RwRLI1IVUQjGo73WdFwY+k9WU2qYNImsGMRH4LVBY
+         NGoLGDAz09o/yosqduTlRt/bCpwDw40AnKJvyTtb5EsV6kYLtwXhkQO6myiWdEiHilCp
+         eezk0kHCVcUBB/e4mc1VfkMXxJnPCuve2SWX/BdtYwhjQIOCgvko85iNcFXLb/8ecU/N
+         rm6g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687595293; x=1690187293;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+        d=1e100.net; s=20221208; t=1687598396; x=1690190396;
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=/GIkG+tRxlPhRtm7YOpXeJRcJeLkXqLt09OeZ1Nh1Q4=;
-        b=b575qk3+9EA7kdrmldwEB+FVpCBcG+mCXmAOVFzBeh+gO9UFsNV8JZhzlaQfoip9Rz
-         0rnokrCCqaLjclwRNeWsvK4j6R73V6FYF1PbC/K6+jec3TaOYRg+8tKaFhXdGc6kFtU0
-         YnCqJPdouOcgqEKkkbAng7XMRu7fwap2/zYdsxL4TaD78d87EEN8RkFUtLPiSlXm1rpX
-         zSBGRxUtvEQLEGRxvU0l4pvXtPfdYs+y3GDkrnF9+gO/YXaXqfS0btw2eSkecOxW+GWJ
-         LOy2bGdteXfaJsy6so12JnYa17LAsKTrkdSKltH+tbBTwh/FuIbbjXXcZrBWN3JZvwni
-         x5DQ==
-X-Gm-Message-State: AC+VfDxpTnhDWvXHn/U/iw4oP1TUS7bXKgcY3pQmFNP1NiJGPX6uNaL0
-        0ZDpz/G6UCrxb3EPTtYYIkn/xg==
-X-Google-Smtp-Source: ACHHUZ4ujAlY65iLeyuRh50Ps6Pp7ng1jowk6gt0zzaeZKnGL1gJBg6GDgqsvIKWUupAOCVYBEqBCQ==
-X-Received: by 2002:a17:907:3e8e:b0:987:88eb:2416 with SMTP id hs14-20020a1709073e8e00b0098788eb2416mr19943130ejc.61.1687595293178;
-        Sat, 24 Jun 2023 01:28:13 -0700 (PDT)
+        bh=KfAcGT4J8pUoMJBGxBaLszgHGiS6c9l8JOpUoHeAAOA=;
+        b=OwYNDWz1rt7yHxTIPeA+Q1G8CEEP8XuQcprzMMTC7lBI91SZIF2OSeJwGeQdLG1w2J
+         hr3GMK+KQyJiyv1e+DJcI7xlt6VsBCvUpRAHP7Z3qodqPBj5VP5yQiPGi06oUH/FqWPi
+         Hg22ukBae42z0Yxh89HF0E0S2DzDWGglVIvWpwwgJJuvb7g9TCZ2jSOyjR2skDPsXCgy
+         t+JgS0KDa8h5+J2X3ifsifHZeIN7yy6PrAB1Eyk8SuEFsZwFIrsuYqztxrFvL7tG8gsb
+         bLxvwhyEiBIT4lMTYv44bJoUHge8X3CTsS3e3cYd65FEySjMFddxXEyz549ne3y9ByJB
+         mhYA==
+X-Gm-Message-State: AC+VfDxDm6Salafzgjh+IVePRh+ZElRxKvZ8ITVs58H5lnME9Y+J6Xis
+        qTnad58r9OHoNHfum+eG1jQrQA==
+X-Google-Smtp-Source: ACHHUZ5fG8f481PX14S7vktzFZQMA1l6HoKP1yysFPHfBvGgcLJOb2TMBp2polua7/w5jYwHHssrXQ==
+X-Received: by 2002:a17:907:987:b0:987:6372:c31f with SMTP id bf7-20020a170907098700b009876372c31fmr16230436ejc.37.1687598396633;
+        Sat, 24 Jun 2023 02:19:56 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.219.26])
-        by smtp.gmail.com with ESMTPSA id kq2-20020a170906abc200b009887bb956e0sm620186ejb.103.2023.06.24.01.28.07
+        by smtp.gmail.com with ESMTPSA id p13-20020a1709060e8d00b00989065149d0sm663324ejf.86.2023.06.24.02.19.50
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 24 Jun 2023 01:28:12 -0700 (PDT)
-Message-ID: <36a6ba38-d01e-96ad-c89f-7e2c860e0a88@linaro.org>
-Date:   Sat, 24 Jun 2023 10:28:06 +0200
+        Sat, 24 Jun 2023 02:19:55 -0700 (PDT)
+Message-ID: <ca3b6a75-2811-6013-28cc-9f6a7854b469@linaro.org>
+Date:   Sat, 24 Jun 2023 11:19:49 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.12.0
-Subject: Re: [PATCH v2 00/45] Add support for sam9x7 SoC family
+Subject: Re: [PATCH v2 01/45] dt-bindings: microchip: atmel,at91rm9200-tcb:
+ add sam9x60, sam9x7 compatible
 Content-Language: en-US
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 To:     Varshini Rajendran <varshini.rajendran@microchip.com>,
         robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
         conor+dt@kernel.org, nicolas.ferre@microchip.com,
@@ -91,41 +93,29 @@ Cc:     Hari.PrasathGE@microchip.com, cristian.birsan@microchip.com,
         manikandan.m@microchip.com, dharma.b@microchip.com,
         nayabbasha.sayed@microchip.com, balakrishnan.s@microchip.com
 References: <20230623203056.689705-1-varshini.rajendran@microchip.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230623203056.689705-1-varshini.rajendran@microchip.com>
+ <20230623203056.689705-2-varshini.rajendran@microchip.com>
+ <074048a2-5153-e013-3562-b5cad2ba0954@linaro.org>
+In-Reply-To: <074048a2-5153-e013-3562-b5cad2ba0954@linaro.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/06/2023 22:30, Varshini Rajendran wrote:
-> This patch series adds support for the new SoC family - sam9x7.
->  - The device tree, configs and drivers are added
->  - Clock driver for sam9x7 is added
->  - Support for basic peripherals is added
->  - Target board SAM9X75 Curiosity is added
+On 24/06/2023 09:53, Krzysztof Kozlowski wrote:
+> On 23/06/2023 22:30, Varshini Rajendran wrote:
+>> Add sam9x60, sam9x7 compatible string support in the schema file.
+>>
+>> Signed-off-by: Varshini Rajendran <varshini.rajendran@microchip.com>
+>> ---
+>>  .../devicetree/bindings/soc/microchip/atmel,at91rm9200-tcb.yaml | 
 > 
->  Changes in v2:
->  --------------
 > 
->  - Added sam9x7 specific compatibles in DT with fallbacks
->  - Documented all the newly added DT compatible strings
->  - Added device tree for the target board sam9x75 curiosity and
->    documented the same in the DT bindings documentation
->  - Removed the dt nodes that are not supported at the moment
->  - Removed the configs added by previous version that are not supported
->    at the moment
->  - Fixed all the corrections in the commit message
->  - Changed all the instances of copyright year to 2023
->  - Added sam9x7 flag in PIT64B configuration
->  - Moved macro definitions to header file
->  - Added another divider in mck characteristics in the pmc driver
->  - Fixed the memory leak in the pmc driver
->  - Dropped patches that are no longer needed
->  - Picked up Acked-by and Reviewed-by tags
+> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Where did you pick them up? Can you point me to the patches?
+Un-acked. Actually NAK.
+
+This does not match your DTS. Please test your patches before sending.
 
 Best regards,
 Krzysztof
