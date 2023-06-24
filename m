@@ -2,59 +2,59 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E358C001DC
-	for <linux-mmc@archiver.kernel.org>; Sat, 24 Jun 2023 08:02:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 111DEC001B1
+	for <linux-mmc@archiver.kernel.org>; Sat, 24 Jun 2023 08:02:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232785AbjFXICu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 24 Jun 2023 04:02:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54628 "EHLO
+        id S232735AbjFXICw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 24 Jun 2023 04:02:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54614 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232752AbjFXICU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Jun 2023 04:02:20 -0400
-Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 25815297A
-        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 01:02:12 -0700 (PDT)
-Received: by mail-lj1-x22d.google.com with SMTP id 38308e7fff4ca-2b4619ef079so22886471fa.2
-        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 01:02:12 -0700 (PDT)
+        with ESMTP id S232728AbjFXICT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Jun 2023 04:02:19 -0400
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7A0D2966
+        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 01:02:01 -0700 (PDT)
+Received: by mail-ed1-x532.google.com with SMTP id 4fb4d7f45d1cf-51d7d0dbec8so488830a12.2
+        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 01:02:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687593731; x=1690185731;
+        d=linaro.org; s=google; t=1687593720; x=1690185720;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=48cLWxnO4hI8zObsw227oEYYKk0Y5PALRubNPuDO6vc=;
-        b=LX7W+yoLVPlIwV1XGxBXwL2aJbtTMbGUVQFZjuzrXh0wV6QHjP/6CddCD/E2flMRhT
-         vztsT0AxCVeYXrgCMazYCdwatn1oodAQYgEbYryOhgT9SawgGTiTsh+csgQdP6kNUyxe
-         7+u8BPExqHZ7ZFyAJTcps4WTaIR9QoQUvOV8w9bGMoxE+6/N2/+adQYLXS0sGTiNN0KJ
-         gcAcX+MzinSjOAga9K0bDpv84dH0l28yQim8n3ipOwgzwqkd/hgTSXelx4MOAJGDwm1c
-         nahyrk+ER/vkBjbl1S6GBta/vg4KMt2zZaWLKqwbibfr91+e82MBHrvqwzlM62GfwzTs
-         ebBw==
+        bh=evwXLshiChnPPoFaOHbuHqZ762vCCjuGEyQDNCOD67s=;
+        b=D9tJ/SfpPzuEgx6VkFAna6q37GPvy140Mp1+3AL4FalYGKRecNq4J5+7jqN3/okS8O
+         6VCYYFjRmknfk1Pc6cmV5km+eu6S8+dNsd/6ZxlJHnuwXBsHrGYlDYPQc+5f6+k6+IuB
+         GQ2i6ZzaDPj3eVQfF+ha5N+EegiRLR6qQUSP7YQmJByxynUIP9FFNPV1KvaIldisXyYf
+         CEC0Kmvo9lFLJYFbPpu7qy9Q8Xiyb4NJqbwsjDnHHtgoqGqOd9Th0k19ifx675SrSoj/
+         Q0oNeP6rMCMHk685HjSqRhDPeDMfnhCGrCr0QzKvt4/28ajDuSinwy8LILhi/tqkhGoC
+         s1TA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687593731; x=1690185731;
+        d=1e100.net; s=20221208; t=1687593720; x=1690185720;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=48cLWxnO4hI8zObsw227oEYYKk0Y5PALRubNPuDO6vc=;
-        b=OuWhoRnBUUHJFNaneZ2pwhyFSFaNjE5uheoLGa177GykupHgn3RCMfUdcyX9fFOHpe
-         HoHcyNcbWgTUGYRb+4QDii5ywcvhv5YYg2VeNjx4m4TRUKAdFW/Djb9jeSxGxll4WtUU
-         9DpwlE3sQoeAQKj/+Gtf4K1qAwsUP+/6b7S+iO32S2Uq+XmaN77OgDZIcs6ndZUSYVIx
-         hc4jB/eRlcW7KnD3ZIaVp181Pqcu5h+96ScR9QtjLa2NOIVVMNm/1yoH2eBlFhaVEl5I
-         XQSoIckGTH7ss3Tzt4yc4+xievADwiYz2lgUyR0kbElGvU00KG9iAzhMg2/IrxgbTWT5
-         qusg==
-X-Gm-Message-State: AC+VfDxtWN518DldXUb9NpYTXNme9wou0aT9WaWt52K9a1jUiXpaLc26
-        0iz4vBQboQvOR7VCXKSYpgumIg==
-X-Google-Smtp-Source: ACHHUZ62t6tmUqM8Yzti6qrq+RSBqmnbfIcQEwHs80C3q6C7j1x32A4aVswUaxA77ONO0Q35Bn2RsQ==
-X-Received: by 2002:a2e:a0d8:0:b0:2b5:7f93:b3ad with SMTP id f24-20020a2ea0d8000000b002b57f93b3admr8673190ljm.16.1687593730934;
-        Sat, 24 Jun 2023 01:02:10 -0700 (PDT)
+        bh=evwXLshiChnPPoFaOHbuHqZ762vCCjuGEyQDNCOD67s=;
+        b=i78FIIZESdTOlBHTdq0YiZQxAzFmrL0/VFe7Q9NqtU0GmviZDPpmD0YLZwz38W9VSz
+         m1KaY3IKtN9EffO5IltlLz2OGqlKNiA6mzWgp53aAV2KSZ8yYwZrMBfzIedow/7eQH+M
+         y/+Z7zJzznFtmmqJGx2UW1J5y8WYv/bNal+7kXMIQQ0CU+jrw0PQH7vLJ9KfrhUBpBXh
+         CdzZdt7Bzdn4F6cnwC8hu7nKTaqZaBviq0KXSC7FhhOBHTlQ3Od6Nd9J+3ltAvDmkjLv
+         NtVfJ3cnxIrYeeMVz5INi40aXCDHucLy4QjxbyGJoBfYqcdMPfXUYIbaWmL8pmdu+MSu
+         TT8w==
+X-Gm-Message-State: AC+VfDzKoUxAypVlI4hvsVwBg60wkW3Ggm+/olujb6TbJcAZCmrBH16X
+        oD26bixWE3q9QQ5ztlUfZf5FZg==
+X-Google-Smtp-Source: ACHHUZ6WVqK97+L/rLsxsj0TIcEtyCmujOvKdKn3w1rntsMk+nGINy7dJc6MjB9ynUGuEpDSVTkQsA==
+X-Received: by 2002:a17:907:3da6:b0:98c:b942:dc7d with SMTP id he38-20020a1709073da600b0098cb942dc7dmr8195232ejc.64.1687593719652;
+        Sat, 24 Jun 2023 01:01:59 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.219.26])
-        by smtp.gmail.com with ESMTPSA id dv9-20020a170906b80900b00982a077599fsm590940ejb.110.2023.06.24.01.02.05
+        by smtp.gmail.com with ESMTPSA id lo6-20020a170906fa0600b00982bf866f9esm607015ejb.66.2023.06.24.01.01.53
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 24 Jun 2023 01:02:10 -0700 (PDT)
-Message-ID: <91773b0f-b337-c5d2-68e9-4d240920f659@linaro.org>
-Date:   Sat, 24 Jun 2023 10:02:04 +0200
+        Sat, 24 Jun 2023 01:01:58 -0700 (PDT)
+Message-ID: <fb91791c-760f-45f5-12db-04f2ff1be8c1@linaro.org>
+Date:   Sat, 24 Jun 2023 10:01:53 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.12.0
-Subject: Re: [PATCH v2 29/45] dt-bindings: rtt: at91rm9260: add sam9x7
+Subject: Re: [PATCH v2 28/45] dt-bindings: rtc: at91rm9200: add sam9x7
  compatible
 Content-Language: en-US
 To:     Varshini Rajendran <varshini.rajendran@microchip.com>,
@@ -92,9 +92,9 @@ Cc:     Hari.PrasathGE@microchip.com, cristian.birsan@microchip.com,
         manikandan.m@microchip.com, dharma.b@microchip.com,
         nayabbasha.sayed@microchip.com, balakrishnan.s@microchip.com
 References: <20230623203056.689705-1-varshini.rajendran@microchip.com>
- <20230623203056.689705-30-varshini.rajendran@microchip.com>
+ <20230623203056.689705-29-varshini.rajendran@microchip.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230623203056.689705-30-varshini.rajendran@microchip.com>
+In-Reply-To: <20230623203056.689705-29-varshini.rajendran@microchip.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -102,26 +102,26 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 23/06/2023 22:30, Varshini Rajendran wrote:
-> Add compatible for SAM9X7 RTT.
+> Add compatible for SAM9X7 RTC.
 > 
 > Signed-off-by: Varshini Rajendran <varshini.rajendran@microchip.com>
 > ---
->  Documentation/devicetree/bindings/rtc/atmel,at91sam9260-rtt.yaml | 1 +
+>  Documentation/devicetree/bindings/rtc/atmel,at91rm9200-rtc.yaml | 1 +
 >  1 file changed, 1 insertion(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/rtc/atmel,at91sam9260-rtt.yaml b/Documentation/devicetree/bindings/rtc/atmel,at91sam9260-rtt.yaml
-> index b80b85c394ac..2d5cce1c1331 100644
-> --- a/Documentation/devicetree/bindings/rtc/atmel,at91sam9260-rtt.yaml
-> +++ b/Documentation/devicetree/bindings/rtc/atmel,at91sam9260-rtt.yaml
+> diff --git a/Documentation/devicetree/bindings/rtc/atmel,at91rm9200-rtc.yaml b/Documentation/devicetree/bindings/rtc/atmel,at91rm9200-rtc.yaml
+> index 4d2bef15fb7a..e15872bbdd7e 100644
+> --- a/Documentation/devicetree/bindings/rtc/atmel,at91rm9200-rtc.yaml
+> +++ b/Documentation/devicetree/bindings/rtc/atmel,at91rm9200-rtc.yaml
 > @@ -20,6 +20,7 @@ properties:
->            - const: atmel,at91sam9260-rtt
->        - items:
->            - const: microchip,sam9x60-rtt
-> +          - const: microchip,sam9x7-rtt
->            - const: atmel,at91sam9260-rtt
+>        - atmel,sama5d4-rtc
+>        - atmel,sama5d2-rtc
+>        - microchip,sam9x60-rtc
+> +      - microchip,sam9x7-rtc
+>        - microchip,sama7g5-rtc
 
-Same as in other cases, so just to avoid applying by submaintainer: not
-tested, broken.
+Same as in other cases, so just to avoid applying by submaintainer:
+looks not tested and not working.
 
 Best regards,
 Krzysztof
