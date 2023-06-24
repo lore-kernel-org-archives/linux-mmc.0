@@ -2,121 +2,77 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8BF2C001E0
-	for <linux-mmc@archiver.kernel.org>; Sat, 24 Jun 2023 09:20:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24336EB64DA
+	for <linux-mmc@archiver.kernel.org>; Sat, 24 Jun 2023 20:39:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232554AbjFXJUE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 24 Jun 2023 05:20:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50484 "EHLO
+        id S229476AbjFXUjg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 24 Jun 2023 16:39:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232967AbjFXJUA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Jun 2023 05:20:00 -0400
-Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 456B41BF7
-        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 02:19:58 -0700 (PDT)
-Received: by mail-ej1-x62d.google.com with SMTP id a640c23a62f3a-9889952ed18so185874966b.3
-        for <linux-mmc@vger.kernel.org>; Sat, 24 Jun 2023 02:19:58 -0700 (PDT)
+        with ESMTP id S229446AbjFXUjf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Jun 2023 16:39:35 -0400
+Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A103513E;
+        Sat, 24 Jun 2023 13:39:34 -0700 (PDT)
+Received: by mail-wm1-x329.google.com with SMTP id 5b1f17b1804b1-3f8fb0e7709so23922075e9.2;
+        Sat, 24 Jun 2023 13:39:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687598396; x=1690190396;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=KfAcGT4J8pUoMJBGxBaLszgHGiS6c9l8JOpUoHeAAOA=;
-        b=yQVzjTKSXVmVV9dLLVhjlfW4hSkCHaHSkFp8XKDuppCzQpGHvyVttjnWT3sZWadL6G
-         Aptg8K8aHU9euO2VsKWw8w5GNb7iZUmQN6s980dsKNw8bDt/Gg0mjyG+1qbTOWHueIrY
-         /Q6bxSUkrx10KI9Bk3ImA6gPyy5RwRLI1IVUQjGo73WdFwY+k9WU2qYNImsGMRH4LVBY
-         NGoLGDAz09o/yosqduTlRt/bCpwDw40AnKJvyTtb5EsV6kYLtwXhkQO6myiWdEiHilCp
-         eezk0kHCVcUBB/e4mc1VfkMXxJnPCuve2SWX/BdtYwhjQIOCgvko85iNcFXLb/8ecU/N
-         rm6g==
+        d=gmail.com; s=20221208; t=1687639172; x=1690231172;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=V1tQEJ0k7bwPr/I1jZcsjkwi2z2V1iF0ppEDhL3SNuk=;
+        b=FdQ/fT0MOVzBPKxjV9625PKp1CoRl3lF62b1U+x+Wa0XAWnb3tilfWr+XLI8BhArMa
+         4HqK7dXKt1ancSps79b5kuIx7Pdf8igvYt+bpHG39PFQFfE2BZ81d5RG1BQPgZFufb61
+         7UAXf5+3s7oJ9rOvCF+POv4fm7nQaa3sAgM/tcykuAvFBC90f3dTewSLMNuk4+Xt2r6A
+         vgb0i07nLc4CGsYx8IIy5mHQ/U6GbuAQDHMtx4dkm6QMqWa7bzm5txhy8tsPP98W4eQ5
+         DKDLd80iHVga+z6yv4twlzxdCmwb/y1ZGNfyhOUfRDAhOh/Q3rVUs4YSU4dV+o9vxPx1
+         0IEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687598396; x=1690190396;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=KfAcGT4J8pUoMJBGxBaLszgHGiS6c9l8JOpUoHeAAOA=;
-        b=OwYNDWz1rt7yHxTIPeA+Q1G8CEEP8XuQcprzMMTC7lBI91SZIF2OSeJwGeQdLG1w2J
-         hr3GMK+KQyJiyv1e+DJcI7xlt6VsBCvUpRAHP7Z3qodqPBj5VP5yQiPGi06oUH/FqWPi
-         Hg22ukBae42z0Yxh89HF0E0S2DzDWGglVIvWpwwgJJuvb7g9TCZ2jSOyjR2skDPsXCgy
-         t+JgS0KDa8h5+J2X3ifsifHZeIN7yy6PrAB1Eyk8SuEFsZwFIrsuYqztxrFvL7tG8gsb
-         bLxvwhyEiBIT4lMTYv44bJoUHge8X3CTsS3e3cYd65FEySjMFddxXEyz549ne3y9ByJB
-         mhYA==
-X-Gm-Message-State: AC+VfDxDm6Salafzgjh+IVePRh+ZElRxKvZ8ITVs58H5lnME9Y+J6Xis
-        qTnad58r9OHoNHfum+eG1jQrQA==
-X-Google-Smtp-Source: ACHHUZ5fG8f481PX14S7vktzFZQMA1l6HoKP1yysFPHfBvGgcLJOb2TMBp2polua7/w5jYwHHssrXQ==
-X-Received: by 2002:a17:907:987:b0:987:6372:c31f with SMTP id bf7-20020a170907098700b009876372c31fmr16230436ejc.37.1687598396633;
-        Sat, 24 Jun 2023 02:19:56 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.219.26])
-        by smtp.gmail.com with ESMTPSA id p13-20020a1709060e8d00b00989065149d0sm663324ejf.86.2023.06.24.02.19.50
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 24 Jun 2023 02:19:55 -0700 (PDT)
-Message-ID: <ca3b6a75-2811-6013-28cc-9f6a7854b469@linaro.org>
-Date:   Sat, 24 Jun 2023 11:19:49 +0200
+        d=1e100.net; s=20221208; t=1687639172; x=1690231172;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=V1tQEJ0k7bwPr/I1jZcsjkwi2z2V1iF0ppEDhL3SNuk=;
+        b=GZtOoG8MUThBW1yV9Vc6bHS0npsRcRGsNC8baOTy3mA9cOKTT2whCSZU5GQjnAIJln
+         F3HKU5NH30rcRdBFJKQhuIQ4gknP4ybybzaUplCO32uyCy1Ps2yVgIWZDxtkjE3dHm6y
+         JzP5OsHBp6fJFc5HWNfd+Xh9P1GqZuXW0RIIrgc+Xx0+dFWbFimsHqjOct5BCxUG82R8
+         n16eeZa9cQwrT/8icsP4gtGhY4+UCdywpgjcQIzuEFeCYTWo2ChT14wnpy3GlN2dzAz7
+         Kzi7lAMfFWnv3QxRfKwqIVVIZqkksrV+Z6AMr18uOSmc0RX7uykKWA8lC57f4y+w7Y+6
+         Eggg==
+X-Gm-Message-State: AC+VfDwoM1p9s94KXYlX5HxDWI6AQQg8rwj6dNWivcNFwVumJd7VySzL
+        r2wJDm92Elb3aS2to2C8UT/Z1RQJkCRUzZOBwaVDHZXSxgoaTQ==
+X-Google-Smtp-Source: ACHHUZ5utXC5XVC2n7mtVYnKClEx4riP+lN2BpDmk/NR0y22fQrRzYvsKArktfprRTzo/zDqIdPsHmgSvb46uDrH0mI=
+X-Received: by 2002:a7b:c7c9:0:b0:3fa:7d11:ad00 with SMTP id
+ z9-20020a7bc7c9000000b003fa7d11ad00mr4023734wmk.25.1687639172242; Sat, 24 Jun
+ 2023 13:39:32 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH v2 01/45] dt-bindings: microchip: atmel,at91rm9200-tcb:
- add sam9x60, sam9x7 compatible
-Content-Language: en-US
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Varshini Rajendran <varshini.rajendran@microchip.com>,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        conor+dt@kernel.org, nicolas.ferre@microchip.com,
-        alexandre.belloni@bootlin.com, claudiu.beznea@microchip.com,
-        mturquette@baylibre.com, sboyd@kernel.org,
-        herbert@gondor.apana.org.au, davem@davemloft.net, vkoul@kernel.org,
-        tglx@linutronix.de, maz@kernel.org, lee@kernel.org,
-        ulf.hansson@linaro.org, tudor.ambarus@linaro.org,
-        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
-        edumazet@google.com, kuba@kernel.org, pabeni@redhat.com,
-        linus.walleij@linaro.org, p.zabel@pengutronix.de,
-        olivia@selenic.com, a.zummo@towertech.it,
-        radu_nicolae.pirea@upb.ro, richard.genoud@gmail.com,
-        gregkh@linuxfoundation.org, lgirdwood@gmail.com,
-        broonie@kernel.org, wim@linux-watchdog.org, linux@roeck-us.net,
-        arnd@arndb.de, olof@lixom.net, soc@kernel.org,
-        linux@armlinux.org.uk, sre@kernel.org, jerry.ray@microchip.com,
-        horatiu.vultur@microchip.com, durai.manickamkr@microchip.com,
-        andrew@lunn.ch, alain.volmat@foss.st.com,
-        neil.armstrong@linaro.org, mihai.sain@microchip.com,
-        eugen.hristev@collabora.com, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-crypto@vger.kernel.org,
-        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        linux-pm@vger.kernel.org
-Cc:     Hari.PrasathGE@microchip.com, cristian.birsan@microchip.com,
-        balamanikandan.gunasundar@microchip.com,
-        manikandan.m@microchip.com, dharma.b@microchip.com,
-        nayabbasha.sayed@microchip.com, balakrishnan.s@microchip.com
-References: <20230623203056.689705-1-varshini.rajendran@microchip.com>
- <20230623203056.689705-2-varshini.rajendran@microchip.com>
- <074048a2-5153-e013-3562-b5cad2ba0954@linaro.org>
-In-Reply-To: <074048a2-5153-e013-3562-b5cad2ba0954@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From:   Pascal Terjan <pterjan@gmail.com>
+Date:   Sat, 24 Jun 2023 21:39:15 +0100
+Message-ID: <CA+CX+bjcvbtW2Wto1XF1dKcAbpGGisdyHAGHX12v3TchhLbKtg@mail.gmail.com>
+Subject: rtsx_usb_sdmmc not detecting card insertion anymore
+To:     linux-kernel <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/06/2023 09:53, Krzysztof Kozlowski wrote:
-> On 23/06/2023 22:30, Varshini Rajendran wrote:
->> Add sam9x60, sam9x7 compatible string support in the schema file.
->>
->> Signed-off-by: Varshini Rajendran <varshini.rajendran@microchip.com>
->> ---
->>  .../devicetree/bindings/soc/microchip/atmel,at91rm9200-tcb.yaml | 
-> 
-> 
-> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Hi,
+I have an ASUS PN50 machine with a 0bda:0129 card reader. The card is
+not seen unless I reload the rtsx_usb_sdmmc module.
 
-Un-acked. Actually NAK.
+I found a Debian bug report for the same regression
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=993068 but nothing
+to see there.
 
-This does not match your DTS. Please test your patches before sending.
+Trying to understand things I found
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=4dad599b8b5d1ffc5ef12a2edb13d15d537202ba
+which seemed related, so I first tried to revert it and that worked.
 
-Best regards,
-Krzysztof
+Assuming the description is correct and the rtsx USB driver runtime
+resumes the rtsx_usb_sdmmc device when it detects that a new card has
+been inserted, I assume this means it doesn't detect that a card was
+inserted and the problem would be in rtsx_usb rather than
+rtsx_usb_sdmmc.
 
+I am not sure how to debug this further, usbmon doesn't see anything
+when I insert the card.
