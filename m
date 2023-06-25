@@ -2,77 +2,84 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24336EB64DA
-	for <linux-mmc@archiver.kernel.org>; Sat, 24 Jun 2023 20:39:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3A15EB64DC
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jun 2023 10:38:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229476AbjFXUjg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 24 Jun 2023 16:39:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33912 "EHLO
+        id S231249AbjFYKi1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 25 Jun 2023 06:38:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57540 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229446AbjFXUjf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Jun 2023 16:39:35 -0400
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A103513E;
-        Sat, 24 Jun 2023 13:39:34 -0700 (PDT)
-Received: by mail-wm1-x329.google.com with SMTP id 5b1f17b1804b1-3f8fb0e7709so23922075e9.2;
-        Sat, 24 Jun 2023 13:39:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1687639172; x=1690231172;
-        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=V1tQEJ0k7bwPr/I1jZcsjkwi2z2V1iF0ppEDhL3SNuk=;
-        b=FdQ/fT0MOVzBPKxjV9625PKp1CoRl3lF62b1U+x+Wa0XAWnb3tilfWr+XLI8BhArMa
-         4HqK7dXKt1ancSps79b5kuIx7Pdf8igvYt+bpHG39PFQFfE2BZ81d5RG1BQPgZFufb61
-         7UAXf5+3s7oJ9rOvCF+POv4fm7nQaa3sAgM/tcykuAvFBC90f3dTewSLMNuk4+Xt2r6A
-         vgb0i07nLc4CGsYx8IIy5mHQ/U6GbuAQDHMtx4dkm6QMqWa7bzm5txhy8tsPP98W4eQ5
-         DKDLd80iHVga+z6yv4twlzxdCmwb/y1ZGNfyhOUfRDAhOh/Q3rVUs4YSU4dV+o9vxPx1
-         0IEg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687639172; x=1690231172;
-        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=V1tQEJ0k7bwPr/I1jZcsjkwi2z2V1iF0ppEDhL3SNuk=;
-        b=GZtOoG8MUThBW1yV9Vc6bHS0npsRcRGsNC8baOTy3mA9cOKTT2whCSZU5GQjnAIJln
-         F3HKU5NH30rcRdBFJKQhuIQ4gknP4ybybzaUplCO32uyCy1Ps2yVgIWZDxtkjE3dHm6y
-         JzP5OsHBp6fJFc5HWNfd+Xh9P1GqZuXW0RIIrgc+Xx0+dFWbFimsHqjOct5BCxUG82R8
-         n16eeZa9cQwrT/8icsP4gtGhY4+UCdywpgjcQIzuEFeCYTWo2ChT14wnpy3GlN2dzAz7
-         Kzi7lAMfFWnv3QxRfKwqIVVIZqkksrV+Z6AMr18uOSmc0RX7uykKWA8lC57f4y+w7Y+6
-         Eggg==
-X-Gm-Message-State: AC+VfDwoM1p9s94KXYlX5HxDWI6AQQg8rwj6dNWivcNFwVumJd7VySzL
-        r2wJDm92Elb3aS2to2C8UT/Z1RQJkCRUzZOBwaVDHZXSxgoaTQ==
-X-Google-Smtp-Source: ACHHUZ5utXC5XVC2n7mtVYnKClEx4riP+lN2BpDmk/NR0y22fQrRzYvsKArktfprRTzo/zDqIdPsHmgSvb46uDrH0mI=
-X-Received: by 2002:a7b:c7c9:0:b0:3fa:7d11:ad00 with SMTP id
- z9-20020a7bc7c9000000b003fa7d11ad00mr4023734wmk.25.1687639172242; Sat, 24 Jun
- 2023 13:39:32 -0700 (PDT)
+        with ESMTP id S230029AbjFYKi0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jun 2023 06:38:26 -0400
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E250E44
+        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 03:38:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1687689506; x=1719225506;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=SnCDPzIBMA29R0QcKEdlu1D5QY0YLYKcPEZbvfxludI=;
+  b=Uke7ej9KQ5cJKl2fayhRGiruETRgtO+/vVppWFu4Fb/Mt0kAAz7uFVNI
+   C+7eNH2EerWrIrIYFtEh+SmbRl5IkUD9sYRgPlUReQ9zc7b0RlVeNCuIK
+   EdzrQNdZDR8am65F+fVNIyLFaOFBcTglfznCcAfB6SVwnFhpH0QivSfM3
+   XDymt/WBRMGYj4/rIUOoM3wze26YiB3nL+xkkctePyUXympkNLZDS2amP
+   sPfbj8so85iJmw9phmm1jPFawZcnjUe0dOdl3vbCAJn1voJJX+WRutRYF
+   i34tZ4mPPEdEBvity5iLxa74gAALsQXCbjTl9InlBso4Ws+fZOYF9tD0W
+   g==;
+X-IronPort-AV: E=Sophos;i="6.01,157,1684771200"; 
+   d="scan'208";a="236159309"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 25 Jun 2023 18:38:26 +0800
+IronPort-SDR: OCtglKiLConCEaBDFXhOqBlvaQLNtCdzxiIrrpd/5BE/eGhbHySB+Z+i+xheNp4pI0yXOg9VeT
+ HRv9YpC6rh3YmYS1+btoJAuWe3/Wh9IFb7LJ3nI7P44Abph/K0jHQoty2+R0D1524yJy3Rynbq
+ 7KX54zlWYU/sKyIGFZnUVepJp4/uCtDvkq0duAoKWeZrx7avrgNMkTvDWoEjtYZIDj7rEC2z9z
+ haDu1yrPTpq2qEQ7IrsiZxBeAiK/+Oo++RHDWR47Ba/oqva49WPWp80ZwZ5KtEXufFcs/+59Ho
+ FBE=
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Jun 2023 02:52:46 -0700
+IronPort-SDR: ka7UT6kUUQt/0XrNvmmNNMu94h+Qz3cEQyY9N8wT3J/wCOLGQCQgLpI4SMeAfSE5UpVNaTrZFn
+ n8mLYwcZKCNx33lpmqVPgb+9Zi+bHH59dhArkb45t9md15Tw0WDeVCu5JkJP4GG83c2n8vSBlS
+ /cyUHOpUxBvYJO51cTR7xwklTcertweG78U6wW/o5Q9Tzms02ra7atTYZn1Y4CzH/thpM77s2U
+ fgXcLbQPKZba8DNeQhLiAbQnG0l6ntC4oaTco+9XizKH3Sem6ouGTYuWUoe3UlpSHoBn9WAMz/
+ qZI=
+WDCIronportException: Internal
+Received: from bxygm33.ad.shared ([10.45.31.229])
+  by uls-op-cesaip01.wdc.com with ESMTP; 25 Jun 2023 03:38:24 -0700
+From:   Avri Altman <avri.altman@wdc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH 0/6] mmc-utils: ffu: ffu of large images
+Date:   Sun, 25 Jun 2023 13:38:08 +0300
+Message-Id: <20230625103814.105-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-From:   Pascal Terjan <pterjan@gmail.com>
-Date:   Sat, 24 Jun 2023 21:39:15 +0100
-Message-ID: <CA+CX+bjcvbtW2Wto1XF1dKcAbpGGisdyHAGHX12v3TchhLbKtg@mail.gmail.com>
-Subject: rtsx_usb_sdmmc not detecting card insertion anymore
-To:     linux-kernel <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-I have an ASUS PN50 machine with a 0bda:0129 card reader. The card is
-not seen unless I reload the rtsx_usb_sdmmc module.
+ffu is done using a single multi-ioctl to carry the entire firmware
+image. This is limiting the fw image size to be at most 512KB, as the
+mmc driver restricts each single ioc data to be at most
+MMC_IOC_MAX_BYTES.
 
-I found a Debian bug report for the same regression
-https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=993068 but nothing
-to see there.
+The spec however, allows the fw image to be written using multiple write
+commands. So if the fw image is larger than 512KB, split it into a
+series of smaller chunks.
 
-Trying to understand things I found
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=4dad599b8b5d1ffc5ef12a2edb13d15d537202ba
-which seemed related, so I first tried to revert it and that worked.
+Avri Altman (6):
+  mmc-utils: Add fill_switch_cmd handler
+  mmc-utils: Add arg argument to set_single_cmd
+  mmc-utils: ffu: Simplify ext_csd bytes parsing
+  mmc-utils: ffu: Add ffu multi-command set handler
+  mmc-utils: ffu: Allow ffu of large images
+  mmc-utils: ffu: Add optional chunk-size argument
 
-Assuming the description is correct and the rtsx USB driver runtime
-resumes the rtsx_usb_sdmmc device when it detects that a new card has
-been inserted, I assume this means it doesn't detect that a card was
-inserted and the problem would be in rtsx_usb rather than
-rtsx_usb_sdmmc.
+ mmc.c      |   6 +-
+ mmc_cmds.c | 161 +++++++++++++++++++++++++++--------------------------
+ 2 files changed, 86 insertions(+), 81 deletions(-)
 
-I am not sure how to debug this further, usbmon doesn't see anything
-when I insert the card.
+-- 
+2.40.1
+
