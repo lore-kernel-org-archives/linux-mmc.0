@@ -2,139 +2,99 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E2C2EB64DD
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jun 2023 10:39:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CCD9EB64DC
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jun 2023 19:17:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231438AbjFYKjX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 25 Jun 2023 06:39:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57638 "EHLO
+        id S229621AbjFYTR2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 25 Jun 2023 15:17:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43794 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231484AbjFYKjW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jun 2023 06:39:22 -0400
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C5A1E44
-        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 03:39:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1687689560; x=1719225560;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=cbPr9is1lhDIdyfCo15q74NmPvMaF3gMv7Z2OgyuoBM=;
-  b=AEd7rREx4bZbt4RSv+KbPnjZI/1sx9T7LNc7G+PPYZF74QjQ6Tq3a+uk
-   PhGtrwynCNmuvvdncZLi9pG75jhY7GSzi6ML53+voi/XLE9BDE9C0WsLz
-   p+yXxmGR1cmKAgi2Ww6y2YQ24qhftIAynUv7Og0KwCp9E5GuiLXMVcprY
-   1mugggQYJJSOVTsmeDT4AKmPxCHXZenNFA/zIQe1zu8+H5nQPMoIyxThD
-   aTMzp6jktG+t6x0pKJu8t/W9M1FcvJDCI4ZV81mIEYUjRSuT61+LoP6+z
-   Af2vJCvJ7LUEdKZzUUHKNNgHW3LXwtcGSrUJ4tDLE02wQnwn0pyS5ds/2
-   A==;
-X-IronPort-AV: E=Sophos;i="6.01,157,1684771200"; 
-   d="scan'208";a="236798746"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 25 Jun 2023 18:39:20 +0800
-IronPort-SDR: bfYaOFTSLknvINKL6fQY9EtNQAkh7F6YeNpuY0FVwJBzYR+cO/O3h968X3Nn+oKpmqW8r1dggX
- j30A2aLIZzBVsaj9k6MoVW+yaIvzbhk67Hq4rX7rU2bvP5plBkPa0IecCCFH6Cnxt2XJb0prrt
- UFSNXiXvUqWT0Kb4TBrU7BOswImezoMth2v//mD/Zh1CxSAYB+M2vToRTeynZVqOza8Di2l0Ro
- R+aV1KILVaP2mz8bOV/8u3ahBNjmbWEUGQeC9fL2tyUA0sTAIaEwkSpJ/l5EhVXXVnfQwEo8MH
- 72o=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Jun 2023 02:53:42 -0700
-IronPort-SDR: 4vfUHZhQl5+TdbTEg87IteUtrC9PHYOrAI6oCEM8Aglvr9PnPX8eSC+5nr+jf3mcWC/ErPKksB
- WMB3BBBhXOrq6uaDUuVrRSLvM900feRoZMmM3sULoZXheXYFzxcRGCYGFzY818q4NH2T20WVGi
- Ztu8IrxL1T4NtbMsK7GBw6y17A3RzuLaAGNdaBfyeO/z/Tv/+8l1RDmZzNwW3OeiSnRe9kAd//
- llPAJQNIuc4nw+vh+RxpaloePeaeeyCOuGerRBQGIUuuVnnBBhQYb4kwmEHoAQ3CBv+6b7SkY+
- Tv4=
-WDCIronportException: Internal
-Received: from bxygm33.ad.shared ([10.45.31.229])
-  by uls-op-cesaip01.wdc.com with ESMTP; 25 Jun 2023 03:39:20 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Avri Altman <avri.altman@wdc.com>,
-        Lund Austin <Austin.Lund@garmin.com>
-Subject: [PATCH 6/6] mmc-utils: ffu: Add optional chunk-size argument
-Date:   Sun, 25 Jun 2023 13:38:14 +0300
-Message-Id: <20230625103814.105-7-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20230625103814.105-1-avri.altman@wdc.com>
-References: <20230625103814.105-1-avri.altman@wdc.com>
+        with ESMTP id S229448AbjFYTR1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jun 2023 15:17:27 -0400
+X-Greylist: delayed 326 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sun, 25 Jun 2023 12:17:26 PDT
+Received: from mxout3.routing.net (mxout3.routing.net [IPv6:2a03:2900:1:a::8])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86268A7
+        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 12:17:26 -0700 (PDT)
+Received: from mxbox3.masterlogin.de (unknown [192.168.10.78])
+        by mxout3.routing.net (Postfix) with ESMTP id 33B6361D70;
+        Sun, 25 Jun 2023 19:11:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
+        s=20200217; t=1687720319;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=I8cdP6cF+nwTWlyfboIiQYyzWM6TGbsre5s255hDw1E=;
+        b=Pl5yHLtQhlZRf6IaetH73juzzgAcv8wvmRT4gxomHF6ZkFCxpKIkojkR90tRkMaLqkgfKY
+        NpKwS9ev3rY8UQUu2n9vZbd4hDRSP4LXhWqEoo+0CMv4krDL6OzHgzdD4tSwTkN2mMl7uq
+        zMfOaBSaX20rnMpkbuXrgEnYY7yBRt8=
+Received: from frank-G5.. (fttx-pool-217.61.151.158.bambit.de [217.61.151.158])
+        by mxbox3.masterlogin.de (Postfix) with ESMTPSA id 614883603F2;
+        Sun, 25 Jun 2023 19:11:58 +0000 (UTC)
+From:   Frank Wunderlich <linux@fw-web.de>
+To:     linux-mediatek@lists.infradead.org
+Cc:     Frank Wunderlich <frank-w@public-files.de>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        Eric Woudstra <ericwouds@gmail.com>, stable@vger.kernel.org
+Subject: [PATCH v1 2/2] arm64: dts: mt7986: fix emmc hs400 mode without uboot initialization
+Date:   Sun, 25 Jun 2023 21:11:51 +0200
+Message-Id: <20230625191151.7808-3-linux@fw-web.de>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230625191151.7808-1-linux@fw-web.de>
+References: <20230625191151.7808-1-linux@fw-web.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Mail-ID: e50c288a-9e4f-4e10-8878-4503de1b0770
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Normally one would like to perform ffu using the largest possible chunk.
-However, since the ffu-timeout is vendor specific, there are times in
-which smaller chunks would lead to a more robust ffu process.  Allow
-this via an additional optional argument.
+From: Eric Woudstra <ericwouds@gmail.com>
 
-Tested-by: Lund Austin <Austin.Lund@garmin.com>
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
+Eric reports errors on emmc with hs400 mode when booting linux on bpi-r3
+without uboot [1]. Booting with uboot does not show this because clocks
+seem to be initialized by uboot.
+
+Fix this by adding assigned-clocks and assigned-clock-parents like it's
+done in uboot [2].
+
+[1] https://forum.banana-pi.org/t/bpi-r3-kernel-fails-setting-emmc-clock-to-416m-depends-on-u-boot/15170
+[2] https://github.com/u-boot/u-boot/blob/master/arch/arm/dts/mt7986.dtsi#L287
+
+Cc: stable@vger.kernel.org
+Fixes: 513b49d19b34 ("arm64: dts: mt7986: add mmc related device nodes")
+Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
+Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 ---
- mmc.c      |  6 ++++--
- mmc_cmds.c | 18 ++++++++++++------
- 2 files changed, 16 insertions(+), 8 deletions(-)
+ arch/arm64/boot/dts/mediatek/mt7986a.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/mmc.c b/mmc.c
-index 795b4e3..bc8f74e 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -228,8 +228,10 @@ static struct Command commands[] = {
- 	  NULL
- 	},
- 	{ do_ffu, -2,
--	  "ffu", "<image name> <device>\n"
--		"Run Field Firmware Update with <image name> on <device>.\n",
-+	  "ffu", "<image name> <device> [chunk-bytes]\n"
-+		"Run Field Firmware Update with <image name> on <device>.\n"
-+		"[chunk-bytes] is optional and defaults to its max - 512k. "
-+		"should be in decimal bytes and sector aligned.\n",
- 	  NULL
- 	},
- 	{ do_erase, -4,
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index a1adbde..10d063d 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2834,11 +2834,9 @@ int do_ffu(int nargs, char **argv)
- 	off_t fw_size, bytes_left, off;
- 	char *device;
- 	struct mmc_ioc_multi_cmd *multi_cmd = NULL;
-+	unsigned int default_chunk = MMC_IOC_MAX_BYTES;
- 
--	if (nargs != 3) {
--		fprintf(stderr, "Usage: ffu <image name> </path/to/mmcblkX> \n");
--		exit(1);
--	}
-+	assert (nargs == 3 || nargs == 4);
- 
- 	device = argv[2];
- 	dev_fd = open(device, O_RDWR);
-@@ -2898,6 +2896,14 @@ int do_ffu(int nargs, char **argv)
- 		goto out;
- 	}
- 
-+	if (nargs == 4) {
-+		default_chunk = strtol(argv[3], NULL, 10);
-+		if (default_chunk > MMC_IOC_MAX_BYTES || default_chunk % 512) {
-+			fprintf(stderr, "Invalid chunk size");
-+			goto out;
-+		}
-+	}
-+
- 	/* prepare multi_cmd for FFU based on cmd to be used */
- 
- 	multi_cmd->num_of_cmds = 4;
-@@ -2922,8 +2928,8 @@ do_retry:
- 	bytes_left = fw_size;
- 	off = 0;
- 	while (bytes_left) {
--		unsigned int chunk_size = bytes_left < MMC_IOC_MAX_BYTES ?
--					  bytes_left : MMC_IOC_MAX_BYTES;
-+		unsigned int chunk_size = bytes_left < default_chunk ?
-+					  bytes_left : default_chunk;
- 
- 		/* prepare multi_cmd for FFU based on cmd to be used */
- 		set_ffu_single_cmd(multi_cmd, ext_csd, chunk_size, buf, off);
+diff --git a/arch/arm64/boot/dts/mediatek/mt7986a.dtsi b/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
+index 68539ea788df..207510abda89 100644
+--- a/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
++++ b/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
+@@ -374,6 +374,10 @@ mmc0: mmc@11230000 {
+ 			reg = <0 0x11230000 0 0x1000>,
+ 			      <0 0x11c20000 0 0x1000>;
+ 			interrupts = <GIC_SPI 143 IRQ_TYPE_LEVEL_HIGH>;
++			assigned-clocks = <&topckgen CLK_TOP_EMMC_416M_SEL>,
++					  <&topckgen CLK_TOP_EMMC_250M_SEL>;
++			assigned-clock-parents = <&apmixedsys CLK_APMIXED_MPLL>,
++						 <&topckgen CLK_TOP_NET1PLL_D5_D2>;
+ 			clocks = <&topckgen CLK_TOP_EMMC_416M_SEL>,
+ 				 <&infracfg CLK_INFRA_MSDC_HCK_CK>,
+ 				 <&infracfg CLK_INFRA_MSDC_CK>,
 -- 
-2.40.1
+2.34.1
 
