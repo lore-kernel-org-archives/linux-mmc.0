@@ -2,86 +2,72 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E706EB64DD
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jun 2023 19:19:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A08BEB64DC
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jun 2023 20:47:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229611AbjFYTT6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 25 Jun 2023 15:19:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44744 "EHLO
+        id S229623AbjFYUrr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 25 Jun 2023 16:47:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38616 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229532AbjFYTT5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jun 2023 15:19:57 -0400
-Received: from mxout4.routing.net (mxout4.routing.net [IPv6:2a03:2900:1:a::9])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1823A7
-        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 12:19:56 -0700 (PDT)
-Received: from mxbox3.masterlogin.de (unknown [192.168.10.78])
-        by mxout4.routing.net (Postfix) with ESMTP id 7227B100877;
-        Sun, 25 Jun 2023 19:11:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1687720318;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=hOhkIMP+kNOLQ9YAs2dWlhnv2oixfRQubnTydB4EaJc=;
-        b=Z3J2zGRjRQFq636jMHZKVXR0v7VK1OT6o//nDMxRKiErjeESe5un7dVgJNFsr2D4R280oJ
-        ux7H1TtvlRrnHvN1bBHEv/RJk7nVAuu07iOZd+c+Dz7FgAMyqZjttI1TJkEwR3EDvm4QlU
-        f3YG1zgMPUz3IQb8AqehVB7EFDDNNZk=
-Received: from frank-G5.. (fttx-pool-217.61.151.158.bambit.de [217.61.151.158])
-        by mxbox3.masterlogin.de (Postfix) with ESMTPSA id B5DB0360931;
-        Sun, 25 Jun 2023 19:11:57 +0000 (UTC)
-From:   Frank Wunderlich <linux@fw-web.de>
-To:     linux-mediatek@lists.infradead.org
-Cc:     Frank Wunderlich <frank-w@public-files.de>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Subject: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: update assigned-clocks/clock-parents for mt7986
-Date:   Sun, 25 Jun 2023 21:11:50 +0200
-Message-Id: <20230625191151.7808-2-linux@fw-web.de>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230625191151.7808-1-linux@fw-web.de>
-References: <20230625191151.7808-1-linux@fw-web.de>
+        with ESMTP id S229510AbjFYUrq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jun 2023 16:47:46 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A1D9113
+        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 13:47:45 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id a640c23a62f3a-9883123260fso241425966b.0
+        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 13:47:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20221208; t=1687726064; x=1690318064;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5AqFVIF9YfIBYb2CvrHHDuEqSvWmX+/UHXMYkRoIX+s=;
+        b=DV0fQxhtxizfrMX3uu1W6cPFSovBnbE7sMjSDJtut5hLi292pSAOMKfV5GT8SNWFnt
+         y6on8ZGRC9OjJB8ctc53gUApt9/YNintfY5SslcLS13Lx4Amw1SIDwKZKbVzr8KyPdhp
+         DNu4bN0CwpzMutuCCUAppyLMO8ltVP+7yBShkx7/P3V0ezQw0VfGnif9jlXZkNbP9U6x
+         3XMbHNAjTtH6o8tyRvbcDJi7P1ojXrC5b65BFD+XfGwx/nwjP4y/Ofyvz/8EzGZYe4Vu
+         sBVvKAOyi/hiyQJjYafQgZLjvkRfATB1ad8duQLnnJr1C+DtMz639kttYIKKE+DptaHx
+         78zA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687726064; x=1690318064;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=5AqFVIF9YfIBYb2CvrHHDuEqSvWmX+/UHXMYkRoIX+s=;
+        b=BLRAmIu/thmodWk7JPgbH9xutThlAMK6ZgyftpIgxsL8KtLsKj8mHDuwP9Nky9yaOb
+         kcA6eEAa34eSYXd7XYH2+GSH9f2xSN9lZSERmoddWNjiuJTGFCtxX3Nnd0OuA7k8jttU
+         VQzQ4m1OTZPiyq/lEG4Jw/JDVpPmBxXVUf9B682IDXBHYnXWJBJS/sIemk89BRwaqWNc
+         j7epAhMbaxMX/0RRCUq39AsXCeZr24HvcZfONVc5TbUTQrw6Pxj5yrB0X2PhfdwDK9wV
+         JLJJ+/U/MrKRL0M4qccDmQFA4on9t6J4tLp9V98kgxsX8RYuBAgZdNd6W/d1J6XojSwp
+         ZOmg==
+X-Gm-Message-State: AC+VfDx9pZ3OzmRnGmaU0lA9DKRIUFtSlg43JF/1dji+lr9Q7SYpAqVG
+        cp1YQQLi0J7RKErGzv1+xHgC1ztD1ubycMEZv7Y=
+X-Google-Smtp-Source: ACHHUZ4dJTnQ+e5HK62iMwxzgdg8edVG5dR+IlPYW/YhSwjjl+dJxjkTY/D2/YtWl6RZz4GhPmx9nZZ4MLpq36fvcTk=
+X-Received: by 2002:a17:907:2d11:b0:988:8a02:4560 with SMTP id
+ gs17-20020a1709072d1100b009888a024560mr15820644ejc.44.1687726063835; Sun, 25
+ Jun 2023 13:47:43 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Mail-ID: 111d6e13-9401-4ca9-bbed-5c71f5bd419c
+References: <20230622105327.77296-1-ulf.hansson@linaro.org>
+In-Reply-To: <20230622105327.77296-1-ulf.hansson@linaro.org>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Sun, 25 Jun 2023 22:47:33 +0200
+Message-ID: <CAFBinCAULmVZJ0Zt5J=kmr11qeudeYgf=57y9esCaH9M5jJLpw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: Drop redundant WARN_ON() in the irq handler
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Frank Wunderlich <frank-w@public-files.de>
-
-MT7986 has 2 clock-parents so update the binding for it.
-
-Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
----
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index 46eefdd19a2c..485516dcc759 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -247,6 +247,10 @@ allOf:
-               - mediatek,mt7986-mmc
-     then:
-       properties:
-+        assigned-clocks:
-+          maxItems: 2
-+        assigned-clock-parents:
-+          maxItems: 2
-         clocks:
-           minItems: 3
-           items:
--- 
-2.34.1
-
+On Thu, Jun 22, 2023 at 12:53=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.or=
+g> wrote:
+>
+> The host pointer is already being dereferenced earlier, so let's just dro=
+p
+> the redundant WARN_ON.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
