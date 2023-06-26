@@ -2,72 +2,165 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A08BEB64DC
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jun 2023 20:47:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57527EB64DC
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Jun 2023 03:04:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229623AbjFYUrr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 25 Jun 2023 16:47:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38616 "EHLO
+        id S230447AbjFZDEo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 25 Jun 2023 23:04:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229510AbjFYUrq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jun 2023 16:47:46 -0400
-Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A1D9113
-        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 13:47:45 -0700 (PDT)
-Received: by mail-ej1-x62b.google.com with SMTP id a640c23a62f3a-9883123260fso241425966b.0
-        for <linux-mmc@vger.kernel.org>; Sun, 25 Jun 2023 13:47:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1687726064; x=1690318064;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=5AqFVIF9YfIBYb2CvrHHDuEqSvWmX+/UHXMYkRoIX+s=;
-        b=DV0fQxhtxizfrMX3uu1W6cPFSovBnbE7sMjSDJtut5hLi292pSAOMKfV5GT8SNWFnt
-         y6on8ZGRC9OjJB8ctc53gUApt9/YNintfY5SslcLS13Lx4Amw1SIDwKZKbVzr8KyPdhp
-         DNu4bN0CwpzMutuCCUAppyLMO8ltVP+7yBShkx7/P3V0ezQw0VfGnif9jlXZkNbP9U6x
-         3XMbHNAjTtH6o8tyRvbcDJi7P1ojXrC5b65BFD+XfGwx/nwjP4y/Ofyvz/8EzGZYe4Vu
-         sBVvKAOyi/hiyQJjYafQgZLjvkRfATB1ad8duQLnnJr1C+DtMz639kttYIKKE+DptaHx
-         78zA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687726064; x=1690318064;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=5AqFVIF9YfIBYb2CvrHHDuEqSvWmX+/UHXMYkRoIX+s=;
-        b=BLRAmIu/thmodWk7JPgbH9xutThlAMK6ZgyftpIgxsL8KtLsKj8mHDuwP9Nky9yaOb
-         kcA6eEAa34eSYXd7XYH2+GSH9f2xSN9lZSERmoddWNjiuJTGFCtxX3Nnd0OuA7k8jttU
-         VQzQ4m1OTZPiyq/lEG4Jw/JDVpPmBxXVUf9B682IDXBHYnXWJBJS/sIemk89BRwaqWNc
-         j7epAhMbaxMX/0RRCUq39AsXCeZr24HvcZfONVc5TbUTQrw6Pxj5yrB0X2PhfdwDK9wV
-         JLJJ+/U/MrKRL0M4qccDmQFA4on9t6J4tLp9V98kgxsX8RYuBAgZdNd6W/d1J6XojSwp
-         ZOmg==
-X-Gm-Message-State: AC+VfDx9pZ3OzmRnGmaU0lA9DKRIUFtSlg43JF/1dji+lr9Q7SYpAqVG
-        cp1YQQLi0J7RKErGzv1+xHgC1ztD1ubycMEZv7Y=
-X-Google-Smtp-Source: ACHHUZ4dJTnQ+e5HK62iMwxzgdg8edVG5dR+IlPYW/YhSwjjl+dJxjkTY/D2/YtWl6RZz4GhPmx9nZZ4MLpq36fvcTk=
-X-Received: by 2002:a17:907:2d11:b0:988:8a02:4560 with SMTP id
- gs17-20020a1709072d1100b009888a024560mr15820644ejc.44.1687726063835; Sun, 25
- Jun 2023 13:47:43 -0700 (PDT)
+        with ESMTP id S230329AbjFZDEm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jun 2023 23:04:42 -0400
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0FE931AC;
+        Sun, 25 Jun 2023 20:04:39 -0700 (PDT)
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 35Q347nlC022441, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 35Q347nlC022441
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=FAIL);
+        Mon, 26 Jun 2023 11:04:07 +0800
+Received: from RTEXMBS03.realtek.com.tw (172.21.6.96) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.32; Mon, 26 Jun 2023 11:04:30 +0800
+Received: from RTEXH36505.realtek.com.tw (172.21.6.25) by
+ RTEXMBS03.realtek.com.tw (172.21.6.96) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Mon, 26 Jun 2023 11:04:29 +0800
+Received: from localhost.localdomain (172.21.252.101) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server id
+ 15.1.2375.32 via Frontend Transport; Mon, 26 Jun 2023 11:04:29 +0800
+From:   Jyan Chou <jyanchou@realtek.com>
+To:     <adrian.hunter@intel.com>, <jh80.chung@samsung.com>,
+        <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <jyanchou@realtek.com>
+Subject: [PATCH] [PATCH 01/1] Add CMDQ feqture to Synopsys IP
+Date:   Mon, 26 Jun 2023 11:04:26 +0800
+Message-ID: <20230626030426.19275-1-jyanchou@realtek.com>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-References: <20230622105327.77296-1-ulf.hansson@linaro.org>
-In-Reply-To: <20230622105327.77296-1-ulf.hansson@linaro.org>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sun, 25 Jun 2023 22:47:33 +0200
-Message-ID: <CAFBinCAULmVZJ0Zt5J=kmr11qeudeYgf=57y9esCaH9M5jJLpw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: Drop redundant WARN_ON() in the irq handler
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-KSE-ServerInfo: RTEXMBS03.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jun 22, 2023 at 12:53=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.or=
-g> wrote:
->
-> The host pointer is already being dereferenced earlier, so let's just dro=
-p
-> the redundant WARN_ON.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Acked-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+CMDQ feature is introduced to eMMC standard in v5.1, which can be used to
+improve performance. We add the mmc driver for the Synopsys
+DesignWare mmc host controller with cmdq support.
+
+Signed-off-by: Jyan Chou <jyanchou@realtek.com>
+---
+ v1 to v2 change:
+1. Add CQHCI call back function patch to solve DMA limitation problem
+2. Fix the build warnings
+---
+ drivers/mmc/host/cqhci-core.c |  5 +++++
+ drivers/mmc/host/cqhci.h      |  2 ++
+ drivers/mmc/host/dw_mmc_cqe.c | 16 ++++++----------
+ drivers/mmc/host/dw_mmc_cqe.h |  2 +-
+ 4 files changed, 14 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index b3d7d6d8d654..4d6fb228a21e 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -516,6 +516,11 @@ static int cqhci_prep_tran_desc(struct mmc_request *mrq,
+ 
+ 	desc = get_trans_desc(cq_host, tag);
+ 
++	if (cq_host->ops->setup_tran_desc) {
++		cq_host->ops->setup_tran_desc(data, cq_host, desc, sg_count);
++		return 0;
++	}
++
+ 	for_each_sg(data->sg, sg, sg_count, i) {
+ 		addr = sg_dma_address(sg);
+ 		len = sg_dma_len(sg);
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index ba9387ed90eb..a3e56da6189d 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -286,6 +286,8 @@ struct cqhci_host_ops {
+ 				 u64 *data);
+ 	void (*pre_enable)(struct mmc_host *mmc);
+ 	void (*post_disable)(struct mmc_host *mmc);
++	void (*setup_tran_desc)(struct mmc_data *data,
++		struct cqhci_host *cq_host, u8 *desc, int sg_count);
+ #ifdef CONFIG_MMC_CRYPTO
+ 	int (*program_key)(struct cqhci_host *cq_host,
+ 			   const union cqhci_crypto_cfg_entry *cfg, int slot);
+diff --git a/drivers/mmc/host/dw_mmc_cqe.c b/drivers/mmc/host/dw_mmc_cqe.c
+index c50a6c71a362..7c7246d13c0d 100644
+--- a/drivers/mmc/host/dw_mmc_cqe.c
++++ b/drivers/mmc/host/dw_mmc_cqe.c
+@@ -94,7 +94,6 @@ static int dw_mci_cqe_req_show(struct seq_file *s, void *v)
+ 
+ 	return 0;
+ }
+-DEFINE_SHOW_ATTRIBUTE(dw_mci_cqe_req);
+ #endif /* defined(CONFIG_DEBUG_FS) */
+ 
+ static int dw_mci_cqe_regs_show(struct dw_mci *host,
+@@ -279,13 +278,10 @@ static void dw_mci_cqe_read_rsp(struct dw_mci *host, struct mmc_command *cmd, u3
+ 			if (drv_data && drv_data->shift_rsp) {
+ 				drv_data->shift_rsp(host, cmd, cmd->resp);
+ 			} else {
+-				/*R2 long response*/
+-				u32 rsp_tmp[4];
+-
+-				rsp_tmp[3] = mci_readl(host, RESP01_R);
+-				rsp_tmp[2] = mci_readl(host, RESP23_R);
+-				rsp_tmp[1] = mci_readl(host, RESP45_R);
+-				rsp_tmp[0] = mci_readl(host, RESP67_R);
++				cmd->resp[3] = mci_readl(host, RESP01_R);
++				cmd->resp[2] = mci_readl(host, RESP23_R);
++				cmd->resp[1] = mci_readl(host, RESP45_R);
++				cmd->resp[0] = mci_readl(host, RESP67_R);
+ 			}
+ 		} else {
+ 			/*Short response*/
+@@ -580,7 +576,7 @@ static void dw_mci_cqe_prepare_desc32(struct dw_mci *host, struct mmc_data *data
+ 
+ 			/*Last descriptor*/
+ 			if (i == host->dma_nents - 1 && remain_blk_cnt == cur_blk_cnt)
+-				tmp_val |= END(0x1);
++				tmp_val |= LAST(0x1);
+ 
+ 			desc_base[0] =  tmp_val;
+ 			desc_base[1] =  dma_addr;
+@@ -766,7 +762,7 @@ static void dw_mci_cqe_err_handle(struct dw_mci *host, struct mmc_command *cmd)
+ 					if (err == -DW_MCI_NOT_READY)
+ 						dev_err(host->dev, "status check failed, err = %d, status = 0x%x\n",
+ 							err, status);
+-						break;
++					break;
+ 				}
+ 			} else {
+ 				break;
+diff --git a/drivers/mmc/host/dw_mmc_cqe.h b/drivers/mmc/host/dw_mmc_cqe.h
+index ef52b67aceb6..fa609017c4cb 100644
+--- a/drivers/mmc/host/dw_mmc_cqe.h
++++ b/drivers/mmc/host/dw_mmc_cqe.h
+@@ -318,7 +318,7 @@ enum dw_mci_cookie {
+ #define SDMMC_PLL_USABLE			BIT(0)
+ 
+ #define VALID(x)			((x & 1) << 0)
+-#define END(x)				((x & 1) << 1)
++#define LAST(x)				((x & 1) << 1)
+ #define INT(x)				((x & 1) << 2)
+ #define ACT(x)				((x & 0x7) << 3)
+ #define DAT_LENGTH(x)			((x & 0xFFFF) << 16)
+-- 
+2.40.1
+
