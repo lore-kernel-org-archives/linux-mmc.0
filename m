@@ -2,100 +2,161 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EB6FEB64D9
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Jun 2023 12:06:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A62C0EB64DC
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Jun 2023 12:10:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231796AbjF0MGJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Jun 2023 08:06:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34062 "EHLO
+        id S231742AbjF0MKW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Jun 2023 08:10:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231793AbjF0MGH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jun 2023 08:06:07 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C265173C;
-        Tue, 27 Jun 2023 05:06:05 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id 2adb3069b0e04-4f954d78bf8so6269823e87.3;
-        Tue, 27 Jun 2023 05:06:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1687867564; x=1690459564;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=+M3NXPsx45UfjIfs1rUQSv4UcGmUhSpn+D7x2X92Y5o=;
-        b=QVXvpiPjbiJFFCL4yOuXURwwSJsFzIdGVCKvku+kqCU8/WDEY3Rq2fAMBk9A7xrCAY
-         kouTIJxKnV9HftD9ixVxSFqxHj798JkNOxSOxf6+lKj1S/p3ejhf0ZAWp/+iPQ1KGmfW
-         PTR+fpNplsU7zyCXjzz4zjcnzT30PZwfDCv9WSD8R/0Mu6Wii9hcxpBc4fR6W+mfq2r0
-         Vu/MAd/G/kxuLngDyG0uWXqz9ohBfWovsHB+8N6/mJgq3t04+G40LQhINxQdkiuqVwOg
-         hMWiDyBnw0sEiOI6P2FlHyu8UNyMPvQZB1Q6ilmdMj8zd5kHp1MddqpTc5mqBrfwGDQl
-         m3BA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687867564; x=1690459564;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=+M3NXPsx45UfjIfs1rUQSv4UcGmUhSpn+D7x2X92Y5o=;
-        b=gwj6z4nVGFCxSSd7dPRprTdt+4ajyF7Y+bCnN4K9Y+nwKOueZc6/6PT6PFOvIWhJjd
-         xHimRS5fTvlYOnDFFlKcBNsgaNhqUayx2qMwKeC4PRGdTbxP+FgYd4/8vE2t7UJjJKu1
-         4RCZnC8wFDCJwjdXMxTopgoQT1eAFRHPoEuH0hbyI0tah2q13whuUo3fNKqKuRFuuRNv
-         K0nEVCU0AjLPKlAhNS20D6Fao62dxnsuk5GLcAsbV+g9P2rAJwpS5alB2LxlFDGqiDeW
-         vQH1qjs6oaWrKCiFo+vPRawDStkocubKNerxyFisHy5a6Yq3RAt1d3FiGqUVfspiElsm
-         Rrkg==
-X-Gm-Message-State: AC+VfDzBRQg48GXqlaFVEWoXxPGUtq1EW5Tu90COrDlfVpKBTm+2nBhj
-        ShlQNiqHJIk148lGWuNW6f5GWJTAO14=
-X-Google-Smtp-Source: ACHHUZ6mIukkgHhmP/8KDJzcpRgaK4+DpT2UKABHTVa6xvx+z0Vr6B/HBPlCedBPGV6SktvFQCcoOg==
-X-Received: by 2002:a19:2d01:0:b0:4f8:7568:e94b with SMTP id k1-20020a192d01000000b004f87568e94bmr13356375lfj.56.1687867563265;
-        Tue, 27 Jun 2023 05:06:03 -0700 (PDT)
-Received: from saproj-Latitude-5501.yandex.net ([2a02:6b8:0:51e:5298:c58:431:de13])
-        by smtp.gmail.com with ESMTPSA id q13-20020ac2514d000000b004fb771a5b2dsm701924lfd.1.2023.06.27.05.06.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Jun 2023 05:06:02 -0700 (PDT)
-From:   Sergei Antonov <saproj@gmail.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     Sergei Antonov <saproj@gmail.com>,
-        Jonas Jensen <jonas.jensen@gmail.com>, stable@vger.kernel.org
-Subject: [PATCH] mmc: moxart: read scr register without changing byte order
-Date:   Tue, 27 Jun 2023 15:05:49 +0300
-Message-Id: <20230627120549.2400325-1-saproj@gmail.com>
-X-Mailer: git-send-email 2.37.2
+        with ESMTP id S231948AbjF0MKO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jun 2023 08:10:14 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A36F8297D;
+        Tue, 27 Jun 2023 05:09:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=public-files.de;
+ s=s31663417; t=1687867773; x=1688472573; i=frank-w@public-files.de;
+ bh=xdHcE/whBthd94x/WQ7c8IRXdm3DaEqEahfNDdPrpiU=;
+ h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
+ b=JmKeWK/e5/gzkD/IRpkToKxv1UBRL7tsoQHCofzr3RalwasG16QZvtK7pAypP5iRlk6CuvX
+ N9eofKYrfIePUidNMaeJIvHRHU5VuBmkXx6ECrc6/gLtf6gnid8+BoGaVt6vDmElB9hrmMd2H
+ 0e3n5PPcARzaIKPbXMjLMROE6vhCPGglKAi4EkQ8GA5GJkG4vjli2FTDIjPBe6vvmnh9yHmpY
+ qL6rzGcciTo+/BmHb1HmOWsBtiz8rP6gJIv7b/A3Jf6OK+6n0BQgo2Ov+TuzJxE5IbQbcnkaF
+ 3WjnV/0La8xhS3T6kuILNuwQr5nruV80bzvogqzuSl8g8UXwm7tA==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [217.61.148.1] ([217.61.148.1]) by web-mail.gmx.net
+ (3c-app-gmx-bs07.server.lan [172.19.170.56]) (via HTTP); Tue, 27 Jun 2023
+ 14:09:33 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Message-ID: <trinity-28cad1dc-f8e0-4f65-874f-a2392c2e878e-1687867773444@3c-app-gmx-bs07>
+From:   Frank Wunderlich <frank-w@public-files.de>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Frank Wunderlich <linux@fw-web.de>,
+        linux-mediatek@lists.infradead.org,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: Aw: Re: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: update
+ assigned-clocks/clock-parents for mt7986
+Content-Type: text/plain; charset=UTF-8
+Date:   Tue, 27 Jun 2023 14:09:33 +0200
+Importance: normal
+Sensitivity: Normal
+In-Reply-To: <91411797-18b4-f515-d6c0-ca0f8ff39696@linaro.org>
+References: <20230625191151.7808-1-linux@fw-web.de>
+ <20230625191151.7808-2-linux@fw-web.de>
+ <91411797-18b4-f515-d6c0-ca0f8ff39696@linaro.org>
+X-UI-Message-Type: mail
+X-Priority: 3
+X-Provags-ID: V03:K1:Wpl0QMXvRlo9cxJewy5JaUWnr3ady4smJq8j0V87WwVmOV7RyXc5ezzcldaYktrMBQXIN
+ M2AOETkDUZJUHzes3VfgSYybEjGnoPUCpIeWvAMoBoGMxxTO6vbT9JBjO4T8LzS1YyGdnfuCMPD7
+ mPl96k7q+ZTRmXa3JaCTMNVLbPKHsUdgpO0ArJEBBwB7k54GmejHfiGofLoRfLFZUNoMZ2uwEHgk
+ uXH/aexMV4YqmmgN79H+oNhvY6N9Hgm7flPjhLL6h9zQaY8LQxbjUO/c0pPJO6EMXAHG+TmsaxOB
+ q0=
+UI-OutboundReport: notjunk:1;M01:P0:1Z0a4tyvnkQ=;VpvzeAEl8Inn7LOHKtEQJ0APbGE
+ wy5+uDfKeYInwKGfypBdqzAg9pUYSbYz7oMsrjbCMJi5fd8+wV/WcIfoSLLRDIvm3Qfhdcsc1
+ 0xa9V+3ku8De6Lgs49f8KJvcbGl5dkhbx9NlgeMhUuPwf14pBSnxBAi+4NZYJ9x5o/90o6A36
+ p0BjPMUoBM/i4wvQNGCPO794wB5h/jXK0EhRd0nRKppL9cwlmK6K2Nml+84dNWu7mpnrsCHz/
+ neZS6vAAcEf8bN5/iJmgOCWlsasvRZm+5o/W8JOuyu6CXclUItv1nID5eXFWILp8W+5LiEyVZ
+ ChUzxQdfGqBu/7KYpyQhNTL4nkkIcYktsG/ew+5/evblJLGV+YKb8pzvuHDyihQg/RzyasjBo
+ gvfbVlaj5fRklbqqykrhEkInlAD459IVzxNRYcuPJQRXrucNJVgfrLEwM+5RuL79Wq2k+q6gp
+ vJhlEZ18Ff3c5E0gmQPQaNhUtpuWv5QW9YGlGZ2Vm726DLt2GGYD1oS6kEqxpBT2x3uKQpWqD
+ 2t99KWVBZ6IhMq7kUpHXD4c+hgFN6ssthuJSqUHxzO2QN+VqzNax4J4Vlpf98gFNAYp3/JGkj
+ D/20IRbgGwHgErmWYCmvQK3Xmx0FK+rBjM3Vv+EFnYZLCWJf48ETRgiSOryV7CZGOGC9P7N8c
+ TDRFEBND0/nlkOMx5tY/tZ0iV0+SFDp00IZnRMPlslvWVpy8VkF1/HclqnDjfw6jQmROuAakk
+ QvFYP4JHDjO8iq8XJXgvNqZRjSIwKjP4OBEfJqN83tP52IlR+LScMFKaLklJAXqmxlJUSnO6w
+ /s8tCekdcyvxO5kJv89YeZBg==
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Conversion from big-endian to native is done in a common function
-mmc_app_send_scr(). Converting in moxart_transfer_pio() is extra.
-Double conversion on a LE system returns an incorrect SCR value,
-leads to errors:
+> Gesendet: Dienstag, 27. Juni 2023 um 12:44 Uhr
+> Von: "Krzysztof Kozlowski" <krzysztof.kozlowski@linaro.org>
+> Betreff: Re: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: update assigned-cl=
+ocks/clock-parents for mt7986
+>
+> On 25/06/2023 21:11, Frank Wunderlich wrote:
+> > From: Frank Wunderlich <frank-w@public-files.de>
+> >
+> > MT7986 has 2 clock-parents so update the binding for it.
+>
+> You didn't test it, I think. If you do, then you will see errors from
+> other trees.
 
-mmc0: unrecognised SCR structure version 8
+Hi,
 
-Fixes: 1b66e94e6b99 ("mmc: moxart: Add MOXA ART SD/MMC driver")
-Signed-off-by: Sergei Antonov <saproj@gmail.com>
-Cc: Jonas Jensen <jonas.jensen@gmail.com>
-Cc: stable@vger.kernel.org
----
- drivers/mmc/host/moxart-mmc.c | 8 +-------
- 1 file changed, 1 insertion(+), 7 deletions(-)
+i tested it of course...which errors do you see?
 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index 2d002c81dcf3..d0d6ffcf78d4 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -338,13 +338,7 @@ static void moxart_transfer_pio(struct moxart_host *host)
- 				return;
- 			}
- 			for (len = 0; len < remain && len < host->fifo_width;) {
--				/* SCR data must be read in big endian. */
--				if (data->mrq->cmd->opcode == SD_APP_SEND_SCR)
--					*sgp = ioread32be(host->base +
--							  REG_DATA_WINDOW);
--				else
--					*sgp = ioread32(host->base +
--							REG_DATA_WINDOW);
-+				*sgp = ioread32(host->base + REG_DATA_WINDOW);
- 				sgp++;
- 				len += 4;
- 			}
--- 
-2.37.2
+this is basicly how i tested it (in case anything has changed):
 
+        logfile=3Ddtbs_arm64.log
+        exec 3> >(tee $logfile)
+        ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make DT_CHECKER_FL=
+AGS=3D-m dt_binding_check 2>&3
+        if [[ $? -ne 0 ]];then echo "arm64 binding check failed!";cat $log=
+file;exit 1;fi
+        ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make defconfig #dt=
+bs_check need kernel-config
+        ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make -j8 DT_CHECKE=
+R_FLAGS=3D-m dtbs_check 2>&3
+        if [[ $? -ne 0 ]];then echo "arm64 dtbs_check failed!";cat $logfil=
+e;exit 1;fi
+
+and looked into the resulting logfile for keywords like mmc like mtk-sd
+
+i tried running dtbs_check with passing the yaml-file, but of course all c=
+ompatibles not matching this file were reported.
+
+ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make -j6 DT_CHECKER_FLAGS=
+=3D-m dtbs_check DT_SCHEMA_FILES=3DDocumentation/devicetree/bindings/mmc/m=
+tk-sd.yaml
+
+but this spits out many errors "failed to match any schema with compatible=
+" because i defined only the changed one...
+
+maybe there is another way to check only one yaml file against all dtbs wi=
+thout these unrelated errors.
+
+pipeline in dt-bindings-patchwork is clean too
+https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20230625191=
+151.7808-2-linux@fw-web.de/
+
+> Anyway, I don't understand why defining it in the first place. Just drop
+> the assigned-clock* from the binding.
+
+as it was defined (not looked where it was used) i only used the soc-speci=
+fic branch to update the MaxItems...just to not break anything. After that=
+ the message i got before was fixed
+
+arch/arm64/boot/dts/mediatek/mt7986a-bananapi-bpi-r3.dtb: mmc@11230000: as=
+signed-clocks: [[4, 35], [4, 34]] is too long
+arch/arm64/boot/dts/mediatek/mt7986a-bananapi-bpi-r3.dtb: mmc@11230000: as=
+signed-clock-parents: [[5, 6], [4, 18]] is too long
+
+but if the right way is to drop the MaxItems from generic (or the property=
+ itself - where is it taken from then?). The only
+include i see is Documentation/devicetree/bindings/mmc/mmc-controller.yaml=
+ and there the assigned-clock* is not defined. And the
+
+unevaluatedProperties: false
+
+tells me that removing the generic one will result in unevaluated propety =
+error.
+
+regards Frank
+
+
+> Best regards,
+> Krzysztof
+>
+>
