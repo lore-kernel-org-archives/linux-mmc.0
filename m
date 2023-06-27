@@ -2,235 +2,146 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81610EB64D9
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Jun 2023 14:10:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ACB8EB64D9
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Jun 2023 17:20:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231395AbjF0OKy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Jun 2023 10:10:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54156 "EHLO
+        id S231290AbjF0RUZ convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Jun 2023 13:20:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230493AbjF0OKv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jun 2023 10:10:51 -0400
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE9C02D76;
-        Tue, 27 Jun 2023 07:10:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=public-files.de;
- s=s31663417; t=1687875007; x=1688479807; i=frank-w@public-files.de;
- bh=tcte7WM1r7NehSLZobJtBRLDopOSLUZydTiAMLTHCp8=;
- h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
- b=C9ZFOGA4C+sQrqOsBVa1RVfSzK0VGDed5iFUh3DmYoCjb5iz3E2renoX9XiEkIb55ZeyrVv
- GXjPxDCH8QRtyAXQ4RhKr/ubwVLHVSax3B27jdEpAoJ35MQVihAWcRIOq5gyfeTohEGzmzP9Q
- gOOuF9MDA6JZ1B4NPWSMJhOIOfEXFQVVAejZDb+FYhVRrzGbnkmPNAdoZXqego/ZyhYc6EVFS
- MTafAwoqiTyNqIgmTTJzpoPgYPWAuKabIOC/wg1fHkJVep2EDGYGbYcpKJ/E9FDlA+65X8Her
- qSMmlp4NiIHWYpAHiCZ1HxsxwN5qLFseDFIVamMbQ41EsRUDWiOA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [217.61.148.1] ([217.61.148.1]) by web-mail.gmx.net
- (3c-app-gmx-bs07.server.lan [172.19.170.56]) (via HTTP); Tue, 27 Jun 2023
- 16:10:06 +0200
+        with ESMTP id S231210AbjF0RUY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jun 2023 13:20:24 -0400
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06B65198;
+        Tue, 27 Jun 2023 10:20:23 -0700 (PDT)
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-570284c7e61so52181587b3.1;
+        Tue, 27 Jun 2023 10:20:22 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1687886422; x=1690478422;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=we44SmO7mtsdbPqwEUGs/5m3S42M0ZPz1W2IALKFOrI=;
+        b=PuTzqYQNGyV9EDRNgMNrWQJEUX4K98nUKRMkdnji/c8b+SEIhnbsAFY9g9P8H3N0df
+         FDpWqupci0f/Ar/ewMhrbDdCcnMAVy6Ej0Pyym0WmDLeFCSG4KWhjf10eOJ/D65UmJq6
+         1XC6vH+UWsvOGjbOjOx/9Knx32tZB7ntbD0SLm376+Y/H2mZoDhewqPW3v7PeJLV20+v
+         BWkpn7RVZHvr9p6Jic521lnR1yF66q+ZFmpKMsLz7svbw5J3/uP4ZqoeP+zws+ej8/oc
+         Par9dg48h1xfCFzNquPxUr5yTv3xLsOePsMuPT6Z4xPkq8CmCuMpSi276MyehzaDFP2I
+         x1ew==
+X-Gm-Message-State: AC+VfDwh6p0wwudVDNbHuzEGgih2oba9U/5FR1c8ilHoq9xCxlEE4/C2
+        VT2cDdFeiP+XjSaVPAgzA4WizsH/wXI1uP78
+X-Google-Smtp-Source: ACHHUZ6wewllzRH48EmvkoG89o5K0oUHe0FOy1quWsvNv2z2ZQfyLyjVZp8PFu/+jMtSqmWyh7CXpw==
+X-Received: by 2002:a81:6f54:0:b0:570:8856:5dbc with SMTP id k81-20020a816f54000000b0057088565dbcmr31372303ywc.41.1687886421982;
+        Tue, 27 Jun 2023 10:20:21 -0700 (PDT)
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com. [209.85.219.173])
+        by smtp.gmail.com with ESMTPSA id m5-20020a819e05000000b00568a207aaedsm1865118ywj.68.2023.06.27.10.20.21
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 27 Jun 2023 10:20:21 -0700 (PDT)
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-be30cbe88b3so4700827276.1;
+        Tue, 27 Jun 2023 10:20:21 -0700 (PDT)
+X-Received: by 2002:a25:d207:0:b0:ba8:2e05:3e9c with SMTP id
+ j7-20020a25d207000000b00ba82e053e9cmr29434011ybg.24.1687886421253; Tue, 27
+ Jun 2023 10:20:21 -0700 (PDT)
 MIME-Version: 1.0
-Message-ID: <trinity-4dd71d69-5514-4da0-8c18-a5676a311df2-1687875006833@3c-app-gmx-bs07>
-From:   Frank Wunderlich <frank-w@public-files.de>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Frank Wunderlich <linux@fw-web.de>,
-        linux-mediatek@lists.infradead.org,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Subject: Aw: Re:  Re: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: update
- assigned-clocks/clock-parents for mt7986
-Content-Type: text/plain; charset=UTF-8
-Date:   Tue, 27 Jun 2023 16:10:06 +0200
-Importance: normal
-Sensitivity: Normal
-In-Reply-To: <b6ef76a8-95fc-aa76-d811-ed25ccb8ad8e@linaro.org>
-References: <20230625191151.7808-1-linux@fw-web.de>
- <20230625191151.7808-2-linux@fw-web.de>
- <91411797-18b4-f515-d6c0-ca0f8ff39696@linaro.org>
- <trinity-28cad1dc-f8e0-4f65-874f-a2392c2e878e-1687867773444@3c-app-gmx-bs07>
- <b6ef76a8-95fc-aa76-d811-ed25ccb8ad8e@linaro.org>
-X-UI-Message-Type: mail
-X-Priority: 3
-X-Provags-ID: V03:K1:/Pe5aYi+s9kKCx0trik0mKEWPWa5NISxt/CIrmej8e0C/W4SDtpPYJ0Cll/ArsO6l7/Zu
- +8+KH5sjk9JiARw4P6SFiDX5vY828bFt5mxI/ynFZRgIFwMFSJSZHy4KilFDsjs+kUPChwrNakGJ
- U9V/s2bYuB+cqbgzGpiXtd1CElHvqKYSJmJPwBeB51hYjzz1XyzO2POzsv+Bti/Gis8NBcpkABqN
- oav0QUuJiHwZ/7BGUfLL4eN1v2YPs6cDawNedCRSUjypTeBXhQ+pkwc5KZruh9kvzSjx9h8U6BbS
- kM=
-UI-OutboundReport: notjunk:1;M01:P0:oc/IDCkwfto=;uyMwuWF0joreAn8VyMb6rA3OLle
- KLew97pISH5oXOt+zzFzGQB5tkaorJjmZdciLWsWq/KDEcfWENbej+2y3rRuRl/yxZsDFIxuF
- dbJCOnDbdnYvkzlrS1+ghwMuOPFJQlNHnAJaiHfi6GtmNDp0ITPUMq491nGELu6xrtv+ej/wa
- Ehg+yvN0ZjsVh+ystNLKBCHDPyTfLaoD1QMD1fEvRUY6u35ie9xWO76OxpcnMlFjUSN3uXnAM
- +afIFKzVbtBL4RKMECoj8Az/3SuXUfWI0GxSe/yXVKECkIz6Z1b6lShv9raUFo5dAFCK91iu9
- nDN2HcLeTJgxYJFpKlFaa3n6j5HvjdkvYr9T+tMyBJUGJ/BpocNVugwwL2SwMeYbmbuAFdQiO
- sW+A/oAqKIM37QPtw/XlAkxErK/lH8invVZ0dOM46qA1kDgPvGfcr/Rc++AkWv0/Fsq7UHhHU
- QB+h854E/TCob0i4zIwj1xnBz3wuP21B4eYa87zYaJn+8+Bo225ChxLAL4pMvM7CuiUDN+7a1
- 4TjA4GCSE6xOhG1Hv0kuoX4n1xIOcrhGYggOa6bA2jrANJqWZrJ3HiyXw5tAOBPdwSK1l0pU3
- CXDfIb6B+MZn7n19RWUCjUDu7SvA+DcGfAo2iEurqVbJ3Q590ipBpmiOfoVM3454642i4bNZI
- JiRRB8hDHczOdyQ1UVo+Rnweb8gFXVDc1ioeYA5H99Lv0JbVVITDEZdk9JeEVNfT1CdnCt6s2
- IRC4fAvEvveqGqfVGBFwQcP7Mhsqi3PnfYsv5aTfVRBzxzz0Q1EVKxzleTmAhZIEOORIquYPv
- NskoKyUr5oL3iq0x62wQuGYW7d3XmjfH1iasCFZIWjhpE=
-Content-Transfer-Encoding: quoted-printable
+References: <20230329202148.71107-1-dennis@kernel.org> <ZCTOMVjW+pnZVGsQ@snowbird>
+In-Reply-To: <ZCTOMVjW+pnZVGsQ@snowbird>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 27 Jun 2023 19:20:09 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdVK2zPnyB9s0uYwoKj0xspa0CRzqPjhrj-YFqVNdXxEkg@mail.gmail.com>
+Message-ID: <CAMuHMdVK2zPnyB9s0uYwoKj0xspa0CRzqPjhrj-YFqVNdXxEkg@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+To:     Dennis Zhou <dennis@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi
+Hi Dennis,
 
-
-> Gesendet: Dienstag, 27. Juni 2023 um 15:37 Uhr
-> Von: "Krzysztof Kozlowski" <krzysztof.kozlowski@linaro.org>
-> On 27/06/2023 14:09, Frank Wunderlich wrote:
-> >> Gesendet: Dienstag, 27. Juni 2023 um 12:44 Uhr
-> >> Von: "Krzysztof Kozlowski" <krzysztof.kozlowski@linaro.org>
-> >> Betreff: Re: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: update assigned=
--clocks/clock-parents for mt7986
-> >>
-> >> On 25/06/2023 21:11, Frank Wunderlich wrote:
-> >>> From: Frank Wunderlich <frank-w@public-files.de>
-> >>>
-> >>> MT7986 has 2 clock-parents so update the binding for it.
-> >>
-> >> You didn't test it, I think. If you do, then you will see errors from
-> >> other trees.
-> >
-> > Hi,
-> >
-> > i tested it of course...which errors do you see?
+On Thu, Mar 30, 2023 at 1:48 AM Dennis Zhou <dennis@kernel.org> wrote:
+> When using dm-verity with a data partition on an emmc device, dm-verity
+> races with the discovery of attached emmc devices. This is because mmc's
+> probing code sets up the host data structure then a work item is
+> scheduled to do discovery afterwards. To prevent this race on init,
+> let's inline the first call to detection, __mm_scan(), and let
+> subsequent detect calls be handled via the workqueue.
 >
-> The top-level said it can be maximum 1, so raising it in allOf:if:then:
-> should not be enough
+> Signed-off-by: Dennis Zhou <dennis@kernel.org>
 
-but the previous error with too long list wasn't there after the change...=
-so it seems to work...if it right, i don't know,
-but other properties are overriddedn the same way.
+Thanks for your patch, which is now commit 2cc83bf7d41113d9 ("mmc:
+core: Allow mmc_start_host() synchronously detect a card") in
+linux-next/master mmc/next next-20230614 next-20230615 next-20230616
 
-> > 11
-> > this is basicly how i tested it (in case anything has changed):
-> >
-> >         logfile=3Ddtbs_arm64.log
-> >         exec 3> >(tee $logfile)
-> >         ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make DT_CHECKE=
-R_FLAGS=3D-m dt_binding_check 2>&3
-> >         if [[ $? -ne 0 ]];then echo "arm64 binding check failed!";cat =
-$logfile;exit 1;fi
-> >         ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make defconfig=
- #dtbs_check need kernel-config
-> >         ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make -j8 DT_CH=
-ECKER_FLAGS=3D-m dtbs_check 2>&3
-> >         if [[ $? -ne 0 ]];then echo "arm64 dtbs_check failed!";cat $lo=
-gfile;exit 1;fi
+I have bisected the following failure on Renesas Salvator-XS with R-Car H3
+ES2.0 to the above commit:
+
+    renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+hardware interrupt (CMD0)
+    renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+hardware interrupt (CMD1)
+    renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+hardware interrupt (CMD0)
+    renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+hardware interrupt (CMD1)
+    mmc0: Failed to initialize a non-removable card
+
+Reverting the commit fixes the issue for me.
+
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+>  }
+>  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
 >
-> A bit over-complicated... why not running dtbs_check against the schema
-> you changed?
-
-it is a script i only start ;) and having a logfile (with all messages - s=
-tdin+stdout) makes it easier to find something.
-i had always the problem, that second run does not show the errors again w=
-ithout changing the yaml or dts.
-
-as you see below i tried the run against the yaml too, but there are many =
-many unrelated compatibles which seem to be not
-documented or still in txt bindings.
-
-> > and looked into the resulting logfile for keywords like mmc like mtk-s=
-d
-> >
-> > i tried running dtbs_check with passing the yaml-file, but of course a=
-ll compatibles not matching this file were reported.
-> >
-> > ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- make -j6 DT_CHECKER_FL=
-AGS=3D-m dtbs_check DT_SCHEMA_FILES=3DDocumentation/devicetree/bindings/mm=
-c/mtk-sd.yaml
-> >
-> > but this spits out many errors "failed to match any schema with compat=
-ible" because i defined only the changed one...
-> >
-> > maybe there is another way to check only one yaml file against all dtb=
-s without these unrelated errors.
-> >
-> > pipeline in dt-bindings-patchwork is clean too
-> > https://patchwork.ozlabs.org/project/devicetree-bindings/patch/2023062=
-5191151.7808-2-linux@fw-web.de/
+> -void mmc_rescan(struct work_struct *work)
+> +static void __mmc_rescan(struct mmc_host *host)
+>  {
+> -       struct mmc_host *host =
+> -               container_of(work, struct mmc_host, detect.work);
+>         int i;
 >
-> Maybe that binding just fails to apply to DTS because of missing or not
-> correct compatibles.
-
-the messages are unrelated to current yaml file i passed with the DT_SCHEM=
-A_FILES parameter, e.g. the last messages:
-
-	From schema: Documentation/devicetree/bindings/display/mediatek/mediatek,=
-dsi.yaml
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@15020000: failed to match any schema with compatible: ['mediatek,mt818=
-3-imgsys', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@16000000: failed to match any schema with compatible: ['mediatek,mt818=
-3-vdecsys', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@17000000: failed to match any schema with compatible: ['mediatek,mt818=
-3-vencsys', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@19000000: failed to match any schema with compatible: ['mediatek,mt818=
-3-ipu_conn', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@19010000: failed to match any schema with compatible: ['mediatek,mt818=
-3-ipu_adl', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@19180000: failed to match any schema with compatible: ['mediatek,mt818=
-3-ipu_core0', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@19280000: failed to match any schema with compatible: ['mediatek,mt818=
-3-ipu_core1', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /soc/sys=
-con@1a000000: failed to match any schema with compatible: ['mediatek,mt818=
-3-camsys', 'syscon']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb:0:0: /mt8183-=
-sound: failed to match any schema with compatible: ['mediatek,mt8183_mt635=
-8_ts3a227_max98357']
-arch/arm64/boot/dts/mediatek/mt8183-kukui-jacuzzi-burnet.dtb: bt-sco: '#so=
-und-dai-cells' is a required property
-
-> >> Anyway, I don't understand why defining it in the first place. Just d=
-rop
-> >> the assigned-clock* from the binding.
-> >
-> > as it was defined (not looked where it was used) i only used the soc-s=
-pecific branch to update the MaxItems...just to not break anything. After =
-that the message i got before was fixed
-> >
-> > arch/arm64/boot/dts/mediatek/mt7986a-bananapi-bpi-r3.dtb: mmc@11230000=
-: assigned-clocks: [[4, 35], [4, 34]] is too long
-> > arch/arm64/boot/dts/mediatek/mt7986a-bananapi-bpi-r3.dtb: mmc@11230000=
-: assigned-clock-parents: [[5, 6], [4, 18]] is too long
-> >
-> > but if the right way is to drop the MaxItems from generic (or the prop=
-erty itself - where is it taken from then?). The only
-> > include i see is Documentation/devicetree/bindings/mmc/mmc-controller.=
-yaml and there the assigned-clock* is not defined. And the
+>         if (host->rescan_disable)
+> @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+>                 mmc_schedule_delayed_work(&host->detect, HZ);
+>  }
 >
-> The way is to entirely drop assigned-clocks. I don't think there are
-> much benefits of having them in the bindings. Maybe if specific rates
-> are required, then yes - device cannot work with other rates and you can
-> verify it with dtbs_check. But otherwise it is like adding values of
-> 'reg' or 'interrupts'. Plus some board might require third item and then
-> what?
+> +void mmc_rescan(struct work_struct *work)
+> +{
+> +       struct mmc_host *host =
+> +               container_of(work, struct mmc_host, detect.work);
+> +
+> +       __mmc_rescan(host);
+> +}
+> +
+>  void mmc_start_host(struct mmc_host *host)
+>  {
+>         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+>         }
+>
+>         mmc_gpiod_request_cd_irq(host);
+> -       _mmc_detect_change(host, 0, false);
+> +       host->detect_change = 1;
+> +       __mmc_rescan(host);
+>  }
+>
+>  void __mmc_stop_host(struct mmc_host *host)
 
-mhm, disabled all assigned-clock* properties and do not get any messages a=
-bout this (don't know why because of "unevaluatedProperties: false", but l=
-ooks like it works)
+Gr{oetje,eeting}s,
 
-there are only some syscon-nodes in mt8173-*.dtb where these properties us=
-ed are reported
+                        Geert
 
-btw. need binding also be backported to stable? so do i need to add the ta=
-g there?
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-regards Frank
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
