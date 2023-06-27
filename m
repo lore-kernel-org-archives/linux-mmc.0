@@ -2,97 +2,125 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B629AEB64D9
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Jun 2023 10:44:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A37DEB64DC
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Jun 2023 11:01:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231137AbjF0Kol (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Jun 2023 06:44:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52474 "EHLO
+        id S231355AbjF0LBp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Jun 2023 07:01:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59680 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230397AbjF0Kok (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jun 2023 06:44:40 -0400
-Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB32210D2
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Jun 2023 03:44:39 -0700 (PDT)
-Received: by mail-wr1-x42b.google.com with SMTP id ffacd0b85a97d-313fb7f0f80so722339f8f.2
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Jun 2023 03:44:39 -0700 (PDT)
+        with ESMTP id S231388AbjF0LBk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jun 2023 07:01:40 -0400
+Received: from mail-yw1-x112a.google.com (mail-yw1-x112a.google.com [IPv6:2607:f8b0:4864:20::112a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5742A1FCA
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Jun 2023 04:01:39 -0700 (PDT)
+Received: by mail-yw1-x112a.google.com with SMTP id 00721157ae682-576918f4cf7so36169217b3.3
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Jun 2023 04:01:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1687862678; x=1690454678;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=efp2x/vq439GzlDaP6vReEXSPEqAUmKPzelvynU65wM=;
-        b=vNZJhrs41u2a92bk0UCjsr4/YqHu97x0IMOWM3zaiv3o5ztkqXkQ9OBRrnDk7JraJq
-         aNpA5IMQ+/RsyISP1SsrMfcfbryD5AYkpRyMrspYrp2F7h7HCKpAorG8BQhL6vnaUJ5C
-         7bU9jkIVHlTU2GHgAB4ttvwyKmoNvdo9ivx3C0MiLrx3hdB5UFqc5/vKsU5pdPnkt0ho
-         DNv7jNuxdCgVnw1dslsLzhcHRFBxhxKHYrvSLW6wu2+CPI4EPlV6YcBZORR5ablaPv3h
-         kJBSSsXW7y7ToTC0X3cHTliRDEvVl/CvMZ/yPdN41ARnR0rK+g5zQENGqtTmRL7k1qCH
-         sMJw==
+        d=linaro.org; s=google; t=1687863698; x=1690455698;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=R0Q5h3oMUk2WtX+PDTrt5F7ey8kBpdLCkGKFBOqFPxc=;
+        b=zuJwE5340h3/k5+rDoVZOKBMBZx1HiKZhMvMUS2/M43/CfGpxC68ECF7fRpRqzo9gm
+         rA0DBXnKE29qdJSY8BZOGJpEc/m1vNQenb9JYV4P2hjbURDv20nAeg5VZUSvfa+W8ek0
+         E0zbbqkmpQntms0UhlGt5vuyBMyLGlPaA/ym62aq5iA6sQmNjb9tQ/dGm1en9n9rQ4J+
+         NGyI/VGX1e7e6VNtQWoz/rM/J3UwKE/XQ+F/7HgPCG1ajwHvms0SqNXBqER0jqTCzdVx
+         hovb1cNOUDIFp/CYwUYQyuKOQY/2I+UBzclq6M8lZtFcBoz+NDgsKAghCjrC2geIXjYF
+         EOpw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1687862678; x=1690454678;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=efp2x/vq439GzlDaP6vReEXSPEqAUmKPzelvynU65wM=;
-        b=g62z32n8YTVPu0Z5ZwZXCsBqjMhhUkhfVk1XmiQ/kVHFZmvOqPImD0jrLltNEx6CDk
-         aCtxe1+jQTUr8q54OltFnATd1Wi812rX+j7PDiTkdGBAeJCceeuOi3aLCNeymSKh7znO
-         dhuaDCDIE5qV6+kTvuFv6kbi2J969qOcm26PLM2N6KbNnLORuKTM2o4Zslf88D2Qonux
-         4IyXa0+RE6dtvEQOZGtffRaUKiYRMQp0CHyxHNTMDdT+GD6zmfiP1zXThp6zbG3ZP7QA
-         Bb3f3tknEPk5swCU8DQUmRaoM1d1I+PMoo85j3hBgALMCQc/XvFRzv4CKRAOxAKnhqVn
-         CqCA==
-X-Gm-Message-State: AC+VfDzHNMs+pcUcxZ2Gknm36gjc+e99CcgTpVL82CL3KjNfovGsKEoF
-        8q2u6yf8e98tcVShZ5n43PfP3w==
-X-Google-Smtp-Source: ACHHUZ51EquQUUJC3vkwKc5QepjVkdNtQ+ZlKp6GJDXkjeC4niT355x2TVGLbVr+uhuZchWiEP6a7A==
-X-Received: by 2002:a5d:508b:0:b0:313:ef57:5bde with SMTP id a11-20020a5d508b000000b00313ef575bdemr4825872wrt.42.1687862678245;
-        Tue, 27 Jun 2023 03:44:38 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.219.26])
-        by smtp.gmail.com with ESMTPSA id u12-20020adfdd4c000000b0030903d44dbcsm10093970wrm.33.2023.06.27.03.44.36
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 27 Jun 2023 03:44:37 -0700 (PDT)
-Message-ID: <91411797-18b4-f515-d6c0-ca0f8ff39696@linaro.org>
-Date:   Tue, 27 Jun 2023 12:44:36 +0200
+        d=1e100.net; s=20221208; t=1687863698; x=1690455698;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=R0Q5h3oMUk2WtX+PDTrt5F7ey8kBpdLCkGKFBOqFPxc=;
+        b=eaaA8JPXqblSqIr60xhUJ513MfozH1/HoAl5iKyQaE2SbAA1VG0YGiFfiTzuGDmRGz
+         j6Dyn3uhfyB4xKPG9yqBmb9bLLj+Dxb3153cSWKOA72Am+X7aRyG0GtZ/COz0YU4lO8I
+         Rjmrm7t7YM4BksTsuT48n/96I48hJt9mqm6XBqY3mTvZqcHJUP0FOZBwXf29A0+uU1Sw
+         X3QbJ4BOTGAwqFQ69bjR4F4qIcpPzDEtyJHLHlTS7NrQK1Z3kJ6UGcUl/cISW1mnAuL3
+         s5dRYw4Etxko8wmYGL8zmZUst3VzkEchTJsAt0mAj0xKSOX9YKXGLRVwEP1wqdCGLb25
+         iqwQ==
+X-Gm-Message-State: AC+VfDwam3TtBhdLfVNBUSRU3qacu/D8X3R0imSIJqqQOIp8WUjKSx2s
+        GR81z5nwXsCNg+MfpdLZUjjLWkGJchtki14IAXjokWhrSrIJOhuCQNQ=
+X-Google-Smtp-Source: ACHHUZ7ug4OCrtj/DupQ71tMmD5IsVeQaLXq3Q6iFEaOFaChH77FdCS1aVFPq0dzJPGQQ9EKZsgWgZJhTioJVhOFig8=
+X-Received: by 2002:a25:aa2a:0:b0:c1e:7649:c244 with SMTP id
+ s39-20020a25aa2a000000b00c1e7649c244mr5893887ybi.15.1687863698511; Tue, 27
+ Jun 2023 04:01:38 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: update
- assigned-clocks/clock-parents for mt7986
-Content-Language: en-US
-To:     Frank Wunderlich <linux@fw-web.de>,
-        linux-mediatek@lists.infradead.org
-Cc:     Frank Wunderlich <frank-w@public-files.de>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-References: <20230625191151.7808-1-linux@fw-web.de>
- <20230625191151.7808-2-linux@fw-web.de>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230625191151.7808-2-linux@fw-web.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <CA+CX+bjcvbtW2Wto1XF1dKcAbpGGisdyHAGHX12v3TchhLbKtg@mail.gmail.com>
+In-Reply-To: <CA+CX+bjcvbtW2Wto1XF1dKcAbpGGisdyHAGHX12v3TchhLbKtg@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 27 Jun 2023 13:01:02 +0200
+Message-ID: <CAPDyKFoTH0j1uVSKvY_d7boMdG0kt_WvmLEKenYG22ZJR=UmvA@mail.gmail.com>
+Subject: Re: rtsx_usb_sdmmc not detecting card insertion anymore
+To:     Pascal Terjan <pterjan@gmail.com>,
+        Kai Heng Feng <kai.heng.feng@canonical.com>
+Cc:     linux-kernel <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Ricky WU <ricky_wu@realtek.com>,
+        Oleksandr Natalenko <oleksandr@natalenko.name>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 25/06/2023 21:11, Frank Wunderlich wrote:
-> From: Frank Wunderlich <frank-w@public-files.de>
-> 
-> MT7986 has 2 clock-parents so update the binding for it.
++ Ricky WU, Kai Heng Feng, Oleksandr Natalenko
 
-You didn't test it, I think. If you do, then you will see errors from
-other trees.
+On Sat, 24 Jun 2023 at 22:39, Pascal Terjan <pterjan@gmail.com> wrote:
+>
+> Hi,
+> I have an ASUS PN50 machine with a 0bda:0129 card reader. The card is
+> not seen unless I reload the rtsx_usb_sdmmc module.
 
-Anyway, I don't understand why defining it in the first place. Just drop
-the assigned-clock* from the binding.
+Thanks for reporting, let's see how we can move this forward.
 
-Best regards,
-Krzysztof
+I have looped in some of the people that has been involved in the
+relevant changes for rtsx_usb. Let's see if they can help too.
 
+>
+> I found a Debian bug report for the same regression
+> https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=993068 but nothing
+> to see there.
+>
+> Trying to understand things I found
+> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=4dad599b8b5d1ffc5ef12a2edb13d15d537202ba
+> which seemed related, so I first tried to revert it and that worked.
+
+Okay! That's certainly good information. Are you willing to help
+running further debug testings?
+
+Unless I mistaken, I think we should avoid doing a plain revert
+(assuming we can find another option) as it will cause us to waste a
+lot of energy instead.
+
+>
+> Assuming the description is correct and the rtsx USB driver runtime
+> resumes the rtsx_usb_sdmmc device when it detects that a new card has
+> been inserted, I assume this means it doesn't detect that a card was
+> inserted and the problem would be in rtsx_usb rather than
+> rtsx_usb_sdmmc.
+
+There is also another interesting commit, which was also part of the
+re-work of the rtsx_usb_sdmmc driver that you pointed to above.
+
+commit 883a87ddf2f1 (misc: rtsx_usb: Use USB remote wakeup signaling
+for card insertion detection")
+
+>
+> I am not sure how to debug this further, usbmon doesn't see anything
+> when I insert the card.
+
+If you are willing to run some tests, I suggest to add some debug prints in:
+drivers/mmc/host/rtsx_usb_sdmmc.c
+  sdmmc_get_cd()
+  rtsx_usb_sdmmc_runtime_resume()
+  rtsx_usb_sdmmc_runtime_suspend()
+
+sdmmc_get_cd() should be returning 1 when it finds that there is card
+inserted, but of course the error path would be interesting too.
+
+rtsx_usb_sdmmc_runtime_resume() may be called during probing of the
+rtsx_usb_sdmmc driver. Beyond that point, it should also be called
+when you insert an SD card. Just having a debug print in there should
+help answer if that actually happens.
+
+Kind regards
+Uffe
