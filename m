@@ -2,98 +2,73 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C98CEC001B1
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jun 2023 18:43:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C524EB64D9
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jun 2023 00:35:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232732AbjF2Snq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Jun 2023 14:43:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57674 "EHLO
+        id S229720AbjF3AfB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Jun 2023 20:35:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56430 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232480AbjF2Sno (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jun 2023 14:43:44 -0400
-Received: from mxout3.routing.net (mxout3.routing.net [IPv6:2a03:2900:1:a::8])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 757AF2D55;
-        Thu, 29 Jun 2023 11:43:36 -0700 (PDT)
-Received: from mxbox2.masterlogin.de (unknown [192.168.10.89])
-        by mxout3.routing.net (Postfix) with ESMTP id 92923605D4;
-        Thu, 29 Jun 2023 18:43:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1688064214;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=I8cdP6cF+nwTWlyfboIiQYyzWM6TGbsre5s255hDw1E=;
-        b=OGbX55DGj/xtkG/hWVz4Qo4R1i22zFNmJxp55CTfnwcpyzy+ao4f+YL/q9cUmFsKtmh3WQ
-        SfRGV00+DKFU+AFks3cdLH1xvu04AOhJ1j452P0Cwd2PdgQB6gWydKc7cZXbj/KnAUW/gn
-        Ox6Nxq39V7ltXPJoF8QFFi+sFdSePNc=
-Received: from frank-G5.. (fttx-pool-157.180.227.241.bambit.de [157.180.227.241])
-        by mxbox2.masterlogin.de (Postfix) with ESMTPSA id 916DD10009B;
-        Thu, 29 Jun 2023 18:43:33 +0000 (UTC)
-From:   Frank Wunderlich <linux@fw-web.de>
-To:     linux-mediatek@lists.infradead.org
-Cc:     Frank Wunderlich <frank-w@public-files.de>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Eric Woudstra <ericwouds@gmail.com>, stable@vger.kernel.org
-Subject: [PATCH v2 2/2] arm64: dts: mt7986: fix emmc hs400 mode without uboot initialization
-Date:   Thu, 29 Jun 2023 20:43:18 +0200
-Message-Id: <20230629184318.551317-3-linux@fw-web.de>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230629184318.551317-1-linux@fw-web.de>
-References: <20230629184318.551317-1-linux@fw-web.de>
+        with ESMTP id S232141AbjF3Aez (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jun 2023 20:34:55 -0400
+Received: from mx.socionext.com (mx.socionext.com [202.248.49.38])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D0A241FCB;
+        Thu, 29 Jun 2023 17:34:52 -0700 (PDT)
+Received: from unknown (HELO iyokan2-ex.css.socionext.com) ([172.31.9.54])
+  by mx.socionext.com with ESMTP; 30 Jun 2023 09:34:52 +0900
+Received: from mail.mfilter.local (mail-arc01.css.socionext.com [10.213.46.36])
+        by iyokan2-ex.css.socionext.com (Postfix) with ESMTP id 1D4AF2224561;
+        Fri, 30 Jun 2023 09:34:52 +0900 (JST)
+Received: from kinkan2.css.socionext.com ([172.31.9.51]) by m-FILTER with ESMTP; Fri, 30 Jun 2023 09:34:52 +0900
+Received: from [10.212.156.14] (unknown [10.212.156.14])
+        by kinkan2.css.socionext.com (Postfix) with ESMTP id 86BA51592F7;
+        Fri, 30 Jun 2023 09:34:51 +0900 (JST)
+Message-ID: <1c2a9e31-4ecc-17cb-3be7-8607dbc29329@socionext.com>
+Date:   Fri, 30 Jun 2023 09:34:51 +0900
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Mail-ID: 79a3025b-a2bb-4026-a6d2-40902656f0e4
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Subject: Re: [PATCH] mmc: sdhci-f-sdh30: Replace with sdhci_pltfm
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20230629004959.22825-1-hayashi.kunihiko@socionext.com>
+ <57dd6bdc-c8dc-219c-f9dd-d2f210a5ce2c@intel.com>
+Content-Language: en-US
+From:   Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+In-Reply-To: <57dd6bdc-c8dc-219c-f9dd-d2f210a5ce2c@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eric Woudstra <ericwouds@gmail.com>
+Hi Adrian,
 
-Eric reports errors on emmc with hs400 mode when booting linux on bpi-r3
-without uboot [1]. Booting with uboot does not show this because clocks
-seem to be initialized by uboot.
+On 2023/06/29 21:57, Adrian Hunter wrote:
+> On 29/06/23 03:49, Kunihiko Hayashi wrote:
+>> Even if sdhci_pltfm_pmops is specified for PM, this driver doesn't apply
+>> sdhci_pltfm, so the structure is not correctly referenced in PM functions.
+>> This applies sdhci_pltfm to this driver to fix this issue.
+>>
+>> - Call sdhci_pltfm_init() instead of sdhci_alloc_host() and
+>>    other functions that covered by sdhci_pltfm.
+>> - Move ops and quirks to sdhci_pltfm_data
+>> - Replace sdhci_priv() with own private function sdhci_f_sdh30_priv().
+>>
+> 
+> Does it need a Fixes tag?
 
-Fix this by adding assigned-clocks and assigned-clock-parents like it's
-done in uboot [2].
+Ah, I see. I'll add it in v2.
 
-[1] https://forum.banana-pi.org/t/bpi-r3-kernel-fails-setting-emmc-clock-to-416m-depends-on-u-boot/15170
-[2] https://github.com/u-boot/u-boot/blob/master/arch/arm/dts/mt7986.dtsi#L287
+>> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+> 
+> Otherwise:
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Cc: stable@vger.kernel.org
-Fixes: 513b49d19b34 ("arm64: dts: mt7986: add mmc related device nodes")
-Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
-Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+Thank you,
+
 ---
- arch/arm64/boot/dts/mediatek/mt7986a.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/arch/arm64/boot/dts/mediatek/mt7986a.dtsi b/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
-index 68539ea788df..207510abda89 100644
---- a/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
-+++ b/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
-@@ -374,6 +374,10 @@ mmc0: mmc@11230000 {
- 			reg = <0 0x11230000 0 0x1000>,
- 			      <0 0x11c20000 0 0x1000>;
- 			interrupts = <GIC_SPI 143 IRQ_TYPE_LEVEL_HIGH>;
-+			assigned-clocks = <&topckgen CLK_TOP_EMMC_416M_SEL>,
-+					  <&topckgen CLK_TOP_EMMC_250M_SEL>;
-+			assigned-clock-parents = <&apmixedsys CLK_APMIXED_MPLL>,
-+						 <&topckgen CLK_TOP_NET1PLL_D5_D2>;
- 			clocks = <&topckgen CLK_TOP_EMMC_416M_SEL>,
- 				 <&infracfg CLK_INFRA_MSDC_HCK_CK>,
- 				 <&infracfg CLK_INFRA_MSDC_CK>,
--- 
-2.34.1
-
+Best Regards
+Kunihiko Hayashi
