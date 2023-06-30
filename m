@@ -2,185 +2,190 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C575BEB64D9
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jun 2023 00:45:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD4D7EB64D7
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jun 2023 11:26:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232152AbjF3Apt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Jun 2023 20:45:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60340 "EHLO
+        id S232186AbjF3L0y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Jun 2023 07:26:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229742AbjF3Apq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jun 2023 20:45:46 -0400
-Received: from mx.socionext.com (mx.socionext.com [202.248.49.38])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B171910C;
-        Thu, 29 Jun 2023 17:45:44 -0700 (PDT)
-Received: from unknown (HELO iyokan2-ex.css.socionext.com) ([172.31.9.54])
-  by mx.socionext.com with ESMTP; 30 Jun 2023 09:45:44 +0900
-Received: from mail.mfilter.local (mail-arc02.css.socionext.com [10.213.46.40])
-        by iyokan2-ex.css.socionext.com (Postfix) with ESMTP id 2B7982224551;
-        Fri, 30 Jun 2023 09:45:44 +0900 (JST)
-Received: from kinkan2.css.socionext.com ([172.31.9.51]) by m-FILTER with ESMTP; Fri, 30 Jun 2023 09:45:44 +0900
-Received: from plum.e01.socionext.com (unknown [10.212.243.119])
-        by kinkan2.css.socionext.com (Postfix) with ESMTP id 921571644A9;
-        Fri, 30 Jun 2023 09:45:43 +0900 (JST)
-From:   Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Subject: [PATCH v2] mmc: sdhci-f-sdh30: Replace with sdhci_pltfm
-Date:   Fri, 30 Jun 2023 09:45:33 +0900
-Message-Id: <20230630004533.26644-1-hayashi.kunihiko@socionext.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S230180AbjF3L0w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jun 2023 07:26:52 -0400
+Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F148E5B
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Jun 2023 04:26:51 -0700 (PDT)
+Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-5704fce0f23so18355997b3.3
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Jun 2023 04:26:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1688124410; x=1690716410;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ZicOvf9bDN4v7xxXHEcxX/D7CBL3Gv0y/6DJ76/RtpU=;
+        b=nr+0qeBnsO0LpFZUv3yLUD2H793smM2ShCQmOJ8jSQ5ovo+SrbqQCuOFvWQc6eC/Tg
+         mfdwp6h8mPk+Suf838p2/LVSoxOQ+i+dglfsAgJ/vTHH1x9fVHIyDkLX1xTgGCoueo5A
+         JJK7t9MhytFIuMmIPJTrxWl/fcevbd2NhGlbIpSveCm9ZaZnu6cXFCmfC0iemSFsG0SS
+         4D7LpmmjslV6bPq82EAx5tCRCm1EDPGgA9OQr6opIRCq6YW3EMfRwz8AMmf8IyS5gbK9
+         IRPpFpfySROLopvKjsda5hzU9kHDl/ZJ4hXBDJR7gr948YnNxqYjA96VlBlHXwM5Unac
+         KE8Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1688124410; x=1690716410;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ZicOvf9bDN4v7xxXHEcxX/D7CBL3Gv0y/6DJ76/RtpU=;
+        b=W6l0Hol1opMj+MQrDpB9cQeXLim264GoGRlKkY52GJ1jz2QBBzXUUFIVKtJZHDLyVA
+         9zkyH695LZqtOkKPwdwTYl2JN22TVxe5HkVacAZWY5OSJxVRmr9GNPA13+x2hkGPMKmj
+         ZuR3NUVNsGZmOef2Li1yh0sUJ9+Tw3jQEAp1Vt8mkrjKUNxCboRhuWxRtU+28vDmA3WN
+         tHHXyhGRl9C0HKsuTVUqMT1F+Ry2fFeenc7LgGYGjr1M8d7jGkcX8AF272QCJnr9FcG9
+         pJ3TMRSu7PkqkDjq4iH89cZpwdy5nqb/6PG+wfQYLobjozgzgBfcMKIazxUZ8uYh4Vo4
+         V/Jw==
+X-Gm-Message-State: ABy/qLbj/pWWtKP+W8ZAewck4P2cH2wMBGp+pSiPjC7d30NnAAO7VxPf
+        S8i+NRLUnKGS1DEbIpLBVvEoXvYNw5JnjKTQYmmjWg==
+X-Google-Smtp-Source: APBJJlGWl+Zz2b36QIag6H3aK/0BNoriFADaghtw2KYGG+i6kE/6uWTfVRFY1+G9TpLfkHrhaUNTQRHOVWpf337++e4=
+X-Received: by 2002:a81:6783:0:b0:577:617c:8cd with SMTP id
+ b125-20020a816783000000b00577617c08cdmr507282ywc.35.1688124410564; Fri, 30
+ Jun 2023 04:26:50 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230329202148.71107-1-dennis@kernel.org> <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAMuHMdVK2zPnyB9s0uYwoKj0xspa0CRzqPjhrj-YFqVNdXxEkg@mail.gmail.com>
+In-Reply-To: <CAMuHMdVK2zPnyB9s0uYwoKj0xspa0CRzqPjhrj-YFqVNdXxEkg@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 30 Jun 2023 13:26:14 +0200
+Message-ID: <CAPDyKFqtgCK5Wb_fZ9+VVK1F-LWYL+htMvQ9JPpp0zPjzBZ9gw@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+To:     Dennis Zhou <dennis@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Even if sdhci_pltfm_pmops is specified for PM, this driver doesn't apply
-sdhci_pltfm, so the structure is not correctly referenced in PM functions.
-This applies sdhci_pltfm to this driver to fix this issue.
+On Tue, 27 Jun 2023 at 19:20, Geert Uytterhoeven <geert@linux-m68k.org> wro=
+te:
+>
+> Hi Dennis,
+>
+> On Thu, Mar 30, 2023 at 1:48=E2=80=AFAM Dennis Zhou <dennis@kernel.org> w=
+rote:
+> > When using dm-verity with a data partition on an emmc device, dm-verity
+> > races with the discovery of attached emmc devices. This is because mmc'=
+s
+> > probing code sets up the host data structure then a work item is
+> > scheduled to do discovery afterwards. To prevent this race on init,
+> > let's inline the first call to detection, __mm_scan(), and let
+> > subsequent detect calls be handled via the workqueue.
+> >
+> > Signed-off-by: Dennis Zhou <dennis@kernel.org>
+>
+> Thanks for your patch, which is now commit 2cc83bf7d41113d9 ("mmc:
+> core: Allow mmc_start_host() synchronously detect a card") in
+> linux-next/master mmc/next next-20230614 next-20230615 next-20230616
+>
+> I have bisected the following failure on Renesas Salvator-XS with R-Car H=
+3
+> ES2.0 to the above commit:
+>
+>     renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+> hardware interrupt (CMD0)
+>     renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+> hardware interrupt (CMD1)
+>     renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+> hardware interrupt (CMD0)
+>     renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting for
+> hardware interrupt (CMD1)
+>     mmc0: Failed to initialize a non-removable card
 
-- Call sdhci_pltfm_init() instead of sdhci_alloc_host() and
-  other functions that covered by sdhci_pltfm.
-- Move ops and quirks to sdhci_pltfm_data
-- Replace sdhci_priv() with own private function sdhci_f_sdh30_priv().
+Thanks for reporting!
 
-Fixes: 87a507459f49 ("mmc: sdhci: host: add new f_sdh30")
-Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci_f_sdh30.c | 60 ++++++++++++++------------------
- 1 file changed, 27 insertions(+), 33 deletions(-)
+After I had a closer look, I realize that all the renesas/tmio drivers
+are suffering from the similar problem. A host driver must not call
+mmc_add_host() before it's ready to serve requests.
 
-Changes since v1:
-- Add Fixes and Acked-by tags
+Things like initializing an irq-handler must be done before
+mmc_add_host() is called, which is not the case for renesas/tmio. In
+fact, there seems to be a few other host drivers that have the similar
+pattern in their probe routines.
 
-diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-index a202a69a4b08..b01ffb4d0973 100644
---- a/drivers/mmc/host/sdhci_f_sdh30.c
-+++ b/drivers/mmc/host/sdhci_f_sdh30.c
-@@ -29,9 +29,16 @@ struct f_sdhost_priv {
- 	bool enable_cmd_dat_delay;
- };
- 
-+static void *sdhci_f_sdhost_priv(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return sdhci_pltfm_priv(pltfm_host);
-+}
-+
- static void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
- {
--	struct f_sdhost_priv *priv = sdhci_priv(host);
-+	struct f_sdhost_priv *priv = sdhci_f_sdhost_priv(host);
- 	u32 ctrl = 0;
- 
- 	usleep_range(2500, 3000);
-@@ -64,7 +71,7 @@ static unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
- 
- static void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
- {
--	struct f_sdhost_priv *priv = sdhci_priv(host);
-+	struct f_sdhost_priv *priv = sdhci_f_sdhost_priv(host);
- 	u32 ctl;
- 
- 	if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0)
-@@ -95,30 +102,32 @@ static const struct sdhci_ops sdhci_f_sdh30_ops = {
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
- 
-+static const struct sdhci_pltfm_data sdhci_f_sdh30_pltfm_data = {
-+	.ops = &sdhci_f_sdh30_ops,
-+	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
-+		| SDHCI_QUIRK_INVERTED_WRITE_PROTECT,
-+	.quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE
-+		|  SDHCI_QUIRK2_TUNING_WORK_AROUND,
-+};
-+
- static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
- 	struct device *dev = &pdev->dev;
--	int irq, ctrl = 0, ret = 0;
-+	int ctrl = 0, ret = 0;
- 	struct f_sdhost_priv *priv;
-+	struct sdhci_pltfm_host *pltfm_host;
- 	u32 reg = 0;
- 
--	irq = platform_get_irq(pdev, 0);
--	if (irq < 0)
--		return irq;
--
--	host = sdhci_alloc_host(dev, sizeof(struct f_sdhost_priv));
-+	host = sdhci_pltfm_init(pdev, &sdhci_f_sdh30_pltfm_data,
-+				sizeof(struct f_sdhost_priv));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
--	priv = sdhci_priv(host);
-+	pltfm_host = sdhci_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
- 	priv->dev = dev;
- 
--	host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
--		       SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
--	host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
--			SDHCI_QUIRK2_TUNING_WORK_AROUND;
--
- 	priv->enable_cmd_dat_delay = device_property_read_bool(dev,
- 						"fujitsu,cmd-dat-delay-select");
- 
-@@ -126,18 +135,6 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto err;
- 
--	platform_set_drvdata(pdev, host);
--
--	host->hw_name = "f_sdh30";
--	host->ops = &sdhci_f_sdh30_ops;
--	host->irq = irq;
--
--	host->ioaddr = devm_platform_ioremap_resource(pdev, 0);
--	if (IS_ERR(host->ioaddr)) {
--		ret = PTR_ERR(host->ioaddr);
--		goto err;
--	}
--
- 	if (dev_of_node(dev)) {
- 		sdhci_get_of_property(pdev);
- 
-@@ -204,24 +201,21 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- err_clk:
- 	clk_disable_unprepare(priv->clk_iface);
- err:
--	sdhci_free_host(host);
-+	sdhci_pltfm_free(pdev);
-+
- 	return ret;
- }
- 
- static int sdhci_f_sdh30_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
--	struct f_sdhost_priv *priv = sdhci_priv(host);
--
--	sdhci_remove_host(host, readl(host->ioaddr + SDHCI_INT_STATUS) ==
--			  0xffffffff);
-+	struct f_sdhost_priv *priv = sdhci_f_sdhost_priv(host);
- 
- 	reset_control_assert(priv->rst);
- 	clk_disable_unprepare(priv->clk);
- 	clk_disable_unprepare(priv->clk_iface);
- 
--	sdhci_free_host(host);
--	platform_set_drvdata(pdev, NULL);
-+	sdhci_pltfm_unregister(pdev);
- 
- 	return 0;
- }
--- 
-2.25.1
+Note that, even if the offending commit below triggers this problem
+100% of the cases (as the probe path has now becomes synchronous),
+there was a potential risk even before. Previously, mmc_add_host()
+ended up punting a work - and if that work ended up sending a request
+to the host driver, *before* the irq-handler would be ready, we would
+hit the similar problem. I bet adding an msleep(1000) immediately
+after mmc_add_host() in tmio_mmc_host_probe(), would then trigger this
+problem too. :-)
 
+That said, I am going to revert the offending commit to fix these
+problems, for now. Then I will try to help out and fixup the relevant
+host drivers  - and when that is done, we can give this whole thing a
+new try.
+
+Any objections or other suggestions to this?
+
+Kind regards
+Uffe
+
+>
+> Reverting the commit fixes the issue for me.
+>
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_c=
+ard *card, sector_t *gpt_sector)
+> >  }
+> >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> >
+> > -void mmc_rescan(struct work_struct *work)
+> > +static void __mmc_rescan(struct mmc_host *host)
+> >  {
+> > -       struct mmc_host *host =3D
+> > -               container_of(work, struct mmc_host, detect.work);
+> >         int i;
+> >
+> >         if (host->rescan_disable)
+> > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> >  }
+> >
+> > +void mmc_rescan(struct work_struct *work)
+> > +{
+> > +       struct mmc_host *host =3D
+> > +               container_of(work, struct mmc_host, detect.work);
+> > +
+> > +       __mmc_rescan(host);
+> > +}
+> > +
+> >  void mmc_start_host(struct mmc_host *host)
+> >  {
+> >         host->f_init =3D max(min(freqs[0], host->f_max), host->f_min);
+> > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> >         }
+> >
+> >         mmc_gpiod_request_cd_irq(host);
+> > -       _mmc_detect_change(host, 0, false);
+> > +       host->detect_change =3D 1;
+> > +       __mmc_rescan(host);
+> >  }
+> >
+> >  void __mmc_stop_host(struct mmc_host *host)
+>
+> Gr{oetje,eeting}s,
+>
+>                         Geert
+>
+> --
+> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m6=
+8k.org
+>
+> In personal conversations with technical people, I call myself a hacker. =
+But
+> when I'm talking to journalists I just say "programmer" or something like=
+ that.
+>                                 -- Linus Torvalds
