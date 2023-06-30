@@ -2,105 +2,95 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16861EB64D7
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jun 2023 13:36:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C05A3EB64D7
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jun 2023 18:09:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230426AbjF3Ngq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 30 Jun 2023 09:36:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52770 "EHLO
+        id S232631AbjF3SJm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Jun 2023 14:09:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33890 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232768AbjF3Ne7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jun 2023 09:34:59 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F78E3C32
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Jun 2023 06:34:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        sang-engineering.com; h=date:from:to:cc:subject:message-id
-        :references:mime-version:content-type:in-reply-to; s=k1; bh=PcXx
-        NOWHcmxCDQGZ2++gyrvWOg/Jh/8imTf8rTAbNTE=; b=DsIVyAe8mFx28qd+QeJD
-        uVFoOFwyRgGUdSRK3s95176ucP4mtVNJvkbpuSQHjtil/AcjknGDu2M2tLlkdnni
-        IvqHZtwebQA6xCFLPBEzHVT88UADuJB7QBap9y0cgKtXPdRBJyQf+61y623k8k+K
-        kXtCG7axscYjCCGscPZ8Ki1Umy7ohF7AviVcmoBOp/TleNIoqy36//zS3x6oAiWD
-        E4SRXiVKMseKF3mC3OOCMU01hzc+3kVL00Ez9PWKjjegElWxVbWQWsXo6+HvAFes
-        /sr4cmkS8DRC9sLbT8MERJkUjETrTCZa9M9jb0NwKJVa6ZpvQGhKh9wHnto7DsJR
-        LA==
-Received: (qmail 4184676 invoked from network); 30 Jun 2023 15:34:39 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Jun 2023 15:34:39 +0200
-X-UD-Smtp-Session: l3s3148p1@/4TB4Fj/db7BVfKA
-Date:   Fri, 30 Jun 2023 15:34:36 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Dennis Zhou <dennis@kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Biju Das <biju.das.jz@bp.renesas.com>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
-Message-ID: <ZJ7Z7HL684hrSkdx@sai>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        with ESMTP id S232965AbjF3SJj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jun 2023 14:09:39 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3861B1FC0;
+        Fri, 30 Jun 2023 11:09:38 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id BB3BA617CE;
+        Fri, 30 Jun 2023 18:09:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D1A5C433C8;
+        Fri, 30 Jun 2023 18:09:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1688148577;
+        bh=bPxZ17UkvfpQ7cl+vOGA9tfbMxzVwDfaSHgruYnO23k=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=N42/HycNUB3R9rtOHRq82XbOPVJ4ZvgsDSe7ml5hzKpb6e1I+qg2pUeQJsQW5p9SL
+         ckfnL+XH6Wlurgze98c1hk/HXd3Cri9vYgci7nIpWsGbMxEXM/eNx+ph7gBCPFolkK
+         30liyPbnNpuAp/diWyYWLiSr7sIfxtBCmLuZxsmBP/th62XvXkkRdYA0kTpvO2CynS
+         7J1rQXJ/0pSgYjMSga5pnGYWggYClqN+CTh4/Az+y34rCyR5cJaGNqGzUG9TtaDxKr
+         u3z8Q+jNwdISz41O81vWHe7T2B3hhrpLrQRDbOR5sc5bcS7GhigxLme65HUzxC9oYk
+         kSkr9dtRTwCkA==
+Date:   Fri, 30 Jun 2023 19:09:31 +0100
+From:   Conor Dooley <conor@kernel.org>
+To:     Frank Wunderlich <linux@fw-web.de>
+Cc:     linux-mediatek@lists.infradead.org,
+        Frank Wunderlich <frank-w@public-files.de>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Dennis Zhou <dennis@kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Biju Das <biju.das.jz@bp.renesas.com>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-References: <20230329202148.71107-1-dennis@kernel.org>
- <ZCTOMVjW+pnZVGsQ@snowbird>
- <CAMuHMdVK2zPnyB9s0uYwoKj0xspa0CRzqPjhrj-YFqVNdXxEkg@mail.gmail.com>
- <CAPDyKFqtgCK5Wb_fZ9+VVK1F-LWYL+htMvQ9JPpp0zPjzBZ9gw@mail.gmail.com>
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: drop
+ assigned-clocks/clock-parents
+Message-ID: <20230630-enrich-configure-c0f640e32cbc@spud>
+References: <20230629184318.551317-1-linux@fw-web.de>
+ <20230629184318.551317-2-linux@fw-web.de>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="ardNddU0yOlyz+Nq"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="XiSMeL3djetO3rf/"
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqtgCK5Wb_fZ9+VVK1F-LWYL+htMvQ9JPpp0zPjzBZ9gw@mail.gmail.com>
+In-Reply-To: <20230629184318.551317-2-linux@fw-web.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---ardNddU0yOlyz+Nq
+--XiSMeL3djetO3rf/
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-
-> Note that, even if the offending commit below triggers this problem
-> 100% of the cases (as the probe path has now becomes synchronous),
-> there was a potential risk even before. Previously, mmc_add_host()
-> ended up punting a work - and if that work ended up sending a request
-> to the host driver, *before* the irq-handler would be ready, we would
-> hit the similar problem. I bet adding an msleep(1000) immediately
-> after mmc_add_host() in tmio_mmc_host_probe(), would then trigger this
-> problem too. :-)
+On Thu, Jun 29, 2023 at 08:43:17PM +0200, Frank Wunderlich wrote:
+> From: Frank Wunderlich <frank-w@public-files.de>
 >=20
-> That said, I am going to revert the offending commit to fix these
-> problems, for now. Then I will try to help out and fixup the relevant
-> host drivers  - and when that is done, we can give this whole thing a
-> new try.
+> MT7986 has 2 clock-parents and these properties are not needed in driver
+> binding. So drop them completely.
+>=20
+> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 
-I'll work on the TMIO/SDHI driver next week. Thanks for the input!
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
 
+Cheers,
+Conor.
 
---ardNddU0yOlyz+Nq
+--XiSMeL3djetO3rf/
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmSe2egACgkQFA3kzBSg
-KbYL0w//Uf2zwM8QA+MvS/28kErGL3iHJwmv3aOLVBcTQcZobGoGYTX7ylZridqi
-k2bsQszEYrOqQHg5Nrgze3x1CmSW4zbKZhz67yhBWobwTY8wkYg/lVraQuXJPJQG
-13J/Cfugtx+QcCfWwvdAyEd/FarBjMMUlBjjft8zz8OT5S4j3MWLKNg+k08Ytkou
-C6TX2YYaSuzkUXo/6j8Zak+OUlIWVAthAnmExWwL8a2azufZoFizG+kWZIXyyjB3
-MGFkNo39lM72eNCKhV8yScEm+DwRIVwnlMxGpy8bk5/Xh9YwJaYDAJgZHB3ZwcyE
-LF/iI8h/EM6GTodNB97UQCFSkrHCyp9En+tqViXKaHrzZvG4Uudju8JZsNl1e/nX
-TOmaSS4usgQfYX7nyO9niohJiw40KXC2xM+ZSLIQkxYwfPF0icqcOXm8mBTiJYO0
-2W+Gs7iIK1+jroPGZtgu6uFplX8A5RgXSnBGyq0lE00GoEmVuV31kPuZPKGIXpdD
-Q3INCdeaFEeR+0l+h9D3T5IkrVRv0VkxIPrgc2wZ13ZdgQx3/UzM57kybPZAz6Zk
-x4FTMSxVOAQP57dOykCLOJMN0UhIB5RUJCJgKBPjbGt06fLEiuAzimd8+1O0jotl
-BA9qn0A08k17fGaSL7bjmeNZkHQUoNiYiXgqJSMk5RREMDnavD8=
-=suR+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZJ8aWwAKCRB4tDGHoIJi
+0rP5AQC2D2dKDFDysbpF3uvL/kWOnVWNg2SDJfdLvMCyaWBkpgD/U6aOgl/StE/w
+Vj2pP1AqURfOz3A5FBU7BH6CuyWhRAQ=
+=aQez
 -----END PGP SIGNATURE-----
 
---ardNddU0yOlyz+Nq--
+--XiSMeL3djetO3rf/--
