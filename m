@@ -2,115 +2,138 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC7CFC001B3
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jul 2023 20:28:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2E3CC0015E
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jul 2023 13:20:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229818AbjGCU24 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Jul 2023 16:28:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38262 "EHLO
+        id S230367AbjGDNUP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Jul 2023 09:20:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229915AbjGCU2z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Jul 2023 16:28:55 -0400
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10AC4AF;
-        Mon,  3 Jul 2023 13:28:54 -0700 (PDT)
-Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-51d9695ec29so4578206a12.1;
-        Mon, 03 Jul 2023 13:28:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1688416132; x=1691008132;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=btFntjY0O3IvQAR+9HWAi9QrudxEpvSJmgYuJTKvtTI=;
-        b=P/2IY1xgAl3/k1IG0imh55eAHTfrSdB5GD9jlHerOgWmBqtOW+2iTqhMRvaBCZn8bM
-         epXKrQtZswPggaRgmebsXPy72F+87TqNgiEOv7/hjwRsf+5xGlkxaj1Cavn29gHcSiir
-         8gVjUY3iaDSvWlBwXKP6/N2mfnwyjsdylTfL3N4WXOoeJhBTyksduxZdYRDVPEenxK41
-         e7SjW1T+8QA091QNxC3ef3O50hzyAnpO6vn0k2/vxl6IIj/Bt3c9RwPCRhvNAxlURxIC
-         CCX37YvD0MP45pfZ65cUCKYZk+mbQiIYMD+R3ij+Bb3zWnHRGCS2HtFxiWVyqej8iNbq
-         TAMg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1688416132; x=1691008132;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=btFntjY0O3IvQAR+9HWAi9QrudxEpvSJmgYuJTKvtTI=;
-        b=h7nyxsQncaiTALpy875/tYSGKMTaJqo8HNqS0VP85EhpS9DQ2xcludw9+3n4z3Ecc/
-         eb1YQjcq4oz0qzA9oHg9YyJVJdNJ53x1+UbNjcvWE48VI1ViWy6Ltb2GMc8Ykl2pJzPx
-         E9hpw4m9cSrxuWl2plA+AcvGr+xT6vfFOfcRKgTj4SWH7jg7ElaRmOMQipLRN4ks59+R
-         CV1knf/gIBUhIYh9J3cLHML+kcgd7T9vi5gUVN++OZf4aQO+6Jo+bMINNe0dVQ0y7ry2
-         Xrj+fi4ADrk2udsdePEVL5FAhxHXijE4KMCgH8g3QPOJX4Z028MQKG9rqBdPMeBzWbb8
-         Yd7Q==
-X-Gm-Message-State: ABy/qLYbqxGix9yULsrJNDcKzWnWl5JfbQJBDf9qNzoTlrK5uMogWP3u
-        YxusgPknzTvY0JaviIBw1EKntmOcPIIXlh8g+pg=
-X-Google-Smtp-Source: APBJJlEouvycMaNq7SW8pfQsXaQaCcJyu1kZ1tJurr0d+7z68IgdVSBIE6WLPsH2RfuMtgVa8aYFuKsE0q+6bUbE7lc=
-X-Received: by 2002:a17:907:76ab:b0:992:d013:1132 with SMTP id
- jw11-20020a17090776ab00b00992d0131132mr6440806ejc.1.1688416132254; Mon, 03
- Jul 2023 13:28:52 -0700 (PDT)
+        with ESMTP id S231461AbjGDNUK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jul 2023 09:20:10 -0400
+Received: from APC01-PSA-obe.outbound.protection.outlook.com (mail-psaapc01on2114.outbound.protection.outlook.com [40.107.255.114])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7025173B;
+        Tue,  4 Jul 2023 06:19:51 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Ee+gx+Cn3AtGL3eOiEHByv7durINCfiZ8MJNdUzxE6WZzokzzpSrbzCyKJzDzKYZhiq6ti4i4oiRzgobOVMLUqKcUBbPMHywIVVr1uhPyF1NCZ1CAmnenRG3cYV6G6hLKpl+Q9bHGuvJ18J7gFN4kcarXZpbgDPSFpxLQwkns4+vua0NuBnyTfVxt/3p+tUYiyFhmrTevNMoE6oPzhelzSRmxJb39/e6Hee1W5us3kPToLvAg5982Krlho2wLlcNW/oM/EJ6/tSPCe34QxeGkGLMhjeiEBv3sXjhJDfup8lHLToC9ZrgAZaTTNba2znG2D6xCsenQwlnUiS0VIUriQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=bUJYWgy5/3vkJfn151l3IAIPQvU5LqBW4ITzlcsIqr4=;
+ b=OaJhhZ9vzg0Qvv6hI32/y/xZqSXU4QFY5oZRlA/fI4uXI0uBZmWNB5Jas7ZpcXWRLYcxbMVzAT/t8pk0VFDF3z9UEXa7O89XHsB+yPhBcLiDpOmDg9ffHpUCaVeGYrKJPMlS8jrU0eIDr0KQHZKfTciGvG5mJeU1sOerxzmPin9Shq/WdW4WLbzM0+MczIQ3dxHlEHnCoQhVvAM8a68wPKPADaeUa+IVkc9MwQH+6xcx08FE7LNoltKEt667Lby1d1USjR4mA8YqxJrBU35AVF9gVwVBtXKK9nv4lRRDU+ruihiiDrYiB/6vtI0nN72LrGgta/xUIN85FCX9st5hvA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
+ dkim=pass header.d=vivo.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=bUJYWgy5/3vkJfn151l3IAIPQvU5LqBW4ITzlcsIqr4=;
+ b=EUL8VFLGxP1NH58ixvBaErrfQZqg8VaRo2qYLEH++L7ODxEdrLONMhZglcn5pBZh30flwuVyKfz9Yk3njAmAgzlgN+IcvObK3Wg+GOZo8GmpKExJM8uSNHfqK/Y8otK/YuMdbPnFYPYUAYZMoN6zizpruIqvnGQQ6S/fhKp0KlIdfaVb5v6/LmK3QFlweapI+l/iKRRFkzzSiFlnkvb/1ve7CT74tJeTDvcGMNU53bFjXOnRgfFQQ2eFEkBBXZrkV6wv7nYojlacMfA2N5lwxx8QLCy+XglapVhj7LJqV1KbhMq25WYbzZ5ZkF5MA9aROCIGzLDEQP9fkvYrZWHYsA==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=vivo.com;
+Received: from SEZPR06MB5269.apcprd06.prod.outlook.com (2603:1096:101:78::6)
+ by TYZPR06MB5027.apcprd06.prod.outlook.com (2603:1096:400:1c9::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6544.24; Tue, 4 Jul
+ 2023 13:19:48 +0000
+Received: from SEZPR06MB5269.apcprd06.prod.outlook.com
+ ([fe80::fa0e:6c06:7474:285c]) by SEZPR06MB5269.apcprd06.prod.outlook.com
+ ([fe80::fa0e:6c06:7474:285c%5]) with mapi id 15.20.6544.024; Tue, 4 Jul 2023
+ 13:19:48 +0000
+From:   Yangtao Li <frank.li@vivo.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Yangtao Li <frank.li@vivo.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH 1/3] mmc: mxcmmc: Use devm_platform_get_and_ioremap_resource()
+Date:   Tue,  4 Jul 2023 21:19:36 +0800
+Message-Id: <20230704131939.22562-1-frank.li@vivo.com>
+X-Mailer: git-send-email 2.39.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SI1PR02CA0035.apcprd02.prod.outlook.com
+ (2603:1096:4:1f6::8) To SEZPR06MB5269.apcprd06.prod.outlook.com
+ (2603:1096:101:78::6)
 MIME-Version: 1.0
-References: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
- <CAFBinCAJ1E6JKmFTuaJwGpd_MBzHMZ0mMj-1AE3TNeB2_72nZA@mail.gmail.com>
-In-Reply-To: <CAFBinCAJ1E6JKmFTuaJwGpd_MBzHMZ0mMj-1AE3TNeB2_72nZA@mail.gmail.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Mon, 3 Jul 2023 22:28:41 +0200
-Message-ID: <CAFBinCAWsurgCqxCJMP_xo-uj-FsPpYK-6e_6KAGMdDJB2adFA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-mx-sdhc: Fix initialization frozen issue
-To:     Ziyang Huang <hzyitc@outlook.com>
-Cc:     ulf.hansson@linaro.org, neil.armstrong@linaro.org,
-        khilman@baylibre.com, jbrunet@baylibre.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SEZPR06MB5269:EE_|TYZPR06MB5027:EE_
+X-MS-Office365-Filtering-Correlation-Id: ac2f6f6a-f9d9-483c-0df6-08db7c9156d5
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: QZsHlVv7PWrlwbVoIXeXIOGhni/3QUPuDxNlrVV0BYngTkvrtmJ0PsaAL4O2B/NedZRUhcPZO6S8RPpdH5ryy1eji6bhnJ8HXDFVmTzImBWz+ekBHn4kfbWx/vd1PN64N/R/CRl7Q7WGlFntwMjbqN+RSBRgHUi+N6gNe4m5SAjjnNBDAo1nQNsACYjiSmWVp4P4X8RplsYCm80LAPS4YtFP5OUO3kQlnfFrmdkUnZ6IvVeO4AFVsQtRART4qB8Z+Wkqk8hVdESAOmzWS3LCxbtRBZMuVR9gn4IkaF703IFyutxy2YL7g2UB1IqREHiRWBdtAkPFvTGKBczpjfcnkRulWv5YJhqsqKoeqNqNeqC4U87ZkBb5VmqchCXDaN+AdRqed/o+bmQrXRi+0CFFnxaRSWa6RC07PkKFuqcrgp9HOSlw6AS/ne3my0D4fKir9aNqapylk5KGX/mjcrUAbeKd0joB582mgjEA1ud5dD/ViLkAXW0IU0qT+yXze6t+7LL8CmJT6UNZ3YAX4utGCewN7uH3RGtFFm3eKt18oSF16oaNQBV88D0Lt6IU7nY4FID8tNrw0qrtJCrG4PqZXR/6K7pCb7UVG3pMQ2cg/Yo=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SEZPR06MB5269.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(376002)(366004)(396003)(346002)(136003)(39850400004)(451199021)(2906002)(4744005)(478600001)(26005)(41300700001)(6666004)(6486002)(86362001)(36756003)(52116002)(8936002)(8676002)(5660300002)(84970400001)(316002)(6512007)(66556008)(66476007)(66946007)(4326008)(38100700002)(6916009)(38350700002)(6506007)(1076003)(2616005)(186003)(83380400001);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?g33LNJnAAMzs0HSvokUZFXWk0lxifUG3E+IGE0mq3yjoFboFkMBJzbqE6dNB?=
+ =?us-ascii?Q?kobritgi8XtLuXkycZSfLoAqDjgvU+8B5KcNIjjvVNkTDvxSvY/h13Y1RKEx?=
+ =?us-ascii?Q?2FOvMRubp1Pzyxt8c45iuuHOJKlvr7efrxnvivQl71E2QQs8TIJW+Bo9YNY4?=
+ =?us-ascii?Q?OWtuPjUHGNGWYrTvz03tGvLdsXUf6p7F7xjboT4kSz/GXgNiq1ReffL1aiEQ?=
+ =?us-ascii?Q?a168XdIPpB7T1vTTf7EaSiUkxuagirzcfLdFoufZALheUsJsEsQGGpVZJHq+?=
+ =?us-ascii?Q?Tn/TsIiRz4GgPTvYfdI+VfaNjU0zk48r7wUn02IPxoq3e9AZHY4EBgj0H4Q0?=
+ =?us-ascii?Q?yUhh6j5o+xtyCILVdqxXmh5uMzxTuRcAvxSx2HrFL+JgeeDXkfO7LNpzWOhC?=
+ =?us-ascii?Q?BmH3LTYs7xwUhakHJqOC6//TjEOLV/o/JRyNObf+b3MQO6ptPQog7qhbDMxw?=
+ =?us-ascii?Q?GhuQd7t30za8sYSQJ/J7mq3CmD59Yl0ri0nrwniQTajKcdJb8Lu0W4uBRiBr?=
+ =?us-ascii?Q?TrM6T5LMBkDw2oVBSNPLwJ8f3eT20q0tmwRRnBy1tRFifsPCOHxlLSxE0lAU?=
+ =?us-ascii?Q?X8Ci9lDXPg/s/8xnb5bhq9vnwE0KRUzZBZcn9JH1ClH0gGkTDoCsrHN0NXxk?=
+ =?us-ascii?Q?6bGO4S7lo2OtPe1vkPXLcsVtmAyKoTEZKy9k5uS2N1x/tDVZ0RSWIcnwkPkP?=
+ =?us-ascii?Q?5cz3K6Xj5nDvBBqN+HHF5syk1BnMPIdG5IzmSf9tTa1WnXM3bKTOswLuoO8U?=
+ =?us-ascii?Q?mPZqDIwCaTSFmyhqHSfQa/T5pR1QHmJRyydE3CiRO01ZZIwPLTnNkKAFY7cR?=
+ =?us-ascii?Q?O/OfmL5Um6mH6qWBbl7/3p0ST4GhGxJHgIh4GBuAEtdn/RZ/HlmFudc8MUAi?=
+ =?us-ascii?Q?noTvIPl7ZnwqS/k+ZzzjyfK8ZJisnQc7ir4rlndcqZ4HeNeWz+wzLDOCIGB7?=
+ =?us-ascii?Q?d5o4zuPLjemTHef7OAzaEiYz7zbkMEI9LNd/TMtda40htLAKDO0GufQ6DUNd?=
+ =?us-ascii?Q?+k8hc/p7iSrpF+PysbBIBNiHzMsPY6fVHA81pbiW2FC6AjzIfteflwWB9lR8?=
+ =?us-ascii?Q?4croOYSBMRfY5yoLf1eCfYYCxOxhjx+r5Rbekt91EE335wx7Vn1WL++k9ggR?=
+ =?us-ascii?Q?zM/k2/YMgSPv6HsN6JEnnf78MjHicjisjHJFfhlVxEeiS0KNHomCZKG3fy2H?=
+ =?us-ascii?Q?PPBONnlyjkV1BCBEovzSs3rJQWjModXzW8Jmt+CazjTcLafoMCP1ErnbWAP9?=
+ =?us-ascii?Q?OTZ5w87Gvrf3OjD1aRAoZfoMl65VeOk1VaT1xFZd9mvVq/H/Uuk4B07wDVTX?=
+ =?us-ascii?Q?ZbvL3wDKqqKdMIX4rrZtYnUAjIiZ+G8B9r1CrpaJuGSYnQw3aFHkRvW8oKfG?=
+ =?us-ascii?Q?j5qjQ+dHh9zVxj/48ebhr8BpNKU3rhOP95hQxWmEd8qBKc1bSYLIgcUXXIpF?=
+ =?us-ascii?Q?cExj749teiYDD3aJiC0Wf2u6eIOW1rMs6Lmd5GhNghqjE/8ljcE4Zr2JkDGd?=
+ =?us-ascii?Q?S91IbnOrHKbMUJ1l6qNQaMwyWAGw6+1iczGlhyHbXio/P+MT4pucoOyuNrAD?=
+ =?us-ascii?Q?bVL1ZBK17kGAsjm6774uD/jmn6/RagVsxO8/nVAt?=
+X-OriginatorOrg: vivo.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ac2f6f6a-f9d9-483c-0df6-08db7c9156d5
+X-MS-Exchange-CrossTenant-AuthSource: SEZPR06MB5269.apcprd06.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Jul 2023 13:19:47.4705
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: K2ixEu/N/C4kVewhFb8fMkOzSSziyJhIHTwVp8YzanvYZqZW9iSf1bkD+y3VUvl31Hr9rum5YvUVL2PRD+TfsA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYZPR06MB5027
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+Convert platform_get_resource(), devm_ioremap_resource() to a single
+call to devm_platform_get_and_ioremap_resource(), as this is exactly
+what this function does.
 
-On Mon, Jun 19, 2023 at 9:51=E2=80=AFPM Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
->
-> Hello,
->
-> first of all: thank you for this patch!
->
-> On Mon, Jun 19, 2023 at 7:36=E2=80=AFPM Ziyang Huang <hzyitc@outlook.com>=
- wrote:
-> >
-> > Commit 4bc31edebde5 ("mmc: core: Set HS clock speed before sending
-> > HS CMD13") set HS clock (52MHz) before switching to HS mode. For this
-> > freq, FCLK_DIV5 will be selected and div value is 10 (reg value is 9).
-> > Then we set rx_clk_phase to 11 or 15 which is out of range and make
-> > hardware frozen. After we send command request, no irq will be
-> > interrupted and the mmc driver will keep to wait for request finished,
-> > even durning rebooting.
-> I think this is the exact same problem I reported some days ago: [0]
-> Ulf is questioning whether we properly support 52MHz clocks correctly,
-> so I think you're onto something!
->
-> So this is an excellent finding! I can confirm that using rx_clk_phase
-> of 1 makes my Odroid-C1 eMMC work again :-)
->
-> > So let's set a common value - 1 just for initialization. Then let
-> > meson_mx_sdhc_execute_tuning() to find the accurate value for data
-> > transfer.
-> As far as I know unconditionally using value 1 can negatively affect
-> other devices.
-> I'm assuming that you're testing on an Odroid-C1 or similar board with
-> HS200 eMMC:
-> On those SoC + eMMC combinations we do support. But on other boards
-> (for example Meson8b EC-100 / Endless Mini) there's no HS200 support
-> because the eMMC is connected with 3.3V IO lines. So tuning is not
-> executed there (if I recall correctly).
->
-> What do you think about adding a special case for the 51MHz "actual
-> clock rate" and adding a comment that it was found by manual testing?
-> For some reason (that I don't understand) Amlogic's vendor driver
-> maxes out at 47.22MHz (presumably because they limit themselves to
-> using FCLK_DIV3 as input only - but I don't get why...).
-Did you have the chance to look into my comment? I would like to hear
-your opinion on this topic!
+Signed-off-by: Yangtao Li <frank.li@vivo.com>
+---
+ drivers/mmc/host/mxcmmc.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 668f865f3efb..f3a72569dd1a 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -989,7 +989,6 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 
+ 	pr_info("i.MX/MPC512x SDHC driver\n");
+ 
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	irq = platform_get_irq(pdev, 0);
+ 	if (irq < 0)
+ 		return irq;
+@@ -1000,7 +999,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 
+ 	host = mmc_priv(mmc);
+ 
+-	host->base = devm_ioremap_resource(&pdev->dev, res);
++	host->base = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
+ 	if (IS_ERR(host->base)) {
+ 		ret = PTR_ERR(host->base);
+ 		goto out_free;
+-- 
+2.39.0
 
-Best regards,
-Martin
