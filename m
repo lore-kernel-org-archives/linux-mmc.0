@@ -2,76 +2,187 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4EABEB64D9
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Jul 2023 06:43:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C843FC00528
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Jul 2023 08:23:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230396AbjGJGnd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Jul 2023 02:43:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48036 "EHLO
+        id S229804AbjGJIXP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Jul 2023 04:23:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231207AbjGJGnd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2023 02:43:33 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3AE3A6;
-        Sun,  9 Jul 2023 23:43:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1688971412; x=1720507412;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=4XYMBsnYy1GuZNBmxJF2HlXlwLl0eQJul6n7IcmqelI=;
-  b=IIdrkboCoz7KpdXlQDjgQxJeyaw+JFxhcw2GOh4fIgsx7yR6zheAXLBI
-   JJCJ0wkqUNAlPzwPfrpYJb6AmRHweXLWJZzpYkqUZ58f0cw4I/+PwIopf
-   PkpZpFAy9a6fb23JXFzugvjtvqBUMHvuoVRfAVVKT64Q6+bFzh5OGWWos
-   cEsxJMUbNJSl5f0X4Kd3XhaZctDYxOrfJkHTGLFX5ul+F7Hika9YR6sP1
-   WiYyoUf5QO8+wmVamSlOVc1vQS5r51DxzHTACr9azj3St7V3xwUC1T83B
-   yMyh/kovenKdzme6BCTDX7WzhwuwG2B7lCWU4m+Iw+zB312s9Ilron14x
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10766"; a="354127717"
-X-IronPort-AV: E=Sophos;i="6.01,194,1684825200"; 
-   d="scan'208";a="354127717"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2023 23:43:32 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10766"; a="844779133"
-X-IronPort-AV: E=Sophos;i="6.01,194,1684825200"; 
-   d="scan'208";a="844779133"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.220.97])
-  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2023 23:43:29 -0700
-Message-ID: <bf137a7a-9081-71ac-340f-8da09d9e63be@intel.com>
-Date:   Mon, 10 Jul 2023 09:43:26 +0300
+        with ESMTP id S232861AbjGJIXF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2023 04:23:05 -0400
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1765291;
+        Mon, 10 Jul 2023 01:23:03 -0700 (PDT)
+Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36A8BaDe027592;
+        Mon, 10 Jul 2023 10:22:23 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=GE6zkKpI6t9uY6L4iGZvQGH0DZZlhk/alBlWR2MxhUs=;
+ b=G+4K12NnVLRH60fLRSLye1p6QMQOse6GHGYvmcXkLdfiDUaeFSQxdVHB8IuIaLl3hTIj
+ cNhrU2X+aizJuhnIEVZGZ3AtqalmKwy1lusGnOvoDtQS3WL/XPW52RrEXjNw6EgYgYRX
+ 7ykkxWK3XJLDKaZW3ywfdgnSJd28+A7BuIgG2xvGBzKbVSK1AorcTFJiX/vb2qrSUU7K
+ KbGigglmesbBjV7AwerCwSCze7W6exOddeiEWGNQenh3iQE5kIdzdont68RbEOAeqajB
+ dsS/sLb1eB5zRqc8iDpTZ5mswkIA4Czb8vK9LHM+wRn2Vrpy2YeSvgiltQE7LfmEfE58 LQ== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3rre8vr37g-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 10 Jul 2023 10:22:23 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id C00B010005A;
+        Mon, 10 Jul 2023 10:22:19 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 58FB521BF6A;
+        Mon, 10 Jul 2023 10:22:19 +0200 (CEST)
+Received: from [10.201.21.121] (10.201.21.121) by SHFDAG1NODE1.st.com
+ (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Mon, 10 Jul
+ 2023 10:22:18 +0200
+Message-ID: <fb72b4e4-d5c6-d9be-269d-29aff996001c@foss.st.com>
+Date:   Mon, 10 Jul 2023 10:22:10 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.13.0
-Subject: Re: [PATCH V8 02/23] mmc: core: Prepare to support SD UHS-II cards
-To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20230621100151.6329-1-victorshihgli@gmail.com>
- <20230621100151.6329-3-victorshihgli@gmail.com>
+ Thunderbird/102.11.0
+Subject: Re: [PATCH 04/10] dt-bindings: treewide: add feature-domains
+ description in binding files
 Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230621100151.6329-3-victorshihgli@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+To:     Rob Herring <robh@kernel.org>
+CC:     <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
+        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
+        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
+        <alexandre.torgue@foss.st.com>, <vkoul@kernel.org>,
+        <jic23@kernel.org>, <olivier.moysan@foss.st.com>,
+        <arnaud.pouliquen@foss.st.com>, <mchehab@kernel.org>,
+        <fabrice.gasnier@foss.st.com>, <andi.shyti@kernel.org>,
+        <ulf.hansson@linaro.org>, <edumazet@google.com>, <kuba@kernel.org>,
+        <pabeni@redhat.com>, <hugues.fruchet@foss.st.com>,
+        <lee@kernel.org>, <will@kernel.org>, <catalin.marinas@arm.com>,
+        <arnd@kernel.org>, <richardcochran@gmail.com>,
+        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <dmaengine@vger.kernel.org>,
+        <linux-i2c@vger.kernel.org>, <linux-iio@vger.kernel.org>,
+        <alsa-devel@alsa-project.org>, <linux-media@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
+        <linux-phy@lists.infradead.org>, <linux-serial@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <linux-usb@vger.kernel.org>
+References: <20230705172759.1610753-1-gatien.chevallier@foss.st.com>
+ <20230705172759.1610753-5-gatien.chevallier@foss.st.com>
+ <20230706145108.GA3858320-robh@kernel.org>
+ <0aaace47-1bb4-82c5-57a5-6f5d27eb4d45@foss.st.com>
+ <20230707152056.GA317056-robh@kernel.org>
+From:   Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
+In-Reply-To: <20230707152056.GA317056-robh@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.201.21.121]
+X-ClientProxiedBy: SHFCAS1NODE1.st.com (10.75.129.72) To SHFDAG1NODE1.st.com
+ (10.75.129.69)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-07-10_05,2023-07-06_02,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/06/23 13:01, Victor Shih wrote:
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+
+
+On 7/7/23 17:20, Rob Herring wrote:
+> On Fri, Jul 07, 2023 at 02:28:28PM +0200, Gatien CHEVALLIER wrote:
+>> Hello Rob,
+>>
+>> On 7/6/23 16:51, Rob Herring wrote:
+>>> On Wed, Jul 05, 2023 at 07:27:53PM +0200, Gatien Chevallier wrote:
+>>>> feature-domains is an optional property that allows a peripheral to
+>>>> refer to one or more feature domain controller(s).
+>>>>
+>>>> Description of this property is added to all peripheral binding files of
+>>>> the peripheral under the STM32 firewall controllers. It allows an accurate
+>>>> representation of the hardware, where various peripherals are connected
+>>>> to this firewall bus. The firewall can then check the peripheral accesses
+>>>> before allowing it to probe.
+>>>>
+>>>> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+>>>> ---
+>>>>
+>>>> Disclaimer: Some error with dtbs_check will be observed as I've
+>>>> considered the property to be generic, as Rob asked
+>>>>
+>>>>    Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml  | 4 ++++
+>>>>    Documentation/devicetree/bindings/dma/st,stm32-dma.yaml      | 4 ++++
+>>>>    Documentation/devicetree/bindings/dma/st,stm32-dmamux.yaml   | 4 ++++
+>>>>    Documentation/devicetree/bindings/i2c/st,stm32-i2c.yaml      | 4 ++++
+>>>>    Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml  | 4 ++++
+>>>>    .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml      | 4 ++++
+>>>>    Documentation/devicetree/bindings/iio/dac/st,stm32-dac.yaml  | 4 ++++
+>>>>    .../devicetree/bindings/media/cec/st,stm32-cec.yaml          | 4 ++++
+>>>>    Documentation/devicetree/bindings/media/st,stm32-dcmi.yaml   | 4 ++++
+>>>>    .../bindings/memory-controllers/st,stm32-fmc2-ebi.yaml       | 4 ++++
+>>>>    Documentation/devicetree/bindings/mfd/st,stm32-lptimer.yaml  | 4 ++++
+>>>>    Documentation/devicetree/bindings/mfd/st,stm32-timers.yaml   | 5 +++++
+>>>>    Documentation/devicetree/bindings/mmc/arm,pl18x.yaml         | 4 ++++
+>>>>    Documentation/devicetree/bindings/net/stm32-dwmac.yaml       | 4 ++++
+>>>>    Documentation/devicetree/bindings/phy/phy-stm32-usbphyc.yaml | 4 ++++
+>>>>    .../devicetree/bindings/regulator/st,stm32-vrefbuf.yaml      | 4 ++++
+>>>>    Documentation/devicetree/bindings/rng/st,stm32-rng.yaml      | 4 ++++
+>>>>    Documentation/devicetree/bindings/serial/st,stm32-uart.yaml  | 4 ++++
+>>>>    Documentation/devicetree/bindings/sound/st,stm32-i2s.yaml    | 4 ++++
+>>>>    Documentation/devicetree/bindings/sound/st,stm32-sai.yaml    | 4 ++++
+>>>>    .../devicetree/bindings/sound/st,stm32-spdifrx.yaml          | 4 ++++
+>>>>    Documentation/devicetree/bindings/spi/st,stm32-qspi.yaml     | 4 ++++
+>>>>    Documentation/devicetree/bindings/spi/st,stm32-spi.yaml      | 4 ++++
+>>>>    Documentation/devicetree/bindings/usb/dwc2.yaml              | 4 ++++
+>>>>    24 files changed, 97 insertions(+)
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml b/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+>>>> index b767ec72a999..daf8dcaef627 100644
+>>>> --- a/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+>>>> +++ b/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+>>>> @@ -50,6 +50,10 @@ properties:
+>>>>      power-domains:
+>>>>        maxItems: 1
+>>>> +  feature-domains:
+>>>> +    minItems: 1
+>>>> +    maxItems: 3
+>>>
+>>> What are the 3 entries?
+>>>
+>>> Rob
+>>
+>> I thought I was benefiting from the description of the pattern-property in
+>> the RIFSC YAML file. But yes anyway, it seems like it needs some description
+>> here as the dependency does not appear in this file.
 > 
-> Updates in V7:
->  - Drop sd_uhs2_set_ios function.
->  - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_up().
->  - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_off().
->  - Drop MMC_TIMING_SD_UHS2 in favor of MMC_TIMING_UHS2_SPEED_A.
->  - Modify sd_uhs2_legacy_init to avoid sd_uhs2_reinit cycle issue.
+> Humm, that should limit the maximum entries to 2, so 3 would never work
+> (if RIFSC is the parent).
+> 
+>> I picked 3 as a maxItems for our ST needs, I'll give it some more thought
+>> when coming back with something clearer.
+> 
+> I'd expect you have 1 entry for register bus and 1 entry for DMA bus if
+> there is one. It's block specific for how many entries, so the RIFSC
+> schema should not be setting that. You could possibly say that
+> 'feature-domains' is required for all the child nodes though.
 
-This patch does not compile because it depends on definitions
-that are in patch 5.
+Ok, I will change to not specifying the number of entries in the
+RIFSC YAML file for V2.
 
+> 
+> Rob
+Some hardware blocks may have a firewall ID for their device part and
+another ID for their master part as well. In the end, the number of
+entries could very well vary between different platforms. And the YAML
+files are common to these platforms.
+
+This property could be used for "extra" arguments as well, that are not
+firewall IDs.
+
+What do you suggest between picking a high maxItems value that would
+(hopefully) cover all cases and not specifying maxItems at all? Or maybe
+another property dedicated to such arguments?
+
+Best regards,
+Gatien
