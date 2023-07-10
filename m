@@ -2,206 +2,189 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8AF0EB64DA
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Jul 2023 14:35:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6298FC04A6A
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Jul 2023 14:42:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230008AbjGJOfl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Jul 2023 10:35:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48828 "EHLO
+        id S231458AbjGJOmn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Jul 2023 10:42:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51604 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229793AbjGJOfk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2023 10:35:40 -0400
-Received: from JPN01-OS0-obe.outbound.protection.outlook.com (mail-os0jpn01on2110.outbound.protection.outlook.com [40.107.113.110])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1038F1;
-        Mon, 10 Jul 2023 07:35:38 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=FFzB8vUOW30ZvHubVkKEspZX0hf5a62MlEFcCQazz3VBoiTK9Ts7xg9wQK28kFhhBfuI3QnjbCTphfDO2D73ln/g2QLdxiz/rg2HEmbfyywlifCrvGoZEj5CE0YhF995wjNsUTmFxiGgxbNuwXeSA4dj2bh6DrWwM6rGnL6+d7yeXlDm1v/4GBiHjNlogjiuVMT1B3crpleK7qBKKQCxU9X//qC3yEaJ+MWfqDyk5EiM7Yuclq5ekKJPkQkoxUBqbz30UIHkjBW7e2qgThed4XjcrrV/6c1s4yUC4Ffbjp7ASHsLbYgJGPYPhKNJZslyJQ3EGAAgu2pyn6J3XWwdfQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=GwgJTLFEVvFt5rweikYbshV55Q8Q+IwlqlcfSJyyOG8=;
- b=eg+kzq1ilLHlO6LEZWdHZfyi4uTrJ9fCXtfuiLdEba2yY1o4Qwe82HtWeHbV7TaZkevQO428wfjXlKmoz1Cs+LtuZv1ErETOqmgIEt1QrPWvDwH9Re3sqRcY70punD80pgPlKkWiFFgRifY3+Dhxg6VJ7aFfYJgQTzLAqcwxcvxwBlUH3l8amh24RewnOOUQZ7przhKmpewaRY4APVd4gjZcm7jKXS+y9+BNnSKYC+WjHcR3/68pYrV+iMMJJAdzX2FaEulJnThsAbzq4wTolajQ1K3R/FfUR6Kk6+saH//wX52E02eJl6Ii9ZJmL5yYctP7y9PQl33Ah7B1CYX/wQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=GwgJTLFEVvFt5rweikYbshV55Q8Q+IwlqlcfSJyyOG8=;
- b=toj5ARCRvdaK2DYllMHo8b691lkePR9nP81+rCr9zzg1Xrcg8vqyIw+gJi7DNr4+KmIs+O6urfaL4t4tU/K1MXY6XiBPScZk19oT6t8OJ5N7asnUqOigu9lSyst4EJT5Hswec6fPnfZ6sUpcpcRVoC6l8TcPnKLGwquXbOHZlxQ=
-Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com (2603:1096:604:bb::5)
- by TYCPR01MB6303.jpnprd01.prod.outlook.com (2603:1096:400:7c::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6565.30; Mon, 10 Jul
- 2023 14:35:35 +0000
-Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com
- ([fe80::de3f:f3ca:8629:c80d]) by OS0PR01MB5922.jpnprd01.prod.outlook.com
- ([fe80::de3f:f3ca:8629:c80d%4]) with mapi id 15.20.6565.028; Mon, 10 Jul 2023
- 14:35:32 +0000
-From:   Biju Das <biju.das.jz@bp.renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH RFT] mmc: renesas_sdhi: register irqs before registering
- controller
-Thread-Topic: [PATCH RFT] mmc: renesas_sdhi: register irqs before registering
- controller
-Thread-Index: AQHZszgc+Vl30+EInk2/Gdg8FTk7p6+zEISQ
-Date:   Mon, 10 Jul 2023 14:35:31 +0000
-Message-ID: <OS0PR01MB59222DB7B5BE666FE8774F308630A@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-References: <20230710140825.47793-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20230710140825.47793-1-wsa+renesas@sang-engineering.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: OS0PR01MB5922:EE_|TYCPR01MB6303:EE_
-x-ms-office365-filtering-correlation-id: 571e5c87-bfd0-43ad-21ea-08db8152ea2d
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: k3I94zjAGWHiSSgkFhYhW5bDRdXmPx1kwdihWyNg1RmhpbXNGH+sXnQxkOY/S9xiSM4hX4kFpYyZv0wIDy6CAeHKPYgwAxINnU8gK28XSVaOw6foJ1i2jGV9GQfQyM1WAQsFFo41wFH/kLfLOfbIR2Hgb8+IeysrJzP3250u4JY+1dwVLYXJ/+UTTrW07MWW+qGGY72sMX/2l5QA+jaO7BN5NUnMHyKnu/AjhyqogsPvHc42cu3MTW4LBH5G47J6+jTGhT8OOmhyQ+rPn8undM31xU3Mr1kCW+WPJwMZa4vyFEIsVqX4lJ5xHzmTqCwwpVgIyBX4xQV1UTp7MeE1vb6D5bZ64Oon+l4aomYQ5zFgoDGaPC8FWVzMqvCFgaBcsalWwgJFnlV6TJqcF5JHrC5OoOUDx8QBSM3EklHs6gV9h3UtA5uk5P+FXx55A3d7JiS0QQVINAVmoFy/fx+EH0m58aRUhN5LtPyqoOLP165Wzts0l7Gwgks7qMxgPMP93fWgnk6deZb1hJMINxI59ejAVUXdgfHd1r9XFNQdnkRM1xSGsLQ2AIDaRNyuauqkyyNkbLqkmD4XEBwu0GDsAPWNoFZk4+WF70b9t53abo4xSVW1UlWjN/rfUTyFFP0c
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OS0PR01MB5922.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(346002)(366004)(396003)(376002)(39860400002)(136003)(451199021)(86362001)(38100700002)(38070700005)(33656002)(71200400001)(55016003)(7696005)(110136005)(54906003)(76116006)(122000001)(53546011)(6506007)(9686003)(186003)(5660300002)(52536014)(2906002)(66556008)(316002)(478600001)(66946007)(8936002)(66476007)(8676002)(83380400001)(4326008)(64756008)(66446008)(41300700001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?HzufElIuNFLcJKV6OY9KZyKWMCSLAZt3PlsY0WPnn+SKgCdFlNieRHCeTDAO?=
- =?us-ascii?Q?XGkvIPcDUX3cqbIGY6kRTL7lXEIz9c6btuSuiNh6dLbcw6lUITAft+grwVVr?=
- =?us-ascii?Q?z0DDYOwQFHKGivNkUa5fqJEkjqgB+2/TbJ3LMCxLMBojR6Tm7mYhVD1fMF7G?=
- =?us-ascii?Q?nBaK13y0aKGHIK+fCh53GkxRm68Mq1YFuCi+k+3BIjRF330BADFgXScajOFD?=
- =?us-ascii?Q?0OE1wEzbrR9tPP/8G8CW77Lp0BqZePAgeQuuqqRMcDhfyBatMItAfnEQrVSc?=
- =?us-ascii?Q?1QnNnhQx7EWmFx6egYUVDX7zvpZHOacI1yNLlY6YDbfqWw/jeI7RefgmenMn?=
- =?us-ascii?Q?2g2FQHZp1OCNV6m1b2cPxEI7EsbH9BswrYZm55UxUtcaJbMMWHNStBVlnjde?=
- =?us-ascii?Q?NAT17lAqL4XVV8JHEu6XOf1zkcyDeomgtzcLamRMFYnZi+c2hbXTOS1hT/GF?=
- =?us-ascii?Q?krFTGT6GR95ougxP8jKLK+ks9sOWHEZMzhdcMzP8q4e605LvLrCpAuHMDZ0V?=
- =?us-ascii?Q?zpdmsKYeUyTl5MbbjMyghkimE1uCEuTiav3YMd6416XabktRK5DzNe+xuckk?=
- =?us-ascii?Q?s05b8HNUMQiDvfWmtCUJIj/cjXV5iyf486BFmKUBGVJwiaTdSWQRrkLCCfWr?=
- =?us-ascii?Q?cpypu9PcnVkheyuGLAaDh4hO3DAbLIXJLE4UELM7oKMCQA9XXqhJFgeMjHFE?=
- =?us-ascii?Q?MMjSER2Ej2kySn9PYYESVNIsJ5Y8QhFgsEkUiqITCK12QXZMgVT2OPQWmk+E?=
- =?us-ascii?Q?Br6OjZrPvuddGCuOjZSYICQ32O/tKO8VGq49ZhzNdZdYCnwuqE9E8nGNqaxq?=
- =?us-ascii?Q?+zqfetkElN7I4UTpj/2lIvwgXFjqGL1g44lc4D9S3haDacjVbMzPr+BMLrRM?=
- =?us-ascii?Q?XyyhAeBiJ26k6yOV1wLWdJIZQKtVXAaiR2qwvPge7T1DEOyTEYPowmPjA4It?=
- =?us-ascii?Q?G8Slsk+BKjt2Ng0eOD4gzDjhXlKKWNInf3t1MudwctubWTftPoFVwZpQM9/1?=
- =?us-ascii?Q?txIrbYdrHHsJwVZTME6Q9v1wancvPCOmzXm6uSX46e5y9KNf2Tl2XD4zBohP?=
- =?us-ascii?Q?NyDclTLPyodY640VXn5tJGwrWrBxslfh4DjBqKSEJb55oLraXadu1rAok+46?=
- =?us-ascii?Q?kO3Z52zagLOVFmYiv0l0nvaZlUvYL6C5sh60NkB0lNMBhuRl5JM77tqJEkVy?=
- =?us-ascii?Q?JOlASmX7vInQPS1Ye/O36m6nG3ohNRHwhTaZMJt+pVYrWDyMTAhM36F3IsAt?=
- =?us-ascii?Q?VU80Z7du94Fc7NxxnuNVsBe/HYirTxknCm7b8wtUu0DkK8QATA0V0W6ibtrq?=
- =?us-ascii?Q?zfsKUn3i2xpyM1YKsrF/Ndql8ebfJoZcSEhnf4ujfBTflQspznj8wt5jUb3b?=
- =?us-ascii?Q?1gbk6iq3El5TkC3SLNWcg+rwYLuf2g3vHhMt12o9v+v8cueI+dhLaaYdKMDO?=
- =?us-ascii?Q?RMlZAhdOdFL9+rQqIwOSDSmVdg2AFTprAkiJztNsn91wrEj1qfusp3D3twiq?=
- =?us-ascii?Q?rRsScNTSpyeb7IuMuiF1vpMy9Zq0N10qljy7MJhPWGFoKTEazIJbcQgsVQuo?=
- =?us-ascii?Q?xvizjKEWLb6JRh0iFFQ=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S229663AbjGJOmm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jul 2023 10:42:42 -0400
+Received: from mail-il1-f171.google.com (mail-il1-f171.google.com [209.85.166.171])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1906C3;
+        Mon, 10 Jul 2023 07:42:40 -0700 (PDT)
+Received: by mail-il1-f171.google.com with SMTP id e9e14a558f8ab-345ff33d286so24253225ab.3;
+        Mon, 10 Jul 2023 07:42:40 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689000160; x=1691592160;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=9youPIImCCAcdEckdoxFQrNpLYrygdk7W9ZtiP8w15k=;
+        b=RNoulLSZHnHbR/2BYwKnhB6ZCVD59ktpzYmSlC+pFzHu5labOYQjxCMLjg4wmUaXA9
+         5vfXG/4I3tImqbWLvdIksMoDeccqRRvd95Z32GFS3nPDNTnlnPJSrEEj7eJXJ/lWUeVr
+         KE0J6gWiBOMpY2LkMZbDHluq+5lcDdGcHnLJ7RBFruBMlvha04KUuNUfZoQzW+chBW5k
+         tYpEHrU4YrdlJ4bvtl7C/W8gUJqi1OXND3pnVB8oYKf6q004qRo/Ok5OdvnmQ5Zmd0bZ
+         nJHvdsoQNiMnmosuh/Y9qGz6npMn4TZDJsXIpqcogTrhPKfeBcRGSvFNYBmn+el3NcTe
+         /V7w==
+X-Gm-Message-State: ABy/qLb0UTDG/EF+3cYvmQZXUUxjYHEQEXmHqRWXEJnqZ28alAfM/g8I
+        jLTwmVejLmJaAiz/gfQnPg==
+X-Google-Smtp-Source: APBJJlG3K/ro2oZtTnsZ7Banw1CdZJLy4OFKR61udj8GbrxlXMYjo+jeaSBEKYBDTKO2X9W4TkNn0w==
+X-Received: by 2002:a92:502:0:b0:345:c8ce:ff4e with SMTP id q2-20020a920502000000b00345c8ceff4emr11579387ile.3.1689000160019;
+        Mon, 10 Jul 2023 07:42:40 -0700 (PDT)
+Received: from robh_at_kernel.org ([64.188.179.250])
+        by smtp.gmail.com with ESMTPSA id x7-20020a92d307000000b00342f537e3c3sm3560577ila.2.2023.07.10.07.42.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 10 Jul 2023 07:42:39 -0700 (PDT)
+Received: (nullmailer pid 1938541 invoked by uid 1000);
+        Mon, 10 Jul 2023 14:42:35 -0000
+Date:   Mon, 10 Jul 2023 08:42:35 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
+Cc:     Oleksii_Moisieiev@epam.com, gregkh@linuxfoundation.org,
+        herbert@gondor.apana.org.au, davem@davemloft.net,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        alexandre.torgue@foss.st.com, vkoul@kernel.org, jic23@kernel.org,
+        olivier.moysan@foss.st.com, arnaud.pouliquen@foss.st.com,
+        mchehab@kernel.org, fabrice.gasnier@foss.st.com,
+        andi.shyti@kernel.org, ulf.hansson@linaro.org, edumazet@google.com,
+        kuba@kernel.org, pabeni@redhat.com, hugues.fruchet@foss.st.com,
+        lee@kernel.org, will@kernel.org, catalin.marinas@arm.com,
+        arnd@kernel.org, richardcochran@gmail.com,
+        linux-crypto@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH 04/10] dt-bindings: treewide: add feature-domains
+ description in binding files
+Message-ID: <20230710144235.GA1922048-robh@kernel.org>
+References: <20230705172759.1610753-1-gatien.chevallier@foss.st.com>
+ <20230705172759.1610753-5-gatien.chevallier@foss.st.com>
+ <20230706145108.GA3858320-robh@kernel.org>
+ <0aaace47-1bb4-82c5-57a5-6f5d27eb4d45@foss.st.com>
+ <20230707152056.GA317056-robh@kernel.org>
+ <fb72b4e4-d5c6-d9be-269d-29aff996001c@foss.st.com>
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: OS0PR01MB5922.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 571e5c87-bfd0-43ad-21ea-08db8152ea2d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 10 Jul 2023 14:35:31.8811
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: MWSayIaAfLa2g/Syunl7ksglokknySsDyer6GHiA6e9tlevkej00Sp7tbpRdWRdw1bBu+ibfxuuXtr/1FgYSWGPVr7tzs/dUu+HG/T9tKtE=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYCPR01MB6303
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <fb72b4e4-d5c6-d9be-269d-29aff996001c@foss.st.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram Sang,
+On Mon, Jul 10, 2023 at 10:22:10AM +0200, Gatien CHEVALLIER wrote:
+> 
+> 
+> On 7/7/23 17:20, Rob Herring wrote:
+> > On Fri, Jul 07, 2023 at 02:28:28PM +0200, Gatien CHEVALLIER wrote:
+> > > Hello Rob,
+> > > 
+> > > On 7/6/23 16:51, Rob Herring wrote:
+> > > > On Wed, Jul 05, 2023 at 07:27:53PM +0200, Gatien Chevallier wrote:
+> > > > > feature-domains is an optional property that allows a peripheral to
+> > > > > refer to one or more feature domain controller(s).
+> > > > > 
+> > > > > Description of this property is added to all peripheral binding files of
+> > > > > the peripheral under the STM32 firewall controllers. It allows an accurate
+> > > > > representation of the hardware, where various peripherals are connected
+> > > > > to this firewall bus. The firewall can then check the peripheral accesses
+> > > > > before allowing it to probe.
+> > > > > 
+> > > > > Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+> > > > > ---
+> > > > > 
+> > > > > Disclaimer: Some error with dtbs_check will be observed as I've
+> > > > > considered the property to be generic, as Rob asked
+> > > > > 
+> > > > >    Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml  | 4 ++++
+> > > > >    Documentation/devicetree/bindings/dma/st,stm32-dma.yaml      | 4 ++++
+> > > > >    Documentation/devicetree/bindings/dma/st,stm32-dmamux.yaml   | 4 ++++
+> > > > >    Documentation/devicetree/bindings/i2c/st,stm32-i2c.yaml      | 4 ++++
+> > > > >    Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml  | 4 ++++
+> > > > >    .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml      | 4 ++++
+> > > > >    Documentation/devicetree/bindings/iio/dac/st,stm32-dac.yaml  | 4 ++++
+> > > > >    .../devicetree/bindings/media/cec/st,stm32-cec.yaml          | 4 ++++
+> > > > >    Documentation/devicetree/bindings/media/st,stm32-dcmi.yaml   | 4 ++++
+> > > > >    .../bindings/memory-controllers/st,stm32-fmc2-ebi.yaml       | 4 ++++
+> > > > >    Documentation/devicetree/bindings/mfd/st,stm32-lptimer.yaml  | 4 ++++
+> > > > >    Documentation/devicetree/bindings/mfd/st,stm32-timers.yaml   | 5 +++++
+> > > > >    Documentation/devicetree/bindings/mmc/arm,pl18x.yaml         | 4 ++++
+> > > > >    Documentation/devicetree/bindings/net/stm32-dwmac.yaml       | 4 ++++
+> > > > >    Documentation/devicetree/bindings/phy/phy-stm32-usbphyc.yaml | 4 ++++
+> > > > >    .../devicetree/bindings/regulator/st,stm32-vrefbuf.yaml      | 4 ++++
+> > > > >    Documentation/devicetree/bindings/rng/st,stm32-rng.yaml      | 4 ++++
+> > > > >    Documentation/devicetree/bindings/serial/st,stm32-uart.yaml  | 4 ++++
+> > > > >    Documentation/devicetree/bindings/sound/st,stm32-i2s.yaml    | 4 ++++
+> > > > >    Documentation/devicetree/bindings/sound/st,stm32-sai.yaml    | 4 ++++
+> > > > >    .../devicetree/bindings/sound/st,stm32-spdifrx.yaml          | 4 ++++
+> > > > >    Documentation/devicetree/bindings/spi/st,stm32-qspi.yaml     | 4 ++++
+> > > > >    Documentation/devicetree/bindings/spi/st,stm32-spi.yaml      | 4 ++++
+> > > > >    Documentation/devicetree/bindings/usb/dwc2.yaml              | 4 ++++
+> > > > >    24 files changed, 97 insertions(+)
+> > > > > 
+> > > > > diff --git a/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml b/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+> > > > > index b767ec72a999..daf8dcaef627 100644
+> > > > > --- a/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+> > > > > +++ b/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+> > > > > @@ -50,6 +50,10 @@ properties:
+> > > > >      power-domains:
+> > > > >        maxItems: 1
+> > > > > +  feature-domains:
+> > > > > +    minItems: 1
+> > > > > +    maxItems: 3
+> > > > 
+> > > > What are the 3 entries?
+> > > > 
+> > > > Rob
+> > > 
+> > > I thought I was benefiting from the description of the pattern-property in
+> > > the RIFSC YAML file. But yes anyway, it seems like it needs some description
+> > > here as the dependency does not appear in this file.
+> > 
+> > Humm, that should limit the maximum entries to 2, so 3 would never work
+> > (if RIFSC is the parent).
+> > 
+> > > I picked 3 as a maxItems for our ST needs, I'll give it some more thought
+> > > when coming back with something clearer.
+> > 
+> > I'd expect you have 1 entry for register bus and 1 entry for DMA bus if
+> > there is one. It's block specific for how many entries, so the RIFSC
+> > schema should not be setting that. You could possibly say that
+> > 'feature-domains' is required for all the child nodes though.
+> 
+> Ok, I will change to not specifying the number of entries in the
+> RIFSC YAML file for V2.
+> 
+> > 
+> > Rob
+> Some hardware blocks may have a firewall ID for their device part and
+> another ID for their master part as well. In the end, the number of
+> entries could very well vary between different platforms. And the YAML
+> files are common to these platforms.
 
-Thanks for the patch.
+A given device has a fixed number of buses. Usually 1 or 2. That does 
+*not* vary by platform (unless the device is modified). You could have 
+the same firewall controller and id for multiple buses, but that 
+should not change the number of entries for the device. Now maybe a bus 
+has no firewall on some platforms. In that case, you should make the 
+optional firewall entry the last one, have a null phandle (0 or -1), or 
+use -names to distinguish the entries.
 
-> -----Original Message-----
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Sent: Monday, July 10, 2023 3:08 PM
-> To: linux-renesas-soc@vger.kernel.org; linux-mmc@vger.kernel.org
-> Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>; Ulf Hansson
-> <ulf.hansson@linaro.org>; linux-kernel@vger.kernel.org
-> Subject: [PATCH RFT] mmc: renesas_sdhi: register irqs before registering
-> controller
->=20
-> IRQs should be ready to serve when we call mmc_add_host() via
-> tmio_mmc_host_probe(). To achieve that, ensure that all irqs are masked
-> before registering the handlers.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> This property could be used for "extra" arguments as well, that are not
+> firewall IDs.
 
+The arg cells are dictated by the provider and opaque to the client.
 
-Tested-by: Biju Das <biju.das.jz@bp.renesas.com>
-> ---
->=20
-> Based on 6.5-rc1 with bf54dec9e953 ("Revert "mmc: Revert "mmc: core:
-> Allow mmc_start_host() synchronously detect a card") reverted. That base
-> alone shows the regression. This patch works fine on a Salvator-X with a
-> M3-W. I'll test more boards. Yet, I send it out so people can tests with
-> boards I don't have.
+> What do you suggest between picking a high maxItems value that would
+> (hopefully) cover all cases and not specifying maxItems at all? Or maybe
+> another property dedicated to such arguments?
 
-Tested on RZ/V2L SMARC EVK, after Revert "mmc: Revert "mmc: core: Allow mmc=
-_start_host() synchronously detect a card""
+You should not specify maxItems in the firewall controller binding.
 
-Cheers,
-Biju
-
->=20
->  drivers/mmc/host/renesas_sdhi_core.c | 11 +++++++----
->  1 file changed, 7 insertions(+), 4 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c
-> b/drivers/mmc/host/renesas_sdhi_core.c
-> index 345934e4f59e..499d043f034f 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -1004,10 +1004,11 @@ int renesas_sdhi_probe(struct platform_device
-> *pdev,
->  		host->ops.start_signal_voltage_switch =3D
->  			renesas_sdhi_start_signal_voltage_switch;
->  		host->sdcard_irq_setbit_mask =3D TMIO_STAT_ALWAYS_SET_27;
-> -		host->sdcard_irq_mask_all =3D TMIO_MASK_ALL_RCAR2;
->  		host->reset =3D renesas_sdhi_reset;
->  	}
->=20
-> +	host->sdcard_irq_mask_all =3D TMIO_MMC_MIN_RCAR2 ?
-> TMIO_MASK_ALL_RCAR2 :
-> +TMIO_MASK_ALL;
-> +
->  	/* Orginally registers were 16 bit apart, could be 32 or 64
-> nowadays */
->  	if (!host->bus_shift && resource_size(res) > 0x100) /* old way to
-> determine the shift */
->  		host->bus_shift =3D 1;
-> @@ -1100,9 +1101,7 @@ int renesas_sdhi_probe(struct platform_device
-> *pdev,
->  		host->ops.hs400_complete =3D renesas_sdhi_hs400_complete;
->  	}
->=20
-> -	ret =3D tmio_mmc_host_probe(host);
-> -	if (ret < 0)
-> -		goto edisclk;
-> +	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK,
-> +host->sdcard_irq_mask_all);
->=20
->  	num_irqs =3D platform_irq_count(pdev);
->  	if (num_irqs < 0) {
-> @@ -1129,6 +1128,10 @@ int renesas_sdhi_probe(struct platform_device
-> *pdev,
->  			goto eirq;
->  	}
->=20
-> +	ret =3D tmio_mmc_host_probe(host);
-> +	if (ret < 0)
-> +		goto edisclk;
-> +
->  	dev_info(&pdev->dev, "%s base at %pa, max clock rate %u MHz\n",
->  		 mmc_hostname(host->mmc), &res->start, host->mmc->f_max /
-> 1000000);
->=20
-> --
-> 2.35.1
-
+Rob
