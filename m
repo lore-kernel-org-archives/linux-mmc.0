@@ -2,133 +2,148 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 727C0EB64DD
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Jul 2023 20:00:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F245DC001DC
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Jul 2023 21:39:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231124AbjGKUAv convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Jul 2023 16:00:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60390 "EHLO
+        id S229884AbjGKVjW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Jul 2023 17:39:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41432 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230446AbjGKUAv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2023 16:00:51 -0400
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3D7C10E7;
-        Tue, 11 Jul 2023 13:00:49 -0700 (PDT)
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-577ddda6ab1so40147b3.0;
-        Tue, 11 Jul 2023 13:00:49 -0700 (PDT)
+        with ESMTP id S229537AbjGKVjV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2023 17:39:21 -0400
+Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A9DC127;
+        Tue, 11 Jul 2023 14:39:20 -0700 (PDT)
+Received: by mail-pl1-x630.google.com with SMTP id d9443c01a7336-1b89d47ffb6so32097155ad.2;
+        Tue, 11 Jul 2023 14:39:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1689111560; x=1691703560;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:sender
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=KtT4gFz6TTEFRseSk+gcMtJFveuGAwBprTn2TmvM3QM=;
+        b=qVGDef4XTDiy2pQQAH3Cwnbtqh8ZKWeDR0YpW5oBVmIf8Ft1FfiQFB9j/nigTkpw8I
+         82vXU59i3SdogLeNz/ABKCqINgA4PTDr9/ZdUPp6ZUB83Z6MdD4YHZx6qWrTB/+YO5SG
+         xt3gCozG7WIu1lWUXRr3EpK+TzZRAcw2ll3vth9VDJ1GAaRvrA2V8kIgGX9kdM2Wgg3l
+         stzdpWOedBvZ0uhTUpLtvsrBCTVN9HRCFZfzCFKFQAEkzZQTdhvlZETvKEQOgCpBxb1y
+         lgv7BtP9O20Qjyp/f7+CQeQ3LbV13czXSXJgwRbcUJP+TfmtuZqC2GkNl1o/MlSqRGEW
+         v5GA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689105649; x=1691697649;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=74whqM41d7CpA+NyRK8UvTd9meXyXG7n/W6IYNx1Ri0=;
-        b=lKY6A+eG3UpHH7hNSNu+SUVlQe6tK40fyRNn34mcY4GzujXib2FkqgDFeYd8RJrNzO
-         SnAg9JnoKd4tLniXtualg7fn7rS95iM/4Rv3DtJEP5BsKVgTItDrpQ/aUv2K2NskgvQX
-         +Wpq3N5sFdPKl6zO/HLH8Swd1DttN90oi3dZyw5Uml3m6a/ZIa8MNvgbS5lF9I/0pa3g
-         U0LXMeG5NH7S9jB9IREJ0tIBpu6TUgs4APnNjvBrHX+i+7UHbY40bODeouHNmT/kpl5L
-         So5XkQRzHYVzKY7SUbWJEGuut1596UkvGGq1HQpfkThrzVo1GzvXBanDQCyjekXYZ3N0
-         0Jvg==
-X-Gm-Message-State: ABy/qLZWbYM9tI+WW3jLb2yaJXsd283v5XFrHu6bnGQTIBafQ6JgEwWy
-        73vtVCFKoZCY1NZYdHPecpRB7tBzW04h9A==
-X-Google-Smtp-Source: APBJJlGDY/dxrz/+tXARzxI38TCEPu6oWr15qCzLg+YBdSr4vV4RcCtrNuvXxR5kQIcfflFhS8KJvg==
-X-Received: by 2002:a81:a114:0:b0:56d:2e66:bd55 with SMTP id y20-20020a81a114000000b0056d2e66bd55mr14633320ywg.3.1689105648809;
-        Tue, 11 Jul 2023 13:00:48 -0700 (PDT)
-Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com. [209.85.219.169])
-        by smtp.gmail.com with ESMTPSA id i184-20020a0dc6c1000000b005771872a8dbsm753755ywd.132.2023.07.11.13.00.48
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 11 Jul 2023 13:00:48 -0700 (PDT)
-Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-c1aad78d5b2so4724276.0;
-        Tue, 11 Jul 2023 13:00:48 -0700 (PDT)
-X-Received: by 2002:a25:db51:0:b0:c5c:76c7:aa44 with SMTP id
- g78-20020a25db51000000b00c5c76c7aa44mr17033206ybf.12.1689105648378; Tue, 11
- Jul 2023 13:00:48 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1689111560; x=1691703560;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:sender
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=KtT4gFz6TTEFRseSk+gcMtJFveuGAwBprTn2TmvM3QM=;
+        b=hm8E4CWDWpbVZZ/+chXcJ7tdA4AR/wwkc6zVZU92wh0wHs5qBdenkc+UEB6mFSZ4XZ
+         8SJ5UAwVhW5mwC6+OrNEvwivGpCBvhuDzKI4tId4ng9Yf8BzmutY01tDT7m0gnqOu+yg
+         m4gMsrzsZj+OnXjDY/tAi1tuwoo2Vo420xOaPzZTe6yyrrR4a6eV/vF2zr0h0q6aB3pw
+         xF6n9AtDZhrtv7gkZteIzebInWjRv6qvq8LQ5D3Yemyds4oLFwI3y9BBiiJ9H8tu51Ij
+         OIsAk5FHDmvvpEKkrbWZET54CKfnJQisQEuxfcY0+Za2rbh1vSW1QW0WFRHkoO4+rLHG
+         cQbw==
+X-Gm-Message-State: ABy/qLY2MGoYPaQXvDgloKfTQQOhhNGNIDy5sCwAO/D0tbP/5sjIELhQ
+        4P4dsfoJXbL45Ui7piOqFVc=
+X-Google-Smtp-Source: APBJJlHvfrCF++DlafNT3B6O6EffAGKpXCrh8newwF9nz4kDCviiDR8GuVNpvkxYKklGu+rZ5VQk5Q==
+X-Received: by 2002:a17:903:24e:b0:1b6:80f0:d969 with SMTP id j14-20020a170903024e00b001b680f0d969mr15429164plh.11.1689111559501;
+        Tue, 11 Jul 2023 14:39:19 -0700 (PDT)
+Received: from localhost ([2620:10d:c090:400::5:9374])
+        by smtp.gmail.com with ESMTPSA id bd5-20020a170902830500b001b8761c739csm2362090plb.271.2023.07.11.14.39.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 Jul 2023 14:39:19 -0700 (PDT)
+Sender: Tejun Heo <htejun@gmail.com>
+Date:   Tue, 11 Jul 2023 11:39:17 -1000
+From:   Tejun Heo <tj@kernel.org>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Lai Jiangshan <jiangshanlai@gmail.com>,
+        "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel-team@meta.com, Linux PM list <linux-pm@vger.kernel.org>,
+        DRI Development <dri-devel@lists.freedesktop.org>,
+        linux-rtc@vger.kernel.org,
+        linux-riscv <linux-riscv@lists.infradead.org>,
+        netdev <netdev@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
+        <linux-ide@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Subject: Re: Consider switching to WQ_UNBOUND messages (was: Re: [PATCH v2
+ 6/7] workqueue: Report work funcs that trigger automatic CPU_INTENSIVE
+ mechanism)
+Message-ID: <ZK3MBfPS-3-tJgjO@slm.duckdns.org>
+References: <20230511181931.869812-1-tj@kernel.org>
+ <20230511181931.869812-7-tj@kernel.org>
+ <ZF6WsSVGX3O1d0pL@slm.duckdns.org>
+ <CAMuHMdVCQmh6V182q4g---jvsWiTOP2hBPZKvma6oUN6535LEg@mail.gmail.com>
+ <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
 MIME-Version: 1.0
-References: <20230710140825.47793-1-wsa+renesas@sang-engineering.com> <CAMuHMdXr4CmupM9vadidHdyv0ShOhR2yYCCxeDt70d1rPUXBdg@mail.gmail.com>
-In-Reply-To: <CAMuHMdXr4CmupM9vadidHdyv0ShOhR2yYCCxeDt70d1rPUXBdg@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 11 Jul 2023 22:00:35 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWwN9Z2Bui6PR6QxBoLJnvs--BXXep10NR7wRd1cfqKKA@mail.gmail.com>
-Message-ID: <CAMuHMdWwN9Z2Bui6PR6QxBoLJnvs--BXXep10NR7wRd1cfqKKA@mail.gmail.com>
-Subject: Re: [PATCH RFT] mmc: renesas_sdhi: register irqs before registering controller
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Hello,
 
-On Mon, Jul 10, 2023 at 4:54 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> On Mon, Jul 10, 2023 at 4:10 PM Wolfram Sang
-> <wsa+renesas@sang-engineering.com> wrote:
-> > IRQs should be ready to serve when we call mmc_add_host() via
-> > tmio_mmc_host_probe(). To achieve that, ensure that all irqs are masked
-> > before registering the handlers.
+On Tue, Jul 11, 2023 at 04:06:22PM +0200, Geert Uytterhoeven wrote:
+> On Tue, Jul 11, 2023 at 3:55 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
 > >
-> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> Thanks for your patch!
->
-> > Based on 6.5-rc1 with bf54dec9e953 ("Revert "mmc: Revert "mmc: core:
-> > Allow mmc_start_host() synchronously detect a card") reverted. That base
-> > alone shows the regression. This patch works fine on a Salvator-X with a
-> > M3-W. I'll test more boards. Yet, I send it out so people can tests with
-> > boards I don't have.
->
-> I guess bf54dec9e953 is your local commit that reverts commit
-> fa700d73494abbd3 ("mmc: Revert "mmc: core: Allow mmc_start_host()
-> synchronously detect a card"") in v6.5-rc1?
->
-> > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > @@ -1004,10 +1004,11 @@ int renesas_sdhi_probe(struct platform_device *pdev,
-> >                 host->ops.start_signal_voltage_switch =
-> >                         renesas_sdhi_start_signal_voltage_switch;
-> >                 host->sdcard_irq_setbit_mask = TMIO_STAT_ALWAYS_SET_27;
-> > -               host->sdcard_irq_mask_all = TMIO_MASK_ALL_RCAR2;
-> >                 host->reset = renesas_sdhi_reset;
-> >         }
+> > Hi Tejun,
 > >
-> > +       host->sdcard_irq_mask_all = TMIO_MMC_MIN_RCAR2 ? TMIO_MASK_ALL_RCAR2 : TMIO_MASK_ALL;
->
-> The condition above is always true. I assume you wanted to test
-> "mmc_data->flags & TMIO_MMC_MIN_RCAR2" instead?
+> > On Fri, May 12, 2023 at 9:54 PM Tejun Heo <tj@kernel.org> wrote:
+> > > Workqueue now automatically marks per-cpu work items that hog CPU for too
+> > > long as CPU_INTENSIVE, which excludes them from concurrency management and
+> > > prevents stalling other concurrency-managed work items. If a work function
+> > > keeps running over the thershold, it likely needs to be switched to use an
+> > > unbound workqueue.
+> > >
+> > > This patch adds a debug mechanism which tracks the work functions which
+> > > trigger the automatic CPU_INTENSIVE mechanism and report them using
+> > > pr_warn() with exponential backoff.
+> > >
+> > > v2: Drop bouncing through kthread_worker for printing messages. It was to
+> > >     avoid introducing circular locking dependency but wasn't effective as it
+> > >     still had pool lock -> wci_lock -> printk -> pool lock loop. Let's just
+> > >     print directly using printk_deferred().
+> > >
+> > > Signed-off-by: Tejun Heo <tj@kernel.org>
+> > > Suggested-by: Peter Zijlstra <peterz@infradead.org>
+> >
+> > Thanks for your patch, which is now commit 6363845005202148
+> > ("workqueue: Report work funcs that trigger automatic CPU_INTENSIVE
+> > mechanism") in v6.5-rc1.
+> >
+> > I guess you are interested to know where this triggers.
+> > I enabled CONFIG_WQ_CPU_INTENSIVE_REPORT=y, and tested
+> > the result on various machines...
+> 
+> > OrangeCrab/Linux-on-LiteX-VexRiscV with ht16k33 14-seg display and ssd130xdrmfb:
+> >
+> >   workqueue: check_lifetime hogged CPU for >10000us 4 times, consider
+> > switching to WQ_UNBOUND
+> >   workqueue: drm_fb_helper_damage_work hogged CPU for >10000us 1024
+> > times, consider switching to WQ_UNBOUND
+> >   workqueue: fb_flashcursor hogged CPU for >10000us 128 times,
+> > consider switching to WQ_UNBOUND
+> >   workqueue: ht16k33_seg14_update hogged CPU for >10000us 128 times,
+> > consider switching to WQ_UNBOUND
+> >   workqueue: mmc_rescan hogged CPU for >10000us 128 times, consider
+> > switching to WQ_UNBOUND
+> 
+> Got one more after a while:
+> 
+> workqueue: neigh_managed_work hogged CPU for >10000us 4 times,
+> consider switching to WQ_UNBOUND
 
-No issues seen after reverting fa700d73494abbd3 and applying your patch
-(plus the fix below) on top of today's renesas-drivers release.
+I wonder whether the right thing to do here is somehow scaling the threshold
+according to the relative processing power. It's difficult to come up with a
+threshold which works well across the latest & fastest and really tiny CPUs.
+I'll think about it some more but if you have some ideas, please feel free
+to suggest.
 
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -1004,11 +1004,12 @@ int renesas_sdhi_probe(struct platform_device *pdev,
-                host->ops.start_signal_voltage_switch =
-                        renesas_sdhi_start_signal_voltage_switch;
-                host->sdcard_irq_setbit_mask = TMIO_STAT_ALWAYS_SET_27;
-+               host->sdcard_irq_mask_all = TMIO_MASK_ALL_RCAR2;
-                host->reset = renesas_sdhi_reset;
-+       } else {
-+               host->sdcard_irq_mask_all = TMIO_MASK_ALL;
-        }
-
--       host->sdcard_irq_mask_all = TMIO_MMC_MIN_RCAR2 ?
-TMIO_MASK_ALL_RCAR2 : TMIO_MASK_ALL;
--
-        /* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
-        if (!host->bus_shift && resource_size(res) > 0x100) /* old way
-to determine the shift */
-                host->bus_shift = 1;
-
-Gr{oetje,eeting}s,
-
-                        Geert
+Thanks.
 
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+tejun
