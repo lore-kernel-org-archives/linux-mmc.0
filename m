@@ -2,134 +2,90 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9EF6C001DD
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Jul 2023 14:06:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8957FEB64DD
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Jul 2023 16:45:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233099AbjGKOGi convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Jul 2023 10:06:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44768 "EHLO
+        id S233023AbjGKQpC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Jul 2023 12:45:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43636 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232888AbjGKOGh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2023 10:06:37 -0400
-Received: from mail-ot1-f53.google.com (mail-ot1-f53.google.com [209.85.210.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1BF79E;
-        Tue, 11 Jul 2023 07:06:36 -0700 (PDT)
-Received: by mail-ot1-f53.google.com with SMTP id 46e09a7af769-6b711c3ad1fso4686128a34.0;
-        Tue, 11 Jul 2023 07:06:36 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689084396; x=1691676396;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=JtrkZvukDlSziDN0KAKNR+HUJU/841tM48VnLXRDDo8=;
-        b=E0N5tqHigGPruoL2OipUVobpIf9hqdDDMV7POeXa1hvOx/8WegYkYYvn94MTxxKxJB
-         kz47DRPK9wkaxvKzUSaY/Y5NlpuFvJrZGr9WdXtD9WeHuH1QPn6YfSKm2WXdsQ4C/nJ+
-         wGf9iWDQJevFgkRbJVqy2mhM7TzViwcncDXgJ22Kl0qGyfrLCaUyT5k+sNh9RqGx34Gx
-         pdLGBeyBUw4jhdjtVHTGavhSKH3cbKBPalYtCzo3KDQIVwi6Iu1tcNpWzbZ7KHdC8Prn
-         jyuMsehIt3AeI6jMw4g86lWQZy9DYYpg0qGYUZoHXk7+nM07DGLlBBk9a/xtkNBH33zs
-         ShZg==
-X-Gm-Message-State: ABy/qLbsxYrWnbJ+5hYqjKPUD1ObgOhYkc0vm0/kt6yZAz2DQ889PHUF
-        B5c8bhSWUQelj8p6zepVpdl6RlP5cApBRw==
-X-Google-Smtp-Source: APBJJlHk6JvYY7usor+bMX+25K9L8lRHpC1MM+kzOkVK2RhHg0e+lmulc9h6UW2o6cwVtHPj090TVw==
-X-Received: by 2002:a05:6870:b608:b0:1b0:7078:58ad with SMTP id cm8-20020a056870b60800b001b0707858admr17820465oab.38.1689084395878;
-        Tue, 11 Jul 2023 07:06:35 -0700 (PDT)
-Received: from mail-ot1-f45.google.com (mail-ot1-f45.google.com. [209.85.210.45])
-        by smtp.gmail.com with ESMTPSA id e3-20020a056870944300b001a6a3f99691sm1029564oal.27.2023.07.11.07.06.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 11 Jul 2023 07:06:35 -0700 (PDT)
-Received: by mail-ot1-f45.google.com with SMTP id 46e09a7af769-6b87d505e28so4671725a34.2;
-        Tue, 11 Jul 2023 07:06:35 -0700 (PDT)
-X-Received: by 2002:a9d:560a:0:b0:6b8:83ca:560a with SMTP id
- e10-20020a9d560a000000b006b883ca560amr13140949oti.18.1689084395442; Tue, 11
- Jul 2023 07:06:35 -0700 (PDT)
+        with ESMTP id S233113AbjGKQoc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jul 2023 12:44:32 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E92C21738;
+        Tue, 11 Jul 2023 09:44:06 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A2CE561573;
+        Tue, 11 Jul 2023 16:44:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6AEE6C433C7;
+        Tue, 11 Jul 2023 16:43:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1689093845;
+        bh=zaf2CZqYHNb3WqOn3g5/TSKwC8Wg0LJ436Q4TrZp4RA=;
+        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+        b=KGVJGsnCZruy2hUuUpH7ijZulq48NN9mnjYRkxxJjynGm26JcUksScIF1TfoPCX/i
+         r6f3ggg+UqlnfDC8exH6e7PS74/XlFttq9p+kmOU9hYXf1ImUimWTMY0z2+2tj2l3/
+         Jk1VB0hRL9DKcciP3cxJhjOMlekjAJH3P6RJPKHWorzn/EFP5qzmufgEyFzhTE2rL1
+         89rukrhKXE24SakUpiwTCpCEb6JU6Th6JehZathj/7UQ3uIHAEQuV4g4S9FgAcVBuE
+         SqvqShT6i3EAPE7sAEcTYX9r0drCG/0POAcYJRJMJYVtt5bAFNFPay3NAIxZKXTEfX
+         Qpv9VDnwO9Q1w==
+From:   Vinod Koul <vkoul@kernel.org>
+To:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?utf-8?q?Uwe_Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Stefan Wahren <stefan.wahren@i2se.com>
+Cc:     linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-pm@vger.kernel.org,
+        bcm-kernel-feedback-list@broadcom.com
+In-Reply-To: <20230617133620.53129-1-stefan.wahren@i2se.com>
+References: <20230617133620.53129-1-stefan.wahren@i2se.com>
+Subject: Re: (subset) [PATCH V2 0/7] ARM: dts: bcm283x: Improve
+ device-trees and bindings
+Message-Id: <168909383906.208679.14234810400324537529.b4-ty@kernel.org>
+Date:   Tue, 11 Jul 2023 22:13:59 +0530
 MIME-Version: 1.0
-References: <20230511181931.869812-1-tj@kernel.org> <20230511181931.869812-7-tj@kernel.org>
- <ZF6WsSVGX3O1d0pL@slm.duckdns.org> <CAMuHMdVCQmh6V182q4g---jvsWiTOP2hBPZKvma6oUN6535LEg@mail.gmail.com>
-In-Reply-To: <CAMuHMdVCQmh6V182q4g---jvsWiTOP2hBPZKvma6oUN6535LEg@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 11 Jul 2023 16:06:22 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
-Message-ID: <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
-Subject: Re: Consider switching to WQ_UNBOUND messages (was: Re: [PATCH v2
- 6/7] workqueue: Report work funcs that trigger automatic CPU_INTENSIVE mechanism)
-To:     Tejun Heo <tj@kernel.org>
-Cc:     Lai Jiangshan <jiangshanlai@gmail.com>,
-        "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kernel-team@meta.com, Linux PM list <linux-pm@vger.kernel.org>,
-        DRI Development <dri-devel@lists.freedesktop.org>,
-        linux-rtc@vger.kernel.org,
-        linux-riscv <linux-riscv@lists.infradead.org>,
-        netdev <netdev@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.12.2
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jul 11, 2023 at 3:55 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
->
-> Hi Tejun,
->
-> On Fri, May 12, 2023 at 9:54 PM Tejun Heo <tj@kernel.org> wrote:
-> > Workqueue now automatically marks per-cpu work items that hog CPU for too
-> > long as CPU_INTENSIVE, which excludes them from concurrency management and
-> > prevents stalling other concurrency-managed work items. If a work function
-> > keeps running over the thershold, it likely needs to be switched to use an
-> > unbound workqueue.
-> >
-> > This patch adds a debug mechanism which tracks the work functions which
-> > trigger the automatic CPU_INTENSIVE mechanism and report them using
-> > pr_warn() with exponential backoff.
-> >
-> > v2: Drop bouncing through kthread_worker for printing messages. It was to
-> >     avoid introducing circular locking dependency but wasn't effective as it
-> >     still had pool lock -> wci_lock -> printk -> pool lock loop. Let's just
-> >     print directly using printk_deferred().
-> >
-> > Signed-off-by: Tejun Heo <tj@kernel.org>
-> > Suggested-by: Peter Zijlstra <peterz@infradead.org>
->
-> Thanks for your patch, which is now commit 6363845005202148
-> ("workqueue: Report work funcs that trigger automatic CPU_INTENSIVE
-> mechanism") in v6.5-rc1.
->
-> I guess you are interested to know where this triggers.
-> I enabled CONFIG_WQ_CPU_INTENSIVE_REPORT=y, and tested
-> the result on various machines...
 
-> OrangeCrab/Linux-on-LiteX-VexRiscV with ht16k33 14-seg display and ssd130xdrmfb:
->
->   workqueue: check_lifetime hogged CPU for >10000us 4 times, consider
-> switching to WQ_UNBOUND
->   workqueue: drm_fb_helper_damage_work hogged CPU for >10000us 1024
-> times, consider switching to WQ_UNBOUND
->   workqueue: fb_flashcursor hogged CPU for >10000us 128 times,
-> consider switching to WQ_UNBOUND
->   workqueue: ht16k33_seg14_update hogged CPU for >10000us 128 times,
-> consider switching to WQ_UNBOUND
->   workqueue: mmc_rescan hogged CPU for >10000us 128 times, consider
-> switching to WQ_UNBOUND
+On Sat, 17 Jun 2023 15:36:13 +0200, Stefan Wahren wrote:
+> This series fix some dtbs_check warning for the Raspberry Pi boards
+> and convert 4 txt DT bindings for BCM2835 to YAML.
+> 
+> Changes in V2:
+> - drop already applied patches (bcm2835-sdhost, bcm2835-thermal)
+> - drop patch "dmaengine: bcm2835: also support generic dma-channel-mask"
+> - keep brcm,bcm2835-dma for ABI compatibility which also resolve
+>   dependency between patch 2 and 3
+> - drop quotes in patch 2 as noted by Rob Herring
+> - add interrupt description as suggested by Rob
+> - add Rob's and Uwe's Reviewed-by
+> 
+> [...]
 
-Got one more after a while:
+Applied, thanks!
 
-workqueue: neigh_managed_work hogged CPU for >10000us 4 times,
-consider switching to WQ_UNBOUND
+[2/7] dt-bindings: dma: convert bcm2835-dma bindings to YAML
+      commit: c60d5060b019e8095df7eebd1716747edfbd192a
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
+Best regards,
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+~Vinod
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+
