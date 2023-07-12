@@ -2,109 +2,87 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E541C001DD
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jul 2023 09:58:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BB54EB64D9
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jul 2023 12:26:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232415AbjGLJ6H convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jul 2023 05:58:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34366 "EHLO
+        id S232688AbjGLM03 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jul 2023 08:26:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232026AbjGLJ6G (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2023 05:58:06 -0400
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B0271720;
-        Wed, 12 Jul 2023 02:58:05 -0700 (PDT)
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-5768a7e3adbso8595087b3.0;
-        Wed, 12 Jul 2023 02:58:05 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689155884; x=1691747884;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Y6MzudJP2Fu/sGdEnelPPluUqTi475Db7xeaDmuW9Sk=;
-        b=LJrwQd7/GT/f6oIF/VO5++yTV31g4WJbSQ1fWlc/6aaAe0vQvJYr4kByUnVfNzoT7X
-         3q3FGJZT/6Z6RHfymi63tAJPT1EY2iwRa75CXHjS3Ot25+fRu84WDKLN9xUi8pxJQluj
-         PwGyOtMkZiK8HKdqp2iAgC0FDJFT+heoiVo5a8pdlw7A+EuipACA1m7X08NZYQuLg/OD
-         4BH/kujvK/Db+8rFjpsFKMfyxPvqea1avTy6JQUB0jahhM9Itqqy49SgaLfGIPhGEnbL
-         ljW/5yIUDSlUn4axOB9G4IApIlfDzHpZdHk/JMhE1rmohX36QxlmsHnsHGtr/7g1jdHD
-         Kl4w==
-X-Gm-Message-State: ABy/qLY/EwIOYS6AZrz2ivULfQAnXCA21K/X7hfKfuI+kiyLNdahXYQ4
-        UHdcDF7kMwh4RmGN6+ZFK/Up2wQ6pmTPxA==
-X-Google-Smtp-Source: APBJJlGYudo9gVR+Cou01gtan/TCm1WXI5ja4PeIWua5VW5I2pAP/ypMPtV4ncbiIL0wMtb9qlUwGw==
-X-Received: by 2002:a0d:d616:0:b0:573:284d:6476 with SMTP id y22-20020a0dd616000000b00573284d6476mr1711934ywd.1.1689155884332;
-        Wed, 12 Jul 2023 02:58:04 -0700 (PDT)
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com. [209.85.219.178])
-        by smtp.gmail.com with ESMTPSA id f67-20020a816a46000000b0057a93844c15sm1059234ywc.127.2023.07.12.02.58.03
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 12 Jul 2023 02:58:03 -0700 (PDT)
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-ca9804dc6e4so198576276.0;
-        Wed, 12 Jul 2023 02:58:03 -0700 (PDT)
-X-Received: by 2002:a25:ae5d:0:b0:bd6:a97e:3597 with SMTP id
- g29-20020a25ae5d000000b00bd6a97e3597mr1632945ybe.30.1689155883328; Wed, 12
- Jul 2023 02:58:03 -0700 (PDT)
+        with ESMTP id S231915AbjGLM03 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2023 08:26:29 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72B079B
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Jul 2023 05:26:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        sang-engineering.com; h=date:from:to:cc:subject:message-id
+        :references:mime-version:content-type:in-reply-to; s=k1; bh=rejZ
+        5mTvsZMPfmMa/85aO/gvEZ1HzcesnUzhj7Rtx5M=; b=hWTfY/bTig3TgvUCEspK
+        RW7aWSfg9iaLGa+f/Z1sljO0/YBfMZH3g0AZQtJ6Q2si8OdxSHdR/2xBSzAVdjdt
+        NOoiukjY8GYFlCwrZzjIgVK8PxXcxXpk7HuZU64eewDRv6l4xH5rMDTiLfMUnHER
+        5c4QKpJMBCc1Fx0uQef2lpes6VE0jbWyZPIFSaadw7I09cBXHwrkHYiQ3VueVH9J
+        dwQwEzK79ZEAcq1ioFzeIvVq9u4wu/viHWME1QMO2mVXKXj/TwbxHhB7uOs0IIVu
+        uddFQIqc+5CD6W+ZEXraP3Au71Ql7LzAGtCIxRojob6W6BYxrd228J7Usf3nkqEn
+        0g==
+Received: (qmail 1611144 invoked from network); 12 Jul 2023 14:26:23 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 12 Jul 2023 14:26:23 +0200
+X-UD-Smtp-Session: l3s3148p1@GuziUkkAnsgujnvL
+Date:   Wed, 12 Jul 2023 14:26:23 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH RFT] mmc: renesas_sdhi: register irqs before registering
+ controller
+Message-ID: <ZK6b70cCxM8h47Z8@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org
+References: <20230710140825.47793-1-wsa+renesas@sang-engineering.com>
+ <CAMuHMdXr4CmupM9vadidHdyv0ShOhR2yYCCxeDt70d1rPUXBdg@mail.gmail.com>
+ <CAMuHMdWwN9Z2Bui6PR6QxBoLJnvs--BXXep10NR7wRd1cfqKKA@mail.gmail.com>
 MIME-Version: 1.0
-References: <20230511181931.869812-1-tj@kernel.org> <20230511181931.869812-7-tj@kernel.org>
- <ZF6WsSVGX3O1d0pL@slm.duckdns.org> <CAMuHMdVCQmh6V182q4g---jvsWiTOP2hBPZKvma6oUN6535LEg@mail.gmail.com>
- <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
- <ZK3MBfPS-3-tJgjO@slm.duckdns.org> <ZK30CR196rs-OWLq@slm.duckdns.org>
-In-Reply-To: <ZK30CR196rs-OWLq@slm.duckdns.org>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 12 Jul 2023 11:57:49 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdUCXPi+aS-7bR3qRetKF9T3W9jk_HKjvaXmfHv5SEeuFg@mail.gmail.com>
-Message-ID: <CAMuHMdUCXPi+aS-7bR3qRetKF9T3W9jk_HKjvaXmfHv5SEeuFg@mail.gmail.com>
-Subject: Re: Consider switching to WQ_UNBOUND messages (was: Re: [PATCH v2
- 6/7] workqueue: Report work funcs that trigger automatic CPU_INTENSIVE mechanism)
-To:     Tejun Heo <tj@kernel.org>
-Cc:     Lai Jiangshan <jiangshanlai@gmail.com>,
-        "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kernel-team@meta.com, Linux PM list <linux-pm@vger.kernel.org>,
-        DRI Development <dri-devel@lists.freedesktop.org>,
-        linux-rtc@vger.kernel.org,
-        linux-riscv <linux-riscv@lists.infradead.org>,
-        netdev <netdev@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="Bry+Vts5mdcdFKyJ"
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdWwN9Z2Bui6PR6QxBoLJnvs--BXXep10NR7wRd1cfqKKA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Tejun,
 
-On Wed, Jul 12, 2023 at 2:30 AM Tejun Heo <tj@kernel.org> wrote:
-> On Tue, Jul 11, 2023 at 11:39:17AM -1000, Tejun Heo wrote:
-> > On Tue, Jul 11, 2023 at 04:06:22PM +0200, Geert Uytterhoeven wrote:
-> > > On Tue, Jul 11, 2023 at 3:55 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> ...
-> > > workqueue: neigh_managed_work hogged CPU for >10000us 4 times,
-> > > consider switching to WQ_UNBOUND
-> >
-> > I wonder whether the right thing to do here is somehow scaling the threshold
-> > according to the relative processing power. It's difficult to come up with a
-> > threshold which works well across the latest & fastest and really tiny CPUs.
-> > I'll think about it some more but if you have some ideas, please feel free
-> > to suggest.
->
-> Geert, do you mind posting the full kernel logs for the affected machines?
+--Bry+Vts5mdcdFKyJ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-https://drive.google.com/file/d/1toDs7ugZJ2eXatpdvySY4yxSsNam9xAC
-is an archive with boot and s2ram logs.  Note that my kernels do contain
-local debug code, and may be noisy.
 
-Gr{oetje,eeting}s,
+> No issues seen after reverting fa700d73494abbd3 and applying your patch
+> (plus the fix below) on top of today's renesas-drivers release.
 
-                        Geert
+Thanks! I would have fixed it differently but I agree this is probably
+the best version when backporting is also considered.
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+--Bry+Vts5mdcdFKyJ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmSum+oACgkQFA3kzBSg
+KbaW4BAAiK5dSXGHctV7D2x4qneA0M+40+sgLVdmramiNOvkaEEr0jpHyFFCsVdu
+7LjzOHxYeZ91jgg+2i9+rs5w9CBGKQv5nrC1NisbTNDHbDMZ920iu7k9tlTXIm0G
+LHl20Ggd6QbKxkQ5Inv7imFCrNzL9d25AHQfre+8s1c0i2rsJ1LHikIyfAj2+67g
+6dEYZlI6zLDNo+ef6gwrEr6ehXIu/Ii7aQXdIKa2dqjjYjfuE7vI1qXQZasT+vKy
+hLxx1AFI6y5FiSanI/fWBvOI615WgqPNGATEW32SNjiD9jkMhySB5Ly5FeEaHXK4
+oTQGF42LKaYGHnPYqQyytST/v01Q6gD5zgox00E4PxCNX6kkxFf6UAfT5/yhc1Dc
+qtWMw17p+sKkcV1mPMcsdF8wcMtPogJRU9cHiGVWnXBIHo7RaPv/XbU2HeEahglY
+bWxWnA9bdCKdzp6XCrtMvo89JzJMH1cRqW573w8zhwYu3w3Njl5oGqgp9+16o+MZ
+gwHdqbubW/5TH1Vyyo5S22a14eVaz8b0N//EYG/ueKeJ5FOh1P2CbILuEHqlCThx
+lpLYGTOv7jdumbNerhV7dKEL1RlgGb5gbSsuXHsTgAiw17SjXiKR3ySqSTMapXaw
+3iwkpJqzexViI/z3uo0Xp5bQ/5FAu/Wk7MaHUgw7aIn7ukUrLrg=
+=o8ZM
+-----END PGP SIGNATURE-----
+
+--Bry+Vts5mdcdFKyJ--
