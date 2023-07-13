@@ -2,96 +2,131 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B26FC0015E
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 14:37:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B1F5C0015E
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 15:13:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229986AbjGMOhV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 10:37:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49936 "EHLO
+        id S233396AbjGMPNw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 11:13:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229472AbjGMOhT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 10:37:19 -0400
-Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BD461734
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 07:37:18 -0700 (PDT)
-Received: by mail-lj1-x22c.google.com with SMTP id 38308e7fff4ca-2b741cf99f8so12022061fa.0
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 07:37:18 -0700 (PDT)
+        with ESMTP id S232637AbjGMPNv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 11:13:51 -0400
+Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4505210D4;
+        Thu, 13 Jul 2023 08:13:49 -0700 (PDT)
+Received: by mail-lf1-x130.google.com with SMTP id 2adb3069b0e04-4fbf1f6c771so1516706e87.1;
+        Thu, 13 Jul 2023 08:13:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bgdev-pl.20221208.gappssmtp.com; s=20221208; t=1689259036; x=1691851036;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=gmail.com; s=20221208; t=1689261227; x=1691853227;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=xPi8Rde664k4OWrsk/yjT4y4yqazwgh3DlNB+1+OPRk=;
-        b=0AQf6ugszcZPVHY7DwMOiA13w29AGJT5OPOCp2OF+zN86xFPJowoWVjL2xiRvqqsF4
-         iRhdMPVvNexvHD9CqLBb8eCGnaaKkW4wpq53MqDi5jxJozA0WNMu8hOWmnOYernj/2IY
-         bA11DqM9IxQv+R+PEm3OGM0M+gif2kxsEXVDNCcMwueZMbQsM4olsXNKpoxlDar+VA32
-         Ly+ry+Ijehrjp3+zB0RYGXAUltkLzxTBJWwLGm9GOtvyE3WEU77BnO1o0I7xV1DLS2Vb
-         tOhAxVRH6x/drXN9EfOv+1gRTFAlCncCJw7GD9Fz2KAjLUSEsihFKlsjacvPKmTEWOBJ
-         eKkA==
+        bh=44HyigfAUkqwYUlLZw+/R4+Jh04cH37c86hvLASsvR4=;
+        b=Sd93XYTjxMgJIu8OY19hVkpV69Z7vs3OEsJXRpbpVWVHsA+XGQN6DAmvLo4Rr4qXWi
+         cmiPbBZ2fKvtc0NFQQyTgkYKlAt12PTSCNjQsSppg657tk9qpAatPTvyLZHLaJKB4B4P
+         7cDVvVQyyhKSnjtV2DkZVIdsCnfzEImF0m6swA7nR34g+knlBzMo/zGZCa8T0vxFa6Fb
+         RpCH9eri5vmJm7lxZMhB7HEG1B23nc8hWO019qnZDfJ/DAUvvrql61IkC3Xm6L33wEav
+         nLnahjxcry0YrcIGJBm6BM4qNXThY5ja6m+49C9/DXetSsriifAlRFVJv5qf7LzYOjDm
+         xknQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689259036; x=1691851036;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20221208; t=1689261227; x=1691853227;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=xPi8Rde664k4OWrsk/yjT4y4yqazwgh3DlNB+1+OPRk=;
-        b=lAB4JI1An28X+xVGCBtu1qURgUofc8bP8d8NbNMqqrPYvnFWhvuezDAuoetn13Fdmx
-         Bgyd5C1KlQkun192epDXQaY6hs8wJt/qITUpq90uf76F84uIgfkE/VvJsClfKsFjbrd5
-         l8UGjyUccXpKtosUnkwStV3Y006e/A0R5gVwAcdhHPazOtaU8ezT5toK6Ufn4zWOTBqb
-         K157DfAcAc/A3igqZex60suFvXt5T9+VyQIF5vzW5IZilUDVS1h6nsSfKOTkuoVv9jL/
-         coEKinqf2NWF4/N7h79SKtcBkhuNggvT9VS9pFZMrpnkpczAeb/heB3IJ/2cU9XtK2jj
-         VVIQ==
-X-Gm-Message-State: ABy/qLZWZ2WvTsTJvPpkMjeI5nETEUuEReLHwagoQDqqgkh8RMAJrK6u
-        LwRAC3EwThulU36qsmTlLMJcW9QyKB0jxpuyaWypLg==
-X-Google-Smtp-Source: APBJJlGb+Hl5Ue9NsHUBSVMKchaqyoYb8Q3XGAg4ZgImreaHHxSMI8h/aNdlV3mV0Si2/cGZyFd6CFDg1CxrvDIwX2w=
-X-Received: by 2002:a2e:9dd0:0:b0:2b6:df15:f6ad with SMTP id
- x16-20020a2e9dd0000000b002b6df15f6admr1529183ljj.18.1689259036279; Thu, 13
- Jul 2023 07:37:16 -0700 (PDT)
-MIME-Version: 1.0
-References: <8b57db8d-1d3a-883e-eb8f-ddf15f19d823@gmail.com>
-In-Reply-To: <8b57db8d-1d3a-883e-eb8f-ddf15f19d823@gmail.com>
-From:   Bartosz Golaszewski <brgl@bgdev.pl>
-Date:   Thu, 13 Jul 2023 16:37:04 +0200
-Message-ID: <CAMRc=MdDmsUUwZqKFt6vMaL9iuRT-44XvLJrEbr9vZTxOJR1Mg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: davinci: Make SDIO irq truly optional
-To:     Julien Delbergue <j.delbergue.foss@gmail.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        bh=44HyigfAUkqwYUlLZw+/R4+Jh04cH37c86hvLASsvR4=;
+        b=O67rdogaj69lhIsDVD/XrAHwcpY1XakttkqhRTWIvkxd3PYWYUCiKEwSJudWDnOyOx
+         w2iuiDyPSjodpUEcqyHL+Zc8Z7IeDPB/REmxcjhDh7rbEqjIUE5akULc+AiK4UaWVyrE
+         fhcQ+ZjjsikzIRWcN4ifNuDvMsgGniCPV0SHuIlmUCVNzqRKBmXLp14PN6601min1k+4
+         5qGIiZh5MtRTHmAfuiK0DLTS/D1qQBc9ZZnCXY0MnT/q4mhS9AksxUZfg6MvV56XY7g2
+         excvGzz8NxJ8AfRXqarB7P0TCtJ8+sqxHpsm299TYdfF5HolK774sQKuKmYkb2YerMuJ
+         nN4w==
+X-Gm-Message-State: ABy/qLbmy/tiz3nCUnV7vhsXRd0xC8IABf8u1hznFL0tB1KAzc8A0cRK
+        yfx/PPxh8/rYt2TBAOl3XGU=
+X-Google-Smtp-Source: APBJJlGttrq9UjDyoQktxgtCKagMhPdmnv/nWHqDmUvYq1WIllLwFO72WKYQb5Bue3tVDQ43/6XAOw==
+X-Received: by 2002:a05:6512:39d2:b0:4f3:b708:f554 with SMTP id k18-20020a05651239d200b004f3b708f554mr1705282lfu.47.1689261227080;
+        Thu, 13 Jul 2023 08:13:47 -0700 (PDT)
+Received: from jernej-laptop.localnet (82-149-1-233.dynamic.telemach.net. [82.149.1.233])
+        by smtp.gmail.com with ESMTPSA id j20-20020aa7c0d4000000b0051d9ee1c9d3sm4444448edp.84.2023.07.13.08.13.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Jul 2023 08:13:46 -0700 (PDT)
+From:   Jernej =?utf-8?B?xaBrcmFiZWM=?= <jernej.skrabec@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>,
+        Samuel Holland <samuel@sholland.org>,
+        Yangtao Li <frank.li@vivo.com>
+Cc:     Yangtao Li <frank.li@vivo.com>,
+        Uwe =?ISO-8859-1?Q?Kleine=2DK=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
         linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH 01/58] mmc: sunxi: Convert to platform remove callback returning
+ void
+Date:   Thu, 13 Jul 2023 17:13:44 +0200
+Message-ID: <5691053.DvuYhMxLoT@jernej-laptop>
+In-Reply-To: <20230713080807.69999-1-frank.li@vivo.com>
+References: <20230713080807.69999-1-frank.li@vivo.com>
+MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 13, 2023 at 11:31=E2=80=AFAM Julien Delbergue
-<j.delbergue.foss@gmail.com> wrote:
->
-> The following error is printed on Logic PD's DA850 EVM:
->   davinci_mmc 1c40000.mmc: error -ENXIO: IRQ index 1 not found
->
-> Depending on the board, the SDIO interrupt may not be present, so use
-> the correct function to reflect that and prevent logging an error.
->
-> Signed-off-by: Julien Delbergue <j.delbergue.foss@gmail.com>
-> ---
->  drivers/mmc/host/davinci_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mm=
-c.c
-> index 7138dfa065bf..fb686c0d171c 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -1257,7 +1257,7 @@ static int davinci_mmcsd_probe(struct platform_devi=
-ce *pdev)
->
->         host->use_dma =3D use_dma;
->         host->mmc_irq =3D irq;
-> -       host->sdio_irq =3D platform_get_irq(pdev, 1);
-> +       host->sdio_irq =3D platform_get_irq_optional(pdev, 1);
->
->         if (host->use_dma) {
->                 ret =3D davinci_acquire_dma_channels(host);
-> --
-> 2.34.1
+Dne =C4=8Detrtek, 13. julij 2023 ob 10:07:10 CEST je Yangtao Li napisal(a):
+> The .remove() callback for a platform driver returns an int which makes
+> many driver authors wrongly assume it's possible to do error handling by
+> returning an error code. However the value returned is (mostly) ignored
+> and this typically results in resource leaks. To improve here there is a
+> quest to make the remove callback return void. In the first step of this
+> quest all drivers are converted to .remove_new() which already returns
+> void.
+>=20
+> Trivially convert this driver from always returning zero in the remove
+> callback to the void returning variant.
+>=20
+> Cc: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
 
-Acked-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Acked-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+
+Best regards,
+Jernej
+
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 69dcb8805e05..d3bd0ac99ec4 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1486,7 +1486,7 @@ static int sunxi_mmc_probe(struct platform_device
+> *pdev) return ret;
+>  }
+>=20
+> -static int sunxi_mmc_remove(struct platform_device *pdev)
+> +static void sunxi_mmc_remove(struct platform_device *pdev)
+>  {
+>  	struct mmc_host	*mmc =3D platform_get_drvdata(pdev);
+>  	struct sunxi_mmc_host *host =3D mmc_priv(mmc);
+> @@ -1499,8 +1499,6 @@ static int sunxi_mmc_remove(struct platform_device
+> *pdev) }
+>  	dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host-
+>sg_dma);
+>  	mmc_free_host(mmc);
+> -
+> -	return 0;
+>  }
+>=20
+>  #ifdef CONFIG_PM
+> @@ -1556,7 +1554,7 @@ static struct platform_driver sunxi_mmc_driver =3D {
+>  		.pm =3D &sunxi_mmc_pm_ops,
+>  	},
+>  	.probe		=3D sunxi_mmc_probe,
+> -	.remove		=3D sunxi_mmc_remove,
+> +	.remove_new	=3D sunxi_mmc_remove,
+>  };
+>  module_platform_driver(sunxi_mmc_driver);
+
+
+
+
