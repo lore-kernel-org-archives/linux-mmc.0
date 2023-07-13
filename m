@@ -2,50 +2,45 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBF55C001B0
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 09:03:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BFF2C001DF
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 09:08:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232827AbjGMJDn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 05:03:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59040 "EHLO
+        id S232977AbjGMJH3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 05:07:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234505AbjGMJC5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 05:02:57 -0400
+        with ESMTP id S234516AbjGMJGr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 05:06:47 -0400
 Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F2281FC8
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 02:02:42 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8276C1FD2
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 02:06:35 -0700 (PDT)
 Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
         by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
         (Exim 4.92)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qJsDZ-0004Hj-Dl; Thu, 13 Jul 2023 11:02:33 +0200
+        id 1qJsHR-00052L-Bg; Thu, 13 Jul 2023 11:06:33 +0200
 Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
         by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qJsDX-00E4qI-So; Thu, 13 Jul 2023 11:02:31 +0200
+        id 1qJsHQ-00E5Ic-DS; Thu, 13 Jul 2023 11:06:32 +0200
 Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qJsDW-004WGM-Om; Thu, 13 Jul 2023 11:02:30 +0200
-Date:   Thu, 13 Jul 2023 11:02:30 +0200
+        id 1qJsHP-004WGy-Pm; Thu, 13 Jul 2023 11:06:31 +0200
+Date:   Thu, 13 Jul 2023 11:06:31 +0200
 From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Yangtao Li <frank.li@vivo.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 14/58] mmc: dw_mmc: exynos: Convert to platform remove
- callback returning void
-Message-ID: <20230713090230.iwhicjbirll5icec@pengutronix.de>
+To:     Yangtao Li <frank.li@vivo.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 16/58] mmc: rtsx_pci: Convert to platform remove callback
+ returning void
+Message-ID: <20230713090631.qq2ffit3wt3rpt7k@pengutronix.de>
 References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-14-frank.li@vivo.com>
- <75d2dc5e-4cbf-2519-cdf7-8fde374126ec@linaro.org>
+ <20230713080807.69999-16-frank.li@vivo.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="d6d7itv6cdabafnt"
+        protocol="application/pgp-signature"; boundary="szvbp7ls2vj2sehh"
 Content-Disposition: inline
-In-Reply-To: <75d2dc5e-4cbf-2519-cdf7-8fde374126ec@linaro.org>
+In-Reply-To: <20230713080807.69999-16-frank.li@vivo.com>
 X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
 X-SA-Exim-Mail-From: ukl@pengutronix.de
 X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
@@ -55,50 +50,77 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---d6d7itv6cdabafnt
+--szvbp7ls2vj2sehh
 Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jul 13, 2023 at 10:11:15AM +0200, Krzysztof Kozlowski wrote:
-> On 13/07/2023 10:07, Yangtao Li wrote:
-> > The .remove() callback for a platform driver returns an int which makes
-> > many driver authors wrongly assume it's possible to do error handling by
-> > returning an error code. However the value returned is (mostly) ignored
-> > and this typically results in resource leaks. To improve here there is a
-> > quest to make the remove callback return void. In the first step of this
-> > quest all drivers are converted to .remove_new() which already returns
-> > void.
-> >=20
-> > Trivially convert this driver from always returning zero in the remove
-> > callback to the void returning variant.
+On Thu, Jul 13, 2023 at 04:07:25PM +0800, Yangtao Li wrote:
+> The .remove() callback for a platform driver returns an int which makes
+> many driver authors wrongly assume it's possible to do error handling by
+> returning an error code. However the value returned is (mostly) ignored
+> and this typically results in resource leaks. To improve here there is a
+> quest to make the remove callback return void. In the first step of this
+> quest all drivers are converted to .remove_new() which already returns
+> void.
 >=20
-> You even copied Uwe's commit msg... Aren't you duplicate his work or is
-> it being coordinated?
+> Trivially convert this driver from always returning zero in the remove
+> callback to the void returning variant.
+>=20
+> Cc: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 8 +++-----
+>  1 file changed, 3 insertions(+), 5 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pc=
+i_sdmmc.c
+> index 8098726dcc0b..5465a7225df4 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -1523,14 +1523,14 @@ static int rtsx_pci_sdmmc_drv_probe(struct platfo=
+rm_device *pdev)
+>  	return 0;
+>  }
+> =20
+> -static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+> +static void rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+>  {
+>  	struct realtek_pci_sdmmc *host =3D platform_get_drvdata(pdev);
+>  	struct rtsx_pcr *pcr;
+>  	struct mmc_host *mmc;
+> =20
+>  	if (!host)
+> -		return 0;
+> +		return;
 
-We communicated and I politely asked to not interfer. This series is
-just what Yangtao had still pending. That's fine for me.
+If host is NULL, there is a problem. While sometimes (rarely) driver
+maintainers object, I usually remove these, see for example
+3d82dca0f27ac5a0bfbbce439bba5c6452f3b7da.
+=20
+>  	pcr =3D host->pcr;
+>  	pcr->slots[RTSX_SD_CARD].p_dev =3D NULL;
 
-Thanks for noticing,
+Best regards
 Uwe
 
 --=20
 Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
 Industrial Linux Solutions                 | https://www.pengutronix.de/ |
 
---d6d7itv6cdabafnt
+--szvbp7ls2vj2sehh
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmSvvaUACgkQj4D7WH0S
-/k48vgf7B9pOCj8BEtBTeW/UjDXpN6Ydodk3PjPhDksAVMx3pfZiUm43bOVMgD/G
-30npFfBBlwWgCrzx3XoBoJ2qFYHoq+pjTlH1EZcipdXN3/AONF5YUQ/OR3+CnwZd
-CWFxvF6RFK/LwkErVlFsrF6WBHpSkJ14lfMvSkAIPtOZ3JoykZtHd+D3YsQJvceS
-rikOZOHI3LJEKOmAPtfRNk+PjEfERw0T+2+/JiLIe4Cip7GZ2vOz5K+2YXRWHeRy
-8vgSXOKRfegphqtSuE0qQxMrTafPsKsck4OKS5U8PC+ebYaW/MUwWTiU45RBiMiz
-QqeKHVZV1Vp2TKVzQSkDkGgoNkxFOw==
-=XV+K
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmSvvpYACgkQj4D7WH0S
+/k7JNgf/RG5cqOCaaxShFaOqw3hQBTAAgvsgmEenLL5pkOyjowFizwD1JgI7SiZ6
+vg296AEls6JKu2e+yXMGZ8lVryBLDz2JHF/LS7Swu5RHMMsttRDFbOEoHWN0IMUV
+bPgassf0Blg9x2pWNySdZMTd+aQAkheiqx3LFeu78onlnWgV7uXz5sstcvj9ibid
+piGsp96kpsleMyMKdfpqgl+MLDSDGnWTkXymR/Ztqmt1yGGqqTsRTKbd1uapu0Sh
+DMVe82qce+L7Dkf8qPoOcR/bbEVULBK6bRO6uq0dHlJ8OL0pUJvokiSAyXJL2fVZ
+1IrwZXFrWiu0UmSyUeo3OWahrZM05g==
+=fYRF
 -----END PGP SIGNATURE-----
 
---d6d7itv6cdabafnt--
+--szvbp7ls2vj2sehh--
