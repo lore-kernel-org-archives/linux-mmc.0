@@ -2,107 +2,208 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1EA3C0015E
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 11:06:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A1CFC001DC
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 11:06:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229515AbjGMLGV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 07:06:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51252 "EHLO
+        id S234289AbjGMLGd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 07:06:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234182AbjGMLGT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 07:06:19 -0400
-Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6362B2120
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:11 -0700 (PDT)
-Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-576a9507a9bso27016137b3.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:11 -0700 (PDT)
+        with ESMTP id S234134AbjGMLG3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 07:06:29 -0400
+Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DD6E26BC
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:16 -0700 (PDT)
+Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-c01e1c0402cso531595276.0
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1689246370; x=1691838370;
+        d=linaro.org; s=google; t=1689246375; x=1691838375;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=rU37mFTJD2ihTlHVA/622ea5niPv5pR87SNHOeXdqbo=;
-        b=zD2pOBqg0UxLMYk7lovuPhL4AZ891i7DGRJyYnEhT7/3B0HOgWzT7T10n5UCj5yACX
-         QXx2wdV1FMaZMvGwqs05xaMRiJBImblR+C6Cp8rOT+MWvCmKyMPu54MQuWnP5F3BVlN+
-         2woVYyF591A00TL+E45aDPxqIAwRsVfeOWxGoOGn4HkYSV+Km5oqb8lFtD2EdgDNNGMT
-         7u9jwDRVc07LePELQTu9NLbkPJnDVy6JM9WJLGxiI7JVSk3ciaCnVCgzenHQCuYlmj/7
-         jmY3I88pniSBSN3Ld3eC70a/7OS/VW6mBZg54lkyOF+qMb20RjK4bDpsvhjYKkIJPf2L
-         T4mg==
+        bh=M2M/lZh8JsEWuYVKsWWFjaGBRpyeEN+n2El8R2XDALY=;
+        b=x+qDakDYU7SCaCRHYo8IHk3AXxJHIyHaxgle5KNxYtDxkFUfBKLDnILKAv5QsqyuyN
+         wCLIDIFrJiI/ylaFEjiZbISdlg40BZmUjVk94y08GZiZ40v/oYKuezCwQFrcVKqa4PY8
+         H6LqVAITrRATp43Yvje5zlxVmnDHPJQNhhnrZxd78bs7oPEBy+tmKglItVZusAEF7U1a
+         nmzE+KFan4KvASFR4nYK3VZ0H1if9kptZ5lowJFTn0OKq4mmFgK129MfgzJYKhcl3WG1
+         GjywAl32C0WEYrUL3Js2+WBHP3nSD7r5pkWL8qXCoJSBaqIbnFLKIUGek1ivJWCBci0A
+         i+8w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689246370; x=1691838370;
+        d=1e100.net; s=20221208; t=1689246375; x=1691838375;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=rU37mFTJD2ihTlHVA/622ea5niPv5pR87SNHOeXdqbo=;
-        b=cT9dhEWO7TJ3nFBSlD9QgmK5aFp7Wly/idAJWisPrOqxsEj8iPchl9XVxhyzu6TjaN
-         ysmrvILsRGQNZJIA9QOFVoJlEQWJzOewi2kYkqAcG5i/bGRJjT+bBqlVYKMn6ve9pUVx
-         eOjUstiXwj2d07D4/WkCbXuTN5QLvu3pG+LrWdLQYlk7LNvp34JhEt63av9l3UBQHgIy
-         di0YlyfTg6rBuJq/LXUBNOCKo/OiKb/S00Cdr3t0hLjhgZtg7midnifFLqNCGVkdaO8H
-         0Kdpk3FKf1meOMrGRKqL4Fat8gJFv8qMbrFw84fg0UXrE8/CJvcdCfu2/fyzK6RwyCS1
-         Vt1Q==
-X-Gm-Message-State: ABy/qLYzHLtUt7eIuqqyB1E+NN0GjUU2wPGVdXu/Fo9olA50xu61QIYl
-        08D2fb3oh1vi61bb4qrn1ynLWWOjh0uEWEfNz7JUGA==
-X-Google-Smtp-Source: APBJJlEeEyo7n9uRnp7pby4ugQLXjOATQgBLLR7fdtxhNtEtRowwGjZ2qpZCwEAf6C0TMmODlBHxXhF+SMLT3s7c5hs=
-X-Received: by 2002:a81:488a:0:b0:56c:f547:e058 with SMTP id
- v132-20020a81488a000000b0056cf547e058mr5155021ywa.18.1689246370067; Thu, 13
- Jul 2023 04:06:10 -0700 (PDT)
+        bh=M2M/lZh8JsEWuYVKsWWFjaGBRpyeEN+n2El8R2XDALY=;
+        b=gs8xnRJsBCi7HAIp5ltSPnRXIm8kfdhb3XcA3lx0+jPpVbOAN/+hatgpdwQsjGxQ9F
+         KjuFmndgSbbVV7Hcm37SZTjxtlWNEfXcKKJoXNC8wm8+xCalYQGxMV8ewWXGSG6D3ez+
+         aDY9vl33q2JLvsQ0MRVJU4ixpBWaJq1uGs6fLtDngf2e5c5e34g03jucSn4h4P+kBuYt
+         Y3/lLWg+9/zc0Gg6wkvKnDofcIW3KTW2Yzl5o7t//QEIGSaoW1+ka0MqkdlgPpI7kA4T
+         7whx2Hg+RmBz1exvC7zJ6YIQbJL026UeyhylVEp0nj04TaegAYveF+XDpineBu0oU1WB
+         KgBw==
+X-Gm-Message-State: ABy/qLZpZ1+sR1SmdB1SGv/E02ecmgX2Clh/cceEH1a3rBtvZ1j6QfUy
+        Yvt9yAHE8kCJ6Uc28nVta7Le7qahpjEiej9nAMsGqg==
+X-Google-Smtp-Source: APBJJlHObgT/444UyFbaYVnmaGs/mnlSqy9iy+e1wKBM+93VVPOHlLqTjqQYV6qyhEfqVkw0MP4O+5D4OjIUjdbyfXw=
+X-Received: by 2002:a25:2f81:0:b0:c80:f701:7467 with SMTP id
+ v123-20020a252f81000000b00c80f7017467mr831061ybv.45.1689246375257; Thu, 13
+ Jul 2023 04:06:15 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230627120549.2400325-1-saproj@gmail.com>
-In-Reply-To: <20230627120549.2400325-1-saproj@gmail.com>
+References: <20230628191243.3632401-1-linus.walleij@linaro.org>
+In-Reply-To: <20230628191243.3632401-1-linus.walleij@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 13 Jul 2023 13:05:34 +0200
-Message-ID: <CAPDyKFr4eZQXUdjY6uAnftPAC8YGk=0zkn2a8ndWbO00cRo8zA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: moxart: read scr register without changing byte order
-To:     Sergei Antonov <saproj@gmail.com>
-Cc:     linux-mmc@vger.kernel.org, Jonas Jensen <jonas.jensen@gmail.com>,
-        stable@vger.kernel.org
+Date:   Thu, 13 Jul 2023 13:05:39 +0200
+Message-ID: <CAPDyKFofJQcFOYzD6TsfOL-ocU4viGnMUSumjnPeojkb0drF_g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: Improve ux500 debug prints
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        Stefan Hansson <newbyte@disroot.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        linux-stm32@st-md-mailman.stormreply.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 27 Jun 2023 at 14:06, Sergei Antonov <saproj@gmail.com> wrote:
+On Wed, 28 Jun 2023 at 21:12, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> Conversion from big-endian to native is done in a common function
-> mmc_app_send_scr(). Converting in moxart_transfer_pio() is extra.
-> Double conversion on a LE system returns an incorrect SCR value,
-> leads to errors:
+> To conclude the ux500 busy timeout fixes, this improves the debug and
+> error prints so we can see a bit what is going on. Here is a typical
+> dmesg with these new debug messages enabled:
 >
-> mmc0: unrecognised SCR structure version 8
+> [    2.648864] mmci-pl18x 80005000.mmc: mmc2: PL180 manf 80 rev4
+>                at 0x80005000 irq 81,0 (pio)
+> [    2.662750] mmci-pl18x 80005000.mmc: DMA channels RX dma0chan4, TX dma0chan5
+> [    3.480407] mmci-pl18x 80005000.mmc: no busy signalling in time CMD06
+> [    3.487457] mmci-pl18x 80005000.mmc: no busy signalling in time CMD06
+> [    3.998321] mmci-pl18x 80005000.mmc: timeout in state waiting for end IRQ
+>                                         waiting for busy CMD06
+> [    3.998535] mmc2: new DDR MMC card at address 0001
+> [    4.000030] mmcblk2: mmc2:0001 M4G1YC 3.69 GiB
+> [    4.008361]  mmcblk2: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15
+>                          p16 p17 p18 p19 p20 p21 p22 p23 p24 p25
+> [    4.017700] mmcblk2boot0: mmc2:0001 M4G1YC 2.00 MiB
+> [    4.020477] mmcblk2boot1: mmc2:0001 M4G1YC 2.00 MiB
+> [    4.022125] mmcblk2rpmb: mmc2:0001 M4G1YC 128 KiB, chardev (246:0)
+> [    5.791381] mmci-pl18x 80005000.mmc: no busy signalling in time CMD06
+> [   10.938568] mmci-pl18x 80005000.mmc: timeout in state waiting for end IRQ
+>                                         waiting for busy CMD06
+> [   17.982849] mmci-pl18x 80005000.mmc: lost busy status when waiting for
+>                                         busy start IRQ CMD06
+> [   18.683563] mmci-pl18x 80005000.mmc: no busy signalling in time CMD06
+> [   19.385437] mmci-pl18x 80005000.mmc: no busy signalling in time CMD06
+> [   20.493652] mmci-pl18x 80005000.mmc: no busy signalling in time CMD06
 >
-> Fixes: 1b66e94e6b99 ("mmc: moxart: Add MOXA ART SD/MMC driver")
-> Signed-off-by: Sergei Antonov <saproj@gmail.com>
-> Cc: Jonas Jensen <jonas.jensen@gmail.com>
-> Cc: stable@vger.kernel.org
+> We see a lot of lost IRQs and the timeout always occur while waiting for
+> the end IRQ, and then the busy status is *low* meaning the busy indication
+> is already de-asserted.
+>
+> So busy signalling is missed in various ways for various reasons,
+> sometimes it appears that IRQs are simply lost.
+>
+> One hypothesis is that this happens because the events happen so fast
+> that they are transient, and since the MMCI state machine in effect is
+> handling an edge trigger (rising or falling signal on DAT0) the
+> internal logic will miss the event, because the state machine in the
+> hardware is sampling the line, and will at times detect only the first
+> event but miss the second, fireing only one IRQ.
+>
+> We print the second timeout error with dev_err() since it is pretty
+> serious, the other events are so common and simple to handle that we
+> can keep them at dev_dbg() level.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-Applied for fixes, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/moxart-mmc.c | 8 +-------
->  1 file changed, 1 insertion(+), 7 deletions(-)
+>  drivers/mmc/host/mmci.c | 37 ++++++++++++++++++++++++++++++-------
+>  1 file changed, 30 insertions(+), 7 deletions(-)
 >
-> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-> index 2d002c81dcf3..d0d6ffcf78d4 100644
-> --- a/drivers/mmc/host/moxart-mmc.c
-> +++ b/drivers/mmc/host/moxart-mmc.c
-> @@ -338,13 +338,7 @@ static void moxart_transfer_pio(struct moxart_host *host)
->                                 return;
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 4fd28eaadc07..5d05269a8567 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -734,7 +734,8 @@ static bool ux500_busy_complete(struct mmci_host *host, struct mmc_command *cmd,
 >                         }
->                         for (len = 0; len < remain && len < host->fifo_width;) {
-> -                               /* SCR data must be read in big endian. */
-> -                               if (data->mrq->cmd->opcode == SD_APP_SEND_SCR)
-> -                                       *sgp = ioread32be(host->base +
-> -                                                         REG_DATA_WINDOW);
-> -                               else
-> -                                       *sgp = ioread32(host->base +
-> -                                                       REG_DATA_WINDOW);
-> +                               *sgp = ioread32(host->base + REG_DATA_WINDOW);
->                                 sgp++;
->                                 len += 4;
->                         }
+>                         retries--;
+>                 }
+> -               dev_dbg(mmc_dev(host->mmc), "no busy signalling in time\n");
+> +               dev_dbg(mmc_dev(host->mmc),
+> +                       "no busy signalling in time CMD%02x\n", cmd->opcode);
+>                 ux500_busy_clear_mask_done(host);
+>                 break;
+>
+> @@ -756,7 +757,8 @@ static bool ux500_busy_complete(struct mmci_host *host, struct mmc_command *cmd,
+>                         host->busy_state = MMCI_BUSY_WAITING_FOR_END_IRQ;
+>                 } else {
+>                         dev_dbg(mmc_dev(host->mmc),
+> -                               "lost busy status when waiting for busy start IRQ\n");
+> +                               "lost busy status when waiting for busy start IRQ CMD%02x\n",
+> +                               cmd->opcode);
+>                         cancel_delayed_work(&host->ux500_busy_timeout_work);
+>                         ux500_busy_clear_mask_done(host);
+>                 }
+> @@ -770,13 +772,14 @@ static bool ux500_busy_complete(struct mmci_host *host, struct mmc_command *cmd,
+>                         ux500_busy_clear_mask_done(host);
+>                 } else {
+>                         dev_dbg(mmc_dev(host->mmc),
+> -                               "busy status still asserted when handling busy end IRQ - will keep waiting\n");
+> +                               "busy status still asserted when handling busy end IRQ - will keep waiting CMD%02x\n",
+> +                               cmd->opcode);
+>                 }
+>                 break;
+>
+>         default:
+> -               dev_dbg(mmc_dev(host->mmc), "fell through on state %d\n",
+> -                       host->busy_state);
+> +               dev_sbg(mmc_dev(host->mmc), "fell through on state %d, CMD%02x\n",
+> +                       host->busy_state, cmd->opcode);
+>                 break;
+>         }
+>
+> @@ -1503,6 +1506,20 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>         }
+>  }
+>
+> +static char *ux500_state_str(struct mmci_host *host)
+> +{
+> +       switch (host->busy_state) {
+> +       case MMCI_BUSY_WAITING_FOR_START_IRQ:
+> +               return "waiting for start IRQ";
+> +       case MMCI_BUSY_WAITING_FOR_END_IRQ:
+> +               return "waiting for end IRQ";
+> +       case MMCI_BUSY_DONE:
+> +               return "not waiting for IRQs";
+> +       default:
+> +               return "unknown";
+> +       }
+> +}
+> +
+>  /*
+>   * This busy timeout worker is used to "kick" the command IRQ if a
+>   * busy detect IRQ fails to appear in reasonable time. Only used on
+> @@ -1522,9 +1539,15 @@ static void ux500_busy_timeout_work(struct work_struct *work)
+>                 /* If we are still busy, let's tag on timeout error. */
+>                 if (status & host->variant->busy_detect_flag) {
+>                         status |= MCI_CMDTIMEOUT;
+> -                       dev_dbg(mmc_dev(host->mmc), "timeout waiting for busy\n");
+> +                       dev_err(mmc_dev(host->mmc),
+> +                               "timeout in state %s still busy with CMD%02x\n",
+> +                               ux500_state_str(host),
+> +                               host->cmd->opcode);
+>                 } else {
+> -                       dev_dbg(mmc_dev(host->mmc), "timeout waiting for busy IRQ\n");
+> +                       dev_err(mmc_dev(host->mmc),
+> +                               "timeout in state %s waiting for busy CMD%02x\n",
+> +                               ux500_state_str(host),
+> +                               host->cmd->opcode);
+>                 }
+>
+>                 mmci_cmd_irq(host, host->cmd, status);
 > --
-> 2.37.2
+> 2.40.1
 >
