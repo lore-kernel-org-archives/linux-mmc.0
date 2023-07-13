@@ -2,48 +2,46 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B657C001B0
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 09:11:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FEDFEB64DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 09:13:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234061AbjGMJLD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 05:11:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38892 "EHLO
+        id S230281AbjGMJNY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 05:13:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37974 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234064AbjGMJKh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 05:10:37 -0400
+        with ESMTP id S234355AbjGMJND (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 05:13:03 -0400
 Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E35EA30E1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 02:10:09 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6834EB4
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 02:12:59 -0700 (PDT)
 Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
         by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
         (Exim 4.92)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qJsKn-0005YE-Nd; Thu, 13 Jul 2023 11:10:01 +0200
+        id 1qJsNb-00061v-9n; Thu, 13 Jul 2023 11:12:55 +0200
 Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
         by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qJsKm-00E5JE-DT; Thu, 13 Jul 2023 11:10:00 +0200
+        id 1qJsNa-00E5JW-Ii; Thu, 13 Jul 2023 11:12:54 +0200
 Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qJsKl-004WHV-Kp; Thu, 13 Jul 2023 11:09:59 +0200
-Date:   Thu, 13 Jul 2023 11:09:59 +0200
+        id 1qJsNZ-004WHr-OI; Thu, 13 Jul 2023 11:12:53 +0200
+Date:   Thu, 13 Jul 2023 11:12:53 +0200
 From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
 To:     Yangtao Li <frank.li@vivo.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-        Masami Hiramatsu <mhiramat@kernel.org>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 25/58]  mmc: uniphier-sd: Convert to platform remove
- callback returning void
-Message-ID: <20230713090959.6ywgj2mlzc6t6eao@pengutronix.de>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 26/58] mmc: f-sdh30: Convert to platform remove callback
+ returning void
+Message-ID: <20230713091253.ugyduhpsda3dr6ov@pengutronix.de>
 References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-25-frank.li@vivo.com>
+ <20230713080807.69999-26-frank.li@vivo.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="yymy3xuhfnllk6sk"
+        protocol="application/pgp-signature"; boundary="mqoekenw6tymbw4e"
 Content-Disposition: inline
-In-Reply-To: <20230713080807.69999-25-frank.li@vivo.com>
+In-Reply-To: <20230713080807.69999-26-frank.li@vivo.com>
 X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
 X-SA-Exim-Mail-From: ukl@pengutronix.de
 X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
@@ -53,19 +51,69 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---yymy3xuhfnllk6sk
+--mqoekenw6tymbw4e
 Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hello,
+On Thu, Jul 13, 2023 at 04:07:35PM +0800, Yangtao Li wrote:
+> The .remove() callback for a platform driver returns an int which makes
+> many driver authors wrongly assume it's possible to do error handling by
+> returning an error code. However the value returned is (mostly) ignored
+> and this typically results in resource leaks. To improve here there is a
+> quest to make the remove callback return void. In the first step of this
+> quest all drivers are converted to .remove_new() which already returns
+> void.
+>=20
+> Trivially convert this driver from always returning zero in the remove
+> callback to the void returning variant.
+>=20
+> Cc: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> ---
+>  drivers/mmc/host/sdhci_f_sdh30.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_=
+sdh30.c
+> index a202a69a4b08..6016e183c03c 100644
+> --- a/drivers/mmc/host/sdhci_f_sdh30.c
+> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
+> @@ -208,7 +208,7 @@ static int sdhci_f_sdh30_probe(struct platform_device=
+ *pdev)
+>  	return ret;
+>  }
+> =20
+> -static int sdhci_f_sdh30_remove(struct platform_device *pdev)
+> +static void sdhci_f_sdh30_remove(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host *host =3D platform_get_drvdata(pdev);
+>  	struct f_sdhost_priv *priv =3D sdhci_priv(host);
+> @@ -222,8 +222,6 @@ static int sdhci_f_sdh30_remove(struct platform_devic=
+e *pdev)
+> =20
+>  	sdhci_free_host(host);
+>  	platform_set_drvdata(pdev, NULL);
+> -
+> -	return 0;
+>  }
+> =20
+>  #ifdef CONFIG_OF
+> @@ -252,7 +250,7 @@ static struct platform_driver sdhci_f_sdh30_driver =
+=3D {
+>  		.pm	=3D &sdhci_pltfm_pmops,
+>  	},
+>  	.probe	=3D sdhci_f_sdh30_probe,
+> -	.remove	=3D sdhci_f_sdh30_remove,
+> +	.remove_new =3D sdhci_f_sdh30_remove,
 
-$Subject ~=3D s/  / /
+Given that the alignment of =3Ds in sdhci_f_sdh30_driver is very
+inconsistent, you might want to consider to do s/\t/ / in it for the two
+remaining offenders while touching this anyhow.
 
-(maybe that's fixed automatically if picked up by git-am, but I'm not
-sure and didn't test.)
+With or without that adapted:
 
-Otherwise looks fine.
+Acked-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
 
 Best regards
 Uwe
@@ -74,19 +122,19 @@ Uwe
 Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
 Industrial Linux Solutions                 | https://www.pengutronix.de/ |
 
---yymy3xuhfnllk6sk
+--mqoekenw6tymbw4e
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmSvv2YACgkQj4D7WH0S
-/k5gSgf/X0zfkLbvESAkKz65/res1tIZ4SuvObKqsdfiVSqsWDhMvYMgHFJwcqc5
-VZkTRs8BjGAwVh1bUGajL+Vzw52YG5iY1sN7pZO851tlnbPaK4rLM73jbIpZVqzl
-TOe9QGOe8SVScIcjgGCHGYtgklp3gN/wRH43iQ4kCs+50QZa4AYukQwlLHdRHLFZ
-lFTc1QV7VM5Q6++zXHCQAeEIts89yAawmk2iNcs2dys+Y1b1LTFqmDbKOlvCVCJ0
-/ijlMJaEAbrzRfzLoBgjQHMWfBC7W4ueDy/dG9xKt1jGrqThATqHIZ+Anln73aSl
-wGh02C7ZD9QShq5k+ViCSUIgKc818A==
-=qzjz
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmSvwBQACgkQj4D7WH0S
+/k5csggApph1hCOPSYnnSu939bLupMfFJ5lWGu+NIHl7CVLS+jcOFo3DIDvP15nX
+9W3KmfSMQcKaPJw/sZIMI+3LAn7NYoSkhV/CNxAscipoW5q6Q96A7RerplzgFdkF
+fFM5jFxZMhPyYiDiUBnZgctoF6gsTsHWUYR/71ChRO0l2lwyagyTbUXaq/g8Kke5
+4PA3q0iXepJX3yBHe1XnO/q6109jhbjMRZiZOWJV6rBRg976TNbXIt9BjcPBX14w
+W6JqMShddWXBS99UqydjZBgdMKUcxf8MZQZATwZegd+D4HpO2RHk9T/dI6vIWyWL
+LJB8wfpEicdVJwfa3UQiJN88TTD8Gg==
+=TgoG
 -----END PGP SIGNATURE-----
 
---yymy3xuhfnllk6sk--
+--mqoekenw6tymbw4e--
