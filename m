@@ -2,219 +2,128 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4742FEB64DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 11:06:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AACC1EB64DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 11:07:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234242AbjGMLGy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 07:06:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51622 "EHLO
+        id S234134AbjGMLHQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 07:07:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234241AbjGMLGv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 07:06:51 -0400
-Received: from mail-oi1-x230.google.com (mail-oi1-x230.google.com [IPv6:2607:f8b0:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF2BB2691
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:46 -0700 (PDT)
-Received: by mail-oi1-x230.google.com with SMTP id 5614622812f47-3a04e5baffcso537133b6e.3
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:46 -0700 (PDT)
+        with ESMTP id S234258AbjGMLHO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 07:07:14 -0400
+Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BBE226AC
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:07:09 -0700 (PDT)
+Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-577637de4beso4902537b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:07:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1689246406; x=1691838406;
+        d=linaro.org; s=google; t=1689246428; x=1691838428;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=zbUK0+KNfrljZMGdgezGa1VL09M/PuMCUQ4epk9qz0M=;
-        b=HRrK+UjkOE9au7uixJmgJoJJwdJJw80q2zzyGjawwloFE9dAYM7WQ8ry/KwjoAIPGn
-         y0xHA1iL/6AosK+IUCmOr+ttHAEMZSDeaHPpLW7BokW3BKOR7vewcX5eFnXYmGtOFYXn
-         qWuiiINC5LresbHCXNrVqryHTfHVyI1WG5gsGcfArUiSxRa9n3xmg03wpVZqndWT0frb
-         L97zBjgIc6z1RoaxMXS1UDmdEcoE65iSJdFgo3/Uxt5rfRaeXPLhHGfALG0c+HCJjzl/
-         0dCyysqqrWp/3Ck62qZPhpYygAJX1sZGfBPmK2H/SRoD4rS/cBsnok2+/D2ITNNqI2GV
-         MOFA==
+        bh=YynRJVjn4jFQingsAjZzW8BP9Z9BqPeKf0r1i2I/YtQ=;
+        b=kBJmQS0O//8na3ZnG7csNH8foyEwvS1eUHZihWOJeQ8RbT02KneJXZhQGjG2wBgWrt
+         98nnZ9ZCMfL/WHj0EyZjD39iSChuxpUqAAmJIFyfcx9+mWVQ7hLlpxTIxFd1cNdEPdaA
+         OZcydG0jB9KmMdjHbf5OUI1RbWkz2vnhOaccp13k3Mj00CYQqbgKz+B/YcpFTalleATk
+         4hJQrJtnSiwcmaeUOQTEF595ZMvrzfS6D36bAzhmEoutQC/7tKZjNLz5i/ZrUY738OLX
+         Mwqy18rprlJWk/m7WAdXXi3R4SPNU83MVaRkRHVQ0SzzI0FUF7jZqnvtFnazfW0V6NC8
+         KAzQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689246406; x=1691838406;
+        d=1e100.net; s=20221208; t=1689246428; x=1691838428;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=zbUK0+KNfrljZMGdgezGa1VL09M/PuMCUQ4epk9qz0M=;
-        b=YCoTsy7/brIM5cpmPc0jAWxi87dozOiCvm7vLFhpNcO572RC6cdW45e+nAm+UMaSQi
-         4BLuNMFoINlnfps0n6a3zCFE5/01BohES80MjpEtN9IWd5pbtVWAKtrl19gzTLze2GJz
-         fL/zmt+Dr4n7RervZMrv1RAupaKozEQ1SW4wZS67dWZI5i+7w61ix213wxCt08OY46Dp
-         5YwYTS6Cy/wWfeH917wMfQ+CEUPXULsq0BtdqCkjZEO6LGkCUkZXHxJe9crSowmCNcAc
-         9XNLnv09JGe5gMJFVyO8XkJCT1Q4sRF4Zi0BlO4myRcDFBIgMBbeR71KYTqxetYVM84F
-         svXg==
-X-Gm-Message-State: ABy/qLbEN4u1BtColKEmiCgAm6jqDtLm+CHBpUCw9pp5DPXFOPVwjgiW
-        oN1iaGay2/oJSAFMTWnDYqacPGUTKz84mRI4eDzIOqS2dWhAxVPe
-X-Google-Smtp-Source: APBJJlH87jC6lHbK8IaI52Wr3SdxRDpbsQG0LS30do7Cik4nP1JSk/l2B0BiEbVR5NI/+S1TDJt37YbwSqC5TFuaRSs=
-X-Received: by 2002:aca:6c1:0:b0:3a1:f237:ec62 with SMTP id
- 184-20020aca06c1000000b003a1f237ec62mr1189805oig.48.1689246405987; Thu, 13
- Jul 2023 04:06:45 -0700 (PDT)
+        bh=YynRJVjn4jFQingsAjZzW8BP9Z9BqPeKf0r1i2I/YtQ=;
+        b=GQrzOaTmfsgpMi4YLmZwyu4MpTwPc6443endNS+PRtd2AAhI0kIK40YlF05aN8+yRB
+         VVz6D02joiXNibYsKFVktVoxYi2Lc/XglP/5lZ9iHBsQgepB84bU8FxQN13xyoF34SA3
+         6khYJmP/w5gZan16ikPaz81uvKE4gXFJsma6Gw9fYDO89VONl5N4QoJhAxC8JHx3OyZu
+         bY95pb3KGv9azTdHmFxDSFln87GsRm2tAvx5W5Hcua8nJvBa+3JoxfqroE5a2TAaXlwy
+         LdlKYibc5UDMKrg0lMInaUF2MTRnXG5KMNLdOcflz9qzwchJXGsab6MuI7z5IQM+J7X7
+         5Xqw==
+X-Gm-Message-State: ABy/qLaES27LlzGVs6wxL613pEYpApJhYeFWOWScCDluidgIli91qaJr
+        6r4ox2bbsCer4iHc2jryNKNgsCr+A5eXG4waSKS17g==
+X-Google-Smtp-Source: APBJJlFxHllpTe01vvfKlpEeTLNBybHL7UxZ/vIhTjEuOdd5yFgvs3rRv5RdMB/bLLg2FER0bI1YHxhjD6rIdSbK2bc=
+X-Received: by 2002:a0d:d78b:0:b0:570:6667:1cfa with SMTP id
+ z133-20020a0dd78b000000b0057066671cfamr1361428ywd.47.1689246428353; Thu, 13
+ Jul 2023 04:07:08 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230630004533.26644-1-hayashi.kunihiko@socionext.com>
-In-Reply-To: <20230630004533.26644-1-hayashi.kunihiko@socionext.com>
+References: <20230712140011.18602-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20230712140011.18602-1-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 13 Jul 2023 13:06:10 +0200
-Message-ID: <CAPDyKFqJU3VwXJJDQPWvNBDz1+gSjYxFJBST3s8mpJoh7-c9-Q@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-f-sdh30: Replace with sdhci_pltfm
-To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Thu, 13 Jul 2023 13:06:32 +0200
+Message-ID: <CAPDyKFrPzLJ+bXfU-GhA5J6ybNRgAx0j7awUxd7uNbLpHhgAsQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: renesas_sdhi: register irqs before registering controller
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 30 Jun 2023 at 02:45, Kunihiko Hayashi
-<hayashi.kunihiko@socionext.com> wrote:
+On Wed, 12 Jul 2023 at 16:00, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> Even if sdhci_pltfm_pmops is specified for PM, this driver doesn't apply
-> sdhci_pltfm, so the structure is not correctly referenced in PM functions.
-> This applies sdhci_pltfm to this driver to fix this issue.
+> IRQs should be ready to serve when we call mmc_add_host() via
+> tmio_mmc_host_probe(). To achieve that, ensure that all irqs are masked
+> before registering the handlers.
 >
-> - Call sdhci_pltfm_init() instead of sdhci_alloc_host() and
->   other functions that covered by sdhci_pltfm.
-> - Move ops and quirks to sdhci_pltfm_data
-> - Replace sdhci_priv() with own private function sdhci_f_sdh30_priv().
->
-> Fixes: 87a507459f49 ("mmc: sdhci: host: add new f_sdh30")
-> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Tested-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-Applied for next, thanks!
+Applied for next and by adding a stable tag, thanks!
 
-Or maybe this should go for fixes and have a stable tag too?
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci_f_sdh30.c | 60 ++++++++++++++------------------
->  1 file changed, 27 insertions(+), 33 deletions(-)
+>
+> Additionally tested on a Renesas Ebisu board (R-Car E3).
 >
 > Changes since v1:
-> - Add Fixes and Acked-by tags
+> * refactored setting sdcard_irq_mask_all (Thanks Geert!)
+> * added tag
 >
-> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-> index a202a69a4b08..b01ffb4d0973 100644
-> --- a/drivers/mmc/host/sdhci_f_sdh30.c
-> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
-> @@ -29,9 +29,16 @@ struct f_sdhost_priv {
->         bool enable_cmd_dat_delay;
->  };
+>  drivers/mmc/host/renesas_sdhi_core.c | 10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
 >
-> +static void *sdhci_f_sdhost_priv(struct sdhci_host *host)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index 345934e4f59e..2d5ef9c37d76 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -1006,6 +1006,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>                 host->sdcard_irq_setbit_mask = TMIO_STAT_ALWAYS_SET_27;
+>                 host->sdcard_irq_mask_all = TMIO_MASK_ALL_RCAR2;
+>                 host->reset = renesas_sdhi_reset;
+> +       } else {
+> +               host->sdcard_irq_mask_all = TMIO_MASK_ALL;
+>         }
+>
+>         /* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
+> @@ -1100,9 +1102,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>                 host->ops.hs400_complete = renesas_sdhi_hs400_complete;
+>         }
+>
+> -       ret = tmio_mmc_host_probe(host);
+> -       if (ret < 0)
+> -               goto edisclk;
+> +       sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
+>
+>         num_irqs = platform_irq_count(pdev);
+>         if (num_irqs < 0) {
+> @@ -1129,6 +1129,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>                         goto eirq;
+>         }
+>
+> +       ret = tmio_mmc_host_probe(host);
+> +       if (ret < 0)
+> +               goto edisclk;
 > +
-> +       return sdhci_pltfm_priv(pltfm_host);
-> +}
-> +
->  static void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
->  {
-> -       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +       struct f_sdhost_priv *priv = sdhci_f_sdhost_priv(host);
->         u32 ctrl = 0;
+>         dev_info(&pdev->dev, "%s base at %pa, max clock rate %u MHz\n",
+>                  mmc_hostname(host->mmc), &res->start, host->mmc->f_max / 1000000);
 >
->         usleep_range(2500, 3000);
-> @@ -64,7 +71,7 @@ static unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
->
->  static void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
->  {
-> -       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +       struct f_sdhost_priv *priv = sdhci_f_sdhost_priv(host);
->         u32 ctl;
->
->         if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0)
-> @@ -95,30 +102,32 @@ static const struct sdhci_ops sdhci_f_sdh30_ops = {
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->
-> +static const struct sdhci_pltfm_data sdhci_f_sdh30_pltfm_data = {
-> +       .ops = &sdhci_f_sdh30_ops,
-> +       .quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
-> +               | SDHCI_QUIRK_INVERTED_WRITE_PROTECT,
-> +       .quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE
-> +               |  SDHCI_QUIRK2_TUNING_WORK_AROUND,
-> +};
-> +
->  static int sdhci_f_sdh30_probe(struct platform_device *pdev)
->  {
->         struct sdhci_host *host;
->         struct device *dev = &pdev->dev;
-> -       int irq, ctrl = 0, ret = 0;
-> +       int ctrl = 0, ret = 0;
->         struct f_sdhost_priv *priv;
-> +       struct sdhci_pltfm_host *pltfm_host;
->         u32 reg = 0;
->
-> -       irq = platform_get_irq(pdev, 0);
-> -       if (irq < 0)
-> -               return irq;
-> -
-> -       host = sdhci_alloc_host(dev, sizeof(struct f_sdhost_priv));
-> +       host = sdhci_pltfm_init(pdev, &sdhci_f_sdh30_pltfm_data,
-> +                               sizeof(struct f_sdhost_priv));
->         if (IS_ERR(host))
->                 return PTR_ERR(host);
->
-> -       priv = sdhci_priv(host);
-> +       pltfm_host = sdhci_priv(host);
-> +       priv = sdhci_pltfm_priv(pltfm_host);
->         priv->dev = dev;
->
-> -       host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-> -                      SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
-> -       host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
-> -                       SDHCI_QUIRK2_TUNING_WORK_AROUND;
-> -
->         priv->enable_cmd_dat_delay = device_property_read_bool(dev,
->                                                 "fujitsu,cmd-dat-delay-select");
->
-> @@ -126,18 +135,6 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
->         if (ret)
->                 goto err;
->
-> -       platform_set_drvdata(pdev, host);
-> -
-> -       host->hw_name = "f_sdh30";
-> -       host->ops = &sdhci_f_sdh30_ops;
-> -       host->irq = irq;
-> -
-> -       host->ioaddr = devm_platform_ioremap_resource(pdev, 0);
-> -       if (IS_ERR(host->ioaddr)) {
-> -               ret = PTR_ERR(host->ioaddr);
-> -               goto err;
-> -       }
-> -
->         if (dev_of_node(dev)) {
->                 sdhci_get_of_property(pdev);
->
-> @@ -204,24 +201,21 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
->  err_clk:
->         clk_disable_unprepare(priv->clk_iface);
->  err:
-> -       sdhci_free_host(host);
-> +       sdhci_pltfm_free(pdev);
-> +
->         return ret;
->  }
->
->  static int sdhci_f_sdh30_remove(struct platform_device *pdev)
->  {
->         struct sdhci_host *host = platform_get_drvdata(pdev);
-> -       struct f_sdhost_priv *priv = sdhci_priv(host);
-> -
-> -       sdhci_remove_host(host, readl(host->ioaddr + SDHCI_INT_STATUS) ==
-> -                         0xffffffff);
-> +       struct f_sdhost_priv *priv = sdhci_f_sdhost_priv(host);
->
->         reset_control_assert(priv->rst);
->         clk_disable_unprepare(priv->clk);
->         clk_disable_unprepare(priv->clk_iface);
->
-> -       sdhci_free_host(host);
-> -       platform_set_drvdata(pdev, NULL);
-> +       sdhci_pltfm_unregister(pdev);
->
->         return 0;
->  }
 > --
-> 2.25.1
+> 2.30.2
 >
