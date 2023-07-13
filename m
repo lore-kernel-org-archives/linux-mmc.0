@@ -2,80 +2,60 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FF97EB64DD
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jul 2023 14:17:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17936EB64DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 03:53:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230202AbjGLORG convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jul 2023 10:17:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52980 "EHLO
+        id S233146AbjGMDxU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jul 2023 23:53:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53416 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229829AbjGLORF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2023 10:17:05 -0400
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8FD112E;
-        Wed, 12 Jul 2023 07:17:04 -0700 (PDT)
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-5700b15c12fso78427367b3.1;
-        Wed, 12 Jul 2023 07:17:04 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689171424; x=1691763424;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=tyyFJfH5D8Bahiy0fpzGvTieHeBNsFN/lGuaj1/X0Yw=;
-        b=QPWJaI0s6BhnWK18XsagKyGIwmUUw1CSGjcwIDpCCik1A3oRQQdh22hQlebTtkEGRC
-         8RNs/qZvwgzngnZ9/uNJj0/czaQ7NGeR1pdXZyGO5YOXfzl6RaJHj1NV2r/q5SGjkyJv
-         IMr9pJ76E7iEVVZkHMJtz65nTARQV8F3aR3MVSl5HMjuHwV4iTxUDd3OyMrTo+ZoKcF/
-         RUKffUquR8dTDTLG8o9quh2iwBCTQRysljnkNiSqL4pu6MCEWj2CotkXv6Tz1s5JFNsx
-         t/b56uotAQ9gtGyghxlh2Um5cNmUiwvdfQ/l2R4gLdEtaWWgWPHoLW1IAk50xFfWOZRz
-         saTg==
-X-Gm-Message-State: ABy/qLYCcP2lsXlgvc21mhdIE21RDFR0gODOfM9e5s1NgLGW5NQiTLCc
-        L5sQPy3BrlSJ65ZJFyoL8O6yI6n6DKy4sw==
-X-Google-Smtp-Source: APBJJlED3MiB1h58MvI3CEE1zUbP2k+V5iFclE+HKSuKnStPCorlG5fifPR5gqYEyu4u0qK6uH/2+g==
-X-Received: by 2002:a0d:c784:0:b0:56f:ff88:2e43 with SMTP id j126-20020a0dc784000000b0056fff882e43mr17762581ywd.27.1689171423726;
-        Wed, 12 Jul 2023 07:17:03 -0700 (PDT)
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com. [209.85.128.174])
-        by smtp.gmail.com with ESMTPSA id x66-20020a0dee45000000b005772646629csm1174508ywe.144.2023.07.12.07.17.03
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 12 Jul 2023 07:17:03 -0700 (PDT)
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-579d5d89b41so78328727b3.2;
-        Wed, 12 Jul 2023 07:17:03 -0700 (PDT)
-X-Received: by 2002:a5b:a83:0:b0:bc9:1019:543 with SMTP id h3-20020a5b0a83000000b00bc910190543mr15888117ybq.58.1689171422864;
- Wed, 12 Jul 2023 07:17:02 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230712140116.18718-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20230712140116.18718-1-wsa+renesas@sang-engineering.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 12 Jul 2023 16:16:49 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXkMWDsjp_QOMUeV3XN5TdYtmMqX1GKbV=Bn8Q-3zyJYg@mail.gmail.com>
-Message-ID: <CAMuHMdXkMWDsjp_QOMUeV3XN5TdYtmMqX1GKbV=Bn8Q-3zyJYg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: remove outdated indentation
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-renesas-soc@vger.kernel.org,
+        with ESMTP id S232133AbjGMDxU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jul 2023 23:53:20 -0400
+Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 000911BF2;
+        Wed, 12 Jul 2023 20:53:18 -0700 (PDT)
+Received: from local
+        by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
+         (Exim 4.96)
+        (envelope-from <daniel@makrotopia.org>)
+        id 1qJnOE-0005w0-1M;
+        Thu, 13 Jul 2023 03:53:15 +0000
+Date:   Thu, 13 Jul 2023 04:52:59 +0100
+From:   Daniel Golle <daniel@makrotopia.org>
+To:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+        Ye Bin <yebin10@huawei.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Seunghui Lee <sh043.lee@samsung.com>
+Subject: [PATCH] mmc: core: set card fwnode_handle
+Message-ID: <ZK91G1qd8JwFEpIX@makrotopia.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 12, 2023 at 4:05 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Using tabs to make a structure initialization more readable is not
-> considered helpful. Remove the final appearance from this driver.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Also set card's device fwnode in case it isn't set yet and of_node is
+present.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Daniel Golle <daniel@makrotopia.org>
+---
+ drivers/mmc/core/bus.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 2c3074a605fc4..ecf6e23e4c307 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -361,6 +361,8 @@ int mmc_add_card(struct mmc_card *card)
+ 
+ 	mmc_add_card_debugfs(card);
+ 	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
++	if (card->dev.of_node && !card->dev.fwnode)
++		card->dev.fwnode = &card->dev.of_node->fwnode;
+ 
+ 	device_enable_async_suspend(&card->dev);
+ 
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+2.41.0
