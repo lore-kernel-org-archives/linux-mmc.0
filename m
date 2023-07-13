@@ -2,67 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0847C0015E
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 15:50:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89CA4C001DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 18:54:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232816AbjGMPuL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 11:50:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50292 "EHLO
+        id S232589AbjGMSyk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 14:54:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49336 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230380AbjGMPuL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 11:50:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B791213F;
-        Thu, 13 Jul 2023 08:50:10 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BA18361087;
-        Thu, 13 Jul 2023 15:50:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1C2BC433C7;
-        Thu, 13 Jul 2023 15:50:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1689263409;
-        bh=2NOFOv1mox0B34eGmT558oG4B3bVJOOiCICa6iNLwA0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=tgx4M+is4LhV6C/gBegZLG5nj+tF4rmWD6hizr2Qupfamu2cOb0wCk9DVIc4yQMBn
-         tah0nR3/cEkKDr0zOgHK8DMttoPbxTsV2aHkSKloS7bKzfQC7/1ugn1mXpgXiJ7IZh
-         dae6KS3iZ8ALgTqRHJcE5OlREzStYbcfktwqTpyY=
-Date:   Thu, 13 Jul 2023 17:50:06 +0200
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Daniel Golle <daniel@makrotopia.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Ye Bin <yebin10@huawei.com>,
-        Seunghui Lee <sh043.lee@samsung.com>
-Subject: Re: [PATCH] mmc: core: set card fwnode_handle
-Message-ID: <2023071334-amnesty-daughter-f5cb@gregkh>
-References: <ZK91G1qd8JwFEpIX@makrotopia.org>
+        with ESMTP id S232744AbjGMSyg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 14:54:36 -0400
+Received: from mail-pj1-x102c.google.com (mail-pj1-x102c.google.com [IPv6:2607:f8b0:4864:20::102c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B41BE3589;
+        Thu, 13 Jul 2023 11:54:08 -0700 (PDT)
+Received: by mail-pj1-x102c.google.com with SMTP id 98e67ed59e1d1-262fa79e97fso524530a91.2;
+        Thu, 13 Jul 2023 11:54:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1689274437; x=1691866437;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:sender
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=S/Rh3N7Hpk2RvvFOi7xZjggtoYOkILDnWZuYI4DoA10=;
+        b=HW5cIj8f6UrrRKqCSEGCEMigQIuAtz5FZOoyenrcfjQXnkfk3x91KqAgmOfMu8rjb0
+         Ck7tu7PddO79GoM9qYGS7C5Xmp7NtD3l3Ns10x1+yAakLRUN0IwG4ffbzHFORM5JjEK7
+         XoqNvaQKUfKQuOFxG8WDYi3aM5Mwe7+AaPuBKK9Iih+Z8SC1e7KILlhVi9WuzfQdrHlp
+         tX9sJsE4pQET7vVqcOht85rsQOHTeT9LGfxwrSPrzw69KHgZP3dH4E01yzu5A0S6DWwQ
+         7EBTGYF8Cw5Pp86VOfuv5xYomnc9HKvK9VUJmyCveJoOvbxWORxNPPNzkQ1CVAsvt35m
+         O2XA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689274437; x=1691866437;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:sender
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=S/Rh3N7Hpk2RvvFOi7xZjggtoYOkILDnWZuYI4DoA10=;
+        b=Q4zGKmKl3FfJ0jQjeHwnZedqU36DzpOMEd8XvNjxrsiY+7JEl8jdnoyBngf0HMJXXq
+         l6Iz7U15V46irymToyX+50XyLH2Mo7rYjFPehEZnETASLIfi7nnktEodehKtKnC+cV/l
+         g4g9VSrfvT30crZwf/ynQZXHehufoQyhg2jh8kTRtEU7sld6RWQlCZEJqfmPALv0fD5R
+         CFNsDzr7AHlDY3XuGL4aVS5dFvK41qq2P8IzuZMHJ6Zq3xzF642J6/qOk9FgUAHSQHuy
+         eV2nDR9RBBdzl373mRmNwavfNbsoCW2Tkgx2EYU7dm23bS/FPJf1wAQF3A6bqdl1bvaO
+         IvNg==
+X-Gm-Message-State: ABy/qLbMADM/57V1QEUvcfMFHsF4+M5JYfbZa+GtQBGr5HFEYNnizQUO
+        nC7oVVsw9CN0x6LIaCJHqvs=
+X-Google-Smtp-Source: APBJJlH+ZBRMwsng5OvfXU8dbB3Xd4jXwQ7bYsHQHvrkPh/St/88lWUsQjEONL/kaZAV4BM6m8npqA==
+X-Received: by 2002:a17:90a:43c3:b0:260:d8c0:ae79 with SMTP id r61-20020a17090a43c300b00260d8c0ae79mr1339393pjg.35.1689274436784;
+        Thu, 13 Jul 2023 11:53:56 -0700 (PDT)
+Received: from localhost (dhcp-72-235-13-41.hawaiiantel.net. [72.235.13.41])
+        by smtp.gmail.com with ESMTPSA id d13-20020a17090a2a4d00b00262eccfa29fsm13036699pjg.33.2023.07.13.11.53.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Jul 2023 11:53:56 -0700 (PDT)
+Sender: Tejun Heo <htejun@gmail.com>
+Date:   Thu, 13 Jul 2023 08:53:55 -1000
+From:   Tejun Heo <tj@kernel.org>
+To:     Peter Zijlstra <peterz@infradead.org>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Lai Jiangshan <jiangshanlai@gmail.com>,
+        "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel-team@meta.com, Linux PM list <linux-pm@vger.kernel.org>,
+        DRI Development <dri-devel@lists.freedesktop.org>,
+        linux-rtc@vger.kernel.org,
+        linux-riscv <linux-riscv@lists.infradead.org>,
+        netdev <netdev@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
+        <linux-ide@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Subject: Re: Consider switching to WQ_UNBOUND messages (was: Re: [PATCH v2
+ 6/7] workqueue: Report work funcs that trigger automatic CPU_INTENSIVE
+ mechanism)
+Message-ID: <ZLBIQ550U-PhkuKJ@slm.duckdns.org>
+References: <20230511181931.869812-1-tj@kernel.org>
+ <20230511181931.869812-7-tj@kernel.org>
+ <ZF6WsSVGX3O1d0pL@slm.duckdns.org>
+ <CAMuHMdVCQmh6V182q4g---jvsWiTOP2hBPZKvma6oUN6535LEg@mail.gmail.com>
+ <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
+ <ZK3MBfPS-3-tJgjO@slm.duckdns.org>
+ <20230712080504.GA3100107@hirez.programming.kicks-ass.net>
+ <CAMuHMdUMRS9_nJXp3rrWQrODRQcBQggze0k=0GjSScCknFmmgQ@mail.gmail.com>
+ <20230712122745.GH3100107@hirez.programming.kicks-ass.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <ZK91G1qd8JwFEpIX@makrotopia.org>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20230712122745.GH3100107@hirez.programming.kicks-ass.net>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 13, 2023 at 04:52:59AM +0100, Daniel Golle wrote:
-> Also set card's device fwnode in case it isn't set yet and of_node is
-> present.
-
-How is this "also" when you are only doing 1 thing in the patch?
-
-
+On Wed, Jul 12, 2023 at 02:27:45PM +0200, Peter Zijlstra wrote:
+> On Wed, Jul 12, 2023 at 11:04:16AM +0200, Geert Uytterhoeven wrote:
+> > Hoi Peter,
+> > 
+> > On Wed, Jul 12, 2023 at 10:05 AM Peter Zijlstra <peterz@infradead.org> wrote:
+> > > On Tue, Jul 11, 2023 at 11:39:17AM -1000, Tejun Heo wrote:
+> > > > I wonder whether the right thing to do here is somehow scaling the threshold
+> > > > according to the relative processing power. It's difficult to come up with a
+> > > > threshold which works well across the latest & fastest and really tiny CPUs.
+> > > > I'll think about it some more but if you have some ideas, please feel free
+> > > > to suggest.
+> > >
+> > > We could scale by BogoMIPS I suppose, it's a bogus measurement, as per
+> > > the name, but it does have some relation to how fast the machine is.
+> > 
+> > That's gonna fail miserably on e.g. ARM and RISC-V, where BogoMIPS
+> > depends on some timer frequency.
+> > 
+> > R-Car M2-W with 1.5 GHz Cortex-A15: 40.00 BogoMIPS
+> > R-Car V4H with 1.8 GHz Cortex-A76: 33.33 BogoMIPS
+> > 
+> > while the real slow 48 MHz VexRiscV gets 128 BogoMIPS.
 > 
-> Signed-off-by: Daniel Golle <daniel@makrotopia.org>
+> Hehe, OK, really bogus then. Lets file this idea in the bit-bucket then.
 
-What commit id does this fix?
+I think it can still be useful. On ryzen 3975wx, it's 6989.92, so while it
+may be off by some hundreds of percents, there are still orders of magnitude
+signal range and that should be enough to suppress most spurious warnings.
+I'll post something later today.
 
-Why is this needed?
+Thanks.
 
-Should it go to stable tree?
-
-thanks,
-
-greg k-h
+-- 
+tejun
