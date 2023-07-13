@@ -2,92 +2,130 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 306FFC001DC
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 10:18:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1645EB64DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 11:06:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233149AbjGMKS0 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 06:18:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59338 "EHLO
+        id S233042AbjGMLGI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 07:06:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233139AbjGMKSZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 06:18:25 -0400
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71DB4199E;
-        Thu, 13 Jul 2023 03:18:24 -0700 (PDT)
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-576a9507a9bso26457087b3.1;
-        Thu, 13 Jul 2023 03:18:24 -0700 (PDT)
+        with ESMTP id S233627AbjGMLGH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 07:06:07 -0400
+Received: from mail-yw1-x1131.google.com (mail-yw1-x1131.google.com [IPv6:2607:f8b0:4864:20::1131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4CCB268F
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:04 -0700 (PDT)
+Received: by mail-yw1-x1131.google.com with SMTP id 00721157ae682-5701eaf0d04so4508497b3.2
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 04:06:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1689246363; x=1691838363;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=jQ5zJ3RE3bkqHW8nA39k1wel/wtNjBxuxQZqeE/oUIc=;
+        b=AF4JKuK521m6pB4IPsTQ+GbIWvx6HdZRWVs+C/32ulGesRM1zmk1vbHB4UwV1J6XP3
+         zd7N23Hr2cH+MRs2rq8FOD+J/ndsTIujQp7lzgR+eh48apV2E/O/x7pwTjuNqGypgJYv
+         U5Yl5JQyBCCTKaccyP4uHt8Plaw+gPFq/0Cq4sVbo+RqhBH7Rf9zZb2UQVz7aQvrKV2X
+         BSS/CrJU1XisLVIOnKYIv7DJniMH7Bq7bmHtpy/Oi6UBYSyt9knrS6YZoBjHP6Rxg79w
+         GA+Zi1PUbXLsu2USX7EwENOe1S8HkIPv0yN3dRPKvde1q6/e2pJfiy3vpofdakqwW0kg
+         ZfaQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689243503; x=1691835503;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=m7ompwo27wvX6iXxPl/OxJSZvzIlPxinCpjcU02EQOQ=;
-        b=HouBKH/6aA4mEWHcCTeSVFfv4mp+9RzQB7SI+tdpMqQP7siFcCCpWoNh6oj2wwJBdY
-         NYphx5GLJnVrMBp5yG8bDdG62ZB1yR1Xr5rIfiOxdYD4Hti296xmg869YwWFlwegpO5v
-         2ajHkWmBoVBQAoo5ckWqT+A9MUXMNWr2Dz6T4dbhUNN4kO7rf+6ueo3ntg5NtT03XqNn
-         Anz4ZF2r/bWtIDBXkxVZYj0gI88LPRmmcpUI6bcOiHAkoNGY9n397c0KUspLCRUdzREJ
-         HFT2gXxYW+JxwSiRKxvxbpKcevsaQGK/yxKb6xSy3nx5KeznwbmtezBfer4ubZjpaV74
-         IsOA==
-X-Gm-Message-State: ABy/qLYywPbCt3rWSgca0hJ7E+0NJybmq04BT5cGUQ1MyNoCm6KAKxk1
-        BrzOWhL3d5OiR3uShQBhVE4tyCrW8OL6ZERc
-X-Google-Smtp-Source: APBJJlGOwAR8SN2x497ExdswxUjVJHzlKEzSmkKubf16yJnmhKrx9C2A1RlZ5BAAiB5A8WUPurScNw==
-X-Received: by 2002:a0d:db48:0:b0:56d:2d82:63de with SMTP id d69-20020a0ddb48000000b0056d2d8263demr4543653ywe.3.1689243503398;
-        Thu, 13 Jul 2023 03:18:23 -0700 (PDT)
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com. [209.85.219.175])
-        by smtp.gmail.com with ESMTPSA id t7-20020a815f07000000b005773ca61111sm1697656ywb.42.2023.07.13.03.18.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Jul 2023 03:18:23 -0700 (PDT)
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-ca9804dc6e4so746881276.0;
-        Thu, 13 Jul 2023 03:18:23 -0700 (PDT)
-X-Received: by 2002:a25:c541:0:b0:c75:593f:d4ab with SMTP id
- v62-20020a25c541000000b00c75593fd4abmr5261509ybe.22.1689243503062; Thu, 13
- Jul 2023 03:18:23 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1689246363; x=1691838363;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=jQ5zJ3RE3bkqHW8nA39k1wel/wtNjBxuxQZqeE/oUIc=;
+        b=PdxODH99vjXSKGKDci/r9qTeNRByt248JgjfPl+6o7Odkxqs99S7GRbSr0qPnXQh3j
+         cAHnecwolGoOh/QoeCV6DTnxtY8Gq3ovxzqdulq4rWZQnNHfSU3oq5asTxa42W3iJwQO
+         pPyAz8REFK3h8x/9pBQr7/OVCRkg8ptZtuIE0gsRckRNxD3JBF9ph/JVx13mhaosBY+6
+         5vzjgYSlo0+oxrkWeKhrRZg2fnFn7x4Sk/GLZSwYtbpXbeamoxT7jVpz458v5zESTe57
+         ZC3WwdomL7tCzn6j6ts/itgdCSaSbZ63TfpWFDW152niRYP0Zj1Vc3StSlKk8/fTh2YT
+         ksbA==
+X-Gm-Message-State: ABy/qLbCNYsEWncsy6v5lU0Xtouj9Skxk0aaRDhSrZOl9TNXHS5nMCOP
+        PM/yfCNw8pjbH4VUn14xzgGpVd0iNYnuTgcTnEu3lw==
+X-Google-Smtp-Source: APBJJlG6zZPjAMen3wDVjrgT8dwhjGZ3m8Hcib7Gz1vJ0iqq3SC5gZIHOnTB0izb/nMffmR2rQGrjr1dp1LGr3QanzM=
+X-Received: by 2002:a0d:dfcf:0:b0:570:6a58:d864 with SMTP id
+ i198-20020a0ddfcf000000b005706a58d864mr1098399ywe.51.1689246363583; Thu, 13
+ Jul 2023 04:06:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230713080807.69999-1-frank.li@vivo.com> <20230713080807.69999-57-frank.li@vivo.com>
-In-Reply-To: <20230713080807.69999-57-frank.li@vivo.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 13 Jul 2023 12:18:09 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdVz5Ufrj87jLK3hYysqWHSGE_EfFzh0UCBP573dCV7MWA@mail.gmail.com>
-Message-ID: <CAMuHMdVz5Ufrj87jLK3hYysqWHSGE_EfFzh0UCBP573dCV7MWA@mail.gmail.com>
-Subject: Re: [PATCH 57/58] mmc: renesas_sdhi: Convert to platform remove
- callback returning void
-To:     Yangtao Li <frank.li@vivo.com>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20230622090233.188539-1-harperchen1110@gmail.com>
+In-Reply-To: <20230622090233.188539-1-harperchen1110@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 13 Jul 2023 13:05:27 +0200
+Message-ID: <CAPDyKFqGG4S9GYZhikt--BhSpemke0t3859mX5QN7Rc2ajYwZQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sunplus: fix return value check of mmc_add_host()
+To:     Wei Chen <harperchen1110@gmail.com>
+Cc:     tonyhuang.sunplus@gmail.com, lhjeff911@gmail.com,
+        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 13, 2023 at 10:32 AM Yangtao Li <frank.li@vivo.com> wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
+On Thu, 22 Jun 2023 at 11:02, Wei Chen <harperchen1110@gmail.com> wrote:
 >
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
+> mmc_add_host() may return error, if we ignore its return value,
+> 1. the memory allocated in mmc_alloc_host() will be leaked
+> 2. null-ptr-deref will happen when calling mmc_remove_host()
+> in remove function spmmc_drv_remove() because deleting not
+> added device.
 >
-> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> Fix this by checking the return value of mmc_add_host(). Moreover,
+> I fixed the error handling path of spmmc_drv_probe() to clean up.
+>
+> Signed-off-by: Wei Chen <harperchen1110@gmail.com>
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Applied for next, thanks!
 
-Gr{oetje,eeting}s,
+Kind regards
+Uffe
 
-                        Geert
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> ---
+>  drivers/mmc/host/sunplus-mmc.c | 16 ++++++++++++----
+>  1 file changed, 12 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
+> index db5e0dcdfa7f..a96e90ea6541 100644
+> --- a/drivers/mmc/host/sunplus-mmc.c
+> +++ b/drivers/mmc/host/sunplus-mmc.c
+> @@ -902,7 +902,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+>
+>         ret = mmc_of_parse(mmc);
+>         if (ret)
+> -               goto probe_free_host;
+> +               goto clk_disable;
+>
+>         mmc->ops = &spmmc_ops;
+>         mmc->f_min = SPMMC_MIN_CLK;
+> @@ -911,7 +911,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+>
+>         ret = mmc_regulator_get_supply(mmc);
+>         if (ret)
+> -               goto probe_free_host;
+> +               goto clk_disable;
+>
+>         if (!mmc->ocr_avail)
+>                 mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+> @@ -927,9 +927,17 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+>         host->tuning_info.enable_tuning = 1;
+>         pm_runtime_set_active(&pdev->dev);
+>         pm_runtime_enable(&pdev->dev);
+> -       mmc_add_host(mmc);
+> +       ret = mmc_add_host(mmc);
+> +       if (ret)
+> +               goto pm_disable;
+>
+> -       return ret;
+> +       return 0;
+> +
+> +pm_disable:
+> +       pm_runtime_disable(&pdev->dev);
+> +
+> +clk_disable:
+> +       clk_disable_unprepare(host->clk);
+>
+>  probe_free_host:
+>         if (mmc)
+> --
+> 2.25.1
+>
