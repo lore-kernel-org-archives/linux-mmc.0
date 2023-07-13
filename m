@@ -2,127 +2,93 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AC6AEB64DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 09:14:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C8C2EB64DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 09:31:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232776AbjGMJOb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 05:14:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43460 "EHLO
+        id S233638AbjGMJbZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 05:31:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232184AbjGMJOa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 05:14:30 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F577CF
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 02:14:29 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1qJsOh-00064e-Uu; Thu, 13 Jul 2023 11:14:03 +0200
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1qJsOd-00E5Je-3M; Thu, 13 Jul 2023 11:13:59 +0200
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1qJsOc-004WHz-Ed; Thu, 13 Jul 2023 11:13:58 +0200
-Date:   Thu, 13 Jul 2023 11:13:58 +0200
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Yangtao Li <frank.li@vivo.com>
-Cc:     Andrew Jeffery <andrew@aj.id.au>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Joel Stanley <joel@jms.id.au>, linux-mmc@vger.kernel.org,
-        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 34/58] mmc: sdhci-of-aspeed: Convert to platform remove
- callback returning void
-Message-ID: <20230713091358.p4r42rnhzje4avdj@pengutronix.de>
-References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-34-frank.li@vivo.com>
+        with ESMTP id S233754AbjGMJbO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 05:31:14 -0400
+Received: from mail-wm1-x32c.google.com (mail-wm1-x32c.google.com [IPv6:2a00:1450:4864:20::32c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03D9A12E;
+        Thu, 13 Jul 2023 02:31:13 -0700 (PDT)
+Received: by mail-wm1-x32c.google.com with SMTP id 5b1f17b1804b1-3facc7a4e8aso874855e9.0;
+        Thu, 13 Jul 2023 02:31:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1689240671; x=1689845471;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=AMVwvredptzXoUFxB3OGmhBpfZn/WXyS0E/tACaQWck=;
+        b=Jg8ay29X+g2oz/IgstdBMUaWd89DktJ5HjoUZfTf/gM2L78ulDjm2VKTDE1XHNLGb4
+         dmYsRLbl65oByJxwY+qRisEMn+IIAJDrlux+/AAEg64ozYGUhMXpCL1PtaEH/ILESQiz
+         q661DYSMKov4rSVGT3MzsGdpXeyHxg0u+TC8n7yaP1cf0bjMB1VSiHvgN33IpVRCo0pa
+         V894NUG7RE7+DqEcnn+W9yO0rK81cpi4NVqU+r9vIV3rr7RY0Rs7oFr6IJwYh0CiNB3J
+         0RR6SlHBLlIeZVD0MM9YvYwwhb+Kixr3OWFeg89AW2msILYCQe9tqcIuLlQkM+R8WDAT
+         cNVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689240671; x=1689845471;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=AMVwvredptzXoUFxB3OGmhBpfZn/WXyS0E/tACaQWck=;
+        b=WPrajAsov26KYY5KEWK7kDNY17GJ8YLpGs600l+yF3bgrWq3QMbK2Y6k2wdFe5vBld
+         Qv2jXJHlS9VlrSRRClHc3A3QWAUKMq+82QVqOdrTKFnVZVCAMy025ttrNYL8U4nneVe2
+         A/2rx0umPqx/i67NpALXSDX0iCeQ4B8SVbmchXNjvGkpIrasTlZV9fhQI+I6kLCO7dls
+         YnoyLWVrGUlfJhINw431jUtzBH/1tj/xSTUTPVGFvhhkWM6V69aLUCZBvjBMFdFdfc05
+         jJPkGLa7W7mf5Z23ZEn3AsrZANhmJsqLJg1iUfg9gcOLzOG5CG2H77xoWiPVmYFLlcRx
+         fpGg==
+X-Gm-Message-State: ABy/qLZqtna3C8q1tlbxCSWLuInzRLIbvfN5dOYUcbKC8dmuBspLw5CC
+        Y6UgXWiAo4NC3HfqL4yJpQ7zxCZgeCVHZg==
+X-Google-Smtp-Source: APBJJlFc8P5cTqgGx+6vwzI519/iZI1K8cXMHRp+q1GHSB5/UB+uQuvisLbhZqXr3Hy+jZH4HipMfQ==
+X-Received: by 2002:a05:600c:5192:b0:3fb:3dd9:89c with SMTP id fa18-20020a05600c519200b003fb3dd9089cmr1027160wmb.0.1689240671165;
+        Thu, 13 Jul 2023 02:31:11 -0700 (PDT)
+Received: from [192.168.52.185] (ip-037-201-213-172.um10.pools.vodafone-ip.de. [37.201.213.172])
+        by smtp.gmail.com with ESMTPSA id b7-20020a05600c11c700b003fc015ae1e1sm7385698wmi.3.2023.07.13.02.31.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 13 Jul 2023 02:31:09 -0700 (PDT)
+Message-ID: <8b57db8d-1d3a-883e-eb8f-ddf15f19d823@gmail.com>
+Date:   Thu, 13 Jul 2023 11:31:08 +0200
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="kadj4nzld535btjr"
-Content-Disposition: inline
-In-Reply-To: <20230713080807.69999-34-frank.li@vivo.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Content-Language: en-US
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        brgl@bgdev.pl
+From:   Julien Delbergue <j.delbergue.foss@gmail.com>
+Subject: [PATCH] mmc: davinci: Make SDIO irq truly optional
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+The following error is printed on Logic PD's DA850 EVM:
+  davinci_mmc 1c40000.mmc: error -ENXIO: IRQ index 1 not found
 
---kadj4nzld535btjr
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Depending on the board, the SDIO interrupt may not be present, so use
+the correct function to reflect that and prevent logging an error.
 
-On Thu, Jul 13, 2023 at 04:07:43PM +0800, Yangtao Li wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
->=20
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
->=20
-> Cc: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Yangtao Li <frank.li@vivo.com>
-> ---
->  drivers/mmc/host/sdhci-of-aspeed.c | 15 +++++----------
->  1 file changed, 5 insertions(+), 10 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-=
-of-aspeed.c
-> index 25b4073f698b..42d54532cabe 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -450,22 +450,19 @@ static int aspeed_sdhci_probe(struct platform_devic=
-e *pdev)
->  	return ret;
->  }
-> =20
-> -static int aspeed_sdhci_remove(struct platform_device *pdev)
-> +static void aspeed_sdhci_remove(struct platform_device *pdev)
->  {
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_host *host;
-> -	int dead =3D 0;
-> =20
->  	host =3D platform_get_drvdata(pdev);
->  	pltfm_host =3D sdhci_priv(host);
-> =20
-> -	sdhci_remove_host(host, dead);
-> +	sdhci_remove_host(host, 0);
+Signed-off-by: Julien Delbergue <j.delbergue.foss@gmail.com>
+---
+ drivers/mmc/host/davinci_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Please mention additional cleanups in the commit log (or split them into
-separate patches).
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---kadj4nzld535btjr
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmSvwFUACgkQj4D7WH0S
-/k6wiggAt93FG44I5BusUjcLCaJIc68VoaotrR0JLJCtFzMpQRD3O6i07AtzGcj0
-GTZ7/O9cLM8BXkhMCFCB2qtEF367tZSFsu7M5JfXZLxBQq705O0CLXl7XxM+O/co
-6la8+3RcyhF7DmifGiz41BBJNq+so3v/LlBbLd5BUuBFV4lWwzq2tbNZTXEzFttF
-sE+Tx0t9kkozlelYHVp+NXIp0XDGTpjgt4ROx3rGWJ/dF44n0C7YPpVmLZVM2qxe
-8tEPNxoij66WrTI+APD83psJ71CNc2J3cdDl0BuqmpL49GY1OJGxenufxVmOEjGW
-bCOH1R0Rqn1aiBByQQQ5tD+PfrRNVg==
-=b7ZI
------END PGP SIGNATURE-----
-
---kadj4nzld535btjr--
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 7138dfa065bf..fb686c0d171c 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -1257,7 +1257,7 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
+ 
+ 	host->use_dma = use_dma;
+ 	host->mmc_irq = irq;
+-	host->sdio_irq = platform_get_irq(pdev, 1);
++	host->sdio_irq = platform_get_irq_optional(pdev, 1);
+ 
+ 	if (host->use_dma) {
+ 		ret = davinci_acquire_dma_channels(host);
+-- 
+2.34.1
