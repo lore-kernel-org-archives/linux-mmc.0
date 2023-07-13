@@ -2,93 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B079BEB64DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 08:17:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE70EEB64DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jul 2023 08:31:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234516AbjGMIRw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jul 2023 04:17:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56446 "EHLO
+        id S233992AbjGMIbA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jul 2023 04:31:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38440 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234393AbjGMIRP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 04:17:15 -0400
-Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0202749C7
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 01:11:23 -0700 (PDT)
-Received: by mail-wm1-x333.google.com with SMTP id 5b1f17b1804b1-3fb4146e8ceso3363605e9.0
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jul 2023 01:11:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1689235878; x=1691827878;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=yb8d44+Azm1wudWtAn5xRkTck24UWL//WFKAbn+rUfU=;
-        b=ascpkzLoPhhIgMmmEAEN6xdJt6oqEZdzliI5wE3gQb4AXxeOQldD1FYpjShjUe07oP
-         MR8YE4EfOFtWYedwzGgQ1/0b5AHlXXu10s305WYBf9dGp1xBPkLl3glMb/oYXQG0BMrK
-         4vaQux0LTz/IYS0tKb0ZBhM3WRhxT6n7LMdU1S0eaVj1lGFVIRpZAT17PWXGr1c8iVUz
-         gKktxCb1KqwQ7XQ4qemWMOIwWYjjX1M9P5fqi2KitWoS3YrMUVOJbudikcjnBEDVx7tC
-         vfI4xScCVshFZbi/nZnhVKtMLLCwG3TAQyitknHiE4ap5tuTFyTHJter+X5nk2hPO2uJ
-         fRdA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689235878; x=1691827878;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=yb8d44+Azm1wudWtAn5xRkTck24UWL//WFKAbn+rUfU=;
-        b=RbAGQudHypbnzgJ7OYIn32CT8V9E74ddrL87fbpkxlpb+rpYj4zOK1QMgmR7WzAeZy
-         n5VcMHci1KfCkQKbYMQw5Ne4yZeRxEUbmAAWci1bNYC/knsVz25yHcbok5Ew90kH6PV7
-         RxLzM81oTp5OkFfA2GLDWNdSvt5/6jYj4020B2QknqL2t/qCtkCQQJiAJOvaWYNenDr6
-         1fySntPCAp4cOuzDdLSuGu5Ilhm04D8FpxEVdilqzzpEiSfAW63bGWJCdFv1Ft7Htee2
-         fGDXJJoeB3ilJBCRSraFiNxj4pQh3cIJbid5qE6Dow2w8F7nOlnbRDlV6qt9cOnZZPeI
-         1ApQ==
-X-Gm-Message-State: ABy/qLaDnnlFrldRqGXzfd9V0+mc8CCez9X8HF3ZHjW/WhKS00/1pTRB
-        qTmp/oSyZhx7qiqihm3ZmxSTJlie+USgW6Pok6xJng==
-X-Google-Smtp-Source: APBJJlEdublQH/URkoiDZqIG/L0SD2i5TgW5g+DYrQXBYFGXmThM0kaDm7NuUOXNoZ6JaeW2aokOiw==
-X-Received: by 2002:a05:600c:20f:b0:3f9:b87c:10db with SMTP id 15-20020a05600c020f00b003f9b87c10dbmr694751wmi.3.1689235878121;
-        Thu, 13 Jul 2023 01:11:18 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.223.104])
-        by smtp.gmail.com with ESMTPSA id q4-20020adfcd84000000b0031134bcdacdsm7240492wrj.42.2023.07.13.01.11.16
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Jul 2023 01:11:17 -0700 (PDT)
-Message-ID: <75d2dc5e-4cbf-2519-cdf7-8fde374126ec@linaro.org>
-Date:   Thu, 13 Jul 2023 10:11:15 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH 14/58] mmc: dw_mmc: exynos: Convert to platform remove
- callback returning void
+        with ESMTP id S234323AbjGMIa1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jul 2023 04:30:27 -0400
+Received: from aposti.net (aposti.net [89.234.176.197])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64BEB1BFA;
+        Thu, 13 Jul 2023 01:21:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
+        s=mail; t=1689236444;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=UOOBqUgvHuPo6oWCliTlkcsf1P60C5K6cRYNo3O2Cy0=;
+        b=T6OSn0Rmxqmn8IAK1KKPdZovLHXxMCyyctONW5Yz10JH91m9+bYeynjk+9i23HFvXBCwEk
+        qk59KHO6lU+C23LmKmDog1/9tsFgnGWV2Min5EN/Vg1L7zMYUXCFHOJO0lUxNdLJFNK2Sa
+        Cd2Wsr57KYkZBTaQIWXSwQnRumNugx0=
+Message-ID: <ac10f71996d363b8298c9cded7fda5a98675b5ec.camel@crapouillou.net>
+Subject: Re: [PATCH 03/58] mmc: jz4740: Convert to platform remove callback
+ returning void
+From:   Paul Cercueil <paul@crapouillou.net>
 To:     Yangtao Li <frank.li@vivo.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>
-Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Thu, 13 Jul 2023 10:20:42 +0200
+In-Reply-To: <20230713080807.69999-3-frank.li@vivo.com>
 References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-14-frank.li@vivo.com>
-Content-Language: en-US
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230713080807.69999-14-frank.li@vivo.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+         <20230713080807.69999-3-frank.li@vivo.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/07/2023 10:07, Yangtao Li wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
+Hi,
+
+Le jeudi 13 juillet 2023 =C3=A0 16:07 +0800, Yangtao Li a =C3=A9crit=C2=A0:
+> The .remove() callback for a platform driver returns an int which
+> makes
+> many driver authors wrongly assume it's possible to do error handling
+> by
+> returning an error code. However the value returned is (mostly)
+> ignored
+> and this typically results in resource leaks. To improve here there
+> is a
+> quest to make the remove callback return void. In the first step of
+> this
+> quest all drivers are converted to .remove_new() which already
+> returns
 > void.
-> 
-> Trivially convert this driver from always returning zero in the remove
+>=20
+> Trivially convert this driver from always returning zero in the
+> remove
 > callback to the void returning variant.
+>=20
+> Cc: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
 
-You even copied Uwe's commit msg... Aren't you duplicate his work or is
-it being coordinated?
+Reviewed-by: Paul Cercueil <paul@crapouillou.net>
 
-Best regards,
-Krzysztof
+Cheers,
+-Paul
+
+> ---
+> =C2=A0drivers/mmc/host/jz4740_mmc.c | 6 ++----
+> =C2=A01 file changed, 2 insertions(+), 4 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/jz4740_mmc.c
+> b/drivers/mmc/host/jz4740_mmc.c
+> index 1846a05210e3..f379ce5b582d 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -1163,7 +1163,7 @@ static int jz4740_mmc_probe(struct
+> platform_device* pdev)
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0return ret;
+> =C2=A0}
+> =C2=A0
+> -static int jz4740_mmc_remove(struct platform_device *pdev)
+> +static void jz4740_mmc_remove(struct platform_device *pdev)
+> =C2=A0{
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0struct jz4740_mmc_host *h=
+ost =3D platform_get_drvdata(pdev);
+> =C2=A0
+> @@ -1179,8 +1179,6 @@ static int jz4740_mmc_remove(struct
+> platform_device *pdev)
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0jz4740_mmc_release_dma_channels(host);
+> =C2=A0
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0mmc_free_host(host->mmc);
+> -
+> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0return 0;
+> =C2=A0}
+> =C2=A0
+> =C2=A0static int jz4740_mmc_suspend(struct device *dev)
+> @@ -1198,7 +1196,7 @@ static
+> DEFINE_SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
+> =C2=A0
+> =C2=A0static struct platform_driver jz4740_mmc_driver =3D {
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.probe =3D jz4740_mmc_pro=
+be,
+> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.remove =3D jz4740_mmc_remove,
+> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.remove_new =3D jz4740_mmc_rem=
+ove,
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.driver =3D {
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0.name =3D "jz4740-mmc",
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0.probe_type =3D PROBE_PREFER_ASYNCHRONOUS,
 
