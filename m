@@ -2,95 +2,97 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97C4CEB64DA
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 09:30:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62183EB64DA
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 09:50:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235649AbjGNJaw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Jul 2023 05:30:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54800 "EHLO
+        id S235508AbjGNJuU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Jul 2023 05:50:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235825AbjGNJav (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 05:30:51 -0400
-Received: from mail-yw1-x1131.google.com (mail-yw1-x1131.google.com [IPv6:2607:f8b0:4864:20::1131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1963B2D68
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 02:30:29 -0700 (PDT)
-Received: by mail-yw1-x1131.google.com with SMTP id 00721157ae682-577497ec6c6so16776867b3.2
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 02:30:29 -0700 (PDT)
+        with ESMTP id S236024AbjGNJtr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 05:49:47 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FD4B3A98
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 02:49:41 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-5701eaf0d04so15044567b3.2
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 02:49:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1689327028; x=1691919028;
+        d=linaro.org; s=google; t=1689328180; x=1691920180;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=GH8CMfUmOJpE9gd+H4iroJkL0rclNflkWxyF8IZniXk=;
-        b=qZcg/XDOZUtXrelRLc7puAIjVSD3iBp0U1/g5G206gLcehHc367RZBkCxbaGui+NM6
-         wlBYFarEg+zCiHhyGNYb+r4Isv2bIeBc8YgUUVfq/ZuDC9QHcf3cbNFd+b/tl+i9OQEE
-         dGmTMqc1LwhcB6tqP3GNtm1Jk6yw2af81K04PXRLurAwpdUYIJYQ3Y5Vg1Db6grWKzeT
-         56s6Sn9uNDK1RrUScx4COgDq6MONtsFZ4cHRyfw6Zl/JFdpA287iMt415MxZI0HTfMk5
-         fz1lOiuhxOmqFvIKqTd4AXLY0wa9FEF7NeleZdLDVfXKjV3gXrMMzo5da0kkrrkghZEd
-         OzlQ==
+        bh=pVRCcYI6KU6X2B0QhZtXZV8P/Bq4K8WpsLsWqaeiYCY=;
+        b=gckjdvJRp7dj9kX3fVv1PBsM74FxOMPv7eGl7UHbw1mKUmPJBuLDyZ1FAr4eVA4o1v
+         rBibOLpivXX/JCTEEjCrpLdnqJsMYOsn1FzkSTAV6okwfMODHbpyTON+1Az87iHfHJsY
+         XPB8k6zzS738KAS9EG9otMF5gcnA7YktUltPe2QFwij/5nvM4gtlTxtbEkPrVivZL6wC
+         6xk8Lk8n1YZlmXpMwFurWfGRESRMaQZeX2TtzW0d89Z+/A905x2Pbez3JAAyDBpSVRHK
+         RzCadUngjUi5FP5+Q3XE/Tclu+hIAVzQ5QBTYthZ9FeJ2qP06Oydu9Cl/kJC+5oFmjtF
+         i3vQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689327028; x=1691919028;
+        d=1e100.net; s=20221208; t=1689328180; x=1691920180;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=GH8CMfUmOJpE9gd+H4iroJkL0rclNflkWxyF8IZniXk=;
-        b=DQ8yvriXuymJkXJYvFh2Qa3LkMa+FZuCo0DBTpksb/Vy4xqsaqrWDXY6FSjKnF9u1X
-         p0TM736loSlBj8xvMVA8Pebqjki3uvJfKHXEk0SpuVzHL/GDREYhNZy9Hf4srYFm47gy
-         L+PrxYM1AwnytA34iqoxgdV/VA+0bv12LKjDW3kNt06iF/SgChSNd1q6XsZXmhPY8/6T
-         /JDRkdznlwWS3bsKsXtHtmQS9k67+v6nl78CNxP8tb1p0jHtAkIo8jTbl13ZW6416+uP
-         dB/122sbaMx3xTBHPmoZ4D6LrtOvsIbKO2vzQeU2uDzw06AzMKwdFUWZZqkQ0XrFOPB2
-         mGRQ==
-X-Gm-Message-State: ABy/qLbpZqNAV1J1NSR8Uo4aP/d7S14yESN6U1+nQ692PQUIcdcg8FgU
-        I94+m3N72kVrk0qXcrDIQ0wHWqNck3rwQmt6dZqpg7fRSZFP9CBv
-X-Google-Smtp-Source: APBJJlH8CHYvCTHYliOCwpjaigKPnVgpNrviUs/vl8GFAGDUWHSsn9TtL2Eq7hDSncWlE/IfF9KUyKouChuPJhF+9CE=
-X-Received: by 2002:a81:4757:0:b0:54f:9cd0:990 with SMTP id
- u84-20020a814757000000b0054f9cd00990mr4245400ywa.18.1689327028459; Fri, 14
- Jul 2023 02:30:28 -0700 (PDT)
+        bh=pVRCcYI6KU6X2B0QhZtXZV8P/Bq4K8WpsLsWqaeiYCY=;
+        b=iPru9KL4uTFGj4fSMNxh4IWSSwTR7QGeiY3RMutq3bvWtyEXdacDQ9LJ21iFZd5Onh
+         03AU32PbLBAPWysouUtiwqdsabVJ+OGdi1M0iMvOwRlxj+Bc2bO4dqV5tK84472gkZyG
+         7D0YiNcvCjLVBhEK6bLeimd964z4bTSoRl7BLKsiXs30t2wTOYnKMEcVC54ivJ8Q0E/m
+         wQeArZUeN47SC8ZAVSRJNIWLMFblHUJs1bPSiw2EZG1sucLKGwaMTDWE0K5pylv1oeHC
+         PNnHIp9I0uVX/QwkH8yHsU6QwpqQ042664hTVrhT7LV42DStOXuH0sakjkZ56xnPtt/I
+         mxOw==
+X-Gm-Message-State: ABy/qLa0oecnw8+SVvv/sXs6F8mTHKEzE93++KWq9wvUVSfE45sTd/n4
+        snrWDZ+BNDoH0Ylq5WE8mWrs2YyR8AidGH6eRBmQyrm31PtD8YVE
+X-Google-Smtp-Source: APBJJlFca572uyzN1V9nYArOEOjIGhR/em7iLkLtW0EDTtrrbLU4GkrmLpU04a4+yN1UuV1I+6cTxksR5yc7sbgM3ww=
+X-Received: by 2002:a0d:eec3:0:b0:577:3fb4:f245 with SMTP id
+ x186-20020a0deec3000000b005773fb4f245mr4757025ywe.19.1689328180403; Fri, 14
+ Jul 2023 02:49:40 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230630004533.26644-1-hayashi.kunihiko@socionext.com>
- <CAPDyKFqJU3VwXJJDQPWvNBDz1+gSjYxFJBST3s8mpJoh7-c9-Q@mail.gmail.com> <1d924f9a-54b7-e70b-304c-284e5bf90b59@socionext.com>
-In-Reply-To: <1d924f9a-54b7-e70b-304c-284e5bf90b59@socionext.com>
+References: <8b57db8d-1d3a-883e-eb8f-ddf15f19d823@gmail.com>
+In-Reply-To: <8b57db8d-1d3a-883e-eb8f-ddf15f19d823@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 14 Jul 2023 11:29:52 +0200
-Message-ID: <CAPDyKFrp0pOr4xr_zEC8bheL61Oys5FCKzFV3Q1XFoXi7Gi7jg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-f-sdh30: Replace with sdhci_pltfm
-To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Fri, 14 Jul 2023 11:49:04 +0200
+Message-ID: <CAPDyKFpUV=Ko5J1nQOgZGYJUuifMFGYe_xwBJtK3zkFNFQ=GRA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: davinci: Make SDIO irq truly optional
+To:     Julien Delbergue <j.delbergue.foss@gmail.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        brgl@bgdev.pl
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 13 Jul 2023 at 13:38, Kunihiko Hayashi
-<hayashi.kunihiko@socionext.com> wrote:
+On Thu, 13 Jul 2023 at 11:31, Julien Delbergue
+<j.delbergue.foss@gmail.com> wrote:
 >
-> Hi Ulf,
+> The following error is printed on Logic PD's DA850 EVM:
+>   davinci_mmc 1c40000.mmc: error -ENXIO: IRQ index 1 not found
 >
-> On 2023/07/13 20:06, Ulf Hansson wrote:
-> > On Fri, 30 Jun 2023 at 02:45, Kunihiko Hayashi
-> > <hayashi.kunihiko@socionext.com> wrote:
-> >>
-> >> Even if sdhci_pltfm_pmops is specified for PM, this driver doesn't apply
-> >> sdhci_pltfm, so the structure is not correctly referenced in PM functions.
-> >> This applies sdhci_pltfm to this driver to fix this issue.
-> >>
-> >> - Call sdhci_pltfm_init() instead of sdhci_alloc_host() and
-> >>    other functions that covered by sdhci_pltfm.
-> >> - Move ops and quirks to sdhci_pltfm_data
-> >> - Replace sdhci_priv() with own private function sdhci_f_sdh30_priv().
-> >>
-> >> Fixes: 87a507459f49 ("mmc: sdhci: host: add new f_sdh30")
-> >> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-> >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> > Applied for next, thanks!
-> >
-> > Or maybe this should go for fixes and have a stable tag too?
+> Depending on the board, the SDIO interrupt may not be present, so use
+> the correct function to reflect that and prevent logging an error.
 >
-> Thank you for applying!
-> I think this should be applied to the stable branch if possible.
+> Signed-off-by: Julien Delbergue <j.delbergue.foss@gmail.com>
 
-Alright, I have moved the patch to fixes and added a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/davinci_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 7138dfa065bf..fb686c0d171c 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -1257,7 +1257,7 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
+>
+>         host->use_dma = use_dma;
+>         host->mmc_irq = irq;
+> -       host->sdio_irq = platform_get_irq(pdev, 1);
+> +       host->sdio_irq = platform_get_irq_optional(pdev, 1);
+>
+>         if (host->use_dma) {
+>                 ret = davinci_acquire_dma_channels(host);
+> --
+> 2.34.1
