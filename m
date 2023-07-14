@@ -2,118 +2,95 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0372EB64DA
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 07:51:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97C4CEB64DA
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 09:30:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234966AbjGNHvf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Jul 2023 03:51:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45438 "EHLO
+        id S235649AbjGNJaw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Jul 2023 05:30:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54800 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233722AbjGNHve (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 03:51:34 -0400
-Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DC65213F;
-        Fri, 14 Jul 2023 00:51:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1689321094; x=1720857094;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=cmxZE3r+8v7kGkShku53lm2dagOvRA1bZuZRZS6YJQE=;
-  b=n57g7i1LrrMaJ+uisfSDuM85vvPRGbPCVULYAT9gEYCV6nuKSKRPt4Vn
-   ftznR37h8CnryBXsFXFwlKPX6ILQ4rcVWBULMXwsWIAI9nHNkicYkVbmD
-   Ak4TDMQP95BpY4UhP5txvKaPk3dacywccdIJpGS0wSg4O6NqtbNb7z6/l
-   tZ/GoNclhWK5WQJiUk2wl7DZPj0t11UsI26wxgdj90/J61tU1ruitNcLC
-   R+jSOxre64rDK0K8BGY3GiKej5eSRlq8F+M92/XgH1GZlPahNNv+mS/qJ
-   cL0q4on91OvNwm2KcDaW3jFUnUFVJrZPqPHClZmoRVZztX7XyLccpYBdI
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10770"; a="431587985"
-X-IronPort-AV: E=Sophos;i="6.01,204,1684825200"; 
-   d="scan'208";a="431587985"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2023 00:51:33 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10770"; a="896326532"
-X-IronPort-AV: E=Sophos;i="6.01,204,1684825200"; 
-   d="scan'208";a="896326532"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.49.109])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2023 00:51:31 -0700
-Message-ID: <a1d7dcce-99c4-7e6e-7041-749d16fe0c95@intel.com>
-Date:   Fri, 14 Jul 2023 10:51:27 +0300
+        with ESMTP id S235825AbjGNJav (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 05:30:51 -0400
+Received: from mail-yw1-x1131.google.com (mail-yw1-x1131.google.com [IPv6:2607:f8b0:4864:20::1131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1963B2D68
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 02:30:29 -0700 (PDT)
+Received: by mail-yw1-x1131.google.com with SMTP id 00721157ae682-577497ec6c6so16776867b3.2
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 02:30:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1689327028; x=1691919028;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=GH8CMfUmOJpE9gd+H4iroJkL0rclNflkWxyF8IZniXk=;
+        b=qZcg/XDOZUtXrelRLc7puAIjVSD3iBp0U1/g5G206gLcehHc367RZBkCxbaGui+NM6
+         wlBYFarEg+zCiHhyGNYb+r4Isv2bIeBc8YgUUVfq/ZuDC9QHcf3cbNFd+b/tl+i9OQEE
+         dGmTMqc1LwhcB6tqP3GNtm1Jk6yw2af81K04PXRLurAwpdUYIJYQ3Y5Vg1Db6grWKzeT
+         56s6Sn9uNDK1RrUScx4COgDq6MONtsFZ4cHRyfw6Zl/JFdpA287iMt415MxZI0HTfMk5
+         fz1lOiuhxOmqFvIKqTd4AXLY0wa9FEF7NeleZdLDVfXKjV3gXrMMzo5da0kkrrkghZEd
+         OzlQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689327028; x=1691919028;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=GH8CMfUmOJpE9gd+H4iroJkL0rclNflkWxyF8IZniXk=;
+        b=DQ8yvriXuymJkXJYvFh2Qa3LkMa+FZuCo0DBTpksb/Vy4xqsaqrWDXY6FSjKnF9u1X
+         p0TM736loSlBj8xvMVA8Pebqjki3uvJfKHXEk0SpuVzHL/GDREYhNZy9Hf4srYFm47gy
+         L+PrxYM1AwnytA34iqoxgdV/VA+0bv12LKjDW3kNt06iF/SgChSNd1q6XsZXmhPY8/6T
+         /JDRkdznlwWS3bsKsXtHtmQS9k67+v6nl78CNxP8tb1p0jHtAkIo8jTbl13ZW6416+uP
+         dB/122sbaMx3xTBHPmoZ4D6LrtOvsIbKO2vzQeU2uDzw06AzMKwdFUWZZqkQ0XrFOPB2
+         mGRQ==
+X-Gm-Message-State: ABy/qLbpZqNAV1J1NSR8Uo4aP/d7S14yESN6U1+nQ692PQUIcdcg8FgU
+        I94+m3N72kVrk0qXcrDIQ0wHWqNck3rwQmt6dZqpg7fRSZFP9CBv
+X-Google-Smtp-Source: APBJJlH8CHYvCTHYliOCwpjaigKPnVgpNrviUs/vl8GFAGDUWHSsn9TtL2Eq7hDSncWlE/IfF9KUyKouChuPJhF+9CE=
+X-Received: by 2002:a81:4757:0:b0:54f:9cd0:990 with SMTP id
+ u84-20020a814757000000b0054f9cd00990mr4245400ywa.18.1689327028459; Fri, 14
+ Jul 2023 02:30:28 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.13.0
-Subject: Re: [PATCH 26/58] mmc: f-sdh30: Convert to platform remove callback
- returning void
-Content-Language: en-US
-To:     Yangtao Li <frank.li@vivo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-26-frank.li@vivo.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230713080807.69999-26-frank.li@vivo.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20230630004533.26644-1-hayashi.kunihiko@socionext.com>
+ <CAPDyKFqJU3VwXJJDQPWvNBDz1+gSjYxFJBST3s8mpJoh7-c9-Q@mail.gmail.com> <1d924f9a-54b7-e70b-304c-284e5bf90b59@socionext.com>
+In-Reply-To: <1d924f9a-54b7-e70b-304c-284e5bf90b59@socionext.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 14 Jul 2023 11:29:52 +0200
+Message-ID: <CAPDyKFrp0pOr4xr_zEC8bheL61Oys5FCKzFV3Q1XFoXi7Gi7jg@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-f-sdh30: Replace with sdhci_pltfm
+To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/07/23 11:07, Yangtao Li wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
-> 
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
-> 
-> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+On Thu, 13 Jul 2023 at 13:38, Kunihiko Hayashi
+<hayashi.kunihiko@socionext.com> wrote:
+>
+> Hi Ulf,
+>
+> On 2023/07/13 20:06, Ulf Hansson wrote:
+> > On Fri, 30 Jun 2023 at 02:45, Kunihiko Hayashi
+> > <hayashi.kunihiko@socionext.com> wrote:
+> >>
+> >> Even if sdhci_pltfm_pmops is specified for PM, this driver doesn't apply
+> >> sdhci_pltfm, so the structure is not correctly referenced in PM functions.
+> >> This applies sdhci_pltfm to this driver to fix this issue.
+> >>
+> >> - Call sdhci_pltfm_init() instead of sdhci_alloc_host() and
+> >>    other functions that covered by sdhci_pltfm.
+> >> - Move ops and quirks to sdhci_pltfm_data
+> >> - Replace sdhci_priv() with own private function sdhci_f_sdh30_priv().
+> >>
+> >> Fixes: 87a507459f49 ("mmc: sdhci: host: add new f_sdh30")
+> >> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+> >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> >
+> > Applied for next, thanks!
+> >
+> > Or maybe this should go for fixes and have a stable tag too?
+>
+> Thank you for applying!
+> I think this should be applied to the stable branch if possible.
 
-Doesn't apply anymore.  You can check against the "next" branch in:
+Alright, I have moved the patch to fixes and added a stable tag, thanks!
 
-	git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
-
-> ---
->  drivers/mmc/host/sdhci_f_sdh30.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-> index a202a69a4b08..6016e183c03c 100644
-> --- a/drivers/mmc/host/sdhci_f_sdh30.c
-> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
-> @@ -208,7 +208,7 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
->  	return ret;
->  }
->  
-> -static int sdhci_f_sdh30_remove(struct platform_device *pdev)
-> +static void sdhci_f_sdh30_remove(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host = platform_get_drvdata(pdev);
->  	struct f_sdhost_priv *priv = sdhci_priv(host);
-> @@ -222,8 +222,6 @@ static int sdhci_f_sdh30_remove(struct platform_device *pdev)
->  
->  	sdhci_free_host(host);
->  	platform_set_drvdata(pdev, NULL);
-> -
-> -	return 0;
->  }
->  
->  #ifdef CONFIG_OF
-> @@ -252,7 +250,7 @@ static struct platform_driver sdhci_f_sdh30_driver = {
->  		.pm	= &sdhci_pltfm_pmops,
->  	},
->  	.probe	= sdhci_f_sdh30_probe,
-> -	.remove	= sdhci_f_sdh30_remove,
-> +	.remove_new = sdhci_f_sdh30_remove,
->  };
->  
->  module_platform_driver(sdhci_f_sdh30_driver);
-
+Kind regards
+Uffe
