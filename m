@@ -2,106 +2,530 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 224A1C001DC
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 14:24:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ACE8C001DC
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 17:50:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234562AbjGNOYU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Jul 2023 10:24:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40468 "EHLO
+        id S236505AbjGNRuL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Jul 2023 13:50:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235460AbjGNOYT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 10:24:19 -0400
-X-Greylist: delayed 512 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 14 Jul 2023 07:24:17 PDT
-Received: from rere.qmqm.pl (rere.qmqm.pl [91.227.64.183])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D851BC9;
-        Fri, 14 Jul 2023 07:24:16 -0700 (PDT)
-Received: from remote.user (localhost [127.0.0.1])
-        by rere.qmqm.pl (Postfix) with ESMTPSA id 4R2YRK42Myz4c;
-        Fri, 14 Jul 2023 16:15:41 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-        t=1689344141; bh=DNdQ06e/S5icm2HaN8am9uGS6XfPvtLWqg9ojI4q4Ak=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=LbhWDbNyTyPmB+DGbsm5bAcE5l8efEKuxaQZVNFhZFInOvOicnbR+dMyZN8wsZ86y
-         47W5sN+McTXZU0LXWgKpl4ZVxC9CCanCDsEf/r536UAz8ptDmHx89JrZvTqr2dhSCa
-         u8qBpE3c8XQqavfNBz/wWDOE5wjtB/nZeP9jjQXqiWak9CYJ56s/p/3SW4WLMRtMuw
-         khzBksaZqHMzU3x+/rTdmpu4gOjTCZOeLHCwhhjzegeuxP9uESl90DjoR5urc2RjFY
-         XMiltF81n79WVVLH8HevP3dMfYF6PkURt02zTbXFyG4706mX6WOe4A3ApczC0S76X6
-         Qx6dInIYvfkcw==
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 0.103.8 at mail
-Date:   Fri, 14 Jul 2023 16:15:40 +0200
-From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-To:     Yangtao Li <frank.li@vivo.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Uwe =?iso-8859-2?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 06/58] mmc: cb710: Convert to platform remove callback
- returning void
-Message-ID: <ZLFYjM/+SLlHwWQF@qmqm.qmqm.pl>
-References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-6-frank.li@vivo.com>
+        with ESMTP id S235605AbjGNRtx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 13:49:53 -0400
+Received: from mail-io1-f51.google.com (mail-io1-f51.google.com [209.85.166.51])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FF303C33;
+        Fri, 14 Jul 2023 10:49:15 -0700 (PDT)
+Received: by mail-io1-f51.google.com with SMTP id ca18e2360f4ac-7869bcee569so86551939f.0;
+        Fri, 14 Jul 2023 10:49:15 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689356890; x=1691948890;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=yEiwehMBCAZF25WQAidvI6nJEofNL4h++Xy3RvOZetY=;
+        b=EHqaRchm8eKDXPV21qz0eNPfsLKHLFvjrt09ijVrPuJr9Qq8fgP4Ih1zSZ/rWcLOXf
+         7QNaiSykKd8+RfHLLbi9TYFW062huQW+MpzE1Ne1iqws4ZX13yP2A2BtZN7BIs1JQK5a
+         MX7JKRAt5UR0ycp1PubdjjjiPemTR/SfCsCvJVPjizl6VB8ZLEOfBXh+dfzH6vVz5jyc
+         NW3NH/ZsNOFLR0PnQBR7p3WdJ5wcfNjtFi7mkqoJeRkfAJTp4NedqoHr78b8Fsccvtm5
+         4a+ouOWsy8C2EQVs6z5SkiSj6byt9uQlGpRG63nAK2L/YPFm+59INdQOeFSQr84gmh20
+         t6Qw==
+X-Gm-Message-State: ABy/qLZeU9WqkJwY9oCU/GFYMSeiwJDoL+nzlJngaqomngoH6V754YJb
+        /tLWKelN50uDmFgy+uj5dg==
+X-Google-Smtp-Source: APBJJlFx5HZwcm9CuImhW98f/K+POh6l7VAn2OsStBIlwr2eSGLHagf0/h4F9QeokVeRWADp+1GOgA==
+X-Received: by 2002:a05:6602:2186:b0:780:d338:5373 with SMTP id b6-20020a056602218600b00780d3385373mr5440097iob.15.1689356890382;
+        Fri, 14 Jul 2023 10:48:10 -0700 (PDT)
+Received: from robh_at_kernel.org ([64.188.179.250])
+        by smtp.gmail.com with ESMTPSA id dm26-20020a0566023b9a00b0077a1d1029fcsm2848606iob.28.2023.07.14.10.48.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Jul 2023 10:48:09 -0700 (PDT)
+Received: (nullmailer pid 4060378 invoked by uid 1000);
+        Fri, 14 Jul 2023 17:47:48 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        Robert Richter <rric@kernel.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Michal Simek <michal.simek@amd.com>,
+        Eugen Hristev <eugen.hristev@collabora.com>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Daniel Machon <daniel.machon@microchip.com>,
+        UNGLinuxDriver@microchip.com,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Ben Dooks <ben-linux@fluff.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Baolin Wang <baolin.wang@linux.alibaba.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
+        Masami Hiramatsu <mhiramat@kernel.org>
+Cc:     devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-amlogic@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        linux-actions@lists.infradead.org,
+        linux-renesas-soc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-tegra@vger.kernel.org
+Subject: [PATCH] mmc: Explicitly include correct DT includes
+Date:   Fri, 14 Jul 2023 11:47:43 -0600
+Message-Id: <20230714174745.4060260-1-robh@kernel.org>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230713080807.69999-6-frank.li@vivo.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 13, 2023 at 04:07:15PM +0800, Yangtao Li wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
-> 
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
-> 
-> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+The DT of_device.h and of_platform.h date back to the separate
+of_platform_bus_type before it as merged into the regular platform bus.
+As part of that merge prepping Arm DT support 13 years ago, they
+"temporarily" include each other. They also include platform_device.h
+and of.h. As a result, there's a pretty much random mix of those include
+files used throughout the tree. In order to detangle these headers and
+replace the implicit includes with struct declarations, users need to
+explicitly include the correct includes.
 
-Acked-by: Micha³ Miros³aw <mirq-linux@rere.qmqm.pl>
+Signed-off-by: Rob Herring <robh@kernel.org>
+---
+ drivers/mmc/host/atmel-mci.c                  | 1 -
+ drivers/mmc/host/cavium-octeon.c              | 2 ++
+ drivers/mmc/host/cavium-thunderx.c            | 1 +
+ drivers/mmc/host/davinci_mmc.c                | 1 -
+ drivers/mmc/host/meson-gx-mmc.c               | 2 +-
+ drivers/mmc/host/mtk-sd.c                     | 4 +---
+ drivers/mmc/host/mxcmmc.c                     | 1 -
+ drivers/mmc/host/mxs-mmc.c                    | 1 -
+ drivers/mmc/host/owl-mmc.c                    | 3 ++-
+ drivers/mmc/host/pxamci.c                     | 1 -
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 3 ++-
+ drivers/mmc/host/sdhci-bcm-kona.c             | 1 -
+ drivers/mmc/host/sdhci-cadence.c              | 2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c            | 2 +-
+ drivers/mmc/host/sdhci-iproc.c                | 2 +-
+ drivers/mmc/host/sdhci-msm.c                  | 2 +-
+ drivers/mmc/host/sdhci-of-arasan.c            | 3 ++-
+ drivers/mmc/host/sdhci-of-at91.c              | 2 +-
+ drivers/mmc/host/sdhci-of-dwcmshc.c           | 2 +-
+ drivers/mmc/host/sdhci-of-sparx5.c            | 2 +-
+ drivers/mmc/host/sdhci-omap.c                 | 1 -
+ drivers/mmc/host/sdhci-pxav2.c                | 1 -
+ drivers/mmc/host/sdhci-s3c.c                  | 1 -
+ drivers/mmc/host/sdhci-sprd.c                 | 1 -
+ drivers/mmc/host/sdhci-tegra.c                | 1 -
+ drivers/mmc/host/sh_mmcif.c                   | 1 -
+ drivers/mmc/host/uniphier-sd.c                | 1 -
+ drivers/mmc/host/wmt-sdmmc.c                  | 1 -
+ 29 files changed, 20 insertions(+), 29 deletions(-)
 
-> ---
->  drivers/mmc/host/cb710-mmc.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
-> index 6d623b2681c3..0aec33b88bef 100644
-> --- a/drivers/mmc/host/cb710-mmc.c
-> +++ b/drivers/mmc/host/cb710-mmc.c
-> @@ -745,7 +745,7 @@ static int cb710_mmc_init(struct platform_device *pdev)
->  	return err;
->  }
->  
-> -static int cb710_mmc_exit(struct platform_device *pdev)
-> +static void cb710_mmc_exit(struct platform_device *pdev)
->  {
->  	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
->  	struct mmc_host *mmc = cb710_slot_to_mmc(slot);
-> @@ -766,13 +766,12 @@ static int cb710_mmc_exit(struct platform_device *pdev)
->  	tasklet_kill(&reader->finish_req_tasklet);
->  
->  	mmc_free_host(mmc);
-> -	return 0;
->  }
->  
->  static struct platform_driver cb710_mmc_driver = {
->  	.driver.name = "cb710-mmc",
->  	.probe = cb710_mmc_init,
-> -	.remove = cb710_mmc_exit,
-> +	.remove_new = cb710_mmc_exit,
->  #ifdef CONFIG_PM
->  	.suspend = cb710_mmc_suspend,
->  	.resume = cb710_mmc_resume,
-> -- 
-> 2.39.0
-> 
-
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index dd18440a90c5..2fdf352b3d86 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -18,7 +18,6 @@
+ #include <linux/ioport.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/of_gpio.h>
+ #include <linux/platform_device.h>
+ #include <linux/scatterlist.h>
+diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-octeon.c
+index 12dca91a8ef6..02429f7afb42 100644
+--- a/drivers/mmc/host/cavium-octeon.c
++++ b/drivers/mmc/host/cavium-octeon.c
+@@ -13,7 +13,9 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
++#include <linux/of.h>
+ #include <linux/of_platform.h>
++#include <linux/platform_device.h>
+ #include <asm/octeon/octeon.h>
+ #include "cavium.h"
+ 
+diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
+index 202b1d6da678..2e2ff984f0b3 100644
+--- a/drivers/mmc/host/cavium-thunderx.c
++++ b/drivers/mmc/host/cavium-thunderx.c
+@@ -14,6 +14,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_platform.h>
++#include <linux/platform_device.h>
+ #include <linux/pci.h>
+ #include "cavium.h"
+ 
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 7138dfa065bf..17a137f85cbe 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -21,7 +21,6 @@
+ #include <linux/dma-mapping.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/interrupt.h>
+ 
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index ee9a25b900ae..0669993108ec 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -11,7 +11,7 @@
+ #include <linux/delay.h>
+ #include <linux/device.h>
+ #include <linux/iopoll.h>
+-#include <linux/of_device.h>
++#include <linux/of.h>
+ #include <linux/platform_device.h>
+ #include <linux/ioport.h>
+ #include <linux/dma-mapping.h>
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 02403ff99e0d..6c68c642ef61 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -12,9 +12,7 @@
+ #include <linux/iopoll.h>
+ #include <linux/ioport.h>
+ #include <linux/irq.h>
+-#include <linux/of_address.h>
+-#include <linux/of_device.h>
+-#include <linux/of_irq.h>
++#include <linux/of.h>
+ #include <linux/of_gpio.h>
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 668f865f3efb..226a10202d25 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -31,7 +31,6 @@
+ #include <linux/dmaengine.h>
+ #include <linux/types.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/of_dma.h>
+ #include <linux/mmc/slot-gpio.h>
+ 
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 8c3655d3be96..951c6c48b4f7 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -11,7 +11,6 @@
+ #include <linux/init.h>
+ #include <linux/ioport.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/platform_device.h>
+ #include <linux/delay.h>
+ #include <linux/interrupt.h>
+diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+index 1bf22b08b373..62d2993573d0 100644
+--- a/drivers/mmc/host/owl-mmc.c
++++ b/drivers/mmc/host/owl-mmc.c
+@@ -16,8 +16,9 @@
+ #include <linux/interrupt.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/slot-gpio.h>
++#include <linux/mod_devicetable.h>
+ #include <linux/module.h>
+-#include <linux/of_platform.h>
++#include <linux/platform_device.h>
+ #include <linux/reset.h>
+ #include <linux/spinlock.h>
+ 
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 2a988f942b6c..d274e4433fc1 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -30,7 +30,6 @@
+ #include <linux/gpio/consumer.h>
+ #include <linux/gfp.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/soc/pxa/cpu.h>
+ 
+ #include <linux/sizes.h>
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 9ab813903b2c..4cc5bcb3213a 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -15,7 +15,8 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/module.h>
+-#include <linux/of_device.h>
++#include <linux/of.h>
++#include <linux/platform_device.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+ #include <linux/sys_soc.h>
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index b559ad38b667..452982e670d2 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -15,7 +15,8 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/module.h>
+-#include <linux/of_device.h>
++#include <linux/of.h>
++#include <linux/platform_device.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+ #include <linux/sys_soc.h>
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 6a93a54fe067..ef1fb383e1e7 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -11,7 +11,6 @@
+ #include <linux/clk.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/mmc/slot-gpio.h>
+ 
+ #include "sdhci-pltfm.h"
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index d2f625054689..25d9849ef0d1 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -11,7 +11,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
++#include <linux/platform_device.h>
+ #include <linux/reset.h>
+ 
+ #include "sdhci-pltfm.h"
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index eebf94604a7f..e767fe058023 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -22,7 +22,7 @@
+ #include <linux/mmc/sdio.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
++#include <linux/platform_device.h>
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/pm_runtime.h>
+ #include "sdhci-cqhci.h"
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+index 86eb0045515e..6a93b1ee0b30 100644
+--- a/drivers/mmc/host/sdhci-iproc.c
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -10,7 +10,7 @@
+ #include <linux/module.h>
+ #include <linux/mmc/host.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
++#include <linux/platform_device.h>
+ #include "sdhci-pltfm.h"
+ 
+ struct sdhci_iproc_data {
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 1c935b5bafe1..c0ce187e740a 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -6,7 +6,6 @@
+  */
+ 
+ #include <linux/module.h>
+-#include <linux/of_device.h>
+ #include <linux/delay.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/pm_runtime.h>
+@@ -15,6 +14,7 @@
+ #include <linux/iopoll.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/interconnect.h>
++#include <linux/of.h>
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/reset.h>
+ 
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 294dd605fd2b..abc3e49fbda5 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -18,7 +18,8 @@
+ #include <linux/clk-provider.h>
+ #include <linux/mfd/syscon.h>
+ #include <linux/module.h>
+-#include <linux/of_device.h>
++#include <linux/of.h>
++#include <linux/platform_device.h>
+ #include <linux/phy/phy.h>
+ #include <linux/regmap.h>
+ #include <linux/reset.h>
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index cd0134580a90..808307a211f2 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -17,7 +17,7 @@
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
++#include <linux/platform_device.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+ 
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index e68cd87998c8..55e1e2d0494d 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -14,7 +14,7 @@
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
++#include <linux/platform_device.h>
+ #include <linux/reset.h>
+ #include <linux/sizes.h>
+ 
+diff --git a/drivers/mmc/host/sdhci-of-sparx5.c b/drivers/mmc/host/sdhci-of-sparx5.c
+index 28e4ee69e100..2e983cf49bc6 100644
+--- a/drivers/mmc/host/sdhci-of-sparx5.c
++++ b/drivers/mmc/host/sdhci-of-sparx5.c
+@@ -13,9 +13,9 @@
+ #include <linux/delay.h>
+ #include <linux/module.h>
+ #include <linux/regmap.h>
+-#include <linux/of_device.h>
+ #include <linux/mfd/syscon.h>
+ #include <linux/dma-mapping.h>
++#include <linux/of.h>
+ 
+ #include "sdhci-pltfm.h"
+ 
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 8ed9256b83da..2593e3fbd0d9 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -11,7 +11,6 @@
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/of_irq.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_runtime.h>
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index 91aca8f8d6ef..86b60b0447b3 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -19,7 +19,6 @@
+ #include <linux/platform_data/pxa_sdhci.h>
+ #include <linux/slab.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/mmc/sdio.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/pinctrl/consumer.h>
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 504015e84308..6245fb4584fe 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -20,7 +20,6 @@
+ #include <linux/gpio.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/of_gpio.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 7f4ee2e12735..a21d6524d7ca 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -11,7 +11,6 @@
+ #include <linux/iopoll.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/of_gpio.h>
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index bff084f178c9..1e1eac953691 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -19,7 +19,6 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
+-#include <linux/of_device.h>
+ #include <linux/of.h>
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 5cf53348372a..838dab179724 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -46,7 +46,6 @@
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/mutex.h>
+-#include <linux/of_device.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_data/sh_mmcif.h>
+ #include <linux/platform_device.h>
+diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+index 61acd69fac0e..c1400d616fff 100644
+--- a/drivers/mmc/host/uniphier-sd.c
++++ b/drivers/mmc/host/uniphier-sd.c
+@@ -13,7 +13,6 @@
+ #include <linux/mmc/host.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_device.h>
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+ #include <linux/regmap.h>
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 68525d900046..f860f363be56 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -21,7 +21,6 @@
+ #include <linux/of.h>
+ #include <linux/of_address.h>
+ #include <linux/of_irq.h>
+-#include <linux/of_device.h>
+ 
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
 -- 
-Micha³ Miros³aw
+2.40.1
+
