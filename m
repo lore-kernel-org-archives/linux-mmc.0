@@ -2,79 +2,67 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B8D2C001B0
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 07:49:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0372EB64DA
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 07:51:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233196AbjGNHtX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Jul 2023 03:49:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43764 "EHLO
+        id S234966AbjGNHvf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Jul 2023 03:51:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235456AbjGNHtX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 03:49:23 -0400
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC9B330DE;
-        Fri, 14 Jul 2023 00:49:21 -0700 (PDT)
+        with ESMTP id S233722AbjGNHve (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 03:51:34 -0400
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DC65213F;
+        Fri, 14 Jul 2023 00:51:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1689320961; x=1720856961;
+  t=1689321094; x=1720857094;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=eNoePpXjcb/oYVmhAC+Kl4gcff6YTEiE2U+fyQudph0=;
-  b=fwbNVG2vuW43pzEmG6y8EwobKmhVFi1kt5h9Xwi2rwcBy70I28rXKOnB
-   fDF2ahjgA6tFS8SK20gUETxoWsSTw1ET8LKk55PHrnou4mW3Vn5gBQCWT
-   WribVP7r4lxKlDmkmlVCB8UjmziQLgvi+Sq/+sex2Qpa8S/p6lHaGhT8T
-   badLvlMEBbGtQ6D2/0ZgHuyuAD8hxkLoZIOLB7NucK5v02W/70bC54Fq9
-   QEbOtCP98n84dnBUfWZ708iK1l6SHPenh8g7V9YaotNzKwyM1qusOEePn
-   sn8BHPSLX/WedtRcbLGSbe02IuVwgcFF/cYUMLLn2NTjpUNGE8amWD9z7
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10770"; a="345731503"
+  bh=cmxZE3r+8v7kGkShku53lm2dagOvRA1bZuZRZS6YJQE=;
+  b=n57g7i1LrrMaJ+uisfSDuM85vvPRGbPCVULYAT9gEYCV6nuKSKRPt4Vn
+   ftznR37h8CnryBXsFXFwlKPX6ILQ4rcVWBULMXwsWIAI9nHNkicYkVbmD
+   Ak4TDMQP95BpY4UhP5txvKaPk3dacywccdIJpGS0wSg4O6NqtbNb7z6/l
+   tZ/GoNclhWK5WQJiUk2wl7DZPj0t11UsI26wxgdj90/J61tU1ruitNcLC
+   R+jSOxre64rDK0K8BGY3GiKej5eSRlq8F+M92/XgH1GZlPahNNv+mS/qJ
+   cL0q4on91OvNwm2KcDaW3jFUnUFVJrZPqPHClZmoRVZztX7XyLccpYBdI
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10770"; a="431587985"
 X-IronPort-AV: E=Sophos;i="6.01,204,1684825200"; 
-   d="scan'208";a="345731503"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2023 00:49:21 -0700
+   d="scan'208";a="431587985"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2023 00:51:33 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10770"; a="835943602"
+X-IronPort-AV: E=McAfee;i="6600,9927,10770"; a="896326532"
 X-IronPort-AV: E=Sophos;i="6.01,204,1684825200"; 
-   d="scan'208";a="835943602"
+   d="scan'208";a="896326532"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.49.109])
-  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2023 00:49:17 -0700
-Message-ID: <5d120109-cbec-f086-c442-f3bd3fd1ebe7@intel.com>
-Date:   Fri, 14 Jul 2023 10:49:12 +0300
+  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2023 00:51:31 -0700
+Message-ID: <a1d7dcce-99c4-7e6e-7041-749d16fe0c95@intel.com>
+Date:   Fri, 14 Jul 2023 10:51:27 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.13.0
-Subject: Re: [PATCH 58/58] mmc: Convert to platform remove callback returning
- void
+Subject: Re: [PATCH 26/58] mmc: f-sdh30: Convert to platform remove callback
+ returning void
 Content-Language: en-US
 To:     Yangtao Li <frank.li@vivo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Kamal Dasu <kamal.dasu@broadcom.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        Steen Hegelund <Steen.Hegelund@microchip.com>,
-        Daniel Machon <daniel.machon@microchip.com>,
-        UNGLinuxDriver@microchip.com
+        Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-58-frank.li@vivo.com>
+ <20230713080807.69999-26-frank.li@vivo.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230713080807.69999-58-frank.li@vivo.com>
+In-Reply-To: <20230713080807.69999-26-frank.li@vivo.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/07/23 11:08, Yangtao Li wrote:
+On 13/07/23 11:07, Yangtao Li wrote:
 > The .remove() callback for a platform driver returns an int which makes
 > many driver authors wrongly assume it's possible to do error handling by
 > returning an error code. However the value returned is (mostly) ignored
@@ -88,173 +76,44 @@ On 13/07/23 11:08, Yangtao Li wrote:
 > 
 > Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
 > Signed-off-by: Yangtao Li <frank.li@vivo.com>
+
+Doesn't apply anymore.  You can check against the "next" branch in:
+
+	git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+
 > ---
->  drivers/mmc/host/sdhci-bcm-kona.c  | 2 +-
->  drivers/mmc/host/sdhci-brcmstb.c   | 2 +-
->  drivers/mmc/host/sdhci-cadence.c   | 2 +-
->  drivers/mmc/host/sdhci-dove.c      | 2 +-
->  drivers/mmc/host/sdhci-iproc.c     | 2 +-
->  drivers/mmc/host/sdhci-of-esdhc.c  | 2 +-
->  drivers/mmc/host/sdhci-of-hlwd.c   | 2 +-
->  drivers/mmc/host/sdhci-of-sparx5.c | 2 +-
->  drivers/mmc/host/sdhci-pltfm.c     | 4 +---
->  drivers/mmc/host/sdhci-pltfm.h     | 2 +-
->  drivers/mmc/host/sdhci-pxav2.c     | 2 +-
-
-Looks like drivers/mmc/host/sdhci-npcm.c was missed
-
->  11 files changed, 11 insertions(+), 13 deletions(-)
+>  drivers/mmc/host/sdhci_f_sdh30.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 6a93a54fe067..2e3736603853 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -319,7 +319,7 @@ static struct platform_driver sdhci_bcm_kona_driver = {
->  		.of_match_table = sdhci_bcm_kona_of_match,
->  	},
->  	.probe		= sdhci_bcm_kona_probe,
-> -	.remove		= sdhci_pltfm_unregister,
-> +	.remove_new	= sdhci_pltfm_unregister,
->  };
->  module_platform_driver(sdhci_bcm_kona_driver);
->  
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index 4c22337199cf..a2b6d8f2eeb6 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -430,7 +430,7 @@ static struct platform_driver sdhci_brcmstb_driver = {
->  		.of_match_table = of_match_ptr(sdhci_brcm_of_match),
->  	},
->  	.probe		= sdhci_brcmstb_probe,
-> -	.remove		= sdhci_pltfm_unregister,
-> +	.remove_new	= sdhci_pltfm_unregister,
->  	.shutdown	= sdhci_brcmstb_shutdown,
->  };
->  
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index d2f625054689..1702a499b36a 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -617,7 +617,7 @@ static struct platform_driver sdhci_cdns_driver = {
->  		.of_match_table = sdhci_cdns_match,
->  	},
->  	.probe = sdhci_cdns_probe,
-> -	.remove = sdhci_pltfm_unregister,
-> +	.remove_new = sdhci_pltfm_unregister,
->  };
->  module_platform_driver(sdhci_cdns_driver);
->  
-> diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-> index 5e5bf82e5976..75335dbf223c 100644
-> --- a/drivers/mmc/host/sdhci-dove.c
-> +++ b/drivers/mmc/host/sdhci-dove.c
-> @@ -110,7 +110,7 @@ static struct platform_driver sdhci_dove_driver = {
->  		.of_match_table = sdhci_dove_of_match_table,
->  	},
->  	.probe		= sdhci_dove_probe,
-> -	.remove		= sdhci_pltfm_unregister,
-> +	.remove_new	= sdhci_pltfm_unregister,
->  };
->  
->  module_platform_driver(sdhci_dove_driver);
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 86eb0045515e..0dbebcecd8fc 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -432,7 +432,7 @@ static struct platform_driver sdhci_iproc_driver = {
->  		.pm = &sdhci_pltfm_pmops,
->  	},
->  	.probe = sdhci_iproc_probe,
-> -	.remove = sdhci_pltfm_unregister,
-> +	.remove_new = sdhci_pltfm_unregister,
->  	.shutdown = sdhci_iproc_shutdown,
->  };
->  module_platform_driver(sdhci_iproc_driver);
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 48ca1cf15b19..5072b59f6165 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -1521,7 +1521,7 @@ static struct platform_driver sdhci_esdhc_driver = {
->  		.pm = &esdhc_of_dev_pm_ops,
->  	},
->  	.probe = sdhci_esdhc_probe,
-> -	.remove = sdhci_pltfm_unregister,
-> +	.remove_new = sdhci_pltfm_unregister,
->  };
->  
->  module_platform_driver(sdhci_esdhc_driver);
-> diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
-> index 12675797b296..cba3ba48e9dc 100644
-> --- a/drivers/mmc/host/sdhci-of-hlwd.c
-> +++ b/drivers/mmc/host/sdhci-of-hlwd.c
-> @@ -85,7 +85,7 @@ static struct platform_driver sdhci_hlwd_driver = {
->  		.pm = &sdhci_pltfm_pmops,
->  	},
->  	.probe = sdhci_hlwd_probe,
-> -	.remove = sdhci_pltfm_unregister,
-> +	.remove_new = sdhci_pltfm_unregister,
->  };
->  
->  module_platform_driver(sdhci_hlwd_driver);
-> diff --git a/drivers/mmc/host/sdhci-of-sparx5.c b/drivers/mmc/host/sdhci-of-sparx5.c
-> index 28e4ee69e100..26aaab068e00 100644
-> --- a/drivers/mmc/host/sdhci-of-sparx5.c
-> +++ b/drivers/mmc/host/sdhci-of-sparx5.c
-> @@ -260,7 +260,7 @@ static struct platform_driver sdhci_sparx5_driver = {
->  		.pm = &sdhci_pltfm_pmops,
->  	},
->  	.probe = sdhci_sparx5_probe,
-> -	.remove = sdhci_pltfm_unregister,
-> +	.remove_new = sdhci_pltfm_unregister,
->  };
->  
->  module_platform_driver(sdhci_sparx5_driver);
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index 673e750a8490..72d07b49b0a3 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -187,7 +187,7 @@ int sdhci_pltfm_register(struct platform_device *pdev,
+> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+> index a202a69a4b08..6016e183c03c 100644
+> --- a/drivers/mmc/host/sdhci_f_sdh30.c
+> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
+> @@ -208,7 +208,7 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+>  	return ret;
 >  }
->  EXPORT_SYMBOL_GPL(sdhci_pltfm_register);
 >  
-> -int sdhci_pltfm_unregister(struct platform_device *pdev)
-> +void sdhci_pltfm_unregister(struct platform_device *pdev)
+> -static int sdhci_f_sdh30_remove(struct platform_device *pdev)
+> +static void sdhci_f_sdh30_remove(struct platform_device *pdev)
 >  {
 >  	struct sdhci_host *host = platform_get_drvdata(pdev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -196,8 +196,6 @@ int sdhci_pltfm_unregister(struct platform_device *pdev)
->  	sdhci_remove_host(host, dead);
->  	clk_disable_unprepare(pltfm_host->clk);
->  	sdhci_pltfm_free(pdev);
+>  	struct f_sdhost_priv *priv = sdhci_priv(host);
+> @@ -222,8 +222,6 @@ static int sdhci_f_sdh30_remove(struct platform_device *pdev)
+>  
+>  	sdhci_free_host(host);
+>  	platform_set_drvdata(pdev, NULL);
 > -
 > -	return 0;
 >  }
->  EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
 >  
-> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-> index 9bd717ff784b..6e6a443dafd9 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.h
-> +++ b/drivers/mmc/host/sdhci-pltfm.h
-> @@ -102,7 +102,7 @@ extern void sdhci_pltfm_free(struct platform_device *pdev);
->  extern int sdhci_pltfm_register(struct platform_device *pdev,
->  				const struct sdhci_pltfm_data *pdata,
->  				size_t priv_size);
-> -extern int sdhci_pltfm_unregister(struct platform_device *pdev);
-> +extern void sdhci_pltfm_unregister(struct platform_device *pdev);
->  
->  extern unsigned int sdhci_pltfm_clk_get_max_clock(struct sdhci_host *host);
->  
-> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-> index 91aca8f8d6ef..1c1e763ce209 100644
-> --- a/drivers/mmc/host/sdhci-pxav2.c
-> +++ b/drivers/mmc/host/sdhci-pxav2.c
-> @@ -359,7 +359,7 @@ static struct platform_driver sdhci_pxav2_driver = {
+>  #ifdef CONFIG_OF
+> @@ -252,7 +250,7 @@ static struct platform_driver sdhci_f_sdh30_driver = {
 >  		.pm	= &sdhci_pltfm_pmops,
 >  	},
->  	.probe		= sdhci_pxav2_probe,
-> -	.remove		= sdhci_pltfm_unregister,
-> +	.remove_new	= sdhci_pltfm_unregister,
+>  	.probe	= sdhci_f_sdh30_probe,
+> -	.remove	= sdhci_f_sdh30_remove,
+> +	.remove_new = sdhci_f_sdh30_remove,
 >  };
 >  
->  module_platform_driver(sdhci_pxav2_driver);
+>  module_platform_driver(sdhci_f_sdh30_driver);
 
