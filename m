@@ -2,83 +2,90 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C711EB64DA
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 10:10:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D3C4EB64DA
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jul 2023 10:13:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236005AbjGNKKp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Jul 2023 06:10:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55308 "EHLO
+        id S231584AbjGNKNN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Jul 2023 06:13:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57342 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234549AbjGNKKo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 06:10:44 -0400
-Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D46ED2120
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 03:10:42 -0700 (PDT)
-Received: by mail-wm1-x334.google.com with SMTP id 5b1f17b1804b1-3fc02a92dcfso15672835e9.0
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 03:10:42 -0700 (PDT)
+        with ESMTP id S236083AbjGNKND (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jul 2023 06:13:03 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D5DD198A
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 03:13:02 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id 2adb3069b0e04-4f9fdb0ef35so3021116e87.0
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jul 2023 03:13:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1689329441; x=1691921441;
+        d=broadcom.com; s=google; t=1689329581; x=1691921581;
         h=in-reply-to:from:references:cc:to:subject:user-agent:mime-version
          :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=klCGl69NK7P6YEo155YSb24KHDMij1Sc968tk+LcHO8=;
-        b=ELuqV7/3/Iioti/AxDBE6Odhqrnw83fWF9AXvumCI6qgJrRt8270HP+IMRdeuNnQWn
-         3KWHQXlscnRRJvLFL7AK/f419AMQTR7u/rg/CNUVtcks4bVFmMBXtWy85k92O0fwBetv
-         ImTsGqaLKsI+gwLbgcsspsMhT/93JSP2BI+M8=
+        bh=FOcEhJwNeYTh6j6IdDxuKNZ9PbkAhj1feYEaKqzEl4E=;
+        b=NphoeNR0Mp47+tFZzzUP0sH4e0lqmpp0wtiSldJY+8mangiJ37DRyZoWbiZL3KH/RF
+         blEru4jQEZ4TD2AOMjnIxHRLfOITb5+CPZ1xHlNQR3//qGdVS2k+eHp7vXU6Rq0kINAR
+         BaDKQnDLz1lSxa46SzDqqu1qeFPSv/OYuf5/Q=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689329441; x=1691921441;
+        d=1e100.net; s=20221208; t=1689329581; x=1691921581;
         h=in-reply-to:from:references:cc:to:subject:user-agent:mime-version
          :date:message-id:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=klCGl69NK7P6YEo155YSb24KHDMij1Sc968tk+LcHO8=;
-        b=AzstjCDG7mBN6rOnxRi+UNyTOVpEgKpqC61dGYmaLvtUwcEQ3c235m7ErpLZE8JNID
-         NYmn7MS6b9a5OEDYo5yHCaLrSskLHmzR3NIrZlKXiBWEEPqy7YFt394jOIrBFi2GJPE6
-         NblhFhpuyO2knI/Xy2J/ddDEequ8EnH8/Ihi9n0o0T8xI3iGxZht57UU1RgwpvOPvd7C
-         UnZQKEO54hANUo49k6bhkP+ZkEHN/IJOgoCj2Lg4p3PDxlBTckfUrZf+c2UDP6mAYuMm
-         jL6ikqgyDzll0Ts//usSPg7w/vCS8EMQ7NQ3nAI2FogHMereI0SQgRn5fnYmrHcuYw9E
-         ZnVA==
-X-Gm-Message-State: ABy/qLZgnwONemR47OD6+8YBrMBWKiAqqTyHexFZXCec614ZH77HTPX/
-        J5yv86P0XlTlD1Co051x5c0pow==
-X-Google-Smtp-Source: APBJJlGN/8LyjJTM0rcEq7VEJWeAPt5L2IFdXE0Y9+o6XeUHN/GkpUMsCMCQNgnUXGSnQn1lwSRkZw==
-X-Received: by 2002:adf:f30d:0:b0:314:a3f:9c17 with SMTP id i13-20020adff30d000000b003140a3f9c17mr3879603wro.42.1689329441057;
-        Fri, 14 Jul 2023 03:10:41 -0700 (PDT)
+        bh=FOcEhJwNeYTh6j6IdDxuKNZ9PbkAhj1feYEaKqzEl4E=;
+        b=KH/McFq9lVck7flkUHOMlHiicWbtOiy48M9uJNsELQOmMMHRnYpTN3EJKemZoxYAyY
+         s9qfG2N1OitG1ij2A8pOJ+xsxFkwZ1Q5wnjyYeb26H/D9WC9JYHUsET+3YFL4GnRVsp8
+         RJTzSVuuqEKatVQIRVhq3VpWL/PHsG/uIrZumzG4Tg+xr79LkV30abxh6CviTt7KkBIv
+         rPnV097uRjM7FBobHidmCDipTVg5/Ztby0SxTKLIZKx3lKa3GxdDyA3A6l2jMJ4EYZxb
+         vDWPbM/3mIhBYBZbxu81PEYZN/eNPv4fTDi+vM3OcIy5dWIwgW1aAyALssc1IRM+RVyJ
+         hxUA==
+X-Gm-Message-State: ABy/qLaFkTxv7wc79fw/yloLQi9+1/MLlGZPd1pnMhJrzNMD6M9tmyxn
+        +H/fDCgOGW5QVlzsc1Yyf/j/PQ==
+X-Google-Smtp-Source: APBJJlHSARJN82zwWe8SwKkS5PJbyR9h3Hale/Lq909Sk3YumTUZ1pkTQnoPncShNDbxSy31uXmmyA==
+X-Received: by 2002:a19:8c50:0:b0:4f7:55e4:4665 with SMTP id i16-20020a198c50000000b004f755e44665mr2795467lfj.56.1689329580784;
+        Fri, 14 Jul 2023 03:13:00 -0700 (PDT)
 Received: from [192.168.47.133] ([37.171.213.33])
-        by smtp.gmail.com with ESMTPSA id y3-20020a056000108300b003141f96ed36sm10404959wrw.0.2023.07.14.03.10.38
+        by smtp.gmail.com with ESMTPSA id f17-20020a7bcd11000000b003fc02218d6csm1060438wmj.25.2023.07.14.03.12.58
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 14 Jul 2023 03:10:39 -0700 (PDT)
-Message-ID: <b7f8f970-1926-d239-d762-bb760935c4dd@broadcom.com>
-Date:   Fri, 14 Jul 2023 12:10:37 +0200
+        Fri, 14 Jul 2023 03:12:59 -0700 (PDT)
+Message-ID: <71bd579a-e0db-111d-b371-b6d7a37be999@broadcom.com>
+Date:   Fri, 14 Jul 2023 12:12:54 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
  Thunderbird/102.12.0
-Subject: Re: [PATCH 02/58] mmc: bcm2835: Convert to platform remove callback
- returning void
+Subject: Re: [PATCH 58/58] mmc: Convert to platform remove callback returning
+ void
 To:     Yangtao Li <frank.li@vivo.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Ray Jui <rjui@broadcom.com>,
         Scott Branden <sbranden@broadcom.com>,
         Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Kamal Dasu <kamal.dasu@broadcom.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Daniel Machon <daniel.machon@microchip.com>,
+        UNGLinuxDriver@microchip.com
 Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
 References: <20230713080807.69999-1-frank.li@vivo.com>
- <20230713080807.69999-2-frank.li@vivo.com>
+ <20230713080807.69999-58-frank.li@vivo.com>
 From:   Florian Fainelli <florian.fainelli@broadcom.com>
-In-Reply-To: <20230713080807.69999-2-frank.li@vivo.com>
+In-Reply-To: <20230713080807.69999-58-frank.li@vivo.com>
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="00000000000043303706006fa92e"
+        boundary="000000000000988df006006fb1b6"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---00000000000043303706006fa92e
+--000000000000988df006006fb1b6
 Content-Language: en-US
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
 
 
-On 7/13/2023 10:07 AM, Yangtao Li wrote:
+On 7/13/2023 10:08 AM, Yangtao Li wrote:
 > The .remove() callback for a platform driver returns an int which makes
 > many driver authors wrongly assume it's possible to do error handling by
 > returning an error code. However the value returned is (mostly) ignored
@@ -92,12 +99,16 @@ On 7/13/2023 10:07 AM, Yangtao Li wrote:
 > 
 > Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
 > Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> ---
+>   drivers/mmc/host/sdhci-bcm-kona.c  | 2 +-
+>   drivers/mmc/host/sdhci-brcmstb.c   | 2 +-
 
-Reviewed-by: Florian Fainelli <florian.fainelli@broadcom.com>
+Acked-by: Florian Fainelli <florian.fainelli@broadcom.com> # Broadcom 
+drivers
 -- 
 Florian
 
---00000000000043303706006fa92e
+--000000000000988df006006fb1b6
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -168,14 +179,14 @@ kNGap1mHJ+JngGzZCz+dDiHRQKGpXLxkHX0BvEDZLW6LGOJ83ImrW38YMOo3ZYnCYNHA9qDOakiw
 NxADYvcRBA0ySL6sZpj8BIIhWiXiuusuBmt2Mak2eEv0xDbovE6Z6hYyl/ZnRadbgK/ClgbY3w+O
 AfUXEZ0xggJtMIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52
 LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgwT
-/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIK+L42XKpLK0Nfcc
-Kx9wP/UszhQZOuecnbZq3js0n7OIMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
-AQkFMQ8XDTIzMDcxNDEwMTA0MVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
+/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEINFZzvH0Ov2FXwZX
+nDBisEkjH20uq9xRnfuBgzfkzxCcMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
+AQkFMQ8XDTIzMDcxNDEwMTMwMVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
 AWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEH
-MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQBdziKTKwCLHl0VJ/ZniJn0gIVBJCDydNxz
-QwuUEB+OtVl0otalhIM1cl0V6srrHlciQunWPl1HExOkfcP5Q8RgGVzlpwh8WzUefymXQJfretbH
-OxJER/8c8UV0J5NqjC6AQl09YCb5lTfB9dH4y/S9OIsGgamBKfhGevxq66F9e1QwYnphTzsyJX9U
-uulSXJfw9pLSZUJQqFlqxpKB1Cg0E0vyCYRpWnYqCej119Yxj2haolBb3Qryja1YVkQt2nw+X94e
-ZnrDw6l+pKoBuawY2VJrmwPKFM1JS6kA2KwrgMfAotqJeOzLLy0QjC1LNGTrY4mTE0rnG2FFl53s
-JGLo
---00000000000043303706006fa92e--
+MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQBUg8oUUWF9IvMwdw1BW3pp/pvGJ6FTYHWN
+rhHSfVZNIPCUKCf1zbYobRDfRQrxrawUce+59O257QNWet0tsM8DF7EPOq5TDleeInHrogX/f0U2
+RenoU1JewsNqAZXGGnyUWu+nrv8Fe5esmlFOMCfZ/5DT2Z0VvR28A/oinpC0x4WdjQgrUr7A/mL/
+jP7TxZ0y8fNLCri8YjUyvc5f0k0SaTzHpEMhcB1NZXmnVgY1LLYDujTMD1oX29+BemwVe8kh7cdC
+hLCfN2AjHafU/rNv4bkUObf8HDOC2aGfvR3ndisD1EOSboi9F/XQGWAC0CQduYyFakemeYQpHPrM
+/Jxh
+--000000000000988df006006fb1b6--
