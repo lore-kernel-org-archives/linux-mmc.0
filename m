@@ -2,182 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 301D1EB64DC
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 18:31:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5141C001DC
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 20:04:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229724AbjGQSbl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jul 2023 14:31:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35388 "EHLO
+        id S230050AbjGQUE6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jul 2023 16:04:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52594 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229667AbjGQSbj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 14:31:39 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26C0D99;
-        Mon, 17 Jul 2023 11:31:39 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id AE62C611E6;
-        Mon, 17 Jul 2023 18:31:38 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82AE2C433C8;
-        Mon, 17 Jul 2023 18:31:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1689618698;
-        bh=b7VM9RFc+h/oFjhTeBRHaiyt8yHybUrRocsHJcphS54=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Rn72TW03cSRsln9AXMHMWipd4EqEo6NwepcNesH3upaT3nmUArCGqrpOElyY1iuu+
-         CZvXX9fSLSpMNOimNUkd4z6fYYSplkBuhfyb+uk8ZEv9CLKwIiHNOlybq5Gt+NyzAU
-         H+05FJk95QpylT91faGNnKxZhM03w3zxJRkuvF9RXdvb31jdyOzUozgHjjxpCTWo6a
-         KawJKQ6LJUlDwWZuzD616w0r8viaC3X7nYWMTc+Ix9ddZYH/pFIzsbbSA6h7XQVrKj
-         Pi296i/AsFebNCNdpItPLpjRK1DvqT8fNIB9raHyem4ACyocu1P4YWoVJoARAMv19+
-         RMLRZsPPok8DA==
-Date:   Mon, 17 Jul 2023 19:31:33 +0100
-From:   Conor Dooley <conor@kernel.org>
-To:     Piyush Malgujar <pmalgujar@marvell.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        p.zabel@pengutronix.de, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        yamada.masahiro@socionext.com, devicetree@vger.kernel.org,
-        jannadurai@marvell.com, cchavva@marvell.com
-Subject: Re: [PATCH v4 5/6] dt-bindings: mmc: sdhci-cadence: SD6 support
-Message-ID: <20230717-dirtiness-pardon-a3fbc0925202@spud>
-References: <20230717125146.16791-1-pmalgujar@marvell.com>
- <20230717125146.16791-6-pmalgujar@marvell.com>
+        with ESMTP id S231580AbjGQUE5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 16:04:57 -0400
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F0BDCC
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Jul 2023 13:04:56 -0700 (PDT)
+Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-51de9c2bc77so6641730a12.3
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Jul 2023 13:04:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1689624294; x=1692216294;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=I76Sas49+3M9ekKP/7ht8hPC9v5gon7krQLvrpuLnTI=;
+        b=kD7qJO0Wnw3ipxc7bweaS63c++QVlzCsrQekZjmx28RC5UFVbFKnY0c/RROj2sVvNR
+         53/FmNf7Cb7kMcnEYupN6pZ/Q4qFx/k6BXG4BOG/y4viI6ZgAwRbR2ityeeUl4RyhSAE
+         pUv+hITUmkk91bXJV37Szmpd5Z6HY7mUvZ1Uk7zTKY6IpHWR5e9Jx9kexgcwKPSooywv
+         osyFo5qIMeZ1QC5mbqrw8aEoCMV0X3Aus2fx++qGBs/RYmCNKfZ4AKsGt35Hcqm7gwLz
+         xGnswyhZJ0vxtz5P6yGwt6y4KHxgtsNipgpZMrfFeTRkifM5Itr0oPxMZAKMx9VOBVGo
+         DJqw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689624294; x=1692216294;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=I76Sas49+3M9ekKP/7ht8hPC9v5gon7krQLvrpuLnTI=;
+        b=SUJkqUJ5nK99w301g9vR3DkWYezDBD/ZyBE0EoQNunXxNJ4w3zNvwK+RErX36BfiCH
+         HeREzsMAG19dsYgjHNHs7mFc+hu2R5/Ecgo37tfuBSMC23OMpyGl48mf9viYdhvJh5vM
+         aDMOwbc6OHXTHSUMfL9lM8VaQrhoVHfW39+xt8+1Dyh1LPIVPWlGkMrvnYBWSaqhFNQn
+         bNKjWDPQcWJCZMchRgBBKSN9hpkkBrZ6b5SCf4696HMGZj1g8QUj/Le03fztEcOXnl96
+         VbX7kkO2/IDZbquWVrUNNZeKmHr22+WOzDasT8Mj4ArpiK0CiyGkRMA+dJdBV6SDa6hy
+         QM5g==
+X-Gm-Message-State: ABy/qLZJrr6Q5WYwllPIDN+hA/t4K6VfBJ+Lkxd78DNogmRQIGLj6Aeh
+        L1CPfEFypIPKCyc/xybsBPdcDg==
+X-Google-Smtp-Source: APBJJlHuA9Bvh2MuZ0h6VH93okT5lM95OFaGlwZCdxHMq0phGKHw+Qu4iLZsc4btdeov/x3+8WXB0w==
+X-Received: by 2002:a05:6402:541:b0:516:81d3:2627 with SMTP id i1-20020a056402054100b0051681d32627mr15167008edx.0.1689624294498;
+        Mon, 17 Jul 2023 13:04:54 -0700 (PDT)
+Received: from [192.168.1.20] ([178.197.223.104])
+        by smtp.gmail.com with ESMTPSA id i19-20020aa7dd13000000b0051de3c6c5e5sm63518edv.94.2023.07.17.13.04.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 17 Jul 2023 13:04:53 -0700 (PDT)
+Message-ID: <b236b46f-d6de-21f1-d535-680518a0b945@linaro.org>
+Date:   Mon, 17 Jul 2023 22:04:50 +0200
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="fYdzJ3cGoqsmeGH1"
-Content-Disposition: inline
-In-Reply-To: <20230717125146.16791-6-pmalgujar@marvell.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH v4 3/6] mmc: sdhci-cadence: SD6 controller support
+Content-Language: en-US
+To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, p.zabel@pengutronix.de, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        yamada.masahiro@socionext.com, devicetree@vger.kernel.org
+Cc:     jannadurai@marvell.com, cchavva@marvell.com,
+        Dhananjay Kangude <dkangude@cadence.com>
+References: <20230717125146.16791-1-pmalgujar@marvell.com>
+ <20230717125146.16791-4-pmalgujar@marvell.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230717125146.16791-4-pmalgujar@marvell.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 17/07/2023 14:51, Piyush Malgujar wrote:
+> From: Dhananjay Kangude <dkangude@cadence.com>
+> 
+> Add support for SD6 controller for Marvell CN10k SoCs and related ops
+> along with support for HS400 and HS400ES emmc modes.
+> Updated HS200 tuning values and support to read tune configuration
+> from FDT and support to configure and read host side drive strength,
+> slew from device tree.
+> 
 
---fYdzJ3cGoqsmeGH1
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+...
 
-On Mon, Jul 17, 2023 at 05:51:45AM -0700, Piyush Malgujar wrote:
-> From: Jayanthi Annadurai <jannadurai@marvell.com>
->=20
-> Add support for SD6 controller on Marvell CN10K series SOCs. The
-> existing sd4hc is not compatible with the SD6 changes.
->=20
-> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
-> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
-> ---
->  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 52 ++++++++++++++++---
->  1 file changed, 45 insertions(+), 7 deletions(-)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Docu=
-mentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index 6c40611405a08717520f4ce3a78a9cb8dd9aac69..51f44c00a50505684c7c7c49c=
-59c1ebd8d85d5d0 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -4,19 +4,23 @@
->  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
-> =20
-> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
-> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
-> =20
->  maintainers:
->    - Masahiro Yamada <yamada.masahiro@socionext.com>
-> =20
->  properties:
->    compatible:
-> -    items:
-> -      - enum:
-> -          - amd,pensando-elba-sd4hc
-> -          - microchip,mpfs-sd4hc
-> -          - socionext,uniphier-sd4hc
-> -      - const: cdns,sd4hc
-> +    oneOf:
-> +      - items:
-> +          - enum:
-> +              - amd,pensando-elba-sd4hc
-> +              - microchip,mpfs-sd4hc
-> +              - socionext,uniphier-sd4hc
-> +          - const: cdns,sd4hc
-> +
-> +      - items:
-> +          - const: marvell,cdns-sd6hc
+>  static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+>  					     struct mmc_ios *ios)
+>  {
+> @@ -518,8 +1752,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_cdns_priv *priv;
+>  	struct clk *clk;
+> +	bool sd6_ctrl;
+>  	int ret;
+>  	struct device *dev = &pdev->dev;
+> +	sd6_ctrl = of_device_is_compatible(dev->of_node, "marvell,cdns-sd6hc");
 
-This seems like a strange compatible. Why have you not gone for
-something like:
-compatible =3D "marvell,$socname-sd6hc", "cdns,sd6hc";
-?
-
-> =20
->    reg:
->      minItems: 1
-> @@ -139,6 +143,40 @@ allOf:
->          reg:
->            maxItems: 1
-> =20
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: marvell,cdns-sd6hc
-> +
-> +    then:
-> +      properties:
-> +        marvell,iocell-input-delay-ps:
-> +          description: Delay in ps across the input IO cells
-
-Are all of these things marvell specific, or would other (future) sd6hc
-users need these properties too?
-
-Thanks,
-Conor.
+Don't sprinkle compatibles in probe. You have match data for quirks and
+flags.
 
 > +
-> +        marvell,iocell-output-delay-ps:
-> +          description: Delay in ps across the output IO cells
-> +
-> +        marvell,delay-element-ps:
-> +          description: Delay element in ps used for calculating phy timi=
-ngs
-> +
-> +        marvell,read-dqs-cmd-delay-ps:
-> +          description: Command delay used in HS200 tuning
-> +
-> +        marvell,tune-val-start-ps:
-> +          description: Staring value of data delay used in HS200 tuning
-> +
-> +        marvell,tune-val-step-ps:
-> +          description: Incremental value of data delay used in HS200 tun=
-ing
-> +
-> +      required:
-> +        - marvell,iocell-input-delay-ps
-> +        - marvell,iocell-output-delay-ps
-> +        - marvell,delay-element-ps
-> +        - marvell,read-dqs-cmd-delay-ps
-> +        - marvell,tune-val-start-ps
-> +        - marvell,tune-val-step-ps
-> +
->  unevaluatedProperties: false
-> =20
->  examples:
-> --=20
-> 2.17.1
->=20
+>  	static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
+>  
 
---fYdzJ3cGoqsmeGH1
-Content-Type: application/pgp-signature; name="signature.asc"
+Best regards,
+Krzysztof
 
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZLWJBQAKCRB4tDGHoIJi
-0mfaAQDTApvAlStJn77X/J3xS3TnixYN7HlFW7aSinffcJPbewD/W3IbUWlgUyon
-NU+xfPE81NTFNwtq7yiaCuUTfSndmAY=
-=WM19
------END PGP SIGNATURE-----
-
---fYdzJ3cGoqsmeGH1--
