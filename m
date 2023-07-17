@@ -2,157 +2,182 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 786C6C001DC
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 17:46:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 301D1EB64DC
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 18:31:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230526AbjGQRq5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jul 2023 13:46:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57298 "EHLO
+        id S229724AbjGQSbl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jul 2023 14:31:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229940AbjGQRq4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 13:46:56 -0400
+        with ESMTP id S229667AbjGQSbj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 14:31:39 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AAA70189;
-        Mon, 17 Jul 2023 10:46:55 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26C0D99;
+        Mon, 17 Jul 2023 11:31:39 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3F146611A5;
-        Mon, 17 Jul 2023 17:46:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9FCE7C433CB;
-        Mon, 17 Jul 2023 17:46:54 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id AE62C611E6;
+        Mon, 17 Jul 2023 18:31:38 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82AE2C433C8;
+        Mon, 17 Jul 2023 18:31:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1689616014;
-        bh=aTPuf0Zd8OpbwoKQZ65jJYeSg9DTodI+njCE2/27PY8=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=fBMcwhUNcM0V4autvJVgcKQnhFbO7brLAEesnhEzKxTvyYBZsqjwc+cojOZv8v9UC
-         C1fFtr+snZnoCQBuIjCC+uqbL1txzClbWIi6/Eqa6m+4RGip54iRnMoz47f6udL2oG
-         QgKwwUVcwaxROldmVq5NNT3ndThlYFno/GItwYo30sXRqpZ3vtfi8rmQeHUZPSZsw8
-         nBomaa0tVX346pR41e0rqob0iI2Yo27n4Om1YAlYa9235UCWZuLT6xOi/p3K5HKm5U
-         yiAaqVLPCkUZKmnHgR84LUxhUnkrP+Q15V/RcRNk1rR8kEkcW0/GgWyopYhnj8btQ/
-         HW5N4J95bcJrg==
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-992b27e1c55so627045266b.2;
-        Mon, 17 Jul 2023 10:46:54 -0700 (PDT)
-X-Gm-Message-State: ABy/qLYHsdcjkilx0BN7/t1n4Ml1FGgPfUozaQr7DJMRdOQG1eYr+Xez
-        pIFJhaGijYNxuSNKXyBT+K794cSdGc3vqW3RdQ==
-X-Google-Smtp-Source: APBJJlEaii1O/P4FM3AIiFrxrm+c2/2j2dMof6/ew372YwZ9YuuOJ20F60zHYXA1FfdAlxaKv4uhiryEoY4fwMAMSwI=
-X-Received: by 2002:a2e:7a1a:0:b0:2b5:bc27:d6eb with SMTP id
- v26-20020a2e7a1a000000b002b5bc27d6ebmr8861286ljc.8.1689615991907; Mon, 17 Jul
- 2023 10:46:31 -0700 (PDT)
+        s=k20201202; t=1689618698;
+        bh=b7VM9RFc+h/oFjhTeBRHaiyt8yHybUrRocsHJcphS54=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Rn72TW03cSRsln9AXMHMWipd4EqEo6NwepcNesH3upaT3nmUArCGqrpOElyY1iuu+
+         CZvXX9fSLSpMNOimNUkd4z6fYYSplkBuhfyb+uk8ZEv9CLKwIiHNOlybq5Gt+NyzAU
+         H+05FJk95QpylT91faGNnKxZhM03w3zxJRkuvF9RXdvb31jdyOzUozgHjjxpCTWo6a
+         KawJKQ6LJUlDwWZuzD616w0r8viaC3X7nYWMTc+Ix9ddZYH/pFIzsbbSA6h7XQVrKj
+         Pi296i/AsFebNCNdpItPLpjRK1DvqT8fNIB9raHyem4ACyocu1P4YWoVJoARAMv19+
+         RMLRZsPPok8DA==
+Date:   Mon, 17 Jul 2023 19:31:33 +0100
+From:   Conor Dooley <conor@kernel.org>
+To:     Piyush Malgujar <pmalgujar@marvell.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        p.zabel@pengutronix.de, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        yamada.masahiro@socionext.com, devicetree@vger.kernel.org,
+        jannadurai@marvell.com, cchavva@marvell.com
+Subject: Re: [PATCH v4 5/6] dt-bindings: mmc: sdhci-cadence: SD6 support
+Message-ID: <20230717-dirtiness-pardon-a3fbc0925202@spud>
+References: <20230717125146.16791-1-pmalgujar@marvell.com>
+ <20230717125146.16791-6-pmalgujar@marvell.com>
 MIME-Version: 1.0
-References: <20230714174745.4060260-1-robh@kernel.org>
-In-Reply-To: <20230714174745.4060260-1-robh@kernel.org>
-From:   Rob Herring <robh@kernel.org>
-Date:   Mon, 17 Jul 2023 11:46:19 -0600
-X-Gmail-Original-Message-ID: <CAL_Jsq+H5jcTfuAdE=XvcWP+Td3xn9hdq1QA3HKouPJDaedwYg@mail.gmail.com>
-Message-ID: <CAL_Jsq+H5jcTfuAdE=XvcWP+Td3xn9hdq1QA3HKouPJDaedwYg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: Explicitly include correct DT includes
-To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Claudiu Beznea <claudiu.beznea@microchip.com>,
-        Robert Richter <rric@kernel.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Florian Fainelli <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Michal Simek <michal.simek@amd.com>,
-        Eugen Hristev <eugen.hristev@collabora.com>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        Steen Hegelund <Steen.Hegelund@microchip.com>,
-        Daniel Machon <daniel.machon@microchip.com>,
-        UNGLinuxDriver@microchip.com,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Ben Dooks <ben-linux@fluff.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Baolin Wang <baolin.wang@linux.alibaba.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-        Masami Hiramatsu <mhiramat@kernel.org>
-Cc:     devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-amlogic@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        linux-actions@lists.infradead.org,
-        linux-renesas-soc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-tegra@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="fYdzJ3cGoqsmeGH1"
+Content-Disposition: inline
+In-Reply-To: <20230717125146.16791-6-pmalgujar@marvell.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jul 14, 2023 at 11:48=E2=80=AFAM Rob Herring <robh@kernel.org> wrot=
-e:
->
-> The DT of_device.h and of_platform.h date back to the separate
-> of_platform_bus_type before it as merged into the regular platform bus.
-> As part of that merge prepping Arm DT support 13 years ago, they
-> "temporarily" include each other. They also include platform_device.h
-> and of.h. As a result, there's a pretty much random mix of those include
-> files used throughout the tree. In order to detangle these headers and
-> replace the implicit includes with struct declarations, users need to
-> explicitly include the correct includes.
->
-> Signed-off-by: Rob Herring <robh@kernel.org>
+
+--fYdzJ3cGoqsmeGH1
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Jul 17, 2023 at 05:51:45AM -0700, Piyush Malgujar wrote:
+> From: Jayanthi Annadurai <jannadurai@marvell.com>
+>=20
+> Add support for SD6 controller on Marvell CN10K series SOCs. The
+> existing sd4hc is not compatible with the SD6 changes.
+>=20
+> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
 > ---
->  drivers/mmc/host/atmel-mci.c                  | 1 -
->  drivers/mmc/host/cavium-octeon.c              | 2 ++
->  drivers/mmc/host/cavium-thunderx.c            | 1 +
->  drivers/mmc/host/davinci_mmc.c                | 1 -
->  drivers/mmc/host/meson-gx-mmc.c               | 2 +-
->  drivers/mmc/host/mtk-sd.c                     | 4 +---
->  drivers/mmc/host/mxcmmc.c                     | 1 -
->  drivers/mmc/host/mxs-mmc.c                    | 1 -
->  drivers/mmc/host/owl-mmc.c                    | 3 ++-
->  drivers/mmc/host/pxamci.c                     | 1 -
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 3 ++-
->  drivers/mmc/host/sdhci-bcm-kona.c             | 1 -
->  drivers/mmc/host/sdhci-cadence.c              | 2 +-
->  drivers/mmc/host/sdhci-esdhc-imx.c            | 2 +-
->  drivers/mmc/host/sdhci-iproc.c                | 2 +-
->  drivers/mmc/host/sdhci-msm.c                  | 2 +-
->  drivers/mmc/host/sdhci-of-arasan.c            | 3 ++-
+>  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 52 ++++++++++++++++---
+>  1 file changed, 45 insertions(+), 7 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Docu=
+mentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> index 6c40611405a08717520f4ce3a78a9cb8dd9aac69..51f44c00a50505684c7c7c49c=
+59c1ebd8d85d5d0 100644
+> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> @@ -4,19 +4,23 @@
+>  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+> =20
+> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
+> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
+> =20
+>  maintainers:
+>    - Masahiro Yamada <yamada.masahiro@socionext.com>
+> =20
+>  properties:
+>    compatible:
+> -    items:
+> -      - enum:
+> -          - amd,pensando-elba-sd4hc
+> -          - microchip,mpfs-sd4hc
+> -          - socionext,uniphier-sd4hc
+> -      - const: cdns,sd4hc
+> +    oneOf:
+> +      - items:
+> +          - enum:
+> +              - amd,pensando-elba-sd4hc
+> +              - microchip,mpfs-sd4hc
+> +              - socionext,uniphier-sd4hc
+> +          - const: cdns,sd4hc
+> +
+> +      - items:
+> +          - const: marvell,cdns-sd6hc
 
-Not visible in the diff, but there's a double include of of.h. v2 coming.
+This seems like a strange compatible. Why have you not gone for
+something like:
+compatible =3D "marvell,$socname-sd6hc", "cdns,sd6hc";
+?
 
->  drivers/mmc/host/sdhci-of-at91.c              | 2 +-
->  drivers/mmc/host/sdhci-of-dwcmshc.c           | 2 +-
->  drivers/mmc/host/sdhci-of-sparx5.c            | 2 +-
->  drivers/mmc/host/sdhci-omap.c                 | 1 -
->  drivers/mmc/host/sdhci-pxav2.c                | 1 -
->  drivers/mmc/host/sdhci-s3c.c                  | 1 -
->  drivers/mmc/host/sdhci-sprd.c                 | 1 -
->  drivers/mmc/host/sdhci-tegra.c                | 1 -
->  drivers/mmc/host/sh_mmcif.c                   | 1 -
->  drivers/mmc/host/uniphier-sd.c                | 1 -
->  drivers/mmc/host/wmt-sdmmc.c                  | 1 -
->  29 files changed, 20 insertions(+), 29 deletions(-)
+> =20
+>    reg:
+>      minItems: 1
+> @@ -139,6 +143,40 @@ allOf:
+>          reg:
+>            maxItems: 1
+> =20
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: marvell,cdns-sd6hc
+> +
+> +    then:
+> +      properties:
+> +        marvell,iocell-input-delay-ps:
+> +          description: Delay in ps across the input IO cells
+
+Are all of these things marvell specific, or would other (future) sd6hc
+users need these properties too?
+
+Thanks,
+Conor.
+
+> +
+> +        marvell,iocell-output-delay-ps:
+> +          description: Delay in ps across the output IO cells
+> +
+> +        marvell,delay-element-ps:
+> +          description: Delay element in ps used for calculating phy timi=
+ngs
+> +
+> +        marvell,read-dqs-cmd-delay-ps:
+> +          description: Command delay used in HS200 tuning
+> +
+> +        marvell,tune-val-start-ps:
+> +          description: Staring value of data delay used in HS200 tuning
+> +
+> +        marvell,tune-val-step-ps:
+> +          description: Incremental value of data delay used in HS200 tun=
+ing
+> +
+> +      required:
+> +        - marvell,iocell-input-delay-ps
+> +        - marvell,iocell-output-delay-ps
+> +        - marvell,delay-element-ps
+> +        - marvell,read-dqs-cmd-delay-ps
+> +        - marvell,tune-val-start-ps
+> +        - marvell,tune-val-step-ps
+> +
+>  unevaluatedProperties: false
+> =20
+>  examples:
+> --=20
+> 2.17.1
+>=20
+
+--fYdzJ3cGoqsmeGH1
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZLWJBQAKCRB4tDGHoIJi
+0mfaAQDTApvAlStJn77X/J3xS3TnixYN7HlFW7aSinffcJPbewD/W3IbUWlgUyon
+NU+xfPE81NTFNwtq7yiaCuUTfSndmAY=
+=WM19
+-----END PGP SIGNATURE-----
+
+--fYdzJ3cGoqsmeGH1--
