@@ -2,146 +2,210 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C8F5EB64DC
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 20:07:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2ECDC0015E
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 23:05:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230325AbjGQUHB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jul 2023 16:07:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53046 "EHLO
+        id S231189AbjGQXFg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jul 2023 19:05:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229908AbjGQUHA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 16:07:00 -0400
-Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CEF9113
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jul 2023 13:06:58 -0700 (PDT)
-Received: by mail-ej1-x631.google.com with SMTP id a640c23a62f3a-98e39784a85so1288868066b.1
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jul 2023 13:06:58 -0700 (PDT)
+        with ESMTP id S231183AbjGQXFf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 19:05:35 -0400
+Received: from mail-il1-x132.google.com (mail-il1-x132.google.com [IPv6:2607:f8b0:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 563AA170A;
+        Mon, 17 Jul 2023 16:04:47 -0700 (PDT)
+Received: by mail-il1-x132.google.com with SMTP id e9e14a558f8ab-3459baa237bso32105315ab.3;
+        Mon, 17 Jul 2023 16:04:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1689624417; x=1692216417;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=XzEdZ0pB3DBUm8uGUbWktWX3tWqRhxkyCGVAClHZTkc=;
-        b=Y8QzN/vBoa6MFURv3gbWbNuC+chDfsvCF9eYbP1B2jyop7AH/u5h3s0dR/Yumhamgk
-         LFf7/AtU3ZHXMWMUez0aebW6FhEFlz5QBQ5UlCu6n11g03pLETd0AXtPGmXXaRpPbyl7
-         jSsl1p0xt4Ajmwu7d0nMVPXOCIpUXCODG609JVgwW1gK7S/0k/V+p46Nyz6/g8z7wCZ7
-         c70sToESVRzN4OJXhvgNa0JIKX2wCemM4aq8SCDva47BNB2PAkJVK3MeXFKbbV/9rOCP
-         vxeZozHwEHjNPgG96isv5Q173jKPppuubBn8WCD7IXSvYpTjJt+GN+ilgIrpaBsjEaPZ
-         J3xg==
+        d=gmail.com; s=20221208; t=1689635007; x=1692227007;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PjdXTr3dzdMnu6+stW9Y5PEi63LoYA7/O+Nyj8BgZrY=;
+        b=DXaD1vRPgFSnKmXn3XmG3556H/iN7AORkeSIiv52gtXqrSsva4y99v678W83plsKQd
+         Sb2RzUfAyqCwSAZXeTyPSTPVhft5cksYPgmlzFxPtaVsXr5qxjkvMhG/pbHf0f5Z50aS
+         h9GVaj7R2fjtsiyItodMYi2N+0lWvihW95Yh1xyg3f7uUHAUyazn/6vxom75h3hyS49M
+         aLO1zkjumLSNbljkXUZ1tYdZnJUSGtbH6lbZ/WdbgQyAalJGZBSmguuL4aRnR0VkTQfA
+         MypCw40Sse8dM7MJ11W8RLcgEnNMiagL13pXMPaU1M+MYaMVjRDZvWqM2XKdb/0HVNLA
+         OHpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689624417; x=1692216417;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XzEdZ0pB3DBUm8uGUbWktWX3tWqRhxkyCGVAClHZTkc=;
-        b=LKTKnVTyhjFeH8lCAvYRsUsf6taniSEq1d4BLygFeED9XqgV/0uRF7JmNa2saW+lGE
-         tfu4bLTv852STxV4dpidv5gcjvWSmWi8EEo3U9pb/nxYSnUWPWzm/+Qq9U3EdKbcjd4f
-         7Czr+bDQYJOz2R+tXW/0OoV9cmEdALz6VLSAAQPTPrNLHZCqNvIP6z2dIuvTuFtlp21/
-         irjbI4XCa9vyaPqALW2VTPV03S8cQrs5dRCbK55AcZ5ZgQZmbi3Dp5fmRi37EbC2Isc3
-         pmebNQQNcFKRTuovEqFU2mQdErGH7x+jVcSyS58nTyPbhfzeMm96bNafwn0VuH+YhcPK
-         Hxgw==
-X-Gm-Message-State: ABy/qLZKa1mdG6irbeRsl6d4j1Nwv7zEdMFsCdIToxG7zNC6sSonTGBI
-        FZR00zvXteHfa9LEwANCAJatgg==
-X-Google-Smtp-Source: APBJJlGBvNflC4SgUGwnbsv/2UACX03vaJlIi1OjO7dSlQ/xFc+hwn7dJpGmRRyNdTwx09zLuWCe3w==
-X-Received: by 2002:a17:906:68c9:b0:989:450:e565 with SMTP id y9-20020a17090668c900b009890450e565mr12035699ejr.23.1689624416963;
-        Mon, 17 Jul 2023 13:06:56 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.223.104])
-        by smtp.gmail.com with ESMTPSA id lu11-20020a170906facb00b00982a352f078sm97674ejb.124.2023.07.17.13.06.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Jul 2023 13:06:56 -0700 (PDT)
-Message-ID: <6dda9ec3-72ef-0367-4914-8c63ce6d07a4@linaro.org>
-Date:   Mon, 17 Jul 2023 22:06:54 +0200
+        d=1e100.net; s=20221208; t=1689635007; x=1692227007;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=PjdXTr3dzdMnu6+stW9Y5PEi63LoYA7/O+Nyj8BgZrY=;
+        b=Z7n7lzoXYvBT8hCuzrQASx0hG8HTGb9DGHccm88ehjGh06T9Bu69MviUaVyk16M4sc
+         vu4IyW8tW5UmrGumqrN8KAdiWqEvGe8F2885N8/Q8YmH+KNMYTxDuJO3Q1D4s2PRR26o
+         1ly73thmitkNId63hcStYYHWaIqg/LLradphCKaLWXpH40WLVJRg/01wN0j1syRV3rxv
+         O9EWRprGV939k9wtnF4LH5KtQjehuyDjUeCat3xvvfjKBVZUOqmMx6YrAcyUdsFdCgLo
+         h+qHCOW20sHg9vnxroV8W+4fGoRH2FMoMt/L1jhS7f7dC2/vyxXYKJJgUX0eh0QB0Gqe
+         YpmQ==
+X-Gm-Message-State: ABy/qLY08tPpSixf7wqxm5/UlPcb50dIt7iLDivYpMaTsp37rOnwi3kV
+        LPkWLStK4lgUom5I4g2Ztqg=
+X-Google-Smtp-Source: APBJJlFC6SX/VCeG/MeX057j4EOjP0lF4J3jcfQ3edgXjMjcygGdQA4pJA+cbFryNUtJs9NdzCdVQg==
+X-Received: by 2002:a05:6e02:1b07:b0:346:189a:1b74 with SMTP id i7-20020a056e021b0700b00346189a1b74mr1436604ilv.0.1689635007204;
+        Mon, 17 Jul 2023 16:03:27 -0700 (PDT)
+Received: from localhost (dhcp-72-235-13-41.hawaiiantel.net. [72.235.13.41])
+        by smtp.gmail.com with ESMTPSA id w5-20020a92d605000000b0034628814e66sm254216ilm.40.2023.07.17.16.03.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 17 Jul 2023 16:03:26 -0700 (PDT)
+Sender: Tejun Heo <htejun@gmail.com>
+Date:   Mon, 17 Jul 2023 13:03:25 -1000
+From:   Tejun Heo <tj@kernel.org>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Lai Jiangshan <jiangshanlai@gmail.com>,
+        "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel-team@meta.com, Linux PM list <linux-pm@vger.kernel.org>,
+        DRI Development <dri-devel@lists.freedesktop.org>,
+        linux-rtc@vger.kernel.org,
+        linux-riscv <linux-riscv@lists.infradead.org>,
+        netdev <netdev@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
+        <linux-ide@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Subject: Re: Consider switching to WQ_UNBOUND messages (was: Re: [PATCH v2
+ 6/7] workqueue: Report work funcs that trigger automatic CPU_INTENSIVE
+ mechanism)
+Message-ID: <ZLXIvXBvhsnL-ik_@slm.duckdns.org>
+References: <20230511181931.869812-1-tj@kernel.org>
+ <20230511181931.869812-7-tj@kernel.org>
+ <ZF6WsSVGX3O1d0pL@slm.duckdns.org>
+ <CAMuHMdVCQmh6V182q4g---jvsWiTOP2hBPZKvma6oUN6535LEg@mail.gmail.com>
+ <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
+ <ZK3MBfPS-3-tJgjO@slm.duckdns.org>
+ <ZK30CR196rs-OWLq@slm.duckdns.org>
+ <CAMuHMdUCXPi+aS-7bR3qRetKF9T3W9jk_HKjvaXmfHv5SEeuFg@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH v4 5/6] dt-bindings: mmc: sdhci-cadence: SD6 support
-Content-Language: en-US
-To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, p.zabel@pengutronix.de, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        yamada.masahiro@socionext.com, devicetree@vger.kernel.org
-Cc:     jannadurai@marvell.com, cchavva@marvell.com
-References: <20230717125146.16791-1-pmalgujar@marvell.com>
- <20230717125146.16791-6-pmalgujar@marvell.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230717125146.16791-6-pmalgujar@marvell.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdUCXPi+aS-7bR3qRetKF9T3W9jk_HKjvaXmfHv5SEeuFg@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/07/2023 14:51, Piyush Malgujar wrote:
-> From: Jayanthi Annadurai <jannadurai@marvell.com>
-> 
-> Add support for SD6 controller on Marvell CN10K series SOCs. The
-> existing sd4hc is not compatible with the SD6 changes.
-> 
-> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
-> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
-> ---
->  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 52 ++++++++++++++++---
->  1 file changed, 45 insertions(+), 7 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index 6c40611405a08717520f4ce3a78a9cb8dd9aac69..51f44c00a50505684c7c7c49c59c1ebd8d85d5d0 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -4,19 +4,23 @@
->  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
-> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
->  
->  maintainers:
->    - Masahiro Yamada <yamada.masahiro@socionext.com>
->  
->  properties:
->    compatible:
-> -    items:
-> -      - enum:
-> -          - amd,pensando-elba-sd4hc
-> -          - microchip,mpfs-sd4hc
-> -          - socionext,uniphier-sd4hc
-> -      - const: cdns,sd4hc
-> +    oneOf:
-> +      - items:
-> +          - enum:
-> +              - amd,pensando-elba-sd4hc
-> +              - microchip,mpfs-sd4hc
-> +              - socionext,uniphier-sd4hc
-> +          - const: cdns,sd4hc
-> +
-> +      - items:
-> +          - const: marvell,cdns-sd6hc
+Hello, Geert.
 
-Except what Conor said (that's not a correct compatible, because cdns is
-vendor prefix, not device name), you do not have multiple items here, so
-drop "items".
+Can you please the following patch and see how many reports you get? Looking
+back at your reports, I think some of them probably should be converted to
+UNBOUND but we should have a better idea with the adjusted threshold.
 
->  
->    reg:
->      minItems: 1
-> @@ -139,6 +143,40 @@ allOf:
->          reg:
->            maxItems: 1
->  
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: marvell,cdns-sd6hc
-> +
-> +    then:
-> +      properties:
-> +        marvell,iocell-input-delay-ps:
-> +          description: Delay in ps across the input IO cells
+Thanks.
 
-Properties should be defined in top-level properties. Require/disallow
-them per variant.
+From 8555cbd4b22e5f85eb2bdcb84fd1d1f519a0a0d3 Mon Sep 17 00:00:00 2001
+From: Tejun Heo <tj@kernel.org>
+Date: Mon, 17 Jul 2023 12:50:02 -1000
+Subject: [PATCH] workqueue: Scale up wq_cpu_intensive_thresh_us if BogoMIPS is
+ below 1000
 
-Best regards,
-Krzysztof
+wq_cpu_intensive_thresh_us is used to detect CPU-hogging per-cpu work items.
+Once detected, they're excluded from concurrency management to prevent them
+from blocking other per-cpu work items. If CONFIG_WQ_CPU_INTENSIVE_REPORT is
+enabled, repeat offenders are also reported so that the code can be updated.
+
+The default threshold is 10ms which is long enough to do fair bit of work on
+modern CPUs while short enough to be usually not noticeable. This
+unfortunately leads to a lot of, arguable spurious, detections on very slow
+CPUs. Using the same threshold across CPUs whose performance levels may be
+apart by multiple levels of magnitude doesn't make whole lot of sense.
+
+This patch scales up wq_cpu_intensive_thresh_us upto 1 second when BogoMIPS
+is below 1000. This is obviously very inaccurate but it doesn't have to be
+accurate to be useful. The mechanism is still useful when the threshold is
+fully scaled up and the benefits of reports are usually shared with everyone
+regardless of who's reporting, so as long as there are sufficient number of
+fast machines reporting, we don't lose much.
+
+Some (or is it all?) ARM CPUs systemtically report significantly lower
+BogoMIPS. While this doesn't break anything, given how widespread ARM CPUs
+are, it's at least a missed opportunity and it probably would be a good idea
+to teach workqueue about it.
+
+Signed-off-by: Tejun Heo <tj@kernel.org>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+---
+ kernel/workqueue.c | 43 ++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 42 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/workqueue.c b/kernel/workqueue.c
+index 02a8f402eeb5..0d7a3d29762f 100644
+--- a/kernel/workqueue.c
++++ b/kernel/workqueue.c
+@@ -52,6 +52,7 @@
+ #include <linux/sched/debug.h>
+ #include <linux/nmi.h>
+ #include <linux/kvm_para.h>
++#include <linux/delay.h>
+ 
+ #include "workqueue_internal.h"
+ 
+@@ -338,8 +339,10 @@ static cpumask_var_t *wq_numa_possible_cpumask;
+  * Per-cpu work items which run for longer than the following threshold are
+  * automatically considered CPU intensive and excluded from concurrency
+  * management to prevent them from noticeably delaying other per-cpu work items.
++ * ULONG_MAX indicates that the user hasn't overridden it with a boot parameter.
++ * The actual value is initialized in wq_cpu_intensive_thresh_init().
+  */
+-static unsigned long wq_cpu_intensive_thresh_us = 10000;
++static unsigned long wq_cpu_intensive_thresh_us = ULONG_MAX;
+ module_param_named(cpu_intensive_thresh_us, wq_cpu_intensive_thresh_us, ulong, 0644);
+ 
+ static bool wq_disable_numa;
+@@ -6513,6 +6516,42 @@ void __init workqueue_init_early(void)
+ 	       !system_freezable_power_efficient_wq);
+ }
+ 
++static void __init wq_cpu_intensive_thresh_init(void)
++{
++	unsigned long thresh;
++	unsigned long mips;
++
++	/* if the user set it to a specific value, keep it */
++	if (wq_cpu_intensive_thresh_us != ULONG_MAX)
++		return;
++
++	/*
++	 * The default of 10ms is derived from the fact that most modern (as of
++	 * 2023) processors can do a lot in 10ms and that it's just below what
++	 * most consider human-perceivable. However, the kernel also runs on a
++	 * lot slower CPUs including microcontrollers where the threshold is way
++	 * too low.
++	 *
++	 * Let's scale up the threshold upto 1 second if BogoMips is below 1000.
++	 * This is by no means accurate but it doesn't have to be. The mechanism
++	 * is still useful even when the threshold is fully scaled up. Also, as
++	 * the reports would usually be applicable to everyone, some machines
++	 * operating on longer thresholds won't significantly diminish their
++	 * usefulness.
++	 */
++	thresh = 10 * USEC_PER_MSEC;
++
++	/* see init/calibrate.c for lpj -> BogoMIPS calculation */
++	mips = max_t(unsigned long, loops_per_jiffy / 500000 * HZ, 1);
++	if (mips < 1000)
++		thresh = min_t(unsigned long, thresh * 1000 / mips, USEC_PER_SEC);
++
++	pr_debug("wq_cpu_intensive_thresh: lpj=%lu mips=%lu thresh_us=%lu\n",
++		 loops_per_jiffy, mips, thresh);
++
++	wq_cpu_intensive_thresh_us = thresh;
++}
++
+ /**
+  * workqueue_init - bring workqueue subsystem fully online
+  *
+@@ -6528,6 +6567,8 @@ void __init workqueue_init(void)
+ 	struct worker_pool *pool;
+ 	int cpu, bkt;
+ 
++	wq_cpu_intensive_thresh_init();
++
+ 	/*
+ 	 * It'd be simpler to initialize NUMA in workqueue_init_early() but
+ 	 * CPU to node mapping may not be available that early on some
+-- 
+2.41.0
 
