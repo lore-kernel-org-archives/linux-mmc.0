@@ -2,138 +2,112 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E34DEB64DC
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 11:19:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DDDEC0015E
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jul 2023 12:52:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230013AbjGQLTg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jul 2023 07:19:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37930 "EHLO
+        id S230160AbjGQMwM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jul 2023 08:52:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229669AbjGQLTd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 07:19:33 -0400
-Received: from mail-lj1-x235.google.com (mail-lj1-x235.google.com [IPv6:2a00:1450:4864:20::235])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 312E910D5
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jul 2023 04:19:27 -0700 (PDT)
-Received: by mail-lj1-x235.google.com with SMTP id 38308e7fff4ca-2b6f97c7115so62759211fa.2
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jul 2023 04:19:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=timesys-com.20221208.gappssmtp.com; s=20221208; t=1689592765; x=1692184765;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NP+nVMJjM1Cb7BnxGt2NHvMg7jOq0WlJMksYF5HiLBg=;
-        b=rj025K+C5Z8BE5/YeGBiuH67TsN9ZX0VWnpkXMlbJGWRFWA7fsAqeVxzWp5qVWkG+o
-         pKLE3QgGPjIIIKbq/4imgPdiBukFyVUQM2WSRBis10DSvld98y0jzXBs52dQnS2gMqW4
-         e3pZ9giZgOD88+JCfXi5xAj1PqUhQgFez1ju7pNvDSOI8sMLcyUq4wOVJ2xrlTnl9z8y
-         I1jWJf4EvHo/9Db6L5/jo5ja0RdPD5pPOy1f72RDjAzA6Moe343BLlVGakPJ6DswXJ86
-         Ht/bh+bom0M98bkyd9g8LGtyLsmvJSot8J3P8KsSDyB6dIuJijn0GfiCJDjGOA/VL7F0
-         l88Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689592765; x=1692184765;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NP+nVMJjM1Cb7BnxGt2NHvMg7jOq0WlJMksYF5HiLBg=;
-        b=g0RWMJs525MhE/fV7q2smFIIEC7GCod7VI+p3Gp/kujfr5ypTOh0eM70Ig02nJByqH
-         xVcCxOKUv7rfohINaCb2B62oBquAD5uRKInISVpDkht7PwsGfSCNcksvDFTuLqWy2f4G
-         sJlAPjll9f51Sb6MCvTySG1UZAsTwq+kGExfzLzodNWQoaJNaEaw8ZJYqWHQRnsl7KyB
-         SpuEpXNSgC0KIQ6B7hBOEqC3nbURMHctbYpJZxara0+m6vqYWkNEs/gdFFwNmb87xk3r
-         FOnNPEzhxu3EdcGFUKkqyN0rTyOCMLEwkvnhnuaJO6ZYxpLoYFP6hOA2RHlysPjvdKD1
-         HJag==
-X-Gm-Message-State: ABy/qLb3ZHDBgWVibR0sVLXjRfWuDT65jTx2wuxoGuQuNqi4VLDhuelT
-        CwR6q9sDudNXX/UiLsxwGcp3Fj4VrA1jsCp2QbfkxA==
-X-Google-Smtp-Source: APBJJlH4R5Xe/E1R4Dc/dga5xiLgfWGkDb3SuDMXjnAI7QZGce5yHzVql6xy4ermoZmvw25KyymPvezpYrkHnpuFqgc=
-X-Received: by 2002:a2e:3603:0:b0:2b6:d536:1bba with SMTP id
- d3-20020a2e3603000000b002b6d5361bbamr8490425lja.18.1689592765299; Mon, 17 Jul
- 2023 04:19:25 -0700 (PDT)
+        with ESMTP id S229579AbjGQMwL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jul 2023 08:52:11 -0400
+Received: from mx0b-0016f401.pphosted.com (mx0a-0016f401.pphosted.com [67.231.148.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6B8CB1;
+        Mon, 17 Jul 2023 05:52:10 -0700 (PDT)
+Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
+        by mx0a-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36H5Tq4m020449;
+        Mon, 17 Jul 2023 05:52:00 -0700
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=pfpt0220; bh=jmtjFxp42ZyNv2chltldYPbE+ncQnkd6aa9V2Suk64o=;
+ b=E/2Em+lT6qKWwbKtRNH2JOqTJqnOjRSWJgWtnYehlS4heHNkZGBD0hFR4BMTNhPTVpeG
+ oMvCN7rX8OWpXzi03g6jLZMD+nvOHLzyXj9+itCBguJsoBaOs6CXRkhiG3e4uqTwbQsB
+ 0KEAUlMD6qTdTO0+xndxTYS1A5dpYLJBkB3+xhnSHtkFdq3GM2sdcQ+e2N2RzumhTY4e
+ UQMF+Wep9g7zdfLDpFZqyi108GEzPH6I+My4SRv83ARbazFlsB5UMNwEmjxPVeB1Ta7v
+ FJ5VS/JixXrXXBc9E6z3JfoqsUlxlHzu8g1Fup6xu5iKBiDn7zYwM1u8aTirdgACC8+w NQ== 
+Received: from dc5-exch01.marvell.com ([199.233.59.181])
+        by mx0a-0016f401.pphosted.com (PPS) with ESMTPS id 3rvyhx18hs-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Mon, 17 Jul 2023 05:52:00 -0700
+Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Mon, 17 Jul
+ 2023 05:51:58 -0700
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
+ Transport; Mon, 17 Jul 2023 05:51:58 -0700
+Received: from localhost.localdomain (unknown [10.110.150.250])
+        by maili.marvell.com (Postfix) with ESMTP id 4F63D3F70A4;
+        Mon, 17 Jul 2023 05:51:58 -0700 (PDT)
+From:   Piyush Malgujar <pmalgujar@marvell.com>
+To:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <p.zabel@pengutronix.de>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
+        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>
+CC:     <jannadurai@marvell.com>, <cchavva@marvell.com>,
+        Piyush Malgujar <pmalgujar@marvell.com>
+Subject: [PATCH v4 0/6] mmc: sdhci-cadence: SD6 controller support
+Date:   Mon, 17 Jul 2023 05:51:40 -0700
+Message-ID: <20230717125146.16791-1-pmalgujar@marvell.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-References: <20230713080807.69999-1-frank.li@vivo.com> <20230713080807.69999-49-frank.li@vivo.com>
-In-Reply-To: <20230713080807.69999-49-frank.li@vivo.com>
-From:   Angelo Dureghello <angelo.dureghello@timesys.com>
-Date:   Mon, 17 Jul 2023 13:18:39 +0200
-Message-ID: <CALJHbkA1HCubm5b31CQmHtX-UC29LfgoafyzwxpHFydttdOe+g@mail.gmail.com>
-Subject: Re: [PATCH 49/58] mmc: sdhci-esdhc-mcf: Convert to platform remove
- callback returning void
-To:     Yangtao Li <frank.li@vivo.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Proofpoint-GUID: T2E7MBMrWTxUjv1d51-exHQETXgqh58R
+X-Proofpoint-ORIG-GUID: T2E7MBMrWTxUjv1d51-exHQETXgqh58R
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-07-17_10,2023-07-13_01,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Yangtao,
+Added changes to support SD6 controller on Marvell CN10K SOCs:
+- Restructure and reformat the code.
+- Add SD6 related operations.
+- Support added for MMC_SDHCI_IO_ACCESSORS.
+- Related changes done in dt bindings.
+- Support for debug option.
 
-thanks,
+Changes since V3:
+- Adapted to the new code structure sdhci_cdns_drv_data.
+- Added controller version specific phy_init separating SD4 and SD6.
+- Added SD6 compatibility check for SD6 specific things like
+  quirks/version.
+- Added marvell specific string to dts properties.
 
-Acked-by: Angelo Dureghello <angelo.dureghello@timesys.com>
+Changes since V2:
+- Added separate patches for renaming of functions and
+  restructuring, adding new structures to support SD4/SD6 operations.
+- Added proper suffixes to properties in dt binding.
+- Removed unreachable code.
+- Handled sdhci_cdns_uniphier_pltfm_data similar to sdhci_cdns_sd4_of_data
+  as per the added structured design.
+- Used dev_dbg instead of DEBUG_DRV in debug patch.
 
+Changes since V1:
+- Added separate patch for reformat/rename changes.
+- Enabled MMC_SDHCI_IO_ACCESSORS in config MMC_SDHCI_CADENCE.
+- Used proper properties in dt binding.
+- Removed patch of config option to change default for sdhci timeout.
+- Resolved issues reported by:
+Reported-by: kernel test robot <lkp@intel.com>
+Reported-by: Dan Carpenter <error27@gmail.com>
 
-On Thu, Jul 13, 2023 at 10:10=E2=80=AFAM Yangtao Li <frank.li@vivo.com> wro=
-te:
->
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
->
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
->
-> Cc: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Yangtao Li <frank.li@vivo.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-mcf.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-=
-esdhc-mcf.c
-> index 05926bf5ecf9..a07f8333cd6b 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-mcf.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
-> @@ -489,7 +489,7 @@ static int sdhci_esdhc_mcf_probe(struct platform_devi=
-ce *pdev)
->         return err;
->  }
->
-> -static int sdhci_esdhc_mcf_remove(struct platform_device *pdev)
-> +static void sdhci_esdhc_mcf_remove(struct platform_device *pdev)
->  {
->         struct sdhci_host *host =3D platform_get_drvdata(pdev);
->         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> @@ -502,8 +502,6 @@ static int sdhci_esdhc_mcf_remove(struct platform_dev=
-ice *pdev)
->         clk_disable_unprepare(mcf_data->clk_per);
->
->         sdhci_pltfm_free(pdev);
-> -
-> -       return 0;
->  }
->
->  static struct platform_driver sdhci_esdhc_mcf_driver =3D {
-> @@ -512,7 +510,7 @@ static struct platform_driver sdhci_esdhc_mcf_driver =
-=3D {
->                 .probe_type =3D PROBE_PREFER_ASYNCHRONOUS,
->         },
->         .probe =3D sdhci_esdhc_mcf_probe,
-> -       .remove =3D sdhci_esdhc_mcf_remove,
-> +       .remove_new =3D sdhci_esdhc_mcf_remove,
->  };
->
->  module_platform_driver(sdhci_esdhc_mcf_driver);
-> --
-> 2.39.0
->
+Dhananjay Kangude (3):
+  mmc: sdhci-cadence: Rename functions/structures to SD4 specific
+  mmc: sdhci-cadence: Restructure the code
+  mmc: sdhci-cadence: SD6 controller support
 
+Jayanthi Annadurai (3):
+  mmc: sdhci-cadence: enable MMC_SDHCI_IO_ACCESSORS support
+  dt-bindings: mmc: sdhci-cadence: SD6 support
+  mmc: sdhci-cadence: Add debug option for SD6 controller
 
---=20
-Angelo Dureghello
-Timesys
-e. angelo.dureghello@timesys.com
+ .../devicetree/bindings/mmc/cdns,sdhci.yaml   |   52 +-
+ drivers/mmc/host/sdhci-cadence.c              | 1613 ++++++++++++++++-
+ 2 files changed, 1603 insertions(+), 62 deletions(-)
+
+-- 
+2.17.1
+
