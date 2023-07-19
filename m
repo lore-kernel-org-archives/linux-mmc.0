@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91E0DC04FE2
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jul 2023 17:07:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EBCCC10F1A
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jul 2023 17:07:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230521AbjGSRH5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jul 2023 13:07:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45208 "EHLO
+        id S231136AbjGSRH6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jul 2023 13:07:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230508AbjGSRHx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 13:07:53 -0400
+        with ESMTP id S230509AbjGSRH4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 13:07:56 -0400
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B5ECB7;
-        Wed, 19 Jul 2023 10:07:51 -0700 (PDT)
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36JH0DsZ002694;
-        Wed, 19 Jul 2023 17:07:48 GMT
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8CE61701;
+        Wed, 19 Jul 2023 10:07:55 -0700 (PDT)
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36JEP68V012583;
+        Wed, 19 Jul 2023 17:07:53 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
  subject : date : message-id : in-reply-to : references : mime-version :
  content-transfer-encoding : content-type; s=qcppdkim1;
- bh=ZWf3H0GEqy6NzOdDGree0WkkScLY1sCT8P7aGx9Ebdo=;
- b=afztzPPNeGWWFb/4iEGAJuxMNEDxiKqZdGFRGXnd8n3XA34OSM7kSltFeeCz9wFbmlLu
- MjvaKTPtThcQ1epIaJ9vZLt8LfuP6JH5TkYgosm1yjZ74Nhz1g9N15aO3v5FdWFk/Cx/
- gvmBHHuvISoLhFH+I25Dlyn9pQQyusx81L0kJrTVJw89ILl/cT5lIPyApx3tL8naOzX6
- /0kCSGD9QD0rWRpowWGilHzeRagjZImjpv8mAgtgaHbsu3FrOB1x9OnTtWgEyqypJ33P
- aAbAAqGcGXVS4kItWObKWgMnYKLThIdN+nkTr3vhWmq7fEVDL43EORSguEntGe/h3WeS NA== 
+ bh=BrLjrFmizLa/0Q3NcdxHntN7kMjILjBJOwyl0A6gifk=;
+ b=eP2JUQEIVkzZP7g6qGN7fYv8s6au1kNWSOZIvo73YTibtejsNRCslLo+a74kwJKZQUXq
+ 3PO9JMPyLEb/ASjydezqMV28bnUUlAInPWopCH8wX5lYmQG6VqEqs/8x5wNEJCJA98Xa
+ yg4IWFmbGR9xXOcrZ0uQAm3GntBw3+PglP/OjWHOwI/ENbwQ1lm6lecC4DHXTChCRSzY
+ fkuXD9Z4jR/E98fyEa1NtU7D86FlMqXYqQETzRIaRUCfwtisYI/MdsOhqhGimaSYZzbq
+ j96yk1iZHGJyl4UQKUS5i80bi/5wyKVSY15GRrlUpounylrowmaYkv50jAIOSrwuaH2w aQ== 
 Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rx1hx2ama-1
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rxg3v8m4h-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 19 Jul 2023 17:07:48 +0000
+        Wed, 19 Jul 2023 17:07:52 +0000
 Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36JH7lKh022209
+        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36JH7qVl022248
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 19 Jul 2023 17:07:47 GMT
+        Wed, 19 Jul 2023 17:07:52 GMT
 Received: from hu-gaurkash-lv.qualcomm.com (10.49.16.6) by
  nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.30; Wed, 19 Jul 2023 10:07:46 -0700
+ 15.2.1118.30; Wed, 19 Jul 2023 10:07:51 -0700
 From:   Gaurav Kashyap <quic_gaurkash@quicinc.com>
 To:     <linux-scsi@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
         <ebiggers@google.com>
@@ -46,9 +46,9 @@ CC:     <linux-mmc@vger.kernel.org>, <linux-block@vger.kernel.org>,
         <quic_psodagud@quicinc.com>, <avmenon@quicinc.com>,
         <abel.vesa@linaro.org>, <quic_spuppala@quicinc.com>,
         Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Subject: [PATCH v2 02/10] qcom_scm: scm call for deriving a software secret
-Date:   Wed, 19 Jul 2023 10:04:16 -0700
-Message-ID: <20230719170423.220033-3-quic_gaurkash@quicinc.com>
+Subject: [PATCH v2 06/10] ufs: host: wrapped keys support in ufs qcom
+Date:   Wed, 19 Jul 2023 10:04:20 -0700
+Message-ID: <20230719170423.220033-7-quic_gaurkash@quicinc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
 References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
@@ -60,144 +60,89 @@ X-ClientProxiedBy: nalasex01b.na.qualcomm.com (10.47.209.197) To
  nalasex01a.na.qualcomm.com (10.47.209.196)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: dm3-M_1hdMgQ51dNem42Y9zSkfijpc8E
-X-Proofpoint-ORIG-GUID: dm3-M_1hdMgQ51dNem42Y9zSkfijpc8E
+X-Proofpoint-GUID: hhsGE9d6-2m7vXkGgHl4_1kmlTNIAIsP
+X-Proofpoint-ORIG-GUID: hhsGE9d6-2m7vXkGgHl4_1kmlTNIAIsP
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
  definitions=2023-07-19_11,2023-07-19_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0
- lowpriorityscore=0 priorityscore=1501 impostorscore=0 malwarescore=0
- spamscore=0 mlxlogscore=828 adultscore=0 clxscore=1015 mlxscore=0
- phishscore=0 suspectscore=0 classifier=spam adjust=0 reason=mlx
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0
+ malwarescore=0 spamscore=0 bulkscore=0 adultscore=0 mlxscore=0
+ suspectscore=0 clxscore=1015 lowpriorityscore=0 priorityscore=1501
+ mlxlogscore=999 phishscore=0 classifier=spam adjust=0 reason=mlx
  scancount=1 engine=8.12.0-2306200000 definitions=main-2307190154
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Inline storage encryption requires deriving a sw secret from
-the hardware wrapped keys. For non-wrapped keys, this can be
-directly done as keys are in the clear.
-
-However, when keys are hardware wrapped, it can be unwrapped
-by HWKM (Hardware Key Manager) which is accessible only from Qualcomm
-Trustzone. Hence, it also makes sense that the software secret is also
-derived there and returned to the linux kernel . This can be invoked by
-using the crypto profile APIs provided by the block layer.
+1. Implement derive software secret defined in ufs core.
+2. Use the wrapped keys quirk when hwkm is supported. The assumption
+   here is that if Qualcomm ICE supports HWKM, then all ICE keys
+   will be treated as hardware wrapped keys.
 
 Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
 ---
- drivers/firmware/qcom_scm.c            | 70 ++++++++++++++++++++++++++
- drivers/firmware/qcom_scm.h            |  1 +
- include/linux/firmware/qcom/qcom_scm.h |  3 ++
- 3 files changed, 74 insertions(+)
+ drivers/ufs/host/ufs-qcom.c | 24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/qcom_scm.c b/drivers/firmware/qcom_scm.c
-index fde33acd46b7..51062d5c7f7b 100644
---- a/drivers/firmware/qcom_scm.c
-+++ b/drivers/firmware/qcom_scm.c
-@@ -1140,6 +1140,76 @@ int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
+diff --git a/drivers/ufs/host/ufs-qcom.c b/drivers/ufs/host/ufs-qcom.c
+index a04aafad4f48..9a7c5d46dbf4 100644
+--- a/drivers/ufs/host/ufs-qcom.c
++++ b/drivers/ufs/host/ufs-qcom.c
+@@ -82,6 +82,8 @@ static int ufs_qcom_ice_init(struct ufs_qcom_host *host)
+ 
+ 	host->ice = ice;
+ 	hba->caps |= UFSHCD_CAP_CRYPTO;
++	if (qcom_ice_hwkm_supported(host->ice))
++		hba->quirks |= UFSHCD_QUIRK_USES_WRAPPED_CRYPTO_KEYS;
+ 
+ 	return 0;
  }
- EXPORT_SYMBOL(qcom_scm_ice_set_key);
+@@ -119,7 +121,11 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+ 	    cap.key_size != UFS_CRYPTO_KEY_SIZE_256)
+ 		return -EINVAL;
  
-+/**
-+ * qcom_scm_derive_sw_secret() - Derive SW secret from wrapped key
-+ * @wrapped_key: the wrapped key used for inline encryption
-+ * @wrapped_key_size: size of the wrapped key
-+ * @sw_secret: the secret to be derived which is exactly the secret size
-+ * @secret_size: size of the secret
-+ *
-+ * Derive a SW secret from a HW Wrapped key for non HW key operations.
-+ * For wrapped keys, the key needs to be unwrapped, in order to derive a
-+ * SW secret, which can be done only by the secure EE.
-+ *
-+ * For more information on sw secret, please refer to "Hardware-wrapped keys"
-+ * section of Documentation/block/inline-encryption.rst.
-+ *
-+ * Return: 0 on success; -errno on failure.
+-	ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
++	if (bkey->crypto_cfg.key_type == BLK_CRYPTO_KEY_TYPE_HW_WRAPPED)
++		ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_WRAPPED;
++	else
++		ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
++
+ 	if (config_enable)
+ 		return qcom_ice_program_key(host->ice,
+ 					    QCOM_ICE_CRYPTO_ALG_AES_XTS,
+@@ -129,9 +135,24 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+ 		return qcom_ice_evict_key(host->ice, slot);
+ }
+ 
++/*
++ * Derive a SW secret from the wrapped key. The key is unwrapped in Trustzone
++ * and a SW key is then derived from it.
 + */
-+int qcom_scm_derive_sw_secret(const u8 *wrapped_key, u32 wrapped_key_size,
-+			      u8 *sw_secret, u32 secret_size)
++int ufs_qcom_ice_derive_sw_secret(struct ufs_hba *hba, const u8 wrapped_key[],
++				  unsigned int wrapped_key_size,
++				  u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
 +{
-+	struct qcom_scm_desc desc = {
-+		.svc = QCOM_SCM_SVC_ES,
-+		.cmd =  QCOM_SCM_ES_DERIVE_SW_SECRET,
-+		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RW,
-+					 QCOM_SCM_VAL, QCOM_SCM_RW,
-+					 QCOM_SCM_VAL),
-+		.args[1] = wrapped_key_size,
-+		.args[3] = secret_size,
-+		.owner = ARM_SMCCC_OWNER_SIP,
-+	};
++	struct ufs_qcom_host *host = ufshcd_get_variant(hba);
 +
-+	void *keybuf, *secretbuf;
-+	dma_addr_t key_phys, secret_phys;
-+	int ret;
-+
-+	/*
-+	 * Like qcom_scm_ice_set_key(), we use dma_alloc_coherent() to properly
-+	 * get a physical address, while guaranteeing that we can zeroize the
-+	 * key material later using memzero_explicit().
-+	 *
-+	 */
-+	keybuf = dma_alloc_coherent(__scm->dev, wrapped_key_size, &key_phys,
-+				    GFP_KERNEL);
-+	if (!keybuf)
-+		return -ENOMEM;
-+	secretbuf = dma_alloc_coherent(__scm->dev, secret_size, &secret_phys,
-+				    GFP_KERNEL);
-+	if (!secretbuf) {
-+		ret = -ENOMEM;
-+		goto bail_keybuf;
-+	}
-+
-+	memcpy(keybuf, wrapped_key, wrapped_key_size);
-+	desc.args[0] = key_phys;
-+	desc.args[2] = secret_phys;
-+
-+	ret = qcom_scm_call(__scm->dev, &desc, NULL);
-+	if (!ret)
-+		memcpy(sw_secret, secretbuf, secret_size);
-+
-+	memzero_explicit(secretbuf, secret_size);
-+	dma_free_coherent(__scm->dev, secret_size, secretbuf, secret_phys);
-+
-+bail_keybuf:
-+	memzero_explicit(keybuf, wrapped_key_size);
-+	dma_free_coherent(__scm->dev, wrapped_key_size, keybuf, key_phys);
-+
-+	return ret;
++	return qcom_ice_derive_sw_secret(host->ice, wrapped_key,
++					wrapped_key_size, sw_secret);
 +}
-+EXPORT_SYMBOL(qcom_scm_derive_sw_secret);
 +
- /**
-  * qcom_scm_hdcp_available() - Check if secure environment supports HDCP.
-  *
-diff --git a/drivers/firmware/qcom_scm.h b/drivers/firmware/qcom_scm.h
-index e6e512bd57d1..c145cdc71ff8 100644
---- a/drivers/firmware/qcom_scm.h
-+++ b/drivers/firmware/qcom_scm.h
-@@ -119,6 +119,7 @@ extern int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
- #define QCOM_SCM_SVC_ES			0x10	/* Enterprise Security */
- #define QCOM_SCM_ES_INVALIDATE_ICE_KEY	0x03
- #define QCOM_SCM_ES_CONFIG_SET_ICE_KEY	0x04
-+#define QCOM_SCM_ES_DERIVE_SW_SECRET	0x07
+ #else
  
- #define QCOM_SCM_SVC_HDCP		0x11
- #define QCOM_SCM_HDCP_INVOKE		0x01
-diff --git a/include/linux/firmware/qcom/qcom_scm.h b/include/linux/firmware/qcom/qcom_scm.h
-index 250ea4efb7cb..20f5d0b7dfd4 100644
---- a/include/linux/firmware/qcom/qcom_scm.h
-+++ b/include/linux/firmware/qcom/qcom_scm.h
-@@ -109,6 +109,9 @@ extern int qcom_scm_ice_invalidate_key(u32 index);
- extern int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
- 				enum qcom_scm_ice_cipher cipher,
- 				u32 data_unit_size);
-+extern int qcom_scm_derive_sw_secret(const u8 *wrapped_key,
-+				     u32 wrapped_key_size, u8 *sw_secret,
-+				     u32 secret_size);
+ #define ufs_qcom_ice_program_key NULL
++#define ufs_qcom_ice_derive_sw_secret NULL
  
- extern bool qcom_scm_hdcp_available(void);
- extern int qcom_scm_hdcp_req(struct qcom_scm_hdcp_req *req, u32 req_cnt,
+ static inline void ufs_qcom_ice_enable(struct ufs_qcom_host *host)
+ {
+@@ -1747,6 +1768,7 @@ static const struct ufs_hba_variant_ops ufs_hba_qcom_vops = {
+ 	.device_reset		= ufs_qcom_device_reset,
+ 	.config_scaling_param = ufs_qcom_config_scaling_param,
+ 	.program_key		= ufs_qcom_ice_program_key,
++	.derive_sw_secret	= ufs_qcom_ice_derive_sw_secret,
+ 	.reinit_notify		= ufs_qcom_reinit_notify,
+ 	.mcq_config_resource	= ufs_qcom_mcq_config_resource,
+ 	.get_hba_mac		= ufs_qcom_get_hba_mac,
 -- 
 2.25.1
 
