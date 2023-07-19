@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3FB1C04FDF
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jul 2023 17:07:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1E49C001B0
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jul 2023 17:07:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231147AbjGSRH5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jul 2023 13:07:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45230 "EHLO
+        id S230492AbjGSRHw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jul 2023 13:07:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45192 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231136AbjGSRHz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 13:07:55 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD7C610CB;
-        Wed, 19 Jul 2023 10:07:54 -0700 (PDT)
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36JDdgGH023487;
-        Wed, 19 Jul 2023 17:07:52 GMT
+        with ESMTP id S229699AbjGSRHv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 13:07:51 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12E7B10FC;
+        Wed, 19 Jul 2023 10:07:46 -0700 (PDT)
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36JDVs8g012979;
+        Wed, 19 Jul 2023 17:07:44 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
  subject : date : message-id : in-reply-to : references : mime-version :
  content-transfer-encoding : content-type; s=qcppdkim1;
- bh=AzZ7rTUv/oNqGjbz0C6F4Y4uqfSBt8GbOEPIY5FjjMU=;
- b=oPQzy1ar5q6uEjJcSXHJ62hK8cG7XGMCoEtCUocf+7JBR+S1Aqq7u559dxmcIfiPp1DE
- mZWQALryksdi7S3Mj0KufA+JQ9RgMZzids0FCq44RjaLvkrkfx/jRkYUvCPHy5AiAB+w
- S+etOgup2Wglfs2j+RKILJu2C3pAI4TEqTyXB5PsIPBRkJDNHVx/IBQphTEuX7fCiC/k
- h4utJ6sKZpGkpNgy7k1rO0JCfl6lR5NThoyUoKQ3MA/0QRIhWfuWjsVwJ6r1mAPBCWIs
- u1tzlK56Vi4KTL5GTmNSM8hGESC4qcUhgF8S035T89vdtBezMmkr7IYtFIq3nYXSD9CM cg== 
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rx1h3aafu-1
+ bh=FwnUHrs40ZF6aUixV5YKnWUjhJ2gl6w96BdjEm/ZRrk=;
+ b=CbeMQuqmL3PkATpO0ZaU4+IgwiEaYUu38cIF2e6Bs/bNNMaa4Na0YpBHsLtqF0ykPFGx
+ VjQFpyA95UudCAouSWMl3afKYH48inMlOqTn4umtNrCCCfvtsV0wiNlHNpgaVTm2vOcD
+ g6CBgB1yJSBu+TOsvCED1iGlMGr5+u2U0r6PPxLpjK0d/XVnl5oKntsrARXj+H2QWtLU
+ k8lE+5JVPBQ0GvH3EkDvAicbTj2G5+l4NbsxGc2iM3P+g/oq3NC0ZvIDfgOFIb56o9jD
+ CYs2DekuTXr8HCTNpzO+cfDeD0myFeMaL6i0fcWbKgJz0YIXyJXgJiYMwG+3+AQinLzq 2Q== 
+Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rx7rnhrbp-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 19 Jul 2023 17:07:51 +0000
+        Wed, 19 Jul 2023 17:07:43 +0000
 Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36JH7of5027192
+        by NALASPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36JH7gdj012761
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 19 Jul 2023 17:07:50 GMT
+        Wed, 19 Jul 2023 17:07:42 GMT
 Received: from hu-gaurkash-lv.qualcomm.com (10.49.16.6) by
  nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.30; Wed, 19 Jul 2023 10:07:50 -0700
+ 15.2.1118.30; Wed, 19 Jul 2023 10:07:42 -0700
 From:   Gaurav Kashyap <quic_gaurkash@quicinc.com>
 To:     <linux-scsi@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
         <ebiggers@google.com>
@@ -46,9 +46,9 @@ CC:     <linux-mmc@vger.kernel.org>, <linux-block@vger.kernel.org>,
         <quic_psodagud@quicinc.com>, <avmenon@quicinc.com>,
         <abel.vesa@linaro.org>, <quic_spuppala@quicinc.com>,
         Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Subject: [PATCH v2 05/10] ufs: core: support wrapped keys in ufs core
-Date:   Wed, 19 Jul 2023 10:04:19 -0700
-Message-ID: <20230719170423.220033-6-quic_gaurkash@quicinc.com>
+Subject: [PATCH v2 01/10] ice, ufs, mmc: use blk_crypto_key for program_key
+Date:   Wed, 19 Jul 2023 10:04:15 -0700
+Message-ID: <20230719170423.220033-2-quic_gaurkash@quicinc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
 References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
@@ -60,135 +60,264 @@ X-ClientProxiedBy: nalasex01b.na.qualcomm.com (10.47.209.197) To
  nalasex01a.na.qualcomm.com (10.47.209.196)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: DoJ0_xRbLQk4nSEjL4q7K62TWF86-dKv
-X-Proofpoint-ORIG-GUID: DoJ0_xRbLQk4nSEjL4q7K62TWF86-dKv
+X-Proofpoint-GUID: KP4vfmVmwdkDoQF9IhIG7vz2QA_7DyDI
+X-Proofpoint-ORIG-GUID: KP4vfmVmwdkDoQF9IhIG7vz2QA_7DyDI
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-07-19_12,2023-07-19_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- lowpriorityscore=0 impostorscore=0 spamscore=0 malwarescore=0 bulkscore=0
- suspectscore=0 clxscore=1015 mlxscore=0 mlxlogscore=999 adultscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ definitions=2023-07-19_11,2023-07-19_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 bulkscore=0
+ priorityscore=1501 mlxscore=0 clxscore=1015 suspectscore=0 mlxlogscore=999
+ impostorscore=0 phishscore=0 adultscore=0 lowpriorityscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2306200000 definitions=main-2307190154
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-1. Add a new quirk in UFS when wrapped keys are supported. Since
-   wrapped keys are not part of the UFS spec, treat it as a
-   supported quirk.
-2. Add derive_sw_secret crypto profile op implementation in ufshcd
-   crypto.
+The program key ops in the storage controller does not
+pass on the blk crypto key structure to ice, this is okay
+when wrapped keys are not supported and keys are standard
+AES XTS sizes. However, wrapped keyblobs can be of any size
+and in preparation for that, modify the ICE and storage
+controller APIs to accept blk_crypto_key.
 
 Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
 ---
- drivers/ufs/core/ufshcd-crypto.c | 40 +++++++++++++++++++++++++-------
- include/ufs/ufshcd.h             | 10 ++++++++
- 2 files changed, 42 insertions(+), 8 deletions(-)
+ drivers/mmc/host/cqhci-crypto.c  | 7 ++++---
+ drivers/mmc/host/cqhci.h         | 2 ++
+ drivers/mmc/host/sdhci-msm.c     | 6 ++++--
+ drivers/soc/qcom/ice.c           | 6 +++---
+ drivers/ufs/core/ufshcd-crypto.c | 7 ++++---
+ drivers/ufs/host/ufs-qcom.c      | 6 ++++--
+ include/soc/qcom/ice.h           | 5 +++--
+ include/ufs/ufshcd.h             | 1 +
+ 8 files changed, 25 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/ufs/core/ufshcd-crypto.c b/drivers/ufs/core/ufshcd-crypto.c
-index 34537cbac622..2d8f43f2df1d 100644
---- a/drivers/ufs/core/ufshcd-crypto.c
-+++ b/drivers/ufs/core/ufshcd-crypto.c
-@@ -81,13 +81,15 @@ static int ufshcd_crypto_keyslot_program(struct blk_crypto_profile *profile,
- 	cfg.crypto_cap_idx = cap_idx;
- 	cfg.config_enable = UFS_CRYPTO_CONFIGURATION_ENABLE;
- 
--	if (ccap_array[cap_idx].algorithm_id == UFS_CRYPTO_ALG_AES_XTS) {
--		/* In XTS mode, the blk_crypto_key's size is already doubled */
--		memcpy(cfg.crypto_key, key->raw, key->size/2);
--		memcpy(cfg.crypto_key + UFS_CRYPTO_KEY_MAX_SIZE/2,
--		       key->raw + key->size/2, key->size/2);
--	} else {
--		memcpy(cfg.crypto_key, key->raw, key->size);
-+	if (key->crypto_cfg.key_type != BLK_CRYPTO_KEY_TYPE_HW_WRAPPED) {
-+		if (ccap_array[cap_idx].algorithm_id == UFS_CRYPTO_ALG_AES_XTS) {
-+			/* In XTS mode, the blk_crypto_key's size is already doubled */
-+			memcpy(cfg.crypto_key, key->raw, key->size/2);
-+			memcpy(cfg.crypto_key + UFS_CRYPTO_KEY_MAX_SIZE/2,
-+			       key->raw + key->size/2, key->size/2);
-+		} else {
-+			memcpy(cfg.crypto_key, key->raw, key->size);
-+		}
- 	}
- 
- 	err = ufshcd_program_key(hba, key, &cfg, slot);
-@@ -127,9 +129,25 @@ bool ufshcd_crypto_enable(struct ufs_hba *hba)
- 	return true;
+diff --git a/drivers/mmc/host/cqhci-crypto.c b/drivers/mmc/host/cqhci-crypto.c
+index 6652982410ec..91da6de1d650 100644
+--- a/drivers/mmc/host/cqhci-crypto.c
++++ b/drivers/mmc/host/cqhci-crypto.c
+@@ -32,6 +32,7 @@ cqhci_host_from_crypto_profile(struct blk_crypto_profile *profile)
  }
  
-+
-+static int ufshcd_crypto_derive_sw_secret(struct blk_crypto_profile *profile,
-+				const u8 wrapped_key[], size_t wrapped_key_size,
-+				u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
-+{
-+	struct ufs_hba *hba =
-+		container_of(profile, struct ufs_hba, crypto_profile);
-+
-+	if (hba->vops && hba->vops->derive_sw_secret)
-+		return  hba->vops->derive_sw_secret(hba, wrapped_key,
-+						 wrapped_key_size, sw_secret);
-+
-+	return -EOPNOTSUPP;
-+}
-+
- static const struct blk_crypto_ll_ops ufshcd_crypto_ops = {
- 	.keyslot_program	= ufshcd_crypto_keyslot_program,
- 	.keyslot_evict		= ufshcd_crypto_keyslot_evict,
-+	.derive_sw_secret	= ufshcd_crypto_derive_sw_secret,
+ static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
++				    const struct blk_crypto_key *bkey,
+ 				    const union cqhci_crypto_cfg_entry *cfg,
+ 				    int slot)
+ {
+@@ -39,7 +40,7 @@ static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
+ 	int i;
+ 
+ 	if (cq_host->ops->program_key)
+-		return cq_host->ops->program_key(cq_host, cfg, slot);
++		return cq_host->ops->program_key(cq_host, bkey, cfg, slot);
+ 
+ 	/* Clear CFGE */
+ 	cqhci_writel(cq_host, 0, slot_offset + 16 * sizeof(cfg->reg_val[0]));
+@@ -99,7 +100,7 @@ static int cqhci_crypto_keyslot_program(struct blk_crypto_profile *profile,
+ 		memcpy(cfg.crypto_key, key->raw, key->size);
+ 	}
+ 
+-	err = cqhci_crypto_program_key(cq_host, &cfg, slot);
++	err = cqhci_crypto_program_key(cq_host, key, &cfg, slot);
+ 
+ 	memzero_explicit(&cfg, sizeof(cfg));
+ 	return err;
+@@ -113,7 +114,7 @@ static int cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
+ 	 */
+ 	union cqhci_crypto_cfg_entry cfg = {};
+ 
+-	return cqhci_crypto_program_key(cq_host, &cfg, slot);
++	return cqhci_crypto_program_key(cq_host, NULL, &cfg, slot);
+ }
+ 
+ static int cqhci_crypto_keyslot_evict(struct blk_crypto_profile *profile,
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index 1a12e40a02e6..949ebbe05773 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -12,6 +12,7 @@
+ #include <linux/completion.h>
+ #include <linux/wait.h>
+ #include <linux/irqreturn.h>
++#include <linux/blk-crypto.h>
+ #include <asm/io.h>
+ 
+ /* registers */
+@@ -291,6 +292,7 @@ struct cqhci_host_ops {
+ 	void (*post_disable)(struct mmc_host *mmc);
+ #ifdef CONFIG_MMC_CRYPTO
+ 	int (*program_key)(struct cqhci_host *cq_host,
++			   const struct blk_crypto_key *bkey,
+ 			   const union cqhci_crypto_cfg_entry *cfg, int slot);
+ #endif
+ };
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 1c935b5bafe1..487d2fdcc7a8 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1859,6 +1859,7 @@ static __maybe_unused int sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
+  * vendor-specific SCM calls for this; it doesn't support the standard way.
+  */
+ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
++				 const struct blk_crypto_key_type *bkey,
+ 				 const union cqhci_crypto_cfg_entry *cfg,
+ 				 int slot)
+ {
+@@ -1866,6 +1867,7 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+ 	union cqhci_crypto_cap_entry cap;
++	u8 ice_key_size;
+ 
+ 	/* Only AES-256-XTS has been tested so far. */
+ 	cap = cq_host->crypto_cap_array[cfg->crypto_cap_idx];
+@@ -1873,11 +1875,11 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+ 		cap.key_size != CQHCI_CRYPTO_KEY_SIZE_256)
+ 		return -EINVAL;
+ 
++	ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
+ 	if (cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE)
+ 		return qcom_ice_program_key(msm_host->ice,
+ 					    QCOM_ICE_CRYPTO_ALG_AES_XTS,
+-					    QCOM_ICE_CRYPTO_KEY_SIZE_256,
+-					    cfg->crypto_key,
++					    ice_key_size, bkey,
+ 					    cfg->data_unit_size, slot);
+ 	else
+ 		return qcom_ice_evict_key(msm_host->ice, slot);
+diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+index a6123ea96272..d19f674bb1b6 100644
+--- a/drivers/soc/qcom/ice.c
++++ b/drivers/soc/qcom/ice.c
+@@ -161,8 +161,8 @@ EXPORT_SYMBOL_GPL(qcom_ice_suspend);
+ 
+ int qcom_ice_program_key(struct qcom_ice *ice,
+ 			 u8 algorithm_id, u8 key_size,
+-			 const u8 crypto_key[], u8 data_unit_size,
+-			 int slot)
++			 const struct blk_crypto_key *bkey,
++			 u8 data_unit_size, int slot)
+ {
+ 	struct device *dev = ice->dev;
+ 	union {
+@@ -181,7 +181,7 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+ 		return -EINVAL;
+ 	}
+ 
+-	memcpy(key.bytes, crypto_key, AES_256_XTS_KEY_SIZE);
++	memcpy(key.bytes, bkey->raw, AES_256_XTS_KEY_SIZE);
+ 
+ 	/* The SCM call requires that the key words are encoded in big endian */
+ 	for (i = 0; i < ARRAY_SIZE(key.words); i++)
+diff --git a/drivers/ufs/core/ufshcd-crypto.c b/drivers/ufs/core/ufshcd-crypto.c
+index f4cc54d82281..34537cbac622 100644
+--- a/drivers/ufs/core/ufshcd-crypto.c
++++ b/drivers/ufs/core/ufshcd-crypto.c
+@@ -18,6 +18,7 @@ static const struct ufs_crypto_alg_entry {
  };
  
- static enum blk_crypto_mode_num
-@@ -191,7 +209,13 @@ int ufshcd_hba_init_crypto_capabilities(struct ufs_hba *hba)
- 	hba->crypto_profile.ll_ops = ufshcd_crypto_ops;
- 	/* UFS only supports 8 bytes for any DUN */
- 	hba->crypto_profile.max_dun_bytes_supported = 8;
--	hba->crypto_profile.key_types_supported = BLK_CRYPTO_KEY_TYPE_STANDARD;
-+	if (hba->quirks & UFSHCD_QUIRK_USES_WRAPPED_CRYPTO_KEYS)
-+		hba->crypto_profile.key_types_supported =
-+				BLK_CRYPTO_KEY_TYPE_HW_WRAPPED;
-+	else
-+		hba->crypto_profile.key_types_supported =
-+				BLK_CRYPTO_KEY_TYPE_STANDARD;
-+
- 	hba->crypto_profile.dev = hba->dev;
+ static int ufshcd_program_key(struct ufs_hba *hba,
++			      const struct blk_crypto_key *bkey,
+ 			      const union ufs_crypto_cfg_entry *cfg, int slot)
+ {
+ 	int i;
+@@ -27,7 +28,7 @@ static int ufshcd_program_key(struct ufs_hba *hba,
+ 	ufshcd_hold(hba);
  
- 	/*
+ 	if (hba->vops && hba->vops->program_key) {
+-		err = hba->vops->program_key(hba, cfg, slot);
++		err = hba->vops->program_key(hba, bkey, cfg, slot);
+ 		goto out;
+ 	}
+ 
+@@ -89,7 +90,7 @@ static int ufshcd_crypto_keyslot_program(struct blk_crypto_profile *profile,
+ 		memcpy(cfg.crypto_key, key->raw, key->size);
+ 	}
+ 
+-	err = ufshcd_program_key(hba, &cfg, slot);
++	err = ufshcd_program_key(hba, key, &cfg, slot);
+ 
+ 	memzero_explicit(&cfg, sizeof(cfg));
+ 	return err;
+@@ -103,7 +104,7 @@ static int ufshcd_clear_keyslot(struct ufs_hba *hba, int slot)
+ 	 */
+ 	union ufs_crypto_cfg_entry cfg = {};
+ 
+-	return ufshcd_program_key(hba, &cfg, slot);
++	return ufshcd_program_key(hba, NULL, &cfg, slot);
+ }
+ 
+ static int ufshcd_crypto_keyslot_evict(struct blk_crypto_profile *profile,
+diff --git a/drivers/ufs/host/ufs-qcom.c b/drivers/ufs/host/ufs-qcom.c
+index 8d6fd4c3324f..a04aafad4f48 100644
+--- a/drivers/ufs/host/ufs-qcom.c
++++ b/drivers/ufs/host/ufs-qcom.c
+@@ -103,6 +103,7 @@ static inline int ufs_qcom_ice_suspend(struct ufs_qcom_host *host)
+ }
+ 
+ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
++				    const struct blk_crypto_key *bkey,
+ 				    const union ufs_crypto_cfg_entry *cfg,
+ 				    int slot)
+ {
+@@ -110,6 +111,7 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+ 	union ufs_crypto_cap_entry cap;
+ 	bool config_enable =
+ 		cfg->config_enable & UFS_CRYPTO_CONFIGURATION_ENABLE;
++	u8 ice_key_size;
+ 
+ 	/* Only AES-256-XTS has been tested so far. */
+ 	cap = hba->crypto_cap_array[cfg->crypto_cap_idx];
+@@ -117,11 +119,11 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+ 	    cap.key_size != UFS_CRYPTO_KEY_SIZE_256)
+ 		return -EINVAL;
+ 
++	ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
+ 	if (config_enable)
+ 		return qcom_ice_program_key(host->ice,
+ 					    QCOM_ICE_CRYPTO_ALG_AES_XTS,
+-					    QCOM_ICE_CRYPTO_KEY_SIZE_256,
+-					    cfg->crypto_key,
++					    ice_key_size, bkey,
+ 					    cfg->data_unit_size, slot);
+ 	else
+ 		return qcom_ice_evict_key(host->ice, slot);
+diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+index 5870a94599a2..9dd835dba2a7 100644
+--- a/include/soc/qcom/ice.h
++++ b/include/soc/qcom/ice.h
+@@ -7,6 +7,7 @@
+ #define __QCOM_ICE_H__
+ 
+ #include <linux/types.h>
++#include <linux/blk-crypto.h>
+ 
+ struct qcom_ice;
+ 
+@@ -30,8 +31,8 @@ int qcom_ice_resume(struct qcom_ice *ice);
+ int qcom_ice_suspend(struct qcom_ice *ice);
+ int qcom_ice_program_key(struct qcom_ice *ice,
+ 			 u8 algorithm_id, u8 key_size,
+-			 const u8 crypto_key[], u8 data_unit_size,
+-			 int slot);
++			 const struct blk_crypto_key *bkey,
++			 u8 data_unit_size, int slot);
+ int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+ struct qcom_ice *of_qcom_ice_get(struct device *dev);
+ #endif /* __QCOM_ICE_H__ */
 diff --git a/include/ufs/ufshcd.h b/include/ufs/ufshcd.h
-index ef5995584bc3..cef8e619fe5d 100644
+index 6dc11fa0ebb1..ef5995584bc3 100644
 --- a/include/ufs/ufshcd.h
 +++ b/include/ufs/ufshcd.h
-@@ -299,6 +299,7 @@ struct ufs_pwr_mode_info {
-  * @device_reset: called to issue a reset pulse on the UFS device
-  * @config_scaling_param: called to configure clock scaling parameters
-  * @program_key: program or evict an inline encryption key
-+ * @derive_sw_secret: derive sw secret from a wrapped key
-  * @event_notify: called to notify important events
-  * @reinit_notify: called to notify reinit of UFSHCD during max gear switch
-  * @mcq_config_resource: called to configure MCQ platform resources
-@@ -343,6 +344,9 @@ struct ufs_hba_variant_ops {
+@@ -341,6 +341,7 @@ struct ufs_hba_variant_ops {
+ 				struct devfreq_dev_profile *profile,
+ 				struct devfreq_simple_ondemand_data *data);
  	int	(*program_key)(struct ufs_hba *hba,
- 			       const struct blk_crypto_key *bkey,
++			       const struct blk_crypto_key *bkey,
  			       const union ufs_crypto_cfg_entry *cfg, int slot);
-+	int	(*derive_sw_secret)(struct ufs_hba *hba, const u8 wrapped_key[],
-+				    unsigned int wrapped_key_size,
-+				    u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE]);
  	void	(*event_notify)(struct ufs_hba *hba,
  				enum ufs_event_type evt, void *data);
- 	void	(*reinit_notify)(struct ufs_hba *);
-@@ -624,6 +628,12 @@ enum ufshcd_quirks {
- 	 * thus need this quirk to skip related flow.
- 	 */
- 	UFSHCD_QUIRK_MCQ_BROKEN_RTC			= 1 << 21,
-+
-+	/*
-+	 * This quirk indicates that UFS will be using HW wrapped keys
-+	 * when using inline encryption.
-+	 */
-+	UFSHCD_QUIRK_USES_WRAPPED_CRYPTO_KEYS		= 1 << 22,
- };
- 
- enum ufshcd_caps {
 -- 
 2.25.1
 
