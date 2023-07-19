@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4000C04A6A
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jul 2023 17:07:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3FB1C04FDF
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jul 2023 17:07:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230482AbjGSRHg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jul 2023 13:07:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45104 "EHLO
+        id S231147AbjGSRH5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jul 2023 13:07:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229699AbjGSRHf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 13:07:35 -0400
+        with ESMTP id S231136AbjGSRHz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 13:07:55 -0400
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DB7BB7;
-        Wed, 19 Jul 2023 10:07:31 -0700 (PDT)
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36JDMxSF013739;
-        Wed, 19 Jul 2023 17:07:28 GMT
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD7C610CB;
+        Wed, 19 Jul 2023 10:07:54 -0700 (PDT)
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36JDdgGH023487;
+        Wed, 19 Jul 2023 17:07:52 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=qcppdkim1;
- bh=1BQj/4/ShoOHhtfTts2VeEpZMxDNQ2NwBUEEeZrAF0E=;
- b=fll4EbiGh2qumdTB46D5wS7zKohJQsAj94fue18SgIrQm1o7lmExD06FsIekVvloNnv9
- jU05TlL8e54Bu9tmWnF2IXe/tgMyi6idC4zAUk4oieGNhv94pja0e/V5Lulkl0TtEG1D
- GIkaId6gvntrl+0IMN/ZQLGl1dhfC6Ebso2nVmgJtiPIRR200+7l/IDXfs/O9gkaZXNy
- fLhm++34GbqD0gs5Cim7g+yYVAl8sYCoZWW547BjFHI2cCPYncP9s29HrlzE2roOT18D
- lO2Q9EB1mFH0YoIDFOrbwjqk9K4hq2xousZofYA0Qlo7BTMFrXmaRZhOLxG2aUyCCsxA 3g== 
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding : content-type; s=qcppdkim1;
+ bh=AzZ7rTUv/oNqGjbz0C6F4Y4uqfSBt8GbOEPIY5FjjMU=;
+ b=oPQzy1ar5q6uEjJcSXHJ62hK8cG7XGMCoEtCUocf+7JBR+S1Aqq7u559dxmcIfiPp1DE
+ mZWQALryksdi7S3Mj0KufA+JQ9RgMZzids0FCq44RjaLvkrkfx/jRkYUvCPHy5AiAB+w
+ S+etOgup2Wglfs2j+RKILJu2C3pAI4TEqTyXB5PsIPBRkJDNHVx/IBQphTEuX7fCiC/k
+ h4utJ6sKZpGkpNgy7k1rO0JCfl6lR5NThoyUoKQ3MA/0QRIhWfuWjsVwJ6r1mAPBCWIs
+ u1tzlK56Vi4KTL5GTmNSM8hGESC4qcUhgF8S035T89vdtBezMmkr7IYtFIq3nYXSD9CM cg== 
 Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rxexkgtu9-1
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rx1h3aafu-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 19 Jul 2023 17:07:28 +0000
+        Wed, 19 Jul 2023 17:07:51 +0000
 Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36JH7RZr026518
+        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36JH7of5027192
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 19 Jul 2023 17:07:27 GMT
+        Wed, 19 Jul 2023 17:07:50 GMT
 Received: from hu-gaurkash-lv.qualcomm.com (10.49.16.6) by
  nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.30; Wed, 19 Jul 2023 10:07:27 -0700
+ 15.2.1118.30; Wed, 19 Jul 2023 10:07:50 -0700
 From:   Gaurav Kashyap <quic_gaurkash@quicinc.com>
 To:     <linux-scsi@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
         <ebiggers@google.com>
@@ -46,10 +46,12 @@ CC:     <linux-mmc@vger.kernel.org>, <linux-block@vger.kernel.org>,
         <quic_psodagud@quicinc.com>, <avmenon@quicinc.com>,
         <abel.vesa@linaro.org>, <quic_spuppala@quicinc.com>,
         Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Subject: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and ufs
-Date:   Wed, 19 Jul 2023 10:04:14 -0700
-Message-ID: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+Subject: [PATCH v2 05/10] ufs: core: support wrapped keys in ufs core
+Date:   Wed, 19 Jul 2023 10:04:19 -0700
+Message-ID: <20230719170423.220033-6-quic_gaurkash@quicinc.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
@@ -58,82 +60,135 @@ X-ClientProxiedBy: nalasex01b.na.qualcomm.com (10.47.209.197) To
  nalasex01a.na.qualcomm.com (10.47.209.196)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: AdU09At96WesfPGF559znTNbLYI2Xiq8
-X-Proofpoint-GUID: AdU09At96WesfPGF559znTNbLYI2Xiq8
+X-Proofpoint-GUID: DoJ0_xRbLQk4nSEjL4q7K62TWF86-dKv
+X-Proofpoint-ORIG-GUID: DoJ0_xRbLQk4nSEjL4q7K62TWF86-dKv
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-07-19_11,2023-07-19_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0
- lowpriorityscore=0 bulkscore=0 spamscore=0 priorityscore=1501
- malwarescore=0 phishscore=0 clxscore=1011 suspectscore=0 impostorscore=0
- mlxlogscore=999 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ definitions=2023-07-19_12,2023-07-19_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ lowpriorityscore=0 impostorscore=0 spamscore=0 malwarescore=0 bulkscore=0
+ suspectscore=0 clxscore=1015 mlxscore=0 mlxlogscore=999 adultscore=0
+ phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2306200000 definitions=main-2307190154
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-These patches add support to Qualcomm ICE (Inline Crypto Enginr) for hardware
-wrapped keys using Qualcomm Hardware Key Manager (HWKM) and are made on top
-of a rebased version  Eric Bigger's set of changes to support wrapped keys in
-fscrypt and block below:
-https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7
-(The rebased patches are not uploaded here)
+1. Add a new quirk in UFS when wrapped keys are supported. Since
+   wrapped keys are not part of the UFS spec, treat it as a
+   supported quirk.
+2. Add derive_sw_secret crypto profile op implementation in ufshcd
+   crypto.
 
-Ref v1 here:
-https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkash@quicinc.com/
+Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+---
+ drivers/ufs/core/ufshcd-crypto.c | 40 +++++++++++++++++++++++++-------
+ include/ufs/ufshcd.h             | 10 ++++++++
+ 2 files changed, 42 insertions(+), 8 deletions(-)
 
-Explanation and use of hardware-wrapped-keys can be found here:
-Documentation/block/inline-encryption.rst
-
-This patch is organized as follows:
-
-Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
-Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
-Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
-Patch 5-6 - Adds support for wrapped keys in UFS
-Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
-
-NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
-      Patch 3, 4, 8, 10 will have MMC equivalents.
-
-Testing:
-Test platform: SM8550 MTP
-Engineering trustzone image is required to test this feature only
-for SM8550. For SM8650 onwards, all trustzone changes to support this
-will be part of the released images.
-The engineering changes primarily contain hooks to generate, import and
-prepare keys for HW wrapped disk encryption.
-
-The changes were tested by mounting initramfs and running the fscryptctl
-tool (Ref: https://github.com/ebiggers/fscryptctl/tree/wip-wrapped-keys) to
-generate and prepare keys, as well as to set policies on folders, which
-consequently invokes disk encryption flows through UFS.
-
-Gaurav Kashyap (10):
-  ice, ufs, mmc: use blk_crypto_key for program_key
-  qcom_scm: scm call for deriving a software secret
-  soc: qcom: ice: add hwkm support in ice
-  soc: qcom: ice: support for hardware wrapped keys
-  ufs: core: support wrapped keys in ufs core
-  ufs: host: wrapped keys support in ufs qcom
-  qcom_scm: scm call for create, prepare and import keys
-  ufs: core: add support for generate, import and prepare keys
-  soc: qcom: support for generate, import and prepare key
-  ufs: host: support for generate, import and prepare key
-
- drivers/firmware/qcom_scm.c            | 292 +++++++++++++++++++++++
- drivers/firmware/qcom_scm.h            |   4 +
- drivers/mmc/host/cqhci-crypto.c        |   7 +-
- drivers/mmc/host/cqhci.h               |   2 +
- drivers/mmc/host/sdhci-msm.c           |   6 +-
- drivers/soc/qcom/ice.c                 | 309 +++++++++++++++++++++++--
- drivers/ufs/core/ufshcd-crypto.c       |  92 +++++++-
- drivers/ufs/host/ufs-qcom.c            |  63 ++++-
- include/linux/firmware/qcom/qcom_scm.h |  13 ++
- include/soc/qcom/ice.h                 |  18 +-
- include/ufs/ufshcd.h                   |  25 ++
- 11 files changed, 797 insertions(+), 34 deletions(-)
-
+diff --git a/drivers/ufs/core/ufshcd-crypto.c b/drivers/ufs/core/ufshcd-crypto.c
+index 34537cbac622..2d8f43f2df1d 100644
+--- a/drivers/ufs/core/ufshcd-crypto.c
++++ b/drivers/ufs/core/ufshcd-crypto.c
+@@ -81,13 +81,15 @@ static int ufshcd_crypto_keyslot_program(struct blk_crypto_profile *profile,
+ 	cfg.crypto_cap_idx = cap_idx;
+ 	cfg.config_enable = UFS_CRYPTO_CONFIGURATION_ENABLE;
+ 
+-	if (ccap_array[cap_idx].algorithm_id == UFS_CRYPTO_ALG_AES_XTS) {
+-		/* In XTS mode, the blk_crypto_key's size is already doubled */
+-		memcpy(cfg.crypto_key, key->raw, key->size/2);
+-		memcpy(cfg.crypto_key + UFS_CRYPTO_KEY_MAX_SIZE/2,
+-		       key->raw + key->size/2, key->size/2);
+-	} else {
+-		memcpy(cfg.crypto_key, key->raw, key->size);
++	if (key->crypto_cfg.key_type != BLK_CRYPTO_KEY_TYPE_HW_WRAPPED) {
++		if (ccap_array[cap_idx].algorithm_id == UFS_CRYPTO_ALG_AES_XTS) {
++			/* In XTS mode, the blk_crypto_key's size is already doubled */
++			memcpy(cfg.crypto_key, key->raw, key->size/2);
++			memcpy(cfg.crypto_key + UFS_CRYPTO_KEY_MAX_SIZE/2,
++			       key->raw + key->size/2, key->size/2);
++		} else {
++			memcpy(cfg.crypto_key, key->raw, key->size);
++		}
+ 	}
+ 
+ 	err = ufshcd_program_key(hba, key, &cfg, slot);
+@@ -127,9 +129,25 @@ bool ufshcd_crypto_enable(struct ufs_hba *hba)
+ 	return true;
+ }
+ 
++
++static int ufshcd_crypto_derive_sw_secret(struct blk_crypto_profile *profile,
++				const u8 wrapped_key[], size_t wrapped_key_size,
++				u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
++{
++	struct ufs_hba *hba =
++		container_of(profile, struct ufs_hba, crypto_profile);
++
++	if (hba->vops && hba->vops->derive_sw_secret)
++		return  hba->vops->derive_sw_secret(hba, wrapped_key,
++						 wrapped_key_size, sw_secret);
++
++	return -EOPNOTSUPP;
++}
++
+ static const struct blk_crypto_ll_ops ufshcd_crypto_ops = {
+ 	.keyslot_program	= ufshcd_crypto_keyslot_program,
+ 	.keyslot_evict		= ufshcd_crypto_keyslot_evict,
++	.derive_sw_secret	= ufshcd_crypto_derive_sw_secret,
+ };
+ 
+ static enum blk_crypto_mode_num
+@@ -191,7 +209,13 @@ int ufshcd_hba_init_crypto_capabilities(struct ufs_hba *hba)
+ 	hba->crypto_profile.ll_ops = ufshcd_crypto_ops;
+ 	/* UFS only supports 8 bytes for any DUN */
+ 	hba->crypto_profile.max_dun_bytes_supported = 8;
+-	hba->crypto_profile.key_types_supported = BLK_CRYPTO_KEY_TYPE_STANDARD;
++	if (hba->quirks & UFSHCD_QUIRK_USES_WRAPPED_CRYPTO_KEYS)
++		hba->crypto_profile.key_types_supported =
++				BLK_CRYPTO_KEY_TYPE_HW_WRAPPED;
++	else
++		hba->crypto_profile.key_types_supported =
++				BLK_CRYPTO_KEY_TYPE_STANDARD;
++
+ 	hba->crypto_profile.dev = hba->dev;
+ 
+ 	/*
+diff --git a/include/ufs/ufshcd.h b/include/ufs/ufshcd.h
+index ef5995584bc3..cef8e619fe5d 100644
+--- a/include/ufs/ufshcd.h
++++ b/include/ufs/ufshcd.h
+@@ -299,6 +299,7 @@ struct ufs_pwr_mode_info {
+  * @device_reset: called to issue a reset pulse on the UFS device
+  * @config_scaling_param: called to configure clock scaling parameters
+  * @program_key: program or evict an inline encryption key
++ * @derive_sw_secret: derive sw secret from a wrapped key
+  * @event_notify: called to notify important events
+  * @reinit_notify: called to notify reinit of UFSHCD during max gear switch
+  * @mcq_config_resource: called to configure MCQ platform resources
+@@ -343,6 +344,9 @@ struct ufs_hba_variant_ops {
+ 	int	(*program_key)(struct ufs_hba *hba,
+ 			       const struct blk_crypto_key *bkey,
+ 			       const union ufs_crypto_cfg_entry *cfg, int slot);
++	int	(*derive_sw_secret)(struct ufs_hba *hba, const u8 wrapped_key[],
++				    unsigned int wrapped_key_size,
++				    u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE]);
+ 	void	(*event_notify)(struct ufs_hba *hba,
+ 				enum ufs_event_type evt, void *data);
+ 	void	(*reinit_notify)(struct ufs_hba *);
+@@ -624,6 +628,12 @@ enum ufshcd_quirks {
+ 	 * thus need this quirk to skip related flow.
+ 	 */
+ 	UFSHCD_QUIRK_MCQ_BROKEN_RTC			= 1 << 21,
++
++	/*
++	 * This quirk indicates that UFS will be using HW wrapped keys
++	 * when using inline encryption.
++	 */
++	UFSHCD_QUIRK_USES_WRAPPED_CRYPTO_KEYS		= 1 << 22,
+ };
+ 
+ enum ufshcd_caps {
 -- 
 2.25.1
 
