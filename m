@@ -2,149 +2,71 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C0917EB64DC
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 06:45:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B571FEB64DC
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 07:06:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229528AbjGTGpZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Jul 2023 02:45:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55804 "EHLO
+        id S229736AbjGTHGE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jul 2023 03:06:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230256AbjGTGpS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 02:45:18 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E25B268C;
-        Wed, 19 Jul 2023 23:45:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1689835517; x=1721371517;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=TfkzamveMbxl7osZRf/DBt0QPKBNI6ZOlRULHeBX3RI=;
-  b=EQenF/8dkNkt+AT4vyXKxEuDvWkGcdmVeRix2H+i20u9FkNMNAYQoIXS
-   4iG1W6FMsqClzffE+EN2lAucP7OeigR5Gh9LaBLi9byJcVpLwIkt/Bu9a
-   6z/dV8G2YSAs6jJdn7Z2lBuZVmVNR2To5ynHxjkG4MX762YagyX3WPuT0
-   KU46lJ3r1lbGhD2boxKdFEfZPeiR6YWZ0BDQnSrkN4F5y7Tv8DCQgC4yj
-   2wAwDsb7Vjo4juwo58k3htCXRE45nC+Axh8G+uM6SdK/XpiB77xRiPKpZ
-   PyEOQWa/fS+XLDC2d5/Sx04LMWZGoId5s1ajEYJwcRde/m3F9yxTl1IN1
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10776"; a="356614779"
-X-IronPort-AV: E=Sophos;i="6.01,218,1684825200"; 
-   d="scan'208";a="356614779"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jul 2023 23:45:07 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10776"; a="674584718"
-X-IronPort-AV: E=Sophos;i="6.01,218,1684825200"; 
-   d="scan'208";a="674584718"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.109])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jul 2023 23:45:05 -0700
-Message-ID: <ff06bd46-bf43-d2dc-751f-47f41ccc1821@intel.com>
-Date:   Thu, 20 Jul 2023 09:44:56 +0300
+        with ESMTP id S229720AbjGTHGC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 03:06:02 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D72326A5;
+        Thu, 20 Jul 2023 00:05:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=sEd+sy2amDGgLLugpD3SukQrlvn/3nTuy6vZTRpyND0=; b=RVHwsLzjkQi2vE+rIbn74ECoA7
+        Ti6U29xIQvJhuMHIFPzDXlUg+3Wwrxj5azQwdebGMxo27KyE0CQxM1w6Cq4Y7vr5sHwrq4u+q1Lxd
+        usOQb7MUyHDZSVKTj/PtISXeZvLFrxUbyLH1XBbbzwC6ughDOSRFXAZHA1lwV8s9rl/L6m0MRXxuo
+        TVXOnfcCbgPrF8xS26V/hx6pJyB6768r+yilmfkwjt5n7R2O+jJr3m8S8BDDVTlUG2mddEkCpjX+0
+        QW79ExSdsXRt5KdsE4Vc1r+JV7czr6tQEZDwbOOF1TJ+e6CE983cqMawwnwQM4gS2RVHSyaBgwoWx
+        PGD3A5Rw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+        id 1qMNiO-00A2qs-00;
+        Thu, 20 Jul 2023 07:04:44 +0000
+Date:   Thu, 20 Jul 2023 00:04:43 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Daniel Golle <daniel@makrotopia.org>
+Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Dave Chinner <dchinner@redhat.com>,
+        Matthew Wilcox <willy@infradead.org>,
+        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
+        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
+        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
+        Christian Loehle <CLoehle@hyperstone.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Hannes Reinecke <hare@suse.de>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Ye Bin <yebin10@huawei.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
+Subject: Re: [RFC PATCH 6/6] block: implement NVMEM provider
+Message-ID: <ZLjci5bHzTI+/Kxs@infradead.org>
+References: <cover.1689802933.git.daniel@makrotopia.org>
+ <e5b709e15739dc0563e9497a2dbbe63050381db0.1689802933.git.daniel@makrotopia.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.13.0
-Subject: Re: [PATCH] mmc: core: Remove FW revision from CID check
-Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, chunyan.zhang@unisoc.com,
-        yuelin.tang@unisoc.com
-References: <20230718011504.10947-1-wenchao.chen@unisoc.com>
- <b4ef97ba-440a-2641-0811-bb05e630ccb1@intel.com>
- <CA+Da2qxOhK7Uc8_ONVgkR=3pTnTo7KgcJi-yS3Cv730+J0pAxA@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CA+Da2qxOhK7Uc8_ONVgkR=3pTnTo7KgcJi-yS3Cv730+J0pAxA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e5b709e15739dc0563e9497a2dbbe63050381db0.1689802933.git.daniel@makrotopia.org>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/07/23 05:46, Wenchao Chen wrote:
-> On Tue, Jul 18, 2023 at 2:13 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 18/07/23 04:15, Wenchao Chen wrote:
->>> When the card is reset, mmc_card_init() will check if this
->>> card is the previous card by comparing the CID.
->>>
->>> If the firmware is upgraded, the product version may change,
->>> so we remove the product version from the CID check.
->>
->> What is the use-case for this?  I would have thought it is safer
->> not to assume anything about the card after the firmware has been
->> upgraded.
->>
-> Hi adrian
->     Understood, but we have case:
->     1.Before the firmware upgrade
->         [T5745@C0] mmc0 oldcard raw->cid[2]: 32691160, raw->cid[3]: d9241800
->         PRV=69
->     2.After the firmware upgrade
->         [T5745@C0] mmc0 cid[2]: 32011160 cid[3]: d9241800
->         PRV=01
->     If the PRV is not excluded in the CID check, then the mmc
-> initialization will fail after the mmc reset.
->     In addition, CRC is excluded because some controllers support
-> SDHCI_QUIRK2_RSP_136_HAS_CRC.
-
-I do not know what others are doing in this regard, nor what
-circumstances are leading to the re-initialization.
-
-Presumably a clean re-initialization could be done by
-unbinding and rebinding the host controller.
-
-> 
->>>
->>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
->>> ---
->>>  drivers/mmc/core/mmc.c | 18 +++++++++++++++++-
->>>  1 file changed, 17 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>> index 89cd48fcec79..32a73378d5c3 100644
->>> --- a/drivers/mmc/core/mmc.c
->>> +++ b/drivers/mmc/core/mmc.c
->>> @@ -32,6 +32,9 @@
->>>  #define MIN_CACHE_EN_TIMEOUT_MS 1600
->>>  #define CACHE_FLUSH_TIMEOUT_MS 30000 /* 30s */
->>>
->>> +#define MMC_CID_PRV_MASK GENMASK(23, 16)
->>> +#define MMC_CID_CRC_MASK GENMASK(7, 0)
->>> +
->>>  static const unsigned int tran_exp[] = {
->>>       10000,          100000,         1000000,        10000000,
->>>       0,              0,              0,              0
->>> @@ -126,6 +129,19 @@ static int mmc_decode_cid(struct mmc_card *card)
->>>       return 0;
->>>  }
->>>
->>> +static int mmc_check_cid(u32 *cid, u32 *raw_cid)
->>> +{
->>> +     /*
->>> +      * When comparing CID, we need to remove the product
->>> +      * version (Field PRV, offset 55:48) and CRC. Because
->>> +      * the product version will change when the firmware
->>> +      * is upgraded. Also, the new CRC is different.
->>> +      */
->>> +     return cid[0] != raw_cid[0] || cid[1] != raw_cid[1] ||
->>> +             (cid[2] & ~MMC_CID_PRV_MASK) != (raw_cid[2] & ~MMC_CID_PRV_MASK) ||
->>> +             (cid[3] & ~MMC_CID_CRC_MASK) != (raw_cid[3] & ~MMC_CID_CRC_MASK);
->>> +}
->>> +
->>>  static void mmc_set_erase_size(struct mmc_card *card)
->>>  {
->>>       if (card->ext_csd.erase_group_def & 1)
->>> @@ -1640,7 +1656,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->>>               goto err;
->>>
->>>       if (oldcard) {
->>> -             if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0) {
->>> +             if (mmc_check_cid(cid, oldcard->raw_cid)) {
->>>                       pr_debug("%s: Perhaps the card was replaced\n",
->>>                               mmc_hostname(host));
->>>                       err = -ENOENT;
->>
+The layering here is exactly the wrong way around.  This block device
+as nvmem provide has not business sitting in the block layer and being
+keyed ff the gendisk registration.  Instead you should create a new
+nvmem backed that opens the block device as needed if it fits your
+OF description without any changes to the core block layer.
 
