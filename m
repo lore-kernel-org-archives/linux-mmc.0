@@ -2,181 +2,133 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F102EB64DA
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 17:45:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AE42EB64DA
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 18:04:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231314AbjGTRpW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Jul 2023 13:45:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41656 "EHLO
+        id S229926AbjGTSEp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jul 2023 14:04:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231699AbjGTRpV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 13:45:21 -0400
-Received: from APC01-PSA-obe.outbound.protection.outlook.com (mail-psaapc01olkn2105.outbound.protection.outlook.com [40.92.52.105])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E00E1269F;
-        Thu, 20 Jul 2023 10:45:16 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=fQie4DeeNSr5iwCLYQ2bfCpxSr2qcSP8Ld+6dvpRijR0uO5kfudqnBUAYkYtRBPrGl8WH+rL3awrQv2lf1RNOFvJFE+rAe/glvzACQavViBq0GNQQj1StcZQnJ+vzIRL5g6Yibo9fvnXoltdx0Gm+14zHg/I+AZiy/IGbzc16/ooFIg8uy+noBwex+wejxVA1++53iMOCi25glnlCDxxRxfJIyAF0To+E1GB+BkVsLERDjXTZ8pvWza0D5NeyoP/k6UYrErQH48FVSUwSrVjdesP3cNWSDVi7NmMaNIi8dXyURNWkmrGDV/EQ4p2BabC5LRq8zNoRTn9DquqRHgv+w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=dln/R/Y0womQgi/U2vrnlyvGevvfnzeMr+HDqhV4YG0=;
- b=OMOlM4/MoOIxdd6QZlD0nKRf3DssoZuUSVCysROmAGObVqiNVNNffZ2r4Wq/L3fDH1gt/ffeewzHBbnXOUjDeZuhk7cnEg1p6ZWZmru+Hmcj61pchOhgb0tDH77Lu2zdJ5ohhuJpUpTRsNcP97BI5ZwwSw+xuHCr5Skud2JWAee0hjmqMCAt+Ke2lDFd5IREPwKfl3yieWQwzvjUJsh03HTEAsONwz531rn2dG+y3v32igd7TuMdjU9czEAWIxfCgZi94INlg4W3DbiwLCOOjmaImerdIArL0tE3h6hmpK90P+ki1yUO5/mg44ooU9BkTKTzCyN5yRxGu6boas0bng==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=dln/R/Y0womQgi/U2vrnlyvGevvfnzeMr+HDqhV4YG0=;
- b=GhP+Q3qcKnlSLR3s1Esvo/dwyyUBd4MuZsxQPMIiC0se63yqdrQeTJ1w0SQvflDLAgWFH40gFwQ+HwpypiRTANzwYYeirWV/ysY6PqXeqZsReMSKTR0FqCPp1Gx5z9GZuTGzvccXhS8lzbNEDtshxahRAFQlRZBkdT6BnonCBmqCyiYIwrG02Qyt2Cpj3b7MvJNbfhZNdYx0k0/kGbSIFLRxX3ByzcaqdJpcQAPcykq1rPFCLiGizobpUEwfKk5i74oVNUiIyA7qWwGik1SJqib5FFuCtN/zUPTSeb012rUgHiuTRhzlMPr8CSu0WvKd0FE7pulOdDQF35a1SAiklQ==
-Received: from TYZPR01MB5556.apcprd01.prod.exchangelabs.com
- (2603:1096:400:363::9) by KL1PR01MB3809.apcprd01.prod.exchangelabs.com
- (2603:1096:820:41::14) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6609.28; Thu, 20 Jul
- 2023 17:45:12 +0000
-Received: from TYZPR01MB5556.apcprd01.prod.exchangelabs.com
- ([fe80::e01e:6b99:522d:65e8]) by TYZPR01MB5556.apcprd01.prod.exchangelabs.com
- ([fe80::e01e:6b99:522d:65e8%6]) with mapi id 15.20.6588.031; Thu, 20 Jul 2023
- 17:45:12 +0000
-Message-ID: <TYZPR01MB555645E1C1100ED41B3D02D5C93EA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
-Date:   Fri, 21 Jul 2023 01:45:01 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [PATCH] mmc: meson-mx-sdhc: Fix initialization frozen issue
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-References: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
- <CAFBinCAJ1E6JKmFTuaJwGpd_MBzHMZ0mMj-1AE3TNeB2_72nZA@mail.gmail.com>
-From:   Ziyang Huang <hzyitc@outlook.com>
-Cc:     jbrunet@baylibre.com, khilman@baylibre.com,
-        linux-amlogic@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, neil.armstrong@linaro.org,
-        ulf.hansson@linaro.org
-In-Reply-To: <CAFBinCAJ1E6JKmFTuaJwGpd_MBzHMZ0mMj-1AE3TNeB2_72nZA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-TMN:  [161d7Lqt2tlivRIhmLwNSrY4pr7hXdtsNq+cDhfcHDs=]
-X-ClientProxiedBy: SG2PR01CA0135.apcprd01.prod.exchangelabs.com
- (2603:1096:4:8f::15) To TYZPR01MB5556.apcprd01.prod.exchangelabs.com
- (2603:1096:400:363::9)
-X-Microsoft-Original-Message-ID: <2ab030da-6998-50ef-017b-1f5655cbdca2@outlook.com>
+        with ESMTP id S229897AbjGTSEp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 14:04:45 -0400
+Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E3152709;
+        Thu, 20 Jul 2023 11:04:43 -0700 (PDT)
+Received: from local
+        by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
+         (Exim 4.96)
+        (envelope-from <daniel@makrotopia.org>)
+        id 1qMY0H-0005Hr-29;
+        Thu, 20 Jul 2023 18:03:53 +0000
+Date:   Thu, 20 Jul 2023 19:03:37 +0100
+From:   Daniel Golle <daniel@makrotopia.org>
+To:     Bart Van Assche <bvanassche@acm.org>
+Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Dave Chinner <dchinner@redhat.com>,
+        Matthew Wilcox <willy@infradead.org>,
+        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
+        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
+        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
+        Christian Loehle <CLoehle@hyperstone.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Hannes Reinecke <hare@suse.de>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Ye Bin <yebin10@huawei.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
+Subject: Re: [RFC PATCH 0/6] nvmem: add block device NVMEM provider
+Message-ID: <ZLl2-TW982oKXMnN@makrotopia.org>
+References: <cover.1689802933.git.daniel@makrotopia.org>
+ <352167df-34fc-ddff-def9-902873796536@acm.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: TYZPR01MB5556:EE_|KL1PR01MB3809:EE_
-X-MS-Office365-Filtering-Correlation-Id: 443b9e9f-4eb0-4b78-2a7d-08db89491152
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: RRC8pmU8FQKoo0B+xIYbNqlWYBVra2cAaHJAMlm4w/OLq7yd6Wxh8bMs2DORMj+z3eghFlbm3ALQ9VNTj1tUQ9A9x1DqgSRoWBBnMILEPegBE0cB84PxxWFhtHcvijFyg6tXRZIfdA7pYaHkmDp/V1t/yIBcsBops96V/6qV6143hLbads6SfnTwfhoRC4/aSiaRBtfue7nx35KH9F82rLs2kKKPwYKNX5JfsjQoTvX+/85xaIsbOM5wcAkR7iIp4mBnPtTRJ5nuBciIf8ROgQ6yNgOPClSvUZ0TmXkTh2+7iTg9QpOhUhGaVBgcT+lkV8IsM3G2RndiULXEIpBDhqTdsByaHRuZzzLqpcRad9zViEoT+q5W6EbhW4w3So9PzAHIOFsC9Zu9+ZFM2HuhzJX8I46JbyE0zgAnB/y34mo9ItX44px9Ul7ZnJVHSrwSnH8smpiSa0w1Of+MeGfz46Z33rPD22tW1mvnNOCNmgr9fj4JNJlPydvgixcNLUrt/gDWgMD6N6e82B+k0sK9d+Zio0C+iY5wT7Bb8wkqh44=
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?TWltTXNhT3k3TU90S2pDeElkRnZ2VzRkTTd2ai9UNUZJSWY5Z3lXZU5wamF5?=
- =?utf-8?B?NkZManVKbUs2VzdySXlFUnlYdDk3YTUrM3FyYTVRRjhrNEVQUUJ1a1FYaFRx?=
- =?utf-8?B?VitwUHM3Vm9rbWVOYVdtcFJuVHhpbVlnM0NPMzJyOEZGNjdNS2s5UFZRNExk?=
- =?utf-8?B?VEtVMFg4U254OStmWW1iL01CYkozTjZZdTZzemR3OTBnM3RwbnV5MnBPdmVS?=
- =?utf-8?B?a3UzMUk3eGJBR0hWSG5XMnA2WjNwWjZMS3NaeGIzMm5JZHgzSHhRelExUG1S?=
- =?utf-8?B?bDNGZ2ZpRXZuNFd5MVFKSkRnTlBOdTZuRnhWZWJQU0J0M2hOODQvVndYeXpw?=
- =?utf-8?B?Y0lCTm1qbmlYaTZidjhRQmwxRTl4ekJqbTlQdzlVSmNjWkh4K0FQbTl6UytM?=
- =?utf-8?B?endVWkRuT2tlNVFvMjd4bmxsU2FPN05iOUVCMTRHbXFyRnRJRDZoUXVOeEtM?=
- =?utf-8?B?VGhrZExwUGcyNmR5TzVVcDByWUpCZXRuNUFOT3BDK1lUaTdSbHlJRkorR2JE?=
- =?utf-8?B?ejlEK3hVVDF2NEl2ZTB4Nmx6bS9NSTQ2amdQVmpOYXNaZll6NHJhUHZ4Z0N5?=
- =?utf-8?B?T3FhSno5YXZOR3NVRFRpanc2YTJrWU9DY2FrLzBpYktNVi9oVXY0K1MyQlZT?=
- =?utf-8?B?QWJOaFpOeVhKUWF6cllxb3RjUUpvcE1XVjZhdk9wVkZUZjlhd21qR3Z1MEZn?=
- =?utf-8?B?R2d0VFFsWU1HOTZwOE5wbnNnaHNXMEpYQ1JyU3c4RGZiRmhIZ3FzYkFtSENq?=
- =?utf-8?B?bjJFREVSditNcUgzRG1xTFFqYk5yZUJEbkg2SlRoQWx0SWYxUUhmckpFa2dB?=
- =?utf-8?B?WHM4MUsyMEFWVzhCdFJ0UnRFekNwQU5TSjNTekdvNng1R2pOTm0wY0NjelNI?=
- =?utf-8?B?Z3YzTDdVcnRJeWZxNHlmbEF6ZGk1d252dXJ4ZjlpUFFycUdUZlVYZE1MTXVv?=
- =?utf-8?B?eU9qQVdGbVl1UWowOWZReGxTMWdZRG9qTUV0TGRteVpSS25DQ0QvYmhsY0Nw?=
- =?utf-8?B?RjZQM0thV24yZ3k0YnhsR01ZTWtVeFpFd2Uyd2U1MUExOTlzUWFyWmoveEwv?=
- =?utf-8?B?T1hxUExNa3M3NTk3Q042aWNZUjA1d0MxdVFUVmNNbGFralg1U1JnL2dUcUM5?=
- =?utf-8?B?Umt0S2NSWW9ySk5DMzNjcHlXT24rUEFwZUpXQ0tyU1BDWVpaSzg3ckYzU2hz?=
- =?utf-8?B?UEY1akRocDNmaE9RQS9nZmovbkVFMExQWmxaWDRoS0tZVXRXWWoxZURuajIz?=
- =?utf-8?B?UVZPRExRbUNySlAxVFlHYjNSRFp2QSs5TDJncHgzQ2o4U3p1UTFNMnU0Vk4x?=
- =?utf-8?B?TzV0eXFvOEgyRyswZ3FDbzVTNWtZdVZvSWZFOFgrNFViUUFlMTR2QUxMTWhn?=
- =?utf-8?B?T1RkWmdrcGtQYktBZTRVU204OUlJaFlyTXdKc1dnQVA2czgyOXVhQUI5K3l5?=
- =?utf-8?B?UWI1K1BUN0JJVDh6U3JJd1AzNGwzS1hsaVNpODhxV2doZDNXSkxOcStVQzJu?=
- =?utf-8?B?WjU2WmFBVmw0Qkw2a3BiaExHeC9BTUdEU2FYekgrSk1IRUlJMTAzclR0Q1Bz?=
- =?utf-8?B?WWE3K3FCdnUzcU1pVHR5STlTemlpQjQrcng3bGlFRkFLUFpLRmRFeXRpdWVv?=
- =?utf-8?B?aVlrQ2ZIbncrUWJORVhqUTkvV0x0QWc9PQ==?=
-X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 443b9e9f-4eb0-4b78-2a7d-08db89491152
-X-MS-Exchange-CrossTenant-AuthSource: TYZPR01MB5556.apcprd01.prod.exchangelabs.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Jul 2023 17:45:12.1951
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg: 00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: KL1PR01MB3809
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <352167df-34fc-ddff-def9-902873796536@acm.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-在 2023/6/20 3:51, Martin Blumenstingl 写道:
-> Hello,
+On Thu, Jul 20, 2023 at 08:30:39AM -0700, Bart Van Assche wrote:
+> On 7/19/23 15:01, Daniel Golle wrote:
+> > On embedded devices using an eMMC it is common that one or more (hw/sw)
+> > partitions on the eMMC are used to store MAC addresses and Wi-Fi
+> > calibration EEPROM data.
+> > 
+> > Implement an NVMEM provider backed by block devices as typically the
+> > NVMEM framework is used to have kernel drivers read and use binary data
+> > from EEPROMs, efuses, flash memory (MTD), ...
+> > 
+> > In order to be able to reference hardware partitions on an eMMC, add code
+> > to bind each hardware partition to a specific firmware subnode.
+> > 
+> > This series is meant to open the discussion on how exactly the device tree
+> > schema for block devices and partitions may look like, and even if using
+> > the block layer to back the NVMEM device is at all the way to go -- to me
+> > it seemed to be a good solution because it will be reuable e.g. for NVMe.
 > 
-> first of all: thank you for this patch!
-> 
-> On Mon, Jun 19, 2023 at 7:36 PM Ziyang Huang <hzyitc@outlook.com> wrote:
->>
->> Commit 4bc31edebde5 ("mmc: core: Set HS clock speed before sending
->> HS CMD13") set HS clock (52MHz) before switching to HS mode. For this
->> freq, FCLK_DIV5 will be selected and div value is 10 (reg value is 9).
->> Then we set rx_clk_phase to 11 or 15 which is out of range and make
->> hardware frozen. After we send command request, no irq will be
->> interrupted and the mmc driver will keep to wait for request finished,
->> even durning rebooting.
-> I think this is the exact same problem I reported some days ago: [0]
-> Ulf is questioning whether we properly support 52MHz clocks correctly,
-> so I think you're onto something!
-> 
-> So this is an excellent finding! I can confirm that using rx_clk_phase
-> of 1 makes my Odroid-C1 eMMC work again :-)
-> 
->> So let's set a common value - 1 just for initialization. Then let
->> meson_mx_sdhc_execute_tuning() to find the accurate value for data
->> transfer.
-> As far as I know unconditionally using value 1 can negatively affect
-> other devices.
-> I'm assuming that you're testing on an Odroid-C1 or similar board with
-> HS200 eMMC:
-> On those SoC + eMMC combinations we do support. But on other boards
-> (for example Meson8b EC-100 / Endless Mini) there's no HS200 support
-> because the eMMC is connected with 3.3V IO lines. So tuning is not
-> executed there (if I recall correctly).
+> Is my understanding correct that these devices boot from eMMC and not over
+> Wi-Fi?
 
-Sorry for the later reply. I'm so busy these day.
+Yes, that's right.
 
-After checking the code, I found the following flow, so I think 
-tuningshould work for all cards.
+> If so, why does this calibration data have to be stored on a raw
+> block device?
 
-   mmc_start_request()
-     -> __mmc_start_request()
-       -> mmc_retune()
-         -> mmc_execute_tuning()          -> host->ops->execute_tuning()
+It's just how many vendors decided to implement it in their firmware.
 
-And yes, 1 may be not a good choice. I consider 3 values:
-   - 1
-   - div_val / 2
-   - div_val - 1
+I reckon this happened mostly out of habbit and in order to avoid any
+potential complexities in their manufacturing and QA processes -- most
+of those processes have been created in a time when NOR flash was the
+most common way to store firmware on embedded devices with Wi-Fi.
 
-Maybe, (div_val / 2) is a good choice. How do you think?
+The occurance of raw NAND and SPI-NAND didn't change much about that,
+most vendors still just use a raw MTD partition to store all that
+per-device 'factory' data. Very few have have started to use raw data
+inside UBI volumes (and I've been working on a UBI NVMEM driver as
+well).
 
-> What do you think about adding a special case for the 51MHz "actual
-> clock rate" and adding a comment that it was found by manual testing?
-> For some reason (that I don't understand) Amlogic's vendor driver
-> maxes out at 47.22MHz (presumably because they limit themselves to
-> using FCLK_DIV3 as input only - but I don't get why...).
+Also when it comes to eMMC they just keep doing things how they were
+always doing them, just that instead of a raw NOR flash, some devices
+nowadays come with an eMMC. Some vendors use the 'boot1' hardware
+partition to store things like MAC addresses at raw offsets there
+(GL.iNet for example [1]), others use small GPT or MBR partitions on
+the main hardware partition of the eMMC to store MAC addresses and
+calibration blobs (for example Adtran [2]).
 
-With some modifications, I found that the mmc controller of S805 can 
-work with all frequency, not only those mentioned in commit 
-e4bf1b0970ef("mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson 
-SDHC host"). It seem like that every things work fine. I will use a 
-oscilloscope to confirm the hardware clock is correct when I have time.
+> Why can't this information be loaded from a file on a
+> filesystem?
 
-For this future commit, I don't want to add a special case.
+Having this information stored in a file on a filesystem is also an
+option, of course, but out in the wild you will hardly find it being
+done like that, for the reason stated above and also because having
+the OS pull the Ethernet MAC addresses somewhere from a filesystem
+while in early user-space will require the OS to even know about the
+individual hardware and how this should be done, so it's not exactly
+beautiful, may need fsck, mounting, ... all before the machine can
+become available with it's assigned MAC address on Ethernet.
 
-> Best regards,
-> Martin
-> 
-> 
-> [0] https://lore.kernel.org/linux-amlogic/CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com/
-> [1] https://lore.kernel.org/linux-amlogic/CAPDyKFpS-UwiaRPMqSpX0mNPrS5p=yJzu3g0=pGyCkWHSYyqWg@mail.gmail.com/
+The RaspberryPi and other brcmfmac-based systems are the exception to
+the rule, here a simple text file stored on the root filesystem serves
+the Wi-Fi calibration. This file hence needs to be shipped with the OS
+instead of being stored on the device, and e.g. Raspbian does so. I
+suppose this is mostly because there just isn't any permanent on-board
+storage large enough and being a low-barrier DYI system they wanted to
+make it easy for users designing systems besed on that (as in: not
+having to mess with raw offsets or partitions, but rather just use
+tools like Etcher on Windows and edit CR-LF terminated text files on a
+FAT filesystem inside notepad...).
 
+However, practically all Qualcomm and MediaTek Wi-Fi AP/Routers which
+come with an eMMC come with their MAC addresses and Wi-Fi EEPROM data
+stored as raw data inside a hardware or software partition.
+
+[1]: https://github.com/dangowrt/linux/commit/8a24f03efb6b1dd7d8fdf68558146bacc71c2c1b
+[2]: https://github.com/dangowrt/linux/commit/b14c0215641047d0447956b40bd344049a11becb
