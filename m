@@ -2,126 +2,72 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BC55C001DC
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 08:24:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B84AC001DC
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 08:57:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231432AbjGTIY1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Jul 2023 04:24:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59664 "EHLO
+        id S230105AbjGTI5i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jul 2023 04:57:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229525AbjGTIY0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 04:24:26 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F01D826AD;
-        Thu, 20 Jul 2023 01:24:20 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        with ESMTP id S231164AbjGTIsW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 04:48:22 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BD042690;
+        Thu, 20 Jul 2023 01:48:21 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 8E7A422A1E;
-        Thu, 20 Jul 2023 08:24:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1689841459; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=l/lqrPJHJ301EskkP7uYoZhLyn+KpT4pekkb8H3GJ54=;
-        b=HyrYogHBg4I7GNRpb0GpoEK+9TsC0eSYQo+9/zjkEx+NQuOdLP8OKgeSWK3z7fbYjbQ+lS
-        XlPoSj4+TNI4A3k+8Wd+M5icKNLZBWOeG13615fZpMSUR1PyOGn9D3D0PnWSjXjCRmIZA0
-        2vCJpO9l+iEyJRpGg8+rY5hcmzdbVkM=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1689841459;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=l/lqrPJHJ301EskkP7uYoZhLyn+KpT4pekkb8H3GJ54=;
-        b=u7X9c28VCrMvNoTHJcbjY2dK/qJNm+Wmy73OTkIynCG2bZ5i1lKdJh1by+2369iENgNJqx
-        LmbwrRzLf6Hiv1AQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 36E83133DD;
-        Thu, 20 Jul 2023 08:24:19 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id LtfiDDPvuGSIIwAAMHmgww
-        (envelope-from <hare@suse.de>); Thu, 20 Jul 2023 08:24:19 +0000
-Message-ID: <0592e021-237d-6d41-7faf-e5b93aefbeea@suse.de>
-Date:   Thu, 20 Jul 2023 10:24:18 +0200
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 074A6618FF;
+        Thu, 20 Jul 2023 08:48:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DEAEDC433C7;
+        Thu, 20 Jul 2023 08:48:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1689842900;
+        bh=8KW1+yEEemv2diKxVcDh9KNKeIEiAXv3oJghvc2cE1A=;
+        h=Date:Subject:To:References:From:In-Reply-To:From;
+        b=Gb34TEMIi+l9IUrtQeod+9N0Zo//acgBpyPyfnsnf5viDm12zyYqS9rjOJbVZU2QP
+         d48qSsil/tECxtXofjiHd/+cu9U6e7b4oyenozL+DfhmOeiZEnb1GKwyOYArMecUWN
+         LL2+K4cPe90drGcszvzGscOxS6G+I+9x+Ibxj5n7q41DsTxkQZphr1Q6EN/6df2vVt
+         QZYXQReB/yPVlXMRHKkvdAe9AcjghAu10o2MvrWCpnd8p3Fg+El4mSnTE7KQrIHG3G
+         8I1EhUTB9XALDztommNih/Quok6oUcc9KOcWyXV5TwoUEuIO8XqFKnCH9kO5mq1a5m
+         xns7aYTBvoXmA==
+Message-ID: <3bd4be69-5a81-c6d5-6a59-691906fe9dd1@kernel.org>
+Date:   Thu, 20 Jul 2023 10:48:08 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [RFC PATCH 3/6] block: add new genhd flag GENHD_FL_NO_NVMEM
-To:     Daniel Golle <daniel@makrotopia.org>, Jens Axboe <axboe@kernel.dk>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Dave Chinner <dchinner@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        =?UTF-8?Q?Thomas_Wei=c3=9fschuh?= <linux@weissschuh.net>,
-        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
-        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
-        Christian Loehle <CLoehle@hyperstone.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jack Wang <jinpu.wang@ionos.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Ye Bin <yebin10@huawei.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
-References: <cover.1689802933.git.daniel@makrotopia.org>
- <96510d925cb0ca1a3a132f8f8affd4bbdafd8fc9.1689802933.git.daniel@makrotopia.org>
+ Thunderbird/102.13.0
+Subject: Re: [v11 3/6] dt-bindings: qcom: Add ipq5018 bindings
 Content-Language: en-US
-From:   Hannes Reinecke <hare@suse.de>
-In-Reply-To: <96510d925cb0ca1a3a132f8f8affd4bbdafd8fc9.1689802933.git.daniel@makrotopia.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>,
+        agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
+        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
+        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, robimarko@gmail.com,
+        krzysztof.kozlowski@linaro.org, andy.shevchenko@gmail.com
+References: <20230616101749.2083974-1-quic_srichara@quicinc.com>
+ <20230616101749.2083974-4-quic_srichara@quicinc.com>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <20230616101749.2083974-4-quic_srichara@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/20/23 00:03, Daniel Golle wrote:
-> Add new flag to destinguish block devices which should not act as an
-> NVMEM provider, such as for example an emulated block device on top of
-> an MTD partition which already acts as an NVMEM provider itself.
+On 16/06/2023 12:17, Sricharan Ramabadhran wrote:
+> Document the new ipq5018 SOC/board device tree bindings.
 > 
-> Signed-off-by: Daniel Golle <daniel@makrotopia.org>
+> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 > ---
->   include/linux/blkdev.h | 3 +++
->   1 file changed, 3 insertions(+)
-> 
-> diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-> index 2f5371b8482c0..e853d1815be15 100644
-> --- a/include/linux/blkdev.h
-> +++ b/include/linux/blkdev.h
-> @@ -80,11 +80,14 @@ struct partition_meta_info {
->    * ``GENHD_FL_NO_PART``: partition support is disabled.  The kernel will not
->    * scan for partitions from add_disk, and users can't add partitions manually.
->    *
-> + * ``GENHD_FL_NO_NVMEM``: NVMEM emulation is disabled.  The kernel will not
-> + * emulate an NVMEM device on top of this disk.
->    */
->   enum {
->   	GENHD_FL_REMOVABLE			= 1 << 0,
->   	GENHD_FL_HIDDEN				= 1 << 1,
->   	GENHD_FL_NO_PART			= 1 << 2,
-> +	GENHD_FL_NO_NVMEM			= 1 << 3,
->   };
->   
->   enum {
-Please reverse this flag. Most of the devices will not have an NVMEM 
-partition, and we shouldn't require each and every driver to tag their 
-devices.
-So please use GENHD_FL_NVMEM and only set this flag on devices which 
-really have an NVMEM partition.
 
-Cheers,
+Please do not merge - turns out incorrect.
 
-Hannes
+Best regards,
+Krzysztof
 
