@@ -2,424 +2,138 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAF53C0015E
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 00:16:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 67A82C001E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 02:55:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229774AbjGTAQT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jul 2023 20:16:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49090 "EHLO
+        id S229684AbjGTCzq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jul 2023 22:55:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35738 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229682AbjGTAQS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 20:16:18 -0400
-Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F3E626A3;
-        Wed, 19 Jul 2023 17:16:02 -0700 (PDT)
-Received: from local
-        by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
-         (Exim 4.96)
-        (envelope-from <daniel@makrotopia.org>)
-        id 1qMHJu-0000v1-1u;
-        Thu, 20 Jul 2023 00:15:02 +0000
-Date:   Thu, 20 Jul 2023 01:14:53 +0100
-From:   Daniel Golle <daniel@makrotopia.org>
-To:     Damien Le Moal <dlemoal@kernel.org>
-Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Dave Chinner <dchinner@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-        Jan Kara <jack@suse.cz>, Ming Lei <ming.lei@redhat.com>,
-        Min Li <min15.li@samsung.com>,
-        Christian Loehle <CLoehle@hyperstone.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Hannes Reinecke <hare@suse.de>,
-        Jack Wang <jinpu.wang@ionos.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Ye Bin <yebin10@huawei.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
-Subject: Re: [RFC PATCH 6/6] block: implement NVMEM provider
-Message-ID: <ZLh8fYW2hsasgD_O@makrotopia.org>
-References: <cover.1689802933.git.daniel@makrotopia.org>
- <e5b709e15739dc0563e9497a2dbbe63050381db0.1689802933.git.daniel@makrotopia.org>
- <a658d0c6-cf34-9835-1e69-76427b8bce69@kernel.org>
+        with ESMTP id S229551AbjGTCzp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 22:55:45 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 786A6172A;
+        Wed, 19 Jul 2023 19:55:44 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0D22360ED0;
+        Thu, 20 Jul 2023 02:55:44 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1722EC433C8;
+        Thu, 20 Jul 2023 02:55:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1689821743;
+        bh=o/YV+k4xqo8X8+NVHObuTllSS7QCYEY/VdOiYZmmdSw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=s4OPQ7U/Ojvxhh6WRwAonmOOoe4/WMAmN+KaT/qJ9vss9Y7CSmkKStaVe2DEDXQHf
+         DY+KAAakCNpwRmdi6k2pWSE4fJXvN9QVPQU/WJ+01TlVQvNsEoNfUh0wiSgVI+sV0S
+         vzQ7YfVU8S4+HRoSKeW64EbOiMFIUKafWbSbq9ZQ4e69WRSN+a5ByoKRJqilk1V0nI
+         8KAI/K7Qumy6EuH8gKtY1Nhsmfw/Fxlh3vMJcYAo2iI9pKv+l3kNXW82Ro6+Fu+521
+         O9mZaqwlVcsgZLNoym1sHni6nv5uN6dQT+Ce7Oh0TGM7+cFYPxP4ZiMa6DG7JAfXW1
+         8WbYbQtmqpLKw==
+Date:   Wed, 19 Jul 2023 19:55:41 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Cc:     linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
+        quic_psodagud@quicinc.com, avmenon@quicinc.com,
+        abel.vesa@linaro.org, quic_spuppala@quicinc.com
+Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
+ ufs
+Message-ID: <20230720025541.GA2607@sol.localdomain>
+References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a658d0c6-cf34-9835-1e69-76427b8bce69@kernel.org>
+In-Reply-To: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 20, 2023 at 08:04:56AM +0900, Damien Le Moal wrote:
-> On 7/20/23 07:04, Daniel Golle wrote:
-> > On embedded devices using an eMMC it is common that one or more partitions
-> > on the eMMC are used to store MAC addresses and Wi-Fi calibration EEPROM
-> > data. Allow referencing the partition in device tree for the kernel and
-> > Wi-Fi drivers accessing it via the NVMEM layer.
-> > 
-> > Signed-off-by: Daniel Golle <daniel@makrotopia.org>
-> > ---
-> >  block/Kconfig           |   8 ++
-> >  block/Makefile          |   1 +
-> >  block/blk-nvmem.c       | 187 ++++++++++++++++++++++++++++++++++++++++
-> >  block/blk.h             |  13 +++
-> >  block/genhd.c           |   2 +
-> >  block/partitions/core.c |   2 +
-> >  6 files changed, 213 insertions(+)
-> >  create mode 100644 block/blk-nvmem.c
-> > 
-> > diff --git a/block/Kconfig b/block/Kconfig
-> > index 86122e459fe04..185573877964d 100644
-> > --- a/block/Kconfig
-> > +++ b/block/Kconfig
-> > @@ -218,6 +218,14 @@ config BLK_MQ_VIRTIO
-> >  config BLK_PM
-> >  	def_bool PM
-> >  
-> > +config BLK_NVMEM
-> > +	bool "Block device NVMEM provider"
-> > +	depends on OF
-> > +	help
-> > +	  Allow block devices (or partitions) to act as NVMEM prodivers,
-> > +	  typically using if an eMMC is used to store MAC addresses or Wi-Fi
-> 
-> Odd grammar... May be "typically used with eMMC to store ..."
+Hi Gaurav,
 
-Thank you, I'll use your suggestion.
-
+On Wed, Jul 19, 2023 at 10:04:14AM -0700, Gaurav Kashyap wrote:
+> These patches add support to Qualcomm ICE (Inline Crypto Enginr) for hardware
+> wrapped keys using Qualcomm Hardware Key Manager (HWKM) and are made on top
+> of a rebased version  Eric Bigger's set of changes to support wrapped keys in
+> fscrypt and block below:
+> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7
+> (The rebased patches are not uploaded here)
 > 
-> > +	  calibration data on embedded devices.
-> > +
-> >  # do not use in new code
-> >  config BLOCK_HOLDER_DEPRECATED
-> >  	bool
-> > diff --git a/block/Makefile b/block/Makefile
-> > index 46ada9dc8bbfe..03c0bfa8642df 100644
-> > --- a/block/Makefile
-> > +++ b/block/Makefile
-> > @@ -34,6 +34,7 @@ obj-$(CONFIG_BLK_DEV_ZONED)	+= blk-zoned.o
-> >  obj-$(CONFIG_BLK_WBT)		+= blk-wbt.o
-> >  obj-$(CONFIG_BLK_DEBUG_FS)	+= blk-mq-debugfs.o
-> >  obj-$(CONFIG_BLK_DEBUG_FS_ZONED)+= blk-mq-debugfs-zoned.o
-> > +obj-$(CONFIG_BLK_NVMEM)		+= blk-nvmem.o
-> >  obj-$(CONFIG_BLK_SED_OPAL)	+= sed-opal.o
-> >  obj-$(CONFIG_BLK_PM)		+= blk-pm.o
-> >  obj-$(CONFIG_BLK_INLINE_ENCRYPTION)	+= blk-crypto.o blk-crypto-profile.o \
-> > diff --git a/block/blk-nvmem.c b/block/blk-nvmem.c
-> > new file mode 100644
-> > index 0000000000000..8238511049f56
-> > --- /dev/null
-> > +++ b/block/blk-nvmem.c
-> > @@ -0,0 +1,187 @@
-> > +// SPDX-License-Identifier: GPL-2.0-or-later
-> > +/*
-> > + * block device NVMEM provider
-> > + *
-> > + * Copyright (c) 2023 Daniel Golle <daniel@makrotopia.org>
-> > + *
-> > + * Useful on devices using a partition on an eMMC for MAC addresses or
-> > + * Wi-Fi calibration EEPROM data.
-> > + */
-> > +
-> > +#include "blk.h"
-> > +#include <linux/nvmem-provider.h>
-> > +#include <linux/of.h>
-> > +#include <linux/pagemap.h>
-> > +#include <linux/property.h>
-> > +
-> > +/* List of all NVMEM devices */
-> > +static LIST_HEAD(nvmem_devices);
-> > +static DEFINE_MUTEX(devices_mutex);
-> > +
-> > +struct blk_nvmem {
-> > +	struct nvmem_device *nvmem;
-> > +	struct block_device *bdev;
-> > +	struct list_head list;
-> > +};
-> > +
-> > +static int blk_nvmem_reg_read(void *priv, unsigned int from,
-> > +			      void *val, size_t bytes)
-> > +{
-> > +	pgoff_t f_index = from >> PAGE_SHIFT;
-> > +	struct address_space *mapping;
-> > +	struct blk_nvmem *bnv = priv;
+> Ref v1 here:
+> https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkash@quicinc.com/
 > 
-> Why not have bnv passed as argument directly ?
-
-Because blk_nvmem_reg_read is used as reg_read function, ie.
-nvmem_reg_read_t {aka 'int (*)(void *, unsigned int,  void *, long unsigned int)'}
-
-Hence 'void *' has to be implicitely type-casted into 'struct blk_nvmem *'.
-
+> Explanation and use of hardware-wrapped-keys can be found here:
+> Documentation/block/inline-encryption.rst
 > 
-> > +	size_t bytes_left = bytes;
-> > +	struct folio *folio;
-> > +	unsigned long offs, to_read;
-> > +	void *p;
-> > +
-> > +	if (!bnv->bdev)
-> > +		return -ENODEV;
-> > +
-> > +	offs = from & ((1 << PAGE_SHIFT) - 1);
+> This patch is organized as follows:
 > 
-> offs = from & PAGE_MASK;
+> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
+> Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
+> Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
+> Patch 5-6 - Adds support for wrapped keys in UFS
+> Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
+> 
+> NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
+>       Patch 3, 4, 8, 10 will have MMC equivalents.
+> 
+> Testing:
+> Test platform: SM8550 MTP
+> Engineering trustzone image is required to test this feature only
+> for SM8550. For SM8650 onwards, all trustzone changes to support this
+> will be part of the released images.
+> The engineering changes primarily contain hooks to generate, import and
+> prepare keys for HW wrapped disk encryption.
+> 
+> The changes were tested by mounting initramfs and running the fscryptctl
+> tool (Ref: https://github.com/ebiggers/fscryptctl/tree/wip-wrapped-keys) to
+> generate and prepare keys, as well as to set policies on folders, which
+> consequently invokes disk encryption flows through UFS.
+> 
+> Gaurav Kashyap (10):
+>   ice, ufs, mmc: use blk_crypto_key for program_key
+>   qcom_scm: scm call for deriving a software secret
+>   soc: qcom: ice: add hwkm support in ice
+>   soc: qcom: ice: support for hardware wrapped keys
+>   ufs: core: support wrapped keys in ufs core
+>   ufs: host: wrapped keys support in ufs qcom
+>   qcom_scm: scm call for create, prepare and import keys
+>   ufs: core: add support for generate, import and prepare keys
+>   soc: qcom: support for generate, import and prepare key
+>   ufs: host: support for generate, import and prepare key
+> 
+>  drivers/firmware/qcom_scm.c            | 292 +++++++++++++++++++++++
+>  drivers/firmware/qcom_scm.h            |   4 +
+>  drivers/mmc/host/cqhci-crypto.c        |   7 +-
+>  drivers/mmc/host/cqhci.h               |   2 +
+>  drivers/mmc/host/sdhci-msm.c           |   6 +-
+>  drivers/soc/qcom/ice.c                 | 309 +++++++++++++++++++++++--
+>  drivers/ufs/core/ufshcd-crypto.c       |  92 +++++++-
+>  drivers/ufs/host/ufs-qcom.c            |  63 ++++-
+>  include/linux/firmware/qcom/qcom_scm.h |  13 ++
+>  include/soc/qcom/ice.h                 |  18 +-
+>  include/ufs/ufshcd.h                   |  25 ++
+>  11 files changed, 797 insertions(+), 34 deletions(-)
 
-Right, that makes it easier...
 
-> 
-> from being an int is really odd though.
+Thank you for continuing to work on this!
 
-Yep, but that's how NVMEM framework defines it.
+According to your cover letter, this feature requires a custom TrustZone image
+to work on SM8550.  Will that image be made available outside Qualcomm?
 
-> 
-> > +	mapping = bnv->bdev->bd_inode->i_mapping;
-> > +
-> > +	while (bytes_left) {
-> > +		folio = read_mapping_folio(mapping, f_index++, NULL);
-> > +		if (IS_ERR(folio))
-> > +			return PTR_ERR(folio);
-> > +
-> > +		to_read = min_t(unsigned long, bytes_left, PAGE_SIZE - offs);
-> > +		p = folio_address(folio) + offset_in_folio(folio, offs);
-> > +		memcpy(val, p, to_read);
-> > +		offs = 0;
-> > +		bytes_left -= to_read;
-> > +		val += to_read;
-> > +		folio_put(folio);
-> > +	}
-> > +
-> > +	return bytes_left == 0 ? 0 : -EIO;
-> 
-> How can bytes_left be 0 here given the above loop with no break ?
+Also according to your cover letter, this feature will work on SM8650 out of the
+box.  That's great to hear.  However, SM8650 does not appear to be publicly
+available yet or have any upstream kernel support.  Do you know approximately
+when a SM8650 development board will become available to the general public?
 
-Well, right... Can just be 'return 0;' at this point obviously.
+Also, can you please make available a git branch somewhere that contains your
+patchset?  It sounds like this depends on
+https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7, but
+actually a version of it that you've rebased, which I don't have access to.
+Without being able to apply your patchset, I can't properly review it.
 
-> 
-> > +}
-> > +
-> > +void blk_register_nvmem(struct block_device *bdev)
-> > +{
-> > +	struct fwnode_handle *fw_parts = NULL, *fw_part_c, *fw_part = NULL;
-> > +	struct nvmem_config config = {};
-> > +	const char *partname, *uuid;
-> > +	struct device *dev, *p0dev;
-> > +	struct blk_nvmem *bnv;
-> > +	u32 reg;
-> > +
-> > +	/*
-> > +	 * skip devices which set GENHD_FL_NO_NVMEM
-> > +	 *
-> > +	 * This flag is used for mtdblock and ubiblock devices because
-> > +	 * both, MTD and UBI already implement their own NVMEM provider.
-> > +	 * To avoid registering multiple NVMEM providers for the same
-> > +	 * device node, skip the block NVMEM provider.
-> > +	 */
-> > +	if (bdev->bd_disk->flags & GENHD_FL_NO_NVMEM)
-> > +		return;
-> > +
-> > +	/* skip too large devices */
-> 
-> Why ? Is that defined in some standards somewhere ?
+Thanks!
 
-NVMEM framework uses 'int' to address byte offsets inside NVMEM devices.
-Hence devices larger than INT_MAX cannot be addressed, I will also state
-that in that comment.
-
-> 
-> > +	if (bdev_nr_bytes(bdev) > INT_MAX)
-> > +		return;
-> > +
-> > +	dev = &bdev->bd_device;
-> > +	if (!bdev_is_partition(bdev)) {
-> > +		fw_part = dev->fwnode;
-> > +
-> > +		if (!fw_part && dev->parent)
-> > +			fw_part = dev->parent->fwnode;
-> > +
-> > +		goto no_parts;
-> > +	}
-> > +
-> > +	p0dev = &bdev->bd_disk->part0->bd_device;
-> > +	fw_parts = device_get_named_child_node(p0dev, "partitions");
-> > +	if (!fw_parts)
-> > +		fw_parts = device_get_named_child_node(p0dev->parent, "partitions");
-> > +
-> > +	if (!fw_parts)
-> > +		return;
-> > +
-> > +	fwnode_for_each_child_node(fw_parts, fw_part_c) {
-> > +		if (!fwnode_property_read_string(fw_part_c, "uuid", &uuid) &&
-> > +		    (!bdev->bd_meta_info || strncmp(uuid,
-> > +						    bdev->bd_meta_info->uuid,
-> > +						    PARTITION_META_INFO_UUIDLTH)))
-> > +			continue;
-> > +
-> > +		if (!fwnode_property_read_string(fw_part_c, "partname", &partname) &&
-> > +		    (!bdev->bd_meta_info || strncmp(partname,
-> > +						    bdev->bd_meta_info->volname,
-> > +						    PARTITION_META_INFO_VOLNAMELTH)))
-> > +			continue;
-> > +
-> > +		/*
-> > +		 * partition addresses (reg) in device tree greater than
-> > +		 * DISK_MAX_PARTS can be used to match uuid or partname only
-> > +		 */
-> > +		if (!fwnode_property_read_u32(fw_part_c, "reg", &reg) &&
-> > +		    reg < DISK_MAX_PARTS && bdev->bd_partno != reg)
-> > +			continue;
-> > +
-> > +		fw_part = fw_part_c;
-> > +		break;
-> > +	}
-> > +
-> > +no_parts:
-> > +	if (!fwnode_device_is_compatible(fw_part, "nvmem-cells"))
-> > +		return;
-> > +
-> > +	bnv = kzalloc(sizeof(struct blk_nvmem), GFP_KERNEL);
-> > +	if (!bnv)
-> > +		return;
-> > +
-> > +	config.id = NVMEM_DEVID_NONE;
-> > +	config.dev = &bdev->bd_device;
-> > +	config.name = dev_name(&bdev->bd_device);
-> > +	config.owner = THIS_MODULE;
-> > +	config.priv = bnv;
-> > +	config.reg_read = blk_nvmem_reg_read;
-> > +	config.size = bdev_nr_bytes(bdev);
-> > +	config.word_size = 1;
-> > +	config.stride = 1;
-> > +	config.read_only = true;
-> > +	config.root_only = true;
-> > +	config.ignore_wp = true;
-> > +	config.of_node = to_of_node(fw_part);
-> > +
-> > +	bnv->bdev = bdev;
-> > +	bnv->nvmem = nvmem_register(&config);
-> > +	if (IS_ERR(bnv->nvmem)) {
-> > +		/* Just ignore if there is no NVMEM support in the kernel */
-> 
-> If there is not, why would this function even be called ?
-
-True. Kconfig depends should make sure blk-nvmem is only built if
-nvmem is supported at all.
-
-> 
-> > +		if (PTR_ERR(bnv->nvmem) != -EOPNOTSUPP)
-> > +			dev_err_probe(&bdev->bd_device, PTR_ERR(bnv->nvmem),
-> > +				      "Failed to register NVMEM device\n");
-> > +
-> > +		kfree(bnv);
-> > +		return;
-> > +	}
-> > +
-> > +	mutex_lock(&devices_mutex);
-> > +	list_add_tail(&bnv->list, &nvmem_devices);
-> > +	mutex_unlock(&devices_mutex);
-> > +}
-> > +
-> > +void blk_unregister_nvmem(struct block_device *bdev)
-> > +{
-> > +	struct blk_nvmem *bnv_c, *bnv = NULL;
-> > +
-> > +	mutex_lock(&devices_mutex);
-> > +	list_for_each_entry(bnv_c, &nvmem_devices, list)
-> > +		if (bnv_c->bdev == bdev) {
-> > +			bnv = bnv_c;
-> > +			break;
-> > +		}
-> 
-> Curly brackets for list_for_each_entry() {} would be nice, even though they are
-> not strictly necessary in this case.
-
-Ack, will add them.
-
-> 
-> > +
-> > +	if (!bnv) {
-> > +		mutex_unlock(&devices_mutex);
-> > +		return;
-> > +	}
-> > +
-> > +	list_del(&bnv->list);
-> > +	mutex_unlock(&devices_mutex);
-> > +	nvmem_unregister(bnv->nvmem);
-> > +	kfree(bnv);
-> > +}
-> > diff --git a/block/blk.h b/block/blk.h
-> > index 686712e138352..7423d0d5494e9 100644
-> > --- a/block/blk.h
-> > +++ b/block/blk.h
-> > @@ -515,4 +515,17 @@ static inline int req_ref_read(struct request *req)
-> >  	return atomic_read(&req->ref);
-> >  }
-> >  
-> > +#ifdef CONFIG_BLK_NVMEM
-> > +void blk_register_nvmem(struct block_device *bdev);
-> > +void blk_unregister_nvmem(struct block_device *bdev);
-> > +#else
-> > +static inline void blk_register_nvmem(struct block_device *bdev)
-> > +{
-> > +}
-> 
-> These could go at the end of the static inline line.
-
-I tried keeping the existing style in that header file.
-See a couple of lines above:
-static inline void bio_integrity_free(struct bio *bio)
-{
-}
-
-> 
-> > +
-> > +static inline void blk_unregister_nvmem(struct block_device *bdev)
-> > +{
-> > +}
-> > +#endif
-> > +
-> >  #endif /* BLK_INTERNAL_H */
-> > diff --git a/block/genhd.c b/block/genhd.c
-> > index 3d287b32d50df..b306e0f407bb2 100644
-> > --- a/block/genhd.c
-> > +++ b/block/genhd.c
-> > @@ -527,6 +527,7 @@ int __must_check device_add_disk(struct device *parent, struct gendisk *disk,
-> >  	disk_update_readahead(disk);
-> >  	disk_add_events(disk);
-> >  	set_bit(GD_ADDED, &disk->state);
-> > +	blk_register_nvmem(disk->part0);
-> >  	return 0;
-> >  
-> >  out_unregister_bdi:
-> > @@ -569,6 +570,7 @@ static void blk_report_disk_dead(struct gendisk *disk)
-> >  		if (bdev->bd_holder_ops && bdev->bd_holder_ops->mark_dead)
-> >  			bdev->bd_holder_ops->mark_dead(bdev);
-> >  		mutex_unlock(&bdev->bd_holder_lock);
-> > +		blk_unregister_nvmem(bdev);
-> >  
-> >  		put_device(&bdev->bd_device);
-> >  		rcu_read_lock();
-> > diff --git a/block/partitions/core.c b/block/partitions/core.c
-> > index 13a7341299a91..68bd655f5e68e 100644
-> > --- a/block/partitions/core.c
-> > +++ b/block/partitions/core.c
-> > @@ -404,6 +404,8 @@ static struct block_device *add_partition(struct gendisk *disk, int partno,
-> >  	/* suppress uevent if the disk suppresses it */
-> >  	if (!dev_get_uevent_suppress(ddev))
-> >  		kobject_uevent(&pdev->kobj, KOBJ_ADD);
-> > +
-> > +	blk_register_nvmem(bdev);
-> >  	return bdev;
-> >  
-> >  out_del:
-> 
-> -- 
-> Damien Le Moal
-> Western Digital Research
-> 
+- Eric
