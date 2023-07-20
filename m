@@ -2,56 +2,34 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1CA6EB64DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 15:30:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA834EB64DA
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 16:04:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232222AbjGTPax (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Jul 2023 11:30:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36172 "EHLO
+        id S229603AbjGTQEc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jul 2023 12:04:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232453AbjGTPav (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 11:30:51 -0400
-Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D2B22718;
-        Thu, 20 Jul 2023 08:30:43 -0700 (PDT)
-Received: by mail-pj1-f54.google.com with SMTP id 98e67ed59e1d1-262e89a3ee2so473237a91.1;
-        Thu, 20 Jul 2023 08:30:43 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689867043; x=1690471843;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=VDNz4+C3Ia+UJJWOL2yYRO78JT/eW+cEwJdo8jSL20g=;
-        b=j24kvBWwDfKqiI7V3bmAeDZ5ZnDfNQZLCeyyVHncofp6D55zjXVwXWSU+Afjz4+tlb
-         IhZK7p8rsDbgglhVpFPiNNSLtPx6YGeFYk+fPsfgQo/G2NyU2c6hhJiyTH8M2qnMpA1Z
-         S74UpLZMBdapuVFe9KZcO27vuZ2LX1qEoCZwVWUcpnV+URA+77WDH1zZmQdMRwX1OB/V
-         hUf4fTVIx9F4//uzYbdKiwhzWN8eYB3tqnDGiM7HBmI6Ax8KuzWQHczF7JdgaPVrlE/q
-         CI5R6E1bpY7MHLQ7aCf8pyUHu4imp6WuA9vuL/SoUFZeWHgGRJNf5CKPti7fzFmIMZLo
-         FjpQ==
-X-Gm-Message-State: ABy/qLbbKYxQUNvCyrh/29X3C3/Zlr4NuMBvPpM6ZTGd5RczNFFtML2A
-        29PZ4vAWlVrgcmc3UzP1QgI=
-X-Google-Smtp-Source: APBJJlEp60fdkh+BwPlnxV7BskYrzw4J3Aqy8/DijBF1o7Ei41aAzfcXecHcQpUp58++ywm58NVt+g==
-X-Received: by 2002:a17:90b:23c5:b0:263:409d:6ef2 with SMTP id md5-20020a17090b23c500b00263409d6ef2mr6275576pjb.24.1689867042556;
-        Thu, 20 Jul 2023 08:30:42 -0700 (PDT)
-Received: from ?IPV6:2601:642:4c05:35c7:a9f2:f55:cb5b:263a? ([2601:642:4c05:35c7:a9f2:f55:cb5b:263a])
-        by smtp.gmail.com with ESMTPSA id l15-20020a17090a384f00b00267b7c5d232sm2993691pjf.48.2023.07.20.08.30.39
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 20 Jul 2023 08:30:41 -0700 (PDT)
-Message-ID: <352167df-34fc-ddff-def9-902873796536@acm.org>
-Date:   Thu, 20 Jul 2023 08:30:39 -0700
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.12.0
-Subject: Re: [RFC PATCH 0/6] nvmem: add block device NVMEM provider
-Content-Language: en-US
-To:     Daniel Golle <daniel@makrotopia.org>, Jens Axboe <axboe@kernel.dk>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+        with ESMTP id S229563AbjGTQEb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 12:04:31 -0400
+Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1956FCE;
+        Thu, 20 Jul 2023 09:04:31 -0700 (PDT)
+Received: from local
+        by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
+         (Exim 4.96)
+        (envelope-from <daniel@makrotopia.org>)
+        id 1qMW70-0004pa-2K;
+        Thu, 20 Jul 2023 16:02:42 +0000
+Date:   Thu, 20 Jul 2023 17:02:32 +0100
+From:   Daniel Golle <daniel@makrotopia.org>
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
         Miquel Raynal <miquel.raynal@bootlin.com>,
         Richard Weinberger <richard@nod.at>,
         Vignesh Raghavendra <vigneshr@ti.com>,
         Dave Chinner <dchinner@redhat.com>,
         Matthew Wilcox <willy@infradead.org>,
-        =?UTF-8?Q?Thomas_Wei=c3=9fschuh?= <linux@weissschuh.net>,
+        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
         Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
         Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
         Christian Loehle <CLoehle@hyperstone.com>,
@@ -63,41 +41,28 @@ To:     Daniel Golle <daniel@makrotopia.org>, Jens Axboe <axboe@kernel.dk>,
         Hans de Goede <hdegoede@redhat.com>,
         Ye Bin <yebin10@huawei.com>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
+        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
         linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
+Subject: Re: [RFC PATCH 6/6] block: implement NVMEM provider
+Message-ID: <ZLlaOB1sb8wSd7Aq@makrotopia.org>
 References: <cover.1689802933.git.daniel@makrotopia.org>
-From:   Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <cover.1689802933.git.daniel@makrotopia.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+ <e5b709e15739dc0563e9497a2dbbe63050381db0.1689802933.git.daniel@makrotopia.org>
+ <ZLjci5bHzTI+/Kxs@infradead.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZLjci5bHzTI+/Kxs@infradead.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/19/23 15:01, Daniel Golle wrote:
-> On embedded devices using an eMMC it is common that one or more (hw/sw)
-> partitions on the eMMC are used to store MAC addresses and Wi-Fi
-> calibration EEPROM data.
+On Thu, Jul 20, 2023 at 12:04:43AM -0700, Christoph Hellwig wrote:
+> The layering here is exactly the wrong way around.  This block device
+> as nvmem provide has not business sitting in the block layer and being
+> keyed ff the gendisk registration.  Instead you should create a new
+> nvmem backed that opens the block device as needed if it fits your
+> OF description without any changes to the core block layer.
 > 
-> Implement an NVMEM provider backed by block devices as typically the
-> NVMEM framework is used to have kernel drivers read and use binary data
-> from EEPROMs, efuses, flash memory (MTD), ...
-> 
-> In order to be able to reference hardware partitions on an eMMC, add code
-> to bind each hardware partition to a specific firmware subnode.
-> 
-> This series is meant to open the discussion on how exactly the device tree
-> schema for block devices and partitions may look like, and even if using
-> the block layer to back the NVMEM device is at all the way to go -- to me
-> it seemed to be a good solution because it will be reuable e.g. for NVMe.
 
-Is my understanding correct that these devices boot from eMMC and not over
-Wi-Fi? If so, why does this calibration data have to be stored on a raw
-block device? Why can't this information be loaded from a file on a
-filesystem?
-
-Thanks,
-
-Bart.
-
+Ok. I will use a class_interface instead.
