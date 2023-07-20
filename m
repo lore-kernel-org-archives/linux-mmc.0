@@ -2,188 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90C2BEB64DA
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 09:27:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8ABEFEB64DD
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 10:52:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230319AbjGTJ1L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Jul 2023 05:27:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58672 "EHLO
+        id S229488AbjGTKwX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jul 2023 06:52:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48750 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbjGTJ0y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 05:26:54 -0400
-Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53FE0C066;
-        Thu, 20 Jul 2023 02:11:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1689844290; x=1721380290;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=SsEtYYmV/1eLHlybJHI/seABvXep05IVE2Gm/J96eWU=;
-  b=CdfLuukalyTBaQIOJbg2hem06IVVCVKaI9t1Ijg34uR4EE7vNcypIY45
-   kN6O7fdGL5Ox7QX0RkVlKbJ63L7uWJCIFE76lUSZ8yCe/eO8yZBtzaSfX
-   FTwZC1o5c4m+6GvxoScHs1dt7LAMGOLCIl8l6EDp5BuABjRvUkEF/h/RB
-   d1MgYtL4MWpLoP+L+Wh9XDPgK+UZVB820imrPwyp5we+a09I0EfuuNmSz
-   PaProaci0/W9/Bqzi1tTRT6tx9lhDOGulSRAk+xOXk1blNmRej5xYsCkS
-   cCrdBT6T5GcBkm210w1qnARKC7mjX3uWKXFDe+9mdwxnsYSLBKw9/m5sD
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10776"; a="369334596"
-X-IronPort-AV: E=Sophos;i="6.01,218,1684825200"; 
-   d="scan'208";a="369334596"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jul 2023 02:11:29 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10776"; a="898216732"
-X-IronPort-AV: E=Sophos;i="6.01,218,1684825200"; 
-   d="scan'208";a="898216732"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.109])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jul 2023 02:11:26 -0700
-Message-ID: <827f7e97-369d-5f1a-44bb-49a76981f801@intel.com>
-Date:   Thu, 20 Jul 2023 12:11:22 +0300
+        with ESMTP id S229453AbjGTKwW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 06:52:22 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6E54172A;
+        Thu, 20 Jul 2023 03:52:21 -0700 (PDT)
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36KAq3et002313;
+        Thu, 20 Jul 2023 10:52:03 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=UwF3Q94ZQtLXCR5FqDfs3Vvs8RGFryqhI1TAbooTbSE=;
+ b=U/YIA0LlLwUgfix3dYSU80xEyQ3iF6BLZjHs4gojkOU49oXfYzKhTyRw2Qt/C4q+m8iC
+ 4y6wY1Vss2o0hlkN3mPrgLcOUYgdnMY1M3aX19l8pslkFo0DZmd06jP3rg7U+/rGy5Hz
+ 5fQvxMM/08gzeb3s8x+1LXugUvESvEzVBXf80mK5H9YJnwbx7YeBgxapKW5nWYRGyKu+
+ GDeBmYZooV9DfkNqnhLaWf1Hl6okEjcZOZkMwJcRVfH95L4epFL5Cp1Eb6nye0zi9o12
+ 5ANtHJxxUtJWyYfapcln6dvCueN4D16Zdft1ukbbb2N1n28dZkHeB2s7hJQKWhb14Swp hA== 
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rxexkjebg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 20 Jul 2023 10:52:03 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36KAq2We008973
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 20 Jul 2023 10:52:02 GMT
+Received: from [10.201.3.182] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.30; Thu, 20 Jul
+ 2023 03:51:56 -0700
+Message-ID: <8e209cd1-aa52-b947-bffd-15931af58391@quicinc.com>
+Date:   Thu, 20 Jul 2023 16:21:53 +0530
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.13.0
-Subject: Re: [PATCH] mmc: core: Remove FW revision from CID check
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [v11 5/6] arm64: dts: Add ipq5018 SoC and rdp432-c2 board support
 Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, chunyan.zhang@unisoc.com,
-        yuelin.tang@unisoc.com
-References: <20230718011504.10947-1-wenchao.chen@unisoc.com>
- <b4ef97ba-440a-2641-0811-bb05e630ccb1@intel.com>
- <CA+Da2qxOhK7Uc8_ONVgkR=3pTnTo7KgcJi-yS3Cv730+J0pAxA@mail.gmail.com>
- <ff06bd46-bf43-d2dc-751f-47f41ccc1821@intel.com>
- <CA+Da2qx+mQ1N-7OnQh0ed6_diXgTadKMzJ+9rkqVZv0rhXYTFQ@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CA+Da2qx+mQ1N-7OnQh0ed6_diXgTadKMzJ+9rkqVZv0rhXYTFQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
+        <andy.shevchenko@gmail.com>
+References: <20230616101749.2083974-1-quic_srichara@quicinc.com>
+ <20230616101749.2083974-6-quic_srichara@quicinc.com>
+ <53721566-2a85-76cb-a4cf-2819f08dfc85@linaro.org>
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <53721566-2a85-76cb-a4cf-2819f08dfc85@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: 2rBOnBTtDA0BKQkA2mSmcep7l7EAnhSL
+X-Proofpoint-GUID: 2rBOnBTtDA0BKQkA2mSmcep7l7EAnhSL
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-07-20_04,2023-07-20_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0
+ lowpriorityscore=0 bulkscore=0 spamscore=0 priorityscore=1501
+ malwarescore=0 phishscore=0 clxscore=1011 suspectscore=0 impostorscore=0
+ mlxlogscore=969 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2306200000 definitions=main-2307200091
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/07/23 11:38, Wenchao Chen wrote:
-> On Thu, Jul 20, 2023 at 2:45 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+Hi,
+
+On 7/20/2023 2:14 PM, Krzysztof Kozlowski wrote:
+> On 16/06/2023 12:17, Sricharan Ramabadhran wrote:
+>> Add initial device tree support for the Qualcomm IPQ5018 SoC and
+>> rdp432-c2 board.
 >>
->> On 19/07/23 05:46, Wenchao Chen wrote:
->>> On Tue, Jul 18, 2023 at 2:13 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>
->>>> On 18/07/23 04:15, Wenchao Chen wrote:
->>>>> When the card is reset, mmc_card_init() will check if this
->>>>> card is the previous card by comparing the CID.
->>>>>
->>>>> If the firmware is upgraded, the product version may change,
->>>>> so we remove the product version from the CID check.
->>>>
->>>> What is the use-case for this?  I would have thought it is safer
->>>> not to assume anything about the card after the firmware has been
->>>> upgraded.
->>>>
->>> Hi adrian
->>>     Understood, but we have case:
->>>     1.Before the firmware upgrade
->>>         [T5745@C0] mmc0 oldcard raw->cid[2]: 32691160, raw->cid[3]: d9241800
->>>         PRV=69
->>>     2.After the firmware upgrade
->>>         [T5745@C0] mmc0 cid[2]: 32011160 cid[3]: d9241800
->>>         PRV=01
->>>     If the PRV is not excluded in the CID check, then the mmc
->>> initialization will fail after the mmc reset.
->>>     In addition, CRC is excluded because some controllers support
->>> SDHCI_QUIRK2_RSP_136_HAS_CRC.
+>> Few things like 'reboot' does not work because, couple of more 'SCM'
+>> APIS are needed to clear some TrustZone settings. Those will be
+>> posted separately.
 >>
->> I do not know what others are doing in this regard, nor what
->> circumstances are leading to the re-initialization.
+>> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+>> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>> Co-developed-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
+>> Signed-off-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
+>> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>> ---
+>>   arch/arm64/boot/dts/qcom/Makefile             |   1 +
+>>   .../arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts |  72 +++++
+>>   arch/arm64/boot/dts/qcom/ipq5018.dtsi         | 250 ++++++++++++++++++
+>>   3 files changed, 323 insertions(+)
+>>   create mode 100644 arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
+>>   create mode 100644 arch/arm64/boot/dts/qcom/ipq5018.dtsi
 >>
-> There is a way: reboot the machine, but we don't want to do that.
 > 
-> When the firmware is upgraded, we need to complete the firmware
-> update by reset card, and the card will be initialized by mmc_init_card
-> after mmc reset.
+> NAK, please do not merge.
 > 
->> Presumably a clean re-initialization could be done by
->> unbinding and rebinding the host controller.
->>
-> Could you tell me how to do that?
-> Thanks.
+> It turns out there are some problems here (pointed out by Hariharan K).
 
-It depends on the name of the device and where the host
-controller driver is in sysfs, but here is an example for
-sdhci-pci with eMMC:
+   The changes from Hariharan K to rename the dts compatibles is not
+   correct. So the compatibles/names in this series should be used.
+   Hariharan can fix his series and re-post.
 
-# ls /sys/bus/pci/drivers/sdhci-pci/
-0000:00:1a.0/  new_id         uevent
-bind           remove_id      unbind
-# echo "0000:00:1a.0" > /sys/bus/pci/drivers/sdhci-pci/unbind 
-[  484.853761] mmc0: card 0001 removed
-
-# echo "0000:00:1a.0" > /sys/bus/pci/drivers/sdhci-pci/bind 
-[  490.621524] sdhci-pci 0000:00:1a.0: SDHCI controller found [8086:4b47] (rev 11)
-[  490.638520] mmc0: CQHCI version 5.10
-[  490.643630] mmc0: SDHCI controller on PCI [0000:00:1a.0] using ADMA 64-bit
-[  490.651837] sdhci-pci 0000:00:1a.1: SDHCI controller found [8086:4b48] (rev 11)
-[  490.780139] mmc0: Command Queue Engine enabled
-[  490.785132] mmc0: new HS400 MMC card at address 0001
-[  490.791171] mmcblk0: mmc0:0001 S0J57X 29.6 GiB 
-[  490.796320] mmcblk0boot0: mmc0:0001 S0J57X partition 1 31.5 MiB
-[  490.803121] mmcblk0boot1: mmc0:0001 S0J57X partition 2 31.5 MiB
-[  490.809918] mmcblk0rpmb: mmc0:0001 S0J57X partition 3 4.00 MiB, chardev (240:0)
-[  490.821390] sdhci-pci 0000:00:1a.1: SDHCI controller found [8086:4b48] (rev 11)
-
-> 
->>>
->>>>>
->>>>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
->>>>> ---
->>>>>  drivers/mmc/core/mmc.c | 18 +++++++++++++++++-
->>>>>  1 file changed, 17 insertions(+), 1 deletion(-)
->>>>>
->>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>>> index 89cd48fcec79..32a73378d5c3 100644
->>>>> --- a/drivers/mmc/core/mmc.c
->>>>> +++ b/drivers/mmc/core/mmc.c
->>>>> @@ -32,6 +32,9 @@
->>>>>  #define MIN_CACHE_EN_TIMEOUT_MS 1600
->>>>>  #define CACHE_FLUSH_TIMEOUT_MS 30000 /* 30s */
->>>>>
->>>>> +#define MMC_CID_PRV_MASK GENMASK(23, 16)
->>>>> +#define MMC_CID_CRC_MASK GENMASK(7, 0)
->>>>> +
->>>>>  static const unsigned int tran_exp[] = {
->>>>>       10000,          100000,         1000000,        10000000,
->>>>>       0,              0,              0,              0
->>>>> @@ -126,6 +129,19 @@ static int mmc_decode_cid(struct mmc_card *card)
->>>>>       return 0;
->>>>>  }
->>>>>
->>>>> +static int mmc_check_cid(u32 *cid, u32 *raw_cid)
->>>>> +{
->>>>> +     /*
->>>>> +      * When comparing CID, we need to remove the product
->>>>> +      * version (Field PRV, offset 55:48) and CRC. Because
->>>>> +      * the product version will change when the firmware
->>>>> +      * is upgraded. Also, the new CRC is different.
->>>>> +      */
->>>>> +     return cid[0] != raw_cid[0] || cid[1] != raw_cid[1] ||
->>>>> +             (cid[2] & ~MMC_CID_PRV_MASK) != (raw_cid[2] & ~MMC_CID_PRV_MASK) ||
->>>>> +             (cid[3] & ~MMC_CID_CRC_MASK) != (raw_cid[3] & ~MMC_CID_CRC_MASK);
->>>>> +}
->>>>> +
->>>>>  static void mmc_set_erase_size(struct mmc_card *card)
->>>>>  {
->>>>>       if (card->ext_csd.erase_group_def & 1)
->>>>> @@ -1640,7 +1656,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->>>>>               goto err;
->>>>>
->>>>>       if (oldcard) {
->>>>> -             if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0) {
->>>>> +             if (mmc_check_cid(cid, oldcard->raw_cid)) {
->>>>>                       pr_debug("%s: Perhaps the card was replaced\n",
->>>>>                               mmc_hostname(host));
->>>>>                       err = -ENOENT;
->>>>
->>
-
+Regards,
+  Sricharan
