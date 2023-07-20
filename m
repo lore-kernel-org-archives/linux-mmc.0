@@ -2,138 +2,96 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67A82C001E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 02:55:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABF09EB64DA
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 06:04:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229684AbjGTCzq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jul 2023 22:55:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35738 "EHLO
+        id S229561AbjGTGEX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jul 2023 02:04:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53944 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229551AbjGTCzp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jul 2023 22:55:45 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 786A6172A;
-        Wed, 19 Jul 2023 19:55:44 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0D22360ED0;
-        Thu, 20 Jul 2023 02:55:44 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1722EC433C8;
-        Thu, 20 Jul 2023 02:55:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1689821743;
-        bh=o/YV+k4xqo8X8+NVHObuTllSS7QCYEY/VdOiYZmmdSw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=s4OPQ7U/Ojvxhh6WRwAonmOOoe4/WMAmN+KaT/qJ9vss9Y7CSmkKStaVe2DEDXQHf
-         DY+KAAakCNpwRmdi6k2pWSE4fJXvN9QVPQU/WJ+01TlVQvNsEoNfUh0wiSgVI+sV0S
-         vzQ7YfVU8S4+HRoSKeW64EbOiMFIUKafWbSbq9ZQ4e69WRSN+a5ByoKRJqilk1V0nI
-         8KAI/K7Qumy6EuH8gKtY1Nhsmfw/Fxlh3vMJcYAo2iI9pKv+l3kNXW82Ro6+Fu+521
-         O9mZaqwlVcsgZLNoym1sHni6nv5uN6dQT+Ce7Oh0TGM7+cFYPxP4ZiMa6DG7JAfXW1
-         8WbYbQtmqpLKw==
-Date:   Wed, 19 Jul 2023 19:55:41 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Cc:     linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
-        quic_psodagud@quicinc.com, avmenon@quicinc.com,
-        abel.vesa@linaro.org, quic_spuppala@quicinc.com
-Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
- ufs
-Message-ID: <20230720025541.GA2607@sol.localdomain>
-References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+        with ESMTP id S229733AbjGTGEW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 02:04:22 -0400
+Received: from relay6-d.mail.gandi.net (relay6-d.mail.gandi.net [217.70.183.198])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72E081724;
+        Wed, 19 Jul 2023 23:04:19 -0700 (PDT)
+Received: by mail.gandi.net (Postfix) with ESMTPSA id D74F2C0004;
+        Thu, 20 Jul 2023 06:04:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+        t=1689833057;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=nUFL7/Mm7BPR8kB+przAb0OhEflLuBBseviQ3BJv9XI=;
+        b=KLwUNU/HXgYZnteyxoUn5AmohuBdHXzopujfXCbx8cF44Qz8QJTIJGrYik1WRX3aR27zOb
+        JtlcjxSq75x4l/MjKwgsYNdnr4bEnhFGgj3l3Hiy3/r+1jNkURLVTCRjjpQkBwjFWUlnt1
+        MBy3ltHjeUuOL1+oLq5NnJai9KKIYdArGGrJXMzWHePNpa03aFKj86L+Sw6I5fHi69NWBh
+        NKa0Pn4Pasn1VUKcUZ7n29qCtN6jQ2lVhnD/JWLE0prgAvJWG1bTer0gkUa16TcrbQRHJ8
+        TGB2/o8DFmVblY79u7kO1qX7XwCIzeJls0LFCpaxm4cca19aXESw87rZwzit4Q==
+Date:   Thu, 20 Jul 2023 08:04:09 +0200
+From:   Miquel Raynal <miquel.raynal@bootlin.com>
+To:     Daniel Golle <daniel@makrotopia.org>
+Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Dave Chinner <dchinner@redhat.com>,
+        Matthew Wilcox <willy@infradead.org>,
+        Thomas =?UTF-8?B?V2Vpw59zY2h1aA==?= <linux@weissschuh.net>,
+        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
+        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
+        Christian Loehle <CLoehle@hyperstone.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Hannes Reinecke <hare@suse.de>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Ye Bin <yebin10@huawei.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
+Subject: Re: [RFC PATCH 4/6] mtd: blkdevs: set GENHD_FL_NO_NVMEM
+Message-ID: <20230720080409.734a312f@xps-13>
+In-Reply-To: <65171d5da3daba24315ecdfef6727442baae5bbf.1689802933.git.daniel@makrotopia.org>
+References: <cover.1689802933.git.daniel@makrotopia.org>
+        <65171d5da3daba24315ecdfef6727442baae5bbf.1689802933.git.daniel@makrotopia.org>
+Organization: Bootlin
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.33; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-GND-Sasl: miquel.raynal@bootlin.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gaurav,
+Hi Daniel,
 
-On Wed, Jul 19, 2023 at 10:04:14AM -0700, Gaurav Kashyap wrote:
-> These patches add support to Qualcomm ICE (Inline Crypto Enginr) for hardware
-> wrapped keys using Qualcomm Hardware Key Manager (HWKM) and are made on top
-> of a rebased version  Eric Bigger's set of changes to support wrapped keys in
-> fscrypt and block below:
-> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7
-> (The rebased patches are not uploaded here)
-> 
-> Ref v1 here:
-> https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkash@quicinc.com/
-> 
-> Explanation and use of hardware-wrapped-keys can be found here:
-> Documentation/block/inline-encryption.rst
-> 
-> This patch is organized as follows:
-> 
-> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
-> Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
-> Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
-> Patch 5-6 - Adds support for wrapped keys in UFS
-> Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
-> 
-> NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
->       Patch 3, 4, 8, 10 will have MMC equivalents.
-> 
-> Testing:
-> Test platform: SM8550 MTP
-> Engineering trustzone image is required to test this feature only
-> for SM8550. For SM8650 onwards, all trustzone changes to support this
-> will be part of the released images.
-> The engineering changes primarily contain hooks to generate, import and
-> prepare keys for HW wrapped disk encryption.
-> 
-> The changes were tested by mounting initramfs and running the fscryptctl
-> tool (Ref: https://github.com/ebiggers/fscryptctl/tree/wip-wrapped-keys) to
-> generate and prepare keys, as well as to set policies on folders, which
-> consequently invokes disk encryption flows through UFS.
-> 
-> Gaurav Kashyap (10):
->   ice, ufs, mmc: use blk_crypto_key for program_key
->   qcom_scm: scm call for deriving a software secret
->   soc: qcom: ice: add hwkm support in ice
->   soc: qcom: ice: support for hardware wrapped keys
->   ufs: core: support wrapped keys in ufs core
->   ufs: host: wrapped keys support in ufs qcom
->   qcom_scm: scm call for create, prepare and import keys
->   ufs: core: add support for generate, import and prepare keys
->   soc: qcom: support for generate, import and prepare key
->   ufs: host: support for generate, import and prepare key
-> 
->  drivers/firmware/qcom_scm.c            | 292 +++++++++++++++++++++++
->  drivers/firmware/qcom_scm.h            |   4 +
->  drivers/mmc/host/cqhci-crypto.c        |   7 +-
->  drivers/mmc/host/cqhci.h               |   2 +
->  drivers/mmc/host/sdhci-msm.c           |   6 +-
->  drivers/soc/qcom/ice.c                 | 309 +++++++++++++++++++++++--
->  drivers/ufs/core/ufshcd-crypto.c       |  92 +++++++-
->  drivers/ufs/host/ufs-qcom.c            |  63 ++++-
->  include/linux/firmware/qcom/qcom_scm.h |  13 ++
->  include/soc/qcom/ice.h                 |  18 +-
->  include/ufs/ufshcd.h                   |  25 ++
->  11 files changed, 797 insertions(+), 34 deletions(-)
+daniel@makrotopia.org wrote on Wed, 19 Jul 2023 23:03:24 +0100:
 
+> As the MTD subsystem already acts as an NVMEM provider, emulated mtdblock
+> devices should not be considered NVMEM providers.
+>=20
+> Signed-off-by: Daniel Golle <daniel@makrotopia.org>
+> ---
+>  drivers/mtd/mtd_blkdevs.c | 1 +
+>  1 file changed, 1 insertion(+)
+>=20
+> diff --git a/drivers/mtd/mtd_blkdevs.c b/drivers/mtd/mtd_blkdevs.c
+> index ff18636e08897..82d5afba6a25a 100644
+> --- a/drivers/mtd/mtd_blkdevs.c
+> +++ b/drivers/mtd/mtd_blkdevs.c
+> @@ -362,6 +362,7 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
+>  		gd->flags |=3D GENHD_FL_NO_PART;
+>  	}
+> =20
+> +	gd->flags |=3D GENHD_FL_NO_NVMEM;
+>  	set_capacity(gd, ((u64)new->size * tr->blksize) >> 9);
+> =20
+>  	/* Create the request queue */
 
-Thank you for continuing to work on this!
+Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
 
-According to your cover letter, this feature requires a custom TrustZone image
-to work on SM8550.  Will that image be made available outside Qualcomm?
-
-Also according to your cover letter, this feature will work on SM8650 out of the
-box.  That's great to hear.  However, SM8650 does not appear to be publicly
-available yet or have any upstream kernel support.  Do you know approximately
-when a SM8650 development board will become available to the general public?
-
-Also, can you please make available a git branch somewhere that contains your
-patchset?  It sounds like this depends on
-https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7, but
-actually a version of it that you've rebased, which I don't have access to.
-Without being able to apply your patchset, I can't properly review it.
-
-Thanks!
-
-- Eric
+Thanks,
+Miqu=C3=A8l
