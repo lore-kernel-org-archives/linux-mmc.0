@@ -2,126 +2,146 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B8CAC001DF
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 14:05:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DB20EB64DC
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 14:29:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230226AbjGTOFA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Jul 2023 10:05:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41116 "EHLO
+        id S231713AbjGTO3E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jul 2023 10:29:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56852 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229448AbjGTOE7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 10:04:59 -0400
-Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D295F1FD7;
-        Thu, 20 Jul 2023 07:04:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1689861898; x=1721397898;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=jRwJIEhFunnqSNUPRBTmhjVK4I+hmWG8Zif3HjmDR94=;
-  b=cR++fv3W+MCic1Jb1Y25qvCT/8VMMtT1Vk9rvc/nxXILa2pI+0/04msM
-   2OoPgNFNzcuqkxLLup//MlPnzPAHWk2HR9xSru2Il9KlShQTUFcbozakZ
-   K5TwqyziLhywf3lyaiJyT7RWlmsc1B8XWZ/7vhMrcULBP3n8KR+yOPcmw
-   JrrVwOcoOkyTtPlXHlF+ucijDf0UQUH0M+yankT+bQA0bEVU/I/vQ/SPC
-   N+Qz6sfFA//B2N2LHcz7P29jm/R4a8NBftVwBXn82szBpXRuRb+hzsWTo
-   bLsK4wJHLGV4g1NvLz4Y3VmTSlw8tBet5Awe9itbc5TvPMwtIcCeZ7Tvx
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10777"; a="432951717"
-X-IronPort-AV: E=Sophos;i="6.01,219,1684825200"; 
-   d="scan'208";a="432951717"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jul 2023 06:31:34 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10777"; a="971033124"
-X-IronPort-AV: E=Sophos;i="6.01,218,1684825200"; 
-   d="scan'208";a="971033124"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.109])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jul 2023 06:31:21 -0700
-Message-ID: <9ecf44f2-7572-f3e6-9bd8-a54575588d0d@intel.com>
-Date:   Thu, 20 Jul 2023 16:31:17 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.13.0
-Subject: Re: [PATCH v2] mmc: Explicitly include correct DT includes
-Content-Language: en-US
-To:     Rob Herring <robh@kernel.org>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Claudiu Beznea <claudiu.beznea@microchip.com>,
-        Robert Richter <rric@kernel.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        =?UTF-8?Q?Andreas_F=c3=a4rber?= <afaerber@suse.de>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Florian Fainel li <florian.fainelli@broadcom.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Michal Simek <michal.simek@amd.com>,
-        Eugen Hristev <eugen.hristev@collabora.com>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        Steen Hegelund <Steen.Hegelund@microchip.com>,
-        Daniel Machon <daniel.machon@microchip.com>,
-        UNGLinuxDriver@microchip.com,
+        with ESMTP id S231702AbjGTO3D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 10:29:03 -0400
+Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54D231BF7;
+        Thu, 20 Jul 2023 07:29:02 -0700 (PDT)
+Received: from local
+        by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
+         (Exim 4.96)
+        (envelope-from <daniel@makrotopia.org>)
+        id 1qMUds-0004Lw-39;
+        Thu, 20 Jul 2023 14:28:33 +0000
+Date:   Thu, 20 Jul 2023 15:28:23 +0100
+From:   Daniel Golle <daniel@makrotopia.org>
+To:     Hannes Reinecke <hare@suse.de>
+Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
         Vignesh Raghavendra <vigneshr@ti.com>,
-        Ben Dooks <ben-linux@fluff.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Baolin Wang <baolin.wang@linux.alibaba.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-        Masami Hiramatsu <mhiramat@kernel.org>
-Cc:     devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-amlogic@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        linux-actions@lists.infradead.org,
-        linux-renesas-soc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-tegra@vger.kernel.org
-References: <20230718143054.1065288-1-robh@kernel.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230718143054.1065288-1-robh@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        Dave Chinner <dchinner@redhat.com>,
+        Matthew Wilcox <willy@infradead.org>,
+        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
+        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
+        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
+        Christian Loehle <CLoehle@hyperstone.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Ye Bin <yebin10@huawei.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
+Subject: Re: [RFC PATCH 3/6] block: add new genhd flag GENHD_FL_NO_NVMEM
+Message-ID: <ZLlEhxspjyMPl29b@makrotopia.org>
+References: <cover.1689802933.git.daniel@makrotopia.org>
+ <96510d925cb0ca1a3a132f8f8affd4bbdafd8fc9.1689802933.git.daniel@makrotopia.org>
+ <0592e021-237d-6d41-7faf-e5b93aefbeea@suse.de>
+ <ZLk6-aARrlAGenk3@makrotopia.org>
+ <f6256c2c-0fd5-764b-92ec-343b99e79c36@suse.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <f6256c2c-0fd5-764b-92ec-343b99e79c36@suse.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/07/23 17:30, Rob Herring wrote:
-> The DT of_device.h and of_platform.h date back to the separate
-> of_platform_bus_type before it as merged into the regular platform bus.
-> As part of that merge prepping Arm DT support 13 years ago, they
-> "temporarily" include each other. They also include platform_device.h
-> and of.h. As a result, there's a pretty much random mix of those include
-> files used throughout the tree. In order to detangle these headers and
-> replace the implicit includes with struct declarations, users need to
-> explicitly include the correct includes.
+On Thu, Jul 20, 2023 at 04:03:22PM +0200, Hannes Reinecke wrote:
+> On 7/20/23 15:47, Daniel Golle wrote:
+> > On Thu, Jul 20, 2023 at 10:24:18AM +0200, Hannes Reinecke wrote:
+> > > On 7/20/23 00:03, Daniel Golle wrote:
+> > > > Add new flag to destinguish block devices which should not act as an
+> > > > NVMEM provider, such as for example an emulated block device on top of
+> > > > an MTD partition which already acts as an NVMEM provider itself.
+> > > > 
+> > > > Signed-off-by: Daniel Golle <daniel@makrotopia.org>
+> > > > ---
+> > > >    include/linux/blkdev.h | 3 +++
+> > > >    1 file changed, 3 insertions(+)
+> > > > 
+> > > > diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+> > > > index 2f5371b8482c0..e853d1815be15 100644
+> > > > --- a/include/linux/blkdev.h
+> > > > +++ b/include/linux/blkdev.h
+> > > > @@ -80,11 +80,14 @@ struct partition_meta_info {
+> > > >     * ``GENHD_FL_NO_PART``: partition support is disabled.  The kernel will not
+> > > >     * scan for partitions from add_disk, and users can't add partitions manually.
+> > > >     *
+> > > > + * ``GENHD_FL_NO_NVMEM``: NVMEM emulation is disabled.  The kernel will not
+> > > > + * emulate an NVMEM device on top of this disk.
+> > > >     */
+> > > >    enum {
+> > > >    	GENHD_FL_REMOVABLE			= 1 << 0,
+> > > >    	GENHD_FL_HIDDEN				= 1 << 1,
+> > > >    	GENHD_FL_NO_PART			= 1 << 2,
+> > > > +	GENHD_FL_NO_NVMEM			= 1 << 3,
+> > > >    };
+> > > >    enum {
+> > > Please reverse this flag. Most of the devices will not have an NVMEM
+> > > partition, and we shouldn't require each and every driver to tag their
+> > > devices.
+> > > So please use GENHD_FL_NVMEM and only set this flag on devices which really
+> > > have an NVMEM partition.
+> > 
+> > The idea here was to exclude all those devices which already implement
+> > an NVMEM provider on a lower layer themselves, such as MTD.
+> > In this cases it would be ambigous if the OF node represents the
+> > NVMEM device registered by the MTD framework or if blk-nvmem should be
+> > used.
+> > 
+> Hmm; not sure if I follow.
+> In the end, it doesn't really matter whether you check for
+> GENHD_FL_NO_NVMEM or !GENHD_FL_NVMEM.
+> With the difference being that in the former case you have to
+> tag 99% of all existing block devices, and in the latter you
+> have to tag 1%.
+
+That's not exactly true. In the current case I only have to flag MTD
+(and UBI in future, I'm working on a UBI NVMEM provider as well) with
+GENHD_FL_NO_NVMEM, so a 'compatible = "nvmem-cells"' in the
+corresponding device tree node should not result in blk-nvmem creating
+an NVMEM device based on the (mtd/ubi)block device, simply because the
+MTD framework (and UBI in future) will already have created their own
+NVMEM device attached to the very same device tree node.
+
+In all other cases of block devices, the compatible string can be used
+to unambigously decide whether an NVMEM device should be created or
+not. blk-nvmem is opt-in, so unless the device is flagged by
+'compatible = "nvmem-cells"' it will not do anything.
+
+For all devices which anyway do not have any device tree representation
+it won't do anything (think: loop, nbd, ...), we would not need to opt
+them out using GENHD_FL_NO_NVMEM. Also all other drivers which do not
+already bring their own NVMEM implementation won't need GENHD_FL_NO_NVMEM,
+the absence of 'compatible = "nvmem-cells"' is enough to indicate that
+they should not be considered as NVMEM providers.
+
+The way you are suggesting will require that, in addition to selecting
+the targetted block device in device tree, the block driver will also
+have to set GENHD_FL_NVMEM. Hence we will need changes in MMC, NVMe
+and potentially also SATA disk drivers setting GENHD_FL_NVMEM when
+registering the disk.
+
 > 
-> Signed-off-by: Rob Herring <robh@kernel.org>
+> > In all other cases device tree can unambigously indicate whether a
+> > block device should serve as NVMEM provider (and right, most of them
+> > never will).
+> > 
+> > However, reversing the logic seems fine just as well.
+> 
+> Thanks. Please do.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
+Either way is fine with me, just 99% vs. 1% is not the right argument
+in this case.
