@@ -2,63 +2,64 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BE70C04A94
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 10:14:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC9DEC04E69
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 10:14:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229847AbjGUKOn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Jul 2023 06:14:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51394 "EHLO
+        id S230078AbjGUKOp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jul 2023 06:14:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51486 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230077AbjGUKOX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 06:14:23 -0400
+        with ESMTP id S231318AbjGUKO2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 06:14:28 -0400
 Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C46111D;
-        Fri, 21 Jul 2023 03:14:17 -0700 (PDT)
-Received: by mail-pl1-x635.google.com with SMTP id d9443c01a7336-1b9e9765f2cso11128905ad.3;
-        Fri, 21 Jul 2023 03:14:17 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9665E10A;
+        Fri, 21 Jul 2023 03:14:26 -0700 (PDT)
+Received: by mail-pl1-x635.google.com with SMTP id d9443c01a7336-1b89600a37fso11387845ad.2;
+        Fri, 21 Jul 2023 03:14:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1689934456; x=1690539256;
+        d=gmail.com; s=20221208; t=1689934466; x=1690539266;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2/nJPACoTSOLrvBSk5uy0WhaC3ot8bwxJlgDenAP7w8=;
-        b=l37gsnFoe8kp1Bt6HnvdvZ7LyGe8nH0h5NSqhETWBEDHjkXkMVLbeffd6A7+EVZD8t
-         Q0W6cAoxmeST8gCaHvuLDQttF5+AAeoEaVck3exGpffABNHzw5xemTPg0cjA8M3+RF2U
-         Q7kNBjnYvifcTFy9DyxMWZBkgeOsO8ZnRUzDIVlMT/GxBVslSCznJLiWJI3bq+f7Glbi
-         kZgCRmwVdSpcHZSl/U57ieIJaDXIRxviaXG7NL2Ys45Bn/AMzukxaGRu85IS40rPd/qP
-         fa99j8z0M0cviLWKibNYePdYop3HdQEL8dl+76pdaKq17dpSHfrTzfnlyPXewSf/LIe5
-         VQ3g==
+        bh=4b8KbcthrufFbqAtu/lD/XEEE4MnKj5jZIAfVSwGqrg=;
+        b=TPE2tIApuY3ddKxvBKMXxtl9MCkBKX6S5/33zqo+ijofriXLdfbRN7C5HSQhrYQnMS
+         pNdEz6XmEjiGge8M52PkNtAomy/1MoLVvDehIk5DsoIcRRiTBIbuN0NhBHusRPVD+5JK
+         5VoCKg+QaaOnK1YTqwabSG90KI5sqIv0OjsA28K1AlSiByqpJF7Ogw1jq9uLSQ8NTQV3
+         vpR8KyQV7M64SkI6ldO1cRzS8mwEgj0Kvyf19St7s6Um54pZuw7DqgR64CGM3SqccCKU
+         1p1Uzil47gA3b4KgfkDOEgJpiw0m389rY5leNSUNwNCy5RsLCmXK01XKazhuIZaYU+28
+         PJNg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1689934456; x=1690539256;
+        d=1e100.net; s=20221208; t=1689934466; x=1690539266;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=2/nJPACoTSOLrvBSk5uy0WhaC3ot8bwxJlgDenAP7w8=;
-        b=B5GmqU/QST90H1MRrwutG8CIbabgBYrTDAChiZLb94nO/YeeBzZMwwmg2MDvQ/109L
-         D2uO9QiNJWxVsPz+ia1U3bWmvN86weIjFmn5M4P1dDxWrZH0mxjEhJYwzK8GGW/jLf+s
-         XgyO4+cBd2G7yGcw/stI5YCFzw+gs3QMfqq/II/XfekgOtQTQ57vbNTKEmokN78IWm6S
-         bm+GhHucBwjPhSTAYSlCo1JVIzUdLjUYRTufAb+m92pD99d/KprRpRqVg81byBadJ1E9
-         aw/y5dwTzZi+V+c3gITfTS2Cd5XgZAymQ/pvQXfNxVB20Y3Ub4wKa8yXX824GhuqTQNa
-         MF/Q==
-X-Gm-Message-State: ABy/qLawbr4pyAPkiafMbHIZaOMlYUKeI/YSzmJGImJUNTLrTJ4VWKuc
-        iu5FeI0/xMc4Dm4yVFuAlGg=
-X-Google-Smtp-Source: APBJJlE/7w89XsnGJ0jWOmcqjkC9k2HyVEaxP9RvrWp9Grjb2FvcJ6Z8RU1mD7Nq6Gx6lgOi6XJK4Q==
-X-Received: by 2002:a17:902:e5cb:b0:1b5:5aa0:cfd9 with SMTP id u11-20020a170902e5cb00b001b55aa0cfd9mr1364863plf.48.1689934456344;
-        Fri, 21 Jul 2023 03:14:16 -0700 (PDT)
+        bh=4b8KbcthrufFbqAtu/lD/XEEE4MnKj5jZIAfVSwGqrg=;
+        b=Pc4Q+RMzcyXqMS66z7hdW27A61Zeah6+E7uqjQ/E33RvGDmkOuO/su6FvyV/okbQ06
+         ut5mMoPQOZKQZtP0RYtuJWWNV+IpW2EZTa/hgzzg1aw3ALieBhXdX3/kzPnK+48ao7ES
+         HrBBZUP+CPri+IbaB211971EgUfJKQfP2+A4xFfWBphIKa3GzAQz3t3o5Vg76yeVHcD4
+         gWbZ+sXitGcOra53HnrUxg6cgY+klLCnT9aSDcYX+LUCOFy5UyIGGDwzrppQ8n7Cox4A
+         Jhsv8cFK1zvKbSn3fEEStoZdg08p0RIbq7Ub6x1yVuTZ4ntFnwBp3GCVO+NneUi03DXj
+         0kHA==
+X-Gm-Message-State: ABy/qLZQlkIg27P6+FsKxiFCpL6QxcXv/OdZTpj4T95hhWXaH1B98c6Y
+        kVkroOoQSUaqbVExYYEO3W8=
+X-Google-Smtp-Source: APBJJlGNa2QrgTQ0a0P/NpFiAjTtyb/OK3DVKbs9fY05qBckYHG//ujhAQbeZUXznJwr2FSTUM1I6g==
+X-Received: by 2002:a17:902:ec84:b0:1b9:de3e:7a59 with SMTP id x4-20020a170902ec8400b001b9de3e7a59mr1678432plg.10.1689934465982;
+        Fri, 21 Jul 2023 03:14:25 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e23e-6b0d-6c46-3684-497a-06ee.emome-ip6.hinet.net. [2001:b400:e23e:6b0d:6c46:3684:497a:6ee])
-        by smtp.gmail.com with ESMTPSA id y1-20020a170902b48100b001b86492d724sm3050719plr.223.2023.07.21.03.14.13
+        by smtp.gmail.com with ESMTPSA id y1-20020a170902b48100b001b86492d724sm3050719plr.223.2023.07.21.03.14.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Jul 2023 03:14:16 -0700 (PDT)
+        Fri, 21 Jul 2023 03:14:25 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
         Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
         dlunev@chromium.org, Victor Shih <victorshihgli@gmail.com>,
+        Jason Lai <jason.lai@genesyslogic.com.tw>,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V9 02/23] mmc: core: Prepare to support SD UHS-II cards
-Date:   Fri, 21 Jul 2023 18:13:28 +0800
-Message-Id: <20230721101349.12387-3-victorshihgli@gmail.com>
+Subject: [PATCH V9 05/23] mmc: core: Add definitions for SD UHS-II cards
+Date:   Fri, 21 Jul 2023 18:13:31 +0800
+Message-Id: <20230721101349.12387-6-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230721101349.12387-1-victorshihgli@gmail.com>
 References: <20230721101349.12387-1-victorshihgli@gmail.com>
@@ -70,552 +71,454 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Update in previous version:
-The SD UHS-II interface was introduced to the SD spec v4.00 several years
-ago. The interface is fundamentally different from an electrical and a
-protocol point of view, comparing to the legacy SD interface.
+Add UHS-II specific data structures for commands and defines for
+registers, as described in Part 1 UHS-II Addendum Version 1.01.
 
-However, the legacy SD protocol is supported through a specific transport
-layer (SD-TRAN) defined in the UHS-II addendum of the spec. This allows the
-SD card to be managed in a very similar way as a legacy SD card, hence a
-lot of code can be re-used to support these new types of cards through the
-mmc subsystem.
-
-Moreover, an SD card that supports the UHS-II interface shall also be
-backwards compatible with the legacy SD interface, which allows a UHS-II
-card to be inserted into a legacy slot. As a matter of fact, this is
-already supported by mmc subsystem as of today.
-
-To prepare to add support for UHS-II, this change puts the basic foundation
-in the mmc core in place, allowing it to be more easily reviewed before
-subsequent changes implements the actual support.
-
-Basically, the approach here adds a new UHS-II bus_ops type and adds a
-separate initialization path for the UHS-II card. The intent is to avoid us
-from sprinkling the legacy initialization path, but also to simplify
-implementation of the UHS-II specific bits.
-
-At this point, there is only one new host ops added to manage the various
-ios settings needed for UHS-II. Additional host ops that are needed, are
-being added from subsequent changes.
+UHS-II related definitions are listed below:
+  1. UHS-II card capability: sd_uhs2_caps{}
+  2. UHS-II configuration: sd_uhs2_config{}
+  3. UHS-II Command structure: uhs2_command{}
+  4. UHS-II register I/O address and register field definitions: sd_uhs2.h
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
 Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 ---
 
-Updates in V9:
- - move sd_uhs2_operation definition of PatchV8[05/23] to
-   PatchV9[02/23] for avoid compilation errors.
- - move uhs2_control definition of PatchV8[05/23] to
-   PatchV9[02/23] for avoid compilation errors.
- - move mmc_host flags definition of PatchV8[05/23] to
-   PatchV9[02/23] for avoid compilation errors.
- - move mmc_host flags MMC_UHS2_SUPPORT definition of PatchV8[05/23] to
-   PatchV9[02/23] for avoid compilation errors.
- - move mmc_host flags MMC_UHS2_SD_TRAN definition of PatchV8[05/23] to
-   PatchV9[02/23] for avoid compilation errors.
-
 Updates in V7:
- - Drop sd_uhs2_set_ios function.
- - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_up().
- - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_off().
- - Drop MMC_TIMING_SD_UHS2 in favor of MMC_TIMING_UHS2_SPEED_A.
- - Modify sd_uhs2_legacy_init to avoid sd_uhs2_reinit cycle issue.
+ - Remove unnecessary definitions.
 
-Updates in V4:
- - Re-based, updated a comment and removed white-space.
- - Moved MMC_VQMMC2_VOLTAGE_180 into a later patch in the series.
- 
+Updates in V6:
+ - Remove unnecessary definitions and functions.
+
 ---
 
- drivers/mmc/core/Makefile  |   2 +-
- drivers/mmc/core/core.c    |  17 ++-
- drivers/mmc/core/core.h    |   1 +
- drivers/mmc/core/sd_uhs2.c | 294 +++++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h   |   7 +
- include/linux/mmc/host.h   |  45 ++++++
- 6 files changed, 364 insertions(+), 2 deletions(-)
- create mode 100644 drivers/mmc/core/sd_uhs2.c
+ include/linux/mmc/card.h    |  31 ++++-
+ include/linux/mmc/core.h    |  13 ++
+ include/linux/mmc/host.h    |  39 +++++-
+ include/linux/mmc/sd_uhs2.h | 240 ++++++++++++++++++++++++++++++++++++
+ 4 files changed, 319 insertions(+), 4 deletions(-)
+ create mode 100644 include/linux/mmc/sd_uhs2.h
 
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 6a907736cd7a..15b067e8b0d1 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -7,7 +7,7 @@ obj-$(CONFIG_MMC)		+= mmc_core.o
- mmc_core-y			:= core.o bus.o host.o \
- 				   mmc.o mmc_ops.o sd.o sd_ops.o \
- 				   sdio.o sdio_ops.o sdio_bus.o \
--				   sdio_cis.o sdio_io.o sdio_irq.o \
-+				   sdio_cis.o sdio_io.o sdio_irq.o sd_uhs2.o\
- 				   slot-gpio.o regulator.o
- mmc_core-$(CONFIG_OF)		+= pwrseq.o
- obj-$(CONFIG_PWRSEQ_SIMPLE)	+= pwrseq_simple.o
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 3d3e0ca52614..ba8808cd9318 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2244,6 +2244,18 @@ void mmc_rescan(struct work_struct *work)
- 		goto out;
- 	}
- 
-+	/*
-+	 * Ideally we should favor initialization of legacy SD cards and defer
-+	 * UHS-II enumeration. However, it seems like cards doesn't reliably
-+	 * announce their support for UHS-II in the response to the ACMD41,
-+	 * while initializing the legacy SD interface. Therefore, let's start
-+	 * with UHS-II for now.
-+	 */
-+	if (!mmc_attach_sd_uhs2(host)) {
-+		mmc_release_host(host);
-+		goto out;
-+	}
-+
- 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
- 		unsigned int freq = freqs[i];
- 		if (freq > host->f_max) {
-@@ -2276,10 +2288,13 @@ void mmc_rescan(struct work_struct *work)
- 
- void mmc_start_host(struct mmc_host *host)
- {
-+	bool power_up = !(host->caps2 &
-+			 (MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_SD_UHS2));
-+
- 	host->f_init = max(min(freqs[0], host->f_max), host->f_min);
- 	host->rescan_disable = 0;
- 
--	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
-+	if (power_up) {
- 		mmc_claim_host(host);
- 		mmc_power_up(host, host->ocr_avail);
- 		mmc_release_host(host);
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 37091a6589ed..920323faa834 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -81,6 +81,7 @@ int mmc_detect_card_removed(struct mmc_host *host);
- int mmc_attach_mmc(struct mmc_host *host);
- int mmc_attach_sd(struct mmc_host *host);
- int mmc_attach_sdio(struct mmc_host *host);
-+int mmc_attach_sd_uhs2(struct mmc_host *host);
- 
- /* Module parameters */
- extern bool use_spi_crc;
-diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
-new file mode 100644
-index 000000000000..06b2aab52b93
---- /dev/null
-+++ b/drivers/mmc/core/sd_uhs2.c
-@@ -0,0 +1,294 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * Copyright (C) 2021 Linaro Ltd
-+ *
-+ * Author: Ulf Hansson <ulf.hansson@linaro.org>
-+ *
-+ * Support for SD UHS-II cards
-+ */
-+#include <linux/err.h>
-+
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
-+
-+#include "core.h"
-+#include "bus.h"
-+#include "sd.h"
-+#include "mmc_ops.h"
-+
-+static const unsigned int sd_uhs2_freqs[] = { 52000000, 26000000 };
-+
-+static int sd_uhs2_power_up(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (host->ios.power_mode == MMC_POWER_ON)
-+		return 0;
-+
-+	host->ios.vdd = fls(host->ocr_avail) - 1;
-+	host->ios.clock = host->f_init;
-+	host->ios.timing = MMC_TIMING_UHS2_SPEED_A;
-+	host->ios.power_mode = MMC_POWER_ON;
-+
-+	err = host->ops->uhs2_control(host, UHS2_SET_IOS);
-+
-+	return err;
-+}
-+
-+static int sd_uhs2_power_off(struct mmc_host *host)
-+{
-+	if (host->ios.power_mode == MMC_POWER_OFF)
-+		return 0;
-+
-+	host->ios.vdd = 0;
-+	host->ios.clock = 0;
-+	host->ios.timing = MMC_TIMING_LEGACY;
-+	host->ios.power_mode = MMC_POWER_OFF;
-+	if (host->flags & MMC_UHS2_SD_TRAN)
-+		host->flags &= ~MMC_UHS2_SD_TRAN;
-+
-+	return host->ops->uhs2_control(host, UHS2_SET_IOS);
-+}
-+
-+/*
-+ * Run the phy initialization sequence, which mainly relies on the UHS-II host
-+ * to check that we reach the expected electrical state, between the host and
-+ * the card.
-+ */
-+static int sd_uhs2_phy_init(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Do the early initialization of the card, by sending the device init broadcast
-+ * command and wait for the process to be completed.
-+ */
-+static int sd_uhs2_dev_init(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Run the enumeration process by sending the enumerate command to the card.
-+ * Note that, we currently support only the point to point connection, which
-+ * means only one card can be attached per host/slot.
-+ */
-+static int sd_uhs2_enum(struct mmc_host *host, u32 *node_id)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Read the UHS-II configuration registers (CFG_REG) of the card, by sending it
-+ * commands and by parsing the responses. Store a copy of the relevant data in
-+ * card->uhs2_config.
-+ */
-+static int sd_uhs2_config_read(struct mmc_host *host, struct mmc_card *card)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Based on the card's and host's UHS-II capabilities, let's update the
-+ * configuration of the card and the host. This may also include to move to a
-+ * greater speed range/mode. Depending on the updated configuration, we may need
-+ * to do a soft reset of the card via sending it a GO_DORMANT_STATE command.
-+ *
-+ * In the final step, let's check if the card signals "config completion", which
-+ * indicates that the card has moved from config state into active state.
-+ */
-+static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Initialize the UHS-II card through the SD-TRAN transport layer. This enables
-+ * commands/requests to be backwards compatible through the legacy SD protocol.
-+ * UHS-II cards has a specific power limit specified for VDD1/VDD2, that should
-+ * be set through a legacy CMD6. Note that, the power limit that becomes set,
-+ * survives a soft reset through the GO_DORMANT_STATE command.
-+ */
-+static int sd_uhs2_legacy_init(struct mmc_host *host, struct mmc_card *card)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Allocate the data structure for the mmc_card and run the UHS-II specific
-+ * initialization sequence.
-+ */
-+static int sd_uhs2_init_card(struct mmc_host *host)
-+{
-+	struct mmc_card *card;
-+	u32 node_id;
-+	int err;
-+
-+	err = sd_uhs2_dev_init(host);
-+	if (err)
-+		return err;
-+
-+	err = sd_uhs2_enum(host, &node_id);
-+	if (err)
-+		return err;
-+
-+	card = mmc_alloc_card(host, &sd_type);
-+	if (IS_ERR(card))
-+		return PTR_ERR(card);
-+
-+	card->uhs2_config.node_id = node_id;
-+	card->type = MMC_TYPE_SD;
-+
-+	err = sd_uhs2_config_read(host, card);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_config_write(host, card);
-+	if (err)
-+		goto err;
-+
-+	host->card = card;
-+	return 0;
-+
-+err:
-+	mmc_remove_card(card);
-+	return err;
-+}
-+
-+static void sd_uhs2_remove(struct mmc_host *host)
-+{
-+	mmc_remove_card(host->card);
-+	host->card = NULL;
-+}
-+
-+static int sd_uhs2_alive(struct mmc_host *host)
-+{
-+	return mmc_send_status(host->card, NULL);
-+}
-+
-+static void sd_uhs2_detect(struct mmc_host *host)
-+{
-+	int err;
-+
-+	mmc_get_card(host->card, NULL);
-+	err = _mmc_detect_card_removed(host);
-+	mmc_put_card(host->card, NULL);
-+
-+	if (err) {
-+		sd_uhs2_remove(host);
-+
-+		mmc_claim_host(host);
-+		mmc_detach_bus(host);
-+		sd_uhs2_power_off(host);
-+		mmc_release_host(host);
-+	}
-+}
-+
-+static int sd_uhs2_suspend(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_resume(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_runtime_suspend(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_runtime_resume(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_shutdown(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_hw_reset(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static const struct mmc_bus_ops sd_uhs2_ops = {
-+	.remove = sd_uhs2_remove,
-+	.alive = sd_uhs2_alive,
-+	.detect = sd_uhs2_detect,
-+	.suspend = sd_uhs2_suspend,
-+	.resume = sd_uhs2_resume,
-+	.runtime_suspend = sd_uhs2_runtime_suspend,
-+	.runtime_resume = sd_uhs2_runtime_resume,
-+	.shutdown = sd_uhs2_shutdown,
-+	.hw_reset = sd_uhs2_hw_reset,
-+};
-+
-+static int sd_uhs2_attach(struct mmc_host *host)
-+{
-+	int err;
-+
-+	err = sd_uhs2_power_up(host);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_phy_init(host);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_init_card(host);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_legacy_init(host, host->card);
-+	if (err)
-+		goto err;
-+
-+	mmc_attach_bus(host, &sd_uhs2_ops);
-+
-+	mmc_release_host(host);
-+
-+	err = mmc_add_card(host->card);
-+	if (err)
-+		goto remove_card;
-+
-+	mmc_claim_host(host);
-+	return 0;
-+
-+remove_card:
-+	mmc_remove_card(host->card);
-+	host->card = NULL;
-+	mmc_claim_host(host);
-+	mmc_detach_bus(host);
-+err:
-+	sd_uhs2_power_off(host);
-+	return err;
-+}
-+
-+int mmc_attach_sd_uhs2(struct mmc_host *host)
-+{
-+	int i, err = 0;
-+
-+	if (!(host->caps2 & MMC_CAP2_SD_UHS2))
-+		return -EOPNOTSUPP;
-+
-+	/* Turn off the legacy SD interface before trying with UHS-II. */
-+	mmc_power_off(host);
-+
-+	/*
-+	 * Start UHS-II initialization at 52MHz and possibly make a retry at
-+	 * 26MHz according to the spec. It's required that the host driver
-+	 * validates ios->clock, to set a rate within the correct range.
-+	 */
-+	for (i = 0; i < ARRAY_SIZE(sd_uhs2_freqs); i++) {
-+		host->f_init = sd_uhs2_freqs[i];
-+		err = sd_uhs2_attach(host);
-+		if (!err)
-+			break;
-+	}
-+
-+	return err;
-+}
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index daa2f40d9ce6..469fd68f854f 100644
+index 469fd68f854f..5cfc94b778f4 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -211,6 +211,11 @@ struct sd_ext_reg {
- #define SD_EXT_PERF_CMD_QUEUE	(1<<4)
+@@ -190,6 +190,12 @@ struct sd_switch_caps {
+ #define SD_MAX_CURRENT_400	(1 << SD_SET_CURRENT_LIMIT_400)
+ #define SD_MAX_CURRENT_600	(1 << SD_SET_CURRENT_LIMIT_600)
+ #define SD_MAX_CURRENT_800	(1 << SD_SET_CURRENT_LIMIT_800)
++
++#define SD4_SET_POWER_LIMIT_0_72W	0
++#define SD4_SET_POWER_LIMIT_1_44W	1
++#define SD4_SET_POWER_LIMIT_2_16W	2
++#define SD4_SET_POWER_LIMIT_2_88W	3
++#define SD4_SET_POWER_LIMIT_1_80W	4
  };
  
-+struct sd_uhs2_config {
-+	u32			node_id;
-+	/* TODO: Extend with more register configs. */
+ struct sd_ext_reg {
+@@ -213,7 +219,30 @@ struct sd_ext_reg {
+ 
+ struct sd_uhs2_config {
+ 	u32			node_id;
+-	/* TODO: Extend with more register configs. */
++
++	u32			n_fcu;
++	u32			maxblk_len;
++	u8			n_lanes;
++	u8			dadr_len;
++	u8			app_type;
++	u8			phy_minor_rev;
++	u8			phy_major_rev;
++	u8			can_hibernate;
++	u8			n_lss_sync;
++	u8			n_lss_dir;
++	u8			link_minor_rev;
++	u8			link_major_rev;
++	u8			dev_type;
++	u8			n_data_gap;
++
++	u32			n_fcu_set;
++	u32			maxblk_len_set;
++	u8			n_lanes_set;
++	u8			speed_range_set;
++	u8			n_lss_sync_set;
++	u8			n_lss_dir_set;
++	u8			n_data_gap_set;
++	u8			max_retry_set;
+ };
+ 
+ struct sdio_cccr {
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 6efec0b9820c..2a0581d87706 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -23,6 +23,14 @@ enum mmc_blk_status {
+ 	MMC_BLK_NEW_REQUEST,
+ };
+ 
++struct uhs2_command {
++	u16	header;
++	u16	arg;
++	__be32	*payload;
++	u32	payload_len;
++	u32	packet_len;
 +};
 +
- struct sdio_cccr {
- 	unsigned int		sdio_vsn;
- 	unsigned int		sd_vsn;
-@@ -318,6 +323,8 @@ struct mmc_card {
- 	struct sd_ext_reg	ext_power;	/* SD extension reg for PM */
- 	struct sd_ext_reg	ext_perf;	/* SD extension reg for PERF */
- 
-+	struct sd_uhs2_config	uhs2_config;	/* SD UHS-II config */
+ struct mmc_command {
+ 	u32			opcode;
+ 	u32			arg;
+@@ -109,6 +117,11 @@ struct mmc_command {
+ 	unsigned int		busy_timeout;	/* busy detect timeout in ms */
+ 	struct mmc_data		*data;		/* data segment associated with cmd */
+ 	struct mmc_request	*mrq;		/* associated request */
 +
- 	unsigned int		sdio_funcs;	/* number of SDIO functions */
- 	atomic_t		sdio_funcs_probed; /* number of probed SDIO funcs */
- 	struct sdio_cccr	cccr;		/* common card info */
++	struct uhs2_command	*uhs2_cmd;	/* UHS2 command */
++	u8			*uhs2_resp;	/* UHS2 native cmd resp */
++	u8			uhs2_resp_len;	/* UHS2 native cmd resp len */
++	u8			uhs2_tmode0_flag; /* UHS2 transfer mode flag */
+ };
+ 
+ struct mmc_data {
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 461d1543893b..2e3748e4f14d 100644
+index 6f1be9993e16..8803fe46ed24 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -63,6 +63,10 @@ struct mmc_ios {
- #define MMC_TIMING_MMC_HS400	10
- #define MMC_TIMING_SD_EXP	11
- #define MMC_TIMING_SD_EXP_1_2V	12
-+#define MMC_TIMING_UHS2_SPEED_A    13
-+#define MMC_TIMING_UHS2_SPEED_A_HD 14
-+#define MMC_TIMING_UHS2_SPEED_B    15
-+#define MMC_TIMING_UHS2_SPEED_B_HD 16
+@@ -16,6 +16,7 @@
+ #include <linux/mmc/pm.h>
+ #include <linux/dma-direction.h>
+ #include <linux/blk-crypto-profile.h>
++#include <linux/mmc/sd_uhs2.h>
  
- 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
- 
-@@ -91,6 +95,21 @@ struct mmc_clk_phase_map {
- 	struct mmc_clk_phase phase[MMC_NUM_CLK_PHASES];
+ struct mmc_ios {
+ 	unsigned int	clock;			/* clock rate */
+@@ -99,7 +100,29 @@ struct mmc_clk_phase_map {
  };
  
-+struct sd_uhs2_caps {
-+	/* TODO: Add UHS-II capabilities for the host. */
-+};
+ struct sd_uhs2_caps {
+-	/* TODO: Add UHS-II capabilities for the host. */
++	u32	dap;
++	u32	gap;
++	u32	group_desc;
++	u32	maxblk_len;
++	u32	n_fcu;
++	u8	n_lanes;
++	u8	addr64;
++	u8	card_type;
++	u8	phy_rev;
++	u8	speed_range;
++	u8	n_lss_sync;
++	u8	n_lss_dir;
++	u8	link_rev;
++	u8	host_type;
++	u8	n_data_gap;
 +
-+enum sd_uhs2_operation {
-+	UHS2_PHY_INIT = 0,
-+	UHS2_SET_CONFIG,
-+	UHS2_ENABLE_INT,
-+	UHS2_DISABLE_INT,
-+	UHS2_ENABLE_CLK,
-+	UHS2_DISABLE_CLK,
-+	UHS2_CHECK_DORMANT,
-+	UHS2_SET_IOS,
-+};
-+
- struct mmc_host;
- 
- enum mmc_err_stat {
-@@ -145,6 +164,17 @@ struct mmc_host_ops {
- 	 */
- 	void	(*set_ios)(struct mmc_host *host, struct mmc_ios *ios);
- 
-+	/*
-+	 * The uhs2_set_ios callback is mandatory to implement for hosts that
-+	 * supports the SD UHS-II interface (MMC_CAP2_SD_UHS2), while the
-+	 * callback is unused for the other cases. Note that, the struct
-+	 * mmc_ios is being re-used for this as well.
-+	 *
-+	 * Expected return values for the uhs2_set_ios callback are a negative
-+	 * errno in case of a failure or zero for success.
-+	 */
-+	int	(*uhs2_set_ios)(struct mmc_host *host, struct mmc_ios *ios);
-+
- 	/*
- 	 * Return values for the get_ro callback should be:
- 	 *   0 for a read/write card
-@@ -212,6 +242,14 @@ struct mmc_host_ops {
- 
- 	/* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
- 	int	(*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
-+
-+	/*
-+	 * The uhs2_control callback is used to execute SD UHS-II specific
-+	 * operations. It's mandatory to implement for hosts that supports the
-+	 * SD UHS-II interface (MMC_CAP2_SD_UHS2). Expected return values are a
-+	 * negative errno in case of a failure or zero for success.
-+	 */
-+	int	(*uhs2_control)(struct mmc_host *host, enum sd_uhs2_operation op);
++	u32	maxblk_len_set;
++	u32	n_fcu_set;
++	u8	n_lanes_set;
++	u8	n_lss_sync_set;
++	u8	n_lss_dir_set;
++	u8	n_data_gap_set;
++	u8	max_retry_set;
  };
  
- struct mmc_cqe_ops {
-@@ -396,6 +434,7 @@ struct mmc_host {
- 				 MMC_CAP2_HS200_1_2V_SDR)
- #define MMC_CAP2_SD_EXP		(1 << 7)	/* SD express via PCIe */
- #define MMC_CAP2_SD_EXP_1_2V	(1 << 8)	/* SD express 1.2V */
-+#define MMC_CAP2_SD_UHS2	(1 << 9)	/* SD UHS-II support */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
- #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
-@@ -422,6 +461,12 @@ struct mmc_host {
+ enum sd_uhs2_operation {
+@@ -345,6 +368,7 @@ struct mmc_pwrseq;
+ 
+ struct mmc_supply {
+ 	struct regulator *vmmc;		/* Card power supply */
++	struct regulator *vmmc2;	/* UHS2 VDD2 power supply */
+ 	struct regulator *vqmmc;	/* Optional Vccq supply */
+ 	struct regulator *vqmmc2;	/* Optional supply for phy */
+ };
+@@ -366,10 +390,12 @@ struct mmc_host {
+ 	u32			ocr_avail_sdio;	/* SDIO-specific OCR */
+ 	u32			ocr_avail_sd;	/* SD-specific OCR */
+ 	u32			ocr_avail_mmc;	/* MMC-specific OCR */
++	u32			ocr_avail_uhs2; /* UHS2-specific OCR */
+ 	struct wakeup_source	*ws;		/* Enable consume of uevents */
+ 	u32			max_current_330;
+ 	u32			max_current_300;
+ 	u32			max_current_180;
++	u32			max_current_180_vdd2; /* UHS2 vdd2 max curt. */
+ 
+ #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
+ #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
+@@ -465,12 +491,13 @@ struct mmc_host {
  #endif
  #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
  
-+	struct sd_uhs2_caps	uhs2_caps;	/* Host UHS-II capabilities */
-+
-+	int flags;
-+#define MMC_UHS2_SUPPORT (1 << 0)
-+#define MMC_UHS2_SD_TRAN (1 << 1)
+-	struct sd_uhs2_caps	uhs2_caps;	/* Host UHS-II capabilities */
+-
+ 	int flags;
+ #define MMC_UHS2_SUPPORT (1 << 0)
+ #define MMC_UHS2_SD_TRAN (1 << 1)
+ 
++	bool   uhs2_app_cmd;           /* Host UHS-II APP Command */
++	struct sd_uhs2_caps uhs2_caps; /* Host UHS-II capabilities */
 +
  	int			fixed_drv_type;	/* fixed driver type for non-removable media */
  
  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+@@ -721,6 +748,12 @@ static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
+ 	host->err_stats[stat] += 1;
+ }
+ 
++static inline int mmc_card_uhs2_hd_mode(struct mmc_host *host)
++{
++	return host->ios.timing == MMC_TIMING_UHS2_SPEED_A_HD ||
++	       host->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD;
++}
++
+ int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
+ int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
+ int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+diff --git a/include/linux/mmc/sd_uhs2.h b/include/linux/mmc/sd_uhs2.h
+new file mode 100644
+index 000000000000..7abe9bd870c7
+--- /dev/null
++++ b/include/linux/mmc/sd_uhs2.h
+@@ -0,0 +1,240 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/*
++ * Header file for UHS-II packets, Host Controller registers and I/O
++ * accessors.
++ *
++ *  Copyright (C) 2014 Intel Corp, All Rights Reserved.
++ */
++#ifndef LINUX_MMC_UHS2_H
++#define LINUX_MMC_UHS2_H
++
++/* LINK Layer definition */
++/*
++ * UHS2 Header:
++ * Refer to UHS-II Addendum Version 1.02 Figure 5-2, the format of CCMD Header is described below:
++ *      bit [3:0]  : DID(Destination ID = Node ID of UHS2 card)
++ *      bit [6:4]  : TYP(Packet Type)
++ *                   000b: CCMD(Control command packet)
++ *                   001b: DCMD(Data command packet)
++ *                   010b: RES(Response packet)
++ *                   011b: DATA(Data payload packet)
++ *                   111b: MSG(Message packet)
++ *                   Others: Reserved
++ *      bit [7]    : NP(Native Packet)
++ *      bit [10:8] : TID(Transaction ID)
++ *      bit [11]   : Reserved
++ *      bit [15:12]: SID(Source ID 0: Node ID of Host)
++ *
++ * Broadcast CCMD issued by Host is represented as DID=SID=0.
++ */
++/*
++ * UHS2 Argument:
++ * Refer to UHS-II Addendum Version 1.02 Figure 6-5, the format of CCMD Argument is described below:
++ *      bit [3:0]  : MSB of IOADR
++ *      bit [5:4]  : PLEN(Payload Length)
++ *                   00b: 0 byte
++ *                   01b: 4 bytes
++ *                   10b: 8 bytes
++ *                   11b: 16 bytes
++ *      bit [6]    : Reserved
++ *      bit [7]    : R/W(Read/Write)
++ *                   0: Control read command
++ *                   1: Control write command
++ *      bit [15:8] : LSB of IOADR
++ *
++ * I/O Address specifies the address of register in UHS-II I/O space accessed by CCMD.
++ * The unit of I/O Address is 4 Bytes. It is transmitted in MSB first, LSB last.
++ */
++#define UHS2_NATIVE_PACKET_POS	7
++#define UHS2_NATIVE_PACKET	(1 << UHS2_NATIVE_PACKET_POS)
++
++#define UHS2_PACKET_TYPE_POS	4
++#define UHS2_PACKET_TYPE_CCMD	(0 << UHS2_PACKET_TYPE_POS)
++#define UHS2_PACKET_TYPE_DCMD	(1 << UHS2_PACKET_TYPE_POS)
++#define UHS2_PACKET_TYPE_RES	(2 << UHS2_PACKET_TYPE_POS)
++#define UHS2_PACKET_TYPE_DATA	(3 << UHS2_PACKET_TYPE_POS)
++#define UHS2_PACKET_TYPE_MSG	(7 << UHS2_PACKET_TYPE_POS)
++
++#define UHS2_DEST_ID_MASK	0x0F
++#define UHS2_DEST_ID		0x1
++
++#define UHS2_SRC_ID_POS		12
++#define UHS2_SRC_ID_MASK	0xF000
++
++#define UHS2_TRANS_ID_POS	8
++#define UHS2_TRANS_ID_MASK	0x0700
++
++/* UHS2 MSG */
++#define UHS2_MSG_CTG_POS	5
++#define UHS2_MSG_CTG_LMSG	0x00
++#define UHS2_MSG_CTG_INT	0x60
++#define UHS2_MSG_CTG_AMSG	0x80
++
++#define UHS2_MSG_CTG_FCREQ	0x00
++#define UHS2_MSG_CTG_FCRDY	0x01
++#define UHS2_MSG_CTG_STAT	0x02
++
++#define UHS2_MSG_CODE_POS			8
++#define UHS2_MSG_CODE_FC_UNRECOVER_ERR		0x8
++#define UHS2_MSG_CODE_STAT_UNRECOVER_ERR	0x8
++#define UHS2_MSG_CODE_STAT_RECOVER_ERR		0x1
++
++/* TRANS Layer definition */
++
++/* Native packets*/
++#define UHS2_NATIVE_CMD_RW_POS	7
++#define UHS2_NATIVE_CMD_WRITE	(1 << UHS2_NATIVE_CMD_RW_POS)
++#define UHS2_NATIVE_CMD_READ	(0 << UHS2_NATIVE_CMD_RW_POS)
++
++#define UHS2_NATIVE_CMD_PLEN_POS	4
++#define UHS2_NATIVE_CMD_PLEN_4B		(1 << UHS2_NATIVE_CMD_PLEN_POS)
++#define UHS2_NATIVE_CMD_PLEN_8B		(2 << UHS2_NATIVE_CMD_PLEN_POS)
++#define UHS2_NATIVE_CMD_PLEN_16B	(3 << UHS2_NATIVE_CMD_PLEN_POS)
++
++#define UHS2_NATIVE_CCMD_GET_MIOADR_MASK	0xF00
++#define UHS2_NATIVE_CCMD_MIOADR_MASK		0x0F
++
++#define UHS2_NATIVE_CCMD_LIOADR_POS		8
++#define UHS2_NATIVE_CCMD_GET_LIOADR_MASK	0x0FF
++
++#define UHS2_CCMD_DEV_INIT_COMPLETE_FLAG	BIT(11)
++#define UHS2_DEV_INIT_PAYLOAD_LEN		1
++#define UHS2_DEV_INIT_RESP_LEN			6
++#define UHS2_DEV_ENUM_PAYLOAD_LEN		1
++#define UHS2_DEV_ENUM_RESP_LEN			8
++#define UHS2_CFG_WRITE_PAYLOAD_LEN		2
++#define UHS2_CFG_WRITE_PHY_SET_RESP_LEN		4
++#define UHS2_CFG_WRITE_GENERIC_SET_RESP_LEN	5
++#define UHS2_GO_DORMANT_PAYLOAD_LEN		1
++
++/*
++ * UHS2 Argument:
++ * Refer to UHS-II Addendum Version 1.02 Figure 6-8, the format of DCMD Argument is described below:
++ *      bit [3:0]  : Reserved
++ *      bit [6:3]  : TMODE(Transfer Mode)
++ *                   bit 3: DAM(Data Access Mode)
++ *                   bit 4: TLUM(TLEN Unit Mode)
++ *                   bit 5: LM(Length Mode)
++ *                   bit 6: DM(Duplex Mode)
++ *      bit [7]    : R/W(Read/Write)
++ *                   0: Control read command
++ *                   1: Control write command
++ *      bit [15:8] : Reserved
++ *
++ * I/O Address specifies the address of register in UHS-II I/O space accessed by CCMD.
++ * The unit of I/O Address is 4 Bytes. It is transmitted in MSB first, LSB last.
++ */
++#define UHS2_DCMD_DM_POS		6
++#define UHS2_DCMD_2L_HD_MODE		(1 << UHS2_DCMD_DM_POS)
++#define UHS2_DCMD_LM_POS		5
++#define UHS2_DCMD_LM_TLEN_EXIST		(1 << UHS2_DCMD_LM_POS)
++#define UHS2_DCMD_TLUM_POS		4
++#define UHS2_DCMD_TLUM_BYTE_MODE	(1 << UHS2_DCMD_TLUM_POS)
++#define UHS2_NATIVE_DCMD_DAM_POS	3
++#define UHS2_NATIVE_DCMD_DAM_IO		(1 << UHS2_NATIVE_DCMD_DAM_POS)
++
++#define UHS2_RES_NACK_POS	7
++#define UHS2_RES_NACK_MASK	(0x1 << UHS2_RES_NACK_POS)
++
++#define UHS2_RES_ECODE_POS	4
++#define UHS2_RES_ECODE_MASK	0x7
++#define UHS2_RES_ECODE_COND	1
++#define UHS2_RES_ECODE_ARG	2
++#define UHS2_RES_ECODE_GEN	3
++
++/* IOADR of device registers */
++#define UHS2_IOADR_GENERIC_CAPS		0x00
++#define UHS2_IOADR_PHY_CAPS		0x02
++#define UHS2_IOADR_LINK_CAPS		0x04
++#define UHS2_IOADR_RSV_CAPS		0x06
++#define UHS2_IOADR_GENERIC_SETTINGS	0x08
++#define UHS2_IOADR_PHY_SETTINGS		0x0A
++#define UHS2_IOADR_LINK_SETTINGS	0x0C
++#define UHS2_IOADR_PRESET		0x40
++
++/* SD application packets */
++#define UHS2_SD_CMD_INDEX_POS	8
++
++#define UHS2_SD_CMD_APP_POS	14
++#define UHS2_SD_CMD_APP		(1 << UHS2_SD_CMD_APP_POS)
++
++/* UHS-II Device Registers */
++#define UHS2_DEV_CONFIG_REG	0x000
++
++/* General Caps and Settings registers */
++#define UHS2_DEV_CONFIG_GEN_CAPS	(UHS2_DEV_CONFIG_REG + 0x000)
++#define UHS2_DEV_CONFIG_N_LANES_POS	8
++#define UHS2_DEV_CONFIG_N_LANES_MASK	0x3F
++#define UHS2_DEV_CONFIG_2L_HD_FD	0x1
++#define UHS2_DEV_CONFIG_2D1U_FD		0x2
++#define UHS2_DEV_CONFIG_1D2U_FD		0x4
++#define UHS2_DEV_CONFIG_2D2U_FD		0x8
++#define UHS2_DEV_CONFIG_DADR_POS	14
++#define UHS2_DEV_CONFIG_DADR_MASK	0x1
++#define UHS2_DEV_CONFIG_APP_POS		16
++#define UHS2_DEV_CONFIG_APP_MASK	0xFF
++#define UHS2_DEV_CONFIG_APP_SD_MEM	0x1
++
++#define UHS2_DEV_CONFIG_GEN_SET			(UHS2_DEV_CONFIG_REG + 0x008)
++#define UHS2_DEV_CONFIG_GEN_SET_N_LANES_POS	8
++#define UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD	0x0
++#define UHS2_DEV_CONFIG_GEN_SET_2D1U_FD		0x2
++#define UHS2_DEV_CONFIG_GEN_SET_1D2U_FD		0x3
++#define UHS2_DEV_CONFIG_GEN_SET_2D2U_FD		0x4
++#define UHS2_DEV_CONFIG_GEN_SET_CFG_COMPLETE	BIT(31)
++
++/* PHY Caps and Settings registers */
++#define UHS2_DEV_CONFIG_PHY_CAPS	(UHS2_DEV_CONFIG_REG + 0x002)
++#define UHS2_DEV_CONFIG_PHY_MINOR_MASK	0xF
++#define UHS2_DEV_CONFIG_PHY_MAJOR_POS	4
++#define UHS2_DEV_CONFIG_PHY_MAJOR_MASK	0x3
++#define UHS2_DEV_CONFIG_CAN_HIBER_POS	15
++#define UHS2_DEV_CONFIG_CAN_HIBER_MASK	0x1
++#define UHS2_DEV_CONFIG_PHY_CAPS1	(UHS2_DEV_CONFIG_REG + 0x003)
++#define UHS2_DEV_CONFIG_N_LSS_SYN_MASK	0xF
++#define UHS2_DEV_CONFIG_N_LSS_DIR_POS	4
++#define UHS2_DEV_CONFIG_N_LSS_DIR_MASK	0xF
++
++#define UHS2_DEV_CONFIG_PHY_SET			(UHS2_DEV_CONFIG_REG + 0x00A)
++#define UHS2_DEV_CONFIG_PHY_SET_SPEED_POS	6
++#define UHS2_DEV_CONFIG_PHY_SET_SPEED_A		0x0
++#define UHS2_DEV_CONFIG_PHY_SET_SPEED_B		0x1
++
++/* LINK-TRAN Caps and Settings registers */
++#define UHS2_DEV_CONFIG_LINK_TRAN_CAPS		(UHS2_DEV_CONFIG_REG + 0x004)
++#define UHS2_DEV_CONFIG_LT_MINOR_MASK		0xF
++#define UHS2_DEV_CONFIG_LT_MAJOR_POS		4
++#define UHS2_DEV_CONFIG_LT_MAJOR_MASK		0x3
++#define UHS2_DEV_CONFIG_N_FCU_POS		8
++#define UHS2_DEV_CONFIG_N_FCU_MASK		0xFF
++#define UHS2_DEV_CONFIG_DEV_TYPE_POS		16
++#define UHS2_DEV_CONFIG_DEV_TYPE_MASK		0x7
++#define UHS2_DEV_CONFIG_MAX_BLK_LEN_POS		20
++#define UHS2_DEV_CONFIG_MAX_BLK_LEN_MASK	0xFFF
++#define UHS2_DEV_CONFIG_LINK_TRAN_CAPS1		(UHS2_DEV_CONFIG_REG + 0x005)
++#define UHS2_DEV_CONFIG_N_DATA_GAP_MASK		0xFF
++
++#define UHS2_DEV_CONFIG_LINK_TRAN_SET		(UHS2_DEV_CONFIG_REG + 0x00C)
++#define UHS2_DEV_CONFIG_LT_SET_MAX_BLK_LEN	0x200
++#define UHS2_DEV_CONFIG_LT_SET_MAX_RETRY_POS	16
++
++/* Preset register */
++#define UHS2_DEV_CONFIG_PRESET	(UHS2_DEV_CONFIG_REG + 0x040)
++
++#define UHS2_DEV_INT_REG	0x100
++
++#define UHS2_DEV_STATUS_REG	0x180
++
++#define UHS2_DEV_CMD_REG		0x200
++#define UHS2_DEV_CMD_FULL_RESET		(UHS2_DEV_CMD_REG + 0x000)
++#define UHS2_DEV_CMD_GO_DORMANT_STATE	(UHS2_DEV_CMD_REG + 0x001)
++#define UHS2_DEV_CMD_DORMANT_HIBER	BIT(7)
++#define UHS2_DEV_CMD_DEVICE_INIT	(UHS2_DEV_CMD_REG + 0x002)
++#define UHS2_DEV_INIT_COMPLETE_FLAG	BIT(11)
++#define UHS2_DEV_CMD_ENUMERATE		(UHS2_DEV_CMD_REG + 0x003)
++#define UHS2_DEV_CMD_TRANS_ABORT	(UHS2_DEV_CMD_REG + 0x004)
++
++#define UHS2_RCLK_MAX	52000000
++#define UHS2_RCLK_MIN	26000000
++
++#endif /* LINUX_MMC_UHS2_H */
 -- 
 2.25.1
 
