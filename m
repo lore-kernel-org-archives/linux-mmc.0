@@ -2,133 +2,114 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AE42EB64DA
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jul 2023 18:04:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 461F9C001DC
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 04:10:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229926AbjGTSEp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Jul 2023 14:04:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50556 "EHLO
+        id S230004AbjGUEKb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jul 2023 00:10:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39360 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229897AbjGTSEp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jul 2023 14:04:45 -0400
-Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E3152709;
-        Thu, 20 Jul 2023 11:04:43 -0700 (PDT)
-Received: from local
-        by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
-         (Exim 4.96)
-        (envelope-from <daniel@makrotopia.org>)
-        id 1qMY0H-0005Hr-29;
-        Thu, 20 Jul 2023 18:03:53 +0000
-Date:   Thu, 20 Jul 2023 19:03:37 +0100
-From:   Daniel Golle <daniel@makrotopia.org>
-To:     Bart Van Assche <bvanassche@acm.org>
-Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Dave Chinner <dchinner@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
-        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
-        Christian Loehle <CLoehle@hyperstone.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Hannes Reinecke <hare@suse.de>,
-        Jack Wang <jinpu.wang@ionos.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Ye Bin <yebin10@huawei.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
-Subject: Re: [RFC PATCH 0/6] nvmem: add block device NVMEM provider
-Message-ID: <ZLl2-TW982oKXMnN@makrotopia.org>
-References: <cover.1689802933.git.daniel@makrotopia.org>
- <352167df-34fc-ddff-def9-902873796536@acm.org>
+        with ESMTP id S229493AbjGUEKa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 00:10:30 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB58A1BC1;
+        Thu, 20 Jul 2023 21:10:29 -0700 (PDT)
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36L1kaEL009547;
+        Fri, 21 Jul 2023 04:10:12 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=pZ5sjngT65EZooyVN6g2/yFN3ZXMQjg0re0eMmcGzL4=;
+ b=ceq1RuXMFjJ0G06tlCo78vsD5gzf3Z+3e9c3YG4V86k+5TwijC5zF9ZO7tTGeOiLaBy6
+ Cu9suzQPUxwb1/Xty8jdlC8LP0r6vUtRwGgZkgys5o8S++skD2dDnV+ZoOtYLFjHPVj8
+ EwckVvbazLz2XQbLjknWDmf8kwWBp5DMw8c3P/rquyke4RRfilSrvCWv/doZPatxtKRc
+ QpNezGbHNTSXnyzhAVgVQjc1po1ceCSDwV6xt4iOczFZ2qJzvQE/k0lVA1wfhjq8TTb9
+ yGOb9TwAybjf3DDEri6KWMhjdrtSdobhn5rbq0SQ7J3gVSYtmosEB3r5F4NqicezGeb9 Qw== 
+Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3rya4sh2a3-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 21 Jul 2023 04:10:12 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36L4ABeZ026215
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 21 Jul 2023 04:10:11 GMT
+Received: from [10.216.41.167] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.30; Thu, 20 Jul
+ 2023 21:10:04 -0700
+Message-ID: <b4e34150-e231-b92c-253e-9f0fa1878b9d@quicinc.com>
+Date:   Fri, 21 Jul 2023 09:40:01 +0530
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <352167df-34fc-ddff-def9-902873796536@acm.org>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [v11 5/6] arm64: dts: Add ipq5018 SoC and rdp432-c2 board support
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
+        <andy.shevchenko@gmail.com>
+References: <20230616101749.2083974-1-quic_srichara@quicinc.com>
+ <20230616101749.2083974-6-quic_srichara@quicinc.com>
+ <53721566-2a85-76cb-a4cf-2819f08dfc85@linaro.org>
+ <8e209cd1-aa52-b947-bffd-15931af58391@quicinc.com>
+ <159e36d6-7806-0424-4e9c-2e07584450fc@linaro.org>
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <159e36d6-7806-0424-4e9c-2e07584450fc@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: wR3NPGESCtnC_4eMxCGTAGiU11UPfF_n
+X-Proofpoint-GUID: wR3NPGESCtnC_4eMxCGTAGiU11UPfF_n
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-07-21_01,2023-07-20_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 bulkscore=0
+ mlxscore=0 lowpriorityscore=0 priorityscore=1501 spamscore=0 phishscore=0
+ adultscore=0 suspectscore=0 malwarescore=0 mlxlogscore=832 impostorscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2306200000
+ definitions=main-2307210038
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 20, 2023 at 08:30:39AM -0700, Bart Van Assche wrote:
-> On 7/19/23 15:01, Daniel Golle wrote:
-> > On embedded devices using an eMMC it is common that one or more (hw/sw)
-> > partitions on the eMMC are used to store MAC addresses and Wi-Fi
-> > calibration EEPROM data.
-> > 
-> > Implement an NVMEM provider backed by block devices as typically the
-> > NVMEM framework is used to have kernel drivers read and use binary data
-> > from EEPROMs, efuses, flash memory (MTD), ...
-> > 
-> > In order to be able to reference hardware partitions on an eMMC, add code
-> > to bind each hardware partition to a specific firmware subnode.
-> > 
-> > This series is meant to open the discussion on how exactly the device tree
-> > schema for block devices and partitions may look like, and even if using
-> > the block layer to back the NVMEM device is at all the way to go -- to me
-> > it seemed to be a good solution because it will be reuable e.g. for NVMe.
+
+
+On 7/20/2023 5:03 PM, Krzysztof Kozlowski wrote:
+> On 20/07/2023 12:51, Sricharan Ramabadhran wrote:
+>>>>    arch/arm64/boot/dts/qcom/Makefile             |   1 +
+>>>>    .../arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts |  72 +++++
+>>>>    arch/arm64/boot/dts/qcom/ipq5018.dtsi         | 250 ++++++++++++++++++
+>>>>    3 files changed, 323 insertions(+)
+>>>>    create mode 100644 arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
+>>>>    create mode 100644 arch/arm64/boot/dts/qcom/ipq5018.dtsi
+>>>>
+>>>
+>>> NAK, please do not merge.
+>>>
+>>> It turns out there are some problems here (pointed out by Hariharan K).
+>>
+>>     The changes from Hariharan K to rename the dts compatibles is not
+>>     correct. So the compatibles/names in this series should be used.
+>>     Hariharan can fix his series and re-post.
 > 
-> Is my understanding correct that these devices boot from eMMC and not over
-> Wi-Fi?
+> Thanks. Conflicting patches touching similar boards is however confusing
+> me a bit...
 
-Yes, that's right.
+  ok sure. Hariharan will fix his patches. I will anyways send V12 with
+  your reviewed-tags just to avoid any confusion.
 
-> If so, why does this calibration data have to be stored on a raw
-> block device?
-
-It's just how many vendors decided to implement it in their firmware.
-
-I reckon this happened mostly out of habbit and in order to avoid any
-potential complexities in their manufacturing and QA processes -- most
-of those processes have been created in a time when NOR flash was the
-most common way to store firmware on embedded devices with Wi-Fi.
-
-The occurance of raw NAND and SPI-NAND didn't change much about that,
-most vendors still just use a raw MTD partition to store all that
-per-device 'factory' data. Very few have have started to use raw data
-inside UBI volumes (and I've been working on a UBI NVMEM driver as
-well).
-
-Also when it comes to eMMC they just keep doing things how they were
-always doing them, just that instead of a raw NOR flash, some devices
-nowadays come with an eMMC. Some vendors use the 'boot1' hardware
-partition to store things like MAC addresses at raw offsets there
-(GL.iNet for example [1]), others use small GPT or MBR partitions on
-the main hardware partition of the eMMC to store MAC addresses and
-calibration blobs (for example Adtran [2]).
-
-> Why can't this information be loaded from a file on a
-> filesystem?
-
-Having this information stored in a file on a filesystem is also an
-option, of course, but out in the wild you will hardly find it being
-done like that, for the reason stated above and also because having
-the OS pull the Ethernet MAC addresses somewhere from a filesystem
-while in early user-space will require the OS to even know about the
-individual hardware and how this should be done, so it's not exactly
-beautiful, may need fsck, mounting, ... all before the machine can
-become available with it's assigned MAC address on Ethernet.
-
-The RaspberryPi and other brcmfmac-based systems are the exception to
-the rule, here a simple text file stored on the root filesystem serves
-the Wi-Fi calibration. This file hence needs to be shipped with the OS
-instead of being stored on the device, and e.g. Raspbian does so. I
-suppose this is mostly because there just isn't any permanent on-board
-storage large enough and being a low-barrier DYI system they wanted to
-make it easy for users designing systems besed on that (as in: not
-having to mess with raw offsets or partitions, but rather just use
-tools like Etcher on Windows and edit CR-LF terminated text files on a
-FAT filesystem inside notepad...).
-
-However, practically all Qualcomm and MediaTek Wi-Fi AP/Routers which
-come with an eMMC come with their MAC addresses and Wi-Fi EEPROM data
-stored as raw data inside a hardware or software partition.
-
-[1]: https://github.com/dangowrt/linux/commit/8a24f03efb6b1dd7d8fdf68558146bacc71c2c1b
-[2]: https://github.com/dangowrt/linux/commit/b14c0215641047d0447956b40bd344049a11becb
+Regards,
+  Sricharan
