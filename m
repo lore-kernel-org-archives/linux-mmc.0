@@ -2,101 +2,91 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84727C0015E
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 08:34:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09E96EB64DC
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 10:11:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230368AbjGUIeE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Jul 2023 04:34:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43784 "EHLO
+        id S229622AbjGUKL2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jul 2023 06:11:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48420 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230347AbjGUIeC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 04:34:02 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CC4B273A
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Jul 2023 01:33:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1689928394;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=fPZO899bBzglVO4zclWOqlIFYd5xOLg0At2VcUxPogk=;
-        b=LJuHB+e7jeKdAqORC6pHNuoZxoF0mpk3fkUSp1USy6p9M/kEJw35g924th7aINx/t1LDWC
-        oALJ3mbawcqJ9DclMcHO2+1QhRZKx7w7pOIMY7MZ/Y5bSY04rvTPdz5zXmWT0ft5OD2Cs1
-        eSVUe5uxo6PDGnkstJNc1dCraVPG00A=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-124-60UcKEJKNB2-sqnmx_eKqQ-1; Fri, 21 Jul 2023 04:33:09 -0400
-X-MC-Unique: 60UcKEJKNB2-sqnmx_eKqQ-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1AE1E80C4FD;
-        Fri, 21 Jul 2023 08:33:08 +0000 (UTC)
-Received: from ovpn-8-26.pek2.redhat.com (ovpn-8-26.pek2.redhat.com [10.72.8.26])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id DF24840C206F;
-        Fri, 21 Jul 2023 08:32:54 +0000 (UTC)
-Date:   Fri, 21 Jul 2023 16:32:49 +0800
-From:   Ming Lei <ming.lei@redhat.com>
-To:     Daniel Golle <daniel@makrotopia.org>
-Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Dave Chinner <dchinner@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
-        Min Li <min15.li@samsung.com>,
-        Christian Loehle <CLoehle@hyperstone.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Hannes Reinecke <hare@suse.de>,
-        Jack Wang <jinpu.wang@ionos.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Ye Bin <yebin10@huawei.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        ming.lei@redhat.com
-Subject: Re: [RFC PATCH 0/6] nvmem: add block device NVMEM provider
-Message-ID: <ZLpCscTMc8h16Tyd@ovpn-8-26.pek2.redhat.com>
-References: <cover.1689802933.git.daniel@makrotopia.org>
+        with ESMTP id S230518AbjGUKL0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 06:11:26 -0400
+Received: from mail-ua1-x92d.google.com (mail-ua1-x92d.google.com [IPv6:2607:f8b0:4864:20::92d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 036E52D7B;
+        Fri, 21 Jul 2023 03:11:25 -0700 (PDT)
+Received: by mail-ua1-x92d.google.com with SMTP id a1e0cc1a2514c-799fa82fb44so22333241.0;
+        Fri, 21 Jul 2023 03:11:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1689934284; x=1690539084;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lQyjXThTHSvlntttE4dIaIKlxVs+RlQSyZMyghuQbM4=;
+        b=ZlccAMBF1FMQtiVaxezdKr+2BEwWj99W8XlToz7phlexCFOa2NMaS9EgpfJsZ4j612
+         QxbjpkjH+FNYI/TamKjSTgzt5kpxrxeuFgY8xtMw8wUdznBqVgMW7CcqMV8uG9R+ClLm
+         apN/CUosMPLFCzewQrg//M9GRg4sIcD2NcOIdJ5mnJGcKxP8ob4FWBcjUa87rf7zzNQM
+         /sRY5jOBTCUhvAviTFmpHPt1j7lzWnU7qXu7qu6+DWfmtkiEcHiC1NF9MNFSJ0UGg0Vw
+         GIBteD/cg5acLJ9wNZSaqX+QgQqqvC75Fil7IGwsqTpPn38v8lmEn6kVxfsURXNRPY0+
+         lPlQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1689934284; x=1690539084;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=lQyjXThTHSvlntttE4dIaIKlxVs+RlQSyZMyghuQbM4=;
+        b=UcecYfHRWOWHSS5ITM+v6kU31JgHtOAgd6NQ3z7JbYMv7yi2uJURnRvY7tnaMG6aXx
+         rtWrRFL3gsBwL7PW/E8+dqqgyN0goxLVonGUgdiOYWIqwbHpVtihoQEfgchRqPkK/JT4
+         tPp/oPeMGiniixQcPjjjRO/PDxg7OJRvuUpesXAtOhq8xZ26TMpOB1W92neBeoiIvV83
+         OpMNshLCCcKZZSYngeecw0GQDQBFpBywPZgkvOgSymgDLv2Sc5HDbiy+6QDxnrPlUd3A
+         xQT7u9VntlkdFt07AZA9o9EDmz35Laap/oENNe0a6zSOL6lZRJhK9msdU4938JDodfpr
+         XP3g==
+X-Gm-Message-State: ABy/qLZIy65wIFzMYfn3H4qKfG8YcACvG05wR/Gt/KF1aoqAa+5VM58L
+        edRNjKLr9ECHuhHOY6RmbF8deCZgrazs0+5BmzQ=
+X-Google-Smtp-Source: APBJJlHSqiF5w6gsYBakpaJ0MPcmOYyfVrOVtKx7I3QoIdON5OlC6t9EWkV59fJv4nAwMslw12bgGoidvD5QgOA4jDw=
+X-Received: by 2002:a05:6102:364a:b0:446:ff4f:bfff with SMTP id
+ s10-20020a056102364a00b00446ff4fbfffmr574900vsu.28.1689934283786; Fri, 21 Jul
+ 2023 03:11:23 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <cover.1689802933.git.daniel@makrotopia.org>
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.1
+References: <20230621100151.6329-1-victorshihgli@gmail.com>
+ <20230621100151.6329-3-victorshihgli@gmail.com> <bf137a7a-9081-71ac-340f-8da09d9e63be@intel.com>
+In-Reply-To: <bf137a7a-9081-71ac-340f-8da09d9e63be@intel.com>
+From:   Victor Shih <victorshihgli@gmail.com>
+Date:   Fri, 21 Jul 2023 18:11:11 +0800
+Message-ID: <CAK00qKBtYTYNB-_VHUZg72rqoxNqLBf7=TmcFSDv+jCrQBnyqw@mail.gmail.com>
+Subject: Re: [PATCH V8 02/23] mmc: core: Prepare to support SD UHS-II cards
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 19, 2023 at 11:01:14PM +0100, Daniel Golle wrote:
-> On embedded devices using an eMMC it is common that one or more (hw/sw)
-> partitions on the eMMC are used to store MAC addresses and Wi-Fi
-> calibration EEPROM data.
-> 
-> Implement an NVMEM provider backed by block devices as typically the
-> NVMEM framework is used to have kernel drivers read and use binary data
-> from EEPROMs, efuses, flash memory (MTD), ...
-> 
-> In order to be able to reference hardware partitions on an eMMC, add code
-> to bind each hardware partition to a specific firmware subnode.
-> 
-> This series is meant to open the discussion on how exactly the device tree
-> schema for block devices and partitions may look like, and even if using
-> the block layer to back the NVMEM device is at all the way to go -- to me
-> it seemed to be a good solution because it will be reuable e.g. for NVMe.
+On Mon, Jul 10, 2023 at 2:43=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
+com> wrote:
+>
+> On 21/06/23 13:01, Victor Shih wrote:
+> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> >
+> > Updates in V7:
+> >  - Drop sd_uhs2_set_ios function.
+> >  - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_up(=
+).
+> >  - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_off=
+().
+> >  - Drop MMC_TIMING_SD_UHS2 in favor of MMC_TIMING_UHS2_SPEED_A.
+> >  - Modify sd_uhs2_legacy_init to avoid sd_uhs2_reinit cycle issue.
+>
+> This patch does not compile because it depends on definitions
+> that are in patch 5.
+>
 
-Just wondering why you don't use request_firmware() in drivers which consume
-the data, then the logic can be moved out of kernel, and you needn't to deal
-with device tree & block device.
+Hi, Adrian
 
-Or Android doesn't support udev and initrd?
+      I will fix it in the V9 version.
 
-
-Thanks,
-Ming
-
+Thanks, Victor Shih
