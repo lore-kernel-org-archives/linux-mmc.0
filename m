@@ -2,33 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40C3BEB64DD
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 06:36:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84727C0015E
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 08:34:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231196AbjGUGgn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Jul 2023 02:36:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34926 "EHLO
+        id S230368AbjGUIeE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jul 2023 04:34:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231168AbjGUGgc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 02:36:32 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55CC730C0;
-        Thu, 20 Jul 2023 23:36:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=dNj9HqDsh0etQFD7jEaoC/caRXY3w0DSveX/n+3VHl4=; b=4p6T2id0FidHtcx3NOENyCPePm
-        Z3I2YToRlMfoa5NXVaq3fxELj//CxCV4hu3dntZFCb5YMC4EyxnxmepXmnrQnNqA1OoEyrxK2E7Iq
-        5TrmdWDBAqXhrc7t4c3X5pmKZPeO2x68/HOIzjAF9lUO7nZRstoNY3vZ6HgYd9XSRz0OaeIRQ5sfw
-        3OLawY/RiOuwBka8po6tIqM46jCHJerAUKpyabW8YJObfwwQGDcQ8+DZXM84reE43Yy+pxEAZ1lBB
-        0YQYRWrfgOMEIpwNDOfpJKHfTD3Wv9nsh/wMdN/9ufm0nyNr0vJ9l08ZGSAcSEPaaWj5tqWML84bX
-        0tD/I02A==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qMjk3-00D37H-0b;
-        Fri, 21 Jul 2023 06:35:55 +0000
-Date:   Thu, 20 Jul 2023 23:35:55 -0700
-From:   Christoph Hellwig <hch@infradead.org>
+        with ESMTP id S230347AbjGUIeC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 04:34:02 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CC4B273A
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Jul 2023 01:33:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1689928394;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=fPZO899bBzglVO4zclWOqlIFYd5xOLg0At2VcUxPogk=;
+        b=LJuHB+e7jeKdAqORC6pHNuoZxoF0mpk3fkUSp1USy6p9M/kEJw35g924th7aINx/t1LDWC
+        oALJ3mbawcqJ9DclMcHO2+1QhRZKx7w7pOIMY7MZ/Y5bSY04rvTPdz5zXmWT0ft5OD2Cs1
+        eSVUe5uxo6PDGnkstJNc1dCraVPG00A=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-124-60UcKEJKNB2-sqnmx_eKqQ-1; Fri, 21 Jul 2023 04:33:09 -0400
+X-MC-Unique: 60UcKEJKNB2-sqnmx_eKqQ-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1AE1E80C4FD;
+        Fri, 21 Jul 2023 08:33:08 +0000 (UTC)
+Received: from ovpn-8-26.pek2.redhat.com (ovpn-8-26.pek2.redhat.com [10.72.8.26])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id DF24840C206F;
+        Fri, 21 Jul 2023 08:32:54 +0000 (UTC)
+Date:   Fri, 21 Jul 2023 16:32:49 +0800
+From:   Ming Lei <ming.lei@redhat.com>
 To:     Daniel Golle <daniel@makrotopia.org>
 Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
         Miquel Raynal <miquel.raynal@bootlin.com>,
@@ -38,7 +47,7 @@ Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
         Matthew Wilcox <willy@infradead.org>,
         Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
         Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
-        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
+        Min Li <min15.li@samsung.com>,
         Christian Loehle <CLoehle@hyperstone.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Hannes Reinecke <hare@suse.de>,
@@ -50,33 +59,44 @@ Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
         linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
-Subject: Re: [RFC PATCH 6/6] block: implement NVMEM provider
-Message-ID: <ZLonS7QXLj2lg4Zg@infradead.org>
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        ming.lei@redhat.com
+Subject: Re: [RFC PATCH 0/6] nvmem: add block device NVMEM provider
+Message-ID: <ZLpCscTMc8h16Tyd@ovpn-8-26.pek2.redhat.com>
 References: <cover.1689802933.git.daniel@makrotopia.org>
- <e5b709e15739dc0563e9497a2dbbe63050381db0.1689802933.git.daniel@makrotopia.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e5b709e15739dc0563e9497a2dbbe63050381db0.1689802933.git.daniel@makrotopia.org>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <cover.1689802933.git.daniel@makrotopia.org>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> +static int blk_nvmem_reg_read(void *priv, unsigned int from,
-> +			      void *val, size_t bytes)
-> +{
-> +	pgoff_t f_index = from >> PAGE_SHIFT;
-> +	struct address_space *mapping;
-> +	struct blk_nvmem *bnv = priv;
-> +	size_t bytes_left = bytes;
-> +	struct folio *folio;
-> +	unsigned long offs, to_read;
-> +	void *p;
+On Wed, Jul 19, 2023 at 11:01:14PM +0100, Daniel Golle wrote:
+> On embedded devices using an eMMC it is common that one or more (hw/sw)
+> partitions on the eMMC are used to store MAC addresses and Wi-Fi
+> calibration EEPROM data.
+> 
+> Implement an NVMEM provider backed by block devices as typically the
+> NVMEM framework is used to have kernel drivers read and use binary data
+> from EEPROMs, efuses, flash memory (MTD), ...
+> 
+> In order to be able to reference hardware partitions on an eMMC, add code
+> to bind each hardware partition to a specific firmware subnode.
+> 
+> This series is meant to open the discussion on how exactly the device tree
+> schema for block devices and partitions may look like, and even if using
+> the block layer to back the NVMEM device is at all the way to go -- to me
+> it seemed to be a good solution because it will be reuable e.g. for NVMe.
 
-Btw, this function really should be using kern_read on a file
-using filp_open instead of poking into block device internals.
-That way you can even have a generic file provider that works
-on anything that can be read from.
+Just wondering why you don't use request_firmware() in drivers which consume
+the data, then the logic can be moved out of kernel, and you needn't to deal
+with device tree & block device.
+
+Or Android doesn't support udev and initrd?
+
+
+Thanks,
+Ming
 
