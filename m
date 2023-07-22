@@ -2,100 +2,81 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB3D2EB64DD
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jul 2023 13:32:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4592AEB64DD
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Jul 2023 01:41:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229992AbjGUNce (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Jul 2023 09:32:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39934 "EHLO
+        id S229644AbjGVBlM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jul 2023 21:41:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229790AbjGUNcd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 09:32:33 -0400
-Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06E781711;
-        Fri, 21 Jul 2023 06:32:32 -0700 (PDT)
-Received: from local
-        by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
-         (Exim 4.96)
-        (envelope-from <daniel@makrotopia.org>)
-        id 1qMqEZ-00024i-03;
-        Fri, 21 Jul 2023 13:31:51 +0000
-Date:   Fri, 21 Jul 2023 14:31:42 +0100
-From:   Daniel Golle <daniel@makrotopia.org>
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Dave Chinner <dchinner@redhat.com>,
-        Matthew Wilcox <willy@infradead.org>,
-        Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-        Jan Kara <jack@suse.cz>, Damien Le Moal <dlemoal@kernel.org>,
-        Ming Lei <ming.lei@redhat.com>, Min Li <min15.li@samsung.com>,
-        Christian Loehle <CLoehle@hyperstone.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Hannes Reinecke <hare@suse.de>,
-        Jack Wang <jinpu.wang@ionos.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Yeqi Fu <asuk4.q@gmail.com>, Avri Altman <avri.altman@wdc.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Ye Bin <yebin10@huawei.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
-Subject: Re: [RFC PATCH 6/6] block: implement NVMEM provider
-Message-ID: <ZLqIvuK2EX2hROJo@makrotopia.org>
-References: <cover.1689802933.git.daniel@makrotopia.org>
- <e5b709e15739dc0563e9497a2dbbe63050381db0.1689802933.git.daniel@makrotopia.org>
- <ZLonS7QXLj2lg4Zg@infradead.org>
+        with ESMTP id S229529AbjGVBlL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jul 2023 21:41:11 -0400
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5C7871721;
+        Fri, 21 Jul 2023 18:41:10 -0700 (PDT)
+Received: from thinkpad-p16sg1.corp.microsoft.com (unknown [167.220.83.99])
+        by linux.microsoft.com (Postfix) with ESMTPSA id 4D005236FE14;
+        Fri, 21 Jul 2023 18:41:09 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 4D005236FE14
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+        s=default; t=1689990069;
+        bh=hlalfOAh675uEo4Jafv9Q9FFSSyZ0FvKFtA0M9RnTVE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=BmFumFmioLwIMPm7/6TdNR7bdL8o57B1Q+GCIXv+i87v/Hdrv9yYeIi8eoeAGmENi
+         MKzHhkcbKfTNXq1QUEqQ91sNjGlXd05lB7x2qxPeHDIlwUVbJvN3eB3Y7lCI/UwTia
+         wNPN+999xORorUK/UI9M0egaCnJ8JOB3TxLj/EKw=
+From:   Shyam Saini <shyamsaini@linux.microsoft.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     linux-mmc@vger.kernel.org, op-tee@lists.trustedfirmware.org,
+        linux-scsi@vger.kernel.org, shyamsaini@linux.microsoft.com
+Subject: [RFC, PATCH 0/1] Replay Protected Memory Block (RPMB) driver
+Date:   Fri, 21 Jul 2023 18:40:36 -0700
+Message-Id: <20230722014037.42647-1-shyamsaini@linux.microsoft.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZLonS7QXLj2lg4Zg@infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 20, 2023 at 11:35:55PM -0700, Christoph Hellwig wrote:
-> > +static int blk_nvmem_reg_read(void *priv, unsigned int from,
-> > +			      void *val, size_t bytes)
-> > +{
-> > +	pgoff_t f_index = from >> PAGE_SHIFT;
-> > +	struct address_space *mapping;
-> > +	struct blk_nvmem *bnv = priv;
-> > +	size_t bytes_left = bytes;
-> > +	struct folio *folio;
-> > +	unsigned long offs, to_read;
-> > +	void *p;
-> 
-> Btw, this function really should be using kern_read on a file
-> using filp_open instead of poking into block device internals.
+Hi everyone,
 
-Unfortunately filp_open requires a device inode on a filesystem to be
-able to open a block device. What if the root filesystem has not yet
-been mounted, or even requires NVMEM (let's say for the Ethernet MAC
-address to be known for a nfsroot, nbd or iSCSI to work) to be
-available first?
+This is yet another attempt to come up with an RPMB API for the kernel.
+This patch is based on patch 1 of last submission except few minor changes.
+The last discussion of this was in the thread:
 
-Can you imagine we could implement something like filp_open_bdev which
-takes a (struct block_device *) as parameter instead of (const char *)?
+  Subject: [PATCH  v2 1/4] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+  Date: Tue,  5 Apr 2022 10:37:56 +0100 [thread overview]
+  Message-ID: <20220405093759.1126835-2-alex.bennee@linaro.org>
 
-That would allow the driver to open and read from the block device
-before any filesystems (incl. /dev) become ready.
+The patch provides a simple RPMB driver. This is a RFC version and this
+single driver can't be used by its own. It would require further work to
+make use of API's provided by this driver.
 
-> That way you can even have a generic file provider that works
-> on anything that can be read from.
-> 
+Changes since the last posting:
+  drop RPMB char driver
+  drop virtio rpmb frontend driver
+  drop rpmb: add RPBM access tool
+  Rename get_write_count to get_write_counter
+  Make return type for rpmb_set_key() function explicit
 
-While this could also be useful, it doesn't fulfil the requirement of
-making NVMEM available as early as possible for other drivers to use,
-e.g. for the Ethernet MAC address.
+Alex Bennée (1):
+  rpmb: add Replay Protected Memory Block (RPMB) driver
 
-And it would also heavily deviate from how things work with other types
-of flash storage typically used in embedded Linux devices such as SPI
-NOR or NAND flash which is represented as MTD device.
+ MAINTAINERS           |   7 +
+ drivers/Kconfig       |   1 +
+ drivers/Makefile      |   2 +
+ drivers/rpmb/Kconfig  |  11 ++
+ drivers/rpmb/Makefile |   7 +
+ drivers/rpmb/core.c   | 439 ++++++++++++++++++++++++++++++++++++++++++
+ include/linux/rpmb.h  | 182 +++++++++++++++++
+ 7 files changed, 649 insertions(+)
+ create mode 100644 drivers/rpmb/Kconfig
+ create mode 100644 drivers/rpmb/Makefile
+ create mode 100644 drivers/rpmb/core.c
+ create mode 100644 include/linux/rpmb.h
 
-Sidenote: block2mtd is also not an option because one cannot reference
-block2mtd devices in device tree, hence they cannot serve as NVMEM
-providers.
+-- 
+2.34.1
+
