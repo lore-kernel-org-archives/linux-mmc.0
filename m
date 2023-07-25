@@ -2,145 +2,172 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D692C001E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 14:46:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29D71C0015E
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 15:15:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231178AbjGYOqz convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Jul 2023 10:46:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55792 "EHLO
+        id S233105AbjGYPPZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Jul 2023 11:15:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44172 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229981AbjGYOqy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 10:46:54 -0400
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2242319B;
-        Tue, 25 Jul 2023 07:46:53 -0700 (PDT)
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-583f99641adso26075787b3.2;
-        Tue, 25 Jul 2023 07:46:53 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690296412; x=1690901212;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=0kxOdPyZyaJv5gxG+QtuGeWvPDhLsU0ZIVKhTdMmlNw=;
-        b=X0LxQB7X99KnCUyv3+DnZNuo4sUL6GUapEvNdqPxoRlDaJc0KKREC6yn+Q2BEmaIfh
-         8ah2YYrxZWyOmgVTlydnhN7OBzppK4+JebbHdWFfQVRMX1mdgaZPcJiQF71C88tOD0PU
-         UidLKUFhvy+LiswFphm4q7XSRGODrxb2a7z9TYT7ACrdlBM2nrx0H+0OwPv2p0msaylM
-         tpMJ26mAq6eMBtct86spgV+KqNi2XVhMA59eTwp6e2JGo6iTvBG9UjrRoPcT3T4MWWGW
-         u0Iv+U6Tajs4F1igevacOMYyYR+HbITRRZCGXGEdvctPsDtDZQ30oqQ4pZPMR0FPxNNx
-         WwLA==
-X-Gm-Message-State: ABy/qLajEW7uKuAXzjkAqvo7amR6RbIhfrWJVOxDk3xscmhiIx4TZJ7+
-        sx8YW0Nq1AFPM8Zo0E/pNsxMPWhzwic/yg==
-X-Google-Smtp-Source: APBJJlH1/GgAaLm9I9Ev8XypDOwyhl9MGgeOHlP1baA0DBCE4RSWv5XEN2Nh+/7ily0Yqg7c+bgjgA==
-X-Received: by 2002:a0d:c8c7:0:b0:57d:24e9:e7f3 with SMTP id k190-20020a0dc8c7000000b0057d24e9e7f3mr8176525ywd.38.1690296412031;
-        Tue, 25 Jul 2023 07:46:52 -0700 (PDT)
-Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com. [209.85.219.170])
-        by smtp.gmail.com with ESMTPSA id j131-20020a819289000000b00570253fc3e5sm3544519ywg.105.2023.07.25.07.46.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 25 Jul 2023 07:46:51 -0700 (PDT)
-Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-c01e1c0402cso4820537276.0;
-        Tue, 25 Jul 2023 07:46:51 -0700 (PDT)
-X-Received: by 2002:a05:6902:1350:b0:c83:27d4:c0d6 with SMTP id
- g16-20020a056902135000b00c8327d4c0d6mr8607825ybu.37.1690296411349; Tue, 25
- Jul 2023 07:46:51 -0700 (PDT)
+        with ESMTP id S231728AbjGYPPY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 11:15:24 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 569D619A0;
+        Tue, 25 Jul 2023 08:15:23 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id DC6B6613DC;
+        Tue, 25 Jul 2023 15:15:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D457AC433C7;
+        Tue, 25 Jul 2023 15:15:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1690298122;
+        bh=uXKJ00uasfRVR16k4FOy30lC5u9cvvfPEmi295ROSWo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=fTH8UPAM+yn81R7Z0KXVtP8plOMp2TcJp0PSNVyugUwDyax88EbHRxI8m3I4eBcPe
+         eCUj3cznRsiQJPalXVlO1yJwcrPx1GgSKlTsZyrW8dttQooC1l9Z3xIxmzxrrkuF7d
+         BjQlmEtI/Wl52M+s6tiFDpazwACyKEJ0Coprc0z7wWUm08GqlSodUDVzyJ9fLTfhMe
+         v+kB9e1cPeBd6ISw2Tay9SDLaUykUHhD3+pMt7p9WWVOh0uG3TJYYR0fndhiQKwoSR
+         Q88j5PyK4KPrdVMx1vKzfwgcsCGmTcSzMiUUODzInRjVYgm/y56VRwPFXwZ6cGFg62
+         0vVfY0WzOcw9Q==
+Date:   Tue, 25 Jul 2023 23:03:44 +0800
+From:   Jisheng Zhang <jszhang@kernel.org>
+To:     Drew Fustini <dfustini@baylibre.com>
+Cc:     Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>
+Subject: Re: [PATCH RFC 4/4] mmc: sdhci-of-dwcmshc: Add support for T-Head
+ TH1520
+Message-ID: <ZL/kUPicOEPWz5NP@xhacker>
+References: <20230724-th1520-emmc-v1-0-cca1b2533da2@baylibre.com>
+ <20230724-th1520-emmc-v1-4-cca1b2533da2@baylibre.com>
 MIME-Version: 1.0
-References: <20230511181931.869812-1-tj@kernel.org> <20230511181931.869812-7-tj@kernel.org>
- <ZF6WsSVGX3O1d0pL@slm.duckdns.org> <CAMuHMdVCQmh6V182q4g---jvsWiTOP2hBPZKvma6oUN6535LEg@mail.gmail.com>
- <CAMuHMdW1kxZ1RHKTRVRqDNAbj1Df2=v0fPn5KYK3kfX_kiXR6A@mail.gmail.com>
- <ZK3MBfPS-3-tJgjO@slm.duckdns.org> <ZK30CR196rs-OWLq@slm.duckdns.org>
- <CAMuHMdUCXPi+aS-7bR3qRetKF9T3W9jk_HKjvaXmfHv5SEeuFg@mail.gmail.com>
- <ZLXIvXBvhsnL-ik_@slm.duckdns.org> <CAMuHMdU8CGhsU-1PZNdWH1xjbWcWSg2s2RFAegXi+vs=d-0t8Q@mail.gmail.com>
- <ZLcLnoAoJmQ9WTuM@slm.duckdns.org>
-In-Reply-To: <ZLcLnoAoJmQ9WTuM@slm.duckdns.org>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 25 Jul 2023 16:46:38 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdUo=17kYsNEYr=qyVceRpJ4D3jMFrMOiqaH--OOhJOM4w@mail.gmail.com>
-Message-ID: <CAMuHMdUo=17kYsNEYr=qyVceRpJ4D3jMFrMOiqaH--OOhJOM4w@mail.gmail.com>
-Subject: Re: Consider switching to WQ_UNBOUND messages (was: Re: [PATCH v2
- 6/7] workqueue: Report work funcs that trigger automatic CPU_INTENSIVE mechanism)
-To:     Tejun Heo <tj@kernel.org>
-Cc:     Lai Jiangshan <jiangshanlai@gmail.com>,
-        "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kernel-team@meta.com, Linux PM list <linux-pm@vger.kernel.org>,
-        DRI Development <dri-devel@lists.freedesktop.org>,
-        linux-rtc@vger.kernel.org,
-        linux-riscv <linux-riscv@lists.infradead.org>,
-        netdev <netdev@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20230724-th1520-emmc-v1-4-cca1b2533da2@baylibre.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Tejun,
+On Mon, Jul 24, 2023 at 05:59:18PM -0700, Drew Fustini wrote:
+> Add basic support for the T-Head TH1520 SoC mmc controller. The new
+> compatible "thead,th1520-dwcmshc" enables basic support by:
 
-On Wed, Jul 19, 2023 at 12:01 AM Tejun Heo <tj@kernel.org> wrote:
-> On Tue, Jul 18, 2023 at 11:54:58AM +0200, Geert Uytterhoeven wrote:
-> > I gave it a try on a system with an 800 MHz Cortex A9, only to discover
-> > it makes no difference, as that machine has 1600 BogoMIPS:
->
-> Oops.
->
-> > workqueue: blk_mq_run_work_fn hogged CPU for >10000us 4 times,
-> > consider switching to WQ_UNBOUND
->
-> It could be that we actually want to switch to UNBOUND for some reports but
-> the above triggering most likely indicates that the threshold is too
-> aggressive.
->
-> > Artificially low BogoMIPS numbers only happen on systems that have
-> > the related timers (Cortex A7/A15 and later, Cortex A9 MPCore,
-> > and arm64).
->
-> Ah, I see. Thanks for the explanation.
->
-> > I will test on more systems, but that will probably not happen until
-> > next week...
->
-> Thanks, really appreciate it. Can you try the following instead when you
-> have time? I just pushed up the lower boundary to 4000 MIPS. The scaling is
-> still capped at 1s.
+Hi Drew,
 
-Thanks, with the below, I see no more WQ_UNBOUND messages.
+> 
+>  - Enabling v4 mode to properly communicate with the mmc device
+>  - Setting quirk to disable ADMA
+>  - Setting flag to disable SDMA and force PIO mode
+>  - Turing .reset op into a no-op as the driver does not yet know how to
+>    configure the phy. Rely on the vendor u-boot to have configured the
+>    phy and do not reset the controller in Linux.
 
-> From 8555cbd4b22e5f85eb2bdcb84fd1d1f519a0a0d3 Mon Sep 17 00:00:00 2001
-> From: Tejun Heo <tj@kernel.org>
-> Date: Mon, 17 Jul 2023 12:50:02 -1000
-> Subject: [PATCH] workqueue: Scale up wq_cpu_intensive_thresh_us if BogoMIPS is
->  below 4000
+The last three itmes are not acceptable. The controller supports ADMA
+well, can you plz bring in the phy driver? We can't rely on bootloader to
+configure phy.
 
-> --- a/kernel/workqueue.c
-> +++ b/kernel/workqueue.c
-
-> @@ -6513,6 +6516,42 @@ void __init workqueue_init_early(void)
->                !system_freezable_power_efficient_wq);
+> 
+> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 42 +++++++++++++++++++++++++++++++++++++
+>  1 file changed, 42 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index e68cd87998c8..8573aff25a81 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -337,6 +337,14 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+>  	sdhci_reset(host, mask);
 >  }
->
-> +static void __init wq_cpu_intensive_thresh_init(void)
+>  
+> +static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
 > +{
-> +       unsigned long thresh;
-> +       unsigned long mips;
-
-This fails to build on mips.
-Apparently mips is a predefined preprocessor macro:
-
-$ echo | mipsel-linux-gnu-gcc -dM -E - | grep -w mips
-#define mips 1
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> +	/*
+> +	 * MMC controller and phy is configured by vendor u-boot so
+> +	 * take the simplistic approach of not doing reset in Linux.
+> +	 */
+> +}
+> +
+>  static const struct sdhci_ops sdhci_dwcmshc_ops = {
+>  	.set_clock		= sdhci_set_clock,
+>  	.set_bus_width		= sdhci_set_bus_width,
+> @@ -355,6 +363,15 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
+>  	.adma_write_desc	= dwcmshc_adma_write_desc,
+>  };
+>  
+> +static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
+> +	.set_clock		= sdhci_set_clock,
+> +	.set_bus_width		= sdhci_set_bus_width,
+> +	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
+> +	.get_max_clock		= dwcmshc_get_max_clock,
+> +	.reset			= th1520_sdhci_reset,
+> +	.adma_write_desc	= dwcmshc_adma_write_desc,
+> +};
+> +
+>  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+>  	.ops = &sdhci_dwcmshc_ops,
+>  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> @@ -378,6 +395,13 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+>  		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>  };
+>  
+> +static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+> +	.ops = &sdhci_dwcmshc_th1520_ops,
+> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN | SDHCI_QUIRK_BROKEN_DMA |
+> +		  SDHCI_QUIRK_BROKEN_ADMA,
+> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +};
+> +
+>  static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+>  {
+>  	int err;
+> @@ -434,6 +458,10 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
+>  }
+>  
+>  static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+> +	{
+> +		.compatible = "thead,th1520-dwcmshc",
+> +		.data = &sdhci_dwcmshc_th1520_pdata,
+> +	},
+>  	{
+>  		.compatible = "rockchip,rk3588-dwcmshc",
+>  		.data = &sdhci_dwcmshc_rk35xx_pdata,
+> @@ -546,6 +574,20 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  		sdhci_enable_v4_mode(host);
+>  #endif
+>  
+> +	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
+> +		/*
+> +		 * The controller needs v4 mode enabled to properly
+> +		 * communicate with the mmc device.
+> +		 */
+> +		sdhci_enable_v4_mode(host);
+> +
+> +		/*
+> +		 * Set flag so the SDHCI host core will disable DMA
+> +		 * and use PIO mode.
+> +		 */
+> +		host->flags &= ~SDHCI_USE_SDMA;
+> +	}
+> +
+>  	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>  
+>  	err = sdhci_setup_host(host);
+> 
+> -- 
+> 2.34.1
+> 
