@@ -2,39 +2,55 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29D71C0015E
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 15:15:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB21CC41513
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 15:54:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233105AbjGYPPZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Jul 2023 11:15:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44172 "EHLO
+        id S231770AbjGYPyQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Jul 2023 11:54:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231728AbjGYPPY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 11:15:24 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 569D619A0;
-        Tue, 25 Jul 2023 08:15:23 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id DC6B6613DC;
-        Tue, 25 Jul 2023 15:15:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D457AC433C7;
-        Tue, 25 Jul 2023 15:15:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690298122;
-        bh=uXKJ00uasfRVR16k4FOy30lC5u9cvvfPEmi295ROSWo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=fTH8UPAM+yn81R7Z0KXVtP8plOMp2TcJp0PSNVyugUwDyax88EbHRxI8m3I4eBcPe
-         eCUj3cznRsiQJPalXVlO1yJwcrPx1GgSKlTsZyrW8dttQooC1l9Z3xIxmzxrrkuF7d
-         BjQlmEtI/Wl52M+s6tiFDpazwACyKEJ0Coprc0z7wWUm08GqlSodUDVzyJ9fLTfhMe
-         v+kB9e1cPeBd6ISw2Tay9SDLaUykUHhD3+pMt7p9WWVOh0uG3TJYYR0fndhiQKwoSR
-         Q88j5PyK4KPrdVMx1vKzfwgcsCGmTcSzMiUUODzInRjVYgm/y56VRwPFXwZ6cGFg62
-         0vVfY0WzOcw9Q==
-Date:   Tue, 25 Jul 2023 23:03:44 +0800
-From:   Jisheng Zhang <jszhang@kernel.org>
-To:     Drew Fustini <dfustini@baylibre.com>
+        with ESMTP id S231485AbjGYPyP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 11:54:15 -0400
+Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4048E2114
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jul 2023 08:54:13 -0700 (PDT)
+Received: by mail-pl1-x633.google.com with SMTP id d9443c01a7336-1bbc87ded50so1092695ad.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jul 2023 08:54:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20221208.gappssmtp.com; s=20221208; t=1690300452; x=1690905252;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=yPT2stxFChZpMg6h3D81cBqzyJBn0I25fZ2MBYv8irM=;
+        b=eD7kANSdAAjiTC37YAfsbtVn214CSpat8MudtF+68viBVkhN/n+RrCvV36qnEGHl6Y
+         nPebh5ij0FBewMkONhjPgvJZC1dy3YYTeJj/WbGwNjGt//VUvZZnpFFjuOZ+Jxc7x2/Q
+         LLaf3ZHb7stUjV+a5Q2DT8P4+CRldCPKRmMD4L8hmsnPTzdQitjoNc+c2p51Whq66UNz
+         M5WVBLSdvJ1IOe1y045VZw1aOsQt+Ql4RV1Y9MEanRKF2Y3PSxcQ/ZlZ028Xp4OYNcqw
+         ACrcWe+xfjoNI+FnSZNTcGxVsLK54BAtURKW2yGIqMWSZyMWvupBPMHG9Et+JrFPr/YL
+         S1Hw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1690300452; x=1690905252;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=yPT2stxFChZpMg6h3D81cBqzyJBn0I25fZ2MBYv8irM=;
+        b=cT+vtmhPUleniEGVxF0aRTGhnSRp30ppX3v4dOtKGOjF2TsN/WL88phGCjXTXEc8En
+         AYyzveNXqxpbYW/cuBrssw8qOD1dUd0X+1dgCZbnOJ0Ywkq+w1kqphg6mTUkAOJyYUK6
+         POHmeIRQhQLkmdhTwm8GwugVRWcf0xe/rXeS6yt7GhmBFK1NviVIu5x/t7WlqOkgasge
+         R9DANmOpLUwIj17h9lZhgU+8AHfegvyZlFQArBwCwnR/hdNBbjg+3cbdFDpKwh5AaK3Z
+         lhms92SMYs7B0NGkIJjMSX2xf5+hilJ8o1NLAAVFf/nLi5q28tD5yM/PY8Z4iMmt0rtX
+         dV+Q==
+X-Gm-Message-State: ABy/qLbhFuuENIfDhIyrAc0BgyVlLJni2MUTZkhrvJ4dsAj610VC/MWi
+        VmEmc9dtWWE88DRp+cc4u+ocew==
+X-Google-Smtp-Source: APBJJlH+vInGZEOGDW0JESmSk+/b0VDKB7Yl0EonVeDj+0oEV2iQCQjLxobPmSDkYNEnTf2Bdija5g==
+X-Received: by 2002:a17:90b:4c51:b0:263:5702:d4c5 with SMTP id np17-20020a17090b4c5100b002635702d4c5mr11605845pjb.19.1690300452577;
+        Tue, 25 Jul 2023 08:54:12 -0700 (PDT)
+Received: from x1 ([2601:1c2:1800:f680:2cbf:9196:a906:e222])
+        by smtp.gmail.com with ESMTPSA id gf4-20020a17090ac7c400b00263d15f0e87sm8225180pjb.42.2023.07.25.08.54.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Jul 2023 08:54:12 -0700 (PDT)
+Date:   Tue, 25 Jul 2023 08:54:10 -0700
+From:   Drew Fustini <dfustini@baylibre.com>
+To:     Jisheng Zhang <jszhang@kernel.org>
 Cc:     Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -51,123 +67,64 @@ Cc:     Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
         Jason Kridner <jkridner@beagleboard.org>
 Subject: Re: [PATCH RFC 4/4] mmc: sdhci-of-dwcmshc: Add support for T-Head
  TH1520
-Message-ID: <ZL/kUPicOEPWz5NP@xhacker>
+Message-ID: <ZL/wIjm4CZh2Ce0N@x1>
 References: <20230724-th1520-emmc-v1-0-cca1b2533da2@baylibre.com>
  <20230724-th1520-emmc-v1-4-cca1b2533da2@baylibre.com>
+ <ZL/kUPicOEPWz5NP@xhacker>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230724-th1520-emmc-v1-4-cca1b2533da2@baylibre.com>
+In-Reply-To: <ZL/kUPicOEPWz5NP@xhacker>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jul 24, 2023 at 05:59:18PM -0700, Drew Fustini wrote:
-> Add basic support for the T-Head TH1520 SoC mmc controller. The new
-> compatible "thead,th1520-dwcmshc" enables basic support by:
+On Tue, Jul 25, 2023 at 11:03:44PM +0800, Jisheng Zhang wrote:
+> On Mon, Jul 24, 2023 at 05:59:18PM -0700, Drew Fustini wrote:
+> > Add basic support for the T-Head TH1520 SoC mmc controller. The new
+> > compatible "thead,th1520-dwcmshc" enables basic support by:
+> 
+> Hi Drew,
+> 
+> > 
+> >  - Enabling v4 mode to properly communicate with the mmc device
+> >  - Setting quirk to disable ADMA
+> >  - Setting flag to disable SDMA and force PIO mode
+> >  - Turing .reset op into a no-op as the driver does not yet know how to
+> >    configure the phy. Rely on the vendor u-boot to have configured the
+> >    phy and do not reset the controller in Linux.
+> 
+> The last three itmes are not acceptable. The controller supports ADMA
+> well, can you plz bring in the phy driver? We can't rely on bootloader to
+> configure phy.
 
-Hi Drew,
+Yes, that makes sense that this is not acceptable. The T-Head vendor
+kernel seems to contain all the necessary information needed to add the
+phy configuration to sdhci-of-dwcmshc.
 
-> 
->  - Enabling v4 mode to properly communicate with the mmc device
->  - Setting quirk to disable ADMA
->  - Setting flag to disable SDMA and force PIO mode
->  - Turing .reset op into a no-op as the driver does not yet know how to
->    configure the phy. Rely on the vendor u-boot to have configured the
->    phy and do not reset the controller in Linux.
+The shipping kernel for the BeagleV Ahead [1] is based on the T-Head SDK
+releases. I looked at changes to drivers/mmc and found that key changes
+are from Linux_SDK_V0.9.5 [2] and Linux_SDK_V1.0.2 [3].
 
-The last three itmes are not acceptable. The controller supports ADMA
-well, can you plz bring in the phy driver? We can't rely on bootloader to
-configure phy.
+That kernel contains drivers/mmc/host/sdhci-of-dwcmshc.h [4] which seems
+to define information about the phy registers. The version of
+drivers/mmc/host/sdhci-of-dwcmshc.h in that kernel defines several
+functions for the phy config and controller reset:
 
-> 
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 42 +++++++++++++++++++++++++++++++++++++
->  1 file changed, 42 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index e68cd87998c8..8573aff25a81 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -337,6 +337,14 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	sdhci_reset(host, mask);
->  }
->  
-> +static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	/*
-> +	 * MMC controller and phy is configured by vendor u-boot so
-> +	 * take the simplistic approach of not doing reset in Linux.
-> +	 */
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
-> @@ -355,6 +363,15 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
->  	.adma_write_desc	= dwcmshc_adma_write_desc,
->  };
->  
-> +static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
-> +	.set_clock		= sdhci_set_clock,
-> +	.set_bus_width		= sdhci_set_bus_width,
-> +	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
-> +	.get_max_clock		= dwcmshc_get_max_clock,
-> +	.reset			= th1520_sdhci_reset,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
-> +};
-> +
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
->  	.ops = &sdhci_dwcmshc_ops,
->  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> @@ -378,6 +395,13 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
->  		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->  };
->  
-> +static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
-> +	.ops = &sdhci_dwcmshc_th1520_ops,
-> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN | SDHCI_QUIRK_BROKEN_DMA |
-> +		  SDHCI_QUIRK_BROKEN_ADMA,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +};
-> +
->  static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
->  {
->  	int err;
-> @@ -434,6 +458,10 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
->  }
->  
->  static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
-> +	{
-> +		.compatible = "thead,th1520-dwcmshc",
-> +		.data = &sdhci_dwcmshc_th1520_pdata,
-> +	},
->  	{
->  		.compatible = "rockchip,rk3588-dwcmshc",
->  		.data = &sdhci_dwcmshc_rk35xx_pdata,
-> @@ -546,6 +574,20 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  		sdhci_enable_v4_mode(host);
->  #endif
->  
-> +	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-> +		/*
-> +		 * The controller needs v4 mode enabled to properly
-> +		 * communicate with the mmc device.
-> +		 */
-> +		sdhci_enable_v4_mode(host);
-> +
-> +		/*
-> +		 * Set flag so the SDHCI host core will disable DMA
-> +		 * and use PIO mode.
-> +		 */
-> +		host->flags &= ~SDHCI_USE_SDMA;
-> +	}
-> +
->  	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->  
->  	err = sdhci_setup_host(host);
-> 
-> -- 
-> 2.34.1
-> 
+sdhci_phy_1_8v_init_no_pull
+sdhci_phy_3_3v_init_no_pull
+snps_phy_1_8v_init
+snps_phy_3_3v_init
+snps_sdhci_set_phy
+snps_sdhci_reset
+
+I'll look into adapting that code into the upstream sdhci-of-dwcmshc.
+
+Thanks,
+Drew
+
+[1] https://git.beagleboard.org/beaglev-ahead/beaglev-ahead-linux
+[2] https://gist.github.com/pdp7/8d85d736dea24957c017eefdeb882668
+[3] https://gist.github.com/pdp7/c1d3a18f9b7c25e630573d5953a58c99
+[4] https://git.beagleboard.org/beaglev-ahead/beaglev-ahead-linux/-/blob/beaglev-v5.10.113-1.1.2/drivers/mmc/host/sdhci-of-dwcmshc.h
+[5] https://git.beagleboard.org/beaglev-ahead/beaglev-ahead-linux/-/blob/beaglev-v5.10.113-1.1.2/drivers/mmc/host/sdhci-of-dwcmshc.c
