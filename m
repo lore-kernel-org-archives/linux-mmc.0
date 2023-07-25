@@ -2,99 +2,140 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 288DFC0015E
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 05:40:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CDF5DC04A94
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 07:36:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231666AbjGYFkn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Jul 2023 01:40:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50798 "EHLO
+        id S232733AbjGYHgK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Jul 2023 03:36:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49808 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230454AbjGYFki (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 01:40:38 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2E5F19A1
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jul 2023 22:40:34 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id 4fb4d7f45d1cf-522382c4840so1962679a12.2
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jul 2023 22:40:34 -0700 (PDT)
+        with ESMTP id S232666AbjGYHfE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 03:35:04 -0400
+Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16452211C
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jul 2023 00:34:20 -0700 (PDT)
+Received: by mail-wr1-x42d.google.com with SMTP id ffacd0b85a97d-314313f127fso4075007f8f.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jul 2023 00:34:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1690263633; x=1690868433;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=OfroF1JF/XJ6mPsu87A6GDB5zqWzLmB48tKx25k/bTA=;
-        b=yrI4YLBQj6H0kT0aJ0MtbeCd1lVLBgOvIhkGL/uktBODBu9jESbkvGWjzjEFqZw2Co
-         bIf9/SUWvye+uV+6HH5p3rKLCAxU8GKxlidhyGivOc64aRIAYDXDhbh51QSA/bhm16n3
-         8akc3dCcyyTfBjqtU+ZlIAuYXY1+k8YUfMQakFOrolJGiTO6CkW34FarX0i+cwoD5u4j
-         gKJpXxfxEmLVffIVTTeGUYKsvXEGAG8jdyvbY0vt3FUDCbj0tL5c5471dhmmPKNvDJwR
-         m4cODdWrYSx5MxjVUCIkUOIR2h4kuQG67nWfCvJSmLxOmbhATuprr581KHkOx3n0O5RC
-         QOZg==
+        d=linaro.org; s=google; t=1690270458; x=1690875258;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=UDGnj8E3hyVERnnPmi0+OR2KS7yE69P/gg3JEe0kCmw=;
+        b=TlcCv3r+21MtMVb5A8K/NLO8fQ8h8l+y4kP/EbvetnIgoXORNiqaD/6zqCXbDgouwv
+         owi575Vwe2Xj0CTVc4Zc0SbvuyuKkDLvgeLnoHLiTJBZSvFLIz4C55aMwO8DG9WEB4H2
+         042pg7XEaGwDkuNn+tPjJbNvLMYv6O5EFDJiwPnTNaLtPDuvfiGre2RKUDbc9k+lb+3Z
+         H0HYHrK4VVYLxDlSWNDWdAY2T1JV7/+9/qAcggtFcucW3O2WIFvGpDN1fb3b3X28QKbk
+         lQthahjxqe+w1A/F2Bpzvd/RZsPVsRk/8M3IukRIBCuv6Em7KolCyYXVn7V6rJUbj1bp
+         R2GQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690263633; x=1690868433;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=OfroF1JF/XJ6mPsu87A6GDB5zqWzLmB48tKx25k/bTA=;
-        b=GBHeLprtPncgqaxaVQDXYI1kgonO/yv/U6iLWqRl+EERw6AtXZshzz8/qW93fjmoxP
-         I728ET1ERyHIBQp2JNDVULwa3AU/VC7jct5sckkQ9O+XsLJhgXjYhLuCwccSJjPGlsZL
-         FLVOO09w6Uq7aHxG3Rra+WIqXvdcodkgFlGYxsMq7dyHFf5dm8G68gOJD9pCTQvP4UC4
-         Vy9vAfvT0Ttezsk2DCRH/Xb1ot2wa+szQBqupYKdx5FynpuBVaD+ugwsxEdyZONmzktl
-         gyj4dtdBYQ5hobVtuOZ2ogAni1sxUjQhJ8WEzMeMM9zOsJ2CXMJcBJrHiKI0AQVpVNG4
-         dZwA==
-X-Gm-Message-State: ABy/qLaSDHC901PwRcnmOOIPeNLCl3J2OuJrM780bcXdepJ0VzU7Si2n
-        6K4Mbadu0VvpEinVPQzAE2Synw==
-X-Google-Smtp-Source: APBJJlEW/3ztfXZS/OG3QYLoj4rG16uxGq7HMDWca0xP36s6SbxzuY4oqrIPd+ZX6loTBq0oGyJ65A==
-X-Received: by 2002:a17:907:7759:b0:992:630f:98b6 with SMTP id kx25-20020a170907775900b00992630f98b6mr11680527ejc.37.1690263633124;
-        Mon, 24 Jul 2023 22:40:33 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.223.104])
-        by smtp.gmail.com with ESMTPSA id si1-20020a170906cec100b00992d70f8078sm7729498ejb.106.2023.07.24.22.40.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 24 Jul 2023 22:40:31 -0700 (PDT)
-Message-ID: <2385928f-1cc1-04f2-7a56-18eb99bf90cc@linaro.org>
-Date:   Tue, 25 Jul 2023 07:40:29 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH RFC 1/4] dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head
- TH1520 compatible
-Content-Language: en-US
-To:     Drew Fustini <dfustini@baylibre.com>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        d=1e100.net; s=20221208; t=1690270458; x=1690875258;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=UDGnj8E3hyVERnnPmi0+OR2KS7yE69P/gg3JEe0kCmw=;
+        b=TPIrRElxr8R+TwJUPzD2wuGsv7LRkyvDJ/tjXDixOH1U6EIrai0a+PNUsUV4ZPJQsA
+         z3hnepo5/w3vk/ffcKj5WsI8QC4+glyzq/b2vhp6WczXK48e6XuRr5pTxa0MNPR68Ucw
+         i0Zx3mSPW2FpgKKUpSztimV8G4Ld0HV0ld6eBxMSgUi49VvIOQOUGsu+f6xu4CAUUjaI
+         DkWIetOn7jqmCM2nnlxV4Q91Ov9DWEq7Vewzp9GFQ22hSfJrxtBSi0sVk5NX9mmUecUV
+         uITGuv3I8PE70uUk+W1w717ZrflZSx6+uUI4HLkhRjnuNUaOxKeoQ38i6XD5iY5A6Qxd
+         L3GQ==
+X-Gm-Message-State: ABy/qLaLfD4tX6EOQ6DGlgMRgSH55mzIcbnGfM1LSHFJj7hlozt6p3M8
+        bQAHQd6GtvqLJy9E2KAzBQ0SkA==
+X-Google-Smtp-Source: APBJJlGleX5XZxoJnhR1vJzLx6A099QP8YxZB9OyiN955KOB/2yaWckeRZ6hXvmNOT311YutWCoVDA==
+X-Received: by 2002:a5d:6204:0:b0:315:a17d:dbc6 with SMTP id y4-20020a5d6204000000b00315a17ddbc6mr7952152wru.14.1690270458478;
+        Tue, 25 Jul 2023 00:34:18 -0700 (PDT)
+Received: from linaro.org ([82.78.74.213])
+        by smtp.gmail.com with ESMTPSA id r5-20020a5d52c5000000b003143bb5ecd5sm15439765wrv.69.2023.07.25.00.34.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Jul 2023 00:34:17 -0700 (PDT)
+Date:   Tue, 25 Jul 2023 10:34:15 +0300
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Oleksij Rempel <o.rempel@pengutronix.de>
+Cc:     Abel Vesa <abelvesa@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>
-References: <20230724-th1520-emmc-v1-0-cca1b2533da2@baylibre.com>
- <20230724-th1520-emmc-v1-1-cca1b2533da2@baylibre.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230724-th1520-emmc-v1-1-cca1b2533da2@baylibre.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
+        Peng Fan <peng.fan@nxp.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Michael Trimarchi <michael@amarulasolutions.com>,
+        Mark Brown <broonie@kernel.org>,
+        Dario Binacchi <dario.binacchi@amarulasolutions.com>,
+        Marek Vasut <marex@denx.de>, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v2 4/5] dt-bindings: clock: imx6ul: Support optional
+ enet*_ref_pad clocks
+Message-ID: <ZL969wWEhZkWNLy5@linaro.org>
+References: <20230621093245.78130-1-o.rempel@pengutronix.de>
+ <20230621093245.78130-5-o.rempel@pengutronix.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230621093245.78130-5-o.rempel@pengutronix.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 25/07/2023 02:59, Drew Fustini wrote:
-> Add compatible value for the T-Head TH1520 dwcmshc controller.
+On 23-06-21 11:32:44, Oleksij Rempel wrote:
+> Extend the 'clocks' and 'clock-names' properties to support optional
+> 'enet1_ref_pad' and 'enet2_ref_pad' clocks to resolve the following
+> dtbs_check warning:
+> imx6ul-prti6g.dtb: clock-controller@20c4000: clocks: [[17], [18], [19], [20], [21]] is too long
+> imx6ul-prti6g.dtb: clock-controller@20c4000: clock-names: ['ckil', 'osc', 'ipp_di0', 'ipp_di1', 'enet1_ref_pad'] is too long
 > 
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 > ---
->  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  Documentation/devicetree/bindings/clock/imx6ul-clock.yaml | 6 ++++++
+>  1 file changed, 6 insertions(+)
 > 
+> diff --git a/Documentation/devicetree/bindings/clock/imx6ul-clock.yaml b/Documentation/devicetree/bindings/clock/imx6ul-clock.yaml
+> index be54d4df5afa2..3b71ebc100bf6 100644
+> --- a/Documentation/devicetree/bindings/clock/imx6ul-clock.yaml
+> +++ b/Documentation/devicetree/bindings/clock/imx6ul-clock.yaml
+> @@ -28,18 +28,24 @@ properties:
+>      const: 1
+>  
+>    clocks:
+> +    minItems: 4
+>      items:
+>        - description: 32k osc
+>        - description: 24m osc
+>        - description: ipp_di0 clock input
+>        - description: ipp_di1 clock input
+> +      - description: Optional lenet1_ref_pad or enet2_ref_pad clocks
+> +      - description: Optional lenet1_ref_pad or enet2_ref_pad clocks
 
+s/lenet1_ref_pad/enet1_ref_pad/g
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+with that:
 
-Best regards,
-Krzysztof
+Reviewed-by: Abel Vesa <abel.vesa@linaro.org>
 
+>  
+>    clock-names:
+> +    minItems: 4
+>      items:
+>        - const: ckil
+>        - const: osc
+>        - const: ipp_di0
+>        - const: ipp_di1
+> +      - pattern: '^enet[12]_ref_pad$'
+> +      - pattern: '^enet[12]_ref_pad$'
+>  
+>  required:
+>    - compatible
+> -- 
+> 2.39.2
+> 
