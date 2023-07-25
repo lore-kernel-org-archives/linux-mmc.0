@@ -2,120 +2,128 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A05A5C04FE0
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 17:49:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A6B7C04E69
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jul 2023 18:16:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232395AbjGYRtr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Jul 2023 13:49:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45910 "EHLO
+        id S231756AbjGYSQZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Jul 2023 14:16:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232032AbjGYRtl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 13:49:41 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 346D31FEF;
-        Tue, 25 Jul 2023 10:49:36 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BB8206184A;
-        Tue, 25 Jul 2023 17:49:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6AB4C433CA;
-        Tue, 25 Jul 2023 17:49:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690307375;
-        bh=WJL53er2hn/3EEx4DOJfAbOjXZnKjKBtRagFrtg05jg=;
-        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-        b=CPO6RMRPaMRtVah/1RA1wO5FXxmP2DhlHptZXjtjeJZn524snzFNmGkI4PM2ckIo6
-         7FXzBD4qXePRo3PzLIkOFhZGyDj+4aolBAs7lhubS+/sugRBmEv5uwY2APQucc4EIz
-         1nGGt64bGnlel2IpehCbvoOPhAXT8wnt5XPyu8AhkROpI7dA7thAncucJtelJljMnw
-         atiZpLOBvBZ0F/r5WTJZfurX5L65y1q7LeSvDTjmcEUXR6SWW06bn+O1CXh/QQgkcV
-         FpqLMVfkRM4VMT0UlbHKmPRIUz4d0EWFPpNeyuIHEERTM60aZDTVat5SY/xyjqL5hf
-         qQXqITOBkCDlA==
-Received: (nullmailer pid 3497939 invoked by uid 1000);
-        Tue, 25 Jul 2023 17:49:25 -0000
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-MIME-Version: 1.0
-From:   Rob Herring <robh@kernel.org>
-To:     Gatien Chevallier <gatien.chevallier@foss.st.com>
-Cc:     kuba@kernel.org, lee@kernel.org, andi.shyti@kernel.org,
-        alsa-devel@alsa-project.org, linux-i2c@vger.kernel.org,
-        richardcochran@gmail.com, linux-mmc@vger.kernel.org,
-        arnaud.pouliquen@foss.st.com, olivier.moysan@foss.st.com,
-        vkoul@kernel.org, linux-serial@vger.kernel.org, robh+dt@kernel.org,
-        alexandre.torgue@foss.st.com, krzysztof.kozlowski+dt@linaro.org,
-        ulf.hansson@linaro.org, linux-media@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, hugues.fruchet@foss.st.com,
-        mchehab@kernel.org, linux-stm32@st-md-mailman.stormreply.com,
-        linux-phy@lists.infradead.org, pabeni@redhat.com,
-        devicetree@vger.kernel.org, gregkh@linuxfoundation.org,
-        linux-kernel@vger.kernel.org, edumazet@google.com,
-        linux-crypto@vger.kernel.org, jic23@kernel.org,
-        Frank Rowand <frowand.list@gmail.com>, arnd@kernel.org,
-        linux-usb@vger.kernel.org, catalin.marinas@arm.com,
-        linux-iio@vger.kernel.org, davem@davemloft.net,
-        Oleksii_Moisieiev@epam.com, will@kernel.org,
-        dmaengine@vger.kernel.org, netdev@vger.kernel.org,
-        fabrice.gasnier@foss.st.com, linux-spi@vger.kernel.org,
-        conor+dt@kernel.org, herbert@gondor.apana.org.au
-In-Reply-To: <20230725164104.273965-4-gatien.chevallier@foss.st.com>
+        with ESMTP id S230464AbjGYSQW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jul 2023 14:16:22 -0400
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77958E9;
+        Tue, 25 Jul 2023 11:16:20 -0700 (PDT)
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36PDW7hH010621;
+        Tue, 25 Jul 2023 18:43:56 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding : content-type; s=selector1;
+ bh=MqeCBr2iwB1ylpsZybUxjhY2AMLlO6u0i1cPCCrgpvE=;
+ b=FcPygnpCmMRI4rYBfElPZ87KsqmzW5pFp7vAN9QNFeuHFaL2YEADnymUZrxcsZH+LuF/
+ Zh2VGnjH6LPaiwLFPWgKnH9nEE/C2l6SvZ0s0l54VOrcgS6V9pPa5DfsE3auCVlfpBZ4
+ KmvNUYN40YMUDrIg9Z1MdijvkMdnKGw+fJDkDyFbDh8GgDbZwABkKwr5ZDYhJjTc36KS
+ g0x9vNXFxARKJNywnoSoZQWZWHGvLf/W6k21N0AInd1zoMTodVOfQVh/6g971RhU3NRI
+ SXpJCegoMFVbE+qnqwDjPuZpO4VjOrm4aOck+kFu6V58OOIPFHVMaGF4OgpoeFvhV3fm uw== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3s2bkbjqrb-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 25 Jul 2023 18:43:56 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 1D06210002A;
+        Tue, 25 Jul 2023 18:43:56 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 0F5FA27FAB5;
+        Tue, 25 Jul 2023 18:43:56 +0200 (CEST)
+Received: from localhost (10.201.21.121) by SHFDAG1NODE1.st.com (10.75.129.69)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Tue, 25 Jul
+ 2023 18:43:55 +0200
+From:   Gatien Chevallier <gatien.chevallier@foss.st.com>
+To:     <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
+        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <conor+dt@kernel.org>, <alexandre.torgue@foss.st.com>,
+        <vkoul@kernel.org>, <jic23@kernel.org>,
+        <olivier.moysan@foss.st.com>, <arnaud.pouliquen@foss.st.com>,
+        <mchehab@kernel.org>, <fabrice.gasnier@foss.st.com>,
+        <andi.shyti@kernel.org>, <ulf.hansson@linaro.org>,
+        <edumazet@google.com>, <kuba@kernel.org>, <pabeni@redhat.com>,
+        <hugues.fruchet@foss.st.com>, <lee@kernel.org>, <will@kernel.org>,
+        <catalin.marinas@arm.com>, <arnd@kernel.org>,
+        <richardcochran@gmail.com>, Frank Rowand <frowand.list@gmail.com>
+CC:     <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <dmaengine@vger.kernel.org>,
+        <linux-i2c@vger.kernel.org>, <linux-iio@vger.kernel.org>,
+        <alsa-devel@alsa-project.org>, <linux-media@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
+        <linux-phy@lists.infradead.org>, <linux-serial@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <linux-usb@vger.kernel.org>,
+        Gatien Chevallier <gatien.chevallier@foss.st.com>
+Subject: [PATCH v2 08/11] arm64: dts: st: add RIFSC as a domain controller for STM32MP25x boards
+Date:   Tue, 25 Jul 2023 18:41:01 +0200
+Message-ID: <20230725164104.273965-9-gatien.chevallier@foss.st.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20230725164104.273965-1-gatien.chevallier@foss.st.com>
 References: <20230725164104.273965-1-gatien.chevallier@foss.st.com>
- <20230725164104.273965-4-gatien.chevallier@foss.st.com>
-Message-Id: <169030736534.3497905.9507005013968358402.robh@kernel.org>
-Subject: Re: [PATCH v2 03/11] dt-bindings: bus: document ETZPC
-Date:   Tue, 25 Jul 2023 11:49:25 -0600
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.201.21.121]
+X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE1.st.com
+ (10.75.129.69)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-07-25_08,2023-07-25_01,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+RIFSC is a firewall controller. Change its compatible so that is matches
+the documentation and reference RIFSC as a feature-domain-controller.
 
-On Tue, 25 Jul 2023 18:40:56 +0200, Gatien Chevallier wrote:
-> Document ETZPC (Extended TrustZone protection controller). ETZPC is a
-> firewall controller.
-> 
-> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
-> ---
-> 
-> Changes in V2:
-> 	- Corrected errors highlighted by Rob's robot
-> 	- No longer define the maxItems for the "feature-domains"
-> 	  property
-> 	- Fix example (node name, status)
-> 	- Declare "feature-domain-names" as an optional
-> 	  property for child nodes
-> 	- Fix description of "feature-domains" property
-> 	- Reorder the properties so it matches RIFSC
-> 	- Add missing "feature-domain-controller" property
-> 
->  .../bindings/bus/st,stm32-etzpc.yaml          | 96 +++++++++++++++++++
->  1 file changed, 96 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/bus/st,stm32-etzpc.yaml
-> 
+Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+---
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+Changes in V2:
+	- Fix rifsc node name
+	- Move the "ranges" property under the
+	  "feature-domains" one
 
-yamllint warnings/errors:
+ arch/arm64/boot/dts/st/stm32mp251.dtsi | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-dtschema/dtc warnings/errors:
-/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/bus/st,stm32-etzpc.example.dtb: serial@4c001000: Unevaluated properties are not allowed ('feature-domains' was unexpected)
-	from schema $id: http://devicetree.org/schemas/serial/st,stm32-uart.yaml#
-
-doc reference errors (make refcheckdocs):
-
-See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20230725164104.273965-4-gatien.chevallier@foss.st.com
-
-The base for the series is generally the latest rc1. A different dependency
-should be noted in *this* patch.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit after running the above command yourself. Note
-that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-your schema. However, it must be unset to test all examples with your schema.
+diff --git a/arch/arm64/boot/dts/st/stm32mp251.dtsi b/arch/arm64/boot/dts/st/stm32mp251.dtsi
+index 5268a4321841..cb084381e4cd 100644
+--- a/arch/arm64/boot/dts/st/stm32mp251.dtsi
++++ b/arch/arm64/boot/dts/st/stm32mp251.dtsi
+@@ -105,11 +105,13 @@ soc@0 {
+ 		interrupt-parent = <&intc>;
+ 		ranges = <0x0 0x0 0x0 0x80000000>;
+ 
+-		rifsc: rifsc-bus@42080000 {
+-			compatible = "simple-bus";
++		rifsc: bus@42080000 {
++			compatible = "st,stm32mp25-rifsc";
+ 			reg = <0x42080000 0x1000>;
+ 			#address-cells = <1>;
+ 			#size-cells = <1>;
++			feature-domain-controller;
++			#feature-domain-cells = <1>;
+ 			ranges;
+ 
+ 			usart2: serial@400e0000 {
+@@ -117,6 +119,7 @@ usart2: serial@400e0000 {
+ 				reg = <0x400e0000 0x400>;
+ 				interrupts = <GIC_SPI 115 IRQ_TYPE_LEVEL_HIGH>;
+ 				clocks = <&ck_flexgen_08>;
++				feature-domains = <&rifsc 32>;
+ 				status = "disabled";
+ 			};
+ 		};
+-- 
+2.35.3
 
