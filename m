@@ -2,142 +2,89 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CFA7C0015E
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Jul 2023 06:55:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15631C001DE
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Jul 2023 06:58:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231230AbjGZGzg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Jul 2023 02:55:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35120 "EHLO
+        id S232254AbjGZG6z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Jul 2023 02:58:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36108 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231351AbjGZGzW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2023 02:55:22 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6B27273E;
-        Tue, 25 Jul 2023 23:55:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1690354506; x=1721890506;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=NGfMfU7QX/FvMvczs5lY6l7TlgmEQkvKreP+H495+9Q=;
-  b=iIuJ29lLWTpBiC5chOdvRx90yMyRa/9zbR/fkHvLVTRxSTQ99b8QwV+4
-   wBdYuXIvPXL84jOHs0OWXx1T3KVKCwDVhCVR4YjECcgi8Vtw2lPud4lWR
-   LtSBRcPmYKacnmoiDvc6RAoNv5b7CrvDdMR+/kR7VAvtVAE7g69cMxwbp
-   A2vcUSGAB5zd/pT+xro99Fc/cTfh4hx0tfxheqr8GuMjzB3sAd0xTgDc/
-   kHy7o0IV0/Bg3OGeIUSEA8fLX/X7dZ1z3Ea9DvK2RZOgPG9jcCU/jBX3S
-   Knz51onA1gB0M4Qd10R6cl1Q5VWtA1vSLj/26s/XzQQZPJdpDck3t1jpw
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10782"; a="357936992"
-X-IronPort-AV: E=Sophos;i="6.01,231,1684825200"; 
-   d="scan'208";a="357936992"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jul 2023 23:55:06 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10782"; a="676547119"
-X-IronPort-AV: E=Sophos;i="6.01,231,1684825200"; 
-   d="scan'208";a="676547119"
-Received: from igosu-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.75])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jul 2023 23:55:03 -0700
-Message-ID: <6cd56798-dbdf-35d8-a381-a569cbbe00ee@intel.com>
-Date:   Wed, 26 Jul 2023 09:54:59 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.13.0
-Subject: Re: [PATCH v2 34/61] mmc: sdhci-of-aspeed: Convert to platform remove
-Content-Language: en-US
-To:     Yangtao Li <frank.li@vivo.com>, Andrew Jeffery <andrew@aj.id.au>,
+        with ESMTP id S232237AbjGZG63 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2023 02:58:29 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 299C82717
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jul 2023 23:58:18 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1qOYT6-00046l-2t; Wed, 26 Jul 2023 08:57:56 +0200
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1qOYT4-002Aw1-9J; Wed, 26 Jul 2023 08:57:54 +0200
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1qOYT3-007reb-J0; Wed, 26 Jul 2023 08:57:53 +0200
+Date:   Wed, 26 Jul 2023 08:57:50 +0200
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Yangtao Li <frank.li@vivo.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Joel Stanley <joel@jms.id.au>
-Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        linux-mmc@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
-        openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
+        Joel Stanley <joel@jms.id.au>, linux-aspeed@lists.ozlabs.org,
+        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 33/61] mmc: sdhci-of-aspeed: remove unneeded variables
+Message-ID: <20230726065750.judvhyyuzcc2zsgu@pengutronix.de>
 References: <20230726040041.26267-1-frank.li@vivo.com>
- <20230726040041.26267-34-frank.li@vivo.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230726040041.26267-34-frank.li@vivo.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+ <20230726040041.26267-33-frank.li@vivo.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="yelgoin2bjjhlkyv"
+Content-Disposition: inline
+In-Reply-To: <20230726040041.26267-33-frank.li@vivo.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/07/23 07:00, Yangtao Li wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
-> 
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
-> 
-> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+
+--yelgoin2bjjhlkyv
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, Jul 26, 2023 at 12:00:13PM +0800, Yangtao Li wrote:
+> The variable 'dead' is redundant, let's remove it.
+>=20
 > Signed-off-by: Yangtao Li <frank.li@vivo.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
 
-> ---
->  drivers/mmc/host/sdhci-of-aspeed.c | 12 ++++--------
->  1 file changed, 4 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-> index b4867bb4a564..42d54532cabe 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -450,7 +450,7 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
->  	return ret;
->  }
->  
-> -static int aspeed_sdhci_remove(struct platform_device *pdev)
-> +static void aspeed_sdhci_remove(struct platform_device *pdev)
->  {
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_host *host;
-> @@ -463,8 +463,6 @@ static int aspeed_sdhci_remove(struct platform_device *pdev)
->  	clk_disable_unprepare(pltfm_host->clk);
->  
->  	sdhci_pltfm_free(pdev);
-> -
-> -	return 0;
->  }
->  
->  static const struct aspeed_sdhci_pdata ast2400_sdhci_pdata = {
-> @@ -520,7 +518,7 @@ static struct platform_driver aspeed_sdhci_driver = {
->  		.of_match_table = aspeed_sdhci_of_match,
->  	},
->  	.probe		= aspeed_sdhci_probe,
-> -	.remove		= aspeed_sdhci_remove,
-> +	.remove_new	= aspeed_sdhci_remove,
->  };
->  
->  static int aspeed_sdc_probe(struct platform_device *pdev)
-> @@ -573,13 +571,11 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
->  	return ret;
->  }
->  
-> -static int aspeed_sdc_remove(struct platform_device *pdev)
-> +static void aspeed_sdc_remove(struct platform_device *pdev)
->  {
->  	struct aspeed_sdc *sdc = dev_get_drvdata(&pdev->dev);
->  
->  	clk_disable_unprepare(sdc->clk);
-> -
-> -	return 0;
->  }
->  
->  static const struct of_device_id aspeed_sdc_of_match[] = {
-> @@ -599,7 +595,7 @@ static struct platform_driver aspeed_sdc_driver = {
->  		.of_match_table = aspeed_sdc_of_match,
->  	},
->  	.probe		= aspeed_sdc_probe,
-> -	.remove		= aspeed_sdc_remove,
-> +	.remove_new	= aspeed_sdc_remove,
->  };
->  
->  #if defined(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)
+Best regards
+Uwe
 
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--yelgoin2bjjhlkyv
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmTAw+0ACgkQj4D7WH0S
+/k5v+wf/dYBVwVf2EH5vWE9ipYC2wAo2mozZWtvfJa5VG9dGJUmBG0m6WjPk0k5w
+MQGB7LZb3VoXJxpxyU4eE0DVtwTrifgqu5AjkDuOQtYVAl5Y9XmhtQC36cykQzo5
+PPTogFKVFLJ50BBbVxehFlLtJQJ/WKdpeX30xTC5bglFOJGEWnAiqeuKelPZxAwh
+CbjWeJgGX2G90D6GeyglBRI83K6losaHj/uw36+uGqtZ19IZwpd109dvfCtOGzCA
+AJaWR1DoIf7s/g6eAVOWupnlRfAFCZ0H5KGaVP2Xtfh7bFTyEts2w0TT7YTDrKg7
+1l/xPlfaWkVBDCqTfoyybWIYF0oRlA==
+=tn4P
+-----END PGP SIGNATURE-----
+
+--yelgoin2bjjhlkyv--
