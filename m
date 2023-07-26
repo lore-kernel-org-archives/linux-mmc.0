@@ -2,116 +2,346 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37988C04E69
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Jul 2023 12:13:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11B89C001DC
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Jul 2023 12:41:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233630AbjGZMNJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Jul 2023 08:13:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59128 "EHLO
+        id S233450AbjGZMlj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Jul 2023 08:41:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233804AbjGZMNA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2023 08:13:00 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3B0D1739;
-        Wed, 26 Jul 2023 05:12:59 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2CC1A61ACC;
-        Wed, 26 Jul 2023 12:12:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73356C433C8;
-        Wed, 26 Jul 2023 12:12:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690373578;
-        bh=Ke8AONnAOWupVgvu9a1rrtccA5xWjVMePJQxM8Ht3Kc=;
-        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-        b=gYrqFr8wvj2MJmmwmwf8M6I8rekTV9+bxmW2rqLD55Qm7Z/X+3fqo2oPfopkxdlCi
-         n241AQBCMxM7eFrih3i3Sbv5AKj0bq28ozziIAExFd7E/RXMMNS1aKn+yJARtnBmU4
-         FfN14X79faCpLGre6x+vnvwoxjIsG/L/ooLw+V13rcjVx7tIPmq/1O2zG9aawBpzTf
-         uhcvPI4MEqZ0fNFaHRBAISQWggi8tN88wV4MzFoUqwVN0pOsQ3BgyiTak4/MrtL+0t
-         6GpQd+/9rUTZVGi45edSMIe9j4qSBoulHPW7gK71wysfs2CSJoMHtELswVidt7IBP2
-         x+DypAIC/tqTg==
-Received: (nullmailer pid 1182938 invoked by uid 1000);
-        Wed, 26 Jul 2023 12:12:54 -0000
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S230296AbjGZMli (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2023 08:41:38 -0400
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A48631FDA;
+        Wed, 26 Jul 2023 05:41:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1690375296; x=1721911296;
+  h=message-id:date:mime-version:from:subject:to:cc:
+   references:in-reply-to:content-transfer-encoding;
+  bh=ETDxxOU+t5OdI9Iv6qVt7WaoqDevvPEJRI39rXKuOmU=;
+  b=lsBw+pzrzwnETjHnu/fj7RuparAhNU2HM4rRbINkuJiKoDDeWphPyLz2
+   +p6NiuWgbqgn0/PRilAf2U/UWVfnXXwORUPY7+kSdTiZsoKM4Us4Befo8
+   mIPEdmviMP2IOAZiRVpJEuAhAQFWC6wOHUHgEp2l/0GmcVhRng9QZQiAk
+   R2wAEn5cT1OgAq+c+4wb4Zex2ky3cQ+vOWldrjIpPbBqprd/wjLnEQvlF
+   vvZ7hguLdyQKdaT4HigbrZVn2iDM/p7rOdfuTec2Ah/u/ND84w7eKAHw3
+   +W4U0OnS9/TdXZBzY15DkcO0/TnUE9HT44NFBibJzW8S/PED2+GdrL8BO
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10783"; a="347617488"
+X-IronPort-AV: E=Sophos;i="6.01,232,1684825200"; 
+   d="scan'208";a="347617488"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Jul 2023 05:41:36 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10783"; a="676683362"
+X-IronPort-AV: E=Sophos;i="6.01,232,1684825200"; 
+   d="scan'208";a="676683362"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.75])
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Jul 2023 05:41:32 -0700
+Message-ID: <165b51d9-a9c8-1fea-f847-d3ce3757a7bd@intel.com>
+Date:   Wed, 26 Jul 2023 15:41:10 +0300
 MIME-Version: 1.0
-From:   Rob Herring <robh@kernel.org>
-To:     Gatien Chevallier <gatien.chevallier@foss.st.com>
-Cc:     linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org,
-        lee@kernel.org, catalin.marinas@arm.com, jic23@kernel.org,
-        hugues.fruchet@foss.st.com, richardcochran@gmail.com,
-        will@kernel.org, arnd@kernel.org, davem@davemloft.net,
-        Oleksii Moisieiev <oleksii_moisieiev@epam.com>,
-        Frank Rowand <frowand.list@gmail.com>,
-        Oleksii_Moisieiev@epam.com, linux-phy@lists.infradead.org,
-        linux-crypto@vger.kernel.org, kuba@kernel.org,
-        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
-        vkoul@kernel.org, linux-arm-kernel@lists.infradead.org,
-        edumazet@google.com, devicetree@vger.kernel.org,
-        linux-iio@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        herbert@gondor.apana.org.au, linux-i2c@vger.kernel.org,
-        alexandre.torgue@foss.st.com, mchehab@kernel.org,
-        robh+dt@kernel.org, linux-kernel@vger.kernel.org,
-        ulf.hansson@linaro.org, netdev@vger.kernel.org,
-        andi.shyti@kernel.org, olivier.moysan@foss.st.com,
-        linux-serial@vger.kernel.org, pabeni@redhat.com,
-        arnaud.pouliquen@foss.st.com, dmaengine@vger.kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, linux-media@vger.kernel.org,
-        conor+dt@kernel.org, fabrice.gasnier@foss.st.com
-In-Reply-To: <20230726083810.232100-2-gatien.chevallier@foss.st.com>
-References: <20230726083810.232100-1-gatien.chevallier@foss.st.com>
- <20230726083810.232100-2-gatien.chevallier@foss.st.com>
-Message-Id: <169037357425.1182922.8121576517266921442.robh@kernel.org>
-Subject: Re: [IGNORE][PATCH v3 01/11] dt-bindings: Document common device
- controller bindings
-Date:   Wed, 26 Jul 2023 06:12:54 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.13.1
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 1/6] mmc: sdhci-cadence: Rename functions/structures to
+ SD4 specific
+To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
+        p.zabel@pengutronix.de, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        yamada.masahiro@socionext.com, devicetree@vger.kernel.org
+Cc:     jannadurai@marvell.com, cchavva@marvell.com,
+        Dhananjay Kangude <dkangude@cadence.com>
+References: <20230717125146.16791-1-pmalgujar@marvell.com>
+ <20230717125146.16791-2-pmalgujar@marvell.com>
+Content-Language: en-US
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230717125146.16791-2-pmalgujar@marvell.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Wed, 26 Jul 2023 10:38:00 +0200, Gatien Chevallier wrote:
-> From: Oleksii Moisieiev <Oleksii_Moisieiev@epam.com>
+On 17/07/23 15:51, Piyush Malgujar wrote:
+> From: Dhananjay Kangude <dkangude@cadence.com>
 > 
-> Introducing of the common device controller bindings for the controller
-> provider and consumer devices. Those bindings are intended to allow
-> divided system on chip into muliple domains, that can be used to
-> configure hardware permissions.
+> Renaming the functions and structures specific to SD4 so
+> that it can be separated from upcoming SD6 related
+> functionality.
 > 
-> Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
+> Signed-off-by: Dhananjay Kangude <dkangude@cadence.com>
+> Co-developed-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
 > ---
->  .../feature-domain-controller.yaml            | 84 +++++++++++++++++++
->  1 file changed, 84 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/feature-controllers/feature-domain-controller.yaml
+>  drivers/mmc/host/sdhci-cadence.c | 92 ++++++++++++++++----------------
+>  1 file changed, 46 insertions(+), 46 deletions(-)
 > 
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index d2f62505468932b069e3411f2a4b7418ffece517..9bb38281bcb244b0be91ef579046c40de7a06e1f 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -16,14 +16,14 @@
+>  
+>  #include "sdhci-pltfm.h"
+>  
+> -/* HRS - Host Register Set (specific to Cadence) */
+> -#define SDHCI_CDNS_HRS04		0x10		/* PHY access port */
+> -#define   SDHCI_CDNS_HRS04_ACK			BIT(26)> -#define   SDHCI_CDNS_HRS04_RD			BIT(25)
+> -#define   SDHCI_CDNS_HRS04_WR			BIT(24)
+> -#define   SDHCI_CDNS_HRS04_RDATA		GENMASK(23, 16)
+> -#define   SDHCI_CDNS_HRS04_WDATA		GENMASK(15, 8)
+> -#define   SDHCI_CDNS_HRS04_ADDR			GENMASK(5, 0)
+> +/* SD 4.0 Controller HRS - Host Register Set (specific to Cadence) */ where
+> +#define SDHCI_CDNS_HRS04			0x10	/* PHY access port */
+> +#define SDHCI_CDNS_SD4_HRS04_ACK		BIT(26)
+> +#define SDHCI_CDNS_SD4_HRS04_RD			BIT(25)
+> +#define SDHCI_CDNS_SD4_HRS04_WR			BIT(24)
+> +#define SDHCI_CDNS_SD4_HRS04_RDATA		GENMASK(23, 16)
+> +#define SDHCI_CDNS_SD4_HRS04_WDATA		GENMASK(15, 8)
+> +#define SDHCI_CDNS_SD4_HRS04_ADDR		GENMASK(5, 0)
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+You have changed the style whereby the register and the fields
+had different indentations (compare SDHCI_CDNS_HRS04 and
+SDHCI_CDNS_HRS04_ACK).  The style doesn't matter much but it
+would be nicer not to end up with a mix of styles.
 
-yamllint warnings/errors:
+It is also a bit surprising not to continue using the register
+name as the prefix for the field name
+e.g. why SDHCI_CDNS_SD4_HRS04_ACK instead of SDHCI_CDNS_HRS04_SD4_ACK
 
-dtschema/dtc warnings/errors:
-/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/feature-controllers/feature-domain-controller.yaml: title: 'Generic Domain Controller bindings' should not be valid under {'pattern': '([Bb]inding| [Ss]chema)'}
-	hint: Everything is a binding/schema, no need to say it. Describe what hardware the binding is for.
-	from schema $id: http://devicetree.org/meta-schemas/core.yaml#
-
-doc reference errors (make refcheckdocs):
-
-See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20230726083810.232100-2-gatien.chevallier@foss.st.com
-
-The base for the series is generally the latest rc1. A different dependency
-should be noted in *this* patch.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit after running the above command yourself. Note
-that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-your schema. However, it must be unset to test all examples with your schema.
+>  
+>  #define SDHCI_CDNS_HRS06		0x18		/* eMMC control */
+>  #define   SDHCI_CDNS_HRS06_TUNE_UP		BIT(15)
+> @@ -39,7 +39,7 @@
+>  /* SRS - Slot Register Set (SDHCI-compatible) */
+>  #define SDHCI_CDNS_SRS_BASE		0x200
+>  
+> -/* PHY */
+> +/* PHY registers for SD4 controller */
+>  #define SDHCI_CDNS_PHY_DLY_SD_HS	0x00
+>  #define SDHCI_CDNS_PHY_DLY_SD_DEFAULT	0x01
+>  #define SDHCI_CDNS_PHY_DLY_UHS_SDR12	0x02
+> @@ -60,7 +60,7 @@
+>   */
+>  #define SDHCI_CDNS_MAX_TUNING_LOOP	40
+>  
+> -struct sdhci_cdns_phy_param {
+> +struct sdhci_cdns_sd4_phy_param {
+>  	u8 addr;
+>  	u8 data;
+>  };
+> @@ -73,10 +73,10 @@ struct sdhci_cdns_priv {
+>  	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
+>  	struct reset_control *rst_hw;
+>  	unsigned int nr_phy_params;
+> -	struct sdhci_cdns_phy_param phy_params[];
+> +	struct sdhci_cdns_sd4_phy_param phy_params[];
+>  };
+>  
+> -struct sdhci_cdns_phy_cfg {
+> +struct sdhci_cdns_sd4_phy_cfg {
+>  	const char *property;
+>  	u8 addr;
+>  };
+> @@ -86,7 +86,7 @@ struct sdhci_cdns_drv_data {
+>  	const struct sdhci_pltfm_data pltfm_data;
+>  };
+>  
+> -static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
+> +static const struct sdhci_cdns_sd4_phy_cfg sdhci_cdns_sd4_phy_cfgs[] = {
+>  	{ "cdns,phy-input-delay-sd-highspeed", SDHCI_CDNS_PHY_DLY_SD_HS, },
+>  	{ "cdns,phy-input-delay-legacy", SDHCI_CDNS_PHY_DLY_SD_DEFAULT, },
+>  	{ "cdns,phy-input-delay-sd-uhs-sdr12", SDHCI_CDNS_PHY_DLY_UHS_SDR12, },
+> @@ -106,76 +106,76 @@ static inline void cdns_writel(struct sdhci_cdns_priv *priv, u32 val,
+>  	writel(val, reg);
+>  }
+>  
+> -static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+> -				    u8 addr, u8 data)
+> +static int sdhci_cdns_sd4_write_phy_reg(struct sdhci_cdns_priv *priv,
+> +					u8 addr, u8 data)
+>  {
+>  	void __iomem *reg = priv->hrs_addr + SDHCI_CDNS_HRS04;
+>  	u32 tmp;
+>  	int ret;
+>  
+> -	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
+> +	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_SD4_HRS04_ACK),
+>  				 0, 10);
+>  	if (ret)
+>  		return ret;
+>  
+> -	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
+> -	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
+> +	tmp = FIELD_PREP(SDHCI_CDNS_SD4_HRS04_WDATA, data) |
+> +	      FIELD_PREP(SDHCI_CDNS_SD4_HRS04_ADDR, addr);
+>  	priv->priv_writel(priv, tmp, reg);
+>  
+> -	tmp |= SDHCI_CDNS_HRS04_WR;
+> +	tmp |= SDHCI_CDNS_SD4_HRS04_WR;
+>  	priv->priv_writel(priv, tmp, reg);
+>  
+> -	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_HRS04_ACK, 0, 10);
+> +	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_SD4_HRS04_ACK, 0, 10);
+>  	if (ret)
+>  		return ret;
+>  
+> -	tmp &= ~SDHCI_CDNS_HRS04_WR;
+> +	tmp &= ~SDHCI_CDNS_SD4_HRS04_WR;
+>  	priv->priv_writel(priv, tmp, reg);
+>  
+> -	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
+> +	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_SD4_HRS04_ACK),
+>  				 0, 10);
+>  
+>  	return ret;
+>  }
+>  
+> -static unsigned int sdhci_cdns_phy_param_count(struct device_node *np)
+> +static unsigned int sdhci_cdns_sd4_phy_param_count(struct device_node *np)
+>  {
+>  	unsigned int count = 0;
+>  	int i;
+>  
+> -	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
+> -		if (of_property_read_bool(np, sdhci_cdns_phy_cfgs[i].property))
+> +	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_sd4_phy_cfgs); i++)
+> +		if (of_property_read_bool(np, sdhci_cdns_sd4_phy_cfgs[i].property))
+>  			count++;
+>  
+>  	return count;
+>  }
+>  
+> -static void sdhci_cdns_phy_param_parse(struct device_node *np,
+> -				       struct sdhci_cdns_priv *priv)
+> +static void sdhci_cdns_sd4_phy_param_parse(struct device_node *np,
+> +					   struct sdhci_cdns_priv *priv)
+>  {
+> -	struct sdhci_cdns_phy_param *p = priv->phy_params;
+> +	struct sdhci_cdns_sd4_phy_param *p = priv->phy_params;
+>  	u32 val;
+>  	int ret, i;
+>  
+> -	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++) {
+> -		ret = of_property_read_u32(np, sdhci_cdns_phy_cfgs[i].property,
+> +	for (i = 0; i < ARRAY_SIZE(sdhci_cdns_sd4_phy_cfgs); i++) {
+> +		ret = of_property_read_u32(np, sdhci_cdns_sd4_phy_cfgs[i].property,
+>  					   &val);
+>  		if (ret)
+>  			continue;
+>  
+> -		p->addr = sdhci_cdns_phy_cfgs[i].addr;
+> +		p->addr = sdhci_cdns_sd4_phy_cfgs[i].addr;
+>  		p->data = val;
+>  		p++;
+>  	}
+>  }
+>  
+> -static int sdhci_cdns_phy_init(struct sdhci_cdns_priv *priv)
+> +static int sdhci_cdns_sd4_phy_init(struct sdhci_cdns_priv *priv)
+>  {
+>  	int ret, i;
+>  
+>  	for (i = 0; i < priv->nr_phy_params; i++) {
+> -		ret = sdhci_cdns_write_phy_reg(priv, priv->phy_params[i].addr,
+> -					       priv->phy_params[i].data);
+> +		ret = sdhci_cdns_sd4_write_phy_reg(priv, priv->phy_params[i].addr,
+> +						   priv->phy_params[i].data);
+>  		if (ret)
+>  			return ret;
+>  	}
+> @@ -218,7 +218,7 @@ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
+>  	return FIELD_GET(SDHCI_CDNS_HRS06_MODE, tmp);
+>  }
+>  
+> -static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+> +static int sdhci_cdns_sd4_set_tune_val(struct sdhci_host *host, unsigned int val)
+>  {
+>  	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+>  	void __iomem *reg = priv->hrs_addr + SDHCI_CDNS_HRS06;
+> @@ -271,7 +271,7 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  		return 0;
+>  
+>  	for (i = 0; i < SDHCI_CDNS_MAX_TUNING_LOOP; i++) {
+> -		if (sdhci_cdns_set_tune_val(host, i) ||
+> +		if (sdhci_cdns_sd4_set_tune_val(host, i) ||
+>  		    mmc_send_tuning(host->mmc, opcode, NULL)) { /* bad */
+>  			cur_streak = 0;
+>  		} else { /* good */
+> @@ -288,7 +288,7 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  		return -EIO;
+>  	}
+>  
+> -	return sdhci_cdns_set_tune_val(host, end_of_streak - max_streak / 2);
+> +	return sdhci_cdns_sd4_set_tune_val(host, end_of_streak - max_streak / 2);
+>  }
+>  
+>  static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+> @@ -410,7 +410,7 @@ static int elba_drv_init(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> -static const struct sdhci_ops sdhci_cdns_ops = {
+> +static const struct sdhci_ops sdhci_cdns_sd4_ops = {
+>  	.set_clock = sdhci_set_clock,
+>  	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+> @@ -421,7 +421,7 @@ static const struct sdhci_ops sdhci_cdns_ops = {
+>  
+>  static const struct sdhci_cdns_drv_data sdhci_cdns_uniphier_drv_data = {
+>  	.pltfm_data = {
+> -		.ops = &sdhci_cdns_ops,
+> +	.ops = &sdhci_cdns_sd4_ops,
+>  		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  	},
+>  };
+> @@ -433,9 +433,9 @@ static const struct sdhci_cdns_drv_data sdhci_elba_drv_data = {
+>  	},
+>  };
+>  
+> -static const struct sdhci_cdns_drv_data sdhci_cdns_drv_data = {
+> +static const struct sdhci_cdns_drv_data sdhci_cdns_sd4_drv_data = {
+>  	.pltfm_data = {
+> -		.ops = &sdhci_cdns_ops,
+> +		.ops = &sdhci_cdns_sd4_ops,
+>  	},
+>  };
+>  
+> @@ -497,9 +497,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  
+>  	data = of_device_get_match_data(dev);
+>  	if (!data)
+> -		data = &sdhci_cdns_drv_data;
+> +		data = &sdhci_cdns_sd4_drv_data;
+>  
+> -	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
+> +	nr_phy_params = sdhci_cdns_sd4_phy_param_count(dev->of_node);
+>  	host = sdhci_pltfm_init(pdev, &data->pltfm_data,
+>  				struct_size(priv, phy_params, nr_phy_params));
+>  	if (IS_ERR(host)) {
+> @@ -532,9 +532,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		goto free;
+>  
+> -	sdhci_cdns_phy_param_parse(dev->of_node, priv);
+> +	sdhci_cdns_sd4_phy_param_parse(dev->of_node, priv);
+>  
+> -	ret = sdhci_cdns_phy_init(priv);
+> +	ret = sdhci_cdns_sd4_phy_init(priv);
+>  	if (ret)
+>  		goto free;
+>  
+> @@ -574,7 +574,7 @@ static int sdhci_cdns_resume(struct device *dev)
+>  	if (ret)
+>  		return ret;
+>  
+> -	ret = sdhci_cdns_phy_init(priv);
+> +	ret = sdhci_cdns_sd4_phy_init(priv);
+>  	if (ret)
+>  		goto disable_clk;
+>  
 
