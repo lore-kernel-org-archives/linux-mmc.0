@@ -2,48 +2,46 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15631C001DE
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Jul 2023 06:58:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9A47C001DC
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Jul 2023 07:04:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232254AbjGZG6z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Jul 2023 02:58:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36108 "EHLO
+        id S229498AbjGZHEy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Jul 2023 03:04:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40650 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232237AbjGZG63 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2023 02:58:29 -0400
+        with ESMTP id S232132AbjGZHEU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jul 2023 03:04:20 -0400
 Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 299C82717
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Jul 2023 23:58:18 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 31FD230EB
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Jul 2023 00:02:44 -0700 (PDT)
 Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
         by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
         (Exim 4.92)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qOYT6-00046l-2t; Wed, 26 Jul 2023 08:57:56 +0200
+        id 1qOYXe-0004vz-Ks; Wed, 26 Jul 2023 09:02:38 +0200
 Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
         by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qOYT4-002Aw1-9J; Wed, 26 Jul 2023 08:57:54 +0200
+        id 1qOYXd-002BMQ-HU; Wed, 26 Jul 2023 09:02:37 +0200
 Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
         (envelope-from <ukl@pengutronix.de>)
-        id 1qOYT3-007reb-J0; Wed, 26 Jul 2023 08:57:53 +0200
-Date:   Wed, 26 Jul 2023 08:57:50 +0200
+        id 1qOYXc-007s5H-TJ; Wed, 26 Jul 2023 09:02:36 +0200
+Date:   Wed, 26 Jul 2023 09:02:34 +0200
 From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
 To:     Yangtao Li <frank.li@vivo.com>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Joel Stanley <joel@jms.id.au>, linux-aspeed@lists.ozlabs.org,
-        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 33/61] mmc: sdhci-of-aspeed: remove unneeded variables
-Message-ID: <20230726065750.judvhyyuzcc2zsgu@pengutronix.de>
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 60/61] mmc: sdhci_am654: Properly handle failures in
+ .remove()
+Message-ID: <20230726070234.4im3v23qbago763b@pengutronix.de>
 References: <20230726040041.26267-1-frank.li@vivo.com>
- <20230726040041.26267-33-frank.li@vivo.com>
+ <20230726040041.26267-60-frank.li@vivo.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="yelgoin2bjjhlkyv"
+        protocol="application/pgp-signature"; boundary="mb7py2dtbfutl63d"
 Content-Disposition: inline
-In-Reply-To: <20230726040041.26267-33-frank.li@vivo.com>
+In-Reply-To: <20230726040041.26267-60-frank.li@vivo.com>
 X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
 X-SA-Exim-Mail-From: ukl@pengutronix.de
 X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
@@ -53,17 +51,42 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---yelgoin2bjjhlkyv
+--mb7py2dtbfutl63d
 Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jul 26, 2023 at 12:00:13PM +0800, Yangtao Li wrote:
-> The variable 'dead' is redundant, let's remove it.
+On Wed, Jul 26, 2023 at 12:00:40PM +0800, Yangtao Li wrote:
+> Returning an error code in a platform driver's remove function is wrong
+> most of the time and there is an effort to make the callback return
+> void. To prepare this rework the function not to exit early.
 >=20
+> Cc: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
 > Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am65=
+4.c
+> index 7cdf0f54e3a5..abe83736d396 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -873,8 +873,7 @@ static int sdhci_am654_remove(struct platform_device =
+*pdev)
+>  	int ret;
+> =20
+>  	ret =3D pm_runtime_resume_and_get(&pdev->dev);
+> -	if (ret < 0)
+> -		return ret;
+> +	WARN_ON(ret < 0);
 
-Acked-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+You must use pm_runtime_get_sync() instead of
+pm_runtime_resume_and_get() here because in the error case
+pm_runtime_resume_and_get() already calls pm_runtime_put_noidle() which
+is repeated here in this driver.
+
+Also WARN_ON is a pretty big hammer, I'd go with a dev_err() instead.
 
 Best regards
 Uwe
@@ -72,19 +95,19 @@ Uwe
 Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
 Industrial Linux Solutions                 | https://www.pengutronix.de/ |
 
---yelgoin2bjjhlkyv
+--mb7py2dtbfutl63d
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmTAw+0ACgkQj4D7WH0S
-/k5v+wf/dYBVwVf2EH5vWE9ipYC2wAo2mozZWtvfJa5VG9dGJUmBG0m6WjPk0k5w
-MQGB7LZb3VoXJxpxyU4eE0DVtwTrifgqu5AjkDuOQtYVAl5Y9XmhtQC36cykQzo5
-PPTogFKVFLJ50BBbVxehFlLtJQJ/WKdpeX30xTC5bglFOJGEWnAiqeuKelPZxAwh
-CbjWeJgGX2G90D6GeyglBRI83K6losaHj/uw36+uGqtZ19IZwpd109dvfCtOGzCA
-AJaWR1DoIf7s/g6eAVOWupnlRfAFCZ0H5KGaVP2Xtfh7bFTyEts2w0TT7YTDrKg7
-1l/xPlfaWkVBDCqTfoyybWIYF0oRlA==
-=tn4P
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmTAxQkACgkQj4D7WH0S
+/k51NwgAktdF0e8v1rBrxIzaK20EAwbITFou+8sdxKFCWruhIUq7bNIBj1ws7uzO
+ztJL2yqPQpj4T28JKALELmkcvuvAf3RG2BKHfbdETIMOjhNr58Xpk04PmrQMQU3W
+cmWBYnItCndnmLNbyTSEHFM86hjpWMx3hoF37XImhU71vnpHeLAfRUYWLfkG+X4H
+ke48+SUE33kWgjjaBb8+9P8aNdxrKnVNO+KStb3b+JONRbpRmDVM6wIiow1b/dwS
+mqZlLpznQxIwtp5w47eKj3ThZttrB0WVQnG6BaYahIDNz/dxfVurYEmvbQjcimhS
+O/xpTYl5WyP+qzfgDT2QLIbbH0/1Gg==
+=VGBu
 -----END PGP SIGNATURE-----
 
---yelgoin2bjjhlkyv--
+--mb7py2dtbfutl63d--
