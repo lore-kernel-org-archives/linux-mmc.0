@@ -2,179 +2,155 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B432EB64DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Jul 2023 06:26:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F5CAC04E69
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Jul 2023 06:54:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231483AbjG0G0D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Jul 2023 02:26:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58156 "EHLO
+        id S232285AbjG0Gyt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Jul 2023 02:54:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229714AbjG0G0C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2023 02:26:02 -0400
-Received: from NAM11-DM6-obe.outbound.protection.outlook.com (mail-dm6nam11on2071.outbound.protection.outlook.com [40.107.223.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D14F1737;
-        Wed, 26 Jul 2023 23:26:01 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=O55bVvdhrInXaWYHWNP1DqiORg2aR0qb5X6aOPaQxSNEThGj7HY8mOiuGs8/TPQ4fkJfAFqAmfNZbk8qIbLb8rH7WIqLLYXZP2M4GZX3ezwV/2OiQJAB8LfYMU+I7ECFkIR5CJVzNnyjngp1Ve+sHKopotCdM9TVB83Da+x+Jd3JeOxg0SL4HiTfIEprNL2A9/w+6yc7OWwch9fyxK990HzWY4TB4XXFG3VchcGKtMcfwvaLzZE9kus/WpFaW3KLx+wUBWRfH/dTxkctQeQF0Zv4RW30+r8w/VbqUrYvb+w8Bo3cD13x8tRErHh3Xyc4LlwinJ2iXH+H1F4rHHiv/A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=QcODz18rhgRatcof0e/BtogCSic7HtNrwH8nFM+OvWA=;
- b=jAyLWj9tcfjeaifVDme4RfazBiVVdMpsNbG2FoKqKRuAf3ie+GHBN56fraMxngAcVdB8xohxyd4/cB8Aw+fiFG6hMUMMvSulgfw/l9s5v5BfmXvgmG/YzL0R1UAWqlAyoxE+gnii9iIbiH4Yaj0jD5+WMVF+GIC8zXOjsLd9C1HUBPcEpbuzSgo7cfZohXQVJj6dit9KcM3oe4aEUSu4qS57jZ9qSx3uheSeHMckZnJq4e1/TKzgB6NDvZF8erOrcxBKFFxxodrjEmi++3MBtR4p8G95cyKyj2Ya0u9dfcmKe2bdpMdhN0By9HAV4Mr2vFuMCgZ74upv7BvoAYqNqw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
- header.d=amd.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=QcODz18rhgRatcof0e/BtogCSic7HtNrwH8nFM+OvWA=;
- b=ZVFm0LxPrXsIilFXQuUCftETLC8xMuQr5EQOpu3NJWedjK/Ott5pV1cfUNFLJRBkGWAf+F9vxeQOn7ifovPkr45bMyvBADbaS2hfO8vDJ0rJWfAq6YuZu23yqZWXf464QPKjbKWCYOutKMzLN77QF4G27e+KQsyAav1JpFkndP0=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=amd.com;
-Received: from BYAPR12MB4758.namprd12.prod.outlook.com (2603:10b6:a03:a5::28)
- by BL1PR12MB5378.namprd12.prod.outlook.com (2603:10b6:208:31d::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6631.29; Thu, 27 Jul
- 2023 06:25:58 +0000
-Received: from BYAPR12MB4758.namprd12.prod.outlook.com
- ([fe80::7790:1431:1e52:44db]) by BYAPR12MB4758.namprd12.prod.outlook.com
- ([fe80::7790:1431:1e52:44db%5]) with mapi id 15.20.6609.032; Thu, 27 Jul 2023
- 06:25:58 +0000
-Message-ID: <5ba4efe1-9328-5edc-889b-6e253152cb88@amd.com>
-Date:   Thu, 27 Jul 2023 08:25:52 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH v2 26/61] mmc: sdhci-of-arasan: Convert to platform remove
- callback returning void
-Content-Language: en-US
-To:     Yangtao Li <frank.li@vivo.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20230726040041.26267-1-frank.li@vivo.com>
- <20230726040041.26267-26-frank.li@vivo.com>
-From:   Michal Simek <michal.simek@amd.com>
-In-Reply-To: <20230726040041.26267-26-frank.li@vivo.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: FR2P281CA0001.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:a::11) To BYAPR12MB4758.namprd12.prod.outlook.com
- (2603:10b6:a03:a5::28)
+        with ESMTP id S231674AbjG0Gyp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2023 02:54:45 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 254BA2691;
+        Wed, 26 Jul 2023 23:54:44 -0700 (PDT)
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36R56NQi013675;
+        Thu, 27 Jul 2023 06:54:28 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=nh4cklR1APrVPPa2bvf47yHK9cYInyXrXll/6iQHCK4=;
+ b=Chhum91iAkxlwWW1DbciVCRTfcQyDvO0aggc+E0b1yZ5ahvc/CZMfb5eK14VnGE76EvW
+ qLstrCaTY4EFNboOLKd5MPJZ1EU7gEzWjJgrnGBrcaV5Dfo0s3cwKrIfpxlDDDpQ3tuJ
+ V8kWFUfSbmMfetSVOotR1QRG231OTFLAYmgvTi0KK8LmkccnUzymnctzqbr5aoHdKAuh
+ 7V9TpjqrYEY/VBFdkVAl1gm/U5j4WrZtozYTeRzKexGJFgzwxAFl3BbevR9N8lRm1DpB
+ tjQZThTCxJhuw3SPGBr2ottrqrweh9rGjjDpEr9Ba23qKUBZ+Bqpd9yXQOSrwSH3DQXQ yg== 
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3s2fms4e03-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 27 Jul 2023 06:54:28 +0000
+Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
+        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36R6sQw4029194
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 27 Jul 2023 06:54:26 GMT
+Received: from [10.216.40.41] (10.80.80.8) by nalasex01a.na.qualcomm.com
+ (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.30; Wed, 26 Jul
+ 2023 23:54:14 -0700
+Message-ID: <86c6e8b1-d286-6858-5de6-b8faf6557fe4@quicinc.com>
+Date:   Thu, 27 Jul 2023 12:24:10 +0530
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BYAPR12MB4758:EE_|BL1PR12MB5378:EE_
-X-MS-Office365-Filtering-Correlation-Id: 8b9fd13f-f066-4a10-b21e-08db8e6a56e2
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: HwcT0ICqCnz++g6k/24MthN0jqo5vEEu6v+iUKZMzTwa58NqG3Rskwfh8gsE267fOgCgaUoKEJvSIvdOKu9aNZ0T7ThGlNEnUFEwTcxapfRcKME1x68KHSAjEc5Rnjv9ifRwfYYZH9q2XPrKa5WmSKad/paWMmBzV80GO3NqIIkuamq3Q1s/gzGiJKv68qmoL2nm4lgfuP0rhEJAjtXGk6wAn/7hUC7IL9HDmdIs7YibTlRIRA+/hPsDnxjRJaaeKMexFRNtbXvWFyOGEyNobl4oKSB8H0e1+LJuePJfwCIqzv1sDIoezBINwQ1vl/7T/MuYHkoMZYknIcQGhwbpDSuPhnFx4ZbH/Wpi5bcXzL8pxkpjxsLEyct2GOG51CqywtVBzgE2ywqV/kxtre27aOwl+1pKO1XZjHjd3Rs5bLHYAKkhYDO/XI/hSaVgZaKt8soufccizqPg4YGlEe2P6gnJE4RkE2pgIS90pD7WlHzB4ekwK/TcIgpM4z/kb4sG9quvQA3jw89/Zi7JnYwYKl+AUv1+/qbXV88SLKuKFtrm+DKFeybWBJgAvSJVXOgoLVttk20r+nKVtS1DkMDy3hpnwSW6vi4+bg5C7wtCixL9YaHfiqOoFhIDRUCBes3zZcXKrOgMxtHYj+PLY22DPA==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR12MB4758.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(136003)(376002)(39860400002)(396003)(366004)(346002)(451199021)(8676002)(5660300002)(8936002)(31686004)(2616005)(316002)(53546011)(26005)(6506007)(186003)(86362001)(31696002)(4326008)(110136005)(6486002)(6666004)(66556008)(66476007)(44832011)(6512007)(66946007)(41300700001)(83380400001)(478600001)(36756003)(2906002)(38100700002)(43740500002)(45980500001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?Y01lSUdqdGZIaXhNK1JCVTlFSXNoRjl2eGVvTllwbXB3aG0vbWxJeis3M3p2?=
- =?utf-8?B?YVE5TlJ2dFRPZGhINGhQK1ZjbHFKSXl6eXF6VUREa3lmb3pobmt5aVVJcFVu?=
- =?utf-8?B?NXQ0NVdZWEtmRGo5Y3dlaXp6MUZTT0ZpOERwTXRhR3RhaU1QNW8zbTYvUGpJ?=
- =?utf-8?B?M1puOVNHZVVBL29rL3BjS2hvV3NWVUV6WWVYR2VPS3JJWHB1VWJJNXBCVUUv?=
- =?utf-8?B?ajg5N3hxTWp6UllCR08rT3dWUUZUNHo0UUtSNktSaElXa0FGajFxT0lhSmov?=
- =?utf-8?B?YTNCbFdOWkp1dllWVFlmdHNiRk9JZjNYSDhxUDFFcWwzTjF3SXkyZ1oyL3l5?=
- =?utf-8?B?SllnNlFYL3djdytBb0tHcVAxa01XL2hsbjZPam5XSWVPR0xEemROeSsrcEgz?=
- =?utf-8?B?OGNLNG9iZGhvZ3FUQmZTVndhbnBORjVSZVNaS1NQZStRM2pVcThqYS9qVkxk?=
- =?utf-8?B?dko4NTk4anBsM2dhc0Z3cFBtVTdkQkJxK0F2ayt2MHpYVTVtOWc1Z3RScUpu?=
- =?utf-8?B?Y0NvVVMrZFgxc216a1hXMXYzbFZuRkhqa1FQWkNTbGpnUWo5bk1uQ2NXOGY5?=
- =?utf-8?B?YmVLV1AxbEFNalNFTzFMQmVYWUFNczVOanJXdTF0NHVlUUxkckg4MmdLNHp2?=
- =?utf-8?B?RWEySW44aWxtczlKV0h4Wk1mUkZ0Ry9xOWpnR3Q0ZEkzS2tkY1dmWXRHVjZh?=
- =?utf-8?B?MTZUZnNwdFpWZ2dyM3U2Wm8xVXF6eDFRWG9nUTVTU3U0N0wybndERFN5NXBU?=
- =?utf-8?B?czNodUxIM3lpS1B2YkVreitTYTVoVGlsdEErZGI5WWpOOWdGdE1tRFN1ZUxZ?=
- =?utf-8?B?STU0MFZpWUM5bzBkSVVNSVZXU0YwN3NET21tNkE5WjlmTVA5Rnl2a2psSkhl?=
- =?utf-8?B?ZzBoaUxyZHlOYndESkx6elRuWk0rdS9oTUh5RDYzbVZHUWRJSzFtdStyRXB0?=
- =?utf-8?B?c2YrUEYyWU1MQnB2Yk1weUpyZ2JlTjNBcE5OMCt2bDZyeFRZQXVFaEVWNzdG?=
- =?utf-8?B?UWZheFAzVGxweXRZWXNJUU8vM3ZNNkFGNE9SWnIvSXhMVWtISXlhQVF3VEh4?=
- =?utf-8?B?Y2M2VFROVG9acU5qeDh4WlErUTNXc1pHQWljZzgwVmUyRy9tRm8wTmQ4QXR6?=
- =?utf-8?B?b29TTW5zSURVd1poSG9qR0lsdGxhWEpDb21jcjFRU2xsK1hrSThUaURsL3Zt?=
- =?utf-8?B?RFFEbW9vWC9rN2pCZWpuUkJpejBPRDBmaWJxNzZJNWJTaXk1ZFlJbE45bm9R?=
- =?utf-8?B?Q3Z5TTh2RFZVZU50TWhEMEMrNHBadWk5YjNSQUVFL3I1KzF4WGwvQnJkS0Nj?=
- =?utf-8?B?OXF5elFzVlZNVEwyVU4xQjI3NUtUQ1JSc0UwVzd4MVJUR20wY2FPYjlialNZ?=
- =?utf-8?B?dzNZRlVmV3crbnR5Yzhhd3g5akRCMmRVNkZmeXFKY0tOczFwZkFkR3NEVkpL?=
- =?utf-8?B?cVcvZy9QUk5kZlpqV2Q2ZDNzWDcwREFjUmFXOEh6UHZ3MkdBYUQySXBEUU1O?=
- =?utf-8?B?UXRtRysweldad3I0MUdiZ2ptM3EzM2V6bUNCdTRSTzdNVHBzbW5LVVhiNFFB?=
- =?utf-8?B?VEl3MDhobkVkeU1EUlFXbXE5TUl3cFpaZERoemFPbWhWNTdqY05qR29JMjFG?=
- =?utf-8?B?NkVVVkRlNmxEYTRPQmNBbTJRV1NWZldkcnhMTXhWSTBsaUFScFpOVlJ2VldG?=
- =?utf-8?B?SVk4WUxUdEZocXhtNmhUamNwQWlUd0ZudHFrYXdBdFFRU21jTnZVdnduT0g3?=
- =?utf-8?B?dE1abVNsaFBtRHc1Z0lYUmFUUGRVUGxESUZPTjg4MmwrUTVxMllCeklSRmd0?=
- =?utf-8?B?T3h6RHI1TDZIdFNoRlZVUUpYLzZORDhsSGdiRkFESDBMMUg5Z2tXNmcyY1N1?=
- =?utf-8?B?RFBsWWFpQ0VFMzZtMkszdENURjhDYW1zVDg5S1VOS1RuK0ZmN3lWTXRteUM2?=
- =?utf-8?B?Q2U3Qm16NGVVS2FoVnRMMkZZZGFtWU50dzdXWkpTN2c1c3J0cnNLZkUxYTdG?=
- =?utf-8?B?NEt6RWs1aklzVHZNdnN1L3FEbHczQ0NsUmhNa0Q0UHNtSmJ6cFE5TmFmQjdQ?=
- =?utf-8?B?OGMzb0VYY3NQVE5Fc2ZsR3psUGcvU3A5UnRSVkpKNG5vcjNzWjhEcHMzVFZx?=
- =?utf-8?Q?nV19iCSw63gac2vF85ByXaEOM?=
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8b9fd13f-f066-4a10-b21e-08db8e6a56e2
-X-MS-Exchange-CrossTenant-AuthSource: BYAPR12MB4758.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jul 2023 06:25:58.0808
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: +t78qe6XE5jii/293Xgmv6BaU41RsoojWeyLcVm1eVMwdEVL3J2QD9CbKpOWKJPX
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL1PR12MB5378
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.0
+Subject: Re: [PATCH] dt-bindings: qcom: Update RPMHPD entries for some SoCs
+Content-Language: en-US
+To:     Pavan Kondeti <quic_pkondeti@quicinc.com>
+CC:     <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <andersson@kernel.org>, <agross@kernel.org>,
+        <konrad.dybcio@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <conor+dt@kernel.org>, <robdclark@gmail.com>,
+        <quic_abhinavk@quicinc.com>, <dmitry.baryshkov@linaro.org>,
+        <sean@poorly.run>, <marijn.suijten@somainline.org>,
+        <airlied@gmail.com>, <daniel@ffwll.ch>,
+        <stanimir.k.varbanov@gmail.com>, <quic_vgarodia@quicinc.com>,
+        <mchehab@kernel.org>, <ulf.hansson@linaro.org>,
+        <mathieu.poirier@linaro.org>, <jonathan@marek.ca>,
+        <vladimir.zapolskiy@linaro.org>, <quic_tdas@quicinc.com>,
+        <neil.armstrong@linaro.org>, <rfoss@kernel.org>,
+        <bhupesh.sharma@linaro.org>, <mani@kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-clk@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <dri-devel@lists.freedesktop.org>,
+        <freedreno@lists.freedesktop.org>, <linux-media@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <linux-remoteproc@vger.kernel.org>
+References: <1690433470-24102-1-git-send-email-quic_rohiagar@quicinc.com>
+ <edac596d-2b3d-4632-9468-4af863aff6f4@quicinc.com>
+From:   Rohit Agarwal <quic_rohiagar@quicinc.com>
+In-Reply-To: <edac596d-2b3d-4632-9468-4af863aff6f4@quicinc.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: gaxiB93QjZMYayGJXBoahVT6HAHoooVe
+X-Proofpoint-ORIG-GUID: gaxiB93QjZMYayGJXBoahVT6HAHoooVe
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-07-26_08,2023-07-26_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 mlxscore=0
+ bulkscore=0 phishscore=0 spamscore=0 malwarescore=0 mlxlogscore=819
+ clxscore=1015 lowpriorityscore=0 suspectscore=0 priorityscore=1501
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2306200000 definitions=main-2307270061
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-
-On 7/26/23 06:00, Yangtao Li wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
-> 
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
-> 
-> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Yangtao Li <frank.li@vivo.com>
-> ---
->   drivers/mmc/host/sdhci-of-arasan.c | 6 ++----
->   1 file changed, 2 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 294dd605fd2b..160bab0c437c 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -2016,7 +2016,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->   	return ret;
->   }
->   
-> -static int sdhci_arasan_remove(struct platform_device *pdev)
-> +static void sdhci_arasan_remove(struct platform_device *pdev)
->   {
->   	struct sdhci_host *host = platform_get_drvdata(pdev);
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -2034,8 +2034,6 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
->   	sdhci_pltfm_unregister(pdev);
->   
->   	clk_disable_unprepare(clk_ahb);
-> -
-> -	return 0;
->   }
->   
->   static struct platform_driver sdhci_arasan_driver = {
-> @@ -2046,7 +2044,7 @@ static struct platform_driver sdhci_arasan_driver = {
->   		.pm = &sdhci_arasan_dev_pm_ops,
->   	},
->   	.probe = sdhci_arasan_probe,
-> -	.remove = sdhci_arasan_remove,
-> +	.remove_new = sdhci_arasan_remove,
->   };
->   
->   module_platform_driver(sdhci_arasan_driver);
-
-Acked-by: Michal Simek <michal.simek@amd.com>
+On 7/27/2023 11:06 AM, Pavan Kondeti wrote:
+> On Thu, Jul 27, 2023 at 10:21:10AM +0530, Rohit Agarwal wrote:
+>> Update the RPMHPD references with new bindings defined in rpmhpd.h
+>> for Qualcomm SoCs SM8[2345]50.
+>>
+>> Signed-off-by: Rohit Agarwal <quic_rohiagar@quicinc.com>
+>> ---
+>>   Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml    | 3 ++-
+>>   Documentation/devicetree/bindings/clock/qcom,sm8350-videocc.yaml   | 3 ++-
+>>   Documentation/devicetree/bindings/clock/qcom,sm8450-camcc.yaml     | 3 ++-
+>>   Documentation/devicetree/bindings/clock/qcom,sm8450-dispcc.yaml    | 3 ++-
+>>   Documentation/devicetree/bindings/clock/qcom,sm8450-videocc.yaml   | 3 ++-
+>>   Documentation/devicetree/bindings/clock/qcom,sm8550-dispcc.yaml    | 3 ++-
+>>   Documentation/devicetree/bindings/clock/qcom,videocc.yaml          | 3 ++-
+>>   Documentation/devicetree/bindings/display/msm/qcom,sm8250-dpu.yaml | 3 ++-
+>>   .../devicetree/bindings/display/msm/qcom,sm8250-mdss.yaml          | 7 ++++---
+>>   Documentation/devicetree/bindings/display/msm/qcom,sm8350-dpu.yaml | 3 ++-
+>>   .../devicetree/bindings/display/msm/qcom,sm8350-mdss.yaml          | 5 +++--
+>>   Documentation/devicetree/bindings/display/msm/qcom,sm8450-dpu.yaml | 3 ++-
+>>   .../devicetree/bindings/display/msm/qcom,sm8450-mdss.yaml          | 7 ++++---
+>>   Documentation/devicetree/bindings/display/msm/qcom,sm8550-dpu.yaml | 3 ++-
+>>   .../devicetree/bindings/display/msm/qcom,sm8550-mdss.yaml          | 7 ++++---
+>>   Documentation/devicetree/bindings/media/qcom,sm8250-venus.yaml     | 3 ++-
+>>   Documentation/devicetree/bindings/mmc/sdhci-msm.yaml               | 3 ++-
+>>   Documentation/devicetree/bindings/remoteproc/qcom,sm8350-pas.yaml  | 5 +++--
+>>   18 files changed, 44 insertions(+), 26 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml b/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml
+>> index d6774db..d6b81c0 100644
+>> --- a/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml
+>> +++ b/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml
+>> @@ -83,6 +83,7 @@ examples:
+>>     - |
+>>       #include <dt-bindings/clock/qcom,rpmh.h>
+>>       #include <dt-bindings/power/qcom-rpmpd.h>
+>> +    #include <dt-bindings/power/qcom,rpmhpd.h>
+>>       clock-controller@af00000 {
+>>         compatible = "qcom,sm8250-dispcc";
+>>         reg = <0x0af00000 0x10000>;
+>> @@ -103,7 +104,7 @@ examples:
+>>         #clock-cells = <1>;
+>>         #reset-cells = <1>;
+>>         #power-domain-cells = <1>;
+>> -      power-domains = <&rpmhpd SM8250_MMCX>;
+>> +      power-domains = <&rpmhpd RPMHPD_MMCX>;
+>>         required-opps = <&rpmhpd_opp_low_svs>;
+>>       };
+>>   ...
+> Does this file still need to include old header? The same is applicable
+> to some of the other files in the patch also.
+>
+> We also discussed on the other thread [1] to move the regulator level
+> definitions to new header. should this change be done after that, so that
+> we don't end up touching the very same files again?
+>
+> [1]
+> https://lore.kernel.org/all/a4zztrn6jhblozdswba7psqtvjt5l765mfr3yl4llsm5gsyqef@7x6q7yabydvm/
+Removing this header directly would also be fine as we are not using any 
+macro defined directly in these
+bindings.
+I already checked with dt_binding_check by removing this header.
 
 Thanks,
-Michal
+Rohit.
