@@ -2,142 +2,132 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33C2AC001E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Jul 2023 05:39:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 508D0C001DC
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Jul 2023 05:43:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232312AbjG0Fj1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Jul 2023 01:39:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53566 "EHLO
+        id S229822AbjG0Fn4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Jul 2023 01:43:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231907AbjG0Fiu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2023 01:38:50 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F4AE30C5;
-        Wed, 26 Jul 2023 22:37:46 -0700 (PDT)
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36R5FnFU027445;
-        Thu, 27 Jul 2023 05:36:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=date : from : to :
- cc : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=qcppdkim1; bh=LnO6JVSt8v4KBBrvn0hKrjbS5yc5Y5fnC+BDhyBGdv4=;
- b=Ers8qz/M4XD2XWeBZ4t4RRfcPqQrtuy0tPDwm1aVRlEkdSQfCeWB9D14M5s2GKWcvtvB
- ejYg2LiZ1FtXS3zXYbzK8F2t0EA0c9RUECkg5nOWAfGsTlVI1BPB0hzBUfSuVzVlFJ6p
- 4A1Y+k8pHhwrKu3MPTlfK/cak0TFBZvAyQPPscXV/jGTsozlpYRo0Az1tROMNgBpVv+h
- it1F1mv4PnZWzVhR/pWnf5mwt9Qg0hmmPGhhQR3fqvVRD8xumW+owCSkjcCW42slgu4w
- UXNr091WFXd8iSa47K29vzzc7r0U3ABg9MZH/jnM66J6ujxwJI74k/rJsBF5NAc8L203 kg== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3s3b0g0q3f-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 27 Jul 2023 05:36:30 +0000
-Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36R5aT1t009107
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 27 Jul 2023 05:36:29 GMT
-Received: from hu-pkondeti-hyd.qualcomm.com (10.80.80.8) by
- nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.30; Wed, 26 Jul 2023 22:36:19 -0700
-Date:   Thu, 27 Jul 2023 11:06:16 +0530
-From:   Pavan Kondeti <quic_pkondeti@quicinc.com>
-To:     Rohit Agarwal <quic_rohiagar@quicinc.com>
-CC:     <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <andersson@kernel.org>, <agross@kernel.org>,
-        <konrad.dybcio@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <conor+dt@kernel.org>, <robdclark@gmail.com>,
-        <quic_abhinavk@quicinc.com>, <dmitry.baryshkov@linaro.org>,
-        <sean@poorly.run>, <marijn.suijten@somainline.org>,
-        <airlied@gmail.com>, <daniel@ffwll.ch>,
-        <stanimir.k.varbanov@gmail.com>, <quic_vgarodia@quicinc.com>,
-        <mchehab@kernel.org>, <ulf.hansson@linaro.org>,
-        <mathieu.poirier@linaro.org>, <jonathan@marek.ca>,
-        <vladimir.zapolskiy@linaro.org>, <quic_tdas@quicinc.com>,
-        <neil.armstrong@linaro.org>, <rfoss@kernel.org>,
-        <bhupesh.sharma@linaro.org>, <mani@kernel.org>,
-        <linux-arm-msm@vger.kernel.org>, <linux-clk@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <dri-devel@lists.freedesktop.org>,
-        <freedreno@lists.freedesktop.org>, <linux-media@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-remoteproc@vger.kernel.org>
-Subject: Re: [PATCH] dt-bindings: qcom: Update RPMHPD entries for some SoCs
-Message-ID: <edac596d-2b3d-4632-9468-4af863aff6f4@quicinc.com>
-References: <1690433470-24102-1-git-send-email-quic_rohiagar@quicinc.com>
+        with ESMTP id S232680AbjG0FnQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2023 01:43:16 -0400
+Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8501E4228
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Jul 2023 22:41:55 -0700 (PDT)
+Received: by mail-pf1-x42f.google.com with SMTP id d2e1a72fcca58-686ed1d2594so581956b3a.2
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Jul 2023 22:41:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1690436458; x=1691041258;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=yTNp0sYgD5zMdnjd5nivhzfUxDOUpHBvlbZBBUuBSK8=;
+        b=Do6o4dH6SqtgInZupQNgE3LGRebmjvQq9ntW2BM+eF/Fn4qI7L4SSBZz4SecjUCEFm
+         3F+5gqWeNjsBAAJ+atklVaHFRcTGG9V4GZOr8MJ9jAcpIMdvTVC2bRvYnqXz4vuEErHj
+         17Fw3zufiIbDMR63WQ2uJub4pY2s31+l7Z8nAvGAVcKoesI7gT5MFJw5GZjFUtV2U+S1
+         hMlTBuPftFbUIlUkSwirMEFA3kTW6tIGz6YxdqyGSe80a9CvKLlYq+xRDjDvU9m8yk2h
+         2/ekTdctVvPa5HP2Suf51o50NcC+0bqD7DDvVp9jWz8MO3a4EtqA1g2E/wayY7zKJMjW
+         9Atw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1690436458; x=1691041258;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=yTNp0sYgD5zMdnjd5nivhzfUxDOUpHBvlbZBBUuBSK8=;
+        b=DouP1g9RJ/7buTspz+QP7GqXT3NidDnW6vRecMILC3neFiABP9nAmpH2611Xqp/2z/
+         pMjsdvO/9+fDs3p54oDynX0XbWyMfUifMr3ZQwQmxmp0fjSy0DkhsoXSHmdUVGQsOBmG
+         ILbyZudgXI0Sk2Ve15jhrkY+hfISIBMaiEe9FJ1gHgrPElIh8iI2w4Y34ksySFVGu7UJ
+         NusXY7YZPyiZpUZx3Fw7NjbTzbjOuC51d05EB5eqsSI0DLmPJJJafrexNkSpw+lmFy1W
+         xH6+3npFvx5PhVfPTqtqaG3tly+QeLnNIhR5ZJCFFX26JfHlVcwFhXQ7PmzsCdeirehA
+         /AKw==
+X-Gm-Message-State: ABy/qLZ0/KOZ6xLN5tTJ+aCpk/3aa/Ax4suqR6d9NXfD7xatPPEz56HK
+        0StLCRWACKc/jzwdddAULQ+obw==
+X-Google-Smtp-Source: APBJJlEgwKoaKppLi57A68jn58J5UBv4vce3uoS3HBVYjj8iEbftSlHAHvZKgDA4UyD8gQuxYPMfHg==
+X-Received: by 2002:a05:6a00:2d8e:b0:682:616a:f910 with SMTP id fb14-20020a056a002d8e00b00682616af910mr5155408pfb.20.1690436458474;
+        Wed, 26 Jul 2023 22:40:58 -0700 (PDT)
+Received: from [10.0.2.15] ([82.78.167.79])
+        by smtp.gmail.com with ESMTPSA id 17-20020aa79111000000b00682a16f0b00sm538227pfh.210.2023.07.26.22.40.50
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 26 Jul 2023 22:40:58 -0700 (PDT)
+Message-ID: <aadee30c-8965-a3c3-c90c-bcdfa6ad143c@tuxon.dev>
+Date:   Thu, 27 Jul 2023 08:40:46 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <1690433470-24102-1-git-send-email-quic_rohiagar@quicinc.com>
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01a.na.qualcomm.com (10.47.209.196)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 57CqSPJ2zRgDhBnuohIC8xe-8JXgN930
-X-Proofpoint-ORIG-GUID: 57CqSPJ2zRgDhBnuohIC8xe-8JXgN930
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-07-26_08,2023-07-26_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- phishscore=0 impostorscore=0 malwarescore=0 bulkscore=0 mlxlogscore=722
- mlxscore=0 adultscore=0 clxscore=1011 lowpriorityscore=0 spamscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2306200000 definitions=main-2307270049
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH v2 12/61] mmc: sdhci-of-at91: Convert to platform remove
+ callback returning void
+Content-Language: en-US
+To:     Yangtao Li <frank.li@vivo.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Eugen Hristev <eugen.hristev@collabora.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>
+Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+References: <20230726040041.26267-1-frank.li@vivo.com>
+ <20230726040041.26267-12-frank.li@vivo.com>
+From:   claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <20230726040041.26267-12-frank.li@vivo.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 27, 2023 at 10:21:10AM +0530, Rohit Agarwal wrote:
-> Update the RPMHPD references with new bindings defined in rpmhpd.h
-> for Qualcomm SoCs SM8[2345]50.
+
+
+On 26.07.2023 06:59, Yangtao Li wrote:
+> The .remove() callback for a platform driver returns an int which makes
+> many driver authors wrongly assume it's possible to do error handling by
+> returning an error code. However the value returned is (mostly) ignored
+> and this typically results in resource leaks. To improve here there is a
+> quest to make the remove callback return void. In the first step of this
+> quest all drivers are converted to .remove_new() which already returns
+> void.
 > 
-> Signed-off-by: Rohit Agarwal <quic_rohiagar@quicinc.com>
+> Trivially convert this driver from always returning zero in the remove
+> callback to the void returning variant.
+> 
+> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+
+Reviewed-by: Claudiu Beznea <claudiu.beznea@tuxon.dev>
+
 > ---
->  Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml    | 3 ++-
->  Documentation/devicetree/bindings/clock/qcom,sm8350-videocc.yaml   | 3 ++-
->  Documentation/devicetree/bindings/clock/qcom,sm8450-camcc.yaml     | 3 ++-
->  Documentation/devicetree/bindings/clock/qcom,sm8450-dispcc.yaml    | 3 ++-
->  Documentation/devicetree/bindings/clock/qcom,sm8450-videocc.yaml   | 3 ++-
->  Documentation/devicetree/bindings/clock/qcom,sm8550-dispcc.yaml    | 3 ++-
->  Documentation/devicetree/bindings/clock/qcom,videocc.yaml          | 3 ++-
->  Documentation/devicetree/bindings/display/msm/qcom,sm8250-dpu.yaml | 3 ++-
->  .../devicetree/bindings/display/msm/qcom,sm8250-mdss.yaml          | 7 ++++---
->  Documentation/devicetree/bindings/display/msm/qcom,sm8350-dpu.yaml | 3 ++-
->  .../devicetree/bindings/display/msm/qcom,sm8350-mdss.yaml          | 5 +++--
->  Documentation/devicetree/bindings/display/msm/qcom,sm8450-dpu.yaml | 3 ++-
->  .../devicetree/bindings/display/msm/qcom,sm8450-mdss.yaml          | 7 ++++---
->  Documentation/devicetree/bindings/display/msm/qcom,sm8550-dpu.yaml | 3 ++-
->  .../devicetree/bindings/display/msm/qcom,sm8550-mdss.yaml          | 7 ++++---
->  Documentation/devicetree/bindings/media/qcom,sm8250-venus.yaml     | 3 ++-
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml               | 3 ++-
->  Documentation/devicetree/bindings/remoteproc/qcom,sm8350-pas.yaml  | 5 +++--
->  18 files changed, 44 insertions(+), 26 deletions(-)
+>   drivers/mmc/host/sdhci-of-at91.c | 6 ++----
+>   1 file changed, 2 insertions(+), 4 deletions(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml b/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml
-> index d6774db..d6b81c0 100644
-> --- a/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml
-> +++ b/Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml
-> @@ -83,6 +83,7 @@ examples:
->    - |
->      #include <dt-bindings/clock/qcom,rpmh.h>
->      #include <dt-bindings/power/qcom-rpmpd.h>
-> +    #include <dt-bindings/power/qcom,rpmhpd.h>
->      clock-controller@af00000 {
->        compatible = "qcom,sm8250-dispcc";
->        reg = <0x0af00000 0x10000>;
-> @@ -103,7 +104,7 @@ examples:
->        #clock-cells = <1>;
->        #reset-cells = <1>;
->        #power-domain-cells = <1>;
-> -      power-domains = <&rpmhpd SM8250_MMCX>;
-> +      power-domains = <&rpmhpd RPMHPD_MMCX>;
->        required-opps = <&rpmhpd_opp_low_svs>;
->      };
->  ...
-
-Does this file still need to include old header? The same is applicable
-to some of the other files in the patch also. 
-
-We also discussed on the other thread [1] to move the regulator level 
-definitions to new header. should this change be done after that, so that 
-we don't end up touching the very same files again?
-
-[1]
-https://lore.kernel.org/all/a4zztrn6jhblozdswba7psqtvjt5l765mfr3yl4llsm5gsyqef@7x6q7yabydvm/
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index cd0134580a90..af5bc0caf29b 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -443,7 +443,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>   	return ret;
+>   }
+>   
+> -static int sdhci_at91_remove(struct platform_device *pdev)
+> +static void sdhci_at91_remove(struct platform_device *pdev)
+>   {
+>   	struct sdhci_host	*host = platform_get_drvdata(pdev);
+>   	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
+> @@ -461,8 +461,6 @@ static int sdhci_at91_remove(struct platform_device *pdev)
+>   	clk_disable_unprepare(gck);
+>   	clk_disable_unprepare(hclock);
+>   	clk_disable_unprepare(mainck);
+> -
+> -	return 0;
+>   }
+>   
+>   static struct platform_driver sdhci_at91_driver = {
+> @@ -473,7 +471,7 @@ static struct platform_driver sdhci_at91_driver = {
+>   		.pm	= &sdhci_at91_dev_pm_ops,
+>   	},
+>   	.probe		= sdhci_at91_probe,
+> -	.remove		= sdhci_at91_remove,
+> +	.remove_new	= sdhci_at91_remove,
+>   };
+>   
+>   module_platform_driver(sdhci_at91_driver);
