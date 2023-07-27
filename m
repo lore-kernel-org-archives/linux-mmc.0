@@ -2,133 +2,97 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A9E3C04FE0
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Jul 2023 13:17:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D0B3C001DC
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Jul 2023 13:55:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232802AbjG0NRC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Jul 2023 09:17:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58474 "EHLO
+        id S232895AbjG0Nzu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Jul 2023 09:55:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41532 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230411AbjG0NRB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2023 09:17:01 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3974271B;
-        Thu, 27 Jul 2023 06:16:59 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8006D61E77;
-        Thu, 27 Jul 2023 13:16:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 069B3C433C9;
-        Thu, 27 Jul 2023 13:16:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690463818;
-        bh=DUlLuWL4cE5am5s9QK+fFshV+j9iTbP7jA5deX6kjTs=;
-        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-        b=AFf47cE1LQhpwJRelzAV0a/V4s5bbicoushv8cjJw/luJEv4giXHlRWecPmsEJA0/
-         KnV36cP0ASblrAOaCu+7P//cqsn/ro7m/wo4b8mWOzEF3iWoH3Uuc3QjmRNuzkKPCw
-         CymVnlaBP2D81Dc5uAcTohwZXHIkdunCZgLGmZKCIxYbJpmcwvgcAZVTYJuaIT07px
-         KwWMvDOBmzvhdZZqM5SMc7umTjVmTwIdIlYICgroOSI1S3flF00xjkJZt6MWV6g0t5
-         uvIMDSHFSTx21w2LzS8iH1SyVbl4VzIRFVCTkK840ezWoEQVbi15e2d2DBy1fJsdPE
-         MxsnA0AvFR5bw==
-Received: (nullmailer pid 1270046 invoked by uid 1000);
-        Thu, 27 Jul 2023 13:16:55 -0000
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S232908AbjG0Nzt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jul 2023 09:55:49 -0400
+Received: from mgamail.intel.com (unknown [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FFD130CD;
+        Thu, 27 Jul 2023 06:55:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1690466139; x=1722002139;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=6GGb97b/A0230i5HJ/7/pyyHsonfnW2KVsnlAov1NPc=;
+  b=KwF0gdDMovOevo6Wkb6i4Wk5jfpRHSpvzWSmxXdr7xuzijHmWyRWnRNE
+   Ply58ns+lhv1/BX8DPLY7CJMz/7riEt0OaVXNoG2gEvk7RIQVWrIDwVrF
+   tLoDfysjKRhFYWfCNpjoZmaL8kDYJ58qt0X36xv6jOKR1225vbg4GV/4N
+   kZUHN86goYLp5l7/gyjKULOHDKKx++kbLvhcPUBF+LhkonK8KPOspZvBD
+   esiCsX55gO8iGorX/1Y1JH+84yuibN19R9imHiN1csKKfvHvZhgWt7T17
+   zIrflJagQa/8YDGER7699ezK6Ym8ibkLICREbpdsEo2ng/3qZpNaZd6E3
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10784"; a="348592124"
+X-IronPort-AV: E=Sophos;i="6.01,235,1684825200"; 
+   d="scan'208";a="348592124"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Jul 2023 06:55:39 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10784"; a="973573668"
+X-IronPort-AV: E=Sophos;i="6.01,235,1684825200"; 
+   d="scan'208";a="973573668"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.37.252])
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Jul 2023 06:55:37 -0700
+Message-ID: <90febfa5-b520-05f5-53ca-af0e1f3fc7c4@intel.com>
+Date:   Thu, 27 Jul 2023 16:55:32 +0300
 MIME-Version: 1.0
-From:   Rob Herring <robh@kernel.org>
-To:     Rohit Agarwal <quic_rohiagar@quicinc.com>
-Cc:     robh+dt@kernel.org, andersson@kernel.org,
-        quic_abhinavk@quicinc.com, mathieu.poirier@linaro.org,
-        quic_tdas@quicinc.com, mchehab@kernel.org, agross@kernel.org,
-        linux-remoteproc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        daniel@ffwll.ch, linux-media@vger.kernel.org,
-        dmitry.baryshkov@linaro.org, vladimir.zapolskiy@linaro.org,
-        neil.armstrong@linaro.org, conor+dt@kernel.org,
-        linux-mmc@vger.kernel.org, marijn.suijten@somainline.org,
-        freedreno@lists.freedesktop.org, jonathan@marek.ca,
-        devicetree@vger.kernel.org, stanimir.k.varbanov@gmail.com,
-        airlied@gmail.com, linux-kernel@vger.kernel.org,
-        mturquette@baylibre.com, rfoss@kernel.org, mani@kernel.org,
-        dri-devel@lists.freedesktop.org, konrad.dybcio@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, bhupesh.sharma@linaro.org,
-        linux-clk@vger.kernel.org, sean@poorly.run, ulf.hansson@linaro.org,
-        robdclark@gmail.com, sboyd@kernel.org, quic_vgarodia@quicinc.com
-In-Reply-To: <1690461813-22564-1-git-send-email-quic_rohiagar@quicinc.com>
-References: <1690461813-22564-1-git-send-email-quic_rohiagar@quicinc.com>
-Message-Id: <169046381501.1270011.10571652656239031435.robh@kernel.org>
-Subject: Re: [PATCH v2] dt-bindings: qcom: Update RPMHPD entries for some
- SoCs
-Date:   Thu, 27 Jul 2023 07:16:55 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.13.1
+Subject: Re: [PATCH v3 62/62] mmc: f-sdh30: fix order of function calls in
+ sdhci_f_sdh30_remove
+Content-Language: en-US
+To:     Yangtao Li <frank.li@vivo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+Cc:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20230727070051.17778-1-frank.li@vivo.com>
+ <20230727070051.17778-62-frank.li@vivo.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230727070051.17778-62-frank.li@vivo.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Thu, 27 Jul 2023 18:13:33 +0530, Rohit Agarwal wrote:
-> Update the RPMHPD references with new bindings defined in rpmhpd.h
-> for Qualcomm SoCs SM8[2345]50.
+On 27/07/23 10:00, Yangtao Li wrote:
+> The order of function calls in sdhci_f_sdh30_remove is wrong,
+> let's call sdhci_pltfm_unregister first.
 > 
-> Signed-off-by: Rohit Agarwal <quic_rohiagar@quicinc.com>
+> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+> Fixes: 5def5c1c15bf ("mmc: sdhci-f-sdh30: Replace with sdhci_pltfm")
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
 > ---
+>  drivers/mmc/host/sdhci_f_sdh30.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> Changes in v2:
->  - Removed the unnecessary inclusion of header rpmpd.h.
-> 
-> This patch is dependent on the series that includes the new rpmhpd.h header
-> https://lore.kernel.org/all/1689744162-9421-1-git-send-email-quic_rohiagar@quicinc.com/
-> 
->  Documentation/devicetree/bindings/clock/qcom,dispcc-sm8x50.yaml   | 4 ++--
->  Documentation/devicetree/bindings/clock/qcom,sm8350-videocc.yaml  | 4 ++--
->  Documentation/devicetree/bindings/clock/qcom,sm8450-camcc.yaml    | 4 ++--
->  Documentation/devicetree/bindings/clock/qcom,sm8450-dispcc.yaml   | 4 ++--
->  Documentation/devicetree/bindings/clock/qcom,sm8450-videocc.yaml  | 4 ++--
->  Documentation/devicetree/bindings/clock/qcom,sm8550-dispcc.yaml   | 4 ++--
->  Documentation/devicetree/bindings/clock/qcom,videocc.yaml         | 4 ++--
->  .../devicetree/bindings/display/msm/qcom,sm8250-dpu.yaml          | 4 ++--
->  .../devicetree/bindings/display/msm/qcom,sm8250-mdss.yaml         | 8 ++++----
->  .../devicetree/bindings/display/msm/qcom,sm8350-dpu.yaml          | 4 ++--
->  .../devicetree/bindings/display/msm/qcom,sm8350-mdss.yaml         | 6 +++---
->  .../devicetree/bindings/display/msm/qcom,sm8450-dpu.yaml          | 4 ++--
->  .../devicetree/bindings/display/msm/qcom,sm8450-mdss.yaml         | 8 ++++----
->  .../devicetree/bindings/display/msm/qcom,sm8550-dpu.yaml          | 4 ++--
->  .../devicetree/bindings/display/msm/qcom,sm8550-mdss.yaml         | 8 ++++----
->  Documentation/devicetree/bindings/media/qcom,sm8250-venus.yaml    | 4 ++--
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml              | 4 ++--
->  Documentation/devicetree/bindings/remoteproc/qcom,sm8350-pas.yaml | 6 +++---
->  18 files changed, 44 insertions(+), 44 deletions(-)
-> 
+> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+> index 840084ee72e6..964fa18a61a4 100644
+> --- a/drivers/mmc/host/sdhci_f_sdh30.c
+> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
+> @@ -211,11 +211,11 @@ static void sdhci_f_sdh30_remove(struct platform_device *pdev)
+>  	struct sdhci_host *host = platform_get_drvdata(pdev);
+>  	struct f_sdhost_priv *priv = sdhci_f_sdhost_priv(host);
+>  
+> +	sdhci_pltfm_unregister(pdev);
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+That also frees priv
 
-yamllint warnings/errors:
-
-dtschema/dtc warnings/errors:
-Documentation/devicetree/bindings/remoteproc/qcom,sm8350-pas.example.dts:21:18: fatal error: dt-bindings/power/qcom,rpmhpd.h: No such file or directory
-   21 |         #include <dt-bindings/power/qcom,rpmhpd.h>
-      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compilation terminated.
-make[2]: *** [scripts/Makefile.lib:419: Documentation/devicetree/bindings/remoteproc/qcom,sm8350-pas.example.dtb] Error 1
-make[2]: *** Waiting for unfinished jobs....
-make[1]: *** [/builds/robherring/dt-review-ci/linux/Makefile:1500: dt_binding_check] Error 2
-make: *** [Makefile:234: __sub-make] Error 2
-
-doc reference errors (make refcheckdocs):
-
-See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/1690461813-22564-1-git-send-email-quic_rohiagar@quicinc.com
-
-The base for the series is generally the latest rc1. A different dependency
-should be noted in *this* patch.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit after running the above command yourself. Note
-that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-your schema. However, it must be unset to test all examples with your schema.
+> +
+>  	reset_control_assert(priv->rst);
+>  	clk_disable_unprepare(priv->clk);
+>  	clk_disable_unprepare(priv->clk_iface);
+> -
+> -	sdhci_pltfm_unregister(pdev);
+>  }
+>  
+>  #ifdef CONFIG_OF
 
