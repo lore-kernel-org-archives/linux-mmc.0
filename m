@@ -2,114 +2,205 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF839C04E69
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Jul 2023 11:33:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1EBFC001DE
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Jul 2023 12:24:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235738AbjG1LdC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Jul 2023 07:33:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38538 "EHLO
+        id S234086AbjG1MYF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Jul 2023 08:24:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37828 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233433AbjG1LdB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Jul 2023 07:33:01 -0400
-Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 168CD3ABC
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Jul 2023 04:32:57 -0700 (PDT)
-Received: by mail-wm1-x32b.google.com with SMTP id 5b1f17b1804b1-3fbef8ad9bbso22476165e9.0
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Jul 2023 04:32:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1690543975; x=1691148775;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=bvt6gTVxDn+2sUGsn1CSbJgPH86R0eTVqQfCu4TXUDo=;
-        b=ihYG/3HHPl5FBpQ+akutSxXPgMXuWO0DzvVRM1SksGA8Z6z6pOdw0xIixvMEZJwJcd
-         4Z9oCv17ECKWSDIarWP03zMzkLYWgMwcwhoxSSaT5GUpRNxEjtRo4EY8oOokfuAmg2K3
-         X3bV9VHSl8t4uwTz1mse0RuhyVeDc9KRKdziDQTXDWRDJdS8WyXvQtCDSSpsLP63bbdW
-         cOiiI52GZVUebGyMsG2X5E6fYT0OIJFnxGAXUetZKDydkrF3Wl2/fb0Wxp0Z75TVQh6T
-         giWorb/o+3LTFwvzrenWwbszz2vm7NxrLdr+hhPHn+acqPkmYagZ70swmgFq3rn/3E7w
-         YSgg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690543975; x=1691148775;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=bvt6gTVxDn+2sUGsn1CSbJgPH86R0eTVqQfCu4TXUDo=;
-        b=an2u5RuWiLyFhzwiMRwFgmWkKac29CvQ7qiWE5pwUbdhzovX9CK4hZGcpHB7qHvr94
-         iSvrp9loYRHEKGgAinyIGgAQg85y22zpuiUOguFtTqFNwEGG35DmS+7i0gv8QTTiwJpI
-         ghwbOIcrFdIF93X4wwkAcSe7H5s5f/5EQ+XMvlDlmvORKpkFtedc1w4vyYiP6J/t37+K
-         e4Z8+UJ9Ce8ffnmAgxpd3/lDV60asl5NDAU0YU3SQNcdjknzcxpeLOfJrUEEXj6h/3e/
-         FA/Y17AujexRW6Tg+NjL4eQ3hKGbPow+pxYfujXwZg2kVNPx8HwG9ADl85UTWAcDyM2W
-         9qQQ==
-X-Gm-Message-State: ABy/qLZ0CVsp4SSS29987y1C4dK7sD68bOEz1jthRcntZ4Aa50qYoB6Z
-        2bw2JVkdT7kqL6PCy+ZeRtEeZw==
-X-Google-Smtp-Source: APBJJlGzFqci86oHnzgj2vDsZF3+rlLFEk6DPLtkPGOiNL5NezUh1WtcFdshRpGeLkVsg8nMnAV0bg==
-X-Received: by 2002:a5d:554b:0:b0:317:6816:578c with SMTP id g11-20020a5d554b000000b003176816578cmr2003464wrw.5.1690543975603;
-        Fri, 28 Jul 2023 04:32:55 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.223.104])
-        by smtp.gmail.com with ESMTPSA id y8-20020adffa48000000b003159d2dabbasm4575839wrr.94.2023.07.28.04.32.50
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 28 Jul 2023 04:32:55 -0700 (PDT)
-Message-ID: <75fb91cc-e505-7aa9-b90d-0b4d5c643b69@linaro.org>
-Date:   Fri, 28 Jul 2023 13:32:50 +0200
+        with ESMTP id S236808AbjG1MXM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Jul 2023 08:23:12 -0400
+Received: from NAM04-MW2-obe.outbound.protection.outlook.com (mail-mw2nam04on2088.outbound.protection.outlook.com [40.107.101.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C543F59F0;
+        Fri, 28 Jul 2023 05:21:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=O1Ttqya420T8uExmVAIM2o1rOziqP0IasgEeP4mLQg97fLF74goMVdmqlJ7YiIM+IlyTYSxIY5qxgEk8Z4vNEkg1yLOpDqCDoppeBNoK/FbOvkWu/oZjP0DEjgF4gIx9RMPa4b6xMhVEw60WLfI9pgFs8JjTneLTNeQCbjSDXpnWRmD2hUMR7t/otexabOPKVqBNqw/i8NiQam87+cVhIrlbYtfXwpoiZQ4/lXXVSm6ZB81QqEx1r8ptDQXRX1kg4uA05MrPW852n+PWPMSykm5Sl9fqPsF7UWQCFIL1x73EZl62uQyFJMZgzHEqU3UhDY6Mgm3SaKL6V84xTkt1lQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=LfOSk08vwUGBSa/EB4oh60SZed4C/QKcPg7Um7FlfAE=;
+ b=T5dpIsH1u/3A/wSlJXqd6V0k21s+IxrvG6RT6OOe/Rd/LjbGj2hwDcRRJJIG6W7nz0i+CPDhnGZDlQrVubVd1VviLbdlY2V8vYyYVMlj6NWeQUikL4iLNjqBi3JKS0FZpzL9jsHTsenhHLHplPpW1aRHPVyc+RkwZL7zk9toXiAO6toIcIPCh87mGep7jK3XbIkSKW8Me/8lBmuWOf8JO9MEaKvTO76oXVepOmtaY9l1bGy8iJHd+0gaJk6Ky/fBsUT/24CFP2f66XFrKRBwjSufkWGvHzbEDekJIPu7OnJTB4tMnCHR0BtAMFsMcvqEN9BeyY97+47YroWBEIMLgA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.118.232) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=LfOSk08vwUGBSa/EB4oh60SZed4C/QKcPg7Um7FlfAE=;
+ b=AUM+diym131+sUwrWiA0NLW1nkWbJnJ1ZoqW2kkahRRmkvXubQ/451TtoLQr5NQDL1ofJtro17AtDkBzU/YuTZlwbQCIng2FxkDI6vEPUczqoLBDTIryku03XxZvh+obV26v4u01ICpHD2elrGWfx3kdiTGrqHBsTdu7ucs9FhaX2ffgyRwyU1y36swYYkmb6yxEaWMn97jwah9YHnxeKl05WyhxuO5EnVSxziqOpBpx+25md6F+E2xnZGT47m4iNW/AOOp7xdMkUPvj0BZaN9ISXUO3Nw518x2thQAHmL5DqnDszdjhPrzGWK27qVRDTBj6pQgDLCH6Q/pUXc/mVw==
+Received: from BN9PR03CA0734.namprd03.prod.outlook.com (2603:10b6:408:110::19)
+ by BY5PR12MB4968.namprd12.prod.outlook.com (2603:10b6:a03:1d2::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6631.29; Fri, 28 Jul
+ 2023 12:21:11 +0000
+Received: from BN8NAM11FT037.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:110:cafe::f7) by BN9PR03CA0734.outlook.office365.com
+ (2603:10b6:408:110::19) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6631.34 via Frontend
+ Transport; Fri, 28 Jul 2023 12:21:11 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.118.232)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.118.232 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.118.232; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.118.232) by
+ BN8NAM11FT037.mail.protection.outlook.com (10.13.177.182) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.6631.35 via Frontend Transport; Fri, 28 Jul 2023 12:21:11 +0000
+Received: from drhqmail201.nvidia.com (10.126.190.180) by mail.nvidia.com
+ (10.127.129.5) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.5; Fri, 28 Jul 2023
+ 05:20:59 -0700
+Received: from drhqmail203.nvidia.com (10.126.190.182) by
+ drhqmail201.nvidia.com (10.126.190.180) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.37; Fri, 28 Jul 2023 05:20:59 -0700
+Received: from vdi.nvidia.com (10.127.8.12) by mail.nvidia.com
+ (10.126.190.182) with Microsoft SMTP Server id 15.2.986.37 via Frontend
+ Transport; Fri, 28 Jul 2023 05:20:58 -0700
+From:   Liming Sun <limings@nvidia.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        David Thompson <davthompson@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>
+CC:     Liming Sun <limings@nvidia.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v5] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+Date:   Fri, 28 Jul 2023 08:20:52 -0400
+Message-ID: <20230728122052.296488-1-limings@nvidia.com>
+X-Mailer: git-send-email 2.30.1
+In-Reply-To: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
+References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH v3 00/50] Add support for sam9x7 SoC family
-Content-Language: en-US
-To:     Varshini Rajendran <varshini.rajendran@microchip.com>,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        conor+dt@kernel.org, nicolas.ferre@microchip.com,
-        alexandre.belloni@bootlin.com, claudiu.beznea@microchip.com,
-        mturquette@baylibre.com, sboyd@kernel.org,
-        herbert@gondor.apana.org.au, davem@davemloft.net, vkoul@kernel.org,
-        andi.shyti@kernel.org, tglx@linutronix.de, maz@kernel.org,
-        lee@kernel.org, ulf.hansson@linaro.org, tudor.ambarus@linaro.org,
-        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
-        edumazet@google.com, kuba@kernel.org, pabeni@redhat.com,
-        linus.walleij@linaro.org, sre@kernel.org, p.zabel@pengutronix.de,
-        olivia@selenic.com, a.zummo@towertech.it,
-        radu_nicolae.pirea@upb.ro, richard.genoud@gmail.com,
-        gregkh@linuxfoundation.org, lgirdwood@gmail.com,
-        broonie@kernel.org, wim@linux-watchdog.org, linux@roeck-us.net,
-        linux@armlinux.org.uk, durai.manickamkr@microchip.com,
-        andrew@lunn.ch, jerry.ray@microchip.com, andre.przywara@arm.com,
-        mani@kernel.org, alexandre.torgue@st.com,
-        gregory.clement@bootlin.com, arnd@arndb.de, rientjes@google.com,
-        deller@gmx.de, 42.hyeyoo@gmail.com, vbabka@suse.cz,
-        mripard@kernel.org, mihai.sain@microchip.com,
-        codrin.ciubotariu@microchip.com, eugen.hristev@collabora.com,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, netdev@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
-References: <20230728102223.265216-1-varshini.rajendran@microchip.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230728102223.265216-1-varshini.rajendran@microchip.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-NV-OnPremToCloud: ExternallySecured
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN8NAM11FT037:EE_|BY5PR12MB4968:EE_
+X-MS-Office365-Filtering-Correlation-Id: 4c8d9676-725c-4f83-3345-08db8f652121
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: JL5Qxe0TC2PNKnSanHZ2Y8YFUDGFPj/LEVPHfG5tGzzxbIM4C6k5WSx1GnqifudKCvRLTyyNa4KLmuiMuXcWjcg1eB6GLgYY4gGKj2Ciqr5ReUGlOOIGyM6OkfjROlfXatiNmb9yA1nozChDuUQkejL1865WH2h3evfMT6yIZfMNgWiE9CWI35ystbRiaTbRm3mV2y664KkkzrEhw74FMfd3n8FPqGny0uDknE27VW/xKktHmJIzyV4E7d0ZBLtks7C+Trs/XLLbeeRwoK7M/7Yg4QZ8LQK5F9XbSuPRbnnUt1EH53viYvlq8/q2KSq9CRQSwcvdfRJRKON2wlh9U1FfSfViypBBHKhM4yYiYJVi2dySNQamFKhs0YH8L/zeji56cdodJLMSwAVdPcO1JyGgpd3cX49zP8MZqBqaoc8uZ9YqJziZgfZTWVJhgMtbhq+BCwrPK5NGOiY5chHtUxE1o5Zpv+Ip2dZpmLbjFlHgGRTqEZh3Oh7bk+eoCMikfOT7jjt1tNvWN/D0LmyGi88OyGYB3IbO5K9pZROf2kg9uw9deqgCVysp4TOloefYAURS+xEt+4mTCtP7wSLsLMntU9ARm53Ug5amYIX4Xo7c6X7oAh+N84d3RaWJLHVVqVG68WYiLbr+BHxUIeGxw2xOLiAA27VrzoZ5AyDaYTXzXjwijeOZUITiygIpzRzaSIokGE211uqNIlF8K3uKGje3Kp/aimDWKLaneE9Dy2AcE1Q+fUozsnX5ge/3UM9NZ3tnHPjv4M5WgCdApEcRdg==
+X-Forefront-Antispam-Report: CIP:216.228.118.232;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc7edge1.nvidia.com;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(396003)(346002)(136003)(376002)(451199021)(82310400008)(36840700001)(46966006)(40470700004)(36860700001)(336012)(186003)(1076003)(26005)(2906002)(4326008)(316002)(40480700001)(83380400001)(36756003)(40460700003)(41300700001)(5660300002)(8676002)(8936002)(2616005)(426003)(47076005)(7696005)(6666004)(54906003)(86362001)(7636003)(478600001)(110136005)(82740400003)(70586007)(70206006)(356005)(133343001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Jul 2023 12:21:11.1474
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4c8d9676-725c-4f83-3345-08db8f652121
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.118.232];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT037.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB4968
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/07/2023 12:22, Varshini Rajendran wrote:
-> This patch series adds support for the new SoC family - sam9x7.
->  - The device tree, configs and drivers are added
->  - Clock driver for sam9x7 is added
->  - Support for basic peripherals is added
->  - Target board SAM9X75 Curiosity is added
-> 
->  Changes in v3:
->  --------------
-> 
->  - Fixed the DT documentation errors pointed out in v2.
+This commit implements the runtime PM operations to disable eMMC
+card clock when idle.
 
-That's too generic. What changed?
+Reviewed-by: David Thompson <davthompson@nvidia.com>
+Signed-off-by: Liming Sun <limings@nvidia.com>
+---
+v4->v5:
+    - Address Adrian's comment to move the pm_enable to the end to
+      avoid race;
+v3->v4:
+    - Fix compiling reported by 'kernel test robot';
+v2->v3:
+    - Revise the commit message;
+v1->v2:
+    Updates for comments from Ulf:
+    - Make the runtime PM logic generic for sdhci-of-dwcmshc;
+v1: Initial version.
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 54 ++++++++++++++++++++++++++++-
+ 1 file changed, 53 insertions(+), 1 deletion(-)
 
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index e68cd87998c8..5cee42d72257 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -15,6 +15,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/pm_runtime.h>
+ #include <linux/reset.h>
+ #include <linux/sizes.h>
+ 
+@@ -559,6 +560,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 	if (err)
+ 		goto err_setup_host;
+ 
++	devm_pm_runtime_enable(dev);
++
+ 	return 0;
+ 
+ err_setup_host:
+@@ -646,7 +649,56 @@ static int dwcmshc_resume(struct device *dev)
+ }
+ #endif
+ 
+-static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
++#ifdef CONFIG_PM
++
++static void dwcmshc_enable_card_clk(struct sdhci_host *host)
++{
++	u16 ctrl;
++
++	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	ctrl |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
++}
++
++static void dwcmshc_disable_card_clk(struct sdhci_host *host)
++{
++	u16 ctrl;
++
++	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	ctrl &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
++}
++
++static int dwcmshc_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	int ret = 0;
++
++	ret = sdhci_runtime_suspend_host(host);
++	if (!ret)
++		dwcmshc_disable_card_clk(host);
++
++	return ret;
++}
++
++static int dwcmshc_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	int ret = 0;
++
++	dwcmshc_enable_card_clk(host);
++	ret = sdhci_runtime_resume_host(host, 0);
++
++	return ret;
++}
++
++#endif
++
++static const struct dev_pm_ops dwcmshc_pmops = {
++	SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend, dwcmshc_resume)
++	SET_RUNTIME_PM_OPS(dwcmshc_runtime_suspend,
++			   dwcmshc_runtime_resume, NULL)
++};
+ 
+ static struct platform_driver sdhci_dwcmshc_driver = {
+ 	.driver	= {
+-- 
+2.30.1
 
