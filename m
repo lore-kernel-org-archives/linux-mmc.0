@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73053C00528
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Jul 2023 11:32:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF839C04E69
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Jul 2023 11:33:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234501AbjG1LcW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Jul 2023 07:32:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37838 "EHLO
+        id S235738AbjG1LdC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Jul 2023 07:33:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38538 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232155AbjG1LcU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Jul 2023 07:32:20 -0400
-Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEBA630C0
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Jul 2023 04:32:18 -0700 (PDT)
-Received: by mail-wr1-x436.google.com with SMTP id ffacd0b85a97d-314417861b9so1879871f8f.0
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Jul 2023 04:32:18 -0700 (PDT)
+        with ESMTP id S233433AbjG1LdB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Jul 2023 07:33:01 -0400
+Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 168CD3ABC
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Jul 2023 04:32:57 -0700 (PDT)
+Received: by mail-wm1-x32b.google.com with SMTP id 5b1f17b1804b1-3fbef8ad9bbso22476165e9.0
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Jul 2023 04:32:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1690543937; x=1691148737;
+        d=linaro.org; s=google; t=1690543975; x=1691148775;
         h=content-transfer-encoding:in-reply-to:from:references:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=+F++azjWGXR/zzwHylDS5zKIIkHfazjhU13uoVBCItI=;
-        b=AMnkE9WuW7Szt2FbkP+Jy7gImGXicajY9/8nwcsWkrUwhvEUvP7ntHlB4esXk3K8U4
-         0i6OvKn+5MRV/VvX72hQyI3+TxZnb6cRN+AlFwW7eoAEroux8iHcBnUojCtWchKA78jl
-         SY5zsDpCGe7jFTiAVJefedCk62+1uRl1DCOGCwjHw3AcI7lBvwuS6yZmpan72Z124GkA
-         HzuwDVmYWrxvejLrwD5DxuP7Te8Jagm+rkOkbxUiWNpEVTWGGoMyhL+3cuwlWbXGDr0B
-         nKgA+tN0Fx8WjnGsZEpQTGxaPoJXDju/pS2BVUhj93heIIMcoWmwxaaXx1t90HNC7HAh
-         LaVA==
+        bh=bvt6gTVxDn+2sUGsn1CSbJgPH86R0eTVqQfCu4TXUDo=;
+        b=ihYG/3HHPl5FBpQ+akutSxXPgMXuWO0DzvVRM1SksGA8Z6z6pOdw0xIixvMEZJwJcd
+         4Z9oCv17ECKWSDIarWP03zMzkLYWgMwcwhoxSSaT5GUpRNxEjtRo4EY8oOokfuAmg2K3
+         X3bV9VHSl8t4uwTz1mse0RuhyVeDc9KRKdziDQTXDWRDJdS8WyXvQtCDSSpsLP63bbdW
+         cOiiI52GZVUebGyMsG2X5E6fYT0OIJFnxGAXUetZKDydkrF3Wl2/fb0Wxp0Z75TVQh6T
+         giWorb/o+3LTFwvzrenWwbszz2vm7NxrLdr+hhPHn+acqPkmYagZ70swmgFq3rn/3E7w
+         YSgg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690543937; x=1691148737;
+        d=1e100.net; s=20221208; t=1690543975; x=1691148775;
         h=content-transfer-encoding:in-reply-to:from:references:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=+F++azjWGXR/zzwHylDS5zKIIkHfazjhU13uoVBCItI=;
-        b=AyZnk01EairbhG+S6tOZS8bIJwB7j4uuzxJIJS3V+YPK5dulxrxaIDhg7tUkRFhxhA
-         GqOM8IFWoZyX0ND9mO53Knm5CqaWGiPkanJjr85TxG8vpTrHVU/FgwvD12Ce7yBrPZgx
-         VP0RvcMualoSiBiX9VkZrlDVJmqC/ASB++Kw5+3Iis9JcW4RPUxQp1kpYY80DM4DMV1T
-         mO7THy//ClRMaLhzADhubor7hBs222lbYPUv6FOMcbXQidHxORcHrNAIslQvymaVH+cd
-         WDbxL7nY0bfp5CMX6mAQY1XbqKTMFXadGkR0qzbonMlJGjQBCGTLNb41Ho7/r4Y4wVnQ
-         lncg==
-X-Gm-Message-State: ABy/qLYVlCvicEJkYowqQ4QEtonkNuZ3b51Ws/VHdwFnawd2cc0qK6Z3
-        6DpUg3dUEw6OkrbhpTg7sldS8w==
-X-Google-Smtp-Source: APBJJlGEkskLn7KheQI/2hh6B8RIJum6fk3h7Nk91C/s4cct7x2FxIqw26uj1lGmelJK6ucVYjt8Ng==
-X-Received: by 2002:adf:e94f:0:b0:314:3611:3e54 with SMTP id m15-20020adfe94f000000b0031436113e54mr1907446wrn.9.1690543937250;
-        Fri, 28 Jul 2023 04:32:17 -0700 (PDT)
+        bh=bvt6gTVxDn+2sUGsn1CSbJgPH86R0eTVqQfCu4TXUDo=;
+        b=an2u5RuWiLyFhzwiMRwFgmWkKac29CvQ7qiWE5pwUbdhzovX9CK4hZGcpHB7qHvr94
+         iSvrp9loYRHEKGgAinyIGgAQg85y22zpuiUOguFtTqFNwEGG35DmS+7i0gv8QTTiwJpI
+         ghwbOIcrFdIF93X4wwkAcSe7H5s5f/5EQ+XMvlDlmvORKpkFtedc1w4vyYiP6J/t37+K
+         e4Z8+UJ9Ce8ffnmAgxpd3/lDV60asl5NDAU0YU3SQNcdjknzcxpeLOfJrUEEXj6h/3e/
+         FA/Y17AujexRW6Tg+NjL4eQ3hKGbPow+pxYfujXwZg2kVNPx8HwG9ADl85UTWAcDyM2W
+         9qQQ==
+X-Gm-Message-State: ABy/qLZ0CVsp4SSS29987y1C4dK7sD68bOEz1jthRcntZ4Aa50qYoB6Z
+        2bw2JVkdT7kqL6PCy+ZeRtEeZw==
+X-Google-Smtp-Source: APBJJlGzFqci86oHnzgj2vDsZF3+rlLFEk6DPLtkPGOiNL5NezUh1WtcFdshRpGeLkVsg8nMnAV0bg==
+X-Received: by 2002:a5d:554b:0:b0:317:6816:578c with SMTP id g11-20020a5d554b000000b003176816578cmr2003464wrw.5.1690543975603;
+        Fri, 28 Jul 2023 04:32:55 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.223.104])
-        by smtp.gmail.com with ESMTPSA id m14-20020adffa0e000000b003177e9b2e64sm4508524wrr.90.2023.07.28.04.32.13
+        by smtp.gmail.com with ESMTPSA id y8-20020adffa48000000b003159d2dabbasm4575839wrr.94.2023.07.28.04.32.50
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 28 Jul 2023 04:32:16 -0700 (PDT)
-Message-ID: <c0792cfd-db4f-7153-0775-824912277908@linaro.org>
-Date:   Fri, 28 Jul 2023 13:32:12 +0200
+        Fri, 28 Jul 2023 04:32:55 -0700 (PDT)
+Message-ID: <75fb91cc-e505-7aa9-b90d-0b4d5c643b69@linaro.org>
+Date:   Fri, 28 Jul 2023 13:32:50 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.13.0
@@ -103,8 +103,12 @@ On 28/07/2023 12:22, Varshini Rajendran wrote:
 >  - Support for basic peripherals is added
 >  - Target board SAM9X75 Curiosity is added
 > 
+>  Changes in v3:
+>  --------------
+> 
+>  - Fixed the DT documentation errors pointed out in v2.
 
-Your threading is absolutely broken making it difficult to review and apply.
+That's too generic. What changed?
 
 Best regards,
 Krzysztof
