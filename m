@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DC47C00528
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Jul 2023 08:35:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABF36C41513
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Jul 2023 08:36:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235067AbjG1Ifc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Jul 2023 04:35:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37108 "EHLO
+        id S235084AbjG1IgI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Jul 2023 04:36:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37682 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231280AbjG1Ie6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Jul 2023 04:34:58 -0400
+        with ESMTP id S235016AbjG1Ifg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Jul 2023 04:35:36 -0400
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 235D4118;
-        Fri, 28 Jul 2023 01:34:37 -0700 (PDT)
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36S2wiqA013590;
-        Fri, 28 Jul 2023 08:34:18 GMT
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EB1146B1;
+        Fri, 28 Jul 2023 01:34:55 -0700 (PDT)
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36S4e27f028229;
+        Fri, 28 Jul 2023 08:34:28 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
  subject : date : message-id : in-reply-to : references : mime-version :
  content-type; s=qcppdkim1;
- bh=zUse9ir/CXgWYdnMJAoQPik1ELZjQR031x6ui3U01tI=;
- b=kQGQ1TpmUcVFPuFO40A4ArO45YCJVq5f6Iuza6/O8TI4LeCcZG18JmqyI3mUCOIkpWkS
- HqWAt8O5vGtCQqmU+SSL7OyZRl8WMuFQcZqFUo53/lZdb+04SqI/VwxPyRZl8A0OMd4R
- G0FMcrmKjDCR8vNtJmI1ZnGiNPitzG/GoE9F/FxYre7VimxnosPm1j8ffQ+A81/ca+Io
- wDZeTErQ5rQwx2WVhrD5KtBM4jVGGSbmHRxZ+P2jUCREzzL755sfQLune/y/9sRFFzrs
- NzWUHcX4HgYPc0JAzcsbFSdBcllvPlBFuUI5UBxJs/Jg2g7isF4WLQoJ281UjAMxXbcO 9Q== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3s448hgk2t-1
+ bh=u45OK1353oCfqSIxC3SEKvQeSV/O+PRSnL7EPPYiG8o=;
+ b=BmXhXCN+yGNmXXTkJ7A5SzDHw+DQkF+2gITBBTlw121UUwxfGvj8geJgQcdbJ4WY0JnL
+ vdXU41y6RWVklPfOdfMWKhL8l7eni8pk4YrmoyIfvUDC+3hmn28pIyH+eZKLVcb6qAqA
+ 6/Wyp7Xh7Pl8JfwwXtZouc5iScDcOIjDb5RVqTyRnzMRB47TFD0p52wzrayFGOOzYskK
+ xD0cAIZtkf3PFvFz9p6RFDOLWdVnRpH+QoqNOeqIKmoLOPjNbgEHdQspeEJzvmefi3Tj
+ T74xqncxTBEJaZesnHJvs/W0yfnc1TF6YcUOnVKWN8N49S1wSMIRI9SZbZhozEd6uQpP 2g== 
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3s46ttgbuc-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 28 Jul 2023 08:34:18 +0000
+        Fri, 28 Jul 2023 08:34:28 +0000
 Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36S8YEmd003493
+        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 36S8Y0Pp032595
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 28 Jul 2023 08:34:14 GMT
+        Fri, 28 Jul 2023 08:34:00 GMT
 Received: from srichara-linux.qualcomm.com (10.80.80.8) by
  nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.30; Fri, 28 Jul 2023 01:34:07 -0700
+ 15.2.1118.30; Fri, 28 Jul 2023 01:33:53 -0700
 From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
 To:     <agross@kernel.org>, <andersson@kernel.org>,
         <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
@@ -51,9 +51,9 @@ To:     <agross@kernel.org>, <andersson@kernel.org>,
         <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
         <krzysztof.kozlowski@linaro.org>, <andy.shevchenko@gmail.com>
 CC:     <quic_srichara@quicinc.com>
-Subject: [PATCH V12 6/6] arm64: defconfig: Enable IPQ5018 SoC base configs
-Date:   Fri, 28 Jul 2023 14:03:12 +0530
-Message-ID: <1690533192-22220-7-git-send-email-quic_srichara@quicinc.com>
+Subject: [PATCH V12 4/6] dt-bindings: scm: Add compatible for IPQ5018
+Date:   Fri, 28 Jul 2023 14:03:10 +0530
+Message-ID: <1690533192-22220-5-git-send-email-quic_srichara@quicinc.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1690533192-22220-1-git-send-email-quic_srichara@quicinc.com>
 References: <1690533192-22220-1-git-send-email-quic_srichara@quicinc.com>
@@ -64,49 +64,42 @@ X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
  nalasex01c.na.qualcomm.com (10.47.97.35)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: cY3oxgFf-Nuy6TS7vhxTKqYIcB2_aU2h
-X-Proofpoint-ORIG-GUID: cY3oxgFf-Nuy6TS7vhxTKqYIcB2_aU2h
+X-Proofpoint-ORIG-GUID: 2mwL9HYoeJeoLOl_C76--va557Ntoe_l
+X-Proofpoint-GUID: 2mwL9HYoeJeoLOl_C76--va557Ntoe_l
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
  definitions=2023-07-27_10,2023-07-26_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 phishscore=0
- clxscore=1015 bulkscore=0 lowpriorityscore=0 suspectscore=0 adultscore=0
- mlxscore=0 priorityscore=1501 mlxlogscore=820 impostorscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 suspectscore=0
+ impostorscore=0 clxscore=1015 priorityscore=1501 mlxlogscore=999
+ lowpriorityscore=0 adultscore=0 spamscore=0 malwarescore=0 bulkscore=0
+ phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2306200000 definitions=main-2307280078
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Enables clk & pinctrl related configs
+From: Manikanta Mylavarapu <quic_mmanikan@quicinc.com>
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Add the scm compatible string for IPQ5018 SoC
+
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Signed-off-by: Manikanta Mylavarapu <quic_mmanikan@quicinc.com>
 ---
- arch/arm64/configs/defconfig | 3 +++
- 1 file changed, 3 insertions(+)
+ Documentation/devicetree/bindings/firmware/qcom,scm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 736cbc1..f2f328f 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -563,6 +563,7 @@ CONFIG_PINCTRL_IMX8ULP=y
- CONFIG_PINCTRL_IMX93=y
- CONFIG_PINCTRL_MSM=y
- CONFIG_PINCTRL_IPQ8074=y
-+CONFIG_PINCTRL_IPQ5018=y
- CONFIG_PINCTRL_IPQ5332=y
- CONFIG_PINCTRL_IPQ6018=y
- CONFIG_PINCTRL_IPQ9574=y
-@@ -1180,6 +1181,8 @@ CONFIG_QCOM_CLK_SMD_RPM=y
- CONFIG_QCOM_CLK_RPMH=y
- CONFIG_IPQ_APSS_6018=y
- CONFIG_IPQ_GCC_5332=y
-+CONFIG_IPQ_APSS_5018=y
-+CONFIG_IPQ_GCC_5018=y
- CONFIG_IPQ_GCC_6018=y
- CONFIG_IPQ_GCC_8074=y
- CONFIG_IPQ_GCC_9574=y
+diff --git a/Documentation/devicetree/bindings/firmware/qcom,scm.yaml b/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
+index 4233ea8..5c02782 100644
+--- a/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
++++ b/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
+@@ -24,6 +24,7 @@ properties:
+           - qcom,scm-apq8064
+           - qcom,scm-apq8084
+           - qcom,scm-ipq4019
++          - qcom,scm-ipq5018
+           - qcom,scm-ipq5332
+           - qcom,scm-ipq6018
+           - qcom,scm-ipq806x
 -- 
 2.7.4
 
