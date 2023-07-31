@@ -2,114 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53A73C001DF
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Aug 2023 08:17:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5216C0015E
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Aug 2023 11:51:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230205AbjHAIRQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Aug 2023 04:17:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37574 "EHLO
+        id S232851AbjHALvF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Aug 2023 07:51:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45840 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230514AbjHAIRP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2023 04:17:15 -0400
-Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C07AFA0;
-        Tue,  1 Aug 2023 01:17:13 -0700 (PDT)
-Received: from dlp.unisoc.com ([10.29.3.86])
-        by SHSQR01.spreadtrum.com with ESMTP id 3718DWQH061383;
-        Tue, 1 Aug 2023 16:13:32 +0800 (+08)
-        (envelope-from Yunlong.Xing@unisoc.com)
-Received: from SHDLP.spreadtrum.com (bjmbx02.spreadtrum.com [10.0.64.8])
-        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RFSWC4QJPz2K1r9S;
-        Tue,  1 Aug 2023 16:11:51 +0800 (CST)
-Received: from tj10379pcu.spreadtrum.com (10.5.32.15) by
- BJMBX02.spreadtrum.com (10.0.64.8) with Microsoft SMTP Server (TLS) id
- 15.0.1497.23; Tue, 1 Aug 2023 16:13:29 +0800
-From:   Yunlong Xing <yunlong.xing@unisoc.com>
-To:     <CLoehle@hyperstone.com>, <adrian.hunter@intel.com>,
-        <hare@suse.de>, <jinpu.wang@ionos.com>, <asuk4.q@gmail.com>,
-        <avri.altman@wdc.com>, <f.fainelli@gmail.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <hongyu.jin@unisoc.com>, <zhiguo.niu@unisoc.com>,
-        <yunlong.xing23@gmail.com>
-Subject: [PATCH] mmc: block: Fix in_flight[issue_type] value error
-Date:   Tue, 1 Aug 2023 16:13:27 +0800
-Message-ID: <20230801081327.1309669-1-yunlong.xing@unisoc.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S232683AbjHALvE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2023 07:51:04 -0400
+Received: from mail.cothiafon.pl (mail.cothiafon.pl [217.61.106.23])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC8D010E
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Aug 2023 04:51:03 -0700 (PDT)
+Received: by mail.cothiafon.pl (Postfix, from userid 1002)
+        id F1AA88390E; Mon, 31 Jul 2023 10:36:29 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=cothiafon.pl; s=mail;
+        t=1690792636; bh=dwoca0X6C9VXklO/zRgFQCPapTk5LFz4tKaENdvy6Po=;
+        h=Date:From:To:Subject:From;
+        b=URt4ZPpOeK/KQ5u9NisNjBz1MjYkKsMF8rTjAb+oGbu/XwwAaMIwuNwH0pX4z5WUk
+         VBqTSozqpMkJAORHHQ0/TFwgFIaexDowLwbgqBVIiNdoOnBqBkCn2adBv0fpgGBWVr
+         AwWCZ4UPk5mYOW0bQPGVvHYlugA8AANMCQX4Fw3KFAOYd03zeys/705pFq/qB5A5cU
+         UA/EDysc5CpjChCtjs0d2gd+j9jpoQsElUbj91fQU0M74eqzpcb82lYRKMfe7143rn
+         YH3vvTRurI1BkvCC9oKupRcMrNdfbPQANVbgb37zJ+iaBi06QctCZFGH4AUyAJ9yP5
+         dkyzv27FxmUow==
+Received: by mail.cothiafon.pl for <linux-mmc@vger.kernel.org>; Mon, 31 Jul 2023 08:35:48 GMT
+Message-ID: <20230731095940-0.1.28.ondn.0.pkw4ekjg73@cothiafon.pl>
+Date:   Mon, 31 Jul 2023 08:35:48 GMT
+From:   =?UTF-8?Q? "Rados=C5=82aw_Grabowski" ?= 
+        <radoslaw.grabowski@cothiafon.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: W sprawie samochodu
+X-Mailer: mail.cothiafon.pl
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.5.32.15]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- BJMBX02.spreadtrum.com (10.0.64.8)
-X-MAIL: SHSQR01.spreadtrum.com 3718DWQH061383
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Yibin Ding <yibin.ding@unisoc.com>
+Dzie=C5=84 dobry,
 
-For a completed request, after the mmc_blk_mq_complete_rq(mq, req)
-function is executed, the bitmap_tags corresponding to the
-request will be cleared, that is, the request will be regarded as
-idle. If the request is acquired by a different type of process at
-this time, the issue_type of the request may change. It further
-caused the value of mq->in_flight[issue_type] to be abnormal,
-and a large number of requests could not be sent.
+chcieliby=C5=9Bmy zapewni=C4=87 Pa=C5=84stwu kompleksowe rozwi=C4=85zania=
+, je=C5=9Bli chodzi o system monitoringu GPS.
 
-p1:					      p2:
-mmc_blk_mq_complete_rq
-  blk_mq_free_request
-					      blk_mq_get_request
-					        blk_mq_rq_ctx_init
-mmc_blk_mq_dec_in_flight
-  mmc_issue_type(mq, req)
+Precyzyjne monitorowanie pojazd=C3=B3w na mapach cyfrowych, =C5=9Bledzeni=
+e ich parametr=C3=B3w eksploatacyjnych w czasie rzeczywistym oraz kontrol=
+a paliwa to kluczowe funkcjonalno=C5=9Bci naszego systemu.=20
 
-This strategy can ensure the consistency of issue_type
-before and after executing mmc_blk_mq_complete_rq.
+Organizowanie pracy pracownik=C3=B3w jest dzi=C4=99ki temu prostsze i bar=
+dziej efektywne, a oszcz=C4=99dno=C5=9Bci i optymalizacja w zakresie pono=
+szonych koszt=C3=B3w, maj=C4=85 dla ka=C5=BCdego przedsi=C4=99biorcy ogro=
+mne znaczenie.
 
-Signed-off-by: Yibin Ding <yibin.ding@unisoc.com>
----
- drivers/mmc/core/block.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+Dopasujemy nasz=C4=85 ofert=C4=99 do Pa=C5=84stwa oczekiwa=C5=84 i potrze=
+b organizacji. Czy mogliby=C5=9Bmy porozmawia=C4=87 o naszej propozycji?
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f701efb1fa78..5b750311f638 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2097,14 +2097,14 @@ static void mmc_blk_mq_poll_completion(struct mmc_queue *mq,
- 	mmc_blk_urgent_bkops(mq, mqrq);
- }
- 
--static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, struct request *req)
-+static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, enum mmc_issue_type issue_type)
- {
- 	unsigned long flags;
- 	bool put_card;
- 
- 	spin_lock_irqsave(&mq->lock, flags);
- 
--	mq->in_flight[mmc_issue_type(mq, req)] -= 1;
-+	mq->in_flight[issue_type] -= 1;
- 
- 	put_card = (mmc_tot_in_flight(mq) == 0);
- 
-@@ -2120,6 +2120,7 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
- 	struct mmc_request *mrq = &mqrq->brq.mrq;
- 	struct mmc_host *host = mq->card->host;
-+	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
- 
- 	mmc_post_req(host, mrq, 0);
- 
-@@ -2136,7 +2137,7 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
- 			blk_mq_complete_request(req);
- 	}
- 
--	mmc_blk_mq_dec_in_flight(mq, req);
-+	mmc_blk_mq_dec_in_flight(mq, issue_type);
- }
- 
- void mmc_blk_mq_recovery(struct mmc_queue *mq)
--- 
-2.25.1
 
+Pozdrawiam
+Rados=C5=82aw Grabowski
