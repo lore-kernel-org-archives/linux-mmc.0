@@ -2,147 +2,203 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C52A3C001DF
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Aug 2023 16:48:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA754C04FDF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Aug 2023 17:32:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232084AbjHAQs4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Aug 2023 12:48:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37074 "EHLO
+        id S233793AbjHARcH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Aug 2023 13:32:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232065AbjHAQsx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2023 12:48:53 -0400
-Received: from mgamail.intel.com (unknown [134.134.136.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98ECF2114;
-        Tue,  1 Aug 2023 09:48:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1690908532; x=1722444532;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=iQ1UhrvtfoymH4yRf6lJpyLLvTEhqq+BWrC7UVoVMJQ=;
-  b=iMkFLSb/CcMScAKkSdbA+adeU1cHWJyk8wBkcMcfanbZAK7ZlTnPqZee
-   y4mOhlDZxb4MxoV9VM1uFcTwYu4x2qvMHF0RXTxA20ZeBG1wmGG8bpU1e
-   asfag4hz7/II3zkDaXJjl+tUk3S+zseMSiFR6d52lC0s5uCuT6LVIH5Pb
-   KcXZ5QRLROsNV4ZBsDo2+RS9RyFnNTTk7LantpaASzdaLzSGWO6WBNl4s
-   +acY52TMy+4BXLh3oKhTNNHORTc5dKdvaNdihCKPwKi1iiu/iAkVQ7pP4
-   JR3ebGmmOHCz6UOqa/G68HZHaxZvf/Gxr6rUALSNmVwmOjY7wdB7KIL4B
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10789"; a="372992368"
-X-IronPort-AV: E=Sophos;i="6.01,247,1684825200"; 
-   d="scan'208";a="372992368"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Aug 2023 09:48:52 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10789"; a="818863644"
-X-IronPort-AV: E=Sophos;i="6.01,247,1684825200"; 
-   d="scan'208";a="818863644"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.38.126])
-  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Aug 2023 09:48:48 -0700
-Message-ID: <5a53c617-fcea-50c6-c595-750a4e12f97a@intel.com>
-Date:   Tue, 1 Aug 2023 19:48:44 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.13.1
-Subject: Re: [PATCH] mmc: block: Fix in_flight[issue_type] value error
+        with ESMTP id S232136AbjHARcG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2023 13:32:06 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A4A9F5;
+        Tue,  1 Aug 2023 10:32:04 -0700 (PDT)
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 371GA2kK001406;
+        Tue, 1 Aug 2023 17:32:01 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=qcppdkim1;
+ bh=Q0zQgRy1fF8lD/XmdYNJfM4tnpsCfZTsWpnSrfRcajY=;
+ b=gjhpkX+1dEGa2VffzW/khy6jFURA4E5PUtk8XMrv/PHRLzL9aSh+8DJ9tji9kcEf9257
+ v8DNWGfo/9E/zzh3EURer/SMsTP2HZiqaVfidTf0Qwbvr8XKzpzRcPrgZSHJdzEM9na2
+ 0r1vVKLJOUddzlxf47rNzgpWvEfAKYnslWSq0xBljUDF0RNUjcw00955BwFHUQAxjrCH
+ EdEXx8gCPi+6YbhVxpQyUVIky/kNLS4yxqPufCxzQorLPDnUexnzFGTy2lB7swOwJIaB
+ dQFWDwq9G+UHVToFYn3QflxjTjN5w967AhikA8bxTD5l/+oYMcejfVtBZhrEGbSiuthd 2g== 
+Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3s75b305wr-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 01 Aug 2023 17:32:00 +0000
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 371HVxeK028158
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 1 Aug 2023 17:31:59 GMT
+Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
+ nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.30; Tue, 1 Aug 2023 10:31:59 -0700
+Received: from nalasex01a.na.qualcomm.com ([fe80::25d0:9235:354f:5fa9]) by
+ nalasex01a.na.qualcomm.com ([fe80::25d0:9235:354f:5fa9%4]) with mapi id
+ 15.02.1118.030; Tue, 1 Aug 2023 10:31:59 -0700
+From:   "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>
+To:     Eric Biggers <ebiggers@kernel.org>
+CC:     "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        "linux-fscrypt@vger.kernel.org" <linux-fscrypt@vger.kernel.org>,
+        "Om Prakash Singh" <omprsing@qti.qualcomm.com>,
+        "Prasad Sodagudi (QUIC)" <quic_psodagud@quicinc.com>,
+        "Arun Menon (SSG)" <avmenon@quicinc.com>,
+        "abel.vesa@linaro.org" <abel.vesa@linaro.org>,
+        "Seshu Madhavi Puppala (QUIC)" <quic_spuppala@quicinc.com>
+Subject: RE: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
+ ufs
+Thread-Topic: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
+ ufs
+Thread-Index: AQHZumN+a5RI3WgcJ0CO2LlDH5s476/Ca+iAgBIbBxA=
+Date:   Tue, 1 Aug 2023 17:31:59 +0000
+Message-ID: <ca11701e403f48b6839b26c47a1b537f@quicinc.com>
+References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+ <20230720025541.GA2607@sol.localdomain>
+In-Reply-To: <20230720025541.GA2607@sol.localdomain>
+Accept-Language: en-US
 Content-Language: en-US
-To:     Yunlong Xing <yunlong.xing@unisoc.com>, CLoehle@hyperstone.com,
-        hare@suse.de, jinpu.wang@ionos.com, asuk4.q@gmail.com,
-        avri.altman@wdc.com, f.fainelli@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        hongyu.jin@unisoc.com, zhiguo.niu@unisoc.com,
-        yunlong.xing23@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>
-References: <20230801081327.1309669-1-yunlong.xing@unisoc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230801081327.1309669-1-yunlong.xing@unisoc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.110.47.159]
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: rEOTZeAVO7KVUd7mTmyYXt70nJ9OESWH
+X-Proofpoint-ORIG-GUID: rEOTZeAVO7KVUd7mTmyYXt70nJ9OESWH
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-08-01_14,2023-08-01_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 adultscore=0
+ suspectscore=0 phishscore=0 lowpriorityscore=0 priorityscore=1501
+ mlxscore=0 spamscore=0 mlxlogscore=999 bulkscore=0 clxscore=1011
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2306200000 definitions=main-2308010157
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/08/23 11:13, Yunlong Xing wrote:
-> From: Yibin Ding <yibin.ding@unisoc.com>
-> 
-> For a completed request, after the mmc_blk_mq_complete_rq(mq, req)
-> function is executed, the bitmap_tags corresponding to the
-> request will be cleared, that is, the request will be regarded as
-> idle. If the request is acquired by a different type of process at
-> this time, the issue_type of the request may change. It further
-> caused the value of mq->in_flight[issue_type] to be abnormal,
-> and a large number of requests could not be sent.
-> 
-> p1:					      p2:
-> mmc_blk_mq_complete_rq
->   blk_mq_free_request
-> 					      blk_mq_get_request
-> 					        blk_mq_rq_ctx_init
-> mmc_blk_mq_dec_in_flight
->   mmc_issue_type(mq, req)
-> 
-> This strategy can ensure the consistency of issue_type
-> before and after executing mmc_blk_mq_complete_rq.
-> 
-> Signed-off-by: Yibin Ding <yibin.ding@unisoc.com>
+Hey Eric, thanks for your reply. Pleasure working with you again.
 
-One cosmetic comment below, otherwise:
+Please find answers inline
 
-Fixes: 81196976ed94 ("mmc: block: Add blk-mq support")
-Cc: stable@vger.kernel.org
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+-----Original Message-----
+From: Eric Biggers <ebiggers@kernel.org>=20
+Sent: Wednesday, July 19, 2023 7:56 PM
+To: Gaurav Kashyap (QUIC) <quic_gaurkash@quicinc.com>
+Cc: linux-scsi@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-mmc@vg=
+er.kernel.org; linux-block@vger.kernel.org; linux-fscrypt@vger.kernel.org; =
+Om Prakash Singh <omprsing@qti.qualcomm.com>; Prasad Sodagudi (QUIC) <quic_=
+psodagud@quicinc.com>; Arun Menon (SSG) <avmenon@quicinc.com>; abel.vesa@li=
+naro.org; Seshu Madhavi Puppala (QUIC) <quic_spuppala@quicinc.com>
+Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and=
+ ufs
 
-Thank you!
+Hi Gaurav,
 
-> ---
->  drivers/mmc/core/block.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index f701efb1fa78..5b750311f638 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2097,14 +2097,14 @@ static void mmc_blk_mq_poll_completion(struct mmc_queue *mq,
->  	mmc_blk_urgent_bkops(mq, mqrq);
->  }
->  
-> -static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, struct request *req)
-> +static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, enum mmc_issue_type issue_type)
->  {
->  	unsigned long flags;
->  	bool put_card;
->  
->  	spin_lock_irqsave(&mq->lock, flags);
->  
-> -	mq->in_flight[mmc_issue_type(mq, req)] -= 1;
-> +	mq->in_flight[issue_type] -= 1;
->  
->  	put_card = (mmc_tot_in_flight(mq) == 0);
->  
-> @@ -2120,6 +2120,7 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
->  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->  	struct mmc_request *mrq = &mqrq->brq.mrq;
->  	struct mmc_host *host = mq->card->host;
-> +	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
+On Wed, Jul 19, 2023 at 10:04:14AM -0700, Gaurav Kashyap wrote:
+> These patches add support to Qualcomm ICE (Inline Crypto Enginr) for=20
+> hardware wrapped keys using Qualcomm Hardware Key Manager (HWKM) and=20
+> are made on top of a rebased version  Eric Bigger's set of changes to=20
+> support wrapped keys in fscrypt and block below:
+> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=3Dwrapped-key
+> s-v7 (The rebased patches are not uploaded here)
+>=20
+> Ref v1 here:
+> https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkas
+> h@quicinc.com/
+>=20
+> Explanation and use of hardware-wrapped-keys can be found here:
+> Documentation/block/inline-encryption.rst
+>=20
+> This patch is organized as follows:
+>=20
+> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around w=
+rapped keys.
+> Patch 2 - Adds a new SCM api to support deriving software secret when=20
+> wrapped keys are used Patch 3-4 - Adds support for wrapped keys in the=20
+> ICE driver. This includes adding HWKM support Patch 5-6 - Adds support=20
+> for wrapped keys in UFS Patch 7-10 - Supports generate, prepare and=20
+> import functionality in ICE and UFS
+>=20
+> NOTE: MMC will have similar changes to UFS and will be uploaded in a diff=
+erent patchset
+>       Patch 3, 4, 8, 10 will have MMC equivalents.
+>=20
+> Testing:
+> Test platform: SM8550 MTP
+> Engineering trustzone image is required to test this feature only for=20
+> SM8550. For SM8650 onwards, all trustzone changes to support this will=20
+> be part of the released images.
+> The engineering changes primarily contain hooks to generate, import=20
+> and prepare keys for HW wrapped disk encryption.
+>=20
+> The changes were tested by mounting initramfs and running the=20
+> fscryptctl tool (Ref:=20
+> https://github.com/ebiggers/fscryptctl/tree/wip-wrapped-keys) to=20
+> generate and prepare keys, as well as to set policies on folders, which c=
+onsequently invokes disk encryption flows through UFS.
+>=20
+> Gaurav Kashyap (10):
+>   ice, ufs, mmc: use blk_crypto_key for program_key
+>   qcom_scm: scm call for deriving a software secret
+>   soc: qcom: ice: add hwkm support in ice
+>   soc: qcom: ice: support for hardware wrapped keys
+>   ufs: core: support wrapped keys in ufs core
+>   ufs: host: wrapped keys support in ufs qcom
+>   qcom_scm: scm call for create, prepare and import keys
+>   ufs: core: add support for generate, import and prepare keys
+>   soc: qcom: support for generate, import and prepare key
+>   ufs: host: support for generate, import and prepare key
+>=20
+>  drivers/firmware/qcom_scm.c            | 292 +++++++++++++++++++++++
+>  drivers/firmware/qcom_scm.h            |   4 +
+>  drivers/mmc/host/cqhci-crypto.c        |   7 +-
+>  drivers/mmc/host/cqhci.h               |   2 +
+>  drivers/mmc/host/sdhci-msm.c           |   6 +-
+>  drivers/soc/qcom/ice.c                 | 309 +++++++++++++++++++++++--
+>  drivers/ufs/core/ufshcd-crypto.c       |  92 +++++++-
+>  drivers/ufs/host/ufs-qcom.c            |  63 ++++-
+>  include/linux/firmware/qcom/qcom_scm.h |  13 ++
+>  include/soc/qcom/ice.h                 |  18 +-
+>  include/ufs/ufshcd.h                   |  25 ++
+>  11 files changed, 797 insertions(+), 34 deletions(-)
 
-It looks slightly neater to put the local declarations in
-descending order of line length if possible e.g.
 
-+	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
-	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-	struct mmc_request *mrq = &mqrq->brq.mrq;
-	struct mmc_host *host = mq->card->host;
+Thank you for continuing to work on this!
 
->  
->  	mmc_post_req(host, mrq, 0);
->  
-> @@ -2136,7 +2137,7 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
->  			blk_mq_complete_request(req);
->  	}
->  
-> -	mmc_blk_mq_dec_in_flight(mq, req);
-> +	mmc_blk_mq_dec_in_flight(mq, issue_type);
->  }
->  
->  void mmc_blk_mq_recovery(struct mmc_queue *mq)
+According to your cover letter, this feature requires a custom TrustZone im=
+age to work on SM8550.  Will that image be made available outside Qualcomm?
+--> Unfortunately, I don't think there is a way to do that. You can still r=
+equest for one through our customer engineering team like before.
 
+Also according to your cover letter, this feature will work on SM8650 out o=
+f the box.  That's great to hear.  However, SM8650 does not appear to be pu=
+blicly available yet or have any upstream kernel support.  Do you know appr=
+oximately when a SM8650 development board will become available to the gene=
+ral public?
+--> I meant it will be available in the future releases. As of today, I don=
+'t have any information on the timelines
+
+Also, can you please make available a git branch somewhere that contains yo=
+ur patchset?  It sounds like this depends on https://git.kernel.org/pub/scm=
+/fs/fscrypt/linux.git/log/?h=3Dwrapped-keys-v7, but actually a version of i=
+t that you've rebased, which I don't have access to.
+Without being able to apply your patchset, I can't properly review it.
+--> As for the fscrypt patches,
+      I have not changed much functionally from the v7 patch, just merge co=
+nflicts.
+      I will update this thread once I figure out a git location.
+
+Thanks!
+
+- Eric
