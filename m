@@ -2,119 +2,173 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8375C41513
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Jul 2023 20:38:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9182CC00528
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Aug 2023 05:23:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229597AbjGaUir (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Jul 2023 16:38:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56190 "EHLO
+        id S229977AbjHAFXh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Aug 2023 01:23:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229550AbjGaUiq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jul 2023 16:38:46 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C42C198;
-        Mon, 31 Jul 2023 13:38:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=ISelzNfwyo+LcVPzu+i+zMJl2RrP3z4luSWxJvJvqhk=; b=ecUqOk1P/oc9OcuXHSZ4MXiHaz
-        s/PUYhO4jddknCn7BxNh6AzglP5ru5XtyE4NPHgTggJ0hBrG/vFhkvbG5IJbN1J7hGM0EDaSwc+pQ
-        TsZc+j9vY2HQCy+iTROBNCUObuLKlTx3SROOpnfU/3kMNRKFdtDEEXomOVD/pJcUfyog6zrUK/ISn
-        regdYt0O7+gGqlcThcy60t/PrOiRSerwdcBtDt1m4wQGOE4knIxa9iQKHqmL9w58KiZAnE9IT07Ub
-        1nty92Qo1vZPqkwYQTLkzX3ueFVI5MOeL/cKXq8eA/gAQ8Ryd1hzXRsM73GsRhoxl8qgKPID3F/cN
-        IJkuQY5g==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qQZey-00HJ3x-0X;
-        Mon, 31 Jul 2023 20:38:32 +0000
-Date:   Mon, 31 Jul 2023 13:38:32 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
+        with ESMTP id S229603AbjHAFXg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2023 01:23:36 -0400
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01C8E1FC0;
+        Mon, 31 Jul 2023 22:23:34 -0700 (PDT)
+Received: from pps.filterd (m0333521.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36VKfvWB001804;
+        Tue, 1 Aug 2023 05:23:30 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-transfer-encoding;
+ s=corp-2023-03-30; bh=uDDsmX1jYKwRiKdRgTn6Do7DO7+Qpy1gQbAxQ7dwHxQ=;
+ b=I9Da7zH7Ya1+vOOUrTX8LtrhtqV5dwlb9eOsYK1lt6XwjgtOvGglk3NdfgQFWJhWFSR4
+ cMOoFBmHWkUd8qMdt8v0uvETY4xYlm/NrfvpVc2i3+r3p0H2dqccD/uv9TwBadm/ko2Z
+ UDnvkEdKgVPfBEVs1pu+6ZB08h4udJGfls/pZSIHSlXGK+TX0G6GCKmCeQ5ooozXAU+D
+ VWa7PjNqhwb/61KMZE8yPzVGCg7ebDXIOSW9p5Vhm/xh3eG7ZrDu0JSDBHRT/H87SFW4
+ pB2tD7cWN7cqcR/Dlv9xfXQKRbsMj3TEZnN6eEyPt/cGVh/9RabsmGeMBgrbKmxrJdfm kA== 
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3s4spc44qe-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 01 Aug 2023 05:23:30 +0000
+Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 3713IQeV008656;
+        Tue, 1 Aug 2023 05:23:28 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+        by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3s4s7c7pt2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 01 Aug 2023 05:23:28 +0000
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3715NSb5017842;
+        Tue, 1 Aug 2023 05:23:28 GMT
+Received: from ca-dev112.us.oracle.com (ca-dev112.us.oracle.com [10.129.136.47])
+        by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTP id 3s4s7c7pse-1;
+        Tue, 01 Aug 2023 05:23:28 +0000
+From:   Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
+To:     Tony Huang <tonyhuang.sunplus@gmail.com>,
+        Li-hao Kuo <lhjeff911@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Yangbo Lu <yangbo.lu@nxp.com>,
-        Joshua Kinard <kumba@gentoo.org>,
-        Daniel Vetter <daniel.vetter@ffwll.ch>,
-        linux-arm-kernel@lists.infradead.org,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-modules@vger.kernel.org
-Subject: Re: [PATCH 5/5] modules: only allow symbol_get of EXPORT_SYMBOL_GPL
- modules
-Message-ID: <ZMgbyNKnotCMyB+f@bombadil.infradead.org>
-References: <20230731083806.453036-1-hch@lst.de>
- <20230731083806.453036-6-hch@lst.de>
+        Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     dan.carpenter@linaro.org, kernel-janitors@vger.kernel.org,
+        error27@gmail.com, harshit.m.mogalapalli@oracle.com
+Subject: [PATCH next] mmc: sunplus: Fix error handling in spmmc_drv_probe()
+Date:   Mon, 31 Jul 2023 22:23:20 -0700
+Message-ID: <20230801052321.1328225-1-harshit.m.mogalapalli@oracle.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230731083806.453036-6-hch@lst.de>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-08-01_03,2023-07-31_02,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxlogscore=999
+ phishscore=0 mlxscore=0 adultscore=0 malwarescore=0 suspectscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2306200000 definitions=main-2308010050
+X-Proofpoint-ORIG-GUID: KrYsyNLaPxCfYNeLm8pheAnWVsrY0hxP
+X-Proofpoint-GUID: KrYsyNLaPxCfYNeLm8pheAnWVsrY0hxP
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jul 31, 2023 at 10:38:06AM +0200, Christoph Hellwig wrote:
-> ---
->  kernel/module/internal.h |  1 +
->  kernel/module/main.c     | 17 ++++++++++++-----
->  2 files changed, 13 insertions(+), 5 deletions(-)
-> 
-> diff --git a/kernel/module/internal.h b/kernel/module/internal.h
-> index c8b7b4dcf7820d..add687c2abde8b 100644
-> --- a/kernel/module/internal.h
-> +++ b/kernel/module/internal.h
-> @@ -93,6 +93,7 @@ struct find_symbol_arg {
->  	/* Input */
->  	const char *name;
->  	bool gplok;
-> +	bool gplonly;
+There are few issues in spmmc_drv_probe():
 
-We'd want to add here a reason or something like that to allow the
-caller to know why we failed if we want to provide feedback.
+1. When mmc allocation fails, goto is a no-op.
+2. When mmc allocation succeeds, the error paths should use goto instead
+   of direct return.
+3. platform_get_irq() doesn't return zero, so '<' is sufficient.
 
->  	bool warn;
->  
->  	/* Output */
-> diff --git a/kernel/module/main.c b/kernel/module/main.c
-> index 59b1d067e52890..85d3f00ca65758 100644
-> --- a/kernel/module/main.c
-> +++ b/kernel/module/main.c
-> @@ -281,6 +281,8 @@ static bool find_exported_symbol_in_section(const struct symsearch *syms,
->  
->  	if (!fsa->gplok && syms->license == GPL_ONLY)
->  		return false;
-> +	if (fsa->gplonly && syms->license != GPL_ONLY)
+Fix the above issues by adding goto instead of direct return, also
+remove NULL check in 'probe_free_host' as we changed the goto to return
+when mmc_alloc_host() fails.
 
-And set it here to something other than perhaps a default of NOT_FOUND.
+Fixes: 4e268fed8b18 ("mmc: Add mmc driver for Sunplus SP7021")
+Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+Closes: https://lore.kernel.org/all/a3829ed3-d827-4b9d-827e-9cc24a3ec3bc@moroto.mountain/
+Signed-off-by: Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
+---
+This is based on static analysis with Smatch. Only compile tested.
+---
+ drivers/mmc/host/sunplus-mmc.c | 41 ++++++++++++++++++++--------------
+ 1 file changed, 24 insertions(+), 17 deletions(-)
 
-> +		return false;
->  
->  	sym = bsearch(fsa->name, syms->start, syms->stop - syms->start,
->  			sizeof(struct kernel_symbol), cmp_name);
-> @@ -776,8 +778,9 @@ SYSCALL_DEFINE2(delete_module, const char __user *, name_user,
-> @@ -1289,14 +1292,18 @@ static void free_module(struct module *mod)
->  void *__symbol_get(const char *symbol)
->  {
->  	struct find_symbol_arg fsa = {
-> -		.name	= symbol,
-> -		.gplok	= true,
-> -		.warn	= true,
-> +		.name		= symbol,
-> +		.gplok		= true,
-> +		.gplonly	= true,
-> +		.warn		= true,
->  	};
->  
->  	preempt_disable();
->  	if (!find_symbol(&fsa) || strong_try_module_get(fsa.owner)) {
->  		preempt_enable();
-> +		if (fsa.gplonly)
-> +			pr_warn("failing symbol_get of non-GPLONLY symbol %s.\n",
+diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
+index a55a87f64d2a..21cd49be08c0 100644
+--- a/drivers/mmc/host/sunplus-mmc.c
++++ b/drivers/mmc/host/sunplus-mmc.c
+@@ -864,10 +864,8 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+ 	int ret = 0;
+ 
+ 	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
+-	if (!mmc) {
+-		ret = -ENOMEM;
+-		goto probe_free_host;
+-	}
++	if (!mmc)
++		return -ENOMEM;
+ 
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
+@@ -875,30 +873,40 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+ 	host->dma_int_threshold = 1024;
+ 
+ 	host->base = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
+-	if (IS_ERR(host->base))
+-		return PTR_ERR(host->base);
++	if (IS_ERR(host->base)) {
++		ret = PTR_ERR(host->base);
++		goto probe_free_host;
++	}
+ 
+ 	host->clk = devm_clk_get(&pdev->dev, NULL);
+-	if (IS_ERR(host->clk))
+-		return dev_err_probe(&pdev->dev, PTR_ERR(host->clk), "clk get fail\n");
++	if (IS_ERR(host->clk)) {
++		ret = dev_err_probe(&pdev->dev, PTR_ERR(host->clk), "clk get fail\n");
++		goto probe_free_host;
++	}
+ 
+ 	host->rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
+-	if (IS_ERR(host->rstc))
+-		return dev_err_probe(&pdev->dev, PTR_ERR(host->rstc), "rst get fail\n");
++	if (IS_ERR(host->rstc)) {
++		ret = dev_err_probe(&pdev->dev, PTR_ERR(host->rstc), "rst get fail\n");
++		goto probe_free_host;
++	}
+ 
+ 	host->irq = platform_get_irq(pdev, 0);
+-	if (host->irq <= 0)
+-		return host->irq;
++	if (host->irq < 0) {
++		ret = host->irq;
++		goto probe_free_host;
++	}
+ 
+ 	ret = devm_request_threaded_irq(&pdev->dev, host->irq,
+ 					spmmc_irq, spmmc_func_finish_req, IRQF_SHARED,
+ 			NULL, host);
+ 	if (ret)
+-		return ret;
++		goto probe_free_host;
+ 
+ 	ret = clk_prepare_enable(host->clk);
+-	if (ret)
+-		return dev_err_probe(&pdev->dev, ret, "failed to enable clk\n");
++	if (ret) {
++		ret = dev_err_probe(&pdev->dev, ret, "failed to enable clk\n");
++		goto probe_free_host;
++	}
+ 
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
+@@ -940,8 +948,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+ 	clk_disable_unprepare(host->clk);
+ 
+ probe_free_host:
+-	if (mmc)
+-		mmc_free_host(mmc);
++	mmc_free_host(mmc);
+ 
+ 	return ret;
+ }
+-- 
+2.39.3
 
-Because here fsa.gplonly is always true here so the above warn will
-print even if a symbol is just not found.
-
-  Luis
