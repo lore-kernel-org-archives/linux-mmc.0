@@ -2,122 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D4EEB64DD
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Aug 2023 02:34:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5DBCC04A6A
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Aug 2023 07:13:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229696AbjHBCeH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Aug 2023 22:34:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38180 "EHLO
+        id S232773AbjHBHN3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Aug 2023 03:13:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229685AbjHBCeG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Aug 2023 22:34:06 -0400
-Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AAC1139;
-        Tue,  1 Aug 2023 19:34:04 -0700 (PDT)
-Received: from dlp.unisoc.com ([10.29.3.86])
-        by SHSQR01.spreadtrum.com with ESMTP id 3722UWPq049048;
-        Wed, 2 Aug 2023 10:30:32 +0800 (+08)
-        (envelope-from Yunlong.Xing@unisoc.com)
-Received: from SHDLP.spreadtrum.com (bjmbx02.spreadtrum.com [10.0.64.8])
-        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RFwrx0tqrz2NmLXW;
-        Wed,  2 Aug 2023 10:28:49 +0800 (CST)
-Received: from tj10379pcu.spreadtrum.com (10.5.32.15) by
- BJMBX02.spreadtrum.com (10.0.64.8) with Microsoft SMTP Server (TLS) id
- 15.0.1497.23; Wed, 2 Aug 2023 10:30:27 +0800
-From:   Yunlong Xing <yunlong.xing@unisoc.com>
-To:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <CLoehle@hyperstone.com>, <brauner@kernel.org>, <hare@suse.de>,
-        <asuk4.q@gmail.com>, <avri.altman@wdc.com>, <beanhuo@micron.com>
-CC:     <linus.walleij@linaro.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <stable@vger.kernel.org>,
-        <hongyu.jin@unisoc.com>, <zhiguo.niu@unisoc.com>,
-        <yunlong.xing23@gmail.com>, <yibin.ding@unisoc.com>,
-        <dongliang.cui@unisoc.com>
-Subject: [PATCH V2] mmc: block: Fix in_flight[issue_type] value error
-Date:   Wed, 2 Aug 2023 10:30:23 +0800
-Message-ID: <20230802023023.1318134-1-yunlong.xing@unisoc.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S232732AbjHBHNV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Aug 2023 03:13:21 -0400
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E22D72116;
+        Wed,  2 Aug 2023 00:13:15 -0700 (PDT)
+Received: by mail-lj1-x232.google.com with SMTP id 38308e7fff4ca-2b9aa1d3029so97075721fa.2;
+        Wed, 02 Aug 2023 00:13:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1690960394; x=1691565194;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2buEm2gDrf1fNgEA1fBvBUhdIcoSkeNWypy9BrDWZro=;
+        b=o/Z0yMvRj/sHbGhhlNrlERgGL/vkblmm6ZJLHQMACyDwmmKmNZYvTU/06maEeEpfRp
+         Qykwe/MywZjAj7CgMOPhkGkeYcF/+NkNb9nzn50MZU8ub6CiuIOy5wlQaHDZiG5zxPFm
+         hOwzsQe8rXq+FQKiuPeG7nEpdZeTr5wWh3uyQZddDw1dVz7T+jkLOZ44dHXGhKyahFF8
+         RSn7gC04V66HalFvzQXJfxycd+4lyPUNPP2wu9sArTQK6awUl2bONG+SgQvFn0/Nru7D
+         YNyTWzdXp1bb3ibxDzOjTS6ZOvdtOkGS6gwUlv+9CUSZEiKg1xeVsqCq30sD7eJNrEvF
+         I9bA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1690960394; x=1691565194;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=2buEm2gDrf1fNgEA1fBvBUhdIcoSkeNWypy9BrDWZro=;
+        b=XUFzgcNj1+T+ja5Sme+MS7rFnPURiwiWAPyenGLL87LNjA6GW0opjGW+JzKm4M5A4t
+         /eF7odK+e4tWp4wRapv/vBd6omuW1fvEwP0ScDOzK3fyCl3xKCP+iDn4HEW7ofmNrf+D
+         xi91SNc6Q5Tki+R87S9sJ0nH8Pjj+6Ik1kZBr64iEdQXtTlR14qTMfgaBCgWMZ11GK/4
+         A5CnyqsSPdslVCNT0pDlIMpjWjerkHBP3DBlbxfZzMi4PIltHBYc7VDGBBIryHRdDWLg
+         EMu5Gek5SIEesNZ4orUfLxy23ffT6Qe37kPwdJWFKIK124NNxJ6HtqQvn20bCyHZreXn
+         h90g==
+X-Gm-Message-State: ABy/qLag+rMIB8Mh3pkcecgn+d3kM1MQau1zI/WW3M0E4B6vIu6b+QSv
+        xjjMtWQhcFOU5jGHdSwoU0jnrY+wwcpieVXhqKk=
+X-Google-Smtp-Source: APBJJlFxZVa5Xg7zcWRSLmy5da3OrRqJyEbYh7IorsIlR3vmcIxbFVhHJnD/w70xPRJB36NtVtlb3OCXjqI+33+VmtI=
+X-Received: by 2002:a05:651c:106:b0:2b5:80e0:f18e with SMTP id
+ a6-20020a05651c010600b002b580e0f18emr4150209ljb.3.1690960393778; Wed, 02 Aug
+ 2023 00:13:13 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.5.32.15]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- BJMBX02.spreadtrum.com (10.0.64.8)
-X-MAIL: SHSQR01.spreadtrum.com 3722UWPq049048
+References: <20230801173544.1929519-1-hch@lst.de> <20230801173544.1929519-3-hch@lst.de>
+In-Reply-To: <20230801173544.1929519-3-hch@lst.de>
+From:   Manuel Lauss <manuel.lauss@gmail.com>
+Date:   Wed, 2 Aug 2023 09:12:37 +0200
+Message-ID: <CAOLZvyGAahsfqS0yMZDaHNVxLBC9QxKGEdW1TRfM_EgieCeORQ@mail.gmail.com>
+Subject: Re: [PATCH 2/5] mmc: au1xmmc: force non-modular build and remove
+ symbol_get usage
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Yangbo Lu <yangbo.lu@nxp.com>,
+        Joshua Kinard <kumba@gentoo.org>,
+        Daniel Vetter <daniel.vetter@ffwll.ch>,
+        Arnd Bergmann <arnd@arndb.de>,
+        linux-arm-kernel@lists.infradead.org,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-modules@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Yibin Ding <yibin.ding@unisoc.com>
+On Tue, Aug 1, 2023 at 7:36=E2=80=AFPM Christoph Hellwig <hch@lst.de> wrote=
+:
+>
+> au1xmmc is split somewhat awkwardly into the main mmc subsystem driver,
+> and callbacks in platform_data that sit under arch/mips/ and are
+> always built in.  The latter than call mmc_detect_change through
+> symbol_get.  Remove the use of symbol_get by requiring the driver
+> to be built in.  In the future the interrupt handlers for card
+> insert/eject detection should probably be moved into the main driver,
+> and which point it can be built modular again.
 
-For a completed request, after the mmc_blk_mq_complete_rq(mq, req)
-function is executed, the bitmap_tags corresponding to the
-request will be cleared, that is, the request will be regarded as
-idle. If the request is acquired by a different type of process at
-this time, the issue_type of the request may change. It further
-caused the value of mq->in_flight[issue_type] to be abnormal,
-and a large number of requests could not be sent.
+The carddetection stuff is entirely system-specific, I don't want the drive=
+r
+littered with board-custom stuff; I'm fine with it being built-in only.
 
-p1:					      p2:
-mmc_blk_mq_complete_rq
-  blk_mq_free_request
-					      blk_mq_get_request
-					        blk_mq_rq_ctx_init
-mmc_blk_mq_dec_in_flight
-  mmc_issue_type(mq, req)
 
-This strategy can ensure the consistency of issue_type
-before and after executing mmc_blk_mq_complete_rq.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  arch/mips/alchemy/devboards/db1000.c |  8 +-------
+>  arch/mips/alchemy/devboards/db1200.c | 19 ++-----------------
+>  arch/mips/alchemy/devboards/db1300.c | 10 +---------
+>  drivers/mmc/host/Kconfig             |  4 ++--
+>  4 files changed, 6 insertions(+), 35 deletions(-)
 
-Fixes: 81196976ed94 ("mmc: block: Add blk-mq support")
-Cc: stable@vger.kernel.org
-Signed-off-by: Yibin Ding <yibin.ding@unisoc.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
-changes of v2: Sort local declarations in descending order of
-line length
----
- drivers/mmc/core/block.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+Ok For me.  If it matters:
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f701efb1fa78..b6f4be25b31b 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2097,14 +2097,14 @@ static void mmc_blk_mq_poll_completion(struct mmc_queue *mq,
- 	mmc_blk_urgent_bkops(mq, mqrq);
- }
- 
--static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, struct request *req)
-+static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, enum mmc_issue_type issue_type)
- {
- 	unsigned long flags;
- 	bool put_card;
- 
- 	spin_lock_irqsave(&mq->lock, flags);
- 
--	mq->in_flight[mmc_issue_type(mq, req)] -= 1;
-+	mq->in_flight[issue_type] -= 1;
- 
- 	put_card = (mmc_tot_in_flight(mq) == 0);
- 
-@@ -2117,6 +2117,7 @@ static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, struct request *req)
- static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
- 				bool can_sleep)
- {
-+	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
- 	struct mmc_request *mrq = &mqrq->brq.mrq;
- 	struct mmc_host *host = mq->card->host;
-@@ -2136,7 +2137,7 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
- 			blk_mq_complete_request(req);
- 	}
- 
--	mmc_blk_mq_dec_in_flight(mq, req);
-+	mmc_blk_mq_dec_in_flight(mq, issue_type);
- }
- 
- void mmc_blk_mq_recovery(struct mmc_queue *mq)
--- 
-2.25.1
+Acked-by: Manuel Lauss <manuel.lauss@gmail.com>
 
+Thanks!
+     Manuel
