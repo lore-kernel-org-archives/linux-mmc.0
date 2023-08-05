@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93FDFC04FDF
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Aug 2023 03:15:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D37E8C41513
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Aug 2023 03:15:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229436AbjHEDPZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Aug 2023 23:15:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38318 "EHLO
+        id S229501AbjHEDP1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Aug 2023 23:15:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229487AbjHEDPS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Aug 2023 23:15:18 -0400
-Received: from mail-pl1-x636.google.com (mail-pl1-x636.google.com [IPv6:2607:f8b0:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CCE84EE1
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Aug 2023 20:15:15 -0700 (PDT)
-Received: by mail-pl1-x636.google.com with SMTP id d9443c01a7336-1bba04b9df3so23737995ad.0
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Aug 2023 20:15:15 -0700 (PDT)
+        with ESMTP id S229538AbjHEDPU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Aug 2023 23:15:20 -0400
+Received: from mail-oo1-xc31.google.com (mail-oo1-xc31.google.com [IPv6:2607:f8b0:4864:20::c31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9118C4EE2
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Aug 2023 20:15:17 -0700 (PDT)
+Received: by mail-oo1-xc31.google.com with SMTP id 006d021491bc7-56c4457c82eso1841494eaf.0
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Aug 2023 20:15:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20221208.gappssmtp.com; s=20221208; t=1691205314; x=1691810114;
+        d=baylibre-com.20221208.gappssmtp.com; s=20221208; t=1691205317; x=1691810117;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=qKcPemMGXOGkd6e68fBQ7r4rih8Hsd/tMIAFH2zBKKY=;
-        b=U9I8H4H2oSIiHiOYExHzDbtlEabitxKvBb85zzo0r3kYZ6LI5LNB4FdOfbfx9fW+CS
-         I18MTXDsOia6GwK/EaiQtLBaEXYAxJhtyGV6rUdIpPPTYVLBaHiC58bVnDkZG5khGWS4
-         S/Sm67JmUcT6KSvSYPyRUuElVgQqKIeqbz7BNVmjWMJyw5BmNgCZQfXFu0BsSrKP/B1y
-         ZJtjE2W7iJVx/r2vONa4XeykBpdVvBfpbg3TnpF87W+C+YCIwUP/jrUbfXVCng7E9Xbr
-         CM1oxTtUzu7e4+Iy7+BbFj8NPKmqBxH67qQEG4lno0ULzNVPG9N8ScrbsW3jubkcIbVn
-         V9fA==
+        bh=HdRLfV4DSjo6NuAp3G0Z9YBsmLluT1U9pYT+QCm2Ogw=;
+        b=Sirb95geXOpdF+w/pVzPoQoiCURDTSuciOvn/xUei5K3StbbKfG9M9SWWEJA6J8KXW
+         2Pdu8HvmQP+5V+NXfwzERYjQ7of36NJWN65NM7hwyB1fdGhyXt2V2nzzPNo7sc3dKOUj
+         H9ETNR/cjSxuMB4y9dkfqhV84Ch1c7BEnDmaWD0I8kXJ/r6kvINdyrx1D97Aw7kLMlok
+         1FBUpcFV0j54uWg0DwZpQAeAU2kgJnCz+3GeIEKCC6l4QckkNfOvi/klhWAZ5/Z+UpGz
+         RQG+9MdYLIa289mgJtDhKk1PhXLXDpk7FaRD9y0QS2xEhxi0Ee2vHnOVwB15DQyy7ZSu
+         l9sw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691205314; x=1691810114;
+        d=1e100.net; s=20221208; t=1691205317; x=1691810117;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=qKcPemMGXOGkd6e68fBQ7r4rih8Hsd/tMIAFH2zBKKY=;
-        b=bPvjxL85sMln093RFL2ZSDlQOHJOLiIIOnooZrx1izHCBch8/9uh9ZF101GVC2koCb
-         l93Sd/S9q/f9BQXU1TdIuK7YKI8+0FWezAAhCvc6qngyT8PMKE+4okvlXrxghv0gJEU8
-         8mTMHOtqNXc2fpJFT1UNaH+0ymdo6f60S8UJRGPbiQEeCMfq6lr6kIYgC+MkbuTjmBAp
-         3+ff1+sOs3fINwodr3J3dB+jtDXhOff8nSyUiqbOGwLoReWkH1V+Dih9Llmyhoz2bTx7
-         Kp2J8K68d9es5ExURLI8fRFVxRo3kqZWaiSizxfDDIkC1n5SI/MWBTyZO3F3c6hXiqJ6
-         ikhg==
-X-Gm-Message-State: AOJu0YzP7atk8e+lIF9gIfGkjy1VDukc4DuzpFHKrtUzPQzz16aFrTvF
-        Y3/Ca16XRWD/3GSOsmMqN+6LEyywpJ0YqfBRyM/DKA==
-X-Google-Smtp-Source: AGHT+IF727UsB1OR6XS/j1Pmf2w+TyT9qGOvl5s/PK4idgD8K/HaVsCLAuTp3MqO9Y2YOQmfrB930A==
-X-Received: by 2002:a17:902:da89:b0:1bc:2437:e54 with SMTP id j9-20020a170902da8900b001bc24370e54mr3797471plx.24.1691205314561;
-        Fri, 04 Aug 2023 20:15:14 -0700 (PDT)
+        bh=HdRLfV4DSjo6NuAp3G0Z9YBsmLluT1U9pYT+QCm2Ogw=;
+        b=WH+M+RYx7ygRtkvx3UKPDaHE7NeTWNXSkBaB96JJBQxf8hIeDvyUhLi6Po6tbUN4Xi
+         Z1kvNUPEERm2NC1O/wFWlR5KLN21wkxw2QVF0lrrvxr3rnIHeV/gk6+zpLMONMecFNr7
+         f74A9GUZh1nLaj76AAMf6tg2Ro9BN/glrYYgP802Qrbe0aoe12sd29Oc7ONaqYTqaEE7
+         J+XcBrS2/P601v8vwu33fFKTQMhNdE+565injiW2eTqnqLvcjKrwGoHW/JQgmezHoEEr
+         2bmQ0AFtFQ20zi1mmSkSSNvnxuNSXUUdPDvPyT+kkNiibJWWJqPOp5bQ/HE+twEnD72c
+         t2Mw==
+X-Gm-Message-State: AOJu0YwjDourxoYxZSxLk4CBcUfE5nl3nI6zxe2eGLGSu+hQ9MYZJ8oM
+        UMyCtrphrKbhzuor7McOI1S2+g==
+X-Google-Smtp-Source: AGHT+IHzW5Dh9evbuaAvm6UO7LWse/VuKTkLwUY6Eyif2RtvDcFf9wUdYu+dWABgQoDwdkeE2gAtHw==
+X-Received: by 2002:a05:6358:5284:b0:134:c682:213f with SMTP id g4-20020a056358528400b00134c682213fmr3883804rwa.31.1691205316886;
+        Fri, 04 Aug 2023 20:15:16 -0700 (PDT)
 Received: from [127.0.1.1] ([2601:1c2:1800:f680:e1a0:2f9c:e6f9:e66c])
-        by smtp.gmail.com with ESMTPSA id h17-20020a170902f55100b001b864add154sm2412145plf.154.2023.08.04.20.15.13
+        by smtp.gmail.com with ESMTPSA id h17-20020a170902f55100b001b864add154sm2412145plf.154.2023.08.04.20.15.15
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Aug 2023 20:15:14 -0700 (PDT)
+        Fri, 04 Aug 2023 20:15:16 -0700 (PDT)
 From:   Drew Fustini <dfustini@baylibre.com>
-Date:   Fri, 04 Aug 2023 20:14:45 -0700
-Subject: [PATCH RFC v2 1/4] dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head
- TH1520 support
+Date:   Fri, 04 Aug 2023 20:14:47 -0700
+Subject: [PATCH RFC v2 3/4] riscv: dts: thead: Enable BeagleV Ahead eMMC
+ controller
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230724-th1520-emmc-v2-1-132ed2e2171e@baylibre.com>
+Message-Id: <20230724-th1520-emmc-v2-3-132ed2e2171e@baylibre.com>
 References: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
 In-Reply-To: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
 To:     Jisheng Zhang <jszhang@kernel.org>, Guo Ren <guoren@kernel.org>,
@@ -75,52 +75,57 @@ Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
         Jason Kridner <jkridner@beagleboard.org>,
         Drew Fustini <dfustini@baylibre.com>
 X-Mailer: b4 0.12.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1691205312; l=1185;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1691205312; l=980;
  i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
- bh=3K5rDs8cYMn2D0gb/trpA7jiBkfDo26+066jZaEVEao=;
- b=s97bIRVyIikHucjhtT5xHg6IE+2nJkWw++h9HqF38zuLSXpBN5TObT50Cq6e4vAfFPT3/ekl1
- v33K7rJ9RVLAuIBoLMoXCyjGyiH993EE9BTsK6JRgLspdZdKbuBOumq
+ bh=fq1uqgjhziV70k9ct30okgNDov04CSkcqVTv+e1VQgM=;
+ b=xot9eapxH2cUSYpXQoibI8Z4Ff4UD4GK5A3fDmYWMiila2+9XbnG2Rse6zZNWn3UKb70c0va1
+ AiqYKQdIC4iBvQL1X269HN0jdo6Y/rlkz5B+PqnyS6gCAcsFHaH9S3n
 X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
  pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add compatible value for the T-Head TH1520 dwcmshc controller and
-thead,io-fixed-1v8 and thead,pull-up properties.
+Add properties to the emmc node and enable it and set the frequency for
+the sdhci clock.
 
 Signed-off-by: Drew Fustini <dfustini@baylibre.com>
 ---
- Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-index a43eb837f8da..57602c345cab 100644
---- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-@@ -19,6 +19,7 @@ properties:
-       - rockchip,rk3568-dwcmshc
-       - rockchip,rk3588-dwcmshc
-       - snps,dwcmshc-sdhci
-+      - thead,th1520-dwcmshc
+diff --git a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
+index c315e5bd3d2d..f93c11754639 100644
+--- a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
++++ b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
+@@ -52,6 +52,10 @@ &uart_sclk {
+ 	clock-frequency = <100000000>;
+ };
  
-   reg:
-     maxItems: 1
-@@ -60,6 +61,14 @@ properties:
-     description: Specify the number of delay for tx sampling.
-     $ref: /schemas/types.yaml#/definitions/uint8
- 
-+  thead,io-fixed-1v8:
-+    description: SoC PHY pad is fixed 1.8V
-+    type: boolean
++&sdhci_clk {
++	clock-frequency = <198000000>;
++};
 +
-+  thead,pull-up:
-+    description: True if pull-up, false if pull-down
-+    type: boolean
+ &dmac0 {
+ 	status = "okay";
+ };
+@@ -59,3 +63,16 @@ &dmac0 {
+ &uart0 {
+ 	status = "okay";
+ };
 +
- 
- required:
-   - compatible
++&mmc0 {
++	max-frequency = <198000000>;
++	non-removable;
++	mmc-hs400-1_8v;
++	thead,io-fixed-1v8;
++	no-sdio;
++	no-sd;
++	thead,pull-up;
++	bus-width = <8>;
++	status = "okay";
++
++};
 
 -- 
 2.34.1
