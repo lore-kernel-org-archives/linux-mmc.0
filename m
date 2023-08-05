@@ -2,519 +2,246 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB7A4C001DB
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Aug 2023 03:15:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F062C001DB
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Aug 2023 13:14:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229559AbjHEDP2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Aug 2023 23:15:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38394 "EHLO
+        id S229755AbjHENOn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 5 Aug 2023 09:14:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41122 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229579AbjHEDPW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Aug 2023 23:15:22 -0400
-Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F25B74EF9
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Aug 2023 20:15:18 -0700 (PDT)
-Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-58451f0fefeso31307857b3.3
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Aug 2023 20:15:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20221208.gappssmtp.com; s=20221208; t=1691205318; x=1691810118;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ZEssXYylfcRLmvvX1PZG2lu6ghbesKpJSC9p5adyHlA=;
-        b=m9TtZJ1YmohVrBqx1ywbr5GBxv0KyDKRkVTU5LjuOxCDvyGTtIRPk8eDBsCnXpaTv6
-         bDOVdW47NOTUB/o+ONbX1F3pk31OVZ4mpauAPhPjw3sdXoMx8A94F3T0eqjaZrl6fvOu
-         XzQh37oi/b1Ax7rxktrIIhr8xf0B4vTDsmo95LxxLXBbO8194iIEvzUhZAlSYCGaD0o1
-         QBPdht05rks7sguZNvMQkvL8ryiE2tZiwntkqXPCTHgR6/z08sUYmMjEgotsIcDIDlOK
-         7uAGUgx66thNik6NJeSg+5xkOyW2xGBijCedZXlkn59t5W2jZ0a2+56EMVBO1be6x/9I
-         fEug==
+        with ESMTP id S229514AbjHENOn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Aug 2023 09:14:43 -0400
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3942210C4
+        for <linux-mmc@vger.kernel.org>; Sat,  5 Aug 2023 06:14:40 -0700 (PDT)
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id D21A83F148
+        for <linux-mmc@vger.kernel.org>; Sat,  5 Aug 2023 13:14:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1691241278;
+        bh=UIZCorPNYUH2jkiVRuR7FSmjsopaTm8kFTAnEKf8VTE=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=bHZvhihxtmDr5Ow0JCOUpb91//mNIAdHegjOHODQUatzVrA0lNNFvzbYPCZfnDvX4
+         f3YOmOzJaPR/rQhljJFoalICXpCWME4/UpZVmb9p0HDZJEzwxhEwqC67DD8dJzjAzz
+         p2VRUkPW597Yp82env3puuVEcAad10zB5ezZMhsAXdEByO8y0fxUVI6MvWaBKkVktl
+         xGxVi1tFwNrYi44dXe9uEJWrlDhWvv3r526CagxOvlxEBK2nUWYNDqi09pd20ccrc5
+         XL6Q1qc5TB2djG3Z5MWzXL6Jr4phdouddU3L4lYLknEcOYkzQ5Gj/btfsdvfVGNqgS
+         TBRf3ftbpbpVQ==
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-76c888cc6cdso334329485a.0
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Aug 2023 06:14:38 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691205318; x=1691810118;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ZEssXYylfcRLmvvX1PZG2lu6ghbesKpJSC9p5adyHlA=;
-        b=RishNxMqr73DDbz1WKfEy71Ppaj3DInqof+phWHOaXYT7qPzdRNDUtuxP9bROBrSz0
-         j9q7Pq0DDhH7F/AnhdQDgWUXFMBXXMDyTVIasPcGnR0dsGI3bZFgelMYPp2FDrABdS6z
-         PQ8Lz384VLJW7tvBhMVeUKNpZTVeCopo1bT1SorKr7XVwfsOVtrNRY64RQOgn4H9Ny70
-         qcvdxVp1GBft+R27yR+xvjhLIE0EnNwe74KHPXMh2ziSxhxwiszWe9vVl4TxXqvhK2Ui
-         sI/w+pQXZ/IcTu+VZCWeObUuHC6e0RbzA15MnOfLyhQTn7AChRRY9ngUL+CK+i1gZARw
-         VEfg==
-X-Gm-Message-State: AOJu0YzG+ojj5NOhKWpJOZRRfi0Gk4Gn1MZl3d7Kz2Z617mwQiFDxiDz
-        OBRwpkR7XEyJvkx/seYJHzEqRA==
-X-Google-Smtp-Source: AGHT+IFAXu64bzecYiS+zN/VXMBk3AC5ZlmcVnM+1xblHJbWf+j87Akk84lYhrAdjvR++C3mLJEyiw==
-X-Received: by 2002:a81:73c1:0:b0:584:3140:fcae with SMTP id o184-20020a8173c1000000b005843140fcaemr3730178ywc.26.1691205317838;
-        Fri, 04 Aug 2023 20:15:17 -0700 (PDT)
-Received: from [127.0.1.1] ([2601:1c2:1800:f680:e1a0:2f9c:e6f9:e66c])
-        by smtp.gmail.com with ESMTPSA id h17-20020a170902f55100b001b864add154sm2412145plf.154.2023.08.04.20.15.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Aug 2023 20:15:17 -0700 (PDT)
-From:   Drew Fustini <dfustini@baylibre.com>
-Date:   Fri, 04 Aug 2023 20:14:48 -0700
-Subject: [PATCH RFC v2 4/4] mmc: sdhci-of-dwcmshc: Add support for T-Head
- TH1520
+        d=1e100.net; s=20221208; t=1691241277; x=1691846077;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=UIZCorPNYUH2jkiVRuR7FSmjsopaTm8kFTAnEKf8VTE=;
+        b=lXke3JYjQuiQ1g44BBVQrMl21msQqAvqC0By+WN1wEuYnYEuXZ874VVNg11tsAKsxY
+         l2D9pq+t4dEqVknMBuq4tjzzdBb9qrAMC6EwRMkzvk77+GsMc38HOtTCc3LjiG9AKoHf
+         0iVmbQL6pvad8CD7QiQXJQfj/MLHEHAI3l9YvzbZGJ39y0yoON+CD4mWzkasgSy9n/Hn
+         B9FXXmTacFX98XpwRXShD7VG/e/j1FfcLJbrWL4SsVeMtWYqavMMLy5Md1dzFdjwC8qh
+         ZVtsyp4DMAnL7JsufSBGd+u/RagM/WMCCb1hCKY8kzWSB6ZRL37UvA0gYZNIxhiGp5ZM
+         RDtg==
+X-Gm-Message-State: AOJu0YzlxHwKGz0w01Uj2WyHvK8BcyC/zUt4fNY/oyZhn8OsPGa3Rb2k
+        r8Z3xn1IfOwi0AuZGviWw/uGYW5Q+80diwyHyhU+cxQEgd28BAJZXffYzq3NNY/ngM4OkvW47G8
+        Q5iL75qxRFWwBYkdTl/eOF20K9dYpYNQ3q9XbKhm7EKGJ7ttZTGmgPg==
+X-Received: by 2002:a05:620a:b19:b0:76c:4833:f851 with SMTP id t25-20020a05620a0b1900b0076c4833f851mr4889931qkg.47.1691241277323;
+        Sat, 05 Aug 2023 06:14:37 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IF+eIfLgnZw5L9ycwyhdLrN0uqyoE4q3saqIVPvg88zQ5KEtjZikqCgXF3BhVK1Upko+kK9baLSnF/xrJ3ejpg=
+X-Received: by 2002:a05:620a:b19:b0:76c:4833:f851 with SMTP id
+ t25-20020a05620a0b1900b0076c4833f851mr4889905qkg.47.1691241277035; Sat, 05
+ Aug 2023 06:14:37 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20230724-th1520-emmc-v2-4-132ed2e2171e@baylibre.com>
-References: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
-In-Reply-To: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
-To:     Jisheng Zhang <jszhang@kernel.org>, Guo Ren <guoren@kernel.org>,
-        Fu Wei <wefu@redhat.com>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
+References: <20230215113249.47727-1-william.qiu@starfivetech.com>
+ <20230215113249.47727-4-william.qiu@starfivetech.com> <CAJM55Z8gVEZS4Ws2Gi7_JbdkS-4y3_8mQvR4ZxLCWZ4A1y9X1g@mail.gmail.com>
+ <CAJM55Z-h+CUmWtkn31Ek+qvxrOr5_Jz3QRRLqWYLz2A0E+h+rA@mail.gmail.com> <d967d628-6961-568e-d72e-ce0e17153818@starfivetech.com>
+In-Reply-To: <d967d628-6961-568e-d72e-ce0e17153818@starfivetech.com>
+From:   Emil Renner Berthing <emil.renner.berthing@canonical.com>
+Date:   Sat, 5 Aug 2023 15:14:20 +0200
+Message-ID: <CAJM55Z_sXt8G4+SFuN74g95zjE73f=9gbtVE+dxZ0UDEcH1hMQ@mail.gmail.com>
+Subject: Re: [PATCH v4 3/4] riscv: dts: starfive: Add mmc node
+To:     William Qiu <william.qiu@starfivetech.com>
 Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Drew Fustini <dfustini@baylibre.com>
-X-Mailer: b4 0.12.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1691205312; l=13837;
- i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
- bh=2qncJ7KYiC6cdlh9U1u79nbaJbz5Do2OWKzGmquv4Hg=;
- b=x18Ag9S9tpvglqxWeMu1+55X8RMK2dlAxP4Wck4uOyOeduvak2HIHLu/kPuICDq1QsaM5FjJU
- SmigiE0+XY+AvLIODqc73iGWveWL60ijMzNMO6Iq58nJRmiHI0Jxn/K
-X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
- pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
+        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add basic support for the T-Head TH1520 SoC mmc controller with the new
-compatible "thead,th1520-dwcmshc".
+On Wed, 15 Feb 2023 at 13:26, William Qiu <william.qiu@starfivetech.com> wrote:
+> On 2023/2/15 20:22, Emil Renner Berthing wrote:
+> > On Wed, 15 Feb 2023 at 13:12, Emil Renner Berthing
+> > <emil.renner.berthing@canonical.com> wrote:
+> >>
+> >> On Wed, 15 Feb 2023 at 12:35, William Qiu <william.qiu@starfivetech.com> wrote:
+> >> >
+> >> > Add the mmc node for the StarFive JH7110 SoC.
+> >> > Set mmco node to emmc and set mmc1 node to sd.
+> >> >
+> >> > Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> >> > ---
+> >> >  .../jh7110-starfive-visionfive-2.dtsi         | 23 +++++++++
+> >> >  arch/riscv/boot/dts/starfive/jh7110.dtsi      | 47 +++++++++++++++++++
+> >> >  2 files changed, 70 insertions(+)
+> >> >
+> >> > diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> >> > index c60280b89c73..e1a0248e907f 100644
+> >> > --- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> >> > +++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> >> > @@ -42,6 +42,29 @@ &rtc_osc {
+> >> >         clock-frequency = <32768>;
+> >> >  };
+> >> >
+> >> > +&mmc0 {
+> >> > +       max-frequency = <100000000>;
+> >> > +       bus-width = <8>;
+> >> > +       cap-mmc-highspeed;
+> >> > +       mmc-ddr-1_8v;
+> >> > +       mmc-hs200-1_8v;
+> >> > +       non-removable;
+> >> > +       cap-mmc-hw-reset;
+> >> > +       post-power-on-delay-ms = <200>;
+> >> > +       status = "okay";
+> >> > +};
+> >> > +
+> >> > +&mmc1 {
+> >> > +       max-frequency = <100000000>;
+> >> > +       bus-width = <4>;
+> >> > +       no-sdio;
+> >> > +       no-mmc;
+> >> > +       broken-cd;
+> >> > +       cap-sd-highspeed;
+> >> > +       post-power-on-delay-ms = <200>;
+> >> > +       status = "okay";
+> >> > +};
+> >
+> > These nodes are also still oddly placed in the middle of the external
+> > clocks. Again please keep the external clocks at the top and then
+> > order the nodes alphabetically to have some sort of system.
+> >
+>
+>
+> Hi Emil,
+>
+> I'll update it in next version.
 
-However, quirks are currently set to disable DMA and use PIO. The proper
-settings for DMA support still need to be determined.
+Hi William,
 
-Another issue is th1520-specific code for MMC_TIMING_MMC_HS400 in
-dwcmshc_set_uhs_signaling() will run on all platforms which is not
-correct. One solution could be to add a th1520 flag to dwcmshc_priv but
-that is hacky. Another solution could be to set the set_uhs_signaling op
-in sdhci_dwcmshc_th1520_ops to a th1520-specific function. However, that
-new function would have to duplicate all the code in the current
-dwcmshc_set_uhs_signaling().
+It seems the mmc nodes are still missing from the upstream device
+tree. The sysreg nodes have been added in Conors riscv-dt-for-next[1]
+branch, so I don't see any missing dependencies. Could you please
+update and send a new version of this?
 
-Signed-off-by: Drew Fustini <dfustini@baylibre.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 336 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 336 insertions(+)
+[1]: https://git.kernel.org/pub/scm/linux/kernel/git/conor/linux.git/log/?h=riscv-dt-for-next
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index e68cd87998c8..d35e204cdb16 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -71,6 +71,63 @@
- 	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
- #define RK35xx_MAX_CLKS 3
- 
-+/* T-Head specific registers */
-+#define DWC_MSHC_PTR_PHY_R	0x300
-+#define PHY_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x00)
-+#define PHY_RSTN		0x0
-+#define PAD_SP			0x10
-+#define PAD_SN			0x14
-+
-+#define PHY_CMDPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x04)
-+#define PHY_DATAPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x06)
-+#define PHY_CLKPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x08)
-+#define PHY_STBPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0a)
-+#define PHY_RSTNPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0c)
-+#define RXSEL			0x0
-+#define WEAKPULL_EN		0x3
-+#define TXSLEW_CTRL_P		0x5
-+#define TXSLEW_CTRL_N		0x9
-+
-+#define PHY_PADTEST_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0e)
-+#define PHY_PADTEST_OUT_R	(DWC_MSHC_PTR_PHY_R + 0x10)
-+#define PHY_PADTEST_IN_R	(DWC_MSHC_PTR_PHY_R + 0x12)
-+#define PHY_PRBS_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x18)
-+#define PHY_PHYLBK_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x1a)
-+#define PHY_COMMDL_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x1c)
-+
-+#define PHY_SDCLKDL_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x1d)
-+#define UPDATE_DC		0x4
-+
-+#define PHY_SDCLKDL_DC_R	(DWC_MSHC_PTR_PHY_R + 0x1e)
-+#define PHY_SMPLDL_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x20)
-+#define PHY_ATDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x21)
-+#define INPSEL_CNFG		2
-+
-+#define PHY_DLL_CTRL_R		(DWC_MSHC_PTR_PHY_R + 0x24)
-+#define DLL_EN			0x0
-+
-+#define PHY_DLL_CNFG1_R		(DWC_MSHC_PTR_PHY_R + 0x25)
-+#define PHY_DLL_CNFG2_R		(DWC_MSHC_PTR_PHY_R + 0x26)
-+#define PHY_DLLDL_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x28)
-+#define SLV_INPSEL		0x5
-+
-+#define P_VENDOR_SPECIFIC_AREA	0x500
-+#define EMMC_CTRL_R		(P_VENDOR_SPECIFIC_AREA + 0x2c)
-+#define AT_CTRL_R		(P_VENDOR_SPECIFIC_AREA + 0x40)
-+#define AT_EN			0x0
-+#define CI_SEL			0x1
-+#define SWIN_TH_EN		0x2
-+#define RPT_TUNE_ERR		0x3
-+#define SW_TUNE_EN		0x4
-+#define WIN_EDGE_SEL		0x8
-+#define TUNE_CLK_STOP_EN	0x10
-+#define PRE_CHANGE_DLY		0x11
-+#define POST_CHANGE_DLY		0x13
-+#define SWIN_TH_VAL		0x18
-+
-+#define DELAY_LINE_HS400	24
-+#define DELAY_LINE_DEFAULT	50
-+
- #define BOUNDARY_OK(addr, len) \
- 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
- 
-@@ -91,6 +148,10 @@ struct dwcmshc_priv {
- 	struct clk	*bus_clk;
- 	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
- 	void *priv; /* pointer to SoC private stuff */
-+	uint32_t delay_line;
-+	bool non_removable;
-+	bool pull_up_en;
-+	bool io_fixed_1v8;
- };
- 
- /*
-@@ -156,11 +217,171 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	sdhci_request(mmc, mrq);
- }
- 
-+static void sdhci_phy_1_8v_init_no_pull(struct sdhci_host *host)
-+{
-+	uint32_t val;
-+	sdhci_writel(host, 1, DWC_MSHC_PTR_PHY_R);
-+	sdhci_writeb(host, 1 << 4, PHY_SDCLKDL_CNFG_R);
-+	sdhci_writeb(host, 0x40, PHY_SDCLKDL_DC_R);
-+
-+	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-+	val &= ~(1 << 4);
-+	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-+
-+
-+	val = sdhci_readw(host, PHY_CMDPAD_CNFG_R);
-+	sdhci_writew(host, val | 1, PHY_CMDPAD_CNFG_R);
-+
-+	val = sdhci_readw(host, PHY_DATAPAD_CNFG_R);
-+	sdhci_writew(host, val | 1, PHY_DATAPAD_CNFG_R);
-+
-+	val = sdhci_readw(host, PHY_RSTNPAD_CNFG_R);
-+	sdhci_writew(host, val | 1, PHY_RSTNPAD_CNFG_R);
-+
-+	val = sdhci_readw(host, PHY_STBPAD_CNFG_R);
-+	sdhci_writew(host, val | 1, PHY_STBPAD_CNFG_R);
-+
-+	val = sdhci_readb(host, PHY_DLL_CTRL_R);
-+	sdhci_writeb(host, val | 1, PHY_DLL_CTRL_R);
-+}
-+
-+static void sdhci_phy_3_3v_init_no_pull(struct sdhci_host *host)
-+{
-+	uint32_t val;
-+
-+	sdhci_writel(host, 1, DWC_MSHC_PTR_PHY_R);
-+	sdhci_writeb(host, 1 << 4, PHY_SDCLKDL_CNFG_R);
-+	sdhci_writeb(host, 0x40, PHY_SDCLKDL_DC_R);
-+
-+	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-+	val &= ~(1 << 4);
-+	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-+
-+	val = sdhci_readw(host, PHY_CMDPAD_CNFG_R);
-+	sdhci_writew(host, val | 2, PHY_CMDPAD_CNFG_R);
-+
-+	val = sdhci_readw(host, PHY_DATAPAD_CNFG_R);
-+	sdhci_writew(host, val | 2, PHY_DATAPAD_CNFG_R);
-+
-+	val = sdhci_readw(host, PHY_RSTNPAD_CNFG_R);
-+	sdhci_writew(host, val | 2, PHY_RSTNPAD_CNFG_R);
-+
-+	val = sdhci_readw(host, PHY_STBPAD_CNFG_R);
-+	sdhci_writew(host, val | 2, PHY_STBPAD_CNFG_R);
-+
-+	val = sdhci_readb(host, PHY_DLL_CTRL_R);
-+	sdhci_writeb(host, val | 1, PHY_DLL_CTRL_R);
-+}
-+
-+static void th1520_phy_1_8v_init(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 val;
-+
-+	if (!priv)
-+		return;
-+
-+	if (priv->pull_up_en == 0) {
-+		sdhci_phy_1_8v_init_no_pull(host);
-+		return;
-+	}
-+
-+	/* set driving force */
-+	sdhci_writel(host, (1 << PHY_RSTN) | (0xc << PAD_SP) | (0xc << PAD_SN), PHY_CNFG_R);
-+
-+	/* disable delay lane */
-+	sdhci_writeb(host, 1 << UPDATE_DC, PHY_SDCLKDL_CNFG_R);
-+
-+	/* set delay lane */
-+	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-+	sdhci_writeb(host, 0xa, PHY_DLL_CNFG2_R);
-+
-+	/* enable delay lane */
-+	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-+	val &= ~(1 << UPDATE_DC);
-+	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-+
-+	val = (1 << RXSEL) | (1 << WEAKPULL_EN) | (3 << TXSLEW_CTRL_P) | (3 << TXSLEW_CTRL_N);
-+	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-+	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-+	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-+
-+	val = (3 << TXSLEW_CTRL_P) | (3 << TXSLEW_CTRL_N);
-+	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-+
-+	val = (1 << RXSEL) | (2 << WEAKPULL_EN) | (3 << TXSLEW_CTRL_P) | (3 << TXSLEW_CTRL_N);
-+	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-+
-+	/* enable data strobe mode */
-+	sdhci_writeb(host, 3 << SLV_INPSEL, PHY_DLLDL_CNFG_R);
-+	sdhci_writeb(host, (1 << DLL_EN),  PHY_DLL_CTRL_R);
-+}
-+
-+static void th1520_phy_3_3v_init(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 val;
-+
-+	if (priv->pull_up_en == 0) {
-+		sdhci_phy_3_3v_init_no_pull(host);
-+		return;
-+	}
-+
-+	/* set driving force */
-+	sdhci_writel(host, (1 << PHY_RSTN) | (0xc << PAD_SP) | (0xc << PAD_SN), PHY_CNFG_R);
-+
-+	/* disable delay lane */
-+	sdhci_writeb(host, 1 << UPDATE_DC, PHY_SDCLKDL_CNFG_R);
-+
-+	/* set delay lane */
-+	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-+	sdhci_writeb(host, 0xa, PHY_DLL_CNFG2_R);
-+
-+	/* enable delay lane */
-+	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-+	val &= ~(1 << UPDATE_DC);
-+	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-+
-+	val = (2 << RXSEL) | (1 << WEAKPULL_EN) | (3 << TXSLEW_CTRL_P) | (3 << TXSLEW_CTRL_N);
-+	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-+	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-+	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-+
-+	val = (3 << TXSLEW_CTRL_P) | (3 << TXSLEW_CTRL_N);
-+	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-+
-+	val = (2 << RXSEL) | (2 << WEAKPULL_EN) | (3 << TXSLEW_CTRL_P) | (3 << TXSLEW_CTRL_N);
-+	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-+}
-+
-+
-+static void th1520_sdhci_set_phy(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u8 emmc_ctl;
-+
-+	/* Before power on, set PHY configs */
-+	emmc_ctl = sdhci_readw(host, EMMC_CTRL_R);
-+	if (priv->non_removable) {
-+		th1520_phy_1_8v_init(host);
-+		emmc_ctl |= (1 << DWCMSHC_CARD_IS_EMMC);
-+	} else {
-+		th1520_phy_3_3v_init(host);
-+		emmc_ctl &=~(1 << DWCMSHC_CARD_IS_EMMC);
-+	}
-+	sdhci_writeb(host, emmc_ctl, EMMC_CTRL_R);
-+	sdhci_writeb(host, 0x25, PHY_DLL_CNFG1_R);
-+}
-+
- static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
- 				      unsigned int timing)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+
- 	u16 ctrl, ctrl_2;
- 
- 	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-@@ -188,7 +409,22 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
- 		ctrl_2 |= DWCMSHC_CTRL_HS400;
- 	}
- 
-+	if (priv->io_fixed_1v8)
-+		ctrl_2 |= SDHCI_CTRL_VDD_180;
-+
- 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+
-+	/* TODO: add check so that this only runs on th1520  */
-+	if (timing == MMC_TIMING_MMC_HS400) {
-+		/* disable auto tuning */
-+		u32 reg = sdhci_readl(host, AT_CTRL_R);
-+		reg &= ~1;
-+		sdhci_writel(host, reg, AT_CTRL_R);
-+		priv->delay_line = DELAY_LINE_HS400;
-+		th1520_sdhci_set_phy(host);
-+	} else {
-+		sdhci_writeb(host, 0, PHY_DLLDL_CNFG_R);
-+	}
- }
- 
- static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
-@@ -337,6 +573,49 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_reset(host, mask);
- }
- 
-+static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	u32 val = 0;
-+
-+	sdhci_writeb(host, 3 << INPSEL_CNFG, PHY_ATDL_CNFG_R);
-+
-+	val = sdhci_readl(host, AT_CTRL_R);
-+	val &= ~((1 << CI_SEL) | (1 << RPT_TUNE_ERR) \
-+	    | (1 << SW_TUNE_EN) |(0xf << WIN_EDGE_SEL));
-+	val |= (1 << AT_EN) | (1 << SWIN_TH_EN) | (1 << TUNE_CLK_STOP_EN)\
-+	    | (1 << PRE_CHANGE_DLY) | (3 << POST_CHANGE_DLY) | (9 << SWIN_TH_VAL);
-+
-+	sdhci_writel(host, val, AT_CTRL_R);
-+
-+	val = sdhci_readl(host, AT_CTRL_R);
-+	if(!(val & (1 << AT_EN))) {
-+		pr_warn("%s(): auto tuning is not enabled", __func__);
-+		return -1;
-+	}
-+
-+	val &= ~(1 << AT_EN);
-+	sdhci_writel(host, val, AT_CTRL_R);
-+
-+	return 0;
-+}
-+
-+static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u16 ctrl_2;
-+
-+	sdhci_reset(host, mask);
-+
-+	if(priv->io_fixed_1v8){
-+		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if(! (ctrl_2 & SDHCI_CTRL_VDD_180)){
-+			ctrl_2 |= SDHCI_CTRL_VDD_180;
-+			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+		}
-+	}
-+}
-+
- static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.set_clock		= sdhci_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
-@@ -355,6 +634,17 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
- };
- 
-+static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
-+	.set_clock		= sdhci_set_clock,
-+	.set_bus_width		= sdhci_set_bus_width,
-+	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
-+	.get_max_clock		= dwcmshc_get_max_clock,
-+	.reset			= th1520_sdhci_reset,
-+	.adma_write_desc	= dwcmshc_adma_write_desc,
-+	.voltage_switch		= th1520_phy_1_8v_init,
-+	.platform_execute_tuning = &th1520_execute_tuning,
-+};
-+
- static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
- 	.ops = &sdhci_dwcmshc_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-@@ -378,6 +668,15 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
- 		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- };
- 
-+static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
-+	.ops = &sdhci_dwcmshc_th1520_ops,
-+
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		  SDHCI_QUIRK_BROKEN_DMA |
-+		  SDHCI_QUIRK_BROKEN_ADMA,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+};
-+
- static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
- {
- 	int err;
-@@ -434,6 +733,10 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
- }
- 
- static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
-+	{
-+		.compatible = "thead,th1520-dwcmshc",
-+		.data = &sdhci_dwcmshc_th1520_pdata,
-+	},
- 	{
- 		.compatible = "rockchip,rk3588-dwcmshc",
- 		.data = &sdhci_dwcmshc_rk35xx_pdata,
-@@ -541,6 +844,39 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 			goto err_clk;
- 	}
- 
-+	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-+
-+		priv->delay_line = DELAY_LINE_DEFAULT;
-+
-+		if (device_property_present(&pdev->dev, "non-removable"))
-+			priv->non_removable = 1;
-+		else
-+			priv->non_removable = 0;
-+
-+		if (device_property_present(&pdev->dev, "thead,pull-up"))
-+			priv->pull_up_en = 1;
-+		else
-+			priv->pull_up_en = 0;
-+
-+		if (device_property_present(&pdev->dev, "thead,io-fixed-1v8"))
-+			priv->io_fixed_1v8 = true;
-+		else
-+			priv->io_fixed_1v8 = false;
-+
-+		/*
-+		 * start_signal_voltage_switch() will try 3.3V first
-+		 * then 1.8V. Use SDHCI_SIGNALING_180 ranther than
-+		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-+		 * in sdhci_start_signal_voltage_switch().
-+		 */
-+		if(priv->io_fixed_1v8){
-+			host->flags &=~SDHCI_SIGNALING_330;
-+			host->flags |= SDHCI_SIGNALING_180;
-+		}
-+
-+		sdhci_enable_v4_mode(host);
-+	}
-+
- #ifdef CONFIG_ACPI
- 	if (pltfm_data == &sdhci_dwcmshc_bf3_pdata)
- 		sdhci_enable_v4_mode(host);
+/Emil
 
--- 
-2.34.1
-
+> Best Regards
+> William
+>
+> >> >  &gmac0_rmii_refin {
+> >> >         clock-frequency = <50000000>;
+> >> >  };
+> >> > diff --git a/arch/riscv/boot/dts/starfive/jh7110.dtsi b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+> >> > index 64d260ea1f29..17f7b3ee6ca3 100644
+> >> > --- a/arch/riscv/boot/dts/starfive/jh7110.dtsi
+> >> > +++ b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+> >> > @@ -314,6 +314,11 @@ uart2: serial@10020000 {
+> >> >                         status = "disabled";
+> >> >                 };
+> >> >
+> >> > +               stg_syscon: syscon@10240000 {
+> >> > +                       compatible = "starfive,jh7110-stg-syscon", "syscon";
+> >> > +                       reg = <0x0 0x10240000 0x0 0x1000>;
+> >> > +               };
+> >> > +
+> >> >                 uart3: serial@12000000 {
+> >> >                         compatible = "snps,dw-apb-uart";
+> >> >                         reg = <0x0 0x12000000 0x0 0x10000>;
+> >> > @@ -370,6 +375,11 @@ syscrg: clock-controller@13020000 {
+> >> >                         #reset-cells = <1>;
+> >> >                 };
+> >> >
+> >> > +               sys_syscon: syscon@13030000 {
+> >> > +                       compatible = "starfive,jh7110-sys-syscon", "syscon";
+> >> > +                       reg = <0x0 0x13030000 0x0 0x1000>;
+> >> > +               };
+> >> > +
+> >> >                 gpio: gpio@13040000 {
+> >> >                         compatible = "starfive,jh7110-sys-pinctrl";
+> >> >                         reg = <0x0 0x13040000 0x0 0x10000>;
+> >> > @@ -397,6 +407,11 @@ aoncrg: clock-controller@17000000 {
+> >> >                         #reset-cells = <1>;
+> >> >                 };
+> >> >
+> >> > +               aon_syscon: syscon@17010000 {
+> >> > +                       compatible = "starfive,jh7110-aon-syscon", "syscon";
+> >> > +                       reg = <0x0 0x17010000 0x0 0x1000>;
+> >> > +               };
+> >> > +
+> >> >                 gpioa: gpio@17020000 {
+> >> >                         compatible = "starfive,jh7110-aon-pinctrl";
+> >> >                         reg = <0x0 0x17020000 0x0 0x10000>;
+> >> > @@ -407,5 +422,37 @@ gpioa: gpio@17020000 {
+> >> >                         gpio-controller;
+> >> >                         #gpio-cells = <2>;
+> >> >                 };
+> >> > +
+> >> > +               mmc0: mmc@16010000 {
+> >> > +                       compatible = "starfive,jh7110-mmc";
+> >> > +                       reg = <0x0 0x16010000 0x0 0x10000>;
+> >> > +                       clocks = <&syscrg JH7110_SYSCLK_SDIO0_AHB>,
+> >> > +                                <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
+> >> > +                       clock-names = "biu","ciu";
+> >> > +                       resets = <&syscrg JH7110_SYSRST_SDIO0_AHB>;
+> >> > +                       reset-names = "reset";
+> >> > +                       interrupts = <74>;
+> >> > +                       fifo-depth = <32>;
+> >> > +                       fifo-watermark-aligned;
+> >> > +                       data-addr = <0>;
+> >> > +                       starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
+> >> > +                       status = "disabled";
+> >> > +               };
+> >> > +
+> >> > +               mmc1: mmc@16020000 {
+> >> > +                       compatible = "starfive,jh7110-mmc";
+> >> > +                       reg = <0x0 0x16020000 0x0 0x10000>;
+> >> > +                       clocks = <&syscrg JH7110_SYSCLK_SDIO1_AHB>,
+> >> > +                                <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
+> >> > +                       clock-names = "biu","ciu";
+> >> > +                       resets = <&syscrg JH7110_SYSRST_SDIO1_AHB>;
+> >> > +                       reset-names = "reset";
+> >> > +                       interrupts = <75>;
+> >> > +                       fifo-depth = <32>;
+> >> > +                       fifo-watermark-aligned;
+> >> > +                       data-addr = <0>;
+> >> > +                       starfive,sysreg = <&sys_syscon 0x9c 0x1 0x3e>;
+> >> > +                       status = "disabled";
+> >> > +               };
+> >>
+> >> Hi William,
+> >>
+> >> These nodes still don't seem to be sorted by address, eg. by the
+> >> number after the @
+> >> Also please move the dt-binding patch before this one, so dtb_check
+> >> won't fail no matter where git bisect happens to land.
+> >>
+> >> /Emil
+> >>
+> >> >         };
+> >> >  };
+> >> > --
+> >> > 2.34.1
+> >> >
+> >> >
+> >> > _______________________________________________
+> >> > linux-riscv mailing list
+> >> > linux-riscv@lists.infradead.org
+> >> > http://lists.infradead.org/mailman/listinfo/linux-riscv
