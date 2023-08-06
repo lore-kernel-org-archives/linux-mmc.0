@@ -2,103 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D484C41513
-	for <linux-mmc@archiver.kernel.org>; Sun,  6 Aug 2023 20:44:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42D87C0015E
+	for <linux-mmc@archiver.kernel.org>; Sun,  6 Aug 2023 21:03:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229999AbjHFUof (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 6 Aug 2023 16:44:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59784 "EHLO
+        id S230232AbjHFVDm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 6 Aug 2023 17:03:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60506 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229562AbjHFUof (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2023 16:44:35 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEE231713
-        for <linux-mmc@vger.kernel.org>; Sun,  6 Aug 2023 13:44:33 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-d075a831636so4311093276.3
-        for <linux-mmc@vger.kernel.org>; Sun, 06 Aug 2023 13:44:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1691354673; x=1691959473;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+wI6YCUXogiyHKAZj5fEeBvGfkgZpTozFy1IwjbVYrU=;
-        b=lHdpwkEK6FPtL8KD5epPve/3UKd2VMRAvY507u8XgqckRU69zSmqlh9tVChKPsRGpU
-         I8kqIlhFETfn5VTPVJS51/sPjUWtkZe5kj65PRwDgoq7FPJeZNAdNt/I4qgpUnngAIhY
-         19+nJg4xEWIu2aRHnM47vD4GvDzKGTwBbW+gFl62woEDd5Kj2dYPiMo2BuW5al0jdZP3
-         KcK/6d8DRE8WEIGA195EV14ouxuqN3xcLbJ0oPPx5wzBbxAg1ZPDzjJ2v0crnqEvaW4x
-         k7QPIDNsUUZdGhR2eUnikM6tIsCQq8USeb/AQswXrEe1xKWa/rKc+mBeDvVfxR/w2Jvo
-         jSiw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691354673; x=1691959473;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+wI6YCUXogiyHKAZj5fEeBvGfkgZpTozFy1IwjbVYrU=;
-        b=erFr9uembHd34nco4ALV2M+hMKW5ANAo5qbTKg4OqkEATESGVDSlPl6pyO4ppa7i6B
-         EARCnXsOwATeOjlD2JsRzhhtoWMFDXsl/q5FQ1RQSpcsEIxXAUgVP9FRrF2F8Qcty++m
-         ixCXDClHjHjkWMCNmYW4ym3ih1c+Xpw8TcwFcjva7lOlX0VDvKPhkYWYmUDw+17mp6xO
-         rWojkOfZ0zLddRy5mkdiRe9JmJRTk4Xgoq6ZZV+2B0HjIcUOfceh+QRehK9PNS4W5VLi
-         LzY+oVA+7p8HdLYpkZIDq0ZnxOh3g7Jb0Si0CsDvpiZiKZjz84xXPK2jaCcUj4zhNmEB
-         PfRA==
-X-Gm-Message-State: AOJu0Yw5v7cUGHYXKY1NKgEFeI/5q4+4Fa4xyY1OKmVjqyj09g+ZV4oF
-        v3U2FUqhao/XSgu7XeW1HoURVU1VTc1YYfLIu2eHaw==
-X-Google-Smtp-Source: AGHT+IH+SxeDZa3CS+VvMm3nn79tkiiMcdWIMM1zA3LZ+hP44KT5SAPBtDrABDbUrxBu9fq/MsHBL1jrAuopwtrHYU0=
-X-Received: by 2002:a25:b0a8:0:b0:d0b:7ad2:6426 with SMTP id
- f40-20020a25b0a8000000b00d0b7ad26426mr7131022ybj.18.1691354672912; Sun, 06
- Aug 2023 13:44:32 -0700 (PDT)
-MIME-Version: 1.0
-References: <ZM+IlctTTQLs7Qg9@lenoch>
-In-Reply-To: <ZM+IlctTTQLs7Qg9@lenoch>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Sun, 6 Aug 2023 22:44:21 +0200
-Message-ID: <CACRpkdZmd-nb21Cx-jp-CDRjW4VQRV=c4MekHxS3h2p3HsDwZQ@mail.gmail.com>
-Subject: Re: (Octeon) MMC performance degradation due to too many requests
-To:     Ladislav Michl <oss-lists@triops.cz>
+        with ESMTP id S229562AbjHFVDl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2023 17:03:41 -0400
+Received: from h1.cmg2.smtp.forpsi.com (h1.cmg2.smtp.forpsi.com [81.2.195.188])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 796501722
+        for <linux-mmc@vger.kernel.org>; Sun,  6 Aug 2023 14:03:39 -0700 (PDT)
+Received: from lenoch ([80.95.121.122])
+        by cmgsmtp with ESMTPSA
+        id SkuVq5qp8v5uISkuWqRo2l; Sun, 06 Aug 2023 23:03:36 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=triops.cz; s=f2019;
+        t=1691355816; bh=gqQsbgHdAQXBJG7c7HQKGiUkjPW4BuK1aHkZuh5N6I0=;
+        h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type;
+        b=zE64+GN8hrAJaH5lkUk1XFCNefvXHYfkAMzOHhUiLd3pFpVeEhGk15FllUfYD4Yw3
+         GyJAzlS+QGpD2N4aQjh0wkG/8Qz674Jpjw2HmXTBnbeZb/n0wMUSC0rlPPvWngLAK0
+         /rdd/KprLqyCJx/+BDS76LE2y+Ex+b3fNIRR6ozzWhOMA7LQ7ca0AfTkKo/a3yiyFR
+         Q9BMuBBjM+rA0khS38nG74/z0kgEleYwW8NARH03cblKBMfGUDdOiYflOM4jc+ZVti
+         LX1A3f+zXthxJEL5mYEM0LClELxWRZD9FJRH727VVJFLTQeg5ZdlHtjtWL3pyjHhCj
+         QV/h9zPgOszNw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=triops.cz; s=f2019;
+        t=1691355816; bh=gqQsbgHdAQXBJG7c7HQKGiUkjPW4BuK1aHkZuh5N6I0=;
+        h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type;
+        b=zE64+GN8hrAJaH5lkUk1XFCNefvXHYfkAMzOHhUiLd3pFpVeEhGk15FllUfYD4Yw3
+         GyJAzlS+QGpD2N4aQjh0wkG/8Qz674Jpjw2HmXTBnbeZb/n0wMUSC0rlPPvWngLAK0
+         /rdd/KprLqyCJx/+BDS76LE2y+Ex+b3fNIRR6ozzWhOMA7LQ7ca0AfTkKo/a3yiyFR
+         Q9BMuBBjM+rA0khS38nG74/z0kgEleYwW8NARH03cblKBMfGUDdOiYflOM4jc+ZVti
+         LX1A3f+zXthxJEL5mYEM0LClELxWRZD9FJRH727VVJFLTQeg5ZdlHtjtWL3pyjHhCj
+         QV/h9zPgOszNw==
+Date:   Sun, 6 Aug 2023 23:03:35 +0200
+From:   Ladislav Michl <oss-lists@triops.cz>
+To:     Linus Walleij <linus.walleij@linaro.org>
 Cc:     Robert Richter <rric@kernel.org>, linux-mmc@vger.kernel.org,
         linux-mips@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: Re: (Octeon) MMC performance degradation due to too many requests
+Message-ID: <ZNAKpw02GR0yfbyv@lenoch>
+References: <ZM+IlctTTQLs7Qg9@lenoch>
+ <CACRpkdZmd-nb21Cx-jp-CDRjW4VQRV=c4MekHxS3h2p3HsDwZQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CACRpkdZmd-nb21Cx-jp-CDRjW4VQRV=c4MekHxS3h2p3HsDwZQ@mail.gmail.com>
+X-CMAE-Envelope: MS4wfEpCs7TVuHZVBR5Di3XREAhjZ9Xz4xZE6OVKIf91+63w8u6MNDVk1S2gQ+nEAxZQkHf0PGIna6WYI7yHQ6SlijHsBc+kE/XOB7yZ9WuE7ncWGrMfo8v7
+ JyTP8QbglyAPVwYWQryAw8MiZlJAyl6neICySVG9K/NHUk1jtFJfaGfE/mGZ22WZm7zUHQ9R+zobthD3OzIXnhVV1NrqWb5eWlFIP1lw3G5FK8rzhHRv0SzZ
+ CCAoH61s82FvFL6PlIPwNe8Aivb4rZ4vNfQQj5UF07E=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Aug 6, 2023 at 1:48=E2=80=AFPM Ladislav Michl <oss-lists@triops.cz>=
- wrote:
+On Sun, Aug 06, 2023 at 10:44:21PM +0200, Linus Walleij wrote:
+> On Sun, Aug 6, 2023 at 1:48 PM Ladislav Michl <oss-lists@triops.cz> wrote:
+> 
+> > How do we get there?
+> > ff4143ccff31 ("MIPS: Octeon: cavium_octeon_defconfig: Enable Octeon MMC")
+> > enabled MMC driver, but left MMC_BLOCK_BOUNCE disabled, although driver
+> > performace depends on it.
+> 
+> Ooops.
+> 
+> > c3dccb74be28 ("mmc: core: Delete bounce buffer Kconfig option")
+> > Added MMC_CAP_NO_BOUNCE_BUFF to the caps, based on assumption it should
+> > be there as MMC_BLOCK_BOUNCE is disabled in defconfig
+> > de3ee99b097d ("mmc: Delete bounce buffer handling")
+> > finally removed all bounce buffer handling as almost nothing needs that.
+> >
+> > Sadly, 70XX SoC cannot do SG, so it suffers a lot. Strangely enough,
+> > above patches are either authored or suggested by Cavium's employees.
+> >
+> > So, given the number of affected SoC and before cooking driver specific
+> > solution, are we sure we indeed do not want some generic one?
+> 
+> So you are talking about something along the lines of:
+> 
+> commit bd9b902798ab14d19ca116b10bde581ddff8f905
+> Author: Linus Walleij <linus.walleij@linaro.org>
+> Date:   Mon Jan 29 00:44:53 2018 +0100
+> 
+>     mmc: sdhci: Implement an SDHCI-specific bounce buffer
+> 
+> ?
 
-> How do we get there?
-> ff4143ccff31 ("MIPS: Octeon: cavium_octeon_defconfig: Enable Octeon MMC")
-> enabled MMC driver, but left MMC_BLOCK_BOUNCE disabled, although driver
-> performace depends on it.
+Yes, this is the exact commit I had in mind :)
 
-Ooops.
+> Yeah I guess that if this is needed by more than one driver it
+> should be made into a library, or say a piece of code turned on by
+> a config option that the dependent drivers select.
+> 
+> Interested in the job? :D
 
-> c3dccb74be28 ("mmc: core: Delete bounce buffer Kconfig option")
-> Added MMC_CAP_NO_BOUNCE_BUFF to the caps, based on assumption it should
-> be there as MMC_BLOCK_BOUNCE is disabled in defconfig
-> de3ee99b097d ("mmc: Delete bounce buffer handling")
-> finally removed all bounce buffer handling as almost nothing needs that.
->
-> Sadly, 70XX SoC cannot do SG, so it suffers a lot. Strangely enough,
-> above patches are either authored or suggested by Cavium's employees.
->
-> So, given the number of affected SoC and before cooking driver specific
-> solution, are we sure we indeed do not want some generic one?
+Interested is not the word I'd use, but yes, I'll give it a try making it
+a little more generic solution.
 
-So you are talking about something along the lines of:
+> Yours,
+> Linus Walleij
 
-commit bd9b902798ab14d19ca116b10bde581ddff8f905
-Author: Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon Jan 29 00:44:53 2018 +0100
-
-    mmc: sdhci: Implement an SDHCI-specific bounce buffer
-
-?
-
-Yeah I guess that if this is needed by more than one driver it
-should be made into a library, or say a piece of code turned on by
-a config option that the dependent drivers select.
-
-Interested in the job? :D
-
-Yours,
-Linus Walleij
+Best reards,
+	ladis
