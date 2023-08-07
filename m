@@ -2,308 +2,140 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C054C001DB
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Aug 2023 15:01:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6E87C001B0
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Aug 2023 15:27:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230011AbjHGPB2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Aug 2023 11:01:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34532 "EHLO
+        id S230042AbjHGP1P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Aug 2023 11:27:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50624 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229689AbjHGPB2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2023 11:01:28 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFE0510CB
-        for <linux-mmc@vger.kernel.org>; Mon,  7 Aug 2023 08:01:25 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-d0a8ae5f8a6so4910561276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Aug 2023 08:01:25 -0700 (PDT)
+        with ESMTP id S230012AbjHGP1M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2023 11:27:12 -0400
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FF9E10FC
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Aug 2023 08:27:04 -0700 (PDT)
+Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-d0b597e7ac1so5264762276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Aug 2023 08:27:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1691420485; x=1692025285;
+        d=linaro.org; s=google; t=1691422024; x=1692026824;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ou5UOAgRK9IFzp5RVUUxlwlvyWmk6ztlO9htLsNxvOQ=;
-        b=LSrHXj53ID3RyCoPAuGuP076PetmyBBoLglo0czMgF4JeKxHlYxJr9swFuMKS54bKl
-         36iSIYC3g+5Q6VXr1T1QaA8SwL2sDDinICR5vOZysshu4ZzfjTSIbLRt1hOCdU8XvOZL
-         tRGz4znHZzarJytYckIj1ci+7xrKJA3jUZZm5Xb580BX3MLOaOv4+JQM+JVbJ2LIKsky
-         BeHRN2rBIYINl/ZBMVo6Vnlnx+UdhEMYYsrxd769M4RZcOd1szT4Hw6DcvVc5ev7f0KM
-         OdAYtDQ4cFbhsOwk6xoUyQBABQYms+tmCCU2FzrP8e8cfOQYxG2g2fnT2XXU0Nggg2QS
-         K5rA==
+        bh=pRItn2cF5TQNt64raTRsWPd5Q0EJhD3/KF9OeDZ1Jek=;
+        b=MUElYBBzp1nPLlNHE6f/TMFiwNBEnp4Jh6A6+RXtQRmfIPxPveRZ6FSfvExGpHEGoB
+         RiwQQQxoK/oWcZ1+Ls05mu9ejhCXsQ2dUL1r0Kc6+JldzbZTVfBMJ+14l7tCB3/VFwM8
+         Y/DaiHPImTPCgI+S4a/8uWx8qZVK9u5sqRdc5zw9BXE9M2F6fPwyWWl4t+ZkK2PtuTFi
+         /GwylrICjRXYosRcN3l5CqE5HrLmurEEGMIsJmx1k7ga9EPPnKZgoAL+d6Rqmp/IiGy8
+         7SDUc8lLFjCOfstH631w+MQ/5F4gCNV69IDXo0Uogb/QrQvPBTD+I+H4+Rxdi65+8hhl
+         /NgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691420485; x=1692025285;
+        d=1e100.net; s=20221208; t=1691422024; x=1692026824;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=ou5UOAgRK9IFzp5RVUUxlwlvyWmk6ztlO9htLsNxvOQ=;
-        b=PI8Y2go1ZSQlP1vjMAdXP0e4U9jG/tZq7008zSGaGbxKfwAeeF0s5e+Vv6R0xfYW21
-         3ZKj2MFZwqhqs9bVmXle4xcWC8uLkWqudBXzrfwHrL4lXAw++NFIWWaLR0fmGuw5Zwde
-         GkiZzmImIkkVIYQBGmwteMh2RkGCmHJAh4k4UPQHZ/HIRCUzIZLLz9RFQ/5+mMYwH4kz
-         A/U7LhBbkHkRzM257SKKzLA1waZszBr7tj8tJ9CwdtORXeOiJ6nP0473uhQs1bpDjcHS
-         xPD0ZSpXPDE2vhVIQy/W3N8ousJrQUQMsQV/geMh4sJMDc9AontPfBX32NhZAEZDSgD8
-         l4rQ==
-X-Gm-Message-State: AOJu0YzOaqsXGOiEHuwUTT6RuQ4fac2swFaE2BCu7LfwOt4v4CK//z/o
-        +5dI3gVDj2zbEyoZsQr7M25rVEmecAowGGlVY/tPgw==
-X-Google-Smtp-Source: AGHT+IFfsbMkd+ynXUPcE2+wKzivGqSyO4/1FrdMlVRWegFnSXOFwJA6NY9cOo1Nb25e/hL9U+gXlOTNUp/pT+wD7bk=
-X-Received: by 2002:a25:2f56:0:b0:d48:9ea:4266 with SMTP id
- v83-20020a252f56000000b00d4809ea4266mr5915927ybv.7.1691420484966; Mon, 07 Aug
- 2023 08:01:24 -0700 (PDT)
+        bh=pRItn2cF5TQNt64raTRsWPd5Q0EJhD3/KF9OeDZ1Jek=;
+        b=XwuZG9eG93WFpKrGE74h2u0s3OE1CqJizT7uHaEKw5gMO/HCObdct4fApVjZb/zdXY
+         2l5dG8+9Tkcn7eWolHqMMFZbiGGKVx9ggyyD0xl7P1Lv5L5BseeSWtESBWLNrpnfrqXl
+         H0Gsnbgds1/bJCPHhoaUHC6tdfTE3C03lWRSuQyc93qzo4fTuthEWLymzVBxpLu3ni6M
+         p6EO/nwIip3QLujPGo53RWkxWcPIIfTfl8HjjIs0tzZCApE37kBfl4I8M9LshSWx3EPW
+         4g1Ks1IH2Lcgg1065XL1c0i5cN1nMpBnpaBSYWHsoPMJZleTxZJB5VZQHKTbYeAk9qt/
+         eTCw==
+X-Gm-Message-State: AOJu0YzfBB5cZ/3YHXuCX7eBEedjYThzn4WaWHLnFmHkt+3pTNxHQjhG
+        0c9j0wFwtevT4aeEr4cASmjDP/HTTryzxaFeeoNOFcfU5wN4TbMdmAA=
+X-Google-Smtp-Source: AGHT+IEnVXumr0NCmry9RyuOxY6r32vIR+eeIv8r9xUwQJax2apeM8tRM+axH69DYQH98HK4UUlOM0RO2JbMTbOXpMg=
+X-Received: by 2002:a25:2396:0:b0:c12:29ac:1d36 with SMTP id
+ j144-20020a252396000000b00c1229ac1d36mr10222700ybj.7.1691422023820; Mon, 07
+ Aug 2023 08:27:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com> <20230722014037.42647-2-shyamsaini@linux.microsoft.com>
-In-Reply-To: <20230722014037.42647-2-shyamsaini@linux.microsoft.com>
+References: <20230727070051.17778-1-frank.li@vivo.com>
+In-Reply-To: <20230727070051.17778-1-frank.li@vivo.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 7 Aug 2023 17:00:48 +0200
-Message-ID: <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
-Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB) driver
-To:     Shyam Saini <shyamsaini@linux.microsoft.com>
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        op-tee@lists.trustedfirmware.org, linux-scsi@vger.kernel.org,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Sumit Garg <sumit.garg@linaro.org>,
-        Tyler Hicks <code@tyhicks.com>,
-        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
-        Paul Moore <paul@paul-moore.com>,
-        Allen Pais <apais@linux.microsoft.com>
+Date:   Mon, 7 Aug 2023 17:26:27 +0200
+Message-ID: <CAPDyKFr5smUN5VHCo-O_iFB=qzHFg5Gn9d6wm3bw+5UEy9n=Ww@mail.gmail.com>
+Subject: Re: [PATCH v3 01/62] mmc: sunxi: Convert to platform remove callback
+ returning void
+To:     Yangtao Li <frank.li@vivo.com>
+Cc:     Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Samuel Holland <samuel@sholland.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 22 Jul 2023 at 03:41, Shyam Saini
-<shyamsaini@linux.microsoft.com> wrote:
+On Thu, 27 Jul 2023 at 09:01, Yangtao Li <frank.li@vivo.com> wrote:
 >
-> From: Alex Benn=C3=A9e <alex.bennee@linaro.org>
+> The .remove() callback for a platform driver returns an int which makes
+> many driver authors wrongly assume it's possible to do error handling by
+> returning an error code. However the value returned is (mostly) ignored
+> and this typically results in resource leaks. To improve here there is a
+> quest to make the remove callback return void. In the first step of this
+> quest all drivers are converted to .remove_new() which already returns
+> void.
 >
-> [This is patch 1 from [1] Alex's submission and this RPMB layer was
-> originally proposed by [2]Thomas Winkler ]
+> Trivially convert this driver from always returning zero in the remove
+> callback to the void returning variant.
 >
-> A number of storage technologies support a specialised hardware
-> partition designed to be resistant to replay attacks. The underlying
-> HW protocols differ but the operations are common. The RPMB partition
-> cannot be accessed via standard block layer, but by a set of specific
-> commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
-> partition provides authenticated and replay protected access, hence
-> suitable as a secure storage.
->
-> The initial aim of this patch is to provide a simple RPMB Driver which
-> can be accessed by Linux's optee driver to facilitate fast-path for
-> RPMB access to optee OS(secure OS) during the boot time. [1] Currently,
-> Optee OS relies on user-tee supplicant to access eMMC RPMB partition.
->
-> A TEE device driver can claim the RPMB interface, for example, via
-> class_interface_register(). The RPMB driver provides a series of
-> operations for interacting with the device.
+> Cc: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> Acked-by: Jernej Skrabec <jernej.skrabec@gmail.com>
 
-I don't quite follow this. More exactly, how will the TEE driver know
-what RPMB device it should use?
+Normally I would prefer one patch per host driver, but in this series
+the changes are so trivial that it just becomes more difficult for me
+to manage.
 
->
->   * program_key - a one time operation for setting up a new device
->   * get_capacity - introspect the device capacity
->   * get_write_counter - check the write counter
->   * write_blocks - write a series of blocks to the RPMB device
->   * read_blocks - read a series of blocks from the RPMB device
->
-> The detailed operation of implementing the access is left to the TEE
-> device driver itself.
->
-> The framing details and HW specific bits (JDEC vs NVME frames) are
-> left to the lower level TEE driver to worry about.
->
-> Without kernel fast path to RPMB access doesn't work when IMA try to
-> extend ftpm's PCR registers.
->
-> This fast-path would require additional work in linux optee driver and
-> as well as in MMC driver.
->
-> [1] https://lore.kernel.org/lkml/20220405093759.1126835-2-alex.bennee@lin=
-aro.org/
-> [2] https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-to=
-mas.winkler@intel.com/
-> [3] https://optee.readthedocs.io/en/latest/architecture/secure_storage.ht=
-ml
->
-> Signed-off-by: Alex Benn=C3=A9e <alex.bennee@linaro.org>
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
->
-
-[...]
-
-> +/**
-> + * rpmb_dev_find_device() - return first matching rpmb device
-> + * @data: data for the match function
-> + * @match: the matching function
-> + *
-> + * Return: matching rpmb device or NULL on failure
-> + */
-> +static
-> +struct rpmb_dev *rpmb_dev_find_device(const void *data,
-> +                                     int (*match)(struct device *dev,
-> +                                                  const void *data))
-> +{
-> +       struct device *dev;
-> +
-> +       dev =3D class_find_device(&rpmb_class, NULL, data, match);
-> +
-> +       return dev ? to_rpmb_dev(dev) : NULL;
-> +}
-> +
-> +struct device_with_target {
-> +       const struct device *dev;
-> +       u8 target;
-> +};
-> +
-> +static int match_by_parent(struct device *dev, const void *data)
-> +{
-> +       const struct device_with_target *d =3D data;
-> +       struct rpmb_dev *rdev =3D to_rpmb_dev(dev);
-> +
-> +       return (d->dev && dev->parent =3D=3D d->dev && rdev->target =3D=
-=3D d->target);
-> +}
-> +
-> +/**
-> + * rpmb_dev_find_by_device() - retrieve rpmb device from the parent devi=
-ce
-> + * @parent: parent device of the rpmb device
-> + * @target: RPMB target/region within the physical device
-> + *
-> + * Return: NULL if there is no rpmb device associated with the parent de=
-vice
-> + */
-> +struct rpmb_dev *rpmb_dev_find_by_device(struct device *parent, u8 targe=
-t)
-> +{
-> +       struct device_with_target t;
-> +
-> +       if (!parent)
-> +               return NULL;
-> +
-> +       t.dev =3D parent;
-> +       t.target =3D target;
-> +
-> +       return rpmb_dev_find_device(&t, match_by_parent);
-> +}
-> +EXPORT_SYMBOL_GPL(rpmb_dev_find_by_device);
-
-Is this what the TEE driver would be calling to find the rpmb device/partit=
-ion?
-
-> +
-> +/**
-> + * rpmb_dev_unregister() - unregister RPMB partition from the RPMB subsy=
-stem
-> + * @rdev: the rpmb device to unregister
-> + * Return:
-> + * *        0 on success
-> + * *        -EINVAL on wrong parameters
-> + */
-> +int rpmb_dev_unregister(struct rpmb_dev *rdev)
-> +{
-> +       if (!rdev)
-> +               return -EINVAL;
-> +
-> +       mutex_lock(&rdev->lock);
-> +       rpmb_cdev_del(rdev);
-
-I can't find the function above. I guess it should be included as a
-part of the patch too?
-
-> +       device_del(&rdev->dev);
-> +       mutex_unlock(&rdev->lock);
-> +
-> +       rpmb_dev_put(rdev);
-> +
-> +       return 0;
-> +}
-> +EXPORT_SYMBOL_GPL(rpmb_dev_unregister);
-
-[...]
-
-> +/**
-> + * rpmb_dev_register - register RPMB partition with the RPMB subsystem
-> + * @dev: storage device of the rpmb device
-> + * @target: RPMB target/region within the physical device
-> + * @ops: device specific operations
-> + *
-> + * Return: a pointer to rpmb device
-> + */
-> +struct rpmb_dev *rpmb_dev_register(struct device *dev, u8 target,
-> +                                  const struct rpmb_ops *ops)
-> +{
-> +       struct rpmb_dev *rdev;
-> +       int id;
-> +       int ret;
-> +
-> +       if (!dev || !ops)
-> +               return ERR_PTR(-EINVAL);
-> +
-> +       if (!ops->program_key)
-> +               return ERR_PTR(-EINVAL);
-> +
-> +       if (!ops->get_capacity)
-> +               return ERR_PTR(-EINVAL);
-> +
-> +       if (!ops->get_write_counter)
-> +               return ERR_PTR(-EINVAL);
-> +
-> +       if (!ops->write_blocks)
-> +               return ERR_PTR(-EINVAL);
-> +
-> +       if (!ops->read_blocks)
-> +               return ERR_PTR(-EINVAL);
-> +
-> +       rdev =3D kzalloc(sizeof(*rdev), GFP_KERNEL);
-> +       if (!rdev)
-> +               return ERR_PTR(-ENOMEM);
-> +
-> +       id =3D ida_simple_get(&rpmb_ida, 0, 0, GFP_KERNEL);
-> +       if (id < 0) {
-> +               ret =3D id;
-> +               goto exit;
-> +       }
-> +
-> +       mutex_init(&rdev->lock);
-> +       rdev->ops =3D ops;
-> +       rdev->id =3D id;
-> +       rdev->target =3D target;
-> +
-> +       dev_set_name(&rdev->dev, "rpmb%d", id);
-> +       rdev->dev.class =3D &rpmb_class;
-> +       rdev->dev.parent =3D dev;
-> +
-> +       rpmb_cdev_prepare(rdev);
-
-Ditto.
-
-> +
-> +       ret =3D device_register(&rdev->dev);
-> +       if (ret)
-> +               goto exit;
-> +
-> +       rpmb_cdev_add(rdev);
-
-Ditto.
-
-> +
-> +       dev_dbg(&rdev->dev, "registered device\n");
-> +
-> +       return rdev;
-> +
-> +exit:
-> +       if (id >=3D 0)
-> +               ida_simple_remove(&rpmb_ida, id);
-> +       kfree(rdev);
-> +       return ERR_PTR(ret);
-> +}
-> +EXPORT_SYMBOL_GPL(rpmb_dev_register);
-> +
-
-[...]
+Please squash all changes that convert from using ->remove() to
+.remove_new() into one single patch for the mmc host drivers. Note
+that, I discovered there are some additional cleanups being part of
+the series, those deserve to be submitted indepently of this.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 69dcb8805e05..d3bd0ac99ec4 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1486,7 +1486,7 @@ static int sunxi_mmc_probe(struct platform_device *=
+pdev)
+>         return ret;
+>  }
+>
+> -static int sunxi_mmc_remove(struct platform_device *pdev)
+> +static void sunxi_mmc_remove(struct platform_device *pdev)
+>  {
+>         struct mmc_host *mmc =3D platform_get_drvdata(pdev);
+>         struct sunxi_mmc_host *host =3D mmc_priv(mmc);
+> @@ -1499,8 +1499,6 @@ static int sunxi_mmc_remove(struct platform_device =
+*pdev)
+>         }
+>         dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_d=
+ma);
+>         mmc_free_host(mmc);
+> -
+> -       return 0;
+>  }
+>
+>  #ifdef CONFIG_PM
+> @@ -1556,7 +1554,7 @@ static struct platform_driver sunxi_mmc_driver =3D =
+{
+>                 .pm =3D &sunxi_mmc_pm_ops,
+>         },
+>         .probe          =3D sunxi_mmc_probe,
+> -       .remove         =3D sunxi_mmc_remove,
+> +       .remove_new     =3D sunxi_mmc_remove,
+>  };
+>  module_platform_driver(sunxi_mmc_driver);
+>
+> --
+> 2.39.0
+>
