@@ -2,198 +2,196 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A455C001B0
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Aug 2023 21:02:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAF98C41513
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Aug 2023 22:18:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229880AbjHGVCZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Aug 2023 17:02:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46926 "EHLO
+        id S230320AbjHGWSP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Aug 2023 18:18:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229737AbjHGVCY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2023 17:02:24 -0400
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F137710FF;
-        Mon,  7 Aug 2023 14:02:21 -0700 (PDT)
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-1bbf8cb61aeso32024815ad.2;
-        Mon, 07 Aug 2023 14:02:21 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691442141; x=1692046941;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=f4TsMm2M6+p2Ae4GV6s1bQ264mBlKjFh+NTJb4KrZa0=;
-        b=Tp3YqnnupVFieGQecJQ8K+ngp1uSUMSvNfXymCiXEVV3j4pOcXLUTrhy1A9xiwj+uf
-         TwWZMFSVNIE+Cmmk3QUxleBLY6OVE2115RGyV0sOVdhx06f/UzTDPWFeKrlTKg33Uh7e
-         IZKAo1IJcm4m5zSBNG3Qa/0SwghGn/zoIB4GVl3uk+hAWkuHw/+b7UBHLty2w8JclvFS
-         rW623Dstz6f/yhGUDfMUOZU/VDiGbKVRuRoq8NGG7p9t1gr/SZ4XGxQ3X/1BUdvGqZPY
-         dkUMxYp0hC8tIgHqtVxY4ROdwWcbxSHpo+nq0dbf7G4k+B3zOXLi1d8ByRDTy15Zg821
-         rJGg==
-X-Gm-Message-State: AOJu0Yw3MkxYcVCWMwoISWEao2klvsjW5MMhTbW8sEMv6noMtw9Xb/8P
-        7By6Bkx2gmVEw4D2WBoKAlE=
-X-Google-Smtp-Source: AGHT+IHlEPhVGdTO53KNTBE5DZUnn2qohUMKtw2SH1yp2hFE6JfkUV+67ka1RBq5XYtamaCpQHQX4Q==
-X-Received: by 2002:a17:902:ea0d:b0:1bb:b30e:4364 with SMTP id s13-20020a170902ea0d00b001bbb30e4364mr10713334plg.39.1691442141018;
-        Mon, 07 Aug 2023 14:02:21 -0700 (PDT)
-Received: from ?IPV6:2620:15c:211:201:3aca:8f43:1895:4b6c? ([2620:15c:211:201:3aca:8f43:1895:4b6c])
-        by smtp.gmail.com with ESMTPSA id ix11-20020a170902f80b00b001bc676df6a9sm3499656plb.132.2023.08.07.14.02.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 07 Aug 2023 14:02:20 -0700 (PDT)
-Message-ID: <7c8945be-2549-ee79-fbdf-4870eca6f908@acm.org>
-Date:   Mon, 7 Aug 2023 14:02:18 -0700
+        with ESMTP id S229769AbjHGWSO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Aug 2023 18:18:14 -0400
+Received: from NAM02-DM3-obe.outbound.protection.outlook.com (mail-dm3nam02on2076.outbound.protection.outlook.com [40.107.95.76])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2587B94;
+        Mon,  7 Aug 2023 15:18:13 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=O8/pWLQsMtkeJcudSsM/wwuTILL0v6LEfcggmMpCVNNiauf4rW+V8ZdX82JHTImTpCnxlEU9pQwyfFwEq7ZIpnFzVdvD6TZ1XUPAbT+5VDtHjCnuTvatmCJaLvCW00Ek++0W5kUOOfkGEdxgAPotvKXaE25u1VB0UVG+h1/FbEf0ZtUF5Xkx/xFwT3X/sE9GmCPZTaXIAbBJQSFXpsxGZDtgbuKbOBior9V+xC13OZNXkpLxg1gNRNyn5raQA/H4mYg/Flc9aaAvvgg6H3CYsQOF1PtMUlmS+7WnKXodLulLLY0s0wsyEKYnrbWv5ACOAM35ZuMrpqoVAW57ryBjCw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=awkLop5uMCOQv/wECiRNtgZ1GNaNSmrMAvLsd/zLsKM=;
+ b=Tx9Ud8nDdJnbM+DKKaFE+HNeEt3xIamszkDz+e2CGE+AwKxgA+U3RgyB2RQqdbmAlngV4POafqpxo+Q6nFJgbozVy96vMzs4CqHezg/bBQgroKorstIPI+57uQBMkb687fQbBe1ceG9k/syJ98eqfCuD/u3gmPVmzHhEHgBVdipmBLAEgBF1Rs/8jepSg/ledCcw+nn6lW2Xhsx1c7T+NugvTM/cATM/N8Ueohbx6rBp/q74NBxE/sr1yW7XY9o6aiyrGswdB/kG59HePeCTG8qJxRxWIQAVPYvSY0tZzmEcQQ8sMm0qRavj/Jt7ZSUwcOVXfb7DTM7ap1xEQicY1w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=arndb.de smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=awkLop5uMCOQv/wECiRNtgZ1GNaNSmrMAvLsd/zLsKM=;
+ b=tO/NTmzCozO/c489h60C13KW1q+d+bZelOTiLBl9GgoLwRag9514Yk8aq1IadxiavEIGgH0n5JxLrHEb+l4QI7WH6LCBIhS4SUa2NL1lmzWIXyZZAJ6MQyGcsx/DIanSOtC3OETOm/CKez5KfdqTjyvRUU7zno83dUJ093cIWOU=
+Received: from BYAPR01CA0072.prod.exchangelabs.com (2603:10b6:a03:94::49) by
+ LV2PR12MB5967.namprd12.prod.outlook.com (2603:10b6:408:170::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6652.20; Mon, 7 Aug
+ 2023 22:18:06 +0000
+Received: from CO1PEPF000042AC.namprd03.prod.outlook.com
+ (2603:10b6:a03:94:cafe::3e) by BYAPR01CA0072.outlook.office365.com
+ (2603:10b6:a03:94::49) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6631.44 via Frontend
+ Transport; Mon, 7 Aug 2023 22:18:10 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ CO1PEPF000042AC.mail.protection.outlook.com (10.167.243.41) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6652.19 via Frontend Transport; Mon, 7 Aug 2023 22:18:09 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.27; Mon, 7 Aug 2023 17:18:04 -0500
+From:   Brad Larson <blarson@amd.com>
+To:     <arnd@arndb.de>
+CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
+        <andy.shevchenko@gmail.com>, <blarson@amd.com>,
+        <brendan.higgins@linux.dev>, <briannorris@chromium.org>,
+        <broonie@kernel.org>, <catalin.marinas@arm.com>,
+        <conor+dt@kernel.org>, <davidgow@google.com>,
+        <devicetree@vger.kernel.org>, <fancer.lancer@gmail.com>,
+        <gerg@linux-m68k.org>, <gsomlo@gmail.com>,
+        <hal.feng@starfivetech.com>, <hasegawa-hitomi@fujitsu.com>,
+        <j.neuschaefer@gmx.net>, <joel@jms.id.au>, <kernel@esmil.dk>,
+        <krzk@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <lee.jones@linaro.org>, <lee@kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <p.zabel@pengutronix.de>,
+        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
+        <samuel@sholland.org>, <skhan@linuxfoundation.org>,
+        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
+        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
+        <vaishnav.a@ti.com>, <walker.chen@starfivetech.com>,
+        <will@kernel.org>, <zhuyinbo@loongson.cn>
+Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
+Date:   Mon, 7 Aug 2023 15:17:54 -0700
+Message-ID: <20230807221754.51667-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <787582a3-51a1-494e-bfd0-b51d1117432e@app.fastmail.com>
+References: <787582a3-51a1-494e-bfd0-b51d1117432e@app.fastmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB)
- driver
-Content-Language: en-US
-To:     Shyam Saini <shyamsaini@linux.microsoft.com>,
-        linux-kernel@vger.kernel.org
-Cc:     linux-mmc@vger.kernel.org, op-tee@lists.trustedfirmware.org,
-        linux-scsi@vger.kernel.org,
-        =?UTF-8?Q?Alex_Benn=c3=a9e?= <alex.bennee@linaro.org>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Sumit Garg <sumit.garg@linaro.org>,
-        Tyler Hicks <code@tyhicks.com>,
-        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
-        Paul Moore <paul@paul-moore.com>,
-        Allen Pais <apais@linux.microsoft.com>
-References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com>
- <20230722014037.42647-2-shyamsaini@linux.microsoft.com>
-From:   Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <20230722014037.42647-2-shyamsaini@linux.microsoft.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1PEPF000042AC:EE_|LV2PR12MB5967:EE_
+X-MS-Office365-Filtering-Correlation-Id: d29386b3-7d78-42a3-39ae-08db97942ecb
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: LkiTNTqYOhgV9P0Y7uWayt6f/doYZVbg7Xow9SN42Zh+d0ERHiGsNS3t/78zhlflOgBp6dgUujQcRy7Jwi71/lZfhk7D5D/W5mbqSZWQvkN8nhNuRgtpMw76JuSlMZVBvuyPIhnjwUfqz3jtli91mt6mkLQ08Ld1APqeKwP4+VBG0pZz2uBtJI0tw6Tu9cFPVxmZfD/2YCWDGLkCm5mEQcqp0Vpd4b9VM2Ry0nfl8xocDSTT11P55tob01Xnb4GrWpq5CJU6n+S2WYWihrKo5XH1CbZ3d/QW4KB5ipvjDIToNUZdJUyt5C9u9iojsjMISmCRTTulKi95nHlqYn7kKCQbWftcPlBB2z5NW/oEOhLUMmi7iad7K+z4axfunlGhxR04McuSu2q5LQX3rckT4AYyVKjykrDEhSjMzeFX90G1V7nARg0IiI7WuKcVptHvL3KiR9kVL7wY49UZjWIT9AlNhQoevVXx/tw86MaNEfhFHcIiVl+3B7nypor/0DAtqbz/eAxmRK4X07j1EC8Xu66rnD8KqCdBAkscV5ewOH9sjtXTQHVWt6d9P1kClH4mSFPD1af2Cyw/+6fzFLHUVXuxb3XGuxL+jLgKlKAQ8tRUA3qKr9QiJvgwXBscYo0osTqbHng6IKGEmgwRBNq3NbfETYOy6f1UMfKjvx2JUC+tMj2KiCHL7nAGd6EBa8ksrHPaNslEGvKkbiDOp8ZLhJuwojHchkb+JdSYXdBqtAG9AqQRSFfNxdpOsj+t7FczDLBuGZFbI8d/08JFt8/8ng==
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(396003)(136003)(376002)(346002)(451199021)(186006)(1800799003)(82310400008)(46966006)(40470700004)(36840700001)(40460700003)(41300700001)(8936002)(8676002)(47076005)(36860700001)(83380400001)(16526019)(26005)(336012)(1076003)(2616005)(426003)(81166007)(356005)(82740400003)(6666004)(6916009)(316002)(36756003)(54906003)(40480700001)(478600001)(4326008)(70586007)(2906002)(5660300002)(70206006)(7406005)(66899021)(7416002)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Aug 2023 22:18:09.7675
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: d29386b3-7d78-42a3-39ae-08db97942ecb
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1PEPF000042AC.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV2PR12MB5967
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/21/23 18:40, Shyam Saini wrote:
-> +config RPMB
-> +	tristate "RPMB partition interface"
-> +	help
-> +	  Unified RPMB partition interface for RPMB capable devices such as
-> +          eMMC and UFS. Provides interface for in kernel security controllers to
-> +	  access RPMB partition.
-> +
-> +	  If unsure, select N.
+Hi Arnd,
 
-Please also mention NVMe.
+> On Wed, May 24, 2023, at 00:11, Brad Larson wrote:
+>>> On Mon, May 15, 2023, at 20:16, Brad Larson wrote:
+...
+>>> Also, can you explain why this needs a low-lever user interface
+>>> in the first place, rather than something that can be expressed
+>>> using high-level abstractions as you already do with the reset
+>>> control?
+>>>
+>>> All of the above should be part of the changelog text to get a
+>>> driver like this merged. I don't think we can get a quick
+>>> solution here though, so maybe you can start by removing the
+>>> ioctl side and having the rest of the driver in drivers/reset?
 
-Please change the word "partition" into "unit" to avoid confusion with 
-the concept "LBA range partition".
+Might be best to pull the whole thing for now until an acceptable 
+solution is reached.  The reset function is a recovery mechanisim rarely
+used where the byte access to the different IP at the 4 chip-selects
+is needed for a system to boot.
 
-> +static DEFINE_IDA(rpmb_ida);
+>> In the original patchset I added a pensando compatible to spidev and that
+>> was nacked in review and reusing some random compatible that made it into 
+>> spidev was just wrong.  Further it was recommended this should be a system 
+>> specific driver and don't rely on a debug driver like spidev.  I changed 
+>> over to a platform specific driver and at that time I also needed to include 
+>> a reset controller (emmc reset only).  I put these in drivers/mfd and 
+>> drivers/reset.  Review of the device tree for this approach went back and 
+>> forth to _not_ have four child nodes on the spi device each with the same 
+>> compatible. Decision was to squash the child nodes into the parent and put 
+>> the reset-controller there also.  One driver and since its pensando
+>> specific its currently in drivers/soc/amd.
+>>
+>> There are five different user processes and some utilities that access the 
+>> functionality in the cpld/fpga.  You're correct, its passing messages that 
+>> are specific to the IP accessed via chip-select.  No Elba system will boot 
+>> without this driver providing ioctl access.
 
-How are accesses to this IDA serialized?
+> Thank you for the detailed summary. Moving away from spidev and
+> from mfd seems all reasonable here. I'm still a bit confused by
+> why you have multiple chipselects here that are for different
+> subdevices but ended with a single user interface for all of them,
+> but that's not a big deal.
 
-> +/**
-> + * rpmb_get_capacity() - returns the capacity of the rpmb device
-> + * @rdev: rpmb device
-> + *
-> + * Return:
-> + * *        capacity of the device in units of 128K, on success
-> + * *        -EINVAL on wrong parameters
-> + * *        -EOPNOTSUPP if device doesn't support the requested operation
-> + * *        < 0 if the operation fails
-> + */
+The goal is to isolate the the kernel from device and platform specific
+changes.  All the IO to the spi connected CPLD/FPGA (design/cost dependent)
+is a byte at a time or up to 16 bytes for internal flash mgmt.  Performance
+is not an issue and spidev was sufficient.
 
-Why in units of 128 KiB?
+Maybe this paints the right picture to zero in on a correct approach.
+Internal and external IP can be present at CS1/CS2 depending on the design
+where the CS0 board controller registers get additions over time in a
+backward compatible manner.
 
-> +/**
-> + * rpmb_dev_find_by_device() - retrieve rpmb device from the parent device
-> + * @parent: parent device of the rpmb device
-> + * @target: RPMB target/region within the physical device
-> + *
-> + * Return: NULL if there is no rpmb device associated with the parent device
-> + */
+Design 1: FPGA 
+CS0: Board controller registers
+CS1: Designware SPI to I2C to board peripherals
+CS2: Lattice dual I2C master
+CS3: Internal storage
 
-Can an NVMe controller have multiple RPMB units? From the NVMe 
-specification: "The controller may support multiple RPMB targets."
+Design 2: CPLD
+CS0: Board controller registers
+CS1: Not used or some other board specific registers
+CS2: Lattice dual I2C master
+CS3: Internal storage
 
-Can rpmb_dev_find_by_device() be used if multiple RPMB units are 
-associated with a single controller?
+> The main bit that sticks out about this high-level design is how
+> it relies on user space utilities at all to understand the message
+> format. From what I understand about the actual functionality of
+> this device, it most closely resembles an embedded controller that
+> you might find in a laptop or server machine, and those usually
+> have kernel drivers in drivers/platform/ to interact with the
+> device.
 
-> +/**
-> + * rpmb_dev_register - register RPMB partition with the RPMB subsystem
-> + * @dev: storage device of the rpmb device
-> + * @target: RPMB target/region within the physical device
-> + * @ops: device specific operations
-> + *
-> + * Return: a pointer to rpmb device
-> + */
-> +struct rpmb_dev *rpmb_dev_register(struct device *dev, u8 target,
-> +				   const struct rpmb_ops *ops)
-> +{
-> +	struct rpmb_dev *rdev;
-> +	int id;
-> +	int ret;
-> +
-> +	if (!dev || !ops)
-> +		return ERR_PTR(-EINVAL);
-> +
-> +	if (!ops->program_key)
-> +		return ERR_PTR(-EINVAL);
-> +
-> +	if (!ops->get_capacity)
-> +		return ERR_PTR(-EINVAL);
-> +
-> +	if (!ops->get_write_counter)
-> +		return ERR_PTR(-EINVAL);
-> +
-> +	if (!ops->write_blocks)
-> +		return ERR_PTR(-EINVAL);
-> +
-> +	if (!ops->read_blocks)
-> +		return ERR_PTR(-EINVAL);
-> +
-> +	rdev = kzalloc(sizeof(*rdev), GFP_KERNEL);
-> +	if (!rdev)
-> +		return ERR_PTR(-ENOMEM);
-> +
-> +	id = ida_simple_get(&rpmb_ida, 0, 0, GFP_KERNEL);
-> +	if (id < 0) {
-> +		ret = id;
-> +		goto exit;
-> +	}
-> +
-> +	mutex_init(&rdev->lock);
-> +	rdev->ops = ops;
-> +	rdev->id = id;
-> +	rdev->target = target;
-> +
-> +	dev_set_name(&rdev->dev, "rpmb%d", id);
-> +	rdev->dev.class = &rpmb_class;
-> +	rdev->dev.parent = dev;
-> +
-> +	rpmb_cdev_prepare(rdev);
-> +
-> +	ret = device_register(&rdev->dev);
-> +	if (ret)
-> +		goto exit;
-> +
-> +	rpmb_cdev_add(rdev);
-> +
-> +	dev_dbg(&rdev->dev, "registered device\n");
-> +
-> +	return rdev;
-> +
-> +exit:
-> +	if (id >= 0)
-> +		ida_simple_remove(&rpmb_ida, id);
-> +	kfree(rdev);
-> +	return ERR_PTR(ret);
-> +}
+The dozens of registers at CS0 for board management are defined in
+userspace programs or script.  Only the regsiter offset/bit for
+emmc reset is needed for the reset function in the patches.
 
-How is user space software supposed to map an NVMe RPMB target ID to an 
-RPMB device name?
+> Has anyone tried to do it like that? Maybe it would help
+> to see what the full protocol and the user space side looks
+> like, in order to move some or all of it into the kernel.
 
-> +MODULE_AUTHOR("Intel Corporation");
+Looking at drivers/platform its pretty sparse.  What do you 
+recommend based on the design 1/2 variations?
 
-Shouldn't this be the name of a person instead of the name of a company?
-
-Thanks,
-
-Bart.
+Regards,
+Brad
