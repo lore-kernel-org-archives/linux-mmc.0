@@ -2,105 +2,240 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42D87C0015E
-	for <linux-mmc@archiver.kernel.org>; Sun,  6 Aug 2023 21:03:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 366AEC001DF
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Aug 2023 01:51:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230232AbjHFVDm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 6 Aug 2023 17:03:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60506 "EHLO
+        id S229660AbjHGBvU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 6 Aug 2023 21:51:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33302 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229562AbjHFVDl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2023 17:03:41 -0400
-Received: from h1.cmg2.smtp.forpsi.com (h1.cmg2.smtp.forpsi.com [81.2.195.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 796501722
-        for <linux-mmc@vger.kernel.org>; Sun,  6 Aug 2023 14:03:39 -0700 (PDT)
-Received: from lenoch ([80.95.121.122])
-        by cmgsmtp with ESMTPSA
-        id SkuVq5qp8v5uISkuWqRo2l; Sun, 06 Aug 2023 23:03:36 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=triops.cz; s=f2019;
-        t=1691355816; bh=gqQsbgHdAQXBJG7c7HQKGiUkjPW4BuK1aHkZuh5N6I0=;
-        h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type;
-        b=zE64+GN8hrAJaH5lkUk1XFCNefvXHYfkAMzOHhUiLd3pFpVeEhGk15FllUfYD4Yw3
-         GyJAzlS+QGpD2N4aQjh0wkG/8Qz674Jpjw2HmXTBnbeZb/n0wMUSC0rlPPvWngLAK0
-         /rdd/KprLqyCJx/+BDS76LE2y+Ex+b3fNIRR6ozzWhOMA7LQ7ca0AfTkKo/a3yiyFR
-         Q9BMuBBjM+rA0khS38nG74/z0kgEleYwW8NARH03cblKBMfGUDdOiYflOM4jc+ZVti
-         LX1A3f+zXthxJEL5mYEM0LClELxWRZD9FJRH727VVJFLTQeg5ZdlHtjtWL3pyjHhCj
-         QV/h9zPgOszNw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=triops.cz; s=f2019;
-        t=1691355816; bh=gqQsbgHdAQXBJG7c7HQKGiUkjPW4BuK1aHkZuh5N6I0=;
-        h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type;
-        b=zE64+GN8hrAJaH5lkUk1XFCNefvXHYfkAMzOHhUiLd3pFpVeEhGk15FllUfYD4Yw3
-         GyJAzlS+QGpD2N4aQjh0wkG/8Qz674Jpjw2HmXTBnbeZb/n0wMUSC0rlPPvWngLAK0
-         /rdd/KprLqyCJx/+BDS76LE2y+Ex+b3fNIRR6ozzWhOMA7LQ7ca0AfTkKo/a3yiyFR
-         Q9BMuBBjM+rA0khS38nG74/z0kgEleYwW8NARH03cblKBMfGUDdOiYflOM4jc+ZVti
-         LX1A3f+zXthxJEL5mYEM0LClELxWRZD9FJRH727VVJFLTQeg5ZdlHtjtWL3pyjHhCj
-         QV/h9zPgOszNw==
-Date:   Sun, 6 Aug 2023 23:03:35 +0200
-From:   Ladislav Michl <oss-lists@triops.cz>
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Robert Richter <rric@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-mips@vger.kernel.org
-Subject: Re: (Octeon) MMC performance degradation due to too many requests
-Message-ID: <ZNAKpw02GR0yfbyv@lenoch>
-References: <ZM+IlctTTQLs7Qg9@lenoch>
- <CACRpkdZmd-nb21Cx-jp-CDRjW4VQRV=c4MekHxS3h2p3HsDwZQ@mail.gmail.com>
+        with ESMTP id S229509AbjHGBvT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Aug 2023 21:51:19 -0400
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16521172E;
+        Sun,  6 Aug 2023 18:51:15 -0700 (PDT)
+Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 75DE1806C;
+        Mon,  7 Aug 2023 09:51:09 +0800 (CST)
+Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
+ (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Mon, 7 Aug
+ 2023 09:51:09 +0800
+Received: from [192.168.120.59] (171.223.208.138) by EXMBX068.cuchost.com
+ (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Mon, 7 Aug
+ 2023 09:51:08 +0800
+Message-ID: <66287e45-f2ed-7010-95f4-9a307108795b@starfivetech.com>
+Date:   Mon, 7 Aug 2023 09:51:09 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CACRpkdZmd-nb21Cx-jp-CDRjW4VQRV=c4MekHxS3h2p3HsDwZQ@mail.gmail.com>
-X-CMAE-Envelope: MS4wfEpCs7TVuHZVBR5Di3XREAhjZ9Xz4xZE6OVKIf91+63w8u6MNDVk1S2gQ+nEAxZQkHf0PGIna6WYI7yHQ6SlijHsBc+kE/XOB7yZ9WuE7ncWGrMfo8v7
- JyTP8QbglyAPVwYWQryAw8MiZlJAyl6neICySVG9K/NHUk1jtFJfaGfE/mGZ22WZm7zUHQ9R+zobthD3OzIXnhVV1NrqWb5eWlFIP1lw3G5FK8rzhHRv0SzZ
- CCAoH61s82FvFL6PlIPwNe8Aivb4rZ4vNfQQj5UF07E=
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH v4 3/4] riscv: dts: starfive: Add mmc node
+To:     Emil Renner Berthing <emil.renner.berthing@canonical.com>
+CC:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20230215113249.47727-1-william.qiu@starfivetech.com>
+ <20230215113249.47727-4-william.qiu@starfivetech.com>
+ <CAJM55Z8gVEZS4Ws2Gi7_JbdkS-4y3_8mQvR4ZxLCWZ4A1y9X1g@mail.gmail.com>
+ <CAJM55Z-h+CUmWtkn31Ek+qvxrOr5_Jz3QRRLqWYLz2A0E+h+rA@mail.gmail.com>
+ <d967d628-6961-568e-d72e-ce0e17153818@starfivetech.com>
+ <CAJM55Z_sXt8G4+SFuN74g95zjE73f=9gbtVE+dxZ0UDEcH1hMQ@mail.gmail.com>
+Content-Language: en-US
+From:   William Qiu <william.qiu@starfivetech.com>
+In-Reply-To: <CAJM55Z_sXt8G4+SFuN74g95zjE73f=9gbtVE+dxZ0UDEcH1hMQ@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
+ (172.16.6.68)
+X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Aug 06, 2023 at 10:44:21PM +0200, Linus Walleij wrote:
-> On Sun, Aug 6, 2023 at 1:48 PM Ladislav Michl <oss-lists@triops.cz> wrote:
-> 
-> > How do we get there?
-> > ff4143ccff31 ("MIPS: Octeon: cavium_octeon_defconfig: Enable Octeon MMC")
-> > enabled MMC driver, but left MMC_BLOCK_BOUNCE disabled, although driver
-> > performace depends on it.
-> 
-> Ooops.
-> 
-> > c3dccb74be28 ("mmc: core: Delete bounce buffer Kconfig option")
-> > Added MMC_CAP_NO_BOUNCE_BUFF to the caps, based on assumption it should
-> > be there as MMC_BLOCK_BOUNCE is disabled in defconfig
-> > de3ee99b097d ("mmc: Delete bounce buffer handling")
-> > finally removed all bounce buffer handling as almost nothing needs that.
-> >
-> > Sadly, 70XX SoC cannot do SG, so it suffers a lot. Strangely enough,
-> > above patches are either authored or suggested by Cavium's employees.
-> >
-> > So, given the number of affected SoC and before cooking driver specific
-> > solution, are we sure we indeed do not want some generic one?
-> 
-> So you are talking about something along the lines of:
-> 
-> commit bd9b902798ab14d19ca116b10bde581ddff8f905
-> Author: Linus Walleij <linus.walleij@linaro.org>
-> Date:   Mon Jan 29 00:44:53 2018 +0100
-> 
->     mmc: sdhci: Implement an SDHCI-specific bounce buffer
-> 
-> ?
 
-Yes, this is the exact commit I had in mind :)
 
-> Yeah I guess that if this is needed by more than one driver it
-> should be made into a library, or say a piece of code turned on by
-> a config option that the dependent drivers select.
+On 2023/8/5 21:14, Emil Renner Berthing wrote:
+> On Wed, 15 Feb 2023 at 13:26, William Qiu <william.qiu@starfivetech.com> wrote:
+>> On 2023/2/15 20:22, Emil Renner Berthing wrote:
+>> > On Wed, 15 Feb 2023 at 13:12, Emil Renner Berthing
+>> > <emil.renner.berthing@canonical.com> wrote:
+>> >>
+>> >> On Wed, 15 Feb 2023 at 12:35, William Qiu <william.qiu@starfivetech.com> wrote:
+>> >> >
+>> >> > Add the mmc node for the StarFive JH7110 SoC.
+>> >> > Set mmco node to emmc and set mmc1 node to sd.
+>> >> >
+>> >> > Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+>> >> > ---
+>> >> >  .../jh7110-starfive-visionfive-2.dtsi         | 23 +++++++++
+>> >> >  arch/riscv/boot/dts/starfive/jh7110.dtsi      | 47 +++++++++++++++++++
+>> >> >  2 files changed, 70 insertions(+)
+>> >> >
+>> >> > diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+>> >> > index c60280b89c73..e1a0248e907f 100644
+>> >> > --- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+>> >> > +++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+>> >> > @@ -42,6 +42,29 @@ &rtc_osc {
+>> >> >         clock-frequency = <32768>;
+>> >> >  };
+>> >> >
+>> >> > +&mmc0 {
+>> >> > +       max-frequency = <100000000>;
+>> >> > +       bus-width = <8>;
+>> >> > +       cap-mmc-highspeed;
+>> >> > +       mmc-ddr-1_8v;
+>> >> > +       mmc-hs200-1_8v;
+>> >> > +       non-removable;
+>> >> > +       cap-mmc-hw-reset;
+>> >> > +       post-power-on-delay-ms = <200>;
+>> >> > +       status = "okay";
+>> >> > +};
+>> >> > +
+>> >> > +&mmc1 {
+>> >> > +       max-frequency = <100000000>;
+>> >> > +       bus-width = <4>;
+>> >> > +       no-sdio;
+>> >> > +       no-mmc;
+>> >> > +       broken-cd;
+>> >> > +       cap-sd-highspeed;
+>> >> > +       post-power-on-delay-ms = <200>;
+>> >> > +       status = "okay";
+>> >> > +};
+>> >
+>> > These nodes are also still oddly placed in the middle of the external
+>> > clocks. Again please keep the external clocks at the top and then
+>> > order the nodes alphabetically to have some sort of system.
+>> >
+>>
+>>
+>> Hi Emil,
+>>
+>> I'll update it in next version.
 > 
-> Interested in the job? :D
+> Hi William,
+> 
+> It seems the mmc nodes are still missing from the upstream device
+> tree. The sysreg nodes have been added in Conors riscv-dt-for-next[1]
+> branch, so I don't see any missing dependencies. Could you please
+> update and send a new version of this?
+> 
+> [1]: https://git.kernel.org/pub/scm/linux/kernel/git/conor/linux.git/log/?h=riscv-dt-for-next
+> 
+> /Emil
+> 
 
-Interested is not the word I'd use, but yes, I'll give it a try making it
-a little more generic solution.
+Hi Emil,
 
-> Yours,
-> Linus Walleij
+I will start to do the upstream work of this part from this week.
+Since the mmc driver has some modifications, I will send a separate
+patch series.
 
-Best reards,
-	ladis
+Best Regards,
+William
+>> Best Regards
+>> William
+>>
+>> >> >  &gmac0_rmii_refin {
+>> >> >         clock-frequency = <50000000>;
+>> >> >  };
+>> >> > diff --git a/arch/riscv/boot/dts/starfive/jh7110.dtsi b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+>> >> > index 64d260ea1f29..17f7b3ee6ca3 100644
+>> >> > --- a/arch/riscv/boot/dts/starfive/jh7110.dtsi
+>> >> > +++ b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+>> >> > @@ -314,6 +314,11 @@ uart2: serial@10020000 {
+>> >> >                         status = "disabled";
+>> >> >                 };
+>> >> >
+>> >> > +               stg_syscon: syscon@10240000 {
+>> >> > +                       compatible = "starfive,jh7110-stg-syscon", "syscon";
+>> >> > +                       reg = <0x0 0x10240000 0x0 0x1000>;
+>> >> > +               };
+>> >> > +
+>> >> >                 uart3: serial@12000000 {
+>> >> >                         compatible = "snps,dw-apb-uart";
+>> >> >                         reg = <0x0 0x12000000 0x0 0x10000>;
+>> >> > @@ -370,6 +375,11 @@ syscrg: clock-controller@13020000 {
+>> >> >                         #reset-cells = <1>;
+>> >> >                 };
+>> >> >
+>> >> > +               sys_syscon: syscon@13030000 {
+>> >> > +                       compatible = "starfive,jh7110-sys-syscon", "syscon";
+>> >> > +                       reg = <0x0 0x13030000 0x0 0x1000>;
+>> >> > +               };
+>> >> > +
+>> >> >                 gpio: gpio@13040000 {
+>> >> >                         compatible = "starfive,jh7110-sys-pinctrl";
+>> >> >                         reg = <0x0 0x13040000 0x0 0x10000>;
+>> >> > @@ -397,6 +407,11 @@ aoncrg: clock-controller@17000000 {
+>> >> >                         #reset-cells = <1>;
+>> >> >                 };
+>> >> >
+>> >> > +               aon_syscon: syscon@17010000 {
+>> >> > +                       compatible = "starfive,jh7110-aon-syscon", "syscon";
+>> >> > +                       reg = <0x0 0x17010000 0x0 0x1000>;
+>> >> > +               };
+>> >> > +
+>> >> >                 gpioa: gpio@17020000 {
+>> >> >                         compatible = "starfive,jh7110-aon-pinctrl";
+>> >> >                         reg = <0x0 0x17020000 0x0 0x10000>;
+>> >> > @@ -407,5 +422,37 @@ gpioa: gpio@17020000 {
+>> >> >                         gpio-controller;
+>> >> >                         #gpio-cells = <2>;
+>> >> >                 };
+>> >> > +
+>> >> > +               mmc0: mmc@16010000 {
+>> >> > +                       compatible = "starfive,jh7110-mmc";
+>> >> > +                       reg = <0x0 0x16010000 0x0 0x10000>;
+>> >> > +                       clocks = <&syscrg JH7110_SYSCLK_SDIO0_AHB>,
+>> >> > +                                <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
+>> >> > +                       clock-names = "biu","ciu";
+>> >> > +                       resets = <&syscrg JH7110_SYSRST_SDIO0_AHB>;
+>> >> > +                       reset-names = "reset";
+>> >> > +                       interrupts = <74>;
+>> >> > +                       fifo-depth = <32>;
+>> >> > +                       fifo-watermark-aligned;
+>> >> > +                       data-addr = <0>;
+>> >> > +                       starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
+>> >> > +                       status = "disabled";
+>> >> > +               };
+>> >> > +
+>> >> > +               mmc1: mmc@16020000 {
+>> >> > +                       compatible = "starfive,jh7110-mmc";
+>> >> > +                       reg = <0x0 0x16020000 0x0 0x10000>;
+>> >> > +                       clocks = <&syscrg JH7110_SYSCLK_SDIO1_AHB>,
+>> >> > +                                <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
+>> >> > +                       clock-names = "biu","ciu";
+>> >> > +                       resets = <&syscrg JH7110_SYSRST_SDIO1_AHB>;
+>> >> > +                       reset-names = "reset";
+>> >> > +                       interrupts = <75>;
+>> >> > +                       fifo-depth = <32>;
+>> >> > +                       fifo-watermark-aligned;
+>> >> > +                       data-addr = <0>;
+>> >> > +                       starfive,sysreg = <&sys_syscon 0x9c 0x1 0x3e>;
+>> >> > +                       status = "disabled";
+>> >> > +               };
+>> >>
+>> >> Hi William,
+>> >>
+>> >> These nodes still don't seem to be sorted by address, eg. by the
+>> >> number after the @
+>> >> Also please move the dt-binding patch before this one, so dtb_check
+>> >> won't fail no matter where git bisect happens to land.
+>> >>
+>> >> /Emil
+>> >>
+>> >> >         };
+>> >> >  };
+>> >> > --
+>> >> > 2.34.1
+>> >> >
+>> >> >
+>> >> > _______________________________________________
+>> >> > linux-riscv mailing list
+>> >> > linux-riscv@lists.infradead.org
+>> >> > http://lists.infradead.org/mailman/listinfo/linux-riscv
