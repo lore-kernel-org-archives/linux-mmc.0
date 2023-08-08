@@ -2,93 +2,166 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20529C001B0
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Aug 2023 16:53:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D945C05051
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Aug 2023 17:11:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233664AbjHHQxT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Aug 2023 12:53:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35746 "EHLO
+        id S234075AbjHHRLN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Aug 2023 13:11:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233827AbjHHQwY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2023 12:52:24 -0400
-Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2BA05B9A
-        for <linux-mmc@vger.kernel.org>; Tue,  8 Aug 2023 08:58:17 -0700 (PDT)
-Received: by mail-qv1-xf2a.google.com with SMTP id 6a1803df08f44-63d30554eefso35058646d6.3
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Aug 2023 08:58:17 -0700 (PDT)
+        with ESMTP id S233971AbjHHRKo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Aug 2023 13:10:44 -0400
+Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D8CB1B531;
+        Tue,  8 Aug 2023 09:04:24 -0700 (PDT)
+Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-585fd99ed8bso97769747b3.1;
+        Tue, 08 Aug 2023 09:04:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1691510291; x=1692115091;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=0ubqfsmYb7V02nf1U7/39ZUb74vPvlvUEXZk/eI/cgk=;
-        b=O8A78HFnJB/CTxySNMT/AtdNsZgdLD1N3iArR3eUjsT5kwrT/8q8F9B+SG7wDq4zBO
-         5KBWZSRjnU/34HYlKc1LQNC620p6r47W6pcZXO2iczRuvjjBLR1Cc/0kIUDw5GqlgNos
-         KScsRQjCnj3T01dPpEcz0fTco0nNIoM7+Glmanq7APlb6fi5/sY83D9nVzfcXTNDJuAg
-         bnbEjVw5WV1SStACk+iV341i5bkIRnkgl3I6EWbO67X9xQnq0dHJB9GBR5YS7j+oOPEY
-         C6HigeeCe/k6cmkE0SHplyqOlCDfKR0FFQHmgXxLvZx/TgEohDmxokq3uDs02FFCIYBZ
-         LXbA==
+        d=gmail.com; s=20221208; t=1691510661; x=1692115461;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Ge4UpGsqgeWYVTzHHgiNtZ1FFA8wffVk7bme0ep5yV8=;
+        b=F815O/mLLDKqliVgjT/GxSLDKtwSKdQ/yDIInEaueB2N54jEGaRdqTajiSGARkkGsA
+         u5X+yyOODshgYP8BotYsuP1TxJDHRlYoYooMkdiD7bEeHUp+oEtN7AvdagCkFXrORn5m
+         DChd1+fUPE+ga+6P/m7EqcmtyfMr2GIVzvLWjoB7D3QN4l/P28cRc2bEP7iCeWi+1KXI
+         lxEXKK+Ntt0vH+r9cJwGfFIP6Jx3B4p9y603lSHYs2E5oZ96nrxwMg4SAmVuIWXjaYM7
+         RtcQa8TaE8deeN/1fT7f/+tapQlp+FoMEvit/qFLBCt9fQaaBmwwzwNO22IjfQHzxk2g
+         vibA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691510291; x=1692115091;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=0ubqfsmYb7V02nf1U7/39ZUb74vPvlvUEXZk/eI/cgk=;
-        b=Q5I6uprNTxGtgMwnuuIk0zDjJf+CNIz6p3c+UeEou7b6txU8WwyNGsEL5gYeYXByfT
-         2BZ9W2RiykUHJDBs5TUqaZ+7TnpGpwkCyNuVX6qEm7kgdK07sf8YQ7jEOjkLxxc5QNJw
-         3PwucFTurfxP8PeGABWJvb0H0qOHZ4wG0j0NxdydYmuOSshNp7sgE2fmCA3OylNH3FjJ
-         FpYcdc8uhbutAfP+XMxRi2X1Hnpy90HTx6yvAqhpnAopoi+O0rg3lng4J8ZtE1OcfKDM
-         zZtAq3mvqnMExQWuC4jLXFiRP3AlwsTmb88Q3lBdT4DsdO3SS7eOkzTIgv7rQQhv1lur
-         bIsQ==
-X-Gm-Message-State: AOJu0YyL6I9h9VViq1YWP0ecuBPAtp0QhlS0XVlOtLxetA0MMECQpfZ2
-        RiGCNu74NKspJFfPT6DzFsV+nqOH8SOSldf/bDWGoeBIpr4nxAHgDL4=
-X-Google-Smtp-Source: AGHT+IHSHduNAZhtuWl0717SI9PBFnzbesbPZPWpUKYUXoQcp0TJmbb1ePGniPOczgezUXb2rRF/CgEe7L4IP+lhQpc=
-X-Received: by 2002:a25:b87:0:b0:d4a:4b59:367e with SMTP id
- 129-20020a250b87000000b00d4a4b59367emr8892048ybl.38.1691490522681; Tue, 08
- Aug 2023 03:28:42 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1691510661; x=1692115461;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Ge4UpGsqgeWYVTzHHgiNtZ1FFA8wffVk7bme0ep5yV8=;
+        b=HHkeLPiOWow8PXicXZrvAKmI0K/8K9G/8HHg+xteAyOrrE1nhw5W3EBoZSYCsdvO69
+         IXSQSlPgay62ZLeGNvqFynuWfpIO+J3LcmqDz7ibCwn/jttVMw+WavY2ZHrvQQ9N/bsS
+         KpKgv976lnTOy1fjf+Dml0ivbPibCkSUZDiYC08EP2bitsMEjce2Ntun/WCdXhBOW9EJ
+         B+U5fYOBUVMxg5CdNeSC96jl21ma3ccXavS4bckSaMiVsP7hEIMydy1bh2nAIRFGxp5R
+         9M6bHXXDCt+GQO4VkICIPfAyfMkZknS9A1dkjhUxmHtLKzIOYI9a3YuhwCzxPk3OwTCJ
+         ilQg==
+X-Gm-Message-State: AOJu0YzrV5jz3pSAInKX3qub71q+Ky2otloxu6uHhofjTRkrsvMzy/yi
+        1rKUHcEiTek2Yzw3pk9NFhoJBBRFGtnPc2MAEYAz7ApnCL8=
+X-Google-Smtp-Source: AGHT+IEjnyGdAyrJUFEAHV8lW6LrCsMS7v6CycxWtVxzjsBRdvzUp8pQlt4w9mAfh175Goj255eodkxuvJwA61+Jle4=
+X-Received: by 2002:a0c:9a49:0:b0:63c:c72e:6762 with SMTP id
+ q9-20020a0c9a49000000b0063cc72e6762mr10418001qvd.9.1691491300456; Tue, 08 Aug
+ 2023 03:41:40 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230721101349.12387-1-victorshihgli@gmail.com> <20230721101349.12387-5-victorshihgli@gmail.com>
-In-Reply-To: <20230721101349.12387-5-victorshihgli@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 8 Aug 2023 12:28:06 +0200
-Message-ID: <CAPDyKFrmwct=b6angucfrKOXneZXe+_2KQ4f--OQEoKD=fc5hg@mail.gmail.com>
-Subject: Re: [PATCH V9 04/23] mmc: core: Extend support for mmc regulators
- with a vqmmc2
-To:     Victor Shih <victorshihgli@gmail.com>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org
+References: <20230803054544.22007-1-wenchao.chen@unisoc.com> <CAPDyKFrb_nH7w8Wjz3oxJ6Vj30W4-U=k2ST8O7aib_kSHBjsFw@mail.gmail.com>
+In-Reply-To: <CAPDyKFrb_nH7w8Wjz3oxJ6Vj30W4-U=k2ST8O7aib_kSHBjsFw@mail.gmail.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Tue, 8 Aug 2023 18:41:28 +0800
+Message-ID: <CA+Da2qzyKxvkkJYcbeYUzF5+VuFMka1tGjkvv09uD8Y1tKZcfg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: queue: replace immediate with hsq->depth
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com,
+        chunyan.zhang@unisoc.com, yuelin.tang@unisoc.com
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 21 Jul 2023 at 12:14, Victor Shih <victorshihgli@gmail.com> wrote:
+On Tue, Aug 8, 2023 at 5:28=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
 >
-> From: Ulf Hansson <ulf.hansson@linaro.org>
+> On Thu, 3 Aug 2023 at 07:46, Wenchao Chen <wenchao.chen@unisoc.com> wrote=
+:
+> >
+> > Hsq is similar to cqe, using hsq->depth to represent
+> > the maximum processing capacity of hsq. We can adjust
+> > hsq->depth according to the actual situation.
 >
-> Updates in V4:
->  - Moved the voltage defines into this patch.
+> Sorry, but I don't quite follow here.
 >
-> Update in previous version:
+> Are you planning to update the host->hsq_depth dynamically from somewhere=
+?
+>
+> Kind regards
+> Uffe
+>
+Hi Uffe,
+Depending on the mmc device, some devices allow host to send more reqs
+to the device.
+Also, we use hsq->hsq_depth instead of immediate number "2" to make
+the code easier to understand.
 
-Please drop the version information from the commit message.
-
-> To allow an additional external regulator to be controlled by an mmc host
-> driver, let's add support for a vqmmc2 regulator to the mmc core.
->
-> For an SD UHS-II interface the vqmmc2 regulator may correspond to the so
-> called vdd2 supply, as described by the SD spec. Initially, only 1.8V is
-> needed, hence limit the new helper function, mmc_regulator_set_vqmmc2() to
-> this too.
->
-> Note that, to allow for flexibility mmc host drivers need to manage the
-> enable/disable of the vqmmc2 regulator themselves, while the regulator is
-> looked up through the common mmc_regulator_get_supply().
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-[...]
-
-Kind regards
-Uffe
+Thanks
+Wenchao.Chen
+> >
+> > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> > ---
+> >  drivers/mmc/core/queue.c   | 6 +-----
+> >  drivers/mmc/host/mmc_hsq.c | 1 +
+> >  drivers/mmc/host/mmc_hsq.h | 7 +++++++
+> >  include/linux/mmc/host.h   | 1 +
+> >  4 files changed, 10 insertions(+), 5 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> > index b396e3900717..a0a2412f62a7 100644
+> > --- a/drivers/mmc/core/queue.c
+> > +++ b/drivers/mmc/core/queue.c
+> > @@ -260,11 +260,7 @@ static blk_status_t mmc_mq_queue_rq(struct blk_mq_=
+hw_ctx *hctx,
+> >                 }
+> >                 break;
+> >         case MMC_ISSUE_ASYNC:
+> > -               /*
+> > -                * For MMC host software queue, we only allow 2 request=
+s in
+> > -                * flight to avoid a long latency.
+> > -                */
+> > -               if (host->hsq_enabled && mq->in_flight[issue_type] > 2)=
+ {
+> > +               if (host->hsq_enabled && mq->in_flight[issue_type] > ho=
+st->hsq_depth) {
+> >                         spin_unlock_irq(&mq->lock);
+> >                         return BLK_STS_RESOURCE;
+> >                 }
+> > diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
+> > index 424dc7b07858..7b3952721c17 100644
+> > --- a/drivers/mmc/host/mmc_hsq.c
+> > +++ b/drivers/mmc/host/mmc_hsq.c
+> > @@ -337,6 +337,7 @@ int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_ho=
+st *mmc)
+> >         hsq->mmc =3D mmc;
+> >         hsq->mmc->cqe_private =3D hsq;
+> >         mmc->cqe_ops =3D &mmc_hsq_ops;
+> > +       mmc->hsq_depth =3D HSQ_MAX_DEPTH;
+> >
+> >         for (i =3D 0; i < HSQ_NUM_SLOTS; i++)
+> >                 hsq->tag_slot[i] =3D HSQ_INVALID_TAG;
+> > diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
+> > index 1808024fc6c5..795f6b9421d7 100644
+> > --- a/drivers/mmc/host/mmc_hsq.h
+> > +++ b/drivers/mmc/host/mmc_hsq.h
+> > @@ -5,6 +5,13 @@
+> >  #define HSQ_NUM_SLOTS  64
+> >  #define HSQ_INVALID_TAG        HSQ_NUM_SLOTS
+> >
+> > +/*
+> > + * For MMC host software queue, we usually allow 2 requests in
+> > + * flight to avoid a long latency. But we can adjust hsq->depth
+> > + * according to the actual situation.
+> > + */
+> > +#define HSQ_MAX_DEPTH  2
+> > +
+> >  struct hsq_slot {
+> >         struct mmc_request *mrq;
+> >  };
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index 461d1543893b..1fd8b1dd8698 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -520,6 +520,7 @@ struct mmc_host {
+> >
+> >         /* Host Software Queue support */
+> >         bool                    hsq_enabled;
+> > +       int                     hsq_depth;
+> >
+> >         u32                     err_stats[MMC_ERR_MAX];
+> >         unsigned long           private[] ____cacheline_aligned;
+> > --
+> > 2.17.1
+> >
