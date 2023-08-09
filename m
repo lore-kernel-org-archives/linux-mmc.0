@@ -2,238 +2,137 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C47BAEB64DD
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 10:59:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BAFFC001DE
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 11:08:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232823AbjHIK70 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Aug 2023 06:59:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53244 "EHLO
+        id S233178AbjHILIi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Aug 2023 07:08:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232824AbjHIK7Z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 06:59:25 -0400
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CBB81FFE
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Aug 2023 03:59:24 -0700 (PDT)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-5768a7e3adbso11351237b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Aug 2023 03:59:24 -0700 (PDT)
+        with ESMTP id S233185AbjHILIh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 07:08:37 -0400
+Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DAE571BFE
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Aug 2023 04:08:36 -0700 (PDT)
+Received: by mail-yb1-xb33.google.com with SMTP id 3f1490d57ef6-d414540af6bso5271576276.2
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Aug 2023 04:08:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1691578764; x=1692183564;
+        d=linaro.org; s=google; t=1691579316; x=1692184116;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=iaYB/Ipn2a2m2D4N0I3VurARbvsG5OxcIS7VBhxmako=;
-        b=d4VL+01TABHXmsF/sknTHW8Rix2EH/NZaxjVqxatJUJtf08r7M+zh6yn+PA1us+AzV
-         z3awp9BTZ2SGvAVHohC08w9xi18NAqlf+RppMRyqUQK0mLFwDujbuBKRT0tgpXbVWIke
-         aq848fTgmA1SRmqy3cqqq14DDujIjW1G1iBJYQV53M0VYtgCxQNpMG+07HJCgi7gvKgS
-         Kj/yC+kHVl8mfSdUD8fMH6jZMGo0/Qw4Z8dGgDVkeUoKILysPjl5CydscQykfuKaTwrL
-         Ighftu4Ff/D7o+4a/6brj1dWeuOz5Csxqp1h3BZ0aOmOEM8fg8RHIt1RvZbXwNpit3tQ
-         rOPQ==
+        bh=lFOUEDGDfnO6FgesixYMbqfbNJGm4+REhXT9PFqBZFw=;
+        b=sN3Bjk9MMzThJz+d2fP+SCRGKYstwupZu4+xtUswcVVDr1aGRsPt2b4JDKwZ6bdQD1
+         zj1vKtGoI2f0QY8xhbIDtS/S1YYLimgbbj6UpdTBRDOVxP0NhmfcUJw3KCB+A8oCxBgc
+         DELXJa4x+NWhB5TyqzPYxVDcNBMwyctYsbRVjz00jvo2GYMDkIeRQ7YHrEfEZobpZqC9
+         1MsIjtQ4CXIpUvPDSnmLuvSPED3K7OcRv6Ax9RoJwxmcg6tit1p9VKKdQuIsMWU5WWj5
+         UKg+m67k66XJ1z8E2GKliTzhPBc7rLztCFLKMvPFY/FazBeU3YT7t3upj7UVvecBNGQv
+         th1Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691578764; x=1692183564;
+        d=1e100.net; s=20221208; t=1691579316; x=1692184116;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=iaYB/Ipn2a2m2D4N0I3VurARbvsG5OxcIS7VBhxmako=;
-        b=Kf9wq7CzCPolOBxZVXBtyVVy3eKdGJB44B6zNwXzHdfoA+BFyrBgmg0NcNhIqpiujN
-         TS1rP6BD3mWZa8zdNUsalS8cwjZMUbG/2HTmgPiH88fEbGcob1oJ5lmQRvF+zbtgsK7W
-         hpOdFaBLdBijGwnYoMOdoKpuVndB9ZtWb/IqkXT+e9c4n+A+2RJeddszHsAFJSqVm6mI
-         Vlg8o2JtOJlx2P9o3C/vP0y7F+jZQzErYvWkWyE5SWvZHQNeLbHEVoYBq3GdJJ1rQr8E
-         uybQm1f3FUmC33X5iH/SaH49M15GUFTs0QqoLsTML61/Sb/Epsqw69P/aUKI3LGffkuf
-         EQqg==
-X-Gm-Message-State: AOJu0YwGMB7IKpUzdHQB72WzDz0nBBCKJc+m+IhEYHl+ui3IKJ5ZepwU
-        ZSPLU4+RvImSocPNCpVubs5b2+44BNQpEkU978oEZg==
-X-Google-Smtp-Source: AGHT+IGf9KnfBxey/rY1ABAA/l9zjpo/dhTHXbZOjXu+o3ulWFuAqa5B3FD+/+ICLarj2DWZ2/xD4E0zUqP8mxA+PW4=
-X-Received: by 2002:a0d:cb52:0:b0:577:186c:2a3c with SMTP id
- n79-20020a0dcb52000000b00577186c2a3cmr11621366ywd.19.1691578763825; Wed, 09
- Aug 2023 03:59:23 -0700 (PDT)
+        bh=lFOUEDGDfnO6FgesixYMbqfbNJGm4+REhXT9PFqBZFw=;
+        b=GzLp7MkRhhXYuDWQt85TnDL/2OG4dYB9Hz44bw4WiWdco8tYEjAgK4FZd6UBLvsjWS
+         W/Ox+JN7WKQ+ntCy34o9F49fH/TWaIs13t+Faj0Uo1zWJ3cNSp0A4VKlaQOazoqZCqWT
+         3wvERFWbFV8eE9/pHk32cqPrqHhYddZcXWeNfZyU9hTwZaSdHTCYKEu79poiPBFrTWqV
+         Mo3AYoeAt9Ob6PXC1QLY83dzqUqcWvD88f8/oesnYcQLOcdVDhAKQchNzMJx2ZufcVmC
+         JJZR3nzNBD1Lo+VUFEuSnyXjPRa2lOz83vAEsdRJhRmtNl8fyk3aUdhkW9d+ioyY0u1U
+         hHlQ==
+X-Gm-Message-State: AOJu0YxjEvKLcoWfIBG1116UH+B8uRkWSxj1jrroZXBhHGrlN9Gr5iD/
+        fS7ryATQmpaMDLvLO2bFZOk4/NnZoQyIIpCBn7qL4V+A0Sog5Fpfg2w=
+X-Google-Smtp-Source: AGHT+IGXZvc0nxLvJQpMtI9VDNoLiiLmHzs1jY0vww3PJij+qW2rMhBTktgwiRk2RJaMxh85O3Qrq6BiC/EuDSR8SC8=
+X-Received: by 2002:a25:d383:0:b0:d37:d0f4:f0b2 with SMTP id
+ e125-20020a25d383000000b00d37d0f4f0b2mr2599136ybf.19.1691579316090; Wed, 09
+ Aug 2023 04:08:36 -0700 (PDT)
 MIME-Version: 1.0
-References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
- <20230804233015.173957-1-limings@nvidia.com>
-In-Reply-To: <20230804233015.173957-1-limings@nvidia.com>
+References: <20230809071812.547229-1-harshit.m.mogalapalli@oracle.com>
+In-Reply-To: <20230809071812.547229-1-harshit.m.mogalapalli@oracle.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 9 Aug 2023 12:58:47 +0200
-Message-ID: <CAPDyKFo0TYw-8Mq8eUasvh0bVM1NLcWR+QZvt-=S2Jb+S7rYBA@mail.gmail.com>
-Subject: Re: [PATCH v6] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-To:     Liming Sun <limings@nvidia.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Wed, 9 Aug 2023 13:08:00 +0200
+Message-ID: <CAPDyKFrstv47OdXeFvSArKwAh40Lq=JXLYfbd8LNCOwAT=b5Cw@mail.gmail.com>
+Subject: Re: [PATCH next v2 1/2] mmc: sunplus: Fix error handling in spmmc_drv_probe()
+To:     Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
+Cc:     tonyhuang.sunplus@gmail.com, lhjeff911@gmail.com,
+        dan.carpenter@linaro.org, arnd@arndb.de, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, error27@gmail.com,
+        kernel-janitors@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 5 Aug 2023 at 01:30, Liming Sun <limings@nvidia.com> wrote:
+On Wed, 9 Aug 2023 at 09:18, Harshit Mogalapalli
+<harshit.m.mogalapalli@oracle.com> wrote:
 >
-> This commit implements the runtime PM operations to disable eMMC
-> card clock when idle.
+> When mmc allocation succeeds, the error paths are not freeing mmc.
 >
-> Reviewed-by: David Thompson <davthompson@nvidia.com>
-> Signed-off-by: Liming Sun <limings@nvidia.com>
-> ---
-> v5->v6:
->     - Address Adrian's more comments and add coordination between
->       runtime PM and system PM;
-> v4->v5:
->     - Address Adrian's comment to move the pm_enable to the end to
->       avoid race;
-> v3->v4:
->     - Fix compiling reported by 'kernel test robot';
-> v2->v3:
->     - Revise the commit message;
-> v1->v2:
->     Updates for comments from Ulf:
->     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
-> v1: Initial version.
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 72 ++++++++++++++++++++++++++++-
->  1 file changed, 70 insertions(+), 2 deletions(-)
+> Fix the above issue by changing mmc_alloc_host() to devm_mmc_alloc_host()
+> to simplify the error handling. Remove label 'probe_free_host' as devm_*
+> api takes care of freeing, also remove mmc_free_host() from remove
+> function as devm_* takes care of freeing.
 >
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index e68cd87998c8..aaf66358f626 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -15,6 +15,7 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/reset.h>
->  #include <linux/sizes.h>
->
-> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
->
->         host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->
-> +       pm_runtime_get_noresume(dev);
-> +       pm_runtime_set_active(dev);
-> +       pm_runtime_enable(dev);
-> +
->         err = sdhci_setup_host(host);
->         if (err)
-> -               goto err_clk;
-> +               goto err_rpm;
->
->         if (rk_priv)
->                 dwcmshc_rk35xx_postinit(host, priv);
-> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
->         if (err)
->                 goto err_setup_host;
->
-> +       pm_runtime_put_sync(dev);
-> +
->         return 0;
->
->  err_setup_host:
->         sdhci_cleanup_host(host);
-> +err_rpm:
-> +       pm_runtime_disable(dev);
-> +       pm_runtime_put_noidle(dev);
->  err_clk:
->         clk_disable_unprepare(pltfm_host->clk);
->         clk_disable_unprepare(priv->bus_clk);
-> @@ -606,6 +616,12 @@ static int dwcmshc_suspend(struct device *dev)
->         if (ret)
->                 return ret;
->
+> Fixes: 4e268fed8b18 ("mmc: Add mmc driver for Sunplus SP7021")
+> Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+> Closes: https://lore.kernel.org/all/a3829ed3-d827-4b9d-827e-9cc24a3ec3bc@moroto.mountain/
+> Signed-off-by: Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
 
-sdhci_suspend_host() is called a few lines above, which requires the
-host to be runtime resumed when called. This may not be the case here.
+This doesn't apply on my next branch, please rebase it.
 
-To fix this there are in principle two options:
-
-1) Call a pm_runtime_get_sync() around here and a corresponding
-pm_runtime_put_noidle() somewhere after you have called
-pm_runtime_force_suspend().
-
-2) Move away from using sdhci_suspend|resume_host(), but use
-sdhci_runtime_suspend|resume_host() instead. This requires some
-additional changes, but with the benefit that we can avoid runtime
-resuming the device upfront. In this case,
-sdhci_runtime_suspend|resume_host() should be called from
-dwcmshc_runtime_suspend|resume(). Moreover, we either need to move the
-entire clock mgmt from dwcmshc_suspend|resume() into the
-dwcmshc_runtime_suspend|resume() or call pm_runtime_get_noresume()
-before calling pm_runtime_force_suspend() and pm_runtime_put_noidle()
-just after it.
-
-> +       ret = pm_runtime_force_suspend(dev);
-> +       if (ret) {
-> +               sdhci_resume_host(host);
-> +               return ret;
-> +       }
-> +
->         clk_disable_unprepare(pltfm_host->clk);
->         if (!IS_ERR(priv->bus_clk))
->                 clk_disable_unprepare(priv->bus_clk);
-> @@ -625,6 +641,10 @@ static int dwcmshc_resume(struct device *dev)
->         struct rk35xx_priv *rk_priv = priv->priv;
->         int ret;
->
-> +       ret = pm_runtime_force_resume(dev);
-> +       if (ret)
-> +               return ret;
-> +
->         ret = clk_prepare_enable(pltfm_host->clk);
->         if (ret)
->                 return ret;
-> @@ -646,7 +666,55 @@ static int dwcmshc_resume(struct device *dev)
->  }
->  #endif
->
-> -static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
-> +#ifdef CONFIG_PM
-> +
-> +static void dwcmshc_enable_card_clk(struct sdhci_host *host)
-> +{
-> +       u16 ctrl;
-> +
-> +       ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +       if ((ctrl & SDHCI_CLOCK_INT_EN) && !(ctrl & SDHCI_CLOCK_CARD_EN)) {
-> +               ctrl |= SDHCI_CLOCK_CARD_EN;
-> +               sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +       }
-> +}
-> +
-> +static void dwcmshc_disable_card_clk(struct sdhci_host *host)
-> +{
-> +       u16 ctrl;
-> +
-> +       ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +       if (ctrl & SDHCI_CLOCK_CARD_EN) {
-> +               ctrl &= ~SDHCI_CLOCK_CARD_EN;
-> +               sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +       }
-> +}
-> +
-> +static int dwcmshc_runtime_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +       dwcmshc_disable_card_clk(host);
-> +
-> +       return 0;
-> +}
-> +
-> +static int dwcmshc_runtime_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +       dwcmshc_enable_card_clk(host);
-> +
-> +       return 0;
-> +}
-> +
-> +#endif
-> +
-> +static const struct dev_pm_ops dwcmshc_pmops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend, dwcmshc_resume)
-> +       SET_RUNTIME_PM_OPS(dwcmshc_runtime_suspend,
-> +                          dwcmshc_runtime_resume, NULL)
-> +};
->
->  static struct platform_driver sdhci_dwcmshc_driver = {
->         .driver = {
+Moreover, it looks like you should replace a few more "goto
+probe_free_host;" with "return ret;". Please have a closer look.
 
 Kind regards
 Uffe
+
+> ---
+> This is based on static analysis with smatch, only compile tested.
+>
+> v1->v2: Simplify code by using devm_mmc_alloc_host() instead of
+> mmc_alloc_host() (Ulf Hansson's suggestion)
+> ---
+>  drivers/mmc/host/sunplus-mmc.c | 14 +++-----------
+>  1 file changed, 3 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
+> index a55a87f64d2a..2bdebeb1f8e4 100644
+> --- a/drivers/mmc/host/sunplus-mmc.c
+> +++ b/drivers/mmc/host/sunplus-mmc.c
+> @@ -863,11 +863,9 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+>         struct spmmc_host *host;
+>         int ret = 0;
+>
+> -       mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
+> -       if (!mmc) {
+> -               ret = -ENOMEM;
+> -               goto probe_free_host;
+> -       }
+> +       mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(struct spmmc_host));
+> +       if (!mmc)
+> +               return -ENOMEM;
+>
+>         host = mmc_priv(mmc);
+>         host->mmc = mmc;
+> @@ -938,11 +936,6 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+>
+>  clk_disable:
+>         clk_disable_unprepare(host->clk);
+> -
+> -probe_free_host:
+> -       if (mmc)
+> -               mmc_free_host(mmc);
+> -
+>         return ret;
+>  }
+>
+> @@ -956,7 +949,6 @@ static int spmmc_drv_remove(struct platform_device *dev)
+>         pm_runtime_put_noidle(&dev->dev);
+>         pm_runtime_disable(&dev->dev);
+>         platform_set_drvdata(dev, NULL);
+> -       mmc_free_host(host->mmc);
+>
+>         return 0;
+>  }
+> --
+> 2.39.3
+>
