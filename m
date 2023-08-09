@@ -2,276 +2,130 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7875EB64DD
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 05:30:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7424DEB64DD
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 07:18:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229817AbjHIFaV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Aug 2023 01:30:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46666 "EHLO
+        id S230254AbjHIHSw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Aug 2023 03:18:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41852 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229667AbjHIFaU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 01:30:20 -0400
-Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C232B19BC;
-        Tue,  8 Aug 2023 22:30:18 -0700 (PDT)
-Received: from dlp.unisoc.com ([10.29.3.86])
-        by SHSQR01.spreadtrum.com with ESMTP id 3795U12R023810;
-        Wed, 9 Aug 2023 13:30:01 +0800 (+08)
-        (envelope-from Wenchao.Chen@unisoc.com)
-Received: from SHDLP.spreadtrum.com (shmbx06.spreadtrum.com [10.0.1.11])
-        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RLJVY3vShz2PD4gy;
-        Wed,  9 Aug 2023 13:28:05 +0800 (CST)
-Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx06.spreadtrum.com
- (10.0.1.11) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Wed, 9 Aug 2023
- 13:30:00 +0800
-From:   Wenchao Chen <wenchao.chen@unisoc.com>
-To:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
-        <chunyan.zhang@unisoc.com>, <yuelin.tang@unisoc.com>,
-        Wenchao Chen <wenchao.chen@unisoc.com>
-Subject: [PATCH] mmc: core: Add host specific tuning support for SD HS mode
-Date:   Wed, 9 Aug 2023 13:29:52 +0800
-Message-ID: <20230809052952.323-1-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S230120AbjHIHSw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 03:18:52 -0400
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 178521BCF;
+        Wed,  9 Aug 2023 00:18:51 -0700 (PDT)
+Received: from pps.filterd (m0333521.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3794P8lg031848;
+        Wed, 9 Aug 2023 07:18:41 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-transfer-encoding;
+ s=corp-2023-03-30; bh=VeqHu8sZLiFLMdgcIzTyJGviQjbnz6KSyK1BX8Dx/so=;
+ b=axMTGxNbrEYaOA3AbIdPsi/HpthnEtTzF2oztQlq6bJcss9pVj+bz1rP/WwncE5bRMrj
+ nE31YtIOal1OPFeYvvEN6ipgQ3N6dqo+QuYPxKYG5Lz1pZVHIlfels84KIuzIqtDrDKH
+ ltHy+72o4EGoQzBwb2FFNR8kEf9dgeAVajkNLZJUYIRJ7H1s9+Xxr84yOXB+qNCDcpd4
+ WwwQCzm5+NHtAhFoXId2hTxGeb/tPcmzO3Ps1hKRN6+vkQupOaviAdFlVVDlnGTd/c34
+ mZcNs9Jl9+m+n6u/BVKpucAUpwYMHWvSRblNlFHUWRFmaNViLM11ac/p6i51XY3uMKdd 6w== 
+Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.appoci.oracle.com [138.1.37.129])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3s9dbc8408-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 09 Aug 2023 07:18:41 +0000
+Received: from pps.filterd (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 3795jmFR021400;
+        Wed, 9 Aug 2023 07:18:40 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+        by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3s9cvdn0pf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 09 Aug 2023 07:18:40 +0000
+Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3797Idt4039843;
+        Wed, 9 Aug 2023 07:18:39 GMT
+Received: from ca-dev112.us.oracle.com (ca-dev112.us.oracle.com [10.129.136.47])
+        by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTP id 3s9cvdn0nx-1;
+        Wed, 09 Aug 2023 07:18:39 +0000
+From:   Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
+To:     tonyhuang.sunplus@gmail.com, lhjeff911@gmail.com,
+        ulf.hansson@linaro.org, dan.carpenter@linaro.org
+Cc:     arnd@arndb.de, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, error27@gmail.com,
+        harshit.m.mogalapalli@oracle.com, kernel-janitors@vger.kernel.org
+Subject: [PATCH next v2 1/2] mmc: sunplus: Fix error handling in spmmc_drv_probe()
+Date:   Wed,  9 Aug 2023 00:18:11 -0700
+Message-ID: <20230809071812.547229-1-harshit.m.mogalapalli@oracle.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.13.2.29]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- shmbx06.spreadtrum.com (10.0.1.11)
-X-MAIL: SHSQR01.spreadtrum.com 3795U12R023810
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-08-09_05,2023-08-08_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 malwarescore=0 spamscore=0
+ adultscore=0 mlxlogscore=999 bulkscore=0 phishscore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2306200000
+ definitions=main-2308090063
+X-Proofpoint-ORIG-GUID: mfotAyxPi_3bhWNPosR6a7WJtMs5yKid
+X-Proofpoint-GUID: mfotAyxPi_3bhWNPosR6a7WJtMs5yKid
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Added .prepare_hs_tuning and .execute_hs_tuning host
-callbacks to support host-specific tuning for SD high
-speed mode.
+When mmc allocation succeeds, the error paths are not freeing mmc.
 
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+Fix the above issue by changing mmc_alloc_host() to devm_mmc_alloc_host()
+to simplify the error handling. Remove label 'probe_free_host' as devm_*
+api takes care of freeing, also remove mmc_free_host() from remove
+function as devm_* takes care of freeing.
+
+Fixes: 4e268fed8b18 ("mmc: Add mmc driver for Sunplus SP7021")
+Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+Closes: https://lore.kernel.org/all/a3829ed3-d827-4b9d-827e-9cc24a3ec3bc@moroto.mountain/
+Signed-off-by: Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
 ---
- drivers/mmc/core/sd.c         |  12 ++++
- drivers/mmc/host/sdhci-sprd.c | 124 ++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h      |   6 ++
- 3 files changed, 142 insertions(+)
+This is based on static analysis with smatch, only compile tested.
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 246ce027ae0a..ac2da8f2fbce 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1518,6 +1518,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		 */
- 		mmc_set_clock(host, mmc_sd_get_max_clock(card));
+v1->v2: Simplify code by using devm_mmc_alloc_host() instead of
+mmc_alloc_host() (Ulf Hansson's suggestion)
+---
+ drivers/mmc/host/sunplus-mmc.c | 14 +++-----------
+ 1 file changed, 3 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
+index a55a87f64d2a..2bdebeb1f8e4 100644
+--- a/drivers/mmc/host/sunplus-mmc.c
++++ b/drivers/mmc/host/sunplus-mmc.c
+@@ -863,11 +863,9 @@ static int spmmc_drv_probe(struct platform_device *pdev)
+ 	struct spmmc_host *host;
+ 	int ret = 0;
  
-+		if (host->ops->prepare_hs_tuning) {
-+			err = host->ops->prepare_hs_tuning(host, card);
-+			if (err)
-+				goto free_card;
-+		}
-+
- 		/*
- 		 * Switch to wider bus (if supported).
- 		 */
-@@ -1529,6 +1535,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+-	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
+-	if (!mmc) {
+-		ret = -ENOMEM;
+-		goto probe_free_host;
+-	}
++	mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(struct spmmc_host));
++	if (!mmc)
++		return -ENOMEM;
  
- 			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
- 		}
-+
-+		if (host->ops->execute_hs_tuning) {
-+			err = host->ops->execute_hs_tuning(host, card);
-+			if (err)
-+				goto free_card;
-+		}
- 	}
- cont:
- 	if (!oldcard) {
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 7f4ee2e12735..5f365dcbb9c7 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -9,6 +9,7 @@
- #include <linux/dma-mapping.h>
- #include <linux/highmem.h>
- #include <linux/iopoll.h>
-+#include <linux/mmc/mmc.h>
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
-@@ -22,6 +23,9 @@
- #include "sdhci-pltfm.h"
- #include "mmc_hsq.h"
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
+@@ -938,11 +936,6 @@ static int spmmc_drv_probe(struct platform_device *pdev)
  
-+#include "../core/mmc_ops.h"
-+#include "../core/sd_ops.h"
-+
- /* SDHCI_ARGUMENT2 register high 16bit */
- #define SDHCI_SPRD_ARG2_STUFF		GENMASK(31, 16)
- 
-@@ -73,6 +77,11 @@
- #define SDHCI_SPRD_CLK_DEF_RATE		26000000
- #define SDHCI_SPRD_PHY_DLL_CLK		52000000
- 
-+#define SDHCI_SPRD_MAX_PHASE		0xff
-+#define SDHCI_SPRD_CMD_DLY_MASK		GENMASK(15, 8)
-+#define SDHCI_SPRD_POSRD_DLY_MASK	GENMASK(23, 16)
-+#define SDHCI_SPRD_CPST_EN		GENMASK(27, 24)
-+
- struct sdhci_sprd_host {
- 	u32 version;
- 	struct clk *clk_sdio;
-@@ -86,6 +95,11 @@ struct sdhci_sprd_host {
- 	u32 phy_delay[MMC_TIMING_MMC_HS400 + 2];
- };
- 
-+enum sdhci_sprd_tuning_type {
-+	SDHCI_SPRD_TUNING_SD_HS_CMD,
-+	SDHCI_SPRD_TUNING_SD_HS_DATA,
-+};
-+
- struct sdhci_sprd_phy_cfg {
- 	const char *property;
- 	u8 timing;
-@@ -533,6 +547,111 @@ static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
- 		     SDHCI_SPRD_REG_32_DLL_DLY);
+ clk_disable:
+ 	clk_disable_unprepare(host->clk);
+-
+-probe_free_host:
+-	if (mmc)
+-		mmc_free_host(mmc);
+-
+ 	return ret;
  }
  
-+static int mmc_send_tuning_cmd(struct mmc_card *card)
-+{
-+	return mmc_send_status(card, NULL);
-+}
-+
-+static int mmc_send_tuning_data(struct mmc_card *card)
-+{
-+	u8 status[64];
-+
-+	return mmc_sd_switch(card, 0, 0, 0, status);
-+}
-+
-+static int sdhci_sprd_tuning(struct mmc_host *mmc, struct mmc_card *card,
-+			enum sdhci_sprd_tuning_type type)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-+	u32 *p = sprd_host->phy_delay;
-+	int err = 0;
-+	int i;
-+	bool value;
-+	int final_phase;
-+	u32 dll_cfg, dll_dly;
-+	int range_end = SDHCI_SPRD_MAX_PHASE;
-+	int len = 0;
-+	int count = 0;
-+
-+	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+
-+	dll_cfg = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
-+	dll_cfg &= ~SDHCI_SPRD_CPST_EN;
-+	sdhci_writel(host, dll_cfg, SDHCI_SPRD_REG_32_DLL_CFG);
-+
-+	dll_dly = p[mmc->ios.timing];
-+
-+	for (i = 0; i <= SDHCI_SPRD_MAX_PHASE; i++) {
-+		if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
-+			dll_dly &= ~SDHCI_SPRD_CMD_DLY_MASK;
-+			dll_dly |= ((i << 8) & SDHCI_SPRD_CMD_DLY_MASK);
-+		} else {
-+			dll_dly &= ~SDHCI_SPRD_POSRD_DLY_MASK;
-+			dll_dly |= ((i << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
-+		}
-+
-+		sdhci_writel(host, dll_dly, SDHCI_SPRD_REG_32_DLL_DLY);
-+
-+		if (type == SDHCI_SPRD_TUNING_SD_HS_CMD)
-+			value = !mmc_send_tuning_cmd(card);
-+		else
-+			value = !mmc_send_tuning_data(card);
-+
-+		if (value) {
-+			dev_dbg(mmc_dev(host->mmc), "tuning ok: %d\n", i);
-+			count++;
-+		} else {
-+			dev_dbg(mmc_dev(host->mmc), "tuning fail: %d\n", i);
-+			if (len < count) {
-+				len = count;
-+				range_end = i - 1;
-+				count = 0;
-+			}
-+		}
-+	}
-+
-+	if (!count) {
-+		final_phase = 0;
-+		dev_err(mmc_dev(host->mmc), "all tuning phase fail!\n");
-+		err = -EIO;
-+		goto out;
-+	}
-+
-+	if (count > len) {
-+		len = count;
-+		range_end = i - 1;
-+	}
-+
-+	final_phase = range_end - (len - 1) / 2;
-+
-+	if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
-+		p[mmc->ios.timing] &= ~SDHCI_SPRD_CMD_DLY_MASK;
-+		p[mmc->ios.timing] |= ((final_phase << 8) & SDHCI_SPRD_CMD_DLY_MASK);
-+	} else {
-+		p[mmc->ios.timing] &= ~(SDHCI_SPRD_POSRD_DLY_MASK);
-+		p[mmc->ios.timing] |= ((final_phase << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
-+	}
-+
-+	dev_info(mmc_dev(host->mmc), "the best step %d, phase 0x%02x, delay value 0x%08x\n",
-+			final_phase, final_phase, p[mmc->ios.timing]);
-+
-+out:
-+	sdhci_writel(host, p[mmc->ios.timing], SDHCI_SPRD_REG_32_DLL_DLY);
-+
-+	return err;
-+}
-+
-+static int sdhci_sprd_prepare_hs_cmd_tuning(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_CMD);
-+}
-+
-+static int sdhci_sprd_execute_hs_data_tuning(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_DATA);
-+}
-+
- static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
- 				       struct device_node *np)
- {
-@@ -577,6 +696,11 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.request = sdhci_sprd_request;
- 	host->mmc_host_ops.hs400_enhanced_strobe =
- 		sdhci_sprd_hs400_enhanced_strobe;
-+	host->mmc_host_ops.prepare_hs_tuning =
-+		sdhci_sprd_prepare_hs_cmd_tuning;
-+	host->mmc_host_ops.execute_hs_tuning =
-+		sdhci_sprd_execute_hs_data_tuning;
-+
- 	/*
- 	 * We can not use the standard ops to change and detect the voltage
- 	 * signal for Spreadtrum SD host controller, since our voltage regulator
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 461d1543893b..13cf894b9e3c 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -184,6 +184,12 @@ struct mmc_host_ops {
- 	/* Execute HS400 tuning depending host driver */
- 	int	(*execute_hs400_tuning)(struct mmc_host *host, struct mmc_card *card);
+@@ -956,7 +949,6 @@ static int spmmc_drv_remove(struct platform_device *dev)
+ 	pm_runtime_put_noidle(&dev->dev);
+ 	pm_runtime_disable(&dev->dev);
+ 	platform_set_drvdata(dev, NULL);
+-	mmc_free_host(host->mmc);
  
-+	/* Prepare HS tuning depending host driver */
-+	int	(*prepare_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
-+
-+	/* Execute HS tuning depending host driver */
-+	int	(*execute_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
-+
- 	/* Prepare switch to DDR during the HS400 init sequence */
- 	int	(*hs400_prepare_ddr)(struct mmc_host *host);
- 
+ 	return 0;
+ }
 -- 
-2.17.1
+2.39.3
 
