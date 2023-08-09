@@ -2,94 +2,328 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F1EEEB64DD
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 07:40:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54E62EB64DD
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 10:09:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229875AbjHIHkh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Aug 2023 03:40:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57982 "EHLO
+        id S232165AbjHIKJU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Aug 2023 06:09:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41782 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229491AbjHIHkg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 03:40:36 -0400
-Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 31014173A
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Aug 2023 00:40:36 -0700 (PDT)
-Received: by mail-wm1-x330.google.com with SMTP id 5b1f17b1804b1-3fe490c05c9so3259855e9.0
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Aug 2023 00:40:36 -0700 (PDT)
+        with ESMTP id S230209AbjHIKJT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 06:09:19 -0400
+Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FE091BFB
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Aug 2023 03:09:18 -0700 (PDT)
+Received: by mail-yb1-xb2c.google.com with SMTP id 3f1490d57ef6-d5eeb722a82so956738276.0
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Aug 2023 03:09:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1691566834; x=1692171634;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=fYypbR2BOr8zET8GaPdSoOCjpxsQd82de6in9KdA03c=;
-        b=UXJHIiWTBam0bGvsriQfntFFLIdoxWBcq4eh8xBIkyzRfhil6eZW+iIpaqq8jaggbC
-         FxEnJRmj9H7pwLfwaUTp0QLVbvP0nUu36hid5c7v3xhDZzddCC3qkyYxenFSv1FLKLSY
-         xj1uGW4TBrABTTPaxdA98pUBdOuz58/IN/95oMc5bndPIfy9fTkAeQhe4bloxGjOHvR8
-         pzVKIitpBaILvRi9Mgo36GwJvqu096bAJ947klQ3uKnxwWzlO2+pyLYwFmLxPVAMvq9k
-         rjChBWJnaiqSc+BtEbJ3Q02z/CYpZynYkwnFn4ta/lOIgOGFsQ4geJbEameWORSITokA
-         ztjg==
+        d=linaro.org; s=google; t=1691575758; x=1692180558;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=kRBBB72Xo69T0OElGoYsRuiUCmdlEmov0FVADVHXFyg=;
+        b=JAxH3YPWYi4xNEfMyew1y0fJU6S3WH9fG3+i2rNMsoN+we0EEVQNsvxaBgioK1CMgW
+         nJ9K+JFDZx11FqBW0wU2q+BvQeZZvYrTnZFnibxca7Z+A3P6HoZrPSHGO93oPKSXcAdh
+         qyV8sDu5UFv6Zpc/bCHNXQ4Wj6QT8wOSMMcuDeM1g5ciPqI+vxle6bUjfSvEFLgEF+rL
+         kmKTis7EBkhx8y0Ylf/FlehJNm0yJSFFagZ80Z3ycj+6fbJOkBwcYvMg+hLtSCLv7Gcg
+         VPosQ9ajcvXetcMNqbXPa5utZBfQx1WhhH2LUepoh4Swgper3qy1CXSi3UaqPFKm8r/m
+         KVaQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691566834; x=1692171634;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fYypbR2BOr8zET8GaPdSoOCjpxsQd82de6in9KdA03c=;
-        b=PO+ZbcN5BnHE9GffGUlb5z1bEkn0yiEJ/GNoBH+SFyoPW/JhK+JRbg2WMUpNbQJEmQ
-         MsnUeji1gckGNFe7T89Yc7+s8Tk/uwO8+4ZdiXjkTGku0b7g6rZOUwBguDvOy1K3Fovo
-         J6NvY9zLX0noYIPlVyW6l9vRI7JqHbfDI+UIPv4n/x4rMN7B8+4d1nB4iX1b7EVqK+M9
-         tUm9qD96Zrb1AHoxYYeup/sKF2PT3Bcm2DtUKlK5hmEWg5dMX7dyBBBsYMPnE0FifQeM
-         wS0HtdZLP51Xo+XHjeeyssV1UIuuy5q6pPzzrdOz6h3N0QqfIFf2HmIG8MKJrdR/3vUX
-         IVbw==
-X-Gm-Message-State: AOJu0YycNxSIR/akmGEBmk63GXTMbBT6mIEwwxhIyocMvRgXIwhzmN+q
-        byOrylP7vZAlHBO343v5jSryahL53up6n1zAUFs=
-X-Google-Smtp-Source: AGHT+IGYAehkRoFOJds1BXJD9VgTewrLVWujc0R3IWoUImvJckfERYsfBHnUNMLnme6MWTwTT9pcAw==
-X-Received: by 2002:a05:600c:1da2:b0:3fe:4c29:e626 with SMTP id p34-20020a05600c1da200b003fe4c29e626mr9532320wms.13.1691566834728;
-        Wed, 09 Aug 2023 00:40:34 -0700 (PDT)
-Received: from localhost ([102.36.222.112])
-        by smtp.gmail.com with ESMTPSA id x26-20020a1c7c1a000000b003fe24da493dsm1087148wmc.41.2023.08.09.00.40.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Aug 2023 00:40:34 -0700 (PDT)
-Date:   Wed, 9 Aug 2023 10:40:30 +0300
-From:   Dan Carpenter <dan.carpenter@linaro.org>
-To:     Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
-Cc:     tonyhuang.sunplus@gmail.com, lhjeff911@gmail.com,
-        ulf.hansson@linaro.org, arnd@arndb.de, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, error27@gmail.com,
-        kernel-janitors@vger.kernel.org
-Subject: Re: [PATCH next v2 1/2] mmc: sunplus: Fix error handling in
- spmmc_drv_probe()
-Message-ID: <d4eb3558-c270-4aea-94a8-b24b8d3a1987@kadam.mountain>
-References: <20230809071812.547229-1-harshit.m.mogalapalli@oracle.com>
+        d=1e100.net; s=20221208; t=1691575758; x=1692180558;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=kRBBB72Xo69T0OElGoYsRuiUCmdlEmov0FVADVHXFyg=;
+        b=bbLwzwUNFDZqogf60RD8u6BdgcMOCCmNgHRK1cUeBXgeKA4Jb2/WYvL4ytE1eGCsh+
+         zYGtTFi0Vng2B9nSxsNlmKg+vp81iEvbeTRdcPhC1LkH4ZFw1t7Cq4IfTQ9gn30cWMJd
+         CPzkxIfWWR0Birm71juQmw6eyXvhvSigGE0grQzzdA8bQJzyw6B1fZ3Pessnm31JZ0gj
+         9wYgf+pcb2Daai1k2qy0X3raq8ur3T4xBtTRAxnmcXKJkgadshxZ/bBuTW6VH1yN+Tbi
+         chaNMOVtZO6rR1ikH7DOcPQEJbG06gvOdJDXgf6eIDuPYHSUwe1cFxCB2sWNszZxZhin
+         C+Cg==
+X-Gm-Message-State: AOJu0YzCyP2DoBg+ahbCJ5F884ElefRaS9O3581XY3I3GoQgwS85PN+9
+        DfajaulpRVAekiRsm2X3eGkQ8h67xL2lk8mJWnLP0w==
+X-Google-Smtp-Source: AGHT+IHJSSi19qUsX44JVBSz7ym7Yn+t4tELB3+w2VWQHTlSXnat5hS/Z+XvN2H6ZVQI3H5/kyhYIx+Q9jGZxy351AY=
+X-Received: by 2002:a25:aca6:0:b0:d40:3069:b3b1 with SMTP id
+ x38-20020a25aca6000000b00d403069b3b1mr12852982ybi.17.1691575757838; Wed, 09
+ Aug 2023 03:09:17 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230809071812.547229-1-harshit.m.mogalapalli@oracle.com>
+References: <20230809052952.323-1-wenchao.chen@unisoc.com>
+In-Reply-To: <20230809052952.323-1-wenchao.chen@unisoc.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 9 Aug 2023 12:08:41 +0200
+Message-ID: <CAPDyKFoykxdP70t2pjeiX0pkKuUCZ2AeFM4yT4-wfVijxB7OHw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Add host specific tuning support for SD HS mode
+To:     Wenchao Chen <wenchao.chen@unisoc.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, wenchao.chen666@gmail.com,
+        zhenxiong.lai@unisoc.com, chunyan.zhang@unisoc.com,
+        yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Aug 09, 2023 at 12:18:11AM -0700, Harshit Mogalapalli wrote:
-> When mmc allocation succeeds, the error paths are not freeing mmc.
-> 
-> Fix the above issue by changing mmc_alloc_host() to devm_mmc_alloc_host()
-> to simplify the error handling. Remove label 'probe_free_host' as devm_*
-> api takes care of freeing, also remove mmc_free_host() from remove
-> function as devm_* takes care of freeing.
-> 
-> Fixes: 4e268fed8b18 ("mmc: Add mmc driver for Sunplus SP7021")
-> Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
-> Closes: https://lore.kernel.org/all/a3829ed3-d827-4b9d-827e-9cc24a3ec3bc@moroto.mountain/
-> Signed-off-by: Harshit Mogalapalli <harshit.m.mogalapalli@oracle.com>
+On Wed, 9 Aug 2023 at 07:30, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+>
+> Added .prepare_hs_tuning and .execute_hs_tuning host
+> callbacks to support host-specific tuning for SD high
+> speed mode.
+
+This certainly needs to be clarified more. Especially why it's needed
+for the sdhci-sprd variant.
+
+>
+> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
 > ---
-> This is based on static analysis with smatch, only compile tested.
-> 
-> v1->v2: Simplify code by using devm_mmc_alloc_host() instead of
-> mmc_alloc_host() (Ulf Hansson's suggestion)
+>  drivers/mmc/core/sd.c         |  12 ++++
+>  drivers/mmc/host/sdhci-sprd.c | 124 ++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/host.h      |   6 ++
+>  3 files changed, 142 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 246ce027ae0a..ac2da8f2fbce 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1518,6 +1518,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>                  */
+>                 mmc_set_clock(host, mmc_sd_get_max_clock(card));
+>
+> +               if (host->ops->prepare_hs_tuning) {
+> +                       err = host->ops->prepare_hs_tuning(host, card);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
 
-Nice.
+Adding a new callback for this is a bit questionable, I think.
 
-Both patches look good to me.
-Reviewed-by: Dan Carpenter <dan.carpenter@linaro.org>
+In the ->set_ios() callback, we could instead check MMC_TIMING_SD_HS
+and when the clock is updated, then also run a tuning sequence, right?
 
-regards,
-dan carpenter
+> +
+>                 /*
+>                  * Switch to wider bus (if supported).
+>                  */
+> @@ -1529,6 +1535,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>
+>                         mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+>                 }
+> +
+> +               if (host->ops->execute_hs_tuning) {
+> +                       err = host->ops->execute_hs_tuning(host, card);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
 
+Similar to the above comment, in the ->set_ios() callback we could
+instead check MMC_TIMING_SD_HS when moving to MMC_BUS_WIDTH_4, then
+run a tuning sequence, right?
+
+>         }
+>  cont:
+>         if (!oldcard) {
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index 7f4ee2e12735..5f365dcbb9c7 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -9,6 +9,7 @@
+>  #include <linux/dma-mapping.h>
+>  #include <linux/highmem.h>
+>  #include <linux/iopoll.h>
+> +#include <linux/mmc/mmc.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> @@ -22,6 +23,9 @@
+>  #include "sdhci-pltfm.h"
+>  #include "mmc_hsq.h"
+>
+> +#include "../core/mmc_ops.h"
+> +#include "../core/sd_ops.h"
+
+No, this isn't how we include header files. Instead move the functions
+that you may need to include/linux/mmc/host.h.
+
+Also, please split up core changes from host driver changes.
+
+> +
+>  /* SDHCI_ARGUMENT2 register high 16bit */
+>  #define SDHCI_SPRD_ARG2_STUFF          GENMASK(31, 16)
+>
+> @@ -73,6 +77,11 @@
+>  #define SDHCI_SPRD_CLK_DEF_RATE                26000000
+>  #define SDHCI_SPRD_PHY_DLL_CLK         52000000
+>
+> +#define SDHCI_SPRD_MAX_PHASE           0xff
+> +#define SDHCI_SPRD_CMD_DLY_MASK                GENMASK(15, 8)
+> +#define SDHCI_SPRD_POSRD_DLY_MASK      GENMASK(23, 16)
+> +#define SDHCI_SPRD_CPST_EN             GENMASK(27, 24)
+> +
+>  struct sdhci_sprd_host {
+>         u32 version;
+>         struct clk *clk_sdio;
+> @@ -86,6 +95,11 @@ struct sdhci_sprd_host {
+>         u32 phy_delay[MMC_TIMING_MMC_HS400 + 2];
+>  };
+>
+> +enum sdhci_sprd_tuning_type {
+> +       SDHCI_SPRD_TUNING_SD_HS_CMD,
+> +       SDHCI_SPRD_TUNING_SD_HS_DATA,
+> +};
+> +
+>  struct sdhci_sprd_phy_cfg {
+>         const char *property;
+>         u8 timing;
+> @@ -533,6 +547,111 @@ static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
+>                      SDHCI_SPRD_REG_32_DLL_DLY);
+>  }
+>
+> +static int mmc_send_tuning_cmd(struct mmc_card *card)
+> +{
+> +       return mmc_send_status(card, NULL);
+> +}
+> +
+> +static int mmc_send_tuning_data(struct mmc_card *card)
+> +{
+> +       u8 status[64];
+
+We use kmalloc-ed data for data transfers.
+
+> +
+> +       return mmc_sd_switch(card, 0, 0, 0, status);
+> +}
+> +
+> +static int sdhci_sprd_tuning(struct mmc_host *mmc, struct mmc_card *card,
+> +                       enum sdhci_sprd_tuning_type type)
+> +{
+> +       struct sdhci_host *host = mmc_priv(mmc);
+> +       struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
+> +       u32 *p = sprd_host->phy_delay;
+> +       int err = 0;
+> +       int i;
+> +       bool value;
+> +       int final_phase;
+> +       u32 dll_cfg, dll_dly;
+> +       int range_end = SDHCI_SPRD_MAX_PHASE;
+> +       int len = 0;
+> +       int count = 0;
+> +
+> +       sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> +
+> +       dll_cfg = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
+> +       dll_cfg &= ~SDHCI_SPRD_CPST_EN;
+> +       sdhci_writel(host, dll_cfg, SDHCI_SPRD_REG_32_DLL_CFG);
+> +
+> +       dll_dly = p[mmc->ios.timing];
+> +
+> +       for (i = 0; i <= SDHCI_SPRD_MAX_PHASE; i++) {
+> +               if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
+> +                       dll_dly &= ~SDHCI_SPRD_CMD_DLY_MASK;
+> +                       dll_dly |= ((i << 8) & SDHCI_SPRD_CMD_DLY_MASK);
+> +               } else {
+> +                       dll_dly &= ~SDHCI_SPRD_POSRD_DLY_MASK;
+> +                       dll_dly |= ((i << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
+> +               }
+> +
+> +               sdhci_writel(host, dll_dly, SDHCI_SPRD_REG_32_DLL_DLY);
+> +
+> +               if (type == SDHCI_SPRD_TUNING_SD_HS_CMD)
+> +                       value = !mmc_send_tuning_cmd(card);
+> +               else
+> +                       value = !mmc_send_tuning_data(card);
+> +
+> +               if (value) {
+> +                       dev_dbg(mmc_dev(host->mmc), "tuning ok: %d\n", i);
+> +                       count++;
+> +               } else {
+> +                       dev_dbg(mmc_dev(host->mmc), "tuning fail: %d\n", i);
+> +                       if (len < count) {
+> +                               len = count;
+> +                               range_end = i - 1;
+> +                               count = 0;
+> +                       }
+> +               }
+> +       }
+> +
+> +       if (!count) {
+> +               final_phase = 0;
+> +               dev_err(mmc_dev(host->mmc), "all tuning phase fail!\n");
+> +               err = -EIO;
+> +               goto out;
+> +       }
+> +
+> +       if (count > len) {
+> +               len = count;
+> +               range_end = i - 1;
+> +       }
+> +
+> +       final_phase = range_end - (len - 1) / 2;
+
+The whole len, count, range_end, final_phase things look rather messy.
+Please have a look and try to clean up that part a bit, I am sure it
+can be done, somehow.
+
+> +
+> +       if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
+> +               p[mmc->ios.timing] &= ~SDHCI_SPRD_CMD_DLY_MASK;
+> +               p[mmc->ios.timing] |= ((final_phase << 8) & SDHCI_SPRD_CMD_DLY_MASK);
+> +       } else {
+> +               p[mmc->ios.timing] &= ~(SDHCI_SPRD_POSRD_DLY_MASK);
+> +               p[mmc->ios.timing] |= ((final_phase << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
+> +       }
+> +
+> +       dev_info(mmc_dev(host->mmc), "the best step %d, phase 0x%02x, delay value 0x%08x\n",
+> +                       final_phase, final_phase, p[mmc->ios.timing]);
+
+Does this really deserve to be a dev_info? Looks like a dev_dbg to me, no?
+
+> +
+> +out:
+> +       sdhci_writel(host, p[mmc->ios.timing], SDHCI_SPRD_REG_32_DLL_DLY);
+> +
+> +       return err;
+> +}
+> +
+> +static int sdhci_sprd_prepare_hs_cmd_tuning(struct mmc_host *mmc, struct mmc_card *card)
+> +{
+> +       return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_CMD);
+> +}
+> +
+> +static int sdhci_sprd_execute_hs_data_tuning(struct mmc_host *mmc, struct mmc_card *card)
+> +{
+> +       return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_DATA);
+> +}
+> +
+>  static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
+>                                        struct device_node *np)
+>  {
+> @@ -577,6 +696,11 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>         host->mmc_host_ops.request = sdhci_sprd_request;
+>         host->mmc_host_ops.hs400_enhanced_strobe =
+>                 sdhci_sprd_hs400_enhanced_strobe;
+> +       host->mmc_host_ops.prepare_hs_tuning =
+> +               sdhci_sprd_prepare_hs_cmd_tuning;
+> +       host->mmc_host_ops.execute_hs_tuning =
+> +               sdhci_sprd_execute_hs_data_tuning;
+> +
+>         /*
+>          * We can not use the standard ops to change and detect the voltage
+>          * signal for Spreadtrum SD host controller, since our voltage regulator
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 461d1543893b..13cf894b9e3c 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -184,6 +184,12 @@ struct mmc_host_ops {
+>         /* Execute HS400 tuning depending host driver */
+>         int     (*execute_hs400_tuning)(struct mmc_host *host, struct mmc_card *card);
+>
+> +       /* Prepare HS tuning depending host driver */
+> +       int     (*prepare_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
+> +
+> +       /* Execute HS tuning depending host driver */
+> +       int     (*execute_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
+> +
+>         /* Prepare switch to DDR during the HS400 init sequence */
+>         int     (*hs400_prepare_ddr)(struct mmc_host *host);
+>
+
+Kind regards
+Uffe
