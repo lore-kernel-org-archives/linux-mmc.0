@@ -2,24 +2,24 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5D62C04FE2
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 18:56:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA329C0015E
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Aug 2023 19:01:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232964AbjHIS4F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Aug 2023 14:56:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42536 "EHLO
+        id S230177AbjHITBE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Aug 2023 15:01:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37780 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233106AbjHIS4E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 14:56:04 -0400
+        with ESMTP id S229653AbjHITBD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Aug 2023 15:01:03 -0400
 Received: from honk.sigxcpu.org (honk.sigxcpu.org [24.134.29.49])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19F85E72;
-        Wed,  9 Aug 2023 11:56:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF427E7A;
+        Wed,  9 Aug 2023 12:01:02 -0700 (PDT)
 Received: from localhost (localhost [127.0.0.1])
-        by honk.sigxcpu.org (Postfix) with ESMTP id EAA95FB04;
-        Wed,  9 Aug 2023 20:50:39 +0200 (CEST)
+        by honk.sigxcpu.org (Postfix) with ESMTP id 0E890FB03;
+        Wed,  9 Aug 2023 20:50:37 +0200 (CEST)
 Received: from honk.sigxcpu.org ([127.0.0.1])
         by localhost (honk.sigxcpu.org [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id 6lFFR-HR70jt; Wed,  9 Aug 2023 20:50:37 +0200 (CEST)
+        with ESMTP id SXqsJqQ7ACYl; Wed,  9 Aug 2023 20:50:31 +0200 (CEST)
 From:   =?UTF-8?q?Guido=20G=C3=BCnther?= <agx@sigxcpu.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -47,9 +47,9 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         alsa-devel@alsa-project.org, linux-arm-kernel@lists.infradead.org,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v1 5/5] arm64: defconfig: Enable Redpine 91X wlan driver
-Date:   Wed,  9 Aug 2023 20:50:14 +0200
-Message-Id: <199e385b0293023def88575d90105cd9fe370035.1691606520.git.agx@sigxcpu.org>
+Subject: [PATCH v1 3/5] arm64: dts: imx8mq-librem5-devkit: Mark buck2 as always on
+Date:   Wed,  9 Aug 2023 20:50:12 +0200
+Message-Id: <206b50ea5e3afe598783b29264c4b995b43229f2.1691606520.git.agx@sigxcpu.org>
 X-Mailer: git-send-email 2.40.1
 In-Reply-To: <cover.1691606520.git.agx@sigxcpu.org>
 References: <cover.1691606520.git.agx@sigxcpu.org>
@@ -60,25 +60,27 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Librem 5 devkit has it connected via SDIO.
+Otherwise the A53 cores are shut down which doesn't end well.
 
+Reported-by: David Heidelberg <david@ixit.cz>
+Tested-by: David Heidelberg <david@ixit.cz>
 Signed-off-by: Guido Günther <agx@sigxcpu.org>
 ---
- arch/arm64/configs/defconfig | 1 +
+ arch/arm64/boot/dts/freescale/imx8mq-librem5-devkit.dts | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index bf13d5c46578..21ab69a3cf4b 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -414,6 +414,7 @@ CONFIG_MWIFIEX=m
- CONFIG_MWIFIEX_SDIO=m
- CONFIG_MWIFIEX_PCIE=m
- CONFIG_MT7921E=m
-+CONFIG_RSI_91X=m
- CONFIG_WL18XX=m
- CONFIG_WLCORE_SDIO=m
- CONFIG_WWAN=m
+diff --git a/arch/arm64/boot/dts/freescale/imx8mq-librem5-devkit.dts b/arch/arm64/boot/dts/freescale/imx8mq-librem5-devkit.dts
+index b3549eae6278..be9ef5c271df 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mq-librem5-devkit.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mq-librem5-devkit.dts
+@@ -324,6 +324,7 @@ buck2_reg: BUCK2 {
+ 				regulator-ramp-delay = <1250>;
+ 				rohm,dvs-run-voltage = <1000000>;
+ 				rohm,dvs-idle-voltage = <900000>;
++				regulator-always-on;
+ 			};
+ 
+ 			buck3_reg: BUCK3 {
 -- 
 2.40.1
 
