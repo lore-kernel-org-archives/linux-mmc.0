@@ -2,244 +2,246 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09B78C001B0
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Aug 2023 08:13:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAE09C41513
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Aug 2023 10:07:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231533AbjHJINM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Aug 2023 04:13:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48744 "EHLO
+        id S231441AbjHJKHX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Aug 2023 06:07:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41918 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232953AbjHJINJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 04:13:09 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24435ED;
-        Thu, 10 Aug 2023 01:13:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1691655186; x=1723191186;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=O9Jsveli4yclURq0bNMJiXiGpid26w6a4aIJvzlJGho=;
-  b=TT/xQ+tbgF/mo3ahFT0vmlwCX2c79vZ4ajN5ooAdIC6Ft+6/cNtJsWip
-   ZTeH61cO5BibpRBNCzzB+jcIfdFTjmr7tig7PeRGnZkuKotDTNw2M/ro+
-   u/ygLJaScZmAzcMp5vuEH0k1DpIX5h8pk6OaQLngUU2DuIcCt7zOLxkBy
-   5/KoiWM+jxLKrgi0Q6xF5z0/nhIoCPNAf6SoLaboWTy5XRYfmgOph2yBF
-   pGRbGWB1lP1EJSkQfhipvkmq1upq/x1lthq8MYoMqaj2F0iWxRHe8GNNW
-   fkcxfVukWcQhpPDRLGune+ihcIyXkYkPUDg+i+U9E0k+yjiA9o66Cc1hk
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10797"; a="368791385"
-X-IronPort-AV: E=Sophos;i="6.01,161,1684825200"; 
-   d="scan'208";a="368791385"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Aug 2023 01:12:55 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10797"; a="978702520"
-X-IronPort-AV: E=Sophos;i="6.01,161,1684825200"; 
-   d="scan'208";a="978702520"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.49.88])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Aug 2023 01:12:53 -0700
-Message-ID: <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
-Date:   Thu, 10 Aug 2023 11:12:49 +0300
+        with ESMTP id S235417AbjHJKHQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 06:07:16 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B73501BD
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 03:07:15 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-5768a7e3adbso26588057b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 03:07:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1691662035; x=1692266835;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5N4xFHhL0TPxvIVZsYrMLTrA+HnWJ2j/PO8ankgTA6g=;
+        b=UQFpbCN4nWM3r/kLHfPA4IdfyuudQ1MvzrwDEVimeruyaDxwxtG66M9KlvzP+pZn8E
+         G24apLB7jejg1jmIh/1J2dgY56wUQPU+b9bUAxp4DqkrRMvvTJQChojbr6PUs9/W8zLN
+         /lb3cQtNXVcEfnWE5McFWS53L4laBQuPFKYAPGj3+qU0PlPCihz2YxeEW0RTbGv3aBHF
+         /iGp0u5rW8lGiQ8vUqUElLBmDBarghGk/INIjStCWlhWjfMuwsUNwes/1Pkk5APqJMn/
+         zesUDtp6NTjtPCYQ7r8cO5Wdo8o+UCH6VybLESKPuEIf8gmkzFJYR7PzCjQNkOeib3RS
+         fAog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1691662035; x=1692266835;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=5N4xFHhL0TPxvIVZsYrMLTrA+HnWJ2j/PO8ankgTA6g=;
+        b=FQTWUlyNVWvQGATM8pRCVOAD36dqK9bi0k/pq7HSeE36Yyl8eWEu9PVmKxDdx1cyzM
+         3pM2VFUkCrC73HtaH7H5nCvi+OSSji8THFBVS1z6dxhc8tXMYPWRUD2BLZOD77NXNwpN
+         Wr32dEa6tY6tWmTjRrOA+CJ2Gt7ua72y42N9iY+UXTemZA0RNbWLa20TRMa2iEv7ZRaa
+         VwsMFJEXPwylIiG6FidoOKSKzQoLbWNEqOVJfHH7bMd0pSHTrAwkofZ8mJYPcL55N2DC
+         NvMfd+j2AciFOFSCiR9Tb3AYi5MUHZTncqLT0Lqf+hS6BN2acInRUqFzhuhd+cfwFANH
+         96dA==
+X-Gm-Message-State: AOJu0YwKFo3Ry6Ynd9jKq0hCBT1sKSx5hvEbZhY3LgqEZVIxn64FHJCM
+        HBkS43rIUII01r9w9O30frnQbIWb56Zo641FK8/alA==
+X-Google-Smtp-Source: AGHT+IE7gV7RQn0tqlUn3NlnIMuVanM+2hz76atnsbs7AkIq+rhbATSRG8IcOLgwERc0KSPiyuZQT62KxsG1TQVbK98=
+X-Received: by 2002:a25:ad06:0:b0:d43:7653:70a with SMTP id
+ y6-20020a25ad06000000b00d437653070amr1862535ybi.5.1691662034892; Thu, 10 Aug
+ 2023 03:07:14 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.14.0
-Subject: Re: [PATCH v7] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-Content-Language: en-US
-To:     Liming Sun <limings@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
- <20230808202319.191434-1-limings@nvidia.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230808202319.191434-1-limings@nvidia.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20230721101349.12387-1-victorshihgli@gmail.com>
+ <20230721101349.12387-7-victorshihgli@gmail.com> <CAPDyKFoCXyHs4ujrQY3iphQG7GwkKLgAxEPPF6gAxoV7u2oxFQ@mail.gmail.com>
+ <CAK00qKC2_ynLa6X2d6A7_hB33B9PX8AzK_b8mr9o_kOANZFx1Q@mail.gmail.com>
+In-Reply-To: <CAK00qKC2_ynLa6X2d6A7_hB33B9PX8AzK_b8mr9o_kOANZFx1Q@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 10 Aug 2023 12:06:39 +0200
+Message-ID: <CAPDyKFp=m98EW6+U-1yQaNxpnCqK3eKX8rvkLKYBLZ67EB=h4w@mail.gmail.com>
+Subject: Re: [PATCH V9 06/23] mmc: core: Support UHS-II card control and access
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Jason Lai <jason.lai@genesyslogic.com.tw>,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/08/23 23:23, Liming Sun wrote:
-> This commit implements the runtime PM operations to disable eMMC
-> card clock when idle.
-> 
-> Reviewed-by: David Thompson <davthompson@nvidia.com>
-> Signed-off-by: Liming Sun <limings@nvidia.com>
-> ---
-> v6->v7:
->     - Address Ulf's comment;
-> v5->v6:
->     - Address Adrian's more comments and add coordination between
->       runtime PM and system PM;
-> v4->v5:
->     - Address Adrian's comment to move the pm_enable to the end to
->       avoid race;
-> v3->v4:
->     - Fix compiling reported by 'kernel test robot';
-> v2->v3:
->     - Revise the commit message;
-> v1->v2:
->     Updates for comments from Ulf:
->     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
-> v1: Initial version.
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 72 ++++++++++++++++++++++++++++-
->  1 file changed, 70 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index e68cd87998c8..c8e145031429 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -15,6 +15,7 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/reset.h>
->  #include <linux/sizes.h>
->  
-> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  
->  	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->  
-> +	pm_runtime_get_noresume(dev);
-> +	pm_runtime_set_active(dev);
-> +	pm_runtime_enable(dev);
-> +
->  	err = sdhci_setup_host(host);
->  	if (err)
-> -		goto err_clk;
-> +		goto err_rpm;
->  
->  	if (rk_priv)
->  		dwcmshc_rk35xx_postinit(host, priv);
-> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	if (err)
->  		goto err_setup_host;
->  
-> +	pm_runtime_put(dev);
-> +
->  	return 0;
->  
->  err_setup_host:
->  	sdhci_cleanup_host(host);
-> +err_rpm:
-> +	pm_runtime_disable(dev);
-> +	pm_runtime_put_noidle(dev);
->  err_clk:
->  	clk_disable_unprepare(pltfm_host->clk);
->  	clk_disable_unprepare(priv->bus_clk);
-> @@ -606,6 +616,12 @@ static int dwcmshc_suspend(struct device *dev)
->  	if (ret)
->  		return ret;
->  
-> +	ret = pm_runtime_force_suspend(dev);
-> +	if (ret) {
-> +		sdhci_resume_host(host);
-> +		return ret;
-> +	}
+On Wed, 9 Aug 2023 at 17:09, Victor Shih <victorshihgli@gmail.com> wrote:
+>
+> On Tue, Aug 8, 2023 at 9:48=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.or=
+g> wrote:
+> >
+> > On Fri, 21 Jul 2023 at 12:14, Victor Shih <victorshihgli@gmail.com> wro=
+te:
+> > >
+> > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > >
+> > > Embed UHS-II access/control functionality into the MMC request
+> > > processing flow.
+> >
+> > This deserves to be extended a bit. There is quite some code being
+> > added in the $subject patch.
+> >
+> > >
+> > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > > Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+> > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > > ---
+> > >
+> > > Updates in V8:
+> > >  - Add MMC_UHS2_SUPPORT to be cleared in sd_uhs2_detect().
+> > >  - Modify return value in sd_uhs2_attach().
+> > >
+> > > Updates in V7:
+> > >  - Add mmc_uhs2_card_prepare_cmd helper function in sd_ops.h.
+> > >  - Drop uhs2_state in favor of ios->timing.
+> > >  - Remove unnecessary functions.
+> > >
+> > > ---
+> > >
+> > >  drivers/mmc/core/block.c   |   18 +-
+> > >  drivers/mmc/core/core.c    |    8 +
+> > >  drivers/mmc/core/mmc_ops.c |   25 +-
+> > >  drivers/mmc/core/mmc_ops.h |    1 +
+> > >  drivers/mmc/core/sd.c      |   13 +-
+> > >  drivers/mmc/core/sd.h      |    4 +
+> > >  drivers/mmc/core/sd_ops.c  |   11 +
+> > >  drivers/mmc/core/sd_ops.h  |   18 +
+> > >  drivers/mmc/core/sd_uhs2.c | 1137 ++++++++++++++++++++++++++++++++++=
++-
+> > >  9 files changed, 1176 insertions(+), 59 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > > index f701efb1fa78..6617ae9fc840 100644
+> > > --- a/drivers/mmc/core/block.c
+> > > +++ b/drivers/mmc/core/block.c
+> > > @@ -918,15 +918,9 @@ static int mmc_sd_num_wr_blocks(struct mmc_card =
+*card, u32 *written_blocks)
+> > >
+> > >         struct scatterlist sg;
+> > >
+> > > -       cmd.opcode =3D MMC_APP_CMD;
+> > > -       cmd.arg =3D card->rca << 16;
+> > > -       cmd.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> > > -
+> > > -       err =3D mmc_wait_for_cmd(card->host, &cmd, 0);
+> > > -       if (err)
+> > > -               return err;
+> > > -       if (!mmc_host_is_spi(card->host) && !(cmd.resp[0] & R1_APP_CM=
+D))
+> > > -               return -EIO;
+> > > +       err =3D mmc_app_cmd(card->host, card);
+> > > +               if (err)
+> > > +                       return err;
+> > >
+> > >         memset(&cmd, 0, sizeof(struct mmc_command));
+> >
+> > The entire chunk of change above deserves its own separate
+> > cleanup-patch. If you want to send it separately I can apply
+> > immediately - or if you decide to make it part of the series then it
+> > should precede the $subject patch.
+> >
+> > Note that, after the cleanup above, the call to memset() can be dropped=
+ too.
+> >
+>
+> Hi, Ulf
+>
+>      Which patch do you think would be the best if I decided to make
+> it part of the series?
 
-Since you are only using the runtime PM callbacks to turn off the card
-clock via SDHCI_CLOCK_CONTROL, pm_runtime_force_suspend() and
-pm_runtime_force_resume() are not needed at all.
+Probably easier to send it separate, before a new respin of the
+series. I can apply it immediately and you rebase your series on top.
 
-sdhci_suspend_host() does not care if SDHCI_CLOCK_CARD_EN is on or off.
-(And you are disabling pltfm_host->clk and priv->bus_clk, so presumably
-the result is no clock either way)
+If there is anything similar part of the series that also can be
+considered as a cleanup, feel free to send that separate too, to get
+that applied first.
 
-sdhci_resume_host() does not restore state unless
-SDHCI_QUIRK2_HOST_OFF_CARD_ON is used, it just resets, so the internal clock
-SDHCI_CLOCK_INT_EN is off which is consistent with either runtime suspended
-or runtime resumed.
+Kind regards
+Uffe
 
-So it just needs some comments, for example:
-
-+/*
-+ * Note, runtime suspend changes only SDHCI_CLOCK_CARD_EN which has no effect on
-+ * system suspend.
-+ */
- static int dwcmshc_suspend(struct device *dev)
- 
-+/*
-+ * Note, system resume leaves SDHCI_CLOCK_INT_EN off which is consistent with
-+ * either runtime suspended or runtime resumed.
-+ */
- static int dwcmshc_resume(struct device *dev)
-
-
-> +
->  	clk_disable_unprepare(pltfm_host->clk);
->  	if (!IS_ERR(priv->bus_clk))
->  		clk_disable_unprepare(priv->bus_clk);
-> @@ -625,6 +641,10 @@ static int dwcmshc_resume(struct device *dev)
->  	struct rk35xx_priv *rk_priv = priv->priv;
->  	int ret;
->  
-> +	ret = pm_runtime_force_resume(dev);
-> +	if (ret)
-> +		return ret;
-> +
->  	ret = clk_prepare_enable(pltfm_host->clk);
->  	if (ret)
->  		return ret;
-> @@ -646,7 +666,55 @@ static int dwcmshc_resume(struct device *dev)
->  }
->  #endif
->  
-> -static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
-> +#ifdef CONFIG_PM
-> +
-> +static void dwcmshc_enable_card_clk(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	if ((ctrl & SDHCI_CLOCK_INT_EN) && !(ctrl & SDHCI_CLOCK_CARD_EN)) {
-> +		ctrl |= SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +	}
-> +}
-> +
-> +static void dwcmshc_disable_card_clk(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	if (ctrl & SDHCI_CLOCK_CARD_EN) {
-> +		ctrl &= ~SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +	}
-> +}
-> +
-> +static int dwcmshc_runtime_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +	dwcmshc_disable_card_clk(host);
-> +
-> +	return 0;
-> +}
-> +
-> +static int dwcmshc_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +	dwcmshc_enable_card_clk(host);
-> +
-> +	return 0;
-> +}
-> +
-> +#endif
-> +
-> +static const struct dev_pm_ops dwcmshc_pmops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend, dwcmshc_resume)
-> +	SET_RUNTIME_PM_OPS(dwcmshc_runtime_suspend,
-> +			   dwcmshc_runtime_resume, NULL)
-> +};
->  
->  static struct platform_driver sdhci_dwcmshc_driver = {
->  	.driver	= {
-
+>
+> Thanks, Victor Shih
+>
+> > >
+> > > @@ -1612,6 +1606,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue=
+_req *mqrq,
+> >
+> > I commented on the changes in mmc_blk_rw_rq_prep() already in version
+> > 6 [1] - but it seems like you haven't addressed my comments yet.
+> >
+> > I have therefore copied the similar comment again, see below.
+> >
+> > >         struct request *req =3D mmc_queue_req_to_req(mqrq);
+> > >         struct mmc_blk_data *md =3D mq->blkdata;
+> > >         bool do_rel_wr, do_data_tag;
+> > > +       bool do_multi;
+> > > +
+> > > +       do_multi =3D (card->host->flags & MMC_UHS2_SD_TRAN) ? true : =
+false;
+> > >
+> > >         mmc_blk_data_prep(mq, mqrq, recovery_mode, &do_rel_wr, &do_da=
+ta_tag);
+> > >
+> > > @@ -1622,7 +1619,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue=
+_req *mqrq,
+> > >                 brq->cmd.arg <<=3D 9;
+> > >         brq->cmd.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC=
+;
+> > >
+> > > -       if (brq->data.blocks > 1 || do_rel_wr) {
+> > > +       if (brq->data.blocks > 1 || do_rel_wr || do_multi) {
+> >
+> > This looks wrong to me. UHS2 can use single block read/writes too. Righ=
+t?
+> >
+> > >                 /* SPI multiblock writes terminate using a special
+> > >                  * token, not a STOP_TRANSMISSION request.
+> > >                  */
+> > > @@ -1635,6 +1632,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue=
+_req *mqrq,
+> > >                 brq->mrq.stop =3D NULL;
+> > >                 readcmd =3D MMC_READ_SINGLE_BLOCK;
+> > >                 writecmd =3D MMC_WRITE_BLOCK;
+> > > +               brq->cmd.uhs2_tmode0_flag =3D 1;
+> > >         }
+> >
+> > As "do_multi" is always set for UHS2, setting this flag here seems to
+> > be wrong/redundant.
+> >
+> > Anyway, if I understand correctly, the flag is intended to be used to
+> > inform the host driver whether the so-called 2L_HD_mode (half-duplex
+> > or full-duplex) should be used for the I/O request or not. Did I
+> > understand this correctly?
+> >
+> > To fix the above behaviour, I suggest we try to move the entire
+> > control of the flag into mmc_uhs2_prepare_cmd(). It seems like we need
+> > the flag to be set for multi block read/writes (CMD18 and CMD25), but
+> > only if the host and card supports the 2L_HD_mode too, right?
+> >
+> > According to my earlier suggestions, we should also be able to check
+> > the 2L_HD_mode via the bits we have set in the ios->timing, no?
+> >
+> > Moreover, by making mmc_uhs2_prepare_cmd() responsible for setting the
+> > flag, we can move the definition of the flag into the struct
+> > uhs2_command instead. While at it, I suggest we also rename the flag
+> > into "tmode_half_duplex", to better describe its purpose. Note that,
+> > this also means the interpretation of the flag becomes inverted.
+> >
+> > >         brq->cmd.opcode =3D rq_data_dir(req) =3D=3D READ ? readcmd : =
+writecmd;
+> > >
+> >
+> > Until we have agreed on how to move forward with the above, I am
+> > temporarily pausing further review.
+> >
+> > [...]
+> >
+> > Kind regards
+> > Uffe
+> >
+> > [1]
+> > https://lore.kernel.org/linux-mmc/CAPDyKFoV3Ch-xzXxiT2RnDeLvsO454Pwq1vQ=
+L_bdNLptM+amAg@mail.gmail.com/
