@@ -2,174 +2,116 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39DA5C04A94
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Aug 2023 10:22:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2218AC001B0
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Aug 2023 11:09:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232018AbjHJKWd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Aug 2023 06:22:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45950 "EHLO
+        id S233612AbjHJLJl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Aug 2023 07:09:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234619AbjHJKWN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 06:22:13 -0400
-Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8432326AC
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 03:22:12 -0700 (PDT)
-Received: by mail-yb1-xb29.google.com with SMTP id 3f1490d57ef6-bc379e4c1cbso669118276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 03:22:12 -0700 (PDT)
+        with ESMTP id S231317AbjHJLJk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 07:09:40 -0400
+Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 445872136
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 04:09:40 -0700 (PDT)
+Received: by mail-yb1-xb2c.google.com with SMTP id 3f1490d57ef6-d656d5e8265so101875276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 04:09:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1691662932; x=1692267732;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=zO4KyyuaXtRM/oTROtyRhv+QW9j9ZaqNkf8KIDhgR1g=;
-        b=h03HkvqsbQUpUNbxXk8ASTVVIlMS5wyQ5GIV9h7Idn3Vy+0swCp0zzFITe4dV2Bb57
-         kyg6/JMeLXn1TFp/Y+xqYjsSGV+EXhtPtkFXYlMD62WoTWWaiyhOcYpM/RlE8QXxgpIk
-         9B7HveL6GlWrwC9FyBnMDm8XqdMyXG91O6dBtMgWAtedLDg6zuX14DDiUMPUjNyn+FRh
-         fD9fFwdYNop4Z9L7ET/si54xPEbqJ7JtGG4QI1KTCLP4Qt/Vo/DjonsClLlYVcE+9Jwb
-         lpWLW54HPMjgVo0HNVrgIhFJCUlSh78qPLFkBSvNeFnhFG4M23RJMo8XbtSYqYRD8Ky4
-         jmkA==
+        d=linaro.org; s=google; t=1691665779; x=1692270579;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=nrCDrSaxkOnoskPLNX6of9fGrq30kSTTjPQNs9alzXw=;
+        b=mqLUcZGAdm5yKSkxr9BjWFd3B/wUgzQDxpBtajmOQByxwqT23HnyN/9GslCSZdK1fl
+         XPRSPd86ZfFgTeyzaFb+TWwfQvH/OcUU3cOb8JJxV0aszhV6F+Gygl3giB9wR7/22vQd
+         fr96lqsvFYBLfMFQj74BJc8X+ujWkyxK3+IT6vhsagBTakO1UTJBPLQ6pwlqp+29R80Y
+         +7P9PmZVTXiu2+pjGX0M8OzvxA+EGEtXmt740D8gvDJmHbs4fxAfV4rgABNkOha3fB0j
+         JFdZEXCtBXJj3rmY3JLWWBCdyQoJsa5OrLis8hsudww1mKFZVGQ4+l3g2MByzHJphERJ
+         Eorw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691662932; x=1692267732;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=zO4KyyuaXtRM/oTROtyRhv+QW9j9ZaqNkf8KIDhgR1g=;
-        b=i2fQ/klJnvUkGz3kGm6bTbkviJVYVt0rLdhi6zjerJTvjJAXr44NCeGdWt6AUIpAu9
-         NZZNPFW91V5bsPsGcm7yGE3+xzVUkkw9JLf4Sq41pREcptTx9sBxzZL6lkfeVTzqY8W0
-         WSVvtEEvmvI6xJT9BNYdHsTikEApGJZ/LqLwS5K6zxK188uoGgS/Yon5LuvxsyCF+gz+
-         n65wnoQGwR2LA1oMmVCl8rE98ofpSdTU6J/pkYWdjlqJjsbhuTU5qAGsEOA9H7+NJ1bK
-         z2T/UaQaBggZGnBYN1duOPuo+pA9DuuIGlkyHs9otJUhk04AWEtQ1SIXiO/AkOdYFvtH
-         wACw==
-X-Gm-Message-State: AOJu0YwgGd8/uHbAfvMJUcW/ykMz5MqCCzkQq1rKxDKSOM0iCqdOCx9I
-        PbaHzvn/RuDjQUIA3JLtbVdkCP6dUfJ1xAao1ZXLH8VSXFr7Xroy
-X-Google-Smtp-Source: AGHT+IElrj9Okjsl2TmHt5zBVp6IvD+QWVOR0hppYxe14YtyWS4pktSp8ZRF4NbazB57+lzeN8oe4Jz8EGzZ83NYt8A=
-X-Received: by 2002:a25:ad20:0:b0:cb6:4943:a021 with SMTP id
- y32-20020a25ad20000000b00cb64943a021mr2380449ybi.7.1691662931757; Thu, 10 Aug
- 2023 03:22:11 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1691665779; x=1692270579;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=nrCDrSaxkOnoskPLNX6of9fGrq30kSTTjPQNs9alzXw=;
+        b=i1mCPtlaLdn5l6zcB1mzFAZkdX5hfMzZBAj+IK10vc+cHYFxjF4jchSxo5C8sl2TVO
+         nI7oj06fHhTl4o6pM3BF6A62qDUGCgX4NPZfQbIi9XmBcJhEIT+ke/sJ0buLI6uRgPkD
+         8QWwxQTzun1mrui9VWi0hAfSl1suZj7j9Ju9/46shl40IrLQbUZMqysR98YIrvsuH9bS
+         gV9j74F3Xbu3xmhj/bGhYVK+h3pG2zMpcrxXF3NJoV+6KElT4KXfWYu+N/cVnZiyWZIH
+         0cWu9gQb1S7ILxW3/3gxakazw7JEDiCuAPl84VouJEmf85gSpjTajHyM1gAoUIlhlPwO
+         bz7Q==
+X-Gm-Message-State: AOJu0YyqtAGaweFKJPEY6FrvjN0iXE3+1bJDSMXAlwxVieoV/r/dXYiT
+        f20pJlNOBpF0M9BFQ1ETHAYYdn9u/n29Dy8KDn8pEg==
+X-Google-Smtp-Source: AGHT+IHZFiJvDdRFwWsv0IC08dq5P2mWN3KmjsdIo4AKS3FUz9cw2DydAD6qCbnSHw/Inw5OMg6uQe9d0pHzlI0Agpc=
+X-Received: by 2002:a25:734b:0:b0:d4e:f64d:97bd with SMTP id
+ o72-20020a25734b000000b00d4ef64d97bdmr2277019ybc.63.1691665779441; Thu, 10
+ Aug 2023 04:09:39 -0700 (PDT)
 MIME-Version: 1.0
-References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
- <20230808202319.191434-1-limings@nvidia.com> <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
-In-Reply-To: <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
+References: <cover.1691606520.git.agx@sigxcpu.org> <d7a0be6a2688a9829077cc21ca4a5bf9528f9eb1.1691606520.git.agx@sigxcpu.org>
+In-Reply-To: <d7a0be6a2688a9829077cc21ca4a5bf9528f9eb1.1691606520.git.agx@sigxcpu.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 10 Aug 2023 12:21:35 +0200
-Message-ID: <CAPDyKFp28mmbRAGf14u8KTO3v7H=SFAYbwcz7xeb1m4tD_G2vQ@mail.gmail.com>
-Subject: Re: [PATCH v7] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Liming Sun <limings@nvidia.com>,
-        David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Thu, 10 Aug 2023 13:09:03 +0200
+Message-ID: <CAPDyKFrhBqvkqnJngSBSx+nqnNwo9BXjfiUjt2uk_TbCsd95Ug@mail.gmail.com>
+Subject: Re: [PATCH v1 2/5] dt-bindings: mmc: Fix reference to pwr-seq-simple
+To:     =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Will Deacon <will@kernel.org>, Peng Fan <peng.fan@nxp.com>,
+        Bjorn Andersson <quic_bjorande@quicinc.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        =?UTF-8?B?TsOtY29sYXMgRi4gUi4gQS4gUHJhZG8=?= 
+        <nfraprado@collabora.com>,
+        =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
+        kernel@puri.sm, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-arm-kernel@lists.infradead.org,
+        David Heidelberg <david@ixit.cz>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 10 Aug 2023 at 10:13, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Wed, 9 Aug 2023 at 20:50, Guido G=C3=BCnther <agx@sigxcpu.org> wrote:
 >
-> On 8/08/23 23:23, Liming Sun wrote:
-> > This commit implements the runtime PM operations to disable eMMC
-> > card clock when idle.
-> >
-> > Reviewed-by: David Thompson <davthompson@nvidia.com>
-> > Signed-off-by: Liming Sun <limings@nvidia.com>
-> > ---
-> > v6->v7:
-> >     - Address Ulf's comment;
-> > v5->v6:
-> >     - Address Adrian's more comments and add coordination between
-> >       runtime PM and system PM;
-> > v4->v5:
-> >     - Address Adrian's comment to move the pm_enable to the end to
-> >       avoid race;
-> > v3->v4:
-> >     - Fix compiling reported by 'kernel test robot';
-> > v2->v3:
-> >     - Revise the commit message;
-> > v1->v2:
-> >     Updates for comments from Ulf:
-> >     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
-> > v1: Initial version.
-> > ---
-> >  drivers/mmc/host/sdhci-of-dwcmshc.c | 72 ++++++++++++++++++++++++++++-
-> >  1 file changed, 70 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > index e68cd87998c8..c8e145031429 100644
-> > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > @@ -15,6 +15,7 @@
-> >  #include <linux/module.h>
-> >  #include <linux/of.h>
-> >  #include <linux/of_device.h>
-> > +#include <linux/pm_runtime.h>
-> >  #include <linux/reset.h>
-> >  #include <linux/sizes.h>
-> >
-> > @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
-> >
-> >       host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
-> >
-> > +     pm_runtime_get_noresume(dev);
-> > +     pm_runtime_set_active(dev);
-> > +     pm_runtime_enable(dev);
-> > +
-> >       err = sdhci_setup_host(host);
-> >       if (err)
-> > -             goto err_clk;
-> > +             goto err_rpm;
-> >
-> >       if (rk_priv)
-> >               dwcmshc_rk35xx_postinit(host, priv);
-> > @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
-> >       if (err)
-> >               goto err_setup_host;
-> >
-> > +     pm_runtime_put(dev);
-> > +
-> >       return 0;
-> >
-> >  err_setup_host:
-> >       sdhci_cleanup_host(host);
-> > +err_rpm:
-> > +     pm_runtime_disable(dev);
-> > +     pm_runtime_put_noidle(dev);
-> >  err_clk:
-> >       clk_disable_unprepare(pltfm_host->clk);
-> >       clk_disable_unprepare(priv->bus_clk);
-> > @@ -606,6 +616,12 @@ static int dwcmshc_suspend(struct device *dev)
-> >       if (ret)
-> >               return ret;
-> >
-> > +     ret = pm_runtime_force_suspend(dev);
-> > +     if (ret) {
-> > +             sdhci_resume_host(host);
-> > +             return ret;
-> > +     }
+> It's a YAML file nowadays.
 >
-> Since you are only using the runtime PM callbacks to turn off the card
-> clock via SDHCI_CLOCK_CONTROL, pm_runtime_force_suspend() and
-> pm_runtime_force_resume() are not needed at all.
+> Signed-off-by: Guido G=C3=BCnther <agx@sigxcpu.org>
 
-Right, it can be done without these too.
-
->
-> sdhci_suspend_host() does not care if SDHCI_CLOCK_CARD_EN is on or off.
-> (And you are disabling pltfm_host->clk and priv->bus_clk, so presumably
-> the result is no clock either way)
->
-> sdhci_resume_host() does not restore state unless
-> SDHCI_QUIRK2_HOST_OFF_CARD_ON is used, it just resets, so the internal clock
-> SDHCI_CLOCK_INT_EN is off which is consistent with either runtime suspended
-> or runtime resumed.
-
-Even if this may work, to me, it doesn't look like good practice for
-how to use runtime PM in combination with system wide suspend/resume.
-
-The point is, sdhci_suspend|resume_host() may end up reading/writing
-to sdhci registers - and we should *not* allow that (because it may
-not always work), unless the sdhci controller has been runtime resumed
-first, right?
-
-[...]
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/=
+Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index 86c73fd825fd..58ae298cd2fc 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -269,7 +269,7 @@ properties:
+>    post-power-on-delay-ms:
+>      description:
+>        It was invented for MMC pwrseq-simple which could be referred to
+> -      mmc-pwrseq-simple.txt. But now it\'s reused as a tunable delay
+> +      mmc-pwrseq-simple.yaml. But now it\'s reused as a tunable delay
+>        waiting for I/O signalling and card power supply to be stable,
+>        regardless of whether pwrseq-simple is used. Default to 10ms if
+>        no available.
+> --
+> 2.40.1
+>
