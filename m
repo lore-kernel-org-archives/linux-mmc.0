@@ -2,121 +2,200 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91EDDC41513
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Aug 2023 15:41:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 488B0C001E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Aug 2023 16:35:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235622AbjHJPlZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Aug 2023 11:41:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40604 "EHLO
+        id S230287AbjHJQfe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Aug 2023 12:35:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53750 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233659AbjHJPlY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 11:41:24 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50ECB26BA;
-        Thu, 10 Aug 2023 08:41:24 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D418066064;
-        Thu, 10 Aug 2023 15:41:23 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02C69C433C8;
-        Thu, 10 Aug 2023 15:41:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1691682083;
-        bh=Vp2jSuFBWOEKjrQYyDUltwIuqr1IYAiJcOZOO7IAL8I=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=CF9xkZjGiPLQKrEDzGEW+a4Cy0dc/eaAwqdDTuNTbmOMKHVp8Rv9uobIHBSfEfpSa
-         W/RK7heCdE9UqBhF6M3kuDm2L8xou9gA7xBFzFDioRXHFGeXgZN5h/+wEzTqrifRkV
-         72p/zqwGEjE4v6uZRLRmGPyjUMbC6+CBsyBrmCadaRl8zBCqhgAFjwlcwo6jB6Dz3O
-         lZrW5sLI6CRSa7p/5lCe7BKrjTpWeMe+7+8PZ42j0OpZ3Y79Rh0Tv4FiUT6w9KZMMd
-         9y6K/FpIeEYL4ZviD3bEy2DilDAWSddUFoVB2DFntwMIa+OGVE3SmbQ62m/l8mszyL
-         klg4oChDuBpaQ==
-Date:   Thu, 10 Aug 2023 16:41:15 +0100
-From:   Conor Dooley <conor@kernel.org>
-To:     Guido =?iso-8859-1?Q?G=FCnther?= <agx@sigxcpu.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>, Peng Fan <peng.fan@nxp.com>,
-        Bjorn Andersson <quic_bjorande@quicinc.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        =?iso-8859-1?Q?N=EDcolas_F=2E_R=2E_A=2E?= Prado 
-        <nfraprado@collabora.com>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-        kernel@puri.sm, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-arm-kernel@lists.infradead.org,
-        David Heidelberg <david@ixit.cz>
-Subject: Re: [PATCH v1 1/5] dt-bindings: sound: gtm601: Add description
-Message-ID: <20230810-decay-pelican-e0de3e95a72a@spud>
-References: <cover.1691606520.git.agx@sigxcpu.org>
- <b6e85fdfaa87d7684a120ccedc1e07d8fe87957f.1691606520.git.agx@sigxcpu.org>
+        with ESMTP id S232216AbjHJQf2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 12:35:28 -0400
+Received: from mail-yb1-xb30.google.com (mail-yb1-xb30.google.com [IPv6:2607:f8b0:4864:20::b30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54268103
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 09:35:27 -0700 (PDT)
+Received: by mail-yb1-xb30.google.com with SMTP id 3f1490d57ef6-d63457dd8b8so1008335276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Aug 2023 09:35:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1691685326; x=1692290126;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=74qEJA231zY4tMaqWdb1XigDSYeTpJgLMJ4WiPPtkaI=;
+        b=AzpMLLNWADt9pLVuk2aS4vZs4c+4Gyc+Tj35Jma7VJmBLf7l0HeZAK9YeNBc4ItPpD
+         +IibzODX1noMZAsSpPrw3n0DSu4d/+Nzy7U3pC5Y6C3F9IQY8sC7T4oZ+Ekgz51qa+1F
+         iSu6qfbdvPKdON+iJWu/foE7IXUssOjltCo65AE5l6FlCPvSklPwfAMJxT0okGcxZhEC
+         V1qSVEc9IauIbU8gNO2d+ImDfiD3vpxMXtF+mTS8aZH0dwTr652XnACzIfmCvCm+h8KU
+         sUP5DqK48extErXLRnwnFQ/TT7t8eLKjrsfv+VG/vANRkeqqTsjhDBkF+Nwl8LkLrFQu
+         deRw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1691685326; x=1692290126;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=74qEJA231zY4tMaqWdb1XigDSYeTpJgLMJ4WiPPtkaI=;
+        b=H05VP/xJMcc29Wp39Zc83c5atXkeom3WQ/3SdFOXUbp51D0c0XhBs+DwkmH//e9OKv
+         tdQKwcFqPf4HEjkwT+OPvm6gWM8zhxSN17kHsDoIfEoDkQfVEArbIE9vw6+ODPImRaPK
+         AD/By8uFGs1+xEvbm5iKYliRvYmbJVC1DLXmuPGkCV9oYxrx+DF9hryFyVN8cfArozQY
+         y78RpU8Y4yxBflh9kFYgouZ6u28ddWmK7TAGbKXZN68rrQR48A69yu98RF9i+oVFoynm
+         eRSA4TlNdv/UghgaJFFUamqN91cFqG+V+XvByZ+mX1z3xkZUgqa/lw5Fu2tSm4umR4we
+         stSA==
+X-Gm-Message-State: AOJu0YxG+x+w68w8qlXfYc+1N3m+mBKBbnocQSHonY2aTgV8HsrJYfRe
+        z8Nsq3hd0oL9uki2/hYFSjecUPcFJokMStddIhoGXyJj4Rwq4+b1
+X-Google-Smtp-Source: AGHT+IFjEfxNOINZ1eZeg+cWvWtQQMU3sGcMiUGUyPJ7VZpsKRllF+8Y5K8u+/adUGkCKOECyUWEnLDd2JlQGq0hlYM=
+X-Received: by 2002:a25:ab24:0:b0:c11:6638:af3e with SMTP id
+ u33-20020a25ab24000000b00c116638af3emr1156504ybi.45.1691685326540; Thu, 10
+ Aug 2023 09:35:26 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="fm5BdTz7t06Oo3Tp"
-Content-Disposition: inline
-In-Reply-To: <b6e85fdfaa87d7684a120ccedc1e07d8fe87957f.1691606520.git.agx@sigxcpu.org>
+References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
+ <20230808202319.191434-1-limings@nvidia.com> <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
+ <CAPDyKFp28mmbRAGf14u8KTO3v7H=SFAYbwcz7xeb1m4tD_G2vQ@mail.gmail.com> <a2f6cd0e-8429-3468-9dcf-a5022717e2ae@intel.com>
+In-Reply-To: <a2f6cd0e-8429-3468-9dcf-a5022717e2ae@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 10 Aug 2023 18:34:50 +0200
+Message-ID: <CAPDyKFqTWMghEAsBdLUF+K4QNEWBozNi3_a7w0+KuuO3x+wkTQ@mail.gmail.com>
+Subject: Re: [PATCH v7] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Liming Sun <limings@nvidia.com>,
+        David Thompson <davthompson@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Thu, 10 Aug 2023 at 14:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 10/08/23 13:21, Ulf Hansson wrote:
+> > On Thu, 10 Aug 2023 at 10:13, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>
+> >> On 8/08/23 23:23, Liming Sun wrote:
+> >>> This commit implements the runtime PM operations to disable eMMC
+> >>> card clock when idle.
+> >>>
+> >>> Reviewed-by: David Thompson <davthompson@nvidia.com>
+> >>> Signed-off-by: Liming Sun <limings@nvidia.com>
+> >>> ---
+> >>> v6->v7:
+> >>>     - Address Ulf's comment;
+> >>> v5->v6:
+> >>>     - Address Adrian's more comments and add coordination between
+> >>>       runtime PM and system PM;
+> >>> v4->v5:
+> >>>     - Address Adrian's comment to move the pm_enable to the end to
+> >>>       avoid race;
+> >>> v3->v4:
+> >>>     - Fix compiling reported by 'kernel test robot';
+> >>> v2->v3:
+> >>>     - Revise the commit message;
+> >>> v1->v2:
+> >>>     Updates for comments from Ulf:
+> >>>     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
+> >>> v1: Initial version.
+> >>> ---
+> >>>  drivers/mmc/host/sdhci-of-dwcmshc.c | 72 ++++++++++++++++++++++++++++-
+> >>>  1 file changed, 70 insertions(+), 2 deletions(-)
+> >>>
+> >>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>> index e68cd87998c8..c8e145031429 100644
+> >>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>> @@ -15,6 +15,7 @@
+> >>>  #include <linux/module.h>
+> >>>  #include <linux/of.h>
+> >>>  #include <linux/of_device.h>
+> >>> +#include <linux/pm_runtime.h>
+> >>>  #include <linux/reset.h>
+> >>>  #include <linux/sizes.h>
+> >>>
+> >>> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
+> >>>
+> >>>       host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+> >>>
+> >>> +     pm_runtime_get_noresume(dev);
+> >>> +     pm_runtime_set_active(dev);
+> >>> +     pm_runtime_enable(dev);
+> >>> +
+> >>>       err = sdhci_setup_host(host);
+> >>>       if (err)
+> >>> -             goto err_clk;
+> >>> +             goto err_rpm;
+> >>>
+> >>>       if (rk_priv)
+> >>>               dwcmshc_rk35xx_postinit(host, priv);
+> >>> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+> >>>       if (err)
+> >>>               goto err_setup_host;
+> >>>
+> >>> +     pm_runtime_put(dev);
+> >>> +
+> >>>       return 0;
+> >>>
+> >>>  err_setup_host:
+> >>>       sdhci_cleanup_host(host);
+> >>> +err_rpm:
+> >>> +     pm_runtime_disable(dev);
+> >>> +     pm_runtime_put_noidle(dev);
+> >>>  err_clk:
+> >>>       clk_disable_unprepare(pltfm_host->clk);
+> >>>       clk_disable_unprepare(priv->bus_clk);
+> >>> @@ -606,6 +616,12 @@ static int dwcmshc_suspend(struct device *dev)
+> >>>       if (ret)
+> >>>               return ret;
+> >>>
+> >>> +     ret = pm_runtime_force_suspend(dev);
+> >>> +     if (ret) {
+> >>> +             sdhci_resume_host(host);
+> >>> +             return ret;
+> >>> +     }
+> >>
+> >> Since you are only using the runtime PM callbacks to turn off the card
+> >> clock via SDHCI_CLOCK_CONTROL, pm_runtime_force_suspend() and
+> >> pm_runtime_force_resume() are not needed at all.
+> >
+> > Right, it can be done without these too.
+> >
+> >>
+> >> sdhci_suspend_host() does not care if SDHCI_CLOCK_CARD_EN is on or off.
+> >> (And you are disabling pltfm_host->clk and priv->bus_clk, so presumably
+> >> the result is no clock either way)
+> >>
+> >> sdhci_resume_host() does not restore state unless
+> >> SDHCI_QUIRK2_HOST_OFF_CARD_ON is used, it just resets, so the internal clock
+> >> SDHCI_CLOCK_INT_EN is off which is consistent with either runtime suspended
+> >> or runtime resumed.
+> >
+> > Even if this may work, to me, it doesn't look like good practice for
+> > how to use runtime PM in combination with system wide suspend/resume.
+> >
+> > The point is, sdhci_suspend|resume_host() may end up reading/writing
+> > to sdhci registers - and we should *not* allow that (because it may
+> > not always work), unless the sdhci controller has been runtime resumed
+> > first, right?
+>
+> I am OK with drivers that just want to use runtime PM to turn off a
+> functional clock.  sdhci-tegra.c is also doing that although using the
+> clock framework.
 
---fm5BdTz7t06Oo3Tp
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Yes, I agree. At least this works for SoC specific drivers.
 
-On Wed, Aug 09, 2023 at 08:50:10PM +0200, Guido G=FCnther wrote:
-> This allows to us to document the channel and sampling
-> rate requirements.
->=20
-> Signed-off-by: Guido G=FCnther <agx@sigxcpu.org>
-> ---
->  Documentation/devicetree/bindings/sound/option,gtm601.yaml | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
->=20
-> diff --git a/Documentation/devicetree/bindings/sound/option,gtm601.yaml b=
-/Documentation/devicetree/bindings/sound/option,gtm601.yaml
-> index 69c2ccc79dc5..ff813d97fc59 100644
-> --- a/Documentation/devicetree/bindings/sound/option,gtm601.yaml
-> +++ b/Documentation/devicetree/bindings/sound/option,gtm601.yaml
-> @@ -16,10 +16,12 @@ description: >
->  properties:
->    compatible:
->      oneOf:
-> -      - items:  # 48 kHz stereo
-> +      - description: Broadmobi BM818 (48Khz stereo)
-> +        items:
->            - const: broadmobi,bm818
->            - const: option,gtm601
-> -      - const: option,gtm601  # 8 kHz mono
-> +      - description: GTM601 (8kHz mono)
-> +        const: option,gtm601
+>
+> Certainly that approach assumes that the host controller's power state
+> is not changed due to runtime PM.
+>
+> To ensure that the host controller is runtime resumed before calling
+> sdhci_suspend_host(), we can just call pm_runtime_resume() I think.
 
-Makes little odds IMO which way it is done.
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
+Yes, that was kind of what I proposed in the other thread as option 1)
+(except for the replacement of pm_runtime_force_suspend|resume).
 
---fm5BdTz7t06Oo3Tp
-Content-Type: application/pgp-signature; name="signature.asc"
+Although, to be clear I would probably use pm_runtime_get_sync()
+instead, to make sure the usage count is incremented too.
 
------BEGIN PGP SIGNATURE-----
+I don't have a strong opinion here, but from an optimization point of
+view I would at least consider what I proposed in option 2) (in the
+other thread). The benefit is that it can allow us to potentially
+avoid runtime resuming the device, during system suspend.
 
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZNUFGwAKCRB4tDGHoIJi
-0gOOAPoDAcz/ZqmjrpjlwQLTuapShIGvjmjfn2rzc+KxUXS5dgEAlgM1rxLHXiGG
-Ej8O7ewGrTrObyfb9ZKlKcpZzz9sWQI=
-=KmJs
------END PGP SIGNATURE-----
-
---fm5BdTz7t06Oo3Tp--
+Kind regards
+Uffe
