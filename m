@@ -2,165 +2,208 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16F05C001DE
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 03:52:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AA9BEB64DD
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 05:57:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231849AbjHKDwF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Aug 2023 23:52:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55772 "EHLO
+        id S229544AbjHKF5g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Aug 2023 01:57:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59874 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233066AbjHKDv6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 23:51:58 -0400
-Received: from m126.mail.126.com (m126.mail.126.com [220.181.12.36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EBCA52710;
-        Thu, 10 Aug 2023 20:51:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=126.com;
-        s=s110527; h=From:Subject:Date:Message-Id; bh=rRsY8wF+12LLSbrp6p
-        l15k6ZSOl72SbfGUbKTXeWh+0=; b=fGPdXk6ooIJKYWfeRKDxjbRNK2IawG75bi
-        kldDGCHwuGEdS6rc5mZaZCiDbWRczzIiSNVIUUGUF+AIxkaUfBVp4tgLuNJOEs9k
-        6cf7CNDthYIRmg7ZavAgZzss6AGvCN95xATz5yzWIQoPsO6uW4JWZQNGfhNhxAYJ
-        23zeWdlBM=
-Received: from wh-chevronli-w10.bayhubtech.com (unknown [58.48.115.170])
-        by zwqz-smtp-mta-g0-1 (Coremail) with SMTP id _____wB3j5eVrNVknHE8Bw--.10021S3;
-        Fri, 11 Aug 2023 11:35:51 +0800 (CST)
-From:   Chevron Li <chevron_li@126.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        with ESMTP id S229546AbjHKF5f (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 01:57:35 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CCC92706;
+        Thu, 10 Aug 2023 22:57:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1691733455; x=1723269455;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=NzC5dML3RiPZQaVQdobaw0aqoIHR6uCRuuDllSIeAw8=;
+  b=geXwxJINFVaAW6nNrqYBwcHJ5lzloQHP1DjAP3+cVFsFxW+2sXlsJ6TT
+   HxCEhTTuFrkaa6Fg48t11rUARCZiQoejggYaU85AWEAqHsQnXwKLS8j+t
+   QmoxzzRzJZG9dU5OCnQsml/ot1a854EJKCYBrsN2w1wHUeuz+jUfE2YBk
+   xjoFnwr5EaBXpuaArJhcVPq5rutSqnpCJDZAgwV6QagFQD9aTG6+RKQcs
+   IHV0Q2wREutgmOEIViqxnTnp0fiZxoi7frczlmZoB9sur4uwVctb9fjjI
+   qw0sIlF6jGv+/yPha7iQFj7c6DA8W0VkW2DId3rq6g57PuzHoNSTEORxH
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="374370657"
+X-IronPort-AV: E=Sophos;i="6.01,164,1684825200"; 
+   d="scan'208";a="374370657"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Aug 2023 22:56:55 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="682419104"
+X-IronPort-AV: E=Sophos;i="6.01,164,1684825200"; 
+   d="scan'208";a="682419104"
+Received: from onuryilm-mobl.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.13])
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Aug 2023 22:56:48 -0700
+Message-ID: <e561174e-a5cf-9503-f47a-d6c3fc7a1719@intel.com>
+Date:   Fri, 11 Aug 2023 08:56:45 +0300
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.14.0
+Subject: Re: [PATCH v7] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Liming Sun <limings@nvidia.com>
+Cc:     David Thompson <davthompson@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com,
-        shaper.liu@bayhubtech.com, Chevron Li <chevron.li@bayhubtech.com>
-Subject: [PATCH V3 2/2] mmc: sdhci-pci-o2micro: add Bayhub new chip GG8 support for express card
-Date:   Fri, 11 Aug 2023 11:35:17 +0800
-Message-Id: <20230811033517.11532-2-chevron_li@126.com>
-X-Mailer: git-send-email 2.18.0.windows.1
-In-Reply-To: <20230811033517.11532-1-chevron_li@126.com>
-References: <20230811033517.11532-1-chevron_li@126.com>
-X-CM-TRANSID: _____wB3j5eVrNVknHE8Bw--.10021S3
-X-Coremail-Antispam: 1Uf129KBjvJXoWxGw4xAw45Cw1kCw1DAw4fKrg_yoWrWrWxpF
-        4Fvas8Cr4rtFW3Z39xJw4kZr1Y9r1vk3yDKFsxJrW0v3W0kF95Wr97CFy5XryUXrZaqw1f
-        Xa1vqFyUGryUAwUanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07joFALUUUUU=
-X-Originating-IP: [58.48.115.170]
-X-CM-SenderInfo: hfkh42xrqbzxa6rslhhfrp/1tbi1w3IAV53b4ALKwACs3
+References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
+ <20230808202319.191434-1-limings@nvidia.com>
+ <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
+ <CAPDyKFp28mmbRAGf14u8KTO3v7H=SFAYbwcz7xeb1m4tD_G2vQ@mail.gmail.com>
+ <a2f6cd0e-8429-3468-9dcf-a5022717e2ae@intel.com>
+ <CAPDyKFqTWMghEAsBdLUF+K4QNEWBozNi3_a7w0+KuuO3x+wkTQ@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CAPDyKFqTWMghEAsBdLUF+K4QNEWBozNi3_a7w0+KuuO3x+wkTQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Chevron Li <chevron.li@bayhubtech.com>
+On 10/08/23 19:34, Ulf Hansson wrote:
+> On Thu, 10 Aug 2023 at 14:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> On 10/08/23 13:21, Ulf Hansson wrote:
+>>> On Thu, 10 Aug 2023 at 10:13, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>
+>>>> On 8/08/23 23:23, Liming Sun wrote:
+>>>>> This commit implements the runtime PM operations to disable eMMC
+>>>>> card clock when idle.
+>>>>>
+>>>>> Reviewed-by: David Thompson <davthompson@nvidia.com>
+>>>>> Signed-off-by: Liming Sun <limings@nvidia.com>
+>>>>> ---
+>>>>> v6->v7:
+>>>>>     - Address Ulf's comment;
+>>>>> v5->v6:
+>>>>>     - Address Adrian's more comments and add coordination between
+>>>>>       runtime PM and system PM;
+>>>>> v4->v5:
+>>>>>     - Address Adrian's comment to move the pm_enable to the end to
+>>>>>       avoid race;
+>>>>> v3->v4:
+>>>>>     - Fix compiling reported by 'kernel test robot';
+>>>>> v2->v3:
+>>>>>     - Revise the commit message;
+>>>>> v1->v2:
+>>>>>     Updates for comments from Ulf:
+>>>>>     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
+>>>>> v1: Initial version.
+>>>>> ---
+>>>>>  drivers/mmc/host/sdhci-of-dwcmshc.c | 72 ++++++++++++++++++++++++++++-
+>>>>>  1 file changed, 70 insertions(+), 2 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>>> index e68cd87998c8..c8e145031429 100644
+>>>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>>> @@ -15,6 +15,7 @@
+>>>>>  #include <linux/module.h>
+>>>>>  #include <linux/of.h>
+>>>>>  #include <linux/of_device.h>
+>>>>> +#include <linux/pm_runtime.h>
+>>>>>  #include <linux/reset.h>
+>>>>>  #include <linux/sizes.h>
+>>>>>
+>>>>> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>>>
+>>>>>       host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>>>>>
+>>>>> +     pm_runtime_get_noresume(dev);
+>>>>> +     pm_runtime_set_active(dev);
+>>>>> +     pm_runtime_enable(dev);
+>>>>> +
+>>>>>       err = sdhci_setup_host(host);
+>>>>>       if (err)
+>>>>> -             goto err_clk;
+>>>>> +             goto err_rpm;
+>>>>>
+>>>>>       if (rk_priv)
+>>>>>               dwcmshc_rk35xx_postinit(host, priv);
+>>>>> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>>>       if (err)
+>>>>>               goto err_setup_host;
+>>>>>
+>>>>> +     pm_runtime_put(dev);
+>>>>> +
+>>>>>       return 0;
+>>>>>
+>>>>>  err_setup_host:
+>>>>>       sdhci_cleanup_host(host);
+>>>>> +err_rpm:
+>>>>> +     pm_runtime_disable(dev);
+>>>>> +     pm_runtime_put_noidle(dev);
+>>>>>  err_clk:
+>>>>>       clk_disable_unprepare(pltfm_host->clk);
+>>>>>       clk_disable_unprepare(priv->bus_clk);
+>>>>> @@ -606,6 +616,12 @@ static int dwcmshc_suspend(struct device *dev)
+>>>>>       if (ret)
+>>>>>               return ret;
+>>>>>
+>>>>> +     ret = pm_runtime_force_suspend(dev);
+>>>>> +     if (ret) {
+>>>>> +             sdhci_resume_host(host);
+>>>>> +             return ret;
+>>>>> +     }
+>>>>
+>>>> Since you are only using the runtime PM callbacks to turn off the card
+>>>> clock via SDHCI_CLOCK_CONTROL, pm_runtime_force_suspend() and
+>>>> pm_runtime_force_resume() are not needed at all.
+>>>
+>>> Right, it can be done without these too.
+>>>
+>>>>
+>>>> sdhci_suspend_host() does not care if SDHCI_CLOCK_CARD_EN is on or off.
+>>>> (And you are disabling pltfm_host->clk and priv->bus_clk, so presumably
+>>>> the result is no clock either way)
+>>>>
+>>>> sdhci_resume_host() does not restore state unless
+>>>> SDHCI_QUIRK2_HOST_OFF_CARD_ON is used, it just resets, so the internal clock
+>>>> SDHCI_CLOCK_INT_EN is off which is consistent with either runtime suspended
+>>>> or runtime resumed.
+>>>
+>>> Even if this may work, to me, it doesn't look like good practice for
+>>> how to use runtime PM in combination with system wide suspend/resume.
+>>>
+>>> The point is, sdhci_suspend|resume_host() may end up reading/writing
+>>> to sdhci registers - and we should *not* allow that (because it may
+>>> not always work), unless the sdhci controller has been runtime resumed
+>>> first, right?
+>>
+>> I am OK with drivers that just want to use runtime PM to turn off a
+>> functional clock.  sdhci-tegra.c is also doing that although using the
+>> clock framework.
+> 
+> Yes, I agree. At least this works for SoC specific drivers.
+> 
+>>
+>> Certainly that approach assumes that the host controller's power state
+>> is not changed due to runtime PM.
+>>
+>> To ensure that the host controller is runtime resumed before calling
+>> sdhci_suspend_host(), we can just call pm_runtime_resume() I think.
+> 
+> Yes, that was kind of what I proposed in the other thread as option 1)
+> (except for the replacement of pm_runtime_force_suspend|resume).
+> 
+> Although, to be clear I would probably use pm_runtime_get_sync()
+> instead, to make sure the usage count is incremented too.
 
-Add Bayhub new chip GG8 support for SD express card.
-This patch depends on patch 1/2.
+In that case, a matching pm_runtime_put() is needed also at the
+end of the resume callback.
 
-Signed-off-by: Chevron Li <chevron.li@bayhubtech.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
-Change in V1:
-1.Implement the SD express card callback routine.
-2.Add SD express card support for Bayhub GG8 chip.
-
-Change in V2:
-1.updated some typo in patch and modified title.
-2.updated patch format according to reviewer's comments.
-3.updated the logical to try UHSI when express card initializatio failed.
-
-Change in V3:
-Fix the redefine issue.
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 65 +++++++++++++++++++++++++++-
- 1 file changed, 64 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index ae2707fbd119..7bfee28116af 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -21,6 +21,7 @@
-  * O2Micro device registers
-  */
- 
-+#define O2_SD_PCIE_SWITCH	0x54
- #define O2_SD_MISC_REG5		0x64
- #define O2_SD_LD0_CTRL		0x68
- #define O2_SD_DEV_CTRL		0x88
-@@ -631,6 +632,67 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_o2_enable_clk(host, clk);
- }
- 
-+static int sdhci_pci_o2_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct sdhci_pci_chip *chip = slot->chip;
-+	u8 scratch8;
-+	u16 scratch16;
-+	int ret;
-+
-+	/* Disable clock */
-+	sdhci_writeb(host, 0, SDHCI_CLOCK_CONTROL);
-+
-+	/* Set VDD2 voltage*/
-+	scratch8 = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+	scratch8 &= 0x0F;
-+	if (host->mmc->ios.timing == MMC_TIMING_SD_EXP_1_2V &&
-+	    host->mmc->caps2 & MMC_CAP2_SD_EXP_1_2V) {
-+		scratch8 |= SDHCI_VDD2_POWER_ON | SDHCI_VDD2_POWER_120;
-+	} else {
-+		scratch8 |= SDHCI_VDD2_POWER_ON | SDHCI_VDD2_POWER_180;
-+	}
-+
-+	sdhci_writeb(host, scratch8, SDHCI_POWER_CONTROL);
-+
-+	/* UnLock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch8);
-+	scratch8 &= 0x7f;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch8);
-+
-+	/* Wait for express card clkreqn assert */
-+	ret = read_poll_timeout(sdhci_readb, scratch8, !(scratch8 & BIT(0)),
-+				1, 30000, false, host, O2_SD_EXP_INT_REG);
-+
-+	if (!ret) {
-+		/* Switch to PCIe mode */
-+		scratch16 = sdhci_readw(host, O2_SD_PCIE_SWITCH);
-+		scratch16 |= BIT(8);
-+		sdhci_writew(host, scratch16, O2_SD_PCIE_SWITCH);
-+	} else {
-+		/* Power off VDD2 voltage*/
-+		scratch8 = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+		scratch8 &= 0x0F;
-+		sdhci_writeb(host, scratch8, SDHCI_POWER_CONTROL);
-+
-+		/* Keep mode as UHSI */
-+		pci_read_config_word(chip->pdev, O2_SD_PARA_SET_REG1, &scratch16);
-+		scratch16 &= ~BIT(11);
-+		pci_write_config_word(chip->pdev, O2_SD_PARA_SET_REG1, scratch16);
-+
-+		host->mmc->ios.timing = MMC_TIMING_LEGACY;
-+		pr_info("%s: Express card initialization failed, falling back to Legacy\n",
-+			mmc_hostname(host->mmc));
-+	}
-+	/* Lock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch8);
-+	scratch8 |= 0x80;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch8);
-+
-+	return 0;
-+}
-+
- static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	struct sdhci_pci_chip *chip;
-@@ -703,10 +765,11 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 	case PCI_DEVICE_ID_O2_GG8_9861:
- 	case PCI_DEVICE_ID_O2_GG8_9862:
- 	case PCI_DEVICE_ID_O2_GG8_9863:
--		host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-+		host->mmc->caps2 |= MMC_CAP2_NO_SDIO | MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V;
- 		host->mmc->caps |= MMC_CAP_HW_RESET;
- 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
- 		slot->host->mmc_host_ops.get_cd = sdhci_o2_get_cd;
-+		host->mmc_host_ops.init_sd_express = sdhci_pci_o2_init_sd_express;
- 		break;
- 	default:
- 		break;
--- 
-2.25.1
+> 
+> I don't have a strong opinion here, but from an optimization point of
+> view I would at least consider what I proposed in option 2) (in the
+> other thread). The benefit is that it can allow us to potentially
+> avoid runtime resuming the device, during system suspend.
+> 
+> Kind regards
+> Uffe
 
