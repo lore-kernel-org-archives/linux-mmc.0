@@ -2,103 +2,88 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC691C001DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 10:15:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A61FC04A94
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 10:16:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229535AbjHKKPL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Aug 2023 06:15:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39030 "EHLO
+        id S233840AbjHKKQs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Aug 2023 06:16:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229546AbjHKKPK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 06:15:10 -0400
-Received: from mail-pf1-x436.google.com (mail-pf1-x436.google.com [IPv6:2607:f8b0:4864:20::436])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53EC03A85;
-        Fri, 11 Aug 2023 03:14:40 -0700 (PDT)
-Received: by mail-pf1-x436.google.com with SMTP id d2e1a72fcca58-687ca37628eso1650632b3a.1;
-        Fri, 11 Aug 2023 03:14:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1691748880; x=1692353680;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=LVi+mii7gitrKtpzMesmKYe+HovpMQt3SZaQ0whSTDk=;
-        b=Tj6KKz3auEzGqe+kIqHqjiPerraxl3oUIbr0cdaqVAI0PGpnTaZz7tbxYZWN32SMNX
-         J/YKzNZ8vwzIuZDHi8RGXgb1ERezfe9l/Z46zbBkMIeCreFga2lZiSzPsBDBHE73Okhi
-         bF79vvx71Qvx1+Xfart6GdBioSSXfqZ4VxCgMZ1MkQCBcovZj2EP03gkG5XEVfyHeBnM
-         AGUVxdgGRH0vJZ5W+o0LJUxNS/TW2zE9rKWBM3dhNTku3ZXwWvPnVAb3tZuuCMTyCTse
-         h9oy5VPOAtA5sykKK/TyT2cWZkqx/vOUXlZiwkR95yuMkoD3QTaGKY25aN7bKotMmebu
-         KwOQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691748880; x=1692353680;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=LVi+mii7gitrKtpzMesmKYe+HovpMQt3SZaQ0whSTDk=;
-        b=lVhof9qw8Q2jX1oMListsVzST//6AJBxLs/4QTd7knLVn9wtg7PvQnsgxKKk/rk0C0
-         04I+INNwcfM74m5U1zvNx9igrV2AfrLD1UJPO7vEQx2UkJTsl2rkG2CB5jeVUci+mNHr
-         u8ChC6DPrGH3TBV7APi5SxW+iYJgIXsoEbTggw3EI5hwJrOlo4AsCuRyT9xQic877qzb
-         XVNh7uteLxAd43xnMkehugYEEC9TkEHL20Z818ndtLqqhMc1skqXfjPiuxxRkPOL1fZ9
-         3Oxg3tOYAUuo98TIEABpbAYvhs7px9vFiZFCm7qFFuRR36Kbs2HPZRXdYGbAbduFyzJU
-         CjVg==
-X-Gm-Message-State: AOJu0Yx7qIlsir4gxuc76K2+JwIJmCZGXnjYeFBWYxcutk+AHBFtnBwU
-        J30PvbkMMxzZx/51PA8/7/M=
-X-Google-Smtp-Source: AGHT+IHo5Mc8EmkSGw2ajx+3oUjYwafaMBnYy704syHa5UsDQejCbAaWjAxvCm+XymY+2Um0RtuWwQ==
-X-Received: by 2002:a05:6a00:b84:b0:67e:ca79:36f0 with SMTP id g4-20020a056a000b8400b0067eca7936f0mr1842577pfj.0.1691748879561;
-        Fri, 11 Aug 2023 03:14:39 -0700 (PDT)
-Received: from localhost.localdomain (2001-b400-e259-ffaa-4fa1-c440-e457-62f5.emome-ip6.hinet.net. [2001:b400:e259:ffaa:4fa1:c440:e457:62f5])
-        by smtp.gmail.com with ESMTPSA id l2-20020a62be02000000b00653fe2d527esm3010554pff.32.2023.08.11.03.14.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 11 Aug 2023 03:14:39 -0700 (PDT)
-From:   Victor Shih <victorshihgli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, Victor Shih <victorshihgli@gmail.com>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V1] mmc: core: Cleanup mmc_sd_num_wr_blocks function
-Date:   Fri, 11 Aug 2023 18:14:04 +0800
-Message-Id: <20230811101404.4463-1-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S229930AbjHKKQr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 06:16:47 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9838BB4;
+        Fri, 11 Aug 2023 03:16:47 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2D3C266E04;
+        Fri, 11 Aug 2023 10:16:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C666C433C7;
+        Fri, 11 Aug 2023 10:16:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1691749006;
+        bh=p0874zC3P/4HkNA+wVRJkLg0l75K8zpw30iVncdc3hA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ZnbEJxBBvvyRVrrgqaUgZZHjXTQaaVvRcmnG+Kw6tY0jW8JMLnEntCAan1/Jv/IwK
+         7S2gJZ1TdIKGrRy6ZexEARpp7JOigKWp2EyHIPnSQm30nHkGgawvRoW4h7JlKMa6bW
+         B9VZPDYj7V1mJVZxUoasRspo2Tk97FQH9M1olZHQ=
+Date:   Fri, 11 Aug 2023 12:16:44 +0200
+From:   Greg KH <gregkh@linuxfoundation.org>
+To:     Gatien Chevallier <gatien.chevallier@foss.st.com>
+Cc:     Oleksii_Moisieiev@epam.com, herbert@gondor.apana.org.au,
+        davem@davemloft.net, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        alexandre.torgue@foss.st.com, vkoul@kernel.org, jic23@kernel.org,
+        olivier.moysan@foss.st.com, arnaud.pouliquen@foss.st.com,
+        mchehab@kernel.org, fabrice.gasnier@foss.st.com,
+        andi.shyti@kernel.org, ulf.hansson@linaro.org, edumazet@google.com,
+        kuba@kernel.org, pabeni@redhat.com, hugues.fruchet@foss.st.com,
+        lee@kernel.org, will@kernel.org, catalin.marinas@arm.com,
+        arnd@kernel.org, richardcochran@gmail.com,
+        Frank Rowand <frowand.list@gmail.com>, peng.fan@oss.nxp.com,
+        linux-crypto@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org
+Subject: Re: [IGNORE][PATCH v4 01/11] dt-bindings: Document common device
+ controller bindings
+Message-ID: <2023081117-sprout-cruncher-862c@gregkh>
+References: <20230811100731.108145-1-gatien.chevallier@foss.st.com>
+ <20230811100731.108145-2-gatien.chevallier@foss.st.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230811100731.108145-2-gatien.chevallier@foss.st.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+On Fri, Aug 11, 2023 at 12:07:21PM +0200, Gatien Chevallier wrote:
+> From: Oleksii Moisieiev <Oleksii_Moisieiev@epam.com>
+> 
+> Introducing of the common device controller bindings for the controller
+> provider and consumer devices. Those bindings are intended to allow
+> divided system on chip into multiple domains, that can be used to
+> configure hardware permissions.
+> 
+> Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
+> [Gatien: Fix typos and YAML error]
+> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+> ---
+> 
+> Changes in V4: 
+> 	Corrected typos and YAML errors	
 
-Use mmc_app_cmd function to simplify code in
-mmc_sd_num_wr_blocks function.
+Why are we supposed to ignore the first patch in this series, but pay
+attention to the 10 after this that depend on it?
 
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
----
- drivers/mmc/core/block.c | 14 +++-----------
- 1 file changed, 3 insertions(+), 11 deletions(-)
+totally confused,
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f701efb1fa78..c665b25bffc3 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -918,17 +918,9 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 
- 	struct scatterlist sg;
- 
--	cmd.opcode = MMC_APP_CMD;
--	cmd.arg = card->rca << 16;
--	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
--
--	err = mmc_wait_for_cmd(card->host, &cmd, 0);
--	if (err)
--		return err;
--	if (!mmc_host_is_spi(card->host) && !(cmd.resp[0] & R1_APP_CMD))
--		return -EIO;
--
--	memset(&cmd, 0, sizeof(struct mmc_command));
-+	err = mmc_app_cmd(card->host, card);
-+		if (err)
-+			return err;
- 
- 	cmd.opcode = SD_APP_SEND_NUM_WR_BLKS;
- 	cmd.arg = 0;
--- 
-2.25.1
-
+greg k-h
