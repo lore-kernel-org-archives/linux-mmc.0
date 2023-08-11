@@ -2,110 +2,339 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10237C41513
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 02:20:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D1EDEB64DD
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 03:51:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230175AbjHKCT6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Aug 2023 22:19:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36256 "EHLO
+        id S229592AbjHKDv0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Aug 2023 23:51:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229475AbjHKCT6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 22:19:58 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9753E2724;
-        Thu, 10 Aug 2023 19:19:57 -0700 (PDT)
-Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 37B1xvgf020538;
-        Fri, 11 Aug 2023 02:19:54 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=date : from : to :
- cc : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=qcppdkim1; bh=vBR7HgckOBL8Gr8JQ1V2+7FWLv7X9l13BJtRZ89G2iM=;
- b=gfGk2nSwCstE7/LBQ7qa1SDN9ZDYNfSGiM2mQJbFX7tKxJg4Tj5vVtFCIFzIMY2ze/+6
- QdsUry9lBY1VMxrxZgIsmyhbF0V7xDDUyah5AsU9ORPqKfhr+Jg6i15QEjQLo9NqlBeB
- OTnbW/zX79dbwipUXJP4PxoSIYS7qXk9+S9Or0yCjwqx2MKk0HvouWvtshoBUKcTy68d
- B9Di+2ASUxP+KMFgwMmNO25GKOxMMEWSnZrtucbtCLraEy+kjPhIFYsxxC/Gmw9vUEGi
- WghOeBVXR7wlYSiZLv2hC9n44WxUQHsJbu/M5/xLxcn/HU0U+P/oM0JD6TvNPa8gt/K2 1Q== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3sd90608ba-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 11 Aug 2023 02:19:53 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 37B2Jq45011080
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 11 Aug 2023 02:19:52 GMT
-Received: from hu-bjorande-lv.qualcomm.com (10.49.16.6) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.30; Thu, 10 Aug 2023 19:19:52 -0700
-Date:   Thu, 10 Aug 2023 19:19:50 -0700
-From:   Bjorn Andersson <quic_bjorande@quicinc.com>
-To:     "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>
-CC:     Eric Biggers <ebiggers@kernel.org>,
-        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
-        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "linux-fscrypt@vger.kernel.org" <linux-fscrypt@vger.kernel.org>,
-        Om Prakash Singh <omprsing@qti.qualcomm.com>,
-        "Prasad Sodagudi (QUIC)" <quic_psodagud@quicinc.com>,
-        "Arun Menon (SSG)" <avmenon@quicinc.com>,
-        "abel.vesa@linaro.org" <abel.vesa@linaro.org>,
-        "Seshu Madhavi Puppala (QUIC)" <quic_spuppala@quicinc.com>
-Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
- ufs
-Message-ID: <20230811021950.GQ1428172@hu-bjorande-lv.qualcomm.com>
-References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
- <20230720025541.GA2607@sol.localdomain>
- <ca11701e403f48b6839b26c47a1b537f@quicinc.com>
- <20230810053642.GD923@sol.localdomain>
- <371088f78c6d4febbbfaf3c1a12cf19f@quicinc.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <371088f78c6d4febbbfaf3c1a12cf19f@quicinc.com>
-X-Originating-IP: [10.49.16.6]
-X-ClientProxiedBy: nalasex01a.na.qualcomm.com (10.47.209.196) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: s5UTdnchEBXw_-T3x-mxWF8YOCgmGGFj
-X-Proofpoint-ORIG-GUID: s5UTdnchEBXw_-T3x-mxWF8YOCgmGGFj
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-08-10_20,2023-08-10_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 phishscore=0
- impostorscore=0 lowpriorityscore=0 priorityscore=1501 adultscore=0
- suspectscore=0 malwarescore=0 mlxscore=0 clxscore=1011 spamscore=0
- mlxlogscore=694 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2306200000 definitions=main-2308110020
+        with ESMTP id S229459AbjHKDvZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 23:51:25 -0400
+X-Greylist: delayed 908 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 10 Aug 2023 20:51:23 PDT
+Received: from m126.mail.126.com (m126.mail.126.com [220.181.12.37])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4C452271B;
+        Thu, 10 Aug 2023 20:51:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=126.com;
+        s=s110527; h=From:Subject:Date:Message-Id; bh=B69RKsGKrBIibzbVBb
+        Ta8Nd78WFpDwbWL2nnXaRIzIo=; b=DI5T/K6vkB9vnios5lgQ86A58CN6Cky3F9
+        cfDvSM6AHV/BF5Q4wPJy00/7LL17n6GmWtLrUD7HcZdAAtYCDsKm8AOYaF7BrRi9
+        bZ7Qxiy4gLTbBbIVAUkvumZQGZ4TlLStTSmdT9KxaLEXJuEBHd1qEk7yp4tYaT0r
+        g6zaq48a4=
+Received: from wh-chevronli-w10.bayhubtech.com (unknown [58.48.115.170])
+        by zwqz-smtp-mta-g0-1 (Coremail) with SMTP id _____wB3j5eVrNVknHE8Bw--.10021S2;
+        Fri, 11 Aug 2023 11:35:50 +0800 (CST)
+From:   Chevron Li <chevron_li@126.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com,
+        shaper.liu@bayhubtech.com, Chevron Li <chevron.li@bayhubtech.com>
+Subject: [PATCH V3 1/2] mmc: sdhci-pci-o2micro: add Bayhub new chip GG8 support for UHS-I
+Date:   Fri, 11 Aug 2023 11:35:16 +0800
+Message-Id: <20230811033517.11532-1-chevron_li@126.com>
+X-Mailer: git-send-email 2.18.0.windows.1
+X-CM-TRANSID: _____wB3j5eVrNVknHE8Bw--.10021S2
+X-Coremail-Antispam: 1Uf129KBjvJXoW3CF1DWr1xGF4kKFyUKw4rXwb_yoWkJr1xpF
+        ZYyayktr4UtFWrZ3s7tw1kZr17GF4qkrW0kFW3GayIqF18C3y5Wr97CFZ8Xry8XrZaqw4f
+        XF4ktrWxWryUJw7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07Uxl1PUUUUU=
+X-Originating-IP: [58.48.115.170]
+X-CM-SenderInfo: hfkh42xrqbzxa6rslhhfrp/1tbiFxvIAVpEG90W5gAAst
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Aug 11, 2023 at 12:27:18AM +0000, Gaurav Kashyap (QUIC) wrote:
-> 
+From: Chevron Li <chevron.li@bayhubtech.com>
 
-Gaurav, it is impossible to decode what part of this message is from
-Eric and what is from you. You must use a proper email client, and
-follow proper etiquette on these mailing lists.
+Add Bayhub new chip GG8 support for UHS-I function
 
-> 
-> -----Original Message-----
-> From: Eric Biggers <ebiggers@kernel.org> 
-> Sent: Wednesday, August 9, 2023 10:37 PM
-> To: Gaurav Kashyap (QUIC) <quic_gaurkash@quicinc.com>
-> Cc: linux-scsi@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-mmc@vger.kernel.org; linux-block@vger.kernel.org; linux-fscrypt@vger.kernel.org; Om Prakash Singh <omprsing@qti.qualcomm.com>; Prasad Sodagudi (QUIC) <quic_psodagud@quicinc.com>; Arun Menon (SSG) <avmenon@quicinc.com>; abel.vesa@linaro.org; Seshu Madhavi Puppala (QUIC) <quic_spuppala@quicinc.com>
-> Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and ufs
-> 
-> On Tue, Aug 01, 2023 at 05:31:59PM +0000, Gaurav Kashyap (QUIC) wrote:
-> > 
-> > According to your cover letter, this feature requires a custom TrustZone image to work on SM8550.  Will that image be made available outside Qualcomm?
-> > --> Unfortunately, I don't think there is a way to do that. You can still request for one through our customer engineering team like before.
-> 
-> I think it's already been shown that that is not a workable approach.
-> 
+Signed-off-by: Chevron Li <chevron.li@bayhubtech.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+Change in V1:
+1.Add GG8 chip IDs in sdhci-pci-core.c and sdhci-pci.h
+2.Add GG8 chip initialization flow at sdhci-pci-o2micro.c
 
-I agree.
+Change in V2:
+1.updated typo description for the patch title.
+2.updated patch format according to reviewer's comments.
 
-Regards,
-Bjorn
+Change in V3:
+Updated patch format according to reviewer's comments.
+---
+ drivers/mmc/host/sdhci-pci-core.c    |   4 +
+ drivers/mmc/host/sdhci-pci-o2micro.c | 148 ++++++++++++++++++++-------
+ drivers/mmc/host/sdhci-pci.h         |   4 +
+ 3 files changed, 120 insertions(+), 36 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 1c2572c0f012..7c14feb5db77 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1898,6 +1898,10 @@ static const struct pci_device_id pci_ids[] = {
+ 	SDHCI_PCI_DEVICE(O2, SDS1,     o2),
+ 	SDHCI_PCI_DEVICE(O2, SEABIRD0, o2),
+ 	SDHCI_PCI_DEVICE(O2, SEABIRD1, o2),
++	SDHCI_PCI_DEVICE(O2, GG8_9860, o2),
++	SDHCI_PCI_DEVICE(O2, GG8_9861, o2),
++	SDHCI_PCI_DEVICE(O2, GG8_9862, o2),
++	SDHCI_PCI_DEVICE(O2, GG8_9863, o2),
+ 	SDHCI_PCI_DEVICE(ARASAN, PHY_EMMC, arasan),
+ 	SDHCI_PCI_DEVICE(SYNOPSYS, DWC_MSHC, snps),
+ 	SDHCI_PCI_DEVICE(GLI, 9750, gl9750),
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index 620f52ad9667..ae2707fbd119 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -36,6 +36,7 @@
+ #define O2_SD_INF_MOD		0xF1
+ #define O2_SD_MISC_CTRL4	0xFC
+ #define O2_SD_MISC_CTRL		0x1C0
++#define O2_SD_EXP_INT_REG	0x1E0
+ #define O2_SD_PWR_FORCE_L0	0x0002
+ #define O2_SD_TUNING_CTRL	0x300
+ #define O2_SD_PLL_SETTING	0x304
+@@ -49,6 +50,9 @@
+ #define O2_SD_UHS2_L1_CTRL	0x35C
+ #define O2_SD_FUNC_REG3		0x3E0
+ #define O2_SD_FUNC_REG4		0x3E4
++#define O2_SD_PARA_SET_REG1	0x444
++#define O2_SD_VDDX_CTRL_REG	0x508
++#define O2_SD_GPIO_CTRL_REG1	0x510
+ #define O2_SD_LED_ENABLE	BIT(6)
+ #define O2_SD_FREG0_LEDOFF	BIT(13)
+ #define O2_SD_SEL_DLL		BIT(16)
+@@ -334,33 +338,45 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	scratch |= O2_SD_PWR_FORCE_L0;
+ 	sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
+ 
+-	/* Stop clk */
+-	reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-	reg_val &= ~SDHCI_CLOCK_CARD_EN;
+-	sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
+-
+-	if ((host->timing == MMC_TIMING_MMC_HS200) ||
+-		(host->timing == MMC_TIMING_UHS_SDR104)) {
+-		/* UnLock WP */
+-		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+-		scratch_8 &= 0x7f;
+-		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+-
+-		/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+-		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+-		reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+-		reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+-		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
++	/* Update output phase */
++	switch (chip->pdev->device) {
++	case PCI_DEVICE_ID_O2_SDS0:
++	case PCI_DEVICE_ID_O2_SEABIRD0:
++	case PCI_DEVICE_ID_O2_SEABIRD1:
++	case PCI_DEVICE_ID_O2_SDS1:
++	case PCI_DEVICE_ID_O2_FUJIN2:
++		/* Stop clk */
++		reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++		reg_val &= ~SDHCI_CLOCK_CARD_EN;
++		sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
++
++		if (host->timing == MMC_TIMING_MMC_HS200 ||
++		    host->timing == MMC_TIMING_UHS_SDR104) {
++			/* UnLock WP */
++			pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
++			scratch_8 &= 0x7f;
++			pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
++
++			/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
++			pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
++			reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
++			reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
++			pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
++
++			/* Lock WP */
++			pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
++			scratch_8 |= 0x80;
++			pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
++		}
+ 
+-		/* Lock WP */
+-		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+-		scratch_8 |= 0x80;
+-		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
++		/* Start clk */
++		reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++		reg_val |= SDHCI_CLOCK_CARD_EN;
++		sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
++		break;
++	default:
++		break;
+ 	}
+-	/* Start clk */
+-	reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-	reg_val |= SDHCI_CLOCK_CARD_EN;
+-	sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
+ 
+ 	/* wait DLL lock, timeout value 5ms */
+ 	if (readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
+@@ -563,6 +579,7 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	u16 clk;
+ 	u8 scratch;
+ 	u32 scratch_32;
++	u32 dmdn_208m, dmdn_200m;
+ 	struct sdhci_pci_slot *slot = sdhci_priv(host);
+ 	struct sdhci_pci_chip *chip = slot->chip;
+ 
+@@ -578,16 +595,27 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	scratch &= 0x7f;
+ 	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+ 
++	if (chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860 ||
++	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861 ||
++	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862 ||
++	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863) {
++		dmdn_208m = 0x2c500000;
++		dmdn_200m = 0x25200000;
++	} else {
++		dmdn_208m = 0x2c280000;
++		dmdn_200m = 0x25100000;
++	}
++
+ 	if ((host->timing == MMC_TIMING_UHS_SDR104) && (clock == 200000000)) {
+ 		pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
+ 
+-		if ((scratch_32 & 0xFFFF0000) != 0x2c280000)
+-			o2_pci_set_baseclk(chip, 0x2c280000);
++		if ((scratch_32 & 0xFFFF0000) != dmdn_208m)
++			o2_pci_set_baseclk(chip, dmdn_208m);
+ 	} else {
+ 		pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
+ 
+-		if ((scratch_32 & 0xFFFF0000) != 0x25100000)
+-			o2_pci_set_baseclk(chip, 0x25100000);
++		if ((scratch_32 & 0xFFFF0000) != dmdn_200m)
++			o2_pci_set_baseclk(chip, dmdn_200m);
+ 	}
+ 
+ 	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
+@@ -624,6 +652,11 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 	if (caps & SDHCI_CAN_DO_8BIT)
+ 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+ 
++	host->quirks2 |= SDHCI_QUIRK2_BROKEN_DDR50;
++
++	sdhci_pci_o2_enable_msi(chip, host);
++
++	host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
+ 	switch (chip->pdev->device) {
+ 	case PCI_DEVICE_ID_O2_SDS0:
+ 	case PCI_DEVICE_ID_O2_SEABIRD0:
+@@ -634,10 +667,6 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 		if (reg & 0x1)
+ 			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+ 
+-		host->quirks2 |= SDHCI_QUIRK2_BROKEN_DDR50;
+-
+-		sdhci_pci_o2_enable_msi(chip, host);
+-
+ 		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+ 			ret = pci_read_config_dword(chip->pdev,
+ 						    O2_SD_MISC_SETTING, &reg);
+@@ -663,15 +692,21 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+ 			host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ 		}
+ 
+-		host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
+-
+ 		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
+ 			break;
+ 		/* set dll watch dog timer */
+ 		reg = sdhci_readl(host, O2_SD_VENDOR_SETTING2);
+ 		reg |= (1 << 12);
+ 		sdhci_writel(host, reg, O2_SD_VENDOR_SETTING2);
+-
++		break;
++	case PCI_DEVICE_ID_O2_GG8_9860:
++	case PCI_DEVICE_ID_O2_GG8_9861:
++	case PCI_DEVICE_ID_O2_GG8_9862:
++	case PCI_DEVICE_ID_O2_GG8_9863:
++		host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
++		host->mmc->caps |= MMC_CAP_HW_RESET;
++		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
++		slot->host->mmc_host_ops.get_cd = sdhci_o2_get_cd;
+ 		break;
+ 	default:
+ 		break;
+@@ -684,6 +719,7 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ {
+ 	int ret;
+ 	u8 scratch;
++	u16 scratch16;
+ 	u32 scratch_32;
+ 
+ 	switch (chip->pdev->device) {
+@@ -893,6 +929,46 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ 		scratch |= 0x80;
+ 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+ 		break;
++	case PCI_DEVICE_ID_O2_GG8_9860:
++	case PCI_DEVICE_ID_O2_GG8_9861:
++	case PCI_DEVICE_ID_O2_GG8_9862:
++	case PCI_DEVICE_ID_O2_GG8_9863:
++		/* UnLock WP */
++		ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch &= 0x7f;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++
++		/* Select mode switch source as software control */
++		pci_read_config_word(chip->pdev, O2_SD_PARA_SET_REG1, &scratch16);
++		scratch16 &= 0xF8FF;
++		scratch16 |= BIT(9);
++		pci_write_config_word(chip->pdev, O2_SD_PARA_SET_REG1, scratch16);
++
++		/* set VDD1 supply source */
++		pci_read_config_word(chip->pdev, O2_SD_VDDX_CTRL_REG, &scratch16);
++		scratch16 &= 0xFFE3;
++		scratch16 |= BIT(3);
++		pci_write_config_word(chip->pdev, O2_SD_VDDX_CTRL_REG, scratch16);
++
++		/* Set host drive strength*/
++		scratch16 = 0x0025;
++		pci_write_config_word(chip->pdev, O2_SD_PLL_SETTING, scratch16);
++
++		/* Set output delay*/
++		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
++		scratch_32 &= 0xFF0FFF00;
++		scratch_32 |= 0x00B0003B;
++		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
++
++		/* Lock WP */
++		ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x80;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++		break;
+ 	}
+ 
+ 	return 0;
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 9c8863956381..153704f812ed 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -11,6 +11,10 @@
+ #define PCI_DEVICE_ID_O2_FUJIN2		0x8520
+ #define PCI_DEVICE_ID_O2_SEABIRD0	0x8620
+ #define PCI_DEVICE_ID_O2_SEABIRD1	0x8621
++#define PCI_DEVICE_ID_O2_GG8_9860	0x9860
++#define PCI_DEVICE_ID_O2_GG8_9861	0x9861
++#define PCI_DEVICE_ID_O2_GG8_9862	0x9862
++#define PCI_DEVICE_ID_O2_GG8_9863	0x9863
+ 
+ #define PCI_DEVICE_ID_INTEL_PCH_SDIO0	0x8809
+ #define PCI_DEVICE_ID_INTEL_PCH_SDIO1	0x880a
+
+base-commit: 25aa0bebba72b318e71fe205bfd1236550cc9534
+-- 
+2.25.1
+
