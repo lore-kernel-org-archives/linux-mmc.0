@@ -2,48 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C9C8C0015E
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 13:08:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D910C001DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 13:42:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233713AbjHKNIK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Aug 2023 09:08:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45654 "EHLO
+        id S229829AbjHKNmt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Aug 2023 09:42:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39808 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236180AbjHKNHt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 09:07:49 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 461A83594;
-        Fri, 11 Aug 2023 06:07:24 -0700 (PDT)
+        with ESMTP id S229543AbjHKNms (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 09:42:48 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.115])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F5F1ED;
+        Fri, 11 Aug 2023 06:42:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1691759244; x=1723295244;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=LId8a7HwDxC1IoswqQqzYbnaFhMlLbhkTHUD6bZclso=;
-  b=CtAZ96YJ6ZPwnqpIlYLYoCrvOd3GZ14zrUECURSaP28xsi0qdXjSzGyQ
-   v8DKz2+TJ9RQ/PMjYPeVeNA5/lLeQ/tyOGw0d7zx7ud3qXgtdBxkmVqfX
-   /Ixqqh0UTyjkvK//booJp8MD5hZougg/X8wMUmbk0NvFp9jS1XVvRjEA3
-   tUGOsv6LOQ8MbjsUy/Ul+x/eE4BqrybOTuOb2rAn2JZXOtpVK2Kx0ScAu
-   UfMCvI8gsjHqlPD+gZC/h5KaIjjpuNE2bHCUx5YP1lLIliS+UK0C6kz8Q
-   8b1dxh56ghsjnS4vUYEUzZu42wVhnql98cd1mjyoS2ydoSvuCKWDsMTYg
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="361812905"
+  t=1691761368; x=1723297368;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=3qCbXJc2LqA6wB4P5vKT0CVjgaPzi1I6Wyv4XAX2IK0=;
+  b=grZy0lwnLMJL5PLZUMBd6w4or7JvD7gE2kgf1yLhx2D0UaBcQ7NkZYwZ
+   XZYggAVT8Hq9B+sJUXt54NAnkE9pcayMr/ROSZzwigOq2TXoUAVAsKj9t
+   UYPP0zi2XqOc4pa4f/UvJZHl5clEGvADc/QEJifA53psvDdceYopN6ZSW
+   5vR53q9yxWNgLdkBICJ4kLdvuSyKLfrgDc/Xhygz4L/Aq/wGrzltC4e/P
+   uMbiwynFnzkHYpLMQbaMVP4LvsybQIUGripSTMhg9ErqxrNrg65yqOd2g
+   nmetYujmMp4vLguoAWU3SbNZVce9SXjxUiEndy3RTijrmY8RMHPMbEKdi
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="371682698"
 X-IronPort-AV: E=Sophos;i="6.01,165,1684825200"; 
-   d="scan'208";a="361812905"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Aug 2023 06:06:53 -0700
+   d="scan'208";a="371682698"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Aug 2023 06:42:47 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="709535540"
+X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="802669536"
 X-IronPort-AV: E=Sophos;i="6.01,165,1684825200"; 
-   d="scan'208";a="709535540"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO ahunter-VirtualBox.home\044ger.corp.intel.com) ([10.252.51.13])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Aug 2023 06:06:29 -0700
-From:   Adrian Hunter <adrian.hunter@intel.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Yangtao Li <frank.li@vivo.com>
-Cc:     Florian Fainelli <florian.fainelli@broadcom.com>,
+   d="scan'208";a="802669536"
+Received: from smile.fi.intel.com ([10.237.72.54])
+  by fmsmga004.fm.intel.com with ESMTP; 11 Aug 2023 06:42:39 -0700
+Received: from andy by smile.fi.intel.com with local (Exim 4.96)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1qUSPT-00HEuE-0U;
+        Fri, 11 Aug 2023 16:42:35 +0300
+Date:   Fri, 11 Aug 2023 16:42:34 +0300
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Yangtao Li <frank.li@vivo.com>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
         Ray Jui <rjui@broadcom.com>,
         Scott Branden <sbranden@broadcom.com>,
         Broadcom internal kernel review list 
@@ -75,86 +80,90 @@ Cc:     Florian Fainelli <florian.fainelli@broadcom.com>,
         Jassi Brar <jaswinder.singh@linaro.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org
-Subject: [PATCH 16/16] mmc: sdhci-pltfm: Rename sdhci_pltfm_register()
-Date:   Fri, 11 Aug 2023 16:03:51 +0300
-Message-Id: <20230811130351.7038-17-adrian.hunter@intel.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230811130351.7038-1-adrian.hunter@intel.com>
+Subject: Re: [PATCH 00/16] mmc: sdhci-pltfm: Minor clean up
+Message-ID: <ZNY6yuLTjW/cHioP@smile.fi.intel.com>
 References: <20230811130351.7038-1-adrian.hunter@intel.com>
 MIME-Version: 1.0
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230811130351.7038-1-adrian.hunter@intel.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Now that sdhci_pltfm_unregister() has been removed, rename
-sdhci_pltfm_register() to sdhci_pltfm_init_and_add_host() to better
-reflect what it does.
+On Fri, Aug 11, 2023 at 04:03:35PM +0300, Adrian Hunter wrote:
+> Hi
+> 
+> sdhci_pltfm_unregister() does:
+> 
+> 	clk_disable_unprepare(pltfm_host->clk)
+> 
+> which prevents drivers from using devm_clk_get_enabled() or similar.
+> 
+> Move it out, and where drivers are doing devm_clk_get*() immediately
+> followed by clk_prepare_enable(), combine them into devm_clk_get_*enabled().
+> 
+> sdhci_pltfm_register() and sdhci_pltfm_unregister() are not paired functions.
+> That are just helpers and effectively get renamed:
+> 
+> 	sdhci_pltfm_register() -> sdhci_pltfm_init_and_add_host()
+> 	sdhci_pltfm_unregister() -> sdhci_pltfm_remove()
+> 
+> Please note, the patches are based on top of some 
+> "Convert to platform remove callback returning void"
+> patches by Yangtao Li, which were posted here:
+> 
+> 	https://lore.kernel.org/linux-mmc/20230727070051.17778-1-frank.li@vivo.com/
+> 
+> Patches can also be found here:
+> 
+> 	https://github.com/ahunter6/linux/commits/sdhci-pltfm-cleanup-1
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-of-hlwd.c | 2 +-
- drivers/mmc/host/sdhci-pltfm.c   | 8 ++++----
- drivers/mmc/host/sdhci-pltfm.h   | 6 +++---
- 3 files changed, 8 insertions(+), 8 deletions(-)
+All look good to me, thanks!
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
-index 06e88bb22ea5..9c1c0ce610ef 100644
---- a/drivers/mmc/host/sdhci-of-hlwd.c
-+++ b/drivers/mmc/host/sdhci-of-hlwd.c
-@@ -68,7 +68,7 @@ static const struct sdhci_pltfm_data sdhci_hlwd_pdata = {
- 
- static int sdhci_hlwd_probe(struct platform_device *pdev)
- {
--	return sdhci_pltfm_register(pdev, &sdhci_hlwd_pdata, 0);
-+	return sdhci_pltfm_init_and_add_host(pdev, &sdhci_hlwd_pdata, 0);
- }
- 
- static const struct of_device_id sdhci_hlwd_of_match[] = {
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 894f3bbe2b0f..a72e123a585d 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -166,9 +166,9 @@ void sdhci_pltfm_free(struct platform_device *pdev)
- }
- EXPORT_SYMBOL_GPL(sdhci_pltfm_free);
- 
--int sdhci_pltfm_register(struct platform_device *pdev,
--			const struct sdhci_pltfm_data *pdata,
--			size_t priv_size)
-+int sdhci_pltfm_init_and_add_host(struct platform_device *pdev,
-+				  const struct sdhci_pltfm_data *pdata,
-+				  size_t priv_size)
- {
- 	struct sdhci_host *host;
- 	int ret = 0;
-@@ -185,7 +185,7 @@ int sdhci_pltfm_register(struct platform_device *pdev,
- 
- 	return ret;
- }
--EXPORT_SYMBOL_GPL(sdhci_pltfm_register);
-+EXPORT_SYMBOL_GPL(sdhci_pltfm_init_and_add_host);
- 
- void sdhci_pltfm_remove(struct platform_device *pdev)
- {
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index bebc450d5098..b81d5b0fd616 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -99,9 +99,9 @@ extern struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 					  size_t priv_size);
- extern void sdhci_pltfm_free(struct platform_device *pdev);
- 
--extern int sdhci_pltfm_register(struct platform_device *pdev,
--				const struct sdhci_pltfm_data *pdata,
--				size_t priv_size);
-+extern int sdhci_pltfm_init_and_add_host(struct platform_device *pdev,
-+					 const struct sdhci_pltfm_data *pdata,
-+					 size_t priv_size);
- extern void sdhci_pltfm_remove(struct platform_device *pdev);
- 
- extern unsigned int sdhci_pltfm_clk_get_max_clock(struct sdhci_host *host);
+> Adrian Hunter (16):
+>       mmc: sdhci-pltfm: Add sdhci_pltfm_remove()
+>       mmc: sdhci-bcm-kona: Use sdhci_pltfm_remove()
+>       mmc: sdhci-brcmstb: Use sdhci_pltfm_remove()
+>       mmc: sdhci-cadence: Use sdhci_pltfm_remove()
+>       mmc: sdhci-dove: Use sdhci_pltfm_remove()
+>       mmc: sdhci_f_sdh30: Use sdhci_pltfm_remove()
+>       mmc: sdhci-iproc: Use sdhci_pltfm_remove()
+>       mmc: sdhci-of-arasan: Use sdhci_pltfm_remove()
+>       mmc: sdhci-of-at91: Use sdhci_pltfm_remove()
+>       mmc: sdhci-of-esdhc: Use sdhci_pltfm_remove()
+>       mmc: sdhci-of-hlwd: Use sdhci_pltfm_remove()
+>       mmc: sdhci-of-sparx5: Use sdhci_pltfm_remove()
+>       mmc: sdhci-pxav2: Use sdhci_pltfm_remove()
+>       mmc: sdhci-st: Use sdhci_pltfm_remove()
+>       mmc: sdhci-pltfm: Remove sdhci_pltfm_unregister()
+>       mmc: sdhci-pltfm: Rename sdhci_pltfm_register()
+> 
+>  drivers/mmc/host/sdhci-bcm-kona.c  | 12 +++++++++++-
+>  drivers/mmc/host/sdhci-brcmstb.c   | 18 +++++-------------
+>  drivers/mmc/host/sdhci-cadence.c   | 17 ++++-------------
+>  drivers/mmc/host/sdhci-dove.c      |  8 ++------
+>  drivers/mmc/host/sdhci-iproc.c     | 14 +++-----------
+>  drivers/mmc/host/sdhci-of-arasan.c |  4 +++-
+>  drivers/mmc/host/sdhci-of-at91.c   |  2 +-
+>  drivers/mmc/host/sdhci-of-esdhc.c  |  2 +-
+>  drivers/mmc/host/sdhci-of-hlwd.c   |  4 ++--
+>  drivers/mmc/host/sdhci-of-sparx5.c | 17 ++++++-----------
+>  drivers/mmc/host/sdhci-pltfm.c     | 14 ++++++--------
+>  drivers/mmc/host/sdhci-pltfm.h     |  8 ++++----
+>  drivers/mmc/host/sdhci-pxav2.c     | 19 ++++++-------------
+>  drivers/mmc/host/sdhci-st.c        |  4 +++-
+>  drivers/mmc/host/sdhci_f_sdh30.c   |  2 +-
+>  15 files changed, 58 insertions(+), 87 deletions(-)
+> 
+> 
+> Regards
+> Adrian
+
 -- 
-2.34.1
+With Best Regards,
+Andy Shevchenko
+
 
