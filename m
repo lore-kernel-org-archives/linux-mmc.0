@@ -2,193 +2,209 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6678FEB64DD
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 07:34:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2724EB64DD
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 08:36:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233954AbjHKHep (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Aug 2023 03:34:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35284 "EHLO
+        id S233180AbjHKIgu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Aug 2023 04:36:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40608 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233943AbjHKHeo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 03:34:44 -0400
-Received: from mail-qv1-xf2b.google.com (mail-qv1-xf2b.google.com [IPv6:2607:f8b0:4864:20::f2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3305812B;
-        Fri, 11 Aug 2023 00:34:44 -0700 (PDT)
-Received: by mail-qv1-xf2b.google.com with SMTP id 6a1803df08f44-63d48c3d242so10355326d6.2;
-        Fri, 11 Aug 2023 00:34:44 -0700 (PDT)
+        with ESMTP id S229447AbjHKIgt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 04:36:49 -0400
+Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C47B62D7F
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Aug 2023 01:36:48 -0700 (PDT)
+Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-5899ed05210so18741277b3.3
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Aug 2023 01:36:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1691739283; x=1692344083;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=u7GcUPXQY9U36+/aaRDeoI7fgExGIaZH3ho2ralObws=;
-        b=EAa8wpKxBuJIkvd/QqQ7qd4mtlizhCd6+wLT4qd6Jqg0cREuqjdYZDZ4rb2k05uMIF
-         OTxGv6O80oK/Q5AfbJIg1M0VOJ4H9+6xVUPW68wcj+pU0Aq428ResIDex70ngo7qfisp
-         1iUZODSoV4XnVr1+gsYZACvpa3wkOs0vQYJiBi56L6djc5u5Vkn9oCuaWhP/SDwLYrRz
-         i2HgWPujlKj7xQQ6Ej3SvGCj2UgCOoybHpWSFux4hFLupK7Rzh/0QXGTgahX0ga68SA8
-         t0xtndTZl1mnjj2QJoczNlOSu8bvpNZgVJq/rZLtfszoyxIJpuU24FByGlsMmk1RQBwT
-         tQ/A==
+        d=linaro.org; s=google; t=1691743008; x=1692347808;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=7RiLDVzYfGeq/75nyVMCH9Ez1G1IWtk1jFuILLki9h4=;
+        b=s9umU4UDjsz9zz7+kZXT8kRxjdfXSfhncTHhwGN6CIw8099q+qBHWeZE0nKnuhIN3p
+         3GT+SvePUoUzRc84ZD9O3yLvVTZI1ONEaaujIQwpju9x7hJBFuMFc4BaO/2GK4G4o8MQ
+         ylVK0GDbdg5ND0zjw4e6yxU+V1mZAv4ayVvehZPyflqkjBusPpzLkAsUQ4Ln64Pjuwxb
+         NdC/A7wRlJFdjkQsazjbZV8YXqYtaus2gkxiaLSrc+otTyAoSlxSypgMJ/yIY5tXq/nB
+         xaAy8Fm4TOmUS7iFxvTvqs4YrZ3T3VuU5FXPRde7ZJz/OCs3zMPXnLygsnCQs7FylG+B
+         KWrw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691739283; x=1692344083;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=u7GcUPXQY9U36+/aaRDeoI7fgExGIaZH3ho2ralObws=;
-        b=k729AirkdamoDTWtDH2JZFyvG4K0NpUF9mkSRBl4M8dvaHK08aff9aZaYOtXmjyPEu
-         glVULculhQhTMxntlBnPrrch3bgiDEegJbhuk/qi+sM5OMYC9PSKDzBPwejUud31gCdH
-         ADdIuGy0UOcZAQZGhMimzJ3WUD+Ukg2N3xgvxM0DzctyOhQBTnPBFPv1aq+4nosHdJi4
-         8cx+ezMzuGtf/ZUEbIm/+eO/72hl8s3R5AR3Z7Rv4V+T+NtX5TIhtkUOu4qIDRWhalSD
-         sABVDK3dYxh8KQl5GyrW0VX/TANFDeosh8p4aZUbRh4z/AAnOfp1tUXCXcehXEXxXyBB
-         Z/bA==
-X-Gm-Message-State: AOJu0YwqUnJCRdruutnl5O+rjkdLwuwp/UAnXnxvb8wX6/zUA72X2Fxc
-        emLcfvLQLDrXxvzsGUUY2XbcvyPh0AEz+Wj4Lzr6kUYsUMs=
-X-Google-Smtp-Source: AGHT+IE24rh4VDB50qxGN5HNkPGlzPSXb9wToey+S0iK2s0b6wjc8VNvtHVilA6cio1vQeUsnGsCQS28nm6Uhqg5LJc=
-X-Received: by 2002:a0c:ca84:0:b0:63f:be66:3c3b with SMTP id
- a4-20020a0cca84000000b0063fbe663c3bmr881709qvk.15.1691739283204; Fri, 11 Aug
- 2023 00:34:43 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1691743008; x=1692347808;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=7RiLDVzYfGeq/75nyVMCH9Ez1G1IWtk1jFuILLki9h4=;
+        b=XGAU+6PfTvgPtjLrhM8P4wFFd0LOnzowvK0ZnhaGLcOzJ8GVb8r59aSAHtoSH6Rgv/
+         6efdEms9aelbMZvsWTOIQQiktyv3FavzmPCK/McpoGt3cX8JlRXmx2f7gwScMnuqDnsL
+         awCPd8R7x+O8VpxLja+e7aO7MpGXQaNYOxXE2a6rRVxNRXIS5Yvkq8bOIFTnGJD2RNVS
+         W2IJEoqEfKMBGgTsfIrWe2jjeQJzRcx8xCjdVIIx7B9H4fJQ7P5oZLatebtcPNU5XVJ8
+         Je2JsLXnBzKltMckljP/4UgdZioncHAyXBnQn0TRGWtH3V7eTsK2ARAoQqbSZAuzWr9e
+         AR/A==
+X-Gm-Message-State: AOJu0Yz3fsQGxhHvslsZtHAOkX97gfHEktYFdZo5oOAtYdR2jBOos3wU
+        Cruy/JgTtS4EMT87nEmOmNPloi7j/Ml/VkDIQBGs9Q==
+X-Google-Smtp-Source: AGHT+IHjPrn41TM+VD7foXzUhoO6Hm7Zhr6d52b3zQ7MweHxSV1adAo5kdJGyasrHxXgEgFI/ETVXe8jrmKhCKMrDsM=
+X-Received: by 2002:a0d:eb83:0:b0:586:a00f:717d with SMTP id
+ u125-20020a0deb83000000b00586a00f717dmr1102637ywe.6.1691743007992; Fri, 11
+ Aug 2023 01:36:47 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230803054544.22007-1-wenchao.chen@unisoc.com>
- <CAPDyKFrb_nH7w8Wjz3oxJ6Vj30W4-U=k2ST8O7aib_kSHBjsFw@mail.gmail.com>
- <CA+Da2qzyKxvkkJYcbeYUzF5+VuFMka1tGjkvv09uD8Y1tKZcfg@mail.gmail.com> <CAPDyKFp2Yp=7FjWreaxHb6nbF8MVaTNtiKR7wfUk=nsE5vVihg@mail.gmail.com>
-In-Reply-To: <CAPDyKFp2Yp=7FjWreaxHb6nbF8MVaTNtiKR7wfUk=nsE5vVihg@mail.gmail.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Fri, 11 Aug 2023 15:34:32 +0800
-Message-ID: <CA+Da2qynMSjtKHEqD_U3nBfXPxO63kjy8b3hwcB3zOV3NZvfLA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: queue: replace immediate with hsq->depth
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com,
-        chunyan.zhang@unisoc.com, yuelin.tang@unisoc.com
+References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
+ <20230808202319.191434-1-limings@nvidia.com> <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
+ <CAPDyKFp28mmbRAGf14u8KTO3v7H=SFAYbwcz7xeb1m4tD_G2vQ@mail.gmail.com>
+ <a2f6cd0e-8429-3468-9dcf-a5022717e2ae@intel.com> <CAPDyKFqTWMghEAsBdLUF+K4QNEWBozNi3_a7w0+KuuO3x+wkTQ@mail.gmail.com>
+ <e561174e-a5cf-9503-f47a-d6c3fc7a1719@intel.com>
+In-Reply-To: <e561174e-a5cf-9503-f47a-d6c3fc7a1719@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 11 Aug 2023 10:36:12 +0200
+Message-ID: <CAPDyKFrZawSORUG6wAJoCGFJABXvadivarNJ7_3V-ajeULLitw@mail.gmail.com>
+Subject: Re: [PATCH v7] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Liming Sun <limings@nvidia.com>,
+        David Thompson <davthompson@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Aug 8, 2023 at 6:57=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
- wrote:
+On Fri, 11 Aug 2023 at 07:57, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> On Tue, 8 Aug 2023 at 12:41, Wenchao Chen <wenchao.chen666@gmail.com> wro=
-te:
+> On 10/08/23 19:34, Ulf Hansson wrote:
+> > On Thu, 10 Aug 2023 at 14:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>
+> >> On 10/08/23 13:21, Ulf Hansson wrote:
+> >>> On Thu, 10 Aug 2023 at 10:13, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>>>
+> >>>> On 8/08/23 23:23, Liming Sun wrote:
+> >>>>> This commit implements the runtime PM operations to disable eMMC
+> >>>>> card clock when idle.
+> >>>>>
+> >>>>> Reviewed-by: David Thompson <davthompson@nvidia.com>
+> >>>>> Signed-off-by: Liming Sun <limings@nvidia.com>
+> >>>>> ---
+> >>>>> v6->v7:
+> >>>>>     - Address Ulf's comment;
+> >>>>> v5->v6:
+> >>>>>     - Address Adrian's more comments and add coordination between
+> >>>>>       runtime PM and system PM;
+> >>>>> v4->v5:
+> >>>>>     - Address Adrian's comment to move the pm_enable to the end to
+> >>>>>       avoid race;
+> >>>>> v3->v4:
+> >>>>>     - Fix compiling reported by 'kernel test robot';
+> >>>>> v2->v3:
+> >>>>>     - Revise the commit message;
+> >>>>> v1->v2:
+> >>>>>     Updates for comments from Ulf:
+> >>>>>     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
+> >>>>> v1: Initial version.
+> >>>>> ---
+> >>>>>  drivers/mmc/host/sdhci-of-dwcmshc.c | 72 ++++++++++++++++++++++++++++-
+> >>>>>  1 file changed, 70 insertions(+), 2 deletions(-)
+> >>>>>
+> >>>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>>>> index e68cd87998c8..c8e145031429 100644
+> >>>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>>>> @@ -15,6 +15,7 @@
+> >>>>>  #include <linux/module.h>
+> >>>>>  #include <linux/of.h>
+> >>>>>  #include <linux/of_device.h>
+> >>>>> +#include <linux/pm_runtime.h>
+> >>>>>  #include <linux/reset.h>
+> >>>>>  #include <linux/sizes.h>
+> >>>>>
+> >>>>> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
+> >>>>>
+> >>>>>       host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+> >>>>>
+> >>>>> +     pm_runtime_get_noresume(dev);
+> >>>>> +     pm_runtime_set_active(dev);
+> >>>>> +     pm_runtime_enable(dev);
+> >>>>> +
+> >>>>>       err = sdhci_setup_host(host);
+> >>>>>       if (err)
+> >>>>> -             goto err_clk;
+> >>>>> +             goto err_rpm;
+> >>>>>
+> >>>>>       if (rk_priv)
+> >>>>>               dwcmshc_rk35xx_postinit(host, priv);
+> >>>>> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+> >>>>>       if (err)
+> >>>>>               goto err_setup_host;
+> >>>>>
+> >>>>> +     pm_runtime_put(dev);
+> >>>>> +
+> >>>>>       return 0;
+> >>>>>
+> >>>>>  err_setup_host:
+> >>>>>       sdhci_cleanup_host(host);
+> >>>>> +err_rpm:
+> >>>>> +     pm_runtime_disable(dev);
+> >>>>> +     pm_runtime_put_noidle(dev);
+> >>>>>  err_clk:
+> >>>>>       clk_disable_unprepare(pltfm_host->clk);
+> >>>>>       clk_disable_unprepare(priv->bus_clk);
+> >>>>> @@ -606,6 +616,12 @@ static int dwcmshc_suspend(struct device *dev)
+> >>>>>       if (ret)
+> >>>>>               return ret;
+> >>>>>
+> >>>>> +     ret = pm_runtime_force_suspend(dev);
+> >>>>> +     if (ret) {
+> >>>>> +             sdhci_resume_host(host);
+> >>>>> +             return ret;
+> >>>>> +     }
+> >>>>
+> >>>> Since you are only using the runtime PM callbacks to turn off the card
+> >>>> clock via SDHCI_CLOCK_CONTROL, pm_runtime_force_suspend() and
+> >>>> pm_runtime_force_resume() are not needed at all.
+> >>>
+> >>> Right, it can be done without these too.
+> >>>
+> >>>>
+> >>>> sdhci_suspend_host() does not care if SDHCI_CLOCK_CARD_EN is on or off.
+> >>>> (And you are disabling pltfm_host->clk and priv->bus_clk, so presumably
+> >>>> the result is no clock either way)
+> >>>>
+> >>>> sdhci_resume_host() does not restore state unless
+> >>>> SDHCI_QUIRK2_HOST_OFF_CARD_ON is used, it just resets, so the internal clock
+> >>>> SDHCI_CLOCK_INT_EN is off which is consistent with either runtime suspended
+> >>>> or runtime resumed.
+> >>>
+> >>> Even if this may work, to me, it doesn't look like good practice for
+> >>> how to use runtime PM in combination with system wide suspend/resume.
+> >>>
+> >>> The point is, sdhci_suspend|resume_host() may end up reading/writing
+> >>> to sdhci registers - and we should *not* allow that (because it may
+> >>> not always work), unless the sdhci controller has been runtime resumed
+> >>> first, right?
+> >>
+> >> I am OK with drivers that just want to use runtime PM to turn off a
+> >> functional clock.  sdhci-tegra.c is also doing that although using the
+> >> clock framework.
 > >
-> > On Tue, Aug 8, 2023 at 5:28=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.=
-org> wrote:
-> > >
-> > > On Thu, 3 Aug 2023 at 07:46, Wenchao Chen <wenchao.chen@unisoc.com> w=
-rote:
-> > > >
-> > > > Hsq is similar to cqe, using hsq->depth to represent
-> > > > the maximum processing capacity of hsq. We can adjust
-> > > > hsq->depth according to the actual situation.
-> > >
-> > > Sorry, but I don't quite follow here.
-> > >
-> > > Are you planning to update the host->hsq_depth dynamically from somew=
-here?
-> > >
-> > > Kind regards
-> > > Uffe
-> > >
-> > Hi Uffe,
-> > Depending on the mmc device, some devices allow host to send more reqs
-> > to the device.
->
-> In that case, please add a patch for that too, to show how this is
-> going to be useful.
->
-
-OK, I'll update it in the next version.
-
-> > Also, we use hsq->hsq_depth instead of immediate number "2" to make
-> > the code easier to understand.
->
-> Right, but we don't need a new member in struct mmc_host for that. We
-> could just be checking HSQ_MAX_DEPTH instead.
->
-> Kind regards
-> Uffe
->
-
-Using the definition of host in core makes it feel a little strange.
-
+> > Yes, I agree. At least this works for SoC specific drivers.
 > >
-> > Thanks
-> > Wenchao.Chen
-> > > >
-> > > > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> > > > ---
-> > > >  drivers/mmc/core/queue.c   | 6 +-----
-> > > >  drivers/mmc/host/mmc_hsq.c | 1 +
-> > > >  drivers/mmc/host/mmc_hsq.h | 7 +++++++
-> > > >  include/linux/mmc/host.h   | 1 +
-> > > >  4 files changed, 10 insertions(+), 5 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> > > > index b396e3900717..a0a2412f62a7 100644
-> > > > --- a/drivers/mmc/core/queue.c
-> > > > +++ b/drivers/mmc/core/queue.c
-> > > > @@ -260,11 +260,7 @@ static blk_status_t mmc_mq_queue_rq(struct blk=
-_mq_hw_ctx *hctx,
-> > > >                 }
-> > > >                 break;
-> > > >         case MMC_ISSUE_ASYNC:
-> > > > -               /*
-> > > > -                * For MMC host software queue, we only allow 2 req=
-uests in
-> > > > -                * flight to avoid a long latency.
-> > > > -                */
-> > > > -               if (host->hsq_enabled && mq->in_flight[issue_type] =
-> 2) {
-> > > > +               if (host->hsq_enabled && mq->in_flight[issue_type] =
-> host->hsq_depth) {
-> > > >                         spin_unlock_irq(&mq->lock);
-> > > >                         return BLK_STS_RESOURCE;
-> > > >                 }
-> > > > diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.=
-c
-> > > > index 424dc7b07858..7b3952721c17 100644
-> > > > --- a/drivers/mmc/host/mmc_hsq.c
-> > > > +++ b/drivers/mmc/host/mmc_hsq.c
-> > > > @@ -337,6 +337,7 @@ int mmc_hsq_init(struct mmc_hsq *hsq, struct mm=
-c_host *mmc)
-> > > >         hsq->mmc =3D mmc;
-> > > >         hsq->mmc->cqe_private =3D hsq;
-> > > >         mmc->cqe_ops =3D &mmc_hsq_ops;
-> > > > +       mmc->hsq_depth =3D HSQ_MAX_DEPTH;
-> > > >
-> > > >         for (i =3D 0; i < HSQ_NUM_SLOTS; i++)
-> > > >                 hsq->tag_slot[i] =3D HSQ_INVALID_TAG;
-> > > > diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.=
-h
-> > > > index 1808024fc6c5..795f6b9421d7 100644
-> > > > --- a/drivers/mmc/host/mmc_hsq.h
-> > > > +++ b/drivers/mmc/host/mmc_hsq.h
-> > > > @@ -5,6 +5,13 @@
-> > > >  #define HSQ_NUM_SLOTS  64
-> > > >  #define HSQ_INVALID_TAG        HSQ_NUM_SLOTS
-> > > >
-> > > > +/*
-> > > > + * For MMC host software queue, we usually allow 2 requests in
-> > > > + * flight to avoid a long latency. But we can adjust hsq->depth
-> > > > + * according to the actual situation.
-> > > > + */
-> > > > +#define HSQ_MAX_DEPTH  2
-> > > > +
-> > > >  struct hsq_slot {
-> > > >         struct mmc_request *mrq;
-> > > >  };
-> > > > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > > > index 461d1543893b..1fd8b1dd8698 100644
-> > > > --- a/include/linux/mmc/host.h
-> > > > +++ b/include/linux/mmc/host.h
-> > > > @@ -520,6 +520,7 @@ struct mmc_host {
-> > > >
-> > > >         /* Host Software Queue support */
-> > > >         bool                    hsq_enabled;
-> > > > +       int                     hsq_depth;
-> > > >
-> > > >         u32                     err_stats[MMC_ERR_MAX];
-> > > >         unsigned long           private[] ____cacheline_aligned;
-> > > > --
-> > > > 2.17.1
-> > > >
+> >>
+> >> Certainly that approach assumes that the host controller's power state
+> >> is not changed due to runtime PM.
+> >>
+> >> To ensure that the host controller is runtime resumed before calling
+> >> sdhci_suspend_host(), we can just call pm_runtime_resume() I think.
+> >
+> > Yes, that was kind of what I proposed in the other thread as option 1)
+> > (except for the replacement of pm_runtime_force_suspend|resume).
+> >
+> > Although, to be clear I would probably use pm_runtime_get_sync()
+> > instead, to make sure the usage count is incremented too.
+>
+> In that case, a matching pm_runtime_put() is needed also at the
+> end of the resume callback.
+
+Yes, of course. Or depending if we are using the force_suspend|resume
+helper, a pm_runtime_put_noidle is sufficient after
+pm_runtime_force_suspend() has been called.
+
+[...]
+
+Kind regards
+Uffe
