@@ -2,106 +2,133 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77E79C04A6A
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Aug 2023 18:03:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75E57C04FDF
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 00:27:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235094AbjHJSDD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Aug 2023 14:03:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55404 "EHLO
+        id S231224AbjHKA1Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Aug 2023 20:27:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235314AbjHJSDA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 14:03:00 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 117B02724;
-        Thu, 10 Aug 2023 11:02:58 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A3A5C6659D;
-        Thu, 10 Aug 2023 18:02:57 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 97EE7C433C7;
-        Thu, 10 Aug 2023 18:02:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1691690577;
-        bh=Y5NbfTzNtvATG9GxZM1Qw0F5nvZfv1HtLDJ4xkBt2hQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=A/YtgsbUK1wEI/m3j+lbTimnm7LKRJA1RywxB47qQiteMKMuxx3i5Hxz5wtM7hmBq
-         gQWNrwf4B/Z3ZTRm6ZdGvpAAHWJuaXjOCXa7N55mL0wtFPvP/ylhqrvMtkqUIMM/JV
-         zgJ30nRuhI4FS9CyjrmqcotVV6h78rgZPOlvHBAGXY41sG42h1oPf7apyqzwbd/rW2
-         2DxJ/u6e3Yu352ECVCo6etxNwrv9NevlS4G0Vl+in1lmuYoXwsSn104EnGHeM4NYM/
-         qrrmX/A1z0Ldu57/+cFQMKtZrQcnYCql4+G+6tmwkWM9V/LrtDLM93ewblFGf3R6NI
-         eb/pN+7Q+2OGQ==
-Date:   Thu, 10 Aug 2023 19:02:48 +0100
-From:   Mark Brown <broonie@kernel.org>
-To:     Guido =?iso-8859-1?Q?G=FCnther?= <agx@sigxcpu.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>, Peng Fan <peng.fan@nxp.com>,
-        Bjorn Andersson <quic_bjorande@quicinc.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        =?iso-8859-1?Q?N=EDcolas_F=2E_R=2E_A=2E?= Prado 
-        <nfraprado@collabora.com>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-        kernel@puri.sm, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-arm-kernel@lists.infradead.org,
-        David Heidelberg <david@ixit.cz>,
-        Sherry Sun <sherry.sun@nxp.com>
-Subject: Re: [PATCH v2 1/4] dt-bindings: sound: gtm601: Add description
-Message-ID: <582be994-d3c8-4edf-9028-99b18505e378@sirena.org.uk>
-References: <cover.1691684726.git.agx@sigxcpu.org>
- <6904cc6d877d28d92e9f9fa9f1bdc404614d9734.1691684726.git.agx@sigxcpu.org>
+        with ESMTP id S229448AbjHKA1Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Aug 2023 20:27:24 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2ED792718;
+        Thu, 10 Aug 2023 17:27:24 -0700 (PDT)
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 37B03Iiq025172;
+        Fri, 11 Aug 2023 00:27:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=qcppdkim1;
+ bh=MRXzDHmf0jpToFYvEYjb8jcM+QLXtNMavgjF9THlYLE=;
+ b=BOTSZ0fDNVkSQ2MXuhqZkVBJtcu1xuqjVkD3kqNgj0R6g+84iJIVm4Ls62c6pBKoI7W7
+ p/dcoq7qe40pDjetHpPopEW2LbWcuryw8NcuK8KJanGLYKXpK53W4fB4rvW/JIeHwCDD
+ GyXBg4t6oYOX+fJ4wrn2E33Bj+xaYFNsN2LU+0yb2Dx7rMpulEtUUEC+eeYuExbOq+mk
+ 0YsFkN+xXVl7/9F6w71K45gensKmlVcH2G2WClIUm7FwTWHsv3nyCeC/o1ddy4sIbHgd
+ SZj0Y1A3vjtNFT6gGklKFuo/dRJBjtGus+6fVv3LAcB9N0mVB2oAuqQjhoXUgGoyf1OA +A== 
+Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3sd90603vk-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 11 Aug 2023 00:27:20 +0000
+Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
+        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 37B0RJsh004329
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 11 Aug 2023 00:27:19 GMT
+Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
+ nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.30; Thu, 10 Aug 2023 17:27:18 -0700
+Received: from nalasex01a.na.qualcomm.com ([fe80::25d0:9235:354f:5fa9]) by
+ nalasex01a.na.qualcomm.com ([fe80::25d0:9235:354f:5fa9%4]) with mapi id
+ 15.02.1118.030; Thu, 10 Aug 2023 17:27:18 -0700
+From:   "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>
+To:     Eric Biggers <ebiggers@kernel.org>
+CC:     "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        "linux-fscrypt@vger.kernel.org" <linux-fscrypt@vger.kernel.org>,
+        "Om Prakash Singh" <omprsing@qti.qualcomm.com>,
+        "Prasad Sodagudi (QUIC)" <quic_psodagud@quicinc.com>,
+        "Arun Menon (SSG)" <avmenon@quicinc.com>,
+        "abel.vesa@linaro.org" <abel.vesa@linaro.org>,
+        "Seshu Madhavi Puppala (QUIC)" <quic_spuppala@quicinc.com>
+Subject: RE: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
+ ufs
+Thread-Topic: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
+ ufs
+Thread-Index: AQHZumN+a5RI3WgcJ0CO2LlDH5s476/Ca+iAgBIbBxCADxLrAIAAxjXQ
+Date:   Fri, 11 Aug 2023 00:27:18 +0000
+Message-ID: <371088f78c6d4febbbfaf3c1a12cf19f@quicinc.com>
+References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+ <20230720025541.GA2607@sol.localdomain>
+ <ca11701e403f48b6839b26c47a1b537f@quicinc.com>
+ <20230810053642.GD923@sol.localdomain>
+In-Reply-To: <20230810053642.GD923@sol.localdomain>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.52.103.164]
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="GODGWzgiFfPQfLkj"
-Content-Disposition: inline
-In-Reply-To: <6904cc6d877d28d92e9f9fa9f1bdc404614d9734.1691684726.git.agx@sigxcpu.org>
-X-Cookie: Reunite Gondwondaland!
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: tNmSuQfPNm_Uwa1dtOWpKf-UlFsAkBQ8
+X-Proofpoint-ORIG-GUID: tNmSuQfPNm_Uwa1dtOWpKf-UlFsAkBQ8
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
+ definitions=2023-08-10_19,2023-08-10_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 phishscore=0
+ impostorscore=0 lowpriorityscore=0 priorityscore=1501 adultscore=0
+ suspectscore=0 malwarescore=0 mlxscore=0 clxscore=1015 spamscore=0
+ mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2306200000 definitions=main-2308110002
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---GODGWzgiFfPQfLkj
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, Aug 10, 2023 at 07:59:49PM +0200, Guido G=FCnther wrote:
-> This allows to us to document the channel and sampling
-> rate requirements.
+-----Original Message-----
+From: Eric Biggers <ebiggers@kernel.org>=20
+Sent: Wednesday, August 9, 2023 10:37 PM
+To: Gaurav Kashyap (QUIC) <quic_gaurkash@quicinc.com>
+Cc: linux-scsi@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-mmc@vg=
+er.kernel.org; linux-block@vger.kernel.org; linux-fscrypt@vger.kernel.org; =
+Om Prakash Singh <omprsing@qti.qualcomm.com>; Prasad Sodagudi (QUIC) <quic_=
+psodagud@quicinc.com>; Arun Menon (SSG) <avmenon@quicinc.com>; abel.vesa@li=
+naro.org; Seshu Madhavi Puppala (QUIC) <quic_spuppala@quicinc.com>
+Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and=
+ ufs
 
-Please do not submit new versions of already applied patches, please
-submit incremental updates to the existing code.  Modifying existing
-commits creates problems for other users building on top of those
-commits so it's best practice to only change pubished git commits if
-absolutely essential.
+On Tue, Aug 01, 2023 at 05:31:59PM +0000, Gaurav Kashyap (QUIC) wrote:
+>=20
+> According to your cover letter, this feature requires a custom TrustZone =
+image to work on SM8550.  Will that image be made available outside Qualcom=
+m?
+> --> Unfortunately, I don't think there is a way to do that. You can still=
+ request for one through our customer engineering team like before.
 
---GODGWzgiFfPQfLkj
-Content-Type: application/pgp-signature; name="signature.asc"
+I think it's already been shown that that is not a workable approach.
 
------BEGIN PGP SIGNATURE-----
+> Also, can you please make available a git branch somewhere that contains =
+your patchset?  It sounds like this depends on https://git.kernel.org/pub/s=
+cm/fs/fscrypt/linux.git/log/?h=3Dwrapped-keys-v7, but actually a version of=
+ it that you've rebased, which I don't have access to.
+> Without being able to apply your patchset, I can't properly review it.
+> --> As for the fscrypt patches,
+>       I have not changed much functionally from the v7 patch, just merge =
+conflicts.
+>       I will update this thread once I figure out a git location.
+>=20
 
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmTVJkcACgkQJNaLcl1U
-h9CWgQf9E1fK+h8U4tglO2QBYdincfV5U+VibIuT+X3R6d04Ld31bt4zcsOebMv6
-fsAbpoGJOrIqB63vKIGaOO3UvhUzmzR3IjzgzHf6J9a2oQm8G59+qayWuwpx8VZ3
-ttWsCsjjJU7ZILOFmfZf2zIBnipw8Ze+dlyT9qzm7W9B0CPW1FEnD6jiklT/o6YP
-ekdGU7vZA2Yap/nLhfDlLFQN5dh1UC0kuSOx/uScsanGSMtYN/WqsQHdCNsPCX0s
-v4BwnIIX+KJcOwFIJ7Ye3YaOUBWanxVI2iWXZCZ0xX1bFOeUVyZRKtKDNGyUSb4p
-jPICdMQVJ1M1b/QOehMvuvGkkbGTJg==
-=ie9k
------END PGP SIGNATURE-----
+Any update on this?  Most kernel developers just create a GitHub repo if th=
+ey don't have kernel.org access.
 
---GODGWzgiFfPQfLkj--
+>> Here are the git links
+>> https://github.com/quic-gaurkash/linux/tree/fscrypt
+>> https://github.com/quic-gaurkash/linux/tree/wrapped_keys_ice_ufs
+
+- Eric
