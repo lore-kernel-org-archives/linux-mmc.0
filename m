@@ -2,208 +2,391 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AA9BEB64DD
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 05:57:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95262EB64DD
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 07:23:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229544AbjHKF5g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Aug 2023 01:57:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59874 "EHLO
+        id S233280AbjHKHXG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Aug 2023 03:23:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229546AbjHKF5f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 01:57:35 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CCC92706;
-        Thu, 10 Aug 2023 22:57:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1691733455; x=1723269455;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=NzC5dML3RiPZQaVQdobaw0aqoIHR6uCRuuDllSIeAw8=;
-  b=geXwxJINFVaAW6nNrqYBwcHJ5lzloQHP1DjAP3+cVFsFxW+2sXlsJ6TT
-   HxCEhTTuFrkaa6Fg48t11rUARCZiQoejggYaU85AWEAqHsQnXwKLS8j+t
-   QmoxzzRzJZG9dU5OCnQsml/ot1a854EJKCYBrsN2w1wHUeuz+jUfE2YBk
-   xjoFnwr5EaBXpuaArJhcVPq5rutSqnpCJDZAgwV6QagFQD9aTG6+RKQcs
-   IHV0Q2wREutgmOEIViqxnTnp0fiZxoi7frczlmZoB9sur4uwVctb9fjjI
-   qw0sIlF6jGv+/yPha7iQFj7c6DA8W0VkW2DId3rq6g57PuzHoNSTEORxH
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="374370657"
-X-IronPort-AV: E=Sophos;i="6.01,164,1684825200"; 
-   d="scan'208";a="374370657"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Aug 2023 22:56:55 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10798"; a="682419104"
-X-IronPort-AV: E=Sophos;i="6.01,164,1684825200"; 
-   d="scan'208";a="682419104"
-Received: from onuryilm-mobl.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.13])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Aug 2023 22:56:48 -0700
-Message-ID: <e561174e-a5cf-9503-f47a-d6c3fc7a1719@intel.com>
-Date:   Fri, 11 Aug 2023 08:56:45 +0300
+        with ESMTP id S229992AbjHKHXD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 03:23:03 -0400
+Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5351DD7;
+        Fri, 11 Aug 2023 00:23:02 -0700 (PDT)
+Received: by mail-qt1-x82b.google.com with SMTP id d75a77b69052e-40fd2de0ddcso11369071cf.2;
+        Fri, 11 Aug 2023 00:23:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1691738581; x=1692343381;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=UogLUKYq0gqOblesBbG58yj9hThY60FiFujRSwjIu0A=;
+        b=D64pqSPLMVFpY00BlcIIUXLRdwI/RZsLmyCoJ/Yn7HWZr7Q6mfnvHfjOt7lTvm4G+8
+         C37FSqLtoo2FeCHv7o+oAUFQnqXBUFXF9XSETis6KVy8uINOUcO4nIxLPLB7jytsH6SI
+         1sgjHkISG4XqC+quEnF3XEA8KSBwYmIwt9JFdpBDnun1YBJBRgLPE9hWUjqrO+hqprJj
+         jETKlSDU4zeBrrVxtrkKj901QxQD+xmKYKFcLTKz/3Fv1PsJ5YEMmoGLLn8fofVQnii8
+         uhz+Q9xELTzqgTID29dRkofd4QF2qDoT1hi7QQmYVB8ST7DdUANdDnxQIifB3oF/toOG
+         iM9A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1691738581; x=1692343381;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=UogLUKYq0gqOblesBbG58yj9hThY60FiFujRSwjIu0A=;
+        b=LguqByLoAQKY4hVzIMvhelDsg907m+WUZFGsfP32U9oOKccvTSLY9R+5gTLpMyPtfC
+         HdJI6ufulRnStzysTPuysJngwePHk94JJiirBuwZB1l5TbgGVBOvojueSgpE+ZiqpU7G
+         PuBXYD3oRP3CDqdmem9PcN7h+F/PgPtUbolfL5WLysIKbmAhhunQtCzNBVmqNWmT3Bhb
+         fvKrdfLxe/8dbPpC+LXDh5CzkNZ3YsJ4toUxExohBlsDUxRIfD6+8+xvflpFinPhIIEP
+         23BuFrkLkRqPoPSaF9mlRCEwaZgTUJ1XZpBwPDbuHNt2rP2yLpVYFVzEYtKdbVbEzK8U
+         F0/g==
+X-Gm-Message-State: AOJu0Yzu7s5udbWYUhYXTrl2ufG/p4zzqhH70G3RlT2SKWL94ePjtqtb
+        TUJu2XJ3dAyahdyP3qrWH+mxhtM9n8Qow1fudyQ=
+X-Google-Smtp-Source: AGHT+IFPaeIj6sYj2JeoZitFCKGI+WQ34332wkOpYin6H/E11sYX7qMN1ShAWRvuuKDXSh0D2TLD3ZJeiBv43f1KV9A=
+X-Received: by 2002:a0c:cb8d:0:b0:63f:7f2e:3b84 with SMTP id
+ p13-20020a0ccb8d000000b0063f7f2e3b84mr864420qvk.63.1691738581335; Fri, 11 Aug
+ 2023 00:23:01 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.14.0
-Subject: Re: [PATCH v7] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Liming Sun <limings@nvidia.com>
-Cc:     David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
- <20230808202319.191434-1-limings@nvidia.com>
- <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
- <CAPDyKFp28mmbRAGf14u8KTO3v7H=SFAYbwcz7xeb1m4tD_G2vQ@mail.gmail.com>
- <a2f6cd0e-8429-3468-9dcf-a5022717e2ae@intel.com>
- <CAPDyKFqTWMghEAsBdLUF+K4QNEWBozNi3_a7w0+KuuO3x+wkTQ@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAPDyKFqTWMghEAsBdLUF+K4QNEWBozNi3_a7w0+KuuO3x+wkTQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20230809052952.323-1-wenchao.chen@unisoc.com> <CAPDyKFoykxdP70t2pjeiX0pkKuUCZ2AeFM4yT4-wfVijxB7OHw@mail.gmail.com>
+In-Reply-To: <CAPDyKFoykxdP70t2pjeiX0pkKuUCZ2AeFM4yT4-wfVijxB7OHw@mail.gmail.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Fri, 11 Aug 2023 15:22:50 +0800
+Message-ID: <CA+Da2qx52QVk5Hz2PdY78qHRmspkDkXbWCWbUOGXCt2nbjNW0Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Add host specific tuning support for SD HS mode
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        zhenxiong.lai@unisoc.com, chunyan.zhang@unisoc.com,
+        yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/08/23 19:34, Ulf Hansson wrote:
-> On Thu, 10 Aug 2023 at 14:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 10/08/23 13:21, Ulf Hansson wrote:
->>> On Thu, 10 Aug 2023 at 10:13, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>
->>>> On 8/08/23 23:23, Liming Sun wrote:
->>>>> This commit implements the runtime PM operations to disable eMMC
->>>>> card clock when idle.
->>>>>
->>>>> Reviewed-by: David Thompson <davthompson@nvidia.com>
->>>>> Signed-off-by: Liming Sun <limings@nvidia.com>
->>>>> ---
->>>>> v6->v7:
->>>>>     - Address Ulf's comment;
->>>>> v5->v6:
->>>>>     - Address Adrian's more comments and add coordination between
->>>>>       runtime PM and system PM;
->>>>> v4->v5:
->>>>>     - Address Adrian's comment to move the pm_enable to the end to
->>>>>       avoid race;
->>>>> v3->v4:
->>>>>     - Fix compiling reported by 'kernel test robot';
->>>>> v2->v3:
->>>>>     - Revise the commit message;
->>>>> v1->v2:
->>>>>     Updates for comments from Ulf:
->>>>>     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
->>>>> v1: Initial version.
->>>>> ---
->>>>>  drivers/mmc/host/sdhci-of-dwcmshc.c | 72 ++++++++++++++++++++++++++++-
->>>>>  1 file changed, 70 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>>>> index e68cd87998c8..c8e145031429 100644
->>>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
->>>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>>>> @@ -15,6 +15,7 @@
->>>>>  #include <linux/module.h>
->>>>>  #include <linux/of.h>
->>>>>  #include <linux/of_device.h>
->>>>> +#include <linux/pm_runtime.h>
->>>>>  #include <linux/reset.h>
->>>>>  #include <linux/sizes.h>
->>>>>
->>>>> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
->>>>>
->>>>>       host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->>>>>
->>>>> +     pm_runtime_get_noresume(dev);
->>>>> +     pm_runtime_set_active(dev);
->>>>> +     pm_runtime_enable(dev);
->>>>> +
->>>>>       err = sdhci_setup_host(host);
->>>>>       if (err)
->>>>> -             goto err_clk;
->>>>> +             goto err_rpm;
->>>>>
->>>>>       if (rk_priv)
->>>>>               dwcmshc_rk35xx_postinit(host, priv);
->>>>> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
->>>>>       if (err)
->>>>>               goto err_setup_host;
->>>>>
->>>>> +     pm_runtime_put(dev);
->>>>> +
->>>>>       return 0;
->>>>>
->>>>>  err_setup_host:
->>>>>       sdhci_cleanup_host(host);
->>>>> +err_rpm:
->>>>> +     pm_runtime_disable(dev);
->>>>> +     pm_runtime_put_noidle(dev);
->>>>>  err_clk:
->>>>>       clk_disable_unprepare(pltfm_host->clk);
->>>>>       clk_disable_unprepare(priv->bus_clk);
->>>>> @@ -606,6 +616,12 @@ static int dwcmshc_suspend(struct device *dev)
->>>>>       if (ret)
->>>>>               return ret;
->>>>>
->>>>> +     ret = pm_runtime_force_suspend(dev);
->>>>> +     if (ret) {
->>>>> +             sdhci_resume_host(host);
->>>>> +             return ret;
->>>>> +     }
->>>>
->>>> Since you are only using the runtime PM callbacks to turn off the card
->>>> clock via SDHCI_CLOCK_CONTROL, pm_runtime_force_suspend() and
->>>> pm_runtime_force_resume() are not needed at all.
->>>
->>> Right, it can be done without these too.
->>>
->>>>
->>>> sdhci_suspend_host() does not care if SDHCI_CLOCK_CARD_EN is on or off.
->>>> (And you are disabling pltfm_host->clk and priv->bus_clk, so presumably
->>>> the result is no clock either way)
->>>>
->>>> sdhci_resume_host() does not restore state unless
->>>> SDHCI_QUIRK2_HOST_OFF_CARD_ON is used, it just resets, so the internal clock
->>>> SDHCI_CLOCK_INT_EN is off which is consistent with either runtime suspended
->>>> or runtime resumed.
->>>
->>> Even if this may work, to me, it doesn't look like good practice for
->>> how to use runtime PM in combination with system wide suspend/resume.
->>>
->>> The point is, sdhci_suspend|resume_host() may end up reading/writing
->>> to sdhci registers - and we should *not* allow that (because it may
->>> not always work), unless the sdhci controller has been runtime resumed
->>> first, right?
->>
->> I am OK with drivers that just want to use runtime PM to turn off a
->> functional clock.  sdhci-tegra.c is also doing that although using the
->> clock framework.
-> 
-> Yes, I agree. At least this works for SoC specific drivers.
-> 
->>
->> Certainly that approach assumes that the host controller's power state
->> is not changed due to runtime PM.
->>
->> To ensure that the host controller is runtime resumed before calling
->> sdhci_suspend_host(), we can just call pm_runtime_resume() I think.
-> 
-> Yes, that was kind of what I proposed in the other thread as option 1)
-> (except for the replacement of pm_runtime_force_suspend|resume).
-> 
-> Although, to be clear I would probably use pm_runtime_get_sync()
-> instead, to make sure the usage count is incremented too.
+On Wed, Aug 9, 2023 at 6:09=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
+>
+> On Wed, 9 Aug 2023 at 07:30, Wenchao Chen <wenchao.chen@unisoc.com> wrote=
+:
+> >
+> > Added .prepare_hs_tuning and .execute_hs_tuning host
+> > callbacks to support host-specific tuning for SD high
+> > speed mode.
+>
+> This certainly needs to be clarified more. Especially why it's needed
+> for the sdhci-sprd variant.
+>
 
-In that case, a matching pm_runtime_put() is needed also at the
-end of the resume callback.
+First of all, Unisoc's IC provides cmd delay and read delay to ensure
+that the host can
+get the correct data. However, according to SD Spec, there is no need
+to do tuning in
+high speed mode, but with the development of chip processes, it is
+more and more difficult
+to find a suitable delay to cover all the chips.
+Therefore, we need SD high speed mode online tuning.
 
-> 
-> I don't have a strong opinion here, but from an optimization point of
-> view I would at least consider what I proposed in option 2) (in the
-> other thread). The benefit is that it can allow us to potentially
-> avoid runtime resuming the device, during system suspend.
-> 
+> >
+> > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> > ---
+> >  drivers/mmc/core/sd.c         |  12 ++++
+> >  drivers/mmc/host/sdhci-sprd.c | 124 ++++++++++++++++++++++++++++++++++
+> >  include/linux/mmc/host.h      |   6 ++
+> >  3 files changed, 142 insertions(+)
+> >
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index 246ce027ae0a..ac2da8f2fbce 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -1518,6 +1518,12 @@ static int mmc_sd_init_card(struct mmc_host *hos=
+t, u32 ocr,
+> >                  */
+> >                 mmc_set_clock(host, mmc_sd_get_max_clock(card));
+> >
+> > +               if (host->ops->prepare_hs_tuning) {
+> > +                       err =3D host->ops->prepare_hs_tuning(host, card=
+);
+> > +                       if (err)
+> > +                               goto free_card;
+> > +               }
+>
+> Adding a new callback for this is a bit questionable, I think.
+>
+> In the ->set_ios() callback, we could instead check MMC_TIMING_SD_HS
+> and when the clock is updated, then also run a tuning sequence, right?
+>
+
+Yeah, I'll try.
+
+> > +
+> >                 /*
+> >                  * Switch to wider bus (if supported).
+> >                  */
+> > @@ -1529,6 +1535,12 @@ static int mmc_sd_init_card(struct mmc_host *hos=
+t, u32 ocr,
+> >
+> >                         mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+> >                 }
+> > +
+> > +               if (host->ops->execute_hs_tuning) {
+> > +                       err =3D host->ops->execute_hs_tuning(host, card=
+);
+> > +                       if (err)
+> > +                               goto free_card;
+> > +               }
+>
+> Similar to the above comment, in the ->set_ios() callback we could
+> instead check MMC_TIMING_SD_HS when moving to MMC_BUS_WIDTH_4, then
+> run a tuning sequence, right?
+>
+
+ibid.
+
+> >         }
+> >  cont:
+> >         if (!oldcard) {
+> > diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-spr=
+d.c
+> > index 7f4ee2e12735..5f365dcbb9c7 100644
+> > --- a/drivers/mmc/host/sdhci-sprd.c
+> > +++ b/drivers/mmc/host/sdhci-sprd.c
+> > @@ -9,6 +9,7 @@
+> >  #include <linux/dma-mapping.h>
+> >  #include <linux/highmem.h>
+> >  #include <linux/iopoll.h>
+> > +#include <linux/mmc/mmc.h>
+> >  #include <linux/module.h>
+> >  #include <linux/of.h>
+> >  #include <linux/of_device.h>
+> > @@ -22,6 +23,9 @@
+> >  #include "sdhci-pltfm.h"
+> >  #include "mmc_hsq.h"
+> >
+> > +#include "../core/mmc_ops.h"
+> > +#include "../core/sd_ops.h"
+>
+> No, this isn't how we include header files. Instead move the functions
+> that you may need to include/linux/mmc/host.h.
+>
+> Also, please split up core changes from host driver changes.
+>
+
+I'll fix it in the next version.
+
+> > +
+> >  /* SDHCI_ARGUMENT2 register high 16bit */
+> >  #define SDHCI_SPRD_ARG2_STUFF          GENMASK(31, 16)
+> >
+> > @@ -73,6 +77,11 @@
+> >  #define SDHCI_SPRD_CLK_DEF_RATE                26000000
+> >  #define SDHCI_SPRD_PHY_DLL_CLK         52000000
+> >
+> > +#define SDHCI_SPRD_MAX_PHASE           0xff
+> > +#define SDHCI_SPRD_CMD_DLY_MASK                GENMASK(15, 8)
+> > +#define SDHCI_SPRD_POSRD_DLY_MASK      GENMASK(23, 16)
+> > +#define SDHCI_SPRD_CPST_EN             GENMASK(27, 24)
+> > +
+> >  struct sdhci_sprd_host {
+> >         u32 version;
+> >         struct clk *clk_sdio;
+> > @@ -86,6 +95,11 @@ struct sdhci_sprd_host {
+> >         u32 phy_delay[MMC_TIMING_MMC_HS400 + 2];
+> >  };
+> >
+> > +enum sdhci_sprd_tuning_type {
+> > +       SDHCI_SPRD_TUNING_SD_HS_CMD,
+> > +       SDHCI_SPRD_TUNING_SD_HS_DATA,
+> > +};
+> > +
+> >  struct sdhci_sprd_phy_cfg {
+> >         const char *property;
+> >         u8 timing;
+> > @@ -533,6 +547,111 @@ static void sdhci_sprd_hs400_enhanced_strobe(stru=
+ct mmc_host *mmc,
+> >                      SDHCI_SPRD_REG_32_DLL_DLY);
+> >  }
+> >
+> > +static int mmc_send_tuning_cmd(struct mmc_card *card)
+> > +{
+> > +       return mmc_send_status(card, NULL);
+> > +}
+> > +
+> > +static int mmc_send_tuning_data(struct mmc_card *card)
+> > +{
+> > +       u8 status[64];
+>
+> We use kmalloc-ed data for data transfers.
+>
+
+Why is it better to use kmalloc-ed data?
+
+> > +
+> > +       return mmc_sd_switch(card, 0, 0, 0, status);
+> > +}
+> > +
+> > +static int sdhci_sprd_tuning(struct mmc_host *mmc, struct mmc_card *ca=
+rd,
+> > +                       enum sdhci_sprd_tuning_type type)
+> > +{
+> > +       struct sdhci_host *host =3D mmc_priv(mmc);
+> > +       struct sdhci_sprd_host *sprd_host =3D TO_SPRD_HOST(host);
+> > +       u32 *p =3D sprd_host->phy_delay;
+> > +       int err =3D 0;
+> > +       int i;
+> > +       bool value;
+> > +       int final_phase;
+> > +       u32 dll_cfg, dll_dly;
+> > +       int range_end =3D SDHCI_SPRD_MAX_PHASE;
+> > +       int len =3D 0;
+> > +       int count =3D 0;
+> > +
+> > +       sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> > +
+> > +       dll_cfg =3D sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
+> > +       dll_cfg &=3D ~SDHCI_SPRD_CPST_EN;
+> > +       sdhci_writel(host, dll_cfg, SDHCI_SPRD_REG_32_DLL_CFG);
+> > +
+> > +       dll_dly =3D p[mmc->ios.timing];
+> > +
+> > +       for (i =3D 0; i <=3D SDHCI_SPRD_MAX_PHASE; i++) {
+> > +               if (type =3D=3D SDHCI_SPRD_TUNING_SD_HS_CMD) {
+> > +                       dll_dly &=3D ~SDHCI_SPRD_CMD_DLY_MASK;
+> > +                       dll_dly |=3D ((i << 8) & SDHCI_SPRD_CMD_DLY_MAS=
+K);
+> > +               } else {
+> > +                       dll_dly &=3D ~SDHCI_SPRD_POSRD_DLY_MASK;
+> > +                       dll_dly |=3D ((i << 16) & SDHCI_SPRD_POSRD_DLY_=
+MASK);
+> > +               }
+> > +
+> > +               sdhci_writel(host, dll_dly, SDHCI_SPRD_REG_32_DLL_DLY);
+> > +
+> > +               if (type =3D=3D SDHCI_SPRD_TUNING_SD_HS_CMD)
+> > +                       value =3D !mmc_send_tuning_cmd(card);
+> > +               else
+> > +                       value =3D !mmc_send_tuning_data(card);
+> > +
+> > +               if (value) {
+> > +                       dev_dbg(mmc_dev(host->mmc), "tuning ok: %d\n", =
+i);
+> > +                       count++;
+> > +               } else {
+> > +                       dev_dbg(mmc_dev(host->mmc), "tuning fail: %d\n"=
+, i);
+> > +                       if (len < count) {
+> > +                               len =3D count;
+> > +                               range_end =3D i - 1;
+> > +                               count =3D 0;
+> > +                       }
+> > +               }
+> > +       }
+> > +
+> > +       if (!count) {
+> > +               final_phase =3D 0;
+> > +               dev_err(mmc_dev(host->mmc), "all tuning phase fail!\n")=
+;
+> > +               err =3D -EIO;
+> > +               goto out;
+> > +       }
+> > +
+> > +       if (count > len) {
+> > +               len =3D count;
+> > +               range_end =3D i - 1;
+> > +       }
+> > +
+> > +       final_phase =3D range_end - (len - 1) / 2;
+>
+> The whole len, count, range_end, final_phase things look rather messy.
+> Please have a look and try to clean up that part a bit, I am sure it
+> can be done, somehow.
+>
+
+Indeed, it looks messy. I'll fix it in the next version.
+
+> > +
+> > +       if (type =3D=3D SDHCI_SPRD_TUNING_SD_HS_CMD) {
+> > +               p[mmc->ios.timing] &=3D ~SDHCI_SPRD_CMD_DLY_MASK;
+> > +               p[mmc->ios.timing] |=3D ((final_phase << 8) & SDHCI_SPR=
+D_CMD_DLY_MASK);
+> > +       } else {
+> > +               p[mmc->ios.timing] &=3D ~(SDHCI_SPRD_POSRD_DLY_MASK);
+> > +               p[mmc->ios.timing] |=3D ((final_phase << 16) & SDHCI_SP=
+RD_POSRD_DLY_MASK);
+> > +       }
+> > +
+> > +       dev_info(mmc_dev(host->mmc), "the best step %d, phase 0x%02x, d=
+elay value 0x%08x\n",
+> > +                       final_phase, final_phase, p[mmc->ios.timing]);
+>
+> Does this really deserve to be a dev_info? Looks like a dev_dbg to me, no=
+?
+>
+
+Yeah. You're right.
+I'll fix it in the next version.
+
+> > +
+> > +out:
+> > +       sdhci_writel(host, p[mmc->ios.timing], SDHCI_SPRD_REG_32_DLL_DL=
+Y);
+> > +
+> > +       return err;
+> > +}
+> > +
+> > +static int sdhci_sprd_prepare_hs_cmd_tuning(struct mmc_host *mmc, stru=
+ct mmc_card *card)
+> > +{
+> > +       return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_CMD=
+);
+> > +}
+> > +
+> > +static int sdhci_sprd_execute_hs_data_tuning(struct mmc_host *mmc, str=
+uct mmc_card *card)
+> > +{
+> > +       return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_DAT=
+A);
+> > +}
+> > +
+> >  static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_ho=
+st,
+> >                                        struct device_node *np)
+> >  {
+> > @@ -577,6 +696,11 @@ static int sdhci_sprd_probe(struct platform_device=
+ *pdev)
+> >         host->mmc_host_ops.request =3D sdhci_sprd_request;
+> >         host->mmc_host_ops.hs400_enhanced_strobe =3D
+> >                 sdhci_sprd_hs400_enhanced_strobe;
+> > +       host->mmc_host_ops.prepare_hs_tuning =3D
+> > +               sdhci_sprd_prepare_hs_cmd_tuning;
+> > +       host->mmc_host_ops.execute_hs_tuning =3D
+> > +               sdhci_sprd_execute_hs_data_tuning;
+> > +
+> >         /*
+> >          * We can not use the standard ops to change and detect the vol=
+tage
+> >          * signal for Spreadtrum SD host controller, since our voltage =
+regulator
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index 461d1543893b..13cf894b9e3c 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -184,6 +184,12 @@ struct mmc_host_ops {
+> >         /* Execute HS400 tuning depending host driver */
+> >         int     (*execute_hs400_tuning)(struct mmc_host *host, struct m=
+mc_card *card);
+> >
+> > +       /* Prepare HS tuning depending host driver */
+> > +       int     (*prepare_hs_tuning)(struct mmc_host *host, struct mmc_=
+card *card);
+> > +
+> > +       /* Execute HS tuning depending host driver */
+> > +       int     (*execute_hs_tuning)(struct mmc_host *host, struct mmc_=
+card *card);
+> > +
+> >         /* Prepare switch to DDR during the HS400 init sequence */
+> >         int     (*hs400_prepare_ddr)(struct mmc_host *host);
+> >
+>
 > Kind regards
 > Uffe
-
