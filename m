@@ -2,134 +2,89 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 046C7C04FE1
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 12:01:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0CE58C04A6A
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Aug 2023 12:02:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234905AbjHKMBH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Aug 2023 08:01:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56980 "EHLO
+        id S235234AbjHKMCk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Aug 2023 08:02:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47616 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231285AbjHKMBF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 08:01:05 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12C2410F;
-        Fri, 11 Aug 2023 05:01:00 -0700 (PDT)
-Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 37B88G8v008911;
-        Fri, 11 Aug 2023 14:00:30 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-        message-id:date:mime-version:subject:to:cc:references:from
-        :in-reply-to:content-type:content-transfer-encoding; s=
-        selector1; bh=YFHcudHf3KpEu6VK+Oi7sDZa7u7aRH57T4p90BFxYt4=; b=kU
-        O35PwDwyu9KjgW31K5h+6ypqbjSO6SxBadYITZWgPgbjcx7JybnAtEPYUufCNZ1c
-        UmcJYsfb4v5cYrhDkibKKDxm5TpRLh/usyV9eplTbzPk8FWxlpA11SMe+tWFoHtE
-        nXPAN596HtBzcvDnDHR0ekdCH486R0r+TxPzL9tozmYQYoPWnnLGInYl3MRzO4Ve
-        mX/GHIkPAIGcQsdV9V/wrcIE3MhSv5JVpUfvddbdbHMcOV/6LpEQ9KIuJdAz19XH
-        RJctqFi0wSAJ+BRNaqX/iLjVk/ggN6VW/unTU9UDPsJ6xBkOROMcl3YQW+ceqGTb
-        HV30OC1Vqh+PAlrRr7vg==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3sdh74h9vb-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 11 Aug 2023 14:00:29 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 64D9710004F;
-        Fri, 11 Aug 2023 14:00:27 +0200 (CEST)
-Received: from Webmail-eu.st.com (eqndag1node4.st.com [10.75.129.133])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 287D02171E0;
-        Fri, 11 Aug 2023 14:00:27 +0200 (CEST)
-Received: from [10.201.21.121] (10.201.21.121) by EQNDAG1NODE4.st.com
- (10.75.129.133) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Fri, 11 Aug
- 2023 14:00:25 +0200
-Message-ID: <4f0f9d6c-ce4d-73a2-60bf-801c1a1d6cc3@foss.st.com>
-Date:   Fri, 11 Aug 2023 14:00:20 +0200
+        with ESMTP id S233683AbjHKMCh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Aug 2023 08:02:37 -0400
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4AF3A110
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Aug 2023 05:02:35 -0700 (PDT)
+Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-d63457dd8b8so1736369276.1
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Aug 2023 05:02:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1691755354; x=1692360154;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/CXtgREuhmv47Kw+ao1teWaVgLC9bV06E2de0JQaJVM=;
+        b=oNTkC6acME+G8I0ioLywq/8DK095y6KyDHOJnLXIypQYGQn0xuoJCqexNEZqANfLNc
+         A8DKfeV3zNVlvOSzO3nmjZTvaULEKrrInwod/wC5VAZqljMXg7nRhdya/ZbEyt10WEHn
+         i6UCiWPm18c0MteNkKvCYZ9Rxb4h6oevJ2GwatAPF0lOU26TY4I1XfZQnZer2iRF5+B4
+         nuGYcC59Pyf4aZFBh0isMayaSpV1+QjqVbEjMevnTuQC7Ukf8wS3AQLMtU5ISE32xs0i
+         RomEhXEWtqTDbg/11TUT9X6DOC8/qwX792IRPqJrVVSgGzRFtneo+GJKSe9VmldEx4up
+         qqzQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1691755354; x=1692360154;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=/CXtgREuhmv47Kw+ao1teWaVgLC9bV06E2de0JQaJVM=;
+        b=TeM2hWtL+wFDA1WJ/2ByQvAlurxYbg+bXjSLJlHkAZpF41vrlkZ7dmIiFDRzYn0XYo
+         svnWbX9r9UHypQdiG/AWqbkAhx9V9WZIseCb+g3MexKbB1hsugn1Oo6Gm7rtv6EomS41
+         M0BpsUpUQ2jfFAT2brIoVsYvPWW4Cvvn2MfVTnBhUHFTcXS4PkTPqaF2aSmgAD5LlERO
+         TSZP6cKI+xlaCiVwLEsuhzroUw4cCzM6FGStb0DV/s1xsikI6ieBUqcRD/k/S240DlWh
+         E3PodLOQaxM7+UgS4+CdNFgeZxRWZM3tSq6sTNm3yLOI9X66XMhGNgLnLQBQ59fsgYEc
+         1dzg==
+X-Gm-Message-State: AOJu0YypFmvj8Aw6vK87gPkonWqdBRKH1Ew10xWE95RKnnkHYzRZogfY
+        HhWdELLDLgReeGXlEAEwFsaJjiJKxE/cXCBNLdWK6A==
+X-Google-Smtp-Source: AGHT+IEqTwqYi3XFQ1XoWt+t7thSmBfY9KEZINHvtEM8V7Uyw58kziNcqtz3Ej4DxqBxltNJ8g3nehmow9akYKkMZBE=
+X-Received: by 2002:a25:e7c7:0:b0:d11:ea26:3263 with SMTP id
+ e190-20020a25e7c7000000b00d11ea263263mr1447177ybh.5.1691755354460; Fri, 11
+ Aug 2023 05:02:34 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [IGNORE][PATCH v4 01/11] dt-bindings: Document common device
- controller bindings
-Content-Language: en-US
-To:     Greg KH <gregkh@linuxfoundation.org>
-CC:     <Oleksii_Moisieiev@epam.com>, <herbert@gondor.apana.org.au>,
-        <davem@davemloft.net>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
-        <alexandre.torgue@foss.st.com>, <vkoul@kernel.org>,
-        <jic23@kernel.org>, <olivier.moysan@foss.st.com>,
-        <arnaud.pouliquen@foss.st.com>, <mchehab@kernel.org>,
-        <fabrice.gasnier@foss.st.com>, <andi.shyti@kernel.org>,
-        <ulf.hansson@linaro.org>, <edumazet@google.com>, <kuba@kernel.org>,
-        <pabeni@redhat.com>, <hugues.fruchet@foss.st.com>,
-        <lee@kernel.org>, <will@kernel.org>, <catalin.marinas@arm.com>,
-        <arnd@kernel.org>, <richardcochran@gmail.com>,
-        Frank Rowand <frowand.list@gmail.com>, <peng.fan@oss.nxp.com>,
-        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <dmaengine@vger.kernel.org>,
-        <linux-i2c@vger.kernel.org>, <linux-iio@vger.kernel.org>,
-        <alsa-devel@alsa-project.org>, <linux-media@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
-        <linux-phy@lists.infradead.org>, <linux-serial@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <linux-usb@vger.kernel.org>
-References: <20230811100731.108145-1-gatien.chevallier@foss.st.com>
- <20230811100731.108145-2-gatien.chevallier@foss.st.com>
- <2023081117-sprout-cruncher-862c@gregkh>
-From:   Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
-In-Reply-To: <2023081117-sprout-cruncher-862c@gregkh>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.201.21.121]
-X-ClientProxiedBy: EQNCAS1NODE4.st.com (10.75.129.82) To EQNDAG1NODE4.st.com
- (10.75.129.133)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-08-11_02,2023-08-10_01,2023-05-22_02
+References: <ZM+IlctTTQLs7Qg9@lenoch> <CACRpkdZmd-nb21Cx-jp-CDRjW4VQRV=c4MekHxS3h2p3HsDwZQ@mail.gmail.com>
+ <ZNYd/mNGROq22MPH@lenoch>
+In-Reply-To: <ZNYd/mNGROq22MPH@lenoch>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Fri, 11 Aug 2023 14:02:21 +0200
+Message-ID: <CACRpkdb+VQYB916TWJCrTabNMkqUReso=hC2eOiK8qxfiEXb6w@mail.gmail.com>
+Subject: Re: (Octeon) MMC performance degradation due to too many requests
+To:     Ladislav Michl <oss-lists@triops.cz>
+Cc:     Robert Richter <rric@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-mips@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Fri, Aug 11, 2023 at 1:39=E2=80=AFPM Ladislav Michl <oss-lists@triops.cz=
+> wrote:
 
+> Just for the reference, implementation based on your above mentioned patc=
+h
+> which restores 4.9 vendor kernel performance can be found below.
 
-On 8/11/23 12:16, Greg KH wrote:
-> On Fri, Aug 11, 2023 at 12:07:21PM +0200, Gatien Chevallier wrote:
->> From: Oleksii Moisieiev <Oleksii_Moisieiev@epam.com>
->>
->> Introducing of the common device controller bindings for the controller
->> provider and consumer devices. Those bindings are intended to allow
->> divided system on chip into multiple domains, that can be used to
->> configure hardware permissions.
->>
->> Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
->> [Gatien: Fix typos and YAML error]
->> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
->> ---
->>
->> Changes in V4:
->> 	Corrected typos and YAML errors	
-> 
-> Why are we supposed to ignore the first patch in this series, but pay
-> attention to the 10 after this that depend on it?
-> 
-> totally confused,
-> 
-> greg k-h
+Hey looks good :)
 
-Hello Greg,
+> It still needs some love, generalization and so on, but as I have already
+> started work on fixing Octeon's USB and ethernet, this is far beyond my
+> time limit.
+>
+> I hope to return to this in the near future and convert it into proper
+> patch series.
 
-I'm sorry that this tag troubles your review. It was first suggested
-in [1]. The "IGNORE" means ignore review on this thread, as it is still
-under review in another thread (Link in the cover letter). It does not
-mean that the content should be ignored for the series. I will change
-this to something else as this is obviously confusing the review.
+OK on the back burner, such happens.
 
-@Oleksii, can we imagine integrating this patch to this series or do
-you prefer to keep it apart?
+> Btw, we really need to invent some other name than 'bounce buffer'...
 
-Should I consider a resend with another tag if Oleksii prefers to keep
-this patch apart?
+I think it should be called "contiguous buffer" because that is what
+it is.
 
-[1] 
-https://lore.kernel.org/all/1e498b93-d3bd-bd12-e991-e3f4bedf632d@linaro.org/
-
-Best regards,
-Gatien
+Yours,
+Linus Walleij
