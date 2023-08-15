@@ -2,283 +2,82 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33A8CC04FDF
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Aug 2023 01:42:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C55AC0015E
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Aug 2023 06:34:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233861AbjHOBmK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Aug 2023 21:42:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59690 "EHLO
+        id S232954AbjHOGdf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Aug 2023 02:33:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233918AbjHOBlw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Aug 2023 21:41:52 -0400
-Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B7ACE7;
-        Mon, 14 Aug 2023 18:41:48 -0700 (PDT)
-Received: from dlp.unisoc.com ([10.29.3.86])
-        by SHSQR01.spreadtrum.com with ESMTP id 37F1fTsu005269;
-        Tue, 15 Aug 2023 09:41:29 +0800 (+08)
-        (envelope-from Wenchao.Chen@unisoc.com)
-Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
-        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RPv7s471Vz2P8CXW;
-        Tue, 15 Aug 2023 09:39:21 +0800 (CST)
-Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
- (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Tue, 15 Aug
- 2023 09:41:26 +0800
-From:   Wenchao Chen <wenchao.chen@unisoc.com>
-To:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
-        <chunyan.zhang@unisoc.com>, <yuelin.tang@unisoc.com>,
-        Wenchao Chen <wenchao.chen@unisoc.com>
-Subject: [PATCH V2 2/2] mmc: sdhci-sprd: Add SD HS mode online tuning
-Date:   Tue, 15 Aug 2023 09:40:57 +0800
-Message-ID: <20230815014057.13589-3-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230815014057.13589-1-wenchao.chen@unisoc.com>
-References: <20230815014057.13589-1-wenchao.chen@unisoc.com>
+        with ESMTP id S235120AbjHOGdI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Aug 2023 02:33:08 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2AF3E13E;
+        Mon, 14 Aug 2023 23:21:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1692080462; x=1723616462;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=pm2/JTgk01VjsV74yulkiEQJr2mi35KIhpGzr41SnaU=;
+  b=DFQVa5/7P6oCsrK2BYrrnJqXBa7beFYE8X38z/8q2KMCYDKv++1Q+P/t
+   51genohud00/WdPniQ4zpupUTrUjzv0cuulgfuNCpdERZU0MvgPap6iYK
+   okaEsWL7/Y8U5EiI8+RLBDCHyu0FOIKaPC0EFmrf6UjgNQE8TLdxT+Ve+
+   uKMS8SKre/S2jq6IylhMKb8/H3YSs8XxaX0pQT3v+fIIadejHjjaJ/tf9
+   j1YIADqgvrl2e3+XhBqDjx3Lx53HDNxGQZxY3XkrYvIzWUlQUdetEJ2r1
+   x5JtgnR0ivm9AxQ9IEfktZvjtzzWzIHIFuOXDt3vKfRVyIwBBs0ciQohz
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10802"; a="352536255"
+X-IronPort-AV: E=Sophos;i="6.01,174,1684825200"; 
+   d="scan'208";a="352536255"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Aug 2023 23:21:01 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10802"; a="823729702"
+X-IronPort-AV: E=Sophos;i="6.01,174,1684825200"; 
+   d="scan'208";a="823729702"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.52.51])
+  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Aug 2023 23:20:59 -0700
+Message-ID: <e66ee2ba-1668-cb88-f7ac-7c7722387fe7@intel.com>
+Date:   Tue, 15 Aug 2023 09:20:55 +0300
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.13.2.29]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- shmbx05.spreadtrum.com (10.29.1.56)
-X-MAIL: SHSQR01.spreadtrum.com 37F1fTsu005269
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.14.0
+Subject: Re: [PATCH V2 0/2] mmc: sdhci-sprd: Add SD HS mode online tuning
+To:     Wenchao Chen <wenchao.chen@unisoc.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        wenchao.chen666@gmail.com, zhenxiong.lai@unisoc.com,
+        chunyan.zhang@unisoc.com, yuelin.tang@unisoc.com
+References: <20230815014057.13589-1-wenchao.chen@unisoc.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230815014057.13589-1-wenchao.chen@unisoc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-First of all, Unisoc's IC provides cmd delay and read delay to ensure
-that the host can get the correct data. However, according to SD Spec,
-there is no need to do tuning in high speed mode, but with the
-development of chip processes, it is more and more difficult to find
-a suitable delay to cover all the chips. Therefore, we need SD high
-speed mode online tuning.
+On 15/08/23 04:40, Wenchao Chen wrote:
+> Change in v2:
+> - add mmc_sd_switch() and mmc_send_status() to the header file
+> - split up core changes from host driver changes
+> - Use pr_debug instead of dev_info and dev_dbg
+> - Optimize the best sampled value algorithm
 
-In addition, we added mmc_sd_switch() and mmc_send_status() to the
-header file to allow it to be usable by the drive
+What about hooking ->set_ios() as Ulf suggested?
 
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
----
- drivers/mmc/core/sd_ops.c     |   1 +
- drivers/mmc/host/sdhci-sprd.c | 152 ++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h      |   2 +
- 3 files changed, 155 insertions(+)
-
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index ef8d1dce5af1..a59cd592f06e 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -323,6 +323,7 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
- 	return mmc_send_adtc_data(card, card->host, SD_SWITCH, cmd_args, resp,
- 				  64);
- }
-+EXPORT_SYMBOL_GPL(mmc_sd_switch);
- 
- int mmc_app_sd_status(struct mmc_card *card, void *ssr)
- {
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 7f4ee2e12735..96c59e010d4c 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -9,6 +9,8 @@
- #include <linux/dma-mapping.h>
- #include <linux/highmem.h>
- #include <linux/iopoll.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/host.h>
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
-@@ -73,6 +75,11 @@
- #define SDHCI_SPRD_CLK_DEF_RATE		26000000
- #define SDHCI_SPRD_PHY_DLL_CLK		52000000
- 
-+#define SDHCI_SPRD_MAX_RANGE		0xff
-+#define SDHCI_SPRD_CMD_DLY_MASK		GENMASK(15, 8)
-+#define SDHCI_SPRD_POSRD_DLY_MASK	GENMASK(23, 16)
-+#define SDHCI_SPRD_CPST_EN		GENMASK(27, 24)
-+
- struct sdhci_sprd_host {
- 	u32 version;
- 	struct clk *clk_sdio;
-@@ -86,6 +93,11 @@ struct sdhci_sprd_host {
- 	u32 phy_delay[MMC_TIMING_MMC_HS400 + 2];
- };
- 
-+enum sdhci_sprd_tuning_type {
-+	SDHCI_SPRD_TUNING_SD_HS_CMD,
-+	SDHCI_SPRD_TUNING_SD_HS_DATA,
-+};
-+
- struct sdhci_sprd_phy_cfg {
- 	const char *property;
- 	u8 timing;
-@@ -533,6 +545,141 @@ static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
- 		     SDHCI_SPRD_REG_32_DLL_DLY);
- }
- 
-+static int mmc_send_tuning_cmd(struct mmc_card *card)
-+{
-+	return mmc_send_status(card, NULL);
-+}
-+
-+static int mmc_send_tuning_data(struct mmc_card *card)
-+{
-+	u8 *status;
-+	int ret;
-+
-+	status = kmalloc(64, GFP_KERNEL);
-+	if (!status)
-+		return -ENOMEM;
-+
-+	ret = mmc_sd_switch(card, 0, 0, 0, status);
-+
-+	kfree(status);
-+
-+	return ret;
-+}
-+
-+static int sdhci_sprd_get_best_clk_sample(struct mmc_host *mmc, u8 *value)
-+{
-+	int range_end = SDHCI_SPRD_MAX_RANGE;
-+	int range_length = 0;
-+	int middle_range = 0;
-+	int count = 0;
-+	int i;
-+
-+	for (i = 0; i <= SDHCI_SPRD_MAX_RANGE; i++) {
-+		if (value[i]) {
-+			pr_debug("%s: tuning ok: %d\n", mmc_hostname(mmc), i);
-+			count++;
-+		} else {
-+			pr_debug("%s: tuning fail: %d\n", mmc_hostname(mmc), i);
-+			if (range_length < count) {
-+				range_length = count;
-+				range_end = i - 1;
-+				count = 0;
-+			}
-+		}
-+	}
-+
-+	if (!count) {
-+		middle_range = 0;
-+		return -EIO;
-+	}
-+
-+	if (count > range_length) {
-+		range_length = count;
-+		range_end = i - 1;
-+	}
-+
-+	middle_range = range_end - (range_length - 1) / 2;
-+
-+	return middle_range;
-+}
-+
-+
-+static int sdhci_sprd_tuning(struct mmc_host *mmc, struct mmc_card *card,
-+			enum sdhci_sprd_tuning_type type)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-+	u32 *p = sprd_host->phy_delay;
-+	u32 dll_cfg, dll_dly;
-+	int best_clk_sample;
-+	int err = 0;
-+	u8 *value;
-+	int i;
-+
-+	value = kmalloc(SDHCI_SPRD_MAX_RANGE + 1, GFP_KERNEL);
-+	if (!value)
-+		return -ENOMEM;
-+
-+	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+
-+	dll_cfg = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
-+	dll_cfg &= ~SDHCI_SPRD_CPST_EN;
-+	sdhci_writel(host, dll_cfg, SDHCI_SPRD_REG_32_DLL_CFG);
-+
-+	dll_dly = p[mmc->ios.timing];
-+
-+	for (i = 0; i <= SDHCI_SPRD_MAX_RANGE; i++) {
-+		if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
-+			dll_dly &= ~SDHCI_SPRD_CMD_DLY_MASK;
-+			dll_dly |= ((i << 8) & SDHCI_SPRD_CMD_DLY_MASK);
-+		} else {
-+			dll_dly &= ~SDHCI_SPRD_POSRD_DLY_MASK;
-+			dll_dly |= ((i << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
-+		}
-+
-+		sdhci_writel(host, dll_dly, SDHCI_SPRD_REG_32_DLL_DLY);
-+
-+		if (type == SDHCI_SPRD_TUNING_SD_HS_CMD)
-+			value[i] = !mmc_send_tuning_cmd(card);
-+		else
-+			value[i] = !mmc_send_tuning_data(card);
-+	}
-+
-+	best_clk_sample = sdhci_sprd_get_best_clk_sample(mmc, value);
-+	if (best_clk_sample < 0) {
-+		dev_err(mmc_dev(host->mmc), "all tuning phase fail!\n");
-+		goto out;
-+	}
-+
-+	if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
-+		p[mmc->ios.timing] &= ~SDHCI_SPRD_CMD_DLY_MASK;
-+		p[mmc->ios.timing] |= ((best_clk_sample << 8) & SDHCI_SPRD_CMD_DLY_MASK);
-+	} else {
-+		p[mmc->ios.timing] &= ~(SDHCI_SPRD_POSRD_DLY_MASK);
-+		p[mmc->ios.timing] |= ((best_clk_sample << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
-+	}
-+
-+	pr_debug("%s: the best clk sample %d, delay value 0x%08x\n",
-+			mmc_hostname(host->mmc), best_clk_sample, p[mmc->ios.timing]);
-+
-+out:
-+	sdhci_writel(host, p[mmc->ios.timing], SDHCI_SPRD_REG_32_DLL_DLY);
-+
-+	kfree(value);
-+
-+	return err;
-+}
-+
-+static int sdhci_sprd_prepare_hs_cmd_tuning(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_CMD);
-+}
-+
-+static int sdhci_sprd_execute_hs_data_tuning(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_DATA);
-+}
-+
- static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
- 				       struct device_node *np)
- {
-@@ -577,6 +724,11 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.request = sdhci_sprd_request;
- 	host->mmc_host_ops.hs400_enhanced_strobe =
- 		sdhci_sprd_hs400_enhanced_strobe;
-+	host->mmc_host_ops.prepare_hs_tuning =
-+		sdhci_sprd_prepare_hs_cmd_tuning;
-+	host->mmc_host_ops.execute_hs_tuning =
-+		sdhci_sprd_execute_hs_data_tuning;
-+
- 	/*
- 	 * We can not use the standard ops to change and detect the voltage
- 	 * signal for Spreadtrum SD host controller, since our voltage regulator
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 13cf894b9e3c..5d069510dc4b 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -671,6 +671,8 @@ static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
- 	host->err_stats[stat] += 1;
- }
- 
-+int mmc_sd_switch(struct mmc_card *card, int mode, int group, u8 value, u8 *resp);
-+int mmc_send_status(struct mmc_card *card, u32 *status);
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
--- 
-2.17.1
+> 
+> Wenchao Chen (2):
+>   mmc: core: Add host specific tuning support for SD HS mode
+>   mmc: sdhci-sprd: Add SD HS mode online tuning
+> 
+>  drivers/mmc/core/sd.c         |  12 +++
+>  drivers/mmc/core/sd_ops.c     |   1 +
+>  drivers/mmc/host/sdhci-sprd.c | 152 ++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/host.h      |   8 ++
+>  4 files changed, 173 insertions(+)
+> 
 
