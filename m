@@ -2,167 +2,320 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5538CC41513
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 22:27:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED17DC41513
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 23:32:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346885AbjHPW0d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Aug 2023 18:26:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36728 "EHLO
+        id S1347176AbjHPXcM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Aug 2023 19:32:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346899AbjHPW0S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 18:26:18 -0400
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21ADDE56
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 15:26:15 -0700 (PDT)
-Received: by mail-pl1-x634.google.com with SMTP id d9443c01a7336-1bc0d39b52cso45455385ad.2
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 15:26:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20221208.gappssmtp.com; s=20221208; t=1692224774; x=1692829574;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=u7uQIIcrOFzc49aqvUkRDZzFxEz4KqT+ICR1+8quc8w=;
-        b=nLsRg3gBX8FVyACCctF8pWA6iGOG69Klww5ee5m0rSCjDQ1YLbML1J9hVFaaA/yc9K
-         gN9B0kRZxzGXG+oIrQ5rA1nGd7nw9fPduPa7qWfDgaCOjGkrRtjnoY0zWtWMnjO5OfuE
-         wrITOm5wFbE09oL+nq29oWN/YMWC9K8uX2wnG/v4lufrI7J/4fdhx5rHfVfy0+MIfrBV
-         kYdgPBB6pyhLfrZsrgkO4wFXcLZKDIrfwa9UeGzJjd1FiwQ78IfmcX0smW7FoLFVRma8
-         47XJ32lOwHSSKwLlIyrf46dCG7xiLL4bl1FLaFz8N8GyW6pXusCNIP6nrAt+1g8yoJm7
-         2OHA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692224774; x=1692829574;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=u7uQIIcrOFzc49aqvUkRDZzFxEz4KqT+ICR1+8quc8w=;
-        b=mB+Ng2tviPqJhkx2f8p4zTNAOuxcLE/34WIzX51y8QWQSxdWAQMPcghXqjtZxp46o5
-         PhSlIktEIC2Xy59bAQcatrtou9eTKNMQhAfZXXyfGJnojyPWoIlhQzE/4jag2oAP0cN0
-         7fbcTFQLTZ7qzJcbb/ZciPzhWz1cIKBPnbSjtwHc2bJNe2LlE2sJ9LTKypMvTbKLIqJW
-         uM9D4jApBv704Jk5D32BmQvAfLNAzN+Vazuy60uVm1kT5CEHniAQ+IfieePAWdCnE8NH
-         tcqHrV5z/QkpIiW89/8rzaF9HfV2tegm94m8GOrpK8dQwUgJETzJTGFp6mKzC2jotHCx
-         y7Bg==
-X-Gm-Message-State: AOJu0YwUaZPQqLhEawzQ+6aHdQc5Bq+o5bpuK57PYYHhlyPwDGcdwfgU
-        xPnCeOaYjVUqk7bjPieVO+KgJw==
-X-Google-Smtp-Source: AGHT+IGkgRJCXIVVufTd3KRR6mXCo4jmAJTUdqHRVFHuFCpLRjBwYq8DpHYyhSTWPV9UPPmJYCZB9w==
-X-Received: by 2002:a17:902:d2c7:b0:1b2:5d5b:e871 with SMTP id n7-20020a170902d2c700b001b25d5be871mr3674598plc.59.1692224774508;
-        Wed, 16 Aug 2023 15:26:14 -0700 (PDT)
-Received: from x1 ([2601:1c2:1800:f680:ad77:24cb:c068:c5e6])
-        by smtp.gmail.com with ESMTPSA id c13-20020a170902d48d00b001bdcd4b1616sm8966890plg.260.2023.08.16.15.26.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Aug 2023 15:26:14 -0700 (PDT)
-Date:   Wed, 16 Aug 2023 15:26:12 -0700
-From:   Drew Fustini <dfustini@baylibre.com>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Jisheng Zhang <jszhang@kernel.org>, Guo Ren <guoren@kernel.org>,
-        Fu Wei <wefu@redhat.com>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>
-Subject: Re: [PATCH RFC v2 1/4] dt-bindings: mmc: sdhci-of-dwcmhsc: Add
- T-Head TH1520 support
-Message-ID: <ZN1NBE2+HHfatQ/T@x1>
-References: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
- <20230724-th1520-emmc-v2-1-132ed2e2171e@baylibre.com>
- <ca0b9a19-d7d7-80e5-f47e-f74615cdac86@linaro.org>
+        with ESMTP id S1347189AbjHPXcC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 19:32:02 -0400
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0AAE12720;
+        Wed, 16 Aug 2023 16:32:00 -0700 (PDT)
+Received: by linux.microsoft.com (Postfix, from userid 1152)
+        id 32840211F61A; Wed, 16 Aug 2023 16:31:59 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 32840211F61A
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+        s=default; t=1692228719;
+        bh=J6mAVcuDUUkGCq7a0/n68XNrg34IWu48uqF8U0WpAm0=;
+        h=Date:From:To:cc:Subject:In-Reply-To:References:From;
+        b=UAHmt4NDP8ojpDlHQ7mmfTrBhz6yBDALkfRASJl8rpxed90SBL69nHszacBg/ijpD
+         +3t4AODe3l90DjlPAMRZIM1J8sHzttOHyMRb+ZBcNobzelIn2ll8NU26zPrwK0UfUb
+         Oh8xeqwChGFhBkCGk3AF8bWMPEqMUJDD1i7Bzf8o=
+Received: from localhost (localhost [127.0.0.1])
+        by linux.microsoft.com (Postfix) with ESMTP id 2C00230705BA;
+        Wed, 16 Aug 2023 16:31:59 -0700 (PDT)
+Date:   Wed, 16 Aug 2023 16:31:59 -0700 (PDT)
+From:   Shyam Saini <shyamsaini@linux.microsoft.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        op-tee@lists.trustedfirmware.org, linux-scsi@vger.kernel.org,
+        =?ISO-8859-15?Q?Alex_Benn=E9e?= <alex.bennee@linaro.org>,
+        Tomas Winkler <tomas.winkler@intel.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Sumit Garg <sumit.garg@linaro.org>,
+        Tyler Hicks <code@tyhicks.com>,
+        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
+        Paul Moore <paul@paul-moore.com>,
+        Allen Pais <apais@linux.microsoft.com>
+Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB)
+ driver
+In-Reply-To: <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
+Message-ID: <b875892c-1777-d84a-987e-1b0d5ac29df@linux.microsoft.com>
+References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com> <20230722014037.42647-2-shyamsaini@linux.microsoft.com> <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ca0b9a19-d7d7-80e5-f47e-f74615cdac86@linaro.org>
+Content-Type: multipart/mixed; boundary="656392-1707973189-1692228719=:10222"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Aug 07, 2023 at 08:29:21AM +0200, Krzysztof Kozlowski wrote:
-> On 05/08/2023 05:14, Drew Fustini wrote:
-> > Add compatible value for the T-Head TH1520 dwcmshc controller and
-> > thead,io-fixed-1v8 and thead,pull-up properties.
-> > 
-> > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 9 +++++++++
-> >  1 file changed, 9 insertions(+)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > index a43eb837f8da..57602c345cab 100644
-> > --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > @@ -19,6 +19,7 @@ properties:
-> >        - rockchip,rk3568-dwcmshc
-> >        - rockchip,rk3588-dwcmshc
-> >        - snps,dwcmshc-sdhci
-> > +      - thead,th1520-dwcmshc
-> >  
-> >    reg:
-> >      maxItems: 1
-> > @@ -60,6 +61,14 @@ properties:
-> >      description: Specify the number of delay for tx sampling.
-> >      $ref: /schemas/types.yaml#/definitions/uint8
-> >  
-> > +  thead,io-fixed-1v8:
-> > +    description: SoC PHY pad is fixed 1.8V
-> > +    type: boolean
-> 
-> Isn't this duplicating existing properties for MMC modes with 1.8 V?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Thank you for reviewing. Yes, now that you mention it, I do see those
-properties now in mmc-controller.yaml. It seems like the existing
-mmc-ddr-1_8v property would be appropriate.
+--656392-1707973189-1692228719=:10222
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8BIT
 
-> 
-> > +
-> > +  thead,pull-up:
-> > +    description: True if pull-up, false if pull-down
-> 
-> This explains me nothing. No clue what you are pulling and why do you
-> need it. Pin pulls should be done via pin controller, not MMC.
 
-Good point that my description is not helpful. The pull-up property
-determines whether certain phy registers are written to. I need to try
-to can get documentation on the phy so that I can better understand the
-details of the pull-up configuration in the phy registers.
+Hi Ulf,
 
-> 
-> Anyway you should have here allOf:if:then (move the allOf: from top to
-> behind "required:") which will disallow these properties for other variants.
+> On Sat, 22 Jul 2023 at 03:41, Shyam Saini
+> <shyamsaini@linux.microsoft.com> wrote:
+>>
+>> From: Alex Bennée <alex.bennee@linaro.org>
+>>
+>> [This is patch 1 from [1] Alex's submission and this RPMB layer was
+>> originally proposed by [2]Thomas Winkler ]
+>>
+>> A number of storage technologies support a specialised hardware
+>> partition designed to be resistant to replay attacks. The underlying
+>> HW protocols differ but the operations are common. The RPMB partition
+>> cannot be accessed via standard block layer, but by a set of specific
+>> commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
+>> partition provides authenticated and replay protected access, hence
+>> suitable as a secure storage.
+>>
+>> The initial aim of this patch is to provide a simple RPMB Driver which
+>> can be accessed by Linux's optee driver to facilitate fast-path for
+>> RPMB access to optee OS(secure OS) during the boot time. [1] Currently,
+>> Optee OS relies on user-tee supplicant to access eMMC RPMB partition.
+>>
+>> A TEE device driver can claim the RPMB interface, for example, via
+>> class_interface_register(). The RPMB driver provides a series of
+>> operations for interacting with the device.
+>
+> I don't quite follow this. More exactly, how will the TEE driver know
+> what RPMB device it should use?
 
-I noticed that nvidia,tegra20-sdhci.yaml has several lines related to
-pull-up/down configuration:
+I don't have complete code to for this yet, but i think OP-TEE driver
+should register with RPMB subsystem and then we can have eMMC/UFS/NVMe
+specific implementation for RPMB operations.
 
-218   - if:
-219       properties:
-220         compatible:
-221           contains:
-222             const: nvidia,tegra210-sdhci
-223     then:
-224       properties:
-225         pinctrl-names:
-226           oneOf:
-227             - items:
-228                 - const: sdmmc-3v3
-229                   description: pad configuration for 3.3 V
-230                 - const: sdmmc-1v8
-231                   description: pad configuration for 1.8 V
-232                 - const: sdmmc-3v3-drv
-233                   description: pull-up/down configuration for 3.3 V
-234                 - const: sdmmc-1v8-drv
-235                   description: pull-up/down configuration for 1.8 V
-236             - items:
-237                 - const: sdmmc-3v3-drv
-238                   description: pull-up/down configuration for 3.3 V
-239                 - const: sdmmc-1v8-drv
-240                   description: pull-up/down configuration for 1.8 V
-241             - items:
-242                 - const: sdmmc-1v8-drv
-243                   description: pull-up/down configuration for 1.8 V
+Linux optee driver can handle RPMB frames and pass it to RPMB subsystem
 
-Do you think creating something like that would be a good approach?
+[1] U-Boot has mmc specific implementation
 
-Thank you,
-Drew
+I think OPTEE-OS has CFG_RPMB_FS_DEV_ID option
+CFG_RPMB_FS_DEV_ID=1 for /dev/mmcblk1rpmb, but in case if a
+system has multiple RPMB devices such as UFS/eMMC/NVMe, one them
+should be declared as secure storage and optee should access that one 
+only.
+
+Sumit, do you have suggestions for this ?
+
+
+>>
+>>   * program_key - a one time operation for setting up a new device
+>>   * get_capacity - introspect the device capacity
+>>   * get_write_counter - check the write counter
+>>   * write_blocks - write a series of blocks to the RPMB device
+>>   * read_blocks - read a series of blocks from the RPMB device
+>>
+>> The detailed operation of implementing the access is left to the TEE
+>> device driver itself.
+>>
+>> The framing details and HW specific bits (JDEC vs NVME frames) are
+>> left to the lower level TEE driver to worry about.
+>>
+>> Without kernel fast path to RPMB access doesn't work when IMA try to
+>> extend ftpm's PCR registers.
+>>
+>> This fast-path would require additional work in linux optee driver and
+>> as well as in MMC driver.
+>>
+>> [1] https://lore.kernel.org/lkml/20220405093759.1126835-2-alex.bennee@linaro.org/
+>> [2] https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-tomas.winkler@intel.com/
+>> [3] https://optee.readthedocs.io/en/latest/architecture/secure_storage.html
+>>
+>> Signed-off-by: Alex Bennée <alex.bennee@linaro.org>
+>> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+>> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
+>>
+>
+> [...]
+>
+>> +/**
+>> + * rpmb_dev_find_device() - return first matching rpmb device
+>> + * @data: data for the match function
+>> + * @match: the matching function
+>> + *
+>> + * Return: matching rpmb device or NULL on failure
+>> + */
+>> +static
+>> +struct rpmb_dev *rpmb_dev_find_device(const void *data,
+>> +                                     int (*match)(struct device *dev,
+>> +                                                  const void *data))
+>> +{
+>> +       struct device *dev;
+>> +
+>> +       dev = class_find_device(&rpmb_class, NULL, data, match);
+>> +
+>> +       return dev ? to_rpmb_dev(dev) : NULL;
+>> +}
+>> +
+>> +struct device_with_target {
+>> +       const struct device *dev;
+>> +       u8 target;
+>> +};
+>> +
+>> +static int match_by_parent(struct device *dev, const void *data)
+>> +{
+>> +       const struct device_with_target *d = data;
+>> +       struct rpmb_dev *rdev = to_rpmb_dev(dev);
+>> +
+>> +       return (d->dev && dev->parent == d->dev && rdev->target == d->target);
+>> +}
+>> +
+>> +/**
+>> + * rpmb_dev_find_by_device() - retrieve rpmb device from the parent device
+>> + * @parent: parent device of the rpmb device
+>> + * @target: RPMB target/region within the physical device
+>> + *
+>> + * Return: NULL if there is no rpmb device associated with the parent device
+>> + */
+>> +struct rpmb_dev *rpmb_dev_find_by_device(struct device *parent, u8 target)
+>> +{
+>> +       struct device_with_target t;
+>> +
+>> +       if (!parent)
+>> +               return NULL;
+>> +
+>> +       t.dev = parent;
+>> +       t.target = target;
+>> +
+>> +       return rpmb_dev_find_device(&t, match_by_parent);
+>> +}
+>> +EXPORT_SYMBOL_GPL(rpmb_dev_find_by_device);
+>
+> Is this what the TEE driver would be calling to find the rpmb device/partition?
+
+yes, that's the idea.
+
+>> +
+>> +/**
+>> + * rpmb_dev_unregister() - unregister RPMB partition from the RPMB subsystem
+>> + * @rdev: the rpmb device to unregister
+>> + * Return:
+>> + * *        0 on success
+>> + * *        -EINVAL on wrong parameters
+>> + */
+>> +int rpmb_dev_unregister(struct rpmb_dev *rdev)
+>> +{
+>> +       if (!rdev)
+>> +               return -EINVAL;
+>> +
+>> +       mutex_lock(&rdev->lock);
+>> +       rpmb_cdev_del(rdev);
+>
+> I can't find the function above. I guess it should be included as a
+> part of the patch too?
+
+Sorry for the confusion, this is leftover from original version
+Will be removed in next iteration.
+
+>> +       device_del(&rdev->dev);
+>> +       mutex_unlock(&rdev->lock);
+>> +
+>> +       rpmb_dev_put(rdev);
+>> +
+>> +       return 0;
+>> +}
+>> +EXPORT_SYMBOL_GPL(rpmb_dev_unregister);
+>
+> [...]
+>
+>> +/**
+>> + * rpmb_dev_register - register RPMB partition with the RPMB subsystem
+>> + * @dev: storage device of the rpmb device
+>> + * @target: RPMB target/region within the physical device
+>> + * @ops: device specific operations
+>> + *
+>> + * Return: a pointer to rpmb device
+>> + */
+>> +struct rpmb_dev *rpmb_dev_register(struct device *dev, u8 target,
+>> +                                  const struct rpmb_ops *ops)
+>> +{
+>> +       struct rpmb_dev *rdev;
+>> +       int id;
+>> +       int ret;
+>> +
+>> +       if (!dev || !ops)
+>> +               return ERR_PTR(-EINVAL);
+>> +
+>> +       if (!ops->program_key)
+>> +               return ERR_PTR(-EINVAL);
+>> +
+>> +       if (!ops->get_capacity)
+>> +               return ERR_PTR(-EINVAL);
+>> +
+>> +       if (!ops->get_write_counter)
+>> +               return ERR_PTR(-EINVAL);
+>> +
+>> +       if (!ops->write_blocks)
+>> +               return ERR_PTR(-EINVAL);
+>> +
+>> +       if (!ops->read_blocks)
+>> +               return ERR_PTR(-EINVAL);
+>> +
+>> +       rdev = kzalloc(sizeof(*rdev), GFP_KERNEL);
+>> +       if (!rdev)
+>> +               return ERR_PTR(-ENOMEM);
+>> +
+>> +       id = ida_simple_get(&rpmb_ida, 0, 0, GFP_KERNEL);
+>> +       if (id < 0) {
+>> +               ret = id;
+>> +               goto exit;
+>> +       }
+>> +
+>> +       mutex_init(&rdev->lock);
+>> +       rdev->ops = ops;
+>> +       rdev->id = id;
+>> +       rdev->target = target;
+>> +
+>> +       dev_set_name(&rdev->dev, "rpmb%d", id);
+>> +       rdev->dev.class = &rpmb_class;
+>> +       rdev->dev.parent = dev;
+>> +
+>> +       rpmb_cdev_prepare(rdev);
+>
+> Ditto.
+
+same as my last comment
+>> +
+>> +       ret = device_register(&rdev->dev);
+>> +       if (ret)
+>> +               goto exit;
+>> +
+>> +       rpmb_cdev_add(rdev);
+>
+> Ditto.
+
+same as above.
+
+>> +
+>> +       dev_dbg(&rdev->dev, "registered device\n");
+>> +
+>> +       return rdev;
+>> +
+>> +exit:
+>> +       if (id >= 0)
+>> +               ida_simple_remove(&rpmb_ida, id);
+>> +       kfree(rdev);
+>> +       return ERR_PTR(ret);
+>> +}
+>> +EXPORT_SYMBOL_GPL(rpmb_dev_register);
+>> +
+>
+> [...]
+>
+
+
+[1] https://source.denx.de/u-boot/u-boot/-/commit/4853ad3e13e21462a86e09caee4ea27ae68e764b
+
+Best Regards,
+Shyam
+--656392-1707973189-1692228719=:10222--
