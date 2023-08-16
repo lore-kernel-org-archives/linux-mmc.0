@@ -2,121 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 612BBC001DF
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 09:54:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84263C41513
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 11:35:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243507AbjHPJxf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Aug 2023 05:53:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33628 "EHLO
+        id S244628AbjHPLe4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Aug 2023 07:34:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58332 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243619AbjHPJxE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 05:53:04 -0400
-Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32A642735
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 02:52:47 -0700 (PDT)
-Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-58c5642701fso17178527b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 02:52:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692179566; x=1692784366;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=/5so/M+AhEEk4mX4pqGb1Pa0ON/8pUQD4BvXmodkCBo=;
-        b=XXivQr6n3Q1n02LmLFKvNhwy2ZFWWELsv6C48KCsw5fEHWPfYbexf3ffuIMEiinrek
-         Y/X4tSzo9RTA+oD8AqmTQOgsypEgRI1IACIl6th69I5MJnHnpAM6DJzjnF0Vig6V1aXF
-         nimlSnBQhrbLHZ2s9/9qQ+2wRcLW3iV6LeAAslAB2Vc7ZsHptr65tDb80MtKJEO+fhEx
-         gmg5PQSqhuOoGgiKl3qCz6PKhZdX7xOEDfa2ZXLqY1AHRLRId8sQV3wxRBiLjFaqpwWS
-         ydo7f/yZ0IdSZQaupZFLJMlf5LsvhRp4oFEi2n5u8qeurZCj9ighow94U2DidWpU4CAJ
-         imVA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692179566; x=1692784366;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=/5so/M+AhEEk4mX4pqGb1Pa0ON/8pUQD4BvXmodkCBo=;
-        b=alojFaRsxl9ND5/aG2vCw/6uJso0LvI0iBPHjfTgQOicGkuN146yv48eoRcOZmQuYr
-         /BX9PbaaRE2LlSD5UXUm8oZtvkQ8C2FhpGDV37AfsScFgZxQn/60mtqNOPBkod0KvKtb
-         Qx+scGnZg9LmN0aYEX+hHXAdYUt9pewmAXUFDeUK3flPx0zYlaN15TL05xVQnrhY1Fa8
-         /Wbzf0zS2pyZfQub8bVCy5YNKKxqu4rzplT2OCp2Zhmq5df8Drs4Zxov9VJdj+Rtng4g
-         EkotUfn1XnuFYDXqNlMGCCIHFU4C4ateBByhiOT7wahqeoxQ3zNJ7D8drqG0lC8rzY+7
-         1Mtg==
-X-Gm-Message-State: AOJu0YwWbXHdRjW0kX4dyR6h8FmTqvkrAcMyxPr7tcuvKPufao8NFHdQ
-        KVgLkqi1V13NbaQH0SNDLHHk4ED7GWgScSyOW3/1zQ==
-X-Google-Smtp-Source: AGHT+IHA9n2w/op4DAH5GzrBpdtTvK2/1xJVANiOu/xelGO0k7TIr+ajFJb7Jsxolv8ybqVetV/we8lj15rls0+GD54=
-X-Received: by 2002:a81:6057:0:b0:583:d1fa:1fc4 with SMTP id
- u84-20020a816057000000b00583d1fa1fc4mr1108904ywb.26.1692179566441; Wed, 16
- Aug 2023 02:52:46 -0700 (PDT)
+        with ESMTP id S244693AbjHPLek (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 07:34:40 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DB8A1BFB
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 04:34:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        sang-engineering.com; h=date:from:to:cc:subject:message-id
+        :references:mime-version:content-type:in-reply-to; s=k1; bh=HBbF
+        lemzEOhPa00H0VmfelS/CW8R7e58HfrA6PqinYI=; b=d8BWs07FAiT3EPZSfUar
+        afa/AO5AcnMNr4BYb0rC+1+2uKo9Ww2BcHpGyDsXKGbLiElioTTlUvXdWvD/BTux
+        JUgK2a9c5dFPZKY+Hd02QdpPg0hRd5fOMAeuvuOGODjPZfMNY8LhHX7UqmaqAL14
+        jRVvZTyT5zzT6r5YDcDkXwdmqInS5Hcg1lypBiRDVGRqY4kTrvorwwn+DoNV8ZGX
+        GopkLqibHhqHActGB4XuSdbHezISpaEGAYcH13WrVuTbzKU6qg/Rq8djA167gZrh
+        iTv4yG2ZTDjaJdZQllhw5s0Xdg/F4X9Q/7IPhTv19n2NmtJCegCbuGQNSVzirsez
+        9w==
+Received: (qmail 116343 invoked from network); 16 Aug 2023 13:27:39 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 16 Aug 2023 13:27:39 +0200
+X-UD-Smtp-Session: l3s3148p1@Cm0/lQgDILcgAwDPXy5qAJ1huuy56R1W
+Date:   Wed, 16 Aug 2023 13:27:38 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yangtao Li <frank.li@vivo.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 56/62] mmc: renesas_sdhi: Convert to platform remove
+ callback returning void
+Message-ID: <ZNyyqlMFFZ2xPLUf@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yangtao Li <frank.li@vivo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20230727070051.17778-1-frank.li@vivo.com>
+ <20230727070051.17778-56-frank.li@vivo.com>
 MIME-Version: 1.0
-References: <20230811214853.8623-1-giulio.benetti@benettiengineering.com>
-In-Reply-To: <20230811214853.8623-1-giulio.benetti@benettiengineering.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Aug 2023 11:52:10 +0200
-Message-ID: <CAPDyKForXMxANUrvOUfEtiRsXYPJ8MbfPBdJB6zu49QfeJfS8A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: improve ESDHC_FLAG_ERR010450
-To:     Giulio Benetti <giulio.benetti@benettiengineering.com>
-Cc:     Haibo Chen <haibo.chen@nxp.com>, Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, Jim Reinhart <jimr@tekvox.com>,
-        James Autry <jautry@tekvox.com>,
-        Matthew Maron <matthewm@tekvox.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="WXxTWG8lhc/cEAqB"
+Content-Disposition: inline
+In-Reply-To: <20230727070051.17778-56-frank.li@vivo.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 11 Aug 2023 at 23:49, Giulio Benetti
-<giulio.benetti@benettiengineering.com> wrote:
->
-> Errata ERR010450 only shows up if voltage is 1.8V, but if the device is
-> supplied by 3v3 the errata can be ignored. So let's check for if quirk
-> SDHCI_QUIRK2_NO_1_8_V is defined or not before limiting the frequency.
->
-> Sponsored by: Tekvox Inc.
 
-Didn't know we have this kind of tag. Can you point me to the
-documentation of it?
+--WXxTWG8lhc/cEAqB
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> Cc: Jim Reinhart <jimr@tekvox.com>
-> Cc: James Autry <jautry@tekvox.com>
-> Cc: Matthew Maron <matthewm@tekvox.com>
-> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+On Thu, Jul 27, 2023 at 03:00:45PM +0800, Yangtao Li wrote:
+> The .remove() callback for a platform driver returns an int which makes
+> many driver authors wrongly assume it's possible to do error handling by
+> returning an error code. However the value returned is (mostly) ignored
+> and this typically results in resource leaks. To improve here there is a
+> quest to make the remove callback return void. In the first step of this
+> quest all drivers are converted to .remove_new() which already returns
+> void.
+>=20
+> Trivially convert this driver from always returning zero in the remove
+> callback to the void returning variant.
+>=20
+> Cc: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Kind regards
-Uffe
+Builds fine, boots fine, rebind works:
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index eebf94604a7f..cddecc1e1ac2 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -171,8 +171,8 @@
->  #define ESDHC_FLAG_HS400               BIT(9)
->  /*
->   * The IP has errata ERR010450
-> - * uSDHC: Due to the I/O timing limit, for SDR mode, SD card clock can't
-> - * exceed 150MHz, for DDR mode, SD card clock can't exceed 45MHz.
-> + * uSDHC: At 1.8V due to the I/O timing limit, for SDR mode, SD card
-> + * clock can't exceed 150MHz, for DDR mode, SD card clock can't exceed 45MHz.
->   */
->  #define ESDHC_FLAG_ERR010450           BIT(10)
->  /* The IP supports HS400ES mode */
-> @@ -961,7 +961,8 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
->                 | ESDHC_CLOCK_MASK);
->         sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
->
-> -       if (imx_data->socdata->flags & ESDHC_FLAG_ERR010450) {
-> +       if ((imx_data->socdata->flags & ESDHC_FLAG_ERR010450) &&
-> +           (!(host->quirks2 & SDHCI_QUIRK2_NO_1_8_V))) {
->                 unsigned int max_clock;
->
->                 max_clock = imx_data->is_ddr ? 45000000 : 150000000;
-> --
-> 2.34.1
->
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--WXxTWG8lhc/cEAqB
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmTcsqYACgkQFA3kzBSg
+KbapCg//RlbUTbKwqc3S3+NyRLwP+SdcP6IJivgpDLTNh6kSTvFj0SKSlEE0ghwr
+KaL3DKWsIICa2YgYTuDNIznUForrQOleFaE8JKS1NBT0DD6sR/wg0H0m06YIhonf
+V+6brxQqEqg55wjYPR2sxFDgJJn6DS8Z2nZlOsns23kt+Ur84CLGZiIewkQuHTZG
+RMv+1ke+ICsGOQTZBwg6fOdGEmjsx+IcRYk15uIEsl41MinpT/aiJuaxlZ7Xr9Ak
+drUvYC7SHhZ0hZXmDaHNiMlJEDWFghOx5gPuTNzTSJP59oIWevLv/eI/QAdrDGAf
+Ogu6jeiuhh3PaT7EJmu3jsYExA8AUoNkwGYxwbjAJDo3aMrdKpX/+on/9TU3L9Co
+wiVTIVO5TCPmPlrctS6NUE8NAjX5C7UYtp76o9LgT39ZGoYe5Sa5ETioj2o2ZAYW
+5DFIckgsYvAyATlnRKHNeBzpgKF9zYDkDZ/r5lAr7utG+DQr0Xq8BqONqIAc6YGf
+i9xXGmmDTzZOwkAzU9jW7au6hG39pQxkNeKJ0VBV3VPURGrFeBIwto260Ku7HXsR
+zGYyJTl8SHKS0AZAWvkhxC+RPUAgwWdCg+xOE23pyORNLmysDkk9SODrDv7RQn3+
+H6LPHxyETABTC8rB3Wxqe+ChNgDbYgluws+64QKn/UCr9SFLXhY=
+=KtVJ
+-----END PGP SIGNATURE-----
+
+--WXxTWG8lhc/cEAqB--
