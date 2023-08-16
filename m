@@ -2,137 +2,167 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5694DC25B7F
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 21:42:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5538CC41513
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 22:27:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346559AbjHPVlj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Aug 2023 17:41:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41696 "EHLO
+        id S1346885AbjHPW0d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Aug 2023 18:26:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346605AbjHPVlR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 17:41:17 -0400
-Received: from mail-yb1-xb30.google.com (mail-yb1-xb30.google.com [IPv6:2607:f8b0:4864:20::b30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 535EF2D4E
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 14:40:56 -0700 (PDT)
-Received: by mail-yb1-xb30.google.com with SMTP id 3f1490d57ef6-bc379e4c1cbso6764322276.2
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 14:40:56 -0700 (PDT)
+        with ESMTP id S1346899AbjHPW0S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 18:26:18 -0400
+Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21ADDE56
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 15:26:15 -0700 (PDT)
+Received: by mail-pl1-x634.google.com with SMTP id d9443c01a7336-1bc0d39b52cso45455385ad.2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 15:26:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692222055; x=1692826855;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ma6f9Ok2+0t+XPGWJJlS+l++mI50erlQmhZRuRa/3Hk=;
-        b=nHme26sKn+oiv7POtxC7pJqQ/5O4M79AK0MzXi3jo0W54gaAUNLO2jGr39PhK6jXa2
-         NpF0rvrtHsXUmuL/gRCYXmQprNiHA+aMsKDYHjkpEYmbv48LheRguEKwPVokHpUTgJF1
-         g8fuXRyztpND2PIBV5yjZgWccNpX36TriYUhwmb1dT9J3GHRlwNt10JvdBjiCzMWROd6
-         skLlzwcpnHZw85SxgtEXJ/xhHTAB4qeNZCvhRLLraBDp6RIkPnC7jcmYAgufbUmrQzGm
-         KisklsfbbMI8zHBr8j2sBUzUR7yVmcW74yRuBaJgWcqxlqNKGK1U/Zx3ZkcwvngfQY3i
-         GfaQ==
+        d=baylibre-com.20221208.gappssmtp.com; s=20221208; t=1692224774; x=1692829574;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=u7uQIIcrOFzc49aqvUkRDZzFxEz4KqT+ICR1+8quc8w=;
+        b=nLsRg3gBX8FVyACCctF8pWA6iGOG69Klww5ee5m0rSCjDQ1YLbML1J9hVFaaA/yc9K
+         gN9B0kRZxzGXG+oIrQ5rA1nGd7nw9fPduPa7qWfDgaCOjGkrRtjnoY0zWtWMnjO5OfuE
+         wrITOm5wFbE09oL+nq29oWN/YMWC9K8uX2wnG/v4lufrI7J/4fdhx5rHfVfy0+MIfrBV
+         kYdgPBB6pyhLfrZsrgkO4wFXcLZKDIrfwa9UeGzJjd1FiwQ78IfmcX0smW7FoLFVRma8
+         47XJ32lOwHSSKwLlIyrf46dCG7xiLL4bl1FLaFz8N8GyW6pXusCNIP6nrAt+1g8yoJm7
+         2OHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692222055; x=1692826855;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Ma6f9Ok2+0t+XPGWJJlS+l++mI50erlQmhZRuRa/3Hk=;
-        b=HYSAN8GkWY97Mrt4seieZHGftpxkXfsR96EatFB+Fe4doA9/lp/pNUqt7Z38veBMso
-         O0isnilOCe7ZBT11GUIDwpJVyGzo7pnkQtJ/J6CcOoHcPKXO4KcGU9DgeCQ2MEaXVt13
-         TcP8rWJx9fcimOAGNNYapp1Ce5Qbzx1ifFTN+b5M8s7i82VNF/zQM+mseq2zruQGVX26
-         JdxRipOC3oQkyQlxQ1jVUMUdTuaKMJPTz3AZvFSq2RVW73Nxp1amG3yPINVmgk0aBRIf
-         BjWVzcbq+xMrWeHM9YStZuFNmeLbU5zZAMoNgZig+D+mirMIMTKVZ8vTCoAx905J/Axd
-         ZzUw==
-X-Gm-Message-State: AOJu0Yy8N6yeA9Cvp4HySym/XFnz/7VLP5MjaDxppNfQp7faVRSnwJEx
-        mRTOenbb78Rz64bzYUdY9BhhlI6049I82wdgf9T9Gw==
-X-Google-Smtp-Source: AGHT+IFQX2G9dQRnr7Qlmhd0VGdqhschoGcmIdkMaKSu7OPh0Yaf0YaCTTNuES0hSst5c7aUdsxZBhu1eFzAb4HKbxY=
-X-Received: by 2002:a05:6902:1024:b0:d12:ab1:d88a with SMTP id
- x4-20020a056902102400b00d120ab1d88amr3980991ybt.40.1692222055464; Wed, 16 Aug
- 2023 14:40:55 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1692224774; x=1692829574;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=u7uQIIcrOFzc49aqvUkRDZzFxEz4KqT+ICR1+8quc8w=;
+        b=mB+Ng2tviPqJhkx2f8p4zTNAOuxcLE/34WIzX51y8QWQSxdWAQMPcghXqjtZxp46o5
+         PhSlIktEIC2Xy59bAQcatrtou9eTKNMQhAfZXXyfGJnojyPWoIlhQzE/4jag2oAP0cN0
+         7fbcTFQLTZ7qzJcbb/ZciPzhWz1cIKBPnbSjtwHc2bJNe2LlE2sJ9LTKypMvTbKLIqJW
+         uM9D4jApBv704Jk5D32BmQvAfLNAzN+Vazuy60uVm1kT5CEHniAQ+IfieePAWdCnE8NH
+         tcqHrV5z/QkpIiW89/8rzaF9HfV2tegm94m8GOrpK8dQwUgJETzJTGFp6mKzC2jotHCx
+         y7Bg==
+X-Gm-Message-State: AOJu0YwUaZPQqLhEawzQ+6aHdQc5Bq+o5bpuK57PYYHhlyPwDGcdwfgU
+        xPnCeOaYjVUqk7bjPieVO+KgJw==
+X-Google-Smtp-Source: AGHT+IGkgRJCXIVVufTd3KRR6mXCo4jmAJTUdqHRVFHuFCpLRjBwYq8DpHYyhSTWPV9UPPmJYCZB9w==
+X-Received: by 2002:a17:902:d2c7:b0:1b2:5d5b:e871 with SMTP id n7-20020a170902d2c700b001b25d5be871mr3674598plc.59.1692224774508;
+        Wed, 16 Aug 2023 15:26:14 -0700 (PDT)
+Received: from x1 ([2601:1c2:1800:f680:ad77:24cb:c068:c5e6])
+        by smtp.gmail.com with ESMTPSA id c13-20020a170902d48d00b001bdcd4b1616sm8966890plg.260.2023.08.16.15.26.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Aug 2023 15:26:14 -0700 (PDT)
+Date:   Wed, 16 Aug 2023 15:26:12 -0700
+From:   Drew Fustini <dfustini@baylibre.com>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Jisheng Zhang <jszhang@kernel.org>, Guo Ren <guoren@kernel.org>,
+        Fu Wei <wefu@redhat.com>, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>
+Subject: Re: [PATCH RFC v2 1/4] dt-bindings: mmc: sdhci-of-dwcmhsc: Add
+ T-Head TH1520 support
+Message-ID: <ZN1NBE2+HHfatQ/T@x1>
+References: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
+ <20230724-th1520-emmc-v2-1-132ed2e2171e@baylibre.com>
+ <ca0b9a19-d7d7-80e5-f47e-f74615cdac86@linaro.org>
 MIME-Version: 1.0
-References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
- <20230808202319.191434-1-limings@nvidia.com> <16047c7a-5bd1-868c-e6eb-e5f415e77fdd@intel.com>
- <CAPDyKFp28mmbRAGf14u8KTO3v7H=SFAYbwcz7xeb1m4tD_G2vQ@mail.gmail.com>
- <a2f6cd0e-8429-3468-9dcf-a5022717e2ae@intel.com> <CAPDyKFqTWMghEAsBdLUF+K4QNEWBozNi3_a7w0+KuuO3x+wkTQ@mail.gmail.com>
- <e561174e-a5cf-9503-f47a-d6c3fc7a1719@intel.com> <CAPDyKFrZawSORUG6wAJoCGFJABXvadivarNJ7_3V-ajeULLitw@mail.gmail.com>
- <BN9PR12MB50688191EFE9CBBD7D3A988AD315A@BN9PR12MB5068.namprd12.prod.outlook.com>
-In-Reply-To: <BN9PR12MB50688191EFE9CBBD7D3A988AD315A@BN9PR12MB5068.namprd12.prod.outlook.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Aug 2023 23:40:18 +0200
-Message-ID: <CAPDyKFp8t-Yg8ABV4YU7LAsAULR_UoAps+COufJ_6hqRFGWxcg@mail.gmail.com>
-Subject: Re: [PATCH v7] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-To:     Liming Sun <limings@nvidia.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ca0b9a19-d7d7-80e5-f47e-f74615cdac86@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
+On Mon, Aug 07, 2023 at 08:29:21AM +0200, Krzysztof Kozlowski wrote:
+> On 05/08/2023 05:14, Drew Fustini wrote:
+> > Add compatible value for the T-Head TH1520 dwcmshc controller and
+> > thead,io-fixed-1v8 and thead,pull-up properties.
+> > 
+> > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 9 +++++++++
+> >  1 file changed, 9 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > index a43eb837f8da..57602c345cab 100644
+> > --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > @@ -19,6 +19,7 @@ properties:
+> >        - rockchip,rk3568-dwcmshc
+> >        - rockchip,rk3588-dwcmshc
+> >        - snps,dwcmshc-sdhci
+> > +      - thead,th1520-dwcmshc
+> >  
+> >    reg:
+> >      maxItems: 1
+> > @@ -60,6 +61,14 @@ properties:
+> >      description: Specify the number of delay for tx sampling.
+> >      $ref: /schemas/types.yaml#/definitions/uint8
+> >  
+> > +  thead,io-fixed-1v8:
+> > +    description: SoC PHY pad is fixed 1.8V
+> > +    type: boolean
+> 
+> Isn't this duplicating existing properties for MMC modes with 1.8 V?
 
-> > > >>>>
-> > > >>>> Since you are only using the runtime PM callbacks to turn off the card
-> > > >>>> clock via SDHCI_CLOCK_CONTROL, pm_runtime_force_suspend() and
-> > > >>>> pm_runtime_force_resume() are not needed at all.
-> > > >>>
-> > > >>> Right, it can be done without these too.
-> > > >>>
-> > > >>>>
-> > > >>>> sdhci_suspend_host() does not care if SDHCI_CLOCK_CARD_EN is on or
-> > off.
-> > > >>>> (And you are disabling pltfm_host->clk and priv->bus_clk, so
-> > presumably
-> > > >>>> the result is no clock either way)
-> > > >>>>
-> > > >>>> sdhci_resume_host() does not restore state unless
-> > > >>>> SDHCI_QUIRK2_HOST_OFF_CARD_ON is used, it just resets, so the
-> > internal clock
-> > > >>>> SDHCI_CLOCK_INT_EN is off which is consistent with either runtime
-> > suspended
-> > > >>>> or runtime resumed.
-> > > >>>
-> > > >>> Even if this may work, to me, it doesn't look like good practice for
-> > > >>> how to use runtime PM in combination with system wide
-> > suspend/resume.
-> > > >>>
-> > > >>> The point is, sdhci_suspend|resume_host() may end up reading/writing
-> > > >>> to sdhci registers - and we should *not* allow that (because it may
-> > > >>> not always work), unless the sdhci controller has been runtime resumed
-> > > >>> first, right?
-> > > >>
-> > > >> I am OK with drivers that just want to use runtime PM to turn off a
-> > > >> functional clock.  sdhci-tegra.c is also doing that although using the
-> > > >> clock framework.
-> > > >
-> > > > Yes, I agree. At least this works for SoC specific drivers.
-> > > >
-> > > >>
-> > > >> Certainly that approach assumes that the host controller's power state
-> > > >> is not changed due to runtime PM.
-> > > >>
-> > > >> To ensure that the host controller is runtime resumed before calling
-> > > >> sdhci_suspend_host(), we can just call pm_runtime_resume() I think.
-> > > >
-> > > > Yes, that was kind of what I proposed in the other thread as option 1)
-> > > > (except for the replacement of pm_runtime_force_suspend|resume).
-> > > >
-> > > > Although, to be clear I would probably use pm_runtime_get_sync()
-> > > > instead, to make sure the usage count is incremented too.
-> > >
-> > > In that case, a matching pm_runtime_put() is needed also at the
-> > > end of the resume callback.
-> >
-> > Yes, of course. Or depending if we are using the force_suspend|resume
-> > helper, a pm_runtime_put_noidle is sufficient after
-> > pm_runtime_force_suspend() has been called.
->
-> Thanks Ulf/Adrian! Plan to upload v8 with the following changes:
-> - Remove pm_runtime_force_suspend/resume() from dwcmshc_suspend()/dwcmshc_resume() (Adrian's comment).
-> - Add comments for dwcmshc_resume()/dwcmshc_suspend();
-> (According to Andrian's comment).
-> - Add pm_runtime_get_sync()/pm_runtime_put() in dwcmshc_suspend(), which is Ulf option-1.  Option-2 seems more efficient, but it involves more changes and I couldn't test the impact on other SoC. Maybe for future enhancement?
+Thank you for reviewing. Yes, now that you mention it, I do see those
+properties now in mmc-controller.yaml. It seems like the existing
+mmc-ddr-1_8v property would be appropriate.
 
-That works for me!
+> 
+> > +
+> > +  thead,pull-up:
+> > +    description: True if pull-up, false if pull-down
+> 
+> This explains me nothing. No clue what you are pulling and why do you
+> need it. Pin pulls should be done via pin controller, not MMC.
 
-Kind regards
-Uffe
+Good point that my description is not helpful. The pull-up property
+determines whether certain phy registers are written to. I need to try
+to can get documentation on the phy so that I can better understand the
+details of the pull-up configuration in the phy registers.
+
+> 
+> Anyway you should have here allOf:if:then (move the allOf: from top to
+> behind "required:") which will disallow these properties for other variants.
+
+I noticed that nvidia,tegra20-sdhci.yaml has several lines related to
+pull-up/down configuration:
+
+218   - if:
+219       properties:
+220         compatible:
+221           contains:
+222             const: nvidia,tegra210-sdhci
+223     then:
+224       properties:
+225         pinctrl-names:
+226           oneOf:
+227             - items:
+228                 - const: sdmmc-3v3
+229                   description: pad configuration for 3.3 V
+230                 - const: sdmmc-1v8
+231                   description: pad configuration for 1.8 V
+232                 - const: sdmmc-3v3-drv
+233                   description: pull-up/down configuration for 3.3 V
+234                 - const: sdmmc-1v8-drv
+235                   description: pull-up/down configuration for 1.8 V
+236             - items:
+237                 - const: sdmmc-3v3-drv
+238                   description: pull-up/down configuration for 3.3 V
+239                 - const: sdmmc-1v8-drv
+240                   description: pull-up/down configuration for 1.8 V
+241             - items:
+242                 - const: sdmmc-1v8-drv
+243                   description: pull-up/down configuration for 1.8 V
+
+Do you think creating something like that would be a good approach?
+
+Thank you,
+Drew
