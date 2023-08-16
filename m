@@ -2,107 +2,167 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84263C41513
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 11:35:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A7A3C001B0
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Aug 2023 11:48:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244628AbjHPLe4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Aug 2023 07:34:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58332 "EHLO
+        id S244751AbjHPLrx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Aug 2023 07:47:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244693AbjHPLek (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 07:34:40 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DB8A1BFB
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 04:34:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        sang-engineering.com; h=date:from:to:cc:subject:message-id
-        :references:mime-version:content-type:in-reply-to; s=k1; bh=HBbF
-        lemzEOhPa00H0VmfelS/CW8R7e58HfrA6PqinYI=; b=d8BWs07FAiT3EPZSfUar
-        afa/AO5AcnMNr4BYb0rC+1+2uKo9Ww2BcHpGyDsXKGbLiElioTTlUvXdWvD/BTux
-        JUgK2a9c5dFPZKY+Hd02QdpPg0hRd5fOMAeuvuOGODjPZfMNY8LhHX7UqmaqAL14
-        jRVvZTyT5zzT6r5YDcDkXwdmqInS5Hcg1lypBiRDVGRqY4kTrvorwwn+DoNV8ZGX
-        GopkLqibHhqHActGB4XuSdbHezISpaEGAYcH13WrVuTbzKU6qg/Rq8djA167gZrh
-        iTv4yG2ZTDjaJdZQllhw5s0Xdg/F4X9Q/7IPhTv19n2NmtJCegCbuGQNSVzirsez
-        9w==
-Received: (qmail 116343 invoked from network); 16 Aug 2023 13:27:39 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 16 Aug 2023 13:27:39 +0200
-X-UD-Smtp-Session: l3s3148p1@Cm0/lQgDILcgAwDPXy5qAJ1huuy56R1W
-Date:   Wed, 16 Aug 2023 13:27:38 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yangtao Li <frank.li@vivo.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 56/62] mmc: renesas_sdhi: Convert to platform remove
- callback returning void
-Message-ID: <ZNyyqlMFFZ2xPLUf@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yangtao Li <frank.li@vivo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20230727070051.17778-1-frank.li@vivo.com>
- <20230727070051.17778-56-frank.li@vivo.com>
+        with ESMTP id S244774AbjHPLr2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Aug 2023 07:47:28 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 339952128
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 04:47:27 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id 2adb3069b0e04-4ff8cf11b90so1784098e87.1
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Aug 2023 04:47:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1692186445; x=1692791245;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=XdVIooP7Ho7O4vx5CwmajztmNRsl01Hr+hDUfrzHogc=;
+        b=xxhn6TRzANpoGLRb2/aK/u4KUe0U1w9sDFilaQQHByky4S5QHKbsJp8JwisGl80UNi
+         FcQgaKhIevk/vspB39SFEvmkcJkUvrBqeVrIFy3oovYYqgLYy7G+dhgOaRzFwFlKhkRH
+         ZxDDTCO7dLbm0Ai0us0JCpFx5A3uQkWdSFL6PMsqRav2pp1jV/Id4rx/RIyN9LK9Jawb
+         XRTy1n0q7JhRCZDcwyiLjIWVlbAU3lyVrBdmDWPMu6Oupfn9Up5tZxJ+D8JJy5qGMMus
+         kEjaYA651WD9LhA81gCBAZzWsuDlYF4T126pvF/K1cz5EYf+Y0p+yMuri7uL3rHrFx9D
+         XTDg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692186445; x=1692791245;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=XdVIooP7Ho7O4vx5CwmajztmNRsl01Hr+hDUfrzHogc=;
+        b=HwxgJSqCsbnib+QuO9hj6G2PwcJDfTEqzZK+kogDlSIghGxh+QOkpmxQPaIniNnlJB
+         E/3v64G5GwfoQExlw/mIhWJ3lqtV7hZ2Bz7s+4oTQ3OoJTYG2O0BKi9Yih3Y22OmfSC+
+         rx9Hc6vOkDr4kcjz8On9GjK1JjQ4ZCFowcBp8nIUR53r6Noud6TnXzpoCxJilU7GkZBd
+         IErVhH0pV8jZ41TF6oTZIsAysarv8YkY7n8NpOjaDmQ1UBot9Dqxg0NeZqSn2HgFGJ/j
+         f0YpE4TaeCN+383obgNlz9HtO35YQt76xon2KEXZ0lBpfeTO/to0UJH6hznZY6FRYkHF
+         cqAQ==
+X-Gm-Message-State: AOJu0Yzl+u9+jP+hYGVGaHs4AxcRZhwoRztr0APaSiVEXqcV4wUWddfA
+        pUbvgNHTcAcPntrvjgGXnYLFFXsDyzwv/fiPp5M=
+X-Google-Smtp-Source: AGHT+IHInKejBBDdX5k76fJuLZ7aKj8UaU3udDXP0w2kVMdO5TH/+uC0Y5X8xwSDsdjaT9pkk/IcoQ==
+X-Received: by 2002:a05:6512:128b:b0:4f8:6625:f2ca with SMTP id u11-20020a056512128b00b004f86625f2camr1769155lfs.61.1692186445122;
+        Wed, 16 Aug 2023 04:47:25 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id a15-20020a056512374f00b004fddaddeb63sm2895683lfs.137.2023.08.16.04.47.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Aug 2023 04:47:24 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Christian Lohle <cloehle@hyperstone.com>,
+        linux-kernel@vger.kernel.org,
+        Christian Loehle <CLoehle@hyperstone.com>
+Subject: [PATCH] mmc: core: Fix error propagation for some ioctl commands
+Date:   Wed, 16 Aug 2023 13:47:12 +0200
+Message-Id: <20230816114712.25093-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="WXxTWG8lhc/cEAqB"
-Content-Disposition: inline
-In-Reply-To: <20230727070051.17778-56-frank.li@vivo.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Userspace has currently has no way of checking the internal R1 response
+error bits for some commands. This is a problem for some commands, like
+RPMB for example. Typically, we may detect that the busy completion
+successfully has ended, while in fact the card did not complete the
+requested operation.
 
---WXxTWG8lhc/cEAqB
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+To fix the problem, let's always poll with CDM13 for these commands and
+during the polling aggregate the R1 response bits. Before completing the
+ioctl request, let's propagate the R1 response bits too.
 
-On Thu, Jul 27, 2023 at 03:00:45PM +0800, Yangtao Li wrote:
-> The .remove() callback for a platform driver returns an int which makes
-> many driver authors wrongly assume it's possible to do error handling by
-> returning an error code. However the value returned is (mostly) ignored
-> and this typically results in resource leaks. To improve here there is a
-> quest to make the remove callback return void. In the first step of this
-> quest all drivers are converted to .remove_new() which already returns
-> void.
->=20
-> Trivially convert this driver from always returning zero in the remove
-> callback to the void returning variant.
->=20
-> Cc: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
-> Signed-off-by: Yangtao Li <frank.li@vivo.com>
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Avri Altman <avri.altman@wdc.com>
+Co-developed-by: Christian Loehle <CLoehle@hyperstone.com>
+Signed-off-by: Christian Loehle <CLoehle@hyperstone.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
 
-Builds fine, boots fine, rebind works:
+Christian, I took the liberty of re-working your previous patch [1]. But rather
+than keeping your authorship I added you as a co-developer. Please tell me if
+you prefer differently.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Kind regards
+Uffe
 
+[1]
+https://lore.kernel.org/all/26d178dcfc2f4b7d9010145d0c051394@hyperstone.com/ 
 
---WXxTWG8lhc/cEAqB
-Content-Type: application/pgp-signature; name="signature.asc"
+---
+ drivers/mmc/core/block.c | 31 ++++++++++++++++++++-----------
+ 1 file changed, 20 insertions(+), 11 deletions(-)
 
------BEGIN PGP SIGNATURE-----
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index b6f4be25b31b..62a8aacc996c 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -179,6 +179,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 			       struct mmc_queue *mq);
+ static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+ static int mmc_spi_err_check(struct mmc_card *card);
++static int mmc_blk_busy_cb(void *cb_data, bool *busy);
+ 
+ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
+ {
+@@ -470,7 +471,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	struct mmc_data data = {};
+ 	struct mmc_request mrq = {};
+ 	struct scatterlist sg;
+-	bool r1b_resp, use_r1b_resp = false;
++	bool r1b_resp;
+ 	unsigned int busy_timeout_ms;
+ 	int err;
+ 	unsigned int target_part;
+@@ -551,8 +552,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	busy_timeout_ms = idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS;
+ 	r1b_resp = (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B;
+ 	if (r1b_resp)
+-		use_r1b_resp = mmc_prepare_busy_cmd(card->host, &cmd,
+-						    busy_timeout_ms);
++		mmc_prepare_busy_cmd(card->host, &cmd, busy_timeout_ms);
+ 
+ 	mmc_wait_for_req(card->host, &mrq);
+ 	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
+@@ -605,19 +605,28 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	if (idata->ic.postsleep_min_us)
+ 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
+ 
+-	/* No need to poll when using HW busy detection. */
+-	if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
+-		return 0;
+-
+ 	if (mmc_host_is_spi(card->host)) {
+ 		if (idata->ic.write_flag || r1b_resp || cmd.flags & MMC_RSP_SPI_BUSY)
+ 			return mmc_spi_err_check(card);
+ 		return err;
+ 	}
+-	/* Ensure RPMB/R1B command has completed by polling with CMD13. */
+-	if (idata->rpmb || r1b_resp)
+-		err = mmc_poll_for_busy(card, busy_timeout_ms, false,
+-					MMC_BUSY_IO);
++
++	/*
++	 * Ensure RPMB, writes and R1B responses are completed by polling with
++	 * CMD13. Note that, usually we don't need to poll when using HW busy
++	 * detection, but here it's needed since some commands may indicate the
++	 * error through the R1 status bits.
++	 */
++	if (idata->rpmb || idata->ic.write_flag || r1b_resp) {
++		struct mmc_blk_busy_data cb_data;
++
++		cb_data.card = card;
++		cb_data.status = 0;
++		err = __mmc_poll_for_busy(card->host, 0, busy_timeout_ms,
++					  &mmc_blk_busy_cb, &cb_data);
++
++		idata->ic.response[0] = cb_data.status;
++	}
+ 
+ 	return err;
+ }
+-- 
+2.34.1
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmTcsqYACgkQFA3kzBSg
-KbapCg//RlbUTbKwqc3S3+NyRLwP+SdcP6IJivgpDLTNh6kSTvFj0SKSlEE0ghwr
-KaL3DKWsIICa2YgYTuDNIznUForrQOleFaE8JKS1NBT0DD6sR/wg0H0m06YIhonf
-V+6brxQqEqg55wjYPR2sxFDgJJn6DS8Z2nZlOsns23kt+Ur84CLGZiIewkQuHTZG
-RMv+1ke+ICsGOQTZBwg6fOdGEmjsx+IcRYk15uIEsl41MinpT/aiJuaxlZ7Xr9Ak
-drUvYC7SHhZ0hZXmDaHNiMlJEDWFghOx5gPuTNzTSJP59oIWevLv/eI/QAdrDGAf
-Ogu6jeiuhh3PaT7EJmu3jsYExA8AUoNkwGYxwbjAJDo3aMrdKpX/+on/9TU3L9Co
-wiVTIVO5TCPmPlrctS6NUE8NAjX5C7UYtp76o9LgT39ZGoYe5Sa5ETioj2o2ZAYW
-5DFIckgsYvAyATlnRKHNeBzpgKF9zYDkDZ/r5lAr7utG+DQr0Xq8BqONqIAc6YGf
-i9xXGmmDTzZOwkAzU9jW7au6hG39pQxkNeKJ0VBV3VPURGrFeBIwto260Ku7HXsR
-zGYyJTl8SHKS0AZAWvkhxC+RPUAgwWdCg+xOE23pyORNLmysDkk9SODrDv7RQn3+
-H6LPHxyETABTC8rB3Wxqe+ChNgDbYgluws+64QKn/UCr9SFLXhY=
-=KtVJ
------END PGP SIGNATURE-----
-
---WXxTWG8lhc/cEAqB--
