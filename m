@@ -2,301 +2,262 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5055FC2FC0E
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Aug 2023 07:36:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7268EC2FC14
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Aug 2023 10:04:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236565AbjHQHgX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Aug 2023 03:36:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47884 "EHLO
+        id S1349882AbjHQKDl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Aug 2023 06:03:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235451AbjHQHfw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2023 03:35:52 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F301812B;
-        Thu, 17 Aug 2023 00:35:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1692257751; x=1723793751;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=iJ+ERG1HMyhW/gOaZ67rW5tiVlX3e0f1StDiN46AJgE=;
-  b=jmvoS8FFtFaqg69bgYDXH38fRqpeg/5UU4TMMbYKEPXT/albyJOuNwwW
-   5H5AxW1KS9bZNhQLeeFzJhE1tfh/PYKj/AD2Eh5cOqf3GExB+Q82K8gtm
-   /dwOyOSm/CNwYHZfNax+/LbSL+xjiMzad7Zri9OFkvTDkW9d8fek7AuXq
-   PKgERxhzvNKorerMOFjXVrI5p9SmdolTt8FJingXRx810DohUHzqQjnES
-   qnrk5L9J0jYCryw7s/rUP/oioJD1LqVqOmXxvY6br3jIeTvCPLfwvfU+v
-   Fx5cZHFMgIvTGg+b3mMH/nroYJv+/tz8mCxGyzcpqlK/M+PFwWui9koPi
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10803"; a="375505545"
-X-IronPort-AV: E=Sophos;i="6.01,179,1684825200"; 
-   d="scan'208";a="375505545"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Aug 2023 00:35:50 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10803"; a="908309223"
-X-IronPort-AV: E=Sophos;i="6.01,179,1684825200"; 
-   d="scan'208";a="908309223"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.40.107])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Aug 2023 00:35:48 -0700
-Message-ID: <d802a8c9-aca1-ea47-f4c9-1d76e0fae9c9@intel.com>
-Date:   Thu, 17 Aug 2023 10:35:43 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.14.0
-Subject: Re: [PATCH v8] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-To:     Liming Sun <limings@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
- <20230817010608.211329-1-limings@nvidia.com>
+        with ESMTP id S1349867AbjHQKDN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Aug 2023 06:03:13 -0400
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB60E210D;
+        Thu, 17 Aug 2023 03:03:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1692266589; x=1723802589;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=Xyle4h2uJB8UK0YYRBhzXE5X2Q9WfJWTQ58x2eKEgVQ=;
+  b=UmF2qUD8eZZhlUKiYi1awO79/k4ydYoXtgtEQOLnZSWPUleINngp4EQL
+   L/zP8j1Ojy3RPmD/gRuAKg5Dup/35NxcG0BGBVSvmGnRAzwnjtHquah9v
+   RCMUVPZwVi80MmoozNN3dZP9xXZ/JYAvhkW9hDznbzDEXXa1BdQo8dRiw
+   /pon/AFS7NWb1qLNHulUY3CC63pGVG0aoVupShZaIMJbEI1nBO5YBRBC8
+   yLPvqI3+WfZO9q/yneaLGZ9mOiBIILxIlZxRI77rPG/SUQgTS46PPIQ8U
+   5JXkEf5G5nTlKUgWM4ysdH+dy8d+TGlOr+wCiL9Y3NzocpdC4bV+CvzKG
+   g==;
+X-IronPort-AV: E=Sophos;i="6.01,179,1684771200"; 
+   d="scan'208";a="245977331"
+Received: from mail-dm6nam12lp2169.outbound.protection.outlook.com (HELO NAM12-DM6-obe.outbound.protection.outlook.com) ([104.47.59.169])
+  by ob1.hgst.iphmx.com with ESMTP; 17 Aug 2023 18:03:09 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=AjgtbNdFoAm2i5Cd5BNGBLLizkHZOH0WB52eLHUzEomlULYlcySP4uek9EF/fA13VdIXNGii61FFFPkuzKDwnLt+AFhDLDdhng04eIcyI+p1wlrUmfT3FJucU6Yty15jFgztqryrncU2agDePFR7n1sOzdHE3507GosNX7C/vhcF51523fmyTYDGrfJ/DsIATTr8J0iAMNM53jOAh3Bex7Z5rzKN+RoqHBIC+t0tfyjvKfiYKiLRkH3hegRvkm//nv+GPhxhvgeh10Rw1CBluLlJtlIAPZJ/7Gi+slZvz9BxdTx7eT6NMqx9rO2xWGZcis96qT4kPnMWAQV2mqziKg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=cqPV1rQZN7L+IulVSokXWGKPAS8/0GVR/YHiMOB/6g8=;
+ b=XEbHrEiKjFDYSwXXrjElzBg9N1MsC3tly5+/lmTRVR9ABy4uTJ09GPnRoN8fS/pGN8Rxv9aQIh/tpJALtwaFi5n+6n1SSiW8tLDUrCoBY1uK9wRwlerXLvkmvbbaR3DD7N9XUYMlTN6BaG8K3Pn9UpUq47ov80SDE6YnXxSK5w8q3qzKy535eL2CT5GnhlxXoFxeHwZWbmKzD7BTm2aGNJmWEynpCftOYLlY1HoXNF2/Y5ny6zH+uC6WhX7hEM/skOHexjY8/xCojKT9Ii9tl9kWne8sziRPcj7dELpa3AuP+vc48Fn5dLsplwCiJb7iMskFJ7zmIc8lAx//UTe4rw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=cqPV1rQZN7L+IulVSokXWGKPAS8/0GVR/YHiMOB/6g8=;
+ b=qJe2VXafRNxZV57V7Q97eBox0cUd0HYQbVpT/1CONf/2qJUggTFSyAbGrCcT27xKlHtHMdTstPNuO6osfmK+fBoB3tYZQ4fib75FH8FBIJEj8Fw8d5eR8Rdgd+hprSwsGPOGkB30gicO5jqNCaaVtMaiGZklhPV22QhoTCieKBk=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ CH2PR04MB7111.namprd04.prod.outlook.com (2603:10b6:610:96::7) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.6678.31; Thu, 17 Aug 2023 10:03:05 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::4781:1e0e:9df8:940b]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::4781:1e0e:9df8:940b%7]) with mapi id 15.20.6678.031; Thu, 17 Aug 2023
+ 10:03:04 +0000
+From:   Avri Altman <Avri.Altman@wdc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     Adrian Hunter <adrian.hunter@intel.com>,
+        Christian Lohle <cloehle@hyperstone.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Christian Loehle <CLoehle@hyperstone.com>
+Subject: RE: [PATCH] mmc: core: Fix error propagation for some ioctl commands
+Thread-Topic: [PATCH] mmc: core: Fix error propagation for some ioctl commands
+Thread-Index: AQHZ0DdwHngodiqC+0eDbhyluMlK5K/uQxdQ
+Date:   Thu, 17 Aug 2023 10:03:04 +0000
+Message-ID: <DM6PR04MB65759A72284F94585D19A3F5FC1AA@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20230816114712.25093-1-ulf.hansson@linaro.org>
+In-Reply-To: <20230816114712.25093-1-ulf.hansson@linaro.org>
+Accept-Language: en-US
 Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230817010608.211329-1-limings@nvidia.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|CH2PR04MB7111:EE_
+x-ms-office365-filtering-correlation-id: 593d2454-bd78-491e-6ef8-08db9f092640
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 2MpJqqAeOxJ6551AeyjnWfK7RpDRMbhIyJxZmhx6RoDyd4mQTIC92f0tweXMww09736MlFLSU0wpa0u7ydZDncOX/hg0ead5WCNYF+2PnbXhm/Z+IhLlRHgjegxgOfUuCsEM13yheg4mnFeA10PWRu/4KToxSiEfpXA7TCS9VWlZJDehylBaVLYSbzBEt7pXHgbA6SCTLlieO1qXIYsNLMCTeUF6ZBv4Sq5fJ1BRphi5YZbk1/aFA6NT6uoexyTel68NmbFAFfCxAT0er0njdq+Uy3xtyrT85kjdUqimU53J+3dP9K8ZB7F5SEIJSD03u/KSKB1m28TVkmjpnl8yySqYQf+flY2nYJFRT/b1Vdd1sfzN1J/O6yOm7yTOUCdJbYvQNGf/a9j29OTjbNNVOoEV5aH4vcNCMGniBsU0i9jkeVUj20lO103rdXaK7jtPVaFmteq9MzAYiUHi5a/kE1B3Yn7FL+xrPcebnOYCdeyAjUNU2TMBfdmQGTKCSFRPA0OQI6yboiN3wnltz+m9HrkXqF59dzCEd9QrVGFFJB2RrtE0DkR5dziRJkXJNpM3H6Y8OVOMMp+GlmW61Ijq6abJu3iXaBZiNTCI4BwCKWM=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366004)(376002)(396003)(39860400002)(136003)(346002)(451199024)(186009)(1800799009)(33656002)(86362001)(55016003)(83380400001)(52536014)(8936002)(4326008)(8676002)(5660300002)(2906002)(41300700001)(26005)(7696005)(6506007)(71200400001)(9686003)(966005)(110136005)(76116006)(478600001)(122000001)(82960400001)(66946007)(66556008)(66476007)(66446008)(64756008)(54906003)(316002)(38100700002)(38070700005);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?pAwDjVwetePg0+C1F4Q3zoDPe5ypQALYwgoIdkjfnOar0KWcO3TbmgnYUPmY?=
+ =?us-ascii?Q?rWTZE+KeagNQAiJmcWqoQLH8G/jAtx3oDTxPUmapR+XC6GRmgaHmTmVJoe0n?=
+ =?us-ascii?Q?aru7pPUocTtXUufHN/wUNE/eUJ+PqKsk1JTTbeoo4hIiI78KzrKJ6hFVwyWH?=
+ =?us-ascii?Q?1IMQUGI3Ng25fM+nABk4Me7V6GklD92xslFDTaUO3+gY+3An7ZbyKc+YJTy/?=
+ =?us-ascii?Q?m7N6BKffEYlzv7yR+RLvk8t/aUh4xwVWbPtk4LoN+HaQAzOoTWavOIWgMpc8?=
+ =?us-ascii?Q?2yVk0XWi0aMo9ZezHX5MkdG27JUz+9YWYuruXO3EakHyGRWEfAGfov8svT7O?=
+ =?us-ascii?Q?5ri7sqEDHmlwM27HZ+5NZp5/mXunQcXtK4PKPrqnt1rDPSAGfPpHF9FFjgzd?=
+ =?us-ascii?Q?htqP4vWVkLkKEMF8ZzJ9yEiW4nvalrBuGhfh63FzzVTljBFDqO9n4STX3Mdb?=
+ =?us-ascii?Q?jH8G0rhOySrLHZimGLH7ile0o2Vzlt9nlTrjqE13Y8eD9eUMw9WwITAhFJbw?=
+ =?us-ascii?Q?ZDcOU4gNQYTqAXfhCaraJNC0/TUf4M1F1xCMR1iaa2MR+8ax0k+wFWJGG1ip?=
+ =?us-ascii?Q?VDbvig1fZty00+yTlPE2mt7c82PsciEn9P57xYFzZmqDeN4hcLKq/7YAEMq/?=
+ =?us-ascii?Q?ULyLsJLdGXjP42KGhhuwwtdS9TJoJdtcVREaS4Dk1DrGH2IjkKzkyiU6WybV?=
+ =?us-ascii?Q?f6Nb4NRO7tb/RL2VomN9D7hZ3J3sBXkdhpxOSdn3E223QAXn3JcCbuSgJfLn?=
+ =?us-ascii?Q?BcJPKx8ep/yevtI1eDq0PIdfwlmjuJ0MKE85/7EMhF6RUKWGPhVxTG4ud1Qn?=
+ =?us-ascii?Q?wg10jZPXG7mfFuAPE231/6t4VWLDgO3Rv9vIqjerhRxVCoYRst5l2pee87U+?=
+ =?us-ascii?Q?ZLieXQ7BgcvVBhhzQfoTrNI5bTWeAWi9AuwNFANVq9I3ipmP8VvkNuT0lnmp?=
+ =?us-ascii?Q?Z71bJgYdv/WnX+Bm+SJvg7+L/BUkXgQvsupOs0HFF3wJ3xH/kfKJM6T+Cn+Z?=
+ =?us-ascii?Q?vg3J5zFroRAb9RX0VyXyKSkkCw13GLSQcUKDgFMwUrDPbzZhkg4cmUwJ6UdX?=
+ =?us-ascii?Q?I0ZSdOcNALx6wcA20yPL3vSVVyyxZStTNfoR3YUV0pRhMx0n+/0x34D2wtu+?=
+ =?us-ascii?Q?sVs9NvOsPrhQGf/De7rs7rmKgkbHAThDlQba28z0ybHCArEqf1of10s54HIP?=
+ =?us-ascii?Q?MNAL24JHzSIXpd6lKKIYNBs7Lz32qHtvAQOP6PHle80M/quG5b5takP9HigX?=
+ =?us-ascii?Q?ypPh1lugFKXm61ApSdbvQ00lhPRrgJM/x31cnA/wtiYoAHqr3Y0lPso6NZJa?=
+ =?us-ascii?Q?UdNS+a3NCeVVWKEKEvwi9NArwRURv7pj9Fm3iaJRkxEPOFzPk14bXye5kgae?=
+ =?us-ascii?Q?y5FcTuvogEREhV3j37JBVkqyEgUU/p21e1ZQ2quBV+y7ZLBlEgss2p8x71Md?=
+ =?us-ascii?Q?UjGsogp+ybbpvsY1QNhZB9t7ONETusw5roPELQNi8/Kex1dASF9zGRB0t6W7?=
+ =?us-ascii?Q?OqAPMyATZwoat6GEWr5HFQDdJqwGJHeT5m6s+j7SWJ6nNpfVwnW+c0QDxXg8?=
+ =?us-ascii?Q?yR/OVUF35jeTekPVf3TdED2n9C3OQbfKV21tkwzD?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: jB/5gMzVz22L/7+uem87gaJeOPHmYejEPr9GgFckQQmLP42t1kTj8JL5hvRNa4wdsjmkXI40vOJWEwm+FVfA9bY/o2Yzd7MTS+uBClTcW0AB1zTm182rENb35Yo0UiQOFEMrLflkpuHxK/jzWiQej2x5RNZmGMLy+CF6/ATIyF2kkgPXseGKVlJ1gzDTZ8BnOV9Xo/2YoSIdAJjBSA9JHjwofWL9jUnIvHyz/9nog4sewf8N0acMgayCgK95DME1D/sr5KGx54J9vfJy+YYMnTfWb4y5iPgC42HU6fGRICUEWi5wRPdjBomcDKxLfakYxl6E3SIBruHgjOSsxAoRqjw9Zv5nlkcgT86usBkeJ3FN0A5uEF5EGA+xmoo6VNh126HCIUIWX5hxYepcM+PTGb9ymYspLwhjxKL5PJBSR0X9MaWE5I/bdXBKewiB6HST0Emm+VSIdY80TDY46//pDA5pJ2HWwodRf4cZLd/zH2Wg0ATYTKguvJs0CMtHajiRO02DXM0Oq9Tp0dBuAQsQ+vSvDGRfjxXbT6Hp5EOdh/FbfbcsdfBXzOX1qqC7UZFHAWvXBw/yAHxUaWv82iiOkyv6riZxbMVomV/0oWyrgsYLdVz1YUuTNfjDlN/9tAuhJk/WHTfBKtAvK7mQaPfFrdYA67/xuItdDDQQ6X6TIpESVx9sbpFevosf8u3pIlW2cDt/hyKa8bv8sy6Sw4efzCiPol3El4YsO4rWMpB28miPzA+ii4qPUiHxPsegqukpjCzkvZywgt6PJ3myDgeXy+0Q/3TCntMqthtqoQJRiIvLJQhslLbEepF+0Ls1GqbsjUdyXmurT1HfuE7kLwCaEJ7lJNBVVpYwjUNNrswM0Ice6+XVQbftgnZWGFTB0rUF
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 593d2454-bd78-491e-6ef8-08db9f092640
+X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Aug 2023 10:03:04.8186
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: AjnCr2eSxLj/KuqsSIw94EVec6e1JfvwmDEoeJVQxJABIttt55Pr4JmGkuLjyW+JU5dOApa0CRQFAPegzwDKTQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR04MB7111
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/08/23 04:06, Liming Sun wrote:
-> This commit implements the runtime PM operations to disable eMMC
-> card clock when idle.
-> 
-> Reviewed-by: David Thompson <davthompson@nvidia.com>
-> Signed-off-by: Liming Sun <limings@nvidia.com>
+> Userspace has currently has no way of checking the internal R1 response
+> error bits for some commands. This is a problem for some commands, like
+> RPMB for example. Typically, we may detect that the busy completion
+> successfully has ended, while in fact the card did not complete the
+> requested operation.
+>=20
+> To fix the problem, let's always poll with CDM13 for these commands and
+> during the polling aggregate the R1 response bits. Before completing the
+> ioctl request, let's propagate the R1 response bits too.
+>=20
+> Cc: Avri Altman <avri.altman@wdc.com>
+> Co-developed-by: Christian Loehle <CLoehle@hyperstone.com>
+> Signed-off-by: Christian Loehle <CLoehle@hyperstone.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Reviewed-by: Avri Altman <avri.altman@wdc.com>
+
+See nit below.
+Thanks,
+Avri
+
 > ---
-> v7->v8:
->     - Address Ulf's comment (option-1);
->     - Updates for Adrian;s comment to remove the force_suspend/resume
->       in dwcmshc_resume()/dwcmshc_suspend(); Add comments for
->       dwcmshc_resume()/dwcmshc_suspend();
-> v6->v7:
->     - Address Ulf's comment;
-> v5->v6:
->     - Address Adrian's more comments and add coordination between
->       runtime PM and system PM;
-> v4->v5:
->     - Address Adrian's comment to move the pm_enable to the end to
->       avoid race;
-> v3->v4:
->     - Fix compiling reported by 'kernel test robot';
-> v2->v3:
->     - Revise the commit message;
-> v1->v2:
->     Updates for comments from Ulf:
->     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
-> v1: Initial version.
+>=20
+> Christian, I took the liberty of re-working your previous patch [1]. But =
+rather
+> than keeping your authorship I added you as a co-developer. Please tell m=
+e
+> if you prefer differently.
+>=20
+> Kind regards
+> Uffe
+>=20
+> [1]
+> https://lore.kernel.org/all/26d178dcfc2f4b7d9010145d0c051394@hypersto
+> ne.com/
+>=20
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 76 +++++++++++++++++++++++++++--
->  1 file changed, 73 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index e68cd87998c8..2196218c9d79 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -15,6 +15,7 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/reset.h>
->  #include <linux/sizes.h>
->  
-> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  
->  	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->  
-> +	pm_runtime_get_noresume(dev);
-> +	pm_runtime_set_active(dev);
-> +	pm_runtime_enable(dev);
+>  drivers/mmc/core/block.c | 31 ++++++++++++++++++++-----------
+>  1 file changed, 20 insertions(+), 11 deletions(-)
+>=20
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index
+> b6f4be25b31b..62a8aacc996c 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -179,6 +179,7 @@ static void mmc_blk_rw_rq_prep(struct
+> mmc_queue_req *mqrq,
+>                                struct mmc_queue *mq);  static void
+> mmc_blk_hsq_req_done(struct mmc_request *mrq);  static int
+> mmc_spi_err_check(struct mmc_card *card);
+> +static int mmc_blk_busy_cb(void *cb_data, bool *busy);
+>=20
+>  static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)  { @@ -
+> 470,7 +471,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card,
+> struct mmc_blk_data *md,
+>         struct mmc_data data =3D {};
+>         struct mmc_request mrq =3D {};
+>         struct scatterlist sg;
+> -       bool r1b_resp, use_r1b_resp =3D false;
+> +       bool r1b_resp;
+>         unsigned int busy_timeout_ms;
+>         int err;
+>         unsigned int target_part;
+> @@ -551,8 +552,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card
+> *card, struct mmc_blk_data *md,
+>         busy_timeout_ms =3D idata->ic.cmd_timeout_ms ? :
+> MMC_BLK_TIMEOUT_MS;
+>         r1b_resp =3D (cmd.flags & MMC_RSP_R1B) =3D=3D MMC_RSP_R1B;
+>         if (r1b_resp)
+> -               use_r1b_resp =3D mmc_prepare_busy_cmd(card->host, &cmd,
+> -                                                   busy_timeout_ms);
+> +               mmc_prepare_busy_cmd(card->host, &cmd, busy_timeout_ms);
+>=20
+>         mmc_wait_for_req(card->host, &mrq);
+>         memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp)); @@ -605,=
+19
+> +605,28 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct
+> mmc_blk_data *md,
+>         if (idata->ic.postsleep_min_us)
+>                 usleep_range(idata->ic.postsleep_min_us, idata-
+> >ic.postsleep_max_us);
+>=20
+> -       /* No need to poll when using HW busy detection. */
+> -       if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
+> use_r1b_resp)
+> -               return 0;
+> -
+>         if (mmc_host_is_spi(card->host)) {
+>                 if (idata->ic.write_flag || r1b_resp || cmd.flags &
+> MMC_RSP_SPI_BUSY)
+>                         return mmc_spi_err_check(card);
+>                 return err;
+>         }
+> -       /* Ensure RPMB/R1B command has completed by polling with CMD13.
+> */
+> -       if (idata->rpmb || r1b_resp)
+> -               err =3D mmc_poll_for_busy(card, busy_timeout_ms, false,
+> -                                       MMC_BUSY_IO);
 > +
->  	err = sdhci_setup_host(host);
->  	if (err)
-> -		goto err_clk;
-> +		goto err_rpm;
->  
->  	if (rk_priv)
->  		dwcmshc_rk35xx_postinit(host, priv);
-> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	if (err)
->  		goto err_setup_host;
->  
-> +	pm_runtime_put(dev);
+> +       /*
+> +        * Ensure RPMB, writes and R1B responses are completed by polling
+> with
+> +        * CMD13. Note that, usually we don't need to poll when using HW =
+busy
+> +        * detection, but here it's needed since some commands may indica=
+te
+> the
+> +        * error through the R1 status bits.
+> +        */
+> +       if (idata->rpmb || idata->ic.write_flag || r1b_resp) {
+> +               struct mmc_blk_busy_data cb_data;
 > +
->  	return 0;
->  
->  err_setup_host:
->  	sdhci_cleanup_host(host);
-> +err_rpm:
-> +	pm_runtime_disable(dev);
-> +	pm_runtime_put_noidle(dev);
->  err_clk:
->  	clk_disable_unprepare(pltfm_host->clk);
->  	clk_disable_unprepare(priv->bus_clk);
-> @@ -594,6 +604,10 @@ static int dwcmshc_remove(struct platform_device *pdev)
+> +               cb_data.card =3D card;
+> +               cb_data.status =3D 0;
+> +               err =3D __mmc_poll_for_busy(card->host, 0, busy_timeout_m=
+s,
+> +                                         &mmc_blk_busy_cb, &cb_data);
+Maybe we can pack those 3 lines in an inline handler - they seems to appear=
+ a couple of times more.
+
+Thanks,
+Avri
+
+> +
+> +               idata->ic.response[0] =3D cb_data.status;
+> +       }
+>=20
+>         return err;
 >  }
->  
->  #ifdef CONFIG_PM_SLEEP
-> +/*
-> + * Note, runtime suspend changes only SDHCI_CLOCK_CARD_EN which has no effect on
-> + * system suspend.
-> + */
-
-This comment isn't needed since pm_runtime_get_sync() will
-always runtime resume the device if needed.
-
->  static int dwcmshc_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> @@ -602,9 +616,11 @@ static int dwcmshc_suspend(struct device *dev)
->  	struct rk35xx_priv *rk_priv = priv->priv;
->  	int ret;
->  
-> +	pm_runtime_get_sync(dev);
-
-This needs a corresponding pm_runtime_put() at the end of dwcmshc_resume().
-
-> +
->  	ret = sdhci_suspend_host(host);
->  	if (ret)
-> -		return ret;
-> +		goto err_suspend;
->  
->  	clk_disable_unprepare(pltfm_host->clk);
->  	if (!IS_ERR(priv->bus_clk))
-> @@ -614,9 +630,15 @@ static int dwcmshc_suspend(struct device *dev)
->  		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
->  					   rk_priv->rockchip_clks);
->  
-> +err_suspend:
-> +	pm_runtime_put_noidle(dev);
->  	return ret;
->  }
->  
-> +/*
-> + * Note, system resume leaves SDHCI_CLOCK_INT_EN off which is consistent with
-> + * either runtime suspended or runtime resumed.
-> + */
-
-As above, this comment isn't needed.
-
->  static int dwcmshc_resume(struct device *dev)
-
-
-As mentioned above, dwcmshc_resume() needs a pm_runtime_put()
-to balance the pm_runtime_get_sync().
-
-Could fix up the error path too, but that should be a
-separate prior patch.
-
-Probably end up looking like:
-
-
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 20aa9b6327d2..c9b020b7a3f6 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -652,17 +652,33 @@ static int dwcmshc_resume(struct device *dev)
- 	if (!IS_ERR(priv->bus_clk)) {
- 		ret = clk_prepare_enable(priv->bus_clk);
- 		if (ret)
--			return ret;
-+			goto disable_clk;
- 	}
- 
- 	if (rk_priv) {
- 		ret = clk_bulk_prepare_enable(RK35xx_MAX_CLKS,
- 					      rk_priv->rockchip_clks);
- 		if (ret)
--			return ret;
-+			goto disable_bus_clk;
- 	}
- 
--	return sdhci_resume_host(host);
-+	ret = sdhci_resume_host(host);
-+	if (ret)
-+		goto disable_rockchip_clks;
-+
-+	pm_runtime_put(dev);
-+
-+	return 0;
-+
-+disable_rockchip_clks:
-+	if (rk_priv)
-+		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS, rk_priv->rockchip_clks);
-+disable_bus_clk:
-+	if (!IS_ERR(priv->bus_clk))
-+		clk_disable_unprepare(priv->bus_clk);
-+disable_clk:
-+	clk_disable_unprepare(pltfm_host->clk);
-+	return ret;
- }
- #endif
- 
-
-
-
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> @@ -646,7 +668,55 @@ static int dwcmshc_resume(struct device *dev)
->  }
->  #endif
->  
-> -static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
-> +#ifdef CONFIG_PM
-> +
-> +static void dwcmshc_enable_card_clk(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	if ((ctrl & SDHCI_CLOCK_INT_EN) && !(ctrl & SDHCI_CLOCK_CARD_EN)) {
-> +		ctrl |= SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +	}
-> +}
-> +
-> +static void dwcmshc_disable_card_clk(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	if (ctrl & SDHCI_CLOCK_CARD_EN) {
-> +		ctrl &= ~SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +	}
-> +}
-> +
-> +static int dwcmshc_runtime_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +	dwcmshc_disable_card_clk(host);
-> +
-> +	return 0;
-> +}
-> +
-> +static int dwcmshc_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +	dwcmshc_enable_card_clk(host);
-> +
-> +	return 0;
-> +}
-> +
-> +#endif
-> +
-> +static const struct dev_pm_ops dwcmshc_pmops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend, dwcmshc_resume)
-> +	SET_RUNTIME_PM_OPS(dwcmshc_runtime_suspend,
-> +			   dwcmshc_runtime_resume, NULL)
-> +};
->  
->  static struct platform_driver sdhci_dwcmshc_driver = {
->  	.driver	= {
+> --
+> 2.34.1
 
