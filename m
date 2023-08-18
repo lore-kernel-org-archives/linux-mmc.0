@@ -2,390 +2,194 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66F2BC71156
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Aug 2023 10:05:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9E38C71136
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Aug 2023 10:20:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359724AbjHRKFK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Aug 2023 06:05:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41542 "EHLO
+        id S231557AbjHRKUR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Aug 2023 06:20:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59498 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1359807AbjHRKEt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Aug 2023 06:04:49 -0400
-Received: from mail-pf1-x42c.google.com (mail-pf1-x42c.google.com [IPv6:2607:f8b0:4864:20::42c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 601393C2D;
-        Fri, 18 Aug 2023 03:04:27 -0700 (PDT)
-Received: by mail-pf1-x42c.google.com with SMTP id d2e1a72fcca58-688731c6331so581042b3a.3;
-        Fri, 18 Aug 2023 03:04:27 -0700 (PDT)
+        with ESMTP id S1358673AbjHRKT6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Aug 2023 06:19:58 -0400
+Received: from mail-yw1-x1132.google.com (mail-yw1-x1132.google.com [IPv6:2607:f8b0:4864:20::1132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4838A359D
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Aug 2023 03:19:55 -0700 (PDT)
+Received: by mail-yw1-x1132.google.com with SMTP id 00721157ae682-58dfe2d5b9aso10462287b3.1
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Aug 2023 03:19:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1692353019; x=1692957819;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=j3ImsKeVTdhxdpT+a4GoerWT4GQatv0MF5s5u1wyjzE=;
-        b=efYETb1GBP1ysaETs3vgb1ezfb/d3Zpwo6lwimDXRXdyPE3spbl6Rm70gN8FZ42WiG
-         emeW+bpMqDp19H2lLXZrZp7Zeskal+mFPO7ZQzra6x9UuIOvUR9MmI24WYNcCWzQJLLF
-         m7K7kZ1aWzCNlJAovHk8cXDkXfVffzjqmJEmtQDo+WCpDXmbna4PCq4U5FB4FmlZlbr2
-         udlicBeXKOzwOQP7FOCd+0+UJznPtnid2Vs2e5Mdg3DiWuo70KWv53LhZQUuQYPK82YS
-         mm8yELLfsVrwkdoWaTCjSyNPe1bLcRHneWZ7Q+4oCvNKkuSjG/n6wtsDCbRopAKtszYx
-         Ek+g==
+        d=linaro.org; s=google; t=1692353994; x=1692958794;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=A263qDAilO21yTbqLbTuQ/l8iRap3GaNXl1w5/CO22A=;
+        b=OLM7IjB52+ggwSa/UVwfVqgAXdKVZPGcQSx45gvD0BV/elA1Qs2OvMQb0UhtPifhe9
+         eXikzUETDpiI8Et6h7VJ5FZj3CfxXiTkb8nGTIRHcLzTnjLyCy+QpALE6HSzrkjhV/Nk
+         Q4o0/3Gx39y59epsYbJl5rJVHX+0uE3AcTiMsMyDv06POqJqtaoPZFSIwr6TkzD/i2bs
+         vnM3GHgX9iPI9FiGNO6+bI18MLl+YZ5dBNMVR+r4/ZPUOwWmlNT1e7jkSu4BEd4M8c7e
+         uA7WBkuKu39BdaG7xuvUaaUSA01FVOCseXpWijXc8FsUmZx0Fey7Y9SOpTLpXA+BYkvs
+         R31A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692353019; x=1692957819;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=j3ImsKeVTdhxdpT+a4GoerWT4GQatv0MF5s5u1wyjzE=;
-        b=dSabBaJqtypykFUeKS3RJ/LiGqFfHY91xx9woHmKK/F3RJQpH6uSaNy4DkU8mYtRZr
-         4jQFqxDYXcEXyG2hwT+9VL5Bp+FSw8fFx3TCKbA7WKDTxUiNaTaQlG//sdkSyAsoskJ8
-         lobL2STLwmlzu6LVcozH3/r5vb1DbkQoyMqumbDZQe2aDF79TfxdKzOGQpVl54XhoFIw
-         1JXcucbEGf2l805X3JvtfqhKsk+Fzp6JVzT6+xuDlsLYAXc0kseOpHDFZoMhlCOLsVpn
-         9ElwaUez04WvT6qU3aBF2CZsesvAycAQ/MIQ8Gper6yL/RC8XuXOmInpCnBJQkNdtRJl
-         plTA==
-X-Gm-Message-State: AOJu0Yxawhzw0Cm+qjNhxfkSy38ZOqKd12MSRwT0d2kFYyItLqnKkbLs
-        56jyxxZxB26MrKvxqteMavQIfRYIZl8=
-X-Google-Smtp-Source: AGHT+IEjO7/jb6uHOa5kBmeLHWxa4wKBaHsOfR4m5HucMnioaVhNrKHvsJ2589rdYLy6vgXPj9bPcA==
-X-Received: by 2002:a05:6a00:1952:b0:671:4b06:4ea7 with SMTP id s18-20020a056a00195200b006714b064ea7mr2146806pfk.15.1692353018877;
-        Fri, 18 Aug 2023 03:03:38 -0700 (PDT)
-Received: from localhost.localdomain (2001-b400-e25c-55ec-ad14-f925-5202-a39b.emome-ip6.hinet.net. [2001:b400:e25c:55ec:ad14:f925:5202:a39b])
-        by smtp.gmail.com with ESMTPSA id n22-20020a62e516000000b006870ccfbb54sm1180649pff.196.2023.08.18.03.03.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Aug 2023 03:03:38 -0700 (PDT)
-From:   Victor Shih <victorshihgli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Victor Shih <victorshihgli@gmail.com>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V10 23/23] mmc: sdhci-pci-gli: enable UHS-II mode for GL9755
-Date:   Fri, 18 Aug 2023 18:02:17 +0800
-Message-Id: <20230818100217.12725-24-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230818100217.12725-1-victorshihgli@gmail.com>
-References: <20230818100217.12725-1-victorshihgli@gmail.com>
+        d=1e100.net; s=20221208; t=1692353994; x=1692958794;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=A263qDAilO21yTbqLbTuQ/l8iRap3GaNXl1w5/CO22A=;
+        b=XInFZw/tgteLEWWRr13dKjkAz5QSekrsJXWdC5xLF3uydCUnNVdgvthax1A0J6OdQO
+         +BJvubd6prO1Q96xEimOvtBBAH379jz/g54eoR3EMBBHjvffH8Oth6URFJH/7KklgqNR
+         flvzZ3JEjgOJyZQoOS7edBHbetYYx/a4HKyt0uK2n2l5bCGcsIUWcpQ+WFBwMMyisj12
+         RWJnjOxoLjgg6O7oc9NXlVrCBNL1ct2lDtvjLD5CEeT9m7wmaqwCdtv7rE0olWlvdKrz
+         y0G93fOF2WKi0l42MlpWE8TgTLpxif/sY3X0qb/Ao2iK3RoTq0GjRqvNqflpj9oiaUnj
+         Zkug==
+X-Gm-Message-State: AOJu0YzbiePXfUluQbYCaDhhyN2SXvhztkyw1hHabwJYcdVSgrwRlC5n
+        mXVqmK1F1FDEeTGWVIpUfKs4s62OPc4VIy5x/AmlF06WZxek11KIGIQ=
+X-Google-Smtp-Source: AGHT+IG8+ezNT84A04MwfR3HtsuZskPbVm+ReMxWxrudL/7l5+KeDeVVwyLGJDdzIVkFgRRy+6Av/aDKQMtOFFlcRp4=
+X-Received: by 2002:a81:49c5:0:b0:583:9935:b8ba with SMTP id
+ w188-20020a8149c5000000b005839935b8bamr6977405ywa.6.1692353994471; Fri, 18
+ Aug 2023 03:19:54 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
+ <20230817162159.242087-1-limings@nvidia.com> <CAPDyKFpezrjPk6Y+TS1A1E2tK4WbjdpTjPwPxLaAUD9fcaQonQ@mail.gmail.com>
+ <c5f59dfd-a0dd-3b77-55fb-1087cbbbef25@intel.com>
+In-Reply-To: <c5f59dfd-a0dd-3b77-55fb-1087cbbbef25@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 18 Aug 2023 12:19:18 +0200
+Message-ID: <CAPDyKFpEfc7EjpKDczwk9XDySug+uJ064FbrxsD6A0CY9ccOaw@mail.gmail.com>
+Subject: Re: [PATCH v9] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Liming Sun <limings@nvidia.com>,
+        David Thompson <davthompson@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+On Fri, 18 Aug 2023 at 11:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 18/08/23 12:00, Ulf Hansson wrote:
+> > On Thu, 17 Aug 2023 at 18:22, Liming Sun <limings@nvidia.com> wrote:
+> >>
+> >> This commit implements the runtime PM operations to disable eMMC
+> >> card clock when idle.
+> >>
+> >> Reviewed-by: David Thompson <davthompson@nvidia.com>
+> >> Signed-off-by: Liming Sun <limings@nvidia.com>
+> >> ---
+> >> v8->v9:
+> >>     - Address Adrian's comment to do the pm_runtime_put() in
+> >>       dwcmshc_resume() instead; Error path changes not included yet.
+> >> v7->v8:
+> >>     - Address Ulf's comment (option-1);
+> >>     - Updates for Adrian's comment to remove the force_suspend/resume
+> >>       in dwcmshc_resume()/dwcmshc_suspend(); Add comments for
+> >>       dwcmshc_resume()/dwcmshc_suspend();
+> >> v6->v7:
+> >>     - Address Ulf's comment;
+> >> v5->v6:
+> >>     - Address Adrian's more comments and add coordination between
+> >>       runtime PM and system PM;
+> >> v4->v5:
+> >>     - Address Adrian's comment to move the pm_enable to the end to
+> >>       avoid race;
+> >> v3->v4:
+> >>     - Fix compiling reported by 'kernel test robot';
+> >> v2->v3:
+> >>     - Revise the commit message;
+> >> v1->v2:
+> >>     Updates for comments from Ulf:
+> >>     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
+> >> v1: Initial version.
+> >> ---
+> >>  drivers/mmc/host/sdhci-of-dwcmshc.c | 76 +++++++++++++++++++++++++++--
+> >>  1 file changed, 72 insertions(+), 4 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >> index e68cd87998c8..3b40f55ce2a4 100644
+> >> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >> @@ -15,6 +15,7 @@
+> >>  #include <linux/module.h>
+> >>  #include <linux/of.h>
+> >>  #include <linux/of_device.h>
+> >> +#include <linux/pm_runtime.h>
+> >>  #include <linux/reset.h>
+> >>  #include <linux/sizes.h>
+> >>
+> >> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
+> >>
+> >>         host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+> >>
+> >> +       pm_runtime_get_noresume(dev);
+> >> +       pm_runtime_set_active(dev);
+> >> +       pm_runtime_enable(dev);
+> >> +
+> >>         err = sdhci_setup_host(host);
+> >>         if (err)
+> >> -               goto err_clk;
+> >> +               goto err_rpm;
+> >>
+> >>         if (rk_priv)
+> >>                 dwcmshc_rk35xx_postinit(host, priv);
+> >> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+> >>         if (err)
+> >>                 goto err_setup_host;
+> >>
+> >> +       pm_runtime_put(dev);
+> >> +
+> >>         return 0;
+> >>
+> >>  err_setup_host:
+> >>         sdhci_cleanup_host(host);
+> >> +err_rpm:
+> >> +       pm_runtime_disable(dev);
+> >> +       pm_runtime_put_noidle(dev);
+> >>  err_clk:
+> >>         clk_disable_unprepare(pltfm_host->clk);
+> >>         clk_disable_unprepare(priv->bus_clk);
+> >> @@ -602,9 +612,13 @@ static int dwcmshc_suspend(struct device *dev)
+> >>         struct rk35xx_priv *rk_priv = priv->priv;
+> >>         int ret;
+> >>
+> >> +       pm_runtime_get_sync(dev);
+> >> +
+> >>         ret = sdhci_suspend_host(host);
+> >> -       if (ret)
+> >> +       if (ret) {
+> >> +               pm_runtime_put(dev);
+> >>                 return ret;
+> >> +       }
+> >>
+> >>         clk_disable_unprepare(pltfm_host->clk);
+> >>         if (!IS_ERR(priv->bus_clk))
+> >> @@ -642,11 +656,65 @@ static int dwcmshc_resume(struct device *dev)
+> >>                         return ret;
+> >>         }
+> >>
+> >> -       return sdhci_resume_host(host);
+> >> +       ret = sdhci_resume_host(host);
+> >> +       if (ret)
+> >> +               return ret;
+> >> +
+> >> +       pm_runtime_put(dev);
+> >
+> > To simplify the error path, I would suggest that you move the call to
+> > pm_runtime_put() to dwcmshc_suspend(). In fact what you need is just a
+> > call to pm_runtime_put_noidle(), somewhere after the call to
+> > pm_runtime_get_sync().
+> >
+> > This is because runtime suspend is prevented by the PM core as it
+> > bumps the usage count with a pm_runtime_get_noresume() in the
+> > device_prepare() phase.
+>
+> I thought you didn't want to assume that, because in that case
+> it can just be pm_runtime_resume() instead of pm_runtime_get_sync(),
+> and then no 'put' is needed at all.
 
-Changes are:
- * Disable GL9755 overcurrent interrupt when power on/off on UHS-II.
- * Enable the internal clock when do reset on UHS-II mode.
- * Increase timeout value before detecting UHS-II interface.
- * Add vendor settings fro UHS-II mode.
+I don't really care, but just wanted to keep it as simple as possible.
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
+So yes, I am fine with a pm_runtime_resume() too. Maybe even simpler
+in this case, as we are not using pm_runtime_force_suspend|resume()
+anymore.
 
-Updates in V9:
- - Rename gl9755_pre_detect_init() to sdhci_gli_pre_detect_init().
- - Rename gl9755_uhs2_reset_sd_tran() to sdhci_gli_uhs2_reset_sd_tran().
-
-Updates in V8:
- - Use sdhci_get_vdd_value() to simplify code in gl9755_set_power().
- - Use read_poll_timeout_atomic() to simplify code in
-   sdhci_wait_clock_stable().
- - Use read_poll_timeout_atomic() to simplify code in sdhci_gl9755_reset().
-
-Updates in V7:
- - Drop using gl9755_post_attach_sd().
-
----
-
- drivers/mmc/host/sdhci-pci-gli.c | 233 ++++++++++++++++++++++++++++++-
- 1 file changed, 232 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index ae8c307b7aa7..e30e755a9974 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -18,6 +18,7 @@
- #include "sdhci-cqhci.h"
- #include "sdhci-pci.h"
- #include "cqhci.h"
-+#include "sdhci-uhs2.h"
- 
- /*  Genesys Logic extra registers */
- #define SDHCI_GLI_9750_WT         0x800
-@@ -139,9 +140,36 @@
- 
- #define PCI_GLI_9755_PLLSSC        0x68
- #define   PCI_GLI_9755_PLLSSC_PPM    GENMASK(15, 0)
-+#define   PCI_GLI_9755_PLLSSC_RTL             BIT(24)
-+#define   GLI_9755_PLLSSC_RTL_VALUE           0x1
-+#define   PCI_GLI_9755_PLLSSC_TRANS_PASS      BIT(27)
-+#define   GLI_9755_PLLSSC_TRANS_PASS_VALUE    0x1
-+#define   PCI_GLI_9755_PLLSSC_RECV            GENMASK(29, 28)
-+#define   GLI_9755_PLLSSC_RECV_VALUE          0x3
-+#define   PCI_GLI_9755_PLLSSC_TRAN            GENMASK(31, 30)
-+#define   GLI_9755_PLLSSC_TRAN_VALUE          0x3
-+
-+#define PCI_GLI_9755_UHS2_PLL            0x6C
-+#define   PCI_GLI_9755_UHS2_PLL_SSC        GENMASK(9, 8)
-+#define   GLI_9755_UHS2_PLL_SSC_VALUE      0x0
-+#define   PCI_GLI_9755_UHS2_PLL_DELAY      BIT(18)
-+#define   GLI_9755_UHS2_PLL_DELAY_VALUE    0x1
-+#define   PCI_GLI_9755_UHS2_PLL_PDRST      BIT(27)
-+#define   GLI_9755_UHS2_PLL_PDRST_VALUE    0x1
- 
- #define PCI_GLI_9755_SerDes  0x70
-+#define   PCI_GLI_9755_UHS2_SERDES_INTR       GENMASK(2, 0)
-+#define   GLI_9755_UHS2_SERDES_INTR_VALUE     0x3
-+#define   PCI_GLI_9755_UHS2_SERDES_ZC1        BIT(3)
-+#define   GLI_9755_UHS2_SERDES_ZC1_VALUE      0x0
-+#define   PCI_GLI_9755_UHS2_SERDES_ZC2        GENMASK(7, 4)
-+#define   GLI_9755_UHS2_SERDES_ZC2_DEFAULT    0xB
-+#define   GLI_9755_UHS2_SERDES_ZC2_SANDISK    0x0
- #define PCI_GLI_9755_SCP_DIS   BIT(19)
-+#define   PCI_GLI_9755_UHS2_SERDES_TRAN       GENMASK(27, 24)
-+#define   GLI_9755_UHS2_SERDES_TRAN_VALUE     0xC
-+#define   PCI_GLI_9755_UHS2_SERDES_RECV       GENMASK(31, 28)
-+#define   GLI_9755_UHS2_SERDES_RECV_VALUE     0xF
- 
- #define PCI_GLI_9755_MISC	    0x78
- #define   PCI_GLI_9755_MISC_SSC_OFF    BIT(26)
-@@ -759,6 +787,201 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
- 	gl9755_wt_off(pdev);
- }
- 
-+static void gl9755_vendor_init(struct sdhci_host *host)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	u32 serdes;
-+	u32 pllssc;
-+	u32 uhs2_pll;
-+
-+	gl9755_wt_on(pdev);
-+
-+	pci_read_config_dword(pdev, PCI_GLI_9755_SerDes, &serdes);
-+	serdes &= ~PCI_GLI_9755_UHS2_SERDES_TRAN;
-+	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_TRAN,
-+			     GLI_9755_UHS2_SERDES_TRAN_VALUE);
-+	serdes &= ~PCI_GLI_9755_UHS2_SERDES_RECV;
-+	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_RECV,
-+			     GLI_9755_UHS2_SERDES_RECV_VALUE);
-+	serdes &= ~PCI_GLI_9755_UHS2_SERDES_INTR;
-+	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_INTR,
-+			     GLI_9755_UHS2_SERDES_INTR_VALUE);
-+	serdes &= ~PCI_GLI_9755_UHS2_SERDES_ZC1;
-+	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_ZC1,
-+			     GLI_9755_UHS2_SERDES_ZC1_VALUE);
-+	serdes &= ~PCI_GLI_9755_UHS2_SERDES_ZC2;
-+	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_ZC2,
-+			     GLI_9755_UHS2_SERDES_ZC2_DEFAULT);
-+	pci_write_config_dword(pdev, PCI_GLI_9755_SerDes, serdes);
-+
-+	pci_read_config_dword(pdev, PCI_GLI_9755_UHS2_PLL, &uhs2_pll);
-+	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_SSC;
-+	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_SSC,
-+			  GLI_9755_UHS2_PLL_SSC_VALUE);
-+	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_DELAY;
-+	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_DELAY,
-+			  GLI_9755_UHS2_PLL_DELAY_VALUE);
-+	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_PDRST;
-+	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_PDRST,
-+			  GLI_9755_UHS2_PLL_PDRST_VALUE);
-+	pci_write_config_dword(pdev, PCI_GLI_9755_UHS2_PLL, uhs2_pll);
-+
-+	pci_read_config_dword(pdev, PCI_GLI_9755_PLLSSC, &pllssc);
-+	pllssc &= ~PCI_GLI_9755_PLLSSC_RTL;
-+	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_RTL,
-+			  GLI_9755_PLLSSC_RTL_VALUE);
-+	pllssc &= ~PCI_GLI_9755_PLLSSC_TRANS_PASS;
-+	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_TRANS_PASS,
-+			  GLI_9755_PLLSSC_TRANS_PASS_VALUE);
-+	pllssc &= ~PCI_GLI_9755_PLLSSC_RECV;
-+	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_RECV,
-+			  GLI_9755_PLLSSC_RECV_VALUE);
-+	pllssc &= ~PCI_GLI_9755_PLLSSC_TRAN;
-+	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_TRAN,
-+			  GLI_9755_PLLSSC_TRAN_VALUE);
-+	pci_write_config_dword(pdev, PCI_GLI_9755_PLLSSC, pllssc);
-+
-+	gl9755_wt_off(pdev);
-+}
-+
-+static void sdhci_gli_pre_detect_init(struct sdhci_host *host)
-+{
-+	/* Need more time on UHS2 detect flow */
-+	sdhci_writeb(host, 0xA7, SDHCI_UHS2_TIMER_CTRL);
-+}
-+
-+static void gl9755_overcurrent_event_enable(struct sdhci_host *host,
-+					    bool enable)
-+{
-+	u32 mask;
-+
-+	mask = sdhci_readl(host, SDHCI_SIGNAL_ENABLE);
-+	if (enable)
-+		mask |= SDHCI_INT_BUS_POWER;
-+	else
-+		mask &= ~SDHCI_INT_BUS_POWER;
-+
-+	sdhci_writel(host, mask, SDHCI_SIGNAL_ENABLE);
-+
-+	mask = sdhci_readl(host, SDHCI_INT_ENABLE);
-+	if (enable)
-+		mask |= SDHCI_INT_BUS_POWER;
-+	else
-+		mask &= ~SDHCI_INT_BUS_POWER;
-+
-+	sdhci_writel(host, mask, SDHCI_INT_ENABLE);
-+}
-+
-+static void gl9755_set_power(struct sdhci_host *host, unsigned char mode,
-+			     unsigned short vdd)
-+{
-+	u8 pwr = 0;
-+
-+	if (mode != MMC_POWER_OFF) {
-+		pwr = sdhci_get_vdd_value(vdd);
-+		if (!pwr)
-+			WARN(1, "%s: Invalid vdd %#x\n", mmc_hostname(host->mmc), vdd);
-+		pwr |= SDHCI_VDD2_POWER_180;
-+	}
-+
-+	if (host->pwr == pwr)
-+		return;
-+
-+	host->pwr = pwr;
-+
-+	if (pwr == 0) {
-+		gl9755_overcurrent_event_enable(host, false);
-+		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-+	} else {
-+		gl9755_overcurrent_event_enable(host, false);
-+		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-+
-+		pwr |= (SDHCI_POWER_ON | SDHCI_VDD2_POWER_ON);
-+
-+		sdhci_writeb(host, pwr & 0xf, SDHCI_POWER_CONTROL);
-+		/* wait stable */
-+		mdelay(5);
-+		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-+		/* wait stable */
-+		mdelay(5);
-+		gl9755_overcurrent_event_enable(host, true);
-+	}
-+}
-+
-+static bool sdhci_wait_clock_stable(struct sdhci_host *host)
-+{
-+	u16 clk = 0;
-+
-+	if (read_poll_timeout_atomic(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
-+				     10, 20000, false, host, SDHCI_CLOCK_CONTROL)) {
-+		pr_err("%s: Internal clock never stabilised.\n", mmc_hostname(host->mmc));
-+		sdhci_dumpregs(host);
-+		return false;
-+	}
-+	return true;
-+}
-+
-+static void sdhci_gli_uhs2_reset_sd_tran(struct sdhci_host *host)
-+{
-+	/* do this on UHS2 mode */
-+	if (host->mmc->flags & MMC_UHS2_SD_TRAN) {
-+		sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
-+		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+		sdhci_uhs2_clear_set_irqs(host,
-+					  SDHCI_INT_ALL_MASK,
-+					  SDHCI_UHS2_INT_ERROR_MASK);
-+	}
-+}
-+
-+static void sdhci_gl9755_reset(struct sdhci_host *host, u8 mask)
-+{
-+	u16 clk_ctrl;
-+	u16 ctrl2;
-+	u8 rst;
-+
-+	/* need internal clock */
-+	if (mask & SDHCI_RESET_ALL) {
-+		ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		clk_ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+
-+		if ((ctrl2 & SDHCI_CTRL_V4_MODE) &&
-+		    (ctrl2 & SDHCI_CTRL_UHS2_ENABLE)) {
-+			sdhci_writew(host,
-+				     SDHCI_CLOCK_INT_EN,
-+				     SDHCI_CLOCK_CONTROL);
-+		} else {
-+			sdhci_writew(host,
-+				     SDHCI_CLOCK_INT_EN,
-+				     SDHCI_CLOCK_CONTROL);
-+			sdhci_wait_clock_stable(host);
-+			sdhci_writew(host,
-+				     SDHCI_CTRL_V4_MODE,
-+				     SDHCI_HOST_CONTROL2);
-+		}
-+	}
-+
-+	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
-+
-+	/* reset sd-tran on UHS2 mode if need to reset cmd/data */
-+	if ((mask & SDHCI_RESET_CMD) | (mask & SDHCI_RESET_DATA))
-+		sdhci_gli_uhs2_reset_sd_tran(host);
-+
-+	if (mask & SDHCI_RESET_ALL)
-+		host->clock = 0;
-+
-+	/* hw clears the bit when it's done */
-+	if (read_poll_timeout_atomic(sdhci_readb, rst, !(rst & mask),
-+				     10, 100000, false, host, SDHCI_SOFTWARE_RESET)) {
-+		pr_err("%s: Reset 0x%x never completed.\n", mmc_hostname(host->mmc), (int)mask);
-+		sdhci_dumpregs(host);
-+		/* manual clear */
-+		sdhci_writeb(host, 0, SDHCI_SOFTWARE_RESET);
-+		return;
-+	}
-+}
-+
- static inline void gl9767_vhs_read(struct pci_dev *pdev)
- {
- 	u32 vhs_enable;
-@@ -1054,6 +1277,7 @@ static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
- 	gli_pcie_enable_msi(slot);
- 	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
- 	sdhci_enable_v4_mode(host);
-+	gl9755_vendor_init(host);
- 
- 	return 0;
- }
-@@ -1472,17 +1696,24 @@ static const struct sdhci_ops sdhci_gl9755_ops = {
- 	.read_w			= sdhci_gli_readw,
- 	.read_b			= sdhci_gli_readb,
- 	.set_clock		= sdhci_gl9755_set_clock,
-+	.set_power		= gl9755_set_power,
- 	.enable_dma		= sdhci_pci_enable_dma,
- 	.set_bus_width		= sdhci_set_bus_width,
--	.reset			= sdhci_reset,
-+	.reset			= sdhci_gl9755_reset,
- 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
- 	.voltage_switch		= sdhci_gli_voltage_switch,
-+	.dump_uhs2_regs		= sdhci_uhs2_dump_regs,
-+	.set_timeout		= sdhci_uhs2_set_timeout,
-+	.irq			= sdhci_uhs2_irq,
-+	.uhs2_pre_detect_init   = sdhci_gli_pre_detect_init,
- };
- 
- const struct sdhci_pci_fixes sdhci_gl9755 = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2	= SDHCI_QUIRK2_BROKEN_DDR50,
- 	.probe_slot	= gli_probe_slot_gl9755,
-+	.add_host	= sdhci_pci_uhs2_add_host,
-+	.remove_host	= sdhci_pci_uhs2_remove_host,
- 	.ops            = &sdhci_gl9755_ops,
- #ifdef CONFIG_PM_SLEEP
- 	.resume         = sdhci_pci_gli_resume,
--- 
-2.25.1
-
+Kind regards
+Uffe
