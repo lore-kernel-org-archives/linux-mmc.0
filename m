@@ -2,187 +2,50 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60410C7113C
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Aug 2023 09:02:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93ECFC71143
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Aug 2023 09:03:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1358866AbjHRJBv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Aug 2023 05:01:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45524 "EHLO
+        id S1352576AbjHRJC5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Aug 2023 05:02:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1358918AbjHRJBj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Aug 2023 05:01:39 -0400
-Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F10DE4208
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Aug 2023 02:01:09 -0700 (PDT)
-Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-58cd9d9dbf5so10010057b3.0
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Aug 2023 02:01:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692349269; x=1692954069;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=RIMtbwO8KD2IoehzK5xo4XD4MDFkwlTkyaP30vazrWk=;
-        b=NDfj2KfLreW7RME+Ag6gxRjuiq9PNGwZfPQPeviCqL2NUfJkae/2HCgd3m/jtS0apu
-         leZvRg9JZkjD9Mw9U7OSxzUe2P5M7ffzeFKuw8SG2p1bCOti8I71pn04HrOAD4fEn/97
-         +WmSaIskdk9+zBYWNy5bTAZ9/4hOe9v1YHHVSrTQ2J4j2rxudlGWszAs4SR5VVNVEEn5
-         s012F44gHb1tDv/6FXRo19cZhIa2AUbkeG+b3L+ZrVi7bOKTUyVpT+KYmEpdSanJAPT3
-         COGQTXzvMHlGBYGKkVunlc0XCyo6xgwNU/4KOukvANvoXSMxKaT+etjXoPRaCSsQVqhN
-         NxrQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692349269; x=1692954069;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=RIMtbwO8KD2IoehzK5xo4XD4MDFkwlTkyaP30vazrWk=;
-        b=RS+muWK0vC3kdOwri3ghyFqb1KTMk3cjefNaJikpBCnUuK0m8DvABYy4phYJm+a81O
-         IxTdzxVq3YLwv3iJffTNODsesOhUmLaXtI5ZKWfTjpo0GEW0ase1pGVfdfKDcRM8Ju/2
-         Lo9ykMcVyxm7OBOVlc5S28FZV3wqb8KbMbSRYxKB0E0Alcf1+maVc2AVZP0mXAdXRSTY
-         U3rTtzmkcN462ChjKNQSEoGgMjsURMB/JBvWlXlMGZqzTqiqoKtkH1jjh0o0LXSFd1sG
-         HhvTdDM2idfuGn+fYaFxCHXdyWAnIWrlCUMnD1LtBsi4ShGiM0GwLy6IhFnhRdLtC0Zr
-         CVHQ==
-X-Gm-Message-State: AOJu0YwOPn3SumFtTF87CdHVunH0KoCqq5FGtDZKE6JzEdcXRs2jR+b+
-        xWcmBQ96TK3czwFnyKjXpQPS7MYrRqqegATMhGVtZA==
-X-Google-Smtp-Source: AGHT+IEWzDCK5yYkY70jff+msXhncrz8POQ3xpL2mas+Bp/FNL0VSiTT9JywxXmqjpwqUVsHlBPOJ1oXEhXsuZnoE8Q=
-X-Received: by 2002:a0d:eb0e:0:b0:58c:adf9:eb03 with SMTP id
- u14-20020a0deb0e000000b0058cadf9eb03mr2530783ywe.6.1692349268872; Fri, 18 Aug
- 2023 02:01:08 -0700 (PDT)
+        with ESMTP id S1358931AbjHRJCa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Aug 2023 05:02:30 -0400
+X-Greylist: delayed 1476 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 18 Aug 2023 02:02:05 PDT
+Received: from mail.leachkin.pl (mail.leachkin.pl [217.61.97.203])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64B2D4231
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Aug 2023 02:02:05 -0700 (PDT)
+Received: by mail.leachkin.pl (Postfix, from userid 1001)
+        id 403DB845F2; Fri, 18 Aug 2023 09:16:33 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=leachkin.pl; s=mail;
+        t=1692346602; bh=elHzctRz/z3PfTIhGYJKd0TeBTmca98Y+JNgX4gfsPI=;
+        h=Date:From:To:Subject:From;
+        b=ZoVgq247E4ZF7uX2aviDuPl2gpEJIEQYIY9FTSOkUZXJuRNjpSWBCoxcGuBdaWeB7
+         QmOkzIocYZOB/YSQjK7zu7qtCSPx5At48gpBTGeeYzCvUrrHXERoRJrlwwL4BlL0VV
+         p6Mb2aLFHcM2HlY0i4PdHOGlmPHkHnjY4gYdfvuxH+mSBeh7ycnJH9UOq3KOYxXF+a
+         b63J6TskPyMYXn5lOyCKwv45wLgglCvCcDNRzTVIpmD7EZ7ZOahqgVTWV0OhUWHtcK
+         cC2hpt7eImmnZnH3QIGQtI3fj7xWGOVsQH41VvgEwSBuOdVkjAPttlylEYJyI2taTp
+         hDwwWkHzlsVxA==
+Received: by mail.leachkin.pl for <linux-mmc@vger.kernel.org>; Fri, 18 Aug 2023 08:15:51 GMT
+Message-ID: <20230818074501-0.1.4u.cuds.0.35fn3yl9t0@leachkin.pl>
+Date:   Fri, 18 Aug 2023 08:15:51 GMT
+From:   "Jakub Lemczak" <jakub.lemczak@leachkin.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: =?UTF-8?Q?Pytanie_o_samoch=C3=B3d?=
+X-Mailer: mail.leachkin.pl
 MIME-Version: 1.0
-References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
- <20230817162159.242087-1-limings@nvidia.com>
-In-Reply-To: <20230817162159.242087-1-limings@nvidia.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 18 Aug 2023 11:00:32 +0200
-Message-ID: <CAPDyKFpezrjPk6Y+TS1A1E2tK4WbjdpTjPwPxLaAUD9fcaQonQ@mail.gmail.com>
-Subject: Re: [PATCH v9] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-To:     Liming Sun <limings@nvidia.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 17 Aug 2023 at 18:22, Liming Sun <limings@nvidia.com> wrote:
->
-> This commit implements the runtime PM operations to disable eMMC
-> card clock when idle.
->
-> Reviewed-by: David Thompson <davthompson@nvidia.com>
-> Signed-off-by: Liming Sun <limings@nvidia.com>
-> ---
-> v8->v9:
->     - Address Adrian's comment to do the pm_runtime_put() in
->       dwcmshc_resume() instead; Error path changes not included yet.
-> v7->v8:
->     - Address Ulf's comment (option-1);
->     - Updates for Adrian's comment to remove the force_suspend/resume
->       in dwcmshc_resume()/dwcmshc_suspend(); Add comments for
->       dwcmshc_resume()/dwcmshc_suspend();
-> v6->v7:
->     - Address Ulf's comment;
-> v5->v6:
->     - Address Adrian's more comments and add coordination between
->       runtime PM and system PM;
-> v4->v5:
->     - Address Adrian's comment to move the pm_enable to the end to
->       avoid race;
-> v3->v4:
->     - Fix compiling reported by 'kernel test robot';
-> v2->v3:
->     - Revise the commit message;
-> v1->v2:
->     Updates for comments from Ulf:
->     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
-> v1: Initial version.
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 76 +++++++++++++++++++++++++++--
->  1 file changed, 72 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index e68cd87998c8..3b40f55ce2a4 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -15,6 +15,7 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/reset.h>
->  #include <linux/sizes.h>
->
-> @@ -548,9 +549,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
->
->         host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->
-> +       pm_runtime_get_noresume(dev);
-> +       pm_runtime_set_active(dev);
-> +       pm_runtime_enable(dev);
-> +
->         err = sdhci_setup_host(host);
->         if (err)
-> -               goto err_clk;
-> +               goto err_rpm;
->
->         if (rk_priv)
->                 dwcmshc_rk35xx_postinit(host, priv);
-> @@ -559,10 +564,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
->         if (err)
->                 goto err_setup_host;
->
-> +       pm_runtime_put(dev);
-> +
->         return 0;
->
->  err_setup_host:
->         sdhci_cleanup_host(host);
-> +err_rpm:
-> +       pm_runtime_disable(dev);
-> +       pm_runtime_put_noidle(dev);
->  err_clk:
->         clk_disable_unprepare(pltfm_host->clk);
->         clk_disable_unprepare(priv->bus_clk);
-> @@ -602,9 +612,13 @@ static int dwcmshc_suspend(struct device *dev)
->         struct rk35xx_priv *rk_priv = priv->priv;
->         int ret;
->
-> +       pm_runtime_get_sync(dev);
-> +
->         ret = sdhci_suspend_host(host);
-> -       if (ret)
-> +       if (ret) {
-> +               pm_runtime_put(dev);
->                 return ret;
-> +       }
->
->         clk_disable_unprepare(pltfm_host->clk);
->         if (!IS_ERR(priv->bus_clk))
-> @@ -642,11 +656,65 @@ static int dwcmshc_resume(struct device *dev)
->                         return ret;
->         }
->
-> -       return sdhci_resume_host(host);
-> +       ret = sdhci_resume_host(host);
-> +       if (ret)
-> +               return ret;
-> +
-> +       pm_runtime_put(dev);
+Dzie=C5=84 dobry,
 
-To simplify the error path, I would suggest that you move the call to
-pm_runtime_put() to dwcmshc_suspend(). In fact what you need is just a
-call to pm_runtime_put_noidle(), somewhere after the call to
-pm_runtime_get_sync().
+Czy interesuje Pa=C5=84stwa rozwi=C4=85zanie umo=C5=BCliwiaj=C4=85ce moni=
+torowanie samochod=C3=B3w firmowych oraz optymalizacj=C4=99 koszt=C3=B3w =
+ich utrzymania?=20
 
-This is because runtime suspend is prevented by the PM core as it
-bumps the usage count with a pm_runtime_get_noresume() in the
-device_prepare() phase.
 
-> +
-> +       return 0;
->  }
->  #endif
-
-[...]
-
-Kind regards
-Uffe
+Pozdrawiam,
+Jakub Lemczak
