@@ -2,68 +2,95 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43221EE498D
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Aug 2023 17:49:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57832EE49A8
+	for <linux-mmc@archiver.kernel.org>; Sat, 19 Aug 2023 06:18:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1379203AbjHRRtF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Aug 2023 13:49:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54236 "EHLO
+        id S245301AbjHSGSC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 19 Aug 2023 02:18:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50694 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1379251AbjHRRsl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Aug 2023 13:48:41 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E0683C16;
-        Fri, 18 Aug 2023 10:48:40 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 10F9663836;
-        Fri, 18 Aug 2023 17:48:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 790CDC43395;
-        Fri, 18 Aug 2023 17:48:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692380919;
-        bh=uImbYaovy5d7UgtYme5C4o0jRBq5yLYnSLDLLPC0yK4=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=kSvjKKbBOafjwvvMs0rGLK4dTkeAWzqYZ1tegMZ5nGKZoiTKwOenDlfdQk69wNk7C
-         tfDpY0KeZPVV4fqKIAT56Y3sdbQxXnjAFGUhvO4ao0lDe3m7X5YHeerRChhnPnRKQY
-         iQarKOOlwQ4FeZSyFjnL+3lAnKT88LAhiBn1iQknA8lFGb5QreDMRclGmH/b6TSD2i
-         G71FjL0/tGeyktl1ujaHZ17OLYL6HKug4RCUwnYLbOVbczkVnsBopwY6OwZNElT8ew
-         I/L227ICxanV/NjzTZTD/p8mXfqnstWw6Q+bNwKYcr1d8wfiZbZVj5H+9E5PNZGDIf
-         TQzpPbnTuFCSA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 679D9E26D33;
-        Fri, 18 Aug 2023 17:48:39 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.5-rc7
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20230818092916.38330-1-ulf.hansson@linaro.org>
-References: <20230818092916.38330-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20230818092916.38330-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.5-rc1-2
-X-PR-Tracked-Commit-Id: 58abdd80b93b09023ca03007b608685c41e3a289
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 88d4a1643afca63a3832eefad5c00775ea20c117
-Message-Id: <169238091942.10816.6747598920892994833.pr-tracker-bot@kernel.org>
-Date:   Fri, 18 Aug 2023 17:48:39 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S1344010AbjHSGR3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Aug 2023 02:17:29 -0400
+Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 514132133
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Aug 2023 23:17:26 -0700 (PDT)
+Received: from kwepemm600014.china.huawei.com (unknown [172.30.72.56])
+        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4RST4K6PVDzVjP4;
+        Sat, 19 Aug 2023 14:15:13 +0800 (CST)
+Received: from ubuntu1804.huawei.com (10.67.175.28) by
+ kwepemm600014.china.huawei.com (7.193.23.54) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.31; Sat, 19 Aug 2023 14:17:23 +0800
+From:   Yi Yang <yiyang13@huawei.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>
+Subject: [PATCH -next] mmc: sdhci-of-dwcmshc: Use helper function devm_clk_get_enabled()
+Date:   Sat, 19 Aug 2023 14:16:59 +0800
+Message-ID: <20230819061659.74716-1-yiyang13@huawei.com>
+X-Mailer: git-send-email 2.17.1
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Originating-IP: [10.67.175.28]
+X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+ kwepemm600014.china.huawei.com (7.193.23.54)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 18 Aug 2023 11:29:16 +0200:
+Since commit 7ef9651e9792 ("clk: Provide new devm_clk helpers for
+prepared and enabled clocks"), devm_clk_get() and clk_prepare_enable()
+can now be replaced by devm_clk_get_enabled() when the driver enables
+(and possibly prepares) the clocks for the whole lifetime of the device.
+Moreover, it is no longer necessary to unprepare and disable the clocks
+explicitly.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.5-rc1-2
+Signed-off-by: Yi Yang <yiyang13@huawei.com>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 18 ++++++++----------
+ 1 file changed, 8 insertions(+), 10 deletions(-)
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/88d4a1643afca63a3832eefad5c00775ea20c117
-
-Thank you!
-
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 31c1892f4ecd..144ca5bc427c 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -495,19 +495,19 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 	priv = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	if (dev->of_node) {
+-		pltfm_host->clk = devm_clk_get(dev, "core");
++		pltfm_host->clk = devm_clk_get_enabled(dev, "core");
+ 		if (IS_ERR(pltfm_host->clk)) {
+ 			err = PTR_ERR(pltfm_host->clk);
+-			dev_err(dev, "failed to get core clk: %d\n", err);
++			dev_err(dev, "failed to get or enable core clk: %d\n", err);
+ 			goto free_pltfm;
+ 		}
+-		err = clk_prepare_enable(pltfm_host->clk);
+-		if (err)
+-			goto free_pltfm;
+ 
+-		priv->bus_clk = devm_clk_get(dev, "bus");
+-		if (!IS_ERR(priv->bus_clk))
+-			clk_prepare_enable(priv->bus_clk);
++		priv->bus_clk = devm_clk_get_enabled(dev, "bus");
++		if (!IS_ERR(priv->bus_clk)) {
++			err = PTR_ERR(priv->bus_clk);
++			dev_err(dev, "failed to get or enable bus clk: %d\n", err);
++			goto free_pltfm;
++		}
+ 	}
+ 
+ 	err = mmc_of_parse(host->mmc);
+@@ -564,8 +564,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ err_setup_host:
+ 	sdhci_cleanup_host(host);
+ err_clk:
+-	clk_disable_unprepare(pltfm_host->clk);
+-	clk_disable_unprepare(priv->bus_clk);
+ 	if (rk_priv)
+ 		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
+ 					   rk_priv->rockchip_clks);
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.17.1
+
