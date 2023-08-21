@@ -2,62 +2,63 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C01BEE4996
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Aug 2023 11:55:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDD05EE49A6
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Aug 2023 11:56:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232585AbjHULzh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Aug 2023 07:55:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40754 "EHLO
+        id S233893AbjHUL4b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Aug 2023 07:56:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232429AbjHULzh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2023 07:55:37 -0400
-Received: from mail-ua1-x930.google.com (mail-ua1-x930.google.com [IPv6:2607:f8b0:4864:20::930])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C11912A
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2023 04:55:11 -0700 (PDT)
-Received: by mail-ua1-x930.google.com with SMTP id a1e0cc1a2514c-79df1303d01so1015152241.0
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2023 04:55:11 -0700 (PDT)
+        with ESMTP id S233572AbjHUL4b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2023 07:56:31 -0400
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CE6190
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2023 04:56:29 -0700 (PDT)
+Received: by mail-lf1-x131.google.com with SMTP id 2adb3069b0e04-4fe1b00fce2so4729635e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2023 04:56:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692618910; x=1693223710;
+        d=linaro.org; s=google; t=1692618988; x=1693223788;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=0gR8I8Q6lx9u8Hp3ihISykSpTYB0L05CPENUuRUE8Ag=;
-        b=D9GP2yfrhDGiqqYYGcGKvFWhUtpwmb+1csMOfoZuC338sR+Dg10xlYhB1j6yuQdU3m
-         5tRJ7LZnLBSsDYQHZGWnFciHZELXTrF0l+n71FgFdd+PIheqOhHJ3QI2vbmV06M714El
-         7aTOIBxaHsc0DlnR8Y0Ji/CuK+C2ECBNlbsZMHp35PPzdJhlFm7M1AxtxLdbFCuJFzXy
-         WxCZUE0736lF679uCYpiCQs3/ZDb94Md17FW+H6i0tqvUROfxpwPgbUL+O/uTxeQ3Wpc
-         7mo2VxValkuAdVCRO5DKgRaMLFUATi7+Mg37/kxzWeVjeKei1YpbG4CyfOAC8dI/KrpI
-         NSbw==
+        bh=gzHaCli76XFFs33dAyI/yMfRmboZlidg3nEdkVe0b9Q=;
+        b=X0ssVBK7yRWBK0zk6g+1Ji2ID9x9G2jXVwT9QWO2vm4RpbTC9yOqx0NwLHVxztI8lH
+         T+rgXo+CVlMMfZBLfCloJByRuwn11CT5vBdrTfAFMdwitcWOJvlXGlKRMTR7tE8IOH78
+         /bbomsm9zEwuH2y8m70LSQYmnlf0EXqJ9jgxGXsmMnsv5eN06tp3D4jYQe4uTF5gCFWm
+         ni99YRNW/p5I564qyZ1Cyr221M1M1F/WvYCIqc1RdDfRL8YALCsCUm4IZmbkHE+Hh1Ux
+         SrjqOBiiNGFvIvnAwrQeRLJNKwyQ1tIXJFedlfnsAbSfC+Z69fsHPilaU5N4SY98KBmE
+         V0zg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692618910; x=1693223710;
+        d=1e100.net; s=20221208; t=1692618988; x=1693223788;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=0gR8I8Q6lx9u8Hp3ihISykSpTYB0L05CPENUuRUE8Ag=;
-        b=G/W1UDwPAJW4XO3MYKXIu2Ba9wLxumpDDlAcxUieoEybNr3ymbP/f6lI/SpIeMEUYS
-         s+sdaZR4MgFN6eR7wnLukWLWpYsd3jV2h1M+zP/JKiGGQeFc0IFWGU1cz2NEkL1sR1QO
-         2mQ/tKDjUhyBje2OkQikZoINW7OtSCfxJurG+BEfRI0axnkunQ/s7TCwUtq+/8noKknD
-         AsJHh0e5XnP63kD7oInnj2MHIU8fL/k4taAnea26UstBzztl8p9AK3+Njc9aHtKgKnQN
-         2H8Lzk0S/CDW5QxlsxB26yv0O/z/QjsdqSju7q4veQkuCfguC/uMsr1j+IZ/oLNoBEEK
-         0NZg==
-X-Gm-Message-State: AOJu0YxACa171HUWijsBRbWYHtXNXl2M4tALqy7xmUVhpBV3XNDj7vJc
-        Z2MAgXrnlhrb78TsI0oN8ydz0d9skgxJCR9ooOvuLg==
-X-Google-Smtp-Source: AGHT+IE2rHnMRiJRqvuyXM+0ECA3Mi1TUyfIRuccTB+v5EBSEi+uLFZvVob9chbPnXA+QkWaZ2U8AYaVn9pSrGt/c18=
-X-Received: by 2002:a67:f70b:0:b0:44d:4385:1627 with SMTP id
- m11-20020a67f70b000000b0044d43851627mr2822642vso.14.1692618910548; Mon, 21
- Aug 2023 04:55:10 -0700 (PDT)
+        bh=gzHaCli76XFFs33dAyI/yMfRmboZlidg3nEdkVe0b9Q=;
+        b=OKnMnjxTLlVApYriV20dmnQaDt3rhXe4EC5UZRLyy2m+RGEQWmS446LLaXs2Q2xHl4
+         0ADxqWLO/Y02iENVe8J276iX67YV3Q5qVghIiWxLcpoqGGRFDoqYwcAppULV7y0ER5sU
+         1zN+p9BnANgjg3c5fxj8cxOD2TlYxVVmvDhMUJwImAPTYkL+tkFCkfOEw+H4ahpwL0n7
+         b5NKtOyr2wrEu662Cr8I6/O5Weudrj0E8TncM9YKH4IOhs7lQWGa0z7YkXTQUvp1Sx6y
+         RdJBsUspzMy5AQ5L4F85FlZ7vK1boxjZxl8NEibbiR1kNzhhWHR1NFz3YxMhz2JqvNni
+         tAQA==
+X-Gm-Message-State: AOJu0YzlS8MtHbKBfehv0I174gmgneKbVJUpXGK/okSh6qd/IBS5bbHN
+        rspdNQDEdgO5tHn9ASfgNeT0W41zMnCjDJEJrv0aDQ==
+X-Google-Smtp-Source: AGHT+IHDnDMYgdw1o22e43vEva7CUygObyhXkZuEOTOkU+m0tAPt9tiUDaG9HAE7F8xMAW9r3E9YZpl1nfGzX+qLqts=
+X-Received: by 2002:a05:6512:108d:b0:4ff:9095:a817 with SMTP id
+ j13-20020a056512108d00b004ff9095a817mr5762946lfg.57.1692618987664; Mon, 21
+ Aug 2023 04:56:27 -0700 (PDT)
 MIME-Version: 1.0
 References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com>
  <20230722014037.42647-2-shyamsaini@linux.microsoft.com> <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
  <b875892c-1777-d84a-987e-1b0d5ac29df@linux.microsoft.com> <94728786-b41b-1467-63c1-8e2d5acfa5e4@linaro.org>
  <CAFA6WYNPViMs=3cbNsEdhqnjNOUCsHE_8uqiDTzwCKDNNiDkCw@mail.gmail.com> <CAHUa44Ek0k2b-igA6Gd1ZXVzibTh2sNDMnE-weQwFFKEZ_1jOA@mail.gmail.com>
 In-Reply-To: <CAHUa44Ek0k2b-igA6Gd1ZXVzibTh2sNDMnE-weQwFFKEZ_1jOA@mail.gmail.com>
-From:   Sumit Garg <sumit.garg@linaro.org>
-Date:   Mon, 21 Aug 2023 17:24:59 +0530
-Message-ID: <CAFA6WYMLuvmXcc3FVoT_mOPsBrjPc3ucSoLK6qY_5995+ygHDw@mail.gmail.com>
+From:   Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date:   Mon, 21 Aug 2023 14:55:51 +0300
+Message-ID: <CAC_iWjKKap47PhiCi=BfPZC_wJhVDB10WSf9oWMgdwSgWCfO_A@mail.gmail.com>
 Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB) driver
 To:     Jens Wiklander <jens.wiklander@linaro.org>
-Cc:     Shyam Saini <shyamsaini@linux.microsoft.com>,
+Cc:     Sumit Garg <sumit.garg@linaro.org>,
+        Shyam Saini <shyamsaini@linux.microsoft.com>,
         Jerome Forissier <jerome.forissier@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
@@ -66,7 +67,6 @@ Cc:     Shyam Saini <shyamsaini@linux.microsoft.com>,
         Tomas Winkler <tomas.winkler@intel.com>,
         Linus Walleij <linus.walleij@linaro.org>,
         Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
         Tyler Hicks <code@tyhicks.com>,
         "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
         Paul Moore <paul@paul-moore.com>,
@@ -77,7 +77,7 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 21 Aug 2023 at 16:49, Jens Wiklander <jens.wiklander@linaro.org> wr=
+On Mon, 21 Aug 2023 at 14:19, Jens Wiklander <jens.wiklander@linaro.org> wr=
 ote:
 >
 > On Mon, Aug 21, 2023 at 12:03=E2=80=AFPM Sumit Garg <sumit.garg@linaro.or=
@@ -174,28 +174,19 @@ ne only.
 > > the RPMB CID which is allocated to the secure world.
 >
 > Another option is for OP-TEE to iterate over all RPMBs with a
-> programmed key and test if the key OP-TEE would use works.
-
-That would require intercepting OP-TEE RPMB frames such that any
-"write key" frame is blocked. As we don't want OP-TEE to occupy
-unprovisioned RPMB partitions.
-
-> That should
-> avoid the problem of provisioning a device-unique secure DTB.
-
-Okay I see the scalability concerns. So how about instead we have a
-UFS/eMMC/NVMe controller specific boolean secure RPMB DT property?
-
-> I'd
+> programmed key and test if the key OP-TEE would use works. That should
+> avoid the problem of provisioning a device-unique secure DTB. I'd
 > expect that the RPMB key is programmed by a trusted provisioning tool
 > since allowing OP-TEE to program the RPMB key has never been secure,
 > not unless the OP-TEE binary is rollback protected.
 
-Agree but any such RPMB key provisioning tool should either belong to
-OP-TEE, u-boot or Linux.
++1 to that.  Overall we shound't 'trust' to do the programming. For
+example, in OP-TEE if you compile it with device programming
+capabilities, you can easily convince OP-TEE to send you the symmetric
+key by swapping the supplicant with a malicious application.
 
--Sumit
-
+Thanks
+/Ilias
 >
 > Cheers,
 > Jens
