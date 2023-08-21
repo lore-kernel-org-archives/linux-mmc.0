@@ -2,106 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FB6DEE49A0
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Aug 2023 06:23:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CF3CEE49A8
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Aug 2023 06:51:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232852AbjHUGXt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Aug 2023 02:23:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33366 "EHLO
+        id S233491AbjHUGvS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Aug 2023 02:51:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49772 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233414AbjHUGXl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2023 02:23:41 -0400
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1911C11C
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Aug 2023 23:23:27 -0700 (PDT)
-Received: from kwepemm600014.china.huawei.com (unknown [172.30.72.57])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4RTj4k6CDjzNmlX;
-        Mon, 21 Aug 2023 14:19:50 +0800 (CST)
-Received: from ubuntu1804.huawei.com (10.67.175.28) by
- kwepemm600014.china.huawei.com (7.193.23.54) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.31; Mon, 21 Aug 2023 14:23:24 +0800
-From:   Yi Yang <yiyang13@huawei.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>
-Subject: [PATCH v2] mmc: sdhci-of-dwcmshc: Use helper function devm_clk_get_enabled()
-Date:   Mon, 21 Aug 2023 14:23:03 +0800
-Message-ID: <20230821062303.185174-1-yiyang13@huawei.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S229721AbjHUGvS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2023 02:51:18 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28DCAB8;
+        Sun, 20 Aug 2023 23:51:12 -0700 (PDT)
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 37L5wNdu009422;
+        Mon, 21 Aug 2023 06:51:00 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=qcppdkim1;
+ bh=di6Tt1gnzwfMZ8GCMunHUWzH+NvbvNGfF66QYbkwU3k=;
+ b=U2BIRXPeAQ6Jz5AmjBuWYN6VGHSvYggkdveM4ogYAElgQi6n5bi6nOsm53nRynCz6/DV
+ O8w+m3QqO/ocTnarNG53FYJ2hvbfL6TtOChvCQXDlCbD85COtUepwaMSBHG0HrAZb1I9
+ EihAx7miYQczfVWeC4fm+l8FNu5qSEfmh3Z4wyvAKpV+XJ30LCr3QBlS7EgyCbH7kSq1
+ toZGOG78m/e+avz8BOD3vOyVVBYqQ5uzmCYVeHuQwoy6wGWrpAFF92kg1F7a3+eIGW4w
+ zBwFmR9NAZbpNHF15dSospiyIdY4JcJ4iZSVBeJ0p55RZJHcyJuwoXcNzpBYGHu16oAh eg== 
+Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3sjken36r3-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 21 Aug 2023 06:50:59 +0000
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 37L6oxQJ011999
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 21 Aug 2023 06:50:59 GMT
+Received: from hu-omprsing-hyd.qualcomm.com (10.80.80.8) by
+ nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.36; Sun, 20 Aug 2023 23:50:56 -0700
+From:   Om Prakash Singh <quic_omprsing@quicinc.com>
+To:     <ebiggers@kernel.org>, <andersson@kernel.org>
+CC:     <linux-mmc@vger.kernel.org>, <satyaprateek2357@gmail.com>,
+        <ulf.hansson@linaro.org>, <agross@kernel.org>,
+        <adrian.hunter@intel.com>, <quic_omprsing@quicinc.com>,
+        <linux-arm-msm@vger.kernel.org>
+Subject: [PATCH] mmc: core: crypto: Add MMC_CAP2_CRYPTO_RETAIN_KEY
+Date:   Mon, 21 Aug 2023 12:20:37 +0530
+Message-ID: <20230821065037.1146977-1-quic_omprsing@quicinc.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-Originating-IP: [10.67.175.28]
-X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
- kwepemm600014.china.huawei.com (7.193.23.54)
-X-CFilter-Loop: Reflected
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01b.na.qualcomm.com (10.47.209.197)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: elue6zeWhpREqPGcOEKelOtWL601IrKp
+X-Proofpoint-GUID: elue6zeWhpREqPGcOEKelOtWL601IrKp
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.601,FMLib:17.11.176.26
+ definitions=2023-08-20_15,2023-08-18_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0
+ mlxlogscore=999 impostorscore=0 phishscore=0 bulkscore=0 malwarescore=0
+ lowpriorityscore=0 clxscore=1011 spamscore=0 adultscore=0 mlxscore=0
+ priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2306200000 definitions=main-2308210063
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Since commit 7ef9651e9792 ("clk: Provide new devm_clk helpers for
-prepared and enabled clocks"), devm_clk_get() and clk_prepare_enable()
-can now be replaced by devm_clk_get_enabled() when the driver enables
-(and possibly prepares) the clocks for the whole lifetime of the device.
-Moreover, it is no longer necessary to unprepare and disable the clocks
-explicitly.
+Add new capability MMC_CAP2_CRYPTO_RETAIN_KEY for mmc host that
+support inline crypto key retention and doesn't need reinitialization
+of all keys after mmc host has reinitialized.
 
-Signed-off-by: Yi Yang <yiyang13@huawei.com>
+Signed-off-by: Om Prakash Singh <quic_omprsing@quicinc.com>
 ---
-v2: Remove clk_disable_unprepare in dwcmshc_remove()
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 20 ++++++++------------
- 1 file changed, 8 insertions(+), 12 deletions(-)
+ drivers/mmc/core/crypto.c    | 3 ++-
+ drivers/mmc/host/sdhci-msm.c | 1 +
+ include/linux/mmc/host.h     | 2 ++
+ 3 files changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 31c1892f4ecd..08b566984733 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -495,19 +495,19 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 	priv = sdhci_pltfm_priv(pltfm_host);
+diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
+index fec4fbf16a5b..f8ce7c2295f6 100644
+--- a/drivers/mmc/core/crypto.c
++++ b/drivers/mmc/core/crypto.c
+@@ -15,7 +15,8 @@
+ void mmc_crypto_set_initial_state(struct mmc_host *host)
+ {
+ 	/* Reset might clear all keys, so reprogram all the keys. */
+-	if (host->caps2 & MMC_CAP2_CRYPTO)
++	if ((host->caps2 & MMC_CAP2_CRYPTO) &&
++	    !(host->caps2 & MMC_CAP2_CRYPTO_RETAIN_KEY))
+ 		blk_crypto_reprogram_all_keys(&host->crypto_profile);
+ }
  
- 	if (dev->of_node) {
--		pltfm_host->clk = devm_clk_get(dev, "core");
-+		pltfm_host->clk = devm_clk_get_enabled(dev, "core");
- 		if (IS_ERR(pltfm_host->clk)) {
- 			err = PTR_ERR(pltfm_host->clk);
--			dev_err(dev, "failed to get core clk: %d\n", err);
-+			dev_err(dev, "failed to get or enable core clk: %d\n", err);
- 			goto free_pltfm;
- 		}
--		err = clk_prepare_enable(pltfm_host->clk);
--		if (err)
--			goto free_pltfm;
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 1c935b5bafe1..cfc2328f90ed 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1828,6 +1828,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
  
--		priv->bus_clk = devm_clk_get(dev, "bus");
--		if (!IS_ERR(priv->bus_clk))
--			clk_prepare_enable(priv->bus_clk);
-+		priv->bus_clk = devm_clk_get_enabled(dev, "bus");
-+		if (!IS_ERR(priv->bus_clk)) {
-+			err = PTR_ERR(priv->bus_clk);
-+			dev_err(dev, "failed to get or enable bus clk: %d\n", err);
-+			goto free_pltfm;
-+		}
- 	}
+ 	msm_host->ice = ice;
+ 	mmc->caps2 |= MMC_CAP2_CRYPTO;
++	mmc->caps2 |= MMC_CAP2_CRYPTO_RETAIN_KEY;
  
- 	err = mmc_of_parse(host->mmc);
-@@ -564,8 +564,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
- err_setup_host:
- 	sdhci_cleanup_host(host);
- err_clk:
--	clk_disable_unprepare(pltfm_host->clk);
--	clk_disable_unprepare(priv->bus_clk);
- 	if (rk_priv)
- 		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
- 					   rk_priv->rockchip_clks);
-@@ -583,8 +581,6 @@ static void dwcmshc_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 461d1543893b..74c69415746d 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -417,8 +417,10 @@ struct mmc_host {
+ #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
+ #ifdef CONFIG_MMC_CRYPTO
+ #define MMC_CAP2_CRYPTO		(1 << 27)	/* Host supports inline encryption */
++#define MMC_CAP2_CRYPTO_RETAIN_KEY (1 << 28)	/* Host doesn't need inline encryption key reinitialization */
+ #else
+ #define MMC_CAP2_CRYPTO		0
++#define MMC_CAP2_CRYPTO_RETAIN_KEY 0
+ #endif
+ #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
  
- 	sdhci_remove_host(host, 0);
- 
--	clk_disable_unprepare(pltfm_host->clk);
--	clk_disable_unprepare(priv->bus_clk);
- 	if (rk_priv)
- 		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
- 					   rk_priv->rockchip_clks);
 -- 
-2.17.1
+2.25.1
 
