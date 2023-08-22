@@ -2,99 +2,213 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E32DEE49AB
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Aug 2023 04:50:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B9C4EE49AF
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Aug 2023 18:43:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232413AbjHVEuQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Aug 2023 00:50:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50566 "EHLO
+        id S229569AbjHVSnq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Aug 2023 14:43:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53544 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232067AbjHVEuP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2023 00:50:15 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D0DA189;
-        Mon, 21 Aug 2023 21:50:14 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0EC746332D;
-        Tue, 22 Aug 2023 04:50:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 25093C433C8;
-        Tue, 22 Aug 2023 04:50:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692679813;
-        bh=368LtFOTDEZpW8msG0Fr/4HntmGt3x/Cdh+ey/KmNfg=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=KTr6MQcKL/n723EvCmkU31o79mzoDHAkHM6rVdM8j3GMj7zRH9IkEEudDwqFhuBaS
-         dXNAE0gtxoLV3pGbjFcBy1ydDwxYXzfnm2sqdJ90RM7cHzp8ebnc3WHc8oqV5i21w6
-         tEEvF9tYEJ2QNmhxpXrmPBlVWss3US6cNFTYoCP+g8MGZrxSUOhsD0c+/c6TeNO4E8
-         qcRyU5FFSe8HQeRx2zmfCaL2rHOIKdLVwyM5REPQpn8UuIfx+h9i+bjNWAtA0TtGj2
-         H8QaPb2WW867kyEsjP37j0Fa3lkAggRg+btun4ywSBZNFn28jvtGG35bIkyDHK/Y8J
-         gB+Hr/FpgjaJA==
-Date:   Mon, 21 Aug 2023 21:50:11 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Om Prakash Singh <quic_omprsing@quicinc.com>
-Cc:     andersson@kernel.org, linux-mmc@vger.kernel.org,
-        satyaprateek2357@gmail.com, ulf.hansson@linaro.org,
-        agross@kernel.org, adrian.hunter@intel.com,
-        linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH] mmc: core: crypto: Add MMC_CAP2_CRYPTO_RETAIN_KEY
-Message-ID: <20230822045011.GA1661@sol.localdomain>
-References: <20230821065037.1146977-1-quic_omprsing@quicinc.com>
+        with ESMTP id S229508AbjHVSnq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2023 14:43:46 -0400
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CF290CD1;
+        Tue, 22 Aug 2023 11:43:43 -0700 (PDT)
+Received: by linux.microsoft.com (Postfix, from userid 1152)
+        id 446E12126CC3; Tue, 22 Aug 2023 11:43:43 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 446E12126CC3
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+        s=default; t=1692729823;
+        bh=arqNRg4wGatPNmrOhmdLvrj5EQchfmRIhWqAHl91U0w=;
+        h=Date:From:To:cc:Subject:In-Reply-To:References:From;
+        b=USX9khdcae7ZtgomjbVEMycgzJuC6NfFuEMyPxCgFxapYjTRfNBYOdA2EnLzaSe1s
+         De2s6IIV6D7/w9litwf5V4341STar4r5AfY0faKCZELCijvgsfoBtDqnORhQyn+7x+
+         dZO+2KCaXYXAbqEQK503bglwrrytkHPdR79/3Pnk=
+Received: from localhost (localhost [127.0.0.1])
+        by linux.microsoft.com (Postfix) with ESMTP id 416C430705C5;
+        Tue, 22 Aug 2023 11:43:43 -0700 (PDT)
+Date:   Tue, 22 Aug 2023 11:43:43 -0700 (PDT)
+From:   Shyam Saini <shyamsaini@linux.microsoft.com>
+To:     Bart Van Assche <bvanassche@acm.org>
+cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        op-tee@lists.trustedfirmware.org, linux-scsi@vger.kernel.org,
+        =?ISO-8859-15?Q?Alex_Benn=E9e?= <alex.bennee@linaro.org>,
+        Tomas Winkler <tomas.winkler@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Sumit Garg <sumit.garg@linaro.org>,
+        Tyler Hicks <code@tyhicks.com>,
+        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
+        Paul Moore <paul@paul-moore.com>,
+        Allen Pais <apais@linux.microsoft.com>
+Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB)
+ driver
+In-Reply-To: <7c8945be-2549-ee79-fbdf-4870eca6f908@acm.org>
+Message-ID: <184a97f5-1ad1-6efc-bc7b-b41fce6f2773@linux.microsoft.com>
+References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com> <20230722014037.42647-2-shyamsaini@linux.microsoft.com> <7c8945be-2549-ee79-fbdf-4870eca6f908@acm.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230821065037.1146977-1-quic_omprsing@quicinc.com>
+Content-Type: text/plain; charset=US-ASCII; format=flowed
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Aug 21, 2023 at 12:20:37PM +0530, Om Prakash Singh wrote:
-> Add new capability MMC_CAP2_CRYPTO_RETAIN_KEY for mmc host that
-> support inline crypto key retention and doesn't need reinitialization
-> of all keys after mmc host has reinitialized.
 
-MMC_CAP2_RETAINS_CRYPTO_KEYS would be a better name.
+Hi Bart,
 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 1c935b5bafe1..cfc2328f90ed 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1828,6 +1828,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->  
->  	msm_host->ice = ice;
->  	mmc->caps2 |= MMC_CAP2_CRYPTO;
-> +	mmc->caps2 |= MMC_CAP2_CRYPTO_RETAIN_KEY;
->  
->  	return 0;
->  }
+sorry for not replying earlier, as I am very new to NVMe/UFS spec and was 
+figuring out few details about them.
 
-Are you sure that *all* versions of Qualcomm's eMMC inline encryption hardware
-have this behavior?
+> On 7/21/23 18:40, Shyam Saini wrote:
+>>  +config RPMB
+>>  +	tristate "RPMB partition interface"
+>>  +	help
+>>  +	  Unified RPMB partition interface for RPMB capable devices such as
+>>  +          eMMC and UFS. Provides interface for in kernel security
+>>  controllers to
+>>  +	  access RPMB partition.
+>>  +
+>>  +	  If unsure, select N.
+>
+> Please also mention NVMe.
 
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 461d1543893b..74c69415746d 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -417,8 +417,10 @@ struct mmc_host {
->  #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
->  #ifdef CONFIG_MMC_CRYPTO
->  #define MMC_CAP2_CRYPTO		(1 << 27)	/* Host supports inline encryption */
-> +#define MMC_CAP2_CRYPTO_RETAIN_KEY (1 << 28)	/* Host doesn't need inline encryption key reinitialization */
+Sure,
+> Please change the word "partition" into "unit" to avoid confusion with the 
+> concept "LBA range partition".
 
-How about:
+sure, in next iteration
 
-/* Host retains inline encryption keys on reset */
+>>  +static DEFINE_IDA(rpmb_ida);
+>
+> How are accesses to this IDA serialized?
 
->  #else
->  #define MMC_CAP2_CRYPTO		0
-> +#define MMC_CAP2_CRYPTO_RETAIN_KEY 0
->  #endif
->  #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
+I will look into that.
 
-'1 << 28' is already used.
+>>  +/**
+>>  + * rpmb_get_capacity() - returns the capacity of the rpmb device
+>>  + * @rdev: rpmb device
+>>  + *
+>>  + * Return:
+>>  + * *        capacity of the device in units of 128K, on success
+>>  + * *        -EINVAL on wrong parameters
+>>  + * *        -EOPNOTSUPP if device doesn't support the requested operation
+>>  + * *        < 0 if the operation fails
+>>  + */
+>
+> Why in units of 128 KiB?
 
-Also, the new flag doesn't need to be in the #ifdef section.
+I think UFS/eMMC RPMB spec suggests size of RPMB multiple of 128K
+and NVMe spec suggests RPMB Data Area to be multiple of 128K as well.
 
-- Eric
+>>  +/**
+>>  + * rpmb_dev_find_by_device() - retrieve rpmb device from the parent
+>>  device
+>>  + * @parent: parent device of the rpmb device
+>>  + * @target: RPMB target/region within the physical device
+>>  + *
+>>  + * Return: NULL if there is no rpmb device associated with the parent
+>>  device
+>>  + */
+>
+> Can an NVMe controller have multiple RPMB units? From the NVMe specification: 
+> "The controller may support multiple RPMB targets."
+
+That we have to figure, I see NVMe device can have upto 7 RPMB
+targets/units
+
+> Can rpmb_dev_find_by_device() be used if multiple RPMB units are associated 
+> with a single controller?
+
+That's not finalised yet, but we some ideas from Optee folks on the other 
+replies.
+
+>>  +/**
+>>  + * rpmb_dev_register - register RPMB partition with the RPMB subsystem
+>>  + * @dev: storage device of the rpmb device
+>>  + * @target: RPMB target/region within the physical device
+>>  + * @ops: device specific operations
+>>  + *
+>>  + * Return: a pointer to rpmb device
+>>  + */
+>>  +struct rpmb_dev *rpmb_dev_register(struct device *dev, u8 target,
+>>  +				   const struct rpmb_ops *ops)
+>>  +{
+>>  +	struct rpmb_dev *rdev;
+>>  +	int id;
+>>  +	int ret;
+>>  +
+>>  +	if (!dev || !ops)
+>>  +		return ERR_PTR(-EINVAL);
+>>  +
+>>  +	if (!ops->program_key)
+>>  +		return ERR_PTR(-EINVAL);
+>>  +
+>>  +	if (!ops->get_capacity)
+>>  +		return ERR_PTR(-EINVAL);
+>>  +
+>>  +	if (!ops->get_write_counter)
+>>  +		return ERR_PTR(-EINVAL);
+>>  +
+>>  +	if (!ops->write_blocks)
+>>  +		return ERR_PTR(-EINVAL);
+>>  +
+>>  +	if (!ops->read_blocks)
+>>  +		return ERR_PTR(-EINVAL);
+>>  +
+>>  +	rdev = kzalloc(sizeof(*rdev), GFP_KERNEL);
+>>  +	if (!rdev)
+>>  +		return ERR_PTR(-ENOMEM);
+>>  +
+>>  +	id = ida_simple_get(&rpmb_ida, 0, 0, GFP_KERNEL);
+>>  +	if (id < 0) {
+>>  +		ret = id;
+>>  +		goto exit;
+>>  +	}
+>>  +
+>>  +	mutex_init(&rdev->lock);
+>>  +	rdev->ops = ops;
+>>  +	rdev->id = id;
+>>  +	rdev->target = target;
+>>  +
+>>  +	dev_set_name(&rdev->dev, "rpmb%d", id);
+>>  +	rdev->dev.class = &rpmb_class;
+>>  +	rdev->dev.parent = dev;
+>>  +
+>>  +	rpmb_cdev_prepare(rdev);
+>>  +
+>>  +	ret = device_register(&rdev->dev);
+>>  +	if (ret)
+>>  +		goto exit;
+>>  +
+>>  +	rpmb_cdev_add(rdev);
+>>  +
+>>  +	dev_dbg(&rdev->dev, "registered device\n");
+>>  +
+>>  +	return rdev;
+>>  +
+>>  +exit:
+>>  +	if (id >= 0)
+>>  +		ida_simple_remove(&rpmb_ida, id);
+>>  +	kfree(rdev);
+>>  +	return ERR_PTR(ret);
+>>  +}
+>
+> How is user space software supposed to map an NVMe RPMB target ID to an RPMB 
+> device name?
+
+I am not sure, this driver aims to provide in kernel RPMB access APIs, 
+user space support may be added later on, but i will look if the current 
+RFC version has any implication on future user-space support.
+
+>>  +MODULE_AUTHOR("Intel Corporation");
+>
+> Shouldn't this be the name of a person instead of the name of a company?
+>
+
+Thanks, I will address that in next iteration.
+
+Please keep posted your reviews and feedback.
+
+Best Regards,
+Shyam
