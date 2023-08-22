@@ -2,186 +2,99 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B71E0EE49A6
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Aug 2023 12:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E32DEE49AB
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Aug 2023 04:50:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232271AbjHUMfp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Aug 2023 08:35:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43178 "EHLO
+        id S232413AbjHVEuQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Aug 2023 00:50:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234971AbjHUMfo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Aug 2023 08:35:44 -0400
-Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 289C9BE
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2023 05:35:39 -0700 (PDT)
-Received: by mail-wm1-x32a.google.com with SMTP id 5b1f17b1804b1-3fee5ddc334so10767775e9.1
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Aug 2023 05:35:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692621337; x=1693226137;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Psh1Yg7aHq2F7Ayg3BGMUuPWMlj2ugXpanVVFkKCEuQ=;
-        b=wVLQitoO44zGDSIkeuTGrmXWXy4m/ccIYC2yFJRkTiA5uNLT+1Vtcp0ZWrnXsPHigu
-         mS7iU954kNWzcx5zaWSNABfT5BZWyK1Mi+VwkHYdRxwECF6Q+WL7pYCKcrs0EQ+d4aZc
-         Y8w6QGqtZ6GnzW6yV/b2L1BC06III5CYmCF6HzZ70BCxL6CQ/c6DGhpzOXU8Wg2O9rXf
-         cWil4Zq/X4ibnBkog8X4EvRgOifd++368bzJW48Ro5XTM3+0ikgjnWu8B+2scLB74Afd
-         BoEVWyEnnt/qd8/4MaH6xvGDrfbXb8E+7PVfhUUs2atkG0WhHDtDgSHyPdRt6QDaEIcc
-         7xaA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692621337; x=1693226137;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Psh1Yg7aHq2F7Ayg3BGMUuPWMlj2ugXpanVVFkKCEuQ=;
-        b=U4iOeGsc/rNgT3GHdDfYq/nUjxfRal1bbpYf7gu0EqoQVdbMupzNmAzK2AL4S3c4ZL
-         D9nNE5HPy203Ivs2sQ7lbxJT85fHEoztQ7msq3p0Ka679+ZiR32YXtlp9ccNfIAIRfJU
-         7CHUbXbR6hCSkm8BlYngrwhl9m7oIHGsb2uaTc7Tamkg6iXF87tJcC1GqMIj0w7XkLBH
-         Zp+EK9QNWnUC311CSknCkMuwnhzFIEUO8Of3YUqnA5zHII5RtQW9sjKeVJ1b/kb5TEji
-         ay2Mjqqx4ZoiCI1nRjs7nG6wcV8vw+dFvbNONS0HXKupf/K6BVl4f2IhV0zS8L5XyArC
-         AhUg==
-X-Gm-Message-State: AOJu0Yxuy12WS7iQPNGW6zIZdEmIGCm5JLOP3kC4df++uuFRDYSRncwp
-        xLvW90dZ8mQe5PzF3cINgyjDXQ==
-X-Google-Smtp-Source: AGHT+IHJqN4nMiwLfU9x7kJBC0WVgqhplnduP2Vx5BXbnBtiFqUiiZX1EmQ7ZHdvMKsKKnYkVGhazg==
-X-Received: by 2002:a05:600c:690e:b0:3fb:c257:9f48 with SMTP id fo14-20020a05600c690e00b003fbc2579f48mr4863816wmb.16.1692621337636;
-        Mon, 21 Aug 2023 05:35:37 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:3cb:7bb0:86ea:e59d:2685:7a39? ([2a01:e0a:3cb:7bb0:86ea:e59d:2685:7a39])
-        by smtp.gmail.com with ESMTPSA id c1-20020a7bc001000000b003fee567235bsm8457053wmb.1.2023.08.21.05.35.36
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Aug 2023 05:35:37 -0700 (PDT)
-Message-ID: <e46f177e-b35d-f6a8-35b1-d260f498c5cf@linaro.org>
-Date:   Mon, 21 Aug 2023 14:35:36 +0200
+        with ESMTP id S232067AbjHVEuP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2023 00:50:15 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D0DA189;
+        Mon, 21 Aug 2023 21:50:14 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0EC746332D;
+        Tue, 22 Aug 2023 04:50:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 25093C433C8;
+        Tue, 22 Aug 2023 04:50:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1692679813;
+        bh=368LtFOTDEZpW8msG0Fr/4HntmGt3x/Cdh+ey/KmNfg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=KTr6MQcKL/n723EvCmkU31o79mzoDHAkHM6rVdM8j3GMj7zRH9IkEEudDwqFhuBaS
+         dXNAE0gtxoLV3pGbjFcBy1ydDwxYXzfnm2sqdJ90RM7cHzp8ebnc3WHc8oqV5i21w6
+         tEEvF9tYEJ2QNmhxpXrmPBlVWss3US6cNFTYoCP+g8MGZrxSUOhsD0c+/c6TeNO4E8
+         qcRyU5FFSe8HQeRx2zmfCaL2rHOIKdLVwyM5REPQpn8UuIfx+h9i+bjNWAtA0TtGj2
+         H8QaPb2WW867kyEsjP37j0Fa3lkAggRg+btun4ywSBZNFn28jvtGG35bIkyDHK/Y8J
+         gB+Hr/FpgjaJA==
+Date:   Mon, 21 Aug 2023 21:50:11 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Om Prakash Singh <quic_omprsing@quicinc.com>
+Cc:     andersson@kernel.org, linux-mmc@vger.kernel.org,
+        satyaprateek2357@gmail.com, ulf.hansson@linaro.org,
+        agross@kernel.org, adrian.hunter@intel.com,
+        linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH] mmc: core: crypto: Add MMC_CAP2_CRYPTO_RETAIN_KEY
+Message-ID: <20230822045011.GA1661@sol.localdomain>
+References: <20230821065037.1146977-1-quic_omprsing@quicinc.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB)
- driver
-Content-Language: en-US
-To:     Jens Wiklander <jens.wiklander@linaro.org>,
-        Sumit Garg <sumit.garg@linaro.org>
-Cc:     Shyam Saini <shyamsaini@linux.microsoft.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        op-tee@lists.trustedfirmware.org, linux-scsi@vger.kernel.org,
-        =?UTF-8?Q?Alex_Benn=c3=a9e?= <alex.bennee@linaro.org>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Tyler Hicks <code@tyhicks.com>,
-        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
-        Paul Moore <paul@paul-moore.com>,
-        Allen Pais <apais@linux.microsoft.com>
-References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com>
- <20230722014037.42647-2-shyamsaini@linux.microsoft.com>
- <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
- <b875892c-1777-d84a-987e-1b0d5ac29df@linux.microsoft.com>
- <94728786-b41b-1467-63c1-8e2d5acfa5e4@linaro.org>
- <CAFA6WYNPViMs=3cbNsEdhqnjNOUCsHE_8uqiDTzwCKDNNiDkCw@mail.gmail.com>
- <CAHUa44Ek0k2b-igA6Gd1ZXVzibTh2sNDMnE-weQwFFKEZ_1jOA@mail.gmail.com>
-From:   Jerome Forissier <jerome.forissier@linaro.org>
-In-Reply-To: <CAHUa44Ek0k2b-igA6Gd1ZXVzibTh2sNDMnE-weQwFFKEZ_1jOA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230821065037.1146977-1-quic_omprsing@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Mon, Aug 21, 2023 at 12:20:37PM +0530, Om Prakash Singh wrote:
+> Add new capability MMC_CAP2_CRYPTO_RETAIN_KEY for mmc host that
+> support inline crypto key retention and doesn't need reinitialization
+> of all keys after mmc host has reinitialized.
 
+MMC_CAP2_RETAINS_CRYPTO_KEYS would be a better name.
 
-On 8/21/23 13:18, Jens Wiklander wrote:
-> On Mon, Aug 21, 2023 at 12:03 PM Sumit Garg <sumit.garg@linaro.org> wrote:
->>
->> On Mon, 21 Aug 2023 at 15:19, Jerome Forissier
->> <jerome.forissier@linaro.org> wrote:
->>>
->>>
->>>
->>> On 8/17/23 01:31, Shyam Saini wrote:
->>>>
->>>> Hi Ulf,
->>>>
->>>>> On Sat, 22 Jul 2023 at 03:41, Shyam Saini
->>>>> <shyamsaini@linux.microsoft.com> wrote:
->>>>>>
->>>>>> From: Alex Bennée <alex.bennee@linaro.org>
->>>>>>
->>>>>> [This is patch 1 from [1] Alex's submission and this RPMB layer was
->>>>>> originally proposed by [2]Thomas Winkler ]
->>>>>>
->>>>>> A number of storage technologies support a specialised hardware
->>>>>> partition designed to be resistant to replay attacks. The underlying
->>>>>> HW protocols differ but the operations are common. The RPMB partition
->>>>>> cannot be accessed via standard block layer, but by a set of specific
->>>>>> commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
->>>>>> partition provides authenticated and replay protected access, hence
->>>>>> suitable as a secure storage.
->>>>>>
->>>>>> The initial aim of this patch is to provide a simple RPMB Driver which
->>>>>> can be accessed by Linux's optee driver to facilitate fast-path for
->>>>>> RPMB access to optee OS(secure OS) during the boot time. [1] Currently,
->>>>>> Optee OS relies on user-tee supplicant to access eMMC RPMB partition.
->>>>>>
->>>>>> A TEE device driver can claim the RPMB interface, for example, via
->>>>>> class_interface_register(). The RPMB driver provides a series of
->>>>>> operations for interacting with the device.
->>>>>
->>>>> I don't quite follow this. More exactly, how will the TEE driver know
->>>>> what RPMB device it should use?
->>>>
->>>> I don't have complete code to for this yet, but i think OP-TEE driver
->>>> should register with RPMB subsystem and then we can have eMMC/UFS/NVMe
->>>> specific implementation for RPMB operations.
->>>>
->>>> Linux optee driver can handle RPMB frames and pass it to RPMB subsystem
->>>>
->>
->> It would be better to have this OP-TEE use case fully implemented. So
->> that we can justify it as a valid user for this proposed RPMB
->> subsystem. If you are looking for any further suggestions then please
->> let us know.
-> 
-> +1
-> 
->>
->>>> [1] U-Boot has mmc specific implementation
->>>>
->>>> I think OPTEE-OS has CFG_RPMB_FS_DEV_ID option
->>>> CFG_RPMB_FS_DEV_ID=1 for /dev/mmcblk1rpmb,
->>>
->>> Correct. Note that tee-supplicant will ignore this device ID if --rmb-cid
->>> is given and use the specified RPMB instead (the CID is a non-ambiguous way
->>> to identify a RPMB device).
->>>
->>>> but in case if a
->>>> system has multiple RPMB devices such as UFS/eMMC/NVMe, one them
->>>> should be declared as secure storage and optee should access that one only.
->>>
->>> Indeed, that would be an equivalent of tee-supplicant's --rpmb-cid.
->>>
->>>> Sumit, do you have suggestions for this ?
->>>
->>
->> I would suggest having an OP-TEE secure DT property that would provide
->> the RPMB CID which is allocated to the secure world.
-> 
-> Another option is for OP-TEE to iterate over all RPMBs with a
-> programmed key and test if the key OP-TEE would use works. That should
-> avoid the problem of provisioning a device-unique secure DTB. I'd
-> expect that the RPMB key is programmed by a trusted provisioning tool
-> since allowing OP-TEE to program the RPMB key has never been secure,
-> not unless the OP-TEE binary is rollback protected.
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 1c935b5bafe1..cfc2328f90ed 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1828,6 +1828,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>  
+>  	msm_host->ice = ice;
+>  	mmc->caps2 |= MMC_CAP2_CRYPTO;
+> +	mmc->caps2 |= MMC_CAP2_CRYPTO_RETAIN_KEY;
+>  
+>  	return 0;
+>  }
 
-+1 if we can assume the same key won't be used for several devices, which
-is probably reasonable.
+Are you sure that *all* versions of Qualcomm's eMMC inline encryption hardware
+have this behavior?
 
-> 
-> Cheers,
-> Jens
-> 
->>
->> -Sumit
->>
->>>
->>> --
->>> Jerome
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 461d1543893b..74c69415746d 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -417,8 +417,10 @@ struct mmc_host {
+>  #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
+>  #ifdef CONFIG_MMC_CRYPTO
+>  #define MMC_CAP2_CRYPTO		(1 << 27)	/* Host supports inline encryption */
+> +#define MMC_CAP2_CRYPTO_RETAIN_KEY (1 << 28)	/* Host doesn't need inline encryption key reinitialization */
+
+How about:
+
+/* Host retains inline encryption keys on reset */
+
+>  #else
+>  #define MMC_CAP2_CRYPTO		0
+> +#define MMC_CAP2_CRYPTO_RETAIN_KEY 0
+>  #endif
+>  #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
+
+'1 << 28' is already used.
+
+Also, the new flag doesn't need to be in the #ifdef section.
+
+- Eric
