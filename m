@@ -2,214 +2,132 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1AABEE49AF
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Aug 2023 22:45:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75A4AEE49A3
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 03:56:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231142AbjHVWpy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Aug 2023 18:45:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51940 "EHLO
+        id S232496AbjHWD4u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Aug 2023 23:56:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230316AbjHVWpx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2023 18:45:53 -0400
-Received: from mail-qv1-xf2d.google.com (mail-qv1-xf2d.google.com [IPv6:2607:f8b0:4864:20::f2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C69E9CF1
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2023 15:45:51 -0700 (PDT)
-Received: by mail-qv1-xf2d.google.com with SMTP id 6a1803df08f44-649921ec030so28717386d6.1
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Aug 2023 15:45:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1692744351; x=1693349151;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=IA+F9ijfpdDdMdFFKNzTJ+HhXSTDp2+LPFf3LSuVukc=;
-        b=MZmfQU/jF6hti+j8QBpEKlF4/1F4b+iSStWbr2ZoCz6SSGNdQeD68dNaIX1JnISuVz
-         5VSa57ZNlt+IZelO4/UCkawz9J0W/USJEp3jhiBT+V8buguwF54PJX1LJR+EmS8kjrOI
-         PWbRwknIVX3y+aZFGygj/fXwc3KV0wUJvEQBk=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692744351; x=1693349151;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=IA+F9ijfpdDdMdFFKNzTJ+HhXSTDp2+LPFf3LSuVukc=;
-        b=eNcxxtUo0YGrfAXnhGrinT+e5rP+Q+DzEAD0M47msLGdcv4d5TRrWOPEx31NsQw5fn
-         7vNd4gmQNnB1//nJnsHnwQF7mFnqfQpQgRFSDOpUBHwTbHW+bKuMJcMU5AivVwIRC+CY
-         2/rNxXJsA1w34tH0IP95WoKAobZ6W8+IIECbAZUy6aG5Njo4CIdAmHBkG8OylwZNcjE4
-         tIC21fCbqvoUsuh/sYu0C+dXSmf0baA49lAGm8iauLgI8a2xBrX61nK+XTIxwIzShe9/
-         vgpOjIbC0GvreKlLfbblnhfihlOjGmSox8bDXCOTv8RvW/SGjKtQCBYnXZq9FNrIO5n3
-         gJxA==
-X-Gm-Message-State: AOJu0Yzp41nH8SHthAl1OrZo9MtiM8uGYUr/u4xMUw1aBXp1pVPh0edz
-        A2fxmPM3nBc6h9EKxFRzSBRPmg==
-X-Google-Smtp-Source: AGHT+IHjE45w2hhTJuEBWNipjgPO63SVpzysUBrY5TQ77WJroBOdxkSOhmVHywFsmr+Xq8LpQcQ5WA==
-X-Received: by 2002:a0c:dc12:0:b0:64b:fdf0:48a3 with SMTP id s18-20020a0cdc12000000b0064bfdf048a3mr11731188qvk.10.1692744350854;
-        Tue, 22 Aug 2023 15:45:50 -0700 (PDT)
-Received: from trappist.c.googlers.com.com (150.254.86.34.bc.googleusercontent.com. [34.86.254.150])
-        by smtp.gmail.com with ESMTPSA id g16-20020a05620a109000b0076ceb5eb309sm3532667qkk.74.2023.08.22.15.45.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Aug 2023 15:45:50 -0700 (PDT)
-From:   Sven van Ashbrook <svenva@chromium.org>
-To:     LKML <linux-kernel@vger.kernel.org>, ulf.hansson@linaro.org,
-        adrian.hunter@intel.com
-Cc:     SeanHY.chen@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
-        jasonlai.genesyslogic@gmail.com, greg.tu@genesyslogic.com.tw,
-        linux-mmc@vger.kernel.org, Renius Chen <reniuschengl@gmail.com>,
-        ben.chuang@genesyslogic.com.tw, skardach@google.com,
-        victor.shih@genesyslogic.com.tw, stable@vger.kernel.org,
-        Sven van Ashbrook <svenva@chromium.org>
-Subject: [PATCH v1] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix SoCs can suspend
-Date:   Tue, 22 Aug 2023 22:45:37 +0000
-Message-ID: <20230822224536.v1.1.I7ed1ca09797be2dd76ca914c57d88b32d24dac88@changeid>
-X-Mailer: git-send-email 2.42.0.rc1.204.g551eb34607-goog
+        with ESMTP id S232206AbjHWD4t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Aug 2023 23:56:49 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3466DE4D;
+        Tue, 22 Aug 2023 20:56:47 -0700 (PDT)
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 37N3koo1001236;
+        Wed, 23 Aug 2023 03:56:40 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=XYFR/hhNrSg1/8o9vpDIeGBTsQ1gKFTng2c2YMs76yc=;
+ b=f1GdiArNc/jOB28hvx1lq6kyeHNQ0DOoEIFUe7JOhDXlm7ydOyelxAkuzKbMjbChOn5N
+ VHBsl6guFst5MuE19GM1+biRFt8dXaMNntjGT6F1GZcH9iV8OiaLhW2G5K2yMumid4UR
+ IQTBowjhphvvG9cla3RWRUD/3sL6n4yw4BvdNXXsmAZ19kHfkWB0mb+2YQDlIdO1UUWL
+ /Zad/11Y73kVfmN6u9F1h3hkhcfXYk0WGi1Pa94SrbpgsFzwJi2bFtCJr6c9mGrnnQDL
+ g6ufgkVZXPZAx9jFe+FsPGLeNvJM6Q931h4BkhQuroUsbzXimgogJsATKYd0pHUsSt7C jQ== 
+Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3sn2bt8up5-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 23 Aug 2023 03:56:40 +0000
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 37N3udXT015167
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 23 Aug 2023 03:56:39 GMT
+Received: from [10.218.47.181] (10.80.80.8) by nalasex01b.na.qualcomm.com
+ (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.36; Tue, 22 Aug
+ 2023 20:56:36 -0700
+Message-ID: <071bf71a-f513-4be8-9c87-ce3e004901fc@quicinc.com>
+Date:   Wed, 23 Aug 2023 09:26:33 +0530
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: core: crypto: Add MMC_CAP2_CRYPTO_RETAIN_KEY
+To:     Eric Biggers <ebiggers@kernel.org>
+CC:     <andersson@kernel.org>, <linux-mmc@vger.kernel.org>,
+        <satyaprateek2357@gmail.com>, <ulf.hansson@linaro.org>,
+        <agross@kernel.org>, <adrian.hunter@intel.com>,
+        <linux-arm-msm@vger.kernel.org>
+References: <20230821065037.1146977-1-quic_omprsing@quicinc.com>
+ <20230822045011.GA1661@sol.localdomain>
+Content-Language: en-US
+From:   Om Prakash Singh <quic_omprsing@quicinc.com>
+In-Reply-To: <20230822045011.GA1661@sol.localdomain>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01b.na.qualcomm.com (10.47.209.197)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: H9Pb4c8F26JuxRFUMzbEjX0stlm2rcld
+X-Proofpoint-GUID: H9Pb4c8F26JuxRFUMzbEjX0stlm2rcld
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.601,FMLib:17.11.176.26
+ definitions=2023-08-22_22,2023-08-22_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0
+ priorityscore=1501 mlxscore=0 suspectscore=0 mlxlogscore=999 clxscore=1015
+ impostorscore=0 adultscore=0 spamscore=0 malwarescore=0 bulkscore=0
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2308100000 definitions=main-2308230036
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To improve the r/w performance of GL9763E, the current driver inhibits LPM
-negotiation while the device is active.
 
-This prevents a large number of SoCs from suspending, notably x86 systems
-which use S0ix as the suspend mechanism:
-1. Userspace initiates s2idle suspend (e.g. via writing to
-   /sys/power/state)
-2. This switches the runtime_pm device state to active, which disables
-   LPM negotiation, then calls the "regular" suspend callback
-3. With LPM negotiation disabled, the bus cannot enter low-power state
-4. On a large number of SoCs, if the bus not in a low-power state, S0ix
-   cannot be entered, which in turn prevents the SoC from entering
-   suspend.
 
-Fix by re-enabling LPM negotiation in the device's suspend callback.
+On 8/22/2023 10:20 AM, Eric Biggers wrote:
+> On Mon, Aug 21, 2023 at 12:20:37PM +0530, Om Prakash Singh wrote:
+>> Add new capability MMC_CAP2_CRYPTO_RETAIN_KEY for mmc host that
+>> support inline crypto key retention and doesn't need reinitialization
+>> of all keys after mmc host has reinitialized.
+> 
+> MMC_CAP2_RETAINS_CRYPTO_KEYS would be a better name.
+I will update in next version
+> 
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 1c935b5bafe1..cfc2328f90ed 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -1828,6 +1828,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>>   
+>>   	msm_host->ice = ice;
+>>   	mmc->caps2 |= MMC_CAP2_CRYPTO;
+>> +	mmc->caps2 |= MMC_CAP2_CRYPTO_RETAIN_KEY;
+>>   
+>>   	return 0;
+>>   }
+> 
+> Are you sure that *all* versions of Qualcomm's eMMC inline encryption hardware
+> have this behavior?
+Thanks for pointing this out. I am not sure and checking internally for 
+more information.
 
-Suggested-by: Stanislaw Kardach <skardach@google.com>
-Fixes: f9e5b33934ce ("mmc: host: Improve I/O read/write performance for GL9763E")
-Cc: stable@vger.kernel.org
-Signed-off-by: Sven van Ashbrook <svenva@chromium.org>
----
+> 
+>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> index 461d1543893b..74c69415746d 100644
+>> --- a/include/linux/mmc/host.h
+>> +++ b/include/linux/mmc/host.h
+>> @@ -417,8 +417,10 @@ struct mmc_host {
+>>   #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
+>>   #ifdef CONFIG_MMC_CRYPTO
+>>   #define MMC_CAP2_CRYPTO		(1 << 27)	/* Host supports inline encryption */
+>> +#define MMC_CAP2_CRYPTO_RETAIN_KEY (1 << 28)	/* Host doesn't need inline encryption key reinitialization */
+> 
+> How about:
+> 
+> /* Host retains inline encryption keys on reset */
+>
+I will update in next version
 
- drivers/mmc/host/sdhci-pci-gli.c | 96 +++++++++++++++++++-------------
- 1 file changed, 58 insertions(+), 38 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 1792665c9494a..bc148276cc001 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -745,42 +745,6 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
- 	return value;
- }
- 
--#ifdef CONFIG_PM_SLEEP
--static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
--{
--	struct sdhci_pci_slot *slot = chip->slots[0];
--
--	pci_free_irq_vectors(slot->chip->pdev);
--	gli_pcie_enable_msi(slot);
--
--	return sdhci_pci_resume_host(chip);
--}
--
--static int sdhci_cqhci_gli_resume(struct sdhci_pci_chip *chip)
--{
--	struct sdhci_pci_slot *slot = chip->slots[0];
--	int ret;
--
--	ret = sdhci_pci_gli_resume(chip);
--	if (ret)
--		return ret;
--
--	return cqhci_resume(slot->host->mmc);
--}
--
--static int sdhci_cqhci_gli_suspend(struct sdhci_pci_chip *chip)
--{
--	struct sdhci_pci_slot *slot = chip->slots[0];
--	int ret;
--
--	ret = cqhci_suspend(slot->host->mmc);
--	if (ret)
--		return ret;
--
--	return sdhci_suspend_host(slot->host);
--}
--#endif
--
- static void gl9763e_hs400_enhanced_strobe(struct mmc_host *mmc,
- 					  struct mmc_ios *ios)
- {
-@@ -1029,6 +993,62 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
- }
- #endif
- 
-+#ifdef CONFIG_PM_SLEEP
-+static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot = chip->slots[0];
-+
-+	pci_free_irq_vectors(slot->chip->pdev);
-+	gli_pcie_enable_msi(slot);
-+
-+	return sdhci_pci_resume_host(chip);
-+}
-+
-+static int gl9763e_resume(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot = chip->slots[0];
-+	int ret;
-+
-+	ret = sdhci_pci_gli_resume(chip);
-+	if (ret)
-+		return ret;
-+
-+	ret = cqhci_resume(slot->host->mmc);
-+	if (ret)
-+		return ret;
-+
-+	/* Disable LPM negotiation to bring device back in sync
-+	 * with its runtime_pm state.
-+	 */
-+	gl9763e_set_low_power_negotiation(slot, false);
-+
-+	return 0;
-+}
-+
-+static int gl9763e_suspend(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot = chip->slots[0];
-+	int ret;
-+
-+	ret = cqhci_suspend(slot->host->mmc);
-+	if (ret)
-+		return ret;
-+
-+	ret = sdhci_suspend_host(slot->host);
-+	if (ret)
-+		return ret;
-+
-+	/* Certain SoCs can suspend only with the bus in low-
-+	 * power state, notably x86 SoCs when using S0ix.
-+	 * Re-enable LPM negotiation to allow entering L1 state
-+	 * and entering system suspend.
-+	 */
-+	gl9763e_set_low_power_negotiation(slot, true);
-+
-+	return 0;
-+}
-+#endif
-+
- static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
- {
- 	struct pci_dev *pdev = slot->chip->pdev;
-@@ -1113,8 +1133,8 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
- 	.probe_slot	= gli_probe_slot_gl9763e,
- 	.ops            = &sdhci_gl9763e_ops,
- #ifdef CONFIG_PM_SLEEP
--	.resume		= sdhci_cqhci_gli_resume,
--	.suspend	= sdhci_cqhci_gli_suspend,
-+	.resume		= gl9763e_resume,
-+	.suspend	= gl9763e_suspend,
- #endif
- #ifdef CONFIG_PM
- 	.runtime_suspend = gl9763e_runtime_suspend,
--- 
-2.42.0.rc1.204.g551eb34607-goog
-
+>>   #else
+>>   #define MMC_CAP2_CRYPTO		0
+>> +#define MMC_CAP2_CRYPTO_RETAIN_KEY 0
+>>   #endif
+>>   #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
+> 
+> '1 << 28' is already used.
+ack
+> Also, the new flag doesn't need to be in the #ifdef section.
+> 
+> - Eric
