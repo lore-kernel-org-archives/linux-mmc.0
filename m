@@ -2,119 +2,100 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69128EE49B1
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 06:18:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27717EE49AF
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 08:06:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232887AbjHWGSW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Aug 2023 02:18:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48654 "EHLO
+        id S233827AbjHWIGS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Aug 2023 04:06:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37436 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232877AbjHWGSV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 02:18:21 -0400
-Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCC8CCF1;
-        Tue, 22 Aug 2023 23:18:17 -0700 (PDT)
-Received: from dlp.unisoc.com ([10.29.3.86])
-        by SHSQR01.spreadtrum.com with ESMTP id 37N6Hsxh025248;
-        Wed, 23 Aug 2023 14:17:54 +0800 (+08)
-        (envelope-from Wenchao.Chen@unisoc.com)
-Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
-        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RVwtp70Gjz2QM4RY;
-        Wed, 23 Aug 2023 14:15:30 +0800 (CST)
-Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
- (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Wed, 23 Aug
- 2023 14:17:52 +0800
-From:   Wenchao Chen <wenchao.chen@unisoc.com>
-To:     <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
-        <yuelin.tang@unisoc.com>, Wenchao Chen <wenchao.chen@unisoc.com>
-Subject: [PATCH V2 1/2] mmc: queue: replace immediate with hsq->depth
-Date:   Wed, 23 Aug 2023 14:17:33 +0800
-Message-ID: <20230823061734.27479-2-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230823061734.27479-1-wenchao.chen@unisoc.com>
-References: <20230823061734.27479-1-wenchao.chen@unisoc.com>
+        with ESMTP id S233741AbjHWIF5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 04:05:57 -0400
+Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14BF31725
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 01:04:34 -0700 (PDT)
+Received: by mail-yb1-xb2b.google.com with SMTP id 3f1490d57ef6-d77a4e30e97so995670276.2
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 01:04:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1692777873; x=1693382673;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4x18HgxcXuVIfqokI9MrmvgHbYOVzb20sqxbnbY2CMg=;
+        b=BHPJJYWgI3y8TP+PbXbXHe9EoUB31NFYFuLKGqC5SqPy+mO00AhzDYg37HhppnIFo/
+         SgZQ76lABeqqefWejNA8ZYtuNbl4+Jti7DDluHO3AdrC089eSQ7E0sQ8fO3c01iULqQe
+         +HPiFlsQiTi72puH++Rr3EHGb/gykt/ga28g3Ed48yIX9X3yf3APdqmO+ZpB6au+26e9
+         4Jq1uAwaTcoua7wJzglFidCTg03+QAN3H/A0wXe1BdIdY1dCpP+HY9KUJCDhjVGPeW+h
+         ElbRVjE3M6iDP/2zT3WjFNr3GZc/lBkpl72tSCK61cxQqfJqTeIXP1H7FurNxCVco1KL
+         vg6A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692777873; x=1693382673;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=4x18HgxcXuVIfqokI9MrmvgHbYOVzb20sqxbnbY2CMg=;
+        b=SqnIjDJJarLOKEzB+6EBq/vh1enmH8bmxtBhjGuIds0GEXbQnoyM4qSj7ewme1j5bs
+         jutUqAft3B5UuUwaxvYQir/xkPj+l202/iRZyMprHtCwcz0x2O9jiiSnopuUP6II+Qwm
+         pWLgqB9JswMD20PxFHeY5wgxjWae55sjZNb81GTjtHV/1D/jiPzIZ/XGoEz4Chp460Ms
+         DpYDaXPtTd/d11wVY4Gate3sivt1pSLhNyGsqMbwrDRDbIH633Hq3sDvw2WVcgpXmVR3
+         HuXfG+X09xsEr4WUtxMF877t3tXvMQbJvS1AfTOMjoeMLVEkSj7R1nL9vtMD49tIbYHi
+         ZC0g==
+X-Gm-Message-State: AOJu0YydiD6K7GnVZuB/iXHYc9yngg3as9v71K92BI6+Wa8Dvs2IXImT
+        J039OLrWmAhp8jWg5n5IuGk/GM/3k1fhaJj6pvWqgg==
+X-Google-Smtp-Source: AGHT+IGrOMMEwVtHryHwU0XzgH5J6pb+GFBjuvEmvNHq8LAg555gZ6ClRom7dtM4aWc9Doh+9kYdPlPZ/Q8JzX59BZQ=
+X-Received: by 2002:a25:aa26:0:b0:d56:7556:93f1 with SMTP id
+ s35-20020a25aa26000000b00d56755693f1mr12580669ybi.29.1692777873522; Wed, 23
+ Aug 2023 01:04:33 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.13.2.29]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- shmbx05.spreadtrum.com (10.29.1.56)
-X-MAIL: SHSQR01.spreadtrum.com 37N6Hsxh025248
+References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com>
+ <20230722014037.42647-2-shyamsaini@linux.microsoft.com> <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
+ <b875892c-1777-d84a-987e-1b0d5ac29df@linux.microsoft.com> <94728786-b41b-1467-63c1-8e2d5acfa5e4@linaro.org>
+ <CAFA6WYNPViMs=3cbNsEdhqnjNOUCsHE_8uqiDTzwCKDNNiDkCw@mail.gmail.com>
+ <CAHUa44Ek0k2b-igA6Gd1ZXVzibTh2sNDMnE-weQwFFKEZ_1jOA@mail.gmail.com>
+ <CAC_iWjKKap47PhiCi=BfPZC_wJhVDB10WSf9oWMgdwSgWCfO_A@mail.gmail.com>
+ <CAFA6WYMPsBUutjKrm+6qTNHpVr80K2GcSLoYa+MFE3CfLSo8ew@mail.gmail.com> <226aa02d-1247-a42c-123d-1c86b6b43d9f@linux.microsoft.com>
+In-Reply-To: <226aa02d-1247-a42c-123d-1c86b6b43d9f@linux.microsoft.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Wed, 23 Aug 2023 10:04:20 +0200
+Message-ID: <CACRpkdb=AnJXG2J_DRsN-RUEh=7_eAs8+_CxPYuueVM0c=DP3Q@mail.gmail.com>
+Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB) driver
+To:     Shyam Saini <shyamsaini@linux.microsoft.com>
+Cc:     Sumit Garg <sumit.garg@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Jens Wiklander <jens.wiklander@linaro.org>,
+        Jerome Forissier <jerome.forissier@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        op-tee@lists.trustedfirmware.org, linux-scsi@vger.kernel.org,
+        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
+        Tomas Winkler <tomas.winkler@intel.com>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>,
+        Tyler Hicks <code@tyhicks.com>,
+        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
+        Paul Moore <paul@paul-moore.com>,
+        Allen Pais <apais@linux.microsoft.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hsq is similar to cqe, using hsq->depth to represent
-the maximum processing capacity of hsq. We can adjust
-hsq->depth according to the actual situation.
+On Tue, Aug 22, 2023 at 9:07=E2=80=AFPM Shyam Saini
+<shyamsaini@linux.microsoft.com> wrote:
 
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
----
- drivers/mmc/core/queue.c   | 6 +-----
- drivers/mmc/host/mmc_hsq.c | 1 +
- drivers/mmc/host/mmc_hsq.h | 6 ++++++
- include/linux/mmc/host.h   | 1 +
- 4 files changed, 9 insertions(+), 5 deletions(-)
+> do we plan to disable access to RPMB devices, once we have this RPMB
+> driver in place. User space tools like mmc-utils/nvme/ufs utils
+> can still access RPMB and programme the key and should
+> RPMB driver deny access to RPMB ?
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index b396e3900717..a0a2412f62a7 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -260,11 +260,7 @@ static blk_status_t mmc_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
- 		}
- 		break;
- 	case MMC_ISSUE_ASYNC:
--		/*
--		 * For MMC host software queue, we only allow 2 requests in
--		 * flight to avoid a long latency.
--		 */
--		if (host->hsq_enabled && mq->in_flight[issue_type] > 2) {
-+		if (host->hsq_enabled && mq->in_flight[issue_type] > host->hsq_depth) {
- 			spin_unlock_irq(&mq->lock);
- 			return BLK_STS_RESOURCE;
- 		}
-diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
-index 424dc7b07858..8556cacb21a1 100644
---- a/drivers/mmc/host/mmc_hsq.c
-+++ b/drivers/mmc/host/mmc_hsq.c
-@@ -337,6 +337,7 @@ int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
- 	hsq->mmc = mmc;
- 	hsq->mmc->cqe_private = hsq;
- 	mmc->cqe_ops = &mmc_hsq_ops;
-+	mmc->hsq_depth = HSQ_NORMAL_DEPTH;
- 
- 	for (i = 0; i < HSQ_NUM_SLOTS; i++)
- 		hsq->tag_slot[i] = HSQ_INVALID_TAG;
-diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
-index 1808024fc6c5..aa5c4543b55f 100644
---- a/drivers/mmc/host/mmc_hsq.h
-+++ b/drivers/mmc/host/mmc_hsq.h
-@@ -5,6 +5,12 @@
- #define HSQ_NUM_SLOTS	64
- #define HSQ_INVALID_TAG	HSQ_NUM_SLOTS
- 
-+/*
-+ * For MMC host software queue, we only allow 2 requests in
-+ * flight to avoid a long latency.
-+ */
-+#define HSQ_NORMAL_DEPTH	2
-+
- struct hsq_slot {
- 	struct mmc_request *mrq;
- };
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 461d1543893b..1fd8b1dd8698 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -520,6 +520,7 @@ struct mmc_host {
- 
- 	/* Host Software Queue support */
- 	bool			hsq_enabled;
-+	int			hsq_depth;
- 
- 	u32			err_stats[MMC_ERR_MAX];
- 	unsigned long		private[] ____cacheline_aligned;
--- 
-2.17.1
+We don't break userspace. Just not. This is not an option.
 
+The RPMB subsystem simply has to provide the rpmb character
+device the same way the MMC subsystem did, or provide an
+in-kernel backend to the MMC subsystem so that it can provide
+the same device. Whatever solution is best.
+
+No deprecation and deletion and breaking userspace. Ever.
+
+Yours,
+Linus Walleij
