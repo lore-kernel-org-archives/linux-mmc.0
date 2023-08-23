@@ -2,116 +2,226 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3311EEE49A0
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 12:41:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F3BDC71134
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 17:41:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234066AbjHWMl3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Aug 2023 08:41:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50964 "EHLO
+        id S237913AbjHWRlz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Aug 2023 13:41:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47754 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232484AbjHWMl2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 08:41:28 -0400
-Received: from mail-oi1-x22c.google.com (mail-oi1-x22c.google.com [IPv6:2607:f8b0:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB8B6E45
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 05:41:26 -0700 (PDT)
-Received: by mail-oi1-x22c.google.com with SMTP id 5614622812f47-3a1ebb85f99so4060767b6e.2
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 05:41:26 -0700 (PDT)
+        with ESMTP id S237909AbjHWRlz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 13:41:55 -0400
+Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10047170F
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 10:41:44 -0700 (PDT)
+Received: by mail-qk1-x734.google.com with SMTP id af79cd13be357-76dbd877cd9so68016185a.0
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 10:41:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692794486; x=1693399286;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=e/f7T3FZf5QGSLEO262NyuWeijF0vG1zwz/aiGhEhO0=;
-        b=sr8rx74L1zfe5NRH3/c1LNcfCpc1f8v2uvrU94iCS9tu5m4puB6UFiog6hf29WcVOL
-         fWPjolJMZ8q/OrmRrs3XtWYMVXD43Hzye8A0YgH0Z4+8uub6URQ0BFy4kXsrYfMAUYO4
-         U+Osy05eZffzhbonC5XyLYPoSdD6+dmhf0eUjYyOv4ufmc56b1cVeML3pX3MaSTdAiq0
-         R84zBhoO4GWpBQ56nhP1hXX+3eguE8UrV26FiWotpz6QcHiiXVCBvTQJwrZ1xQGeRLN4
-         iVCuldTdO13IcvOP6ca19/MuwLYdVUyFxw2RuZvqU5H0fCnd/4Iy0cpIg7R1fthThHRS
-         /8sQ==
+        d=chromium.org; s=google; t=1692812504; x=1693417304;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=LC8K7Zo5Yoep5L4Vza1MxS3+pDLFt90cGnt8c4fzq10=;
+        b=XWck+c/7bHleK3gsrqMcOEIXt/w2hvtSHEeVubKC7x6lWa8PJHrgAjubQFR3csMQ80
+         0DqyQeGdd09TmMbB7F6nz19mGkJuQrDNAVSjG0l5SE+FFc/RNWp98wjRoyh2HfwN6r+d
+         1msWnsM50jEFIaCJQIdE8BY2D9BDPigxwafTs=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692794486; x=1693399286;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=e/f7T3FZf5QGSLEO262NyuWeijF0vG1zwz/aiGhEhO0=;
-        b=OLIj0PlmZ0T+UhlGS5DIBlYJi6UbG+8sJjqiDBHsiJKQCe10Zk3hzPHi7wZiTGA3Ra
-         CrR5ARHQp4v8RKIT60zVb0s+QRWP8n2+Yz1MKfCrgFGRArQ1cnrB2KXNc7x/1WAnrDS/
-         QUEHbkIEvR+PS4HwFa0+W7Ig0ev5DU6oamiNAgw4zOVohPAKpkt8qH38PE6io90MyHH0
-         AS0XkeqUWaE9o+UXkYQdXuvoqm6a/2pPEInSWzXx/hRh90QOFs1E0B6PYm1nJzhhl69+
-         /B9GBnkTCVXMMUQ8IevMTMJdXW7+iB8Ck8ExKrF93IPjjcsl2PJRYyL8YNAOFMhwo93u
-         uF9A==
-X-Gm-Message-State: AOJu0Yzh6f3Nqqco31tMds33qB9H/E/iY4ekwmC+JsldS7UOCSO4ZrVP
-        qOysDHg7ZR0CyG7GFoR3cf9vOruKq4Owj5OQ52aFnw==
-X-Google-Smtp-Source: AGHT+IGEVmJslUpD3TVQwsDHcK7stA8pSL9fmRj2QDvtZ9ZXvOFRcGwz5G+dkmi/efeD5ViaafkbJuoJhokEz4S2QrQ=
-X-Received: by 2002:a05:6358:33a2:b0:135:99fa:a125 with SMTP id
- i34-20020a05635833a200b0013599faa125mr12763757rwd.1.1692794485931; Wed, 23
- Aug 2023 05:41:25 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1692812504; x=1693417304;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=LC8K7Zo5Yoep5L4Vza1MxS3+pDLFt90cGnt8c4fzq10=;
+        b=OgjifGhOEpNKU6w/WVNZ8XmCpPDsphheqZ/Bijo8aUndQ5rEcnnY/bb471rSPTfB98
+         pk/6NhMmZICiPaxJ0QgFDkPPlqmpvr4WfYwRENrOFMNRYYojt7GtIkNPsjHyIa7W86zR
+         6LhVUI/9XJiJvphPeWKcNxCsgl8wR2Uk362J9/vElN3dqMzhTAGlTThV2Dydo6FXnODA
+         h47hBdXhWsPlk52SoPldPlMrjxOZ59bsw/xr0d2O31NEqPzAvD5yS0fPkbTk3bL7CxN2
+         tbV8MW0KBoPJsir8n55pOgajWovucKBXwoT2JKpXCWK2B98beOBbsk/5QCJtztvEFs4Y
+         h5Xg==
+X-Gm-Message-State: AOJu0YzpH7Y2UReUZQxmrbmFP8EOGX4g5sQnjh+VLR+onkWZpJATBPWm
+        pnkbIvt7BgxQvhceKT0+ZHALhw==
+X-Google-Smtp-Source: AGHT+IE4G7DcP/ZKzpAetu3BmuHK3JUhWkuBndpmZRLLtP6S2DUuoWp3zw4r7o5ir5HH3JjOmCwCSg==
+X-Received: by 2002:a05:620a:4042:b0:76c:ea00:e5d7 with SMTP id i2-20020a05620a404200b0076cea00e5d7mr16606914qko.12.1692812504023;
+        Wed, 23 Aug 2023 10:41:44 -0700 (PDT)
+Received: from trappist.c.googlers.com.com (129.239.188.35.bc.googleusercontent.com. [35.188.239.129])
+        by smtp.gmail.com with ESMTPSA id g23-20020a37e217000000b00767dba7a4d3sm4069919qki.109.2023.08.23.10.41.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 23 Aug 2023 10:41:43 -0700 (PDT)
+From:   Sven van Ashbrook <svenva@chromium.org>
+To:     LKML <linux-kernel@vger.kernel.org>, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com
+Cc:     jason.lai@genesyslogic.com.tw, skardach@google.com,
+        Renius Chen <reniuschengl@gmail.com>,
+        linux-mmc@vger.kernel.org, greg.tu@genesyslogic.com.tw,
+        jasonlai.genesyslogic@gmail.com, SeanHY.chen@genesyslogic.com.tw,
+        ben.chuang@genesyslogic.com.tw, victor.shih@genesyslogic.com.tw,
+        stable@vger.kernel.org, Sven van Ashbrook <svenva@chromium.org>
+Subject: [PATCH v2] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix SoCs can suspend
+Date:   Wed, 23 Aug 2023 17:41:34 +0000
+Message-ID: <20230823174134.v2.1.I7ed1ca09797be2dd76ca914c57d88b32d24dac88@changeid>
+X-Mailer: git-send-email 2.42.0.rc1.204.g551eb34607-goog
 MIME-Version: 1.0
-References: <20230823104010.79107-1-balamanikandan.gunasundar@microchip.com> <20230823104010.79107-4-balamanikandan.gunasundar@microchip.com>
-In-Reply-To: <20230823104010.79107-4-balamanikandan.gunasundar@microchip.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 23 Aug 2023 14:41:14 +0200
-Message-ID: <CACRpkda2gJkj6_25rnLUHNaLC3_kcSbCF+y6RRvbnUsju-iJYg@mail.gmail.com>
-Subject: Re: [PATCH v5 3/3] mmc: atmel-mci: Move card detect gpio polarity
- quirk to gpiolib
-To:     Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>
-Cc:     dmitry.torokhov@gmail.com, ulf.hansson@linaro.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
-        alexandre.belloni@bootlin.com, hari.prasathge@microchip.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Balamanikandan,
+To improve the r/w performance of GL9763E, the current driver inhibits LPM
+negotiation while the device is active.
 
-thanks for your patch!
+This prevents a large number of SoCs from suspending, notably x86 systems
+which use S0ix as the suspend mechanism:
+1. Userspace initiates s2idle suspend (e.g. via writing to
+   /sys/power/state)
+2. This switches the runtime_pm device state to active, which disables
+   LPM negotiation, then calls the "regular" suspend callback
+3. With LPM negotiation disabled, the bus cannot enter low-power state
+4. On a large number of SoCs, if the bus not in a low-power state, S0ix
+   cannot be entered, which in turn prevents the SoC from entering
+   suspend.
 
-On Wed, Aug 23, 2023 at 12:40=E2=80=AFPM Balamanikandan Gunasundar
-<balamanikandan.gunasundar@microchip.com> wrote:
+Fix by re-enabling LPM negotiation in the device's suspend callback.
 
-> The polarity of the card detection gpio is handled by the "cd-inverted"
-> property in the device tree. Move this inversion logic to gpiolib to avoi=
-d
-> reading the gpio raw value.
->
-> Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@micro=
-chip.com>
-(...)
->  drivers/gpio/gpiolib-of.c    |  7 +++++++
+Suggested-by: Stanislaw Kardach <skardach@google.com>
+Fixes: f9e5b33934ce ("mmc: host: Improve I/O read/write performance for GL9763E")
+Cc: stable@vger.kernel.org
+Signed-off-by: Sven van Ashbrook <svenva@chromium.org>
+     # on gladios device
+     # on 15590.0.0 with v5.10 and upstream (v6.4) kernels
 
-Patching here is the right approach!
+---
 
-> +#if IS_ENABLED(CONFIG_MMC_ATMELMCI)
-> +       if (of_device_is_compatible(np->parent, "atmel,hsmci") &&
-> +           !strcmp(propname, "cd-gpios")) {
-> +               active_high =3D of_property_read_bool(np, "cd-inverted");
-> +               of_gpio_quirk_polarity(np, active_high, flags);
-> +       }
-> +#endif
->         for (i =3D 0; i < ARRAY_SIZE(gpios); i++) {
->                 if (of_device_is_compatible(np, gpios[i].compatible) &&
->                     !strcmp(propname, gpios[i].gpio_propname)) {
+Changes in v2:
+- improved symmetry and error path in s2idle suspend callback (internal review)
 
-This duplicates the code right below. Can't you just add an entry to the
-existing gpios[] array?
+ drivers/mmc/host/sdhci-pci-gli.c | 102 +++++++++++++++++++------------
+ 1 file changed, 64 insertions(+), 38 deletions(-)
 
-I would imagine:
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 1792665c9494a..19f577cc8bceb 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -745,42 +745,6 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
+ 	return value;
+ }
+ 
+-#ifdef CONFIG_PM_SLEEP
+-static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
+-{
+-	struct sdhci_pci_slot *slot = chip->slots[0];
+-
+-	pci_free_irq_vectors(slot->chip->pdev);
+-	gli_pcie_enable_msi(slot);
+-
+-	return sdhci_pci_resume_host(chip);
+-}
+-
+-static int sdhci_cqhci_gli_resume(struct sdhci_pci_chip *chip)
+-{
+-	struct sdhci_pci_slot *slot = chip->slots[0];
+-	int ret;
+-
+-	ret = sdhci_pci_gli_resume(chip);
+-	if (ret)
+-		return ret;
+-
+-	return cqhci_resume(slot->host->mmc);
+-}
+-
+-static int sdhci_cqhci_gli_suspend(struct sdhci_pci_chip *chip)
+-{
+-	struct sdhci_pci_slot *slot = chip->slots[0];
+-	int ret;
+-
+-	ret = cqhci_suspend(slot->host->mmc);
+-	if (ret)
+-		return ret;
+-
+-	return sdhci_suspend_host(slot->host);
+-}
+-#endif
+-
+ static void gl9763e_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 					  struct mmc_ios *ios)
+ {
+@@ -1029,6 +993,68 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+ }
+ #endif
+ 
++#ifdef CONFIG_PM_SLEEP
++static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot = chip->slots[0];
++
++	pci_free_irq_vectors(slot->chip->pdev);
++	gli_pcie_enable_msi(slot);
++
++	return sdhci_pci_resume_host(chip);
++}
++
++static int gl9763e_resume(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot = chip->slots[0];
++	int ret;
++
++	ret = sdhci_pci_gli_resume(chip);
++	if (ret)
++		return ret;
++
++	ret = cqhci_resume(slot->host->mmc);
++	if (ret)
++		return ret;
++
++	/* Disable LPM negotiation to bring device back in sync
++	 * with its runtime_pm state.
++	 */
++	gl9763e_set_low_power_negotiation(slot, false);
++
++	return 0;
++}
++
++static int gl9763e_suspend(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot = chip->slots[0];
++	int ret;
++
++	/* Certain SoCs can suspend only with the bus in low-
++	 * power state, notably x86 SoCs when using S0ix.
++	 * Re-enable LPM negotiation to allow entering L1 state
++	 * and entering system suspend.
++	 */
++	gl9763e_set_low_power_negotiation(slot, true);
++
++	ret = cqhci_suspend(slot->host->mmc);
++	if (ret)
++		goto err_suspend;
++
++	ret = sdhci_suspend_host(slot->host);
++	if (ret)
++		goto err_suspend_host;
++
++	return 0;
++
++err_suspend_host:
++	cqhci_resume(slot->host->mmc);
++err_suspend:
++	gl9763e_set_low_power_negotiation(slot, false);
++	return ret;
++}
++#endif
++
+ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
+ {
+ 	struct pci_dev *pdev = slot->chip->pdev;
+@@ -1113,8 +1139,8 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
+ 	.probe_slot	= gli_probe_slot_gl9763e,
+ 	.ops            = &sdhci_gl9763e_ops,
+ #ifdef CONFIG_PM_SLEEP
+-	.resume		= sdhci_cqhci_gli_resume,
+-	.suspend	= sdhci_cqhci_gli_suspend,
++	.resume		= gl9763e_resume,
++	.suspend	= gl9763e_suspend,
+ #endif
+ #ifdef CONFIG_PM
+ 	.runtime_suspend = gl9763e_runtime_suspend,
+-- 
+2.42.0.rc1.204.g551eb34607-goog
 
-    static const struct {
-        const char *compatible;
-        const char *gpio_propname;
-        const char *polarity_propname;
-    } gpios[] =3D {
-#if IS_ENABLED(CONFIG_MMC_ATMELMCI)
-        { "atmel,hsmci", "cd-gpios", "cd-inverted" },
-#endif
-(...)
-
-
-Yours,
-Linus Walleij
