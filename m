@@ -2,100 +2,103 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27717EE49AF
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 08:06:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03943EE49A0
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 10:40:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233827AbjHWIGS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Aug 2023 04:06:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37436 "EHLO
+        id S232039AbjHWKkg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Aug 2023 06:40:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233741AbjHWIF5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 04:05:57 -0400
-Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14BF31725
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 01:04:34 -0700 (PDT)
-Received: by mail-yb1-xb2b.google.com with SMTP id 3f1490d57ef6-d77a4e30e97so995670276.2
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 01:04:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692777873; x=1693382673;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=4x18HgxcXuVIfqokI9MrmvgHbYOVzb20sqxbnbY2CMg=;
-        b=BHPJJYWgI3y8TP+PbXbXHe9EoUB31NFYFuLKGqC5SqPy+mO00AhzDYg37HhppnIFo/
-         SgZQ76lABeqqefWejNA8ZYtuNbl4+Jti7DDluHO3AdrC089eSQ7E0sQ8fO3c01iULqQe
-         +HPiFlsQiTi72puH++Rr3EHGb/gykt/ga28g3Ed48yIX9X3yf3APdqmO+ZpB6au+26e9
-         4Jq1uAwaTcoua7wJzglFidCTg03+QAN3H/A0wXe1BdIdY1dCpP+HY9KUJCDhjVGPeW+h
-         ElbRVjE3M6iDP/2zT3WjFNr3GZc/lBkpl72tSCK61cxQqfJqTeIXP1H7FurNxCVco1KL
-         vg6A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692777873; x=1693382673;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=4x18HgxcXuVIfqokI9MrmvgHbYOVzb20sqxbnbY2CMg=;
-        b=SqnIjDJJarLOKEzB+6EBq/vh1enmH8bmxtBhjGuIds0GEXbQnoyM4qSj7ewme1j5bs
-         jutUqAft3B5UuUwaxvYQir/xkPj+l202/iRZyMprHtCwcz0x2O9jiiSnopuUP6II+Qwm
-         pWLgqB9JswMD20PxFHeY5wgxjWae55sjZNb81GTjtHV/1D/jiPzIZ/XGoEz4Chp460Ms
-         DpYDaXPtTd/d11wVY4Gate3sivt1pSLhNyGsqMbwrDRDbIH633Hq3sDvw2WVcgpXmVR3
-         HuXfG+X09xsEr4WUtxMF877t3tXvMQbJvS1AfTOMjoeMLVEkSj7R1nL9vtMD49tIbYHi
-         ZC0g==
-X-Gm-Message-State: AOJu0YydiD6K7GnVZuB/iXHYc9yngg3as9v71K92BI6+Wa8Dvs2IXImT
-        J039OLrWmAhp8jWg5n5IuGk/GM/3k1fhaJj6pvWqgg==
-X-Google-Smtp-Source: AGHT+IGrOMMEwVtHryHwU0XzgH5J6pb+GFBjuvEmvNHq8LAg555gZ6ClRom7dtM4aWc9Doh+9kYdPlPZ/Q8JzX59BZQ=
-X-Received: by 2002:a25:aa26:0:b0:d56:7556:93f1 with SMTP id
- s35-20020a25aa26000000b00d56755693f1mr12580669ybi.29.1692777873522; Wed, 23
- Aug 2023 01:04:33 -0700 (PDT)
+        with ESMTP id S230521AbjHWKkf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 06:40:35 -0400
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C49111F;
+        Wed, 23 Aug 2023 03:40:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1692787233; x=1724323233;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=BT70sNujtMKgc6xs08Sbs3FPM36lphKrmvSphUxZujk=;
+  b=ZDEb0/UWELjbRBz/FPYGER6bQ5wAd2D888wd+36FEpkUNLiIJC8JOABV
+   8FbxF2GLedVk9j9R3vwyA/bsrVuNcIQzGJE0cFqngqBVNQxHAVibiCea7
+   pnuPX+e3jSxL+nOBoVXlzEVVW3vfuDnEsxQNeWiIbQ5/ToH2tPVZwnxXj
+   y71ZFAdrmkda8EIyKRNO6w5Su4U5pXYpN6H+rhua5On2vkY4G0zrP78fg
+   l34W6fJvBrSJKk5FAZ0+oWOw/4StULFmJSm8TAMpyCeOMhKrIjl5aeioW
+   AnSeg3q9SmCAprBIKUqAnvEbnAWnk8x5kZrHcPzcQlTLoVyJyWrTgwCRY
+   g==;
+X-IronPort-AV: E=Sophos;i="6.01,195,1684825200"; 
+   d="scan'208";a="869464"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 23 Aug 2023 03:40:33 -0700
+Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.21; Wed, 23 Aug 2023 03:40:33 -0700
+Received: from che-lt-i64410lx.microchip.com (10.10.85.11) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server id
+ 15.1.2507.21 via Frontend Transport; Wed, 23 Aug 2023 03:40:27 -0700
+From:   Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+To:     <linus.walleij@linaro.org>, <dmitry.torokhov@gmail.com>,
+        <ulf.hansson@linaro.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <ludovic.desroches@microchip.com>, <nicolas.ferre@microchip.com>,
+        <alexandre.belloni@bootlin.com>
+CC:     <hari.prasathge@microchip.com>,
+        <balamanikandan.gunasundar@microchip.com>
+Subject: [PATCH v5 0/3] mmc: atmel-mci: Convert to gpio descriptors
+Date:   Wed, 23 Aug 2023 16:10:07 +0530
+Message-ID: <20230823104010.79107-1-balamanikandan.gunasundar@microchip.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com>
- <20230722014037.42647-2-shyamsaini@linux.microsoft.com> <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
- <b875892c-1777-d84a-987e-1b0d5ac29df@linux.microsoft.com> <94728786-b41b-1467-63c1-8e2d5acfa5e4@linaro.org>
- <CAFA6WYNPViMs=3cbNsEdhqnjNOUCsHE_8uqiDTzwCKDNNiDkCw@mail.gmail.com>
- <CAHUa44Ek0k2b-igA6Gd1ZXVzibTh2sNDMnE-weQwFFKEZ_1jOA@mail.gmail.com>
- <CAC_iWjKKap47PhiCi=BfPZC_wJhVDB10WSf9oWMgdwSgWCfO_A@mail.gmail.com>
- <CAFA6WYMPsBUutjKrm+6qTNHpVr80K2GcSLoYa+MFE3CfLSo8ew@mail.gmail.com> <226aa02d-1247-a42c-123d-1c86b6b43d9f@linux.microsoft.com>
-In-Reply-To: <226aa02d-1247-a42c-123d-1c86b6b43d9f@linux.microsoft.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 23 Aug 2023 10:04:20 +0200
-Message-ID: <CACRpkdb=AnJXG2J_DRsN-RUEh=7_eAs8+_CxPYuueVM0c=DP3Q@mail.gmail.com>
-Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB) driver
-To:     Shyam Saini <shyamsaini@linux.microsoft.com>
-Cc:     Sumit Garg <sumit.garg@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Jens Wiklander <jens.wiklander@linaro.org>,
-        Jerome Forissier <jerome.forissier@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        op-tee@lists.trustedfirmware.org, linux-scsi@vger.kernel.org,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Tyler Hicks <code@tyhicks.com>,
-        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
-        Paul Moore <paul@paul-moore.com>,
-        Allen Pais <apais@linux.microsoft.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Aug 22, 2023 at 9:07=E2=80=AFPM Shyam Saini
-<shyamsaini@linux.microsoft.com> wrote:
+Replace legacy gpio apis with gpio descriptors. Handle card detection gpio
+polarity in gpiolib
 
-> do we plan to disable access to RPMB devices, once we have this RPMB
-> driver in place. User space tools like mmc-utils/nvme/ufs utils
-> can still access RPMB and programme the key and should
-> RPMB driver deny access to RPMB ?
+v5:
+- Rebase to latest next branch of
+  https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+- Move handling active_high inversion logic to gpiolib instead of reading
+  the raw value of gpio and inverting it manually.
+- Use PTR_ERR_OR_ZERO instead of IS_ERR. To avoid ignoring valid errors as
+  suggested by Dmitry Torokhov
+- Use gpiod_get_value_cansleep() instead of gpiod_get_value()
 
-We don't break userspace. Just not. This is not an option.
+v4:
+- Rebase on top of next branch
+  https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git 
 
-The RPMB subsystem simply has to provide the rpmb character
-device the same way the MMC subsystem did, or provide an
-in-kernel backend to the MMC subsystem so that it can provide
-the same device. Whatever solution is best.
+v3:
+- [PATCH v3 1/2] mmc: atmel-mci: Convert to gpio descriptors
+  Convert devm_gpiod_get_from_of_node() into devm_fwnode_gpiod_get()
 
-No deprecation and deletion and breaking userspace. Ever.
+v2:
+- [PATCH 1/2] mmc: atmel-mci: Convert to gpio descriptors
+  Remove "#include <linux/gpio.h>" as it is not necessary
+- [PATCH 2/2] mmc: atmel-mci: move atmel MCI header file
+  Move linux/atmel-mci.h into drivers/mmc/host/atmel-mci.c as it is
+  used only by one file
 
-Yours,
-Linus Walleij
+
+Balamanikandan Gunasundar (3):
+  mmc: atmel-mci: Convert to gpio descriptors
+  mmc: atmel-mci: move atmel MCI header file
+  mmc: atmel-mci: Move card detect gpio polarity quirk to gpiolib
+
+ drivers/gpio/gpiolib-of.c    |   7 ++
+ drivers/mmc/host/atmel-mci.c | 133 +++++++++++++++++++++--------------
+ include/linux/atmel-mci.h    |  46 ------------
+ 3 files changed, 89 insertions(+), 97 deletions(-)
+ delete mode 100644 include/linux/atmel-mci.h
+
+-- 
+2.25.1
+
