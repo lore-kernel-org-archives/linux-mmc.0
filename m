@@ -2,57 +2,56 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E09AC88CB2
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Aug 2023 21:17:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7332BC71145
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 02:57:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237297AbjHWVQ5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Aug 2023 17:16:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36528 "EHLO
+        id S239525AbjHXC5T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Aug 2023 22:57:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43020 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237832AbjHWVQq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 17:16:46 -0400
-Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB0001700
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 14:16:34 -0700 (PDT)
-Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-d63c0a6568fso6021476276.0
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Aug 2023 14:16:34 -0700 (PDT)
+        with ESMTP id S239464AbjHXC5F (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Aug 2023 22:57:05 -0400
+Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43CA5124;
+        Wed, 23 Aug 2023 19:56:59 -0700 (PDT)
+Received: by mail-qk1-x730.google.com with SMTP id af79cd13be357-76d92a5e652so383902785a.0;
+        Wed, 23 Aug 2023 19:56:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692825394; x=1693430194;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=iEpTjrnLVqxen66G7Uvz7Jyy/E11cVlVrjCW6/VyKj8=;
-        b=ZDmv2BjJU3fBSftYGcNM3tb+ILU/d9+cLODcLN7bJx5jE0GqvFKrPnlSYGlL0k9kWu
-         m0bch7za38IJ+CLWsWjflpljG/O8F9HEsNE/VWjVNStBDOBq3iJDnH2eTLO/dJEAtALA
-         zbXY+4ZWcbcUYtwqB7UctSATyz1sDYmgfZ/uZj88iB4dhaAHsNB4lm1XJShf+lSlTUF4
-         q1mw8cBg/PsTLqlxfYRQ9OdT1JyBSqfrgsLuehUHu9V36ypWdR+RMX9JIQmW7yxqcnfx
-         Bu1+6uVlgAFqvayOjaJa8cEpXa7Hm+cDiofeMeKPmewLASFqzTHTuUzB1cC9zTcv8uzK
-         +bQw==
+        d=gmail.com; s=20221208; t=1692845818; x=1693450618;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Q9Fv6zMHUmxIJtQTWw3otja3eb7daBbRUnAPWR3+Kws=;
+        b=EVi36tdUqJMlOvMF5BKp2qBduN+pjKuz6Us6qWN0euQMxX//FBn2tkevUvmQ0jT7dy
+         QIYTSLIrOwJJrbwKo9ZkDfR2N+fo2G2cnY9a7T0gyOxaEX87NC1xNeL/UwLcOFtHALic
+         ZLiva7jbc5XlX1Ewghy60+GynWZHY461VYZBL+rKjJr0gJc6PhtDfsvnnfDKMTF+nmSY
+         b67dYc7Ry1QTt8dSvag7E3m3wxL+T/zxdYaloB7x8dxtgj588ko4UqYQcmY36CHVtxWt
+         iYF3G4mM3FFe+F+/+nyQoaPThIAVJk/g4AuxUBKaCu+vIZtlOzjd8HrBF87f6fV68U4J
+         kBtg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692825394; x=1693430194;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20221208; t=1692845818; x=1693450618;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=iEpTjrnLVqxen66G7Uvz7Jyy/E11cVlVrjCW6/VyKj8=;
-        b=MlKXoRm5KfJix4cysy8AUhkmyZ8kzsMSrijplfa0TLOyLSXmtIad4o2++Xv9k7mICB
-         rBVLTMuzqgqLp0JzB6JXE6+gCY3yyDBrB9jW1MjDKE1FaQrHkDPxzAiDBX3cOdHAy+/o
-         eBWnCovfvgR0nhvl9ww1gRofFOLO0pX8T44gmKyPe/JjS50E8om0eDA2PSuksfFKVCTS
-         CxWYFmeAjtsFjo9t9uMjnxQSVd8zdSWloHrXEy7scRwxGCJd7PVEilXzKcex6Ma/otaE
-         pWWaOc0Ph4iec8c9Z4EO9F1yBkdX+5YJ2ZvRK9p5P+V8Rt7dfBVq0NCw6ynIRd0r36uu
-         6zyA==
-X-Gm-Message-State: AOJu0YxNtNZv/DZGMm+eUTydzToVlAGcpdIkv2daSPiFA31gzOstbS6z
-        bq5wjwP1gewX1P41kbyQJ9XNI3YptMAtAUuqfKMViA==
-X-Google-Smtp-Source: AGHT+IGU5hlAbzjKR6dHf8nG7wjH+gLTIhLdkOAR0BQZYCAzmvxO+0vsobrLpwu8+6G8uJRZXAov+P50unjaO9+ZE7g=
-X-Received: by 2002:a25:c08f:0:b0:d09:f39b:cecf with SMTP id
- c137-20020a25c08f000000b00d09f39bcecfmr12862557ybf.9.1692825393910; Wed, 23
- Aug 2023 14:16:33 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230823183749.2609013-1-robh@kernel.org>
-In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 23 Aug 2023 23:16:22 +0200
-Message-ID: <CACRpkdbuB-NotnMXc9vZj-byjk7spCSkZ+Dx=R_eOqoSV5CdTA@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Drop remaining unneeded quotes
+        bh=Q9Fv6zMHUmxIJtQTWw3otja3eb7daBbRUnAPWR3+Kws=;
+        b=ZV7JD2PItNNgINa80/2cPivFJfCsfpZfGIJad1Q2T2yg4eReWKFsKl4B0X6bWW7D4I
+         OhZmsSx9ObxvmsBTWRD9ZcbDxS/rVKnnouTItqO5fdednXNYJQvZzySgg/FmAm5vIoS5
+         fD1XcrVk+iYsmC+HCZaleA8ots9wvUaxMZd2Vzc9njnIrXMKNlXffYKnPpQ7UkA/hVXW
+         VrXngXiougdiAAuyvA4arEcFLhGwoZ1Mw2OYpk6ZHrzi6+hT6DYTQv4fEyt4FV52Ophx
+         rknVPTKU1szUH9dAN6r3tcYzHcx6R47JEJ8UI220hxtW4IU9sv61S9mrVPcqbAB7bxoG
+         06ZA==
+X-Gm-Message-State: AOJu0YzTgp518ISLA9kNoOzUEjHuawPPGrRr9RhkCwprc+Z8Fhl/LDe2
+        63VCtALML+m3YuZavTHY1E0=
+X-Google-Smtp-Source: AGHT+IGfrlLR+AVm4rNxdl7JpMbBTxVzD5wv8rDFBbxVFAKSvhzmEDzdpW59h59MCcReusMlyP0fPw==
+X-Received: by 2002:a05:620a:290e:b0:767:261d:1ef6 with SMTP id m14-20020a05620a290e00b00767261d1ef6mr19366337qkp.59.1692845818303;
+        Wed, 23 Aug 2023 19:56:58 -0700 (PDT)
+Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id z137-20020a63338f000000b0055386b1415dsm4743735pgz.51.2023.08.23.19.56.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 23 Aug 2023 19:56:57 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Date:   Wed, 23 Aug 2023 19:56:56 -0700
+From:   Guenter Roeck <linux@roeck-us.net>
 To:     Rob Herring <robh@kernel.org>
 Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
         Mike Leach <mike.leach@linaro.org>,
@@ -60,11 +59,11 @@ Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
         Leo Yan <leo.yan@linaro.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Conor Dooley <conor+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
         Alexandre Torgue <alexandre.torgue@foss.st.com>,
         Bartosz Golaszewski <brgl@bgdev.pl>,
         Andy Shevchenko <andy@kernel.org>,
         Chen-Yu Tsai <wens@csie.org>, Jean Delvare <jdelvare@suse.com>,
-        Guenter Roeck <linux@roeck-us.net>,
         Emil Renner Berthing <kernel@esmil.dk>,
         Alexandre Belloni <alexandre.belloni@bootlin.com>,
         Jonathan Cameron <jic23@kernel.org>,
@@ -94,21 +93,28 @@ Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
         linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
         alsa-devel@alsa-project.org, linux-scsi@vger.kernel.org,
         linux-watchdog@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH] dt-bindings: Drop remaining unneeded quotes
+Message-ID: <0f6ee9b9-3792-4865-8183-c50d4f3896e1@roeck-us.net>
+References: <20230823183749.2609013-1-robh@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Aug 23, 2023 at 8:38=E2=80=AFPM Rob Herring <robh@kernel.org> wrote=
-:
-
+On Wed, Aug 23, 2023 at 01:28:47PM -0500, Rob Herring wrote:
 > Cleanup bindings dropping the last remaining unneeded quotes. With this,
 > the check for this can be enabled in yamllint.
->
+> 
 > Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+>  .../devicetree/bindings/hwmon/iio-hwmon.yaml         |  4 ++--
+>  .../bindings/watchdog/toshiba,visconti-wdt.yaml      |  4 ++--
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+For hwmon and watchdog:
 
-Yours,
-Linus Walleij
+Acked-by: Guenter Roeck <linux@roeck-us.net>
+
+Guenter
