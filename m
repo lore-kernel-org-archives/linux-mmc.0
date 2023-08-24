@@ -2,29 +2,35 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85727EE49AD
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 15:02:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4173FEE49A6
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 20:27:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241996AbjHXPBf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 11:01:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52544 "EHLO
+        id S243522AbjHXU0m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Aug 2023 16:26:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242039AbjHXPBV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 11:01:21 -0400
-Received: from frasgout.his.huawei.com (frasgout.his.huawei.com [185.176.79.56])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD978FD;
-        Thu, 24 Aug 2023 08:01:15 -0700 (PDT)
-Received: from lhrpeml500005.china.huawei.com (unknown [172.18.147.201])
-        by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4RWmQ50xfGz6J7kR;
-        Thu, 24 Aug 2023 22:57:01 +0800 (CST)
-Received: from localhost (10.202.227.76) by lhrpeml500005.china.huawei.com
- (7.191.163.240) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.31; Thu, 24 Aug
- 2023 16:01:11 +0100
-Date:   Thu, 24 Aug 2023 16:01:10 +0100
-From:   Jonathan Cameron <Jonathan.Cameron@Huawei.com>
+        with ESMTP id S243521AbjHXU0O (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 16:26:14 -0400
+Received: from relay1-d.mail.gandi.net (relay1-d.mail.gandi.net [217.70.183.193])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B28C1FC4;
+        Thu, 24 Aug 2023 13:25:39 -0700 (PDT)
+Received: by mail.gandi.net (Postfix) with ESMTPSA id 12945240004;
+        Thu, 24 Aug 2023 20:24:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+        t=1692908737;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=ujvMeJdRrlwdpn7qQgMLktbCGIyae1LBRG+zxTv3lqU=;
+        b=Ula8hEOcS+/eKkw3qByvNwkENDIVN4W8dILOW2xA3QeZByi1NFKT4qjpR20ylYIrPR/LPn
+        8ZC6T3xf65QonT74gL16iUsIdr1fuBn4EDOGgijSzoAPQ/Fb6/9wr81q4yL1eTihpwM+/d
+        fSRL6wO8TBroYggS+h1LB85zHjhOXdzIS2YlpkafjfL685M9ItlEfOxA61XsiZxswwH6HK
+        JA9dLTxrCBdPhkJrRkKdm2JLl6bAHCX8ASzdgEHn5qbguMdu7i7IG/LXWSCd6ZshcO7ZLA
+        yqmMZES++aBOm7AqwsgUyH2FPWNSXrx+/IFEY7P7uy1f38YVMbAG6o3ie5IJhQ==
+Date:   Thu, 24 Aug 2023 22:24:02 +0200
+From:   Alexandre Belloni <alexandre.belloni@bootlin.com>
 To:     Rob Herring <robh@kernel.org>
-CC:     Suzuki K Poulose <suzuki.poulose@arm.com>,
+Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
         Mike Leach <mike.leach@linaro.org>,
         James Clark <james.clark@arm.com>,
         Leo Yan <leo.yan@linaro.org>,
@@ -33,66 +39,55 @@ CC:     Suzuki K Poulose <suzuki.poulose@arm.com>,
         Linus Walleij <linus.walleij@linaro.org>,
         Alexandre Torgue <alexandre.torgue@foss.st.com>,
         Bartosz Golaszewski <brgl@bgdev.pl>,
-        "Andy Shevchenko" <andy@kernel.org>, Chen-Yu Tsai <wens@csie.org>,
-        Jean Delvare <jdelvare@suse.com>,
+        Andy Shevchenko <andy@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>, Jean Delvare <jdelvare@suse.com>,
         Guenter Roeck <linux@roeck-us.net>,
-        "Emil Renner Berthing" <kernel@esmil.dk>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Emil Renner Berthing <kernel@esmil.dk>,
         Jonathan Cameron <jic23@kernel.org>,
         Lars-Peter Clausen <lars@metafoo.de>,
         Corey Minyard <minyard@acm.org>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        "Miquel Raynal" <miquel.raynal@bootlin.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
         Richard Weinberger <richard@nod.at>,
         Geert Uytterhoeven <geert+renesas@glider.be>,
         Magnus Damm <magnus.damm@gmail.com>,
         M ark Brown <broonie@kernel.org>,
         Thierry Reding <thierry.reding@gmail.com>,
         Bart Van Assche <bvanassche@acm.org>,
-        "Wim Van Sebroeck" <wim@linux-watchdog.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
         Mathieu Poirier <mathieu.poirier@linaro.org>,
         Anshuman Khandual <anshuman.khandual@arm.com>,
         Sudeep Holla <sudeep.holla@arm.com>,
-        <coresight@lists.linaro.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-i2c@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-        <linux-hwmon@vger.kernel.org>, <linux-i3c@lists.infradead.org>,
-        <linux-iio@vger.kernel.org>,
-        <openipmi-developer@lists.sourceforge.net>,
-        <linux-media@vger.kernel.org>, <linux-mips@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-mtd@lists.infradead.org>,
-        <alsa-devel@alsa-project.org>, <linux-scsi@vger.kernel.org>,
-        <linux-watchdog@vger.kernel.org>
+        coresight@lists.linaro.org, linux-arm-kernel@lists.infradead.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-hwmon@vger.kernel.org, linux-i3c@lists.infradead.org,
+        linux-iio@vger.kernel.org,
+        openipmi-developer@lists.sourceforge.net,
+        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        alsa-devel@alsa-project.org, linux-scsi@vger.kernel.org,
+        linux-watchdog@vger.kernel.org
 Subject: Re: [PATCH] dt-bindings: Drop remaining unneeded quotes
-Message-ID: <20230824160110.00002272@Huawei.com>
-In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
+Message-ID: <20230824201756563976f6@mail.local>
 References: <20230823183749.2609013-1-robh@kernel.org>
-Organization: Huawei Technologies Research and Development (UK) Ltd.
-X-Mailer: Claws Mail 4.1.0 (GTK 3.24.33; x86_64-w64-mingw32)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.202.227.76]
-X-ClientProxiedBy: lhrpeml500005.china.huawei.com (7.191.163.240) To
- lhrpeml500005.china.huawei.com (7.191.163.240)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
+X-GND-Sasl: alexandre.belloni@bootlin.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 23 Aug 2023 13:28:47 -0500
-Rob Herring <robh@kernel.org> wrote:
-
+On 23/08/2023 13:28:47-0500, Rob Herring wrote:
 > Cleanup bindings dropping the last remaining unneeded quotes. With this,
 > the check for this can be enabled in yamllint.
 > 
 > Signed-off-by: Rob Herring <robh@kernel.org>
-For IIO
-
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
 
 > ---
 >  .../bindings/arm/arm,embedded-trace-extension.yaml   |  4 ++--
@@ -798,4 +793,16 @@ Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
 >  
 >  title: Toshiba Visconti SoCs PIUWDT Watchdog timer
 >  
+> -- 
+> 2.40.1
+> 
+> 
+> -- 
+> linux-i3c mailing list
+> linux-i3c@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-i3c
 
+-- 
+Alexandre Belloni, co-owner and COO, Bootlin
+Embedded Linux and Kernel engineering
+https://bootlin.com
