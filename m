@@ -2,56 +2,57 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36A8EC3DA6F
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 10:00:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 306AFC7113B
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 10:12:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235736AbjHXKAY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 06:00:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55718 "EHLO
+        id S238023AbjHXKLv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Aug 2023 06:11:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53738 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240905AbjHXKAP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 06:00:15 -0400
-Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB1921BEF
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:00:03 -0700 (PDT)
-Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-58fb8963617so53718617b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:00:03 -0700 (PDT)
+        with ESMTP id S238666AbjHXKLv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 06:11:51 -0400
+Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2039C1985
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:11:49 -0700 (PDT)
+Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-5920efd91c7so45112807b3.2
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:11:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692871203; x=1693476003;
+        d=linaro.org; s=google; t=1692871908; x=1693476708;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=g5rBPrC0vQuMcmp4DDXqhGWwYLuvH0qXFYCzdTPwswc=;
-        b=UvHbie/8LWoOd9pmsDUaYRgDhjjMFGDF1C3OOlCJ5qJ2CvjeQUuaV2iX/fcxhlVXg1
-         txgK80KGJJY33qF2q8Y5tGr+k9h/HzuX2NDw2x8vk37SYnNAsXc0GEJ2Vp9RPrr4seZ9
-         vatxLLtKsnxhb21G4mZZRAD8WmfUcWQ3Eq+SUe/6DwEv/TNp4h224VUnibnPAVj9kGFw
-         +4HQRuFlmF5BjyBjswmH4RRvRPWW04XnmYYAXPylv2fxSJYKA95oQvGesF0t9yQ6ttLG
-         EbyQhIVz8m3e+4p5VLqmbX+Kutok5QytFDrrltEwBSkpLu79JsS2Oj/doGQ+UzqnBScp
-         qDVA==
+        bh=Bl1Q50iBdvCe5yXtMKZeggNf2z/kDCkF0CSNbFHkckI=;
+        b=MWPeZiaV94eD0r+5t0wdUz9wReNqAYmRAENUMMJEkml4RH2wlEoFqGlDit+EWODwQA
+         5ZG4ehZHT9fkISlrVp95oFTdEQwKHpkGxTsn/Oa+djoo1naBWG+DRNh9KZDx+x0uUyNL
+         lkgk5aqZ8GpuvHQlymX/f19ZkYdlftRtLDWyBc2HBVNRqCi+JMwmsMdBG92IUaMytyH2
+         3npp5YsqUIzJjVXp2INqN26cid6g95//+SeEsv8EuIN4g9PPEIXfjxEPPW9IYbA/V/GO
+         Z6vgS6WlFMnff9hs2GXybOmJyjrcaMeF6EA4eF7cRWk/oVE7DabMtnx6g14lhoCR6srH
+         zVQw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692871203; x=1693476003;
+        d=1e100.net; s=20221208; t=1692871908; x=1693476708;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=g5rBPrC0vQuMcmp4DDXqhGWwYLuvH0qXFYCzdTPwswc=;
-        b=ElnzpWAk93IMOZ7CgM34zGfqzEZgdju7fGY0O4P85oc1UIxVko60uAu7qPqxe7yBjI
-         wHvBpf3+lbVPbMkHH57Ct+dMVjTFwQ4a56v6SNg3p6zS4foOKqGMQ20nwdmS80G7TAQs
-         VBjc/VlRDWgUdYvm6nL4fL9Dz/ZI4rUPSlv65BZnV5DnyEgGLTLJ0Uey7CpYym1cFL88
-         5WAmOm6Zee3YaqAtUcafca424U5VBu4swPFie4MG8416XuWtaV5LH2VM4dG3KQDf/Na6
-         R/KbHxJbfX4qzpyDIpKCs928KdA0VAWBmL5uJpieqK/WY7OS3yrDXplKIQ516Jq7JOXD
-         LitA==
-X-Gm-Message-State: AOJu0YxHFAmm0CpCKSzhR2vK1JCTopuDiHvEfSwA/idsYRPE++zG8/Bl
-        4IuM7il/9vWbyiDRpctEEAZFOCkVXD4RBbmgOtM+qg==
-X-Google-Smtp-Source: AGHT+IFCajrkQF9SFLOKPslL3gpX83VYgr+19SYAR8dR/LwPG2vSDJtUovktxg/kfqHey2hK+xu2RcKp9dNsJTnze8I=
-X-Received: by 2002:a81:8882:0:b0:55a:3ce9:dc3d with SMTP id
- y124-20020a818882000000b0055a3ce9dc3dmr14818684ywf.13.1692871203062; Thu, 24
- Aug 2023 03:00:03 -0700 (PDT)
+        bh=Bl1Q50iBdvCe5yXtMKZeggNf2z/kDCkF0CSNbFHkckI=;
+        b=k828GN68vWfoRhDxLrm5WKP6y6YcBzUaTT1qF7UA8NnsylZ4XY1hko/Km8bRhnB33d
+         oYd+iLxHzuulpLn/yla/3rVsPkZ153bdqPa8oVXiSnjCaBCfyV77PV1ZRLli6gu26Lz/
+         HrHmdvWZ1EGzPLvsRzu+h4AO6MPenvm4L9fb3cszor2UZMZp4iOf278TeqYsFoTBuF3v
+         pcHSNLqYXwGm5QYh+RoRGrR+gRXqBBJB6sYPjVQAcQy8V3voiiIot679XFY0QSaxUtbB
+         lu8YdMPYRQa000nRqu45LyAES4nwSlogeb5/qbMMe8D9dxjEvBW/6wAymoZfMTfGfVt/
+         CBQg==
+X-Gm-Message-State: AOJu0YwyaEqZeNhrdqP97Pp8xbD0UAP3pkTPtD8YBL3XUY4UoUWd1p7K
+        CabKKoAlObvJ9mcKvyN61Qj+xDMI8jT/ThSiBkfBFOdGvZvF2PJUIxIvtw==
+X-Google-Smtp-Source: AGHT+IGvSXY7+rdDaIUHF9HjDvskEigToneQarxKPoW1CYKgFy0fTTrMflFl3uOlx1h55l1O4xnlqO1ip0o2IVD4ULk=
+X-Received: by 2002:a0d:e692:0:b0:565:c21d:8ec6 with SMTP id
+ p140-20020a0de692000000b00565c21d8ec6mr14885752ywe.6.1692871908391; Thu, 24
+ Aug 2023 03:11:48 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230815014057.13589-1-wenchao.chen@unisoc.com> <20230815014057.13589-3-wenchao.chen@unisoc.com>
-In-Reply-To: <20230815014057.13589-3-wenchao.chen@unisoc.com>
+References: <20230815014057.13589-1-wenchao.chen@unisoc.com> <20230815014057.13589-2-wenchao.chen@unisoc.com>
+In-Reply-To: <20230815014057.13589-2-wenchao.chen@unisoc.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 24 Aug 2023 11:59:26 +0200
-Message-ID: <CAPDyKFoMR_rX5O6rmp94SsBZL0=VeCgtanZzGVmTHcUihmHyKA@mail.gmail.com>
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-sprd: Add SD HS mode online tuning
+Date:   Thu, 24 Aug 2023 12:11:12 +0200
+Message-ID: <CAPDyKFphAPOSj5L6Q8tdmD0S3EkxTW8EfMyXKsoUU2jqLydx=g@mail.gmail.com>
+Subject: Re: [PATCH V2 1/2] mmc: core: Add host specific tuning support for SD
+ HS mode
 To:     Wenchao Chen <wenchao.chen@unisoc.com>
 Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, wenchao.chen666@gmail.com,
@@ -64,40 +65,90 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Tue, 15 Aug 2023 at 03:41, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
 >
-> First of all, Unisoc's IC provides cmd delay and read delay to ensure
-> that the host can get the correct data. However, according to SD Spec,
-> there is no need to do tuning in high speed mode, but with the
-> development of chip processes, it is more and more difficult to find
-> a suitable delay to cover all the chips. Therefore, we need SD high
-> speed mode online tuning.
->
-> In addition, we added mmc_sd_switch() and mmc_send_status() to the
-> header file to allow it to be usable by the drive
+> Added .prepare_hs_tuning and .execute_hs_tuning host callbacks to
+> support host-specific tuning for SD high speed mode.
+
+Please clarify this is entirely optional, host specific - and that
+there is nothing in the SD spec that mentions this.
+
 >
 > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
 > ---
->  drivers/mmc/core/sd_ops.c     |   1 +
->  drivers/mmc/host/sdhci-sprd.c | 152 ++++++++++++++++++++++++++++++++++
->  include/linux/mmc/host.h      |   2 +
->  3 files changed, 155 insertions(+)
+>  drivers/mmc/core/sd.c    | 12 ++++++++++++
+>  include/linux/mmc/host.h |  6 ++++++
+>  2 files changed, 18 insertions(+)
 >
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index ef8d1dce5af1..a59cd592f06e 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -323,6 +323,7 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
->         return mmc_send_adtc_data(card, card->host, SD_SWITCH, cmd_args, resp,
->                                   64);
->  }
-> +EXPORT_SYMBOL_GPL(mmc_sd_switch);
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 246ce027ae0a..ac2da8f2fbce 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1518,6 +1518,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>                  */
+>                 mmc_set_clock(host, mmc_sd_get_max_clock(card));
+>
+> +               if (host->ops->prepare_hs_tuning) {
 
-Please move changes in include/linux/mmc/host.h and
-drivers/mmc/core/sd_ops.c into patch1. When doing that, please update
-the commit messages too.
+Shouldn't we check if we actually succeeded to enable MMC_TIMING_SD_HS
+before invoking this callback?
 
-[...]
+> +                       err = host->ops->prepare_hs_tuning(host, card);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
+> +
+>                 /*
+>                  * Switch to wider bus (if supported).
+>                  */
+> @@ -1529,6 +1535,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>
+>                         mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+>                 }
+> +
+> +               if (host->ops->execute_hs_tuning) {
 
-Other than the above, this looks okay to me!
+Ditto.
+
+> +                       err = host->ops->execute_hs_tuning(host, card);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
+>         }
+>  cont:
+>         if (!oldcard) {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 461d1543893b..13cf894b9e3c 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -184,6 +184,12 @@ struct mmc_host_ops {
+>         /* Execute HS400 tuning depending host driver */
+>         int     (*execute_hs400_tuning)(struct mmc_host *host, struct mmc_card *card);
+>
+> +       /* Prepare HS tuning depending host driver */
+
+How about rephrasing this into something along the lines of "Optional
+callback to prepare for SD high-speed tuning"
+
+> +       int     (*prepare_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
+
+To make it more clear this if for SD high-speed, maybe we should
+rename the callback into:
+
+"prepare_sd_hs_tuning"
+
+> +
+> +       /* Execute HS tuning depending host driver */
+
+How about rephrasing this to something along the lines of "Optional
+callback to execute SD high-speed tuning"
+
+> +       int     (*execute_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
+
+Maybe execute_sd_hs_tuning instead?
+
+> +
+>         /* Prepare switch to DDR during the HS400 init sequence */
+>         int     (*hs400_prepare_ddr)(struct mmc_host *host);
+>
 
 Kind regards
 Uffe
