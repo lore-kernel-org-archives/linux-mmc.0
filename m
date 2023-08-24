@@ -2,139 +2,89 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33FF2C6FA8F
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 10:27:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BB5DEE49AD
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 10:29:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230526AbjHXK0s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 06:26:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50986 "EHLO
+        id S240858AbjHXK3C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Aug 2023 06:29:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44250 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236975AbjHXK0q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 06:26:46 -0400
-Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60AC8198D
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:26:44 -0700 (PDT)
-Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-58fb73e26a6so55347127b3.1
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:26:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692872803; x=1693477603;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=LiVO2zIIfAlMOLu1hE32MnDX+QGTLXrL91WCVdNOGro=;
-        b=snHFrSX9kpgGnVaHypf4EWd1p7qcpSAzammAIwD8QSTejP8bl8J0oy6MiEPe5zkjLT
-         5Kx/3ON3pU4omX68exa8+FuX/R67h9YdNt1Fyqi811yca+pdnjcXscyxyDaP02PFUGAu
-         ORcAJf5fRlvWUsoRIbVvbuvyNXfmTdnd4bebXz92mGG2Ks6x9eJ9zrvLqtWy9AJ+ixUI
-         8k5zgJqipAjc32b8Te5RIs0nr3rw4W7SUe+8Mzlbq11hj1eoNauIiojBVxwKkQGR3Kc4
-         +5cY/4d2Jscl0HWHqdf/bXPL2i7g34EmSBWVXKCtoetsQ0usHZgvmsRrUhb1RV6zf26C
-         jsvw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692872803; x=1693477603;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=LiVO2zIIfAlMOLu1hE32MnDX+QGTLXrL91WCVdNOGro=;
-        b=NCNEhpnb6G1Q3Re4VXjWbpomViolzEVrGe+2c2ogXSQsOTGTO+idvtC19QxPlamenQ
-         GSEPwWXBfn3IffTFvMMP4xpKezfqO46T9pNdaYf08998aCKPM6oyGEjGPw3DrQHndIKD
-         I4OeF6fZbc2PBj6hLf7V8LRrHIRUKjeXMUYQcUG1CGsdPYVBsf4hU4TriYXNZ+wwCnP5
-         fQFl/ecA2FQoGVw/3OWZedOVT0eyr3r8c9oV2sHyBCgd+MdAXEX8eizntm9KHDvkzw++
-         O+FWUdevAkO1ey+YOuoBvpKDYdL6v9X2j2tHAFNTGol2h5yRPtaFfF0uDie467YEs9XH
-         DUrA==
-X-Gm-Message-State: AOJu0Yz+aS/KqEVwjpB8dzr/QmcLOdNwEEUGr50oJTJcGAjCsdYqC+qp
-        Du/5U3bHfP2YXnnJjPWz0EdBaUx2LyzLea0nVOIwbg==
-X-Google-Smtp-Source: AGHT+IGEF/ohPnecRPr+1/Us9nPZdUGng0F281dTDctUO63ONUqAvna6vjLJF4sW+SdB52LmJ61MFUpiBprWMIl6vSk=
-X-Received: by 2002:a81:6cd5:0:b0:54f:ba89:225d with SMTP id
- h204-20020a816cd5000000b0054fba89225dmr14041774ywc.19.1692872803527; Thu, 24
- Aug 2023 03:26:43 -0700 (PDT)
+        with ESMTP id S239591AbjHXK23 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 06:28:29 -0400
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B5C851991;
+        Thu, 24 Aug 2023 03:28:26 -0700 (PDT)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 612BD1042;
+        Thu, 24 Aug 2023 03:29:06 -0700 (PDT)
+Received: from bogus (e103737-lin.cambridge.arm.com [10.1.197.49])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id BFDD63F740;
+        Thu, 24 Aug 2023 03:28:19 -0700 (PDT)
+Date:   Thu, 24 Aug 2023 11:28:16 +0100
+From:   Sudeep Holla <sudeep.holla@arm.com>
+To:     Rob Herring <robh@kernel.org>
+Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
+        Mike Leach <mike.leach@linaro.org>,
+        James Clark <james.clark@arm.com>,
+        Leo Yan <leo.yan@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Andy Shevchenko <andy@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>, Jean Delvare <jdelvare@suse.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Emil Renner Berthing <kernel@esmil.dk>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Corey Minyard <minyard@acm.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        M ark Brown <broonie@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Anshuman Khandual <anshuman.khandual@arm.com>,
+        Sudeep Holla <sudeep.holla@arm.com>,
+        coresight@lists.linaro.org, linux-arm-kernel@lists.infradead.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-hwmon@vger.kernel.org, linux-i3c@lists.infradead.org,
+        linux-iio@vger.kernel.org,
+        openipmi-developer@lists.sourceforge.net,
+        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        alsa-devel@alsa-project.org, linux-scsi@vger.kernel.org,
+        linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Drop remaining unneeded quotes
+Message-ID: <20230824102816.q3qoub6vzen5uomj@bogus>
+References: <20230823183749.2609013-1-robh@kernel.org>
 MIME-Version: 1.0
-References: <20230823061734.27479-1-wenchao.chen@unisoc.com>
-In-Reply-To: <20230823061734.27479-1-wenchao.chen@unisoc.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 24 Aug 2023 12:26:07 +0200
-Message-ID: <CAPDyKFqbY5yLNwhODDq0XimKtnf0V93rEbmSdG+qZ2FrYWJFsw@mail.gmail.com>
-Subject: Re: [PATCH V2 0/2] mmc: hsq: Dynamically adjust hsq_depth to improve performance
-To:     Wenchao Chen <wenchao.chen@unisoc.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        wenchao.chen666@gmail.com, zhenxiong.lai@unisoc.com,
-        yuelin.tang@unisoc.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 23 Aug 2023 at 08:18, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
->
-> Change in v2:
-> - Support for dynamic adjustment of hsq_depth.
->
-> Test
-> =====
-> I tested 3 times for each case and output a average speed.
-> Ran 'fio' to evaluate the performance:
-> 1.Fixed hsq_depth
-> 1) Sequential write:
-> Speed: 168 164 165
-> Average speed: 165.67MB/S
->
-> 2) Sequential read:
-> Speed: 326 326 326
-> Average speed: 326MB/S
->
-> 3) Random write:
-> Speed: 82.6 83 83
-> Average speed: 82.87MB/S
->
-> 4) Random read:
-> Speed: 48.2 48.3 47.6
-> Average speed: 48.03MB/S
->
-> 2.Dynamic hsq_depth
-> 1) Sequential write:
-> Speed: 167 166 166
-> Average speed: 166.33MB/S
->
-> 2) Sequential read:
-> Speed: 327 326 326
-> Average speed: 326.3MB/S
->
-> 3) Random write:
-> Speed: 86.1 86.2 87.7
-> Average speed: 86.67MB/S
->
-> 4) Random read:
-> Speed: 48.1 48 48
-> Average speed: 48.03MB/S
->
-> Based on the above data, dynamic hsq_depth can improve the performance of random writes.
-> Random write improved by 4.6%.
+On Wed, Aug 23, 2023 at 01:28:47PM -0500, Rob Herring wrote:
+> Cleanup bindings dropping the last remaining unneeded quotes. With this,
+> the check for this can be enabled in yamllint.
+> 
+> Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+>  .../devicetree/bindings/arm/arm,vexpress-juno.yaml   |  2 +-
 
-Thanks for sharing this, interesting!
+Acked-by: Sudeep Holla <sudeep.holla@arm.com>
 
->
-> Test cmd
-> =========
-> 1)write: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=write -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 2)read: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=read -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 3)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 4)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
->
-
-The buffer you used for randwrite/randread is 4K blocks. Did you try
-with something bigger too?
-
-Or maybe we are afraid of introducing a bigger latency if we
-dynamically change the hsq_depth to match something bigger than 4K?
-
->
-> Wenchao Chen (2):
->   mmc: queue: replace immediate with hsq->depth
->   mmc: hsq: dynamic adjustment of hsq->depth
->
->  drivers/mmc/core/queue.c   |  6 +-----
->  drivers/mmc/host/mmc_hsq.c | 27 +++++++++++++++++++++++++++
->  drivers/mmc/host/mmc_hsq.h |  8 ++++++++
->  include/linux/mmc/host.h   |  1 +
->  4 files changed, 37 insertions(+), 5 deletions(-)
->
-
-Kind regards
-Uffe
+-- 
+Regards,
+Sudeep
