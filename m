@@ -2,99 +2,136 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE46DEE49A5
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 08:08:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58ABAC7113B
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 08:25:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231185AbjHXIIW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 04:08:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48436 "EHLO
+        id S229609AbjHXIZR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Aug 2023 04:25:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43738 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229892AbjHXIHx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 04:07:53 -0400
-Received: from relay3-d.mail.gandi.net (relay3-d.mail.gandi.net [IPv6:2001:4b98:dc4:8::223])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADF911BCD;
-        Thu, 24 Aug 2023 01:07:18 -0700 (PDT)
-Received: by mail.gandi.net (Postfix) with ESMTPSA id A58C56000A;
-        Thu, 24 Aug 2023 08:06:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
-        t=1692864415;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=5iy90UPBEpYr9Ks6Pdn0quIrhraOkWjQhbq0wpTYDBM=;
-        b=XizArq1AmE8u1PlEKB4g8NjhXu0zjN5QFi79zW24HbCXBErrvogWggSj9arbq+KhrFKB+O
-        uNFRNoDum6eiw6b1FusyrSJGtFu52oxgQ2aZxvU94bbYQ6VeF6C6+aaiIjsvth2eXnzCxv
-        fG9eW8n1Z7MjHVpGZKNTWsEMTPK6e/12/dzQCGsxQ9uVm1S5ddD2cTGo7DkevkDqa3KU8H
-        w1ZbBKh6080wCbuer4WK7KK05Jg/bzrwy8FVePWax3FVuMu3JvmQ+yeRvZQEooNr0+hv60
-        bNmbWEfq0tXu55UOuMr9+VZp+jY7MAOxARwAMNEhCJ6ymjR+mtZvO+UxG0Uu9Q==
-Date:   Thu, 24 Aug 2023 10:06:48 +0200
-From:   Miquel Raynal <miquel.raynal@bootlin.com>
-To:     Rob Herring <robh@kernel.org>
-Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
-        Mike Leach <mike.leach@linaro.org>,
-        James Clark <james.clark@arm.com>,
-        Leo Yan <leo.yan@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Andy Shevchenko <andy@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>, Jean Delvare <jdelvare@suse.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Corey Minyard <minyard@acm.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Richard Weinberger <richard@nod.at>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        M ark Brown <broonie@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Anshuman Khandual <anshuman.khandual@arm.com>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        coresight@lists.linaro.org, linux-arm-kernel@lists.infradead.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i3c@lists.infradead.org,
-        linux-iio@vger.kernel.org,
-        openipmi-developer@lists.sourceforge.net,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        alsa-devel@alsa-project.org, linux-scsi@vger.kernel.org,
-        linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Drop remaining unneeded quotes
-Message-ID: <20230824100648.5b6e8b70@xps-13>
-In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
-References: <20230823183749.2609013-1-robh@kernel.org>
-Organization: Bootlin
-X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.33; x86_64-pc-linux-gnu)
+        with ESMTP id S231207AbjHXIYr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 04:24:47 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E522171B
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 01:24:44 -0700 (PDT)
+Received: from kwepemm600014.china.huawei.com (unknown [172.30.72.57])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4RWbDY4jmfztRn2;
+        Thu, 24 Aug 2023 16:03:09 +0800 (CST)
+Received: from [10.67.110.164] (10.67.110.164) by
+ kwepemm600014.china.huawei.com (7.193.23.54) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.31; Thu, 24 Aug 2023 16:06:54 +0800
+Subject: Re: [PATCH v2] mmc: sdhci-of-dwcmshc: Use helper function
+ devm_clk_get_enabled()
+To:     Adrian Hunter <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, Liming Sun <limings@nvidia.com>,
+        David Thompson <davthompson@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>
+References: <20230821062303.185174-1-yiyang13@huawei.com>
+ <842a0ac5-7eb2-390e-41af-f86e894b3c79@intel.com>
+ <79151ed0-46da-489c-1335-4f0286a6fdf1@intel.com>
+From:   "yiyang (D)" <yiyang13@huawei.com>
+Message-ID: <bb53bff4-cf2d-f3e9-5131-be7a88d32744@huawei.com>
+Date:   Thu, 24 Aug 2023 16:06:46 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-X-GND-Sasl: miquel.raynal@bootlin.com
+In-Reply-To: <79151ed0-46da-489c-1335-4f0286a6fdf1@intel.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.67.110.164]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ kwepemm600014.china.huawei.com (7.193.23.54)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
 
-robh@kernel.org wrote on Wed, 23 Aug 2023 13:28:47 -0500:
+On 2023/8/24 15:42, Adrian Hunter wrote:
+> On 24/08/23 10:37, Adrian Hunter wrote:
+>> On 21/08/23 09:23, Yi Yang wrote:
+>>> Since commit 7ef9651e9792 ("clk: Provide new devm_clk helpers for
+>>> prepared and enabled clocks"), devm_clk_get() and clk_prepare_enable()
+>>> can now be replaced by devm_clk_get_enabled() when the driver enables
+>>> (and possibly prepares) the clocks for the whole lifetime of the device.
+>>> Moreover, it is no longer necessary to unprepare and disable the clocks
+>>> explicitly.
+>>>
+>>> Signed-off-by: Yi Yang <yiyang13@huawei.com>
+>>> ---
+>>> v2: Remove clk_disable_unprepare in dwcmshc_remove()
+>>> ---
+>>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 20 ++++++++------------
+>>>   1 file changed, 8 insertions(+), 12 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> index 31c1892f4ecd..08b566984733 100644
+>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> @@ -495,19 +495,19 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>   	priv = sdhci_pltfm_priv(pltfm_host);
+>>>   
+>>>   	if (dev->of_node) {
+>>> -		pltfm_host->clk = devm_clk_get(dev, "core");
+>>> +		pltfm_host->clk = devm_clk_get_enabled(dev, "core");
+>>>   		if (IS_ERR(pltfm_host->clk)) {
+>>>   			err = PTR_ERR(pltfm_host->clk);
+>>> -			dev_err(dev, "failed to get core clk: %d\n", err);
+>>> +			dev_err(dev, "failed to get or enable core clk: %d\n", err);
+>>>   			goto free_pltfm;
+>>>   		}
+>>> -		err = clk_prepare_enable(pltfm_host->clk);
+>>> -		if (err)
+>>> -			goto free_pltfm;
+>>>   
+>>> -		priv->bus_clk = devm_clk_get(dev, "bus");
+>>> -		if (!IS_ERR(priv->bus_clk))
+>>> -			clk_prepare_enable(priv->bus_clk);
+>>> +		priv->bus_clk = devm_clk_get_enabled(dev, "bus");
+>>> +		if (!IS_ERR(priv->bus_clk)) {
+>>
+>> "!" does not belong, should be "if (IS_ERR(priv->bus_clk))" instead
+> 
 
-> Cleanup bindings dropping the last remaining unneeded quotes. With this,
-> the check for this can be enabled in yamllint.
->=20
-> Signed-off-by: Rob Herring <robh@kernel.org>
+I'm sorry for this low-level mistake.
 
-Acked-by: Miquel Raynal <miquel.raynal@bootlin.com> # for mtd
+> Although previously it seemed like the clock was optional.
+> At least the error was not considered fatal.
+> 
+Yes,this not a fatal mistake.
 
-Thanks,
-Miqu=C3=A8l
+>>
+>>> +			err = PTR_ERR(priv->bus_clk);
+>>> +			dev_err(dev, "failed to get or enable bus clk: %d\n", err);
+>>> +			goto free_pltfm;
+>>> +		}
+>>>   	}
+>>>   
+>>>   	err = mmc_of_parse(host->mmc);
+>>> @@ -564,8 +564,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>   err_setup_host:
+>>>   	sdhci_cleanup_host(host);
+>>>   err_clk:
+>>> -	clk_disable_unprepare(pltfm_host->clk);
+>>> -	clk_disable_unprepare(priv->bus_clk);
+>>>   	if (rk_priv)
+>>>   		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
+>>>   					   rk_priv->rockchip_clks);
+>>> @@ -583,8 +581,6 @@ static void dwcmshc_remove(struct platform_device *pdev)
+>>>   
+>>>   	sdhci_remove_host(host, 0);
+>>>   
+>>> -	clk_disable_unprepare(pltfm_host->clk);
+>>> -	clk_disable_unprepare(priv->bus_clk);
+>>>   	if (rk_priv)
+>>>   		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
+>>>   					   rk_priv->rockchip_clks);
+>>
+> 
+> 
+> .
+> 
+
+-- 
+Yi
