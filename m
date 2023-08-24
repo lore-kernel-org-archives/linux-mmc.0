@@ -2,278 +2,217 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D3011C6FA8F
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 12:19:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 720ECC71153
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 14:02:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241331AbjHXMSj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 08:18:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56602 "EHLO
+        id S232700AbjHXOCR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Aug 2023 10:02:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241329AbjHXMSd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 08:18:33 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A054D10EF;
-        Thu, 24 Aug 2023 05:18:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1692879511; x=1724415511;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=BI0e4xgTMuP0vJIr6AvvWn1zdIhqDFSz5JPSyTyMEcI=;
-  b=eaCBFrSKe48JkSWRIkpEJDCMVXnEmPDKOzhqhrOEFnVP3THm9W9y3gAD
-   HESoWpwgpny2sVT9AObwp1cfb/PuGJpboANQ1d+AWtOuf4joexLBjINwe
-   E47xHDhQdyD4I0VTDm/3nWhZ+BcUHPW/r9DSxl8zoSSM/Rige7u2ju61F
-   D9TKRHF8HITaorgPIY3DmirJR7QNZ580jtVHA/nUbJjbUxq/q2zdr08kz
-   nb+bZgEp4TD2WCogzQSr2TTLs5P2WqBQ5xMxPnSQ5fl8fo3LXmJrbks8d
-   tT/5+MzEk1U97tHkctuduPGFEPmWvlqL4ZPX7oH2lfpDYJLFsoTEG9ipV
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10811"; a="438356173"
-X-IronPort-AV: E=Sophos;i="6.02,195,1688454000"; 
-   d="scan'208";a="438356173"
-Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Aug 2023 05:18:31 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10811"; a="737027321"
-X-IronPort-AV: E=Sophos;i="6.02,195,1688454000"; 
-   d="scan'208";a="737027321"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.212.187])
-  by orsmga002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Aug 2023 05:18:27 -0700
-Message-ID: <391c4270-637a-2afb-210d-6b6dfef01efa@intel.com>
-Date:   Thu, 24 Aug 2023 15:18:23 +0300
+        with ESMTP id S241326AbjHXOBu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 10:01:50 -0400
+Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70B221BD3
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 07:01:40 -0700 (PDT)
+Received: by mail-vs1-xe2f.google.com with SMTP id ada2fe7eead31-44d58933a17so1554181137.0
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 07:01:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1692885699; x=1693490499;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rgE1Z6hS5PELjPgipAhTPY+hEOvvc5P1iG+fu9pr+/k=;
+        b=I/VxC+vxoc/EHs7XzgN70uqxwVQTpl3vtai+42TcV7nR3KFDq5Jz+LHjOIETirfusw
+         aZE7uWz37nO2Ojt+VPpwhNsdgir8vpsjIlQzUeYrBCorvnmx2/Y9kBbGauUj6qZ4TNuq
+         WlmmW5m4pn3UxEM0879scGUNVrSz67NVYjRpGJUZ9tBIE3byC19kIQ8qfO5ETL4mcM64
+         1+o1S02w66PI4vGBv+5MV5OOENYuz0mJzG2N8+3Z6zeS6EQ/eXXWl77RjE2LmIUDwyki
+         0phopVDvdd95+88ffBZG/qhNtStivEf8hD1kd7jAE033VppkBzSNKEx05mqeaAvV6Gab
+         J40w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692885699; x=1693490499;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=rgE1Z6hS5PELjPgipAhTPY+hEOvvc5P1iG+fu9pr+/k=;
+        b=d8wvrx3qmqEHDAjfw2vQh0tzbBnsrjFoM0e0+byFb9A2Ri+c3LiHt+UXTsS0dOSRrW
+         tESGAhzNIUH8FjFhEm+lskAomACr2CpFD6+7ryW190QaLV4dRuP8bPLE8ENQ0TftvJtC
+         tTWE+2ua6n1Kx26NXfOIuAPJ6EqjHhreg2mx8fl7Cj04BQ0XAquhtje/qNW3PLgtX0Hx
+         T8J9xy5sNujRgx8DlDdpfFZzxNTBrry7KPynns5L+KmzLrkq4tXDVAH/6KJ8ZJ88YM+R
+         gk90FiNqmHcED1OKgZArISwirwlnEguuHsrVEKG8VQDu0aP2QFKJwJJ9jJvm84x5Okx9
+         j/uQ==
+X-Gm-Message-State: AOJu0YyhtsvATWJK4LnHH6v70LTXbZqvUeAaek0GYeuA2htn8atBjkmT
+        a3HjmJn/OSv2/qLh9neQCefFu6RihT3FIC6av75dOA==
+X-Google-Smtp-Source: AGHT+IExU45Wzw0uDMlScM3eigEjBo+8qsRt5W/u2kC/1ACD7gi5tr+OsjcvOtx3XwBJj1sC2cOVTqxGHuIn12NMr2I=
+X-Received: by 2002:a67:e9d6:0:b0:44e:9ab0:ed24 with SMTP id
+ q22-20020a67e9d6000000b0044e9ab0ed24mr1452325vso.24.1692885699504; Thu, 24
+ Aug 2023 07:01:39 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.14.0
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix
- SoCs can suspend
-Content-Language: en-US
-To:     =?UTF-8?Q?Stanis=c5=82aw_Kardach?= <skardach@google.com>
-Cc:     Sven van Ashbrook <svenva@chromium.org>,
-        LKML <linux-kernel@vger.kernel.org>, ulf.hansson@linaro.org,
-        jason.lai@genesyslogic.com.tw,
-        Renius Chen <reniuschengl@gmail.com>,
-        linux-mmc@vger.kernel.org, greg.tu@genesyslogic.com.tw,
-        jasonlai.genesyslogic@gmail.com, SeanHY.chen@genesyslogic.com.tw,
-        ben.chuang@genesyslogic.com.tw, victor.shih@genesyslogic.com.tw,
-        stable@vger.kernel.org
-References: <20230823174134.v2.1.I7ed1ca09797be2dd76ca914c57d88b32d24dac88@changeid>
- <e22c4a5f-c592-7121-7173-eef669ebdf89@intel.com>
- <CADj_en4p8MsfSsuzgpNU22FV7W_ME=g04coXfk4+e_-Jk11yrA@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CADj_en4p8MsfSsuzgpNU22FV7W_ME=g04coXfk4+e_-Jk11yrA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20230722014037.42647-1-shyamsaini@linux.microsoft.com>
+ <20230722014037.42647-2-shyamsaini@linux.microsoft.com> <CAPDyKFoBC+GaGerGDEAjg9q4ayV9mMBKkfFk3nO-zcQzOZ_H6Q@mail.gmail.com>
+ <b875892c-1777-d84a-987e-1b0d5ac29df@linux.microsoft.com> <94728786-b41b-1467-63c1-8e2d5acfa5e4@linaro.org>
+ <CAFA6WYNPViMs=3cbNsEdhqnjNOUCsHE_8uqiDTzwCKDNNiDkCw@mail.gmail.com> <d24dba8-a777-1acb-98f0-747998b6e8a3@linux.microsoft.com>
+In-Reply-To: <d24dba8-a777-1acb-98f0-747998b6e8a3@linux.microsoft.com>
+From:   Sumit Garg <sumit.garg@linaro.org>
+Date:   Thu, 24 Aug 2023 19:31:28 +0530
+Message-ID: <CAFA6WYMYepbFwF0nWpR1vNkmzvFUoNojY1cWRPtGQAF8U8ngfA@mail.gmail.com>
+Subject: Re: [RFC, PATCH 1/1] rpmb: add Replay Protected Memory Block (RPMB) driver
+To:     Shyam Saini <shyamsaini@linux.microsoft.com>
+Cc:     Jerome Forissier <jerome.forissier@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        op-tee@lists.trustedfirmware.org, linux-scsi@vger.kernel.org,
+        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
+        Tomas Winkler <tomas.winkler@intel.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Tyler Hicks <code@tyhicks.com>,
+        "Srivatsa S . Bhat" <srivatsa@csail.mit.edu>,
+        Paul Moore <paul@paul-moore.com>,
+        Allen Pais <apais@linux.microsoft.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/08/23 14:50, Stanisław Kardach wrote:
-> Hi Adrian,
-> 
-> Thanks for reviewing our patches.
-> 
-> On Thu, Aug 24, 2023 at 1:47 PM Adrian Hunter <adrian.hunter@intel.com <mailto:adrian.hunter@intel.com>> wrote:
-> 
->     Hi
-> 
->     Looks OK - a few minor comments below
-> 
->     On 23/08/23 20:41, Sven van Ashbrook wrote:
->     > To improve the r/w performance of GL9763E, the current driver inhibits LPM
->     > negotiation while the device is active.
->     >
->     > This prevents a large number of SoCs from suspending, notably x86 systems
-> 
->     If possible, can you give example of which SoCs / products
-> 
->     > which use S0ix as the suspend mechanism:
->     > 1. Userspace initiates s2idle suspend (e.g. via writing to
->     >    /sys/power/state)
->     > 2. This switches the runtime_pm device state to active, which disables
->     >    LPM negotiation, then calls the "regular" suspend callback
->     > 3. With LPM negotiation disabled, the bus cannot enter low-power state
->     > 4. On a large number of SoCs, if the bus not in a low-power state, S0ix
->     >    cannot be entered, which in turn prevents the SoC from entering
->     >    suspend.
->     >
->     > Fix by re-enabling LPM negotiation in the device's suspend callback.
->     >
->     > Suggested-by: Stanislaw Kardach <skardach@google.com <mailto:skardach@google.com>>
->     > Fixes: f9e5b33934ce ("mmc: host: Improve I/O read/write performance for GL9763E")
->     > Cc: stable@vger.kernel.org <mailto:stable@vger.kernel.org>
->     > Signed-off-by: Sven van Ashbrook <svenva@chromium.org <mailto:svenva@chromium.org>>
->     >      # on gladios device
->     >      # on 15590.0.0 with v5.10 and upstream (v6.4) kernels
->     >
-> 
->     3 extraneous lines here - please remove
-> 
->     > ---
->     >
->     > Changes in v2:
->     > - improved symmetry and error path in s2idle suspend callback (internal review)
->     >
->     >  drivers/mmc/host/sdhci-pci-gli.c | 102 +++++++++++++++++++------------
->     >  1 file changed, 64 insertions(+), 38 deletions(-)
->     >
->     > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
->     > index 1792665c9494a..19f577cc8bceb 100644
->     > --- a/drivers/mmc/host/sdhci-pci-gli.c
->     > +++ b/drivers/mmc/host/sdhci-pci-gli.c
->     > @@ -745,42 +745,6 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
->     >       return value;
->     >  }
->     > 
->     > -#ifdef CONFIG_PM_SLEEP
->     > -static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
->     > -{
->     > -     struct sdhci_pci_slot *slot = chip->slots[0];
->     > -
->     > -     pci_free_irq_vectors(slot->chip->pdev);
->     > -     gli_pcie_enable_msi(slot);
->     > -
->     > -     return sdhci_pci_resume_host(chip);
->     > -}
->     > -
->     > -static int sdhci_cqhci_gli_resume(struct sdhci_pci_chip *chip)
->     > -{
->     > -     struct sdhci_pci_slot *slot = chip->slots[0];
->     > -     int ret;
->     > -
->     > -     ret = sdhci_pci_gli_resume(chip);
->     > -     if (ret)
->     > -             return ret;
->     > -
->     > -     return cqhci_resume(slot->host->mmc);
->     > -}
->     > -
->     > -static int sdhci_cqhci_gli_suspend(struct sdhci_pci_chip *chip)
->     > -{
->     > -     struct sdhci_pci_slot *slot = chip->slots[0];
->     > -     int ret;
->     > -
->     > -     ret = cqhci_suspend(slot->host->mmc);
->     > -     if (ret)
->     > -             return ret;
->     > -
->     > -     return sdhci_suspend_host(slot->host);
->     > -}
->     > -#endif
->     > -
->     >  static void gl9763e_hs400_enhanced_strobe(struct mmc_host *mmc,
->     >                                         struct mmc_ios *ios)
->     >  {
->     > @@ -1029,6 +993,68 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
->     >  }
->     >  #endif
->     > 
->     > +#ifdef CONFIG_PM_SLEEP
->     > +static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
->     > +{
->     > +     struct sdhci_pci_slot *slot = chip->slots[0];
->     > +
->     > +     pci_free_irq_vectors(slot->chip->pdev);
->     > +     gli_pcie_enable_msi(slot);
->     > +
->     > +     return sdhci_pci_resume_host(chip);
->     > +}
->     > +
->     > +static int gl9763e_resume(struct sdhci_pci_chip *chip)
->     > +{
->     > +     struct sdhci_pci_slot *slot = chip->slots[0];
->     > +     int ret;
->     > +
->     > +     ret = sdhci_pci_gli_resume(chip);
->     > +     if (ret)
->     > +             return ret;
->     > +
->     > +     ret = cqhci_resume(slot->host->mmc);
->     > +     if (ret)
->     > +             return ret;
->     > +
->     > +     /* Disable LPM negotiation to bring device back in sync
->     > +      * with its runtime_pm state.
->     > +      */
-> 
->     I would prefer the comment style:
-> 
->             /*
->              * Blah, blah ...
->              * Blah, blah, blah.
->              */
-> 
->     > +     gl9763e_set_low_power_negotiation(slot, false);
->     > +
->     > +     return 0;
->     > +}
->     > +
->     > +static int gl9763e_suspend(struct sdhci_pci_chip *chip)
->     > +{
->     > +     struct sdhci_pci_slot *slot = chip->slots[0];
->     > +     int ret;
->     > +
->     > +     /* Certain SoCs can suspend only with the bus in low-
-> 
->     Ditto re comment style
-> 
->     > +      * power state, notably x86 SoCs when using S0ix.
->     > +      * Re-enable LPM negotiation to allow entering L1 state
->     > +      * and entering system suspend.
->     > +      */
->     > +     gl9763e_set_low_power_negotiation(slot, true);
-> 
->     Couldn't this be at the end of the function, save
->     an error path
-> 
-> Please correct me if I'm wrong but writing to device config
-> space could trigger a side effect, so it's probably better to
-> do it before calling functions suspending the device?
+On Wed, 23 Aug 2023 at 00:29, Shyam Saini
+<shyamsaini@linux.microsoft.com> wrote:
+>
+>
+> Hi Sumit,
+>
+> > On Mon, 21 Aug 2023 at 15:19, Jerome Forissier
+> > <jerome.forissier@linaro.org> wrote:
+> >>
+> >>
+> >>
+> >> On 8/17/23 01:31, Shyam Saini wrote:
+> >>>
+> >>> Hi Ulf,
+> >>>
+> >>>> On Sat, 22 Jul 2023 at 03:41, Shyam Saini
+> >>>> <shyamsaini@linux.microsoft.com> wrote:
+> >>>>>
+> >>>>> From: Alex Benn=C3=A9e <alex.bennee@linaro.org>
+> >>>>>
+> >>>>> [This is patch 1 from [1] Alex's submission and this RPMB layer was
+> >>>>> originally proposed by [2]Thomas Winkler ]
+> >>>>>
+> >>>>> A number of storage technologies support a specialised hardware
+> >>>>> partition designed to be resistant to replay attacks. The underlyin=
+g
+> >>>>> HW protocols differ but the operations are common. The RPMB partiti=
+on
+> >>>>> cannot be accessed via standard block layer, but by a set of specif=
+ic
+> >>>>> commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
+> >>>>> partition provides authenticated and replay protected access, hence
+> >>>>> suitable as a secure storage.
+> >>>>>
+> >>>>> The initial aim of this patch is to provide a simple RPMB Driver wh=
+ich
+> >>>>> can be accessed by Linux's optee driver to facilitate fast-path for
+> >>>>> RPMB access to optee OS(secure OS) during the boot time. [1] Curren=
+tly,
+> >>>>> Optee OS relies on user-tee supplicant to access eMMC RPMB partitio=
+n.
+> >>>>>
+> >>>>> A TEE device driver can claim the RPMB interface, for example, via
+> >>>>> class_interface_register(). The RPMB driver provides a series of
+> >>>>> operations for interacting with the device.
+> >>>>
+> >>>> I don't quite follow this. More exactly, how will the TEE driver kno=
+w
+> >>>> what RPMB device it should use?
+> >>>
+> >>> I don't have complete code to for this yet, but i think OP-TEE driver
+> >>> should register with RPMB subsystem and then we can have eMMC/UFS/NVM=
+e
+> >>> specific implementation for RPMB operations.
+> >>>
+> >>> Linux optee driver can handle RPMB frames and pass it to RPMB subsyst=
+em
+> >>>
+> >
+> > It would be better to have this OP-TEE use case fully implemented. So
+> > that we can justify it as a valid user for this proposed RPMB
+> > subsystem. If you are looking for any further suggestions then please
+> > let us know.
+>
+> I was looking into UFS/NVMe user-space utils, it seems we may have to
+> adapt rpmb frame data structure in optee-os to to handle NVMe/UFS
+> specific bits.
+>
+> For nvme rpmb data frame, I think we would need an extra "target" member
+> in rpmb data frame structure,
+> as NVMe can support upto 7 RPMB units, see  [1] "struct rpmb_data_frame_t=
+"
+> UFS may support upto 3 or 4 RPMB regions.
+>
+> So even if we use CID to uniquely identify RPMB device either from
+> eMMC/NVMe/UFS, we still need identify which RPMB target/unit in case
+> if the device is NVMe, and which RPMB region if the device UFS.
+>
+> Also both NVMe/UFS utils have two extra RPMB operations implemented,
+> Although new request/response operation than eMMC spec:
+>   1) Authenticated Device Configuration Block Write
+>   2) Authenticated Device Configuration Block Read
+>
+> see [2] enum rpmb_request/response_type and [3]enum rpmb_op_type
+>
+> do we need those implemented as well ?
 
-sdhci doesn't know anything about the bus.  It is independent
-of PCI, so I can't see how it would make any difference.
-One of the people cc'ed might know more.  Jason Lai (cc'ed)
-added it for runtime PM.
+IMO, we should start with eMMC RPMB support first with OP-TEE. This is
+what OP-TEE currently supports. And later on we can extend that
+framework for UFS and NVMe RPMB.
 
-> 
-> 
->     > +
->     > +     ret = cqhci_suspend(slot->host->mmc);
->     > +     if (ret)
->     > +             goto err_suspend;
->     > +
->     > +     ret = sdhci_suspend_host(slot->host);
->     > +     if (ret)
->     > +             goto err_suspend_host;
->     > +
->     > +     return 0;
->     > +
->     > +err_suspend_host:
->     > +     cqhci_resume(slot->host->mmc);
->     > +err_suspend:
->     > +     gl9763e_set_low_power_negotiation(slot, false);
->     > +     return ret;
->     > +}
->     > +#endif
->     > +
->     >  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
->     >  {
->     >       struct pci_dev *pdev = slot->chip->pdev;
->     > @@ -1113,8 +1139,8 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
->     >       .probe_slot     = gli_probe_slot_gl9763e,
->     >       .ops            = &sdhci_gl9763e_ops,
->     >  #ifdef CONFIG_PM_SLEEP
->     > -     .resume         = sdhci_cqhci_gli_resume,
->     > -     .suspend        = sdhci_cqhci_gli_suspend,
->     > +     .resume         = gl9763e_resume,
->     > +     .suspend        = gl9763e_suspend,
->     >  #endif
->     >  #ifdef CONFIG_PM
->     >       .runtime_suspend = gl9763e_runtime_suspend,
-> 
-> 
-> 
-> -- 
-> Best Regards,
-> Stanisław Kardach
+We need to put extra care here regarding the eMMC RPMB ABI among
+OP-TEE and Linux kernel. It should be designed in a way that it is
+future compatible for UFS/NMVe. IOW, the bits that you have already
+discovered above.
 
+Also, we have to be backwards compatible with eMMC RPMB ABI towards
+u-boot too since OP-TEE would use the same ABI whether it is towards
+Linux or u-boot.
+
+-Sumit
+
+>
+> Please let me know what you think about these.
+>
+> [1] https://github.com/linux-nvme/nvme-cli/blob/master/nvme-rpmb.c#L252
+> [2] https://github.com/linux-nvme/nvme-cli/blob/master/nvme-rpmb.c#L230
+> [3] https://github.com/westerndigitalcorporation/ufs-utils/blob/dev/ufs_r=
+pmb.c#L27
+>
+> >>> [1] U-Boot has mmc specific implementation
+> >>>
+> >>> I think OPTEE-OS has CFG_RPMB_FS_DEV_ID option
+> >>> CFG_RPMB_FS_DEV_ID=3D1 for /dev/mmcblk1rpmb,
+> >>
+> >> Correct. Note that tee-supplicant will ignore this device ID if --rmb-=
+cid
+> >> is given and use the specified RPMB instead (the CID is a non-ambiguou=
+s way
+> >> to identify a RPMB device).
+> >>
+> >>> but in case if a
+> >>> system has multiple RPMB devices such as UFS/eMMC/NVMe, one them
+> >>> should be declared as secure storage and optee should access that one=
+ only.
+> >>
+> >> Indeed, that would be an equivalent of tee-supplicant's --rpmb-cid.
+> >>
+> >>> Sumit, do you have suggestions for this ?
+> >>
+> >
+> > I would suggest having an OP-TEE secure DT property that would provide
+> > the RPMB CID which is allocated to the secure world.
+> >
+> > -Sumit
+> >
+> >>
+> >> --
+> >> Jerome
+> >
