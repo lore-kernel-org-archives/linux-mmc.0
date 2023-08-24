@@ -2,129 +2,102 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 447EEC27C40
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 09:29:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36A8EC3DA6F
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 10:00:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238033AbjHXJ2t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 05:28:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57046 "EHLO
+        id S235736AbjHXKAY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Aug 2023 06:00:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240751AbjHXJ2d (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 05:28:33 -0400
-Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F124C19BE
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 02:28:25 -0700 (PDT)
-Received: from kwepemm600014.china.huawei.com (unknown [172.30.72.55])
-        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4RWd2Z0yBCztS6q;
-        Thu, 24 Aug 2023 17:24:38 +0800 (CST)
-Received: from [10.67.110.164] (10.67.110.164) by
- kwepemm600014.china.huawei.com (7.193.23.54) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.31; Thu, 24 Aug 2023 17:28:22 +0800
-Subject: Re: [PATCH V3] mmc: sdhci-of-dwcmshc: Use helper function
- devm_clk_get_enabled()
-To:     Adrian Hunter <adrian.hunter@intel.com>
-CC:     <linux-mmc@vger.kernel.org>, <ulf.hansson@linaro.org>,
-        Liming Sun <limings@nvidia.com>,
-        David Thompson <davthompson@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>
-References: <20230824084629.135361-1-yiyang13@huawei.com>
- <b7ffe3db-aafe-9d88-7c4a-b8d6dc77ef8f@intel.com>
-From:   "yiyang (D)" <yiyang13@huawei.com>
-Message-ID: <deebb2fb-23a0-bd10-6178-73dd1ef68223@huawei.com>
-Date:   Thu, 24 Aug 2023 17:28:22 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.12.0
+        with ESMTP id S240905AbjHXKAP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 06:00:15 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB1921BEF
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:00:03 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-58fb8963617so53718617b3.3
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 03:00:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1692871203; x=1693476003;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=g5rBPrC0vQuMcmp4DDXqhGWwYLuvH0qXFYCzdTPwswc=;
+        b=UvHbie/8LWoOd9pmsDUaYRgDhjjMFGDF1C3OOlCJ5qJ2CvjeQUuaV2iX/fcxhlVXg1
+         txgK80KGJJY33qF2q8Y5tGr+k9h/HzuX2NDw2x8vk37SYnNAsXc0GEJ2Vp9RPrr4seZ9
+         vatxLLtKsnxhb21G4mZZRAD8WmfUcWQ3Eq+SUe/6DwEv/TNp4h224VUnibnPAVj9kGFw
+         +4HQRuFlmF5BjyBjswmH4RRvRPWW04XnmYYAXPylv2fxSJYKA95oQvGesF0t9yQ6ttLG
+         EbyQhIVz8m3e+4p5VLqmbX+Kutok5QytFDrrltEwBSkpLu79JsS2Oj/doGQ+UzqnBScp
+         qDVA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692871203; x=1693476003;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=g5rBPrC0vQuMcmp4DDXqhGWwYLuvH0qXFYCzdTPwswc=;
+        b=ElnzpWAk93IMOZ7CgM34zGfqzEZgdju7fGY0O4P85oc1UIxVko60uAu7qPqxe7yBjI
+         wHvBpf3+lbVPbMkHH57Ct+dMVjTFwQ4a56v6SNg3p6zS4foOKqGMQ20nwdmS80G7TAQs
+         VBjc/VlRDWgUdYvm6nL4fL9Dz/ZI4rUPSlv65BZnV5DnyEgGLTLJ0Uey7CpYym1cFL88
+         5WAmOm6Zee3YaqAtUcafca424U5VBu4swPFie4MG8416XuWtaV5LH2VM4dG3KQDf/Na6
+         R/KbHxJbfX4qzpyDIpKCs928KdA0VAWBmL5uJpieqK/WY7OS3yrDXplKIQ516Jq7JOXD
+         LitA==
+X-Gm-Message-State: AOJu0YxHFAmm0CpCKSzhR2vK1JCTopuDiHvEfSwA/idsYRPE++zG8/Bl
+        4IuM7il/9vWbyiDRpctEEAZFOCkVXD4RBbmgOtM+qg==
+X-Google-Smtp-Source: AGHT+IFCajrkQF9SFLOKPslL3gpX83VYgr+19SYAR8dR/LwPG2vSDJtUovktxg/kfqHey2hK+xu2RcKp9dNsJTnze8I=
+X-Received: by 2002:a81:8882:0:b0:55a:3ce9:dc3d with SMTP id
+ y124-20020a818882000000b0055a3ce9dc3dmr14818684ywf.13.1692871203062; Thu, 24
+ Aug 2023 03:00:03 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <b7ffe3db-aafe-9d88-7c4a-b8d6dc77ef8f@intel.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.67.110.164]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- kwepemm600014.china.huawei.com (7.193.23.54)
-X-CFilter-Loop: Reflected
+References: <20230815014057.13589-1-wenchao.chen@unisoc.com> <20230815014057.13589-3-wenchao.chen@unisoc.com>
+In-Reply-To: <20230815014057.13589-3-wenchao.chen@unisoc.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 24 Aug 2023 11:59:26 +0200
+Message-ID: <CAPDyKFoMR_rX5O6rmp94SsBZL0=VeCgtanZzGVmTHcUihmHyKA@mail.gmail.com>
+Subject: Re: [PATCH V2 2/2] mmc: sdhci-sprd: Add SD HS mode online tuning
+To:     Wenchao Chen <wenchao.chen@unisoc.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, wenchao.chen666@gmail.com,
+        zhenxiong.lai@unisoc.com, chunyan.zhang@unisoc.com,
+        yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, 15 Aug 2023 at 03:41, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+>
+> First of all, Unisoc's IC provides cmd delay and read delay to ensure
+> that the host can get the correct data. However, according to SD Spec,
+> there is no need to do tuning in high speed mode, but with the
+> development of chip processes, it is more and more difficult to find
+> a suitable delay to cover all the chips. Therefore, we need SD high
+> speed mode online tuning.
+>
+> In addition, we added mmc_sd_switch() and mmc_send_status() to the
+> header file to allow it to be usable by the drive
+>
+> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> ---
+>  drivers/mmc/core/sd_ops.c     |   1 +
+>  drivers/mmc/host/sdhci-sprd.c | 152 ++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/host.h      |   2 +
+>  3 files changed, 155 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+> index ef8d1dce5af1..a59cd592f06e 100644
+> --- a/drivers/mmc/core/sd_ops.c
+> +++ b/drivers/mmc/core/sd_ops.c
+> @@ -323,6 +323,7 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+>         return mmc_send_adtc_data(card, card->host, SD_SWITCH, cmd_args, resp,
+>                                   64);
+>  }
+> +EXPORT_SYMBOL_GPL(mmc_sd_switch);
 
-On 2023/8/24 17:13, Adrian Hunter wrote:
-> On 24/08/23 11:46, Yi Yang wrote:
->> Since commit 7ef9651e9792 ("clk: Provide new devm_clk helpers for
->> prepared and enabled clocks"), devm_clk_get() and clk_prepare_enable()
->> can now be replaced by devm_clk_get_enabled() when the driver enables
->> (and possibly prepares) the clocks for the whole lifetime of the device.
->> Moreover, it is no longer necessary to unprepare and disable the clocks
->> explicitly.
->>
->> Signed-off-by: Yi Yang <yiyang13@huawei.com>
->> ---
->> v3: Fix err check logic
->> v2: Remove clk_disable_unprepare in dwcmshc_remove()
->> ---
->>   drivers/mmc/host/sdhci-of-dwcmshc.c | 20 ++++++++------------
->>   1 file changed, 8 insertions(+), 12 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
->> index 31c1892f4ecd..7e1cf78d9695 100644
->> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
->> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
->> @@ -495,19 +495,19 @@ static int dwcmshc_probe(struct platform_device *pdev)
->>   	priv = sdhci_pltfm_priv(pltfm_host);
->>   
->>   	if (dev->of_node) {
->> -		pltfm_host->clk = devm_clk_get(dev, "core");
->> +		pltfm_host->clk = devm_clk_get_enabled(dev, "core");
->>   		if (IS_ERR(pltfm_host->clk)) {
->>   			err = PTR_ERR(pltfm_host->clk);
->> -			dev_err(dev, "failed to get core clk: %d\n", err);
->> +			dev_err(dev, "failed to get or enable core clk: %d\n", err);
->>   			goto free_pltfm;
->>   		}
->> -		err = clk_prepare_enable(pltfm_host->clk);
->> -		if (err)
->> -			goto free_pltfm;
->>   
->> -		priv->bus_clk = devm_clk_get(dev, "bus");
->> -		if (!IS_ERR(priv->bus_clk))
->> -			clk_prepare_enable(priv->bus_clk);
->> +		priv->bus_clk = devm_clk_get_enabled(dev, "bus");
-> 
-> This should probably be devm_clk_get_enabled_optional()
-> Maybe someone who knows the hardware can confirm?
-> 
-I don't know enough about hardware, Maybe we can wait for someone to 
-confirm the change.
+Please move changes in include/linux/mmc/host.h and
+drivers/mmc/core/sd_ops.c into patch1. When doing that, please update
+the commit messages too.
 
->> +		if (IS_ERR(priv->bus_clk)) {
->> +			err = PTR_ERR(priv->bus_clk);
->> +			dev_err(dev, "failed to get or enable bus clk: %d\n", err);
->> +			goto free_pltfm;
->> +		}
->>   	}
->>   
->>   	err = mmc_of_parse(host->mmc);
->> @@ -564,8 +564,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
->>   err_setup_host:
->>   	sdhci_cleanup_host(host);
->>   err_clk:
->> -	clk_disable_unprepare(pltfm_host->clk);
->> -	clk_disable_unprepare(priv->bus_clk);
->>   	if (rk_priv)
->>   		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
->>   					   rk_priv->rockchip_clks);
->> @@ -583,8 +581,6 @@ static void dwcmshc_remove(struct platform_device *pdev)
->>   
->>   	sdhci_remove_host(host, 0);
->>   
->> -	clk_disable_unprepare(pltfm_host->clk);
->> -	clk_disable_unprepare(priv->bus_clk);
->>   	if (rk_priv)
->>   		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
->>   					   rk_priv->rockchip_clks);
-> 
-> .
-> 
+[...]
 
--- 
-Yi
+Other than the above, this looks okay to me!
+
+Kind regards
+Uffe
