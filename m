@@ -2,129 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FB89C7113B
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 07:38:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C34EC71145
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 07:43:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240356AbjHXHiO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 03:38:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48420 "EHLO
+        id S234780AbjHXHnE convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Aug 2023 03:43:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240347AbjHXHho (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 03:37:44 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00214C7
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Aug 2023 00:37:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1692862658; x=1724398658;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=mEv8earHf4s8Uc0JjRUBKxWcH1lx179p6U8zdF/NbaI=;
-  b=Ez6Dh1u7/clpQ54Qwr6fYwdLVP0RvpWY6FmbK7+u2VbqTdLh48Uu/I8D
-   1nR9tYdKOycp4eRBcNdjoQ5PZitJtJfDkj1+vYUob0H6o2Oj3S3zeh8Sa
-   kTHf6g9MIC3qXoOkRl8uIgL0ZhkPabOCdUg+w4MMjYGUqpaTUnpmS5sGI
-   URnn8thpzikcYrmf2JTeTVMsum4qdern9KgYAMt46dN4ZGw2JWpxYn03J
-   2efojwNgKegja/wTPCdDP58JArOj4Dcl7wb74ZrKF5JweNiqNyDgPHczN
-   OM6oRSCX+hthYLQsMwZ35wL0NMvKlIfbMn7aIBYQSX9Edgm7bOiaqp+0u
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10811"; a="438304391"
-X-IronPort-AV: E=Sophos;i="6.01,195,1684825200"; 
-   d="scan'208";a="438304391"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Aug 2023 00:37:38 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10811"; a="807000936"
-X-IronPort-AV: E=Sophos;i="6.01,195,1684825200"; 
-   d="scan'208";a="807000936"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.212.187])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Aug 2023 00:37:36 -0700
-Message-ID: <842a0ac5-7eb2-390e-41af-f86e894b3c79@intel.com>
-Date:   Thu, 24 Aug 2023 10:37:32 +0300
+        with ESMTP id S240429AbjHXHml (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 03:42:41 -0400
+Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77C7A170A;
+        Thu, 24 Aug 2023 00:42:26 -0700 (PDT)
+Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-bcb6dbc477eso5955730276.1;
+        Thu, 24 Aug 2023 00:42:26 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692862929; x=1693467729;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=dhv4Bg1fdD4fcuHP4DlJnIZ9JdHOfbSov1NYQWp3Ek8=;
+        b=AUkWWfX/zFe56Yxj+BNMG9GYZd670gyfSKx962grd7skql98XJFT6sYafeF+K5Z5UT
+         uOSKmvz4SSZIBuz5mqlJIuCg1m7IThElJhOyVuw3ickhoASJp57LSq/vhONcjoAzu5DS
+         fJuAxaKSWp9TpgL6jR3raPzeb5LyRJKMzifsIEdYLoKXmiPpU6Qfxu/lmAHFtsYOm+cL
+         DA26NRyOTLp4V8sfKm1CH9KnnpgoD1ArDN88uQ2GUXJ/q7zmPf9FaW3o0Ws2OXLChTub
+         FKdW2N+Kp3V2QocRbp7vgkdQBkENXTXCCyC8bqGPrQelFUg6dYk1WS8VekSuws3VXTt9
+         ipig==
+X-Gm-Message-State: AOJu0Yx9vL8zg2n+aLaEmW1xcn/9o7fif0DG/MxgpsxjIpyozYQSjt2+
+        1CGVEXxp2jYf0iYPVcQKqxHj8MGbeILy8w==
+X-Google-Smtp-Source: AGHT+IFHvPS0ch0Ft+QoIRmYP0ssAD5Obu+K54gJyP4DyMVpin6CXenCeFQLr0zMO2e8H5nv/tKibg==
+X-Received: by 2002:a81:dd02:0:b0:58f:afe5:4c16 with SMTP id e2-20020a81dd02000000b0058fafe54c16mr15233630ywn.30.1692862928821;
+        Thu, 24 Aug 2023 00:42:08 -0700 (PDT)
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com. [209.85.219.177])
+        by smtp.gmail.com with ESMTPSA id i127-20020a819185000000b0058c4e33b2d6sm3798266ywg.90.2023.08.24.00.42.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 24 Aug 2023 00:42:08 -0700 (PDT)
+Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-d77f614243aso478610276.0;
+        Thu, 24 Aug 2023 00:42:08 -0700 (PDT)
+X-Received: by 2002:a25:ae92:0:b0:d3b:e659:5331 with SMTP id
+ b18-20020a25ae92000000b00d3be6595331mr14472125ybj.58.1692862928507; Thu, 24
+ Aug 2023 00:42:08 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.14.0
-Subject: Re: [PATCH v2] mmc: sdhci-of-dwcmshc: Use helper function
- devm_clk_get_enabled()
-Content-Language: en-US
-To:     Yi Yang <yiyang13@huawei.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org
-References: <20230821062303.185174-1-yiyang13@huawei.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230821062303.185174-1-yiyang13@huawei.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20230823183749.2609013-1-robh@kernel.org>
+In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 24 Aug 2023 09:41:56 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdWSrpjUK4Fa9cBiRqsnhh2GxyXK5fCt8B-RmaDgEy6OeA@mail.gmail.com>
+Message-ID: <CAMuHMdWSrpjUK4Fa9cBiRqsnhh2GxyXK5fCt8B-RmaDgEy6OeA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: Drop remaining unneeded quotes
+To:     Rob Herring <robh@kernel.org>
+Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
+        Mike Leach <mike.leach@linaro.org>,
+        James Clark <james.clark@arm.com>,
+        Leo Yan <leo.yan@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Andy Shevchenko <andy@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>, Jean Delvare <jdelvare@suse.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Emil Renner Berthing <kernel@esmil.dk>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Corey Minyard <minyard@acm.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        M ark Brown <broonie@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Anshuman Khandual <anshuman.khandual@arm.com>,
+        Sudeep Holla <sudeep.holla@arm.com>,
+        coresight@lists.linaro.org, linux-arm-kernel@lists.infradead.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-hwmon@vger.kernel.org, linux-i3c@lists.infradead.org,
+        linux-iio@vger.kernel.org,
+        openipmi-developer@lists.sourceforge.net,
+        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        alsa-devel@alsa-project.org, linux-scsi@vger.kernel.org,
+        linux-watchdog@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/08/23 09:23, Yi Yang wrote:
-> Since commit 7ef9651e9792 ("clk: Provide new devm_clk helpers for
-> prepared and enabled clocks"), devm_clk_get() and clk_prepare_enable()
-> can now be replaced by devm_clk_get_enabled() when the driver enables
-> (and possibly prepares) the clocks for the whole lifetime of the device.
-> Moreover, it is no longer necessary to unprepare and disable the clocks
-> explicitly.
-> 
-> Signed-off-by: Yi Yang <yiyang13@huawei.com>
-> ---
-> v2: Remove clk_disable_unprepare in dwcmshc_remove()
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 20 ++++++++------------
->  1 file changed, 8 insertions(+), 12 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 31c1892f4ecd..08b566984733 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -495,19 +495,19 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	priv = sdhci_pltfm_priv(pltfm_host);
->  
->  	if (dev->of_node) {
-> -		pltfm_host->clk = devm_clk_get(dev, "core");
-> +		pltfm_host->clk = devm_clk_get_enabled(dev, "core");
->  		if (IS_ERR(pltfm_host->clk)) {
->  			err = PTR_ERR(pltfm_host->clk);
-> -			dev_err(dev, "failed to get core clk: %d\n", err);
-> +			dev_err(dev, "failed to get or enable core clk: %d\n", err);
->  			goto free_pltfm;
->  		}
-> -		err = clk_prepare_enable(pltfm_host->clk);
-> -		if (err)
-> -			goto free_pltfm;
->  
-> -		priv->bus_clk = devm_clk_get(dev, "bus");
-> -		if (!IS_ERR(priv->bus_clk))
-> -			clk_prepare_enable(priv->bus_clk);
-> +		priv->bus_clk = devm_clk_get_enabled(dev, "bus");
-> +		if (!IS_ERR(priv->bus_clk)) {
+On Wed, Aug 23, 2023 at 8:38 PM Rob Herring <robh@kernel.org> wrote:
+> Cleanup bindings dropping the last remaining unneeded quotes. With this,
+> the check for this can be enabled in yamllint.
+>
+> Signed-off-by: Rob Herring <robh@kernel.org>
 
-"!" does not belong, should be "if (IS_ERR(priv->bus_clk))" instead
+>  .../bindings/soc/renesas/renesas,rzg2l-sysc.yaml     |  4 ++--
 
-> +			err = PTR_ERR(priv->bus_clk);
-> +			dev_err(dev, "failed to get or enable bus clk: %d\n", err);
-> +			goto free_pltfm;
-> +		}
->  	}
->  
->  	err = mmc_of_parse(host->mmc);
-> @@ -564,8 +564,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  err_setup_host:
->  	sdhci_cleanup_host(host);
->  err_clk:
-> -	clk_disable_unprepare(pltfm_host->clk);
-> -	clk_disable_unprepare(priv->bus_clk);
->  	if (rk_priv)
->  		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
->  					   rk_priv->rockchip_clks);
-> @@ -583,8 +581,6 @@ static void dwcmshc_remove(struct platform_device *pdev)
->  
->  	sdhci_remove_host(host, 0);
->  
-> -	clk_disable_unprepare(pltfm_host->clk);
-> -	clk_disable_unprepare(priv->bus_clk);
->  	if (rk_priv)
->  		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
->  					   rk_priv->rockchip_clks);
+Acked-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
