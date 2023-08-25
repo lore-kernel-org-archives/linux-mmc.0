@@ -2,146 +2,257 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A841FC3DA66
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 15:37:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4451BC001DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 16:24:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242187AbjHYPgt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 11:36:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44292 "EHLO
+        id S234995AbjHYQYC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 12:24:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242183AbjHYPgc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 11:36:32 -0400
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.19])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DE5A2134;
-        Fri, 25 Aug 2023 08:36:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=public-files.de;
- s=s31663417; t=1692977768; x=1693582568; i=frank-w@public-files.de;
- bh=VdrUkzAPLFRLGC4qVYhEGfYBGe1g2ruEZDgeplhbi88=;
- h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
- b=nHkhHILK2J/MqzgRe84029JDk0X/iHDH1aU5wu5PbMc+PwfcTRh4U0S4P6xA0dSzIeWH9Vk
- SGtabHoZxe/AsDzptN9QWaodPbBZpMn/ZrCJ+wYq4BPpsN6NnJm88e5OognriPl1ZAJc8bLJb
- YAamrVR9oi2Yat0MwBnCuUmCEHCwhyYnNFks4wYighb4jd3F+3Sh26b3ERBfcbWW/ZUmN00dx
- 0c5czRaLidA/QYIIOdqRvaE5rJQE+NA9tQlQ/in+pl7ZI4UEOCoTOQecIjze2sbwsQHja7LwN
- acSq1RhLTddzbGdxh51uVVNKXEyjx2zDSaXdCOK/EmYbZO7gC9gg==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [157.180.224.17] ([157.180.224.17]) by web-mail.gmx.net
- (3c-app-gmx-bs20.server.lan [172.19.170.72]) (via HTTP); Fri, 25 Aug 2023
- 17:36:08 +0200
+        with ESMTP id S1344046AbjHYQXi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 12:23:38 -0400
+Received: from mail-il1-x130.google.com (mail-il1-x130.google.com [IPv6:2607:f8b0:4864:20::130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13E782D4A
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 09:23:14 -0700 (PDT)
+Received: by mail-il1-x130.google.com with SMTP id e9e14a558f8ab-34ca192f8feso3706165ab.3
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 09:23:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1692980593; x=1693585393;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=qAgaBwC6Q5Y39wQbVYe+ScCcTDd8jZp5BOkC+BhMzcI=;
+        b=ZL0WR/L1jC4P+6VgxpOl7NBqfNPE006ANhEPLdLDUMCdz8oLAOFKxI2M0l9+spddFU
+         CnALsHjT/tVfdBJ+WRvkwR6nnxBnIwP7p6ZIDFqKPTCX6wEb9eZZyzQF86EE/H8B5uk3
+         HA/LErEZeBrSI8CTGUHFEFgWYj0m7j9YVnkSY=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692980593; x=1693585393;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=qAgaBwC6Q5Y39wQbVYe+ScCcTDd8jZp5BOkC+BhMzcI=;
+        b=lZ+86qoKYfMgOeVT8jCsG57YNYqLkjVANy2zTj63SUi2QVTyVM36vYxRBJvMKMO2fD
+         Wxl7z4SZFF3n1bJT6iTBxcsGmK8Ae+LadV0nkyRaWKBa2rKPbfht0JINlPWBHype4YXF
+         DkQdLQwJsyThmthRIcn7xNL70C0ypAWnu2RvRiOOQASNNGYAtoFASZdReIRAvaPSPCh2
+         Svge4Lmi3deM7IT3LAY/0/vjDA1Z83v8awxnzQMB8Q3i1ERguO63B/nAeqlHiUWhF0IZ
+         0kLRMXyVcfxlJe/lZwTDgOJj6tyJQzL5t2w2IlBwMJAHeZRNyfbJcQUVjrICMjv92d9C
+         D4NA==
+X-Gm-Message-State: AOJu0YwYcHAfDtlgZEqxNlEyk+BD/Ouw+TE8jTG40JM6LE78Fp1+j0uO
+        c69z4CN4Btsijaeo0Vf7FsVl7B0frjpDDYg9feZg1A==
+X-Google-Smtp-Source: AGHT+IGZErQZli9FT/lDK1EW2+fXYXLewM9MKiRjVOJfjV/+8wa/iSpYBq4cIqhCQ+mHRLlOJ5PF5TdeZYwBW7eJW9U=
+X-Received: by 2002:a05:6e02:144f:b0:348:797d:a94e with SMTP id
+ p15-20020a056e02144f00b00348797da94emr10347096ilo.2.1692980593002; Fri, 25
+ Aug 2023 09:23:13 -0700 (PDT)
 MIME-Version: 1.0
-Message-ID: <trinity-06c31f89-2833-402f-9451-2270a14a5d71-1692977768615@3c-app-gmx-bs20>
-From:   Frank Wunderlich <frank-w@public-files.de>
-To:     Frank Wunderlich <linux@fw-web.de>
-Cc:     linux-mediatek@lists.infradead.org,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Sam Shih <sam.shih@mediatek.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Eric Woudstra <ericwouds@gmail.com>, stable@vger.kernel.org
-Subject: Aw: [PATCH v2 2/2] arm64: dts: mt7986: fix emmc hs400 mode without
- uboot initialization
-Content-Type: text/plain; charset=UTF-8
-Date:   Fri, 25 Aug 2023 17:36:08 +0200
-Importance: normal
-Sensitivity: Normal
-In-Reply-To: <20230629184318.551317-3-linux@fw-web.de>
-References: <20230629184318.551317-1-linux@fw-web.de>
- <20230629184318.551317-3-linux@fw-web.de>
-X-UI-Message-Type: mail
-X-Priority: 3
-X-Provags-ID: V03:K1:jLmgX2xrUWmxLoyc5GosYJEGAAy+M/UfobOHavCkZCsfSMXYLEVuTuL7eyL7A/81kf9dO
- 3EVOYUOaCBIrmfLQNtf94f4TbqYZ6fC3P9MR6P+HFceuiP2uyOVIBMKxQoySqSOYCp2MYRkrktxN
- lcuClMK4/ayXmRMyc8yvJddgktK6jasBC0GDdnh4iQQFApClBwBeda9h9gtLeJsnPsB8hf4u7gAy
- 0wy7nzoyv1zef8p2KBYi/b9i1a1SfmBZCEEhQrcSdjZ35d1/7/0wBhGOfIknCE09Q0Qpanvl2N8v
- CQ=
-UI-OutboundReport: notjunk:1;M01:P0:YvFxJiBsRc0=;VYvrekVB2wysNxvT6zZABSQfKDJ
- Umw3aV1ismrOon8ZSBRcD1QrrqeU60hqGFXuZsQNKQTRj9Xj27DwnDZgDsy9w0QyEm3k/aO4T
- pjhNp4xP1tNSi6NtnY3+9S7SxykZEzn4jTxl3IsXta/xFoOcNQpOBIlwPsDh0g+g9Z+2Ak5nd
- bKbbxa+tf3p79ZZe0G8zkF755pyPkcc5X9Ipgyxv29qTI8dqW3Fj8atmwvfcvT0dIRBMwX59E
- 2L1MWf9gqJ583jl06irx8yl6jZvOFTIG3DHVhMSqdGiTDPM6nhfqK6M5RnoHhs44IKfQ138WB
- SEEHK3GI7SQ6g7Vdha20/+NY2ZCfRdTNspUBMFrIF04xbycuAgxlXYs/T3alP3rQSB1ksjheu
- Z4dksthaw0WWHEbCiAIfupDwkyAXPuYFnQweKhRqV97I0u0l7tW78gGfEi6PC0K1icSl3Udfg
- brQFjFQTfwrD1TOaRIFYA7FM47hjWKn6/KhV7F/ZBIhqBOwScz9i2/OrbQKgJKJ3xbZDbgs4B
- 5ghXdKD123a9SOr7vJU9ca80L/Dbw7Lt2ZxYQGVF0qUrNsXUikHhwGiG6+Vph0J3twbIqEQ+V
- aL7HMX7+XFY9z3afSe+N8D8D9Bc06XvK89bgTNErrJJjxln4QNWELS9Fkb8yv1PmYi+YSJDmb
- P6g3jaFJMdk8kX2IK3x/9JK+v/FHkGkyiG3KkFPy1Nx+iBCWC9nlrL0aKPwhGWPe1K88nk0F6
- wAGcs8z1GM8FVXgKn0zTkXs39PI56FBPvrULeOSRoe4EniUG9sy8BpaNhmUtnu7ZPZ98goJ4e
- JJW+CisC5H+chmurcIzaAwaw==
-Content-Transfer-Encoding: quoted-printable
+References: <20230811130351.7038-1-adrian.hunter@intel.com> <20230811130351.7038-4-adrian.hunter@intel.com>
+In-Reply-To: <20230811130351.7038-4-adrian.hunter@intel.com>
+From:   Kamal Dasu <kamal.dasu@broadcom.com>
+Date:   Fri, 25 Aug 2023 12:22:36 -0400
+Message-ID: <CAKekbevGu0rx7UTN925XJDE_SH=NConk4BjQ35ekXa=nN49Jfw@mail.gmail.com>
+Subject: Re: [PATCH 03/16] mmc: sdhci-brcmstb: Use sdhci_pltfm_remove()
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Yangtao Li <frank.li@vivo.com>,
+        Florian Fainelli <florian.fainelli@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Michal Simek <michal.simek@amd.com>,
+        Eugen Hristev <eugen.hristev@collabora.com>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Daniel Machon <daniel.machon@microchip.com>,
+        UNGLinuxDriver@microchip.com,
+        Patrice Chotard <patrice.chotard@foss.st.com>,
+        Brian Norris <briannorris@chromium.org>,
+        Ye Xingchen <ye.xingchen@zte.com.cn>,
+        Brad Larson <blarson@amd.com>,
+        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
+        Swati Agarwal <swati.agarwal@amd.com>,
+        Andy Tang <andy.tang@nxp.com>,
+        Georgii Kruglov <georgy.kruglov@yandex.ru>,
+        Jiapeng Chong <jiapeng.chong@linux.alibaba.com>,
+        Doug Brown <doug@schmorgal.com>,
+        Li Zetao <lizetao1@huawei.com>,
+        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
+        Jassi Brar <jaswinder.singh@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+        boundary="000000000000dfaa210603c1c20f"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+--000000000000dfaa210603c1c20f
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-just a friendly reminder, patch seems not applied to next.
+On Fri, Aug 11, 2023 at 9:04=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
+com> wrote:
+>
+> Use sdhci_pltfm_remove() instead of sdhci_pltfm_unregister() so that
+> devm_clk_get_optional_enabled() can be used for pltfm_host->clk.
+>
+> This has the side effect that the order of operations on the error path
+> and remove path is not the same as it was before, but should be safe
+> nevertheless.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-dt-binding part is reported as applied
+Reviewed-by : Kamal Dasu <kamal.dasu@broadcom.com>
 
-regards Frank
-
-
-> Gesendet: Donnerstag, 29. Juni 2023 um 20:43 Uhr
-> Von: "Frank Wunderlich" <linux@fw-web.de>
-> An: linux-mediatek@lists.infradead.org
-> Cc: "Frank Wunderlich" <frank-w@public-files.de>, "Chaotian Jing" <chaot=
-ian.jing@mediatek.com>, "Ulf Hansson" <ulf.hansson@linaro.org>, "Rob Herri=
-ng" <robh+dt@kernel.org>, "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@li=
-naro.org>, "Conor Dooley" <conor+dt@kernel.org>, "Matthias Brugger" <matth=
-ias.bgg@gmail.com>, "AngeloGioacchino Del Regno" <angelogioacchino.delregn=
-o@collabora.com>, "Wenbin Mei" <wenbin.mei@mediatek.com>, "Sam Shih" <sam.=
-shih@mediatek.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,=
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, "Eric=
- Woudstra" <ericwouds@gmail.com>, stable@vger.kernel.org
-> Betreff: [PATCH v2 2/2] arm64: dts: mt7986: fix emmc hs400 mode without =
-uboot initialization
->
-> From: Eric Woudstra <ericwouds@gmail.com>
->
-> Eric reports errors on emmc with hs400 mode when booting linux on bpi-r3
-> without uboot [1]. Booting with uboot does not show this because clocks
-> seem to be initialized by uboot.
->
-> Fix this by adding assigned-clocks and assigned-clock-parents like it's
-> done in uboot [2].
->
-> [1] https://forum.banana-pi.org/t/bpi-r3-kernel-fails-setting-emmc-clock=
--to-416m-depends-on-u-boot/15170
-> [2] https://github.com/u-boot/u-boot/blob/master/arch/arm/dts/mt7986.dts=
-i#L287
->
-> Cc: stable@vger.kernel.org
-> Fixes: 513b49d19b34 ("arm64: dts: mt7986: add mmc related device nodes")
-> Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
-> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 > ---
->  arch/arm64/boot/dts/mediatek/mt7986a.dtsi | 4 ++++
->  1 file changed, 4 insertions(+)
+>  drivers/mmc/host/sdhci-brcmstb.c | 18 +++++-------------
+>  1 file changed, 5 insertions(+), 13 deletions(-)
 >
-> diff --git a/arch/arm64/boot/dts/mediatek/mt7986a.dtsi b/arch/arm64/boot=
-/dts/mediatek/mt7986a.dtsi
-> index 68539ea788df..207510abda89 100644
-> --- a/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
-> +++ b/arch/arm64/boot/dts/mediatek/mt7986a.dtsi
-> @@ -374,6 +374,10 @@ mmc0: mmc@11230000 {
->  			reg =3D <0 0x11230000 0 0x1000>,
->  			      <0 0x11c20000 0 0x1000>;
->  			interrupts =3D <GIC_SPI 143 IRQ_TYPE_LEVEL_HIGH>;
-> +			assigned-clocks =3D <&topckgen CLK_TOP_EMMC_416M_SEL>,
-> +					  <&topckgen CLK_TOP_EMMC_250M_SEL>;
-> +			assigned-clock-parents =3D <&apmixedsys CLK_APMIXED_MPLL>,
-> +						 <&topckgen CLK_TOP_NET1PLL_D5_D2>;
->  			clocks =3D <&topckgen CLK_TOP_EMMC_416M_SEL>,
->  				 <&infracfg CLK_INFRA_MSDC_HCK_CK>,
->  				 <&infracfg CLK_INFRA_MSDC_CK>,
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-br=
+cmstb.c
+> index a2b6d8f2eeb6..c23251bb95f3 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -264,23 +264,17 @@ static int sdhci_brcmstb_probe(struct platform_devi=
+ce *pdev)
+>
+>         dev_dbg(&pdev->dev, "Probe found match for %s\n",  match->compati=
+ble);
+>
+> -       clk =3D devm_clk_get_optional(&pdev->dev, NULL);
+> +       clk =3D devm_clk_get_optional_enabled(&pdev->dev, NULL);
+>         if (IS_ERR(clk))
+>                 return dev_err_probe(&pdev->dev, PTR_ERR(clk),
+> -                                    "Failed to get clock from Device Tre=
+e\n");
+> -
+> -       res =3D clk_prepare_enable(clk);
+> -       if (res)
+> -               return res;
+> +                                    "Failed to get and enable clock from=
+ Device Tree\n");
+>
+>         memset(&brcmstb_pdata, 0, sizeof(brcmstb_pdata));
+>         brcmstb_pdata.ops =3D match_priv->ops;
+>         host =3D sdhci_pltfm_init(pdev, &brcmstb_pdata,
+>                                 sizeof(struct sdhci_brcmstb_priv));
+> -       if (IS_ERR(host)) {
+> -               res =3D PTR_ERR(host);
+> -               goto err_clk;
+> -       }
+> +       if (IS_ERR(host))
+> +               return PTR_ERR(host);
+>
+>         pltfm_host =3D sdhci_priv(host);
+>         priv =3D sdhci_pltfm_priv(pltfm_host);
+> @@ -369,9 +363,7 @@ static int sdhci_brcmstb_probe(struct platform_device=
+ *pdev)
+>
+>  err:
+>         sdhci_pltfm_free(pdev);
+> -err_clk:
+>         clk_disable_unprepare(base_clk);
+> -       clk_disable_unprepare(clk);
+>         return res;
+>  }
+>
+> @@ -430,7 +422,7 @@ static struct platform_driver sdhci_brcmstb_driver =
+=3D {
+>                 .of_match_table =3D of_match_ptr(sdhci_brcm_of_match),
+>         },
+>         .probe          =3D sdhci_brcmstb_probe,
+> -       .remove_new     =3D sdhci_pltfm_unregister,
+> +       .remove_new     =3D sdhci_pltfm_remove,
+>         .shutdown       =3D sdhci_brcmstb_shutdown,
+>  };
+>
 > --
 > 2.34.1
 >
->
+
+--000000000000dfaa210603c1c20f
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
+
+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
+DxuNuBlySpn/GYqPcDcRZd8EENWqnZrjtjHMk0j7ZfrPGXq8sQkbG3OX+DOwSaefPRq1pLGWBZaZ
+YuUo5O7CNHo7h7Hc9GgjiW+6X9BjKAzSaDy8jwIDAQABo4IB2DCCAdQwDgYDVR0PAQH/BAQDAgWg
+MIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
+LmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUFBzABhjVo
+dHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAyMDBNBgNV
+HSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xvYmFsc2ln
+bi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRwOi8vY3Js
+Lmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAiBgNVHREEGzAZ
+gRdrYW1hbC5kYXN1QGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAfBgNVHSMEGDAW
+gBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUcRYSWvAVyA3hgTrQ2c4AFquBsG0wDQYJ
+KoZIhvcNAQELBQADggEBAIKB2IOweF2sIYGBZTDm+Hwmhga+sjekM167Sk/KwxxvQFwZYP6i0SnR
+7aR59vbfVQVaAiZH/a+35EYxP/sXaIM4+E3bFykBuXwcGEnYyEn6MceiOCkjkWQq1Co2JyOdNvkP
+nAxyPoWlsJtr+N/MF1EYKGpYMdPM7S2T/gujjO9N56BCGu9yJElszWcXHmBl5IsaQqMS36vhsV0b
+NxffjNkeAdgfN/SS9S9Rj4WXD7pF1M0Xq8gPLCLyXrx1i2KkYOYJsj0PWlC6VRg6E1xXkYDte0VL
+fAAG4QsETU27E1HBNQyp5zF1PoPCPvq3EnWQnbLgYk+Jz2iwIUwiqwr/bDgxggJtMIICaQIBATBr
+MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
+YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgw89WX2Pp7ue922QVkwDQYJYIZI
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIIVX+po+GaylSRquU5gMW9opdtRVOw2SEwA/28mW
+1LkOMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMDgyNTE2MjMx
+M1owaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
+hkiG9w0BAQEFAASCAQBKUPHMJg4QojUI3HE9DEeOmvI0iewni5tG2D66Qj6RPmoVII4bwZHJf2mq
+nU7vaShyLH1sMemQYIuyf4xBWdjvs/Zlgtjt116fexkBHMCq7a1R25hLwuDY0kLEVGh7qaSQ4bbI
+0HCjQ1E5yiQoskcT8pV8sOAHfRnShnCI47KjYKIqkbEaC2bvvUDUOGmxvqb4Q2GVazd7/SPZkhez
+9goOqq2ZtgNsac7aIWT0SQy4ujksNEUgi81hmcpwOJ+BOVWJbUG7+WtmppcEAinnibQzNOjM3rg9
+zwW4YJKrx6PyrKoBWnW023F/nPTOXJSWuU5MmJb4HgwcsTLVPcBSkpFo
+--000000000000dfaa210603c1c20f--
