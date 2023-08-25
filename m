@@ -2,253 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAB8CC88CB2
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 09:19:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D68FFC3DA66
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 09:54:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231497AbjHYJSw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 05:18:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35200 "EHLO
+        id S238128AbjHYJxj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 05:53:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42372 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238681AbjHYJSX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 05:18:23 -0400
-Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2F961FDE;
-        Fri, 25 Aug 2023 02:18:19 -0700 (PDT)
-Received: from dlp.unisoc.com ([10.29.3.86])
-        by SHSQR01.spreadtrum.com with ESMTP id 37P9HuTd015670;
-        Fri, 25 Aug 2023 17:17:56 +0800 (+08)
-        (envelope-from Wenchao.Chen@unisoc.com)
-Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
-        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RXDnY2YNRz2PXDCV;
-        Fri, 25 Aug 2023 17:15:29 +0800 (CST)
-Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
- (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Fri, 25 Aug
- 2023 17:17:55 +0800
-From:   Wenchao Chen <wenchao.chen@unisoc.com>
-To:     <ulf.hansson@linaro.org>, <orsonzhai@gmail.com>,
-        <baolin.wang@linux.alibaba.com>, <zhang.lyra@gmail.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
-        <yuelin.tang@unisoc.com>, Wenchao Chen <wenchao.chen@unisoc.com>
-Subject: [PATCH V3 2/2] mmc: sdhci-sprd: Add SD HS mode online tuning
-Date:   Fri, 25 Aug 2023 17:17:43 +0800
-Message-ID: <20230825091743.15613-3-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230825091743.15613-1-wenchao.chen@unisoc.com>
-References: <20230825091743.15613-1-wenchao.chen@unisoc.com>
+        with ESMTP id S239548AbjHYJxG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 05:53:06 -0400
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C717A2106;
+        Fri, 25 Aug 2023 02:53:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1692957183; x=1724493183;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=TPQF3Wxbk/74CzPmTQm+rUHXfMqpNqNTCji2x+nMYHk=;
+  b=ed9oTmEfvDagYPCOcFwxQhGBY422bKLOmvR+PrRnI+ejD9i5XOvbwPei
+   ipqZEEZglpVvqPq2WGeEzFfyoqOMPE3kwrxv2MyEEdtF+SaqPPna6WAef
+   szRQR8b6v5O2iCg+2/JXfTIsrg+yE/mTx6rsFMPAinh8ZkJ3qcNrmySYm
+   pxh1IdmTB0lDlPynHMXj9YldTzz3yIExcmr/QfHAMzWDTzBHD6s/ZgeX6
+   8RDC1x+7jC9eQN9h84xc+Ezam+hPSDrpHaDcQh4/tiJndfL4EMXyXl3sS
+   zJq12qi1kkB0SEoU1NeSwgNOOrGCtEeNkTtcCCfqhukS21hZMujLVEd1B
+   Q==;
+X-IronPort-AV: E=Sophos;i="6.02,195,1688454000"; 
+   d="scan'208";a="1291908"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 25 Aug 2023 02:53:03 -0700
+Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
+ chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.21; Fri, 25 Aug 2023 02:52:29 -0700
+Received: from che-lt-i64410lx.microchip.com (10.10.85.11) by
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server id
+ 15.1.2507.21 via Frontend Transport; Fri, 25 Aug 2023 02:52:24 -0700
+From:   Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+To:     <linus.walleij@linaro.org>, <dmitry.torokhov@gmail.com>,
+        <ulf.hansson@linaro.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <ludovic.desroches@microchip.com>, <nicolas.ferre@microchip.com>,
+        <alexandre.belloni@bootlin.com>
+CC:     <hari.prasathge@microchip.com>,
+        <balamanikandan.gunasundar@microchip.com>
+Subject: [PATCH v6 0/3] mmc: atmel-mci: Convert to gpio descriptors
+Date:   Fri, 25 Aug 2023 15:21:54 +0530
+Message-ID: <20230825095157.76073-1-balamanikandan.gunasundar@microchip.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-Originating-IP: [10.13.2.29]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- shmbx05.spreadtrum.com (10.29.1.56)
-X-MAIL: SHSQR01.spreadtrum.com 37P9HuTd015670
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-First of all, Unisoc's IC provides cmd delay and read delay to ensure
-that the host can get the correct data. However, according to SD Spec,
-there is no need to do tuning in high speed mode, but with the
-development of chip processes, it is more and more difficult to find
-a suitable delay to cover all the chips. Therefore, we need SD high
-speed mode online tuning.
+v6:
+- 0001-mmc-atmel-mci-Convert-to-gpio-descriptors.patch
+  Remove code duplication while checking if the device is compatible with
+  atmel,hsmci
+- Add Suggested-by tag
 
-In addition, we added mmc_sd_switch() and mmc_send_status() to the
-header file to allow it to be usable by the driver.
+v5:
+- Rebase to latest next branch of
+  https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+- Move handling active_high inversion logic to gpiolib instead of reading
+  the raw value of gpio and inverting it manually.
+- Use PTR_ERR_OR_ZERO instead of IS_ERR. To avoid ignoring valid errors as
+  suggested by Dmitry Torokhov
+- Use gpiod_get_value_cansleep() instead of gpiod_get_value()
 
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
----
- drivers/mmc/host/sdhci-sprd.c | 149 ++++++++++++++++++++++++++++++++++
- 1 file changed, 149 insertions(+)
+v4:
+- Rebase on top of next branch
+  https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git 
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 7f4ee2e12735..2a8b6c039f75 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -9,6 +9,8 @@
- #include <linux/dma-mapping.h>
- #include <linux/highmem.h>
- #include <linux/iopoll.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/host.h>
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
-@@ -73,6 +75,11 @@
- #define SDHCI_SPRD_CLK_DEF_RATE		26000000
- #define SDHCI_SPRD_PHY_DLL_CLK		52000000
- 
-+#define SDHCI_SPRD_MAX_RANGE		0xff
-+#define SDHCI_SPRD_CMD_DLY_MASK		GENMASK(15, 8)
-+#define SDHCI_SPRD_POSRD_DLY_MASK	GENMASK(23, 16)
-+#define SDHCI_SPRD_CPST_EN		GENMASK(27, 24)
-+
- struct sdhci_sprd_host {
- 	u32 version;
- 	struct clk *clk_sdio;
-@@ -86,6 +93,11 @@ struct sdhci_sprd_host {
- 	u32 phy_delay[MMC_TIMING_MMC_HS400 + 2];
- };
- 
-+enum sdhci_sprd_tuning_type {
-+	SDHCI_SPRD_TUNING_SD_HS_CMD,
-+	SDHCI_SPRD_TUNING_SD_HS_DATA,
-+};
-+
- struct sdhci_sprd_phy_cfg {
- 	const char *property;
- 	u8 timing;
-@@ -533,6 +545,138 @@ static void sdhci_sprd_hs400_enhanced_strobe(struct mmc_host *mmc,
- 		     SDHCI_SPRD_REG_32_DLL_DLY);
- }
- 
-+static int mmc_send_tuning_cmd(struct mmc_card *card)
-+{
-+	return mmc_send_status(card, NULL);
-+}
-+
-+static int mmc_send_tuning_data(struct mmc_card *card)
-+{
-+	u8 *status;
-+	int ret;
-+
-+	status = kmalloc(64, GFP_KERNEL);
-+	if (!status)
-+		return -ENOMEM;
-+
-+	ret = mmc_sd_switch(card, 0, 0, 0, status);
-+
-+	kfree(status);
-+
-+	return ret;
-+}
-+
-+static int sdhci_sprd_get_best_clk_sample(struct mmc_host *mmc, u8 *value)
-+{
-+	int range_end = SDHCI_SPRD_MAX_RANGE;
-+	int range_length = 0;
-+	int middle_range = 0;
-+	int count = 0;
-+	int i;
-+
-+	for (i = 0; i <= SDHCI_SPRD_MAX_RANGE; i++) {
-+		if (value[i]) {
-+			pr_debug("%s: tuning ok: %d\n", mmc_hostname(mmc), i);
-+			count++;
-+		} else {
-+			pr_debug("%s: tuning fail: %d\n", mmc_hostname(mmc), i);
-+			if (range_length < count) {
-+				range_length = count;
-+				range_end = i - 1;
-+				count = 0;
-+			}
-+		}
-+	}
-+
-+	if (!count)
-+		return -EIO;
-+
-+	if (count > range_length) {
-+		range_length = count;
-+		range_end = i - 1;
-+	}
-+
-+	middle_range = range_end - (range_length - 1) / 2;
-+
-+	return middle_range;
-+}
-+
-+static int sdhci_sprd_tuning(struct mmc_host *mmc, struct mmc_card *card,
-+			enum sdhci_sprd_tuning_type type)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-+	u32 *p = sprd_host->phy_delay;
-+	u32 dll_cfg, dll_dly;
-+	int best_clk_sample;
-+	int err = 0;
-+	u8 *value;
-+	int i;
-+
-+	value = kmalloc(SDHCI_SPRD_MAX_RANGE + 1, GFP_KERNEL);
-+	if (!value)
-+		return -ENOMEM;
-+
-+	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+
-+	dll_cfg = sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG);
-+	dll_cfg &= ~SDHCI_SPRD_CPST_EN;
-+	sdhci_writel(host, dll_cfg, SDHCI_SPRD_REG_32_DLL_CFG);
-+
-+	dll_dly = p[mmc->ios.timing];
-+
-+	for (i = 0; i <= SDHCI_SPRD_MAX_RANGE; i++) {
-+		if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
-+			dll_dly &= ~SDHCI_SPRD_CMD_DLY_MASK;
-+			dll_dly |= ((i << 8) & SDHCI_SPRD_CMD_DLY_MASK);
-+		} else {
-+			dll_dly &= ~SDHCI_SPRD_POSRD_DLY_MASK;
-+			dll_dly |= ((i << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
-+		}
-+
-+		sdhci_writel(host, dll_dly, SDHCI_SPRD_REG_32_DLL_DLY);
-+
-+		if (type == SDHCI_SPRD_TUNING_SD_HS_CMD)
-+			value[i] = !mmc_send_tuning_cmd(card);
-+		else
-+			value[i] = !mmc_send_tuning_data(card);
-+	}
-+
-+	best_clk_sample = sdhci_sprd_get_best_clk_sample(mmc, value);
-+	if (best_clk_sample < 0) {
-+		dev_err(mmc_dev(host->mmc), "all tuning phase fail!\n");
-+		goto out;
-+	}
-+
-+	if (type == SDHCI_SPRD_TUNING_SD_HS_CMD) {
-+		p[mmc->ios.timing] &= ~SDHCI_SPRD_CMD_DLY_MASK;
-+		p[mmc->ios.timing] |= ((best_clk_sample << 8) & SDHCI_SPRD_CMD_DLY_MASK);
-+	} else {
-+		p[mmc->ios.timing] &= ~(SDHCI_SPRD_POSRD_DLY_MASK);
-+		p[mmc->ios.timing] |= ((best_clk_sample << 16) & SDHCI_SPRD_POSRD_DLY_MASK);
-+	}
-+
-+	pr_debug("%s: the best clk sample %d, delay value 0x%08x\n",
-+			mmc_hostname(host->mmc), best_clk_sample, p[mmc->ios.timing]);
-+
-+out:
-+	sdhci_writel(host, p[mmc->ios.timing], SDHCI_SPRD_REG_32_DLL_DLY);
-+
-+	kfree(value);
-+
-+	return err;
-+}
-+
-+static int sdhci_sprd_prepare_sd_hs_cmd_tuning(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_CMD);
-+}
-+
-+static int sdhci_sprd_execute_sd_hs_data_tuning(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	return sdhci_sprd_tuning(mmc, card, SDHCI_SPRD_TUNING_SD_HS_DATA);
-+}
-+
- static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
- 				       struct device_node *np)
- {
-@@ -577,6 +721,11 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.request = sdhci_sprd_request;
- 	host->mmc_host_ops.hs400_enhanced_strobe =
- 		sdhci_sprd_hs400_enhanced_strobe;
-+	host->mmc_host_ops.prepare_sd_hs_tuning =
-+		sdhci_sprd_prepare_sd_hs_cmd_tuning;
-+	host->mmc_host_ops.execute_sd_hs_tuning =
-+		sdhci_sprd_execute_sd_hs_data_tuning;
-+
- 	/*
- 	 * We can not use the standard ops to change and detect the voltage
- 	 * signal for Spreadtrum SD host controller, since our voltage regulator
+v3:
+- [PATCH v3 1/2] mmc: atmel-mci: Convert to gpio descriptors
+  Convert devm_gpiod_get_from_of_node() into devm_fwnode_gpiod_get()
+
+v2:
+- [PATCH 1/2] mmc: atmel-mci: Convert to gpio descriptors
+  Remove "#include <linux/gpio.h>" as it is not necessary
+- [PATCH 2/2] mmc: atmel-mci: move atmel MCI header file
+  Move linux/atmel-mci.h into drivers/mmc/host/atmel-mci.c as it is
+  used only by one file
+
+Balamanikandan Gunasundar (3):
+  mmc: atmel-mci: Convert to gpio descriptors
+  mmc: atmel-mci: move atmel MCI header file
+  mmc: atmel-mci: Move card detect gpio polarity quirk to gpiolib
+
+ drivers/gpio/gpiolib-of.c    |  20 +++++-
+ drivers/mmc/host/atmel-mci.c | 133 +++++++++++++++++++++--------------
+ include/linux/atmel-mci.h    |  46 ------------
+ 3 files changed, 100 insertions(+), 99 deletions(-)
+ delete mode 100644 include/linux/atmel-mci.h
+
 -- 
-2.17.1
+2.25.1
 
