@@ -2,106 +2,117 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 135AFC88CB2
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 11:46:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A1F5C71133
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 12:10:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243264AbjHYLqJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 07:46:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35844 "EHLO
+        id S243802AbjHYMKX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 08:10:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243802AbjHYLpg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 07:45:36 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 864FC2106
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 04:45:32 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-d77c5414433so824890276.0
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 04:45:32 -0700 (PDT)
+        with ESMTP id S244482AbjHYMKM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 08:10:12 -0400
+Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C192E6B
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 05:10:10 -0700 (PDT)
+Received: by mail-yb1-xb2a.google.com with SMTP id 3f1490d57ef6-ccc462deca6so854244276.0
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 05:10:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692963932; x=1693568732;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fcf02hKF/0IdH3b1tfgEymyLjXbz5lFk9LkSgZ+/VMA=;
-        b=NXO+TOtkKX+bmKbXuTm0NUbkfxdku2aPo89ryMUq6iKKoSkZeNcvPAxF/bwzV7Eujg
-         u6WF2gihqJ9s2SCDG6vYWQ9kbfporJWKFWZ1QouFO3tOeQlAoSm9lJ82Iuc03a6V/q1F
-         NtK//fmUSm9gcKGUZxXwhxksr7YPzQbaBWBOQHfeFqodDOP7/Nr0IPLxY9Fe0oSNBmcr
-         HrabKwve6jfC5QWE5nYDd2fztV+PeSf4R2gcaO2E3u4kEyJ6v9lvTu41asp9/vy6oEcT
-         VLznEBoC+AGgyzjEhlUbFuyE9feuer683jMNKgerc2uCsoX+uimeVpNR/ymwy33l4mYH
-         I2hA==
+        d=linaro.org; s=google; t=1692965410; x=1693570210;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=W1ZXaAxt+/qreECWmUwSQxF6mPK3tFp076msIpV1KBo=;
+        b=YPJTawHEDHia5KYjZSr+WOlLLuYzo6IVvRtfvdu/oIYmgHGwTXkRPZ7g7rjLHlpXca
+         uNu8RaKwMvDNWa8br1OtQFZN3rnH1gBXdR5Of2KZzT6W8aRb5mwU0HXJII1I9Q2PLTqS
+         IOKCx0sey/2QVRgRKOpS4ujyDwIiN5FyxM5yS2YiDuDqOMgrofFZGUJmQPEm+g/NlzWq
+         zaydvqtcJpJZV0jQct73GWP528FlptREalk2j7NMwkucH3CGDOetDYGCeiEMez2Q4NPw
+         7qDiDVO809WVBJQYrJV7xJtiGW2GjvUFACKAOAxzUN1DHReJN22DN8X8mXrt8I5n4cmh
+         vXkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692963932; x=1693568732;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=fcf02hKF/0IdH3b1tfgEymyLjXbz5lFk9LkSgZ+/VMA=;
-        b=ShFCmfgefJYeRhZfpQ1j+tzk7oq2GaE/PSteKzHApQUGYnbF9odESQSgc6w6HDFOtp
-         3jGrPRDgW47Wq3jJEhH8dGn1Z/Kq2NMVkAo6XZ/cHpPtCVp0j5ih6T6l+/2rAuPbVmdu
-         OHLdZGcEx9h3F1qLDO5KAJD7vTV00yAYTBU+wQOMfWSVaGhv2c14ukYs0PdzrurxBBlu
-         ObDPtaNvq82LB+MiuV/pJdSMHdEi4mr8tOU+7eU54YCgaTlG6NchVCfNVIO1iMXlJLsn
-         cBZ+cYEos0L3OeeXeJg+2dkrPbnw3fsTrub6p1vPLeyUO5klogbNg6vYbGVH3hiDVzIp
-         W9hA==
-X-Gm-Message-State: AOJu0YwU7q+yo6t4YJZ8zi5K2w2q6ZL+OsT4nbPb0etjwlwaO/jeKVqx
-        r8ekHnIIjJXNkPVMk1t3GmwzThrX3t/BthFdxuvLfA==
-X-Google-Smtp-Source: AGHT+IGrtKMF8Yp+gEsaJ2A+cL1/buPgbXCYxwk792IJXE1syFo/+NkzfJGbMAyhGaVIo5+B9Tp9iUpkpzem/NxNnX0=
-X-Received: by 2002:a25:d0d5:0:b0:d77:ec2f:63b with SMTP id
- h204-20020a25d0d5000000b00d77ec2f063bmr5858906ybg.5.1692963931772; Fri, 25
- Aug 2023 04:45:31 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1692965410; x=1693570210;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=W1ZXaAxt+/qreECWmUwSQxF6mPK3tFp076msIpV1KBo=;
+        b=UMQsbtSGRdU8qawAstfARzM7sHuKowSOUinfMBphBqxuyLVVNAAQrNnhnvHYGBrOhp
+         m3aHBS/Ocv2mIWzbtUjhqtxWnhhzTHWmATGn5xhl6n9K0ZQW88nalp52p66JR5vmShpy
+         nfx0xdLi65i+YptJYLfIbmZmiw0SSCNxZ3i7Q8XBjv1TqLeLEEI4bVYIU+27WSEmNc9t
+         KI7tSt3FZWmYFGJ3TGyfPWDRrWlYq21I4CsxJr8kqa75CT1lGbaaI2eezbtGbXFlXmuO
+         DMRbW8ksrFzXbE8E51b8T2QxKmYV8iuzExtNtp1TMAJD6Cz14NTJNLI6qh8mwXKJJsg0
+         Oi4Q==
+X-Gm-Message-State: AOJu0YzorrtvoJmdKdhBDGW8uU4c5Gh/poLz10kdg+5xHA+BhQOsvsJK
+        UNz2pdMInkWh2jaaRjQ44mflEIvOqVLV2d80c0XU1g==
+X-Google-Smtp-Source: AGHT+IExnGXE8C1EbVN7jY0Wc5ZWg3qZ07JB7Re+7JVXnXTnMc9Qbkxu+/lPq/5Jb49jB4fufcAmeKCbsT8MgEZb7DE=
+X-Received: by 2002:a25:32d0:0:b0:d78:8eb:9924 with SMTP id
+ y199-20020a2532d0000000b00d7808eb9924mr4283668yby.52.1692965409795; Fri, 25
+ Aug 2023 05:10:09 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230825095157.76073-1-balamanikandan.gunasundar@microchip.com> <20230825095157.76073-4-balamanikandan.gunasundar@microchip.com>
-In-Reply-To: <20230825095157.76073-4-balamanikandan.gunasundar@microchip.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 25 Aug 2023 13:45:20 +0200
-Message-ID: <CACRpkdahEcKgR9gR7iU0cW_aDTReDYBKdP+5_F+hGcarCjG9gg@mail.gmail.com>
-Subject: Re: [PATCH v6 3/3] mmc: atmel-mci: Move card detect gpio polarity
- quirk to gpiolib
+References: <20230825095157.76073-1-balamanikandan.gunasundar@microchip.com>
+In-Reply-To: <20230825095157.76073-1-balamanikandan.gunasundar@microchip.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 25 Aug 2023 14:09:33 +0200
+Message-ID: <CAPDyKFrabm3gUJ1pfnq3PhROuRo_8TjocemMy93rJgDK04qqKQ@mail.gmail.com>
+Subject: Re: [PATCH v6 0/3] mmc: atmel-mci: Convert to gpio descriptors
 To:     Balamanikandan Gunasundar 
         <balamanikandan.gunasundar@microchip.com>
-Cc:     dmitry.torokhov@gmail.com, ulf.hansson@linaro.org,
+Cc:     linus.walleij@linaro.org, dmitry.torokhov@gmail.com,
         linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
         ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
         alexandre.belloni@bootlin.com, hari.prasathge@microchip.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Aug 25, 2023 at 11:53=E2=80=AFAM Balamanikandan Gunasundar
+On Fri, 25 Aug 2023 at 11:53, Balamanikandan Gunasundar
 <balamanikandan.gunasundar@microchip.com> wrote:
-
-> The polarity of the card detection gpio is handled by the "cd-inverted"
-> property in the device tree. Move this inversion logic to gpiolib to avoi=
-d
-> reading the gpio raw value.
 >
-> Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@micro=
-chip.com>
-> Suggested-by: Linus Walleij <linus.walleij@linaro.org>
+> v6:
+> - 0001-mmc-atmel-mci-Convert-to-gpio-descriptors.patch
+>   Remove code duplication while checking if the device is compatible with
+>   atmel,hsmci
+> - Add Suggested-by tag
+>
+> v5:
+> - Rebase to latest next branch of
+>   https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+> - Move handling active_high inversion logic to gpiolib instead of reading
+>   the raw value of gpio and inverting it manually.
+> - Use PTR_ERR_OR_ZERO instead of IS_ERR. To avoid ignoring valid errors as
+>   suggested by Dmitry Torokhov
+> - Use gpiod_get_value_cansleep() instead of gpiod_get_value()
+>
+> v4:
+> - Rebase on top of next branch
+>   https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+>
+> v3:
+> - [PATCH v3 1/2] mmc: atmel-mci: Convert to gpio descriptors
+>   Convert devm_gpiod_get_from_of_node() into devm_fwnode_gpiod_get()
+>
+> v2:
+> - [PATCH 1/2] mmc: atmel-mci: Convert to gpio descriptors
+>   Remove "#include <linux/gpio.h>" as it is not necessary
+> - [PATCH 2/2] mmc: atmel-mci: move atmel MCI header file
+>   Move linux/atmel-mci.h into drivers/mmc/host/atmel-mci.c as it is
+>   used only by one file
+>
+> Balamanikandan Gunasundar (3):
+>   mmc: atmel-mci: Convert to gpio descriptors
+>   mmc: atmel-mci: move atmel MCI header file
+>   mmc: atmel-mci: Move card detect gpio polarity quirk to gpiolib
+>
+>  drivers/gpio/gpiolib-of.c    |  20 +++++-
+>  drivers/mmc/host/atmel-mci.c | 133 +++++++++++++++++++++--------------
+>  include/linux/atmel-mci.h    |  46 ------------
+>  3 files changed, 100 insertions(+), 99 deletions(-)
+>  delete mode 100644 include/linux/atmel-mci.h
+>
+> --
+> 2.25.1
+>
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Applied for next, thanks!
 
-> +#if IS_ENABLED(CONFIG_MMC_ATMELMCI)
-> +       /*
-> +        * The Atmel HSMCI has compatible property in the parent node and
-> +        * gpio property in a child node
-> +        */
-> +       if (of_device_is_compatible(np->parent, "atmel,hsmci")) {
-> +               np_compat =3D np->parent;
-> +               np_propname =3D np;
-> +       }
-> +#endif
-
-You don't need to use the preprocessor actually, what I did in my
-example works:
-
-if (IS_ENABLED()... && of_device_is_compatible()...) {
-...
-}
-
-If the first expression in the if() clause is constant false, the compiler
-will optimize out the entire if()-clause. At least the compilers we care
-about.
-
-Yours,
-Linus Walleij
+Kind regards
+Uffe
