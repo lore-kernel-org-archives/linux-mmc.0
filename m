@@ -2,193 +2,164 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 190B3C71133
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 09:54:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BADB7C7EE2C
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 10:01:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238770AbjHYJxk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 05:53:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58494 "EHLO
+        id S238782AbjHYKAj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 06:00:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49490 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233476AbjHYJxL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 05:53:11 -0400
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26B331FD3;
-        Fri, 25 Aug 2023 02:53:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1692957189; x=1724493189;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=OXd/cO1jC0n1lhZm5VNzylnvJMWqGYjkafbXBg592zg=;
-  b=qrdUcOJ0+YkIh6c8j+cBgCrhtBDVVpNL7RlNW/5oC9hI6ajBJ2QliwKu
-   QbAxuO+EyOibm4BFvWZ1wvMNd6Xuvvomol9sdxE1ZVKv3WHpFIqfW9BeF
-   s8o7Z/CFStolIm4HkkvFuZ4TcrFBaOaCmmgrBMSJmMhsuHDD+80QvaiJo
-   X9aI/lEyjfZX2mzUck9OSutGxpCJ3XWlhrgFxsxutuGvY2L2e9h9FpLVG
-   SEr+i9k4Sl6+DO5iZifrar3k2RU8+xRKOLJrHRFqqC7fG6aGjD8zTdTdk
-   wMPQtBkBCbaxxZJgLdPNoA1rGuCyg+tbCpUqLaqv4bmIDr6ugmpx/s7/J
-   w==;
-X-IronPort-AV: E=Sophos;i="6.02,195,1688454000"; 
-   d="scan'208";a="231695116"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 25 Aug 2023 02:53:08 -0700
-Received: from chn-vm-ex02.mchp-main.com (10.10.87.72) by
- chn-vm-ex02.mchp-main.com (10.10.87.72) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.21; Fri, 25 Aug 2023 02:52:40 -0700
-Received: from che-lt-i64410lx.microchip.com (10.10.85.11) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server id
- 15.1.2507.21 via Frontend Transport; Fri, 25 Aug 2023 02:52:35 -0700
-From:   Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>
-To:     <linus.walleij@linaro.org>, <dmitry.torokhov@gmail.com>,
-        <ulf.hansson@linaro.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <ludovic.desroches@microchip.com>, <nicolas.ferre@microchip.com>,
-        <alexandre.belloni@bootlin.com>
-CC:     <hari.prasathge@microchip.com>,
-        <balamanikandan.gunasundar@microchip.com>
-Subject: [PATCH v6 2/3] mmc: atmel-mci: move atmel MCI header file
-Date:   Fri, 25 Aug 2023 15:21:56 +0530
-Message-ID: <20230825095157.76073-3-balamanikandan.gunasundar@microchip.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230825095157.76073-1-balamanikandan.gunasundar@microchip.com>
-References: <20230825095157.76073-1-balamanikandan.gunasundar@microchip.com>
+        with ESMTP id S241806AbjHYKAY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 06:00:24 -0400
+Received: from mail-yw1-x1132.google.com (mail-yw1-x1132.google.com [IPv6:2607:f8b0:4864:20::1132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92DBA2106
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:00:19 -0700 (PDT)
+Received: by mail-yw1-x1132.google.com with SMTP id 00721157ae682-58fae4a5285so9177047b3.0
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:00:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1692957619; x=1693562419;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=5UIQb/eeOE/85eBFbBN6HeTQWfUWEUKgLruaLwRSxTc=;
+        b=TLWxRfXRDkr/vfHiMPaLwGEMzLb6ieehakvbzXnIqGNf3V6g0Ih9N7CRZlPg9WxEV5
+         stDyFl50W4eo3GAGk0dIVfZYo9IeSpvxi7mgXLXWzlOTDS3GG7VABQdp/xKDkLlZ64eB
+         uIPjAceyynwXOl9+NPZh0LYaIwrku9sLAgM3NLeM2ZVk8vdkNbXIH2ApcdDpZogloYrw
+         HAJ8I1h7MlgpZT2lByDmAYqtWR8evg6e8WQF3VXXvHrLc0sd5EmcKlMUJqpgyj7snMZW
+         /6BdDoi/ZfR/mAf9oM0zhxCjuauE1+vIoA9rsIrId1uvv/q7eNgicu6Y0HDVGuoazs3c
+         ICeA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692957619; x=1693562419;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=5UIQb/eeOE/85eBFbBN6HeTQWfUWEUKgLruaLwRSxTc=;
+        b=PEogl4lJSgrN238faTYMZJgw6iVFKaH2tS9UVHFlbls68ay5jTuFYD0W9804QnasLF
+         3LQXpnqBnbgp8Ggd+GXbYeguimWDo2zexMxQIHE9qeKyhRU4LS/1Tf351A80srt9MtZ1
+         A9h6Nvz1hYMI21mHTTwDPPYkQfpdec1F7SjzQvP7jfXV+LpaQ6+q9CHAM6uoiyNn9i5O
+         wtgtkbey9E8hK2Krurnv/6jTPdSOFv/yNK+MStH4SdYeyrTzmwRoZBzqao5LAQtvt4cx
+         sAFlnEs3JrRBNApSRb/gpOlKmkWvBTyxhzK0p9/ZfU2rBUMU3ylipbzbcv2nopzEqpLE
+         qmyA==
+X-Gm-Message-State: AOJu0Yyo3dg0LVe6FrXJ6heLxdZmMt8H2326bmKaNtqewoP0+NPvUCLb
+        BKe4ewxfPutEHiYcQkk5DRLRd7WQ2o3jWG4wCnCpQQ==
+X-Google-Smtp-Source: AGHT+IHWdBDNnJaCqx17itCTuTbzGUmGoy3wuFxLEPG7iF9R+hGAewU83apq7KbH5xTJJzHsrrUYc5Uf99bhG0tinps=
+X-Received: by 2002:a25:7352:0:b0:d0e:8b3b:1e12 with SMTP id
+ o79-20020a257352000000b00d0e8b3b1e12mr18053604ybc.38.1692957618790; Fri, 25
+ Aug 2023 03:00:18 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+References: <20230825091743.15613-1-wenchao.chen@unisoc.com> <20230825091743.15613-2-wenchao.chen@unisoc.com>
+In-Reply-To: <20230825091743.15613-2-wenchao.chen@unisoc.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 25 Aug 2023 11:59:42 +0200
+Message-ID: <CAPDyKFqj3f3sjfNsYEs8cuyqwirMN_vnKVnFWTBghifpEukOTA@mail.gmail.com>
+Subject: Re: [PATCH V3 1/2] mmc: core: Add host specific tuning support for SD
+ HS mode
+To:     Wenchao Chen <wenchao.chen@unisoc.com>
+Cc:     orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
+        zhang.lyra@gmail.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, wenchao.chen666@gmail.com,
+        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Move the contents of linux/atmel-mci.h into
-drivers/mmc/host/atmel-mci.c as it is only used in one file
+On Fri, 25 Aug 2023 at 11:18, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+>
+> Added .prepare_hs_tuning and .execute_hs_tuning host callbacks to
+> support host-specific tuning for SD high speed mode. Howerver, these
+> callbacks are optional, host specific - and that there is nothing
+> in the SD spec that mentions this.
+>
+> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> ---
+>  drivers/mmc/core/sd.c     | 14 ++++++++++++++
+>  drivers/mmc/core/sd_ops.c |  1 +
+>  include/linux/mmc/host.h  |  8 ++++++++
+>  3 files changed, 23 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 246ce027ae0a..c3e554344c99 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1518,6 +1518,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>                  */
+>                 mmc_set_clock(host, mmc_sd_get_max_clock(card));
+>
+> +               if (host->ios.timing == MMC_TIMING_SD_HS &&
+> +                       host->ops->prepare_sd_hs_tuning) {
+> +                       err = host->ops->prepare_sd_hs_tuning(host, card);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
+> +
+>                 /*
+>                  * Switch to wider bus (if supported).
+>                  */
+> @@ -1529,6 +1536,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>
+>                         mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+>                 }
+> +
+> +               if (host->ios.timing == MMC_TIMING_SD_HS &&
+> +                       host->ops->execute_sd_hs_tuning) {
+> +                       err = host->ops->execute_sd_hs_tuning(host, card);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
+>         }
+>  cont:
+>         if (!oldcard) {
+> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+> index ef8d1dce5af1..a59cd592f06e 100644
+> --- a/drivers/mmc/core/sd_ops.c
+> +++ b/drivers/mmc/core/sd_ops.c
+> @@ -323,6 +323,7 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+>         return mmc_send_adtc_data(card, card->host, SD_SWITCH, cmd_args, resp,
+>                                   64);
+>  }
+> +EXPORT_SYMBOL_GPL(mmc_sd_switch);
+>
+>  int mmc_app_sd_status(struct mmc_card *card, void *ssr)
+>  {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 461d1543893b..62a6847a3b6f 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -184,6 +184,12 @@ struct mmc_host_ops {
+>         /* Execute HS400 tuning depending host driver */
+>         int     (*execute_hs400_tuning)(struct mmc_host *host, struct mmc_card *card);
+>
+> +       /* Optional callback to prepare for SD high-speed tuning */
+> +       int     (*prepare_sd_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
+> +
+> +       /* Optional callback to execute SD high-speed tuning */
+> +       int     (*execute_sd_hs_tuning)(struct mmc_host *host, struct mmc_card *card);
+> +
+>         /* Prepare switch to DDR during the HS400 init sequence */
+>         int     (*hs400_prepare_ddr)(struct mmc_host *host);
+>
+> @@ -665,6 +671,8 @@ static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
+>         host->err_stats[stat] += 1;
+>  }
+>
+> +int mmc_sd_switch(struct mmc_card *card, int mode, int group, u8 value, u8 *resp);
 
-Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@microchip.com>
-Reviewed-by: Ludovic Desroches <ludovic.desroches@microchip.com>
----
- drivers/mmc/host/atmel-mci.c | 39 +++++++++++++++++++++++++++++-
- include/linux/atmel-mci.h    | 46 ------------------------------------
- 2 files changed, 38 insertions(+), 47 deletions(-)
- delete mode 100644 include/linux/atmel-mci.h
+We need to drop the corresponding declaration in drivers/mmc/core/sd_ops.h.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 892d29fed9ec..6f815818dd22 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -29,7 +29,6 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdio.h>
- 
--#include <linux/atmel-mci.h>
- #include <linux/atmel_pdc.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-@@ -39,6 +38,8 @@
- #include <asm/io.h>
- #include <asm/unaligned.h>
- 
-+#define ATMCI_MAX_NR_SLOTS	2
-+
- /*
-  * Superset of MCI IP registers integrated in Atmel AT91 Processor
-  * Registers and bitfields marked with [2] are only available in MCI2
-@@ -200,6 +201,42 @@ enum atmci_pdc_buf {
- 	PDC_SECOND_BUF,
- };
- 
-+/**
-+ * struct mci_slot_pdata - board-specific per-slot configuration
-+ * @bus_width: Number of data lines wired up the slot
-+ * @detect_pin: GPIO pin wired to the card detect switch
-+ * @wp_pin: GPIO pin wired to the write protect sensor
-+ * @detect_is_active_high: The state of the detect pin when it is active
-+ * @non_removable: The slot is not removable, only detect once
-+ *
-+ * If a given slot is not present on the board, @bus_width should be
-+ * set to 0. The other fields are ignored in this case.
-+ *
-+ * Any pins that aren't available should be set to a negative value.
-+ *
-+ * Note that support for multiple slots is experimental -- some cards
-+ * might get upset if we don't get the clock management exactly right.
-+ * But in most cases, it should work just fine.
-+ */
-+struct mci_slot_pdata {
-+	unsigned int		bus_width;
-+	struct gpio_desc        *detect_pin;
-+	struct gpio_desc	*wp_pin;
-+	bool			detect_is_active_high;
-+	bool			non_removable;
-+};
-+
-+/**
-+ * struct mci_platform_data - board-specific MMC/SDcard configuration
-+ * @dma_slave: DMA slave interface to use in data transfers.
-+ * @slot: Per-slot configuration data.
-+ */
-+struct mci_platform_data {
-+	void			*dma_slave;
-+	dma_filter_fn		dma_filter;
-+	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
-+};
-+
- struct atmel_mci_caps {
- 	bool    has_dma_conf_reg;
- 	bool    has_pdc;
-diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
-deleted file mode 100644
-index 017e7d8f6126..000000000000
---- a/include/linux/atmel-mci.h
-+++ /dev/null
-@@ -1,46 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0 */
--#ifndef __LINUX_ATMEL_MCI_H
--#define __LINUX_ATMEL_MCI_H
--
--#include <linux/types.h>
--#include <linux/dmaengine.h>
--
--#define ATMCI_MAX_NR_SLOTS	2
--
--/**
-- * struct mci_slot_pdata - board-specific per-slot configuration
-- * @bus_width: Number of data lines wired up the slot
-- * @detect_pin: GPIO pin wired to the card detect switch
-- * @wp_pin: GPIO pin wired to the write protect sensor
-- * @detect_is_active_high: The state of the detect pin when it is active
-- * @non_removable: The slot is not removable, only detect once
-- *
-- * If a given slot is not present on the board, @bus_width should be
-- * set to 0. The other fields are ignored in this case.
-- *
-- * Any pins that aren't available should be set to a negative value.
-- *
-- * Note that support for multiple slots is experimental -- some cards
-- * might get upset if we don't get the clock management exactly right.
-- * But in most cases, it should work just fine.
-- */
--struct mci_slot_pdata {
--	unsigned int		bus_width;
--	struct gpio_desc        *detect_pin;
--	struct gpio_desc	*wp_pin;
--	bool			detect_is_active_high;
--	bool			non_removable;
--};
--
--/**
-- * struct mci_platform_data - board-specific MMC/SDcard configuration
-- * @dma_slave: DMA slave interface to use in data transfers.
-- * @slot: Per-slot configuration data.
-- */
--struct mci_platform_data {
--	void			*dma_slave;
--	dma_filter_fn		dma_filter;
--	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
--};
--
--#endif /* __LINUX_ATMEL_MCI_H */
--- 
-2.25.1
+> +int mmc_send_status(struct mmc_card *card, u32 *status);
 
+We need to drop the corresponding declaration in drivers/mmc/core/mmc_ops.h
+
+>  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
+>  int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
+>  int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+> --
+> 2.17.1
+>
+
+Other than the small thing above, this looks good to me!
+
+Although, no need to resend, I will amend the patch when applying.
+
+Kind regards
+Uffe
