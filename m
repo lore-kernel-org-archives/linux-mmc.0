@@ -2,171 +2,115 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA336C3DA6F
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 12:26:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAC55C3DA6F
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 13:55:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231875AbjHYMZc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 08:25:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46368 "EHLO
+        id S245327AbjHYNza (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 09:55:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244880AbjHYMZZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 08:25:25 -0400
-Received: from mail-qv1-xf2d.google.com (mail-qv1-xf2d.google.com [IPv6:2607:f8b0:4864:20::f2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6C40212B;
-        Fri, 25 Aug 2023 05:24:49 -0700 (PDT)
-Received: by mail-qv1-xf2d.google.com with SMTP id 6a1803df08f44-649edb3a3d6so4262986d6.0;
-        Fri, 25 Aug 2023 05:24:49 -0700 (PDT)
+        with ESMTP id S245339AbjHYNzX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 09:55:23 -0400
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D400213F
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 06:55:21 -0700 (PDT)
+Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-52683da3f5cso1402317a12.3
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 06:55:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1692966237; x=1693571037;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1692971720; x=1693576520;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=5AI4j/imUS1MUuQuGpKi9NalKkJwpNjUoHfF8ByAQng=;
-        b=UdvTOpoxY/bhUnWcwMDoPK3kdZpyKVKrnioA961W9+oEUcjNgxrV5Tue0bv+v//qKs
-         DtTT4REBuL39Fb1rY2VvgwZqPWpBaEycuMWT47HyyU8xheDjANC+hJjSXkOexRPpeMsE
-         bYE11Fw4GrJPX1jpt0LVAb7i3hbt1HoMstnhvT4/2YYzb5ItJrp6L1eXl+d6u2ENnyeW
-         cN5pclyTlYuHMZD2ag9nQGV3lw5WrRxyO3uu3bE1XS+n/D/UKlb3yNjI9/T7SZoWyY9v
-         Oy7wMP/Cfn89YnHV9haKI8PJOlcxkEDy81a6qMXacVgbw4FiygZge8pLy3XfPd1WEp/M
-         SA0Q==
+        bh=WPFNeQZ6wVRfzI8X+CMFP24H+xIdOAmdyrQlfRbcMWo=;
+        b=ZN01E7vC5V4lr5DN8gK8WHHWia8UvZTCNZidis4wfPTVeTWXb7LIUjOy2lUstg2QFL
+         5GAg2aiShjUkSQK+8pamK94NEv+14WKP3TKGoCvA4s04POXDZOQ07bM8jTkNWPCLQGoY
+         SWsNKpUONLJeLM0Zel0KZHHSgd/OC2bb/eka/nIgZ4q0zDvllFitZi/8m8NOOyaZZQUd
+         kcmAthFH0TpQQWMESMcUQQ51C0EWAzsK7QnHzzLiak9o9vbiOTCXyuvBGia+Ze1Bd2Ze
+         DrKM71kEzpn1GWokkIAhYGn9ktuS1TNBEsEGm4iN5+SUe/of73o5DcFx57RZFOlcNzXU
+         qD/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692966237; x=1693571037;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20221208; t=1692971720; x=1693576520;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=5AI4j/imUS1MUuQuGpKi9NalKkJwpNjUoHfF8ByAQng=;
-        b=S8JMOuRUFrf9+/XyDFMuEyhgFM/W+htkLAyyfeTHOO993jSSIOFXx+r+WUgkwo5c5q
-         nYXgX5H9vkPDBnWNQ5z/j3BmIFSEE8kvMDvzRn5LaID3BRAYy1HIurXACdPRj81mEV16
-         Ygt+IVwH3I7wx/3fVQu5e+yvKEonRCW0zO1//UxI8vhF3AIlnroN0I0PJVxHDQcrSAEf
-         mfmqvyJ9WfURhrfstRGWWpw7KN99k0v7cYUea8ZIj960PaEcG8fkdIxuK8C0GzkHqU+X
-         RWBPdcZlu76jyilUVpCSQehUAB05FqzS+8+w30OYqPjkL5ywcAhtDRTSzrXriuM4j7j/
-         HHAQ==
-X-Gm-Message-State: AOJu0Yxsvcyu0gJJEj/HVkmHtQRFsZMfvKhuyHST5bXcgrfCZYyF0QEX
-        2VwYd1Y3nkQ50kGOeLJjWBtih+8KQ4yUwxj0FMe3if07K/g=
-X-Google-Smtp-Source: AGHT+IGtZ7hZKI6y2+C2LIuIKucinFYqd9TnTYNAMR9h9zLHBa9eEs/JQljbdDYs/MShD6tHQS1vpuVnBnneRKpm9jc=
-X-Received: by 2002:a0c:dc06:0:b0:64f:6625:48f4 with SMTP id
- s6-20020a0cdc06000000b0064f662548f4mr7140539qvk.5.1692966237149; Fri, 25 Aug
- 2023 05:23:57 -0700 (PDT)
+        bh=WPFNeQZ6wVRfzI8X+CMFP24H+xIdOAmdyrQlfRbcMWo=;
+        b=eYRHVkVe3v7Fcux+6rWASuNFYTzKTyHIV3a8xXQnOzwQkGMv3kowhOR3cNqMaeliw/
+         JLwFzqwDd7e9P+MTLnH7/amX/NEaPKTrBoZchyGxUFAUaf6YE/zP8KsQKdmM0es5pyoL
+         1j6a/BIOko00n4rTcV010SATgFzIHT6F/HBjk51bWEvWzUj3I0MDpbXOAXPRcEfrk2Fa
+         e0yhiWcAilT+7Zs7NlK+x2EEmQdBbq94Mlf4z+PVCEnO6c8RUrUvuZx8BWySIDGcy0QP
+         KistZY01vhTJS0KfQ3l+w3yO7lIZeNvGWh1h9aVyGovJ4WQVLEh6VCAA1QuVD1AV6DjG
+         Wvww==
+X-Gm-Message-State: AOJu0YwwL//9NUBtpYtKaoGvjxUfXxynodrHf28P/7uvVYYkXeJIxF0P
+        YAKC+T3jV/2VgLxTl2CJgR8Vyw==
+X-Google-Smtp-Source: AGHT+IFRV3jqjze/aOO11lTy2Fdk+HSPuP8nR7u8lakxQfGbHRcI9XDn413gGrhmM5E4cgTzI4fdqw==
+X-Received: by 2002:aa7:c698:0:b0:527:60c:53d9 with SMTP id n24-20020aa7c698000000b00527060c53d9mr12929555edq.15.1692971719371;
+        Fri, 25 Aug 2023 06:55:19 -0700 (PDT)
+Received: from krzk-bin.. ([77.252.47.198])
+        by smtp.gmail.com with ESMTPSA id c21-20020aa7d615000000b005256aaa6e7asm1019660edr.78.2023.08.25.06.55.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 25 Aug 2023 06:55:18 -0700 (PDT)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 2/2] dt-bindings: mmc: sdhci-msm: allow flexible order of optional clocks
+Date:   Fri, 25 Aug 2023 15:55:03 +0200
+Message-Id: <20230825135503.282135-2-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230825135503.282135-1-krzysztof.kozlowski@linaro.org>
+References: <20230825135503.282135-1-krzysztof.kozlowski@linaro.org>
 MIME-Version: 1.0
-References: <c8c059ce-53a9-3627-8984-dff771dff1de@rock-chips.com> <20230825083918.24334-1-Sharp.Xia@mediatek.com>
-In-Reply-To: <20230825083918.24334-1-Sharp.Xia@mediatek.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Fri, 25 Aug 2023 20:23:45 +0800
-Message-ID: <CA+Da2qxaCJwZhn0C7VxZzx8TB1VDR_xa2P0cDXUaNA9=YzSJYg@mail.gmail.com>
-Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
-To:     Sharp.Xia@mediatek.com
-Cc:     shawn.lin@rock-chips.com, angelogioacchino.delregno@collabora.com,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        matthias.bgg@gmail.com, ulf.hansson@linaro.org,
-        wsd_upstream@mediatek.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Aug 25, 2023 at 7:43=E2=80=AFPM <Sharp.Xia@mediatek.com> wrote:
->
-> On Fri, 2023-08-25 at 16:11 +0800, Shawn Lin wrote:
-> >
-> >  Hi Sharp,
-> >
-> > On 2023/8/25 15:10, Sharp Xia (=E5=A4=8F=E5=AE=87=E5=BD=AC) wrote:
-> > > On Thu, 2023-08-24 at 12:55 +0200, Ulf Hansson wrote:
-> > >>
-> > >> External email : Please do not click links or open attachments
-> > until
-> > >> you have verified the sender or the content.
-> > >>   On Fri, 18 Aug 2023 at 04:45, <Sharp.Xia@mediatek.com> wrote:
-> > >>>
-> > >>> From: Sharp Xia <Sharp.Xia@mediatek.com>
-> > >>>
-> > >>> MMC does not set readahead and uses the default
-> > VM_READAHEAD_PAGES
-> > >>> resulting in slower reading speed.
-> > >>> Use the max_req_size reported by host driver to set the optimal
-> > >>> I/O size to improve performance.
-> > >>
-> > >> This seems reasonable to me. However, it would be nice if you
-> > could
-> > >> share some performance numbers too - comparing before and after
-> > >> $subject patch.
-> > >>
-> > >> Kind regards
-> > >> Uffe
-> > >>
-> > >>>
-> > >>> Signed-off-by: Sharp Xia <Sharp.Xia@mediatek.com>
-> > >>> ---
-> > >>>   drivers/mmc/core/queue.c | 1 +
-> > >>>   1 file changed, 1 insertion(+)
-> > >>>
-> > >>> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> > >>> index b396e3900717..fc83c4917360 100644
-> > >>> --- a/drivers/mmc/core/queue.c
-> > >>> +++ b/drivers/mmc/core/queue.c
-> > >>> @@ -359,6 +359,7 @@ static void mmc_setup_queue(struct mmc_queue
-> > >> *mq, struct mmc_card *card)
-> > >>>                  blk_queue_bounce_limit(mq->queue,
-> > BLK_BOUNCE_HIGH);
-> > >>>          blk_queue_max_hw_sectors(mq->queue,
-> > >>>                  min(host->max_blk_count, host->max_req_size /
-> > >> 512));
-> > >>> +       blk_queue_io_opt(mq->queue, host->max_req_size);
-> > >>>          if (host->can_dma_map_merge)
-> > >>>                  WARN(!blk_queue_can_use_dma_map_merging(mq-
-> > >queue,
-> > >>>                                                          mmc_dev(
-> > hos
-> > >> t)),
-> > >>> --
-> > >>> 2.18.0
-> > >>>
-> > >
-> > > I test this patch on internal platform(kernel-5.15).
-> >
-> > I patched this one and the test shows me a stable 11% performance
-> > drop.
-> >
-> > Before:
-> > echo 3 > proc/sys/vm/drop_caches && dd if=3D/data/1GB.img of=3D/dev/nul=
-l
-> >
-> > 2048000+0 records in
-> > 2048000+0 records out
-> > 1048576000 bytes (0.9 G) copied, 3.912249 s, 256 M/s
-> >
-> > After:
-> > echo 3 > proc/sys/vm/drop_caches && dd if=3D/data/1GB.img of=3D/dev/nul=
-l
-> > 2048000+0 records in
-> > 2048000+0 records out
-> > 1048576000 bytes (0.9 G) copied, 4.436271 s, 225 M/s
-> >
-> > >
-> > > Before:
-> > > console:/ # echo 3 > /proc/sys/vm/drop_caches
-> > > console:/ # dd if=3D/mnt/media_rw/8031-130D/super.img of=3D/dev/null
-> > > 4485393+1 records in
-> > > 4485393+1 records out
-> > > 2296521564 bytes (2.1 G) copied, 37.124446 s, 59 M/s
-> > > console:/ # cat /sys/block/mmcblk0/queue/read_ahead_kb
-> > > 128
-> > >
-> > > After:
-> > > console:/ # echo 3 > /proc/sys/vm/drop_caches
-> > > console:/ # dd if=3D/mnt/media_rw/8031-130D/super.img of=3D/dev/null
-> > > 4485393+1 records in
-> > > 4485393+1 records out
-> > > 2296521564 bytes (2.1 G) copied, 28.956049 s, 76 M/s
-> > > console:/ # cat /sys/block/mmcblk0/queue/read_ahead_kb
-> > > 1024
-> > >
-> Hi Shawn,
->
-> What is your readahead value before and after applying this patch?
->
+The Qualcomm SDHCI controller lists optional clocks, but still expects
+fixed order of them and does not allow to skip such clocks if further
+one in the list is needed.  These optional clocks are truly optional,
+so we need to allow the list to have different orders.  The clocks are:
+ - ice: used for Inline Crypto Engine, which is actually separate block
+   and merging it with SDHCI is not a requirement,
+ - bus: clock for SDCC bus frequency voting,
+ - cal and sleep: used for RCLK delay calibration and required for
+   certain platforms for such calibration (as expressed in original
+   commit 4946b3af5e8e ("mmc: sdhci-msm: Enable delay circuit
+   calibration clocks")).  Only MSM8974pro has these clocks.
 
-Hi Sharp
-Use "echo 1024 > sys/block/mmcblk0/queue/read_ahead_kb" instead of
-"blk_queue_io_opt(mq->queue, host->max_req_size);"=EF=BC=9F
+Relaxing the order fixes dtbs_check warnings:
+
+  qcom-msm8974pro-fairphone-fp2.dtb: mmc@f9824900: clock-names:3: 'ice' was expected
+  qcom-msm8974pro-fairphone-fp2.dtb: mmc@f9824900: clock-names:4: 'bus' was expected
+
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+index 10f34aa8ba8a..69a213965089 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+@@ -85,10 +85,10 @@ properties:
+       - const: iface
+       - const: core
+       - const: xo
+-      - const: ice
+-      - const: bus
+-      - const: cal
+-      - const: sleep
++      - enum: [ice, bus, cal, sleep]
++      - enum: [ice, bus, cal, sleep]
++      - enum: [ice, bus, cal, sleep]
++      - enum: [ice, bus, cal, sleep]
+ 
+   dma-coherent: true
+ 
+-- 
+2.34.1
+
