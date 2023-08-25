@@ -2,95 +2,164 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D400C3DA6F
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 10:01:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8701EEE49A5
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 10:21:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229593AbjHYKBM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 06:01:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51596 "EHLO
+        id S243884AbjHYKUf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 06:20:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35106 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241604AbjHYKAm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 06:00:42 -0400
-Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8544F2107
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:00:39 -0700 (PDT)
-Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-5924093a9b2so8836737b3.2
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:00:39 -0700 (PDT)
+        with ESMTP id S244402AbjHYKUK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 06:20:10 -0400
+Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67FCA2693
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:19:44 -0700 (PDT)
+Received: by mail-ej1-x629.google.com with SMTP id a640c23a62f3a-99cce6f7de2so87956466b.3
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:19:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692957638; x=1693562438;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=d6If5EjcjNWDZstp6qFU/ATLLg3ICZt1fdKDrO8/tZ0=;
-        b=nbI/JwabJN9ZeZcmPE1O5VxauB1CWuioWf0xlXmfRufq0VO3/lR9taNtbLp71Mo1Eq
-         LCPu2Q6/tKcUD5LOSfWA761HbbLtlft/M0+ealNEIfYz1k0BK4hAZyTyi/kSGcfN8oqL
-         jLuBCJgu1lUGE3pkoPoIT/djjNreJza1CLIk/Qcd+B0m7Crc4WLTwgLM5PURPuJ3MOWr
-         gXgnlU4rap4rN4SW+Nt14jYykzpQwLv3ny7wFIk2oUNRxm5eJXAW1uRYCdOBseanqCxI
-         Q1eqzg86L0Cr0/Osd242hgru665hz0xFd7yd+VhXEir/DYIKdMaGKyeZhqo8UG9ljpfy
-         PH+A==
+        d=linaro.org; s=google; t=1692958783; x=1693563583;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=8hmeN79sYGm2yupcg1U1ZPEVlv8mSwCgTnsR3HDlFcg=;
+        b=P1oUEbW6Avm1OcDDYWJCLmKiBo8QGj9EuaqkPpWDnihUz9zA78OWflrSORwwLycFFe
+         +hzuHp1q1lpm/Pt43kAvQvoVhHQd1Gt9IoNLMVAqkfa9inOi3g451+u9nKAOF4uvzfM7
+         w6YBMQZd0bdA8CokkDkOVw00zhPitOpLevFM8O5KTeV6qmF5XPxe6nPc/ctTqrZGH2Im
+         dUaI6+kpgRMaxoEgUk0xHP5G8TpB6idTW8qsN4VxK4X9T5SiGZGAasGtb6tyGtMN0uDd
+         za9gsaGZRzZ3LVzjqYEg0ljOelY8Ix3GmiMTbyi5RgQi4zAGzF66kk/HzC0k+uw1WZTC
+         NYRA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692957638; x=1693562438;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=d6If5EjcjNWDZstp6qFU/ATLLg3ICZt1fdKDrO8/tZ0=;
-        b=CQ8CwRUo1E8FDqww4RJqMwyRCXKE+Jz7r8J/6zAWYUBX4Lukd+r1EzpP/tjZGSX6Fr
-         JbaIvIAz+8MxSv4kX/91MYHtHQf+iI3RK3bvBwTZOrh/soSnWzDv4UHHvVIMBbzzuYlk
-         cfxaC/3meNMAxfYUrgeMozYNVEpDqp63U06FEBK037xXEjqNAGYDA/Cd9h7xUAk9D9O/
-         5bMkQTGItMLMNJaWVu4JbVTR+IlnEqWqVkqwOtLMMWJnwP6le+2hFxCvugw1xTzQI5nr
-         eS6zcKSmHvbxZDLKgUdaPrINvDfSyIoQvk9o+q6b9j0i2nX/aHIACjCgrHR8NH8uzNyD
-         himg==
-X-Gm-Message-State: AOJu0YzLTc0e4taM1rMNiN9IsC06V3Z0boykVB7pWOkgfAYmYQNDSETG
-        s9olX5FdKNyisaFhyUfBlH0m3jwWMkf2kbnzIEfJ1To5gJl0ECoMfLs=
-X-Google-Smtp-Source: AGHT+IEOsbOy+RYASkcI/UnK7YnLgMYNKZ1ts7Vx3xLDADc2hk/6VG4xLAk6rgwHyCF+46GXcaoPiyniIDPGrmQbRdk=
-X-Received: by 2002:a25:f81b:0:b0:d15:7402:f7cd with SMTP id
- u27-20020a25f81b000000b00d157402f7cdmr18874314ybd.27.1692957638523; Fri, 25
- Aug 2023 03:00:38 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1692958783; x=1693563583;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=8hmeN79sYGm2yupcg1U1ZPEVlv8mSwCgTnsR3HDlFcg=;
+        b=GaDxUvW3IpSlQsnZ/QSDMsqvAjRvfvID/iAjILL2cLUUd4WyrOcUbNW9MewdoHhNbm
+         QejKmC8qSlfj1ggWCwV0akxC/6Jd7Xdo0RV+E2u0sE5mK2ugHH6DAT4Oj367Xk3tGRT2
+         cmgP5IA1L5qtZmbDONxYLfNqxkna5jkPNlvcI2RL6+qOuwkZMtmO0Q+QhbBhl1MZy9of
+         e/GGv8hsN9PTDioMfA8aFqHcwHOtBVb1mWsgYkv2rDENIvNhHo9Pu4zK2TOi0L71fk2G
+         lOmCgUT/JWzusE8NgjMlCkh/CMM3/r2r+CZ88QE7d5nMQgZNHw0xkrwJ6ad8Oq3nTOlO
+         L7+Q==
+X-Gm-Message-State: AOJu0YxgYCLYH5j875Cpsjry8pMv9aXW8HtQlTnU7ILkHlT2vS7yWvs7
+        zgo5Gxq2on9Ah7LSL9J0ke5L9AqEsAYS5LuAvfg=
+X-Google-Smtp-Source: AGHT+IFLSi2VQHJDpvE/O9nRgSIMhEaB16ib6oXZqIwxs7UTphQws++T+eBZGRZa8TvD2hXubHxxqw==
+X-Received: by 2002:a17:906:220f:b0:9a3:faf:7aa8 with SMTP id s15-20020a170906220f00b009a30faf7aa8mr2104632ejs.10.1692958782813;
+        Fri, 25 Aug 2023 03:19:42 -0700 (PDT)
+Received: from [192.168.1.195] ([5.133.47.210])
+        by smtp.googlemail.com with ESMTPSA id z7-20020a17090655c700b00992f309cfe8sm810217ejp.178.2023.08.25.03.19.41
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 25 Aug 2023 03:19:42 -0700 (PDT)
+Message-ID: <f4b5512b-9922-1511-fc22-f14d25e2426a@linaro.org>
+Date:   Fri, 25 Aug 2023 11:19:41 +0100
 MIME-Version: 1.0
-References: <20230825091743.15613-1-wenchao.chen@unisoc.com>
-In-Reply-To: <20230825091743.15613-1-wenchao.chen@unisoc.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 25 Aug 2023 12:00:02 +0200
-Message-ID: <CAPDyKFoBnZCF7MMfou=mY0xqVtCcCOMMtZGv=KpxhKxFFjkqiw@mail.gmail.com>
-Subject: Re: [PATCH V3 0/2] mmc: sdhci-sprd: Add SD HS mode online tuning
-To:     Wenchao Chen <wenchao.chen@unisoc.com>
-Cc:     orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, wenchao.chen666@gmail.com,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
+ ufs
+Content-Language: en-US
+To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        ebiggers@google.com
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
+        quic_psodagud@quicinc.com, avmenon@quicinc.com,
+        abel.vesa@linaro.org, quic_spuppala@quicinc.com
+References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+In-Reply-To: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 25 Aug 2023 at 11:18, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
->
-> Change in v3:
-> - Move changes in include/linux/mmc/host.h and drivers/mmc/core/sd_ops.c into patch1
-> - The callback is executed when timing is equal to MMC_TIMING_SD_HS
-> - Rename prepare_hs_tuning to prepare_sd_hs_tuning
-> - Rename execute_hs_tuning to execute_sd_hs_tuning
->
-> Change in v2:
-> - add mmc_sd_switch() and mmc_send_status() to the header file
-> - split up core changes from host driver changes
-> - Use pr_debug instead of dev_info and dev_dbg
-> - Optimize the best sampled value algorithm
->
-> Wenchao Chen (2):
->   mmc: core: Add host specific tuning support for SD HS mode
->   mmc: sdhci-sprd: Add SD HS mode online tuning
->
->  drivers/mmc/core/sd.c         |  14 ++++
->  drivers/mmc/core/sd_ops.c     |   1 +
->  drivers/mmc/host/sdhci-sprd.c | 149 ++++++++++++++++++++++++++++++++++
->  include/linux/mmc/host.h      |   8 ++
->  4 files changed, 172 insertions(+)
->
-> --
-> 2.17.1
->
 
-Applied for next, thanks!
+On 19/07/2023 18:04, Gaurav Kashyap wrote:
+> These patches add support to Qualcomm ICE (Inline Crypto Enginr) for hardware
+> wrapped keys using Qualcomm Hardware Key Manager (HWKM) and are made on top
+> of a rebased version  Eric Bigger's set of changes to support wrapped keys in
+> fscrypt and block below:
+> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7
+> (The rebased patches are not uploaded here)
+> 
+> Ref v1 here:
+> https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkash@quicinc.com/
+> 
+> Explanation and use of hardware-wrapped-keys can be found here:
+> Documentation/block/inline-encryption.rst
+> 
+> This patch is organized as follows:
+> 
+> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
+> Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
+> Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
+> Patch 5-6 - Adds support for wrapped keys in UFS
+> Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
+> 
+> NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
+>        Patch 3, 4, 8, 10 will have MMC equivalents.
+> 
+> Testing:
+> Test platform: SM8550 MTP
+> Engineering trustzone image is required to test this feature only
+> for SM8550. For SM8650 onwards, all trustzone changes to support this
+> will be part of the released images.
 
-Kind regards
-Uffe
+AFAIU, Prior to these proposed changes in scm, HWKM was done with help 
+of TA(Trusted Application) for generate, import, unwrap ... functionality.
+
+1. What is the reason for moving this from TA to new smc calls?
+
+Is this because of missing smckinvoke support in upstream?
+
+How scalable is this approach? Are we going to add new sec sys calls to 
+every interface to TA?
+
+2. How are the older SoCs going to deal with this, given that you are 
+changing drivers that are common across these?
+
+Have you tested these patches on any older platforms?
+
+What happens if someone want to add support to wrapped keys to this 
+platforms in upstream, How is that going to be handled?
+
+As I understand with this, we will endup with two possible solutions 
+over time in upstream.
+
+
+thanks,
+--srini
+
+> The engineering changes primarily contain hooks to generate, import and
+> prepare keys for HW wrapped disk encryption.
+> 
+> The changes were tested by mounting initramfs and running the fscryptctl
+> tool (Ref: https://github.com/ebiggers/fscryptctl/tree/wip-wrapped-keys) to
+> generate and prepare keys, as well as to set policies on folders, which
+> consequently invokes disk encryption flows through UFS.
+> 
+> Gaurav Kashyap (10):
+>    ice, ufs, mmc: use blk_crypto_key for program_key
+>    qcom_scm: scm call for deriving a software secret
+>    soc: qcom: ice: add hwkm support in ice
+>    soc: qcom: ice: support for hardware wrapped keys
+>    ufs: core: support wrapped keys in ufs core
+>    ufs: host: wrapped keys support in ufs qcom
+>    qcom_scm: scm call for create, prepare and import keys
+>    ufs: core: add support for generate, import and prepare keys
+>    soc: qcom: support for generate, import and prepare key
+>    ufs: host: support for generate, import and prepare key
+> 
+>   drivers/firmware/qcom_scm.c            | 292 +++++++++++++++++++++++
+>   drivers/firmware/qcom_scm.h            |   4 +
+>   drivers/mmc/host/cqhci-crypto.c        |   7 +-
+>   drivers/mmc/host/cqhci.h               |   2 +
+>   drivers/mmc/host/sdhci-msm.c           |   6 +-
+>   drivers/soc/qcom/ice.c                 | 309 +++++++++++++++++++++++--
+>   drivers/ufs/core/ufshcd-crypto.c       |  92 +++++++-
+>   drivers/ufs/host/ufs-qcom.c            |  63 ++++-
+>   include/linux/firmware/qcom/qcom_scm.h |  13 ++
+>   include/soc/qcom/ice.h                 |  18 +-
+>   include/ufs/ufshcd.h                   |  25 ++
+>   11 files changed, 797 insertions(+), 34 deletions(-)
+> 
