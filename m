@@ -2,164 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8701EEE49A5
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 10:21:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 135AFC88CB2
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 11:46:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243884AbjHYKUf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 06:20:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35106 "EHLO
+        id S243264AbjHYLqJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 07:46:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244402AbjHYKUK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 06:20:10 -0400
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67FCA2693
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:19:44 -0700 (PDT)
-Received: by mail-ej1-x629.google.com with SMTP id a640c23a62f3a-99cce6f7de2so87956466b.3
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 03:19:44 -0700 (PDT)
+        with ESMTP id S243802AbjHYLpg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 07:45:36 -0400
+Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 864FC2106
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 04:45:32 -0700 (PDT)
+Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-d77c5414433so824890276.0
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Aug 2023 04:45:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1692958783; x=1693563583;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=8hmeN79sYGm2yupcg1U1ZPEVlv8mSwCgTnsR3HDlFcg=;
-        b=P1oUEbW6Avm1OcDDYWJCLmKiBo8QGj9EuaqkPpWDnihUz9zA78OWflrSORwwLycFFe
-         +hzuHp1q1lpm/Pt43kAvQvoVhHQd1Gt9IoNLMVAqkfa9inOi3g451+u9nKAOF4uvzfM7
-         w6YBMQZd0bdA8CokkDkOVw00zhPitOpLevFM8O5KTeV6qmF5XPxe6nPc/ctTqrZGH2Im
-         dUaI6+kpgRMaxoEgUk0xHP5G8TpB6idTW8qsN4VxK4X9T5SiGZGAasGtb6tyGtMN0uDd
-         za9gsaGZRzZ3LVzjqYEg0ljOelY8Ix3GmiMTbyi5RgQi4zAGzF66kk/HzC0k+uw1WZTC
-         NYRA==
+        d=linaro.org; s=google; t=1692963932; x=1693568732;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=fcf02hKF/0IdH3b1tfgEymyLjXbz5lFk9LkSgZ+/VMA=;
+        b=NXO+TOtkKX+bmKbXuTm0NUbkfxdku2aPo89ryMUq6iKKoSkZeNcvPAxF/bwzV7Eujg
+         u6WF2gihqJ9s2SCDG6vYWQ9kbfporJWKFWZ1QouFO3tOeQlAoSm9lJ82Iuc03a6V/q1F
+         NtK//fmUSm9gcKGUZxXwhxksr7YPzQbaBWBOQHfeFqodDOP7/Nr0IPLxY9Fe0oSNBmcr
+         HrabKwve6jfC5QWE5nYDd2fztV+PeSf4R2gcaO2E3u4kEyJ6v9lvTu41asp9/vy6oEcT
+         VLznEBoC+AGgyzjEhlUbFuyE9feuer683jMNKgerc2uCsoX+uimeVpNR/ymwy33l4mYH
+         I2hA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692958783; x=1693563583;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=8hmeN79sYGm2yupcg1U1ZPEVlv8mSwCgTnsR3HDlFcg=;
-        b=GaDxUvW3IpSlQsnZ/QSDMsqvAjRvfvID/iAjILL2cLUUd4WyrOcUbNW9MewdoHhNbm
-         QejKmC8qSlfj1ggWCwV0akxC/6Jd7Xdo0RV+E2u0sE5mK2ugHH6DAT4Oj367Xk3tGRT2
-         cmgP5IA1L5qtZmbDONxYLfNqxkna5jkPNlvcI2RL6+qOuwkZMtmO0Q+QhbBhl1MZy9of
-         e/GGv8hsN9PTDioMfA8aFqHcwHOtBVb1mWsgYkv2rDENIvNhHo9Pu4zK2TOi0L71fk2G
-         lOmCgUT/JWzusE8NgjMlCkh/CMM3/r2r+CZ88QE7d5nMQgZNHw0xkrwJ6ad8Oq3nTOlO
-         L7+Q==
-X-Gm-Message-State: AOJu0YxgYCLYH5j875Cpsjry8pMv9aXW8HtQlTnU7ILkHlT2vS7yWvs7
-        zgo5Gxq2on9Ah7LSL9J0ke5L9AqEsAYS5LuAvfg=
-X-Google-Smtp-Source: AGHT+IFLSi2VQHJDpvE/O9nRgSIMhEaB16ib6oXZqIwxs7UTphQws++T+eBZGRZa8TvD2hXubHxxqw==
-X-Received: by 2002:a17:906:220f:b0:9a3:faf:7aa8 with SMTP id s15-20020a170906220f00b009a30faf7aa8mr2104632ejs.10.1692958782813;
-        Fri, 25 Aug 2023 03:19:42 -0700 (PDT)
-Received: from [192.168.1.195] ([5.133.47.210])
-        by smtp.googlemail.com with ESMTPSA id z7-20020a17090655c700b00992f309cfe8sm810217ejp.178.2023.08.25.03.19.41
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 25 Aug 2023 03:19:42 -0700 (PDT)
-Message-ID: <f4b5512b-9922-1511-fc22-f14d25e2426a@linaro.org>
-Date:   Fri, 25 Aug 2023 11:19:41 +0100
+        d=1e100.net; s=20221208; t=1692963932; x=1693568732;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=fcf02hKF/0IdH3b1tfgEymyLjXbz5lFk9LkSgZ+/VMA=;
+        b=ShFCmfgefJYeRhZfpQ1j+tzk7oq2GaE/PSteKzHApQUGYnbF9odESQSgc6w6HDFOtp
+         3jGrPRDgW47Wq3jJEhH8dGn1Z/Kq2NMVkAo6XZ/cHpPtCVp0j5ih6T6l+/2rAuPbVmdu
+         OHLdZGcEx9h3F1qLDO5KAJD7vTV00yAYTBU+wQOMfWSVaGhv2c14ukYs0PdzrurxBBlu
+         ObDPtaNvq82LB+MiuV/pJdSMHdEi4mr8tOU+7eU54YCgaTlG6NchVCfNVIO1iMXlJLsn
+         cBZ+cYEos0L3OeeXeJg+2dkrPbnw3fsTrub6p1vPLeyUO5klogbNg6vYbGVH3hiDVzIp
+         W9hA==
+X-Gm-Message-State: AOJu0YwU7q+yo6t4YJZ8zi5K2w2q6ZL+OsT4nbPb0etjwlwaO/jeKVqx
+        r8ekHnIIjJXNkPVMk1t3GmwzThrX3t/BthFdxuvLfA==
+X-Google-Smtp-Source: AGHT+IGrtKMF8Yp+gEsaJ2A+cL1/buPgbXCYxwk792IJXE1syFo/+NkzfJGbMAyhGaVIo5+B9Tp9iUpkpzem/NxNnX0=
+X-Received: by 2002:a25:d0d5:0:b0:d77:ec2f:63b with SMTP id
+ h204-20020a25d0d5000000b00d77ec2f063bmr5858906ybg.5.1692963931772; Fri, 25
+ Aug 2023 04:45:31 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
- ufs
-Content-Language: en-US
-To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        ebiggers@google.com
-Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
-        quic_psodagud@quicinc.com, avmenon@quicinc.com,
-        abel.vesa@linaro.org, quic_spuppala@quicinc.com
-References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
-From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-In-Reply-To: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20230825095157.76073-1-balamanikandan.gunasundar@microchip.com> <20230825095157.76073-4-balamanikandan.gunasundar@microchip.com>
+In-Reply-To: <20230825095157.76073-4-balamanikandan.gunasundar@microchip.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Fri, 25 Aug 2023 13:45:20 +0200
+Message-ID: <CACRpkdahEcKgR9gR7iU0cW_aDTReDYBKdP+5_F+hGcarCjG9gg@mail.gmail.com>
+Subject: Re: [PATCH v6 3/3] mmc: atmel-mci: Move card detect gpio polarity
+ quirk to gpiolib
+To:     Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+Cc:     dmitry.torokhov@gmail.com, ulf.hansson@linaro.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
+        alexandre.belloni@bootlin.com, hari.prasathge@microchip.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Fri, Aug 25, 2023 at 11:53=E2=80=AFAM Balamanikandan Gunasundar
+<balamanikandan.gunasundar@microchip.com> wrote:
 
-On 19/07/2023 18:04, Gaurav Kashyap wrote:
-> These patches add support to Qualcomm ICE (Inline Crypto Enginr) for hardware
-> wrapped keys using Qualcomm Hardware Key Manager (HWKM) and are made on top
-> of a rebased version  Eric Bigger's set of changes to support wrapped keys in
-> fscrypt and block below:
-> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7
-> (The rebased patches are not uploaded here)
-> 
-> Ref v1 here:
-> https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkash@quicinc.com/
-> 
-> Explanation and use of hardware-wrapped-keys can be found here:
-> Documentation/block/inline-encryption.rst
-> 
-> This patch is organized as follows:
-> 
-> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
-> Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
-> Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
-> Patch 5-6 - Adds support for wrapped keys in UFS
-> Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
-> 
-> NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
->        Patch 3, 4, 8, 10 will have MMC equivalents.
-> 
-> Testing:
-> Test platform: SM8550 MTP
-> Engineering trustzone image is required to test this feature only
-> for SM8550. For SM8650 onwards, all trustzone changes to support this
-> will be part of the released images.
+> The polarity of the card detection gpio is handled by the "cd-inverted"
+> property in the device tree. Move this inversion logic to gpiolib to avoi=
+d
+> reading the gpio raw value.
+>
+> Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@micro=
+chip.com>
+> Suggested-by: Linus Walleij <linus.walleij@linaro.org>
 
-AFAIU, Prior to these proposed changes in scm, HWKM was done with help 
-of TA(Trusted Application) for generate, import, unwrap ... functionality.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-1. What is the reason for moving this from TA to new smc calls?
+> +#if IS_ENABLED(CONFIG_MMC_ATMELMCI)
+> +       /*
+> +        * The Atmel HSMCI has compatible property in the parent node and
+> +        * gpio property in a child node
+> +        */
+> +       if (of_device_is_compatible(np->parent, "atmel,hsmci")) {
+> +               np_compat =3D np->parent;
+> +               np_propname =3D np;
+> +       }
+> +#endif
 
-Is this because of missing smckinvoke support in upstream?
+You don't need to use the preprocessor actually, what I did in my
+example works:
 
-How scalable is this approach? Are we going to add new sec sys calls to 
-every interface to TA?
+if (IS_ENABLED()... && of_device_is_compatible()...) {
+...
+}
 
-2. How are the older SoCs going to deal with this, given that you are 
-changing drivers that are common across these?
+If the first expression in the if() clause is constant false, the compiler
+will optimize out the entire if()-clause. At least the compilers we care
+about.
 
-Have you tested these patches on any older platforms?
-
-What happens if someone want to add support to wrapped keys to this 
-platforms in upstream, How is that going to be handled?
-
-As I understand with this, we will endup with two possible solutions 
-over time in upstream.
-
-
-thanks,
---srini
-
-> The engineering changes primarily contain hooks to generate, import and
-> prepare keys for HW wrapped disk encryption.
-> 
-> The changes were tested by mounting initramfs and running the fscryptctl
-> tool (Ref: https://github.com/ebiggers/fscryptctl/tree/wip-wrapped-keys) to
-> generate and prepare keys, as well as to set policies on folders, which
-> consequently invokes disk encryption flows through UFS.
-> 
-> Gaurav Kashyap (10):
->    ice, ufs, mmc: use blk_crypto_key for program_key
->    qcom_scm: scm call for deriving a software secret
->    soc: qcom: ice: add hwkm support in ice
->    soc: qcom: ice: support for hardware wrapped keys
->    ufs: core: support wrapped keys in ufs core
->    ufs: host: wrapped keys support in ufs qcom
->    qcom_scm: scm call for create, prepare and import keys
->    ufs: core: add support for generate, import and prepare keys
->    soc: qcom: support for generate, import and prepare key
->    ufs: host: support for generate, import and prepare key
-> 
->   drivers/firmware/qcom_scm.c            | 292 +++++++++++++++++++++++
->   drivers/firmware/qcom_scm.h            |   4 +
->   drivers/mmc/host/cqhci-crypto.c        |   7 +-
->   drivers/mmc/host/cqhci.h               |   2 +
->   drivers/mmc/host/sdhci-msm.c           |   6 +-
->   drivers/soc/qcom/ice.c                 | 309 +++++++++++++++++++++++--
->   drivers/ufs/core/ufshcd-crypto.c       |  92 +++++++-
->   drivers/ufs/host/ufs-qcom.c            |  63 ++++-
->   include/linux/firmware/qcom/qcom_scm.h |  13 ++
->   include/soc/qcom/ice.h                 |  18 +-
->   include/ufs/ufshcd.h                   |  25 ++
->   11 files changed, 797 insertions(+), 34 deletions(-)
-> 
+Yours,
+Linus Walleij
