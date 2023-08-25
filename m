@@ -2,25 +2,25 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5B49C3DA6F
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 07:43:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 616BFC71133
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 07:44:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231359AbjHYHnA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Aug 2023 03:43:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43360 "EHLO
+        id S232793AbjHYHoD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 03:44:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34638 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232793AbjHYHmp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 03:42:45 -0400
+        with ESMTP id S243374AbjHYHoC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 03:44:02 -0400
 Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24BABE6A;
-        Fri, 25 Aug 2023 00:42:36 -0700 (PDT)
-X-UUID: f359327e431a11ee9cb5633481061a41-20230825
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96D651FDA;
+        Fri, 25 Aug 2023 00:43:59 -0700 (PDT)
+X-UUID: 22987158431b11ee9cb5633481061a41-20230825
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
         h=Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=sU4/V6ndA5R7lvrGvDLIjLvlK6dyYIJGN/XjomZsBm8=;
-        b=iHuxotYZaEKndvPVIOALXBfrOPCiYKuNU6N57Arg9zeoYavBHe1jq8d8AGZAxw4/eAYmlYlxk/BbhMslgQawjTfJwQesBN8H3MWMne+hsvwn+5+IDv3HWltCSEXRiGXoGRt0Fum3HQ1tUKJO+6IO94tQbEYebgEijJfLsgMzIgg=;
-X-CID-CACHE: Type:Local,Time:202308251510+08,HitQuantity:1
+        b=We+D3KgVp1hooiQw9IIah1owpiZCfGeuFa2aVB3IUHZtUbZ+A0POr64tANBE7ySBR3Es+zPAlnXo7qTkNUgF8WNtVph5y9C1ucIRlfYQSdzZn5NGHAumgBoUxAv4OMmIlRFSbl5mJo0r9AmAPmulfE/SsMoo+IdJr9VdFTola3s=;
+X-CID-CACHE: Type:Local,Time:202308251510+08,HitQuantity:2
 X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.31,REQID:910c819d-5461-4904-ac5e-b6d885aad33c,IP:0,U
+X-CID-O-INFO: VERSION:1.1.31,REQID:4157ade1-9c63-4697-b19f-3901d351eb84,IP:0,U
         RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
         release,TS:0
 X-CID-META: VersionHash:0ad78a4,CLOUDID:8c67bd1f-33fd-4aaa-bb43-d3fd68d9d5ae,B
@@ -30,18 +30,18 @@ X-CID-META: VersionHash:0ad78a4,CLOUDID:8c67bd1f-33fd-4aaa-bb43-d3fd68d9d5ae,B
 X-CID-BVR: 0,NGT
 X-CID-BAS: 0,NGT,0,_
 X-CID-FACTOR: TF_CID_SPAM_SNR
-X-UUID: f359327e431a11ee9cb5633481061a41-20230825
+X-UUID: 22987158431b11ee9cb5633481061a41-20230825
 Received: from mtkmbs13n2.mediatek.inc [(172.21.101.108)] by mailgw01.mediatek.com
         (envelope-from <sharp.xia@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 1792325326; Fri, 25 Aug 2023 15:42:32 +0800
+        with ESMTP id 1965188680; Fri, 25 Aug 2023 15:43:51 +0800
 Received: from mtkmbs13n2.mediatek.inc (172.21.101.108) by
- mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Fri, 25 Aug 2023 15:42:31 +0800
+ 15.2.1118.26; Fri, 25 Aug 2023 15:43:50 +0800
 Received: from mbjsdccf07.mediatek.inc (10.15.20.246) by
  mtkmbs13n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Fri, 25 Aug 2023 15:42:30 +0800
+ 15.2.1118.26 via Frontend Transport; Fri, 25 Aug 2023 15:43:50 +0800
 From:   <Sharp.Xia@mediatek.com>
 To:     <ulf.hansson@linaro.org>
 CC:     <Sharp.Xia@mediatek.com>,
@@ -49,10 +49,10 @@ CC:     <Sharp.Xia@mediatek.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-kernel@vger.kernel.org>,
         <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
-        <matthias.bgg@gmail.com>, <wsd_upstream@medaitek.com>
+        <matthias.bgg@gmail.com>, <wsd_upstream@mediatek.com>
 Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
-Date:   Fri, 25 Aug 2023 15:25:36 +0800
-Message-ID: <20230825072536.23602-1-Sharp.Xia@mediatek.com>
+Date:   Fri, 25 Aug 2023 15:26:56 +0800
+Message-ID: <20230825072656.23652-1-Sharp.Xia@mediatek.com>
 X-Mailer: git-send-email 2.18.0
 In-Reply-To: <CAPDyKFqN0K=2e4rijUBz=9LXVfhEVvDzNgqXTyTgvaPRK-PBNQ@mail.gmail.com>
 References: <CAPDyKFqN0K=2e4rijUBz=9LXVfhEVvDzNgqXTyTgvaPRK-PBNQ@mail.gmail.com>
