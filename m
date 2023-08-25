@@ -2,807 +2,199 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4173FEE49A6
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Aug 2023 20:27:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A3BCC3DA66
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Aug 2023 07:12:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243522AbjHXU0m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Aug 2023 16:26:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56044 "EHLO
+        id S230304AbjHYHLs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Aug 2023 03:11:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243521AbjHXU0O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Aug 2023 16:26:14 -0400
-Received: from relay1-d.mail.gandi.net (relay1-d.mail.gandi.net [217.70.183.193])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B28C1FC4;
-        Thu, 24 Aug 2023 13:25:39 -0700 (PDT)
-Received: by mail.gandi.net (Postfix) with ESMTPSA id 12945240004;
-        Thu, 24 Aug 2023 20:24:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
-        t=1692908737;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ujvMeJdRrlwdpn7qQgMLktbCGIyae1LBRG+zxTv3lqU=;
-        b=Ula8hEOcS+/eKkw3qByvNwkENDIVN4W8dILOW2xA3QeZByi1NFKT4qjpR20ylYIrPR/LPn
-        8ZC6T3xf65QonT74gL16iUsIdr1fuBn4EDOGgijSzoAPQ/Fb6/9wr81q4yL1eTihpwM+/d
-        fSRL6wO8TBroYggS+h1LB85zHjhOXdzIS2YlpkafjfL685M9ItlEfOxA61XsiZxswwH6HK
-        JA9dLTxrCBdPhkJrRkKdm2JLl6bAHCX8ASzdgEHn5qbguMdu7i7IG/LXWSCd6ZshcO7ZLA
-        yqmMZES++aBOm7AqwsgUyH2FPWNSXrx+/IFEY7P7uy1f38YVMbAG6o3ie5IJhQ==
-Date:   Thu, 24 Aug 2023 22:24:02 +0200
-From:   Alexandre Belloni <alexandre.belloni@bootlin.com>
-To:     Rob Herring <robh@kernel.org>
-Cc:     Suzuki K Poulose <suzuki.poulose@arm.com>,
-        Mike Leach <mike.leach@linaro.org>,
-        James Clark <james.clark@arm.com>,
-        Leo Yan <leo.yan@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Andy Shevchenko <andy@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>, Jean Delvare <jdelvare@suse.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Corey Minyard <minyard@acm.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        M ark Brown <broonie@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Anshuman Khandual <anshuman.khandual@arm.com>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        coresight@lists.linaro.org, linux-arm-kernel@lists.infradead.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i3c@lists.infradead.org,
-        linux-iio@vger.kernel.org,
-        openipmi-developer@lists.sourceforge.net,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        alsa-devel@alsa-project.org, linux-scsi@vger.kernel.org,
-        linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Drop remaining unneeded quotes
-Message-ID: <20230824201756563976f6@mail.local>
-References: <20230823183749.2609013-1-robh@kernel.org>
+        with ESMTP id S241914AbjHYHLT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Aug 2023 03:11:19 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13E8D1FEC;
+        Fri, 25 Aug 2023 00:11:05 -0700 (PDT)
+X-UUID: 889be548431611eeb20a276fd37b9834-20230825
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=MIME-Version:Content-Transfer-Encoding:Content-ID:Content-Type:In-Reply-To:References:Message-ID:Date:Subject:CC:To:From; bh=wXMKz09eWY1DUv4NyUezqG65ZgyfjPnGr9lPyqhvmHo=;
+        b=DlhraF/6TA6mUSIVlAyYzn8wqj5HXGZPVgDR8vwtK1o9JVxogGThwTm45pHV1eDDI3aH8mqpVXzGGsZ9cNN9GwQ/WnGR0gC7w99q1cY8niWAUYAukfCBaR33sdC/cLFOHJCLyirNTEbMfwDIIOgIjU89D7/9bWxZa7/TPhuUuCU=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.31,REQID:7e4d53d3-e176-4d07-9f9c-b557fb60bedf,IP:0,U
+        RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+        release,TS:0
+X-CID-META: VersionHash:0ad78a4,CLOUDID:38d143c2-1e57-4345-9d31-31ad9818b39f,B
+        ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
+        RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,
+        DKR:0,DKP:0,BRR:0,BRE:0
+X-CID-BVR: 0,NGT
+X-CID-BAS: 0,NGT,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-UUID: 889be548431611eeb20a276fd37b9834-20230825
+Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw02.mediatek.com
+        (envelope-from <sharp.xia@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 549131379; Fri, 25 Aug 2023 15:10:55 +0800
+Received: from mtkmbs10n2.mediatek.inc (172.21.101.183) by
+ mtkmbs13n1.mediatek.inc (172.21.101.193) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.26; Fri, 25 Aug 2023 15:10:54 +0800
+Received: from APC01-SG2-obe.outbound.protection.outlook.com (172.21.101.237)
+ by mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Fri, 25 Aug 2023 15:10:54 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=lVQk66JunQ2/vp6P8ZnNIIcLk5P9leg18i2d3HizkrTIB3v82k1vu/aHe6hbuC+UByHiz5BToVcC2A0LoDJ7EZp4JDZkvDKR8mgf6YISL70TzFRSm28sn+0LBSkZH41KfyFcG7qJSii/WGpxhS01sH3VlM9kzIo4E/6C46eh5a3V0as59wcJHQK8NvwPLsRdgvHC7hPXimCymOJfIin1tdFn37HA/vB4FkQEjTA5K2Eddp1cVWEWFZAioNdAAiIvVZ/7lSrlQGZnGUpoUdHOpn7lfvGMC5f8Eck6KTLKbHzdhkG/uAqGLWkxXoTpW+ayObIDbLw0+pGU7zDn46cYNA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=wXMKz09eWY1DUv4NyUezqG65ZgyfjPnGr9lPyqhvmHo=;
+ b=g1ntm7cpCxlY50YvpUPBsLHlCz/9YsbdSigfJp6iVlqkNaEEeoefxo0tERE7muXgZaVI4EOEk6AeDpZXrjkTm++tlf902HH4QrthKv0YSs9F6kLtMebfudO0xPxtICksT2OU2UNxI6XsHTO+xJlzCrmo06gljmJAVAYbYxpeGjNAUDsTbeDOw1h49huqJTzppR2Geo0Usc7iYAnGVobwqixtvLODj9xWHHRk9jCqy23vGxaS5Jya+fyxp3trCuQ1ZETNzZLY+vXPO/XoN8c8v3+hihcP1SPTd50RQ53yBY7WzRyaMelMD4MDTZrVX1cS/UAECms1LAhUk+gUErAWSg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=mediatek.com; dmarc=pass action=none header.from=mediatek.com;
+ dkim=pass header.d=mediatek.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=mediateko365.onmicrosoft.com; s=selector2-mediateko365-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=wXMKz09eWY1DUv4NyUezqG65ZgyfjPnGr9lPyqhvmHo=;
+ b=ffBthg7yHI6rL+baaxpYgapwPFD7hwYXnXLd3S8M8AUR1KhC33jKseCpGexjOxkFcd/w+OfUXn3f7t8EyysQKJMSl2A6to5jWCFN/5+f+s9+4bQdC6B7unjMuVI2O6bJBn0aJJ+n93w0ygPutOPS5XxBvfo/HpgiDDsdNagIU7U=
+Received: from SG2PR03MB6585.apcprd03.prod.outlook.com (2603:1096:4:1d6::7) by
+ TYZPR03MB7846.apcprd03.prod.outlook.com (2603:1096:400:45d::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6699.27; Fri, 25 Aug
+ 2023 07:10:50 +0000
+Received: from SG2PR03MB6585.apcprd03.prod.outlook.com
+ ([fe80::d979:9114:c5e2:d40e]) by SG2PR03MB6585.apcprd03.prod.outlook.com
+ ([fe80::d979:9114:c5e2:d40e%7]) with mapi id 15.20.6699.027; Fri, 25 Aug 2023
+ 07:10:50 +0000
+From:   =?utf-8?B?U2hhcnAgWGlhICjlpI/lroflvawp?= <Sharp.Xia@mediatek.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+CC:     "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
+        wsd_upstream <wsd_upstream@mediatek.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "angelogioacchino.delregno@collabora.com" 
+        <angelogioacchino.delregno@collabora.com>,
+        "linux-mediatek@lists.infradead.org" 
+        <linux-mediatek@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
+Thread-Topic: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
+Thread-Index: AQHZ0X4bQGWGKv+wY0Gyx8yF1gT/66/5T/qAgAFO3YA=
+Date:   Fri, 25 Aug 2023 07:10:50 +0000
+Message-ID: <f71672cc699900b57d257c56b325e185f2b6fdd9.camel@mediatek.com>
+References: <20230818022817.3341-1-Sharp.Xia@mediatek.com>
+         <CAPDyKFqN0K=2e4rijUBz=9LXVfhEVvDzNgqXTyTgvaPRK-PBNQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFqN0K=2e4rijUBz=9LXVfhEVvDzNgqXTyTgvaPRK-PBNQ@mail.gmail.com>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=mediatek.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SG2PR03MB6585:EE_|TYZPR03MB7846:EE_
+x-ms-office365-filtering-correlation-id: 3cfb887e-e1b5-492d-b396-08dba53a69ea
+x-ld-processed: a7687ede-7a6b-4ef6-bace-642f677fbe31,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: +LQ7i8HC7htYOryJE1UWa314JeAZHxmn/6npNQ8bsf/xbFfFEpJH+d74ROSwN2MzmKtO/e7jbP19XFh4VXVGYHb7FKjhXj6cJuCzVRmQyfk1DDJEHzsqYIai9H/+XVtBt/q9izET8lwZsWCMt3hKYgJCRcQgjSGTRwoLawNE4LTVtEQ2fk81x/WSuDoaEsdvOU8EOqzl7NbEZMfuM0/NezAg3Ez+5tciGcsXfyu0wUIvc6PxOlPxVNs3NAM8wxaVpzO3/9oasccNQhUjnu6QMtwlzz60Lvqq3XUXw3EewpQUQ5aOygSVcQcnH0hibopaGfknjCjOhd6Z5ZovC+q/QvOPbC+crOk50iI7t1oCwhTmPm6KGbKp48LPjDra2RXRwFmqRl6BArZsJjnI0fSMDPgkV3T7iwD1MEZsNGa9r0uyHtEL9sq6empmDJBxiBxxphx53FA/oUL6LbrHc4oAMIgWpMoFtKzwEulWU85hRxHxk6o0MjP58Eja08sPC3koaKuTsrhRgBj6DfYeKTfZe72vKYmAzqOUbYGNPlHpPLaRp+MAFJLDLpMRzQqv9UrdbY2O6h028ae00S0Owx3QSuBo5odYWcNVg3kVwNJGRbnlZo/KuOwxJ2xQvv5tOJbWclLx0IZge7H0RFt6Oih9T7TB5KQ/Hl8bKYv7F2+f1Dnbf9HVC6Xq4SA6sLT2I3gpLgffla4pBUNKbGshafmZ6gvutXKh6jjhvaWqmAeWd8E=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SG2PR03MB6585.apcprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(346002)(396003)(136003)(376002)(366004)(39860400002)(186009)(1800799009)(451199024)(2616005)(5660300002)(4326008)(8936002)(8676002)(85182001)(36756003)(83380400001)(2906002)(26005)(71200400001)(38100700002)(38070700005)(6916009)(122000001)(66946007)(66556008)(64756008)(66446008)(54906003)(76116006)(66476007)(316002)(91956017)(478600001)(12101799020)(41300700001)(6506007)(6512007)(86362001)(6486002)(99106002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?b1MvNmliUmRkNFlGaUlrMmhPQzRmVXpLTThkWlBRaEtvV3dHVG54MTBYb2R4?=
+ =?utf-8?B?YmNGQVFvZ2I5U2xkRlhpVnVlYnNOT29xaVdPRmx0RTVUWnlORUNXZ3BLMWps?=
+ =?utf-8?B?QTVzQ05DWEQxWVlBWnQzV3J1SWY2SXE3WVY0cnBPblV4OENJSTFnMTErMCtB?=
+ =?utf-8?B?WXoyQlAvVU04ZHh6bzBqTXBwZnZJV2lWMSsrbE1mN2JDUWhLZnRHRStBTW9j?=
+ =?utf-8?B?a04vR2lFbGpuRXhMUXByRzZzQ1AvRU1vaTZjRk0xVk5kUmc2ZFIyQldwd2pu?=
+ =?utf-8?B?K2l4Vk9xeHQ0UHFKSkpTOXozWTRMbW5MSlNlU003MU94MlRNMmFmYWtPbmdn?=
+ =?utf-8?B?bjg5cVVJUDFQTDluTHpob3I2UWRFUmxNYm9QcmtLdUxrc3RWSkRnZndHeCt3?=
+ =?utf-8?B?b2U3cDJGWTRxOEpVT0RxQW5xMVc3dkEwVFJybG1RYUpiRTVabUJPQUZkeW1Q?=
+ =?utf-8?B?bFhhZTZXcXR0QlFpWGdhY2dnc3F0dHNCQ1lodmdUNE1xWVhuVk1wVUJZMyti?=
+ =?utf-8?B?Y0R0ZjFQdDRMUy9mcmFZaU1FOG1vTzlMdC9aWDNJT1JKM3hYcG5qWGZWVFV0?=
+ =?utf-8?B?QXNwYmdCQis0K2YyNGlia2d4b2NWU2pNSFQrdjQxZVJPWVcxeU4vRWFZZVhZ?=
+ =?utf-8?B?cXN3UEh5NFhzTXEwanlhTk04bHB6dEo5SVdGNzI4NzlIT3RWQndwbUlRaTlu?=
+ =?utf-8?B?OEZqVU05TjdZenA2T2Q1UFN5U3BGZHc4ZW1ZUHpycHdxTk1FWkFIUk1zWWVV?=
+ =?utf-8?B?eXoyYVYrV2puUFNzNmdZMEZEV2hxSlkvblJ1d3NkU0VUWGtUdDJrSzY3UzVR?=
+ =?utf-8?B?RTVKYWFqMHhjZSswRnBNc2tPQi9pVlM2bldNU29NNXlLTlNrT3FTT0UyNVhl?=
+ =?utf-8?B?UHhIRkh2OHpRK0RFWWMxeXJrNU1ZMDdwMVc1dVJsc2tpT0dHOEVMUTVvM2l6?=
+ =?utf-8?B?Wm1QMTNGVy95OGsxcEtuZXVYdnk4MkJ5bDNFcFRSRzFPNkJjTDJULzNkYW9x?=
+ =?utf-8?B?b0FUdWx2S3VFMmlEdnZuaDIxbnVRd2djM2lhdzlLckRDMDFsUGZtK0hKY3I0?=
+ =?utf-8?B?anpWbjF1NGdWSkNTcjU3YjhjVUF5aVRkUFExV0FhNGZBc1AvbTU4MndxU1Jn?=
+ =?utf-8?B?eEJUeElFVEVVK0JzTkhPdmZ1TnlKLzRRL1huMTFoWlJ3VSsvTFdiQnZtMTVQ?=
+ =?utf-8?B?cWtUU1o3M1ZtUnlWVzEzUE5yYkdrVkMrQlViOUE5Q3o4RUZTV28xQzVRQk1o?=
+ =?utf-8?B?bk85aTZRc2o5WFp0V2ZnSkR4cnJub0drZVhsUmlmVThjN25Wa0NjM1p3UmZQ?=
+ =?utf-8?B?VS80cXNyalFWaEY3R3J6Q3lWQlJFd1dockhnWmc2OWgzNU5tcnFwNXVZVzlZ?=
+ =?utf-8?B?eFZ5L0dqNkw2eWkyTkRkZmZkVVNQbzhwYzViVFFPOUR3cnk3WXZDdkhlSUwy?=
+ =?utf-8?B?RVdSQ3RoZm9BL3cvNlJoL2JSbURjT1FCZ1o2MWZzRXFpN0RST0RCdkNCK1pl?=
+ =?utf-8?B?R3dUM0pYckJ5UnpOSWxGVmtyUTE3bWoxWGdUTmR3OEMyTnRNc3hldnhiWUlY?=
+ =?utf-8?B?YlBGbXlYdVhsWjMxUDIrOVdxRzkxRVNwbW5WL1ZoUjZycEc4WEFNQ2p3aFpa?=
+ =?utf-8?B?Z09HeUF1RnNGUEc1NWkzeWc2V25vTEFJOFk4ZU9VV0VyNlhTUS90R1p6THF6?=
+ =?utf-8?B?M1ZEWnJkcmgyZEdKTjhnMUtzTlV0Wlc0WC9kNTdNU3RoTXB2bS9JVXVjZzBy?=
+ =?utf-8?B?NU9DaUcvdnIxeDAwU296YTY1bUNoMkl3MFczNTNBekxORXlWZmJzQ2VpREpm?=
+ =?utf-8?B?SG9YZmQ5N0FoSzArdzliSUhCOHN4WjJpaU4raUVWazZiZWF3MEZFNmxEblZC?=
+ =?utf-8?B?UWJ6SllDd1FyOEVTMTFBMUk2TVJGT0Q3L0g2UUEvUVpsaHhNalpDQjI3UExI?=
+ =?utf-8?B?bnBvNEg2aWlFY2hiSTFud01ZN2QvTGltbmR6ZEhUaWNNZDIzaUtOajRoVzRZ?=
+ =?utf-8?B?dWlCVFlnbzBXOHRSQ3pNVktDbjVrcUpwZ3dDeTNQa0ZkM3l3ZFBRdVZ1LzZy?=
+ =?utf-8?B?a200dUkxU3NiK2hDVDJ4cGcva1ZEWUhuTXNJTnJEMDdmKzcrY0xxdGFDS3px?=
+ =?utf-8?B?aEwrS3ZCMk9oUWpydXNnWXRvTDR4eWp0dTk5UGMyK1RpN3lWOEY0WE85U1o4?=
+ =?utf-8?B?bHc9PQ==?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <E1C28FD61E93524BB7FA3FC7DF9DD034@apcprd03.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230823183749.2609013-1-robh@kernel.org>
-X-GND-Sasl: alexandre.belloni@bootlin.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SG2PR03MB6585.apcprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3cfb887e-e1b5-492d-b396-08dba53a69ea
+X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Aug 2023 07:10:50.6659
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: a7687ede-7a6b-4ef6-bace-642f677fbe31
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: ECHi+lddQySVWSAXawqZWKw5iCBpDA2MywHvvE8MCTopH1iIlPEsXfsY3JbwoZyAK8AgcfrzCKbPr6t3jcTPBQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYZPR03MB7846
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/08/2023 13:28:47-0500, Rob Herring wrote:
-> Cleanup bindings dropping the last remaining unneeded quotes. With this,
-> the check for this can be enabled in yamllint.
-> 
-> Signed-off-by: Rob Herring <robh@kernel.org>
-Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
-
-> ---
->  .../bindings/arm/arm,embedded-trace-extension.yaml   |  4 ++--
->  .../bindings/arm/arm,trace-buffer-extension.yaml     |  7 ++++---
->  .../devicetree/bindings/arm/arm,vexpress-juno.yaml   |  2 +-
->  .../devicetree/bindings/arm/aspeed/aspeed,sbc.yaml   |  4 ++--
->  .../arm/firmware/tlm,trusted-foundations.yaml        |  4 ++--
->  .../bindings/arm/mstar/mstar,l3bridge.yaml           |  4 ++--
->  .../devicetree/bindings/arm/mstar/mstar,smpctrl.yaml |  4 ++--
->  .../devicetree/bindings/arm/stm32/st,mlahb.yaml      |  4 ++--
->  .../bindings/arm/stm32/st,stm32-syscon.yaml          |  4 ++--
->  .../devicetree/bindings/connector/usb-connector.yaml |  4 ++--
->  Documentation/devicetree/bindings/eeprom/at24.yaml   |  4 ++--
->  Documentation/devicetree/bindings/eeprom/at25.yaml   |  4 ++--
->  .../intel,ixp4xx-network-processing-engine.yaml      |  4 ++--
->  .../bindings/gpio/x-powers,axp209-gpio.yaml          |  4 ++--
->  .../bindings/gpio/xlnx,zynqmp-gpio-modepin.yaml      |  4 ++--
->  .../devicetree/bindings/gpio/xylon,logicvc-gpio.yaml |  4 ++--
->  .../devicetree/bindings/hwmon/iio-hwmon.yaml         |  4 ++--
->  .../bindings/hwmon/starfive,jh71x0-temp.yaml         |  8 ++++----
->  .../devicetree/bindings/i3c/mipi-i3c-hci.yaml        |  4 ++--
->  .../devicetree/bindings/iio/accel/fsl,mma7455.yaml   |  4 ++--
->  .../bindings/iio/adc/atmel,sama9260-adc.yaml         |  4 ++--
->  .../bindings/ipmi/aspeed,ast2400-kcs-bmc.yaml        |  8 ++++----
->  .../devicetree/bindings/ipmi/ipmi-ipmb.yaml          |  2 +-
->  .../devicetree/bindings/ipmi/ipmi-smic.yaml          |  2 +-
->  .../bindings/media/qcom,msm8916-venus.yaml           |  4 ++--
->  .../bindings/mips/loongson/ls2k-reset.yaml           |  4 ++--
->  .../bindings/mips/loongson/rs780e-acpi.yaml          |  4 ++--
->  .../misc/intel,ixp4xx-ahb-queue-manager.yaml         |  4 ++--
->  .../devicetree/bindings/mmc/marvell,xenon-sdhci.yaml |  4 ++--
->  .../bindings/mtd/microchip,mchp48l640.yaml           |  4 ++--
->  .../devicetree/bindings/soc/aspeed/uart-routing.yaml |  4 ++--
->  .../bindings/soc/intel/intel,hps-copy-engine.yaml    |  4 ++--
->  .../bindings/soc/litex/litex,soc-controller.yaml     |  4 ++--
->  .../bindings/soc/renesas/renesas,rzg2l-sysc.yaml     |  4 ++--
->  .../devicetree/bindings/soc/ti/k3-ringacc.yaml       |  4 ++--
->  .../devicetree/bindings/sound/dialog,da7219.yaml     |  4 ++--
->  .../bindings/sound/nvidia,tegra-audio-max9808x.yaml  | 12 ++++++------
->  .../bindings/sound/nvidia,tegra-audio-rt5631.yaml    |  8 ++++----
->  .../devicetree/bindings/ufs/ufs-common.yaml          |  2 +-
->  .../bindings/watchdog/toshiba,visconti-wdt.yaml      |  4 ++--
->  40 files changed, 88 insertions(+), 87 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/arm/arm,embedded-trace-extension.yaml b/Documentation/devicetree/bindings/arm/arm,embedded-trace-extension.yaml
-> index 108460627d9a..a477a810f9e9 100644
-> --- a/Documentation/devicetree/bindings/arm/arm,embedded-trace-extension.yaml
-> +++ b/Documentation/devicetree/bindings/arm/arm,embedded-trace-extension.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2021, Arm Ltd
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/arm,embedded-trace-extension.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/arm,embedded-trace-extension.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: ARM Embedded Trace Extensions
->  
-> diff --git a/Documentation/devicetree/bindings/arm/arm,trace-buffer-extension.yaml b/Documentation/devicetree/bindings/arm/arm,trace-buffer-extension.yaml
-> index b1322658063a..8c27e510cb71 100644
-> --- a/Documentation/devicetree/bindings/arm/arm,trace-buffer-extension.yaml
-> +++ b/Documentation/devicetree/bindings/arm/arm,trace-buffer-extension.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2021, Arm Ltd
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/arm,trace-buffer-extension.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/arm,trace-buffer-extension.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: ARM Trace Buffer Extensions
->  
-> @@ -19,7 +19,8 @@ description: |
->  
->  properties:
->    $nodename:
-> -    const: "trbe"
-> +    const: trbe
-> +
->    compatible:
->      items:
->        - const: arm,trace-buffer-extension
-> diff --git a/Documentation/devicetree/bindings/arm/arm,vexpress-juno.yaml b/Documentation/devicetree/bindings/arm/arm,vexpress-juno.yaml
-> index cdd65881fcdd..8dd6b6446394 100644
-> --- a/Documentation/devicetree/bindings/arm/arm,vexpress-juno.yaml
-> +++ b/Documentation/devicetree/bindings/arm/arm,vexpress-juno.yaml
-> @@ -143,7 +143,7 @@ patternProperties:
->        "simple-bus". If the compatible is placed in the "motherboard-bus" node,
->        it is stricter and always has two compatibles.
->      type: object
-> -    $ref: '/schemas/simple-bus.yaml'
-> +    $ref: /schemas/simple-bus.yaml
->      unevaluatedProperties: false
->  
->      properties:
-> diff --git a/Documentation/devicetree/bindings/arm/aspeed/aspeed,sbc.yaml b/Documentation/devicetree/bindings/arm/aspeed/aspeed,sbc.yaml
-> index c72aab706484..b8c5cacb09bd 100644
-> --- a/Documentation/devicetree/bindings/arm/aspeed/aspeed,sbc.yaml
-> +++ b/Documentation/devicetree/bindings/arm/aspeed/aspeed,sbc.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2021 Joel Stanley, IBM Corp.
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/aspeed/aspeed,sbc.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/aspeed/aspeed,sbc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: ASPEED Secure Boot Controller
->  
-> diff --git a/Documentation/devicetree/bindings/arm/firmware/tlm,trusted-foundations.yaml b/Documentation/devicetree/bindings/arm/firmware/tlm,trusted-foundations.yaml
-> index 9d1857c0aa07..e3980b659f63 100644
-> --- a/Documentation/devicetree/bindings/arm/firmware/tlm,trusted-foundations.yaml
-> +++ b/Documentation/devicetree/bindings/arm/firmware/tlm,trusted-foundations.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/firmware/tlm,trusted-foundations.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/firmware/tlm,trusted-foundations.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Trusted Foundations
->  
-> diff --git a/Documentation/devicetree/bindings/arm/mstar/mstar,l3bridge.yaml b/Documentation/devicetree/bindings/arm/mstar/mstar,l3bridge.yaml
-> index 6816bd68f9cf..a8ac4a2d672d 100644
-> --- a/Documentation/devicetree/bindings/arm/mstar/mstar,l3bridge.yaml
-> +++ b/Documentation/devicetree/bindings/arm/mstar/mstar,l3bridge.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2020 thingy.jp.
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/mstar/mstar,l3bridge.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/mstar/mstar,l3bridge.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: MStar/SigmaStar Armv7 SoC l3bridge
->  
-> diff --git a/Documentation/devicetree/bindings/arm/mstar/mstar,smpctrl.yaml b/Documentation/devicetree/bindings/arm/mstar/mstar,smpctrl.yaml
-> index 599c65980f5d..5739848000b1 100644
-> --- a/Documentation/devicetree/bindings/arm/mstar/mstar,smpctrl.yaml
-> +++ b/Documentation/devicetree/bindings/arm/mstar/mstar,smpctrl.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2020 thingy.jp.
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/mstar/mstar,smpctrl.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/mstar/mstar,smpctrl.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: MStar/SigmaStar Armv7 SoC SMP control registers
->  
-> diff --git a/Documentation/devicetree/bindings/arm/stm32/st,mlahb.yaml b/Documentation/devicetree/bindings/arm/stm32/st,mlahb.yaml
-> index 2297ad3f4774..d2dce238ff5d 100644
-> --- a/Documentation/devicetree/bindings/arm/stm32/st,mlahb.yaml
-> +++ b/Documentation/devicetree/bindings/arm/stm32/st,mlahb.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/stm32/st,mlahb.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/stm32/st,mlahb.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: STMicroelectronics STM32 ML-AHB interconnect
->  
-> diff --git a/Documentation/devicetree/bindings/arm/stm32/st,stm32-syscon.yaml b/Documentation/devicetree/bindings/arm/stm32/st,stm32-syscon.yaml
-> index b63ff591ef8f..d083d8ad48b7 100644
-> --- a/Documentation/devicetree/bindings/arm/stm32/st,stm32-syscon.yaml
-> +++ b/Documentation/devicetree/bindings/arm/stm32/st,stm32-syscon.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/arm/stm32/st,stm32-syscon.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/arm/stm32/st,stm32-syscon.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: STMicroelectronics STM32 Platforms System Controller
->  
-> diff --git a/Documentation/devicetree/bindings/connector/usb-connector.yaml b/Documentation/devicetree/bindings/connector/usb-connector.yaml
-> index 3ecb51f55a71..7c8a3e8430d3 100644
-> --- a/Documentation/devicetree/bindings/connector/usb-connector.yaml
-> +++ b/Documentation/devicetree/bindings/connector/usb-connector.yaml
-> @@ -232,8 +232,8 @@ properties:
->      type: boolean
->  
->  dependencies:
-> -  sink-vdos-v1: [ 'sink-vdos' ]
-> -  sink-vdos: [ 'sink-vdos-v1' ]
-> +  sink-vdos-v1: [ sink-vdos ]
-> +  sink-vdos: [ sink-vdos-v1 ]
->  
->  required:
->    - compatible
-> diff --git a/Documentation/devicetree/bindings/eeprom/at24.yaml b/Documentation/devicetree/bindings/eeprom/at24.yaml
-> index 84af0d5f52aa..b1e5dddf9bf4 100644
-> --- a/Documentation/devicetree/bindings/eeprom/at24.yaml
-> +++ b/Documentation/devicetree/bindings/eeprom/at24.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2019 BayLibre SAS
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/eeprom/at24.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/eeprom/at24.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: I2C EEPROMs compatible with Atmel's AT24
->  
-> diff --git a/Documentation/devicetree/bindings/eeprom/at25.yaml b/Documentation/devicetree/bindings/eeprom/at25.yaml
-> index 0e31bb36ebb1..1715b0c9feea 100644
-> --- a/Documentation/devicetree/bindings/eeprom/at25.yaml
-> +++ b/Documentation/devicetree/bindings/eeprom/at25.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/eeprom/at25.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/eeprom/at25.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: SPI EEPROMs or FRAMs compatible with Atmel's AT25
->  
-> diff --git a/Documentation/devicetree/bindings/firmware/intel,ixp4xx-network-processing-engine.yaml b/Documentation/devicetree/bindings/firmware/intel,ixp4xx-network-processing-engine.yaml
-> index 9a785bbaafb7..e6bed7d93e2d 100644
-> --- a/Documentation/devicetree/bindings/firmware/intel,ixp4xx-network-processing-engine.yaml
-> +++ b/Documentation/devicetree/bindings/firmware/intel,ixp4xx-network-processing-engine.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2019 Linaro Ltd.
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/firmware/intel,ixp4xx-network-processing-engine.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/firmware/intel,ixp4xx-network-processing-engine.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Intel IXP4xx Network Processing Engine
->  
-> diff --git a/Documentation/devicetree/bindings/gpio/x-powers,axp209-gpio.yaml b/Documentation/devicetree/bindings/gpio/x-powers,axp209-gpio.yaml
-> index 1638cfe90f1c..5eeb29bcdd21 100644
-> --- a/Documentation/devicetree/bindings/gpio/x-powers,axp209-gpio.yaml
-> +++ b/Documentation/devicetree/bindings/gpio/x-powers,axp209-gpio.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: GPL-2.0
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/gpio/x-powers,axp209-gpio.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/gpio/x-powers,axp209-gpio.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: X-Powers AXP209 GPIO
->  
-> diff --git a/Documentation/devicetree/bindings/gpio/xlnx,zynqmp-gpio-modepin.yaml b/Documentation/devicetree/bindings/gpio/xlnx,zynqmp-gpio-modepin.yaml
-> index 18e61aff2185..56143f1fe84a 100644
-> --- a/Documentation/devicetree/bindings/gpio/xlnx,zynqmp-gpio-modepin.yaml
-> +++ b/Documentation/devicetree/bindings/gpio/xlnx,zynqmp-gpio-modepin.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/gpio/xlnx,zynqmp-gpio-modepin.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/gpio/xlnx,zynqmp-gpio-modepin.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: ZynqMP Mode Pin GPIO controller
->  
-> diff --git a/Documentation/devicetree/bindings/gpio/xylon,logicvc-gpio.yaml b/Documentation/devicetree/bindings/gpio/xylon,logicvc-gpio.yaml
-> index a36aec27069c..59c79a6943ec 100644
-> --- a/Documentation/devicetree/bindings/gpio/xylon,logicvc-gpio.yaml
-> +++ b/Documentation/devicetree/bindings/gpio/xylon,logicvc-gpio.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2019 Bootlin
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/gpio/xylon,logicvc-gpio.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/gpio/xylon,logicvc-gpio.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Xylon LogiCVC GPIO controller
->  
-> diff --git a/Documentation/devicetree/bindings/hwmon/iio-hwmon.yaml b/Documentation/devicetree/bindings/hwmon/iio-hwmon.yaml
-> index c54b5986b365..e5b24782f448 100644
-> --- a/Documentation/devicetree/bindings/hwmon/iio-hwmon.yaml
-> +++ b/Documentation/devicetree/bindings/hwmon/iio-hwmon.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/hwmon/iio-hwmon.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/hwmon/iio-hwmon.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: ADC-attached Hardware Sensor
->  
-> diff --git a/Documentation/devicetree/bindings/hwmon/starfive,jh71x0-temp.yaml b/Documentation/devicetree/bindings/hwmon/starfive,jh71x0-temp.yaml
-> index f5b34528928d..733cba780186 100644
-> --- a/Documentation/devicetree/bindings/hwmon/starfive,jh71x0-temp.yaml
-> +++ b/Documentation/devicetree/bindings/hwmon/starfive,jh71x0-temp.yaml
-> @@ -27,8 +27,8 @@ properties:
->  
->    clock-names:
->      items:
-> -      - const: "sense"
-> -      - const: "bus"
-> +      - const: sense
-> +      - const: bus
->  
->    '#thermal-sensor-cells':
->      const: 0
-> @@ -39,8 +39,8 @@ properties:
->  
->    reset-names:
->      items:
-> -      - const: "sense"
-> -      - const: "bus"
-> +      - const: sense
-> +      - const: bus
->  
->  required:
->    - compatible
-> diff --git a/Documentation/devicetree/bindings/i3c/mipi-i3c-hci.yaml b/Documentation/devicetree/bindings/i3c/mipi-i3c-hci.yaml
-> index c002afdbfc7c..5dda8cb44cdb 100644
-> --- a/Documentation/devicetree/bindings/i3c/mipi-i3c-hci.yaml
-> +++ b/Documentation/devicetree/bindings/i3c/mipi-i3c-hci.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/i3c/mipi-i3c-hci.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/i3c/mipi-i3c-hci.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: MIPI I3C HCI
->  
-> diff --git a/Documentation/devicetree/bindings/iio/accel/fsl,mma7455.yaml b/Documentation/devicetree/bindings/iio/accel/fsl,mma7455.yaml
-> index c8659c5eba2a..cb31e75ba680 100644
-> --- a/Documentation/devicetree/bindings/iio/accel/fsl,mma7455.yaml
-> +++ b/Documentation/devicetree/bindings/iio/accel/fsl,mma7455.yaml
-> @@ -36,8 +36,8 @@ properties:
->      maxItems: 2
->      items:
->        enum:
-> -        - "INT1"
-> -        - "INT2"
-> +        - INT1
-> +        - INT2
->  
->  required:
->    - compatible
-> diff --git a/Documentation/devicetree/bindings/iio/adc/atmel,sama9260-adc.yaml b/Documentation/devicetree/bindings/iio/adc/atmel,sama9260-adc.yaml
-> index e6a1f915b542..1f30a8569187 100644
-> --- a/Documentation/devicetree/bindings/iio/adc/atmel,sama9260-adc.yaml
-> +++ b/Documentation/devicetree/bindings/iio/adc/atmel,sama9260-adc.yaml
-> @@ -56,8 +56,8 @@ properties:
->        String corresponding to an identifier from atmel,adc-res-names property.
->        If not specified, the highest resolution will be used.
->      enum:
-> -      - "lowres"
-> -      - "highres"
-> +      - lowres
-> +      - highres
->  
->    atmel,adc-sleep-mode:
->      $ref: /schemas/types.yaml#/definitions/flag
-> diff --git a/Documentation/devicetree/bindings/ipmi/aspeed,ast2400-kcs-bmc.yaml b/Documentation/devicetree/bindings/ipmi/aspeed,ast2400-kcs-bmc.yaml
-> index 4ff6fabfcb30..129e32c4c774 100644
-> --- a/Documentation/devicetree/bindings/ipmi/aspeed,ast2400-kcs-bmc.yaml
-> +++ b/Documentation/devicetree/bindings/ipmi/aspeed,ast2400-kcs-bmc.yaml
-> @@ -41,7 +41,7 @@ properties:
->        - description: STR register
->  
->    aspeed,lpc-io-reg:
-> -    $ref: '/schemas/types.yaml#/definitions/uint32-array'
-> +    $ref: /schemas/types.yaml#/definitions/uint32-array
->      minItems: 1
->      maxItems: 2
->      description: |
-> @@ -50,7 +50,7 @@ properties:
->        status address may be optionally provided.
->  
->    aspeed,lpc-interrupts:
-> -    $ref: "/schemas/types.yaml#/definitions/uint32-array"
-> +    $ref: /schemas/types.yaml#/definitions/uint32-array
->      minItems: 2
->      maxItems: 2
->      description: |
-> @@ -63,12 +63,12 @@ properties:
->  
->    kcs_chan:
->      deprecated: true
-> -    $ref: '/schemas/types.yaml#/definitions/uint32'
-> +    $ref: /schemas/types.yaml#/definitions/uint32
->      description: The LPC channel number in the controller
->  
->    kcs_addr:
->      deprecated: true
-> -    $ref: '/schemas/types.yaml#/definitions/uint32'
-> +    $ref: /schemas/types.yaml#/definitions/uint32
->      description: The host CPU IO map address
->  
->  required:
-> diff --git a/Documentation/devicetree/bindings/ipmi/ipmi-ipmb.yaml b/Documentation/devicetree/bindings/ipmi/ipmi-ipmb.yaml
-> index 3f25cdb4e99b..52647bff31af 100644
-> --- a/Documentation/devicetree/bindings/ipmi/ipmi-ipmb.yaml
-> +++ b/Documentation/devicetree/bindings/ipmi/ipmi-ipmb.yaml
-> @@ -18,7 +18,7 @@ properties:
->  
->    device_type:
->      items:
-> -      - const: "ipmi"
-> +      - const: ipmi
->  
->    reg:
->      maxItems: 1
-> diff --git a/Documentation/devicetree/bindings/ipmi/ipmi-smic.yaml b/Documentation/devicetree/bindings/ipmi/ipmi-smic.yaml
-> index c1b4bf95ef99..4bffa3d86128 100644
-> --- a/Documentation/devicetree/bindings/ipmi/ipmi-smic.yaml
-> +++ b/Documentation/devicetree/bindings/ipmi/ipmi-smic.yaml
-> @@ -20,7 +20,7 @@ properties:
->  
->    device_type:
->      items:
-> -      - const: "ipmi"
-> +      - const: ipmi
->  
->    reg:
->      maxItems: 1
-> diff --git a/Documentation/devicetree/bindings/media/qcom,msm8916-venus.yaml b/Documentation/devicetree/bindings/media/qcom,msm8916-venus.yaml
-> index 2350bf4b370e..9410f13ca97c 100644
-> --- a/Documentation/devicetree/bindings/media/qcom,msm8916-venus.yaml
-> +++ b/Documentation/devicetree/bindings/media/qcom,msm8916-venus.yaml
-> @@ -40,7 +40,7 @@ properties:
->  
->      properties:
->        compatible:
-> -        const: "venus-decoder"
-> +        const: venus-decoder
->  
->      required:
->        - compatible
-> @@ -52,7 +52,7 @@ properties:
->  
->      properties:
->        compatible:
-> -        const: "venus-encoder"
-> +        const: venus-encoder
->  
->      required:
->        - compatible
-> diff --git a/Documentation/devicetree/bindings/mips/loongson/ls2k-reset.yaml b/Documentation/devicetree/bindings/mips/loongson/ls2k-reset.yaml
-> index 20b5836efd90..358ac8cd4d1d 100644
-> --- a/Documentation/devicetree/bindings/mips/loongson/ls2k-reset.yaml
-> +++ b/Documentation/devicetree/bindings/mips/loongson/ls2k-reset.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/mips/loongson/ls2k-reset.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/mips/loongson/ls2k-reset.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Loongson 2K1000 PM Controller
->  
-> diff --git a/Documentation/devicetree/bindings/mips/loongson/rs780e-acpi.yaml b/Documentation/devicetree/bindings/mips/loongson/rs780e-acpi.yaml
-> index 7c0f9022202c..3e3a3705e879 100644
-> --- a/Documentation/devicetree/bindings/mips/loongson/rs780e-acpi.yaml
-> +++ b/Documentation/devicetree/bindings/mips/loongson/rs780e-acpi.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/mips/loongson/rs780e-acpi.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/mips/loongson/rs780e-acpi.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Loongson RS780E PCH ACPI Controller
->  
-> diff --git a/Documentation/devicetree/bindings/misc/intel,ixp4xx-ahb-queue-manager.yaml b/Documentation/devicetree/bindings/misc/intel,ixp4xx-ahb-queue-manager.yaml
-> index 38ab0499102d..36a9dbdf3f03 100644
-> --- a/Documentation/devicetree/bindings/misc/intel,ixp4xx-ahb-queue-manager.yaml
-> +++ b/Documentation/devicetree/bindings/misc/intel,ixp4xx-ahb-queue-manager.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2019 Linaro Ltd.
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/misc/intel,ixp4xx-ahb-queue-manager.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/misc/intel,ixp4xx-ahb-queue-manager.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Intel IXP4xx AHB Queue Manager
->  
-> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> index 3ee758886558..3a8e74894ae0 100644
-> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> @@ -71,8 +71,8 @@ properties:
->    marvell,xenon-phy-type:
->      $ref: /schemas/types.yaml#/definitions/string
->      enum:
-> -      - "emmc 5.1 phy"
-> -      - "emmc 5.0 phy"
-> +      - emmc 5.1 phy
-> +      - emmc 5.0 phy
->      description: |
->        Xenon support multiple types of PHYs. To select eMMC 5.1 PHY, set:
->        marvell,xenon-phy-type = "emmc 5.1 phy" eMMC 5.1 PHY is the default
-> diff --git a/Documentation/devicetree/bindings/mtd/microchip,mchp48l640.yaml b/Documentation/devicetree/bindings/mtd/microchip,mchp48l640.yaml
-> index 00882892f47e..0ff32bd00bf6 100644
-> --- a/Documentation/devicetree/bindings/mtd/microchip,mchp48l640.yaml
-> +++ b/Documentation/devicetree/bindings/mtd/microchip,mchp48l640.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/mtd/microchip,mchp48l640.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/mtd/microchip,mchp48l640.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Microchip 48l640 (and similar) serial EERAM
->  
-> diff --git a/Documentation/devicetree/bindings/soc/aspeed/uart-routing.yaml b/Documentation/devicetree/bindings/soc/aspeed/uart-routing.yaml
-> index 6876407124dc..51aaf34acb32 100644
-> --- a/Documentation/devicetree/bindings/soc/aspeed/uart-routing.yaml
-> +++ b/Documentation/devicetree/bindings/soc/aspeed/uart-routing.yaml
-> @@ -3,8 +3,8 @@
->  # # Copyright (c) 2021 Aspeed Technology Inc.
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/soc/aspeed/uart-routing.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/soc/aspeed/uart-routing.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Aspeed UART Routing Controller
->  
-> diff --git a/Documentation/devicetree/bindings/soc/intel/intel,hps-copy-engine.yaml b/Documentation/devicetree/bindings/soc/intel/intel,hps-copy-engine.yaml
-> index 8634865015cd..ceb81646fe75 100644
-> --- a/Documentation/devicetree/bindings/soc/intel/intel,hps-copy-engine.yaml
-> +++ b/Documentation/devicetree/bindings/soc/intel/intel,hps-copy-engine.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright (C) 2022, Intel Corporation
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/soc/intel/intel,hps-copy-engine.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/soc/intel/intel,hps-copy-engine.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Intel HPS Copy Engine
->  
-> diff --git a/Documentation/devicetree/bindings/soc/litex/litex,soc-controller.yaml b/Documentation/devicetree/bindings/soc/litex/litex,soc-controller.yaml
-> index ecae9fa8561b..a64406ca17b5 100644
-> --- a/Documentation/devicetree/bindings/soc/litex/litex,soc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/soc/litex/litex,soc-controller.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2020 Antmicro <www.antmicro.com>
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/soc/litex/litex,soc-controller.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/soc/litex/litex,soc-controller.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: LiteX SoC Controller driver
->  
-> diff --git a/Documentation/devicetree/bindings/soc/renesas/renesas,rzg2l-sysc.yaml b/Documentation/devicetree/bindings/soc/renesas/renesas,rzg2l-sysc.yaml
-> index 398663d21ab1..e52e176d8cb3 100644
-> --- a/Documentation/devicetree/bindings/soc/renesas/renesas,rzg2l-sysc.yaml
-> +++ b/Documentation/devicetree/bindings/soc/renesas/renesas,rzg2l-sysc.yaml
-> @@ -1,8 +1,8 @@
->  # SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/soc/renesas/renesas,rzg2l-sysc.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/soc/renesas/renesas,rzg2l-sysc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Renesas RZ/{G2L,V2L} System Controller (SYSC)
->  
-> diff --git a/Documentation/devicetree/bindings/soc/ti/k3-ringacc.yaml b/Documentation/devicetree/bindings/soc/ti/k3-ringacc.yaml
-> index 22cf9002fee7..4ac00716885e 100644
-> --- a/Documentation/devicetree/bindings/soc/ti/k3-ringacc.yaml
-> +++ b/Documentation/devicetree/bindings/soc/ti/k3-ringacc.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright (C) 2020 Texas Instruments Incorporated - http://www.ti.com/
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/soc/ti/k3-ringacc.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/soc/ti/k3-ringacc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Texas Instruments K3 NavigatorSS Ring Accelerator
->  
-> diff --git a/Documentation/devicetree/bindings/sound/dialog,da7219.yaml b/Documentation/devicetree/bindings/sound/dialog,da7219.yaml
-> index 2d01956cefbb..19137abdba3e 100644
-> --- a/Documentation/devicetree/bindings/sound/dialog,da7219.yaml
-> +++ b/Documentation/devicetree/bindings/sound/dialog,da7219.yaml
-> @@ -74,7 +74,7 @@ properties:
->      $ref: /schemas/types.yaml#/definitions/uint32
->  
->    dlg,mic-amp-in-sel:
-> -    enum: ["diff", "se_p", "se_n"]
-> +    enum: [diff, se_p, se_n]
->      description:
->        Mic input source type.
->  
-> @@ -124,7 +124,7 @@ properties:
->          $ref: /schemas/types.yaml#/definitions/uint32
->  
->        dlg,jack-ins-det-pty:
-> -        enum: ["low", "high"]
-> +        enum: [low, high]
->          description:
->            Polarity for jack insertion detection.
->          $ref: /schemas/types.yaml#/definitions/string
-> diff --git a/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-max9808x.yaml b/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-max9808x.yaml
-> index fc89dbd6bf24..c29d7942915c 100644
-> --- a/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-max9808x.yaml
-> +++ b/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-max9808x.yaml
-> @@ -35,12 +35,12 @@ properties:
->      items:
->        enum:
->          # Board Connectors
-> -        - "Int Spk"
-> -        - "Headphone Jack"
-> -        - "Earpiece"
-> -        - "Headset Mic"
-> -        - "Internal Mic 1"
-> -        - "Internal Mic 2"
-> +        - Int Spk
-> +        - Headphone Jack
-> +        - Earpiece
-> +        - Headset Mic
-> +        - Internal Mic 1
-> +        - Internal Mic 2
->  
->          # CODEC Pins
->          - HPL
-> diff --git a/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-rt5631.yaml b/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-rt5631.yaml
-> index a04487002e88..0c8067c3b056 100644
-> --- a/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-rt5631.yaml
-> +++ b/Documentation/devicetree/bindings/sound/nvidia,tegra-audio-rt5631.yaml
-> @@ -31,10 +31,10 @@ properties:
->      items:
->        enum:
->          # Board Connectors
-> -        - "Int Spk"
-> -        - "Headphone Jack"
-> -        - "Mic Jack"
-> -        - "Int Mic"
-> +        - Int Spk
-> +        - Headphone Jack
-> +        - Mic Jack
-> +        - Int Mic
->  
->          # CODEC Pins
->          - MIC1
-> diff --git a/Documentation/devicetree/bindings/ufs/ufs-common.yaml b/Documentation/devicetree/bindings/ufs/ufs-common.yaml
-> index 47a4e9e1a775..bbaee4f5f7b2 100644
-> --- a/Documentation/devicetree/bindings/ufs/ufs-common.yaml
-> +++ b/Documentation/devicetree/bindings/ufs/ufs-common.yaml
-> @@ -74,7 +74,7 @@ properties:
->        Specifies max. load that can be drawn from VCCQ2 supply.
->  
->  dependencies:
-> -  freq-table-hz: [ 'clocks' ]
-> +  freq-table-hz: [ clocks ]
->  
->  required:
->    - interrupts
-> diff --git a/Documentation/devicetree/bindings/watchdog/toshiba,visconti-wdt.yaml b/Documentation/devicetree/bindings/watchdog/toshiba,visconti-wdt.yaml
-> index 51d03d5b08ad..3e9fd49d935e 100644
-> --- a/Documentation/devicetree/bindings/watchdog/toshiba,visconti-wdt.yaml
-> +++ b/Documentation/devicetree/bindings/watchdog/toshiba,visconti-wdt.yaml
-> @@ -2,8 +2,8 @@
->  # Copyright 2020 Toshiba Electronic Devices & Storage Corporation
->  %YAML 1.2
->  ---
-> -$id: "http://devicetree.org/schemas/watchdog/toshiba,visconti-wdt.yaml#"
-> -$schema: "http://devicetree.org/meta-schemas/core.yaml#"
-> +$id: http://devicetree.org/schemas/watchdog/toshiba,visconti-wdt.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Toshiba Visconti SoCs PIUWDT Watchdog timer
->  
-> -- 
-> 2.40.1
-> 
-> 
-> -- 
-> linux-i3c mailing list
-> linux-i3c@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-i3c
-
--- 
-Alexandre Belloni, co-owner and COO, Bootlin
-Embedded Linux and Kernel engineering
-https://bootlin.com
+T24gVGh1LCAyMDIzLTA4LTI0IGF0IDEyOjU1ICswMjAwLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4g
+IAkgDQo+IEV4dGVybmFsIGVtYWlsIDogUGxlYXNlIGRvIG5vdCBjbGljayBsaW5rcyBvciBvcGVu
+IGF0dGFjaG1lbnRzIHVudGlsDQo+IHlvdSBoYXZlIHZlcmlmaWVkIHRoZSBzZW5kZXIgb3IgdGhl
+IGNvbnRlbnQuDQo+ICBPbiBGcmksIDE4IEF1ZyAyMDIzIGF0IDA0OjQ1LCA8U2hhcnAuWGlhQG1l
+ZGlhdGVrLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBGcm9tOiBTaGFycCBYaWEgPFNoYXJwLlhpYUBt
+ZWRpYXRlay5jb20+DQo+ID4NCj4gPiBNTUMgZG9lcyBub3Qgc2V0IHJlYWRhaGVhZCBhbmQgdXNl
+cyB0aGUgZGVmYXVsdCBWTV9SRUFEQUhFQURfUEFHRVMNCj4gPiByZXN1bHRpbmcgaW4gc2xvd2Vy
+IHJlYWRpbmcgc3BlZWQuDQo+ID4gVXNlIHRoZSBtYXhfcmVxX3NpemUgcmVwb3J0ZWQgYnkgaG9z
+dCBkcml2ZXIgdG8gc2V0IHRoZSBvcHRpbWFsDQo+ID4gSS9PIHNpemUgdG8gaW1wcm92ZSBwZXJm
+b3JtYW5jZS4NCj4gDQo+IFRoaXMgc2VlbXMgcmVhc29uYWJsZSB0byBtZS4gSG93ZXZlciwgaXQg
+d291bGQgYmUgbmljZSBpZiB5b3UgY291bGQNCj4gc2hhcmUgc29tZSBwZXJmb3JtYW5jZSBudW1i
+ZXJzIHRvbyAtIGNvbXBhcmluZyBiZWZvcmUgYW5kIGFmdGVyDQo+ICRzdWJqZWN0IHBhdGNoLg0K
+PiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4gDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBT
+aGFycCBYaWEgPFNoYXJwLlhpYUBtZWRpYXRlay5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMv
+bW1jL2NvcmUvcXVldWUuYyB8IDEgKw0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24o
+KykNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL3F1ZXVlLmMgYi9kcml2
+ZXJzL21tYy9jb3JlL3F1ZXVlLmMNCj4gPiBpbmRleCBiMzk2ZTM5MDA3MTcuLmZjODNjNDkxNzM2
+MCAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL3F1ZXVlLmMNCj4gPiArKysgYi9k
+cml2ZXJzL21tYy9jb3JlL3F1ZXVlLmMNCj4gPiBAQCAtMzU5LDYgKzM1OSw3IEBAIHN0YXRpYyB2
+b2lkIG1tY19zZXR1cF9xdWV1ZShzdHJ1Y3QgbW1jX3F1ZXVlDQo+ICptcSwgc3RydWN0IG1tY19j
+YXJkICpjYXJkKQ0KPiA+ICAgICAgICAgICAgICAgICBibGtfcXVldWVfYm91bmNlX2xpbWl0KG1x
+LT5xdWV1ZSwgQkxLX0JPVU5DRV9ISUdIKTsNCj4gPiAgICAgICAgIGJsa19xdWV1ZV9tYXhfaHdf
+c2VjdG9ycyhtcS0+cXVldWUsDQo+ID4gICAgICAgICAgICAgICAgIG1pbihob3N0LT5tYXhfYmxr
+X2NvdW50LCBob3N0LT5tYXhfcmVxX3NpemUgLw0KPiA1MTIpKTsNCj4gPiArICAgICAgIGJsa19x
+dWV1ZV9pb19vcHQobXEtPnF1ZXVlLCBob3N0LT5tYXhfcmVxX3NpemUpOw0KPiA+ICAgICAgICAg
+aWYgKGhvc3QtPmNhbl9kbWFfbWFwX21lcmdlKQ0KPiA+ICAgICAgICAgICAgICAgICBXQVJOKCFi
+bGtfcXVldWVfY2FuX3VzZV9kbWFfbWFwX21lcmdpbmcobXEtPnF1ZXVlLA0KPiA+ICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2Rldiho
+b3MNCj4gdCkpLA0KPiA+IC0tDQo+ID4gMi4xOC4wDQo+ID4NCg0KSSB0ZXN0IHRoaXMgcGF0Y2gg
+b24gaW50ZXJuYWwgcGxhdGZvcm0oa2VybmVsLTUuMTUpLg0KDQpCZWZvcmU6DQpjb25zb2xlOi8g
+IyBlY2hvIDMgPiAvcHJvYy9zeXMvdm0vZHJvcF9jYWNoZXMNCmNvbnNvbGU6LyAjIGRkIGlmPS9t
+bnQvbWVkaWFfcncvODAzMS0xMzBEL3N1cGVyLmltZyBvZj0vZGV2L251bGwNCjQ0ODUzOTMrMSBy
+ZWNvcmRzIGluDQo0NDg1MzkzKzEgcmVjb3JkcyBvdXQNCjIyOTY1MjE1NjQgYnl0ZXMgKDIuMSBH
+KSBjb3BpZWQsIDM3LjEyNDQ0NiBzLCA1OSBNL3MNCmNvbnNvbGU6LyAjIGNhdCAvc3lzL2Jsb2Nr
+L21tY2JsazAvcXVldWUvcmVhZF9haGVhZF9rYg0KMTI4DQoNCkFmdGVyOg0KY29uc29sZTovICMg
+ZWNobyAzID4gL3Byb2Mvc3lzL3ZtL2Ryb3BfY2FjaGVzDQpjb25zb2xlOi8gIyBkZCBpZj0vbW50
+L21lZGlhX3J3LzgwMzEtMTMwRC9zdXBlci5pbWcgb2Y9L2Rldi9udWxsDQo0NDg1MzkzKzEgcmVj
+b3JkcyBpbg0KNDQ4NTM5MysxIHJlY29yZHMgb3V0DQoyMjk2NTIxNTY0IGJ5dGVzICgyLjEgRykg
+Y29waWVkLCAyOC45NTYwNDkgcywgNzYgTS9zDQpjb25zb2xlOi8gIyBjYXQgL3N5cy9ibG9jay9t
+bWNibGswL3F1ZXVlL3JlYWRfYWhlYWRfa2INCjEwMjQNCg0K
