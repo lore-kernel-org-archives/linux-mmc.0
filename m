@@ -2,24 +2,25 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4016CC83F11
-	for <linux-mmc@archiver.kernel.org>; Sat, 26 Aug 2023 16:44:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D2BCC83F15
+	for <linux-mmc@archiver.kernel.org>; Sat, 26 Aug 2023 17:13:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230112AbjHZQnw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 26 Aug 2023 12:43:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52394 "EHLO
+        id S229518AbjHZRMF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 26 Aug 2023 13:12:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44398 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230203AbjHZQnt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Aug 2023 12:43:49 -0400
+        with ESMTP id S230317AbjHZRL5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Aug 2023 13:11:57 -0400
 Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A6B21995;
-        Sat, 26 Aug 2023 09:43:38 -0700 (PDT)
-X-UUID: afba5c26442f11eeb20a276fd37b9834-20230827
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 988B0E4E;
+        Sat, 26 Aug 2023 10:11:54 -0700 (PDT)
+X-UUID: a415f7b4443311eeb20a276fd37b9834-20230827
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=run78isH9wzuv4qEeW4mY8FxhoAXSLzkLolztccpSzM=;
-        b=PwjqMvbrBO/ZU7p57J5iqNeMWApmC5ERFmMRQbiFU0j57V1ghXhHEJ5LNZ7eUuEJat8Z93KfKbHbUUWMPY0goa0bLZ7DNntkleegp9xriEGptqvXUJyZDhf90Hk6N2/JYF9QcwqV0U4bRvNqfeZoRSKHFnXb7+LkLgzH4zm9X/g=;
+        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=lW5JiU3OBo1fpU5FFkkuisIRL20Eimt0nkU4ubNxKCc=;
+        b=XLidcVyErnKrwBnMcnBZ5X4A4asghx6tHcizZqkUI2tQ81nl87Ks8lTnOY62LS+bo4+SiuUgV4EgNNmRslWWK5Y+AfkH0Al4yEKvEpyvNvjozoIDUxXz4ezLG3dKLH96wIb+42CDskQ0lqnOr9E8eBIOBwVeYfHjpWzcX0eyZ3A=;
+X-CID-CACHE: Type:Local,Time:202308270043+08,HitQuantity:1
 X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.31,REQID:fe925674-a4eb-4fd3-8d3e-12e0b9b64a6a,IP:0,U
+X-CID-O-INFO: VERSION:1.1.31,REQID:1a60ee05-a56e-45f2-93e0-f7fa5a4e5e55,IP:0,U
         RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
         release,TS:0
 X-CID-META: VersionHash:0ad78a4,CLOUDID:48abf9ee-9a6e-4c39-b73e-f2bc08ca3dc5,B
@@ -29,107 +30,51 @@ X-CID-META: VersionHash:0ad78a4,CLOUDID:48abf9ee-9a6e-4c39-b73e-f2bc08ca3dc5,B
 X-CID-BVR: 0,NGT
 X-CID-BAS: 0,NGT,0,_
 X-CID-FACTOR: TF_CID_SPAM_SNR
-X-UUID: afba5c26442f11eeb20a276fd37b9834-20230827
+X-UUID: a415f7b4443311eeb20a276fd37b9834-20230827
 Received: from mtkmbs13n2.mediatek.inc [(172.21.101.108)] by mailgw02.mediatek.com
         (envelope-from <sharp.xia@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 1266044288; Sun, 27 Aug 2023 00:43:29 +0800
+        with ESMTP id 96954622; Sun, 27 Aug 2023 01:11:48 +0800
 Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
  mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Sun, 27 Aug 2023 00:43:28 +0800
+ 15.2.1118.26; Sun, 27 Aug 2023 01:11:46 +0800
 Received: from mbjsdccf07.mediatek.inc (10.15.20.246) by
  mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Sun, 27 Aug 2023 00:43:27 +0800
+ 15.2.1118.26 via Frontend Transport; Sun, 27 Aug 2023 01:11:46 +0800
 From:   <Sharp.Xia@mediatek.com>
-To:     <shawn.lin@rock-chips.com>
+To:     <wenchao.chen666@gmail.com>
 CC:     <Sharp.Xia@mediatek.com>,
         <angelogioacchino.delregno@collabora.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-kernel@vger.kernel.org>,
         <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
-        <matthias.bgg@gmail.com>, <ulf.hansson@linaro.org>,
-        <wsd_upstream@mediatek.com>
+        <matthias.bgg@gmail.com>, <shawn.lin@rock-chips.com>,
+        <ulf.hansson@linaro.org>, <wsd_upstream@mediatek.com>
 Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
-Date:   Sun, 27 Aug 2023 00:26:35 +0800
-Message-ID: <20230826162635.617-1-Sharp.Xia@mediatek.com>
+Date:   Sun, 27 Aug 2023 00:54:54 +0800
+Message-ID: <20230826165454.1196-1-Sharp.Xia@mediatek.com>
 X-Mailer: git-send-email 2.18.0
-In-Reply-To: <769a67cb-1b32-fd4f-b37e-e3ec4dab5eb9@rock-chips.com>
-References: <769a67cb-1b32-fd4f-b37e-e3ec4dab5eb9@rock-chips.com>
+In-Reply-To: <CA+Da2qxaCJwZhn0C7VxZzx8TB1VDR_xa2P0cDXUaNA9=YzSJYg@mail.gmail.com>
+References: <CA+Da2qxaCJwZhn0C7VxZzx8TB1VDR_xa2P0cDXUaNA9=YzSJYg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2023-08-25 at 17:17 +0800, Shawn Lin wrote:
->  	 
-> 
->  On 2023/8/25 16:39, Sharp.Xia@mediatek.com wrote:
-> > On Fri, 2023-08-25 at 16:11 +0800, Shawn Lin wrote:
-> >>   
-> >>   Hi Sharp,
-> 
-> ...
-> 
-> >>> 1024
-> >>>
-> > Hi Shawn,
-> > 
-> > What is your readahead value before and after applying this patch?
-> > 
-> 
-> The original readahead is 128, and after applying the patch is 1024
+On Fri, 2023-08-25 at 20:23 +0800, Wenchao Chen wrote:
 > 
 > 
-> cat /d/mmc0/ios
-> clock:          200000000 Hz
-> actual clock:   200000000 Hz
-> vdd:            18 (3.0 ~ 3.1 V)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     2 (on)
-> bus width:      3 (8 bits)
-> timing spec:    10 (mmc HS400 enhanced strobe)
-> signal voltage: 1 (1.80 V)
-> driver type:    0 (driver type B)
-> 
-> The driver I used is sdhci-of-dwcmshc.c with a KLMBG2JETDB041 eMMC
-> chip.
+> Hi Sharp
+> Use "echo 1024 > sys/block/mmcblk0/queue/read_ahead_kb" instead of
+> "blk_queue_io_opt(mq->queue, host->max_req_size);"？
 
-I tested with RK3568 and sdhci-of-dwcmshc.c driver, the performance improved by 2~3%.
- 
-Before:
-root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
-2097152+0 records in
-2097152+0 records out
-real    0m 6.01s
-user    0m 0.84s
-sys     0m 2.89s
-root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
-128
- 
-After:
-root@OpenWrt:/mnt/mmcblk0p3# echo 3 > /proc/sys/vm/drop_caches
-root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
-2097152+0 records in
-2097152+0 records out
-real    0m 5.86s
-user    0m 1.04s
-sys     0m 3.18s
-root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
-1024
- 
-root@OpenWrt:/sys/kernel/debug/mmc0# cat ios
-clock:          200000000 Hz
-actual clock:   200000000 Hz
-vdd:            18 (3.0 ~ 3.1 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      3 (8 bits)
-timing spec:    9 (mmc HS200)
-signal voltage: 1 (1.80 V)
-driver type:    0 (driver type B)
+Hi Wenchao,
+
+User space does not know the max_req_size of each mmc host.
+And when the SD card is hot inserted,
+it is complicated for the user space to modify this value.
 
