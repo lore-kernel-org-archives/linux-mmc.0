@@ -2,99 +2,93 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C69AC83F17
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 02:43:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03D5AC83F14
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 04:41:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229693AbjH1C2k (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 27 Aug 2023 22:28:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43478 "EHLO
+        id S229504AbjH1El2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Aug 2023 00:41:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38118 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229821AbjH1C2V (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Aug 2023 22:28:21 -0400
-Received: from mail-m11880.qiye.163.com (mail-m11880.qiye.163.com [115.236.118.80])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77BA8DA;
-        Sun, 27 Aug 2023 19:28:18 -0700 (PDT)
-Received: from [172.16.12.69] (unknown [58.22.7.114])
-        by mail-m11880.qiye.163.com (Hmail) with ESMTPA id 5C8D620881;
-        Mon, 28 Aug 2023 10:27:34 +0800 (CST)
-Message-ID: <95e9525e-3101-4433-27e2-cd69f254af1c@rock-chips.com>
-Date:   Mon, 28 Aug 2023 10:27:34 +0800
+        with ESMTP id S229512AbjH1ElM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 00:41:12 -0400
+Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.154.54.12])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0B17124;
+        Sun, 27 Aug 2023 21:41:07 -0700 (PDT)
+X-QQ-mid: bizesmtp78t1693197620tdj5elbh
+Received: from wangjiexun-virtual-machine.loca ( [120.225.34.249])
+        by bizesmtp.qq.com (ESMTP) with 
+        id ; Mon, 28 Aug 2023 12:40:17 +0800 (CST)
+X-QQ-SSF: 01200000000000001000000A0000000
+X-QQ-FEAT: znfcQSa1hKYDxmkXgnl9lrc8jm7ncjAYCvItBCS+bXKY++nEN9itQfpOM0KLH
+        Oqr4Gg/mQj1qE4+umRvFwq6/LH8K3ysz5/vuSYTxFWjafMILTFvoP1vMsKqTSUJwY++Z9fI
+        V+nQTh5qrHw2E2qIqik81duYSAF6Y46S4o/S4lb+ubZ34C56RBuIW6f9yY3paBw37SBvM2d
+        MPas2/XycMRbK0qKwVULKjTSl0Xvl0x4qM6jvU04Vye23X9pBkqpy4LHTTSQwcA3ibY4b8d
+        JgcuIAbF1pwh80gFwTPzkwDwK3VH07fUtjFz4u0NQ/FiKx+tc6Di2ylR1K8u+GIaqh53atJ
+        LybILy8fHzRNHZgcbvCjB0yg9r2fxClx3ebmEh+
+X-QQ-GoodBg: 0
+X-BIZMAIL-ID: 1038203160215464499
+From:   Jiexun Wang <wangjiexun@tinylab.org>
+To:     dfustini@baylibre.com
+Cc:     adrian.hunter@intel.com, aou@eecs.berkeley.edu,
+        conor+dt@kernel.org, conor@kernel.org, devicetree@vger.kernel.org,
+        guoren@kernel.org, jkridner@beagleboard.org, jszhang@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
+        palmer@dabbelt.com, paul.walmsley@sifive.com,
+        robertcnelson@beagleboard.org, robh+dt@kernel.org,
+        ulf.hansson@linaro.org, wefu@redhat.com
+Subject: Re: [PATCH RFC v2 0/4] RISC-V: Add basic eMMC support for BeagleV Ahead
+Date:   Mon, 28 Aug 2023 12:40:16 +0800
+Message-Id: <20230828044016.109515-1-wangjiexun@tinylab.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
+References: <20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.14.0
-Cc:     shawn.lin@rock-chips.com, angelogioacchino.delregno@collabora.com,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        matthias.bgg@gmail.com, ulf.hansson@linaro.org,
-        wsd_upstream@mediatek.com
-Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
-Content-Language: en-GB
-To:     Sharp.Xia@mediatek.com
-References: <769a67cb-1b32-fd4f-b37e-e3ec4dab5eb9@rock-chips.com>
- <20230826162635.617-1-Sharp.Xia@mediatek.com>
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20230826162635.617-1-Sharp.Xia@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-        tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0pISVZLSkkfGhoaQkxJTx5VEwETFh
-        oSFyQUDg9ZV1kYEgtZQVlOQ1VJSVVMVUpKT1lXWRYaDxIVHRRZQVlPS0hVSk1PSU5IVUpLS1VKQk
-        tLWQY+
-X-HM-Tid: 0a8a39f7c8492eb6kusn5c8d620881
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6Pj46HDo5HT1DDTMcDDY8Eioo
-        KU5PCwlVSlVKTUJISkNCTU5OS01PVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-        C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUhJTUk3Bg++
+Content-Transfer-Encoding: quoted-printable
+X-QQ-SENDSIZE: 520
+Feedback-ID: bizesmtp:tinylab.org:qybglogicsvrgz:qybglogicsvrgz5a-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Sharp
-
-On 2023/8/27 0:26, Sharp.Xia@mediatek.com wrote:
-> On Fri, 2023-08-25 at 17:17 +0800, Shawn Lin wrote:
->>   	
->>
-
-After more testing, most of my platforms which runs at HS400/HS200 mode 
-shows nearly no differences with the readahead ranging from 128 to 1024. 
-Yet just a board shows a performance drop now. Highly suspect it's eMMC
-chip depends. I would recommand leave it to the BSP guys to decide which
-readahead value is best for their usage.
-
-> 
-> I tested with RK3568 and sdhci-of-dwcmshc.c driver, the performance improved by 2~3%.
->   
-> Before:
-> root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
-> 2097152+0 records in
-> 2097152+0 records out
-> real    0m 6.01s
-> user    0m 0.84s
-> sys     0m 2.89s
-> root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
-> 128
->   
-> After:
-> root@OpenWrt:/mnt/mmcblk0p3# echo 3 > /proc/sys/vm/drop_caches
-> root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
-> 2097152+0 records in
-> 2097152+0 records out
-> real    0m 5.86s
-> user    0m 1.04s
-> sys     0m 3.18s
-> root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
-> 1024
->   
-> root@OpenWrt:/sys/kernel/debug/mmc0# cat ios
-> clock:          200000000 Hz
-> actual clock:   200000000 Hz
-> vdd:            18 (3.0 ~ 3.1 V)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     2 (on)
-> bus width:      3 (8 bits)
-> timing spec:    9 (mmc HS200)
-> signal voltage: 1 (1.80 V)
-> driver type:    0 (driver type B)
-> 
+Hello,=0D
+I tested the patch on my LicheePi 4A board.=0D
+It can successfully boot with eMMC, but when I use the eMMC more frequently=
+ - for instance:=0D
+=0D
+$ while true; do /bin/dd if=3D/dev/zero of=3Dbigfile bs=3D1024000 count=3D1=
+024; done &=0D
+=0D
+I encounter the following error:=0D
+=0D
+sbi_trap_error: hart1: illegal instruction handler failed (error -2)=0D
+sbi_trap_error: hart1: mcause=3D0x0000000000000002 mtval=3D0x0000000060e2de=
+4f=0D
+sbi_trap_error: hart1: mepc=3D0x000000000001897c mstatus=3D0x0000000a000018=
+20=0D
+sbi_trap_error: hart1: ra=3D0x00000000000170f8 sp=3D0x000000000004adc8=0D
+sbi_trap_error: hart1: gp=3D0xffffffff8136ea90 tp=3D0xffffffd900228000=0D
+sbi_trap_error: hart1: s0=3D0x0000000000000000 s1=3D0x000000000004ae08=0D
+sbi_trap_error: hart1: a0=3D0x000000003f9aa9bc a1=3D0x0000000000000004=0D
+sbi_trap_error: hart1: a2=3D0x0000000000000000 a3=3D0x0000000000000000=0D
+sbi_trap_error: hart1: a4=3D0x0000000000042248 a5=3D0x00000000000170e5=0D
+sbi_trap_error: hart1: a6=3D0x0000000000000000 a7=3D0x0000000054494d45=0D
+sbi_trap_error: hart1: s2=3D0x000000000004aee8 s3=3D0x0000000000000000=0D
+sbi_trap_error: hart1: s4=3D0x000000000004ae08 s5=3D0x0000000000000000=0D
+sbi_trap_error: hart1: s6=3D0xffffffff813aa240 s7=3D0x0000000000000080=0D
+sbi_trap_error: hart1: s8=3D0xffffffff80a1b5f0 s9=3D0x0000000000000000=0D
+sbi_trap_error: hart1: s10=3D0xffffffd9fef5d380 s11=3D0xffffffff81290a80=0D
+sbi_trap_error: hart1: t0=3D0x0000000a00000820 t1=3D0x0000000000000000=0D
+sbi_trap_error: hart1: t2=3D0xffffffff80c00318 t3=3D0x0000000000000001=0D
+sbi_trap_error: hart1: t4=3D0x0000000000000330 t5=3D0x0000000000000001=0D
+sbi_trap_error: hart1: t6=3D0x0000000000040000=0D
+=0D
+My kernel version is v6.5-rc3.=0D
+My OpenSBI version is 1.3.=0D
+I tried to use other versions of OpenSBI, yet the problem persists. =0D
+Is there a possibility of any underlying bug? Your insights into this would=
+ be greatly appreciated.=0D
+=0D
+Thanks,=0D
+Jiexun Wang=0D
+=0D
