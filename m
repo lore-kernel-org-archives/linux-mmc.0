@@ -2,162 +2,129 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 668FDC83F11
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 09:00:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC750C83F12
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 09:06:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229650AbjH1I7x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Aug 2023 04:59:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43928 "EHLO
+        id S229604AbjH1JFy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Aug 2023 05:05:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229950AbjH1I7u (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 04:59:50 -0400
-Received: from mail-qk1-x736.google.com (mail-qk1-x736.google.com [IPv6:2607:f8b0:4864:20::736])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D29103;
-        Mon, 28 Aug 2023 01:59:47 -0700 (PDT)
-Received: by mail-qk1-x736.google.com with SMTP id af79cd13be357-76da8e70ed3so177940485a.3;
-        Mon, 28 Aug 2023 01:59:47 -0700 (PDT)
+        with ESMTP id S229573AbjH1JFd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 05:05:33 -0400
+Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE405102
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 02:05:30 -0700 (PDT)
+Received: by mail-yb1-xb2d.google.com with SMTP id 3f1490d57ef6-d743a5fe05aso2834744276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 02:05:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1693213187; x=1693817987;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=g6/obRJ5ioyT4HGrPxjoMWXiWDYdXVyzHpHN+4tAdfM=;
-        b=LZwzEb5BQgbi7VGf5ZmGZmOIyzdEHmzuHd6TEPDu/fVJ3uvGT5KpXxnrC4wbDzHU2y
-         F5CNZQ8ClIWDeQiIarBLbsL/lGwMgn6UvCyEu/L1eSr4jE2wPJN+lQhUGwLe/t5Wgy7f
-         sdhvG7PoBA4Xf5WsSBd/bax03neNJcoiwjyKa1nrJ3RUWnGRdCHqPlBlr2AAmb8GfOia
-         uHSF5ID7XAeRul0dOMhTp8dA99k/1uKllM9M/aOaF4nkDf5nx0GXIVCX1UgnlQdR3idu
-         HblpvC+qxCrJZD969XuYZcl5gR6YiE1sIWasNnjWhkbYtlopbVHPksM+6Q0cmVx/fWQh
-         /vdA==
+        d=linaro.org; s=google; t=1693213530; x=1693818330;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=J1RNMza/FYgHvj33jNjozA6gVKX8HFlv5PptHiwW4FU=;
+        b=d2aQfYsK32hUyp2Yu5cXAdJwNM7w09dyAa694IhAP449GN90ljg8UT03FZtYOHTkNe
+         0u/2vxFEiJTKr/tgpGfqFTAhyC0XRo1s0FRs45HRvNbVsSaMc0qfwLSg7VEou9TFparr
+         Hx4FXLlxnvbRbdx7G28RosE9WH4wbT6rT5BMxAuQcs5510Q0kYwew0iNmxj6EMkWSzJ/
+         XkMb1yZKN/sNq+mGq5nh7NoAmBZBfip9mQeteFqDFLqf6G65w6vUuhLiD9QEY3mE6bLa
+         Szcu5EB2I38TgAp0hXGn8Co0k0oODnhqI13xoG8zIVAXNkSb2FZT3CAXar5F/v+emPur
+         KfqA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693213187; x=1693817987;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=g6/obRJ5ioyT4HGrPxjoMWXiWDYdXVyzHpHN+4tAdfM=;
-        b=cKfiZ2LtPdV3K9XPyAkbFI++VghkFNwOj0DGp4U7HH3Zs9EZczmDpw6C9lRjIF1zN4
-         vY0qYs5Aa4FfwMmIOVc6zHt7vRdtQ/XINehtMoo2FWVkp+fpYRul6xnspOpEclpAB8Xo
-         1b4IB3KbRTdylr4Y07bLgEbcMY3VM1omC+1enq2smPcjS0eqUEI1JwGwOTlEFl79tLrN
-         vziDjc2m0LZUGRABcDg4LknhPs/pm8mxuj5Gxp5sHygLTnurjplVo8N9us9mgVHZ/anF
-         PKclhwQ+HK/H6cl5Tjp+yGMGbonA1A5wUi+4tM7uGDKirh3z69Fj8kpY8Qp6vK96IuOo
-         4XXg==
-X-Gm-Message-State: AOJu0YxXgEFZrCLmUBGuTBzEL8Sz7KeUkdU/tFmvJ7saa9dZvPggG8l4
-        CEUo/jYyCvPNTNiJeqj71BfJiyPJoj1FYBH4EIV6xagIz9Y=
-X-Google-Smtp-Source: AGHT+IH1zyaLI3bOrANccKAtefGchSmSDUk3GJooSvfC2L+NnKMoE4zItrP3AArM78MhyWE/WgW4LlDQkapZNYMqYFU=
-X-Received: by 2002:a0c:c547:0:b0:64f:3882:512a with SMTP id
- y7-20020a0cc547000000b0064f3882512amr23079371qvi.13.1693213186970; Mon, 28
- Aug 2023 01:59:46 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1693213530; x=1693818330;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=J1RNMza/FYgHvj33jNjozA6gVKX8HFlv5PptHiwW4FU=;
+        b=M4/sigxIgEz7DPISi33Y6PG3OYn3lqMTS6z30HBz4KyJ+igUBi/vxET4O/FYwgGFRo
+         WEKFKkKeU+Ir7q/hbh74XOPmB5ln8DxM+Vr/zEVD23VNOdh5JRzi1jeLdMhNZhbo6Vkt
+         5bbbsky0Hoec8WdkQol8Dy6ik/VC6Cg1OSR0bQvSEdZJeRLh+/EMZg/nZakn9EZ0dDFm
+         6T9FrLchdMhMUSRTCIvQ1WbFsjZrGZg5b6+ifDphZUeXWnAmpddS+2n7KRoCOrqgLeuZ
+         LRVDA95eW2XeNWgrQKhr3u3HYGnEozWndq3IkA5Sul/2avnjkHLzGX1w+0ftGKtjbDr5
+         sCkA==
+X-Gm-Message-State: AOJu0YzmYTCgao7jmWwIv9UfYOL4qNe2k9QRqHzU8Xobi8QjZwFqMElt
+        udiRK93ruoXW3CVF+tKCStQoGc7AMMVSEe+SmS6jjdqaVm2BFz/fGzE=
+X-Google-Smtp-Source: AGHT+IHq+aJHFLWI8UMIwAM1r5QOuuXEt5p+X5yVlU5MKm+roaUxdv6D3/izv+QX8vHNDmiY/hXGs6MNYvsLy/6tvqs=
+X-Received: by 2002:a25:23c6:0:b0:d7a:bfcf:2d3 with SMTP id
+ j189-20020a2523c6000000b00d7abfcf02d3mr5069144ybj.51.1693213530110; Mon, 28
+ Aug 2023 02:05:30 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230823061734.27479-1-wenchao.chen@unisoc.com>
- <20230823061734.27479-3-wenchao.chen@unisoc.com> <CAPDyKFriZ_uu-WACjqXK5um1bYJSDaHsghOMGwwPJXM8pYCoGw@mail.gmail.com>
-In-Reply-To: <CAPDyKFriZ_uu-WACjqXK5um1bYJSDaHsghOMGwwPJXM8pYCoGw@mail.gmail.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Mon, 28 Aug 2023 16:59:35 +0800
-Message-ID: <CA+Da2qzsDv9MVvmXwG=DsF6B70geR1PCy+KG63n8dqJecHzXUg@mail.gmail.com>
-Subject: Re: [PATCH V2 2/2] mmc: hsq: dynamic adjustment of hsq->depth
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com,
-        yuelin.tang@unisoc.com
+References: <769a67cb-1b32-fd4f-b37e-e3ec4dab5eb9@rock-chips.com>
+ <20230826162635.617-1-Sharp.Xia@mediatek.com> <95e9525e-3101-4433-27e2-cd69f254af1c@rock-chips.com>
+In-Reply-To: <95e9525e-3101-4433-27e2-cd69f254af1c@rock-chips.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 28 Aug 2023 11:04:54 +0200
+Message-ID: <CAPDyKFqgQmvdmXe8Sxnv2E5EY9cose+E2pBK3r0P_OzqAC79dg@mail.gmail.com>
+Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
+To:     sharp.xia@mediatek.com, Shawn Lin <shawn.lin@rock-chips.com>
+Cc:     angelogioacchino.delregno@collabora.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        matthias.bgg@gmail.com, wsd_upstream@mediatek.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Aug 24, 2023 at 6:37=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
-> wrote:
+On Mon, 28 Aug 2023 at 04:28, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> On Wed, 23 Aug 2023 at 08:18, Wenchao Chen <wenchao.chen@unisoc.com> wrot=
-e:
-> >
-> > Increasing hsq_depth improves random write performance.
-> >
-> > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> > ---
-> >  drivers/mmc/host/mmc_hsq.c | 26 ++++++++++++++++++++++++++
-> >  drivers/mmc/host/mmc_hsq.h |  2 ++
-> >  2 files changed, 28 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
-> > index 8556cacb21a1..8682a3d16a76 100644
-> > --- a/drivers/mmc/host/mmc_hsq.c
-> > +++ b/drivers/mmc/host/mmc_hsq.c
-> > @@ -21,6 +21,30 @@ static void mmc_hsq_retry_handler(struct work_struct=
- *work)
-> >         mmc->ops->request(mmc, hsq->mrq);
-> >  }
-> >
-> > +static void mmc_hsq_modify_threshold(struct mmc_hsq *hsq)
-> > +{
-> > +       struct mmc_host *mmc =3D hsq->mmc;
-> > +       struct mmc_request *mrq;
-> > +       struct hsq_slot *slot;
-> > +       int need_change =3D 0;
-> > +       int tag;
-> > +
-> > +       for (tag =3D 0; tag < HSQ_NUM_SLOTS; tag++) {
-> > +               slot =3D &hsq->slot[tag];
-> > +               mrq =3D slot->mrq;
-> > +               if (mrq && mrq->data && (mrq->data->blocks =3D=3D HSQ_D=
-ATA_IS_4K)
+> Hi Sharp
 >
-> This assumes mrq->data->blksz is 512 (which at least for now is always
-> the case), but perhaps better to compute the request size instead?
-> Hence:
+> On 2023/8/27 0:26, Sharp.Xia@mediatek.com wrote:
+> > On Fri, 2023-08-25 at 17:17 +0800, Shawn Lin wrote:
+> >>
+> >>
 >
-> "mrq->data->blksz * mrq->data->blocks =3D=3D 4096"
->
+> After more testing, most of my platforms which runs at HS400/HS200 mode
+> shows nearly no differences with the readahead ranging from 128 to 1024.
+> Yet just a board shows a performance drop now. Highly suspect it's eMMC
+> chip depends. I would recommand leave it to the BSP guys to decide which
+> readahead value is best for their usage.
 
-I will update it in the next version. Thanks.
+That's a very good point. The SD/eMMC card certainly behaves
+differently, depending on the request-size.
 
-> > +                               && (mrq->data->flags & MMC_DATA_WRITE))
-> > +                       need_change++;
-> > +               else
-> > +                       break;
-> > +       }
-> > +
-> > +       if (need_change > 1)
-> > +               mmc->hsq_depth =3D HSQ_PERFORMANCE_DEPTH;
-> > +       else
-> > +               mmc->hsq_depth =3D HSQ_NORMAL_DEPTH;
-> > +}
-> > +
-> >  static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
-> >  {
-> >         struct mmc_host *mmc =3D hsq->mmc;
-> > @@ -42,6 +66,8 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq=
-)
-> >                 return;
-> >         }
+Another thing we could consider doing, could be to combine the
+information about the request-size from the mmc host, with some
+relevant information from the registers in the card (not sure exactly
+what though).
+
+>
 > >
-> > +       mmc_hsq_modify_threshold(hsq);
-> > +
-> >         slot =3D &hsq->slot[hsq->next_tag];
-> >         hsq->mrq =3D slot->mrq;
-> >         hsq->qcnt--;
-> > diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
-> > index aa5c4543b55f..fc031e38f1e0 100644
-> > --- a/drivers/mmc/host/mmc_hsq.h
-> > +++ b/drivers/mmc/host/mmc_hsq.h
-> > @@ -10,6 +10,8 @@
-> >   * flight to avoid a long latency.
-> >   */
-> >  #define HSQ_NORMAL_DEPTH       2
-> > +#define HSQ_PERFORMANCE_DEPTH  5
-> > +#define HSQ_DATA_IS_4K 8
->
-> Perhaps re-phrase the comment a few lines above to explain why/when
-> '5' can be good too.
->
-
-Ok, I'll add that in the next version. Thanks.
-
-For 4k random writes, we allow hsq_depth to increase to 5 for better
-performance.
-
+> > I tested with RK3568 and sdhci-of-dwcmshc.c driver, the performance improved by 2~3%.
 > >
-> >  struct hsq_slot {
-> >         struct mmc_request *mrq;
->
-> Kind regards
-> Uffe
+> > Before:
+> > root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
+> > 2097152+0 records in
+> > 2097152+0 records out
+> > real    0m 6.01s
+> > user    0m 0.84s
+> > sys     0m 2.89s
+> > root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
+> > 128
+> >
+> > After:
+> > root@OpenWrt:/mnt/mmcblk0p3# echo 3 > /proc/sys/vm/drop_caches
+> > root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
+> > 2097152+0 records in
+> > 2097152+0 records out
+> > real    0m 5.86s
+> > user    0m 1.04s
+> > sys     0m 3.18s
+> > root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
+> > 1024
+> >
+> > root@OpenWrt:/sys/kernel/debug/mmc0# cat ios
+> > clock:          200000000 Hz
+> > actual clock:   200000000 Hz
+> > vdd:            18 (3.0 ~ 3.1 V)
+> > bus mode:       2 (push-pull)
+> > chip select:    0 (don't care)
+> > power mode:     2 (on)
+> > bus width:      3 (8 bits)
+> > timing spec:    9 (mmc HS200)
+> > signal voltage: 1 (1.80 V)
+> > driver type:    0 (driver type B)
+> >
+
+Thanks for testing and sharing the data, both of you!
+
+Kind regards
+Uffe
