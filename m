@@ -2,318 +2,198 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF74CC71153
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 07:49:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 386AAC83F12
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 08:52:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229830AbjH1HtG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Aug 2023 03:49:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60794 "EHLO
+        id S229506AbjH1IwU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Aug 2023 04:52:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229556AbjH1Hsu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 03:48:50 -0400
-Received: from mail-m11880.qiye.163.com (mail-m11880.qiye.163.com [115.236.118.80])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0AC5114;
-        Mon, 28 Aug 2023 00:48:45 -0700 (PDT)
-Received: from [172.16.12.69] (unknown [58.22.7.114])
-        by mail-m11880.qiye.163.com (Hmail) with ESMTPA id 9CB7020B2B;
-        Mon, 28 Aug 2023 15:48:39 +0800 (CST)
-Message-ID: <cf81c490-098b-4d2b-1129-8297ccf14090@rock-chips.com>
-Date:   Mon, 28 Aug 2023 15:48:39 +0800
+        with ESMTP id S229523AbjH1Ivv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 04:51:51 -0400
+Received: from mail-qv1-xf2d.google.com (mail-qv1-xf2d.google.com [IPv6:2607:f8b0:4864:20::f2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E0ADBF;
+        Mon, 28 Aug 2023 01:51:48 -0700 (PDT)
+Received: by mail-qv1-xf2d.google.com with SMTP id 6a1803df08f44-649a653479bso16353976d6.0;
+        Mon, 28 Aug 2023 01:51:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1693212707; x=1693817507;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6QlQsqhbMuO0FCtthsUOG1XI6SmEnrXMxQcpEIHQeP4=;
+        b=LdZr+dgSjzgr+iamC9Y2A7MI3nBpu/wEkh3x7NyO6aB/PqziDjNZyVzR9y+VZHC/h/
+         ee/EtlsCSd7+mSEUQrWm42l+GGRZgfRp6ZKoPvoRh0lGab5DrT1t0ZcbDE21DbE+Xy1B
+         CRBcKNYqz1UzUYnXzBML5fSEjPqG2DfivkvRREFCvrnqneGtJnidqsdREAuWLWgmDIyQ
+         4Qzd+5Z1hNSSsfODsrWKV3b+aR2CE2zjaWkqlfq7IXHDXItI34FksR+YeNF3lvxh+mkR
+         OV1q2Vbll7EE7fryenjc28UP++jQFwCjiUAfb13Eo/fwwhKN+J+uAX5bj1igrp7o2vb2
+         grkA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693212707; x=1693817507;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=6QlQsqhbMuO0FCtthsUOG1XI6SmEnrXMxQcpEIHQeP4=;
+        b=mASCGU8cZ6ro4LHKgIVLSBX0wEH1OYKC2PSdpMAC77Bi3e7QgITAg8rsrZgiaNqfC9
+         crxFwE+Mxgv+QOMGZHryDCCccRXPGxC7RPpCdTfNuSK9l7pif+4A9PlIOXuBXuQEuAlR
+         nhCK7ViYxxfrqCBx2Irzr6lf+Nq2jh0rmagCNFpP0i1d5v8TxWHbJ79zguRCIv8RDZFV
+         VPBlAlojC5Vp6cVwZuNZSFpvDMC4xXLIvw7qJT+BG2jEs/Cm3AaY2xpYt2U7B03CU648
+         lFlnK4B27BaS7fxmP7vOCW5U4GO+zJvxb6vCh0IFd3YwCmlNoM459upOiKJM/N/+v0rx
+         pg8g==
+X-Gm-Message-State: AOJu0Yy65G+s181XewBCDnjy3ZlFjNdRqpFH3+3wOnunvWq7u93S07lo
+        AC9hfXmzSqTISU1lI9u63yrrc+1qsgleFIrOtxeY053VQE0=
+X-Google-Smtp-Source: AGHT+IGvcGpJ/BkF2tzwfwhnDeHi0Sl7YUGemSsVyjafNd6vWGXzxLfatq2nynP+7qkXioJZBv/dybpjBkJ3VJz1WCg=
+X-Received: by 2002:a0c:e392:0:b0:64e:c5da:49e0 with SMTP id
+ a18-20020a0ce392000000b0064ec5da49e0mr23572729qvl.13.1693212707398; Mon, 28
+ Aug 2023 01:51:47 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.14.0
-Cc:     shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        linux-kernel@vger.kernel.org, Jyan Chou <jyanchou@realtek.com>
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Add CQE support
-Content-Language: en-GB
-To:     Sergey Khimich <serghox@gmail.com>
-References: <20230825143525.869906-1-serghox@gmail.com>
- <20230825143525.869906-2-serghox@gmail.com>
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20230825143525.869906-2-serghox@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-        tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0sZQlZJTE4ZQhgYT0tKS0JVEwETFh
-        oSFyQUDg9ZV1kYEgtZQVlOQ1VJSVVMVUpKT1lXWRYaDxIVHRRZQVlPS0hVSkpLSEpDVUpLS1VLWQ
-        Y+
-X-HM-Tid: 0a8a3b1dbf122eb6kusn9cb7020b2b
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6MyI6Mio*Mz0BLzINEy0cPjYS
-        HzdPCjJVSlVKTUJISUtDQklLTkNMVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-        C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUpLTUJINwY+
+References: <20230823061734.27479-1-wenchao.chen@unisoc.com> <CAPDyKFqbY5yLNwhODDq0XimKtnf0V93rEbmSdG+qZ2FrYWJFsw@mail.gmail.com>
+In-Reply-To: <CAPDyKFqbY5yLNwhODDq0XimKtnf0V93rEbmSdG+qZ2FrYWJFsw@mail.gmail.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Mon, 28 Aug 2023 16:51:35 +0800
+Message-ID: <CA+Da2qw+JR5oVONzX9C3YtSZfXjTZnDa=3+iUpwvCqN6m1ApLQ@mail.gmail.com>
+Subject: Re: [PATCH V2 0/2] mmc: hsq: Dynamically adjust hsq_depth to improve performance
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com,
+        yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+Jyan Chou
+On Thu, Aug 24, 2023 at 6:26=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+>
+> On Wed, 23 Aug 2023 at 08:18, Wenchao Chen <wenchao.chen@unisoc.com> wrot=
+e:
+> >
+> > Change in v2:
+> > - Support for dynamic adjustment of hsq_depth.
+> >
+> > Test
+> > =3D=3D=3D=3D=3D
+> > I tested 3 times for each case and output a average speed.
+> > Ran 'fio' to evaluate the performance:
+> > 1.Fixed hsq_depth
+> > 1) Sequential write:
+> > Speed: 168 164 165
+> > Average speed: 165.67MB/S
+> >
+> > 2) Sequential read:
+> > Speed: 326 326 326
+> > Average speed: 326MB/S
+> >
+> > 3) Random write:
+> > Speed: 82.6 83 83
+> > Average speed: 82.87MB/S
+> >
+> > 4) Random read:
+> > Speed: 48.2 48.3 47.6
+> > Average speed: 48.03MB/S
+> >
+> > 2.Dynamic hsq_depth
+> > 1) Sequential write:
+> > Speed: 167 166 166
+> > Average speed: 166.33MB/S
+> >
+> > 2) Sequential read:
+> > Speed: 327 326 326
+> > Average speed: 326.3MB/S
+> >
+> > 3) Random write:
+> > Speed: 86.1 86.2 87.7
+> > Average speed: 86.67MB/S
+> >
+> > 4) Random read:
+> > Speed: 48.1 48 48
+> > Average speed: 48.03MB/S
+> >
+> > Based on the above data, dynamic hsq_depth can improve the performance =
+of random writes.
+> > Random write improved by 4.6%.
+>
+> Thanks for sharing this, interesting!
+>
+> >
+> > Test cmd
+> > =3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > 1)write: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Dwrite -bs=3D=
+512K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread -iodep=
+th=3D64
+> > 2)read: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Dread -bs=3D51=
+2K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread -iodepth=
+=3D64
+> > 3)randwrite: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Drandwrit=
+e -bs=3D4K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread =
+-iodepth=3D64
+> > 4)randread: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Drandread =
+-bs=3D4K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread -i=
+odepth=3D64
+> >
+>
+> The buffer you used for randwrite/randread is 4K blocks. Did you try
+> with something bigger too?
+>
+Hi Uffe
+I tried bs=3D8k and bs=3D16k, the random read and random write performance
+improvement was not noticeable.
 
-On 2023/8/25 22:35, Sergey Khimich wrote:
-> Implement SDHCI CQE support for DesignWare SDHCI.
-> For enabling CQE support just set 'supports-cqe' in your DevTree file
-> for appropriate mmc node.
-> 
+1.Fixed hsq_depth
+1) Random write(bs=3D8K):
+Speed: 116 114 115
+Average speed: 115MB/S
 
-Hi Sergey
+2) Random read(bs=3D8K):
+Speed: 83 83 82.5
+Average speed: 82.8MB/S
 
-Jyan had pushed a version to support it:
-https://patchwork.kernel.org/project/linux-mmc/patch/20230616063731.17591-1-jyanchou@realtek.com/
+3) Random write(bs=3D16K):
+Speed: 141 142 141
+Average speed: 141.3MB/S
 
-And obviously there are some special limitations from IP vendor
-you need to address such as 128MB DMA boundary.
+4) Random read(bs=3D16K):
+Speed: 132 132 132
+Average speed: 132MB/S
 
-> Signed-off-by: Sergey Khimich <serghox@gmail.com>
-> ---
->   drivers/mmc/host/Kconfig            |   1 +
->   drivers/mmc/host/sdhci-of-dwcmshc.c | 154 +++++++++++++++++++++++++++-
->   2 files changed, 154 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 159a3e9490ae..c9fc790d7dba 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -233,6 +233,7 @@ config MMC_SDHCI_OF_DWCMSHC
->   	depends on MMC_SDHCI_PLTFM
->   	depends on OF
->   	depends on COMMON_CLK
-> +	select MMC_CQHCI
->   	help
->   	  This selects Synopsys DesignWare Cores Mobile Storage Controller
->   	  support.
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index e68cd87998c8..5ee8954a8f5a 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -19,6 +19,7 @@
->   #include <linux/sizes.h>
->   
->   #include "sdhci-pltfm.h"
-> +#include "cqhci.h"
->   
->   #define SDHCI_DWCMSHC_ARG2_STUFF	GENMASK(31, 16)
->   
-> @@ -35,6 +36,9 @@
->   #define DWCMSHC_ENHANCED_STROBE		BIT(8)
->   #define DWCMSHC_EMMC_ATCTRL		0x40
->   
-> +/* DWC IP vendor area 2 pointer */
-> +#define DWCMSHC_P_VENDOR_AREA2		0xea
-> +
->   /* Rockchip specific Registers */
->   #define DWCMSHC_EMMC_DLL_CTRL		0x800
->   #define DWCMSHC_EMMC_DLL_RXCLK		0x804
-> @@ -74,6 +78,10 @@
->   #define BOUNDARY_OK(addr, len) \
->   	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
->   
-> +#define DWCMCHC_SDHCI_CQE_TRNS_MODE	(SDHCI_TRNS_MULTI | \
-> +					 SDHCI_TRNS_BLK_CNT_EN | \
-> +					 SDHCI_TRNS_DMA)
-> +
->   enum dwcmshc_rk_type {
->   	DWCMSHC_RK3568,
->   	DWCMSHC_RK3588,
-> @@ -89,7 +97,8 @@ struct rk35xx_priv {
->   
->   struct dwcmshc_priv {
->   	struct clk	*bus_clk;
-> -	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
-> +	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA1 reg */
-> +	int vendor_specific_area2; /* P_VENDOR_SPECIFIC_AREA2 reg */
->   	void *priv; /* pointer to SoC private stuff */
->   };
->   
-> @@ -209,6 +218,65 @@ static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
->   	sdhci_writel(host, vendor, reg);
->   }
->   
-> +static u32 dwcmshc_cqe_irq_handler(struct sdhci_host *host, u32 intmask)
-> +{
-> +	int cmd_error = 0;
-> +	int data_error = 0;
-> +
-> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
-> +		return intmask;
-> +
-> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +
-> +	return 0;
-> +}
-> +
-> +static void dwcmshc_sdhci_cqe_enable(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	u32 pstate;
-> +	u8 ctrl;
-> +	int count = 10;
-> +
-> +	/*
-> +	 * CQE gets stuck if it sees Buffer Read Enable bit set, which can be
-> +	 * the case after tuning, so ensure the buffer is drained.
-> +	 */
-> +	pstate = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +	while (pstate & SDHCI_DATA_AVAILABLE) {
-> +		sdhci_readl(host, SDHCI_BUFFER);
-> +		pstate = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +		if (count-- == 0) {
-> +			dev_warn(mmc_dev(host->mmc),
-> +				 "CQE may get stuck because the Buffer Read Enable bit is set\n");
-> +			break;
-> +		}
-> +		mdelay(1);
-> +	}
-> +
-> +	sdhci_writew(host, DWCMCHC_SDHCI_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
-> +
-> +	sdhci_cqe_enable(mmc);
-> +
-> +	/*
-> +	 * The "DesignWare Cores Mobile Storage Host Controller
-> +	 * DWC_mshc / DWC_mshc_lite Databook" says:
-> +	 * when Host Version 4 Enable" is 1 in Host Control 2 register,
-> +	 * SDHCI_CTRL_ADMA32 bit means ADMA2 is selected.
-> +	 * Selection of 32-bit/64-bit System Addressing:
-> +	 * either 32-bit or 64-bit system addressing is selected by
-> +	 * 64-bit Addressing bit in Host Control 2 register.
-> +	 *
-> +	 * On the other hand the "DesignWare Cores Mobile Storage Host
-> +	 * Controller DWC_mshc / DWC_mshc_lite User Guide" says, that we have to
-> +	 * set DMA_SEL to ADMA2 _only_ mode in the Host Control 2 register.
-> +	 */
-> +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +	ctrl &= ~SDHCI_CTRL_DMA_MASK;
-> +	ctrl |= SDHCI_CTRL_ADMA32;
-> +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +}
-> +
->   static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock)
->   {
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -344,6 +412,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
->   	.get_max_clock		= dwcmshc_get_max_clock,
->   	.reset			= sdhci_reset,
->   	.adma_write_desc	= dwcmshc_adma_write_desc,
-> +	.irq			= dwcmshc_cqe_irq_handler,
->   };
->   
->   static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
-> @@ -378,6 +447,74 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
->   		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->   };
->   
-> +static void dwcmshc_cqhci_dumpregs(struct mmc_host *mmc)
-> +{
-> +	sdhci_dumpregs(mmc_priv(mmc));
-> +}
-> +
-> +static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
-> +	.enable		= dwcmshc_sdhci_cqe_enable,
-> +	.disable	= sdhci_cqe_disable,
-> +	.dumpregs	= dwcmshc_cqhci_dumpregs,
-> +};
-> +
-> +static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *pdev)
-> +{
-> +	struct cqhci_host *cq_host;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	bool dma64 = false;
-> +	u16 clk;
-> +	int err;
-> +
-> +	host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
-> +	cq_host = devm_kzalloc(&pdev->dev, sizeof(*cq_host), GFP_KERNEL);
-> +	if (!cq_host) {
-> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: not enough memory\n");
-> +		return;
-> +	}
-> +
-> +	/*
-> +	 * For dwcmshc host controller we have to enable internal clock
-> +	 * before access to some registers from Vendor Specific Aria 2.
-> +	 */
-> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	clk |= SDHCI_CLOCK_INT_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	if (!(clk & SDHCI_CLOCK_INT_EN)) {
-> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: internal clock enable error\n");
-> +		goto free_cq_host;
-> +	}
-> +
-> +	cq_host->mmio = host->ioaddr + priv->vendor_specific_area2;
-> +	cq_host->ops = &dwcmshc_cqhci_ops;
-> +
-> +	/* Enable using of 128-bit task descriptors */
-> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
-> +	if (dma64) {
-> +		dev_dbg(mmc_dev(host->mmc), "128-bit task descriptors\n");
-> +		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
-> +	}
-> +	err = cqhci_init(cq_host, host->mmc, dma64);
-> +	if (err) {
-> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: error %d\n", err);
-> +		goto int_clok_disable;
-> +	}
-> +
-> +	dev_dbg(mmc_dev(host->mmc), "CQE init done\n");
-> +
-> +	return;
-> +
-> +int_clok_disable:
-> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	clk &= ~SDHCI_CLOCK_INT_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +free_cq_host:
-> +	devm_kfree(&pdev->dev, cq_host);
-> +}
-> +
->   static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
->   {
->   	int err;
-> @@ -471,6 +608,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
->   	const struct sdhci_pltfm_data *pltfm_data;
->   	int err;
->   	u32 extra;
-> +	u32 caps;
->   
->   	pltfm_data = device_get_match_data(&pdev->dev);
->   	if (!pltfm_data) {
-> @@ -518,6 +656,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
->   
->   	priv->vendor_specific_area1 =
->   		sdhci_readl(host, DWCMSHC_P_VENDOR_AREA1) & DWCMSHC_AREA1_MASK;
-> +	priv->vendor_specific_area2 =
-> +		sdhci_readw(host, DWCMSHC_P_VENDOR_AREA2);
->   
->   	host->mmc_host_ops.request = dwcmshc_request;
->   	host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
-> @@ -546,12 +686,24 @@ static int dwcmshc_probe(struct platform_device *pdev)
->   		sdhci_enable_v4_mode(host);
->   #endif
->   
-> +	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-> +	if (caps & SDHCI_CAN_64BIT_V4)
-> +		sdhci_enable_v4_mode(host);
-> +
->   	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
->   
->   	err = sdhci_setup_host(host);
->   	if (err)
->   		goto err_clk;
->   
-> +	/* Setup Command Queue Engine if enabled */
-> +	if (device_property_read_bool(&pdev->dev, "supports-cqe")) {
-> +		if (caps & SDHCI_CAN_64BIT_V4)
-> +			dwcmshc_cqhci_init(host, pdev);
-> +		else
-> +			dev_warn(dev, "Cannot enable CQE without V4 mode support\n");
-> +	}
-> +
->   	if (rk_priv)
->   		dwcmshc_rk35xx_postinit(host, priv);
->   
+2.Dynamic hsq_depth
+1) Random write(bs=3D8K):
+Speed: 115 115 115
+Average speed: 115MB/S
+
+2) Random read(bs=3D8K):
+Speed: 82.7 82.9 82.8
+Average speed: 82.8MB/S
+
+3) Random write(bs=3D16K):
+Speed: 143 141 141
+Average speed: 141.6MB/S
+
+4) Random read(bs=3D16K):
+Speed: 132 132 132
+Average speed: 132MB/S
+
+> Or maybe we are afraid of introducing a bigger latency if we
+> dynamically change the hsq_depth to match something bigger than 4K?
+>
+
+Increasing hsq_depth cannot improve 8k and 16k random read/write performanc=
+e.
+To reduce latency, we dynamically increase hsq_depth only for 4k random wri=
+tes.
+
+> >
+> > Wenchao Chen (2):
+> >   mmc: queue: replace immediate with hsq->depth
+> >   mmc: hsq: dynamic adjustment of hsq->depth
+> >
+> >  drivers/mmc/core/queue.c   |  6 +-----
+> >  drivers/mmc/host/mmc_hsq.c | 27 +++++++++++++++++++++++++++
+> >  drivers/mmc/host/mmc_hsq.h |  8 ++++++++
+> >  include/linux/mmc/host.h   |  1 +
+> >  4 files changed, 37 insertions(+), 5 deletions(-)
+> >
+>
+> Kind regards
+> Uffe
