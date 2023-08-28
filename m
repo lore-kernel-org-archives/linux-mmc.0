@@ -2,57 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 386AAC83F12
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 08:52:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 668FDC83F11
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 09:00:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229506AbjH1IwU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Aug 2023 04:52:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48950 "EHLO
+        id S229650AbjH1I7x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Aug 2023 04:59:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43928 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229523AbjH1Ivv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 04:51:51 -0400
-Received: from mail-qv1-xf2d.google.com (mail-qv1-xf2d.google.com [IPv6:2607:f8b0:4864:20::f2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E0ADBF;
-        Mon, 28 Aug 2023 01:51:48 -0700 (PDT)
-Received: by mail-qv1-xf2d.google.com with SMTP id 6a1803df08f44-649a653479bso16353976d6.0;
-        Mon, 28 Aug 2023 01:51:48 -0700 (PDT)
+        with ESMTP id S229950AbjH1I7u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 04:59:50 -0400
+Received: from mail-qk1-x736.google.com (mail-qk1-x736.google.com [IPv6:2607:f8b0:4864:20::736])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D29103;
+        Mon, 28 Aug 2023 01:59:47 -0700 (PDT)
+Received: by mail-qk1-x736.google.com with SMTP id af79cd13be357-76da8e70ed3so177940485a.3;
+        Mon, 28 Aug 2023 01:59:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1693212707; x=1693817507;
+        d=gmail.com; s=20221208; t=1693213187; x=1693817987;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=6QlQsqhbMuO0FCtthsUOG1XI6SmEnrXMxQcpEIHQeP4=;
-        b=LdZr+dgSjzgr+iamC9Y2A7MI3nBpu/wEkh3x7NyO6aB/PqziDjNZyVzR9y+VZHC/h/
-         ee/EtlsCSd7+mSEUQrWm42l+GGRZgfRp6ZKoPvoRh0lGab5DrT1t0ZcbDE21DbE+Xy1B
-         CRBcKNYqz1UzUYnXzBML5fSEjPqG2DfivkvRREFCvrnqneGtJnidqsdREAuWLWgmDIyQ
-         4Qzd+5Z1hNSSsfODsrWKV3b+aR2CE2zjaWkqlfq7IXHDXItI34FksR+YeNF3lvxh+mkR
-         OV1q2Vbll7EE7fryenjc28UP++jQFwCjiUAfb13Eo/fwwhKN+J+uAX5bj1igrp7o2vb2
-         grkA==
+        bh=g6/obRJ5ioyT4HGrPxjoMWXiWDYdXVyzHpHN+4tAdfM=;
+        b=LZwzEb5BQgbi7VGf5ZmGZmOIyzdEHmzuHd6TEPDu/fVJ3uvGT5KpXxnrC4wbDzHU2y
+         F5CNZQ8ClIWDeQiIarBLbsL/lGwMgn6UvCyEu/L1eSr4jE2wPJN+lQhUGwLe/t5Wgy7f
+         sdhvG7PoBA4Xf5WsSBd/bax03neNJcoiwjyKa1nrJ3RUWnGRdCHqPlBlr2AAmb8GfOia
+         uHSF5ID7XAeRul0dOMhTp8dA99k/1uKllM9M/aOaF4nkDf5nx0GXIVCX1UgnlQdR3idu
+         HblpvC+qxCrJZD969XuYZcl5gR6YiE1sIWasNnjWhkbYtlopbVHPksM+6Q0cmVx/fWQh
+         /vdA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693212707; x=1693817507;
+        d=1e100.net; s=20221208; t=1693213187; x=1693817987;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=6QlQsqhbMuO0FCtthsUOG1XI6SmEnrXMxQcpEIHQeP4=;
-        b=mASCGU8cZ6ro4LHKgIVLSBX0wEH1OYKC2PSdpMAC77Bi3e7QgITAg8rsrZgiaNqfC9
-         crxFwE+Mxgv+QOMGZHryDCCccRXPGxC7RPpCdTfNuSK9l7pif+4A9PlIOXuBXuQEuAlR
-         nhCK7ViYxxfrqCBx2Irzr6lf+Nq2jh0rmagCNFpP0i1d5v8TxWHbJ79zguRCIv8RDZFV
-         VPBlAlojC5Vp6cVwZuNZSFpvDMC4xXLIvw7qJT+BG2jEs/Cm3AaY2xpYt2U7B03CU648
-         lFlnK4B27BaS7fxmP7vOCW5U4GO+zJvxb6vCh0IFd3YwCmlNoM459upOiKJM/N/+v0rx
-         pg8g==
-X-Gm-Message-State: AOJu0Yy65G+s181XewBCDnjy3ZlFjNdRqpFH3+3wOnunvWq7u93S07lo
-        AC9hfXmzSqTISU1lI9u63yrrc+1qsgleFIrOtxeY053VQE0=
-X-Google-Smtp-Source: AGHT+IGvcGpJ/BkF2tzwfwhnDeHi0Sl7YUGemSsVyjafNd6vWGXzxLfatq2nynP+7qkXioJZBv/dybpjBkJ3VJz1WCg=
-X-Received: by 2002:a0c:e392:0:b0:64e:c5da:49e0 with SMTP id
- a18-20020a0ce392000000b0064ec5da49e0mr23572729qvl.13.1693212707398; Mon, 28
- Aug 2023 01:51:47 -0700 (PDT)
+        bh=g6/obRJ5ioyT4HGrPxjoMWXiWDYdXVyzHpHN+4tAdfM=;
+        b=cKfiZ2LtPdV3K9XPyAkbFI++VghkFNwOj0DGp4U7HH3Zs9EZczmDpw6C9lRjIF1zN4
+         vY0qYs5Aa4FfwMmIOVc6zHt7vRdtQ/XINehtMoo2FWVkp+fpYRul6xnspOpEclpAB8Xo
+         1b4IB3KbRTdylr4Y07bLgEbcMY3VM1omC+1enq2smPcjS0eqUEI1JwGwOTlEFl79tLrN
+         vziDjc2m0LZUGRABcDg4LknhPs/pm8mxuj5Gxp5sHygLTnurjplVo8N9us9mgVHZ/anF
+         PKclhwQ+HK/H6cl5Tjp+yGMGbonA1A5wUi+4tM7uGDKirh3z69Fj8kpY8Qp6vK96IuOo
+         4XXg==
+X-Gm-Message-State: AOJu0YxXgEFZrCLmUBGuTBzEL8Sz7KeUkdU/tFmvJ7saa9dZvPggG8l4
+        CEUo/jYyCvPNTNiJeqj71BfJiyPJoj1FYBH4EIV6xagIz9Y=
+X-Google-Smtp-Source: AGHT+IH1zyaLI3bOrANccKAtefGchSmSDUk3GJooSvfC2L+NnKMoE4zItrP3AArM78MhyWE/WgW4LlDQkapZNYMqYFU=
+X-Received: by 2002:a0c:c547:0:b0:64f:3882:512a with SMTP id
+ y7-20020a0cc547000000b0064f3882512amr23079371qvi.13.1693213186970; Mon, 28
+ Aug 2023 01:59:46 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230823061734.27479-1-wenchao.chen@unisoc.com> <CAPDyKFqbY5yLNwhODDq0XimKtnf0V93rEbmSdG+qZ2FrYWJFsw@mail.gmail.com>
-In-Reply-To: <CAPDyKFqbY5yLNwhODDq0XimKtnf0V93rEbmSdG+qZ2FrYWJFsw@mail.gmail.com>
+References: <20230823061734.27479-1-wenchao.chen@unisoc.com>
+ <20230823061734.27479-3-wenchao.chen@unisoc.com> <CAPDyKFriZ_uu-WACjqXK5um1bYJSDaHsghOMGwwPJXM8pYCoGw@mail.gmail.com>
+In-Reply-To: <CAPDyKFriZ_uu-WACjqXK5um1bYJSDaHsghOMGwwPJXM8pYCoGw@mail.gmail.com>
 From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Mon, 28 Aug 2023 16:51:35 +0800
-Message-ID: <CA+Da2qw+JR5oVONzX9C3YtSZfXjTZnDa=3+iUpwvCqN6m1ApLQ@mail.gmail.com>
-Subject: Re: [PATCH V2 0/2] mmc: hsq: Dynamically adjust hsq_depth to improve performance
+Date:   Mon, 28 Aug 2023 16:59:35 +0800
+Message-ID: <CA+Da2qzsDv9MVvmXwG=DsF6B70geR1PCy+KG63n8dqJecHzXUg@mail.gmail.com>
+Subject: Re: [PATCH V2 2/2] mmc: hsq: dynamic adjustment of hsq->depth
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com,
@@ -63,137 +64,100 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Aug 24, 2023 at 6:26=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+On Thu, Aug 24, 2023 at 6:37=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
 > wrote:
 >
 > On Wed, 23 Aug 2023 at 08:18, Wenchao Chen <wenchao.chen@unisoc.com> wrot=
 e:
 > >
-> > Change in v2:
-> > - Support for dynamic adjustment of hsq_depth.
+> > Increasing hsq_depth improves random write performance.
 > >
-> > Test
-> > =3D=3D=3D=3D=3D
-> > I tested 3 times for each case and output a average speed.
-> > Ran 'fio' to evaluate the performance:
-> > 1.Fixed hsq_depth
-> > 1) Sequential write:
-> > Speed: 168 164 165
-> > Average speed: 165.67MB/S
+> > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> > ---
+> >  drivers/mmc/host/mmc_hsq.c | 26 ++++++++++++++++++++++++++
+> >  drivers/mmc/host/mmc_hsq.h |  2 ++
+> >  2 files changed, 28 insertions(+)
 > >
-> > 2) Sequential read:
-> > Speed: 326 326 326
-> > Average speed: 326MB/S
+> > diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
+> > index 8556cacb21a1..8682a3d16a76 100644
+> > --- a/drivers/mmc/host/mmc_hsq.c
+> > +++ b/drivers/mmc/host/mmc_hsq.c
+> > @@ -21,6 +21,30 @@ static void mmc_hsq_retry_handler(struct work_struct=
+ *work)
+> >         mmc->ops->request(mmc, hsq->mrq);
+> >  }
 > >
-> > 3) Random write:
-> > Speed: 82.6 83 83
-> > Average speed: 82.87MB/S
-> >
-> > 4) Random read:
-> > Speed: 48.2 48.3 47.6
-> > Average speed: 48.03MB/S
-> >
-> > 2.Dynamic hsq_depth
-> > 1) Sequential write:
-> > Speed: 167 166 166
-> > Average speed: 166.33MB/S
-> >
-> > 2) Sequential read:
-> > Speed: 327 326 326
-> > Average speed: 326.3MB/S
-> >
-> > 3) Random write:
-> > Speed: 86.1 86.2 87.7
-> > Average speed: 86.67MB/S
-> >
-> > 4) Random read:
-> > Speed: 48.1 48 48
-> > Average speed: 48.03MB/S
-> >
-> > Based on the above data, dynamic hsq_depth can improve the performance =
-of random writes.
-> > Random write improved by 4.6%.
+> > +static void mmc_hsq_modify_threshold(struct mmc_hsq *hsq)
+> > +{
+> > +       struct mmc_host *mmc =3D hsq->mmc;
+> > +       struct mmc_request *mrq;
+> > +       struct hsq_slot *slot;
+> > +       int need_change =3D 0;
+> > +       int tag;
+> > +
+> > +       for (tag =3D 0; tag < HSQ_NUM_SLOTS; tag++) {
+> > +               slot =3D &hsq->slot[tag];
+> > +               mrq =3D slot->mrq;
+> > +               if (mrq && mrq->data && (mrq->data->blocks =3D=3D HSQ_D=
+ATA_IS_4K)
 >
-> Thanks for sharing this, interesting!
+> This assumes mrq->data->blksz is 512 (which at least for now is always
+> the case), but perhaps better to compute the request size instead?
+> Hence:
 >
-> >
-> > Test cmd
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > 1)write: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Dwrite -bs=3D=
-512K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread -iodep=
-th=3D64
-> > 2)read: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Dread -bs=3D51=
-2K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread -iodepth=
-=3D64
-> > 3)randwrite: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Drandwrit=
-e -bs=3D4K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread =
--iodepth=3D64
-> > 4)randread: fio -filename=3D/dev/mmcblk0p72 -direct=3D1 -rw=3Drandread =
--bs=3D4K -size=3D512M -group_reporting -name=3Dtest -numjobs=3D8 -thread -i=
-odepth=3D64
-> >
->
-> The buffer you used for randwrite/randread is 4K blocks. Did you try
-> with something bigger too?
->
-Hi Uffe
-I tried bs=3D8k and bs=3D16k, the random read and random write performance
-improvement was not noticeable.
-
-1.Fixed hsq_depth
-1) Random write(bs=3D8K):
-Speed: 116 114 115
-Average speed: 115MB/S
-
-2) Random read(bs=3D8K):
-Speed: 83 83 82.5
-Average speed: 82.8MB/S
-
-3) Random write(bs=3D16K):
-Speed: 141 142 141
-Average speed: 141.3MB/S
-
-4) Random read(bs=3D16K):
-Speed: 132 132 132
-Average speed: 132MB/S
-
-2.Dynamic hsq_depth
-1) Random write(bs=3D8K):
-Speed: 115 115 115
-Average speed: 115MB/S
-
-2) Random read(bs=3D8K):
-Speed: 82.7 82.9 82.8
-Average speed: 82.8MB/S
-
-3) Random write(bs=3D16K):
-Speed: 143 141 141
-Average speed: 141.6MB/S
-
-4) Random read(bs=3D16K):
-Speed: 132 132 132
-Average speed: 132MB/S
-
-> Or maybe we are afraid of introducing a bigger latency if we
-> dynamically change the hsq_depth to match something bigger than 4K?
+> "mrq->data->blksz * mrq->data->blocks =3D=3D 4096"
 >
 
-Increasing hsq_depth cannot improve 8k and 16k random read/write performanc=
-e.
-To reduce latency, we dynamically increase hsq_depth only for 4k random wri=
-tes.
+I will update it in the next version. Thanks.
+
+> > +                               && (mrq->data->flags & MMC_DATA_WRITE))
+> > +                       need_change++;
+> > +               else
+> > +                       break;
+> > +       }
+> > +
+> > +       if (need_change > 1)
+> > +               mmc->hsq_depth =3D HSQ_PERFORMANCE_DEPTH;
+> > +       else
+> > +               mmc->hsq_depth =3D HSQ_NORMAL_DEPTH;
+> > +}
+> > +
+> >  static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
+> >  {
+> >         struct mmc_host *mmc =3D hsq->mmc;
+> > @@ -42,6 +66,8 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq=
+)
+> >                 return;
+> >         }
+> >
+> > +       mmc_hsq_modify_threshold(hsq);
+> > +
+> >         slot =3D &hsq->slot[hsq->next_tag];
+> >         hsq->mrq =3D slot->mrq;
+> >         hsq->qcnt--;
+> > diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
+> > index aa5c4543b55f..fc031e38f1e0 100644
+> > --- a/drivers/mmc/host/mmc_hsq.h
+> > +++ b/drivers/mmc/host/mmc_hsq.h
+> > @@ -10,6 +10,8 @@
+> >   * flight to avoid a long latency.
+> >   */
+> >  #define HSQ_NORMAL_DEPTH       2
+> > +#define HSQ_PERFORMANCE_DEPTH  5
+> > +#define HSQ_DATA_IS_4K 8
+>
+> Perhaps re-phrase the comment a few lines above to explain why/when
+> '5' can be good too.
+>
+
+Ok, I'll add that in the next version. Thanks.
+
+For 4k random writes, we allow hsq_depth to increase to 5 for better
+performance.
 
 > >
-> > Wenchao Chen (2):
-> >   mmc: queue: replace immediate with hsq->depth
-> >   mmc: hsq: dynamic adjustment of hsq->depth
-> >
-> >  drivers/mmc/core/queue.c   |  6 +-----
-> >  drivers/mmc/host/mmc_hsq.c | 27 +++++++++++++++++++++++++++
-> >  drivers/mmc/host/mmc_hsq.h |  8 ++++++++
-> >  include/linux/mmc/host.h   |  1 +
-> >  4 files changed, 37 insertions(+), 5 deletions(-)
-> >
+> >  struct hsq_slot {
+> >         struct mmc_request *mrq;
 >
 > Kind regards
 > Uffe
