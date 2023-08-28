@@ -2,98 +2,218 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03419C83F12
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 10:05:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD811C83F16
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 10:25:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230291AbjH1KEx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Aug 2023 06:04:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40884 "EHLO
+        id S229547AbjH1KZZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Aug 2023 06:25:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44070 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230340AbjH1KEt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 06:04:49 -0400
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01DF6F4;
-        Mon, 28 Aug 2023 03:04:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1693217086; x=1724753086;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=k7s9F712FvA8jSYfxO5MUGK+mY28MxXzM47n2+XEP4A=;
-  b=MNNIY11R2+LjARYA+DMyZUHcQPLAdrCUz35YbQ7+W7Fgch0oKJkBTWlK
-   bpJlB3wKsirwI+avh35vyoT2lGUHnBpwo6ljNj3W5b803F5Exvd4Exai/
-   HW6To5lYcoj7QpwDKEMsPI2ZfW7MCB1wdjtPV1Dmb/kOfHkO5Ouwe8A7e
-   3O6J5R86c8ehyAHGloS4jyfPppS+RzxKGw8MjJGcXXom2nW9wK+DvfC6s
-   lId/J+ZyDorNwN7/Yl2b/kCHBbpKcx6Vnj9zU5VWFCfn6Ch2rttKcliG1
-   5EdRMqCWRRC0SP9sYV55/74eLTZ/leYWENOjcTkbdiBRZQ+iLBIA5S3JD
-   A==;
-X-IronPort-AV: E=Sophos;i="6.02,207,1688454000"; 
-   d="scan'208";a="1616437"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa2.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 28 Aug 2023 03:04:45 -0700
-Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.21; Mon, 28 Aug 2023 03:04:34 -0700
-Received: from che-lt-i64410lx.microchip.com (10.10.85.11) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.21 via Frontend Transport; Mon, 28 Aug 2023 03:04:29 -0700
-From:   Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>
-To:     <linus.walleij@linaro.org>, <dmitry.torokhov@gmail.com>,
-        <ulf.hansson@linaro.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <ludovic.desroches@microchip.com>, <nicolas.ferre@microchip.com>,
-        <alexandre.belloni@bootlin.com>
-CC:     <hari.prasathge@microchip.com>,
-        <balamanikandan.gunasundar@microchip.com>
-Subject: [PATCH] mmc: atmel-mci: Remove preprocessor directive
-Date:   Mon, 28 Aug 2023 15:34:21 +0530
-Message-ID: <20230828100421.19758-1-balamanikandan.gunasundar@microchip.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S231287AbjH1KZJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 06:25:09 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58A23AB;
+        Mon, 28 Aug 2023 03:25:06 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EA41763A50;
+        Mon, 28 Aug 2023 10:25:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 09CB6C433C8;
+        Mon, 28 Aug 2023 10:25:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1693218305;
+        bh=/VbqimkloGhR5wub24GQwY1fXQleuKWm1OLtthuQ83k=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=bngle1JCjU7A78t/mOH1mikS5Ck0bXpjRNPd1VDeOLUPxnhRxMlz5qo6DsksWMkQ1
+         8RaELrcoepGbxgnaWD5WdBqy5aLohpQRDzRFGoCQRZz8BMjQuXDdF9p7tMz4IXcafc
+         H3ncWafLw7fw1nn6MpfKo74Qr1iZ2vSwow8nAEsA=
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     stable@vger.kernel.org
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        patches@lists.linux.dev, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, Stephen Boyd <swboyd@chromium.org>,
+        Sasha Levin <sashal@kernel.org>
+Subject: [PATCH 4.19 040/129] mmc: Remove dev_err() usage after platform_get_irq()
+Date:   Mon, 28 Aug 2023 12:12:14 +0200
+Message-ID: <20230828101154.652058221@linuxfoundation.org>
+X-Mailer: git-send-email 2.42.0
+In-Reply-To: <20230828101153.030066927@linuxfoundation.org>
+References: <20230828101153.030066927@linuxfoundation.org>
+User-Agent: quilt/0.67
+X-stable: review
+X-Patchwork-Hint: ignore
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Remove the preprocessor directive IS_ENABLED(CONFIG_MMC_ATMELMCI) while
-checking if the device is compatible with atmel,hsmci. Instead handle it in
-the if() condition. The compiler optimizes out the entire if() clause if
-the first expression in the if() clause is constant false.
+4.19-stable review patch.  If anyone has any objections, please let me know.
 
-Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@microchip.com>
-Suggested-by: Linus Walleij <linus.walleij@linaro.org>
+------------------
+
+From: Stephen Boyd <swboyd@chromium.org>
+
+[ Upstream commit 9a7957d0c9557f7780cdda970a2530d6351bd861 ]
+
+We don't need dev_err() messages when platform_get_irq() fails now that
+platform_get_irq() prints an error message itself when something goes
+wrong. Let's remove these prints with a simple semantic patch.
+
+// <smpl>
+@@
+expression ret;
+struct platform_device *E;
+@@
+
+ret =
+(
+platform_get_irq(E, ...)
+|
+platform_get_irq_byname(E, ...)
+);
+
+if ( \( ret < 0 \| ret <= 0 \) )
+{
+(
+-if (ret != -EPROBE_DEFER)
+-{ ...
+-dev_err(...);
+-... }
+|
+...
+-dev_err(...);
+)
+...
+}
+// </smpl>
+
+While we're here, remove braces on if statements that only have one
+statement (manually).
+
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stephen Boyd <swboyd@chromium.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Stable-dep-of: 71150ac12558 ("mmc: bcm2835: fix deferred probing")
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/gpio/gpiolib-of.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ drivers/mmc/host/bcm2835.c       |    1 -
+ drivers/mmc/host/jz4740_mmc.c    |    1 -
+ drivers/mmc/host/meson-gx-mmc.c  |    1 -
+ drivers/mmc/host/mxcmmc.c        |    4 +---
+ drivers/mmc/host/s3cmci.c        |    1 -
+ drivers/mmc/host/sdhci-msm.c     |    2 --
+ drivers/mmc/host/sdhci-pltfm.c   |    1 -
+ drivers/mmc/host/sdhci-s3c.c     |    4 +---
+ drivers/mmc/host/sdhci_f_sdh30.c |    4 +---
+ 9 files changed, 3 insertions(+), 16 deletions(-)
 
-diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
-index 9694eb5afa21..9a191940d5af 100644
---- a/drivers/gpio/gpiolib-of.c
-+++ b/drivers/gpio/gpiolib-of.c
-@@ -262,16 +262,15 @@ static void of_gpio_set_polarity_by_property(const struct device_node *np,
- 	unsigned int i;
- 	bool active_high;
+--- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -1418,7 +1418,6 @@ static int bcm2835_probe(struct platform
  
--#if IS_ENABLED(CONFIG_MMC_ATMELMCI)
- 	/*
- 	 * The Atmel HSMCI has compatible property in the parent node and
- 	 * gpio property in a child node
- 	 */
--	if (of_device_is_compatible(np->parent, "atmel,hsmci")) {
-+	if (IS_ENABLED(CONFIG_MMC_ATMELMCI) &&
-+	    of_device_is_compatible(np->parent, "atmel,hsmci")) {
- 		np_compat = np->parent;
- 		np_propname = np;
+ 	host->irq = platform_get_irq(pdev, 0);
+ 	if (host->irq <= 0) {
+-		dev_err(dev, "get IRQ failed\n");
+ 		ret = -EINVAL;
+ 		goto err;
  	}
--#endif
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -1060,7 +1060,6 @@ static int jz4740_mmc_probe(struct platf
+ 	host->irq = platform_get_irq(pdev, 0);
+ 	if (host->irq < 0) {
+ 		ret = host->irq;
+-		dev_err(&pdev->dev, "Failed to get platform irq: %d\n", ret);
+ 		goto err_free_host;
+ 	}
  
- 	for (i = 0; i < ARRAY_SIZE(gpios); i++) {
- 		if (of_device_is_compatible(np_compat, gpios[i].compatible) &&
--- 
-2.25.1
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1272,7 +1272,6 @@ static int meson_mmc_probe(struct platfo
+ 
+ 	host->irq = platform_get_irq(pdev, 0);
+ 	if (host->irq <= 0) {
+-		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+ 		ret = -EINVAL;
+ 		goto free_host;
+ 	}
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1017,10 +1017,8 @@ static int mxcmci_probe(struct platform_
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	irq = platform_get_irq(pdev, 0);
+-	if (irq < 0) {
+-		dev_err(&pdev->dev, "failed to get IRQ: %d\n", irq);
++	if (irq < 0)
+ 		return irq;
+-	}
+ 
+ 	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
+ 	if (!mmc)
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1661,7 +1661,6 @@ static int s3cmci_probe(struct platform_
+ 
+ 	host->irq = platform_get_irq(pdev, 0);
+ 	if (host->irq <= 0) {
+-		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+ 		ret = -EINVAL;
+ 		goto probe_iounmap;
+ 	}
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1914,8 +1914,6 @@ static int sdhci_msm_probe(struct platfo
+ 	/* Setup IRQ for handling power/voltage tasks with PMIC */
+ 	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
+ 	if (msm_host->pwr_irq < 0) {
+-		dev_err(&pdev->dev, "Get pwr_irq failed (%d)\n",
+-			msm_host->pwr_irq);
+ 		ret = msm_host->pwr_irq;
+ 		goto clk_disable;
+ 	}
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -131,7 +131,6 @@ struct sdhci_host *sdhci_pltfm_init(stru
+ 
+ 	irq = platform_get_irq(pdev, 0);
+ 	if (irq < 0) {
+-		dev_err(&pdev->dev, "failed to get IRQ number\n");
+ 		ret = irq;
+ 		goto err;
+ 	}
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -493,10 +493,8 @@ static int sdhci_s3c_probe(struct platfo
+ 	}
+ 
+ 	irq = platform_get_irq(pdev, 0);
+-	if (irq < 0) {
+-		dev_err(dev, "no irq specified\n");
++	if (irq < 0)
+ 		return irq;
+-	}
+ 
+ 	host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c));
+ 	if (IS_ERR(host)) {
+--- a/drivers/mmc/host/sdhci_f_sdh30.c
++++ b/drivers/mmc/host/sdhci_f_sdh30.c
+@@ -122,10 +122,8 @@ static int sdhci_f_sdh30_probe(struct pl
+ 	u32 reg = 0;
+ 
+ 	irq = platform_get_irq(pdev, 0);
+-	if (irq < 0) {
+-		dev_err(dev, "%s: no irq specified\n", __func__);
++	if (irq < 0)
+ 		return irq;
+-	}
+ 
+ 	host = sdhci_alloc_host(dev, sizeof(struct f_sdhost_priv));
+ 	if (IS_ERR(host))
+
 
