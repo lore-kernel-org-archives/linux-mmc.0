@@ -2,79 +2,99 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D2BCC83F15
-	for <linux-mmc@archiver.kernel.org>; Sat, 26 Aug 2023 17:13:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C69AC83F17
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 02:43:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229518AbjHZRMF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 26 Aug 2023 13:12:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44398 "EHLO
+        id S229693AbjH1C2k (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 27 Aug 2023 22:28:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230317AbjHZRL5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Aug 2023 13:11:57 -0400
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 988B0E4E;
-        Sat, 26 Aug 2023 10:11:54 -0700 (PDT)
-X-UUID: a415f7b4443311eeb20a276fd37b9834-20230827
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=lW5JiU3OBo1fpU5FFkkuisIRL20Eimt0nkU4ubNxKCc=;
-        b=XLidcVyErnKrwBnMcnBZ5X4A4asghx6tHcizZqkUI2tQ81nl87Ks8lTnOY62LS+bo4+SiuUgV4EgNNmRslWWK5Y+AfkH0Al4yEKvEpyvNvjozoIDUxXz4ezLG3dKLH96wIb+42CDskQ0lqnOr9E8eBIOBwVeYfHjpWzcX0eyZ3A=;
-X-CID-CACHE: Type:Local,Time:202308270043+08,HitQuantity:1
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.31,REQID:1a60ee05-a56e-45f2-93e0-f7fa5a4e5e55,IP:0,U
-        RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
-        release,TS:0
-X-CID-META: VersionHash:0ad78a4,CLOUDID:48abf9ee-9a6e-4c39-b73e-f2bc08ca3dc5,B
-        ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,
-        DKR:0,DKP:0,BRR:0,BRE:0
-X-CID-BVR: 0,NGT
-X-CID-BAS: 0,NGT,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-UUID: a415f7b4443311eeb20a276fd37b9834-20230827
-Received: from mtkmbs13n2.mediatek.inc [(172.21.101.108)] by mailgw02.mediatek.com
-        (envelope-from <sharp.xia@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 96954622; Sun, 27 Aug 2023 01:11:48 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Sun, 27 Aug 2023 01:11:46 +0800
-Received: from mbjsdccf07.mediatek.inc (10.15.20.246) by
- mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Sun, 27 Aug 2023 01:11:46 +0800
-From:   <Sharp.Xia@mediatek.com>
-To:     <wenchao.chen666@gmail.com>
-CC:     <Sharp.Xia@mediatek.com>,
-        <angelogioacchino.delregno@collabora.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
-        <matthias.bgg@gmail.com>, <shawn.lin@rock-chips.com>,
-        <ulf.hansson@linaro.org>, <wsd_upstream@mediatek.com>
-Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
-Date:   Sun, 27 Aug 2023 00:54:54 +0800
-Message-ID: <20230826165454.1196-1-Sharp.Xia@mediatek.com>
-X-Mailer: git-send-email 2.18.0
-In-Reply-To: <CA+Da2qxaCJwZhn0C7VxZzx8TB1VDR_xa2P0cDXUaNA9=YzSJYg@mail.gmail.com>
-References: <CA+Da2qxaCJwZhn0C7VxZzx8TB1VDR_xa2P0cDXUaNA9=YzSJYg@mail.gmail.com>
+        with ESMTP id S229821AbjH1C2V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Aug 2023 22:28:21 -0400
+Received: from mail-m11880.qiye.163.com (mail-m11880.qiye.163.com [115.236.118.80])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77BA8DA;
+        Sun, 27 Aug 2023 19:28:18 -0700 (PDT)
+Received: from [172.16.12.69] (unknown [58.22.7.114])
+        by mail-m11880.qiye.163.com (Hmail) with ESMTPA id 5C8D620881;
+        Mon, 28 Aug 2023 10:27:34 +0800 (CST)
+Message-ID: <95e9525e-3101-4433-27e2-cd69f254af1c@rock-chips.com>
+Date:   Mon, 28 Aug 2023 10:27:34 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-X-MTK:  N
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.14.0
+Cc:     shawn.lin@rock-chips.com, angelogioacchino.delregno@collabora.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        matthias.bgg@gmail.com, ulf.hansson@linaro.org,
+        wsd_upstream@mediatek.com
+Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
+Content-Language: en-GB
+To:     Sharp.Xia@mediatek.com
+References: <769a67cb-1b32-fd4f-b37e-e3ec4dab5eb9@rock-chips.com>
+ <20230826162635.617-1-Sharp.Xia@mediatek.com>
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20230826162635.617-1-Sharp.Xia@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+        tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0pISVZLSkkfGhoaQkxJTx5VEwETFh
+        oSFyQUDg9ZV1kYEgtZQVlOQ1VJSVVMVUpKT1lXWRYaDxIVHRRZQVlPS0hVSk1PSU5IVUpLS1VKQk
+        tLWQY+
+X-HM-Tid: 0a8a39f7c8492eb6kusn5c8d620881
+X-HM-MType: 1
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6Pj46HDo5HT1DDTMcDDY8Eioo
+        KU5PCwlVSlVKTUJISkNCTU5OS01PVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
+        C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUhJTUk3Bg++
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2023-08-25 at 20:23 +0800, Wenchao Chen wrote:
+Hi Sharp
+
+On 2023/8/27 0:26, Sharp.Xia@mediatek.com wrote:
+> On Fri, 2023-08-25 at 17:17 +0800, Shawn Lin wrote:
+>>   	
+>>
+
+After more testing, most of my platforms which runs at HS400/HS200 mode 
+shows nearly no differences with the readahead ranging from 128 to 1024. 
+Yet just a board shows a performance drop now. Highly suspect it's eMMC
+chip depends. I would recommand leave it to the BSP guys to decide which
+readahead value is best for their usage.
+
 > 
+> I tested with RK3568 and sdhci-of-dwcmshc.c driver, the performance improved by 2~3%.
+>   
+> Before:
+> root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
+> 2097152+0 records in
+> 2097152+0 records out
+> real    0m 6.01s
+> user    0m 0.84s
+> sys     0m 2.89s
+> root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
+> 128
+>   
+> After:
+> root@OpenWrt:/mnt/mmcblk0p3# echo 3 > /proc/sys/vm/drop_caches
+> root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
+> 2097152+0 records in
+> 2097152+0 records out
+> real    0m 5.86s
+> user    0m 1.04s
+> sys     0m 3.18s
+> root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
+> 1024
+>   
+> root@OpenWrt:/sys/kernel/debug/mmc0# cat ios
+> clock:          200000000 Hz
+> actual clock:   200000000 Hz
+> vdd:            18 (3.0 ~ 3.1 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    9 (mmc HS200)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
 > 
-> Hi Sharp
-> Use "echo 1024 > sys/block/mmcblk0/queue/read_ahead_kb" instead of
-> "blk_queue_io_opt(mq->queue, host->max_req_size);"？
-
-Hi Wenchao,
-
-User space does not know the max_req_size of each mmc host.
-And when the SD card is hot inserted,
-it is complicated for the user space to modify this value.
-
