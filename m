@@ -2,129 +2,129 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC750C83F12
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 09:06:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDA69C83F16
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 09:12:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229604AbjH1JFy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Aug 2023 05:05:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53530 "EHLO
+        id S229810AbjH1JLu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Aug 2023 05:11:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229573AbjH1JFd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 05:05:33 -0400
-Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE405102
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 02:05:30 -0700 (PDT)
-Received: by mail-yb1-xb2d.google.com with SMTP id 3f1490d57ef6-d743a5fe05aso2834744276.2
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 02:05:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1693213530; x=1693818330;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=J1RNMza/FYgHvj33jNjozA6gVKX8HFlv5PptHiwW4FU=;
-        b=d2aQfYsK32hUyp2Yu5cXAdJwNM7w09dyAa694IhAP449GN90ljg8UT03FZtYOHTkNe
-         0u/2vxFEiJTKr/tgpGfqFTAhyC0XRo1s0FRs45HRvNbVsSaMc0qfwLSg7VEou9TFparr
-         Hx4FXLlxnvbRbdx7G28RosE9WH4wbT6rT5BMxAuQcs5510Q0kYwew0iNmxj6EMkWSzJ/
-         XkMb1yZKN/sNq+mGq5nh7NoAmBZBfip9mQeteFqDFLqf6G65w6vUuhLiD9QEY3mE6bLa
-         Szcu5EB2I38TgAp0hXGn8Co0k0oODnhqI13xoG8zIVAXNkSb2FZT3CAXar5F/v+emPur
-         KfqA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693213530; x=1693818330;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=J1RNMza/FYgHvj33jNjozA6gVKX8HFlv5PptHiwW4FU=;
-        b=M4/sigxIgEz7DPISi33Y6PG3OYn3lqMTS6z30HBz4KyJ+igUBi/vxET4O/FYwgGFRo
-         WEKFKkKeU+Ir7q/hbh74XOPmB5ln8DxM+Vr/zEVD23VNOdh5JRzi1jeLdMhNZhbo6Vkt
-         5bbbsky0Hoec8WdkQol8Dy6ik/VC6Cg1OSR0bQvSEdZJeRLh+/EMZg/nZakn9EZ0dDFm
-         6T9FrLchdMhMUSRTCIvQ1WbFsjZrGZg5b6+ifDphZUeXWnAmpddS+2n7KRoCOrqgLeuZ
-         LRVDA95eW2XeNWgrQKhr3u3HYGnEozWndq3IkA5Sul/2avnjkHLzGX1w+0ftGKtjbDr5
-         sCkA==
-X-Gm-Message-State: AOJu0YzmYTCgao7jmWwIv9UfYOL4qNe2k9QRqHzU8Xobi8QjZwFqMElt
-        udiRK93ruoXW3CVF+tKCStQoGc7AMMVSEe+SmS6jjdqaVm2BFz/fGzE=
-X-Google-Smtp-Source: AGHT+IHq+aJHFLWI8UMIwAM1r5QOuuXEt5p+X5yVlU5MKm+roaUxdv6D3/izv+QX8vHNDmiY/hXGs6MNYvsLy/6tvqs=
-X-Received: by 2002:a25:23c6:0:b0:d7a:bfcf:2d3 with SMTP id
- j189-20020a2523c6000000b00d7abfcf02d3mr5069144ybj.51.1693213530110; Mon, 28
- Aug 2023 02:05:30 -0700 (PDT)
+        with ESMTP id S229892AbjH1JLT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 05:11:19 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BD62131;
+        Mon, 28 Aug 2023 02:11:01 -0700 (PDT)
+Received: from pps.filterd (m0369458.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 37S8UX7F026285;
+        Mon, 28 Aug 2023 11:10:50 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
+        message-id:date:mime-version:subject:to:cc:references:from
+        :in-reply-to:content-type:content-transfer-encoding; s=
+        selector1; bh=++Z9W352LrkHIhiuvZ/btgckmjm3FHEDCFBUAFfqJ8c=; b=w5
+        6GaASUsoagtYjF9phFvOQ9AmQvf+L15wAUvt0bAfEJVoNaceIy/Z6ezOk52CPLv5
+        IrKPt3mTfayrM3vLkzUVsNheVRKzcswF/VJY93nwUaa1AiuphBL6wd5eU/aJJ0ey
+        GvIETU8o+RhitQ22och/DBfcSPxP1/HPcihweReZpJiQHCMx1M6f/tI6rFGzx95e
+        oomB87kyxswUQP5uAuA37qfKP0fwAFLJpJR7n/zgWkdKzqIK9dWwjsDIlFk9OuC7
+        y/lRgYWUa8hsYyGxoKXgr/Vp+gRARFbMIfHaHRyKQ1nQJXmGUruLRCMSKyEcjB31
+        oVQUe9FRFwL+llh/uzFA==
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3sqtxyme78-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 28 Aug 2023 11:10:50 +0200 (MEST)
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id CF16D100056;
+        Mon, 28 Aug 2023 11:10:49 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 9D54B218628;
+        Mon, 28 Aug 2023 11:10:49 +0200 (CEST)
+Received: from [10.201.20.38] (10.201.20.38) by SHFDAG1NODE1.st.com
+ (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Mon, 28 Aug
+ 2023 11:10:49 +0200
+Message-ID: <72e27136-67ef-403a-ad87-1d0eab87f5d5@foss.st.com>
+Date:   Mon, 28 Aug 2023 11:10:48 +0200
 MIME-Version: 1.0
-References: <769a67cb-1b32-fd4f-b37e-e3ec4dab5eb9@rock-chips.com>
- <20230826162635.617-1-Sharp.Xia@mediatek.com> <95e9525e-3101-4433-27e2-cd69f254af1c@rock-chips.com>
-In-Reply-To: <95e9525e-3101-4433-27e2-cd69f254af1c@rock-chips.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Aug 2023 11:04:54 +0200
-Message-ID: <CAPDyKFqgQmvdmXe8Sxnv2E5EY9cose+E2pBK3r0P_OzqAC79dg@mail.gmail.com>
-Subject: Re: [PATCH 1/1] mmc: Set optimal I/O size when mmc_setip_queue
-To:     sharp.xia@mediatek.com, Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     angelogioacchino.delregno@collabora.com,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        matthias.bgg@gmail.com, wsd_upstream@mediatek.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH v3 46/62] mmc: sdhci-st: Convert to platform remove
+ callback returning void
+Content-Language: en-US
+To:     Yangtao Li <frank.li@vivo.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20230727070051.17778-1-frank.li@vivo.com>
+ <20230727070051.17778-46-frank.li@vivo.com>
+From:   Patrice CHOTARD <patrice.chotard@foss.st.com>
+In-Reply-To: <20230727070051.17778-46-frank.li@vivo.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.201.20.38]
+X-ClientProxiedBy: SHFCAS1NODE1.st.com (10.75.129.72) To SHFDAG1NODE1.st.com
+ (10.75.129.69)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.601,FMLib:17.11.176.26
+ definitions=2023-08-28_06,2023-08-25_01,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 28 Aug 2023 at 04:28, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
-> Hi Sharp
->
-> On 2023/8/27 0:26, Sharp.Xia@mediatek.com wrote:
-> > On Fri, 2023-08-25 at 17:17 +0800, Shawn Lin wrote:
-> >>
-> >>
->
-> After more testing, most of my platforms which runs at HS400/HS200 mode
-> shows nearly no differences with the readahead ranging from 128 to 1024.
-> Yet just a board shows a performance drop now. Highly suspect it's eMMC
-> chip depends. I would recommand leave it to the BSP guys to decide which
-> readahead value is best for their usage.
 
-That's a very good point. The SD/eMMC card certainly behaves
-differently, depending on the request-size.
 
-Another thing we could consider doing, could be to combine the
-information about the request-size from the mmc host, with some
-relevant information from the registers in the card (not sure exactly
-what though).
+On 7/27/23 09:00, Yangtao Li wrote:
+> The .remove() callback for a platform driver returns an int which makes
+> many driver authors wrongly assume it's possible to do error handling by
+> returning an error code. However the value returned is (mostly) ignored
+> and this typically results in resource leaks. To improve here there is a
+> quest to make the remove callback return void. In the first step of this
+> quest all drivers are converted to .remove_new() which already returns
+> void.
+> 
+> Trivially convert this driver from always returning zero in the remove
+> callback to the void returning variant.
+> 
+> Cc: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Yangtao Li <frank.li@vivo.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/host/sdhci-st.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index 6415916fbd91..d955b5f4b7e9 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -434,7 +434,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>  	return ret;
+>  }
+>  
+> -static int sdhci_st_remove(struct platform_device *pdev)
+> +static void sdhci_st_remove(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host *host = platform_get_drvdata(pdev);
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -446,8 +446,6 @@ static int sdhci_st_remove(struct platform_device *pdev)
+>  	clk_disable_unprepare(pdata->icnclk);
+>  
+>  	reset_control_assert(rstc);
+> -
+> -	return 0;
+>  }
+>  
+>  #ifdef CONFIG_PM_SLEEP
+> @@ -510,7 +508,7 @@ MODULE_DEVICE_TABLE(of, st_sdhci_match);
+>  
+>  static struct platform_driver sdhci_st_driver = {
+>  	.probe = sdhci_st_probe,
+> -	.remove = sdhci_st_remove,
+> +	.remove_new = sdhci_st_remove,
+>  	.driver = {
+>  		   .name = "sdhci-st",
+>  		   .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+Reviewed-by: Patrice Chotard <patrice.chotard@foss.st.com>
 
->
-> >
-> > I tested with RK3568 and sdhci-of-dwcmshc.c driver, the performance improved by 2~3%.
-> >
-> > Before:
-> > root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
-> > 2097152+0 records in
-> > 2097152+0 records out
-> > real    0m 6.01s
-> > user    0m 0.84s
-> > sys     0m 2.89s
-> > root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
-> > 128
-> >
-> > After:
-> > root@OpenWrt:/mnt/mmcblk0p3# echo 3 > /proc/sys/vm/drop_caches
-> > root@OpenWrt:/mnt/mmcblk0p3# time dd if=test.img of=/dev/null
-> > 2097152+0 records in
-> > 2097152+0 records out
-> > real    0m 5.86s
-> > user    0m 1.04s
-> > sys     0m 3.18s
-> > root@OpenWrt:/mnt/mmcblk0p3# cat /sys/block/mmcblk0/queue/read_ahead_kb
-> > 1024
-> >
-> > root@OpenWrt:/sys/kernel/debug/mmc0# cat ios
-> > clock:          200000000 Hz
-> > actual clock:   200000000 Hz
-> > vdd:            18 (3.0 ~ 3.1 V)
-> > bus mode:       2 (push-pull)
-> > chip select:    0 (don't care)
-> > power mode:     2 (on)
-> > bus width:      3 (8 bits)
-> > timing spec:    9 (mmc HS200)
-> > signal voltage: 1 (1.80 V)
-> > driver type:    0 (driver type B)
-> >
-
-Thanks for testing and sharing the data, both of you!
-
-Kind regards
-Uffe
+Thanks
+Patrice
