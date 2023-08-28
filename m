@@ -2,385 +2,367 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C559C83F16
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 10:59:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FB81C83F12
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Aug 2023 12:16:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232206AbjH1K7F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Aug 2023 06:59:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35162 "EHLO
+        id S230498AbjH1MQU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Aug 2023 08:16:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42192 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232391AbjH1K6m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 06:58:42 -0400
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE8EEF9
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 03:58:33 -0700 (PDT)
-Received: by mail-pl1-x62e.google.com with SMTP id d9443c01a7336-1b52875b8d9so277835ad.0
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 03:58:33 -0700 (PDT)
+        with ESMTP id S231795AbjH1MP5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Aug 2023 08:15:57 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D33C8D8
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 05:15:52 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id 38308e7fff4ca-2bb97f2c99cso47505461fa.0
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Aug 2023 05:15:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20221208; t=1693220313; x=1693825113; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ljL1zThljNasYQ4d5IYv4Q1vKQ9tJwA3CVawyxE2lvA=;
-        b=CBhMy1Zhg0aT9q7W2gF8mS2/k7YTOOK7XS92x+cNEAEeS/3LfKKWfWRlOhn5Moh6lF
-         Cmoq76ipQaDHrZ1u/J0VxMAA3pLQ0q9BKRhE14XOUC7Gb+Dd77p1FAi60SqR8/OxCS0p
-         3Ts3UUDgbP7hJlievl+l99XsNtE72lBLJ3wik1yu1LVJhiblaudGq/68hEXu6yZlYCsC
-         gjIF6oeOV3AmVAVOroHQt+2+89LFGYyQNV/nteOSS18tsV5P//6dF+t7KMw5ysGbtvcU
-         j48uz+b5AOfxe8PajF6nTt91FcaMkNmgayYx5MOJrpJy1w032x41qfuxbwlhHEVXkt/A
-         OQWw==
+        d=linaro.org; s=google; t=1693224951; x=1693829751;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=HfY+430Mmt3Y+JnQoDV9LCldHPmAfJHhgnZVMksWZmU=;
+        b=iCfIQLPrqav92YrYCWlo3tOEQQEndymyw2iWXIo8gIpcnGNVco5f3KN6fVNXZkrU49
+         Ylh3unpU6Cu+UG39+AOBf9ettTehvBU4fNZm1XAv627HysGoneX11molsywbERNSuxaY
+         XoG5kWHqBbgKI0Ga6qdv00aeJGWrCQVeMlbFsh1T0mGAFnk/8sPUz/4SVzYsHzFhjEhR
+         VXU3FJ9qQB5HuVUa12GH7sWNTtauKkXC8Ou3m0nto8xMuelb0sli3gAHVasMCSf1BFTu
+         Tn18uoPasTdJP3ZFb8YmFgqAT9cYq8VtputFMzwPerxH+U7fsBsXdB2Ygyq1p3475Lim
+         WhbQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693220313; x=1693825113;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ljL1zThljNasYQ4d5IYv4Q1vKQ9tJwA3CVawyxE2lvA=;
-        b=i/rHec81CVCueE4EKeP8J1xQS+XYUvsVml46Rz1FOV4KH6SbOH53vycY3VqqwZJId4
-         UQHD/ROIG624lCC0mICkLGv4r5p7lwIFV1YD3tPHSVhOMNDvoj4280XhunpBZq82mEDG
-         sy0Rcv8PTpf0e3BJkoVvc+CHLIHhb1Wlo4P7iPWRwMT/jtvvDI0r7GALh6tr5owfQHCx
-         sV69vUTkKhXNTG/Ew04Gt8HpXd4QVU67+FD34FlKyxhqPUMTd/s7FiQA1BbHVNS+4oG5
-         dcNBbVL+HwkPF6mzeMQb5pbnI/WZz+uu5dxm5iDC69/K1AIs46qaltNsxPWGaNmwCFaw
-         dFlA==
-X-Gm-Message-State: AOJu0Yx4bR2TCpAQfAo1VBdzV3GssfgTvDzgNgPTJW0tCCFUrHDWhh//
-        KXMo+DkVk67/64iE7rdJB/9sZEdh5M02vN/FgZGLgw==
-X-Google-Smtp-Source: AGHT+IG+mcjH46KFJbv9Xyf6eAr40t0VLQkMB5ZkYJptXrUwi91WHySh6jdFgXtg+sKU+2XFGOfguluz1NTx/E9D9gQ=
-X-Received: by 2002:a17:902:c64a:b0:1b9:c5de:9aa with SMTP id
- s10-20020a170902c64a00b001b9c5de09aamr307146pls.27.1693220313032; Mon, 28 Aug
- 2023 03:58:33 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1693224951; x=1693829751;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=HfY+430Mmt3Y+JnQoDV9LCldHPmAfJHhgnZVMksWZmU=;
+        b=dXbERIgNT3MSd08H7MV1MlNdVYsyfgqV+xRIhoUJqu3VNAwwo7dedZkXG5EkHJurDp
+         +DSeJ7ddD9e06bMl7LSazjH+EsLoI/GIDbRSrZseN/e/xsG3fomSuUZVcmBdPaVZ5dFH
+         YPFgJm8bZWMDaUjN4ZMee7HKG99E4Cp6BLugMX2eyeoQ+dLcvdILeJKkk8qN+GjmZlCv
+         XVFYVT8gSnHW0Yv8rjgZWkyerRQ48XHt3SX6UWx3O1iswKouR4IW8I2DmeG9K7V6tGrj
+         zyYCewlh0LZe9H8UA20ew9t5sfxBEFP3E5I/VMMTXrnhpP3PxvFuM9xvez0J0j+SaL+9
+         vvKA==
+X-Gm-Message-State: AOJu0YwBgMtHEbLgfGxSXIKdkPOCcZHs26urPj2arQEkAmF2VL3F5efv
+        7QgwWKDk1zJe2UBjYiaD96oqfA==
+X-Google-Smtp-Source: AGHT+IGHFAS4RO19fDb2Ex7ebv/VziR1QmzCkg8+4TKxErais4VcbzpdB4o0JW9ySdL8bJxvYJURUg==
+X-Received: by 2002:a05:6512:3b0d:b0:500:acf1:b42f with SMTP id f13-20020a0565123b0d00b00500acf1b42fmr5703770lfv.53.1693224951107;
+        Mon, 28 Aug 2023 05:15:51 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id eq8-20020a056512488800b004fe4aef5b18sm1562278lfb.164.2023.08.28.05.15.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 28 Aug 2023 05:15:50 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC updates for v6.6
+Date:   Mon, 28 Aug 2023 14:15:49 +0200
+Message-Id: <20230828121549.285925-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <391c4270-637a-2afb-210d-6b6dfef01efa@intel.com> <20230828100313.3051403-1-benchuanggli@gmail.com>
-In-Reply-To: <20230828100313.3051403-1-benchuanggli@gmail.com>
-From:   =?UTF-8?Q?Stanis=C5=82aw_Kardach?= <skardach@google.com>
-Date:   Mon, 28 Aug 2023 12:57:56 +0200
-Message-ID: <CADj_en4DkCKwRuLqUpCMPeAxMX5v7upifGabDrhW+d+kwKNDZw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix
- SoCs can suspend
-To:     Ben Chuang <benchuanggli@gmail.com>
-Cc:     adrian.hunter@intel.com, SeanHY.chen@genesyslogic.com.tw,
-        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
-        jason.lai@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        reniuschengl@gmail.com, stable@vger.kernel.org,
-        svenva@chromium.org, ulf.hansson@linaro.org,
-        victor.shih@genesyslogic.com.tw, victorshihgli@gmail.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ben,
+Hi Linus,
 
-Thanks for reviewing our patch.
+Here's the pull-request with the MMC updates (no MEMSTICK changes this time) for
+for v6.6-rc1. Details about the highlights are as usual found in the signed tag.
 
-On Mon, Aug 28, 2023 at 12:03=E2=80=AFPM Ben Chuang <benchuanggli@gmail.com=
-> wrote:
->
-> Hi,
->
-> On 24/08/23 20:18, Adrian Hunter wrote:
-> > On 24/08/23 14:50, Stanis=C5=82aw Kardach wrote:
-> > > Hi Adrian,
-> > >
-> > > Thanks for reviewing our patches.
-> > >
-> > > On Thu, Aug 24, 2023 at 1:47=E2=80=AFPM Adrian Hunter <adrian.hunter@=
-intel.com <mailto:adrian.hunter@intel.com>> wrote:
-> > >
-> > >     Hi
-> > >
-> > >     Looks OK - a few minor comments below
-> > >
-> > >     On 23/08/23 20:41, Sven van Ashbrook wrote:
-> > >     > To improve the r/w performance of GL9763E, the current driver i=
-nhibits LPM
-> > >     > negotiation while the device is active.
-> > >     >
-> > >     > This prevents a large number of SoCs from suspending, notably x=
-86 systems
-> > >
-> > >     If possible, can you give example of which SoCs / products
-> > >
-> > >     > which use S0ix as the suspend mechanism:
-> > >     > 1. Userspace initiates s2idle suspend (e.g. via writing to
-> > >     >    /sys/power/state)
-> > >     > 2. This switches the runtime_pm device state to active, which d=
-isables
-> > >     >    LPM negotiation, then calls the "regular" suspend callback
-> > >     > 3. With LPM negotiation disabled, the bus cannot enter low-powe=
-r state
-> > >     > 4. On a large number of SoCs, if the bus not in a low-power sta=
-te, S0ix
-> > >     >    cannot be entered, which in turn prevents the SoC from enter=
-ing
-> > >     >    suspend.
-> > >     >
-> > >     > Fix by re-enabling LPM negotiation in the device's suspend call=
-back.
-> > >     >
-> > >     > Suggested-by: Stanislaw Kardach <skardach@google.com <mailto:sk=
-ardach@google.com>>
-> > >     > Fixes: f9e5b33934ce ("mmc: host: Improve I/O read/write perform=
-ance for GL9763E")
-> > >     > Cc: stable@vger.kernel.org <mailto:stable@vger.kernel.org>
-> > >     > Signed-off-by: Sven van Ashbrook <svenva@chromium.org <mailto:s=
-venva@chromium.org>>
-> > >     >      # on gladios device
-> > >     >      # on 15590.0.0 with v5.10 and upstream (v6.4) kernels
-> > >     >
-> > >
-> > >     3 extraneous lines here - please remove
-> > >
-> > >     > ---
-> > >     >
-> > >     > Changes in v2:
-> > >     > - improved symmetry and error path in s2idle suspend callback (=
-internal review)
-> > >     >
-> > >     >  drivers/mmc/host/sdhci-pci-gli.c | 102 +++++++++++++++++++----=
---------
-> > >     >  1 file changed, 64 insertions(+), 38 deletions(-)
-> > >     >
-> > >     > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/hos=
-t/sdhci-pci-gli.c
-> > >     > index 1792665c9494a..19f577cc8bceb 100644
-> > >     > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > >     > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > >     > @@ -745,42 +745,6 @@ static u32 sdhci_gl9750_readl(struct sdhci=
-_host *host, int reg)
-> > >     >       return value;
-> > >     >  }
-> > >     >
-> > >     > -#ifdef CONFIG_PM_SLEEP
-> > >     > -static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
-> > >     > -{
-> > >     > -     struct sdhci_pci_slot *slot =3D chip->slots[0];
-> > >     > -
-> > >     > -     pci_free_irq_vectors(slot->chip->pdev);
-> > >     > -     gli_pcie_enable_msi(slot);
-> > >     > -
-> > >     > -     return sdhci_pci_resume_host(chip);
-> > >     > -}
-> > >     > -
-> > >     > -static int sdhci_cqhci_gli_resume(struct sdhci_pci_chip *chip)
-> > >     > -{
-> > >     > -     struct sdhci_pci_slot *slot =3D chip->slots[0];
-> > >     > -     int ret;
-> > >     > -
-> > >     > -     ret =3D sdhci_pci_gli_resume(chip);
-> > >     > -     if (ret)
-> > >     > -             return ret;
-> > >     > -
-> > >     > -     return cqhci_resume(slot->host->mmc);
-> > >     > -}
-> > >     > -
-> > >     > -static int sdhci_cqhci_gli_suspend(struct sdhci_pci_chip *chip=
-)
-> > >     > -{
-> > >     > -     struct sdhci_pci_slot *slot =3D chip->slots[0];
-> > >     > -     int ret;
-> > >     > -
-> > >     > -     ret =3D cqhci_suspend(slot->host->mmc);
-> > >     > -     if (ret)
-> > >     > -             return ret;
-> > >     > -
-> > >     > -     return sdhci_suspend_host(slot->host);
-> > >     > -}
-> > >     > -#endif
-> > >     > -
-> > >     >  static void gl9763e_hs400_enhanced_strobe(struct mmc_host *mmc=
-,
-> > >     >                                         struct mmc_ios *ios)
-> > >     >  {
-> > >     > @@ -1029,6 +993,68 @@ static int gl9763e_runtime_resume(struct =
-sdhci_pci_chip *chip)
-> > >     >  }
-> > >     >  #endif
-> > >     >
-> > >     > +#ifdef CONFIG_PM_SLEEP
-> > >     > +static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
-> > >     > +{
-> > >     > +     struct sdhci_pci_slot *slot =3D chip->slots[0];
-> > >     > +
-> > >     > +     pci_free_irq_vectors(slot->chip->pdev);
-> > >     > +     gli_pcie_enable_msi(slot);
-> > >     > +
-> > >     > +     return sdhci_pci_resume_host(chip);
-> > >     > +}
->
-> sdhci_pci_gli_resume() is the same as before. Is there any reason to move=
- it here?
-To avoid having multiple #ifdef CONFIG_PM_SLEEP blocks. We can leave
-it, where it
-was if you prefer.
->
-> > >     > +
-> > >     > +static int gl9763e_resume(struct sdhci_pci_chip *chip)
-> > >     > +{
-> > >     > +     struct sdhci_pci_slot *slot =3D chip->slots[0];
-> > >     > +     int ret;
-> > >     > +
-> > >     > +     ret =3D sdhci_pci_gli_resume(chip);
-> > >     > +     if (ret)
-> > >     > +             return ret;
-> > >     > +
-> > >     > +     ret =3D cqhci_resume(slot->host->mmc);
-> > >     > +     if (ret)
-> > >     > +             return ret;
-> > >     > +
-> > >     > +     /* Disable LPM negotiation to bring device back in sync
-> > >     > +      * with its runtime_pm state.
-> > >     > +      */
-> > >
-> > >     I would prefer the comment style:
-> > >
-> > >             /*
-> > >              * Blah, blah ...
-> > >              * Blah, blah, blah.
-> > >              */
-> > >
-> > >     > +     gl9763e_set_low_power_negotiation(slot, false);
->
-> There is a situation for your reference.
-> If `allow_runtime_pm' is set to false and the system resumes from suspend=
-, GL9763E
-> LPM negotiation will be always disabled on S0. GL9763E will stay L0 and n=
-ever
-> enter L1 because GL9763E LPM negotiation is disabled.
->
-> This patch enables allow_runtime_pm. The simple flow is
-> gl9763e_suspend() -> LPM enabled -> gl9763e_resume() -> LPM disabled -> (=
-a)
-> (a) -+--> idle -->  gl9763e_runtime_suspend() -> LPM enabled
->      |
->      +--> no idle -> gl9763e_runtime_resume() -> LPM disabled
-Is the lower branch of this sequence possible? I mean please correct
-me if I'm wrong
-but after the s2idle resume, devices are considered runtime active unless d=
-eemed
-otherwise, so gl_9763e_resume() -> fl9763e_runtime_resume() should not
-happen, right?
->
-> This patch disables allow_runtime_pm. The simple flow is
-> gl9763e_suspend() -> LPM enabled -> gl9763e_resume() -> LPM disabled (no =
-runtime_pm)
->
-> Although that may not be the case with the current configuration, it's on=
-ly a
-> possibility.
-Actually last year there was a patch to improve R/W performance of GL9763E:
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?=
-id=3Df9e5b33934cec24b8c024add5c5d65d2f93ade05
-If I'm reading the code right we're not modifying allow_runtime_pm,
-rather we're disabling
-the L1 negotiation in the same manner as the abovementioned patch does
-in the runtime
-PM flow. So in a way we're restoring whatever setting was there except
-a situation where
-the runtime PM was disabled from the start on the device and we do not
-restore the
-original state of the LPM negotiation fields. Not sure if such case is
-really possible.
->
-> > >     > +
-> > >     > +     return 0;
-> > >     > +}
-> > >     > +
-> > >     > +static int gl9763e_suspend(struct sdhci_pci_chip *chip)
-> > >     > +{
-> > >     > +     struct sdhci_pci_slot *slot =3D chip->slots[0];
-> > >     > +     int ret;
-> > >     > +
-> > >     > +     /* Certain SoCs can suspend only with the bus in low-
-> > >
-> > >     Ditto re comment style
-> > >
-> > >     > +      * power state, notably x86 SoCs when using S0ix.
-> > >     > +      * Re-enable LPM negotiation to allow entering L1 state
-> > >     > +      * and entering system suspend.
-> > >     > +      */
-> > >     > +     gl9763e_set_low_power_negotiation(slot, true);
-> > >
-> > >     Couldn't this be at the end of the function, save
-> > >     an error path
-> > >
-> > > Please correct me if I'm wrong but writing to device config
-> > > space could trigger a side effect, so it's probably better to
-> > > do it before calling functions suspending the device?
-> >
-> > sdhci doesn't know anything about the bus.  It is independent
-> > of PCI, so I can't see how it would make any difference.
-> > One of the people cc'ed might know more.  Jason Lai (cc'ed)
-> > added it for runtime PM.
-> >
->
-> As far as I know, when disabling LPM negotiation, the GL9763E will stop e=
-ntering
-> L1. It doesn't other side effect. Does Jason.Lai and Victor.Shih have any=
- comments
-> or suggestions?
-The reason we've put the LPM negotiation handling at the start of
-suspend and finish
-of resume was mostly for semantical reasons - first do device logic,
-then call base
-framework/module logic which might expect all the device-specific steps to =
-be
-performed already. Maybe it does not make any difference in the real world =
-for
-SDHCI controllers but it just seemed to look better. Also suspend and resum=
-e
-callbacks already have such ordering when it comes to cqhci_* and sdhci_*
-functions.
->
-> Best regards,
-> Ben Chuang
->
-> > >
-> > >
-> > >     > +
-> > >     > +     ret =3D cqhci_suspend(slot->host->mmc);
-> > >     > +     if (ret)
-> > >     > +             goto err_suspend;
-> > >     > +
-> > >     > +     ret =3D sdhci_suspend_host(slot->host);
-> > >     > +     if (ret)
-> > >     > +             goto err_suspend_host;
-> > >     > +
-> > >     > +     return 0;
-> > >     > +
-> > >     > +err_suspend_host:
-> > >     > +     cqhci_resume(slot->host->mmc);
-> > >     > +err_suspend:
-> > >     > +     gl9763e_set_low_power_negotiation(slot, false);
-> > >     > +     return ret;
-> > >     > +}
-> > >     > +#endif
-> > >     > +
-> > >     >  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
-> > >     >  {
-> > >     >       struct pci_dev *pdev =3D slot->chip->pdev;
-> > >     > @@ -1113,8 +1139,8 @@ const struct sdhci_pci_fixes sdhci_gl9763=
-e =3D {
-> > >     >       .probe_slot     =3D gli_probe_slot_gl9763e,
-> > >     >       .ops            =3D &sdhci_gl9763e_ops,
-> > >     >  #ifdef CONFIG_PM_SLEEP
-> > >     > -     .resume         =3D sdhci_cqhci_gli_resume,
-> > >     > -     .suspend        =3D sdhci_cqhci_gli_suspend,
-> > >     > +     .resume         =3D gl9763e_resume,
-> > >     > +     .suspend        =3D gl9763e_suspend,
-> > >     >  #endif
-> > >     >  #ifdef CONFIG_PM
-> > >     >       .runtime_suspend =3D gl9763e_runtime_suspend,
-> > >
-> > >
-> > >
-> > > --
-> > > Best Regards,
-> > > Stanis=C5=82aw Kardach
-> >
-> >
+Please pull this in!
+
+Kind regards
+Ulf Hansson
 
 
+The following changes since commit 52a93d39b17dc7eb98b6aa3edb93943248e03b2f:
 
---=20
-Best Regards,
-Stanis=C5=82aw Kardach
+  Linux 6.5-rc5 (2023-08-06 15:07:51 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.6
+
+for you to fetch changes up to 98ac9e4fc07f101c435f1ab6b395b6245b096a68:
+
+  mmc: atmel-mci: Move card detect gpio polarity quirk to gpiolib (2023-08-25 13:40:21 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Convert drivers to use the ->remove_new() callback
+ - Propagate the removable attribute for the card's device
+
+MMC host:
+ - Convert drivers to use the ->remove_new() callback
+ - atmel-mci: Convert to gpio descriptors and cleanup the code
+ - davinci: Make SDIO irq truly optional
+ - renesas_sdhi: Register irqs before registering controller
+ - sdhci: Simplify the sdhci_pltfm_* interface a bit
+ - sdhci-esdhc-imx: Improve support for the 1.8V errata
+ - sdhci-of-at91: Add support for the microchip sam9x7 variant
+ - sdhci-of-dwcmshc: Add support for runtime PM
+ - sdhci-pci-o2micro: Add support for the new Bayhub GG8 variant
+ - sdhci-sprd: Add support for SD high-speed mode tuning
+ - uniphier-sd: Register irqs before registering controller
+
+----------------------------------------------------------------
+Adrian Hunter (16):
+      mmc: sdhci-pltfm: Add sdhci_pltfm_remove()
+      mmc: sdhci-bcm-kona: Use sdhci_pltfm_remove()
+      mmc: sdhci-brcmstb: Use sdhci_pltfm_remove()
+      mmc: sdhci-cadence: Use sdhci_pltfm_remove()
+      mmc: sdhci-dove: Use sdhci_pltfm_remove()
+      mmc: sdhci_f_sdh30: Use sdhci_pltfm_remove()
+      mmc: sdhci-iproc: Use sdhci_pltfm_remove()
+      mmc: sdhci-of-arasan: Use sdhci_pltfm_remove()
+      mmc: sdhci-of-at91: Use sdhci_pltfm_remove()
+      mmc: sdhci-of-esdhc: Use sdhci_pltfm_remove()
+      mmc: sdhci-of-hlwd: Use sdhci_pltfm_remove()
+      mmc: sdhci-of-sparx5: Use sdhci_pltfm_remove()
+      mmc: sdhci-pxav2: Use sdhci_pltfm_remove()
+      mmc: sdhci-st: Use sdhci_pltfm_remove()
+      mmc: sdhci-pltfm: Remove sdhci_pltfm_unregister()
+      mmc: sdhci-pltfm: Rename sdhci_pltfm_register()
+
+Balamanikandan Gunasundar (3):
+      mmc: atmel-mci: Convert to gpio descriptors
+      mmc: atmel-mci: move atmel MCI header file
+      mmc: atmel-mci: Move card detect gpio polarity quirk to gpiolib
+
+Chevron Li (2):
+      mmc: sdhci-pci-o2micro: add Bayhub new chip GG8 support for UHS-I
+      mmc: sdhci-pci-o2micro: add Bayhub new chip GG8 support for express card
+
+Frank Wunderlich (1):
+      dt-bindings: mmc: mtk-sd: drop assigned-clocks/clock-parents
+
+Giulio Benetti (1):
+      mmc: sdhci-esdhc-imx: improve ESDHC_FLAG_ERR010450
+
+Guido Günther (1):
+      dt-bindings: mmc: Fix reference to pwr-seq-simple
+
+Harshit Mogalapalli (2):
+      mmc: sunplus: Fix error handling in spmmc_drv_probe()
+      mmc: sunplus: Fix platform_get_irq() error checking
+
+Julien Delbergue (1):
+      mmc: davinci: Make SDIO irq truly optional
+
+Kunihiko Hayashi (1):
+      mmc: sdhci-f-sdh30: Replace with sdhci_pltfm
+
+Li Zetao (1):
+      mmc: sdhci-st: Use devm_platform_ioremap_resource_byname()
+
+Liming Sun (2):
+      mmc: sdhci-of-dwcmshc: Add error handling in dwcmshc_resume
+      mmc: sdhci-of-dwcmshc: Add runtime PM operations
+
+Linus Walleij (1):
+      mmc: mmci: Improve ux500 debug prints
+
+Michal Simek (1):
+      dt-bindings: mmc: arasan,sdci: Add power-domains and iommus properties
+
+Rob Herring (1):
+      mmc: Explicitly include correct DT includes
+
+Sergei Antonov (1):
+      mmc: moxart: read scr register without changing byte order
+
+Thomas Weißschuh (1):
+      mmc: core: propagate removable attribute to driver core
+
+Ulf Hansson (3):
+      mmc: meson-gx: Drop redundant WARN_ON() in the irq handler
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+
+Varshini Rajendran (1):
+      dt-bindings: sdhci-of-at91: add microchip,sam9x7-sdhci
+
+Victor Shih (1):
+      mmc: core: Cleanup mmc_sd_num_wr_blocks() function
+
+Wei Chen (1):
+      mmc: sunplus: fix return value check of mmc_add_host()
+
+Wenchao Chen (2):
+      mmc: core: Add host specific tuning support for SD HS mode
+      mmc: sdhci-sprd: Add SD HS mode online tuning
+
+Wolfram Sang (3):
+      mmc: renesas_sdhi: register irqs before registering controller
+      mmc: renesas_sdhi: remove outdated indentation
+      mmc: uniphier-sd: register irqs before registering controller
+
+Yang Yingliang (2):
+      mmc: wbsd: fix double mmc_free_host() in wbsd_init()
+      mmc: remove unnecessary set_drvdata() function
+
+Yangtao Li (65):
+      mmc: mxcmmc: Use devm_platform_get_and_ioremap_resource()
+      mmc: omap_hsmmc: Use devm_platform_get_and_ioremap_resource()
+      mmc: pxamci: Use devm_platform_get_and_ioremap_resource()
+      mmc: sunxi: Convert to platform remove callback returning void
+      mmc: bcm2835: Convert to platform remove callback returning void
+      mmc: jz4740: Convert to platform remove callback returning void
+      mmc: litex_mmc: Convert to platform remove callback returning void
+      mmc: mtk-sd: Convert to platform remove callback returning void
+      mmc: cb710: Convert to platform remove callback returning void
+      mmc: davinci_mmc: Convert to platform remove callback returning void
+      mmc: dw_mmc: hi3798cv200: Convert to platform remove callback returning void
+      mmc: sdhci-pic32: Convert to platform remove callback returning void
+      mmc: sdhci: milbeaut: Convert to platform remove callback returning void
+      mmc: omap_hsmmc: Convert to platform remove callback returning void
+      mmc: sdhci-of-at91: Convert to platform remove callback returning void
+      mmc: omap: Convert to platform remove callback returning void
+      mmc: dw_mmc: exynos: Convert to platform remove callback returning void
+      mmc: sdhci-pxav3: Convert to platform remove callback returning void
+      mmc: rtsx_pci: Drop if block with always false condition
+      mmc: rtsx_pci: Convert to platform remove callback returning void
+      mmc: sh_mmcif: Convert to platform remove callback returning void
+      mmc: meson-gx: Convert to platform remove callback returning void
+      mmc: xenon: Convert to platform remove callback returning void
+      mmc: sdhci-s3c: Convert to platform remove callback returning void
+      mmc: meson-mx-sdhc: Convert to platform remove callback returning void
+      mmc: rtsx_usb_sdmmc: Convert to platform remove callback returning void
+      mmc: mxs-mmc: Convert to platform remove callback returning void
+      mmc: sdhci-of-arasan: Convert to platform remove callback returning void
+      mmc: sdhci-of-dwcmshc: Convert to platform remove callback returning void
+      mmc: au1xmmc: Convert to platform remove callback returning void
+      mmc: cavium-octeon: Convert to platform remove callback returning void
+      mmc: pxamci: Convert to platform remove callback returning void
+      mmc: moxart: Convert to platform remove callback returning void
+      mmc: sdhci-omap: Convert to platform remove callback returning void
+      mmc: sdhci-of-aspeed: remove unneeded variables
+      mmc: sdhci-of-aspeed: Convert to platform remove
+      mmc: meson-mx-sdio: Convert to platform remove callback returning void
+      mmc: sdhci-sprd: Convert to platform remove callback returning void
+      mmc: sdhci-tegra: Convert to platform remove callback returning void
+      mmc: sdhci-acpi: Convert to platform remove callback returning void
+      mmc: sdhci-esdhc-imx: Convert to platform remove callback returning void
+      mmc: sdhci-msm: Convert to platform remove callback returning void
+      mmc: alcor: Convert to platform remove callback returning void
+      mmc: dw_mmc: rockchip: Convert to platform remove callback returning void
+      mmc: owl: Convert to platform remove callback returning void
+      mmc: wbsd: Convert to platform remove callback returning void
+      mmc: usdhi60rol0: Convert to platform remove callback returning void
+      mmc: atmel-mci: Convert to platform remove callback returning void
+      mmc: sdhci-st: Convert to platform remove callback returning void
+      mmc: wmt-sdmmc: Convert to platform remove callback returning void
+      mmc: sdhci-esdhc-mcf: Convert to platform remove callback returning void
+      mmc: sunplus-mmc: Convert to platform remove callback returning void
+      mmc: sdhci-spear: Convert to platform remove callback returning void
+      mmc: mxcmmc: Convert to platform remove callback returning void
+      mmc: mvsdio: Convert to platform remove callback returning void
+      mmc: pwrseq_simple: Convert to platform remove callback returning void
+      mmc: pwrseq: sd8787: Convert to platform remove callback returning void
+      mmc: pwrseq: Convert to platform remove callback returning void
+      mmc: renesas_sdhi: Convert to platform remove callback returning void
+      mmc: Convert to platform remove callback returning void
+      mmc: uniphier-sd: Convert to platform remove callback returning void
+      mmc: sdhci_am654: Properly handle failures in .remove()
+      mmc: sdhci_am654: Convert to platform remove callback returning void
+      mmc: f-sdh30: fix order of function calls in sdhci_f_sdh30_remove
+      mmc: f-sdh30: Convert to platform remove callback returning void
+
+Yibin Ding (1):
+      mmc: block: Fix in_flight[issue_type] value error
+
+Zhu Wang (2):
+      mmc: sdhci-spear: remove redundant of_match_ptr()
+      mmc: sdhci: milbeaut: remove redundant of_match_ptr()
+
+ .../devicetree/bindings/mmc/arasan,sdhci.yaml      |   6 +
+ .../devicetree/bindings/mmc/mmc-controller.yaml    |   2 +-
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |  10 -
+ .../devicetree/bindings/mmc/sdhci-atmel.txt        |   4 +-
+ drivers/gpio/gpiolib-of.c                          |  20 +-
+ drivers/mmc/core/block.c                           |  18 +-
+ drivers/mmc/core/bus.c                             |   3 +
+ drivers/mmc/core/mmc_ops.h                         |   1 -
+ drivers/mmc/core/pwrseq_emmc.c                     |   6 +-
+ drivers/mmc/core/pwrseq_sd8787.c                   |   6 +-
+ drivers/mmc/core/pwrseq_simple.c                   |   6 +-
+ drivers/mmc/core/sd.c                              |  14 ++
+ drivers/mmc/core/sd_ops.c                          |   1 +
+ drivers/mmc/core/sd_ops.h                          |   2 -
+ drivers/mmc/host/alcor.c                           |   6 +-
+ drivers/mmc/host/atmel-mci.c                       | 140 ++++++++------
+ drivers/mmc/host/au1xmmc.c                         |   5 +-
+ drivers/mmc/host/bcm2835.c                         |   6 +-
+ drivers/mmc/host/cavium-octeon.c                   |   7 +-
+ drivers/mmc/host/cavium-thunderx.c                 |   1 +
+ drivers/mmc/host/cb710-mmc.c                       |   5 +-
+ drivers/mmc/host/davinci_mmc.c                     |   9 +-
+ drivers/mmc/host/dw_mmc-exynos.c                   |   6 +-
+ drivers/mmc/host/dw_mmc-hi3798cv200.c              |   6 +-
+ drivers/mmc/host/dw_mmc-rockchip.c                 |   6 +-
+ drivers/mmc/host/jz4740_mmc.c                      |   6 +-
+ drivers/mmc/host/litex_mmc.c                       |   5 +-
+ drivers/mmc/host/meson-gx-mmc.c                    |  11 +-
+ drivers/mmc/host/meson-mx-sdhc-mmc.c               |   6 +-
+ drivers/mmc/host/meson-mx-sdio.c                   |   6 +-
+ drivers/mmc/host/mmci.c                            |  39 +++-
+ drivers/mmc/host/moxart-mmc.c                      |  16 +-
+ drivers/mmc/host/mtk-sd.c                          |  10 +-
+ drivers/mmc/host/mvsdio.c                          |   6 +-
+ drivers/mmc/host/mxcmmc.c                          |  10 +-
+ drivers/mmc/host/mxs-mmc.c                         |   7 +-
+ drivers/mmc/host/omap.c                            |   6 +-
+ drivers/mmc/host/omap_hsmmc.c                      |  11 +-
+ drivers/mmc/host/owl-mmc.c                         |   9 +-
+ drivers/mmc/host/pxamci.c                          |  12 +-
+ drivers/mmc/host/renesas_sdhi.h                    |   2 +-
+ drivers/mmc/host/renesas_sdhi_core.c               |  26 +--
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   5 +-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   5 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |   9 +-
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  |   8 +-
+ drivers/mmc/host/sdhci-acpi.c                      |   6 +-
+ drivers/mmc/host/sdhci-bcm-kona.c                  |  13 +-
+ drivers/mmc/host/sdhci-brcmstb.c                   |  18 +-
+ drivers/mmc/host/sdhci-cadence.c                   |  19 +-
+ drivers/mmc/host/sdhci-dove.c                      |   8 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |  15 +-
+ drivers/mmc/host/sdhci-esdhc-mcf.c                 |   6 +-
+ drivers/mmc/host/sdhci-iproc.c                     |  16 +-
+ drivers/mmc/host/sdhci-milbeaut.c                  |   8 +-
+ drivers/mmc/host/sdhci-msm.c                       |   7 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 |  14 +-
+ drivers/mmc/host/sdhci-of-aspeed.c                 |  15 +-
+ drivers/mmc/host/sdhci-of-at91.c                   |  10 +-
+ drivers/mmc/host/sdhci-of-dwcmshc.c                |  93 ++++++++-
+ drivers/mmc/host/sdhci-of-esdhc.c                  |   2 +-
+ drivers/mmc/host/sdhci-of-hlwd.c                   |   4 +-
+ drivers/mmc/host/sdhci-of-sparx5.c                 |  19 +-
+ drivers/mmc/host/sdhci-omap.c                      |   7 +-
+ drivers/mmc/host/sdhci-pci-core.c                  |   4 +
+ drivers/mmc/host/sdhci-pci-o2micro.c               | 211 +++++++++++++++++----
+ drivers/mmc/host/sdhci-pci.h                       |   4 +
+ drivers/mmc/host/sdhci-pic32.c                     |   6 +-
+ drivers/mmc/host/sdhci-pltfm.c                     |  16 +-
+ drivers/mmc/host/sdhci-pltfm.h                     |   8 +-
+ drivers/mmc/host/sdhci-pxav2.c                     |  20 +-
+ drivers/mmc/host/sdhci-pxav3.c                     |   6 +-
+ drivers/mmc/host/sdhci-s3c.c                       |   7 +-
+ drivers/mmc/host/sdhci-spear.c                     |  10 +-
+ drivers/mmc/host/sdhci-sprd.c                      | 156 ++++++++++++++-
+ drivers/mmc/host/sdhci-st.c                        |  15 +-
+ drivers/mmc/host/sdhci-tegra.c                     |   7 +-
+ drivers/mmc/host/sdhci-xenon.c                     |   6 +-
+ drivers/mmc/host/sdhci_am654.c                     |  14 +-
+ drivers/mmc/host/sdhci_f_sdh30.c                   |  77 ++++----
+ drivers/mmc/host/sh_mmcif.c                        |   7 +-
+ drivers/mmc/host/sunplus-mmc.c                     |  35 ++--
+ drivers/mmc/host/sunxi-mmc.c                       |   6 +-
+ drivers/mmc/host/uniphier-sd.c                     |  19 +-
+ drivers/mmc/host/usdhi6rol0.c                      |   6 +-
+ drivers/mmc/host/via-sdmmc.c                       |   2 -
+ drivers/mmc/host/wbsd.c                            |  11 +-
+ drivers/mmc/host/wmt-sdmmc.c                       |   7 +-
+ include/linux/atmel-mci.h                          |  46 -----
+ include/linux/mmc/host.h                           |   8 +
+ 90 files changed, 866 insertions(+), 639 deletions(-)
+ delete mode 100644 include/linux/atmel-mci.h
