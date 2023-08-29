@@ -2,104 +2,191 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DECBC71153
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Aug 2023 16:36:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C1B7C83F19
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Aug 2023 17:12:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235308AbjH2Qf3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Aug 2023 12:35:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38864 "EHLO
+        id S232748AbjH2RMJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Aug 2023 13:12:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49182 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237495AbjH2QfW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Aug 2023 12:35:22 -0400
-Received: from mail-oo1-xc34.google.com (mail-oo1-xc34.google.com [IPv6:2607:f8b0:4864:20::c34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A160198
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Aug 2023 09:35:20 -0700 (PDT)
-Received: by mail-oo1-xc34.google.com with SMTP id 006d021491bc7-573675e6b43so2121571eaf.0
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Aug 2023 09:35:20 -0700 (PDT)
+        with ESMTP id S237708AbjH2RMD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Aug 2023 13:12:03 -0400
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89CCFAD
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Aug 2023 10:11:58 -0700 (PDT)
+Received: by mail-ej1-x62f.google.com with SMTP id a640c23a62f3a-99df431d4bfso613932966b.1
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Aug 2023 10:11:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1693326918; x=1693931718;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=X0pWbpInDstIHBeP/BS4VOTRMTkNBmu1VJYzwpZwV48=;
-        b=mfRZRWbghdgh0zjCP5AmsjeyhQDj/khco0H/tA3gxDMc0QrOgFq/kvqlvs+R9YQDuP
-         XAkfzfLzsKH+qlyoeeORg3tnPEYuSLDN+OuUD5STnwjIhHlG7uFZv0EJcV7nJxpSfPYV
-         4GMH/NhgRY2yaAqGR5DD7PmxJwAVgrcf66RY4=
+        d=linaro.org; s=google; t=1693329117; x=1693933917;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=ot7NCiA1P/g4QoRkOQO6VMoid0N82LUVt6BxtNZWwmA=;
+        b=kFkjG26yLAe5K8ALk26O8/s7w9aSc4YyRn0bdowDdLZ4mYavz8iNAtLZOMKkmqIBPI
+         WEofqJk1dD4kGs1UmigQ52RgSX1NftgJvQApLCgbLE0C8G64pbc+M7pG5KY/jbMfewyt
+         vV0pANu/Xjyjd22oFF0rmlKcXj0/RaAkcTgMJTo+0aakxcK6uFCwG7EScD3iXv6DYIsA
+         V6o0J1Ajre6v5lV+umzWIms90yxUpIy0gCS0T2Cj707ONHuDOPps+EKJZnDU4Y/rf8KW
+         9Yt2WJ4ui8KIYEUzTEm6viwqveypq0oLZheEwYkl37Exl/4ivyBSRb5k8AX5nqhM306z
+         TqIQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693326918; x=1693931718;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=X0pWbpInDstIHBeP/BS4VOTRMTkNBmu1VJYzwpZwV48=;
-        b=Z8YHsrXUaeL5Zm8+xqF2/9VREs+SgP0Iw1f5s3DGJHeeV/3QvcjIxQL/1V56AkPHw/
-         MdItcjFirwgC/w4dQXEphqAcTdGwmdD0sj3nQCPxv5y8xWDy/WVKg+hbHHx8DFaM4yQw
-         bL9X7mMm4HMuWTTILTRLNZ3OlN2AUvSBHjAc/gPQKwUE7Y2BdYu/33XT+L0R4ryRXEEA
-         GOkXYMhbppJiLA9AG2B72a5NmPSk1peZp8CTAQpHcGELa6qE8HGlbutAFjsyW9yj/Tqj
-         K1fH60h2po8o+0IsaynF0yE+vJ+SXrkrw5A2+juwzVtWQnFVw1zEv8WuzBxCiTlzHy4P
-         +JMA==
-X-Gm-Message-State: AOJu0YxXrDbXBzvUxuPC6v0v2WWkrg1lcBEnDJlXPkEMH9OYfw3Psks8
-        SDSwCBDf6oi1HgzeZYZAkLdWXMQqkIYaLP7BsF6cgQ==
-X-Google-Smtp-Source: AGHT+IGc5a3RHIDC903KhYAdCNp4NhyszcvbVEQ3ozZ1UJetLD8jl2bwSLKwJYPtWPl7FhSb4DGeiiI4ID14JE+nfzg=
-X-Received: by 2002:a4a:765b:0:b0:571:28d5:2c72 with SMTP id
- w27-20020a4a765b000000b0057128d52c72mr15448838ooe.7.1693326918612; Tue, 29
- Aug 2023 09:35:18 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1693329117; x=1693933917;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=ot7NCiA1P/g4QoRkOQO6VMoid0N82LUVt6BxtNZWwmA=;
+        b=kDXa1k5xobReupP8y/ih7H8m3To24098iy7VKn5XXLtKaXhtNt/Sm1bLqTR0dGcMfa
+         wsQwS+jKOZmQW++/JkrGq1atJwxbagK+P3qRJwhvmWOHmGUiXOKF/D0EGtx8SgfglOQY
+         14MiuRHZsxaA2Y7vb9KNmpCqOY0B8AO5OI/pRVw7cG/WjnFNg6zsua8wpR6Tc/KREWCn
+         zVuIxLKAql9xeh0iV5mI+1RZUjMbzPkkx9GvvJI1a4Qyfw0yn/H42wGeiqX81qdq+08m
+         V4/ukjBRZFuTFwEm6ukf9Ct2G4qnoL7Z76yAqtCARULaqcEHjoWyXipguSDGdcbJVVCb
+         MZUw==
+X-Gm-Message-State: AOJu0YzzZTIqH9hv+EkeUNx25cUE45U1QhaS72jVFwjMDUMGU9fo76sD
+        7SBtU3nzkFy4awZWM2depsTurw==
+X-Google-Smtp-Source: AGHT+IHgNSSHh3AWiFFc5SXQxm5XtnChf182toZPst6EvcFV/KfYJ713N6dciRt0nbyr9w+llzG0/A==
+X-Received: by 2002:a17:907:2be0:b0:9a5:a247:5bbc with SMTP id gv32-20020a1709072be000b009a5a2475bbcmr5940898ejc.28.1693329116951;
+        Tue, 29 Aug 2023 10:11:56 -0700 (PDT)
+Received: from [192.168.86.24] ([5.133.47.210])
+        by smtp.googlemail.com with ESMTPSA id i13-20020a170906a28d00b0098884f86e41sm6126999ejz.123.2023.08.29.10.11.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 29 Aug 2023 10:11:56 -0700 (PDT)
+Message-ID: <f63ce281-1434-f86f-3f4e-e1958a684bbd@linaro.org>
+Date:   Tue, 29 Aug 2023 18:11:55 +0100
 MIME-Version: 1.0
-References: <391c4270-637a-2afb-210d-6b6dfef01efa@intel.com>
- <20230828100313.3051403-1-benchuanggli@gmail.com> <CAG-rBig+koxDf3TuC-0p=tcBY_2WM1sPCvRDtjRmR7AnikrN-A@mail.gmail.com>
- <CACT4zj-BaX4tHji8B8gS5jiKkd-2BcwfzHM4fS-OUn0f8DSxcw@mail.gmail.com>
-In-Reply-To: <CACT4zj-BaX4tHji8B8gS5jiKkd-2BcwfzHM4fS-OUn0f8DSxcw@mail.gmail.com>
-From:   Sven van Ashbrook <svenva@chromium.org>
-Date:   Tue, 29 Aug 2023 12:35:07 -0400
-Message-ID: <CAG-rBihBkTeZR6yMSF+5zg-h1U1pxGuN-nv=Y7DXLvxV435hDw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix
- SoCs can suspend
-To:     Ben Chuang <benchuanggli@gmail.com>,
-        "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
-Cc:     skardach@google.com, adrian.hunter@intel.com,
-        SeanHY.chen@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
-        greg.tu@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
-        jasonlai.genesyslogic@gmail.com, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, reniuschengl@gmail.com,
-        stable@vger.kernel.org, ulf.hansson@linaro.org,
-        victor.shih@genesyslogic.com.tw, victorshihgli@gmail.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
+ ufs
+Content-Language: en-US
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
+        quic_psodagud@quicinc.com, avmenon@quicinc.com,
+        abel.vesa@linaro.org, quic_spuppala@quicinc.com
+References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+ <f4b5512b-9922-1511-fc22-f14d25e2426a@linaro.org>
+ <20230825210727.GA1366@sol.localdomain>
+From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+In-Reply-To: <20230825210727.GA1366@sol.localdomain>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Rafael for advice on runtime_pm corner cases.
 
-On Mon, Aug 28, 2023 at 10:48=E2=80=AFPM Ben Chuang <benchuanggli@gmail.com=
-> wrote:
->
->
-> My concern is that when runtime_pm is false, gl9763e is disabled LPM
-> negotiation, gl9763e can't enter L1.x and s0ix may fail.
-> It seems that runtime_pm will always exist and that's ok.
->
 
-Thank you. I believe we can address your concern.
+On 25/08/2023 22:07, Eric Biggers wrote:
+> Hi Srinivas,
+> 
+> On Fri, Aug 25, 2023 at 11:19:41AM +0100, Srinivas Kandagatla wrote:
+>>
+>> On 19/07/2023 18:04, Gaurav Kashyap wrote:
+>>> These patches add support to Qualcomm ICE (Inline Crypto Enginr) for hardware
+>>> wrapped keys using Qualcomm Hardware Key Manager (HWKM) and are made on top
+>>> of a rebased version  Eric Bigger's set of changes to support wrapped keys in
+>>> fscrypt and block below:
+>>> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7
+>>> (The rebased patches are not uploaded here)
+>>>
+>>> Ref v1 here:
+>>> https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkash@quicinc.com/
+>>>
+>>> Explanation and use of hardware-wrapped-keys can be found here:
+>>> Documentation/block/inline-encryption.rst
+>>>
+>>> This patch is organized as follows:
+>>>
+>>> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
+>>> Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
+>>> Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
+>>> Patch 5-6 - Adds support for wrapped keys in UFS
+>>> Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
+>>>
+>>> NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
+>>>         Patch 3, 4, 8, 10 will have MMC equivalents.
+>>>
+>>> Testing:
+>>> Test platform: SM8550 MTP
+>>> Engineering trustzone image is required to test this feature only
+>>> for SM8550. For SM8650 onwards, all trustzone changes to support this
+>>> will be part of the released images.
+>>
+>> AFAIU, Prior to these proposed changes in scm, HWKM was done with help of
+>> TA(Trusted Application) for generate, import, unwrap ... functionality.
+>>
+>> 1. What is the reason for moving this from TA to new smc calls?
+>>
+>> Is this because of missing smckinvoke support in upstream?
+>>
+>> How scalable is this approach? Are we going to add new sec sys calls to
+>> every interface to TA?
+>>
+>> 2. How are the older SoCs going to deal with this, given that you are
+>> changing drivers that are common across these?
+>>
+>> Have you tested these patches on any older platforms?
+>>
+>> What happens if someone want to add support to wrapped keys to this
+>> platforms in upstream, How is that going to be handled?
+>>
+>> As I understand with this, we will endup with two possible solutions over
+>> time in upstream.
+> 
+> It's true that Qualcomm based Android devices already use HW-wrapped keys on
+> SoCs earlier than SM8650.  The problem is that the key generation, import, and
+> conversion were added to Android's KeyMint HAL, as a quick way to get the
+> feature out the door when it was needed (so to speak).  Unfortunately this
 
-- XXX_suspend/XXX_resume (i.e. classic suspend/resume) depends on
-  CONFIG_PM_SLEEP. This always selects CONFIG_PM. This always includes
-  the runtime_pm framework. So, if XXX_suspend/XXX_resume gets called,
-  the runtime_pm framework is always present, but may not be actively
-  managing the device.
+There is an attempt in 2021 todo exactly same thing I guess,
 
-- "when runtime_pm is false" AFAIK the only way to disable runtime_pm
-  when CONFIG_PM is set, is to write "on" to /sys/devices/.../power/control=
-.
-  See https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-devices-po=
-wer
-  In that case, the runtime_pm framework will activate the device, calling
-  XXX_runtime_resume() if necessary. Are there other ways of disabling it?
+https://patchwork.kernel.org/project/linux-fscrypt/cover/20211206225725.77512-1-quic_gaurkash@quicinc.com/
 
-- if /sys/devices/.../power/control is "on", then:
-  gl9763e_runtime_resume() always called -> LPM always disabled
-  gl9763e_suspend() -> LPM enabled -> gl9763e_resume() -> LPM disabled
-  In between "classic" XXX_suspend and XXX_resume, LPM will be enabled,
-  so the device can enter L1.x and S0ix.
+If this was the right thing to do they why is the TZ firmware on SoCs 
+after 2021 not having support for this ?
 
-And the LPM negotiation flags look correct.
-Does that address your concerns?
+> coupled this feature unnecessarily to the Android KeyMint and the corresponding
+> (closed source) userspace HAL provided by Qualcomm, which it's not actually
+
+So how does Andriod kernel upgrades work after applying this patchset on 
+platforms like SM8550 or SM8450 or SM8250..or any old platforms.
+
+> related to.  I'd guess that Qualcomm's closed source userspace HAL makes SMC
+> calls into Qualcomm's KeyMint TA, but I have no insight into those details.
+> 
+If we have an smcinvoke tee driver we can talk to to this TA.
+
+> The new SMC calls eliminate the dependency on the Android-specific KeyMint.
+
+I can see that.
+
+Am not against adding this new interface, but is this new interface 
+leaving a gap for older platforms?
+
+
+Is there any other technical reason for moving out from TA based to a 
+smc calls?
+
+And are we doing a quick solution here to fix something
+
+
+> They're also being documented by Qualcomm.  So, as this patchset does, they can
+> be used by Linux in the implementation of new ioctls which provide a vendor
+> independent interface to HW-wrapped key generation, import, and conversion.
+> 
+> I think the new approach is the only one that is viable outside the Android
+> context.  As such, I don't think anyone has any plan to upstream support for
+> HW-wrapped keys for older Qualcomm SoCs that lack the new interface.
+
+AFAIU, There are other downstream Qualcomm LE platforms that use wrapped 
+key support with the older interface.
+What happens to them whey then upgrade the kernel?
+
+Does TA interface still continue to work with the changes that went into 
+common drivers (ufs/sd)?
+
+--srini
+
+> 
+> - Eric
