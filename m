@@ -2,120 +2,148 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D310C83F01
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Aug 2023 18:29:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81441C83F17
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Aug 2023 18:29:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229998AbjH3S3M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Aug 2023 14:29:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45684 "EHLO
+        id S229721AbjH3S3O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Aug 2023 14:29:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242981AbjH3KAQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2023 06:00:16 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AAC1B1BE
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2023 03:00:11 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id 2adb3069b0e04-500cefc3644so138969e87.3
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2023 03:00:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1693389610; x=1693994410; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=3xTYLzShSJrMNa33kOQFBwQyF7CcLinjfIsI73sj6mA=;
-        b=NhZVFfnZrY4lUb7uBX51m41Wvv2oL8ZuKoDEcP347ewa3qI6U3GfIJLNtwr1jVDnFF
-         E8lUHrzatV/ve4JM0dKcLqAecCAs5+WAqyHS2B7NvhP9SiFZ7NcAlhvLKCwR3dPK4peX
-         TqkxTDhY4a4C8qfmbfhvHnmBjmEqsTbwHicf/TKHh4gVQcBvV8us5V4Japo+tMnEembw
-         VA2Pqny78q90kCaoC5xTx1Ia3W3ZfN2VAUcINRg1t3c60ailf1WO6eH0c2MyAYRThFIG
-         U6juh+WNxwBT+Cdt4v521GRG9jB3fiVvoiT6YQchcO1Hd+1hD/KtZ0b1oEY6xPboByFA
-         7HPw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693389610; x=1693994410;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=3xTYLzShSJrMNa33kOQFBwQyF7CcLinjfIsI73sj6mA=;
-        b=CM4xRZYHAtJJci4SVF/+yxRFaHMivj7wLCwdfRen+ViBGqGFyweZayyfmPpRo5PQaL
-         pS4TBE4aufl6SIQPlpdiArFq+NQoQenUV9qokBc8N+rAMRAtZZpm7yPDAVt6kHHdEWts
-         W6VgXDBvT48lady/GQsbPAiyXb2I8ZklXyDEfOQ5XjLiZj6HOveOzQiBPkfNco+KGTXe
-         bDth+o0vcIdPQu903GddNMTl3nFRhZoq/w3Usro5kxxuKk7ckgwzxYlNQjjQGqTHtjyI
-         djCDtJ7orVxI4Jo8xqprUquvQV9LJ724lHAoNhj1lTS0qQaWMy/gzlc5+WCADtXFqcY8
-         fCGw==
-X-Gm-Message-State: AOJu0Ywj+fXjkP8kggiFgilah1s1qb7W7xcjtK57AdEwFzy7a9mkCbl6
-        IgraeL0aFzZf6jRsL54yGh1gig==
-X-Google-Smtp-Source: AGHT+IHCaFP31zkAGHF02AmzezLz996huf1FhuxFlQEm+QFgPfp9jCQOyRrIpXdq64Q6sPBPvdP6GQ==
-X-Received: by 2002:a05:6512:2088:b0:500:7881:7b2f with SMTP id t8-20020a056512208800b0050078817b2fmr1125481lfr.54.1693389609676;
-        Wed, 30 Aug 2023 03:00:09 -0700 (PDT)
-Received: from [192.168.86.24] ([5.133.47.210])
-        by smtp.googlemail.com with ESMTPSA id dk24-20020a170906f0d800b0099ddc81903asm7030466ejb.221.2023.08.30.03.00.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 30 Aug 2023 03:00:08 -0700 (PDT)
-Message-ID: <2230571a-114c-0d03-d02a-fa08c2a8d483@linaro.org>
-Date:   Wed, 30 Aug 2023 11:00:07 +0100
+        with ESMTP id S241307AbjH3Gva (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2023 02:51:30 -0400
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B13CD194;
+        Tue, 29 Aug 2023 23:51:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1693378287; x=1724914287;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=iJiqQM/21AbbfFTBJGuHIq/kCZ7VDhCQMZ/MLtlN5jI=;
+  b=KFPUYuEA6zBCEdE2XJdykEejjZAAF+U6jRoxYSIA8dd/qs7YrTjC0Zp0
+   qoJWG+K63BCw/4Xk6wf6DrOkfoqouQU1xWY0a/klgS8g/O/78QaXFU6Ae
+   IQo14RlhSyYciqUSrJRfgXc8ZOk3BCnHul8TvcCXAwq/PDz4syfLy2HvE
+   yHN/E8C/D59rAem1yog3khS7g+hHppZDXVl5JrcAJJh23GOYoa2PZoIoC
+   Y+Bt+0nfcLfqC5TROkZUFjYX5xIJqg8lwShaz90KaAamvqtEMHIMtnoQh
+   unAKrwg8vau74I4ObwcfgDPILDKVRoSnhSjNOGMkjKZfawy0lGeM7n2GY
+   w==;
+X-IronPort-AV: E=Sophos;i="6.02,212,1688454000"; 
+   d="asc'?scan'208";a="169011728"
+X-Amp-Result: UNKNOWN
+X-Amp-Original-Verdict: FILE UNKNOWN
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa6.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 29 Aug 2023 23:51:26 -0700
+Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.21; Tue, 29 Aug 2023 23:51:22 -0700
+Received: from wendy (10.10.85.11) by chn-vm-ex04.mchp-main.com (10.10.85.152)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21 via Frontend
+ Transport; Tue, 29 Aug 2023 23:51:20 -0700
+Date:   Wed, 30 Aug 2023 07:50:37 +0100
+From:   Conor Dooley <conor.dooley@microchip.com>
+To:     William Qiu <william.qiu@starfivetech.com>
+CC:     <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-riscv@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
+        Emil Renner Berthing <kernel@esmil.dk>,
+        Rob Herring <robh+dt@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>
+Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Drop unused properties
+Message-ID: <20230830-commence-trickery-40eaa193cb15@wendy>
+References: <20230830031846.127957-1-william.qiu@starfivetech.com>
+ <20230830031846.127957-2-william.qiu@starfivetech.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
- ufs
-Content-Language: en-US
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
-        quic_psodagud@quicinc.com, avmenon@quicinc.com,
-        abel.vesa@linaro.org, quic_spuppala@quicinc.com
-References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
- <f4b5512b-9922-1511-fc22-f14d25e2426a@linaro.org>
- <20230825210727.GA1366@sol.localdomain>
- <f63ce281-1434-f86f-3f4e-e1958a684bbd@linaro.org>
- <20230829181223.GA2066264@google.com>
-From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-In-Reply-To: <20230829181223.GA2066264@google.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="VGI59nk8mzz/pDkD"
+Content-Disposition: inline
+In-Reply-To: <20230830031846.127957-2-william.qiu@starfivetech.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Eric,
+--VGI59nk8mzz/pDkD
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On 29/08/2023 19:12, Eric Biggers wrote:
-> 
->>> They're also being documented by Qualcomm.  So, as this patchset does, they can
->>> be used by Linux in the implementation of new ioctls which provide a vendor
->>> independent interface to HW-wrapped key generation, import, and conversion.
->>>
->>> I think the new approach is the only one that is viable outside the Android
->>> context.  As such, I don't think anyone has any plan to upstream support for
->>> HW-wrapped keys for older Qualcomm SoCs that lack the new interface.
->> AFAIU, There are other downstream Qualcomm LE platforms that use wrapped key
->> support with the older interface.
->> What happens to them whey then upgrade the kernel?
->>
->> Does TA interface still continue to work with the changes that went into
->> common drivers (ufs/sd)?
-> This is a strange line of questioning for upstream review, as this feature does
-> not exist upstream.  This is the first time it will be supported by upstream
-> Linux, ever.  Adding support for this feature does not break anything.
-These are not unusual questions, what am trying to understand here is 
-below questions for better context, big picture and review/test. At the 
-end of the day we all want to get these features available in upstream.
+On Wed, Aug 30, 2023 at 11:18:44AM +0800, William Qiu wrote:
+> Due to the change of tuning implementation, it's no longer necessary to
+> use the "starfive,sysreg" property in dts, so drop the relevant
+> description in dt-bindings here.
 
-1. How backward compatibility of this wrapped key support. I guess the 
-answer is NO.
+How does changing your software implantation invalidate a description of
+the hardware?
 
-2. secondly reasons behind this change. Am still not really convinced 
-with the current technical reasoning to shift from TA based approach to 
-this. But I guess this is all done to dump the closed source userspace 
-thingy. Am hoping that this can be made available to other older SoCs at 
-some point in time.
+>=20
+> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> ---
+>  .../bindings/mmc/starfive,jh7110-mmc.yaml         | 15 ---------------
+>  1 file changed, 15 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.ya=
+ml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+> index 51e1b04e799f..10df41941331 100644
+> --- a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+> @@ -36,26 +36,12 @@ properties:
+>    interrupts:
+>      maxItems: 1
+> =20
+> -  starfive,sysreg:
+> -    $ref: /schemas/types.yaml#/definitions/phandle-array
+> -    items:
+> -      - items:
+> -          - description: phandle to System Register Controller syscon no=
+de
+> -          - description: offset of SYS_SYSCONSAIF__SYSCFG register for M=
+MC controller
+> -          - description: shift of SYS_SYSCONSAIF__SYSCFG register for MM=
+C controller
+> -          - description: mask of SYS_SYSCONSAIF__SYSCFG register for MMC=
+ controller
+> -    description:
+> -      Should be four parameters, the phandle to System Register Controll=
+er
+> -      syscon node and the offset/shift/mask of SYS_SYSCONSAIF__SYSCFG re=
+gister
+> -      for MMC controller.
+> -
+>  required:
+>    - compatible
+>    - reg
+>    - clocks
+>    - clock-names
+>    - interrupts
+> -  - starfive,sysreg
+> =20
+>  unevaluatedProperties: false
+> =20
+> @@ -73,5 +59,4 @@ examples:
+>          fifo-depth =3D <32>;
+>          fifo-watermark-aligned;
+>          data-addr =3D <0>;
+> -        starfive,sysreg =3D <&sys_syscon 0x14 0x1a 0x7c000000>;
+>      };
+> --=20
+> 2.34.1
+>=20
 
-3. We are adding these apis/callbacks in common code without doing any 
-compatible or SoC checks. Is this going to be a issue if someone tries 
-fscrypt?
+--VGI59nk8mzz/pDkD
+Content-Type: application/pgp-signature; name="signature.asc"
 
---srini
+-----BEGIN PGP SIGNATURE-----
 
-> 
-> Downstream users who implemented a less well designed version of this feature
-> can continue to use their existing code.
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZO7mswAKCRB4tDGHoIJi
+0j0ZAPoD8g3POZOxVjU8MHAqAQsVrGSXh9a5G6ibHoCJuX5zqQD+OwU3VEu8ihr1
+DsPdiiCV8fgivVirHHYW8sFlFgF+jQg=
+=iZHY
+-----END PGP SIGNATURE-----
+
+--VGI59nk8mzz/pDkD--
