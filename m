@@ -2,111 +2,160 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50FE3C83F01
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Aug 2023 20:43:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5B84C83F01
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Aug 2023 00:20:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240182AbjH3Ung (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Aug 2023 16:43:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50504 "EHLO
+        id S236743AbjHaAU1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Aug 2023 20:20:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36746 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240173AbjH3UnX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2023 16:43:23 -0400
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 693763A9C
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2023 13:29:27 -0700 (PDT)
-Received: by mail-pj1-x102e.google.com with SMTP id 98e67ed59e1d1-26fc9e49859so111102a91.0
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Aug 2023 13:29:27 -0700 (PDT)
+        with ESMTP id S229844AbjHaAU1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Aug 2023 20:20:27 -0400
+Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C004BE;
+        Wed, 30 Aug 2023 17:20:24 -0700 (PDT)
+Received: by mail-ed1-x534.google.com with SMTP id 4fb4d7f45d1cf-52713d2c606so221903a12.2;
+        Wed, 30 Aug 2023 17:20:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1693427277; x=1694032077; darn=vger.kernel.org;
+        d=gmail.com; s=20221208; t=1693441223; x=1694046023; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=6TmLk0fQBF61eW6D8ZlImNTOGih/aAgkyRTy6ROPKDY=;
-        b=FQggWjyYeGIQv1Du4kp6n5qybxIkzpKMNVpKooum+YvitKfxcO9KetjPSe5kWWTpP1
-         hAEYYPop5P/0Dgic3nkLeCrWjAzQ6+lre3pzf35ahzGvKU0ZgObfOGgg5bGH5K8CQgug
-         4NmfcMp/M6jJ7WPHlck7Sw6qYiOFXs+CsPfwM=
+        bh=Y9cTUiRTcMYqhtEMxnwb8DlAD19IswY7y/gCbaQ+V6Y=;
+        b=piiCd2guvuggFvoMCdnsZ3K6EohylG4xwE6u1rmRNo5V5Vgl6ocvdQAS7y4yC8WgyD
+         5BXgFclAp8X1kWgNbu+1yK21Tomdbl4bnEeG7HfvkwZRBCT6Q+380vKRnapbNLCwgGx4
+         q+sylyqZCPSojNYnqOXx4ZuvhUnak1cPrnGgksN989ON1xV6zIszrEUSRc0bYlRHNnVq
+         vLJonMv5XBLinXrJC2zRcRha7jqA9c5FAt0U+2hbDGrMjv09L4hmGOLYPS+l0/IuWP28
+         m4/XPi3n/ePaFBhvwZMRMQvIT1vnRS9wHnkZQEdzHNC97Wm4QEBnSqdLGPtOQB8QPue5
+         1gPQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693427277; x=1694032077;
+        d=1e100.net; s=20221208; t=1693441223; x=1694046023;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=6TmLk0fQBF61eW6D8ZlImNTOGih/aAgkyRTy6ROPKDY=;
-        b=WA6HMXMEHrfCGKdloO6L5idjmtizOJJBo4OECwIFbXWipb+VQkoGCUFR/3L8wXZYPR
-         dSeoefbq2cYbriAbPdSyTsxMsrP5EPX0XVuH5o6QhEtGbl4J4rNzJ9ELM18QhrggvXFz
-         YSNIXtaKekQH3HJDecbyQ97Bwwg41k1C9c24HXj9t+kywtwvhLyhSIUkRJQFyVns6hp4
-         3zqJO9gjt19HbrkuHX4Jl2NObYfHPMwo6bJu0CDUIy9MwE9CAOmUp3NRDGC6T1aTP34v
-         8Wqn8d/s79xpK+xWmOGRJaATh7MMBNc7mV3TBRQ4YJQiqa+E/D8b5+BRdROnKzz93rys
-         42hA==
-X-Gm-Message-State: AOJu0YxXmd06mwFqEwwNEif3rBmtqb/fJ23NbRLi3fLucB/mFgO4JuyC
-        4aAlfRK4wSQitVK8MrrsVKWVAoEQqyVtPwcxsKn+Z9pZj1ReO8c/29A=
-X-Google-Smtp-Source: AGHT+IEjRi05Wg22Qjjn/hflcI7CQBa5XMdC0mt0jO+fQBSO3iMmADiYtjmP70bxRwmPUSH03EeDMSyRdegww4AwyXw=
-X-Received: by 2002:a4a:3416:0:b0:566:ec2f:36d0 with SMTP id
- b22-20020a4a3416000000b00566ec2f36d0mr3163656ooa.2.1693426449335; Wed, 30 Aug
- 2023 13:14:09 -0700 (PDT)
+        bh=Y9cTUiRTcMYqhtEMxnwb8DlAD19IswY7y/gCbaQ+V6Y=;
+        b=fJLQKRYYHOeRsfLh8o5J2uYzj7lQLr/hYttPNb6yh8KA0N3tLUCmr8jOI5vxzHx1qh
+         v0uxBX+GDEUtE4D+D/kQqHRnQ3jX44nQ8m+hzUsdGjPzwIgCSeL45MgO4YogqW503xsr
+         aQCdLH8PowoODTY+EKciJ9MBZtBotR28OTwSyEWE8MTVXZZTq5DwpierEBOFo23KrjaD
+         rMND8Eg3NegqEHUuF29rgt4ar4MB1DkGkGgRCq4uTwKt9XqVT52B5CJOz+akpV8/XUSQ
+         qPhKXj3DnTzqTAdszZSJcoJNwm17bTatuBqtvanHBwxfAHyUczVSSaGdTppNkTv3+5dK
+         UJLg==
+X-Gm-Message-State: AOJu0YzB3vfEBY3xzoLXmQm65vsXfOzXxH6aLCMMzdudgjdYCEzt7A2v
+        L51VTpG0VMEuWH8Jv0MMJzlEQIzOe4f8Qjk6Blc=
+X-Google-Smtp-Source: AGHT+IHm7k6OxDln7z/XYZdpIY3YtxSHNRTpCJ1iCdW76E+h+G1eBVIT9iDnBEV3zTGnwiAW+9ZensLKX2joawQZ0t0=
+X-Received: by 2002:a05:6402:7d7:b0:522:3a0d:38c2 with SMTP id
+ u23-20020a05640207d700b005223a0d38c2mr2756822edy.9.1693441222498; Wed, 30 Aug
+ 2023 17:20:22 -0700 (PDT)
 MIME-Version: 1.0
 References: <391c4270-637a-2afb-210d-6b6dfef01efa@intel.com>
  <20230828100313.3051403-1-benchuanggli@gmail.com> <CAG-rBig+koxDf3TuC-0p=tcBY_2WM1sPCvRDtjRmR7AnikrN-A@mail.gmail.com>
  <CACT4zj-BaX4tHji8B8gS5jiKkd-2BcwfzHM4fS-OUn0f8DSxcw@mail.gmail.com>
- <CAG-rBihBkTeZR6yMSF+5zg-h1U1pxGuN-nv=Y7DXLvxV435hDw@mail.gmail.com> <CACT4zj_84eCYOq56zdqaydaEGqyqBrXDrsTkDRyCntvVF78-0A@mail.gmail.com>
-In-Reply-To: <CACT4zj_84eCYOq56zdqaydaEGqyqBrXDrsTkDRyCntvVF78-0A@mail.gmail.com>
-From:   Sven van Ashbrook <svenva@chromium.org>
-Date:   Wed, 30 Aug 2023 16:13:58 -0400
-Message-ID: <CAG-rBigLPfJ6u5LQZ4FwMMm_h3b5fQiRYFkwNjFHm4cDCN1VRw@mail.gmail.com>
+ <CAG-rBihBkTeZR6yMSF+5zg-h1U1pxGuN-nv=Y7DXLvxV435hDw@mail.gmail.com>
+ <CACT4zj_84eCYOq56zdqaydaEGqyqBrXDrsTkDRyCntvVF78-0A@mail.gmail.com> <CADj_en4MTtqm0VSs2=1K5VB0fpZjga3ttMLE7RoEGQgxvQ8XFA@mail.gmail.com>
+In-Reply-To: <CADj_en4MTtqm0VSs2=1K5VB0fpZjga3ttMLE7RoEGQgxvQ8XFA@mail.gmail.com>
+From:   Ben Chuang <benchuanggli@gmail.com>
+Date:   Thu, 31 Aug 2023 08:19:54 +0800
+Message-ID: <CACT4zj-JuKgnL9QLH_+5auhjWsiB74wMoSaetOKT7vWJvgTNLg@mail.gmail.com>
 Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix
  SoCs can suspend
-To:     Ben Chuang <benchuanggli@gmail.com>
-Cc:     "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
-        skardach@google.com, adrian.hunter@intel.com,
-        SeanHY.chen@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
-        greg.tu@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
-        jasonlai.genesyslogic@gmail.com, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, reniuschengl@gmail.com,
-        stable@vger.kernel.org, ulf.hansson@linaro.org,
-        victor.shih@genesyslogic.com.tw, victorshihgli@gmail.com
+To:     =?UTF-8?Q?Stanis=C5=82aw_Kardach?= <skardach@google.com>
+Cc:     Sven van Ashbrook <svenva@chromium.org>,
+        "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
+        adrian.hunter@intel.com, SeanHY.chen@genesyslogic.com.tw,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        jason.lai@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        reniuschengl@gmail.com, stable@vger.kernel.org,
+        ulf.hansson@linaro.org, victor.shih@genesyslogic.com.tw,
+        victorshihgli@gmail.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Aug 29, 2023 at 10:27=E2=80=AFPM Ben Chuang <benchuanggli@gmail.com=
-> wrote:
+Hi Stanis=C5=82aw,
+
+On Wed, Aug 30, 2023 at 3:32=E2=80=AFPM Stanis=C5=82aw Kardach <skardach@go=
+ogle.com> wrote:
 >
+> On Wed, Aug 30, 2023 at 4:27=E2=80=AFAM Ben Chuang <benchuanggli@gmail.co=
+m> wrote:
 > >
-> > - if /sys/devices/.../power/control is "on", then:
-> >   <snip>
+> > Hi,
+> > On Wed, Aug 30, 2023 at 12:35=E2=80=AFAM Sven van Ashbrook <svenva@chro=
+mium.org> wrote:
+> > >
+> > > + Rafael for advice on runtime_pm corner cases.
+> > >
+> > > On Mon, Aug 28, 2023 at 10:48=E2=80=AFPM Ben Chuang <benchuanggli@gma=
+il.com> wrote:
+> > > >
+> > > >
+> > > > My concern is that when runtime_pm is false, gl9763e is disabled LP=
+M
+> > > > negotiation, gl9763e can't enter L1.x and s0ix may fail.
+> > > > It seems that runtime_pm will always exist and that's ok.
+> > > >
+> > >
+> > > Thank you. I believe we can address your concern.
+> > >
+> > > - XXX_suspend/XXX_resume (i.e. classic suspend/resume) depends on
+> > >   CONFIG_PM_SLEEP. This always selects CONFIG_PM. This always include=
+s
+> > >   the runtime_pm framework. So, if XXX_suspend/XXX_resume gets called=
+,
+> > >   the runtime_pm framework is always present, but may not be actively
+> > >   managing the device.
+> > This is ok.
 > >
-> In this cas, after gl9763e_resume(), it is LPM disabled.
-> Is there no chance for gl9763e to enter L1.x again when the system is idl=
-e?
+> > >
+> > > - "when runtime_pm is false" AFAIK the only way to disable runtime_pm
+> > >   when CONFIG_PM is set, is to write "on" to /sys/devices/.../power/c=
+ontrol.
+> > >   See https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-devi=
+ces-power
+> > >   In that case, the runtime_pm framework will activate the device, ca=
+lling
+> > >   XXX_runtime_resume() if necessary. Are there other ways of disablin=
+g it?
+> > >
+> > > - if /sys/devices/.../power/control is "on", then:
+> > >   gl9763e_runtime_resume() always called -> LPM always disabled
+> > >   gl9763e_suspend() -> LPM enabled -> gl9763e_resume() -> LPM disable=
+d
+> > >   In between "classic" XXX_suspend and XXX_resume, LPM will be enable=
+d,
+> > >   so the device can enter L1.x and S0ix.
+> > In this cas, after gl9763e_resume(), it is LPM disabled.
+> > Is there no chance for gl9763e to enter L1.x again when the system is i=
+dle?
+> With runtime PM disabled via sysfs, the short answer is not since
+> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit=
+/?id=3Df9e5b33934cec24b8c024add5c5d65d2f93ade05.
 >
+> The longer answer is:
+> 1. System boots up with LPM flags in PCI config space in default value
+> (might be LPM enabled).
+> 2.1. If runtime PM is disabled before first runtime suspend -
+> registers will be left in their default state.
+> 2.2. If runtime PM is disabled after first runtime suspend, the device
+> will be woken up and the gl9763e runtime resume callback will disable
+> LPM.
 
-AFAIK the only way to disable runtime_pm is to write:
-  $ echo on > /sys/devices/.../power/control
-where
-  $ echo auto > /sys/devices/.../power/control
-      means: runtime_pm is actively managing the device, device can be "act=
-ive"
-      or "suspended".
-  $ echo on > /sys/devices/.../power/control
-      means: runtime_pm is not managing the device, device is "active" only=
-.
+OK. Thank you for your answer.
 
-In the "auto" case, we know what should happen: LPM negotiation is enabled =
-when
-idle, disabled when active.
+Best Regards,
+Ben Chuang
 
-What should be the LPM negotiation state in the "on" case? We have to
-make a choice:
-a) LPM negotiation disabled: normal performance, high power consumption, OR
-b) LPM negotiation  enabled: low    performance, low  power consumption
-
-If userspace disables our device's runtime_pm by writing "on", it expects t=
-he
-device to be always-on. It should then expect a higher power consumption.
-It should then also expect a performance that is not-worse than the "auto" =
-case.
-
-So my suggestion would be to use (a), which is what this patch does.
-
-Appreciate your thoughts.
+> >
+> > >
+> > > And the LPM negotiation flags look correct.
+> > > Does that address your concerns?
+> >
+> > Best regards,
+> > Ben Chuang
+>
+> --
+> Best Regards,
+> Stanis=C5=82aw Kardach
