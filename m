@@ -2,298 +2,315 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8631C83F29
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Aug 2023 08:36:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A08B8C83F10
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Aug 2023 08:40:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231495AbjHaIgi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Aug 2023 04:36:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34270 "EHLO
+        id S238719AbjHaIkW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Aug 2023 04:40:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55700 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235599AbjHaIge (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Aug 2023 04:36:34 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 31F1DE75;
-        Thu, 31 Aug 2023 01:35:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1693470959; x=1725006959;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=fA57oYLGFg0kwbKul1wqjbHN6c9XpJtzg5SwFCiRtks=;
-  b=RntLQpmY3HFKQP0eArHVwdglmRhR9VqS6SmS//gQvhuZxWi3kA4gCJSF
-   O3LEEWXUQpMlJ+Y85cFHFe+jcVYx1oLqwIAA2Pd50AC2A2QmCQ0TbGEI4
-   LqcDt8MRcUcIoNTt+lScPPD3i1INQGsf0AW/PUkCk6WaxKKLUaLw2FqsK
-   9zq3hpKLXXXAYr7ASUKMkATK1Mo+Nx+7UfVVw2oAoBB9YJSUNUaypkRES
-   GUzqskCM+jFf3kSRVHrABEBlmlHYkLgKOwVKKjeK0ma9r8WuYJnyPddTH
-   3OBrZkYgpq2lYVhJ2CaCS4BYz4N9EaoX9/2vH75Zq/xTtC9lxFavz2nkd
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10818"; a="355366248"
-X-IronPort-AV: E=Sophos;i="6.02,216,1688454000"; 
-   d="scan'208";a="355366248"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Aug 2023 01:34:58 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10818"; a="809492361"
-X-IronPort-AV: E=Sophos;i="6.02,216,1688454000"; 
-   d="scan'208";a="809492361"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.57.245])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Aug 2023 01:34:54 -0700
-Message-ID: <e8ed5409-5a00-9478-5b91-85d54b7fb2bb@intel.com>
-Date:   Thu, 31 Aug 2023 11:34:51 +0300
+        with ESMTP id S239025AbjHaIkT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Aug 2023 04:40:19 -0400
+Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F239E66
+        for <linux-mmc@vger.kernel.org>; Thu, 31 Aug 2023 01:39:47 -0700 (PDT)
+Received: by mail-wr1-x433.google.com with SMTP id ffacd0b85a97d-307d20548adso428509f8f.0
+        for <linux-mmc@vger.kernel.org>; Thu, 31 Aug 2023 01:39:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1693471168; x=1694075968; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt:from
+         :references:cc:to:content-language:subject:reply-to:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=964YURPHIDahuD+Ho9xAvPp19oa0tTryVvoT/t7+K9Q=;
+        b=sOl4rtaMMBg89mRlejQsdnSycJr5n0iOEmXF6ApWGQd292w3rC5U6mAeCta3h9aOsb
+         nkryduLHYmK9jE6w0dHIZECv10sr8zjv1WUUDgTY35RSC+Pxsil8hpqYZbJAtrguivwa
+         kfQ4mJteW2cZhsKLGRkiWlrXJEOmtvJTWArY//PrmVNh6OE9gp3cKvo9EsQBFDEyhKRW
+         ZXtIQWgj1NLx6956FyA1jYoiR9Eh1TmUL6sJB4Hukl55Vqpge7ABFbreu8SWMy9mdmo3
+         za7foao7Jz73kTjxcqEhT71FvvialmaFJnj011f80dbuUAbXBOJ5M0doikcmJq/Yobkj
+         6Q/g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693471168; x=1694075968;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt:from
+         :references:cc:to:content-language:subject:reply-to:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=964YURPHIDahuD+Ho9xAvPp19oa0tTryVvoT/t7+K9Q=;
+        b=FYB376FbTrp5grbWUOulvZO8ZI+pde3H+GVtAIVxUU6hkHuy7aUx0jopdFQEyyHASf
+         JSnZcMP18xJVoLTWWL/rNbeuicmRtS/gFk2acO5c/pbf/AAXZKm0C3FZy6nrFqYAY2UY
+         nGS+FNpv6u9sqWYdvaRXT4SAcHWBTd+WkjtRhakcmiJIPTtK0ApY8bBUIXMWnv33s20s
+         oVEWyGe4wtadNrZz4CWLdQAgKcxCCBPwEveXBhnBfiAyGxFd0ZCODk8NTaBvnVBTD8fS
+         8ATs7n0Xk0ZOPzp7cTT2vy+yzWx9DTxBWN06evucrTqMHkdLHDDxN2PmCfzdIsKOjXRT
+         wAsA==
+X-Gm-Message-State: AOJu0YwA35Vh4ZwWRhdsTwyXmaCoLNZLrUUOnjV8H/NHaFcAEO+csMEx
+        tRNTy6wb9pU74eNG4zl+n6Gd/Q==
+X-Google-Smtp-Source: AGHT+IH622REtHgmfxDFuzcoi34tnDSwqboEnVjqvA2kcj4uGSAMqD5HLM53K+dY2PEgmSqqO+zw6g==
+X-Received: by 2002:a05:6000:128d:b0:319:6d03:13ae with SMTP id f13-20020a056000128d00b003196d0313aemr2858867wrx.55.1693471167638;
+        Thu, 31 Aug 2023 01:39:27 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:982:cbb0:a33e:476b:58d7:9689? ([2a01:e0a:982:cbb0:a33e:476b:58d7:9689])
+        by smtp.gmail.com with ESMTPSA id b8-20020a5d4d88000000b003179d7ed4f3sm1428151wru.12.2023.08.31.01.39.25
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 31 Aug 2023 01:39:26 -0700 (PDT)
+Message-ID: <fcbf6dee-aa6a-4af8-9ff1-495adbcb5a57@linaro.org>
+Date:   Thu, 31 Aug 2023 10:39:25 +0200
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.15.0
-Subject: Re: [PATCH V10 20/23] mmc: sdhci-uhs2: add add_host() and others to
- set up the driver
-Content-Language: en-US
-To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20230818100217.12725-1-victorshihgli@gmail.com>
- <20230818100217.12725-21-victorshihgli@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230818100217.12725-21-victorshihgli@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+User-Agent: Mozilla Thunderbird
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH v2 03/10] soc: qcom: ice: add hwkm support in ice
+Content-Language: en-US, fr
+To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        ebiggers@google.com
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
+        quic_psodagud@quicinc.com, avmenon@quicinc.com,
+        abel.vesa@linaro.org, quic_spuppala@quicinc.com
+References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
+ <20230719170423.220033-4-quic_gaurkash@quicinc.com>
+From:   Neil Armstrong <neil.armstrong@linaro.org>
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro Developer Services
+In-Reply-To: <20230719170423.220033-4-quic_gaurkash@quicinc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/08/23 13:02, Victor Shih wrote:
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+Hi,
+
+On 19/07/2023 19:04, Gaurav Kashyap wrote:
+> Qualcomm's ICE (Inline Crypto Engine) contains a proprietary
+> key management hardware called Hardware Key Manager (HWKM).
+> This patch integrates HWKM support in ICE when it is
+> available. HWKM primarily provides hardware wrapped key support
+> where the ICE (storage) keys are not available in software and
+> protected in hardware.
 > 
-> This is a UHS-II version of sdhci's add_host/remove_host operation.
-> Any sdhci drivers which are capable of handling UHS-II cards must
-> call those functions instead of the corresponding sdhci's.
-> 
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
 > ---
+>   drivers/soc/qcom/ice.c | 112 ++++++++++++++++++++++++++++++++++++++++-
+>   include/soc/qcom/ice.h |   1 +
+>   2 files changed, 112 insertions(+), 1 deletion(-)
 > 
-> Updates in V10:
->  - Move some definitions of PatchV9[05/23] to PatchV10[20/23].
-> 
-> Updates in V8:
->  - Change return type to void for __sdhci_uhs2_add_host_v4().
->  - Remove unused variables in __sdhci_uhs2_add_host_v4().
-> 
-> Updates in V7:
->  - __sdhci_add_host() to instead of __sdhci_uhs2_add_host()
->    in sdhci_uhs2_add_host().
->  - Cancel export state of some functions.
-> 
-> Updates in V6:
->  - Add complete_work_fn/thread_irq_fn variables in struct sdhci_host.
->  - Use complete_work_fn/thread_irq_fn variables in
->    sdhci_alloc_host() and sdhci_uhs2_add_host().
->  - Use sdhci_uhs2_mode() to simplify code in __sdhci_uhs2_remove_host().
-> 
-> ---
-> 
->  drivers/mmc/host/sdhci-uhs2.c | 102 ++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-uhs2.h |   2 +
->  drivers/mmc/host/sdhci.c      |   7 ++-
->  drivers/mmc/host/sdhci.h      |   3 +
->  include/linux/mmc/host.h      |   1 +
->  5 files changed, 113 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> index 8d1be670af49..80eafacc8b9f 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.c
-> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -16,6 +16,7 @@
->  #include <linux/bitfield.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/host.h>
-> +#include <linux/regulator/consumer.h>
->  
->  #include "sdhci.h"
->  #include "sdhci-uhs2.h"
-> @@ -997,6 +998,107 @@ static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
->  	return IRQ_HANDLED;
->  }
->  
-> +/*****************************************************************************\
+> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> index d19f674bb1b6..242306d13049 100644
+> --- a/drivers/soc/qcom/ice.c
+> +++ b/drivers/soc/qcom/ice.c
+> @@ -24,6 +24,18 @@
+>   #define QCOM_ICE_REG_FUSE_SETTING		0x0010
+>   #define QCOM_ICE_REG_BIST_STATUS		0x0070
+>   #define QCOM_ICE_REG_ADVANCED_CONTROL		0x1000
+> +#define QCOM_ICE_REG_CONTROL			0x0
+> +/* QCOM ICE HWKM registers */
+> +#define QCOM_ICE_REG_HWKM_TZ_KM_CTL		0x1000
+> +#define QCOM_ICE_REG_HWKM_TZ_KM_STATUS		0x1004
+> +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_0		0x5000
+> +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_1		0x5004
+> +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_2		0x5008
+> +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_3		0x500C
+> +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_4		0x5010
+> +
+> +#define QCOM_ICE_HWKM_BIST_DONE_V1_VAL		0x11
+> +#define QCOM_ICE_HWKM_BIST_DONE_V2_VAL		0x287
+>   
+>   /* BIST ("built-in self-test") status flags */
+>   #define QCOM_ICE_BIST_STATUS_MASK		GENMASK(31, 28)
+> @@ -32,6 +44,9 @@
+>   #define QCOM_ICE_FORCE_HW_KEY0_SETTING_MASK	0x2
+>   #define QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK	0x4
+>   
+> +#define QCOM_ICE_HWKM_REG_OFFSET	0x8000
+> +#define HWKM_OFFSET(reg)		(reg + QCOM_ICE_HWKM_REG_OFFSET)
+
+The current upstream ICE memory region is only 0x8000, so you should
+probably check the memory region size before enabling HWKM otherwise
+you'll access unmapped memory for non-updated DT.
+
+Neil
+
+> +
+>   #define qcom_ice_writel(engine, val, reg)	\
+>   	writel((val), (engine)->base + (reg))
+>   
+> @@ -44,6 +59,7 @@ struct qcom_ice {
+>   	struct device_link *link;
+>   
+>   	struct clk *core_clk;
+> +	u8 hwkm_version;
+>   };
+>   
+>   static bool qcom_ice_check_supported(struct qcom_ice *ice)
+> @@ -61,8 +77,20 @@ static bool qcom_ice_check_supported(struct qcom_ice *ice)
+>   		return false;
+>   	}
+>   
+> +	if ((major >= 4) || ((major == 3) && (minor == 2) && (step >= 1)))
+> +		ice->hwkm_version = 2;
+> +	else if ((major == 3) && (minor == 2))
+> +		ice->hwkm_version = 1;
+> +	else
+> +		ice->hwkm_version = 0;
+> +
+>   	dev_info(dev, "Found QC Inline Crypto Engine (ICE) v%d.%d.%d\n",
+>   		 major, minor, step);
+> +	if (!ice->hwkm_version)
+> +		dev_info(dev, "QC ICE HWKM (Hardware Key Manager) not supported");
+> +	else
+> +		dev_info(dev, "QC ICE HWKM (Hardware Key Manager) version = %d",
+> +			 ice->hwkm_version);
+>   
+>   	/* If fuses are blown, ICE might not work in the standard way. */
+>   	regval = qcom_ice_readl(ice, QCOM_ICE_REG_FUSE_SETTING);
+> @@ -111,10 +139,14 @@ static void qcom_ice_optimization_enable(struct qcom_ice *ice)
+>    * fails, so we needn't do it in software too, and (c) properly testing
+>    * storage encryption requires testing the full storage stack anyway,
+>    * and not relying on hardware-level self-tests.
 > + *
-> + * Device allocation/registration                                            *
-> + *                                                                           *
-> +\*****************************************************************************/
-> +
-> +static void __sdhci_uhs2_add_host_v4(struct sdhci_host *host, u32 caps1)
-> +{
-> +	struct mmc_host *mmc;
-> +	u32 max_current_caps2;
-> +
-> +	mmc = host->mmc;
-> +
-> +	/* Support UHS2 */
-> +	if (caps1 & SDHCI_SUPPORT_UHS2)
-> +		mmc->caps2 |= MMC_CAP2_SD_UHS2;
-> +
-> +	max_current_caps2 = sdhci_readl(host, SDHCI_MAX_CURRENT_1);
-> +
-> +	if ((caps1 & SDHCI_CAN_VDD2_180) &&
-> +	    !max_current_caps2 &&
-> +	    !IS_ERR(mmc->supply.vmmc2)) {
-> +		/* UHS2 - VDD2 */
-> +		int curr = regulator_get_current_limit(mmc->supply.vmmc2);
-> +
-> +		if (curr > 0) {
-> +			/* convert to SDHCI_MAX_CURRENT format */
-> +			curr = curr / 1000;  /* convert to mA */
-> +			curr = curr / SDHCI_MAX_CURRENT_MULTIPLIER;
-> +			curr = min_t(u32, curr, SDHCI_MAX_CURRENT_LIMIT);
-> +			max_current_caps2 = curr;
+> + * However, we still care about if HWKM BIST failed (when supported) as
+> + * important functionality would fail later, so disable hwkm on failure.
+>    */
+>   static int qcom_ice_wait_bist_status(struct qcom_ice *ice)
+>   {
+>   	u32 regval;
+> +	u32 bist_done_val;
+>   	int err;
+>   
+>   	err = readl_poll_timeout(ice->base + QCOM_ICE_REG_BIST_STATUS,
+> @@ -123,15 +155,87 @@ static int qcom_ice_wait_bist_status(struct qcom_ice *ice)
+>   	if (err)
+>   		dev_err(ice->dev, "Timed out waiting for ICE self-test to complete\n");
+>   
+> +	if (ice->hwkm_version) {
+> +		bist_done_val = (ice->hwkm_version == 1) ?
+> +				 QCOM_ICE_HWKM_BIST_DONE_V1_VAL :
+> +				 QCOM_ICE_HWKM_BIST_DONE_V2_VAL;
+> +		if (qcom_ice_readl(ice,
+> +				   HWKM_OFFSET(QCOM_ICE_REG_HWKM_TZ_KM_STATUS)) !=
+> +				   bist_done_val) {
+> +			dev_warn(ice->dev, "HWKM BIST error\n");
+> +			ice->hwkm_version = 0;
 > +		}
 > +	}
-> +
-> +	if (caps1 & SDHCI_CAN_VDD2_180)
-> +		mmc->ocr_avail_uhs2 |= MMC_VDD_165_195;
-> +	else
-> +		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
-> +}
-> +
-> +static int sdhci_uhs2_host_ops_init(struct sdhci_host *host);
-> +
-> +static void __sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
+>   	return err;
+>   }
+>   
+> +static void qcom_ice_enable_standard_mode(struct qcom_ice *ice)
 > +{
-> +	if (!sdhci_uhs2_mode(host))
+> +	u32 val = 0;
+> +
+> +	if (!ice->hwkm_version)
 > +		return;
 > +
-> +	if (!dead)
-> +		sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_FULL);
+> +	/*
+> +         * When ICE is in standard (hwkm) mode, it supports HW wrapped
+> +         * keys, and when it is in legacy mode, it only supports standard
+> +         * (non HW wrapped) keys.
+> +         *
+> +	 * Put ICE in standard mode, ICE defaults to legacy mode.
+> +	 * Legacy mode - ICE HWKM slave not supported.
+> +	 * Standard mode - ICE HWKM slave supported.
+> +	 *
+> +	 * Depending on the version of HWKM, it is controlled by different
+> +	 * registers in ICE.
+> +	 */
+> +	if (ice->hwkm_version >= 2) {
+> +		val = qcom_ice_readl(ice, QCOM_ICE_REG_CONTROL);
+> +		val = val & 0xFFFFFFFE;
+> +		qcom_ice_writel(ice, val, QCOM_ICE_REG_CONTROL);
+> +	} else {
+> +		qcom_ice_writel(ice, 0x7,
+> +				HWKM_OFFSET(QCOM_ICE_REG_HWKM_TZ_KM_CTL));
+> +	}
 > +}
 > +
-> +int sdhci_uhs2_add_host(struct sdhci_host *host)
+> +static void qcom_ice_hwkm_init(struct qcom_ice *ice)
 > +{
-> +	struct mmc_host *mmc = host->mmc;
-> +	int ret;
+> +	if (!ice->hwkm_version)
+> +		return;
 > +
-> +	ret = sdhci_setup_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	if (host->version >= SDHCI_SPEC_400)
-> +		__sdhci_uhs2_add_host_v4(host, host->caps1);
-> +
-> +	if ((mmc->caps2 & MMC_CAP2_SD_UHS2) && !host->v4_mode)
-> +		/* host doesn't want to enable UHS2 support */
-> +		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
-> +
-> +	/* overwrite ops */
-> +	if (mmc->caps2 & MMC_CAP2_SD_UHS2)
-> +		sdhci_uhs2_host_ops_init(host);
-> +
-> +	host->complete_work_fn = sdhci_uhs2_complete_work;
-> +	host->thread_irq_fn    = sdhci_uhs2_thread_irq;
-> +
-> +	/* LED support not implemented for UHS2 */
-> +	host->quirks |= SDHCI_QUIRK_NO_LED;
-> +
-> +	ret = __sdhci_add_host(host);
-> +	if (ret)
-> +		goto cleanup;
-> +
-> +	return 0;
-> +
-> +cleanup:
-> +	if (host->version >= SDHCI_SPEC_400)
-> +		__sdhci_uhs2_remove_host(host, 0);
-> +
-> +	sdhci_cleanup_host(host);
-> +
-> +	return ret;
+> +	/*
+> +	 * Give register bank of the HWKM slave access to read and modify
+> +	 * the keyslots in ICE HWKM slave. Without this, trustzone will not
+> +	 * be able to program keys into ICE.
+> +	 */
+> +	qcom_ice_writel(ice, 0xFFFFFFFF,
+> +			HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_0));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF,
+> +			HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_1));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF,
+> +			HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_2));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF,
+> +			HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_3));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF,
+> +			HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_4));
 > +}
-> +EXPORT_SYMBOL_GPL(sdhci_uhs2_add_host);
 > +
-> +void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
+>   int qcom_ice_enable(struct qcom_ice *ice)
+>   {
+> +	int err;
+> +
+>   	qcom_ice_low_power_mode_enable(ice);
+>   	qcom_ice_optimization_enable(ice);
+>   
+> -	return qcom_ice_wait_bist_status(ice);
+> +	qcom_ice_enable_standard_mode(ice);
+> +
+> +	err = qcom_ice_wait_bist_status(ice);
+> +	if (err)
+> +		return err;
+> +
+> +	qcom_ice_hwkm_init(ice);
+> +
+> +	return err;
+>   }
+>   EXPORT_SYMBOL_GPL(qcom_ice_enable);
+>   
+> @@ -203,6 +307,12 @@ int qcom_ice_evict_key(struct qcom_ice *ice, int slot)
+>   }
+>   EXPORT_SYMBOL_GPL(qcom_ice_evict_key);
+>   
+> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice)
 > +{
-> +	__sdhci_uhs2_remove_host(host, dead);
-> +
-> +	sdhci_remove_host(host, dead);
+> +	return (ice->hwkm_version > 0);
 > +}
-> +EXPORT_SYMBOL_GPL(sdhci_uhs2_remove_host);
+> +EXPORT_SYMBOL_GPL(qcom_ice_hwkm_supported);
 > +
->  void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
->  	struct sdhci_host *host = mmc_priv(mmc);
-> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-> index 3aa2cb4b39d6..bd5aae054c6f 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.h
-> +++ b/drivers/mmc/host/sdhci-uhs2.h
-> @@ -186,5 +186,7 @@ void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
->  void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq);
->  int sdhci_uhs2_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
->  u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask);
-> +int sdhci_uhs2_add_host(struct sdhci_host *host);
-> +void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead);
->  
->  #endif /* __SDHCI_UHS2_H */
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 318d4830732f..b3de7e30ba54 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -4104,6 +4104,9 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
->  
->  	host->max_timeout_count = 0xE;
->  
-> +	host->complete_work_fn = sdhci_complete_work;
-> +	host->thread_irq_fn    = sdhci_thread_irq;
-> +
->  	return host;
->  }
->  
-> @@ -4853,7 +4856,7 @@ int __sdhci_add_host(struct sdhci_host *host)
->  	if (!host->complete_wq)
->  		return -ENOMEM;
->  
-> -	INIT_WORK(&host->complete_work, sdhci_complete_work);
-> +	INIT_WORK(&host->complete_work, host->complete_work_fn);
->  
->  	timer_setup(&host->timer, sdhci_timeout_timer, 0);
->  	timer_setup(&host->data_timer, sdhci_timeout_data_timer, 0);
-> @@ -4862,7 +4865,7 @@ int __sdhci_add_host(struct sdhci_host *host)
->  
->  	sdhci_init(host, 0);
->  
-> -	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_thread_irq,
-> +	ret = request_threaded_irq(host->irq, sdhci_irq, host->thread_irq_fn,
->  				   IRQF_SHARED,	mmc_hostname(mmc), host);
->  	if (ret) {
->  		pr_err("%s: Failed to request IRQ %d: %d\n",
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 6bbb9f073f29..5235f2da6568 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -626,6 +626,9 @@ struct sdhci_host {
->  	struct timer_list timer;	/* Timer for timeouts */
->  	struct timer_list data_timer;	/* Timer for data timeouts */
->  
-> +	void		(*complete_work_fn)(struct work_struct *work);
-> +	irqreturn_t	(*thread_irq_fn)(int irq, void *dev_id);
-> +
->  #if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
->  	struct dma_chan *rx_chan;
->  	struct dma_chan *tx_chan;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 1eba64228725..918d4998c1de 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -379,6 +379,7 @@ struct mmc_host {
->  	u32			ocr_avail_sdio;	/* SDIO-specific OCR */
->  	u32			ocr_avail_sd;	/* SD-specific OCR */
->  	u32			ocr_avail_mmc;	/* MMC-specific OCR */
-> +	u32			ocr_avail_uhs2; /* UHS2-specific OCR */
-
-ocr_avail_uhs2 gets set but doesn't seem to be used
-
->  	struct wakeup_source	*ws;		/* Enable consume of uevents */
->  	u32			max_current_330;
->  	u32			max_current_300;
+>   static struct qcom_ice *qcom_ice_create(struct device *dev,
+>   					void __iomem *base)
+>   {
+> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+> index 9dd835dba2a7..1f52e82e3e1c 100644
+> --- a/include/soc/qcom/ice.h
+> +++ b/include/soc/qcom/ice.h
+> @@ -34,5 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+>   			 const struct blk_crypto_key *bkey,
+>   			 u8 data_unit_size, int slot);
+>   int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice);
+>   struct qcom_ice *of_qcom_ice_get(struct device *dev);
+>   #endif /* __QCOM_ICE_H__ */
 
