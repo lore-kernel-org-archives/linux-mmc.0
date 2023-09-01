@@ -2,130 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD589CA0FE4
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Sep 2023 15:33:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94910CA0FE1
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Sep 2023 15:42:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350270AbjIAPdx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Sep 2023 11:33:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55962 "EHLO
+        id S234168AbjIAPnA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Sep 2023 11:43:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241125AbjIAPdw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Sep 2023 11:33:52 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 819A010D2;
-        Fri,  1 Sep 2023 08:33:49 -0700 (PDT)
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 381C2pZb024661;
-        Fri, 1 Sep 2023 17:33:08 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-        message-id:date:mime-version:subject:to:cc:references:from
-        :in-reply-to:content-type:content-transfer-encoding; s=
-        selector1; bh=bi3VYNViQtJCdjL7dyg53UF58C/uOQWQ7xolLTOM3Vc=; b=dy
-        na2h6N0tXT2dNWEVshdFvkivlGm5yguKrqAa/Wlione68+uhdIjBCIGadoHpSAiu
-        VO2jmtriOl70sTfaToMBUw1nWmalzq4HlIG0WtJt7XMcoNsJApu9tgAFhVJRTqzH
-        ELJU0Zda/5YHFsxoXi8mK6v4k4xHRnjMlclH+F342FHct2K9tpQtPEvQ6itB/PCt
-        91AhO/HqtQpmbhGju+IQnO1twFV7dBy0dVDSDAKQc3cbh6i+/dgct2/fMfegV0XL
-        f2nD1j0FX9Jwqs+E7Qjl/NH5IhHgSo3PgpcJvaKiKVDu7tHI5srrU5JEdqAXV4/x
-        amxE1E5R7+4pxpaZXfcQ==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3sq6h4kp3r-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 01 Sep 2023 17:33:08 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 5B57A100056;
-        Fri,  1 Sep 2023 17:33:07 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 503C423D3F2;
-        Fri,  1 Sep 2023 17:33:07 +0200 (CEST)
-Received: from [10.201.20.125] (10.201.20.125) by SHFDAG1NODE2.st.com
- (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Fri, 1 Sep
- 2023 17:33:04 +0200
-Message-ID: <3eed1865-d70d-c89a-fcaf-7b0e2bb6da98@foss.st.com>
-Date:   Fri, 1 Sep 2023 17:33:03 +0200
+        with ESMTP id S233355AbjIAPm7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Sep 2023 11:42:59 -0400
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3A6CAC;
+        Fri,  1 Sep 2023 08:42:56 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by sin.source.kernel.org (Postfix) with ESMTPS id E0A71CE201A;
+        Fri,  1 Sep 2023 15:42:54 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C978C433C8;
+        Fri,  1 Sep 2023 15:42:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693582973;
+        bh=Aec0t6krFCEGf5U3ptUC6kwjD2IAlaWgVN7rht2AvZU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nsT62ZoHWt5x0aCRPsHutsG+4ryQ4Ewb1L7t+icTEW4pIECRDYYxVH9UhxS4Wwq+h
+         9+HQLKh5uU1TC8U/o3WUj242ae6d98D2XnM34kAHfW+nTzpLF57X/err1iGrD5GNzE
+         7KgMGe69qoCTqNQkFb9KA3LvwnHQVz6YrOXxRrMSzMGScusjrstm3e6NwUpFF9Q8Ks
+         8mL5GNM7hzTGF/fimd9nsjhpw3OsqmPAnHT0kWjnVnPsPZo9GGHwM5G2znW4e9FQ25
+         VZZ0aeTCaIyxuB6zpFes93NsCjKT/v6WUdQEPhABP8iCmQ7XIYoyvPoJL6IBdgHQQK
+         /Qm4eVkrBSSyg==
+Date:   Fri, 1 Sep 2023 16:42:47 +0100
+From:   Conor Dooley <conor@kernel.org>
+To:     William Qiu <william.qiu@starfivetech.com>
+Cc:     Conor Dooley <conor.dooley@microchip.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Emil Renner Berthing <kernel@esmil.dk>,
+        Rob Herring <robh+dt@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>
+Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Drop unused properties
+Message-ID: <20230901-remold-sublease-a1ddb1fc6348@spud>
+References: <20230830031846.127957-1-william.qiu@starfivetech.com>
+ <20230830031846.127957-2-william.qiu@starfivetech.com>
+ <20230830-commence-trickery-40eaa193cb15@wendy>
+ <b375b88c-0d9c-30a9-21f6-283083cf3880@linaro.org>
+ <20230830-procedure-frostbite-56c751f7c276@wendy>
+ <efab6f52-4d7f-ea3c-0fc3-4e3ad03c14c7@starfivetech.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH] mmc: mmci: stm32: add SDIO in-band interrupt mode
-To:     Linus Walleij <linus.walleij@linaro.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        Rob Herring <robh@kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230901120836.1057900-1-yann.gautier@foss.st.com>
- <CACRpkdacRe5cPoSFJyEdo6nZrtmUHTNqMxf55CntvsdpFqhhrQ@mail.gmail.com>
-Content-Language: en-US
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CACRpkdacRe5cPoSFJyEdo6nZrtmUHTNqMxf55CntvsdpFqhhrQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.201.20.125]
-X-ClientProxiedBy: SHFCAS1NODE1.st.com (10.75.129.72) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.601,FMLib:17.11.176.26
- definitions=2023-09-01_13,2023-08-31_01,2023-05-22_02
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="pLuG68yt4VHhXP8C"
+Content-Disposition: inline
+In-Reply-To: <efab6f52-4d7f-ea3c-0fc3-4e3ad03c14c7@starfivetech.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/1/23 16:10, Linus Walleij wrote:
-> Hi Yann/Christophe,
-> 
-> thanks for your patch!
 
-Hi Linus
+--pLuG68yt4VHhXP8C
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks for the review, I agree with the proposed changes.
-I'll prepare a new version and send it next week!
+On Fri, Sep 01, 2023 at 10:33:13AM +0800, William Qiu wrote:
+>=20
+>=20
+> On 2023/8/30 16:34, Conor Dooley wrote:
+> > On Wed, Aug 30, 2023 at 09:29:20AM +0200, Krzysztof Kozlowski wrote:
+> >> On 30/08/2023 08:50, Conor Dooley wrote:
+> >> > On Wed, Aug 30, 2023 at 11:18:44AM +0800, William Qiu wrote:
+> >> >> Due to the change of tuning implementation, it's no longer necessar=
+y to
+> >> >> use the "starfive,sysreg" property in dts, so drop the relevant
+> >> >> description in dt-bindings here.
+> >> >=20
+> >> > How does changing your software implantation invalidate a descriptio=
+n of
+> >> > the hardware?
+> >> >=20
+> >>=20
+> >> Which is kind of proof that this syscon was just to substitute
+> >> incomplete hardware description (e.g. missing clocks and phys). We
+> >> should have rejected it. Just like we should reject them in the future.
+> >=20
+> > :s I dunno what to do with this... I'm inclined to say not to remove it
+> > from the binding or dts at all & only change the software.
+> >=20
+> >> There are just few cases where syscon is reasonable. All others is just
+> >> laziness. It's not only starfivetech, of course. Several other
+> >> contributors do the same.
+> >=20
+> > I'm not sure if laziness is fair, lack of understanding is usually more
+> > likely.
+>=20
+> For this, I tend to keep it in binding, but remove it from required. Beca=
+use
+> we only modify the tuning implementation, it doesn't mean that this prope=
+rty
+> need to be removed, it's just no longer be the required one.
 
-Best regards,
-Yann
-> 
-> On Fri, Sep 1, 2023 at 2:08 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
-> 
->> From: Christophe Kerello <christophe.kerello@foss.st.com>
->>
->> Add the support of SDIO in-band interrupt mode for STM32 variant.
->> It allows the SD I/O card to interrupt the host on SDMMC_D1 data line.
->>
->> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
->> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
-> (...)
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -332,6 +332,7 @@ enum mmci_busy_state {
->>    * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
->>    * @dma_lli: true if variant has dma link list feature.
->>    * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
->> + * @use_sdio_irq: allow SD I/O card to interrupt the host
-> 
-> The documentation tag should be one line up (compare to the members...)
-> 
->> @@ -376,6 +377,7 @@ struct variant_data {
->>          u32                     start_err;
->>          u32                     opendrain;
->>          u8                      dma_lli:1;
->> +       u8                      use_sdio_irq:1;
-> 
-> 1. bool use_sdio_irq;
-> 
-> 2. supports_sdio_irq is more to the point don't you think?
->      Especially since it activates these two callbacks:
-> 
->> +       void (*enable_sdio_irq)(struct mmci_host *host, int enable);
->> +       void (*sdio_irq)(struct mmci_host *host, u32 status);
-> 
-> Further: all the Ux500 variants support this (bit 22) as well, so enable those
-> too in their vendor data. All I have is out-of-band signaling with an GPIO IRQ
-> on my Broadcom chips but I think it works (maybe Ulf has tested it in the
-> far past).
-> 
-> Yours,
-> Linus Walleij
+Please only remove it from required if the current driver doesn't break
+if the regmap is removed.
 
+--pLuG68yt4VHhXP8C
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZPIGdwAKCRB4tDGHoIJi
+0s3uAQCCUsv/FqKDOGNlzYbIkcuD89HVaHQ7QYCJNSwvBPh3/gD9Gmy1suT2VgbM
+R6+a6rUuyrNXFDz0Y9tRIQt3NPZZ9w4=
+=dgfB
+-----END PGP SIGNATURE-----
+
+--pLuG68yt4VHhXP8C--
