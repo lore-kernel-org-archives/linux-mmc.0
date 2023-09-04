@@ -2,132 +2,102 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB9CCC71153
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Sep 2023 07:31:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B254AC83F33
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Sep 2023 07:38:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237235AbjIDHbk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Sep 2023 03:31:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43828 "EHLO
+        id S242610AbjIDHiW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Sep 2023 03:38:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351935AbjIDHbj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 03:31:39 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C6FF1AC;
-        Mon,  4 Sep 2023 00:31:14 -0700 (PDT)
-Received: from pps.filterd (m0369458.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 383LHANh011127;
-        Mon, 4 Sep 2023 09:30:40 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-        message-id:date:mime-version:subject:to:cc:references:from
-        :in-reply-to:content-type:content-transfer-encoding; s=
-        selector1; bh=CJ6f+Mj4xw5e5f2nUevdxPupbRu8vHoKZgu1otbVbto=; b=Ct
-        Ax+XF23ODo/au8B+ZrDh83sB9V35dL97jfSytDcF7GnaFpEfXua1uO5mNveiF6ZV
-        ULJqOWqQ8/CW9vKbt8JtAkZZfIYkfm7ZkuDQCFX97ES4W97cbNjGR/P0MJXvXc8N
-        8e6BrOsY3KYAQK9iXSTEvNTBSPfPJSxKVp9Jyw8+c9EA/ysRV2M9ao+ZLpleINMK
-        clAX1gMEbcIYZf//j7XFUPD1NM0WPgsp53LtLEID+8n4mcDwAWOFLkA5F6hamyJM
-        1olxdiwbjUuF+Oc/BTewcK8FNIPptKC7OL0hw1jO0YVNDeVlJIds9WiKEOde88Nt
-        +PNsOLv7+6Zu72uc0V5g==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3svem0bhah-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 04 Sep 2023 09:30:40 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 2F187100058;
-        Mon,  4 Sep 2023 09:30:38 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 4A66C2122EB;
-        Mon,  4 Sep 2023 09:30:38 +0200 (CEST)
-Received: from [10.201.20.125] (10.201.20.125) by SHFDAG1NODE2.st.com
- (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Mon, 4 Sep
- 2023 09:30:37 +0200
-Message-ID: <26ca3e45-b89a-705a-5aa2-9c5f1a5e20db@foss.st.com>
-Date:   Mon, 4 Sep 2023 09:30:37 +0200
+        with ESMTP id S232161AbjIDHiW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 03:38:22 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C2D0D3;
+        Mon,  4 Sep 2023 00:38:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1693813099; x=1725349099;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=pxioTKTutxNDiFXKYNZhBSCDvsQd+k7UsSb2LQ2IIYQ=;
+  b=aBSTQMA1ryB4qvdJ+Y9beVOC/6z3e/NxkJP/DSGg4IVpAopVh4MzVXyV
+   C/Fnc7+sVqYLaPJtI/1GHdvwJWurY2X02sqtuy4Fuhcpr+HNcDw1cgQVZ
+   ePBSS7SWILku83S9cGN5eSh/CaolPk3rYF5h9IJ2OsQ6Uq92rW2/6kBN7
+   cUBYMY5IcsWOKwBV3Srg5TCB6qDWQi824NtRDq8p7Q/T7LHhEtjn1JJSm
+   tbm4JALm9L2DPYXhvEwaXEMDFDtiLxPxcz2+/mQOQJUWh0+pcCMZ7m/FZ
+   HQShhOGN1PX0YI0UM00eailh7xHeTelOETEN6h3Tt6fmAxNVZYuzH0NGg
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10822"; a="361563097"
+X-IronPort-AV: E=Sophos;i="6.02,225,1688454000"; 
+   d="scan'208";a="361563097"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Sep 2023 00:38:18 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10822"; a="775748018"
+X-IronPort-AV: E=Sophos;i="6.02,225,1688454000"; 
+   d="scan'208";a="775748018"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.59.119])
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Sep 2023 00:38:14 -0700
+Message-ID: <096e9122-23b8-5a36-7779-28994187c620@intel.com>
+Date:   Mon, 4 Sep 2023 10:38:11 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH] mmc: mmci: stm32: add SDIO in-band interrupt mode
+ Firefox/102.0 Thunderbird/102.15.0
+Subject: Re: [PATCH] mmc: Fix force card detect in sdhci
 Content-Language: en-US
-To:     Linus Walleij <linus.walleij@linaro.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        Rob Herring <robh@kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230901120836.1057900-1-yann.gautier@foss.st.com>
- <CACRpkdaj6bEQTo6a5gOJQne-wKqBLvuxiOe9kE+q-nkYLOU7Pw@mail.gmail.com>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CACRpkdaj6bEQTo6a5gOJQne-wKqBLvuxiOe9kE+q-nkYLOU7Pw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.201.20.125]
-X-ClientProxiedBy: EQNCAS1NODE3.st.com (10.75.129.80) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.601,FMLib:17.11.176.26
- definitions=2023-09-04_04,2023-08-31_01,2023-05-22_02
+To:     mathieu <mathieu.moneyron@gmail.com>,
+        ludovic.desroches@microchip.com, ulf.hansson@linaro.org,
+        nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com,
+        Eugen Hristev <eugen.hristev@microchip.com>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+References: <20230830092314.624212-1-mathieu.moneyron@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230830092314.624212-1-mathieu.moneyron@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/2/23 18:43, Linus Walleij wrote:
-> Hi Yann/Christophe,
-> 
-> just a quick note:
-> 
-> On Fri, Sep 1, 2023 at 2:08 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
-> 
->> +static void sdmmc_enable_sdio_irq(struct mmci_host *host, int enable)
->> +{
->> +       void __iomem *base = host->base;
->> +       u32 mask = readl_relaxed(base + MMCIMASK0);
->> +
->> +       if (enable)
->> +               writel_relaxed(mask | MCI_ST_SDIOITMASK, base + MMCIMASK0);
->> +       else
->> +               writel_relaxed(mask & ~MCI_ST_SDIOITMASK, base + MMCIMASK0);
->> +}
->> +
->> +static void sdmmc_sdio_irq(struct mmci_host *host, u32 status)
->> +{
->> +       if (status & MCI_ST_SDIOIT) {
->> +               sdmmc_enable_sdio_irq(host, 0);
->> +               sdio_signal_irq(host->mmc);
->> +       }
->> +}
-> 
-> You need to move these to mmci and rename them since Ux500 will use
-> the same callbacks.
++ Eugen Hristev
 
-Hi Linus,
-
-Yes, that's what I was planning to do.
+On 30/08/23 12:23, mathieu wrote:
+> From: Mathieu Moneyron <mathieu.moneyron@gmail.com>
 > 
->>   static struct mmci_host_ops sdmmc_variant_ops = {
->>          .validate_data = sdmmc_idma_validate_data,
-> (...)
->> +       .enable_sdio_irq = sdmmc_enable_sdio_irq,
->> +       .sdio_irq = sdmmc_sdio_irq,
->>   };
+> On the ATMEL at91 when using the non-removable flag in device tree and not
+> using the card-detect pin inside the device-tree pinctrl, the card detect
+> pin is physically still used which can cause unknown behaviour when this
+> pin is used for other purposes.
 > 
-> What about dropping the per-variant callbacks and just inline
-> this into mmci_enable_sdio_irq()/mmci_ack_sdio_irq() since
-> so many variants have the same scheme? I haven't looked
-> at the Qualcomm variant though, maybe it is completely
-> different...
-
-I'm not sure about this. Keeping the ops will make it easier for other 
-variants to bring their own code if their scheme is different.
-
-Best regards,
-Yann
-
+> From my interpretation this seems to be caused by a hardware design flaw
+> and the real hardware is not working as intended by the documentation.
 > 
-> Yours,
-> Linus Walleij
+> Signed-off-by: Mathieu Moneyron <mathieu.moneyron@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 69fef88e7..4fd6bfbf6 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -51,10 +51,15 @@ struct sdhci_at91_priv {
+>  static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
+>  {
+>  	u8 mc1r;
+> +	u8 ctrl;
+>  
+>  	mc1r = readb(host->ioaddr + SDMMC_MC1R);
+>  	mc1r |= SDMMC_MC1R_FCD;
+>  	writeb(mc1r, host->ioaddr + SDMMC_MC1R);
+> +
+> +	ctrl = readb(host->ioaddr + SDHCI_HOST_CONTROL);
+> +	ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
+> +	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+>  }
+>  
+>  static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
 
