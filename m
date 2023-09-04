@@ -2,136 +2,115 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE388C83F3E
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Sep 2023 12:22:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3699C71153
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Sep 2023 15:05:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350231AbjIDMWQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Sep 2023 08:22:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54044 "EHLO
+        id S243497AbjIDPFX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Sep 2023 11:05:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344969AbjIDMWQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 08:22:16 -0400
-Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4E0F1B7
-        for <linux-mmc@vger.kernel.org>; Mon,  4 Sep 2023 05:22:12 -0700 (PDT)
-Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-d7bb34576b9so1223557276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Sep 2023 05:22:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1693830132; x=1694434932; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=EtWz4Zjn1UW6f/Bp4thXGCFf7baahobrbXRCy95Pavs=;
-        b=UhsS0EBIvwrlU0X3g+ma8zg/cvrCUw/0Tb3iGQV7qei6X2rBwYCyCxB5l2bt4/9QJ5
-         5OWZbprpt47hee50lCQjvOHS3mS6+79bgqbs+RCM88Ve57xdFafnOxrz3Y/BiJP4MGQk
-         mt/GkjzyqdL2rAaPUkn68JKl3MupsPiLcJ+ZINv0fGWdSDSLMr1g1id2qXH8m874qTTO
-         F8iUnYfEZLFFR95i+gqvj8HQkXntlMJihwjYZce0OUQhrDO3iBluabciB14sfx+Jd4ES
-         j8B9JcUTira4CUbMelNFojR93n+yCXhniRFntiu2gsFXvreadrUG0LhZC5O720UGbBpE
-         qZQw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693830132; x=1694434932;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=EtWz4Zjn1UW6f/Bp4thXGCFf7baahobrbXRCy95Pavs=;
-        b=JNoMZkjGqIH7/VMYqsTJEBBtjC/GzKm0CbBh+mSBwPzUO+EI+KakfIgJ2blu1t/ols
-         4jxNH0xSktwZBEuOEd4Z1xKYsA2HxmbPocps+zcyW1oBLcceMXFZyYEmPjV7paGekNV7
-         mP92enaRjDvGZFIuGASuQ0/dOdTXRsQDz4RSQOGLdecfrX6Ao1zkAv9EyNf2TVWVnE4T
-         XG1PHRSAPa4gQ0YzfMA02y3zgVXQKWllqQz7Qgzm5ImePTHtBXasFOYloUukNxeJm/LA
-         yNMHY5EcuV5MRcu3ys03VpXzvf1UKPRics5HV5O9yjIjOnAzcYJGyXopA8fQTunuZz4o
-         4H6g==
-X-Gm-Message-State: AOJu0Yz4AbBbinPy/1Q9nKY0dS4hV5g+PbHWl7BITKpoJqoOJfpskV+Y
-        Qp/bFGxAsceQLd8q/2bSqfXFrkfmrfnQJIlE3is3c5M/2YChaAVy2qx+gA==
-X-Google-Smtp-Source: AGHT+IHPwKOL/2Z9FQ4y0NEX4i5C+ax07Yhv4XOcJCyrKvr2TbeaxnBIPI7R8RJYi9WrH6gCRPBTH43bpu9g6ij4cKI=
-X-Received: by 2002:a25:c509:0:b0:d74:6163:db8c with SMTP id
- v9-20020a25c509000000b00d746163db8cmr11092688ybe.41.1693830131892; Mon, 04
- Sep 2023 05:22:11 -0700 (PDT)
+        with ESMTP id S236448AbjIDPFT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 11:05:19 -0400
+Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B1AE1B7;
+        Mon,  4 Sep 2023 08:05:12 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by sin.source.kernel.org (Postfix) with ESMTPS id D7025CE0EE7;
+        Mon,  4 Sep 2023 15:05:10 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0A43C433C7;
+        Mon,  4 Sep 2023 15:05:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693839909;
+        bh=ljgv0MpAqVctGjtWZkElSITFiR5RbtuGf5naRqQkjmM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nAV2mP/F3umwbP/x9qYaYUwoCW4umGg9SjIkHMlYrX3gj1pusAzsFssWINlJbwWrl
+         +16uJGWL7QhZzx1rQADqchCCyimOAUnlTrwv/60stjJncUQCtWtgGBTcgGpcYjxPAX
+         m8/5kaXOWk/dVC9V2uxhMpN/wb/TF0Bvr/tLM6zo9trsbYnBWqObit/yKIIg9X2Cpj
+         AyfpZ2XAmtMtgmE4jhGGU2Y8MR5SxCd36KJFvcs9NXecwm8ru9GLqWo6YQDi9bwrhn
+         l1Z7YyCRlJLj3uL8B21bpAC9/kZtMSG5PvO2Mjjb35os2yk9q/w9ELLo/coCeLMlfz
+         4o5BEbobV8CJA==
+Date:   Mon, 4 Sep 2023 22:53:11 +0800
+From:   Jisheng Zhang <jszhang@kernel.org>
+To:     Drew Fustini <dfustini@baylibre.com>
+Cc:     Jiexun Wang <wangjiexun@tinylab.org>, adrian.hunter@intel.com,
+        aou@eecs.berkeley.edu, conor+dt@kernel.org, conor@kernel.org,
+        devicetree@vger.kernel.org, guoren@kernel.org,
+        jkridner@beagleboard.org, krzysztof.kozlowski+dt@linaro.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-riscv@lists.infradead.org, palmer@dabbelt.com,
+        paul.walmsley@sifive.com, robertcnelson@beagleboard.org,
+        robh+dt@kernel.org, ulf.hansson@linaro.org, wefu@redhat.com
+Subject: Re: [PATCH RFC v2 0/4] RISC-V: Add basic eMMC support for BeagleV
+ Ahead
+Message-ID: <ZPXvV/1dbUf7g+0a@xhacker>
+References: <ZOy3v+YgZgU1NrWx@xhacker>
+ <20230829015647.115757-1-wangjiexun@tinylab.org>
+ <ZO4MmdNRqrye/x2b@x1>
 MIME-Version: 1.0
-References: <20230901120836.1057900-1-yann.gautier@foss.st.com> <CACRpkdacRe5cPoSFJyEdo6nZrtmUHTNqMxf55CntvsdpFqhhrQ@mail.gmail.com>
-In-Reply-To: <CACRpkdacRe5cPoSFJyEdo6nZrtmUHTNqMxf55CntvsdpFqhhrQ@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 4 Sep 2023 14:21:35 +0200
-Message-ID: <CAPDyKFqJzoBiG4c2NbXA_6YDNsAh4W0TO-SP9+C2Qw40TKVH7g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci: stm32: add SDIO in-band interrupt mode
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Yann Gautier <yann.gautier@foss.st.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        Rob Herring <robh@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-arm-kernel@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <ZO4MmdNRqrye/x2b@x1>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 1 Sept 2023 at 16:10, Linus Walleij <linus.walleij@linaro.org> wrot=
-e:
->
-> Hi Yann/Christophe,
->
-> thanks for your patch!
->
-> On Fri, Sep 1, 2023 at 2:08=E2=80=AFPM Yann Gautier <yann.gautier@foss.st=
-.com> wrote:
->
-> > From: Christophe Kerello <christophe.kerello@foss.st.com>
-> >
-> > Add the support of SDIO in-band interrupt mode for STM32 variant.
-> > It allows the SD I/O card to interrupt the host on SDMMC_D1 data line.
-> >
-> > Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
-> > Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
-> (...)
-> > +++ b/drivers/mmc/host/mmci.h
-> > @@ -332,6 +332,7 @@ enum mmci_busy_state {
-> >   * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER =
-register
-> >   * @dma_lli: true if variant has dma link list feature.
-> >   * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
-> > + * @use_sdio_irq: allow SD I/O card to interrupt the host
->
-> The documentation tag should be one line up (compare to the members...)
->
-> > @@ -376,6 +377,7 @@ struct variant_data {
-> >         u32                     start_err;
-> >         u32                     opendrain;
-> >         u8                      dma_lli:1;
-> > +       u8                      use_sdio_irq:1;
->
-> 1. bool use_sdio_irq;
->
-> 2. supports_sdio_irq is more to the point don't you think?
->     Especially since it activates these two callbacks:
->
-> > +       void (*enable_sdio_irq)(struct mmci_host *host, int enable);
-> > +       void (*sdio_irq)(struct mmci_host *host, u32 status);
->
-> Further: all the Ux500 variants support this (bit 22) as well, so enable =
-those
-> too in their vendor data. All I have is out-of-band signaling with an GPI=
-O IRQ
-> on my Broadcom chips but I think it works (maybe Ulf has tested it in the
-> far past).
+On Tue, Aug 29, 2023 at 08:19:53AM -0700, Drew Fustini wrote:
+> On Tue, Aug 29, 2023 at 09:56:47AM +0800, Jiexun Wang wrote:
+> > Date: Mon, 28 Aug 2023 23:05:35 +0800, Jisheng Zhang wrote:
+> > >On Mon, Aug 28, 2023 at 12:40:16PM +0800, Jiexun Wang wrote:
+> > >> Hello,
+> > >> I tested the patch on my LicheePi 4A board.
+> > >> It can successfully boot with eMMC, but when I use the eMMC more frequently - for instance:
+> > >> 
+> > >> $ while true; do /bin/dd if=/dev/zero of=bigfile bs=1024000 count=1024; done &
+> > >> 
+> > >> I encounter the following error:
+> > >> 
+> > >> sbi_trap_error: hart1: illegal instruction handler failed (error -2)
+> > >
+> > >> sbi_trap_error: hart1: mcause=0x0000000000000002 mtval=0x0000000060e2de4f
+> > >> sbi_trap_error: hart1: mepc=0x000000000001897c mstatus=0x0000000a00001820
+> > >> sbi_trap_error: hart1: ra=0x00000000000170f8 sp=0x000000000004adc8
+> > >> sbi_trap_error: hart1: gp=0xffffffff8136ea90 tp=0xffffffd900228000
+> > >> sbi_trap_error: hart1: s0=0x0000000000000000 s1=0x000000000004ae08
+> > >> sbi_trap_error: hart1: a0=0x000000003f9aa9bc a1=0x0000000000000004
+> > >> sbi_trap_error: hart1: a2=0x0000000000000000 a3=0x0000000000000000
+> > >> sbi_trap_error: hart1: a4=0x0000000000042248 a5=0x00000000000170e5
+> > >> sbi_trap_error: hart1: a6=0x0000000000000000 a7=0x0000000054494d45
+> > >> sbi_trap_error: hart1: s2=0x000000000004aee8 s3=0x0000000000000000
+> > >> sbi_trap_error: hart1: s4=0x000000000004ae08 s5=0x0000000000000000
+> > >> sbi_trap_error: hart1: s6=0xffffffff813aa240 s7=0x0000000000000080
+> > >> sbi_trap_error: hart1: s8=0xffffffff80a1b5f0 s9=0x0000000000000000
+> > >> sbi_trap_error: hart1: s10=0xffffffd9fef5d380 s11=0xffffffff81290a80
+> > >> sbi_trap_error: hart1: t0=0x0000000a00000820 t1=0x0000000000000000
+> > >> sbi_trap_error: hart1: t2=0xffffffff80c00318 t3=0x0000000000000001
+> > >> sbi_trap_error: hart1: t4=0x0000000000000330 t5=0x0000000000000001
+> > >> sbi_trap_error: hart1: t6=0x0000000000040000
+> > >> 
+> > >> My kernel version is v6.5-rc3.
+> > >> My OpenSBI version is 1.3.
+> > >> I tried to use other versions of OpenSBI, yet the problem persists. 
+> > >> Is there a possibility of any underlying bug? Your insights into this would be greatly appreciated.
+> > >
+> > >
+> > >Can you plz try below opensbi?
+> > 
+> > I tried the OpenSBI you provided and the issue didn't recur.
+> > I conducted stress test about 30 minutes and the system appears to be functioning very well.
+> > Thank you so much for helping me resolve this problem.
+> 
+> That's great!
+> 
+> Jisheng - are these the commits that fix the error?
+> 
+> d98da90a19b5 ("lib: sbi_illegal_insn: Fix FENCE.TSO emulation infinite trap loop")
+> 39d1e698c975 ("lib: sbi_illegal_insn: Add emulation for fence.tso")
+> 
 
-For the ux500 variant there is a HW problem. After running some stress
-tests, we may end up being stuck waiting for an SDIO IRQ to be
-delivered. Even if the SDIO irqs should be considered level triggered,
-it looked like it was implemented in the HW as an edge triggered IRQ.
-
-The downstream workaround consisted of re-routing the DAT1 to a GPIO
-at runtime suspend (we wanted that for optimal power save support
-anyway) - and manually checking if the DAT1 line was asserted, before
-enabling the GPIO line for an irq. This worked perfectly fine as a
-workaround, with the limitation that one may observe a little bit of
-hick-up in the traffic occasionally.
-
-That said, the out-of-band IRQs is what works best for the ux500 variants.
-
-Kind regards
-Uffe
+These two commits have been in upstream OpenSBI, so there
+must be something to be patched/fixed in the upstream OpenSBI, but I have not
+yet bisected the upstream OpenSBI to find the root cause.
+This issue is on my TODO list.
