@@ -2,154 +2,63 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1899ACA0FF3
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Sep 2023 16:20:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 063A8C83F2C
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Sep 2023 16:21:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245708AbjIEQUq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Sep 2023 12:20:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36000 "EHLO
+        id S232925AbjIEQUs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Sep 2023 12:20:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343617AbjIECkR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 22:40:17 -0400
-Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4EB2AEB;
-        Mon,  4 Sep 2023 19:40:10 -0700 (PDT)
-Received: from dlp.unisoc.com ([10.29.3.86])
-        by SHSQR01.spreadtrum.com with ESMTP id 3852dfYk095566;
-        Tue, 5 Sep 2023 10:39:41 +0800 (+08)
-        (envelope-from Wenchao.Chen@unisoc.com)
-Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
-        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RfqQX1bnbz2RD6Z7;
-        Tue,  5 Sep 2023 10:36:52 +0800 (CST)
-Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
- (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Tue, 5 Sep
- 2023 10:39:39 +0800
-From:   Wenchao Chen <wenchao.chen@unisoc.com>
-To:     <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
-        <yuelin.tang@unisoc.com>, Wenchao Chen <wenchao.chen@unisoc.com>
-Subject: [PATCH V3 0/2 RESEND] mmc: hsq: dynamically adjust hsq_depth to improve performance
-Date:   Tue, 5 Sep 2023 10:39:19 +0800
-Message-ID: <20230905023921.10766-1-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S1354084AbjIEJfX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Sep 2023 05:35:23 -0400
+X-Greylist: delayed 4331 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 05 Sep 2023 02:35:20 PDT
+Received: from mail.equinoxrise.pl (mail.equinoxrise.pl [217.61.112.157])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0289D1A7
+        for <linux-mmc@vger.kernel.org>; Tue,  5 Sep 2023 02:35:19 -0700 (PDT)
+Received: by mail.equinoxrise.pl (Postfix, from userid 1002)
+        id E41B38378D; Mon,  4 Sep 2023 09:41:12 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=equinoxrise.pl;
+        s=mail; t=1693813355;
+        bh=v6OgBfK5dN7P5dQ0wCu59rOfZaiqziJeLNblJ8dOcGI=;
+        h=Date:From:To:Subject:From;
+        b=gAFBBiZEJXZLYgy52eQb5dT0Nsi2SHWKPBUcpfJ8fsMBau3ExPNwOR5XIPSGQb2Lf
+         QcFh8fMICt9mcX2fsbaczbMfjbWcQRPlmUq4SYNE9xLx83kXFuJccJUhY5uVigvrIc
+         PW8blY1UFiEWMJF3k5tnGW4T3IznSt5c8Uaom1u/O2ZNRBXqNV9cWzgcpvC3em979r
+         5Nduab1QNSrOU8o8Ynp3xLSw0Nfxb0RcQAKzqs2sCAXCKZIJfvNii00Sz3QMsInhcr
+         VU/7ofd8apz958VamsDxHDODawpA1+t9i1kA1/ZPppX5+r0rbZd2WgR124LPOPKv9n
+         28Mt9FbI4Kfkw==
+Received: by mail.equinoxrise.pl for <linux-mmc@vger.kernel.org>; Mon,  4 Sep 2023 07:40:34 GMT
+Message-ID: <20230904084500-0.1.7.qxw.0.l6tals34nr@equinoxrise.pl>
+Date:   Mon,  4 Sep 2023 07:40:34 GMT
+From:   "Mateusz Talaga" <mateusz.talaga@equinoxrise.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: Prezentacja
+X-Mailer: mail.equinoxrise.pl
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.13.2.29]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- shmbx05.spreadtrum.com (10.29.1.56)
-X-MAIL: SHSQR01.spreadtrum.com 3852dfYk095566
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Change in v3:
-- Use "mrq->data->blksz * mrq->data->blocks == 4096" for 4K.
-- Add explanation for "HSQ_PERFORMANCE_DEPTH".
+Dzie=C5=84 dobry!
 
-Change in v2:
-- Support for dynamic adjustment of hsq_depth.
+Czy m=C3=B3g=C5=82bym przedstawi=C4=87 rozwi=C4=85zanie, kt=C3=B3re umo=C5=
+=BCliwia monitoring ka=C5=BCdego auta w czasie rzeczywistym w tym jego po=
+zycj=C4=99, zu=C5=BCycie paliwa i przebieg?
 
-Test
-=====
-I tested 3 times for each case and output a average speed.
-Ran 'fio' to evaluate the performance:
-1.Fixed hsq_depth
-1) Sequential write:
-Speed: 168 164 165
-Average speed: 165.67MB/S
+Dodatkowo nasze narz=C4=99dzie minimalizuje koszty utrzymania samochod=C3=
+=B3w, skraca czas przejazd=C3=B3w, a tak=C5=BCe tworzenie planu tras czy =
+dostaw.
 
-2) Sequential read:
-Speed: 326 326 326
-Average speed: 326MB/S
+Z naszej wiedzy i do=C5=9Bwiadczenia korzysta ju=C5=BC ponad 49 tys. Klie=
+nt=C3=B3w. Monitorujemy 809 000 pojazd=C3=B3w na ca=C5=82ym =C5=9Bwiecie,=
+ co jest nasz=C4=85 najlepsz=C4=85 wizyt=C3=B3wk=C4=85.
 
-3) Random write:
-Speed: 82.6 83 83
-Average speed: 82.87MB/S
+Bardzo prosz=C4=99 o e-maila zwrotnego, je=C5=9Bli mogliby=C5=9Bmy wsp=C3=
+=B3lnie om=C3=B3wi=C4=87 potencja=C5=82 wykorzystania takiego rozwi=C4=85=
+zania w Pa=C5=84stwa firmie.
 
-4) Random read:
-Speed: 48.2 48.3 47.6
-Average speed: 48.03MB/S
 
-2.Dynamic hsq_depth
-1) Sequential write:
-Speed: 167 166 166
-Average speed: 166.33MB/S
-
-2) Sequential read:
-Speed: 327 326 326
-Average speed: 326.3MB/S
-
-3) Random write:
-Speed: 86.1 86.2 87.7
-Average speed: 86.67MB/S
-
-4) Random read:
-Speed: 48.1 48 48
-Average speed: 48.03MB/S
-
-Based on the above data, dynamic hsq_depth can improve the performance of random writes.
-Random write improved by 4.6%.
-
-In addition, we tested 8K and 16K.
-1.Fixed hsq_depth
-1) Random write(bs=8K):
-Speed: 116 114 115
-Average speed: 115MB/S
-
-2) Random read(bs=8K):
-Speed: 83 83 82.5
-Average speed: 82.8MB/S
-
-3) Random write(bs=16K):
-Speed: 141 142 141
-Average speed: 141.3MB/S
-
-4) Random read(bs=16K):
-Speed: 132 132 132
-Average speed: 132MB/S
-
-2.Dynamic hsq_depth(mrq->data->blksz * mrq->data->blocks == 8192 or 16384)
-1) Random write(bs=8K):
-Speed: 115 115 115
-Average speed: 115MB/S
-
-2) Random read(bs=8K):
-Speed: 82.7 82.9 82.8
-Average speed: 82.8MB/S
-
-3) Random write(bs=16K):
-Speed: 143 141 141
-Average speed: 141.6MB/S
-
-4) Random read(bs=16K):
-Speed: 132 132 132
-Average speed: 132MB/S
-
-Increasing hsq_depth cannot improve 8k and 16k random read/write performance.
-To reduce latency, we dynamically increase hsq_depth only for 4k random writes.
-
-Test cmd
-=========
-1)write: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=write -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64									
-2)read: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=read -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64									
-3)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64									
-4)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-5)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=8K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64									
-6)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=8K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-7)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=16K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64									
-8)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=16K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-
-Wenchao Chen (2):
-  mmc: queue: replace immediate with hsq->depth
-  mmc: hsq: dynamic adjustment of hsq->depth
-
- drivers/mmc/core/queue.c   |  6 +-----
- drivers/mmc/host/mmc_hsq.c | 28 ++++++++++++++++++++++++++++
- drivers/mmc/host/mmc_hsq.h | 11 +++++++++++
- include/linux/mmc/host.h   |  1 +
- 4 files changed, 41 insertions(+), 5 deletions(-)
-
--- 
-2.17.1
-
+Pozdrawiam
+Mateusz Talaga
