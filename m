@@ -2,102 +2,104 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B254AC83F33
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Sep 2023 07:38:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66D6EC71153
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Sep 2023 08:12:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242610AbjIDHiW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Sep 2023 03:38:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60478 "EHLO
+        id S242835AbjIDIMB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Sep 2023 04:12:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232161AbjIDHiW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 03:38:22 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C2D0D3;
-        Mon,  4 Sep 2023 00:38:19 -0700 (PDT)
+        with ESMTP id S1351400AbjIDIL7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 04:11:59 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C6FDF9
+        for <linux-mmc@vger.kernel.org>; Mon,  4 Sep 2023 01:11:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1693813099; x=1725349099;
+  t=1693815115; x=1725351115;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=pxioTKTutxNDiFXKYNZhBSCDvsQd+k7UsSb2LQ2IIYQ=;
-  b=aBSTQMA1ryB4qvdJ+Y9beVOC/6z3e/NxkJP/DSGg4IVpAopVh4MzVXyV
-   C/Fnc7+sVqYLaPJtI/1GHdvwJWurY2X02sqtuy4Fuhcpr+HNcDw1cgQVZ
-   ePBSS7SWILku83S9cGN5eSh/CaolPk3rYF5h9IJ2OsQ6Uq92rW2/6kBN7
-   cUBYMY5IcsWOKwBV3Srg5TCB6qDWQi824NtRDq8p7Q/T7LHhEtjn1JJSm
-   tbm4JALm9L2DPYXhvEwaXEMDFDtiLxPxcz2+/mQOQJUWh0+pcCMZ7m/FZ
-   HQShhOGN1PX0YI0UM00eailh7xHeTelOETEN6h3Tt6fmAxNVZYuzH0NGg
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10822"; a="361563097"
+  bh=Ut1hgUg7qR8MGYKvW4DwY+SFcmWK+vtGvn0SuJjBLW0=;
+  b=Nhlu1L/y7AypMcqQj2earxKmidX209FsoFry2rqFSokYxcsKeS4aTsSt
+   yoa0ku+Rwv1K2QaRdcUphwttQHCyLwRY8v5L6XPmuEcc8ZS0QDB7PMxYi
+   kVWmpTmj96XCYONccoG1gIgQhV8LJGbFlshchzHCcZLhTWIlMuNgeAgzq
+   3AtZbNAb/uPpYG263SV0K2l4YIXhqyc2WSqioEofpeaBMbgpE8skT021k
+   dvNOYS2FJpE5uEwdruufBJivbhJRVDmWZ6E05zT2qKjTnMc80rjlV4gN4
+   pgGMFZMlxYjpx4MPMxdwOxyFRT2dU8s1bLu7hefY1cmvWXuNcBP+mq/ER
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10822"; a="440510762"
 X-IronPort-AV: E=Sophos;i="6.02,225,1688454000"; 
-   d="scan'208";a="361563097"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Sep 2023 00:38:18 -0700
+   d="scan'208";a="440510762"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Sep 2023 01:11:53 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10822"; a="775748018"
+X-IronPort-AV: E=McAfee;i="6600,9927,10822"; a="987416627"
 X-IronPort-AV: E=Sophos;i="6.02,225,1688454000"; 
-   d="scan'208";a="775748018"
+   d="scan'208";a="987416627"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.59.119])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Sep 2023 00:38:14 -0700
-Message-ID: <096e9122-23b8-5a36-7779-28994187c620@intel.com>
-Date:   Mon, 4 Sep 2023 10:38:11 +0300
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Sep 2023 01:11:51 -0700
+Message-ID: <24299751-8b13-fe39-07a0-a9e9111241c8@intel.com>
+Date:   Mon, 4 Sep 2023 11:11:49 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.15.0
-Subject: Re: [PATCH] mmc: Fix force card detect in sdhci
+Subject: Re: [PATCH] mmc: core: sdio: hold retuning if sdio in 1-bit mode
 Content-Language: en-US
-To:     mathieu <mathieu.moneyron@gmail.com>,
-        ludovic.desroches@microchip.com, ulf.hansson@linaro.org,
-        nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com,
-        Eugen Hristev <eugen.hristev@microchip.com>
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-References: <20230830092314.624212-1-mathieu.moneyron@gmail.com>
+To:     haibo.chen@nxp.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     linux-imx@nxp.com, hkallweit1@gmail.com
+References: <20230830093922.3095850-1-haibo.chen@nxp.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230830092314.624212-1-mathieu.moneyron@gmail.com>
+In-Reply-To: <20230830093922.3095850-1-haibo.chen@nxp.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Eugen Hristev
+On 30/08/23 12:39, haibo.chen@nxp.com wrote:
+> From: Haibo Chen <haibo.chen@nxp.com>
+> 
+> tuning only support in 4-bit mode or 8 bit mode, so in 1-bit mode,
+> need to hold retuning.
+> 
+> Find this issue when use manual tuning method on imx93. When system
+> resume back, SDIO WIFI try to switch back to 4 bit mode, first will
+> trigger retuning, and all tuning command failed.
+> 
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
-On 30/08/23 12:23, mathieu wrote:
-> From: Mathieu Moneyron <mathieu.moneyron@gmail.com>
-> 
-> On the ATMEL at91 when using the non-removable flag in device tree and not
-> using the card-detect pin inside the device-tree pinctrl, the card detect
-> pin is physically still used which can cause unknown behaviour when this
-> pin is used for other purposes.
-> 
-> From my interpretation this seems to be caused by a hardware design flaw
-> and the real hardware is not working as intended by the documentation.
-> 
-> Signed-off-by: Mathieu Moneyron <mathieu.moneyron@gmail.com>
+UHS-I is also not meant for 1-bit mode, but I guess switching modes
+in this case is also risky.
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+Fixes tag?
+
 > ---
->  drivers/mmc/host/sdhci-of-at91.c | 5 +++++
->  1 file changed, 5 insertions(+)
+>  drivers/mmc/core/sdio.c | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 69fef88e7..4fd6bfbf6 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -51,10 +51,15 @@ struct sdhci_at91_priv {
->  static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
->  {
->  	u8 mc1r;
-> +	u8 ctrl;
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index f64b9ac76a5c..5914516df2f7 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -1089,8 +1089,14 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>  		}
+>  		err = mmc_sdio_reinit_card(host);
+>  	} else if (mmc_card_wake_sdio_irq(host)) {
+> -		/* We may have switched to 1-bit mode during suspend */
+> +		/*
+> +		 * We may have switched to 1-bit mode during suspend,
+> +		 * need to hold retuning, because tuning only supprt
+> +		 * 4-bit mode or 8 bit mode.
+> +		 */
+> +		mmc_retune_hold_now(host);
+>  		err = sdio_enable_4bit_bus(host->card);
+> +		mmc_retune_release(host);
+>  	}
 >  
->  	mc1r = readb(host->ioaddr + SDMMC_MC1R);
->  	mc1r |= SDMMC_MC1R_FCD;
->  	writeb(mc1r, host->ioaddr + SDMMC_MC1R);
-> +
-> +	ctrl = readb(host->ioaddr + SDHCI_HOST_CONTROL);
-> +	ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-> +	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
->  }
->  
->  static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	if (err)
 
