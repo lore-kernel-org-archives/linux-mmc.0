@@ -2,60 +2,118 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B5E0CA0FFC
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Sep 2023 16:21:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B273CA0FFB
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Sep 2023 16:21:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343710AbjIEQUv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Sep 2023 12:20:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58084 "EHLO
+        id S244038AbjIEQUy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Sep 2023 12:20:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353791AbjIEIPb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Sep 2023 04:15:31 -0400
-X-Greylist: delayed 552 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 05 Sep 2023 01:15:25 PDT
-Received: from mail.tanarotla.com (mail.tanarotla.com [79.137.80.196])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B834D1AE
-        for <linux-mmc@vger.kernel.org>; Tue,  5 Sep 2023 01:15:25 -0700 (PDT)
-Received: by mail.tanarotla.com (Postfix, from userid 1002)
-        id DB525236D1; Tue,  5 Sep 2023 08:06:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tanarotla.com;
-        s=mail; t=1693901170;
-        bh=NwGZ/McUBhbrX4yj4evr41zGI0Xgn6o+z/fL++USvl0=;
-        h=Date:From:To:Subject:From;
-        b=D2HLu4Jw8m5Q18oNvoJj8khhxL44Cm16rvGFjMQznhaZ9kV54MAxkG5bExhXK/fnk
-         yrSLnriijkyx5CuT63jYCck8LGuSsueJtZ6Q82dQwBgM4RBlEWPuWAs//F66AyNh5l
-         C6EXreublgNupehh9xdw3kPkXK1DC0EiFV9DMI9g8fn74oGBzOMy8d2yaD48rUUmBN
-         cEVTa7eEKC3tcnQR5LT4WgIrDqyZR0nq/FDp4Z5OeFtui+FIjB5BmoDizO0XLuBpS4
-         5xtItEoGNT9gyooiWbrGxUKisuQUE6CfjhW0gaFLSikR0MI7TrmUkwBVM2o2Fe+nMK
-         Aj0R5wSOjhm5w==
-Received: by mail.tanarotla.com for <linux-mmc@vger.kernel.org>; Tue,  5 Sep 2023 08:06:06 GMT
-Message-ID: <20230905064500-0.1.1b.32y0.0.xh9m0o3l0r@tanarotla.com>
-Date:   Tue,  5 Sep 2023 08:06:06 GMT
-From:   "Michael Beutler" <michael.beutler@tanarotla.com>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Custom-made displays
-X-Mailer: mail.tanarotla.com
+        with ESMTP id S1343596AbjIECkP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Sep 2023 22:40:15 -0400
+Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CD66E6;
+        Mon,  4 Sep 2023 19:40:10 -0700 (PDT)
+Received: from dlp.unisoc.com ([10.29.3.86])
+        by SHSQR01.spreadtrum.com with ESMTP id 3852dg4t095690;
+        Tue, 5 Sep 2023 10:39:42 +0800 (+08)
+        (envelope-from Wenchao.Chen@unisoc.com)
+Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
+        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4RfqQY4hNyz2RD6Z7;
+        Tue,  5 Sep 2023 10:36:53 +0800 (CST)
+Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
+ (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Tue, 5 Sep
+ 2023 10:39:40 +0800
+From:   Wenchao Chen <wenchao.chen@unisoc.com>
+To:     <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
+        <yuelin.tang@unisoc.com>, Wenchao Chen <wenchao.chen@unisoc.com>
+Subject: [PATCH V3 2/2] mmc: hsq: dynamic adjustment of hsq->depth
+Date:   Tue, 5 Sep 2023 10:39:21 +0800
+Message-ID: <20230905023921.10766-3-wenchao.chen@unisoc.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20230905023921.10766-1-wenchao.chen@unisoc.com>
+References: <20230905023921.10766-1-wenchao.chen@unisoc.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+X-Originating-IP: [10.13.2.29]
+X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
+ shmbx05.spreadtrum.com (10.29.1.56)
+X-MAIL: SHSQR01.spreadtrum.com 3852dg4t095690
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Increasing hsq_depth improves random write performance.
 
-I would like to reach out to the person responsible for marketing or sale=
-s in your company.
+Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+---
+ drivers/mmc/host/mmc_hsq.c | 27 +++++++++++++++++++++++++++
+ drivers/mmc/host/mmc_hsq.h |  5 +++++
+ 2 files changed, 32 insertions(+)
 
-For over 40 years, we have been producing attractive Point Of Sales mater=
-ials that help our international Partners to win more customers every day=
-=2E
+diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
+index 8556cacb21a1..0984c39108ba 100644
+--- a/drivers/mmc/host/mmc_hsq.c
++++ b/drivers/mmc/host/mmc_hsq.c
+@@ -21,6 +21,31 @@ static void mmc_hsq_retry_handler(struct work_struct *work)
+ 	mmc->ops->request(mmc, hsq->mrq);
+ }
+ 
++static void mmc_hsq_modify_threshold(struct mmc_hsq *hsq)
++{
++	struct mmc_host *mmc = hsq->mmc;
++	struct mmc_request *mrq;
++	struct hsq_slot *slot;
++	int need_change = 0;
++	int tag;
++
++	for (tag = 0; tag < HSQ_NUM_SLOTS; tag++) {
++		slot = &hsq->slot[tag];
++		mrq = slot->mrq;
++		if (mrq && mrq->data &&
++			(mrq->data->blksz * mrq->data->blocks == 4096) &&
++			(mrq->data->flags & MMC_DATA_WRITE))
++			need_change++;
++		else
++			break;
++	}
++
++	if (need_change > 1)
++		mmc->hsq_depth = HSQ_PERFORMANCE_DEPTH;
++	else
++		mmc->hsq_depth = HSQ_NORMAL_DEPTH;
++}
++
+ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
+ {
+ 	struct mmc_host *mmc = hsq->mmc;
+@@ -42,6 +67,8 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
+ 		return;
+ 	}
+ 
++	mmc_hsq_modify_threshold(hsq);
++
+ 	slot = &hsq->slot[hsq->next_tag];
+ 	hsq->mrq = slot->mrq;
+ 	hsq->qcnt--;
+diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
+index aa5c4543b55f..dd352a6ac32a 100644
+--- a/drivers/mmc/host/mmc_hsq.h
++++ b/drivers/mmc/host/mmc_hsq.h
+@@ -10,6 +10,11 @@
+  * flight to avoid a long latency.
+  */
+ #define HSQ_NORMAL_DEPTH	2
++/*
++ * For 4k random writes, we allow hsq_depth to increase to 5
++ * for better performance.
++ */
++#define HSQ_PERFORMANCE_DEPTH	5
+ 
+ struct hsq_slot {
+ 	struct mmc_request *mrq;
+-- 
+2.17.1
 
-Thanks to creative and unconventional designs, sales of products of vario=
-us companies increase on average by 35%.
-
-If you have space to service new customers, I will be happy to present wh=
-at we could do for you. We can talk?
-
-
-Kind regards
-Michael Beutler
