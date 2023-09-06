@@ -2,91 +2,88 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8409EB8FA3
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Sep 2023 02:27:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9586EEB8FB3
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Sep 2023 05:33:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231162AbjIFC1N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Sep 2023 22:27:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44834 "EHLO
+        id S229807AbjIFFdw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Sep 2023 01:33:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51428 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229628AbjIFC1N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Sep 2023 22:27:13 -0400
-Received: from mail-pf1-x429.google.com (mail-pf1-x429.google.com [IPv6:2607:f8b0:4864:20::429])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3FD6CDE;
-        Tue,  5 Sep 2023 19:27:09 -0700 (PDT)
-Received: by mail-pf1-x429.google.com with SMTP id d2e1a72fcca58-68becf931bfso2105979b3a.0;
-        Tue, 05 Sep 2023 19:27:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1693967229; x=1694572029; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/YDixPpX0g5WZRo9H4Hc1n4iO7NG7GMD3/mGn+bU5KE=;
-        b=UnhrDoFTjwb3vbPDdbV0ZrFDiSqpBnf4tuVSBnK+hKX9K0xI8dq2p4gI3dk29pL/+l
-         nbQFOu11IUSuIV4XNeFbVC21ZxYYsT36RFb9HY5UJ7r7uT4OnHOn4ZziDa7nisSoHx1O
-         i7Q9CtQJUVot6Z/MIuY8QxVr3h6ZEShF2IO9Oi5pmuH2DBi94DcD4iebcEcv0Pi642Hr
-         8wleCXHW+BD/frOYAbTgB92PIjAvcaH6LvhQU9cPzdUvyrEjfzIqV+9RFWC36f19705h
-         LtdUCnjBouZFFjf7J8Mt/agEf3H8milfZOPEnR2pEAKngnSfAwuUmdWMwzZZDpzSpgly
-         Vtvg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693967229; x=1694572029;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=/YDixPpX0g5WZRo9H4Hc1n4iO7NG7GMD3/mGn+bU5KE=;
-        b=gSZhtWP2w8moghM250WzCMTSoLWzgHUsmNAnv8zVeorA18zlLYsIw4sTYLtnkUwP1B
-         TyI9KhHp5pl8oOsTdz2hCjFgtwS/fzXPwhbvDsjU5dy/sPESCLrJ7Eb4vWbM7vY9U55D
-         G4e649FCTsPIH6IjRogk0CsA8wT8Hzxl1bJ1q8P4NXDjdgL3/7UZxWmEW16pviP24J58
-         OS5uq0zlc6wp+2c6C6I8kba1835jnfnwL7VltOyyvhA8lBBAlnkHa/t/gvL2ZyCi4T04
-         UH6rk0rORj3VxbVB+WzEZ9Y1tWhC+YFOT1oYw5e6aUi3J0Sjk2p7652jLPFQqmNq9J8G
-         mlwA==
-X-Gm-Message-State: AOJu0Yzv/fvfVE5rHnT99XtLB0zSTcOVNrySpYVGke3EnQcoqDo1w2t4
-        kJNplba+bU69liMIvxl3Des=
-X-Google-Smtp-Source: AGHT+IH1nbG1WLw7E24n9u6IgDMUHEMu0LSImK1dD9wt+SGz6ObchDBJoLAm5m9A2JsQmMTLuJqYMw==
-X-Received: by 2002:a05:6a20:158e:b0:13e:9dba:ea52 with SMTP id h14-20020a056a20158e00b0013e9dbaea52mr15170663pzj.13.1693967229274;
-        Tue, 05 Sep 2023 19:27:09 -0700 (PDT)
-Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id c10-20020a62e80a000000b0064fde7ae1ffsm9683967pfi.38.2023.09.05.19.27.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 05 Sep 2023 19:27:08 -0700 (PDT)
-From:   Ben Chuang <benchuanggli@gmail.com>
-To:     svenva@chromium.org
-Cc:     linux-mmc@vger.kernel.org, SeanHY.chen@genesyslogic.com.tw,
-        adrian.hunter@intel.com, ben.chuang@genesyslogic.com.tw,
-        benchuanggli@gmail.com, greg.tu@genesyslogic.com.tw,
-        jason.lai@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com,
-        linux-kernel@vger.kernel.org, rafael.j.wysocki@intel.com,
-        reniuschengl@gmail.com, skardach@google.com,
-        stable@vger.kernel.org, ulf.hansson@linaro.org,
-        victor.shih@genesyslogic.com.tw
-Subject: Re: [PATCH v3] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix SoCs can suspend
-Date:   Wed,  6 Sep 2023 10:25:30 +0800
-Message-ID: <20230906022530.825734-1-benchuanggli@gmail.com>
-X-Mailer: git-send-email 2.41.0
-In-Reply-To: <CAG-rBig796Yc9iyTiLOLt2R9PW9SoOFtuks3a1usu4XwvkzAOQ@mail.gmail.com>
-References: <CAG-rBig796Yc9iyTiLOLt2R9PW9SoOFtuks3a1usu4XwvkzAOQ@mail.gmail.com>
+        with ESMTP id S229741AbjIFFdw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Sep 2023 01:33:52 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE17EEA;
+        Tue,  5 Sep 2023 22:33:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1693978428; x=1725514428;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=FZ/m7FomPfXPRk4GBSL1OiQkLTl0EuoMl+30KDzbF/A=;
+  b=OIqPB/NLfvEFdCvnoP4gu8cTNelukwZygS8xOUWjbTXtT9hQs6Vas/K9
+   laLqe2dmhwHEGK+gW9U+4G/GYgQuU7WS2kyI69aiU4L7n1uAn9a5ZdfkF
+   ffw846z6aq+9laGCKCnpkNF3WPm+Z+ADk0VZXzH0UryO7s+UWaJsfCOBR
+   2NV5/0RYc+KOx/TW5MjXXrZ2XOovZdXsOwNSXbah7yYmaul+3tFcPc2MG
+   ytluHEQjm372gY/heBOzGVfpduwyyB0DvvJbSP1DSUoVVVnwWiLFcM34L
+   +6gb6FtfJ+EGUp21f4/K08xRcUev2rDq84jqr39JSC419AVs+sNnRKpdH
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10824"; a="463358044"
+X-IronPort-AV: E=Sophos;i="6.02,231,1688454000"; 
+   d="scan'208";a="463358044"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Sep 2023 22:33:48 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10824"; a="691177683"
+X-IronPort-AV: E=Sophos;i="6.02,231,1688454000"; 
+   d="scan'208";a="691177683"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.216.62])
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Sep 2023 22:33:43 -0700
+Message-ID: <7035c4ba-2432-2bde-27dc-601b4df74ea7@intel.com>
+Date:   Wed, 6 Sep 2023 08:33:39 +0300
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.15.0
+Subject: Re: [PATCH v3] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix
+ SoCs can suspend
+To:     Sven van Ashbrook <svenva@chromium.org>, ulf.hansson@linaro.org,
+        ben.chuang@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com
+Cc:     LKML <linux-kernel@vger.kernel.org>, jason.lai@genesyslogic.com.tw,
+        skardach@google.com, Renius Chen <reniuschengl@gmail.com>,
+        rafael.j.wysocki@intel.com, linux-mmc@vger.kernel.org,
+        stable@vger.kernel.org, SeanHY.chen@genesyslogic.com.tw,
+        victor.shih@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
+References: <20230831160055.v3.1.I7ed1ca09797be2dd76ca914c57d88b32d24dac88@changeid>
+ <8d88df6b-20c8-cc8e-c08a-e9f09466dc41@intel.com>
+ <CAG-rBig796Yc9iyTiLOLt2R9PW9SoOFtuks3a1usu4XwvkzAOQ@mail.gmail.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CAG-rBig796Yc9iyTiLOLt2R9PW9SoOFtuks3a1usu4XwvkzAOQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: benchuanggli@gmail.com
+On 5/09/23 21:15, Sven van Ashbrook wrote:
+> What do we need for Ulf to add this to the maintainer git?
 
-On Tue, Sep 5, 2023 at 11:15 AM Sven van Ashbrook <svenva@chromium.org>
+Nothing, it will get processed in due course, likely making it into
+one of the 6.6 release candidates, because it is a fix, and from
+there to stable.
+
+But right now is the middle of the merge window so some delay can
+be expected anyway.
+
 > What do we need for Ulf to add this to the maintainer git? There are
+>                                                            There are
 > released devices waiting for this fix, but picking from list generates
 > lots of paperwork, so I'd prefer to pick from git.
->
+> 
 > We have a LGTM from Jason Lai, do we need one from Ben Chuang as well?
-
-LGTM, too.
-
-Best regards,
-Ben Chuang
-
->
->On Mon, Sep 4, 2023 at 3:42 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> 
+> On Mon, Sep 4, 2023 at 3:42 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
 >>
 >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >>
