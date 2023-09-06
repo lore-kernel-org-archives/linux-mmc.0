@@ -2,89 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9586EEB8FB3
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Sep 2023 05:33:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9646EB8FAD
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Sep 2023 08:04:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229807AbjIFFdw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Sep 2023 01:33:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51428 "EHLO
+        id S231322AbjIFIEH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Sep 2023 04:04:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33992 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229741AbjIFFdw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Sep 2023 01:33:52 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE17EEA;
-        Tue,  5 Sep 2023 22:33:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1693978428; x=1725514428;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=FZ/m7FomPfXPRk4GBSL1OiQkLTl0EuoMl+30KDzbF/A=;
-  b=OIqPB/NLfvEFdCvnoP4gu8cTNelukwZygS8xOUWjbTXtT9hQs6Vas/K9
-   laLqe2dmhwHEGK+gW9U+4G/GYgQuU7WS2kyI69aiU4L7n1uAn9a5ZdfkF
-   ffw846z6aq+9laGCKCnpkNF3WPm+Z+ADk0VZXzH0UryO7s+UWaJsfCOBR
-   2NV5/0RYc+KOx/TW5MjXXrZ2XOovZdXsOwNSXbah7yYmaul+3tFcPc2MG
-   ytluHEQjm372gY/heBOzGVfpduwyyB0DvvJbSP1DSUoVVVnwWiLFcM34L
-   +6gb6FtfJ+EGUp21f4/K08xRcUev2rDq84jqr39JSC419AVs+sNnRKpdH
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10824"; a="463358044"
-X-IronPort-AV: E=Sophos;i="6.02,231,1688454000"; 
-   d="scan'208";a="463358044"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Sep 2023 22:33:48 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10824"; a="691177683"
-X-IronPort-AV: E=Sophos;i="6.02,231,1688454000"; 
-   d="scan'208";a="691177683"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.216.62])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Sep 2023 22:33:43 -0700
-Message-ID: <7035c4ba-2432-2bde-27dc-601b4df74ea7@intel.com>
-Date:   Wed, 6 Sep 2023 08:33:39 +0300
+        with ESMTP id S229969AbjIFIEH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Sep 2023 04:04:07 -0400
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id F36BECF0;
+        Wed,  6 Sep 2023 01:03:59 -0700 (PDT)
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 386839PB0008536, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 386839PB0008536
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 6 Sep 2023 16:03:09 +0800
+Received: from RTEXMBS03.realtek.com.tw (172.21.6.96) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.17; Wed, 6 Sep 2023 16:03:37 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXMBS03.realtek.com.tw (172.21.6.96) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Wed, 6 Sep 2023 16:03:37 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b]) by
+ RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b%5]) with mapi id
+ 15.01.2375.007; Wed, 6 Sep 2023 16:03:37 +0800
+From:   Ricky WU <ricky_wu@realtek.com>
+To:     "arnd@arndb.de" <arnd@arndb.de>,
+        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        Ricky WU <ricky_wu@realtek.com>,
+        "kai.heng.feng@canonical.com" <kai.heng.feng@canonical.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: [PATCH] misc: rtsx: Fix an error access Page fault
+Thread-Topic: [PATCH] misc: rtsx: Fix an error access Page fault
+Thread-Index: AQHZ4Jftyjh/fSClKUGC38rBdS0qoQ==
+Date:   Wed, 6 Sep 2023 08:03:36 +0000
+Message-ID: <2ce258f371234b1f8a1a470d5488d00e@realtek.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [172.22.81.102]
+x-kse-serverinfo: RTEXMBS03.realtek.com.tw, 9
+x-kse-antispam-interceptor-info: fallback
+x-kse-antivirus-interceptor-info: fallback
+Content-Type: text/plain; charset="big5"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.15.0
-Subject: Re: [PATCH v3] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix
- SoCs can suspend
-To:     Sven van Ashbrook <svenva@chromium.org>, ulf.hansson@linaro.org,
-        ben.chuang@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com
-Cc:     LKML <linux-kernel@vger.kernel.org>, jason.lai@genesyslogic.com.tw,
-        skardach@google.com, Renius Chen <reniuschengl@gmail.com>,
-        rafael.j.wysocki@intel.com, linux-mmc@vger.kernel.org,
-        stable@vger.kernel.org, SeanHY.chen@genesyslogic.com.tw,
-        victor.shih@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
-References: <20230831160055.v3.1.I7ed1ca09797be2dd76ca914c57d88b32d24dac88@changeid>
- <8d88df6b-20c8-cc8e-c08a-e9f09466dc41@intel.com>
- <CAG-rBig796Yc9iyTiLOLt2R9PW9SoOFtuks3a1usu4XwvkzAOQ@mail.gmail.com>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAG-rBig796Yc9iyTiLOLt2R9PW9SoOFtuks3a1usu4XwvkzAOQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-KSE-AntiSpam-Interceptor-Info: fallback
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 5/09/23 21:15, Sven van Ashbrook wrote:
-> What do we need for Ulf to add this to the maintainer git?
-
-Nothing, it will get processed in due course, likely making it into
-one of the 6.6 release candidates, because it is a fix, and from
-there to stable.
-
-But right now is the middle of the merge window so some delay can
-be expected anyway.
-
-> What do we need for Ulf to add this to the maintainer git? There are
->                                                            There are
-> released devices waiting for this fix, but picking from list generates
-> lots of paperwork, so I'd prefer to pick from git.
-> 
-> We have a LGTM from Jason Lai, do we need one from Ben Chuang as well?
-> 
-> On Mon, Sep 4, 2023 at 3:42 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>
-
+YW4gZXJyb3Igb2NjdXJzIG9uIGluc2VydCBTRDcuMCBjYXJkLg0KVGhlIHBjaSBzbG90IG9mIHJ0
+c3hfcGNpIHdpbGwgTGluayBEb3duIHdoZW4gdGhlIFNENy4wIGNhcmQgaW5zZXJ0ZWQsDQpidXQg
+dGhlIHJ0c3hfcGNpIG5vdCBleGl0IGZyb20gcnVudGltZV9pZGxlIGF0IHRoYXQgdGltZSwNCnRo
+ZW4gZG8gdGhlIHBvd2VyX3NhdmluZyBmdW5jdGlvbiB0byBhY2Nlc3MgdGhlIHdyb25nIHJlc291
+cmNlDQoNCkZpeGVzOiA1OTc1NjhlOGRmMDQgKCJtaXNjOiBydHN4OiBSZXdvcmsgcnVudGltZSBw
+b3dlciBtYW5hZ2VtZW50IGZsb3ciKQ0KQ2M6IEthaS1IZW5nIEZlbmcgPGthaS5oZW5nLmZlbmdA
+Y2Fub25pY2FsLmNvbT4NClNpZ25lZC1vZmYtYnk6IFJpY2t5IFd1IDxyaWNreV93dUByZWFsdGVr
+LmNvbT4NCi0tLQ0KIGRyaXZlcnMvbWlzYy9jYXJkcmVhZGVyL3J0c3hfcGNyLmMgfCAxNCArKysr
+KysrKy0tLS0tLQ0KIGRyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYyAgfCAgMSArDQog
+aW5jbHVkZS9saW51eC9ydHN4X3BjaS5oICAgICAgICAgICB8ICAxICsNCiAzIGZpbGVzIGNoYW5n
+ZWQsIDEwIGluc2VydGlvbnMoKyksIDYgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2
+ZXJzL21pc2MvY2FyZHJlYWRlci9ydHN4X3Bjci5jIGIvZHJpdmVycy9taXNjL2NhcmRyZWFkZXIv
+cnRzeF9wY3IuYw0KaW5kZXggYTNmNGI1MmJiMTU5Li41MzZhMzY4MWZkNWUgMTAwNjQ0DQotLS0g
+YS9kcml2ZXJzL21pc2MvY2FyZHJlYWRlci9ydHN4X3Bjci5jDQorKysgYi9kcml2ZXJzL21pc2Mv
+Y2FyZHJlYWRlci9ydHN4X3Bjci5jDQpAQCAtMTUyNiw2ICsxNTI2LDcgQEAgc3RhdGljIGludCBy
+dHN4X3BjaV9wcm9iZShzdHJ1Y3QgcGNpX2RldiAqcGNpZGV2LA0KIAlwY3ItPmhvc3Rfc2dfdGJs
+X2FkZHIgPSBwY3ItPnJ0c3hfcmVzdl9idWZfYWRkciArIEhPU1RfQ01EU19CVUZfTEVOOw0KIAlw
+Y3ItPmNhcmRfaW5zZXJ0ZWQgPSAwOw0KIAlwY3ItPmNhcmRfcmVtb3ZlZCA9IDA7DQorCXBjci0+
+aXNfc2RfZXhwcmVzcyA9IGZhbHNlOw0KIAlJTklUX0RFTEFZRURfV09SSygmcGNyLT5jYXJkZGV0
+X3dvcmssIHJ0c3hfcGNpX2NhcmRfZGV0ZWN0KTsNCiANCiAJcGNyLT5tc2lfZW4gPSBtc2lfZW47
+DQpAQCAtMTczNSwxMiArMTczNiwxMyBAQCBzdGF0aWMgaW50IHJ0c3hfcGNpX3J1bnRpbWVfaWRs
+ZShzdHJ1Y3QgZGV2aWNlICpkZXZpY2UpDQogDQogCXBjci0+c3RhdGUgPSBQREVWX1NUQVRfSURM
+RTsNCiANCi0JaWYgKHBjci0+b3BzLT5kaXNhYmxlX2F1dG9fYmxpbmspDQotCQlwY3ItPm9wcy0+
+ZGlzYWJsZV9hdXRvX2JsaW5rKHBjcik7DQotCWlmIChwY3ItPm9wcy0+dHVybl9vZmZfbGVkKQ0K
+LQkJcGNyLT5vcHMtPnR1cm5fb2ZmX2xlZChwY3IpOw0KLQ0KLQlydHN4X3BtX3Bvd2VyX3Nhdmlu
+ZyhwY3IpOw0KKwlpZiAoIXBjci0+aXNfc2RfZXhwcmVzcykgew0KKwkJaWYgKHBjci0+b3BzLT5k
+aXNhYmxlX2F1dG9fYmxpbmspDQorCQkJcGNyLT5vcHMtPmRpc2FibGVfYXV0b19ibGluayhwY3Ip
+Ow0KKwkJaWYgKHBjci0+b3BzLT50dXJuX29mZl9sZWQpDQorCQkJcGNyLT5vcHMtPnR1cm5fb2Zm
+X2xlZChwY3IpOw0KKwkJcnRzeF9wbV9wb3dlcl9zYXZpbmcocGNyKTsNCisJfQ0KIA0KIAltdXRl
+eF91bmxvY2soJnBjci0+cGNyX211dGV4KTsNCiANCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9o
+b3N0L3J0c3hfcGNpX3NkbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMN
+CmluZGV4IDg3ZDc4NDMyYTFlMC4uODBiMmYyYTMxZmRjIDEwMDY0NA0KLS0tIGEvZHJpdmVycy9t
+bWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5jDQorKysgYi9kcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNp
+X3NkbW1jLmMNCkBAIC0xMzkzLDYgKzEzOTMsNyBAQCBzdGF0aWMgaW50IHNkbW1jX2luaXRfc2Rf
+ZXhwcmVzcyhzdHJ1Y3QgbW1jX2hvc3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykNCiAJCVJU
+UzUyNjFfTUNVX0JVU19TRUxfTUFTSyB8IFJUUzUyNjFfTUNVX0NMT0NLX1NFTF9NQVNLDQogCQl8
+IFJUUzUyNjFfRFJJVkVSX0VOQUJMRV9GVywNCiAJCVJUUzUyNjFfTUNVX0NMT0NLX1NFTF8xNk0g
+fCBSVFM1MjYxX0RSSVZFUl9FTkFCTEVfRlcpOw0KKwlwY3ItPmlzX3NkX2V4cHJlc3MgPSB0cnVl
+Ow0KIAlob3N0LT5lamVjdCA9IHRydWU7DQogCXJldHVybiAwOw0KIH0NCmRpZmYgLS1naXQgYS9p
+bmNsdWRlL2xpbnV4L3J0c3hfcGNpLmggYi9pbmNsdWRlL2xpbnV4L3J0c3hfcGNpLmgNCmluZGV4
+IDUzNDAzOGQ5NjJlNC4uMjk1ZTkyMjI0ZmQwIDEwMDY0NA0KLS0tIGEvaW5jbHVkZS9saW51eC9y
+dHN4X3BjaS5oDQorKysgYi9pbmNsdWRlL2xpbnV4L3J0c3hfcGNpLmgNCkBAIC0xMjYyLDYgKzEy
+NjIsNyBAQCBzdHJ1Y3QgcnRzeF9wY3Igew0KIAl1OAkJCW9jcF9zdGF0Ow0KIAl1OAkJCW9jcF9z
+dGF0MjsNCiAJdTgJCQlydGQzX2VuOw0KKwlib29sCQkJaXNfc2RfZXhwcmVzczsNCiB9Ow0KIA0K
+ICNkZWZpbmUgUElEXzUyNEEJMHg1MjRBDQotLSANCjIuMjUuMQ0KDQo=
