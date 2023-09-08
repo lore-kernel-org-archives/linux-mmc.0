@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D3980EEB566
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 18:31:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF30BEEB562
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 18:31:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241178AbjIHSbe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Sep 2023 14:31:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58122 "EHLO
+        id S234121AbjIHSbh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Sep 2023 14:31:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242004AbjIHSbU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 14:31:20 -0400
+        with ESMTP id S1344464AbjIHSbV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 14:31:21 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8282726AB;
-        Fri,  8 Sep 2023 11:21:59 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ECF67C433CD;
-        Fri,  8 Sep 2023 18:20:29 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE3313C32;
+        Fri,  8 Sep 2023 11:21:29 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5C09CC116A7;
+        Fri,  8 Sep 2023 18:20:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1694197231;
-        bh=TKR08tZvvKh54izKRJ7OHq5T1M1CFFEInQWOm7ewHBQ=;
+        s=k20201202; t=1694197260;
+        bh=msuEY8CrdO359CdUyxpt1beCYFwmAb2Unqy/MSCOlKY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=PBulZfkPIksWGDYA6FBNTyp8WmleMz1qE8zzq7Zd7GbrldpFNAiDAopY3yhPABHBV
-         TVghF+6PpQQzugjmmMH2XIuohcz9zSSYfgN8AEc1wbdBgNyatehS1AdGVqzEWMFyF8
-         BlL414zoQ+uL/ea69RB5GFaSawWEETgiFe9dWRVGrLxMt2bPOCSUzIh6buWUWeBf9f
-         +LSQGEGT4Ey/mgu8ykkE4hpeSHoKxq7jZRoAdUaKPkZjJcWNyruSQvVotmGn4lsj//
-         2pTRpoR4qiX8CbmnPML40oU4UtzKk1J6WnSeLV/nBqB5Z3Fc0JWEFCznlWFeNT6S3u
-         ilnQqVl4MR+gQ==
+        b=uoBVEAtJJjVjgL9j1hW2auOYe3oDamYAi2SCFMoBRnqDWsQnHfOwNZEwAlydI48z5
+         tjvAVdXbPL4+kGRocrUJHGgSQQIfBT7fU3Knjnz+8t9n9FJbm8+hQ1WU8o3d9/wwV8
+         XPscbgbITuafiWzmWs3cYHDXWHBpwzOHCMgTal56+C4NeGIGXyJVepDZ40S2h64dpi
+         BgWDSZyKLUoxHkp2DuVzcJaq20dDBpnXPtnqSbMo0duH3tTnQGwcKGkjQAIBlRfbD4
+         cUl3t3kWYea8mdKxRBEgGOrIMWMdJ1fepSvffYSLrhCUS6baMGtRJcVGVJ+fOEbyNz
+         y/q2JS9N8ro1w==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Giulio Benetti <giulio.benetti@benettiengineering.com>,
@@ -38,16 +38,16 @@ Cc:     Giulio Benetti <giulio.benetti@benettiengineering.com>,
         Sasha Levin <sashal@kernel.org>, shawnguo@kernel.org,
         linux-imx@nxp.com, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org
-Subject: [PATCH AUTOSEL 5.10 09/14] mmc: sdhci-esdhc-imx: improve ESDHC_FLAG_ERR010450
-Date:   Fri,  8 Sep 2023 14:19:56 -0400
-Message-Id: <20230908182003.3460721-9-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 06/10] mmc: sdhci-esdhc-imx: improve ESDHC_FLAG_ERR010450
+Date:   Fri,  8 Sep 2023 14:20:40 -0400
+Message-Id: <20230908182046.3460968-6-sashal@kernel.org>
 X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20230908182003.3460721-1-sashal@kernel.org>
-References: <20230908182003.3460721-1-sashal@kernel.org>
+In-Reply-To: <20230908182046.3460968-1-sashal@kernel.org>
+References: <20230908182046.3460968-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 5.10.194
+X-stable-base: Linux 5.4.256
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -75,10 +75,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 70f388f83485c..b030f657e2534 100644
+index b3f761eca8299..762288c6d30ce 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -166,8 +166,8 @@
+@@ -153,8 +153,8 @@
  #define ESDHC_FLAG_HS400		BIT(9)
  /*
   * The IP has errata ERR010450
@@ -89,7 +89,7 @@ index 70f388f83485c..b030f657e2534 100644
   */
  #define ESDHC_FLAG_ERR010450		BIT(10)
  /* The IP supports HS400ES mode */
-@@ -873,7 +873,8 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+@@ -777,7 +777,8 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
  		| ESDHC_CLOCK_MASK);
  	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
  
