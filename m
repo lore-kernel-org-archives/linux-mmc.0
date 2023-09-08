@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8B46EEB566
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 18:18:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 847BDEEB56B
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 18:20:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243166AbjIHSSM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Sep 2023 14:18:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43088 "EHLO
+        id S1344220AbjIHSUS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Sep 2023 14:20:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58626 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240259AbjIHSRv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 14:17:51 -0400
+        with ESMTP id S229587AbjIHSTN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 14:19:13 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADFEA26A9;
-        Fri,  8 Sep 2023 11:17:23 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C57BC116B5;
-        Fri,  8 Sep 2023 18:14:50 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E355D1FFD;
+        Fri,  8 Sep 2023 11:18:39 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6CCB1C3277B;
+        Fri,  8 Sep 2023 18:17:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1694196891;
+        s=k20201202; t=1694197022;
         bh=MaYCL40TNC+JgOFwtRYiX20EhwwqpGGhLX6YIcj6Fcc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Cks7BZXpOkF7WNNQ7v4/WZfv54phjb/ecqiDthYVYEr0niWbNj9mImGCMw6HQrzG0
-         aiby2gchDrIbL06LeXkJZkAk327SEaeSCcnBhIRfcTT54dAJEIdUyTxmZ1IHGtGGMX
-         n9+NOcNLu8T6snhqjAN1hLTGa4rBLI4HzTTqha7yNXuLNFR3S9TkGyV5zHyS0H5Xaj
-         87INKL46YzpU2v6q1bwAAnAsPKVN6eP91BKq8DZI1/TB85nq/m352nvnoAOSLPl4Dw
-         ZYD35nf/6IurQZm6+U95trNfr3axHhrfkaY8Ab5FMgEF2Y1317uPe/XyUy+n1C+25K
-         9xJuiGw+XR/zQ==
+        b=H83y1caxxrGl9GNcUV9B852NgCLqjmx6WFJXLqS1PYYNJIAp0Kbg+Ot4l03ZhXkjz
+         mLPOqN0AksRlxy6ERMMwSOi1VmeCc4pKP7s+8GF0jUqOkGzoWVtrnm0PYSCRjuMRgr
+         qJyJqZz4+euLr8SsrH/8xA4WcW3h4C2zy3amqSBuzJqwZXj/QXGEhIvi6IVkUNmhYf
+         0RnGhZbLj9dFtGY9Jbgqluz+vmztWs5tp6yIGC6gvBZJfK3Mu4mk+7J77EGNyW/58I
+         XXgg/plugTmXKL3QTgxM00J5sF4C0TRYMa9lEOkXQIW13aPoLG+6mlda4gyS4pHht3
+         EhD7adYovuiiQ==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Giulio Benetti <giulio.benetti@benettiengineering.com>,
@@ -38,16 +38,16 @@ Cc:     Giulio Benetti <giulio.benetti@benettiengineering.com>,
         Sasha Levin <sashal@kernel.org>, shawnguo@kernel.org,
         linux-imx@nxp.com, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org
-Subject: [PATCH AUTOSEL 6.5 29/45] mmc: sdhci-esdhc-imx: improve ESDHC_FLAG_ERR010450
-Date:   Fri,  8 Sep 2023 14:13:10 -0400
-Message-Id: <20230908181327.3459042-29-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.4 26/41] mmc: sdhci-esdhc-imx: improve ESDHC_FLAG_ERR010450
+Date:   Fri,  8 Sep 2023 14:15:40 -0400
+Message-Id: <20230908181555.3459640-26-sashal@kernel.org>
 X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20230908181327.3459042-1-sashal@kernel.org>
-References: <20230908181327.3459042-1-sashal@kernel.org>
+In-Reply-To: <20230908181555.3459640-1-sashal@kernel.org>
+References: <20230908181555.3459640-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.5.2
+X-stable-base: Linux 6.4.15
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
