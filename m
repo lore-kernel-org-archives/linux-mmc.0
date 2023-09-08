@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 937F7EE57EC
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 09:55:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A3C5EE57EE
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 09:55:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237492AbjIHJzr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Sep 2023 05:55:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43460 "EHLO
+        id S242730AbjIHJzs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Sep 2023 05:55:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241279AbjIHJzm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 05:55:42 -0400
-Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 410262127;
-        Fri,  8 Sep 2023 02:54:53 -0700 (PDT)
-Received: by mail-pl1-x635.google.com with SMTP id d9443c01a7336-1c0d0bf18d7so15075685ad.0;
-        Fri, 08 Sep 2023 02:54:53 -0700 (PDT)
+        with ESMTP id S241168AbjIHJzn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 05:55:43 -0400
+Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27B831FE2;
+        Fri,  8 Sep 2023 02:54:56 -0700 (PDT)
+Received: by mail-pl1-x634.google.com with SMTP id d9443c01a7336-1bf6ea270b2so14103425ad.0;
+        Fri, 08 Sep 2023 02:54:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1694166861; x=1694771661; darn=vger.kernel.org;
+        d=gmail.com; s=20221208; t=1694166867; x=1694771667; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=pGB6aEfT29O/np/vugEtzabJh26wlJ/7P9M9FZXoZFU=;
-        b=f4NVmaf6y5cvYwLMG0y6PwFn3Mb4ZAF/BhdCe6dWggf5LWuVg4MZV2JTvA4uT7gGxq
-         LcaGgK71wND94zxEZm9W8D8Bkv1RjPnbYy0mBv1Sn0ULzCKJBzHlB6jSDl8gOnGcNnQ0
-         HVHJ78m141Aw+P+I+m73HjgTkBLSOfoCZmtDROqsFmFYvFo0aJlDvglrhJ4fUc0t4U3H
-         F3iCvoPNnvOzVYQ5pgA2JtY8MrbXFInk4mUA7I8tfNBHNi5sBBRBXdug7YAjbuOisfB6
-         +02Sf8+4Ws5hZTb2NJA5/yQSl4puUEfZ1ef/dKZ9PV7VFBzg9MEOHXiakNMm27WSkOq+
-         EiqA==
+        bh=AI2qWA9XhDl3lpIqedIzHA9EWnR4IN8BpGre5NF9u4c=;
+        b=QcT5Eki/DHWri2v+DaklJq/zLxu1R7Ho+ajJTBXyFRFFIeACUdpbUfim64/WXBPTPv
+         Y6ejSzazHZFI2sBFx2WvWJDvct4HvKdSq01FpvuekIev8Ii8GzjEdyJo7w8u8buXdX8W
+         xJtPCdZR7WALLicZwZv4I2Vi1ET9ihZXPdtCQgNfMhudi0zxGojGPRT8tK0Ym5SJnnv+
+         j6rVBWWy8DjNMVpbn/DAKWa6DOkSKChdzTsNorWfxgEgDDp+HIc/+Uk3scJq9LDdVoYe
+         DRb6fYUrMOcp/gDJaBqF3nFhj3JTSfO8w10vgQMALamMYjcsSRuXgEMS4z9Fl2A9wjWA
+         lkoQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694166861; x=1694771661;
+        d=1e100.net; s=20230601; t=1694166867; x=1694771667;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=pGB6aEfT29O/np/vugEtzabJh26wlJ/7P9M9FZXoZFU=;
-        b=UuXpiyiCjOLf0aJQZLJK+SAjG3RjPk8cF6VUuwZDyU1NjnuMaSEbbjEgBqiNYO4C/h
-         uojmM+9aTdIMezrpQUuZTG9w9e8QgrDgAj/kljaku+4Yg8k6cC25QtpvY3Kj7ZZLZG9x
-         +Rrsgfg5hsVk26JKDiBXE7jt1jTxyHdRETWtLLgmxuEp5qMCYXOoeMWP0wpZdMtkpCzf
-         fvm6KHpJ6CoCChsVfyHp1ix0oEWyvvcShfkBJFbU2xh3MGm2IAx5Xdxvy6COW7xvuQSb
-         NNdo2YT1Nuhjgcd7nund98sG7mu2vn/M58SI7giCphGLPND7URAmHFoCEFxX3+UyTktv
-         g9FA==
-X-Gm-Message-State: AOJu0Yy5uEaGMIfaCrHtMnGdOoAxSQahPRI2nuxVnp4lI3uTdSkjMJpS
-        SFE51H6QeqFBSst3qrkdFNU=
-X-Google-Smtp-Source: AGHT+IHekJLrSh99CoK7ufa11hWTAENrAfgmOOY1PQAuxFVyJ9ggCoBxgR6c69SvBJdN4XaDI8zUSw==
-X-Received: by 2002:a17:902:e74f:b0:1c3:4565:21a with SMTP id p15-20020a170902e74f00b001c34565021amr2684085plf.49.1694166861070;
-        Fri, 08 Sep 2023 02:54:21 -0700 (PDT)
+        bh=AI2qWA9XhDl3lpIqedIzHA9EWnR4IN8BpGre5NF9u4c=;
+        b=YZVLuIu7Rolu/7Shak35zVFRxOTkjmubPrYIIZ/R2zGLmDGhe97zvWCXq3C5CUYu6Q
+         WNvUAyElu0uBDx5ag/ePEzbbGB40hE1iOPJRs8hHuq9jvuLPmklrpawCFSdSOXqOFiC8
+         QXG1cS3UjWaLnSd0dhJ7osXE+mfmdmK6mEEwJkWj9fxzzcSsdcF5AP5+L07XBIB9QoG3
+         xwgcMkSej6mQTHRlGvnT8IVIWK7j3DhmE/UY2kMY9Oqb+R1MWzedzz/AxlSmZ234H21a
+         cZRXPb+EY6TnlQvyX9tUVh9GKHjGKa9eSYDQB1xGhFlCGgCEicBQkZXRnKJAdXAML2YE
+         Ng8Q==
+X-Gm-Message-State: AOJu0YxzweIYi+eCCtpm0XcxWjANs9wcZrU0j7qBLnaQVjMsyF5hWTxJ
+        olk7NEAjfSErdbm4TeyL7cg=
+X-Google-Smtp-Source: AGHT+IF8sjO4rVxj9E595Tp6TVo8pedM5wQ8FHngX3sGT4HsOpwjZpKUh9uWxed407XS6sD2cDfABw==
+X-Received: by 2002:a17:902:e54b:b0:1b9:f7f4:5687 with SMTP id n11-20020a170902e54b00b001b9f7f45687mr2693013plf.24.1694166866847;
+        Fri, 08 Sep 2023 02:54:26 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e3a1-00a4-a20b-46bc-ccec-3e79.emome-ip6.hinet.net. [2001:b400:e3a1:a4:a20b:46bc:ccec:3e79])
-        by smtp.gmail.com with ESMTPSA id c9-20020a170902d48900b001b892aac5c9sm1172178plg.298.2023.09.08.02.54.18
+        by smtp.gmail.com with ESMTPSA id c9-20020a170902d48900b001b892aac5c9sm1172178plg.298.2023.09.08.02.54.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Sep 2023 02:54:20 -0700 (PDT)
+        Fri, 08 Sep 2023 02:54:26 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -57,9 +57,9 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         dlunev@chromium.org, Victor Shih <victorshihgli@gmail.com>,
         Ben Chuang <ben.chuang@genesyslogic.com.tw>,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V11 15/23] mmc: sdhci-uhs2: add detect_init() to detect the interface
-Date:   Fri,  8 Sep 2023 17:53:22 +0800
-Message-Id: <20230908095330.12075-16-victorshihgli@gmail.com>
+Subject: [PATCH V11 17/23] mmc: sdhci-uhs2: add uhs2_control() to initialise the interface
+Date:   Fri,  8 Sep 2023 17:53:24 +0800
+Message-Id: <20230908095330.12075-18-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230908095330.12075-1-victorshihgli@gmail.com>
 References: <20230908095330.12075-1-victorshihgli@gmail.com>
@@ -71,9 +71,8 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Sdhci_uhs2_do_detect_init() is a sdhci version of mmc's uhs2_detect_init
-operation. After detected, the host's UHS-II capabilities will be set up
-here and interrupts will also be enabled.
+This is a sdhci version of mmc's uhs2_set_reg operation.
+UHS-II interface (related registers) will be initialised here.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
@@ -82,147 +81,137 @@ Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
 
 Updates in V8:
- - usleep_range() to instead of udelay() in sdhci_uhs2_interface_detect().
+ - Reorder the definitions and lose the parentheses in
+   sdhci_uhs2_set_config().
  - read_poll_timeout() to instead of read_poll_timeout_atomic()
-   in sdhci_uhs2_interface_detect().
- - Modify return value in sdhci_uhs2_do_detect_init().
+   in sdhci_uhs2_check_dormant().
 
 Updates in V7:
- - Drop using uhs2_reset ops and use sdhci_uhs2_reset()
-   in sdhci_uhs2_do_detect_init().
+ - Remove unnecessary function.
 
 Updates in V6:
- - Remove unnecessary functions.
- - Wrap at 100 columns in some functions.
+ - Remove unnecessary function.
+ - Remove unnecessary parameter when call the DBG().
+ - Cancel export state of some functions.
 
 ---
 
- drivers/mmc/host/sdhci-uhs2.c | 112 ++++++++++++++++++++++++++++++++++
- 1 file changed, 112 insertions(+)
+ drivers/mmc/host/sdhci-uhs2.c | 88 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 88 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index ad791c48f681..4c2a56629ab3 100644
+index af1b0c5e48fd..09b86fec9f7b 100644
 --- a/drivers/mmc/host/sdhci-uhs2.c
 +++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -335,6 +335,118 @@ static int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-  *                                                                           *
- \*****************************************************************************/
+@@ -278,6 +278,48 @@ static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	sdhci_set_clock(host, host->clock);
+ }
  
-+static int sdhci_uhs2_interface_detect(struct sdhci_host *host)
++static void sdhci_uhs2_set_config(struct sdhci_host *host)
++{
++	u32 value;
++	u16 sdhci_uhs2_set_ptr = sdhci_readw(host, SDHCI_UHS2_SETTINGS_PTR);
++	u16 sdhci_uhs2_gen_set_reg	= sdhci_uhs2_set_ptr;
++	u16 sdhci_uhs2_phy_set_reg	= sdhci_uhs2_set_ptr + 4;
++	u16 sdhci_uhs2_tran_set_reg	= sdhci_uhs2_set_ptr + 8;
++	u16 sdhci_uhs2_tran_set_1_reg	= sdhci_uhs2_set_ptr + 12;
++
++	/* Set Gen Settings */
++	value = FIELD_PREP(SDHCI_UHS2_GEN_SETTINGS_N_LANES_MASK, host->mmc->uhs2_caps.n_lanes_set);
++	sdhci_writel(host, value, sdhci_uhs2_gen_set_reg);
++
++	/* Set PHY Settings */
++	value = FIELD_PREP(SDHCI_UHS2_PHY_N_LSS_DIR_MASK, host->mmc->uhs2_caps.n_lss_dir_set) |
++		FIELD_PREP(SDHCI_UHS2_PHY_N_LSS_SYN_MASK, host->mmc->uhs2_caps.n_lss_sync_set);
++	if (host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B ||
++	    host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD)
++		value |= SDHCI_UHS2_PHY_SET_SPEED_B;
++	sdhci_writel(host, value, sdhci_uhs2_phy_set_reg);
++
++	/* Set LINK-TRAN Settings */
++	value = FIELD_PREP(SDHCI_UHS2_TRAN_RETRY_CNT_MASK, host->mmc->uhs2_caps.max_retry_set) |
++		FIELD_PREP(SDHCI_UHS2_TRAN_N_FCU_MASK, host->mmc->uhs2_caps.n_fcu_set);
++	sdhci_writel(host, value, sdhci_uhs2_tran_set_reg);
++	sdhci_writel(host, host->mmc->uhs2_caps.n_data_gap_set, sdhci_uhs2_tran_set_1_reg);
++}
++
++static int sdhci_uhs2_check_dormant(struct sdhci_host *host)
 +{
 +	int timeout = 100000; /* 100ms */
 +	u32 val;
 +
-+	usleep_range(50, 200); /* wait for 50us - 200us before check */
-+
-+	if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_IF_DETECT),
++	if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_IN_DORMANT_STATE),
 +			      100, timeout, true, host, SDHCI_PRESENT_STATE)) {
-+		pr_warn("%s: not detect UHS2 interface in 100ms.\n", mmc_hostname(host->mmc));
++		pr_warn("%s: UHS2 IN_DORMANT fail in 100ms.\n", mmc_hostname(host->mmc));
 +		sdhci_dumpregs(host);
 +		return -EIO;
 +	}
-+
-+	/* Enable UHS2 error interrupts */
-+	sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI_UHS2_INT_ERROR_MASK);
-+
-+	/* 150ms */
-+	timeout = 150000;
-+	if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_LANE_SYNC),
-+			      100, timeout, true, host, SDHCI_PRESENT_STATE)) {
-+		pr_warn("%s: UHS2 Lane sync fail in 150ms.\n", mmc_hostname(host->mmc));
-+		sdhci_dumpregs(host);
-+		return -EIO;
-+	}
-+
-+	DBG("%s: UHS2 Lane synchronized in UHS2 mode, PHY is initialized.\n",
-+	    mmc_hostname(host->mmc));
 +	return 0;
 +}
 +
-+static int sdhci_uhs2_init(struct sdhci_host *host)
-+{
-+	u16 caps_ptr = 0;
-+	u32 caps_gen = 0;
-+	u32 caps_phy = 0;
-+	u32 caps_tran[2] = {0, 0};
-+	struct mmc_host *mmc = host->mmc;
+ /*****************************************************************************\
+  *                                                                           *
+  * MMC callbacks                                                             *
+@@ -359,6 +401,51 @@ static int sdhci_uhs2_enable_clk(struct mmc_host *mmc)
+ 	return 0;
+ }
+ 
++static int sdhci_uhs2_do_detect_init(struct mmc_host *mmc);
 +
-+	caps_ptr = sdhci_readw(host, SDHCI_UHS2_CAPS_PTR);
-+	if (caps_ptr < 0x100 || caps_ptr > 0x1FF) {
-+		pr_err("%s: SDHCI_UHS2_CAPS_PTR(%d) is wrong.\n",
-+		       mmc_hostname(mmc), caps_ptr);
-+		return -ENODEV;
-+	}
-+	caps_gen = sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_OFFSET);
-+	caps_phy = sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_PHY_OFFSET);
-+	caps_tran[0] = sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_TRAN_OFFSET);
-+	caps_tran[1] = sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_TRAN_1_OFFSET);
-+
-+	/* General Caps */
-+	mmc->uhs2_caps.dap = caps_gen & SDHCI_UHS2_CAPS_DAP_MASK;
-+	mmc->uhs2_caps.gap = FIELD_GET(SDHCI_UHS2_CAPS_GAP_MASK, caps_gen);
-+	mmc->uhs2_caps.n_lanes = FIELD_GET(SDHCI_UHS2_CAPS_LANE_MASK, caps_gen);
-+	mmc->uhs2_caps.addr64 =	(caps_gen & SDHCI_UHS2_CAPS_ADDR_64) ? 1 : 0;
-+	mmc->uhs2_caps.card_type = FIELD_GET(SDHCI_UHS2_CAPS_DEV_TYPE_MASK, caps_gen);
-+
-+	/* PHY Caps */
-+	mmc->uhs2_caps.phy_rev = caps_phy & SDHCI_UHS2_CAPS_PHY_REV_MASK;
-+	mmc->uhs2_caps.speed_range = FIELD_GET(SDHCI_UHS2_CAPS_PHY_RANGE_MASK, caps_phy);
-+	mmc->uhs2_caps.n_lss_sync = FIELD_GET(SDHCI_UHS2_CAPS_PHY_N_LSS_SYN_MASK, caps_phy);
-+	mmc->uhs2_caps.n_lss_dir = FIELD_GET(SDHCI_UHS2_CAPS_PHY_N_LSS_DIR_MASK, caps_phy);
-+	if (mmc->uhs2_caps.n_lss_sync == 0)
-+		mmc->uhs2_caps.n_lss_sync = 16 << 2;
-+	else
-+		mmc->uhs2_caps.n_lss_sync <<= 2;
-+	if (mmc->uhs2_caps.n_lss_dir == 0)
-+		mmc->uhs2_caps.n_lss_dir = 16 << 3;
-+	else
-+		mmc->uhs2_caps.n_lss_dir <<= 3;
-+
-+	/* LINK/TRAN Caps */
-+	mmc->uhs2_caps.link_rev = caps_tran[0] & SDHCI_UHS2_CAPS_TRAN_LINK_REV_MASK;
-+	mmc->uhs2_caps.n_fcu = FIELD_GET(SDHCI_UHS2_CAPS_TRAN_N_FCU_MASK, caps_tran[0]);
-+	if (mmc->uhs2_caps.n_fcu == 0)
-+		mmc->uhs2_caps.n_fcu = 256;
-+	mmc->uhs2_caps.host_type = FIELD_GET(SDHCI_UHS2_CAPS_TRAN_HOST_TYPE_MASK, caps_tran[0]);
-+	mmc->uhs2_caps.maxblk_len = FIELD_GET(SDHCI_UHS2_CAPS_TRAN_BLK_LEN_MASK, caps_tran[0]);
-+	mmc->uhs2_caps.n_data_gap = caps_tran[1] & SDHCI_UHS2_CAPS_TRAN_1_N_DATA_GAP_MASK;
-+
-+	return 0;
-+}
-+
-+static int sdhci_uhs2_do_detect_init(struct mmc_host *mmc)
++static int sdhci_uhs2_control(struct mmc_host *mmc, enum sd_uhs2_operation op)
 +{
 +	struct sdhci_host *host = mmc_priv(mmc);
++	struct mmc_ios *ios = &mmc->ios;
++	int err = 0;
 +
-+	DBG("Begin do uhs2 detect init.\n");
++	DBG("Begin uhs2 control, act %d.\n", op);
 +
-+	if (sdhci_uhs2_interface_detect(host)) {
-+		pr_warn("%s: cannot detect UHS2 interface.\n", mmc_hostname(host->mmc));
-+		return -EIO;
++	switch (op) {
++	case UHS2_PHY_INIT:
++		err = sdhci_uhs2_do_detect_init(mmc);
++		break;
++	case UHS2_SET_CONFIG:
++		sdhci_uhs2_set_config(host);
++		break;
++	case UHS2_ENABLE_INT:
++		sdhci_uhs2_clear_set_irqs(host, 0, SDHCI_INT_CARD_INT);
++		break;
++	case UHS2_DISABLE_INT:
++		sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_CARD_INT, 0);
++		break;
++	case UHS2_CHECK_DORMANT:
++		err = sdhci_uhs2_check_dormant(host);
++		break;
++	case UHS2_DISABLE_CLK:
++		err = sdhci_uhs2_disable_clk(mmc);
++		break;
++	case UHS2_ENABLE_CLK:
++		err = sdhci_uhs2_enable_clk(mmc);
++		break;
++	case UHS2_SET_IOS:
++		err = sdhci_uhs2_set_ios(mmc, ios);
++		break;
++	default:
++		pr_err("%s: input sd uhs2 operation %d is wrong!\n",
++		       mmc_hostname(host->mmc), op);
++		err = -EIO;
++		break;
 +	}
 +
-+	if (sdhci_uhs2_init(host)) {
-+		pr_warn("%s: UHS2 init fail.\n", mmc_hostname(host->mmc));
-+		return -EIO;
-+	}
-+
-+	/* Init complete, do soft reset and enable UHS2 error irqs. */
-+	sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
-+	sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI_UHS2_INT_ERROR_MASK);
-+	/*
-+	 * N.B SDHCI_INT_ENABLE and SDHCI_SIGNAL_ENABLE was cleared
-+	 * by SDHCI_UHS2_SW_RESET_SD
-+	 */
-+	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+
-+	return 0;
++	return err;
 +}
 +
- static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
+ /*****************************************************************************\
+  *                                                                           *
+  * Driver init/exit                                                          *
+@@ -481,6 +568,7 @@ static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
  {
  	host->mmc_host_ops.start_signal_voltage_switch =
+ 		sdhci_uhs2_start_signal_voltage_switch;
++	host->mmc_host_ops.uhs2_control = sdhci_uhs2_control;
+ 
+ 	return 0;
+ }
 -- 
 2.25.1
 
