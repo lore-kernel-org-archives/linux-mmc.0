@@ -2,104 +2,142 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C839EE57E2
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 08:37:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C3BBEE57EC
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 09:53:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235517AbjIHIiA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Sep 2023 04:38:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56168 "EHLO
+        id S238614AbjIHJxq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Sep 2023 05:53:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49930 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236220AbjIHIh7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 04:37:59 -0400
-Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F52C1BE6;
-        Fri,  8 Sep 2023 01:37:55 -0700 (PDT)
-Received: by mail-qv1-xf32.google.com with SMTP id 6a1803df08f44-649a653479bso10900016d6.0;
-        Fri, 08 Sep 2023 01:37:55 -0700 (PDT)
+        with ESMTP id S230475AbjIHJxp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 05:53:45 -0400
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 248171BD3;
+        Fri,  8 Sep 2023 02:53:41 -0700 (PDT)
+Received: by mail-pg1-x52f.google.com with SMTP id 41be03b00d2f7-573d52030fbso1387183a12.0;
+        Fri, 08 Sep 2023 02:53:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1694162274; x=1694767074; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=IZLIX+qkXBSKjQlXcim9NmeX7B/uqpBQpeJJ9z2xGlQ=;
-        b=A0Kdoj05fjHCpXszkveCQ8H0iJ+QfK2YTZ/YwuTthB+CAVOevjFeESeSQcNGQ1DNGD
-         JUBL18Aztp30W0eB51xcYgZyBVPb9onj9j5DdXsuFZWNYB3M4CPXaxuyT8We4JeJ1NUh
-         UFfVSTyrwKR9s3hWkFmLvf8x+oBDYE9jl00K1gpmXLx0/anw09l32tfk7rZdE51hzuSZ
-         Yqz51v8IlHpRiAytNkFGLuZv93HmFfTsqHh2sn3UbMBinAb5YLcEuDoO6mNjiKv+y10l
-         7FW1wr8o2gk8pWum/oC5d7r6EQp+ZfjgeIP0how2FH/mmYmvhP8gVAsIhq3PT16Ye4Ox
-         MdfQ==
+        d=gmail.com; s=20221208; t=1694166820; x=1694771620; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qUyhKz0IZnGv/kDPhh0zvtC7NPuBSxGKLGuzvFl9j+w=;
+        b=YaSWqxNhK2FEU7nErELA6h8mRu+WQrNa7ogsIdaoKb7FQI4mCzYRATkT5hDgYnhBZX
+         SXCSadvmyex2KFjhLNOyh67YrTVgVxNN4e1K3Q7ps+dTGscvg53N8tH6K4953v8UKhPv
+         FZSORH5k8q9vxSdIB4gXjZ5WXyi1rPW0RqjHwaWCUbNhHpc8DXH+sNF96PV6qaDQqEPM
+         LiqK5Gsi+o2i4hrUvIvaClsKOy97Opc2oOtoJpQ+jwS87ZjtjyPiSnktwSjYvh0gJeAC
+         ulZBYD50VrbvL6PioyXA6IFFvO/8Yc2skjMVb1h29Gu01YasbgsuqRA8Sj80Ri79C8vt
+         yDzw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694162274; x=1694767074;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=IZLIX+qkXBSKjQlXcim9NmeX7B/uqpBQpeJJ9z2xGlQ=;
-        b=MoqnPxydA0Bzy0JQgHYIGZif5JigmUTmPRFZlzlXEUvn+awfL8Jx+e4wzGxBSlSl5a
-         Oa5p37cqG2D72+++NeTqCrdUIhHVQh0Fac6TWldxnQVUHZ4hWwfhEgE9iVEcBKxjRHwx
-         GbNRMwqL/6i5kb3hKuRAnMj9DNtBvi+QoDHyVAupqGvFWuOULbDDKoGVr0ZGEHWAFGx+
-         +ElMUYhJvDubRKsL3SVD1sgtmhaOz5qP2L54dyGK6VXyQgVxbgjanoil2H7ovCKXbK/j
-         wjoRWUm0+zw/iFWWSvuzzQBhSmywwhYoJlqQjQ9kmQMwYeABOyx6cLKSy1BBIrZD6S4l
-         TXnQ==
-X-Gm-Message-State: AOJu0Yx4M8RMg6o9UqsROtfDJsM5NyfN3BQxzACGgi0J3Tx/9PnYMQeD
-        kFctzq83pe+5267l7LyKvqodlGO/jNe9D8R9RNs=
-X-Google-Smtp-Source: AGHT+IHFy6wcaGj3ffQOJmttrg2ui42ldutOVivvrtIwaEbq7LnnNMUHxyMTvsuLMKtN+AQ4nFcTC7V3BgMT2kgYWEo=
-X-Received: by 2002:a0c:c985:0:b0:647:1bae:a37b with SMTP id
- b5-20020a0cc985000000b006471baea37bmr1566886qvk.60.1694162274453; Fri, 08 Sep
- 2023 01:37:54 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1694166820; x=1694771620;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=qUyhKz0IZnGv/kDPhh0zvtC7NPuBSxGKLGuzvFl9j+w=;
+        b=U5fUM9+h2z+Lw/GCL7UHM5IsU8O+3K0DM2DgALtHsAFZMaQ1Xr86Fk3rxYRk8naBD5
+         sNa/7gKTTfj+OnXcsyI0WZD1NqZcwP4d31jqTyN8tXgQaMk1CR/wHGMexxidlXqpmiTD
+         scFS/D+S9zBIwcynQm9hL5JzEg2RroMmudF7zD39Oi5sMcTrTDPFFMo9Zln8SWyv3Dbs
+         MmBhgVRnAMcgA+6AcJaxizWTma0xLvM9/e+EsFTc5iWzIDPIqy32rHekZVNzNOe875Vx
+         lJAkeRixyGvsMt8EdREgYNhl5xgkLiq+Lw/YcPHmWM4ANrR1zMUqb37xd0bI0oWY31LA
+         4DxA==
+X-Gm-Message-State: AOJu0Yx0lvUwbhwmG0mKlYxvTEoyK+9Z5hjg82Vb8p5FwhMgiQ2jcsWO
+        sf5Qqvu4MiXqnHcXqOX5LB0=
+X-Google-Smtp-Source: AGHT+IFKwp2MtaQyqprNbgxb33hojVJsHkCXZPF8d/OrgMwYIqXhWvd68rx7PIJRUw0kvXRq5Bkj7A==
+X-Received: by 2002:a05:6a20:7490:b0:13b:a2c9:922e with SMTP id p16-20020a056a20749000b0013ba2c9922emr2164193pzd.27.1694166820500;
+        Fri, 08 Sep 2023 02:53:40 -0700 (PDT)
+Received: from localhost.localdomain (2001-b400-e3a1-00a4-a20b-46bc-ccec-3e79.emome-ip6.hinet.net. [2001:b400:e3a1:a4:a20b:46bc:ccec:3e79])
+        by smtp.gmail.com with ESMTPSA id c9-20020a170902d48900b001b892aac5c9sm1172178plg.298.2023.09.08.02.53.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 08 Sep 2023 02:53:40 -0700 (PDT)
+From:   Victor Shih <victorshihgli@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+        dlunev@chromium.org, Victor Shih <victorshihgli@gmail.com>
+Subject: [PATCH V11 01/23] mmc: core: Cleanup printing of speed mode at card insertion
+Date:   Fri,  8 Sep 2023 17:53:08 +0800
+Message-Id: <20230908095330.12075-2-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20230908095330.12075-1-victorshihgli@gmail.com>
+References: <20230908095330.12075-1-victorshihgli@gmail.com>
 MIME-Version: 1.0
-References: <a8af0a08-8405-43cc-bd83-85ff25f572ca@moroto.mountain> <CAAfSe-tMK=4D3=JTw-tLDz8OL0BPgzCd35eUFx7gxD49BHLOrA@mail.gmail.com>
-In-Reply-To: <CAAfSe-tMK=4D3=JTw-tLDz8OL0BPgzCd35eUFx7gxD49BHLOrA@mail.gmail.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Fri, 8 Sep 2023 16:37:43 +0800
-Message-ID: <CA+Da2qy4Gt7g4g5N2HyOZjk4KXu=fkkVO=Wr_vsDBZKxTc75dg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-sprd: Fix error code in sdhci_sprd_tuning()
-To:     Chunyan Zhang <zhang.lyra@gmail.com>
-Cc:     Dan Carpenter <dan.carpenter@linaro.org>,
-        Wenchao Chen <wenchao.chen@unisoc.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Baolin Wang <baolin.wang@linux.alibaba.com>,
-        linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 8 Sept 2023 at 15:31, Chunyan Zhang <zhang.lyra@gmail.com> wrote:
->
-> + Wenchao's gmail
->
-> On Thu, 7 Sept 2023 at 17:54, Dan Carpenter <dan.carpenter@linaro.org> wrote:
-> >
-> > Return an error code if sdhci_sprd_get_best_clk_sample() fails.
-> > Currently, it returns success.
-> >
-> > Fixes: d83d251bf3c2 ("mmc: sdhci-sprd: Add SD HS mode online tuning")
-> > Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
-> > ---
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Reviewed-by: Wenchao Chen <wenchao.chen@unisoc.com>
+The current print of the bus speed mode in mmc_add_card() has grown over
+the years and is now difficult to parse. Let's clean up the code and also
+take the opportunity to properly announce "DDR" for eMMCs as
+"high speed DDR", which is according to the eMMC spec.
 
-Thanks,
-Wenchao
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/bus.c | 36 ++++++++++++++++++++----------------
+ 1 file changed, 20 insertions(+), 16 deletions(-)
 
-> > This is from static analysis and has not been tested.
-> > ---
-> >  drivers/mmc/host/sdhci-sprd.c | 1 +
-> >  1 file changed, 1 insertion(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> > index 649ae075e229..6b84ba27e6ab 100644
-> > --- a/drivers/mmc/host/sdhci-sprd.c
-> > +++ b/drivers/mmc/host/sdhci-sprd.c
-> > @@ -644,6 +644,7 @@ static int sdhci_sprd_tuning(struct mmc_host *mmc, struct mmc_card *card,
-> >         best_clk_sample = sdhci_sprd_get_best_clk_sample(mmc, value);
-> >         if (best_clk_sample < 0) {
-> >                 dev_err(mmc_dev(host->mmc), "all tuning phase fail!\n");
-> > +               err = best_clk_sample;
-> >                 goto out;
-> >         }
-> >
-> > --
-> > 2.39.2
-> >
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 0af96548e7da..bd761e2858f1 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -299,6 +299,7 @@ int mmc_add_card(struct mmc_card *card)
+ {
+ 	int ret;
+ 	const char *type;
++	const char *speed_mode = "";
+ 	const char *uhs_bus_speed_mode = "";
+ 	static const char *const uhs_speeds[] = {
+ 		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
+@@ -340,27 +341,30 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
+ 
++	if (mmc_card_hs(card))
++		speed_mode = "high speed ";
++	else if (mmc_card_uhs(card))
++		speed_mode = "ultra high speed ";
++	else if	(mmc_card_ddr52(card))
++		speed_mode = "high speed DDR ";
++	else if (mmc_card_hs200(card))
++		speed_mode = "HS200 ";
++	else if (mmc_card_hs400es(card))
++		speed_mode = "HS400 Enhanced strobe ";
++	else if (mmc_card_hs400(card))
++		speed_mode = "HS400 ";
++
+ 	if (mmc_card_uhs(card) &&
+ 		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+ 		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+ 
+-	if (mmc_host_is_spi(card->host)) {
+-		pr_info("%s: new %s%s%s card on SPI\n",
+-			mmc_hostname(card->host),
+-			mmc_card_hs(card) ? "high speed " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
+-			type);
+-	} else {
+-		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+-			mmc_hostname(card->host),
+-			mmc_card_uhs(card) ? "ultra high speed " :
+-			(mmc_card_hs(card) ? "high speed " : ""),
+-			mmc_card_hs400(card) ? "HS400 " :
+-			(mmc_card_hs200(card) ? "HS200 " : ""),
+-			mmc_card_hs400es(card) ? "Enhanced strobe " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
++	if (mmc_host_is_spi(card->host))
++		pr_info("%s: new %s%s card on SPI\n",
++			mmc_hostname(card->host), speed_mode, type);
++	else
++		pr_info("%s: new %s%s%s card at address %04x\n",
++			mmc_hostname(card->host), speed_mode,
+ 			uhs_bus_speed_mode, type, card->rca);
+-	}
+ 
+ 	mmc_add_card_debugfs(card);
+ 	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
+-- 
+2.25.1
+
