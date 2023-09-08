@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5132EE57EB
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 09:55:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55B73EE57EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Sep 2023 09:56:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240856AbjIHJzu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Sep 2023 05:55:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37710 "EHLO
+        id S231450AbjIHJ4Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Sep 2023 05:56:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37766 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242752AbjIHJzq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 05:55:46 -0400
-Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2858D1FDA;
-        Fri,  8 Sep 2023 02:54:58 -0700 (PDT)
-Received: by mail-pl1-x633.google.com with SMTP id d9443c01a7336-1bf078d5f33so16882015ad.3;
-        Fri, 08 Sep 2023 02:54:58 -0700 (PDT)
+        with ESMTP id S242829AbjIHJzy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Sep 2023 05:55:54 -0400
+Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBCDE1FF0;
+        Fri,  8 Sep 2023 02:55:06 -0700 (PDT)
+Received: by mail-pg1-x52d.google.com with SMTP id 41be03b00d2f7-573ccec985dso1398728a12.2;
+        Fri, 08 Sep 2023 02:55:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1694166870; x=1694771670; darn=vger.kernel.org;
+        d=gmail.com; s=20221208; t=1694166884; x=1694771684; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=gtYlqqhFqFVYtFkprm2YqdLZmUEybK65Y+HMJZYF/mo=;
-        b=O6CYGiMlZGuR3QsB3XezLp5zGhr4Fugemm8ZolJBAPxRL+qfWmvZKJg3GsTHvezAHc
-         h/7zYy0VeAZG/s5BUvvHdevJFBewinjdprih9MAVQ6hK97koRjroLLuQj1sjFG7QSxMW
-         4+8dcoh2vqcoRQD/Fy3gcDP5grsC3LykBlT4YwCUnryXhPKjywMatW1mJxRc1xRrGrSK
-         xXCErgfvRTok8uEMGx0jSgdvusZMrTuZ3/K67uC9GPVJ9+etIub9K0ganobKK+WlGthb
-         xB/RFdHM/TXsFNhhjvZaye3MDaeqk18XGWcA1HhAc1MeVnF8V555Kc2Mw3g1fDV73Dg1
-         yMJA==
+        bh=j3ImsKeVTdhxdpT+a4GoerWT4GQatv0MF5s5u1wyjzE=;
+        b=YI4es/q/+XY0QMdTr8I4OR3XnOdrVSPqKk381ESeHVstCCQB9mj93CZw6PRs3qpySS
+         1yG433P7Df7JuvqSW7SKlVkW6IbJqfhfMjBrpEtfEbAmCbf00PDZrY0LBGY7nuSBwrpW
+         jT8JkGXrkKMJErF9a4dNkpnyHfd0XyrnaWSI09V2/qpxH+6sn1pol6bk5BD4XHceT3DN
+         g0XO7Ine59S4u74QOPadIkk92ZpTgXDW7kzXlTxe0aAMWDieSoEXV0VO34oN/i9XC+Dq
+         XlWNA4M077Ejsf1hS3OtdMW0TFoDcY4qCdCPhydX/Ri7rNAFAad1gnNBujqqFbEqR0hO
+         t8+A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694166870; x=1694771670;
+        d=1e100.net; s=20230601; t=1694166884; x=1694771684;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=gtYlqqhFqFVYtFkprm2YqdLZmUEybK65Y+HMJZYF/mo=;
-        b=X1sBPCeF1SunEB3DYVJI2zYEQ+LXHlw+k4EY7VSTQ/AEuCNQvL37RD3xqVtl2uoMIT
-         CfvWTRfDem0iyT3k9wTmjKqLF79/sSMjGjqNeqXcsWJMhSozuxs1U0SSQkE3lcqNdya9
-         hBNsK7HQIt0cEVhP9eXglfbciJfdKN818OWGsRPYMxsPuemw7//7vnqWuaZawVX+5mt0
-         3R4706mRNDi4ozaIr9h9i1gIUbNdhKm/5w8H9iRNBrP0SBwx7QAuII5AmAhWQ7+23r3D
-         jgxtatkDlgLI+YRZrR/NhPSFAxtP5FB/OJLuAubFXLywstPpAuapo8XkSnOrPQr9s7EW
-         4oRw==
-X-Gm-Message-State: AOJu0YwQjiR35u2aKSKH8VTKBHZ9WALEy+/lPHV5iBcvtqhtLtTmeY42
-        jeYSNVEoOMzKWOo4z3uSnqg=
-X-Google-Smtp-Source: AGHT+IFbfv+jUHWgJ11B3AJz1BvcnY4wMwqYAddnIfIzl0T8ajhBaQkPd/NrzFtA9aMEKZPYqQYurg==
-X-Received: by 2002:a17:902:e88e:b0:1c3:4565:22f with SMTP id w14-20020a170902e88e00b001c34565022fmr2401483plg.21.1694166869727;
-        Fri, 08 Sep 2023 02:54:29 -0700 (PDT)
+        bh=j3ImsKeVTdhxdpT+a4GoerWT4GQatv0MF5s5u1wyjzE=;
+        b=mymHSNKUBAuNyv4IV7jXgRV1vyIZvglxi4g1Ea7WXgOkj5ldPZ6L2qUPWqDcbHKe9T
+         16HbZ/GJ3hRhhqg4UbqzEshmGHfiI+u0g0mQ2PFBnhvKSZX788l+Rb8/6dU4dKjls9vV
+         FHk7tMh578V2SLAJqn94YXAQrLaB4ablpVbXNiu0GsPO9Xjy+GGsP9GceNzs3cSk5xRl
+         TsgsXWuZrXa+/3H4I0L6PnpOEWmVy5tW4iglIaxxpOJ9V89UgaYnj9lV5FuVA+Kr1eQ5
+         +oE/DzwHYmkwdlviJuV4DQbIHyIo1azbAMC9Wsf2S7MLaTOA5SdHbFMYJE51BiS0Q+ei
+         zOmQ==
+X-Gm-Message-State: AOJu0YxMQtup7Ag3NtI/kasH4M0z4haJmATquIvtWaD/b4geRV2cRb9a
+        0SUiUUxznxSe3wL1oSOebk8ecSEth3A=
+X-Google-Smtp-Source: AGHT+IE7PyS+gi9dJBmaRVmRk8VXgxfuv96Nf5fIauy+ohqqcL6Ouj3PojoYhFmLye3x1IHB1ntAyg==
+X-Received: by 2002:a05:6a20:3d03:b0:140:3aa:e2ce with SMTP id y3-20020a056a203d0300b0014003aae2cemr2506860pzi.42.1694166883695;
+        Fri, 08 Sep 2023 02:54:43 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e3a1-00a4-a20b-46bc-ccec-3e79.emome-ip6.hinet.net. [2001:b400:e3a1:a4:a20b:46bc:ccec:3e79])
-        by smtp.gmail.com with ESMTPSA id c9-20020a170902d48900b001b892aac5c9sm1172178plg.298.2023.09.08.02.54.27
+        by smtp.gmail.com with ESMTPSA id c9-20020a170902d48900b001b892aac5c9sm1172178plg.298.2023.09.08.02.54.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Sep 2023 02:54:29 -0700 (PDT)
+        Fri, 08 Sep 2023 02:54:43 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -57,9 +57,9 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         dlunev@chromium.org, Victor Shih <victorshihgli@gmail.com>,
         Ben Chuang <ben.chuang@genesyslogic.com.tw>,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V11 18/23] mmc: sdhci-uhs2: add request() and others
-Date:   Fri,  8 Sep 2023 17:53:25 +0800
-Message-Id: <20230908095330.12075-19-victorshihgli@gmail.com>
+Subject: [PATCH V11 23/23] mmc: sdhci-pci-gli: enable UHS-II mode for GL9755
+Date:   Fri,  8 Sep 2023 17:53:30 +0800
+Message-Id: <20230908095330.12075-24-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230908095330.12075-1-victorshihgli@gmail.com>
 References: <20230908095330.12075-1-victorshihgli@gmail.com>
@@ -71,670 +71,321 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-This is a sdhci version of mmc's request operation.
-It covers both UHS-I and UHS-II.
+Changes are:
+ * Disable GL9755 overcurrent interrupt when power on/off on UHS-II.
+ * Enable the internal clock when do reset on UHS-II mode.
+ * Increase timeout value before detecting UHS-II interface.
+ * Add vendor settings fro UHS-II mode.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
-
-Updates in V11:
- - Drop the check mmc_card_uhs2_hd_mode(host->mmc)
-   in sdhci_uhs2_set_transfer_mode().
-
-Updates in V10:
- - Use tmode_half_duplex to instead of uhs2_tmode0_flag
-   in sdhci_uhs2_set_transfer_mode().
 
 Updates in V9:
- - Modify the annotations in __sdhci_uhs2_send_command().
+ - Rename gl9755_pre_detect_init() to sdhci_gli_pre_detect_init().
+ - Rename gl9755_uhs2_reset_sd_tran() to sdhci_gli_uhs2_reset_sd_tran().
 
 Updates in V8:
- - Adjust the position of matching brackets in
-   sdhci_uhs2_send_command_retry().
- - Modify CameCase definition in __sdhci_uhs2_finish_command().
- - Modify error message in __sdhci_uhs2_finish_command().
- - sdhci_uhs2_send_command_retry() to instead of sdhci_uhs2_send_command()
-   in sdhci_uhs2_request().
- - Use sdhci_uhs2_mode() to simplify code in sdhci_uhs2_request_atomic().
- - Add forward declaration for sdhci_send_command().
+ - Use sdhci_get_vdd_value() to simplify code in gl9755_set_power().
+ - Use read_poll_timeout_atomic() to simplify code in
+   sdhci_wait_clock_stable().
+ - Use read_poll_timeout_atomic() to simplify code in sdhci_gl9755_reset().
 
 Updates in V7:
- - Cancel export state of some functions.
- - Remove unnecessary whitespace changes.
-
-Updates in V6:
- - Add uhs2_dev_cmd() to simplify code.
- - Remove unnecessary functions.
- - Cancel export state of some functions.
- - Drop use CONFIG_MMC_DEBUG().
- - Wrap at 100 columns in some functions.
+ - Drop using gl9755_post_attach_sd().
 
 ---
 
- drivers/mmc/host/sdhci-uhs2.c | 412 ++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c      |  49 ++--
- drivers/mmc/host/sdhci.h      |   8 +
- 3 files changed, 454 insertions(+), 15 deletions(-)
+ drivers/mmc/host/sdhci-pci-gli.c | 233 ++++++++++++++++++++++++++++++-
+ 1 file changed, 232 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index 09b86fec9f7b..1f8d527424fd 100644
---- a/drivers/mmc/host/sdhci-uhs2.c
-+++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -14,6 +14,8 @@
- #include <linux/module.h>
- #include <linux/iopoll.h>
- #include <linux/bitfield.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/host.h>
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index ae8c307b7aa7..e30e755a9974 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -18,6 +18,7 @@
+ #include "sdhci-cqhci.h"
+ #include "sdhci-pci.h"
+ #include "cqhci.h"
++#include "sdhci-uhs2.h"
  
- #include "sdhci.h"
- #include "sdhci-uhs2.h"
-@@ -24,6 +26,8 @@
- #define SDHCI_UHS2_DUMP(f, x...) \
- 	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
+ /*  Genesys Logic extra registers */
+ #define SDHCI_GLI_9750_WT         0x800
+@@ -139,9 +140,36 @@
  
-+#define UHS2_ARG_IOADR_MASK 0xfff
+ #define PCI_GLI_9755_PLLSSC        0x68
+ #define   PCI_GLI_9755_PLLSSC_PPM    GENMASK(15, 0)
++#define   PCI_GLI_9755_PLLSSC_RTL             BIT(24)
++#define   GLI_9755_PLLSSC_RTL_VALUE           0x1
++#define   PCI_GLI_9755_PLLSSC_TRANS_PASS      BIT(27)
++#define   GLI_9755_PLLSSC_TRANS_PASS_VALUE    0x1
++#define   PCI_GLI_9755_PLLSSC_RECV            GENMASK(29, 28)
++#define   GLI_9755_PLLSSC_RECV_VALUE          0x3
++#define   PCI_GLI_9755_PLLSSC_TRAN            GENMASK(31, 30)
++#define   GLI_9755_PLLSSC_TRAN_VALUE          0x3
 +
- void sdhci_uhs2_dump_regs(struct sdhci_host *host)
- {
- 	if (!(sdhci_uhs2_mode(host)))
-@@ -58,6 +62,11 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
-  *                                                                           *
- \*****************************************************************************/
++#define PCI_GLI_9755_UHS2_PLL            0x6C
++#define   PCI_GLI_9755_UHS2_PLL_SSC        GENMASK(9, 8)
++#define   GLI_9755_UHS2_PLL_SSC_VALUE      0x0
++#define   PCI_GLI_9755_UHS2_PLL_DELAY      BIT(18)
++#define   GLI_9755_UHS2_PLL_DELAY_VALUE    0x1
++#define   PCI_GLI_9755_UHS2_PLL_PDRST      BIT(27)
++#define   GLI_9755_UHS2_PLL_PDRST_VALUE    0x1
  
-+static inline u16 uhs2_dev_cmd(struct mmc_command *cmd)
-+{
-+	return be16_to_cpu((__be16)cmd->uhs2_cmd->arg) & UHS2_ARG_IOADR_MASK;
-+}
-+
- static inline int mmc_opt_regulator_set_ocr(struct mmc_host *mmc,
- 					    struct regulator *supply,
- 					    unsigned short vdd_bit)
-@@ -446,6 +455,408 @@ static int sdhci_uhs2_control(struct mmc_host *mmc, enum sd_uhs2_operation op)
- 	return err;
+ #define PCI_GLI_9755_SerDes  0x70
++#define   PCI_GLI_9755_UHS2_SERDES_INTR       GENMASK(2, 0)
++#define   GLI_9755_UHS2_SERDES_INTR_VALUE     0x3
++#define   PCI_GLI_9755_UHS2_SERDES_ZC1        BIT(3)
++#define   GLI_9755_UHS2_SERDES_ZC1_VALUE      0x0
++#define   PCI_GLI_9755_UHS2_SERDES_ZC2        GENMASK(7, 4)
++#define   GLI_9755_UHS2_SERDES_ZC2_DEFAULT    0xB
++#define   GLI_9755_UHS2_SERDES_ZC2_SANDISK    0x0
+ #define PCI_GLI_9755_SCP_DIS   BIT(19)
++#define   PCI_GLI_9755_UHS2_SERDES_TRAN       GENMASK(27, 24)
++#define   GLI_9755_UHS2_SERDES_TRAN_VALUE     0xC
++#define   PCI_GLI_9755_UHS2_SERDES_RECV       GENMASK(31, 28)
++#define   GLI_9755_UHS2_SERDES_RECV_VALUE     0xF
+ 
+ #define PCI_GLI_9755_MISC	    0x78
+ #define   PCI_GLI_9755_MISC_SSC_OFF    BIT(26)
+@@ -759,6 +787,201 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+ 	gl9755_wt_off(pdev);
  }
  
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Core functions                                                            *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+static void sdhci_uhs2_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
++static void gl9755_vendor_init(struct sdhci_host *host)
 +{
-+	struct mmc_data *data = cmd->data;
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	u32 serdes;
++	u32 pllssc;
++	u32 uhs2_pll;
 +
-+	sdhci_initialize_data(host, data);
++	gl9755_wt_on(pdev);
 +
-+	sdhci_prepare_dma(host, data);
++	pci_read_config_dword(pdev, PCI_GLI_9755_SerDes, &serdes);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_TRAN;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_TRAN,
++			     GLI_9755_UHS2_SERDES_TRAN_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_RECV;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_RECV,
++			     GLI_9755_UHS2_SERDES_RECV_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_INTR;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_INTR,
++			     GLI_9755_UHS2_SERDES_INTR_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_ZC1;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_ZC1,
++			     GLI_9755_UHS2_SERDES_ZC1_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_ZC2;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_ZC2,
++			     GLI_9755_UHS2_SERDES_ZC2_DEFAULT);
++	pci_write_config_dword(pdev, PCI_GLI_9755_SerDes, serdes);
 +
-+	sdhci_writew(host, data->blksz, SDHCI_UHS2_BLOCK_SIZE);
-+	sdhci_writew(host, data->blocks, SDHCI_UHS2_BLOCK_COUNT);
++	pci_read_config_dword(pdev, PCI_GLI_9755_UHS2_PLL, &uhs2_pll);
++	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_SSC;
++	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_SSC,
++			  GLI_9755_UHS2_PLL_SSC_VALUE);
++	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_DELAY;
++	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_DELAY,
++			  GLI_9755_UHS2_PLL_DELAY_VALUE);
++	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_PDRST;
++	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_PDRST,
++			  GLI_9755_UHS2_PLL_PDRST_VALUE);
++	pci_write_config_dword(pdev, PCI_GLI_9755_UHS2_PLL, uhs2_pll);
++
++	pci_read_config_dword(pdev, PCI_GLI_9755_PLLSSC, &pllssc);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_RTL;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_RTL,
++			  GLI_9755_PLLSSC_RTL_VALUE);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_TRANS_PASS;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_TRANS_PASS,
++			  GLI_9755_PLLSSC_TRANS_PASS_VALUE);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_RECV;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_RECV,
++			  GLI_9755_PLLSSC_RECV_VALUE);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_TRAN;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_TRAN,
++			  GLI_9755_PLLSSC_TRAN_VALUE);
++	pci_write_config_dword(pdev, PCI_GLI_9755_PLLSSC, pllssc);
++
++	gl9755_wt_off(pdev);
 +}
 +
-+static void sdhci_uhs2_finish_data(struct sdhci_host *host)
++static void sdhci_gli_pre_detect_init(struct sdhci_host *host)
 +{
-+	struct mmc_data *data = host->data;
-+
-+	__sdhci_finish_data_common(host);
-+
-+	__sdhci_finish_mrq(host, data->mrq);
++	/* Need more time on UHS2 detect flow */
++	sdhci_writeb(host, 0xA7, SDHCI_UHS2_TIMER_CTRL);
 +}
 +
-+static void sdhci_uhs2_set_transfer_mode(struct sdhci_host *host, struct mmc_command *cmd)
++static void gl9755_overcurrent_event_enable(struct sdhci_host *host,
++					    bool enable)
 +{
-+	u16 mode;
-+	struct mmc_data *data = cmd->data;
-+
-+	if (!data) {
-+		/* clear Auto CMD settings for no data CMDs */
-+		if (uhs2_dev_cmd(cmd) == UHS2_DEV_CMD_TRANS_ABORT) {
-+			mode =  0;
-+		} else {
-+			mode = sdhci_readw(host, SDHCI_UHS2_TRANS_MODE);
-+			if (cmd->opcode == MMC_STOP_TRANSMISSION || cmd->opcode == MMC_ERASE)
-+				mode |= SDHCI_UHS2_TRNS_WAIT_EBSY;
-+			else
-+				/* send status mode */
-+				if (cmd->opcode == MMC_SEND_STATUS)
-+					mode = 0;
-+		}
-+
-+		DBG("UHS2 no data trans mode is 0x%x.\n", mode);
-+
-+		sdhci_writew(host, mode, SDHCI_UHS2_TRANS_MODE);
-+		return;
-+	}
-+
-+	WARN_ON(!host->data);
-+
-+	mode = SDHCI_UHS2_TRNS_BLK_CNT_EN | SDHCI_UHS2_TRNS_WAIT_EBSY;
-+	if (data->flags & MMC_DATA_WRITE)
-+		mode |= SDHCI_UHS2_TRNS_DATA_TRNS_WRT;
-+
-+	if (data->blocks == 1 &&
-+	    data->blksz != 512 &&
-+	    cmd->opcode != MMC_READ_SINGLE_BLOCK &&
-+	    cmd->opcode != MMC_WRITE_BLOCK) {
-+		mode &= ~SDHCI_UHS2_TRNS_BLK_CNT_EN;
-+		mode |= SDHCI_UHS2_TRNS_BLK_BYTE_MODE;
-+	}
-+
-+	if (host->flags & SDHCI_REQ_USE_DMA)
-+		mode |= SDHCI_UHS2_TRNS_DMA;
-+
-+	if (cmd->uhs2_cmd->tmode_half_duplex)
-+		mode |= SDHCI_UHS2_TRNS_2L_HD;
-+
-+	sdhci_writew(host, mode, SDHCI_UHS2_TRANS_MODE);
-+
-+	DBG("UHS2 trans mode is 0x%x.\n", mode);
-+}
-+
-+static void __sdhci_uhs2_send_command(struct sdhci_host *host, struct mmc_command *cmd)
-+{
-+	int i, j;
-+	int cmd_reg;
-+
-+	i = 0;
-+	sdhci_writel(host,
-+		     ((u32)cmd->uhs2_cmd->arg << 16) |
-+				(u32)cmd->uhs2_cmd->header,
-+		     SDHCI_UHS2_CMD_PACKET + i);
-+	i += 4;
-+
-+	/*
-+	 * Per spec, payload (config) should be MSB before sending out.
-+	 * But we don't need convert here because had set payload as
-+	 * MSB when preparing config read/write commands.
-+	 */
-+	for (j = 0; j < cmd->uhs2_cmd->payload_len / sizeof(u32); j++) {
-+		sdhci_writel(host, *(cmd->uhs2_cmd->payload + j), SDHCI_UHS2_CMD_PACKET + i);
-+		i += 4;
-+	}
-+
-+	for ( ; i < SDHCI_UHS2_CMD_PACK_MAX_LEN; i += 4)
-+		sdhci_writel(host, 0, SDHCI_UHS2_CMD_PACKET + i);
-+
-+	DBG("UHS2 CMD packet_len = %d.\n", cmd->uhs2_cmd->packet_len);
-+	for (i = 0; i < cmd->uhs2_cmd->packet_len; i++)
-+		DBG("UHS2 CMD_PACKET[%d] = 0x%x.\n", i,
-+		    sdhci_readb(host, SDHCI_UHS2_CMD_PACKET + i));
-+
-+	cmd_reg = FIELD_PREP(SDHCI_UHS2_CMD_PACK_LEN_MASK, cmd->uhs2_cmd->packet_len);
-+	if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC)
-+		cmd_reg |= SDHCI_UHS2_CMD_DATA;
-+	if (cmd->opcode == MMC_STOP_TRANSMISSION)
-+		cmd_reg |= SDHCI_UHS2_CMD_CMD12;
-+
-+	/* UHS2 Native ABORT */
-+	if ((cmd->uhs2_cmd->header & UHS2_NATIVE_PACKET) &&
-+	    (uhs2_dev_cmd(cmd) == UHS2_DEV_CMD_TRANS_ABORT))
-+		cmd_reg |= SDHCI_UHS2_CMD_TRNS_ABORT;
-+
-+	/* UHS2 Native DORMANT */
-+	if ((cmd->uhs2_cmd->header & UHS2_NATIVE_PACKET) &&
-+	    (uhs2_dev_cmd(cmd) == UHS2_DEV_CMD_GO_DORMANT_STATE))
-+		cmd_reg |= SDHCI_UHS2_CMD_DORMANT;
-+
-+	DBG("0x%x is set to UHS2 CMD register.\n", cmd_reg);
-+
-+	sdhci_writew(host, cmd_reg, SDHCI_UHS2_CMD);
-+}
-+
-+static bool sdhci_uhs2_send_command(struct sdhci_host *host, struct mmc_command *cmd)
-+{
-+	int flags;
 +	u32 mask;
-+	unsigned long timeout;
 +
-+	WARN_ON(host->cmd);
-+
-+	/* Initially, a command has no error */
-+	cmd->error = 0;
-+
-+	if (cmd->opcode == MMC_STOP_TRANSMISSION)
-+		cmd->flags |= MMC_RSP_BUSY;
-+
-+	mask = SDHCI_CMD_INHIBIT;
-+
-+	if (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask)
-+		return false;
-+
-+	host->cmd = cmd;
-+	host->data_timeout = 0;
-+	if (sdhci_data_line_cmd(cmd)) {
-+		WARN_ON(host->data_cmd);
-+		host->data_cmd = cmd;
-+		__sdhci_uhs2_set_timeout(host);
-+	}
-+
-+	if (cmd->data)
-+		sdhci_uhs2_prepare_data(host, cmd);
-+
-+	sdhci_uhs2_set_transfer_mode(host, cmd);
-+
-+	if ((cmd->flags & MMC_RSP_136) && (cmd->flags & MMC_RSP_BUSY)) {
-+		WARN_ONCE(1, "Unsupported response type!\n");
-+		/*
-+		 * This does not happen in practice because 136-bit response
-+		 * commands never have busy waiting, so rather than complicate
-+		 * the error path, just remove busy waiting and continue.
-+		 */
-+		cmd->flags &= ~MMC_RSP_BUSY;
-+	}
-+
-+	if (!(cmd->flags & MMC_RSP_PRESENT))
-+		flags = SDHCI_CMD_RESP_NONE;
-+	else if (cmd->flags & MMC_RSP_136)
-+		flags = SDHCI_CMD_RESP_LONG;
-+	else if (cmd->flags & MMC_RSP_BUSY)
-+		flags = SDHCI_CMD_RESP_SHORT_BUSY;
++	mask = sdhci_readl(host, SDHCI_SIGNAL_ENABLE);
++	if (enable)
++		mask |= SDHCI_INT_BUS_POWER;
 +	else
-+		flags = SDHCI_CMD_RESP_SHORT;
++		mask &= ~SDHCI_INT_BUS_POWER;
 +
-+	if (cmd->flags & MMC_RSP_CRC)
-+		flags |= SDHCI_CMD_CRC;
-+	if (cmd->flags & MMC_RSP_OPCODE)
-+		flags |= SDHCI_CMD_INDEX;
++	sdhci_writel(host, mask, SDHCI_SIGNAL_ENABLE);
 +
-+	timeout = jiffies;
-+	if (host->data_timeout)
-+		timeout += nsecs_to_jiffies(host->data_timeout);
-+	else if (!cmd->data && cmd->busy_timeout > 9000)
-+		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
++	mask = sdhci_readl(host, SDHCI_INT_ENABLE);
++	if (enable)
++		mask |= SDHCI_INT_BUS_POWER;
 +	else
-+		timeout += 10 * HZ;
-+	sdhci_mod_timer(host, cmd->mrq, timeout);
++		mask &= ~SDHCI_INT_BUS_POWER;
 +
-+	__sdhci_uhs2_send_command(host, cmd);
-+
-+	return true;
++	sdhci_writel(host, mask, SDHCI_INT_ENABLE);
 +}
 +
-+static bool sdhci_uhs2_send_command_retry(struct sdhci_host *host,
-+					  struct mmc_command *cmd,
-+					  unsigned long flags)
-+	__releases(host->lock)
-+	__acquires(host->lock)
++static void gl9755_set_power(struct sdhci_host *host, unsigned char mode,
++			     unsigned short vdd)
 +{
-+	struct mmc_command *deferred_cmd = host->deferred_cmd;
-+	int timeout = 10; /* Approx. 10 ms */
-+	bool present;
++	u8 pwr = 0;
 +
-+	while (!sdhci_uhs2_send_command(host, cmd)) {
-+		if (!timeout--) {
-+			pr_err("%s: Controller never released inhibit bit(s).\n",
-+			       mmc_hostname(host->mmc));
-+			sdhci_dumpregs(host);
-+			cmd->error = -EIO;
-+			return false;
-+		}
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+
-+		usleep_range(1000, 1250);
-+
-+		present = host->mmc->ops->get_cd(host->mmc);
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+
-+		/* A deferred command might disappear, handle that */
-+		if (cmd == deferred_cmd && cmd != host->deferred_cmd)
-+			return true;
-+
-+		if (sdhci_present_error(host, cmd, present))
-+			return false;
++	if (mode != MMC_POWER_OFF) {
++		pwr = sdhci_get_vdd_value(vdd);
++		if (!pwr)
++			WARN(1, "%s: Invalid vdd %#x\n", mmc_hostname(host->mmc), vdd);
++		pwr |= SDHCI_VDD2_POWER_180;
 +	}
 +
-+	if (cmd == host->deferred_cmd)
-+		host->deferred_cmd = NULL;
++	if (host->pwr == pwr)
++		return;
 +
-+	return true;
-+}
++	host->pwr = pwr;
 +
-+static void __sdhci_uhs2_finish_command(struct sdhci_host *host)
-+{
-+	struct mmc_command *cmd = host->cmd;
-+	u8 resp;
-+	u8 ecode;
-+	bool breada0 = 0;
-+	int i;
-+
-+	if (host->mmc->flags & MMC_UHS2_SD_TRAN) {
-+		resp = sdhci_readb(host, SDHCI_UHS2_RESPONSE + 2);
-+		if (resp & UHS2_RES_NACK_MASK) {
-+			ecode = (resp >> UHS2_RES_ECODE_POS) & UHS2_RES_ECODE_MASK;
-+			pr_err("%s: NACK response, ECODE=0x%x.\n", mmc_hostname(host->mmc), ecode);
-+		}
-+		breada0 = 1;
-+	}
-+
-+	if (cmd->uhs2_resp &&
-+	    cmd->uhs2_resp_len && cmd->uhs2_resp_len <= 20) {
-+		/* Get whole response of some native CCMD, like
-+		 * DEVICE_INIT, ENUMERATE.
-+		 */
-+		for (i = 0; i < cmd->uhs2_resp_len; i++)
-+			cmd->uhs2_resp[i] = sdhci_readb(host, SDHCI_UHS2_RESPONSE + i);
++	if (pwr == 0) {
++		gl9755_overcurrent_event_enable(host, false);
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
 +	} else {
-+		/* Get SD CMD response and Payload for some read
-+		 * CCMD, like INQUIRY_CFG.
-+		 */
-+		/* Per spec (p136), payload field is divided into
-+		 * a unit of DWORD and transmission order within
-+		 * a DWORD is big endian.
-+		 */
-+		if (!breada0)
-+			sdhci_readl(host, SDHCI_UHS2_RESPONSE);
-+		for (i = 4; i < 20; i += 4) {
-+			cmd->resp[i / 4 - 1] =
-+				(sdhci_readb(host,
-+					     SDHCI_UHS2_RESPONSE + i) << 24) |
-+				(sdhci_readb(host,
-+					     SDHCI_UHS2_RESPONSE + i + 1)
-+					<< 16) |
-+				(sdhci_readb(host,
-+					     SDHCI_UHS2_RESPONSE + i + 2)
-+					<< 8) |
-+				sdhci_readb(host, SDHCI_UHS2_RESPONSE + i + 3);
-+		}
++		gl9755_overcurrent_event_enable(host, false);
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++
++		pwr |= (SDHCI_POWER_ON | SDHCI_VDD2_POWER_ON);
++
++		sdhci_writeb(host, pwr & 0xf, SDHCI_POWER_CONTROL);
++		/* wait stable */
++		mdelay(5);
++		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++		/* wait stable */
++		mdelay(5);
++		gl9755_overcurrent_event_enable(host, true);
 +	}
 +}
 +
-+static void sdhci_uhs2_finish_command(struct sdhci_host *host)
++static bool sdhci_wait_clock_stable(struct sdhci_host *host)
 +{
-+	struct mmc_command *cmd = host->cmd;
++	u16 clk = 0;
 +
-+	__sdhci_uhs2_finish_command(host);
++	if (read_poll_timeout_atomic(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
++				     10, 20000, false, host, SDHCI_CLOCK_CONTROL)) {
++		pr_err("%s: Internal clock never stabilised.\n", mmc_hostname(host->mmc));
++		sdhci_dumpregs(host);
++		return false;
++	}
++	return true;
++}
 +
-+	host->cmd = NULL;
++static void sdhci_gli_uhs2_reset_sd_tran(struct sdhci_host *host)
++{
++	/* do this on UHS2 mode */
++	if (host->mmc->flags & MMC_UHS2_SD_TRAN) {
++		sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
++		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++		sdhci_uhs2_clear_set_irqs(host,
++					  SDHCI_INT_ALL_MASK,
++					  SDHCI_UHS2_INT_ERROR_MASK);
++	}
++}
 +
-+	if (cmd->mrq->cap_cmd_during_tfr && cmd == cmd->mrq->cmd)
-+		mmc_command_done(host->mmc, cmd->mrq);
++static void sdhci_gl9755_reset(struct sdhci_host *host, u8 mask)
++{
++	u16 clk_ctrl;
++	u16 ctrl2;
++	u8 rst;
 +
-+	/*
-+	 * The host can send and interrupt when the busy state has
-+	 * ended, allowing us to wait without wasting CPU cycles.
-+	 * The busy signal uses DAT0 so this is similar to waiting
-+	 * for data to complete.
-+	 *
-+	 * Note: The 1.0 specification is a bit ambiguous about this
-+	 *       feature so there might be some problems with older
-+	 *       controllers.
-+	 */
-+	if (cmd->flags & MMC_RSP_BUSY) {
-+		if (cmd->data) {
-+			DBG("Cannot wait for busy signal when also doing a data transfer");
-+		} else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ) &&
-+			   cmd == host->data_cmd) {
-+			/* Command complete before busy is ended */
-+			return;
++	/* need internal clock */
++	if (mask & SDHCI_RESET_ALL) {
++		ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++		clk_ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++
++		if ((ctrl2 & SDHCI_CTRL_V4_MODE) &&
++		    (ctrl2 & SDHCI_CTRL_UHS2_ENABLE)) {
++			sdhci_writew(host,
++				     SDHCI_CLOCK_INT_EN,
++				     SDHCI_CLOCK_CONTROL);
++		} else {
++			sdhci_writew(host,
++				     SDHCI_CLOCK_INT_EN,
++				     SDHCI_CLOCK_CONTROL);
++			sdhci_wait_clock_stable(host);
++			sdhci_writew(host,
++				     SDHCI_CTRL_V4_MODE,
++				     SDHCI_HOST_CONTROL2);
 +		}
 +	}
 +
-+	/* Processed actual command. */
-+	if (host->data && host->data_early)
-+		sdhci_uhs2_finish_data(host);
++	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
 +
-+	if (!cmd->data)
-+		__sdhci_finish_mrq(host, cmd->mrq);
-+}
++	/* reset sd-tran on UHS2 mode if need to reset cmd/data */
++	if ((mask & SDHCI_RESET_CMD) | (mask & SDHCI_RESET_DATA))
++		sdhci_gli_uhs2_reset_sd_tran(host);
 +
-+void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct mmc_command *cmd;
-+	unsigned long flags;
-+	bool present;
++	if (mask & SDHCI_RESET_ALL)
++		host->clock = 0;
 +
-+	if (!(sdhci_uhs2_mode(host))) {
-+		sdhci_request(mmc, mrq);
++	/* hw clears the bit when it's done */
++	if (read_poll_timeout_atomic(sdhci_readb, rst, !(rst & mask),
++				     10, 100000, false, host, SDHCI_SOFTWARE_RESET)) {
++		pr_err("%s: Reset 0x%x never completed.\n", mmc_hostname(host->mmc), (int)mask);
++		sdhci_dumpregs(host);
++		/* manual clear */
++		sdhci_writeb(host, 0, SDHCI_SOFTWARE_RESET);
 +		return;
 +	}
-+
-+	mrq->stop = NULL;
-+	mrq->sbc = NULL;
-+	if (mrq->data)
-+		mrq->data->stop = NULL;
-+
-+	/* Firstly check card presence */
-+	present = mmc->ops->get_cd(mmc);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (sdhci_present_error(host, mrq->cmd, present))
-+		goto out_finish;
-+
-+	cmd = mrq->cmd;
-+
-+	if (!sdhci_uhs2_send_command_retry(host, cmd, flags))
-+		goto out_finish;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return;
-+
-+out_finish:
-+	sdhci_finish_mrq(host, mrq);
-+	spin_unlock_irqrestore(&host->lock, flags);
 +}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_request);
 +
-+int sdhci_uhs2_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct mmc_command *cmd;
-+	unsigned long flags;
-+	int ret = 0;
-+
-+	if (!sdhci_uhs2_mode(host))
-+		return sdhci_request_atomic(mmc, mrq);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (sdhci_present_error(host, mrq->cmd, true)) {
-+		sdhci_finish_mrq(host, mrq);
-+		goto out_finish;
-+	}
-+
-+	cmd = mrq->cmd;
-+
-+	/*
-+	 * The HSQ may send a command in interrupt context without polling
-+	 * the busy signaling, which means we should return BUSY if controller
-+	 * has not released inhibit bits to allow HSQ trying to send request
-+	 * again in non-atomic context. So we should not finish this request
-+	 * here.
-+	 */
-+	if (!sdhci_uhs2_send_command(host, cmd))
-+		ret = -EBUSY;
-+
-+out_finish:
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	return ret;
-+}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_request_atomic);
-+
- /*****************************************************************************\
-  *                                                                           *
-  * Driver init/exit                                                          *
-@@ -569,6 +980,7 @@ static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
- 	host->mmc_host_ops.start_signal_voltage_switch =
- 		sdhci_uhs2_start_signal_voltage_switch;
- 	host->mmc_host_ops.uhs2_control = sdhci_uhs2_control;
-+	host->mmc_host_ops.request = sdhci_uhs2_request;
+ static inline void gl9767_vhs_read(struct pci_dev *pdev)
+ {
+ 	u32 vhs_enable;
+@@ -1054,6 +1277,7 @@ static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
+ 	gli_pcie_enable_msi(slot);
+ 	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
+ 	sdhci_enable_v4_mode(host);
++	gl9755_vendor_init(host);
  
  	return 0;
  }
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 57209accbb03..9d031e83b6ba 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -147,10 +147,11 @@ void sdhci_enable_v4_mode(struct sdhci_host *host)
- }
- EXPORT_SYMBOL_GPL(sdhci_enable_v4_mode);
+@@ -1472,17 +1696,24 @@ static const struct sdhci_ops sdhci_gl9755_ops = {
+ 	.read_w			= sdhci_gli_readw,
+ 	.read_b			= sdhci_gli_readb,
+ 	.set_clock		= sdhci_gl9755_set_clock,
++	.set_power		= gl9755_set_power,
+ 	.enable_dma		= sdhci_pci_enable_dma,
+ 	.set_bus_width		= sdhci_set_bus_width,
+-	.reset			= sdhci_reset,
++	.reset			= sdhci_gl9755_reset,
+ 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
+ 	.voltage_switch		= sdhci_gli_voltage_switch,
++	.dump_uhs2_regs		= sdhci_uhs2_dump_regs,
++	.set_timeout		= sdhci_uhs2_set_timeout,
++	.irq			= sdhci_uhs2_irq,
++	.uhs2_pre_detect_init   = sdhci_gli_pre_detect_init,
+ };
  
--static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
-+bool sdhci_data_line_cmd(struct mmc_command *cmd)
- {
- 	return cmd->data || cmd->flags & MMC_RSP_BUSY;
- }
-+EXPORT_SYMBOL_GPL(sdhci_data_line_cmd);
- 
- static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
- {
-@@ -502,14 +503,15 @@ static inline void sdhci_led_deactivate(struct sdhci_host *host)
- 
- #endif
- 
--static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
--			    unsigned long timeout)
-+void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
-+		     unsigned long timeout)
- {
- 	if (sdhci_data_line_cmd(mrq->cmd))
- 		mod_timer(&host->data_timer, timeout);
- 	else
- 		mod_timer(&host->timer, timeout);
- }
-+EXPORT_SYMBOL_GPL(sdhci_mod_timer);
- 
- static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
- {
-@@ -1076,8 +1078,7 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 		__sdhci_set_timeout(host, cmd);
- }
- 
--static void sdhci_initialize_data(struct sdhci_host *host,
--				  struct mmc_data *data)
-+void sdhci_initialize_data(struct sdhci_host *host, struct mmc_data *data)
- {
- 	WARN_ON(host->data);
- 
-@@ -1090,6 +1091,7 @@ static void sdhci_initialize_data(struct sdhci_host *host,
- 	host->data_early = 0;
- 	host->data->bytes_xfered = 0;
- }
-+EXPORT_SYMBOL_GPL(sdhci_initialize_data);
- 
- static inline void sdhci_set_block_info(struct sdhci_host *host,
- 					struct mmc_data *data)
-@@ -1112,12 +1114,8 @@ static inline void sdhci_set_block_info(struct sdhci_host *host,
- 	}
- }
- 
--static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
-+void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data)
- {
--	struct mmc_data *data = cmd->data;
--
--	sdhci_initialize_data(host, data);
--
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		struct scatterlist *sg;
- 		unsigned int length_mask, offset_mask;
-@@ -1202,6 +1200,16 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	}
- 
- 	sdhci_set_transfer_irqs(host);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_prepare_dma);
-+
-+static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
-+{
-+	struct mmc_data *data = cmd->data;
-+
-+	sdhci_initialize_data(host, data);
-+
-+	sdhci_prepare_dma(host, data);
- 
- 	sdhci_set_block_info(host, data);
- }
-@@ -1519,7 +1527,7 @@ static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq)
- 	WARN_ON(i >= SDHCI_MAX_MRQS);
- }
- 
--static void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
-+void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
- {
- 	if (host->cmd && host->cmd->mrq == mrq)
- 		host->cmd = NULL;
-@@ -1543,15 +1551,17 @@ static void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
- 	if (!sdhci_has_requests(host))
- 		sdhci_led_deactivate(host);
- }
-+EXPORT_SYMBOL_GPL(__sdhci_finish_mrq);
- 
--static void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
-+void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
- {
- 	__sdhci_finish_mrq(host, mrq);
- 
- 	queue_work(host->complete_wq, &host->complete_work);
- }
-+EXPORT_SYMBOL_GPL(sdhci_finish_mrq);
- 
--static void __sdhci_finish_data(struct sdhci_host *host, bool sw_data_timeout)
-+void __sdhci_finish_data_common(struct sdhci_host *host)
- {
- 	struct mmc_command *data_cmd = host->data_cmd;
- 	struct mmc_data *data = host->data;
-@@ -1585,6 +1595,14 @@ static void __sdhci_finish_data(struct sdhci_host *host, bool sw_data_timeout)
- 		data->bytes_xfered = 0;
- 	else
- 		data->bytes_xfered = data->blksz * data->blocks;
-+}
-+EXPORT_SYMBOL_GPL(__sdhci_finish_data_common);
-+
-+static void __sdhci_finish_data(struct sdhci_host *host, bool sw_data_timeout)
-+{
-+	struct mmc_data *data = host->data;
-+
-+	__sdhci_finish_data_common(host);
- 
- 	/*
- 	 * Need to send CMD12 if -
-@@ -1719,8 +1737,8 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	return true;
- }
- 
--static bool sdhci_present_error(struct sdhci_host *host,
--				struct mmc_command *cmd, bool present)
-+bool sdhci_present_error(struct sdhci_host *host,
-+			 struct mmc_command *cmd, bool present)
- {
- 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
- 		cmd->error = -ENOMEDIUM;
-@@ -1729,6 +1747,7 @@ static bool sdhci_present_error(struct sdhci_host *host,
- 
- 	return false;
- }
-+EXPORT_SYMBOL_GPL(sdhci_present_error);
- 
- static bool sdhci_send_command_retry(struct sdhci_host *host,
- 				     struct mmc_command *cmd,
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 03d29423a678..9a2bd319d94c 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -828,6 +828,14 @@ static inline void sdhci_read_caps(struct sdhci_host *host)
- 	__sdhci_read_caps(host, NULL, NULL, NULL);
- }
- 
-+bool sdhci_data_line_cmd(struct mmc_command *cmd);
-+void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq, unsigned long timeout);
-+void sdhci_initialize_data(struct sdhci_host *host, struct mmc_data *data);
-+void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data);
-+void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq);
-+void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq);
-+void __sdhci_finish_data_common(struct sdhci_host *host);
-+bool sdhci_present_error(struct sdhci_host *host, struct mmc_command *cmd, bool present);
- u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
- 		   unsigned int *actual_clock);
- void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
+ const struct sdhci_pci_fixes sdhci_gl9755 = {
+ 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2	= SDHCI_QUIRK2_BROKEN_DDR50,
+ 	.probe_slot	= gli_probe_slot_gl9755,
++	.add_host	= sdhci_pci_uhs2_add_host,
++	.remove_host	= sdhci_pci_uhs2_remove_host,
+ 	.ops            = &sdhci_gl9755_ops,
+ #ifdef CONFIG_PM_SLEEP
+ 	.resume         = sdhci_pci_gli_resume,
 -- 
 2.25.1
 
