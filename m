@@ -2,94 +2,141 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21B52CA0EC2
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Sep 2023 21:29:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C05ACA0EC0
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Sep 2023 21:29:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345418AbjIKVUX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Sep 2023 17:20:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56782 "EHLO
+        id S1345424AbjIKVUY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Sep 2023 17:20:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242585AbjIKPww (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Sep 2023 11:52:52 -0400
-Received: from mail-wr1-x435.google.com (mail-wr1-x435.google.com [IPv6:2a00:1450:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C55D9193
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 08:52:46 -0700 (PDT)
-Received: by mail-wr1-x435.google.com with SMTP id ffacd0b85a97d-31fa666000dso1189858f8f.2
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 08:52:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694447564; x=1695052364; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=vprVq4/fIAbFZ3+Z+xgdIo0JUeYirqwRwX7pZL6u4fA=;
-        b=wDJKy9L0I+SKSWtQy/K81xgMjKmEduFNKp1rwtMKZXJQAzxW7EIKTn59XXyHSrDMBM
-         RqfQbYv/bmjicySq+c8g9bmWlgNeXZ5AOdg1UYk/dnE0QryEJo2odUoXS4j3DzeDYjaH
-         EslS7rDMuQ1tF2fxZO6q3r9L6gvVlpUfQchjMuxPQYYv+tJiFXqdGmrylrNe9DUGr/Up
-         DBh+g97ojzWEVObNDsqsniWR8SmpZl6wn7MzxAkVzo3ln4/KM8Vfhpt49KrOyvMfJhV7
-         lBUrMV2dsGqmD1SjH0L0/Sibgx6HPYw126NUkdXLJ2Gbvf/yW3WvZxzPDZYKqRWASIgC
-         SIJQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694447564; x=1695052364;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=vprVq4/fIAbFZ3+Z+xgdIo0JUeYirqwRwX7pZL6u4fA=;
-        b=GBnG3WhXzrlotX2K4EeJh64553nG9dnCFzdwMNVParHAen10pAwN+9rinXlgUSSxYR
-         tRRl+A+7y584Jf99J4GlBzp3ZhbiF6MUBE60TPxLOwM+dUjiWxY+a5zP9ErePaXiWoxl
-         C2icz7MQX+Ry+UBaxkiQwR7gnYmrCqA1jGXSnvzGRU5i0DyDrLPw0MN7aR47SnDrh29o
-         pSfpV0hCf6poMraYImEzkfe8I5WlNtmqYX6EwOIFzRWWiXNrBvciC55BZ63EC9G9Bjng
-         CFFP94XRofMUStx1wWbFk6AuE/i184ZkhEuJHPJkWz0EFnHnlmNIomx0ALW1V5ao02AF
-         J+oQ==
-X-Gm-Message-State: AOJu0YySOc0uWDFA3xIBCHALfQIwsR31kbkwLMOYkOXke1auqKhoiABP
-        bRuaWFygLA5VmfKLmUp5YBUmO33N4U4sWq2ik+O6yg==
-X-Google-Smtp-Source: AGHT+IGUlTJ1BW2ei9S+2zEfUFxpzm/NdK01VQBtmj64Biovz3gEfjbEA6RA919h5wHqlMsvf0BgDg==
-X-Received: by 2002:a5d:55cf:0:b0:313:ef24:6fe6 with SMTP id i15-20020a5d55cf000000b00313ef246fe6mr8680107wrw.1.1694447564646;
-        Mon, 11 Sep 2023 08:52:44 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.214.188])
-        by smtp.gmail.com with ESMTPSA id c6-20020adfed86000000b0031de43fe9bfsm10474792wro.0.2023.09.11.08.52.43
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 Sep 2023 08:52:44 -0700 (PDT)
-Message-ID: <8b1fdd46-8ebd-f992-68df-389683ef5368@linaro.org>
-Date:   Mon, 11 Sep 2023 17:52:42 +0200
+        with ESMTP id S235506AbjIKIsp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Sep 2023 04:48:45 -0400
+Received: from wp530.webpack.hosteurope.de (wp530.webpack.hosteurope.de [80.237.130.52])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43E381A1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 01:48:41 -0700 (PDT)
+Received: from [2a02:8108:8980:2478:8cde:aa2c:f324:937e]; authenticated
+        by wp530.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.3:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        id 1qfcay-0004oo-4O; Mon, 11 Sep 2023 10:48:36 +0200
+Message-ID: <fd58e1e9-0a15-4320-9a0a-cceeed45d0b4@leemhuis.info>
+Date:   Mon, 11 Sep 2023 10:48:35 +0200
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.0
-Subject: Re: [PATCH] MAINTAINERS: mmc: take over as maintainer of MCI & SDHCI
- MICROCHIP DRIVERS
-Content-Language: en-US
-To:     Aubin Constans <aubin.constans@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Eugen Hristev <eugen.hristev@collabora.com>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>
-Cc:     Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-        Hari Prasath Gujulan Elango <hari.prasathge@microchip.com>,
-        linux-arm-kernel@lists.infradead.org
-References: <20230911153246.137148-1-aubin.constans@microchip.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230911153246.137148-1-aubin.constans@microchip.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
+ clock speed before sending HS CMD13")
+Content-Language: en-US, de-DE
+From:   Thorsten Leemhuis <regressions@leemhuis.info>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Brian Norris <briannorris@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Luca Weiss <luca@z3ntu.xyz>,
+        Linux kernel regressions list <regressions@lists.linux.dev>,
+        Ziyang Huang <hzyitc@outlook.com>
+Reply-To: Linux regressions mailing list <regressions@lists.linux.dev>
+References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+ <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
+ <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
+ <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
+ <CAFBinCDwgYw3v31hP4AtV3+Z1o+esDqMKugRwMMMLqSX0Acjzw@mail.gmail.com>
+ <CAPDyKFr+hQo+N31r=3f58taf9sYW0UF0ApCJhwz9vRsyNizcvg@mail.gmail.com>
+ <CAFBinCDSv_vdu5887vveotvaOGFrZvaSX4jM+7Q3QvDhTdazzw@mail.gmail.com>
+ <CAPDyKFpS-UwiaRPMqSpX0mNPrS5p=yJzu3g0=pGyCkWHSYyqWg@mail.gmail.com>
+ <CAFBinCCnB=po9x6tsxCzRM99ZqgV9=5jBxS9LaoJqLPGZYSH6g@mail.gmail.com>
+ <CAPDyKFpAGUudAJKAmzMbcM=LrALU6ELpwaD-ijy18o7yrPgOqA@mail.gmail.com>
+ <3a6f8d86-b369-bcf7-406b-4f7d0cd5cfa3@leemhuis.info>
+In-Reply-To: <3a6f8d86-b369-bcf7-406b-4f7d0cd5cfa3@leemhuis.info>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-bounce-key: webpack.hosteurope.de;regressions@leemhuis.info;1694422121;ba5efe33;
+X-HE-SMSGID: 1qfcay-0004oo-4O
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/09/2023 17:32, Aubin Constans wrote:
-> On the one hand Eugen has taken responsibilities outside Microchip,
+On 29.08.23 11:59, Linux regression tracking (Thorsten Leemhuis) wrote:
+> Hi, Thorsten here, the Linux kernel's regression tracker. Top-posting
+> for once, to make this easily accessible to everyone.
+> 
+> I still have this regression (caused by a commit from Brian, applied by
+> Ulf) on my list of tracked issues. Was there any progress to finally get
+> this fixed[1]? Doesn't look like it from here, but I might have easily
+> missed something, that's why I'm asking.
+> 
+> [1] this patch from Ziyang Huang afaics was supposed to help, but it
+> went nowhere afaics
+> https://lore.kernel.org/linux-amlogic/TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com/
+> 
+> Or does anybody stop caring?
 
-That's not a reason to drop Eugen or change his status to a reviewer...
-Unless of course this is what Eugen wants?
-Normally you should just update the email address, although if it is
-still not updated, then indeed change might be needed here.
+No reply, then I assume that's the case. In that case I won't waste any
+cycles tracking this:
 
-> on the other hand I have some experience with the Microchip SDMMC
-> SDHCI controller.
-> Change Eugen as reviewer and take over maintainership of the SDHCI
-> MICROCHIP DRIVER.
+#regzbot inconclusive: seem nobody cares anymore
 
+Martin, if this is wrong and you want to see this fixed, please speak up.
 
-Best regards,
-Krzysztof
+Ciao, Thorsten (wearing his 'the Linux kernel's regression tracker' hat)
+--
+Everything you wanna know about Linux kernel regression tracking:
+https://linux-regtracking.leemhuis.info/about/#tldr
+If I did something stupid, please tell me, as explained on that page.
 
+> On 20.06.23 11:53, Ulf Hansson wrote:
+>> On Mon, 19 Jun 2023 at 21:54, Martin Blumenstingl
+>> <martin.blumenstingl@googlemail.com> wrote:
+>>>
+>>> On Wed, Jun 14, 2023 at 5:49 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> [...]
+>>>>> Full register dump:
+>>>>> # cat /sys/kernel/debug/regmap/c1108e00.mmc/registers
+>>>>> 00: 00000900
+>>>>> 04: 0000004d
+>>>>> 08: e7ffe002
+>>>>> 0c: 02f0003f
+>>>>> 10: 0003f009
+>>>>> 14: 03b81c00
+>>>>> 18: 2c43bcf0
+>>>>> 1c: e0000150
+>>>>> 20: 00000000
+>>>>> 24: 00003067
+>>>>> 28: 00000000
+>>>>> 2c: 00000000
+>>>>> 30: 00000000
+>>>>> 34: 00fe0cff
+>>>>> 38: 0000100b
+>>>>>
+>>>>> In case you are curious, the driver is: drivers/mmc/host/meson-mx-sdhc-mmc.c
+>>>>
+>>>> Thanks for sharing this data!
+>>>>
+>>>> I assume the above registers indicate that we have sent the command
+>>>> and are now waiting for an IRQ for a response/error, but we never
+>>>> receive one.
+>>>>
+>>>> To really figure out what is going on, I think we need to do some
+>>>> additional low level debugging/testing.
+>>>>
+>>>> I was looking at the commit message from e4bf1b0970ef ("mmc: host:
+>>>> meson-mx-sdhc: new driver for the Amlogic Meson SDHC host"), which
+>>>> indicates that the clock management is quite limited for this HW. For
+>>>> example, the 51000000Hz isn't one of the supported frequencies. Could
+>>>> that be the reason for the problem? Perhaps if we play with changing
+>>>> the frequency to something that is considered supported - then can we
+>>>> make this work?
+>>> You seem to be more familiar with this Amlogic MMC controller than I am ;-)
+>>
+>> Sometimes a well written commit message actually helps. :-)
+>>
+>>> Today I finally had some time for testing and when I started Ziyang
+>>> Huang provided a patch [0] (admittedly: I think it needs to be
+>>> improved, but finally we know that it's a MMC controller driver
+>>> limitation and not an MMC core bug)
+>>
+>> Great news!
+>>
+>> I will continue to monitor the thread and defer to apply anything
+>> until you have given it your blessing, of course.
+>>
+>> Kind regards
+>> Uffe
