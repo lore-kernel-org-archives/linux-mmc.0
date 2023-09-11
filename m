@@ -2,89 +2,176 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3DF1C71153
-	for <linux-mmc@archiver.kernel.org>; Sun, 10 Sep 2023 18:00:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B23CCA0EC4
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Sep 2023 21:28:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235938AbjIJSA2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 10 Sep 2023 14:00:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58958 "EHLO
+        id S241491AbjIKVUD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Sep 2023 17:20:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235350AbjIJSA0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Sep 2023 14:00:26 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FA24188;
-        Sun, 10 Sep 2023 11:00:22 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id D277FC433C8;
-        Sun, 10 Sep 2023 18:00:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1694368821;
-        bh=7pMVydPneVg3URKXwfaH+adzpHN2LLjVZsTSGuRN/Dc=;
-        h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
-        b=WNCcNX0j78tRLBxMWD5xHUNdVWsV4X1c4GJprcT9133xluNlViXTJ+y1MbbMmvw4S
-         9l6p0mwmq1ciXkoHmtsYyK8lFvb1p3EVodnEbrR25eIRn+6jRHWBjTxm2wzjyRS6Mh
-         /jvEouU2JwW8Gm/EnKA/L+ncaZS7ANxE1SqxSdP9VAlRZQQbAQGSZNr44Pfjzomk2O
-         YmugA3EJ+2/4ZTwGg7O1MhyTBgt+SEpxLAiqRaqU5NrZ9WSluxkkNsOvrlaLWdV7jR
-         voEyBX1vKb3bWRjPhlJDd4v26hqNBBRPVghPsTewXgHu/u+K2aUEWjjrhAgY/J0FrG
-         nZp7NWsEXqO2w==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id B8F74F1D6A8;
-        Sun, 10 Sep 2023 18:00:21 +0000 (UTC)
-Content-Type: text/plain; charset="utf-8"
+        with ESMTP id S236849AbjIKLfs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Sep 2023 07:35:48 -0400
+Received: from mail-qv1-xf31.google.com (mail-qv1-xf31.google.com [IPv6:2607:f8b0:4864:20::f31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16F23CDD;
+        Mon, 11 Sep 2023 04:35:44 -0700 (PDT)
+Received: by mail-qv1-xf31.google.com with SMTP id 6a1803df08f44-64f4ac604c2so23616506d6.1;
+        Mon, 11 Sep 2023 04:35:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1694432142; x=1695036942; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=UfhyDcoChV91gT7BZOcZOKjPTTphZ99Y65ZjQNCETsY=;
+        b=j8htr0Rv+5wDAbiJ3xxTdgkyK80QCVYGdXqDZ/8O4cwMesWH3szkyGAWYJosmzGYtU
+         gZa2c+1rYMHj29pQlxP7isn+uL1GMqxsnERj+X9zHt0/Eq6TiYfD5eSUCzZZncxnhBiz
+         CY7cNXsQ/mQyX7ofcZJyjlCxZmFHPB+rBK/JKK+m/XgLUB2nLjRSzco9IgrIWKbXFc8c
+         HUcEaCh4ZiCOCSR+fz8TaAXrAr0vvvQHTt0Hr66ZHYTxeo4xnXbATOpIvU+6p2L9zl1M
+         XB/tP+3MZ4SiPN9wxq8kyRLYSDQetxPbVVdj6pYJa6KWdEE9DkUy8ejgSwJhGmvlAwJL
+         5foA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694432142; x=1695036942;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=UfhyDcoChV91gT7BZOcZOKjPTTphZ99Y65ZjQNCETsY=;
+        b=LSQyKkkd034+kUSh2a6Y2eAvtnU6XqRau13kLtavhNHj2aNApMgEjj5Eeib8xoinfF
+         OgcHRbDkKbRMUH/1h0mSxTrNtJNOCESVhWu5Pq9Z2LuqVv1dztrSEybOXwrjpza7h+t3
+         9g9UUj2C0QemfEw59qQx38Cr7ruqNyTLLp4FjVeZVDY2xGABxvhjUZbLLYf3wG+d3eLy
+         AY0INpcZRf7VL6pY1h/r3+DiEFOtdah62jGxDHIPBZ7eWCFDNaZFRDGn35juDuGdYe9Q
+         ndPJrFuEVHDIPBbhpUdE4zpLSTjbp2KLrr0H6zMIJ3WF9KmCNM2E/X6GxMihHxgEoEbo
+         LlxA==
+X-Gm-Message-State: AOJu0YxH36UnaEZBMAFRXtfGsW80L2gifuEFzc3QRqwXqySCWv+LQptI
+        djvmsalpKu7v12bHglheEJYXYoj2VVSGV+mEq2Fgz//F
+X-Google-Smtp-Source: AGHT+IExTVrxJSlXVu7/JurFF/CvjBFs8advpdQems+83jE0bH+zIsnvYWvbFb1WHf+4EaVBeN8B59R10uW1q3rDTDw=
+X-Received: by 2002:a0c:f312:0:b0:636:1daa:94e with SMTP id
+ j18-20020a0cf312000000b006361daa094emr7994387qvl.38.1694432142263; Mon, 11
+ Sep 2023 04:35:42 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Subject: Re: [PATCH 00/11] add missing of_node_put
-From:   patchwork-bot+netdevbpf@kernel.org
-Message-Id: <169436882175.20878.16500068409286410519.git-patchwork-notify@kernel.org>
-Date:   Sun, 10 Sep 2023 18:00:21 +0000
-References: <20230907095521.14053-1-Julia.Lawall@inria.fr>
-In-Reply-To: <20230907095521.14053-1-Julia.Lawall@inria.fr>
-To:     Julia Lawall <julia.lawall@inria.fr>
-Cc:     alsa-devel@alsa-project.org, kernel-janitors@vger.kernel.org,
-        rui.zhang@intel.com, amitk@kernel.org, linux-pm@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com,
-        linux-kernel@vger.kernel.org, npiggin@gmail.com,
-        christophe.leroy@csgroup.eu, linuxppc-dev@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-mediatek@lists.infradead.org,
-        angelogioacchino.delregno@collabora.com,
-        linux-media@vger.kernel.org
+References: <20230905023921.10766-1-wenchao.chen@unisoc.com>
+In-Reply-To: <20230905023921.10766-1-wenchao.chen@unisoc.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Mon, 11 Sep 2023 19:35:31 +0800
+Message-ID: <CA+Da2qx77FVJk0Mesbm34su_cuHZU6Me8WMZFt3MkjjtDyGc1w@mail.gmail.com>
+Subject: Re: [PATCH V3 0/2 RESEND] mmc: hsq: dynamically adjust hsq_depth to
+ improve performance
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
+        Wenchao Chen <wenchao.chen@unisoc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello:
-
-This patch was applied to netdev/net.git (main)
-by David S. Miller <davem@davemloft.net>:
-
-On Thu,  7 Sep 2023 11:55:10 +0200 you wrote:
-> Add of_node_put on a break out of an of_node loop.
-> 
-> ---
-> 
->  arch/powerpc/kexec/file_load_64.c                    |    8 ++++++--
->  arch/powerpc/platforms/powermac/low_i2c.c            |    4 +++-
->  arch/powerpc/platforms/powermac/smp.c                |    4 +++-
->  drivers/bus/arm-cci.c                                |    4 +++-
->  drivers/genpd/ti/ti_sci_pm_domains.c                 |    8 ++++++--
->  drivers/gpu/drm/mediatek/mtk_disp_ovl_adaptor.c      |    4 +++-
->  drivers/gpu/drm/mediatek/mtk_drm_drv.c               |    4 +++-
->  drivers/media/platform/mediatek/mdp3/mtk-mdp3-comp.c |    1 +
->  drivers/mmc/host/atmel-mci.c                         |    8 ++++++--
->  drivers/net/ethernet/broadcom/asp2/bcmasp.c          |    1 +
->  drivers/soc/dove/pmu.c                               |    5 ++++-
->  drivers/thermal/thermal_of.c                         |    8 ++++++--
->  sound/soc/sh/rcar/core.c                             |    1 +
->  13 files changed, 46 insertions(+), 14 deletions(-)
-
-Here is the summary with links:
-  - [02/11] net: bcmasp: add missing of_node_put
-    https://git.kernel.org/netdev/net/c/e73d1ab6cd7e
-
-You are awesome, thank you!
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/patchwork/pwbot.html
-
-
+Ping...
+On Tue, 5 Sept 2023 at 10:40, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+>
+> Change in v3:
+> - Use "mrq->data->blksz * mrq->data->blocks == 4096" for 4K.
+> - Add explanation for "HSQ_PERFORMANCE_DEPTH".
+>
+> Change in v2:
+> - Support for dynamic adjustment of hsq_depth.
+>
+> Test
+> =====
+> I tested 3 times for each case and output a average speed.
+> Ran 'fio' to evaluate the performance:
+> 1.Fixed hsq_depth
+> 1) Sequential write:
+> Speed: 168 164 165
+> Average speed: 165.67MB/S
+>
+> 2) Sequential read:
+> Speed: 326 326 326
+> Average speed: 326MB/S
+>
+> 3) Random write:
+> Speed: 82.6 83 83
+> Average speed: 82.87MB/S
+>
+> 4) Random read:
+> Speed: 48.2 48.3 47.6
+> Average speed: 48.03MB/S
+>
+> 2.Dynamic hsq_depth
+> 1) Sequential write:
+> Speed: 167 166 166
+> Average speed: 166.33MB/S
+>
+> 2) Sequential read:
+> Speed: 327 326 326
+> Average speed: 326.3MB/S
+>
+> 3) Random write:
+> Speed: 86.1 86.2 87.7
+> Average speed: 86.67MB/S
+>
+> 4) Random read:
+> Speed: 48.1 48 48
+> Average speed: 48.03MB/S
+>
+> Based on the above data, dynamic hsq_depth can improve the performance of random writes.
+> Random write improved by 4.6%.
+>
+> In addition, we tested 8K and 16K.
+> 1.Fixed hsq_depth
+> 1) Random write(bs=8K):
+> Speed: 116 114 115
+> Average speed: 115MB/S
+>
+> 2) Random read(bs=8K):
+> Speed: 83 83 82.5
+> Average speed: 82.8MB/S
+>
+> 3) Random write(bs=16K):
+> Speed: 141 142 141
+> Average speed: 141.3MB/S
+>
+> 4) Random read(bs=16K):
+> Speed: 132 132 132
+> Average speed: 132MB/S
+>
+> 2.Dynamic hsq_depth(mrq->data->blksz * mrq->data->blocks == 8192 or 16384)
+> 1) Random write(bs=8K):
+> Speed: 115 115 115
+> Average speed: 115MB/S
+>
+> 2) Random read(bs=8K):
+> Speed: 82.7 82.9 82.8
+> Average speed: 82.8MB/S
+>
+> 3) Random write(bs=16K):
+> Speed: 143 141 141
+> Average speed: 141.6MB/S
+>
+> 4) Random read(bs=16K):
+> Speed: 132 132 132
+> Average speed: 132MB/S
+>
+> Increasing hsq_depth cannot improve 8k and 16k random read/write performance.
+> To reduce latency, we dynamically increase hsq_depth only for 4k random writes.
+>
+> Test cmd
+> =========
+> 1)write: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=write -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+> 2)read: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=read -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+> 3)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+> 4)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+> 5)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=8K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+> 6)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=8K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+> 7)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=16K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+> 8)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=16K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
+>
+> Wenchao Chen (2):
+>   mmc: queue: replace immediate with hsq->depth
+>   mmc: hsq: dynamic adjustment of hsq->depth
+>
+>  drivers/mmc/core/queue.c   |  6 +-----
+>  drivers/mmc/host/mmc_hsq.c | 28 ++++++++++++++++++++++++++++
+>  drivers/mmc/host/mmc_hsq.h | 11 +++++++++++
+>  include/linux/mmc/host.h   |  1 +
+>  4 files changed, 41 insertions(+), 5 deletions(-)
+>
+> --
+> 2.17.1
+>
