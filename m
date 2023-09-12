@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 236B7CA0ECA
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 08:14:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FD8FCA0ECE
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 08:14:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232375AbjILIOQ convert rfc822-to-8bit (ORCPT
+        id S232438AbjILIOS convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 04:14:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45144 "EHLO
+        Tue, 12 Sep 2023 04:14:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45170 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232058AbjILIOP (ORCPT
+        with ESMTP id S232317AbjILIOP (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 04:14:15 -0400
 Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 978F710C6;
-        Tue, 12 Sep 2023 01:14:10 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96F99E73;
+        Tue, 12 Sep 2023 01:14:11 -0700 (PDT)
 Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
         (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
         (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id 793D124E305;
-        Tue, 12 Sep 2023 16:14:07 +0800 (CST)
+        by ex01.ufhost.com (Postfix) with ESMTP id 7CC9824E308;
+        Tue, 12 Sep 2023 16:14:04 +0800 (CST)
 Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX166.cuchost.com
  (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 12 Sep
- 2023 16:14:07 +0800
+ 2023 16:14:04 +0800
 Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
  by EXMBX168.cuchost.com (172.16.6.78) with Microsoft SMTP Server (TLS) id
- 15.0.1497.42; Tue, 12 Sep 2023 16:14:06 +0800
+ 15.0.1497.42; Tue, 12 Sep 2023 16:14:03 +0800
 From:   William Qiu <william.qiu@starfivetech.com>
 To:     <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         <linux-riscv@lists.infradead.org>, <linux-mmc@vger.kernel.org>
@@ -39,9 +39,9 @@ CC:     Emil Renner Berthing <kernel@esmil.dk>,
         "Palmer Dabbelt" <palmer@dabbelt.com>,
         Albert Ou <aou@eecs.berkeley.edu>,
         William Qiu <william.qiu@starfivetech.com>
-Subject: [PATCH v2 2/3] mmc: starfive: Change tuning implementation
-Date:   Tue, 12 Sep 2023 16:14:01 +0800
-Message-ID: <20230912081402.51477-6-william.qiu@starfivetech.com>
+Subject: [PATCH 2/3] mmc: starfive: Change tuning implementation
+Date:   Tue, 12 Sep 2023 16:13:57 +0800
+Message-ID: <20230912081402.51477-2-william.qiu@starfivetech.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230912081402.51477-1-william.qiu@starfivetech.com>
 References: <20230912081402.51477-1-william.qiu@starfivetech.com>
@@ -66,18 +66,10 @@ Signed-off-by: William Qiu <william.qiu@starfivetech.com>
  1 file changed, 40 insertions(+), 97 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc-starfive.c b/drivers/mmc/host/dw_mmc-starfive.c
-index fd05a648a8bb..ad8f39c62fed 100644
+index fd05a648a8bb..2ee66a94ccaa 100644
 --- a/drivers/mmc/host/dw_mmc-starfive.c
 +++ b/drivers/mmc/host/dw_mmc-starfive.c
-@@ -5,6 +5,7 @@
-  * Copyright (c) 2022 StarFive Technology Co., Ltd.
-  */
- 
-+#include <linux/bitfield.h>
- #include <linux/clk.h>
- #include <linux/delay.h>
- #include <linux/mfd/syscon.h>
-@@ -20,13 +21,7 @@
+@@ -20,13 +20,7 @@
  #define ALL_INT_CLR		0x1ffff
  #define MAX_DELAY_CHAIN		32
  
@@ -92,13 +84,14 @@ index fd05a648a8bb..ad8f39c62fed 100644
  
  static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
  {
-@@ -44,117 +39,65 @@ static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+@@ -44,117 +38,66 @@ static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
  	}
  }
  
 +static void dw_mci_starfive_set_sample_phase(struct dw_mci *host, u32 smpl_phase)
 +{
 +	/* change driver phase and sample phase */
++	u32 mask = 0x1f;
 +	u32 reg_value = mci_readl(host, UHS_REG_EXT);
 +
 +	/* In UHS_REG_EXT, only 5 bits valid in DRV_PHASE and SMPL_PHASE */
