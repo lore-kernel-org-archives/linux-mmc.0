@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFE06CA0ECE
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 08:14:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4446CA0ED3
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 08:14:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232274AbjILIOP convert rfc822-to-8bit (ORCPT
+        id S232139AbjILIOQ convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 04:14:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45126 "EHLO
+        Tue, 12 Sep 2023 04:14:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232228AbjILIOO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 04:14:14 -0400
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6033DE7F;
+        with ESMTP id S232193AbjILIOP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 04:14:15 -0400
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21E1410C8;
         Tue, 12 Sep 2023 01:14:10 -0700 (PDT)
 Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
         (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
         (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id A64DA24E2FE;
-        Tue, 12 Sep 2023 16:14:03 +0800 (CST)
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 3AADF80CF;
+        Tue, 12 Sep 2023 16:14:08 +0800 (CST)
 Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX165.cuchost.com
  (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 12 Sep
- 2023 16:14:03 +0800
+ 2023 16:14:08 +0800
 Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
  by EXMBX168.cuchost.com (172.16.6.78) with Microsoft SMTP Server (TLS) id
- 15.0.1497.42; Tue, 12 Sep 2023 16:14:02 +0800
+ 15.0.1497.42; Tue, 12 Sep 2023 16:14:07 +0800
 From:   William Qiu <william.qiu@starfivetech.com>
 To:     <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         <linux-riscv@lists.infradead.org>, <linux-mmc@vger.kernel.org>
@@ -39,10 +39,12 @@ CC:     Emil Renner Berthing <kernel@esmil.dk>,
         "Palmer Dabbelt" <palmer@dabbelt.com>,
         Albert Ou <aou@eecs.berkeley.edu>,
         William Qiu <william.qiu@starfivetech.com>
-Subject: [PATCH 1/3] dt-bindings: mmc: Remove properties from required
-Date:   Tue, 12 Sep 2023 16:13:56 +0800
-Message-ID: <20230912081402.51477-1-william.qiu@starfivetech.com>
+Subject: [PATCH v2 3/3] riscv: dts: starfive: Drop unused properties and limit frquency
+Date:   Tue, 12 Sep 2023 16:14:02 +0800
+Message-ID: <20230912081402.51477-7-william.qiu@starfivetech.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230912081402.51477-1-william.qiu@starfivetech.com>
+References: <20230912081402.51477-1-william.qiu@starfivetech.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-Originating-IP: [171.223.208.138]
@@ -54,32 +56,57 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Due to the change of tuning implementation, it's no longer necessary to
-use the "starfive,sysreg" property in dts, so remove it from required.
+Drop unused properties and limit cclk_in to 50M, thus cancelling the
+internal frequency and adopting the by-pass mode.
 
 Signed-off-by: William Qiu <william.qiu@starfivetech.com>
 ---
- Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml | 2 --
- 1 file changed, 2 deletions(-)
+ .../riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi | 4 ++++
+ arch/riscv/boot/dts/starfive/jh7110.dtsi                      | 2 --
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-index 51e1b04e799f..553a75195c2e 100644
---- a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-@@ -55,7 +55,6 @@ required:
-   - clocks
-   - clock-names
-   - interrupts
--  - starfive,sysreg
+diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+index d79f94432b27..d1f2ec308bca 100644
+--- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
++++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+@@ -205,6 +205,8 @@ &i2c6 {
  
- unevaluatedProperties: false
+ &mmc0 {
+ 	max-frequency = <100000000>;
++	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
++	assigned-clock-rates = <50000000>;
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
+ 	mmc-ddr-1_8v;
+@@ -221,6 +223,8 @@ &mmc0 {
  
-@@ -73,5 +72,4 @@ examples:
-         fifo-depth = <32>;
-         fifo-watermark-aligned;
-         data-addr = <0>;
--        starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
-     };
+ &mmc1 {
+ 	max-frequency = <100000000>;
++	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
++	assigned-clock-rates = <50000000>;
+ 	bus-width = <4>;
+ 	no-sdio;
+ 	no-mmc;
+diff --git a/arch/riscv/boot/dts/starfive/jh7110.dtsi b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+index e85464c328d0..7b8e841aeef8 100644
+--- a/arch/riscv/boot/dts/starfive/jh7110.dtsi
++++ b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+@@ -870,7 +870,6 @@ mmc0: mmc@16010000 {
+ 			fifo-depth = <32>;
+ 			fifo-watermark-aligned;
+ 			data-addr = <0>;
+-			starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
+ 			status = "disabled";
+ 		};
+ 
+@@ -886,7 +885,6 @@ mmc1: mmc@16020000 {
+ 			fifo-depth = <32>;
+ 			fifo-watermark-aligned;
+ 			data-addr = <0>;
+-			starfive,sysreg = <&sys_syscon 0x9c 0x1 0x3e>;
+ 			status = "disabled";
+ 		};
+ 
 -- 
 2.34.1
 
