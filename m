@@ -2,274 +2,287 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DA5CCA0ECA
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 12:40:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9763CA0ECA
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 13:20:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235149AbjILMkE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 08:40:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57278 "EHLO
+        id S235478AbjILNUR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 09:20:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235141AbjILMkE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 08:40:04 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 93860C4;
-        Tue, 12 Sep 2023 05:40:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1694522400; x=1726058400;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=dZP1LM+xVZ/yUwnBaICXHVkRiLUwNhOEawORbPO48ZY=;
-  b=VEGgBlT8GC62eCUcr8Xylhm/HexevnJOpNWlGUwRvZ7gSwlCqeZ5t23e
-   U2Pg2AkfSIUp2llowlOQ4iS5k2u/mcc6xO6T+QQq13CzAlalu+XN14hSo
-   xBmLOgT3sjodLR+T0EL1v6082GQYkLRSObLajb/ZoPhem2pv4v/hlPaeN
-   qoqaLCTwxHTiVVl74uOWyXRMaEZruqoJGF/nr2ienPwaYs2WxyxCY7EIE
-   lWimEFyN10qRyjipW6WSmRQs8HbDcWEzbISWmYHchIpufg55eOb9FjlwK
-   adplTkR5uqRHMuecwjrm5dy5uMGU392+rSbpkzPNxTShNgg25l4nkeebD
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10831"; a="464731306"
-X-IronPort-AV: E=Sophos;i="6.02,139,1688454000"; 
-   d="scan'208";a="464731306"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 05:40:00 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10831"; a="693475259"
-X-IronPort-AV: E=Sophos;i="6.02,139,1688454000"; 
-   d="scan'208";a="693475259"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.45.152])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 05:39:56 -0700
-Message-ID: <ef6648b4-94da-20a8-c1e2-b7d6d0090918@intel.com>
-Date:   Tue, 12 Sep 2023 15:39:52 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.15.0
-Subject: Re: [PATCH V10 18/23] mmc: sdhci-uhs2: add request() and others
-Content-Language: en-US
-To:     Victor Shih <victorshihgli@gmail.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20230818100217.12725-1-victorshihgli@gmail.com>
- <20230818100217.12725-19-victorshihgli@gmail.com>
- <2b3f8b30-1ee1-31dd-53d7-cb2a0deea511@intel.com>
- <CAK00qKAR_4EaRtLRi_CKPDOy+CTFDw_CzkbmL=GOY2QWTU2yOQ@mail.gmail.com>
- <18716e05-6138-d326-ab29-f90e03650490@intel.com>
- <CAK00qKAEW8qkvXUsnb4UVHBSGAtjT-F1bJiKRMOTWR+Pirg3oA@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAK00qKAEW8qkvXUsnb4UVHBSGAtjT-F1bJiKRMOTWR+Pirg3oA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S235500AbjILNUQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 09:20:16 -0400
+Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F6D010CA
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 06:20:11 -0700 (PDT)
+Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com [209.85.167.197])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id C85563F63D
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 13:20:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1694524809;
+        bh=Sf56SkwawGpbC/RXPSnmT5Ux3keGTDqMFdPqD5kK9Z4=;
+        h=From:In-Reply-To:References:Mime-Version:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=O0qtfvA/Dr9x7CWNrHDBntzk5TKybBarsUQKGf4ap/xA3xGF4OWpqxi5P7rV67YDt
+         B4belnNHzsoNrzuU/eogwYa5jcrVQVd9exFkbh/EKJ5ctE3VRQBiLD5uPPEEGXQ/Mo
+         cCe+5pcq2L9iveev0fk3WV+NISWCjA6J4Y8bUJOeqprLYi4aRa8GeODc7UPwhurP7Y
+         +CNYnJXIckHlD8ZaV8J1QntZfuNwrKyy+7h9y68ahDR8aIzN1PepIDxj7l9UlZkeEz
+         GWch2L1gRTi9anCKC1Jpg8W2obOqYS7FsfKRgzMutaq+fOJ3rzvMmdKMAmyfqhS/yx
+         9J3PJ2EcLpsBQ==
+Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3aa172b512eso7000415b6e.3
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 06:20:09 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694524808; x=1695129608;
+        h=cc:to:subject:message-id:date:mime-version:references:in-reply-to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Sf56SkwawGpbC/RXPSnmT5Ux3keGTDqMFdPqD5kK9Z4=;
+        b=nII8WtFPJlwg5ge5ewK2AlfCyrgq4s0ZlzIedqoxM+oKBF38jTYOwF3DHPTDOGz9+i
+         kyP0k00xyjTnrWr9Ur5CqQvAq/lQQxmlLULzwGKMN00Qpfv+3woTxtmTpHU3B2pVOIEi
+         APhAbaF6RlcZPqm8mMtTnSLCWo3CRLrLrdYbJP5mYRlO78EXcnW/+Tz2X9LwEL3MFA6O
+         ccNYb0Rj52Jb0NTMTPGD/Sp7LrVL5TX60F5+ebTOIJP8j3AdDd2mb6dZYVm9u/htL/hm
+         rTzskH/4MhYrfNeP1/3hyuiT1/BTQEOlNOuWKzhnot3HlqWK+q5bj32fkNmCJ5WCCzRY
+         GjlQ==
+X-Gm-Message-State: AOJu0YwAggo5IBv3GbAXzCj0pdJeIgoF4HJA7J18z/z0WxVIGIFQPpoO
+        q36rx0Ko0X2jK+9Y+IwgYlam8NNp9nZWzEzloqDTQDMxS3GV0AqgC7kWVh4uBGRWKvY5V3HIzJw
+        RPBdItnZufxFORYqy0+WXzJJtfKLSwd/EpL40kG99L18jYGHN5i+8Zw==
+X-Received: by 2002:a54:4101:0:b0:3a4:1f0f:d108 with SMTP id l1-20020a544101000000b003a41f0fd108mr14393049oic.46.1694524808655;
+        Tue, 12 Sep 2023 06:20:08 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG4tqK3LNB3nC4RtCAQYbX1Quh3QzmjM4JzXHKI7S/+TjQFf7rCkw4++4RrSzzbyNfkzEgQDnrmo7gpHJADav4=
+X-Received: by 2002:a54:4101:0:b0:3a4:1f0f:d108 with SMTP id
+ l1-20020a544101000000b003a41f0fd108mr14393037oic.46.1694524808389; Tue, 12
+ Sep 2023 06:20:08 -0700 (PDT)
+Received: from 348282803490 named unknown by gmailapi.google.com with
+ HTTPREST; Tue, 12 Sep 2023 06:20:07 -0700
+From:   Emil Renner Berthing <emil.renner.berthing@canonical.com>
+In-Reply-To: <20230912081402.51477-6-william.qiu@starfivetech.com>
+References: <20230912081402.51477-1-william.qiu@starfivetech.com> <20230912081402.51477-6-william.qiu@starfivetech.com>
+Mime-Version: 1.0
+Date:   Tue, 12 Sep 2023 06:20:07 -0700
+Message-ID: <CAJM55Z9riu4vwfgri1a4UsAtCmTeatVhKCGA3LAtTXsHsddtXA@mail.gmail.com>
+Subject: Re: [PATCH v2 2/3] mmc: starfive: Change tuning implementation
+To:     William Qiu <william.qiu@starfivetech.com>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc:     Emil Renner Berthing <kernel@esmil.dk>,
+        Rob Herring <robh+dt@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/09/23 19:14, Victor Shih wrote:
-> On Thu, Aug 31, 2023 at 7:20 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 31/08/23 13:33, Victor Shih wrote:
->>> On Thu, Aug 31, 2023 at 4:33 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>
->>>> On 18/08/23 13:02, Victor Shih wrote:
->>>>> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->>>>>
->>>>> This is a sdhci version of mmc's request operation.
->>>>> It covers both UHS-I and UHS-II.
->>>>>
->>>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->>>>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
->>>>> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
->>>>> ---
->>>>>
->>>>> Updates in V10:
->>>>>  - Use tmode_half_duplex to instead of uhs2_tmode0_flag
->>>>>    in sdhci_uhs2_set_transfer_mode().
->>>>>
->>>>> Updates in V9:
->>>>>  - Modify the annotations in __sdhci_uhs2_send_command().
->>>>>
->>>>> Updates in V8:
->>>>>  - Adjust the position of matching brackets in
->>>>>    sdhci_uhs2_send_command_retry().
->>>>>  - Modify CameCase definition in __sdhci_uhs2_finish_command().
->>>>>  - Modify error message in __sdhci_uhs2_finish_command().
->>>>>  - sdhci_uhs2_send_command_retry() to instead of sdhci_uhs2_send_command()
->>>>>    in sdhci_uhs2_request().
->>>>>  - Use sdhci_uhs2_mode() to simplify code in sdhci_uhs2_request_atomic().
->>>>>  - Add forward declaration for sdhci_send_command().
->>>>>
->>>>> Updates in V7:
->>>>>  - Cancel export state of some functions.
->>>>>  - Remove unnecessary whitespace changes.
->>>>>
->>>>> Updates in V6:
->>>>>  - Add uhs2_dev_cmd() to simplify code.
->>>>>  - Remove unnecessary functions.
->>>>>  - Cancel export state of some functions.
->>>>>  - Drop use CONFIG_MMC_DEBUG().
->>>>>  - Wrap at 100 columns in some functions.
->>>>>
->>>>> ---
->>>>>
->>>>>  drivers/mmc/host/sdhci-uhs2.c | 412 ++++++++++++++++++++++++++++++++++
->>>>>  drivers/mmc/host/sdhci.c      |  49 ++--
->>>>>  drivers/mmc/host/sdhci.h      |   8 +
->>>>>  3 files changed, 454 insertions(+), 15 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
->>>>> index 09b86fec9f7b..08fef7174239 100644
->>>>> --- a/drivers/mmc/host/sdhci-uhs2.c
->>>>> +++ b/drivers/mmc/host/sdhci-uhs2.c
->>>>> @@ -14,6 +14,8 @@
->>>>>  #include <linux/module.h>
->>>>>  #include <linux/iopoll.h>
->>>>>  #include <linux/bitfield.h>
->>>>> +#include <linux/mmc/mmc.h>
->>>>> +#include <linux/mmc/host.h>
->>>>>
->>>>>  #include "sdhci.h"
->>>>>  #include "sdhci-uhs2.h"
->>>>> @@ -24,6 +26,8 @@
->>>>>  #define SDHCI_UHS2_DUMP(f, x...) \
->>>>>       pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
->>>>>
->>>>> +#define UHS2_ARG_IOADR_MASK 0xfff
->>>>> +
->>>>>  void sdhci_uhs2_dump_regs(struct sdhci_host *host)
->>>>>  {
->>>>>       if (!(sdhci_uhs2_mode(host)))
->>>>> @@ -58,6 +62,11 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
->>>>>   *                                                                           *
->>>>>  \*****************************************************************************/
->>>>>
->>>>> +static inline u16 uhs2_dev_cmd(struct mmc_command *cmd)
->>>>> +{
->>>>> +     return be16_to_cpu((__be16)cmd->uhs2_cmd->arg) & UHS2_ARG_IOADR_MASK;
->>>>> +}
->>>>> +
->>>>>  static inline int mmc_opt_regulator_set_ocr(struct mmc_host *mmc,
->>>>>                                           struct regulator *supply,
->>>>>                                           unsigned short vdd_bit)
->>>>> @@ -446,6 +455,408 @@ static int sdhci_uhs2_control(struct mmc_host *mmc, enum sd_uhs2_operation op)
->>>>>       return err;
->>>>>  }
->>>>>
->>>>> +/*****************************************************************************\
->>>>> + *                                                                           *
->>>>> + * Core functions                                                            *
->>>>> + *                                                                           *
->>>>> +\*****************************************************************************/
->>>>> +
->>>>> +static void sdhci_uhs2_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>>>> +{
->>>>> +     struct mmc_data *data = cmd->data;
->>>>> +
->>>>> +     sdhci_initialize_data(host, data);
->>>>> +
->>>>> +     sdhci_prepare_dma(host, data);
->>>>> +
->>>>> +     sdhci_writew(host, data->blksz, SDHCI_UHS2_BLOCK_SIZE);
->>>>> +     sdhci_writew(host, data->blocks, SDHCI_UHS2_BLOCK_COUNT);
->>>>> +}
->>>>> +
->>>>> +static void sdhci_uhs2_finish_data(struct sdhci_host *host)
->>>>> +{
->>>>> +     struct mmc_data *data = host->data;
->>>>> +
->>>>> +     __sdhci_finish_data_common(host);
->>>>> +
->>>>> +     __sdhci_finish_mrq(host, data->mrq);
->>>>> +}
->>>>> +
->>>>> +static void sdhci_uhs2_set_transfer_mode(struct sdhci_host *host, struct mmc_command *cmd)
->>>>> +{
->>>>> +     u16 mode;
->>>>> +     struct mmc_data *data = cmd->data;
->>>>> +
->>>>> +     if (!data) {
->>>>> +             /* clear Auto CMD settings for no data CMDs */
->>>>> +             if (uhs2_dev_cmd(cmd) == UHS2_DEV_CMD_TRANS_ABORT) {
->>>>> +                     mode =  0;
->>>>> +             } else {
->>>>> +                     mode = sdhci_readw(host, SDHCI_UHS2_TRANS_MODE);
->>>>> +                     if (cmd->opcode == MMC_STOP_TRANSMISSION || cmd->opcode == MMC_ERASE)
->>>>> +                             mode |= SDHCI_UHS2_TRNS_WAIT_EBSY;
->>>>> +                     else
->>>>> +                             /* send status mode */
->>>>> +                             if (cmd->opcode == MMC_SEND_STATUS)
->>>>> +                                     mode = 0;
->>>>> +             }
->>>>> +
->>>>> +             DBG("UHS2 no data trans mode is 0x%x.\n", mode);
->>>>> +
->>>>> +             sdhci_writew(host, mode, SDHCI_UHS2_TRANS_MODE);
->>>>> +             return;
->>>>> +     }
->>>>> +
->>>>> +     WARN_ON(!host->data);
->>>>> +
->>>>> +     mode = SDHCI_UHS2_TRNS_BLK_CNT_EN | SDHCI_UHS2_TRNS_WAIT_EBSY;
->>>>> +     if (data->flags & MMC_DATA_WRITE)
->>>>> +             mode |= SDHCI_UHS2_TRNS_DATA_TRNS_WRT;
->>>>> +
->>>>> +     if (data->blocks == 1 &&
->>>>> +         data->blksz != 512 &&
->>>>> +         cmd->opcode != MMC_READ_SINGLE_BLOCK &&
->>>>> +         cmd->opcode != MMC_WRITE_BLOCK) {
->>>>> +             mode &= ~SDHCI_UHS2_TRNS_BLK_CNT_EN;
->>>>> +             mode |= SDHCI_UHS2_TRNS_BLK_BYTE_MODE;
->>>>> +     }
->>>>> +
->>>>> +     if (host->flags & SDHCI_REQ_USE_DMA)
->>>>> +             mode |= SDHCI_UHS2_TRNS_DMA;
->>>>> +
->>>>> +     if ((mmc_card_uhs2_hd_mode(host->mmc)) && cmd->uhs2_cmd->tmode_half_duplex)
->>>>
->>>> Should not check mmc_card_uhs2_hd_mode(host->mmc).  The mmc core
->>>> must get it right.
->>>>
->>>> Also why is the setting different for different commands?
->>>>
->>>
->>> Hi, Adrian
->>>
->>> I will drop the check  mmc_card_uhs2_hd_mode(host->mmc) in the next version.
->>> But I'm not quite sure what the "why is the setting different for
->>> different commands" means.
->>> Could you help explain it a little bit more clearly?
->>
->> In mmc_uhs2_prepare_cmd() there is this code:
->>
->>         if (cmd->opcode == SD_APP_SEND_SCR || cmd->opcode == SD_APP_SD_STATUS ||
->>             cmd->opcode == MMC_SEND_EXT_CSD || cmd->opcode == SD_SWITCH ||
->>             cmd->opcode == SD_READ_EXTR_SINGLE || cmd->opcode == MMC_SEND_CSD ||
->>             cmd->opcode == MMC_SEND_CID)
->>                 cmd->uhs2_cmd->tmode_half_duplex = 0;
->>         else
->>                 cmd->uhs2_cmd->tmode_half_duplex = mmc_card_uhs2_hd_mode(host);
->>
->> So different commands can have different duplex?  Why is that?
->>
-> 
-> Hi, Adrian
-> 
-> Please correct me if I understand wrong.
-> We use tmode_half_duplex instead of uhs2_tmode0_flag.
-> As I know, the above commands need to be sent in tmode0.
-> That's why I set different duplex for different commands.
+William Qiu wrote:
+> Before, we used syscon to achieve tuning, but the actual measurement
+> showed little effect, so the tuning implementation was modified here,
+> and it was realized by reading and writing the UHS_REG_EXT register.
+>
+> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> ---
+>  drivers/mmc/host/dw_mmc-starfive.c | 137 +++++++++--------------------
+>  1 file changed, 40 insertions(+), 97 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-starfive.c b/drivers/mmc/host/dw_mmc-starfive.c
+> index fd05a648a8bb..ad8f39c62fed 100644
+> --- a/drivers/mmc/host/dw_mmc-starfive.c
+> +++ b/drivers/mmc/host/dw_mmc-starfive.c
+> @@ -5,6 +5,7 @@
+>   * Copyright (c) 2022 StarFive Technology Co., Ltd.
+>   */
+>
+> +#include <linux/bitfield.h>
+>  #include <linux/clk.h>
+>  #include <linux/delay.h>
+>  #include <linux/mfd/syscon.h>
+> @@ -20,13 +21,7 @@
+>  #define ALL_INT_CLR		0x1ffff
+>  #define MAX_DELAY_CHAIN		32
+>
+> -struct starfive_priv {
+> -	struct device *dev;
+> -	struct regmap *reg_syscon;
+> -	u32 syscon_offset;
+> -	u32 syscon_shift;
+> -	u32 syscon_mask;
+> -};
+> +#define STARFIVE_SMPL_PHASE     GENMASK(20, 16)
+>
+>  static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  {
+> @@ -44,117 +39,65 @@ static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  	}
+>  }
+>
+> +static void dw_mci_starfive_set_sample_phase(struct dw_mci *host, u32 smpl_phase)
+> +{
+> +	/* change driver phase and sample phase */
+> +	u32 reg_value = mci_readl(host, UHS_REG_EXT);
+> +
+> +	/* In UHS_REG_EXT, only 5 bits valid in DRV_PHASE and SMPL_PHASE */
+> +	reg_value &= ~STARFIVE_SMPL_PHASE;
+> +	reg_value |= FIELD_PREP(STARFIVE_SMPL_PHASE, smpl_phase);
+> +	mci_writel(host, UHS_REG_EXT, reg_value);
+> +
+> +	/* We should delay 1ms wait for timing setting finished. */
+> +	mdelay(1);
+> +}
+> +
+>  static int dw_mci_starfive_execute_tuning(struct dw_mci_slot *slot,
+>  					     u32 opcode)
+>  {
+>  	static const int grade  = MAX_DELAY_CHAIN;
+>  	struct dw_mci *host = slot->host;
+> -	struct starfive_priv *priv = host->priv;
+> -	int rise_point = -1, fall_point = -1;
+> -	int err, prev_err = 0;
+> -	int i;
+> -	bool found = 0;
+> -	u32 regval;
+> -
+> -	/*
+> -	 * Use grade as the max delay chain, and use the rise_point and
+> -	 * fall_point to ensure the best sampling point of a data input
+> -	 * signals.
+> -	 */
+> -	for (i = 0; i < grade; i++) {
+> -		regval = i << priv->syscon_shift;
+> -		err = regmap_update_bits(priv->reg_syscon, priv->syscon_offset,
+> -						priv->syscon_mask, regval);
+> -		if (err)
+> -			return err;
+> +	int smpl_phase, smpl_raise = -1, smpl_fall = -1;
+> +	int ret;
+> +
+> +	for (smpl_phase = 0; smpl_phase < grade; smpl_phase++) {
+> +		dw_mci_starfive_set_sample_phase(host, smpl_phase);
+>  		mci_writel(host, RINTSTS, ALL_INT_CLR);
+>
+> -		err = mmc_send_tuning(slot->mmc, opcode, NULL);
+> -		if (!err)
+> -			found = 1;
+> +		ret = mmc_send_tuning(slot->mmc, opcode, NULL);
+>
+> -		if (i > 0) {
+> -			if (err && !prev_err)
+> -				fall_point = i - 1;
+> -			if (!err && prev_err)
+> -				rise_point = i;
+> +		if (!ret && smpl_raise < 0) {
+> +			smpl_raise = smpl_phase;
+> +		} else if (ret && smpl_raise >= 0) {
+> +			smpl_fall = smpl_phase - 1;
+> +			break;
+>  		}
+> -
+> -		if (rise_point != -1 && fall_point != -1)
+> -			goto tuning_out;
+> -
+> -		prev_err = err;
+> -		err = 0;
+>  	}
+>
+> -tuning_out:
+> -	if (found) {
+> -		if (rise_point == -1)
+> -			rise_point = 0;
+> -		if (fall_point == -1)
+> -			fall_point = grade - 1;
+> -		if (fall_point < rise_point) {
+> -			if ((rise_point + fall_point) >
+> -			    (grade - 1))
+> -				i = fall_point / 2;
+> -			else
+> -				i = (rise_point + grade - 1) / 2;
+> -		} else {
+> -			i = (rise_point + fall_point) / 2;
+> -		}
+> -
+> -		regval = i << priv->syscon_shift;
+> -		err = regmap_update_bits(priv->reg_syscon, priv->syscon_offset,
+> -						priv->syscon_mask, regval);
+> -		if (err)
+> -			return err;
+> -		mci_writel(host, RINTSTS, ALL_INT_CLR);
+> +	if (smpl_phase >= grade && smpl_raise >= 0)
+> +		smpl_fall = grade - 1;
 
-UHS-II Addendum 7.2.1.2 DCMD says:
+If you switch the order of the two if's above and below you won't need the
+smpl_raise >= 0 clause here. With that cleaned up:
 
- "Host may set DM to 1 for DCMD which supports multi-block read / write regardless of
- data transfer length (e.g., CMD18, CMD25). Otherwise, it shall not set DM to 1.
- (e.g. CMD6, CMD17, CMD24). These rules are also applied to other multi-block read / write
- commands defined in other Part of SD specifications (for example, Host may set DM to 1
- for ACMD18 or ACMD25)."
+Reviewed-by: Emil Renner Berthing <emil.renner.berthing@canonical.com>
 
-Which sounds like we should check for CMD18 and CMD25 rather than the other way around?
-Perhaps use mmc_op_multi() and add a comment.
-
+>
+> -		dev_info(host->dev, "Found valid delay chain! use it [delay=%d]\n", i);
+> -	} else {
+> +	if (smpl_raise < 0) {
+> +		smpl_phase = 0;
+>  		dev_err(host->dev, "No valid delay chain! use default\n");
+> -		err = -EINVAL;
+> +		ret = -EINVAL;
+> +		goto out;
+>  	}
+>
+> -	mci_writel(host, RINTSTS, ALL_INT_CLR);
+> -	return err;
+> -}
+> -
+> -static int dw_mci_starfive_parse_dt(struct dw_mci *host)
+> -{
+> -	struct of_phandle_args args;
+> -	struct starfive_priv *priv;
+> -	int ret;
+> -
+> -	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+> -	if (!priv)
+> -		return -ENOMEM;
+> +	smpl_phase = (smpl_raise + smpl_fall) / 2;
+> +	dev_dbg(host->dev, "Found valid delay chain! use it [delay=%d]\n", smpl_phase);
+> +	ret = 0;
+>
+> -	ret = of_parse_phandle_with_fixed_args(host->dev->of_node,
+> -						"starfive,sysreg", 3, 0, &args);
+> -	if (ret) {
+> -		dev_err(host->dev, "Failed to parse starfive,sysreg\n");
+> -		return -EINVAL;
+> -	}
+> -
+> -	priv->reg_syscon = syscon_node_to_regmap(args.np);
+> -	of_node_put(args.np);
+> -	if (IS_ERR(priv->reg_syscon))
+> -		return PTR_ERR(priv->reg_syscon);
+> -
+> -	priv->syscon_offset = args.args[0];
+> -	priv->syscon_shift  = args.args[1];
+> -	priv->syscon_mask   = args.args[2];
+> -
+> -	host->priv = priv;
+> -
+> -	return 0;
+> +out:
+> +	dw_mci_starfive_set_sample_phase(host, smpl_phase);
+> +	mci_writel(host, RINTSTS, ALL_INT_CLR);
+> +	return ret;
+>  }
+>
+>  static const struct dw_mci_drv_data starfive_data = {
+>  	.common_caps		= MMC_CAP_CMD23,
+>  	.set_ios		= dw_mci_starfive_set_ios,
+> -	.parse_dt		= dw_mci_starfive_parse_dt,
+>  	.execute_tuning		= dw_mci_starfive_execute_tuning,
+>  };
+>
+> --
+> 2.34.1
+>
+>
+> _______________________________________________
+> linux-riscv mailing list
+> linux-riscv@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-riscv
