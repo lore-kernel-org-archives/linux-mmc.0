@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 306CFCA0ED8
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 04:55:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B294CA0ECF
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 04:56:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229833AbjILE4B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 00:56:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36866 "EHLO
+        id S230361AbjILE4M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 00:56:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229932AbjILEy5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 00:54:57 -0400
-Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39E8E268D
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:53:09 -0700 (PDT)
-Received: by mail-ed1-x52e.google.com with SMTP id 4fb4d7f45d1cf-523100882f2so6644371a12.2
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:53:09 -0700 (PDT)
+        with ESMTP id S230159AbjILEzT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 00:55:19 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A26B026AD
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:53:13 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id 2adb3069b0e04-502b1bbe5c3so3649147e87.1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:53:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1694494387; x=1695099187; darn=vger.kernel.org;
+        d=tuxon.dev; s=google; t=1694494392; x=1695099192; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=RhCaDIua2ELjKm61B/fNI293TcxyRj4KFS/PJUnGxg8=;
-        b=nApQrTbZ/DMwak6rFd4XKQAztVtiBNGkZBzbnVUf/gHARkT2LE9n14w3WtQNUKGNOy
-         2hLYzJwged2Ca8xXirfdv1657tS8ivzyWvazuO2SfK+x/HBC8FU2pGFWMxS3G/Y36pa9
-         0FSsHCh8MNW8c+Iu52qkVj6Fum4qW7nf1dI6vCx8MJozrsjgaF9KxZe0VogtwLrmHgw4
-         sDdDDU0bPGoOeOd1h4HX/13E4bci441pIxr+F4C00oy0Mpy8z6mLFpubZbb9BTmbrZ9P
-         aHcKHGcHMilMY9Gh5R0c6AkmPW+gRtShsga57bhPVMIcRXYxjUKqpQP7AKwQuWMZ02D5
-         DYAQ==
+        bh=FPzDfgS0m67yk3NBORH6P58ZJVJyMAJ/Dphs2EJDyuo=;
+        b=AamAtubrUVA7kk2x6EsegL6aKzOIzfBTgRkEtun2BKeb/mDtz1WdLNItfVcrwn6bEo
+         Z2V8gf8z6zuvdudrjzw4IzLxatlMtLg6leHlVYN21NUNNpu+eud+lSUTexpP/wcQGphv
+         ISwsiB7XcyWyj/sEzO5SYzVPzVteNHrFhaMAsFwMoBVYi+LEPk7idKOpee1cPWk+steS
+         1kgPDJtd3RTTCK0itWPWknDvGV5Hqenn/4p5vh3jS+TIo5t+Togju5b0G4+KceMRQSTC
+         yvCCFO8X1kabIX45YbYrYZ4mhX6lTzorGxC7yIYwvVJ7rKNL0K+jDwqXRDbnuiT6a0nv
+         AsxA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694494387; x=1695099187;
+        d=1e100.net; s=20230601; t=1694494392; x=1695099192;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=RhCaDIua2ELjKm61B/fNI293TcxyRj4KFS/PJUnGxg8=;
-        b=KJpgCOKIB2smo8cI8WE1EK/DQf//0mrgqEPUJ7BhfUBXKwQBuNVfy6fVlVNyyKwUZY
-         OLjsQ59FyLtAygUKO9MJMcF8OE2C++Qi1NuX3Y497jCNbtvjzs1/Nxu6hJBoBdJY6u5K
-         Ts6MqanUxgiJxpRQiFLQcFDeUHDtOgBnIXzXZi+Cxn/LRkMQ9b6Kh3bOUSxAVlcwl5Bx
-         f8m3GLahu/FsojVGjCRmNW5rjmfnYcUgrfoHUL+/H8nSsAiU4OpNbGrIQyWYxIFsiUP9
-         MtNo9Md+ETYOS4x4noYB1kXC+HXlmfq5bNIR52KpWyH9RCxamJLtM8JrV+J/FWzNZ8qi
-         M0cA==
-X-Gm-Message-State: AOJu0Yw6EgVVNpxVxJ7m1qNqVCrYnmXIOV1DN7eTnn42dUQgU7aQfbj0
-        EyPszKP6lI/eZFAySVasWrx3gg==
-X-Google-Smtp-Source: AGHT+IHtDAyGWwsTihwqYWIWjYGcMH84Kzvqf+B4fLDDAmKoCa48e1lUhWY9yaNrMxhEuORomBRuuw==
-X-Received: by 2002:aa7:dd01:0:b0:523:1053:9b50 with SMTP id i1-20020aa7dd01000000b0052310539b50mr10347895edv.20.1694494387802;
-        Mon, 11 Sep 2023 21:53:07 -0700 (PDT)
+        bh=FPzDfgS0m67yk3NBORH6P58ZJVJyMAJ/Dphs2EJDyuo=;
+        b=rPoXJlfHghrqDTddr1eAHF/RWRcjOotfWe1LgQbupZTqm8feGqTfmvDCmkGerFDsne
+         HUCZfj8RQxLco62wA34JicGTLu6lY1x9KjCF8IEmXiBdso7mb+NBU3f2JlSahN4iq+A9
+         INKquTzU1C6akAb7ksQkO0uV36vFmzGKBuYeePB+bohYEUW/xuJoJrT9nByiFOAPrRkp
+         TJgtmuy7tCTmwICKPzt/rJkJGnuBGQWYEMXxqyGEkWU/CYIEhlhph14sN7Cdsgo66BPx
+         D0fnIugGSWaxS2Oil5/RIDSimJecQ+0OwMwfYI3nutYjncWWGgczToj2DyQD2OwBAr9g
+         qoKw==
+X-Gm-Message-State: AOJu0Yy+lXbInuOJazJlZYVJfbjgcrP1OuLPgK9oPqgRw4JiqEIiUT99
+        yDHjtVtYm+IyLOobOOGE5iRaEQ==
+X-Google-Smtp-Source: AGHT+IHQMo5E3dklyI4K8s4HoUsPQM7WiC1IBtX0UieZR++XPmL4ZlOQncT47bKkUM+C5dVlGwNQMQ==
+X-Received: by 2002:a05:6512:3189:b0:500:b0e8:a899 with SMTP id i9-20020a056512318900b00500b0e8a899mr10424630lfe.30.1694494391909;
+        Mon, 11 Sep 2023 21:53:11 -0700 (PDT)
 Received: from claudiu-X670E-Pro-RS.. ([82.78.167.145])
-        by smtp.gmail.com with ESMTPSA id f21-20020a05640214d500b0051e22660835sm5422415edx.46.2023.09.11.21.53.05
+        by smtp.gmail.com with ESMTPSA id f21-20020a05640214d500b0051e22660835sm5422415edx.46.2023.09.11.21.53.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Sep 2023 21:53:07 -0700 (PDT)
+        Mon, 11 Sep 2023 21:53:11 -0700 (PDT)
 From:   Claudiu <claudiu.beznea@tuxon.dev>
 X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
 To:     geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
@@ -67,9 +67,9 @@ Cc:     linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
         linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Subject: [PATCH 25/37] pinctrl: renesas: rzg2l: adapt function number for RZ/G3S
-Date:   Tue, 12 Sep 2023 07:51:45 +0300
-Message-Id: <20230912045157.177966-26-claudiu.beznea.uj@bp.renesas.com>
+Subject: [PATCH 27/37] pinctrl: renesas: rzg2l: add support for different ds values on different groups
+Date:   Tue, 12 Sep 2023 07:51:47 +0300
+Message-Id: <20230912045157.177966-28-claudiu.beznea.uj@bp.renesas.com>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
 References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
@@ -81,57 +81,523 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-On RZ/G3S PFC register allow setting 8 functions for individual ports
-(function1 to function8). For function1 register need to be configured
-with 0, for function8 register need to be configured with 7.
-We cannot use zero based addressing when requesting functions from
-different code places as documentation (RZG3S_pinfunction_List_r1.0.xlsx)
-states explicitly that function0 has different meaning.
+RZ/G3S supports different drive strenght values for different power sources
+and pin groups (A, B, C). On each group there could be up to 4 drive
+strength values per power source. Available power sources are 1v8, 2v5,
+3v3. Drive strength values are fine tuned than what was previously
+available on the driver thus the necessity of having micro-amp support.
+As drive strength and power source values are linked togheter the
+hardware setup for these was moved at the end of
+rzg2l_pinctrl_pinconf_set() to ensure proper validation of the new
+values.
 
-For this add a new member to struct rzg2l_hwcfg that will keep the
-offset that need to be substracted before applying a value to PFC register.
+The drive strength values are expected to be initialized though SoC
+specific hardware configuration data structure.
 
 Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 ---
- drivers/pinctrl/renesas/pinctrl-rzg2l.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ drivers/pinctrl/renesas/pinctrl-rzg2l.c | 345 ++++++++++++++++++++----
+ 1 file changed, 294 insertions(+), 51 deletions(-)
 
 diff --git a/drivers/pinctrl/renesas/pinctrl-rzg2l.c b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-index 8bdf065aa85b..80cacac7ec95 100644
+index 1277bb26069c..d90ff5ea356d 100644
 --- a/drivers/pinctrl/renesas/pinctrl-rzg2l.c
 +++ b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-@@ -136,9 +136,11 @@ struct rzg2l_register_offsets {
+@@ -55,6 +55,8 @@
+ #define PIN_CFG_FILONOFF		BIT(10)
+ #define PIN_CFG_FILNUM			BIT(11)
+ #define PIN_CFG_FILCLKSEL		BIT(12)
++#define PIN_CFG_IOLH_C			BIT(13)
++#define PIN_CFG_SOFT_PS			BIT(14)
+ 
+ #define RZG2L_MPXED_PIN_FUNCS		(PIN_CFG_IOLH_A | \
+ 					 PIN_CFG_SR | \
+@@ -133,27 +135,40 @@ struct rzg2l_register_offsets {
+ 	u16 sd_ch;
+ };
+ 
++/* Value to be passed on drive strength arrays as invalid value. */
++#define RZG2L_INVALID_IOLH_VAL (0xffff)
++
+ /**
+  * enum rzg2l_iolh_index - starting indexes in IOLH specific arrays
++ * @RZG2L_IOLH_IDX_1V8: starting index for 1V8 power source
++ * @RZG2L_IOLH_IDX_2V5: starting index for 2V5 power source
+  * @RZG2L_IOLH_IDX_3V3: starting index for 3V3 power source
+  * @RZG2L_IOLH_IDX_MAX: maximum index
+  */
+ enum rzg2l_iolh_index {
+-	RZG2L_IOLH_IDX_3V3 = 0,
+-	RZG2L_IOLH_IDX_MAX = 4,
++	RZG2L_IOLH_IDX_1V8 = 0,
++	RZG2L_IOLH_IDX_2V5 = 4,
++	RZG2L_IOLH_IDX_3V3 = 8,
++	RZG2L_IOLH_IDX_MAX = 12,
+ };
+ 
  /**
   * struct rzg2l_hwcfg - hardware configuration data structure
   * @regs: hardware specific register offsets
-+ * @func_base: base number for port function (see register PFC)
+  * @iolh_groupa_ua: IOLH group A micro amps specific values
++ * @iolh_groupb_ua: IOLH group B micro amps specific values
++ * @iolh_groupc_ua: IOLH group C micro amps specific values
+  * @iolh_groupb_oi: IOLH group B output impedance specific values
++ * @drive_strength_ua: driver strenght in ua is supported (otherwise mA is supported)
+  * @func_base: base number for port function (see register PFC)
   */
  struct rzg2l_hwcfg {
  	const struct rzg2l_register_offsets regs;
-+	u8 func_base;
+ 	u16 iolh_groupa_ua[RZG2L_IOLH_IDX_MAX];
++	u16 iolh_groupb_ua[RZG2L_IOLH_IDX_MAX];
++	u16 iolh_groupc_ua[RZG2L_IOLH_IDX_MAX];
+ 	u16 iolh_groupb_oi[RZG2L_IOLH_IDX_MAX];
++	bool drive_strength_ua;
+ 	u8 func_base;
  };
  
- struct rzg2l_dedicated_configs {
-@@ -221,6 +223,7 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_dev *pctldev,
- 				 unsigned int group_selector)
+@@ -172,6 +187,16 @@ struct rzg2l_pinctrl_data {
+ 	const struct rzg2l_hwcfg *hwcfg;
+ };
+ 
++/**
++ * struct rzg2l_pinctrl_pin_settings - pin data
++ * @power_source: power source
++ * @drive_strength_ua: drive strength (in micro amps)
++ */
++struct rzg2l_pinctrl_pin_settings {
++	u16 power_source;
++	u16 drive_strength_ua;
++};
++
+ struct rzg2l_pinctrl {
+ 	struct pinctrl_dev		*pctl;
+ 	struct pinctrl_desc		desc;
+@@ -189,8 +214,12 @@ struct rzg2l_pinctrl {
+ 
+ 	spinlock_t			lock; /* lock read/write registers */
+ 	struct mutex			mutex; /* serialize adding groups and functions */
++
++	struct rzg2l_pinctrl_pin_settings *settings;
+ };
+ 
++static const u16 available_ps[] = { 1800, 2500, 3300 };
++
+ static void rzg2l_pinctrl_set_pfc_mode(struct rzg2l_pinctrl *pctrl,
+ 				       u8 pin, u8 off, u8 func)
  {
- 	struct rzg2l_pinctrl *pctrl = pinctrl_dev_get_drvdata(pctldev);
+@@ -555,6 +584,164 @@ static void rzg2l_rmw_pin_config(struct rzg2l_pinctrl *pctrl, u32 offset,
+ 	spin_unlock_irqrestore(&pctrl->lock, flags);
+ }
+ 
++static int rzg2l_get_power_source(struct rzg2l_pinctrl *pctrl, u32 pin, u32 caps)
++{
 +	const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
- 	const struct pinctrl_pin_desc *pin_desc;
- 	unsigned int i, *psel_val, *pin_data;
- 	struct function_desc *func;
-@@ -247,9 +250,9 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_dev *pctldev,
- 		off = RZG2L_PIN_CFG_TO_PORT_OFFSET(*pin_data);
++	const struct rzg2l_register_offsets *regs = &hwcfg->regs;
++	unsigned long flags;
++	void __iomem *addr;
++	u32 pwr_reg;
++	u16 ps;
++
++	if (caps & PIN_CFG_IO_VMC_SD0)
++		pwr_reg = SD_CH(regs->sd_ch, 0);
++	else if (caps & PIN_CFG_IO_VMC_SD1)
++		pwr_reg = SD_CH(regs->sd_ch, 1);
++	else if (caps & PIN_CFG_IO_VMC_QSPI)
++		pwr_reg = QSPI;
++	else if (!(caps & PIN_CFG_SOFT_PS))
++		return -EINVAL;
++
++	spin_lock_irqsave(&pctrl->lock, flags);
++	if (caps & PIN_CFG_SOFT_PS) {
++		ps = pctrl->settings[pin].power_source;
++	} else {
++		addr = pctrl->base + pwr_reg;
++		ps = (readl(addr) & PVDD_MASK) ? 1800 : 3300;
++	}
++	spin_unlock_irqrestore(&pctrl->lock, flags);
++
++	return ps;
++}
++
++static int rzg2l_set_power_source(struct rzg2l_pinctrl *pctrl, u32 pin, u32 caps, u32 ps)
++{
++	const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
++	const struct rzg2l_register_offsets *regs = &hwcfg->regs;
++	unsigned long flags;
++	void __iomem *addr;
++	u32 pwr_reg;
++
++	if (caps & PIN_CFG_IO_VMC_SD0)
++		pwr_reg = SD_CH(regs->sd_ch, 0);
++	else if (caps & PIN_CFG_IO_VMC_SD1)
++		pwr_reg = SD_CH(regs->sd_ch, 1);
++	else if (caps & PIN_CFG_IO_VMC_QSPI)
++		pwr_reg = QSPI;
++	else if (!(caps & PIN_CFG_SOFT_PS))
++		return -EINVAL;
++
++	addr = pctrl->base + pwr_reg;
++	spin_lock_irqsave(&pctrl->lock, flags);
++	if (!(caps & PIN_CFG_SOFT_PS))
++		writel((ps == 1800) ? PVDD_1800 : PVDD_3300, addr);
++	pctrl->settings[pin].power_source = ps;
++	spin_unlock_irqrestore(&pctrl->lock, flags);
++
++	return 0;
++}
++
++static bool rzg2l_ps_is_supported(u16 ps)
++{
++	u8 i;
++
++	for (i = 0; i < ARRAY_SIZE(available_ps); i++) {
++		if (available_ps[i] == ps)
++			return true;
++	}
++
++	return false;
++}
++
++static enum rzg2l_iolh_index rzg2l_ps_to_iolh_idx(u16 ps)
++{
++	int i;
++
++	for (i = 0; i < ARRAY_SIZE(available_ps); i++) {
++		if (available_ps[i] == ps)
++			break;
++	}
++
++	/*
++	 * We multiply with 4 as we have 4 DS values per power source
++	 * (see enum rzg2l_iolh_index)
++	 */
++	return i * 4;
++}
++
++static u16 rzg2l_iolh_val_to_ua(const struct rzg2l_hwcfg *hwcfg, u32 caps, u8 val)
++{
++	if (caps & PIN_CFG_IOLH_A)
++		return hwcfg->iolh_groupa_ua[val];
++
++	if (caps & PIN_CFG_IOLH_B)
++		return hwcfg->iolh_groupb_ua[val];
++
++	if (caps & PIN_CFG_IOLH_C)
++		return hwcfg->iolh_groupc_ua[val];
++
++	/* Should not happen. */
++	return 0;
++}
++
++static u16 rzg2l_iolh_ua_to_val(const struct rzg2l_hwcfg *hwcfg, u32 caps,
++				enum rzg2l_iolh_index ps_index, u16 ua)
++{
++	const u16 *array = NULL;
++	u16 i;
++
++	if (caps & PIN_CFG_IOLH_A)
++		array = &hwcfg->iolh_groupa_ua[ps_index];
++
++	if (caps & PIN_CFG_IOLH_B)
++		array = &hwcfg->iolh_groupb_ua[ps_index];
++
++	if (caps & PIN_CFG_IOLH_C)
++		array = &hwcfg->iolh_groupc_ua[ps_index];
++
++	if (!array)
++		return RZG2L_INVALID_IOLH_VAL;
++
++	for (i = 0; i < 4; i++) {
++		if (array[i] == ua)
++			return i;
++	}
++
++	return RZG2L_INVALID_IOLH_VAL;
++}
++
++static bool rzg2l_ds_supported(struct rzg2l_pinctrl *pctrl, u32 caps,
++			       enum rzg2l_iolh_index iolh_idx,
++			       u16 ds)
++{
++	const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
++	const u16 *array = NULL;
++	u16 i;
++
++	if (caps & PIN_CFG_IOLH_A)
++		array = hwcfg->iolh_groupa_ua;
++
++	if (caps & PIN_CFG_IOLH_B)
++		array = hwcfg->iolh_groupb_ua;
++
++	if (caps & PIN_CFG_IOLH_C)
++		array = hwcfg->iolh_groupc_ua;
++
++	/* Should not happen. */
++	if (!array)
++		return false;
++
++	if (array[iolh_idx] == RZG2L_INVALID_IOLH_VAL)
++		return false;
++
++	for (i = 0; i < 4; i++) {
++		if (array[iolh_idx + i] == ds)
++			return true;
++	}
++
++	return false;
++}
++
+ static int rzg2l_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
+ 				     unsigned int _pin,
+ 				     unsigned long *config)
+@@ -562,13 +749,11 @@ static int rzg2l_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
+ 	struct rzg2l_pinctrl *pctrl = pinctrl_dev_get_drvdata(pctldev);
+ 	enum pin_config_param param = pinconf_to_config_param(*config);
+ 	const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
+-	const struct rzg2l_register_offsets *regs = &hwcfg->regs;
+ 	const struct pinctrl_pin_desc *pin = &pctrl->desc.pins[_pin];
+ 	unsigned int *pin_data = pin->drv_data;
+ 	unsigned int arg = 0;
+-	unsigned long flags;
+-	void __iomem *addr;
+ 	u32 off, cfg;
++	int ret;
+ 	u8 bit;
  
- 		dev_dbg(pctrl->dev, "port:%u pin: %u off:%x PSEL:%u\n", port,
--			pin, off, psel_val[i]);
-+			pin, off, psel_val[i] - hwcfg->func_base);
+ 	if (!pin_data)
+@@ -594,40 +779,50 @@ static int rzg2l_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
+ 			return -EINVAL;
+ 		break;
  
--		rzg2l_pinctrl_set_pfc_mode(pctrl, pin, off, psel_val[i]);
-+		rzg2l_pinctrl_set_pfc_mode(pctrl, pin, off, psel_val[i] - hwcfg->func_base);
+-	case PIN_CONFIG_POWER_SOURCE: {
+-		u32 pwr_reg = 0x0;
+-
+-		if (cfg & PIN_CFG_IO_VMC_SD0)
+-			pwr_reg = SD_CH(regs->sd_ch, 0);
+-		else if (cfg & PIN_CFG_IO_VMC_SD1)
+-			pwr_reg = SD_CH(regs->sd_ch, 1);
+-		else if (cfg & PIN_CFG_IO_VMC_QSPI)
+-			pwr_reg = QSPI;
+-		else
+-			return -EINVAL;
+-
+-		spin_lock_irqsave(&pctrl->lock, flags);
+-		addr = pctrl->base + pwr_reg;
+-		arg = (readl(addr) & PVDD_MASK) ? 1800 : 3300;
+-		spin_unlock_irqrestore(&pctrl->lock, flags);
++	case PIN_CONFIG_POWER_SOURCE:
++		ret = rzg2l_get_power_source(pctrl, _pin, cfg);
++		if (ret < 0)
++			return ret;
++		arg = ret;
+ 		break;
+-	}
+ 
+ 	case PIN_CONFIG_DRIVE_STRENGTH: {
+ 		unsigned int index;
+ 
+-		if (!(cfg & PIN_CFG_IOLH_A))
++		if (!(cfg & PIN_CFG_IOLH_A) || hwcfg->drive_strength_ua)
+ 			return -EINVAL;
+ 
+ 		index = rzg2l_read_pin_config(pctrl, IOLH(off), bit, IOLH_MASK);
++		/*
++		 * Drive strenght mA is supported only by group A and only
++		 * for 3V3 port source.
++		 */
+ 		arg = hwcfg->iolh_groupa_ua[index + RZG2L_IOLH_IDX_3V3] / 1000;
+ 		break;
  	}
  
++	case PIN_CONFIG_DRIVE_STRENGTH_UA: {
++		enum rzg2l_iolh_index iolh_idx;
++		u8 val;
++
++		if (!(cfg & (PIN_CFG_IOLH_A | PIN_CFG_IOLH_B | PIN_CFG_IOLH_C)) ||
++		    !hwcfg->drive_strength_ua)
++			return -EINVAL;
++
++		ret = rzg2l_get_power_source(pctrl, _pin, cfg);
++		if (ret < 0)
++			return ret;
++		iolh_idx = rzg2l_ps_to_iolh_idx(ret);
++		val = rzg2l_read_pin_config(pctrl, IOLH(off), bit, IOLH_MASK);
++		arg = rzg2l_iolh_val_to_ua(hwcfg, cfg, iolh_idx + val);
++		break;
++	}
++
+ 	case PIN_CONFIG_OUTPUT_IMPEDANCE_OHMS: {
+ 		unsigned int index;
+ 
+-		if (!(cfg & PIN_CFG_IOLH_B))
++		if (!(cfg & PIN_CFG_IOLH_B) ||
++		    hwcfg->iolh_groupb_oi[0] == RZG2L_INVALID_IOLH_VAL)
+ 			return -EINVAL;
+ 
+ 		index = rzg2l_read_pin_config(pctrl, IOLH(off), bit, IOLH_MASK);
+@@ -651,12 +846,10 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
+ {
+ 	struct rzg2l_pinctrl *pctrl = pinctrl_dev_get_drvdata(pctldev);
+ 	const struct pinctrl_pin_desc *pin = &pctrl->desc.pins[_pin];
+-	unsigned int *pin_data = pin->drv_data;
+ 	const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
+-	const struct rzg2l_register_offsets *regs = &hwcfg->regs;
++	struct rzg2l_pinctrl_pin_settings settings = pctrl->settings[_pin];
++	unsigned int *pin_data = pin->drv_data;
+ 	enum pin_config_param param;
+-	unsigned long flags;
+-	void __iomem *addr;
+ 	unsigned int i;
+ 	u32 cfg, off;
+ 	u8 bit;
+@@ -689,34 +882,15 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
+ 			break;
+ 		}
+ 
+-		case PIN_CONFIG_POWER_SOURCE: {
+-			unsigned int mV = pinconf_to_config_argument(_configs[i]);
+-			u32 pwr_reg = 0x0;
+-
+-			if (mV != 1800 && mV != 3300)
+-				return -EINVAL;
+-
+-			if (cfg & PIN_CFG_IO_VMC_SD0)
+-				pwr_reg = SD_CH(regs->sd_ch, 0);
+-			else if (cfg & PIN_CFG_IO_VMC_SD1)
+-				pwr_reg = SD_CH(regs->sd_ch, 1);
+-			else if (cfg & PIN_CFG_IO_VMC_QSPI)
+-				pwr_reg = QSPI;
+-			else
+-				return -EINVAL;
+-
+-			addr = pctrl->base + pwr_reg;
+-			spin_lock_irqsave(&pctrl->lock, flags);
+-			writel((mV == 1800) ? PVDD_1800 : PVDD_3300, addr);
+-			spin_unlock_irqrestore(&pctrl->lock, flags);
++		case PIN_CONFIG_POWER_SOURCE:
++			settings.power_source = pinconf_to_config_argument(_configs[i]);
+ 			break;
+-		}
+ 
+ 		case PIN_CONFIG_DRIVE_STRENGTH: {
+ 			unsigned int arg = pinconf_to_config_argument(_configs[i]);
+ 			unsigned int index;
+ 
+-			if (!(cfg & PIN_CFG_IOLH_A))
++			if (!(cfg & PIN_CFG_IOLH_A) || hwcfg->drive_strength_ua)
+ 				return -EINVAL;
+ 
+ 			for (index = RZG2L_IOLH_IDX_3V3; index < RZG2L_IOLH_IDX_3V3 + 4; index++) {
+@@ -730,11 +904,20 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
+ 			break;
+ 		}
+ 
++		case PIN_CONFIG_DRIVE_STRENGTH_UA:
++			if (!(cfg & (PIN_CFG_IOLH_A | PIN_CFG_IOLH_B | PIN_CFG_IOLH_C)) ||
++			    !hwcfg->drive_strength_ua)
++				return -EINVAL;
++
++			settings.drive_strength_ua = pinconf_to_config_argument(_configs[i]);
++			break;
++
+ 		case PIN_CONFIG_OUTPUT_IMPEDANCE_OHMS: {
+ 			unsigned int arg = pinconf_to_config_argument(_configs[i]);
+ 			unsigned int index;
+ 
+-			if (!(cfg & PIN_CFG_IOLH_B))
++			if (!(cfg & PIN_CFG_IOLH_B) ||
++			    hwcfg->iolh_groupb_oi[0] == RZG2L_INVALID_IOLH_VAL)
+ 				return -EINVAL;
+ 
+ 			for (index = 0; index < ARRAY_SIZE(hwcfg->iolh_groupb_oi); index++) {
+@@ -753,6 +936,47 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
+ 		}
+ 	}
+ 
++	/* Apply drive strength and power source. */
++	if (memcmp(&settings, &pctrl->settings[_pin], sizeof(settings))) {
++		enum rzg2l_iolh_index iolh_idx;
++		unsigned long flags;
++		int ret;
++		u16 val;
++
++		if (settings.power_source == pctrl->settings[_pin].power_source)
++			goto apply_drive_strength;
++
++		ret = rzg2l_ps_is_supported(settings.power_source);
++		if (!ret)
++			return -EINVAL;
++
++		/* Apply power source. */
++		ret = rzg2l_set_power_source(pctrl, _pin, cfg, settings.power_source);
++		if (ret)
++			return ret;
++
++apply_drive_strength:
++		if (settings.drive_strength_ua == pctrl->settings[_pin].drive_strength_ua)
++			return 0;
++
++		iolh_idx = rzg2l_ps_to_iolh_idx(settings.power_source);
++		ret = rzg2l_ds_supported(pctrl, cfg, iolh_idx,
++					 settings.drive_strength_ua);
++		if (!ret)
++			return -EINVAL;
++
++		/* Get register value for this PS/DS tuple. */
++		val = rzg2l_iolh_ua_to_val(hwcfg, cfg, iolh_idx, settings.drive_strength_ua);
++		if (val == RZG2L_INVALID_IOLH_VAL)
++			return -EINVAL;
++
++		/* Apply drive strength. */
++		rzg2l_rmw_pin_config(pctrl, IOLH(off), bit, IOLH_MASK, val);
++		spin_lock_irqsave(&pctrl->lock, flags);
++		pctrl->settings[_pin].drive_strength_ua = settings.drive_strength_ua;
++		spin_unlock_irqrestore(&pctrl->lock, flags);
++	}
++
  	return 0;
+ }
+ 
+@@ -1459,6 +1683,7 @@ static int rzg2l_gpio_register(struct rzg2l_pinctrl *pctrl)
+ 
+ static int rzg2l_pinctrl_register(struct rzg2l_pinctrl *pctrl)
+ {
++	const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
+ 	struct pinctrl_pin_desc *pins;
+ 	unsigned int i, j;
+ 	u32 *pin_data;
+@@ -1501,6 +1726,22 @@ static int rzg2l_pinctrl_register(struct rzg2l_pinctrl *pctrl)
+ 		pins[index].drv_data = &pin_data[index];
+ 	}
+ 
++	pctrl->settings = devm_kzalloc(pctrl->dev, sizeof(*pctrl->settings) * pctrl->desc.npins,
++				       GFP_KERNEL);
++	if (!pctrl->settings)
++		return -ENOMEM;
++
++	for (i = 0; hwcfg->drive_strength_ua && i < pctrl->desc.npins; i++) {
++		if (pin_data[i] & PIN_CFG_SOFT_PS) {
++			pctrl->settings[i].power_source = 3300;
++		} else {
++			ret = rzg2l_get_power_source(pctrl, i, pin_data[i]);
++			if (ret < 0)
++				continue;
++			pctrl->settings[i].power_source = ret;
++		}
++	}
++
+ 	ret = devm_pinctrl_register_and_init(pctrl->dev, &pctrl->desc, pctrl,
+ 					     &pctrl->pctl);
+ 	if (ret) {
+@@ -1574,6 +1815,8 @@ static const struct rzg2l_hwcfg rzg2l_hwcfg = {
+ 		.sd_ch = 0x3000,
+ 	},
+ 	.iolh_groupa_ua = {
++		/* 1v8, 2v5 power source */
++		[RZG2L_IOLH_IDX_1V8 ... RZG2L_IOLH_IDX_3V3 - 1] = RZG2L_INVALID_IOLH_VAL,
+ 		/* 3v3 power source */
+ 		[RZG2L_IOLH_IDX_3V3] = 2000, 4000, 8000, 12000,
+ 	},
 -- 
 2.39.2
 
