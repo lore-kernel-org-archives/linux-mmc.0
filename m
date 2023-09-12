@@ -2,154 +2,192 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F7FECA0ED3
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 04:22:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A778CA0ECE
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 04:52:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232977AbjILEWD convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 00:22:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38434 "EHLO
+        id S229504AbjILEwW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 00:52:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233019AbjILEVz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 00:21:55 -0400
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 645F645A83;
-        Mon, 11 Sep 2023 19:00:31 -0700 (PDT)
-Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id 0D38324E267;
-        Tue, 12 Sep 2023 10:00:23 +0800 (CST)
-Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX165.cuchost.com
- (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 12 Sep
- 2023 10:00:23 +0800
-Received: from [192.168.120.76] (171.223.208.138) by EXMBX168.cuchost.com
- (172.16.6.78) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 12 Sep
- 2023 10:00:22 +0800
-Message-ID: <5e7b00c2-7579-04b5-2d37-249ed30ca668@starfivetech.com>
-Date:   Tue, 12 Sep 2023 10:00:20 +0800
+        with ESMTP id S229479AbjILEwW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 00:52:22 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 538F7E6C
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:52:18 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id 4fb4d7f45d1cf-522dd6b6438so6225860a12.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:52:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1694494336; x=1695099136; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZL8AUPRM1aegmrc4Jg4uOM+4oALiCtGLkJY+J8Syis0=;
+        b=A22sv3d3DNDHoX7QPOiJI2uQWPQ2CkA+q3mvysmXlMBDsp6Ny+bDNpRUP29JrFlqfE
+         yf2GJTuj5Aiz5MEjr4tzU+k2Omnamfom57uPsg+sDqTiVIQJ8prQuJAO96UOdH6QPHIR
+         rT0bLAfezPTJVTz7f+Lph9M+HpiMvhlcWiBIdKWXQrDF3frkqJjmOds7Sr5jTAhtDA+Q
+         cQs4rdtUBhQMUi2yAckKQbFusUDF3Y1usdyNj9Plr/iRzGi6a4JAtvRnK1HB18Owud1U
+         i1SxYMF9GgrBIEVhbgBalE6O6H2AEaGCxqh+68fEXj5nddk0Fi81oDx2tBnLNGvjmmap
+         +B5w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694494336; x=1695099136;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ZL8AUPRM1aegmrc4Jg4uOM+4oALiCtGLkJY+J8Syis0=;
+        b=p/ogEjd5ztjVu7UcwZajStGaF8t5DIiMwQjZWJ8pxuiekCrPs2pj/oLo3k4nTRl38L
+         G7/OTvHzsQbheHeUW/RlzzIw8lUc/0q3C8vgbvoSjDsOizlBQZrjQ743ibYrxC6O2oTz
+         jOzAdD3mPa1jRlctLfY1WRusciSSE2izXHPiqDsV9p+f5Y0M5QEDisiV4VXPGm6rDRaq
+         d1JPNsijBZcU7u4tZCHj+sEa6KAyMY1MFMj4jUFOWbZDs/q4iupgyBObYecxYXD3aSJM
+         p3Td3jzFfwuULZkO3id2i7ngr/Bb6+wfjUgMvyHs7chjL0DbX4tzJVlYTsriFu6AfG4P
+         K/HA==
+X-Gm-Message-State: AOJu0YxH+keZIMdf6sDghA7wBCwa6ukkCovUHwBClVC1rfaStlVE7Kum
+        PLPb0bnpiuDiHEOQ9wbfGxd5Vg==
+X-Google-Smtp-Source: AGHT+IH/7FX3AG4GBKPNWl3bGJcnTxMw8eitbqLPSbHY6Kq8+B6wBqEBknJ7/dQ5zhBRhOc1jR5Sgg==
+X-Received: by 2002:a50:ec90:0:b0:522:6e3f:b65 with SMTP id e16-20020a50ec90000000b005226e3f0b65mr9982020edr.33.1694494336357;
+        Mon, 11 Sep 2023 21:52:16 -0700 (PDT)
+Received: from claudiu-X670E-Pro-RS.. ([82.78.167.145])
+        by smtp.gmail.com with ESMTPSA id f21-20020a05640214d500b0051e22660835sm5422415edx.46.2023.09.11.21.52.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Sep 2023 21:52:16 -0700 (PDT)
+From:   Claudiu <claudiu.beznea@tuxon.dev>
+X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
+To:     geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        conor+dt@kernel.org, ulf.hansson@linaro.org,
+        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
+        jirislaby@kernel.org, magnus.damm@gmail.com,
+        catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com
+Cc:     linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Subject: [PATCH 00/37] Add new Renesas RZ/G3S SoC and RZ/G3S SMARC EVK
+Date:   Tue, 12 Sep 2023 07:51:20 +0300
+Message-Id: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.0
-Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Drop unused properties
-To:     Conor Dooley <conor@kernel.org>,
-        Emil Renner Berthing <emil.renner.berthing@canonical.com>
-CC:     Jessica Clarke <jrtc27@jrtc27.com>,
-        Conor Dooley <conor.dooley@microchip.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
-        linux-riscv <linux-riscv@lists.infradead.org>,
-        <linux-mmc@vger.kernel.org>,
-        "Emil Renner Berthing" <kernel@esmil.dk>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        "Palmer Dabbelt" <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>
-References: <20230830031846.127957-2-william.qiu@starfivetech.com>
- <20230830-commence-trickery-40eaa193cb15@wendy>
- <b375b88c-0d9c-30a9-21f6-283083cf3880@linaro.org>
- <20230830-procedure-frostbite-56c751f7c276@wendy>
- <efab6f52-4d7f-ea3c-0fc3-4e3ad03c14c7@starfivetech.com>
- <20230901-remold-sublease-a1ddb1fc6348@spud>
- <9EF26965-10E5-4BCA-AC5E-93C5AA55A0DF@jrtc27.com>
- <20230901-affected-wanting-ab517791a870@spud>
- <dd63bb4f-a59b-0323-08fb-03f8cc048b6e@starfivetech.com>
- <CAJM55Z8XowmB-Hfzr+hBtWu+SGL2v7jya6Nx5_rATf8=5qA4Fg@mail.gmail.com>
- <20230911-implosive-shrill-506d18d9bde2@spud>
-Content-Language: en-US
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <20230911-implosive-shrill-506d18d9bde2@spud>
-Content-Type: text/plain; charset="UTF-8"
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX168.cuchost.com
- (172.16.6.78)
-X-YovoleRuleAgent: yovoleflag
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
+Hi,
 
-On 2023/9/12 0:14, Conor Dooley wrote:
-> On Fri, Sep 08, 2023 at 03:32:36PM +0200, Emil Renner Berthing wrote:
->> On Fri, 8 Sept 2023 at 12:03, William Qiu <william.qiu@starfivetech.com> wrote:
->> > On 2023/9/2 1:43, Conor Dooley wrote:
->> > > On Fri, Sep 01, 2023 at 06:20:38PM +0100, Jessica Clarke wrote:
->> > >> On 1 Sep 2023, at 16:42, Conor Dooley <conor@kernel.org> wrote:
->> > >> >
->> > >> > On Fri, Sep 01, 2023 at 10:33:13AM +0800, William Qiu wrote:
->> > >> >>
->> > >> >>
->> > >> >> On 2023/8/30 16:34, Conor Dooley wrote:
->> > >> >>> On Wed, Aug 30, 2023 at 09:29:20AM +0200, Krzysztof Kozlowski wrote:
->> > >> >>>> On 30/08/2023 08:50, Conor Dooley wrote:
->> > >> >>>>> On Wed, Aug 30, 2023 at 11:18:44AM +0800, William Qiu wrote:
->> > >> >>>>>> Due to the change of tuning implementation, it's no longer necessary to
->> > >> >>>>>> use the "starfive,sysreg" property in dts, so drop the relevant
->> > >> >>>>>> description in dt-bindings here.
->> > >> >>>>>
->> > >> >>>>> How does changing your software implantation invalidate a description of
->> > >> >>>>> the hardware?
->> > >> >>>>>
->> > >> >>>>
->> > >> >>>> Which is kind of proof that this syscon was just to substitute
->> > >> >>>> incomplete hardware description (e.g. missing clocks and phys). We
->> > >> >>>> should have rejected it. Just like we should reject them in the future.
->> > >> >>>
->> > >> >>> :s I dunno what to do with this... I'm inclined to say not to remove it
->> > >> >>> from the binding or dts at all & only change the software.
->> > >> >>>
->> > >> >>>> There are just few cases where syscon is reasonable. All others is just
->> > >> >>>> laziness. It's not only starfivetech, of course. Several other
->> > >> >>>> contributors do the same.
->> > >> >>>
->> > >> >>> I'm not sure if laziness is fair, lack of understanding is usually more
->> > >> >>> likely.
->> > >> >>
->> > >> >> For this, I tend to keep it in binding, but remove it from required. Because
->> > >> >> we only modify the tuning implementation, it doesn't mean that this property
->> > >> >> need to be removed, it's just no longer be the required one.
->> > >> >
->> > >> > Please only remove it from required if the current driver doesn't break
->> > >> > if the regmap is removed.
->> > >>
->> > >> Either way please make sure the documentation clearly states “never use
->> > >> this, if you’re using it you’re doing it wrong, this only exists
->> > >> because it was wrongly used in the past”. Otherwise people writing
->> > >> drivers for other OSes will probably use it too thinking they need to.
->> > >
->> > > Maybe we should just delete it if the impact is going to be negligible,
->> > > sounds like you're not using it in FreeBSD, which was part of what I was
->> > > worried about. Guess it depends on what Emil & the distro heads think.
->> > Hi Conor,
->> >
->> > After discussing it with our colleagues, we decided that deleting it was the best
->> > course of action. Since there will no longer be a related implementation of
->> > "starfive,sysreg" in future drivers, even if the dt-binding is described, it will
->> > be "never use", so I think it should be deleted.
->> >
->> > What do you think?
->> 
->> The device tree should be a description of the hardware and there
->> really is a 'u0_sdio_data_strobe_phase_ctrl' field in the sysreg
->> registers[1] on the JH7110 that seems to do _something_ related to the
->> sdio interface. So I don't think the fact that the Linux driver no
->> longer uses it is a good reason to remove it, but if there are some
->> other pragmatic reasons to do so then I'm fine with it. Removing it
->> from the list of required properties should be fine though.
-> 
-> SGTM. Can you update the patch to do that please William?
-> 
-> Thanks,
-> Conor.
+This patch series adds initial support for The Renesas RZ/G3S (R9A08G045{S33})
+SoC. The RZ/G3S device is a general-purpose microprocessor with a
+single-core Arm® Cortex®-A55 (1.1GHz) and a dual-core Arm® Cortex®-M33 (250MHz),
+perfect for an IOT gateway controller.
 
-OK, I will update the patch as suggested by Emil.
+This includes:
+- SoC identification;
+- clocks (core clocks, pin controller clock, serial interface, SD ch0
+  clock) and corresponding resets;
+- minimal device tree for SoM and carrier boards.
 
-Best Regards,
-William
+With this series Linux can boot from eMMC or SD card. The eMMC and uSD
+interface are multiplexed on the SoM; selection is made using a hardware
+switch.
+
+Patches are gouped as follows:
+- 01-04 adds SoC identification support;
+- 05	is a simple cleanup on SoC identification support
+- 06-09	contain fixes on clock drivers identified while adding RZ/G3S
+	support
+- 10-14	clock cleanups identifies while adding support for RZ/G3S
+- 15-22	clock changes needed by RZ/G3S
+- 23-30	pinctrl changes needed by RZ/G3S
+- 31	document SDHI for RZ/G3S
+- 32-37 device tree support for RZ/G3S
+
+Thank you,
+Claudiu Beznea
+
+Claudiu Beznea (37):
+  dt-bindings: serial: renesas,scif: document r9a08g045 support
+  dt-bindings: soc: renesas: document Renesas RZ/G3S SoC variants
+  dt-bindings: soc: renesas: renesas,rzg2l-sysc: document RZ/G3S SoC
+  soc: renesas: identify RZ/G3S SoC
+  soc: renesas: remove blank lines
+  clk: renesas: rzg2l: wait for status bit of SD mux before continuing
+  clk: renesas: rzg2l: lock around writes to mux register
+  clk: renesas: rzg2l: trust value returned by hardware
+  clk: renesas: rzg2l: fix computation formula
+  clk: renesas: rzg2l: use core->name for clock name
+  clk: renesas: rzg2l: simplify a bit the logic in
+    rzg2l_mod_clock_endisable()
+  clk: renesas: rzg2l: reduce the critical area
+  clk: renesas: rzg2l: use FIELD_GET() for PLL register fields
+  clk: renesas: rzg2l: use u32 for flag and mux_flags
+  clk: renesas: rzg2l: add support for RZ/G3S PLL
+  clk: renesas: rzg2l: add struct clk_hw_data
+  clk: renesas: rzg2l: remove CPG_SDHI_DSEL from generic header
+  clk: renesas: rzg2l: refactor sd mux driver
+  clk: renesas: rzg2l: add a divider clock for RZ/G3S
+  dt-bindings: clock: renesas,rzg2l-cpg: document RZ/G3S SoC
+  dt-bindings: clock: add r9a08g045 CPG clocks and resets definitions
+  clk: renesas: add minimal boot support for RZ/G3S SoC
+  pinctrl: renesas: rzg2l: index all registers based on port offset
+  pinctrl: renesas: rzg2l: adapt for different SD/PWPR register offsets
+  pinctrl: renesas: rzg2l: adapt function number for RZ/G3S
+  pinctrl: renesas: rzg2l: move ds and oi to SoC specific configuration
+  pinctrl: renesas: rzg2l: add support for different ds values on
+    different groups
+  pinctrl: renesas: rzg2l: make struct
+    rzg2l_pinctrl_data::dedicated_pins constant
+  dt-bindings: pinctrl: renesas: document RZ/G3S SoC
+  pinctrl: renesas: rzg2l: add support for RZ/G3S SoC
+  dt-bindings: mmc: renesas,sdhi: Document RZ/G3S support
+  arm64: dts: renesas: add initial DTSI for RZ/G3S SoC
+  arm64: dts: renesas: rzg3l-smarc-som: add initial support for RZ/G3S
+    SMARC Carrier-II SoM
+  arm64: dts: renesas: rzg3s-smarc: add initial device tree for RZ SMARC
+    Carrier-II Board
+  dt-bindings: arm: renesas: document SMARC Carrier-II EVK
+  arm64: dts: renesas: r9a08g045s33-smarc: add initial device tree for
+    RZ/G3S SMARC EVK board
+  arm64: defconfig: enable RZ/G3S (R9A08G045) SoC
+
+ .../bindings/clock/renesas,rzg2l-cpg.yaml     |   1 +
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml |   2 +
+ .../pinctrl/renesas,rzg2l-pinctrl.yaml        |  26 +-
+ .../bindings/serial/renesas,scif.yaml         |   1 +
+ .../soc/renesas/renesas,rzg2l-sysc.yaml       |   1 +
+ .../bindings/soc/renesas/renesas.yaml         |   8 +
+ arch/arm64/boot/dts/renesas/Makefile          |   2 +
+ arch/arm64/boot/dts/renesas/r9a08g045.dtsi    | 139 ++++
+ .../boot/dts/renesas/r9a08g045s33-smarc.dts   |  17 +
+ arch/arm64/boot/dts/renesas/r9a08g045s33.dtsi |  14 +
+ .../boot/dts/renesas/rzg3s-smarc-som.dtsi     | 147 ++++
+ arch/arm64/boot/dts/renesas/rzg3s-smarc.dtsi  |  28 +
+ arch/arm64/configs/defconfig                  |   1 +
+ drivers/clk/renesas/Kconfig                   |   7 +-
+ drivers/clk/renesas/Makefile                  |   1 +
+ drivers/clk/renesas/r9a07g043-cpg.c           |  19 +-
+ drivers/clk/renesas/r9a07g044-cpg.c           |  19 +-
+ drivers/clk/renesas/r9a08g045-cpg.c           | 217 ++++++
+ drivers/clk/renesas/rzg2l-cpg.c               | 495 ++++++++++--
+ drivers/clk/renesas/rzg2l-cpg.h               |  39 +-
+ drivers/pinctrl/renesas/pinctrl-rzg2l.c       | 728 ++++++++++++++----
+ drivers/soc/renesas/Kconfig                   |   6 +
+ drivers/soc/renesas/renesas-soc.c             |  15 +-
+ include/dt-bindings/clock/r9a08g045-cpg.h     | 243 ++++++
+ 24 files changed, 1924 insertions(+), 252 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/renesas/r9a08g045.dtsi
+ create mode 100644 arch/arm64/boot/dts/renesas/r9a08g045s33-smarc.dts
+ create mode 100644 arch/arm64/boot/dts/renesas/r9a08g045s33.dtsi
+ create mode 100644 arch/arm64/boot/dts/renesas/rzg3s-smarc-som.dtsi
+ create mode 100644 arch/arm64/boot/dts/renesas/rzg3s-smarc.dtsi
+ create mode 100644 drivers/clk/renesas/r9a08g045-cpg.c
+ create mode 100644 include/dt-bindings/clock/r9a08g045-cpg.h
+
+-- 
+2.39.2
+
