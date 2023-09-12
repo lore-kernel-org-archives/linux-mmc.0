@@ -2,133 +2,87 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E4A2CA0EF4
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 16:44:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85E2FEE3F0B
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 17:55:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236922AbjILQoE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 12:44:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37074 "EHLO
+        id S237296AbjILRz6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 13:55:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234829AbjILQoD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 12:44:03 -0400
-Received: from mx01.omp.ru (mx01.omp.ru [90.154.21.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 349DC115;
-        Tue, 12 Sep 2023 09:43:58 -0700 (PDT)
-Received: from [192.168.1.103] (31.173.80.111) by msexch01.omp.ru
- (10.188.4.12) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.986.14; Tue, 12 Sep
- 2023 19:43:52 +0300
-Subject: Re: [PATCH 08/37] clk: renesas: rzg2l: trust value returned by
- hardware
-To:     Claudiu <claudiu.beznea@tuxon.dev>, <geert+renesas@glider.be>,
-        <mturquette@baylibre.com>, <sboyd@kernel.org>,
-        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <conor+dt@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <gregkh@linuxfoundation.org>,
-        <jirislaby@kernel.org>, <magnus.damm@gmail.com>,
-        <catalin.marinas@arm.com>, <will@kernel.org>,
-        <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        <biju.das.jz@bp.renesas.com>, <quic_bjorande@quicinc.com>,
-        <arnd@arndb.de>, <konrad.dybcio@linaro.org>,
-        <neil.armstrong@linaro.org>, <nfraprado@collabora.com>,
-        <rafal@milecki.pl>, <wsa+renesas@sang-engineering.com>
-CC:     <linux-renesas-soc@vger.kernel.org>, <linux-clk@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-        <linux-serial@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-9-claudiu.beznea.uj@bp.renesas.com>
-From:   Sergey Shtylyov <s.shtylyov@omp.ru>
-Organization: Open Mobile Platform
-Message-ID: <8490f909-c0ad-5a6d-7a97-03c80a8b47ba@omp.ru>
-Date:   Tue, 12 Sep 2023 19:43:52 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        with ESMTP id S237196AbjILRzz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 13:55:55 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89E511706;
+        Tue, 12 Sep 2023 10:55:50 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C44B9C433C7;
+        Tue, 12 Sep 2023 17:55:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1694541350;
+        bh=NeiCnNPo3KOW64wUUmXZOw3OrKGWSoH40pjr74D8cEg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Ez4kU3Bb4kgBzNrxnsI6uBF3Wbe6qBzHTer7W/rvAOtyCbZZXAqCjiNwu4vIcrtHP
+         NVWrkNFGSxlxU4tMObk8yF8Up3APTrZkI0M4U/H0EYSkGrSkp5Y1E6GSaLIZog7qs8
+         i6/o1o4NGc3k5lIE0OTZcQ9HrYnvM5L3goYs3vhAPpM27X9vkCDI0QEu1UkJLp9LQ7
+         VZ/wNuoGJznbyiQXOF2/JzFEvtyPhwPm2LPpRQ8vUyVDSSU8YEl8hrwwwwrw7s/Th2
+         5Xhu6Lxn4Mq9ancHyaWbXTENfHCIkDkjjLHT5MUygJ9ZhFDEjArTscpYMxSm9zeEY1
+         RyQ5Gm/d05jWA==
+Received: (nullmailer pid 995268 invoked by uid 1000);
+        Tue, 12 Sep 2023 17:55:47 -0000
+Date:   Tue, 12 Sep 2023 12:55:47 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     William Qiu <william.qiu@starfivetech.com>
+Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Emil Renner Berthing <kernel@esmil.dk>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>
+Subject: Re: [PATCH v2 0/3] Change tuning implementation
+Message-ID: <20230912175547.GA993874-robh@kernel.org>
+References: <20230912081402.51477-1-william.qiu@starfivetech.com>
+ <20230912081402.51477-4-william.qiu@starfivetech.com>
 MIME-Version: 1.0
-In-Reply-To: <20230912045157.177966-9-claudiu.beznea.uj@bp.renesas.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [31.173.80.111]
-X-ClientProxiedBy: msexch01.omp.ru (10.188.4.12) To msexch01.omp.ru
- (10.188.4.12)
-X-KSE-ServerInfo: msexch01.omp.ru, 9
-X-KSE-AntiSpam-Interceptor-Info: scan successful
-X-KSE-AntiSpam-Version: 5.9.59, Database issued on: 09/12/2023 16:20:25
-X-KSE-AntiSpam-Status: KAS_STATUS_NOT_DETECTED
-X-KSE-AntiSpam-Method: none
-X-KSE-AntiSpam-Rate: 59
-X-KSE-AntiSpam-Info: Lua profiles 179815 [Sep 12 2023]
-X-KSE-AntiSpam-Info: Version: 5.9.59.0
-X-KSE-AntiSpam-Info: Envelope from: s.shtylyov@omp.ru
-X-KSE-AntiSpam-Info: LuaCore: 530 530 ecb1547b3f72d1df4c71c0b60e67ba6b4aea5432
-X-KSE-AntiSpam-Info: {rep_avail}
-X-KSE-AntiSpam-Info: {Tracking_from_domain_doesnt_match_to}
-X-KSE-AntiSpam-Info: {relay has no DNS name}
-X-KSE-AntiSpam-Info: {SMTP from is not routable}
-X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.80.111 in (user)
- b.barracudacentral.org}
-X-KSE-AntiSpam-Info: {Found in DNSBL: 31.173.80.111 in (user)
- dbl.spamhaus.org}
-X-KSE-AntiSpam-Info: 31.173.80.111:7.7.1,7.4.1,7.1.2,7.7.3;omp.ru:7.1.1;127.0.0.199:7.1.2;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1
-X-KSE-AntiSpam-Info: {cloud_iprep_silent}
-X-KSE-AntiSpam-Info: FromAlignment: s
-X-KSE-AntiSpam-Info: {rdns complete}
-X-KSE-AntiSpam-Info: {fromrtbl complete}
-X-KSE-AntiSpam-Info: ApMailHostAddress: 31.173.80.111
-X-KSE-AntiSpam-Info: Rate: 59
-X-KSE-AntiSpam-Info: Status: not_detected
-X-KSE-AntiSpam-Info: Method: none
-X-KSE-AntiSpam-Info: Auth:dmarc=none header.from=omp.ru;spf=none
- smtp.mailfrom=omp.ru;dkim=none
-X-KSE-Antiphishing-Info: Clean
-X-KSE-Antiphishing-ScanningType: Heuristic
-X-KSE-Antiphishing-Method: None
-X-KSE-Antiphishing-Bases: 09/12/2023 16:26:00
-X-KSE-Antivirus-Interceptor-Info: scan successful
-X-KSE-Antivirus-Info: Clean, bases: 9/12/2023 3:17:00 PM
-X-KSE-Attachment-Filter-Triggered-Rules: Clean
-X-KSE-Attachment-Filter-Triggered-Filters: Clean
-X-KSE-BulkMessagesFiltering-Scan-Result: InTheLimit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230912081402.51477-4-william.qiu@starfivetech.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/12/23 7:51 AM, Claudiu wrote:
-
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+On Tue, Sep 12, 2023 at 04:13:59PM +0800, William Qiu wrote:
+> Hi,
 > 
-> Initial value of CPG_PL2SDHI_DSEL bits 0..1 or 4..6 is 01b. Hardware user's
-> manual (r01uh0914ej0130-rzg2l-rzg2lc.pdf) specifies that setting 0 is
-> prohibited. The rzg2l_cpg_sd_clk_mux_get_parent() should just read
-> CPG_PL2SDHI_DSEL, trust the value and return the proper clock parent index
-> based on the read value. Do this.
+> This series of patches changes the tuning implementation, from the
+> previous way of reading and writing system controller registers to
+> reading and writing UHS_REG_EXT register, thus optimizing the tuning
+> of obtaining delay-chain.
 > 
-> Fixes: eaff33646f4cb ("clk: renesas: rzg2l: Add SDHI clk mux support")
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> ---
->  drivers/clk/renesas/rzg2l-cpg.c | 8 +-------
->  1 file changed, 1 insertion(+), 7 deletions(-)
+> Changes v1->v2:
+
+Please don't send new versions as a reply to the prior version.
+
+> - Rebased to v6.6rc1.
+> - Keeped "starfive,sysreg" in dt-bindings but removed from required.
+> - Changed the function interface name.
+> - Maked the code implementation more concise.
 > 
-> diff --git a/drivers/clk/renesas/rzg2l-cpg.c b/drivers/clk/renesas/rzg2l-cpg.c
-> index 1195d4b1f545..d0d086d6dc51 100644
-> --- a/drivers/clk/renesas/rzg2l-cpg.c
-> +++ b/drivers/clk/renesas/rzg2l-cpg.c
-> @@ -239,14 +239,8 @@ static u8 rzg2l_cpg_sd_clk_mux_get_parent(struct clk_hw *hw)
->  
->  	val >>= GET_SHIFT(hwdata->conf);
->  	val &= GENMASK(GET_WIDTH(hwdata->conf) - 1, 0);
-> -	if (val) {
-> -		val--;
-> -	} else {
-> -		/* Prohibited clk source, change it to 533 MHz(reset value) */
-> -		rzg2l_cpg_sd_clk_mux_set_parent(hw, 0);
-> -	}
->  
-> -	return val;
-> +	return val ? --val : val;
-
-	return val ? val - 1 : 0;
-
+> The patch series is based on v6.6rc1.
+> 
+> William Qiu (3):
+>   dt-bindings: mmc: Remove properties from required
+>   mmc: starfive: Change tuning implementation
+>   riscv: dts: starfive: Drop unused properties and limit frquency
+> 
+>  .../bindings/mmc/starfive,jh7110-mmc.yaml     |   2 -
+>  .../jh7110-starfive-visionfive-2.dtsi         |   4 +
+>  arch/riscv/boot/dts/starfive/jh7110.dtsi      |   2 -
+>  drivers/mmc/host/dw_mmc-starfive.c            | 137 +++++-------------
+>  4 files changed, 44 insertions(+), 101 deletions(-)
+> 
+> --
+> 2.34.1
+> 
