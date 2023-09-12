@@ -2,188 +2,286 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B96DBCA0ED3
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 10:07:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C431ECA0ECA
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 11:26:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233868AbjILKHW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 06:07:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50574 "EHLO
+        id S234435AbjILL0g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 07:26:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233875AbjILKHJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 06:07:09 -0400
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3521319AA
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 03:06:46 -0700 (PDT)
-Received: by mail-ej1-x629.google.com with SMTP id a640c23a62f3a-9aa0495f9cfso780813066b.1
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 03:06:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694513204; x=1695118004; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=IBiBGq8YC/oHp0cfRWnQ5YGlOgmjdNVAihPt6gGNcNM=;
-        b=dR2dofEh4XuswaSIzndsGtc4G9Lo5IjAAN4SKBDvmzwjY2h22OkHIE2UXrNP54vV1c
-         ounoZUGiKswVQtcKDZO+BquiTBBUGAKqyaevyuy6joGwJOd1dARjlBr6bxIyhxmxror3
-         H7DLUj35S6M2ITsxUsLyEzPmWz3qyT4i3516bPL/xFOS1snx+F1KooisTxfH9HlVxIl3
-         cAl4Dpf/M4TeUo/hOAZUb2SFxk8rlKEciKZ+d8g8+kLX/OQBH4OGkn6mD3KMvOWrOU5L
-         31BhbfPqQMsOTuTkG62QZJaTqE4QrUIpz/5fmVZ59AdoVNzIuAFMl5UXwltvGekNBg1A
-         8aXA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694513204; x=1695118004;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=IBiBGq8YC/oHp0cfRWnQ5YGlOgmjdNVAihPt6gGNcNM=;
-        b=fDZq6YbTgUhDGv0mdzQhuqWU15Vp1YLs+Qj+oRG45iCfjRVSV3AXQSMA3KNmbwsULz
-         eMrCRU0BSCm4+YI8B+lbp3oSW1BIlbdMN2pGLA1aG+xyCpq3obQj/LGoY+G+7QQhUqql
-         95b5dXGdurLeYAbWBYSmQ8yFl7tJeUV1hUdOe6uItlcQvOvNe0b4nQBIJxXyBV85885q
-         WcQbp49cOYIECF2AUpB+9AP7pg/FzJUhn5T5CcKei2SB5SfjbXalj2iLvRQ5VYrnE2M0
-         +mshE8xCusH9bKWBdqTTTECxho0PUayEkY5SEAfFm/G1IBkBfNA8qL68fTViAhZtLzIl
-         EeSQ==
-X-Gm-Message-State: AOJu0YwT0QJ89NZWzxoLLI9dmPjVjYuPGDHbPbiMyI0v6e0z7kQZA7P5
-        mZGItxcc3es/vl4HI0NvJpUqSEJ9EYoOfQzKK7s=
-X-Google-Smtp-Source: AGHT+IFRiMz1rvx/NGmDmYF9SHj5ttXTISHN66oLEMrxFb0YDiSPZvNprwhgZC4DPQf5c18sfGiofw==
-X-Received: by 2002:a17:907:c246:b0:9ad:7cbc:ea5b with SMTP id tj6-20020a170907c24600b009ad7cbcea5bmr2310997ejc.10.1694513204542;
-        Tue, 12 Sep 2023 03:06:44 -0700 (PDT)
-Received: from [192.168.86.24] ([5.133.47.210])
-        by smtp.googlemail.com with ESMTPSA id oy25-20020a170907105900b0099d0c0bb92bsm6583517ejb.80.2023.09.12.03.06.43
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 12 Sep 2023 03:06:44 -0700 (PDT)
-Message-ID: <cf3816b0-7718-278c-aac2-bdd2dd85ac87@linaro.org>
-Date:   Tue, 12 Sep 2023 11:06:42 +0100
+        with ESMTP id S234795AbjILL02 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 07:26:28 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C182BF1;
+        Tue, 12 Sep 2023 04:26:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1694517984; x=1726053984;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=Kxq6o/orVznn1HhKfOHTmV4tqMkd+sDRssuFkyejEQ4=;
+  b=YzR4Mxzjv3LR/7FYWKU0hz1UnwKuvje1qT6SIgAY0pTpVsiMYFkU1P2t
+   i8+IuhY7W51ngPcRuFY/YyjEB8FajllxhY82FrKOHoTrka+4rY6RgAixC
+   /fOji7nDaI3nZZ9Z5j5e5rmutm94oB2CGGwxdZvR2zmm9CrbBjjKHnUlu
+   KPem3UMrBNWN5brSCRUPOT6a7mdUVGBKUNW3mVjRchkGjax6jNVZIzQ61
+   7JiL79L952rUi9jKWukawBWEgKxftBvCpLxajt5ZIrQ9hZkKai3/MgpPT
+   8wU+Kzq20jOTfFoREbc2zm/z8UrZmJxBnzBPwmvPXmbFMkLhy9OOh7iGV
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10830"; a="464715700"
+X-IronPort-AV: E=Sophos;i="6.02,139,1688454000"; 
+   d="scan'208";a="464715700"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 04:26:24 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10830"; a="772961428"
+X-IronPort-AV: E=Sophos;i="6.02,139,1688454000"; 
+   d="scan'208";a="772961428"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.45.152])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 04:26:20 -0700
+Message-ID: <8431584b-48b9-52a6-3647-e265bdd1c437@intel.com>
+Date:   Tue, 12 Sep 2023 14:26:16 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH v2 00/10] Hardware wrapped key support for qcom ice and
- ufs
+ Firefox/102.0 Thunderbird/102.15.0
+Subject: Re: [PATCH V11 20/23] mmc: sdhci-uhs2: add add_host() and others to
+ set up the driver
 Content-Language: en-US
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
-        quic_psodagud@quicinc.com, avmenon@quicinc.com,
-        abel.vesa@linaro.org, quic_spuppala@quicinc.com
-References: <20230719170423.220033-1-quic_gaurkash@quicinc.com>
- <f4b5512b-9922-1511-fc22-f14d25e2426a@linaro.org>
- <20230825210727.GA1366@sol.localdomain>
-From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-In-Reply-To: <20230825210727.GA1366@sol.localdomain>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+        dlunev@chromium.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20230908095330.12075-1-victorshihgli@gmail.com>
+ <20230908095330.12075-21-victorshihgli@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230908095330.12075-21-victorshihgli@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Eric/Gaurav,
-
-Adding more information and some questions to this discussion,
-
-On 25/08/2023 14:07, Eric Biggers wrote:
-> Hi Srinivas,
+On 8/09/23 12:53, Victor Shih wrote:
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
 > 
-> On Fri, Aug 25, 2023 at 11:19:41AM +0100, Srinivas Kandagatla wrote:
->>
->> On 19/07/2023 18:04, Gaurav Kashyap wrote:
->>> These patches add support to Qualcomm ICE (Inline Crypto Enginr) for hardware
->>> wrapped keys using Qualcomm Hardware Key Manager (HWKM) and are made on top
->>> of a rebased version  Eric Bigger's set of changes to support wrapped keys in
->>> fscrypt and block below:
->>> https://git.kernel.org/pub/scm/fs/fscrypt/linux.git/log/?h=wrapped-keys-v7
->>> (The rebased patches are not uploaded here)
->>>
->>> Ref v1 here:
->>> https://lore.kernel.org/linux-scsi/20211206225725.77512-1-quic_gaurkash@quicinc.com/
->>>
->>> Explanation and use of hardware-wrapped-keys can be found here:
->>> Documentation/block/inline-encryption.rst
->>>
->>> This patch is organized as follows:
->>>
->>> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
->>> Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
->>> Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
->>> Patch 5-6 - Adds support for wrapped keys in UFS
->>> Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
->>>
->>> NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
->>>         Patch 3, 4, 8, 10 will have MMC equivalents.
->>>
->>> Testing:
->>> Test platform: SM8550 MTP
->>> Engineering trustzone image is required to test this feature only
->>> for SM8550. For SM8650 onwards, all trustzone changes to support this
->>> will be part of the released images.
->>
->> AFAIU, Prior to these proposed changes in scm, HWKM was done with help of
->> TA(Trusted Application) for generate, import, unwrap ... functionality.
->>
->> 1. What is the reason for moving this from TA to new smc calls?
->>
->> Is this because of missing smckinvoke support in upstream?
->>
->> How scalable is this approach? Are we going to add new sec sys calls to
->> every interface to TA?
->>
->> 2. How are the older SoCs going to deal with this, given that you are
->> changing drivers that are common across these?
->>
->> Have you tested these patches on any older platforms?
->>
->> What happens if someone want to add support to wrapped keys to this
->> platforms in upstream, How is that going to be handled?
->>
->> As I understand with this, we will endup with two possible solutions over
->> time in upstream.
+> This is a UHS-II version of sdhci's add_host/remove_host operation.
+> Any sdhci drivers which are capable of handling UHS-II cards must
+> call those functions instead of the corresponding sdhci's.
 > 
-> It's true that Qualcomm based Android devices already use HW-wrapped keys on
-> SoCs earlier than SM8650.  The problem is that the key generation, import, and
-> conversion were added to Android's KeyMint HAL, as a quick way to get the
-> feature out the door when it was needed (so to speak).  Unfortunately this
-> coupled this feature unnecessarily to the Android KeyMint and the corresponding
-> (closed source) userspace HAL provided by Qualcomm, which it's not actually
-> related to.  I'd guess that Qualcomm's closed source userspace HAL makes SMC
-> calls into Qualcomm's KeyMint TA, but I have no insight into those details.
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
 > 
-> The new SMC calls eliminate the dependency on the Android-specific KeyMint.
-> They're also being documented by Qualcomm.  So, as this patchset does, they can
-> be used by Linux in the implementation of new ioctls which provide a vendor
-> independent interface to HW-wrapped key generation, import, and conversion.
+> Updates in V11:
+>  - Remove unused ocr_avail_uhs2.
 > 
-> I think the new approach is the only one that is viable outside the Android
-> context.  As such, I don't think anyone has any plan to upstream support for
-
-Just bit of history afaiu.
-
-on Qcom SoCs there are 3 ways to talk to Trusted service/Trusted 
-application.
-
-1> Adding SCM calls. This is not scalable solution, imagine we keep 
-adding new scm calls and static services to the TZ as required and this 
-is going to bloat up the tz image size. Not only that, new SoCs would 
-need to maintain backward compatibility, which is not going to happen. 
-AFAIU this is discouraged in general and Qcom at some point in time will 
-move away from this..
-
-2> using QSEECOM: This has some scalable issues, which is now replaced 
-with smcinvoke.
-
-3> smcinvoke: This is preferred way to talk to any QTEE service or 
-application. The issue is that this is based on some downstream UAPI 
-which is not upstream ready yet.
-
-IMO, adding a solution that is just going to live for few years is 
-questionable for upstream.
-
-Fixing [3] seems to be much scalable solution along with it we will also 
-get support for this feature in all the Qualcomm platforms.
-
-Am interested to hear what Gaurav has to say on this.
-
-
---srini
-
-
-> HW-wrapped keys for older Qualcomm SoCs that lack the new interface.
+> Updates in V10:
+>  - Move some definitions of PatchV9[05/23] to PatchV10[20/23].
 > 
-> - Eric
+> Updates in V8:
+>  - Change return type to void for __sdhci_uhs2_add_host_v4().
+>  - Remove unused variables in __sdhci_uhs2_add_host_v4().
+> 
+> Updates in V7:
+>  - __sdhci_add_host() to instead of __sdhci_uhs2_add_host()
+>    in sdhci_uhs2_add_host().
+>  - Cancel export state of some functions.
+> 
+> Updates in V6:
+>  - Add complete_work_fn/thread_irq_fn variables in struct sdhci_host.
+>  - Use complete_work_fn/thread_irq_fn variables in
+>    sdhci_alloc_host() and sdhci_uhs2_add_host().
+>  - Use sdhci_uhs2_mode() to simplify code in __sdhci_uhs2_remove_host().
+> 
+> ---
+> 
+>  drivers/mmc/host/sdhci-uhs2.c | 100 ++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-uhs2.h |   2 +
+>  drivers/mmc/host/sdhci.c      |   7 ++-
+>  drivers/mmc/host/sdhci.h      |   3 +
+>  4 files changed, 110 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+> index 7e4265c404ac..add0eea55b24 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.c
+> +++ b/drivers/mmc/host/sdhci-uhs2.c
+> @@ -16,6 +16,7 @@
+>  #include <linux/bitfield.h>
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/host.h>
+> +#include <linux/regulator/consumer.h>
+>  
+>  #include "sdhci.h"
+>  #include "sdhci-uhs2.h"
+> @@ -997,6 +998,105 @@ static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
+>  	return IRQ_HANDLED;
+>  }
+>  
+> +/*****************************************************************************\
+> + *
+> + * Device allocation/registration                                            *
+> + *                                                                           *
+> +\*****************************************************************************/
+> +
+> +static void __sdhci_uhs2_add_host_v4(struct sdhci_host *host, u32 caps1)
+> +{
+> +	struct mmc_host *mmc;
+> +	u32 max_current_caps2;
+> +
+> +	mmc = host->mmc;
+> +
+> +	/* Support UHS2 */
+> +	if (caps1 & SDHCI_SUPPORT_UHS2)
+> +		mmc->caps2 |= MMC_CAP2_SD_UHS2;
+> +
+> +	max_current_caps2 = sdhci_readl(host, SDHCI_MAX_CURRENT_1);
+> +
+> +	if ((caps1 & SDHCI_CAN_VDD2_180) &&
+> +	    !max_current_caps2 &&
+> +	    !IS_ERR(mmc->supply.vmmc2)) {
+> +		/* UHS2 - VDD2 */
+> +		int curr = regulator_get_current_limit(mmc->supply.vmmc2);
+> +
+> +		if (curr > 0) {
+> +			/* convert to SDHCI_MAX_CURRENT format */
+> +			curr = curr / 1000;  /* convert to mA */
+> +			curr = curr / SDHCI_MAX_CURRENT_MULTIPLIER;
+> +			curr = min_t(u32, curr, SDHCI_MAX_CURRENT_LIMIT);
+> +			max_current_caps2 = curr;
+> +		}
+> +	}
+> +
+> +	if (!(caps1 & SDHCI_CAN_VDD2_180))
+> +		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
+> +}
+> +
+> +static int sdhci_uhs2_host_ops_init(struct sdhci_host *host);
+> +
+> +static void __sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
+> +{
+> +	if (!sdhci_uhs2_mode(host))
+> +		return;
+> +
+> +	if (!dead)
+> +		sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_FULL);
+> +}
+> +
+> +int sdhci_uhs2_add_host(struct sdhci_host *host)
+> +{
+> +	struct mmc_host *mmc = host->mmc;
+> +	int ret;
+> +
+> +	ret = sdhci_setup_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	if (host->version >= SDHCI_SPEC_400)
+> +		__sdhci_uhs2_add_host_v4(host, host->caps1);
+> +
+> +	if ((mmc->caps2 & MMC_CAP2_SD_UHS2) && !host->v4_mode)
+> +		/* host doesn't want to enable UHS2 support */
+> +		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
+> +
+> +	/* overwrite ops */
+> +	if (mmc->caps2 & MMC_CAP2_SD_UHS2)
+> +		sdhci_uhs2_host_ops_init(host);
+> +
+> +	host->complete_work_fn = sdhci_uhs2_complete_work;
+> +	host->thread_irq_fn    = sdhci_uhs2_thread_irq;
+> +
+> +	/* LED support not implemented for UHS2 */
+> +	host->quirks |= SDHCI_QUIRK_NO_LED;
+> +
+> +	ret = __sdhci_add_host(host);
+> +	if (ret)
+> +		goto cleanup;
+> +
+> +	return 0;
+> +
+> +cleanup:
+> +	if (host->version >= SDHCI_SPEC_400)
+> +		__sdhci_uhs2_remove_host(host, 0);
+> +
+> +	sdhci_cleanup_host(host);
+> +
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_uhs2_add_host);
+> +
+> +void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
+> +{
+> +	__sdhci_uhs2_remove_host(host, dead);
+> +
+> +	sdhci_remove_host(host, dead);
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_uhs2_remove_host);
+> +
+>  void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>  	struct sdhci_host *host = mmc_priv(mmc);
+> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
+> index 3aa2cb4b39d6..bd5aae054c6f 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.h
+> +++ b/drivers/mmc/host/sdhci-uhs2.h
+> @@ -186,5 +186,7 @@ void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
+>  void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq);
+>  int sdhci_uhs2_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
+>  u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask);
+> +int sdhci_uhs2_add_host(struct sdhci_host *host);
+> +void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead);
+>  
+>  #endif /* __SDHCI_UHS2_H */
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 318d4830732f..b3de7e30ba54 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -4104,6 +4104,9 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+>  
+>  	host->max_timeout_count = 0xE;
+>  
+> +	host->complete_work_fn = sdhci_complete_work;
+> +	host->thread_irq_fn    = sdhci_thread_irq;
+> +
+>  	return host;
+>  }
+>  
+> @@ -4853,7 +4856,7 @@ int __sdhci_add_host(struct sdhci_host *host)
+>  	if (!host->complete_wq)
+>  		return -ENOMEM;
+>  
+> -	INIT_WORK(&host->complete_work, sdhci_complete_work);
+> +	INIT_WORK(&host->complete_work, host->complete_work_fn);
+>  
+>  	timer_setup(&host->timer, sdhci_timeout_timer, 0);
+>  	timer_setup(&host->data_timer, sdhci_timeout_data_timer, 0);
+> @@ -4862,7 +4865,7 @@ int __sdhci_add_host(struct sdhci_host *host)
+>  
+>  	sdhci_init(host, 0);
+>  
+> -	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_thread_irq,
+> +	ret = request_threaded_irq(host->irq, sdhci_irq, host->thread_irq_fn,
+>  				   IRQF_SHARED,	mmc_hostname(mmc), host);
+>  	if (ret) {
+>  		pr_err("%s: Failed to request IRQ %d: %d\n",
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 6bbb9f073f29..5235f2da6568 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -626,6 +626,9 @@ struct sdhci_host {
+>  	struct timer_list timer;	/* Timer for timeouts */
+>  	struct timer_list data_timer;	/* Timer for data timeouts */
+>  
+> +	void		(*complete_work_fn)(struct work_struct *work);
+> +	irqreturn_t	(*thread_irq_fn)(int irq, void *dev_id);
+> +
+>  #if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
+>  	struct dma_chan *rx_chan;
+>  	struct dma_chan *tx_chan;
+
