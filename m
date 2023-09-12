@@ -2,122 +2,121 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA419CA0EC3
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 09:12:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DE06CA0EC3
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 09:17:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233147AbjILJMw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 05:12:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36144 "EHLO
+        id S230225AbjILJRW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 05:17:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37026 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230016AbjILJMv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 05:12:51 -0400
-Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B282171A
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 02:12:47 -0700 (PDT)
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 624CA3F639
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 09:12:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1694509966;
-        bh=XqCmz97wiINzvOoT4WgJ0jIs9/XOEFkVGg6FT5TVn8s=;
-        h=From:In-Reply-To:References:Mime-Version:Date:Message-ID:Subject:
-         To:Cc:Content-Type;
-        b=AfP5do/6J5GIGAwXM5VWuPUlh1EAWHOhJdVtno3OjG1ctcBXJiQZatDq7avxUPtqc
-         2lwZsaguzKfck41ndLSI+4HTawnb00sAKqFBUERkuZXcjCWUB4dPF10dulYGE95gMP
-         8ymATo9/kgFeC5c9aD2/VGUFEXA76xfLUQlDNtRIeFuyPb9U3Zksy6yV6Cwvj8CJ3a
-         qU6IBKt6cYWDnPFk693yUHf1D7W9ltKxNJ0bREg5Vi/ZXZPowZkl59OWjLP6EnIokN
-         pNOPG38WgUVRro62gfOyFu7L6Cb+CxNMBv38r8n3xh5eyq9STldtYAzaqmPuHT2yLc
-         SdvZWNjDZcZDA==
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-414f842870dso61420871cf.1
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 02:12:46 -0700 (PDT)
+        with ESMTP id S229509AbjILJRW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 05:17:22 -0400
+Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 362DAA9;
+        Tue, 12 Sep 2023 02:17:18 -0700 (PDT)
+Received: by mail-pf1-x430.google.com with SMTP id d2e1a72fcca58-68fbb10dea4so1649315b3a.3;
+        Tue, 12 Sep 2023 02:17:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1694510237; x=1695115037; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=owu+iw/2FkUrRYrZDkX+J602qOAcIdeb4iAQuIcFb/M=;
+        b=blxTRj4oK1E/xG/KC2l0mWgEeBMaxnpHIPMUbhoUzxGTekbyDM5NZ9N/Y/L9QoPT3C
+         Y7spyiTvr9AiHVVG0ZNOw0MO3s0ZLUemGwE3gQrgPuJ1RIpS90Swz5tBbVsfrW+PdL0a
+         kHPlka9J/GBc3tYfKPVlQdDCV1eJSq9RcoxiWRoAth1nWAxkndFQ66DysgGrrCfX/bDm
+         K1//tH1ZcWrpNUCcx3C3HxwtDxRSWwx33sN9JFjH858lrcsoUYnjsUXt8PBTl8O/Y20R
+         VUmOzxmH76yrGFAHrd+fNJaruwvb55WvkSuaRJw7LYKvir9UyjFvt7nnJ/TyLdycm+q1
+         YnWA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694509965; x=1695114765;
-        h=cc:to:subject:message-id:date:mime-version:references:in-reply-to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XqCmz97wiINzvOoT4WgJ0jIs9/XOEFkVGg6FT5TVn8s=;
-        b=ct2uf7F56tikDg2Op062MLNOua3U7+uKsEyVTPUrYgdBVvwk3LqW/EFqBzWXydTYIL
-         bjWlb1/cQMYlAj31ttM/2T8kN7r19TpWABt3G30QCRlAqWxvAJrV8bEEzB6Jj1xJC3uI
-         6fnOT3zslQpaA+sxXQ17plhQ3BpZQo0OmZ0y4H8a+KMYDaplfpHqdKBKnXjicDxU/Ip1
-         XtFwmYmZWanSqFvxlA0v0xlYz/DcyBGZTmpuIAqPmRw8LlfyEdKsFw55fnKpwgaJEnhC
-         YmpcAto2YiwRRLrNbCX6BprY4Zw7g5wb/pK8G0ziqzWxzX3QkleX2E3x1tNdfF2KO/jI
-         gUbg==
-X-Gm-Message-State: AOJu0YxFtk6ukoJnZGosGR6WMYL/FIb+FQe7Bbyy1sgOpXJgkmANBSk3
-        tbEMp4mJVl3ZfGTFYN3DXprafcasV+/jLC8nLIwBj2HqiIHrr+X/zjxFLkhZVU3RIT7XLw7iLtX
-        8dQFRsGzgh4IN7ixPFRJvmOUayvMJc1XsuzGHj1gSzBTzf/UQvevkOQ==
-X-Received: by 2002:ac8:5a89:0:b0:412:1c5f:4783 with SMTP id c9-20020ac85a89000000b004121c5f4783mr15578483qtc.10.1694509965372;
-        Tue, 12 Sep 2023 02:12:45 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFQQlGlQgk/r9shaDmrB/tSYmyaL8Wp5LDCM9Gtr+QkolQC9uKaGfomkgojXdkeuMHTeIyAFpf8bRY5ZqnJUC4=
-X-Received: by 2002:ac8:5a89:0:b0:412:1c5f:4783 with SMTP id
- c9-20020ac85a89000000b004121c5f4783mr15578458qtc.10.1694509965100; Tue, 12
- Sep 2023 02:12:45 -0700 (PDT)
-Received: from 348282803490 named unknown by gmailapi.google.com with
- HTTPREST; Tue, 12 Sep 2023 02:12:44 -0700
-From:   Emil Renner Berthing <emil.renner.berthing@canonical.com>
-In-Reply-To: <20230912081402.51477-1-william.qiu@starfivetech.com>
-References: <20230912081402.51477-1-william.qiu@starfivetech.com>
-Mime-Version: 1.0
-Date:   Tue, 12 Sep 2023 02:12:44 -0700
-Message-ID: <CAJM55Z_NjSVwCcS0MfHw3mAwsBuScAU0OXX1Ga1+TfQNHKB7Vw@mail.gmail.com>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: Remove properties from required
-To:     William Qiu <william.qiu@starfivetech.com>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc:     Emil Renner Berthing <kernel@esmil.dk>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>
-Content-Type: text/plain; charset="UTF-8"
+        d=1e100.net; s=20230601; t=1694510237; x=1695115037;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=owu+iw/2FkUrRYrZDkX+J602qOAcIdeb4iAQuIcFb/M=;
+        b=pn0hU1zkD8oYy9nE0HFbLqe3rlMPEtH69gz1npBlfean3rC7hky+N6c6F8XJ4bLZUV
+         m+lxVXD0/5roHeoyb/mEZknHUKQQxVgS2y9FdVAgS4mWRYXTm1vLU+8kDo2fRT0PhIOC
+         oKGq6+aIWdtMASy0MATj4J7iD+w4wh5eDOMWKD5nASu2/E2q9/pRTEe3CvvMEp9UbXGZ
+         4BjNqWREDkhQmjds2dy61pL8munDlsVu4zcuOK2BOKwP2LKOOqbbRa9Jd6dV9+wIco3Q
+         8vovSSV2IYG2Oz2Ku7EYRpqQC5xv+BH5vDDvfVYsYyOfIEQkeGMirLJSe0hrel8ydgNP
+         hmDw==
+X-Gm-Message-State: AOJu0YycX/dcFTYziv8Xm57BBJIsbnUMmo4WATG3QoZiyke+7Q6xs5ZV
+        JdGEudmKf6o+EKdME+gK2BQ=
+X-Google-Smtp-Source: AGHT+IGqXNDHKApQE1bCCD8nNs98zTt/9xRUjd40elC0JNPe6ofIn7CyEUKrWqEeqzUgxUAAINQ11A==
+X-Received: by 2002:a05:6a20:3d82:b0:13d:bf07:7444 with SMTP id s2-20020a056a203d8200b0013dbf077444mr12497353pzi.0.1694510237473;
+        Tue, 12 Sep 2023 02:17:17 -0700 (PDT)
+Received: from localhost.localdomain (2001-b400-e3a1-00a4-e9b8-a113-90c8-ebfb.emome-ip6.hinet.net. [2001:b400:e3a1:a4:e9b8:a113:90c8:ebfb])
+        by smtp.gmail.com with ESMTPSA id fa5-20020a056a002d0500b0068fb5e44827sm4186555pfb.67.2023.09.12.02.17.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 12 Sep 2023 02:17:17 -0700 (PDT)
+From:   Victor Shih <victorshihgli@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, liukun11@huaqin.com,
+        Victor Shih <victorshihgli@gmail.com>,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V1] mmc: sdhci-pci-gli: A workaround to allow GL9750 to enter ASPM L1.2
+Date:   Tue, 12 Sep 2023 17:17:10 +0800
+Message-Id: <20230912091710.7797-1-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-William Qiu wrote:
-> Due to the change of tuning implementation, it's no longer necessary to
-> use the "starfive,sysreg" property in dts, so remove it from required.
+From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-nit: again the device tree should be a description of the hardware, so the
-justification here shouldn't be that the Linux driver doesn't use the field,
-but that it turns out the registers aren't required for the peripheral to work
-properly. Don't respin the series just for this though.
+When GL9750 enters ASPM L1 sub-states, it will stay at L1.1 and will not
+enter L1.2. The workaround is to toggle PM state to allow GL9750 to enter
+ASPM L1.2.
 
-Reviewed-by: Emil Renner Berthing <emil.renner.berthing@canonical.com>
+Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> ---
->  Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-> index 51e1b04e799f..553a75195c2e 100644
-> --- a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-> @@ -55,7 +55,6 @@ required:
->    - clocks
->    - clock-names
->    - interrupts
-> -  - starfive,sysreg
->
->  unevaluatedProperties: false
->
-> @@ -73,5 +72,4 @@ examples:
->          fifo-depth = <32>;
->          fifo-watermark-aligned;
->          data-addr = <0>;
-> -        starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
->      };
-> --
-> 2.34.1
->
->
-> _______________________________________________
-> linux-riscv mailing list
-> linux-riscv@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-riscv
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index ae8c307b7aa7..dd6f09024f08 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -25,6 +25,9 @@
+ #define   GLI_9750_WT_EN_ON	    0x1
+ #define   GLI_9750_WT_EN_OFF	    0x0
+ 
++#define PCI_GLI_9750_PM_CTRL	0xFC
++#define   PCI_GLI_9750_PM_STATE	  GENMASK(1, 0)
++
+ #define SDHCI_GLI_9750_CFG2          0x848
+ #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+ #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+@@ -536,8 +539,12 @@ static void sdhci_gl9750_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ static void gl9750_hw_setting(struct sdhci_host *host)
+ {
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev;
+ 	u32 value;
+ 
++	pdev = slot->chip->pdev;
++
+ 	gl9750_wt_on(host);
+ 
+ 	value = sdhci_readl(host, SDHCI_GLI_9750_CFG2);
+@@ -547,6 +554,13 @@ static void gl9750_hw_setting(struct sdhci_host *host)
+ 			    GLI_9750_CFG2_L1DLY_VALUE);
+ 	sdhci_writel(host, value, SDHCI_GLI_9750_CFG2);
+ 
++	/* toggle PM state to allow GL9750 to enter ASPM L1.2 */
++	pci_read_config_dword(pdev, PCI_GLI_9750_PM_CTRL, &value);
++	value |= PCI_GLI_9750_PM_STATE;
++	pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
++	value &= ~PCI_GLI_9750_PM_STATE;
++	pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
++
+ 	gl9750_wt_off(host);
+ }
+ 
+-- 
+2.25.1
+
