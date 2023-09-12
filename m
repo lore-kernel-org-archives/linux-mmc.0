@@ -2,52 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A778CA0ECE
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 04:52:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EB87CA0ED8
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 04:52:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229504AbjILEwW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 00:52:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51280 "EHLO
+        id S229588AbjILEwa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 00:52:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51398 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229479AbjILEwW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 00:52:22 -0400
-Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 538F7E6C
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:52:18 -0700 (PDT)
-Received: by mail-ed1-x530.google.com with SMTP id 4fb4d7f45d1cf-522dd6b6438so6225860a12.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:52:18 -0700 (PDT)
+        with ESMTP id S229600AbjILEw1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 00:52:27 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A158E6C
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:52:23 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id 2adb3069b0e04-502153ae36cso8302691e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 21:52:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1694494336; x=1695099136; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZL8AUPRM1aegmrc4Jg4uOM+4oALiCtGLkJY+J8Syis0=;
-        b=A22sv3d3DNDHoX7QPOiJI2uQWPQ2CkA+q3mvysmXlMBDsp6Ny+bDNpRUP29JrFlqfE
-         yf2GJTuj5Aiz5MEjr4tzU+k2Omnamfom57uPsg+sDqTiVIQJ8prQuJAO96UOdH6QPHIR
-         rT0bLAfezPTJVTz7f+Lph9M+HpiMvhlcWiBIdKWXQrDF3frkqJjmOds7Sr5jTAhtDA+Q
-         cQs4rdtUBhQMUi2yAckKQbFusUDF3Y1usdyNj9Plr/iRzGi6a4JAtvRnK1HB18Owud1U
-         i1SxYMF9GgrBIEVhbgBalE6O6H2AEaGCxqh+68fEXj5nddk0Fi81oDx2tBnLNGvjmmap
-         +B5w==
+        d=tuxon.dev; s=google; t=1694494341; x=1695099141; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=w90FUtPMI0czzU7H17II7VSdTXdjnYx+N94QP72v1PQ=;
+        b=dKVEIer5m8Q99AOMcFYgITometDGlilno5OUcCA4SYvXn4/ib4VgjN3iceE1MG5PcN
+         5QpFvKndsYgdrAZv5wzCj0aGx8uF6rz0QTh+C2BYhX/DzWzUWRQfW1BUPDbvQUC4V1Sw
+         MNgfi80Ne+I1oOkerKvIeHuXM8pU7DREbYgGyVbylC2hnnH2RlPlaWvB2nvCpu6XLtpb
+         FekDRtUzSOxpkok+rVJzM7RFs4AI3Z5TXexjk4b7h1ZbwVapnmpa+6yZ3f1f3ksZd69c
+         mF2wWTT/qCd8ELJYdg1qZvvUKY/5Cw0W7xFkQ055mEomGhVCp1Y1BRj6QEwDuN9oJ49w
+         ah7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694494336; x=1695099136;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ZL8AUPRM1aegmrc4Jg4uOM+4oALiCtGLkJY+J8Syis0=;
-        b=p/ogEjd5ztjVu7UcwZajStGaF8t5DIiMwQjZWJ8pxuiekCrPs2pj/oLo3k4nTRl38L
-         G7/OTvHzsQbheHeUW/RlzzIw8lUc/0q3C8vgbvoSjDsOizlBQZrjQ743ibYrxC6O2oTz
-         jOzAdD3mPa1jRlctLfY1WRusciSSE2izXHPiqDsV9p+f5Y0M5QEDisiV4VXPGm6rDRaq
-         d1JPNsijBZcU7u4tZCHj+sEa6KAyMY1MFMj4jUFOWbZDs/q4iupgyBObYecxYXD3aSJM
-         p3Td3jzFfwuULZkO3id2i7ngr/Bb6+wfjUgMvyHs7chjL0DbX4tzJVlYTsriFu6AfG4P
-         K/HA==
-X-Gm-Message-State: AOJu0YxH+keZIMdf6sDghA7wBCwa6ukkCovUHwBClVC1rfaStlVE7Kum
-        PLPb0bnpiuDiHEOQ9wbfGxd5Vg==
-X-Google-Smtp-Source: AGHT+IH/7FX3AG4GBKPNWl3bGJcnTxMw8eitbqLPSbHY6Kq8+B6wBqEBknJ7/dQ5zhBRhOc1jR5Sgg==
-X-Received: by 2002:a50:ec90:0:b0:522:6e3f:b65 with SMTP id e16-20020a50ec90000000b005226e3f0b65mr9982020edr.33.1694494336357;
-        Mon, 11 Sep 2023 21:52:16 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1694494341; x=1695099141;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=w90FUtPMI0czzU7H17II7VSdTXdjnYx+N94QP72v1PQ=;
+        b=lPgt+gzOQh1JqfiWZxG5O4MvrD3fjnkfuQpxi18CR3+wBDkyPfIBDlx+H5AFAD68n+
+         LKXVJH5HyI651laJRx9+kglWmBZcLUipf1yeAtaPYYpwSV0HZct/kOLiZkN53m6vzgKJ
+         RTodaw1Xv6txJ0a2iwR73Jei8K3f+RT7qqY5M6Cc+88YCSH54DG/jzQSfd0vhILjvwR0
+         M/f1Ss1WhxdwM685hCf8Nm1nt+Rw+YYQG8av1PJWw6G7qzO2gnq6EC66KWHHY5+OqyRO
+         ErjpMIVUwlbfpYQx9KaQwflaBTEoVfOzVZBqVhTaTp1uMwJNNHwlznrItnHcS05Ih7iA
+         uXLg==
+X-Gm-Message-State: AOJu0YwJPRb+S5b/lEE65jBBk9C0OspGtzEmXpiRNOW4SwjPGfzhz49P
+        0hXrB76JZhcdxTRcWku3EXTD0A==
+X-Google-Smtp-Source: AGHT+IELmzsWU1otNTyeKxCyz+acJywZL+qAyX/1Qem3vil+a9S8qIts3JL61DCTWjnZD5Ll+knGnA==
+X-Received: by 2002:a05:6512:3713:b0:4f9:556b:93c2 with SMTP id z19-20020a056512371300b004f9556b93c2mr8048220lfr.1.1694494341080;
+        Mon, 11 Sep 2023 21:52:21 -0700 (PDT)
 Received: from claudiu-X670E-Pro-RS.. ([82.78.167.145])
-        by smtp.gmail.com with ESMTPSA id f21-20020a05640214d500b0051e22660835sm5422415edx.46.2023.09.11.21.52.14
+        by smtp.gmail.com with ESMTPSA id f21-20020a05640214d500b0051e22660835sm5422415edx.46.2023.09.11.21.52.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Sep 2023 21:52:16 -0700 (PDT)
+        Mon, 11 Sep 2023 21:52:20 -0700 (PDT)
 From:   Claudiu <claudiu.beznea@tuxon.dev>
 X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
 To:     geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
@@ -66,12 +67,13 @@ Cc:     linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
         linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Subject: [PATCH 00/37] Add new Renesas RZ/G3S SoC and RZ/G3S SMARC EVK
-Date:   Tue, 12 Sep 2023 07:51:20 +0300
-Message-Id: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+Subject: [PATCH 02/37] dt-bindings: soc: renesas: document Renesas RZ/G3S SoC variants
+Date:   Tue, 12 Sep 2023 07:51:22 +0300
+Message-Id: <20230912045157.177966-3-claudiu.beznea.uj@bp.renesas.com>
 X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -79,115 +81,30 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-Hi,
+Document RZ/G3S (R9A08G045) SoC variants.
 
-This patch series adds initial support for The Renesas RZ/G3S (R9A08G045{S33})
-SoC. The RZ/G3S device is a general-purpose microprocessor with a
-single-core Arm® Cortex®-A55 (1.1GHz) and a dual-core Arm® Cortex®-M33 (250MHz),
-perfect for an IOT gateway controller.
+Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+---
+ Documentation/devicetree/bindings/soc/renesas/renesas.yaml | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-This includes:
-- SoC identification;
-- clocks (core clocks, pin controller clock, serial interface, SD ch0
-  clock) and corresponding resets;
-- minimal device tree for SoM and carrier boards.
-
-With this series Linux can boot from eMMC or SD card. The eMMC and uSD
-interface are multiplexed on the SoM; selection is made using a hardware
-switch.
-
-Patches are gouped as follows:
-- 01-04 adds SoC identification support;
-- 05	is a simple cleanup on SoC identification support
-- 06-09	contain fixes on clock drivers identified while adding RZ/G3S
-	support
-- 10-14	clock cleanups identifies while adding support for RZ/G3S
-- 15-22	clock changes needed by RZ/G3S
-- 23-30	pinctrl changes needed by RZ/G3S
-- 31	document SDHI for RZ/G3S
-- 32-37 device tree support for RZ/G3S
-
-Thank you,
-Claudiu Beznea
-
-Claudiu Beznea (37):
-  dt-bindings: serial: renesas,scif: document r9a08g045 support
-  dt-bindings: soc: renesas: document Renesas RZ/G3S SoC variants
-  dt-bindings: soc: renesas: renesas,rzg2l-sysc: document RZ/G3S SoC
-  soc: renesas: identify RZ/G3S SoC
-  soc: renesas: remove blank lines
-  clk: renesas: rzg2l: wait for status bit of SD mux before continuing
-  clk: renesas: rzg2l: lock around writes to mux register
-  clk: renesas: rzg2l: trust value returned by hardware
-  clk: renesas: rzg2l: fix computation formula
-  clk: renesas: rzg2l: use core->name for clock name
-  clk: renesas: rzg2l: simplify a bit the logic in
-    rzg2l_mod_clock_endisable()
-  clk: renesas: rzg2l: reduce the critical area
-  clk: renesas: rzg2l: use FIELD_GET() for PLL register fields
-  clk: renesas: rzg2l: use u32 for flag and mux_flags
-  clk: renesas: rzg2l: add support for RZ/G3S PLL
-  clk: renesas: rzg2l: add struct clk_hw_data
-  clk: renesas: rzg2l: remove CPG_SDHI_DSEL from generic header
-  clk: renesas: rzg2l: refactor sd mux driver
-  clk: renesas: rzg2l: add a divider clock for RZ/G3S
-  dt-bindings: clock: renesas,rzg2l-cpg: document RZ/G3S SoC
-  dt-bindings: clock: add r9a08g045 CPG clocks and resets definitions
-  clk: renesas: add minimal boot support for RZ/G3S SoC
-  pinctrl: renesas: rzg2l: index all registers based on port offset
-  pinctrl: renesas: rzg2l: adapt for different SD/PWPR register offsets
-  pinctrl: renesas: rzg2l: adapt function number for RZ/G3S
-  pinctrl: renesas: rzg2l: move ds and oi to SoC specific configuration
-  pinctrl: renesas: rzg2l: add support for different ds values on
-    different groups
-  pinctrl: renesas: rzg2l: make struct
-    rzg2l_pinctrl_data::dedicated_pins constant
-  dt-bindings: pinctrl: renesas: document RZ/G3S SoC
-  pinctrl: renesas: rzg2l: add support for RZ/G3S SoC
-  dt-bindings: mmc: renesas,sdhi: Document RZ/G3S support
-  arm64: dts: renesas: add initial DTSI for RZ/G3S SoC
-  arm64: dts: renesas: rzg3l-smarc-som: add initial support for RZ/G3S
-    SMARC Carrier-II SoM
-  arm64: dts: renesas: rzg3s-smarc: add initial device tree for RZ SMARC
-    Carrier-II Board
-  dt-bindings: arm: renesas: document SMARC Carrier-II EVK
-  arm64: dts: renesas: r9a08g045s33-smarc: add initial device tree for
-    RZ/G3S SMARC EVK board
-  arm64: defconfig: enable RZ/G3S (R9A08G045) SoC
-
- .../bindings/clock/renesas,rzg2l-cpg.yaml     |   1 +
- .../devicetree/bindings/mmc/renesas,sdhi.yaml |   2 +
- .../pinctrl/renesas,rzg2l-pinctrl.yaml        |  26 +-
- .../bindings/serial/renesas,scif.yaml         |   1 +
- .../soc/renesas/renesas,rzg2l-sysc.yaml       |   1 +
- .../bindings/soc/renesas/renesas.yaml         |   8 +
- arch/arm64/boot/dts/renesas/Makefile          |   2 +
- arch/arm64/boot/dts/renesas/r9a08g045.dtsi    | 139 ++++
- .../boot/dts/renesas/r9a08g045s33-smarc.dts   |  17 +
- arch/arm64/boot/dts/renesas/r9a08g045s33.dtsi |  14 +
- .../boot/dts/renesas/rzg3s-smarc-som.dtsi     | 147 ++++
- arch/arm64/boot/dts/renesas/rzg3s-smarc.dtsi  |  28 +
- arch/arm64/configs/defconfig                  |   1 +
- drivers/clk/renesas/Kconfig                   |   7 +-
- drivers/clk/renesas/Makefile                  |   1 +
- drivers/clk/renesas/r9a07g043-cpg.c           |  19 +-
- drivers/clk/renesas/r9a07g044-cpg.c           |  19 +-
- drivers/clk/renesas/r9a08g045-cpg.c           | 217 ++++++
- drivers/clk/renesas/rzg2l-cpg.c               | 495 ++++++++++--
- drivers/clk/renesas/rzg2l-cpg.h               |  39 +-
- drivers/pinctrl/renesas/pinctrl-rzg2l.c       | 728 ++++++++++++++----
- drivers/soc/renesas/Kconfig                   |   6 +
- drivers/soc/renesas/renesas-soc.c             |  15 +-
- include/dt-bindings/clock/r9a08g045-cpg.h     | 243 ++++++
- 24 files changed, 1924 insertions(+), 252 deletions(-)
- create mode 100644 arch/arm64/boot/dts/renesas/r9a08g045.dtsi
- create mode 100644 arch/arm64/boot/dts/renesas/r9a08g045s33-smarc.dts
- create mode 100644 arch/arm64/boot/dts/renesas/r9a08g045s33.dtsi
- create mode 100644 arch/arm64/boot/dts/renesas/rzg3s-smarc-som.dtsi
- create mode 100644 arch/arm64/boot/dts/renesas/rzg3s-smarc.dtsi
- create mode 100644 drivers/clk/renesas/r9a08g045-cpg.c
- create mode 100644 include/dt-bindings/clock/r9a08g045-cpg.h
-
+diff --git a/Documentation/devicetree/bindings/soc/renesas/renesas.yaml b/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
+index 53b95f348f8e..822faf081e84 100644
+--- a/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
++++ b/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
+@@ -474,6 +474,12 @@ properties:
+               - renesas,rzv2mevk2   # RZ/V2M Eval Board v2.0
+           - const: renesas,r9a09g011
+ 
++      - description: RZ/G3S (R9A08G045)
++        items:
++          - enum:
++              - renesas,r9a08g045s33 # PCIe support
++          - const: renesas,r9a08g045
++
+ additionalProperties: true
+ 
+ ...
 -- 
 2.39.2
 
