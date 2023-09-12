@@ -2,141 +2,70 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C05ACA0EC0
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Sep 2023 21:29:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98168CA0EC3
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 01:39:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345424AbjIKVUY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Sep 2023 17:20:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34976 "EHLO
+        id S235591AbjILBjE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Sep 2023 21:39:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235506AbjIKIsp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Sep 2023 04:48:45 -0400
-Received: from wp530.webpack.hosteurope.de (wp530.webpack.hosteurope.de [80.237.130.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43E381A1
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Sep 2023 01:48:41 -0700 (PDT)
-Received: from [2a02:8108:8980:2478:8cde:aa2c:f324:937e]; authenticated
-        by wp530.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.3:ECDHE_RSA_AES_128_GCM_SHA256:128)
-        id 1qfcay-0004oo-4O; Mon, 11 Sep 2023 10:48:36 +0200
-Message-ID: <fd58e1e9-0a15-4320-9a0a-cceeed45d0b4@leemhuis.info>
-Date:   Mon, 11 Sep 2023 10:48:35 +0200
+        with ESMTP id S235262AbjILBiq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Sep 2023 21:38:46 -0400
+Received: from out30-112.freemail.mail.aliyun.com (out30-112.freemail.mail.aliyun.com [115.124.30.112])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48C3A1601AF;
+        Mon, 11 Sep 2023 18:16:28 -0700 (PDT)
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R851e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045176;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0Vruc1gH_1694481384;
+Received: from 30.97.48.71(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0Vruc1gH_1694481384)
+          by smtp.aliyun-inc.com;
+          Tue, 12 Sep 2023 09:16:25 +0800
+Message-ID: <7c4a8e50-499c-ec13-536b-42ee951f58c3@linux.alibaba.com>
+Date:   Tue, 12 Sep 2023 09:16:32 +0800
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
- clock speed before sending HS CMD13")
-Content-Language: en-US, de-DE
-From:   Thorsten Leemhuis <regressions@leemhuis.info>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Brian Norris <briannorris@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Luca Weiss <luca@z3ntu.xyz>,
-        Linux kernel regressions list <regressions@lists.linux.dev>,
-        Ziyang Huang <hzyitc@outlook.com>
-Reply-To: Linux regressions mailing list <regressions@lists.linux.dev>
-References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
- <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
- <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
- <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
- <CAFBinCDwgYw3v31hP4AtV3+Z1o+esDqMKugRwMMMLqSX0Acjzw@mail.gmail.com>
- <CAPDyKFr+hQo+N31r=3f58taf9sYW0UF0ApCJhwz9vRsyNizcvg@mail.gmail.com>
- <CAFBinCDSv_vdu5887vveotvaOGFrZvaSX4jM+7Q3QvDhTdazzw@mail.gmail.com>
- <CAPDyKFpS-UwiaRPMqSpX0mNPrS5p=yJzu3g0=pGyCkWHSYyqWg@mail.gmail.com>
- <CAFBinCCnB=po9x6tsxCzRM99ZqgV9=5jBxS9LaoJqLPGZYSH6g@mail.gmail.com>
- <CAPDyKFpAGUudAJKAmzMbcM=LrALU6ELpwaD-ijy18o7yrPgOqA@mail.gmail.com>
- <3a6f8d86-b369-bcf7-406b-4f7d0cd5cfa3@leemhuis.info>
-In-Reply-To: <3a6f8d86-b369-bcf7-406b-4f7d0cd5cfa3@leemhuis.info>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-bounce-key: webpack.hosteurope.de;regressions@leemhuis.info;1694422121;ba5efe33;
-X-HE-SMSGID: 1qfcay-0004oo-4O
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.0
+Subject: Re: [PATCH] mmc: sdhci-sprd: Fix error code in sdhci_sprd_tuning()
+To:     Dan Carpenter <dan.carpenter@linaro.org>,
+        Wenchao Chen <wenchao.chen@unisoc.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
+References: <a8af0a08-8405-43cc-bd83-85ff25f572ca@moroto.mountain>
+From:   Baolin Wang <baolin.wang@linux.alibaba.com>
+In-Reply-To: <a8af0a08-8405-43cc-bd83-85ff25f572ca@moroto.mountain>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29.08.23 11:59, Linux regression tracking (Thorsten Leemhuis) wrote:
-> Hi, Thorsten here, the Linux kernel's regression tracker. Top-posting
-> for once, to make this easily accessible to everyone.
+
+
+On 9/7/2023 5:54 PM, Dan Carpenter wrote:
+> Return an error code if sdhci_sprd_get_best_clk_sample() fails.
+> Currently, it returns success.
 > 
-> I still have this regression (caused by a commit from Brian, applied by
-> Ulf) on my list of tracked issues. Was there any progress to finally get
-> this fixed[1]? Doesn't look like it from here, but I might have easily
-> missed something, that's why I'm asking.
+> Fixes: d83d251bf3c2 ("mmc: sdhci-sprd: Add SD HS mode online tuning")
+> Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+
+Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
+
+> ---
+> This is from static analysis and has not been tested.
+> ---
+>   drivers/mmc/host/sdhci-sprd.c | 1 +
+>   1 file changed, 1 insertion(+)
 > 
-> [1] this patch from Ziyang Huang afaics was supposed to help, but it
-> went nowhere afaics
-> https://lore.kernel.org/linux-amlogic/TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com/
-> 
-> Or does anybody stop caring?
-
-No reply, then I assume that's the case. In that case I won't waste any
-cycles tracking this:
-
-#regzbot inconclusive: seem nobody cares anymore
-
-Martin, if this is wrong and you want to see this fixed, please speak up.
-
-Ciao, Thorsten (wearing his 'the Linux kernel's regression tracker' hat)
---
-Everything you wanna know about Linux kernel regression tracking:
-https://linux-regtracking.leemhuis.info/about/#tldr
-If I did something stupid, please tell me, as explained on that page.
-
-> On 20.06.23 11:53, Ulf Hansson wrote:
->> On Mon, 19 Jun 2023 at 21:54, Martin Blumenstingl
->> <martin.blumenstingl@googlemail.com> wrote:
->>>
->>> On Wed, Jun 14, 2023 at 5:49 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> [...]
->>>>> Full register dump:
->>>>> # cat /sys/kernel/debug/regmap/c1108e00.mmc/registers
->>>>> 00: 00000900
->>>>> 04: 0000004d
->>>>> 08: e7ffe002
->>>>> 0c: 02f0003f
->>>>> 10: 0003f009
->>>>> 14: 03b81c00
->>>>> 18: 2c43bcf0
->>>>> 1c: e0000150
->>>>> 20: 00000000
->>>>> 24: 00003067
->>>>> 28: 00000000
->>>>> 2c: 00000000
->>>>> 30: 00000000
->>>>> 34: 00fe0cff
->>>>> 38: 0000100b
->>>>>
->>>>> In case you are curious, the driver is: drivers/mmc/host/meson-mx-sdhc-mmc.c
->>>>
->>>> Thanks for sharing this data!
->>>>
->>>> I assume the above registers indicate that we have sent the command
->>>> and are now waiting for an IRQ for a response/error, but we never
->>>> receive one.
->>>>
->>>> To really figure out what is going on, I think we need to do some
->>>> additional low level debugging/testing.
->>>>
->>>> I was looking at the commit message from e4bf1b0970ef ("mmc: host:
->>>> meson-mx-sdhc: new driver for the Amlogic Meson SDHC host"), which
->>>> indicates that the clock management is quite limited for this HW. For
->>>> example, the 51000000Hz isn't one of the supported frequencies. Could
->>>> that be the reason for the problem? Perhaps if we play with changing
->>>> the frequency to something that is considered supported - then can we
->>>> make this work?
->>> You seem to be more familiar with this Amlogic MMC controller than I am ;-)
->>
->> Sometimes a well written commit message actually helps. :-)
->>
->>> Today I finally had some time for testing and when I started Ziyang
->>> Huang provided a patch [0] (admittedly: I think it needs to be
->>> improved, but finally we know that it's a MMC controller driver
->>> limitation and not an MMC core bug)
->>
->> Great news!
->>
->> I will continue to monitor the thread and defer to apply anything
->> until you have given it your blessing, of course.
->>
->> Kind regards
->> Uffe
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index 649ae075e229..6b84ba27e6ab 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -644,6 +644,7 @@ static int sdhci_sprd_tuning(struct mmc_host *mmc, struct mmc_card *card,
+>   	best_clk_sample = sdhci_sprd_get_best_clk_sample(mmc, value);
+>   	if (best_clk_sample < 0) {
+>   		dev_err(mmc_dev(host->mmc), "all tuning phase fail!\n");
+> +		err = best_clk_sample;
+>   		goto out;
+>   	}
+>   
