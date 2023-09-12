@@ -2,286 +2,274 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C431ECA0ECA
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 11:26:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DA5CCA0ECA
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 12:40:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234435AbjILL0g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 07:26:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39704 "EHLO
+        id S235149AbjILMkE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Sep 2023 08:40:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234795AbjILL02 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 07:26:28 -0400
+        with ESMTP id S235141AbjILMkE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 08:40:04 -0400
 Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C182BF1;
-        Tue, 12 Sep 2023 04:26:24 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 93860C4;
+        Tue, 12 Sep 2023 05:40:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1694517984; x=1726053984;
+  t=1694522400; x=1726058400;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=Kxq6o/orVznn1HhKfOHTmV4tqMkd+sDRssuFkyejEQ4=;
-  b=YzR4Mxzjv3LR/7FYWKU0hz1UnwKuvje1qT6SIgAY0pTpVsiMYFkU1P2t
-   i8+IuhY7W51ngPcRuFY/YyjEB8FajllxhY82FrKOHoTrka+4rY6RgAixC
-   /fOji7nDaI3nZZ9Z5j5e5rmutm94oB2CGGwxdZvR2zmm9CrbBjjKHnUlu
-   KPem3UMrBNWN5brSCRUPOT6a7mdUVGBKUNW3mVjRchkGjax6jNVZIzQ61
-   7JiL79L952rUi9jKWukawBWEgKxftBvCpLxajt5ZIrQ9hZkKai3/MgpPT
-   8wU+Kzq20jOTfFoREbc2zm/z8UrZmJxBnzBPwmvPXmbFMkLhy9OOh7iGV
+  bh=dZP1LM+xVZ/yUwnBaICXHVkRiLUwNhOEawORbPO48ZY=;
+  b=VEGgBlT8GC62eCUcr8Xylhm/HexevnJOpNWlGUwRvZ7gSwlCqeZ5t23e
+   U2Pg2AkfSIUp2llowlOQ4iS5k2u/mcc6xO6T+QQq13CzAlalu+XN14hSo
+   xBmLOgT3sjodLR+T0EL1v6082GQYkLRSObLajb/ZoPhem2pv4v/hlPaeN
+   qoqaLCTwxHTiVVl74uOWyXRMaEZruqoJGF/nr2ienPwaYs2WxyxCY7EIE
+   lWimEFyN10qRyjipW6WSmRQs8HbDcWEzbISWmYHchIpufg55eOb9FjlwK
+   adplTkR5uqRHMuecwjrm5dy5uMGU392+rSbpkzPNxTShNgg25l4nkeebD
    w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10830"; a="464715700"
+X-IronPort-AV: E=McAfee;i="6600,9927,10831"; a="464731306"
 X-IronPort-AV: E=Sophos;i="6.02,139,1688454000"; 
-   d="scan'208";a="464715700"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 04:26:24 -0700
+   d="scan'208";a="464731306"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 05:40:00 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10830"; a="772961428"
+X-IronPort-AV: E=McAfee;i="6600,9927,10831"; a="693475259"
 X-IronPort-AV: E=Sophos;i="6.02,139,1688454000"; 
-   d="scan'208";a="772961428"
+   d="scan'208";a="693475259"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.45.152])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 04:26:20 -0700
-Message-ID: <8431584b-48b9-52a6-3647-e265bdd1c437@intel.com>
-Date:   Tue, 12 Sep 2023 14:26:16 +0300
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2023 05:39:56 -0700
+Message-ID: <ef6648b4-94da-20a8-c1e2-b7d6d0090918@intel.com>
+Date:   Tue, 12 Sep 2023 15:39:52 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.15.0
-Subject: Re: [PATCH V11 20/23] mmc: sdhci-uhs2: add add_host() and others to
- set up the driver
+Subject: Re: [PATCH V10 18/23] mmc: sdhci-uhs2: add request() and others
 Content-Language: en-US
-To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20230908095330.12075-1-victorshihgli@gmail.com>
- <20230908095330.12075-21-victorshihgli@gmail.com>
+References: <20230818100217.12725-1-victorshihgli@gmail.com>
+ <20230818100217.12725-19-victorshihgli@gmail.com>
+ <2b3f8b30-1ee1-31dd-53d7-cb2a0deea511@intel.com>
+ <CAK00qKAR_4EaRtLRi_CKPDOy+CTFDw_CzkbmL=GOY2QWTU2yOQ@mail.gmail.com>
+ <18716e05-6138-d326-ab29-f90e03650490@intel.com>
+ <CAK00qKAEW8qkvXUsnb4UVHBSGAtjT-F1bJiKRMOTWR+Pirg3oA@mail.gmail.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230908095330.12075-21-victorshihgli@gmail.com>
+In-Reply-To: <CAK00qKAEW8qkvXUsnb4UVHBSGAtjT-F1bJiKRMOTWR+Pirg3oA@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/09/23 12:53, Victor Shih wrote:
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+On 6/09/23 19:14, Victor Shih wrote:
+> On Thu, Aug 31, 2023 at 7:20 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> On 31/08/23 13:33, Victor Shih wrote:
+>>> On Thu, Aug 31, 2023 at 4:33 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>
+>>>> On 18/08/23 13:02, Victor Shih wrote:
+>>>>> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+>>>>>
+>>>>> This is a sdhci version of mmc's request operation.
+>>>>> It covers both UHS-I and UHS-II.
+>>>>>
+>>>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+>>>>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+>>>>> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+>>>>> ---
+>>>>>
+>>>>> Updates in V10:
+>>>>>  - Use tmode_half_duplex to instead of uhs2_tmode0_flag
+>>>>>    in sdhci_uhs2_set_transfer_mode().
+>>>>>
+>>>>> Updates in V9:
+>>>>>  - Modify the annotations in __sdhci_uhs2_send_command().
+>>>>>
+>>>>> Updates in V8:
+>>>>>  - Adjust the position of matching brackets in
+>>>>>    sdhci_uhs2_send_command_retry().
+>>>>>  - Modify CameCase definition in __sdhci_uhs2_finish_command().
+>>>>>  - Modify error message in __sdhci_uhs2_finish_command().
+>>>>>  - sdhci_uhs2_send_command_retry() to instead of sdhci_uhs2_send_command()
+>>>>>    in sdhci_uhs2_request().
+>>>>>  - Use sdhci_uhs2_mode() to simplify code in sdhci_uhs2_request_atomic().
+>>>>>  - Add forward declaration for sdhci_send_command().
+>>>>>
+>>>>> Updates in V7:
+>>>>>  - Cancel export state of some functions.
+>>>>>  - Remove unnecessary whitespace changes.
+>>>>>
+>>>>> Updates in V6:
+>>>>>  - Add uhs2_dev_cmd() to simplify code.
+>>>>>  - Remove unnecessary functions.
+>>>>>  - Cancel export state of some functions.
+>>>>>  - Drop use CONFIG_MMC_DEBUG().
+>>>>>  - Wrap at 100 columns in some functions.
+>>>>>
+>>>>> ---
+>>>>>
+>>>>>  drivers/mmc/host/sdhci-uhs2.c | 412 ++++++++++++++++++++++++++++++++++
+>>>>>  drivers/mmc/host/sdhci.c      |  49 ++--
+>>>>>  drivers/mmc/host/sdhci.h      |   8 +
+>>>>>  3 files changed, 454 insertions(+), 15 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+>>>>> index 09b86fec9f7b..08fef7174239 100644
+>>>>> --- a/drivers/mmc/host/sdhci-uhs2.c
+>>>>> +++ b/drivers/mmc/host/sdhci-uhs2.c
+>>>>> @@ -14,6 +14,8 @@
+>>>>>  #include <linux/module.h>
+>>>>>  #include <linux/iopoll.h>
+>>>>>  #include <linux/bitfield.h>
+>>>>> +#include <linux/mmc/mmc.h>
+>>>>> +#include <linux/mmc/host.h>
+>>>>>
+>>>>>  #include "sdhci.h"
+>>>>>  #include "sdhci-uhs2.h"
+>>>>> @@ -24,6 +26,8 @@
+>>>>>  #define SDHCI_UHS2_DUMP(f, x...) \
+>>>>>       pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
+>>>>>
+>>>>> +#define UHS2_ARG_IOADR_MASK 0xfff
+>>>>> +
+>>>>>  void sdhci_uhs2_dump_regs(struct sdhci_host *host)
+>>>>>  {
+>>>>>       if (!(sdhci_uhs2_mode(host)))
+>>>>> @@ -58,6 +62,11 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
+>>>>>   *                                                                           *
+>>>>>  \*****************************************************************************/
+>>>>>
+>>>>> +static inline u16 uhs2_dev_cmd(struct mmc_command *cmd)
+>>>>> +{
+>>>>> +     return be16_to_cpu((__be16)cmd->uhs2_cmd->arg) & UHS2_ARG_IOADR_MASK;
+>>>>> +}
+>>>>> +
+>>>>>  static inline int mmc_opt_regulator_set_ocr(struct mmc_host *mmc,
+>>>>>                                           struct regulator *supply,
+>>>>>                                           unsigned short vdd_bit)
+>>>>> @@ -446,6 +455,408 @@ static int sdhci_uhs2_control(struct mmc_host *mmc, enum sd_uhs2_operation op)
+>>>>>       return err;
+>>>>>  }
+>>>>>
+>>>>> +/*****************************************************************************\
+>>>>> + *                                                                           *
+>>>>> + * Core functions                                                            *
+>>>>> + *                                                                           *
+>>>>> +\*****************************************************************************/
+>>>>> +
+>>>>> +static void sdhci_uhs2_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>> +{
+>>>>> +     struct mmc_data *data = cmd->data;
+>>>>> +
+>>>>> +     sdhci_initialize_data(host, data);
+>>>>> +
+>>>>> +     sdhci_prepare_dma(host, data);
+>>>>> +
+>>>>> +     sdhci_writew(host, data->blksz, SDHCI_UHS2_BLOCK_SIZE);
+>>>>> +     sdhci_writew(host, data->blocks, SDHCI_UHS2_BLOCK_COUNT);
+>>>>> +}
+>>>>> +
+>>>>> +static void sdhci_uhs2_finish_data(struct sdhci_host *host)
+>>>>> +{
+>>>>> +     struct mmc_data *data = host->data;
+>>>>> +
+>>>>> +     __sdhci_finish_data_common(host);
+>>>>> +
+>>>>> +     __sdhci_finish_mrq(host, data->mrq);
+>>>>> +}
+>>>>> +
+>>>>> +static void sdhci_uhs2_set_transfer_mode(struct sdhci_host *host, struct mmc_command *cmd)
+>>>>> +{
+>>>>> +     u16 mode;
+>>>>> +     struct mmc_data *data = cmd->data;
+>>>>> +
+>>>>> +     if (!data) {
+>>>>> +             /* clear Auto CMD settings for no data CMDs */
+>>>>> +             if (uhs2_dev_cmd(cmd) == UHS2_DEV_CMD_TRANS_ABORT) {
+>>>>> +                     mode =  0;
+>>>>> +             } else {
+>>>>> +                     mode = sdhci_readw(host, SDHCI_UHS2_TRANS_MODE);
+>>>>> +                     if (cmd->opcode == MMC_STOP_TRANSMISSION || cmd->opcode == MMC_ERASE)
+>>>>> +                             mode |= SDHCI_UHS2_TRNS_WAIT_EBSY;
+>>>>> +                     else
+>>>>> +                             /* send status mode */
+>>>>> +                             if (cmd->opcode == MMC_SEND_STATUS)
+>>>>> +                                     mode = 0;
+>>>>> +             }
+>>>>> +
+>>>>> +             DBG("UHS2 no data trans mode is 0x%x.\n", mode);
+>>>>> +
+>>>>> +             sdhci_writew(host, mode, SDHCI_UHS2_TRANS_MODE);
+>>>>> +             return;
+>>>>> +     }
+>>>>> +
+>>>>> +     WARN_ON(!host->data);
+>>>>> +
+>>>>> +     mode = SDHCI_UHS2_TRNS_BLK_CNT_EN | SDHCI_UHS2_TRNS_WAIT_EBSY;
+>>>>> +     if (data->flags & MMC_DATA_WRITE)
+>>>>> +             mode |= SDHCI_UHS2_TRNS_DATA_TRNS_WRT;
+>>>>> +
+>>>>> +     if (data->blocks == 1 &&
+>>>>> +         data->blksz != 512 &&
+>>>>> +         cmd->opcode != MMC_READ_SINGLE_BLOCK &&
+>>>>> +         cmd->opcode != MMC_WRITE_BLOCK) {
+>>>>> +             mode &= ~SDHCI_UHS2_TRNS_BLK_CNT_EN;
+>>>>> +             mode |= SDHCI_UHS2_TRNS_BLK_BYTE_MODE;
+>>>>> +     }
+>>>>> +
+>>>>> +     if (host->flags & SDHCI_REQ_USE_DMA)
+>>>>> +             mode |= SDHCI_UHS2_TRNS_DMA;
+>>>>> +
+>>>>> +     if ((mmc_card_uhs2_hd_mode(host->mmc)) && cmd->uhs2_cmd->tmode_half_duplex)
+>>>>
+>>>> Should not check mmc_card_uhs2_hd_mode(host->mmc).  The mmc core
+>>>> must get it right.
+>>>>
+>>>> Also why is the setting different for different commands?
+>>>>
+>>>
+>>> Hi, Adrian
+>>>
+>>> I will drop the check  mmc_card_uhs2_hd_mode(host->mmc) in the next version.
+>>> But I'm not quite sure what the "why is the setting different for
+>>> different commands" means.
+>>> Could you help explain it a little bit more clearly?
+>>
+>> In mmc_uhs2_prepare_cmd() there is this code:
+>>
+>>         if (cmd->opcode == SD_APP_SEND_SCR || cmd->opcode == SD_APP_SD_STATUS ||
+>>             cmd->opcode == MMC_SEND_EXT_CSD || cmd->opcode == SD_SWITCH ||
+>>             cmd->opcode == SD_READ_EXTR_SINGLE || cmd->opcode == MMC_SEND_CSD ||
+>>             cmd->opcode == MMC_SEND_CID)
+>>                 cmd->uhs2_cmd->tmode_half_duplex = 0;
+>>         else
+>>                 cmd->uhs2_cmd->tmode_half_duplex = mmc_card_uhs2_hd_mode(host);
+>>
+>> So different commands can have different duplex?  Why is that?
+>>
 > 
-> This is a UHS-II version of sdhci's add_host/remove_host operation.
-> Any sdhci drivers which are capable of handling UHS-II cards must
-> call those functions instead of the corresponding sdhci's.
+> Hi, Adrian
 > 
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> Please correct me if I understand wrong.
+> We use tmode_half_duplex instead of uhs2_tmode0_flag.
+> As I know, the above commands need to be sent in tmode0.
+> That's why I set different duplex for different commands.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+UHS-II Addendum 7.2.1.2 DCMD says:
 
-> ---
-> 
-> Updates in V11:
->  - Remove unused ocr_avail_uhs2.
-> 
-> Updates in V10:
->  - Move some definitions of PatchV9[05/23] to PatchV10[20/23].
-> 
-> Updates in V8:
->  - Change return type to void for __sdhci_uhs2_add_host_v4().
->  - Remove unused variables in __sdhci_uhs2_add_host_v4().
-> 
-> Updates in V7:
->  - __sdhci_add_host() to instead of __sdhci_uhs2_add_host()
->    in sdhci_uhs2_add_host().
->  - Cancel export state of some functions.
-> 
-> Updates in V6:
->  - Add complete_work_fn/thread_irq_fn variables in struct sdhci_host.
->  - Use complete_work_fn/thread_irq_fn variables in
->    sdhci_alloc_host() and sdhci_uhs2_add_host().
->  - Use sdhci_uhs2_mode() to simplify code in __sdhci_uhs2_remove_host().
-> 
-> ---
-> 
->  drivers/mmc/host/sdhci-uhs2.c | 100 ++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-uhs2.h |   2 +
->  drivers/mmc/host/sdhci.c      |   7 ++-
->  drivers/mmc/host/sdhci.h      |   3 +
->  4 files changed, 110 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> index 7e4265c404ac..add0eea55b24 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.c
-> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -16,6 +16,7 @@
->  #include <linux/bitfield.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/host.h>
-> +#include <linux/regulator/consumer.h>
->  
->  #include "sdhci.h"
->  #include "sdhci-uhs2.h"
-> @@ -997,6 +998,105 @@ static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
->  	return IRQ_HANDLED;
->  }
->  
-> +/*****************************************************************************\
-> + *
-> + * Device allocation/registration                                            *
-> + *                                                                           *
-> +\*****************************************************************************/
-> +
-> +static void __sdhci_uhs2_add_host_v4(struct sdhci_host *host, u32 caps1)
-> +{
-> +	struct mmc_host *mmc;
-> +	u32 max_current_caps2;
-> +
-> +	mmc = host->mmc;
-> +
-> +	/* Support UHS2 */
-> +	if (caps1 & SDHCI_SUPPORT_UHS2)
-> +		mmc->caps2 |= MMC_CAP2_SD_UHS2;
-> +
-> +	max_current_caps2 = sdhci_readl(host, SDHCI_MAX_CURRENT_1);
-> +
-> +	if ((caps1 & SDHCI_CAN_VDD2_180) &&
-> +	    !max_current_caps2 &&
-> +	    !IS_ERR(mmc->supply.vmmc2)) {
-> +		/* UHS2 - VDD2 */
-> +		int curr = regulator_get_current_limit(mmc->supply.vmmc2);
-> +
-> +		if (curr > 0) {
-> +			/* convert to SDHCI_MAX_CURRENT format */
-> +			curr = curr / 1000;  /* convert to mA */
-> +			curr = curr / SDHCI_MAX_CURRENT_MULTIPLIER;
-> +			curr = min_t(u32, curr, SDHCI_MAX_CURRENT_LIMIT);
-> +			max_current_caps2 = curr;
-> +		}
-> +	}
-> +
-> +	if (!(caps1 & SDHCI_CAN_VDD2_180))
-> +		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
-> +}
-> +
-> +static int sdhci_uhs2_host_ops_init(struct sdhci_host *host);
-> +
-> +static void __sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
-> +{
-> +	if (!sdhci_uhs2_mode(host))
-> +		return;
-> +
-> +	if (!dead)
-> +		sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_FULL);
-> +}
-> +
-> +int sdhci_uhs2_add_host(struct sdhci_host *host)
-> +{
-> +	struct mmc_host *mmc = host->mmc;
-> +	int ret;
-> +
-> +	ret = sdhci_setup_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	if (host->version >= SDHCI_SPEC_400)
-> +		__sdhci_uhs2_add_host_v4(host, host->caps1);
-> +
-> +	if ((mmc->caps2 & MMC_CAP2_SD_UHS2) && !host->v4_mode)
-> +		/* host doesn't want to enable UHS2 support */
-> +		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
-> +
-> +	/* overwrite ops */
-> +	if (mmc->caps2 & MMC_CAP2_SD_UHS2)
-> +		sdhci_uhs2_host_ops_init(host);
-> +
-> +	host->complete_work_fn = sdhci_uhs2_complete_work;
-> +	host->thread_irq_fn    = sdhci_uhs2_thread_irq;
-> +
-> +	/* LED support not implemented for UHS2 */
-> +	host->quirks |= SDHCI_QUIRK_NO_LED;
-> +
-> +	ret = __sdhci_add_host(host);
-> +	if (ret)
-> +		goto cleanup;
-> +
-> +	return 0;
-> +
-> +cleanup:
-> +	if (host->version >= SDHCI_SPEC_400)
-> +		__sdhci_uhs2_remove_host(host, 0);
-> +
-> +	sdhci_cleanup_host(host);
-> +
-> +	return ret;
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_uhs2_add_host);
-> +
-> +void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
-> +{
-> +	__sdhci_uhs2_remove_host(host, dead);
-> +
-> +	sdhci_remove_host(host, dead);
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_uhs2_remove_host);
-> +
->  void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
->  	struct sdhci_host *host = mmc_priv(mmc);
-> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-> index 3aa2cb4b39d6..bd5aae054c6f 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.h
-> +++ b/drivers/mmc/host/sdhci-uhs2.h
-> @@ -186,5 +186,7 @@ void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
->  void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq);
->  int sdhci_uhs2_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
->  u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask);
-> +int sdhci_uhs2_add_host(struct sdhci_host *host);
-> +void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead);
->  
->  #endif /* __SDHCI_UHS2_H */
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 318d4830732f..b3de7e30ba54 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -4104,6 +4104,9 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
->  
->  	host->max_timeout_count = 0xE;
->  
-> +	host->complete_work_fn = sdhci_complete_work;
-> +	host->thread_irq_fn    = sdhci_thread_irq;
-> +
->  	return host;
->  }
->  
-> @@ -4853,7 +4856,7 @@ int __sdhci_add_host(struct sdhci_host *host)
->  	if (!host->complete_wq)
->  		return -ENOMEM;
->  
-> -	INIT_WORK(&host->complete_work, sdhci_complete_work);
-> +	INIT_WORK(&host->complete_work, host->complete_work_fn);
->  
->  	timer_setup(&host->timer, sdhci_timeout_timer, 0);
->  	timer_setup(&host->data_timer, sdhci_timeout_data_timer, 0);
-> @@ -4862,7 +4865,7 @@ int __sdhci_add_host(struct sdhci_host *host)
->  
->  	sdhci_init(host, 0);
->  
-> -	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_thread_irq,
-> +	ret = request_threaded_irq(host->irq, sdhci_irq, host->thread_irq_fn,
->  				   IRQF_SHARED,	mmc_hostname(mmc), host);
->  	if (ret) {
->  		pr_err("%s: Failed to request IRQ %d: %d\n",
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 6bbb9f073f29..5235f2da6568 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -626,6 +626,9 @@ struct sdhci_host {
->  	struct timer_list timer;	/* Timer for timeouts */
->  	struct timer_list data_timer;	/* Timer for data timeouts */
->  
-> +	void		(*complete_work_fn)(struct work_struct *work);
-> +	irqreturn_t	(*thread_irq_fn)(int irq, void *dev_id);
-> +
->  #if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
->  	struct dma_chan *rx_chan;
->  	struct dma_chan *tx_chan;
+ "Host may set DM to 1 for DCMD which supports multi-block read / write regardless of
+ data transfer length (e.g., CMD18, CMD25). Otherwise, it shall not set DM to 1.
+ (e.g. CMD6, CMD17, CMD24). These rules are also applied to other multi-block read / write
+ commands defined in other Part of SD specifications (for example, Host may set DM to 1
+ for ACMD18 or ACMD25)."
+
+Which sounds like we should check for CMD18 and CMD25 rather than the other way around?
+Perhaps use mmc_op_multi() and add a comment.
 
