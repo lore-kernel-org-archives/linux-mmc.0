@@ -2,114 +2,64 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FD95EEB593
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 05:40:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C12BCA5501
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 07:42:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236623AbjIMFks (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Sep 2023 01:40:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52464 "EHLO
+        id S233874AbjIMHm0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Sep 2023 03:42:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58356 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229485AbjIMFkr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 01:40:47 -0400
-Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87DBB172A
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 22:40:43 -0700 (PDT)
-Received: by mail-lj1-x22c.google.com with SMTP id 38308e7fff4ca-2bfb1167277so12908651fa.2
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 22:40:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1694583642; x=1695188442; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=71OlVQxE8cMBTPBAwgblkofANxXLnUttN6x83QKm24I=;
-        b=SfKcgmdqm7OurFHu7ymtTy2m8s4Qa7E+feQU3rmoqVdE7vf34rKwehbNsxyB0e00Li
-         fstfRZx2nM0MAzHNc3+fEoXi08tF0Ma6QfQl+jGfiCIhdHD4XNKgqpcJfMKHYRGUACIJ
-         qoDQ5Et3Gag6xsaPILWtZu6RZ1Efkl0FR9v8yM5RA7PgcXOcKZXb4qNCyTZRYmDWI6Tx
-         mxHufs6F6vdnBlLUxfmLBzPV3ku2ZYXoI2BzhC0x8TGhgAzy4yEkaIBG9r8uVqlFHGKU
-         z6iTdjGaKnwUz++142FMLXPa+DMZHwZj4fM4/eCG9oRZaCUsSzINq74+5K0yJl0R5Skf
-         V5Nw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694583642; x=1695188442;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=71OlVQxE8cMBTPBAwgblkofANxXLnUttN6x83QKm24I=;
-        b=VWPXT7lY3YNLPwcJzIil4xnsVsYjCpC2Og8DRo0sWG/KlcJmWVhTkwRDC1RSpmbx1d
-         b1NFPnT2vMxnW7S1ulEdBOanHyD/fFHtzSE0NGyQTgjXCapFVQkFXcc3WRUeLdUBxiIo
-         I3B+iJ4NUF4h9ehJiVbdPNUTojrR+OfcYMDGewMkiLS5wDFsV1Rm/LEqaHvKYFGVy87k
-         EWqRrEnk81tOMCP/Mk8me/B+0Db0t74j5AqVseJhD2laz1H9eWUu6YrUdXfUMh3GJxNZ
-         +dAzL4QxVWqOH1gr6p+PT5otSRjxdp1rB5Mh9zbQV5AJ1lnQnWxUBM8GL3S6hevNESKN
-         i56g==
-X-Gm-Message-State: AOJu0Yyk/RucT3aQP2/EcK9BzgSMVm4/puORR+y6vwo202jRaXGeWd2P
-        czJlDPv4fvNmCzxO3mcHKFRHqw==
-X-Google-Smtp-Source: AGHT+IF8hao+YolDUSCPtVx3Gw6N4Lx2rppYX6jWNMGbxXVG9WZR+2tZjXwkXTHdGRMIW8XhcdIuXA==
-X-Received: by 2002:a2e:9216:0:b0:2bc:d097:2b72 with SMTP id k22-20020a2e9216000000b002bcd0972b72mr1522749ljg.48.1694583641685;
-        Tue, 12 Sep 2023 22:40:41 -0700 (PDT)
-Received: from [192.168.50.4] ([82.78.167.145])
-        by smtp.gmail.com with ESMTPSA id os10-20020a170906af6a00b0099b921de301sm7764554ejb.159.2023.09.12.22.40.39
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 12 Sep 2023 22:40:41 -0700 (PDT)
-Message-ID: <dbf668bb-7682-fcbb-b159-8d036bfe3ff2@tuxon.dev>
-Date:   Wed, 13 Sep 2023 08:40:37 +0300
+        with ESMTP id S238614AbjIMHmZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 03:42:25 -0400
+X-Greylist: delayed 384 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 13 Sep 2023 00:42:20 PDT
+Received: from mail.moosomin24.com (mail.moosomin24.com [217.61.112.134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADC3D1729
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 00:42:20 -0700 (PDT)
+Received: by mail.moosomin24.com (Postfix, from userid 1002)
+        id 078338257F; Wed, 13 Sep 2023 09:35:51 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=moosomin24.com;
+        s=mail; t=1694590554;
+        bh=sxkamsLepnJSy5ikFDKOiyq8RChcIfs44Djo0bti1MM=;
+        h=Date:From:To:Subject:From;
+        b=k3a9toKAItU0edoNJgSL4XwFEKfV1S/Elgi16lQb6SmAcObFRMT8MMN3Y4ciutB2C
+         j1xvhIv5hWT1S8ntM0yOl00f4/OA/0KncDqP2/EmGQo9MUZH9Bmlk9vFrOM0+XOf6J
+         TKnea6ksKYtwlwBUA/Fb4Zi0UWFHzTHY7+h7gUxnQXQepZpdFTM39h3/hMArqk6huK
+         whc3yDW6kgoPlfA30OPOgPgVi2X/bTH3k0nAcsS8C6qzXJRtcmvXi+x8LLAa+xqfTt
+         KavBaCCiz6DUhpo158a1Iyd3FMqJfRD/rtjSDyz3JqqvoAYmT4GvyFkO8gHi3bCJHq
+         TRupObgjkijDQ==
+Received: by mail.moosomin24.com for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 07:35:49 GMT
+Message-ID: <20230913084500-0.1.2a.2zkh.0.yfdn77i454@moosomin24.com>
+Date:   Wed, 13 Sep 2023 07:35:49 GMT
+From:   "Philipp Raber" <philipp.raber@moosomin24.com>
+To:     <linux-mmc@vger.kernel.org>
+Subject: Metalworking and welding
+X-Mailer: mail.moosomin24.com
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.0
-Subject: Re: [PATCH 00/37] Add new Renesas RZ/G3S SoC and RZ/G3S SMARC EVK
-Content-Language: en-US
-To:     Linus Walleij <linus.walleij@linaro.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, gregkh@linuxfoundation.org,
-        jirislaby@kernel.org, magnus.damm@gmail.com,
-        catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>,
-        Ulrich Hecht <uli@fpond.eu>
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <CACRpkdYL46wY_4dm2w45kdPqOJ8zU9X=SSAXv_K=9wfBZFqyDQ@mail.gmail.com>
- <CAMuHMdXi6PPFqgjvr6tBXQnXqNb3YL=87JeSiGN0+QqkAvziAA@mail.gmail.com>
- <CACRpkdYFzJD+F4v0DTfppGv39guL6YbeA=5aByxuu3u8Jp7u6A@mail.gmail.com>
-From:   claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <CACRpkdYFzJD+F4v0DTfppGv39guL6YbeA=5aByxuu3u8Jp7u6A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Linus,
+Good morning,
 
-On 12.09.2023 12:05, Linus Walleij wrote:
-> On Tue, Sep 12, 2023 at 11:03 AM Geert Uytterhoeven
-> <geert@linux-m68k.org> wrote:
->> On Tue, Sep 12, 2023 at 10:55 AM Linus Walleij <linus.walleij@linaro.org> wrote:
-> 
->>> For new code try to use <linux/cleanup.h>.
->>> Or if you prefer take a sweep and introduce scoped guards
->>> everywhere (for spinlocks, mutexes..).
->>
->> Hmmm, <linux/cleanup.h> is only available in v6.5 and later.
->> I don't know whether the CiP machinery is planning to backport
->> <linux/cleanup.h> to e.g. v6.1 LTS...
-> 
-> Only for new code! (for-v6.7+)
+We specialize in serial production of metal elements.
 
-Would you prefer <linux/cleanup.h> even if the new code just uses the
-already existing spinlocks, mutexes? Or only for new code that introduces
-new spinlocks, mutexes?
+You do not have to resort to the services of subcontractors - we offer yo=
+u comprehensive services
+Support from design to production to transportation, which guarantees sho=
+rt delivery times orders and lower costs.
 
-Thank you,
-Claudiu Beznea
+We have an extensive machine park and a large team of specialists, thanks=
+ to which we can offer services such as laser sheet metal cutting, pipe a=
+nd profile bending, welding and powder coating.
 
-> 
-> Yours,
-> Linus Walleij
+The main area of our production is currently storage and transport trolle=
+ys. We produce transport pallets, scissor lifts, furniture elements, buil=
+ding formwork and much more.
+
+If you have any need regarding this, please send me a message.
+
+
+Greetings
+Philipp Raber
