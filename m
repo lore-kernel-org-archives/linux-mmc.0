@@ -2,136 +2,160 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76EF6CA5537
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 10:50:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30D0DEDEC40
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 11:29:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238068AbjIMKum (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Sep 2023 06:50:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59310 "EHLO
+        id S238238AbjIML3l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Sep 2023 07:29:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55342 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232545AbjIMKul (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 06:50:41 -0400
-Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 651B7CA;
-        Wed, 13 Sep 2023 03:50:37 -0700 (PDT)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by fd01.gateway.ufhost.com (Postfix) with ESMTP id BEFB424E337;
-        Wed, 13 Sep 2023 18:50:33 +0800 (CST)
-Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 13 Sep
- 2023 18:50:33 +0800
-Received: from [192.168.120.76] (171.223.208.138) by EXMBX168.cuchost.com
- (172.16.6.78) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 13 Sep
- 2023 18:50:32 +0800
-Message-ID: <d6bf4465-28a7-418f-47c9-7189fa746ca0@starfivetech.com>
-Date:   Wed, 13 Sep 2023 18:50:31 +0800
+        with ESMTP id S240129AbjIML3k (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 07:29:40 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9735219AD
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:29:36 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id 2adb3069b0e04-502153ae36cso10790162e87.3
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:29:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1694604574; x=1695209374; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=d+YB6ER9rLtVLBq9rEid6BXzvaD59o5es/ubi9S/WB8=;
+        b=gEU14NnK4yh6K5wSQszAx49YdLDDTjEnMaWslGtu/b2sDwMIN0/AwLTBAttrwkgkHR
+         oa6KZ2VGTSSlMgojPTa/E+1xmK2q2kfRWAENM9ktJKRP9iJ9CuIMpZZ2CwcP2a9dX7bU
+         hkfYWhKbVVW/eWWiZqYWQTuSHrHrzKQXppEBY3aUTRZIEetMkOfxxPAukroH5al9t/aG
+         hHpdaK5ajLQtXKdBH4dIRzBRfDuns+r/7JTOKjbT0wFUyIlwjF7bJOBSSPBsJ3o38GZ3
+         dObbR1NEMNvyOTeVIWmTbhaCyT20HlIQbMz7Pw5PGcpogX8aojg+Xi97myGOzS7HQIdz
+         IkVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694604574; x=1695209374;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=d+YB6ER9rLtVLBq9rEid6BXzvaD59o5es/ubi9S/WB8=;
+        b=I4WVR/KrSMJ1bDYwjx4IZgc5sRTiO2PTr1Lqvv0ioLMgcMBOylRAXLJQ7FeCLuta8k
+         gVHwntU4urBNi1mWWoOVOank5Lasm3oa2Vq9EwbKDrNDb0OI+aRtQobAaGxUY9UFami+
+         v0MdEMMG4pqbSIyjOpLvMBiVRARtA9r1rWxBBhvqJsimoICV5afQ+ldGI8KTZVdaYtZi
+         e/izkY3SX8vSdoBn60LOOB8t+CQoYN36y4HEm6d5VPuyI90AF5dLMbXo8JijFtNE96Ix
+         4b6Tp2ZJjl7YNSZ2y+C0LZb5yk9gK42iVPp/q9DXPyMmlYvGUOwLC2hq6gqPu6cbgrFF
+         qxhw==
+X-Gm-Message-State: AOJu0YwA7StzOuMo0WU1VtFwBK2ebB0ZLxVPeXCcvWC/wZyYp4yz+D0c
+        yGN7L1qAjMypV7+8xZd3GhreRSUT4viz2Bi1jLnHEw==
+X-Google-Smtp-Source: AGHT+IFb0UguTRshbuqSnEdYPChV16O1AzS6uwBm6aDwafv1McNCuDlv8il3PdJ5WRFpjywxJdoAkg==
+X-Received: by 2002:a19:655d:0:b0:500:98ff:4162 with SMTP id c29-20020a19655d000000b0050098ff4162mr1821401lfj.40.1694604574576;
+        Wed, 13 Sep 2023 04:29:34 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id o3-20020ac24343000000b004fdb85646f1sm2113690lfl.201.2023.09.13.04.29.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 13 Sep 2023 04:29:33 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Christian Loehle <christian.loehle@arm.com>,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: core: Fix error propagation for some ioctl commands
+Date:   Wed, 13 Sep 2023 13:29:21 +0200
+Message-Id: <20230913112921.553019-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.0
-Subject: Re: [PATCH v2 3/3] riscv: dts: starfive: Drop unused properties and
- limit frquency
-To:     Emil Renner Berthing <emil.renner.berthing@canonical.com>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-riscv@lists.infradead.org>, <linux-mmc@vger.kernel.org>
-CC:     Emil Renner Berthing <kernel@esmil.dk>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        "Palmer Dabbelt" <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>
-References: <20230912081402.51477-1-william.qiu@starfivetech.com>
- <20230912081402.51477-7-william.qiu@starfivetech.com>
- <CAJM55Z-_V6Ty61u1bF=BziBRwn7bzTygE02g_4B3UW9tG4yikw@mail.gmail.com>
-Content-Language: en-US
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <CAJM55Z-_V6Ty61u1bF=BziBRwn7bzTygE02g_4B3UW9tG4yikw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX168.cuchost.com
- (172.16.6.78)
-X-YovoleRuleAgent: yovoleflag
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Userspace has currently no way of checking the internal R1 response error
+bits for some commands. This is a problem for some commands, like RPMB for
+example. Typically, we may detect that the busy completion has successfully
+ended, while in fact the card did not complete the requested operation.
 
+To fix the problem, let's always poll with CMD13 for these commands and
+during the polling, let's also aggregate the R1 response bits. Before
+completing the ioctl request, let's propagate the R1 response bits too.
 
-On 2023/9/12 21:23, Emil Renner Berthing wrote:
-> William Qiu wrote:
->> Drop unused properties and limit cclk_in to 50M, thus cancelling the
->> internal frequency and adopting the by-pass mode.
-> 
-> That's two unrelated changes which should really be in different patches. But
-> again the hardware still has the relevant field in the syscon registers even if
-> the driver doesn't use it, so maybe just leave them and just keep this patch
-> adding the assigned-clock* properties.
-> 
-> /Emil
-> 
->>
-Will update.
+Reviewed-by: Avri Altman <avri.altman@wdc.com>
+Co-developed-by: Christian Loehle <christian.loehle@arm.com>
+Signed-off-by: Christian Loehle <christian.loehle@arm.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
 
-Best Regards,
-William
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
->> ---
->>  .../riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi | 4 ++++
->>  arch/riscv/boot/dts/starfive/jh7110.dtsi                      | 2 --
->>  2 files changed, 4 insertions(+), 2 deletions(-)
->>
->> diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
->> index d79f94432b27..d1f2ec308bca 100644
->> --- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
->> +++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
->> @@ -205,6 +205,8 @@ &i2c6 {
->>
->>  &mmc0 {
->>  	max-frequency = <100000000>;
->> +	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
->> +	assigned-clock-rates = <50000000>;
->>  	bus-width = <8>;
->>  	cap-mmc-highspeed;
->>  	mmc-ddr-1_8v;
->> @@ -221,6 +223,8 @@ &mmc0 {
->>
->>  &mmc1 {
->>  	max-frequency = <100000000>;
->> +	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
->> +	assigned-clock-rates = <50000000>;
->>  	bus-width = <4>;
->>  	no-sdio;
->>  	no-mmc;
->> diff --git a/arch/riscv/boot/dts/starfive/jh7110.dtsi b/arch/riscv/boot/dts/starfive/jh7110.dtsi
->> index e85464c328d0..7b8e841aeef8 100644
->> --- a/arch/riscv/boot/dts/starfive/jh7110.dtsi
->> +++ b/arch/riscv/boot/dts/starfive/jh7110.dtsi
->> @@ -870,7 +870,6 @@ mmc0: mmc@16010000 {
->>  			fifo-depth = <32>;
->>  			fifo-watermark-aligned;
->>  			data-addr = <0>;
->> -			starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
->>  			status = "disabled";
->>  		};
->>
->> @@ -886,7 +885,6 @@ mmc1: mmc@16020000 {
->>  			fifo-depth = <32>;
->>  			fifo-watermark-aligned;
->>  			data-addr = <0>;
->> -			starfive,sysreg = <&sys_syscon 0x9c 0x1 0x3e>;
->>  			status = "disabled";
->>  		};
->>
->> --
->> 2.34.1
->>
->>
->> _______________________________________________
->> linux-riscv mailing list
->> linux-riscv@lists.infradead.org
->> http://lists.infradead.org/mailman/listinfo/linux-riscv
+Changes in v2:
+	- Updated Christian's email.
+	- Updated the commit message.
+	- Initialize mmc_blk_busy_data struct directly.
+
+---
+ drivers/mmc/core/block.c | 31 ++++++++++++++++++++-----------
+ 1 file changed, 20 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index b5b414a71e0b..3a8f27c3e310 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -179,6 +179,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 			       struct mmc_queue *mq);
+ static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+ static int mmc_spi_err_check(struct mmc_card *card);
++static int mmc_blk_busy_cb(void *cb_data, bool *busy);
+ 
+ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
+ {
+@@ -470,7 +471,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	struct mmc_data data = {};
+ 	struct mmc_request mrq = {};
+ 	struct scatterlist sg;
+-	bool r1b_resp, use_r1b_resp = false;
++	bool r1b_resp;
+ 	unsigned int busy_timeout_ms;
+ 	int err;
+ 	unsigned int target_part;
+@@ -551,8 +552,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	busy_timeout_ms = idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS;
+ 	r1b_resp = (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B;
+ 	if (r1b_resp)
+-		use_r1b_resp = mmc_prepare_busy_cmd(card->host, &cmd,
+-						    busy_timeout_ms);
++		mmc_prepare_busy_cmd(card->host, &cmd, busy_timeout_ms);
+ 
+ 	mmc_wait_for_req(card->host, &mrq);
+ 	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
+@@ -605,19 +605,28 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	if (idata->ic.postsleep_min_us)
+ 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
+ 
+-	/* No need to poll when using HW busy detection. */
+-	if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
+-		return 0;
+-
+ 	if (mmc_host_is_spi(card->host)) {
+ 		if (idata->ic.write_flag || r1b_resp || cmd.flags & MMC_RSP_SPI_BUSY)
+ 			return mmc_spi_err_check(card);
+ 		return err;
+ 	}
+-	/* Ensure RPMB/R1B command has completed by polling with CMD13. */
+-	if (idata->rpmb || r1b_resp)
+-		err = mmc_poll_for_busy(card, busy_timeout_ms, false,
+-					MMC_BUSY_IO);
++
++	/*
++	 * Ensure RPMB, writes and R1B responses are completed by polling with
++	 * CMD13. Note that, usually we don't need to poll when using HW busy
++	 * detection, but here it's needed since some commands may indicate the
++	 * error through the R1 status bits.
++	 */
++	if (idata->rpmb || idata->ic.write_flag || r1b_resp) {
++		struct mmc_blk_busy_data cb_data = {
++			.card = card,
++		};
++
++		err = __mmc_poll_for_busy(card->host, 0, busy_timeout_ms,
++					  &mmc_blk_busy_cb, &cb_data);
++
++		idata->ic.response[0] = cb_data.status;
++	}
+ 
+ 	return err;
+ }
+-- 
+2.34.1
+
