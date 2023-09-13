@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60746EDEC48
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 11:50:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F223EDEC4E
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 11:50:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240559AbjIMLu3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Sep 2023 07:50:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47174 "EHLO
+        id S240613AbjIMLuc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Sep 2023 07:50:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47238 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240556AbjIMLu0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 07:50:26 -0400
-Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4CB7198B
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:50:22 -0700 (PDT)
-Received: by mail-wr1-x431.google.com with SMTP id ffacd0b85a97d-31f7638be6eso5938928f8f.3
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:50:22 -0700 (PDT)
+        with ESMTP id S240561AbjIMLu2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 07:50:28 -0400
+Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DAA6D1990
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:50:23 -0700 (PDT)
+Received: by mail-wm1-x333.google.com with SMTP id 5b1f17b1804b1-401d2e11dacso5431275e9.0
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:50:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1694605821; x=1695210621; darn=vger.kernel.org;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1694605822; x=1695210622; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=9VygHWUUTxJcwgk20gKLWHe+YEMHPQx8FheNmwIckcQ=;
-        b=it6XWD63NWzmlXIvizvgT6JCD9RWAoAEwGWTLHbrTB9cBevk2KasDN3Hvq/cBcMTci
-         /GZ9Jwaj3xM6j67vzx0Iu70UkpbvB/MQox/v6wEkDAdFf3qXsl/3mZZZtqkS8bp8KuEy
-         QUuoJeTzvYc38TIzguvRl1iCzvgBaQ8W41EclIJ/ZVpEn8pEHkEpd23pjO4K3N3wBM9H
-         DDEOdS9C0jYoGRySHc9yWUKHEIFBjQOkH2f2nmNDbYsVShyXfoHVYa2xVDd4aSE/QwIg
-         D7l1gyjKSb6urjJ+WXeDWMiGHlarDCCQMYTori2ay49npCywVbUYkzZA42ZXGjOj/3X9
-         Vcfw==
+        bh=jSDvgG/AlTocCbtsh72PpLY+FqxqCYIc4jmjYno6s+Q=;
+        b=LPBaRxGKMqxZeVdBmAh6uE6kJYetpBgLfZaeQ5ZTeaAnb7dbPzxZMLpW6rKB8MTGET
+         fn6QXEMiRSoXe7fZZnCMqoZSk5OnPd/EPLDMZ3I8m2J8cEyAUQ2tqqUzd6IhD75fhBT/
+         bnXfXL/3vO8x+ScWtCkhQK6+LRdN2uBXZo5RjcHixqOpCkFrZnEQ//PQRxwV0E6O83f4
+         9TR2TPo6vXwxRf03TkU8G/o/UA9C0QhBRuLvTsAD2fn5LEE/r9GB5PmOdp1tpSEkLaSD
+         71XMTllaBzKCrPwd7R0MhZTp7q8MG+5DjV/urg4o+eTVw8bqGmzliKPLWt6/rPmNG025
+         DFsQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694605821; x=1695210621;
+        d=1e100.net; s=20230601; t=1694605822; x=1695210622;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=9VygHWUUTxJcwgk20gKLWHe+YEMHPQx8FheNmwIckcQ=;
-        b=ayOKdO9Kgy2bI0BKAnHO5egbGNabnmZk58Ultr+zyF5ZERH3kF10PPs1hHHUyNJM1E
-         lOVeKjJPH2kJDTzyTY63jYW8ky5IZlWJ8EoS2wxr1y+kUWOftGfMaFoptK7MKBYsyRBi
-         7a6FmpYatKQ/1PYbmLCyxx5HyOr/SsZfQtGBgegb/AEfkMdHJkTWKRhHGucEnE+7F3ir
-         i9fI4YzGuW896kz0oqiGQANx0OvPDStIOcLuxRHddAes/3IiS7EQECK4RAgW1xsxEQBv
-         gMDET8r07E1Fuk1UYBKKTNljeYK2l0Z7zdYX76zM+AMlexU00aR2X69zPWTtNIcvZJ8G
-         QHVg==
-X-Gm-Message-State: AOJu0YwB0wAZmXtW+sAoTVTfVUm9+j5H9lkWJ9/Tja2VAj6KRUj5uCX7
-        DKTAZgbUQpWc2xyd5l28Gew0Sg==
-X-Google-Smtp-Source: AGHT+IE8/xUMx2CxEG3cqDJgSjbSA2NWMS00vPEgINZ0yvChOcoxgNUbEbPflHzcyEJln62XxJ5Bpg==
-X-Received: by 2002:a5d:5957:0:b0:314:12c:4322 with SMTP id e23-20020a5d5957000000b00314012c4322mr1948005wri.4.1694605821222;
-        Wed, 13 Sep 2023 04:50:21 -0700 (PDT)
+        bh=jSDvgG/AlTocCbtsh72PpLY+FqxqCYIc4jmjYno6s+Q=;
+        b=bnCDdkTBWNRZ+UuAeFpPHDTinmamoMxPpAkDvkEJ9XpT9wdlvYH/OLYQRDCnhCAiGj
+         I/TNBadEUGt/COQ1PeDfDzli55oe1+9Wwvon0jXhPRiisTvwW0RHYMV236reMnYtEq9d
+         koiG/+Fjyji7rBUr0Z1oRDo6Zo1QPb6tvWn9bLBOC61EB8q+Xim9GJJGAimj7QT5vaxz
+         ieSNMNXm4cRGFMLbxynig4YdHVhMdoscpf8Uhshr0XUFyqnansJ9YZPVamSJnGAqd/XR
+         /6LVr35PiamPj6DQoBimI9QHqKwQ0P1iVvBv1MSougV5hmYSe3kaTLRmOMhBpgs1sp5S
+         db3A==
+X-Gm-Message-State: AOJu0Yw8Ho1E4zLxeMTSLgPlOw5u9e2JLUfjidH0L/Lij/qOYnGqVdHT
+        VwRUQHCwN/1Dbo8NOPbCendVRQ==
+X-Google-Smtp-Source: AGHT+IESxmTjjKwZ3Mmhzu2vYwbPTXYIyEeB82mrbgAnbchaF/ankGu50kRqPiQDLeOH4+3ZF+l1XA==
+X-Received: by 2002:adf:e885:0:b0:31f:9bd6:e8c3 with SMTP id d5-20020adfe885000000b0031f9bd6e8c3mr1744751wrm.22.1694605822422;
+        Wed, 13 Sep 2023 04:50:22 -0700 (PDT)
 Received: from brgl-uxlite.home ([2a01:cb1d:334:ac00:3b50:bca5:a754:7463])
-        by smtp.gmail.com with ESMTPSA id j14-20020adfd20e000000b0031fc4c31d77sm1932689wrh.88.2023.09.13.04.50.20
+        by smtp.gmail.com with ESMTPSA id j14-20020adfd20e000000b0031fc4c31d77sm1932689wrh.88.2023.09.13.04.50.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Sep 2023 04:50:20 -0700 (PDT)
+        Wed, 13 Sep 2023 04:50:21 -0700 (PDT)
 From:   Bartosz Golaszewski <brgl@bgdev.pl>
 To:     Linus Walleij <linus.walleij@linaro.org>,
         Andy Shevchenko <andy@kernel.org>,
@@ -66,9 +66,9 @@ Cc:     linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-mips@vger.kernel.org,
         linux-mtd@lists.infradead.org, platform-driver-x86@vger.kernel.org,
         Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
-Subject: [PATCH 3/5] mmc: slot-gpio: use gpiod_set_active_[low|high]()
-Date:   Wed, 13 Sep 2023 13:49:59 +0200
-Message-Id: <20230913115001.23183-4-brgl@bgdev.pl>
+Subject: [PATCH 4/5] platform/x86: int3472/discrete: use gpiod_set_active_low()
+Date:   Wed, 13 Sep 2023 13:50:00 +0200
+Message-Id: <20230913115001.23183-5-brgl@bgdev.pl>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230913115001.23183-1-brgl@bgdev.pl>
 References: <20230913115001.23183-1-brgl@bgdev.pl>
@@ -80,44 +80,41 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 
-We have new, less cumbersome and clearer interfaces for controlling GPIO
-polarity. Use them in the MMC code.
+Use the new polarity setter instead of the more cumbersome toggle
+function.
 
 Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 ---
- drivers/mmc/core/slot-gpio.c | 11 +++++------
- 1 file changed, 5 insertions(+), 6 deletions(-)
+ drivers/platform/x86/intel/int3472/clk_and_regulator.c | 2 +-
+ drivers/platform/x86/intel/int3472/led.c               | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 2a2d949a9344..a6fea6559a5e 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -204,12 +204,11 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+diff --git a/drivers/platform/x86/intel/int3472/clk_and_regulator.c b/drivers/platform/x86/intel/int3472/clk_and_regulator.c
+index ef4b3141efcd..31e520838b95 100644
+--- a/drivers/platform/x86/intel/int3472/clk_and_regulator.c
++++ b/drivers/platform/x86/intel/int3472/clk_and_regulator.c
+@@ -183,7 +183,7 @@ int skl_int3472_register_gpio_clock(struct int3472_discrete_device *int3472,
  	}
  
- 	/* override forces default (active-low) polarity ... */
--	if (override_active_level && !gpiod_is_active_low(desc))
--		gpiod_toggle_active_low(desc);
--
-+	if (override_active_level)
-+		gpiod_set_active_low(desc);
- 	/* ... or active-high */
--	if (host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
--		gpiod_toggle_active_low(desc);
-+	else if (host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
-+		gpiod_set_active_high(desc);
+ 	if (polarity == GPIO_ACTIVE_LOW)
+-		gpiod_toggle_active_low(int3472->clock.ena_gpio);
++		gpiod_set_active_low(int3472->clock.ena_gpio);
  
- 	ctx->cd_gpio = desc;
+ 	/* Ensure the pin is in output mode and non-active state */
+ 	gpiod_direction_output(int3472->clock.ena_gpio, 0);
+diff --git a/drivers/platform/x86/intel/int3472/led.c b/drivers/platform/x86/intel/int3472/led.c
+index bca1ce7d0d0c..46c9c569df5e 100644
+--- a/drivers/platform/x86/intel/int3472/led.c
++++ b/drivers/platform/x86/intel/int3472/led.c
+@@ -32,7 +32,7 @@ int skl_int3472_register_pled(struct int3472_discrete_device *int3472,
+ 				     "getting privacy LED GPIO\n");
  
-@@ -256,7 +255,7 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
- 	}
+ 	if (polarity == GPIO_ACTIVE_LOW)
+-		gpiod_toggle_active_low(int3472->pled.gpio);
++		gpiod_set_active_low(int3472->pled.gpio);
  
- 	if (host->caps2 & MMC_CAP2_RO_ACTIVE_HIGH)
--		gpiod_toggle_active_low(desc);
-+		gpiod_set_active_high(desc);
- 
- 	ctx->ro_gpio = desc;
- 
+ 	/* Ensure the pin is in output mode and non-active state */
+ 	gpiod_direction_output(int3472->pled.gpio, 0);
 -- 
 2.39.2
 
