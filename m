@@ -2,135 +2,94 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4FD2EDEC73
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 15:22:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 664F4EDEC79
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 15:37:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234081AbjIMPW2 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Sep 2023 11:22:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49060 "EHLO
+        id S229735AbjIMPhv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Sep 2023 11:37:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230188AbjIMPW1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 11:22:27 -0400
-Received: from mail-qk1-f172.google.com (mail-qk1-f172.google.com [209.85.222.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDED7CE;
-        Wed, 13 Sep 2023 08:22:23 -0700 (PDT)
-Received: by mail-qk1-f172.google.com with SMTP id af79cd13be357-770ef353b8fso326351585a.0;
-        Wed, 13 Sep 2023 08:22:23 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694618543; x=1695223343;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=7YO1tPkDOEwQyc/Dv+HaOfcjogh4Es5EpVUGisTZOW4=;
-        b=sHTB26XNZ8teze6yZ9Ixw9kqdAyYVWnLlDSTGSBflM3o/T8d/XnR0ltTMjN15mwhMe
-         vAch7EnHtODeg9nb4fnZvSlCSxj0nMzfH0NA6iQn2K/AKhZHCUpd1uu4/cBDRMt4/Hx2
-         zw4Rp7dEaHm5T8mKrygsErZOCXUBcHeq0m/IHBMUuapBhjadQoptgQYqi3Se4dpyxn1D
-         ZkN7TiLaUjfZCH9dJUpSCuT0K33qCgrcPNjE1suEoU2X6PpWnp0VAUfraAy9RcfsQL/h
-         5eHFyugAlBv5blCIvJp9geqtNvPX5Usbjh8YdTWKlDqYvTqCfqS6Yc0aP3DE74SNi0u1
-         JIpQ==
-X-Gm-Message-State: AOJu0YwYWS6hYq5QxE0zM8N8KayeOi75z2kpba2NetgULvXQ8O36SDxe
-        QUiFn5RQiBCW5EYYAhW9sPfNcX2Pe5D5KQ==
-X-Google-Smtp-Source: AGHT+IEWLMHZWuUElViNkfPsqVJNkVnRs/obn/xLwb7A1rORq0QfqkXdEdSkStvIeU9CQexjOYe1kg==
-X-Received: by 2002:a0c:e147:0:b0:64a:131f:b214 with SMTP id c7-20020a0ce147000000b0064a131fb214mr2907571qvl.12.1694618542767;
-        Wed, 13 Sep 2023 08:22:22 -0700 (PDT)
-Received: from mail-qk1-f171.google.com (mail-qk1-f171.google.com. [209.85.222.171])
-        by smtp.gmail.com with ESMTPSA id a17-20020a05620a125100b0076f039d87c6sm3966650qkl.82.2023.09.13.08.22.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 13 Sep 2023 08:22:22 -0700 (PDT)
-Received: by mail-qk1-f171.google.com with SMTP id af79cd13be357-76dc77fd01fso436119885a.3;
-        Wed, 13 Sep 2023 08:22:22 -0700 (PDT)
-X-Received: by 2002:a25:ad08:0:b0:d7f:8e1e:a95f with SMTP id
- y8-20020a25ad08000000b00d7f8e1ea95fmr2686664ybi.6.1694618224901; Wed, 13 Sep
- 2023 08:17:04 -0700 (PDT)
+        with ESMTP id S229714AbjIMPhs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 11:37:48 -0400
+Received: from relay9-d.mail.gandi.net (relay9-d.mail.gandi.net [217.70.183.199])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A58CC1;
+        Wed, 13 Sep 2023 08:37:43 -0700 (PDT)
+Received: by mail.gandi.net (Postfix) with ESMTPSA id CFCDFFF805;
+        Wed, 13 Sep 2023 15:37:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+        t=1694619461;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=VDuZH+uvutfHgzRCfxDkmOKfULSH31Y70SqnVTdAeGk=;
+        b=iTv6IPZ5VJ6ivejmv38YJcRCQo4Bk742r5mSjfamtnlAULg3m5HGMB8U+owY39f6WMVb0b
+        1pS4JKckO5+cvma/c7QPR8yQ8z30gBdbSVHME8MYCQR+cO+G1853ASCKJqjO69AoIc5qfn
+        ZUFUu5xx9Sup0UTmjl6Pnm1h4DmSklI5ymlYQbBLpOOEQ4WjR3LT++w3kfOfeNJ60KM1UA
+        Q8V25gbjIOj8MziacdZ0D2/yl3Se9FFa/x6/lTR7mBlaCjz6ZdCWpKBySBo/A4lk4+e8AR
+        r0A6QTwhz/lts1oACqie3EZBrFgebCCFCkbODHPc/UgsOUSA/zKFmqo+rbZF0w==
+Date:   Wed, 13 Sep 2023 17:37:38 +0200
+From:   Miquel Raynal <miquel.raynal@bootlin.com>
+To:     Paul Cercueil <paul@crapouillou.net>
+Cc:     Bartosz Golaszewski <brgl@bgdev.pl>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Andy Shevchenko <andy@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Harvey Hunt <harveyhuntnexus@gmail.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Daniel Scally <djrscally@gmail.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Mark Gross <markgross@kernel.org>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mtd@lists.infradead.org, platform-driver-x86@vger.kernel.org,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Subject: Re: [PATCH 2/5] mtd: rawnand: ingenic: use gpiod_set_active_high()
+Message-ID: <20230913173724.60ed3b8d@xps-13>
+In-Reply-To: <a3c8b1eaba0e7aae190cb5f2ffd8a360fab0251c.camel@crapouillou.net>
+References: <20230913115001.23183-1-brgl@bgdev.pl>
+        <20230913115001.23183-3-brgl@bgdev.pl>
+        <a3c8b1eaba0e7aae190cb5f2ffd8a360fab0251c.camel@crapouillou.net>
+Organization: Bootlin
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.33; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-36-claudiu.beznea.uj@bp.renesas.com>
- <20230912161635.GA877089-robh@kernel.org> <56cf08f2-5d8e-6098-6218-081d8f620abe@tuxon.dev>
-In-Reply-To: <56cf08f2-5d8e-6098-6218-081d8f620abe@tuxon.dev>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 13 Sep 2023 17:16:52 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWntLTk9ZmAF1voE-tdB+4vVzE804h=qsfaoN-8_6RN_Q@mail.gmail.com>
-Message-ID: <CAMuHMdWntLTk9ZmAF1voE-tdB+4vVzE804h=qsfaoN-8_6RN_Q@mail.gmail.com>
-Subject: Re: [PATCH 35/37] dt-bindings: arm: renesas: document SMARC
- Carrier-II EVK
-To:     claudiu beznea <claudiu.beznea@tuxon.dev>
-Cc:     Rob Herring <robh@kernel.org>, mturquette@baylibre.com,
-        sboyd@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        conor+dt@kernel.org, ulf.hansson@linaro.org,
-        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
-        jirislaby@kernel.org, magnus.damm@gmail.com,
-        catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-GND-Sasl: miquel.raynal@bootlin.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Claudiu,
+Hi Bartosz,
 
-On Wed, Sep 13, 2023 at 7:32 AM claudiu beznea <claudiu.beznea@tuxon.dev> wrote:
-> On 12.09.2023 19:16, Rob Herring wrote:
-> > On Tue, Sep 12, 2023 at 07:51:55AM +0300, Claudiu wrote:
-> >> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> >>
-> >> Document Renesas SMARC Carrier-II EVK board which is based on RZ/G3S
-> >> (R9A08G045) SoC. The SMARC Carrier-II EVK consists of RZ/G3S SoM module and
-> >> SMARC Carrier-II carrier board, the SoM module sits on top of carrier
-> >> board.
-> >>
-> >> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+paul@crapouillou.net wrote on Wed, 13 Sep 2023 14:01:47 +0200:
 
-Thanks for your patch!
+> Hi,
+>=20
+> Le mercredi 13 septembre 2023 =C3=A0 13:49 +0200, Bartosz Golaszewski a
+> =C3=A9crit=C2=A0:
+> > From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+> >=20
+> > Use the new, less cumbersome interface for setting the GPIO as
+> > active-high that doesn't require first checking the current state.
+> >=20
+> > Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org> =20
+>=20
+> Works for me.
+>=20
+> Acked-by: Paul Cercueil <paul@crapouillou.net>
 
-> >> --- a/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
-> >> +++ b/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
-> >> @@ -476,6 +476,8 @@ properties:
-> >>
-> >>        - description: RZ/G3S (R9A08G045)
-> >>          items:
-> >> +          - enum:
-> >> +              - renesas,smarc2-evk # SMARC Carrier-II EVK
-> >
-> > You just changed the existing binding...
-> >
-> >>            - enum:
-> >>                - renesas,r9a08g045s33 # PCIe support
-> >
-> > This is the SoM module?
->
-> No, this is a SoC variant which supports PCIe.
+For me as well, the new API looks much better.
 
-Ideally, we need a compatible value for the SoM as well, as the SoM
-can be used stand-alone, or plugged in a different carrier board.
+I saw Hans is fine with you merging the platform/x86 patch. I am also
+fine if all maintainers agree on that. In this case:
 
-For iWave Systems RZ/G1E SODIMM, we have that.
-For the existing RZ/G2L variants, we forgot, but it can still be added...
+Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
 
->
-> > You either need to squash this change or add
-> > another case with 3 entries and maintain the 2 entry case. (there's no
-> > way to express any entry at the beginning or middle can be optional)
-> >
-> >>            - const: renesas,r9a08g045
+However, if you finally need to produce an immutable tag, let me know
+and I will take the patch through our tree.
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Thanks,
+Miqu=C3=A8l
