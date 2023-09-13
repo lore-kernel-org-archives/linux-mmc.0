@@ -2,160 +2,104 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30D0DEDEC40
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 11:29:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4360CEDEC49
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 11:50:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238238AbjIML3l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Sep 2023 07:29:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55342 "EHLO
+        id S240532AbjIMLuZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Sep 2023 07:50:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47060 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240129AbjIML3k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 07:29:40 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9735219AD
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:29:36 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id 2adb3069b0e04-502153ae36cso10790162e87.3
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:29:36 -0700 (PDT)
+        with ESMTP id S240279AbjIMLuX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 07:50:23 -0400
+Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D5D71999
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:50:19 -0700 (PDT)
+Received: by mail-wm1-x32b.google.com with SMTP id 5b1f17b1804b1-403012f27e1so48087745e9.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 04:50:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694604574; x=1695209374; darn=vger.kernel.org;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1694605818; x=1695210618; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=d+YB6ER9rLtVLBq9rEid6BXzvaD59o5es/ubi9S/WB8=;
-        b=gEU14NnK4yh6K5wSQszAx49YdLDDTjEnMaWslGtu/b2sDwMIN0/AwLTBAttrwkgkHR
-         oa6KZ2VGTSSlMgojPTa/E+1xmK2q2kfRWAENM9ktJKRP9iJ9CuIMpZZ2CwcP2a9dX7bU
-         hkfYWhKbVVW/eWWiZqYWQTuSHrHrzKQXppEBY3aUTRZIEetMkOfxxPAukroH5al9t/aG
-         hHpdaK5ajLQtXKdBH4dIRzBRfDuns+r/7JTOKjbT0wFUyIlwjF7bJOBSSPBsJ3o38GZ3
-         dObbR1NEMNvyOTeVIWmTbhaCyT20HlIQbMz7Pw5PGcpogX8aojg+Xi97myGOzS7HQIdz
-         IkVQ==
+        bh=wE2ORVq287JLkcnuWpgymLTUjppVm5JnqXblhoOF+yE=;
+        b=0OOsdDHBRtrLCVZElwuZ1wNqoib2sJOpZLkK56+PrfcUd3OBHx3EGYOp8VemCfHxcz
+         dKy1GmsVheKR+fs2u7NWbawiLo+QVOS6awLxDoxsyFjZkKSFsCBCZUIG6bGO+39RtqRu
+         Leyy7DgAfveKRcsG82LB0WUgz3SsHtrolpN0zR/VM5/bG61OCo9jSXWKHJJaXiJqElNh
+         7A2zDr8i4aMFDD/ETCuI86ZLswFQqki1Jjaj5qdF8sxbSWPMcmJv1MdQtDfA+3KAYejU
+         C7bH2zGLfVz2N8wg3+bVxHwh8qn/GclO0sPWHD6KI0ylQLA4xWzBBRm5jnuQLyQ7PCk7
+         z4qA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694604574; x=1695209374;
+        d=1e100.net; s=20230601; t=1694605818; x=1695210618;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=d+YB6ER9rLtVLBq9rEid6BXzvaD59o5es/ubi9S/WB8=;
-        b=I4WVR/KrSMJ1bDYwjx4IZgc5sRTiO2PTr1Lqvv0ioLMgcMBOylRAXLJQ7FeCLuta8k
-         gVHwntU4urBNi1mWWoOVOank5Lasm3oa2Vq9EwbKDrNDb0OI+aRtQobAaGxUY9UFami+
-         v0MdEMMG4pqbSIyjOpLvMBiVRARtA9r1rWxBBhvqJsimoICV5afQ+ldGI8KTZVdaYtZi
-         e/izkY3SX8vSdoBn60LOOB8t+CQoYN36y4HEm6d5VPuyI90AF5dLMbXo8JijFtNE96Ix
-         4b6Tp2ZJjl7YNSZ2y+C0LZb5yk9gK42iVPp/q9DXPyMmlYvGUOwLC2hq6gqPu6cbgrFF
-         qxhw==
-X-Gm-Message-State: AOJu0YwA7StzOuMo0WU1VtFwBK2ebB0ZLxVPeXCcvWC/wZyYp4yz+D0c
-        yGN7L1qAjMypV7+8xZd3GhreRSUT4viz2Bi1jLnHEw==
-X-Google-Smtp-Source: AGHT+IFb0UguTRshbuqSnEdYPChV16O1AzS6uwBm6aDwafv1McNCuDlv8il3PdJ5WRFpjywxJdoAkg==
-X-Received: by 2002:a19:655d:0:b0:500:98ff:4162 with SMTP id c29-20020a19655d000000b0050098ff4162mr1821401lfj.40.1694604574576;
-        Wed, 13 Sep 2023 04:29:34 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
-        by smtp.gmail.com with ESMTPSA id o3-20020ac24343000000b004fdb85646f1sm2113690lfl.201.2023.09.13.04.29.32
+        bh=wE2ORVq287JLkcnuWpgymLTUjppVm5JnqXblhoOF+yE=;
+        b=X7Zuoj+qlse1Z5Rr8VjFu0Em1URmT5iYNl2s5rRnWjaSSzpHQ7jjMyc/3l/sNVHsGn
+         jrdkgkLhMuUfzfLtG2nw0IYuf+NwPHmd0DHuNPEK3tXHojgELGAXcWkHZP43cmuyyG6+
+         /UWKxf4zKvud4LI772e6FcFhEFtF1upZA//1F68Zthd9DCEGzN888xl/HkV2MharXTgF
+         J+fVLoj1BrfnWbFsYxn3677+PjEgFaeSeqYAbvMmMm8fUkC2J6K2IfB+4+CoxuX8UPSg
+         i7NqmIcgLOiu9MchEN3l0kFGNR8+XRVukztKjHp56SnI1N5Z9whyetdsyD+iflnpCil8
+         eY4g==
+X-Gm-Message-State: AOJu0YwUGNKLkjMlJ968u+tjGCnR2IotJGEm1NiyzIbQoTV6TbOZgSw5
+        IT9DOGlknraWwyJTWGdIUnk6LA==
+X-Google-Smtp-Source: AGHT+IFXSSuEq9wtyazcQ7l1hh+jAkGlzZwC0/98tI2tsHjMXKI3a8JB3xTIjBmtqjgeTD74oF6Sxg==
+X-Received: by 2002:adf:fe47:0:b0:31a:b3aa:d19b with SMTP id m7-20020adffe47000000b0031ab3aad19bmr1937928wrs.23.1694605817854;
+        Wed, 13 Sep 2023 04:50:17 -0700 (PDT)
+Received: from brgl-uxlite.home ([2a01:cb1d:334:ac00:3b50:bca5:a754:7463])
+        by smtp.gmail.com with ESMTPSA id j14-20020adfd20e000000b0031fc4c31d77sm1932689wrh.88.2023.09.13.04.50.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Sep 2023 04:29:33 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Christian Loehle <christian.loehle@arm.com>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v2] mmc: core: Fix error propagation for some ioctl commands
-Date:   Wed, 13 Sep 2023 13:29:21 +0200
-Message-Id: <20230913112921.553019-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        Wed, 13 Sep 2023 04:50:17 -0700 (PDT)
+From:   Bartosz Golaszewski <brgl@bgdev.pl>
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        Andy Shevchenko <andy@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Paul Cercueil <paul@crapouillou.net>,
+        Harvey Hunt <harveyhuntnexus@gmail.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Daniel Scally <djrscally@gmail.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Mark Gross <markgross@kernel.org>,
+        Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mtd@lists.infradead.org, platform-driver-x86@vger.kernel.org,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Subject: [PATCH 0/5] gpio: remove gpiod_toggle_active_low()
+Date:   Wed, 13 Sep 2023 13:49:56 +0200
+Message-Id: <20230913115001.23183-1-brgl@bgdev.pl>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Userspace has currently no way of checking the internal R1 response error
-bits for some commands. This is a problem for some commands, like RPMB for
-example. Typically, we may detect that the busy completion has successfully
-ended, while in fact the card did not complete the requested operation.
+From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 
-To fix the problem, let's always poll with CMD13 for these commands and
-during the polling, let's also aggregate the R1 response bits. Before
-completing the ioctl request, let's propagate the R1 response bits too.
+The semantics of gpiod_toggle_active_low() are just bad and in almost
+all cases require users to check the current state anyway. Let's replace
+it with something clearer and more useful.
 
-Reviewed-by: Avri Altman <avri.altman@wdc.com>
-Co-developed-by: Christian Loehle <christian.loehle@arm.com>
-Signed-off-by: Christian Loehle <christian.loehle@arm.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+For getting this upstream: I'm thinking that I should apply patch 1/5,
+provide other subsystems with an immutable tag and then we can apply
+patch 5/5 for the next release once first four are in master.
 
-Changes in v2:
-	- Updated Christian's email.
-	- Updated the commit message.
-	- Initialize mmc_blk_busy_data struct directly.
+Bartosz Golaszewski (5):
+  gpiolib: provide gpiod_set_active_[low/high]()
+  mtd: rawnand: ingenic: use gpiod_set_active_high()
+  mmc: slot-gpio: use gpiod_set_active_[low|high]()
+  platform/x86: int3472/discrete: use gpiod_set_active_low()
+  gpiolib: remove gpiod_toggle_active_low()
 
----
- drivers/mmc/core/block.c | 31 ++++++++++++++++++++-----------
- 1 file changed, 20 insertions(+), 11 deletions(-)
+ drivers/gpio/gpiolib.c                        | 21 ++++++++++++++-----
+ drivers/mmc/core/slot-gpio.c                  | 11 +++++-----
+ .../mtd/nand/raw/ingenic/ingenic_nand_drv.c   |  5 ++---
+ .../x86/intel/int3472/clk_and_regulator.c     |  2 +-
+ drivers/platform/x86/intel/int3472/led.c      |  2 +-
+ include/linux/gpio/consumer.h                 | 11 ++++++++--
+ 6 files changed, 34 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index b5b414a71e0b..3a8f27c3e310 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -179,6 +179,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 			       struct mmc_queue *mq);
- static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
- static int mmc_spi_err_check(struct mmc_card *card);
-+static int mmc_blk_busy_cb(void *cb_data, bool *busy);
- 
- static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
- {
-@@ -470,7 +471,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	struct mmc_data data = {};
- 	struct mmc_request mrq = {};
- 	struct scatterlist sg;
--	bool r1b_resp, use_r1b_resp = false;
-+	bool r1b_resp;
- 	unsigned int busy_timeout_ms;
- 	int err;
- 	unsigned int target_part;
-@@ -551,8 +552,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	busy_timeout_ms = idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS;
- 	r1b_resp = (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B;
- 	if (r1b_resp)
--		use_r1b_resp = mmc_prepare_busy_cmd(card->host, &cmd,
--						    busy_timeout_ms);
-+		mmc_prepare_busy_cmd(card->host, &cmd, busy_timeout_ms);
- 
- 	mmc_wait_for_req(card->host, &mrq);
- 	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
-@@ -605,19 +605,28 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	if (idata->ic.postsleep_min_us)
- 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
- 
--	/* No need to poll when using HW busy detection. */
--	if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
--		return 0;
--
- 	if (mmc_host_is_spi(card->host)) {
- 		if (idata->ic.write_flag || r1b_resp || cmd.flags & MMC_RSP_SPI_BUSY)
- 			return mmc_spi_err_check(card);
- 		return err;
- 	}
--	/* Ensure RPMB/R1B command has completed by polling with CMD13. */
--	if (idata->rpmb || r1b_resp)
--		err = mmc_poll_for_busy(card, busy_timeout_ms, false,
--					MMC_BUSY_IO);
-+
-+	/*
-+	 * Ensure RPMB, writes and R1B responses are completed by polling with
-+	 * CMD13. Note that, usually we don't need to poll when using HW busy
-+	 * detection, but here it's needed since some commands may indicate the
-+	 * error through the R1 status bits.
-+	 */
-+	if (idata->rpmb || idata->ic.write_flag || r1b_resp) {
-+		struct mmc_blk_busy_data cb_data = {
-+			.card = card,
-+		};
-+
-+		err = __mmc_poll_for_busy(card->host, 0, busy_timeout_ms,
-+					  &mmc_blk_busy_cb, &cb_data);
-+
-+		idata->ic.response[0] = cb_data.status;
-+	}
- 
- 	return err;
- }
 -- 
-2.34.1
+2.39.2
 
