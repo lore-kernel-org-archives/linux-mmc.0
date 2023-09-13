@@ -2,58 +2,59 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1148EDEC4D
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 12:24:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB099EDEC4F
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 12:39:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238451AbjIMMYo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Sep 2023 08:24:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59766 "EHLO
+        id S236200AbjIMMjh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Sep 2023 08:39:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230307AbjIMMYo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 08:24:44 -0400
-Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A26B19A8
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 05:24:40 -0700 (PDT)
-Received: by mail-yb1-xb2c.google.com with SMTP id 3f1490d57ef6-d8164e661abso412673276.1
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 05:24:40 -0700 (PDT)
+        with ESMTP id S231339AbjIMMjh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 08:39:37 -0400
+Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22F6E19AD
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 05:39:33 -0700 (PDT)
+Received: by mail-vs1-xe2d.google.com with SMTP id ada2fe7eead31-450f8f1368cso166301137.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Sep 2023 05:39:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694607879; x=1695212679; darn=vger.kernel.org;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1694608772; x=1695213572; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=vCKxnDesqkrsZ7yc2N/Fu7/OJ4drr6VqYcEJHvcodks=;
-        b=vxKbfQLARYe7n9PhA60DoNm/TpOCGp1cbwa8vsAyFYwt9+QX0e6Rd/v+qcx90xwS0v
-         /ujR3QhO8OqxjR4ovDwYatXhXKB2Yy0ePiL5I6TXJoSd/YtaseNrqvQWZ//ABUlwyD1C
-         4Pcr8elDKTrFT2MXB9jlVcAwLArzWqeBYhMzsLW39lBZFtcDBN48j9tR+fzUqB4KEiQe
-         H4CVs6zQeYvQQig6UMoWR8O0KRXyd7Aalk6wcYsMisQlzsCjewZCxDar6d0vNik/cuhY
-         HR8UcOebcA7eJdyy9Z0HDsCoNCzbQCK666ysqUjaN/mYdF057B8glJaRp+JUuGTq5BMl
-         Q5mA==
+        bh=ofo7sSePT/jaZ7VhEZ8Xa5CLpX5xgx/ZwhBkOWdddew=;
+        b=FS6PKu7cFaiKkXGoREvmNvcSSWrkorNOoAb4llWAGsgpSLVeeW4D/Gm++e0sgDRfyS
+         GBc0IFv3IqiDlzD7V1Pr6EYiCvtQas/PWj+QkoM5mKd1yYELakqwYdUWl2xAq8uhArXh
+         h7GL6P+ZtWmXtporIoYgenT5SSaWXfwd09MSxxBHsnfZseW4XfKU5T+r57b+XRh35x/I
+         DQkaWSQute483X7x8XwVGIlMJIZ6EhaWmd06OxHDG23iKaqye40V5kprbMb6FMVVdObJ
+         n11R2oTaGCL5dijA3BNyqZwY0FO6AE0vJwhnXistP4pdxMgmIFGUFPnbjNndB88k9Lew
+         zcPg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694607879; x=1695212679;
+        d=1e100.net; s=20230601; t=1694608772; x=1695213572;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=vCKxnDesqkrsZ7yc2N/Fu7/OJ4drr6VqYcEJHvcodks=;
-        b=lMYP9co1K0UbO5eeaBuZIk6hvlBBZrKWGBAg5fIzo0uU9D74lixpEJkYCryhW2pD0/
-         55oKabg/eAAHSXMeg4iKD9TtoBJN4m3/AUv6KChLZ91mOSPz01jO9gTgEo3+k/xQgcLe
-         DxCwS5G8R9JIO+6fNh3YGZg/xN00dbVY+iyLiOIN+J++9XsfSwHa54VKLo9QPyVpt96P
-         jo9jhKDeJ5Bd526Sfve0cbZwiZWyC4sCxo6atUt9CLyGVQRHCziAwvbO3wXF2KPaicUk
-         /bK5EcuPwWAw63IHFvZrHQIQLvedCjLQymG2DYTbp352hikdOx9QgEr84lOl7UcSIhWJ
-         8IOg==
-X-Gm-Message-State: AOJu0Yxah1mgyjIoPSlkHPSg3EZZwQE21hGw3Mq7fig3xEy9WxYN7BLI
-        0us0BIRcIc9GZJrTymrBiVPEYAPNKdoHvNXbLz3KaQ==
-X-Google-Smtp-Source: AGHT+IE8wHWtBHQhWxeImNTh2xHB8xY4DlJAz5zyhEtTpEQcIyhnt6SupOHKd7UVSyFDSlkPFcRI5nGIciiQMYVkWDE=
-X-Received: by 2002:a25:da06:0:b0:d81:70b6:c24b with SMTP id
- n6-20020a25da06000000b00d8170b6c24bmr686830ybf.19.1694607878656; Wed, 13 Sep
- 2023 05:24:38 -0700 (PDT)
+        bh=ofo7sSePT/jaZ7VhEZ8Xa5CLpX5xgx/ZwhBkOWdddew=;
+        b=NttemtSV80vVxWRNKF0tc69wF9kxwXW7ZNX4aqKMRyz0daz6FL946DpmxdLBnDqo3S
+         kRdweZlTNEAjLp+CqFmR0OGrLznPQn6ebWJkU/SsFuYPwltXTgLx6bs0UwNf+yOs25m7
+         fmnHfciiT/mxys0cNX1G+TOYPEKV1zSSWL9AElbPmQlbjrasry63EubJ59F4H3VKpovF
+         42dGtCYv2KMdgPekc00CuM+Bb+Y8lBtZs3GJ5Q2uRk3+4IoymYOz9AeVQQBMhmhMQ+g4
+         ZEhxmt1nzfOFSm6pEiN4qCL+psXwkQyiwbJG4SpxqYVOM5fR4eGRIicZfH7r96QbEn07
+         c26Q==
+X-Gm-Message-State: AOJu0YysoHvLkTLRx43xSTaR21iUS+FoMM2Yo/0jaTjP3y9H0W6AzGQo
+        5UJyuiEGEa8K5t96BQb7AFn5bbuRFlcfxdsLjh2rgQ==
+X-Google-Smtp-Source: AGHT+IGdKI7ktabjI9KwOzEcCjHAPyvQReZHZJXN4jgvOMDrMNawaWOJWq7y+jd93g3lR7Fo2HZ29IzhmronhGMfaDk=
+X-Received: by 2002:a67:fa03:0:b0:447:779b:a357 with SMTP id
+ i3-20020a67fa03000000b00447779ba357mr1865242vsq.32.1694608772217; Wed, 13 Sep
+ 2023 05:39:32 -0700 (PDT)
 MIME-Version: 1.0
 References: <20230913115001.23183-1-brgl@bgdev.pl> <20230913115001.23183-4-brgl@bgdev.pl>
-In-Reply-To: <20230913115001.23183-4-brgl@bgdev.pl>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 13 Sep 2023 14:24:27 +0200
-Message-ID: <CACRpkdax-CrB42LeQ1bs3E7VqMncsgEwMs7b_v7J6R5AE+BjAg@mail.gmail.com>
+ <CACRpkdax-CrB42LeQ1bs3E7VqMncsgEwMs7b_v7J6R5AE+BjAg@mail.gmail.com>
+In-Reply-To: <CACRpkdax-CrB42LeQ1bs3E7VqMncsgEwMs7b_v7J6R5AE+BjAg@mail.gmail.com>
+From:   Bartosz Golaszewski <brgl@bgdev.pl>
+Date:   Wed, 13 Sep 2023 14:39:21 +0200
+Message-ID: <CAMRc=Mdt0wbjzbwBLK5m--VLV2WE5JybgrNYWXtbinPu_c=psw@mail.gmail.com>
 Subject: Re: [PATCH 3/5] mmc: slot-gpio: use gpiod_set_active_[low|high]()
-To:     Bartosz Golaszewski <brgl@bgdev.pl>
+To:     Linus Walleij <linus.walleij@linaro.org>
 Cc:     Andy Shevchenko <andy@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Paul Cercueil <paul@crapouillou.net>,
@@ -75,35 +76,62 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 13, 2023 at 1:50=E2=80=AFPM Bartosz Golaszewski <brgl@bgdev.pl>=
- wrote:
-
-> From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+On Wed, Sep 13, 2023 at 2:24=E2=80=AFPM Linus Walleij <linus.walleij@linaro=
+.org> wrote:
 >
-> We have new, less cumbersome and clearer interfaces for controlling GPIO
-> polarity. Use them in the MMC code.
+> On Wed, Sep 13, 2023 at 1:50=E2=80=AFPM Bartosz Golaszewski <brgl@bgdev.p=
+l> wrote:
 >
-> Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+> > From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+> >
+> > We have new, less cumbersome and clearer interfaces for controlling GPI=
+O
+> > polarity. Use them in the MMC code.
+> >
+> > Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+>
+> I like the looks of the code better, obviously but this looks like this f=
+or
+> a reason unfortunately.
+>
+> See the following from
+> Documentation/devicetree/bindings/mmc/mmc-controller.yaml:
+>
+>   # CD and WP lines can be implemented on the hardware in one of two
+>   # ways: as GPIOs, specified in cd-gpios and wp-gpios properties, or
+>   # as dedicated pins. Polarity of dedicated pins can be specified,
+>   # using *-inverted properties. GPIO polarity can also be specified
+>   # using the GPIO_ACTIVE_LOW flag. This creates an ambiguity in the
+>   # latter case. We choose to use the XOR logic for GPIO CD and WP
+>   # lines.  This means, the two properties are "superimposed," for
+>   # example leaving the GPIO_ACTIVE_LOW flag clear and specifying the
+>   # respective *-inverted property property results in a
+>   # double-inversion and actually means the "normal" line polarity is
+>   # in effect.
+>
 
-I like the looks of the code better, obviously but this looks like this for
-a reason unfortunately.
+I hate it, thanks. :)
 
-See the following from
-Documentation/devicetree/bindings/mmc/mmc-controller.yaml:
+> Will you still provide the desired "double inversion" after this patch?
+>
 
-  # CD and WP lines can be implemented on the hardware in one of two
-  # ways: as GPIOs, specified in cd-gpios and wp-gpios properties, or
-  # as dedicated pins. Polarity of dedicated pins can be specified,
-  # using *-inverted properties. GPIO polarity can also be specified
-  # using the GPIO_ACTIVE_LOW flag. This creates an ambiguity in the
-  # latter case. We choose to use the XOR logic for GPIO CD and WP
-  # lines.  This means, the two properties are "superimposed," for
-  # example leaving the GPIO_ACTIVE_LOW flag clear and specifying the
-  # respective *-inverted property property results in a
-  # double-inversion and actually means the "normal" line polarity is
-  # in effect.
+Not in the current form. Would it work to go:
 
-Will you still provide the desired "double inversion" after this patch?
+if (override_active_level) {
+    if (!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH))
+        gpiod_set_active_high(desc);
+    else
+        gpiod_set_active_low(desc);
+} else {
+    if (host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
+        gpiod_set_active_high(desc);
+    else
+        gpiod_set_active_low(desc);
+}
 
-Yours,
-Linus Walleij
+?
+
+Alternatively we could reimplement the toggle semantics locally in a
+helper function in order to get rid of it from GPIOLIB.
+
+Bart
