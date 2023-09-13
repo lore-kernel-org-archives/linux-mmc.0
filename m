@@ -2,87 +2,129 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85E2FEE3F0B
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Sep 2023 17:55:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A11C3EEB596
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Sep 2023 05:32:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237296AbjILRz6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Sep 2023 13:55:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39934 "EHLO
+        id S236986AbjIMFcl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Sep 2023 01:32:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49602 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237196AbjILRzz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Sep 2023 13:55:55 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89E511706;
-        Tue, 12 Sep 2023 10:55:50 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C44B9C433C7;
-        Tue, 12 Sep 2023 17:55:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1694541350;
-        bh=NeiCnNPo3KOW64wUUmXZOw3OrKGWSoH40pjr74D8cEg=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Ez4kU3Bb4kgBzNrxnsI6uBF3Wbe6qBzHTer7W/rvAOtyCbZZXAqCjiNwu4vIcrtHP
-         NVWrkNFGSxlxU4tMObk8yF8Up3APTrZkI0M4U/H0EYSkGrSkp5Y1E6GSaLIZog7qs8
-         i6/o1o4NGc3k5lIE0OTZcQ9HrYnvM5L3goYs3vhAPpM27X9vkCDI0QEu1UkJLp9LQ7
-         VZ/wNuoGJznbyiQXOF2/JzFEvtyPhwPm2LPpRQ8vUyVDSSU8YEl8hrwwwwrw7s/Th2
-         5Xhu6Lxn4Mq9ancHyaWbXTENfHCIkDkjjLHT5MUygJ9ZhFDEjArTscpYMxSm9zeEY1
-         RyQ5Gm/d05jWA==
-Received: (nullmailer pid 995268 invoked by uid 1000);
-        Tue, 12 Sep 2023 17:55:47 -0000
-Date:   Tue, 12 Sep 2023 12:55:47 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     William Qiu <william.qiu@starfivetech.com>
-Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>
-Subject: Re: [PATCH v2 0/3] Change tuning implementation
-Message-ID: <20230912175547.GA993874-robh@kernel.org>
-References: <20230912081402.51477-1-william.qiu@starfivetech.com>
- <20230912081402.51477-4-william.qiu@starfivetech.com>
+        with ESMTP id S233418AbjIMFck (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Sep 2023 01:32:40 -0400
+Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA6AF172E
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 22:32:36 -0700 (PDT)
+Received: by mail-wr1-x432.google.com with SMTP id ffacd0b85a97d-31f737b8b69so5953627f8f.3
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Sep 2023 22:32:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1694583155; x=1695187955; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=N4nYj22yWcBXT0fLmDHEet6LUruNho+epuPQlZMk6rA=;
+        b=QfIuB7m5npkIjdxEqLwP/UTYKoi0Aid+CBgxNJNeQIm29w78Vckcx7Xl158RrQriHm
+         xyiGqFkjn3hIa0/7pWc861IvFuMza8/zGM2B+I2u7h7bHvuUksUjHaadTjYzA/pM/xLy
+         Qk9UgnBw6wB84kjy/C4l9s08ndOqkKSGutvIcPlFEPDbcSmZszD8iVI9i5vE8zq0QZIc
+         6qyd4oiKPk0pKo6mWzFO86Ar48M3F41sxmRFdMGG5jdKPGgW3rZ3aJV6kyjdDFatqk8n
+         t+Q6Svjl9DWSxn8u4+g4Rbb8JnmqhgpQSOGaoA1F0HlkATlg22ZTh+6OzNBeMAehpw2J
+         13Rw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694583155; x=1695187955;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=N4nYj22yWcBXT0fLmDHEet6LUruNho+epuPQlZMk6rA=;
+        b=WpLwu+kVFzn+uKaa7LO2EFBMsHqk4uGgp+UbAk/EG5vDZpOJtDebiOhfzqnZ/TzQ1r
+         ChGmb5c0S+q3FEQZr6RTiDHFH2/YHoX8J7PXEX/gPbK5JT+nTreRrWCqtK8jacawn6cy
+         CBgbDaYTythPAQabyWJD/bHn2Qyq1Di+th+VhVpN+t2jh/5AfVSkHojc3KzcOrhMEo4c
+         NWgSIsvCy0Wa/KDnxcgWbSDoA69sPZ6juS6t5dW/ax4hOqe6UJ6m9O3Fabr6ihaZ2iKP
+         k1dhrf75Tu4mfcX+zK3EYhmB71pXJd2JH+zkl4th6jYteNBhWqfD1xpS5eqmPx0CP4qG
+         6Ovw==
+X-Gm-Message-State: AOJu0YxRpPOQHgNdew2tftfNhJr4Nts7r1pqxvc+oIKGeZ6CwJzKaqRo
+        fgo73dnXnuwlvj/7hSC0wRz2jg==
+X-Google-Smtp-Source: AGHT+IER9H3VVgLr+hfSKE6vI6LgtgJgyvA5sBGY5z57WD3YPKGjBTuZJ6vz2gIvOl0O6kav/COyJg==
+X-Received: by 2002:adf:e350:0:b0:319:7787:54a9 with SMTP id n16-20020adfe350000000b00319778754a9mr1037074wrj.24.1694583155059;
+        Tue, 12 Sep 2023 22:32:35 -0700 (PDT)
+Received: from [192.168.50.4] ([82.78.167.145])
+        by smtp.gmail.com with ESMTPSA id n15-20020a5d598f000000b0031fba0a746bsm3448003wri.9.2023.09.12.22.32.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 12 Sep 2023 22:32:34 -0700 (PDT)
+Message-ID: <56cf08f2-5d8e-6098-6218-081d8f620abe@tuxon.dev>
+Date:   Wed, 13 Sep 2023 08:32:31 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230912081402.51477-4-william.qiu@starfivetech.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.0
+Subject: Re: [PATCH 35/37] dt-bindings: arm: renesas: document SMARC
+ Carrier-II EVK
+Content-Language: en-US
+To:     Rob Herring <robh@kernel.org>
+Cc:     geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-36-claudiu.beznea.uj@bp.renesas.com>
+ <20230912161635.GA877089-robh@kernel.org>
+From:   claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <20230912161635.GA877089-robh@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 12, 2023 at 04:13:59PM +0800, William Qiu wrote:
-> Hi,
-> 
-> This series of patches changes the tuning implementation, from the
-> previous way of reading and writing system controller registers to
-> reading and writing UHS_REG_EXT register, thus optimizing the tuning
-> of obtaining delay-chain.
-> 
-> Changes v1->v2:
 
-Please don't send new versions as a reply to the prior version.
 
-> - Rebased to v6.6rc1.
-> - Keeped "starfive,sysreg" in dt-bindings but removed from required.
-> - Changed the function interface name.
-> - Maked the code implementation more concise.
+On 12.09.2023 19:16, Rob Herring wrote:
+> On Tue, Sep 12, 2023 at 07:51:55AM +0300, Claudiu wrote:
+>> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>>
+>> Document Renesas SMARC Carrier-II EVK board which is based on RZ/G3S
+>> (R9A08G045) SoC. The SMARC Carrier-II EVK consists of RZ/G3S SoM module and
+>> SMARC Carrier-II carrier board, the SoM module sits on top of carrier
+>> board.
+>>
+>> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>> ---
+>>  Documentation/devicetree/bindings/soc/renesas/renesas.yaml | 2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/soc/renesas/renesas.yaml b/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
+>> index 822faf081e84..f4964445e5ab 100644
+>> --- a/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
+>> +++ b/Documentation/devicetree/bindings/soc/renesas/renesas.yaml
+>> @@ -476,6 +476,8 @@ properties:
+>>  
+>>        - description: RZ/G3S (R9A08G045)
+>>          items:
+>> +          - enum:
+>> +              - renesas,smarc2-evk # SMARC Carrier-II EVK
 > 
-> The patch series is based on v6.6rc1.
+> You just changed the existing binding...
 > 
-> William Qiu (3):
->   dt-bindings: mmc: Remove properties from required
->   mmc: starfive: Change tuning implementation
->   riscv: dts: starfive: Drop unused properties and limit frquency
+>>            - enum:
+>>                - renesas,r9a08g045s33 # PCIe support
 > 
->  .../bindings/mmc/starfive,jh7110-mmc.yaml     |   2 -
->  .../jh7110-starfive-visionfive-2.dtsi         |   4 +
->  arch/riscv/boot/dts/starfive/jh7110.dtsi      |   2 -
->  drivers/mmc/host/dw_mmc-starfive.c            | 137 +++++-------------
->  4 files changed, 44 insertions(+), 101 deletions(-)
+> This is the SoM module? 
+
+No, this is a SoC variant which supports PCIe.
+
+> You either need to squash this change or add 
+> another case with 3 entries and maintain the 2 entry case. (there's no 
+> way to express any entry at the beginning or middle can be optional)
 > 
-> --
-> 2.34.1
-> 
+>>            - const: renesas,r9a08g045
+>> -- 
+>> 2.39.2
+>>
