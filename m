@@ -2,121 +2,103 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77C24EE020C
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 13:29:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15387EEAA40
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 13:49:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237766AbjINN37 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 09:29:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38842 "EHLO
+        id S239088AbjINNti (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 09:49:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50490 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235397AbjINN36 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 09:29:58 -0400
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C7001FD8;
-        Thu, 14 Sep 2023 06:29:54 -0700 (PDT)
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-5925e580f12so11411447b3.3;
-        Thu, 14 Sep 2023 06:29:54 -0700 (PDT)
+        with ESMTP id S239049AbjINNth (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 09:49:37 -0400
+Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 718651BE
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:49:33 -0700 (PDT)
+Received: by mail-yb1-xb2b.google.com with SMTP id 3f1490d57ef6-d776e1f181bso999004276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:49:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1694699372; x=1695304172; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KkZqjZNgB3Y1SyzOUIg94VhrWAWI+a6+Hf5lJqrRRNg=;
+        b=Y6ZYo/SwMSCo+eD47c61jpkcM+x8sL+EdM7HOZiS33hyuLXZZWWsArQNkjV0U10iMR
+         u8hTFCuAiLzFMIY3HKBsWCQ5e9rr/RjFe/i+aUBltZEqfoa0g6HWY65b1qQvuBheFMEw
+         JJVXaEL19o1+j5FYrAfLPBIf2tuyL7PRzv93o8mpANGSExBouhUz8Da31Zd8ejPxzFlE
+         izVyiac0O5yAGEgOkBg/39/CkhSYD4yxtgqBv/lLJ11OgT/Q19hw4k4XILbgAk53WMLQ
+         wdOcp7uvGgkW3ZBNwBTN3udmly3B43aDsuYhz0EZm/ZKBe6/7Ck6fj+TMfqH5RYLmNr1
+         bD7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694698193; x=1695302993;
+        d=1e100.net; s=20230601; t=1694699372; x=1695304172;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=MMgnSEID+xkECrUs/n98woQl+ojuPd0/IiG5nfXIn2c=;
-        b=XzOelWPkiVoyl5RggkTcRd3uA415Z162tBB3CDrInXacj6nPzpABWMzAnB4PpROIua
-         nR2OvbrozuiwByoF79OQHRDCan6qXryQHUomw5kleQQzv29QBpZtP3sYxbss6G4i3LxE
-         97Xg53EqVldYoAxzJM//+QVFXFWZevXujZSnY9zxdP3K/1DfM/4A9plmlOmrCB0+GBm3
-         XA5jHgzZxV0WAX1y8GFy/NYTrvbiYOfLTy50/dM7PZ31+aHSyVJvDMF/gkRAk9DKGQX9
-         6qxmEiymL97L0V71FfS1AZwdmxa+3sYzzO1KCXZXT4U4ChqHnnShTZnSMbjZMvIGn/Dp
-         +OWg==
-X-Gm-Message-State: AOJu0YxRn2nJ1IhFRaj4ClhPlBwSXh4h7ibZXqSkuyZMCKL2ThaE198N
-        QZMCbJOix1H0a/ZZQ7wH85OUT6gcwbaAjw==
-X-Google-Smtp-Source: AGHT+IEqkaYIojyrujrVO1BiGM9aV1qiSgkX3ciD/0/s2n379RnWi+PZW1+3eZyfAzTGGaaNUj5fuw==
-X-Received: by 2002:a81:7287:0:b0:59b:8da4:dc1 with SMTP id n129-20020a817287000000b0059b8da40dc1mr5820380ywc.38.1694698193125;
-        Thu, 14 Sep 2023 06:29:53 -0700 (PDT)
-Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com. [209.85.128.169])
-        by smtp.gmail.com with ESMTPSA id h125-20020a816c83000000b00582fae92aa7sm318186ywc.93.2023.09.14.06.29.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 14 Sep 2023 06:29:52 -0700 (PDT)
-Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-59bd2e19c95so11653557b3.0;
-        Thu, 14 Sep 2023 06:29:52 -0700 (PDT)
-X-Received: by 2002:a0d:fe43:0:b0:589:c065:b419 with SMTP id
- o64-20020a0dfe43000000b00589c065b419mr5624958ywf.34.1694698192345; Thu, 14
- Sep 2023 06:29:52 -0700 (PDT)
+        bh=KkZqjZNgB3Y1SyzOUIg94VhrWAWI+a6+Hf5lJqrRRNg=;
+        b=JbUQ8NMHhaeg+Ykn6MdswIWTkS6d1YaAzAq5lMusqJj4Ose6xi42xKV4PgpuFCEUGy
+         X8JqXAZg0G6T54KBL+PH10ZEsWyobFSj8wrUgRKFaQfE/GgB5xWWE5gQ9MwsFyfxTqmj
+         KZihNf7ViwURyEILd+9oSWZAGXDNf4U3mJuvOIr83ZSK+4ldsxh3SyRWXg6WfE2vJ7FT
+         rSqRtyq4dnGvxV2+DIgKqEWIYB4HyjSr8TwjlnRt6BiIErUCB1JIv7Q1WipqfgSB3hGu
+         XjZd2Up0zM/LaD4AeZdgYGDSdH3GkCj+JKl5YBHRkPGJQbnl6UuSukGbrBevOUFPNrTe
+         kV7A==
+X-Gm-Message-State: AOJu0YwForB5TNeK7cGnmT6VwHrs/UbEh96chKeUHO9y3kRvdiIep/f3
+        AIpJCNeBn1UaMeYWzUlENEwtkjxnL5e2coVyTTaiYA==
+X-Google-Smtp-Source: AGHT+IEPbpu+f+x7Mxg2JcryCNwUiv/H2T0EP2OKWQkM+1Az2v0erf8Suz+I1yRTsUHgS+cLuGC8uIDdKyjo9397fDA=
+X-Received: by 2002:a5b:1c3:0:b0:d78:ae6:e75a with SMTP id f3-20020a5b01c3000000b00d780ae6e75amr4738510ybp.60.1694699372664;
+ Thu, 14 Sep 2023 06:49:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com> <20230912045157.177966-15-claudiu.beznea.uj@bp.renesas.com>
-In-Reply-To: <20230912045157.177966-15-claudiu.beznea.uj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 14 Sep 2023 15:29:40 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWRxaBsPAn0OR15WFua_5HZVPTmWabFnnex5gDLKjE9Cw@mail.gmail.com>
-Message-ID: <CAMuHMdWRxaBsPAn0OR15WFua_5HZVPTmWabFnnex5gDLKjE9Cw@mail.gmail.com>
-Subject: Re: [PATCH 14/37] clk: renesas: rzg2l: use u32 for flag and mux_flags
-To:     Claudiu <claudiu.beznea@tuxon.dev>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230828100421.19758-1-balamanikandan.gunasundar@microchip.com>
+ <CACRpkdZKALgcN58Es_hKL1MyEKYaTezuRGyaMkkBYyfXhRpdKg@mail.gmail.com> <CAPDyKFrX1JNBio1tm4TbOwO4KSGP5ZHsLbJEXVv8qn-2Cq_KJg@mail.gmail.com>
+In-Reply-To: <CAPDyKFrX1JNBio1tm4TbOwO4KSGP5ZHsLbJEXVv8qn-2Cq_KJg@mail.gmail.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Thu, 14 Sep 2023 15:49:21 +0200
+Message-ID: <CACRpkdaAqG86XwO0FcKdgNggthW7=v2L=GfhUbr-dhc99tXxyw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: atmel-mci: Remove preprocessor directive
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Cc:     Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>,
+        dmitry.torokhov@gmail.com, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
+        alexandre.belloni@bootlin.com, hari.prasathge@microchip.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Claudiu,
-
-On Tue, Sep 12, 2023 at 6:52 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+On Thu, Sep 14, 2023 at 2:16=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+> On Tue, 29 Aug 2023 at 09:18, Linus Walleij <linus.walleij@linaro.org> wr=
+ote:
+> >
+> > On Mon, Aug 28, 2023 at 12:04=E2=80=AFPM Balamanikandan Gunasundar
+> > <balamanikandan.gunasundar@microchip.com> wrote:
+> >
+> > > Remove the preprocessor directive IS_ENABLED(CONFIG_MMC_ATMELMCI) whi=
+le
+> > > checking if the device is compatible with atmel,hsmci. Instead handle=
+ it in
+> > > the if() condition. The compiler optimizes out the entire if() clause=
+ if
+> > > the first expression in the if() clause is constant false.
+> > >
+> > > Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@m=
+icrochip.com>
+> > > Suggested-by: Linus Walleij <linus.walleij@linaro.org>
+> >
+> > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> >
+> > Thanks for tidying this up Balamanikandan!
 >
-> flag and mux_flags are intended to keep bit masks. Use u32 type for it.
->
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> Linus, we didn't manage to get this into v6.6. So, it's probably
+> better if you pick up this via your tree for v6.7.
 
-Thanks for your patch!
+Oh it's actually Bartosz managing the GPIO tree these days.
+(Which I am very happy about!)
 
-> --- a/drivers/clk/renesas/rzg2l-cpg.h
-> +++ b/drivers/clk/renesas/rzg2l-cpg.h
-> @@ -92,8 +92,8 @@ struct cpg_core_clk {
->         unsigned int conf;
->         const struct clk_div_table *dtable;
->         const char * const *parent_names;
-> -       int flag;
-> -       int mux_flags;
-> +       u32 flag;
+The best is to resend the patch to the GPIO maintainers and
+linux-gpio@vger.
 
-"flag" is used for several purposes, which expected different types:
-    - clk_init_data.flags is unsigned long,
-    - The clk_divider_flags parameter of clk_hw_register_divider_table() is u8,
-    - The clk_divider_flags parameter of __clk_hw_register_divider() is u8,
-    - The flags parameter of __devm_clk_hw_register_mux() is unsigned long.
-
-> +       u32 mux_flags;
-
-Actually the clk_mux_flags parameter of __devm_clk_hw_register_mux() is u8.
-
->         int num_parents;
->  };
-
-I guess u32 is fine for all.
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Yours,
+Linus Walleij
