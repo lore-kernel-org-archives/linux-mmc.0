@@ -2,78 +2,82 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BFABCA5506
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 13:03:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9CFDEE0205
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 13:03:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238623AbjINNDh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 09:03:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41912 "EHLO
+        id S238651AbjINNDj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 09:03:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238624AbjINNDg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 09:03:36 -0400
+        with ESMTP id S238585AbjINNDh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 09:03:37 -0400
 Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A69F1FE1
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:27 -0700 (PDT)
-Received: by mail-yb1-xb32.google.com with SMTP id 3f1490d57ef6-d7f1bc4ece3so973806276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:27 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66E801FDF
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:33 -0700 (PDT)
+Received: by mail-yb1-xb32.google.com with SMTP id 3f1490d57ef6-d77ad095f13so965066276.2
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694696606; x=1695301406; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1694696612; x=1695301412; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mmYkjVuRaoLsE0f7fPGLJllxHG538KK2N8Bu0iEsdvY=;
-        b=yIDo3z365H83ecBLmwOku4G1wI6Dr+dLLo4DpB1QUA8ooB8rCPDVDyAxvRGpaQ2DPB
-         vLb7+tnEcYCPFMrL5yA1RfZa4qpatukfsHcKgaoRpiu4LnOmaoq4ym9kcj/P46XXMlji
-         cOD2CQnWRFt+69CF0CfRO1K8AN0+hCBP/gCFXyeH5oeRgboHFC0hA3xW4LYvdaqRnhv8
-         aqBnsVMjf9Lm/cwhxwzWohOzt1oh8GRTR7oPoRGkNZSH7tzWR+5WaYEhWLWM6VQqRVwy
-         cUmR/XldluHoYyM8CD+iAM9ubunvjDhD7Hg9FwR5fzmmTJccNVFO6RTVWo1mcGWr9Cri
-         Je7g==
+        bh=OGBNv/WCy7mlfSU/rquHrfUjucCsufeS4fxpOpJpRLo=;
+        b=Fm5n8fCEQoCvtP/ZiYEwftfaaRFRcsT1NGihjTABbR0yJareDaZkWKN6WwdbBFHDld
+         mY/zwWAf7Lu/Cfa+q6+zFjinzDKHNpEvzjG2Bqc+qdBBLIOxABJiFShj+ZB3VC+wjqkY
+         njFAeq7MYc4AmDaRz3s+SPx9kV5+Y7mU+WjvcCwVA5iZSe+66l+NSegMK5lfRktFcc/9
+         KbmQnX4aMD25AWv1NtwOq6S8v4+F6bb7Zfcdis3FH8x46+mQdvYLZbUn59wVRc4xsM8l
+         YMVYyWJkTbN+1pFJAZq3+CMZ0IJYcdPM+TkQv88QR1Evh01uz+YWoB32Fp+rc7x4eMt9
+         DkJA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694696606; x=1695301406;
+        d=1e100.net; s=20230601; t=1694696612; x=1695301412;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=mmYkjVuRaoLsE0f7fPGLJllxHG538KK2N8Bu0iEsdvY=;
-        b=Lzy0h/LkxF/tYu7p8phVwZANQfbHIwdlaOEmsxY5+Y87OwXHtGrf8IyjGx20CVHgm4
-         ceEwvdPJA9WC6HXYqp6XGonr/BxayURhnGRF15IahETMbNIEpemgbNMvpMe7XzwPz41p
-         PWOXDZqJ9++hoj1tXqohkqG3JlnSlWWNZcGeT0AyAmhXjvDDNs3XpyzfLxjV3Z5ppkZm
-         sofmEH6O4zXxKlTQ0gpBCKrK4ZBukYvUxhD3WLEcU/dv02vFf8Ml5RphtvQhT+FoJMg1
-         loaW5iXfmaZ1Te/bCh3bucgKKn/8lHQr2oftOBLYRCna19i4+dqL6Q6eWiiE+1gl+Ec3
-         5+nQ==
-X-Gm-Message-State: AOJu0YyJYR4iXoQKVDzF5XS70ZM/KBLzDs4UF9/cN80oSBxuuJgEkQIy
-        T7JkgXdpueoaS57qTuP4/ap6iQ5AaczCbZhOSYKQJw==
-X-Google-Smtp-Source: AGHT+IHTqcY+LtkJI8cGNZIHEZEWGm9nu4RxMcaM+QIMojeXaWtWLJjh/JIpEgJBzl13lHwBhQkndRvis568r7P4Yp8=
-X-Received: by 2002:a25:7905:0:b0:d18:5c77:9f2a with SMTP id
- u5-20020a257905000000b00d185c779f2amr5535759ybc.65.1694696606525; Thu, 14 Sep
- 2023 06:03:26 -0700 (PDT)
+        bh=OGBNv/WCy7mlfSU/rquHrfUjucCsufeS4fxpOpJpRLo=;
+        b=OdBCrUsCF7vX1hhC4cADNFvvXWYE9VrprIgb/X/uKjm1qPjwkMteVLTlEHLuU4lrvg
+         mCBxk6rb7ecDOZOhgCPrL74UtgnX2mXSlzJRtYE3iGoZsYtIwGgJisTxCFmfXwD4HFYF
+         P/7//eR5UHdGu5Zjw6zOywWvFwZz46lKBZSpOzRlwBGSov83swzwJXpZZyta8TnDICrO
+         YKMeixhspgdh2mvsX4/7DBIDRryvpsWbTgNmH8gYgXymrX4e7lQ+MNcllTYxyIs2m7Li
+         yahlVfyjARpLZ5CBOjzpqzchRt6zYhetDZ3pp0HeRhdR5jBIfB6VcfskhSrH1CqbWo9l
+         m5mg==
+X-Gm-Message-State: AOJu0Yw3CKo2WJ5aUG2X8cr9X7o5PG/p4XTRREgtSS85Btyi1RV5+ixh
+        27vO/QR3tLpcg9Y/5skLwQPU6hhiax9A5coGkyQ7zA==
+X-Google-Smtp-Source: AGHT+IHPMzUI/ot3DCoZ/iT1g4muQjpo9ZWKdRV8KZQpwQK3nU4X4TeTU3Js/qM/a3ER6+dKUgmedezyGL+8aAKDGC4=
+X-Received: by 2002:a25:1545:0:b0:d81:6116:ac2d with SMTP id
+ 66-20020a251545000000b00d816116ac2dmr4087422ybv.59.1694696612626; Thu, 14 Sep
+ 2023 06:03:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230831032647.3128702-1-haibo.chen@nxp.com>
-In-Reply-To: <20230831032647.3128702-1-haibo.chen@nxp.com>
+References: <20230901122701.318082-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20230901122701.318082-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 14 Sep 2023 15:02:50 +0200
-Message-ID: <CAPDyKFoRLRjCV74zCWNF3xrG5fEJu=TEATor3C3scdp+ojiGow@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: optimize the manual tuing logic to
- get the best timing
-To:     haibo.chen@nxp.com
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-imx@nxp.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
-        kernel@pengutronix.de, festevam@gmail.com
+Date:   Thu, 14 Sep 2023 15:02:56 +0200
+Message-ID: <CAPDyKFrmQs76oDbDrza=CKsp0VLHj8xTn9smUwvpXFbKaCZpAA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: host: Kconfig: Make MMC_SDHI_INTERNAL_DMAC config
+ option dependant on ARCH_RENESAS
+To:     Prabhakar <prabhakar.csengg@gmail.com>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 31 Aug 2023 at 05:22, <haibo.chen@nxp.com> wrote:
+On Fri, 1 Sept 2023 at 14:27, Prabhakar <prabhakar.csengg@gmail.com> wrote:
 >
-> From: Haibo Chen <haibo.chen@nxp.com>
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 >
-> Current manual tuning logic only get the first pass window, but
-> this pass window maybe not the best pass window.
+> MMC_SDHI_INTERNAL_DMAC config option has dependency on ARM64 and
+> R7S9210/R8A77470 this dependency will keep growing for future SoCs for
+> varying architectures. So to simplify this configuration make
+> MMC_SDHI_INTERNAL_DMAC solely depend on ARCH_RENESAS, as all Renesas
+> SoCs inherently depend on the ARCH_RENESAS config option.
 >
-> Now find all the pass window, and chose the largest pass window,
-> and use the average value of this largest pass window to get the
-> best timing.
+> This allows selecting MMC_SDHI_INTERNAL_DMAC config option for RZ/Five SoC
+> which is based on RISC-V architecture.
 >
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
 Applied for next, thanks!
 
@@ -82,82 +86,31 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 52 +++++++++++++++++++++---------
->  1 file changed, 36 insertions(+), 16 deletions(-)
+> v1-v2
+> * Add dependency on ARCH_RENESAS instead of RISCV
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 6170b7121f36..4cbbc0a786a0 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1154,32 +1154,52 @@ static void esdhc_post_tuning(struct sdhci_host *host)
->         writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
->  }
+> v1:
+> https://lore.kernel.org/linux-renesas-soc/20230901113703.314667-1-prabhakar.mahadev-lad.rj@bp.renesas.com/
+> ---
+>  drivers/mmc/host/Kconfig | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> +/*
-> + * find the largest pass window, and use the average delay of this
-> + * largest window to get the best timing.
-> + */
->  static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
->  {
->         int min, max, avg, ret;
-> +       int win_length, target_min, target_max, target_win_length;
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 554e67103c1a..2e8476db2381 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -677,9 +677,9 @@ config MMC_SDHI_SYS_DMAC
 >
-> -       /* find the mininum delay first which can pass tuning */
->         min = ESDHC_TUNE_CTRL_MIN;
-> -       while (min < ESDHC_TUNE_CTRL_MAX) {
-> -               esdhc_prepare_tuning(host, min);
-> -               if (!mmc_send_tuning(host->mmc, opcode, NULL))
-> -                       break;
-> -               min += ESDHC_TUNE_CTRL_STEP;
-> -       }
-> -
-> -       /* find the maxinum delay which can not pass tuning */
-> -       max = min + ESDHC_TUNE_CTRL_STEP;
-> +       max = ESDHC_TUNE_CTRL_MIN;
-> +       target_win_length = 0;
->         while (max < ESDHC_TUNE_CTRL_MAX) {
-> -               esdhc_prepare_tuning(host, max);
-> -               if (mmc_send_tuning(host->mmc, opcode, NULL)) {
-> -                       max -= ESDHC_TUNE_CTRL_STEP;
-> -                       break;
-> +               /* find the mininum delay first which can pass tuning */
-> +               while (min < ESDHC_TUNE_CTRL_MAX) {
-> +                       esdhc_prepare_tuning(host, min);
-> +                       if (!mmc_send_tuning(host->mmc, opcode, NULL))
-> +                               break;
-> +                       min += ESDHC_TUNE_CTRL_STEP;
->                 }
-> -               max += ESDHC_TUNE_CTRL_STEP;
-> +
-> +               /* find the maxinum delay which can not pass tuning */
-> +               max = min + ESDHC_TUNE_CTRL_STEP;
-> +               while (max < ESDHC_TUNE_CTRL_MAX) {
-> +                       esdhc_prepare_tuning(host, max);
-> +                       if (mmc_send_tuning(host->mmc, opcode, NULL)) {
-> +                               max -= ESDHC_TUNE_CTRL_STEP;
-> +                               break;
-> +                       }
-> +                       max += ESDHC_TUNE_CTRL_STEP;
-> +               }
-> +
-> +               win_length = max - min + 1;
-> +               /* get the largest pass window */
-> +               if (win_length > target_win_length) {
-> +                       target_win_length = win_length;
-> +                       target_min = min;
-> +                       target_max = max;
-> +               }
-> +
-> +               /* continue to find the next pass window */
-> +               min = max + ESDHC_TUNE_CTRL_STEP;
->         }
->
->         /* use average delay to get the best timing */
-> -       avg = (min + max) / 2;
-> +       avg = (target_min + target_max) / 2;
->         esdhc_prepare_tuning(host, avg);
->         ret = mmc_send_tuning(host->mmc, opcode, NULL);
->         esdhc_post_tuning(host);
+>  config MMC_SDHI_INTERNAL_DMAC
+>         tristate "DMA for SDHI SD/SDIO controllers using on-chip bus mastering"
+> -       depends on ARM64 || ARCH_R7S9210 || ARCH_R8A77470 || COMPILE_TEST
+> +       depends on ARCH_RENESAS || COMPILE_TEST
+>         depends on MMC_SDHI
+> -       default MMC_SDHI if (ARM64 || ARCH_R7S9210 || ARCH_R8A77470)
+> +       default MMC_SDHI if ARCH_RENESAS
+>         help
+>           This provides DMA support for SDHI SD/SDIO controllers
+>           using on-chip bus mastering. This supports the controllers
 > --
 > 2.34.1
 >
