@@ -2,123 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11E38CA553C
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 12:57:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2AAFCA5506
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 13:03:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238303AbjINM5p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 08:57:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41982 "EHLO
+        id S238471AbjINNDW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 09:03:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59780 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232206AbjINM5p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 08:57:45 -0400
-Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15AE51FD0
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 05:57:41 -0700 (PDT)
-Received: by mail-yb1-xb32.google.com with SMTP id 3f1490d57ef6-d801c83325fso983704276.0
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 05:57:41 -0700 (PDT)
+        with ESMTP id S233970AbjINNDV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 09:03:21 -0400
+Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1AC41FD5
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:17 -0700 (PDT)
+Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-59b4ec8d9c1so10827407b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694696260; x=1695301060; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1694696597; x=1695301397; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=RR3Rm3BvRcsogaZkU4Bg0Ejafb0av4o4WZ1/jDMEr44=;
-        b=GT7YOe3Yag96osS+kNebu+LJLVACEAtPbg9PB4bRLk0libnh1Zg72oQEJO54houkTx
-         sPj//pX0rD48MNlrcLVt6OTGmRm1HcX7+6TI8Bt8RR1VkR/tKCiDtk+WbScktLOyYcLZ
-         ZujbMWe2y6w1biWg+gVOgtmN+KnFQW8JsLm9K5VEqMPEhokovfYGcV9zxw7r7p8eCr0Q
-         7Suy8IRIIDPQhXt/UQirIVyVpAVr+7fHviQQ3rqGTn+PnZJgwfyN4Y7+gin1pVK8gl0H
-         2FzGEB/r3dlgTVs8zGNFjbeEE1Z6TcS2M8RJMT4k05MPfEY/PecRriGWQz/6SpM21m/I
-         i62w==
+        bh=aCsgoVc5MdDS0OEMSd5NVyJPQJml3xjCRjHmB8pQyQU=;
+        b=UmE2vFAwharNvYSJfAL72mxudS2a4wmMf/TkC49VsGZd89aOhrQvypUzbF7VHtx+5a
+         YC0BViG1cIGoWdpq0Wk1WSpeJL+12Xh2uJyvSYm4SC027sk8+3R+pbPXDyFh0sgVh+zq
+         +toHzyaCDhS2DVcf+VzvePK3BfVZmovOBVq2KdwMDfy5PAWy12EcC9/a0poZjYvQyi/L
+         CNS44n8C13mCfK+ICsZayqr9N842nE3AoEGju5c4BBD/ulhQAdP6J0AO99JNrOrCt24I
+         Ayvd+SP0ciP7DovwVIQLwsp++nn1D6dz0sQPsuh3QoBcK5aT0bUCOLTT6cWsXl9M78IH
+         b8MA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694696260; x=1695301060;
+        d=1e100.net; s=20230601; t=1694696597; x=1695301397;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=RR3Rm3BvRcsogaZkU4Bg0Ejafb0av4o4WZ1/jDMEr44=;
-        b=LEzEZ6RFU24+AGWmxMrARitmfifuu8NvktJFyRNDKdHr+5TJcrdP0uz95YXhrh8wu7
-         QmnsTU+5pb4Ar979Wr4NVUbsArjbWE4h00aRxm4bfOulDY5ZjMo2e5gDClIvFykiBltx
-         cJQKMYtpywgCOjnJ0yg/YDGfL5KIl1tvbBYrVypfVjNdE3EE8WRnqSqk5HnoSY6vO/bD
-         siYw1lEMQYR8qdWd5qg2U+yhckYbMFA4ODQ6/RV2NXf5MgqyTGvJ2CWM1aCmbQOlC9vq
-         tvXcUWjhKUhrYQmwPVRsrY440CKeeWaQLJcdg8NGvmjzkl2j1YNnkKf2TXZIcLGDuYpb
-         ND+Q==
-X-Gm-Message-State: AOJu0YzsKK9CS0hyROelGOfOebdSHp5b9INAy6TN/etVOxdRHecZ3ViY
-        IFI/h50bUQvy4jPlyo5Vy6rxZpWAHBvvaJXlBM1Tuuu5SAOT6pARULXUhw==
-X-Google-Smtp-Source: AGHT+IG8dtH15HRge6eN5RlxGnO2HTIFHcEjtnY4jBQGka7yBs1wMha24i43rdlme67glVBBEQnXGuMH2GKwzCxr1Iw=
-X-Received: by 2002:a25:42ca:0:b0:d72:80bc:d3b2 with SMTP id
- p193-20020a2542ca000000b00d7280bcd3b2mr5130485yba.32.1694696260210; Thu, 14
- Sep 2023 05:57:40 -0700 (PDT)
+        bh=aCsgoVc5MdDS0OEMSd5NVyJPQJml3xjCRjHmB8pQyQU=;
+        b=CN348XZZvFGvbnRfWINUp+gSNflRHShDKb2nVMWXCoYbOvCdTlg9+HzOypf+Ba/aEe
+         3Y3JBoKO+Zs1H6v+86g/eupgGihcTu7+T14rc4ECCqkYIWwuQIoGYqDL4n0F69+/JF9m
+         nQ4gbIQK+DAJxm98N2wPSBt/v8dlyFrqs6FTuuXPxko6zZjNrzcClYP2XKc92g44FuWt
+         niyOc+6pNL15rjO/mfylZtVoiAJgTNFzn9amg+pnuRytR3jy4H6kSEf0uB1bnkuvjswK
+         Q0koakX1MCw3z6tsnhh34H86bfXb2riNYxOl5+v5dh/hzSJNpLPTmFn+R56k7B4MCT04
+         V0KQ==
+X-Gm-Message-State: AOJu0YxkHSgAx/ks2zXZvfHzHlX2WsKXsGk3rkWd43Wf02Pu2Sxke58u
+        orrxDf0x8CvTc1CmX7IlV2mncBIiBQb49W8ZOZTksw==
+X-Google-Smtp-Source: AGHT+IHtq67DZntMzVUKa/tcZfvAY9V5Pu2y+pL8a0RH0Ax2Jq7NeiRTvdNMEGDNeImVEaPGukeWC05mKHKjfg4DqmE=
+X-Received: by 2002:a5b:449:0:b0:d54:b34c:1c7b with SMTP id
+ s9-20020a5b0449000000b00d54b34c1c7bmr4766279ybp.59.1694696596656; Thu, 14 Sep
+ 2023 06:03:16 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230829020451.9828-1-wenchao.chen@unisoc.com> <20230829020451.9828-3-wenchao.chen@unisoc.com>
-In-Reply-To: <20230829020451.9828-3-wenchao.chen@unisoc.com>
+References: <20230825135503.282135-1-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230825135503.282135-1-krzysztof.kozlowski@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 14 Sep 2023 14:57:04 +0200
-Message-ID: <CAPDyKFo67SOWS3eYgEDKGOtmZJY5UtPw7+V0BEdkF_Y8yY2i5A@mail.gmail.com>
-Subject: Re: [PATCH V3 2/2] mmc: hsq: dynamic adjustment of hsq->depth
-To:     Wenchao Chen <wenchao.chen@unisoc.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        wenchao.chen666@gmail.com, zhenxiong.lai@unisoc.com,
-        yuelin.tang@unisoc.com
+Date:   Thu, 14 Sep 2023 15:02:40 +0200
+Message-ID: <CAPDyKFpZnoVnZt-WN_5YdqesoT_Xcbs56tJunwS5oNZSJySxgg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: correct minimum number
+ of clocks
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 29 Aug 2023 at 04:05, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+On Fri, 25 Aug 2023 at 15:55, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> Increasing hsq_depth improves random write performance.
+> In the TXT binding before conversion, the "xo" clock was listed as
+> optional.  Conversion kept it optional in "clock-names", but not in
+> "clocks".  This fixes dbts_check warnings like:
 >
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> ---
->  drivers/mmc/host/mmc_hsq.c | 27 +++++++++++++++++++++++++++
->  drivers/mmc/host/mmc_hsq.h |  5 +++++
->  2 files changed, 32 insertions(+)
+>   qcom-sdx65-mtp.dtb: mmc@8804000: clocks: [[13, 59], [13, 58]] is too short
 >
-> diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
-> index 8556cacb21a1..0984c39108ba 100644
-> --- a/drivers/mmc/host/mmc_hsq.c
-> +++ b/drivers/mmc/host/mmc_hsq.c
-> @@ -21,6 +21,31 @@ static void mmc_hsq_retry_handler(struct work_struct *work)
->         mmc->ops->request(mmc, hsq->mrq);
->  }
->
-> +static void mmc_hsq_modify_threshold(struct mmc_hsq *hsq)
-> +{
-> +       struct mmc_host *mmc = hsq->mmc;
-> +       struct mmc_request *mrq;
-> +       struct hsq_slot *slot;
-> +       int need_change = 0;
+> Cc: <stable@vger.kernel.org>
+> Fixes: a45537723f4b ("dt-bindings: mmc: sdhci-msm: Convert bindings to yaml")
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Rather than using a variable to keep track of this, why not just do
-the below here?
-
-mmc->hsq_depth = HSQ_NORMAL_DEPTH;
-
-> +       int tag;
-> +
-> +       for (tag = 0; tag < HSQ_NUM_SLOTS; tag++) {
-> +               slot = &hsq->slot[tag];
-> +               mrq = slot->mrq;
-> +               if (mrq && mrq->data &&
-> +                       (mrq->data->blksz * mrq->data->blocks == 4096) &&
-> +                       (mrq->data->flags & MMC_DATA_WRITE))
-> +                       need_change++;
-
-And following above, then we can do the below here:
-mmc->hsq_depth = HSQ_PERFORMANCE_DEPTH;
-break;
-
-That should simplify and make this more efficient too, right?
-
-> +               else
-> +                       break;
-> +       }
-> +
-> +       if (need_change > 1)
-> +               mmc->hsq_depth = HSQ_PERFORMANCE_DEPTH;
-> +       else
-> +               mmc->hsq_depth = HSQ_NORMAL_DEPTH;
-> +}
-> +
-
-[...]
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index 80141eb7fc6b..10f34aa8ba8a 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -69,7 +69,7 @@ properties:
+>      maxItems: 4
+>
+>    clocks:
+> -    minItems: 3
+> +    minItems: 2
+>      items:
+>        - description: Main peripheral bus clock, PCLK/HCLK - AHB Bus clock
+>        - description: SDC MMC clock, MCLK
+> --
+> 2.34.1
+>
