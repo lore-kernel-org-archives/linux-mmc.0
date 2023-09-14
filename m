@@ -2,98 +2,314 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 954A4EEAA4E
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 15:07:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EF43EEAA50
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 15:09:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240408AbjINPHF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 11:07:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48622 "EHLO
+        id S240832AbjINPJm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 11:09:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54630 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240429AbjINPHE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 11:07:04 -0400
-Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEF33A8
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 08:07:00 -0700 (PDT)
-Received: by mail-yb1-xb32.google.com with SMTP id 3f1490d57ef6-d81b9f0487eso178412276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 08:07:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694704020; x=1695308820; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Dk1zfhhe6JPFaB+z2q0yx4wsz7+R2d86W0fVR7Z+Who=;
-        b=tl2etwl188wUBy5ou/56NAJs+5hYGnbeYJQ613TXG48u8r4EW/b5tIQ9LE7if4NO46
-         qCEzZmKd/r1097Zyu4kqVbeDi252dn1zpi/Cz4OQbpsUS7AAMantSSSwywLL5iVzUzWp
-         GMaUvgZgjkI0Pb7hT4EheMHSTfdEZvFKEKqg3796t97b+o//ZZITu6pFrAetI7zQC3rD
-         14SQIVajAG2SlehrsIXTIW+AhyHHpGxCopwSdAGV1C0Vvqsqw6nsGU0/Aqwk36xmtF2w
-         mY3sqFpWwc5dO6xekM2XIuA9llTwosXWH7dVxy5ISpNAKSb3LQo5ENhC9bXOyhGOB7LN
-         a4qw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694704020; x=1695308820;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Dk1zfhhe6JPFaB+z2q0yx4wsz7+R2d86W0fVR7Z+Who=;
-        b=YEZz6EWXIEtH6E+iKICeiL2G9mBoU9pLzbbA2rmsUAK4B2UUWyAWkdfMXYO0myxs/i
-         HRyv3uh2X/4NM6l3D7FkfDgISE89h+bvrjeKGhjpCb0ivzrTNikn25QziQBCmaBSwG7B
-         hz9gRtdzuIBKYE36kifDOqqvQXokTWbQWCysvlO3XHv1VCQ9rPF7yu7XDq68BznY9nAm
-         DvTSrw3dePrujM7CiGky18qUwhyqPTYBfnnmj9woG99TS4PcoiGRNAE6d/KZVhlA/KXH
-         YlhDO7WHa85bwqMB70x05/ZGQ2sCn7FWaZMbdvpgrk75HS2c7hO9QkyJBH8DXMyxO7y5
-         ODzg==
-X-Gm-Message-State: AOJu0YzjY9JbWNdMx5yKaAPYqRNaw2+DS4m476z46Z1UUlwzXw0FpYgP
-        5I0qCjZ8hqoanxoalvbsUtx5duRYUXxFlAZtKeDYYQ==
-X-Google-Smtp-Source: AGHT+IGpmpLTQfyZsYu/3gVdW8yFDYo6WesgROzbFyj3lcVEqCEzq6WLE/dWuEvCOkweyudTmrWS/5MZXipYnJLRrhI=
-X-Received: by 2002:a25:212:0:b0:d80:2525:9f1 with SMTP id 18-20020a250212000000b00d80252509f1mr4986428ybc.43.1694704020001;
- Thu, 14 Sep 2023 08:07:00 -0700 (PDT)
+        with ESMTP id S240720AbjINPJk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 11:09:40 -0400
+Received: from mx08-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 595D01FDE;
+        Thu, 14 Sep 2023 08:09:36 -0700 (PDT)
+Received: from pps.filterd (m0369457.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 38EDUaQk012973;
+        Thu, 14 Sep 2023 17:09:12 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding:content-type; s=selector1; bh=Llasz91
+        kExcUst5D/Q+VIfLb+oe3DIWGDBBs81P3iKY=; b=K8Pt3zXQYHJFdM7aTiuQlNI
+        60uLlqpOD0OMbYYsf+S5/Yf5if/kGhu8xJnfqMcx8cC7fiGorFEU0fLgPkH1ukyW
+        wzhd0t7jNL+5zFLaE9Dp1t9tf5oy2k+M2BIVwe6VHGi/T7axfIyyUvrS/9UUchvR
+        0AFr2D46MCZInBFP5Osf2Ejcr6WPvkA1Isp2+gJ3M4cC+JfnHaohYUdzY4K9JfCM
+        /zxFY/Fp4ASe6V3wDqMdbiYeshfz0HizrR6umCyxG9NiETVzAxgOZfiusakkqLcA
+        MdgtyAXqKtwc0xHpCjDH5mu5l7HymfhJk2CmPeWxvA6dhvxGOHA6QriS5BkogBQ=
+        =
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3t434d0ec4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 14 Sep 2023 17:09:12 +0200 (MEST)
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id D332910005A;
+        Thu, 14 Sep 2023 17:09:10 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id C56B925AF19;
+        Thu, 14 Sep 2023 17:09:10 +0200 (CEST)
+Received: from localhost (10.201.20.125) by SHFDAG1NODE2.st.com (10.75.129.70)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Thu, 14 Sep
+ 2023 17:09:07 +0200
+From:   Yann Gautier <yann.gautier@foss.st.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Linus Walleij <linus.walleij@linaro.org>
+CC:     Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Yang Yingliang <yangyingliang@huawei.com>,
+        Rob Herring <robh@kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        Yann Gautier <yann.gautier@foss.st.com>
+Subject: [PATCH v2] mmc: mmci: stm32: add SDIO in-band interrupt mode
+Date:   Thu, 14 Sep 2023 17:09:04 +0200
+Message-ID: <20230914150904.155630-1-yann.gautier@foss.st.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20230908095330.12075-1-victorshihgli@gmail.com> <20230908095330.12075-6-victorshihgli@gmail.com>
-In-Reply-To: <20230908095330.12075-6-victorshihgli@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 14 Sep 2023 17:06:23 +0200
-Message-ID: <CAPDyKFoCj=XGaCXzEGj4FbuNF=ds_XwHgF5FHqix4e4Pn68g1A@mail.gmail.com>
-Subject: Re: [PATCH V11 05/23] mmc: core: Add definitions for SD UHS-II cards
-To:     Victor Shih <victorshihgli@gmail.com>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Jason Lai <jason.lai@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.201.20.125]
+X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
+ (10.75.129.70)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.601,FMLib:17.11.176.26
+ definitions=2023-09-14_09,2023-09-14_01,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 8 Sept 2023 at 11:53, Victor Shih <victorshihgli@gmail.com> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> Add UHS-II specific data structures for commands and defines for
-> registers, as described in Part 1 UHS-II Addendum Version 1.01.
->
-> UHS-II related definitions are listed below:
->   1. UHS-II card capability: sd_uhs2_caps{}
->   2. UHS-II configuration: sd_uhs2_config{}
->   3. UHS-II register I/O address and register field definitions: sd_uhs2.h
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> ---
->
+From: Christophe Kerello <christophe.kerello@foss.st.com>
 
-[...]
+Add the support of SDIO in-band interrupt mode for STM32 and Ux500
+variants.
+It allows the SD I/O card to interrupt the host on SDMMC_D1 data line.
+It is not enabled by default on Ux500 variant as this is unstable and
+Ux500 users should use out-of-band IRQs.
 
->
->  enum sd_uhs2_operation {
-> @@ -358,6 +381,7 @@ struct mmc_host {
->         u32                     max_current_330;
->         u32                     max_current_300;
->         u32                     max_current_180;
-> +       u32                     max_current_180_vdd2; /* UHS2 vdd2 max curt. */
+Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
+Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+---
+Updates on v2:
+* rename use_sdio_irq to supports_sdio_irq and change it to bool
+* use common code for ux500 and stm32 variants
 
-Looks unused in the series, please drop it.
+---
+ drivers/mmc/host/mmci.c             | 85 +++++++++++++++++++++++++++++
+ drivers/mmc/host/mmci.h             |  7 +++
+ drivers/mmc/host/mmci_stm32_sdmmc.c |  2 +
+ 3 files changed, 94 insertions(+)
 
-[...]
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index dda756a563793..65cc03ee7f23b 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -272,6 +272,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.stm32_idmabsize_mask	= GENMASK(12, 5),
+ 	.stm32_idmabsize_align	= BIT(5),
++	.supports_sdio_irq	= true,
+ 	.busy_timeout		= true,
+ 	.busy_detect		= true,
+ 	.busy_detect_flag	= MCI_STM32_BUSYD0,
+@@ -299,6 +300,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.stm32_idmabsize_mask	= GENMASK(16, 5),
+ 	.stm32_idmabsize_align	= BIT(5),
++	.supports_sdio_irq	= true,
+ 	.dma_lli		= true,
+ 	.busy_timeout		= true,
+ 	.busy_detect		= true,
+@@ -327,6 +329,7 @@ static struct variant_data variant_stm32_sdmmcv3 = {
+ 	.datactrl_mask_sdio	= MCI_DPSM_ST_SDIOEN,
+ 	.stm32_idmabsize_mask	= GENMASK(16, 6),
+ 	.stm32_idmabsize_align	= BIT(6),
++	.supports_sdio_irq	= true,
+ 	.dma_lli		= true,
+ 	.busy_timeout		= true,
+ 	.busy_detect		= true,
+@@ -423,6 +426,11 @@ static void mmci_write_datactrlreg(struct mmci_host *host, u32 datactrl)
+ 	/* Keep busy mode in DPSM if enabled */
+ 	datactrl |= host->datactrl_reg & host->variant->busy_dpsm_flag;
+ 
++	/* Keep SD I/O interrupt mode enabled */
++	if (host->variant->supports_sdio_irq &&
++	    host->mmc->caps & MMC_CAP_SDIO_IRQ)
++		datactrl |= host->variant->datactrl_mask_sdio;
++
+ 	if (host->datactrl_reg != datactrl) {
+ 		host->datactrl_reg = datactrl;
+ 		writel(datactrl, host->base + MMCIDATACTRL);
+@@ -817,6 +825,25 @@ static bool ux500_busy_complete(struct mmci_host *host, struct mmc_command *cmd,
+ 	return (host->busy_state == MMCI_BUSY_DONE);
+ }
+ 
++void ux500_and_stm32_enable_sdio_irq(struct mmci_host *host, int enable)
++{
++	void __iomem *base = host->base;
++	u32 mask = readl_relaxed(base + MMCIMASK0);
++
++	if (enable)
++		writel_relaxed(mask | MCI_ST_SDIOITMASK, base + MMCIMASK0);
++	else
++		writel_relaxed(mask & ~MCI_ST_SDIOITMASK, base + MMCIMASK0);
++}
++
++void ux500_and_stm32_sdio_irq(struct mmci_host *host, u32 status)
++{
++	if (status & MCI_ST_SDIOIT) {
++		ux500_and_stm32_enable_sdio_irq(host, 0);
++		sdio_signal_irq(host->mmc);
++	}
++}
++
+ /*
+  * All the DMA operation mode stuff goes inside this ifdef.
+  * This assumes that you have a generic DMA device interface,
+@@ -1191,6 +1218,8 @@ static void ux500_variant_init(struct mmci_host *host)
+ {
+ 	host->ops = &mmci_variant_ops;
+ 	host->ops->busy_complete = ux500_busy_complete;
++	host->ops->enable_sdio_irq = ux500_and_stm32_enable_sdio_irq;
++	host->ops->sdio_irq = ux500_and_stm32_sdio_irq;
+ }
+ 
+ static void ux500v2_variant_init(struct mmci_host *host)
+@@ -1198,6 +1227,8 @@ static void ux500v2_variant_init(struct mmci_host *host)
+ 	host->ops = &mmci_variant_ops;
+ 	host->ops->busy_complete = ux500_busy_complete;
+ 	host->ops->get_datactrl_cfg = ux500v2_get_dctrl_cfg;
++	host->ops->enable_sdio_irq = ux500_and_stm32_enable_sdio_irq;
++	host->ops->sdio_irq = ux500_and_stm32_sdio_irq;
+ }
+ 
+ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq)
+@@ -1805,6 +1836,11 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 			mmci_data_irq(host, host->data, status);
+ 		}
+ 
++		if (host->variant->supports_sdio_irq &&
++		    host->mmc->caps & MMC_CAP_SDIO_IRQ &&
++		    host->ops && host->ops->sdio_irq)
++			host->ops->sdio_irq(host, status);
++
+ 		/*
+ 		 * Busy detection has been handled by mmci_cmd_irq() above.
+ 		 * Clear the status bit to prevent polling in IRQ context.
+@@ -2041,6 +2077,45 @@ static int mmci_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return ret;
+ }
+ 
++static void mmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
++{
++	struct mmci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	if (!host->variant->supports_sdio_irq)
++		return;
++
++	if (host->ops && host->ops->enable_sdio_irq) {
++		if (enable)
++			/* Keep device active while SDIO IRQ is enabled */
++			pm_runtime_get_sync(mmc_dev(mmc));
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->ops->enable_sdio_irq(host, enable);
++		spin_unlock_irqrestore(&host->lock, flags);
++
++		if (!enable) {
++			pm_runtime_mark_last_busy(mmc_dev(mmc));
++			pm_runtime_put_autosuspend(mmc_dev(mmc));
++		}
++	}
++}
++
++static void mmci_ack_sdio_irq(struct mmc_host *mmc)
++{
++	struct mmci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	if (!host->variant->supports_sdio_irq)
++		return;
++
++	if (host->ops && host->ops->enable_sdio_irq) {
++		spin_lock_irqsave(&host->lock, flags);
++		host->ops->enable_sdio_irq(host, 1);
++		spin_unlock_irqrestore(&host->lock, flags);
++	}
++}
++
+ static struct mmc_host_ops mmci_ops = {
+ 	.request	= mmci_request,
+ 	.pre_req	= mmci_pre_request,
+@@ -2049,6 +2124,8 @@ static struct mmc_host_ops mmci_ops = {
+ 	.get_ro		= mmc_gpio_get_ro,
+ 	.get_cd		= mmci_get_cd,
+ 	.start_signal_voltage_switch = mmci_sig_volt_switch,
++	.enable_sdio_irq = mmci_enable_sdio_irq,
++	.ack_sdio_irq	= mmci_ack_sdio_irq,
+ };
+ 
+ static void mmci_probe_level_translator(struct mmc_host *mmc)
+@@ -2316,6 +2393,14 @@ static int mmci_probe(struct amba_device *dev,
+ 		mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+ 	}
+ 
++	if (variant->supports_sdio_irq && host->mmc->caps & MMC_CAP_SDIO_IRQ) {
++		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
++
++		if (variant->datactrl_mask_sdio)
++			mmci_write_datactrlreg(host,
++					       host->variant->datactrl_mask_sdio);
++	}
++
+ 	/* Variants with mandatory busy timeout in HW needs R1B responses. */
+ 	if (variant->busy_timeout)
+ 		mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 253197f132fca..5ea4975c18ec5 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -331,6 +331,7 @@ enum mmci_busy_state {
+  *	       register.
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+  * @dma_lli: true if variant has dma link list feature.
++ * @supports_sdio_irq: allow SD I/O card to interrupt the host
+  * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
+  */
+ struct variant_data {
+@@ -376,6 +377,7 @@ struct variant_data {
+ 	u32			start_err;
+ 	u32			opendrain;
+ 	u8			dma_lli:1;
++	bool			supports_sdio_irq;
+ 	u32			stm32_idmabsize_mask;
+ 	u32			stm32_idmabsize_align;
+ 	void (*init)(struct mmci_host *host);
+@@ -400,6 +402,8 @@ struct mmci_host_ops {
+ 	bool (*busy_complete)(struct mmci_host *host, struct mmc_command *cmd, u32 status, u32 err_msk);
+ 	void (*pre_sig_volt_switch)(struct mmci_host *host);
+ 	int (*post_sig_volt_switch)(struct mmci_host *host, struct mmc_ios *ios);
++	void (*enable_sdio_irq)(struct mmci_host *host, int enable);
++	void (*sdio_irq)(struct mmci_host *host, u32 status);
+ };
+ 
+ struct mmci_host {
+@@ -481,6 +485,9 @@ void mmci_dmae_finalize(struct mmci_host *host, struct mmc_data *data);
+ void mmci_dmae_error(struct mmci_host *host);
+ #endif
+ 
++void ux500_and_stm32_enable_sdio_irq(struct mmci_host *host, int enable);
++void ux500_and_stm32_sdio_irq(struct mmci_host *host, u32 status);
++
+ #ifdef CONFIG_MMC_QCOM_DML
+ void qcom_variant_init(struct mmci_host *host);
+ #else
+diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+index 35067e1e6cd80..fbfaa0bcec51e 100644
+--- a/drivers/mmc/host/mmci_stm32_sdmmc.c
++++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+@@ -681,6 +681,8 @@ static struct mmci_host_ops sdmmc_variant_ops = {
+ 	.busy_complete = sdmmc_busy_complete,
+ 	.pre_sig_volt_switch = sdmmc_pre_sig_volt_vswitch,
+ 	.post_sig_volt_switch = sdmmc_post_sig_volt_switch,
++	.enable_sdio_irq = ux500_and_stm32_enable_sdio_irq,
++	.sdio_irq = ux500_and_stm32_sdio_irq,
+ };
+ 
+ static struct sdmmc_tuning_ops dlyb_tuning_mp15_ops = {
+-- 
+2.34.1
 
-Kind regards
-Uffe
