@@ -2,96 +2,121 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6277EDE9B7
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 12:17:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F017BEDE9B9
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 12:19:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235871AbjINMRF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 08:17:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44100 "EHLO
+        id S238254AbjINMTH convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 08:19:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34786 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238119AbjINMRC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 08:17:02 -0400
-Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D7071FCA
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 05:16:58 -0700 (PDT)
-Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-d81a4b96a86so308637276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 05:16:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694693817; x=1695298617; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yr+llaI5KQeooOMwZpfHvY4lngd1AofNhZErF5ZMjrQ=;
-        b=DQr6ovxBcWfbud4kiE4WnHiQxwwZgK7DFaczKXoQGkF45/t6uHFzjvrdANaoATRvCa
-         Nokly/4zkydGsZ1EnCi5A/MJxkuvDBt6Gz2RwWydOPWP+GdtE17ceM2EWHtIDQpRSjgk
-         jAtmY1hQVFcE9eQJScDoah1maMvzoO3jWadeeotfELOHLZ5FiclD8GP9v0eqmxjdvmLT
-         dxUv+P1ILJiTdY4Zrzhqs609My3IQGg5uLWPscyRQEWJzF75ln+w8z2vAL/Oa2eBb8dn
-         AAUF3LLHc+EujKbAXpGnMWJOUQZQb11Zagr5TVRPvHnx55/IlvUpK+i4eW7vtjgMgqz4
-         plFA==
+        with ESMTP id S234522AbjINMTG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 08:19:06 -0400
+Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 502EE1FC9;
+        Thu, 14 Sep 2023 05:19:02 -0700 (PDT)
+Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-59b4ec8d9c1so10295017b3.0;
+        Thu, 14 Sep 2023 05:19:02 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694693817; x=1695298617;
+        d=1e100.net; s=20230601; t=1694693941; x=1695298741;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=yr+llaI5KQeooOMwZpfHvY4lngd1AofNhZErF5ZMjrQ=;
-        b=dGUkBE3cnow836J/IBTEoUog5WLjV+5fKxivNg8QGNKgX++7pL+3ntG7w8ZqMtf4LG
-         +P/wIEGZPLtK8YQDw2QZonXzsS3b3lEDEFq/JonxE+WpTIxBLCYo3pAOq0Wm0rXjOuqD
-         tejdM2FZx6+DP2Xq8+N7PeeVafcvJaqlO+VnyzgSl4nKgRJE9LNsEXbjRiELNN7nO1zP
-         cfuhF/HDUHc+zEt9CyI8hnrbuBVOAtMLrMrpXKN7ShTnMGbi6KsWse7LN7XmBjVwYPrx
-         OblZmwHlqF65c7fD0pB3or0gIat6jXQ1rpwhQlKul6+kzktlnIIp9RYX1trDoEO0EZN2
-         vv2w==
-X-Gm-Message-State: AOJu0YxVFP6qDrIyd/MPwAqVfcrLbdMzETzFirRxfJYiBm3wRd6pBmPm
-        uvxGqgp8OlrA62Tsyo1qo18XKmrWEPlchk7wA69Dvg==
-X-Google-Smtp-Source: AGHT+IGy47RyRdUCvMqANoPaoR6Tn7BvENA0d/H15MygaC3tgtS2zUr1kqNSdPGpbC+cdFyfG/H6N87XJuUgcjYAYUg=
-X-Received: by 2002:a25:ac4b:0:b0:d81:754a:7cb8 with SMTP id
- r11-20020a25ac4b000000b00d81754a7cb8mr3274641ybd.65.1694693817406; Thu, 14
- Sep 2023 05:16:57 -0700 (PDT)
+        bh=MY7JVFz1bNlrjVrnjoxD6/0CcvRhM6TdVrF+6BcMksE=;
+        b=q5y1sKPpwLX0KM2RNEmFA4MB8YIF3vDdXnCO5DAmkLVtpNhsZVmiD90bsy19l1GnqN
+         xpNOJn9PoMNi2dfOKrMMhZOw+yIjR5KeYdpvn8VjwabRVE8+FQIGvbgRaOlmlb6iHyRp
+         h4xMp3F/cmphQLK9LT1HuQ1l1YTRS+huAZQYJkGLbW5uKcwEHaYFrYclqPELe7AFFUKG
+         he+1tvylE0uXa8i74Bmq9elCpaSZ6aIojRTtjGuq64dlBkED4Dt3O/KKkOEAamOSNGDO
+         unGZ+IWgovNveXFT1kRf6VC9WG5w5c8BDgl/RmbrIHBNR9uaLdbCoKoOZZOHTUn89SJE
+         G5dg==
+X-Gm-Message-State: AOJu0YxQP2t5u+4oHSheHOpS9v5WvH38TGoT01QtIpZ1s73EF+qOFL7U
+        KW4bxOF3uB3yHYfWKk88rg1jH7ay+Y+miA==
+X-Google-Smtp-Source: AGHT+IHDI3/+al5HUi8dKZXgD8BiFrxrHJDWa02JY2zlc6bSiAMHxJR/bBXKHYSah2mzcXOoyULAYg==
+X-Received: by 2002:a81:6c53:0:b0:592:1bab:52bd with SMTP id h80-20020a816c53000000b005921bab52bdmr5423379ywc.39.1694693941331;
+        Thu, 14 Sep 2023 05:19:01 -0700 (PDT)
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com. [209.85.219.178])
+        by smtp.gmail.com with ESMTPSA id i130-20020a0ddf88000000b0056d51c39c1fsm291307ywe.23.2023.09.14.05.18.58
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 14 Sep 2023 05:18:59 -0700 (PDT)
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-d801c83325fso936861276.0;
+        Thu, 14 Sep 2023 05:18:58 -0700 (PDT)
+X-Received: by 2002:a25:7497:0:b0:d78:3a4e:c19e with SMTP id
+ p145-20020a257497000000b00d783a4ec19emr5260394ybc.24.1694693938512; Thu, 14
+ Sep 2023 05:18:58 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230828100421.19758-1-balamanikandan.gunasundar@microchip.com> <CACRpkdZKALgcN58Es_hKL1MyEKYaTezuRGyaMkkBYyfXhRpdKg@mail.gmail.com>
-In-Reply-To: <CACRpkdZKALgcN58Es_hKL1MyEKYaTezuRGyaMkkBYyfXhRpdKg@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 14 Sep 2023 14:16:21 +0200
-Message-ID: <CAPDyKFrX1JNBio1tm4TbOwO4KSGP5ZHsLbJEXVv8qn-2Cq_KJg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: atmel-mci: Remove preprocessor directive
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>,
-        dmitry.torokhov@gmail.com, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
-        alexandre.belloni@bootlin.com, hari.prasathge@microchip.com
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-9-claudiu.beznea.uj@bp.renesas.com> <8490f909-c0ad-5a6d-7a97-03c80a8b47ba@omp.ru>
+In-Reply-To: <8490f909-c0ad-5a6d-7a97-03c80a8b47ba@omp.ru>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 14 Sep 2023 14:18:44 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXjhCth125PHKxrWJENFUhrvXfFJPLhL2ZRY6++azzczA@mail.gmail.com>
+Message-ID: <CAMuHMdXjhCth125PHKxrWJENFUhrvXfFJPLhL2ZRY6++azzczA@mail.gmail.com>
+Subject: Re: [PATCH 08/37] clk: renesas: rzg2l: trust value returned by hardware
+To:     Sergey Shtylyov <s.shtylyov@omp.ru>
+Cc:     Claudiu <claudiu.beznea@tuxon.dev>, mturquette@baylibre.com,
+        sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 29 Aug 2023 at 09:18, Linus Walleij <linus.walleij@linaro.org> wrot=
-e:
+On Tue, Sep 12, 2023 at 6:43 PM Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
+> On 9/12/23 7:51 AM, Claudiu wrote:
 >
-> On Mon, Aug 28, 2023 at 12:04=E2=80=AFPM Balamanikandan Gunasundar
-> <balamanikandan.gunasundar@microchip.com> wrote:
->
-> > Remove the preprocessor directive IS_ENABLED(CONFIG_MMC_ATMELMCI) while
-> > checking if the device is compatible with atmel,hsmci. Instead handle i=
-t in
-> > the if() condition. The compiler optimizes out the entire if() clause i=
-f
-> > the first expression in the if() clause is constant false.
+> > From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 > >
-> > Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@mic=
-rochip.com>
-> > Suggested-by: Linus Walleij <linus.walleij@linaro.org>
+> > Initial value of CPG_PL2SDHI_DSEL bits 0..1 or 4..6 is 01b. Hardware user's
+> > manual (r01uh0914ej0130-rzg2l-rzg2lc.pdf) specifies that setting 0 is
+> > prohibited. The rzg2l_cpg_sd_clk_mux_get_parent() should just read
+> > CPG_PL2SDHI_DSEL, trust the value and return the proper clock parent index
+> > based on the read value. Do this.
+> >
+> > Fixes: eaff33646f4cb ("clk: renesas: rzg2l: Add SDHI clk mux support")
+> > Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+
+> > --- a/drivers/clk/renesas/rzg2l-cpg.c
+> > +++ b/drivers/clk/renesas/rzg2l-cpg.c
+> > @@ -239,14 +239,8 @@ static u8 rzg2l_cpg_sd_clk_mux_get_parent(struct clk_hw *hw)
+> >
+> >       val >>= GET_SHIFT(hwdata->conf);
+> >       val &= GENMASK(GET_WIDTH(hwdata->conf) - 1, 0);
+> > -     if (val) {
+> > -             val--;
+> > -     } else {
+> > -             /* Prohibited clk source, change it to 533 MHz(reset value) */
+> > -             rzg2l_cpg_sd_clk_mux_set_parent(hw, 0);
+> > -     }
+> >
+> > -     return val;
+> > +     return val ? --val : val;
 >
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
->
-> Thanks for tidying this up Balamanikandan!
+>         return val ? val - 1 : 0;
 
-Linus, we didn't manage to get this into v6.6. So, it's probably
-better if you pick up this via your tree for v6.7.
+Definitely, mixing multiple users of the same variable and pre-decrement
+is ill-defined.
 
-Note that the commit message header may be a bit misleading, as this
-is really a gpio patch. Maybe you can amend that when applying?
+Gr{oetje,eeting}s,
 
-Kind regards
-Uffe
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
