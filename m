@@ -2,115 +2,242 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9CFDEE0205
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 13:03:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A491CEE020C
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 13:03:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238651AbjINNDj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S238630AbjINNDj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Thu, 14 Sep 2023 09:03:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41940 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43584 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238585AbjINNDh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 09:03:37 -0400
-Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66E801FDF
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:33 -0700 (PDT)
-Received: by mail-yb1-xb32.google.com with SMTP id 3f1490d57ef6-d77ad095f13so965066276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:33 -0700 (PDT)
+        with ESMTP id S238640AbjINNDg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 09:03:36 -0400
+Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE6501FEB
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:30 -0700 (PDT)
+Received: by mail-yb1-xb29.google.com with SMTP id 3f1490d57ef6-d8162698f0dso979365276.0
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 06:03:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694696612; x=1695301412; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1694696610; x=1695301410; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=OGBNv/WCy7mlfSU/rquHrfUjucCsufeS4fxpOpJpRLo=;
-        b=Fm5n8fCEQoCvtP/ZiYEwftfaaRFRcsT1NGihjTABbR0yJareDaZkWKN6WwdbBFHDld
-         mY/zwWAf7Lu/Cfa+q6+zFjinzDKHNpEvzjG2Bqc+qdBBLIOxABJiFShj+ZB3VC+wjqkY
-         njFAeq7MYc4AmDaRz3s+SPx9kV5+Y7mU+WjvcCwVA5iZSe+66l+NSegMK5lfRktFcc/9
-         KbmQnX4aMD25AWv1NtwOq6S8v4+F6bb7Zfcdis3FH8x46+mQdvYLZbUn59wVRc4xsM8l
-         YMVYyWJkTbN+1pFJAZq3+CMZ0IJYcdPM+TkQv88QR1Evh01uz+YWoB32Fp+rc7x4eMt9
-         DkJA==
+        bh=ob8SQM+bmq/PuBNTw6TcaVLNQ1zeeWO4ZtVc5W6iJRs=;
+        b=IGxQwgySBIzXEcyRinHXjbYkau/6kt7JZpKswkhrbqGd+yJyjwTF4sQPyOKPAmaAdZ
+         9uG/EB9a+UhcsYkWtc7MuF6lvGfLTaOKpF1zjw0y7vnd4cRrmdmShZpXSu1JEEvUn/Px
+         hLUPou0WleMwNJIJkPb7YG2RJsSXa+p4OWcuKQHTBBTuYPvLUmFH9ndkXcZLFMH528Nj
+         Gu5TazHtGOltrxgPa5DuZW8fCbINMFIf1CNd+ch/LXw5/bUy6oFkO9ickYXQfq+ID5xW
+         K5aM/D75MeGWwo6HC2/KTWLStzbndPIpFYG8luJQXfq6A/XRAR0/bx/QxJ+dhuirpawc
+         /uFw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694696612; x=1695301412;
+        d=1e100.net; s=20230601; t=1694696610; x=1695301410;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=OGBNv/WCy7mlfSU/rquHrfUjucCsufeS4fxpOpJpRLo=;
-        b=OdBCrUsCF7vX1hhC4cADNFvvXWYE9VrprIgb/X/uKjm1qPjwkMteVLTlEHLuU4lrvg
-         mCBxk6rb7ecDOZOhgCPrL74UtgnX2mXSlzJRtYE3iGoZsYtIwGgJisTxCFmfXwD4HFYF
-         P/7//eR5UHdGu5Zjw6zOywWvFwZz46lKBZSpOzRlwBGSov83swzwJXpZZyta8TnDICrO
-         YKMeixhspgdh2mvsX4/7DBIDRryvpsWbTgNmH8gYgXymrX4e7lQ+MNcllTYxyIs2m7Li
-         yahlVfyjARpLZ5CBOjzpqzchRt6zYhetDZ3pp0HeRhdR5jBIfB6VcfskhSrH1CqbWo9l
-         m5mg==
-X-Gm-Message-State: AOJu0Yw3CKo2WJ5aUG2X8cr9X7o5PG/p4XTRREgtSS85Btyi1RV5+ixh
-        27vO/QR3tLpcg9Y/5skLwQPU6hhiax9A5coGkyQ7zA==
-X-Google-Smtp-Source: AGHT+IHPMzUI/ot3DCoZ/iT1g4muQjpo9ZWKdRV8KZQpwQK3nU4X4TeTU3Js/qM/a3ER6+dKUgmedezyGL+8aAKDGC4=
-X-Received: by 2002:a25:1545:0:b0:d81:6116:ac2d with SMTP id
- 66-20020a251545000000b00d816116ac2dmr4087422ybv.59.1694696612626; Thu, 14 Sep
- 2023 06:03:32 -0700 (PDT)
+        bh=ob8SQM+bmq/PuBNTw6TcaVLNQ1zeeWO4ZtVc5W6iJRs=;
+        b=wJCwrs7wAtH+MSs9EPtw/pIaXtnn+2luUTJDNDtCPyEsE4idWIOrwifBJoyul/e33T
+         CrOeuz3YxyKC44WBcKJf61o0h0yK384x07K86rRsvl04xq+K1C6WBhpdaya/8KPLzO4Y
+         3KKTOUHXPH1dkfucrv1s0Pl/TCpgTMxazym53K3vA+FlVyBdTtlC+K7j7yVyx/wvTUn0
+         9FX/bA1pJXm95OK67oJJpTCt4etSFI8bUwqxWocsJgeRTodI7hCjl7Qt6aOFXqXnLXvT
+         TF0kt5PiIs4qDDVfbWiAT2KGR57a/oqkhMccNg7hGdX//xFRNr0uodrmi4Np2DuTlExQ
+         NocQ==
+X-Gm-Message-State: AOJu0YzFUr4FSU5/ZI9byGHUTtqa6ujPnlrEFjucxVIXEFsYxYye6OhS
+        5eqhz0KM0KF2Q/IApQY6aQwtUQT+1Nca2gaDygqK3Q==
+X-Google-Smtp-Source: AGHT+IH6YkWJEN52KxYqwksy7XeIE77ym5oKBBQTAMc1y9A7PSsTbC4UtM+Yk0dnZEGUypdjvCxvkZRxxsrAwVPctng=
+X-Received: by 2002:a25:1607:0:b0:d4c:6b49:fed7 with SMTP id
+ 7-20020a251607000000b00d4c6b49fed7mr4697103ybw.45.1694696609708; Thu, 14 Sep
+ 2023 06:03:29 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230901122701.318082-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <20230901122701.318082-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20230831160055.v3.1.I7ed1ca09797be2dd76ca914c57d88b32d24dac88@changeid>
+In-Reply-To: <20230831160055.v3.1.I7ed1ca09797be2dd76ca914c57d88b32d24dac88@changeid>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 14 Sep 2023 15:02:56 +0200
-Message-ID: <CAPDyKFrmQs76oDbDrza=CKsp0VLHj8xTn9smUwvpXFbKaCZpAA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: host: Kconfig: Make MMC_SDHI_INTERNAL_DMAC config
- option dependant on ARCH_RENESAS
-To:     Prabhakar <prabhakar.csengg@gmail.com>
-Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Biju Das <biju.das.jz@bp.renesas.com>,
-        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Date:   Thu, 14 Sep 2023 15:02:53 +0200
+Message-ID: <CAPDyKFoAbOjjS9H495mBNMiH6dV8eRsuoio6to5G6hz-sPY8xw@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: sdhci-pci-gli: fix LPM negotiation so x86/S0ix
+ SoCs can suspend
+To:     Sven van Ashbrook <svenva@chromium.org>
+Cc:     LKML <linux-kernel@vger.kernel.org>, adrian.hunter@intel.com,
+        ben.chuang@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
+        jasonlai.genesyslogic@gmail.com, skardach@google.com,
+        Renius Chen <reniuschengl@gmail.com>,
+        rafael.j.wysocki@intel.com, linux-mmc@vger.kernel.org,
+        stable@vger.kernel.org, SeanHY.chen@genesyslogic.com.tw,
+        victor.shih@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 1 Sept 2023 at 14:27, Prabhakar <prabhakar.csengg@gmail.com> wrote:
+On Thu, 31 Aug 2023 at 18:01, Sven van Ashbrook <svenva@chromium.org> wrote:
 >
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> To improve the r/w performance of GL9763E, the current driver inhibits LPM
+> negotiation while the device is active.
 >
-> MMC_SDHI_INTERNAL_DMAC config option has dependency on ARM64 and
-> R7S9210/R8A77470 this dependency will keep growing for future SoCs for
-> varying architectures. So to simplify this configuration make
-> MMC_SDHI_INTERNAL_DMAC solely depend on ARCH_RENESAS, as all Renesas
-> SoCs inherently depend on the ARCH_RENESAS config option.
+> This prevents a large number of SoCs from suspending, notably x86 systems
+> which commonly use S0ix as the suspend mechanism - for example, Intel
+> Alder Lake and Raptor Lake processors.
 >
-> This allows selecting MMC_SDHI_INTERNAL_DMAC config option for RZ/Five SoC
-> which is based on RISC-V architecture.
+> Failure description:
+> 1. Userspace initiates s2idle suspend (e.g. via writing to
+>    /sys/power/state)
+> 2. This switches the runtime_pm device state to active, which disables
+>    LPM negotiation, then calls the "regular" suspend callback
+> 3. With LPM negotiation disabled, the bus cannot enter low-power state
+> 4. On a large number of SoCs, if the bus not in a low-power state, S0ix
+>    cannot be entered, which in turn prevents the SoC from entering
+>    suspend.
 >
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Fix by re-enabling LPM negotiation in the device's suspend callback.
+>
+> Suggested-by: Stanislaw Kardach <skardach@google.com>
+> Fixes: f9e5b33934ce ("mmc: host: Improve I/O read/write performance for GL9763E")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Sven van Ashbrook <svenva@chromium.org>
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> v1-v2
-> * Add dependency on ARCH_RENESAS instead of RISCV
 >
-> v1:
-> https://lore.kernel.org/linux-renesas-soc/20230901113703.314667-1-prabhakar.mahadev-lad.rj@bp.renesas.com/
-> ---
->  drivers/mmc/host/Kconfig | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> Changes in v3:
+> - applied maintainer feedback from https://lore.kernel.org/lkml/CACT4zj-BaX4tHji8B8gS5jiKkd-2BcwfzHM4fS-OUn0f8DSxcw@mail.gmail.com/T/#m7cea7b6b987d1ab1ca95feedf2c6f9da5783da5c
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 554e67103c1a..2e8476db2381 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -677,9 +677,9 @@ config MMC_SDHI_SYS_DMAC
+> Changes in v2:
+> - improved symmetry and error path in s2idle suspend callback (internal review)
 >
->  config MMC_SDHI_INTERNAL_DMAC
->         tristate "DMA for SDHI SD/SDIO controllers using on-chip bus mastering"
-> -       depends on ARM64 || ARCH_R7S9210 || ARCH_R8A77470 || COMPILE_TEST
-> +       depends on ARCH_RENESAS || COMPILE_TEST
->         depends on MMC_SDHI
-> -       default MMC_SDHI if (ARM64 || ARCH_R7S9210 || ARCH_R8A77470)
-> +       default MMC_SDHI if ARCH_RENESAS
->         help
->           This provides DMA support for SDHI SD/SDIO controllers
->           using on-chip bus mastering. This supports the controllers
+>  drivers/mmc/host/sdhci-pci-gli.c | 104 ++++++++++++++++++++-----------
+>  1 file changed, 66 insertions(+), 38 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index 1792665c9494a..a4ccb6c3e27a6 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -745,42 +745,6 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
+>         return value;
+>  }
+>
+> -#ifdef CONFIG_PM_SLEEP
+> -static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
+> -{
+> -       struct sdhci_pci_slot *slot = chip->slots[0];
+> -
+> -       pci_free_irq_vectors(slot->chip->pdev);
+> -       gli_pcie_enable_msi(slot);
+> -
+> -       return sdhci_pci_resume_host(chip);
+> -}
+> -
+> -static int sdhci_cqhci_gli_resume(struct sdhci_pci_chip *chip)
+> -{
+> -       struct sdhci_pci_slot *slot = chip->slots[0];
+> -       int ret;
+> -
+> -       ret = sdhci_pci_gli_resume(chip);
+> -       if (ret)
+> -               return ret;
+> -
+> -       return cqhci_resume(slot->host->mmc);
+> -}
+> -
+> -static int sdhci_cqhci_gli_suspend(struct sdhci_pci_chip *chip)
+> -{
+> -       struct sdhci_pci_slot *slot = chip->slots[0];
+> -       int ret;
+> -
+> -       ret = cqhci_suspend(slot->host->mmc);
+> -       if (ret)
+> -               return ret;
+> -
+> -       return sdhci_suspend_host(slot->host);
+> -}
+> -#endif
+> -
+>  static void gl9763e_hs400_enhanced_strobe(struct mmc_host *mmc,
+>                                           struct mmc_ios *ios)
+>  {
+> @@ -1029,6 +993,70 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+>  }
+>  #endif
+>
+> +#ifdef CONFIG_PM_SLEEP
+> +static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
+> +{
+> +       struct sdhci_pci_slot *slot = chip->slots[0];
+> +
+> +       pci_free_irq_vectors(slot->chip->pdev);
+> +       gli_pcie_enable_msi(slot);
+> +
+> +       return sdhci_pci_resume_host(chip);
+> +}
+> +
+> +static int gl9763e_resume(struct sdhci_pci_chip *chip)
+> +{
+> +       struct sdhci_pci_slot *slot = chip->slots[0];
+> +       int ret;
+> +
+> +       ret = sdhci_pci_gli_resume(chip);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = cqhci_resume(slot->host->mmc);
+> +       if (ret)
+> +               return ret;
+> +
+> +       /*
+> +        * Disable LPM negotiation to bring device back in sync
+> +        * with its runtime_pm state.
+> +        */
+> +       gl9763e_set_low_power_negotiation(slot, false);
+> +
+> +       return 0;
+> +}
+> +
+> +static int gl9763e_suspend(struct sdhci_pci_chip *chip)
+> +{
+> +       struct sdhci_pci_slot *slot = chip->slots[0];
+> +       int ret;
+> +
+> +       /*
+> +        * Certain SoCs can suspend only with the bus in low-
+> +        * power state, notably x86 SoCs when using S0ix.
+> +        * Re-enable LPM negotiation to allow entering L1 state
+> +        * and entering system suspend.
+> +        */
+> +       gl9763e_set_low_power_negotiation(slot, true);
+> +
+> +       ret = cqhci_suspend(slot->host->mmc);
+> +       if (ret)
+> +               goto err_suspend;
+> +
+> +       ret = sdhci_suspend_host(slot->host);
+> +       if (ret)
+> +               goto err_suspend_host;
+> +
+> +       return 0;
+> +
+> +err_suspend_host:
+> +       cqhci_resume(slot->host->mmc);
+> +err_suspend:
+> +       gl9763e_set_low_power_negotiation(slot, false);
+> +       return ret;
+> +}
+> +#endif
+> +
+>  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
+>  {
+>         struct pci_dev *pdev = slot->chip->pdev;
+> @@ -1113,8 +1141,8 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
+>         .probe_slot     = gli_probe_slot_gl9763e,
+>         .ops            = &sdhci_gl9763e_ops,
+>  #ifdef CONFIG_PM_SLEEP
+> -       .resume         = sdhci_cqhci_gli_resume,
+> -       .suspend        = sdhci_cqhci_gli_suspend,
+> +       .resume         = gl9763e_resume,
+> +       .suspend        = gl9763e_suspend,
+>  #endif
+>  #ifdef CONFIG_PM
+>         .runtime_suspend = gl9763e_runtime_suspend,
 > --
-> 2.34.1
+> 2.42.0.283.g2d96d420d3-goog
 >
