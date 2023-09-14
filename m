@@ -2,151 +2,138 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA753EDE9AD
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 11:42:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAD99EDE9A4
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 11:52:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236455AbjINLmY convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 07:42:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55772 "EHLO
+        id S237316AbjINLwI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 07:52:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56846 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235161AbjINLmX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 07:42:23 -0400
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40446CC3;
-        Thu, 14 Sep 2023 04:42:19 -0700 (PDT)
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-59b9d255037so9680767b3.2;
-        Thu, 14 Sep 2023 04:42:19 -0700 (PDT)
+        with ESMTP id S237253AbjINLwH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 07:52:07 -0400
+Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F537CC3
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 04:52:03 -0700 (PDT)
+Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-59bc956b029so9742667b3.2
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 04:52:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1694692323; x=1695297123; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=XOUEoWCoocBtSGgV6FK5TFmlWuuWLandTZ80F2DQ2rk=;
+        b=q++ZGo1B47W/LTNaEjZTX2l+ByO3OEB8Nbz+LgAh9yVwtMVRj4g1cnVKa5yLj4O4WK
+         2AIBpQxT1g88bfEAYY/WdBSl88K6uTd7RCFfa99vtllffVXyNCE3SMOAcczkMkPeZADT
+         uIcSGwINQJOHsAWiLva3bDo/R5i6X1eNnlDG4B8d3ak73p/INWpKOTMBJ9qg9O+TCTel
+         1npKkSgFABY5+3B1frpuEMqxfv6wKU0nTggcZMtq4Y/3JTNUET9+cZ5dFWllQlDQjbUR
+         mkD5VyOEDawj7HzcY8ZWpXFnfsRi3JcmLRBjUyKid4f1FCLT4NXUwlARATaFN6LeE2N7
+         3CrQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694691738; x=1695296538;
+        d=1e100.net; s=20230601; t=1694692323; x=1695297123;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=TQF6azidQAjPWw/iF7OTkfye/Uwv7/91WnosuLGo4H0=;
-        b=KRnazo4b3oK3Ks80sZ9YwBqZ6xe5m9l7EplvvSZ7n533Jj0sGVsmxvb7E1Ubha9X49
-         3pvqgFAc0LQVRM5+uXjVO5J6hrkVd9Sltk4bM/lvxXfRURlGvW0/xhpsvu7f02kyzogs
-         If6oNpnHXlTaIQH99wRBrWT3j2hM8kA8SHG5+vyzLz03uxQlqxBlNRoi1xtAQlECi45K
-         10mUks1PSym7GeZ5M1iHso4qGqezTGe78jsCRkdp7SQkUiij6Rghsaf3Zq07BDQoUCns
-         PCdL1+gyRApk2rOaTVBg2CzIg8jGnIWDHLxVX+U3hSS7fh7dOG27D9O5WQe2YD9czxrx
-         UoaA==
-X-Gm-Message-State: AOJu0YxbPVJxeSkMv5ONQ3fTr4ZrWIKhzJrOkG3s+RryLnMCmHQag6cg
-        RkjZtdBGRhsaznrTFKa57v0SPj8cCFYQ1g==
-X-Google-Smtp-Source: AGHT+IF0Sgpy0A5vUjYzeH274xmHzh4WNbwSDJ0nsHb0aJrnlaQDcsZtmGN7NOioeDgdpMgpB5N8vQ==
-X-Received: by 2002:a81:49ca:0:b0:59b:e622:f820 with SMTP id w193-20020a8149ca000000b0059be622f820mr2817520ywa.13.1694691738247;
-        Thu, 14 Sep 2023 04:42:18 -0700 (PDT)
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com. [209.85.219.174])
-        by smtp.gmail.com with ESMTPSA id z5-20020a81a245000000b005832fe29034sm269217ywg.89.2023.09.14.04.42.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 14 Sep 2023 04:42:17 -0700 (PDT)
-Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-d776e1f181bso855446276.3;
-        Thu, 14 Sep 2023 04:42:17 -0700 (PDT)
-X-Received: by 2002:a25:8683:0:b0:d7b:8d9a:4ec5 with SMTP id
- z3-20020a258683000000b00d7b8d9a4ec5mr4800309ybk.41.1694691737069; Thu, 14 Sep
- 2023 04:42:17 -0700 (PDT)
+        bh=XOUEoWCoocBtSGgV6FK5TFmlWuuWLandTZ80F2DQ2rk=;
+        b=IZmvnFF4Mqlf6EgJnKj/8D2GFjaV8J4Nn8lzsV/FrRISgws1klQ4rGY4GMdnxMMiY0
+         FtjQlQlp6p4JDCATy95z8VuFWmS1tvL0VuUNceKzYgKnZ2fxZxK8NMnp+W2TSlUGv/xP
+         iOXxkHa4dfby5qX2Xpby+Hf1nOnkiVZf0lo1loiQN/o9zkBg/H7C93TWxzjyS9wzBFG7
+         A3oq7FE895Hjv8jWejogNt7xOylxg4jhZRtu/zN4GTCbGUznmW844DPKf6aV3FvNylbT
+         r9VJp9vDTEVgrYrO0QfgvRZKqrjJSk0S8cgoibtKW0ZgCsqk8t9Z0PB4DmlcFHRD5RjR
+         nCXQ==
+X-Gm-Message-State: AOJu0Yzfy5NAqjHHK3xXiFUKXsXjRTx5CXxTIibySvurmgW0v9EnXuvh
+        4rUz2LscUq6wdU32YcWFC5Omsdpd/st8o6V1fjMQ0FsaHemlBHww
+X-Google-Smtp-Source: AGHT+IHD8VvcoE47pb1lIcfSKbtIiW7ws0imUaLM67I3lgZ6IbvqTW/m+pTULfW+iNfibDtFe9PuifpTuzvff1x23T0=
+X-Received: by 2002:a25:109:0:b0:d00:cc5b:8a9f with SMTP id
+ 9-20020a250109000000b00d00cc5b8a9fmr4681660ybb.16.1694692322860; Thu, 14 Sep
+ 2023 04:52:02 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com> <20230912045157.177966-7-claudiu.beznea.uj@bp.renesas.com>
-In-Reply-To: <20230912045157.177966-7-claudiu.beznea.uj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 14 Sep 2023 13:42:04 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXoq96ptmm+oU_yHdkSfN4+WCfABn98tXV5xfyvM66Eig@mail.gmail.com>
-Message-ID: <CAMuHMdXoq96ptmm+oU_yHdkSfN4+WCfABn98tXV5xfyvM66Eig@mail.gmail.com>
-Subject: Re: [PATCH 06/37] clk: renesas: rzg2l: wait for status bit of SD mux
- before continuing
-To:     Claudiu <claudiu.beznea@tuxon.dev>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230901120836.1057900-1-yann.gautier@foss.st.com>
+ <CACRpkdacRe5cPoSFJyEdo6nZrtmUHTNqMxf55CntvsdpFqhhrQ@mail.gmail.com>
+ <CAPDyKFqJzoBiG4c2NbXA_6YDNsAh4W0TO-SP9+C2Qw40TKVH7g@mail.gmail.com> <ab2f88c3-2f80-a0ae-3a74-d90dd2a6ccf3@foss.st.com>
+In-Reply-To: <ab2f88c3-2f80-a0ae-3a74-d90dd2a6ccf3@foss.st.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Thu, 14 Sep 2023 13:51:51 +0200
+Message-ID: <CACRpkdY1cU4D_qbC3g6wV5hcKVCL6uMJu9mH=byw+2RgQTPicQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: stm32: add SDIO in-band interrupt mode
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Yang Yingliang <yangyingliang@huawei.com>,
+        Rob Herring <robh@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Claudiu,
-
-On Tue, Sep 12, 2023 at 6:52 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+On Thu, Sep 14, 2023 at 11:08=E2=80=AFAM Yann Gautier <yann.gautier@foss.st=
+.com> wrote:
+> On 9/4/23 14:21, Ulf Hansson wrote:
+> > On Fri, 1 Sept 2023 at 16:10, Linus Walleij <linus.walleij@linaro.org> =
+wrote:
+> >>
+> >> Hi Yann/Christophe,
+> >>
+> >> thanks for your patch!
+> >>
+> >> On Fri, Sep 1, 2023 at 2:08=E2=80=AFPM Yann Gautier <yann.gautier@foss=
+.st.com> wrote:
+> >>
+> >>> From: Christophe Kerello <christophe.kerello@foss.st.com>
+> >>>
+> >>> Add the support of SDIO in-band interrupt mode for STM32 variant.
+> >>> It allows the SD I/O card to interrupt the host on SDMMC_D1 data line=
+.
+> >>>
+> >>> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
+> >>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+> >> (...)
+> >>> +++ b/drivers/mmc/host/mmci.h
+> >>> @@ -332,6 +332,7 @@ enum mmci_busy_state {
+> >>>    * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOW=
+ER register
+> >>>    * @dma_lli: true if variant has dma link list feature.
+> >>>    * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
+> >>> + * @use_sdio_irq: allow SD I/O card to interrupt the host
+> >>
+> >> The documentation tag should be one line up (compare to the members...=
+)
+> >>
+> >>> @@ -376,6 +377,7 @@ struct variant_data {
+> >>>          u32                     start_err;
+> >>>          u32                     opendrain;
+> >>>          u8                      dma_lli:1;
+> >>> +       u8                      use_sdio_irq:1;
+> >>
+> >> 1. bool use_sdio_irq;
+> >>
+> Hi,
 >
-> Hardware user manual of RZ/G2L (r01uh0914ej0130-rzg2l-rzg2lc.pdf,
-> chapter 7.4.7 Procedure for Switching Clocks by the Dynamic Switching
-> Frequency Selectors) specifies that we need to check CPG_PL2SDHI_DSEL for
-> SD clock switching status.
+> Should it really be changed to a bool?
+> Other boolean likes in the structure are u8:1.
+
+Yes, two wrongs does not make one right.
+
+Using u8:1 is a way of trying to outsmart the compiler
+which is generally a bad idea.
+
+> > That said, the out-of-band IRQs is what works best for the ux500 varian=
+ts.
 >
-> Fixes: eaff33646f4cb ("clk: renesas: rzg2l: Add SDHI clk mux support")
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> What I understand here is that in-band interrupts are not properly
+> working on ux500, and then the feature shouldn't be enabled for this
+> platform.
+> Am I correct?
 
-Thanks for your patch!
+I think we can flag the feature as available and implement the handling
+but add a comment that this is unstable and that Ux500 users should
+prefer to use out-of-band IRQs.
 
-> --- a/drivers/clk/renesas/rzg2l-cpg.c
-> +++ b/drivers/clk/renesas/rzg2l-cpg.c
-> @@ -188,7 +188,8 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
->         u32 off = GET_REG_OFFSET(hwdata->conf);
->         u32 shift = GET_SHIFT(hwdata->conf);
->         const u32 clk_src_266 = 2;
-> -       u32 bitmask;
-> +       u32 msk, val, bitmask;
-> +       int ret;
->
->         /*
->          * As per the HW manual, we should not directly switch from 533 MHz to
-> @@ -203,9 +204,6 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
->          */
->         bitmask = (GENMASK(GET_WIDTH(hwdata->conf) - 1, 0) << shift) << 16;
->         if (index != clk_src_266) {
-> -               u32 msk, val;
-> -               int ret;
-> -
->                 writel(bitmask | ((clk_src_266 + 1) << shift), priv->base + off);
->
->                 msk = off ? CPG_CLKSTATUS_SELSDHI1_STS : CPG_CLKSTATUS_SELSDHI0_STS;
-> @@ -221,7 +219,13 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
->
->         writel(bitmask | ((index + 1) << shift), priv->base + off);
->
-> -       return 0;
-> +       ret = readl_poll_timeout(priv->base + CPG_CLKSTATUS, val,
-> +                                !(val & msk), 100,
-
-"msk" may be uninitialized.
-
-> +                                CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US);
-> +       if (ret)
-> +               dev_err(priv->dev, "failed to switch clk source\n");
-> +
-> +       return ret;
-
-This is now (supposed to be) doing the same thing twice, once using
-clk_src_266, and then again with the wanted index, so why not introduce
-a small helper? That would have avoided the uninitialized variable, too.
-
-I know you're rewriting this code in "[PATCH 18/37] clk: renesas:
-rzg2l: refactor sd mux driver", but even after that, you always do
-a register write before calling rzg2l_cpg_wait_clk_update_done(),
-so it may still be a net win.
-
->  }
->
->  static u8 rzg2l_cpg_sd_clk_mux_get_parent(struct clk_hw *hw)
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Yours,
+Linus Walleij
