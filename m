@@ -2,114 +2,96 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 286CEEDE98F
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 08:00:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF3E2EDE994
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 08:30:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236133AbjINIAv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 04:00:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56650 "EHLO
+        id S236359AbjINIaW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 04:30:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51416 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236112AbjINIAt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 04:00:49 -0400
-Received: from mail-qv1-xf2b.google.com (mail-qv1-xf2b.google.com [IPv6:2607:f8b0:4864:20::f2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E614E1BF6;
-        Thu, 14 Sep 2023 01:00:44 -0700 (PDT)
-Received: by mail-qv1-xf2b.google.com with SMTP id 6a1803df08f44-64b8e1c739aso4415906d6.0;
-        Thu, 14 Sep 2023 01:00:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1694678444; x=1695283244; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=u8F9T8J053YQMscaSaisfFP3x9A/nwLzOssGfj6BwlE=;
-        b=CQgyUvvxbQYq47/SJT4JjNG2LpwkTooSL0/GS/VACVVyzP90nZlgOY8nLi+hAPLZAe
-         lSHwpuhrD66hYTwdLliHG6Kxfz/fCbqyOSlTpNgVt5o0oST7CeEJAslJX6zQuB578BgQ
-         wTRVU9s7HLDxPVJaE8e+3nNrLlNPq/VRMTgVDNLu6YOmQ1Dui4ew/jNnMrZuI33/jS/o
-         WmrdbC5l+V+XUcs8HjOxaIwYJ8czNCZ1fub+zRE4A7gpcVjMpvTUAKetG5J+H9/dG8Xp
-         MDKAZIixEXAUozpyFjcmgCmkcOisGLmAHLqjkXOixiWp7hrsJrb12sYX9wKbblKYeD79
-         u//g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694678444; x=1695283244;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=u8F9T8J053YQMscaSaisfFP3x9A/nwLzOssGfj6BwlE=;
-        b=vfFxsVOIxRiGZj5HT/JhLNUCht9ACdhJP6hiHNKS9zAx3IHtijD8EBfIyhdjz/262a
-         gTm988keDfGA5gYKkrZIGC2hFynjkkbTO3EcrsGT33oHbgw5mx5pNLZX47pcy1Ny4TJy
-         lX1EOv3tmSDncZ8vzaVush+FaLwvyTHIfp6n0yCJisEO6tEqqU9RGqkAvzhdirKIAAYJ
-         WJjuAYGpSjdtciiWtYmRQhARLUAB22K3c5jmgJlIMUpvH1vFOJvulqv0kSHs/+/Nkdi1
-         yIa8IfNylHGjVXujnNhXEBy/iIzL5WXRuAXLUEP1/icsBA+uN9Vz29vwKrVYMwLVz5wU
-         4i0A==
-X-Gm-Message-State: AOJu0YzvFv4oK6LeITOb8A1+sNhiN/Oev0HITUuzePGMAtCVZBUleyMj
-        suNVYk5epSEpRHISltzg8n4Sp3NUBbST06AnG5U=
-X-Google-Smtp-Source: AGHT+IERUzsU3IkZMmquqlUe6UZl/69j7L03jmUS7ZjX/Le1OWcDLACLhpLxe6Ojxsc/nAr7XtUGujfW+R2nfQgECqg=
-X-Received: by 2002:a0c:ab4f:0:b0:656:1d37:3afd with SMTP id
- i15-20020a0cab4f000000b006561d373afdmr1066143qvb.54.1694678443965; Thu, 14
- Sep 2023 01:00:43 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230914000348.25790-1-michael@allwinnertech.com>
-In-Reply-To: <20230914000348.25790-1-michael@allwinnertech.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Thu, 14 Sep 2023 16:00:32 +0800
-Message-ID: <CA+Da2qzr0SBu-kUtFTnBqT+OObFOSTFgmU30L3B-Rjv3rYbGKw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Add new flag to force hardware reset
-To:     Michael Wu <michael@allwinnertech.com>
-Cc:     ulf.hansson@linaro.org, CLoehle@hyperstone.com,
-        adrian.hunter@intel.com, jinpu.wang@ionos.com, hare@suse.de,
-        victor.shih@genesyslogic.com.tw, avri.altman@wdc.com,
-        asuk4.q@gmail.com, axboe@kernel.dk, brauner@kernel.org,
-        f.fainelli@gmail.com, beanhuo@micron.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+        with ESMTP id S235215AbjINIaW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 04:30:22 -0400
+Received: from aposti.net (aposti.net [89.234.176.197])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26E4BCD8;
+        Thu, 14 Sep 2023 01:30:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
+        s=mail; t=1694680215;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=L3QNlCsd4KrtdLCl8FujpLR9D66KZlMKVr8PFtC9Zj8=;
+        b=tIBeXCzmhsYqsWsjrwpnqguwuBD5fXYC/Eb4uuoG7n3c3EEb7DyvSU4Y9dpM1IUgC0bySP
+        sG97FPryrWMEsDiLl/oJcqji3jRNgnJ6zBwkJCJXtRnpV2RmtcooQ8L6WNXv9o0oMYkE9c
+        SXsy27g2omhA+TmEn9Kgnnz6BYKzv5U=
+Message-ID: <4de724a1630eda74f4f304dc224dc981eb3b0875.camel@crapouillou.net>
+Subject: Re: [PATCH 2/5] mtd: rawnand: ingenic: use gpiod_set_active_high()
+From:   Paul Cercueil <paul@crapouillou.net>
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Andy Shevchenko <andy@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Harvey Hunt <harveyhuntnexus@gmail.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Daniel Scally <djrscally@gmail.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Mark Gross <markgross@kernel.org>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mtd@lists.infradead.org, platform-driver-x86@vger.kernel.org,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Date:   Thu, 14 Sep 2023 10:30:13 +0200
+In-Reply-To: <CAHp75Vd2a06rnGCEiJW0reN00amso0RyvgLT516nZiYLYZ-xcQ@mail.gmail.com>
+References: <20230913115001.23183-1-brgl@bgdev.pl>
+         <20230913115001.23183-3-brgl@bgdev.pl>
+         <CAHp75Ve8aK4Pfid1JYWH86mKy-Zb-G2QDPrJYmRzPCYOsn1TqQ@mail.gmail.com>
+         <CACRpkdYtYDJa6fo6RnizHNzUsyazBQxEaNMznaij8rBF4ie+ew@mail.gmail.com>
+         <20230913222338.07d1625b@xps-13>
+         <CAHp75Vd2a06rnGCEiJW0reN00amso0RyvgLT516nZiYLYZ-xcQ@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 14 Sept 2023 at 08:04, Michael Wu <michael@allwinnertech.com> wrote:
->
-> Entering the recovery system itself indicates a transmission error.
-> In this situation, we intend to execute the mmc_blk_reset function
-> to clear any anomalies that may be caused by errors. We have previously
-> discussed with several MMC device manufacturers, and they expressed
-> their desire for us to reset the device when errors occur to ensure
-> stable operation. We aim to make this code compatible with all devices
-> and ensure its stable performance, so we would like to add this patch
->
-> Signed-off-by: Michael Wu <michael@allwinnertech.com>
+Hi,
 
-like: https://lore.kernel.org/linux-mmc/20220603051534.22672-1-quic_sartgarg@quicinc.com/
+Le jeudi 14 septembre 2023 =C3=A0 10:02 +0300, Andy Shevchenko a =C3=A9crit=
+=C2=A0:
+> On Wed, Sep 13, 2023 at 11:23=E2=80=AFPM Miquel Raynal
+> <miquel.raynal@bootlin.com> wrote:
+> > linus.walleij@linaro.org=C2=A0wrote on Wed, 13 Sep 2023 22:12:40 +0200:
+> > > On Wed, Sep 13, 2023 at 10:05=E2=80=AFPM Andy Shevchenko
+> > > <andy.shevchenko@gmail.com> wrote:
+> > > > On Wed, Sep 13, 2023 at 2:50=E2=80=AFPM Bartosz Golaszewski
+> > > > <brgl@bgdev.pl> wrote:
+>=20
+> ...
+>=20
+> > > > Why not moving this quirk to gpiolib-of.c?
+> > >=20
+> > > That's a better idea here I think, it's clearly a quirk for a
+> > > buggy device tree.
+> >=20
+> > Agreed, it's just for backward compatibility purposes in a single
+> > driver. I believe it should stay here.
+>=20
+> I believe Linus was for moving.
 
-You should enable it in the vendor host.
+Which Linus? Because the one who's also the gpio maintainer just wrote
+above that it was better to keep it in the driver.
 
-> ---
->  drivers/mmc/core/block.c | 2 +-
->  include/linux/mmc/host.h | 1 +
->  2 files changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index b5b414a71e0b..29fbe0ddeadb 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1503,7 +1503,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
->         pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
->
->         err = mmc_cqe_recovery(host);
-> -       if (err)
-> +       if (err || host->cqe_recovery_reset_always)
->                 mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
->         mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
->
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 62a6847a3b6f..f578541a06b5 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -518,6 +518,7 @@ struct mmc_host {
->         int                     cqe_qdepth;
->         bool                    cqe_enabled;
->         bool                    cqe_on;
-> +       bool                    cqe_recovery_reset_always;
->
->         /* Inline encryption support */
->  #ifdef CONFIG_MMC_CRYPTO
-> --
-> 2.29.0
->
+Cheers,
+-Paul
+
+>=20
+> gpiolib-of.c contains a lot of quirks, including this one. Calling
+> these new (or old) APIs for overriding polarity in many cases
+> shouldn't be needed if were no issues with DT or something like that.
+>=20
+
