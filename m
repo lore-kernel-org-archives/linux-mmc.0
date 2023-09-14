@@ -2,156 +2,128 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7165EDE99E
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 09:09:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61870EDE9A0
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 09:30:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236617AbjINJJj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 05:09:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54058 "EHLO
+        id S236930AbjINJaT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Sep 2023 05:30:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55112 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236903AbjINJJZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 05:09:25 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7B1530CD;
-        Thu, 14 Sep 2023 02:08:45 -0700 (PDT)
-Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 38E4F14n000879;
-        Thu, 14 Sep 2023 11:08:14 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-        message-id:date:mime-version:subject:to:cc:references:from
-        :in-reply-to:content-type:content-transfer-encoding; s=
-        selector1; bh=19/t/7aa3tjI7A+p++1QXECy1ZjoXC8SO7oXAgid7Sc=; b=u3
-        x4KHbO52/oq3U66cUFVWVm7f45NKHDyjrgZ5+mnwiFdJfanA+4PaQNLZ+wTP21Gg
-        is6c/bjxfH9SAMkK3wcKg6VqMb7+nSEiTZs+lh2jBonWYcowJZX5vGS8t193KtKv
-        fbSuBSARQ0/R5TEj7jMRNAHQpyhymD0BouS/4wZhWFNyUyiN93t+2f978bjybZam
-        XfQ0PUYbZORaaSDQskqMHClEaM8jNbSgBxbI93Yn78jc2uYeBWOOSUQXRKh/yD66
-        9vZPrZkHlaHhLFfhuhcPIR0IEbjgHJ/1GNGVYUKayrD2TSJcbG6fMr4izIyK553L
-        rK3C4dM0ZYO146SjuDug==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3t3tyw18gx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 14 Sep 2023 11:08:14 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id D609E10005A;
-        Thu, 14 Sep 2023 11:08:13 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id BE640227EFD;
-        Thu, 14 Sep 2023 11:08:13 +0200 (CEST)
-Received: from [10.201.20.125] (10.201.20.125) by SHFDAG1NODE2.st.com
- (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Thu, 14 Sep
- 2023 11:08:12 +0200
-Message-ID: <ab2f88c3-2f80-a0ae-3a74-d90dd2a6ccf3@foss.st.com>
-Date:   Thu, 14 Sep 2023 11:08:11 +0200
+        with ESMTP id S236830AbjINJaS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 05:30:18 -0400
+Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 434F41BF2
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 02:30:14 -0700 (PDT)
+Received: by mail-vs1-xe2e.google.com with SMTP id ada2fe7eead31-44ee1123667so1223908137.0
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 02:30:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1694683813; x=1695288613; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=p2ppFbBJ6eSrXngOvBl4Cb6zXMC/U2RNI6NUtLKD4qk=;
+        b=A5qFBXPuNfXapaDc1ES++K3Rar679LuNluYnHoBx4L14PSGbpK9ddRuMsWEoL7+Vee
+         lP3zM0IkQoM8uljFn+F4dbxumEu0ueiQgIq9/W4yvjXJM33GBy2/1L1yjrM4Ln5c1IZH
+         AvjAeo+h+ZuaKdmy0Aklm3m5XRVm0RyOmpTqwzRjoOOvstR1lQrb7r0vCkO3gmp/t5ie
+         l4wOVi6LbbOIoZGzd8Tv1Kim6pHPelF41P8+6SMPS5JV7ghq4kdx3Tftj/XGv/Jdwapd
+         IViDH4k83ORDqoNusi2GSdur//QOznyHDy7gZZR53WsNi0YeTMyYeWlNVgAO0l06PIfc
+         0pZw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694683813; x=1695288613;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=p2ppFbBJ6eSrXngOvBl4Cb6zXMC/U2RNI6NUtLKD4qk=;
+        b=oWzroQNtCeQWPyCC9SYbVwFH5wYl83R1jM3oXc6LWxZZ07k0AnQ+jPEj315uOxoxpp
+         gZdIOMUEqopd+4LChuscUulbo8XZ0zLurAp/GCPXZBEKti1wk+kp01c94WQaJXQnNNuX
+         BLD2YW5wwL070IYiloOr/GiLkuh12zdwc1xRw5ks8Y+glz91y65O4OdRV8Vbq6i2R0RG
+         8V5uGfvNTfHdIrgs6Xv9twfpRpZeQEoXC5pykuBB3MVzU3Cjl9RXqS8WtfAalsAl52sN
+         NpAchXHg1SdGOnExy0kdns2xOaki4IuOzoaeBl71hAq3kAPduiIiiDMNNhpknTC/OC2D
+         f0Mg==
+X-Gm-Message-State: AOJu0YwprfFZbpt2mgBCU/PeUbFxS3JaUyFJvBGNk4Kd/qoBNMxm2/Ew
+        5hW3TYiaornMlAERreieVb9k0sW6uTt4JshV7rrbAVVR9LdWZymL
+X-Google-Smtp-Source: AGHT+IFdpKc86Ba4+Ce1Kw+37JilCE4JPGPOzMp6WOHfoT2BLvKGNI+DWUjLDVVh+a1NN/cT820cMVMpi35QbT24b9U=
+X-Received: by 2002:a05:6102:3169:b0:450:6ef1:e415 with SMTP id
+ l9-20020a056102316900b004506ef1e415mr582724vsm.13.1694683813313; Thu, 14 Sep
+ 2023 02:30:13 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.0
-Subject: Re: [PATCH] mmc: mmci: stm32: add SDIO in-band interrupt mode
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+References: <20230913115001.23183-1-brgl@bgdev.pl> <20230913115001.23183-3-brgl@bgdev.pl>
+ <CAHp75Ve8aK4Pfid1JYWH86mKy-Zb-G2QDPrJYmRzPCYOsn1TqQ@mail.gmail.com>
+ <CACRpkdYtYDJa6fo6RnizHNzUsyazBQxEaNMznaij8rBF4ie+ew@mail.gmail.com>
+ <20230913222338.07d1625b@xps-13> <CAHp75Vd2a06rnGCEiJW0reN00amso0RyvgLT516nZiYLYZ-xcQ@mail.gmail.com>
+ <4de724a1630eda74f4f304dc224dc981eb3b0875.camel@crapouillou.net>
+In-Reply-To: <4de724a1630eda74f4f304dc224dc981eb3b0875.camel@crapouillou.net>
+From:   Bartosz Golaszewski <brgl@bgdev.pl>
+Date:   Thu, 14 Sep 2023 11:30:02 +0200
+Message-ID: <CAMRc=MfnPdr66OPSkkjjpZY2VY7wN4WO2uBPbpyExFH0F6e=1Q@mail.gmail.com>
+Subject: Re: [PATCH 2/5] mtd: rawnand: ingenic: use gpiod_set_active_high()
+To:     Paul Cercueil <paul@crapouillou.net>,
         Linus Walleij <linus.walleij@linaro.org>
-CC:     Russell King <linux@armlinux.org.uk>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        Rob Herring <robh@kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230901120836.1057900-1-yann.gautier@foss.st.com>
- <CACRpkdacRe5cPoSFJyEdo6nZrtmUHTNqMxf55CntvsdpFqhhrQ@mail.gmail.com>
- <CAPDyKFqJzoBiG4c2NbXA_6YDNsAh4W0TO-SP9+C2Qw40TKVH7g@mail.gmail.com>
-Content-Language: en-US
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CAPDyKFqJzoBiG4c2NbXA_6YDNsAh4W0TO-SP9+C2Qw40TKVH7g@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.201.20.125]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.601,FMLib:17.11.176.26
- definitions=2023-09-14_07,2023-09-13_01,2023-05-22_02
+Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Andy Shevchenko <andy@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Harvey Hunt <harveyhuntnexus@gmail.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Daniel Scally <djrscally@gmail.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Mark Gross <markgross@kernel.org>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mtd@lists.infradead.org, platform-driver-x86@vger.kernel.org,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/4/23 14:21, Ulf Hansson wrote:
-> On Fri, 1 Sept 2023 at 16:10, Linus Walleij <linus.walleij@linaro.org> wrote:
->>
->> Hi Yann/Christophe,
->>
->> thanks for your patch!
->>
->> On Fri, Sep 1, 2023 at 2:08 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
->>
->>> From: Christophe Kerello <christophe.kerello@foss.st.com>
->>>
->>> Add the support of SDIO in-band interrupt mode for STM32 variant.
->>> It allows the SD I/O card to interrupt the host on SDMMC_D1 data line.
->>>
->>> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
->>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
->> (...)
->>> +++ b/drivers/mmc/host/mmci.h
->>> @@ -332,6 +332,7 @@ enum mmci_busy_state {
->>>    * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
->>>    * @dma_lli: true if variant has dma link list feature.
->>>    * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
->>> + * @use_sdio_irq: allow SD I/O card to interrupt the host
->>
->> The documentation tag should be one line up (compare to the members...)
->>
->>> @@ -376,6 +377,7 @@ struct variant_data {
->>>          u32                     start_err;
->>>          u32                     opendrain;
->>>          u8                      dma_lli:1;
->>> +       u8                      use_sdio_irq:1;
->>
->> 1. bool use_sdio_irq;
->>
-Hi,
+On Thu, Sep 14, 2023 at 10:30=E2=80=AFAM Paul Cercueil <paul@crapouillou.ne=
+t> wrote:
+>
+> Hi,
+>
+> Le jeudi 14 septembre 2023 =C3=A0 10:02 +0300, Andy Shevchenko a =C3=A9cr=
+it :
+> > On Wed, Sep 13, 2023 at 11:23=E2=80=AFPM Miquel Raynal
+> > <miquel.raynal@bootlin.com> wrote:
+> > > linus.walleij@linaro.org wrote on Wed, 13 Sep 2023 22:12:40 +0200:
+> > > > On Wed, Sep 13, 2023 at 10:05=E2=80=AFPM Andy Shevchenko
+> > > > <andy.shevchenko@gmail.com> wrote:
+> > > > > On Wed, Sep 13, 2023 at 2:50=E2=80=AFPM Bartosz Golaszewski
+> > > > > <brgl@bgdev.pl> wrote:
+> >
+> > ...
+> >
+> > > > > Why not moving this quirk to gpiolib-of.c?
+> > > >
+> > > > That's a better idea here I think, it's clearly a quirk for a
+> > > > buggy device tree.
+> > >
+> > > Agreed, it's just for backward compatibility purposes in a single
+> > > driver. I believe it should stay here.
+> >
+> > I believe Linus was for moving.
+>
+> Which Linus? Because the one who's also the gpio maintainer just wrote
+> above that it was better to keep it in the driver.
+>
 
-Should it really be changed to a bool?
-Other boolean likes in the structure are u8:1.
+I'm also under the impression that Linus meant moving it to gpiolib-of.c. L=
+et's
 
->> 2. supports_sdio_irq is more to the point don't you think?
->>      Especially since it activates these two callbacks:
->>
->>> +       void (*enable_sdio_irq)(struct mmci_host *host, int enable);
->>> +       void (*sdio_irq)(struct mmci_host *host, u32 status);
->>
->> Further: all the Ux500 variants support this (bit 22) as well, so enable those
->> too in their vendor data. All I have is out-of-band signaling with an GPIO IRQ
->> on my Broadcom chips but I think it works (maybe Ulf has tested it in the
->> far past).
-> 
-> For the ux500 variant there is a HW problem. After running some stress
-> tests, we may end up being stuck waiting for an SDIO IRQ to be
-> delivered. Even if the SDIO irqs should be considered level triggered,
-> it looked like it was implemented in the HW as an edge triggered IRQ.
-> 
-> The downstream workaround consisted of re-routing the DAT1 to a GPIO
-> at runtime suspend (we wanted that for optimal power save support
-> anyway) - and manually checking if the DAT1 line was asserted, before
-> enabling the GPIO line for an irq. This worked perfectly fine as a
-> workaround, with the limitation that one may observe a little bit of
-> hick-up in the traffic occasionally.
-> 
-> That said, the out-of-band IRQs is what works best for the ux500 variants.
+Linus: Could you clarify?
 
-What I understand here is that in-band interrupts are not properly 
-working on ux500, and then the feature shouldn't be enabled for this 
-platform.
-Am I correct?
+Bart
 
-If this is the case, the v2 will consist in changing the use_sdio_irq to 
-use_sdio_irq, and update the comment of the struct.
-And depending on the answer, maybe change the field to bool.
-
-Best regards,
-Yann
-> 
-> Kind regards
-> Uffe
-
+> Cheers,
+> -Paul
+>
+> >
+> > gpiolib-of.c contains a lot of quirks, including this one. Calling
+> > these new (or old) APIs for overriding polarity in many cases
+> > shouldn't be needed if were no issues with DT or something like that.
+> >
+>
