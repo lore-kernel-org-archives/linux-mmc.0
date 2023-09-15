@@ -2,193 +2,173 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70D28EEAA7A
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Sep 2023 22:09:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AC21EE3F01
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Sep 2023 05:35:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229715AbjINWJo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Sep 2023 18:09:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45216 "EHLO
+        id S229554AbjIOFf1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Sep 2023 01:35:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33638 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229472AbjINWJn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Sep 2023 18:09:43 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2B8F270B
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 15:09:39 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-d815a5eee40so1442398276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 15:09:39 -0700 (PDT)
+        with ESMTP id S231997AbjIOFf0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2023 01:35:26 -0400
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 103142710
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 22:35:20 -0700 (PDT)
+Received: by mail-wr1-x429.google.com with SMTP id ffacd0b85a97d-31c4d5bd69cso1624996f8f.3
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 22:35:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694729379; x=1695334179; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=97JhCG6zT6B7+SMugkJ45haE3nskGaAz9YD6QLxdNWA=;
-        b=zwB2xIEQDSN8CjpndNUnoA7xo3SMnHBbeYp4W/AvH5szeU5tj4Azz3ca8269glqJ/R
-         sC4DEOFUSrhq8FaWA7oe+cAK1ANpxtKTCV7BrQr9bJxzjKYBrRcBVgTzA3viycvFuHJF
-         9eGpAZyM2hgsUSrsNFaPZgQUZSKECjy7aVHz03V3asFd/z2WuTv+X6nLDzWewT5DLD2G
-         sx7MWdlSb3mg0iLWT4zLujyDUxBLeGFo9mJ/Yns0o3fYQPYu05UjeJurBTdUjiUEtQvh
-         5zELfUaYTssSfApYXdctMbrB4qaFkkKuNzwONunyty5y5gvSIbkdkUv+h7tBwfau9pR3
-         WpUw==
+        d=tuxon.dev; s=google; t=1694756118; x=1695360918; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=jCFwLWQlvVlQiSU7UZdz9MimUN6oP0AbuVDIc/7fuZ0=;
+        b=aOBXzb4Y0TOR/laA9Eag4nyKqTZLC+hJ4q4xWnRB9kAEjnEH2NF5mvNhhyPDKz6/+B
+         NgaHZ5dHKmq5c1Jv/nokLyyZyUA+HZN6jpp83HqyfYgp6ZlJRpM85GBDjECmooCtT6SA
+         TrV0Bx52GGKET6qghcD+EXOv431IT/K3WATdrt0tTy/kSQ+DXd8hNWG4uybhKSMKBeZ3
+         MGOk0b1kFRD1HNSmq4abuWgYBsEB7j3Dsw+SYFIiJiEGyc7AIAhMUgHIW3HGcp+GYmZH
+         eZ83q4Q2AB/FW8OPNxR8Q3BYQVdm5Z3NlCassfOf0Y+wO8P2Q/Ns8uuvwUiv8xtGvQji
+         JggQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694729379; x=1695334179;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=97JhCG6zT6B7+SMugkJ45haE3nskGaAz9YD6QLxdNWA=;
-        b=Vn9P8k9i5MxINa586wF3PdTluUmdRxTGN1EfsTMrgiBdhkIExOWYl/hFhQAlNx+eKE
-         l9G+RlF0gjLqvsaw0Lo6KFbNNUaNubFssEbkKdIUAKw+m84ehnQUn+TZqFLYWSZIflm+
-         2XKUt75TsnlBGjl9npcTzm/PVuTfjqjFRLG8JM4L2wscI9nHn/vAbz5ce96ZyPsof6jy
-         09L7m45c4WdVIr3DI4U3x1p0zfN7sVQPGI0AAZljucpxrKGaFpxEHwYr4Hxl7rq6nGjV
-         XTscebpJaWtDfxYq4mcVOLUKImTZ8w0gSFjaKx+0zaYxjmop1UiU4cV8wOamC9N9C/Si
-         GN/Q==
-X-Gm-Message-State: AOJu0YwIaU1ASMsmhqsty/wNpJuAGvOFBzGXflrxgStlUQdJARQj5HqI
-        FpmBsPWz63jG2Jl71C6ka/0fmlYhMDByInzreJeFSA==
-X-Google-Smtp-Source: AGHT+IEcbGqOpg5LJtzsNrqES8vQmdyxgmljQj8ZCrKtPz48cJO0h9zvdtNGsftBR/rQAtaxzYM27BNlLXN/d+TnDFQ=
-X-Received: by 2002:a25:9d04:0:b0:d78:48b0:21d2 with SMTP id
- i4-20020a259d04000000b00d7848b021d2mr5894012ybp.3.1694729378893; Thu, 14 Sep
- 2023 15:09:38 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1694756118; x=1695360918;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=jCFwLWQlvVlQiSU7UZdz9MimUN6oP0AbuVDIc/7fuZ0=;
+        b=DNiMy+WjFd2JAqQWt2SfyXgRr+477O3piJdL/cpXIPb4JFolLukvQ76ixrx+GSwRhz
+         RAS9/rasZCxZgqcSHok+qkVAGq2hZfdsdcayJsa0HOQl+LCfzigmZq6EPzanKdh1kUrj
+         6MYnWSPG/xG3mkB9Z2baEejVFHFAFfSxPdNLZqzf5RuJcHjVqeP3ErhPA5h84QXSYyQI
+         gfoWWVJnoj65+cJuXEPycICIwGrNkocyQTMLwviGm5fP9VntOhK+0FNJ8AwpasjKjH7L
+         cqBQRnnbC4GDRvk0F93drpPAlAgvmteOd+qAhYIRofiJr4RBIlfKcgkeXAmgwPkTu6UL
+         yzTA==
+X-Gm-Message-State: AOJu0Yy+Lyu6xhJur8xfWNELzYuTiY293rexSp0iAC0uaMkUFGeq01sH
+        7yt73PR2ncGpln/bdc5qxmIoaw==
+X-Google-Smtp-Source: AGHT+IGL9oG9qxI8b+K2vqWLJ/uBYUSG/EAvdwsyp1zBwA32EpDfEXEXIjOzgvRHhIU/3erKMLaNJA==
+X-Received: by 2002:adf:dcd1:0:b0:31f:98c2:b384 with SMTP id x17-20020adfdcd1000000b0031f98c2b384mr517214wrm.30.1694756118266;
+        Thu, 14 Sep 2023 22:35:18 -0700 (PDT)
+Received: from [192.168.32.2] ([82.78.167.145])
+        by smtp.gmail.com with ESMTPSA id k8-20020a5d4288000000b00317a29af4b2sm3439064wrq.68.2023.09.14.22.35.15
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 14 Sep 2023 22:35:17 -0700 (PDT)
+Message-ID: <94ae925c-6bd3-7253-9ac5-1d87280a1972@tuxon.dev>
+Date:   Fri, 15 Sep 2023 08:35:14 +0300
 MIME-Version: 1.0
-References: <20230914202749.470100-1-beanhuo@iokpp.de>
-In-Reply-To: <20230914202749.470100-1-beanhuo@iokpp.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 15 Sep 2023 00:09:02 +0200
-Message-ID: <CAPDyKFruYooG4yQ4yqrwEcrvy4xe6hYByF2Q57eQ1g0tiUtcug@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for Micron
- eMMC Q2J54A
-To:     Bean Huo <beanhuo@iokpp.de>
-Cc:     adrian.hunter@intel.com, beanhuo@micron.com,
-        jakub.kwapisz@toradex.com, rafael.beims@toradex.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.0
+Subject: Re: [PATCH 06/37] clk: renesas: rzg2l: wait for status bit of SD mux
+ before continuing
+Content-Language: en-US
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-7-claudiu.beznea.uj@bp.renesas.com>
+ <CAMuHMdXoq96ptmm+oU_yHdkSfN4+WCfABn98tXV5xfyvM66Eig@mail.gmail.com>
+From:   claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <CAMuHMdXoq96ptmm+oU_yHdkSfN4+WCfABn98tXV5xfyvM66Eig@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 14 Sept 2023 at 22:28, Bean Huo <beanhuo@iokpp.de> wrote:
->
-> From: Bean Huo <beanhuo@micron.com>
->
-> Micron MTFC4GACAJCN eMMC supports cache but requires that flush cache
-> operation be allowed only after a write has occurred. Otherwise, the
-> cache flush command or subsequent commands will time out.
+Hi, Geert,
 
-For my information, more exactly, how can we trigger this problem?
+On 14.09.2023 14:42, Geert Uytterhoeven wrote:
+> Hi Claudiu,
+> 
+> On Tue, Sep 12, 2023 at 6:52 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+>> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>>
+>> Hardware user manual of RZ/G2L (r01uh0914ej0130-rzg2l-rzg2lc.pdf,
+>> chapter 7.4.7 Procedure for Switching Clocks by the Dynamic Switching
+>> Frequency Selectors) specifies that we need to check CPG_PL2SDHI_DSEL for
+>> SD clock switching status.
+>>
+>> Fixes: eaff33646f4cb ("clk: renesas: rzg2l: Add SDHI clk mux support")
+>> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> 
+> Thanks for your patch!
+> 
+>> --- a/drivers/clk/renesas/rzg2l-cpg.c
+>> +++ b/drivers/clk/renesas/rzg2l-cpg.c
+>> @@ -188,7 +188,8 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
+>>         u32 off = GET_REG_OFFSET(hwdata->conf);
+>>         u32 shift = GET_SHIFT(hwdata->conf);
+>>         const u32 clk_src_266 = 2;
+>> -       u32 bitmask;
+>> +       u32 msk, val, bitmask;
+>> +       int ret;
+>>
+>>         /*
+>>          * As per the HW manual, we should not directly switch from 533 MHz to
+>> @@ -203,9 +204,6 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
+>>          */
+>>         bitmask = (GENMASK(GET_WIDTH(hwdata->conf) - 1, 0) << shift) << 16;
+>>         if (index != clk_src_266) {
+>> -               u32 msk, val;
+>> -               int ret;
+>> -
+>>                 writel(bitmask | ((clk_src_266 + 1) << shift), priv->base + off);
+>>
+>>                 msk = off ? CPG_CLKSTATUS_SELSDHI1_STS : CPG_CLKSTATUS_SELSDHI0_STS;
+>> @@ -221,7 +219,13 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
+>>
+>>         writel(bitmask | ((index + 1) << shift), priv->base + off);
+>>
+>> -       return 0;
+>> +       ret = readl_poll_timeout(priv->base + CPG_CLKSTATUS, val,
+>> +                                !(val & msk), 100,
+> 
+> "msk" may be uninitialized.
 
->
-> Signed-off-by: Bean Huo <beanhuo@micron.com>
-> Co-developed-by: Rafael Beims <rafael.beims@toradex.com>
-> Tested-by: Rafael Beims <rafael.beims@toradex.com>
-> Cc: stable@vger.kernel.org
-> ---
-> Changelog:
->
-> v1--v2:
->     1. Add Rafael's test-tag, and Co-developed-by.
->     2. Check host->card whether NULL or not in __mmc_start_request() before asserting host->card->->quirks
->
-> ---
->  drivers/mmc/core/core.c   | 7 +++++++
->  drivers/mmc/core/mmc.c    | 5 +++++
->  drivers/mmc/core/quirks.h | 7 ++++---
->  include/linux/mmc/card.h  | 2 ++
->  4 files changed, 18 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 3d3e0ca52614..86a669b35b91 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -259,6 +259,13 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->                 host->cqe_ops->cqe_off(host);
->
->         host->ops->request(host, mrq);
-> +
-> +       if (host->card && host->card->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH &&
-> +           !host->card->written_flag) {
-> +               if (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK ||
-> +                   mrq->cmd->opcode == MMC_WRITE_BLOCK)
-> +                       host->card->written_flag = true;
-> +       }
+Indeed! I'll update it in next version.
 
-I don't quite like that we are adding the above code here - as it's
-used for *all* requests.
+> 
+>> +                                CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US);
+>> +       if (ret)
+>> +               dev_err(priv->dev, "failed to switch clk source\n");
+>> +
+>> +       return ret;
+> 
+> This is now (supposed to be) doing the same thing twice, once using
+> clk_src_266, and then again with the wanted index, so why not introduce
+> a small helper? That would have avoided the uninitialized variable, too.
 
-Seems like the flag is better set from the mmc block device driver
-instead. Somewhere in the path when we serve I/O write requests.
+Initially I thought about it but I found it too much for this stage as it
+is only about the readl_poll_timeout() and the debug message. I may keep
+the debug message in a local variable if you think worth it (but FMPOV it
+the code will look a bit... unusual). Moreover, as the code is rewritten in
+patch "[PATCH 18/37] clk: renesas:
+rzg2l: refactor sd mux driver" I thought it doesn't worth introducing a new
+helper in this patch.
 
->  }
->
->  static void mmc_mrq_pr_debug(struct mmc_host *host, struct mmc_request *mrq,
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 89cd48fcec79..a2edd065fa1b 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1929,6 +1929,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->         if (!oldcard)
->                 host->card = card;
->
-> +       card->written_flag = false;
-> +
+Thank you,
+Claudiu Beznea
 
-According to your earlier reply, it sounds like the problem isn't
-really about the card being re-initialized, but rather that we
-actually need a write request to happen before a flush. No matter
-what, no?
-
-See more about this below.
-
->         return 0;
->
->  free_card:
-> @@ -2081,6 +2083,9 @@ static int _mmc_flush_cache(struct mmc_host *host)
->  {
->         int err = 0;
->
-> +       if (host->card->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH && !host->card->written_flag)
-> +               return err;
-> +
-
-Could an option to the above, be to reset the flag here instead. After
-a successful cache flush has been done.
-
->         if (_mmc_cache_enabled(host)) {
->                 err = mmc_switch(host->card, EXT_CSD_CMD_SET_NORMAL,
->                                  EXT_CSD_FLUSH_CACHE, 1,
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index 32b64b564fb1..5e68c8b4cdca 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -110,11 +110,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
->                   MMC_QUIRK_TRIM_BROKEN),
->
->         /*
-> -        * Micron MTFC4GACAJCN-1M advertises TRIM but it does not seems to
-> -        * support being used to offload WRITE_ZEROES.
-> +        * Micron MTFC4GACAJCN-1M supports TRIM but does not appear to suppor
-> +        * WRITE_ZEROES offloading. It also supports caching, but the cache can
-> +        * only be flushed after a write has occurred.
->          */
->         MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
-> -                 MMC_QUIRK_TRIM_BROKEN),
-> +                 MMC_QUIRK_TRIM_BROKEN | MMC_QUIRK_BROKEN_CACHE_FLUSH),
->
->         /*
->          * Kingston EMMC04G-M627 advertises TRIM but it does not seems to
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index daa2f40d9ce6..7b12eebc5586 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -295,7 +295,9 @@ struct mmc_card {
->  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
->  #define MMC_QUIRK_BROKEN_SD_DISCARD    (1<<14) /* Disable broken SD discard support */
->  #define MMC_QUIRK_BROKEN_SD_CACHE      (1<<15) /* Disable broken SD cache support */
-> +#define MMC_QUIRK_BROKEN_CACHE_FLUSH   (1<<16) /* Don't flush cache until the write has occurred */
->
-> +       bool                    written_flag;   /* Indicates eMMC has been written since power on */
->         bool                    reenable_cmdq;  /* Re-enable Command Queue */
->
->         unsigned int            erase_size;     /* erase size in sectors */
-> --
-> 2.34.1
->
-
-Kind regards
-Uffe
+> 
+> I know you're rewriting this code in "[PATCH 18/37] clk: renesas:
+> rzg2l: refactor sd mux driver", but even after that, you always do
+> a register write before calling rzg2l_cpg_wait_clk_update_done(),
+> so it may still be a net win.
+> 
+>>  }
+>>
+>>  static u8 rzg2l_cpg_sd_clk_mux_get_parent(struct clk_hw *hw)
+> 
+> Gr{oetje,eeting}s,
+> 
+>                         Geert
+> 
