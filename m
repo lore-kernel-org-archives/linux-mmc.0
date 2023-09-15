@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D506EE644D
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Sep 2023 09:47:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B86A2EE644B
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Sep 2023 09:48:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233912AbjIOJr7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Sep 2023 05:47:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56792 "EHLO
+        id S233371AbjIOJsK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Sep 2023 05:48:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233841AbjIOJr7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2023 05:47:59 -0400
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EBBB3AA5;
-        Fri, 15 Sep 2023 02:44:54 -0700 (PDT)
-Received: by mail-pj1-x1032.google.com with SMTP id 98e67ed59e1d1-26b44247123so1545102a91.2;
-        Fri, 15 Sep 2023 02:44:54 -0700 (PDT)
+        with ESMTP id S233825AbjIOJsH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2023 05:48:07 -0400
+Received: from mail-pg1-x531.google.com (mail-pg1-x531.google.com [IPv6:2607:f8b0:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 783053AB8;
+        Fri, 15 Sep 2023 02:45:00 -0700 (PDT)
+Received: by mail-pg1-x531.google.com with SMTP id 41be03b00d2f7-573e67cc6eeso1534162a12.2;
+        Fri, 15 Sep 2023 02:45:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1694771094; x=1695375894; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1694771099; x=1695375899; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kLEWNFxOCDY4+HfR4kKkDYuhCfOt71giz4d7DguvjGA=;
-        b=IEOxeyBFj3M7a9imSQjyMgYP2vAC3qKLQgiAIOy1D08WbIzwPE3Hasqo7yaAtV2qdn
-         hY9q1DfjaT5cjwyt42DTV2cJET0hbpYpgxZpPSSjEB8RMQ0vm+0c0GKpwMDVVqT5MmIR
-         THVfF7eeLZIQtNYLdU4lNQaqqJtLOgCs37RKF80jaOFgY9Guh5X6X7qVSsjH3jO/6m32
-         PY5DF6Y48BHBxRgWmf8SaewlmoaJ0Ellwj2Hk8XG5tW2pHxifL1RCsMHg4YeT8m74e2a
-         4bNcyCbYX6HQd/2X3Zun+zZzgSj5x7N2L2++o84SFh8eeaIxAKzDxq2hUpUj095dGPV9
-         WAeA==
+        bh=JFzZ8I84cwmSh5chN+rYIopKyMDgjnG6h49lrdInWmY=;
+        b=JhLzfJWEQEGvv6vd2wMBDbIwirA0+4Z1oYVbOP6OVeW1Cw17mSScXSzOQgGW8/wy22
+         yWF4EeK+hhLfE75c1ttsCcYFks7uWJf6JtXccRj4h2J8SgLYgkfDPpTz3mHx09xkcxN9
+         DcTedJkrcbunaSbO4idj/ibfCRXkSiemWoJEgkRGmWbbuZVLAKpBoWFsMm4gRDpL2KYv
+         uIjrvMs5tZl968tx9znF45UhS2ouGByB0QhCwrCVGrO0pfRFs+eTFVaOFqepCZB/AlwC
+         ESvSDdZ7IR5aWEOMfEXiqZbxxVcM1jmwKVfmpp6OiYBCi7WNTvQp8m+QCW2MlXcOQLJb
+         cunw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694771094; x=1695375894;
+        d=1e100.net; s=20230601; t=1694771099; x=1695375899;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=kLEWNFxOCDY4+HfR4kKkDYuhCfOt71giz4d7DguvjGA=;
-        b=X3cB53jb9KiyR+MF1144pTD33HNRZKRqSW/j0i+Dk5esZX6QWRBrD/IOH63VlUMlwt
-         1KJD7PILV/zH7jRxMtuDsY2D+W+UQ4gUmpNyWRxydof1cnjq6WIbfr1UaGATrf6Oj9O8
-         dBRf7xBQ2G7enZfBKvyHPvSe+ZFOjm4zyR3lr1vnK1KVJgst7WNhR1htTO/85YIIPrKA
-         oHkuG4cSl0Ngz+9KkD1dW5w2Xa7EISa/zphkCa2kKmHhae3adtC8Ft4LWndI8kXVAln8
-         q1mFbELypBth68K5GiVqrOIJSWJuLEZIuaUIpihFPUqqL2BGXVt82080N6M3XofXbwmW
-         FJGA==
-X-Gm-Message-State: AOJu0Yyz6MQmfDYtHr1dvPowv7dvEIn4eezkwZebk/7POql5BOOI0Fk0
-        YPsGl7pdm/yxozZC0bzPK2I=
-X-Google-Smtp-Source: AGHT+IHOnm45zxFtUrtiLqGwSZtxn/bcc+Gb+GPn1Zum88pY5hVqZ9aFhowOzP5SLA/nBycZlFMiMA==
-X-Received: by 2002:a17:90a:ea8a:b0:274:726d:7914 with SMTP id h10-20020a17090aea8a00b00274726d7914mr931486pjz.47.1694771094070;
-        Fri, 15 Sep 2023 02:44:54 -0700 (PDT)
+        bh=JFzZ8I84cwmSh5chN+rYIopKyMDgjnG6h49lrdInWmY=;
+        b=lJZJnugRKFchb5zNbksDO4TkIz7yhb/ay5avyRKYm35W4svDGr8zI3u4UYExV7gY4i
+         MA28TVYVJkePqOKKcVSzSjHhnIgYWtLRJt8MLA/2n5XLDp6RgEjBNgS+PX3gomOcF5ao
+         fZlB1/V4qcVKyyTmEQOH1kEnOnttRwBUgDx0j5fqoqqOboSvXBIcekYGhTTg8K6eSe5l
+         L1ajc1tuAX/czJFcTr2/S2CH3R6gOHfjzaI5U2MlhnbYs9rR9XPEOZ05LIlBgntwi2Eu
+         xxzXchSFQKwyvzsVd9J/9nbgYsPHX7Hn9u8LZ1dYuZiKbPGEE0qt75fxB5Fp7hdp3kbn
+         AvkQ==
+X-Gm-Message-State: AOJu0YxLvKGc5VBy2nkXvvoGV+YlvBp6+DqORGKyoYj1h7MYU3dEcWKp
+        IdJmM9Rf5cFZxXHj/MLpaIHRa9/wvx0=
+X-Google-Smtp-Source: AGHT+IF6hPFjjfx5ahZTuEB4jQbYQnhUXrIM8nSP/NYSyBq08vZ/Ym/2mizs99rcWLwgKOS57BgSyg==
+X-Received: by 2002:a17:90a:6407:b0:273:ec96:b6f9 with SMTP id g7-20020a17090a640700b00273ec96b6f9mr922308pjj.25.1694771099520;
+        Fri, 15 Sep 2023 02:44:59 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e2a6-6d77-d32f-f490-6688-3d32.emome-ip6.hinet.net. [2001:b400:e2a6:6d77:d32f:f490:6688:3d32])
-        by smtp.gmail.com with ESMTPSA id x4-20020a17090a530400b0025023726fc4sm4432794pjh.26.2023.09.15.02.44.51
+        by smtp.gmail.com with ESMTPSA id x4-20020a17090a530400b0025023726fc4sm4432794pjh.26.2023.09.15.02.44.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 Sep 2023 02:44:53 -0700 (PDT)
+        Fri, 15 Sep 2023 02:44:59 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -57,9 +57,9 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         dlunev@chromium.org, Victor Shih <victorshihgli@gmail.com>,
         Ben Chuang <ben.chuang@genesyslogic.com.tw>,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V12 20/23] mmc: sdhci-uhs2: add add_host() and others to set up the driver
-Date:   Fri, 15 Sep 2023 17:43:48 +0800
-Message-Id: <20230915094351.11120-21-victorshihgli@gmail.com>
+Subject: [PATCH V12 22/23] mmc: sdhci-pci: add UHS-II support framework
+Date:   Fri, 15 Sep 2023 17:43:50 +0800
+Message-Id: <20230915094351.11120-23-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230915094351.11120-1-victorshihgli@gmail.com>
 References: <20230915094351.11120-1-victorshihgli@gmail.com>
@@ -71,9 +71,8 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-This is a UHS-II version of sdhci's add_host/remove_host operation.
-Any sdhci drivers which are capable of handling UHS-II cards must
-call those functions instead of the corresponding sdhci's.
+This patch prepares for adding UHS-II support at a specific UHS-II
+capable sdhci-pci controller, GL9755 for now.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
@@ -81,211 +80,90 @@ Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
 
-Updates in V11:
- - Remove unused ocr_avail_uhs2.
-
-Updates in V10:
- - Move some definitions of PatchV9[05/23] to PatchV10[20/23].
-
 Updates in V8:
- - Change return type to void for __sdhci_uhs2_add_host_v4().
- - Remove unused variables in __sdhci_uhs2_add_host_v4().
-
-Updates in V7:
- - __sdhci_add_host() to instead of __sdhci_uhs2_add_host()
-   in sdhci_uhs2_add_host().
- - Cancel export state of some functions.
-
-Updates in V6:
- - Add complete_work_fn/thread_irq_fn variables in struct sdhci_host.
- - Use complete_work_fn/thread_irq_fn variables in
-   sdhci_alloc_host() and sdhci_uhs2_add_host().
- - Use sdhci_uhs2_mode() to simplify code in __sdhci_uhs2_remove_host().
+ - Add config select MMC_SDHCI_UHS2 in Kconfig.
 
 ---
 
- drivers/mmc/host/sdhci-uhs2.c | 100 ++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-uhs2.h |   2 +
- drivers/mmc/host/sdhci.c      |   7 ++-
- drivers/mmc/host/sdhci.h      |   3 +
- 4 files changed, 110 insertions(+), 2 deletions(-)
+ drivers/mmc/host/Kconfig          |  1 +
+ drivers/mmc/host/sdhci-pci-core.c | 16 +++++++++++++++-
+ drivers/mmc/host/sdhci-pci.h      |  3 +++
+ 3 files changed, 19 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index 7e4265c404ac..add0eea55b24 100644
---- a/drivers/mmc/host/sdhci-uhs2.c
-+++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -16,6 +16,7 @@
- #include <linux/bitfield.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/host.h>
-+#include <linux/regulator/consumer.h>
- 
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 1aeded48ec99..f6a7bfaa67e4 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -111,6 +111,7 @@ config MMC_SDHCI_PCI
+ 	tristate "SDHCI support on PCI bus"
+ 	depends on MMC_SDHCI && PCI
+ 	select MMC_CQHCI
++	select MMC_SDHCI_UHS2
+ 	select IOSF_MBI if X86
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 7c14feb5db77..22698119ecf2 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -40,6 +40,7 @@
  #include "sdhci.h"
- #include "sdhci-uhs2.h"
-@@ -997,6 +998,105 @@ static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
- 	return IRQ_HANDLED;
+ #include "sdhci-cqhci.h"
+ #include "sdhci-pci.h"
++#include "sdhci-uhs2.h"
+ 
+ static void sdhci_pci_hw_reset(struct sdhci_host *host);
+ 
+@@ -2160,7 +2161,10 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
+ 	if (scratch == (u32)-1)
+ 		dead = 1;
+ 
+-	sdhci_remove_host(slot->host, dead);
++	if (slot->chip->fixes && slot->chip->fixes->remove_host)
++		slot->chip->fixes->remove_host(slot, dead);
++	else
++		sdhci_remove_host(slot->host, dead);
+ 
+ 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
+ 		slot->chip->fixes->remove_slot(slot, dead);
+@@ -2168,6 +2172,16 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
+ 	sdhci_free_host(slot->host);
  }
  
-+/*****************************************************************************\
-+ *
-+ * Device allocation/registration                                            *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+static void __sdhci_uhs2_add_host_v4(struct sdhci_host *host, u32 caps1)
++int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot)
 +{
-+	struct mmc_host *mmc;
-+	u32 max_current_caps2;
-+
-+	mmc = host->mmc;
-+
-+	/* Support UHS2 */
-+	if (caps1 & SDHCI_SUPPORT_UHS2)
-+		mmc->caps2 |= MMC_CAP2_SD_UHS2;
-+
-+	max_current_caps2 = sdhci_readl(host, SDHCI_MAX_CURRENT_1);
-+
-+	if ((caps1 & SDHCI_CAN_VDD2_180) &&
-+	    !max_current_caps2 &&
-+	    !IS_ERR(mmc->supply.vmmc2)) {
-+		/* UHS2 - VDD2 */
-+		int curr = regulator_get_current_limit(mmc->supply.vmmc2);
-+
-+		if (curr > 0) {
-+			/* convert to SDHCI_MAX_CURRENT format */
-+			curr = curr / 1000;  /* convert to mA */
-+			curr = curr / SDHCI_MAX_CURRENT_MULTIPLIER;
-+			curr = min_t(u32, curr, SDHCI_MAX_CURRENT_LIMIT);
-+			max_current_caps2 = curr;
-+		}
-+	}
-+
-+	if (!(caps1 & SDHCI_CAN_VDD2_180))
-+		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
++	return sdhci_uhs2_add_host(slot->host);
 +}
 +
-+static int sdhci_uhs2_host_ops_init(struct sdhci_host *host);
-+
-+static void __sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
++void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead)
 +{
-+	if (!sdhci_uhs2_mode(host))
-+		return;
-+
-+	if (!dead)
-+		sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_FULL);
++	sdhci_uhs2_remove_host(slot->host, dead);
 +}
 +
-+int sdhci_uhs2_add_host(struct sdhci_host *host)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	int ret;
-+
-+	ret = sdhci_setup_host(host);
-+	if (ret)
-+		return ret;
-+
-+	if (host->version >= SDHCI_SPEC_400)
-+		__sdhci_uhs2_add_host_v4(host, host->caps1);
-+
-+	if ((mmc->caps2 & MMC_CAP2_SD_UHS2) && !host->v4_mode)
-+		/* host doesn't want to enable UHS2 support */
-+		mmc->caps2 &= ~MMC_CAP2_SD_UHS2;
-+
-+	/* overwrite ops */
-+	if (mmc->caps2 & MMC_CAP2_SD_UHS2)
-+		sdhci_uhs2_host_ops_init(host);
-+
-+	host->complete_work_fn = sdhci_uhs2_complete_work;
-+	host->thread_irq_fn    = sdhci_uhs2_thread_irq;
-+
-+	/* LED support not implemented for UHS2 */
-+	host->quirks |= SDHCI_QUIRK_NO_LED;
-+
-+	ret = __sdhci_add_host(host);
-+	if (ret)
-+		goto cleanup;
-+
-+	return 0;
-+
-+cleanup:
-+	if (host->version >= SDHCI_SPEC_400)
-+		__sdhci_uhs2_remove_host(host, 0);
-+
-+	sdhci_cleanup_host(host);
-+
-+	return ret;
-+}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_add_host);
-+
-+void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead)
-+{
-+	__sdhci_uhs2_remove_host(host, dead);
-+
-+	sdhci_remove_host(host, dead);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_remove_host);
-+
- void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void sdhci_pci_runtime_pm_allow(struct device *dev)
  {
- 	struct sdhci_host *host = mmc_priv(mmc);
-diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-index 3aa2cb4b39d6..bd5aae054c6f 100644
---- a/drivers/mmc/host/sdhci-uhs2.h
-+++ b/drivers/mmc/host/sdhci-uhs2.h
-@@ -186,5 +186,7 @@ void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
- void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq);
- int sdhci_uhs2_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
- u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask);
-+int sdhci_uhs2_add_host(struct sdhci_host *host);
-+void sdhci_uhs2_remove_host(struct sdhci_host *host, int dead);
+ 	pm_suspend_ignore_children(dev, 1);
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 153704f812ed..e807c039a8b1 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -145,6 +145,7 @@ struct sdhci_pci_fixes {
+ 	int			(*probe_slot) (struct sdhci_pci_slot *);
+ 	int			(*add_host) (struct sdhci_pci_slot *);
+ 	void			(*remove_slot) (struct sdhci_pci_slot *, int);
++	void			(*remove_host) (struct sdhci_pci_slot *, int);
  
- #endif /* __SDHCI_UHS2_H */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 318d4830732f..b3de7e30ba54 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -4104,6 +4104,9 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 
- 	host->max_timeout_count = 0xE;
- 
-+	host->complete_work_fn = sdhci_complete_work;
-+	host->thread_irq_fn    = sdhci_thread_irq;
-+
- 	return host;
+ #ifdef CONFIG_PM_SLEEP
+ 	int			(*suspend) (struct sdhci_pci_chip *);
+@@ -189,6 +190,8 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
+ 	return (void *)slot->private;
  }
  
-@@ -4853,7 +4856,7 @@ int __sdhci_add_host(struct sdhci_host *host)
- 	if (!host->complete_wq)
- 		return -ENOMEM;
- 
--	INIT_WORK(&host->complete_work, sdhci_complete_work);
-+	INIT_WORK(&host->complete_work, host->complete_work_fn);
- 
- 	timer_setup(&host->timer, sdhci_timeout_timer, 0);
- 	timer_setup(&host->data_timer, sdhci_timeout_data_timer, 0);
-@@ -4862,7 +4865,7 @@ int __sdhci_add_host(struct sdhci_host *host)
- 
- 	sdhci_init(host, 0);
- 
--	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_thread_irq,
-+	ret = request_threaded_irq(host->irq, sdhci_irq, host->thread_irq_fn,
- 				   IRQF_SHARED,	mmc_hostname(mmc), host);
- 	if (ret) {
- 		pr_err("%s: Failed to request IRQ %d: %d\n",
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6bbb9f073f29..5235f2da6568 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -626,6 +626,9 @@ struct sdhci_host {
- 	struct timer_list timer;	/* Timer for timeouts */
- 	struct timer_list data_timer;	/* Timer for data timeouts */
- 
-+	void		(*complete_work_fn)(struct work_struct *work);
-+	irqreturn_t	(*thread_irq_fn)(int irq, void *dev_id);
-+
- #if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
- 	struct dma_chan *rx_chan;
- 	struct dma_chan *tx_chan;
++int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot);
++void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead);
+ #ifdef CONFIG_PM_SLEEP
+ int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
+ #endif
 -- 
 2.25.1
 
