@@ -2,60 +2,60 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AC21EE3F01
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Sep 2023 05:35:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54475EE3F2E
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Sep 2023 05:46:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229554AbjIOFf1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Sep 2023 01:35:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33638 "EHLO
+        id S232062AbjIOFqr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Sep 2023 01:46:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231997AbjIOFf0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2023 01:35:26 -0400
-Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 103142710
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 22:35:20 -0700 (PDT)
-Received: by mail-wr1-x429.google.com with SMTP id ffacd0b85a97d-31c4d5bd69cso1624996f8f.3
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 22:35:19 -0700 (PDT)
+        with ESMTP id S229754AbjIOFqq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2023 01:46:46 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7941B2710
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 22:46:39 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id 4fb4d7f45d1cf-52bcd4db4c0so3901120a12.0
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Sep 2023 22:46:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1694756118; x=1695360918; darn=vger.kernel.org;
+        d=tuxon.dev; s=google; t=1694756798; x=1695361598; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=jCFwLWQlvVlQiSU7UZdz9MimUN6oP0AbuVDIc/7fuZ0=;
-        b=aOBXzb4Y0TOR/laA9Eag4nyKqTZLC+hJ4q4xWnRB9kAEjnEH2NF5mvNhhyPDKz6/+B
-         NgaHZ5dHKmq5c1Jv/nokLyyZyUA+HZN6jpp83HqyfYgp6ZlJRpM85GBDjECmooCtT6SA
-         TrV0Bx52GGKET6qghcD+EXOv431IT/K3WATdrt0tTy/kSQ+DXd8hNWG4uybhKSMKBeZ3
-         MGOk0b1kFRD1HNSmq4abuWgYBsEB7j3Dsw+SYFIiJiEGyc7AIAhMUgHIW3HGcp+GYmZH
-         eZ83q4Q2AB/FW8OPNxR8Q3BYQVdm5Z3NlCassfOf0Y+wO8P2Q/Ns8uuvwUiv8xtGvQji
-         JggQ==
+        bh=dBFecL9CWJp1g51f9tBvXZNbnBULvxEsI9jL0YhvbgI=;
+        b=VFpOepHyhERpGBZraBCMkTsmwtJXinh95opofI3a4yui2AxBH/On8d1BeVKLiT4hrK
+         BBNicKwuLfjRmWo7KFbCFb5ruwxAzFZTlXPwE3zTT65SzRapaBVAzOVEdUYEVZq2u1ht
+         zd+7bgo5EPY9J69KftU/scB9i6PSLhQq3STqdFl1Tv8gZ9GHLzSV/xt+cEw3bbVNOMce
+         zHCJ6pDN8BtgJrbGkSmzgf/MKHZSF0UZHHC7wBCEUB4kidM+KYlGgGbhbw15hAaBbQXE
+         Inh2942nc5OaLQGQh29gu5HwzpewqjIcWBcgj28oQzAkwcm6eLac8o8lYIw47PaMyWjU
+         zQOw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694756118; x=1695360918;
+        d=1e100.net; s=20230601; t=1694756798; x=1695361598;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=jCFwLWQlvVlQiSU7UZdz9MimUN6oP0AbuVDIc/7fuZ0=;
-        b=DNiMy+WjFd2JAqQWt2SfyXgRr+477O3piJdL/cpXIPb4JFolLukvQ76ixrx+GSwRhz
-         RAS9/rasZCxZgqcSHok+qkVAGq2hZfdsdcayJsa0HOQl+LCfzigmZq6EPzanKdh1kUrj
-         6MYnWSPG/xG3mkB9Z2baEejVFHFAFfSxPdNLZqzf5RuJcHjVqeP3ErhPA5h84QXSYyQI
-         gfoWWVJnoj65+cJuXEPycICIwGrNkocyQTMLwviGm5fP9VntOhK+0FNJ8AwpasjKjH7L
-         cqBQRnnbC4GDRvk0F93drpPAlAgvmteOd+qAhYIRofiJr4RBIlfKcgkeXAmgwPkTu6UL
-         yzTA==
-X-Gm-Message-State: AOJu0Yy+Lyu6xhJur8xfWNELzYuTiY293rexSp0iAC0uaMkUFGeq01sH
-        7yt73PR2ncGpln/bdc5qxmIoaw==
-X-Google-Smtp-Source: AGHT+IGL9oG9qxI8b+K2vqWLJ/uBYUSG/EAvdwsyp1zBwA32EpDfEXEXIjOzgvRHhIU/3erKMLaNJA==
-X-Received: by 2002:adf:dcd1:0:b0:31f:98c2:b384 with SMTP id x17-20020adfdcd1000000b0031f98c2b384mr517214wrm.30.1694756118266;
-        Thu, 14 Sep 2023 22:35:18 -0700 (PDT)
+        bh=dBFecL9CWJp1g51f9tBvXZNbnBULvxEsI9jL0YhvbgI=;
+        b=vumSBWyXgwngcSWSl9dz2jtJoqnX2BMalX6u00PqkBEL7CdFYLaO6dPdHQaQiFObfm
+         85HJ2h7KCfumsO1YnrMnNJXBmAQ/VneL0jIbou8njaptVcoC+haGZC4dGDkQ9B7+KxvK
+         +ocRkWG1IGuq9TszgwFxsLENZXBUtZ/Y4JiOeTZOUZI+MWmVVBGcsQfIkP2lVr6tY04t
+         dT1M0lwKS2DWV2Zsc86XcnfKE2g7zcBNRJyOF1I0FpytmSwfLe0JjiZCZt/PXIFpfmjP
+         XtNGaqu95gI0iRJte2cIppfrN+SQbboB2nlD40yvwTLf/M9SrHCjlpF+10TAMjoShJdT
+         pYyg==
+X-Gm-Message-State: AOJu0YwitByJayWSu7YbN+Ub9+rtYJGRVE462FUHv8uI5t65kPuokN65
+        eAkDBbh+0YrJSaw2pV6m1807qg==
+X-Google-Smtp-Source: AGHT+IEODL+RpbrigRr6ILUXdOUTmvcIqPQeQU6mBp3NXEa+wUaHYHJhFKWyE/sQXCzyI5YAWAIO1Q==
+X-Received: by 2002:a05:6402:3485:b0:522:c226:34ea with SMTP id v5-20020a056402348500b00522c22634eamr4759852edc.7.1694756797898;
+        Thu, 14 Sep 2023 22:46:37 -0700 (PDT)
 Received: from [192.168.32.2] ([82.78.167.145])
-        by smtp.gmail.com with ESMTPSA id k8-20020a5d4288000000b00317a29af4b2sm3439064wrq.68.2023.09.14.22.35.15
+        by smtp.gmail.com with ESMTPSA id u23-20020aa7d997000000b0052a3edff5c3sm1742625eds.87.2023.09.14.22.46.35
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 14 Sep 2023 22:35:17 -0700 (PDT)
-Message-ID: <94ae925c-6bd3-7253-9ac5-1d87280a1972@tuxon.dev>
-Date:   Fri, 15 Sep 2023 08:35:14 +0300
+        Thu, 14 Sep 2023 22:46:37 -0700 (PDT)
+Message-ID: <305ec65a-bc73-62fc-84a4-4f84ccd1ff1a@tuxon.dev>
+Date:   Fri, 15 Sep 2023 08:46:35 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.15.0
-Subject: Re: [PATCH 06/37] clk: renesas: rzg2l: wait for status bit of SD mux
- before continuing
+Subject: Re: [PATCH 07/37] clk: renesas: rzg2l: lock around writes to mux
+ register
 Content-Language: en-US
 To:     Geert Uytterhoeven <geert@linux-m68k.org>
 Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
@@ -74,28 +74,30 @@ Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
         linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-7-claudiu.beznea.uj@bp.renesas.com>
- <CAMuHMdXoq96ptmm+oU_yHdkSfN4+WCfABn98tXV5xfyvM66Eig@mail.gmail.com>
+ <20230912045157.177966-8-claudiu.beznea.uj@bp.renesas.com>
+ <CAMuHMdXo14JwdJE+b1zdnJ7Re5cn8ugzxueD1a=-n=PUQz7VKw@mail.gmail.com>
 From:   claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <CAMuHMdXoq96ptmm+oU_yHdkSfN4+WCfABn98tXV5xfyvM66Eig@mail.gmail.com>
+In-Reply-To: <CAMuHMdXo14JwdJE+b1zdnJ7Re5cn8ugzxueD1a=-n=PUQz7VKw@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Geert,
 
-On 14.09.2023 14:42, Geert Uytterhoeven wrote:
+
+On 14.09.2023 15:13, Geert Uytterhoeven wrote:
 > Hi Claudiu,
 > 
 > On Tue, Sep 12, 2023 at 6:52 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
 >> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 >>
->> Hardware user manual of RZ/G2L (r01uh0914ej0130-rzg2l-rzg2lc.pdf,
->> chapter 7.4.7 Procedure for Switching Clocks by the Dynamic Switching
->> Frequency Selectors) specifies that we need to check CPG_PL2SDHI_DSEL for
->> SD clock switching status.
+>> SD MUX output (SD0) is further divided by 4 in G2{L, UL}. The divided
+>> clock is SD0_DIV4. SD0_DIV4 is registered with CLK_SET_RATE_PARENT which
+>> means a rate request for it is propagated to the MUX and could reach
+>> rzg2l_cpg_sd_clk_mux_set_parent() concurrently with the users of SD0.
+>> Add proper locking to avoid concurrent access on SD MUX set rate
+>> registers.
 >>
 >> Fixes: eaff33646f4cb ("clk: renesas: rzg2l: Add SDHI clk mux support")
 >> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
@@ -104,69 +106,71 @@ On 14.09.2023 14:42, Geert Uytterhoeven wrote:
 > 
 >> --- a/drivers/clk/renesas/rzg2l-cpg.c
 >> +++ b/drivers/clk/renesas/rzg2l-cpg.c
->> @@ -188,7 +188,8 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
->>         u32 off = GET_REG_OFFSET(hwdata->conf);
+>> @@ -189,6 +189,7 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
 >>         u32 shift = GET_SHIFT(hwdata->conf);
 >>         const u32 clk_src_266 = 2;
->> -       u32 bitmask;
->> +       u32 msk, val, bitmask;
->> +       int ret;
+>>         u32 msk, val, bitmask;
+>> +       unsigned long flags;
+>>         int ret;
 >>
 >>         /*
->>          * As per the HW manual, we should not directly switch from 533 MHz to
->> @@ -203,9 +204,6 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
+>> @@ -203,25 +204,27 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
+>>          * the index to value mapping is done by adding 1 to the index.
 >>          */
 >>         bitmask = (GENMASK(GET_WIDTH(hwdata->conf) - 1, 0) << shift) << 16;
+>> +       spin_lock_irqsave(&priv->rmw_lock, flags);
 >>         if (index != clk_src_266) {
->> -               u32 msk, val;
->> -               int ret;
->> -
 >>                 writel(bitmask | ((clk_src_266 + 1) << shift), priv->base + off);
 >>
 >>                 msk = off ? CPG_CLKSTATUS_SELSDHI1_STS : CPG_CLKSTATUS_SELSDHI0_STS;
->> @@ -221,7 +219,13 @@ static int rzg2l_cpg_sd_clk_mux_set_parent(struct clk_hw *hw, u8 index)
+>>
+>> -               ret = readl_poll_timeout(priv->base + CPG_CLKSTATUS, val,
+>> -                                        !(val & msk), 100,
+>> -                                        CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US);
+>> -               if (ret) {
+>> -                       dev_err(priv->dev, "failed to switch clk source\n");
+>> -                       return ret;
+>> -               }
+>> +               ret = readl_poll_timeout_atomic(priv->base + CPG_CLKSTATUS, val,
+>> +                                               !(val & msk), 100,
+> 
+> According to the read_poll_timeout_atomic() documentation,
+> delay_us should be less than ~10us.
+
+I'll update it, thanks for pointing it.
+
+> 
+>> +                                               CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US);
+> 
+> CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US = 20 ms, which is a long timeout
+> for an atomic poll.
+
+I'll have to find the the rationale behind the original timeout. It may be
+random, experimental or hardware related.
+
+> 
+>> +               if (ret)
+>> +                       goto unlock;
+>>         }
 >>
 >>         writel(bitmask | ((index + 1) << shift), priv->base + off);
 >>
->> -       return 0;
->> +       ret = readl_poll_timeout(priv->base + CPG_CLKSTATUS, val,
->> +                                !(val & msk), 100,
+>> -       ret = readl_poll_timeout(priv->base + CPG_CLKSTATUS, val,
+>> -                                !(val & msk), 100,
+>> -                                CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US);
+>> +       ret = readl_poll_timeout_atomic(priv->base + CPG_CLKSTATUS, val,
+>> +                                       !(val & msk), 100,
+>> +                                       CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US);
 > 
-> "msk" may be uninitialized.
-
-Indeed! I'll update it in next version.
-
+> Likewise.
 > 
->> +                                CPG_SDHI_CLK_SWITCH_STATUS_TIMEOUT_US);
->> +       if (ret)
->> +               dev_err(priv->dev, "failed to switch clk source\n");
+>> +unlock:
+>> +       spin_unlock_irqrestore(&priv->rmw_lock, flags);
 >> +
->> +       return ret;
+>>         if (ret)
+>>                 dev_err(priv->dev, "failed to switch clk source\n");
 > 
-> This is now (supposed to be) doing the same thing twice, once using
-> clk_src_266, and then again with the wanted index, so why not introduce
-> a small helper? That would have avoided the uninitialized variable, too.
-
-Initially I thought about it but I found it too much for this stage as it
-is only about the readl_poll_timeout() and the debug message. I may keep
-the debug message in a local variable if you think worth it (but FMPOV it
-the code will look a bit... unusual). Moreover, as the code is rewritten in
-patch "[PATCH 18/37] clk: renesas:
-rzg2l: refactor sd mux driver" I thought it doesn't worth introducing a new
-helper in this patch.
-
-Thank you,
-Claudiu Beznea
-
-> 
-> I know you're rewriting this code in "[PATCH 18/37] clk: renesas:
-> rzg2l: refactor sd mux driver", but even after that, you always do
-> a register write before calling rzg2l_cpg_wait_clk_update_done(),
-> so it may still be a net win.
-> 
->>  }
->>
->>  static u8 rzg2l_cpg_sd_clk_mux_get_parent(struct clk_hw *hw)
+> The rest LGTM.
 > 
 > Gr{oetje,eeting}s,
 > 
