@@ -2,93 +2,230 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 627EAEEB59A
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Sep 2023 14:34:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A082CD13D2
+	for <linux-mmc@archiver.kernel.org>; Sun, 17 Sep 2023 20:12:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235765AbjIOOed convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Sep 2023 10:34:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50600 "EHLO
+        id S240537AbjIQULp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 17 Sep 2023 16:11:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235633AbjIOOed (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Sep 2023 10:34:33 -0400
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B4271FCE;
-        Fri, 15 Sep 2023 07:34:28 -0700 (PDT)
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-59c2ca01f27so563867b3.2;
-        Fri, 15 Sep 2023 07:34:28 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694788467; x=1695393267;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2Bg+/ZlDV5cEjktS5gTZzV6GvE3CfacbspJaXAFuHm8=;
-        b=d6Aop0qV/FY92P92vPrbPg3s28t7atINAVPHB+Cmh22mT+JkB4kcKtLirnOr8S+gYz
-         jBB2qogCy/yD9sUk8pwsGENeLuNpxZnlBzksFuduChnOLAYTCCghlZT7vvQ5fVbK/gNb
-         vFOnaUVAPnkaADrS+zycVYlyPHJjO+tu0l8QwkRm1kps03dW1tCKux52cDpOSNRt2FaH
-         XyWLQuhvuqfGVH7vT0KimmdEcumf4rRA3BUpSqPEdCTDSmy5rZWKBBqyMxPGlZz7rMZh
-         lwhPdgmT2/C/rVgzwJrTyOvyda3gkAkKnvgcPCTB/jajJnKWBkoiYtdn8X4FaevxDf4m
-         7m4A==
-X-Gm-Message-State: AOJu0YxrczgOTFioHVgOxuXDoHEsx1zQqOO5qaAgJ0pmkpSUEbaZLiy4
-        KmiOzPXxsQW0pdMGDiqRyXQRMvBZja31UA==
-X-Google-Smtp-Source: AGHT+IH6EveqHYcx/3C9xqQjrlqRaxedtE9rgp9QsIZ8zCtO0RoS5FOW+cOsuoEwcOqviJEJ61Uplw==
-X-Received: by 2002:a81:d551:0:b0:599:241d:3a31 with SMTP id l17-20020a81d551000000b00599241d3a31mr2021303ywj.43.1694788467430;
-        Fri, 15 Sep 2023 07:34:27 -0700 (PDT)
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com. [209.85.219.175])
-        by smtp.gmail.com with ESMTPSA id j20-20020a819214000000b00598d67585d7sm885341ywg.117.2023.09.15.07.34.25
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 15 Sep 2023 07:34:26 -0700 (PDT)
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-d7b91422da8so2102804276.2;
-        Fri, 15 Sep 2023 07:34:25 -0700 (PDT)
-X-Received: by 2002:a25:68ce:0:b0:d3c:58ef:ef7b with SMTP id
- d197-20020a2568ce000000b00d3c58efef7bmr1850354ybc.6.1694788465622; Fri, 15
- Sep 2023 07:34:25 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com> <20230912045157.177966-38-claudiu.beznea.uj@bp.renesas.com>
-In-Reply-To: <20230912045157.177966-38-claudiu.beznea.uj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 15 Sep 2023 16:34:12 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdUVfZednCjMSkJGZX7B+7G6mV33EJ=fpmuqqKuod7U55w@mail.gmail.com>
-Message-ID: <CAMuHMdUVfZednCjMSkJGZX7B+7G6mV33EJ=fpmuqqKuod7U55w@mail.gmail.com>
-Subject: Re: [PATCH 37/37] arm64: defconfig: enable RZ/G3S (R9A08G045) SoC
-To:     Claudiu <claudiu.beznea@tuxon.dev>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+        with ESMTP id S240590AbjIQULd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Sep 2023 16:11:33 -0400
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 567B3F1;
+        Sun, 17 Sep 2023 13:11:27 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1694981485; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=XcsXwrMZJ4WmkGraLw8tnCxf93iR/28w9SR7c7+HCSiww3BEdBHCUP3YOLbtvM9Tib
+    IECw3WuoXOiu0Da/PESnntJmYoIDWA/486YGzzbDDDYsyaj8Vg/gyFLopaPw0Lu0XhBZ
+    p46NBsyQJaEXrDiJsCUKDal7z/eKDlmoQTxvXp28xjWKcitYcVHg+5T8CrgGHtadXFAJ
+    xWS/SvFNrS+SY8YAgGHKvghLZxHh47JdU5thxAWzhT8RNf0/NWDjBS/X8eSHe/rTJPlo
+    aArkMzjRP1vmmxbAG1To1c+lQiQLVcaVEQ3mfAU6Sp5plhS0wOlcF5nRpeMsyeEvsNDl
+    bwtw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1694981485;
+    s=strato-dkim-0002; d=strato.com;
+    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
+    From:Subject:Sender;
+    bh=zGxppwIRX0Tl3MeLWQbRI04qLkWaOFo5HeDhjvTY4G0=;
+    b=Ef0il6xRoac5wEKvL9zmOYkxhdTxsKQxlUA0odQNLvrDgFSRcocAHvMbbQABCLHJs2
+    AIrENww6hzKbF5a2t+lEIUBuqrWSzIHBcvG0CmvYHIst7cFFkLddbB3E2LAXyV7HX6Si
+    OZIVACXZFsce8I97+aMDt/3fYk5QcmXvcy0k+9cIeEn1T4IsZDZw0QvE08HjlNnKkbr2
+    eeZlH0HUGRLGLVXkS1hbbBFg0cNhqAwRtsleq8UdEbgQpmtu8lgB4f/xCImZRYOiujPE
+    PtkeG97lkd+ua1ar+0lOGBOVcv2YoPN01LRvra5U8lUES9P2iM2pLJzCCGtsL/2es9Zd
+    He3g==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo01
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1694981484;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
+    From:Subject:Sender;
+    bh=zGxppwIRX0Tl3MeLWQbRI04qLkWaOFo5HeDhjvTY4G0=;
+    b=OSnuotJG+MwgZLx8mfpTzwjApvKCScN0Nv4W7AJGdKKCieOo51os4/8XNZY70jR6Pd
+    dldHWl+ybZP8RgVdBGRw4X/11DYdWftSIi5R8y3P8ram3+CR8qklFjyvrwC6gZ9Ttcjr
+    P3zepjXk9GhZh+XQNbFzhCQd8QtaMuQmLzW1TX6+yV+7JurRBfJigDPLU34Yb5SqNaM1
+    jkSXbvbZGPOlunKMbcy+Jp9kJ/NlBG/daKa06zCYpmW+JhmeoQRTSEAa/0wTiZj+CFCy
+    b1bsbluFVNzbu4UyrGl6wB6D9ZMXeyO+PaRgIhTytEQd4+PGT7h7RTkOuGS0wIoiI+cp
+    JnEQ==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1694981484;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
+    From:Subject:Sender;
+    bh=zGxppwIRX0Tl3MeLWQbRI04qLkWaOFo5HeDhjvTY4G0=;
+    b=42b5DEePtqlChrZhp9Op9nz7V4ylqCq3akygV8jbyjuNu14kvdlfFHQp8kNnMNcach
+    VsvjSQLemRN5ottbkbBA==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSeBwhhSxarlUcu05JyMI1zXvWpofGAbhC22VTSyBo5Bpg9wgYEqSm4NXFaofpx464Ao="
+Received: from p200300c58703581b312819b392712fb6.dip0.t-ipconnect.de
+    by smtp.strato.de (RZmta 49.8.2 AUTH)
+    with ESMTPSA id V04024z8HKBOI6g
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+        (Client did not present a certificate);
+    Sun, 17 Sep 2023 22:11:24 +0200 (CEST)
+Message-ID: <c66810ae52446db41fd187ee4be24d04d40c1abb.camel@iokpp.de>
+Subject: Re: [PATCH v2] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for
+ Micron eMMC Q2J54A
+From:   Bean Huo <beanhuo@iokpp.de>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     adrian.hunter@intel.com, beanhuo@micron.com,
+        jakub.kwapisz@toradex.com, rafael.beims@toradex.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org
+Date:   Sun, 17 Sep 2023 22:11:24 +0200
+In-Reply-To: <CAPDyKFruYooG4yQ4yqrwEcrvy4xe6hYByF2Q57eQ1g0tiUtcug@mail.gmail.com>
+References: <20230914202749.470100-1-beanhuo@iokpp.de>
+         <CAPDyKFruYooG4yQ4yqrwEcrvy4xe6hYByF2Q57eQ1g0tiUtcug@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.44.4-0ubuntu2 
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->
-> Enable config flag for Renesas RZ/G3S (R9A08G045) SoC.
->
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Hi Ulf,
 
-Gr{oetje,eeting}s,
+Thanks for your comment, much appreciated!
 
-                        Geert
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+On Fri, 2023-09-15 at 00:09 +0200, Ulf Hansson wrote:
+> On Thu, 14 Sept 2023 at 22:28, Bean Huo <beanhuo@iokpp.de> wrote:
+> >=20
+> > From: Bean Huo <beanhuo@micron.com>
+> >=20
+> > Micron MTFC4GACAJCN eMMC supports cache but requires that flush
+> > cache
+> > operation be allowed only after a write has occurred. Otherwise,
+> > the
+> > cache flush command or subsequent commands will time out.
+>=20
+> For my information, more exactly, how can we trigger this problem?
+>=20
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+This issue may be likely reproduced in this command sequence:
+
+eMMC power-cycle/reset-->...(other operations, but no data write)...-
+>cache flush-->...... ->write data, must say, it is not 100%
+reproducable.
+
+> >=20
+> > Signed-off-by: Bean Huo <beanhuo@micron.com>
+> > Co-developed-by: Rafael Beims <rafael.beims@toradex.com>
+> > Tested-by: Rafael Beims <rafael.beims@toradex.com>
+> > Cc: stable@vger.kernel.org
+> > ---
+> > Changelog:
+> >=20
+> > v1--v2:
+> > =C2=A0=C2=A0=C2=A0 1. Add Rafael's test-tag, and Co-developed-by.
+> > =C2=A0=C2=A0=C2=A0 2. Check host->card whether NULL or not in
+> > __mmc_start_request() before asserting host->card->->quirks
+> >=20
+> > ---
+> > =C2=A0drivers/mmc/core/core.c=C2=A0=C2=A0 | 7 +++++++
+> > =C2=A0drivers/mmc/core/mmc.c=C2=A0=C2=A0=C2=A0 | 5 +++++
+> > =C2=A0drivers/mmc/core/quirks.h | 7 ++++---
+> > =C2=A0include/linux/mmc/card.h=C2=A0 | 2 ++
+> > =C2=A04 files changed, 18 insertions(+), 3 deletions(-)
+> >=20
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 3d3e0ca52614..86a669b35b91 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -259,6 +259,13 @@ static void __mmc_start_request(struct
+> > mmc_host *host, struct mmc_request *mrq)
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 host->cqe_ops->cqe_off(host);
+> >=20
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 host->ops->request(host, mrq=
+);
+> > +
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (host->card && host->card->qui=
+rks &
+> > MMC_QUIRK_BROKEN_CACHE_FLUSH &&
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 !host->ca=
+rd->written_flag) {
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 if (mrq->cmd->opcode =3D=3D MMC_WRITE_MULTIPLE_BLOCK ||
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 mrq->cmd->opcode =3D=3D MMC_WRITE_B=
+LOCK)
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 host->card-=
+>written_flag =3D true;
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }
+>=20
+> I don't quite like that we are adding the above code here - as it's
+> used for *all* requests.
+>=20
+> Seems like the flag is better set from the mmc block device driver
+> instead. Somewhere in the path when we serve I/O write requests.
+>=20
+
+yes, you are correct, I will update the patch and add this flag set in
+mmc block driver mmc_blk_mq_issue_rq().
+
+> > =C2=A0}
+> >=20
+> > =C2=A0static void mmc_mrq_pr_debug(struct mmc_host *host, struct
+> > mmc_request *mrq,
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > index 89cd48fcec79..a2edd065fa1b 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -1929,6 +1929,8 @@ static int mmc_init_card(struct mmc_host
+> > *host, u32 ocr,
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (!oldcard)
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 host->card =3D card;
+> >=20
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 card->written_flag =3D false;
+> > +
+>=20
+> According to your earlier reply, it sounds like the problem isn't
+> really about the card being re-initialized, but rather that we
+> actually need a write request to happen before a flush. No matter
+> what, no?
+>=20
+> See more about this below.
+>=20
+
+Actually, it matters that the first cache flush command after
+reboot/reset. means that for the first cache flush command, before
+execution, the write data operation should occur,
+After that, there is no problem even if there are no writes before the
+cache is flushed.
+
+
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return 0;
+> >=20
+> > =C2=A0free_card:
+> > @@ -2081,6 +2083,9 @@ static int _mmc_flush_cache(struct mmc_host
+> > *host)
+> > =C2=A0{
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 int err =3D 0;
+> >=20
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (host->card->quirks & MMC_QUIR=
+K_BROKEN_CACHE_FLUSH &&
+> > !host->card->written_flag)
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 return err;
+> > +
+>=20
+> Could an option to the above, be to reset the flag here instead.
+> After
+> a successful cache flush has been done.
+>=20
+>=20
+
+As I explained above, the first cache flush after a power cycle/reset
+is important. We just want to eliminate the first unnecessary cache
+flush.
+We can eliminate all unnecessary cache flushes when the cache is empty.
+But I don't want to change the current logic too much, only want to
+focus on the first unnecessary cache flush, how do you think?
+
+Kind regards,
+Bean
+
