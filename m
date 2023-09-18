@@ -2,331 +2,335 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B2F0CD37B0
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 06:10:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61A2ACD37B0
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 06:22:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229529AbjIRGJq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Sep 2023 02:09:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33388 "EHLO
+        id S239854AbjIRGVi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Sep 2023 02:21:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235633AbjIRGJR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 02:09:17 -0400
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEE7810B
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:09:09 -0700 (PDT)
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com [209.85.210.200])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 0A5033F182
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Sep 2023 06:09:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1695017348;
-        bh=Wgoj75WmltWQ4EurBvfin7gk3XuAaajHdXNdRLJkhGs=;
-        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-         To:Cc:Content-Type;
-        b=DZKl4++NMfjTw7cdqTBzNEmDc+CL/JZ6scUDv5g4HgksTwdO+oE0LNPOdQ5sKeSoI
-         qR3DM8U3Hwl4hVarEi/hya+BOUOZ9ai4tzhFQ0cKnOEOmO0/haEDcez7PmX0MV3R4p
-         s33UbVH8faBgnQ2AMvV73Zko/8sqQ4dJ7bMFrmEkgcXnxRgVV5jHElp0RAexc+YFES
-         y49RjmZSfef6pIa0/2/zMTVMZ8/qenowUhqj2bZZ/HhZNCZtCad+KilhC2efNCnCvw
-         IRfxtsPHry8Jea8watRC7ToAAY0sHTDZiH+6glME6wXthxDfzjTsg6wN2UpQVNmQio
-         lAuDoWiv6insA==
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-68faf55989cso4117907b3a.3
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:09:07 -0700 (PDT)
+        with ESMTP id S235633AbjIRGVH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 02:21:07 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98DA711A
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:20:59 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id 38308e7fff4ca-2c00c0f11b2so9241901fa.1
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:20:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1695018058; x=1695622858; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=d9O452KtA6IKYA2rXY2T8FC1zQsLGqf6bLwwFeZSRb4=;
+        b=PXuX1KKVhTpGfOk4EsVaZeKrmix9ESivX4fDiifxvX7xIJLuXoorAfwIcuU7DpCsN0
+         8Fs5jZS4anPBTfVqvc53QUD4Io8pZAdAgbiHenHphgNd4jws3EIUkLNgubNQ11ynXbTM
+         pCe1Zd8ts/26o8UsMLcba8vScJQR7d+zmvm/wtkh/yYnwrx0Yo6qd2+9Dl/nQ0q9SVeI
+         6vYUXfEU2YSdK/v9jLwjCmbk5vawOYuFBtfMRLXKia0XP+itai7tf2yN3qmmRMcHKb+K
+         AJYMftGThF99x3Gmwnm3xb8TV5yGFfNZmJlke65ZI3dY/kMqDnDzutO2/SHyILbIHFS3
+         eR8g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695017346; x=1695622146;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Wgoj75WmltWQ4EurBvfin7gk3XuAaajHdXNdRLJkhGs=;
-        b=pvTBYPyOk2ezThObWT0yLi+bhr0NlTbeGRM2fboWy/21lFEcuKry/FODOchDu6Y/5c
-         w3zos1DtfLB+11ahpTprKV6YpSCe0B3YN4B4sPnx2si5bUiQQA9CgbJ4bWQeoro8lnZ/
-         D3MxfrltbQDTj1UaFUEIdPkf9Wje5HRBsokIS0W3Jw/bC3zW0mn/Wo4W3h05Z0FPWxD4
-         McR9WD2Bz5uVGuAGSKonJcyZiH0QT1PHRMMwkuGDnt9RBlT2c1A0WjOykqu+nBMtG+E/
-         BiD3Ge35I/fISEGFS081b/l0g/P9d3lx24K/dyJ1lpEAa6DC4MZAhFocK8YegYJ0TRB2
-         Gbrg==
-X-Gm-Message-State: AOJu0YwRMbLq6rfc4VOQNP3xW1/hRwoSUDLvcEtDUsWoghNssvsDEU3F
-        cRXPEPIw0yZAXSfXpmlT1fCf3ZTxE0LazwAhqrcNu2bDqE+gU5cUlsvLTd3DaeDhbooJdzTbrYp
-        NowFvjeIvs0vNQuNUb1qtZiEeAUVXFBfuhfgagxSYGN+CFhNnCN8G8+DpyTTwp9La
-X-Received: by 2002:a05:6a00:24ca:b0:68e:2f6e:b4c0 with SMTP id d10-20020a056a0024ca00b0068e2f6eb4c0mr8637915pfv.28.1695017346630;
-        Sun, 17 Sep 2023 23:09:06 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFFgLoywcCrmqHzXC+lJIbQxOSRBEWnuQrri2loJ3K5psBozLhqtomxVvBvctUSEbx4hIR2Y9Jyk7/GYt6NKLQ=
-X-Received: by 2002:a05:6a00:24ca:b0:68e:2f6e:b4c0 with SMTP id
- d10-20020a056a0024ca00b0068e2f6eb4c0mr8637902pfv.28.1695017346304; Sun, 17
- Sep 2023 23:09:06 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695018058; x=1695622858;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=d9O452KtA6IKYA2rXY2T8FC1zQsLGqf6bLwwFeZSRb4=;
+        b=GXfaTvGYiffwqHxWW54fFjpZsSGyfh3rf1GgJTZLmvxjqwMGe3jZfGJmmPTcCXu72D
+         +ufVnf64VL9n/27rFP2qXQI6g0SApl2diD81S1/T0Jy9bNOyQ1NVBlUxtN9g9Z2uh6Fi
+         IgVzuf07dWxH5Z9XcTFIETblhigaP1BVEvHuw8zE7dv6+XcB6i+eCwXDv1iHTIY/2Xge
+         X7SvaftrEcJpkcc2GiphAv0RUtarvDeGS49KRJXRIhRZQwo/8wj9hm050N1oc8OphIy2
+         abPAxf9XWLlEfkyjRCoYS0zytLwZSo41/W8hwU7AfO5MVNZQ+Q/MF/2oowY0wkcJJOyW
+         wS8g==
+X-Gm-Message-State: AOJu0YxEzFpA0op3HX1g+NlEZ5yaOQPB89kEVbe6Do3Fagqxok6g6/fx
+        hSPBYE+rAQc2fuPtqUDoaYhLwg==
+X-Google-Smtp-Source: AGHT+IG8i1BIcDrXDMTfz7z6/DTJVdsXBVep2ZCu9AJ2q03gtpXpAWrsMtNqvcOkhO8okyTFydqB9g==
+X-Received: by 2002:a2e:8046:0:b0:2bc:b821:84ad with SMTP id p6-20020a2e8046000000b002bcb82184admr6782756ljg.16.1695018057527;
+        Sun, 17 Sep 2023 23:20:57 -0700 (PDT)
+Received: from [192.168.32.2] ([82.78.167.145])
+        by smtp.gmail.com with ESMTPSA id u1-20020a1709064ac100b009934855d8f1sm5939527ejt.34.2023.09.17.23.20.54
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 17 Sep 2023 23:20:57 -0700 (PDT)
+Message-ID: <e8d3f59a-fa1d-9993-6e84-99d976eb05fa@tuxon.dev>
+Date:   Mon, 18 Sep 2023 09:20:53 +0300
 MIME-Version: 1.0
-References: <2ce258f371234b1f8a1a470d5488d00e@realtek.com> <CAAd53p4LVL3uuNDCHPxteqM+jYD8E4atVyQvkt-HRhGKBVMoFg@mail.gmail.com>
- <0c73b27b8b07408da1940421217304a5@realtek.com>
-In-Reply-To: <0c73b27b8b07408da1940421217304a5@realtek.com>
-From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
-Date:   Mon, 18 Sep 2023 14:08:52 +0800
-Message-ID: <CAAd53p7YOFP7G0JxLi3uHu7Xb3p1+d0DyoFjpdWAcK99VxkFBg@mail.gmail.com>
-Subject: Re: [PATCH] misc: rtsx: Fix an error access Page fault
-To:     Ricky WU <ricky_wu@realtek.com>
-Cc:     "arnd@arndb.de" <arnd@arndb.de>,
-        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH 22/37] clk: renesas: add minimal boot support for RZ/G3S
+ SoC
+Content-Language: en-US
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        conor+dt@kernel.org, ulf.hansson@linaro.org,
+        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
+        jirislaby@kernel.org, magnus.damm@gmail.com,
+        catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-23-claudiu.beznea.uj@bp.renesas.com>
+ <CAMuHMdUCpbPA3cDjNAq1irvr6z4Jux-5-tVDBuyr6nx_qOQGpg@mail.gmail.com>
+From:   claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <CAMuHMdUCpbPA3cDjNAq1irvr6z4Jux-5-tVDBuyr6nx_qOQGpg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ricky,
+Hi, Geert,
 
-On Fri, Sep 8, 2023 at 2:36=E2=80=AFPM Ricky WU <ricky_wu@realtek.com> wrot=
-e:
->
-> > Hi Ricky,
-> >
-> > On Wed, Sep 6, 2023 at 4:03=E2=80=AFPM Ricky WU <ricky_wu@realtek.com> =
-wrote:
-> > >
-> > > an error occurs on insert SD7.0 card.
-> > > The pci slot of rtsx_pci will Link Down when the SD7.0 card inserted,
-> > > but the rtsx_pci not exit from runtime_idle at that time, then do the
-> > > power_saving function to access the wrong resource
-> >
-> > Is it possible to attach full dmesg? Maybe the issue is coming from PCI=
- side?
-> >
-> > Kai-Heng
-> >
->
-> Dmesg as below....
-> -------------------------------------------------------------------------=
------------------------------------------
-> [   60.748953] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
-> [   60.748958] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
-> [   60.884619] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
-> [   60.884662] pci 0000:01:00.0: reg 0x10: [mem 0xa3b00000-0xa3b00fff]
-> [   60.884767] pci 0000:01:00.0: Upstream bridge's Max Payload Size set t=
-o 128 (was 256, max 256)
-> [   60.884778] pci 0000:01:00.0: Max Payload Size set to 128 (was 128, ma=
-x 128)
-> [   60.884917] pci 0000:01:00.0: supports D1 D2
-> [   60.884921] pci 0000:01:00.0: PME# supported from D1 D2 D3hot D3cold
-> [   60.885537] pci 0000:01:00.0: BAR 0: assigned [mem 0xa3b00000-0xa3b00f=
-ff]
-> [   60.885570] pcieport 0000:00:1c.0: PCI bridge to [bus 01]
-> [   60.885585] pcieport 0000:00:1c.0:   bridge window [io  0x4000-0x4fff]
-> [   60.885598] pcieport 0000:00:1c.0:   bridge window [mem 0xa3b00000-0xa=
-44fffff]
-> [   60.885630] pcieport 0000:00:1c.0:   bridge window [mem 0xa0a00000-0xa=
-13fffff 64bit pref]
-> [   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> [   63.912118] BUG: unable to handle page fault for address: ffffb24d403e=
-5010
-> [   63.912122] #PF: supervisor read access in kernel mode
-> [   63.912125] #PF: error_code(0x0000) - not-present page
-> [   63.912126] PGD 100000067 P4D 100000067 PUD 1001fe067 PMD 100d97067 PT=
-E 0
-> [   63.912131] Oops: 0000 [#1] PREEMPT SMP PTI
-> [   63.912134] CPU: 3 PID: 534 Comm: kworker/3:10 Not tainted 6.4.0 #6
-> [   63.912137] Hardware name: To Be Filled By O.E.M. To Be Filled By O.E.=
-M./H370M Pro4, BIOS P3.40 10/25/2018
-> [   63.912138] Workqueue: pm pm_runtime_work
-> [   63.912144] RIP: 0010:ioread32+0x2e/0x70
-> [   63.912148] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d=
-9 54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
-8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f 15 99 48
-> [   63.912150] RSP: 0018:ffffb24d40a5bd78 EFLAGS: 00010296
-> [   63.912152] RAX: ffffb24d403e5000 RBX: 0000000000000152 RCX: 000000000=
-000007f
-> [   63.912153] RDX: 000000000000ff00 RSI: ffffb24d403e5010 RDI: ffffb24d4=
-03e5010
-> [   63.912155] RBP: ffffb24d40a5bd98 R08: ffffb24d403e5010 R09: 000000000=
-0000000
-> [   63.912156] R10: ffff9074cd95e7f4 R11: 0000000000000003 R12: 000000000=
-000007f
-> [   63.912158] R13: ffff9074e1a68c00 R14: ffff9074e1a68d00 R15: 000000000=
-0009003
-> [   63.912159] FS:  0000000000000000(0000) GS:ffff90752a180000(0000) knlG=
-S:0000000000000000
-> [   63.912161] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [   63.912162] CR2: ffffb24d403e5010 CR3: 0000000152832006 CR4: 000000000=
-03706e0
-> [   63.912164] Call Trace:
-> [   63.912165]  <TASK>
-> [   63.912167]  ? show_regs+0x68/0x70
-> [   63.912171]  ? __die_body+0x20/0x70
-> [   63.912173]  ? __die+0x2b/0x40
-> [   63.912175]  ? page_fault_oops+0x160/0x480
-> [   63.912177]  ? search_bpf_extables+0x63/0x90
-> [   63.912180]  ? ioread32+0x2e/0x70
-> [   63.912183]  ? search_exception_tables+0x5f/0x70
-> [   63.912186]  ? kernelmode_fixup_or_oops+0xa2/0x120
-> [   63.912189]  ? __bad_area_nosemaphore+0x179/0x230
-> [   63.912191]  ? bad_area_nosemaphore+0x16/0x20
-> [   63.912193]  ? do_kern_addr_fault+0x8b/0xa0
-> [   63.912195]  ? exc_page_fault+0xe5/0x180
-> [   63.912198]  ? asm_exc_page_fault+0x27/0x30
-> [   63.912203]  ? ioread32+0x2e/0x70
-> [   63.912206]  ? rtsx_pci_write_register+0x5b/0x90 [rtsx_pci]
-> [   63.912217]  rtsx_set_l1off_sub+0x1c/0x30 [rtsx_pci]
-> [   63.912226]  rts5261_set_l1off_cfg_sub_d0+0x36/0x40 [rtsx_pci]
-> [   63.912234]  rtsx_pci_runtime_idle+0xc7/0x160 [rtsx_pci]
-> [   63.912243]  ? __pfx_pci_pm_runtime_idle+0x10/0x10
-> [   63.912246]  pci_pm_runtime_idle+0x34/0x70
-> [   63.912248]  rpm_idle+0xc4/0x2b0
-> [   63.912251]  pm_runtime_work+0x93/0xc0
-> [   63.912254]  process_one_work+0x21a/0x430
-> [   63.912258]  worker_thread+0x4a/0x3c0
-> [   63.912261]  ? __pfx_worker_thread+0x10/0x10
-> [   63.912263]  kthread+0x106/0x140
-> [   63.912266]  ? __pfx_kthread+0x10/0x10
-> [   63.912268]  ret_from_fork+0x29/0x50
-> [   63.912273]  </TASK>
-> [   63.912274] Modules linked in: nvme nvme_core snd_hda_codec_hdmi snd_s=
-of_pci_intel_cnl snd_sof_intel_hda_common snd_hda_codec_realtek snd_hda_cod=
-ec_generic snd_soc_hdac_hda soundwire_intel ledtrig_audio nls_iso8859_1 sou=
-ndwire_generic_allocation soundwire_cadence snd_sof_intel_hda_mlink snd_sof=
-_intel_hda snd_sof_pci snd_sof_xtensa_dsp snd_sof snd_sof_utils snd_hda_ext=
-_core snd_soc_acpi_intel_match snd_soc_acpi soundwire_bus snd_soc_core snd_=
-compress ac97_bus snd_pcm_dmaengine snd_hda_intel i915 snd_intel_dspcfg snd=
-_intel_sdw_acpi intel_rapl_msr snd_hda_codec intel_rapl_common snd_hda_core=
- x86_pkg_temp_thermal intel_powerclamp snd_hwdep coretemp snd_pcm kvm_intel=
- drm_buddy ttm mei_hdcp kvm drm_display_helper snd_seq_midi snd_seq_midi_ev=
-ent cec crct10dif_pclmul ghash_clmulni_intel sha512_ssse3 aesni_intel crypt=
-o_simd rc_core cryptd rapl snd_rawmidi drm_kms_helper binfmt_misc intel_cst=
-ate i2c_algo_bit joydev snd_seq snd_seq_device syscopyarea wmi_bmof snd_tim=
-er sysfillrect input_leds snd ee1004 sysimgblt mei_me soundcore
-> [   63.912324]  mei intel_pch_thermal mac_hid acpi_tad acpi_pad sch_fq_co=
-del msr parport_pc ppdev lp ramoops drm parport reed_solomon efi_pstore ip_=
-tables x_tables autofs4 hid_generic usbhid hid rtsx_pci_sdmmc crc32_pclmul =
-ahci e1000e i2c_i801 i2c_smbus rtsx_pci xhci_pci libahci xhci_pci_renesas v=
-ideo wmi
-> [   63.912346] CR2: ffffb24d403e5010
-> [   63.912348] ---[ end trace 0000000000000000 ]---
-> [   64.067753] RIP: 0010:ioread32+0x2e/0x70
-> [   64.067762] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d=
-9 54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
-8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f 15 99 48
-> [   64.067764] RSP: 0018:ffffb24d40a5bd78 EFLAGS: 00010296
-> [   64.067767] RAX: ffffb24d403e5000 RBX: 0000000000000152 RCX: 000000000=
-000007f
-> [   64.067769] RDX: 000000000000ff00 RSI: ffffb24d403e5010 RDI: ffffb24d4=
-03e5010
-> [   64.067770] RBP: ffffb24d40a5bd98 R08: ffffb24d403e5010 R09: 000000000=
-0000000
-> [   64.067772] R10: ffff9074cd95e7f4 R11: 0000000000000003 R12: 000000000=
-000007f
-> [   64.067773] R13: ffff9074e1a68c00 R14: ffff9074e1a68d00 R15: 000000000=
-0009003
-> [   64.067775] FS:  0000000000000000(0000) GS:ffff90752a180000(0000) knlG=
-S:0000000000000000
-> [   64.067776] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [   64.067778] CR2: ffffb24d403e5010 CR3: 0000000119402003 CR4: 000000000=
-03706e0
-> [   64.067780] note: kworker/3:10[534] exited with irqs disabled
-> -------------------------------------------------------------------------=
-------------------------------------------
->
+On 15.09.2023 15:52, Geert Uytterhoeven wrote:
+> Hi Claudiu,
+> 
+> On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+>> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>>
+>> Add minimal clock and reset support for RZ/G3S SoC to be able to boot
+>> Linux from SD Card/eMMC. This includes necessary core clocks for booting
+>> and GIC, SCIF, GPIO, SD0 mod clocks and resets.
+>>
+>> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> 
+> Thanks for your patch!
+> 
+>> --- /dev/null
+>> +++ b/drivers/clk/renesas/r9a08g045-cpg.c
+>> @@ -0,0 +1,217 @@
+>> +// SPDX-License-Identifier: GPL-2.0
+>> +/*
+>> + * RZ/G3S CPG driver
+>> + *
+>> + * Copyright (C) 2023 Renesas Electronics Corp.
+>> + */
+>> +
+>> +#include <linux/clk-provider.h>
+>> +#include <linux/device.h>
+>> +#include <linux/init.h>
+>> +#include <linux/kernel.h>
+>> +
+>> +#include <dt-bindings/clock/r9a08g045-cpg.h>
+>> +
+>> +#include "rzg2l-cpg.h"
+>> +
+>> +/* RZ/G3S Specific registers. */
+>> +#define G3S_CPG_PL2_DDIV               (0x204)
+>> +#define G3S_CPG_SDHI_DDIV              (0x218)
+>> +#define G3S_CPG_PLL_DSEL               (0x240)
+>> +#define G3S_CPG_SDHI_DSEL              (0x244)
+>> +#define G3S_CLKSELSTATUS               (0x284)
+>> +
+>> +/* RZ/G3S Specific division configuration.  */
+>> +#define G3S_DIVPL2B            DDIV_PACK(G3S_CPG_PL2_DDIV, 4, 3)
+>> +#define G3S_DIV_SDHI0          DDIV_PACK(G3S_CPG_SDHI_DDIV, 0, 1)
+>> +
+>> +/* RZ/G3S Clock status configuration. */
+>> +#define G3S_DIVPL1A_STS                DDIV_PACK(CPG_CLKSTATUS, 0, 1)
+>> +#define G3S_DIVPL2B_STS                DDIV_PACK(CPG_CLKSTATUS, 5, 1)
+>> +#define G3S_DIVPL3A_STS                DDIV_PACK(CPG_CLKSTATUS, 8, 1)
+>> +#define G3S_DIVPL3B_STS                DDIV_PACK(CPG_CLKSTATUS, 9, 1)
+>> +#define G3S_DIVPL3C_STS                DDIV_PACK(CPG_CLKSTATUS, 10, 1)
+>> +#define G3S_DIV_SDHI0_STS      DDIV_PACK(CPG_CLKSTATUS, 24, 1)
+> 
+> The register at offset 0x280 is called CPG_CLKDIVSTATUS, so
+> you probably want to add and use a G3S-specific definition.
 
-Does the following change work for you?
+I just used the already definition as there is no conflict at the moment,
+it points to the same offset and is almost identical in name. With this
+would you still prefer to have it separately ?
 
-diff --git a/drivers/pci/hotplug/pciehp_ctrl.c
-b/drivers/pci/hotplug/pciehp_ctrl.c
-index dcdbfcf404dd..ef93364a4422 100644
---- a/drivers/pci/hotplug/pciehp_ctrl.c
-+++ b/drivers/pci/hotplug/pciehp_ctrl.c
-@@ -356,6 +356,7 @@ static int pciehp_disable_slot(struct controller
-*ctrl, bool safe_removal)
-        int ret;
+> 
+>> +#define G3S_SEL_PLL4_STS       SEL_PLL_PACK(G3S_CLKSELSTATUS, 6, 1)
+>> +#define G3S_SEL_SDHI0_STS      SEL_PLL_PACK(G3S_CLKSELSTATUS, 16, 1)
+>> +
+>> +/* RZ/G3S Specific clocks select. */
+>> +#define G3S_SEL_PLL4           SEL_PLL_PACK(G3S_CPG_PLL_DSEL, 6, 1)
+>> +#define G3S_SEL_SDHI0          SEL_PLL_PACK(G3S_CPG_SDHI_DSEL, 0, 2)
+>> +
+>> +/* PLL 1/4/6 configuration registers macro. */
+>> +#define G3S_PLL146_CONF(clk1, clk2)    ((clk1) << 22 | (clk2) << 12)
+>> +
+>> +#define DEF_G3S_MUX(_name, _id, _conf, _parent_names, _mux_flags, _clk_flags) \
+>> +       DEF_TYPE(_name, _id, CLK_TYPE_MUX, .conf = (_conf), \
+>> +                .parent_names = (_parent_names), \
+>> +                .num_parents = ARRAY_SIZE((_parent_names)), \
+>> +                .mux_flags = CLK_MUX_HIWORD_MASK | (_mux_flags), \
+>> +                .flag = (_clk_flags))
+>> +
+>> +enum clk_ids {
+>> +       /* Core Clock Outputs exported to DT */
+>> +       LAST_DT_CORE_CLK = R9A08G045_SWD,
+>> +
+>> +       /* External Input Clocks */
+>> +       CLK_EXTAL,
+>> +
+>> +       /* Internal Core Clocks */
+>> +       CLK_OSC_DIV1000,
+>> +       CLK_PLL1,
+>> +       CLK_PLL2,
+>> +       CLK_PLL2_DIV2,
+>> +       CLK_PLL2_DIV2_8,
+>> +       CLK_PLL2_DIV6,
+>> +       CLK_PLL3,
+>> +       CLK_PLL3_DIV2,
+>> +       CLK_PLL3_DIV2_2,
+> 
+> Do you need CLK_PLL3_DIV2_2?
+> When adding support for R9A07G043_CLK_AT later, you can define it
+> as CLK_PLL3_DIV2 / 2.
 
-        pm_runtime_get_sync(&ctrl->pcie->port->dev);
-+       pm_runtime_barrier(&ctrl->pcie->port->dev);
-        ret =3D __pciehp_disable_slot(ctrl, safe_removal);
-        pm_runtime_put(&ctrl->pcie->port->dev);
+That's true. I kept it here as I saw it as a core clock. I can remove it.
 
+> 
+>> +       CLK_PLL3_DIV2_4,
+>> +       CLK_PLL3_DIV2_8,
+>> +       CLK_PLL3_DIV6,
+>> +       CLK_PLL4,
+>> +       CLK_PLL6,
+>> +       CLK_PLL6_DIV2,
+>> +       CLK_SEL_SDHI0,
+>> +       CLK_SEL_PLL4,
+>> +       CLK_P1_DIV2,
+>> +       CLK_P3_DIV2,
+> 
+> Do you need CLK_P1_DIV2 and CLK_P3_DIV2?
+> I don't see them in Figure 7.3 ("Clock System Diagram (2)").
+> 
+>> +       CLK_SD0_DIV,
+> 
+> CLK_SD0_DIV is unused.
 
-Kai-Heng
+Ok, I'll remove it.
 
->
-> > >
-> > > Fixes: 597568e8df04 ("misc: rtsx: Rework runtime power management
-> > > flow")
-> > > Cc: Kai-Heng Feng <kai.heng.feng@canonical.com>
-> > > Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> > > ---
-> > >  drivers/misc/cardreader/rtsx_pcr.c | 14 ++++++++------
-> > > drivers/mmc/host/rtsx_pci_sdmmc.c  |  1 +
-> > >  include/linux/rtsx_pci.h           |  1 +
-> > >  3 files changed, 10 insertions(+), 6 deletions(-)
-> > >
-> > > diff --git a/drivers/misc/cardreader/rtsx_pcr.c
-> > > b/drivers/misc/cardreader/rtsx_pcr.c
-> > > index a3f4b52bb159..536a3681fd5e 100644
-> > > --- a/drivers/misc/cardreader/rtsx_pcr.c
-> > > +++ b/drivers/misc/cardreader/rtsx_pcr.c
-> > > @@ -1526,6 +1526,7 @@ static int rtsx_pci_probe(struct pci_dev *pcide=
-v,
-> > >         pcr->host_sg_tbl_addr =3D pcr->rtsx_resv_buf_addr +
-> > HOST_CMDS_BUF_LEN;
-> > >         pcr->card_inserted =3D 0;
-> > >         pcr->card_removed =3D 0;
-> > > +       pcr->is_sd_express =3D false;
-> > >         INIT_DELAYED_WORK(&pcr->carddet_work,
-> > rtsx_pci_card_detect);
-> > >
-> > >         pcr->msi_en =3D msi_en;
-> > > @@ -1735,12 +1736,13 @@ static int rtsx_pci_runtime_idle(struct devic=
-e
-> > > *device)
-> > >
-> > >         pcr->state =3D PDEV_STAT_IDLE;
-> > >
-> > > -       if (pcr->ops->disable_auto_blink)
-> > > -               pcr->ops->disable_auto_blink(pcr);
-> > > -       if (pcr->ops->turn_off_led)
-> > > -               pcr->ops->turn_off_led(pcr);
-> > > -
-> > > -       rtsx_pm_power_saving(pcr);
-> > > +       if (!pcr->is_sd_express) {
-> > > +               if (pcr->ops->disable_auto_blink)
-> > > +                       pcr->ops->disable_auto_blink(pcr);
-> > > +               if (pcr->ops->turn_off_led)
-> > > +                       pcr->ops->turn_off_led(pcr);
-> > > +               rtsx_pm_power_saving(pcr);
-> > > +       }
-> > >
-> > >         mutex_unlock(&pcr->pcr_mutex);
-> > >
-> > > diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > index 87d78432a1e0..80b2f2a31fdc 100644
-> > > --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > @@ -1393,6 +1393,7 @@ static int sdmmc_init_sd_express(struct mmc_hos=
-t
-> > *mmc, struct mmc_ios *ios)
-> > >                 RTS5261_MCU_BUS_SEL_MASK |
-> > RTS5261_MCU_CLOCK_SEL_MASK
-> > >                 | RTS5261_DRIVER_ENABLE_FW,
-> > >                 RTS5261_MCU_CLOCK_SEL_16M |
-> > RTS5261_DRIVER_ENABLE_FW);
-> > > +       pcr->is_sd_express =3D true;
-> > >         host->eject =3D true;
-> > >         return 0;
-> > >  }
-> > > diff --git a/include/linux/rtsx_pci.h b/include/linux/rtsx_pci.h inde=
-x
-> > > 534038d962e4..295e92224fd0 100644
-> > > --- a/include/linux/rtsx_pci.h
-> > > +++ b/include/linux/rtsx_pci.h
-> > > @@ -1262,6 +1262,7 @@ struct rtsx_pcr {
-> > >         u8                      ocp_stat;
-> > >         u8                      ocp_stat2;
-> > >         u8                      rtd3_en;
-> > > +       bool                    is_sd_express;
-> > >  };
-> > >
-> > >  #define PID_524A       0x524A
-> > > --
-> > > 2.25.1
-> > >
-> >
-> > ------Please consider the environment before printing this e-mail.
->
+> 
+>> +       CLK_SD0_DIV4,
+>> +       CLK_S0_DIV2,
+> 
+> CLK_S0_DIV2 is unused.
+
+ok.
+
+> 
+>> +
+>> +       /* Module Clocks */
+>> +       MOD_CLK_BASE,
+>> +};
+>> +
+>> +/* Divider tables */
+>> +static const struct clk_div_table dtable_1_2[] = {
+>> +       {0, 1},
+> 
+> "{ 0, 1 }," etc...
+
+ok.
+
+> 
+>> +       {1, 2},
+>> +       {0, 0},
+>> +};
+>> +
+>> +static const struct clk_div_table dtable_1_8[] = {
+>> +       {0, 1},
+>> +       {1, 2},
+>> +       {2, 4},
+>> +       {3, 8},
+>> +       {0, 0},
+>> +};
+>> +
+>> +static const struct clk_div_table dtable_1_32[] = {
+>> +       {0, 1},
+>> +       {1, 2},
+>> +       {2, 4},
+>> +       {3, 8},
+>> +       {4, 32},
+>> +       {0, 0},
+>> +};
+>> +
+>> +/* Mux clock names tables. */
+>> +static const char * const sel_sdhi[] = { ".pll2_div2", ".pll6", ".pll2_div6" };
+>> +static const char * const sel_pll4[] = { ".osc_div1000", ".pll4" };
+>> +
+>> +/* Mux clock indexes tables. */
+> 
+> indices
+> 
+>> +static const u32 mtable_sd[] = { 0, 2, 3 };
+>> +static const u32 mtable_pll4[] = { 0, 1 };
+>> +
+>> +static const struct cpg_core_clk r9a08g045_core_clks[] __initconst = {
+>> +       /* External Clock Inputs */
+>> +       DEF_INPUT("extal", CLK_EXTAL),
+>> +
+>> +       /* Internal Core Clocks */
+>> +       DEF_FIXED(".osc", R9A08G045_OSCCLK, CLK_EXTAL, 1, 1),
+> 
+> "OSC", as this is not an internal core clock.
+
+ok, I wasn't aware of this convention.
+
+> 
+>> +       DEF_FIXED(".osc2", R9A08G045_OSCCLK2, CLK_EXTAL, 1, 3),
+> 
+> "OSC2"
+
+ok.
+
+> 
+>> +       DEF_FIXED(".osc_div1000", CLK_OSC_DIV1000, CLK_EXTAL, 1, 1000),
+>> +       DEF_G3S_SAMPLL(".pll1", CLK_PLL1, CLK_EXTAL, G3S_PLL146_CONF(0x4, 0x8)),
+>> +       DEF_FIXED(".pll2", CLK_PLL2, CLK_EXTAL, 200, 3),
+>> +       DEF_FIXED(".pll3", CLK_PLL3, CLK_EXTAL, 200, 3),
+>> +       DEF_FIXED(".pll4", CLK_PLL4, CLK_EXTAL, 100, 3),
+>> +       DEF_FIXED(".pll6", CLK_PLL6, CLK_EXTAL, 125, 6),
+>> +       DEF_FIXED(".pll2_div2", CLK_PLL2_DIV2, CLK_PLL2, 1, 2),
+>> +       DEF_FIXED(".pll2_div2_8", CLK_PLL2_DIV2_8, CLK_PLL2_DIV2, 1, 8),
+>> +       DEF_FIXED(".pll2_div6", CLK_PLL2_DIV6, CLK_PLL2, 1, 6),
+>> +       DEF_FIXED(".pll3_div2", CLK_PLL3_DIV2, CLK_PLL3, 1, 2),
+>> +       DEF_FIXED(".pll3_div2_2", CLK_PLL3_DIV2_2, CLK_PLL3_DIV2, 1, 2),
+>> +       DEF_FIXED(".pll3_div2_4", CLK_PLL3_DIV2_4, CLK_PLL3_DIV2, 1, 4),
+>> +       DEF_FIXED(".pll3_div2_8", CLK_PLL3_DIV2_8, CLK_PLL3_DIV2, 1, 8),
+>> +       DEF_FIXED(".pll3_div6", CLK_PLL3_DIV6, CLK_PLL3, 1, 6),
+>> +       DEF_FIXED(".pll6_div2", CLK_PLL6_DIV2, CLK_PLL6, 1, 2),
+>> +       DEF_SD_MUX(".sel_sd0", CLK_SEL_SDHI0, G3S_SEL_SDHI0, G3S_SEL_SDHI0_STS, sel_sdhi,
+>> +                  mtable_sd, 0, NULL),
+>> +       DEF_SD_MUX(".sel_pll4", CLK_SEL_PLL4, G3S_SEL_PLL4, G3S_SEL_PLL4_STS, sel_pll4,
+>> +                  mtable_pll4, CLK_SET_PARENT_GATE, NULL),
+>> +
+>> +       /* Core output clk */
+>> +       DEF_G3S_DIV("I", R9A08G045_CLK_I, CLK_PLL1, DIVPL1A, G3S_DIVPL1A_STS, dtable_1_8,
+>> +                   0, 0, NULL),
+>> +       DEF_G3S_DIV("P0", R9A08G045_CLK_P0, CLK_PLL2_DIV2_8, G3S_DIVPL2B, G3S_DIVPL2B_STS,
+>> +                   dtable_1_32, 0, 0, NULL),
+>> +       DEF_G3S_DIV("SD0", R9A08G045_CLK_SD0, CLK_SEL_SDHI0, G3S_DIV_SDHI0, G3S_DIV_SDHI0_STS,
+>> +                   dtable_1_2, 800000000UL, CLK_SET_RATE_PARENT, DIV_NOTIF),
+>> +       DEF_FIXED("SD0_DIV4", CLK_SD0_DIV4, R9A08G045_CLK_SD0, 1, 4),
+> 
+> ".sd0_div4", as this is not a public core clock.
+
+ok.
+
+> 
+>> +       DEF_FIXED("M0", R9A08G045_CLK_M0, CLK_PLL3_DIV2_4, 1, 1),
+>> +       DEF_G3S_DIV("P1", R9A08G045_CLK_P1, CLK_PLL3_DIV2_4, DIVPL3A, G3S_DIVPL3A_STS,
+>> +                   dtable_1_32, 0, 0, NULL),
+>> +       DEF_FIXED("P1_DIV2", CLK_P1_DIV2, R9A08G045_CLK_P1, 1, 2),
+>> +       DEF_G3S_DIV("P2", R9A08G045_CLK_P2, CLK_PLL3_DIV2_8, DIVPL3B, G3S_DIVPL3B_STS,
+>> +                   dtable_1_32, 0, 0, NULL),
+>> +       DEF_G3S_DIV("P3", R9A08G045_CLK_P3, CLK_PLL3_DIV2_4, DIVPL3C, G3S_DIVPL3C_STS,
+>> +                   dtable_1_32, 0, 0, NULL),
+>> +       DEF_FIXED("P3_DIV2", CLK_P3_DIV2, R9A08G045_CLK_P3, 1, 2),
+>> +       DEF_FIXED("S0", R9A08G045_CLK_S0, CLK_SEL_PLL4, 1, 2),
+>> +       DEF_FIXED("S0_DIV2", CLK_S0_DIV2, R9A08G045_CLK_S0, 1, 2),
+>> +};
+> 
+> Gr{oetje,eeting}s,
+> 
+>                         Geert
+> 
