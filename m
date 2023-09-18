@@ -2,129 +2,144 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2CDFCD13D2
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 10:31:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0D2CC46CA1
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 11:04:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237571AbjIRKbW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Sep 2023 06:31:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51544 "EHLO
+        id S239696AbjIRLDn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Sep 2023 07:03:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59622 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241354AbjIRKbO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 06:31:14 -0400
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64F33D8;
-        Mon, 18 Sep 2023 03:31:05 -0700 (PDT)
-Received: by mail-pf1-x433.google.com with SMTP id d2e1a72fcca58-68fb6fd2836so4017759b3a.0;
-        Mon, 18 Sep 2023 03:31:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695033065; x=1695637865; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=QLJZOub4/BAt+7IdwydIQJYY2CoSBI6D30tEHY6X3RQ=;
-        b=h+eH0bWoHTaoVPU6K6DN3xfxwyjiDF/Ea/f/NoeGPSlCf77uz4OF7CmxA0C/Np9D/m
-         tGTu9zQjinJN7BjHrEm+BxY8zPhG9hKPJc621cWKWhua/JA2kPM4Qr+zMGr4T3Dbbjnp
-         LA+Cljb8nqKPiKVvrP2tWMMjRv9dZXmqrNU12f3flRuMvPnrb0s/2rLHoVHJ5BvFBaq0
-         FgbEjjFr37fbwteR42vkK05S/SkThHFJlpyWSw3qJ8TZsu8wuTaSW1q1nXQoCjFCsFN+
-         5KsbZ7nrlOAlp3aZe3w0I6YOZqo75em+jtb6zwC/WHRfzleKs3y5tDr9XJNCcPZBcUuf
-         Pseg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695033065; x=1695637865;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=QLJZOub4/BAt+7IdwydIQJYY2CoSBI6D30tEHY6X3RQ=;
-        b=pENKH6qmPDviYdDgKOZdwSZDqsZzZB6ViPhv9ukQnyXpHw2Bc2y8kKTOifmHyCZDvf
-         lWgedWMHk13p6oLdjq/acDb6ZpYfIR7rPHFuEIaPCbLkUvMMtxSRrScEeZ5hbujL6UP1
-         KColWCViP4+S/hLzw4TDRMbhpu5W8a5PMt/Z7oX1Uid9JIC7n7H69nfk3x0TgRxLqG3v
-         Mo15AqcLZV4iHds8mqx7Qd8K+3ttnjjcc9SzD1plyjdHtM0EqUud212XdSPyAegeV7l5
-         ed9dS7P4juMwGPOYwwIGP6UR2MdbJvzoW2sNAP8M5/1+fOvh+fnowqy8O52Di7uzGrY6
-         cEgw==
-X-Gm-Message-State: AOJu0Yxn86ALdMhOPXLdSjZrV+sCUppPjnb4JCGvjWN9veTK+UqEm/pn
-        Yx7oY35XJry5g5fU3YrCB1M=
-X-Google-Smtp-Source: AGHT+IF21bVzTe/9AlnQIU7ozlm9pww9Vx+yiNPLNR4tU5eNpV9IcfnWExwi4b0Opd2KQOyzz5CfkA==
-X-Received: by 2002:a05:6a00:3994:b0:690:2ecd:a593 with SMTP id fi20-20020a056a00399400b006902ecda593mr10089185pfb.26.1695033064750;
-        Mon, 18 Sep 2023 03:31:04 -0700 (PDT)
-Received: from localhost.localdomain (2001-b400-e2a7-a325-4595-6688-c34c-2ae9.emome-ip6.hinet.net. [2001:b400:e2a7:a325:4595:6688:c34c:2ae9])
-        by smtp.gmail.com with ESMTPSA id o17-20020a639211000000b0056c3a4a3ca5sm6616292pgd.36.2023.09.18.03.31.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Sep 2023 03:31:04 -0700 (PDT)
-From:   Victor Shih <victorshihgli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, kangzhen.lou@dell.com,
-        kai.heng.feng@canonical.com, Victor Shih <victorshihgli@gmail.com>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V1] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer timeout of AER
-Date:   Mon, 18 Sep 2023 18:30:55 +0800
-Message-Id: <20230918103055.5471-1-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S233284AbjIRLDN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 07:03:13 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECC0B94;
+        Mon, 18 Sep 2023 04:03:07 -0700 (PDT)
+Received: from [192.168.0.125] (unknown [82.76.24.202])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: ehristev)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id B0D066607095;
+        Mon, 18 Sep 2023 12:03:05 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1695034986;
+        bh=v0kfhus51k2k8c4hQ+BgUzlZKVruHcTbgFeT81afp2Q=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=EQHULyuHA0LylSZe+l9E5vhmHEV0eiOEBOwd4RvOqtSXhf+ypG9pX2jt7zV2XH6i2
+         H+3e5lEl4QfL+a6U+V/betDz/X/1da2OnMDdGFdOQmIoPAY8Ma7UTWF9K+ZbNUtDDI
+         9JwG02rbV4zYWQlCMTNbG6xytC5i2bTH+/Uw75N/eh4wL67Js3npy+yJy8fwZ6QB2q
+         NXT8/HAPBlTsVc+kUMBToqCoYqzH5ih2BpRujU8Yn9g52o5L3ulOYw3A/b80rcQheo
+         fLCKsIeQb2ZoG9aMoMPTtzhXoGmDxQpLqQ788qyforyhSRDyovVULw0Dd5GJBcxrKC
+         qOmq0G/1guQ/g==
+Message-ID: <55e85f31-fab6-07f9-0ffe-8ebcd2a56489@collabora.com>
+Date:   Mon, 18 Sep 2023 14:03:02 +0300
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH] MAINTAINERS: mmc: take over as maintainer of MCI & SDHCI
+ MICROCHIP DRIVERS
+Content-Language: en-US
+To:     Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        aubin.constans@microchip.com, Ludovic.Desroches@microchip.com
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Hari.PrasathGE@microchip.com, alexandre.belloni@bootlin.com,
+        claudiu.beznea@tuxon.dev
+References: <20230911153246.137148-1-aubin.constans@microchip.com>
+ <fd02d42e-7b24-4f50-849e-b0c752d1f011@microchip.com>
+ <CAPDyKFpYzgwPvrWntgDQCZo97OZr2qd2FaVXpi7OnNc7i_gYtw@mail.gmail.com>
+ <c4f43487-da93-4e67-0389-e31dde550d40@microchip.com>
+From:   Eugen Hristev <eugen.hristev@collabora.com>
+In-Reply-To: <c4f43487-da93-4e67-0389-e31dde550d40@microchip.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+On 9/14/23 20:01, Nicolas Ferre wrote:
+> On 14/09/2023 at 16:21, Ulf Hansson wrote:
+>> On Tue, 12 Sept 2023 at 07:21, <Ludovic.Desroches@microchip.com> wrote:
+>>>
+>>> On 9/11/23 17:32, Aubin Constans wrote:
+>>>> On the one hand Eugen has taken responsibilities outside Microchip,
+>>>> on the other hand I have some experience with the Microchip SDMMC
+>>>> SDHCI controller.
+>>>> Change Eugen as reviewer and take over maintainership of the SDHCI
+>>>> MICROCHIP DRIVER.
+>>>> Also, take over maintainership of its predecessor, that is the MCI
+>>>> MICROCHIP DRIVER.
+>>>>
+>>>> Cc: Eugen Hristev <eugen.hristev@collabora.com>
+>>>> Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
+>>>> Signed-off-by: Aubin Constans <aubin.constans@microchip.com>
+>>>
+>>> For atmel-mci:
+>>> Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
+>>
+>> Sounds like the patch could be split up, as there is an agreement on
+>> the atmel-mci part.
+>>
+>> Aubin, can you make a separate patch for the atmel-mci part and add
+>> Ludovic's ack to it?
+>>
+>> In regards to the sdhci driver, I suggest you just add yourself as a
+>> maintainer too, along with Eugen.
+> 
+> For adding more background to this patch, in fact it was created in 
+> coordination with Eugen. We can wait a bit for him to catch-up with 
+> emails, no hurry there as Aubin won't have access to emails for a few 
+> days anyway.
+> 
+> If it has an interest you can add my:
+> Acked-by: Nicolas Ferre <nicolas.ferre@microchip.com>
+> But definitively, no problem to delay this change.
 
-Due to a flaw in the hardware design, the GL975x replay timer frequently
-times out when ASPM is enabled. As a result, the system will resume
-immediately when it enters suspend. Therefore, the replay timer
-timeout must be masked.
+Hi,
 
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
----
- drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+I am fine with this change, as Nicolas has already discussed this with me.
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index d83261e857a5..d8a991b349a8 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -28,6 +28,9 @@
- #define PCI_GLI_9750_PM_CTRL	0xFC
- #define   PCI_GLI_9750_PM_STATE	  GENMASK(1, 0)
- 
-+#define PCI_GLI_9750_CORRERR_MASK				0x214
-+#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT	  BIT(12)
-+
- #define SDHCI_GLI_9750_CFG2          0x848
- #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
- #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
-@@ -152,6 +155,9 @@
- #define PCI_GLI_9755_PM_CTRL     0xFC
- #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
- 
-+#define PCI_GLI_9755_CORRERR_MASK				0x214
-+#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT	  BIT(12)
-+
- #define SDHCI_GLI_9767_GM_BURST_SIZE			0x510
- #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET	  BIT(8)
- 
-@@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_host *host)
- 	value &= ~PCI_GLI_9750_PM_STATE;
- 	pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
- 
-+	/* mask the replay timer timeout of AER */
-+	pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &value);
-+	value |= PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-+	pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, value);
-+
- 	gl9750_wt_off(host);
- }
- 
-@@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
- 	value &= ~PCI_GLI_9755_PM_STATE;
- 	pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
- 
-+	/* mask the replay timer timeout of AER */
-+	pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &value);
-+	value |= PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-+	pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, value);
-+
- 	gl9755_wt_off(pdev);
- }
- 
--- 
-2.25.1
+Acked-by: Eugen Hristev <eugen.hristev@collabora.com>
+
+P.S. I have a mailmap entry for the new e-mail so the change is not 
+compulsory, you can change as you see fit.
+
+Eugen
+
+> 
+> Thanks for your understanding. Best regards,
+>    Nicolas
+> 
+>>>> ---
+>>>>    MAINTAINERS | 5 +++--
+>>>>    1 file changed, 3 insertions(+), 2 deletions(-)
+>>>>
+>>>> diff --git a/MAINTAINERS b/MAINTAINERS
+>>>> index 2833e2da63e0..52beaf4f7fbb 100644
+>>>> --- a/MAINTAINERS
+>>>> +++ b/MAINTAINERS
+>>>> @@ -14022,7 +14022,7 @@ F:    
+>>>> Documentation/devicetree/bindings/iio/adc/microchip,mcp3911.yaml
+>>>>    F:  drivers/iio/adc/mcp3911.c
+>>>>
+>>>>    MICROCHIP MMC/SD/SDIO MCI DRIVER
+>>>> -M:   Ludovic Desroches <ludovic.desroches@microchip.com>
+>>>> +M:   Aubin Constans <aubin.constans@microchip.com>
+>>>>    S:  Maintained
+>>>>    F:  drivers/mmc/host/atmel-mci.c
+>>>>
+>>>> @@ -19235,7 +19235,8 @@ F:    
+>>>> Documentation/devicetree/bindings/mmc/sdhci-common.yaml
+>>>>    F:  drivers/mmc/host/sdhci*
+>>>>
+>>>>    SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) MICROCHIP DRIVER
+>>>> -M:   Eugen Hristev <eugen.hristev@microchip.com>
+>>>> +M:   Aubin Constans <aubin.constans@microchip.com>
+>>>> +R:   Eugen Hristev <eugen.hristev@collabora.com>
+>>>>    L:  linux-mmc@vger.kernel.org
+>>>>    S:  Supported
+>>>>    F:  drivers/mmc/host/sdhci-of-at91.c
+>>>
+> 
 
