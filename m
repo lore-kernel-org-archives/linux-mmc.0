@@ -2,230 +2,248 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A082CD13D2
-	for <linux-mmc@archiver.kernel.org>; Sun, 17 Sep 2023 20:12:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D35FCD37B0
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 06:03:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240537AbjIQULp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 17 Sep 2023 16:11:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34526 "EHLO
+        id S239837AbjIRGCu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Sep 2023 02:02:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34908 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240590AbjIQULd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Sep 2023 16:11:33 -0400
-Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 567B3F1;
-        Sun, 17 Sep 2023 13:11:27 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1694981485; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=XcsXwrMZJ4WmkGraLw8tnCxf93iR/28w9SR7c7+HCSiww3BEdBHCUP3YOLbtvM9Tib
-    IECw3WuoXOiu0Da/PESnntJmYoIDWA/486YGzzbDDDYsyaj8Vg/gyFLopaPw0Lu0XhBZ
-    p46NBsyQJaEXrDiJsCUKDal7z/eKDlmoQTxvXp28xjWKcitYcVHg+5T8CrgGHtadXFAJ
-    xWS/SvFNrS+SY8YAgGHKvghLZxHh47JdU5thxAWzhT8RNf0/NWDjBS/X8eSHe/rTJPlo
-    aArkMzjRP1vmmxbAG1To1c+lQiQLVcaVEQ3mfAU6Sp5plhS0wOlcF5nRpeMsyeEvsNDl
-    bwtw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1694981485;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=zGxppwIRX0Tl3MeLWQbRI04qLkWaOFo5HeDhjvTY4G0=;
-    b=Ef0il6xRoac5wEKvL9zmOYkxhdTxsKQxlUA0odQNLvrDgFSRcocAHvMbbQABCLHJs2
-    AIrENww6hzKbF5a2t+lEIUBuqrWSzIHBcvG0CmvYHIst7cFFkLddbB3E2LAXyV7HX6Si
-    OZIVACXZFsce8I97+aMDt/3fYk5QcmXvcy0k+9cIeEn1T4IsZDZw0QvE08HjlNnKkbr2
-    eeZlH0HUGRLGLVXkS1hbbBFg0cNhqAwRtsleq8UdEbgQpmtu8lgB4f/xCImZRYOiujPE
-    PtkeG97lkd+ua1ar+0lOGBOVcv2YoPN01LRvra5U8lUES9P2iM2pLJzCCGtsL/2es9Zd
-    He3g==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo01
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1694981484;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=zGxppwIRX0Tl3MeLWQbRI04qLkWaOFo5HeDhjvTY4G0=;
-    b=OSnuotJG+MwgZLx8mfpTzwjApvKCScN0Nv4W7AJGdKKCieOo51os4/8XNZY70jR6Pd
-    dldHWl+ybZP8RgVdBGRw4X/11DYdWftSIi5R8y3P8ram3+CR8qklFjyvrwC6gZ9Ttcjr
-    P3zepjXk9GhZh+XQNbFzhCQd8QtaMuQmLzW1TX6+yV+7JurRBfJigDPLU34Yb5SqNaM1
-    jkSXbvbZGPOlunKMbcy+Jp9kJ/NlBG/daKa06zCYpmW+JhmeoQRTSEAa/0wTiZj+CFCy
-    b1bsbluFVNzbu4UyrGl6wB6D9ZMXeyO+PaRgIhTytEQd4+PGT7h7RTkOuGS0wIoiI+cp
-    JnEQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1694981484;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=zGxppwIRX0Tl3MeLWQbRI04qLkWaOFo5HeDhjvTY4G0=;
-    b=42b5DEePtqlChrZhp9Op9nz7V4ylqCq3akygV8jbyjuNu14kvdlfFHQp8kNnMNcach
-    VsvjSQLemRN5ottbkbBA==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSeBwhhSxarlUcu05JyMI1zXvWpofGAbhC22VTSyBo5Bpg9wgYEqSm4NXFaofpx464Ao="
-Received: from p200300c58703581b312819b392712fb6.dip0.t-ipconnect.de
-    by smtp.strato.de (RZmta 49.8.2 AUTH)
-    with ESMTPSA id V04024z8HKBOI6g
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-        (Client did not present a certificate);
-    Sun, 17 Sep 2023 22:11:24 +0200 (CEST)
-Message-ID: <c66810ae52446db41fd187ee4be24d04d40c1abb.camel@iokpp.de>
-Subject: Re: [PATCH v2] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for
- Micron eMMC Q2J54A
-From:   Bean Huo <beanhuo@iokpp.de>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     adrian.hunter@intel.com, beanhuo@micron.com,
-        jakub.kwapisz@toradex.com, rafael.beims@toradex.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        stable@vger.kernel.org
-Date:   Sun, 17 Sep 2023 22:11:24 +0200
-In-Reply-To: <CAPDyKFruYooG4yQ4yqrwEcrvy4xe6hYByF2Q57eQ1g0tiUtcug@mail.gmail.com>
-References: <20230914202749.470100-1-beanhuo@iokpp.de>
-         <CAPDyKFruYooG4yQ4yqrwEcrvy4xe6hYByF2Q57eQ1g0tiUtcug@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.4-0ubuntu2 
+        with ESMTP id S239720AbjIRGCW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 02:02:22 -0400
+Received: from mail-wr1-x42e.google.com (mail-wr1-x42e.google.com [IPv6:2a00:1450:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0121F101
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:02:11 -0700 (PDT)
+Received: by mail-wr1-x42e.google.com with SMTP id ffacd0b85a97d-3215f19a13aso23558f8f.3
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:02:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1695016930; x=1695621730; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=utARk3pA80ZpdJiXILdi626DttxX2nbKMhwhhWazB0w=;
+        b=YMZtx6ZJI0DwEErCSi5w+S3KqPxHMuNG1qG1240fRe2pbUF0QXkKiQmWe2zTWmIQ9Z
+         9ASsS8kZ8134NcRR6unbuxYGTj3fl5JREar+a6wHNtdsWNPnXvoEjkm8T5M0uWKOu6gT
+         m21gZa+MzvdTa39dPBreE+h3E1GXhVtLSKm7cjPsjV5hn6YkrL1gsQuyg86oa7Av3/ml
+         /DNHF0RRdGkrYJniB3ljeCLVak1pGaF68AAmcl0ZEpIoYrzgOa4/Aw1XnpVGtiG4ZXXT
+         BcKuOby6JEJ6us2fDLgHXyEEPUuTO97Rok/xXvAeB379lP4nFItfYR/NJrLI6mZp6IiM
+         1MKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695016930; x=1695621730;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=utARk3pA80ZpdJiXILdi626DttxX2nbKMhwhhWazB0w=;
+        b=NYaaOm75oSVHVlhs5m36s73TkBxleJYbK24P2m2JDS+p8s+Vgwx7XOu+X/AIzC0Tq1
+         wqFKudtYLhRzKmd+zs07rcSysw0OhcSTiPXaHmjxUD+SrSMKu4jgwnYdG035B+8FwaXk
+         37XfULEYwzYPFALBEls7doTQArs+BB0dF4+vw2U9RIKjxpqXJVL8XGbiasVT5d8Fb//K
+         5uyY8v8vHewBo140kUvlcsSIRJ78B82UiFQzvOsMXDX+tXDFjRIOub0eGfiE7VStdDRI
+         47wSea8p+9yM7+gFpG0p5h8NdvKi7Z2amenpxhXBdhIcd6V0GSp0MJ494PAfrKwRc8Ga
+         ak/Q==
+X-Gm-Message-State: AOJu0Yzlu/Dh6aGD+t9tcVd93mGXygsF9XZ7acKrfXFbEsDTBGO33h9z
+        3srrazrnXL/8jEx6ImAb75SJeQ==
+X-Google-Smtp-Source: AGHT+IHp0qFS6xGsK25AktAjmIe39Vn37L/gbzfBpt+VNyZTYa3REIePYUyoEE2pqDRgvpG5ShpzkQ==
+X-Received: by 2002:a05:6000:1a44:b0:317:3d6c:5b27 with SMTP id t4-20020a0560001a4400b003173d6c5b27mr6781745wry.46.1695016930169;
+        Sun, 17 Sep 2023 23:02:10 -0700 (PDT)
+Received: from [192.168.32.2] ([82.78.167.145])
+        by smtp.gmail.com with ESMTPSA id j5-20020a5d6045000000b0032008f99216sm4743995wrt.96.2023.09.17.23.02.07
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 17 Sep 2023 23:02:09 -0700 (PDT)
+Message-ID: <458ac1fb-575b-6ebd-7da0-a8d3abd3d5f8@tuxon.dev>
+Date:   Mon, 18 Sep 2023 09:02:07 +0300
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH 33/37] arm64: dts: renesas: rzg3l-smarc-som: add initial
+ support for RZ/G3S SMARC Carrier-II SoM
+Content-Language: en-US
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-34-claudiu.beznea.uj@bp.renesas.com>
+ <CAMuHMdUfwtpe5qLonZ0CZcaRw1j5x7xLLXJpMqpWLX5AzK3xmw@mail.gmail.com>
+From:   claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <CAMuHMdUfwtpe5qLonZ0CZcaRw1j5x7xLLXJpMqpWLX5AzK3xmw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi, Geert,
 
-Hi Ulf,
+On 15.09.2023 17:28, Geert Uytterhoeven wrote:
+> Hi Claudiu,
+> 
+> Thanks for your patch!
+> 
+> On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+>> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>>
+>> Add initial support for RZ/G3S SMARC Carrier-II SoM. SoM contains the following
+>> devices:
+>> - RZ/G3S microcontroller: Renesas R9A08G045S33GBG
+>> - 9-channel PMIC: Renesas RAA215300
+>> - Clock Generator: Renesas 5L35023B
+>> - 128M QSPI Flash: Renesas AT25QL128A
+>> - 8G LPDDR4 SDRAM: Micron MT53D512M16D1DS-046
+> 
+> That's an 8 Gib part, so 1 GiB?
+> 
+>> - 64GB eMMC Flash: Micron MTFC64GBCAQTC
+>> - 2x Gigabit Ethernet Transceiver: Microchip KSZ9131RNX
+>> - 5x Current Monitors: Renesas ISL28025FR12Z
+>>
+>> The following interfaces are available on SoM board:
+>> - 2 uSD interfaces
+>> - 12-pin, 1.0mm pitch connector to the RZ/G3S ADC IO
+>> - 4-pin, 1.0mm pitch connector to the RZ/G3S I3C IO
+>> - JTAG connector
+> 
+> Please drop the description of parts you are not adding to the DTS yet.
+> 
+>> At the moment the 24MHz output of 5L35023B, memory SD ch0 (with all its
+>> bits) were described in device tree.
+>>
+>> SD channel 0 of RZ/G3S is connected to an uSD card interface
+>> and an eMMC. The selection b/w them is done though a hardware switch.
+>> The DT will select b/w uSD and eMMC though SW_SD0_DEV_SEL build flag.
+>>
+>> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> 
+>> --- /dev/null
+>> +++ b/arch/arm64/boot/dts/renesas/rzg3s-smarc-som.dtsi
+>> @@ -0,0 +1,147 @@
+>> +// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+>> +/*
+>> + * Device Tree Source for the R9A08G045S33 SMARC Carrier-II's SoM board.
+>> + *
+>> + * Copyright (C) 2023 Renesas Electronics Corp.
+>> + */
+>> +
+>> +#include <dt-bindings/gpio/gpio.h>
+>> +#include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
+>> +
+>> +/*
+>> + * Signals of SW_CONFIG switches:
+>> + * @SW_SD0_DEV_SEL:
+>> + *     0 - SD0 is connected to eMMC
+>> + *     1 - SD0 is connected to uSD0 card
+>> + */
+>> +#define SW_SD0_DEV_SEL 1
+>> +
+>> +/ {
+>> +       aliases {
+>> +               mmc0 = &sdhi0;
+>> +       };
+>> +
+>> +       chosen {
+>> +               bootargs = "ignore_loglevel";
+>> +               stdout-path = "serial0:115200n8";
+>> +       };
+>> +
+>> +       memory@48000000 {
+>> +               device-type = "memory";
+>> +               /* First 128MB is reserved for secure area. */
+>> +               reg = <0x0 0x48000000 0x0 0x38000000>;
+>> +       };
+>> +
+>> +       reg_3p3v: regulator0 {
+>> +               compatible = "regulator-fixed";
+>> +               regulator-name = "fixed-3.3V";
+>> +               regulator-min-microvolt = <3300000>;
+>> +               regulator-max-microvolt = <3300000>;
+>> +               regulator-boot-on;
+>> +               regulator-always-on;
+>> +       };
+>> +
+>> +#if SW_SD0_DEV_SEL
+>> +       vccq_sdhi0: regulator1 {
+>> +               compatible = "regulator-gpio";
+>> +               regulator-name = "SDHI0 VccQ";
+>> +               regulator-min-microvolt = <1800000>;
+>> +               regulator-max-microvolt = <3300000>;
+>> +               gpios = <&pinctrl RZG2L_GPIO(2, 2) GPIO_ACTIVE_HIGH>;
+>> +               gpios-states = <1>;
+>> +               states = <3300000 1>, <1800000 0>;
+>> +       };
+>> +#else
+>> +       reg_1p8v: regulator1 {
+>> +               compatible = "regulator-fixed";
+>> +               regulator-name = "fixed-1.8V";
+>> +               regulator-min-microvolt = <1800000>;
+>> +               regulator-max-microvolt = <1800000>;
+>> +               regulator-boot-on;
+>> +               regulator-always-on;
+>> +       };
+>> +#endif
+>> +};
+>> +
+>> +&extal_clk {
+>> +       clock-frequency = <24000000>;
+>> +};
+>> +
+>> +#if SW_SD0_DEV_SEL
+>> +/* SD0 slot */
+>> +&sdhi0 {
+>> +       pinctrl-0 = <&sdhi0_pins>;
+>> +       pinctrl-1 = <&sdhi0_uhs_pins>;
+>> +       pinctrl-names = "default", "state_uhs";
+>> +       vmmc-supply = <&reg_3p3v>;
+>> +       vqmmc-supply = <&vccq_sdhi0>;
+>> +       bus-width = <4>;
+>> +       sd-uhs-sdr50;
+>> +       sd-uhs-sdr104;
+>> +       max-frequency = <125000000>;
+>> +       status = "okay";
+>> +};
+>> +#else
+>> +/* eMMC */
+>> +&sdhi0 {
+>> +       pinctrl-0 = <&sdhi0_emmc_pins>;
+>> +       pinctrl-1 = <&sdhi0_emmc_pins>;
+>> +       pinctrl-names = "default", "state_uhs";
+>> +       vmmc-supply = <&reg_3p3v>;
+>> +       vqmmc-supply = <&reg_1p8v>;
+>> +       bus-width = <8>;
+>> +       mmc-hs200-1_8v;
+>> +       non-removable;
+>> +       fixed-emmc-driver-type = <1>;
+>> +       max-frequency = <125000000>;
+>> +       status = "okay";
+>> +};
+>> +#endif
+>> +
+>> +&pinctrl {
+>> +       sd0-pwr-en-hog {
+>> +               gpio-hog;
+>> +               gpios = <RZG2L_GPIO(2, 1) GPIO_ACTIVE_HIGH>;
+> 
+> According to the schematics, P2_1 controls power to the uSD slot.
+> Hence shouldn't reg_3p3v above be modelled using regulator-gpio,
+> with enable-gpios pointing to P2_1?
 
-Thanks for your comment, much appreciated!
+That should work. I'll check it, thanks!
 
-
-On Fri, 2023-09-15 at 00:09 +0200, Ulf Hansson wrote:
-> On Thu, 14 Sept 2023 at 22:28, Bean Huo <beanhuo@iokpp.de> wrote:
-> >=20
-> > From: Bean Huo <beanhuo@micron.com>
-> >=20
-> > Micron MTFC4GACAJCN eMMC supports cache but requires that flush
-> > cache
-> > operation be allowed only after a write has occurred. Otherwise,
-> > the
-> > cache flush command or subsequent commands will time out.
->=20
-> For my information, more exactly, how can we trigger this problem?
->=20
-
-This issue may be likely reproduced in this command sequence:
-
-eMMC power-cycle/reset-->...(other operations, but no data write)...-
->cache flush-->...... ->write data, must say, it is not 100%
-reproducable.
-
-> >=20
-> > Signed-off-by: Bean Huo <beanhuo@micron.com>
-> > Co-developed-by: Rafael Beims <rafael.beims@toradex.com>
-> > Tested-by: Rafael Beims <rafael.beims@toradex.com>
-> > Cc: stable@vger.kernel.org
-> > ---
-> > Changelog:
-> >=20
-> > v1--v2:
-> > =C2=A0=C2=A0=C2=A0 1. Add Rafael's test-tag, and Co-developed-by.
-> > =C2=A0=C2=A0=C2=A0 2. Check host->card whether NULL or not in
-> > __mmc_start_request() before asserting host->card->->quirks
-> >=20
-> > ---
-> > =C2=A0drivers/mmc/core/core.c=C2=A0=C2=A0 | 7 +++++++
-> > =C2=A0drivers/mmc/core/mmc.c=C2=A0=C2=A0=C2=A0 | 5 +++++
-> > =C2=A0drivers/mmc/core/quirks.h | 7 ++++---
-> > =C2=A0include/linux/mmc/card.h=C2=A0 | 2 ++
-> > =C2=A04 files changed, 18 insertions(+), 3 deletions(-)
-> >=20
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 3d3e0ca52614..86a669b35b91 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -259,6 +259,13 @@ static void __mmc_start_request(struct
-> > mmc_host *host, struct mmc_request *mrq)
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0 host->cqe_ops->cqe_off(host);
-> >=20
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 host->ops->request(host, mrq=
-);
-> > +
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (host->card && host->card->qui=
-rks &
-> > MMC_QUIRK_BROKEN_CACHE_FLUSH &&
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 !host->ca=
-rd->written_flag) {
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 if (mrq->cmd->opcode =3D=3D MMC_WRITE_MULTIPLE_BLOCK ||
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 mrq->cmd->opcode =3D=3D MMC_WRITE_B=
-LOCK)
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 host->card-=
->written_flag =3D true;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }
->=20
-> I don't quite like that we are adding the above code here - as it's
-> used for *all* requests.
->=20
-> Seems like the flag is better set from the mmc block device driver
-> instead. Somewhere in the path when we serve I/O write requests.
->=20
-
-yes, you are correct, I will update the patch and add this flag set in
-mmc block driver mmc_blk_mq_issue_rq().
-
-> > =C2=A0}
-> >=20
-> > =C2=A0static void mmc_mrq_pr_debug(struct mmc_host *host, struct
-> > mmc_request *mrq,
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index 89cd48fcec79..a2edd065fa1b 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -1929,6 +1929,8 @@ static int mmc_init_card(struct mmc_host
-> > *host, u32 ocr,
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (!oldcard)
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0 host->card =3D card;
-> >=20
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 card->written_flag =3D false;
-> > +
->=20
-> According to your earlier reply, it sounds like the problem isn't
-> really about the card being re-initialized, but rather that we
-> actually need a write request to happen before a flush. No matter
-> what, no?
->=20
-> See more about this below.
->=20
-
-Actually, it matters that the first cache flush command after
-reboot/reset. means that for the first cache flush command, before
-execution, the write data operation should occur,
-After that, there is no problem even if there are no writes before the
-cache is flushed.
-
-
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return 0;
-> >=20
-> > =C2=A0free_card:
-> > @@ -2081,6 +2083,9 @@ static int _mmc_flush_cache(struct mmc_host
-> > *host)
-> > =C2=A0{
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 int err =3D 0;
-> >=20
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (host->card->quirks & MMC_QUIR=
-K_BROKEN_CACHE_FLUSH &&
-> > !host->card->written_flag)
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 return err;
-> > +
->=20
-> Could an option to the above, be to reset the flag here instead.
-> After
-> a successful cache flush has been done.
->=20
->=20
-
-As I explained above, the first cache flush after a power cycle/reset
-is important. We just want to eliminate the first unnecessary cache
-flush.
-We can eliminate all unnecessary cache flushes when the cache is empty.
-But I don't want to change the current logic too much, only want to
-focus on the first unnecessary cache flush, how do you think?
-
-Kind regards,
-Bean
-
+> 
+>> +               output-high;
+>> +               line-name = "sd0_pwr_en";
+>> +       };
+> Gr{oetje,eeting}s,
+> 
+>                         Geert
+> 
