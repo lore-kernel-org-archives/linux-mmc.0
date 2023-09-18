@@ -2,248 +2,331 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D35FCD37B0
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 06:03:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B2F0CD37B0
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 06:10:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239837AbjIRGCu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Sep 2023 02:02:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34908 "EHLO
+        id S229529AbjIRGJq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Sep 2023 02:09:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239720AbjIRGCW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 02:02:22 -0400
-Received: from mail-wr1-x42e.google.com (mail-wr1-x42e.google.com [IPv6:2a00:1450:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0121F101
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:02:11 -0700 (PDT)
-Received: by mail-wr1-x42e.google.com with SMTP id ffacd0b85a97d-3215f19a13aso23558f8f.3
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:02:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1695016930; x=1695621730; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=utARk3pA80ZpdJiXILdi626DttxX2nbKMhwhhWazB0w=;
-        b=YMZtx6ZJI0DwEErCSi5w+S3KqPxHMuNG1qG1240fRe2pbUF0QXkKiQmWe2zTWmIQ9Z
-         9ASsS8kZ8134NcRR6unbuxYGTj3fl5JREar+a6wHNtdsWNPnXvoEjkm8T5M0uWKOu6gT
-         m21gZa+MzvdTa39dPBreE+h3E1GXhVtLSKm7cjPsjV5hn6YkrL1gsQuyg86oa7Av3/ml
-         /DNHF0RRdGkrYJniB3ljeCLVak1pGaF68AAmcl0ZEpIoYrzgOa4/Aw1XnpVGtiG4ZXXT
-         BcKuOby6JEJ6us2fDLgHXyEEPUuTO97Rok/xXvAeB379lP4nFItfYR/NJrLI6mZp6IiM
-         1MKg==
+        with ESMTP id S235633AbjIRGJR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 02:09:17 -0400
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEE7810B
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:09:09 -0700 (PDT)
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com [209.85.210.200])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 0A5033F182
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Sep 2023 06:09:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1695017348;
+        bh=Wgoj75WmltWQ4EurBvfin7gk3XuAaajHdXNdRLJkhGs=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=DZKl4++NMfjTw7cdqTBzNEmDc+CL/JZ6scUDv5g4HgksTwdO+oE0LNPOdQ5sKeSoI
+         qR3DM8U3Hwl4hVarEi/hya+BOUOZ9ai4tzhFQ0cKnOEOmO0/haEDcez7PmX0MV3R4p
+         s33UbVH8faBgnQ2AMvV73Zko/8sqQ4dJ7bMFrmEkgcXnxRgVV5jHElp0RAexc+YFES
+         y49RjmZSfef6pIa0/2/zMTVMZ8/qenowUhqj2bZZ/HhZNCZtCad+KilhC2efNCnCvw
+         IRfxtsPHry8Jea8watRC7ToAAY0sHTDZiH+6glME6wXthxDfzjTsg6wN2UpQVNmQio
+         lAuDoWiv6insA==
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-68faf55989cso4117907b3a.3
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Sep 2023 23:09:07 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695016930; x=1695621730;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=utARk3pA80ZpdJiXILdi626DttxX2nbKMhwhhWazB0w=;
-        b=NYaaOm75oSVHVlhs5m36s73TkBxleJYbK24P2m2JDS+p8s+Vgwx7XOu+X/AIzC0Tq1
-         wqFKudtYLhRzKmd+zs07rcSysw0OhcSTiPXaHmjxUD+SrSMKu4jgwnYdG035B+8FwaXk
-         37XfULEYwzYPFALBEls7doTQArs+BB0dF4+vw2U9RIKjxpqXJVL8XGbiasVT5d8Fb//K
-         5uyY8v8vHewBo140kUvlcsSIRJ78B82UiFQzvOsMXDX+tXDFjRIOub0eGfiE7VStdDRI
-         47wSea8p+9yM7+gFpG0p5h8NdvKi7Z2amenpxhXBdhIcd6V0GSp0MJ494PAfrKwRc8Ga
-         ak/Q==
-X-Gm-Message-State: AOJu0Yzlu/Dh6aGD+t9tcVd93mGXygsF9XZ7acKrfXFbEsDTBGO33h9z
-        3srrazrnXL/8jEx6ImAb75SJeQ==
-X-Google-Smtp-Source: AGHT+IHp0qFS6xGsK25AktAjmIe39Vn37L/gbzfBpt+VNyZTYa3REIePYUyoEE2pqDRgvpG5ShpzkQ==
-X-Received: by 2002:a05:6000:1a44:b0:317:3d6c:5b27 with SMTP id t4-20020a0560001a4400b003173d6c5b27mr6781745wry.46.1695016930169;
-        Sun, 17 Sep 2023 23:02:10 -0700 (PDT)
-Received: from [192.168.32.2] ([82.78.167.145])
-        by smtp.gmail.com with ESMTPSA id j5-20020a5d6045000000b0032008f99216sm4743995wrt.96.2023.09.17.23.02.07
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 17 Sep 2023 23:02:09 -0700 (PDT)
-Message-ID: <458ac1fb-575b-6ebd-7da0-a8d3abd3d5f8@tuxon.dev>
-Date:   Mon, 18 Sep 2023 09:02:07 +0300
+        d=1e100.net; s=20230601; t=1695017346; x=1695622146;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Wgoj75WmltWQ4EurBvfin7gk3XuAaajHdXNdRLJkhGs=;
+        b=pvTBYPyOk2ezThObWT0yLi+bhr0NlTbeGRM2fboWy/21lFEcuKry/FODOchDu6Y/5c
+         w3zos1DtfLB+11ahpTprKV6YpSCe0B3YN4B4sPnx2si5bUiQQA9CgbJ4bWQeoro8lnZ/
+         D3MxfrltbQDTj1UaFUEIdPkf9Wje5HRBsokIS0W3Jw/bC3zW0mn/Wo4W3h05Z0FPWxD4
+         McR9WD2Bz5uVGuAGSKonJcyZiH0QT1PHRMMwkuGDnt9RBlT2c1A0WjOykqu+nBMtG+E/
+         BiD3Ge35I/fISEGFS081b/l0g/P9d3lx24K/dyJ1lpEAa6DC4MZAhFocK8YegYJ0TRB2
+         Gbrg==
+X-Gm-Message-State: AOJu0YwRMbLq6rfc4VOQNP3xW1/hRwoSUDLvcEtDUsWoghNssvsDEU3F
+        cRXPEPIw0yZAXSfXpmlT1fCf3ZTxE0LazwAhqrcNu2bDqE+gU5cUlsvLTd3DaeDhbooJdzTbrYp
+        NowFvjeIvs0vNQuNUb1qtZiEeAUVXFBfuhfgagxSYGN+CFhNnCN8G8+DpyTTwp9La
+X-Received: by 2002:a05:6a00:24ca:b0:68e:2f6e:b4c0 with SMTP id d10-20020a056a0024ca00b0068e2f6eb4c0mr8637915pfv.28.1695017346630;
+        Sun, 17 Sep 2023 23:09:06 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFFgLoywcCrmqHzXC+lJIbQxOSRBEWnuQrri2loJ3K5psBozLhqtomxVvBvctUSEbx4hIR2Y9Jyk7/GYt6NKLQ=
+X-Received: by 2002:a05:6a00:24ca:b0:68e:2f6e:b4c0 with SMTP id
+ d10-20020a056a0024ca00b0068e2f6eb4c0mr8637902pfv.28.1695017346304; Sun, 17
+ Sep 2023 23:09:06 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH 33/37] arm64: dts: renesas: rzg3l-smarc-som: add initial
- support for RZ/G3S SMARC Carrier-II SoM
-Content-Language: en-US
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-34-claudiu.beznea.uj@bp.renesas.com>
- <CAMuHMdUfwtpe5qLonZ0CZcaRw1j5x7xLLXJpMqpWLX5AzK3xmw@mail.gmail.com>
-From:   claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <CAMuHMdUfwtpe5qLonZ0CZcaRw1j5x7xLLXJpMqpWLX5AzK3xmw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <2ce258f371234b1f8a1a470d5488d00e@realtek.com> <CAAd53p4LVL3uuNDCHPxteqM+jYD8E4atVyQvkt-HRhGKBVMoFg@mail.gmail.com>
+ <0c73b27b8b07408da1940421217304a5@realtek.com>
+In-Reply-To: <0c73b27b8b07408da1940421217304a5@realtek.com>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Mon, 18 Sep 2023 14:08:52 +0800
+Message-ID: <CAAd53p7YOFP7G0JxLi3uHu7Xb3p1+d0DyoFjpdWAcK99VxkFBg@mail.gmail.com>
+Subject: Re: [PATCH] misc: rtsx: Fix an error access Page fault
+To:     Ricky WU <ricky_wu@realtek.com>
+Cc:     "arnd@arndb.de" <arnd@arndb.de>,
+        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Geert,
+Hi Ricky,
 
-On 15.09.2023 17:28, Geert Uytterhoeven wrote:
-> Hi Claudiu,
-> 
-> Thanks for your patch!
-> 
-> On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
->> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->>
->> Add initial support for RZ/G3S SMARC Carrier-II SoM. SoM contains the following
->> devices:
->> - RZ/G3S microcontroller: Renesas R9A08G045S33GBG
->> - 9-channel PMIC: Renesas RAA215300
->> - Clock Generator: Renesas 5L35023B
->> - 128M QSPI Flash: Renesas AT25QL128A
->> - 8G LPDDR4 SDRAM: Micron MT53D512M16D1DS-046
-> 
-> That's an 8 Gib part, so 1 GiB?
-> 
->> - 64GB eMMC Flash: Micron MTFC64GBCAQTC
->> - 2x Gigabit Ethernet Transceiver: Microchip KSZ9131RNX
->> - 5x Current Monitors: Renesas ISL28025FR12Z
->>
->> The following interfaces are available on SoM board:
->> - 2 uSD interfaces
->> - 12-pin, 1.0mm pitch connector to the RZ/G3S ADC IO
->> - 4-pin, 1.0mm pitch connector to the RZ/G3S I3C IO
->> - JTAG connector
-> 
-> Please drop the description of parts you are not adding to the DTS yet.
-> 
->> At the moment the 24MHz output of 5L35023B, memory SD ch0 (with all its
->> bits) were described in device tree.
->>
->> SD channel 0 of RZ/G3S is connected to an uSD card interface
->> and an eMMC. The selection b/w them is done though a hardware switch.
->> The DT will select b/w uSD and eMMC though SW_SD0_DEV_SEL build flag.
->>
->> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> 
->> --- /dev/null
->> +++ b/arch/arm64/boot/dts/renesas/rzg3s-smarc-som.dtsi
->> @@ -0,0 +1,147 @@
->> +// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->> +/*
->> + * Device Tree Source for the R9A08G045S33 SMARC Carrier-II's SoM board.
->> + *
->> + * Copyright (C) 2023 Renesas Electronics Corp.
->> + */
->> +
->> +#include <dt-bindings/gpio/gpio.h>
->> +#include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
->> +
->> +/*
->> + * Signals of SW_CONFIG switches:
->> + * @SW_SD0_DEV_SEL:
->> + *     0 - SD0 is connected to eMMC
->> + *     1 - SD0 is connected to uSD0 card
->> + */
->> +#define SW_SD0_DEV_SEL 1
->> +
->> +/ {
->> +       aliases {
->> +               mmc0 = &sdhi0;
->> +       };
->> +
->> +       chosen {
->> +               bootargs = "ignore_loglevel";
->> +               stdout-path = "serial0:115200n8";
->> +       };
->> +
->> +       memory@48000000 {
->> +               device-type = "memory";
->> +               /* First 128MB is reserved for secure area. */
->> +               reg = <0x0 0x48000000 0x0 0x38000000>;
->> +       };
->> +
->> +       reg_3p3v: regulator0 {
->> +               compatible = "regulator-fixed";
->> +               regulator-name = "fixed-3.3V";
->> +               regulator-min-microvolt = <3300000>;
->> +               regulator-max-microvolt = <3300000>;
->> +               regulator-boot-on;
->> +               regulator-always-on;
->> +       };
->> +
->> +#if SW_SD0_DEV_SEL
->> +       vccq_sdhi0: regulator1 {
->> +               compatible = "regulator-gpio";
->> +               regulator-name = "SDHI0 VccQ";
->> +               regulator-min-microvolt = <1800000>;
->> +               regulator-max-microvolt = <3300000>;
->> +               gpios = <&pinctrl RZG2L_GPIO(2, 2) GPIO_ACTIVE_HIGH>;
->> +               gpios-states = <1>;
->> +               states = <3300000 1>, <1800000 0>;
->> +       };
->> +#else
->> +       reg_1p8v: regulator1 {
->> +               compatible = "regulator-fixed";
->> +               regulator-name = "fixed-1.8V";
->> +               regulator-min-microvolt = <1800000>;
->> +               regulator-max-microvolt = <1800000>;
->> +               regulator-boot-on;
->> +               regulator-always-on;
->> +       };
->> +#endif
->> +};
->> +
->> +&extal_clk {
->> +       clock-frequency = <24000000>;
->> +};
->> +
->> +#if SW_SD0_DEV_SEL
->> +/* SD0 slot */
->> +&sdhi0 {
->> +       pinctrl-0 = <&sdhi0_pins>;
->> +       pinctrl-1 = <&sdhi0_uhs_pins>;
->> +       pinctrl-names = "default", "state_uhs";
->> +       vmmc-supply = <&reg_3p3v>;
->> +       vqmmc-supply = <&vccq_sdhi0>;
->> +       bus-width = <4>;
->> +       sd-uhs-sdr50;
->> +       sd-uhs-sdr104;
->> +       max-frequency = <125000000>;
->> +       status = "okay";
->> +};
->> +#else
->> +/* eMMC */
->> +&sdhi0 {
->> +       pinctrl-0 = <&sdhi0_emmc_pins>;
->> +       pinctrl-1 = <&sdhi0_emmc_pins>;
->> +       pinctrl-names = "default", "state_uhs";
->> +       vmmc-supply = <&reg_3p3v>;
->> +       vqmmc-supply = <&reg_1p8v>;
->> +       bus-width = <8>;
->> +       mmc-hs200-1_8v;
->> +       non-removable;
->> +       fixed-emmc-driver-type = <1>;
->> +       max-frequency = <125000000>;
->> +       status = "okay";
->> +};
->> +#endif
->> +
->> +&pinctrl {
->> +       sd0-pwr-en-hog {
->> +               gpio-hog;
->> +               gpios = <RZG2L_GPIO(2, 1) GPIO_ACTIVE_HIGH>;
-> 
-> According to the schematics, P2_1 controls power to the uSD slot.
-> Hence shouldn't reg_3p3v above be modelled using regulator-gpio,
-> with enable-gpios pointing to P2_1?
+On Fri, Sep 8, 2023 at 2:36=E2=80=AFPM Ricky WU <ricky_wu@realtek.com> wrot=
+e:
+>
+> > Hi Ricky,
+> >
+> > On Wed, Sep 6, 2023 at 4:03=E2=80=AFPM Ricky WU <ricky_wu@realtek.com> =
+wrote:
+> > >
+> > > an error occurs on insert SD7.0 card.
+> > > The pci slot of rtsx_pci will Link Down when the SD7.0 card inserted,
+> > > but the rtsx_pci not exit from runtime_idle at that time, then do the
+> > > power_saving function to access the wrong resource
+> >
+> > Is it possible to attach full dmesg? Maybe the issue is coming from PCI=
+ side?
+> >
+> > Kai-Heng
+> >
+>
+> Dmesg as below....
+> -------------------------------------------------------------------------=
+-----------------------------------------
+> [   60.748953] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> [   60.748958] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> [   60.884619] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
+> [   60.884662] pci 0000:01:00.0: reg 0x10: [mem 0xa3b00000-0xa3b00fff]
+> [   60.884767] pci 0000:01:00.0: Upstream bridge's Max Payload Size set t=
+o 128 (was 256, max 256)
+> [   60.884778] pci 0000:01:00.0: Max Payload Size set to 128 (was 128, ma=
+x 128)
+> [   60.884917] pci 0000:01:00.0: supports D1 D2
+> [   60.884921] pci 0000:01:00.0: PME# supported from D1 D2 D3hot D3cold
+> [   60.885537] pci 0000:01:00.0: BAR 0: assigned [mem 0xa3b00000-0xa3b00f=
+ff]
+> [   60.885570] pcieport 0000:00:1c.0: PCI bridge to [bus 01]
+> [   60.885585] pcieport 0000:00:1c.0:   bridge window [io  0x4000-0x4fff]
+> [   60.885598] pcieport 0000:00:1c.0:   bridge window [mem 0xa3b00000-0xa=
+44fffff]
+> [   60.885630] pcieport 0000:00:1c.0:   bridge window [mem 0xa0a00000-0xa=
+13fffff 64bit pref]
+> [   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> [   63.912118] BUG: unable to handle page fault for address: ffffb24d403e=
+5010
+> [   63.912122] #PF: supervisor read access in kernel mode
+> [   63.912125] #PF: error_code(0x0000) - not-present page
+> [   63.912126] PGD 100000067 P4D 100000067 PUD 1001fe067 PMD 100d97067 PT=
+E 0
+> [   63.912131] Oops: 0000 [#1] PREEMPT SMP PTI
+> [   63.912134] CPU: 3 PID: 534 Comm: kworker/3:10 Not tainted 6.4.0 #6
+> [   63.912137] Hardware name: To Be Filled By O.E.M. To Be Filled By O.E.=
+M./H370M Pro4, BIOS P3.40 10/25/2018
+> [   63.912138] Workqueue: pm pm_runtime_work
+> [   63.912144] RIP: 0010:ioread32+0x2e/0x70
+> [   63.912148] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d=
+9 54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
+8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f 15 99 48
+> [   63.912150] RSP: 0018:ffffb24d40a5bd78 EFLAGS: 00010296
+> [   63.912152] RAX: ffffb24d403e5000 RBX: 0000000000000152 RCX: 000000000=
+000007f
+> [   63.912153] RDX: 000000000000ff00 RSI: ffffb24d403e5010 RDI: ffffb24d4=
+03e5010
+> [   63.912155] RBP: ffffb24d40a5bd98 R08: ffffb24d403e5010 R09: 000000000=
+0000000
+> [   63.912156] R10: ffff9074cd95e7f4 R11: 0000000000000003 R12: 000000000=
+000007f
+> [   63.912158] R13: ffff9074e1a68c00 R14: ffff9074e1a68d00 R15: 000000000=
+0009003
+> [   63.912159] FS:  0000000000000000(0000) GS:ffff90752a180000(0000) knlG=
+S:0000000000000000
+> [   63.912161] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [   63.912162] CR2: ffffb24d403e5010 CR3: 0000000152832006 CR4: 000000000=
+03706e0
+> [   63.912164] Call Trace:
+> [   63.912165]  <TASK>
+> [   63.912167]  ? show_regs+0x68/0x70
+> [   63.912171]  ? __die_body+0x20/0x70
+> [   63.912173]  ? __die+0x2b/0x40
+> [   63.912175]  ? page_fault_oops+0x160/0x480
+> [   63.912177]  ? search_bpf_extables+0x63/0x90
+> [   63.912180]  ? ioread32+0x2e/0x70
+> [   63.912183]  ? search_exception_tables+0x5f/0x70
+> [   63.912186]  ? kernelmode_fixup_or_oops+0xa2/0x120
+> [   63.912189]  ? __bad_area_nosemaphore+0x179/0x230
+> [   63.912191]  ? bad_area_nosemaphore+0x16/0x20
+> [   63.912193]  ? do_kern_addr_fault+0x8b/0xa0
+> [   63.912195]  ? exc_page_fault+0xe5/0x180
+> [   63.912198]  ? asm_exc_page_fault+0x27/0x30
+> [   63.912203]  ? ioread32+0x2e/0x70
+> [   63.912206]  ? rtsx_pci_write_register+0x5b/0x90 [rtsx_pci]
+> [   63.912217]  rtsx_set_l1off_sub+0x1c/0x30 [rtsx_pci]
+> [   63.912226]  rts5261_set_l1off_cfg_sub_d0+0x36/0x40 [rtsx_pci]
+> [   63.912234]  rtsx_pci_runtime_idle+0xc7/0x160 [rtsx_pci]
+> [   63.912243]  ? __pfx_pci_pm_runtime_idle+0x10/0x10
+> [   63.912246]  pci_pm_runtime_idle+0x34/0x70
+> [   63.912248]  rpm_idle+0xc4/0x2b0
+> [   63.912251]  pm_runtime_work+0x93/0xc0
+> [   63.912254]  process_one_work+0x21a/0x430
+> [   63.912258]  worker_thread+0x4a/0x3c0
+> [   63.912261]  ? __pfx_worker_thread+0x10/0x10
+> [   63.912263]  kthread+0x106/0x140
+> [   63.912266]  ? __pfx_kthread+0x10/0x10
+> [   63.912268]  ret_from_fork+0x29/0x50
+> [   63.912273]  </TASK>
+> [   63.912274] Modules linked in: nvme nvme_core snd_hda_codec_hdmi snd_s=
+of_pci_intel_cnl snd_sof_intel_hda_common snd_hda_codec_realtek snd_hda_cod=
+ec_generic snd_soc_hdac_hda soundwire_intel ledtrig_audio nls_iso8859_1 sou=
+ndwire_generic_allocation soundwire_cadence snd_sof_intel_hda_mlink snd_sof=
+_intel_hda snd_sof_pci snd_sof_xtensa_dsp snd_sof snd_sof_utils snd_hda_ext=
+_core snd_soc_acpi_intel_match snd_soc_acpi soundwire_bus snd_soc_core snd_=
+compress ac97_bus snd_pcm_dmaengine snd_hda_intel i915 snd_intel_dspcfg snd=
+_intel_sdw_acpi intel_rapl_msr snd_hda_codec intel_rapl_common snd_hda_core=
+ x86_pkg_temp_thermal intel_powerclamp snd_hwdep coretemp snd_pcm kvm_intel=
+ drm_buddy ttm mei_hdcp kvm drm_display_helper snd_seq_midi snd_seq_midi_ev=
+ent cec crct10dif_pclmul ghash_clmulni_intel sha512_ssse3 aesni_intel crypt=
+o_simd rc_core cryptd rapl snd_rawmidi drm_kms_helper binfmt_misc intel_cst=
+ate i2c_algo_bit joydev snd_seq snd_seq_device syscopyarea wmi_bmof snd_tim=
+er sysfillrect input_leds snd ee1004 sysimgblt mei_me soundcore
+> [   63.912324]  mei intel_pch_thermal mac_hid acpi_tad acpi_pad sch_fq_co=
+del msr parport_pc ppdev lp ramoops drm parport reed_solomon efi_pstore ip_=
+tables x_tables autofs4 hid_generic usbhid hid rtsx_pci_sdmmc crc32_pclmul =
+ahci e1000e i2c_i801 i2c_smbus rtsx_pci xhci_pci libahci xhci_pci_renesas v=
+ideo wmi
+> [   63.912346] CR2: ffffb24d403e5010
+> [   63.912348] ---[ end trace 0000000000000000 ]---
+> [   64.067753] RIP: 0010:ioread32+0x2e/0x70
+> [   64.067762] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d=
+9 54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
+8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f 15 99 48
+> [   64.067764] RSP: 0018:ffffb24d40a5bd78 EFLAGS: 00010296
+> [   64.067767] RAX: ffffb24d403e5000 RBX: 0000000000000152 RCX: 000000000=
+000007f
+> [   64.067769] RDX: 000000000000ff00 RSI: ffffb24d403e5010 RDI: ffffb24d4=
+03e5010
+> [   64.067770] RBP: ffffb24d40a5bd98 R08: ffffb24d403e5010 R09: 000000000=
+0000000
+> [   64.067772] R10: ffff9074cd95e7f4 R11: 0000000000000003 R12: 000000000=
+000007f
+> [   64.067773] R13: ffff9074e1a68c00 R14: ffff9074e1a68d00 R15: 000000000=
+0009003
+> [   64.067775] FS:  0000000000000000(0000) GS:ffff90752a180000(0000) knlG=
+S:0000000000000000
+> [   64.067776] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [   64.067778] CR2: ffffb24d403e5010 CR3: 0000000119402003 CR4: 000000000=
+03706e0
+> [   64.067780] note: kworker/3:10[534] exited with irqs disabled
+> -------------------------------------------------------------------------=
+------------------------------------------
+>
 
-That should work. I'll check it, thanks!
+Does the following change work for you?
 
-> 
->> +               output-high;
->> +               line-name = "sd0_pwr_en";
->> +       };
-> Gr{oetje,eeting}s,
-> 
->                         Geert
-> 
+diff --git a/drivers/pci/hotplug/pciehp_ctrl.c
+b/drivers/pci/hotplug/pciehp_ctrl.c
+index dcdbfcf404dd..ef93364a4422 100644
+--- a/drivers/pci/hotplug/pciehp_ctrl.c
++++ b/drivers/pci/hotplug/pciehp_ctrl.c
+@@ -356,6 +356,7 @@ static int pciehp_disable_slot(struct controller
+*ctrl, bool safe_removal)
+        int ret;
+
+        pm_runtime_get_sync(&ctrl->pcie->port->dev);
++       pm_runtime_barrier(&ctrl->pcie->port->dev);
+        ret =3D __pciehp_disable_slot(ctrl, safe_removal);
+        pm_runtime_put(&ctrl->pcie->port->dev);
+
+
+Kai-Heng
+
+>
+> > >
+> > > Fixes: 597568e8df04 ("misc: rtsx: Rework runtime power management
+> > > flow")
+> > > Cc: Kai-Heng Feng <kai.heng.feng@canonical.com>
+> > > Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+> > > ---
+> > >  drivers/misc/cardreader/rtsx_pcr.c | 14 ++++++++------
+> > > drivers/mmc/host/rtsx_pci_sdmmc.c  |  1 +
+> > >  include/linux/rtsx_pci.h           |  1 +
+> > >  3 files changed, 10 insertions(+), 6 deletions(-)
+> > >
+> > > diff --git a/drivers/misc/cardreader/rtsx_pcr.c
+> > > b/drivers/misc/cardreader/rtsx_pcr.c
+> > > index a3f4b52bb159..536a3681fd5e 100644
+> > > --- a/drivers/misc/cardreader/rtsx_pcr.c
+> > > +++ b/drivers/misc/cardreader/rtsx_pcr.c
+> > > @@ -1526,6 +1526,7 @@ static int rtsx_pci_probe(struct pci_dev *pcide=
+v,
+> > >         pcr->host_sg_tbl_addr =3D pcr->rtsx_resv_buf_addr +
+> > HOST_CMDS_BUF_LEN;
+> > >         pcr->card_inserted =3D 0;
+> > >         pcr->card_removed =3D 0;
+> > > +       pcr->is_sd_express =3D false;
+> > >         INIT_DELAYED_WORK(&pcr->carddet_work,
+> > rtsx_pci_card_detect);
+> > >
+> > >         pcr->msi_en =3D msi_en;
+> > > @@ -1735,12 +1736,13 @@ static int rtsx_pci_runtime_idle(struct devic=
+e
+> > > *device)
+> > >
+> > >         pcr->state =3D PDEV_STAT_IDLE;
+> > >
+> > > -       if (pcr->ops->disable_auto_blink)
+> > > -               pcr->ops->disable_auto_blink(pcr);
+> > > -       if (pcr->ops->turn_off_led)
+> > > -               pcr->ops->turn_off_led(pcr);
+> > > -
+> > > -       rtsx_pm_power_saving(pcr);
+> > > +       if (!pcr->is_sd_express) {
+> > > +               if (pcr->ops->disable_auto_blink)
+> > > +                       pcr->ops->disable_auto_blink(pcr);
+> > > +               if (pcr->ops->turn_off_led)
+> > > +                       pcr->ops->turn_off_led(pcr);
+> > > +               rtsx_pm_power_saving(pcr);
+> > > +       }
+> > >
+> > >         mutex_unlock(&pcr->pcr_mutex);
+> > >
+> > > diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > index 87d78432a1e0..80b2f2a31fdc 100644
+> > > --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > @@ -1393,6 +1393,7 @@ static int sdmmc_init_sd_express(struct mmc_hos=
+t
+> > *mmc, struct mmc_ios *ios)
+> > >                 RTS5261_MCU_BUS_SEL_MASK |
+> > RTS5261_MCU_CLOCK_SEL_MASK
+> > >                 | RTS5261_DRIVER_ENABLE_FW,
+> > >                 RTS5261_MCU_CLOCK_SEL_16M |
+> > RTS5261_DRIVER_ENABLE_FW);
+> > > +       pcr->is_sd_express =3D true;
+> > >         host->eject =3D true;
+> > >         return 0;
+> > >  }
+> > > diff --git a/include/linux/rtsx_pci.h b/include/linux/rtsx_pci.h inde=
+x
+> > > 534038d962e4..295e92224fd0 100644
+> > > --- a/include/linux/rtsx_pci.h
+> > > +++ b/include/linux/rtsx_pci.h
+> > > @@ -1262,6 +1262,7 @@ struct rtsx_pcr {
+> > >         u8                      ocp_stat;
+> > >         u8                      ocp_stat2;
+> > >         u8                      rtd3_en;
+> > > +       bool                    is_sd_express;
+> > >  };
+> > >
+> > >  #define PID_524A       0x524A
+> > > --
+> > > 2.25.1
+> > >
+> >
+> > ------Please consider the environment before printing this e-mail.
+>
