@@ -2,68 +2,63 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 687CCCD37B0
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 07:55:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75334CD13D3
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Sep 2023 08:05:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240687AbjIRHyd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Sep 2023 03:54:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45304 "EHLO
+        id S238622AbjIRIEx convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Sep 2023 04:04:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58888 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240675AbjIRHyB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 03:54:01 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE4243A94
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Sep 2023 00:50:40 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id 38308e7fff4ca-2c00b37ad84so10732621fa.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Sep 2023 00:50:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1695023432; x=1695628232; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=3y431fp7zImpDWkvcmWfe4LAHrYOVE+zuYJQGH6Vve8=;
-        b=SISV0CS8M5bxkkPkub1VMfMVIDBOE2nLvyt9OK5Yc8nrVfgdWuhLYOV0FuDEVzVBuA
-         3y83V5Fj2s7lqszoHZ/V5ULI7nGf5pqU9hCRz6mXzxrub0WXLerP9+QVWPGbUhCvKq+h
-         XXElYbaAKLNGJ260n5qM3flrj6P7SelcmSCBMAAy5TSpI5YnphYLFqBA790hDM9n0KQG
-         CTgkQvZFbspQuu8HgG2bObtmiCLwn52G9O3D+c13cWV0dYQS4RUaBAnnhBQJeMuC8jAh
-         j972D6N2rUmqCRyNSrUMYSNAQvkfsUT2QIyCl/EhbJSfRsSSB9MKqstiExrEqWgo+6Ps
-         9j7A==
+        with ESMTP id S238743AbjIRIEY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Sep 2023 04:04:24 -0400
+Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21A43CD3;
+        Mon, 18 Sep 2023 01:03:52 -0700 (PDT)
+Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-d815a5eee40so3749360276.2;
+        Mon, 18 Sep 2023 01:03:52 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695023432; x=1695628232;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=3y431fp7zImpDWkvcmWfe4LAHrYOVE+zuYJQGH6Vve8=;
-        b=l8MXdp1GLRwm1tqoNGV7171pjy1rjbusOoVLI/0NASaTMWjnxwRoLmvGBRyXMzFrnD
-         21FHqOFghA83K/O2e34GoQqjNx8pImD/xyyzrP2nbTiGPlpHEFR3uwgtVBP+wTxGfkxG
-         UmAw3c1YkBma2rtFs+P4JagbrG6J/WgA4yaSX9KwZhMQH90X83K0Me4n4fBoyvEK8HbG
-         9rN+5IdDUrzdlwpJ5PsZOqkG0YCDnVFMnRF9BdnzNw4povngvCBQ09lo6B2FA1L8EP0Q
-         mDZWqaD6yjWsaqcmR7WrwNzWid2Uh3xfQ4pBp9uMhUZ6rsaJ1IodoYJBKDfhaJjWU3+v
-         diUg==
-X-Gm-Message-State: AOJu0YzbHyt01qEevNbksP2JKRtp+shIF7EmQLttJLI+AU4w7yIaCIwx
-        582sBFhcbopdsyyegNNVRj9Z7g==
-X-Google-Smtp-Source: AGHT+IGDwTGCqvI7ErFSwd5+9EaU2bhKoinXXuDhfENDvQM6ygOX7ZuQ/7Sf1mEAGjlycsO7Ct0+tg==
-X-Received: by 2002:a2e:9b87:0:b0:2bd:d4d:7fb6 with SMTP id z7-20020a2e9b87000000b002bd0d4d7fb6mr6798737lji.2.1695023431915;
-        Mon, 18 Sep 2023 00:50:31 -0700 (PDT)
-Received: from [192.168.32.2] ([82.78.167.145])
-        by smtp.gmail.com with ESMTPSA id r11-20020a170906350b00b009a5f1d1564dsm5993808eja.126.2023.09.18.00.50.29
+        d=1e100.net; s=20230601; t=1695024228; x=1695629028;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=vO8AVtHDIpoQwzownXUxstbhdvdc8FtTt4K0IUKijtA=;
+        b=BF2APwXvqVRWBfP8Dw8dY/brG/bVMwUGWaAqyFrRYw+hqYCUZOglBDSlEDYBpW64Ak
+         kl8a0MfcZswnHNwff+RLLTiSt7ipL14Kh2Yn7SPMhTDfbATFCxbVINuG4wNVvtNyNB4b
+         8tMF9xudMNQgTr5Sm0bBynbqeVFOPWlLAoEc9Yz0mDCYstgmgDDxxrAEcuprf1nJdv6j
+         gS2o3TNzVIftjIZE3NIRhIKCkpihZD3XtwnklvwxOWVlqOqM1pyoZkkWmT8Fc4I1rMNv
+         FWNAkNOqE1B9VNj1IDPzU1NRJ4Z7At60B8fXvY225Ak8aXXsT5lj6g4nA9aeSz2YO+F0
+         8LYw==
+X-Gm-Message-State: AOJu0YxK58bXlzjYnJgwbyXqXmPcOOICByzL1RgPm7S4eQcTUT2JLBPN
+        yA6nCbmDdRbEVAi1WtvsnE+UpeSqMIFV8w==
+X-Google-Smtp-Source: AGHT+IF5MkS4OTzcXwSe3eNGeFIAZsBWXCpdbopfIp1liaZsOffiqIHBirhk/sRHU+IdBR6m+jmdDQ==
+X-Received: by 2002:a5b:347:0:b0:d84:d709:7966 with SMTP id q7-20020a5b0347000000b00d84d7097966mr2114718ybp.0.1695024228432;
+        Mon, 18 Sep 2023 01:03:48 -0700 (PDT)
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com. [209.85.128.173])
+        by smtp.gmail.com with ESMTPSA id 185-20020a2519c2000000b00d8514dcbbfdsm182700ybz.13.2023.09.18.01.03.47
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 18 Sep 2023 00:50:31 -0700 (PDT)
-Message-ID: <701ee3bd-5d16-6b5f-2d34-4a4919c4c532@tuxon.dev>
-Date:   Mon, 18 Sep 2023 10:50:28 +0300
+        Mon, 18 Sep 2023 01:03:47 -0700 (PDT)
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-59bd2e19c95so44472397b3.0;
+        Mon, 18 Sep 2023 01:03:47 -0700 (PDT)
+X-Received: by 2002:a0d:df43:0:b0:59a:b7b2:5f02 with SMTP id
+ i64-20020a0ddf43000000b0059ab7b25f02mr9659667ywe.18.1695024227472; Mon, 18
+ Sep 2023 01:03:47 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH 22/37] clk: renesas: add minimal boot support for RZ/G3S
- SoC
-Content-Language: en-US
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        conor+dt@kernel.org, ulf.hansson@linaro.org,
-        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
-        jirislaby@kernel.org, magnus.damm@gmail.com,
-        catalin.marinas@arm.com, will@kernel.org,
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-11-claudiu.beznea.uj@bp.renesas.com>
+ <CAMuHMdV+54heFxPGmN53OMmP0cu4+3-t0ARZWH0c+qgZA_G73g@mail.gmail.com> <d54e14b2-9897-fbd4-7f5f-f5dd44c40f5e@tuxon.dev>
+In-Reply-To: <d54e14b2-9897-fbd4-7f5f-f5dd44c40f5e@tuxon.dev>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Mon, 18 Sep 2023 10:03:35 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdUB-EyMhdOos2rO3V625xtmF8hw72fXEvXA06v=4B3_6w@mail.gmail.com>
+Message-ID: <CAMuHMdUB-EyMhdOos2rO3V625xtmF8hw72fXEvXA06v=4B3_6w@mail.gmail.com>
+Subject: Re: [PATCH 10/37] clk: renesas: rzg2l: use core->name for clock name
+To:     claudiu beznea <claudiu.beznea@tuxon.dev>
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
         prabhakar.mahadev-lad.rj@bp.renesas.com,
         biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
         arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
@@ -74,61 +69,47 @@ Cc:     geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
         linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
         linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-23-claudiu.beznea.uj@bp.renesas.com>
- <CAMuHMdUCpbPA3cDjNAq1irvr6z4Jux-5-tVDBuyr6nx_qOQGpg@mail.gmail.com>
-From:   claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <CAMuHMdUCpbPA3cDjNAq1irvr6z4Jux-5-tVDBuyr6nx_qOQGpg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Geert,
+On Fri, Sep 15, 2023 at 7:47 AM claudiu beznea <claudiu.beznea@tuxon.dev> wrote:
+> On 14.09.2023 16:04, Geert Uytterhoeven wrote:
+> > On Tue, Sep 12, 2023 at 6:52 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+> >> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> >>
+> >> core->name already contains the clock name thus, there is no
+> >> need to check the GET_SHIFT(core->conf) to decide on it.
+> >>
+> >> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> >
+> > Thanks for your patch!
+> >
+> >> --- a/drivers/clk/renesas/rzg2l-cpg.c
+> >> +++ b/drivers/clk/renesas/rzg2l-cpg.c
+> >> @@ -266,7 +266,7 @@ rzg2l_cpg_sd_mux_clk_register(const struct cpg_core_clk *core,
+> >>         clk_hw_data->priv = priv;
+> >>         clk_hw_data->conf = core->conf;
+> >>
+> >> -       init.name = GET_SHIFT(core->conf) ? "sd1" : "sd0";
+> >> +       init.name = core->name;
+> >
+> > Note that this does change the case of the names (e.g. "SD0" => "sd0").
+> > I guess no one cares...
+>
+> As of my experiments and investigation we should be good with it.
 
-On 15.09.2023 15:52, Geert Uytterhoeven wrote:
-> Hi Claudiu,
-> 
-> On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
->> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->>
->> Add minimal clock and reset support for RZ/G3S SoC to be able to boot
->> Linux from SD Card/eMMC. This includes necessary core clocks for booting
->> and GIC, SCIF, GPIO, SD0 mod clocks and resets.
->>
->> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> 
-> Thanks for your patch!
-> 
+Thx, will queue in renesas-clk-for-v6.7.
 
-[ ... ]
+Gr{oetje,eeting}s,
 
->> +       CLK_PLL3_DIV2_4,
->> +       CLK_PLL3_DIV2_8,
->> +       CLK_PLL3_DIV6,
->> +       CLK_PLL4,
->> +       CLK_PLL6,
->> +       CLK_PLL6_DIV2,
->> +       CLK_SEL_SDHI0,
->> +       CLK_SEL_PLL4,
->> +       CLK_P1_DIV2,
->> +       CLK_P3_DIV2,
-> 
-> Do you need CLK_P1_DIV2 and CLK_P3_DIV2?
-> I don't see them in Figure 7.3 ("Clock System Diagram (2)").
-> 
+                        Geert
 
-P1_DIV2 is clock source for MHU_PCLK or OTFDE_DDR_PCLK.
-P3_DIV2 is clock source for DMAC_PCLK, OTFDE_SPI_PCLK.
-These are expressed in clock list document
-(RZG3S_clock_list_r1.00_20230602.xlsx).
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-It is true the functionality could be preserved even w/o these 2 clocks but
-I kept them here as I saw them as core clocks even though they are not
-present in the Clock System Diagram from HW manual.
-
-With these, would you prefer to keep these clocks or just remove them?
-
-Thank you,
-Claudiu Beznea
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
