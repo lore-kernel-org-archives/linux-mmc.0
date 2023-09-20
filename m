@@ -2,242 +2,142 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8D6FCE79CE
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Sep 2023 13:44:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2772BCE79D1
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Sep 2023 13:52:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234973AbjITNoa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Sep 2023 09:44:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35666 "EHLO
+        id S234936AbjITNwz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Sep 2023 09:52:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234771AbjITNo3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Sep 2023 09:44:29 -0400
-Received: from mail-vk1-xa35.google.com (mail-vk1-xa35.google.com [IPv6:2607:f8b0:4864:20::a35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78C1AAD;
-        Wed, 20 Sep 2023 06:44:23 -0700 (PDT)
-Received: by mail-vk1-xa35.google.com with SMTP id 71dfb90a1353d-4962ea9921aso2682665e0c.0;
-        Wed, 20 Sep 2023 06:44:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695217462; x=1695822262; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=95fTQPVKJHWmCHRYGh/6GuNTqeE/4yo9MhUnxDaE2lo=;
-        b=CB0wsID4G4zWqt++NXEzpOaoNFWcw4IxRRt5gXO70xHnC1/fyV71xpb75nTQqol9Iu
-         SwhhSL/uA7+zmlv7VnCOAfoW17mI7ei2SHMRY6tBNRW3GBqgQ4E2jssSZZldg/JMXPAP
-         T6pp+f/wCjhyAgTZwbTJubSAvA4IZq+vMRvhz1iACvH8YPHHmcKyjkqQQeAyTfjDSvMI
-         D/oawpmL5mBIeg05ACF3auxGooFM25KbyMCH+tIoQJfMzGr+vKzRDz5sMwqS2JKSWzZC
-         KYxsz64Fy4PWJ4vkeQ5NHPmnsHJ5J04ohbfsR+Ei+hRNTEIgE7Z3Q1S6+eFY1PJIPiyn
-         cRGw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695217462; x=1695822262;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=95fTQPVKJHWmCHRYGh/6GuNTqeE/4yo9MhUnxDaE2lo=;
-        b=PqEV+7aVztKDXkKKQFa1wbGJdDc/KLALsKIaIvegz2L8QD+dPAuwcb1hWS5DTJxQfv
-         Xdum/Lz9xe50nxi0TO6cjRtF3Tai+cJnt9ubfl+w+Jkk1/yf+Jv+Z4lfCyJ7Req0EnRJ
-         z19bKblu5zF95l6BzqbOzBJm6i/wAfGGWtpFV4wEZXdqSFSn7paiL9Au0BAcSOCvDOJC
-         eGQYu7YYfX3jXtWUPkq9PFBmnyzGRxumUKo/eFfpebhn13fUqhwRuIQrnRnjGzQQRH53
-         cWinsvIAa1DkqgsTGO65gJzbAemuQ7Pku0xufOm5jIaX/xxnvwotWcoNb7DeGp7U9LK2
-         FUfg==
-X-Gm-Message-State: AOJu0YzWg/RkTc3uGU7aW6bqmwZKuscCeP33gMhuyroNe/G+xa59mP8w
-        fYYeMuhnGfIJ67CjSf4S11EC8XQgceNlTw4YgrE=
-X-Google-Smtp-Source: AGHT+IHMmwuzvv3m+YOPL1VZk9naST2BH9KaMdyZjYBGtPJKZd+26gmjj5LV5wpQUnYyN5k5pq3Aj7bDw4GZyw78O1M=
-X-Received: by 2002:a1f:4c43:0:b0:48f:e2eb:6dd9 with SMTP id
- z64-20020a1f4c43000000b0048fe2eb6dd9mr2628965vka.8.1695217462414; Wed, 20 Sep
- 2023 06:44:22 -0700 (PDT)
+        with ESMTP id S234796AbjITNwy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Sep 2023 09:52:54 -0400
+Received: from wp530.webpack.hosteurope.de (wp530.webpack.hosteurope.de [80.237.130.52])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B158AC;
+        Wed, 20 Sep 2023 06:52:48 -0700 (PDT)
+Received: from [2a02:8108:8980:2478:8cde:aa2c:f324:937e]; authenticated
+        by wp530.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.3:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        id 1qixdE-0002e2-SC; Wed, 20 Sep 2023 15:52:44 +0200
+Message-ID: <e34d4c14-af07-b5a1-8341-d8658c1efb39@leemhuis.info>
+Date:   Wed, 20 Sep 2023 15:52:44 +0200
 MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-24-claudiu.beznea.uj@bp.renesas.com> <CAMuHMdUwnsJ0uKeLtFcwB6a2nQtaSUPu0ZR7kYwQeEhKMhfXFQ@mail.gmail.com>
-In-Reply-To: <CAMuHMdUwnsJ0uKeLtFcwB6a2nQtaSUPu0ZR7kYwQeEhKMhfXFQ@mail.gmail.com>
-From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date:   Wed, 20 Sep 2023 14:43:55 +0100
-Message-ID: <CA+V-a8vQzBs-Qq0mRyjn_=ciqxna9Fw64dvnQCFF-0xLEx7Fmg@mail.gmail.com>
-Subject: Re: [PATCH 23/37] pinctrl: renesas: rzg2l: index all registers based
- on port offset
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Claudiu <claudiu.beznea@tuxon.dev>,
-        prabhakar.mahadev-lad.rj@bp.renesas.com, mturquette@baylibre.com,
-        sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: meson-mx-sdhc: Fix initialization frozen issue
+Content-Language: en-US, de-DE
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Ziyang Huang <hzyitc@outlook.com>,
+        martin.blumenstingl@googlemail.com
+Cc:     neil.armstrong@linaro.org, khilman@baylibre.com,
+        jbrunet@baylibre.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Brian Norris <briannorris@chromium.org>
+References: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
+ <CAPDyKFqyi97kjdiNM60WYK+cs4pw5pW3AyfiWKnsCRXd5BXUww@mail.gmail.com>
+From:   Thorsten Leemhuis <regressions@leemhuis.info>
+In-Reply-To: <CAPDyKFqyi97kjdiNM60WYK+cs4pw5pW3AyfiWKnsCRXd5BXUww@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-bounce-key: webpack.hosteurope.de;regressions@leemhuis.info;1695217968;03883f8f;
+X-HE-SMSGID: 1qixdE-0002e2-SC
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Geert,
+On 14.09.23 16:45, Ulf Hansson wrote:
+> + Thorsten
 
-On Wed, Sep 20, 2023 at 2:22=E2=80=AFPM Geert Uytterhoeven <geert@linux-m68=
-k.org> wrote:
->
-> Hi Claudiu,
->
-> Thanks for your patch!
->
-> On Tue, Sep 12, 2023 at 6:53=E2=80=AFAM Claudiu <claudiu.beznea@tuxon.dev=
-> wrote:
-> > From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> >
-> > To get address that needs to be read/write for specific port
-> > functionalities the P(), PM(), PMC(), PFC(), PIN(), IOLH() IEN(), ISEL(=
-)
-> > macros are used. Some of these macros received as argument the hardware
-> > port identifier, some hardware port offset address (e.g. ISEL() receive=
-d
-> > port identifier, IOLH() received port offset address). This makes hard =
-to
-> > extend the current driver for SoCs were port identifiers are not contin=
-uous
-> > in memory map of pin controller. This is the case for RZ/G3S pin contro=
-ller
-> > were ports are mapped as follows:
-> >
-> > port offset    port identifier
-> > -----------    ---------------
-> > 0x20           P0
-> > 0x21           P5
-> > 0x22           P6
-> > 0x23           P11
-> > 0x24           P12
-> > 0x25           P13
-> > 0x26           P14
-> > 0x27           P15
-> > 0x28           P16
-> > 0x29           P17
-> > 0x2a           P18
-> > 0x30           P1
-> > 0x31           P2
-> > 0x32           P3
-> > 0x33           P4
-> > 0x34           P7
-> > 0x35           P8
-> > 0x36           P8
-> > 0x37           P10
-> >
-> > To make this achievable change all the above macros used to get the add=
-ress
-> > of a port register for specific port functionality based on port hardwa=
-re
-> > address. Shortly, all the above macros will get as argument the port
-> > offset address listed in the above table.
-> >
-> > With this RZG2L_SINGLE_PIN_GET_PORT_OFFSET() and
-> > RZG2L_PIN_ID_TO_PORT_OFFSET() were replaced by
->
-> and RZG2L_GPIO_PORT_GET_INDEX()?
->
-> > RZG2L_PIN_CFG_TO_PORT_OFFSET(), RZG2L_SINGLE_PIN_GET_CFGS() and
-> > RZG2L_GPIO_PORT_GET_CFGS() were replaced by RZG2L_PIN_CFG_TO_CAPS().
-> >
-> > Also rzg2l_pinctrl_set_pfc_mode() don't need port argument anymore.
-> > Also rzg2l_gpio_direction_input() and rzg2l_gpio_direction_output() don=
-'t
-> > need to translate port and bit locally as this can be done by
-> > rzg2l_gpio_set_direction().
-> >
-> > To use the same naming for port, bit/pin and register offset the
-> > port_offset variable names in different places was replaced by variable
-> > named off and there is no need to initialize anymore cfg and bit in
-> > different code places.
-> >
-> > Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->
-> This looks like a nice cleanup, thanks a lot!
-> Prabhakar: do you like it, too?
->
-Yes indeed, I loved it when I reviewed it internally. This makes it
-easier for me to add those extra port pins present on rz/five ;)
+I recently gave up on this, as it seems nobody cared anymore, but let's
+give this another try.
 
-Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Tested-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> On Mon, 19 Jun 2023 at 19:36, Ziyang Huang <hzyitc@outlook.com> wrote:
+>>
+>> Commit 4bc31edebde5 ("mmc: core: Set HS clock speed before sending
+>> HS CMD13") set HS clock (52MHz) before switching to HS mode. For this
+>> freq, FCLK_DIV5 will be selected and div value is 10 (reg value is 9).
+>> Then we set rx_clk_phase to 11 or 15 which is out of range and make
+>> hardware frozen. After we send command request, no irq will be
+>> interrupted and the mmc driver will keep to wait for request finished,
+>> even durning rebooting.
+>>
+>> So let's set a common value - 1 just for initialization. Then let
+>> meson_mx_sdhc_execute_tuning() to find the accurate value for data
+>> transfer.
+>>
+>> Fixes: e4bf1b0970ef ("mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host")
+>> Signed-off-by: Ziyang Huang <hzyitc@outlook.com>
+> 
+> I don't quite understand if this patch is ok for everybody for me to apply?
+> 
+> It seems like it solves at least some part of the problems that
+> Martin/Thorsten were looking at too [1], right?
 
-Cheers,
-Prabhakar
+Martin, could you help clarifying the situation here? It seems Ziyang
+Huang is busy.
 
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> You can find a few suggestions for improvement below...
->
-> > --- a/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-> > +++ b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-> > @@ -202,9 +202,11 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_de=
-v *pctldev,
-> >                                  unsigned int group_selector)
-> >  {
-> >         struct rzg2l_pinctrl *pctrl =3D pinctrl_dev_get_drvdata(pctldev=
-);
-> > +       const struct pinctrl_pin_desc *pin_desc;
-> > +       unsigned int i, *psel_val, *pin_data;
-> >         struct function_desc *func;
-> > -       unsigned int i, *psel_val;
-> >         struct group_desc *group;
-> > +       u32 port, pin, off;
->
-> Please move the new variable declarations inside the for(), and
-> combine them with their initialization.
->
-> >         int *pins;
-> >
-> >         func =3D pinmux_generic_get_function(pctldev, func_selector);
-> > @@ -218,11 +220,17 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_d=
-ev *pctldev,
-> >         pins =3D group->pins;
-> >
-> >         for (i =3D 0; i < group->num_pins; i++) {
-> > -               dev_dbg(pctrl->dev, "port:%u pin: %u PSEL:%u\n",
-> > -                       RZG2L_PIN_ID_TO_PORT(pins[i]), RZG2L_PIN_ID_TO_=
-PIN(pins[i]),
-> > -                       psel_val[i]);
-> > -               rzg2l_pinctrl_set_pfc_mode(pctrl, RZG2L_PIN_ID_TO_PORT(=
-pins[i]),
-> > -                                          RZG2L_PIN_ID_TO_PIN(pins[i])=
-, psel_val[i]);
-> > +               pin_desc =3D &pctrl->desc.pins[pins[i]];
-> > +               pin_data =3D pin_desc->drv_data;
-> > +
-> > +               port =3D RZG2L_PIN_ID_TO_PORT(pins[i]);
->
-> As port is unused but in the debug print, please drop the variable,
-> and use RZG2L_PIN_ID_TO_PORT() in the debug print below.
->
-> > +               pin =3D RZG2L_PIN_ID_TO_PIN(pins[i]);
-> > +               off =3D RZG2L_PIN_CFG_TO_PORT_OFFSET(*pin_data);
-> > +
-> > +               dev_dbg(pctrl->dev, "port:%u pin: %u off:%x PSEL:%u\n",=
- port,
-> > +                       pin, off, psel_val[i]);
-> > +
-> > +               rzg2l_pinctrl_set_pfc_mode(pctrl, pin, off, psel_val[i]=
-);
-> >         }
->
-> Gr{oetje,eeting}s,
->
->                         Geert
->
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m6=
-8k.org
->
-> In personal conversations with technical people, I call myself a hacker. =
-But
-> when I'm talking to journalists I just say "programmer" or something like=
- that.
->                                 -- Linus Torvalds
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+I briefly skimmed this thread again and to me it sounded like there was
+a plan for an improved patch that hasn't shown up yet.
+
+Also CCing Brian Norris who according to the bisection from Martin in
+that "[1]" caused the regression (or am I missing/confusing something
+here?).
+
+> [1]
+> https://lore.kernel.org/all/CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com/#r
+
+Ciao, Thorsten
+
+>> ---
+>>  drivers/mmc/host/meson-mx-sdhc-mmc.c | 26 +++-----------------------
+>>  1 file changed, 3 insertions(+), 23 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/meson-mx-sdhc-mmc.c b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+>> index da85c2f2..a01090a2 100644
+>> --- a/drivers/mmc/host/meson-mx-sdhc-mmc.c
+>> +++ b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+>> @@ -269,7 +269,6 @@ static int meson_mx_sdhc_enable_clks(struct mmc_host *mmc)
+>>  static int meson_mx_sdhc_set_clk(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  {
+>>         struct meson_mx_sdhc_host *host = mmc_priv(mmc);
+>> -       u32 rx_clk_phase;
+>>         int ret;
+>>
+>>         meson_mx_sdhc_disable_clks(mmc);
+>> @@ -290,31 +289,12 @@ static int meson_mx_sdhc_set_clk(struct mmc_host *mmc, struct mmc_ios *ios)
+>>                 mmc->actual_clock = clk_get_rate(host->sd_clk);
+>>
+>>                 /*
+>> -                * according to Amlogic the following latching points are
+>> -                * selected with empirical values, there is no (known) formula
+>> -                * to calculate these.
+>> +                * This value is just for initialization. For data transmission,
+>> +                * meson_mx_sdhc_execute_tuning() will find a accurate value
+>>                  */
+>> -               if (mmc->actual_clock > 100000000) {
+>> -                       rx_clk_phase = 1;
+>> -               } else if (mmc->actual_clock > 45000000) {
+>> -                       if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
+>> -                               rx_clk_phase = 15;
+>> -                       else
+>> -                               rx_clk_phase = 11;
+>> -               } else if (mmc->actual_clock >= 25000000) {
+>> -                       rx_clk_phase = 15;
+>> -               } else if (mmc->actual_clock > 5000000) {
+>> -                       rx_clk_phase = 23;
+>> -               } else if (mmc->actual_clock > 1000000) {
+>> -                       rx_clk_phase = 55;
+>> -               } else {
+>> -                       rx_clk_phase = 1061;
+>> -               }
+>> -
+>>                 regmap_update_bits(host->regmap, MESON_SDHC_CLK2,
+>>                                    MESON_SDHC_CLK2_RX_CLK_PHASE,
+>> -                                  FIELD_PREP(MESON_SDHC_CLK2_RX_CLK_PHASE,
+>> -                                             rx_clk_phase));
+>> +                                  FIELD_PREP(MESON_SDHC_CLK2_RX_CLK_PHASE, 1));
+>>         } else {
+>>                 mmc->actual_clock = 0;
+>>         }
+>> --
+>> 2.34.1
+>>
+> 
