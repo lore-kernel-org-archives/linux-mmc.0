@@ -2,210 +2,199 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09A5ECE79AC
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Sep 2023 08:54:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CECCCE79CE
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Sep 2023 13:21:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233727AbjITIyG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Sep 2023 04:54:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49106 "EHLO
+        id S234548AbjITNVH convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Sep 2023 09:21:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233615AbjITIyF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Sep 2023 04:54:05 -0400
-Received: from mail-ua1-x933.google.com (mail-ua1-x933.google.com [IPv6:2607:f8b0:4864:20::933])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 558459E;
-        Wed, 20 Sep 2023 01:53:59 -0700 (PDT)
-Received: by mail-ua1-x933.google.com with SMTP id a1e0cc1a2514c-7870821d9a1so444869241.1;
-        Wed, 20 Sep 2023 01:53:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695200038; x=1695804838; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IrrQJKkKes28oqech+rUAf+7IG5PdT7LFyD0ckVQ1ag=;
-        b=dpweKRhbjw4FwX+NfhmkJyt7YW3UZoqQT2M5A3X7RrhVQecs4MIBnCSzwBtTqVibgk
-         yIrnnFiTzMfD/5QG8qiur9W1kahfJNimaEO5PALJfr0OlA3Q93vWazsLw+ownzl+jsX9
-         d2lUSc0iwiGROZp4z23GYUHIbvt+FCos2CFrx2oTkcZAk+w4zxWa/l7GqHJ8xP+BVJGM
-         xWN0emkvtjTCHs9edYSUPLx8cQDPoT8tZr4PIY2U91JokVXFPxvuULhhA54tj9/LNG/z
-         1z6ZeuX7gVOjm0AtfBrFE50L2/5MwqQPwAGXtzYBXDHZwBZcqaeKD+eVkxjq+H5Mz+y1
-         j5Gw==
+        with ESMTP id S234531AbjITNVG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Sep 2023 09:21:06 -0400
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E29791;
+        Wed, 20 Sep 2023 06:21:00 -0700 (PDT)
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-59be9a09c23so69922107b3.1;
+        Wed, 20 Sep 2023 06:21:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695200038; x=1695804838;
+        d=1e100.net; s=20230601; t=1695216059; x=1695820859;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=IrrQJKkKes28oqech+rUAf+7IG5PdT7LFyD0ckVQ1ag=;
-        b=d0MkCYpsWt+KSB0gUDzTLKJgPgRlOXcNJ55VyrKGsJnGOki4ctX6RLbKukDR4eCy0V
-         VbNEDQbKJYI5G69AC/ivTs42NpeTer537ZogQmdDOaHYV60KM11q97TxP+St5imb/s1D
-         9xjUY9sNTnlRCHYDLFpFKNeKVy1hKkRKWgLJwMORMozTUIJ/6+7xHaT81ErXddYMHp9L
-         WHRxi/pLeifFDfVpSUOoVrlvdzTWYS6K6o9KVFtmqF1QETKdEKWkkRuD416S6uUQ/FCU
-         /3u8RYvc7+jyOG8rNfCg7uRiwk/RJDwEJIxwT4HGFQV6wCIiMgV7ciaFLuzj+gKL6A0Q
-         FflA==
-X-Gm-Message-State: AOJu0Yz+wqpBONYqR2ipn8LB5HzZ1tXwWpe04A+4YMP1t93f16DmS6Ge
-        tLdkl4aEYZ6LJigrYybUqzolKFQAwdwKUJ03zwo=
-X-Google-Smtp-Source: AGHT+IFITPG1Lw0bQlaXkEIvpzAWajhVilVHRJvLKi0dbcR+748lf1WeMOet7434fQqo1MKvA2U4Z38ooConYDSkqcE=
-X-Received: by 2002:a67:fd51:0:b0:452:7715:ef91 with SMTP id
- g17-20020a67fd51000000b004527715ef91mr1078111vsr.12.1695200038303; Wed, 20
- Sep 2023 01:53:58 -0700 (PDT)
+        bh=ka/OcyoPMxG4j7LyFSyUdeXyO8W0OSLZSbeuJkMK0nM=;
+        b=P+NTtcFyaBc/nzxDx5U0Z7Sax4b1GfAZ37TUpwB8TAwRoc4GIf5k6/ZYwdaeLVtxHp
+         IlzV9XeQvHkY4unwoKaKm5zTAh4TxwfK2EvpDi+ZxycB43I37Sf4sbQenEODKfXZvR1C
+         E/CdLPL/3vcnZ1bA45SsWuaOBCvBKpQXmA6L+vcauRaLg69ztyeiySByvktptCTXUFgn
+         dIz/8CEAAt5jcD2kglFDawzHCkpbFfFTqWXR9qJfVopN1IxAlapI4iYNqUtyuwZVdlqT
+         X11GOPrAOVmBd+r/QenW5pbXIRGGg8RH5JBEaPNkNXwB6N/kiNGKtMhfiYFsL+v5OCwB
+         v0IA==
+X-Gm-Message-State: AOJu0YyJuNndb1cYfUFf7ak6bGXdk9Tmjpcrz3Sk7quBqPBkAWelf5Hd
+        KNKy/doTWKCQK9Pdi0dd3mu+Eg+f8bMJjA==
+X-Google-Smtp-Source: AGHT+IEtU7n0U/31lgYZvjj9wyWugYzGwgKQ95rbX2RbVhVOgffG2ZyBxOqIEddPMNw98a9QR76BQA==
+X-Received: by 2002:a0d:d68d:0:b0:56d:3b91:7e78 with SMTP id y135-20020a0dd68d000000b0056d3b917e78mr2284775ywd.20.1695216057584;
+        Wed, 20 Sep 2023 06:20:57 -0700 (PDT)
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com. [209.85.128.176])
+        by smtp.gmail.com with ESMTPSA id d145-20020a814f97000000b0059bcadded9dsm3770319ywb.116.2023.09.20.06.20.56
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 20 Sep 2023 06:20:56 -0700 (PDT)
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-59e8d963adbso39015297b3.0;
+        Wed, 20 Sep 2023 06:20:56 -0700 (PDT)
+X-Received: by 2002:a0d:d9c8:0:b0:59b:fe73:debc with SMTP id
+ b191-20020a0dd9c8000000b0059bfe73debcmr2567469ywe.0.1695216056182; Wed, 20
+ Sep 2023 06:20:56 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230918103055.5471-1-victorshihgli@gmail.com>
- <CAAd53p4qhf+3j=zMs_RXSpLQzn6RGD9yUNcSA12V5aACswgeeQ@mail.gmail.com>
- <CAK00qKDnG1o6ZxzY=pGs0J7o_RYYsr1XHxJKirRKeghsp6QOBg@mail.gmail.com> <CAAd53p6cgN7QDZXzTsw_DVgOmpv46DY+Ttom5V0vTBVn2jpUQg@mail.gmail.com>
-In-Reply-To: <CAAd53p6cgN7QDZXzTsw_DVgOmpv46DY+Ttom5V0vTBVn2jpUQg@mail.gmail.com>
-From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Wed, 20 Sep 2023 16:53:46 +0800
-Message-ID: <CAK00qKA2kaQ2k0Tp=F86BmAMEK=GiAmtLiAQcZRBGVvHOd64MQ@mail.gmail.com>
-Subject: Re: [PATCH V1] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
- timeout of AER
-To:     Kai-Heng Feng <kai.heng.feng@canonical.com>
-Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, kangzhen.lou@dell.com,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com> <20230912045157.177966-24-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20230912045157.177966-24-claudiu.beznea.uj@bp.renesas.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 20 Sep 2023 15:20:44 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdUwnsJ0uKeLtFcwB6a2nQtaSUPu0ZR7kYwQeEhKMhfXFQ@mail.gmail.com>
+Message-ID: <CAMuHMdUwnsJ0uKeLtFcwB6a2nQtaSUPu0ZR7kYwQeEhKMhfXFQ@mail.gmail.com>
+Subject: Re: [PATCH 23/37] pinctrl: renesas: rzg2l: index all registers based
+ on port offset
+To:     Claudiu <claudiu.beznea@tuxon.dev>,
+        prabhakar.mahadev-lad.rj@bp.renesas.com
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 19, 2023 at 3:31=E2=80=AFPM Kai-Heng Feng
-<kai.heng.feng@canonical.com> wrote:
->
-> Hi Victor,
->
-> On Tue, Sep 19, 2023 at 3:10=E2=80=AFPM Victor Shih <victorshihgli@gmail.=
-com> wrote:
-> >
-> > On Tue, Sep 19, 2023 at 12:24=E2=80=AFPM Kai-Heng Feng
-> > <kai.heng.feng@canonical.com> wrote:
-> > >
-> > > Hi Victor,
-> > >
-> > > On Mon, Sep 18, 2023 at 6:31=E2=80=AFPM Victor Shih <victorshihgli@gm=
-ail.com> wrote:
-> > > >
-> > > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > > >
-> > > > Due to a flaw in the hardware design, the GL975x replay timer frequ=
-ently
-> > > > times out when ASPM is enabled. As a result, the system will resume
-> > > > immediately when it enters suspend. Therefore, the replay timer
-> > > > timeout must be masked.
-> > >
-> > > This patch solves AER error when its PCI config gets accessed, but th=
-e
-> > > AER still happens at system suspend:
-> > >
-> > > [ 1100.103603] ACPI: EC: interrupt blocked
-> > > [ 1100.268244] ACPI: EC: interrupt unblocked
-> > > [ 1100.326960] pcieport 0000:00:1c.0: AER: Corrected error received:
-> > > 0000:00:1c.0
-> > > [ 1100.326991] pcieport 0000:00:1c.0: PCIe Bus Error:
-> > > severity=3DCorrected, type=3DData Link Layer, (Transmitter ID)
-> > > [ 1100.326993] pcieport 0000:00:1c.0:   device [8086:7ab9] error
-> > > status/mask=3D00001000/00002000
-> > > [ 1100.326996] pcieport 0000:00:1c.0:    [12] Timeout
-> > >
-> > > Kai-Heng
-> > >
-> >
-> > Hi, Kai-Heng
-> >
-> > Could you try applying the patch and re-testing again after restarting
-> > the system?
->
-> Same issue happens after coldboot.
->
-> > Because I applied the patch and restarted the system and it didn't happ=
-en.
-> > The system can enter suspend normally.
-> >
-> > If you still have the issue after following the above instructions,
-> > please provide me with your environment and I will verify it again.
->
-> The patch gets applied on top of next-20230918. Please let me know
-> what else you want to know.
->
-> Kai-Heng
->
+Hi Claudiu,
 
-Hi, Kai-Heng
+Thanks for your patch!
 
-If I want to mask the replay timer timeout AER of the upper layer root port=
-,
-could you give me some suggestions?
-Or could you provide sample code for my reference?
+On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>
+> To get address that needs to be read/write for specific port
+> functionalities the P(), PM(), PMC(), PFC(), PIN(), IOLH() IEN(), ISEL()
+> macros are used. Some of these macros received as argument the hardware
+> port identifier, some hardware port offset address (e.g. ISEL() received
+> port identifier, IOLH() received port offset address). This makes hard to
+> extend the current driver for SoCs were port identifiers are not continuous
+> in memory map of pin controller. This is the case for RZ/G3S pin controller
+> were ports are mapped as follows:
+>
+> port offset    port identifier
+> -----------    ---------------
+> 0x20           P0
+> 0x21           P5
+> 0x22           P6
+> 0x23           P11
+> 0x24           P12
+> 0x25           P13
+> 0x26           P14
+> 0x27           P15
+> 0x28           P16
+> 0x29           P17
+> 0x2a           P18
+> 0x30           P1
+> 0x31           P2
+> 0x32           P3
+> 0x33           P4
+> 0x34           P7
+> 0x35           P8
+> 0x36           P8
+> 0x37           P10
+>
+> To make this achievable change all the above macros used to get the address
+> of a port register for specific port functionality based on port hardware
+> address. Shortly, all the above macros will get as argument the port
+> offset address listed in the above table.
+>
+> With this RZG2L_SINGLE_PIN_GET_PORT_OFFSET() and
+> RZG2L_PIN_ID_TO_PORT_OFFSET() were replaced by
 
-Thanks, Victor Shih
+and RZG2L_GPIO_PORT_GET_INDEX()?
 
-> >
-> > Thanks, Victor Shih
-> >
-> > > >
-> > > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > > > ---
-> > > >  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
-> > > >  1 file changed, 16 insertions(+)
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sd=
-hci-pci-gli.c
-> > > > index d83261e857a5..d8a991b349a8 100644
-> > > > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > > > @@ -28,6 +28,9 @@
-> > > >  #define PCI_GLI_9750_PM_CTRL   0xFC
-> > > >  #define   PCI_GLI_9750_PM_STATE          GENMASK(1, 0)
-> > > >
-> > > > +#define PCI_GLI_9750_CORRERR_MASK                              0x2=
-14
-> > > > +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT         B=
-IT(12)
-> > > > +
-> > > >  #define SDHCI_GLI_9750_CFG2          0x848
-> > > >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
-> > > >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
-> > > > @@ -152,6 +155,9 @@
-> > > >  #define PCI_GLI_9755_PM_CTRL     0xFC
-> > > >  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
-> > > >
-> > > > +#define PCI_GLI_9755_CORRERR_MASK                              0x2=
-14
-> > > > +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT         B=
-IT(12)
-> > > > +
-> > > >  #define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
-> > > >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT(8)
-> > > >
-> > > > @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_hos=
-t *host)
-> > > >         value &=3D ~PCI_GLI_9750_PM_STATE;
-> > > >         pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
-> > > >
-> > > > +       /* mask the replay timer timeout of AER */
-> > > > +       pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &val=
-ue);
-> > > > +       value |=3D PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-> > > > +       pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, val=
-ue);
-> > > > +
-> > > >         gl9750_wt_off(host);
-> > > >  }
-> > > >
-> > > > @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_pci=
-_slot *slot)
-> > > >         value &=3D ~PCI_GLI_9755_PM_STATE;
-> > > >         pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
-> > > >
-> > > > +       /* mask the replay timer timeout of AER */
-> > > > +       pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &val=
-ue);
-> > > > +       value |=3D PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-> > > > +       pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, val=
-ue);
-> > > > +
-> > > >         gl9755_wt_off(pdev);
-> > > >  }
-> > > >
-> > > > --
-> > > > 2.25.1
-> > > >
+> RZG2L_PIN_CFG_TO_PORT_OFFSET(), RZG2L_SINGLE_PIN_GET_CFGS() and
+> RZG2L_GPIO_PORT_GET_CFGS() were replaced by RZG2L_PIN_CFG_TO_CAPS().
+>
+> Also rzg2l_pinctrl_set_pfc_mode() don't need port argument anymore.
+> Also rzg2l_gpio_direction_input() and rzg2l_gpio_direction_output() don't
+> need to translate port and bit locally as this can be done by
+> rzg2l_gpio_set_direction().
+>
+> To use the same naming for port, bit/pin and register offset the
+> port_offset variable names in different places was replaced by variable
+> named off and there is no need to initialize anymore cfg and bit in
+> different code places.
+>
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+
+This looks like a nice cleanup, thanks a lot!
+Prabhakar: do you like it, too?
+
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+You can find a few suggestions for improvement below...
+
+> --- a/drivers/pinctrl/renesas/pinctrl-rzg2l.c
+> +++ b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
+> @@ -202,9 +202,11 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_dev *pctldev,
+>                                  unsigned int group_selector)
+>  {
+>         struct rzg2l_pinctrl *pctrl = pinctrl_dev_get_drvdata(pctldev);
+> +       const struct pinctrl_pin_desc *pin_desc;
+> +       unsigned int i, *psel_val, *pin_data;
+>         struct function_desc *func;
+> -       unsigned int i, *psel_val;
+>         struct group_desc *group;
+> +       u32 port, pin, off;
+
+Please move the new variable declarations inside the for(), and
+combine them with their initialization.
+
+>         int *pins;
+>
+>         func = pinmux_generic_get_function(pctldev, func_selector);
+> @@ -218,11 +220,17 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_dev *pctldev,
+>         pins = group->pins;
+>
+>         for (i = 0; i < group->num_pins; i++) {
+> -               dev_dbg(pctrl->dev, "port:%u pin: %u PSEL:%u\n",
+> -                       RZG2L_PIN_ID_TO_PORT(pins[i]), RZG2L_PIN_ID_TO_PIN(pins[i]),
+> -                       psel_val[i]);
+> -               rzg2l_pinctrl_set_pfc_mode(pctrl, RZG2L_PIN_ID_TO_PORT(pins[i]),
+> -                                          RZG2L_PIN_ID_TO_PIN(pins[i]), psel_val[i]);
+> +               pin_desc = &pctrl->desc.pins[pins[i]];
+> +               pin_data = pin_desc->drv_data;
+> +
+> +               port = RZG2L_PIN_ID_TO_PORT(pins[i]);
+
+As port is unused but in the debug print, please drop the variable,
+and use RZG2L_PIN_ID_TO_PORT() in the debug print below.
+
+> +               pin = RZG2L_PIN_ID_TO_PIN(pins[i]);
+> +               off = RZG2L_PIN_CFG_TO_PORT_OFFSET(*pin_data);
+> +
+> +               dev_dbg(pctrl->dev, "port:%u pin: %u off:%x PSEL:%u\n", port,
+> +                       pin, off, psel_val[i]);
+> +
+> +               rzg2l_pinctrl_set_pfc_mode(pctrl, pin, off, psel_val[i]);
+>         }
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
