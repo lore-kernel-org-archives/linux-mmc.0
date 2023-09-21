@@ -2,266 +2,309 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8AF84E7D0A5
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Sep 2023 18:51:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21DB7E7D0A6
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Sep 2023 19:38:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230170AbjIUSvn convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Sep 2023 14:51:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58958 "EHLO
+        id S230355AbjIUTio (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Sep 2023 15:38:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43672 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229847AbjIUSvW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2023 14:51:22 -0400
-Received: from mail-qk1-f173.google.com (mail-qk1-f173.google.com [209.85.222.173])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B27891B86;
-        Thu, 21 Sep 2023 10:55:20 -0700 (PDT)
-Received: by mail-qk1-f173.google.com with SMTP id af79cd13be357-76f2843260bso75619885a.3;
-        Thu, 21 Sep 2023 10:55:20 -0700 (PDT)
+        with ESMTP id S230107AbjIUTiZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2023 15:38:25 -0400
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE55298A67
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Sep 2023 10:56:51 -0700 (PDT)
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com [209.85.210.199])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 6627E3F665
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Sep 2023 06:07:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1695276447;
+        bh=dcZbIS3SCPizfsavnP9p9wJ2LqoEiuieySpIExpSNBw=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=rtCu+D9e3Lx00GQYN/yZJSSzwjBN0op4OJIHg9cp3jjP6UDZ2Y6RQPc9SabBfKGSF
+         ARJXb8zzkbvDY7vS/ILrU7Za1XrncYdg31r6jLLsY6+kiRLl+iPu903XqVjkzYHAfV
+         SRZmhhAVOSc3tP7n2CUAzSuhq0Y0GYE1jTDgXn0IFAWjRtph5w56pJEl8PmXg93rXv
+         L03+TI/5S13JsTQiDvyNIuSjvjP66lCYXq9tY7Vx1VXhE9ffuuzxR+JRQUAZL6KAMp
+         B4tXNNNUG7QpzyUScNDKTK2XAV7caQ/vTVSJBgeDRMtZqrkPXeANBpumo7Cmd8NuWo
+         EL1zXiV21FgFQ==
+Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-690bbc5fabaso587072b3a.1
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Sep 2023 23:07:27 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695318845; x=1695923645;
+        d=1e100.net; s=20230601; t=1695276446; x=1695881246;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=vtqRvZvxNnSb6xtGb81vBMV2QFz9nIlyazexCBBcUTo=;
-        b=tXvCTDz13iRSzFZKKw3uop/JyfI8R2QvZ8EQKPbCAQmdUdvJ/pNSXBKFhlqmlma8s8
-         pMceazvahh0cnp2eJVpMB3RyMAp46l8mivAAFeNmrhCNGuXKndbG4VeeRImUgrOMka95
-         6c+Dq7eJQP4dZ7T/1CadsSX/BFOGzx2yz371S0hyEdx1WfqNZkQYTt45h30ykJt4t3x1
-         fX6LHDAhBBWhFl9zI+DT65Z7Qz/Fu0GNI3bkSGqwKLJebg2hoO/Z3iLmFd1WtjXRmIFJ
-         MU/DWzaBjSHyZyyXSMyOt9SpZyfaXA2pTQYAiOFuancm54TyDpVvr+nbfkgVVrQM8fE5
-         GHUA==
-X-Gm-Message-State: AOJu0YxDBoFvTegV6J78Qhum+SIhBvQpOypfoUEZZ5I+Eaz585N32fgb
-        5/gia2ulsgJ34P48W4u2FwsZpkf5dWF+4zew
-X-Google-Smtp-Source: AGHT+IF4TdCX1VWZvDAS3qu+8Aa1EAcRT/2KCviM23hJxgL00ZM/LbBrmo9g1vn+iHjvWg3+zphjvQ==
-X-Received: by 2002:a25:8d0d:0:b0:d81:58d3:cc70 with SMTP id n13-20020a258d0d000000b00d8158d3cc70mr5826363ybl.52.1695308334094;
-        Thu, 21 Sep 2023 07:58:54 -0700 (PDT)
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com. [209.85.219.171])
-        by smtp.gmail.com with ESMTPSA id w8-20020a25ac08000000b00d7b957d8ed9sm376899ybi.17.2023.09.21.07.58.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 21 Sep 2023 07:58:53 -0700 (PDT)
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-d81adf0d57fso1311975276.1;
-        Thu, 21 Sep 2023 07:58:52 -0700 (PDT)
-X-Received: by 2002:a25:9e0f:0:b0:d78:35cd:7f5c with SMTP id
- m15-20020a259e0f000000b00d7835cd7f5cmr4976733ybq.46.1695308332470; Thu, 21
- Sep 2023 07:58:52 -0700 (PDT)
+        bh=dcZbIS3SCPizfsavnP9p9wJ2LqoEiuieySpIExpSNBw=;
+        b=pNkF/EyzCOZhpGYFmHpXXhwE5tv9lrpfv52AXQ7+AvEaiDe7x95Tvms+7chcBUheS5
+         W5oM9UboYmfsDZMBlSlrqZ9bThKZQAMQ/coS/hmLlBSXVkVWG6klBSG06+h0u9/kbNPu
+         bMujxnSgNSJTlMwuk813JDoM6p5JLpMKV+AV/gBYrEuVy5DSFoHf1OOkXtvDkRi9MV0x
+         L+MFqfwOzN5qqm8key4c9n3znmpx9yWm830M4IWwWM4GNSWBAADzs+uSCt/rH6tX7QFu
+         4pIiQ/F59lD8+g8AF5oWDHk0MHRWdMgvaJc4aHqIot0M2l6NVmDXavAZINIQV2BggM5f
+         tdYA==
+X-Gm-Message-State: AOJu0Yyzkv62zXSGcLFBji5SFAYOBTSpKPDelubrIOrnCaC5h31KKNNH
+        aQZxTWfrToRbEtyUa9ZDwWrMFMTzMOiorCBPyxSQbMHcyaRIKatBHhjcnmLL5tlkMZpsC5xWjrZ
+        H25UBwJ6svEviKXkYo3waoWeysxFiMzTSTT5P7mtbRzL+eGuTt8uar2OAEVKl9dBH
+X-Received: by 2002:a05:6a21:66c7:b0:13f:5234:24ce with SMTP id ze7-20020a056a2166c700b0013f523424cemr4025704pzb.28.1695276445827;
+        Wed, 20 Sep 2023 23:07:25 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHlaSz99pL0v/fkfVZaX1IewtyyYiEOwbYnG26drXlG1xbsVCgpIpIxT/bqZ3/n9fhFzbQOnQ8woGoDeLCfjhU=
+X-Received: by 2002:a05:6a21:66c7:b0:13f:5234:24ce with SMTP id
+ ze7-20020a056a2166c700b0013f523424cemr4025696pzb.28.1695276445473; Wed, 20
+ Sep 2023 23:07:25 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com> <20230912045157.177966-31-claudiu.beznea.uj@bp.renesas.com>
-In-Reply-To: <20230912045157.177966-31-claudiu.beznea.uj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 21 Sep 2023 16:58:40 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdV2GEKF0QjKudz529_tmUksTNMJtZu9NwC18KX-AXwaeg@mail.gmail.com>
-Message-ID: <CAMuHMdV2GEKF0QjKudz529_tmUksTNMJtZu9NwC18KX-AXwaeg@mail.gmail.com>
-Subject: Re: [PATCH 30/37] pinctrl: renesas: rzg2l: add support for RZ/G3S SoC
-To:     Claudiu <claudiu.beznea@tuxon.dev>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <2ce258f371234b1f8a1a470d5488d00e@realtek.com> <CAAd53p4LVL3uuNDCHPxteqM+jYD8E4atVyQvkt-HRhGKBVMoFg@mail.gmail.com>
+ <0c73b27b8b07408da1940421217304a5@realtek.com> <CAAd53p7YOFP7G0JxLi3uHu7Xb3p1+d0DyoFjpdWAcK99VxkFBg@mail.gmail.com>
+ <8850da0bfc6044599b999a80ee249b2a@realtek.com>
+In-Reply-To: <8850da0bfc6044599b999a80ee249b2a@realtek.com>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Thu, 21 Sep 2023 14:07:12 +0800
+Message-ID: <CAAd53p4NQfALZ0p2vKFe=+KCByOQUMrOJddyLek0Y16Bx0x9TA@mail.gmail.com>
+Subject: Re: [PATCH] misc: rtsx: Fix an error access Page fault
+To:     "Rafael J. Wysocki" <rafael@kernel.org>
+Cc:     Ricky WU <ricky_wu@realtek.com>, "arnd@arndb.de" <arnd@arndb.de>,
+        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Claudiu,
+[+Cc Rafael, linux-pm]
 
-On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+On Mon, Sep 18, 2023 at 3:30=E2=80=AFPM Ricky WU <ricky_wu@realtek.com> wro=
+te:
 >
-> Add basic support for RZ/G3S to be able to boot from SD card, have a
-> running console port and use GPIOs. RZ/G3S has 82 general-purpose IO
-> ports. Support for the remaining pin functions (e.g. Ethernet, XSPI)
-> will be added along with controller specific support.
+> Hi Kai-heng=EF=BC=8C
 >
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-
-Thanks for your patch!
-
-> --- a/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-> +++ b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-> @@ -1330,6 +1336,36 @@ static const u32 r9a07g043_gpio_configs[] = {
->         RZG2L_GPIO_PORT_PACK(6, 0x22, RZG2L_MPXED_PIN_FUNCS),
->  };
+> It is not work, still get fail..
+> Dmesg log as below
+> ------------------------------------------------------------------
+> [  122.214916] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> [  122.227416] BUG: unable to handle page fault for address: ffff9fa18008=
+9010
+> [  122.227428] #PF: supervisor read access in kernel mode
+> [  122.227430] #PF: error_code(0x0000) - not-present page
+> [  122.227432] PGD 100000067 P4D 100000067 PUD 1001fe067 PMD 1001ff067 PT=
+E 0
+> [  122.227438] Oops: 0000 [#1] PREEMPT SMP PTI
+> [  122.227441] CPU: 3 PID: 1956 Comm: kworker/3:11 Not tainted 6.4.0 #7
+> [  122.227444] Hardware name: To Be Filled By O.E.M. To Be Filled By O.E.=
+M./H370M Pro4, BIOS P3.40 10/25/2018
+> [  122.227446] Workqueue: pm pm_runtime_work
+> [  122.227452] RIP: 0010:ioread32+0x2e/0x70
+> [  122.227456] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d=
+9 54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
+8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f d5 a7 48
+> [  122.227459] RSP: 0018:ffff9fa1836d7d78 EFLAGS: 00010296
+> [  122.227461] RAX: ffff9fa180089000 RBX: 0000000000000310 RCX: 000000000=
+000007f
+> [  122.227462] RDX: 000000000000ff00 RSI: ffff9fa180089010 RDI: ffff9fa18=
+0089010
+> [  122.227464] RBP: ffff9fa1836d7d98 R08: ffff9fa180089010 R09: 000000000=
+0000000
+> [  122.227465] R10: ffff8ac55298deb4 R11: 0000000000000003 R12: 000000000=
+000007f
+> [  122.227466] R13: ffff8ac54022e000 R14: ffff8ac54022e100 R15: 000000000=
+0009003
+> [  122.227468] FS:  0000000000000000(0000) GS:ffff8ac5aa180000(0000) knlG=
+S:0000000000000000
+> [  122.227470] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [  122.227472] CR2: ffff9fa180089010 CR3: 0000000115a32006 CR4: 000000000=
+03706e0
+> [  122.227473] Call Trace:
+> [  122.227475]  <TASK>
+> [  122.227477]  ? show_regs+0x68/0x70
+> [  122.227481]  ? __die_body+0x20/0x70
+> [  122.227483]  ? __die+0x2b/0x40
+> [  122.227485]  ? page_fault_oops+0x160/0x480
+> [  122.227488]  ? search_bpf_extables+0x63/0x90
+> [  122.227490]  ? ioread32+0x2e/0x70
+> [  122.227493]  ? search_exception_tables+0x5f/0x70
+> [  122.227497]  ? kernelmode_fixup_or_oops+0xa2/0x120
+> [  122.227499]  ? __bad_area_nosemaphore+0x179/0x230
+> [  122.227501]  ? bad_area_nosemaphore+0x16/0x20
+> [  122.227503]  ? do_kern_addr_fault+0x8b/0xa0
+> [  122.227505]  ? exc_page_fault+0xe5/0x180
+> [  122.227509]  ? asm_exc_page_fault+0x27/0x30
+> [  122.227514]  ? ioread32+0x2e/0x70
+> [  122.227517]  ? rtsx_pci_write_register+0x5b/0x90 [rtsx_pci]
+> [  122.227527]  rtsx_set_l1off_sub+0x1c/0x30 [rtsx_pci]
+> [  122.227536]  rts5261_set_l1off_cfg_sub_d0+0x36/0x40 [rtsx_pci]
+> [  122.227545]  rtsx_pci_runtime_idle+0xc7/0x160 [rtsx_pci]
+> [  122.227553]  ? __pfx_pci_pm_runtime_idle+0x10/0x10
+> [  122.227557]  pci_pm_runtime_idle+0x34/0x70
+> [  122.227559]  rpm_idle+0xc4/0x2b0
+> [  122.227562]  pm_runtime_work+0x93/0xc0
+> [  122.227565]  process_one_work+0x21a/0x430
+> [  122.227569]  worker_thread+0x4a/0x3c0
+> [  122.227572]  ? __pfx_worker_thread+0x10/0x10
+> [  122.227574]  kthread+0x106/0x140
+> [  122.227577]  ? __pfx_kthread+0x10/0x10
+> [  122.227579]  ret_from_fork+0x29/0x50
+> [  122.227585]  </TASK>
+> [  122.227586] Modules linked in: nls_iso8859_1 snd_hda_codec_hdmi snd_hd=
+a_codec_realtek snd_hda_codec_generic ledtrig_audio intel_rapl_msr intel_ra=
+pl_common snd_sof_pci_intel_cnl snd_sof_intel_hda_common snd_soc_hdac_hda s=
+oundwire_intel soundwire_generic_allocation soundwire_cadence snd_sof_intel=
+_hda_mlink snd_sof_intel_hda snd_sof_pci snd_sof_xtensa_dsp snd_sof snd_sof=
+_utils snd_hda_ext_core snd_soc_acpi_intel_match snd_soc_acpi soundwire_bus=
+ snd_soc_core snd_compress ac97_bus snd_pcm_dmaengine x86_pkg_temp_thermal =
+intel_powerclamp coretemp snd_hda_intel kvm_intel snd_intel_dspcfg snd_inte=
+l_sdw_acpi i915 kvm mei_hdcp crct10dif_pclmul snd_hda_codec ghash_clmulni_i=
+ntel sha512_ssse3 aesni_intel binfmt_misc crypto_simd snd_hda_core cryptd s=
+nd_hwdep snd_pcm input_leds drm_buddy snd_seq_midi rapl snd_seq_midi_event =
+ttm joydev snd_rawmidi drm_display_helper ee1004 intel_cstate cec snd_seq w=
+mi_bmof rc_core snd_seq_device snd_timer mei_me drm_kms_helper snd soundcor=
+e mei intel_pch_thermal i2c_algo_bit syscopyarea sysfillrect
+> [  122.227634]  sysimgblt mac_hid acpi_pad acpi_tad sch_fq_codel msr parp=
+ort_pc ppdev lp drm parport ramoops reed_solomon efi_pstore ip_tables x_tab=
+les autofs4 hid_generic usbhid hid rtsx_pci_sdmmc i2c_i801 e1000e ahci crc3=
+2_pclmul xhci_pci i2c_smbus rtsx_pci libahci xhci_pci_renesas video wmi
+> [  122.227656] CR2: ffff9fa180089010
+> [  122.227658] ---[ end trace 0000000000000000 ]---
+> [  122.384633] RIP: 0010:ioread32+0x2e/0x70
+> [  122.384642] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d=
+9 54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
+8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f d5 a7 48
+> [  122.384644] RSP: 0018:ffff9fa1836d7d78 EFLAGS: 00010296
+> [  122.384647] RAX: ffff9fa180089000 RBX: 0000000000000310 RCX: 000000000=
+000007f
+> [  122.384649] RDX: 000000000000ff00 RSI: ffff9fa180089010 RDI: ffff9fa18=
+0089010
+> [  122.384650] RBP: ffff9fa1836d7d98 R08: ffff9fa180089010 R09: 000000000=
+0000000
+> [  122.384652] R10: ffff8ac55298deb4 R11: 0000000000000003 R12: 000000000=
+000007f
+> [  122.384653] R13: ffff8ac54022e000 R14: ffff8ac54022e100 R15: 000000000=
+0009003
+> [  122.384654] FS:  0000000000000000(0000) GS:ffff8ac5aa180000(0000) knlG=
+S:0000000000000000
+> [  122.384656] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [  122.384658] CR2: ffff9fa180089010 CR3: 0000000119526001 CR4: 000000000=
+03706e0
+> [  122.384660] note: kworker/3:11[1956] exited with irqs disabled
+> -------------------------------------------------------------------
 >
-> +static const u32 r9a08g045_gpio_configs[] = {
-> +       RZG2L_GPIO_PORT_PACK(4, 0x20, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P0  */
-> +       RZG2L_GPIO_PORT_PACK(5, 0x30, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P1 */
+[snipped]
+> > Does the following change work for you?
+> >
+> > diff --git a/drivers/pci/hotplug/pciehp_ctrl.c
+> > b/drivers/pci/hotplug/pciehp_ctrl.c
+> > index dcdbfcf404dd..ef93364a4422 100644
+> > --- a/drivers/pci/hotplug/pciehp_ctrl.c
+> > +++ b/drivers/pci/hotplug/pciehp_ctrl.c
+> > @@ -356,6 +356,7 @@ static int pciehp_disable_slot(struct controller *c=
+trl,
+> > bool safe_removal)
+> >         int ret;
+> >
+> >         pm_runtime_get_sync(&ctrl->pcie->port->dev);
+> > +       pm_runtime_barrier(&ctrl->pcie->port->dev);
+> >         ret =3D __pciehp_disable_slot(ctrl, safe_removal);
+> >         pm_runtime_put(&ctrl->pcie->port->dev);
 
-P1_0 and P7_0 have IEN functionality.
-I don't know how to represent that...
+The issue is that when the PCI cardreader gets hot unplugged,
+rtsx_pci_runtime_idle still gets scheduled.
+And using pm_runtime_barrier() is still not enough.
 
-> +       RZG2L_GPIO_PORT_PACK(4, 0x31, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P2 */
-> +       RZG2L_GPIO_PORT_PACK(4, 0x32, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P3 */
-> +       RZG2L_GPIO_PORT_PACK(6, 0x33, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P4 */
-> +       RZG2L_GPIO_PORT_PACK(5, 0x21, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P5  */
-> +       RZG2L_GPIO_PORT_PACK(5, 0x22, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P6  */
-> +       RZG2L_GPIO_PORT_PACK(5, 0x34, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P7 */
-> +       RZG2L_GPIO_PORT_PACK(5, 0x35, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P8 */
-> +       RZG2L_GPIO_PORT_PACK(4, 0x36, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P9 */
-> +       RZG2L_GPIO_PORT_PACK(5, 0x37, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
-> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P10 */
-> +       RZG2L_GPIO_PORT_PACK(4, 0x23, RZG3S_MPXED_PIN_FUNCS(B) | PIN_CFG_IEN),          /* P11  */
+Is this something should be addressed by PM core?
 
-P11_0 does not have IEN functionality.
-I don't know how to represent that...
+Kai-Heng
 
-> +       RZG2L_GPIO_PORT_PACK(2, 0x24, RZG3S_MPXED_PIN_FUNCS(B) | PIN_CFG_IEN),          /* P12  */
-> +       RZG2L_GPIO_PORT_PACK(5, 0x25, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P13  */
-> +       RZG2L_GPIO_PORT_PACK(3, 0x26, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P14  */
-> +       RZG2L_GPIO_PORT_PACK(4, 0x27, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P15  */
-> +       RZG2L_GPIO_PORT_PACK(2, 0x28, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P16  */
-> +       RZG2L_GPIO_PORT_PACK(4, 0x29, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P17  */
-> +       RZG2L_GPIO_PORT_PACK(6, 0x2a, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P18 */
-> +};
-> +
->  static const struct {
->         struct rzg2l_dedicated_configs common[35];
->         struct rzg2l_dedicated_configs rzg2l_pins[7];
-> @@ -1416,6 +1452,46 @@ static const struct {
->         }
->  };
->
-> +static const struct rzg2l_dedicated_configs rzg3s_dedicated_pins[] = {
-> +       { "NMI", RZG2L_SINGLE_PIN_PACK(0x0, 0, (PIN_CFG_FILONOFF | PIN_CFG_FILNUM |
-> +                                               PIN_CFG_FILCLKSEL)) },
-> +       { "TMS/SWDIO", RZG2L_SINGLE_PIN_PACK(0x1, 0, (PIN_CFG_IOLH_A | PIN_CFG_IEN |
-> +                                                     PIN_CFG_SOFT_PS)) },
-> +       { "TDO", RZG2L_SINGLE_PIN_PACK(0x1, 1, (PIN_CFG_IOLH_A | PIN_CFG_SOFT_PS)) },
-> +       { "WDTOVF_PERROUT#", RZG2L_SINGLE_PIN_PACK(0x6, 0, PIN_CFG_IOLH_A | PIN_CFG_SOFT_PS) },
-> +       { "SD0_CLK", RZG2L_SINGLE_PIN_PACK(0x10, 0, (PIN_CFG_IOLH_B | PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_CMD", RZG2L_SINGLE_PIN_PACK(0x10, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                    PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_RST#", RZG2L_SINGLE_PIN_PACK(0x10, 2, (PIN_CFG_IOLH_B | PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA0", RZG2L_SINGLE_PIN_PACK(0x11, 0, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA1", RZG2L_SINGLE_PIN_PACK(0x11, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA2", RZG2L_SINGLE_PIN_PACK(0x11, 2, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA3", RZG2L_SINGLE_PIN_PACK(0x11, 3, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA4", RZG2L_SINGLE_PIN_PACK(0x11, 4, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA5", RZG2L_SINGLE_PIN_PACK(0x11, 5, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA6", RZG2L_SINGLE_PIN_PACK(0x11, 6, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD0_DATA7", RZG2L_SINGLE_PIN_PACK(0x11, 7, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD0)) },
-> +       { "SD1_CLK", RZG2L_SINGLE_PIN_PACK(0x12, 0, (PIN_CFG_IOLH_B | PIN_CFG_IO_VMC_SD1)) },
-> +       { "SD1_CMD", RZG2L_SINGLE_PIN_PACK(0x12, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                    PIN_CFG_IO_VMC_SD1)) },
-> +       { "SD1_DATA0", RZG2L_SINGLE_PIN_PACK(0x13, 0, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD1)) },
-> +       { "SD1_DATA1", RZG2L_SINGLE_PIN_PACK(0x13, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD1)) },
-> +       { "SD1_DATA2", RZG2L_SINGLE_PIN_PACK(0x13, 2, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD1)) },
-> +       { "SD1_DATA3", RZG2L_SINGLE_PIN_PACK(0x13, 3, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
-> +                                                      PIN_CFG_IO_VMC_SD1)) },
-
-Is there any specific reason you left out the XSPI, Audio clock, and I3C pins?
-
-> +};
-> +
->  static int rzg2l_gpio_get_gpioint(unsigned int virq, const struct rzg2l_pinctrl_data *data)
->  {
->         unsigned int gpioint;
-> @@ -1823,6 +1899,40 @@ static const struct rzg2l_hwcfg rzg2l_hwcfg = {
->         .iolh_groupb_oi = { 100, 66, 50, 33, },
->  };
->
-> +static const struct rzg2l_hwcfg rzg3s_hwcfg = {
-> +       .regs = {
-> +               .pwpr = 0x3000,
-> +               .sd_ch = 0x3004,
-> +       },
-> +       .iolh_groupa_ua = {
-> +               /* 1v8 power source */
-> +               [RZG2L_IOLH_IDX_1V8] = 2200, 4400, 9000, 10000,
-> +               /* 2v5 power source */
-> +               [RZG2L_IOLH_IDX_2V5 ... RZG2L_IOLH_IDX_3V3 - 1] = RZG2L_INVALID_IOLH_VAL,
-
-Can be dropped once zero means invalid.
-
-> +               /* 3v3 power source */
-> +               [RZG2L_IOLH_IDX_3V3] = 1900, 4000, 8000, 9000,
-> +       },
-> +       .iolh_groupb_ua = {
-> +               /* 1v8 power source */
-> +               [RZG2L_IOLH_IDX_1V8] = 7000, 8000, 9000, 10000,
-> +               /* 2v5 power source */
-> +               [RZG2L_IOLH_IDX_2V5 ... RZG2L_IOLH_IDX_3V3 - 1] = RZG2L_INVALID_IOLH_VAL,
-
-Can be dropped once zero means invalid.
-
-> +               /* 3v3 power source */
-> +               [RZG2L_IOLH_IDX_3V3] = 4000, 6000, 8000, 9000,
-> +       },
-> +       .iolh_groupc_ua = {
-> +               /* 1v8 power source */
-> +               [RZG2L_IOLH_IDX_1V8] = 5200, 6000, 6550, 6800,
-> +               /* 2v5 source */
-> +               [RZG2L_IOLH_IDX_2V5] = 4700, 5300, 5800, 6100,
-> +               /* 3v3 power source */
-> +               [RZG2L_IOLH_IDX_3V3] = 4500, 5200, 5700, 6050,
-> +       },
-> +       .drive_strength_ua = true,
-> +       .iolh_groupb_oi = { [0 ... 3] = RZG2L_INVALID_IOLH_VAL, },
-> +       .func_base = 1,
-> +};
-> +
->  static struct rzg2l_pinctrl_data r9a07g043_data = {
->         .port_pins = rzg2l_gpio_names,
->         .port_pin_configs = r9a07g043_gpio_configs,
-> @@ -1844,6 +1954,16 @@ static struct rzg2l_pinctrl_data r9a07g044_data = {
->         .hwcfg = &rzg2l_hwcfg,
->  };
->
-> +static struct rzg2l_pinctrl_data r9a08g045_data = {
-> +       .port_pins = rzg2l_gpio_names,
-> +       .port_pin_configs = r9a08g045_gpio_configs,
-> +       .n_ports = ARRAY_SIZE(r9a08g045_gpio_configs),
-> +       .dedicated_pins = rzg3s_dedicated_pins,
-> +       .n_port_pins = ARRAY_SIZE(r9a08g045_gpio_configs) * RZG2L_PINS_PER_PORT,
-> +       .n_dedicated_pins = ARRAY_SIZE(rzg3s_dedicated_pins),
-> +       .hwcfg = &rzg3s_hwcfg,
-> +};
-> +
->  static const struct of_device_id rzg2l_pinctrl_of_table[] = {
->         {
->                 .compatible = "renesas,r9a07g043-pinctrl",
-
-Please add a BUILD_BUG_ON() check for RZ/G3S to the
-rzg2l_pinctrl_probe() function, as is done for the other SoCs in
-the family.
-
-The rest LGTM.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> >
+> >
+> > Kai-Heng
+> >
+> > >
+> > > > >
+> > > > > Fixes: 597568e8df04 ("misc: rtsx: Rework runtime power management
+> > > > > flow")
+> > > > > Cc: Kai-Heng Feng <kai.heng.feng@canonical.com>
+> > > > > Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+> > > > > ---
+> > > > >  drivers/misc/cardreader/rtsx_pcr.c | 14 ++++++++------
+> > > > > drivers/mmc/host/rtsx_pci_sdmmc.c  |  1 +
+> > > > >  include/linux/rtsx_pci.h           |  1 +
+> > > > >  3 files changed, 10 insertions(+), 6 deletions(-)
+> > > > >
+> > > > > diff --git a/drivers/misc/cardreader/rtsx_pcr.c
+> > > > > b/drivers/misc/cardreader/rtsx_pcr.c
+> > > > > index a3f4b52bb159..536a3681fd5e 100644
+> > > > > --- a/drivers/misc/cardreader/rtsx_pcr.c
+> > > > > +++ b/drivers/misc/cardreader/rtsx_pcr.c
+> > > > > @@ -1526,6 +1526,7 @@ static int rtsx_pci_probe(struct pci_dev
+> > *pcidev,
+> > > > >         pcr->host_sg_tbl_addr =3D pcr->rtsx_resv_buf_addr +
+> > > > HOST_CMDS_BUF_LEN;
+> > > > >         pcr->card_inserted =3D 0;
+> > > > >         pcr->card_removed =3D 0;
+> > > > > +       pcr->is_sd_express =3D false;
+> > > > >         INIT_DELAYED_WORK(&pcr->carddet_work,
+> > > > rtsx_pci_card_detect);
+> > > > >
+> > > > >         pcr->msi_en =3D msi_en;
+> > > > > @@ -1735,12 +1736,13 @@ static int rtsx_pci_runtime_idle(struct
+> > > > > device
+> > > > > *device)
+> > > > >
+> > > > >         pcr->state =3D PDEV_STAT_IDLE;
+> > > > >
+> > > > > -       if (pcr->ops->disable_auto_blink)
+> > > > > -               pcr->ops->disable_auto_blink(pcr);
+> > > > > -       if (pcr->ops->turn_off_led)
+> > > > > -               pcr->ops->turn_off_led(pcr);
+> > > > > -
+> > > > > -       rtsx_pm_power_saving(pcr);
+> > > > > +       if (!pcr->is_sd_express) {
+> > > > > +               if (pcr->ops->disable_auto_blink)
+> > > > > +                       pcr->ops->disable_auto_blink(pcr);
+> > > > > +               if (pcr->ops->turn_off_led)
+> > > > > +                       pcr->ops->turn_off_led(pcr);
+> > > > > +               rtsx_pm_power_saving(pcr);
+> > > > > +       }
+> > > > >
+> > > > >         mutex_unlock(&pcr->pcr_mutex);
+> > > > >
+> > > > > diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > index 87d78432a1e0..80b2f2a31fdc 100644
+> > > > > --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > @@ -1393,6 +1393,7 @@ static int sdmmc_init_sd_express(struct
+> > > > > mmc_host
+> > > > *mmc, struct mmc_ios *ios)
+> > > > >                 RTS5261_MCU_BUS_SEL_MASK |
+> > > > RTS5261_MCU_CLOCK_SEL_MASK
+> > > > >                 | RTS5261_DRIVER_ENABLE_FW,
+> > > > >                 RTS5261_MCU_CLOCK_SEL_16M |
+> > > > RTS5261_DRIVER_ENABLE_FW);
+> > > > > +       pcr->is_sd_express =3D true;
+> > > > >         host->eject =3D true;
+> > > > >         return 0;
+> > > > >  }
+> > > > > diff --git a/include/linux/rtsx_pci.h b/include/linux/rtsx_pci.h
+> > > > > index
+> > > > > 534038d962e4..295e92224fd0 100644
+> > > > > --- a/include/linux/rtsx_pci.h
+> > > > > +++ b/include/linux/rtsx_pci.h
+> > > > > @@ -1262,6 +1262,7 @@ struct rtsx_pcr {
+> > > > >         u8                      ocp_stat;
+> > > > >         u8                      ocp_stat2;
+> > > > >         u8                      rtd3_en;
+> > > > > +       bool                    is_sd_express;
+> > > > >  };
+> > > > >
+> > > > >  #define PID_524A       0x524A
+> > > > > --
+> > > > > 2.25.1
+> > > > >
+> > > >
+> > > > ------Please consider the environment before printing this e-mail.
+> > >
