@@ -2,319 +2,96 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1063BE7D0A2
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Sep 2023 17:50:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57B06E7D0A5
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Sep 2023 18:16:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229764AbjIURu2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Sep 2023 13:50:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49120 "EHLO
+        id S230385AbjIUSQm convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Sep 2023 14:16:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52672 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229754AbjIURuD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2023 13:50:03 -0400
-Received: from mail-qk1-x733.google.com (mail-qk1-x733.google.com [IPv6:2607:f8b0:4864:20::733])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2296400CE;
-        Thu, 21 Sep 2023 10:15:02 -0700 (PDT)
-Received: by mail-qk1-x733.google.com with SMTP id af79cd13be357-773c03f2ac4so64888485a.3;
-        Thu, 21 Sep 2023 10:15:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695316501; x=1695921301; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pSGt8GmgPTrgC8DHgC9SgthQTvKXBruCz417lKX/6DM=;
-        b=AvbqNESZcyAC0HsTYxSp55kBu2C+j538N2kvN3hUf5P37VlwZH12jUmeUPCQpohjan
-         0aBIw/IRXkGDrnWJWOxB0xWUf5ipaPjC/6HOYrz6nfo/r9HYmk79XqY83ToiJEyfvyHC
-         X59w7pGZkzSsETAg7gOM32yjw1cQ9BSz8/shIOfFXvejirxqTjY6am/fpzCqt5wmS2Cb
-         U9xcp4+/+ur5TD6DS09kDypk8qiiBQ50C27VigAxAQvu8wwFtalK7t0T5oGLZ5+/iBS3
-         RuHYcQo3ivhd+WDMEz1HkgXWQ1qkALSdOt2X2C8GAQpv9Uxv3Y+OZ8vHGCJYknlrzfu3
-         KkNw==
+        with ESMTP id S230301AbjIUSQ1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2023 14:16:27 -0400
+Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A17CE5AE2E;
+        Thu, 21 Sep 2023 10:21:40 -0700 (PDT)
+Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-52f9a45b4bdso1423259a12.3;
+        Thu, 21 Sep 2023 10:21:40 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695316501; x=1695921301;
+        d=1e100.net; s=20230601; t=1695316899; x=1695921699;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=pSGt8GmgPTrgC8DHgC9SgthQTvKXBruCz417lKX/6DM=;
-        b=miQnKgLQ7MrxQ3qDNsKr8GfSknMmI9ty3nrHtJagyynnatmuPAuc96dJgBTjTk0EJR
-         66N645xOliwZyAFHb4ANNqasQM0DXCUWPsr0PSjdH0VqqIb3l4XhUUh9ZiTSV9gR5oal
-         HyJxPfK5R9XwAar9Wxg2uQIbNfEHIuz6BmkcAwmfIw2AEmLlPP9udn2U79K0ylL2Eeg7
-         RVc8CCZwb+bemi2leFF5V5FCAnY/TDEXtoR/LvehrvQej4vsc1iOFob/SRcScZCrF47i
-         RZp1hb2KqK2CpgIyAyk+cYPGcfGCEq2A2skZIjhD2Tz+HrWTfJuIASk2RGfZbx6jhXag
-         U6yA==
-X-Gm-Message-State: AOJu0Yx5oBQvfWD32by/1orHPGSEAXxV+0SpfK4HmsKGbC+kiWrdQf0v
-        xyt1CPY3rNSXIPcyOzZ3DOayXEHmiAO7or55qnjGkLOe0fF2EQ==
-X-Google-Smtp-Source: AGHT+IHbKJswryODKEqx2Tbnn5V1qJQhZH1DF7k1r2FZCl7CPJ+76ehOvhPwRK35bBt25exHmoz9koX0UKVfur+k7H4=
-X-Received: by 2002:aca:d10:0:b0:3ab:8cb8:1294 with SMTP id
- 16-20020aca0d10000000b003ab8cb81294mr5315709oin.28.1695309633703; Thu, 21 Sep
- 2023 08:20:33 -0700 (PDT)
+        bh=78TMJJFlsLVACVaST0yD4fr1cOAvW144T6j75QycuXg=;
+        b=BAV30hJkYC7gDJg8tJ5MgmwgAeTItbBEzWUcixCeM/pAGaCgaQ8iMiyn0XLG6VH9AG
+         ATLhbdtVyCC4KBdQdSsCTH0JJXuR7XVOSpV3URxP7TbirqHqYFRHRbBWD7+I3DjzCUZ0
+         iu65ni8UHH5hJfVmugdCvjEeqTP4zFi4RxIie6MPXhe9eTmsLORXD/5wosNIUBMifG9j
+         lSBCLxcxr0nbNY41dJQU3tqmp4sKBbaCaM27tuidbCQzJUwFo7JleTbtt8kmem84QoDV
+         zKqJa3Leqv9IUbhA64LQUI3GFTuCZ4samvzOPMyY2jFjLR5XbI/opUALhieLgtJd7xXY
+         YUKA==
+X-Gm-Message-State: AOJu0Yy11+ifoLtQMj0zsVqtcJIIdGl/qpKcTULNtlXmQqyT9qQ/0DL6
+        JbaLbcnQYqAHQbj57DOkw4bWirx05e9jlYr9
+X-Google-Smtp-Source: AGHT+IH+uBVw292r+sxaKfU8NLmvm5e2Jkc2m0Sb1GJILXn42+85/1qKFwBKoGAB4t0PUKVC9cnpbw==
+X-Received: by 2002:a2e:8098:0:b0:2c0:c6a:eb2f with SMTP id i24-20020a2e8098000000b002c00c6aeb2fmr5027753ljg.1.1695302182923;
+        Thu, 21 Sep 2023 06:16:22 -0700 (PDT)
+Received: from mail-lj1-f180.google.com (mail-lj1-f180.google.com. [209.85.208.180])
+        by smtp.gmail.com with ESMTPSA id p2-20020a2e9a82000000b002c001e57e1asm337469lji.73.2023.09.21.06.16.22
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 21 Sep 2023 06:16:22 -0700 (PDT)
+Received: by mail-lj1-f180.google.com with SMTP id 38308e7fff4ca-2c007d6159aso15303351fa.3;
+        Thu, 21 Sep 2023 06:16:22 -0700 (PDT)
+X-Received: by 2002:a05:6512:3987:b0:500:bb99:69a7 with SMTP id
+ j7-20020a056512398700b00500bb9969a7mr6201266lfu.14.1695301737311; Thu, 21 Sep
+ 2023 06:08:57 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230913214944.59804-1-blarson@amd.com> <20230913214944.59804-7-blarson@amd.com>
-In-Reply-To: <20230913214944.59804-7-blarson@amd.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Thu, 21 Sep 2023 18:19:57 +0300
-Message-ID: <CAHp75VfRLv1=3M+a9pr=ZJgNwtBOrT9xi0UjDJMuY8uM9+ffSw@mail.gmail.com>
-Subject: Re: [PATCH v16 6/6] soc: amd: Add support for AMD Pensando SoC Controller
-To:     Brad Larson <blarson@amd.com>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        adrian.hunter@intel.com, alcooperx@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        catalin.marinas@arm.com, conor+dt@kernel.org, davidgow@google.com,
-        gsomlo@gmail.com, gerg@linux-m68k.org, hal.feng@starfivetech.com,
-        hasegawa-hitomi@fujitsu.com, j.neuschaefer@gmx.net, joel@jms.id.au,
-        kernel@esmil.dk, krzk@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org, p.zabel@pengutronix.de,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
-        fancer.lancer@gmail.com, skhan@linuxfoundation.org,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
-        vaishnav.a@ti.com, walker.chen@starfivetech.com, will@kernel.org,
-        zhuyinbo@loongson.cn, devicetree@vger.kernel.org
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com> <20230912045157.177966-29-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20230912045157.177966-29-claudiu.beznea.uj@bp.renesas.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 21 Sep 2023 15:08:39 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdV5BuPPLkZUDfhjXzq_aQ+LFfEM=eXGT-XjmpxSjSqeJg@mail.gmail.com>
+Message-ID: <CAMuHMdV5BuPPLkZUDfhjXzq_aQ+LFfEM=eXGT-XjmpxSjSqeJg@mail.gmail.com>
+Subject: Re: [PATCH 28/37] pinctrl: renesas: rzg2l: make struct
+ rzg2l_pinctrl_data::dedicated_pins constant
+To:     Claudiu <claudiu.beznea@tuxon.dev>
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Sep 14, 2023 at 12:52=E2=80=AFAM Brad Larson <blarson@amd.com> wrot=
-e:
+On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 >
-> The Pensando SoC controller is a SPI connected companion device
-> that is present in all Pensando SoC board designs.  The essential
-> board management registers are accessed on chip select 0 with
-> board mgmt IO support accessed using additional chip selects.
+> struct rzg2l_pinctrl_data::dedicated_pins is constant thus mark it so.
+>
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-...
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+i.e. will queue in renesas-pinctrl-for-v6.7.
 
-> +#include <linux/cdev.h>
-> +#include <linux/device.h>
-> +#include <linux/err.h>
-> +#include <linux/fs.h>
-> +#include <linux/init.h>
-> +#include <linux/miscdevice.h>
-> +#include <linux/mod_devicetable.h>
-> +#include <linux/module.h>
-> +#include <linux/mutex.h>
-> +#include <linux/reset-controller.h>
-> +#include <linux/spi/spi.h>
+Gr{oetje,eeting}s,
 
-types.h ?
+                        Geert
 
-> +#include <linux/uaccess.h>
 
-...
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-> +       struct penctrl_device *penctrl;
-
-> +       u8 tx_buf[PENCTRL_MAX_MSG_LEN];
-> +       u8 rx_buf[PENCTRL_MAX_MSG_LEN];
-
-These are not DMA-safe, is this a problem?
-
-> +       struct spi_transfer t[2] =3D {};
-> +       struct penctrl_spi_xfer *msg;
-> +       struct spi_device *spi;
-> +       unsigned int num_msgs;
-> +       struct spi_message m;
-> +       u32 size;
-> +       int ret;
-
-...
-
-> +       /* Verify and prepare SPI message */
-> +       size =3D _IOC_SIZE(cmd);
-> +       num_msgs =3D size / sizeof(struct penctrl_spi_xfer);
-
-sizeof (*msg) ?
-
-> +       if (num_msgs > 2 || size =3D=3D 0 || size % sizeof(struct penctrl=
-_spi_xfer)) {
-
-Dito.
-
-> +               ret =3D -EINVAL;
-> +               goto out_unlock;
-> +       }
-
-...
-
-> +       msg =3D memdup_user((struct penctrl_spi_xfer *)arg, size);
-> +       if (IS_ERR(msg)) {
-> +               ret =3D PTR_ERR(msg);
-> +               goto out_unlock;
-> +       }
-
-Wondering if you can start using cleanup.h.
-
-...
-
-> +       /* Perform the transfer */
-> +       mutex_lock(&spi_lock);
-> +       ret =3D spi_sync(spi, &m);
-> +       mutex_unlock(&spi_lock);
-
-> +       if (ret || (num_msgs =3D=3D 1))
-> +               goto out_unlock;
-
-Second conditional will return 0. Is it by design?
-Since it's not so obvious I would split these conditionals.
-
-...
-
-> +       spi->chip_select =3D current_cs;
-
-spi_set_chipselect()
-
-...
-
-> +static int penctrl_regs_read(struct penctrl_device *penctrl, u32 reg, u3=
-2 *val)
-> +{
-> +       struct spi_device *spi =3D penctrl->spi;
-> +       struct spi_transfer t[2] =3D {};
-> +       struct spi_message m;
-
-> +       u8 txbuf[3];
-> +       u8 rxbuf[1];
-
-Not DMA-safe. Is it a problem?
-
-> +       int ret;
-
-> +       txbuf[0] =3D PENCTRL_SPI_CMD_REGRD;
-> +       txbuf[1] =3D reg;
-> +       txbuf[2] =3D 0;
-
-Can be assigned in the definition block
-
-       u8 txbuf[] =3D { ... };
-
-> +       t[0].tx_buf =3D txbuf;
-> +       t[0].len =3D sizeof(txbuf);
-
-> +       rxbuf[0] =3D 0;
-
-Ditto.
-
-    u8 rxbuf[] =3D { 0 };
-
-> +       t[1].rx_buf =3D rxbuf;
-> +       t[1].len =3D sizeof(rxbuf);
-> +
-> +       spi_message_init_with_transfers(&m, t, ARRAY_SIZE(t));
-> +       ret =3D spi_sync(spi, &m);
-> +       if (ret)
-> +               return ret;
-> +
-> +       *val =3D rxbuf[0];
-> +       return 0;
-> +}
-
-...
-
-> +static int penctrl_regs_write(struct penctrl_device *penctrl, u32 reg, u=
-32 val)
-> +{
-> +       struct spi_device *spi =3D penctrl->spi;
-> +       struct spi_transfer t =3D {};
-> +       struct spi_message m;
-> +       u8 txbuf[4];
-
-> +       txbuf[0] =3D PENCTRL_SPI_CMD_REGWR;
-> +       txbuf[1] =3D reg;
-> +       txbuf[2] =3D val;
-> +       txbuf[3] =3D 0;
-
-Can be assigned in the definition block.
-
-> +       t.tx_buf =3D txbuf;
-> +       t.len =3D sizeof(txbuf);
-> +       spi_message_init_with_transfers(&m, &t, 1);
-> +       return spi_sync(spi, &m);
-> +}
-
-...
-
-> +       struct penctrl_device *penctrl =3D
-> +               container_of(rcdev, struct penctrl_device, rcdev);
-
-One line?
-
-...
-
-> +       spi->chip_select =3D 0;
-
-spi_set_chipselect()
-
-...
-
-> +       struct penctrl_device *penctrl =3D
-> +               container_of(rcdev, struct penctrl_device, rcdev);
-
-One line?
-
-...
-
-> +       spi->chip_select =3D 0;
-
-spi_set_chipselect()
-
-...
-
-> +static int penctrl_spi_probe(struct spi_device *spi)
-> +{
-> +       int i, ret;
-> +
-> +       /* Allocate driver data */
-> +       penctrl =3D kzalloc(sizeof(*penctrl), GFP_KERNEL);
-
-devm_kzalloc() ?
-
-> +       if (!penctrl)
-> +               return -ENOMEM;
-> +
-> +       penctrl->spi =3D spi;
-> +       mutex_init(&spi_lock);
-> +
-> +       for (i =3D 0; i < ARRAY_SIZE(penctrl_devices); i++) {
-> +               ret =3D misc_register(&penctrl_devices[i]);
-> +               if (ret) {
-> +                       dev_err(&spi->dev, "Failed to register device %s\=
-n",
-> +                               penctrl_devices[i].name);
-> +                       goto cleanup;
-> +               }
-> +       }
-> +
-> +       /* Register reset controller */
-> +       penctrl->rcdev.dev =3D &spi->dev;
-> +       penctrl->rcdev.ops =3D &penctrl_reset_ops;
-> +       penctrl->rcdev.owner =3D THIS_MODULE;
-> +       penctrl->rcdev.of_node =3D spi->dev.of_node;
-> +       penctrl->rcdev.nr_resets =3D 1;
-> +       device_set_node(penctrl->rcdev.dev, dev_fwnode(&spi->dev));
-> +
-> +       ret =3D reset_controller_register(&penctrl->rcdev);
-> +       if (ret)
-> +               return dev_err_probe(&spi->dev, ret,
-> +                                    "failed to register reset controller=
-\n");
-> +       return 0;
-
-> +cleanup:
-
-err_cleanup: ?
-
-> +       for (i =3D 0; i < ARRAY_SIZE(penctrl_devices); i++) {
-
-  while (i--) {
-
-> +               if (penctrl_devices[i].this_device)
-> +                       misc_deregister(&penctrl_devices[i]);
-> +       }
-> +       return ret;
-> +}
-
---=20
-With Best Regards,
-Andy Shevchenko
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
