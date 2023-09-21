@@ -2,142 +2,59 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2772BCE79D1
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Sep 2023 13:52:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F0A5CE79A9
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Sep 2023 17:10:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234936AbjITNwz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Sep 2023 09:52:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47796 "EHLO
+        id S229983AbjIURKz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Sep 2023 13:10:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54410 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234796AbjITNwy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Sep 2023 09:52:54 -0400
-Received: from wp530.webpack.hosteurope.de (wp530.webpack.hosteurope.de [80.237.130.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B158AC;
-        Wed, 20 Sep 2023 06:52:48 -0700 (PDT)
-Received: from [2a02:8108:8980:2478:8cde:aa2c:f324:937e]; authenticated
-        by wp530.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.3:ECDHE_RSA_AES_128_GCM_SHA256:128)
-        id 1qixdE-0002e2-SC; Wed, 20 Sep 2023 15:52:44 +0200
-Message-ID: <e34d4c14-af07-b5a1-8341-d8658c1efb39@leemhuis.info>
-Date:   Wed, 20 Sep 2023 15:52:44 +0200
+        with ESMTP id S230502AbjIURKD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2023 13:10:03 -0400
+Received: from gandalf.ozlabs.org (mail.ozlabs.org [IPv6:2404:9400:2221:ea00::3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7863C7693;
+        Thu, 21 Sep 2023 10:05:26 -0700 (PDT)
+Received: from authenticated.ozlabs.org (localhost [127.0.0.1])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        by mail.ozlabs.org (Postfix) with ESMTPSA id 4Rrqvj0M5wz4xPc;
+        Thu, 21 Sep 2023 19:33:21 +1000 (AEST)
+From:   Michael Ellerman <patch-notifications@ellerman.id.au>
+To:     alsa-devel@alsa-project.org, Julia Lawall <Julia.Lawall@inria.fr>
+Cc:     kernel-janitors@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>,
+        Amit Kucheria <amitk@kernel.org>, linux-pm@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org,
+        bcm-kernel-feedback-list@broadcom.com,
+        linux-kernel@vger.kernel.org, Nicholas Piggin <npiggin@gmail.com>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        linuxppc-dev@lists.ozlabs.org, linux-mmc@vger.kernel.org,
+        dri-devel@lists.freedesktop.org,
+        linux-mediatek@lists.infradead.org,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        linux-media@vger.kernel.org
+In-Reply-To: <20230907095521.14053-1-Julia.Lawall@inria.fr>
+References: <20230907095521.14053-1-Julia.Lawall@inria.fr>
+Subject: Re: [PATCH 00/11] add missing of_node_put
+Message-Id: <169528860030.876432.17353767421208248949.b4-ty@ellerman.id.au>
+Date:   Thu, 21 Sep 2023 19:30:00 +1000
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: meson-mx-sdhc: Fix initialization frozen issue
-Content-Language: en-US, de-DE
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Ziyang Huang <hzyitc@outlook.com>,
-        martin.blumenstingl@googlemail.com
-Cc:     neil.armstrong@linaro.org, khilman@baylibre.com,
-        jbrunet@baylibre.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Brian Norris <briannorris@chromium.org>
-References: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
- <CAPDyKFqyi97kjdiNM60WYK+cs4pw5pW3AyfiWKnsCRXd5BXUww@mail.gmail.com>
-From:   Thorsten Leemhuis <regressions@leemhuis.info>
-In-Reply-To: <CAPDyKFqyi97kjdiNM60WYK+cs4pw5pW3AyfiWKnsCRXd5BXUww@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-bounce-key: webpack.hosteurope.de;regressions@leemhuis.info;1695217968;03883f8f;
-X-HE-SMSGID: 1qixdE-0002e2-SC
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14.09.23 16:45, Ulf Hansson wrote:
-> + Thorsten
-
-I recently gave up on this, as it seems nobody cared anymore, but let's
-give this another try.
-
-> On Mon, 19 Jun 2023 at 19:36, Ziyang Huang <hzyitc@outlook.com> wrote:
->>
->> Commit 4bc31edebde5 ("mmc: core: Set HS clock speed before sending
->> HS CMD13") set HS clock (52MHz) before switching to HS mode. For this
->> freq, FCLK_DIV5 will be selected and div value is 10 (reg value is 9).
->> Then we set rx_clk_phase to 11 or 15 which is out of range and make
->> hardware frozen. After we send command request, no irq will be
->> interrupted and the mmc driver will keep to wait for request finished,
->> even durning rebooting.
->>
->> So let's set a common value - 1 just for initialization. Then let
->> meson_mx_sdhc_execute_tuning() to find the accurate value for data
->> transfer.
->>
->> Fixes: e4bf1b0970ef ("mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host")
->> Signed-off-by: Ziyang Huang <hzyitc@outlook.com>
+On Thu, 07 Sep 2023 11:55:10 +0200, Julia Lawall wrote:
+> Add of_node_put on a break out of an of_node loop.
 > 
-> I don't quite understand if this patch is ok for everybody for me to apply?
-> 
-> It seems like it solves at least some part of the problems that
-> Martin/Thorsten were looking at too [1], right?
 
-Martin, could you help clarifying the situation here? It seems Ziyang
-Huang is busy.
+Patches 3 and 6 applied to powerpc/next.
 
-I briefly skimmed this thread again and to me it sounded like there was
-a plan for an improved patch that hasn't shown up yet.
+[03/11] powerpc/powermac: add missing of_node_put
+        https://git.kernel.org/powerpc/c/a59e9eb25216eb1dc99e14fc31b76aa648d79540
+[06/11] powerpc/kexec_file: add missing of_node_put
+        https://git.kernel.org/powerpc/c/06b627c1236216ac1239c5e1afcc75359af3fb72
 
-Also CCing Brian Norris who according to the bisection from Martin in
-that "[1]" caused the regression (or am I missing/confusing something
-here?).
-
-> [1]
-> https://lore.kernel.org/all/CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com/#r
-
-Ciao, Thorsten
-
->> ---
->>  drivers/mmc/host/meson-mx-sdhc-mmc.c | 26 +++-----------------------
->>  1 file changed, 3 insertions(+), 23 deletions(-)
->>
->> diff --git a/drivers/mmc/host/meson-mx-sdhc-mmc.c b/drivers/mmc/host/meson-mx-sdhc-mmc.c
->> index da85c2f2..a01090a2 100644
->> --- a/drivers/mmc/host/meson-mx-sdhc-mmc.c
->> +++ b/drivers/mmc/host/meson-mx-sdhc-mmc.c
->> @@ -269,7 +269,6 @@ static int meson_mx_sdhc_enable_clks(struct mmc_host *mmc)
->>  static int meson_mx_sdhc_set_clk(struct mmc_host *mmc, struct mmc_ios *ios)
->>  {
->>         struct meson_mx_sdhc_host *host = mmc_priv(mmc);
->> -       u32 rx_clk_phase;
->>         int ret;
->>
->>         meson_mx_sdhc_disable_clks(mmc);
->> @@ -290,31 +289,12 @@ static int meson_mx_sdhc_set_clk(struct mmc_host *mmc, struct mmc_ios *ios)
->>                 mmc->actual_clock = clk_get_rate(host->sd_clk);
->>
->>                 /*
->> -                * according to Amlogic the following latching points are
->> -                * selected with empirical values, there is no (known) formula
->> -                * to calculate these.
->> +                * This value is just for initialization. For data transmission,
->> +                * meson_mx_sdhc_execute_tuning() will find a accurate value
->>                  */
->> -               if (mmc->actual_clock > 100000000) {
->> -                       rx_clk_phase = 1;
->> -               } else if (mmc->actual_clock > 45000000) {
->> -                       if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
->> -                               rx_clk_phase = 15;
->> -                       else
->> -                               rx_clk_phase = 11;
->> -               } else if (mmc->actual_clock >= 25000000) {
->> -                       rx_clk_phase = 15;
->> -               } else if (mmc->actual_clock > 5000000) {
->> -                       rx_clk_phase = 23;
->> -               } else if (mmc->actual_clock > 1000000) {
->> -                       rx_clk_phase = 55;
->> -               } else {
->> -                       rx_clk_phase = 1061;
->> -               }
->> -
->>                 regmap_update_bits(host->regmap, MESON_SDHC_CLK2,
->>                                    MESON_SDHC_CLK2_RX_CLK_PHASE,
->> -                                  FIELD_PREP(MESON_SDHC_CLK2_RX_CLK_PHASE,
->> -                                             rx_clk_phase));
->> +                                  FIELD_PREP(MESON_SDHC_CLK2_RX_CLK_PHASE, 1));
->>         } else {
->>                 mmc->actual_clock = 0;
->>         }
->> --
->> 2.34.1
->>
-> 
+cheers
