@@ -2,253 +2,238 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4291EE7D0CD
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 06:29:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85F63E7D0D8
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 07:11:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230469AbjIVG3H convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Sep 2023 02:29:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41474 "EHLO
+        id S230432AbjIVHLN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Sep 2023 03:11:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230480AbjIVG3D (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 02:29:03 -0400
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6732CCC1;
-        Thu, 21 Sep 2023 23:28:53 -0700 (PDT)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id 1A69524E28E;
-        Fri, 22 Sep 2023 14:28:38 +0800 (CST)
-Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 22 Sep
- 2023 14:28:38 +0800
-Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
- by EXMBX168.cuchost.com (172.16.6.78) with Microsoft SMTP Server (TLS) id
- 15.0.1497.42; Fri, 22 Sep 2023 14:28:36 +0800
-From:   William Qiu <william.qiu@starfivetech.com>
-To:     <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-riscv@lists.infradead.org>, <linux-mmc@vger.kernel.org>
-CC:     Emil Renner Berthing <kernel@esmil.dk>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        "Palmer Dabbelt" <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        William Qiu <william.qiu@starfivetech.com>
-Subject: [PATCH v3 2/3] mmc: starfive: Change tuning implementation
-Date:   Fri, 22 Sep 2023 14:28:33 +0800
-Message-ID: <20230922062834.39212-3-william.qiu@starfivetech.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230922062834.39212-1-william.qiu@starfivetech.com>
-References: <20230922062834.39212-1-william.qiu@starfivetech.com>
+        with ESMTP id S230253AbjIVHLL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 03:11:11 -0400
+Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BB0B198
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 00:11:03 -0700 (PDT)
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id DC96E41DB4
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 07:11:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1695366660;
+        bh=32y6QHnxViOsZUOoPcCiP72zawebasLjgpKpSnUSB6U=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=EonPbVMGxqAxqIDxkbZp33AITVnkrRBYQbysMpYcwDrgD8G7qFBJCKXh5RYcS0O2K
+         8hDDPJziwrh1Yxs90aK9IAk4bW0lgQhQz2eVXgkjBPNLT6+GFlMNBq6MakIc0oWXPm
+         Ph+vK4k+WwnX40OdM/iHzlTJt8ZEV3OTFB4+SIJsXFWIl4kQpnmVnieCDwkODSBV/y
+         ejc72lvLMvwg+eocQz3gMgNIb8ohm0Oom/GNaLxGck0beXW+XvLdMSmgRMTQ8Cwkr5
+         eWk3cwqaesBYrjsMRaKySlXmRURLPCZgcJ0d4nO7OZDx6qmE+8egN12tCpqf49Pt6X
+         qyLEnEO/iNWqA==
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-277118dab4dso222170a91.1
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 00:11:00 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695366656; x=1695971456;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=32y6QHnxViOsZUOoPcCiP72zawebasLjgpKpSnUSB6U=;
+        b=w81rN5h3bgRxaC8QnDqQJIXVSMrMnWN/BDhX2F7hLITD4h3+KwmjtM1MKNaLfWohh5
+         n20NcVhG26/FED6RkLaQtnNelfMu/T+Z73mviL8zEhXCmfrLO0LEQzuMeM6FsKWMlEkC
+         EPgd4D52MK1nYWo4j45arVnwACAz/6qQSwzPaIS9OCHE/AOs9u7mvqjmHq8GLmVDOT66
+         OeYFdH9KB1Mtsz9rRuoVlOYtA1Lw0UZ4vGqm/Zcm4zZsMDaZWUXapaK5nBzD75nfMJyP
+         mpDiYrvpz1HeI2Nnl/pDXLxd6c1w5m3KBpuPmLNQTmPHVZm1bKOd87d4zyvcfrqXG90Y
+         hFLg==
+X-Gm-Message-State: AOJu0YwvsoR39HBCcQl5nYcfUoo6UTJ10/U68+UZqFPk8P/hyGSjqEAT
+        h2Jd/5myZUd7tVvirAixfPdBGxXQ7p/Xehxvk292wpRaIXm11MDwFTPvg/iBH3ZLZlBuQdboUNB
+        OZq06SrV8Gy0Q5f14hH/bFQ9S83HDOqNjG0MB+Tyb0ZoyKsIEKRd3Wg==
+X-Received: by 2002:a17:90b:1018:b0:274:84e4:4ef8 with SMTP id gm24-20020a17090b101800b0027484e44ef8mr8134172pjb.32.1695366655860;
+        Fri, 22 Sep 2023 00:10:55 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGod7CcERn2eMZR/UVTGo78WSbu0rFiusPo9zXcqFuZ4I5paN2ltrtP4yo1wndlXn4mtKrdxLetX9V84XrL8uw=
+X-Received: by 2002:a17:90b:1018:b0:274:84e4:4ef8 with SMTP id
+ gm24-20020a17090b101800b0027484e44ef8mr8134161pjb.32.1695366655510; Fri, 22
+ Sep 2023 00:10:55 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS062.cuchost.com (172.16.6.22) To EXMBX168.cuchost.com
- (172.16.6.78)
-X-YovoleRuleAgent: yovoleflag
-Content-Transfer-Encoding: 8BIT
+References: <20230918103055.5471-1-victorshihgli@gmail.com>
+ <CAAd53p4qhf+3j=zMs_RXSpLQzn6RGD9yUNcSA12V5aACswgeeQ@mail.gmail.com>
+ <CAK00qKDnG1o6ZxzY=pGs0J7o_RYYsr1XHxJKirRKeghsp6QOBg@mail.gmail.com>
+ <CAAd53p6cgN7QDZXzTsw_DVgOmpv46DY+Ttom5V0vTBVn2jpUQg@mail.gmail.com> <CAK00qKA2kaQ2k0Tp=F86BmAMEK=GiAmtLiAQcZRBGVvHOd64MQ@mail.gmail.com>
+In-Reply-To: <CAK00qKA2kaQ2k0Tp=F86BmAMEK=GiAmtLiAQcZRBGVvHOd64MQ@mail.gmail.com>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Fri, 22 Sep 2023 15:10:42 +0800
+Message-ID: <CAAd53p4EemJQfp2nwKTPoGpwPJchZKfC8hKU8zuvtK-YKmM9bQ@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
+ timeout of AER
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, kangzhen.lou@dell.com,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Before, we used syscon to achieve tuning, but the actual measurement
-showed little effect, so the tuning implementation was modified here,
-and it was realized by reading and writing the UHS_REG_EXT register.
+Hi Victor,
 
-Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-Reviewed-by: Emil Renner Berthing <emil.renner.berthing@canonical.com>
----
- drivers/mmc/host/dw_mmc-starfive.c | 137 +++++++++--------------------
- 1 file changed, 40 insertions(+), 97 deletions(-)
+On Wed, Sep 20, 2023 at 4:54=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
+m> wrote:
+>
+> On Tue, Sep 19, 2023 at 3:31=E2=80=AFPM Kai-Heng Feng
+> <kai.heng.feng@canonical.com> wrote:
+> >
+> > Hi Victor,
+> >
+> > On Tue, Sep 19, 2023 at 3:10=E2=80=AFPM Victor Shih <victorshihgli@gmai=
+l.com> wrote:
+> > >
+> > > On Tue, Sep 19, 2023 at 12:24=E2=80=AFPM Kai-Heng Feng
+> > > <kai.heng.feng@canonical.com> wrote:
+> > > >
+> > > > Hi Victor,
+> > > >
+> > > > On Mon, Sep 18, 2023 at 6:31=E2=80=AFPM Victor Shih <victorshihgli@=
+gmail.com> wrote:
+> > > > >
+> > > > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > > > >
+> > > > > Due to a flaw in the hardware design, the GL975x replay timer fre=
+quently
+> > > > > times out when ASPM is enabled. As a result, the system will resu=
+me
+> > > > > immediately when it enters suspend. Therefore, the replay timer
+> > > > > timeout must be masked.
+> > > >
+> > > > This patch solves AER error when its PCI config gets accessed, but =
+the
+> > > > AER still happens at system suspend:
+> > > >
+> > > > [ 1100.103603] ACPI: EC: interrupt blocked
+> > > > [ 1100.268244] ACPI: EC: interrupt unblocked
+> > > > [ 1100.326960] pcieport 0000:00:1c.0: AER: Corrected error received=
+:
+> > > > 0000:00:1c.0
+> > > > [ 1100.326991] pcieport 0000:00:1c.0: PCIe Bus Error:
+> > > > severity=3DCorrected, type=3DData Link Layer, (Transmitter ID)
+> > > > [ 1100.326993] pcieport 0000:00:1c.0:   device [8086:7ab9] error
+> > > > status/mask=3D00001000/00002000
+> > > > [ 1100.326996] pcieport 0000:00:1c.0:    [12] Timeout
+> > > >
+> > > > Kai-Heng
+> > > >
+> > >
+> > > Hi, Kai-Heng
+> > >
+> > > Could you try applying the patch and re-testing again after restartin=
+g
+> > > the system?
+> >
+> > Same issue happens after coldboot.
+> >
+> > > Because I applied the patch and restarted the system and it didn't ha=
+ppen.
+> > > The system can enter suspend normally.
+> > >
+> > > If you still have the issue after following the above instructions,
+> > > please provide me with your environment and I will verify it again.
+> >
+> > The patch gets applied on top of next-20230918. Please let me know
+> > what else you want to know.
+> >
+> > Kai-Heng
+> >
+>
+> Hi, Kai-Heng
+>
+> If I want to mask the replay timer timeout AER of the upper layer root po=
+rt,
+> could you give me some suggestions?
+> Or could you provide sample code for my reference?
 
-diff --git a/drivers/mmc/host/dw_mmc-starfive.c b/drivers/mmc/host/dw_mmc-starfive.c
-index fd05a648a8bb..b4d81ef0f3af 100644
---- a/drivers/mmc/host/dw_mmc-starfive.c
-+++ b/drivers/mmc/host/dw_mmc-starfive.c
-@@ -5,6 +5,7 @@
-  * Copyright (c) 2022 StarFive Technology Co., Ltd.
-  */
- 
-+#include <linux/bitfield.h>
- #include <linux/clk.h>
- #include <linux/delay.h>
- #include <linux/mfd/syscon.h>
-@@ -20,13 +21,7 @@
- #define ALL_INT_CLR		0x1ffff
- #define MAX_DELAY_CHAIN		32
- 
--struct starfive_priv {
--	struct device *dev;
--	struct regmap *reg_syscon;
--	u32 syscon_offset;
--	u32 syscon_shift;
--	u32 syscon_mask;
--};
-+#define STARFIVE_SMPL_PHASE     GENMASK(20, 16)
- 
- static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- {
-@@ -44,117 +39,65 @@ static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	}
- }
- 
-+static void dw_mci_starfive_set_sample_phase(struct dw_mci *host, u32 smpl_phase)
-+{
-+	/* change driver phase and sample phase */
-+	u32 reg_value = mci_readl(host, UHS_REG_EXT);
-+
-+	/* In UHS_REG_EXT, only 5 bits valid in DRV_PHASE and SMPL_PHASE */
-+	reg_value &= ~STARFIVE_SMPL_PHASE;
-+	reg_value |= FIELD_PREP(STARFIVE_SMPL_PHASE, smpl_phase);
-+	mci_writel(host, UHS_REG_EXT, reg_value);
-+
-+	/* We should delay 1ms wait for timing setting finished. */
-+	mdelay(1);
-+}
-+
- static int dw_mci_starfive_execute_tuning(struct dw_mci_slot *slot,
- 					     u32 opcode)
- {
- 	static const int grade  = MAX_DELAY_CHAIN;
- 	struct dw_mci *host = slot->host;
--	struct starfive_priv *priv = host->priv;
--	int rise_point = -1, fall_point = -1;
--	int err, prev_err = 0;
--	int i;
--	bool found = 0;
--	u32 regval;
--
--	/*
--	 * Use grade as the max delay chain, and use the rise_point and
--	 * fall_point to ensure the best sampling point of a data input
--	 * signals.
--	 */
--	for (i = 0; i < grade; i++) {
--		regval = i << priv->syscon_shift;
--		err = regmap_update_bits(priv->reg_syscon, priv->syscon_offset,
--						priv->syscon_mask, regval);
--		if (err)
--			return err;
-+	int smpl_phase, smpl_raise = -1, smpl_fall = -1;
-+	int ret;
-+
-+	for (smpl_phase = 0; smpl_phase < grade; smpl_phase++) {
-+		dw_mci_starfive_set_sample_phase(host, smpl_phase);
- 		mci_writel(host, RINTSTS, ALL_INT_CLR);
- 
--		err = mmc_send_tuning(slot->mmc, opcode, NULL);
--		if (!err)
--			found = 1;
-+		ret = mmc_send_tuning(slot->mmc, opcode, NULL);
- 
--		if (i > 0) {
--			if (err && !prev_err)
--				fall_point = i - 1;
--			if (!err && prev_err)
--				rise_point = i;
-+		if (!ret && smpl_raise < 0) {
-+			smpl_raise = smpl_phase;
-+		} else if (ret && smpl_raise >= 0) {
-+			smpl_fall = smpl_phase - 1;
-+			break;
- 		}
--
--		if (rise_point != -1 && fall_point != -1)
--			goto tuning_out;
--
--		prev_err = err;
--		err = 0;
- 	}
- 
--tuning_out:
--	if (found) {
--		if (rise_point == -1)
--			rise_point = 0;
--		if (fall_point == -1)
--			fall_point = grade - 1;
--		if (fall_point < rise_point) {
--			if ((rise_point + fall_point) >
--			    (grade - 1))
--				i = fall_point / 2;
--			else
--				i = (rise_point + grade - 1) / 2;
--		} else {
--			i = (rise_point + fall_point) / 2;
--		}
--
--		regval = i << priv->syscon_shift;
--		err = regmap_update_bits(priv->reg_syscon, priv->syscon_offset,
--						priv->syscon_mask, regval);
--		if (err)
--			return err;
--		mci_writel(host, RINTSTS, ALL_INT_CLR);
-+	if (smpl_phase >= grade)
-+		smpl_fall = grade - 1;
- 
--		dev_info(host->dev, "Found valid delay chain! use it [delay=%d]\n", i);
--	} else {
-+	if (smpl_raise < 0) {
-+		smpl_phase = 0;
- 		dev_err(host->dev, "No valid delay chain! use default\n");
--		err = -EINVAL;
-+		ret = -EINVAL;
-+		goto out;
- 	}
- 
--	mci_writel(host, RINTSTS, ALL_INT_CLR);
--	return err;
--}
--
--static int dw_mci_starfive_parse_dt(struct dw_mci *host)
--{
--	struct of_phandle_args args;
--	struct starfive_priv *priv;
--	int ret;
--
--	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
--	if (!priv)
--		return -ENOMEM;
-+	smpl_phase = (smpl_raise + smpl_fall) / 2;
-+	dev_dbg(host->dev, "Found valid delay chain! use it [delay=%d]\n", smpl_phase);
-+	ret = 0;
- 
--	ret = of_parse_phandle_with_fixed_args(host->dev->of_node,
--						"starfive,sysreg", 3, 0, &args);
--	if (ret) {
--		dev_err(host->dev, "Failed to parse starfive,sysreg\n");
--		return -EINVAL;
--	}
--
--	priv->reg_syscon = syscon_node_to_regmap(args.np);
--	of_node_put(args.np);
--	if (IS_ERR(priv->reg_syscon))
--		return PTR_ERR(priv->reg_syscon);
--
--	priv->syscon_offset = args.args[0];
--	priv->syscon_shift  = args.args[1];
--	priv->syscon_mask   = args.args[2];
--
--	host->priv = priv;
--
--	return 0;
-+out:
-+	dw_mci_starfive_set_sample_phase(host, smpl_phase);
-+	mci_writel(host, RINTSTS, ALL_INT_CLR);
-+	return ret;
- }
- 
- static const struct dw_mci_drv_data starfive_data = {
- 	.common_caps		= MMC_CAP_CMD23,
- 	.set_ios		= dw_mci_starfive_set_ios,
--	.parse_dt		= dw_mci_starfive_parse_dt,
- 	.execute_tuning		= dw_mci_starfive_execute_tuning,
- };
- 
--- 
-2.34.1
+I am not aware of anyway to mask "replay timer timeout" from root port.
+I wonder if the device supoprt D3hot? Or should it stay at D0 when
+ASPM L1.2 is enabled?
 
+Kai-Heng
+
+>
+> Thanks, Victor Shih
+>
+> > >
+> > > Thanks, Victor Shih
+> > >
+> > > > >
+> > > > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > > > > ---
+> > > > >  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
+> > > > >  1 file changed, 16 insertions(+)
+> > > > >
+> > > > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/=
+sdhci-pci-gli.c
+> > > > > index d83261e857a5..d8a991b349a8 100644
+> > > > > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > > > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > > > > @@ -28,6 +28,9 @@
+> > > > >  #define PCI_GLI_9750_PM_CTRL   0xFC
+> > > > >  #define   PCI_GLI_9750_PM_STATE          GENMASK(1, 0)
+> > > > >
+> > > > > +#define PCI_GLI_9750_CORRERR_MASK                              0=
+x214
+> > > > > +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT        =
+ BIT(12)
+> > > > > +
+> > > > >  #define SDHCI_GLI_9750_CFG2          0x848
+> > > > >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+> > > > >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+> > > > > @@ -152,6 +155,9 @@
+> > > > >  #define PCI_GLI_9755_PM_CTRL     0xFC
+> > > > >  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> > > > >
+> > > > > +#define PCI_GLI_9755_CORRERR_MASK                              0=
+x214
+> > > > > +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT        =
+ BIT(12)
+> > > > > +
+> > > > >  #define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
+> > > > >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT(8)
+> > > > >
+> > > > > @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_h=
+ost *host)
+> > > > >         value &=3D ~PCI_GLI_9750_PM_STATE;
+> > > > >         pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value)=
+;
+> > > > >
+> > > > > +       /* mask the replay timer timeout of AER */
+> > > > > +       pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &v=
+alue);
+> > > > > +       value |=3D PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT=
+;
+> > > > > +       pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, v=
+alue);
+> > > > > +
+> > > > >         gl9750_wt_off(host);
+> > > > >  }
+> > > > >
+> > > > > @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_p=
+ci_slot *slot)
+> > > > >         value &=3D ~PCI_GLI_9755_PM_STATE;
+> > > > >         pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value)=
+;
+> > > > >
+> > > > > +       /* mask the replay timer timeout of AER */
+> > > > > +       pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &v=
+alue);
+> > > > > +       value |=3D PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT=
+;
+> > > > > +       pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, v=
+alue);
+> > > > > +
+> > > > >         gl9755_wt_off(pdev);
+> > > > >  }
+> > > > >
+> > > > > --
+> > > > > 2.25.1
+> > > > >
