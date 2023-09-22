@@ -2,55 +2,56 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53843E6FE41
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 15:18:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77E91CD4844
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 16:23:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232370AbjIVPSW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Sep 2023 11:18:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51176 "EHLO
+        id S229579AbjIVQXc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Sep 2023 12:23:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59982 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232327AbjIVPSV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 11:18:21 -0400
-Received: from mail-pf1-x436.google.com (mail-pf1-x436.google.com [IPv6:2607:f8b0:4864:20::436])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75F0BA3
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 08:18:14 -0700 (PDT)
-Received: by mail-pf1-x436.google.com with SMTP id d2e1a72fcca58-68fb85afef4so2091846b3a.1
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 08:18:14 -0700 (PDT)
+        with ESMTP id S229983AbjIVQXb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 12:23:31 -0400
+Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BC9F196
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 09:23:24 -0700 (PDT)
+Received: by mail-pf1-x42b.google.com with SMTP id d2e1a72fcca58-68cbbff84f6so2715704b3a.1
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 09:23:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695395894; x=1696000694; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=28ycCMVqr+jLHcID+cLGjL2F35QcRv/+OsF8PSg4e9w=;
-        b=ButDVAR9tTC7uXAuV5J2qo4ZQbvJl8oZRiJIqRfLL8Wrj/4DPr8pUXQGcqaNe3cLhK
-         POhz0NNfhCmdVR7Cfq0k/a78GWVXkYaa0M4xf5WA5ae8UGtas3u4jFvwDbqo4CnBv6Ee
-         b+XEZRXiOCQzeijJhPI31QvcFxi9NHI4MtazLywyBkW1C9+5H+9ZQEWn+YX4GXHUq9Pa
-         +zyI7PcWx2QK8klHQWL3P8JatyYCjho8j5Zyi8JpgoQg1tZcH9FKtctvNLFukeGDMur4
-         qNwsqaqmsFImdFQeZ5bswJq0wBvMm51FG0yqKeyfm7SC1TGM7Im97qDY8e0UPehHBJ1f
-         cNBw==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695399804; x=1696004604; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=AHg6WGFiYjr1HXimk+u+8jzAweDZw4kGMIG8TL93+tY=;
+        b=OBsj7UXuilNejuelWW2fSyBYD07C8b+34e0FOTN4n3KlejzV1K+XWcLhRpaK5m6KGD
+         THGrpY/rma2UsKaTmFeBNRrlkxNuz4FKuNer1xmH8BwKsVNnNwhhFg0Iwu/x3u7xySf3
+         Lkb7wVU55QxQGAXF4AlhBe/eXVXmj/cuwJeIiOrEzN1H6mXskj+UlPmBcwqKNFbF//ly
+         rlSStqMz1dyUuDFuJw4ANupuiK9djGXBrz55T/+4bjp6Xl2kzv2uAgFNujhveHHU2pwj
+         6AB01tdel60iujWkizWgJ1pZhVlTiaBe2NQwYMYUX/KCeP5JW/LQ62eyVFQDAUI/HYP+
+         tb2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695395894; x=1696000694;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=28ycCMVqr+jLHcID+cLGjL2F35QcRv/+OsF8PSg4e9w=;
-        b=XY7kKkHROaSr3WoOYSC8oX1uXAZQtlt4k1vwPaBW4GGJSkMGNQsdIMYF0/6h+74UiH
-         sooosB03lhfU0S76FITMBbahKlbeVSy4e6idI9jkKCBxiHCR9dGqilQ0hi+L9wuo5dAC
-         T6Mrb3s0OyDptPm0yubfl7FEdNvblM6Q1QzIx7n0iwQS/ABD/O2QEmrWo1/cgzu5//6Z
-         edFx6pGd6yZtrS9/9uSuIClHC3uoCHdc5ibOvgVTZdXsRIE2K/fFcIslHMtjDKBRUROE
-         lX3YfWchpDaTQ2cTVF3+5Mn78Fj5+zKa7CgYY/QFQLeaH1aJeIZv/mUphDlLDxAth73f
-         eQWQ==
-X-Gm-Message-State: AOJu0Yx12NogI1qMDhUU4+4BnxWqUWYney4uYv6+LnXTELuv9Zl7o/1y
-        RvaHB6WyMAhrTV60qgn4GMoBmQ==
-X-Google-Smtp-Source: AGHT+IEYqxKV/Zdv/b6QlfOjx23Mb/9uFyIcZZjiFtr8f5V9ahoe0eQHX3dZEw5wH7KcGntm/EnFFg==
-X-Received: by 2002:a05:6a21:4881:b0:14c:9a61:a310 with SMTP id av1-20020a056a21488100b0014c9a61a310mr7787505pzc.24.1695395893958;
-        Fri, 22 Sep 2023 08:18:13 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695399804; x=1696004604;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=AHg6WGFiYjr1HXimk+u+8jzAweDZw4kGMIG8TL93+tY=;
+        b=Z7a+PkuBw9BeJkEAnK0ky3WqK/0aJ5W+KKjsUeaGG8hxfWNtJXA/VzIXamxlIQUyOV
+         A++HcdmN3idKz773dpd3Qjihpm1yQEjrwa16IL7t8+zQ0LSgCtEx2OUcS+lJ5oOZUF2b
+         +Ql3VGnK+DgAcDT1M67uOJVEMVdy5P8lNW8qrOpRaNO3yFPhZKgq1Q3EyzCu/8feZPMJ
+         0Cxx0gebCqYo9gUiKSsPuz5NA8zM+quZ8BRcjt0DRta/3VSFThpNOoprs30vTBuCY3JD
+         RsaKvTt1C0LyM6FkBSr1PvrCf5L+xb8lK3AtJ0mgOBE0G5SZw/ZIiBFF0jemanN0dBdA
+         W3mw==
+X-Gm-Message-State: AOJu0YzY0ESMfD5BbvvgkO1C+sLhPtigXILHNonxahhHwkhw1ou7kElO
+        D5Pxs7Gyio5SVqRsJRJe81uS1Q==
+X-Google-Smtp-Source: AGHT+IFmxJwCFBncjjkZSaX6oosj8CqRhfXIommcUiSmAdtJAZgRc2IHT8A5lJUeO5ShWEdV/QZBwg==
+X-Received: by 2002:a05:6a20:7283:b0:134:73f6:5832 with SMTP id o3-20020a056a20728300b0013473f65832mr281394pzk.16.1695399803769;
+        Fri, 22 Sep 2023 09:23:23 -0700 (PDT)
 Received: from x1 ([2601:1c2:1800:f680:c44:77f:ca7d:adec])
-        by smtp.gmail.com with ESMTPSA id 6-20020a170902e9c600b001c1f4edfb87sm3614450plk.92.2023.09.22.08.18.12
+        by smtp.gmail.com with ESMTPSA id u25-20020a63a919000000b0057ab7d42a4dsm3249805pge.86.2023.09.22.09.23.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Sep 2023 08:18:13 -0700 (PDT)
-Date:   Fri, 22 Sep 2023 08:18:11 -0700
+        Fri, 22 Sep 2023 09:23:23 -0700 (PDT)
+Date:   Fri, 22 Sep 2023 09:23:21 -0700
 From:   Drew Fustini <dfustini@baylibre.com>
-To:     Conor Dooley <conor@kernel.org>
+To:     Xi Ruoyao <xry111@xry111.site>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -61,74 +62,73 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Paul Walmsley <paul.walmsley@sifive.com>,
         Palmer Dabbelt <palmer@dabbelt.com>,
         Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
         Robert Nelson <robertcnelson@beagleboard.org>,
         Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org
-Subject: Re: [PATCH 1/6] dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head
- TH1520 support
-Message-ID: <ZQ2tP48Z19C5xRug@x1>
+        Han Gao <gaohan@iscas.ac.cn>, Icenowy Zheng <uwu@icenowy.me>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org
+Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
+Message-ID: <ZQ2/eUKbW3wK7kHp@x1>
 References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <20230921-th1520-mmc-v1-1-49f76c274fb3@baylibre.com>
- <20230922-parish-ice-a22e93dc3027@spud>
+ <c1a4a7ab5c68c00dd8b3bb249c0371dbb8bcb929.camel@xry111.site>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20230922-parish-ice-a22e93dc3027@spud>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <c1a4a7ab5c68c00dd8b3bb249c0371dbb8bcb929.camel@xry111.site>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Sep 22, 2023 at 10:57:36AM +0100, Conor Dooley wrote:
-> Hey Drew,
-> 
-> On Thu, Sep 21, 2023 at 06:49:48PM -0700, Drew Fustini wrote:
-> > Add compatible value for the T-Head TH1520 dwcmshc controller and add
-> > thead,phy-pull-up property.
+On Fri, Sep 22, 2023 at 07:41:37PM +0800, Xi Ruoyao wrote:
+> On Thu, 2023-09-21 at 18:49 -0700, Drew Fustini wrote:
+> > This series adds support for the eMMC on the BeagleV Ahead and the
+> > Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
+> > eMMC.
 > > 
-> > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 4 ++++
-> >  1 file changed, 4 insertions(+)
+> > I tested on top of v6.6-rc2 with this config [1]. I was able to boot
+> > both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
+> > are required:
 > > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > index a43eb837f8da..46b768d46712 100644
-> > --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > @@ -19,6 +19,7 @@ properties:
-> >        - rockchip,rk3568-dwcmshc
-> >        - rockchip,rk3588-dwcmshc
-> >        - snps,dwcmshc-sdhci
-> > +      - thead,th1520-dwcmshc
-> >  
-> >    reg:
-> >      maxItems: 1
-> > @@ -60,6 +61,9 @@ properties:
-> >      description: Specify the number of delay for tx sampling.
-> >      $ref: /schemas/types.yaml#/definitions/uint8
-> >  
-> > +  thead,phy-pull-up:
-> > +    description: Enable weak pull-up on PHY pads
-> > +    type: boolean
+> >   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
+> > 
+> > I pushed a branch [5] with this patch series and the above patch for
+> > those that find a git branch easier to test.
+> > 
+> > Please note that only the MMC controller connected to the eMMC device
+> > is enabled in the device trees for these two boards. I did not yet
+> > attempt to configure and use the microSD card slot. My preference is to
+> > address that in a future patch series.
+> > 
+> > References:
+> > [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
+> > [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
+> > [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
+> > [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
+> > [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
 > 
-> Why is the weak pull-up required? How would the dts author know if they
-> need to use this property?
+> I've tested this branch and successfully booted a rootfs on Lichee Pi 4A
+> eMMC with rootdelay=10.
+> 
+> Curiously is there some way to make it work without rootdelay?
 
-This is a good question, and I don't have a good reason beyond it is
-what the vendor SDK was doing.
+Thank you for testing.
 
-There are only two boards right now using the TH1520 that I know of.
-Both the LPi4a [1] and the Ahead [2] have the pull-up property set on
-all the mmc controller nodes their downstream device trees.
+This is the kernel command line that I am using on both the lpi4 and
+the ahead:
 
-Rob suggested on #devicetree that it would be simpler to just enable it
-in the driver and disable support when needed. I like this idea as it
-will simplify this binding patch and the code in the driver patch.
+root=/dev/mmcblk0p3 ro rootfstype=ext4 rootwait console=ttyS0,115200
 
-Thanks,
-Drew
+I seem to recall that before I used rootwait that there would be a VFS
+oops because mmcblk0p3 didn't exist yet.
 
-[1] https://git.beagleboard.org/beaglev-ahead/BeagleBoard-DeviceTrees/-/blob/v5.10.x-ti-unified/src/riscv/light-beagle-ref.dts
-[2] https://github.com/revyos/thead-kernel/blob/lpi4a/arch/riscv/boot/dts/thead/light-lpi4a-ref.dts
+Have you tried rootwait instead of the 10 second delay?
+
+I imagine an enforced delay would be very annoying. With "rootwait", I
+don't notice any delay, it boots to the login prompt faster than I can
+read the text scrolling by during boot. (my rootfs is a simple
+buildroot).
+
+thanks,
+drew
