@@ -2,554 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 459C2E7D0B4
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Sep 2023 22:56:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E886DE7D0C0
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 01:51:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230357AbjIUW4H convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Sep 2023 18:56:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58482 "EHLO
+        id S230178AbjIVBvR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Sep 2023 21:51:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34332 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231406AbjIUWzs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2023 18:55:48 -0400
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A91FA4A32D;
-        Thu, 21 Sep 2023 10:14:24 -0700 (PDT)
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-68fcb4dc8a9so1111729b3a.2;
-        Thu, 21 Sep 2023 10:14:24 -0700 (PDT)
+        with ESMTP id S229473AbjIVBvQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Sep 2023 21:51:16 -0400
+Received: from mail-oi1-x22d.google.com (mail-oi1-x22d.google.com [IPv6:2607:f8b0:4864:20::22d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F757E8
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Sep 2023 18:51:09 -0700 (PDT)
+Received: by mail-oi1-x22d.google.com with SMTP id 5614622812f47-3adc3d94f66so1001520b6e.1
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Sep 2023 18:51:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695347469; x=1695952269; darn=vger.kernel.org;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=AdU57Jx9PEmIXARyS6MsKYI5yf8mmNXKxZvGJyz9CZ0=;
+        b=QniIRoY87sMEV/oz9MY1HtCu+GALB1T3w0zgnjNUCynTEV+9gbKJGfQS+5nJYpkXlz
+         UHB6FumCvDCj3EJJ8l4nVuOtQn8W94SzBi11XsmK4XofsAETnFCUKKtH5PJKfMWBEV4Z
+         SHeuU/De+E5v/uhrZqR+zMYO7nf8stxkTcs0+a4UbaOadRnwsPVLwhL/OJk8MtX7ElpV
+         nDFJYYwce/cOZaI+GNz8gg/1eTtN/U71vwjuepRW07eflQuRlHV2LGQJkXdDxdvFwbsV
+         dQv0bP+R1LLQVXO6uP3CmD5nJCCaTYFsDFN5miteS5CLtCR2wObu1Eca8vvGMsGypJrr
+         6Diw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695316381; x=1695921181;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20230601; t=1695347469; x=1695952269;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=UAHKG7R+6lgDEExNMzQpuzImNL/hQIVkiU8H9tQe9qs=;
-        b=qn1ShQ654vea/JyspgXm4BKzvAq1BI2+RQRKH9d3X0FIb2IiFf78005+9QVVMR6DlV
-         ZKKfkDmQCaVjdinLXXlQ3CPGr38xNL2WqGA+f7tWjjaoxnfuLWfx0o1y2S9zJzZiQ3al
-         h0BwA1r5Yv6BWpALyu5fRMtQHjBc03w6taidVd+sblAVBuUZe+KLhg/vj3DZIkSc9w8P
-         C9bgEbQVCSvoMRCI2pMHjYYaM+rVnfrFMzK7yNOPQP1vPU/MXer2l/5dDZ1dUPdyHGZF
-         r+LxrKQISxijzkRWLZjufc7I2GGlMPvTKxa86vGr/bE88Pwbcw7y0OQCW3lX7sQcneLL
-         IAuw==
-X-Gm-Message-State: AOJu0YxrDsTmr0Ae1sXNZ/bqQ6LRvLvcW87XWDrJEXGudQejZCDJbQDL
-        vCyzPvEjTtkzVasgHhAZxMbTS/9Q0S5R664I
-X-Google-Smtp-Source: AGHT+IE+DSffpVBY2fAYdjK9RqpHWFHeAABPgDSQcgdEstjFSu4XhYPWPAjjeOKcf3AXtNokRlDirA==
-X-Received: by 2002:a25:850e:0:b0:d0a:a1fa:b8e4 with SMTP id w14-20020a25850e000000b00d0aa1fab8e4mr5651126ybk.38.1695301687803;
-        Thu, 21 Sep 2023 06:08:07 -0700 (PDT)
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com. [209.85.128.173])
-        by smtp.gmail.com with ESMTPSA id z17-20020a258691000000b00d7e3e42d0c4sm308412ybk.53.2023.09.21.06.08.07
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 21 Sep 2023 06:08:07 -0700 (PDT)
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-59ed7094255so11814607b3.3;
-        Thu, 21 Sep 2023 06:08:07 -0700 (PDT)
-X-Received: by 2002:a81:c213:0:b0:58f:bda3:8dd with SMTP id
- z19-20020a81c213000000b0058fbda308ddmr5534159ywc.32.1695301687169; Thu, 21
- Sep 2023 06:08:07 -0700 (PDT)
+        bh=AdU57Jx9PEmIXARyS6MsKYI5yf8mmNXKxZvGJyz9CZ0=;
+        b=idkeg2dpiQiHqqA7UOT747x6XiJvfmCAdzVN+gp8MIB1W468P0GrAWeCIg8UrQfE2z
+         08m554252WOJ7UztrHiEXDv8KqImbed25JU9Vr5HAWYY9Wv8LQ7D5QKsJbstGBx54nrN
+         HwsW/oIpaHrCqAhmc+PX4Vz10Yzd+xIdSIP36iQreoFzexzJdDe77OyJxmqJ4QEwcHpV
+         9hz81DkswDxGL0YtjTHByJ4vivZ7nfbgnpLKALJ2gBprQxLNQCtpbYWgPzjgGAOBHA/B
+         PHAJgP1TFQt3w+5XeKbpxGg9wlaOh9sIZPJINbih6nYGi2BQVMf5l/5jWTuwEZU620/P
+         K6DQ==
+X-Gm-Message-State: AOJu0Yzo/SQ8zdCXxaopFTG8h+eauUInMTd4OoLUCS0kqMV+5MGozCS5
+        AdQCSifmJ/qn1FpKO2gD2x4a8A==
+X-Google-Smtp-Source: AGHT+IHBIOCNTfL32DX8sqcPvGCoAvfb0oRHov683BI2vSEw1XFpc+I3dbfeffGIcS9K8qEUO9NE9Q==
+X-Received: by 2002:a05:6870:3293:b0:1be:ccce:7991 with SMTP id q19-20020a056870329300b001beccce7991mr7369865oac.13.1695347469207;
+        Thu, 21 Sep 2023 18:51:09 -0700 (PDT)
+Received: from [127.0.1.1] ([2601:1c2:1800:f680:fa26:6227:be1c:67f0])
+        by smtp.gmail.com with ESMTPSA id y10-20020a63b50a000000b0057412d84d25sm1973856pge.4.2023.09.21.18.51.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 21 Sep 2023 18:51:08 -0700 (PDT)
+From:   Drew Fustini <dfustini@baylibre.com>
+Date:   Thu, 21 Sep 2023 18:49:48 -0700
+Subject: [PATCH 1/6] dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head TH1520
+ support
 MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com> <20230912045157.177966-28-claudiu.beznea.uj@bp.renesas.com>
-In-Reply-To: <20230912045157.177966-28-claudiu.beznea.uj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 21 Sep 2023 15:07:53 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWfa_vre2Y0nOwST4FZ5D8NZj7cOmhrvk+MaMTjNYM+uA@mail.gmail.com>
-Message-ID: <CAMuHMdWfa_vre2Y0nOwST4FZ5D8NZj7cOmhrvk+MaMTjNYM+uA@mail.gmail.com>
-Subject: Re: [PATCH 27/37] pinctrl: renesas: rzg2l: add support for different
- ds values on different groups
-To:     Claudiu <claudiu.beznea@tuxon.dev>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20230921-th1520-mmc-v1-1-49f76c274fb3@baylibre.com>
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+In-Reply-To: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>
+Cc:     Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+        linux-riscv@lists.infradead.org,
+        Drew Fustini <dfustini@baylibre.com>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1695347467; l=1067;
+ i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
+ bh=lVStiUHxeHbyNt2+zib4d2cdPudtKK6oNMBUQREoPOc=;
+ b=Q8id6rVsSYwP6E+iXtE8EEJBdpfTwGmm0EDwKwz276FYyD9CgqZLnz0ACffcwGavDc/d0fScS
+ a4r/IUtRvh1A4kShsI9oBwJNbY9Otbdr+VEmtnmc12pL4kS6vyLRKBn
+X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
+ pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Claudiu,
+Add compatible value for the T-Head TH1520 dwcmshc controller and add
+thead,phy-pull-up property.
+
+Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+---
+ Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index a43eb837f8da..46b768d46712 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -19,6 +19,7 @@ properties:
+       - rockchip,rk3568-dwcmshc
+       - rockchip,rk3588-dwcmshc
+       - snps,dwcmshc-sdhci
++      - thead,th1520-dwcmshc
+ 
+   reg:
+     maxItems: 1
+@@ -60,6 +61,9 @@ properties:
+     description: Specify the number of delay for tx sampling.
+     $ref: /schemas/types.yaml#/definitions/uint8
+ 
++  thead,phy-pull-up:
++    description: Enable weak pull-up on PHY pads
++    type: boolean
+ 
+ required:
+   - compatible
+
+-- 
+2.34.1
 
-Thanks for your patch!
-
-On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
->
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->
-> RZ/G3S supports different drive strenght values for different power sources
-
-strength
-
-> and pin groups (A, B, C). On each group there could be up to 4 drive
-> strength values per power source. Available power sources are 1v8, 2v5,
-> 3v3. Drive strength values are fine tuned than what was previously
-> available on the driver thus the necessity of having micro-amp support.
-> As drive strength and power source values are linked togheter the
-
-together
-
-> hardware setup for these was moved at the end of
-> rzg2l_pinctrl_pinconf_set() to ensure proper validation of the new
-> values.
->
-> The drive strength values are expected to be initialized though SoC
-> specific hardware configuration data structure.
->
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-
-> --- a/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-> +++ b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
-
-> @@ -133,27 +135,40 @@ struct rzg2l_register_offsets {
->         u16 sd_ch;
->  };
->
-> +/* Value to be passed on drive strength arrays as invalid value. */
-> +#define RZG2L_INVALID_IOLH_VAL (0xffff)
-
-I think you can do without this (see below).
-
-> +
->  /**
->   * enum rzg2l_iolh_index - starting indexes in IOLH specific arrays
-> + * @RZG2L_IOLH_IDX_1V8: starting index for 1V8 power source
-> + * @RZG2L_IOLH_IDX_2V5: starting index for 2V5 power source
->   * @RZG2L_IOLH_IDX_3V3: starting index for 3V3 power source
->   * @RZG2L_IOLH_IDX_MAX: maximum index
->   */
->  enum rzg2l_iolh_index {
-> -       RZG2L_IOLH_IDX_3V3 = 0,
-> -       RZG2L_IOLH_IDX_MAX = 4,
-> +       RZG2L_IOLH_IDX_1V8 = 0,
-> +       RZG2L_IOLH_IDX_2V5 = 4,
-> +       RZG2L_IOLH_IDX_3V3 = 8,
-> +       RZG2L_IOLH_IDX_MAX = 12,
->  };
->
->  /**
->   * struct rzg2l_hwcfg - hardware configuration data structure
->   * @regs: hardware specific register offsets
->   * @iolh_groupa_ua: IOLH group A micro amps specific values
-> + * @iolh_groupb_ua: IOLH group B micro amps specific values
-> + * @iolh_groupc_ua: IOLH group C micro amps specific values
-
-uA
-
->   * @iolh_groupb_oi: IOLH group B output impedance specific values
-> + * @drive_strength_ua: driver strenght in ua is supported (otherwise mA is supported)
-
-drive strength in uA
-
->   * @func_base: base number for port function (see register PFC)
->   */
->  struct rzg2l_hwcfg {
->         const struct rzg2l_register_offsets regs;
->         u16 iolh_groupa_ua[RZG2L_IOLH_IDX_MAX];
-> +       u16 iolh_groupb_ua[RZG2L_IOLH_IDX_MAX];
-> +       u16 iolh_groupc_ua[RZG2L_IOLH_IDX_MAX];
->         u16 iolh_groupb_oi[RZG2L_IOLH_IDX_MAX];
-> +       bool drive_strength_ua;
->         u8 func_base;
->  };
->
-
-> @@ -555,6 +584,164 @@ static void rzg2l_rmw_pin_config(struct rzg2l_pinctrl *pctrl, u32 offset,
->         spin_unlock_irqrestore(&pctrl->lock, flags);
->  }
->
-> +static int rzg2l_get_power_source(struct rzg2l_pinctrl *pctrl, u32 pin, u32 caps)
-> +{
-> +       const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
-> +       const struct rzg2l_register_offsets *regs = &hwcfg->regs;
-> +       unsigned long flags;
-> +       void __iomem *addr;
-> +       u32 pwr_reg;
-> +       u16 ps;
-> +
-> +       if (caps & PIN_CFG_IO_VMC_SD0)
-> +               pwr_reg = SD_CH(regs->sd_ch, 0);
-> +       else if (caps & PIN_CFG_IO_VMC_SD1)
-> +               pwr_reg = SD_CH(regs->sd_ch, 1);
-> +       else if (caps & PIN_CFG_IO_VMC_QSPI)
-> +               pwr_reg = QSPI;
-> +       else if (!(caps & PIN_CFG_SOFT_PS))
-> +               return -EINVAL;
-> +
-> +       spin_lock_irqsave(&pctrl->lock, flags);
-
-No need to take this spinlock
-(it was just moved, and wasn't needed before).
-
-> +       if (caps & PIN_CFG_SOFT_PS) {
-> +               ps = pctrl->settings[pin].power_source;
-> +       } else {
-> +               addr = pctrl->base + pwr_reg;
-> +               ps = (readl(addr) & PVDD_MASK) ? 1800 : 3300;
-> +       }
-> +       spin_unlock_irqrestore(&pctrl->lock, flags);
-
-I think the above can be simplified using a new caps_to_pwr_reg()
-helper:
-
-    if (caps & PIN_CFG_SOFT_PS)
-                return pctrl->settings[pin].power_source;
-
-    addr = pctrl->base + caps_to_pwr_reg(caps);
-    if (addr == (u32)-1)
-            return -EINVAL;
-
-    return (readl(addr) & PVDD_MASK) ? 1800 : 3300;
-
-BTW, if it wasn't for the initialization of settings[pin].power_source
-in rzg2l_pinctrl_register() using rzg2l_get_power_source() too, you
-could always return the cached value.
-
-> +
-> +       return ps;
-> +}
-> +
-> +static int rzg2l_set_power_source(struct rzg2l_pinctrl *pctrl, u32 pin, u32 caps, u32 ps)
-> +{
-> +       const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
-> +       const struct rzg2l_register_offsets *regs = &hwcfg->regs;
-> +       unsigned long flags;
-> +       void __iomem *addr;
-> +       u32 pwr_reg;
-> +
-> +       if (caps & PIN_CFG_IO_VMC_SD0)
-> +               pwr_reg = SD_CH(regs->sd_ch, 0);
-> +       else if (caps & PIN_CFG_IO_VMC_SD1)
-> +               pwr_reg = SD_CH(regs->sd_ch, 1);
-> +       else if (caps & PIN_CFG_IO_VMC_QSPI)
-> +               pwr_reg = QSPI;
-> +       else if (!(caps & PIN_CFG_SOFT_PS))
-> +               return -EINVAL;
-> +
-> +       addr = pctrl->base + pwr_reg;
-> +       spin_lock_irqsave(&pctrl->lock, flags);
-> +       if (!(caps & PIN_CFG_SOFT_PS))
-> +               writel((ps == 1800) ? PVDD_1800 : PVDD_3300, addr);
-> +       pctrl->settings[pin].power_source = ps;
-> +       spin_unlock_irqrestore(&pctrl->lock, flags);
-
-No need to take this spinlock
-(it was just moved, and wasn't needed before).
-
-> +
-> +       return 0;
-
-This function can be simplified in a similar way.
-
-> +}
-
-> +static u16 rzg2l_iolh_ua_to_val(const struct rzg2l_hwcfg *hwcfg, u32 caps,
-> +                               enum rzg2l_iolh_index ps_index, u16 ua)
-> +{
-> +       const u16 *array = NULL;
-> +       u16 i;
-> +
-> +       if (caps & PIN_CFG_IOLH_A)
-> +               array = &hwcfg->iolh_groupa_ua[ps_index];
-> +
-> +       if (caps & PIN_CFG_IOLH_B)
-> +               array = &hwcfg->iolh_groupb_ua[ps_index];
-> +
-> +       if (caps & PIN_CFG_IOLH_C)
-> +               array = &hwcfg->iolh_groupc_ua[ps_index];
-> +
-> +       if (!array)
-> +               return RZG2L_INVALID_IOLH_VAL;
-
-Just make the function return int, and return -EINVAL.
-
-> +
-> +       for (i = 0; i < 4; i++) {
-> +               if (array[i] == ua)
-> +                       return i;
-> +       }
-> +
-> +       return RZG2L_INVALID_IOLH_VAL;
-> +}
-> +
-> +static bool rzg2l_ds_supported(struct rzg2l_pinctrl *pctrl, u32 caps,
-
-rzg2l_ds_is_supported(), for consistency with rzg2l_ps_is_supported()
-
-> +                              enum rzg2l_iolh_index iolh_idx,
-> +                              u16 ds)
-> +{
-> +       const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
-> +       const u16 *array = NULL;
-> +       u16 i;
-> +
-> +       if (caps & PIN_CFG_IOLH_A)
-> +               array = hwcfg->iolh_groupa_ua;
-> +
-> +       if (caps & PIN_CFG_IOLH_B)
-> +               array = hwcfg->iolh_groupb_ua;
-> +
-> +       if (caps & PIN_CFG_IOLH_C)
-> +               array = hwcfg->iolh_groupc_ua;
-> +
-> +       /* Should not happen. */
-> +       if (!array)
-> +               return false;
-> +
-> +       if (array[iolh_idx] == RZG2L_INVALID_IOLH_VAL)
-
-If zero uA is considered an invalid value, this can be simplified to
-
-    if (!array[iolh_idx])
-
-> +               return false;
-> +
-> +       for (i = 0; i < 4; i++) {
-> +               if (array[iolh_idx + i] == ds)
-> +                       return true;
-> +       }
-> +
-> +       return false;
-> +}
-> +
->  static int rzg2l_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
->                                      unsigned int _pin,
->                                      unsigned long *config)
-
-> @@ -594,40 +779,50 @@ static int rzg2l_pinctrl_pinconf_get(struct pinctrl_dev *pctldev,
->                         return -EINVAL;
->                 break;
->
-> -       case PIN_CONFIG_POWER_SOURCE: {
-> -               u32 pwr_reg = 0x0;
-> -
-> -               if (cfg & PIN_CFG_IO_VMC_SD0)
-> -                       pwr_reg = SD_CH(regs->sd_ch, 0);
-> -               else if (cfg & PIN_CFG_IO_VMC_SD1)
-> -                       pwr_reg = SD_CH(regs->sd_ch, 1);
-> -               else if (cfg & PIN_CFG_IO_VMC_QSPI)
-> -                       pwr_reg = QSPI;
-> -               else
-> -                       return -EINVAL;
-> -
-> -               spin_lock_irqsave(&pctrl->lock, flags);
-> -               addr = pctrl->base + pwr_reg;
-> -               arg = (readl(addr) & PVDD_MASK) ? 1800 : 3300;
-> -               spin_unlock_irqrestore(&pctrl->lock, flags);
-> +       case PIN_CONFIG_POWER_SOURCE:
-> +               ret = rzg2l_get_power_source(pctrl, _pin, cfg);
-> +               if (ret < 0)
-> +                       return ret;
-> +               arg = ret;
->                 break;
-> -       }
->
->         case PIN_CONFIG_DRIVE_STRENGTH: {
->                 unsigned int index;
->
-> -               if (!(cfg & PIN_CFG_IOLH_A))
-> +               if (!(cfg & PIN_CFG_IOLH_A) || hwcfg->drive_strength_ua)
->                         return -EINVAL;
->
->                 index = rzg2l_read_pin_config(pctrl, IOLH(off), bit, IOLH_MASK);
-> +               /*
-> +                * Drive strenght mA is supported only by group A and only
-> +                * for 3V3 port source.
-> +                */
->                 arg = hwcfg->iolh_groupa_ua[index + RZG2L_IOLH_IDX_3V3] / 1000;
->                 break;
->         }
->
-> +       case PIN_CONFIG_DRIVE_STRENGTH_UA: {
-> +               enum rzg2l_iolh_index iolh_idx;
-> +               u8 val;
-> +
-> +               if (!(cfg & (PIN_CFG_IOLH_A | PIN_CFG_IOLH_B | PIN_CFG_IOLH_C)) ||
-> +                   !hwcfg->drive_strength_ua)
-> +                       return -EINVAL;
-> +
-> +               ret = rzg2l_get_power_source(pctrl, _pin, cfg);
-> +               if (ret < 0)
-> +                       return ret;
-> +               iolh_idx = rzg2l_ps_to_iolh_idx(ret);
-> +               val = rzg2l_read_pin_config(pctrl, IOLH(off), bit, IOLH_MASK);
-> +               arg = rzg2l_iolh_val_to_ua(hwcfg, cfg, iolh_idx + val);
-> +               break;
-> +       }
-> +
->         case PIN_CONFIG_OUTPUT_IMPEDANCE_OHMS: {
->                 unsigned int index;
->
-> -               if (!(cfg & PIN_CFG_IOLH_B))
-> +               if (!(cfg & PIN_CFG_IOLH_B) ||
-> +                   hwcfg->iolh_groupb_oi[0] == RZG2L_INVALID_IOLH_VAL)
-
-    !hwcfg->iolh_groupb_oi[0]
-
->                         return -EINVAL;
->
->                 index = rzg2l_read_pin_config(pctrl, IOLH(off), bit, IOLH_MASK);
-
-> @@ -730,11 +904,20 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
->                         break;
->                 }
->
-> +               case PIN_CONFIG_DRIVE_STRENGTH_UA:
-> +                       if (!(cfg & (PIN_CFG_IOLH_A | PIN_CFG_IOLH_B | PIN_CFG_IOLH_C)) ||
-> +                           !hwcfg->drive_strength_ua)
-> +                               return -EINVAL;
-> +
-> +                       settings.drive_strength_ua = pinconf_to_config_argument(_configs[i]);
-> +                       break;
-> +
->                 case PIN_CONFIG_OUTPUT_IMPEDANCE_OHMS: {
->                         unsigned int arg = pinconf_to_config_argument(_configs[i]);
->                         unsigned int index;
->
-> -                       if (!(cfg & PIN_CFG_IOLH_B))
-> +                       if (!(cfg & PIN_CFG_IOLH_B) ||
-> +                           hwcfg->iolh_groupb_oi[0] == RZG2L_INVALID_IOLH_VAL)
-
-!iolh_groupb_oi[0]
-
->                                 return -EINVAL;
->
->                         for (index = 0; index < ARRAY_SIZE(hwcfg->iolh_groupb_oi); index++) {
-> @@ -753,6 +936,47 @@ static int rzg2l_pinctrl_pinconf_set(struct pinctrl_dev *pctldev,
->                 }
->         }
->
-> +       /* Apply drive strength and power source. */
-> +       if (memcmp(&settings, &pctrl->settings[_pin], sizeof(settings))) {
-
-I'd rather invert the logic and return early here, so you can decrease
-indentation below...
-
-> +               enum rzg2l_iolh_index iolh_idx;
-> +               unsigned long flags;
-> +               int ret;
-> +               u16 val;
-> +
-> +               if (settings.power_source == pctrl->settings[_pin].power_source)
-> +                       goto apply_drive_strength;
-
-... and invert the logic here to avoid the goto:
-
-    if (settings.power_source != pctrl->settings[_pin].power_source)) {
-            ...
-> +
-> +               ret = rzg2l_ps_is_supported(settings.power_source);
-> +               if (!ret)
-> +                       return -EINVAL;
-> +
-> +               /* Apply power source. */
-> +               ret = rzg2l_set_power_source(pctrl, _pin, cfg, settings.power_source);
-> +               if (ret)
-> +                       return ret;
-> +
-
-    }
-
-> +apply_drive_strength:
-> +               if (settings.drive_strength_ua == pctrl->settings[_pin].drive_strength_ua)
-> +                       return 0;
-
-Same here:
-
-    if (settings.drive_strength_ua != pctrl->settings[_pin].drive_strength_ua) {
-            ...
-
-> +
-> +               iolh_idx = rzg2l_ps_to_iolh_idx(settings.power_source);
-> +               ret = rzg2l_ds_supported(pctrl, cfg, iolh_idx,
-> +                                        settings.drive_strength_ua);
-> +               if (!ret)
-> +                       return -EINVAL;
-> +
-> +               /* Get register value for this PS/DS tuple. */
-> +               val = rzg2l_iolh_ua_to_val(hwcfg, cfg, iolh_idx, settings.drive_strength_ua);
-> +               if (val == RZG2L_INVALID_IOLH_VAL)
-> +                       return -EINVAL;
-
-Make val int, and return val if it is a negative error code.
-
-> +
-> +               /* Apply drive strength. */
-> +               rzg2l_rmw_pin_config(pctrl, IOLH(off), bit, IOLH_MASK, val);
-> +               spin_lock_irqsave(&pctrl->lock, flags);
-> +               pctrl->settings[_pin].drive_strength_ua = settings.drive_strength_ua;
-> +               spin_unlock_irqrestore(&pctrl->lock, flags);
-
-No need to take the spinlock.
-
-> +       }
-> +
-
-And after that, you'll realize the memcmp() can just be dropped ;-)
-
->         return 0;
->  }
->
-> @@ -1459,6 +1683,7 @@ static int rzg2l_gpio_register(struct rzg2l_pinctrl *pctrl)
->
->  static int rzg2l_pinctrl_register(struct rzg2l_pinctrl *pctrl)
->  {
-> +       const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
->         struct pinctrl_pin_desc *pins;
->         unsigned int i, j;
->         u32 *pin_data;
-> @@ -1501,6 +1726,22 @@ static int rzg2l_pinctrl_register(struct rzg2l_pinctrl *pctrl)
->                 pins[index].drv_data = &pin_data[index];
->         }
->
-> +       pctrl->settings = devm_kzalloc(pctrl->dev, sizeof(*pctrl->settings) * pctrl->desc.npins,
-> +                                      GFP_KERNEL);
-
-devm_kcalloc()
-
-> +       if (!pctrl->settings)
-> +               return -ENOMEM;
-> +
-> +       for (i = 0; hwcfg->drive_strength_ua && i < pctrl->desc.npins; i++) {
-> +               if (pin_data[i] & PIN_CFG_SOFT_PS) {
-> +                       pctrl->settings[i].power_source = 3300;
-> +               } else {
-> +                       ret = rzg2l_get_power_source(pctrl, i, pin_data[i]);
-> +                       if (ret < 0)
-> +                               continue;
-> +                       pctrl->settings[i].power_source = ret;
-> +               }
-> +       }
-> +
->         ret = devm_pinctrl_register_and_init(pctrl->dev, &pctrl->desc, pctrl,
->                                              &pctrl->pctl);
->         if (ret) {
-> @@ -1574,6 +1815,8 @@ static const struct rzg2l_hwcfg rzg2l_hwcfg = {
->                 .sd_ch = 0x3000,
->         },
->         .iolh_groupa_ua = {
-> +               /* 1v8, 2v5 power source */
-> +               [RZG2L_IOLH_IDX_1V8 ... RZG2L_IOLH_IDX_3V3 - 1] = RZG2L_INVALID_IOLH_VAL,
-
-If zero uA is considered an invalid value, the initialization above can
-be dropped.
-
->                 /* 3v3 power source */
->                 [RZG2L_IOLH_IDX_3V3] = 2000, 4000, 8000, 12000,
->         },
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
