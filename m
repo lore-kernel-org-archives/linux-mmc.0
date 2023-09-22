@@ -2,124 +2,178 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB764CD4F45
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 09:57:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6E47CD4F53
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 10:24:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231764AbjIVJ5u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Sep 2023 05:57:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54106 "EHLO
+        id S233279AbjIVKYc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Sep 2023 06:24:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54266 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232940AbjIVJ5t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 05:57:49 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A1AF194;
-        Fri, 22 Sep 2023 02:57:43 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E69C9C433C7;
-        Fri, 22 Sep 2023 09:57:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1695376662;
-        bh=Lfg64vDBMqqMuekyEShYM/GguXqls4PxLGqLNLeMVQU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=t/RhEJc/+n34ONrY1ylE/pq0kRonnc5VfiydY7HWO0N7NLeIPD9XgdaKB7qtHPncW
-         w/KRdPGIAAuNEyrQQMZ+W1b8CwWq2Mm7oCk155jEUQgJnIw/dAIQQufz6XX0z5FUJm
-         j4IduZfdMbcSk22cStuwAjqbG2JFRFXzjrwPghF2COD60L6et/QMuPOaGxM22iGIoy
-         AO/NWv/iTykwQE3Xkn+ckgNaOBkbi+Yw3D5g82qapaTx9VY7iWO0PmAh0zSmHvESv5
-         j3HepWM0yPGlL3F674r9723GkHHfevPS/eC8ej8KuR5Vq6+Kjm5z6MNNRlHcj+5TnT
-         d13G5qryQ6mRA==
-Date:   Fri, 22 Sep 2023 10:57:36 +0100
-From:   Conor Dooley <conor@kernel.org>
-To:     Drew Fustini <dfustini@baylibre.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org
-Subject: Re: [PATCH 1/6] dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head
- TH1520 support
-Message-ID: <20230922-parish-ice-a22e93dc3027@spud>
-References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <20230921-th1520-mmc-v1-1-49f76c274fb3@baylibre.com>
+        with ESMTP id S232616AbjIVKYb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 06:24:31 -0400
+Received: from out2-smtp.messagingengine.com (out2-smtp.messagingengine.com [66.111.4.26])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD7D094;
+        Fri, 22 Sep 2023 03:24:25 -0700 (PDT)
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
+        by mailout.nyi.internal (Postfix) with ESMTP id B16D55C01FE;
+        Fri, 22 Sep 2023 06:24:22 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute6.internal (MEProxy); Fri, 22 Sep 2023 06:24:22 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:content-type:date:date:from:from:in-reply-to
+        :in-reply-to:message-id:mime-version:references:reply-to:sender
+        :subject:subject:to:to; s=fm1; t=1695378262; x=1695464662; bh=A0
+        XJfKTmT4m+q8kCLVyRa+uLfx4AGYjYo6nvHEPffdA=; b=GTD+dHmCDg7zufMm6p
+        oXcyZ+t63bJq7ylCADy4w931wBNORB8rG7UgSuVklWYaRFEuOu5aHNZPdmFLtMSB
+        z08eD/Nn6jXWMniDEwxD6LzsXcUQY4xp/b361ExdTROSjpzbetbVHE6P9YdNyyTk
+        FbqHNIjP2GQoOpdXqMlCic1dRIPLPsL8eMdwb9gzq9Zw/o1AtzkuzcCLyEBmv4vZ
+        h62U+uKA0DR84cWYdYFyqck9MZx3RBdh4J/6tHOGcr8DWS8xO5HYizYl8A2od3AC
+        N7ItA4WkWiLmcQ08OrP5ECW3BYkyKlTB3yWL0PvnpqGNd0Qw38ES8tZzGKWyV1Ys
+        HnAA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:content-type:date:date
+        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
+        :x-sasl-enc; s=fm2; t=1695378262; x=1695464662; bh=A0XJfKTmT4m+q
+        8kCLVyRa+uLfx4AGYjYo6nvHEPffdA=; b=XRMNJeYlK72hMxhN/3An8PUSvQ8Zs
+        vbI4+6agWjVM0MapR6INJWexsglDbkRUw7pMOeIsBfBSF1u+I+kdSQvu6VXoH+54
+        Z/11Tc1BobX2Np+7T6CZYURaptzhz+rjsXYOkbASJLozDJx5cK15NSxhAmYM/AUZ
+        2e/5zWEHJJ0/0Dh/sZCMk+2887tX7mUlo91limrXLcG3vC8EvaPFrtrEGYowlpVv
+        bJwczwlEqcyEZFYWJpM6WMohIUBeGFVTD3Nm0+YmHX/TYx7JUGeiE8thTOq/mSsD
+        xVTDZaCp7sMtOHrzFQyaurf9kLy1W5x/zJs1rN0uiPf3yxciqCOhWPvZw==
+X-ME-Sender: <xms:VWsNZbfMidwvWFraBYFRXS97Td5dBI8J6aWczIKGH9GzVo7dKde-ug>
+    <xme:VWsNZROwQmd7C5eHy7HCavTbeiJDi-sa8u40DwxSzQv57cVYG2cl6DVofq5gWmhO7
+    BdN_Ko9aLNudgs32Pw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedviedrudekkedgvdeiucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
+    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
+    htvghrnhepveefvdekgeejhfeggfejteeuieffhfevudeuudevtddukeejtedtteekveeg
+    geehnecuffhomhgrihhnpehlihgsvghrrgdrtghhrghtnecuvehluhhsthgvrhfuihiivg
+    eptdenucfrrghrrghmpehmrghilhhfrhhomheprghrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:VWsNZUhieqRV1B_7-A9rXHAwppqWiOJmbfNefxyUCnpIwmSi_LTZ-Q>
+    <xmx:VWsNZc_0q0vWpQNsjCzyvmhLDB2LiEAZ27YGR210PK2-VcJEDfzZqg>
+    <xmx:VWsNZXv6QCPeZDfkr-HcluIRtm_i5zyhivYKZ1VJ7SHdmx5ybHMDCQ>
+    <xmx:VmsNZQT1iCfOjJrZSE_aRFDPAoIBWBhFtEF6QCpv81Zg_gYD8WOK5w>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id EF820B60089; Fri, 22 Sep 2023 06:24:20 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.9.0-alpha0-761-gece9e40c48-fm-20230913.001-gece9e40c
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="eawcWMQ/3FYJXdeS"
-Content-Disposition: inline
-In-Reply-To: <20230921-th1520-mmc-v1-1-49f76c274fb3@baylibre.com>
+Message-Id: <68ca306c-5ea2-437e-b7f1-68bad88557a0@app.fastmail.com>
+In-Reply-To: <20230913214944.59804-7-blarson@amd.com>
+References: <20230913214944.59804-1-blarson@amd.com>
+ <20230913214944.59804-7-blarson@amd.com>
+Date:   Fri, 22 Sep 2023 06:24:00 -0400
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Brad Larson" <blarson@amd.com>,
+        linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        linux-spi@vger.kernel.org,
+        "Adrian Hunter" <adrian.hunter@intel.com>, alcooperx@gmail.com,
+        "Andy Shevchenko" <andy.shevchenko@gmail.com>,
+        brendan.higgins@linux.dev,
+        "Brian Norris" <briannorris@chromium.org>,
+        "Catalin Marinas" <catalin.marinas@arm.com>,
+        "Conor Dooley" <conor+dt@kernel.org>,
+        "David Gow" <davidgow@google.com>, gsomlo@gmail.com,
+        "Greg Ungerer" <gerg@linux-m68k.org>,
+        "Hal Feng" <hal.feng@starfivetech.com>,
+        "Hitomi Hasegawa" <hasegawa-hitomi@fujitsu.com>,
+        =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Emil Renner Berthing" <kernel@esmil.dk>,
+        "Krzysztof Kozlowski" <krzk@kernel.org>,
+        krzysztof.kozlowski+dt@linaro.org, "Lee Jones" <lee@kernel.org>,
+        "Lee Jones" <lee.jones@linaro.org>,
+        "Mark Brown" <broonie@kernel.org>,
+        "Philipp Zabel" <p.zabel@pengutronix.de>,
+        "Randy Dunlap" <rdunlap@infradead.org>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Samuel Holland" <samuel@sholland.org>,
+        "Serge Semin" <fancer.lancer@gmail.com>,
+        "Shuah Khan" <skhan@linuxfoundation.org>,
+        suravee.suthikulpanit@amd.com,
+        "Tom Lendacky" <thomas.lendacky@amd.com>,
+        "Tony Huang" <tonyhuang.sunplus@gmail.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>, vaishnav.a@ti.com,
+        "Walker Chen" <walker.chen@starfivetech.com>,
+        "Will Deacon" <will@kernel.org>,
+        "Yinbo Zhu" <zhuyinbo@loongson.cn>, devicetree@vger.kernel.org
+Subject: Re: [PATCH v16 6/6] soc: amd: Add support for AMD Pensando SoC Controller
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
---eawcWMQ/3FYJXdeS
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hey Drew,
-
-On Thu, Sep 21, 2023 at 06:49:48PM -0700, Drew Fustini wrote:
-> Add compatible value for the T-Head TH1520 dwcmshc controller and add
-> thead,phy-pull-up property.
->=20
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+On Wed, Sep 13, 2023, at 17:49, Brad Larson wrote:
+> The Pensando SoC controller is a SPI connected companion device
+> that is present in all Pensando SoC board designs.  The essential
+> board management registers are accessed on chip select 0 with
+> board mgmt IO support accessed using additional chip selects.
+>
+> Signed-off-by: Brad Larson <blarson@amd.com>
 > ---
->  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 4 ++++
->  1 file changed, 4 insertions(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yam=
-l b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index a43eb837f8da..46b768d46712 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -19,6 +19,7 @@ properties:
->        - rockchip,rk3568-dwcmshc
->        - rockchip,rk3588-dwcmshc
->        - snps,dwcmshc-sdhci
-> +      - thead,th1520-dwcmshc
-> =20
->    reg:
->      maxItems: 1
-> @@ -60,6 +61,9 @@ properties:
->      description: Specify the number of delay for tx sampling.
->      $ref: /schemas/types.yaml#/definitions/uint8
-> =20
-> +  thead,phy-pull-up:
-> +    description: Enable weak pull-up on PHY pads
-> +    type: boolean
+>
+> v15 changes:
+> - Drop custom ioctl and use existing miscdevice interface.
+> - Delete unused definitions in amd-pensando-ctrl.h 
+> - Makefile change to compile for ARCH_PENSANDO
 
-Why is the weak pull-up required? How would the dts author know if they
-need to use this property?
+Hi Brad,
 
-Thanks,
-Conor.
+I'm sorry I've been out of the loop for so long, and I hope
+we can find a way to manage your SoC support soon. My impression
+is that the normal support patches (1, 3, 4, and 5) are largely
+uncontroversial, while the SoC controller support seems like
+we are still not converging onto something that is ready to
+merge, so I would suggest you split the two parts and send
+the basic support for inclusion in linux-6.7 while we continue
+to discuss the soc controller driver.
 
-> =20
->  required:
->    - compatible
->=20
-> --=20
-> 2.34.1
->=20
+Please remove any references to the soc controller from the
+dts files and send that first series to:soc@kernel.org
+cc:linux-arm-kernel (and the other interested parties) so
+I can pick those up.
 
---eawcWMQ/3FYJXdeS
-Content-Type: application/pgp-signature; name="signature.asc"
+Regarding the soc controller driver, let me try to give
+you my impression of where we are:
 
------BEGIN PGP SIGNATURE-----
+- you have gone through 16 revisions already, which is way
+  too much for a public review, we should have been able
+  to find a solution earlier than that, and this is partly
+  our fault on the reviewer side, and I'm sorry about that.
 
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZQ1lEAAKCRB4tDGHoIJi
-0ur5AP9J83si/VNah9uXWQh6yWcqwodTBG01tc11Lr8CYSXRhAEAs3heA19N2euY
-iKJcToy85ytl2YnADrdTAOVK+RzGMgE=
-=kKS5
------END PGP SIGNATURE-----
+- Andy's latest comments and a lot of the earlier reviews
+  were focused on implementation details. While those comments
+  are helpful suggestions for improving the code, they miss
+  the larger point about the system design that I'm worried
+  about and probably don't help you actually get it merged.
 
---eawcWMQ/3FYJXdeS--
+- The main problem I still see is that this driver completely
+  bypasses our normal kernel abstractions and instead creates
+  a low-level passthrough interface for handling kernel
+  functionality in userspace. This creates a liability both
+  for the user ABI and the kernel implementation and prevents
+  any 
+
+- There is a chance that your design is in fact the
+  best way to handle this particular hardware, but it is
+  your job to write a convincing explanation of why this
+  platform is different from all the others in the patch
+  description. Your current one-paragraph text does not
+  explain this at all.
+ 
+I would suggest you prioritize getting the other patches
+included for the moment, but we can keep discussion the
+API design for this driver either in this thread or on the
+#armlinux IRC channel (irc.libera.chat) in parallel if you
+like. In order to help you here, I would need either
+the documentation of the SPI software interface, or the
+source code for the userspace tool.
+
+     Arnd 
