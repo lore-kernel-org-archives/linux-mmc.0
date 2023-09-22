@@ -2,121 +2,135 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 913FECD4847
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 18:00:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7077CCD4852
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 19:08:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233158AbjIVSAO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Sep 2023 14:00:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59220 "EHLO
+        id S231209AbjIVTIu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Sep 2023 15:08:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33146 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234318AbjIVSAH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 14:00:07 -0400
-Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2784A1BEA
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 10:52:51 -0700 (PDT)
-Received: by mail-pl1-x632.google.com with SMTP id d9443c01a7336-1bf6ea270b2so21357115ad.0
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 10:52:51 -0700 (PDT)
+        with ESMTP id S233816AbjIVTIt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 15:08:49 -0400
+Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55FD1C1;
+        Fri, 22 Sep 2023 12:08:43 -0700 (PDT)
+Received: by mail-ua1-x934.google.com with SMTP id a1e0cc1a2514c-7ab9488f2f0so154971241.3;
+        Fri, 22 Sep 2023 12:08:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1695405171; x=1696009971; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=eKO7HZA7note+xxP86iPyjMQTezIOPPmqe4sHJnTuiU=;
-        b=chHLRQ3imy6l+WvL3/9yPEvGEVvSJJW0yxJbVMVuXHzWOVShRXSo0P/rJ2VT6ODRUR
-         eCshQqm3zy8L7phIxMpNSJMdWW7ZVRR/AEdfWovJRYUiDzwr/BeEVd0e0o1EwUhRzWMk
-         1tjAI4gMNE56/5fW+W3U5Q0y2L6ImFUnoj5mY=
+        d=gmail.com; s=20230601; t=1695409722; x=1696014522; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=7L9HvqDP5WJky24lmHONuk63n7kfCDpjCwpcpj0vxMA=;
+        b=Mi/5vk+W/rYXHqn8ZjMSE9WEFZH0UK7eboKSAemx5t8p+j3rx10R6ryXBV2eNPVYUH
+         ZjIZtkGDXkNAX0oRqMElAMSG4aqM3FFF8bnYRw3b0lAqz6WhggA9Twffra4v2YVh762M
+         HLOwXm6xq5QAc9WEqrIj9TuH0Y7FEDSaM+wJ1S4s1/+9/RpuUQR07ZWXdfhhVf3B8fsw
+         gQKPjXVrC02FzTfeDs2IhfL+cDP3FYPvvc758rU6FKUjbd+RtCYxbOv7oLaszwFQyVDT
+         R6M9QUggKVTVVpyztzqE2Cbsxn+QqcZMItykOsZzB+M8JE5BzPNquVt3Fs7YIgacy3S/
+         dnJw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695405171; x=1696009971;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=eKO7HZA7note+xxP86iPyjMQTezIOPPmqe4sHJnTuiU=;
-        b=XB9dVJKjxbIuZTjUjcahTf3l3vzVsUEFE5EOnYlaVVuQMAw70wti4EuS/6u3wqomcP
-         9byZuFcVTzLD0Tbn7vEzmzcqpIs1vky9lfWNTdG56tvTqy6WkQN3sSXAsjmqGotD2ePo
-         9gyfkhwMdu4fmqV5Wyd7ZDBiNAxg1siLCJbqWK7m6hkDeRjicG9mclXQqtUFjD1qasS9
-         2HJJzVWnigucKPo9wOGkxVBzt67PIXeCPaeMiBx3HmPQALR9kTNOxykV4udBNG+sXicZ
-         pw2QWKKpgsxmZNOHWJqs+2sLrJDRNDWrCfRHwOaxCLyLKvZLu3i3ekyEeF/q/gU+2xmh
-         /smQ==
-X-Gm-Message-State: AOJu0YxoPpGeUgAhr75RPNldX1PABFVoRwcuml1KxPBsRqrC22+s4VoM
-        d6gDnuhHSnM5G6g6/A8bN0sh+Q==
-X-Google-Smtp-Source: AGHT+IFaViTplprBwLRsyLm+3YZWtewV01aqBFowvprcsZQclymf5ubRmD+3j2W/qAbz4TplZJUwAg==
-X-Received: by 2002:a17:90b:b05:b0:268:352c:9d13 with SMTP id bf5-20020a17090b0b0500b00268352c9d13mr496040pjb.0.1695405171425;
-        Fri, 22 Sep 2023 10:52:51 -0700 (PDT)
-Received: from www.outflux.net (198-0-35-241-static.hfc.comcastbusiness.net. [198.0.35.241])
-        by smtp.gmail.com with ESMTPSA id z2-20020a17090a1fc200b00263b9e75aecsm3834838pjz.41.2023.09.22.10.52.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Sep 2023 10:52:51 -0700 (PDT)
-From:   Kees Cook <keescook@chromium.org>
-To:     Maxim Levitsky <maximlevitsky@gmail.com>
-Cc:     Kees Cook <keescook@chromium.org>, Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Tom Rix <trix@redhat.com>, Len Baker <len.baker@gmx.com>,
-        Dan Carpenter <error27@gmail.com>,
-        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
-        linux-mmc@vger.kernel.org, Nathan Chancellor <nathan@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
-        linux-hardening@vger.kernel.org
-Subject: [PATCH] memstick: jmb38x_ms: Annotate struct jmb38x_ms with __counted_by
-Date:   Fri, 22 Sep 2023 10:52:50 -0700
-Message-Id: <20230922175249.work.593-kees@kernel.org>
-X-Mailer: git-send-email 2.34.1
+        d=1e100.net; s=20230601; t=1695409722; x=1696014522;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=7L9HvqDP5WJky24lmHONuk63n7kfCDpjCwpcpj0vxMA=;
+        b=mzqaorlbKx7AILa+GmrMOYFm0SX1NB+WAGOLbK9MCFoDLMwn8RODJob1F6H/WJb9ju
+         yalJxAzber2cDQhGWE0uK295JYTg4HH9Yc9NmQxtFZvE00PrfHPnfqzpXLpf1/czWwGn
+         100F/f7FoDSJES1mBlAjQbegHPe3HVAiuQfXbM8mobiR4pC5PktaG9IH24Zipa5yxeRE
+         ar74V+zN03eIMKPsAkqrNLzLwCsYw6K+PV4ioEJxIgtK/B4NwZulEqFAKtbfFnnCg/3j
+         s3jFGXAGidVLS17LCu7+ue1EBDKPqthrDXBeGXiwWDwg7KdPnr6eZsiT5cfCMm/lFCZO
+         7IoA==
+X-Gm-Message-State: AOJu0YyepZU/X4ZmhCabvyz6AYIPGnlciE3roy9w0dPznuyddDFLRflH
+        edZAz19Th+Vo5oZhzbXklQ9MT/Vvixu3TX84djQ=
+X-Google-Smtp-Source: AGHT+IEIuHwatFh1RJWylUlf8xGj74/AAV7K6EqAqxS9YaAsvTvQZCNSlpedgXwBetK5NHqFPcDAKpBDiR2hEQSg3vk=
+X-Received: by 2002:a1f:ed45:0:b0:490:29bb:670b with SMTP id
+ l66-20020a1fed45000000b0049029bb670bmr114533vkh.12.1695409722407; Fri, 22 Sep
+ 2023 12:08:42 -0700 (PDT)
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1429; i=keescook@chromium.org;
- h=from:subject:message-id; bh=IYB/5z7VQPpaTtnk20ryAqWUCT0rzInyLePi0vxIKHI=;
- b=owEBbQKS/ZANAwAKAYly9N/cbcAmAcsmYgBlDdRx1X2xU9/fAJc4ZPAebmwE5hH3qrgWsM1dw
- vLMDlH/bXeJAjMEAAEKAB0WIQSlw/aPIp3WD3I+bhOJcvTf3G3AJgUCZQ3UcQAKCRCJcvTf3G3A
- JmkPEACRHShf/0k3dIPbAkc3C7PfZIdI1FQTAFGzE/GaNVBsm8T3tTI5WyNX3UFKuEjxENQnu1i
- cIYrj0Y3gqh34Y9l8ITYPOB/LSIlCaUWFZnvaTXa45XGrQbSO56fQGjzVUrUCTh/8CVTrNd7Tos
- hNTn7XpmKZh9ZnJhKI88D5dF7sBRTLSe2ONhHcLmuBtsJ0EYUARWlMX7NprBWotDGgYR3p7JrzZ
- 81CmSQ3dCxRW+Yf3wKwwsIKcFsH/7LnYoC3GflvxAh7ux8B7/1GWu7yiZC9tMdwIYeTpQE7jFKZ
- dTcqeNNIH6RqJvX2Sn5Fy3/iHIZgETt5fYlYXbn0hLbBJV5JMu+sKBGjm8LaGIdtlq9W+CAOVEz
- TVy0Z9o7xicwh/FMfEouStlbJBn+2kyVUy0ahd7OWlXKaS7ARVyD36XPJ2XYQaCSbhHhZC4kA8I
- m5cI+RxKRK3fvFjkS3RoWpKXCH8gTrrp9Vl7LwUjXs0YouI3xIdbmi4JF2pg61MK6onmsXLIyKl
- vQuZCZ8SADPi3mumw+zC78p62HxeGpgHUhyUC54yRGesI4P+D8b2jZd4yFmUxY0RU5hC/DDPE9B
- EkMVoryyGfhne1hZmeF0BWN2XMnP6xpRHxsSOLzQCsLowor7oQ0hoqaj1Lasy4pG7CSZQyHwyGw
- 0S0YD41 /KOE3bOA==
-X-Developer-Key: i=keescook@chromium.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
-Content-Transfer-Encoding: 8bit
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+In-Reply-To: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+From:   Robert Nelson <robertcnelson@gmail.com>
+Date:   Fri, 22 Sep 2023 14:08:16 -0500
+Message-ID: <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
+To:     Drew Fustini <dfustini@baylibre.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Prepare for the coming implementation by GCC and Clang of the __counted_by
-attribute. Flexible array members annotated with __counted_by can have
-their accesses bounds-checked at run-time checking via CONFIG_UBSAN_BOUNDS
-(for array indexing) and CONFIG_FORTIFY_SOURCE (for strcpy/memcpy-family
-functions).
+On Thu, Sep 21, 2023 at 8:51=E2=80=AFPM Drew Fustini <dfustini@baylibre.com=
+> wrote:
+>
+> This series adds support for the eMMC on the BeagleV Ahead and the
+> Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
+> eMMC.
+>
+> I tested on top of v6.6-rc2 with this config [1]. I was able to boot
+> both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
+> are required:
+>
+>   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
+>
+> I pushed a branch [5] with this patch series and the above patch for
+> those that find a git branch easier to test.
+>
+> Please note that only the MMC controller connected to the eMMC device
+> is enabled in the device trees for these two boards. I did not yet
+> attempt to configure and use the microSD card slot. My preference is to
+> address that in a future patch series.
+>
+> References:
+> [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
+> [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
+> [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
+> [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@ker=
+nel.org/
+> [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
 
-As found with Coccinelle[1], add __counted_by for struct jmb38x_ms.
+This patchset came out very nice!
 
-[1] https://github.com/kees/kernel-tools/blob/trunk/coccinelle/examples/counted_by.cocci
+v6.6-rc2 with Last RFC v2:
 
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Alex Dubov <oakad@yahoo.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tom Rix <trix@redhat.com>
-Cc: Len Baker <len.baker@gmx.com>
-Cc: Dan Carpenter <error27@gmail.com>
-Cc: "Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Kees Cook <keescook@chromium.org>
----
- drivers/memstick/host/jmb38x_ms.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+[    4.066630] mmc0: SDHCI controller on ffe7080000.mmc
+[ffe7080000.mmc] using PIO
 
-diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
-index 21cb2a786058..e77eb8b0eb12 100644
---- a/drivers/memstick/host/jmb38x_ms.c
-+++ b/drivers/memstick/host/jmb38x_ms.c
-@@ -66,7 +66,7 @@ struct jmb38x_ms_host {
- struct jmb38x_ms {
- 	struct pci_dev        *pdev;
- 	int                   host_cnt;
--	struct memstick_host  *hosts[];
-+	struct memstick_host  *hosts[] __counted_by(host_cnt);
- };
- 
- #define BLOCK_COUNT_MASK       0xffff0000
--- 
-2.34.1
+debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
 
+/dev/mmcblk0:
+ Timing cached reads:   1516 MB in  2.00 seconds =3D 758.09 MB/sec
+ Timing buffered disk reads:  84 MB in  3.01 seconds =3D  27.94 MB/sec
+
+vs v6.6-rc2 with this patchset:
+
+ [    4.096837] mmc0: SDHCI controller on ffe7080000.mmc
+[ffe7080000.mmc] using DMA
+
+debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+
+/dev/mmcblk0:
+ Timing cached reads:   1580 MB in  2.00 seconds =3D 790.97 MB/sec
+ Timing buffered disk reads: 418 MB in  3.00 seconds =3D 139.11 MB/sec
+
+Regards,
+
+--=20
+Robert Nelson
+https://rcn-ee.com/
