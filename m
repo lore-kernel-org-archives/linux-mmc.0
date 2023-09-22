@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2570BE7D0CF
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 06:28:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71431E7D0D0
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 06:28:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229758AbjIVG2s convert rfc822-to-8bit (ORCPT
+        id S229862AbjIVG2u convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Sep 2023 02:28:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44460 "EHLO
+        Fri, 22 Sep 2023 02:28:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44468 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229605AbjIVG2r (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 02:28:47 -0400
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49761CE;
-        Thu, 21 Sep 2023 23:28:41 -0700 (PDT)
+        with ESMTP id S229809AbjIVG2t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 02:28:49 -0400
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBD6C102;
+        Thu, 21 Sep 2023 23:28:43 -0700 (PDT)
 Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
         (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
         (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id BDC8324E289;
-        Fri, 22 Sep 2023 14:28:38 +0800 (CST)
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 26FF324E2B9;
+        Fri, 22 Sep 2023 14:28:37 +0800 (CST)
 Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX165.cuchost.com
  (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 22 Sep
- 2023 14:28:39 +0800
+ 2023 14:28:37 +0800
 Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
  by EXMBX168.cuchost.com (172.16.6.78) with Microsoft SMTP Server (TLS) id
- 15.0.1497.42; Fri, 22 Sep 2023 14:28:37 +0800
+ 15.0.1497.42; Fri, 22 Sep 2023 14:28:36 +0800
 From:   William Qiu <william.qiu@starfivetech.com>
 To:     <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         <linux-riscv@lists.infradead.org>, <linux-mmc@vger.kernel.org>
@@ -39,9 +39,9 @@ CC:     Emil Renner Berthing <kernel@esmil.dk>,
         "Palmer Dabbelt" <palmer@dabbelt.com>,
         Albert Ou <aou@eecs.berkeley.edu>,
         William Qiu <william.qiu@starfivetech.com>
-Subject: [PATCH v3 3/3] riscv: dts: starfive: add assigned-clock* to limit frquency
-Date:   Fri, 22 Sep 2023 14:28:34 +0800
-Message-ID: <20230922062834.39212-4-william.qiu@starfivetech.com>
+Subject: [PATCH v3 1/3] dt-bindings: mmc: Remove properties from required
+Date:   Fri, 22 Sep 2023 14:28:32 +0800
+Message-ID: <20230922062834.39212-2-william.qiu@starfivetech.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230922062834.39212-1-william.qiu@starfivetech.com>
 References: <20230922062834.39212-1-william.qiu@starfivetech.com>
@@ -56,36 +56,34 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In JH7110 SoC, we need to go by-pass mode, so we need add the
-assigned-clock* properties to limit clock frquency.
+Due to the change of tuning implementation, it's no longer necessary to
+use the "starfive,sysreg" property in dts, so remove it from required.
 
 Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
+Reviewed-by: Emil Renner Berthing <emil.renner.berthing@canonical.com>
 ---
- .../riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
+ Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
-index d79f94432b27..d1f2ec308bca 100644
---- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
-+++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
-@@ -205,6 +205,8 @@ &i2c6 {
+diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+index 51e1b04e799f..553a75195c2e 100644
+--- a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
++++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+@@ -55,7 +55,6 @@ required:
+   - clocks
+   - clock-names
+   - interrupts
+-  - starfive,sysreg
  
- &mmc0 {
- 	max-frequency = <100000000>;
-+	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
-+	assigned-clock-rates = <50000000>;
- 	bus-width = <8>;
- 	cap-mmc-highspeed;
- 	mmc-ddr-1_8v;
-@@ -221,6 +223,8 @@ &mmc0 {
+ unevaluatedProperties: false
  
- &mmc1 {
- 	max-frequency = <100000000>;
-+	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
-+	assigned-clock-rates = <50000000>;
- 	bus-width = <4>;
- 	no-sdio;
- 	no-mmc;
+@@ -73,5 +72,4 @@ examples:
+         fifo-depth = <32>;
+         fifo-watermark-aligned;
+         data-addr = <0>;
+-        starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
+     };
 -- 
 2.34.1
 
