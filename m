@@ -2,133 +2,119 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77E91CD4844
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 16:23:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C3AECD4844
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 16:36:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229579AbjIVQXc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Sep 2023 12:23:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59982 "EHLO
+        id S232492AbjIVQgS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Sep 2023 12:36:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229983AbjIVQXb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 12:23:31 -0400
-Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BC9F196
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 09:23:24 -0700 (PDT)
-Received: by mail-pf1-x42b.google.com with SMTP id d2e1a72fcca58-68cbbff84f6so2715704b3a.1
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 09:23:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695399804; x=1696004604; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=AHg6WGFiYjr1HXimk+u+8jzAweDZw4kGMIG8TL93+tY=;
-        b=OBsj7UXuilNejuelWW2fSyBYD07C8b+34e0FOTN4n3KlejzV1K+XWcLhRpaK5m6KGD
-         THGrpY/rma2UsKaTmFeBNRrlkxNuz4FKuNer1xmH8BwKsVNnNwhhFg0Iwu/x3u7xySf3
-         Lkb7wVU55QxQGAXF4AlhBe/eXVXmj/cuwJeIiOrEzN1H6mXskj+UlPmBcwqKNFbF//ly
-         rlSStqMz1dyUuDFuJw4ANupuiK9djGXBrz55T/+4bjp6Xl2kzv2uAgFNujhveHHU2pwj
-         6AB01tdel60iujWkizWgJ1pZhVlTiaBe2NQwYMYUX/KCeP5JW/LQ62eyVFQDAUI/HYP+
-         tb2g==
+        with ESMTP id S230396AbjIVQgR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 12:36:17 -0400
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7E96194
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 09:36:10 -0700 (PDT)
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 042743F68C
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 16:36:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1695400569;
+        bh=RKbV4MhZk6b87JTksm1ZK/ObuKYUjj6Uoe+MaWe9BjM=;
+        h=From:In-Reply-To:References:Mime-Version:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=axOpRfO6PfpGE2I6/iuXN+52W8z6r6OeH/Putaats6zPZaj53Dvhp17aXUAxdRWu5
+         ARyhyDJlAy011T75vqdIstcXohjwNuE9NJ9/BpiHYEW6ha3abGBvVcGCHJrWuavJEa
+         jVYe0AFjuoVvx7rU67/b4DN27aK83U1cNEBEeDRWRyuYHn+7gH2sRxc2z1I80LH+w4
+         viJhXqHe8vZHK1y2X6YfIaMHNjgvb5z4BKvbwJEUxts/BsRziTfGT+cOzHhaN6vJ6f
+         woJCMZ/C4mmJlSBFEpZYV+aM8kPzQg2knJFvvu+u4XUy5/WwCXGt8G6f369VYTh8dD
+         ri+78Vh6Q3YJQ==
+Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-417f94d6938so10811641cf.3
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Sep 2023 09:36:08 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695399804; x=1696004604;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=AHg6WGFiYjr1HXimk+u+8jzAweDZw4kGMIG8TL93+tY=;
-        b=Z7a+PkuBw9BeJkEAnK0ky3WqK/0aJ5W+KKjsUeaGG8hxfWNtJXA/VzIXamxlIQUyOV
-         A++HcdmN3idKz773dpd3Qjihpm1yQEjrwa16IL7t8+zQ0LSgCtEx2OUcS+lJ5oOZUF2b
-         +Ql3VGnK+DgAcDT1M67uOJVEMVdy5P8lNW8qrOpRaNO3yFPhZKgq1Q3EyzCu/8feZPMJ
-         0Cxx0gebCqYo9gUiKSsPuz5NA8zM+quZ8BRcjt0DRta/3VSFThpNOoprs30vTBuCY3JD
-         RsaKvTt1C0LyM6FkBSr1PvrCf5L+xb8lK3AtJ0mgOBE0G5SZw/ZIiBFF0jemanN0dBdA
-         W3mw==
-X-Gm-Message-State: AOJu0YzY0ESMfD5BbvvgkO1C+sLhPtigXILHNonxahhHwkhw1ou7kElO
-        D5Pxs7Gyio5SVqRsJRJe81uS1Q==
-X-Google-Smtp-Source: AGHT+IFmxJwCFBncjjkZSaX6oosj8CqRhfXIommcUiSmAdtJAZgRc2IHT8A5lJUeO5ShWEdV/QZBwg==
-X-Received: by 2002:a05:6a20:7283:b0:134:73f6:5832 with SMTP id o3-20020a056a20728300b0013473f65832mr281394pzk.16.1695399803769;
-        Fri, 22 Sep 2023 09:23:23 -0700 (PDT)
-Received: from x1 ([2601:1c2:1800:f680:c44:77f:ca7d:adec])
-        by smtp.gmail.com with ESMTPSA id u25-20020a63a919000000b0057ab7d42a4dsm3249805pge.86.2023.09.22.09.23.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Sep 2023 09:23:23 -0700 (PDT)
-Date:   Fri, 22 Sep 2023 09:23:21 -0700
-From:   Drew Fustini <dfustini@baylibre.com>
-To:     Xi Ruoyao <xry111@xry111.site>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        d=1e100.net; s=20230601; t=1695400568; x=1696005368;
+        h=cc:to:subject:message-id:date:mime-version:references:in-reply-to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=RKbV4MhZk6b87JTksm1ZK/ObuKYUjj6Uoe+MaWe9BjM=;
+        b=ciaDIWDcvAAkI6Jc9Vsrk0Arn1NM3S9fV4lzpwktmKLvLKvnrOALuenmT16oLRhcy0
+         rNcSmTrXil4iryv8rFCSPCgXHBAvdKB5UQggjTqOznu+plvw6AFdSRdnlBmmfNjU2Lbw
+         1C+cdRAKRNQLi6ius8PJfIjyGRaiqL6gV2eTD0kqSBelhUjIv+Yg35VVHBX0WnqJLoRV
+         WPTnosQNns0JEA3rmdwP8T3Knuo+NBG5OCsF3/bwn1DqnZBWnwSWnbhzSYxabwKwv9ej
+         JepFyQrCH2FwadxASTaCI447pHKJ8PoAIop0PsUp3OZePJKsVnDH32X95fKsGI4v2oqv
+         rpTA==
+X-Gm-Message-State: AOJu0YzhZ3p4qXHj8DKMmq4kC0c5KAroo3ZPEgwSi5wkiqg8oemKpBDU
+        FBCZ8+QBF5DYvTbu1mjJqqOYwDKkdGZvLPglnkJ2kR4TJJSL/m/HJuI3IQGLib5RGb22RCqycyd
+        3vwhtWV3bKti1XWluAm8nx/tibN8bDRDNKt2TqgjryyZJCWSusbOKJA==
+X-Received: by 2002:a05:622a:1a9b:b0:400:9c4e:2abe with SMTP id s27-20020a05622a1a9b00b004009c4e2abemr9153635qtc.13.1695400568114;
+        Fri, 22 Sep 2023 09:36:08 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHtMOJCOBegPGfmaYPe4P541XIPb9WGKoNNQRopHdNvUyr6IlUhMeHDT069xvrKjurwJHkDV/lgU//1vjPUCGw=
+X-Received: by 2002:a05:622a:1a9b:b0:400:9c4e:2abe with SMTP id
+ s27-20020a05622a1a9b00b004009c4e2abemr9153614qtc.13.1695400567857; Fri, 22
+ Sep 2023 09:36:07 -0700 (PDT)
+Received: from 348282803490 named unknown by gmailapi.google.com with
+ HTTPREST; Fri, 22 Sep 2023 11:36:07 -0500
+From:   Emil Renner Berthing <emil.renner.berthing@canonical.com>
+In-Reply-To: <20230922062834.39212-4-william.qiu@starfivetech.com>
+References: <20230922062834.39212-1-william.qiu@starfivetech.com> <20230922062834.39212-4-william.qiu@starfivetech.com>
+Mime-Version: 1.0
+Date:   Fri, 22 Sep 2023 11:36:07 -0500
+Message-ID: <CAJM55Z-huG6KSLywzA0Zih=MtzqvL0w+CxrqN7CKUrzor_A65g@mail.gmail.com>
+Subject: Re: [PATCH v3 3/3] riscv: dts: starfive: add assigned-clock* to limit frquency
+To:     William Qiu <william.qiu@starfivetech.com>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc:     Emil Renner Berthing <kernel@esmil.dk>,
         Rob Herring <robh+dt@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Conor Dooley <conor+dt@kernel.org>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
         Paul Walmsley <paul.walmsley@sifive.com>,
         Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Han Gao <gaohan@iscas.ac.cn>, Icenowy Zheng <uwu@icenowy.me>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org
-Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
-Message-ID: <ZQ2/eUKbW3wK7kHp@x1>
-References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <c1a4a7ab5c68c00dd8b3bb249c0371dbb8bcb929.camel@xry111.site>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <c1a4a7ab5c68c00dd8b3bb249c0371dbb8bcb929.camel@xry111.site>
+        Albert Ou <aou@eecs.berkeley.edu>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Sep 22, 2023 at 07:41:37PM +0800, Xi Ruoyao wrote:
-> On Thu, 2023-09-21 at 18:49 -0700, Drew Fustini wrote:
-> > This series adds support for the eMMC on the BeagleV Ahead and the
-> > Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
-> > eMMC.
-> > 
-> > I tested on top of v6.6-rc2 with this config [1]. I was able to boot
-> > both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
-> > are required:
-> > 
-> >   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
-> > 
-> > I pushed a branch [5] with this patch series and the above patch for
-> > those that find a git branch easier to test.
-> > 
-> > Please note that only the MMC controller connected to the eMMC device
-> > is enabled in the device trees for these two boards. I did not yet
-> > attempt to configure and use the microSD card slot. My preference is to
-> > address that in a future patch series.
-> > 
-> > References:
-> > [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
-> > [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
-> > [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
-> > [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
-> > [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
-> 
-> I've tested this branch and successfully booted a rootfs on Lichee Pi 4A
-> eMMC with rootdelay=10.
-> 
-> Curiously is there some way to make it work without rootdelay?
+William Qiu wrote:
+> In JH7110 SoC, we need to go by-pass mode, so we need add the
+> assigned-clock* properties to limit clock frquency.
+>
+> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
 
-Thank you for testing.
+Thanks!
 
-This is the kernel command line that I am using on both the lpi4 and
-the ahead:
+Reviewed-by: Emil Renner Berthing <emil.renner.berthing@canonical.com>
 
-root=/dev/mmcblk0p3 ro rootfstype=ext4 rootwait console=ttyS0,115200
-
-I seem to recall that before I used rootwait that there would be a VFS
-oops because mmcblk0p3 didn't exist yet.
-
-Have you tried rootwait instead of the 10 second delay?
-
-I imagine an enforced delay would be very annoying. With "rootwait", I
-don't notice any delay, it boots to the login prompt faster than I can
-read the text scrolling by during boot. (my rootfs is a simple
-buildroot).
-
-thanks,
-drew
+> ---
+>  .../riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> index d79f94432b27..d1f2ec308bca 100644
+> --- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> +++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> @@ -205,6 +205,8 @@ &i2c6 {
+>
+>  &mmc0 {
+>  	max-frequency = <100000000>;
+> +	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
+> +	assigned-clock-rates = <50000000>;
+>  	bus-width = <8>;
+>  	cap-mmc-highspeed;
+>  	mmc-ddr-1_8v;
+> @@ -221,6 +223,8 @@ &mmc0 {
+>
+>  &mmc1 {
+>  	max-frequency = <100000000>;
+> +	assigned-clocks = <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
+> +	assigned-clock-rates = <50000000>;
+>  	bus-width = <4>;
+>  	no-sdio;
+>  	no-mmc;
+> --
+> 2.34.1
+>
