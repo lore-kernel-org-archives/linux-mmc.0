@@ -2,56 +2,56 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7077CCD4852
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 19:08:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8A7FCE7A81
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Sep 2023 22:48:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231209AbjIVTIu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Sep 2023 15:08:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33146 "EHLO
+        id S230141AbjIVWsz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Sep 2023 18:48:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33116 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233816AbjIVTIt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 15:08:49 -0400
-Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55FD1C1;
-        Fri, 22 Sep 2023 12:08:43 -0700 (PDT)
-Received: by mail-ua1-x934.google.com with SMTP id a1e0cc1a2514c-7ab9488f2f0so154971241.3;
-        Fri, 22 Sep 2023 12:08:43 -0700 (PDT)
+        with ESMTP id S230081AbjIVWsy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Sep 2023 18:48:54 -0400
+Received: from mail-ua1-x92d.google.com (mail-ua1-x92d.google.com [IPv6:2607:f8b0:4864:20::92d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E1A0AB;
+        Fri, 22 Sep 2023 15:48:48 -0700 (PDT)
+Received: by mail-ua1-x92d.google.com with SMTP id a1e0cc1a2514c-79a2216a2d1so1284813241.2;
+        Fri, 22 Sep 2023 15:48:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695409722; x=1696014522; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1695422927; x=1696027727; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=7L9HvqDP5WJky24lmHONuk63n7kfCDpjCwpcpj0vxMA=;
-        b=Mi/5vk+W/rYXHqn8ZjMSE9WEFZH0UK7eboKSAemx5t8p+j3rx10R6ryXBV2eNPVYUH
-         ZjIZtkGDXkNAX0oRqMElAMSG4aqM3FFF8bnYRw3b0lAqz6WhggA9Twffra4v2YVh762M
-         HLOwXm6xq5QAc9WEqrIj9TuH0Y7FEDSaM+wJ1S4s1/+9/RpuUQR07ZWXdfhhVf3B8fsw
-         gQKPjXVrC02FzTfeDs2IhfL+cDP3FYPvvc758rU6FKUjbd+RtCYxbOv7oLaszwFQyVDT
-         R6M9QUggKVTVVpyztzqE2Cbsxn+QqcZMItykOsZzB+M8JE5BzPNquVt3Fs7YIgacy3S/
-         dnJw==
+        bh=bRzCTvAX8lq6ewJO7NcrsXgOFKTlOn5VfN4T0R6NmVE=;
+        b=F8nu001fh9WgcEMWgmhgT8GwdTfkC+V4+rEHu6URg92Kk1qnpwzJLnIIAvCeAeKZxh
+         hMljXNWNZ54LayoY+ufMtdN2hbT2gAySBRN1wBb8Dofqib5vYAvQoAu8BrntRa3yJ2HT
+         nwLq+myc9FqcdgINrtwUGyDbHJnkcsjH2seF1j6XRXG3thwvA33tXpgOC8jjCo7MuNw1
+         Unt90P+Z54cXt7UjBqDd4qQ/TfPf6W2ZsBteqKUMic48r8EIhiqcEEn8p376k7gYdcDP
+         bUTuezPxA5EsgGiAMHA+h1kxkWinApDXlUoDs37i1cMbCkfTx2OxVitrF4gGYbBJl/BK
+         NrDg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695409722; x=1696014522;
+        d=1e100.net; s=20230601; t=1695422927; x=1696027727;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=7L9HvqDP5WJky24lmHONuk63n7kfCDpjCwpcpj0vxMA=;
-        b=mzqaorlbKx7AILa+GmrMOYFm0SX1NB+WAGOLbK9MCFoDLMwn8RODJob1F6H/WJb9ju
-         yalJxAzber2cDQhGWE0uK295JYTg4HH9Yc9NmQxtFZvE00PrfHPnfqzpXLpf1/czWwGn
-         100F/f7FoDSJES1mBlAjQbegHPe3HVAiuQfXbM8mobiR4pC5PktaG9IH24Zipa5yxeRE
-         ar74V+zN03eIMKPsAkqrNLzLwCsYw6K+PV4ioEJxIgtK/B4NwZulEqFAKtbfFnnCg/3j
-         s3jFGXAGidVLS17LCu7+ue1EBDKPqthrDXBeGXiwWDwg7KdPnr6eZsiT5cfCMm/lFCZO
-         7IoA==
-X-Gm-Message-State: AOJu0YyepZU/X4ZmhCabvyz6AYIPGnlciE3roy9w0dPznuyddDFLRflH
-        edZAz19Th+Vo5oZhzbXklQ9MT/Vvixu3TX84djQ=
-X-Google-Smtp-Source: AGHT+IEIuHwatFh1RJWylUlf8xGj74/AAV7K6EqAqxS9YaAsvTvQZCNSlpedgXwBetK5NHqFPcDAKpBDiR2hEQSg3vk=
-X-Received: by 2002:a1f:ed45:0:b0:490:29bb:670b with SMTP id
- l66-20020a1fed45000000b0049029bb670bmr114533vkh.12.1695409722407; Fri, 22 Sep
- 2023 12:08:42 -0700 (PDT)
+        bh=bRzCTvAX8lq6ewJO7NcrsXgOFKTlOn5VfN4T0R6NmVE=;
+        b=Bzt6FmyXTqK3lBNsRGFhyu2P40WHnrPgPg8M1OgeGPPGst+LFfGvQRwvaZQ6TzrzGw
+         RcBQEopopiIVpUhUJcwxa8hKu3NPtbxmD7nH0H+FONi4UlKauV3Nh3PaMq75X2TGGgYv
+         TskAF1La78wiRpokvOiXeR8j3ncrGiHp9nuTWhgkPbJ0yCvvPR8Pqtp8ucMjFqPskVzE
+         Aapwne2/JfOxWouHgP60+EEPbVLm64HS1yImwkBGlxrp8y93r9RhTtv3SfmBiXlCCtrH
+         nPcfqqkvG+X2/GT05TUKWmFj2UQ2OKxPteJngjKE6Qt5ge41QKPAORhUt6aRSpgtLEiw
+         fxZw==
+X-Gm-Message-State: AOJu0Yz8+o4gTPhor9I6CP5P/VbRU7eQQJnQx3rJgROZoaaYdusIm7vz
+        aSXVnWilnsN9rZQsiI/N+G2lv+E9scfbHwTqy5U=
+X-Google-Smtp-Source: AGHT+IF1gUPUngEFORaH938h7YzS+JWWpSVyKmix417AKosTTVqEnfAzpMoyZWQpN/BKfzgbZwWB7ubXlAqBNOi+HEI=
+X-Received: by 2002:a67:ef99:0:b0:452:951f:2bb1 with SMTP id
+ r25-20020a67ef99000000b00452951f2bb1mr838983vsp.29.1695422927511; Fri, 22 Sep
+ 2023 15:48:47 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
-In-Reply-To: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com> <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+In-Reply-To: <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
 From:   Robert Nelson <robertcnelson@gmail.com>
-Date:   Fri, 22 Sep 2023 14:08:16 -0500
-Message-ID: <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+Date:   Fri, 22 Sep 2023 17:48:21 -0500
+Message-ID: <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
 Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
 To:     Drew Fustini <dfustini@baylibre.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -76,58 +76,78 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Sep 21, 2023 at 8:51=E2=80=AFPM Drew Fustini <dfustini@baylibre.com=
-> wrote:
+On Fri, Sep 22, 2023 at 2:08=E2=80=AFPM Robert Nelson <robertcnelson@gmail.=
+com> wrote:
 >
-> This series adds support for the eMMC on the BeagleV Ahead and the
-> Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
-> eMMC.
+> On Thu, Sep 21, 2023 at 8:51=E2=80=AFPM Drew Fustini <dfustini@baylibre.c=
+om> wrote:
+> >
+> > This series adds support for the eMMC on the BeagleV Ahead and the
+> > Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
+> > eMMC.
+> >
+> > I tested on top of v6.6-rc2 with this config [1]. I was able to boot
+> > both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
+> > are required:
+> >
+> >   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
+> >
+> > I pushed a branch [5] with this patch series and the above patch for
+> > those that find a git branch easier to test.
+> >
+> > Please note that only the MMC controller connected to the eMMC device
+> > is enabled in the device trees for these two boards. I did not yet
+> > attempt to configure and use the microSD card slot. My preference is to
+> > address that in a future patch series.
+> >
+> > References:
+> > [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
+> > [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
+> > [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
+> > [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@k=
+ernel.org/
+> > [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
 >
-> I tested on top of v6.6-rc2 with this config [1]. I was able to boot
-> both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
-> are required:
+> This patchset came out very nice!
 >
->   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
+> v6.6-rc2 with Last RFC v2:
 >
-> I pushed a branch [5] with this patch series and the above patch for
-> those that find a git branch easier to test.
+> [    4.066630] mmc0: SDHCI controller on ffe7080000.mmc
+> [ffe7080000.mmc] using PIO
 >
-> Please note that only the MMC controller connected to the eMMC device
-> is enabled in the device trees for these two boards. I did not yet
-> attempt to configure and use the microSD card slot. My preference is to
-> address that in a future patch series.
+> debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
 >
-> References:
-> [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
-> [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
-> [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
-> [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@ker=
-nel.org/
-> [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
+> /dev/mmcblk0:
+>  Timing cached reads:   1516 MB in  2.00 seconds =3D 758.09 MB/sec
+>  Timing buffered disk reads:  84 MB in  3.01 seconds =3D  27.94 MB/sec
+>
+> vs v6.6-rc2 with this patchset:
+>
+>  [    4.096837] mmc0: SDHCI controller on ffe7080000.mmc
+> [ffe7080000.mmc] using DMA
+>
+> debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+>
+> /dev/mmcblk0:
+>  Timing cached reads:   1580 MB in  2.00 seconds =3D 790.97 MB/sec
+>  Timing buffered disk reads: 418 MB in  3.00 seconds =3D 139.11 MB/sec
 
-This patchset came out very nice!
+Drew pointed out on Slack, this was not quite right.. After more
+digging by Drew, CONFIG_DMA_GLOBAL_POOL is causing a DMA limitation
+with the multiplatform defconfig. so with,
 
-v6.6-rc2 with Last RFC v2:
+./scripts/config --disable CONFIG_ARCH_R9A07G043
 
-[    4.066630] mmc0: SDHCI controller on ffe7080000.mmc
-[ffe7080000.mmc] using PIO
+(to remove CONFIG_DMA_GLOBAL_POOL)... another 2x in buffered reads..
+
+[    4.059242] mmc0: SDHCI controller on ffe7080000.mmc
+[ffe7080000.mmc] using ADMA 64-bit
 
 debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
 
 /dev/mmcblk0:
- Timing cached reads:   1516 MB in  2.00 seconds =3D 758.09 MB/sec
- Timing buffered disk reads:  84 MB in  3.01 seconds =3D  27.94 MB/sec
-
-vs v6.6-rc2 with this patchset:
-
- [    4.096837] mmc0: SDHCI controller on ffe7080000.mmc
-[ffe7080000.mmc] using DMA
-
-debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
-
-/dev/mmcblk0:
- Timing cached reads:   1580 MB in  2.00 seconds =3D 790.97 MB/sec
- Timing buffered disk reads: 418 MB in  3.00 seconds =3D 139.11 MB/sec
+ Timing cached reads:   1600 MB in  2.00 seconds =3D 800.93 MB/sec
+ Timing buffered disk reads: 892 MB in  3.00 seconds =3D 297.06 MB/sec
 
 Regards,
 
