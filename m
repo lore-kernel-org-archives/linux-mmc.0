@@ -2,108 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01ECECE7A96
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Sep 2023 14:07:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0946ECE7A94
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Sep 2023 14:41:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229788AbjIYOHT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Sep 2023 10:07:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39642 "EHLO
+        id S232278AbjIYOlt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Sep 2023 10:41:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232067AbjIYOHS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2023 10:07:18 -0400
-Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43421109
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:07:11 -0700 (PDT)
-Received: by mail-yb1-xb2c.google.com with SMTP id 3f1490d57ef6-d862533ea85so5613272276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:07:11 -0700 (PDT)
+        with ESMTP id S229537AbjIYOls (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2023 10:41:48 -0400
+Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C75E107
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:41:40 -0700 (PDT)
+Received: by mail-wr1-x432.google.com with SMTP id ffacd0b85a97d-32164a6af64so5573724f8f.2
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:41:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1695650830; x=1696255630; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=pbeInWKlUN3Z2QQBrR4UtpzNoToZLCsYpJRewAj23h8=;
-        b=u6KT1EOy4DnS7okQTzXwROIFx2P8jddoRYL+AKF9JeJKCFdlFeZ1mz8ZmqzNoLjtKA
-         1ux1WoOTPuvTMB1EZXr982mOOOxj89bC+SNRrFWtB6IMGJwqLENeWovlgeyBmFmLK5Kl
-         GzP9/9gPBmw3qe50jgBsnCdJg93PAeo1LkNWWoCoZwsfW/YBQKL6nG8xgTgC9N0Yvgrf
-         Mcb/Xn4/3CZlxmfxiFXkTA5rCT4l6YY5lLu92g5buyRh0nSGfFdFdKu7aeR65y04P0YM
-         aS7BAVKv+jRpsxdkT9SRanDPGkqXjNIYAVkKMWI72p9C2PCNq1cUtjir5+H0mLLdK53n
-         q/Ag==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695652899; x=1696257699; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZnQkb6b5eXRZq2LrytU5CtIWVTHEXBAeVcMvdSE/Rjs=;
+        b=RgrjnsBAhL6Gsfqefnw2S4Nddo2drXSwMMH3mHDEhVQILMGP2SstZN882aVhsvu3Dx
+         jEU5hGPGMuOS96AWyEsw5yI2nSuXu36pR6so+ZjVD2GO26joIZ+xPZMEq2dBTqIeXiC4
+         0PoLZfHkDnK1fCiPeiOuAo/3G3gpDbezpoiqq/4iP7X6Dc/TFjEwSR6PlyvEk6Djrhjd
+         CdCI2Ir1ClAcaXdrObTwAZswQVphBhq2PZd5Z0mJ7Dv/d7/n80+bcQIpqTeMm6hUvjAQ
+         h+NPxqixVADe3HyJnaitXq7qVHoOiu7vTjPvpgmTeYfA8+k5kjSlVua3f87IZrcpBFCD
+         XZrw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695650830; x=1696255630;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=pbeInWKlUN3Z2QQBrR4UtpzNoToZLCsYpJRewAj23h8=;
-        b=QkZdEP0+3fvsBQSIO8X7iRZt1ujAN67oEXaeHMUrz9J+VQYPrRWv8gMbQeE21/+Va3
-         p0sRkVs8xCQnrW4kppQyz54gDX3Hc5mh+1eQJT6o9r/CkFKWmDss7g3OzsHiOTiQzyaO
-         TcOC3z6JTDq9WCTRtrMuOjCAPhMKUPnNVy9qjV3VwIxllAHL/DcrqAl4PxjvUjIfcaq3
-         XBdCsaIKydvpofDfPpMFG6nEepub71Ftc4FKS7AoQ7rsobedY5DgmMnanVYVcrHszwWh
-         16oE37bkj45gR2IOJgyHmpxfoLDrzTFvhDS5wqT4mjpmv55an8RuLVWNpIB/+lbEh6z1
-         jaDA==
-X-Gm-Message-State: AOJu0YxgcwebibC20tztcsbgMNxF+i8i33PzOQYgxJQMryc0ZiQ7ZJJq
-        6DRT92xyZsGQTAV5GdEtFsvIOe1YBRVPvxIBcwvY1Q==
-X-Google-Smtp-Source: AGHT+IGybh6b+QMCWVSNtS3PoG9odUy0INJ8lN7t0nCkj2GqRCzX4hr4FBHQ6scP86ZT8zt2NFX8jVlVz6abd2tcvGs=
-X-Received: by 2002:a25:ce4c:0:b0:d80:9ef:928e with SMTP id
- x73-20020a25ce4c000000b00d8009ef928emr5922448ybe.33.1695650830416; Mon, 25
- Sep 2023 07:07:10 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695652899; x=1696257699;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ZnQkb6b5eXRZq2LrytU5CtIWVTHEXBAeVcMvdSE/Rjs=;
+        b=WcWe+OWs7bScivBessp6umyJ9QVqZ9vxjJmv7c8+mWRvSVBU/B4uRmU61uQFuvDFJB
+         8Sas6EUGuZ1knTKY5z7N2GoXM9sTwOcrpfe+ZuGNSltXiiKBUBtt2JPkquBxgIGx2cLg
+         iezJ9X0p4OzwiL947R410qWujQC+09tW1Ag1kVAcRQ18gArdeiEamk7+/o4uYXE9qXqz
+         q5xs0nY7axcOQxMrPJgZuJZtpsegccaXyddQQrCtECJddkpHl5PmMV/JcKIDsLEpoQQF
+         3u3xhbVPQJgl04mXd6IIFtgflGwTtdjNRvoF/BivbvKHqPdpqPsbuRY8qf7aPJaQDm+b
+         fndA==
+X-Gm-Message-State: AOJu0YyRwz2VgrPSjtuk+IE4mTls46qi13DbqRgZFO8YH3ap0x5nEX2a
+        /a2MgUP60+43DMTzYrNePCRwJA==
+X-Google-Smtp-Source: AGHT+IHPb8vKchvFnY0s05TsviFcSJxnsXgmrDWlqO7Le6/fH+Zwot+4Ces80LRgrG4M+d5CjIT0Lw==
+X-Received: by 2002:adf:f205:0:b0:31f:8a6d:e527 with SMTP id p5-20020adff205000000b0031f8a6de527mr6030302wro.45.1695652898924;
+        Mon, 25 Sep 2023 07:41:38 -0700 (PDT)
+Received: from x1 ([193.52.24.5])
+        by smtp.gmail.com with ESMTPSA id bt14-20020a056000080e00b003200c918c81sm5683354wrb.112.2023.09.25.07.41.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 25 Sep 2023 07:41:38 -0700 (PDT)
+Date:   Mon, 25 Sep 2023 16:41:30 +0200
+From:   Drew Fustini <dfustini@baylibre.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
+        Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org
+Subject: Re: [PATCH 2/6] mmc: sdhci: add __sdhci_execute_tuning() to header
+Message-ID: <ZRGcGnl8N80yblkw@x1>
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+ <20230921-th1520-mmc-v1-2-49f76c274fb3@baylibre.com>
+ <4ef60ffd-3661-4bca-91a3-b49d6189c71b@intel.com>
 MIME-Version: 1.0
-References: <20230921203426.638262-1-beanhuo@iokpp.de>
-In-Reply-To: <20230921203426.638262-1-beanhuo@iokpp.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 25 Sep 2023 16:06:34 +0200
-Message-ID: <CAPDyKFqN9xASjqJWmjtkTGdYEG0AauMzCVkR7VJ10Va0oF-B4w@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for Micron
- eMMC Q2J54A
-To:     Bean Huo <beanhuo@iokpp.de>
-Cc:     adrian.hunter@intel.com, beanhuo@micron.com,
-        jakub.kwapisz@toradex.com, rafael.beims@toradex.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4ef60ffd-3661-4bca-91a3-b49d6189c71b@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 21 Sept 2023 at 22:35, Bean Huo <beanhuo@iokpp.de> wrote:
->
-> From: Bean Huo <beanhuo@micron.com>
->
-> Micron MTFC4GACAJCN eMMC supports cache but requires that flush cache
-> operation be allowed only after a write has occurred. Otherwise, the
-> cache flush command or subsequent commands will time out.
->
-> Signed-off-by: Bean Huo <beanhuo@micron.com>
-> Co-developed-by: Rafael Beims <rafael.beims@toradex.com>
-> Cc: stable@vger.kernel.org
-> ---
-> Changelog:
->
-> v2--v3:
->     1. Set card->written_flag in mmc_blk_mq_issue_rq().
-> v1--v2:
->     1. Add Rafael's test-tag, and Co-developed-by.
->     2. Check host->card whether NULL or not in __mmc_start_request() before asserting host->card->->quirks
-> ---
->  drivers/mmc/core/block.c  | 4 ++++
->  drivers/mmc/core/mmc.c    | 5 +++++
->  drivers/mmc/core/quirks.h | 7 ++++---
->  include/linux/mmc/card.h  | 2 ++
->  4 files changed, 15 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 3a8f27c3e310..14d0dc7942de 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2387,6 +2387,10 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
->                                 ret = mmc_blk_cqe_issue_rw_rq(mq, req);
->                         else
->                                 ret = mmc_blk_mq_issue_rw_rq(mq, req);
-> +
-> +                       if (host->card->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH &&
+On Mon, Sep 25, 2023 at 01:21:05PM +0300, Adrian Hunter wrote:
+> On 22/09/23 04:49, Drew Fustini wrote:
+> > Expose __sdhci_execute_tuning() so that it can be called from the
+> > mmc host controller drivers.
+> > 
+> > In the sdhci-of-dwcmshc driver, sdhci_dwcmshc_th1520_ops sets
+> > platform_execute_tuning to th1520_execute_tuning(). That function has
+> > to manipulate phy registers before tuning can be performed. To avoid
+> > copying the code verbatim from __sdhci_execute_tuning() into
+> > th1520_execute_tuning(), make it possible for __sdhci_execute_tuning()
+> > to be called from sdhci-of-dwcmshc.
+> > 
+> > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> > ---
+> >  drivers/mmc/host/sdhci.c | 2 +-
+> >  drivers/mmc/host/sdhci.h | 1 +
+> >  2 files changed, 2 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index ff41aa56564e..fd607058d176 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2841,7 +2841,7 @@ void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+> >  }
+> >  EXPORT_SYMBOL_GPL(sdhci_send_tuning);
+> >  
+> > -static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> > +int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> 
+> Also need
+> 	EXPORT_SYMBOL_GPL(__sdhci_execute_tuning);
 
-Please add an inline helper function for this in
-drivers/mmc/core/card.h, along with the others.
+Thank, I will add that.
 
-[...]
+I wasn't sure if making __sdhci_execute_tuning() available outside of
+sdhci.c was going to be seen as an acceptable solution.
 
-Kind regards
-Uffe
+Do you think my apporach is acceptable (once I add EXPORT_SYMBOL_GPL)?
+
+Thanks,
+Drew
