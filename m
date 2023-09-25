@@ -2,116 +2,133 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 430B0CE7A81
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Sep 2023 10:35:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CD67CE7A94
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Sep 2023 14:00:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231851AbjIYKfw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Sep 2023 06:35:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59312 "EHLO
+        id S232036AbjIYOAW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Sep 2023 10:00:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43004 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231706AbjIYKfv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2023 06:35:51 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23F7CB3;
-        Mon, 25 Sep 2023 03:35:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1695638145; x=1727174145;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=NGy5Y6K22tAMvFW2W8adwaIoI8/17ieV64EtLSlFNBU=;
-  b=RSDoBB5kVlkjTMEBnJyI1dxtufjK/ySn8YKopORRK3pYuWxo2bUpn23X
-   ug3to7trM1X9ILZ9J/RDXVrZSJ39EE83RACnZV5LCGxVTQ7jTKLAiCWME
-   iB2NiAINpEcTnSCNwH1ThTulGnujdEiwEislm0mqWCHlTU6iu7i0rUpRh
-   wiBYoxz+CLQzM73rmCjrlVBHKfJUrzYUPsvtjQwq4z0Bg417V95mv7ok4
-   nLHPiB3GkeSuASXAEKvQ9r+ar/JIeGGAm8eMEOwqvMW3ztHlWCEwBxLsf
-   rxxcQgvF0Ls2tDeFGRtlNnombXSIciNMf8eeJvD29Fwpg2xdqmk9x5cFE
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10843"; a="385049406"
-X-IronPort-AV: E=Sophos;i="6.03,174,1694761200"; 
-   d="scan'208";a="385049406"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Sep 2023 03:35:44 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10843"; a="697929670"
-X-IronPort-AV: E=Sophos;i="6.03,174,1694761200"; 
-   d="scan'208";a="697929670"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.50.180])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Sep 2023 03:35:39 -0700
-Message-ID: <a420c2e5-db23-4b61-a110-476f8fb8636a@intel.com>
-Date:   Mon, 25 Sep 2023 13:35:36 +0300
+        with ESMTP id S231226AbjIYOAV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2023 10:00:21 -0400
+Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4F93CE
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:00:14 -0700 (PDT)
+Received: by mail-yb1-xb2b.google.com with SMTP id 3f1490d57ef6-d7ecdb99b7aso7327234276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:00:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1695650414; x=1696255214; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=simHxQla0UGgl7e9uhulgQd+yieE8p7l9WM34RpzBNo=;
+        b=MVvms30Gt+kQ1W/QtgHK6ZP7eyNvylwgYKzQvpsVRY5JRpZTkvJoIwlBzc5YSwAYIp
+         5Q355GWgY/y4k8KuwRozwwOvYRU0mpdZ9DGKzQ0EELfprTt9u9eQ5RBCwRAsg0gpna1+
+         BkJS2sA7Xp235MixqUM3k3Fwe5SIG8iKPxe5r+KCmbZ6qKEWKM11nVc5rQrPGNZh9t/a
+         SBy9zQIiIKO5RQhsN2BxA72ej9g7HUAMv+QKY4Rbc/G5mg0zOMSt3hdfIfGloLMQYfUC
+         DnfSwpxDbEYP7I71+5q8vlOvnvoOPViY7qCfCyLUd+BRR6mGCqL990pNdoMYXyiNQOmY
+         kccw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695650414; x=1696255214;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=simHxQla0UGgl7e9uhulgQd+yieE8p7l9WM34RpzBNo=;
+        b=SjJ3sZr20WjQ1KSOYufgSQ9S3efBGAbTTmF/upcru9bB459Ge2VaXC2n8vWtjyHwXV
+         Cn4n5Ezk1lorvFh5XP77tFvFH8X1Zw7mVHwHZeo/F+0T1edFYuFb1U22NfVdNwqyTlwZ
+         1U2mS4m1u2DpUa0nvoUfLfsqlRIil8k7kqaFhZNR1IqC1Pf9Ive/eC+6auZmNc6NhIo4
+         WhrBIxJC68gUZ3wf1k8VPR1CEt1dZIsUQw9HLLpDF4QOk717Z9Vn6yFrBD3vtzhu3z7N
+         Rh8d9/lbYeK4OTLHn20w1L4zmtump63B5nTaLQMWON1T6Ehwl5UsglJTE2XfJZ0koHjK
+         6bGA==
+X-Gm-Message-State: AOJu0YxGi0uZ9QRgYRmqENhrjfDoa/XWBEnLD3sHnjGdVIoV8MJZvL2Q
+        nFIXpb8h+AS3dGqn7UetFFUe5Mrgmo9cET7qU6YVAg==
+X-Google-Smtp-Source: AGHT+IFdrhN2FzdmxrLxhj4hyTn+/FFWlAOvNyceXBIoIfDOhwc/3Stsrlp+HE4vRp2rU//z4W2h+ypQ0psOAE3ypvM=
+X-Received: by 2002:a25:264b:0:b0:d4c:2a34:e577 with SMTP id
+ m72-20020a25264b000000b00d4c2a34e577mr6557478ybm.19.1695650413981; Mon, 25
+ Sep 2023 07:00:13 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/6] mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520
-Content-Language: en-US
-To:     Drew Fustini <dfustini@baylibre.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>
-Cc:     Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org
-References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <20230921-th1520-mmc-v1-3-49f76c274fb3@baylibre.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230921-th1520-mmc-v1-3-49f76c274fb3@baylibre.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20230914000348.25790-1-michael@allwinnertech.com> <CA+Da2qzr0SBu-kUtFTnBqT+OObFOSTFgmU30L3B-Rjv3rYbGKw@mail.gmail.com>
+In-Reply-To: <CA+Da2qzr0SBu-kUtFTnBqT+OObFOSTFgmU30L3B-Rjv3rYbGKw@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 25 Sep 2023 15:59:37 +0200
+Message-ID: <CAPDyKFpHw+6vovHRWbhsDwre81U4Uu_X-Wy_viQCZp6nj=5Jkw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Add new flag to force hardware reset
+To:     Michael Wu <michael@allwinnertech.com>,
+        Wenchao Chen <wenchao.chen666@gmail.com>
+Cc:     adrian.hunter@intel.com, jinpu.wang@ionos.com,
+        victor.shih@genesyslogic.com.tw, avri.altman@wdc.com,
+        asuk4.q@gmail.com, f.fainelli@gmail.com, beanhuo@micron.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Sarthak Garg <quic_sartgarg@quicinc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 22/09/23 04:49, Drew Fustini wrote:
-> Add support for the mmc controller in the T-Head TH1520 with the new
-> compatible "thead,th1520-dwcmshc". Implement custom sdhci_ops for
-> set_uhs_signaling, reset, voltage_switch, and platform_execute_tuning.
-> 
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 456 ++++++++++++++++++++++++++++++++++++
->  1 file changed, 456 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 3a3bae6948a8..7294bf1afb7d 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -35,6 +35,26 @@
->  #define DWCMSHC_CARD_IS_EMMC		BIT(0)
->  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
->  #define DWCMSHC_EMMC_ATCTRL		0x40
-> +/* Tuning and auto-tuning fields in AT_CTRL_R control register */
-> +#define AT_CTRL_AT_EN			0x1 /* autotuning is enabled */
-> +#define AT_CTRL_CI_SEL_SHIFT		0x1 /* bit 1 */
-> +#define AT_CTRL_CI_SEL			0x1 /* interval to drive center phase select */
-> +#define AT_CTRL_SWIN_TH_EN_SHIFT	0x2 /* bit 2 */
-> +#define AT_CTRL_SWIN_TH_EN		0x1 /* sampling window threshold enable */
-> +#define AT_CTRL_RPT_TUNE_ERR_SHIFT	0x3 /* bit 3 */
-> +#define AT_CTRL_RPT_TUNE_ERR		0x1 /* enable reporting framing errors */
-> +#define AT_CTRL_SW_TUNE_EN_SHIFT	0x4 /* bit 4 */
-> +#define AT_CTRL_SW_TUNE_EN		0x1 /* enable software managed tuning */
-> +#define AT_CTRL_WIN_EDGE_SEL_SHIFT	0x8 /* bits [11:8] */
-> +#define AT_CTRL_WIN_EDGE_SEL		0xf /* sampling window edge select */
-> +#define AT_CTRL_TUNE_CLK_STOP_EN_SHIFT	0x10 /* bit 16 */
-> +#define AT_CTRL_TUNE_CLK_STOP_EN	0x1  /* clocks stopped during phase code change */
-> +#define AT_CTRL_PRE_CHANGE_DLY_SHIFT	0x11 /* bits [18:17] */
-> +#define AT_CTRL_PRE_CHANGE_DLY		0x1  /* 2-cycle latency */
-> +#define AT_CTRL_POST_CHANGE_DLY_SHIFT	0x13 /* bits [20:19] */
-> +#define AT_CTRL_POST_CHANGE_DLY		0x3  /* 4-cycle latency */
-> +#define AT_CTRL_SWIN_TH_VAL_SHIFT	0x18 /* bits [31:24] */
-> +#define AT_CTRL_SWIN_TH_VAL		0x9  /* sampling window threshold */
+- trimmed cc-list, + Sartak Garg
 
-Here and elsewhere, please try to make use of BIT(), GENMASK(),
-FIELD_PREP(), FIELD_GET()
+On Thu, 14 Sept 2023 at 10:00, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
+>
+> On Thu, 14 Sept 2023 at 08:04, Michael Wu <michael@allwinnertech.com> wrote:
+> >
+> > Entering the recovery system itself indicates a transmission error.
+> > In this situation, we intend to execute the mmc_blk_reset function
+> > to clear any anomalies that may be caused by errors. We have previously
+> > discussed with several MMC device manufacturers, and they expressed
+> > their desire for us to reset the device when errors occur to ensure
+> > stable operation. We aim to make this code compatible with all devices
+> > and ensure its stable performance, so we would like to add this patch
+> >
+> > Signed-off-by: Michael Wu <michael@allwinnertech.com>
+>
+> like: https://lore.kernel.org/linux-mmc/20220603051534.22672-1-quic_sartgarg@quicinc.com/
 
+Looks like this series didn't make it. I was awaiting a rebase from
+Sartak to apply it, but apparently something got in his way for a new
+submission.
+
+>
+> You should enable it in the vendor host.
+
+Yes! We don't want unused code in the core. We need a user of it too.
+
+May I suggest that you pick up Sartak's patch for the core and thus
+add another patch for the host driver you care about and then
+re-submit it as a small series.
+
+Kind regards
+Uffe
+
+>
+> > ---
+> >  drivers/mmc/core/block.c | 2 +-
+> >  include/linux/mmc/host.h | 1 +
+> >  2 files changed, 2 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index b5b414a71e0b..29fbe0ddeadb 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -1503,7 +1503,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
+> >         pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
+> >
+> >         err = mmc_cqe_recovery(host);
+> > -       if (err)
+> > +       if (err || host->cqe_recovery_reset_always)
+> >                 mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
+> >         mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
+> >
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index 62a6847a3b6f..f578541a06b5 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -518,6 +518,7 @@ struct mmc_host {
+> >         int                     cqe_qdepth;
+> >         bool                    cqe_enabled;
+> >         bool                    cqe_on;
+> > +       bool                    cqe_recovery_reset_always;
+> >
+> >         /* Inline encryption support */
+> >  #ifdef CONFIG_MMC_CRYPTO
+> > --
+> > 2.29.0
+> >
