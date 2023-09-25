@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0946ECE7A94
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Sep 2023 14:41:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E6E1CE7A95
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Sep 2023 14:43:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232278AbjIYOlt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Sep 2023 10:41:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42316 "EHLO
+        id S232002AbjIYOns (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Sep 2023 10:43:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44226 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229537AbjIYOls (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2023 10:41:48 -0400
-Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C75E107
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:41:40 -0700 (PDT)
-Received: by mail-wr1-x432.google.com with SMTP id ffacd0b85a97d-32164a6af64so5573724f8f.2
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:41:40 -0700 (PDT)
+        with ESMTP id S232340AbjIYOnr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2023 10:43:47 -0400
+Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EAA311C
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:43:39 -0700 (PDT)
+Received: by mail-wm1-x32b.google.com with SMTP id 5b1f17b1804b1-405361bb949so69337185e9.1
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Sep 2023 07:43:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695652899; x=1696257699; darn=vger.kernel.org;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695653018; x=1696257818; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZnQkb6b5eXRZq2LrytU5CtIWVTHEXBAeVcMvdSE/Rjs=;
-        b=RgrjnsBAhL6Gsfqefnw2S4Nddo2drXSwMMH3mHDEhVQILMGP2SstZN882aVhsvu3Dx
-         jEU5hGPGMuOS96AWyEsw5yI2nSuXu36pR6so+ZjVD2GO26joIZ+xPZMEq2dBTqIeXiC4
-         0PoLZfHkDnK1fCiPeiOuAo/3G3gpDbezpoiqq/4iP7X6Dc/TFjEwSR6PlyvEk6Djrhjd
-         CdCI2Ir1ClAcaXdrObTwAZswQVphBhq2PZd5Z0mJ7Dv/d7/n80+bcQIpqTeMm6hUvjAQ
-         h+NPxqixVADe3HyJnaitXq7qVHoOiu7vTjPvpgmTeYfA8+k5kjSlVua3f87IZrcpBFCD
-         XZrw==
+        bh=t/sMphRuA0VcjIhUu52wZChuZavyxtp56aeA36+PYxE=;
+        b=aUOOreRInVc77su+vU68pq2DcBu5WxOTbtrNFudxrQ8+rlB7kQrHZIZAFzjaIGgW3D
+         eT+c5NJqWpQELL9YvLEtchHONLQZ66xRMYZFFqofbmPmVtUJqTwz3cr/24e/yR2AAX+D
+         ppuGlSUtnZn/ikZj/7SP5hL02ArrdVyNzxnXtW09BFh4qXgZmjDeqwj8Ya6oqbOUmL+4
+         dmGfwrf4+liTNGwnYco313nVsnld1qR1ZcvYf13ZOnp1lZj6FIHaIDicgzmyf9raCpqP
+         lS6j1A7HaPGi4T/WrVpL7hgs0hI83sSJ4uPYWIReNGysu3eVDBCBra0UMPNAU6DIf3w6
+         k+jA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695652899; x=1696257699;
+        d=1e100.net; s=20230601; t=1695653018; x=1696257818;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ZnQkb6b5eXRZq2LrytU5CtIWVTHEXBAeVcMvdSE/Rjs=;
-        b=WcWe+OWs7bScivBessp6umyJ9QVqZ9vxjJmv7c8+mWRvSVBU/B4uRmU61uQFuvDFJB
-         8Sas6EUGuZ1knTKY5z7N2GoXM9sTwOcrpfe+ZuGNSltXiiKBUBtt2JPkquBxgIGx2cLg
-         iezJ9X0p4OzwiL947R410qWujQC+09tW1Ag1kVAcRQ18gArdeiEamk7+/o4uYXE9qXqz
-         q5xs0nY7axcOQxMrPJgZuJZtpsegccaXyddQQrCtECJddkpHl5PmMV/JcKIDsLEpoQQF
-         3u3xhbVPQJgl04mXd6IIFtgflGwTtdjNRvoF/BivbvKHqPdpqPsbuRY8qf7aPJaQDm+b
-         fndA==
-X-Gm-Message-State: AOJu0YyRwz2VgrPSjtuk+IE4mTls46qi13DbqRgZFO8YH3ap0x5nEX2a
-        /a2MgUP60+43DMTzYrNePCRwJA==
-X-Google-Smtp-Source: AGHT+IHPb8vKchvFnY0s05TsviFcSJxnsXgmrDWlqO7Le6/fH+Zwot+4Ces80LRgrG4M+d5CjIT0Lw==
-X-Received: by 2002:adf:f205:0:b0:31f:8a6d:e527 with SMTP id p5-20020adff205000000b0031f8a6de527mr6030302wro.45.1695652898924;
-        Mon, 25 Sep 2023 07:41:38 -0700 (PDT)
+        bh=t/sMphRuA0VcjIhUu52wZChuZavyxtp56aeA36+PYxE=;
+        b=Mvvbagvep6ArFyd+u5nGX3bhrtGzusSSjMYEcX2ab6AlH5//rJ2ZFLKB3G+65PQNdA
+         EJu773mGnZRE2AxtiiDO0MbdrMEC+G7FOw9586/Pco4tcufXe76prTfLbY/ANVI7LQ0F
+         r++1NlW7yKsHMf2pZTnvZwR7Y3n6eZAZFRWXYeWYCN/ujy0VXW0StD+CieugFf9dRuRO
+         aG0kkDfCPQkI56F1LDKdIP0J+w1+Jft0xeWqJ6ykmpCNEK2w9fwU8fZvrlQLaoWUzFlN
+         eIn6YYe1ifA4QXj0wYVXxl5KsKEpvWHYGPS+NboKerFqFl3QHO9JZq0drTwfnzdfdisK
+         jSlw==
+X-Gm-Message-State: AOJu0YzQYVVuKuwh6FxhJyjYt6dkySDS9xYBEgeTnYEjsBJxA5Bt+UAf
+        BCr5GgyZTnNbx98KCRcX8E/yKQ==
+X-Google-Smtp-Source: AGHT+IEbGAlM/VewJdTcTv5/aTJRKALQYUm6lwgRKY3S9S1k9trypjsl9J42XlYhfQuHu1BmTqd4sg==
+X-Received: by 2002:a7b:cd07:0:b0:405:3ae6:2401 with SMTP id f7-20020a7bcd07000000b004053ae62401mr5847424wmj.14.1695653017666;
+        Mon, 25 Sep 2023 07:43:37 -0700 (PDT)
 Received: from x1 ([193.52.24.5])
-        by smtp.gmail.com with ESMTPSA id bt14-20020a056000080e00b003200c918c81sm5683354wrb.112.2023.09.25.07.41.38
+        by smtp.gmail.com with ESMTPSA id n13-20020a7bc5cd000000b003fee53feab5sm12588862wmk.10.2023.09.25.07.43.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 Sep 2023 07:41:38 -0700 (PDT)
-Date:   Mon, 25 Sep 2023 16:41:30 +0200
+        Mon, 25 Sep 2023 07:43:37 -0700 (PDT)
+Date:   Mon, 25 Sep 2023 16:43:29 +0200
 From:   Drew Fustini <dfustini@baylibre.com>
 To:     Adrian Hunter <adrian.hunter@intel.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -67,57 +67,65 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-riscv@lists.infradead.org
-Subject: Re: [PATCH 2/6] mmc: sdhci: add __sdhci_execute_tuning() to header
-Message-ID: <ZRGcGnl8N80yblkw@x1>
+Subject: Re: [PATCH 3/6] mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520
+Message-ID: <ZRGckWotC4RYHLNZ@x1>
 References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <20230921-th1520-mmc-v1-2-49f76c274fb3@baylibre.com>
- <4ef60ffd-3661-4bca-91a3-b49d6189c71b@intel.com>
+ <20230921-th1520-mmc-v1-3-49f76c274fb3@baylibre.com>
+ <a420c2e5-db23-4b61-a110-476f8fb8636a@intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <4ef60ffd-3661-4bca-91a3-b49d6189c71b@intel.com>
+In-Reply-To: <a420c2e5-db23-4b61-a110-476f8fb8636a@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Sep 25, 2023 at 01:21:05PM +0300, Adrian Hunter wrote:
+On Mon, Sep 25, 2023 at 01:35:36PM +0300, Adrian Hunter wrote:
 > On 22/09/23 04:49, Drew Fustini wrote:
-> > Expose __sdhci_execute_tuning() so that it can be called from the
-> > mmc host controller drivers.
-> > 
-> > In the sdhci-of-dwcmshc driver, sdhci_dwcmshc_th1520_ops sets
-> > platform_execute_tuning to th1520_execute_tuning(). That function has
-> > to manipulate phy registers before tuning can be performed. To avoid
-> > copying the code verbatim from __sdhci_execute_tuning() into
-> > th1520_execute_tuning(), make it possible for __sdhci_execute_tuning()
-> > to be called from sdhci-of-dwcmshc.
+> > Add support for the mmc controller in the T-Head TH1520 with the new
+> > compatible "thead,th1520-dwcmshc". Implement custom sdhci_ops for
+> > set_uhs_signaling, reset, voltage_switch, and platform_execute_tuning.
 > > 
 > > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
 > > ---
-> >  drivers/mmc/host/sdhci.c | 2 +-
-> >  drivers/mmc/host/sdhci.h | 1 +
-> >  2 files changed, 2 insertions(+), 1 deletion(-)
+> >  drivers/mmc/host/sdhci-of-dwcmshc.c | 456 ++++++++++++++++++++++++++++++++++++
+> >  1 file changed, 456 insertions(+)
 > > 
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index ff41aa56564e..fd607058d176 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -2841,7 +2841,7 @@ void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
-> >  }
-> >  EXPORT_SYMBOL_GPL(sdhci_send_tuning);
-> >  
-> > -static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-> > +int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> > index 3a3bae6948a8..7294bf1afb7d 100644
+> > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> > @@ -35,6 +35,26 @@
+> >  #define DWCMSHC_CARD_IS_EMMC		BIT(0)
+> >  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
+> >  #define DWCMSHC_EMMC_ATCTRL		0x40
+> > +/* Tuning and auto-tuning fields in AT_CTRL_R control register */
+> > +#define AT_CTRL_AT_EN			0x1 /* autotuning is enabled */
+> > +#define AT_CTRL_CI_SEL_SHIFT		0x1 /* bit 1 */
+> > +#define AT_CTRL_CI_SEL			0x1 /* interval to drive center phase select */
+> > +#define AT_CTRL_SWIN_TH_EN_SHIFT	0x2 /* bit 2 */
+> > +#define AT_CTRL_SWIN_TH_EN		0x1 /* sampling window threshold enable */
+> > +#define AT_CTRL_RPT_TUNE_ERR_SHIFT	0x3 /* bit 3 */
+> > +#define AT_CTRL_RPT_TUNE_ERR		0x1 /* enable reporting framing errors */
+> > +#define AT_CTRL_SW_TUNE_EN_SHIFT	0x4 /* bit 4 */
+> > +#define AT_CTRL_SW_TUNE_EN		0x1 /* enable software managed tuning */
+> > +#define AT_CTRL_WIN_EDGE_SEL_SHIFT	0x8 /* bits [11:8] */
+> > +#define AT_CTRL_WIN_EDGE_SEL		0xf /* sampling window edge select */
+> > +#define AT_CTRL_TUNE_CLK_STOP_EN_SHIFT	0x10 /* bit 16 */
+> > +#define AT_CTRL_TUNE_CLK_STOP_EN	0x1  /* clocks stopped during phase code change */
+> > +#define AT_CTRL_PRE_CHANGE_DLY_SHIFT	0x11 /* bits [18:17] */
+> > +#define AT_CTRL_PRE_CHANGE_DLY		0x1  /* 2-cycle latency */
+> > +#define AT_CTRL_POST_CHANGE_DLY_SHIFT	0x13 /* bits [20:19] */
+> > +#define AT_CTRL_POST_CHANGE_DLY		0x3  /* 4-cycle latency */
+> > +#define AT_CTRL_SWIN_TH_VAL_SHIFT	0x18 /* bits [31:24] */
+> > +#define AT_CTRL_SWIN_TH_VAL		0x9  /* sampling window threshold */
 > 
-> Also need
-> 	EXPORT_SYMBOL_GPL(__sdhci_execute_tuning);
+> Here and elsewhere, please try to make use of BIT(), GENMASK(),
+> FIELD_PREP(), FIELD_GET()
 
-Thank, I will add that.
+Thank you for the advice.  FIELD_PREP() and FIELD_GET() look like they
+can make the code simpler.  I'll make use of those macros in the next
+version.
 
-I wasn't sure if making __sdhci_execute_tuning() available outside of
-sdhci.c was going to be seen as an acceptable solution.
-
-Do you think my apporach is acceptable (once I add EXPORT_SYMBOL_GPL)?
-
-Thanks,
-Drew
+thanks,
+drew
