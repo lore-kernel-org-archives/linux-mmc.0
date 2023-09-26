@@ -2,181 +2,292 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E3D0E7D27D
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 10:54:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BCF3E7D27B
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 10:58:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234383AbjIZKyv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Sep 2023 06:54:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59700 "EHLO
+        id S234499AbjIZK67 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Sep 2023 06:58:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232786AbjIZKyu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 06:54:50 -0400
-Received: from mail-qv1-xf29.google.com (mail-qv1-xf29.google.com [IPv6:2607:f8b0:4864:20::f29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8271CB4;
-        Tue, 26 Sep 2023 03:54:43 -0700 (PDT)
-Received: by mail-qv1-xf29.google.com with SMTP id 6a1803df08f44-65afd8af8bbso30194896d6.3;
-        Tue, 26 Sep 2023 03:54:43 -0700 (PDT)
+        with ESMTP id S234387AbjIZK66 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 06:58:58 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A0FF180
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 03:58:50 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id 38308e7fff4ca-2c131ddfc95so131983671fa.0
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 03:58:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695725682; x=1696330482; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=hEe7gpz9O/IbuF6Xwxx1AfsWWLFpDZDyH/t90uDzBnA=;
-        b=ZP6f7DRLvsEPd3C/+aumZG8dDbJpK6oSEkoQIJOUedh0OYgqf3RN+ysLS7ZQKPemXD
-         rFx+i8B8a7k97NoGCNVjXOEC9/4zHP5LWZeWqVw7vpgADkf+6WDh8lNseHwHmpqAuiOT
-         bYXqMftEMHPxt3do7Tb6xyYeUPap0pqQl9UBSETY9MJaM5MeK7lmeUccp3Ncsh5HzEwL
-         um7iyeEhk7Z9qMi35C8+S0DeQTkvuDyA4IGRpmhl/ZIxHitkt1RDekLAFnnf9blPf8Th
-         E9IqQY+nnhphnwgxCt+vJJRnWKF6HEoKMrBwSFL4bmb03Jwy/Fj2XfyEHUiTBNPgdRmI
-         NO6w==
+        d=tuxon.dev; s=google; t=1695725928; x=1696330728; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=uw1cUsiT57O3RUVdq5mZiqTz08pOHH5WJzsYWq/LW4w=;
+        b=LDs36G73REglQOX9D/Nya1bWJXhVrk7ORjYwC6a3KKQdd8ycOnerhIDZ8PA8098Tb5
+         yj01CRMSd8x57BhfdqYEurmSNlDe85jiwc3wy1IBJre9ue4kUG1kvgDB+Phvi25kl6f7
+         OKP/mimaxCloGoKbLoMm80RW4QEdcwDWyze26yyz9PUeNFSZ8KwDK4g5OgwUOOC6c5MW
+         CilxLhNnKGoUWgtl2PKeGNSXYXXX/8zYxMj+MNNaNOWk9EpaHy5TNZKecKCbX46JBerS
+         5T0OXAx9gMR8AxKLTYxOZyRPhw6GfS6ghLN3taeqSxVKzem4O4iSlkuxG4YRLYw90A1q
+         XUoA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695725682; x=1696330482;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=hEe7gpz9O/IbuF6Xwxx1AfsWWLFpDZDyH/t90uDzBnA=;
-        b=LdbMhcC0CSWV7HlYmhJIGgX39tBDMg0X+Ou2j/cPci49jQsizHoSx055pNR/Us/3Wm
-         d5mPYbf6QbEUpaEtH9d5eq4ehywOxj4O9YFFEcslARa3bVgabbon2dcxHYGWr6cO1lDU
-         OCjcX8s+Ny25ubNTk/t53lhMysaZdDIwGThn+iKbV+5d4fuZHLmqhZSTbx3VyB9AKjJ4
-         IQmXyHuh2YUAs1+9t8dKhwzl/8MppV/4o/iXdiXTnI73VTsU4F95SB8LR73rCOwu1dTI
-         ecjVd4xTZvvaDNRMP/yPkNhZSXylG1Qk4ubkx8SqqgwFkIDl5jFbT95uDwool3bqyGD4
-         jeEQ==
-X-Gm-Message-State: AOJu0YzMUIdYAk8fpsDzQaBQks7TeYPtyNqdmVKlAvCdD/drf12RHLxP
-        Fx5Mom2aX7r3NVmJzHZ+/aRKn0sSDeNXV9LOVpc=
-X-Google-Smtp-Source: AGHT+IFJT66HvvUyaOQISGvS5hla1pblVYmG5a7HC0ngNchN7+H+eAJn/DG5uh3iCX9FlEMZKLxpxGMqNr0irNAqR7w=
-X-Received: by 2002:a0c:b71a:0:b0:658:9168:e6b6 with SMTP id
- t26-20020a0cb71a000000b006589168e6b6mr11251431qvd.52.1695725682595; Tue, 26
- Sep 2023 03:54:42 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695725928; x=1696330728;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=uw1cUsiT57O3RUVdq5mZiqTz08pOHH5WJzsYWq/LW4w=;
+        b=eYLKGbAj2yhA7fLGCCgp0uAiH+Y7EUwIL5YjL5qRQcK+Jst+Mmw5ka2vOLVBrbhp77
+         zQsAKlONmRdf7EiBCbNh9xStGbEb0idnn+bGEAFc8MQNmlh+bnhBbXDuafEWG2XZDgRB
+         QBk7c613cvZGoMRREFZMgmv1BIwMs+8JxwQOkmS9G+S08mptYRhmiN0paZty3TV+MvRZ
+         VtEdCKVUTKZEJpNvtmiK6gGm1W1CNDS1Ys1xcuFjIPE+AGNVaNye64hloUaji+QJUFkO
+         us+/3vQVu4uitUcB2RqvukuB2Ebzw6YccgMWH7VgatBWImgWr7WbzkYUBdNARJuQneAy
+         efjQ==
+X-Gm-Message-State: AOJu0YyvwoKyfEwEgr8+z459ZdVhiZWCNxnOg1qmqqhEIg7oitMyaKu5
+        YiPcKqP7ls9y1OcDQ6aAUYVnnQ==
+X-Google-Smtp-Source: AGHT+IG6q6rzMJI50tbGhCpzLWa59Dfr/8oOlsuBHFVc+7zzzxAnHqZNID2Eo94dRB44wFNMHKElWw==
+X-Received: by 2002:a2e:2e0f:0:b0:2b6:a3a0:5f7 with SMTP id u15-20020a2e2e0f000000b002b6a3a005f7mr7763488lju.9.1695725928289;
+        Tue, 26 Sep 2023 03:58:48 -0700 (PDT)
+Received: from [192.168.32.2] ([82.78.167.177])
+        by smtp.gmail.com with ESMTPSA id k22-20020a170906129600b009aa292a2df2sm7548486ejb.217.2023.09.26.03.58.45
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 26 Sep 2023 03:58:47 -0700 (PDT)
+Message-ID: <64e91f8d-a94e-c835-75ef-ce9ab557dc54@tuxon.dev>
+Date:   Tue, 26 Sep 2023 13:58:44 +0300
 MIME-Version: 1.0
-References: <20230919074707.25517-1-wenchao.chen@unisoc.com>
-In-Reply-To: <20230919074707.25517-1-wenchao.chen@unisoc.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Tue, 26 Sep 2023 18:54:30 +0800
-Message-ID: <CA+Da2qyk0=Vt_3NE5=mQB6UqEE2y=jFyAm5jWGzVEhw4siT3pw@mail.gmail.com>
-Subject: Re: [PATCH V4 0/2] mmc: hsq: dynamically adjust hsq_depth to improve performance
-To:     ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhang.lyra@gmail.com, zhenxiong.lai@unisoc.com,
-        yuelin.tang@unisoc.com, Wenchao Chen <wenchao.chen@unisoc.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH 30/37] pinctrl: renesas: rzg2l: add support for RZ/G3S SoC
+Content-Language: en-US
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-31-claudiu.beznea.uj@bp.renesas.com>
+ <CAMuHMdV2GEKF0QjKudz529_tmUksTNMJtZu9NwC18KX-AXwaeg@mail.gmail.com>
+From:   claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <CAMuHMdV2GEKF0QjKudz529_tmUksTNMJtZu9NwC18KX-AXwaeg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-A gentle ping.
+Hi, Geert,
 
-On Tue, 19 Sept 2023 at 15:47, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
->
-> Change in v4:
-> - Remove "struct hsq_slot *slot" and simplify the code.
-> - In general, need_change has to be greater than or equal to 2 to allow the threshold
->   to be adjusted.
->
-> Change in v3:
-> - Use "mrq->data->blksz * mrq->data->blocks == 4096" for 4K.
-> - Add explanation for "HSQ_PERFORMANCE_DEPTH".
->
-> Change in v2:
-> - Support for dynamic adjustment of hsq_depth.
->
-> Test
-> =====
-> I tested 3 times for each case and output a average speed.
-> Ran 'fio' to evaluate the performance:
-> 1.Fixed hsq_depth
-> 1) Sequential write:
-> Speed: 168 164 165
-> Average speed: 165.67MB/S
->
-> 2) Sequential read:
-> Speed: 326 326 326
-> Average speed: 326MB/S
->
-> 3) Random write:
-> Speed: 82.6 83 83
-> Average speed: 82.87MB/S
->
-> 4) Random read:
-> Speed: 48.2 48.3 47.6
-> Average speed: 48.03MB/S
->
-> 2.Dynamic hsq_depth
-> 1) Sequential write:
-> Speed: 167 166 166
-> Average speed: 166.33MB/S
->
-> 2) Sequential read:
-> Speed: 327 326 326
-> Average speed: 326.3MB/S
->
-> 3) Random write:
-> Speed: 86.1 86.2 87.7
-> Average speed: 86.67MB/S
->
-> 4) Random read:
-> Speed: 48.1 48 48
-> Average speed: 48.03MB/S
->
-> Based on the above data, dynamic hsq_depth can improve the performance of random writes.
-> Random write improved by 4.6%.
->
-> In addition, we tested 8K and 16K.
-> 1.Fixed hsq_depth
-> 1) Random write(bs=8K):
-> Speed: 116 114 115
-> Average speed: 115MB/S
->
-> 2) Random read(bs=8K):
-> Speed: 83 83 82.5
-> Average speed: 82.8MB/S
->
-> 3) Random write(bs=16K):
-> Speed: 141 142 141
-> Average speed: 141.3MB/S
->
-> 4) Random read(bs=16K):
-> Speed: 132 132 132
-> Average speed: 132MB/S
->
-> 2.Dynamic hsq_depth(mrq->data->blksz * mrq->data->blocks == 8192 or 16384)
-> 1) Random write(bs=8K):
-> Speed: 115 115 115
-> Average speed: 115MB/S
->
-> 2) Random read(bs=8K):
-> Speed: 82.7 82.9 82.8
-> Average speed: 82.8MB/S
->
-> 3) Random write(bs=16K):
-> Speed: 143 141 141
-> Average speed: 141.6MB/S
->
-> 4) Random read(bs=16K):
-> Speed: 132 132 132
-> Average speed: 132MB/S
->
-> Increasing hsq_depth cannot improve 8k and 16k random read/write performance.
-> To reduce latency, we dynamically increase hsq_depth only for 4k random writes.
->
-> Test cmd
-> =========
-> 1)write: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=write -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 2)read: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=read -bs=512K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 3)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 4)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=4K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 5)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=8K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 6)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=8K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 7)randwrite: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randwrite -bs=16K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
-> 8)randread: fio -filename=/dev/mmcblk0p72 -direct=1 -rw=randread -bs=16K -size=512M -group_reporting -name=test -numjobs=8 -thread -iodepth=64
->
-> Wenchao Chen (2):
->   mmc: queue: replace immediate with hsq->depth
->   mmc: hsq: dynamic adjustment of hsq->depth
->
->  drivers/mmc/core/queue.c   |  6 +-----
->  drivers/mmc/host/mmc_hsq.c | 22 ++++++++++++++++++++++
->  drivers/mmc/host/mmc_hsq.h | 11 +++++++++++
->  include/linux/mmc/host.h   |  1 +
->  4 files changed, 35 insertions(+), 5 deletions(-)
->
-> --
-> 2.17.1
->
+On 21.09.2023 17:58, Geert Uytterhoeven wrote:
+> Hi Claudiu,
+> 
+> On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+>> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>>
+>> Add basic support for RZ/G3S to be able to boot from SD card, have a
+>> running console port and use GPIOs. RZ/G3S has 82 general-purpose IO
+>> ports. Support for the remaining pin functions (e.g. Ethernet, XSPI)
+>> will be added along with controller specific support.
+>>
+>> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> 
+> Thanks for your patch!
+> 
+>> --- a/drivers/pinctrl/renesas/pinctrl-rzg2l.c
+>> +++ b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
+>> @@ -1330,6 +1336,36 @@ static const u32 r9a07g043_gpio_configs[] = {
+>>         RZG2L_GPIO_PORT_PACK(6, 0x22, RZG2L_MPXED_PIN_FUNCS),
+>>  };
+>>
+>> +static const u32 r9a08g045_gpio_configs[] = {
+>> +       RZG2L_GPIO_PORT_PACK(4, 0x20, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P0  */
+>> +       RZG2L_GPIO_PORT_PACK(5, 0x30, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P1 */
+> 
+> P1_0 and P7_0 have IEN functionality.
+> I don't know how to represent that...
+
+I think Prabhakar's series at [1] may help (or make a step forward) in
+supporting this. I have in mind to wait for it and adapt RZ/G3S afterwards.
+
+[1]
+https://lore.kernel.org/all/20230630120433.49529-2-prabhakar.mahadev-lad.rj@bp.renesas.com/
+
+> 
+>> +       RZG2L_GPIO_PORT_PACK(4, 0x31, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P2 */
+>> +       RZG2L_GPIO_PORT_PACK(4, 0x32, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P3 */
+>> +       RZG2L_GPIO_PORT_PACK(6, 0x33, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH0)),  /* P4 */
+>> +       RZG2L_GPIO_PORT_PACK(5, 0x21, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P5  */
+>> +       RZG2L_GPIO_PORT_PACK(5, 0x22, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P6  */
+>> +       RZG2L_GPIO_PORT_PACK(5, 0x34, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P7 */
+>> +       RZG2L_GPIO_PORT_PACK(5, 0x35, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P8 */
+>> +       RZG2L_GPIO_PORT_PACK(4, 0x36, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P9 */
+>> +       RZG2L_GPIO_PORT_PACK(5, 0x37, RZG2L_MPXED_ETH_PIN_FUNCS(PIN_CFG_IOLH_C |
+>> +                                                               PIN_CFG_IO_VMC_ETH1)),  /* P10 */
+>> +       RZG2L_GPIO_PORT_PACK(4, 0x23, RZG3S_MPXED_PIN_FUNCS(B) | PIN_CFG_IEN),          /* P11  */
+> 
+> P11_0 does not have IEN functionality.
+> I don't know how to represent that...
+
+Same here.
+
+> 
+>> +       RZG2L_GPIO_PORT_PACK(2, 0x24, RZG3S_MPXED_PIN_FUNCS(B) | PIN_CFG_IEN),          /* P12  */
+>> +       RZG2L_GPIO_PORT_PACK(5, 0x25, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P13  */
+>> +       RZG2L_GPIO_PORT_PACK(3, 0x26, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P14  */
+>> +       RZG2L_GPIO_PORT_PACK(4, 0x27, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P15  */
+>> +       RZG2L_GPIO_PORT_PACK(2, 0x28, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P16  */
+>> +       RZG2L_GPIO_PORT_PACK(4, 0x29, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P17  */
+>> +       RZG2L_GPIO_PORT_PACK(6, 0x2a, RZG3S_MPXED_PIN_FUNCS(A)),                        /* P18 */
+>> +};
+>> +
+>>  static const struct {
+>>         struct rzg2l_dedicated_configs common[35];
+>>         struct rzg2l_dedicated_configs rzg2l_pins[7];
+>> @@ -1416,6 +1452,46 @@ static const struct {
+>>         }
+>>  };
+>>
+>> +static const struct rzg2l_dedicated_configs rzg3s_dedicated_pins[] = {
+>> +       { "NMI", RZG2L_SINGLE_PIN_PACK(0x0, 0, (PIN_CFG_FILONOFF | PIN_CFG_FILNUM |
+>> +                                               PIN_CFG_FILCLKSEL)) },
+>> +       { "TMS/SWDIO", RZG2L_SINGLE_PIN_PACK(0x1, 0, (PIN_CFG_IOLH_A | PIN_CFG_IEN |
+>> +                                                     PIN_CFG_SOFT_PS)) },
+>> +       { "TDO", RZG2L_SINGLE_PIN_PACK(0x1, 1, (PIN_CFG_IOLH_A | PIN_CFG_SOFT_PS)) },
+>> +       { "WDTOVF_PERROUT#", RZG2L_SINGLE_PIN_PACK(0x6, 0, PIN_CFG_IOLH_A | PIN_CFG_SOFT_PS) },
+>> +       { "SD0_CLK", RZG2L_SINGLE_PIN_PACK(0x10, 0, (PIN_CFG_IOLH_B | PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_CMD", RZG2L_SINGLE_PIN_PACK(0x10, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                    PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_RST#", RZG2L_SINGLE_PIN_PACK(0x10, 2, (PIN_CFG_IOLH_B | PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA0", RZG2L_SINGLE_PIN_PACK(0x11, 0, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA1", RZG2L_SINGLE_PIN_PACK(0x11, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA2", RZG2L_SINGLE_PIN_PACK(0x11, 2, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA3", RZG2L_SINGLE_PIN_PACK(0x11, 3, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA4", RZG2L_SINGLE_PIN_PACK(0x11, 4, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA5", RZG2L_SINGLE_PIN_PACK(0x11, 5, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA6", RZG2L_SINGLE_PIN_PACK(0x11, 6, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD0_DATA7", RZG2L_SINGLE_PIN_PACK(0x11, 7, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD0)) },
+>> +       { "SD1_CLK", RZG2L_SINGLE_PIN_PACK(0x12, 0, (PIN_CFG_IOLH_B | PIN_CFG_IO_VMC_SD1)) },
+>> +       { "SD1_CMD", RZG2L_SINGLE_PIN_PACK(0x12, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                    PIN_CFG_IO_VMC_SD1)) },
+>> +       { "SD1_DATA0", RZG2L_SINGLE_PIN_PACK(0x13, 0, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD1)) },
+>> +       { "SD1_DATA1", RZG2L_SINGLE_PIN_PACK(0x13, 1, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD1)) },
+>> +       { "SD1_DATA2", RZG2L_SINGLE_PIN_PACK(0x13, 2, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD1)) },
+>> +       { "SD1_DATA3", RZG2L_SINGLE_PIN_PACK(0x13, 3, (PIN_CFG_IOLH_B | PIN_CFG_IEN |
+>> +                                                      PIN_CFG_IO_VMC_SD1)) },
+> 
+> Is there any specific reason you left out the XSPI, Audio clock, and I3C pins?
+
+I kept only the necessary support for booting and having SDs, GPIO
+functional as a way of proving that all that has been added has been tested
+(similar to clock support). Thus, with e.g. XSPI support I will add at the
+same time clocks and pinctrl.
+
+> 
+>> +};
+>> +
+>>  static int rzg2l_gpio_get_gpioint(unsigned int virq, const struct rzg2l_pinctrl_data *data)
+>>  {
+>>         unsigned int gpioint;
+>> @@ -1823,6 +1899,40 @@ static const struct rzg2l_hwcfg rzg2l_hwcfg = {
+>>         .iolh_groupb_oi = { 100, 66, 50, 33, },
+>>  };
+>>
+>> +static const struct rzg2l_hwcfg rzg3s_hwcfg = {
+>> +       .regs = {
+>> +               .pwpr = 0x3000,
+>> +               .sd_ch = 0x3004,
+>> +       },
+>> +       .iolh_groupa_ua = {
+>> +               /* 1v8 power source */
+>> +               [RZG2L_IOLH_IDX_1V8] = 2200, 4400, 9000, 10000,
+>> +               /* 2v5 power source */
+>> +               [RZG2L_IOLH_IDX_2V5 ... RZG2L_IOLH_IDX_3V3 - 1] = RZG2L_INVALID_IOLH_VAL,
+> 
+> Can be dropped once zero means invalid.
+> 
+>> +               /* 3v3 power source */
+>> +               [RZG2L_IOLH_IDX_3V3] = 1900, 4000, 8000, 9000,
+>> +       },
+>> +       .iolh_groupb_ua = {
+>> +               /* 1v8 power source */
+>> +               [RZG2L_IOLH_IDX_1V8] = 7000, 8000, 9000, 10000,
+>> +               /* 2v5 power source */
+>> +               [RZG2L_IOLH_IDX_2V5 ... RZG2L_IOLH_IDX_3V3 - 1] = RZG2L_INVALID_IOLH_VAL,
+> 
+> Can be dropped once zero means invalid.
+> 
+>> +               /* 3v3 power source */
+>> +               [RZG2L_IOLH_IDX_3V3] = 4000, 6000, 8000, 9000,
+>> +       },
+>> +       .iolh_groupc_ua = {
+>> +               /* 1v8 power source */
+>> +               [RZG2L_IOLH_IDX_1V8] = 5200, 6000, 6550, 6800,
+>> +               /* 2v5 source */
+>> +               [RZG2L_IOLH_IDX_2V5] = 4700, 5300, 5800, 6100,
+>> +               /* 3v3 power source */
+>> +               [RZG2L_IOLH_IDX_3V3] = 4500, 5200, 5700, 6050,
+>> +       },
+>> +       .drive_strength_ua = true,
+>> +       .iolh_groupb_oi = { [0 ... 3] = RZG2L_INVALID_IOLH_VAL, },
+>> +       .func_base = 1,
+>> +};
+>> +
+>>  static struct rzg2l_pinctrl_data r9a07g043_data = {
+>>         .port_pins = rzg2l_gpio_names,
+>>         .port_pin_configs = r9a07g043_gpio_configs,
+>> @@ -1844,6 +1954,16 @@ static struct rzg2l_pinctrl_data r9a07g044_data = {
+>>         .hwcfg = &rzg2l_hwcfg,
+>>  };
+>>
+>> +static struct rzg2l_pinctrl_data r9a08g045_data = {
+>> +       .port_pins = rzg2l_gpio_names,
+>> +       .port_pin_configs = r9a08g045_gpio_configs,
+>> +       .n_ports = ARRAY_SIZE(r9a08g045_gpio_configs),
+>> +       .dedicated_pins = rzg3s_dedicated_pins,
+>> +       .n_port_pins = ARRAY_SIZE(r9a08g045_gpio_configs) * RZG2L_PINS_PER_PORT,
+>> +       .n_dedicated_pins = ARRAY_SIZE(rzg3s_dedicated_pins),
+>> +       .hwcfg = &rzg3s_hwcfg,
+>> +};
+>> +
+>>  static const struct of_device_id rzg2l_pinctrl_of_table[] = {
+>>         {
+>>                 .compatible = "renesas,r9a07g043-pinctrl",
+> 
+> Please add a BUILD_BUG_ON() check for RZ/G3S to the
+> rzg2l_pinctrl_probe() function, as is done for the other SoCs in
+> the family.
+
+Ok.
+
+> 
+> The rest LGTM.
+> 
+> Gr{oetje,eeting}s,
+> 
+>                         Geert
+> 
