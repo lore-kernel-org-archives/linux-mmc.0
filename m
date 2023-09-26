@@ -2,177 +2,83 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CE1CE7D274
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 09:56:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7D0AE7D273
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 10:01:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232671AbjIZJ4S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Sep 2023 05:56:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40914 "EHLO
+        id S232671AbjIZKBg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Sep 2023 06:01:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58966 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233151AbjIZJ4K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 05:56:10 -0400
-Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48805CCA
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 02:55:58 -0700 (PDT)
-Received: by mail-ej1-x630.google.com with SMTP id a640c23a62f3a-9ad8bf9bfabso1053417666b.3
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 02:55:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1695722156; x=1696326956; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=oCGAB9bjd2rRkobql917EBDyBbo8Xf1tmOkuieid9Qw=;
-        b=HFmsZ4RrW76dmgghgjnLmy/if7RGsBsH4gCiOAm04mIl6nM43bU4nQtLpo9Mipeio4
-         JUhdNIn4w3HgA3gLB+81owUI+uiPg/4oyDitaKB+k6BzOwxh8C6RoMsHT6RFdWJ/t5fa
-         kZkn3eT+bQKDuIZbyX+KdFGTZlx/r1PFcgLzEr1Wa9Gxr4hkCtQiDoaruQAnT9TdaoLw
-         Lk8iZytyVRi3Hc982kBcXwdfyLV5KKQ7qefdk6LDk/U0aXwxhIAfzfZc7PFdV29YdBRj
-         k6fRmlWHQ+eJ/xaWFtECSUf0Xd7QCXN5TOpRM4YTq/E0wPiTnPiEcvndPYLYKtNKLhqs
-         A6tg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695722156; x=1696326956;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=oCGAB9bjd2rRkobql917EBDyBbo8Xf1tmOkuieid9Qw=;
-        b=pIB1/zl2xFVkJNG9cHHK7CWp00+zcrGZdANJsU5CIfRwX9FMKK9oTY/JbD8Lqwe6O/
-         LASK81EhR8bBNRv//bkJZkE8b1kx6NEe/KhiA38To12Xvq4aX/hObiiPbOJfS8PIH4ch
-         5AMXU7cx0x2QaMqfqPx0pRSd53/NHCyUBuywvdRuiq3p9mXoVfpHd+qPm7AOtJcGs/or
-         iihIJpQH0sRTLjtwjJ9QmZLO23Imwr9I3U00zTRofe3k6Syh0yhjoKOFt6vVh7PD0Szq
-         wTY1JRZu/Y7TQ3A56rdf8EGKHnItkPx5uHtUAJMgmz/Qu/uqH6De0qvgnr5Gve8+IH9A
-         AZFg==
-X-Gm-Message-State: AOJu0YxPKXQdj+pnR+DPGpLQzTd/46WR2qta4DmBNCyCkzJuIeuV+vtc
-        c65e2LXV7tbops/CumzMqR6bXQ==
-X-Google-Smtp-Source: AGHT+IEiQ8iJO3tEsrKT6DurQH2FvKo0uS+xJFcGLGiCr6SvtCfNXfJUyT6nkOwQSaE5M72oHauuhA==
-X-Received: by 2002:a17:906:3188:b0:9ae:5fdc:aee8 with SMTP id 8-20020a170906318800b009ae5fdcaee8mr8441103ejy.53.1695722156458;
-        Tue, 26 Sep 2023 02:55:56 -0700 (PDT)
-Received: from [192.168.32.2] ([82.78.167.177])
-        by smtp.gmail.com with ESMTPSA id j26-20020a170906831a00b00997d7aa59fasm7698269ejx.14.2023.09.26.02.55.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 26 Sep 2023 02:55:55 -0700 (PDT)
-Message-ID: <1f1b5174-cfd4-4393-3a86-9adfc8c2cce1@tuxon.dev>
-Date:   Tue, 26 Sep 2023 12:55:53 +0300
+        with ESMTP id S229445AbjIZKBe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 06:01:34 -0400
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 138AB97
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 03:01:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1695722488; x=1727258488;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=DX85ddMRw2BOVECfXw4MNxkJe8I9JIe9xRnZOdFKlek=;
+  b=UKwNcJN5GeU0CAyKWDhxTisWVhMHis1ZIHPUktpqj38byioPxSmS7wRm
+   0LKtH3Hh0I1qAI9WfzQBhlT/6AyUmH+kyp66XVXuciAVH3adLijUAl3uZ
+   U/4NFySdLj52/Qi5+D/J7gOrSjUOFbymwKkwJrcZwZJzT2ksKg8vtb/QF
+   HpBCY/KdnH4zOBnm0RkisO4vJ8AVDCGoUiYMJp0yv1qwYVaNYs+VdrNay
+   Gd4Ojl1jsMw06SO+wu3Ybgv/F/NFQtbiChsYsv275egcH0EBOfC+3b/4X
+   clwNHsjL63CEk19FqmoBKHeDSee5BY4vJ7K9xzN3OXdADxz+D+t0q8CVf
+   A==;
+X-CSE-ConnectionGUID: 407czrcuR02wfww+poHrtQ==
+X-CSE-MsgGUID: h74W+YBlRaGBLf5ookyDFQ==
+X-IronPort-AV: E=Sophos;i="6.03,177,1694707200"; 
+   d="scan'208";a="249466672"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 26 Sep 2023 18:01:27 +0800
+IronPort-SDR: v8XBAqXZeTLyxJeuowcDnaKg4wyljkKC1rXlp7EQgnjqrbspxyZkac4TX8ACB/S49e2tW9SG4Y
+ aZ/MaP6LKoy5s/THaT9nTPzqcO8BVOtgQTx608JflE+4vgxz8MHVsL7ZhydlgvwjwljmUcdUIl
+ 3Rwhucs+XXLwgNKRuxDzNQVL7Hwk3TISmcJQhKF9kk2sYDYTfyWKOGI2D23X21gC3w0oPCaf54
+ XsQ/FzChWZV1oslkYgin5soPMX5UfAkHN98DUJH89XMMiLprfCacYkmf0nRhW7kLevXMaw5lFE
+ HDM=
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 26 Sep 2023 02:08:14 -0700
+IronPort-SDR: jllmZEJHbbH+GrfiLeGMjmw7YCWpM5i/xKVJ+uRc9XQNyg/V5uxt5bb5Xq6NPUDeRDUJFzAj9O
+ C+9r4KnrZ9e/Jvsndvbj6ybgMP+7UBuIwA3WIF9bYCB1XccPlj2KuA/RrMYkhaL0DkUaIEE3PA
+ itr7YzkKDEfpZvCGYW+GQTlTgSd2JHdQfw4cQnTsiqUyn6QOA7a5Ki8SfHZcokWk2IX3pO9eEy
+ vmds6keK0eyd7ozgDGljgFSUYhaRRudY31f319rzov6Gdsbym/x2bCd61ljtFM8H1XW0Vijy2f
+ n0U=
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP; 26 Sep 2023 03:01:27 -0700
+From:   Avri Altman <avri.altman@wdc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH 0/5] Revamp CSD register parsing
+Date:   Tue, 26 Sep 2023 13:00:01 +0300
+Message-Id: <20230926100006.1789276-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH 25/37] pinctrl: renesas: rzg2l: adapt function number for
- RZ/G3S
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-26-claudiu.beznea.uj@bp.renesas.com>
- <CAMuHMdVkttQpA-s0MrKbTVxJ6K+xXmhV3sNNLTAPSbDa0f8XYA@mail.gmail.com>
-Content-Language: en-US
-From:   claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <CAMuHMdVkttQpA-s0MrKbTVxJ6K+xXmhV3sNNLTAPSbDa0f8XYA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Geert,
+Dust-up this old code that practically left untouched since lsmmc got
+merged into mmc-utils.
 
-On 21.09.2023 15:51, Geert Uytterhoeven wrote:
-> Hi Claudiu,
-> 
-> Thanks for your patch!
-> 
-> On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
->> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->>
->> On RZ/G3S PFC register allow setting 8 functions for individual ports
->> (function1 to function8). For function1 register need to be configured
->> with 0, for function8 register need to be configured with 7.
->> We cannot use zero based addressing when requesting functions from
->> different code places as documentation (RZG3S_pinfunction_List_r1.0.xlsx)
->> states explicitly that function0 has different meaning.
-> 
-> According to that table, function0 is GPIO.
+The first 4 patches are mostly cleanups, where the 5fth is fixing a
+capacity calculation bug.
 
-Yes, I'll mention it like this in the next version.
+Avri Altman (4):
+  mmc-utils: lsmmc: Reuse do_read_reg
+  mmc-utils: lsmmc: Simplify prinitng manufacturer name
+  mmc-utils: lsmmc: Simplify interface processing functions
+  mmc-utils: lsmmc: Disintegrade print_mmc_csd
 
-> 
->> For this add a new member to struct rzg2l_hwcfg that will keep the
->> offset that need to be substracted before applying a value to PFC register.
->>
->> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> 
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> 
-> But one question below...
-> 
->> --- a/drivers/pinctrl/renesas/pinctrl-rzg2l.c
->> +++ b/drivers/pinctrl/renesas/pinctrl-rzg2l.c
->> @@ -136,9 +136,11 @@ struct rzg2l_register_offsets {
->>  /**
->>   * struct rzg2l_hwcfg - hardware configuration data structure
->>   * @regs: hardware specific register offsets
->> + * @func_base: base number for port function (see register PFC)
->>   */
->>  struct rzg2l_hwcfg {
->>         const struct rzg2l_register_offsets regs;
->> +       u8 func_base;
->>  };
->>
->>  struct rzg2l_dedicated_configs {
->> @@ -221,6 +223,7 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_dev *pctldev,
->>                                  unsigned int group_selector)
->>  {
->>         struct rzg2l_pinctrl *pctrl = pinctrl_dev_get_drvdata(pctldev);
->> +       const struct rzg2l_hwcfg *hwcfg = pctrl->data->hwcfg;
->>         const struct pinctrl_pin_desc *pin_desc;
->>         unsigned int i, *psel_val, *pin_data;
->>         struct function_desc *func;
->> @@ -247,9 +250,9 @@ static int rzg2l_pinctrl_set_mux(struct pinctrl_dev *pctldev,
->>                 off = RZG2L_PIN_CFG_TO_PORT_OFFSET(*pin_data);
->>
->>                 dev_dbg(pctrl->dev, "port:%u pin: %u off:%x PSEL:%u\n", port,
->> -                       pin, off, psel_val[i]);
->> +                       pin, off, psel_val[i] - hwcfg->func_base);
->>
->> -               rzg2l_pinctrl_set_pfc_mode(pctrl, pin, off, psel_val[i]);
->> +               rzg2l_pinctrl_set_pfc_mode(pctrl, pin, off, psel_val[i] - hwcfg->func_base);
->>         }
->>
->>         return 0;
-> 
-> Perhaps the adjustment should be done in rzg2l_dt_subnode_to_map()
-> instead, when obtaining MUX_FUNC() from DT? That would allow you to do
-> some basic validation on it too, which is currently completely missing
-> (reject out-of-range values overflowing into adjacent PFC fields,
-> reject zero on RZ/G3S).
+wanggang26 (1):
+  mmc-utils: lsmmc: Fix emmc capacity calculation
 
-I'll have a look on this. I see .set_mux() can also be called from sysfs
-though pinmux-select exported file thus, I don't know at the moment if
-validating it on rzg2l_dt_subnode_to_map() will be enough.
+ lsmmc.c | 1585 +++++++++++++++++++++++++------------------------------
+ 1 file changed, 727 insertions(+), 858 deletions(-)
 
-Would it be OK to have this outside of this series or you would prefer it now?
+-- 
+2.42.0
 
-Thank you,
-Claudiu Beznea
-
-> 
-> Gr{oetje,eeting}s,
-> 
->                         Geert
-> 
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-> 
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
