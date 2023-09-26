@@ -2,168 +2,84 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C20F9E8181F
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 06:40:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 980BBE7D242
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 07:16:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233736AbjIZGkS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Sep 2023 02:40:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33228 "EHLO
+        id S229738AbjIZHQi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Sep 2023 03:16:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41264 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233655AbjIZGkR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 02:40:17 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49797AF;
-        Mon, 25 Sep 2023 23:40:11 -0700 (PDT)
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 38Q58NuB030917;
-        Tue, 26 Sep 2023 06:39:28 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=T8mV7AkFQM0nhzBiFcBjsEXg08CoxMbkHo1NRZn7xQY=;
- b=KHqZsvg3k6k3cNmAK0q/nf8JTs8hQwNSi1rR6Cq1oQLhxSu5EbKtFv3C+lycVXZeJODw
- NcfMHgBDsbue0O2kjRmX4Ebtz3nuGSTxnNNZeQT84m1G3I0KIVKyoHVTH13ntixuEDK8
- Sq0lMChQe9sO/cEa6j3bDyEbfmUgZ1ezXRwthEzjWMluvosNlJALHj0gYLAYpV1EAZqz
- r7d3EoOIdLMrmyKzzpvREaUY46mHDf20BfrrH4APcYFRanr6CFoSqMs2IWFIIEDFSE2S
- 3rsPCKpWMae8wHyEtpEPTB8a2UqRjNGRQy3bcOndJuy2vwkdJGF9oAfNlpcJThNgProW qg== 
-Received: from nasanppmta04.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3tbexgh52m-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 26 Sep 2023 06:39:28 +0000
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-        by NASANPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 38Q6dRpP031713
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 26 Sep 2023 06:39:27 GMT
-Received: from [10.217.218.207] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.36; Mon, 25 Sep
- 2023 23:39:21 -0700
-Message-ID: <c06480b1-95e3-49cd-9498-5c7c5f1deabe@quicinc.com>
-Date:   Tue, 26 Sep 2023 12:09:18 +0530
+        with ESMTP id S232317AbjIZHQh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 03:16:37 -0400
+X-Greylist: delayed 60 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 26 Sep 2023 00:16:30 PDT
+Received: from smtpcmd01-g.aruba.it (smtpcmd01-g.aruba.it [62.149.158.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5227AFF
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 00:16:30 -0700 (PDT)
+Received: from localhost.localdomain ([146.241.127.78])
+        by Aruba Outgoing Smtp  with ESMTPSA
+        id l2I2qCEHD4eZZl2I2qUW84; Tue, 26 Sep 2023 09:15:26 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
+        t=1695712526; bh=OExhW2DgjmeiaHG/jb9dsLA8Whjyqh4y9yQrv2YMLzM=;
+        h=From:To:Subject:Date:MIME-Version:Content-Type;
+        b=emjADryJhcpQhTfxQXFpNIzrSALOlGS1EA1LjZSb2N0BNJ44YY9NgHvHl+ugc8ZId
+         0lSLLTIRDDUQghnJriovPtHXBVpfn2y/u61x8j21gS4WHFsrxJFVtFqmKBoqbFXlO6
+         U7voT+2q+HZSZ7XThie2c1K7vRgAJKbZfUOc39LPt5jaj66SgZuZMD7dOnU+a1Id6V
+         AYUBertD846f3Soz8ET1eOhfp5KY0vNvs2kpJN3JmymTym9Kr784Qyin0rkpTSrntn
+         G+6yIxhi2oaWJ7BmHNuc3EEgL095E9ICaUzqbS4NlZ8+hYbZ+XtJ5NRSHvUpKD5LqI
+         MdksTP//e6Fgg==
+From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     Giulio Benetti <giulio.benetti@benettiengineering.com>
+Subject: [PATCH] mmc-utils: fix potential overflow
+Date:   Tue, 26 Sep 2023 09:15:24 +0200
+Message-Id: <20230926071524.3638706-1-giulio.benetti@benettiengineering.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V1] mmc: core: Add partial initialization support
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "Kamasali Satyanarayan (Consultant) (QUIC)" 
-        <quic_kamasali@quicinc.com>,
-        "avri.altman@wdc.com" <avri.altman@wdc.com>,
-        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
-        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>,
-        "merez@codeaurora.org" <merez@codeaurora.org>,
-        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
-        "huijin.park@samsung.com" <huijin.park@samsung.com>,
-        "briannorris@chromium.org" <briannorris@chromium.org>,
-        "digetx@gmail.com" <digetx@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Veerabhadrarao Badiganti" <vbadigan@codeaurora.org>,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-References: <1650963852-4173-1-git-send-email-quic_spathi@quicinc.com>
- <CAPDyKFo7H=fOiX49gttrKO3gwe=ddYMjdgrO_xSnnZjZh7P7ZA@mail.gmail.com>
- <MWHPR0201MB3466C629ECABC8FD6B009276E3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
- <ea318551ec0b43429ce47bfac9ebf285@quicinc.com>
- <CAPDyKFq2-Jwii_aMbsqYNM_Dq0-MMEEtUYnNKGbQgvDL+M-wdw@mail.gmail.com>
-From:   Sarthak Garg <quic_sartgarg@quicinc.com>
-In-Reply-To: <CAPDyKFq2-Jwii_aMbsqYNM_Dq0-MMEEtUYnNKGbQgvDL+M-wdw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: uTYgw018y0xzFoxeI5THTAQi7phhsQRY
-X-Proofpoint-GUID: uTYgw018y0xzFoxeI5THTAQi7phhsQRY
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-09-26_04,2023-09-25_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- phishscore=0 spamscore=0 suspectscore=0 impostorscore=0 mlxlogscore=899
- adultscore=0 clxscore=1015 bulkscore=0 mlxscore=0 malwarescore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2309180000 definitions=main-2309260058
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-CMAE-Envelope: MS4xfAFl05mLTrFUCtBOy7psjaOOqlCxS8AR0owtY/CsCQM0wsIgpo49h+79I5mYz4k3ODwnC+xUa+rqR0HQ2J3Zi0L7YdOtfQbWcok0SdPnJkyyp1H3fQ6c
+ H6HHip0Mtu2GvifsBZsyowLhUgVvEBNRkUnfxewntcAtEFoIFFZzeJPE+CMRhHEAd/zq3batuDghUHasrCGYmDI8oLwKqfs5V/P8ZxicnEsiXNV4kfJKIctr
+ 3id21rLAV8TWZ0fCWvbo2Nc9zA0t+zPX+4LoUO6KN4s57wzrvvSNq2cSoEfAE59r
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+With fortify enabled gcc throws following error:
+                 from mmc_cmds.c:20:
+In function ‘read’,
+    inlined from ‘do_rpmb_write_key’ at mmc_cmds.c:2233:8:
+/home/giuliobenetti/br_reproduce/a53922c5db3e605a5e81e53c034f45017ebb7db7/output/host/mipsel-buildroot-linux-gnu/sysroot/usr/include/bits/unistd.h:38:10: error: ‘__read_alias’ writing 228 or more bytes into a region of size 32 overflows the destination [-Werror=stringop-overflow=]
+   38 |   return __glibc_fortify (read, __nbytes, sizeof (char),
+      |          ^~~~~~~~~~~~~~~
+mmc_cmds.c: In function ‘do_rpmb_write_key’:
+mmc_cmds.c:2087:19: note: destination object ‘key_mac’ of size 32
+ 2087 |         u_int8_t  key_mac[32];
+      |                   ^~~~~~~
+/home/giuliobenetti/br_reproduce/a53922c5db3e605a5e81e53c034f45017ebb7db7/output/host/mipsel-buildroot-linux-gnu/sysroot/usr/include/bits/unistd.h:26:16: note: in a call to function ‘__read_alias’ declared with attribute ‘access (write_only, 2, 3)’
+   26 | extern ssize_t __REDIRECT (__read_alias, (int __fd, void *__buf,
+      |                ^~~~~~~~~~
 
-On 6/16/2022 4:18 AM, Ulf Hansson wrote:
-> On Tue, 24 May 2022 at 07:37, Sarthak Garg (QUIC)
-> <quic_sartgarg@quicinc.com> wrote:
->> Hi Ulf,
->>
->> Please find the gains seen on micron and kingston eMMC parts below with partial initialization feature (These are the averaged numbers) :
->>
->> 1) Micron eMMC (ManfID 0x13)
->>
->> Partial init                            Full Init
->>
->> a) _mmc_resume:                         _mmc_resume :
->>
->> Total time : 62ms                       Total time : 84ms
->> (Decrease % from full init = ~26%)
-> Alright, so we gained around 22ms. Not too bad.
->
->> Breakup :
->> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.1ms
->> mmc_power_up_time: 33ms         mmc_power_up_time: 33ms
->> mmc_sleepawake_time: 28ms               mmc_init_card_time: 50ms
->> mmc_partial_init_time: 1ms
->>
->> b) _mmc_suspend:                        _mmc_suspend:
->>
->> Total time: 5ms                         Total time: 7.5ms
->> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 1ms
->> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 2.5 ms
->> mmc_sleep_time: 1.5ms           mmc_sleep_time: 2ms
->> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
-> The suspend time shouldn't really differ. Or is there a reason for this?
+read() could potentially return more than nbyte so let's check for
+ret < nbyte.
 
+Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+---
+ mmc_cmds.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I think this could be due to run to run variation as we can see 
-mmc_claim_host and mmc_flush_cache itself taking some extra 1ms.
-
-
->
->>
->> 2) Kingston eMMC (ManfID 0x70)
->>
->> Partial init                            Full Init
->>
->> a) _mmc_resume:                 _mmc_resume :
->> Total time : 46ms                       Total time : 62ms
->> (Decrease % from full init = ~25%)
->>
->> Breakup :
->> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.2ms
->> mmc_power_up_time: 30ms         mmc_power_up_time: 30ms
->> mmc_sleepawake_time: 14ms               mmc_init_card_time: 31ms
->> mmc_partial_init_time: 2ms
->>
->>
->> b) _mmc_suspend:                        _mmc_suspend:
->> Total time : 5ms                        Total: 5ms
->>
->> Breakup :
->> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 0.5ms
->> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 1.5 ms
->> mmc_sleep_time: 1.5ms           mmc_sleep_time: 1ms
->> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
->>
->> Did some minor modifications as well to this patchset as per avri's comment which I'll post as V2.
->> Please let me know your inputs about these numbers.
-> Thanks for posting these numbers, much appreciated! Please try to
-> include some of the data as part of the commit message as I think it's
-> valuable information.
->
-> When it comes to reviewing the code, I am awaiting your v2 then.
->
-> [...]
->
-> Kind regards
-> Uffe
-
-Sure will add this data to the commit text in V2.
-
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 10d063d..ae7b876 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2065,7 +2065,7 @@ int do_sanitize(int nargs, char **argv)
+ 			}										\
+ 			else if (r > 0)							\
+ 				ret += r;							\
+-		} while (r != 0 && (size_t)ret != nbyte);	\
++		} while (r != 0 && (size_t)ret < nbyte);	\
+ 													\
+ 		ret;										\
+ 	})
+-- 
+2.34.1
 
