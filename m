@@ -2,167 +2,111 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF192E7E63F
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 14:44:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8DF2E7E647
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 14:58:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234971AbjIZOoY convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Sep 2023 10:44:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45862 "EHLO
+        id S230125AbjIZO63 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Sep 2023 10:58:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234950AbjIZOoX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 10:44:23 -0400
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E886F101;
-        Tue, 26 Sep 2023 07:44:16 -0700 (PDT)
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-59e77e4f707so108567687b3.0;
-        Tue, 26 Sep 2023 07:44:16 -0700 (PDT)
+        with ESMTP id S229841AbjIZO62 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 10:58:28 -0400
+Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0F15116
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 07:58:21 -0700 (PDT)
+Received: by mail-yb1-xb2f.google.com with SMTP id 3f1490d57ef6-d84c24a810dso10403463276.2
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Sep 2023 07:58:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1695740301; x=1696345101; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=jZbxtg1mBfCZMzNBoLIQJWtwMNJFStlqqB1T72xxhYg=;
+        b=Zct6p4K4jaKU2HKVEyFQxeCtTa0fBC+SwDsPeA24OiADcX6oXsxkTLK5hLjbRZ6J6g
+         z0zarWzdyXsorxODdfbw8NT2U5qE7h4f803RmCSI0NfGhWeXLhP8wGXe0YEvb/+ryvD1
+         T/ZaQe1iGzo59j3gRb5MQfcQXhWyDk1v9NQkNdGR1V39jF4d68vTXPZY6V6S5xTOHLNC
+         WD+JiyGW2io/AP4pWxqrzBbpMRQFRb2k0e27PF5DZSrMp5Nn7q4ElrNwO2V6lyktzjrx
+         vQDJlscnnEHNGrE5nBTLHU6oWG/bz0ZEOEjQsNO8V/MBgMTjNmx73rF/hX/wdKxi0/TF
+         u93A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695739456; x=1696344256;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ivyZHRBgAcyVi68nE2bpnhz+CC5mnJuOpqgFaju5LfE=;
-        b=Z6Mb42gQhMV63Z42pDaqMqd6CYwKaEM8Tbg/GS9rKy9DJpkP/7XBiB0bP8vPdJOHrT
-         pWLUxzqmLY+jKEbN7duAXMKAFXWI7FPLwRHt3RexZm0DgLGq7MB5oJK48s6UB4KEFM9A
-         dCHWZmyPhc/mkx1xB2lWn0mF8y0YNvfuwmIWk+8KEXs7dFmuUHrUH0fbfCqOd2jX8ldc
-         0JUynAPTZNafb8jZl4o0mOeSJHR8FZ3Auw0G6z+/aUFnbw7FZGmLuTVrImRLTT4b4Gg6
-         1vq7O3szugR887tmzxF0UFtCXXftnvGZ6aXccJKddEL441/R5bxHLwJtQgQYPr48OWw/
-         IgoQ==
-X-Gm-Message-State: AOJu0Yxy8YmV3+lnl9MxPbNJm222mIdq6lZSkjtpxIofPisOA/8k8oqV
-        07olPEuD4JQ4vYp4srtWWZe3UgNmvJ0s9Q==
-X-Google-Smtp-Source: AGHT+IGa5Jo9kJDHGXIFdHHPnQGaIArnecMrPDAH9XvmvJxbK+ZhjCjymTogMAHfIDKCN4JZ8V85EQ==
-X-Received: by 2002:a0d:d1c3:0:b0:58a:83cd:115d with SMTP id t186-20020a0dd1c3000000b0058a83cd115dmr7781934ywd.50.1695739455915;
-        Tue, 26 Sep 2023 07:44:15 -0700 (PDT)
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com. [209.85.128.174])
-        by smtp.gmail.com with ESMTPSA id d133-20020a814f8b000000b0058fb9863fe7sm3008430ywb.103.2023.09.26.07.44.13
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 26 Sep 2023 07:44:14 -0700 (PDT)
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-59e77e4f707so108566047b3.0;
-        Tue, 26 Sep 2023 07:44:13 -0700 (PDT)
-X-Received: by 2002:a0d:e603:0:b0:570:28a9:fe40 with SMTP id
- p3-20020a0de603000000b0057028a9fe40mr9000567ywe.5.1695739453342; Tue, 26 Sep
- 2023 07:44:13 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695740301; x=1696345101;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=jZbxtg1mBfCZMzNBoLIQJWtwMNJFStlqqB1T72xxhYg=;
+        b=TSbhd2S2shAEEbSMyI18GWx4vyfzn3lp/EnJbkGTgoctc3eHi0tgV7UatWjX8V038S
+         i0XU8vQT0ecaXQQiUNW4UiY5tBcxGijcnqfDnvZGCUU3mo/FHJwedYwRvxVY//KQ1QAi
+         Qi0OkianRMZbYxncb5ojvjymV9bFS7TLSy0z60oKTUrw58vzJWnUFaIDiq60rFKbdSHt
+         7n9jVDUOX1KwYUi7QxaVwvXoZ0FP1qcGaekm3nGXUx9UviK3QklF9YnehKTSbYyA5KNH
+         tQ4f3QEMJ9sUXFCVZgIbblLcdVGTG3c02cTU8F+sU0RjFBZbEUUCUZ2JsCDr+NpLi/HO
+         bGyQ==
+X-Gm-Message-State: AOJu0Yzh7V4J1onC0195hZ5/DQsgDFyJU5fUsViCxLMU2tESDZBxG8gH
+        m/vR2SFaDEVcuTX6YXO3Fa+7TN2DorpxsdKsNPvSRIKdgnYb9U1dhuQ=
+X-Google-Smtp-Source: AGHT+IE1o1qWDkZEpF346JB3JDVb9LCnv531f0QxlOdNoUdij2dM8xqI+aDHSud58opOjtQcTrIsd4jaxIyH07e96j0=
+X-Received: by 2002:a25:4409:0:b0:d62:b8f5:d745 with SMTP id
+ r9-20020a254409000000b00d62b8f5d745mr7870619yba.52.1695740300815; Tue, 26 Sep
+ 2023 07:58:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
- <20230912045157.177966-10-claudiu.beznea.uj@bp.renesas.com>
- <CAMuHMdVNzgHqURohOgpFEaGn+6+rQTqsDomoS1u_-jn=GgmHXw@mail.gmail.com> <dfe64c7c-2f90-65a2-05fc-e96ec5113a60@tuxon.dev>
-In-Reply-To: <dfe64c7c-2f90-65a2-05fc-e96ec5113a60@tuxon.dev>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 26 Sep 2023 16:44:00 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXJ_gp5cdGpcK-kGk16YGDX8d9MEjQQkSobOGLphbJ5dQ@mail.gmail.com>
-Message-ID: <CAMuHMdXJ_gp5cdGpcK-kGk16YGDX8d9MEjQQkSobOGLphbJ5dQ@mail.gmail.com>
-Subject: Re: [PATCH 09/37] clk: renesas: rzg2l: fix computation formula
-To:     claudiu beznea <claudiu.beznea@tuxon.dev>
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, jirislaby@kernel.org,
-        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
-        prabhakar.mahadev-lad.rj@bp.renesas.com,
-        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
-        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
-        nfraprado@collabora.com, rafal@milecki.pl,
-        wsa+renesas@sang-engineering.com,
-        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230923173728.1781844-1-avri.altman@wdc.com>
+In-Reply-To: <20230923173728.1781844-1-avri.altman@wdc.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 26 Sep 2023 16:57:44 +0200
+Message-ID: <CAPDyKFpkLaQJCw9VHcsxTC4XeVajpH+s5r8iztjrkKUXvUmyag@mail.gmail.com>
+Subject: Re: [PATCH] mmc: Capture correct oemid
+To:     Avri Altman <avri.altman@wdc.com>
+Cc:     linux-mmc@vger.kernel.org, Alex Fetters <Alex.Fetters@garmin.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Claudiu,
++ Alex
 
-On Tue, Sep 26, 2023 at 1:47 PM claudiu beznea <claudiu.beznea@tuxon.dev> wrote:
-> On 14.09.2023 15:55, Geert Uytterhoeven wrote:
-> > On Tue, Sep 12, 2023 at 6:52 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
-> >> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> >>
-> >> According to hardware manual of RZ/G2L (r01uh0914ej0130-rzg2l-rzg2lc.pdf)
-> >> the computation formula for PLL rate is as follows:
-> >>
-> >> Fout = ((m + k/65536) * Fin) / (p * 2^s)
-> >>
-> >> and k has values in range [-32768, 32767]. Dividing k by 65536 with
-> >> integer variables leads all the time to zero. Thus we may have slight
-> >> differences b/w what has been set vs. what is displayed. Thus,
-> >> get rid of this and decompose the formula before dividing k by 65536.
-> >>
-> >> Fixes: ef3c613ccd68a ("clk: renesas: Add CPG core wrapper for RZ/G2L SoC")
-> >> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> >
-> > Thanks for your patch!
-> >
-> >> --- a/drivers/clk/renesas/rzg2l-cpg.c
-> >> +++ b/drivers/clk/renesas/rzg2l-cpg.c
-> >> @@ -696,18 +696,22 @@ static unsigned long rzg2l_cpg_pll_clk_recalc_rate(struct clk_hw *hw,
-> >>         struct pll_clk *pll_clk = to_pll(hw);
-> >>         struct rzg2l_cpg_priv *priv = pll_clk->priv;
-> >>         unsigned int val1, val2;
-> >> -       unsigned int mult = 1;
-> >> -       unsigned int div = 1;
-> >> +       unsigned int div;
-> >> +       u64 rate;
-> >> +       s16 kdiv;
-> >>
-> >>         if (pll_clk->type != CLK_TYPE_SAM_PLL)
-> >>                 return parent_rate;
-> >>
-> >>         val1 = readl(priv->base + GET_REG_SAMPLL_CLK1(pll_clk->conf));
-> >>         val2 = readl(priv->base + GET_REG_SAMPLL_CLK2(pll_clk->conf));
-> >> -       mult = MDIV(val1) + KDIV(val1) / 65536;
-> >> +       kdiv = KDIV(val1);
-> >>         div = PDIV(val1) << SDIV(val2);
-> >>
-> >> -       return DIV_ROUND_CLOSEST_ULL((u64)parent_rate * mult, div);
-> >> +       rate = (u64)MDIV(val1) * parent_rate;
-> >> +       rate += ((long long)parent_rate * kdiv) / 65536;
-> >
-> > As the division is a binary shift, you can use the mul_u64_u32_shr() helper,
-> > and incorporate the sdiv shift at the same time:
-> >
-> >     rate += mul_u64_u32_shr(parent_rate, KDIV(val1), 16 + SDIV(val2));
+On Sat, 23 Sept 2023 at 19:38, Avri Altman <avri.altman@wdc.com> wrote:
+>
+> The OEMID is an 8-bit binary number that identifies the Device OEM
+> and/or the Device contents (when used as a distribution media either on
+> ROM or FLASH Devices).  It occupies bits [111:104] in the CID register:
+> see the eMMC spec JESD84-B51 paragraph 7.2.3.
+>
+> So it is 8 bits, and has been so since ever - this bug is so ancients I
+> couldn't even find its source.  The furthest I could go is to commit
+> 335eadf2ef6a (sd: initialize SD cards) but its already was wrong.  Could
+> be because in SD its indeed 16 bits (a 2-characters ASCII string).
 
- [1]^
+As pointed out by Alex (offlist), it seems like this comes from the
+legacy MMC specs (v3.31 and before). That probably doesn't matter as I
+guess the oemid isn't that important to use for these old devices.
 
-> >
-> > You can save a multiplication by premultiplying mdiv by 65536:
-> >
-> >     rate = mul_u64_u32_shr(parent_rate, (MDIV(val1) << 16)) + KDIV(val1),
-> >                            16 + SDIV(val2));
-
-[2]^
+However, it would be nice if you could add some of this information to
+the commit msg, to make this clear.
 
 >
-> Looking again at this: KDIV (aka DIV_K) could have negative values thus
-> mul_u64_u32_shr() cannot be used here.
+> It is important to fix it because we are using it as one of our quirk's
+> token, as well as other tools, e.g. the LVFS
+> (https://github.com/fwupd/fwupd/).
+>
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-That means you can indeed not use [1].
+Kind regards
+Uffe
 
-But you can still use [2], as MDIV() must be in the range 64..533[3],
-so "(MDIV(val1) << 16)) + (s16)KDIV(val1)" is always positive.
-Note that you do need the cast to s16 (which I had missed before), or
-the intermediate variable kdiv of type s16 (like in your patch).
-
-[3] As the current PLL driver is read-only, there is no calculation or
-    validation of the PLL parameters.
-
-> >> +
-> >> +       return DIV_ROUND_CLOSEST_ULL(rate, div);
-> >
-> > return DIV_ROUND_CLOSEST_ULL(rate, PDIV(val1));
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> ---
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 89cd48fcec79..4a4bab9aa726 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -104,7 +104,7 @@ static int mmc_decode_cid(struct mmc_card *card)
+>         case 3: /* MMC v3.1 - v3.3 */
+>         case 4: /* MMC v4 */
+>                 card->cid.manfid        = UNSTUFF_BITS(resp, 120, 8);
+> -               card->cid.oemid         = UNSTUFF_BITS(resp, 104, 16);
+> +               card->cid.oemid         = UNSTUFF_BITS(resp, 104, 8);
+>                 card->cid.prod_name[0]  = UNSTUFF_BITS(resp, 96, 8);
+>                 card->cid.prod_name[1]  = UNSTUFF_BITS(resp, 88, 8);
+>                 card->cid.prod_name[2]  = UNSTUFF_BITS(resp, 80, 8);
+> --
+> 2.42.0
+>
