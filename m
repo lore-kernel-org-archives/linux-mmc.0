@@ -2,277 +2,423 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3E37CE7A9D
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Sep 2023 15:40:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23370E8181F
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Sep 2023 06:33:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230459AbjIYPk3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Sep 2023 11:40:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53836 "EHLO
+        id S230207AbjIZGdd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Sep 2023 02:33:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229874AbjIYPk2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Sep 2023 11:40:28 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BC43FF;
-        Mon, 25 Sep 2023 08:40:20 -0700 (PDT)
-Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 38PB8uT6014707;
-        Mon, 25 Sep 2023 17:39:35 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-        message-id:date:mime-version:subject:to:cc:references:from
-        :in-reply-to:content-type:content-transfer-encoding; s=
-        selector1; bh=mGHKtScuDGvlKtHxb7FEML0faIVvgVUaxKEFd7mNV8E=; b=4q
-        Kcoqc3zgo9sJUre04DyZDGbklDpC/KeHLYhQUqjGRISItW8tgxD1HfsY5C4dvmqU
-        ypND1/tw6xNpNdiaI9cj+0DWwB+AO0jLWS/wje1xIs8ahvEonwIRLgsKfwpyGxPj
-        WrbsnrDRuDGY9paZF0VD3ToFCcy5ZYDaUcatISItUInwnHoiND9VP6eDGTO9iYXo
-        ZEP5o7P/ZBL2FD+txkgb4ZEpwSXXmY28sPofNNkoXeBmhTKN4+cuSPwfop+Qz5FQ
-        7qyGBbMEzJI/xgZpubfLrOe/BKmIRB3aBHd5cxl6QkR5912kToqhArv0Ruzk8VDm
-        KERn0jfP42AQsJ6JQr2A==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3t9qbwr14m-1
+        with ESMTP id S229776AbjIZGdc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 02:33:32 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01F2CDF;
+        Mon, 25 Sep 2023 23:33:23 -0700 (PDT)
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 38Q5YaRT017583;
+        Tue, 26 Sep 2023 06:32:31 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=6r74SF/MEkn3vHAj01ANhBz+/YVAiGxoIyM6nqnZiSk=;
+ b=G27kQ4fLN+gIwiOyoMZcupOQFVqV4xlPxa40CPZa1+dDBFWpVRDfcS5Gpzj3bMhgcLKy
+ hOqESVQbTJJQwdmTeGgvunTGex7BdZjSjgo4JwNZ9vSi1Qy+XCoAMnXidA8+1oNWWwg0
+ rKExWmvulHnXbqWMjHh1oxy0X86A+5lt8Lpfc88AxjlVCOR3mqtcboCMpvd8Qz3l4/MH
+ F1W4jO5QpPe3yD0i6AJmQo4O/P1j4JsfixZxo71eb50g05PFnTztG/ltGNQ7fI/TL2PO
+ b7E1rKDOQQRiQ3DR5kmcuYcZxFbw83KZSuEjOqBFXb91YSkY6nBp+SaJG0NXOVNbLieW YQ== 
+Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3tb7re2atj-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 25 Sep 2023 17:39:35 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 16D6610005C;
-        Mon, 25 Sep 2023 17:39:15 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id D8052245514;
-        Mon, 25 Sep 2023 17:39:15 +0200 (CEST)
-Received: from [10.201.20.32] (10.201.20.32) by SHFDAG1NODE1.st.com
- (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Mon, 25 Sep
- 2023 17:39:13 +0200
-Message-ID: <4eb771d5-1f22-c708-0390-0111e8d1a9a0@foss.st.com>
-Date:   Mon, 25 Sep 2023 17:39:13 +0200
+        Tue, 26 Sep 2023 06:32:31 +0000
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+        by NASANPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 38Q6WTQA002406
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 26 Sep 2023 06:32:29 GMT
+Received: from [10.217.218.207] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.36; Mon, 25 Sep
+ 2023 23:32:24 -0700
+Message-ID: <f32214ce-850c-428f-95a5-12d68358b47c@quicinc.com>
+Date:   Tue, 26 Sep 2023 12:01:59 +0530
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH v3 00/11] Introduce STM32 Firewall framework
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V1] mmc: core: Add partial initialization support
 Content-Language: en-US
-To:     <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
-        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
-        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <conor+dt@kernel.org>, <alexandre.torgue@foss.st.com>,
-        <vkoul@kernel.org>, <jic23@kernel.org>,
-        <olivier.moysan@foss.st.com>, <arnaud.pouliquen@foss.st.com>,
-        <mchehab@kernel.org>, <fabrice.gasnier@foss.st.com>,
-        <andi.shyti@kernel.org>, <ulf.hansson@linaro.org>,
-        <edumazet@google.com>, <kuba@kernel.org>, <pabeni@redhat.com>,
-        <hugues.fruchet@foss.st.com>, <lee@kernel.org>, <will@kernel.org>,
-        <catalin.marinas@arm.com>, <arnd@kernel.org>,
-        <richardcochran@gmail.com>, Frank Rowand <frowand.list@gmail.com>
-CC:     <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <dmaengine@vger.kernel.org>,
-        <linux-i2c@vger.kernel.org>, <linux-iio@vger.kernel.org>,
-        <alsa-devel@alsa-project.org>, <linux-media@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
-        <linux-phy@lists.infradead.org>, <linux-serial@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <linux-usb@vger.kernel.org>
-References: <20230726083810.232100-1-gatien.chevallier@foss.st.com>
-From:   Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
-In-Reply-To: <20230726083810.232100-1-gatien.chevallier@foss.st.com>
+To:     Ben Chuang <benchuanggli@gmail.com>,
+        "Kamasali Satyanarayan (Consultant) (QUIC)" 
+        <quic_kamasali@quicinc.com>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
+        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>,
+        "merez@codeaurora.org" <merez@codeaurora.org>,
+        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
+        "huijin.park@samsung.com" <huijin.park@samsung.com>,
+        "briannorris@chromium.org" <briannorris@chromium.org>,
+        "digetx@gmail.com" <digetx@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "Veerabhadrarao Badiganti" <vbadigan@codeaurora.org>,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
+        "quic_spathi@quicinc.com" <quic_spathi@quicinc.com>
+References: <1650963852-4173-1-git-send-email-quic_spathi@quicinc.com>
+ <CAPDyKFo7H=fOiX49gttrKO3gwe=ddYMjdgrO_xSnnZjZh7P7ZA@mail.gmail.com>
+ <MWHPR0201MB3466C629ECABC8FD6B009276E3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
+ <CACT4zj8knKUUsafZ_r5cL50DQDw+vSa_RBi_QCnAS5Y1hB47yw@mail.gmail.com>
+From:   Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <CACT4zj8knKUUsafZ_r5cL50DQDw+vSa_RBi_QCnAS5Y1hB47yw@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.201.20.32]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE1.st.com
- (10.75.129.69)
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: dulO9-b3duc5F6xxAAqvPJzr-mpJu0G6
+X-Proofpoint-GUID: dulO9-b3duc5F6xxAAqvPJzr-mpJu0G6
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-09-25_13,2023-09-25_01,2023-05-22_02
+ definitions=2023-09-26_04,2023-09-25_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0
+ lowpriorityscore=0 suspectscore=0 bulkscore=0 mlxlogscore=999 adultscore=0
+ priorityscore=1501 phishscore=0 clxscore=1011 spamscore=0 impostorscore=0
+ mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2309180000 definitions=main-2309260057
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello all,
 
-Since the "feature-domains" bindings lacks precision (maybe some
-renaming for better clarity on its purpose), I will send v4 with a
-vendor binding so the generic one better discussed and enriched with
-other contributor examples.
+On 6/2/2022 1:26 PM, Ben Chuang wrote:
+> Hi Sarthak and others,
+>
+> I like your patch, I'm not familiar with the whole sleep/wake flow.
+> But I have a question.
+>
+> Regarding mmc_poweroff_notify() , there is a parameter notify_type.
+> In the spec., it has a value 0x04: SLEEP_NOTIFICATION (host is going
+> to put the device in sleep mode.)
+> Is there anything that needs to be changed in _mmc_suspend() before
+> calling mmc_sleepawake(host, true)/mmc_power_off(host)?
+> Thanks in advance.
+>
+> Best regards,
+> Ben
 
-This will avoid mixing several patch set.
 
-Best regards,
-Gatien
+Hi Ben,
 
-On 7/26/23 10:37, Gatien Chevallier wrote:
-> Introduce STM32 Firewall framework for STM32MP1x and STM32MP2x
-> platforms. STM32MP1x(ETZPC) and STM32MP2x(RIFSC) Firewall controllers
-> register to the framework to offer firewall services such as access
-> granting.
-> 
-> This series of patches is a new approach on the previous STM32 system
-> bus, history is available here:
-> https://lore.kernel.org/lkml/20230127164040.1047583/
-> 
-> The need for such framework arises from the fact that there are now
-> multiple hardware firewalls implemented across multiple products.
-> Drivers are shared between different products, using the same code.
-> When it comes to firewalls, the purpose mostly stays the same: Protect
-> hardware resources. But the implementation differs, and there are
-> multiple types of firewalls: peripheral, memory, ...
-> 
-> Some hardware firewall controllers such as the RIFSC implemented on
-> STM32MP2x platforms may require to take ownership of a resource before
-> being able to use it, hence the requirement for firewall services to
-> take/release the ownership of such resources.
-> 
-> On the other hand, hardware firewall configurations are becoming
-> more and more complex. These mecanisms prevent platform crashes
-> or other firewall-related incoveniences by denying access to some
-> resources.
-> 
-> The stm32 firewall framework offers an API that is defined in
-> firewall controllers drivers to best fit the specificity of each
-> firewall.
-> 
-> For every peripherals protected by either the ETZPC or the RIFSC, the
-> firewall framework checks the firewall controlelr registers to see if
-> the peripheral's access is granted to the Linux kernel. If not, the
-> peripheral is configured as secure, the node is marked populated,
-> so that the driver is not probed for that device.
-> 
-> The firewall framework relies on the feature-domain-controller device
-> tree bindings: https://lore.kernel.org/lkml/0c0a82bb-18ae-d057-562b.
-> It is used by peripherals to reference a domain controller, in this
-> case a firewall feature domain. The bus uses the ID referenced by
-> the feature-domains property to know where to look in the firewall
-> to get the security configuration for the peripheral. This allows
-> a device tree description rather than a hardcoded peripheral table
-> in the bus driver.
-> 
-> The STM32 ETZPC device is responsible for filtering accesses based on
-> security level, or co-processor isolation for any resource connected
-> to it.
-> 
-> The RIFSC is responsible for filtering accesses based on Compartment
-> ID / security level / privilege level for any resource connected to
-> it.
-> 
-> STM32MP13/15/25 SoC device tree files are updated in this series to
-> implement this mecanism.
-> 
-> Changes in V2:
-> 
-> 	generic:
-> 		- Add fw_devlink dependency for "feature-domains"
-> 		  property.
-> 
-> 	bindings:
-> 		- Corrected YAMLS errors highlighted by Rob's robot
-> 		- Firewall controllers YAMLs no longer define the
-> 		  maxItems for the "feature-domains" property
-> 		- Renamed st,stm32-rifsc.yaml to
-> 		  st,stm32mp25-rifsc.yaml
-> 		- Fix examples in YAML files
-> 		- Change feature-domains maxItems to 2 in firewall
-> 		  consumer files as there should not be more than
-> 		  2 entries for now
-> 		- Declare "feature-domain-names" as an optional
-> 		  property for firewall controllers child nodes.
-> 		- Add missing "feature-domains" property declaration
-> 		  in bosch,m_can.yaml and st,stm32-cryp.yaml files
-> 
-> 	firewall framework:
-> 		- Support multiple entries for "feature-domains"
-> 		  property
-> 		- Better handle the device-tree parsing using
-> 		  phandle+args APIs
-> 		- Remove "resource firewall" type
-> 		- Add a field for the name of the firewall entry
-> 		- Fix licenses
-> 	
-> 	RIFSC:
-> 		- Add controller name
-> 		- Driver is now a module_platform_driver
-> 		- Fix license
-> 
-> 	ETZPC:
-> 		- Add controller name
-> 		- Driver is now a module_platform_driver
-> 		- Fix license
-> 
-> 	Device trees:
-> 		- Fix rifsc node name
-> 		- Move the "ranges" property under the
-> 		  "feature-domains" one
-> 
-> Changes in V3:
-> 
-> 	Change incorrect ordering for bindings commits leading
-> 	to an error while running
-> 	"make DT_CHECKER_FLAGS=-m dt_binding_check"
-> 
-> Oleksii Moisieiev (1):
->    dt-bindings: Document common device controller bindings
-> 
-> Gatien Chevallier (10):
->    dt-bindings: treewide: add feature-domains description
->    dt-bindings: bus: document RIFSC
->    dt-bindings: bus: document ETZPC
->    firewall: introduce stm32_firewall framework
->    of: property: fw_devlink: Add support for "feature-domains"
->    bus: rifsc: introduce RIFSC firewall controller driver
->    arm64: dts: st: add RIFSC as a domain controller for STM32MP25x boards
->    bus: etzpc: introduce ETZPC firewall controller driver
->    ARM: dts: stm32: add ETZPC as a system bus for STM32MP15x boards
->    ARM: dts: stm32: add ETZPC as a system bus for STM32MP13x boards
-> 
->   .../bindings/bus/st,stm32-etzpc.yaml          |   96 +
->   .../bindings/bus/st,stm32mp25-rifsc.yaml      |  105 +
->   .../bindings/crypto/st,stm32-cryp.yaml        |    4 +
->   .../bindings/crypto/st,stm32-hash.yaml        |    4 +
->   .../devicetree/bindings/dma/st,stm32-dma.yaml |    4 +
->   .../bindings/dma/st,stm32-dmamux.yaml         |    4 +
->   .../feature-domain-controller.yaml            |   84 +
->   .../devicetree/bindings/i2c/st,stm32-i2c.yaml |    4 +
->   .../bindings/iio/adc/st,stm32-adc.yaml        |    4 +
->   .../bindings/iio/adc/st,stm32-dfsdm-adc.yaml  |    4 +
->   .../bindings/iio/dac/st,stm32-dac.yaml        |    4 +
->   .../bindings/media/cec/st,stm32-cec.yaml      |    4 +
->   .../bindings/media/st,stm32-dcmi.yaml         |    4 +
->   .../memory-controllers/st,stm32-fmc2-ebi.yaml |    4 +
->   .../bindings/mfd/st,stm32-lptimer.yaml        |    4 +
->   .../bindings/mfd/st,stm32-timers.yaml         |    5 +
->   .../devicetree/bindings/mmc/arm,pl18x.yaml    |    4 +
->   .../bindings/net/can/bosch,m_can.yaml         |    4 +
->   .../devicetree/bindings/net/stm32-dwmac.yaml  |    4 +
->   .../bindings/phy/phy-stm32-usbphyc.yaml       |    4 +
->   .../bindings/regulator/st,stm32-vrefbuf.yaml  |    4 +
->   .../devicetree/bindings/rng/st,stm32-rng.yaml |    4 +
->   .../bindings/serial/st,stm32-uart.yaml        |    4 +
->   .../bindings/sound/st,stm32-i2s.yaml          |    4 +
->   .../bindings/sound/st,stm32-sai.yaml          |    4 +
->   .../bindings/sound/st,stm32-spdifrx.yaml      |    4 +
->   .../bindings/spi/st,stm32-qspi.yaml           |    4 +
->   .../devicetree/bindings/spi/st,stm32-spi.yaml |    4 +
->   .../devicetree/bindings/usb/dwc2.yaml         |    4 +
->   MAINTAINERS                                   |    7 +
->   arch/arm/boot/dts/st/stm32mp131.dtsi          | 1027 +++---
->   arch/arm/boot/dts/st/stm32mp133.dtsi          |   51 +-
->   arch/arm/boot/dts/st/stm32mp13xc.dtsi         |   19 +-
->   arch/arm/boot/dts/st/stm32mp13xf.dtsi         |   19 +-
->   arch/arm/boot/dts/st/stm32mp151.dtsi          | 2757 +++++++++--------
->   arch/arm/boot/dts/st/stm32mp153.dtsi          |   52 +-
->   arch/arm/boot/dts/st/stm32mp15xc.dtsi         |   19 +-
->   arch/arm64/Kconfig.platforms                  |    1 +
->   arch/arm64/boot/dts/st/stm32mp251.dtsi        |    7 +-
->   drivers/bus/Kconfig                           |    9 +
->   drivers/bus/Makefile                          |    1 +
->   drivers/bus/stm32_etzpc.c                     |  141 +
->   drivers/bus/stm32_firewall.c                  |  288 ++
->   drivers/bus/stm32_firewall.h                  |   83 +
->   drivers/bus/stm32_rifsc.c                     |  252 ++
->   drivers/of/property.c                         |    2 +
->   include/linux/bus/stm32_firewall_device.h     |  140 +
->   47 files changed, 3346 insertions(+), 1919 deletions(-)
->   create mode 100644 Documentation/devicetree/bindings/bus/st,stm32-etzpc.yaml
->   create mode 100644 Documentation/devicetree/bindings/bus/st,stm32mp25-rifsc.yaml
->   create mode 100644 Documentation/devicetree/bindings/feature-controllers/feature-domain-controller.yaml
->   create mode 100644 drivers/bus/stm32_etzpc.c
->   create mode 100644 drivers/bus/stm32_firewall.c
->   create mode 100644 drivers/bus/stm32_firewall.h
->   create mode 100644 drivers/bus/stm32_rifsc.c
->   create mode 100644 include/linux/bus/stm32_firewall_device.h
-> 
+I went through the sleep notification in the eMMC spec. This sleep 
+notification seems optional as per this statement in spec: "It *may* use 
+to a power notification (SLEEP_NOTIFICATION) if it intends to turn-off 
+VCC after moving the device to sleep state". So it doesn't seem to be a 
+good club this with my change. We can revisit and take this separately.
+
+Thanks,
+Sarthak
+
+>
+> On Wed, May 25, 2022 at 12:31 AM Kamasali Satyanarayan (Consultant)
+> (QUIC) <quic_kamasali@quicinc.com> wrote:
+>> Hi,
+>>
+>> These patches will be further taken by Sarthak.
+>>
+>> Thanks,
+>> Satya
+>>
+>> -----Original Message-----
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>> Sent: Wednesday, April 27, 2022 1:06 PM
+>> To: quic_spathi <quic_spathi@quicinc.com>
+>> Cc: avri.altman@wdc.com; linus.walleij@linaro.org; shawn.lin@rock-chips.com; merez@codeaurora.org; s.shtylyov@omp.ru; huijin.park@samsung.com; briannorris@chromium.org; digetx@gmail.com; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Veerabhadrarao Badiganti <vbadigan@codeaurora.org>; Shaik Sajida Bhanu <sbhanu@codeaurora.org>; Kamasali Satyanarayan (Consultant) (QUIC) <quic_kamasali@quicinc.com>
+>> Subject: Re: [PATCH V1] mmc: core: Add partial initialization support
+>>
+>> On Tue, 26 Apr 2022 at 11:04, Srinivasarao Pathipati <quic_spathi@quicinc.com> wrote:
+>>> From: Maya Erez <merez@codeaurora.org>
+>>>
+>>> This change adds the ability to partially initialize the MMC card by
+>>> using card Sleep/Awake sequence (CMD5).
+>>> Card will be sent to Sleep state during runtime/system suspend and
+>>> will be woken up during runtime/system resume.
+>>> By using this sequence the card doesn't need full initialization which
+>>> gives time reduction in system/runtime resume path.
+>>>
+>>> Signed-off-by: Maya Erez <merez@codeaurora.org>
+>>> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>>> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+>>> Signed-off-by: kamasali <quic_kamasali@quicinc.com>
+>>> Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
+>> It seems like this patch has been posted before [1]. Let me repeat my question sent back then.
+>>
+>> It would be nice if you could provide some more exact numbers of what the gain is for a couple of different eMMCs, to justify the change.
+>> Can you please do that?
+>>
+>> Kind regards
+>> Uffe
+>>
+>> [1]
+>> https://patchwork.kernel.org/project/linux-mmc/patch/1591277381-7734-1-git-send-email-vbadigan@codeaurora.org/
+>>
+>>> ---
+>>>   drivers/mmc/core/mmc.c   | 149 ++++++++++++++++++++++++++++++++++++++++++++---
+>>>   include/linux/mmc/card.h |   4 ++
+>>>   include/linux/mmc/host.h |   2 +
+>>>   3 files changed, 146 insertions(+), 9 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
+>>> 9ab915b..8691c00 100644
+>>> --- a/drivers/mmc/core/mmc.c
+>>> +++ b/drivers/mmc/core/mmc.c
+>>> @@ -1942,7 +1942,14 @@ static int mmc_sleep_busy_cb(void *cb_data, bool *busy)
+>>>          return 0;
+>>>   }
+>>>
+>>> -static int mmc_sleep(struct mmc_host *host)
+>>> +static int mmc_can_sleepawake(struct mmc_host *host) {
+>>> +       return host && (host->caps2 & MMC_CAP2_SLEEP_AWAKE) && host->card &&
+>>> +               (host->card->ext_csd.rev >= 3);
+>>> +
+>>> +}
+>>> +
+>>> +static int mmc_sleepawake(struct mmc_host *host, bool sleep)
+>>>   {
+>>>          struct mmc_command cmd = {};
+>>>          struct mmc_card *card = host->card; @@ -1953,14 +1960,17 @@
+>>> static int mmc_sleep(struct mmc_host *host)
+>>>          /* Re-tuning can't be done once the card is deselected */
+>>>          mmc_retune_hold(host);
+>>>
+>>> -       err = mmc_deselect_cards(host);
+>>> -       if (err)
+>>> -               goto out_release;
+>>> +       if (sleep) {
+>>> +               err = mmc_deselect_cards(host);
+>>> +               if (err)
+>>> +                       goto out_release;
+>>> +       }
+>>>
+>>>          cmd.opcode = MMC_SLEEP_AWAKE;
+>>>          cmd.arg = card->rca << 16;
+>>> -       cmd.arg |= 1 << 15;
+>>>          use_r1b_resp = mmc_prepare_busy_cmd(host, &cmd, timeout_ms);
+>>> +       if (sleep)
+>>> +               cmd.arg |= 1 << 15;
+>>>
+>>>          err = mmc_wait_for_cmd(host, &cmd, 0);
+>>>          if (err)
+>>> @@ -1982,6 +1992,9 @@ static int mmc_sleep(struct mmc_host *host)
+>>>
+>>>          err = __mmc_poll_for_busy(host, 0, timeout_ms,
+>>> &mmc_sleep_busy_cb, host);
+>>>
+>>> +       if (!sleep)
+>>> +               err = mmc_select_card(card);
+>>> +
+>>>   out_release:
+>>>          mmc_retune_release(host);
+>>>          return err;
+>>> @@ -2080,6 +2093,66 @@ static int _mmc_flush_cache(struct mmc_host *host)
+>>>                          pr_err("%s: cache flush error %d\n",
+>>>                                 mmc_hostname(host), err);
+>>>          }
+>>> +       return err;
+>>> +}
+>>> +
+>>> +static int mmc_cache_card_ext_csd(struct mmc_host *host) {
+>>> +       int err;
+>>> +       u8 *ext_csd;
+>>> +       struct mmc_card *card = host->card;
+>>> +
+>>> +       err = mmc_get_ext_csd(card, &ext_csd);
+>>> +       if (err || !ext_csd) {
+>>> +               pr_err("%s: %s: mmc_get_ext_csd failed (%d)\n",
+>>> +                       mmc_hostname(host), __func__, err);
+>>> +               return err;
+>>> +       }
+>>> +       /* only cache read/write fields that the sw changes */
+>>> +       card->ext_csd.raw_ext_csd_cmdq = ext_csd[EXT_CSD_CMDQ_MODE_EN];
+>>> +       card->ext_csd.raw_ext_csd_cache_ctrl = ext_csd[EXT_CSD_CACHE_CTRL];
+>>> +       card->ext_csd.raw_ext_csd_bus_width = ext_csd[EXT_CSD_BUS_WIDTH];
+>>> +       card->ext_csd.raw_ext_csd_hs_timing =
+>>> + ext_csd[EXT_CSD_HS_TIMING];
+>>> +
+>>> +       kfree(ext_csd);
+>>> +
+>>> +       return 0;
+>>> +}
+>>> +
+>>> +static int mmc_test_awake_ext_csd(struct mmc_host *host) {
+>>> +       int err;
+>>> +       u8 *ext_csd;
+>>> +       struct mmc_card *card = host->card;
+>>> +
+>>> +       err = mmc_get_ext_csd(card, &ext_csd);
+>>> +       if (err) {
+>>> +               pr_err("%s: %s: mmc_get_ext_csd failed (%d)\n",
+>>> +                       mmc_hostname(host), __func__, err);
+>>> +               return err;
+>>> +       }
+>>> +
+>>> +       /* only compare read/write fields that the sw changes */
+>>> +       pr_debug("%s: %s: type(cached:current) cmdq(%d:%d) cache_ctrl(%d:%d) bus_width (%d:%d) timing(%d:%d)\n",
+>>> +               mmc_hostname(host), __func__,
+>>> +               card->ext_csd.raw_ext_csd_cmdq,
+>>> +               ext_csd[EXT_CSD_CMDQ_MODE_EN],
+>>> +               card->ext_csd.raw_ext_csd_cache_ctrl,
+>>> +               ext_csd[EXT_CSD_CACHE_CTRL],
+>>> +               card->ext_csd.raw_ext_csd_bus_width,
+>>> +               ext_csd[EXT_CSD_BUS_WIDTH],
+>>> +               card->ext_csd.raw_ext_csd_hs_timing,
+>>> +               ext_csd[EXT_CSD_HS_TIMING]);
+>>> +       err = !((card->ext_csd.raw_ext_csd_cmdq ==
+>>> +                       ext_csd[EXT_CSD_CMDQ_MODE_EN]) &&
+>>> +               (card->ext_csd.raw_ext_csd_cache_ctrl ==
+>>> +                       ext_csd[EXT_CSD_CACHE_CTRL]) &&
+>>> +               (card->ext_csd.raw_ext_csd_bus_width ==
+>>> +                       ext_csd[EXT_CSD_BUS_WIDTH]) &&
+>>> +               (card->ext_csd.raw_ext_csd_hs_timing ==
+>>> +                       ext_csd[EXT_CSD_HS_TIMING]));
+>>> +
+>>> +       kfree(ext_csd);
+>>>
+>>>          return err;
+>>>   }
+>>> @@ -2103,8 +2176,12 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>>>              ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
+>>>               (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND)))
+>>>                  err = mmc_poweroff_notify(host->card, notify_type);
+>>> -       else if (mmc_can_sleep(host->card))
+>>> -               err = mmc_sleep(host);
+>>> +       if (mmc_can_sleepawake(host)) {
+>>> +               memcpy(&host->cached_ios, &host->ios, sizeof(host->cached_ios));
+>>> +                mmc_cache_card_ext_csd(host);
+>>> +       }
+>>> +       if (mmc_can_sleep(host->card))
+>>> +               err = mmc_sleepawake(host, true);
+>>>          else if (!mmc_host_is_spi(host))
+>>>                  err = mmc_deselect_cards(host);
+>>>
+>>> @@ -2117,6 +2194,48 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>>>          return err;
+>>>   }
+>>>
+>>> +static int mmc_partial_init(struct mmc_host *host) {
+>>> +       int err = 0;
+>>> +       struct mmc_card *card = host->card;
+>>> +
+>>> +       mmc_set_bus_width(host, host->cached_ios.bus_width);
+>>> +       mmc_set_timing(host, host->cached_ios.timing);
+>>> +       if (host->cached_ios.enhanced_strobe) {
+>>> +               host->ios.enhanced_strobe = true;
+>>> +               if (host->ops->hs400_enhanced_strobe)
+>>> +                       host->ops->hs400_enhanced_strobe(host, &host->ios);
+>>> +       }
+>>> +       mmc_set_clock(host, host->cached_ios.clock);
+>>> +       mmc_set_bus_mode(host, host->cached_ios.bus_mode);
+>>> +
+>>> +       if (!mmc_card_hs400es(card) &&
+>>> +                       (mmc_card_hs200(card) || mmc_card_hs400(card))) {
+>>> +               err = mmc_execute_tuning(card);
+>>> +               if (err) {
+>>> +                       pr_err("%s: %s: Tuning failed (%d)\n",
+>>> +                               mmc_hostname(host), __func__, err);
+>>> +                       goto out;
+>>> +               }
+>>> +       }
+>>> +       /*
+>>> +        * The ext_csd is read to make sure the card did not went through
+>>> +        * Power-failure during sleep period.
+>>> +        * A subset of the W/E_P, W/C_P register will be tested. In case
+>>> +        * these registers values are different from the values that were
+>>> +        * cached during suspend, we will conclude that a Power-failure occurred
+>>> +        * and will do full initialization sequence.
+>>> +        */
+>>> +       err = mmc_test_awake_ext_csd(host);
+>>> +       if (err) {
+>>> +               pr_debug("%s: %s: fail on ext_csd read (%d)\n",
+>>> +                       mmc_hostname(host), __func__, err);
+>>> +               goto out;
+>>> +       }
+>>> +out:
+>>> +       return err;
+>>> +}
+>>> +
+>>>   /*
+>>>    * Suspend callback
+>>>    */
+>>> @@ -2139,7 +2258,7 @@ static int mmc_suspend(struct mmc_host *host)
+>>>    */
+>>>   static int _mmc_resume(struct mmc_host *host)  {
+>>> -       int err = 0;
+>>> +       int err = -EINVAL;
+>>>
+>>>          mmc_claim_host(host);
+>>>
+>>> @@ -2147,7 +2266,19 @@ static int _mmc_resume(struct mmc_host *host)
+>>>                  goto out;
+>>>
+>>>          mmc_power_up(host, host->card->ocr);
+>>> -       err = mmc_init_card(host, host->card->ocr, host->card);
+>>> +
+>>> +       if (mmc_can_sleepawake(host)) {
+>>> +               err = mmc_sleepawake(host, false);
+>>> +               if (!err)
+>>> +                       err = mmc_partial_init(host);
+>>> +               else
+>>> +                       pr_err("%s: %s: awake failed (%d), fallback to full init\n",
+>>> +                               mmc_hostname(host), __func__, err);
+>>> +       }
+>>> +
+>>> +       if (err)
+>>> +               err = mmc_init_card(host, host->card->ocr, host->card);
+>>> +
+>>>          mmc_card_clr_suspended(host->card);
+>>>
+>>>   out:
+>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>>> index 37f9758..ed7f6f7 100644
+>>> --- a/include/linux/mmc/card.h
+>>> +++ b/include/linux/mmc/card.h
+>>> @@ -86,6 +86,8 @@ struct mmc_ext_csd {
+>>>          unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
+>>>          unsigned int            boot_ro_lock;           /* ro lock support */
+>>>          bool                    boot_ro_lockable;
+>>> +       u8                      raw_ext_csd_cmdq;       /* 15 */
+>>> +       u8                      raw_ext_csd_cache_ctrl; /* 33 */
+>>>          bool                    ffu_capable;    /* Firmware upgrade support */
+>>>          bool                    cmdq_en;        /* Command Queue enabled */
+>>>          bool                    cmdq_support;   /* Command Queue supported */
+>>> @@ -96,7 +98,9 @@ struct mmc_ext_csd {
+>>>          u8                      raw_partition_support;  /* 160 */
+>>>          u8                      raw_rpmb_size_mult;     /* 168 */
+>>>          u8                      raw_erased_mem_count;   /* 181 */
+>>> +       u8                      raw_ext_csd_bus_width;  /* 183 */
+>>>          u8                      strobe_support;         /* 184 */
+>>> +       u8                      raw_ext_csd_hs_timing;  /* 185 */
+>>>          u8                      raw_ext_csd_structure;  /* 194 */
+>>>          u8                      raw_card_type;          /* 196 */
+>>>          u8                      raw_driver_strength;    /* 197 */
+>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>>> index c38072e..a9ddf7a 100644
+>>> --- a/include/linux/mmc/host.h
+>>> +++ b/include/linux/mmc/host.h
+>>> @@ -422,6 +422,7 @@ struct mmc_host {
+>>>   #else
+>>>   #define MMC_CAP2_CRYPTO                0
+>>>   #endif
+>>> +#define MMC_CAP2_SLEEP_AWAKE   (1 << 29)       /* Use Sleep/Awake (CMD5) */
+>>>   #define MMC_CAP2_ALT_GPT_TEGRA (1 << 28)       /* Host with eMMC that has GPT entry at a non-standard location */
+>>>
+>>>          int                     fixed_drv_type; /* fixed driver type for non-removable media */
+>>> @@ -441,6 +442,7 @@ struct mmc_host {
+>>>          spinlock_t              lock;           /* lock for claim and bus ops */
+>>>
+>>>          struct mmc_ios          ios;            /* current io bus settings */
+>>> +       struct mmc_ios          cached_ios;
+>>>
+>>>          /* group bitfields together to minimize padding */
+>>>          unsigned int            use_spi_crc:1;
+>>> --
+>>> 2.7.4
+>>>
