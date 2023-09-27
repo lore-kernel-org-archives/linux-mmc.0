@@ -2,121 +2,118 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D52C1E7F144
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 00:07:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8BA4E7F151
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 01:38:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231245AbjI0AHG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Sep 2023 20:07:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44770 "EHLO
+        id S235193AbjI0BiU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Sep 2023 21:38:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231449AbjI0AFF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 20:05:05 -0400
-Received: from codeconstruct.com.au (pi.codeconstruct.com.au [203.29.241.158])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 472E99011;
-        Tue, 26 Sep 2023 16:22:23 -0700 (PDT)
-Received: from [192.168.68.112] (ppp118-210-175-231.adl-adc-lon-bras34.tpg.internode.on.net [118.210.175.231])
-        by mail.codeconstruct.com.au (Postfix) with ESMTPSA id 6B2562017B;
-        Wed, 27 Sep 2023 07:22:14 +0800 (AWST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=codeconstruct.com.au; s=2022a; t=1695770536;
-        bh=3xy3oYvGG7Rgvu7rXIPqMIaHFUEefO32BL/5JeivFsM=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References;
-        b=Nc1pzZmuL8BIfPa9WmVMAMK3q2oPyV6epmFy5ihSOS5smQ+L7+AvhVpWriHV8/ZLh
-         uwSAqCUSfyLQ0xjfIj+vnu82oGAWij+2M3B2+zL1W/seZW/cqQHT6ST4I1+8hPC4XX
-         Mdh6X04rt5eSwtTilUak5akhIQdszckz7bT2nTcbGco+CTlM1GBDShPol1EvR0ujCT
-         tQY6fR69A9K80khCkl/Sl/e02bi+59zFMnyMllUCSmiNtqNSPEiNicMBTjSPerc4Xa
-         erf4KHlO8DG2rj61hMoz2nnTmU3GdAci354zUOMDSndkpfgRveeh5GE7MUA2FWxBsd
-         I3MhVR3d7j5tg==
-Message-ID: <7a7d5a7f19fc793f157508fec7fbc09ca8c4cc4b.camel@codeconstruct.com.au>
-Subject: Re: [PATCH] MAINTAINERS: aspeed: Update Andrew's email address
-From:   Andrew Jeffery <andrew@codeconstruct.com.au>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     joel@jms.id.au, andrew@aj.id.au, linux-aspeed@lists.ozlabs.org,
-        linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, openbmc@lists.ozlabs.org
-Date:   Wed, 27 Sep 2023 08:52:09 +0930
-In-Reply-To: <CAPDyKFrFxYxSTa=z2VnCk4m_d-wEgd17wBokzyNCCRLtSUnFKw@mail.gmail.com>
-References: <20230925030647.40283-1-andrew@codeconstruct.com.au>
-         <CAPDyKFrFxYxSTa=z2VnCk4m_d-wEgd17wBokzyNCCRLtSUnFKw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.46.4-2 
+        with ESMTP id S233631AbjI0BgQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Sep 2023 21:36:16 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 213CB46BC;
+        Tue, 26 Sep 2023 17:42:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1695775372; x=1727311372;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=abfoQSPVt17fR8DX8fA1zsxuQ00F/MRzLbn6R8vvj7k=;
+  b=FG4fq4NkbRWghmkBy3wRifnJDOumpeyVtljMdR7NpQdOIDF0rLZsnNS7
+   FMYxH0c1W5IPAm3HmkjQah2sahyH5ZvNL8YWJDMs5UJUSP35xZoTvQuyY
+   c+w8kaDkJ4Xt6Ysp/DBrpzQhA8s8L9qBNObHGPia4RSIDfCaUcYHW7VcK
+   usX5Oxe90Dy9kYsYFiHDcuf6mc5kH3NfBHz4MXI712WYeY0j3wQXlptFG
+   20AgQg7ge0U+KAohZwMeVi3hfGg42jweePpOdLHGX9RTFC+gaH1uN/A9F
+   IgsoDNxU2d1G74X787NwMxBb8KKhtkppxqBV0VgwIqq1b6xDRoPuV7Hmn
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10845"; a="372030157"
+X-IronPort-AV: E=Sophos;i="6.03,179,1694761200"; 
+   d="scan'208";a="372030157"
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Sep 2023 17:42:51 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10845"; a="725613690"
+X-IronPort-AV: E=Sophos;i="6.03,179,1694761200"; 
+   d="scan'208";a="725613690"
+Received: from lkp-server02.sh.intel.com (HELO 32c80313467c) ([10.239.97.151])
+  by orsmga006.jf.intel.com with ESMTP; 26 Sep 2023 17:42:48 -0700
+Received: from kbuild by 32c80313467c with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1qlIda-0003Xl-28;
+        Wed, 27 Sep 2023 00:42:46 +0000
+Date:   Wed, 27 Sep 2023 08:42:06 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Sergey Khimich <serghox@gmail.com>, linux-kernel@vger.kernel.org
+Cc:     oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Jyan Chou <jyanchou@realtek.com>
+Subject: Re: [PATCH v2 1/2] mmc: cqhci: Add cqhci_set_tran_desc() callback
+Message-ID: <202309270807.VoVn81m6-lkp@intel.com>
+References: <20230926090242.105020-2-serghox@gmail.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230926090242.105020-2-serghox@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 2023-09-26 at 17:03 +0200, Ulf Hansson wrote:
-> On Mon, 25 Sept 2023 at 05:07, Andrew Jeffery
-> <andrew@codeconstruct.com.au> wrote:
-> >=20
-> > I've changed employers, have company email that deals with patch-based
-> > workflows without too much of a headache, and am trying to steer some
-> > content out of my personal mail.
-> >=20
-> > Signed-off-by: Andrew Jeffery <andrew@codeconstruct.com.au>
->=20
-> I guess it doesn't really matter what tree this gets funneled through,
-> so I decided to pick this up via my mmc tree.
->=20
-> So, applied for next, thanks!
+Hi Sergey,
 
-Ah, thanks for being so prompt! However, Joel has sent a PR to Arnd
-with the patch:
+kernel test robot noticed the following build warnings:
 
-https://lore.kernel.org/all/CACPK8Xc+D=3DYBc2Dhk-6-gOuvKN0xGgZYNop6oJVa=3DV=
-NgaEYOHw@mail.gmail.com/
+[auto build test WARNING on linus/master]
+[also build test WARNING on ulf-hansson-mmc-mirror/next v6.6-rc3 next-20230926]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-I thought I'd left a note under the fold asking Joel to do that so
-people knew how it would get into the tree, but that clearly isn't the
-case. Sorry about that, I must have rolled the patch off again after I
-put the note into the original.
+url:    https://github.com/intel-lab-lkp/linux/commits/Sergey-Khimich/mmc-cqhci-Add-cqhci_set_tran_desc-callback/20230926-170331
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20230926090242.105020-2-serghox%40gmail.com
+patch subject: [PATCH v2 1/2] mmc: cqhci: Add cqhci_set_tran_desc() callback
+config: alpha-allyesconfig (https://download.01.org/0day-ci/archive/20230927/202309270807.VoVn81m6-lkp@intel.com/config)
+compiler: alpha-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20230927/202309270807.VoVn81m6-lkp@intel.com/reproduce)
 
-Andrew
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202309270807.VoVn81m6-lkp@intel.com/
 
->=20
-> Kind regards
-> Uffe
->=20
->=20
-> > ---
-> >  MAINTAINERS | 6 +++---
-> >  1 file changed, 3 insertions(+), 3 deletions(-)
-> >=20
-> > diff --git a/MAINTAINERS b/MAINTAINERS
-> > index b19995690904..1965cee433b0 100644
-> > --- a/MAINTAINERS
-> > +++ b/MAINTAINERS
-> > @@ -1963,7 +1963,7 @@ F:        drivers/irqchip/irq-aspeed-i2c-ic.c
-> >=20
-> >  ARM/ASPEED MACHINE SUPPORT
-> >  M:     Joel Stanley <joel@jms.id.au>
-> > -R:     Andrew Jeffery <andrew@aj.id.au>
-> > +R:     Andrew Jeffery <andrew@codeconstruct.com.au>
-> >  L:     linux-arm-kernel@lists.infradead.org (moderated for non-subscri=
-bers)
-> >  L:     linux-aspeed@lists.ozlabs.org (moderated for non-subscribers)
-> >  S:     Supported
-> > @@ -3058,7 +3058,7 @@ F:        Documentation/devicetree/bindings/peci/=
-peci-aspeed.yaml
-> >  F:     drivers/peci/controller/peci-aspeed.c
-> >=20
-> >  ASPEED PINCTRL DRIVERS
-> > -M:     Andrew Jeffery <andrew@aj.id.au>
-> > +M:     Andrew Jeffery <andrew@codeconstruct.com.au>
-> >  L:     linux-aspeed@lists.ozlabs.org (moderated for non-subscribers)
-> >  L:     openbmc@lists.ozlabs.org (moderated for non-subscribers)
-> >  L:     linux-gpio@vger.kernel.org
-> > @@ -3075,7 +3075,7 @@ F:        drivers/irqchip/irq-aspeed-scu-ic.c
-> >  F:     include/dt-bindings/interrupt-controller/aspeed-scu-ic.h
-> >=20
-> >  ASPEED SD/MMC DRIVER
-> > -M:     Andrew Jeffery <andrew@aj.id.au>
-> > +M:     Andrew Jeffery <andrew@codeconstruct.com.au>
-> >  L:     linux-aspeed@lists.ozlabs.org (moderated for non-subscribers)
-> >  L:     openbmc@lists.ozlabs.org (moderated for non-subscribers)
-> >  L:     linux-mmc@vger.kernel.org
-> > --
-> > 2.39.2
-> >=20
+All warnings (new ones prefixed by >>):
 
+   In file included from drivers/mmc/host/sdhci_am654.c:17:
+>> drivers/mmc/host/cqhci.h:296:39: warning: 'struct mmc_data' declared inside parameter list will not be visible outside of this definition or declaration
+     296 |         void (*prep_tran_desc)(struct mmc_data *data, struct cqhci_host *cq_host,
+         |                                       ^~~~~~~~
+
+
+vim +296 drivers/mmc/host/cqhci.h
+
+   281	
+   282	struct cqhci_host_ops {
+   283		void (*dumpregs)(struct mmc_host *mmc);
+   284		void (*write_l)(struct cqhci_host *host, u32 val, int reg);
+   285		u32 (*read_l)(struct cqhci_host *host, int reg);
+   286		void (*enable)(struct mmc_host *mmc);
+   287		void (*disable)(struct mmc_host *mmc, bool recovery);
+   288		void (*update_dcmd_desc)(struct mmc_host *mmc, struct mmc_request *mrq,
+   289					 u64 *data);
+   290		void (*pre_enable)(struct mmc_host *mmc);
+   291		void (*post_disable)(struct mmc_host *mmc);
+   292	#ifdef CONFIG_MMC_CRYPTO
+   293		int (*program_key)(struct cqhci_host *cq_host,
+   294				   const union cqhci_crypto_cfg_entry *cfg, int slot);
+   295	#endif
+ > 296		void (*prep_tran_desc)(struct mmc_data *data, struct cqhci_host *cq_host,
+   297				       u8 *desc, int sg_count);
+   298	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
