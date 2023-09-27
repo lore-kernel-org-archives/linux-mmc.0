@@ -2,411 +2,145 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B353E810D9
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 12:28:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E3A1CD37B3
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 12:59:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229531AbjI0M2i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Sep 2023 08:28:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36772 "EHLO
+        id S231760AbjI0M7j (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Sep 2023 08:59:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46286 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229880AbjI0M2h (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 08:28:37 -0400
-Received: from m15.mail.163.com (m15.mail.163.com [45.254.50.219])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E8402139;
-        Wed, 27 Sep 2023 05:28:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
-        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=B53hY
-        oLnIk6ygf7LWyIKjxm7/j4fwIl1INinLTwMaGM=; b=mO24yqwp8IV86MsiX9lAf
-        WDzDnuUmwuDfz8v32xzZiLFeXAo9OBqhRZog86tqP77jiQJw5g6BU+fIwk441w9y
-        D6ZuhSQ45BnDFo19kp7Ybe6kDPimLnfKl+t+/h2AJMFqScuF18JuPhRsnRpMg3l6
-        tkTR/10liDGLm+I3Q8wIkk=
-Received: from test-Z390-GAMING-X.bayhubtech.com (unknown [58.48.115.170])
-        by zwqz-smtp-mta-g0-0 (Coremail) with SMTP id _____wAXY6HAHxRl78MKDQ--.24784S2;
-        Wed, 27 Sep 2023 20:27:45 +0800 (CST)
-From:   liuchang_125125@163.com
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
-        thomas.hu@bayhubtech.com, charl.liu@bayhubtech.com,
-        Charl Liu <liuchang_125125@163.com>
-Subject: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: Fix Bayhub SD host hardware tuning compatibility issue for BanQ card
-Date:   Wed, 27 Sep 2023 20:26:52 +0800
-Message-Id: <20230927122652.4969-1-liuchang_125125@163.com>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S231805AbjI0M7i (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 08:59:38 -0400
+Received: from mail-oo1-xc35.google.com (mail-oo1-xc35.google.com [IPv6:2607:f8b0:4864:20::c35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 457B8136;
+        Wed, 27 Sep 2023 05:59:37 -0700 (PDT)
+Received: by mail-oo1-xc35.google.com with SMTP id 006d021491bc7-57ba5f05395so4250373eaf.1;
+        Wed, 27 Sep 2023 05:59:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695819576; x=1696424376; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=SzrVgOmYsIRSuT5i2Iuq8x6qyRRfEUm7yS5SiLLhnY8=;
+        b=H4ZLBxr20C+4/elTAATUIDlDpXNPgi1mM+i2VMiTUxXFMsKonxpAz5u5tMVm/m+AV1
+         qg6htdB7ad/8nSUNYDA2pEDvXjyVuSFA1s2AyMp+874PMI4JAfdYy0jwPZ1O9Rwbyw4m
+         FkqYOX5bVfCkG+HZPUI35IM+iHeDqZBjrNUiRyGkscVNCX9tYkESpKEFQD0/leALw1Y1
+         Yvu+D12VsDbYuklFRWGF+TRCqaZ2kEVGLdMyZqYPe+Ceh7U4AsVMocuZl4fwJL5aEOmg
+         Cf6f1WJU7fkfGwh8WcJfa39Nk4BYiHzKeEA4QwqX5qE3Dt4TRjKJh8M/A5mThdQ8pmqG
+         cFaQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695819576; x=1696424376;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=SzrVgOmYsIRSuT5i2Iuq8x6qyRRfEUm7yS5SiLLhnY8=;
+        b=R2Iw5pJoLQY2PsAux1GVGlpuW6YJOBC7T+FTnbFYtox9eRw1ZEqGRAv4NNym3IF+pX
+         ubL9o1FKeHCG/Q5sMdPoJGDySArco3aJ/1HPdYrGj+6PPupiwoYzbVHQ+nAbTeGtsTbd
+         YoigMCob5eWyRlToAFIMzgS4btI7SUrLWxr7WEZw6XHZwJJ8Rep2QJjvyGbyP3ZBZ8Sa
+         bKWaPbXnRjjPq8Zrf4n33JzVp27H0woeC7mpkEqSkftHyHNh8/Oqfew1wWMGHj0xMgL/
+         sA4RYzs1rPTQcesYMQ9JH7rhagNkWVT6OYGE4P8qA6izbaomScWpm18MDqKoClsi+eUK
+         dkLw==
+X-Gm-Message-State: AOJu0YynuUyNqc1g0Uzd+J1eJkbchY/ppojuNl+n42d6jW0AkonI2JlY
+        iMlQ+0sOoZGnBldeIywPAHbVdfT8bKHgjMeqkMU=
+X-Google-Smtp-Source: AGHT+IGHxeX/0rvnZnBrYX4vca7q1HBpULYfkd+KQlXBJUdVjHqN4+84zPghil8ovZ908wCta4IvbyGEjIzTVsVa9us=
+X-Received: by 2002:a4a:918f:0:b0:57b:63a6:306d with SMTP id
+ d15-20020a4a918f000000b0057b63a6306dmr1932059ooh.6.1695819576407; Wed, 27 Sep
+ 2023 05:59:36 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: _____wAXY6HAHxRl78MKDQ--.24784S2
-X-Coremail-Antispam: 1Uf129KBjvAXoW3CF13GFy7WF4kArykur48WFg_yoW8JF18Xo
-        WfW3Z5tw18Gw1fXFykt3s7KFyUC34UKa1rJa15ur4DZa4xGa1rXr4SkF4fXFy3Wr1Fgryk
-        uryxK34FyrW5Ar1kn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73VFW2AGmfu7bjvjm3
-        AaLaJ3UbIYCTnIWIevJa73UjIFyTuYvj4RW5l8DUUUU
-X-Originating-IP: [58.48.115.170]
-X-CM-SenderInfo: polxux5dqjsiqsvrjki6rwjhhfrp/1tbiNwH3WVWBqdqKcAAAsF
+References: <CAHp75VfRLv1=3M+a9pr=ZJgNwtBOrT9xi0UjDJMuY8uM9+ffSw@mail.gmail.com>
+ <20230926200541.35787-1-blarson@amd.com>
+In-Reply-To: <20230926200541.35787-1-blarson@amd.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Wed, 27 Sep 2023 15:59:00 +0300
+Message-ID: <CAHp75Vd3Jj_giyWKhA2OyPrY5xKhyQ6We3qkz9-yDs15F+SFRg@mail.gmail.com>
+Subject: Re: [PATCH v16 6/6] soc: amd: Add support for AMD Pensando SoC Controller
+To:     Brad Larson <blarson@amd.com>
+Cc:     adrian.hunter@intel.com, alcooperx@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        broonie@kernel.org, catalin.marinas@arm.com, conor+dt@kernel.org,
+        davidgow@google.com, devicetree@vger.kernel.org,
+        fancer.lancer@gmail.com, gerg@linux-m68k.org, gsomlo@gmail.com,
+        hal.feng@starfivetech.com, hasegawa-hitomi@fujitsu.com,
+        j.neuschaefer@gmx.net, joel@jms.id.au, kernel@esmil.dk,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        lee.jones@linaro.org, lee@kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
+        p.zabel@pengutronix.de, rdunlap@infradead.org, robh+dt@kernel.org,
+        samuel@sholland.org, skhan@linuxfoundation.org,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
+        vaishnav.a@ti.com, walker.chen@starfivetech.com, will@kernel.org,
+        zhuyinbo@loongson.cn
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Charl Liu <liuchang_125125@163.com>
+On Tue, Sep 26, 2023 at 11:05=E2=80=AFPM Brad Larson <blarson@amd.com> wrot=
+e:
+> On Thu, Sep 21, 2023 at 18:19:57 +0300 Andy Shevchenko <andy.shevchenko@g=
+mail.com> wrote:
+> > On Thu, Sep 14, 2023 at 12:52=E2=80=AFAM Brad Larson <blarson@amd.com> =
+wrote:
 
-1.Driver get the card's MID and OID by init_card callback
-function to judge whether the card is BanQ card
-2.Update tuning setting to make sure tuning done can be set
-3.Stop transfer for CMD19 after tuning done is set to avoid data
-line inhibit and then set input phase manually for BanQ card
+...
 
-Signed-off-by: Charl Liu <liuchang_125125@163.com>
----
-Change in V1:
-Update the tuning process to be compatibility with BanQ card.
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 204 ++++++++++++++++++++++++---
- 1 file changed, 182 insertions(+), 22 deletions(-)
+> >> +       u8 tx_buf[PENCTRL_MAX_MSG_LEN];
+> >> +       u8 rx_buf[PENCTRL_MAX_MSG_LEN];
+> >
+> > These are not DMA-safe, is this a problem?
+>
+> It's not a problem, the peripheral is PIO FIFO driven only.
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index 7bfee28116af..ab898c583323 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -36,6 +36,7 @@
- #define O2_SD_MISC_CTRL2	0xF0
- #define O2_SD_INF_MOD		0xF1
- #define O2_SD_MISC_CTRL4	0xFC
-+#define O2_SD_DLL_CTRL		0x1B0
- #define O2_SD_MISC_CTRL		0x1C0
- #define O2_SD_EXP_INT_REG	0x1E0
- #define O2_SD_PWR_FORCE_L0	0x0002
-@@ -78,7 +79,8 @@ static const u32 dmdn_table[] = {0x2B1C0000,
- #define DMDN_SZ ARRAY_SIZE(dmdn_table)
- 
- struct o2_host {
--	u8 dll_adjust_count;
-+	u8 dll_adjust_count: 4;
-+	u8 banq_card_setting: 4;
- };
- 
- static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
-@@ -311,14 +313,104 @@ static int sdhci_o2_dll_recovery(struct sdhci_host *host)
- 	return ret;
- }
- 
-+static void sdhci_o2_send_stop_transmission(struct sdhci_host *host)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_command cmd = {};
-+	struct mmc_request mrq = {};
-+
-+	cmd.opcode = MMC_STOP_TRANSMISSION;
-+	cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
-+	cmd.busy_timeout = 150;
-+
-+	mrq.cmd = &cmd;
-+
-+	mmc_wait_for_req(mmc, &mrq);
-+
-+	/*
-+	 * Command CRC error may occur due to compatibility issue.
-+	 * It is normal and ignore it here.
-+	 */
-+	if ((cmd.error != 0) && (cmd.error != -EILSEQ))
-+		pr_err("%s: CMD12 error: %d\n", mmc_hostname(mmc), cmd.error);
-+}
-+
-+static void sdhci_o2_tuning_setting(struct mmc_host *mmc, bool isbanq, u8 phase_num)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct sdhci_pci_chip *chip = slot->chip;
-+	struct o2_host *o2_host = sdhci_pci_priv(slot);
-+	u32 reg_val;
-+
-+	if (isbanq) {
-+		/* update tuning command times for BanQ card */
-+		pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL, &reg_val);
-+		reg_val &= 0x00FFFFFF;
-+		reg_val |= 0x02000000;
-+		pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, reg_val);
-+	} else {
-+		reg_val = sdhci_readl(host, O2_SD_DLL_CTRL);
-+		reg_val &= ~BIT(28);
-+		sdhci_writel(host, reg_val, O2_SD_DLL_CTRL);
-+
-+		/* Update tuning command times for normal card */
-+		pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL, &reg_val);
-+		reg_val &= 0x00FFFFFF;
-+		reg_val |= (phase_num * 3) << 24;
-+		pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, reg_val);
-+	}
-+}
-+
-+static void sdhci_o2_configure_banq_best_input_phase(struct sdhci_host *host)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct sdhci_pci_chip *chip = slot->chip;
-+
-+	u32 response = 0;
-+	u16 dll_phase_configure = 0;
-+	u16 best_input_phase = 0;
-+
-+	switch (chip->pdev->device) {
-+	case PCI_DEVICE_ID_O2_FUJIN2:
-+		best_input_phase = 0x0;
-+		break;
-+
-+	case PCI_DEVICE_ID_O2_SEABIRD0:
-+	case PCI_DEVICE_ID_O2_SEABIRD1:
-+		best_input_phase = 0x0;
-+		break;
-+
-+	case PCI_DEVICE_ID_O2_GG8_9860:
-+	case PCI_DEVICE_ID_O2_GG8_9861:
-+	case PCI_DEVICE_ID_O2_GG8_9862:
-+	case PCI_DEVICE_ID_O2_GG8_9863:
-+		best_input_phase = 0xB;
-+		break;
-+
-+	default:
-+		break;
-+	}
-+
-+	/* configure the best input phase (0xB) for BanQ card */
-+	dll_phase_configure = sdhci_readw(host, 0x1B2);
-+	dll_phase_configure = (dll_phase_configure & (u16)0xF0FF) |
-+		(best_input_phase << 8) | BIT(12);
-+	sdhci_writew(host, dll_phase_configure, 0x1B2);
-+}
-+
- static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	struct sdhci_pci_slot *slot = sdhci_priv(host);
- 	struct sdhci_pci_chip *chip = slot->chip;
-+	struct mmc_card *card = mmc->card;
-+	struct o2_host *o2_host = sdhci_pci_priv(slot);
- 	int current_bus_width = 0;
- 	u32 scratch32 = 0;
-+	u16 data_timeout_counter_value = 0;
- 	u16 scratch = 0;
-+	u8 phase_num = 0;
- 	u8  scratch_8 = 0;
- 	u32 reg_val;
- 
-@@ -334,6 +426,31 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (WARN_ON(!mmc_op_tuning(opcode)))
- 		return -EINVAL;
- 
-+	if ((chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860) ||
-+		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861) ||
-+		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862) ||
-+		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863)) {
-+		phase_num = 14;
-+	} else {
-+		phase_num = 11;
-+	}
-+
-+	/* UnLock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-+	scratch_8 &= 0x7f;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-+
-+	sdhci_o2_tuning_setting(mmc, (bool)o2_host->banq_card_setting, phase_num);
-+
-+	if (o2_host->banq_card_setting) {
-+		/*
-+		 * set data timeout counter value to 0 to ensure that
-+		 * the tuning process can be completed
-+		 */
-+		data_timeout_counter_value = sdhci_readw(host, SDHCI_TIMEOUT_CONTROL);
-+		sdhci_writew(host, data_timeout_counter_value & (u16)0xFFF0, SDHCI_TIMEOUT_CONTROL);
-+	}
-+
- 	/* Force power mode enter L0 */
- 	scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
- 	scratch |= O2_SD_PWR_FORCE_L0;
-@@ -351,23 +468,13 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		reg_val &= ~SDHCI_CLOCK_CARD_EN;
- 		sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
- 
--		if (host->timing == MMC_TIMING_MMC_HS200 ||
--		    host->timing == MMC_TIMING_UHS_SDR104) {
--			/* UnLock WP */
--			pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
--			scratch_8 &= 0x7f;
--			pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
--
-+		if ((host->timing == MMC_TIMING_MMC_HS200) ||
-+			(host->timing == MMC_TIMING_UHS_SDR104)) {
- 			/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
- 			pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
- 			reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
- 			reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
- 			pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
--
--			/* Lock WP */
--			pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
--			scratch_8 |= 0x80;
--			pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
- 		}
- 
- 		/* Start clk */
-@@ -375,10 +482,19 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		reg_val |= SDHCI_CLOCK_CARD_EN;
- 		sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
- 		break;
-+	case PCI_DEVICE_ID_O2_GG8_9860:
-+	case PCI_DEVICE_ID_O2_GG8_9861:
-+	case PCI_DEVICE_ID_O2_GG8_9862:
-+	case PCI_DEVICE_ID_O2_GG8_9863:
- 	default:
- 		break;
- 	}
- 
-+	/* Lock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-+	scratch_8 |= 0x80;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-+
- 	/* wait DLL lock, timeout value 5ms */
- 	if (readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
- 		scratch32, (scratch32 & O2_DLL_LOCK_STATUS), 1, 5000))
-@@ -416,6 +532,20 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		sdhci_set_bus_width(host, current_bus_width);
- 	}
- 
-+	/* update input phase for BanQ card */
-+	if (o2_host->banq_card_setting) {
-+		/* recover the data timeout counter value */
-+		sdhci_writew(host, data_timeout_counter_value, SDHCI_TIMEOUT_CONTROL);
-+
-+		/*
-+		 * Stop transfer for CMD19 after tuning done is set to
-+		 * avoid data line inhibit
-+		 */
-+		sdhci_o2_send_stop_transmission(host);
-+
-+		sdhci_o2_configure_banq_best_input_phase(host);
-+	}
-+
- 	/* Cancel force power mode enter L0 */
- 	scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
- 	scratch &= ~(O2_SD_PWR_FORCE_L0);
-@@ -428,6 +558,24 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	return 0;
- }
- 
-+static void sdhci_o2_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct o2_host *o2_host = sdhci_pci_priv(slot);
-+	unsigned int manfid;
-+	unsigned short oemid;
-+
-+	manfid = card->raw_cid[0] >> 24;
-+	oemid = (card->raw_cid[0] >> 8) & 0xFFFF;
-+
-+	/* judge whether the card is BanQ card */
-+	if (manfid == 0x89 && oemid == 0x303)
-+		o2_host->banq_card_setting = 1;
-+	else
-+		o2_host->banq_card_setting = 0;
-+}
-+
- static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
- {
- 	int ret;
-@@ -596,15 +744,20 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
- 	scratch &= 0x7f;
- 	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
- 
--	if (chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860 ||
--	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861 ||
--	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862 ||
--	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863) {
-+	if ((chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860) ||
-+		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861) ||
-+		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862) ||
-+		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863)) {
- 		dmdn_208m = 0x2c500000;
- 		dmdn_200m = 0x25200000;
- 	} else {
- 		dmdn_208m = 0x2c280000;
- 		dmdn_200m = 0x25100000;
-+
-+		/* open-clock for old project */
-+		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
-+		scratch_32 &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
-+		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
- 	}
- 
- 	if ((host->timing == MMC_TIMING_UHS_SDR104) && (clock == 200000000)) {
-@@ -619,10 +772,6 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
- 			o2_pci_set_baseclk(chip, dmdn_200m);
- 	}
- 
--	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
--	scratch_32 &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
--	pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
--
- 	/* Lock WP */
- 	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
- 	scratch |= 0x80;
-@@ -632,6 +781,11 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_o2_enable_clk(host, clk);
- }
- 
-+static void sdhci_o2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-+{
-+	sdhci_writeb(host, 0x0E, SDHCI_TIMEOUT_CONTROL);
-+}
-+
- static int sdhci_pci_o2_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -705,6 +859,7 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 	host = slot->host;
- 
- 	o2_host->dll_adjust_count = 0;
-+	o2_host->banq_card_setting = 0;
- 	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
- 
- 	/*
-@@ -718,7 +873,9 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 
- 	sdhci_pci_o2_enable_msi(chip, host);
- 
-+	host->mmc_host_ops.init_card = sdhci_o2_init_card;
- 	host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
-+
- 	switch (chip->pdev->device) {
- 	case PCI_DEVICE_ID_O2_SDS0:
- 	case PCI_DEVICE_ID_O2_SEABIRD0:
-@@ -770,6 +927,8 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
- 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
- 		slot->host->mmc_host_ops.get_cd = sdhci_o2_get_cd;
- 		host->mmc_host_ops.init_sd_express = sdhci_pci_o2_init_sd_express;
-+
-+		sdhci_writel(host, 0xFFFFFFFF, SDHCI_INT_STATUS);
- 		break;
- 	default:
- 		break;
-@@ -1022,7 +1181,7 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 		/* Set output delay*/
- 		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
- 		scratch_32 &= 0xFF0FFF00;
--		scratch_32 |= 0x00B0003B;
-+		scratch_32 |= 0x00B000CB;
- 		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
- 
- 		/* Lock WP */
-@@ -1051,6 +1210,7 @@ static const struct sdhci_ops sdhci_pci_o2_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.set_timeout = sdhci_o2_set_timeout,
- };
- 
- const struct sdhci_pci_fixes sdhci_o2 = {
+The question was about the SPI controller itself.
+Also, depending on the driver it may or may not require DMA-safe
+pointers. I believe with the new pump queue used in the SPI core all
+drivers that are using it are DMA-safe and the caller needs no
+additional care.
 
-base-commit: 0e945134b680040b8613e962f586d91b6d40292d
--- 
-2.34.1
+...
 
+> >> +       msg =3D memdup_user((struct penctrl_spi_xfer *)arg, size);
+> >> +       if (IS_ERR(msg)) {
+> >> +               ret =3D PTR_ERR(msg);
+> >> +               goto out_unlock;
+> >> +       }
+> >
+> > Wondering if you can start using cleanup.h.
+>
+> Perhaps if recommended, I don't see DEFINE_(FREE,UNLOCK,...) being used.
+
+It's guard()() and scoped_guard() for locks and __free() for the allocation=
+s.
+
+Plenty of uses in a few modules already (talking about Linux Next snapshot)=
+.
+
+...
+
+> >> +       spi->chip_select =3D current_cs;
+> >
+> > spi_set_chipselect()
+>
+> Yes, I'll change to inline function spi_set_chipselect(spi, 0, current_cs=
+).  The
+> second arg must be legacy as its unused.
+
+Actually, it's a placeholder for the future support of indexed CS'.
+
+...
+
+> >> +       u8 txbuf[3];
+> >> +       u8 rxbuf[1];
+> >
+> > Not DMA-safe. Is it a problem?
+>
+> Not a problem, the peripheral is PIO only using FIFOs.
+
+Same as somewhere above.
+
+--=20
+With Best Regards,
+Andy Shevchenko
