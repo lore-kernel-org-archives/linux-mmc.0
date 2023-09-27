@@ -2,139 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F21E9E80A9E
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 07:26:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84108E80AA2
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 07:47:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229458AbjI0H07 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Sep 2023 03:26:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57288 "EHLO
+        id S230022AbjI0HrF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Sep 2023 03:47:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229949AbjI0H05 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 03:26:57 -0400
-Received: from APC01-SG2-obe.outbound.protection.outlook.com (mail-sgaapc01on2094.outbound.protection.outlook.com [40.107.215.94])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42999126;
-        Wed, 27 Sep 2023 00:26:09 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=H6Pfxy6wG1DbzvfRYvK9QlfDXbE8cTjMvVLoXn8WLHYWoYU6guvf8zVchb3FpGV3i3v2bwlz1Uz/jrMlx0nbZ73X6vGBvbaIu9jPtRuaB7Az6EbYm0r1SmeEBOtZmf4IZvMX/edSF89uO7HARHcTQil2sOGodm1hg4zpSAPLrDSYNAHi/gI3EqQT3+tP2U5wV1uK8nzXzBbp83slfabF7DH/C1wHsLdWcV5tkPS05B+OQo5AN4qCunhjDAEEJj9QryWsWS1Z1csBjHhHZR3aejRVa5+sK6QSPjUyw2tjoxdygraIOX0m/5/r24poH7HNPGyE6zAHe5PoyM8TEIeW6w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ZNvPCgj6HwB6SzIsrGSoHHZDb5nKuZMAlqzer6xMG8k=;
- b=KXmZrSX5xR1JZuSUFJeKLAVcTzs/DRcJ+Aur5nLJXdn80bet9ZWV9Ow7+s5LAn9awsAScFzskujyFOPYuEtjlfUVcd790MlhBncq+ELD6YebaE07b/RyJvEUleI0UaIKHZDfIuDzdBmgkDiw2YfL+F5UpPB1HlolJhl7WcFsYlhrGtKxv5E85Ck5+T094ukASpAXclAmQUAe/eUao3vuQgj8m6aEzflORrP7WR/gCqj5D+3qlNNvFdmIFKxSxF3/Z0SEMJJmIvRMMOsPuV5cwxCqcu/Y86YSFU3gZEgjwK91GjQkGNChiVeQWvfADBLwFs3dXbwGjF/SJmu9VBgEMw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=amlogic.com; dmarc=pass action=none header.from=amlogic.com;
- dkim=pass header.d=amlogic.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amlogic.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ZNvPCgj6HwB6SzIsrGSoHHZDb5nKuZMAlqzer6xMG8k=;
- b=y0cgW5YuUz8u7emIa285B3Zg36egX65tHkPY0Ofs2I8YJVSsQio7cAz9nYRH3b15Ey3Zenddjkv732ZYUxGIecSGwhGaH8Hl7E7yScbOSfA95ROvGcOhdwH4cjDKv9bdpB2rWCPqSCqTkccWWV/0srs79ecbrEqhmC35yFR+aUlB6mmMUigEn+jXzVtSV3vUjWvl3W0ocSBH9cSTBzF31RSWeogMIP3rhgaWUyrG6UlpLyfnHPs3zeixY0MR4oN+ciG+wtfAGoZXkCRBf/ebRDmDOdevGLdPPMsGyto2S0DkneenBurRYKy9JUE+v37vBYfvejyzVZFHeWdE3xbVVg==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=amlogic.com;
-Received: from SI2PR03MB5943.apcprd03.prod.outlook.com (2603:1096:4:147::8) by
- KL1PR03MB7285.apcprd03.prod.outlook.com (2603:1096:820:e2::12) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6813.28; Wed, 27 Sep 2023 07:26:02 +0000
-Received: from SI2PR03MB5943.apcprd03.prod.outlook.com
- ([fe80::c088:78e7:87ab:dd1d]) by SI2PR03MB5943.apcprd03.prod.outlook.com
- ([fe80::c088:78e7:87ab:dd1d%4]) with mapi id 15.20.6813.027; Wed, 27 Sep 2023
- 07:26:01 +0000
-From:   "Rong.Chen" <Rong.Chen@amlogic.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        with ESMTP id S230020AbjI0HrE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 03:47:04 -0400
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5A9F11D
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Sep 2023 00:47:02 -0700 (PDT)
+Received: by mail-wr1-x434.google.com with SMTP id ffacd0b85a97d-3214cdb4b27so9790547f8f.1
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Sep 2023 00:47:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1695800821; x=1696405621; darn=vger.kernel.org;
+        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
+         :user-agent:references:from:to:cc:subject:date:message-id:reply-to;
+        bh=aKQmixWBkQbfwrPWW4Kcl6BhuNloeHKy7RaNCIpQr2w=;
+        b=RXX7PgNJaFediTXV0bNyeIN7D/4LArLxXLTGh/Xh8Oa7VDg2aicJs3p0Q8K+CGKrWy
+         WFH4N1ONX4EMpZDc+BWGvpRCTstkLb/+FF17JMlYXcdRBnCrXYuiA6M2U9l4oA8waukq
+         jYIXR57Gjg0XnHs9otSxQcFhhGWXyRHpIcO8gbUpoiVe7w7nOwqB/sEYPTgTbM8KF1MB
+         LUz8IFeog2iA8z+uBMT0Hyx6LBdihddKPdyo1yzC2tM4MFbPSDiz98Rjx/OOuaGpJKni
+         DaqMCDh7T2XaLd5OxF6IwN/w499ogncdn2XJHdf0XaWzBEmN4gJtwxr8tW/B5i50uAnT
+         KSxA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695800821; x=1696405621;
+        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
+         :user-agent:references:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=aKQmixWBkQbfwrPWW4Kcl6BhuNloeHKy7RaNCIpQr2w=;
+        b=sWnYX7P4OjnboVTnPez/vLJaKCUY10hmTTvb4CDB6qjMaOnvT/bEfBsRVfgKIeVfY4
+         rh8e7LiGj7tWOw5lwOdEDw+40kmyQuYlspGkWbQXxUG7nM8eDZU0faqMHzxrwABAIIMv
+         fbPqMki8uJzbZDI3bUIdmCMwxdFHTi6KiQKymtWqYMoKjMNG6mbdsSxuaWM9csbmK0Th
+         GQKla9A+qDkLzYrJ59eHCC+Z3j+fcH5alRP8o5yYatqVGkB31NgRYfG2dZD7FVfkGNq+
+         l4A9Wg1e7whzVhY+zofuZlPHaqVoWMIwQpazUlVleIR9WL8HKi6EagGzd9KzHQKBM+r+
+         MS3w==
+X-Gm-Message-State: AOJu0Yxa8zdeO55CopB8MHcNldPybC284Tpcmb8NYm/kJW5XHxtyEjJm
+        Mw3T2FqSJbnVVAcGOT/W4CLUhA==
+X-Google-Smtp-Source: AGHT+IGGmLNmRtPyNVhH3suncTUw2D0Z9IxkXxlJ+RvD02DQWvi3FRSkVOacLNW/OVVCbN0M32WHeA==
+X-Received: by 2002:adf:f285:0:b0:323:1d06:38e5 with SMTP id k5-20020adff285000000b003231d0638e5mr936747wro.55.1695800820675;
+        Wed, 27 Sep 2023 00:47:00 -0700 (PDT)
+Received: from localhost ([2a01:e0a:3c5:5fb1:99be:56aa:a730:ad2d])
+        by smtp.gmail.com with ESMTPSA id f4-20020a5d50c4000000b0031fa870d4b3sm16429083wrt.60.2023.09.27.00.46.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 27 Sep 2023 00:47:00 -0700 (PDT)
+References: <20230927072544.764285-1-Rong.Chen@amlogic.com>
+User-agent: mu4e 1.8.13; emacs 29.1
+From:   Jerome Brunet <jbrunet@baylibre.com>
+To:     "Rong.Chen" <Rong.Chen@amlogic.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Neil Armstrong <narmstrong@baylibre.com>,
         Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
         Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Rong Chen <rong.chen@amlogic.com>
-Subject: [PATCH] mmc: meson-gx: Remove setting of CMD_CFG_ERROR
-Date:   Wed, 27 Sep 2023 15:25:44 +0800
-Message-ID: <20230927072544.764285-1-Rong.Chen@amlogic.com>
-X-Mailer: git-send-email 2.42.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SG2PR02CA0138.apcprd02.prod.outlook.com
- (2603:1096:4:188::12) To SI2PR03MB5943.apcprd03.prod.outlook.com
- (2603:1096:4:147::8)
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: meson-gx: Remove setting of CMD_CFG_ERROR
+Date:   Wed, 27 Sep 2023 09:43:57 +0200
+In-reply-to: <20230927072544.764285-1-Rong.Chen@amlogic.com>
+Message-ID: <1jr0mkkqh8.fsf@starbuckisacylon.baylibre.com>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SI2PR03MB5943:EE_|KL1PR03MB7285:EE_
-X-MS-Office365-Filtering-Correlation-Id: b7e97300-c08b-483d-ef0d-08dbbf2b001d
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: DJS9y40kvwajYewOr4Kg9Qg83/7htZKtN/Kew0cCk0ITNyxUJyviUs66hIyZnM3i4sRsGxltJW4P/338HFXU5jG9X3JCvQYfCK/6fUxQ4a6vrVq29wSOTQxDTkK3dUTygpDAvjLDJrYjgvdwJ2JVHWqzX/I//9TPnRtM4ZK2/RrXEq/qYzZmtwvZb3NjWxMF60RgnBZHflDWw8cWk9eCs7F4m520Y8r4004l3Di0VYDzcsu2y5uagRfvwbNT3JyX45uKRfpoLzxypGesAfRaKU7aOLrBOD619SFw5PJZGAbJBwvKYo+rGvzr/0BODJlo1jracTACZO/o1jT5qWOmi/6ZrLNIKNrgbsIqTRegNXIhcISgL/4+yF+tqPJFtkYGiAd8mGMbXjMMck8gY09eD96ieqUgiYo38ri7wrrJYwmsCKi10Et7DPALuVFwMA1q84t42G3vp3TRHWF48hDszkNdwNCOcROWgPAry5wT1RmZuh1EQj6xkl+gZK/LRL8U2426Z20Hj2gfFKZbxLcWS1drS2muCFKIodQbLANzlhyK+7XqohXo7J6zUS+ZhWraiR+pAMNO+083ebjiEmRL35amB+4TFrvzZ2O2G0gpLCiZrjn8HMBKOb5ABatfqw+/I34f01uR2tVC/CWrqHt9IgAxAYxeRYJdugIRB42YaSA=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SI2PR03MB5943.apcprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(136003)(396003)(376002)(346002)(366004)(39850400004)(230922051799003)(451199024)(186009)(1800799009)(52116002)(2616005)(1076003)(66476007)(6506007)(6512007)(83380400001)(478600001)(6486002)(86362001)(26005)(110136005)(66946007)(38350700002)(38100700002)(107886003)(66556008)(41300700001)(2906002)(4744005)(5660300002)(4326008)(8936002)(8676002)(6666004)(316002)(36756003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?NpAi/SeEKbM9mabdh6kMFyWnovR0DtZbU1uakkWufYXpCeOellVlmfqJJ8cR?=
- =?us-ascii?Q?6ZBnbpE6hyIe25KEkvvOQlZ1iCz3Y7GyVJFn4Kt/IzckOpih+cNwkAT+KHLQ?=
- =?us-ascii?Q?LXcJWK6heqv6EnMyp/yVNHv05aAvHWAVrH0ftF5lPCcM2VDKmFIHkE5s9C5D?=
- =?us-ascii?Q?E9WwcfPKorQPXLMQcmIDhYDkijuJS7j3YT5rgeHsf/sAr/yDx5zzkhNkOYjZ?=
- =?us-ascii?Q?Ler593t2Fod1LBhcyJjF4u8X3hJHwYsDL6ms67gwwC1wifeNj/WKYyxI99Jp?=
- =?us-ascii?Q?hRyk2WyHl1QjAOUeMjkDZtC0I/Zr9g89NWC26M2phI5cAYfH10FQ2/szrBWf?=
- =?us-ascii?Q?GcATj2XodVdQRQvFOLZtWST4XBcdB49WsnwX51xrXaPtpO9YNk3w+fLNKMDL?=
- =?us-ascii?Q?j784rBXHtAq/5gawhNlOGwdAvxYerT7kb++IyqYZzimn5L8DlQMl334Mf07a?=
- =?us-ascii?Q?juuCW1zViOyoalIO2nj6M7rLx1rtzwSF6QJp/AddLoFB4lUiO//ZgTLadL1N?=
- =?us-ascii?Q?jMGvsZ1jRvJqdBh8UnE5WZ3sD4iD7Cn57M1X6OiejWjXmMm0TzBbEwdQPgTi?=
- =?us-ascii?Q?N3xScVtSbgGeBuZSQ7Vid56btXWiLaHk48CBvJ1satbahA+rlnO6Z8bSrCPu?=
- =?us-ascii?Q?KbFMX8Bd9oCTRdjsb7XhNZ6g+Ueg4MAPbIRbxlhVdzbXjc/GZ/BozD+fO/ky?=
- =?us-ascii?Q?XSfsDz0wC45D0PUsMMGWJXg3K3Bgf4DGW2Pe0kPtCc0amH+hkImKGxes0/qv?=
- =?us-ascii?Q?jHPTieTuY4NjJ+iijU6RNlsDP40hiiogOVl0KDvDfW4wRZ54aulZcm+bWZSl?=
- =?us-ascii?Q?cwxcwiYVlgYQ76lP1OrAdcqjF48jfhDbKIVzib9f7UFyKYLxkolHz5JuVT3t?=
- =?us-ascii?Q?9yg6jk+W/mg4//eUuXxRyv6AYB25K2lpEpooYn7jlm9xXeGQd3Zm7p7HnoaI?=
- =?us-ascii?Q?OgaOX4w9r4xGT5v436xbICh9YzK87ftoqZifPnQ9ubrbqaS5Mwy3cWW/iLiu?=
- =?us-ascii?Q?S3dAesgPiSKNqOhOXZj4/fyVGGee6+ZpsvveevkggEz9hQRmFD295V3lh9RE?=
- =?us-ascii?Q?4h13l6jyzkyoTWM5WAHWtrdhyttotcT/KcUf5gKMp0a42TNIQvAvqfBEMUAC?=
- =?us-ascii?Q?kOFim3tf5Ph3GyRIq/9hXspRP2bCJNhCii2S/FO6fGlDnoPzuVwcQtfeBBRk?=
- =?us-ascii?Q?BnNaPyvwulgHwuOR75+4yS06gFQhekckrlwp+t8e5+mi99JUHWEiRdrKxv7q?=
- =?us-ascii?Q?hSXyYCzPO4EgRzydmmYLCsdAeSTVBWzh6YkzDBgaOt3F190Bj+peFoUG/6dz?=
- =?us-ascii?Q?HYgL/oIrmHOE46WWMsxY5/wu8MjQFfP+V760CI3S2+LaRfcNWeCrnF89XIHl?=
- =?us-ascii?Q?aEfIqQIywEXDw+Zdd4U0nXQB6FDWH9z/YRHeBcvA7ier0Ob9DCi2HYlFExbW?=
- =?us-ascii?Q?yShbKsV/7WMXlIb5nLQ82bQKsrH100tvOrov3Q5slS9Thc5v8WjqGNoOq5tz?=
- =?us-ascii?Q?m2LhxLpASxGsP6ZBQwf4lfcs5AjxnD4kcJ1pdfuBxeMBTBFFsUcnuvQv0F4H?=
- =?us-ascii?Q?Esbxta3LfpFe4LKOLVSGuLWdeYXvwwGDvjy3Adzm?=
-X-OriginatorOrg: amlogic.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b7e97300-c08b-483d-ef0d-08dbbf2b001d
-X-MS-Exchange-CrossTenant-AuthSource: SI2PR03MB5943.apcprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Sep 2023 07:26:01.1839
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 0df2add9-25ca-4b3a-acb4-c99ddf0b1114
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: upaKkhx0dnXsproctZ2sEdjnpiUNiyR9EmzEbAutbbi9kJRKhoPBMWKcMszGynAfGromgP5GdRHihu/VRgGCpw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: KL1PR03MB7285
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Rong Chen <rong.chen@amlogic.com>
+s
+On Wed 27 Sep 2023 at 15:25, "Rong.Chen" <Rong.Chen@amlogic.com> wrote:
 
-Setting bit CMD_CFG_ERROR has non effects on previous controllers.
-However, it will cause an IRQ and stop working on latest controllers,
-This bit is used for selecting SG LINK of data address.
-Don't set the bit CMD_CFG_ERROR anymore to resolve this issuse.
+> From: Rong Chen <rong.chen@amlogic.com>
+>
+> Setting bit CMD_CFG_ERROR has non effects on previous controllers.
 
-Therefore, remove this setting.
+Which previous controllers ? v2, v3 ? Can you list the SoCs please ?
 
-Signed-off-by: Rong Chen <rong.chen@amlogic.com>
----
- drivers/mmc/host/meson-gx-mmc.c | 1 -
- 1 file changed, 1 deletion(-)
+> However, it will cause an IRQ and stop working on latest controllers,
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 9837dab096e6..c7c067b9415a 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -801,7 +801,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 
- 	cmd_cfg |= FIELD_PREP(CMD_CFG_CMD_INDEX_MASK, cmd->opcode);
- 	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
--	cmd_cfg |= CMD_CFG_ERROR; /* stop in case of error */
- 
- 	meson_mmc_set_response_bits(cmd, &cmd_cfg);
- 
--- 
-2.42.0
+Isn't it desirable to stop on error ? seems like a sane thing to do.
+
+> This bit is used for selecting SG LINK of data address.
+> Don't set the bit CMD_CFG_ERROR anymore to resolve this issuse.
+
+I'm not sure I understand the actual issue being resolved.
+Could you provide more details please ?
+
+>
+> Therefore, remove this setting.
+>
+> Signed-off-by: Rong Chen <rong.chen@amlogic.com>
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 1 -
+>  1 file changed, 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 9837dab096e6..c7c067b9415a 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -801,7 +801,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>  
+>  	cmd_cfg |= FIELD_PREP(CMD_CFG_CMD_INDEX_MASK, cmd->opcode);
+>  	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
+> -	cmd_cfg |= CMD_CFG_ERROR; /* stop in case of error */
+>  
+>  	meson_mmc_set_response_bits(cmd, &cmd_cfg);
 
