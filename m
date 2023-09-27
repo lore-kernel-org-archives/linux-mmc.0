@@ -2,145 +2,132 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E3A1CD37B3
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 12:59:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48BF9E82CC0
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Sep 2023 18:47:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231760AbjI0M7j (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Sep 2023 08:59:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46286 "EHLO
+        id S229459AbjI0SrH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Sep 2023 14:47:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59490 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231805AbjI0M7i (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 08:59:38 -0400
-Received: from mail-oo1-xc35.google.com (mail-oo1-xc35.google.com [IPv6:2607:f8b0:4864:20::c35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 457B8136;
-        Wed, 27 Sep 2023 05:59:37 -0700 (PDT)
-Received: by mail-oo1-xc35.google.com with SMTP id 006d021491bc7-57ba5f05395so4250373eaf.1;
-        Wed, 27 Sep 2023 05:59:37 -0700 (PDT)
+        with ESMTP id S229536AbjI0SrG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 14:47:06 -0400
+Received: from mail-qk1-x736.google.com (mail-qk1-x736.google.com [IPv6:2607:f8b0:4864:20::736])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DEACE6
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Sep 2023 11:47:04 -0700 (PDT)
+Received: by mail-qk1-x736.google.com with SMTP id af79cd13be357-774105e8c37so750117785a.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Sep 2023 11:47:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695819576; x=1696424376; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=SzrVgOmYsIRSuT5i2Iuq8x6qyRRfEUm7yS5SiLLhnY8=;
-        b=H4ZLBxr20C+4/elTAATUIDlDpXNPgi1mM+i2VMiTUxXFMsKonxpAz5u5tMVm/m+AV1
-         qg6htdB7ad/8nSUNYDA2pEDvXjyVuSFA1s2AyMp+874PMI4JAfdYy0jwPZ1O9Rwbyw4m
-         FkqYOX5bVfCkG+HZPUI35IM+iHeDqZBjrNUiRyGkscVNCX9tYkESpKEFQD0/leALw1Y1
-         Yvu+D12VsDbYuklFRWGF+TRCqaZ2kEVGLdMyZqYPe+Ceh7U4AsVMocuZl4fwJL5aEOmg
-         Cf6f1WJU7fkfGwh8WcJfa39Nk4BYiHzKeEA4QwqX5qE3Dt4TRjKJh8M/A5mThdQ8pmqG
-         cFaQ==
+        d=hefring-com.20230601.gappssmtp.com; s=20230601; t=1695840423; x=1696445223; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=xGsoS6S76d+wc39dHVr5d6LqZuXhI4/2gCLnqm1TcHs=;
+        b=Tx6qmdJGqtbLxKKG5F+TQKLy+Lu9Fwv2VXVv/6UJfBoiUtTyQ+PyalRanal+PiXSlX
+         3UqmZWpygyX2Z2dPgBMmr4whJX1R8MKrQiSgFD+AAm/YRMMeWFq0yZZ3auJS37OqNchP
+         QtLg5+yydBTjGGnj7/EC0Y5Zub3y7SGEx6ntAJ9q3MjSV1Zd34TLfiXkjKARqqvJ7CQW
+         fYwCSNPTBQtSfXFlzJeMzNoPedxf9cFU/GOp+NRPWq1GwV0xW0DQCHjD2ZswhSLR5dLe
+         WgbeSRYIHHl6akaEglgpSnEF4pevEbvP3cRVpYdFF0jDWc7BpyUVluQ7dZC/RmMZzn2S
+         CXug==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695819576; x=1696424376;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=SzrVgOmYsIRSuT5i2Iuq8x6qyRRfEUm7yS5SiLLhnY8=;
-        b=R2Iw5pJoLQY2PsAux1GVGlpuW6YJOBC7T+FTnbFYtox9eRw1ZEqGRAv4NNym3IF+pX
-         ubL9o1FKeHCG/Q5sMdPoJGDySArco3aJ/1HPdYrGj+6PPupiwoYzbVHQ+nAbTeGtsTbd
-         YoigMCob5eWyRlToAFIMzgS4btI7SUrLWxr7WEZw6XHZwJJ8Rep2QJjvyGbyP3ZBZ8Sa
-         bKWaPbXnRjjPq8Zrf4n33JzVp27H0woeC7mpkEqSkftHyHNh8/Oqfew1wWMGHj0xMgL/
-         sA4RYzs1rPTQcesYMQ9JH7rhagNkWVT6OYGE4P8qA6izbaomScWpm18MDqKoClsi+eUK
-         dkLw==
-X-Gm-Message-State: AOJu0YynuUyNqc1g0Uzd+J1eJkbchY/ppojuNl+n42d6jW0AkonI2JlY
-        iMlQ+0sOoZGnBldeIywPAHbVdfT8bKHgjMeqkMU=
-X-Google-Smtp-Source: AGHT+IGHxeX/0rvnZnBrYX4vca7q1HBpULYfkd+KQlXBJUdVjHqN4+84zPghil8ovZ908wCta4IvbyGEjIzTVsVa9us=
-X-Received: by 2002:a4a:918f:0:b0:57b:63a6:306d with SMTP id
- d15-20020a4a918f000000b0057b63a6306dmr1932059ooh.6.1695819576407; Wed, 27 Sep
- 2023 05:59:36 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695840423; x=1696445223;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=xGsoS6S76d+wc39dHVr5d6LqZuXhI4/2gCLnqm1TcHs=;
+        b=bQGULeQAa7gZzVSJAjSqiIv5WImxOchEYeReFKV0I1GpPvBJjPDg8fdsOgzl69N+zV
+         NFrg/ZD87xd3I0r9vczLKPoN6A1EVfSZ4UXnYKu0tI/JlUUU2Szoh0HZaYErUqjSsyuZ
+         +zyX1eOtcoN0GQRtFX76BLihhXgJBM39U4Ez+t+ru1iRIM33Ru2Jz2oAyC8iei7PJ4CM
+         cTDqx/1Kcbb1V3NLLclQJBbD2H2iy/Gp+WQ0uZOX2wlLJDjSfX/2NuBBp7fSOhX0DWC0
+         0hFAIXNUf+XOIxxog8sin453UECY8bKCjb0EnBhKbLR0BJf3otHDtkB+G0Y9hCBc7Mll
+         MsPw==
+X-Gm-Message-State: AOJu0YyTv07jWAg2FbCrnBFvfpDmsRApvFiR5JXGWH8g/gKDiwvk2VSa
+        g1XpK7Tx7YtOcgABDzXVH5dEFA==
+X-Google-Smtp-Source: AGHT+IG7+8cNxtjYaW8DLvuAzwkpFnOPp3GRgfoPosS/SSNgOQZqBfvWW6vOfnDQFgGdZtkac5nPfA==
+X-Received: by 2002:a05:620a:8325:b0:774:2893:3f25 with SMTP id pa37-20020a05620a832500b0077428933f25mr2602290qkn.25.1695840423687;
+        Wed, 27 Sep 2023 11:47:03 -0700 (PDT)
+Received: from localhost.localdomain ([50.212.55.89])
+        by smtp.gmail.com with ESMTPSA id d8-20020ac81188000000b00411fcc18cc1sm5522232qtj.64.2023.09.27.11.47.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 27 Sep 2023 11:47:03 -0700 (PDT)
+From:   Ben Wolsieffer <ben.wolsieffer@hefring.com>
+To:     linux-stm32@st-md-mailman.stormreply.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Russell King <linux@armlinux.org.uk>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ben Wolsieffer <Ben.Wolsieffer@hefring.com>
+Subject: [PATCH] mmc: mmci: use peripheral flow control for STM32
+Date:   Wed, 27 Sep 2023 14:45:56 -0400
+Message-ID: <20230927184556.1422122-1-ben.wolsieffer@hefring.com>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
-References: <CAHp75VfRLv1=3M+a9pr=ZJgNwtBOrT9xi0UjDJMuY8uM9+ffSw@mail.gmail.com>
- <20230926200541.35787-1-blarson@amd.com>
-In-Reply-To: <20230926200541.35787-1-blarson@amd.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Wed, 27 Sep 2023 15:59:00 +0300
-Message-ID: <CAHp75Vd3Jj_giyWKhA2OyPrY5xKhyQ6We3qkz9-yDs15F+SFRg@mail.gmail.com>
-Subject: Re: [PATCH v16 6/6] soc: amd: Add support for AMD Pensando SoC Controller
-To:     Brad Larson <blarson@amd.com>
-Cc:     adrian.hunter@intel.com, alcooperx@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        broonie@kernel.org, catalin.marinas@arm.com, conor+dt@kernel.org,
-        davidgow@google.com, devicetree@vger.kernel.org,
-        fancer.lancer@gmail.com, gerg@linux-m68k.org, gsomlo@gmail.com,
-        hal.feng@starfivetech.com, hasegawa-hitomi@fujitsu.com,
-        j.neuschaefer@gmx.net, joel@jms.id.au, kernel@esmil.dk,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        lee.jones@linaro.org, lee@kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        p.zabel@pengutronix.de, rdunlap@infradead.org, robh+dt@kernel.org,
-        samuel@sholland.org, skhan@linuxfoundation.org,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
-        vaishnav.a@ti.com, walker.chen@starfivetech.com, will@kernel.org,
-        zhuyinbo@loongson.cn
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 26, 2023 at 11:05=E2=80=AFPM Brad Larson <blarson@amd.com> wrot=
-e:
-> On Thu, Sep 21, 2023 at 18:19:57 +0300 Andy Shevchenko <andy.shevchenko@g=
-mail.com> wrote:
-> > On Thu, Sep 14, 2023 at 12:52=E2=80=AFAM Brad Larson <blarson@amd.com> =
-wrote:
+From: Ben Wolsieffer <Ben.Wolsieffer@hefring.com>
 
-...
+The STM32 SDMMC peripheral (at least for the STM32F429, STM32F469 and
+STM32F746, which are all the currently supported devices using periphid
+0x00880180) requires DMA to be performed in peripheral flow controller
+mode. From the STM32F74/5 reference manual, section 35.3.2:
 
-> >> +       u8 tx_buf[PENCTRL_MAX_MSG_LEN];
-> >> +       u8 rx_buf[PENCTRL_MAX_MSG_LEN];
-> >
-> > These are not DMA-safe, is this a problem?
->
-> It's not a problem, the peripheral is PIO FIFO driven only.
+"SDMMC host allows only to use the DMA in peripheral flow controller
+mode. DMA stream used to serve SDMMC must be configured in peripheral
+flow controller mode"
 
-The question was about the SPI controller itself.
-Also, depending on the driver it may or may not require DMA-safe
-pointers. I believe with the new pump queue used in the SPI core all
-drivers that are using it are DMA-safe and the caller needs no
-additional care.
+This patch adds a variant option to control peripheral flow control and
+enables it for the STM32 variant.
 
-...
+Signed-off-by: Ben Wolsieffer <Ben.Wolsieffer@hefring.com>
+---
+ drivers/mmc/host/mmci.c | 3 ++-
+ drivers/mmc/host/mmci.h | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
-> >> +       msg =3D memdup_user((struct penctrl_spi_xfer *)arg, size);
-> >> +       if (IS_ERR(msg)) {
-> >> +               ret =3D PTR_ERR(msg);
-> >> +               goto out_unlock;
-> >> +       }
-> >
-> > Wondering if you can start using cleanup.h.
->
-> Perhaps if recommended, I don't see DEFINE_(FREE,UNLOCK,...) being used.
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 769b34afa835..90e32f18abbc 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -249,6 +249,7 @@ static struct variant_data variant_stm32 = {
+ 	.f_max			= 48000000,
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
++	.dma_flow_controller	= true,
+ 	.init			= mmci_variant_init,
+ };
+ 
+@@ -1012,7 +1013,7 @@ static int _mmci_dmae_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
+ 		.src_maxburst = variant->fifohalfsize >> 2, /* # of words */
+ 		.dst_maxburst = variant->fifohalfsize >> 2, /* # of words */
+-		.device_fc = false,
++		.device_fc = variant->dma_flow_controller,
+ 	};
+ 	struct dma_chan *chan;
+ 	struct dma_device *device;
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 253197f132fc..9a81f30f6748 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -332,6 +332,7 @@ enum mmci_busy_state {
+  * @opendrain: bitmask identifying the OPENDRAIN bit inside MMCIPOWER register
+  * @dma_lli: true if variant has dma link list feature.
+  * @stm32_idmabsize_mask: stm32 sdmmc idma buffer size.
++ * @dma_flow_controller: use peripheral as flow controller for DMA.
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -378,6 +379,7 @@ struct variant_data {
+ 	u8			dma_lli:1;
+ 	u32			stm32_idmabsize_mask;
+ 	u32			stm32_idmabsize_align;
++	u8			dma_flow_controller:1;
+ 	void (*init)(struct mmci_host *host);
+ };
+ 
+-- 
+2.42.0
 
-It's guard()() and scoped_guard() for locks and __free() for the allocation=
-s.
-
-Plenty of uses in a few modules already (talking about Linux Next snapshot)=
-.
-
-...
-
-> >> +       spi->chip_select =3D current_cs;
-> >
-> > spi_set_chipselect()
->
-> Yes, I'll change to inline function spi_set_chipselect(spi, 0, current_cs=
-).  The
-> second arg must be legacy as its unused.
-
-Actually, it's a placeholder for the future support of indexed CS'.
-
-...
-
-> >> +       u8 txbuf[3];
-> >> +       u8 rxbuf[1];
-> >
-> > Not DMA-safe. Is it a problem?
->
-> Not a problem, the peripheral is PIO only using FIFOs.
-
-Same as somewhere above.
-
---=20
-With Best Regards,
-Andy Shevchenko
