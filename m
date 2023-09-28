@@ -2,169 +2,140 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5014ACE7AF8
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Sep 2023 03:20:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1124BCE7AF9
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Sep 2023 04:54:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229472AbjI1DUp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Sep 2023 23:20:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50246 "EHLO
+        id S230160AbjI1Eyx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Sep 2023 00:54:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55300 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229437AbjI1DUo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 23:20:44 -0400
-Received: from mail-qv1-xf35.google.com (mail-qv1-xf35.google.com [IPv6:2607:f8b0:4864:20::f35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B46B94;
-        Wed, 27 Sep 2023 20:20:39 -0700 (PDT)
-Received: by mail-qv1-xf35.google.com with SMTP id 6a1803df08f44-65b10205207so37577026d6.0;
-        Wed, 27 Sep 2023 20:20:39 -0700 (PDT)
+        with ESMTP id S230179AbjI1Eyw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Sep 2023 00:54:52 -0400
+Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 700DF139
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Sep 2023 21:54:49 -0700 (PDT)
+Received: by mail-ej1-x636.google.com with SMTP id a640c23a62f3a-9ada2e6e75fso1653925566b.2
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Sep 2023 21:54:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695871238; x=1696476038; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=NS/wz0bl6MuMokliWeLl4WPqdz4fGJLWZvYUHGBxFS4=;
-        b=X15kYYsYgroTAczbUZ5jRwW/uWadO+s2HtJThG0GwhnUeA7JbjlfIh8UawCcZioGn/
-         r1LIM0aeAD4DolcN+6td8iNsJWL77CWSLVDQM1v6fo/2zcqv616TKNAr1yIR0sP55YHY
-         TpARGEueGkj1rw6MTAB+dyEG9lTcT1QZBmzplpgmH0M3SppANeF/lMasr27jHNnvkmlQ
-         EMNMUOUsENf0C6PF1QHimoqINjjiwVFX9QYoWIKVmkB3Y4qbOuXpFgpLeRorAEPQ1/xr
-         oB599x4FtExSyiLdHlw7nGp2YuWwuwtd5bmhDIpWqs6ymrxOzkz/Kf98B5KBdp6SNwTd
-         byHQ==
+        d=tuxon.dev; s=google; t=1695876888; x=1696481688; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=olm/D+dJExjfSBWXGE2Uq9vVnEsfwITsdsfFo+MxoTk=;
+        b=Dr1zyC1tiyCEQjBL1uj1JD4h+4CA80qgc0YJRvtD7Fw+xe6WnHNn+uMkxHDV7XJe67
+         A1LEWxgV1Pe5CESNz5cbrPvRDAZHdqRYYeXNMu6xo9etQIurMbGD/bAcmvmpG03pjJTN
+         SeuF3oJAxs7Vyy9w/KlCsKMonoiWdoc0tcaD82qg+oKXI5FQ6SJ1eUAOsRNdehy2p8uj
+         7eKOe8lWUfrUWiSjyndt82MaOSEiPGjeV0oapU+aPlEV5uvnA5Uh88E7R80KjpXlI5Pa
+         V26TlUnUOJW2XT4t2qvf4vNFqpIKZXoeNgw7jQsavdqALhMc05oKE6h7C1VMuAqPRnOZ
+         0ajw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695871238; x=1696476038;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=NS/wz0bl6MuMokliWeLl4WPqdz4fGJLWZvYUHGBxFS4=;
-        b=RzuflU/NgZ9vC1eZCe478cV1uz9mSdNdrMETqHUnV1rNad58TLBh9tI3Qq1HydOGMS
-         KXf/2Zt7GWiF8GmbObiB5fOsC27visFlsosoSMOTzJNH1ANZL+BE+QWrqtVAua2TNnre
-         Rr4BRpL/xZRHA7qYqJ2ndDZml0KQ9UzGSrxl4lJtmh9Bi+5qBIf8iu/lNHNdx5RFEctQ
-         XZpp+j3RG9kALts5tx38WUo4K26myXJHwoMdLEfz5g+pHjYR0E33b4Y/k65mIBkrzXL9
-         mivdBzokPpodB4ChsHOPR0kZE7dkpK4r4j2rPC3KTN8UleMQeiuRqjbh1MybV/4QOq9H
-         hXxQ==
-X-Gm-Message-State: AOJu0YzbKM9ZTMOffg60Wnc+BsuBoqu/qloW6S/p9CvpGWgwK7PF4WVk
-        V/L4i71W22hWCVmXu+qJ/As/zR9CataUudSfgVo=
-X-Google-Smtp-Source: AGHT+IFxC7y63XEVcyYVD8IeHqL+kfqaTfLE8fKn497jLjoPJRiCF6zhTjJv7+Hn5zBDo43mQgQtMUQtLwgEk5p6/Q0=
-X-Received: by 2002:a0c:f24f:0:b0:65b:896:1cb1 with SMTP id
- z15-20020a0cf24f000000b0065b08961cb1mr28914qvl.17.1695871238178; Wed, 27 Sep
- 2023 20:20:38 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695876888; x=1696481688;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=olm/D+dJExjfSBWXGE2Uq9vVnEsfwITsdsfFo+MxoTk=;
+        b=XYb805bquEkDUqUSPVfxJOns5zrJ+q+m7/dcFaKxODnROgCsxi0MDHB6IWcq6Nc9pV
+         Wb0GqTf071+psAsP7HhJ6gj57Q4ci+OWQDy8VU2UgUTWsvaeKo/Y+JcvVeTsOuX8mghp
+         UOGZ9w/er4oE9UL452zk6t4E3x54CW8CWUkvJayYorA0OKpEUfd2rVOSZ6jE99ISd0ts
+         bVdrYqBcMa/0gsAe1cuT2IsbWXZ1VzYN8bF5hdG4Gqdi+n9O+gj7X45A2InsceMNqpmT
+         iIHPWCD5Mo8Mc9lx5slYfs7rr0usgQ32P00SbD7Uo10+XoXwU3vVnBrw9kGSFEs+BeJf
+         qw7g==
+X-Gm-Message-State: AOJu0YyoVQuJghA9WxyzO4uFb7K5p+hFCKXFW1clVkr2PfNZ+qFuzDqW
+        1ndZK2i7JgTr4p7GhVhVEeY0dg==
+X-Google-Smtp-Source: AGHT+IEFpdq3a7HATHUTgENVuaEGn2ioT9l2ERfVEJ8IOkiDOT6bn01Sn56ChsWGJMbIjhbJQj2snQ==
+X-Received: by 2002:a17:906:518e:b0:9ae:5fe1:ef03 with SMTP id y14-20020a170906518e00b009ae5fe1ef03mr176773ejk.67.1695876887638;
+        Wed, 27 Sep 2023 21:54:47 -0700 (PDT)
+Received: from [192.168.32.2] ([82.78.167.177])
+        by smtp.gmail.com with ESMTPSA id p26-20020a170906229a00b009ad8338aafasm10387144eja.13.2023.09.27.21.54.45
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 27 Sep 2023 21:54:47 -0700 (PDT)
+Message-ID: <154b823e-d532-ede7-5ada-08436ec86804@tuxon.dev>
+Date:   Thu, 28 Sep 2023 07:54:43 +0300
 MIME-Version: 1.0
-References: <1650963852-4173-1-git-send-email-quic_spathi@quicinc.com>
- <CAPDyKFo7H=fOiX49gttrKO3gwe=ddYMjdgrO_xSnnZjZh7P7ZA@mail.gmail.com>
- <MWHPR0201MB3466C629ECABC8FD6B009276E3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
- <ea318551ec0b43429ce47bfac9ebf285@quicinc.com> <CAPDyKFq2-Jwii_aMbsqYNM_Dq0-MMEEtUYnNKGbQgvDL+M-wdw@mail.gmail.com>
- <c06480b1-95e3-49cd-9498-5c7c5f1deabe@quicinc.com>
-In-Reply-To: <c06480b1-95e3-49cd-9498-5c7c5f1deabe@quicinc.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Thu, 28 Sep 2023 11:20:26 +0800
-Message-ID: <CA+Da2qz2dSUKa9t4gBaDg=kAE=CjRrx2Sz_Je+nFsrM5xr_+5w@mail.gmail.com>
-Subject: Re: [PATCH V1] mmc: core: Add partial initialization support
-To:     Sarthak Garg <quic_sartgarg@quicinc.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "Kamasali Satyanarayan (Consultant) (QUIC)" 
-        <quic_kamasali@quicinc.com>,
-        "avri.altman@wdc.com" <avri.altman@wdc.com>,
-        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
-        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>,
-        "merez@codeaurora.org" <merez@codeaurora.org>,
-        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
-        "huijin.park@samsung.com" <huijin.park@samsung.com>,
-        "briannorris@chromium.org" <briannorris@chromium.org>,
-        "digetx@gmail.com" <digetx@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH 21/37] dt-bindings: clock: add r9a08g045 CPG clocks and
+ resets definitions
+Content-Language: en-US
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, jirislaby@kernel.org,
+        magnus.damm@gmail.com, catalin.marinas@arm.com, will@kernel.org,
+        prabhakar.mahadev-lad.rj@bp.renesas.com,
+        biju.das.jz@bp.renesas.com, quic_bjorande@quicinc.com,
+        arnd@arndb.de, konrad.dybcio@linaro.org, neil.armstrong@linaro.org,
+        nfraprado@collabora.com, rafal@milecki.pl,
+        wsa+renesas@sang-engineering.com,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20230912045157.177966-1-claudiu.beznea.uj@bp.renesas.com>
+ <20230912045157.177966-22-claudiu.beznea.uj@bp.renesas.com>
+ <CAMuHMdWc6yy=oJDo4zMdvB-t8pjCuE1oJ_Y6Ck0aX_hPkfhPug@mail.gmail.com>
+From:   claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <CAMuHMdWc6yy=oJDo4zMdvB-t8pjCuE1oJ_Y6Ck0aX_hPkfhPug@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 26 Sept 2023 at 18:41, Sarthak Garg <quic_sartgarg@quicinc.com> wrote:
->
->
-> On 6/16/2022 4:18 AM, Ulf Hansson wrote:
-> > On Tue, 24 May 2022 at 07:37, Sarthak Garg (QUIC)
-> > <quic_sartgarg@quicinc.com> wrote:
-> >> Hi Ulf,
-> >>
-> >> Please find the gains seen on micron and kingston eMMC parts below with partial initialization feature (These are the averaged numbers) :
-> >>
-> >> 1) Micron eMMC (ManfID 0x13)
-> >>
-> >> Partial init                            Full Init
-> >>
-> >> a) _mmc_resume:                         _mmc_resume :
-> >>
-> >> Total time : 62ms                       Total time : 84ms
-> >> (Decrease % from full init = ~26%)
-> > Alright, so we gained around 22ms. Not too bad.
-> >
-> >> Breakup :
-> >> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.1ms
-> >> mmc_power_up_time: 33ms         mmc_power_up_time: 33ms
-> >> mmc_sleepawake_time: 28ms               mmc_init_card_time: 50ms
-> >> mmc_partial_init_time: 1ms
-> >>
-> >> b) _mmc_suspend:                        _mmc_suspend:
-> >>
-> >> Total time: 5ms                         Total time: 7.5ms
-> >> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 1ms
-> >> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 2.5 ms
-> >> mmc_sleep_time: 1.5ms           mmc_sleep_time: 2ms
-> >> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
-> > The suspend time shouldn't really differ. Or is there a reason for this?
->
->
-> I think this could be due to run to run variation as we can see
-> mmc_claim_host and mmc_flush_cache itself taking some extra 1ms.
->
->
+Hi, Geert,
 
-Hi Sarthak
+On 15.09.2023 14:59, Geert Uytterhoeven wrote:
+> On Tue, Sep 12, 2023 at 6:53 AM Claudiu <claudiu.beznea@tuxon.dev> wrote:
+>> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>>
+>> Add RZ/G3S (R9A08G045) Clock Pulse Generator (CPG) core clocks, module
+>> clocks and resets.
+>>
+>> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> 
+> Thanks for your patch!
+> 
+>> --- /dev/null
+>> +++ b/include/dt-bindings/clock/r9a08g045-cpg.h
+> 
+>> +/* R9A08G045 Module Clocks */
+> 
+>> +#define R9A08G045_USB_U2H0_HCLK                65
+>> +#define R9A08G045_USB_U2H1_HCLK                66
+>> +#define R9A08G045_USB_U2P_EXR_CPUCLK   67
+>> +#define R9A08G045_USB_PCLK             68
+>> +#define R9A08G045_USB_SCLK             69
+> 
+> There is no USB_SCLK bit in CPG_CLKON_USB, so please drop
+> R9A08G045_USB_SCLK.
+> 
+>> +/* R9A08G045 Resets */
+> 
+>> +#define R9A08G045_SRAM_ACPU_ARESETN0   11
+>> +#define R9A08G045_SRAM_ACPU_ARESETN1   12
+>> +#define R9A08G045_SRAM_ACPU_ARESETN2   13
+> 
+> There is no SRAM_ACPU_ARESETN2 bit in CPG_RST_SRAM_MCPU,
+> so please drop R9A08G045_SRAM_ACPU_ARESETN2.
 
-I have a question.
-1.What is the difference between Partial init and Full Init on SOC
-power consumption?
-2.Partial init and Full init improve IO performance?
-3.Could you share the test methods if you want?
+I see there is SRAM_ACPU_ARESETN2 in CPG_RST_SRAM_*A*CPU register. You are
+actually saying that the documentation might be wrong?
 
-> >
-> >>
-> >> 2) Kingston eMMC (ManfID 0x70)
-> >>
-> >> Partial init                            Full Init
-> >>
-> >> a) _mmc_resume:                 _mmc_resume :
-> >> Total time : 46ms                       Total time : 62ms
-> >> (Decrease % from full init = ~25%)
-> >>
-> >> Breakup :
-> >> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.2ms
-> >> mmc_power_up_time: 30ms         mmc_power_up_time: 30ms
-> >> mmc_sleepawake_time: 14ms               mmc_init_card_time: 31ms
-> >> mmc_partial_init_time: 2ms
-> >>
-> >>
-> >> b) _mmc_suspend:                        _mmc_suspend:
-> >> Total time : 5ms                        Total: 5ms
-> >>
-> >> Breakup :
-> >> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 0.5ms
-> >> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 1.5 ms
-> >> mmc_sleep_time: 1.5ms           mmc_sleep_time: 1ms
-> >> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
-> >>
-> >> Did some minor modifications as well to this patchset as per avri's comment which I'll post as V2.
-> >> Please let me know your inputs about these numbers.
-> > Thanks for posting these numbers, much appreciated! Please try to
-> > include some of the data as part of the commit message as I think it's
-> > valuable information.
-> >
-> > When it comes to reviewing the code, I am awaiting your v2 then.
-> >
-> > [...]
-> >
-> > Kind regards
-> > Uffe
->
-> Sure will add this data to the commit text in V2.
->
->
+Thank you,
+Claudiu Beznea
+
+> 
+> The rest LGTM.
+> 
+> Gr{oetje,eeting}s,
+> 
+>                         Geert
+> 
+> --
+> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+> 
+> In personal conversations with technical people, I call myself a hacker. But
+> when I'm talking to journalists I just say "programmer" or something like that.
+>                                 -- Linus Torvalds
