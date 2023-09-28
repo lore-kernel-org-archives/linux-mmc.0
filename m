@@ -2,328 +2,169 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4BDFE80A8A
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Sep 2023 00:38:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5014ACE7AF8
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Sep 2023 03:20:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229469AbjI1AiB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Sep 2023 20:38:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49270 "EHLO
+        id S229472AbjI1DUp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Sep 2023 23:20:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229437AbjI1AiA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 20:38:00 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFCB4BF;
-        Wed, 27 Sep 2023 17:37:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1695861478; x=1727397478;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=uV5QaqpuKb5uDxr1hW2u8bXPE4XZPSR/+dsQ8TrfyRM=;
-  b=lO463FprBN0X7jUOmepopMnX+Wt+MK145CtwsmLbAa56XpwrjbQsXRRT
-   +18/JJvlmqjTenxYMsTUPX98YotXxZXl+zDotjETkAzSKUgBq0fmkdmal
-   TwC+U2H6LerANEnF0cl0tkWNB0O/Vyn5pAydeMNEZuKbXCNjKRpV0alJ7
-   kXUHRVAtDxbsn/7Wj5PkU0qvulB5K3vqM7zRD1GM14dRBNJ9kwJgn+amD
-   Ufw1bA75rxYx30DS4fVLjFJtLDHeZ3hTwIDhvMayATPOkWg59izYFm+HZ
-   yGU+8LOiqULwNynabeejNX9quZLosfEM3NLQI33DntQLWT2R0LSuEBhTl
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10846"; a="565337"
-X-IronPort-AV: E=Sophos;i="6.03,182,1694761200"; 
-   d="scan'208";a="565337"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2023 17:37:58 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10846"; a="784518923"
-X-IronPort-AV: E=Sophos;i="6.03,182,1694761200"; 
-   d="scan'208";a="784518923"
-Received: from lkp-server02.sh.intel.com (HELO c3b01524d57c) ([10.239.97.151])
-  by orsmga001.jf.intel.com with ESMTP; 27 Sep 2023 17:37:53 -0700
-Received: from kbuild by c3b01524d57c with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1qlf2M-0000vF-3C;
-        Thu, 28 Sep 2023 00:37:50 +0000
-Date:   Thu, 28 Sep 2023 08:37:30 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     liuchang_125125@163.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     oe-kbuild-all@lists.linux.dev, shaper.liu@bayhubtech.com,
-        chevron.li@bayhubtech.com, thomas.hu@bayhubtech.com,
-        charl.liu@bayhubtech.com, Charl Liu <liuchang_125125@163.com>
-Subject: Re: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: Fix Bayhub SD host
- hardware tuning compatibility issue for BanQ card
-Message-ID: <202309280818.XQbiYALu-lkp@intel.com>
-References: <20230927122652.4969-1-liuchang_125125@163.com>
+        with ESMTP id S229437AbjI1DUo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Sep 2023 23:20:44 -0400
+Received: from mail-qv1-xf35.google.com (mail-qv1-xf35.google.com [IPv6:2607:f8b0:4864:20::f35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B46B94;
+        Wed, 27 Sep 2023 20:20:39 -0700 (PDT)
+Received: by mail-qv1-xf35.google.com with SMTP id 6a1803df08f44-65b10205207so37577026d6.0;
+        Wed, 27 Sep 2023 20:20:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695871238; x=1696476038; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=NS/wz0bl6MuMokliWeLl4WPqdz4fGJLWZvYUHGBxFS4=;
+        b=X15kYYsYgroTAczbUZ5jRwW/uWadO+s2HtJThG0GwhnUeA7JbjlfIh8UawCcZioGn/
+         r1LIM0aeAD4DolcN+6td8iNsJWL77CWSLVDQM1v6fo/2zcqv616TKNAr1yIR0sP55YHY
+         TpARGEueGkj1rw6MTAB+dyEG9lTcT1QZBmzplpgmH0M3SppANeF/lMasr27jHNnvkmlQ
+         EMNMUOUsENf0C6PF1QHimoqINjjiwVFX9QYoWIKVmkB3Y4qbOuXpFgpLeRorAEPQ1/xr
+         oB599x4FtExSyiLdHlw7nGp2YuWwuwtd5bmhDIpWqs6ymrxOzkz/Kf98B5KBdp6SNwTd
+         byHQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695871238; x=1696476038;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=NS/wz0bl6MuMokliWeLl4WPqdz4fGJLWZvYUHGBxFS4=;
+        b=RzuflU/NgZ9vC1eZCe478cV1uz9mSdNdrMETqHUnV1rNad58TLBh9tI3Qq1HydOGMS
+         KXf/2Zt7GWiF8GmbObiB5fOsC27visFlsosoSMOTzJNH1ANZL+BE+QWrqtVAua2TNnre
+         Rr4BRpL/xZRHA7qYqJ2ndDZml0KQ9UzGSrxl4lJtmh9Bi+5qBIf8iu/lNHNdx5RFEctQ
+         XZpp+j3RG9kALts5tx38WUo4K26myXJHwoMdLEfz5g+pHjYR0E33b4Y/k65mIBkrzXL9
+         mivdBzokPpodB4ChsHOPR0kZE7dkpK4r4j2rPC3KTN8UleMQeiuRqjbh1MybV/4QOq9H
+         hXxQ==
+X-Gm-Message-State: AOJu0YzbKM9ZTMOffg60Wnc+BsuBoqu/qloW6S/p9CvpGWgwK7PF4WVk
+        V/L4i71W22hWCVmXu+qJ/As/zR9CataUudSfgVo=
+X-Google-Smtp-Source: AGHT+IFxC7y63XEVcyYVD8IeHqL+kfqaTfLE8fKn497jLjoPJRiCF6zhTjJv7+Hn5zBDo43mQgQtMUQtLwgEk5p6/Q0=
+X-Received: by 2002:a0c:f24f:0:b0:65b:896:1cb1 with SMTP id
+ z15-20020a0cf24f000000b0065b08961cb1mr28914qvl.17.1695871238178; Wed, 27 Sep
+ 2023 20:20:38 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230927122652.4969-1-liuchang_125125@163.com>
+References: <1650963852-4173-1-git-send-email-quic_spathi@quicinc.com>
+ <CAPDyKFo7H=fOiX49gttrKO3gwe=ddYMjdgrO_xSnnZjZh7P7ZA@mail.gmail.com>
+ <MWHPR0201MB3466C629ECABC8FD6B009276E3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
+ <ea318551ec0b43429ce47bfac9ebf285@quicinc.com> <CAPDyKFq2-Jwii_aMbsqYNM_Dq0-MMEEtUYnNKGbQgvDL+M-wdw@mail.gmail.com>
+ <c06480b1-95e3-49cd-9498-5c7c5f1deabe@quicinc.com>
+In-Reply-To: <c06480b1-95e3-49cd-9498-5c7c5f1deabe@quicinc.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Thu, 28 Sep 2023 11:20:26 +0800
+Message-ID: <CA+Da2qz2dSUKa9t4gBaDg=kAE=CjRrx2Sz_Je+nFsrM5xr_+5w@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: core: Add partial initialization support
+To:     Sarthak Garg <quic_sartgarg@quicinc.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "Kamasali Satyanarayan (Consultant) (QUIC)" 
+        <quic_kamasali@quicinc.com>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
+        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>,
+        "merez@codeaurora.org" <merez@codeaurora.org>,
+        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
+        "huijin.park@samsung.com" <huijin.park@samsung.com>,
+        "briannorris@chromium.org" <briannorris@chromium.org>,
+        "digetx@gmail.com" <digetx@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Tue, 26 Sept 2023 at 18:41, Sarthak Garg <quic_sartgarg@quicinc.com> wrote:
+>
+>
+> On 6/16/2022 4:18 AM, Ulf Hansson wrote:
+> > On Tue, 24 May 2022 at 07:37, Sarthak Garg (QUIC)
+> > <quic_sartgarg@quicinc.com> wrote:
+> >> Hi Ulf,
+> >>
+> >> Please find the gains seen on micron and kingston eMMC parts below with partial initialization feature (These are the averaged numbers) :
+> >>
+> >> 1) Micron eMMC (ManfID 0x13)
+> >>
+> >> Partial init                            Full Init
+> >>
+> >> a) _mmc_resume:                         _mmc_resume :
+> >>
+> >> Total time : 62ms                       Total time : 84ms
+> >> (Decrease % from full init = ~26%)
+> > Alright, so we gained around 22ms. Not too bad.
+> >
+> >> Breakup :
+> >> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.1ms
+> >> mmc_power_up_time: 33ms         mmc_power_up_time: 33ms
+> >> mmc_sleepawake_time: 28ms               mmc_init_card_time: 50ms
+> >> mmc_partial_init_time: 1ms
+> >>
+> >> b) _mmc_suspend:                        _mmc_suspend:
+> >>
+> >> Total time: 5ms                         Total time: 7.5ms
+> >> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 1ms
+> >> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 2.5 ms
+> >> mmc_sleep_time: 1.5ms           mmc_sleep_time: 2ms
+> >> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
+> > The suspend time shouldn't really differ. Or is there a reason for this?
+>
+>
+> I think this could be due to run to run variation as we can see
+> mmc_claim_host and mmc_flush_cache itself taking some extra 1ms.
+>
+>
 
-kernel test robot noticed the following build warnings:
+Hi Sarthak
 
-[auto build test WARNING on 0e945134b680040b8613e962f586d91b6d40292d]
+I have a question.
+1.What is the difference between Partial init and Full Init on SOC
+power consumption?
+2.Partial init and Full init improve IO performance?
+3.Could you share the test methods if you want?
 
-url:    https://github.com/intel-lab-lkp/linux/commits/liuchang_125125-163-com/mmc-sdhci-pci-o2micro-Fix-Bayhub-SD-host-hardware-tuning-compatibility-issue-for-BanQ-card/20230927-203005
-base:   0e945134b680040b8613e962f586d91b6d40292d
-patch link:    https://lore.kernel.org/r/20230927122652.4969-1-liuchang_125125%40163.com
-patch subject: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: Fix Bayhub SD host hardware tuning compatibility issue for BanQ card
-config: alpha-allyesconfig (https://download.01.org/0day-ci/archive/20230928/202309280818.XQbiYALu-lkp@intel.com/config)
-compiler: alpha-linux-gcc (GCC) 13.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20230928/202309280818.XQbiYALu-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202309280818.XQbiYALu-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
-   drivers/mmc/host/sdhci-pci-o2micro.c: In function 'sdhci_o2_tuning_setting':
->> drivers/mmc/host/sdhci-pci-o2micro.c:343:25: warning: unused variable 'o2_host' [-Wunused-variable]
-     343 |         struct o2_host *o2_host = sdhci_pci_priv(slot);
-         |                         ^~~~~~~
-   drivers/mmc/host/sdhci-pci-o2micro.c: In function 'sdhci_o2_configure_banq_best_input_phase':
->> drivers/mmc/host/sdhci-pci-o2micro.c:370:13: warning: unused variable 'response' [-Wunused-variable]
-     370 |         u32 response = 0;
-         |             ^~~~~~~~
-   drivers/mmc/host/sdhci-pci-o2micro.c: In function 'sdhci_o2_execute_tuning':
->> drivers/mmc/host/sdhci-pci-o2micro.c:407:26: warning: unused variable 'card' [-Wunused-variable]
-     407 |         struct mmc_card *card = mmc->card;
-         |                          ^~~~
-
-
-vim +/o2_host +343 drivers/mmc/host/sdhci-pci-o2micro.c
-
-   337	
-   338	static void sdhci_o2_tuning_setting(struct mmc_host *mmc, bool isbanq, u8 phase_num)
-   339	{
-   340		struct sdhci_host *host = mmc_priv(mmc);
-   341		struct sdhci_pci_slot *slot = sdhci_priv(host);
-   342		struct sdhci_pci_chip *chip = slot->chip;
- > 343		struct o2_host *o2_host = sdhci_pci_priv(slot);
-   344		u32 reg_val;
-   345	
-   346		if (isbanq) {
-   347			/* update tuning command times for BanQ card */
-   348			pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL, &reg_val);
-   349			reg_val &= 0x00FFFFFF;
-   350			reg_val |= 0x02000000;
-   351			pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, reg_val);
-   352		} else {
-   353			reg_val = sdhci_readl(host, O2_SD_DLL_CTRL);
-   354			reg_val &= ~BIT(28);
-   355			sdhci_writel(host, reg_val, O2_SD_DLL_CTRL);
-   356	
-   357			/* Update tuning command times for normal card */
-   358			pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL, &reg_val);
-   359			reg_val &= 0x00FFFFFF;
-   360			reg_val |= (phase_num * 3) << 24;
-   361			pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, reg_val);
-   362		}
-   363	}
-   364	
-   365	static void sdhci_o2_configure_banq_best_input_phase(struct sdhci_host *host)
-   366	{
-   367		struct sdhci_pci_slot *slot = sdhci_priv(host);
-   368		struct sdhci_pci_chip *chip = slot->chip;
-   369	
- > 370		u32 response = 0;
-   371		u16 dll_phase_configure = 0;
-   372		u16 best_input_phase = 0;
-   373	
-   374		switch (chip->pdev->device) {
-   375		case PCI_DEVICE_ID_O2_FUJIN2:
-   376			best_input_phase = 0x0;
-   377			break;
-   378	
-   379		case PCI_DEVICE_ID_O2_SEABIRD0:
-   380		case PCI_DEVICE_ID_O2_SEABIRD1:
-   381			best_input_phase = 0x0;
-   382			break;
-   383	
-   384		case PCI_DEVICE_ID_O2_GG8_9860:
-   385		case PCI_DEVICE_ID_O2_GG8_9861:
-   386		case PCI_DEVICE_ID_O2_GG8_9862:
-   387		case PCI_DEVICE_ID_O2_GG8_9863:
-   388			best_input_phase = 0xB;
-   389			break;
-   390	
-   391		default:
-   392			break;
-   393		}
-   394	
-   395		/* configure the best input phase (0xB) for BanQ card */
-   396		dll_phase_configure = sdhci_readw(host, 0x1B2);
-   397		dll_phase_configure = (dll_phase_configure & (u16)0xF0FF) |
-   398			(best_input_phase << 8) | BIT(12);
-   399		sdhci_writew(host, dll_phase_configure, 0x1B2);
-   400	}
-   401	
-   402	static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
-   403	{
-   404		struct sdhci_host *host = mmc_priv(mmc);
-   405		struct sdhci_pci_slot *slot = sdhci_priv(host);
-   406		struct sdhci_pci_chip *chip = slot->chip;
- > 407		struct mmc_card *card = mmc->card;
-   408		struct o2_host *o2_host = sdhci_pci_priv(slot);
-   409		int current_bus_width = 0;
-   410		u32 scratch32 = 0;
-   411		u16 data_timeout_counter_value = 0;
-   412		u16 scratch = 0;
-   413		u8 phase_num = 0;
-   414		u8  scratch_8 = 0;
-   415		u32 reg_val;
-   416	
-   417		/*
-   418		 * This handler implements the hardware tuning that is specific to
-   419		 * this controller.  Fall back to the standard method for other TIMING.
-   420		 */
-   421		if ((host->timing != MMC_TIMING_MMC_HS200) &&
-   422			(host->timing != MMC_TIMING_UHS_SDR104) &&
-   423			(host->timing != MMC_TIMING_UHS_SDR50))
-   424			return sdhci_execute_tuning(mmc, opcode);
-   425	
-   426		if (WARN_ON(!mmc_op_tuning(opcode)))
-   427			return -EINVAL;
-   428	
-   429		if ((chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860) ||
-   430			(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861) ||
-   431			(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862) ||
-   432			(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863)) {
-   433			phase_num = 14;
-   434		} else {
-   435			phase_num = 11;
-   436		}
-   437	
-   438		/* UnLock WP */
-   439		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-   440		scratch_8 &= 0x7f;
-   441		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-   442	
-   443		sdhci_o2_tuning_setting(mmc, (bool)o2_host->banq_card_setting, phase_num);
-   444	
-   445		if (o2_host->banq_card_setting) {
-   446			/*
-   447			 * set data timeout counter value to 0 to ensure that
-   448			 * the tuning process can be completed
-   449			 */
-   450			data_timeout_counter_value = sdhci_readw(host, SDHCI_TIMEOUT_CONTROL);
-   451			sdhci_writew(host, data_timeout_counter_value & (u16)0xFFF0, SDHCI_TIMEOUT_CONTROL);
-   452		}
-   453	
-   454		/* Force power mode enter L0 */
-   455		scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
-   456		scratch |= O2_SD_PWR_FORCE_L0;
-   457		sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
-   458	
-   459		/* Update output phase */
-   460		switch (chip->pdev->device) {
-   461		case PCI_DEVICE_ID_O2_SDS0:
-   462		case PCI_DEVICE_ID_O2_SEABIRD0:
-   463		case PCI_DEVICE_ID_O2_SEABIRD1:
-   464		case PCI_DEVICE_ID_O2_SDS1:
-   465		case PCI_DEVICE_ID_O2_FUJIN2:
-   466			/* Stop clk */
-   467			reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-   468			reg_val &= ~SDHCI_CLOCK_CARD_EN;
-   469			sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
-   470	
-   471			if ((host->timing == MMC_TIMING_MMC_HS200) ||
-   472				(host->timing == MMC_TIMING_UHS_SDR104)) {
-   473				/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
-   474				pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
-   475				reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
-   476				reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
-   477				pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
-   478			}
-   479	
-   480			/* Start clk */
-   481			reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-   482			reg_val |= SDHCI_CLOCK_CARD_EN;
-   483			sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
-   484			break;
-   485		case PCI_DEVICE_ID_O2_GG8_9860:
-   486		case PCI_DEVICE_ID_O2_GG8_9861:
-   487		case PCI_DEVICE_ID_O2_GG8_9862:
-   488		case PCI_DEVICE_ID_O2_GG8_9863:
-   489		default:
-   490			break;
-   491		}
-   492	
-   493		/* Lock WP */
-   494		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-   495		scratch_8 |= 0x80;
-   496		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-   497	
-   498		/* wait DLL lock, timeout value 5ms */
-   499		if (readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
-   500			scratch32, (scratch32 & O2_DLL_LOCK_STATUS), 1, 5000))
-   501			pr_warn("%s: DLL can't lock in 5ms after force L0 during tuning.\n",
-   502					mmc_hostname(host->mmc));
-   503		/*
-   504		 * Judge the tuning reason, whether caused by dll shift
-   505		 * If cause by dll shift, should call sdhci_o2_dll_recovery
-   506		 */
-   507		if (!sdhci_o2_wait_dll_detect_lock(host))
-   508			if (!sdhci_o2_dll_recovery(host)) {
-   509				pr_err("%s: o2 dll recovery failed\n",
-   510					mmc_hostname(host->mmc));
-   511				return -EINVAL;
-   512			}
-   513		/*
-   514		 * o2 sdhci host didn't support 8bit emmc tuning
-   515		 */
-   516		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
-   517			current_bus_width = mmc->ios.bus_width;
-   518			mmc->ios.bus_width = MMC_BUS_WIDTH_4;
-   519			sdhci_set_bus_width(host, MMC_BUS_WIDTH_4);
-   520		}
-   521	
-   522		sdhci_o2_set_tuning_mode(host);
-   523	
-   524		sdhci_start_tuning(host);
-   525	
-   526		__sdhci_o2_execute_tuning(host, opcode);
-   527	
-   528		sdhci_end_tuning(host);
-   529	
-   530		if (current_bus_width == MMC_BUS_WIDTH_8) {
-   531			mmc->ios.bus_width = MMC_BUS_WIDTH_8;
-   532			sdhci_set_bus_width(host, current_bus_width);
-   533		}
-   534	
-   535		/* update input phase for BanQ card */
-   536		if (o2_host->banq_card_setting) {
-   537			/* recover the data timeout counter value */
-   538			sdhci_writew(host, data_timeout_counter_value, SDHCI_TIMEOUT_CONTROL);
-   539	
-   540			/*
-   541			 * Stop transfer for CMD19 after tuning done is set to
-   542			 * avoid data line inhibit
-   543			 */
-   544			sdhci_o2_send_stop_transmission(host);
-   545	
-   546			sdhci_o2_configure_banq_best_input_phase(host);
-   547		}
-   548	
-   549		/* Cancel force power mode enter L0 */
-   550		scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
-   551		scratch &= ~(O2_SD_PWR_FORCE_L0);
-   552		sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
-   553	
-   554		sdhci_reset(host, SDHCI_RESET_CMD);
-   555		sdhci_reset(host, SDHCI_RESET_DATA);
-   556	
-   557		host->flags &= ~SDHCI_HS400_TUNING;
-   558		return 0;
-   559	}
-   560	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+> >
+> >>
+> >> 2) Kingston eMMC (ManfID 0x70)
+> >>
+> >> Partial init                            Full Init
+> >>
+> >> a) _mmc_resume:                 _mmc_resume :
+> >> Total time : 46ms                       Total time : 62ms
+> >> (Decrease % from full init = ~25%)
+> >>
+> >> Breakup :
+> >> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.2ms
+> >> mmc_power_up_time: 30ms         mmc_power_up_time: 30ms
+> >> mmc_sleepawake_time: 14ms               mmc_init_card_time: 31ms
+> >> mmc_partial_init_time: 2ms
+> >>
+> >>
+> >> b) _mmc_suspend:                        _mmc_suspend:
+> >> Total time : 5ms                        Total: 5ms
+> >>
+> >> Breakup :
+> >> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 0.5ms
+> >> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 1.5 ms
+> >> mmc_sleep_time: 1.5ms           mmc_sleep_time: 1ms
+> >> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
+> >>
+> >> Did some minor modifications as well to this patchset as per avri's comment which I'll post as V2.
+> >> Please let me know your inputs about these numbers.
+> > Thanks for posting these numbers, much appreciated! Please try to
+> > include some of the data as part of the commit message as I think it's
+> > valuable information.
+> >
+> > When it comes to reviewing the code, I am awaiting your v2 then.
+> >
+> > [...]
+> >
+> > Kind regards
+> > Uffe
+>
+> Sure will add this data to the commit text in V2.
+>
+>
