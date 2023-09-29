@@ -2,123 +2,163 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEC87E80ABE
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Sep 2023 11:47:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA82FE810D5
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Sep 2023 11:54:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232964AbjI2LrL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Sep 2023 07:47:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47378 "EHLO
+        id S229508AbjI2LyL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Sep 2023 07:54:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233114AbjI2LrJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Sep 2023 07:47:09 -0400
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02F491B5
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Sep 2023 04:47:05 -0700 (PDT)
-Received: by mail-ej1-x632.google.com with SMTP id a640c23a62f3a-991c786369cso1785093466b.1
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Sep 2023 04:47:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1695988024; x=1696592824; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=zhfeqUeMx+7/r3P/H5lkKaQ46xIFwCOzIqxVzNl8FtY=;
-        b=MeTO8Cs/C2Cb9NcNgnJc/FXO7HAqA3Sa2FYH5CgL7vHNiYKxzvg9ygS8MVSN9Ou1qy
-         866iz4osJ3ctz65idqltHOrwvdpKHFH/atuxaDD4Duw5p6cTXZz6jHoNN7hLhDlUHTJF
-         zrc9t+B/WyycJjxmqvpTBt8PH77Yq0I/3K0JcsjZgqJORGX8YfKgNDPF72ua+qKopX6H
-         gy0tbpTIrBdlT7U425spJdKKrguR/w/41hD2fPrXfbGfgUWl2CnXNSQkv86lU2iyJCW5
-         +VzRUCk30RKaYte+AupWIt21hNLpe5ItEXzi1sdoYjAKB2gr3hygCoDYsHSmWQoYNo0h
-         nuYg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695988024; x=1696592824;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=zhfeqUeMx+7/r3P/H5lkKaQ46xIFwCOzIqxVzNl8FtY=;
-        b=PmYseBBIpQ1Z64s3jngn61Ag9hb3VGMRIIlcL5yqr7z1qWdAVJw8gzWDRHOSwf+ZTI
-         YcDpZZNQyqg69W37yaReY5SPaHL9ajMKL35GHs8+QynRdVwUQH0mOupELML/tADAEf2P
-         D1YFZOOJWMsy2AmH1yt8w1a+kitVMVHyCWTcg3Q4oKPC3VlaPmCZ6rm3OXRVUbfTtkQD
-         p5tiPHEz8qw2GTamOXhjgY92HjH4xodEFklA7lFAAKHKYzt9gEdQjEgrwDldciOxCpdc
-         yDjW9KSumrGS+v8f7q4TnojtNG/8Ru7L2t8zQ/WGZFEVxpcPrNTkKNU2286P5yGv8ymO
-         56ng==
-X-Gm-Message-State: AOJu0YwkWB5I2C7IXFC5vGvYIa0BcKSn4hh4Q4MfkVVAcM0defBfo4rN
-        5rwDuTEBgsCv+aAdT1aV/O1ywQ==
-X-Google-Smtp-Source: AGHT+IG6MmQOXBlTfZUeoYaL0esXYeiA/w/RCcrcnF1MUCJmDJLTGwGwCVfEBd7FDt+kszFfSBomGg==
-X-Received: by 2002:a17:907:78da:b0:9a5:ed5b:241e with SMTP id kv26-20020a17090778da00b009a5ed5b241emr3689325ejc.25.1695988023927;
-        Fri, 29 Sep 2023 04:47:03 -0700 (PDT)
-Received: from [192.168.33.189] (178235177217.dynamic-4-waw-k-1-1-0.vectranet.pl. [178.235.177.217])
-        by smtp.gmail.com with ESMTPSA id mh2-20020a170906eb8200b00992b2c55c67sm12324412ejb.156.2023.09.29.04.47.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 29 Sep 2023 04:47:03 -0700 (PDT)
-Message-ID: <7db0a714-de18-4644-84d1-a5d543af5693@linaro.org>
-Date:   Fri, 29 Sep 2023 13:47:01 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-msm: Enable MMC_CAP2_SLEEP_AWAKE for
- Qualcomm controllers
-Content-Language: en-US
+        with ESMTP id S232490AbjI2LyK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Sep 2023 07:54:10 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5EEA193;
+        Fri, 29 Sep 2023 04:54:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1695988449; x=1727524449;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=ISv2rSDawxjEuQmt6UgE2EEBy6745yQLVfXV6XeXgxA=;
+  b=Ip9WwZFaxVNPbNU6nlorzh4oaJhNoLDvJxyAF9bzEZbZZQZRw93IVEVa
+   6GZtMVGz9M/c3522VmX7ouwN2K7MSUM7baW+mGK1DgxsK0YlJuQgGbF2w
+   sJ7SB55IjWigz9Ilae/Z3krqpf7P/pL78mv9QeLo/sYXW8t4lw58nBrAU
+   7jyCmdvOyEjU5wGfFa1uXNFb7OnViswE9320OrERDVfEPS1Zu1u+KHdCl
+   eeWO1Np+quRzAZOJ/BQN5pN1WJvM9cOCpiNj3bWKC2/bcZYXAkA4wfofn
+   3qbOTQKDCqbFGk13TyAEsvA9m5h9ZfrWa0Arop3SM7nbT2+7T2xQ9nw/+
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10847"; a="367338815"
+X-IronPort-AV: E=Sophos;i="6.03,187,1694761200"; 
+   d="scan'208";a="367338815"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Sep 2023 04:54:08 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10847"; a="749936816"
+X-IronPort-AV: E=Sophos;i="6.03,187,1694761200"; 
+   d="scan'208";a="749936816"
+Received: from lkp-server02.sh.intel.com (HELO c3b01524d57c) ([10.239.97.151])
+  by orsmga002.jf.intel.com with ESMTP; 29 Sep 2023 04:54:04 -0700
+Received: from kbuild by c3b01524d57c with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1qmC4H-0002oj-2X;
+        Fri, 29 Sep 2023 11:54:01 +0000
+Date:   Fri, 29 Sep 2023 19:53:59 +0800
+From:   kernel test robot <lkp@intel.com>
 To:     Sarthak Garg <quic_sartgarg@quicinc.com>, adrian.hunter@intel.com,
         ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
-        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>
-References: <20230929102831.9702-1-quic_sartgarg@quicinc.com>
- <20230929102831.9702-3-quic_sartgarg@quicinc.com>
-From:   Konrad Dybcio <konrad.dybcio@linaro.org>
-Autocrypt: addr=konrad.dybcio@linaro.org; keydata=
- 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
- izWDgYvmBE8=
-In-Reply-To: <20230929102831.9702-3-quic_sartgarg@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Cc:     oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+        quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
+        quic_narepall@quicinc.com,
+        Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Veerabhadrarao Badiganti <quic_vbadigan@quicinc.com>
+Subject: Re: [PATCH V2 1/2] mmc: core: Add partial initialization support
+Message-ID: <202309291907.0fApmbb7-lkp@intel.com>
+References: <20230929102831.9702-2-quic_sartgarg@quicinc.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230929102831.9702-2-quic_sartgarg@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29.09.2023 12:28, Sarthak Garg wrote:
-> Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers to let them use
-> sleep/awake functionality for faster eMMC resume instead of
-> doing full initialization.
-> 
-> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> ---
-Will this work on all SoCs from MSM8974 to SM8550 inclusive?
+Hi Sarthak,
 
-Such changes affect all users of this driver.
+kernel test robot noticed the following build warnings:
 
-Konrad
+[auto build test WARNING on linus/master]
+[also build test WARNING on ulf-hansson-mmc-mirror/next v6.6-rc3 next-20230929]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Sarthak-Garg/mmc-core-Add-partial-initialization-support/20230929-183238
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20230929102831.9702-2-quic_sartgarg%40quicinc.com
+patch subject: [PATCH V2 1/2] mmc: core: Add partial initialization support
+config: m68k-allyesconfig (https://download.01.org/0day-ci/archive/20230929/202309291907.0fApmbb7-lkp@intel.com/config)
+compiler: m68k-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20230929/202309291907.0fApmbb7-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202309291907.0fApmbb7-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+>> drivers/mmc/core/mmc.c:1975: warning: Function parameter or member 'host' not described in 'mmc_sleepawake'
+
+
+vim +1975 drivers/mmc/core/mmc.c
+
+8786b9922e6b87 Sarthak Garg    2023-09-29  1962  
+8786b9922e6b87 Sarthak Garg    2023-09-29  1963  /**
+8786b9922e6b87 Sarthak Garg    2023-09-29  1964   * mmc_sleepawake - function to sleep or awake the device
+8786b9922e6b87 Sarthak Garg    2023-09-29  1965   * @sleep: if true then sleep command is sent else awake
+8786b9922e6b87 Sarthak Garg    2023-09-29  1966   *
+8786b9922e6b87 Sarthak Garg    2023-09-29  1967   * This function first deselects the card and then sends the sleep command
+8786b9922e6b87 Sarthak Garg    2023-09-29  1968   * in case of sleep whereas in case of awake first awake command is send
+8786b9922e6b87 Sarthak Garg    2023-09-29  1969   * and then the card is selected.
+8786b9922e6b87 Sarthak Garg    2023-09-29  1970   *
+8786b9922e6b87 Sarthak Garg    2023-09-29  1971   * Returns 0 on success, non-zero value on failure
+8786b9922e6b87 Sarthak Garg    2023-09-29  1972   */
+8786b9922e6b87 Sarthak Garg    2023-09-29  1973  
+8786b9922e6b87 Sarthak Garg    2023-09-29  1974  static int mmc_sleepawake(struct mmc_host *host, bool sleep)
+07a682160866e3 Ulf Hansson     2013-04-19 @1975  {
+c7836d1593b87c Masahiro Yamada 2016-12-19  1976  	struct mmc_command cmd = {};
+07a682160866e3 Ulf Hansson     2013-04-19  1977  	struct mmc_card *card = host->card;
+cb962e04b04fb6 Ulf Hansson     2014-01-14  1978  	unsigned int timeout_ms = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000);
+e62f1e0b2384e2 Ulf Hansson     2021-05-04  1979  	bool use_r1b_resp;
+07a682160866e3 Ulf Hansson     2013-04-19  1980  	int err;
+07a682160866e3 Ulf Hansson     2013-04-19  1981  
+436f8daa6f5a29 Adrian Hunter   2015-05-07  1982  	/* Re-tuning can't be done once the card is deselected */
+436f8daa6f5a29 Adrian Hunter   2015-05-07  1983  	mmc_retune_hold(host);
+436f8daa6f5a29 Adrian Hunter   2015-05-07  1984  
+8786b9922e6b87 Sarthak Garg    2023-09-29  1985  	if (sleep) {
+07a682160866e3 Ulf Hansson     2013-04-19  1986  		err = mmc_deselect_cards(host);
+07a682160866e3 Ulf Hansson     2013-04-19  1987  		if (err)
+436f8daa6f5a29 Adrian Hunter   2015-05-07  1988  			goto out_release;
+8786b9922e6b87 Sarthak Garg    2023-09-29  1989  	}
+07a682160866e3 Ulf Hansson     2013-04-19  1990  
+07a682160866e3 Ulf Hansson     2013-04-19  1991  	cmd.opcode = MMC_SLEEP_AWAKE;
+07a682160866e3 Ulf Hansson     2013-04-19  1992  	cmd.arg = card->rca << 16;
+e62f1e0b2384e2 Ulf Hansson     2021-05-04  1993  	use_r1b_resp = mmc_prepare_busy_cmd(host, &cmd, timeout_ms);
+8786b9922e6b87 Sarthak Garg    2023-09-29  1994  	if (sleep)
+8786b9922e6b87 Sarthak Garg    2023-09-29  1995  		cmd.arg |= BIT(15);
+cb962e04b04fb6 Ulf Hansson     2014-01-14  1996  
+07a682160866e3 Ulf Hansson     2013-04-19  1997  	err = mmc_wait_for_cmd(host, &cmd, 0);
+07a682160866e3 Ulf Hansson     2013-04-19  1998  	if (err)
+436f8daa6f5a29 Adrian Hunter   2015-05-07  1999  		goto out_release;
+07a682160866e3 Ulf Hansson     2013-04-19  2000  
+07a682160866e3 Ulf Hansson     2013-04-19  2001  	/*
+6fa79651cc808f Ulf Hansson     2021-05-04  2002  	 * If the host does not wait while the card signals busy, then we can
+6fa79651cc808f Ulf Hansson     2021-05-04  2003  	 * try to poll, but only if the host supports HW polling, as the
+6fa79651cc808f Ulf Hansson     2021-05-04  2004  	 * SEND_STATUS cmd is not allowed. If we can't poll, then we simply need
+6fa79651cc808f Ulf Hansson     2021-05-04  2005  	 * to wait the sleep/awake timeout.
+07a682160866e3 Ulf Hansson     2013-04-19  2006  	 */
+6fa79651cc808f Ulf Hansson     2021-05-04  2007  	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY && use_r1b_resp)
+6fa79651cc808f Ulf Hansson     2021-05-04  2008  		goto out_release;
+6fa79651cc808f Ulf Hansson     2021-05-04  2009  
+6fa79651cc808f Ulf Hansson     2021-05-04  2010  	if (!host->ops->card_busy) {
+cb962e04b04fb6 Ulf Hansson     2014-01-14  2011  		mmc_delay(timeout_ms);
+6fa79651cc808f Ulf Hansson     2021-05-04  2012  		goto out_release;
+6fa79651cc808f Ulf Hansson     2021-05-04  2013  	}
+6fa79651cc808f Ulf Hansson     2021-05-04  2014  
+1760fdb6fe9f79 Ulf Hansson     2022-03-04  2015  	err = __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_sleep_busy_cb, host);
+07a682160866e3 Ulf Hansson     2013-04-19  2016  
+436f8daa6f5a29 Adrian Hunter   2015-05-07  2017  out_release:
+8786b9922e6b87 Sarthak Garg    2023-09-29  2018  	if (!sleep)
+8786b9922e6b87 Sarthak Garg    2023-09-29  2019  		err = mmc_select_card(card);
+8786b9922e6b87 Sarthak Garg    2023-09-29  2020  
+436f8daa6f5a29 Adrian Hunter   2015-05-07  2021  	mmc_retune_release(host);
+07a682160866e3 Ulf Hansson     2013-04-19  2022  	return err;
+07a682160866e3 Ulf Hansson     2013-04-19  2023  }
+07a682160866e3 Ulf Hansson     2013-04-19  2024  
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
