@@ -2,78 +2,196 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A73ECE77362
-	for <linux-mmc@archiver.kernel.org>; Sat, 30 Sep 2023 08:59:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49956E78486
+	for <linux-mmc@archiver.kernel.org>; Sun,  1 Oct 2023 19:50:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229578AbjI3I75 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 30 Sep 2023 04:59:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35000 "EHLO
+        id S235330AbjJATuB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 1 Oct 2023 15:50:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229447AbjI3I74 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Sep 2023 04:59:56 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFA951A4;
-        Sat, 30 Sep 2023 01:59:54 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6CE8BC433C8;
-        Sat, 30 Sep 2023 08:59:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1696064394;
-        bh=1NZBpNaePwgZyqTYVZzHQMy6LAwMcDHJLc2HBjoXiRE=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=aYJJKganbX3CrwsaFP6Ya8fNmRlm6VYhCesgYNknoAOLq8CD4oGZUiwDQ6ZjAwIN6
-         hvdS6pG4aY0zkjIvgcHpAbH/sQ+HGzTatB8CWL7TyJpQOj05lqp5ZJsAA99t9njbed
-         WLwdRMkHIanVfLmwzkGpWvoM6wZqeMY+vBmrNSe2JhD1Prcwsc5VHC0U/8O7yJ3JHU
-         +HSqmMJXWATQdAguQ/8pl9BQuTUsy6+1EbowQYbsr0AFjl3ZgnBuQ+CJDd+79mGRgw
-         rDxrTbnMqQMx2FHPrapN7Euy0nHFRHRxj3sVVcJ6IMgSWuu0jmK+bD7KGPXxxI1FEu
-         BplZmUREXbPag==
-From:   Conor Dooley <conor@kernel.org>
-To:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org,
-        William Qiu <william.qiu@starfivetech.com>
-Cc:     conor@kernel.org, Conor Dooley <conor.dooley@microchip.com>,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>
-Subject: Re: (subset) [PATCH v3 0/3] Change tuning implementation
-Date:   Sat, 30 Sep 2023 09:59:36 +0100
-Message-Id: <20230930-unmoral-mutiny-e3f91c0dfee9@spud>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230922062834.39212-1-william.qiu@starfivetech.com>
-References: <20230922062834.39212-1-william.qiu@starfivetech.com>
+        with ESMTP id S235309AbjJATuA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Oct 2023 15:50:00 -0400
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DB3CC4;
+        Sun,  1 Oct 2023 12:49:56 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1696189791; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=ZrWkQLoc1wy90SLi9DHxeq2l++ZaAgh3FFRuBJG9TFw2xZUuD6G6O/h4fW4hR6nC7H
+    qY1cvHjj8df3xnnMdaC9lfH4thqye/d6yoc9Vb1uzc5C1HgecOHAe5k2oDsK1OCP6hHK
+    N9I+w/HBpGB3Nvo1H7Bz3SyLWovxujolGIX69yXIi2LzfSw8UkWK0gUCzizyDIotysV5
+    l5cI+btxouv6EX+wYk7AQaSnuSQWWQ5WeMcXhtrSNC2ihQxuxOnz34nwrDtfUzYriJ/n
+    UIo94J3lC1BJX+5pBpVgqDajgDU5csqgvfDdk++waVlNVNf/jeVuHcpnQmVNqCE0sBBr
+    sxeA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1696189791;
+    s=strato-dkim-0002; d=strato.com;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=QLHEjSqRnmsPYmLACZfYaE2h/KV+lL95YcLFNCIfGt0=;
+    b=E3/IaUB0raN8HV8z1eWZReDcjC2qrLinGsIy8nes4teTtJn2LKRytC/y5Mzv0br42T
+    URiJqnSG/AvUWIgNlOI3z7PHJWO0CJnb95VG++t4Nkika76VfDKewYmcZbUcWChRjv9d
+    N+jfFHuekFoF/tlEmWaFgiKrqnU/ukbK2gjbmbN85WuAXKszW/0gRe7lurem/2jOes5G
+    1x0Vej+0P+dWMuXtpbgH8vGngpWRO5xBRo+Ng9gsTAxyMTvyvokgqEz95a3aCHZCiNcS
+    qWWwWIL2vXIygQ6Xo8oKOzMfT2iyFX4gFS3qDWDKO6OfPG3NOJCnhwT4uUxbMtonnAzX
+    11UQ==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo01
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1696189791;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=QLHEjSqRnmsPYmLACZfYaE2h/KV+lL95YcLFNCIfGt0=;
+    b=AP95hDXhdsYYBiFXhvJ+LU75UoJNjxqBQ+2FL9D4HpWqHuDHr0Ifn2dMAybwhhPD1l
+    VbC7mU3fwaRB+BWO6OT1HqJ7xJWzlrneh9rDObF04HxO34KM8REGMj69/i4kD5NMDqv4
+    XYt2km1FKS+EpUObSdgb95xF6bvb9pPEie/DyN42p+k1J0qqcN06qd37IaxiKisVCCx/
+    YGnbPfohIdTP/9smTNflzWHmUXSNbSu2hZ9KbYynQoPnR+j+JoAFdFyLHSDb1CyNb3/P
+    SokJF4oSrW+K+p4fZLCHSKS4ggNSSWx+ShhX69k5V7HsFb9HhjzxkcMe0SF+H30+8iFl
+    O7PQ==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1696189791;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=QLHEjSqRnmsPYmLACZfYaE2h/KV+lL95YcLFNCIfGt0=;
+    b=soeK+dKj1zCcGUwSZZ1IXnDc28H415rQPlW9etBhMxAPjhULenTtiQqc/AxPaSHOpO
+    uZCWrIuXcg+HDfBPYJCA==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSedrgBzPc9DUyubU4DD1QLj68UeUr1+U1BzWso7brrTglLCNtuGSDRUWFfel8K81hDt+rA=="
+Received: from blinux.speedport.ip
+    by smtp.strato.de (RZmta 49.8.2 AUTH)
+    with ESMTPSA id V04024z91Jnox5D
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+        (Client did not present a certificate);
+    Sun, 1 Oct 2023 21:49:50 +0200 (CEST)
+From:   Bean Huo <beanhuo@iokpp.de>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        beanhuo@micron.com, jakub.kwapisz@toradex.com,
+        rafael.beims@toradex.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org
+Subject: [PATCH v4] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for Micron eMMC Q2J54A
+Date:   Sun,  1 Oct 2023 21:49:43 +0200
+Message-Id: <20231001194943.658299-1-beanhuo@iokpp.de>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-X-Developer-Signature: v=1; a=openpgp-sha256; l=614; i=conor.dooley@microchip.com; h=from:subject:message-id; bh=oc9r++Iw46ON8c3zQoZkFVZiJ95/zJVfIOBlU0YyBzE=; b=owGbwMvMwCFWscWwfUFT0iXG02pJDKnij8s6zJ/s40s25vz64se9FoHD5w+FbtqR3RRnwFZmU Rplp8/UUcrCIMbBICumyJJ4u69Fav0flx3OPW9h5rAygQxh4OIUgIlcfMnwzzp9Qkx6jBCfwY71 YdME/p75tHjKXvv0H88OhCrP0GIWPcjwV5Tb9V6c3p77qyteaCa0qE+7HtmbanpwB1+q2Ot/0o8 aWQA=
-X-Developer-Key: i=conor.dooley@microchip.com; a=openpgp; fpr=F9ECA03CF54F12CD01F1655722E2C55B37CF380C
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Conor Dooley <conor.dooley@microchip.com>
+From: Bean Huo <beanhuo@micron.com>
 
-On Fri, 22 Sep 2023 14:28:31 +0800, William Qiu wrote:
-> This series of patches changes the tuning implementation, from the
-> previous way of reading and writing system controller registers to
-> reading and writing UHS_REG_EXT register, thus optimizing the tuning
-> of obtaining delay-chain.
-> 
-> Changes v2->v3:
-> - Rebased to v6.6rc2.
-> - Dropped redundant criteria.
-> - Keeped "starfive,sysreg" in dts file.
-> 
-> [...]
+Micron MTFC4GACAJCN eMMC supports cache but requires that flush cache
+operation be allowed only after a write has occurred. Otherwise, the
+cache flush command or subsequent commands will time out.
 
-Applied to riscv-dt-for-next, thanks!
+Signed-off-by: Bean Huo <beanhuo@micron.com>
+Signed-off-by: Rafael Beims <rafael.beims@toradex.com>
+Cc: stable@vger.kernel.org
 
-[3/3] riscv: dts: starfive: add assigned-clock* to limit frquency
-      https://git.kernel.org/conor/c/af571133f7ae
+---
+Changelog:
 
-Thanks,
-Conor.
+v3--v4:
+    1. Add helper function for this quirk in drivers/mmc/core/card.h.
+    2. Set card->written_flag only for REQ_OP_WRITE.
+v2--v3:
+    1. Set card->written_flag in mmc_blk_mq_issue_rq().
+v1--v2:
+    1. Add Rafael's test-tag, and Co-developed-by.
+    2. Check host->card whether NULL or not in __mmc_start_request() before asserting host->card->->quirks
+---
+ drivers/mmc/core/block.c  | 5 ++++-
+ drivers/mmc/core/card.h   | 4 ++++
+ drivers/mmc/core/mmc.c    | 5 +++++
+ drivers/mmc/core/quirks.h | 7 ++++---
+ include/linux/mmc/card.h  | 2 ++
+ 5 files changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 3a8f27c3e310..dfa67d9c80bb 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2381,8 +2381,11 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
+ 			}
+ 			ret = mmc_blk_cqe_issue_flush(mq, req);
+ 			break;
+-		case REQ_OP_READ:
+ 		case REQ_OP_WRITE:
++			if (mmc_card_broken_cache_flush(card) && !card->written_flag)
++				card->written_flag = true;
++			fallthrough;
++		case REQ_OP_READ:
+ 			if (host->cqe_enabled)
+ 				ret = mmc_blk_cqe_issue_rw_rq(mq, req);
+ 			else
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index 4edf9057fa79..b7754a1b8d97 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -280,4 +280,8 @@ static inline int mmc_card_broken_sd_cache(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BROKEN_SD_CACHE;
+ }
+ 
++static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
++}
+ #endif
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 89cd48fcec79..47896c32086e 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1929,6 +1929,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	if (!oldcard)
+ 		host->card = card;
+ 
++	card->written_flag = false;
++
+ 	return 0;
+ 
+ free_card:
+@@ -2081,6 +2083,9 @@ static int _mmc_flush_cache(struct mmc_host *host)
+ {
+ 	int err = 0;
+ 
++	if (mmc_card_broken_cache_flush(host->card) && !host->card->written_flag)
++		return err;
++
+ 	if (_mmc_cache_enabled(host)) {
+ 		err = mmc_switch(host->card, EXT_CSD_CMD_SET_NORMAL,
+ 				 EXT_CSD_FLUSH_CACHE, 1,
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 32b64b564fb1..5e68c8b4cdca 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -110,11 +110,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
+ 	/*
+-	 * Micron MTFC4GACAJCN-1M advertises TRIM but it does not seems to
+-	 * support being used to offload WRITE_ZEROES.
++	 * Micron MTFC4GACAJCN-1M supports TRIM but does not appear to suppor
++	 * WRITE_ZEROES offloading. It also supports caching, but the cache can
++	 * only be flushed after a write has occurred.
+ 	 */
+ 	MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
+-		  MMC_QUIRK_TRIM_BROKEN),
++		  MMC_QUIRK_TRIM_BROKEN | MMC_QUIRK_BROKEN_CACHE_FLUSH),
+ 
+ 	/*
+ 	 * Kingston EMMC04G-M627 advertises TRIM but it does not seems to
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index daa2f40d9ce6..7b12eebc5586 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -295,7 +295,9 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ #define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
+ #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
++#define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
+ 
++	bool			written_flag;	/* Indicates eMMC has been written since power on */
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+-- 
+2.34.1
+
