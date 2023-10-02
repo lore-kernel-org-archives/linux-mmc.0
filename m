@@ -2,58 +2,59 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D2D5E74902
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 18:22:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A345AE74902
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 18:29:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229612AbjJBSWJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Oct 2023 14:22:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54080 "EHLO
+        id S236879AbjJBS34 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Oct 2023 14:29:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229596AbjJBSWI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2023 14:22:08 -0400
-Received: from mail-oo1-xc32.google.com (mail-oo1-xc32.google.com [IPv6:2607:f8b0:4864:20::c32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18AACAB;
-        Mon,  2 Oct 2023 11:22:05 -0700 (PDT)
-Received: by mail-oo1-xc32.google.com with SMTP id 006d021491bc7-57e40f0189aso26179eaf.1;
-        Mon, 02 Oct 2023 11:22:05 -0700 (PDT)
+        with ESMTP id S229538AbjJBS34 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2023 14:29:56 -0400
+Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 619A29B;
+        Mon,  2 Oct 2023 11:29:53 -0700 (PDT)
+Received: by mail-lj1-x22d.google.com with SMTP id 38308e7fff4ca-2bffa8578feso397971fa.2;
+        Mon, 02 Oct 2023 11:29:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1696270924; x=1696875724; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1696271391; x=1696876191; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=jfENVpQuZdv1PgXfltbR7B/XTb+JunRgWdUE5rSAEv0=;
-        b=cp84VvZVpK+OWorzyB+1nvLycbuGqyGLH+7a9wSCxz5piVk2fn0EXVYBWH1bDTKUzG
-         WyQJyO45VJr2v6pHjvNaCgRZ50b2jt0NdanhJg4irIAxVVS5yJIkcv+WOG21IjEBzAbI
-         KERJ23hsx+SasG+nE/GA878CjZnyylZse3WbSNQacdKmdbgL8WjpQyuk8gjeTftdb6q+
-         GdpWMQSXLhiZRWdsJeRojhwfXYpicYaa7FuXzulH5oITnVJd5ARaelb9YlJoEAWWU6N0
-         sgc4KOHmiPC9le7RTLZvF/h/ECCR6u+Dng7BKSbsy01pW661wh607pHw9L2ySYQLTLEz
-         9X2w==
+        bh=qmLeKYNGSecYfl9ikGzmRlf+uP/RUxaBYTCk9xIy0Aw=;
+        b=DbSbo9wIoSd8VXWJK7J3XtQeAdMShrZRAb3e+r3PYbUQ8Swm4rEBvB0iKrErKFgijQ
+         DB8WACJA5ysGKg/1wVDConn84bQ8q7Eb40mbEPZIglN9TMumvQoAoAIPBlvXfZVlSzxU
+         gwgQt5fub2i8EJ0ER4D+FZ3qOoOsjPryM58bj6QVEBzuIuaz3cD2VyBxvuq9l/l6sM60
+         ok1MNR/Kx9Yn+5k8OCvzbJ8LEi4BE5ujFNqx6+PiezqvL1EvLci0BkEXVmJBIj4NNdK7
+         h8rc9h0KLX/6Lfi+f5tyLl57pkPZbVMnvW4sIyJR6BSVcjEFKAqNEhbk9a6cXetSeDbV
+         YlUQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696270924; x=1696875724;
+        d=1e100.net; s=20230601; t=1696271391; x=1696876191;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=jfENVpQuZdv1PgXfltbR7B/XTb+JunRgWdUE5rSAEv0=;
-        b=f0y6xQsnr+FcwjPNE0NnbDr8auYQ7vFqRKC69c3DqdfAClWI7gb5i0uvBMUisko8tT
-         YaYDgWyJHbr8IjnMVOcQmTWrdibliyGFVv5NbOL0ULwZiZN78Pl1fHXpNWcAeJ87OABp
-         QwQKDsTdSam4cPl6Z/FhjCRpvK51SAMoi96BGKfbWIKLU3hxC0em28PlbYfA74/QR1I2
-         W44L1vy+6dZY7qoBfpNi7lKC5Aa/jvqyDBc5yn+osc80yhtzw3a3qMTFd7kuGVM+iJEu
-         /Rorn/KUVDbhHUU1bjJ6TcodF/qyB5tZNzE8KifSb5ew+MQiTa/6a6THQs0zhPoRQly3
-         CC3A==
-X-Gm-Message-State: AOJu0YzNoEZl0lURxzEGB5lRLNzJwxbvFC+ZPqQf//Iqdma6Uz5sSvea
-        OMxsabfOPTlkFlxjK5FbKmlZjSCgz4aMglWCKn0=
-X-Google-Smtp-Source: AGHT+IHC6KT31UbIzqXi5TZPU7mVY6wLqS+UeMb1ep1LavYVR7vDcy5MaFclxAkz4aB2p3t5R8ulrintOTk3LDBNiM8=
-X-Received: by 2002:a4a:3459:0:b0:57b:7b1b:108a with SMTP id
- n25-20020a4a3459000000b0057b7b1b108amr11529642oof.8.1696270924335; Mon, 02
- Oct 2023 11:22:04 -0700 (PDT)
+        bh=qmLeKYNGSecYfl9ikGzmRlf+uP/RUxaBYTCk9xIy0Aw=;
+        b=OiUK+Q7M8LkdKEy3H+rg+WAsRTVnc5wHxz6kfkRY+y+CTk65ibyB9XFmqzuwFIrejb
+         cdm0PHszCx5xyZji/b8bjLd0T3eEZWAnrqgnCsjbVPDgZwryYvu4XSv3p0uUSNfb7qTX
+         06hVhbi49XRqDNSjtyJsjky55pqcUKawSJUeKaccmPRNh9N8NYHA55jv4I2B2WSjLurl
+         tFQqul9VfvreqexB0Ju9BN6y89TTGaEVg/S6TGK+8b+HWemPtNlqihkSXUrXF52OevUT
+         DzP5nwT00s9BAn9hwg6/Yur/Xf/NDapMDTnMWO6H/G9unL/y0POdhg7pn33zp+FjnHvr
+         6AWA==
+X-Gm-Message-State: AOJu0YxT2RmQNVPCqXHFYlJHarUFXuD2KcXn8awiUBnXpfokp/lDi+T3
+        7cyL989jaxQ8E6nvsL6dTxGoiRNjQPH95Hrv05k=
+X-Google-Smtp-Source: AGHT+IFMt/wHWyitPjznMpFt2azasGJ7FG/aPXRTTkgmXI2UdwrxaMHvhIW7i3jpWxNdQII5HorAJCWm3hbhEz1OhSY=
+X-Received: by 2002:a2e:97c9:0:b0:2bc:cc1a:139c with SMTP id
+ m9-20020a2e97c9000000b002bccc1a139cmr9686291ljj.11.1696271391296; Mon, 02 Oct
+ 2023 11:29:51 -0700 (PDT)
 MIME-Version: 1.0
 References: <20231002175052.112406-1-tmaimon77@gmail.com> <20231002175052.112406-3-tmaimon77@gmail.com>
-In-Reply-To: <20231002175052.112406-3-tmaimon77@gmail.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Mon, 2 Oct 2023 21:21:28 +0300
-Message-ID: <CAHp75Vd701sE-pkTWYi=PsOpVoBa-fbOm91P3bGLruCn5U1KXA@mail.gmail.com>
+ <CAHp75Vd701sE-pkTWYi=PsOpVoBa-fbOm91P3bGLruCn5U1KXA@mail.gmail.com>
+In-Reply-To: <CAHp75Vd701sE-pkTWYi=PsOpVoBa-fbOm91P3bGLruCn5U1KXA@mail.gmail.com>
+From:   Tomer Maimon <tmaimon77@gmail.com>
+Date:   Mon, 2 Oct 2023 21:29:40 +0300
+Message-ID: <CAP6Zq1jM3=D5PBp1z7=K6LRNJaZe3rEPutXm_xxo7p2Z60sWmQ@mail.gmail.com>
 Subject: Re: [PATCH v3 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-To:     Tomer Maimon <tmaimon77@gmail.com>
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
 Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
         tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
         yuenn@google.com, benjaminfair@google.com, adrian.hunter@intel.com,
@@ -68,49 +69,62 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Oct 2, 2023 at 8:51=E2=80=AFPM Tomer Maimon <tmaimon77@gmail.com> w=
-rote:
+Hi Andy,
+
+Thanks for your comments.
+
+On Mon, 2 Oct 2023 at 21:22, Andy Shevchenko <andy.shevchenko@gmail.com> wr=
+ote:
 >
-> Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
+> On Mon, Oct 2, 2023 at 8:51=E2=80=AFPM Tomer Maimon <tmaimon77@gmail.com>=
+ wrote:
+> >
+> > Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
+>
+> ...
+>
+> > +/*
+> > + * NPCM SDHC MMC host controller driver.
+> > + *
+> > + * Copyright (c) 2020 Nuvoton Technology corporation.
+>
+> Shouldn't it be at least 2020,2023 ?
+will change to 2023
+>
+> > + */
+>
+> ...
+>
+> > +#include <linux/clk.h>
+> > +#include <linux/err.h>
+> > +#include <linux/io.h>
+> > +#include <linux/mmc/host.h>
+> > +#include <linux/mmc/mmc.h>
+>
+> + mod_devicetable.h
+why?
+> > +#include <linux/module.h>
+> > +#include <linux/of.h>
+>
+> ...
+>
+> > +       pltfm_host->clk =3D devm_clk_get_optional(&pdev->dev, NULL);
+> > +       if (IS_ERR(pltfm_host->clk)) {
+> > +               ret =3D PTR_ERR(pltfm_host->clk);
+> > +               goto err_sdhci;
+> > +       }
+> > +
+> > +       ret =3D clk_prepare_enable(pltfm_host->clk);
+> > +       if (ret)
+> > +               goto err_sdhci;
+>
+> Why not use devm_clk_get_optional_enabled()?
+Will do
+>
+> --
+> With Best Regards,
+> Andy Shevchenko
 
-...
+Best regards,
 
-> +/*
-> + * NPCM SDHC MMC host controller driver.
-> + *
-> + * Copyright (c) 2020 Nuvoton Technology corporation.
-
-Shouldn't it be at least 2020,2023 ?
-
-> + */
-
-...
-
-> +#include <linux/clk.h>
-> +#include <linux/err.h>
-> +#include <linux/io.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-
-+ mod_devicetable.h
-
-> +#include <linux/module.h>
-> +#include <linux/of.h>
-
-...
-
-> +       pltfm_host->clk =3D devm_clk_get_optional(&pdev->dev, NULL);
-> +       if (IS_ERR(pltfm_host->clk)) {
-> +               ret =3D PTR_ERR(pltfm_host->clk);
-> +               goto err_sdhci;
-> +       }
-> +
-> +       ret =3D clk_prepare_enable(pltfm_host->clk);
-> +       if (ret)
-> +               goto err_sdhci;
-
-Why not use devm_clk_get_optional_enabled()?
-
---=20
-With Best Regards,
-Andy Shevchenko
+Tomer
