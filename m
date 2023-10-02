@@ -2,202 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5C21E784B2
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 09:11:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8940BE7849A
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 11:33:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236002AbjJBJLF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Oct 2023 05:11:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49798 "EHLO
+        id S235059AbjJBLdK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Oct 2023 07:33:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55578 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235965AbjJBJLE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2023 05:11:04 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7192C83;
-        Mon,  2 Oct 2023 02:11:00 -0700 (PDT)
-Received: from pps.filterd (m0369458.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 3928E3qR022118;
-        Mon, 2 Oct 2023 11:10:14 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-        message-id:date:mime-version:subject:to:cc:references:from
-        :in-reply-to:content-type:content-transfer-encoding; s=
-        selector1; bh=E01OcOCHWhP/6+N5KY2PJxe8Vqf5B2GZBRHXsK7b/ZI=; b=aA
-        egtRg/HZV5z61BlbQRmw/xhKB5/NOvXNbEABAWfThJ4zPTHndz302pa5QVjGM+sM
-        3J8B5ueo8i4iRhw3Pi7HwaWlrkqWsy58TBUitGYwlxhFctZH+p7nxHxKyjmiDHP0
-        gunyUnqWwhUVh8dpDShiYuX54yeB8rEzvnWdNJYWKBCqzgkrTC+zGteyX1b5Pb5j
-        Rf6xRjDsxe+C3FBAdS36hxq9MRrXNisC3EZbZEbT4TzCJ6MY1lbLR6cryXr1bkaw
-        d59gty15vIlgDcfiUoAb0YziosPbln43LGmK99GlHY0DfgQb6OF9EUVre9tgoPIq
-        Z+Sxdr7e5cMYwyIcmVVA==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3tew80bymt-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 02 Oct 2023 11:10:14 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id B9C5F100059;
-        Mon,  2 Oct 2023 11:10:12 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 6252F211F22;
-        Mon,  2 Oct 2023 11:10:12 +0200 (CEST)
-Received: from [10.201.20.32] (10.201.20.32) by SHFDAG1NODE1.st.com
- (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Mon, 2 Oct
- 2023 11:10:10 +0200
-Message-ID: <f3dbcd84-1320-9efb-f715-71b6bb4c7bdb@foss.st.com>
-Date:   Mon, 2 Oct 2023 11:10:05 +0200
+        with ESMTP id S230427AbjJBLdK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2023 07:33:10 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 968B4D3;
+        Mon,  2 Oct 2023 04:33:07 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id 2adb3069b0e04-503065c4b25so25092547e87.1;
+        Mon, 02 Oct 2023 04:33:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1696246385; x=1696851185; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=veDUF5kAmIGjrBTZorjxEHNQVjHCsWyYzBTuHCrDAMk=;
+        b=Z+rezgSQXl7Egy9yu76MSH66agpP56rt4FCR65yDa/AavimaRusYEouXI1seJ82/0N
+         bZSsFADB0GDA63oToZbg0y9AfMHCfI8fyj9hSrcwWwNmJIFV3lGSPcPfDB/ITYtYmL5z
+         HdcqpssfqctNCH0vwJKDQtQlG9OnnzgLX87myR0xcGuOVbXvbhSSyGr7V3pIRaF8rR4K
+         oBn+ywqVR/kSzEJ5e2qzGiuk2dYRDprP9+8VsDmV0qpn3bB11xCTzUb/dMIlsrEiUH5S
+         M36azy3QY9FENd/Yu80Zeop+9OaQqOBmS2t+GOemNU4J4REmcQQOPAn4ZlL4uWu+MJGd
+         DpVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696246385; x=1696851185;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=veDUF5kAmIGjrBTZorjxEHNQVjHCsWyYzBTuHCrDAMk=;
+        b=AhTxFe5W5gzrFS3kA3SQ6bVgZ0I5rkq/+VSlnOkMXCHZU5YDZIddVXRKkhc2GWt+3A
+         RDk8X77kefDe9woTYJJ2juT21w61UKqUeKiQgkFI6/v3K5XznnDfwbaA1eNJC6TdA0hc
+         mBDMa8KVCuZtMlaZtYO+Kp4JStDCbsxSSoCj4Po/JR2Tb03v6JzLhBbxfFJqHC/64Lj6
+         7fe5DyIyJA96p74vHKancIk4rTq44ZmRZZIvmZkO2QdLCBqHV1/rna+t6TyEukYJ+Ylh
+         wVQC5NOLJ06Kie+njdCHcnA40s7XxcnhjIvAMoKqqp4V3KFlqFDoz16JIvdfnPRpF/dB
+         kfpA==
+X-Gm-Message-State: AOJu0YyXyoo1g3s/bE3cXNzaxOzzdXfV+RCYoa7Ds/5Iv6Dsa3sUPZrL
+        5zFamCmMvxC/VlRllOT2bsDW3fIMAGUY6gOpy1k=
+X-Google-Smtp-Source: AGHT+IG80++BNCcQ5m3rhyd7IgC5JKUl2jaNPc66dLXl4BQw6bds1+v6MEebOXnIS/x4emyVU0jT6g==
+X-Received: by 2002:a05:6512:310f:b0:503:653:5713 with SMTP id n15-20020a056512310f00b0050306535713mr9027047lfb.47.1696246385197;
+        Mon, 02 Oct 2023 04:33:05 -0700 (PDT)
+Received: from skhimich.dev.yadro.com ([185.15.172.210])
+        by smtp.gmail.com with ESMTPSA id i26-20020ac2523a000000b005041cc98273sm4715055lfl.300.2023.10.02.04.33.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Oct 2023 04:33:04 -0700 (PDT)
+From:   Sergey Khimich <serghox@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Jyan Chou <jyanchou@realtek.com>
+Subject: [PATCH v3 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
+Date:   Mon,  2 Oct 2023 14:32:59 +0300
+Message-Id: <20231002113301.1531717-1-serghox@gmail.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH v5 01/11] dt-bindings: document generic access controller
-To:     Rob Herring <robh@kernel.org>
-CC:     <arnd@kernel.org>, <linux-phy@lists.infradead.org>,
-        <linux-mmc@vger.kernel.org>, <dmaengine@vger.kernel.org>,
-        <robh+dt@kernel.org>, <jic23@kernel.org>, <davem@davemloft.net>,
-        <kuba@kernel.org>, <pabeni@redhat.com>,
-        <linux-spi@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
-        <olivier.moysan@foss.st.com>, <linux-media@vger.kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>,
-        Oleksii Moisieiev <oleksii_moisieiev@epam.com>,
-        <edumazet@google.com>, <linux-stm32@st-md-mailman.stormreply.com>,
-        <ulf.hansson@linaro.org>, <richardcochran@gmail.com>,
-        <will@kernel.org>, <linux-crypto@vger.kernel.org>,
-        <netdev@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <arnaud.pouliquen@foss.st.com>, <linux-serial@vger.kernel.org>,
-        <alexandre.torgue@foss.st.com>,
-        Frank Rowand <frowand.list@gmail.com>, <andi.shyti@kernel.org>,
-        <linux-usb@vger.kernel.org>, <peng.fan@oss.nxp.com>,
-        <lee@kernel.org>, <fabrice.gasnier@foss.st.com>,
-        <conor+dt@kernel.org>, <herbert@gondor.apana.org.au>,
-        <linux-arm-kernel@lists.infradead.org>, <catalin.marinas@arm.com>,
-        <al.sa-devel@alsa-project.org>, <hugues.fruchet@foss.st.com>,
-        <devicetree@vger.kernel.org>, <linux-iio@vger.kernel.org>,
-        <mchehab@kernel.org>, <vkoul@kernel.org>,
-        <gregkh@linuxfoundation.org>
-References: <20230929142852.578394-1-gatien.chevallier@foss.st.com>
- <20230929142852.578394-2-gatien.chevallier@foss.st.com>
- <169600172184.3601218.2121908606358610119.robh@kernel.org>
-Content-Language: en-US
-From:   Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
-In-Reply-To: <169600172184.3601218.2121908606358610119.robh@kernel.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.201.20.32]
-X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE1.st.com
- (10.75.129.69)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-10-02_03,2023-09-28_03,2023-05-22_02
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hello!
+
+This is implementation of SDHCI CQE support for sdhci-of-dwcmshc driver.
+For enabling CQE support just set 'supports-cqe' in your DevTree file
+for appropriate mmc node.
+
+Also, while implementing CQE support for the driver, I faced with a problem 
+which I will describe below.
+According to the IP block documentation CQE works only with "AMDA-2 only"
+mode which is activated only with v4 mode enabled. I see in dwcmshc_probe()
+function that v4 mode gets enabled only for 'sdhci_dwcmshc_bf3_pdata' platform data.
+
+So my question is: is it correct to enable v4 mode for all platform data
+if 'SDHCI_CAN_64BIT_V4' bit is set in hw?
+
+Because I`m afraid that enabling v4 mode for some platforms could break
+them down. On the other hand, if host controller says that it can do v4
+(caps & SDHCI_CAN_64BIT_V4), lets do v4 or disable it manualy by some
+quirk. Anyway - RFC.
 
 
-On 9/29/23 17:35, Rob Herring wrote:
-> 
-> On Fri, 29 Sep 2023 16:28:42 +0200, Gatien Chevallier wrote:
->> From: Oleksii Moisieiev <Oleksii_Moisieiev@epam.com>
->>
->> Introducing of the generic access controller bindings for the
->> access controller provider and consumer devices. Those bindings are
->> intended to allow a better handling of accesses to resources in a
->> hardware architecture supporting several compartments.
->>
->> This patch is based on [1]. It is integrated in this patchset as it
->> provides a use-case for it.
->>
->> Diffs with [1]:
->> 	- Rename feature-domain* properties to access-control* to narrow
->> 	  down the scope of the binding
->> 	- YAML errors and typos corrected.
->> 	- Example updated
->> 	- Some rephrasing in the binding description
->>
->> [1]: https://lore.kernel.org/lkml/0c0a82bb-18ae-d057-562b
->>
->> Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
->> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
->>
->> ---
->> Changes in V5:
->> 	- Diffs with [1]
->> 	- Discarded the [IGNORE] tag as the patch is now part of the
->> 	  patchset
->>
->>   .../access-controllers/access-controller.yaml | 90 +++++++++++++++++++
->>   1 file changed, 90 insertions(+)
->>   create mode 100644 Documentation/devicetree/bindings/access-controllers/access-controller.yaml
->>
-> 
-> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-> on your patch (DT_CHECKER_FLAGS is new in v5.13):
-> 
-> yamllint warnings/errors:
-> 
-> dtschema/dtc warnings/errors:
-> /builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/access-controllers/access-controller.yaml: access-control-provider: missing type definition
-> 
-> doc reference errors (make refcheckdocs):
-> 
-> See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20230929142852.578394-2-gatien.chevallier@foss.st.com
-> 
-> The base for the series is generally the latest rc1. A different dependency
-> should be noted in *this* patch.
-> 
-> If you already ran 'make dt_binding_check' and didn't see the above
-> error(s), then make sure 'yamllint' is installed and dt-schema is up to
-> date:
-> 
-> pip3 install dtschema --upgrade
-> 
-> Please check and re-submit after running the above command yourself. Note
-> that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-> your schema. However, it must be unset to test all examples with your schema.
-> 
+v2:
+ - Added dwcmshc specific cqe_disable hook to prevent losing
+   in-flight cmd when an ioctl is issued and cqe_disable is called;
 
-Hi Rob,
+ - Added processing 128Mb boundary for the host memory data buffer size
+   and the data buffer. For implementing this processing an extra
+   callback is added to the struct 'sdhci_ops'.
 
-Running:
-1- make dt_binding_check | grep access-control
-2- make dt_binding_check 
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/access-controllers/access-controller.yaml
-from Krzysztof's slideset
+ - Fixed typo.
 
-with
+v3:
+ - Fix warning reported by kernel test robot:
+	| Reported-by: kernel test robot <lkp@intel.com>
+	| Closes: https://lore.kernel.org/oe-kbuild-all/202309270807.VoVn81m6-lkp@intel.com/
+	| Closes: https://lore.kernel.org/oe-kbuild-all/202309300806.dcR19kcE-lkp@intel.com/
 
-pip3 show dtschema
-Name: dtschema
-Version: 2023.9
 
-and
+Thanks in advance, Sergey.
 
-pip3 show yamllint
-Name: yamllint
-Version: 1.32.0
 
-I don't see any of the errors reported by the robot. I have to clone
-your repository to reproduce it.
+Sergey Khimich (2):
+  mmc: cqhci: Add cqhci_set_tran_desc() callback
+  Implement SDHCI CQE support for DesignWare SDHCI.
 
-Should I resubmit with a clean dt-check using the latest dtschema?
+ drivers/mmc/host/Kconfig            |   1 +
+ drivers/mmc/host/cqhci-core.c       |   5 +
+ drivers/mmc/host/cqhci.h            |   4 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 233 +++++++++++++++++++++++++++-
+ 4 files changed, 241 insertions(+), 2 deletions(-)
 
-***********
-However, I get:
-warning: ignoring duplicate '$id' value 
-'http://devicetree.org/schemas/reserved-memory/framebuffer.yaml#
-warning: ignoring duplicate '$id' value 
-'http://devicetree.org/schemas/reserved-memory/memory-region.yaml#
-warning: ignoring duplicate '$id' value 
-'http://devicetree.org/schemas/reserved-memory/shared-dma-pool.yaml#
-warning: ignoring duplicate '$id' value 
-'http://devicetree.org/schemas/reserved-memory/reserved-memory.yaml
+-- 
+2.30.2
 
-Above warnings disappears when switching to:
-pip3 show dtschema
-Name: dtschema
-Version: 2023.7
-
-The above YAMLs seem to be duplicated in dtschema's latest version.
-I guess it's a synchro that needs to be done since:
-https://lore.kernel.org/all/20230830231758.2561402-2-sjg@chromium.org/
-***********
-
-Best regards,
-Gatien
