@@ -2,196 +2,272 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49956E78486
-	for <linux-mmc@archiver.kernel.org>; Sun,  1 Oct 2023 19:50:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2386AE784A7
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 02:18:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235330AbjJATuB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 1 Oct 2023 15:50:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48654 "EHLO
+        id S235212AbjJBCSk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 1 Oct 2023 22:18:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235309AbjJATuA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Oct 2023 15:50:00 -0400
-Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DB3CC4;
-        Sun,  1 Oct 2023 12:49:56 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1696189791; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=ZrWkQLoc1wy90SLi9DHxeq2l++ZaAgh3FFRuBJG9TFw2xZUuD6G6O/h4fW4hR6nC7H
-    qY1cvHjj8df3xnnMdaC9lfH4thqye/d6yoc9Vb1uzc5C1HgecOHAe5k2oDsK1OCP6hHK
-    N9I+w/HBpGB3Nvo1H7Bz3SyLWovxujolGIX69yXIi2LzfSw8UkWK0gUCzizyDIotysV5
-    l5cI+btxouv6EX+wYk7AQaSnuSQWWQ5WeMcXhtrSNC2ihQxuxOnz34nwrDtfUzYriJ/n
-    UIo94J3lC1BJX+5pBpVgqDajgDU5csqgvfDdk++waVlNVNf/jeVuHcpnQmVNqCE0sBBr
-    sxeA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1696189791;
-    s=strato-dkim-0002; d=strato.com;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=QLHEjSqRnmsPYmLACZfYaE2h/KV+lL95YcLFNCIfGt0=;
-    b=E3/IaUB0raN8HV8z1eWZReDcjC2qrLinGsIy8nes4teTtJn2LKRytC/y5Mzv0br42T
-    URiJqnSG/AvUWIgNlOI3z7PHJWO0CJnb95VG++t4Nkika76VfDKewYmcZbUcWChRjv9d
-    N+jfFHuekFoF/tlEmWaFgiKrqnU/ukbK2gjbmbN85WuAXKszW/0gRe7lurem/2jOes5G
-    1x0Vej+0P+dWMuXtpbgH8vGngpWRO5xBRo+Ng9gsTAxyMTvyvokgqEz95a3aCHZCiNcS
-    qWWwWIL2vXIygQ6Xo8oKOzMfT2iyFX4gFS3qDWDKO6OfPG3NOJCnhwT4uUxbMtonnAzX
-    11UQ==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo01
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1696189791;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=QLHEjSqRnmsPYmLACZfYaE2h/KV+lL95YcLFNCIfGt0=;
-    b=AP95hDXhdsYYBiFXhvJ+LU75UoJNjxqBQ+2FL9D4HpWqHuDHr0Ifn2dMAybwhhPD1l
-    VbC7mU3fwaRB+BWO6OT1HqJ7xJWzlrneh9rDObF04HxO34KM8REGMj69/i4kD5NMDqv4
-    XYt2km1FKS+EpUObSdgb95xF6bvb9pPEie/DyN42p+k1J0qqcN06qd37IaxiKisVCCx/
-    YGnbPfohIdTP/9smTNflzWHmUXSNbSu2hZ9KbYynQoPnR+j+JoAFdFyLHSDb1CyNb3/P
-    SokJF4oSrW+K+p4fZLCHSKS4ggNSSWx+ShhX69k5V7HsFb9HhjzxkcMe0SF+H30+8iFl
-    O7PQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1696189791;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=QLHEjSqRnmsPYmLACZfYaE2h/KV+lL95YcLFNCIfGt0=;
-    b=soeK+dKj1zCcGUwSZZ1IXnDc28H415rQPlW9etBhMxAPjhULenTtiQqc/AxPaSHOpO
-    uZCWrIuXcg+HDfBPYJCA==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSedrgBzPc9DUyubU4DD1QLj68UeUr1+U1BzWso7brrTglLCNtuGSDRUWFfel8K81hDt+rA=="
-Received: from blinux.speedport.ip
-    by smtp.strato.de (RZmta 49.8.2 AUTH)
-    with ESMTPSA id V04024z91Jnox5D
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-        (Client did not present a certificate);
-    Sun, 1 Oct 2023 21:49:50 +0200 (CEST)
-From:   Bean Huo <beanhuo@iokpp.de>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
-        beanhuo@micron.com, jakub.kwapisz@toradex.com,
-        rafael.beims@toradex.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        stable@vger.kernel.org
-Subject: [PATCH v4] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for Micron eMMC Q2J54A
-Date:   Sun,  1 Oct 2023 21:49:43 +0200
-Message-Id: <20231001194943.658299-1-beanhuo@iokpp.de>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S234967AbjJBCSj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Oct 2023 22:18:39 -0400
+Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E205EC9
+        for <linux-mmc@vger.kernel.org>; Sun,  1 Oct 2023 19:18:35 -0700 (PDT)
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 99D3B3F4D7
+        for <linux-mmc@vger.kernel.org>; Mon,  2 Oct 2023 02:18:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1696213114;
+        bh=arwkRh59RvIRo3RXrZAKRa9j+onW5QMC0mP/sOojdHs=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=crXK+jiBBQdE83yYfzZvvJMZMmxBn/IGDxESHniu0vBhsK1hqpLKybgcVMxoKTm2i
+         ICa/Pq22L+ZcV4kdXyAFrZDpkLiBVO0jeIPpHLd/a/L8znQCdTtNDVQ9Rcxwd8E+Qd
+         k3v5Se8bVffl55+2qke7cxyWHniZf7/IuuKhnJL6wOE5WCQ/fNd1GAL70P6DZxyVN6
+         jwgGS6XeoQ0FQl4scC48ml6pALm5WrfOjgrYGSA50Aqf9LwQi6d57AXUZ6DOkrhyob
+         2e/1e96FIUb6JvX+/ZKODMpg70+cwgecd4aPYbh0GtTjHYSbd9HvHvZV5mYVBVrkBD
+         XRagn+rdCccRA==
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-6933e676395so1879581b3a.0
+        for <linux-mmc@vger.kernel.org>; Sun, 01 Oct 2023 19:18:34 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696213112; x=1696817912;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=arwkRh59RvIRo3RXrZAKRa9j+onW5QMC0mP/sOojdHs=;
+        b=opVEPL+O3p6Q1YDuT2czeMEe0x5uNDoMRBHOSYRXhOLFm3Bs/jp6VMtfYQ2loJdSyG
+         zLv68nkjKpSi+SGYXRGrSb/jiFODvnPkD8WRUpQlOkgXxKHddUrTHgF5WbhCvXvMN6ft
+         9+dxvyG+tJeSVC+tIEWMlhW0wmZQ89mTe8g5vyiFoaCebMVU4saJT/YWPIOTQTbzWIpx
+         Z7ryvvCKAX9BrSo8jLmKko7Eyj+dKE4i0spGpDnZuoMSVXKmAr3ZNmvz3n9zrjR4Arf/
+         itSYFAyuX8jZJviXgrrQsUjpL2KQM8kTWSbucMKdBAEETHmO6qHKcmnwrpGfbUQ8F3dA
+         liYQ==
+X-Gm-Message-State: AOJu0YwHiXjH2vtnlJr0FqP/pY2gohOVK7ethqn4TFUO2buNELMUn9oX
+        5CfOYviXJN6llmDCHV029TvKxa8laMw/5jmyqlrlafnqp/QtJU10tqJpCCdkfRYzzboGa9wwrph
+        whZfgkdBY6iZuVp8PhnsUtbeWfrgZcdrqhxN0eaiabGAif0wUJWSNsA==
+X-Received: by 2002:a05:6a21:a5a8:b0:159:c07d:66f0 with SMTP id gd40-20020a056a21a5a800b00159c07d66f0mr17612010pzc.6.1696213112537;
+        Sun, 01 Oct 2023 19:18:32 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHeQwkwVunDAptU6uHN7shOm/W7m9tX5j1saEKRmCdr9hEv+TLoTPuGBnJhX14CjIC2LvmkdpQGopP8md/45oM=
+X-Received: by 2002:a05:6a21:a5a8:b0:159:c07d:66f0 with SMTP id
+ gd40-20020a056a21a5a800b00159c07d66f0mr17611995pzc.6.1696213112242; Sun, 01
+ Oct 2023 19:18:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain; charset="us-ascii"
+References: <20230918103055.5471-1-victorshihgli@gmail.com>
+ <CAAd53p4qhf+3j=zMs_RXSpLQzn6RGD9yUNcSA12V5aACswgeeQ@mail.gmail.com>
+ <CAK00qKDnG1o6ZxzY=pGs0J7o_RYYsr1XHxJKirRKeghsp6QOBg@mail.gmail.com>
+ <CAAd53p6cgN7QDZXzTsw_DVgOmpv46DY+Ttom5V0vTBVn2jpUQg@mail.gmail.com>
+ <CAK00qKA2kaQ2k0Tp=F86BmAMEK=GiAmtLiAQcZRBGVvHOd64MQ@mail.gmail.com>
+ <CAAd53p4EemJQfp2nwKTPoGpwPJchZKfC8hKU8zuvtK-YKmM9bQ@mail.gmail.com> <CAK00qKCXYg_JPUf=kCxLR1wmi=kmQ25X-ScQ7OYL1zpBKQAQkA@mail.gmail.com>
+In-Reply-To: <CAK00qKCXYg_JPUf=kCxLR1wmi=kmQ25X-ScQ7OYL1zpBKQAQkA@mail.gmail.com>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Mon, 2 Oct 2023 10:18:19 +0800
+Message-ID: <CAAd53p6_qQvp3EJgds_CAnHHSJLBQWc9TYyWpOzNaBZjyoDpeg@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
+ timeout of AER
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, kangzhen.lou@dell.com,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Bean Huo <beanhuo@micron.com>
+Hi Victor,
 
-Micron MTFC4GACAJCN eMMC supports cache but requires that flush cache
-operation be allowed only after a write has occurred. Otherwise, the
-cache flush command or subsequent commands will time out.
+On Tue, Sep 26, 2023 at 4:21=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
+m> wrote:
+>
+> On Fri, Sep 22, 2023 at 3:11=E2=80=AFPM Kai-Heng Feng
+> <kai.heng.feng@canonical.com> wrote:
+> >
+> > Hi Victor,
+> >
+> > On Wed, Sep 20, 2023 at 4:54=E2=80=AFPM Victor Shih <victorshihgli@gmai=
+l.com> wrote:
+> > >
+> > > On Tue, Sep 19, 2023 at 3:31=E2=80=AFPM Kai-Heng Feng
+> > > <kai.heng.feng@canonical.com> wrote:
+> > > >
+> > > > Hi Victor,
+> > > >
+> > > > On Tue, Sep 19, 2023 at 3:10=E2=80=AFPM Victor Shih <victorshihgli@=
+gmail.com> wrote:
+> > > > >
+> > > > > On Tue, Sep 19, 2023 at 12:24=E2=80=AFPM Kai-Heng Feng
+> > > > > <kai.heng.feng@canonical.com> wrote:
+> > > > > >
+> > > > > > Hi Victor,
+> > > > > >
+> > > > > > On Mon, Sep 18, 2023 at 6:31=E2=80=AFPM Victor Shih <victorshih=
+gli@gmail.com> wrote:
+> > > > > > >
+> > > > > > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > > > > > >
+> > > > > > > Due to a flaw in the hardware design, the GL975x replay timer=
+ frequently
+> > > > > > > times out when ASPM is enabled. As a result, the system will =
+resume
+> > > > > > > immediately when it enters suspend. Therefore, the replay tim=
+er
+> > > > > > > timeout must be masked.
+> > > > > >
+> > > > > > This patch solves AER error when its PCI config gets accessed, =
+but the
+> > > > > > AER still happens at system suspend:
+> > > > > >
+> > > > > > [ 1100.103603] ACPI: EC: interrupt blocked
+> > > > > > [ 1100.268244] ACPI: EC: interrupt unblocked
+> > > > > > [ 1100.326960] pcieport 0000:00:1c.0: AER: Corrected error rece=
+ived:
+> > > > > > 0000:00:1c.0
+> > > > > > [ 1100.326991] pcieport 0000:00:1c.0: PCIe Bus Error:
+> > > > > > severity=3DCorrected, type=3DData Link Layer, (Transmitter ID)
+> > > > > > [ 1100.326993] pcieport 0000:00:1c.0:   device [8086:7ab9] erro=
+r
+> > > > > > status/mask=3D00001000/00002000
+> > > > > > [ 1100.326996] pcieport 0000:00:1c.0:    [12] Timeout
+> > > > > >
+> > > > > > Kai-Heng
+> > > > > >
+> > > > >
+> > > > > Hi, Kai-Heng
+> > > > >
+> > > > > Could you try applying the patch and re-testing again after resta=
+rting
+> > > > > the system?
+> > > >
+> > > > Same issue happens after coldboot.
+> > > >
+> > > > > Because I applied the patch and restarted the system and it didn'=
+t happen.
+> > > > > The system can enter suspend normally.
+> > > > >
+> > > > > If you still have the issue after following the above instruction=
+s,
+> > > > > please provide me with your environment and I will verify it agai=
+n.
+> > > >
+> > > > The patch gets applied on top of next-20230918. Please let me know
+> > > > what else you want to know.
+> > > >
+> > > > Kai-Heng
+> > > >
+> > >
+> > > Hi, Kai-Heng
+> > >
+> > > If I want to mask the replay timer timeout AER of the upper layer roo=
+t port,
+> > > could you give me some suggestions?
+> > > Or could you provide sample code for my reference?
+> >
+> > I am not aware of anyway to mask "replay timer timeout" from root port.
+> > I wonder if the device supoprt D3hot? Or should it stay at D0 when
+> > ASPM L1.2 is enabled?
+> >
+> > Kai-Heng
+> >
+>
+> Hi, Kai-Heng
+>
+> Do you know any way to mask the replay timer timeout AER of the
+> upstream port from the device?
 
-Signed-off-by: Bean Huo <beanhuo@micron.com>
-Signed-off-by: Rafael Beims <rafael.beims@toradex.com>
-Cc: stable@vger.kernel.org
+Per PCIe Spec, I don't think it's possible to only mask 'replay timer timeo=
+ut'.
 
----
-Changelog:
+> The device supports D3hot.
 
-v3--v4:
-    1. Add helper function for this quirk in drivers/mmc/core/card.h.
-    2. Set card->written_flag only for REQ_OP_WRITE.
-v2--v3:
-    1. Set card->written_flag in mmc_blk_mq_issue_rq().
-v1--v2:
-    1. Add Rafael's test-tag, and Co-developed-by.
-    2. Check host->card whether NULL or not in __mmc_start_request() before asserting host->card->->quirks
----
- drivers/mmc/core/block.c  | 5 ++++-
- drivers/mmc/core/card.h   | 4 ++++
- drivers/mmc/core/mmc.c    | 5 +++++
- drivers/mmc/core/quirks.h | 7 ++++---
- include/linux/mmc/card.h  | 2 ++
- 5 files changed, 19 insertions(+), 4 deletions(-)
+Do you think such error plays any crucial rule? Otherwise disable
+'correctable' errors may be plausible.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 3a8f27c3e310..dfa67d9c80bb 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2381,8 +2381,11 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
- 			}
- 			ret = mmc_blk_cqe_issue_flush(mq, req);
- 			break;
--		case REQ_OP_READ:
- 		case REQ_OP_WRITE:
-+			if (mmc_card_broken_cache_flush(card) && !card->written_flag)
-+				card->written_flag = true;
-+			fallthrough;
-+		case REQ_OP_READ:
- 			if (host->cqe_enabled)
- 				ret = mmc_blk_cqe_issue_rw_rq(mq, req);
- 			else
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index 4edf9057fa79..b7754a1b8d97 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -280,4 +280,8 @@ static inline int mmc_card_broken_sd_cache(const struct mmc_card *c)
- 	return c->quirks & MMC_QUIRK_BROKEN_SD_CACHE;
- }
- 
-+static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
-+}
- #endif
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 89cd48fcec79..47896c32086e 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1929,6 +1929,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	if (!oldcard)
- 		host->card = card;
- 
-+	card->written_flag = false;
-+
- 	return 0;
- 
- free_card:
-@@ -2081,6 +2083,9 @@ static int _mmc_flush_cache(struct mmc_host *host)
- {
- 	int err = 0;
- 
-+	if (mmc_card_broken_cache_flush(host->card) && !host->card->written_flag)
-+		return err;
-+
- 	if (_mmc_cache_enabled(host)) {
- 		err = mmc_switch(host->card, EXT_CSD_CMD_SET_NORMAL,
- 				 EXT_CSD_FLUSH_CACHE, 1,
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 32b64b564fb1..5e68c8b4cdca 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -110,11 +110,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
- 		  MMC_QUIRK_TRIM_BROKEN),
- 
- 	/*
--	 * Micron MTFC4GACAJCN-1M advertises TRIM but it does not seems to
--	 * support being used to offload WRITE_ZEROES.
-+	 * Micron MTFC4GACAJCN-1M supports TRIM but does not appear to suppor
-+	 * WRITE_ZEROES offloading. It also supports caching, but the cache can
-+	 * only be flushed after a write has occurred.
- 	 */
- 	MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
--		  MMC_QUIRK_TRIM_BROKEN),
-+		  MMC_QUIRK_TRIM_BROKEN | MMC_QUIRK_BROKEN_CACHE_FLUSH),
- 
- 	/*
- 	 * Kingston EMMC04G-M627 advertises TRIM but it does not seems to
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index daa2f40d9ce6..7b12eebc5586 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -295,7 +295,9 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
- #define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
- #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
-+#define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
- 
-+	bool			written_flag;	/* Indicates eMMC has been written since power on */
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
--- 
-2.34.1
+Kai-Heng
 
+>
+> Thanks, Victor Shih
+>
+> > >
+> > > Thanks, Victor Shih
+> > >
+> > > > >
+> > > > > Thanks, Victor Shih
+> > > > >
+> > > > > > >
+> > > > > > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > > > > > > ---
+> > > > > > >  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
+> > > > > > >  1 file changed, 16 insertions(+)
+> > > > > > >
+> > > > > > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/h=
+ost/sdhci-pci-gli.c
+> > > > > > > index d83261e857a5..d8a991b349a8 100644
+> > > > > > > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > > > > > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > > > > > > @@ -28,6 +28,9 @@
+> > > > > > >  #define PCI_GLI_9750_PM_CTRL   0xFC
+> > > > > > >  #define   PCI_GLI_9750_PM_STATE          GENMASK(1, 0)
+> > > > > > >
+> > > > > > > +#define PCI_GLI_9750_CORRERR_MASK                           =
+   0x214
+> > > > > > > +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT    =
+     BIT(12)
+> > > > > > > +
+> > > > > > >  #define SDHCI_GLI_9750_CFG2          0x848
+> > > > > > >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+> > > > > > >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+> > > > > > > @@ -152,6 +155,9 @@
+> > > > > > >  #define PCI_GLI_9755_PM_CTRL     0xFC
+> > > > > > >  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> > > > > > >
+> > > > > > > +#define PCI_GLI_9755_CORRERR_MASK                           =
+   0x214
+> > > > > > > +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT    =
+     BIT(12)
+> > > > > > > +
+> > > > > > >  #define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
+> > > > > > >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT=
+(8)
+> > > > > > >
+> > > > > > > @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdh=
+ci_host *host)
+> > > > > > >         value &=3D ~PCI_GLI_9750_PM_STATE;
+> > > > > > >         pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, va=
+lue);
+> > > > > > >
+> > > > > > > +       /* mask the replay timer timeout of AER */
+> > > > > > > +       pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK=
+, &value);
+> > > > > > > +       value |=3D PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIM=
+EOUT;
+> > > > > > > +       pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MAS=
+K, value);
+> > > > > > > +
+> > > > > > >         gl9750_wt_off(host);
+> > > > > > >  }
+> > > > > > >
+> > > > > > > @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdh=
+ci_pci_slot *slot)
+> > > > > > >         value &=3D ~PCI_GLI_9755_PM_STATE;
+> > > > > > >         pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, va=
+lue);
+> > > > > > >
+> > > > > > > +       /* mask the replay timer timeout of AER */
+> > > > > > > +       pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK=
+, &value);
+> > > > > > > +       value |=3D PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIM=
+EOUT;
+> > > > > > > +       pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MAS=
+K, value);
+> > > > > > > +
+> > > > > > >         gl9755_wt_off(pdev);
+> > > > > > >  }
+> > > > > > >
+> > > > > > > --
+> > > > > > > 2.25.1
+> > > > > > >
