@@ -2,62 +2,67 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71E77E74919
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 20:06:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7A1EE74919
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 20:06:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229714AbjJBUG0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Oct 2023 16:06:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53008 "EHLO
+        id S229785AbjJBUG3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Oct 2023 16:06:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53020 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbjJBUGZ (ORCPT
+        with ESMTP id S229629AbjJBUGZ (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2023 16:06:25 -0400
-Received: from APC01-SG2-obe.outbound.protection.outlook.com (mail-sgaapc01hn2217.outbound.protection.outlook.com [52.100.164.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8FB2AC;
-        Mon,  2 Oct 2023 13:06:20 -0700 (PDT)
+Received: from APC01-PSA-obe.outbound.protection.outlook.com (mail-psaapc01hn2220.outbound.protection.outlook.com [52.100.0.220])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73715B3;
+        Mon,  2 Oct 2023 13:06:21 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=K40noMo+h179G3Dh1dxTD6ss3ioPvGH7Qmrk3K/4H241nQkKHShRed0Jc0gC+yjRYom51VmJbl0VoP42/TfPKavgCJBUmZXFux/nCRDW+ebnvTe0t15C+y8RjFYGxuTPbHpoA5zrkQiV1b3hCiHeKyxoaUyYOgg/CsdobubeOsKcPvIPMv9LMr8Zg0Nl+ZjZRGM3KA9NrEKm25nSlhM/W6nW0va+NtyrxlIYdqDfGwBEqQ332BtI1qfcS3bNIvU3w3qVFb1OxG/GssAoqWXybgtzdw2vLSex4TohzKZMiMr4nChC68wgKbKdbxAriAOVzdwTypQw+rHmZGtDevY2SA==
+ b=S9In1i08rOqIdRiyancrNynRFrbawjwZo3wetvG5bazoepqb0/WIterq0mmrLXdRiIaIAHiCGhIBpdfevmGS+6Q8lsucTw2n1qokDWdR+QXqNV1BisHcz96vH2dd2oe7COXlmIvfVcnHsf23IqN0BlvFb2extes4JrtQDNU9SzgXdk7wF7rnMg1bK3P9fPNWegH7HpifKZtNfs24Cw9HVVL6WrncbYIWjbaK91yP70mqU3Fi06i/M6Np0vMmdyrSTywelJJVFg/NZyzGP8ub1CGDYBjlVxwd4XLwYPXWS/O1cVhnZ76DPRqtaK6kT28YUnYqA4fBaAmuae/UhOdSEg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=3kB6sD7Tg1vA5u7ClWBa1Vtm7Dz0yAQZmvUQO/v/5AU=;
- b=dcWa7TbIF2mTHpFFT0z+tuF7kxt6e3WdF8N7rf12lnkzzo8kE/XN3wCukxH9V5ENOxt1xYJUKBE64ojRP5DN5vvpyTHFateDbveXpwimtG+1Ok39H5iaitwO04R53o0E5W4P8zB0bYPYnY2y0lBqSEVPgbqNreGb+WP2v/QTWoroFt+S6kpjrQ0KK7dsN8qgR8dKYlHa7eCroluRlxNo1rMxf6v9YqQt4JsOIakwJ2goC0Chnvu6Hw9Fc3e8O0SLJti90DN7+wpY0M9jRn0L9R4CVdAw2Y6apBDqaNYwPWWWOqvspqYWk4/N9NZeb7FozuJAO8TPgResZyuYk/bl1A==
+ bh=Kjs+CzyHENhNVIjt8JxPtm/DTB6YeEj6WaFm1IJxGZo=;
+ b=cETh+Wow3INyLp6fgaOwYSFBzGXD+YfRRdlj5tP/BeiQWWEzY7OLUH8QSuD9J4b6HUd97IyAKQStE0A1XP2IFysOoVofe158+ZwzyF9mhF5FPalUMqW5agLZVOuWszMPlxsDQzzTmIg43aACb+mTjsJoWdCiynRazzW6ZnOXxn/YsMpgZPcYoVr7h/xrXpUN0VlD68LSdSu6XfOTy8GZXXmnpkpgFZzKb6bEiMZHcvQ2TSQNWGt4JhBv/uOR0WvGsaKZJFnwjv5SXR8nhfc2SQqqAWQkSPQ9GAjh0Ve2NwnNg2zJktw3mssFgHGDOAqvMdyN/eMoFfS/9b1wlvUdXw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 175.98.123.7) smtp.rcpttodomain=antmicro.com smtp.mailfrom=nuvoton.com;
+ 211.75.126.7) smtp.rcpttodomain=antmicro.com smtp.mailfrom=nuvoton.com;
  dmarc=fail (p=none sp=quarantine pct=100) action=none header.from=gmail.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=nuvoton.onmicrosoft.com; s=selector2-nuvoton-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3kB6sD7Tg1vA5u7ClWBa1Vtm7Dz0yAQZmvUQO/v/5AU=;
- b=IF027t69zadnrF2pO1h0VoTo/OeGpami6dkAvJt9v/Y9NExfOYFDocW+U4VCM64cNSqXKhb5GUbKNQUJLcAIn1DKKpyvMxSTcWaFG3bDNSUbbUGZBT8Ioa2p/NtK5J+MxPMDO0vVbnwZqPN7DjpqWH0vUkRUViOygybhVEgWJak=
-Received: from SG2PR02CA0112.apcprd02.prod.outlook.com (2603:1096:4:92::28) by
- TYSPR03MB7451.apcprd03.prod.outlook.com (2603:1096:400:40f::5) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6838.32; Mon, 2 Oct 2023 20:06:15 +0000
-Received: from SG1PEPF000082E5.apcprd02.prod.outlook.com
- (2603:1096:4:92:cafe::b1) by SG2PR02CA0112.outlook.office365.com
- (2603:1096:4:92::28) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6838.30 via Frontend
- Transport; Mon, 2 Oct 2023 20:06:15 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 175.98.123.7)
+ bh=Kjs+CzyHENhNVIjt8JxPtm/DTB6YeEj6WaFm1IJxGZo=;
+ b=jrzk20Sv8KURU9MiUtD+sVSpecF+5Xz+34uFYzbyUZ8hHhr9xI2w2oJMQq6MQt/z1VJ/jeyhvm207QOLhxNICG3BZyNkc0254KPovxgcMEoI6OHXU3y96MhG6pHPDhgOgveWQ0lPp5Ygd0ZWzMwOmrfjhlruM7NlOZA4BE5Zgw8=
+Received: from KU1PR03CA0039.apcprd03.prod.outlook.com (2603:1096:802:19::27)
+ by TY0PR03MB8329.apcprd03.prod.outlook.com (2603:1096:405:19::5) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6838.33; Mon, 2 Oct
+ 2023 20:06:17 +0000
+Received: from HK3PEPF0000021E.apcprd03.prod.outlook.com
+ (2603:1096:802:19:cafe::1e) by KU1PR03CA0039.outlook.office365.com
+ (2603:1096:802:19::27) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6863.23 via Frontend
+ Transport; Mon, 2 Oct 2023 20:06:17 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 211.75.126.7)
  smtp.mailfrom=nuvoton.com; dkim=none (message not signed)
  header.d=none;dmarc=fail action=none header.from=gmail.com;
 Received-SPF: Pass (protection.outlook.com: domain of nuvoton.com designates
- 175.98.123.7 as permitted sender) receiver=protection.outlook.com;
- client-ip=175.98.123.7; helo=NTHCCAS04.nuvoton.com; pr=C
-Received: from NTHCCAS04.nuvoton.com (175.98.123.7) by
- SG1PEPF000082E5.mail.protection.outlook.com (10.167.240.8) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
- 15.20.6838.14 via Frontend Transport; Mon, 2 Oct 2023 20:06:14 +0000
-Received: from NTHCCAS01.nuvoton.com (10.1.8.28) by NTHCCAS04.nuvoton.com
- (10.1.8.29) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.14; Tue, 3
- Oct 2023 04:06:13 +0800
+ 211.75.126.7 as permitted sender) receiver=protection.outlook.com;
+ client-ip=211.75.126.7; helo=NTHCCAS01.nuvoton.com; pr=C
+Received: from NTHCCAS01.nuvoton.com (211.75.126.7) by
+ HK3PEPF0000021E.mail.protection.outlook.com (10.167.8.40) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6838.22 via Frontend Transport; Mon, 2 Oct 2023 20:06:16 +0000
+Received: from NTHCML01B.nuvoton.com (10.1.8.178) by NTHCCAS01.nuvoton.com
+ (10.1.8.28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Tue, 3 Oct
+ 2023 04:06:15 +0800
+Received: from NTHCCAS01.nuvoton.com (10.1.8.28) by NTHCML01B.nuvoton.com
+ (10.1.8.178) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2176.14; Tue, 3 Oct
+ 2023 04:06:14 +0800
 Received: from taln60.nuvoton.co.il (10.191.1.180) by NTHCCAS01.nuvoton.com
  (10.1.8.28) with Microsoft SMTP Server id 15.1.2375.34 via Frontend
- Transport; Tue, 3 Oct 2023 04:06:13 +0800
+ Transport; Tue, 3 Oct 2023 04:06:14 +0800
 Received: by taln60.nuvoton.co.il (Postfix, from userid 10070)
-        id 7DC336473F; Mon,  2 Oct 2023 23:06:12 +0300 (IDT)
+        id 5F45B64742; Mon,  2 Oct 2023 23:06:13 +0300 (IDT)
 From:   Tomer Maimon <tmaimon77@gmail.com>
 To:     <ulf.hansson@linaro.org>, <avifishman70@gmail.com>,
         <tali.perry1@gmail.com>, <joel@jms.id.au>, <venture@google.com>,
@@ -69,97 +74,197 @@ To:     <ulf.hansson@linaro.org>, <avifishman70@gmail.com>,
 CC:     <openbmc@lists.ozlabs.org>, <linux-mmc@vger.kernel.org>,
         <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         Tomer Maimon <tmaimon77@gmail.com>
-Subject: [PATCH v5 0/2] add NPCM SDHCI driver support
-Date:   Mon, 2 Oct 2023 23:06:08 +0300
-Message-ID: <20231002200610.129799-1-tmaimon77@gmail.com>
+Subject: [PATCH v5 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
+Date:   Mon, 2 Oct 2023 23:06:10 +0300
+Message-ID: <20231002200610.129799-3-tmaimon77@gmail.com>
 X-Mailer: git-send-email 2.33.0
+In-Reply-To: <20231002200610.129799-1-tmaimon77@gmail.com>
+References: <20231002200610.129799-1-tmaimon77@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-NotSetDelaration: True
 X-EOPAttributedMessage: 0
-X-MS-Exchange-SkipListedInternetSender: ip=[175.98.123.7];domain=NTHCCAS04.nuvoton.com
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SG1PEPF000082E5:EE_|TYSPR03MB7451:EE_
-X-MS-Office365-Filtering-Correlation-Id: f51346d0-1b5f-4e5f-813f-08dbc38307f5
+X-MS-TrafficTypeDiagnostic: HK3PEPF0000021E:EE_|TY0PR03MB8329:EE_
+X-MS-Office365-Filtering-Correlation-Id: a0ab0702-6bda-48c1-2dca-08dbc383096d
 X-MS-Exchange-SenderADCheck: 0
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: =?us-ascii?Q?HZgqERuf1fU4oIiDSCUgOZOGsJMpu8lMxSE7jyubDrCdho4YT5Zi636TI2WJ?=
- =?us-ascii?Q?E03vcZfbP+/kJzFjBaHVzHq5e+PPyIAP0qCw7fJqn3+1WSwKsuqW55hs1dEh?=
- =?us-ascii?Q?w0hyfi3eD+7IqviSMOWq/W848A9SyyomNvln9m0urfMBp2Qyqin3oF7sG/PS?=
- =?us-ascii?Q?kl5gC4vQpjHnyXPxutTQjwthTKeisxlzakTbgqc5CJXXKzGOixBysluV6JMy?=
- =?us-ascii?Q?l3sVdyFC+9vK/ow30BJ47H/s4H5SRaH6ufA5G+50Jw/+P0Bw3LamPVmFAwnZ?=
- =?us-ascii?Q?5lzxJfuNWEpdYzDifAgNWhtDEtiJv2kQg2OzSiQfA+Mi7MduzRJ0HjiCg1Jw?=
- =?us-ascii?Q?i2KRJW7SejS2riBXe0oqop+2vUPG2Gj9i7fNSZeUrgBDKLtdvAviwRIy0t8e?=
- =?us-ascii?Q?oLRL7lNtFWPtYI2m+7dV7pt274W3Jqtyr8Pt1Splnn9ajIUZmlM7y0+EUQjN?=
- =?us-ascii?Q?a1fCDceoQIq0mWL5BvvhbuSAM8p61SE3tEujGv8bEO6Ss2GZO2fqTnfCvFNU?=
- =?us-ascii?Q?YYh5RGJqdBKt0mt5fkN+CpfIM1GwlVLyUgQRjYonNM7Qp64Fy09jcmu2sEV/?=
- =?us-ascii?Q?ET4c91YYiuUFS05A4MwxervPaERmon6X9VDxzVO42jl4R5aXKiYaiS3b3RE3?=
- =?us-ascii?Q?QoPX/LPWiPWcL7M2uzyDi9NTZ6kOI3ZUJXT0sv08Ebw0IknX7PTE1PfWzSL9?=
- =?us-ascii?Q?pkJzcOGFIrCTtwBpPIePuQ3ttrca6VQ07KQZVs3RX/eK5iSfhD07CM6oDQYP?=
- =?us-ascii?Q?R1Vw/T0Bk62vSZv7PXecPEbFUkC0Aan0P4GMniQ2tk/081oMTXQY7MVCv5Lt?=
- =?us-ascii?Q?EQnxGVWutYtZyA6dLqnwmFNw5tbyKaJf5G6gNo3s6y1dYH8Auy/tccyoSvan?=
- =?us-ascii?Q?Hc6IAlauY5Uf6uhzKrCnCvWn2Uzbpg2oyGrr+J5NCzux4bcRdzpdOCcSeOGJ?=
- =?us-ascii?Q?1e6ISgj6AJffXGCfNMGjXk0pnfwt03wDw0FLNiyNGM0=3D?=
-X-Forefront-Antispam-Report: CIP:175.98.123.7;CTRY:TW;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:NTHCCAS04.nuvoton.com;PTR:175-98-123-7.static.tfn.net.tw;CAT:NONE;SFS:(13230031)(4636009)(396003)(136003)(39860400002)(346002)(376002)(230922051799003)(64100799003)(48200799006)(451199024)(61400799006)(5400799018)(82310400011)(186009)(46966006)(40470700004)(36840700001)(6636002)(54906003)(42186006)(76482006)(70206006)(70586007)(110136005)(26005)(82202003)(1076003)(2616005)(83380400001)(336012)(36756003)(921005)(73392003)(42882007)(6266002)(6666004)(36860700001)(83170400001)(81166007)(40480700001)(82740400003)(55446002)(34020700004)(47076005)(356005)(478600001)(966005)(40460700003)(316002)(2906002)(7416002)(4326008)(8676002)(8936002)(41300700001)(5660300002)(45356006)(35450700002)(84790400001)(12100799045);DIR:OUT;SFP:1501;
+X-Microsoft-Antispam-Message-Info: =?us-ascii?Q?B4CEZ0z8wSrt76QXBY6GafHLuzBllvvDgT4/igLKOaR+Fqjk8xFVuQ7+97JT?=
+ =?us-ascii?Q?x7TOqIC+F+/E5Xi720l6HqzbIoMke5dam/mrAO3WXVVHjFyvn7Uj/rcsMKyv?=
+ =?us-ascii?Q?gh6vaZnOaIoyB03EG7QaPSfTUIRk+Lcglk+WkyqitIim3zR7Z7BPYbac9Be0?=
+ =?us-ascii?Q?E4wqlROrRIj2mkSTZE2O3cGiOd/7HYkwaTwroSjYkZf6canqU+XpzYCZnCCe?=
+ =?us-ascii?Q?d+oqK5h906gK/EZTzYBXYHiZHa6pBv4XP1FIRycM4CVKvnX3AS0qZmL5iMfU?=
+ =?us-ascii?Q?EEquJjYcVVqk+ZuE55yLLIHRdgi8RELBiLhOSOmhoY2Va9WgiWtVnP2jxZ5j?=
+ =?us-ascii?Q?TffkZunyQu4Cde892XopBijpicj4303P+RveDyJHW9kuWfVI++wAQWYpLUtY?=
+ =?us-ascii?Q?SANxhm1bgpG6HBCT2yyjRDh4DWRkhIt/kGzZk8oYGgXThjCsiS2jnsO/3RkY?=
+ =?us-ascii?Q?e8G7N3QQIV7jtHmvK3VNenjuTUB/rti5igHAkl85c2jLUzCS82k6w5YAN2QL?=
+ =?us-ascii?Q?IPOsfTogBlH3GZraAD5ybuZ1dsJNqe4Z3tPvnr6sg/NCodYVJOcUGESNajGG?=
+ =?us-ascii?Q?5BbqO3o32B5L1XPOnv1ni/5Ax8cvZCfNk63FROiJ0aG0a3Zu6ZSlkjUCxA75?=
+ =?us-ascii?Q?oZAuifZIj4n0fe+mQnV+/rEpNGn4xjMJuTOa5TOo5PV95Dku212H0eSX8Np3?=
+ =?us-ascii?Q?S51qinkfYXnccszJDsVgAUZZOgfFo06nUZWcL81xyRmy+jFRBLWOSw3G5aCq?=
+ =?us-ascii?Q?V7KNwrQSQbklo9/xMM9HaodGXqbSEN9jbU78M2SlRRzEOPNWaM7fbFLfHvgP?=
+ =?us-ascii?Q?sXkqVqiuHcdmTAMrvGuVVG8AZ3ZMAFXNfj1VElkrtB3UD1JCWHE88SngVuq7?=
+ =?us-ascii?Q?25SOKhH5VKYmkPHSEZGLtGxhUeKZHccpivd0AxBQSv2264kshcPR+J6hVWEF?=
+ =?us-ascii?Q?RN5pwo8ct6usP6Xf3DC3tqVOOtnTLwnqe0vEr+oQVdE=3D?=
+X-Forefront-Antispam-Report: CIP:211.75.126.7;CTRY:TW;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:NTHCCAS01.nuvoton.com;PTR:211-75-126-7.hinet-ip.hinet.net;CAT:NONE;SFS:(13230031)(4636009)(376002)(39860400002)(346002)(396003)(136003)(230922051799003)(61400799006)(186009)(451199024)(82310400011)(48200799006)(5400799018)(64100799003)(36840700001)(46966006)(40470700004)(40480700001)(356005)(921005)(1076003)(82740400003)(76482006)(26005)(41300700001)(36756003)(42882007)(73392003)(6266002)(336012)(2616005)(54906003)(82202003)(42186006)(70586007)(70206006)(83170400001)(6636002)(316002)(110136005)(40460700003)(478600001)(81166007)(7416002)(34020700004)(2906002)(47076005)(36860700001)(55446002)(8936002)(8676002)(4326008)(5660300002)(45356006)(84790400001)(35450700002)(12100799045);DIR:OUT;SFP:1501;
 X-OriginatorOrg: nuvoton.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Oct 2023 20:06:14.3625
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Oct 2023 20:06:16.8870
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: f51346d0-1b5f-4e5f-813f-08dbc38307f5
+X-MS-Exchange-CrossTenant-Network-Message-Id: a0ab0702-6bda-48c1-2dca-08dbc383096d
 X-MS-Exchange-CrossTenant-Id: a3f24931-d403-4b4a-94f1-7d83ac638e07
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=a3f24931-d403-4b4a-94f1-7d83ac638e07;Ip=[175.98.123.7];Helo=[NTHCCAS04.nuvoton.com]
-X-MS-Exchange-CrossTenant-AuthSource: SG1PEPF000082E5.apcprd02.prod.outlook.com
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=a3f24931-d403-4b4a-94f1-7d83ac638e07;Ip=[211.75.126.7];Helo=[NTHCCAS01.nuvoton.com]
+X-MS-Exchange-CrossTenant-AuthSource: HK3PEPF0000021E.apcprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYSPR03MB7451
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY0PR03MB8329
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch set adds SDHCI support for the Nuvoton NPCM Baseboard 
-Management Controller (BMC).
+Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
 
-Deeply sorry it took that long until sending version three, promise to try
-to do better on the next versions (if needed) :-),
-
-The NPCM SDHCI driver tested on NPCM750 and NPCM845 EVB.
-
-Addressed comments from:
- - Andy Shevchenko : https://www.spinics.net/lists/devicetree/msg638000.html
-
-Changes since version 4:
- - Remove unnecessary clk_disable_unprepare function.
-
-Changes since version 3:
- - Use devm_clk_get_optional_enabled function.
- - Add mod_devicetable.h.
- - Modify copyright year.
-
-Changes since version 2:
- - Add data to handle architecture-specific SDHCI parameters.
- - Change config place in make and kconfig files.
- - Calling sdhci_pltfm_free to to avoid a memory leak on error.
-
-Changes since version 1:
- - Use correct spaces in the dt-bindings.
- - Drop unused labels from dt-bindings.
- - Order by module name in the make a configuration.
- - Remove unnecessary blank lines.
- - Using devm_clk_get_optional instead of devm_clk_get.
-
-Tomer Maimon (2):
-  dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI controller
-  mmc: sdhci-npcm: Add NPCM SDHCI driver
-
- .../devicetree/bindings/mmc/npcm,sdhci.yaml   | 45 +++++++++
- drivers/mmc/host/Kconfig                      |  8 ++
- drivers/mmc/host/Makefile                     |  1 +
- drivers/mmc/host/sdhci-npcm.c                 | 94 +++++++++++++++++++
- 4 files changed, 148 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
+Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/Kconfig      |  8 +++
+ drivers/mmc/host/Makefile     |  1 +
+ drivers/mmc/host/sdhci-npcm.c | 94 +++++++++++++++++++++++++++++++++++
+ 3 files changed, 103 insertions(+)
  create mode 100644 drivers/mmc/host/sdhci-npcm.c
 
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 554e67103c1a..3999d4fddc73 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -429,6 +429,14 @@ config MMC_SDHCI_IPROC
+ 
+ 	  If unsure, say N.
+ 
++config MMC_SDHCI_NPCM
++	tristate "Secure Digital Host Controller Interface support for NPCM"
++	depends on ARCH_NPCM || COMPILE_TEST
++	depends on MMC_SDHCI_PLTFM
++	help
++	  This provides support for the SD/eMMC controller found in
++	  NPCM BMC family SoCs.
++
+ config MMC_MESON_GX
+ 	tristate "Amlogic S905/GX*/AXG SD/MMC Host Controller support"
+ 	depends on ARCH_MESON|| COMPILE_TEST
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index a693fa3d3f1c..d0be4465f3ec 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -89,6 +89,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)	+= sdhci-of-dwcmshc.o
+ obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)	+= sdhci-of-sparx5.o
+ obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
+ obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
++obj-$(CONFIG_MMC_SDHCI_NPCM)		+= sdhci-npcm.o
+ obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
+ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+ obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
+diff --git a/drivers/mmc/host/sdhci-npcm.c b/drivers/mmc/host/sdhci-npcm.c
+new file mode 100644
+index 000000000000..a3045dd2ddeb
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-npcm.c
+@@ -0,0 +1,94 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * NPCM SDHC MMC host controller driver.
++ *
++ * Copyright (c) 2023 Nuvoton Technology corporation.
++ */
++
++#include <linux/clk.h>
++#include <linux/err.h>
++#include <linux/io.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mod_devicetable.h>
++#include <linux/module.h>
++#include <linux/of.h>
++
++#include "sdhci-pltfm.h"
++
++static const struct sdhci_pltfm_data npcm7xx_sdhci_pdata = {
++	.quirks  = SDHCI_QUIRK_DELAY_AFTER_POWER,
++	.quirks2 = SDHCI_QUIRK2_STOP_WITH_TC |
++		   SDHCI_QUIRK2_NO_1_8_V,
++};
++
++static const struct sdhci_pltfm_data npcm8xx_sdhci_pdata = {
++	.quirks  = SDHCI_QUIRK_DELAY_AFTER_POWER,
++	.quirks2 = SDHCI_QUIRK2_STOP_WITH_TC,
++};
++
++static int npcm_sdhci_probe(struct platform_device *pdev)
++{
++	const struct sdhci_pltfm_data *data;
++	struct sdhci_pltfm_host *pltfm_host;
++	struct device *dev = &pdev->dev;
++	struct sdhci_host *host;
++	u32 caps;
++	int ret;
++
++	data = of_device_get_match_data(dev);
++	if (!data)
++		return -EINVAL;
++
++	host = sdhci_pltfm_init(pdev, data, 0);
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	pltfm_host = sdhci_priv(host);
++
++	pltfm_host->clk = devm_clk_get_optional_enabled(dev, NULL);
++	if (IS_ERR(pltfm_host->clk)) {
++		ret = PTR_ERR(pltfm_host->clk);
++		goto err_sdhci;
++	}
++
++	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
++	if (caps & SDHCI_CAN_DO_8BIT)
++		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
++
++	ret = mmc_of_parse(host->mmc);
++	if (ret)
++		goto err_sdhci;
++
++	ret = sdhci_add_host(host);
++	if (ret)
++		goto err_sdhci;
++
++	return 0;
++
++err_sdhci:
++	sdhci_pltfm_free(pdev);
++	return ret;
++}
++
++static const struct of_device_id npcm_sdhci_of_match[] = {
++	{ .compatible = "nuvoton,npcm750-sdhci", .data = &npcm7xx_sdhci_pdata, },
++	{ .compatible = "nuvoton,npcm845-sdhci", .data = &npcm8xx_sdhci_pdata, },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, npcm_sdhci_of_match);
++
++static struct platform_driver npcm_sdhci_driver = {
++	.driver = {
++		.name	= "npcm-sdhci",
++		.of_match_table = npcm_sdhci_of_match,
++		.pm	= &sdhci_pltfm_pmops,
++	},
++	.probe		= npcm_sdhci_probe,
++	.remove_new	= sdhci_pltfm_remove,
++};
++module_platform_driver(npcm_sdhci_driver);
++
++MODULE_DESCRIPTION("NPCM Secure Digital Host Controller Interface driver");
++MODULE_AUTHOR("Tomer Maimon <tomer.maimon@nuvoton.com>");
++MODULE_LICENSE("GPL");
 -- 
 2.33.0
 
