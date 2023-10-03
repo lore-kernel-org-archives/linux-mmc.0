@@ -2,100 +2,192 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19B77E7490C
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Oct 2023 20:07:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01CCEE75420
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Oct 2023 04:37:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231178AbjJBUH4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Oct 2023 16:07:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54326 "EHLO
+        id S230198AbjJCEhx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Oct 2023 00:37:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229629AbjJBUH4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Oct 2023 16:07:56 -0400
-Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C818793;
-        Mon,  2 Oct 2023 13:07:52 -0700 (PDT)
-Received: by mail-lj1-x22d.google.com with SMTP id 38308e7fff4ca-2c2907ff9fcso1559921fa.1;
-        Mon, 02 Oct 2023 13:07:52 -0700 (PDT)
+        with ESMTP id S230151AbjJCEhw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2023 00:37:52 -0400
+Received: from mail-pf1-x435.google.com (mail-pf1-x435.google.com [IPv6:2607:f8b0:4864:20::435])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D2CA9
+        for <linux-mmc@vger.kernel.org>; Mon,  2 Oct 2023 21:37:48 -0700 (PDT)
+Received: by mail-pf1-x435.google.com with SMTP id d2e1a72fcca58-6907e44665bso377237b3a.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Oct 2023 21:37:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1696277271; x=1696882071; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QzzKZoEmdCGE7S1RXteRn52a8Z5fDrSNy3okgZBM+pc=;
-        b=VDsZXbGMk82TElpM95ipyLgSyNqNJsZ//EAIfNVloi0WOowYJJIGyhCrPKGvZH/c1l
-         R10sjdXjUzbH6+thwoK6zSQIM9KQ5dZpvcb/h75z1MkXN1RMlGtPQJbGcLTQSSpYdA2O
-         PZjm1RrJpncLik4u+h5E+Siu0A7/27mB8PU8WLqJ6HCgO9gW8hQVagt9NFdsc2atonrx
-         emasOfYTCr+VBxzpNQ/eatuULYHGGfb0E6qw9qy/TTMsYVkUn+EqxQvwXWcwHykcyS2f
-         iCmiEWHfJ0bbYB/KjCPqkLsdCXg7DVaivYZJuuCBhUYCYtyyJJUwj6U7OGSgVxbGczPi
-         XGNA==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1696307868; x=1696912668; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=GKgPQ38AECrVlc0moMdpWxxk1GnLwNaF/JmBiOPzlGM=;
+        b=fyA9lFh/rG2cgAwFdubzHyYqgK+w0UeUl6rM8nCZHodSlZh4XmxK+p9SH4t1uraChB
+         0grTrYEtHjfPKqTpAPwI5rh34ukAOP/OHOb8x/wu+AESdnStF+Lzuv63Omh6Twdu5AYa
+         HMydc5tiwYBL7kCrKswEC+JyXtAy64ThJJDm6chrGFJTZen5wcntSZYtL5ovGzPorn60
+         +mJWOhu75pUrPRWAgec3aXXRv7oUb1lf4KJbTLi2GZv7u2RC9/ZgU44ZvP02/heFUF+i
+         Sog5LN1cTqW8GOniXydMIT3ISEUPuPo3K/9qCxd57ZviplZfHBU2bO1H+/i4G9+73gLj
+         9BYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696277271; x=1696882071;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=QzzKZoEmdCGE7S1RXteRn52a8Z5fDrSNy3okgZBM+pc=;
-        b=Oox5r9W2VNMFeuZo6i7Y68mkf8X3qFLDmRGpdN/RXrAWJF8Drj4QVndMGmiyNZSKaM
-         BPN1dfiX2SV7MLPzLy+6MPL9lQPyxTeNJw4WeEedT1dYznCCGQyu9aTWsAEj39TWfyQb
-         hpq3yKwzkZhrVZZ/pp61GQ4r6BR5GdE8eYAjkOIl1d1cfjY7753aVjq065eIqa8dASHc
-         LjLZ1hDxQY7S0V2BmNeHkDM2brO9u2I54utDUe3Dl1j2QgIJO7QIV3fV6jisKM18qaxI
-         +iTWRsYZn4mQbLr50wIg7Qy52NWQuEiHDwYGFE4Y6Z9Li5CJdJuAQIOty8Sh6syGOp9H
-         FvWw==
-X-Gm-Message-State: AOJu0YzfOERQJU9KznhH8JqcTXTk4BeNRQtpm+L+qx4N3+Mzyfgzt0xx
-        T9uHNdRViR/lZeC7SG8b46wg7c6JMP6gOT+CfeM=
-X-Google-Smtp-Source: AGHT+IHfAwfrbZiXrWiDIVYFKatdO7nPRT0KeuksW27VNFvfFxPfriAmuquY7kqLS5l/DTLOc9tMmisPbwCaGXu9QRo=
-X-Received: by 2002:a2e:868e:0:b0:2c0:cd8:2bdc with SMTP id
- l14-20020a2e868e000000b002c00cd82bdcmr10560836lji.24.1696277270845; Mon, 02
- Oct 2023 13:07:50 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1696307868; x=1696912668;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=GKgPQ38AECrVlc0moMdpWxxk1GnLwNaF/JmBiOPzlGM=;
+        b=p9ruotkR9jEeORbZO6EoQLYEikSOBnVIQ46PqnLnky3b9RzN9AnrU5u4WHUvL/j9Zs
+         +74k2BtugXVHLc34HulFEbofiLWFsJK/JiIk7kuGVOzVUo7FXbEoVvcrDjwM7Q3B7/7G
+         wPBnLs9ziiJ2rQim3iuFNPx1Ipgkcw9Zz3iMjrjzozwT8QyNG9pnrNfGLNK0L1+q1hXd
+         71J8dRQ11neUWIY5lvFG/fjFiI0VDiKQTORjyFeg1lDK7snNWmczRr+YvFxEq7ygBCSY
+         2Z9/vhgZ7R26P0ZVY4rI+anqOAnNr6Whz0tf6WmxytMn+x25LMZ8CpZp2we1bqkwkEGj
+         M7TQ==
+X-Gm-Message-State: AOJu0YyGR5mk4zExenCsdd06b7WO4wNNTDmQIVGqqWywPXjyc3oXEMCS
+        6I0Z0w7G3cVNjRhX1dqchMcbmg==
+X-Google-Smtp-Source: AGHT+IGcJswyqq2+v8adfeB7JFHPk6IW7uTaWtSmL6Jtu5yzeYDhKrvLZYKMEUvZXOisUIZVOAzPIw==
+X-Received: by 2002:aa7:88c1:0:b0:68f:dfda:1814 with SMTP id k1-20020aa788c1000000b0068fdfda1814mr16065099pff.18.1696307868388;
+        Mon, 02 Oct 2023 21:37:48 -0700 (PDT)
+Received: from x1 ([2601:1c2:1800:f680:6f96:60b4:c2b:8120])
+        by smtp.gmail.com with ESMTPSA id z9-20020aa785c9000000b00692acfc4b3csm332716pfn.136.2023.10.02.21.37.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Oct 2023 21:37:48 -0700 (PDT)
+Date:   Mon, 2 Oct 2023 21:37:44 -0700
+From:   Drew Fustini <dfustini@baylibre.com>
+To:     Robert Nelson <robertcnelson@gmail.com>,
+        Prabhakar <prabhakar.csengg@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org,
+        =?iso-8859-1?Q?Bj=F6rn_T=F6pel?= <bjorn@kernel.org>,
+        Alexandre Ghiti <alexghiti@rivosinc.com>
+Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
+Message-ID: <ZRuamJuShOnvP1pr@x1>
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+ <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+ <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
 MIME-Version: 1.0
-References: <20231002194138.125349-1-tmaimon77@gmail.com> <20231002194138.125349-3-tmaimon77@gmail.com>
- <CAHp75VfDcqTAVhZmo-q8v8c8TKwZUjQMr2-0RBarYDDJD1+TZw@mail.gmail.com>
-In-Reply-To: <CAHp75VfDcqTAVhZmo-q8v8c8TKwZUjQMr2-0RBarYDDJD1+TZw@mail.gmail.com>
-From:   Tomer Maimon <tmaimon77@gmail.com>
-Date:   Mon, 2 Oct 2023 23:07:39 +0300
-Message-ID: <CAP6Zq1gnjDUSWqe2aNMfMx-Ksdx_Mw6skCu4ecRC4na2A-UNkg@mail.gmail.com>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-To:     Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
-        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
-        yuenn@google.com, benjaminfair@google.com, adrian.hunter@intel.com,
-        skhan@linuxfoundation.org, davidgow@google.com,
-        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
-        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Andy
-
-Thank a lot Address in V5
-
-On Mon, 2 Oct 2023 at 22:46, Andy Shevchenko <andy.shevchenko@gmail.com> wr=
-ote:
->
-> On Mon, Oct 2, 2023 at 10:41=E2=80=AFPM Tomer Maimon <tmaimon77@gmail.com=
-> wrote:
+On Fri, Sep 22, 2023 at 05:48:21PM -0500, Robert Nelson wrote:
+> On Fri, Sep 22, 2023 at 2:08 PM Robert Nelson <robertcnelson@gmail.com> wrote:
 > >
-> > Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
->
-> ...
->
-> > +       pltfm_host->clk =3D devm_clk_get_optional_enabled(dev, NULL);
-> > +       if (IS_ERR(pltfm_host->clk)) {
-> > +               ret =3D PTR_ERR(pltfm_host->clk);
-> > +               goto err_sdhci;
-> > +       }
->
-> ...
->
-> > +err_sdhci_clk:
-> > +       clk_disable_unprepare(pltfm_host->clk);
->
-> Now this is leftover that leads to unbalanced reference counting.
->
-> --
-> With Best Regards,
-> Andy Shevchenko
+> > On Thu, Sep 21, 2023 at 8:51 PM Drew Fustini <dfustini@baylibre.com> wrote:
+> > >
+> > > This series adds support for the eMMC on the BeagleV Ahead and the
+> > > Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
+> > > eMMC.
+> > >
+> > > I tested on top of v6.6-rc2 with this config [1]. I was able to boot
+> > > both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
+> > > are required:
+> > >
+> > >   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
+> > >
+> > > I pushed a branch [5] with this patch series and the above patch for
+> > > those that find a git branch easier to test.
+> > >
+> > > Please note that only the MMC controller connected to the eMMC device
+> > > is enabled in the device trees for these two boards. I did not yet
+> > > attempt to configure and use the microSD card slot. My preference is to
+> > > address that in a future patch series.
+> > >
+> > > References:
+> > > [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
+> > > [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
+> > > [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
+> > > [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
+> > > [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
+> >
+> > This patchset came out very nice!
+> >
+> > v6.6-rc2 with Last RFC v2:
+> >
+> > [    4.066630] mmc0: SDHCI controller on ffe7080000.mmc
+> > [ffe7080000.mmc] using PIO
+> >
+> > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> >
+> > /dev/mmcblk0:
+> >  Timing cached reads:   1516 MB in  2.00 seconds = 758.09 MB/sec
+> >  Timing buffered disk reads:  84 MB in  3.01 seconds =  27.94 MB/sec
+> >
+> > vs v6.6-rc2 with this patchset:
+> >
+> >  [    4.096837] mmc0: SDHCI controller on ffe7080000.mmc
+> > [ffe7080000.mmc] using DMA
+> >
+> > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> >
+> > /dev/mmcblk0:
+> >  Timing cached reads:   1580 MB in  2.00 seconds = 790.97 MB/sec
+> >  Timing buffered disk reads: 418 MB in  3.00 seconds = 139.11 MB/sec
+> 
+> Drew pointed out on Slack, this was not quite right.. After more
+> digging by Drew, CONFIG_DMA_GLOBAL_POOL is causing a DMA limitation
+> with the multiplatform defconfig. so with,
+> 
+> ./scripts/config --disable CONFIG_ARCH_R9A07G043
+> 
+> (to remove CONFIG_DMA_GLOBAL_POOL)... another 2x in buffered reads..
+> 
+> [    4.059242] mmc0: SDHCI controller on ffe7080000.mmc
+> [ffe7080000.mmc] using ADMA 64-bit
+> 
+> debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> 
+> /dev/mmcblk0:
+>  Timing cached reads:   1600 MB in  2.00 seconds = 800.93 MB/sec
+>  Timing buffered disk reads: 892 MB in  3.00 seconds = 297.06 MB/sec
+
+It seems CONFIG_DMA_GLOBAL_POOL=y causes ADMA buffer alloc to fail [1]:
+
+  mmc0: Unable to allocate ADMA buffers - falling back to standard DMA
+
+Prabhakar's AX45MP non-coherent DMA support [2] series introduced the
+selection of DMA_GLOBAL_POOL for ARCH_R9A07G043 and the riscv defconfig
+selects ARCH_R9A07G043. 
+
+Patch 5 in the series [3] states that:
+
+  With DMA_GLOBAL_POOL enabled all DMA allocations happen from this
+  region and synchronization callbacks are implemented to synchronize
+  when doing DMA transactions.
+
+This example of a "shared-dma-pool" node was given:
+
+        pma_resv0@58000000 {
+            compatible = "shared-dma-pool";
+            reg = <0x0 0x58000000 0x0 0x08000000>;
+            no-map;
+            linux,dma-default;
+        };
+
+I've copied that to th1520-beaglev-ahead.dts. The address of 0x58000000
+has no significance on th1520, but the existence of shared-dma-pool
+seems to fix the problem. ADMA mode [4] is now working even though
+CONFIG_DMA_GLOBAL_POOL=y.
+
+Thanks,
+Drew
+
+[1] https://gist.github.com/pdp7/73041ed808bbc7dd445836fb90574979
+[2] https://lore.kernel.org/linux-riscv/20230818135723.80612-1-prabhakar.mahadev-lad.rj@bp.renesas.com/
+[3] https://lore.kernel.org/linux-riscv/20230818135723.80612-6-prabhakar.mahadev-lad.rj@bp.renesas.com/
+[4] https://gist.github.com/pdp7/91e72a663d3bb73eb28182337ad8bbcb
