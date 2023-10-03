@@ -2,192 +2,249 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01CCEE75420
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Oct 2023 04:37:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BB31E75434
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Oct 2023 07:46:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230198AbjJCEhx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Oct 2023 00:37:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48662 "EHLO
+        id S230403AbjJCHqi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Oct 2023 03:46:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50262 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230151AbjJCEhw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2023 00:37:52 -0400
-Received: from mail-pf1-x435.google.com (mail-pf1-x435.google.com [IPv6:2607:f8b0:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D2CA9
-        for <linux-mmc@vger.kernel.org>; Mon,  2 Oct 2023 21:37:48 -0700 (PDT)
-Received: by mail-pf1-x435.google.com with SMTP id d2e1a72fcca58-6907e44665bso377237b3a.1
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Oct 2023 21:37:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1696307868; x=1696912668; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=GKgPQ38AECrVlc0moMdpWxxk1GnLwNaF/JmBiOPzlGM=;
-        b=fyA9lFh/rG2cgAwFdubzHyYqgK+w0UeUl6rM8nCZHodSlZh4XmxK+p9SH4t1uraChB
-         0grTrYEtHjfPKqTpAPwI5rh34ukAOP/OHOb8x/wu+AESdnStF+Lzuv63Omh6Twdu5AYa
-         HMydc5tiwYBL7kCrKswEC+JyXtAy64ThJJDm6chrGFJTZen5wcntSZYtL5ovGzPorn60
-         +mJWOhu75pUrPRWAgec3aXXRv7oUb1lf4KJbTLi2GZv7u2RC9/ZgU44ZvP02/heFUF+i
-         Sog5LN1cTqW8GOniXydMIT3ISEUPuPo3K/9qCxd57ZviplZfHBU2bO1H+/i4G9+73gLj
-         9BYQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696307868; x=1696912668;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=GKgPQ38AECrVlc0moMdpWxxk1GnLwNaF/JmBiOPzlGM=;
-        b=p9ruotkR9jEeORbZO6EoQLYEikSOBnVIQ46PqnLnky3b9RzN9AnrU5u4WHUvL/j9Zs
-         +74k2BtugXVHLc34HulFEbofiLWFsJK/JiIk7kuGVOzVUo7FXbEoVvcrDjwM7Q3B7/7G
-         wPBnLs9ziiJ2rQim3iuFNPx1Ipgkcw9Zz3iMjrjzozwT8QyNG9pnrNfGLNK0L1+q1hXd
-         71J8dRQ11neUWIY5lvFG/fjFiI0VDiKQTORjyFeg1lDK7snNWmczRr+YvFxEq7ygBCSY
-         2Z9/vhgZ7R26P0ZVY4rI+anqOAnNr6Whz0tf6WmxytMn+x25LMZ8CpZp2we1bqkwkEGj
-         M7TQ==
-X-Gm-Message-State: AOJu0YyGR5mk4zExenCsdd06b7WO4wNNTDmQIVGqqWywPXjyc3oXEMCS
-        6I0Z0w7G3cVNjRhX1dqchMcbmg==
-X-Google-Smtp-Source: AGHT+IGcJswyqq2+v8adfeB7JFHPk6IW7uTaWtSmL6Jtu5yzeYDhKrvLZYKMEUvZXOisUIZVOAzPIw==
-X-Received: by 2002:aa7:88c1:0:b0:68f:dfda:1814 with SMTP id k1-20020aa788c1000000b0068fdfda1814mr16065099pff.18.1696307868388;
-        Mon, 02 Oct 2023 21:37:48 -0700 (PDT)
-Received: from x1 ([2601:1c2:1800:f680:6f96:60b4:c2b:8120])
-        by smtp.gmail.com with ESMTPSA id z9-20020aa785c9000000b00692acfc4b3csm332716pfn.136.2023.10.02.21.37.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 02 Oct 2023 21:37:48 -0700 (PDT)
-Date:   Mon, 2 Oct 2023 21:37:44 -0700
-From:   Drew Fustini <dfustini@baylibre.com>
-To:     Robert Nelson <robertcnelson@gmail.com>,
-        Prabhakar <prabhakar.csengg@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        =?iso-8859-1?Q?Bj=F6rn_T=F6pel?= <bjorn@kernel.org>,
-        Alexandre Ghiti <alexghiti@rivosinc.com>
-Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
-Message-ID: <ZRuamJuShOnvP1pr@x1>
-References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
- <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
+        with ESMTP id S229835AbjJCHqg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2023 03:46:36 -0400
+Received: from mx08-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7289F90;
+        Tue,  3 Oct 2023 00:46:32 -0700 (PDT)
+Received: from pps.filterd (m0369457.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 39353va3021962;
+        Tue, 3 Oct 2023 09:45:56 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
+        message-id:date:mime-version:subject:to:cc:references:from
+        :in-reply-to:content-type:content-transfer-encoding; s=
+        selector1; bh=x3zvFTP/cLetsfZPkK+gIr/Q1D7D0ztqpwYaPZYqEI8=; b=uO
+        k9aJK7R1840fb0b3pBnvZI/Q+sO/3kzxpReIyl8a2WtjvEs45JT6XTDrlHMrsGPn
+        Io4kdlT3zs4GfXE3bNHXaM0035fkGjMAqp2uMreLcEPQiYepILPOa+cc7NCAPguM
+        XG/+aAp+4tKUhiooqE+RCJHYp2y7MjmaJGdf1IMZoAa94a14CtlOeJUBnEw8dsgw
+        u6oWujro9NzuU9qeHL/ppQLDYgxAEDr6y873+ikT+KJq7Fg4e8TZp7c+qkB+QmPp
+        mFyCfe1vyeHFUsZQmgUNkpuoVew6YGy6z2Wppfm2ptuSn7pxaIHLo+x4mVReKTrQ
+        5oexx004P/dDF0l4T6kQ==
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3texmj0c3h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 03 Oct 2023 09:45:56 +0200 (MEST)
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 787F8100057;
+        Tue,  3 Oct 2023 09:45:54 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 1D361229A9D;
+        Tue,  3 Oct 2023 09:45:54 +0200 (CEST)
+Received: from [10.201.20.32] (10.201.20.32) by SHFDAG1NODE1.st.com
+ (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Tue, 3 Oct
+ 2023 09:45:52 +0200
+Message-ID: <1a48fce4-0faf-5e26-c57a-064307573c69@foss.st.com>
+Date:   Tue, 3 Oct 2023 09:45:36 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH v5 01/11] dt-bindings: document generic access controller
+To:     Rob Herring <robh@kernel.org>
+CC:     <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
+        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
+        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
+        <alexandre.torgue@foss.st.com>, <vkoul@kernel.org>,
+        <jic23@kernel.org>, <olivier.moysan@foss.st.com>,
+        <arnaud.pouliquen@foss.st.com>, <mchehab@kernel.org>,
+        <fabrice.gasnier@foss.st.com>, <andi.shyti@kernel.org>,
+        <ulf.hansson@linaro.org>, <edumazet@google.com>, <kuba@kernel.org>,
+        <pabeni@redhat.com>, <hugues.fruchet@foss.st.com>,
+        <lee@kernel.org>, <will@kernel.org>, <catalin.marinas@arm.com>,
+        <arnd@kernel.org>, <richardcochran@gmail.com>,
+        Frank Rowand <frowand.list@gmail.com>, <peng.fan@oss.nxp.com>,
+        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <dmaengine@vger.kernel.org>,
+        <linux-i2c@vger.kernel.org>, <linux-iio@vger.kernel.org>,
+        <alsa-devel@alsa-project.org>, <linux-media@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
+        <linux-p.hy@lists.infradead.org>, <linux-serial@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <linux-usb@vger.kernel.org>
+References: <20230929142852.578394-1-gatien.chevallier@foss.st.com>
+ <20230929142852.578394-2-gatien.chevallier@foss.st.com>
+ <20231002173019.GA2037244-robh@kernel.org>
+Content-Language: en-US
+From:   Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
+In-Reply-To: <20231002173019.GA2037244-robh@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.201.20.32]
+X-ClientProxiedBy: SHFCAS1NODE2.st.com (10.75.129.73) To SHFDAG1NODE1.st.com
+ (10.75.129.69)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-10-03_04,2023-10-02_01,2023-05-22_02
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Sep 22, 2023 at 05:48:21PM -0500, Robert Nelson wrote:
-> On Fri, Sep 22, 2023 at 2:08 PM Robert Nelson <robertcnelson@gmail.com> wrote:
-> >
-> > On Thu, Sep 21, 2023 at 8:51 PM Drew Fustini <dfustini@baylibre.com> wrote:
-> > >
-> > > This series adds support for the eMMC on the BeagleV Ahead and the
-> > > Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
-> > > eMMC.
-> > >
-> > > I tested on top of v6.6-rc2 with this config [1]. I was able to boot
-> > > both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
-> > > are required:
-> > >
-> > >   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
-> > >
-> > > I pushed a branch [5] with this patch series and the above patch for
-> > > those that find a git branch easier to test.
-> > >
-> > > Please note that only the MMC controller connected to the eMMC device
-> > > is enabled in the device trees for these two boards. I did not yet
-> > > attempt to configure and use the microSD card slot. My preference is to
-> > > address that in a future patch series.
-> > >
-> > > References:
-> > > [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
-> > > [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
-> > > [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
-> > > [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
-> > > [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
-> >
-> > This patchset came out very nice!
-> >
-> > v6.6-rc2 with Last RFC v2:
-> >
-> > [    4.066630] mmc0: SDHCI controller on ffe7080000.mmc
-> > [ffe7080000.mmc] using PIO
-> >
-> > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
-> >
-> > /dev/mmcblk0:
-> >  Timing cached reads:   1516 MB in  2.00 seconds = 758.09 MB/sec
-> >  Timing buffered disk reads:  84 MB in  3.01 seconds =  27.94 MB/sec
-> >
-> > vs v6.6-rc2 with this patchset:
-> >
-> >  [    4.096837] mmc0: SDHCI controller on ffe7080000.mmc
-> > [ffe7080000.mmc] using DMA
-> >
-> > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
-> >
-> > /dev/mmcblk0:
-> >  Timing cached reads:   1580 MB in  2.00 seconds = 790.97 MB/sec
-> >  Timing buffered disk reads: 418 MB in  3.00 seconds = 139.11 MB/sec
+Hi Rob,
+
+On 10/2/23 19:30, Rob Herring wrote:
+> On Fri, Sep 29, 2023 at 04:28:42PM +0200, Gatien Chevallier wrote:
+>> From: Oleksii Moisieiev <Oleksii_Moisieiev@epam.com>
+>>
+>> Introducing of the generic access controller bindings for the
+>> access controller provider and consumer devices. Those bindings are
+>> intended to allow a better handling of accesses to resources in a
+>> hardware architecture supporting several compartments.
+>>
+>> This patch is based on [1]. It is integrated in this patchset as it
+>> provides a use-case for it.
+>>
+>> Diffs with [1]:
+>> 	- Rename feature-domain* properties to access-control* to narrow
+>> 	  down the scope of the binding
+>> 	- YAML errors and typos corrected.
+>> 	- Example updated
+>> 	- Some rephrasing in the binding description
+>>
+>> [1]: https://lore.kernel.org/lkml/0c0a82bb-18ae-d057-562b
+>>
+>> Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
+>> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+>>
+>> ---
+>> Changes in V5:
+>> 	- Diffs with [1]
+>> 	- Discarded the [IGNORE] tag as the patch is now part of the
+>> 	  patchset
+>>
+>>   .../access-controllers/access-controller.yaml | 90 +++++++++++++++++++
+>>   1 file changed, 90 insertions(+)
+>>   create mode 100644 Documentation/devicetree/bindings/access-controllers/access-controller.yaml
+>>
+>> diff --git a/Documentation/devicetree/bindings/access-controllers/access-controller.yaml b/Documentation/devicetree/bindings/access-controllers/access-controller.yaml
+>> new file mode 100644
+>> index 000000000000..9d305fccc333
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/access-controllers/access-controller.yaml
+>> @@ -0,0 +1,90 @@
+>> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+>> +%YAML 1.2
+>> +---
+>> +$id: http://devicetree.org/schemas/access-controllers/access-controller.yaml#
+>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>> +
+>> +title: Generic Domain Access Controller
+>> +
+>> +maintainers:
+>> +  - Oleksii Moisieiev <oleksii_moisieiev@epam.com>
+>> +
+>> +description: |+
+>> +  Common access controllers properties
+>> +
+>> +  Access controllers are in charge of stating which of the hardware blocks under
+>> +  their responsibility (their domain) can be accesssed by which compartment. A
+>> +  compartment can be a cluster of CPUs (or coprocessors), a range of addresses
+>> +  or a group of hardware blocks. An access controller's domain is the set of
+>> +  resources covered by the access controller.
+>> +
+>> +  This device tree bindings can be used to bind devices to their access
+>> +  controller provided by access-controller property. In this case, the device is
+>> +  a consumer and the access controller is the provider.
+>> +
+>> +  An access controller can be represented by any node in the device tree and
+>> +  can provide one or more configuration parameters, needed to control parameters
+>> +  of the consumer device. A consumer node can refer to the provider by phandle
+>> +  and a set of phandle arguments, specified by '#access-controller-cells'
+>> +  property in the access controller node.
+>> +
+>> +  Access controllers are typically used to set/read the permissions of a
+>> +  hardware block and grant access to it. Any of which depends on the access
+>> +  controller. The capabilities of each access controller are defined by the
+>> +  binding of the access controller device.
+>> +
+>> +  Each node can be a consumer for the several access controllers.
+>> +
+>> +# always select the core schema
+>> +select: true
+>> +
+>> +properties:
+>> +  "#access-controller-cells":
+>> +    $ref: /schemas/types.yaml#/definitions/uint32
 > 
-> Drew pointed out on Slack, this was not quite right.. After more
-> digging by Drew, CONFIG_DMA_GLOBAL_POOL is causing a DMA limitation
-> with the multiplatform defconfig. so with,
+> Drop. "#.*-cells" already defines the type.
 > 
-> ./scripts/config --disable CONFIG_ARCH_R9A07G043
+
+Ok, I will drop it for V6
+
+>> +    description:
+>> +      Number of cells in a access-controller specifier;
+>> +      Can be any value as specified by device tree binding documentation
+>> +      of a particular provider.
+>> +
+>> +  access-control-provider:
+>> +    description:
+>> +      Indicates that the node is an access controller.
 > 
-> (to remove CONFIG_DMA_GLOBAL_POOL)... another 2x in buffered reads..
+> Drop. The presence of "#access-controller-cells" is enough to do that.
 > 
-> [    4.059242] mmc0: SDHCI controller on ffe7080000.mmc
-> [ffe7080000.mmc] using ADMA 64-bit
+
+Ok, I wasn't sure. I'll will drop it for V6
+
+>> +
+>> +  access-controller-names:
+>> +    $ref: /schemas/types.yaml#/definitions/string-array
+>> +    description:
+>> +      A list of access-controller names, sorted in the same order as
+>> +      access-controller entries. Consumer drivers will use
+>> +      access-controller-names to match with existing access-controller entries.
+>> +
+>> +  access-controller:
 > 
-> debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> For consistency with other provider bindings: access-controllers
 > 
-> /dev/mmcblk0:
->  Timing cached reads:   1600 MB in  2.00 seconds = 800.93 MB/sec
->  Timing buffered disk reads: 892 MB in  3.00 seconds = 297.06 MB/sec
 
-It seems CONFIG_DMA_GLOBAL_POOL=y causes ADMA buffer alloc to fail [1]:
+Ack
 
-  mmc0: Unable to allocate ADMA buffers - falling back to standard DMA
+>> +    $ref: /schemas/types.yaml#/definitions/phandle-array
+>> +    description:
+>> +      A list of access controller specifiers, as defined by the
+>> +      bindings of the access-controller provider.
+>> +
+>> +additionalProperties: true
+>> +
+>> +examples:
+>> +  - |
+>> +    uart_controller: access-controller@50000 {
+>> +        reg = <0x50000 0x10>;
+>> +        access-control-provider;
+>> +        #access-controller-cells = <2>;
+>> +    };
+>> +
+>> +    bus_controller: bus@60000 {
+>> +        reg = <0x60000 0x10000>;
+>> +        #address-cells = <1>;
+>> +        #size-cells = <1>;
+>> +        ranges;
+>> +        access-control-provider;
+>> +        #access-controller-cells = <3>;
+>> +
+>> +        uart4: serial@60100 {
+>> +            reg = <0x60100 0x400>;
+>> +            access-controller = <&uart_controller 1 2>,
+>> +                                <&bus_controller 1 3 5>;
+>> +            access-controller-names = "controller", "bus-controller";
+> 
+> Not great names. It should indicate what access is being controlled
+> locally. Perhaps "reg" for register access, "dma" or "bus" for bus
+> master access. (Not sure what your uart_controller is controlling access
+> to.)
+> 
+> Rob
 
-Prabhakar's AX45MP non-coherent DMA support [2] series introduced the
-selection of DMA_GLOBAL_POOL for ARCH_R9A07G043 and the riscv defconfig
-selects ARCH_R9A07G043. 
+Yes, I agree it's poor naming. I'll come up with something more
+adequate. Thank you for the input.
 
-Patch 5 in the series [3] states that:
-
-  With DMA_GLOBAL_POOL enabled all DMA allocations happen from this
-  region and synchronization callbacks are implemented to synchronize
-  when doing DMA transactions.
-
-This example of a "shared-dma-pool" node was given:
-
-        pma_resv0@58000000 {
-            compatible = "shared-dma-pool";
-            reg = <0x0 0x58000000 0x0 0x08000000>;
-            no-map;
-            linux,dma-default;
-        };
-
-I've copied that to th1520-beaglev-ahead.dts. The address of 0x58000000
-has no significance on th1520, but the existence of shared-dma-pool
-seems to fix the problem. ADMA mode [4] is now working even though
-CONFIG_DMA_GLOBAL_POOL=y.
-
-Thanks,
-Drew
-
-[1] https://gist.github.com/pdp7/73041ed808bbc7dd445836fb90574979
-[2] https://lore.kernel.org/linux-riscv/20230818135723.80612-1-prabhakar.mahadev-lad.rj@bp.renesas.com/
-[3] https://lore.kernel.org/linux-riscv/20230818135723.80612-6-prabhakar.mahadev-lad.rj@bp.renesas.com/
-[4] https://gist.github.com/pdp7/91e72a663d3bb73eb28182337ad8bbcb
+Best regards,
+Gatien
