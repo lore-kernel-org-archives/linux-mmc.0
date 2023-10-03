@@ -2,56 +2,57 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E246AE7543D
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Oct 2023 09:58:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D4E0E75445
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Oct 2023 10:30:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239808AbjJCJ64 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Oct 2023 05:58:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54350 "EHLO
+        id S231300AbjJCKa6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Oct 2023 06:30:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35486 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239793AbjJCJ64 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2023 05:58:56 -0400
-Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D364A3
-        for <linux-mmc@vger.kernel.org>; Tue,  3 Oct 2023 02:58:53 -0700 (PDT)
-Received: by mail-yb1-xb33.google.com with SMTP id 3f1490d57ef6-d81f35511e6so620661276.0
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Oct 2023 02:58:53 -0700 (PDT)
+        with ESMTP id S230370AbjJCKa5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2023 06:30:57 -0400
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F34E2A3
+        for <linux-mmc@vger.kernel.org>; Tue,  3 Oct 2023 03:30:53 -0700 (PDT)
+Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-d8181087dc9so763491276.3
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Oct 2023 03:30:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1696327133; x=1696931933; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1696329053; x=1696933853; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=znrOVYIM3TgYWJ+uG1Asu14WG/jKlSZIDknBX8rEXMs=;
-        b=H+OqqOoxj3kvNqMBQgjkn19cJV37rshMzVtStcV0zsXzO1CKLVa/bD8qsabWbipy8f
-         13qP6hJK9OIF7lv5yU3ns6PogcNPhwIvYGOowBhUPJGDPNx3Cpy8Es6sn/FCU9bX5Uez
-         tDCQXBkYvrq4evI8blKqWR9D8nPU8GFudG3rQXXhPCsPQAdluxv0+72UZIkBzWfw4vyc
-         MISX1lDmnDxgjLFUorFsEGqqoWzPoGCEB3bMZud8SA2iVvqF3KY0VCVTSYEyLAKcA40y
-         mKYh2+SUZYFHdc9ysj1FUsQ14OPNx+O0PeDmMauprOusvbWn0Y4BrqDINfAz1vWN81bv
-         1qyA==
+        bh=mVwfFUWyiMyIuOlyBEbAGxUKblcDseIlgsjk2Nx2xkY=;
+        b=mrMmC/LBMgbw1CVz0QuuAMEP/2oAHpXunkZZ5GSwfNPq/a0oqThoBL0twNxHMqUAyP
+         lVwDKm4waZiAYxEXopf9/Hpo574toTiBx31YXYltpDLNox7sLHD5zuwrb6pqNdkCtfSx
+         WRV5S9LinBWDqJiJ0ntJKO2DgLxbXDSskqhbEuPA/T50HhA57WKvUSymfWHdGp/1LqBU
+         GWUdN0QbHRyYBTVeSghMe3f7qqf9MfMvDFP1pcyKAosuW8hqljIjKKXK9hQTSbVFRLMj
+         +ZZjcrkgAkZgkTRN4xQ/Kib+5X2gh/aYEjze3ePEmvq7JSCBhECVXo7ElIYGG/7wqTZV
+         Sc8w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696327133; x=1696931933;
+        d=1e100.net; s=20230601; t=1696329053; x=1696933853;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=znrOVYIM3TgYWJ+uG1Asu14WG/jKlSZIDknBX8rEXMs=;
-        b=toMSDaFY1BG0YkWIui3HMyLbpJeCGSI5kpGdX/Q5J+/Qfv/PCbrzf3QjEWDxvn48Sz
-         fu++BnQRRcW+pKJNAR/5P4tegUP0qktGPW/BNiXNkjOZ+5oRQBtTuOT9MBk6S3k6b41w
-         Esumtldb5JClKLDqUE9PSEMzg9fVbKFs+FfXwoSDXIHMC6ZevF1xD5rMKQswrN1WWaCb
-         wB7JjO1bL8oRAVYj6LuZ0sUvJsDq8IGOxGbLizOB63MExlYucfwTPz6e1SPMDa6HNFUR
-         +yHif0MwiUQ/OP9GZEbccT3DcP82qMVNqB37pHBpmKHuQcx0fSqKXe0Cu3MyN8nctqcz
-         X0DQ==
-X-Gm-Message-State: AOJu0YzD6vIfufwZjHZdd6zEUH3ionYHSnZ2jk39PTQed/6oijJOeSSk
-        k9+6hae4q86f3wD7lomSkv0+Vod8hLCwAfhy1/6JPg==
-X-Google-Smtp-Source: AGHT+IHOABImhHJaaAE1q8BneZDvSrnMU/2KbtgnUSN9zby4FOmr+mJVXE7EryPRqvcEvH697Oy130x/J8DeF5Wx7ZU=
-X-Received: by 2002:a25:accd:0:b0:d85:ae0d:20eb with SMTP id
- x13-20020a25accd000000b00d85ae0d20ebmr1606305ybd.14.1696327132702; Tue, 03
- Oct 2023 02:58:52 -0700 (PDT)
+        bh=mVwfFUWyiMyIuOlyBEbAGxUKblcDseIlgsjk2Nx2xkY=;
+        b=om3nJy6EDLQWVQnGJJesAhIRIwlNrrYR0OhqtCDUQ1JixLtiMKLseaVzQeplZUA4hf
+         xrdN5hqONunSk2mxCpgMaqojyNQh+zRROO9yZudX5vO4ppmRM5sGWXqrUTkgUO0MpBKD
+         rBVZUgfNbRt9OEaa6yNWbUdh15sY8bMSVJAMuuQfpjAtdTl5DNVDaHIWRPyp2gIQGZhi
+         Vlz1PLhweGEoxrIJ1cVprL9CO2s+ysfRNXdlgFZhcaIse2HZY67hFDpuiWrC+puSSh6x
+         ecRAkJ1tsJymMJp9lyTYqQHKG1bKQBjNJY5o9z6Nt46VUzZRVS+7rGkJZ97ORFOezy7S
+         GUww==
+X-Gm-Message-State: AOJu0YwHM8cm8zQJptkT1E3Tr3YpMSn3zl7UuIGUv4jBEwZJ+Zw5wuBt
+        ulB1s9ui6f3xZ9v7iVoOSA0B9bsSmovaHJ22FXD1ng==
+X-Google-Smtp-Source: AGHT+IHVRVSpfyrBedF23ZuSgpOA5q5YBP6BOnOD2FUGzu6+0s46SlWES+Ezs1YuyagbPz9u47t19l5ffiMj0ymytno=
+X-Received: by 2002:a25:ade6:0:b0:d48:1936:14d0 with SMTP id
+ d38-20020a25ade6000000b00d48193614d0mr14521918ybe.53.1696329053136; Tue, 03
+ Oct 2023 03:30:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230915094351.11120-1-victorshihgli@gmail.com> <20230915094351.11120-13-victorshihgli@gmail.com>
-In-Reply-To: <20230915094351.11120-13-victorshihgli@gmail.com>
+References: <20230915094351.11120-1-victorshihgli@gmail.com> <20230915094351.11120-11-victorshihgli@gmail.com>
+In-Reply-To: <20230915094351.11120-11-victorshihgli@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 3 Oct 2023 11:58:17 +0200
-Message-ID: <CAPDyKFpzuds6Ttbhw1cqZwisa+M6167DT3DUihcDqFjYJX95eA@mail.gmail.com>
-Subject: Re: [PATCH V12 12/23] mmc: sdhci-uhs2: skip signal_voltage_switch()
+Date:   Tue, 3 Oct 2023 12:30:16 +0200
+Message-ID: <CAPDyKFrynugse6+vwummTQ73egwvGAfKreH=iihv9bhFN1SJYQ@mail.gmail.com>
+Subject: Re: [PATCH V12 10/23] mmc: sdhci-uhs2: add reset function and
+ uhs2_mode function
 To:     Victor Shih <victorshihgli@gmail.com>
 Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
@@ -68,11 +69,7 @@ On Fri, 15 Sept 2023 at 11:44, Victor Shih <victorshihgli@gmail.com> wrote:
 >
 > From: Victor Shih <victor.shih@genesyslogic.com.tw>
 >
-> For UHS2, the signal voltage is supplied by vdd2 which is already 1.8v,
-> so no voltage switch required.
-
-Can you please elaborate on this? I don't get anything of the above, sorry.
-
+> Sdhci_uhs2_reset() does a UHS-II specific reset operation.
 >
 > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
@@ -80,61 +77,116 @@ Can you please elaborate on this? I don't get anything of the above, sorry.
 > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
 >
-> Updates in V5:
->  - Use sdhci_uhs2_mode() to simplify code in
->    sdhci_uhs2_start_signal_voltage_switch().
+> Updates in V8:
+>  - Adjust the position of matching brackets.
+>
+> Updates in V6:
+>  - Remove unnecessary functions and simplify code.
 >
 > ---
 >
->  drivers/mmc/host/sdhci-uhs2.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
+>  drivers/mmc/host/sdhci-uhs2.c | 45 +++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-uhs2.h |  2 ++
+>  2 files changed, 47 insertions(+)
 >
 > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> index fc37a34629c2..92fb69b7e209 100644
+> index e339821d3504..dfc80a7f1bad 100644
 > --- a/drivers/mmc/host/sdhci-uhs2.c
 > +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -142,6 +142,27 @@ static void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, un
->         }
+> @@ -10,7 +10,9 @@
+>   *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+>   */
+>
+> +#include <linux/delay.h>
+>  #include <linux/module.h>
+> +#include <linux/iopoll.h>
+>
+>  #include "sdhci.h"
+>  #include "sdhci-uhs2.h"
+> @@ -49,6 +51,49 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
 >  }
+>  EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
 >
 > +/*****************************************************************************\
 > + *                                                                           *
-> + * MMC callbacks                                                             *
+> + * Low level functions                                                       *
 > + *                                                                           *
 > +\*****************************************************************************/
 > +
-> +static int sdhci_uhs2_start_signal_voltage_switch(struct mmc_host *mmc,
-> +                                                 struct mmc_ios *ios)
+> +bool sdhci_uhs2_mode(struct sdhci_host *host)
 > +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +
-> +       /*
-> +        * For UHS2, the signal voltage is supplied by vdd2 which is
-> +        * already 1.8v so no voltage switch required.
-> +        */
-> +       if (sdhci_uhs2_mode(host))
-> +               return 0;
+> +       return host->mmc->flags & MMC_UHS2_SUPPORT;
 
-This is just wrong. If we are initializing a uhs2 card, we certainly
-should call ->start_signal_voltage_switch() callback at all. This is
-for UHS-I cards, right?
+The MMC_UHS2_SUPPORT bit looks redundant to me. Instead, I think we
+should be using mmc->ios.timings, which already indicates whether we
+are using UHS2 (MMC_TIMING_UHS2_SPEED_*). See patch2 where we added
+this.
 
-> +
-> +       return sdhci_start_signal_voltage_switch(mmc, ios);
+That said, I think we should drop the sdhci_uhs2_mode() function
+altogether and instead use mmc_card_uhs2(), which means we should move
+it to include/linux/mmc/host.h, so it becomes available for host
+drivers.
+
 > +}
+> +
+> +/**
+> + * sdhci_uhs2_reset - invoke SW reset
+> + * @host: SDHCI host
+> + * @mask: Control mask
+> + *
+> + * Invoke SW reset, depending on a bit in @mask and wait for completion.
+> + */
+> +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
+> +{
+> +       unsigned long timeout;
+> +       u32 val;
+> +
+> +       sdhci_writew(host, mask, SDHCI_UHS2_SW_RESET);
+> +
+> +       if (mask & SDHCI_UHS2_SW_RESET_FULL)
+> +               host->clock = 0;
+> +
+> +       /* Wait max 100 ms */
+> +       timeout = 100000;
+
+Please convert into using a define and use that directly, below instead.
+
+> +
+> +       /* hw clears the bit when it's done */
+> +       if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
+> +                                    timeout, true, host, SDHCI_UHS2_SW_RESET)) {
+> +               pr_err("%s: %s: Reset 0x%x never completed.\n", __func__,
+> +                      mmc_hostname(host->mmc), (int)mask);
+> +               pr_err("%s: clean reset bit\n", mmc_hostname(host->mmc));
+
+It looks silly to do two pr_err immediately after each other, please
+combine them into one.
+
+Moreover, I think we should probably convert into using a pr_warn() instead.
+
+> +               sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
+> +               return;
+> +       }
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
 > +
 >  /*****************************************************************************\
 >   *                                                                           *
 >   * Driver init/exit                                                          *
-> @@ -150,6 +171,9 @@ static void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, un
+> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
+> index 2bfe18d29bca..8253d50f7852 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.h
+> +++ b/drivers/mmc/host/sdhci-uhs2.h
+> @@ -177,5 +177,7 @@
+>  struct sdhci_host;
 >
->  static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
->  {
-> +       host->mmc_host_ops.start_signal_voltage_switch =
-> +               sdhci_uhs2_start_signal_voltage_switch;
-> +
->         return 0;
->  }
+>  void sdhci_uhs2_dump_regs(struct sdhci_host *host);
+> +bool sdhci_uhs2_mode(struct sdhci_host *host);
+> +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
+>
+>  #endif /* __SDHCI_UHS2_H */
+> --
+> 2.25.1
 >
 
 Kind regards
