@@ -2,139 +2,392 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62D56E75450
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Oct 2023 11:37:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87729E75452
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Oct 2023 12:15:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239955AbjJCLhd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Oct 2023 07:37:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41238 "EHLO
+        id S232131AbjJCMPq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Oct 2023 08:15:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43804 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231472AbjJCLhd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2023 07:37:33 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1AEC8E;
-        Tue,  3 Oct 2023 04:37:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1696333050; x=1727869050;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=C32ByUo447YYv+RlPWVC6MinO3qaNAkiZax9oAqDLHg=;
-  b=Rx2ObdGErZQg+C/yarFH08mmd+74aaPDSx7eLzC7SAv9MX4XGt/eMZSv
-   HGgK5TdAiwuJTsUphRnkER63yY7PzuYKNd7nyffwv8y5yY+VW4+9S5XrC
-   UmqVT86cIdDd07jute3yvHoEQIDOOAlZTGvtJs/kCga3SrhSsc8V9pmlq
-   gxrcgHr5APmdQugHVRETwwXL/nUdhiOP377YXkZ7OUT7WV8HJG9CoZwTH
-   o/yDbS499kPLAt4HL+c8VXmTPhOhT2GcxRP5jW3mbtTQLa/F1aAvQ0MPB
-   3Hh4oB+nQIXCauQpDZpv+KjzgmQfdjEziYmEI1e/i48H+V41kU+0Gklvy
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10851"; a="413765305"
-X-IronPort-AV: E=Sophos;i="6.03,197,1694761200"; 
-   d="scan'208";a="413765305"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Oct 2023 04:37:30 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10851"; a="997984639"
-X-IronPort-AV: E=Sophos;i="6.03,197,1694761200"; 
-   d="scan'208";a="997984639"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.56.99])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Oct 2023 04:37:27 -0700
-Message-ID: <afa2aeed-7296-4075-a7e0-62f3d59bfdf4@intel.com>
-Date:   Tue, 3 Oct 2023 14:37:22 +0300
+        with ESMTP id S231998AbjJCMPq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Oct 2023 08:15:46 -0400
+Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A38DAC
+        for <linux-mmc@vger.kernel.org>; Tue,  3 Oct 2023 05:15:42 -0700 (PDT)
+Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-59e77e4f707so10494037b3.0
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Oct 2023 05:15:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1696335341; x=1696940141; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=VDVpSksuWR7AsHnYKiy6VQr580Esn9Zomwi8qvkWS/g=;
+        b=zvADul/5c5pG0m1/UEIS9V7tCT4o0Kyk847/6YYGqzfCJFNdAMZ3uKhD6WP5nFV57x
+         /uuvL8YM3jsOEIcyaxu9YaFI2VNFV5I7jVuixG3jyzF3wneheoiRGfatZuWxeojZH9TF
+         n8blcBsZZrDAdApnTXj+DL+CltQSXaa8SwK5/G8uVwxdH/rTezREC8501zwPjik524Ui
+         5N66RSWueAM+AP8zIRlecRKBVewULMLWuz0wgZUtcLU3rVZbXHnkF01+c8dBbmLDBqAx
+         Y67H+nHNo8z9oMOH3aanVGy+qUTpy5OGnsYt/TLS+EBlltbFG1uTlgWNlGbfoF1YisVS
+         obzA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696335341; x=1696940141;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VDVpSksuWR7AsHnYKiy6VQr580Esn9Zomwi8qvkWS/g=;
+        b=hThxu+DHP+3upeMf8YbJBo1tCfatrq/PeyGHsovMGmF9dvCwurazLukzLlkHc1IjT2
+         6zj6PW5rzAuf175EDumK+VQuOKlHkkolGXIR6FQasrcdT5LEqhbC83/tkHa8MRlfGahB
+         qI2XO5FQ+iSx8MVwkcUWAF8fJwxx5iBvCrS4EsVtJLQN3o4OanwSMGebig+zypvJzEjw
+         dfvYw5ndi6X2KJu9GgQ2GoBaYROEdBFqxzEP3hdcsh4uMougNue5dQPZMKlKJ2HWQ6gZ
+         lRkR2X2RZc7kpRVOx8N7/BWsVb4PbG/jTlU3mSwsB5qZF9MsFF3oXksryIFVsvkQmnJf
+         n+rw==
+X-Gm-Message-State: AOJu0Yye+Jr8JQ+GuWwGIQ+S056DpeSsMMsqZY2ujwmqkasajG6gK3gi
+        rRY8TlBfi0I3rZzLO96Lw0Ev/7JBFpxk668SmuZj9g==
+X-Google-Smtp-Source: AGHT+IERnUEcqQgnhAOdB/R9TGzaBtJL6LVSF4qMYHTQGC5Uquy7PjxhWq5MUrvaZleYyHxubxovZM8XljrTVxuoDSk=
+X-Received: by 2002:a25:aa93:0:b0:d78:ef4:76ae with SMTP id
+ t19-20020a25aa93000000b00d780ef476aemr13144936ybi.33.1696335341408; Tue, 03
+ Oct 2023 05:15:41 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V12 10/23] mmc: sdhci-uhs2: add reset function and
- uhs2_mode function
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Victor Shih <victorshihgli@gmail.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+References: <20230915094351.11120-1-victorshihgli@gmail.com> <20230915094351.11120-19-victorshihgli@gmail.com>
+In-Reply-To: <20230915094351.11120-19-victorshihgli@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 3 Oct 2023 14:15:05 +0200
+Message-ID: <CAPDyKFoiroN0XX0CLHGxZYHCZmWe11z5avH=KnS7qpkuNdwxiw@mail.gmail.com>
+Subject: Re: [PATCH V12 18/23] mmc: sdhci-uhs2: add request() and others
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20230915094351.11120-1-victorshihgli@gmail.com>
- <20230915094351.11120-11-victorshihgli@gmail.com>
- <CAPDyKFrynugse6+vwummTQ73egwvGAfKreH=iihv9bhFN1SJYQ@mail.gmail.com>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAPDyKFrynugse6+vwummTQ73egwvGAfKreH=iihv9bhFN1SJYQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/10/23 13:30, Ulf Hansson wrote:
-> On Fri, 15 Sept 2023 at 11:44, Victor Shih <victorshihgli@gmail.com> wrote:
->>
->> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->>
->> Sdhci_uhs2_reset() does a UHS-II specific reset operation.
->>
->> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
->> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>
->> Updates in V8:
->>  - Adjust the position of matching brackets.
->>
->> Updates in V6:
->>  - Remove unnecessary functions and simplify code.
->>
->> ---
->>
->>  drivers/mmc/host/sdhci-uhs2.c | 45 +++++++++++++++++++++++++++++++++++
->>  drivers/mmc/host/sdhci-uhs2.h |  2 ++
->>  2 files changed, 47 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
->> index e339821d3504..dfc80a7f1bad 100644
->> --- a/drivers/mmc/host/sdhci-uhs2.c
->> +++ b/drivers/mmc/host/sdhci-uhs2.c
->> @@ -10,7 +10,9 @@
->>   *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
->>   */
->>
->> +#include <linux/delay.h>
->>  #include <linux/module.h>
->> +#include <linux/iopoll.h>
->>
->>  #include "sdhci.h"
->>  #include "sdhci-uhs2.h"
->> @@ -49,6 +51,49 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
->>  }
->>  EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
->>
->> +/*****************************************************************************\
->> + *                                                                           *
->> + * Low level functions                                                       *
->> + *                                                                           *
->> +\*****************************************************************************/
->> +
->> +bool sdhci_uhs2_mode(struct sdhci_host *host)
->> +{
->> +       return host->mmc->flags & MMC_UHS2_SUPPORT;
-> 
-> The MMC_UHS2_SUPPORT bit looks redundant to me. Instead, I think we
-> should be using mmc->ios.timings, which already indicates whether we
-> are using UHS2 (MMC_TIMING_UHS2_SPEED_*). See patch2 where we added
-> this.
-> 
-> That said, I think we should drop the sdhci_uhs2_mode() function
-> altogether and instead use mmc_card_uhs2(), which means we should move
-> it to include/linux/mmc/host.h, so it becomes available for host
-> drivers.
-> 
+On Fri, 15 Sept 2023 at 11:44, Victor Shih <victorshihgli@gmail.com> wrote:
+>
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+>
+> This is a sdhci version of mmc's request operation.
+> It covers both UHS-I and UHS-II.
 
-UHS2 mode starts at UHS2 initialization and ends either when UHS2
-initialization fails, or the card is removed.
+Okay, but again, please elaborate on why we need/want this.
 
-So it includes re-initialization and reset when the transfer mode
-currently transitions through MMC_TIMING_LEGACY.
+>
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> ---
+>
+> Updates in V11:
+>  - Drop the check mmc_card_uhs2_hd_mode(host->mmc)
+>    in sdhci_uhs2_set_transfer_mode().
+>
+> Updates in V10:
+>  - Use tmode_half_duplex to instead of uhs2_tmode0_flag
+>    in sdhci_uhs2_set_transfer_mode().
+>
+> Updates in V9:
+>  - Modify the annotations in __sdhci_uhs2_send_command().
+>
+> Updates in V8:
+>  - Adjust the position of matching brackets in
+>    sdhci_uhs2_send_command_retry().
+>  - Modify CameCase definition in __sdhci_uhs2_finish_command().
+>  - Modify error message in __sdhci_uhs2_finish_command().
+>  - sdhci_uhs2_send_command_retry() to instead of sdhci_uhs2_send_command()
+>    in sdhci_uhs2_request().
+>  - Use sdhci_uhs2_mode() to simplify code in sdhci_uhs2_request_atomic().
+>  - Add forward declaration for sdhci_send_command().
+>
+> Updates in V7:
+>  - Cancel export state of some functions.
+>  - Remove unnecessary whitespace changes.
+>
+> Updates in V6:
+>  - Add uhs2_dev_cmd() to simplify code.
+>  - Remove unnecessary functions.
+>  - Cancel export state of some functions.
+>  - Drop use CONFIG_MMC_DEBUG().
+>  - Wrap at 100 columns in some functions.
+>
+> ---
+>
+>  drivers/mmc/host/sdhci-uhs2.c | 412 ++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.c      |  49 ++--
+>  drivers/mmc/host/sdhci.h      |   8 +
+>  3 files changed, 454 insertions(+), 15 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+> index 09b86fec9f7b..1f8d527424fd 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.c
+> +++ b/drivers/mmc/host/sdhci-uhs2.c
 
-So mmc_card_uhs2() won't work correctly for the host callbacks
-unless something is done about that.
+[...]
 
+> +
+> +static void __sdhci_uhs2_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+> +{
+> +       int i, j;
+> +       int cmd_reg;
+> +
+> +       i = 0;
+> +       sdhci_writel(host,
+> +                    ((u32)cmd->uhs2_cmd->arg << 16) |
+> +                               (u32)cmd->uhs2_cmd->header,
+> +                    SDHCI_UHS2_CMD_PACKET + i);
+> +       i += 4;
+> +
+> +       /*
+> +        * Per spec, payload (config) should be MSB before sending out.
+> +        * But we don't need convert here because had set payload as
+> +        * MSB when preparing config read/write commands.
+> +        */
+> +       for (j = 0; j < cmd->uhs2_cmd->payload_len / sizeof(u32); j++) {
+> +               sdhci_writel(host, *(cmd->uhs2_cmd->payload + j), SDHCI_UHS2_CMD_PACKET + i);
+> +               i += 4;
+> +       }
+> +
+> +       for ( ; i < SDHCI_UHS2_CMD_PACK_MAX_LEN; i += 4)
+> +               sdhci_writel(host, 0, SDHCI_UHS2_CMD_PACKET + i);
+> +
+> +       DBG("UHS2 CMD packet_len = %d.\n", cmd->uhs2_cmd->packet_len);
+> +       for (i = 0; i < cmd->uhs2_cmd->packet_len; i++)
+> +               DBG("UHS2 CMD_PACKET[%d] = 0x%x.\n", i,
+> +                   sdhci_readb(host, SDHCI_UHS2_CMD_PACKET + i));
+
+We are ignoring what we just read. Isn't there something we need to verify?
+
+Moreover, the whole thing with i,j and the +4 thing above looks a bit
+odd to me. I am not sure whether the above can be simplified, but I
+leave that for you to have a second look at.
+
+> +
+> +       cmd_reg = FIELD_PREP(SDHCI_UHS2_CMD_PACK_LEN_MASK, cmd->uhs2_cmd->packet_len);
+> +       if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC)
+> +               cmd_reg |= SDHCI_UHS2_CMD_DATA;
+> +       if (cmd->opcode == MMC_STOP_TRANSMISSION)
+> +               cmd_reg |= SDHCI_UHS2_CMD_CMD12;
+> +
+> +       /* UHS2 Native ABORT */
+> +       if ((cmd->uhs2_cmd->header & UHS2_NATIVE_PACKET) &&
+> +           (uhs2_dev_cmd(cmd) == UHS2_DEV_CMD_TRANS_ABORT))
+> +               cmd_reg |= SDHCI_UHS2_CMD_TRNS_ABORT;
+> +
+> +       /* UHS2 Native DORMANT */
+> +       if ((cmd->uhs2_cmd->header & UHS2_NATIVE_PACKET) &&
+> +           (uhs2_dev_cmd(cmd) == UHS2_DEV_CMD_GO_DORMANT_STATE))
+> +               cmd_reg |= SDHCI_UHS2_CMD_DORMANT;
+> +
+> +       DBG("0x%x is set to UHS2 CMD register.\n", cmd_reg);
+> +
+> +       sdhci_writew(host, cmd_reg, SDHCI_UHS2_CMD);
+> +}
+
+[...]
+
+> +static bool sdhci_uhs2_send_command_retry(struct sdhci_host *host,
+> +                                         struct mmc_command *cmd,
+> +                                         unsigned long flags)
+> +       __releases(host->lock)
+> +       __acquires(host->lock)
+> +{
+> +       struct mmc_command *deferred_cmd = host->deferred_cmd;
+> +       int timeout = 10; /* Approx. 10 ms */
+> +       bool present;
+
+Why do we need a retry mechanism at this level? The mmc core sometimes
+retries commands when it seems reasonable, why isn't that sufficient?
+
+> +
+> +       while (!sdhci_uhs2_send_command(host, cmd)) {
+> +               if (!timeout--) {
+> +                       pr_err("%s: Controller never released inhibit bit(s).\n",
+> +                              mmc_hostname(host->mmc));
+> +                       sdhci_dumpregs(host);
+> +                       cmd->error = -EIO;
+> +                       return false;
+> +               }
+> +
+> +               spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +               usleep_range(1000, 1250);
+> +
+> +               present = host->mmc->ops->get_cd(host->mmc);
+> +
+> +               spin_lock_irqsave(&host->lock, flags);
+> +
+> +               /* A deferred command might disappear, handle that */
+> +               if (cmd == deferred_cmd && cmd != host->deferred_cmd)
+> +                       return true;
+> +
+> +               if (sdhci_present_error(host, cmd, present))
+> +                       return false;
+> +       }
+
+If the retry is needed, would it be possible to convert into using
+read_poll_timeout() for the above while loop instead? If so, please
+make that conversion.
+
+> +
+> +       if (cmd == host->deferred_cmd)
+> +               host->deferred_cmd = NULL;
+> +
+> +       return true;
+> +}
+> +
+> +static void __sdhci_uhs2_finish_command(struct sdhci_host *host)
+> +{
+> +       struct mmc_command *cmd = host->cmd;
+> +       u8 resp;
+> +       u8 ecode;
+> +       bool breada0 = 0;
+
+Nitpick: Maybe find some better variable names. Like error_code...
+
+> +       int i;
+> +
+> +       if (host->mmc->flags & MMC_UHS2_SD_TRAN) {
+> +               resp = sdhci_readb(host, SDHCI_UHS2_RESPONSE + 2);
+> +               if (resp & UHS2_RES_NACK_MASK) {
+> +                       ecode = (resp >> UHS2_RES_ECODE_POS) & UHS2_RES_ECODE_MASK;
+> +                       pr_err("%s: NACK response, ECODE=0x%x.\n", mmc_hostname(host->mmc), ecode);
+> +               }
+> +               breada0 = 1;
+> +       }
+> +
+> +       if (cmd->uhs2_resp &&
+> +           cmd->uhs2_resp_len && cmd->uhs2_resp_len <= 20) {
+> +               /* Get whole response of some native CCMD, like
+> +                * DEVICE_INIT, ENUMERATE.
+> +                */
+> +               for (i = 0; i < cmd->uhs2_resp_len; i++)
+> +                       cmd->uhs2_resp[i] = sdhci_readb(host, SDHCI_UHS2_RESPONSE + i);
+> +       } else {
+> +               /* Get SD CMD response and Payload for some read
+> +                * CCMD, like INQUIRY_CFG.
+> +                */
+> +               /* Per spec (p136), payload field is divided into
+> +                * a unit of DWORD and transmission order within
+> +                * a DWORD is big endian.
+> +                */
+> +               if (!breada0)
+> +                       sdhci_readl(host, SDHCI_UHS2_RESPONSE);
+> +               for (i = 4; i < 20; i += 4) {
+
+Again we do sdhci_readl above but just ignore the data. I assume
+that's deliberate, as we are probably just interested in the remaining
+pieces.
+
+Moreover, the whole thing with +4 things continues to look a bit odd
+to me. I am not sure whether it can be simplified, but I leave that
+for you to have a second look at.
+
+> +                       cmd->resp[i / 4 - 1] =
+> +                               (sdhci_readb(host,
+> +                                            SDHCI_UHS2_RESPONSE + i) << 24) |
+> +                               (sdhci_readb(host,
+> +                                            SDHCI_UHS2_RESPONSE + i + 1)
+> +                                       << 16) |
+> +                               (sdhci_readb(host,
+> +                                            SDHCI_UHS2_RESPONSE + i + 2)
+> +                                       << 8) |
+> +                               sdhci_readb(host, SDHCI_UHS2_RESPONSE + i + 3);
+> +               }
+> +       }
+> +}
+
+[...]
+
+> +
+> +void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
+
+static void
+
+> +{
+> +       struct sdhci_host *host = mmc_priv(mmc);
+> +       struct mmc_command *cmd;
+> +       unsigned long flags;
+> +       bool present;
+> +
+> +       if (!(sdhci_uhs2_mode(host))) {
+> +               sdhci_request(mmc, mrq);
+> +               return;
+> +       }
+> +
+> +       mrq->stop = NULL;
+> +       mrq->sbc = NULL;
+> +       if (mrq->data)
+> +               mrq->data->stop = NULL;
+> +
+> +       /* Firstly check card presence */
+> +       present = mmc->ops->get_cd(mmc);
+> +
+> +       spin_lock_irqsave(&host->lock, flags);
+> +
+> +       if (sdhci_present_error(host, mrq->cmd, present))
+> +               goto out_finish;
+> +
+> +       cmd = mrq->cmd;
+> +
+> +       if (!sdhci_uhs2_send_command_retry(host, cmd, flags))
+> +               goto out_finish;
+> +
+> +       spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +       return;
+> +
+> +out_finish:
+> +       sdhci_finish_mrq(host, mrq);
+> +       spin_unlock_irqrestore(&host->lock, flags);
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_uhs2_request);
+
+Drop this, it's not used outside this module.
+
+> +
+> +int sdhci_uhs2_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq)
+
+This function is entirely unused. Did you actually test this with an
+hsq enabled host? Or perhaps you have just added this for
+completeness?
+
+> +{
+> +       struct sdhci_host *host = mmc_priv(mmc);
+> +       struct mmc_command *cmd;
+> +       unsigned long flags;
+> +       int ret = 0;
+> +
+> +       if (!sdhci_uhs2_mode(host))
+> +               return sdhci_request_atomic(mmc, mrq);
+> +
+> +       spin_lock_irqsave(&host->lock, flags);
+> +
+> +       if (sdhci_present_error(host, mrq->cmd, true)) {
+> +               sdhci_finish_mrq(host, mrq);
+> +               goto out_finish;
+> +       }
+> +
+> +       cmd = mrq->cmd;
+> +
+> +       /*
+> +        * The HSQ may send a command in interrupt context without polling
+> +        * the busy signaling, which means we should return BUSY if controller
+> +        * has not released inhibit bits to allow HSQ trying to send request
+> +        * again in non-atomic context. So we should not finish this request
+> +        * here.
+> +        */
+> +       if (!sdhci_uhs2_send_command(host, cmd))
+> +               ret = -EBUSY;
+> +
+> +out_finish:
+> +       spin_unlock_irqrestore(&host->lock, flags);
+> +       return ret;
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_uhs2_request_atomic);
+> +
+
+[...]
+
+Kind regards
+Uffe
