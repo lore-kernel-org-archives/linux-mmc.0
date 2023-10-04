@@ -2,118 +2,193 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B8D4E7B5E8
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 10:58:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A857DE7B5F9
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 11:42:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233041AbjJDK6l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Oct 2023 06:58:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56620 "EHLO
+        id S232919AbjJDLmu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Oct 2023 07:42:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232814AbjJDK6l (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 06:58:41 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E7ADA1;
-        Wed,  4 Oct 2023 03:58:38 -0700 (PDT)
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 39469Q9j013823;
-        Wed, 4 Oct 2023 10:58:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=2rmV/ARSRJlBfpZHJp2o0ucha4GQrOhHYJw/fdsnWAY=;
- b=Zy2xVcNkYmafw2P37d19rimvP//dPRK98kM7nasrwKN6tGjz681pAGmbVBV/Hg5F/pjr
- EvgoGvTyD3IwOTYZ19CpyCUe3bnaeZB25X0F3NGY8fS4PGO+bBejasUoWjQn8h9KWYk/
- HCTp6B7eJTcxmI8NVHdqlxsCP9UKzRlsTYh/NCbgCGHWmx63UJR+k/q3dcFNkQZD6e9w
- ozIM0MYv8JUBzhMp1oyqskQBdGHLGbQgmAopKc00p0k+ngH2Pxu4MReH1LSVrHWlFr8H
- gndy5OgaDMupO+ZVbYHIcdC5qPx80evUZZMQJj++76zcjDiG+qMQyHfKOYrMhyfnd3Zw ww== 
-Received: from nasanppmta01.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3th2gq0huq-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 04 Oct 2023 10:58:33 +0000
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-        by NASANPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 394AwWat026777
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 4 Oct 2023 10:58:32 GMT
-Received: from [10.217.218.207] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.36; Wed, 4 Oct
- 2023 03:58:28 -0700
-Message-ID: <44bb2149-1c12-41f0-bd39-1458528aecdf@quicinc.com>
-Date:   Wed, 4 Oct 2023 16:28:25 +0530
+        with ESMTP id S232795AbjJDLmu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 07:42:50 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0791CA7;
+        Wed,  4 Oct 2023 04:42:45 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0385EC433C7;
+        Wed,  4 Oct 2023 11:42:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1696419764;
+        bh=fyfWdnLL1in84snsB7P+H9eun3ijbjisxGk16TwTc9U=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=F4e7oRS6CgYtSKUDfmtLJhKBv08S3FB82BJNHFH7bS9u7LpfroBlPZ7GjxdEUk2k7
+         Ukzd9Udbh/Dr6wjGvD5uQ+1sUnh7bohewHVUrglOdCAVei1OzBpMCM++2o47yEBWnj
+         oRCU5/lGRSaeTTgiw6DeyD1QCjBUe3KHFM/MB8qe+UpDmGoHn4nQZeM0v74idTF+SJ
+         SIyEKyT+529xt/CdmbRDj2WCnDw5WFrP6t4Zss7kqKfTywDNODWJ4InBtVjHXkVYOq
+         1BgfpHrn0tIV1vYoqAzEzOlD+TkhlopU0Tz7UamhDitPF9luEmQYR90NtOT6/0HY8X
+         9emfIJVTnjEAw==
+Date:   Wed, 4 Oct 2023 19:30:36 +0800
+From:   Jisheng Zhang <jszhang@kernel.org>
+To:     Drew Fustini <dfustini@baylibre.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Robert Nelson <robertcnelson@gmail.com>,
+        Prabhakar <prabhakar.csengg@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org,
+        =?utf-8?B?QmrDtnJuIFTDtnBlbA==?= <bjorn@kernel.org>,
+        Alexandre Ghiti <alexghiti@rivosinc.com>
+Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
+Message-ID: <ZR1M3FcdXrDmIGu2@xhacker>
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+ <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+ <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
+ <ZRuamJuShOnvP1pr@x1>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V2 0/2] Add partial initialization support
-Content-Language: en-US
-To:     Bryan O'Donoghue <bryan.odonoghue@linaro.org>,
-        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-arm-msm@vger.kernel.org>, <quic_rampraka@quicinc.com>,
-        <quic_pragalla@quicinc.com>, <quic_sayalil@quicinc.com>,
-        <quic_nitirawa@quicinc.com>, <quic_sachgupt@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <quic_narepall@quicinc.com>
-References: <20230929102831.9702-1-quic_sartgarg@quicinc.com>
- <f6e4413b-eac1-4c0d-9ecd-ff28138617ff@linaro.org>
-From:   Sarthak Garg <quic_sartgarg@quicinc.com>
-In-Reply-To: <f6e4413b-eac1-4c0d-9ecd-ff28138617ff@linaro.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: SgM0_mnGSbbwP6wjjRblvTs5sGkg2iLp
-X-Proofpoint-ORIG-GUID: SgM0_mnGSbbwP6wjjRblvTs5sGkg2iLp
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-10-04_01,2023-10-02_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0
- lowpriorityscore=0 phishscore=0 mlxlogscore=705 mlxscore=0 impostorscore=0
- malwarescore=0 suspectscore=0 clxscore=1011 bulkscore=0 adultscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2309180000 definitions=main-2310040079
+In-Reply-To: <ZRuamJuShOnvP1pr@x1>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Mon, Oct 02, 2023 at 09:37:44PM -0700, Drew Fustini wrote:
+> On Fri, Sep 22, 2023 at 05:48:21PM -0500, Robert Nelson wrote:
+> > On Fri, Sep 22, 2023 at 2:08 PM Robert Nelson <robertcnelson@gmail.com> wrote:
+> > >
+> > > On Thu, Sep 21, 2023 at 8:51 PM Drew Fustini <dfustini@baylibre.com> wrote:
+> > > >
+> > > > This series adds support for the eMMC on the BeagleV Ahead and the
+> > > > Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
+> > > > eMMC.
+> > > >
+> > > > I tested on top of v6.6-rc2 with this config [1]. I was able to boot
+> > > > both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
+> > > > are required:
+> > > >
+> > > >   [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
+> > > >
+> > > > I pushed a branch [5] with this patch series and the above patch for
+> > > > those that find a git branch easier to test.
+> > > >
+> > > > Please note that only the MMC controller connected to the eMMC device
+> > > > is enabled in the device trees for these two boards. I did not yet
+> > > > attempt to configure and use the microSD card slot. My preference is to
+> > > > address that in a future patch series.
+> > > >
+> > > > References:
+> > > > [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
+> > > > [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
+> > > > [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
+> > > > [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
+> > > > [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
+> > >
+> > > This patchset came out very nice!
+> > >
+> > > v6.6-rc2 with Last RFC v2:
+> > >
+> > > [    4.066630] mmc0: SDHCI controller on ffe7080000.mmc
+> > > [ffe7080000.mmc] using PIO
+> > >
+> > > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> > >
+> > > /dev/mmcblk0:
+> > >  Timing cached reads:   1516 MB in  2.00 seconds = 758.09 MB/sec
+> > >  Timing buffered disk reads:  84 MB in  3.01 seconds =  27.94 MB/sec
+> > >
+> > > vs v6.6-rc2 with this patchset:
+> > >
+> > >  [    4.096837] mmc0: SDHCI controller on ffe7080000.mmc
+> > > [ffe7080000.mmc] using DMA
+> > >
+> > > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> > >
+> > > /dev/mmcblk0:
+> > >  Timing cached reads:   1580 MB in  2.00 seconds = 790.97 MB/sec
+> > >  Timing buffered disk reads: 418 MB in  3.00 seconds = 139.11 MB/sec
+> > 
+> > Drew pointed out on Slack, this was not quite right.. After more
+> > digging by Drew, CONFIG_DMA_GLOBAL_POOL is causing a DMA limitation
+> > with the multiplatform defconfig. so with,
+> > 
+> > ./scripts/config --disable CONFIG_ARCH_R9A07G043
+> > 
+> > (to remove CONFIG_DMA_GLOBAL_POOL)... another 2x in buffered reads..
+> > 
+> > [    4.059242] mmc0: SDHCI controller on ffe7080000.mmc
+> > [ffe7080000.mmc] using ADMA 64-bit
+> > 
+> > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> > 
+> > /dev/mmcblk0:
+> >  Timing cached reads:   1600 MB in  2.00 seconds = 800.93 MB/sec
+> >  Timing buffered disk reads: 892 MB in  3.00 seconds = 297.06 MB/sec
+> 
+> It seems CONFIG_DMA_GLOBAL_POOL=y causes ADMA buffer alloc to fail [1]:
+> 
+>   mmc0: Unable to allocate ADMA buffers - falling back to standard DMA
+> 
+> Prabhakar's AX45MP non-coherent DMA support [2] series introduced the
+> selection of DMA_GLOBAL_POOL for ARCH_R9A07G043 and the riscv defconfig
+> selects ARCH_R9A07G043. 
+> 
+> Patch 5 in the series [3] states that:
+> 
+>   With DMA_GLOBAL_POOL enabled all DMA allocations happen from this
+>   region and synchronization callbacks are implemented to synchronize
+>   when doing DMA transactions.
+> 
+> This example of a "shared-dma-pool" node was given:
+> 
+>         pma_resv0@58000000 {
+>             compatible = "shared-dma-pool";
+>             reg = <0x0 0x58000000 0x0 0x08000000>;
+>             no-map;
+>             linux,dma-default;
+>         };
+> 
+> I've copied that to th1520-beaglev-ahead.dts. The address of 0x58000000
+> has no significance on th1520, but the existence of shared-dma-pool
+> seems to fix the problem. ADMA mode [4] is now working even though
+> CONFIG_DMA_GLOBAL_POOL=y.
 
-On 9/29/2023 6:38 PM, Bryan O'Donoghue wrote:
-> On 29/09/2023 11:28, Sarthak Garg wrote:
->> Add the ability to partially initialize the MMC device by
->> using device sleep/awake sequence (CMD5).
->> Device will be sent to sleep state during mmc runtime/system suspend
->> and will be woken up during mmc runtime/system resume.
->> By using this sequence the device doesn't need full initialization
->> which gives 25% time reduction in system/runtime resume path.
->> Also enable this feature for qualcomm controllers.
->>
->> Sarthak Garg (2):
->>    mmc: core: Add partial initialization support
->>    mmc: sdhci-msm: Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers
->>
->>   drivers/mmc/core/mmc.c       | 162 +++++++++++++++++++++++++++++++++--
->>   drivers/mmc/host/sdhci-msm.c |   1 +
->>   include/linux/mmc/card.h     |   4 +
->>   include/linux/mmc/host.h     |   2 +
->>   4 files changed, 160 insertions(+), 9 deletions(-)
->>
->> -- 
->> 2.17.1
->>
->
-> A terrible nit pick on my part however, you should include the name of 
-> the subsystem/driver in the title of the series.
->
-> "mmc: Do this awesome new thing"
->
-> ---
-> bod
++ Christoph, Lad
 
+IMHO, this is not TH1520 specific but a generic issue.
 
-Thanks for the comment will take care in V3.
+I believe commit 484861e09f3e ("soc: renesas: Kconfig: Select the
+required configs for RZ/Five SoC") can cause regression on all
+non-dma-coherent riscv platforms with generic defconfig. This is
+a common issue. The logic here is: generic riscv defconfig selects
+ARCH_R9A07G043 which selects DMA_GLOBAL_POOL, which assumes all
+non-dma-coherent riscv platforms have a dma global pool, this assumption
+seems not correct. And I believe DMA_GLOBAL_POOL should not be
+selected by ARCH_SOCFAMILIY, instead, only ARCH under some specific
+conditions can select it globaly, for example NOMMU ARM and so on.
 
-Thanks,
-Sarthak
+Since this is a regression, what's proper fix? any suggestion is
+appreciated.
 
+Thanks
 
-
+> 
+> Thanks,
+> Drew
+> 
+> [1] https://gist.github.com/pdp7/73041ed808bbc7dd445836fb90574979
+> [2] https://lore.kernel.org/linux-riscv/20230818135723.80612-1-prabhakar.mahadev-lad.rj@bp.renesas.com/
+> [3] https://lore.kernel.org/linux-riscv/20230818135723.80612-6-prabhakar.mahadev-lad.rj@bp.renesas.com/
+> [4] https://gist.github.com/pdp7/91e72a663d3bb73eb28182337ad8bbcb
