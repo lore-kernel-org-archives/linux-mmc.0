@@ -2,32 +2,46 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3105E7C4C0
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 14:18:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E71EAE7C4C8
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 14:47:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242819AbjJDOSh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Oct 2023 10:18:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52116 "EHLO
+        id S232786AbjJDOre (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Oct 2023 10:47:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242692AbjJDOSc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 10:18:32 -0400
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 58743AB;
-        Wed,  4 Oct 2023 07:18:28 -0700 (PDT)
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 6C5C7DA7;
-        Wed,  4 Oct 2023 07:19:06 -0700 (PDT)
-Received: from [10.1.196.40] (e121345-lin.cambridge.arm.com [10.1.196.40])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 8454B3F59C;
-        Wed,  4 Oct 2023 07:18:24 -0700 (PDT)
-Message-ID: <a568a9dd-bab2-1e23-c4d5-9f6475bdcc3b@arm.com>
-Date:   Wed, 4 Oct 2023 15:18:23 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
+        with ESMTP id S232838AbjJDOrd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 10:47:33 -0400
+X-Greylist: delayed 2582 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 04 Oct 2023 07:47:30 PDT
+Received: from sender4-op-o10.zoho.com (sender4-op-o10.zoho.com [136.143.188.10])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24C86C0;
+        Wed,  4 Oct 2023 07:47:30 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1696430820; cv=none; 
+        d=zohomail.com; s=zohoarc; 
+        b=nxDApxEtzlx2xFddY5YqEaRiOelJY8n/5mSNawUGpBG3I4vQC4X6GggHHzTZGSLcLkPGqCZOrc+tkBKbKAd3i06Bbk7F0OUL7UxA76yEowMwZhSJ74h2XX37KOf54puONWX7BIVNHtshOXE/9mI3fxe3FOJu3TJpZ9yeDzplVFw=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+        t=1696430820; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+        bh=U9trAlWX6nBvb4VRniGzCrIKYuNDIMWaTtr2TJttzSk=; 
+        b=Pb0xQhHAo1a30Wk3f00tHT5zSAo2GAyeRFIbWiMCxFSbygrlW4OnZkyNQoDbzqLwOwSwyQOebsf6/MlERWP1fwTNGjA2pBlD/OqclMdwf49it/1lzynrNllKQdwiSv5oknBgYLs0vMONzdPCafJAOFvRlkXb15dZE03/+ELxbug=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+        dkim=pass  header.i=icenowy.me;
+        spf=pass  smtp.mailfrom=uwu@icenowy.me;
+        dmarc=pass header.from=<uwu@icenowy.me>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1696430820;
+        s=zmail2; d=icenowy.me; i=uwu@icenowy.me;
+        h=Message-ID:Subject:Subject:From:From:To:To:Cc:Cc:Date:Date:In-Reply-To:References:Content-Type:Content-Transfer-Encoding:MIME-Version:Message-Id:Reply-To;
+        bh=U9trAlWX6nBvb4VRniGzCrIKYuNDIMWaTtr2TJttzSk=;
+        b=clD1xuxQ/rJT7sA7O7drvAgcArpOp3gx//OhNLxCkza9KKFmcbCglsnObwhOrAKZ
+        V4iO/MHUcJIfw+nCFggVYLY0hPT/C/R0nG9HUcMtbRgcQwvxBt6DrPVPLO5xVl4tqj9
+        t/+YXinXCg+k30aSzalQmTOkomM8b/NVjL5ArW78BBufIWPenKo7XjKK+Gd5iYWtH7H
+        urAHnBNC4SpiQ6QzjUG19BJg3sxcSxZeb0TDa3liQHXmPy/A9Pt8j96RbJlaFoApC/t
+        ug0UzUii4LGLU2jmdXK7JwSwRe6suIbo9t68yzPgI/egoHEWZU+P2ZFIgI34IxpOMjs
+        UfnD+EigcQ==
+Received: from edelgard.fodlan.icenowy.me (120.85.98.65 [120.85.98.65]) by mx.zohomail.com
+        with SMTPS id 1696430817671586.6852143453285; Wed, 4 Oct 2023 07:46:57 -0700 (PDT)
+Message-ID: <be4e43b676ca5619e99b0f5abf228e45fadedb70.camel@icenowy.me>
 Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
-Content-Language: en-GB
-To:     Icenowy Zheng <uwu@icenowy.me>,
+From:   Icenowy Zheng <uwu@icenowy.me>
+To:     Robin Murphy <robin.murphy@arm.com>,
         "Lad, Prabhakar" <prabhakar.csengg@gmail.com>,
         Jisheng Zhang <jszhang@kernel.org>
 Cc:     Drew Fustini <dfustini@baylibre.com>,
@@ -48,61 +62,86 @@ Cc:     Drew Fustini <dfustini@baylibre.com>,
         Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
-        =?UTF-8?B?QmrDtnJuIFTDtnBlbA==?= <bjorn@kernel.org>,
+        =?ISO-8859-1?Q?Bj=F6rn_T=F6pel?= <bjorn@kernel.org>,
         Alexandre Ghiti <alexghiti@rivosinc.com>,
         Linux-MM <linux-mm@kvack.org>
+Date:   Wed, 04 Oct 2023 22:46:49 +0800
+In-Reply-To: <a568a9dd-bab2-1e23-c4d5-9f6475bdcc3b@arm.com>
 References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
- <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
- <ZRuamJuShOnvP1pr@x1> <ZR1M3FcdXrDmIGu2@xhacker>
- <CA+V-a8ugwqkQxnX-wwWCHVtBBtG=aVv=MZTc53LbpxtFA=N1_A@mail.gmail.com>
- <bc2b0b30-ab37-f336-c90e-eab570d393a2@arm.com>
- <c2ea3f34bb919293b850fab6ed42b61e3517ba35.camel@icenowy.me>
-From:   Robin Murphy <robin.murphy@arm.com>
-In-Reply-To: <c2ea3f34bb919293b850fab6ed42b61e3517ba35.camel@icenowy.me>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+         <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+         <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
+         <ZRuamJuShOnvP1pr@x1> <ZR1M3FcdXrDmIGu2@xhacker>
+         <CA+V-a8ugwqkQxnX-wwWCHVtBBtG=aVv=MZTc53LbpxtFA=N1_A@mail.gmail.com>
+         <bc2b0b30-ab37-f336-c90e-eab570d393a2@arm.com>
+         <c2ea3f34bb919293b850fab6ed42b61e3517ba35.camel@icenowy.me>
+         <a568a9dd-bab2-1e23-c4d5-9f6475bdcc3b@arm.com>
+Organization: Anthon Open-Source Community
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.44.4 
+MIME-Version: 1.0
+X-ZohoMailClient: External
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 04/10/2023 3:02 pm, Icenowy Zheng wrote:
-[...]
->>>> I believe commit 484861e09f3e ("soc: renesas: Kconfig: Select the
->>>> required configs for RZ/Five SoC") can cause regression on all
->>>> non-dma-coherent riscv platforms with generic defconfig. This is
->>>> a common issue. The logic here is: generic riscv defconfig
->>>> selects
->>>> ARCH_R9A07G043 which selects DMA_GLOBAL_POOL, which assumes all
->>>> non-dma-coherent riscv platforms have a dma global pool, this
->>>> assumption
->>>> seems not correct. And I believe DMA_GLOBAL_POOL should not be
->>>> selected by ARCH_SOCFAMILIY, instead, only ARCH under some
->>>> specific
->>>> conditions can select it globaly, for example NOMMU ARM and so
->>>> on.
->>>>
->>>> Since this is a regression, what's proper fix? any suggestion is
->>>> appreciated.
->>
->> I think the answer is to not select DMA_GLOBAL_POOL, since that is
->> only
-> 
-> Well I think for RISC-V, it's not NOMMU only but applicable for every
-> core that does not support Svpbmt or vendor-specific alternatives,
-> because the original RISC-V priv spec does not define memory attributes
-> in page table entries.
-> 
-> For the Renesas/Andes case I think a pool is set by OpenSBI with
-> vendor-specific M-mode facility and then passed in DT, and the S-mode
-> (which MMU is enabled in) just sees fixed memory attributes, in this
-> case I think DMA_GLOBAL_POOL is needed.
+=E5=9C=A8 2023-10-04=E6=98=9F=E6=9C=9F=E4=B8=89=E7=9A=84 15:18 +0100=EF=BC=
+=8CRobin Murphy=E5=86=99=E9=81=93=EF=BC=9A
+> On 04/10/2023 3:02 pm, Icenowy Zheng wrote:
+> [...]
+> > > > > I believe commit 484861e09f3e ("soc: renesas: Kconfig: Select
+> > > > > the
+> > > > > required configs for RZ/Five SoC") can cause regression on
+> > > > > all
+> > > > > non-dma-coherent riscv platforms with generic defconfig. This
+> > > > > is
+> > > > > a common issue. The logic here is: generic riscv defconfig
+> > > > > selects
+> > > > > ARCH_R9A07G043 which selects DMA_GLOBAL_POOL, which assumes
+> > > > > all
+> > > > > non-dma-coherent riscv platforms have a dma global pool, this
+> > > > > assumption
+> > > > > seems not correct. And I believe DMA_GLOBAL_POOL should not
+> > > > > be
+> > > > > selected by ARCH_SOCFAMILIY, instead, only ARCH under some
+> > > > > specific
+> > > > > conditions can select it globaly, for example NOMMU ARM and
+> > > > > so
+> > > > > on.
+> > > > >=20
+> > > > > Since this is a regression, what's proper fix? any suggestion
+> > > > > is
+> > > > > appreciated.
+> > >=20
+> > > I think the answer is to not select DMA_GLOBAL_POOL, since that
+> > > is
+> > > only
+> >=20
+> > Well I think for RISC-V, it's not NOMMU only but applicable for
+> > every
+> > core that does not support Svpbmt or vendor-specific alternatives,
+> > because the original RISC-V priv spec does not define memory
+> > attributes
+> > in page table entries.
+> >=20
+> > For the Renesas/Andes case I think a pool is set by OpenSBI with
+> > vendor-specific M-mode facility and then passed in DT, and the S-
+> > mode
+> > (which MMU is enabled in) just sees fixed memory attributes, in
+> > this
+> > case I think DMA_GLOBAL_POOL is needed.
+>=20
+> Oh wow, is that really a thing? In that case, either you just can't=20
+> support this platform in a multi-platform kernel, or someone needs to
+> do=20
 
-Oh wow, is that really a thing? In that case, either you just can't 
-support this platform in a multi-platform kernel, or someone needs to do 
-some fiddly work in dma-direct to a) introduce the notion of an optional 
-global pool, and b) make it somehow cope with DMA_DIRECT_REMAP being 
-enabled but non-functional.
+Emmmm thus RZ/Five should `depends on NONPORTABLE`?
 
-Thanks,
-Robin.
+> some fiddly work in dma-direct to a) introduce the notion of an
+> optional=20
+> global pool, and b) make it somehow cope with DMA_DIRECT_REMAP being=20
+> enabled but non-functional.
+>=20
+> Thanks,
+> Robin.
+
