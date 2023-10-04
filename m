@@ -2,738 +2,226 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEF8BE7C4EC
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 19:13:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0679E7C4F0
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 19:38:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245247AbjJDTNR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Oct 2023 15:13:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57998 "EHLO
+        id S233141AbjJDTi7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Oct 2023 15:38:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34436 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244564AbjJDTNN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 15:13:13 -0400
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AED9F10FF
-        for <linux-mmc@vger.kernel.org>; Wed,  4 Oct 2023 12:13:05 -0700 (PDT)
-Received: by mail-pf1-x42e.google.com with SMTP id d2e1a72fcca58-6910ea9cddbso133446b3a.0
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Oct 2023 12:13:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1696446784; x=1697051584; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=E2uXFFx3fj47JIw2jgwj+xsWZUpJymvlG8kks1rNkjI=;
-        b=ZbESkDCakdk5R5s7Sxmw2UDuzUXTatjJky0phUBBoYoNJ+TrGzL0E8Xtu6hIIHNJxD
-         mcN2khdLdJqnJsqclZotU0+dYH4pUMXsjVykCBIhhjLElo3p4D9Lh+uc8Tg3bttfpWWl
-         q/zJq3/w1iurQcTpnB4Fnmyv6nkhKhI+ed4tIL6OMeZ/l0MFAx7YojEeMqxd4vPDqrI6
-         BE3AaedH3ScYa1kyLbx5+B2R7ItRnydmQoZp2NKN5Yj9nOCVFifqvrAopeE+/kpLe87U
-         atHttvVnSiNjClzOoIXpbDYCDTIPhrqM0vGoubCjqtWDN5LhhWefcayBT2Si5r22pdE6
-         +y5w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696446784; x=1697051584;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=E2uXFFx3fj47JIw2jgwj+xsWZUpJymvlG8kks1rNkjI=;
-        b=CA6qhjsKsLGkQa1hOSIVrevUPU3ubd8cufXgduky4kb8UPGHP+xaWm/awTiaj3BeNK
-         h5FhNe0S1iEiaiX0wSBjumTP7/SyPrQOGOrmgTw0wg6L9bwe1J2sYgvkzk6zw97qxeUV
-         TBY5l8C4mvvZJWx9X55NBeIjGeo1KuNJ18ssiLCK19eb3gIn1UP9ybZFmGdBmCOBPYSq
-         pBCMGbrEb/7z0pIr10JiSxXrMjM8LtNfw8JTyPcfWwDI3hatB8cMt5d1E/9PgTSCvj+c
-         cmvS8201JYrio4FtorWrfvK+eWsoWd3x7LkQEvcfArw68DJsErU1DL2taDEs9LIBcuGp
-         N6AA==
-X-Gm-Message-State: AOJu0Yw9L84nQ1xsOQtBJXwD+nr/PkQyR7jllAKCPD2umiQFYLhTwVp2
-        nFsT1PGX2daBBHNV/q9CpHPrtQ==
-X-Google-Smtp-Source: AGHT+IFfcVarDogpzQPdK6Wk2MFzCxRmWbl9a12a+89g/Dg2+ty6uCzr7EAmA4LKikK3XVXPBNR3YA==
-X-Received: by 2002:a05:6a20:974d:b0:161:afbc:c02f with SMTP id hs13-20020a056a20974d00b00161afbcc02fmr3062583pzc.54.1696446784366;
-        Wed, 04 Oct 2023 12:13:04 -0700 (PDT)
-Received: from x1 ([2601:1c2:1800:f680:95a1:7b5c:a766:5db1])
-        by smtp.gmail.com with ESMTPSA id n26-20020a62e51a000000b0069501bf29basm3593443pff.77.2023.10.04.12.13.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Oct 2023 12:13:03 -0700 (PDT)
-Date:   Wed, 4 Oct 2023 12:12:59 -0700
-From:   Drew Fustini <dfustini@baylibre.com>
-To:     Jisheng Zhang <jszhang@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org
-Subject: Re: [PATCH 3/6] mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520
-Message-ID: <ZR25O+hErvYbvr1t@x1>
-References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
- <20230921-th1520-mmc-v1-3-49f76c274fb3@baylibre.com>
- <ZR2Qd7g+WE9DN5Ph@xhacker>
+        with ESMTP id S233651AbjJDTi6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 15:38:58 -0400
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EFD31AB;
+        Wed,  4 Oct 2023 12:38:52 -0700 (PDT)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3BC50C15;
+        Wed,  4 Oct 2023 12:39:31 -0700 (PDT)
+Received: from [10.57.67.242] (unknown [10.57.67.242])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 89C933F762;
+        Wed,  4 Oct 2023 12:38:47 -0700 (PDT)
+Message-ID: <498ffcef-2ff9-495b-8544-b87c5c2eb6e1@arm.com>
+Date:   Wed, 4 Oct 2023 20:38:39 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZR2Qd7g+WE9DN5Ph@xhacker>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
+Content-Language: en-GB
+To:     Samuel Holland <samuel.holland@sifive.com>,
+        "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Drew Fustini <dfustini@baylibre.com>,
+        linux-kernel@vger.kernel.org, Linux-MM <linux-mm@kvack.org>,
+        Guo Ren <guoren@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-riscv@lists.infradead.org, Christoph Hellwig <hch@lst.de>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Fabrizio Castro <fabrizio.castro@bp.renesas.com>,
+        devicetree@vger.kernel.org, Conor Dooley <conor+dt@kernel.org>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Alexandre Ghiti <alexghiti@rivosinc.com>,
+        Arnd Bergmann <arnd@arndb.de>, Han Gao <gaohan@iscas.ac.cn>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Robert Nelson <robertcnelson@gmail.com>,
+        linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        Conor Dooley <conor@kernel.org>,
+        =?UTF-8?B?QmrDtnJuIFTDtnBlbA==?= <bjorn@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Xi Ruoyao <xry111@xry111.site>, Fu Wei <wefu@redhat.com>
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+ <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+ <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
+ <ZRuamJuShOnvP1pr@x1> <ZR1M3FcdXrDmIGu2@xhacker>
+ <CA+V-a8ugwqkQxnX-wwWCHVtBBtG=aVv=MZTc53LbpxtFA=N1_A@mail.gmail.com>
+ <bc2b0b30-ab37-f336-c90e-eab570d393a2@arm.com>
+ <c2ea3f34bb919293b850fab6ed42b61e3517ba35.camel@icenowy.me>
+ <a568a9dd-bab2-1e23-c4d5-9f6475bdcc3b@arm.com>
+ <CA+V-a8s1S4yTH19PVNSznAgUFoHRNoye9CfwjW6iy6PbQ9thew@mail.gmail.com>
+ <CA+V-a8vbWW6=HTfR+FCPOB0bAa8M3Bbm_k=7+XbjOc3ybo6VNQ@mail.gmail.com>
+ <20075b03-e3b0-4f29-9ba1-98eed361a44f@sifive.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+In-Reply-To: <20075b03-e3b0-4f29-9ba1-98eed361a44f@sifive.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 05, 2023 at 12:19:03AM +0800, Jisheng Zhang wrote:
-> On Thu, Sep 21, 2023 at 06:49:50PM -0700, Drew Fustini wrote:
-> > Add support for the mmc controller in the T-Head TH1520 with the new
-> > compatible "thead,th1520-dwcmshc". Implement custom sdhci_ops for
-> > set_uhs_signaling, reset, voltage_switch, and platform_execute_tuning.
-> > 
-> > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+On 2023-10-04 19:49, Samuel Holland wrote:
+> On 2023-10-04 12:16 PM, Lad, Prabhakar wrote:
+>> On Wed, Oct 4, 2023 at 5:03 PM Lad, Prabhakar
+>> <prabhakar.csengg@gmail.com> wrote:
+>>>
+>>> On Wed, Oct 4, 2023 at 3:18 PM Robin Murphy <robin.murphy@arm.com> wrote:
+>>>>
+>>>> On 04/10/2023 3:02 pm, Icenowy Zheng wrote:
+>>>> [...]
+>>>>>>>> I believe commit 484861e09f3e ("soc: renesas: Kconfig: Select the
+>>>>>>>> required configs for RZ/Five SoC") can cause regression on all
+>>>>>>>> non-dma-coherent riscv platforms with generic defconfig. This is
+>>>>>>>> a common issue. The logic here is: generic riscv defconfig
+>>>>>>>> selects
+>>>>>>>> ARCH_R9A07G043 which selects DMA_GLOBAL_POOL, which assumes all
+>>>>>>>> non-dma-coherent riscv platforms have a dma global pool, this
+>>>>>>>> assumption
+>>>>>>>> seems not correct. And I believe DMA_GLOBAL_POOL should not be
+>>>>>>>> selected by ARCH_SOCFAMILIY, instead, only ARCH under some
+>>>>>>>> specific
+>>>>>>>> conditions can select it globaly, for example NOMMU ARM and so
+>>>>>>>> on.
+>>>>>>>>
+>>>>>>>> Since this is a regression, what's proper fix? any suggestion is
+>>>>>>>> appreciated.
+>>>>>>
+>>>>>> I think the answer is to not select DMA_GLOBAL_POOL, since that is
+>>>>>> only
+>>>>>
+>>>>> Well I think for RISC-V, it's not NOMMU only but applicable for every
+>>>>> core that does not support Svpbmt or vendor-specific alternatives,
+>>>>> because the original RISC-V priv spec does not define memory attributes
+>>>>> in page table entries.
+>>>>>
+>>>>> For the Renesas/Andes case I think a pool is set by OpenSBI with
+>>>>> vendor-specific M-mode facility and then passed in DT, and the S-mode
+>>>>> (which MMU is enabled in) just sees fixed memory attributes, in this
+>>>>> case I think DMA_GLOBAL_POOL is needed.
+>>>>
+>>>> Oh wow, is that really a thing? In that case, either you just can't
+>>>> support this platform in a multi-platform kernel, or someone needs to do
+>>>> some fiddly work in dma-direct to a) introduce the notion of an optional
+>>>> global pool,
+>>> Looking at the code [0] we do have compile time check for
+>>> CONFIG_DMA_GLOBAL_POOL irrespective of this being present in DT or
+>>> not, instead if we make it compile time and runtime check ie either
+>>> check for DT node or see if pool is available and only then proceed
+>>> for allocation form this pool.
+>>>
+>>> What are your thoughts on this?
+>>>
+>> Something like the below:
+>>
+>> diff --git a/include/linux/dma-map-ops.h b/include/linux/dma-map-ops.h
+>> index f2fc203fb8a1..7bf41a4634a4 100644
+>> --- a/include/linux/dma-map-ops.h
+>> +++ b/include/linux/dma-map-ops.h
+>> @@ -198,6 +198,7 @@ int dma_release_from_global_coherent(int order,
+>> void *vaddr);
+>>   int dma_mmap_from_global_coherent(struct vm_area_struct *vma, void *cpu_addr,
+>>                  size_t size, int *ret);
+>>   int dma_init_global_coherent(phys_addr_t phys_addr, size_t size);
+>> +bool dma_global_pool_available(void);
+>>   #else
+>>   static inline void *dma_alloc_from_global_coherent(struct device *dev,
+>>                  ssize_t size, dma_addr_t *dma_handle)
+>> @@ -213,6 +214,10 @@ static inline int
+>> dma_mmap_from_global_coherent(struct vm_area_struct *vma,
+>>   {
+>>          return 0;
+>>   }
+>> +static inline bool dma_global_pool_available(void)
+>> +{
+>> +       return false;
+>> +}
+>>   #endif /* CONFIG_DMA_GLOBAL_POOL */
+>>
+>>   /*
+>> diff --git a/kernel/dma/coherent.c b/kernel/dma/coherent.c
+>> index c21abc77c53e..605f243b8262 100644
+>> --- a/kernel/dma/coherent.c
+>> +++ b/kernel/dma/coherent.c
+>> @@ -277,6 +277,14 @@ int dma_mmap_from_dev_coherent(struct device
+>> *dev, struct vm_area_struct *vma,
+>>   #ifdef CONFIG_DMA_GLOBAL_POOL
+>>   static struct dma_coherent_mem *dma_coherent_default_memory __ro_after_init;
+>>
+>> +bool dma_global_pool_available(void)
+>> +{
+>> +       if (!dma_coherent_default_memory)
+>> +               return false;
+>> +
+>> +       return true;
+>> +}
+>> +
+>>   void *dma_alloc_from_global_coherent(struct device *dev, ssize_t size,
+>>                                       dma_addr_t *dma_handle)
+>>   {
+>> diff --git a/kernel/dma/direct.c b/kernel/dma/direct.c
+>> index 9596ae1aa0da..a599bb731ceb 100644
+>> --- a/kernel/dma/direct.c
+>> +++ b/kernel/dma/direct.c
+>> @@ -235,7 +235,7 @@ void *dma_direct_alloc(struct device *dev, size_t size,
+>>                   * If there is a global pool, always allocate from it for
+>>                   * non-coherent devices.
+>>                   */
+>> -               if (IS_ENABLED(CONFIG_DMA_GLOBAL_POOL))
+>> +               if (IS_ENABLED(CONFIG_DMA_GLOBAL_POOL) &&
+>> dma_global_pool_available())
+>>                          return dma_alloc_from_global_coherent(dev, size,
+>>                                          dma_handle);
 > 
-> Hi Drew,
-> Thanks for doing this and sorry for being late for this code review. Some
-> comments below.
+> dma_alloc_from_global_coherent() already checks dma_coherent_default_memory, so
+> the solution could be even simpler:
 > 
-> > ---
-> >  drivers/mmc/host/sdhci-of-dwcmshc.c | 456 ++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 456 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > index 3a3bae6948a8..7294bf1afb7d 100644
-> > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > @@ -35,6 +35,26 @@
-> >  #define DWCMSHC_CARD_IS_EMMC		BIT(0)
-> >  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
-> >  #define DWCMSHC_EMMC_ATCTRL		0x40
-> > +/* Tuning and auto-tuning fields in AT_CTRL_R control register */
-> > +#define AT_CTRL_AT_EN			0x1 /* autotuning is enabled */
-> > +#define AT_CTRL_CI_SEL_SHIFT		0x1 /* bit 1 */
-> > +#define AT_CTRL_CI_SEL			0x1 /* interval to drive center phase select */
-> > +#define AT_CTRL_SWIN_TH_EN_SHIFT	0x2 /* bit 2 */
-> > +#define AT_CTRL_SWIN_TH_EN		0x1 /* sampling window threshold enable */
-> > +#define AT_CTRL_RPT_TUNE_ERR_SHIFT	0x3 /* bit 3 */
-> > +#define AT_CTRL_RPT_TUNE_ERR		0x1 /* enable reporting framing errors */
-> > +#define AT_CTRL_SW_TUNE_EN_SHIFT	0x4 /* bit 4 */
-> > +#define AT_CTRL_SW_TUNE_EN		0x1 /* enable software managed tuning */
-> > +#define AT_CTRL_WIN_EDGE_SEL_SHIFT	0x8 /* bits [11:8] */
-> > +#define AT_CTRL_WIN_EDGE_SEL		0xf /* sampling window edge select */
-> > +#define AT_CTRL_TUNE_CLK_STOP_EN_SHIFT	0x10 /* bit 16 */
-> > +#define AT_CTRL_TUNE_CLK_STOP_EN	0x1  /* clocks stopped during phase code change */
-> > +#define AT_CTRL_PRE_CHANGE_DLY_SHIFT	0x11 /* bits [18:17] */
-> > +#define AT_CTRL_PRE_CHANGE_DLY		0x1  /* 2-cycle latency */
-> > +#define AT_CTRL_POST_CHANGE_DLY_SHIFT	0x13 /* bits [20:19] */
-> > +#define AT_CTRL_POST_CHANGE_DLY		0x3  /* 4-cycle latency */
-> > +#define AT_CTRL_SWIN_TH_VAL_SHIFT	0x18 /* bits [31:24] */
-> > +#define AT_CTRL_SWIN_TH_VAL		0x9  /* sampling window threshold */
-> >  
-> >  /* Rockchip specific Registers */
-> >  #define DWCMSHC_EMMC_DLL_CTRL		0x800
-> > @@ -72,6 +92,84 @@
-> >  	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
-> >  #define RK35xx_MAX_CLKS 3
-> >  
-> > +/* PHY register area pointer */
-> > +#define DWC_MSHC_PTR_PHY_R	0x300
-> > +
-> > +/* PHY general configuration */
-> > +#define PHY_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x00)
-> > +#define PHY_CNFG_RSTN_DEASSERT	0x1  /* Deassert PHY reset */
-> > +#define PHY_CNFG_PAD_SP_SHIFT	0x10 /* bits [16:9] */
-> > +#define PHY_CNFG_PAD_SP_VALUE	0x0c /* PMOS TX drive strength */
-> > +#define PHY_CNFG_PAD_SN_SHIFT	0x14 /* bits [23:20] */
-> > +#define PHY_CNFG_PAD_SN_VALUE	0x0c /* NMOS TX drive strength */
-> > +
-> > +/* PHY command/response pad settings */
-> > +#define PHY_CMDPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x04)
-> > +
-> > +/* PHY data pad settings */
-> > +#define PHY_DATAPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x06)
-> > +
-> > +/* PHY clock pad settings */
-> > +#define PHY_CLKPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x08)
-> > +
-> > +/* PHY strobe pad settings */
-> > +#define PHY_STBPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0a)
-> > +
-> > +/* PHY reset pad settings */
-> > +#define PHY_RSTNPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0c)
-> > +
-> > +/* Bitfields are common for all pad settings */
-> > +#define PHY_PAD_RXSEL_1V8		0x1 /* Receiver type select for 1.8V */
-> > +#define PHY_PAD_RXSEL_3V3		0x2 /* Receiver type select for 3.3V */
-> > +
-> > +#define PHY_PAD_WEAKPULL_SHIFT		0x3 /* bits [4:3] */
-> > +#define PHY_PAD_WEAKPULL_PULLUP		0x1 /* Weak pull down enabled */
-> > +#define PHY_PAD_WEAKPULL_PULLDOWN	0x2 /* Weak pull down enabled */
-> > +
-> > +#define PHY_PAD_TXSLEW_CTRL_P_SHIFT	0x5 /* bits [8:5] */
-> > +#define PHY_PAD_TXSLEW_CTRL_P_VALUE	0x3 /* Slew control for P-Type pad TX */
-> > +#define PHY_PAD_TXSLEW_CTRL_N_SHIFT	0x9 /* bits [12:9] */
-> > +#define PHY_PAD_TXSLEW_CTRL_N_VALUE	0x3 /* Slew control for N-Type pad TX */
-> > +
-> > +/* PHY CLK delay line settings */
-> > +#define PHY_SDCLKDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x1d)
-> > +#define PHY_SDCLKDL_CNFG_UPDATE_SHIFT	0x4 /* bit 4 */
-> > +#define PHY_SDCLKDL_CNFG_UPDATE_DC	0x1 /* set before writing to SDCLKDL_DC */
-> > +
-> > +/* PHY CLK delay line delay code */
-> > +#define PHY_SDCLKDL_DC_R		(DWC_MSHC_PTR_PHY_R + 0x1e)
-> > +#define PHY_SDCLKDL_DC_INITIAL		0x40 /* initial delay code */
-> > +#define PHY_SDCLKDL_DC_DEFAULT		0x32 /* default delay code */
-> > +#define PHY_SDCLKDL_DC_HS400		0x18 /* delay code for HS400 mode */
-> > +
-> > +/* PHY drift_cclk_rx delay line configuration setting */
-> > +#define PHY_ATDL_CNFG_R			(DWC_MSHC_PTR_PHY_R + 0x21)
-> > +#define PHY_ATDL_CNFG_INPSEL_SHIFT	0x2 /* bits [3:2] */
-> > +#define PHY_ATDL_CNFG_INPSEL_VALUE	0x3 /* delay line input source */
-> > +
-> > +/* PHY DLL control settings */
-> > +#define PHY_DLL_CTRL_R			(DWC_MSHC_PTR_PHY_R + 0x24)
-> > +#define PHY_DLL_CTRL_DISABLE		0x0 /* PHY DLL is enabled */
-> > +#define PHY_DLL_CTRL_ENABLE		0x1 /* PHY DLL is disabled */
-> > +
-> > +/* PHY DLL  configuration register 1 */
-> > +#define PHY_DLL_CNFG1_R			(DWC_MSHC_PTR_PHY_R + 0x25)
-> > +#define PHY_DLL_CNFG1_SLVDLY_SHIFT	0x4 /* bits [5:4] */
-> > +#define PHY_DLL_CNFG1_SLVDLY_VALUE	0x2 /* DLL slave update delay input */
-> > +#define PHY_DLL_CNFG1_WAITCYCLE		0x5 /* DLL wait cycle input */
-> > +
-> > +/* PHY DLL configuration register 2 */
-> > +#define PHY_DLL_CNFG2_R			(DWC_MSHC_PTR_PHY_R + 0x26)
-> > +#define PHY_DLL_CNFG2_JUMPSTEP		0xa /* DLL jump step input */
-> > +
-> > +/* PHY DLL master and slave delay line configuration settings */
-> > +#define PHY_DLLDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x28)
-> > +#define PHY_DLLDL_CNFG_SLV_INPSEL_SHIFT	0x5 /* bits [6:5] */
-> > +#define PHY_DLLDL_CNFG_SLV_INPSEL_VALUE	0x3 /* clock source select for slave DL */
-> > +
-> > +#define FLAG_PULL_UP_EN		BIT(0)
-> > +#define FLAG_IO_FIXED_1V8	BIT(1)
-> > +
-> >  #define BOUNDARY_OK(addr, len) \
-> >  	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
-> >  
-> > @@ -92,6 +190,8 @@ struct dwcmshc_priv {
-> >  	struct clk	*bus_clk;
-> >  	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
-> >  	void *priv; /* pointer to SoC private stuff */
-> > +	u16 delay_line;
-> > +	u16 flags;
-> >  };
-> >  
-> >  /*
-> > @@ -157,6 +257,206 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> >  	sdhci_request(mmc, mrq);
-> >  }
-> >  
-> > +static void th1520_phy_1_8v_init_no_pull(struct sdhci_host *host)
-> > +{
-> > +	u32 val;
-> > +
-> > +	/* deassert phy reset */
-> > +	sdhci_writel(host, PHY_CNFG_RSTN_DEASSERT, PHY_CNFG_R);
-> > +
-> > +	/* disable delay line */
-> > +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT,
-> > +		     PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* set delay line */
-> > +	sdhci_writeb(host, PHY_SDCLKDL_DC_INITIAL, PHY_SDCLKDL_DC_R);
-> > +
-> > +	/* enable delay lane */
-> > +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> > +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT);
-> > +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* configure phy pads */
-> > +	val = sdhci_readw(host, PHY_CMDPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_1V8, PHY_CMDPAD_CNFG_R);
-> > +
-> > +	val = sdhci_readw(host, PHY_DATAPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_1V8, PHY_DATAPAD_CNFG_R);
-> > +
-> > +	val = sdhci_readw(host, PHY_RSTNPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_1V8, PHY_RSTNPAD_CNFG_R);
-> > +
-> > +	val = sdhci_readw(host, PHY_STBPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_1V8, PHY_STBPAD_CNFG_R);
-> > +
-> > +	/* enable phy dll */
-> > +	val = sdhci_readb(host, PHY_DLL_CTRL_R);
-> > +	sdhci_writeb(host, val | PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> > +}
-> > +
-> > +static void th1520_phy_3_3v_init_no_pull(struct sdhci_host *host)
-> > +{
-> > +	u32 val;
-> > +
-> > +	/* deassert phy reset */
-> > +	sdhci_writel(host, PHY_CNFG_RSTN_DEASSERT, PHY_CNFG_R);
-> > +
-> > +	/* disable delay line */
-> > +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT,
-> > +		     PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* set delay line */
-> > +	sdhci_writeb(host, PHY_SDCLKDL_DC_INITIAL, PHY_SDCLKDL_DC_R);
-> > +
-> > +	/* enable delay lane */
-> > +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> > +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT);
-> > +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* configure phy pads */
-> > +	val = sdhci_readw(host, PHY_CMDPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_3V3, PHY_CMDPAD_CNFG_R);
-> > +
-> > +	val = sdhci_readw(host, PHY_DATAPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_3V3, PHY_DATAPAD_CNFG_R);
-> > +
-> > +	val = sdhci_readw(host, PHY_RSTNPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_3V3, PHY_RSTNPAD_CNFG_R);
-> > +
-> > +	val = sdhci_readw(host, PHY_STBPAD_CNFG_R);
-> > +	sdhci_writew(host, val | PHY_PAD_RXSEL_3V3, PHY_STBPAD_CNFG_R);
-> > +
-> > +	/* enable phy dll */
-> > +	val = sdhci_readb(host, PHY_DLL_CTRL_R);
-> > +	sdhci_writeb(host, val | PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> > +}
-> > +
-> > +static void th1520_phy_1_8v_init(struct sdhci_host *host)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +	u32 val;
-> > +
-> > +	if (!priv)
-> > +		return;
-> > +
-> > +	if (!(priv->flags & FLAG_PULL_UP_EN)) {
-> > +		th1520_phy_1_8v_init_no_pull(host);
-> > +		return;
-> > +	}
-> > +
-> > +	/* deassert phy reset & set tx drive strength */
-> > +	sdhci_writel(host, PHY_CNFG_RSTN_DEASSERT |
-> > +		    (PHY_CNFG_PAD_SP_VALUE << PHY_CNFG_PAD_SP_SHIFT) |
-> > +		    (PHY_CNFG_PAD_SN_VALUE << PHY_CNFG_PAD_SN_SHIFT),
-> > +		    PHY_CNFG_R);
-> > +
-> > +	/* disable delay line */
-> > +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT,
-> > +		     PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* set delay line */
-> > +	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-> > +	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
-> > +
-> > +	/* enable delay lane */
-> > +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> > +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT);
-> > +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* configure phy pads */
-> > +	val = PHY_PAD_RXSEL_1V8 | (PHY_PAD_WEAKPULL_PULLUP << PHY_PAD_WEAKPULL_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_P_VALUE << PHY_PAD_TXSLEW_CTRL_P_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_N_VALUE << PHY_PAD_TXSLEW_CTRL_N_SHIFT);
-> > +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> > +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> > +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> > +
-> > +	val = (PHY_PAD_TXSLEW_CTRL_P_VALUE << PHY_PAD_TXSLEW_CTRL_P_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_N_VALUE << PHY_PAD_TXSLEW_CTRL_N_SHIFT);
-> > +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> > +
-> > +	val = PHY_PAD_RXSEL_1V8 | (PHY_PAD_WEAKPULL_PULLDOWN << PHY_PAD_WEAKPULL_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_P_VALUE << PHY_PAD_TXSLEW_CTRL_P_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_N_VALUE << PHY_PAD_TXSLEW_CTRL_N_SHIFT);
-> > +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> > +
-> > +	/* enable data strobe mode */
-> > +	sdhci_writeb(host, PHY_DLLDL_CNFG_SLV_INPSEL_VALUE << PHY_DLLDL_CNFG_SLV_INPSEL_SHIFT,
-> > +		     PHY_DLLDL_CNFG_R);
-> > +
-> > +	/* enable phy dll */
-> > +	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE,  PHY_DLL_CTRL_R);
-> > +}
-> > +
-> > +static void th1520_phy_3_3v_init(struct sdhci_host *host)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +	u32 val;
-> > +
-> > +	if (!(priv->flags & FLAG_PULL_UP_EN)) {
-> > +		th1520_phy_3_3v_init_no_pull(host);
-> > +		return;
-> > +	}
-> > +
-> > +	/* deassert phy reset & set tx drive strength */
-> > +	sdhci_writel(host, PHY_CNFG_RSTN_DEASSERT |
-> > +		    (PHY_CNFG_PAD_SP_VALUE << PHY_CNFG_PAD_SP_SHIFT) |
-> > +		    (PHY_CNFG_PAD_SN_VALUE << PHY_CNFG_PAD_SN_SHIFT),
-> > +		    PHY_CNFG_R);
-> > +
-> > +	/* disable delay line */
-> > +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT,
-> > +		     PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* set delay line */
-> > +	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-> > +	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
-> > +
-> > +	/* enable delay lane */
-> > +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> > +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE_DC << PHY_SDCLKDL_CNFG_UPDATE_SHIFT);
-> > +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> > +
-> > +	/* configure phy pads */
-> > +	val = PHY_PAD_RXSEL_3V3 | (PHY_PAD_WEAKPULL_PULLUP << PHY_PAD_WEAKPULL_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_P_VALUE << PHY_PAD_TXSLEW_CTRL_P_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_N_VALUE << PHY_PAD_TXSLEW_CTRL_N_SHIFT);
-> > +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> > +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> > +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> > +
-> > +	val = (PHY_PAD_TXSLEW_CTRL_P_VALUE << PHY_PAD_TXSLEW_CTRL_P_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_N_VALUE << PHY_PAD_TXSLEW_CTRL_N_SHIFT);
-> > +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> > +
-> > +	val = PHY_PAD_RXSEL_3V3 | (PHY_PAD_WEAKPULL_PULLDOWN << PHY_PAD_WEAKPULL_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_P_VALUE << PHY_PAD_TXSLEW_CTRL_P_SHIFT) |
-> > +	      (PHY_PAD_TXSLEW_CTRL_N_VALUE << PHY_PAD_TXSLEW_CTRL_N_SHIFT);
-> > +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> > +}
-> > +
-> > +static void th1520_sdhci_set_phy(struct sdhci_host *host)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +	u16 emmc_ctrl;
-> > +
-> > +	/* Before power on, set PHY configs */
-> > +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
+> --- a/kernel/dma/direct.c
+> +++ b/kernel/dma/direct.c
+> @@ -232,12 +232,12 @@ void *dma_direct_alloc(struct device *dev, size_t size,
+>   					      attrs);
 > 
-> check flag & FLAG_IO_FIXED_1V8 instead? Because I didn't see why
-> 3.3v can't be non-removeable. I know you only brought up emmc
-> now, but we can also prepare for sdio/sd support at the same time.
+>   		/*
+> -		 * If there is a global pool, always allocate from it for
+> +		 * If there is a global pool, always try to allocate from it for
+>   		 * non-coherent devices.
+>   		 */
+> -		if (IS_ENABLED(CONFIG_DMA_GLOBAL_POOL))
+> -			return dma_alloc_from_global_coherent(dev, size,
+> -					dma_handle);
+> +		ret = dma_alloc_from_global_coherent(dev, size, dma_handle);
+> +		if (ret)
+> +			return ret;
 
-Okay, that does seem to make more sense to check for the 1.8V flag when
-deciding whether to call th1520_phy_1_8v_init().
+So if allocation fails because the pool is full, we should go ahead and 
+remap something that can't work? ;)
+
+The dma_global_pool_available() idea sort of works, but I'm still 
+concerned about the case where it *should* have been available but the 
+platform has been misconfigured, so again we fall through to 
+DMA_DIRECT_REMAP "successfully" returning a coherent buffer that isn't, 
+and the user's filesystem gets corrupted. Or at best, they get confused 
+by weird errors from random devices going wrong. That's why I said it 
+would be fiddly - the current state of DMA_GLOBAL_POOL as a binary 
+arch-wide thing is relatively robust and easy to reason about, but 
+attempting to generalise it further is... less so.
+
+Thanks,
+Robin.
 
 > 
-> > +		th1520_phy_1_8v_init(host);
-> > +		emmc_ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> > +		emmc_ctrl |= DWCMSHC_CARD_IS_EMMC;
+>   		/*
+>   		 * Otherwise remap if the architecture is asking for it.  But
 > 
-> can we check host->mmc->caps2 to know whether this is eMMC or not, then
-> set this bit for eMMC after that.
+> Regards,
+> Samuel
 > 
-> And setting DWCMSHC_CARD_IS_EMMC should be orthogonalized with 3.3v/1.8v
-> etc.
-
-Okay, I'll move the write to emmc_ctrl outside of this if() block. I'll
-put it in a new if() block directly after. There is MMC_CAP_NONREMOVABLE
-but that is mmc_host->caps and not mmc_host->caps2. Is that what you
-meant?
-
-> 
-> > +		sdhci_writew(host, emmc_ctrl, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> > +	} else {
-> > +		th1520_phy_3_3v_init(host);
-> 
-> > +	}
-> > +
-> > +	sdhci_writeb(host, (PHY_DLL_CNFG1_SLVDLY_VALUE << PHY_DLL_CNFG1_SLVDLY_SHIFT) |
-> 
-> I'm not sure whether we need to get the delay value from DT.
-> Do emmc, sd and sdio share the same delay value?
-
-The PHY_DLL_CNFG1_SLVDLY_VALUE ("DLL slave update delay input") field
-appeared to be the same for all instances in the T-Head SDK.
-
-Whereas, the PHY_SDCLKDL_DC register ("CLK delay line delay code") does
-have different value depending on whether HS400 mode is used.
-
-> 
-> > +		     PHY_DLL_CNFG1_WAITCYCLE, PHY_DLL_CNFG1_R);
-> > +}
-> > +
-> >  static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
-> >  				      unsigned int timing)
-> >  {
-> > @@ -189,9 +489,30 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
-> >  		ctrl_2 |= DWCMSHC_CTRL_HS400;
-> >  	}
-> >  
-> > +	if (priv->flags & FLAG_IO_FIXED_1V8)
-> > +		ctrl_2 |= SDHCI_CTRL_VDD_180;
-> >  	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> >  }
-> >  
-> > +static void th1520_set_uhs_signaling(struct sdhci_host *host,
-> > +				     unsigned int timing)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +	u32 reg;
-> > +
-> > +	dwcmshc_set_uhs_signaling(host, timing);
-> > +	if (timing == MMC_TIMING_MMC_HS400) {
-> > +		reg = sdhci_readl(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > +		reg &= ~AT_CTRL_AT_EN;
-> > +		sdhci_writel(host, reg, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> 
-> can we move the auto tuning bit setting to tuning routine?
-
-It is unclear to me why the T-Head's version manipulated AT_CTRL_AT_EN
-in the th1520_set_uhs_signaling(). I can try removing it and seeing if
-there is any effect.
-
-> 
-> > +		priv->delay_line = PHY_SDCLKDL_DC_HS400;
-> 
-> this delay line may need to be gotten from DT?
-
-There were only 3 different values used in the T-Head SDK so I am not
-sure a DT property is needed. The three values for the CLK delayline
-delay code (PHY_SDCLKDL_DC) are:
-  
-  PHY_SDCLKDL_DC_INITIAL          0x40
-  PHY_SDCLKDL_DC_DEFAULT          0x32
-  PHY_SDCLKDL_DC_HS400            0x18
-
-PHY_SDCLKDL_DC_INITIAL is only used in th1520_phy_1_8v_init_no_pull()
-and th1520_phy_3_3v_init_no_pull(). Based on earlier discussion in this
-thread, I will be removing those functions in the next revision as they
-are unused.
-
-th1520_phy_1_8v_init() and th1520_phy_3_3v_init() both use
-dwcmshc_priv.delay_line to program the PHY_SDCLKDL_DC register.
-
-dwcmshc_probe() sets delay_line to PHY_SDCLKDL_DC_DEFAULT. If HS400 is
-used, then th1520_set_uhs_signaling() will change delay_line to
-PHY_SDCLKDL_DC_HS400.
-
-Based on the above, I don't think DT needs direct control of the
-delay_line value, but I can add a delay line DT prop if you prefer.
-
-> 
-> > +		th1520_sdhci_set_phy(host);
-> > +	} else {
-> > +		sdhci_writeb(host, 0, PHY_DLLDL_CNFG_R);
-> > +	}
-> > +}
-> > +
-> >  static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
-> >  					  struct mmc_ios *ios)
-> >  {
-> > @@ -338,6 +659,91 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
-> >  	sdhci_reset(host, mask);
-> >  }
-> >  
-> > +static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +	u32 val = 0;
-> > +
-> > +	if (host->flags & SDHCI_HS400_TUNING)
-> > +		return 0;
-> > +
-> > +	sdhci_writeb(host, PHY_ATDL_CNFG_INPSEL_VALUE << PHY_ATDL_CNFG_INPSEL_SHIFT,
-> > +		     PHY_ATDL_CNFG_R);
-> > +	val = sdhci_readl(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > +
-> > +	/*
-> > +	 * configure tuning settings:
-> > +	 *  - center phase select code driven in block gap interval
-> > +	 *  - disable reporting of framing errors
-> > +	 *  - disable software managed tuning
-> > +	 *  - disable user selection of sampling window edges,
-> > +	 *    instead tuning calculated edges are used
-> > +	 */
-> > +	val &= ~((AT_CTRL_CI_SEL << AT_CTRL_CI_SEL_SHIFT) |
-> > +		(AT_CTRL_RPT_TUNE_ERR << AT_CTRL_RPT_TUNE_ERR_SHIFT) |
-> > +		(AT_CTRL_SW_TUNE_EN << AT_CTRL_SW_TUNE_EN_SHIFT) |
-> > +		(AT_CTRL_WIN_EDGE_SEL << AT_CTRL_WIN_EDGE_SEL_SHIFT));
-> > +
-> > +	/*
-> > +	 * configure tuning settings:
-> > +	 *  - enable auto-tuning
-> > +	 *  - enable sampling window threshold
-> > +	 *  - stop clocks during phase code change
-> > +	 *  - set max latency in cycles between tx and rx clocks
-> > +	 *  - set max latency in cycles to switch output phase
-> > +	 *  - set max sampling window threshold value
-> > +	 */
-> > +	val |= AT_CTRL_AT_EN | (AT_CTRL_SWIN_TH_EN << AT_CTRL_SWIN_TH_EN_SHIFT) |
-> > +		(AT_CTRL_TUNE_CLK_STOP_EN << AT_CTRL_TUNE_CLK_STOP_EN_SHIFT) |
-> > +		(AT_CTRL_PRE_CHANGE_DLY << AT_CTRL_PRE_CHANGE_DLY_SHIFT) |
-> > +		(AT_CTRL_POST_CHANGE_DLY << AT_CTRL_POST_CHANGE_DLY_SHIFT) |
-> > +		(AT_CTRL_SWIN_TH_VAL << AT_CTRL_SWIN_TH_VAL_SHIFT);
-> > +
-> > +	sdhci_writel(host, val, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > +	val = sdhci_readl(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > +
-> > +	/* check if is possible to enable auto-tuning */
-> > +	if (!(val & AT_CTRL_AT_EN)) {
-> > +		dev_err(mmc_dev(host->mmc), "failed to enable auto tuning\n");
-> > +		return -EIO;
-> > +	}
-> > +
-> > +	/* disable auto tuning */
-> > +	val &= ~AT_CTRL_AT_EN;
-> > +	sdhci_writel(host, val, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> 
-> AFAIK, the HW support auto tuning, can we enable it?
-
-I am not sure why the version of the driver in the T-Head SDK disables
-auto tuning.
-
-The AT_EN field in the AT_CTRL register is supposed to be enabled by
-default if the controller was designed to support Mode3 retuning. I am
-not sure if this is the case for this SoC.
-
-AT_EN is meant to be cleared when software wishes to disable Mode3
-retuning which I believe is also known as Mode1.
-
-I suppose the best thing for me to do is experiement with AT_EN and see
-if I can in fact turn on auto-tuning.
-
-> 
-> > +
-> > +	/* perform tuning */
-> > +	sdhci_start_tuning(host);
-> > +	host->tuning_err = __sdhci_execute_tuning(host, opcode);
-> > +	if (host->tuning_err) {
-> > +		val &= ~AT_CTRL_AT_EN;
-> 
-> It looks like auto tunning is never enabled, so why do clear it here?
-
-I was confused by this also. I copied it from the T-Head SDK but I agree
-it doesn't seem to do anything useful.
-
-> 
-> > +		sdhci_writel(host, val, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > +		dev_err(mmc_dev(host->mmc), "tuning failed: %d\n", host->tuning_err);
-> > +		return -EIO;
-> > +	}
-> > +	sdhci_end_tuning(host);
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +	u16 ctrl_2;
-> > +
-> > +	sdhci_reset(host, mask);
-> > +
-> > +	if (priv->flags & FLAG_IO_FIXED_1V8) {
-> > +		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > +		if (!(ctrl_2 & SDHCI_CTRL_VDD_180)) {
-> > +			ctrl_2 |= SDHCI_CTRL_VDD_180;
-> > +			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> > +		}
-> > +	}
-> > +}
-> > +
-> >  static const struct sdhci_ops sdhci_dwcmshc_ops = {
-> >  	.set_clock		= sdhci_set_clock,
-> >  	.set_bus_width		= sdhci_set_bus_width,
-> > @@ -356,6 +762,17 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
-> >  	.adma_write_desc	= dwcmshc_adma_write_desc,
-> >  };
-> >  
-> > +static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
-> > +	.set_clock		= sdhci_set_clock,
-> > +	.set_bus_width		= sdhci_set_bus_width,
-> > +	.set_uhs_signaling	= th1520_set_uhs_signaling,
-> > +	.get_max_clock		= dwcmshc_get_max_clock,
-> > +	.reset			= th1520_sdhci_reset,
-> > +	.adma_write_desc	= dwcmshc_adma_write_desc,
-> > +	.voltage_switch		= th1520_phy_1_8v_init,
-> > +	.platform_execute_tuning = &th1520_execute_tuning,
-> > +};
-> > +
-> >  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-> >  	.ops = &sdhci_dwcmshc_ops,
-> >  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> > @@ -379,6 +796,12 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
-> >  		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-> >  };
-> >  
-> > +static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
-> > +	.ops = &sdhci_dwcmshc_th1520_ops,
-> > +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> > +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> > +};
-> > +
-> >  static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-> >  {
-> >  	int err;
-> > @@ -447,6 +870,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
-> >  		.compatible = "snps,dwcmshc-sdhci",
-> >  		.data = &sdhci_dwcmshc_pdata,
-> >  	},
-> > +	{
-> > +		.compatible = "thead,th1520-dwcmshc",
-> > +		.data = &sdhci_dwcmshc_th1520_pdata,
-> > +	},
-> >  	{},
-> >  };
-> >  MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
-> > @@ -542,6 +969,35 @@ static int dwcmshc_probe(struct platform_device *pdev)
-> >  			goto err_clk;
-> >  	}
-> >  
-> > +	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-> > +		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> 
-> Ditto. 
-
-There seems to only be two values used for the CLK delayline delay code,
-one for default and one for HS400. However, I could make it a dt
-property if you prefer.
-
-> 
-> > +
-> > +		if (device_property_present(&pdev->dev, "thead,phy-pull-up"))
-> > +			priv->flags |= FLAG_PULL_UP_EN;
-> > +		else
-> > +			priv->flags &= ~FLAG_PULL_UP_EN;
-> > +
-> > +		if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
-> > +		    (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
-> > +		    (device_property_read_bool(dev, "mmc-hs400-1_8v")))
-> > +			priv->flags |= FLAG_IO_FIXED_1V8;
-> > +		else
-> > +			priv->flags &= ~FLAG_IO_FIXED_1V8;
-> > +
-> > +		/*
-> > +		 * start_signal_voltage_switch() will try 3.3V first
-> > +		 * then 1.8V. Use SDHCI_SIGNALING_180 ranther than
-> > +		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> > +		 * in sdhci_start_signal_voltage_switch().
-> > +		 */
-> > +		if (priv->flags & FLAG_IO_FIXED_1V8) {
-> > +			host->flags &= ~SDHCI_SIGNALING_330;
-> > +			host->flags |=  SDHCI_SIGNALING_180;
-> > +		}
-> > +
-> > +		sdhci_enable_v4_mode(host);
-> > +	}
-> > +
-> >  #ifdef CONFIG_ACPI
-> >  	if (pltfm_data == &sdhci_dwcmshc_bf3_pdata)
-> >  		sdhci_enable_v4_mode(host);
-> > 
-> > -- 
-> > 2.34.1
-> > 
-
-Thank you for the review,
-Drew
