@@ -2,43 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E71EAE7C4C8
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 14:47:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01DFBE7C4CB
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 14:59:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232786AbjJDOre (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Oct 2023 10:47:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55526 "EHLO
+        id S232959AbjJDO7n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Oct 2023 10:59:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232838AbjJDOrd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 10:47:33 -0400
-X-Greylist: delayed 2582 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 04 Oct 2023 07:47:30 PDT
-Received: from sender4-op-o10.zoho.com (sender4-op-o10.zoho.com [136.143.188.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24C86C0;
-        Wed,  4 Oct 2023 07:47:30 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1696430820; cv=none; 
+        with ESMTP id S233192AbjJDO7n (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 10:59:43 -0400
+Received: from sender3-op-o18.zoho.com (sender3-op-o18.zoho.com [136.143.184.18])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FBD59B;
+        Wed,  4 Oct 2023 07:59:39 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1696431543; cv=none; 
         d=zohomail.com; s=zohoarc; 
-        b=nxDApxEtzlx2xFddY5YqEaRiOelJY8n/5mSNawUGpBG3I4vQC4X6GggHHzTZGSLcLkPGqCZOrc+tkBKbKAd3i06Bbk7F0OUL7UxA76yEowMwZhSJ74h2XX37KOf54puONWX7BIVNHtshOXE/9mI3fxe3FOJu3TJpZ9yeDzplVFw=
+        b=gMNoEli4g2cQmjpcvCqiTd0zYxrBPMD7THOpvqCJHuBCjFTHlL9bRpK1PpNn9VxWIMRRvOWFj/81OVWtua0txKV9ePNxYJz/s9wa8Qqwc1qR17pt+ONK2llQh9jXO0O5o9UxpU03SAa1SuhE8GBIMYh9hcJmZxEeC1MxpTxWMWQ=
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-        t=1696430820; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-        bh=U9trAlWX6nBvb4VRniGzCrIKYuNDIMWaTtr2TJttzSk=; 
-        b=Pb0xQhHAo1a30Wk3f00tHT5zSAo2GAyeRFIbWiMCxFSbygrlW4OnZkyNQoDbzqLwOwSwyQOebsf6/MlERWP1fwTNGjA2pBlD/OqclMdwf49it/1lzynrNllKQdwiSv5oknBgYLs0vMONzdPCafJAOFvRlkXb15dZE03/+ELxbug=
+        t=1696431543; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+        bh=LdPMaLjHlfUS0gHSy+2qt31lLyAWmRO7wmsNvzL4OAA=; 
+        b=RndgPiKwFgWEQvELvUjLB4YgihwR+6RtVkQGlc1vQeTytOl0qwkq5Grh5h9Q9vBuNH3GrYJZrJs9ZSIAeB86tKLvEloWPMRDz0OLeCPIvzRfZ1ZFefbdsUggu3U4WAAyjQNBpKAKOZ4d/EhXai85OdmlZj5xQXKqxiKnUt5F3uM=
 ARC-Authentication-Results: i=1; mx.zohomail.com;
         dkim=pass  header.i=icenowy.me;
         spf=pass  smtp.mailfrom=uwu@icenowy.me;
         dmarc=pass header.from=<uwu@icenowy.me>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1696430820;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1696431543;
         s=zmail2; d=icenowy.me; i=uwu@icenowy.me;
         h=Message-ID:Subject:Subject:From:From:To:To:Cc:Cc:Date:Date:In-Reply-To:References:Content-Type:Content-Transfer-Encoding:MIME-Version:Message-Id:Reply-To;
-        bh=U9trAlWX6nBvb4VRniGzCrIKYuNDIMWaTtr2TJttzSk=;
-        b=clD1xuxQ/rJT7sA7O7drvAgcArpOp3gx//OhNLxCkza9KKFmcbCglsnObwhOrAKZ
-        V4iO/MHUcJIfw+nCFggVYLY0hPT/C/R0nG9HUcMtbRgcQwvxBt6DrPVPLO5xVl4tqj9
-        t/+YXinXCg+k30aSzalQmTOkomM8b/NVjL5ArW78BBufIWPenKo7XjKK+Gd5iYWtH7H
-        urAHnBNC4SpiQ6QzjUG19BJg3sxcSxZeb0TDa3liQHXmPy/A9Pt8j96RbJlaFoApC/t
-        ug0UzUii4LGLU2jmdXK7JwSwRe6suIbo9t68yzPgI/egoHEWZU+P2ZFIgI34IxpOMjs
-        UfnD+EigcQ==
+        bh=LdPMaLjHlfUS0gHSy+2qt31lLyAWmRO7wmsNvzL4OAA=;
+        b=eR+gxRYUfLByktnwDoAwm9lPs4BfVqK07dHUdshqDxQX2gRuSzUu3NFgPnhbxYRc
+        rMLb8eGiorRLyOJ6xgw3daXcyMGY2mq886CEGxS+toWYQzUc2hAtqYhDWbylPy5cyru
+        lULRYYaZaMkWc4UCNNbRIi8ttEPo1CXM5swK74Bcscl9OZ3+MlpilTGcqSMFxaV0HNR
+        VmMkv2V9QlRvVB2a9wjbrBQ02AP5OmGfA642uz3IbHTtbREbkub7MO2+IpvBJ9yECtI
+        PK3T9xtDX4OVUyarYMIkSfRjEgR286oGWKYn3eTMHyjiFuQ29v0YbqYHFSlrN6FjeGg
+        xCr+bBBG+w==
 Received: from edelgard.fodlan.icenowy.me (120.85.98.65 [120.85.98.65]) by mx.zohomail.com
-        with SMTPS id 1696430817671586.6852143453285; Wed, 4 Oct 2023 07:46:57 -0700 (PDT)
-Message-ID: <be4e43b676ca5619e99b0f5abf228e45fadedb70.camel@icenowy.me>
+        with SMTPS id 1696431540266745.8094566529361; Wed, 4 Oct 2023 07:59:00 -0700 (PDT)
+Message-ID: <12ea9707f8c45dc398eb20f303aba9ecc7624455.camel@icenowy.me>
 Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
 From:   Icenowy Zheng <uwu@icenowy.me>
 To:     Robin Murphy <robin.murphy@arm.com>,
@@ -65,7 +64,7 @@ Cc:     Drew Fustini <dfustini@baylibre.com>,
         =?ISO-8859-1?Q?Bj=F6rn_T=F6pel?= <bjorn@kernel.org>,
         Alexandre Ghiti <alexghiti@rivosinc.com>,
         Linux-MM <linux-mm@kvack.org>
-Date:   Wed, 04 Oct 2023 22:46:49 +0800
+Date:   Wed, 04 Oct 2023 22:58:52 +0800
 In-Reply-To: <a568a9dd-bab2-1e23-c4d5-9f6475bdcc3b@arm.com>
 References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
          <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
@@ -135,7 +134,12 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 > support this platform in a multi-platform kernel, or someone needs to
 > do=20
 
-Emmmm thus RZ/Five should `depends on NONPORTABLE`?
+Well, considering RZ/Five enables some spec-non-conformant local memory
+(which bypasses MMU) that makes even running generic user space
+binaries not so viable (PIE ones may still run, but those built to be
+on the default fixed location of binutils will conflict with the MMU-
+bypassing local memory), not supporting it in a multi-platform kernel
+doesn't look like a big deal.
 
 > some fiddly work in dma-direct to a) introduce the notion of an
 > optional=20
