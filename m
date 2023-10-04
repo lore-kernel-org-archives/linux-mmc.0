@@ -2,220 +2,190 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9480E8FDDA
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 08:36:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B0D2E7B5E8
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 10:47:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241723AbjJDIgV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Oct 2023 04:36:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48586 "EHLO
+        id S232939AbjJDKrK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Oct 2023 06:47:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50156 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241711AbjJDIgT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 04:36:19 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A54CB83
-        for <linux-mmc@vger.kernel.org>; Wed,  4 Oct 2023 01:36:16 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-d77ad095f13so1901635276.2
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Oct 2023 01:36:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1696408576; x=1697013376; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=yNmmYgCjSxXxIRoxGSMK0QQqTDsrWAUVkTpb18p92u8=;
-        b=qhgMlPjTsG/qdg+cZOh6it9C5GuaT/J0iHgc/KbxfdfDkWXjLIR4FXQ182YYbJbrbK
-         ErIGvQAwckoL9pmglkNzFk8Bxj9BkLU9H36zZNmC05EOBYqHeyZYFATfQENK+7p/AkQD
-         yyiCtOy1+8SvN0DSKrBaL75MBk954XaQkbfR6h9HP11EgFrf6dwwfhOx58C37Zcx7w7m
-         OenuZtxSYMJQP32RJpezwwfV7xtz0GvWJlKpGjQqsV5n36Z/x+7M1bEoOTZL9hf7iVsT
-         onaiWpADJJMxaawBdoojs8vi18l2DvJo+y/wwZZCaRMHqPwowvRme/DFkYc323/6oWlX
-         ChLw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696408576; x=1697013376;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=yNmmYgCjSxXxIRoxGSMK0QQqTDsrWAUVkTpb18p92u8=;
-        b=xAfkt7ETxFfng/JTyOllMZo+O4Ymc2t0lCBf8D0I1p6gvbJdT42n03tiwFBYKVxavf
-         ECMwHjBmOn7feHb/HzwiPa7SzWn+NHx6VHcPZm8lcDKTCGR6EN4JGf27mzRNAb+b1gjv
-         2eOPyL3BJsKd6jStUZMYNIgSLLjlcPuPVtdaK96vMc+sfYk3rvzS57CkjTQUJV5eqIiN
-         chOcHAEHaXrETHg89rHAJwr7tEvKMcbM7sL1KFqd7R2UCVyAnyW/FYtDlXaL1relHUHs
-         cAHgC4MUSvHPBtmdOLN3+zkCnVs1kSEvvScqTtmOsTmcxIpJfXYvkl7apSWWn2fhh9W2
-         wUAQ==
-X-Gm-Message-State: AOJu0YxNPSHQoh6a+tXA6Yin14/QrGzYzO47h774BDkm3cTNCsfgyosM
-        KqHqYfnACPa3PxCI1haMkHPcqmYTsm9O46M53a71iA==
-X-Google-Smtp-Source: AGHT+IHioMNPp0e6TuU7XZzbtyJB2o5aREJwLeXKLMBBOK5IOj/DqlZbG27TG4p1nspDmkZElEP9rTFFyJA8aFcOgXs=
-X-Received: by 2002:a5b:110:0:b0:d81:85c9:cea9 with SMTP id
- 16-20020a5b0110000000b00d8185c9cea9mr1331920ybx.65.1696408575811; Wed, 04 Oct
- 2023 01:36:15 -0700 (PDT)
+        with ESMTP id S232840AbjJDKrJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 06:47:09 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29033A1;
+        Wed,  4 Oct 2023 03:47:06 -0700 (PDT)
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 394AEqD8011480;
+        Wed, 4 Oct 2023 10:46:11 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=TV/xcuPEKKHvdC2TDkpxifWrlD/iEo8VWu/rt/uinwY=;
+ b=MaHJdgkRzByyM8OoHLi2fF87hJdjUAtrKvbZ8ZHcUFLx64XDtl8bTBT7SlhdO3adg9d/
+ VNfjZeIoKRd20C0CQsYX2TGujB/3Ns2iJBO7p7Hnq1eYFY+MY3TpnyJwsqYhxJg3RA/l
+ gV1KARHm15CARiUYO5GnOyiSVKgbffyjAhBaftKLgcv43fxVYO/EBf0BOC896YNBbsG3
+ gpDRskEXCCK72vrqUdDHUX8OnyYhEII6NiOW26HUoQPCUnPWhrGjgwtniCGqo8PGfpBQ
+ 34hWUcaN5eu2b+Q55NFK5KYnP9jKMQKEzoEW+4Bbalb9X0XdOEGuU6YESystg9Ot/zEq ig== 
+Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3th2gq0gg1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 04 Oct 2023 10:46:11 +0000
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+        by NASANPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 394AkARh011675
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 4 Oct 2023 10:46:10 GMT
+Received: from [10.217.218.207] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.36; Wed, 4 Oct
+ 2023 03:46:05 -0700
+Message-ID: <1e9b2d55-09cf-422e-a3f5-2f6084e675c3@quicinc.com>
+Date:   Wed, 4 Oct 2023 16:15:44 +0530
 MIME-Version: 1.0
-References: <20230915094351.11120-1-victorshihgli@gmail.com>
- <20230915094351.11120-11-victorshihgli@gmail.com> <CAPDyKFrynugse6+vwummTQ73egwvGAfKreH=iihv9bhFN1SJYQ@mail.gmail.com>
- <afa2aeed-7296-4075-a7e0-62f3d59bfdf4@intel.com> <CAPDyKFqidGZ242P-9xnxokSCeGxk8uziqR=AteWt=iQFz5fA9g@mail.gmail.com>
- <81bf38cd-b6a4-4a6f-a51d-bc916e3b8f96@intel.com>
-In-Reply-To: <81bf38cd-b6a4-4a6f-a51d-bc916e3b8f96@intel.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Oct 2023 10:35:39 +0200
-Message-ID: <CAPDyKFoc0phsXuX5W0PqFu2En57Lc9D-+MTGxAYtJhPpHcVZ2g@mail.gmail.com>
-Subject: Re: [PATCH V12 10/23] mmc: sdhci-uhs2: add reset function and
- uhs2_mode function
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Victor Shih <victorshihgli@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V1] mmc: core: Add partial initialization support
+To:     Wenchao Chen <wenchao.chen666@gmail.com>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "Kamasali Satyanarayan (Consultant) (QUIC)" 
+        <quic_kamasali@quicinc.com>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
+        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>,
+        "merez@codeaurora.org" <merez@codeaurora.org>,
+        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
+        "huijin.park@samsung.com" <huijin.park@samsung.com>,
+        "briannorris@chromium.org" <briannorris@chromium.org>,
+        "digetx@gmail.com" <digetx@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "Veerabhadrarao Badiganti" <vbadigan@codeaurora.org>,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+References: <1650963852-4173-1-git-send-email-quic_spathi@quicinc.com>
+ <CAPDyKFo7H=fOiX49gttrKO3gwe=ddYMjdgrO_xSnnZjZh7P7ZA@mail.gmail.com>
+ <MWHPR0201MB3466C629ECABC8FD6B009276E3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
+ <ea318551ec0b43429ce47bfac9ebf285@quicinc.com>
+ <CAPDyKFq2-Jwii_aMbsqYNM_Dq0-MMEEtUYnNKGbQgvDL+M-wdw@mail.gmail.com>
+ <c06480b1-95e3-49cd-9498-5c7c5f1deabe@quicinc.com>
+ <CA+Da2qz2dSUKa9t4gBaDg=kAE=CjRrx2Sz_Je+nFsrM5xr_+5w@mail.gmail.com>
+Content-Language: en-US
+From:   Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <CA+Da2qz2dSUKa9t4gBaDg=kAE=CjRrx2Sz_Je+nFsrM5xr_+5w@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: Oq17tu6_89Zz-8aGtRVvGK3-INOlrcR-
+X-Proofpoint-ORIG-GUID: Oq17tu6_89Zz-8aGtRVvGK3-INOlrcR-
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-10-04_01,2023-10-02_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0
+ lowpriorityscore=0 phishscore=0 mlxlogscore=999 mlxscore=0 impostorscore=0
+ malwarescore=0 suspectscore=0 clxscore=1011 bulkscore=0 adultscore=0
+ priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2309180000 definitions=main-2310040078
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 3 Oct 2023 at 17:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 3/10/23 15:22, Ulf Hansson wrote:
-> > On Tue, 3 Oct 2023 at 13:37, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >>
-> >> On 3/10/23 13:30, Ulf Hansson wrote:
-> >>> On Fri, 15 Sept 2023 at 11:44, Victor Shih <victorshihgli@gmail.com> wrote:
-> >>>>
-> >>>> From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >>>>
-> >>>> Sdhci_uhs2_reset() does a UHS-II specific reset operation.
-> >>>>
-> >>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> >>>> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >>>> ---
-> >>>>
-> >>>> Updates in V8:
-> >>>>  - Adjust the position of matching brackets.
-> >>>>
-> >>>> Updates in V6:
-> >>>>  - Remove unnecessary functions and simplify code.
-> >>>>
-> >>>> ---
-> >>>>
-> >>>>  drivers/mmc/host/sdhci-uhs2.c | 45 +++++++++++++++++++++++++++++++++++
-> >>>>  drivers/mmc/host/sdhci-uhs2.h |  2 ++
-> >>>>  2 files changed, 47 insertions(+)
-> >>>>
-> >>>> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> >>>> index e339821d3504..dfc80a7f1bad 100644
-> >>>> --- a/drivers/mmc/host/sdhci-uhs2.c
-> >>>> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> >>>> @@ -10,7 +10,9 @@
-> >>>>   *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> >>>>   */
-> >>>>
-> >>>> +#include <linux/delay.h>
-> >>>>  #include <linux/module.h>
-> >>>> +#include <linux/iopoll.h>
-> >>>>
-> >>>>  #include "sdhci.h"
-> >>>>  #include "sdhci-uhs2.h"
-> >>>> @@ -49,6 +51,49 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
-> >>>>  }
-> >>>>  EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
-> >>>>
-> >>>> +/*****************************************************************************\
-> >>>> + *                                                                           *
-> >>>> + * Low level functions                                                       *
-> >>>> + *                                                                           *
-> >>>> +\*****************************************************************************/
-> >>>> +
-> >>>> +bool sdhci_uhs2_mode(struct sdhci_host *host)
-> >>>> +{
-> >>>> +       return host->mmc->flags & MMC_UHS2_SUPPORT;
-> >>>
-> >>> The MMC_UHS2_SUPPORT bit looks redundant to me. Instead, I think we
-> >>> should be using mmc->ios.timings, which already indicates whether we
-> >>> are using UHS2 (MMC_TIMING_UHS2_SPEED_*). See patch2 where we added
-> >>> this.
-> >>>
-> >>> That said, I think we should drop the sdhci_uhs2_mode() function
-> >>> altogether and instead use mmc_card_uhs2(), which means we should move
-> >>> it to include/linux/mmc/host.h, so it becomes available for host
-> >>> drivers.
-> >>>
-> >>
-> >> UHS2 mode starts at UHS2 initialization and ends either when UHS2
-> >> initialization fails, or the card is removed.
-> >>
-> >> So it includes re-initialization and reset when the transfer mode
-> >> currently transitions through MMC_TIMING_LEGACY.
-> >>
-> >> So mmc_card_uhs2() won't work correctly for the host callbacks
-> >> unless something is done about that.
-> >
-> > Right, thanks for clarifying!
-> >
-> > In that case I wonder if we couldn't change the way we update the
-> > ->ios.timing for UHS2. It seems silly to have two (similar) ways to
-> > indicate that we have moved to UHS2.
->
-> Perhaps something like below:
->
-> diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
-> index aacefdd6bc9e..e39d63d46041 100644
-> --- a/drivers/mmc/core/sd_uhs2.c
-> +++ b/drivers/mmc/core/sd_uhs2.c
-> @@ -70,7 +70,8 @@ static int sd_uhs2_power_off(struct mmc_host *host)
->
->         host->ios.vdd = 0;
->         host->ios.clock = 0;
-> -       host->ios.timing = MMC_TIMING_LEGACY;
-> +       /* Must set UHS2 timing to identify UHS2 mode */
-> +       host->ios.timing = MMC_TIMING_UHS2_SPEED_A;
->         host->ios.power_mode = MMC_POWER_OFF;
->         if (host->flags & MMC_UHS2_SD_TRAN)
->                 host->flags &= ~MMC_UHS2_SD_TRAN;
-> @@ -1095,7 +1096,8 @@ static void sd_uhs2_detect(struct mmc_host *host)
->                 mmc_claim_host(host);
->                 mmc_detach_bus(host);
->                 sd_uhs2_power_off(host);
-> -               host->flags &= ~MMC_UHS2_SUPPORT;
-> +               /* Remove UHS2 timing to indicate the end of UHS2 mode */
-> +               host->ios.timing = MMC_TIMING_LEGACY;
->                 mmc_release_host(host);
->         }
->  }
-> @@ -1338,7 +1340,8 @@ static int sd_uhs2_attach(struct mmc_host *host)
->  err:
->         mmc_detach_bus(host);
->         sd_uhs2_power_off(host);
-> -       host->flags &= ~MMC_UHS2_SUPPORT;
-> +       /* Remove UHS2 timing to indicate the end of UHS2 mode */
-> +       host->ios.timing = MMC_TIMING_LEGACY;
->         return err;
->  }
 
-I wouldn't mind changing to the above. But, maybe an even better
-option is to use the ->timing variable in the struct sdhci_host, as
-it's there already to keep track of the current/previous timing state.
-Would that work too?
+On 9/28/2023 8:50 AM, Wenchao Chen wrote:
+> On Tue, 26 Sept 2023 at 18:41, Sarthak Garg <quic_sartgarg@quicinc.com> wrote:
+>>
+>> On 6/16/2022 4:18 AM, Ulf Hansson wrote:
+>>> On Tue, 24 May 2022 at 07:37, Sarthak Garg (QUIC)
+>>> <quic_sartgarg@quicinc.com> wrote:
+>>>> Hi Ulf,
+>>>>
+>>>> Please find the gains seen on micron and kingston eMMC parts below with partial initialization feature (These are the averaged numbers) :
+>>>>
+>>>> 1) Micron eMMC (ManfID 0x13)
+>>>>
+>>>> Partial init                            Full Init
+>>>>
+>>>> a) _mmc_resume:                         _mmc_resume :
+>>>>
+>>>> Total time : 62ms                       Total time : 84ms
+>>>> (Decrease % from full init = ~26%)
+>>> Alright, so we gained around 22ms. Not too bad.
+>>>
+>>>> Breakup :
+>>>> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.1ms
+>>>> mmc_power_up_time: 33ms         mmc_power_up_time: 33ms
+>>>> mmc_sleepawake_time: 28ms               mmc_init_card_time: 50ms
+>>>> mmc_partial_init_time: 1ms
+>>>>
+>>>> b) _mmc_suspend:                        _mmc_suspend:
+>>>>
+>>>> Total time: 5ms                         Total time: 7.5ms
+>>>> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 1ms
+>>>> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 2.5 ms
+>>>> mmc_sleep_time: 1.5ms           mmc_sleep_time: 2ms
+>>>> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
+>>> The suspend time shouldn't really differ. Or is there a reason for this?
+>>
+>> I think this could be due to run to run variation as we can see
+>> mmc_claim_host and mmc_flush_cache itself taking some extra 1ms.
+>>
+>>
+> Hi Sarthak
+>
+> I have a question.
+> 1.What is the difference between Partial init and Full Init on SOC
+> power consumption?
+> 2.Partial init and Full init improve IO performance?
+> 3.Could you share the test methods if you want?
+
+
+No difference in SOC power consumption between the two .. it just 
+improves the resume latency as mentioned in commit text.
+Partial init and Full init only improves the resume latency and no IO 
+performance impact.
+We don't have any such test methods instead just evaluated the resume 
+delays using ftraces.
+
+Thanks,
+Sarthak
 
 >
-> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> index 517c497112f4..d1f3318b7d3a 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.c
-> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -267,10 +267,11 @@ static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->
->         /* UHS2 timing. Note, UHS2 timing is disabled when powering off */
->         ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> -       if (ios->timing == MMC_TIMING_UHS2_SPEED_A ||
-> -           ios->timing == MMC_TIMING_UHS2_SPEED_A_HD ||
-> -           ios->timing == MMC_TIMING_UHS2_SPEED_B ||
-> -           ios->timing == MMC_TIMING_UHS2_SPEED_B_HD)
-> +       if (ios->power_mode != MMC_POWER_OFF &&
-> +           (ios->timing == MMC_TIMING_UHS2_SPEED_A ||
-> +            ios->timing == MMC_TIMING_UHS2_SPEED_A_HD ||
-> +            ios->timing == MMC_TIMING_UHS2_SPEED_B ||
-> +            ios->timing == MMC_TIMING_UHS2_SPEED_B_HD))
->                 ctrl_2 |= SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE;
->         else
->                 ctrl_2 &= ~(SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE);
->
->
-
-Kind regards
-Uffe
+>>>> 2) Kingston eMMC (ManfID 0x70)
+>>>>
+>>>> Partial init                            Full Init
+>>>>
+>>>> a) _mmc_resume:                 _mmc_resume :
+>>>> Total time : 46ms                       Total time : 62ms
+>>>> (Decrease % from full init = ~25%)
+>>>>
+>>>> Breakup :
+>>>> mmc_claim_host_time: 0.2ms              mmc_claim_host_time: 0.2ms
+>>>> mmc_power_up_time: 30ms         mmc_power_up_time: 30ms
+>>>> mmc_sleepawake_time: 14ms               mmc_init_card_time: 31ms
+>>>> mmc_partial_init_time: 2ms
+>>>>
+>>>>
+>>>> b) _mmc_suspend:                        _mmc_suspend:
+>>>> Total time : 5ms                        Total: 5ms
+>>>>
+>>>> Breakup :
+>>>> mmc_claim_host_time: 0.5ms              mmc_claim_host_time: 0.5ms
+>>>> mmc_flush_cache_time : 1.5 ms   mmc_flush_cache_time : 1.5 ms
+>>>> mmc_sleep_time: 1.5ms           mmc_sleep_time: 1ms
+>>>> mmc_power_off_time: 1.5ms               mmc_power_off_time: 1.5ms
+>>>>
+>>>> Did some minor modifications as well to this patchset as per avri's comment which I'll post as V2.
+>>>> Please let me know your inputs about these numbers.
+>>> Thanks for posting these numbers, much appreciated! Please try to
+>>> include some of the data as part of the commit message as I think it's
+>>> valuable information.
+>>>
+>>> When it comes to reviewing the code, I am awaiting your v2 then.
+>>>
+>>> [...]
+>>>
+>>> Kind regards
+>>> Uffe
+>> Sure will add this data to the commit text in V2.
+>>
+>>
