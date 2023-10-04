@@ -2,48 +2,63 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01DFBE7C4CB
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 14:59:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 099B0E7C4D0
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Oct 2023 15:33:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232959AbjJDO7n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Oct 2023 10:59:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44796 "EHLO
+        id S233575AbjJDPdn convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Oct 2023 11:33:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233192AbjJDO7n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 10:59:43 -0400
-Received: from sender3-op-o18.zoho.com (sender3-op-o18.zoho.com [136.143.184.18])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FBD59B;
-        Wed,  4 Oct 2023 07:59:39 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1696431543; cv=none; 
-        d=zohomail.com; s=zohoarc; 
-        b=gMNoEli4g2cQmjpcvCqiTd0zYxrBPMD7THOpvqCJHuBCjFTHlL9bRpK1PpNn9VxWIMRRvOWFj/81OVWtua0txKV9ePNxYJz/s9wa8Qqwc1qR17pt+ONK2llQh9jXO0O5o9UxpU03SAa1SuhE8GBIMYh9hcJmZxEeC1MxpTxWMWQ=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-        t=1696431543; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-        bh=LdPMaLjHlfUS0gHSy+2qt31lLyAWmRO7wmsNvzL4OAA=; 
-        b=RndgPiKwFgWEQvELvUjLB4YgihwR+6RtVkQGlc1vQeTytOl0qwkq5Grh5h9Q9vBuNH3GrYJZrJs9ZSIAeB86tKLvEloWPMRDz0OLeCPIvzRfZ1ZFefbdsUggu3U4WAAyjQNBpKAKOZ4d/EhXai85OdmlZj5xQXKqxiKnUt5F3uM=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-        dkim=pass  header.i=icenowy.me;
-        spf=pass  smtp.mailfrom=uwu@icenowy.me;
-        dmarc=pass header.from=<uwu@icenowy.me>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1696431543;
-        s=zmail2; d=icenowy.me; i=uwu@icenowy.me;
-        h=Message-ID:Subject:Subject:From:From:To:To:Cc:Cc:Date:Date:In-Reply-To:References:Content-Type:Content-Transfer-Encoding:MIME-Version:Message-Id:Reply-To;
-        bh=LdPMaLjHlfUS0gHSy+2qt31lLyAWmRO7wmsNvzL4OAA=;
-        b=eR+gxRYUfLByktnwDoAwm9lPs4BfVqK07dHUdshqDxQX2gRuSzUu3NFgPnhbxYRc
-        rMLb8eGiorRLyOJ6xgw3daXcyMGY2mq886CEGxS+toWYQzUc2hAtqYhDWbylPy5cyru
-        lULRYYaZaMkWc4UCNNbRIi8ttEPo1CXM5swK74Bcscl9OZ3+MlpilTGcqSMFxaV0HNR
-        VmMkv2V9QlRvVB2a9wjbrBQ02AP5OmGfA642uz3IbHTtbREbkub7MO2+IpvBJ9yECtI
-        PK3T9xtDX4OVUyarYMIkSfRjEgR286oGWKYn3eTMHyjiFuQ29v0YbqYHFSlrN6FjeGg
-        xCr+bBBG+w==
-Received: from edelgard.fodlan.icenowy.me (120.85.98.65 [120.85.98.65]) by mx.zohomail.com
-        with SMTPS id 1696431540266745.8094566529361; Wed, 4 Oct 2023 07:59:00 -0700 (PDT)
-Message-ID: <12ea9707f8c45dc398eb20f303aba9ecc7624455.camel@icenowy.me>
+        with ESMTP id S233550AbjJDPdn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Oct 2023 11:33:43 -0400
+Received: from mail-ot1-f50.google.com (mail-ot1-f50.google.com [209.85.210.50])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0A2293;
+        Wed,  4 Oct 2023 08:33:39 -0700 (PDT)
+Received: by mail-ot1-f50.google.com with SMTP id 46e09a7af769-6c4e7951dc1so1568995a34.3;
+        Wed, 04 Oct 2023 08:33:39 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696433619; x=1697038419;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=7+vH9ZjDJZ1+GqxJ7pOb8CHx+0pluQ1FP46Flmdef0g=;
+        b=n4fr1K42TUy8Q5nvd8XagEwOHTSPHcphWm00XmYm/rnF0vR4ljoir5ng1mnyXQFzC9
+         8an80Q/U55hXcQfBKm+DWwbx8YgW5wX266ynhUNPJ1J9U8HAv7Sq4w1ZZMNJPGYY1WU5
+         kBNztqVc+dRZt65tnISLiKIfwGXHAT3ndzLL0WVq5Y87i4uXmj4C5+ZmF2jCha781xtV
+         Ks5j92AyiUafoThVtHai1tL2xduW/7yhD+LPYe+pnKgoql70WKKhwv8BSyhS5P8sFBid
+         2hRtFqVt18uRBnWjJNtN03lNn1PMS6GwcnCqzMvUIZ5sljljxwMjUzratJpXBrpZDs/z
+         aTmA==
+X-Gm-Message-State: AOJu0Yx0UoY/DoNKJ8+3vDgiMeimfnu4vwQyc3CB3+5DvG68B2IT3zvK
+        DJsKk9a9becZwEX1Pn7KAc3IUfMSmIzRyg==
+X-Google-Smtp-Source: AGHT+IGikuA3DCiy97pWZ2LJok93ciQGyAH+B+/W4sGOxgHyiI56RSO1SjDUhmiTBYFqzSDygfTnFA==
+X-Received: by 2002:a9d:7e87:0:b0:6bc:b80c:bd53 with SMTP id m7-20020a9d7e87000000b006bcb80cbd53mr2401833otp.38.1696433618795;
+        Wed, 04 Oct 2023 08:33:38 -0700 (PDT)
+Received: from mail-oa1-f51.google.com (mail-oa1-f51.google.com. [209.85.160.51])
+        by smtp.gmail.com with ESMTPSA id i22-20020a056830011600b006b8a0c7e14asm483186otp.55.2023.10.04.08.33.38
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 04 Oct 2023 08:33:38 -0700 (PDT)
+Received: by mail-oa1-f51.google.com with SMTP id 586e51a60fabf-1dd7139aa57so1495978fac.1;
+        Wed, 04 Oct 2023 08:33:38 -0700 (PDT)
+X-Received: by 2002:a0d:d7cc:0:b0:584:4bbb:963b with SMTP id
+ z195-20020a0dd7cc000000b005844bbb963bmr2800485ywd.15.1696433239582; Wed, 04
+ Oct 2023 08:27:19 -0700 (PDT)
+MIME-Version: 1.0
+References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
+ <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
+ <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
+ <ZRuamJuShOnvP1pr@x1> <ZR1M3FcdXrDmIGu2@xhacker> <CA+V-a8ugwqkQxnX-wwWCHVtBBtG=aVv=MZTc53LbpxtFA=N1_A@mail.gmail.com>
+ <bc2b0b30-ab37-f336-c90e-eab570d393a2@arm.com> <ZR1xSw47Z1/SEIwz@xhacker>
+In-Reply-To: <ZR1xSw47Z1/SEIwz@xhacker>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 4 Oct 2023 17:27:06 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXt9+XuUEF2j=osAVFFaPkYF4UntPdcqYydu8QzyyuMfw@mail.gmail.com>
+Message-ID: <CAMuHMdXt9+XuUEF2j=osAVFFaPkYF4UntPdcqYydu8QzyyuMfw@mail.gmail.com>
 Subject: Re: [PATCH 0/6] RISC-V: Add eMMC support for TH1520 boards
-From:   Icenowy Zheng <uwu@icenowy.me>
-To:     Robin Murphy <robin.murphy@arm.com>,
+To:     Jisheng Zhang <jszhang@kernel.org>
+Cc:     Robin Murphy <robin.murphy@arm.com>,
         "Lad, Prabhakar" <prabhakar.csengg@gmail.com>,
-        Jisheng Zhang <jszhang@kernel.org>
-Cc:     Drew Fustini <dfustini@baylibre.com>,
+        Drew Fustini <dfustini@baylibre.com>,
         Christoph Hellwig <hch@lst.de>,
         Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
         Robert Nelson <robertcnelson@gmail.com>,
@@ -59,93 +74,167 @@ Cc:     Drew Fustini <dfustini@baylibre.com>,
         Conor Dooley <conor@kernel.org>,
         Jason Kridner <jkridner@beagleboard.org>,
         Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
-        =?ISO-8859-1?Q?Bj=F6rn_T=F6pel?= <bjorn@kernel.org>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org,
+        =?UTF-8?B?QmrDtnJuIFTDtnBlbA==?= <bjorn@kernel.org>,
         Alexandre Ghiti <alexghiti@rivosinc.com>,
         Linux-MM <linux-mm@kvack.org>
-Date:   Wed, 04 Oct 2023 22:58:52 +0800
-In-Reply-To: <a568a9dd-bab2-1e23-c4d5-9f6475bdcc3b@arm.com>
-References: <20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com>
-         <CAOCHtYhnx1EpBM+o3xhdsicx5uqLidojK3f0HQ+VfyVv1ZXnVQ@mail.gmail.com>
-         <CAOCHtYi5Ab5ppCmaQV3QuKQcpmJX+sHdAmtuEXhfq8xf5fFCYQ@mail.gmail.com>
-         <ZRuamJuShOnvP1pr@x1> <ZR1M3FcdXrDmIGu2@xhacker>
-         <CA+V-a8ugwqkQxnX-wwWCHVtBBtG=aVv=MZTc53LbpxtFA=N1_A@mail.gmail.com>
-         <bc2b0b30-ab37-f336-c90e-eab570d393a2@arm.com>
-         <c2ea3f34bb919293b850fab6ed42b61e3517ba35.camel@icenowy.me>
-         <a568a9dd-bab2-1e23-c4d5-9f6475bdcc3b@arm.com>
-Organization: Anthon Open-Source Community
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.4 
-MIME-Version: 1.0
-X-ZohoMailClient: External
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-=E5=9C=A8 2023-10-04=E6=98=9F=E6=9C=9F=E4=B8=89=E7=9A=84 15:18 +0100=EF=BC=
-=8CRobin Murphy=E5=86=99=E9=81=93=EF=BC=9A
-> On 04/10/2023 3:02 pm, Icenowy Zheng wrote:
-> [...]
-> > > > > I believe commit 484861e09f3e ("soc: renesas: Kconfig: Select
-> > > > > the
-> > > > > required configs for RZ/Five SoC") can cause regression on
-> > > > > all
-> > > > > non-dma-coherent riscv platforms with generic defconfig. This
-> > > > > is
-> > > > > a common issue. The logic here is: generic riscv defconfig
-> > > > > selects
-> > > > > ARCH_R9A07G043 which selects DMA_GLOBAL_POOL, which assumes
-> > > > > all
-> > > > > non-dma-coherent riscv platforms have a dma global pool, this
-> > > > > assumption
-> > > > > seems not correct. And I believe DMA_GLOBAL_POOL should not
-> > > > > be
-> > > > > selected by ARCH_SOCFAMILIY, instead, only ARCH under some
-> > > > > specific
-> > > > > conditions can select it globaly, for example NOMMU ARM and
-> > > > > so
-> > > > > on.
-> > > > >=20
-> > > > > Since this is a regression, what's proper fix? any suggestion
-> > > > > is
-> > > > > appreciated.
-> > >=20
-> > > I think the answer is to not select DMA_GLOBAL_POOL, since that
-> > > is
-> > > only
-> >=20
-> > Well I think for RISC-V, it's not NOMMU only but applicable for
-> > every
-> > core that does not support Svpbmt or vendor-specific alternatives,
-> > because the original RISC-V priv spec does not define memory
-> > attributes
-> > in page table entries.
-> >=20
-> > For the Renesas/Andes case I think a pool is set by OpenSBI with
-> > vendor-specific M-mode facility and then passed in DT, and the S-
-> > mode
-> > (which MMU is enabled in) just sees fixed memory attributes, in
-> > this
-> > case I think DMA_GLOBAL_POOL is needed.
->=20
-> Oh wow, is that really a thing? In that case, either you just can't=20
-> support this platform in a multi-platform kernel, or someone needs to
-> do=20
+Hi Jisheng,
 
-Well, considering RZ/Five enables some spec-non-conformant local memory
-(which bypasses MMU) that makes even running generic user space
-binaries not so viable (PIE ones may still run, but those built to be
-on the default fixed location of binutils will conflict with the MMU-
-bypassing local memory), not supporting it in a multi-platform kernel
-doesn't look like a big deal.
+On Wed, Oct 4, 2023 at 4:18 PM Jisheng Zhang <jszhang@kernel.org> wrote:
+> On Wed, Oct 04, 2023 at 02:49:56PM +0100, Robin Murphy wrote:
+> > On 04/10/2023 2:02 pm, Lad, Prabhakar wrote:
+> > > + CC linux-mm and Robin Murphy
+> > >
+> > > On Wed, Oct 4, 2023 at 12:42 PM Jisheng Zhang <jszhang@kernel.org> wrote:
+ > > >
+> > > > On Mon, Oct 02, 2023 at 09:37:44PM -0700, Drew Fustini wrote:
+> > > > > On Fri, Sep 22, 2023 at 05:48:21PM -0500, Robert Nelson wrote:
+> > > > > > On Fri, Sep 22, 2023 at 2:08 PM Robert Nelson <robertcnelson@gmail.com> wrote:
+> > > > > > >
+> > > > > > > On Thu, Sep 21, 2023 at 8:51 PM Drew Fustini <dfustini@baylibre.com> wrote:
+> > > > > > > >
+> > > > > > > > This series adds support for the eMMC on the BeagleV Ahead and the
+> > > > > > > > Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
+> > > > > > > > eMMC.
+> > > > > > > >
+> > > > > > > > I tested on top of v6.6-rc2 with this config [1]. I was able to boot
+> > > > > > > > both the Ahead [2] and LPi4a [3] from eMMC. The following prerequisites
+> > > > > > > > are required:
+> > > > > > > >
+> > > > > > > >    [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [4]
+> > > > > > > >
+> > > > > > > > I pushed a branch [5] with this patch series and the above patch for
+> > > > > > > > those that find a git branch easier to test.
+> > > > > > > >
+> > > > > > > > Please note that only the MMC controller connected to the eMMC device
+> > > > > > > > is enabled in the device trees for these two boards. I did not yet
+> > > > > > > > attempt to configure and use the microSD card slot. My preference is to
+> > > > > > > > address that in a future patch series.
+> > > > > > > >
+> > > > > > > > References:
+> > > > > > > > [1] https://gist.github.com/pdp7/5fbdcf2a65eb1abdd3a29d519c19cdd2
+> > > > > > > > [2] https://gist.github.com/pdp7/91a801a5f8d1070c53509eda9800ad78
+> > > > > > > > [3] https://gist.github.com/pdp7/1445c3c991e88fd69c60165cef65726a
+> > > > > > > > [4] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
+> > > > > > > > [5] https://github.com/pdp7/linux/tree/b4/th1520-mmc
+> > > > > > >
+> > > > > > > This patchset came out very nice!
+> > > > > > >
+> > > > > > > v6.6-rc2 with Last RFC v2:
+> > > > > > >
+> > > > > > > [    4.066630] mmc0: SDHCI controller on ffe7080000.mmc
+> > > > > > > [ffe7080000.mmc] using PIO
+> > > > > > >
+> > > > > > > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> > > > > > >
+> > > > > > > /dev/mmcblk0:
+> > > > > > >   Timing cached reads:   1516 MB in  2.00 seconds = 758.09 MB/sec
+> > > > > > >   Timing buffered disk reads:  84 MB in  3.01 seconds =  27.94 MB/sec
+> > > > > > >
+> > > > > > > vs v6.6-rc2 with this patchset:
+> > > > > > >
+> > > > > > >   [    4.096837] mmc0: SDHCI controller on ffe7080000.mmc
+> > > > > > > [ffe7080000.mmc] using DMA
+> > > > > > >
+> > > > > > > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> > > > > > >
+> > > > > > > /dev/mmcblk0:
+> > > > > > >   Timing cached reads:   1580 MB in  2.00 seconds = 790.97 MB/sec
+> > > > > > >   Timing buffered disk reads: 418 MB in  3.00 seconds = 139.11 MB/sec
+> > > > > >
+> > > > > > Drew pointed out on Slack, this was not quite right.. After more
+> > > > > > digging by Drew, CONFIG_DMA_GLOBAL_POOL is causing a DMA limitation
+> > > > > > with the multiplatform defconfig. so with,
+> > > > > >
+> > > > > > ./scripts/config --disable CONFIG_ARCH_R9A07G043
+> > > > > >
+> > > > > > (to remove CONFIG_DMA_GLOBAL_POOL)... another 2x in buffered reads..
+> > > > > >
+> > > > > > [    4.059242] mmc0: SDHCI controller on ffe7080000.mmc
+> > > > > > [ffe7080000.mmc] using ADMA 64-bit
+> > > > > >
+> > > > > > debian@BeagleV:~$ sudo hdparm -tT /dev/mmcblk0
+> > > > > >
+> > > > > > /dev/mmcblk0:
+> > > > > >   Timing cached reads:   1600 MB in  2.00 seconds = 800.93 MB/sec
+> > > > > >   Timing buffered disk reads: 892 MB in  3.00 seconds = 297.06 MB/sec
+> > > > >
+> > > > > It seems CONFIG_DMA_GLOBAL_POOL=y causes ADMA buffer alloc to fail [1]:
+> > > > >
+> > > > >    mmc0: Unable to allocate ADMA buffers - falling back to standard DMA
+> > > > >
+> > > > > Prabhakar's AX45MP non-coherent DMA support [2] series introduced the
+> > > > > selection of DMA_GLOBAL_POOL for ARCH_R9A07G043 and the riscv defconfig
+> > > > > selects ARCH_R9A07G043.
+> > > > >
+> > > > > Patch 5 in the series [3] states that:
+> > > > >
+> > > > >    With DMA_GLOBAL_POOL enabled all DMA allocations happen from this
+> > > > >    region and synchronization callbacks are implemented to synchronize
+> > > > >    when doing DMA transactions.
+> > > > >
+> > > > > This example of a "shared-dma-pool" node was given:
+> > > > >
+> > > > >          pma_resv0@58000000 {
+> > > > >              compatible = "shared-dma-pool";
+> > > > >              reg = <0x0 0x58000000 0x0 0x08000000>;
+> > > > >              no-map;
+> > > > >              linux,dma-default;
+> > > > >          };
+> > > > >
+> > > > > I've copied that to th1520-beaglev-ahead.dts. The address of 0x58000000
+> > > > > has no significance on th1520, but the existence of shared-dma-pool
+> > > > > seems to fix the problem. ADMA mode [4] is now working even though
+> > > > > CONFIG_DMA_GLOBAL_POOL=y.
+> > > >
+> > > > + Christoph, Lad
+> > > >
+> > > > IMHO, this is not TH1520 specific but a generic issue.
+> > > >
+> > > > I believe commit 484861e09f3e ("soc: renesas: Kconfig: Select the
+> > > > required configs for RZ/Five SoC") can cause regression on all
+> > > > non-dma-coherent riscv platforms with generic defconfig. This is
+> > > > a common issue. The logic here is: generic riscv defconfig selects
+> > > > ARCH_R9A07G043 which selects DMA_GLOBAL_POOL, which assumes all
+> > > > non-dma-coherent riscv platforms have a dma global pool, this assumption
+> > > > seems not correct. And I believe DMA_GLOBAL_POOL should not be
+> > > > selected by ARCH_SOCFAMILIY, instead, only ARCH under some specific
+> > > > conditions can select it globaly, for example NOMMU ARM and so on.
+> > > >
+> > > > Since this is a regression, what's proper fix? any suggestion is
+> > > > appreciated.
+> >
+> > I think the answer is to not select DMA_GLOBAL_POOL, since that is only
+> > designed for nommu cases where non-cacheable memory lives in a fixed place
+> > in the physical address map, and regular kernel pages can't be remapped. As
+> > far as I'm aware, RISCV_DMA_NONCOHERENT is the thing you want, such that
+> > DMA_DIRECT_REMAP can dynamically provide non-cacheable coherent buffers for
+> > non-hardware-coherent devices.
+>
+> Thank Robin!
+> AFAIK, ARCH_R9A07G043 needs the dma global pool to handle its CMO. So
+> it looks like ARCH_R9A07G043 can't be enabled in riscv generic
+> defconfig. And we also need a special solution to prevent random config
+> from selecting ARCH_R9A07G043 by chance for other platforms
 
-> some fiddly work in dma-direct to a) introduce the notion of an
-> optional=20
-> global pool, and b) make it somehow cope with DMA_DIRECT_REMAP being=20
-> enabled but non-functional.
->=20
-> Thanks,
-> Robin.
+There will be a similar issue with e.g. Starlight, as ERRATA_STARFIVE_JH7100
+(not yet upstream, but in esmil/visionfive) also selects DMA_GLOBAL_POOL.
 
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
