@@ -2,90 +2,187 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 970E5E94139
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Oct 2023 22:49:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21533E9413E
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Oct 2023 02:27:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233796AbjJFWt5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Oct 2023 18:49:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47746 "EHLO
+        id S234008AbjJGC13 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Oct 2023 22:27:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233726AbjJFWt4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Oct 2023 18:49:56 -0400
-Received: from aposti.net (aposti.net [89.234.176.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FD2393;
-        Fri,  6 Oct 2023 15:49:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
-        s=mail; t=1696632590;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=P/La+bAQr6pbo7yXrDUvr9bsXfjHbKwNCBXnfzuP/Bw=;
-        b=TefHFfqsF9Oydyb1jzb3mELyju5aT68PwLr1aPdoGLxRB7p72sY2HNen+OYdFycmkgJoB2
-        zrwuiw0hsfJT7375dizXLJUzA3PYmqvJQiERFhoszcvyIOK/eseyDuwhRbfmKQAUA0ZbLm
-        2/pzkvcvQG96hLE32NGmH8Mq3ubksE8=
-Message-ID: <034f46130949c89dd144f51f0c1bca152367ee78.camel@crapouillou.net>
-Subject: Re: [PATCH] mmc: jz4740: Use device_get_match_data()
-From:   Paul Cercueil <paul@crapouillou.net>
-To:     Rob Herring <robh@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Date:   Sat, 07 Oct 2023 00:49:48 +0200
-In-Reply-To: <20231006224343.441720-1-robh@kernel.org>
-References: <20231006224343.441720-1-robh@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: base64
+        with ESMTP id S233755AbjJGC12 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Oct 2023 22:27:28 -0400
+Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6498ABD;
+        Fri,  6 Oct 2023 19:27:27 -0700 (PDT)
+Received: by mail-qv1-xf36.google.com with SMTP id 6a1803df08f44-65b0557ec77so15066696d6.0;
+        Fri, 06 Oct 2023 19:27:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1696645646; x=1697250446; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=yNDhtLOEKcYAnbXxDszSP4U1anKPaHCaiVOg9N7z6KQ=;
+        b=Mvs9FlG6CjgFiLAjDkwDiSi0P1MKXpEiRJbcueJFrWKA1qtAAnuGQ093cyu/RLxlq8
+         k9FnHh7KX9tkPHpLGBsGYWkqEQahZOSpeIemR7satPmskvNzSPuW4bXGof3M+86L1D+D
+         EVf3+SGJWznoqRC103+/wMBXHBFMSLQ5fIaRopQ7MkLYLh83aZDmzn1Yz9ziaZelCjJl
+         3kgQczaLKVM7GnqG3423fzNfpih6SfDP9xdSPG+X9vq3LwajdonT9IWWkpoaCmij6Ld4
+         OcaepBGQXVT1ZvTU2cUKRe/LypF2gsjwNGpc/3kDWPHI1AYl8/fA7LV8WAhTkzklaZeR
+         v4FQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696645646; x=1697250446;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=yNDhtLOEKcYAnbXxDszSP4U1anKPaHCaiVOg9N7z6KQ=;
+        b=We+DH0vH9qzlXDhP0pbvQQzuieKftbzj/4lmUBBk4fTt/Zuu+iwPxCFFycnU/iC9yV
+         gKym11OI333lmCPyLi+7rPX2dnEGFM5CamXb1SYbLxi113eO5rfAnnIOa3BOk1SZd2j9
+         lxgLZ7vDkLiFuZuH30/kw8i+YfV0jDw/9aq6QaNg63FZbOLjbPw5LEXOX7W9j0ehuZK+
+         aaTUg0RTOgb7SVeceIuUs/cz+8ibzjgTlMyVR0U/9lm7HkXJq4xdYbEypR9wOwVXAnfp
+         SxjL3uoMOOe280gJpeHD/suhlKOkabvSMzPYYlhw+v5eFpm9+ItqUnXWB/Mlu73csEwM
+         cEbQ==
+X-Gm-Message-State: AOJu0Yzvooj1p0lqKKkcuexUj5uArOwgVqguR9gr4nifUX8ycKjdiBor
+        KrXEZ6KTkEay0DZvI+kJeMIKkEQmdwBhNkjkkBK1H7XAt8s=
+X-Google-Smtp-Source: AGHT+IGfrIoyKbqF/4x8tCVuCkxWlvb9G7XOFRkJZ1RzOuA5QP98zms/OUwmW4RtEOnfYQR/KT1O8qDl551WOuaPTBk=
+X-Received: by 2002:a05:6214:310f:b0:658:59e7:aac5 with SMTP id
+ ks15-20020a056214310f00b0065859e7aac5mr8793292qvb.23.1696645646459; Fri, 06
+ Oct 2023 19:27:26 -0700 (PDT)
 MIME-Version: 1.0
+References: <20230929-mmc-caps-v2-0-11a4c2d94f15@axis.com> <20230929-mmc-caps-v2-2-11a4c2d94f15@axis.com>
+In-Reply-To: <20230929-mmc-caps-v2-2-11a4c2d94f15@axis.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Sat, 7 Oct 2023 10:27:15 +0800
+Message-ID: <CA+Da2qy=6CVEkuP5t2dPQVk_eHex-U4-BzJuQ2Y6ozZMfSEbuw@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: debugfs: Allow host caps to be modified
+To:     Vincent Whitchurch <vincent.whitchurch@axis.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel@axis.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgUm9iLAoKTGUgdmVuZHJlZGkgMDYgb2N0b2JyZSAyMDIzIMOgIDE3OjQzIC0wNTAwLCBSb2Ig
-SGVycmluZyBhIMOpY3JpdMKgOgo+IFVzZSBwcmVmZXJyZWQgZGV2aWNlX2dldF9tYXRjaF9kYXRh
-KCkgaW5zdGVhZCBvZiBvZl9tYXRjaF9kZXZpY2UoKSB0bwo+IGdldCB0aGUgZHJpdmVyIG1hdGNo
-IGRhdGEuIFdpdGggdGhpcywgYWRqdXN0IHRoZSBpbmNsdWRlcyB0bwo+IGV4cGxpY2l0bHkKPiBp
-bmNsdWRlIHRoZSBjb3JyZWN0IGhlYWRlcnMuCj4gCj4gU2lnbmVkLW9mZi1ieTogUm9iIEhlcnJp
-bmcgPHJvYmhAa2VybmVsLm9yZz4KPiAtLS0KPiDCoGRyaXZlcnMvbW1jL2hvc3Qvano0NzQwX21t
-Yy5jIHwgMTUgKysrKystLS0tLS0tLS0tCj4gwqAxIGZpbGUgY2hhbmdlZCwgNSBpbnNlcnRpb25z
-KCspLCAxMCBkZWxldGlvbnMoLSkKPiAKPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9q
-ejQ3NDBfbW1jLmMKPiBiL2RyaXZlcnMvbW1jL2hvc3Qvano0NzQwX21tYy5jCj4gaW5kZXggZjM3
-OWNlNWI1ODJkLi42YTQ1OTkxY2EwNTYgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9q
-ejQ3NDBfbW1jLmMKPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L2p6NDc0MF9tbWMuYwo+IEBAIC0x
-OCw5ICsxOCwxMCBAQAo+IMKgI2luY2x1ZGUgPGxpbnV4L21tYy9ob3N0Lmg+Cj4gwqAjaW5jbHVk
-ZSA8bGludXgvbW1jL3Nsb3QtZ3Bpby5oPgo+IMKgI2luY2x1ZGUgPGxpbnV4L21vZHVsZS5oPgo+
-IC0jaW5jbHVkZSA8bGludXgvb2ZfZGV2aWNlLmg+Cj4gKyNpbmNsdWRlIDxsaW51eC9vZi5oPgo+
-IMKgI2luY2x1ZGUgPGxpbnV4L3BpbmN0cmwvY29uc3VtZXIuaD4KPiDCoCNpbmNsdWRlIDxsaW51
-eC9wbGF0Zm9ybV9kZXZpY2UuaD4KPiArI2luY2x1ZGUgPGxpbnV4L3Byb3BlcnR5Lmg+Cj4gwqAj
-aW5jbHVkZSA8bGludXgvcmVndWxhdG9yL2NvbnN1bWVyLmg+Cj4gwqAjaW5jbHVkZSA8bGludXgv
-c2NhdHRlcmxpc3QuaD4KPiDCoAo+IEBAIC0xMDQwLDcgKzEwNDEsNiBAQCBzdGF0aWMgaW50IGp6
-NDc0MF9tbWNfcHJvYmUoc3RydWN0Cj4gcGxhdGZvcm1fZGV2aWNlKiBwZGV2KQo+IMKgwqDCoMKg
-wqDCoMKgwqBpbnQgcmV0Owo+IMKgwqDCoMKgwqDCoMKgwqBzdHJ1Y3QgbW1jX2hvc3QgKm1tYzsK
-PiDCoMKgwqDCoMKgwqDCoMKgc3RydWN0IGp6NDc0MF9tbWNfaG9zdCAqaG9zdDsKPiAtwqDCoMKg
-wqDCoMKgwqBjb25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkICptYXRjaDsKPiDCoAo+IMKgwqDCoMKg
-wqDCoMKgwqBtbWMgPSBtbWNfYWxsb2NfaG9zdChzaXplb2Yoc3RydWN0IGp6NDc0MF9tbWNfaG9z
-dCksICZwZGV2LQo+ID5kZXYpOwo+IMKgwqDCoMKgwqDCoMKgwqBpZiAoIW1tYykgewo+IEBAIC0x
-MDUwLDEzICsxMDUwLDggQEAgc3RhdGljIGludCBqejQ3NDBfbW1jX3Byb2JlKHN0cnVjdAo+IHBs
-YXRmb3JtX2RldmljZSogcGRldikKPiDCoAo+IMKgwqDCoMKgwqDCoMKgwqBob3N0ID0gbW1jX3By
-aXYobW1jKTsKPiDCoAo+IC3CoMKgwqDCoMKgwqDCoG1hdGNoID0gb2ZfbWF0Y2hfZGV2aWNlKGp6
-NDc0MF9tbWNfb2ZfbWF0Y2gsICZwZGV2LT5kZXYpOwo+IC3CoMKgwqDCoMKgwqDCoGlmIChtYXRj
-aCkgewo+IC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBob3N0LT52ZXJzaW9uID0gKGVu
-dW0gano0NzQwX21tY192ZXJzaW9uKW1hdGNoLT5kYXRhOwo+IC3CoMKgwqDCoMKgwqDCoH0gZWxz
-ZSB7Cj4gLcKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoC8qIEpaNDc0MCBzaG91bGQgYmUg
-dGhlIG9ubHkgb25lIHVzaW5nIGxlZ2FjeSBwcm9iZQo+ICovCj4gLcKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoGhvc3QtPnZlcnNpb24gPSBKWl9NTUNfSlo0NzQwOwo+IC3CoMKgwqDCoMKg
-wqDCoH0KPiArwqDCoMKgwqDCoMKgwqAvKiBEZWZhdWx0IGlmIG5vIG1hdGNoIGlzIEpaNDc0MCAq
-Lwo+ICvCoMKgwqDCoMKgwqDCoGhvc3QtPnZlcnNpb24gPSAoZW51bQo+IGp6NDc0MF9tbWNfdmVy
-c2lvbilkZXZpY2VfZ2V0X21hdGNoX2RhdGEoJnBkZXYtPmRldik7CgpQcmV0dHkgY2xldmVyLgoK
-UmV2aWV3ZWQtYnk6IFBhdWwgQ2VyY3VlaWwgPHBhdWxAY3JhcG91aWxsb3UubmV0PgoKQ2hlZXJz
-LAotUGF1bAoKPiDCoAo+IMKgwqDCoMKgwqDCoMKgwqByZXQgPSBtbWNfb2ZfcGFyc2UobW1jKTsK
-PiDCoMKgwqDCoMKgwqDCoMKgaWYgKHJldCkgewo+IEBAIC0xMjAwLDcgKzExOTUsNyBAQCBzdGF0
-aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBqejQ3NDBfbW1jX2RyaXZlcgo+ID0gewo+IMKgwqDC
-oMKgwqDCoMKgwqAuZHJpdmVyID0gewo+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-Lm5hbWUgPSAiano0NzQwLW1tYyIsCj4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAu
-cHJvYmVfdHlwZSA9IFBST0JFX1BSRUZFUl9BU1lOQ0hST05PVVMsCj4gLcKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoC5vZl9tYXRjaF90YWJsZSA9IG9mX21hdGNoX3B0cihqejQ3NDBfbW1j
-X29mX21hdGNoKSwKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgLm9mX21hdGNoX3Rh
-YmxlID0gano0NzQwX21tY19vZl9tYXRjaCwKPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoC5wbSA9IHBtX3NsZWVwX3B0cigmano0NzQwX21tY19wbV9vcHMpLAo+IMKgwqDCoMKgwqDC
-oMKgwqB9LAo+IMKgfTsKCg==
+On Fri, 29 Sept 2023 at 21:17, Vincent Whitchurch
+<vincent.whitchurch@axis.com> wrote:
+>
+> During board verification, there is a need to test the various supported
+> eMMC/SD speed modes.  However, since the framework chooses the best mode
+> supported by the card and the host controller's caps, this currently
+> necessitates changing the devicetree for every iteration.
+>
+> Allow the various speed mode host capabilities to be modified via
+> debugfs in order to allow easier hardware verification.  The values to
+> be written are the raw MMC_CAP* values from include/linux/mmc/host.h.
+> This is rather low-level, and these defines are not guaranteed to be
+> stable, but it is perhaps good enough for the intended use case.
+>
+> MMC_CAP_AGGRESSIVE_PM can also be set, in order to be able to
+> re-initialize the card without having to physically remove and re-insert
+> it.
+>
+>  /sys/kernel/debug/mmc0# grep timing ios
+>  timing spec:   9 (mmc HS200)
+>
+>  // Turn on MMC_CAP_AGGRESSIVE_PM and re-trigger runtime suspend
+>  /sys/kernel/debug/mmc0# echo $(($(cat caps) | (1 << 7))) > caps
+>  /sys/kernel/debug/mmc0# echo on > /sys/bus/mmc/devices/mmc0\:0001/power/control
+>  /sys/kernel/debug/mmc0# echo auto > /sys/bus/mmc/devices/mmc0\:0001/power/control
+>
+>  // MMC_CAP2_HS200_1_8V_SDR
+>  /sys/kernel/debug/mmc0# echo $(($(cat caps2) & ~(1 << 5))) > caps2
 
+$(($(cat caps2) & ~(1 << 5))) looks complicated, does it use echo DDR52 > caps2?
+
+>  /sys/kernel/debug/mmc0# echo on > /sys/bus/mmc/devices/mmc0\:0001/power/control
+>  /sys/kernel/debug/mmc0# grep timing ios
+>  timing spec:   8 (mmc DDR52)
+>
+> Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
+> ---
+>  drivers/mmc/core/debugfs.c | 51 ++++++++++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 49 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index 2c97b94aab23..1642ea72d22c 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -12,9 +12,12 @@
+>  #include <linux/slab.h>
+>  #include <linux/stat.h>
+>  #include <linux/fault-inject.h>
+> +#include <linux/time.h>
+>
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/host.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/mmc/sd.h>
+>
+>  #include "core.h"
+>  #include "card.h"
+> @@ -298,6 +301,49 @@ static const struct file_operations mmc_err_stats_fops = {
+>         .release = single_release,
+>  };
+>
+> +static int mmc_caps_get(void *data, u64 *val)
+> +{
+> +       *val = *(u32 *)data;
+> +       return 0;
+> +}
+> +
+> +static int mmc_caps_set(void *data, u64 val)
+> +{
+> +       u32 *caps = data;
+> +       u32 diff = *caps ^ val;
+> +       u32 allowed = MMC_CAP_AGGRESSIVE_PM |
+> +                     MMC_CAP_SD_HIGHSPEED |
+> +                     MMC_CAP_MMC_HIGHSPEED |
+> +                     MMC_CAP_UHS |
+> +                     MMC_CAP_DDR;
+> +
+> +       if (diff & ~allowed)
+> +               return -EINVAL;
+> +
+> +       *caps = val;
+> +
+> +       return 0;
+> +}
+> +
+> +static int mmc_caps2_set(void *data, u64 val)
+> +{
+> +       u32 allowed = MMC_CAP2_HSX00_1_8V | MMC_CAP2_HSX00_1_2V;
+> +       u32 *caps = data;
+> +       u32 diff = *caps ^ val;
+> +
+> +       if (diff & ~allowed)
+> +               return -EINVAL;
+> +
+> +       *caps = val;
+> +
+> +       return 0;
+> +}
+> +
+> +DEFINE_DEBUGFS_ATTRIBUTE(mmc_caps_fops, mmc_caps_get, mmc_caps_set,
+> +                        "0x%08llx\n");
+> +DEFINE_DEBUGFS_ATTRIBUTE(mmc_caps2_fops, mmc_caps_get, mmc_caps2_set,
+> +                        "0x%08llx\n");
+> +
+>  void mmc_add_host_debugfs(struct mmc_host *host)
+>  {
+>         struct dentry *root;
+> @@ -306,8 +352,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+>         host->debugfs_root = root;
+>
+>         debugfs_create_file("ios", S_IRUSR, root, host, &mmc_ios_fops);
+> -       debugfs_create_x32("caps", S_IRUSR, root, &host->caps);
+> -       debugfs_create_x32("caps2", S_IRUSR, root, &host->caps2);
+> +       debugfs_create_file("caps", 0600, root, &host->caps, &mmc_caps_fops);
+> +       debugfs_create_file("caps2", 0600, root, &host->caps2,
+> +                           &mmc_caps2_fops);
+
+Would it be better to use "S_IRUSR | S_IWUSR" instead of "0600"?
+
+>         debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
+>                                    &mmc_clock_fops);
+>
+>
+> --
+> 2.34.1
+>
