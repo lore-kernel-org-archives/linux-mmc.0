@@ -2,153 +2,460 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E880E95A91
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Oct 2023 07:28:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 760EFE95A8E
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Oct 2023 10:26:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234364AbjJIH2T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Oct 2023 03:28:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36922 "EHLO
+        id S1345535AbjJIK0w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Oct 2023 06:26:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52996 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232625AbjJIH2T (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2023 03:28:19 -0400
-Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2059.outbound.protection.outlook.com [40.107.21.59])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1671DAC;
-        Mon,  9 Oct 2023 00:28:17 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=F/4+DPbqzxr87oAfvdPCkf/16TCKCRKFUajYbvjsamj8j44mc/D8lArMOpdrQPhpo7yk5tv2OYonFaDOpQ8gnUg6UPdlRi4PElMX6b7G2TGLC/WFhdBzZpXAeA7HLnHTOwpCixiAa+TR9fSEYKtCbDYaMpVrK+mxYRhltsTy1/ORrxTt+BZhM/Nq2TDiukB3LaOxrTCUT3PhP09NBVXoi1gq96dUmUizIRwvgAoyvb3AvAEN3jlrZbdOVpccKdHMnXQ2e63NpJhfv2EFqkCegi8NhKG2oEPoI11E0Z5OFj/gANLbUPb8Js702luCq0LjA/udGOh2toluujeqooR1cg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Z3fPmwq4Gt4c38bJn3fxkXerKIgpFFq+MfGt5aIR/eg=;
- b=kYedei0i4571WbMw7BA0MRISp23+hndnP6ToafvWHSlYZgJwOy/nGSTCLkH8WDn6rAQ7mvG44O9e+AyyGNgUeOApwqHZ+MNF4bNyw1gu5FuMvHxPIt3sGq3cFP8gTGhnl5PapsDTQo9xg/q2qoU/plIQSFHUyWgzQF4Ds0YXNsylfwEvWVu9PZiJp3m+rjyWE5D39qY5A5sB+8r0wiMojCC1ldVhRRvqsswfFMAem2WClaW3OKxh+9tznS/mJdSmQbN8GTWJFOOHbhb9banZup4va9koWQy4DZX4ODF/AGhDwT4VB//Ztsc3/rwYcZV1jIUgcbApVU9XffNE+QxtZw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=axis.com; dmarc=pass action=none header.from=axis.com;
- dkim=pass header.d=axis.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=axis.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Z3fPmwq4Gt4c38bJn3fxkXerKIgpFFq+MfGt5aIR/eg=;
- b=hhPrAGCvGUXHAKbDFFLkNeenwXed00Usc0/8ClKDMm5eMWPfslQLCQlyv6hhn6H9lMSIlM/jE5Pzfk1haR2lt6Ippj9QrSedC+jozBOVN5PwkFbH290rMXW2zjkU977OD2Dgdk6UHESRzC6p/g9es8L71AVziZVJAKrTpxSujFE=
-Received: from PAWPR02MB10280.eurprd02.prod.outlook.com
- (2603:10a6:102:34f::18) by VI1PR02MB6254.eurprd02.prod.outlook.com
- (2603:10a6:800:199::18) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6838.39; Mon, 9 Oct
- 2023 07:28:14 +0000
-Received: from PAWPR02MB10280.eurprd02.prod.outlook.com
- ([fe80::ae8a:f8e:f622:d3db]) by PAWPR02MB10280.eurprd02.prod.outlook.com
- ([fe80::ae8a:f8e:f622:d3db%7]) with mapi id 15.20.6838.040; Mon, 9 Oct 2023
- 07:28:14 +0000
-From:   Vincent Whitchurch <Vincent.Whitchurch@axis.com>
-To:     Vincent Whitchurch <Vincent.Whitchurch@axis.com>,
-        "wenchao.chen666@gmail.com" <wenchao.chen666@gmail.com>
-CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        kernel <kernel@axis.com>
-Subject: Re: [PATCH v2 2/2] mmc: debugfs: Allow host caps to be modified
-Thread-Topic: [PATCH v2 2/2] mmc: debugfs: Allow host caps to be modified
-Thread-Index: AQHZ8qjlFEKaUyJADkyDDbc1l5b7g7A9pkCAgAN4wgA=
-Date:   Mon, 9 Oct 2023 07:28:14 +0000
-Message-ID: <d7b1664f32f3ab7a3ec3e557ff957826ba396be0.camel@axis.com>
-References: <20230929-mmc-caps-v2-0-11a4c2d94f15@axis.com>
-         <20230929-mmc-caps-v2-2-11a4c2d94f15@axis.com>
-         <CA+Da2qy=6CVEkuP5t2dPQVk_eHex-U4-BzJuQ2Y6ozZMfSEbuw@mail.gmail.com>
-In-Reply-To: <CA+Da2qy=6CVEkuP5t2dPQVk_eHex-U4-BzJuQ2Y6ozZMfSEbuw@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-user-agent: Evolution 3.38.3-1+deb11u1 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=axis.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PAWPR02MB10280:EE_|VI1PR02MB6254:EE_
-x-ms-office365-filtering-correlation-id: cbd631be-b9e9-4389-0fb3-08dbc8994ccb
-x-ld-processed: 78703d3c-b907-432f-b066-88f7af9ca3af,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: HJ1kdqldhjVO14/DA/uI9qe63AgzvBr77H7+SVFBGHRM4DPN3Mo++dQu+6gcj5No33Xys9+WDaU3dXxZR5VdaE58meL7/L06JUdXoejfNYIA/J2HG6lLRkth6ia1WTuIzr9+Yyu5dV8yC5GuEjFHwmVn+Q8AA3z4nxGy4qkMEHIhyhQpi5QC5SyirjYe3QBc93Zv5Nf/DUyjAb0/kFagAw4LmNqSw4WX9wUMN9i52eqAqWngTLfMXmdUfZxhUrgpFVaOFtSDdw84qL86Yg3K0Mbyl8HefMjqi+aXKr6gUE9+wgM5DSrDDrHd4ltvYHGdMo/PKWXhkbC3gptkRnaUhkVqPSI8arKoIpBYLmnqh8GqT+FobpFPc7V/IPiS47Fm/0ONjBqzmw09iFg7b0LbvFiwyEsWM5E+t3Cm4YZy+/7wmeIKYyBbM5CoanWgZKGLzwAPx7C4DEuC8T7zfWrv2OqNChvYDZZx6qA32+LLq61i6BfqFVtAQOvzXk5U67NHbKGiSOKpEGNJpZO7wxKecxT45JYOyGbmiibd3CI8a1lBUSm8yvSlTRkGU5S1h2O3mIkoQ6WtZEx47qeIdgBoBTi2s00xpaopjAuorXOJh6zbHv4ZlzxlD8zG0D7yCn4Y
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAWPR02MB10280.eurprd02.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366004)(346002)(136003)(396003)(376002)(39850400004)(230922051799003)(64100799003)(451199024)(186009)(1800799009)(6506007)(2616005)(6512007)(107886003)(478600001)(6486002)(2906002)(91956017)(76116006)(5660300002)(66946007)(41300700001)(110136005)(54906003)(66556008)(66446008)(66476007)(4326008)(64756008)(8936002)(316002)(8676002)(26005)(86362001)(38070700005)(38100700002)(36756003)(122000001)(71200400001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?VDNkU29oRDZwOHBmemU1OXY0Ylpia0tkVzBnemtFMTlHbm5LNkdiNkIwZXZx?=
- =?utf-8?B?K3M0eEZTcHRzUnZINkNzYVVrNUFxckFiOVQ0VmYwM2I2R2tDeE1LendsM1lu?=
- =?utf-8?B?NU81cStUdG9pR1ZxYVB4RnZ3b1VjUEZUdTBWNzdKankwZWVpU0YrMGUrTnVJ?=
- =?utf-8?B?NXNoeXE3SlpRZkt0SWdxQlA3c2J6NTZyaE1XYUI1akFpdEdpdDJBdjVGYnBG?=
- =?utf-8?B?QzRUYVpuZFVDZ1RLWURwR2FwV0UwOUJ2Z3Q2WHdoZWVDWmMxWjJZWnNWWEtk?=
- =?utf-8?B?dW1CakY1a29rMmszRzZocGlmS2FDN2h5aFU5Y3RXT0g0bHM1Q0lFWGRRQmxH?=
- =?utf-8?B?WGRnVThaSTN6MFlNZ00yS2QveXk5OFNHUkorSXVrV2RiTkZjRzF5RUJrWjlU?=
- =?utf-8?B?QURQc3FxcUV4Y1JRYUROcmZtc3lwOXI0bmFvQVplV294QW9DdndBRXNqSWJT?=
- =?utf-8?B?Rk9JT0dRaEthdTJJNUdiK2RqSW9Cdkxnb0lrNDNoaitZZUVHNU1lWE5hUTA2?=
- =?utf-8?B?WGt2UzJrQ1NsajNuaktnWFVoL0pvK0xZamRWc2F6VEZVNlQ2bUpRc29iRVBC?=
- =?utf-8?B?WWpDMVNCVUwyUXdBRTk5VnRiRUthNUVtdXZKdWU3UkF5ZGtEaGRLZEw0M3ZC?=
- =?utf-8?B?VUYxL1M3OCtaZUdTMDJoVVkyYVFEbFhPNVVJU1V5YXNvNmdVaFRPL0FSNklM?=
- =?utf-8?B?dkNvbnZmdTVvNEd0eW9IeGg3ZmdNcWpBS3JORGxwUCsvVFY1QmR0dzkrZDdl?=
- =?utf-8?B?SUwxTVcrbGpUREduME9xV2o0RlJ3M1ZUdDRYMll1TXBFVnFFK0ZIYVQzZnBn?=
- =?utf-8?B?bWN4N1MwVTZQamNEMC9VTHlRdXZtUEVWZ2ZmR1o3OWFLTHB6T0wxUDVGTGpL?=
- =?utf-8?B?c21mRnlMVjNhSEtVcFFOZ0thRlBhT3lQVTNxLzE3ckZCbXRibEo5OHVsb3lq?=
- =?utf-8?B?R21WRllkMVd0QW5MMWc0dEJIQ1RFUnF5YThLeVBwYVdtaCtaU3RnVFBERVY0?=
- =?utf-8?B?OFdSQ204WmF1OWxLSjR5RkFNMy9hMDZWcExjQzMrSlU1c0x2OHVwUkQ3Ymto?=
- =?utf-8?B?aFJmTExzRnlzK1NRL2NFS1R2bGg2V1BtcGxKUVAxaEpCZ2kvNkU4Y2ZJaDRV?=
- =?utf-8?B?aUFvWms0YTNoZGt3bXZZVzRCWS9GMk43cGZJcHJvUjkvZzNzdExNZC8vbWhK?=
- =?utf-8?B?bWFsL2o2YmxWeVplV0t5UER3cXBXcHFYSEs3NHlLcWZ3L1NYaFFiVWg2bDZM?=
- =?utf-8?B?bTh0ZmFpd0YrNldmV1Rob3ZNMzBZekJoYVd0YnpTRDN6am9JNTNQR1BzZXZn?=
- =?utf-8?B?UlZrL20zREIyTXlUMGNUanZ3RGVhdTF1bklBR2J5c2pPY0V1c2JpTEtrMmxx?=
- =?utf-8?B?cVNVOVRRQjYzaEdJK3NhVXZXQ1VkTFRZck53eGN6UGFnWXBNWmlMZ1ZqanJ6?=
- =?utf-8?B?N1NVTFJKUEMyREd3bGxtWm1semdGMjBwU3NUZWVjbnNTeUc2Q2ZRbnNEZyt6?=
- =?utf-8?B?UjBDc2JRaGJ5cXZlKzg5a3hkMlZoTGNrbGtKU0hyZGpiY3FDNkZiQkI4UlFr?=
- =?utf-8?B?QUFNOWFUa0xMNWUyUnd4SkdyTzIrR25ieXRENXJKSGJuUXQ5U0M2eTgzRzhu?=
- =?utf-8?B?T253MXJ2SGFlTUJtQ0ZWelE3cWVqQUF1SE56YUwreFdMWFlWZUdjNlpjT0JW?=
- =?utf-8?B?U2lpL1FqdUdIVkUzaDU0ZmpGN25lNE82cjFmb1ZYTW9LUjVvc3U3ZXp1YzNU?=
- =?utf-8?B?Q0NSYXhWbTRDYnR5N0dzZzZua3ljWDJSOUVVUjNRcE5lY0Jvc1VNN21BZlRI?=
- =?utf-8?B?TTVhWmRBQm1HTmV6eXlucWVrZ0lBdXRoOUkxczdPSStVb3hjT2tCVE8wVGNt?=
- =?utf-8?B?b0c5bnpwZG54MG91ZUxTZnhVSVJTUjNEa3R4VWZwQXZ0MVhZTnFIRy9XemtS?=
- =?utf-8?B?emgvL0Y3SlY0YTRzMWhWWU41VE96SmZ1Y0RXSHNQa2g2WVNiYWRKQTV4TE5P?=
- =?utf-8?B?RVo0OTljeGdCQXdYMkpxWDdwRzVOVEVPaEcwRWJSWGo2amV5N1o4UW41dmFJ?=
- =?utf-8?B?b0lCR2NGQkk2STU2QitYV0JqY0FoQmU1a050cmxLUU52T2FKam01ZEo3MXJu?=
- =?utf-8?Q?fMchCSTEIOdQyVrXXebWrtLgy?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <C5BB3993AB760F46BEB1B2CD013EA05E@eurprd02.prod.outlook.com>
-Content-Transfer-Encoding: base64
+        with ESMTP id S1345537AbjJIK0v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2023 06:26:51 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8579199;
+        Mon,  9 Oct 2023 03:26:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1696847208; x=1728383208;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=S1l/fw0soDOrQwjCkmNHYr7DgrjWlS+RPFsltmZ9bR8=;
+  b=ThK9d7uLx79qV+miNv0sqciUnLk40KPVTiKFtw30IpYVagRvAoJLBDBN
+   vBhKN+XbTE9H3b9rPge+igFE86blW6KlKDlOeALVxqecjlhnAn3NwLG3k
+   VTukU5JnJ2jcyBs/m0h9AcIAAeeWQi5NrPzhxZorUE7HihYS9DQeafpCY
+   fHCwsPO6LbvfJ0dwayh2pWKQExXY5sx+GntS0hEOWLZQpB7EzhTEodCtA
+   FXgWI0uHtGph2yj9uIJG7HdoXZr0RYmRqhWbFPGcb16ASvsEEbjJhiG94
+   1HapjqBTw5kc9wRUQ010E9U0YSvmCABFqnJFHpZbBsazJOBk/h9ye7cgx
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10857"; a="386956921"
+X-IronPort-AV: E=Sophos;i="6.03,210,1694761200"; 
+   d="scan'208";a="386956921"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2023 03:26:48 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10857"; a="746625130"
+X-IronPort-AV: E=Sophos;i="6.03,210,1694761200"; 
+   d="scan'208";a="746625130"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.36.27])
+  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2023 03:26:45 -0700
+Message-ID: <05d0ff56-e227-45c5-a24a-b2c7e5951534@intel.com>
+Date:   Mon, 9 Oct 2023 13:26:41 +0300
 MIME-Version: 1.0
-X-OriginatorOrg: axis.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PAWPR02MB10280.eurprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: cbd631be-b9e9-4389-0fb3-08dbc8994ccb
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Oct 2023 07:28:14.6586
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 78703d3c-b907-432f-b066-88f7af9ca3af
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: yzfz1S2JGbrw1eAGEg4zUbz80+azHUQUHl9oYaJA3e94rUiStgzUAgOiFpTES1o4
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR02MB6254
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V2 1/1] mmc: sdhci-pci-o2micro: Fix Bayhub SD host
+ hardware tuning compatibility issue for BanQ card
+Content-Language: en-US
+To:     =?UTF-8?B?5YiY55WF?= <liuchang_125125@163.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, shaper.liu@bayhubtech.com,
+        chevron.li@bayhubtech.com, thomas.hu@bayhubtech.com,
+        charl.liu@bayhubtech.com
+References: <20230928102202.8393-1-liuchang_125125@163.com>
+ <529b935f-dc21-4889-8fb1-04eea7ab511c@intel.com>
+ <215186cb.1b46.18b1249201f.Coremail.liuchang_125125@163.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <215186cb.1b46.18b1249201f.Coremail.liuchang_125125@163.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gU2F0LCAyMDIzLTEwLTA3IGF0IDEwOjI3ICswODAwLCBXZW5jaGFvIENoZW4gd3JvdGU6DQo+
-IE9uIEZyaSwgMjkgU2VwdCAyMDIzIGF0IDIxOjE3LCBWaW5jZW50IFdoaXRjaHVyY2gNCj4gPHZp
-bmNlbnQud2hpdGNodXJjaEBheGlzLmNvbT4gd3JvdGU6DQo+ID4gwqAvLyBNTUNfQ0FQMl9IUzIw
-MF8xXzhWX1NEUg0KPiA+IMKgL3N5cy9rZXJuZWwvZGVidWcvbW1jMCMgZWNobyAkKCgkKGNhdCBj
-YXBzMikgJiB+KDEgPDwgNSkpKSA+IGNhcHMyDQo+IA0KPiAkKCgkKGNhdCBjYXBzMikgJiB+KDEg
-PDwgNSkpKSBsb29rcyBjb21wbGljYXRlZCwgZG9lcyBpdCB1c2UgZWNobyBERFI1MiA+IGNhcHMy
-Pw0KDQoxIDw8IDUgaXMgKGFzIHRoZSBjb21tZW50IGFib3ZlIHNheXMpIE1NQ19DQVAyX0hTMjAw
-XzFfOFZfU0RSLiAgVGhlDQpyZWFkLW1vZGlmeS13cml0ZSBpcyBuZWVkZWQgdG8gbm90IGNsZWFy
-IHVucmVsYXRlZCBiaXRzLiAgVGhlIE1NQw0KZnJhbWV3b3JrIHBpY2tzIHRoZSBiZXN0IHBvc3Np
-YmxlIG1vZGUgc3VwcG9ydGVkIGJ5IGJvdGggdGhlIGNhcmQgYW5kDQp0aGUgaG9zdCBjb250cm9s
-bGVyLCBzbyBkaXNhYmxpbmcgc3VwcG9ydCBmb3IgSFMyMDAgaW4gdGhlIGhvc3QNCmNvbnRyb2xs
-ZXIgbGVhZHMgdG8gRERSNTIgYmVpbmcgcGlja2VkIGluIHRoaXMgY2FzZS4NCg0KWy4uLl0NCj4g
-PiDCoHZvaWQgbW1jX2FkZF9ob3N0X2RlYnVnZnMoc3RydWN0IG1tY19ob3N0ICpob3N0KQ0KPiA+
-IMKgew0KPiA+IMKgwqDCoMKgwqDCoMKgwqBzdHJ1Y3QgZGVudHJ5ICpyb290Ow0KPiA+IEBAIC0z
-MDYsOCArMzUyLDkgQEAgdm9pZCBtbWNfYWRkX2hvc3RfZGVidWdmcyhzdHJ1Y3QgbW1jX2hvc3Qg
-Kmhvc3QpDQo+ID4gwqDCoMKgwqDCoMKgwqDCoGhvc3QtPmRlYnVnZnNfcm9vdCA9IHJvb3Q7DQo+
-ID4gDQo+ID4gwqDCoMKgwqDCoMKgwqDCoGRlYnVnZnNfY3JlYXRlX2ZpbGUoImlvcyIsIFNfSVJV
-U1IsIHJvb3QsIGhvc3QsICZtbWNfaW9zX2ZvcHMpOw0KPiA+IC0gICAgICAgZGVidWdmc19jcmVh
-dGVfeDMyKCJjYXBzIiwgU19JUlVTUiwgcm9vdCwgJmhvc3QtPmNhcHMpOw0KPiA+IC0gICAgICAg
-ZGVidWdmc19jcmVhdGVfeDMyKCJjYXBzMiIsIFNfSVJVU1IsIHJvb3QsICZob3N0LT5jYXBzMik7
-DQo+ID4gKyAgICAgICBkZWJ1Z2ZzX2NyZWF0ZV9maWxlKCJjYXBzIiwgMDYwMCwgcm9vdCwgJmhv
-c3QtPmNhcHMsICZtbWNfY2Fwc19mb3BzKTsNCj4gPiArICAgICAgIGRlYnVnZnNfY3JlYXRlX2Zp
-bGUoImNhcHMyIiwgMDYwMCwgcm9vdCwgJmhvc3QtPmNhcHMyLA0KPiA+ICsgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAmbW1jX2NhcHMyX2ZvcHMpOw0KPiANCj4gV291bGQgaXQgYmUgYmV0dGVy
-IHRvIHVzZSAiU19JUlVTUiB8IFNfSVdVU1IiIGluc3RlYWQgb2YgIjA2MDAiPw0KDQpObywgbm90
-IGFjY29yZGluZyB0byBjaGVja3BhdGNoIHdoaWNoIHNheXMgdGhhdCBudW1lcmljIHBlcm1pc3Np
-b25zIGFyZQ0KcHJlZmVycmVkLg0K
+On 9/10/23 05:34, 刘畅 wrote:
+> 
+> At 2023-09-29 14:00:45, "Adrian Hunter" <adrian.hunter@intel.com> wrote:
+>>On 28/09/23 13:22, liuchang_125125@163.com wrote:
+>>> From: Charl Liu <liuchang_125125@163.com>
+>>> 
+>>> 1.Driver get the card's MID and OID by init_card callback
+>>> function to judge whether the card is BanQ card
+>>> 2.Update tuning setting to make sure tuning done can be set
+>>> 3.Stop transfer for CMD19 after tuning done is set to avoid data
+>>> line inhibit and then set input phase manually for BanQ card
+>>
+>>Changing each driver for each card is not a scalable way to
+>>do things.
+>>
+> 
+> This solution is suitable for cards that take longer time (>150 ns) to handle CMD19. So far, it is only found that BanQ card belongs to the above-mentioned cards.
+> 
+>>What is different about banq cards than other cards?
+>>
+> 
+> In the tuning stage, if the interval between BanQ card receiving
+> the data of the previous CMD19 and host sending the next CMD19
+> is less than 330ns, BanQ card will not return data pattern to host,
+> which will result in tuning timeout error.
+
+So why not just recover from the timeout error when it happens
+instead of checking for BanQ card?
+
+> Other cards do not have this issue.
+> 
+>>What is wrong with the way sdhci-pci-o2micro does tuning?
+>>
+> 
+> In order to reduce tuning time, O2/Bayhub use hardware tuning which
+> is suitable for cards that respond quickly to CMD19.
+> Host will automatically send next CMD19 after receiving data pattern returned by card.
+> The interval is very short (about 150 ns), and less than 330ns,
+> which will result in the compatibility issue.
+> 
+>>> 
+>>> Signed-off-by: Charl Liu <liuchang_125125@163.com>
+>>> ---
+>>> Change in V1:
+>>> Update the tuning process to be compatibility with BanQ card.
+>>> 
+>>> Change in V2:
+>>> Remove unused variables in order to fix compilation warnings
+>>> noticed by kernel test robot.
+>>> ---
+>>>  drivers/mmc/host/sdhci-pci-o2micro.c | 201 ++++++++++++++++++++++++---
+>>>  1 file changed, 179 insertions(+), 22 deletions(-)
+>>> 
+>>> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+>>> index 7bfee28116af..668de44c6ba2 100644
+>>> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+>>> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+>>> @@ -36,6 +36,7 @@
+>>>  #define O2_SD_MISC_CTRL2	0xF0
+>>>  #define O2_SD_INF_MOD		0xF1
+>>>  #define O2_SD_MISC_CTRL4	0xFC
+>>> +#define O2_SD_DLL_CTRL		0x1B0
+>>>  #define O2_SD_MISC_CTRL		0x1C0
+>>>  #define O2_SD_EXP_INT_REG	0x1E0
+>>>  #define O2_SD_PWR_FORCE_L0	0x0002
+>>> @@ -78,7 +79,8 @@ static const u32 dmdn_table[] = {0x2B1C0000,
+>>>  #define DMDN_SZ ARRAY_SIZE(dmdn_table)
+>>>  
+>>>  struct o2_host {
+>>> -	u8 dll_adjust_count;
+>>> +	u8 dll_adjust_count: 4;
+>>> +	u8 banq_card_setting: 4;
+>>>  };
+>>>  
+>>>  static void sdhci_o2_wait_card_detect_stable(struct sdhci_host *host)
+>>> @@ -311,14 +313,101 @@ static int sdhci_o2_dll_recovery(struct sdhci_host *host)
+>>>  	return ret;
+>>>  }
+>>>  
+>>> +static void sdhci_o2_send_stop_transmission(struct sdhci_host *host)
+>>> +{
+>>> +	struct mmc_host *mmc = host->mmc;
+>>> +	struct mmc_command cmd = {};
+>>> +	struct mmc_request mrq = {};
+>>> +
+>>> +	cmd.opcode = MMC_STOP_TRANSMISSION;
+>>> +	cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
+>>> +	cmd.busy_timeout = 150;
+>>> +
+>>> +	mrq.cmd = &cmd;
+>>> +
+>>> +	mmc_wait_for_req(mmc, &mrq);
+>>> +
+>>> +	/*
+>>> +	 * Command CRC error may occur due to compatibility issue.
+>>> +	 * It is normal and ignore it here.
+>>> +	 */
+>>> +	if ((cmd.error != 0) && (cmd.error != -EILSEQ))
+>>> +		pr_err("%s: CMD12 error: %d\n", mmc_hostname(mmc), cmd.error);
+>>> +}
+>>> +
+>>> +static void sdhci_o2_tuning_setting(struct mmc_host *mmc, bool isbanq, u8 phase_num)
+>>> +{
+>>> +	struct sdhci_host *host = mmc_priv(mmc);
+>>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>>> +	struct sdhci_pci_chip *chip = slot->chip;
+>>> +	u32 reg_val;
+>>> +
+>>> +	if (isbanq) {
+>>> +		/* update tuning command times for BanQ card */
+>>> +		pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL, &reg_val);
+>>> +		reg_val &= 0x00FFFFFF;
+>>> +		reg_val |= 0x02000000;
+>>> +		pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, reg_val);
+>>> +	} else {
+>>> +		reg_val = sdhci_readl(host, O2_SD_DLL_CTRL);
+>>> +		reg_val &= ~BIT(28);
+>>> +		sdhci_writel(host, reg_val, O2_SD_DLL_CTRL);
+>>> +
+>>> +		/* Update tuning command times for normal card */
+>>> +		pci_read_config_dword(chip->pdev, O2_SD_TUNING_CTRL, &reg_val);
+>>> +		reg_val &= 0x00FFFFFF;
+>>> +		reg_val |= (phase_num * 3) << 24;
+>>> +		pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, reg_val);
+>>> +	}
+>>> +}
+>>> +
+>>> +static void sdhci_o2_configure_banq_best_input_phase(struct sdhci_host *host)
+>>> +{
+>>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>>> +	struct sdhci_pci_chip *chip = slot->chip;
+>>> +
+>>> +	u16 dll_phase_configure = 0;
+>>> +	u16 best_input_phase = 0;
+>>> +
+>>> +	switch (chip->pdev->device) {
+>>> +	case PCI_DEVICE_ID_O2_FUJIN2:
+>>> +		best_input_phase = 0x0;
+>>> +		break;
+>>> +
+>>> +	case PCI_DEVICE_ID_O2_SEABIRD0:
+>>> +	case PCI_DEVICE_ID_O2_SEABIRD1:
+>>> +		best_input_phase = 0x0;
+>>> +		break;
+>>> +
+>>> +	case PCI_DEVICE_ID_O2_GG8_9860:
+>>> +	case PCI_DEVICE_ID_O2_GG8_9861:
+>>> +	case PCI_DEVICE_ID_O2_GG8_9862:
+>>> +	case PCI_DEVICE_ID_O2_GG8_9863:
+>>> +		best_input_phase = 0xB;
+>>> +		break;
+>>> +
+>>> +	default:
+>>> +		break;
+>>> +	}
+>>> +
+>>> +	/* configure the best input phase (0xB) for BanQ card */
+>>> +	dll_phase_configure = sdhci_readw(host, 0x1B2);
+>>> +	dll_phase_configure = (dll_phase_configure & (u16)0xF0FF) |
+>>> +		(best_input_phase << 8) | BIT(12);
+>>> +	sdhci_writew(host, dll_phase_configure, 0x1B2);
+>>> +}
+>>> +
+>>>  static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>  {
+>>>  	struct sdhci_host *host = mmc_priv(mmc);
+>>>  	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>>>  	struct sdhci_pci_chip *chip = slot->chip;
+>>> +	struct o2_host *o2_host = sdhci_pci_priv(slot);
+>>>  	int current_bus_width = 0;
+>>>  	u32 scratch32 = 0;
+>>> +	u16 data_timeout_counter_value = 0;
+>>>  	u16 scratch = 0;
+>>> +	u8 phase_num = 0;
+>>>  	u8  scratch_8 = 0;
+>>>  	u32 reg_val;
+>>>  
+>>> @@ -334,6 +423,31 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>  	if (WARN_ON(!mmc_op_tuning(opcode)))
+>>>  		return -EINVAL;
+>>>  
+>>> +	if ((chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860) ||
+>>> +		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861) ||
+>>> +		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862) ||
+>>> +		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863)) {
+>>> +		phase_num = 14;
+>>> +	} else {
+>>> +		phase_num = 11;
+>>> +	}
+>>> +
+>>> +	/* UnLock WP */
+>>> +	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+>>> +	scratch_8 &= 0x7f;
+>>> +	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+>>> +
+>>> +	sdhci_o2_tuning_setting(mmc, (bool)o2_host->banq_card_setting, phase_num);
+>>> +
+>>> +	if (o2_host->banq_card_setting) {
+>>> +		/*
+>>> +		 * set data timeout counter value to 0 to ensure that
+>>> +		 * the tuning process can be completed
+>>> +		 */
+>>> +		data_timeout_counter_value = sdhci_readw(host, SDHCI_TIMEOUT_CONTROL);
+>>> +		sdhci_writew(host, data_timeout_counter_value & (u16)0xFFF0, SDHCI_TIMEOUT_CONTROL);
+>>> +	}
+>>> +
+>>>  	/* Force power mode enter L0 */
+>>>  	scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
+>>>  	scratch |= O2_SD_PWR_FORCE_L0;
+>>> @@ -351,23 +465,13 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>  		reg_val &= ~SDHCI_CLOCK_CARD_EN;
+>>>  		sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
+>>>  
+>>> -		if (host->timing == MMC_TIMING_MMC_HS200 ||
+>>> -		    host->timing == MMC_TIMING_UHS_SDR104) {
+>>> -			/* UnLock WP */
+>>> -			pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+>>> -			scratch_8 &= 0x7f;
+>>> -			pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+>>> -
+>>> +		if ((host->timing == MMC_TIMING_MMC_HS200) ||
+>>> +			(host->timing == MMC_TIMING_UHS_SDR104)) {
+>>>  			/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+>>>  			pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+>>>  			reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+>>>  			reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+>>>  			pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
+>>> -
+>>> -			/* Lock WP */
+>>> -			pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+>>> -			scratch_8 |= 0x80;
+>>> -			pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+>>>  		}
+>>>  
+>>>  		/* Start clk */
+>>> @@ -375,10 +479,19 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>  		reg_val |= SDHCI_CLOCK_CARD_EN;
+>>>  		sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
+>>>  		break;
+>>> +	case PCI_DEVICE_ID_O2_GG8_9860:
+>>> +	case PCI_DEVICE_ID_O2_GG8_9861:
+>>> +	case PCI_DEVICE_ID_O2_GG8_9862:
+>>> +	case PCI_DEVICE_ID_O2_GG8_9863:
+>>>  	default:
+>>>  		break;
+>>>  	}
+>>>  
+>>> +	/* Lock WP */
+>>> +	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+>>> +	scratch_8 |= 0x80;
+>>> +	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+>>> +
+>>>  	/* wait DLL lock, timeout value 5ms */
+>>>  	if (readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
+>>>  		scratch32, (scratch32 & O2_DLL_LOCK_STATUS), 1, 5000))
+>>> @@ -416,6 +529,20 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>  		sdhci_set_bus_width(host, current_bus_width);
+>>>  	}
+>>>  
+>>> +	/* update input phase for BanQ card */
+>>> +	if (o2_host->banq_card_setting) {
+>>> +		/* recover the data timeout counter value */
+>>> +		sdhci_writew(host, data_timeout_counter_value, SDHCI_TIMEOUT_CONTROL);
+>>> +
+>>> +		/*
+>>> +		 * Stop transfer for CMD19 after tuning done is set to
+>>> +		 * avoid data line inhibit
+>>> +		 */
+>>> +		sdhci_o2_send_stop_transmission(host);
+>>> +
+>>> +		sdhci_o2_configure_banq_best_input_phase(host);
+>>> +	}
+>>> +
+>>>  	/* Cancel force power mode enter L0 */
+>>>  	scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
+>>>  	scratch &= ~(O2_SD_PWR_FORCE_L0);
+>>> @@ -428,6 +555,24 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>>  	return 0;
+>>>  }
+>>>  
+>>> +static void sdhci_o2_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>>> +{
+>>> +	struct sdhci_host *host = mmc_priv(mmc);
+>>> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
+>>> +	struct o2_host *o2_host = sdhci_pci_priv(slot);
+>>> +	unsigned int manfid;
+>>> +	unsigned short oemid;
+>>> +
+>>> +	manfid = card->raw_cid[0] >> 24;
+>>> +	oemid = (card->raw_cid[0] >> 8) & 0xFFFF;
+>>> +
+>>> +	/* judge whether the card is BanQ card */
+>>> +	if (manfid == 0x89 && oemid == 0x303)
+>>> +		o2_host->banq_card_setting = 1;
+>>> +	else
+>>> +		o2_host->banq_card_setting = 0;
+>>> +}
+>>> +
+>>>  static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
+>>>  {
+>>>  	int ret;
+>>> @@ -596,15 +741,20 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>  	scratch &= 0x7f;
+>>>  	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+>>>  
+>>> -	if (chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860 ||
+>>> -	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861 ||
+>>> -	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862 ||
+>>> -	    chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863) {
+>>> +	if ((chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9860) ||
+>>> +		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9861) ||
+>>> +		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9862) ||
+>>> +		(chip->pdev->device == PCI_DEVICE_ID_O2_GG8_9863)) {
+>>>  		dmdn_208m = 0x2c500000;
+>>>  		dmdn_200m = 0x25200000;
+>>>  	} else {
+>>>  		dmdn_208m = 0x2c280000;
+>>>  		dmdn_200m = 0x25100000;
+>>> +
+>>> +		/* open-clock for old project */
+>>> +		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
+>>> +		scratch_32 &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+>>> +		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
+>>>  	}
+>>>  
+>>>  	if ((host->timing == MMC_TIMING_UHS_SDR104) && (clock == 200000000)) {
+>>> @@ -619,10 +769,6 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>  			o2_pci_set_baseclk(chip, dmdn_200m);
+>>>  	}
+>>>  
+>>> -	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
+>>> -	scratch_32 &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+>>> -	pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
+>>> -
+>>>  	/* Lock WP */
+>>>  	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+>>>  	scratch |= 0x80;
+>>> @@ -632,6 +778,11 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>  	sdhci_o2_enable_clk(host, clk);
+>>>  }
+>>>  
+>>> +static void sdhci_o2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>>> +{
+>>> +	sdhci_writeb(host, 0x0E, SDHCI_TIMEOUT_CONTROL);
+>>> +}
+>>> +
+>>>  static int sdhci_pci_o2_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>  {
+>>>  	struct sdhci_host *host = mmc_priv(mmc);
+>>> @@ -705,6 +856,7 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>>>  	host = slot->host;
+>>>  
+>>>  	o2_host->dll_adjust_count = 0;
+>>> +	o2_host->banq_card_setting = 0;
+>>>  	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+>>>  
+>>>  	/*
+>>> @@ -718,7 +870,9 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>>>  
+>>>  	sdhci_pci_o2_enable_msi(chip, host);
+>>>  
+>>> +	host->mmc_host_ops.init_card = sdhci_o2_init_card;
+>>>  	host->mmc_host_ops.execute_tuning = sdhci_o2_execute_tuning;
+>>> +
+>>>  	switch (chip->pdev->device) {
+>>>  	case PCI_DEVICE_ID_O2_SDS0:
+>>>  	case PCI_DEVICE_ID_O2_SEABIRD0:
+>>> @@ -770,6 +924,8 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>>>  		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+>>>  		slot->host->mmc_host_ops.get_cd = sdhci_o2_get_cd;
+>>>  		host->mmc_host_ops.init_sd_express = sdhci_pci_o2_init_sd_express;
+>>> +
+>>> +		sdhci_writel(host, 0xFFFFFFFF, SDHCI_INT_STATUS);
+>>>  		break;
+>>>  	default:
+>>>  		break;
+>>> @@ -1022,7 +1178,7 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>>>  		/* Set output delay*/
+>>>  		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
+>>>  		scratch_32 &= 0xFF0FFF00;
+>>> -		scratch_32 |= 0x00B0003B;
+>>> +		scratch_32 |= 0x00B000CB;
+>>>  		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
+>>>  
+>>>  		/* Lock WP */
+>>> @@ -1051,6 +1207,7 @@ static const struct sdhci_ops sdhci_pci_o2_ops = {
+>>>  	.set_bus_width = sdhci_set_bus_width,
+>>>  	.reset = sdhci_reset,
+>>>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>>> +	.set_timeout = sdhci_o2_set_timeout,
+>>>  };
+>>>  
+>>>  const struct sdhci_pci_fixes sdhci_o2 = {
+>>> 
+>>> base-commit: 0e945134b680040b8613e962f586d91b6d40292d
+
