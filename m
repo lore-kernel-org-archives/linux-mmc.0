@@ -2,92 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70468CD6101
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Oct 2023 16:15:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 373CFCD6107
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Oct 2023 16:35:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377133AbjJIQPt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Oct 2023 12:15:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35002 "EHLO
+        id S1377293AbjJIQfW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Oct 2023 12:35:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377121AbjJIQPs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2023 12:15:48 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3281492;
-        Mon,  9 Oct 2023 09:15:47 -0700 (PDT)
+        with ESMTP id S1377235AbjJIQfV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Oct 2023 12:35:21 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.115])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB9709E;
+        Mon,  9 Oct 2023 09:35:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1696868147; x=1728404147;
+  t=1696869319; x=1728405319;
   h=message-id:date:mime-version:subject:to:references:from:
    in-reply-to:content-transfer-encoding;
-  bh=kSRc3U+XdQD0Wx1crW7aMZ5DUH3qauCyrQrJWbPgz2E=;
-  b=YXIEWPmO+kgs5ilg2p1f/JgekwjxBMyFnqNEkwoa01BacRs5stVLR9co
-   jiQZgm0LV71LujO/z0uc0MnlrqkllIhFpZHRXgUeuiYk7M9lUv5DVBoY9
-   JAuXfFjeThPVuBg1WBP9W0eYzvOHed4fr+7XT1L/uJd7Bky+ZXQqxGQf/
-   LdgjgDVHMJ5I5J9X7Pl9LSbSq7cMXEkk+JKSQS5qVPGRf2S4vcKROB6Vh
-   FC0sMuq7c1ATwQh/OkAEtcpfl3EpQzrz3pSIhmjDvv+1cj4nX4fLutYAQ
-   lna48bvSIswtmIwFPoIkaRb4ha4qsd1Ccc6AiIQiPUt2V/vtng5Tv12Ny
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10858"; a="364474317"
+  bh=+5aTGRPEMm+/zcuFb1ktUrXhpx+ZuGNHWibFsWuZRgI=;
+  b=Cuy2HCSyxdVTRPPOE5RWTDeL+/EMRBcdwFRkvpSWpdD+Ug3HGvHFgSD3
+   y9LGLjyRIk0dk9fkVwjJZFLdQWEmdi/AlpPlbYfh9MLiSxL+JJVOXZpAp
+   V+F+ZmeO67C7sNdEsU8wkA6mcWz5mQTwm0Fas7wybnH6zl+eXxT8Ilp1w
+   DIHm+uw+zOkgEMaQr5tEAvEatrzTKDIiUu3k16cqwnbEIw2cha0b+5BXh
+   kAI8m2WsNhBUHEYglHTEdcfuG7HTTGhspa4ft4bS37pS3pGCHaj5+zQeG
+   AhbuNGgkZR+bRMW4xBsT7tZHtLrXeY6VQW3x9kbGQRaLQEeoIprUWruaj
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10858"; a="384055074"
 X-IronPort-AV: E=Sophos;i="6.03,210,1694761200"; 
-   d="scan'208";a="364474317"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2023 09:15:42 -0700
+   d="scan'208";a="384055074"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2023 09:35:13 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10858"; a="818896663"
+X-IronPort-AV: E=McAfee;i="6600,9927,10858"; a="896836713"
 X-IronPort-AV: E=Sophos;i="6.03,210,1694761200"; 
-   d="scan'208";a="818896663"
+   d="scan'208";a="896836713"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.36.27])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2023 09:15:40 -0700
-Message-ID: <2118f573-0760-4dae-ab63-ff2768c7b437@intel.com>
-Date:   Mon, 9 Oct 2023 19:15:36 +0300
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2023 09:33:32 -0700
+Message-ID: <7443c574-7f1d-4ee5-b3f9-da42989af90e@intel.com>
+Date:   Mon, 9 Oct 2023 19:35:08 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-pci: Switch to use
- acpi_evaluate_dsm_typed()
+Subject: Re: [PATCH v1 1/2] mmc: sdhci-pltfm: Drop unnecessary error messages
+ in sdhci_pltfm_init()
 Content-Language: en-US
 To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20231002135103.2602847-1-andriy.shevchenko@linux.intel.com>
+References: <20231006105803.3374241-1-andriy.shevchenko@linux.intel.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20231002135103.2602847-1-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20231006105803.3374241-1-andriy.shevchenko@linux.intel.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/10/23 16:51, Andy Shevchenko wrote:
-> The acpi_evaluate_dsm_typed() provides a way to check the type of the
-> object evaluated by _DSM call. Use it instead of open coded variant.
+On 6/10/23 13:58, Andy Shevchenko wrote:
+> The devm_platform_ioremap_resource() and platform_get_irq() print
+> the error messages themselves and our "failed" one brings no value
+> and just noise. Refactor code to avoid those noisy error messages.
 > 
 > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-pltfm.c | 22 +++++++---------------
+>  1 file changed, 7 insertions(+), 15 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 7c14feb5db77..025b31aa712c 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -483,11 +483,12 @@ static int __intel_dsm(struct intel_host *intel_host, struct device *dev,
->  	int err = 0;
->  	size_t len;
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index a72e123a585d..4d1a703a5bdb 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -115,26 +115,21 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+>  {
+>  	struct sdhci_host *host;
+>  	void __iomem *ioaddr;
+> -	int irq, ret;
+> +	int irq;
 >  
-> -	obj = acpi_evaluate_dsm(ACPI_HANDLE(dev), &intel_dsm_guid, 0, fn, NULL);
-> +	obj = acpi_evaluate_dsm_typed(ACPI_HANDLE(dev), &intel_dsm_guid, 0, fn, NULL,
-> +				      ACPI_TYPE_BUFFER);
->  	if (!obj)
->  		return -EOPNOTSUPP;
+>  	ioaddr = devm_platform_ioremap_resource(pdev, 0);
+> -	if (IS_ERR(ioaddr)) {
+> -		ret = PTR_ERR(ioaddr);
+> -		goto err;
+> -	}
+> +	if (IS_ERR(ioaddr))
+> +		return ERR_CAST(ioaddr);
 >  
-> -	if (obj->type != ACPI_TYPE_BUFFER || obj->buffer.length < 1) {
-> +	if (obj->buffer.length < 1) {
->  		err = -EINVAL;
->  		goto out;
+>  	irq = platform_get_irq(pdev, 0);
+> -	if (irq < 0) {
+> -		ret = irq;
+> -		goto err;
+> -	}
+> +	if (irq < 0)
+> +		return ERR_PTR(irq);
+>  
+>  	host = sdhci_alloc_host(&pdev->dev,
+>  		sizeof(struct sdhci_pltfm_host) + priv_size);
+> -
+>  	if (IS_ERR(host)) {
+> -		ret = PTR_ERR(host);
+> -		goto err;
+> +		dev_err(&pdev->dev, "%s failed %pe\n", __func__, host);
+> +		return ERR_CAST(host);
 >  	}
+>  
+>  	host->ioaddr = ioaddr;
+> @@ -152,9 +147,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+>  	platform_set_drvdata(pdev, host);
+>  
+>  	return host;
+> -err:
+> -	dev_err(&pdev->dev, "%s failed %d\n", __func__, ret);
+> -	return ERR_PTR(ret);
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_pltfm_init);
+>  
 
