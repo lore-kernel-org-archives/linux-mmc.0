@@ -2,123 +2,147 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9B22CD8CB4
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Oct 2023 19:36:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBB60CD98C3
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Oct 2023 21:04:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234252AbjJJTgO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Oct 2023 15:36:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33076 "EHLO
+        id S231530AbjJJVE5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Oct 2023 17:04:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234244AbjJJTgM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Oct 2023 15:36:12 -0400
-Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 033DFAF;
-        Tue, 10 Oct 2023 12:36:10 -0700 (PDT)
-Received: by mail-lj1-x232.google.com with SMTP id 38308e7fff4ca-2c008042211so74146651fa.2;
-        Tue, 10 Oct 2023 12:36:09 -0700 (PDT)
+        with ESMTP id S230203AbjJJVE4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Oct 2023 17:04:56 -0400
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFA2E92
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2023 14:04:54 -0700 (PDT)
+Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-d818d65f23cso6676038276.3
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2023 14:04:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1696966568; x=1697571368; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1696971894; x=1697576694; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=EnCyCL9CqSgjOWusL/DcIe34tmAuDeD2eNNCQWG/+So=;
-        b=lg/9Mhl57JyJXxLTkAks6IVUyv3WYJQbeVVmejFsdRRjTfLPox/mdoq6dgM0xy3R0h
-         1/7kS34bfTTqdW26sBrbDaoiOaG/FDdLbdrgAWL+VGJ+UipDegRwAvr2S/+09Lh7Zgm3
-         U+EQGUa6uevRgQsPd5PsRKOJl5DRQG85SaRxCvYGB8ATxRR6uD2DSdBwvUdZaKKYAdq9
-         u0GWBXACdc5ugWo4Bus/OAE/lfwkLqnZ55LJSNLN9y9ocnMpFIjkIqx731DvpKtsl40W
-         iERPb/c2rjy9YBN3FEL1gnL+IRdIjXLVxWQkZi+M99/HH/fhwI+ZzF21MLUoAVEIGBzM
-         uwbg==
+        bh=0JPdI81s1g1jD64Q6FcuAIQKwcDv5/ca0TQcTmOhurM=;
+        b=Os+bFrzjhKtV+ps1T390Qm8hpHMVq3LwUOgCgOVfUlkN3Q8TL8cVK0ReTu0o6Sq4JB
+         2/wAEYVjoN2plvvMndkzomzIMsYozdssEUPQx5b5NS0wz5W3noHvSJMeB3mvmwW4oFnu
+         FXMA4aVMjstZ4AvEWAcR736DnW62WaGhYP7aezjJK+/mPOITmfXCHoiGCLgiJlMl1pPv
+         4/VpSq3O+EYV7x7Hk2TI1Gcp0UGmYE/x2oMdl689WUHUHorp56k2jfmOnjliti+CfnJ1
+         Ck1dHaOiYmtG8dCclg7t2TwRqapvu4cr5BpQu4DHsSVTrUDDSJ6dPs0TqMpaY4VsTTmc
+         Dm2w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696966568; x=1697571368;
+        d=1e100.net; s=20230601; t=1696971894; x=1697576694;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=EnCyCL9CqSgjOWusL/DcIe34tmAuDeD2eNNCQWG/+So=;
-        b=Urn/i3HVqciQ2ao897J8eVJCXBo2UeOgrW1ZTl+9w3MCBJ+x5dvTyZRRQnbPIdSSZh
-         rA1wDbKtX6e0wP48Rhb2ezJgQmxTj1tumFRcZT9u8zI2x0pJ+drWDBTSqJf5IveR+RyE
-         pNFHW9wIa4W6WpLCEb7AfFPxUyi9vn4sqyTIOBiJOWR95jHykQWCiAzZtvacHlYbJOlM
-         3VDx+TElsfdjK/7LG0wDw6IDsPb3JcZHDDzfwV0Nv0Kz+Pq+GQ2azxjpNT/zp+ku7nN7
-         vRhiPYh3TSIx6mU0EX0p6yUSuVRTf50n9zRvkMhi6mqYPVkxw7beqtQE69F3haXb98Rs
-         pC4g==
-X-Gm-Message-State: AOJu0Ywh0DU+zE3PIcEtfLg0WcI2CR14M51eGsd7Y9LodYB+kScKKdQe
-        VUfQ70wFJ2yA+GebKeL0q7FRsfoCiW40IwVjaQk=
-X-Google-Smtp-Source: AGHT+IFh0GPOwwi4vGUKtm0FShcUPBvpdzJkQpyfIUh9wMFu4ei5Fw3aFTsOCszk/QW3i1AUiC1n+Anw6KOmvvZ82v4=
-X-Received: by 2002:a05:651c:141:b0:2c0:2583:520e with SMTP id
- c1-20020a05651c014100b002c02583520emr14990485ljd.41.1696966567771; Tue, 10
- Oct 2023 12:36:07 -0700 (PDT)
+        bh=0JPdI81s1g1jD64Q6FcuAIQKwcDv5/ca0TQcTmOhurM=;
+        b=kaS9eGJk7bSQybw3Q3qDllqBRfrywzfezofdhZKZREQbwkalamE83qpGZxuzmt+kno
+         OKwjIyyCOgwi/Zqf1e6eFEhIbV5jPF9e5g0xxKzxWHFJbdYxJgzGyWI+ZqvyGP2/vyiU
+         p7XE8q7oBsL7uziSpD69b7+Cn19UlN2ilEordYsE0eTPkHwJUGUV5nHySftaddseoRAp
+         CXc9TP3X7fHr6g4mNbM1qY22SNIdIIsBQ0XVGxX0jdg36vbRKk7bXUn3yfEDxeYk+eyg
+         lWBp+aivzQiaalqjSl3qS/ttnNe2K4QPeHIIHvBKHoAfnM8Ek46t/gHsFKPvA5T5XlQR
+         FtMg==
+X-Gm-Message-State: AOJu0YxOeP/r0Pv1dNxGUFfaiLv9+Qtu6sB6rRRkj98QIKFusNTmMXKr
+        T/wTBMIazbCDJoBWrNOF4h4X9cFvh0CirgWmRBSV8w==
+X-Google-Smtp-Source: AGHT+IHuv4B4I/7pSOoU5p4zYXXxB+UnuU5+plZrypxjr00y7A8QvxFJzcakHp6OBM059ut4sqv1nhHOkk4zB/QCxkI=
+X-Received: by 2002:a05:6902:707:b0:d84:afae:96a8 with SMTP id
+ k7-20020a056902070700b00d84afae96a8mr23439973ybt.7.1696971893895; Tue, 10 Oct
+ 2023 14:04:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <20231002200610.129799-1-tmaimon77@gmail.com> <CAPDyKForPWPHoAuRuyXBHRpNVA9MvYa-eTXDrHx8Z94nSWpXBg@mail.gmail.com>
-In-Reply-To: <CAPDyKForPWPHoAuRuyXBHRpNVA9MvYa-eTXDrHx8Z94nSWpXBg@mail.gmail.com>
-From:   Tomer Maimon <tmaimon77@gmail.com>
-Date:   Tue, 10 Oct 2023 22:35:56 +0300
-Message-ID: <CAP6Zq1hZF=v6T+Bn8AuZNUKCaTChpyLZKLvPcSo-SbfNS1-V+g@mail.gmail.com>
-Subject: Re: [PATCH v5 0/2] add NPCM SDHCI driver support
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     avifishman70@gmail.com, tali.perry1@gmail.com, joel@jms.id.au,
-        venture@google.com, yuenn@google.com, benjaminfair@google.com,
-        adrian.hunter@intel.com, skhan@linuxfoundation.org,
-        davidgow@google.com, pbrobinson@gmail.com, gsomlo@gmail.com,
-        briannorris@chromium.org, arnd@arndb.de, krakoczy@antmicro.com,
-        andy.shevchenko@gmail.com, openbmc@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+References: <20231001194943.658299-1-beanhuo@iokpp.de> <CAPDyKFpgPEhVuTbxe5YhYQ0W6907SwJRxSQLB1F2FbVW3zKHxg@mail.gmail.com>
+ <254df9b8ca7475ad9dbd3a303c60e1f99eca9c56.camel@iokpp.de>
+In-Reply-To: <254df9b8ca7475ad9dbd3a303c60e1f99eca9c56.camel@iokpp.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 10 Oct 2023 23:04:16 +0200
+Message-ID: <CAPDyKFofJR0xtpmjCQXM7=VzUeN5jQLD2AZYEWocuyCnYNObYw@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for Micron
+ eMMC Q2J54A
+To:     Bean Huo <beanhuo@iokpp.de>
+Cc:     adrian.hunter@intel.com, beanhuo@micron.com,
+        jakub.kwapisz@toradex.com, rafael.beims@toradex.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Thank a lot Ulf
+On Tue, 10 Oct 2023 at 17:33, Bean Huo <beanhuo@iokpp.de> wrote:
+>
+> Hi Ulf,
+>
+> thanks for your comments, I didn't quite get your points:
+>
+> On Tue, 2023-10-10 at 16:20 +0200, Ulf Hansson wrote:
+> > > @@ -2381,8 +2381,11 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct
+> > > mmc_queue *mq, struct request *req)
+> > >                          }
+> > >                          ret = mmc_blk_cqe_issue_flush(mq, req);
+> > >                          break;
+> > > -               case REQ_OP_READ:
+> > >                  case REQ_OP_WRITE:
+> > > +                       if (mmc_card_broken_cache_flush(card) &&
+> > > !card->written_flag)
+> >
+> > It looks superfluous to me to check mmc_card_broken_cache_flush() and
+> > !card->written_flag. Just set the card->written_flag unconditionally.
+>
+> what did you mean "Just set the card->written_flag unconditionally."?
+> This means I just need to check card->written_flag and set card-
+> >written_flag to true and false in the case
+> MMC_QUIRK_BROKEN_CACHE_FLUSH? or don't need to call
+> mmc_card_broken_cache_flush()?
 
-Appreciate it!
+I mean skip the checks above and just do the assignment below.
 
-On Tue, 10 Oct 2023 at 17:28, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> On Mon, 2 Oct 2023 at 22:06, Tomer Maimon <tmaimon77@gmail.com> wrote:
 > >
-> > This patch set adds SDHCI support for the Nuvoton NPCM Baseboard
-> > Management Controller (BMC).
+> > > +                               card->written_flag = true;
+> > > +                       fallthrough;
+> > > +               case REQ_OP_READ:
+> > >                          if (host->cqe_enabled)
+> > >                                  ret = mmc_blk_cqe_issue_rw_rq(mq,
+> > > req);
+> > >                          else
+> > > diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> > > index 4edf9057fa79..b7754a1b8d97 100644
+> > > --- a/drivers/mmc/core/card.h
+> > > +++ b/drivers/mmc/core/card.h
+> > > @@ -280,4 +280,8 @@ static inline int
+> > > mmc_card_broken_sd_cache(const struct mmc_card *c)
+> > >          return c->quirks & MMC_QUIRK_BROKEN_SD_CACHE;
+> > >   }
+> > >
+> > > +static inline int mmc_card_broken_cache_flush(const struct
+> > > mmc_card *c)
+> > > +{
+> > > +       return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
+> > > +}
+> > >   #endif
+> > > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > > index 89cd48fcec79..47896c32086e 100644
+> > > --- a/drivers/mmc/core/mmc.c
+> > > +++ b/drivers/mmc/core/mmc.c
+> > > @@ -1929,6 +1929,8 @@ static int mmc_init_card(struct mmc_host
+> > > *host, u32 ocr,
+> > >          if (!oldcard)
+> > >                  host->card = card;
+> > >
+> > > +       card->written_flag = false;
+> > > +
 > >
-> > Deeply sorry it took that long until sending version three, promise to try
-> > to do better on the next versions (if needed) :-),
-> >
-> > The NPCM SDHCI driver tested on NPCM750 and NPCM845 EVB.
-> >
-> > Addressed comments from:
-> >  - Andy Shevchenko : https://www.spinics.net/lists/devicetree/msg638000.html
-> >
-> > Changes since version 4:
-> >  - Remove unnecessary clk_disable_unprepare function.
-> >
-> > Changes since version 3:
-> >  - Use devm_clk_get_optional_enabled function.
-> >  - Add mod_devicetable.h.
-> >  - Modify copyright year.
-> >
-> > Changes since version 2:
-> >  - Add data to handle architecture-specific SDHCI parameters.
-> >  - Change config place in make and kconfig files.
-> >  - Calling sdhci_pltfm_free to to avoid a memory leak on error.
-> >
-> > Changes since version 1:
-> >  - Use correct spaces in the dt-bindings.
-> >  - Drop unused labels from dt-bindings.
-> >  - Order by module name in the make a configuration.
-> >  - Remove unnecessary blank lines.
-> >  - Using devm_clk_get_optional instead of devm_clk_get.
-> >
-> > Tomer Maimon (2):
-> >   dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI controller
-> >   mmc: sdhci-npcm: Add NPCM SDHCI driver
-> >
-> >  .../devicetree/bindings/mmc/npcm,sdhci.yaml   | 45 +++++++++
-> >  drivers/mmc/host/Kconfig                      |  8 ++
-> >  drivers/mmc/host/Makefile                     |  1 +
-> >  drivers/mmc/host/sdhci-npcm.c                 | 94 +++++++++++++++++++
-> >  4 files changed, 148 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
-> >  create mode 100644 drivers/mmc/host/sdhci-npcm.c
-> >
+> > How about doing this after a successful flush operation instead? In
+> > other words in _mmc_flush_cache().
 >
-> Applied for next (and by amending patch2 to remove some commas), thanks!
->
-> Kind regards
-> Uffe
+> Here initializes flag and the patch is intenting to eliminate the cache
+> flush command before writing. what do you mean adding in
+> mmc_flush_cache()?
+
+mmc_init_card() is called while initializing and re-initializing the
+card. So, it certainly works to reset the flag from here.
+
+However, _mmc_flush_cache() is called before powering off the card,
+which then would work similarly to the above, but also gets called for
+REQ_OP_FLUSH. Wouldn't that mean that we may be able to skip some
+unnecessary/troublesome cache flush requests if we would reset the
+flag from  mmc_flush_cache(), rather than from mmc_init_card()?
+
+Kind regards
+Uffe
