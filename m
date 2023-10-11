@@ -2,243 +2,310 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C034CD98C7
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Oct 2023 05:36:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15E18CD98F3
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Oct 2023 06:35:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229534AbjJKFg4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Oct 2023 01:36:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51080 "EHLO
+        id S1345373AbjJKGfC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Oct 2023 02:35:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229471AbjJKFg4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Oct 2023 01:36:56 -0400
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05CF68E;
-        Tue, 10 Oct 2023 22:36:53 -0700 (PDT)
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 39B5alcwF3590138, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.92/5.92) with ESMTPS id 39B5alcwF3590138
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 11 Oct 2023 13:36:47 +0800
-Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
- RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.17; Wed, 11 Oct 2023 13:36:47 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Wed, 11 Oct 2023 13:36:47 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b]) by
- RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b%5]) with mapi id
- 15.01.2375.007; Wed, 11 Oct 2023 13:36:47 +0800
-From:   Ricky WU <ricky_wu@realtek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-Thread-Topic: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-Thread-Index: AQHX9mTncx2NNhc4Hk2xCW7FootmX6w8X/iAgAN+/CD//4BBAIAB2EewgAY9WACAAfsEAIA+RCiAgATnqGCAAA5YAIO7cd/g
-Date:   Wed, 11 Oct 2023 05:36:46 +0000
-Message-ID: <a533dde76d2d4345b85cd060a8e403db@realtek.com>
-References: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com>
- <CAPDyKFrLpim75nUB7ksDie2edkWsnFSq6TbFSFFpw5cY5d4y1w@mail.gmail.com>
- <fabaed5751f04105a9719c1cb0390c98@realtek.com>
- <CAPDyKFr3NRUgfKtkb2DBrhziekFAB0jT_X3Fsfvjk_bGZLC9mA@mail.gmail.com>
- <fa10aa1c644241808c2ad880088240ab@realtek.com>
- <CAPDyKFrtBKHHRgeF-JO27ANsbSmt8rdnhn-WNr5Je9okEgA29Q@mail.gmail.com>
- <feb0c4e71e9c48a2a21f18b7d3baf135@realtek.com>
- <CAPDyKFoq_PDk_JgW4D+o4eEPdcffUq2RLbBreRDqeK47m0UnJA@mail.gmail.com>
- <a82d7e877dc041d4be5e0ef38c2da406@realtek.com>
- <CAPDyKFo59Q3dmUJU-hJ++=k0uwx2KxamW9KckDX=O_CA84O1_g@mail.gmail.com>
-In-Reply-To: <CAPDyKFo59Q3dmUJU-hJ++=k0uwx2KxamW9KckDX=O_CA84O1_g@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-x-originating-ip: [172.22.81.100]
-x-kse-serverinfo: RTEXDAG01.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        with ESMTP id S1345324AbjJKGfB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Oct 2023 02:35:01 -0400
+Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D29C798
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2023 23:34:59 -0700 (PDT)
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com [209.85.216.69])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 28BFC40342
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Oct 2023 06:34:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1697006096;
+        bh=UMKdS5SnMMrOpMCMYwNeeTyyHh/lJY0Na/By5DR8NHA=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=txPxfoA0mJinslGNZcMWFjN/OmGrLodif954kfpKRo/n5ihbtMjOU1wHm7TJR3E7f
+         lQ5kPawwxDIDXGZBA4Do45K9X2nB7L3dxTeIUx4CECno37qRXk4fkBUT3rPpHJ8t24
+         nnHysFghGo92w6epZcm+pJyx0znfzjEfMUAgKfyta5bPyQhcXFCl1QBAtxHK5+BGup
+         R5khfwIWRTWSdYiahF3I5Ikz5Jb5MkeuUdC3GlC4a8lHNjVw7fFMpebUfwOKZPParZ
+         64VoO6CumlY7EYn1SkyuaPG4s6lX3M2BXtrSN6jf26fEusGQaxO5IUDk0YzSiSvM9Q
+         wquuphrh7cDNw==
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-27cc62af393so2360287a91.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Oct 2023 23:34:56 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1697006092; x=1697610892;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=UMKdS5SnMMrOpMCMYwNeeTyyHh/lJY0Na/By5DR8NHA=;
+        b=RP2UDwfJYa9aSLdx/zsRb0oXBIIxDmnSflSbkoUJNq/MF6edn5OpOEAj4SPdww/Zv6
+         a0ZtoaJo/J2n3DaTVMxy5YuQ4hgUvoQSZUkBPssj+tz+6F+Iduuf8LSOygs72c/PmuBT
+         Our+eKwubOXwvhlm+Vsj5/XC24Ny+22IK6uiWqYI7TXomioGjZK3EYRnafbhenQ3jodc
+         AJ068qcJWHPfyxKXKkG7t6gh4eFsvaEKVuR84T3iSOeTZ5FFvYc0GXQm5c48KC5iXTjK
+         WwYPdO4nezXTmmcdgW2dA7xxWV8Je2tyif87TW8B8BOJcO9dzIYnJ2oI7LBVMEh13ql0
+         C/3Q==
+X-Gm-Message-State: AOJu0YzeUj0ONBAz2Dq9D49iJktdzIcRP2QwYRDascvWRX3QWA8rGfpi
+        NHloq6YQUBmJK6xjcIT6aNIBD/O5w+ql3Q2FrhytVJ4zD/mAscWOiBAtu+pGYcacmlZZUMV+SGN
+        cm0U/IN0BrPzqITNzqB/E6p+StFCZTJ9V5aUxNFyoMT4XpXhPKwQSlw==
+X-Received: by 2002:a17:90b:207:b0:263:ebab:a152 with SMTP id fy7-20020a17090b020700b00263ebaba152mr17455690pjb.19.1697006092276;
+        Tue, 10 Oct 2023 23:34:52 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG7Jg8p5JoarrZc0SP0VmvntkNCM4Bi6vD3Oq1kx7GyQ/FZG+mqRHFLHLMNSUEcC96PyTkWuiVj2mriWrNmD5c=
+X-Received: by 2002:a17:90b:207:b0:263:ebab:a152 with SMTP id
+ fy7-20020a17090b020700b00263ebaba152mr17455674pjb.19.1697006091933; Tue, 10
+ Oct 2023 23:34:51 -0700 (PDT)
 MIME-Version: 1.0
-X-KSE-AntiSpam-Interceptor-Info: fallback
+References: <20230918103055.5471-1-victorshihgli@gmail.com>
+ <CAAd53p4qhf+3j=zMs_RXSpLQzn6RGD9yUNcSA12V5aACswgeeQ@mail.gmail.com>
+ <CAK00qKDnG1o6ZxzY=pGs0J7o_RYYsr1XHxJKirRKeghsp6QOBg@mail.gmail.com>
+ <CAAd53p6cgN7QDZXzTsw_DVgOmpv46DY+Ttom5V0vTBVn2jpUQg@mail.gmail.com>
+ <CAK00qKA2kaQ2k0Tp=F86BmAMEK=GiAmtLiAQcZRBGVvHOd64MQ@mail.gmail.com>
+ <CAAd53p4EemJQfp2nwKTPoGpwPJchZKfC8hKU8zuvtK-YKmM9bQ@mail.gmail.com>
+ <CAK00qKCXYg_JPUf=kCxLR1wmi=kmQ25X-ScQ7OYL1zpBKQAQkA@mail.gmail.com>
+ <CAAd53p6_qQvp3EJgds_CAnHHSJLBQWc9TYyWpOzNaBZjyoDpeg@mail.gmail.com> <CAK00qKAhOnGzX8mAUADXDAjExHTQmyb5DyNkZoFht3Cn6bU1Aw@mail.gmail.com>
+In-Reply-To: <CAK00qKAhOnGzX8mAUADXDAjExHTQmyb5DyNkZoFht3Cn6bU1Aw@mail.gmail.com>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Wed, 11 Oct 2023 14:34:39 +0800
+Message-ID: <CAAd53p7YD4B9U6C+3RiW_mgMXnGTMNbVmgkAuge5U3ZXVL7FQQ@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
+ timeout of AER
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, kangzhen.lou@dell.com,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgVWxmIEhhbnNzb24sDQoNCkNhbiBJIGtub3cgd2hhdCBpcyB0aGlzIHBhdGNoIHN0YXR1cyBv
-ciBoYXMgc29tZSBjb25jZXJuIG9uIHRoaXMgcGF0Y2g/DQoNClJpY2t5DQo+IC0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8u
-b3JnPg0KPiBTZW50OiBUaHVyc2RheSwgRmVicnVhcnkgMTAsIDIwMjIgMTA6NTcgUE0NCj4gVG86
-IFJpY2t5IFdVIDxyaWNreV93dUByZWFsdGVrLmNvbT4NCj4gQ2M6IHRvbW15aGViYkBnbWFpbC5j
-b207IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7DQo+IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5l
-bC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2M10gbW1jOiBydHN4OiBpbXByb3ZlIHBlcmZv
-cm1hbmNlIGZvciBtdWx0aSBibG9jayBydw0KPiANCj4gT24gVGh1LCAxMCBGZWIgMjAyMiBhdCAw
-Nzo0MywgUmlja3kgV1UgPHJpY2t5X3d1QHJlYWx0ZWsuY29tPiB3cm90ZToNCj4gPg0KPiA+DQo+
-ID4NCj4gPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gPiBGcm9tOiBVbGYgSGFu
-c3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gPiA+IFNlbnQ6IE1vbmRheSwgRmVicnVh
-cnkgNywgMjAyMiA3OjExIFBNDQo+ID4gPiBUbzogUmlja3kgV1UgPHJpY2t5X3d1QHJlYWx0ZWsu
-Y29tPg0KPiA+ID4gQ2M6IHRvbW15aGViYkBnbWFpbC5jb207IGxpbnV4LW1tY0B2Z2VyLmtlcm5l
-bC5vcmc7DQo+ID4gPiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+ID4gPiBTdWJqZWN0
-OiBSZTogW1BBVENIIHYzXSBtbWM6IHJ0c3g6IGltcHJvdmUgcGVyZm9ybWFuY2UgZm9yIG11bHRp
-DQo+ID4gPiBibG9jayBydw0KPiA+ID4NCj4gPiA+IFsuLi5dDQo+ID4gPg0KPiA+ID4gPiA+ID4g
-PiA+DQo+ID4gPiA+ID4gPiA+ID4gRG8geW91IGhhdmUgYW55IHN1Z2dlc3Rpb24gZm9yIHRlc3Rp
-bmcgcmFuZG9tIEkvTyBCdXQgd2UNCj4gPiA+ID4gPiA+ID4gPiB0aGluayByYW5kb20gSS9PIHdp
-bGwgbm90IGNoYW5nZSBtdWNoDQo+ID4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiA+IEkgd291bGQg
-cHJvYmFibHkgbG9vayBpbnRvIHVzaW5nIGZpbywNCj4gPiA+ID4gPiA+ID4gaHR0cHM6Ly9maW8u
-cmVhZHRoZWRvY3MuaW8vZW4vbGF0ZXN0Lw0KPiA+ID4gPiA+ID4gPg0KPiA+ID4gPiA+ID4NCj4g
-PiA+ID4gPiA+IEZpbGxlZCByYW5kb20gSS9PIGRhdGENCj4gPiA+ID4gPiA+IEJlZm9yZSB0aGUg
-cGF0Y2g6DQo+ID4gPiA+ID4gPiBDTUQgKFJhbmRyZWFkKToNCj4gPiA+ID4gPiA+IHN1ZG8gZmlv
-IC1maWxlbmFtZT0vZGV2L21tY2JsazAgLWRpcmVjdD0xIC1udW1qb2JzPTEgLXRocmVhZA0KPiA+
-ID4gPiA+ID4gLWdyb3VwX3JlcG9ydGluZyAtaW9lbmdpbmU9cHN5bmMgLWlvZGVwdGg9MSAtc2l6
-ZT0xRw0KPiA+ID4gPiA+ID4gLW5hbWU9bXl0ZXN0IC1icz0xTSAtcnc9cmFuZHJlYWQNCj4gPiA+
-ID4gPg0KPiA+ID4gPiA+IFRoYW5rcyBmb3IgcnVubmluZyB0aGUgdGVzdHMhIE92ZXJhbGwsIEkg
-d291bGQgbm90IGV4cGVjdCBhbg0KPiA+ID4gPiA+IGltcGFjdCBvbiB0aGUgdGhyb3VnaHB1dCB3
-aGVuIHVzaW5nIGEgYmlnIGJsb2Nrc2l6ZSBsaWtlIDFNLg0KPiA+ID4gPiA+IFRoaXMgaXMgYWxz
-byBwcmV0dHkgY2xlYXIgZnJvbSB0aGUgcmVzdWx0IHlvdSBoYXZlIHByb3ZpZGVkLg0KPiA+ID4g
-PiA+DQo+ID4gPiA+ID4gSG93ZXZlciwgZXNwZWNpYWxseSBmb3IgcmFuZG9tIHdyaXRlcyBhbmQg
-cmVhZHMsIHdlIHdhbnQgdG8gdHJ5DQo+ID4gPiA+ID4gd2l0aCBzbWFsbGVyIGJsb2Nrc2l6ZXMu
-IExpa2UgOGsgb3IgMTZrLCB3b3VsZCB5b3UgbWluZCBydW5uaW5nDQo+ID4gPiA+ID4gYW5vdGhl
-ciByb3VuZCBvZiB0ZXN0cyB0byBzZWUgaG93IHRoYXQgd29ya3Mgb3V0Pw0KPiA+ID4gPiA+DQo+
-ID4gPiA+DQo+ID4gPiA+IEZpbGxlZCByYW5kb20gSS9PIGRhdGEoOGsvMTZrKQ0KPiA+ID4NCj4g
-PiA+IEhpIFJpY2t5LA0KPiA+ID4NCj4gPiA+IEFwb2xvZ2l6ZSBmb3IgdGhlIGRlbGF5ISBUaGFu
-a3MgZm9yIHJ1bm5pbmcgdGhlIHRlc3RzLiBMZXQgbWUNCj4gPiA+IGNvbW1lbnQgb24gdGhlbSBi
-ZWxvdy4NCj4gPiA+DQo+ID4gPiA+DQo+ID4gPiA+IEJlZm9yZShyYW5kcmVhZCkNCj4gPiA+ID4g
-OGs6DQo+ID4gPiA+IENtZDogc3VkbyBmaW8gLWZpbGVuYW1lPS9kZXYvbW1jYmxrMCAtZGlyZWN0
-PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4gPiA+IC1ncm91cF9yZXBvcnRpbmcgLWlvZW5naW5l
-PXBzeW5jIC1pb2RlcHRoPTEgLXNpemU9MUcgLW5hbWU9bXl0ZXN0DQo+ID4gPiA+IC1icz04ayAt
-cnc9cmFuZHJlYWQNCj4gPiA+ID4gbXl0ZXN0OiAoZz0wKTogcnc9cmFuZHJlYWQsIGJzPShSKSA4
-MTkyQi04MTkyQiwgKFcpIDgxOTJCLTgxOTJCLA0KPiA+ID4gPiAoVCkgODE5MkItODE5MkIsIGlv
-ZW5naW5lPXBzeW5jLCBpb2RlcHRoPTENCj4gPiA+ID4gcmVzdWx0Og0KPiA+ID4gPiBSdW4gc3Rh
-dHVzIGdyb3VwIDAgKGFsbCBqb2JzKToNCj4gPiA+ID4gICAgUkVBRDogYnc9MTYuNU1pQi9zICgx
-Ny4zTUIvcyksIDE2LjVNaUIvcy0xNi41TWlCL3MNCj4gPiA+ID4gKDE3LjNNQi9zLTE3LjNNQi9z
-KSwgaW89MTAyNE1pQiAoMTA3NE1CKSwgcnVuPTYyMDE5LTYyMDE5bXNlYw0KPiBEaXNrDQo+ID4g
-PiBzdGF0cyAocmVhZC93cml0ZSk6DQo+ID4gPiA+ICAgbW1jYmxrMDogaW9zPTEzMDc1Ny8wLCBt
-ZXJnZT0wLzAsIHRpY2tzPTU3NzUxLzAsIGluX3F1ZXVlPTU3NzUxLA0KPiA+ID4gPiB1dGlsPTk5
-Ljg5JQ0KPiA+ID4gPg0KPiA+ID4gPiAxNms6DQo+ID4gPiA+IENtZDogc3VkbyBmaW8gLWZpbGVu
-YW1lPS9kZXYvbW1jYmxrMCAtZGlyZWN0PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4gPiA+IC1n
-cm91cF9yZXBvcnRpbmcgLWlvZW5naW5lPXBzeW5jIC1pb2RlcHRoPTEgLXNpemU9MUcgLW5hbWU9
-bXl0ZXN0DQo+ID4gPiA+IC1icz0xNmsgLXJ3PXJhbmRyZWFkDQo+ID4gPiA+IG15dGVzdDogKGc9
-MCk6IHJ3PXJhbmRyZWFkLCBicz0oUikgMTYuMEtpQi0xNi4wS2lCLCAoVykNCj4gPiA+ID4gMTYu
-MEtpQi0xNi4wS2lCLCAoVCkgMTYuMEtpQi0xNi4wS2lCLCBpb2VuZ2luZT1wc3luYywgaW9kZXB0
-aD0xDQo+ID4gPiA+IHJlc3VsdDoNCj4gPiA+ID4gUnVuIHN0YXR1cyBncm91cCAwIChhbGwgam9i
-cyk6DQo+ID4gPiA+ICAgIFJFQUQ6IGJ3PTIzLjNNaUIvcyAoMjQuNE1CL3MpLCAyMy4zTWlCL3Mt
-MjMuM01pQi9zDQo+ID4gPiA+ICgyNC40TUIvcy0yNC40TUIvcyksIGlvPTEwMjRNaUIgKDEwNzRN
-QiksIHJ1bj00NDAzNC00NDAzNG1zZWMNCj4gRGlzaw0KPiA+ID4gc3RhdHMgKHJlYWQvd3JpdGUp
-Og0KPiA+ID4gPiAgIG1tY2JsazA6IGlvcz02NTMzMy8wLCBtZXJnZT0wLzAsIHRpY2tzPTM5NDIw
-LzAsIGluX3F1ZXVlPTM5NDIwLA0KPiA+ID4gPiB1dGlsPTk5Ljg0JQ0KPiA+ID4gPg0KPiA+ID4g
-PiBCZWZvcmUocmFuZHJ3cml0ZSkNCj4gPiA+ID4gOGs6DQo+ID4gPiA+IENtZDogc3VkbyBmaW8g
-LWZpbGVuYW1lPS9kZXYvbW1jYmxrMCAtZGlyZWN0PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4g
-PiA+IC1ncm91cF9yZXBvcnRpbmcgLWlvZW5naW5lPXBzeW5jIC1pb2RlcHRoPTEgLXNpemU9MTAw
-TQ0KPiA+ID4gPiAtbmFtZT1teXRlc3QgLWJzPThrIC1ydz1yYW5kd3JpdGUNCj4gPiA+ID4gbXl0
-ZXN0OiAoZz0wKTogcnc9cmFuZHdyaXRlLCBicz0oUikgODE5MkItODE5MkIsIChXKSA4MTkyQi04
-MTkyQiwNCj4gPiA+ID4gKFQpIDgxOTJCLTgxOTJCLCBpb2VuZ2luZT1wc3luYywgaW9kZXB0aD0x
-DQo+ID4gPiA+IHJlc3VsdDoNCj4gPiA+ID4gUnVuIHN0YXR1cyBncm91cCAwIChhbGwgam9icyk6
-DQo+ID4gPiA+ICAgV1JJVEU6IGJ3PTQwNjBLaUIvcyAoNDE1OGtCL3MpLCA0MDYwS2lCL3MtNDA2
-MEtpQi9zDQo+ID4gPiA+ICg0MTU4a0Ivcy00MTU4a0IvcyksIGlvPTEwME1pQiAoMTA1TUIpLCBy
-dW49MjUyMjAtMjUyMjBtc2VjIERpc2sNCj4gPiA+ID4gc3RhdHMNCj4gPiA+IChyZWFkL3dyaXRl
-KToNCj4gPiA+ID4gICBtbWNibGswOiBpb3M9NTEvMTI3NTksIG1lcmdlPTAvMCwgdGlja3M9ODAv
-MjQxNTQsDQo+ID4gPiA+IGluX3F1ZXVlPTI0MjM0LCB1dGlsPTk5LjkwJQ0KPiA+ID4gPg0KPiA+
-ID4gPiAxNms6DQo+ID4gPiA+IENtZDogc3VkbyBmaW8gLWZpbGVuYW1lPS9kZXYvbW1jYmxrMCAt
-ZGlyZWN0PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4gPiA+IC1ncm91cF9yZXBvcnRpbmcgLWlv
-ZW5naW5lPXBzeW5jIC1pb2RlcHRoPTEgLXNpemU9MTAwTQ0KPiA+ID4gPiAtbmFtZT1teXRlc3Qg
-LWJzPTE2ayAtcnc9cmFuZHdyaXRlDQo+ID4gPiA+IG15dGVzdDogKGc9MCk6IHJ3PXJhbmR3cml0
-ZSwgYnM9KFIpIDE2LjBLaUItMTYuMEtpQiwgKFcpDQo+ID4gPiA+IDE2LjBLaUItMTYuMEtpQiwg
-KFQpIDE2LjBLaUItMTYuMEtpQiwgaW9lbmdpbmU9cHN5bmMsIGlvZGVwdGg9MQ0KPiA+ID4gPiBy
-ZXN1bHQ6DQo+ID4gPiA+IFJ1biBzdGF0dXMgZ3JvdXAgMCAoYWxsIGpvYnMpOg0KPiA+ID4gPiAg
-IFdSSVRFOiBidz03MjAxS2lCL3MgKDczNzNrQi9zKSwgNzIwMUtpQi9zLTcyMDFLaUIvcw0KPiA+
-ID4gPiAoNzM3M2tCL3MtNzM3M2tCL3MpLCBpbz0xMDBNaUIgKDEwNU1CKSwgcnVuPTE0MjIxLTE0
-MjIxbXNlYyBEaXNrDQo+ID4gPiA+IHN0YXRzDQo+ID4gPiAocmVhZC93cml0ZSk6DQo+ID4gPiA+
-ICAgbW1jYmxrMDogaW9zPTUxLzYzNjcsIG1lcmdlPTAvMCwgdGlja3M9ODIvMTM2NDcsIGluX3F1
-ZXVlPTEzNzI4LA0KPiA+ID4gPiB1dGlsPTk5LjgxJQ0KPiA+ID4gPg0KPiA+ID4gPg0KPiA+ID4g
-PiBBZnRlcihyYW5kcmVhZCkNCj4gPiA+ID4gOGs6DQo+ID4gPiA+IENtZDogc3VkbyBmaW8gLWZp
-bGVuYW1lPS9kZXYvbW1jYmxrMCAtZGlyZWN0PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4gPiA+
-IC1ncm91cF9yZXBvcnRpbmcgLWlvZW5naW5lPXBzeW5jIC1pb2RlcHRoPTEgLXNpemU9MUcgLW5h
-bWU9bXl0ZXN0DQo+ID4gPiA+IC1icz04ayAtcnc9cmFuZHJlYWQNCj4gPiA+ID4gbXl0ZXN0OiAo
-Zz0wKTogcnc9cmFuZHJlYWQsIGJzPShSKSA4MTkyQi04MTkyQiwgKFcpIDgxOTJCLTgxOTJCLA0K
-PiA+ID4gPiAoVCkgODE5MkItODE5MkIsIGlvZW5naW5lPXBzeW5jLCBpb2RlcHRoPTENCj4gPiA+
-ID4gcmVzdWx0Og0KPiA+ID4gPiBSdW4gc3RhdHVzIGdyb3VwIDAgKGFsbCBqb2JzKToNCj4gPiA+
-ID4gICAgUkVBRDogYnc9MTIuNE1pQi9zICgxMy4wTUIvcyksIDEyLjRNaUIvcy0xMi40TWlCL3MN
-Cj4gPiA+ID4gKDEzLjBNQi9zLTEzLjBNQi9zKSwgaW89MTAyNE1pQiAoMTA3NE1CKSwgcnVuPTgy
-Mzk3LTgyMzk3bXNlYw0KPiBEaXNrDQo+ID4gPiBzdGF0cyAocmVhZC93cml0ZSk6DQo+ID4gPiA+
-ICAgbW1jYmxrMDogaW9zPTEzMDY0MC8wLCBtZXJnZT0wLzAsIHRpY2tzPTc0MTI1LzAsIGluX3F1
-ZXVlPTc0MTI1LA0KPiA+ID4gPiB1dGlsPTk5Ljk0JQ0KPiA+ID4gPg0KPiA+ID4gPiAxNms6DQo+
-ID4gPiA+IENtZDogc3VkbyBmaW8gLWZpbGVuYW1lPS9kZXYvbW1jYmxrMCAtZGlyZWN0PTEgLW51
-bWpvYnM9MSAtdGhyZWFkDQo+ID4gPiA+IC1ncm91cF9yZXBvcnRpbmcgLWlvZW5naW5lPXBzeW5j
-IC1pb2RlcHRoPTEgLXNpemU9MUcgLW5hbWU9bXl0ZXN0DQo+ID4gPiA+IC1icz0xNmsgLXJ3PXJh
-bmRyZWFkDQo+ID4gPiA+IG15dGVzdDogKGc9MCk6IHJ3PXJhbmRyZWFkLCBicz0oUikgMTYuMEtp
-Qi0xNi4wS2lCLCAoVykNCj4gPiA+ID4gMTYuMEtpQi0xNi4wS2lCLCAoVCkgMTYuMEtpQi0xNi4w
-S2lCLCBpb2VuZ2luZT1wc3luYywgaW9kZXB0aD0xDQo+ID4gPiA+IHJlc3VsdDoNCj4gPiA+ID4g
-UnVuIHN0YXR1cyBncm91cCAwIChhbGwgam9icyk6DQo+ID4gPiA+ICAgIFJFQUQ6IGJ3PTIwLjBN
-aUIvcyAoMjEuME1CL3MpLCAyMC4wTWlCL3MtMjAuME1pQi9zDQo+ID4gPiA+ICgyMS4wTUIvcy0y
-MS4wTUIvcyksIGlvPTEwMjRNaUIgKDEwNzRNQiksIHJ1bj01MTA3Ni01MTA3Nm1zZWMNCj4gRGlz
-aw0KPiA+ID4gc3RhdHMgKHJlYWQvd3JpdGUpOg0KPiA+ID4gPiAgIG1tY2JsazA6IGlvcz02NTI4
-Mi8wLCBtZXJnZT0wLzAsIHRpY2tzPTQ2MjU1LzAsIGluX3F1ZXVlPTQ2MjU0LA0KPiA+ID4gPiB1
-dGlsPTk5Ljg3JQ0KPiA+ID4gPg0KPiA+ID4gPiBBZnRlcihyYW5kd3JpdGUpDQo+ID4gPiA+IDhr
-Og0KPiA+ID4gPiBDbWQ6IHN1ZG8gZmlvIC1maWxlbmFtZT0vZGV2L21tY2JsazAgLWRpcmVjdD0x
-IC1udW1qb2JzPTEgLXRocmVhZA0KPiA+ID4gPiAtZ3JvdXBfcmVwb3J0aW5nIC1pb2VuZ2luZT1w
-c3luYyAtaW9kZXB0aD0xIC1zaXplPTEwME0NCj4gPiA+ID4gLW5hbWU9bXl0ZXN0IC1icz04ayAt
-cnc9cmFuZHdyaXRlDQo+ID4gPiA+IG15dGVzdDogKGc9MCk6IHJ3PXJhbmR3cml0ZSwgYnM9KFIp
-IDgxOTJCLTgxOTJCLCAoVykgODE5MkItODE5MkIsDQo+ID4gPiA+IChUKSA4MTkyQi04MTkyQiwg
-aW9lbmdpbmU9cHN5bmMsIGlvZGVwdGg9MQ0KPiA+ID4gPiByZXN1bHQ6DQo+ID4gPiA+IFJ1biBz
-dGF0dXMgZ3JvdXAgMCAoYWxsIGpvYnMpOg0KPiA+ID4gPiAgIFdSSVRFOiBidz00MjE1S2lCL3Mg
-KDQzMTdrQi9zKSwgNDIxNUtpQi9zLTQyMTVLaUIvcw0KPiA+ID4gPiAoNDMxN2tCL3MtNDMxN2tC
-L3MpLCBpbz0xMDBNaUIgKDEwNU1CKSwgcnVuPTI0MjkyLTI0MjkybXNlYyBEaXNrDQo+ID4gPiA+
-IHN0YXRzDQo+ID4gPiAocmVhZC93cml0ZSk6DQo+ID4gPiA+ICAgbW1jYmxrMDogaW9zPTUyLzEy
-NzE3LCBtZXJnZT0wLzAsIHRpY2tzPTg2LzIzMTgyLA0KPiA+ID4gPiBpbl9xdWV1ZT0yMzI2Nywg
-dXRpbD05OS45MiUNCj4gPiA+ID4NCj4gPiA+ID4gMTZrOg0KPiA+ID4gPiBDbWQ6IHN1ZG8gZmlv
-IC1maWxlbmFtZT0vZGV2L21tY2JsazAgLWRpcmVjdD0xIC1udW1qb2JzPTEgLXRocmVhZA0KPiA+
-ID4gPiAtZ3JvdXBfcmVwb3J0aW5nIC1pb2VuZ2luZT1wc3luYyAtaW9kZXB0aD0xIC1zaXplPTEw
-ME0NCj4gPiA+ID4gLW5hbWU9bXl0ZXN0IC1icz0xNmsgLXJ3PXJhbmR3cml0ZQ0KPiA+ID4gPiBt
-eXRlc3Q6IChnPTApOiBydz1yYW5kd3JpdGUsIGJzPShSKSAxNi4wS2lCLTE2LjBLaUIsIChXKQ0K
-PiA+ID4gPiAxNi4wS2lCLTE2LjBLaUIsIChUKSAxNi4wS2lCLTE2LjBLaUIsIGlvZW5naW5lPXBz
-eW5jLCBpb2RlcHRoPTENCj4gPiA+ID4gcmVzdWx0Og0KPiA+ID4gPiBSdW4gc3RhdHVzIGdyb3Vw
-IDAgKGFsbCBqb2JzKToNCj4gPiA+ID4gICBXUklURTogYnc9NjQ5OUtpQi9zICg2NjU1a0Ivcyks
-IDY0OTlLaUIvcy02NDk5S2lCL3MNCj4gPiA+ID4gKDY2NTVrQi9zLTY2NTVrQi9zKSwgaW89MTAw
-TWlCICgxMDVNQiksIHJ1bj0xNTc1Ni0xNTc1Nm1zZWMgRGlzaw0KPiA+ID4gPiBzdGF0cw0KPiA+
-ID4gKHJlYWQvd3JpdGUpOg0KPiA+ID4gPiAgIG1tY2JsazA6IGlvcz01MS82MzQ3LCBtZXJnZT0w
-LzAsIHRpY2tzPTg0LzE1MTIwLCBpbl9xdWV1ZT0xNTIwNCwNCj4gPiA+ID4gdXRpbD05OS44MCUN
-Cj4gPiA+DQo+ID4gPiBJdCBsb29rcyBsaWtlIHRoZSByYW5kLXJlYWQgdGVzdHMgYWJvdmUgYXJl
-IGRlZ3JhZGluZyB3aXRoIHRoZSBuZXcNCj4gPiA+IGNoYW5nZXMsIHdoaWxlIHJhbmQtd3JpdGVz
-IGFyZSBib3RoIGltcHJvdmluZyBhbmQgZGVncmFkaW5nLg0KPiA+ID4NCj4gPiA+IFRvIHN1bW1h
-cml6ZSBteSB2aWV3IGZyb20gYWxsIHRoZSB0ZXN0cyB5b3UgaGF2ZSBkb25lIGF0IHRoaXMgcG9p
-bnQNCj4gPiA+ICh0aGFua3MgYSBsb3QpOyBpdCBsb29rcyBsaWtlIHRoZSBibG9jayBJL08gbWVy
-Z2luZyBpc24ndCByZWFsbHkNCj4gPiA+IGhhcHBlbmluZyBhdCBjb21tb24gYmxvY2tsYXllciwg
-YXQgbGVhc3QgdG8gdGhhdCBleHRlbnQgdGhhdCB3b3VsZA0KPiA+ID4gYmVuZWZpdCB1cy4gQ2xl
-YXJseSB5b3UgaGF2ZSBzaG93biB0aGF0IGJ5IHRoZSBzdWdnZXN0ZWQgY2hhbmdlIGluDQo+ID4g
-PiB0aGUgbW1jIGhvc3QgZHJpdmVyLCBieSBkZXRlY3Rpbmcgd2hldGhlciB0aGUgIm5leHQiIHJl
-cXVlc3QgaXMNCj4gPiA+IHNlcXVlbnRpYWwgdG8gdGhlIHByZXZpb3VzIG9uZSwgd2hpY2ggYWxs
-b3dzIHVzIHRvIHNraXAgYQ0KPiA+ID4gQ01EMTIgYW5kIG1pbmltaXplIHNvbWUgY29tbWFuZCBv
-dmVyaGVhZC4NCj4gPiA+DQo+ID4gPiBIb3dldmVyLCBhY2NvcmRpbmcgdG8gdGhlIGxhdGVzdCB0
-ZXN0cyBhYm92ZSwgeW91IGhhdmUgYWxzbyBwcm92ZWQNCj4gPiA+IHRoYXQgdGhlIGNoYW5nZXMg
-aW4gdGhlIG1tYyBob3N0IGRyaXZlciBkb2Vzbid0IGNvbWUgd2l0aG91dCBhIGNvc3QuDQo+ID4g
-PiBJbiBwYXJ0aWN1bGFyLCBzbWFsbCByYW5kb20tcmVhZHMgd291bGQgZGVncmFkZSBpbiBwZXJm
-b3JtYW5jZSBmcm9tDQo+ID4gPiB0aGVzZSBjaGFuZ2VzLg0KPiA+ID4NCj4gPiA+IFRoYXQgc2Fp
-ZCwgaXQgbG9va3MgdG8gbWUgdGhhdCByYXRoZXIgdGhhbiB0cnlpbmcgdG8gaW1wcm92ZSB0aGlu
-Z3MNCj4gPiA+IGZvciBvbmUgc3BlY2lmaWMgbW1jIGhvc3QgZHJpdmVyLCBpdCB3b3VsZCBiZSBi
-ZXR0ZXIgdG8gbG9vayBhdCB0aGlzDQo+ID4gPiBmcm9tIHRoZSBnZW5lcmljIGJsb2NrIGxheWVy
-IHBvaW50IG9mIHZpZXcgLSBhbmQgaW52ZXN0aWdhdGUgd2h5DQo+ID4gPiBzZXF1ZW50aWFsIHJl
-YWRzL3dyaXRlcyBhcmVuJ3QgZ2V0dGluZyBtZXJnZWQgb2Z0ZW4gZW5vdWdoIGZvciB0aGUNCj4g
-PiA+IE1NQy9TRCBjYXNlLiBJZiB3ZSBjYW4gZml4IHRoZSBwcm9ibGVtIHRoZXJlLCBhbGwgbW1j
-IGhvc3QgZHJpdmVycyB3b3VsZA0KPiBiZW5lZml0IEkgYXNzdW1lLg0KPiA+ID4NCj4gPg0KPiA+
-IFNvIHlvdSBhcmUgdGhpbmtpbmcgYWJvdXQgaG93IHRvIHBhdGNoIHRoaXMgaW4gTU1DL1NEPw0K
-PiA+IEkgZG9uJ3Qga25vdyBpZiB0aGlzIG1ldGhvZCBpcyBjb21wYXRpYmxlIHdpdGggb3RoZXIg
-TU1DIEhvc3RzPyBPcg0KPiA+IHRoZXkgbmVlZCB0byBwYXRjaCBvdGhlciBjb2RlIG9uIHRoZWly
-IGhvc3QgZHJpdmVyDQo+IA0KPiBJIHdvdWxkIG5vdCBsaW1pdCB0aGlzIHRvIHRoZSBjb3JlIGxh
-eWVyIG9mIE1NQy9TRC4gVGhlIHBvaW50IEkgd2FzIHRyeWluZyB0bw0KPiBtYWtlIHdhcyB0aGF0
-IGl0IGRvZXNuJ3QgbG9vayBsaWtlIHRoZSBnZW5lcmljIGJsb2NrIGxheWVyIGlzIG1lcmdpbmcg
-dGhlDQo+IHNlcXVlbnRpYWwgSS9PIHJlcXVlc3RzIGluIHRoZSBtb3N0IGVmZmljaWVudCB3YXks
-IGF0IGxlYXN0IGZvciB0aGUgZU1NQy9TRA0KPiBkZXZpY2VzLiBXaHkgdGhpcyBpcyB0aGUgY2Fz
-ZSwgSSBjYW4ndCB0ZWxsLiBJdCBsb29rcyBsaWtlIHdlIG5lZWQgdG8gZG8gc29tZSBtb3JlDQo+
-IGluLWRlcHRoIGFuYWx5c2lzIHRvIHVuZGVyc3RhbmQgd2h5IG1lcmdpbmcgaXNuJ3QgZWZmaWNp
-ZW50IGZvciB1cy4NCj4gDQo+ID4NCj4gPiA+IEJUVywgaGF2ZSB5b3UgdHJpZWQgd2l0aCBkaWZm
-ZXJlbnQgSS9PIHNjaGVkdWxlcnM/IElmIHlvdSBoYXZlbid0DQo+ID4gPiB0cmllZCBCRlEsIEkg
-c3VnZ2VzdCB5b3UgZG8gYXMgaXQncyBhIGdvb2QgZml0IGZvciBNTUMvU0QuDQo+ID4gPg0KPiA+
-DQo+ID4gSSBkb27igJl0IGtub3cgd2hhdCBpcyBkaWZmZXJlbnQgSS9PIHNjaGVkdWxlcnMgbWVh
-bnM/DQo+IA0KPiBXaGF0IEkvTyBzY2hlZHVsZXIgZGlkIHlvdSB1c2Ugd2hlbiBydW5uaW5nIHRo
-ZSB0ZXN0Pw0KPiANCj4gRm9yIE1NQy9TRCB0aGUgb25seSBvbmUgdGhhdCBtYWtlcyBzZW5zZSB0
-byB1c2UgaXMgQkZRLCBob3dldmVyIHRoYXQgbmVlZHMNCj4gdG8gYmUgY29uZmlndXJlZCB2aWEg
-c3lzZnMgYWZ0ZXIgYm9vdC4gVGhlcmUgaXMgbm8gd2F5LCBjdXJyZW50bHksIHRvIG1ha2UgaXQg
-dGhlDQo+IGRlZmF1bHQsIEkgdGhpbmsuIFlvdSBtYXkgbG9vayBhdCBEb2N1bWVudGF0aW9uL2Js
-b2NrL2JmcS1pb3NjaGVkLnJzdCwgaWYgeW91DQo+IGFyZSBtb3JlIGludGVyZXN0ZWQuDQo+IA0K
-PiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiAtLS0tLS1QbGVhc2UgY29uc2lkZXIgdGhlIGVudmly
-b25tZW50IGJlZm9yZSBwcmludGluZyB0aGlzIGUtbWFpbC4NCg0K
+On Fri, Oct 6, 2023 at 6:30=E2=80=AFPM Victor Shih <victorshihgli@gmail.com=
+> wrote:
+>
+> On Mon, Oct 2, 2023 at 10:18=E2=80=AFAM Kai-Heng Feng
+> <kai.heng.feng@canonical.com> wrote:
+> >
+> > Hi Victor,
+> >
+> > On Tue, Sep 26, 2023 at 4:21=E2=80=AFPM Victor Shih <victorshihgli@gmai=
+l.com> wrote:
+> > >
+> > > On Fri, Sep 22, 2023 at 3:11=E2=80=AFPM Kai-Heng Feng
+> > > <kai.heng.feng@canonical.com> wrote:
+> > > >
+> > > > Hi Victor,
+> > > >
+> > > > On Wed, Sep 20, 2023 at 4:54=E2=80=AFPM Victor Shih <victorshihgli@=
+gmail.com> wrote:
+> > > > >
+> > > > > On Tue, Sep 19, 2023 at 3:31=E2=80=AFPM Kai-Heng Feng
+> > > > > <kai.heng.feng@canonical.com> wrote:
+> > > > > >
+> > > > > > Hi Victor,
+> > > > > >
+> > > > > > On Tue, Sep 19, 2023 at 3:10=E2=80=AFPM Victor Shih <victorshih=
+gli@gmail.com> wrote:
+> > > > > > >
+> > > > > > > On Tue, Sep 19, 2023 at 12:24=E2=80=AFPM Kai-Heng Feng
+> > > > > > > <kai.heng.feng@canonical.com> wrote:
+> > > > > > > >
+> > > > > > > > Hi Victor,
+> > > > > > > >
+> > > > > > > > On Mon, Sep 18, 2023 at 6:31=E2=80=AFPM Victor Shih <victor=
+shihgli@gmail.com> wrote:
+> > > > > > > > >
+> > > > > > > > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > > > > > > > >
+> > > > > > > > > Due to a flaw in the hardware design, the GL975x replay t=
+imer frequently
+> > > > > > > > > times out when ASPM is enabled. As a result, the system w=
+ill resume
+> > > > > > > > > immediately when it enters suspend. Therefore, the replay=
+ timer
+> > > > > > > > > timeout must be masked.
+> > > > > > > >
+> > > > > > > > This patch solves AER error when its PCI config gets access=
+ed, but the
+> > > > > > > > AER still happens at system suspend:
+> > > > > > > >
+> > > > > > > > [ 1100.103603] ACPI: EC: interrupt blocked
+> > > > > > > > [ 1100.268244] ACPI: EC: interrupt unblocked
+> > > > > > > > [ 1100.326960] pcieport 0000:00:1c.0: AER: Corrected error =
+received:
+> > > > > > > > 0000:00:1c.0
+> > > > > > > > [ 1100.326991] pcieport 0000:00:1c.0: PCIe Bus Error:
+> > > > > > > > severity=3DCorrected, type=3DData Link Layer, (Transmitter =
+ID)
+> > > > > > > > [ 1100.326993] pcieport 0000:00:1c.0:   device [8086:7ab9] =
+error
+> > > > > > > > status/mask=3D00001000/00002000
+> > > > > > > > [ 1100.326996] pcieport 0000:00:1c.0:    [12] Timeout
+> > > > > > > >
+> > > > > > > > Kai-Heng
+> > > > > > > >
+> > > > > > >
+> > > > > > > Hi, Kai-Heng
+> > > > > > >
+> > > > > > > Could you try applying the patch and re-testing again after r=
+estarting
+> > > > > > > the system?
+> > > > > >
+> > > > > > Same issue happens after coldboot.
+> > > > > >
+> > > > > > > Because I applied the patch and restarted the system and it d=
+idn't happen.
+> > > > > > > The system can enter suspend normally.
+> > > > > > >
+> > > > > > > If you still have the issue after following the above instruc=
+tions,
+> > > > > > > please provide me with your environment and I will verify it =
+again.
+> > > > > >
+> > > > > > The patch gets applied on top of next-20230918. Please let me k=
+now
+> > > > > > what else you want to know.
+> > > > > >
+> > > > > > Kai-Heng
+> > > > > >
+> > > > >
+> > > > > Hi, Kai-Heng
+> > > > >
+> > > > > If I want to mask the replay timer timeout AER of the upper layer=
+ root port,
+> > > > > could you give me some suggestions?
+> > > > > Or could you provide sample code for my reference?
+> > > >
+> > > > I am not aware of anyway to mask "replay timer timeout" from root p=
+ort.
+> > > > I wonder if the device supoprt D3hot? Or should it stay at D0 when
+> > > > ASPM L1.2 is enabled?
+> > > >
+> > > > Kai-Heng
+> > > >
+> > >
+> > > Hi, Kai-Heng
+> > >
+> > > Do you know any way to mask the replay timer timeout AER of the
+> > > upstream port from the device?
+> >
+> > Per PCIe Spec, I don't think it's possible to only mask 'replay timer t=
+imeout'.
+> >
+> > > The device supports D3hot.
+> >
+> > Do you think such error plays any crucial rule? Otherwise disable
+> > 'correctable' errors may be plausible.
+> >
+> > Kai-Heng
+> >
+>
+> Hi, Kai-Heng
+>
+> Due to a flaw in the hardware design, the GL975x replay timer frequently
+> times out when ASPM is enabled.
+> This patch solves the AER error of the replay timer timeout for GL975x.
+> We have not encountered any other errors so far.
+
+On the system I tested, this patch reduces the occurrence of the
+error, but not completely eliminated.
+
+> Does your 'correctable' errors mean the AER error of the replay timer tim=
+eout?
+> May I ask if you have any other comments on this patch?
+
+Spamming `lspci -vv -s` on the device can still observe the AER error.
+
+I think the "correctable" mask should be optional, let me send a patch
+to PCI for comment.
+
+Kai-Heng
+
+>
+> Thanks, Victor Shih
+>
+> > >
+> > > Thanks, Victor Shih
+> > >
+> > > > >
+> > > > > Thanks, Victor Shih
+> > > > >
+> > > > > > >
+> > > > > > > Thanks, Victor Shih
+> > > > > > >
+> > > > > > > > >
+> > > > > > > > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.=
+tw>
+> > > > > > > > > ---
+> > > > > > > > >  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
+> > > > > > > > >  1 file changed, 16 insertions(+)
+> > > > > > > > >
+> > > > > > > > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/m=
+mc/host/sdhci-pci-gli.c
+> > > > > > > > > index d83261e857a5..d8a991b349a8 100644
+> > > > > > > > > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > > > > > > > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > > > > > > > > @@ -28,6 +28,9 @@
+> > > > > > > > >  #define PCI_GLI_9750_PM_CTRL   0xFC
+> > > > > > > > >  #define   PCI_GLI_9750_PM_STATE          GENMASK(1, 0)
+> > > > > > > > >
+> > > > > > > > > +#define PCI_GLI_9750_CORRERR_MASK                       =
+       0x214
+> > > > > > > > > +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT=
+         BIT(12)
+> > > > > > > > > +
+> > > > > > > > >  #define SDHCI_GLI_9750_CFG2          0x848
+> > > > > > > > >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+> > > > > > > > >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+> > > > > > > > > @@ -152,6 +155,9 @@
+> > > > > > > > >  #define PCI_GLI_9755_PM_CTRL     0xFC
+> > > > > > > > >  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> > > > > > > > >
+> > > > > > > > > +#define PCI_GLI_9755_CORRERR_MASK                       =
+       0x214
+> > > > > > > > > +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT=
+         BIT(12)
+> > > > > > > > > +
+> > > > > > > > >  #define SDHCI_GLI_9767_GM_BURST_SIZE                   0=
+x510
+> > > > > > > > >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET   =
+ BIT(8)
+> > > > > > > > >
+> > > > > > > > > @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct=
+ sdhci_host *host)
+> > > > > > > > >         value &=3D ~PCI_GLI_9750_PM_STATE;
+> > > > > > > > >         pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL=
+, value);
+> > > > > > > > >
+> > > > > > > > > +       /* mask the replay timer timeout of AER */
+> > > > > > > > > +       pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_=
+MASK, &value);
+> > > > > > > > > +       value |=3D PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER=
+_TIMEOUT;
+> > > > > > > > > +       pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR=
+_MASK, value);
+> > > > > > > > > +
+> > > > > > > > >         gl9750_wt_off(host);
+> > > > > > > > >  }
+> > > > > > > > >
+> > > > > > > > > @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct=
+ sdhci_pci_slot *slot)
+> > > > > > > > >         value &=3D ~PCI_GLI_9755_PM_STATE;
+> > > > > > > > >         pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL=
+, value);
+> > > > > > > > >
+> > > > > > > > > +       /* mask the replay timer timeout of AER */
+> > > > > > > > > +       pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_=
+MASK, &value);
+> > > > > > > > > +       value |=3D PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER=
+_TIMEOUT;
+> > > > > > > > > +       pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR=
+_MASK, value);
+> > > > > > > > > +
+> > > > > > > > >         gl9755_wt_off(pdev);
+> > > > > > > > >  }
+> > > > > > > > >
+> > > > > > > > > --
+> > > > > > > > > 2.25.1
+> > > > > > > > >
