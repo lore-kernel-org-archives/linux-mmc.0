@@ -2,180 +2,287 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85854CDB486
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Oct 2023 12:03:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19CF2CDB482
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Oct 2023 14:54:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232778AbjJPMDd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Oct 2023 08:03:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44062 "EHLO
+        id S233737AbjJPOye (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Oct 2023 10:54:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43828 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229501AbjJPMDc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Oct 2023 08:03:32 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C840AE6;
-        Mon, 16 Oct 2023 05:03:29 -0700 (PDT)
-Received: from pps.filterd (m0369458.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 39G7h1Um007323;
-        Mon, 16 Oct 2023 14:02:47 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-        message-id:date:mime-version:from:subject:to:cc:references
-        :in-reply-to:content-type:content-transfer-encoding; s=
-        selector1; bh=GEtT1vGNrN2L3qXSsS6BjSB5ruMmKsplVyDRLRyeo9Y=; b=1J
-        98O2DjQg2zsjt4f510btLN/TCgkmPUp32hr+x1F3zVIG6OoZLfC3Cbyjc01lX9nZ
-        VSS73Gn48GLdu2Pj2PdtzQCh6rQpYFXh63DE6xW8H+rsFN1zzvxxEYZ+i7yOrOVy
-        1ybut4hcc4ZKwAQt8fVMxknPbllcUus7znWDRJmPQvi1rHJqIrPWzqu6PICGgi4T
-        lPhNG+AgOBhZOVBNR4OCi7G99qM+FbpiuaYRVCuRKuOTObDyKtkIfcpdvYv/o3Zu
-        vwBRb1d9cJyQS7368vGtITam91qeWebiryaExexOXLeN9hsY/CpxbuHNjAGKdma9
-        ZC1Ob39vbFcYhfvYRXtg==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3tr4hyn1db-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 16 Oct 2023 14:02:47 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 3AB9A10005B;
-        Mon, 16 Oct 2023 14:02:45 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id A384A22F7D3;
-        Mon, 16 Oct 2023 14:02:45 +0200 (CEST)
-Received: from [10.201.20.32] (10.201.20.32) by SHFDAG1NODE1.st.com
- (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Mon, 16 Oct
- 2023 14:02:43 +0200
-Message-ID: <b16ed06f-66fd-457b-9610-a67ad07deb60@foss.st.com>
-Date:   Mon, 16 Oct 2023 14:02:39 +0200
+        with ESMTP id S233741AbjJPOyd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Oct 2023 10:54:33 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8055CE1;
+        Mon, 16 Oct 2023 07:54:31 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 78DC6C433C8;
+        Mon, 16 Oct 2023 14:54:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1697468071;
+        bh=s/VRWj66mkawiyCQiIKItGofUD+YauMZ/L3raQJNZyY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Jf05Y7TmLUsWRS3GHZLq97gsFdEUKrh10GtL2G+Ds3xydUMW4eIwEAzkpVyCO37h2
+         VjIzOgMlO0f6N/gfAWNrBNdP8LagQVXdZY3GfKGWt93yQmZ9e4wZrlYIjvVnMXmpNO
+         MNVLkXovmo0FNQvPRxCdgwow25XVYPcMuivB/c5Ustu9p6MDtDk4cXkjOCavWlGyGj
+         MdBjlTVB2HZy5Rs3npFey8UNOk5BXMqk2Gv7JzmSickeTfueIILcvFjVsjrAvG2kkO
+         3VOwxBAW/Oy74AWxrd/e8yij0vXGf+xL6N/NObHxLnBQaeRFZuF2zW9WdyDPCoGnkO
+         ALqoJdD0DzmyQ==
+Date:   Mon, 16 Oct 2023 15:54:26 +0100
+From:   Mark Brown <broonie@kernel.org>
+To:     Martin =?iso-8859-1?Q?Hundeb=F8ll?= <martin@geanix.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sasha Levin <sashal@kernel.org>
+Cc:     kernelci-results@groups.io, bot@kernelci.org,
+        stable@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: stable-rc/linux-4.19.y bisection: baseline.dmesg.emerg on
+ meson-gxm-q200
+Message-ID: <7f942203-7bdf-480a-95bf-8b78426d3e28@sirena.org.uk>
+References: <652d4b68.170a0220.3b458.fd95@mx.google.com>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From:   Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
-Subject: Re: [PATCH v6 10/11] ARM: dts: stm32: add ETZPC as a system bus for
- STM32MP15x boards
-To:     Rob Herring <robh@kernel.org>
-CC:     <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
-        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
-        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
-        <alexandre.torgue@foss.st.com>, <vkoul@kernel.org>,
-        <jic23@kernel.org>, <olivier.moysan@foss.st.com>,
-        <arnaud.pouliquen@foss.st.com>, <mchehab@kernel.org>,
-        <fabrice.gasnier@foss.st.com>, <andi.shyti@kernel.org>,
-        <ulf.hansson@linaro.org>, <edumazet@google.com>, <kuba@kernel.org>,
-        <pabeni@redhat.com>, <hugues.fruchet@foss.st.com>,
-        <lee@kernel.org>, <will@kernel.org>, <catalin.marinas@arm.com>,
-        <arnd@kernel.org>, <richardcochran@gmail.com>,
-        Frank Rowand <frowand.list@gmail.com>, <peng.fan@oss.nxp.com>,
-        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <dmaengine@vger.kernel.org>,
-        <linux-i2c@vger.kernel.org>, <linux-iio@vger.kernel.org>,
-        <alsa-devel@alsa-project.org>, <linux-media@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
-        <linux-p.hy@lists.infradead.org>, <linux-serial@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <linux-usb@vger.kernel.org>
-References: <20231010125719.784627-1-gatien.chevallier@foss.st.com>
- <20231010125719.784627-11-gatien.chevallier@foss.st.com>
- <20231010184212.GA1221641-robh@kernel.org>
- <8f1b6915-68be-a525-c5d5-37f0983c14de@foss.st.com>
- <20231012153012.GA698406-robh@kernel.org>
-Content-Language: en-US
-In-Reply-To: <20231012153012.GA698406-robh@kernel.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.201.20.32]
-X-ClientProxiedBy: EQNCAS1NODE3.st.com (10.75.129.80) To SHFDAG1NODE1.st.com
- (10.75.129.69)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-10-16_05,2023-10-12_01,2023-05-22_02
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="LcUlVISh0GomjiCY"
+Content-Disposition: inline
+In-Reply-To: <652d4b68.170a0220.3b458.fd95@mx.google.com>
+X-Cookie: If you're happy, you're successful.
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
 
-On 10/12/23 17:30, Rob Herring wrote:
-> On Wed, Oct 11, 2023 at 10:49:58AM +0200, Gatien CHEVALLIER wrote:
->> Hi Rob,
->>
->> On 10/10/23 20:42, Rob Herring wrote:
->>> On Tue, Oct 10, 2023 at 02:57:18PM +0200, Gatien Chevallier wrote:
->>>> ETZPC is a firewall controller. Put all peripherals filtered by the
->>>> ETZPC as ETZPC subnodes and reference ETZPC as an
->>>> access-control-provider.
->>>>
->>>> For more information on which peripheral is securable or supports MCU
->>>> isolation, please read the STM32MP15 reference manual.
->>>>
->>>> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
->>>> ---
->>>>
->>>> Changes in V6:
->>>>       	- Renamed access-controller to access-controllers
->>>>       	- Removal of access-control-provider property
->>>>
->>>> Changes in V5:
->>>>       	- Renamed feature-domain* to access-control*
->>>>
->>>>    arch/arm/boot/dts/st/stm32mp151.dtsi  | 2756 +++++++++++++------------
->>>>    arch/arm/boot/dts/st/stm32mp153.dtsi  |   52 +-
->>>>    arch/arm/boot/dts/st/stm32mp15xc.dtsi |   19 +-
->>>>    3 files changed, 1450 insertions(+), 1377 deletions(-)
->>>
->>> This is not reviewable. Change the indentation and any non-functional
->>> change in one patch and then actual changes in another.
->>
->> Ok, I'll make it easier to read.
->>
->>>
->>> This is also an ABI break. Though I'm not sure it's avoidable. All the
->>> devices below the ETZPC node won't probe on existing kernel. A
->>> simple-bus fallback for ETZPC node should solve that.
->>>
->>
->> I had one issue when trying with a simple-bus fallback that was the
->> drivers were probing even though the access rights aren't correct.
->> Hence the removal of the simple-bus compatible in the STM32MP25 patch.
-> 
-> But it worked before, right? So the difference is you have either added
-> new devices which need setup or your firmware changed how devices are
-> setup (or not setup). Certainly can't fix the latter case. You just need
-> to be explicit about what you are doing to users.
-> 
+--LcUlVISh0GomjiCY
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I should've specified it was during a test where I deliberately set
-incorrect rights on a peripheral and enabled its node to see if the
-firewall would allow the creation of the device.
+On Mon, Oct 16, 2023 at 07:40:40AM -0700, KernelCI bot wrote:
 
-> 
->> Even though a node is tagged with the OF_POPULATED flag when checking
->> the access rights with the firewall controller, it seems that when
->> simple-bus is probing, there's no check of this flag.
-> 
-> It shouldn't. Those flags are for creating the devices (or not) and
-> removing only devices of_platform_populate() created.
-> 
+The KernelCI bisection bot has identified that commit 74fc50666e0af
+("mmc: meson-gx: remove redundant mmc_request_done() call from irq
+context") in v4.19 stable-rc is causing boot splats for meson-gxm-q200.
+Full report below, including links to the full boot logs:
 
-About the "simple-bus" being a fallback, I think I understood why I saw
-that the devices were created.
+> * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+> * This automated bisection report was sent to you on the basis  *
+> * that you may be involved with the breaking commit it has      *
+> * found.  No manual investigation has been done to verify it,   *
+> * and the root cause of the problem may be somewhere else.      *
+> *                                                               *
+> * If you do send a fix, please include this trailer:            *
+> *   Reported-by: "kernelci.org bot" <bot@kernelci.org>          *
+> *                                                               *
+> * Hope this helps!                                              *
+> * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+>=20
+> stable-rc/linux-4.19.y bisection: baseline.dmesg.emerg on meson-gxm-q200
+>=20
+> Summary:
+>   Start:      b3c2ae79aa73e Linux 4.19.297-rc1
+>   Plain log:  https://storage.kernelci.org/stable-rc/linux-4.19.y/v4.19.2=
+96-42-gb3c2ae79aa73/arm64/defconfig/gcc-10/lab-baylibre/baseline-meson-gxm-=
+q200.txt
+>   HTML log:   https://storage.kernelci.org/stable-rc/linux-4.19.y/v4.19.2=
+96-42-gb3c2ae79aa73/arm64/defconfig/gcc-10/lab-baylibre/baseline-meson-gxm-=
+q200.html
+>   Result:     74fc50666e0af mmc: meson-gx: remove redundant mmc_request_d=
+one() call from irq context
+>=20
+> Checks:
+>   revert:     PASS
+>   verify:     PASS
+>=20
+> Parameters:
+>   Tree:       stable-rc
+>   URL:        https://git.kernel.org/pub/scm/linux/kernel/git/stable/linu=
+x-stable-rc.git
+>   Branch:     linux-4.19.y
+>   Target:     meson-gxm-q200
+>   CPU arch:   arm64
+>   Lab:        lab-baylibre
+>   Compiler:   gcc-10
+>   Config:     defconfig
+>   Test case:  baseline.dmesg.emerg
+>=20
+> Breaking commit found:
+>=20
+> -------------------------------------------------------------------------=
+------
+> commit 74fc50666e0af2514a7e6b0937166a75692c2a42
+> Author: Martin Hundeb=F8ll <martin@geanix.com>
+> Date:   Wed Jun 7 10:27:12 2023 +0200
+>=20
+>     mmc: meson-gx: remove redundant mmc_request_done() call from irq cont=
+ext
+>    =20
+>     [ Upstream commit 3c40eb8145325b0f5b93b8a169146078cb2c49d6 ]
+>    =20
+>     The call to mmc_request_done() can schedule, so it must not be called
+>     from irq context. Wake the irq thread if it needs to be called, and l=
+et
+>     its existing logic do its work.
+>    =20
+>     Fixes the following kernel bug, which appears when running an RT patc=
+hed
+>     kernel on the AmLogic Meson AXG A113X SoC:
+>     [   11.111407] BUG: scheduling while atomic: kworker/0:1H/75/0x000100=
+01
+>     [   11.111438] Modules linked in:
+>     [   11.111451] CPU: 0 PID: 75 Comm: kworker/0:1H Not tainted 6.4.0-rc=
+3-rt2-rtx-00081-gfd07f41ed6b4-dirty #1
+>     [   11.111461] Hardware name: RTX AXG A113X Linux Platform Board (DT)
+>     [   11.111469] Workqueue: kblockd blk_mq_run_work_fn
+>     [   11.111492] Call trace:
+>     [   11.111497]  dump_backtrace+0xac/0xe8
+>     [   11.111510]  show_stack+0x18/0x28
+>     [   11.111518]  dump_stack_lvl+0x48/0x60
+>     [   11.111530]  dump_stack+0x18/0x24
+>     [   11.111537]  __schedule_bug+0x4c/0x68
+>     [   11.111548]  __schedule+0x80/0x574
+>     [   11.111558]  schedule_loop+0x2c/0x50
+>     [   11.111567]  schedule_rtlock+0x14/0x20
+>     [   11.111576]  rtlock_slowlock_locked+0x468/0x730
+>     [   11.111587]  rt_spin_lock+0x40/0x64
+>     [   11.111596]  __wake_up_common_lock+0x5c/0xc4
+>     [   11.111610]  __wake_up+0x18/0x24
+>     [   11.111620]  mmc_blk_mq_req_done+0x68/0x138
+>     [   11.111633]  mmc_request_done+0x104/0x118
+>     [   11.111644]  meson_mmc_request_done+0x38/0x48
+>     [   11.111654]  meson_mmc_irq+0x128/0x1f0
+>     [   11.111663]  __handle_irq_event_percpu+0x70/0x114
+>     [   11.111674]  handle_irq_event_percpu+0x18/0x4c
+>     [   11.111683]  handle_irq_event+0x80/0xb8
+>     [   11.111691]  handle_fasteoi_irq+0xa4/0x120
+>     [   11.111704]  handle_irq_desc+0x20/0x38
+>     [   11.111712]  generic_handle_domain_irq+0x1c/0x28
+>     [   11.111721]  gic_handle_irq+0x8c/0xa8
+>     [   11.111735]  call_on_irq_stack+0x24/0x4c
+>     [   11.111746]  do_interrupt_handler+0x88/0x94
+>     [   11.111757]  el1_interrupt+0x34/0x64
+>     [   11.111769]  el1h_64_irq_handler+0x18/0x24
+>     [   11.111779]  el1h_64_irq+0x64/0x68
+>     [   11.111786]  __add_wait_queue+0x0/0x4c
+>     [   11.111795]  mmc_blk_rw_wait+0x84/0x118
+>     [   11.111804]  mmc_blk_mq_issue_rq+0x5c4/0x654
+>     [   11.111814]  mmc_mq_queue_rq+0x194/0x214
+>     [   11.111822]  blk_mq_dispatch_rq_list+0x3ac/0x528
+>     [   11.111834]  __blk_mq_sched_dispatch_requests+0x340/0x4d0
+>     [   11.111847]  blk_mq_sched_dispatch_requests+0x38/0x70
+>     [   11.111858]  blk_mq_run_work_fn+0x3c/0x70
+>     [   11.111865]  process_one_work+0x17c/0x1f0
+>     [   11.111876]  worker_thread+0x1d4/0x26c
+>     [   11.111885]  kthread+0xe4/0xf4
+>     [   11.111894]  ret_from_fork+0x10/0x20
+>    =20
+>     Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
+>     Cc: stable@vger.kernel.org
+>     Signed-off-by: Martin Hundeb=F8ll <martin@geanix.com>
+>     Link: https://lore.kernel.org/r/20230607082713.517157-1-martin@geanix=
+=2Ecom
+>     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>     Signed-off-by: Sasha Levin <sashal@kernel.org>
+>=20
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-=
+mmc.c
+> index 313aff92b97c9..a3e5be81b4660 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -1067,11 +1067,8 @@ static irqreturn_t meson_mmc_irq(int irq, void *de=
+v_id)
+>  	if (status & (IRQ_END_OF_CHAIN | IRQ_RESP_STATUS)) {
+>  		if (data && !cmd->error)
+>  			data->bytes_xfered =3D data->blksz * data->blocks;
+> -		if (meson_mmc_bounce_buf_read(data) ||
+> -		    meson_mmc_get_next_command(cmd))
+> -			ret =3D IRQ_WAKE_THREAD;
+> -		else
+> -			ret =3D IRQ_HANDLED;
+> +
+> +		return IRQ_WAKE_THREAD;
+>  	}
+> =20
+>  out:
+> @@ -1086,9 +1083,6 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev=
+_id)
+>  		writel(start, host->regs + SD_EMMC_START);
+>  	}
+> =20
+> -	if (ret =3D=3D IRQ_HANDLED)
+> -		meson_mmc_request_done(host->mmc, cmd->mrq);
+> -
+>  	return ret;
+>  }
+> -------------------------------------------------------------------------=
+------
+>=20
+>=20
+> Git bisection log:
+>=20
+> -------------------------------------------------------------------------=
+------
+> git bisect start
+> # good: [94bffc1044d871e2ec89b2621e9a384355832988] Linux 4.19.288
+> git bisect good 94bffc1044d871e2ec89b2621e9a384355832988
+> # bad: [b3c2ae79aa73e61b75d4fa6f3dae226b59b7bd41] Linux 4.19.297-rc1
+> git bisect bad b3c2ae79aa73e61b75d4fa6f3dae226b59b7bd41
+> # bad: [5f63100cf9a673eaef15a1b1415d7a480af1571c] net: phy: broadcom: stu=
+b c45 read/write for 54810
+> git bisect bad 5f63100cf9a673eaef15a1b1415d7a480af1571c
+> # good: [916a02b6487f90cfcda24636e9b2b8da38b96bbc] net: ethernet: ti: cps=
+w_ale: Fix cpsw_ale_get_field()/cpsw_ale_set_field()
+> git bisect good 916a02b6487f90cfcda24636e9b2b8da38b96bbc
+> # good: [f114bcacd558aaae6eb2bff350ae305632e4e37e] ARM: dts: imx6sll: fix=
+up of operating points
+> git bisect good f114bcacd558aaae6eb2bff350ae305632e4e37e
+> # good: [56804da32a6edef397e9d967b01e82a4b04a8e9d] IMA: allow/fix UML bui=
+lds
+> git bisect good 56804da32a6edef397e9d967b01e82a4b04a8e9d
+> # bad: [97a2d55ead76358245b446efd87818e919196d7a] virtio-mmio: don't brea=
+k lifecycle of vm_dev
+> git bisect bad 97a2d55ead76358245b446efd87818e919196d7a
+> # good: [cbc6a5f11ca2a622f77bcb6901b274bd995653d6] irqchip/mips-gic: Use =
+raw spinlock for gic_lock
+> git bisect good cbc6a5f11ca2a622f77bcb6901b274bd995653d6
+> # bad: [22b64a6b59fc2107d304715d8a778eebeb8659ae] mmc: Remove dev_err() u=
+sage after platform_get_irq()
+> git bisect bad 22b64a6b59fc2107d304715d8a778eebeb8659ae
+> # good: [d7aacfd2e388519434acf504a6b53099cc4da978] mmc: meson-gx: remove =
+useless lock
+> git bisect good d7aacfd2e388519434acf504a6b53099cc4da978
+> # bad: [e1036bf905f9ec7b01fd5ee946a9a94f9671ee83] mmc: tmio: replace tmio=
+_mmc_clk_stop() calls with tmio_mmc_set_clock()
+> git bisect bad e1036bf905f9ec7b01fd5ee946a9a94f9671ee83
+> # bad: [74fc50666e0af2514a7e6b0937166a75692c2a42] mmc: meson-gx: remove r=
+edundant mmc_request_done() call from irq context
+> git bisect bad 74fc50666e0af2514a7e6b0937166a75692c2a42
+> # first bad commit: [74fc50666e0af2514a7e6b0937166a75692c2a42] mmc: meson=
+-gx: remove redundant mmc_request_done() call from irq context
+> -------------------------------------------------------------------------=
+------
+>=20
+>=20
+> -=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
+> Groups.io Links: You receive all messages sent to this group.
+> View/Reply Online (#47481): https://groups.io/g/kernelci-results/message/=
+47481
+> Mute This Topic: https://groups.io/mt/101996911/1131744
+> Group Owner: kernelci-results+owner@groups.io
+> Unsubscribe: https://groups.io/g/kernelci-results/unsub [broonie@kernel.o=
+rg]
+> -=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
+>=20
+>=20
 
-All devices under a node whose compatible is "simple-bus" are created
-in of_platform_device_create_pdata(), called by
-of_platform_default_populate_init() at arch_initcall level. This
-before the firewall-controller has a chance to populate it's bus.
+--LcUlVISh0GomjiCY
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Therefore, when I flag nodes when populating the firewall-bus, the
-devices are already created. The "simple-bus" mechanism is not a
-fallback here as it precedes the driver probe.
+-----BEGIN PGP SIGNATURE-----
 
-Is there a safe way to safely remove/disable a device created this way?
-Devices that are under the firewall controller (simple-bus) node
-should not be probed before it as they're child of it.
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmUtTqEACgkQJNaLcl1U
+h9C5lgf+MFxKC+anUp6smAFWMKE9yF7LZbkhIQRldpP9uFwq/MoMqIOFGWDOXI3b
+X2U4FFJhIdkqLJBOFNrlHnOf0VHdwmrMHkxaU3AaQKRFvqH+zS4VJsPwnIq77kP/
+ZeK52LgG8u8jfqf/kB0O4r7NWJVh8dhTfmJBBHU6O29f3D4nKQDih8fmJn/yIdTT
+Uy1QEKjGQNOOwBYdz+3WE8hVYkdC/3XCUKApBS9+ocuDHK2qi9y+S2r2LGPE9WtT
+W7GHPvW8SSacAr065gbkqpVZMNLjHgTDadBurq60sW0N668ozFW+kDYD0fz3C0lQ
+cHp+oJbL4/Wb9DVtOat8oEcEq9SZTA==
+=wM1O
+-----END PGP SIGNATURE-----
 
-Best regards,
-Gatien
-
->> of_platform_populate() checks and sets the OF_POPULATED_BUS flag.
->> Maybe that is my error and the firewall bus populate should set
->> OF_POPULATED_BUS instead of OF_POPULATED. Is that correct?
-> 
-> Shrug. Off hand, I'd say probably not, but am not certain.
-> 
-> Rob
+--LcUlVISh0GomjiCY--
