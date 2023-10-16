@@ -2,82 +2,100 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FFFBC46CA1
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Oct 2023 09:32:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7728EC41513
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Oct 2023 09:56:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230361AbjJPJcQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Oct 2023 05:32:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34794 "EHLO
+        id S230152AbjJPJ4U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Oct 2023 05:56:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37254 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229666AbjJPJcP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Oct 2023 05:32:15 -0400
-Received: from bmailout2.hostsharing.net (bmailout2.hostsharing.net [83.223.78.240])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33F5497;
-        Mon, 16 Oct 2023 02:32:13 -0700 (PDT)
-Received: from h08.hostsharing.net (h08.hostsharing.net [83.223.95.28])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256
-         client-signature RSA-PSS (4096 bits) client-digest SHA256)
-        (Client CN "*.hostsharing.net", Issuer "RapidSSL Global TLS RSA4096 SHA256 2022 CA1" (verified OK))
-        by bmailout2.hostsharing.net (Postfix) with ESMTPS id 8AC352800A290;
-        Mon, 16 Oct 2023 11:32:10 +0200 (CEST)
-Received: by h08.hostsharing.net (Postfix, from userid 100393)
-        id 7C3D82ED8B5; Mon, 16 Oct 2023 11:32:10 +0200 (CEST)
-Date:   Mon, 16 Oct 2023 11:32:10 +0200
-From:   Lukas Wunner <lukas@wunner.de>
-To:     Kai-Heng Feng <kai.heng.feng@canonical.com>
-Cc:     bhelgaas@google.com, linux-pm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Ricky Wu <ricky_wu@realtek.com>,
-        Kees Cook <keescook@chromium.org>,
-        Tony Luck <tony.luck@intel.com>,
-        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
-        linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-hardening@vger.kernel.org, bpf@vger.kernel.org
-Subject: Re: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on
- PCIe Link Down
-Message-ID: <20231016093210.GA22952@wunner.de>
-References: <20231016040132.23824-1-kai.heng.feng@canonical.com>
+        with ESMTP id S230418AbjJPJ4T (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Oct 2023 05:56:19 -0400
+Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B95AEB4
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Oct 2023 02:56:16 -0700 (PDT)
+Received: by mail-wm1-x333.google.com with SMTP id 5b1f17b1804b1-4056ce55e7eso42390835e9.2
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Oct 2023 02:56:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google; t=1697450175; x=1698054975; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=6Ykfy1aQinss/cScFDXLYGVKdm7XaTfwtTVLqUolg/A=;
+        b=YT1vyB+ko87mdpuZ/ahTYSNMImDPDrmq7sDPHZhlPJfsiw7X0+UL0NDR4FGvEswfgi
+         DgZN2Cnq/ZcrTluvj6iSL/AtFmNTj0kD218izW8vzbi5/92p+88U0PF/UFDSC+SZ95hT
+         BqBlsmSnReQNULSl9BiDMhBOBRh3KOwE4O98s=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1697450175; x=1698054975;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=6Ykfy1aQinss/cScFDXLYGVKdm7XaTfwtTVLqUolg/A=;
+        b=qkq5XOuIIUIckAsAIsKCst40OTeBg5iIpT1K8pommL4UiZE05phnE/Bnx3xazSX3Tg
+         CYOReiEjUeF3BiHmsjVvyNrsMN4uktZdH2l23Q2BcrVkya9Cgr2qy3AYZ3BqoR1lBWNH
+         //g0B/x8nLZEymYJAUuLYMuSnOhIzY5lvvonlN4kZVN3p5Mco8qJJnhn3/OeE7H6SUBa
+         vsqNS9y8zucvxeKC+L6sCZRd2FhnpxpKNdG9jeA4S6ehBRe+3R/7mJQzp9lATkpAb11n
+         APtKQrNFcVSOkcspMkdhxwir34Gy19plgmSpTzPgCr88Fh7qnT8UQch331s2jxiW1wRM
+         YArQ==
+X-Gm-Message-State: AOJu0YxTmFld1hPKwxA2hg4vg3MneniOXyL2iU3tIse2ydZ1Sx3n/V46
+        mLXZldsPkvV7qghL3QH2drdkX7AfwXcQQO7QApU=
+X-Google-Smtp-Source: AGHT+IEajqlMs7jK0VUTXrO2Mp+eRM0mC2/Xk8/DfFOEueyPhrOyDbU2cqu5hQjB2lnEIueoLeR6eA==
+X-Received: by 2002:a5d:4d08:0:b0:32d:a405:b6b7 with SMTP id z8-20020a5d4d08000000b0032da405b6b7mr4410671wrt.32.1697450174747;
+        Mon, 16 Oct 2023 02:56:14 -0700 (PDT)
+Received: from orzel1.c.googlers.com.com (180.232.140.34.bc.googleusercontent.com. [34.140.232.180])
+        by smtp.gmail.com with ESMTPSA id t11-20020a5d534b000000b003232380ffd5sm26899696wrv.106.2023.10.16.02.56.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Oct 2023 02:56:14 -0700 (PDT)
+From:   =?UTF-8?q?Kornel=20Dul=C4=99ba?= <korneld@chromium.org>
+To:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <quic_asutoshd@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Radoslaw Biernacki <biernacki@google.com>,
+        Guenter Roeck <groeck@chromium.org>,
+        Gwendal Grignou <gwendal@chromium.org>, upstream@semihalf.com,
+        =?UTF-8?q?Kornel=20Dul=C4=99ba?= <korneld@chromium.org>
+Subject: [PATCH] mmc: cqhci: Be more verbose in error irq handler
+Date:   Mon, 16 Oct 2023 09:56:10 +0000
+Message-ID: <20231016095610.1095084-1-korneld@chromium.org>
+X-Mailer: git-send-email 2.42.0.655.g421f12c284-goog
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231016040132.23824-1-kai.heng.feng@canonical.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Oct 16, 2023 at 12:01:31PM +0800, Kai-Heng Feng wrote:
-> When inserting an SD7.0 card to Realtek card reader, it can trigger PCI
-> slot Link down and causes the following error:
+There are several reasons for controller to generate an error interrupt.
+They include controller<->card timeout, and CRC mismatch error.
+Right now we only get one line in the logs stating that CQE recovery was
+triggered, but with no information about what caused it.
+To figure out what happened be more verbose and dump the registers from
+irq error handler logic.
+This matches the behaviour of the software timeout logic, see
+cqhci_timeout.
 
-Why does *inserting* a card cause a Link Down?
+Signed-off-by: Kornel Dulęba <korneld@chromium.org>
+---
+ drivers/mmc/host/cqhci-core.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index b3d7d6d8d654..33abb4bd53b5 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -700,8 +700,9 @@ static void cqhci_error_irq(struct mmc_host *mmc, u32 status, int cmd_error,
+ 
+ 	terri = cqhci_readl(cq_host, CQHCI_TERRI);
+ 
+-	pr_debug("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d TERRI: 0x%08x\n",
+-		 mmc_hostname(mmc), status, cmd_error, data_error, terri);
++	pr_warn("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d\n",
++		 mmc_hostname(mmc), status, cmd_error, data_error);
++	cqhci_dumpregs(cq_host);
+ 
+ 	/* Forget about errors when recovery has already been triggered */
+ 	if (cq_host->recovery_halt)
+-- 
+2.42.0.655.g421f12c284-goog
 
-> [   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> [   63.912118] BUG: unable to handle page fault for address: ffffb24d403e5010
-[...]
-> [   63.912198]  ? asm_exc_page_fault+0x27/0x30
-> [   63.912203]  ? ioread32+0x2e/0x70
-> [   63.912206]  ? rtsx_pci_write_register+0x5b/0x90 [rtsx_pci]
-> [   63.912217]  rtsx_set_l1off_sub+0x1c/0x30 [rtsx_pci]
-> [   63.912226]  rts5261_set_l1off_cfg_sub_d0+0x36/0x40 [rtsx_pci]
-> [   63.912234]  rtsx_pci_runtime_idle+0xc7/0x160 [rtsx_pci]
-> [   63.912243]  ? __pfx_pci_pm_runtime_idle+0x10/0x10
-> [   63.912246]  pci_pm_runtime_idle+0x34/0x70
-> [   63.912248]  rpm_idle+0xc4/0x2b0
-> [   63.912251]  pm_runtime_work+0x93/0xc0
-> [   63.912254]  process_one_work+0x21a/0x430
-> [   63.912258]  worker_thread+0x4a/0x3c0
-
-This looks like pcr->remap_addr is accessed after it has been iounmap'ed
-in rtsx_pci_remove() or before it has been iomap'ed in rtsx_pci_probe().
-
-Is the card reader itself located below a hotplug port and unplugged here?
-Or is this about the card being removed from the card reader?
-
-Having full dmesg output and lspci -vvv output attached to a bugzilla
-would help to understand what is going on.
-
-Thanks,
-
-Lukas
