@@ -2,274 +2,188 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7349CDB474
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Oct 2023 02:27:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B68DCDB465
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Oct 2023 04:02:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229495AbjJMC1W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Oct 2023 22:27:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44346 "EHLO
+        id S229623AbjJPEC1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Oct 2023 00:02:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229461AbjJMC1V (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Oct 2023 22:27:21 -0400
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8542495;
-        Thu, 12 Oct 2023 19:27:16 -0700 (PDT)
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 39D2RAdP42128333, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-        by rtits2.realtek.com.tw (8.15.2/2.92/5.92) with ESMTPS id 39D2RAdP42128333
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 13 Oct 2023 10:27:10 +0800
-Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.32; Fri, 13 Oct 2023 10:27:08 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Fri, 13 Oct 2023 10:27:08 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b]) by
- RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b%5]) with mapi id
- 15.01.2375.007; Fri, 13 Oct 2023 10:27:08 +0800
-From:   Ricky WU <ricky_wu@realtek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-Thread-Topic: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-Thread-Index: AQHX9mTncx2NNhc4Hk2xCW7FootmX6w8X/iAgAN+/CD//4BBAIAB2EewgAY9WACAAfsEAIA+RCiAgATnqGCAAA5YAIO7cd/ggAGUdwCAAVcUMA==
-Date:   Fri, 13 Oct 2023 02:27:08 +0000
-Message-ID: <5752164983174ca68a669c241e7ef436@realtek.com>
-References: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com>
- <CAPDyKFrLpim75nUB7ksDie2edkWsnFSq6TbFSFFpw5cY5d4y1w@mail.gmail.com>
- <fabaed5751f04105a9719c1cb0390c98@realtek.com>
- <CAPDyKFr3NRUgfKtkb2DBrhziekFAB0jT_X3Fsfvjk_bGZLC9mA@mail.gmail.com>
- <fa10aa1c644241808c2ad880088240ab@realtek.com>
- <CAPDyKFrtBKHHRgeF-JO27ANsbSmt8rdnhn-WNr5Je9okEgA29Q@mail.gmail.com>
- <feb0c4e71e9c48a2a21f18b7d3baf135@realtek.com>
- <CAPDyKFoq_PDk_JgW4D+o4eEPdcffUq2RLbBreRDqeK47m0UnJA@mail.gmail.com>
- <a82d7e877dc041d4be5e0ef38c2da406@realtek.com>
- <CAPDyKFo59Q3dmUJU-hJ++=k0uwx2KxamW9KckDX=O_CA84O1_g@mail.gmail.com>
- <a533dde76d2d4345b85cd060a8e403db@realtek.com>
- <CAPDyKFp3sbbQmKiV6NnuWnPmpfuyWzRBTuYJaWx_7oTLLsXdaA@mail.gmail.com>
-In-Reply-To: <CAPDyKFp3sbbQmKiV6NnuWnPmpfuyWzRBTuYJaWx_7oTLLsXdaA@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-x-originating-ip: [172.22.81.100]
-x-kse-serverinfo: RTEXDAG01.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        with ESMTP id S229503AbjJPEC0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Oct 2023 00:02:26 -0400
+Received: from smtp-relay-canonical-0.canonical.com (smtp-relay-canonical-0.canonical.com [185.125.188.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53D93AD;
+        Sun, 15 Oct 2023 21:02:24 -0700 (PDT)
+Received: from localhost.localdomain (unknown [10.101.196.174])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-canonical-0.canonical.com (Postfix) with ESMTPSA id 43BAB3F0C6;
+        Mon, 16 Oct 2023 04:02:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1697428940;
+        bh=vkafOmpdBRmco3tsD/n12uXh8EE6SvdVyF3TIx5/KiY=;
+        h=From:To:Cc:Subject:Date:Message-Id:MIME-Version;
+        b=LfIysylXk+F/ROUKC4Q2wqhQ4OOd9ajiuEdPBqVJGauGHJvWmlqKOeZmm65H1SF/j
+         vIMAB7Gy1QXMiqXzVw9WUTS+6YYX1LUkUvfsuTgXYaH9e5NhbCvLfifOw9lgfpw5r5
+         GtRNW0QyiXlngsXfBskskWvZ7zPGr+ftxfSKO9l75QBT7NR5opLaTvYqAWwkgfo/uO
+         bAU+ks79D38JYUaLBLfePH5ruoU5teDcpLHvebA8pX6XvqmbBmZNda7bMVOUOYNiWe
+         AaDVs0IUhO/k2VBEh3qpNdn+8jXX16DE4hOb8ozay72KmpyBM7+4fVosGKGRlqWt+H
+         CC8dVJiH3EWOw==
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+To:     bhelgaas@google.com
+Cc:     linux-pm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Ricky Wu <ricky_wu@realtek.com>,
+        Kees Cook <keescook@chromium.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+        Lukas Wunner <lukas@wunner.de>, linux-pci@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org,
+        bpf@vger.kernel.org
+Subject: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on PCIe Link Down
+Date:   Mon, 16 Oct 2023 12:01:31 +0800
+Message-Id: <20231016040132.23824-1-kai.heng.feng@canonical.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-PiBPbiBXZWQsIDExIE9jdCAyMDIzIGF0IDA3OjM2LCBSaWNreSBXVSA8cmlja3lfd3VAcmVhbHRl
-ay5jb20+IHdyb3RlOg0KPiA+DQo+ID4gSGkgVWxmIEhhbnNzb24sDQo+ID4NCj4gPiBDYW4gSSBr
-bm93IHdoYXQgaXMgdGhpcyBwYXRjaCBzdGF0dXMgb3IgaGFzIHNvbWUgY29uY2VybiBvbiB0aGlz
-IHBhdGNoPw0KPiANCj4gRGlkbid0IHlvdSByZWFkIG15IGVhcmxpZXIgcmVwbGllcz8NCj4gDQoN
-CkFyZSB5b3UgdGFsa2luZyBhYm91dCBCRlEgZm9yIHRlc3Rpbmcgc3BlZWQ/IA0KQmVjYXVzZSB3
-ZSB0ZXN0ZWQgdGhlIFJlYWQvV3JpdGUgc3BlZWQgYXJlIGJldHRlciB0aGFuIGJlZm9yZSBhbmQg
-b3VyIGN1c3RvbWVyIHRoYXQgdXNlcyBvdXIgcmVhZGVyIG9uIHRoZWlyIHByb2R1Y3QgYWxzbyB0
-ZXN0ZWQgdGhlIFJlYWQvV3JpdGUgc3BlZWQsIHRoZXkgd2FudCB1cyB0byBwdXNoIHRoaXMgcGF0
-Y2ggb24gDQoNCg0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gPg0KPiA+IFJpY2t5DQo+
-ID4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+ID4gRnJvbTogVWxmIEhhbnNzb24g
-PHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+ID4gPiBTZW50OiBUaHVyc2RheSwgRmVicnVhcnkg
-MTAsIDIwMjIgMTA6NTcgUE0NCj4gPiA+IFRvOiBSaWNreSBXVSA8cmlja3lfd3VAcmVhbHRlay5j
-b20+DQo+ID4gPiBDYzogdG9tbXloZWJiQGdtYWlsLmNvbTsgbGludXgtbW1jQHZnZXIua2VybmVs
-Lm9yZzsNCj4gPiA+IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmcNCj4gPiA+IFN1YmplY3Q6
-IFJlOiBbUEFUQ0ggdjNdIG1tYzogcnRzeDogaW1wcm92ZSBwZXJmb3JtYW5jZSBmb3IgbXVsdGkg
-YmxvY2sgcncNCj4gPiA+DQo+ID4gPiBPbiBUaHUsIDEwIEZlYiAyMDIyIGF0IDA3OjQzLCBSaWNr
-eSBXVSA8cmlja3lfd3VAcmVhbHRlay5jb20+IHdyb3RlOg0KPiA+ID4gPg0KPiA+ID4gPg0KPiA+
-ID4gPg0KPiA+ID4gPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4gPiA+ID4gRnJv
-bTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+ID4gPiA+ID4gU2VudDog
-TW9uZGF5LCBGZWJydWFyeSA3LCAyMDIyIDc6MTEgUE0NCj4gPiA+ID4gPiBUbzogUmlja3kgV1Ug
-PHJpY2t5X3d1QHJlYWx0ZWsuY29tPg0KPiA+ID4gPiA+IENjOiB0b21teWhlYmJAZ21haWwuY29t
-OyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOw0KPiA+ID4gPiA+IGxpbnV4LWtlcm5lbEB2Z2Vy
-Lmtlcm5lbC5vcmcNCj4gPiA+ID4gPiBTdWJqZWN0OiBSZTogW1BBVENIIHYzXSBtbWM6IHJ0c3g6
-IGltcHJvdmUgcGVyZm9ybWFuY2UgZm9yIG11bHRpDQo+ID4gPiA+ID4gYmxvY2sgcncNCj4gPiA+
-ID4gPg0KPiA+ID4gPiA+IFsuLi5dDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiA+ID4gPiA+ID4NCj4g
-PiA+ID4gPiA+ID4gPiA+ID4gRG8geW91IGhhdmUgYW55IHN1Z2dlc3Rpb24gZm9yIHRlc3Rpbmcg
-cmFuZG9tIEkvTyBCdXQgd2UNCj4gPiA+ID4gPiA+ID4gPiA+ID4gdGhpbmsgcmFuZG9tIEkvTyB3
-aWxsIG5vdCBjaGFuZ2UgbXVjaA0KPiA+ID4gPiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+ID4gPiA+
-IEkgd291bGQgcHJvYmFibHkgbG9vayBpbnRvIHVzaW5nIGZpbywNCj4gPiA+ID4gPiA+ID4gPiA+
-IGh0dHBzOi8vZmlvLnJlYWR0aGVkb2NzLmlvL2VuL2xhdGVzdC8NCj4gPiA+ID4gPiA+ID4gPiA+
-DQo+ID4gPiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+ID4gPiBGaWxsZWQgcmFuZG9tIEkvTyBkYXRh
-DQo+ID4gPiA+ID4gPiA+ID4gQmVmb3JlIHRoZSBwYXRjaDoNCj4gPiA+ID4gPiA+ID4gPiBDTUQg
-KFJhbmRyZWFkKToNCj4gPiA+ID4gPiA+ID4gPiBzdWRvIGZpbyAtZmlsZW5hbWU9L2Rldi9tbWNi
-bGswIC1kaXJlY3Q9MSAtbnVtam9icz0xIC10aHJlYWQNCj4gPiA+ID4gPiA+ID4gPiAtZ3JvdXBf
-cmVwb3J0aW5nIC1pb2VuZ2luZT1wc3luYyAtaW9kZXB0aD0xIC1zaXplPTFHDQo+ID4gPiA+ID4g
-PiA+ID4gLW5hbWU9bXl0ZXN0IC1icz0xTSAtcnc9cmFuZHJlYWQNCj4gPiA+ID4gPiA+ID4NCj4g
-PiA+ID4gPiA+ID4gVGhhbmtzIGZvciBydW5uaW5nIHRoZSB0ZXN0cyEgT3ZlcmFsbCwgSSB3b3Vs
-ZCBub3QgZXhwZWN0IGFuDQo+ID4gPiA+ID4gPiA+IGltcGFjdCBvbiB0aGUgdGhyb3VnaHB1dCB3
-aGVuIHVzaW5nIGEgYmlnIGJsb2Nrc2l6ZSBsaWtlIDFNLg0KPiA+ID4gPiA+ID4gPiBUaGlzIGlz
-IGFsc28gcHJldHR5IGNsZWFyIGZyb20gdGhlIHJlc3VsdCB5b3UgaGF2ZSBwcm92aWRlZC4NCj4g
-PiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+ID4gSG93ZXZlciwgZXNwZWNpYWxseSBmb3IgcmFuZG9t
-IHdyaXRlcyBhbmQgcmVhZHMsIHdlIHdhbnQgdG8gdHJ5DQo+ID4gPiA+ID4gPiA+IHdpdGggc21h
-bGxlciBibG9ja3NpemVzLiBMaWtlIDhrIG9yIDE2aywgd291bGQgeW91IG1pbmQgcnVubmluZw0K
-PiA+ID4gPiA+ID4gPiBhbm90aGVyIHJvdW5kIG9mIHRlc3RzIHRvIHNlZSBob3cgdGhhdCB3b3Jr
-cyBvdXQ/DQo+ID4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPg0KPiA+ID4gPiA+ID4gRmlsbGVkIHJh
-bmRvbSBJL08gZGF0YSg4ay8xNmspDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBIaSBSaWNreSwNCj4g
-PiA+ID4gPg0KPiA+ID4gPiA+IEFwb2xvZ2l6ZSBmb3IgdGhlIGRlbGF5ISBUaGFua3MgZm9yIHJ1
-bm5pbmcgdGhlIHRlc3RzLiBMZXQgbWUNCj4gPiA+ID4gPiBjb21tZW50IG9uIHRoZW0gYmVsb3cu
-DQo+ID4gPiA+ID4NCj4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiBCZWZvcmUocmFuZHJlYWQpDQo+
-ID4gPiA+ID4gPiA4azoNCj4gPiA+ID4gPiA+IENtZDogc3VkbyBmaW8gLWZpbGVuYW1lPS9kZXYv
-bW1jYmxrMCAtZGlyZWN0PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4gPiA+ID4gPiAtZ3JvdXBf
-cmVwb3J0aW5nIC1pb2VuZ2luZT1wc3luYyAtaW9kZXB0aD0xIC1zaXplPTFHIC1uYW1lPW15dGVz
-dA0KPiA+ID4gPiA+ID4gLWJzPThrIC1ydz1yYW5kcmVhZA0KPiA+ID4gPiA+ID4gbXl0ZXN0OiAo
-Zz0wKTogcnc9cmFuZHJlYWQsIGJzPShSKSA4MTkyQi04MTkyQiwgKFcpIDgxOTJCLTgxOTJCLA0K
-PiA+ID4gPiA+ID4gKFQpIDgxOTJCLTgxOTJCLCBpb2VuZ2luZT1wc3luYywgaW9kZXB0aD0xDQo+
-ID4gPiA+ID4gPiByZXN1bHQ6DQo+ID4gPiA+ID4gPiBSdW4gc3RhdHVzIGdyb3VwIDAgKGFsbCBq
-b2JzKToNCj4gPiA+ID4gPiA+ICAgIFJFQUQ6IGJ3PTE2LjVNaUIvcyAoMTcuM01CL3MpLCAxNi41
-TWlCL3MtMTYuNU1pQi9zDQo+ID4gPiA+ID4gPiAoMTcuM01CL3MtMTcuM01CL3MpLCBpbz0xMDI0
-TWlCICgxMDc0TUIpLA0KPiBydW49NjIwMTktNjIwMTltc2VjDQo+ID4gPiBEaXNrDQo+ID4gPiA+
-ID4gc3RhdHMgKHJlYWQvd3JpdGUpOg0KPiA+ID4gPiA+ID4gICBtbWNibGswOiBpb3M9MTMwNzU3
-LzAsIG1lcmdlPTAvMCwgdGlja3M9NTc3NTEvMCwNCj4gaW5fcXVldWU9NTc3NTEsDQo+ID4gPiA+
-ID4gPiB1dGlsPTk5Ljg5JQ0KPiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+IDE2azoNCj4gPiA+ID4g
-PiA+IENtZDogc3VkbyBmaW8gLWZpbGVuYW1lPS9kZXYvbW1jYmxrMCAtZGlyZWN0PTEgLW51bWpv
-YnM9MSAtdGhyZWFkDQo+ID4gPiA+ID4gPiAtZ3JvdXBfcmVwb3J0aW5nIC1pb2VuZ2luZT1wc3lu
-YyAtaW9kZXB0aD0xIC1zaXplPTFHIC1uYW1lPW15dGVzdA0KPiA+ID4gPiA+ID4gLWJzPTE2ayAt
-cnc9cmFuZHJlYWQNCj4gPiA+ID4gPiA+IG15dGVzdDogKGc9MCk6IHJ3PXJhbmRyZWFkLCBicz0o
-UikgMTYuMEtpQi0xNi4wS2lCLCAoVykNCj4gPiA+ID4gPiA+IDE2LjBLaUItMTYuMEtpQiwgKFQp
-IDE2LjBLaUItMTYuMEtpQiwgaW9lbmdpbmU9cHN5bmMsIGlvZGVwdGg9MQ0KPiA+ID4gPiA+ID4g
-cmVzdWx0Og0KPiA+ID4gPiA+ID4gUnVuIHN0YXR1cyBncm91cCAwIChhbGwgam9icyk6DQo+ID4g
-PiA+ID4gPiAgICBSRUFEOiBidz0yMy4zTWlCL3MgKDI0LjRNQi9zKSwgMjMuM01pQi9zLTIzLjNN
-aUIvcw0KPiA+ID4gPiA+ID4gKDI0LjRNQi9zLTI0LjRNQi9zKSwgaW89MTAyNE1pQiAoMTA3NE1C
-KSwNCj4gcnVuPTQ0MDM0LTQ0MDM0bXNlYw0KPiA+ID4gRGlzaw0KPiA+ID4gPiA+IHN0YXRzIChy
-ZWFkL3dyaXRlKToNCj4gPiA+ID4gPiA+ICAgbW1jYmxrMDogaW9zPTY1MzMzLzAsIG1lcmdlPTAv
-MCwgdGlja3M9Mzk0MjAvMCwNCj4gaW5fcXVldWU9Mzk0MjAsDQo+ID4gPiA+ID4gPiB1dGlsPTk5
-Ljg0JQ0KPiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+IEJlZm9yZShyYW5kcndyaXRlKQ0KPiA+ID4g
-PiA+ID4gOGs6DQo+ID4gPiA+ID4gPiBDbWQ6IHN1ZG8gZmlvIC1maWxlbmFtZT0vZGV2L21tY2Js
-azAgLWRpcmVjdD0xIC1udW1qb2JzPTEgLXRocmVhZA0KPiA+ID4gPiA+ID4gLWdyb3VwX3JlcG9y
-dGluZyAtaW9lbmdpbmU9cHN5bmMgLWlvZGVwdGg9MSAtc2l6ZT0xMDBNDQo+ID4gPiA+ID4gPiAt
-bmFtZT1teXRlc3QgLWJzPThrIC1ydz1yYW5kd3JpdGUNCj4gPiA+ID4gPiA+IG15dGVzdDogKGc9
-MCk6IHJ3PXJhbmR3cml0ZSwgYnM9KFIpIDgxOTJCLTgxOTJCLCAoVykgODE5MkItODE5MkIsDQo+
-ID4gPiA+ID4gPiAoVCkgODE5MkItODE5MkIsIGlvZW5naW5lPXBzeW5jLCBpb2RlcHRoPTENCj4g
-PiA+ID4gPiA+IHJlc3VsdDoNCj4gPiA+ID4gPiA+IFJ1biBzdGF0dXMgZ3JvdXAgMCAoYWxsIGpv
-YnMpOg0KPiA+ID4gPiA+ID4gICBXUklURTogYnc9NDA2MEtpQi9zICg0MTU4a0IvcyksIDQwNjBL
-aUIvcy00MDYwS2lCL3MNCj4gPiA+ID4gPiA+ICg0MTU4a0Ivcy00MTU4a0IvcyksIGlvPTEwME1p
-QiAoMTA1TUIpLCBydW49MjUyMjAtMjUyMjBtc2VjDQo+IERpc2sNCj4gPiA+ID4gPiA+IHN0YXRz
-DQo+ID4gPiA+ID4gKHJlYWQvd3JpdGUpOg0KPiA+ID4gPiA+ID4gICBtbWNibGswOiBpb3M9NTEv
-MTI3NTksIG1lcmdlPTAvMCwgdGlja3M9ODAvMjQxNTQsDQo+ID4gPiA+ID4gPiBpbl9xdWV1ZT0y
-NDIzNCwgdXRpbD05OS45MCUNCj4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiAxNms6DQo+ID4gPiA+
-ID4gPiBDbWQ6IHN1ZG8gZmlvIC1maWxlbmFtZT0vZGV2L21tY2JsazAgLWRpcmVjdD0xIC1udW1q
-b2JzPTEgLXRocmVhZA0KPiA+ID4gPiA+ID4gLWdyb3VwX3JlcG9ydGluZyAtaW9lbmdpbmU9cHN5
-bmMgLWlvZGVwdGg9MSAtc2l6ZT0xMDBNDQo+ID4gPiA+ID4gPiAtbmFtZT1teXRlc3QgLWJzPTE2
-ayAtcnc9cmFuZHdyaXRlDQo+ID4gPiA+ID4gPiBteXRlc3Q6IChnPTApOiBydz1yYW5kd3JpdGUs
-IGJzPShSKSAxNi4wS2lCLTE2LjBLaUIsIChXKQ0KPiA+ID4gPiA+ID4gMTYuMEtpQi0xNi4wS2lC
-LCAoVCkgMTYuMEtpQi0xNi4wS2lCLCBpb2VuZ2luZT1wc3luYywgaW9kZXB0aD0xDQo+ID4gPiA+
-ID4gPiByZXN1bHQ6DQo+ID4gPiA+ID4gPiBSdW4gc3RhdHVzIGdyb3VwIDAgKGFsbCBqb2JzKToN
-Cj4gPiA+ID4gPiA+ICAgV1JJVEU6IGJ3PTcyMDFLaUIvcyAoNzM3M2tCL3MpLCA3MjAxS2lCL3Mt
-NzIwMUtpQi9zDQo+ID4gPiA+ID4gPiAoNzM3M2tCL3MtNzM3M2tCL3MpLCBpbz0xMDBNaUIgKDEw
-NU1CKSwgcnVuPTE0MjIxLTE0MjIxbXNlYw0KPiBEaXNrDQo+ID4gPiA+ID4gPiBzdGF0cw0KPiA+
-ID4gPiA+IChyZWFkL3dyaXRlKToNCj4gPiA+ID4gPiA+ICAgbW1jYmxrMDogaW9zPTUxLzYzNjcs
-IG1lcmdlPTAvMCwgdGlja3M9ODIvMTM2NDcsDQo+IGluX3F1ZXVlPTEzNzI4LA0KPiA+ID4gPiA+
-ID4gdXRpbD05OS44MSUNCj4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPg0KPiA+ID4gPiA+ID4gQWZ0
-ZXIocmFuZHJlYWQpDQo+ID4gPiA+ID4gPiA4azoNCj4gPiA+ID4gPiA+IENtZDogc3VkbyBmaW8g
-LWZpbGVuYW1lPS9kZXYvbW1jYmxrMCAtZGlyZWN0PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4g
-PiA+ID4gPiAtZ3JvdXBfcmVwb3J0aW5nIC1pb2VuZ2luZT1wc3luYyAtaW9kZXB0aD0xIC1zaXpl
-PTFHIC1uYW1lPW15dGVzdA0KPiA+ID4gPiA+ID4gLWJzPThrIC1ydz1yYW5kcmVhZA0KPiA+ID4g
-PiA+ID4gbXl0ZXN0OiAoZz0wKTogcnc9cmFuZHJlYWQsIGJzPShSKSA4MTkyQi04MTkyQiwgKFcp
-IDgxOTJCLTgxOTJCLA0KPiA+ID4gPiA+ID4gKFQpIDgxOTJCLTgxOTJCLCBpb2VuZ2luZT1wc3lu
-YywgaW9kZXB0aD0xDQo+ID4gPiA+ID4gPiByZXN1bHQ6DQo+ID4gPiA+ID4gPiBSdW4gc3RhdHVz
-IGdyb3VwIDAgKGFsbCBqb2JzKToNCj4gPiA+ID4gPiA+ICAgIFJFQUQ6IGJ3PTEyLjRNaUIvcyAo
-MTMuME1CL3MpLCAxMi40TWlCL3MtMTIuNE1pQi9zDQo+ID4gPiA+ID4gPiAoMTMuME1CL3MtMTMu
-ME1CL3MpLCBpbz0xMDI0TWlCICgxMDc0TUIpLA0KPiBydW49ODIzOTctODIzOTdtc2VjDQo+ID4g
-PiBEaXNrDQo+ID4gPiA+ID4gc3RhdHMgKHJlYWQvd3JpdGUpOg0KPiA+ID4gPiA+ID4gICBtbWNi
-bGswOiBpb3M9MTMwNjQwLzAsIG1lcmdlPTAvMCwgdGlja3M9NzQxMjUvMCwNCj4gaW5fcXVldWU9
-NzQxMjUsDQo+ID4gPiA+ID4gPiB1dGlsPTk5Ljk0JQ0KPiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+
-IDE2azoNCj4gPiA+ID4gPiA+IENtZDogc3VkbyBmaW8gLWZpbGVuYW1lPS9kZXYvbW1jYmxrMCAt
-ZGlyZWN0PTEgLW51bWpvYnM9MSAtdGhyZWFkDQo+ID4gPiA+ID4gPiAtZ3JvdXBfcmVwb3J0aW5n
-IC1pb2VuZ2luZT1wc3luYyAtaW9kZXB0aD0xIC1zaXplPTFHIC1uYW1lPW15dGVzdA0KPiA+ID4g
-PiA+ID4gLWJzPTE2ayAtcnc9cmFuZHJlYWQNCj4gPiA+ID4gPiA+IG15dGVzdDogKGc9MCk6IHJ3
-PXJhbmRyZWFkLCBicz0oUikgMTYuMEtpQi0xNi4wS2lCLCAoVykNCj4gPiA+ID4gPiA+IDE2LjBL
-aUItMTYuMEtpQiwgKFQpIDE2LjBLaUItMTYuMEtpQiwgaW9lbmdpbmU9cHN5bmMsIGlvZGVwdGg9
-MQ0KPiA+ID4gPiA+ID4gcmVzdWx0Og0KPiA+ID4gPiA+ID4gUnVuIHN0YXR1cyBncm91cCAwIChh
-bGwgam9icyk6DQo+ID4gPiA+ID4gPiAgICBSRUFEOiBidz0yMC4wTWlCL3MgKDIxLjBNQi9zKSwg
-MjAuME1pQi9zLTIwLjBNaUIvcw0KPiA+ID4gPiA+ID4gKDIxLjBNQi9zLTIxLjBNQi9zKSwgaW89
-MTAyNE1pQiAoMTA3NE1CKSwNCj4gcnVuPTUxMDc2LTUxMDc2bXNlYw0KPiA+ID4gRGlzaw0KPiA+
-ID4gPiA+IHN0YXRzIChyZWFkL3dyaXRlKToNCj4gPiA+ID4gPiA+ICAgbW1jYmxrMDogaW9zPTY1
-MjgyLzAsIG1lcmdlPTAvMCwgdGlja3M9NDYyNTUvMCwNCj4gaW5fcXVldWU9NDYyNTQsDQo+ID4g
-PiA+ID4gPiB1dGlsPTk5Ljg3JQ0KPiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+IEFmdGVyKHJhbmR3
-cml0ZSkNCj4gPiA+ID4gPiA+IDhrOg0KPiA+ID4gPiA+ID4gQ21kOiBzdWRvIGZpbyAtZmlsZW5h
-bWU9L2Rldi9tbWNibGswIC1kaXJlY3Q9MSAtbnVtam9icz0xIC10aHJlYWQNCj4gPiA+ID4gPiA+
-IC1ncm91cF9yZXBvcnRpbmcgLWlvZW5naW5lPXBzeW5jIC1pb2RlcHRoPTEgLXNpemU9MTAwTQ0K
-PiA+ID4gPiA+ID4gLW5hbWU9bXl0ZXN0IC1icz04ayAtcnc9cmFuZHdyaXRlDQo+ID4gPiA+ID4g
-PiBteXRlc3Q6IChnPTApOiBydz1yYW5kd3JpdGUsIGJzPShSKSA4MTkyQi04MTkyQiwgKFcpIDgx
-OTJCLTgxOTJCLA0KPiA+ID4gPiA+ID4gKFQpIDgxOTJCLTgxOTJCLCBpb2VuZ2luZT1wc3luYywg
-aW9kZXB0aD0xDQo+ID4gPiA+ID4gPiByZXN1bHQ6DQo+ID4gPiA+ID4gPiBSdW4gc3RhdHVzIGdy
-b3VwIDAgKGFsbCBqb2JzKToNCj4gPiA+ID4gPiA+ICAgV1JJVEU6IGJ3PTQyMTVLaUIvcyAoNDMx
-N2tCL3MpLCA0MjE1S2lCL3MtNDIxNUtpQi9zDQo+ID4gPiA+ID4gPiAoNDMxN2tCL3MtNDMxN2tC
-L3MpLCBpbz0xMDBNaUIgKDEwNU1CKSwgcnVuPTI0MjkyLTI0MjkybXNlYw0KPiBEaXNrDQo+ID4g
-PiA+ID4gPiBzdGF0cw0KPiA+ID4gPiA+IChyZWFkL3dyaXRlKToNCj4gPiA+ID4gPiA+ICAgbW1j
-YmxrMDogaW9zPTUyLzEyNzE3LCBtZXJnZT0wLzAsIHRpY2tzPTg2LzIzMTgyLA0KPiA+ID4gPiA+
-ID4gaW5fcXVldWU9MjMyNjcsIHV0aWw9OTkuOTIlDQo+ID4gPiA+ID4gPg0KPiA+ID4gPiA+ID4g
-MTZrOg0KPiA+ID4gPiA+ID4gQ21kOiBzdWRvIGZpbyAtZmlsZW5hbWU9L2Rldi9tbWNibGswIC1k
-aXJlY3Q9MSAtbnVtam9icz0xIC10aHJlYWQNCj4gPiA+ID4gPiA+IC1ncm91cF9yZXBvcnRpbmcg
-LWlvZW5naW5lPXBzeW5jIC1pb2RlcHRoPTEgLXNpemU9MTAwTQ0KPiA+ID4gPiA+ID4gLW5hbWU9
-bXl0ZXN0IC1icz0xNmsgLXJ3PXJhbmR3cml0ZQ0KPiA+ID4gPiA+ID4gbXl0ZXN0OiAoZz0wKTog
-cnc9cmFuZHdyaXRlLCBicz0oUikgMTYuMEtpQi0xNi4wS2lCLCAoVykNCj4gPiA+ID4gPiA+IDE2
-LjBLaUItMTYuMEtpQiwgKFQpIDE2LjBLaUItMTYuMEtpQiwgaW9lbmdpbmU9cHN5bmMsIGlvZGVw
-dGg9MQ0KPiA+ID4gPiA+ID4gcmVzdWx0Og0KPiA+ID4gPiA+ID4gUnVuIHN0YXR1cyBncm91cCAw
-IChhbGwgam9icyk6DQo+ID4gPiA+ID4gPiAgIFdSSVRFOiBidz02NDk5S2lCL3MgKDY2NTVrQi9z
-KSwgNjQ5OUtpQi9zLTY0OTlLaUIvcw0KPiA+ID4gPiA+ID4gKDY2NTVrQi9zLTY2NTVrQi9zKSwg
-aW89MTAwTWlCICgxMDVNQiksIHJ1bj0xNTc1Ni0xNTc1Nm1zZWMNCj4gRGlzaw0KPiA+ID4gPiA+
-ID4gc3RhdHMNCj4gPiA+ID4gPiAocmVhZC93cml0ZSk6DQo+ID4gPiA+ID4gPiAgIG1tY2JsazA6
-IGlvcz01MS82MzQ3LCBtZXJnZT0wLzAsIHRpY2tzPTg0LzE1MTIwLA0KPiBpbl9xdWV1ZT0xNTIw
-NCwNCj4gPiA+ID4gPiA+IHV0aWw9OTkuODAlDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBJdCBsb29r
-cyBsaWtlIHRoZSByYW5kLXJlYWQgdGVzdHMgYWJvdmUgYXJlIGRlZ3JhZGluZyB3aXRoIHRoZSBu
-ZXcNCj4gPiA+ID4gPiBjaGFuZ2VzLCB3aGlsZSByYW5kLXdyaXRlcyBhcmUgYm90aCBpbXByb3Zp
-bmcgYW5kIGRlZ3JhZGluZy4NCj4gPiA+ID4gPg0KPiA+ID4gPiA+IFRvIHN1bW1hcml6ZSBteSB2
-aWV3IGZyb20gYWxsIHRoZSB0ZXN0cyB5b3UgaGF2ZSBkb25lIGF0IHRoaXMgcG9pbnQNCj4gPiA+
-ID4gPiAodGhhbmtzIGEgbG90KTsgaXQgbG9va3MgbGlrZSB0aGUgYmxvY2sgSS9PIG1lcmdpbmcg
-aXNuJ3QgcmVhbGx5DQo+ID4gPiA+ID4gaGFwcGVuaW5nIGF0IGNvbW1vbiBibG9ja2xheWVyLCBh
-dCBsZWFzdCB0byB0aGF0IGV4dGVudCB0aGF0IHdvdWxkDQo+ID4gPiA+ID4gYmVuZWZpdCB1cy4g
-Q2xlYXJseSB5b3UgaGF2ZSBzaG93biB0aGF0IGJ5IHRoZSBzdWdnZXN0ZWQgY2hhbmdlIGluDQo+
-ID4gPiA+ID4gdGhlIG1tYyBob3N0IGRyaXZlciwgYnkgZGV0ZWN0aW5nIHdoZXRoZXIgdGhlICJu
-ZXh0IiByZXF1ZXN0IGlzDQo+ID4gPiA+ID4gc2VxdWVudGlhbCB0byB0aGUgcHJldmlvdXMgb25l
-LCB3aGljaCBhbGxvd3MgdXMgdG8gc2tpcCBhDQo+ID4gPiA+ID4gQ01EMTIgYW5kIG1pbmltaXpl
-IHNvbWUgY29tbWFuZCBvdmVyaGVhZC4NCj4gPiA+ID4gPg0KPiA+ID4gPiA+IEhvd2V2ZXIsIGFj
-Y29yZGluZyB0byB0aGUgbGF0ZXN0IHRlc3RzIGFib3ZlLCB5b3UgaGF2ZSBhbHNvIHByb3ZlZA0K
-PiA+ID4gPiA+IHRoYXQgdGhlIGNoYW5nZXMgaW4gdGhlIG1tYyBob3N0IGRyaXZlciBkb2Vzbid0
-IGNvbWUgd2l0aG91dCBhIGNvc3QuDQo+ID4gPiA+ID4gSW4gcGFydGljdWxhciwgc21hbGwgcmFu
-ZG9tLXJlYWRzIHdvdWxkIGRlZ3JhZGUgaW4gcGVyZm9ybWFuY2UgZnJvbQ0KPiA+ID4gPiA+IHRo
-ZXNlIGNoYW5nZXMuDQo+ID4gPiA+ID4NCj4gPiA+ID4gPiBUaGF0IHNhaWQsIGl0IGxvb2tzIHRv
-IG1lIHRoYXQgcmF0aGVyIHRoYW4gdHJ5aW5nIHRvIGltcHJvdmUgdGhpbmdzDQo+ID4gPiA+ID4g
-Zm9yIG9uZSBzcGVjaWZpYyBtbWMgaG9zdCBkcml2ZXIsIGl0IHdvdWxkIGJlIGJldHRlciB0byBs
-b29rIGF0IHRoaXMNCj4gPiA+ID4gPiBmcm9tIHRoZSBnZW5lcmljIGJsb2NrIGxheWVyIHBvaW50
-IG9mIHZpZXcgLSBhbmQgaW52ZXN0aWdhdGUgd2h5DQo+ID4gPiA+ID4gc2VxdWVudGlhbCByZWFk
-cy93cml0ZXMgYXJlbid0IGdldHRpbmcgbWVyZ2VkIG9mdGVuIGVub3VnaCBmb3IgdGhlDQo+ID4g
-PiA+ID4gTU1DL1NEIGNhc2UuIElmIHdlIGNhbiBmaXggdGhlIHByb2JsZW0gdGhlcmUsIGFsbCBt
-bWMgaG9zdCBkcml2ZXJzDQo+IHdvdWxkDQo+ID4gPiBiZW5lZml0IEkgYXNzdW1lLg0KPiA+ID4g
-PiA+DQo+ID4gPiA+DQo+ID4gPiA+IFNvIHlvdSBhcmUgdGhpbmtpbmcgYWJvdXQgaG93IHRvIHBh
-dGNoIHRoaXMgaW4gTU1DL1NEPw0KPiA+ID4gPiBJIGRvbid0IGtub3cgaWYgdGhpcyBtZXRob2Qg
-aXMgY29tcGF0aWJsZSB3aXRoIG90aGVyIE1NQyBIb3N0cz8gT3INCj4gPiA+ID4gdGhleSBuZWVk
-IHRvIHBhdGNoIG90aGVyIGNvZGUgb24gdGhlaXIgaG9zdCBkcml2ZXINCj4gPiA+DQo+ID4gPiBJ
-IHdvdWxkIG5vdCBsaW1pdCB0aGlzIHRvIHRoZSBjb3JlIGxheWVyIG9mIE1NQy9TRC4gVGhlIHBv
-aW50IEkgd2FzIHRyeWluZyB0bw0KPiA+ID4gbWFrZSB3YXMgdGhhdCBpdCBkb2Vzbid0IGxvb2sg
-bGlrZSB0aGUgZ2VuZXJpYyBibG9jayBsYXllciBpcyBtZXJnaW5nIHRoZQ0KPiA+ID4gc2VxdWVu
-dGlhbCBJL08gcmVxdWVzdHMgaW4gdGhlIG1vc3QgZWZmaWNpZW50IHdheSwgYXQgbGVhc3QgZm9y
-IHRoZSBlTU1DL1NEDQo+ID4gPiBkZXZpY2VzLiBXaHkgdGhpcyBpcyB0aGUgY2FzZSwgSSBjYW4n
-dCB0ZWxsLiBJdCBsb29rcyBsaWtlIHdlIG5lZWQgdG8gZG8gc29tZQ0KPiBtb3JlDQo+ID4gPiBp
-bi1kZXB0aCBhbmFseXNpcyB0byB1bmRlcnN0YW5kIHdoeSBtZXJnaW5nIGlzbid0IGVmZmljaWVu
-dCBmb3IgdXMuDQo+ID4gPg0KPiA+ID4gPg0KPiA+ID4gPiA+IEJUVywgaGF2ZSB5b3UgdHJpZWQg
-d2l0aCBkaWZmZXJlbnQgSS9PIHNjaGVkdWxlcnM/IElmIHlvdSBoYXZlbid0DQo+ID4gPiA+ID4g
-dHJpZWQgQkZRLCBJIHN1Z2dlc3QgeW91IGRvIGFzIGl0J3MgYSBnb29kIGZpdCBmb3IgTU1DL1NE
-Lg0KPiA+ID4gPiA+DQo+ID4gPiA+DQo+ID4gPiA+IEkgZG9u4oCZdCBrbm93IHdoYXQgaXMgZGlm
-ZmVyZW50IEkvTyBzY2hlZHVsZXJzIG1lYW5zPw0KPiA+ID4NCj4gPiA+IFdoYXQgSS9PIHNjaGVk
-dWxlciBkaWQgeW91IHVzZSB3aGVuIHJ1bm5pbmcgdGhlIHRlc3Q/DQo+ID4gPg0KPiA+ID4gRm9y
-IE1NQy9TRCB0aGUgb25seSBvbmUgdGhhdCBtYWtlcyBzZW5zZSB0byB1c2UgaXMgQkZRLCBob3dl
-dmVyIHRoYXQNCj4gbmVlZHMNCj4gPiA+IHRvIGJlIGNvbmZpZ3VyZWQgdmlhIHN5c2ZzIGFmdGVy
-IGJvb3QuIFRoZXJlIGlzIG5vIHdheSwgY3VycmVudGx5LCB0byBtYWtlIGl0DQo+IHRoZQ0KPiA+
-ID4gZGVmYXVsdCwgSSB0aGluay4gWW91IG1heSBsb29rIGF0IERvY3VtZW50YXRpb24vYmxvY2sv
-YmZxLWlvc2NoZWQucnN0LCBpZg0KPiB5b3UNCj4gPiA+IGFyZSBtb3JlIGludGVyZXN0ZWQuDQo+
-ID4gPg0KPiA+ID4gS2luZCByZWdhcmRzDQo+ID4gPiBVZmZlDQo+ID4gPiAtLS0tLS1QbGVhc2Ug
-Y29uc2lkZXIgdGhlIGVudmlyb25tZW50IGJlZm9yZSBwcmludGluZyB0aGlzIGUtbWFpbC4NCj4g
-Pg0K
+When inserting an SD7.0 card to Realtek card reader, it can trigger PCI
+slot Link down and causes the following error:
+[   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+[   63.912118] BUG: unable to handle page fault for address: ffffb24d403e50=
+10
+[   63.912122] #PF: supervisor read access in kernel mode
+[   63.912125] #PF: error_code(0x0000) - not-present page
+[   63.912126] PGD 100000067 P4D 100000067 PUD 1001fe067 PMD 100d97067 PTE 0
+[   63.912131] Oops: 0000 [#1] PREEMPT SMP PTI
+[   63.912134] CPU: 3 PID: 534 Comm: kworker/3:10 Not tainted 6.4.0 #6
+[   63.912137] Hardware name: To Be Filled By O.E.M. To Be Filled By O.E.M.=
+/H370M Pro4, BIOS P3.40 10/25/2018
+[   63.912138] Workqueue: pm pm_runtime_work
+[   63.912144] RIP: 0010:ioread32+0x2e/0x70
+[   63.912148] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d9 =
+54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <8b=
+> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f 15 99 48
+[   63.912150] RSP: 0018:ffffb24d40a5bd78 EFLAGS: 00010296
+[   63.912152] RAX: ffffb24d403e5000 RBX: 0000000000000152 RCX: 00000000000=
+0007f
+[   63.912153] RDX: 000000000000ff00 RSI: ffffb24d403e5010 RDI: ffffb24d403=
+e5010
+[   63.912155] RBP: ffffb24d40a5bd98 R08: ffffb24d403e5010 R09: 00000000000=
+00000
+[   63.912156] R10: ffff9074cd95e7f4 R11: 0000000000000003 R12: 00000000000=
+0007f
+[   63.912158] R13: ffff9074e1a68c00 R14: ffff9074e1a68d00 R15: 00000000000=
+09003
+[   63.912159] FS:  0000000000000000(0000) GS:ffff90752a180000(0000) knlGS:=
+0000000000000000
+[   63.912161] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   63.912162] CR2: ffffb24d403e5010 CR3: 0000000152832006 CR4: 00000000003=
+706e0
+[   63.912164] Call Trace:
+[   63.912165]  <TASK>
+[   63.912167]  ? show_regs+0x68/0x70
+[   63.912171]  ? __die_body+0x20/0x70
+[   63.912173]  ? __die+0x2b/0x40
+[   63.912175]  ? page_fault_oops+0x160/0x480
+[   63.912177]  ? search_bpf_extables+0x63/0x90
+[   63.912180]  ? ioread32+0x2e/0x70
+[   63.912183]  ? search_exception_tables+0x5f/0x70
+[   63.912186]  ? kernelmode_fixup_or_oops+0xa2/0x120
+[   63.912189]  ? __bad_area_nosemaphore+0x179/0x230
+[   63.912191]  ? bad_area_nosemaphore+0x16/0x20
+[   63.912193]  ? do_kern_addr_fault+0x8b/0xa0
+[   63.912195]  ? exc_page_fault+0xe5/0x180
+[   63.912198]  ? asm_exc_page_fault+0x27/0x30
+[   63.912203]  ? ioread32+0x2e/0x70
+[   63.912206]  ? rtsx_pci_write_register+0x5b/0x90 [rtsx_pci]
+[   63.912217]  rtsx_set_l1off_sub+0x1c/0x30 [rtsx_pci]
+[   63.912226]  rts5261_set_l1off_cfg_sub_d0+0x36/0x40 [rtsx_pci]
+[   63.912234]  rtsx_pci_runtime_idle+0xc7/0x160 [rtsx_pci]
+[   63.912243]  ? __pfx_pci_pm_runtime_idle+0x10/0x10
+[   63.912246]  pci_pm_runtime_idle+0x34/0x70
+[   63.912248]  rpm_idle+0xc4/0x2b0
+[   63.912251]  pm_runtime_work+0x93/0xc0
+[   63.912254]  process_one_work+0x21a/0x430
+[   63.912258]  worker_thread+0x4a/0x3c0
+[   63.912261]  ? __pfx_worker_thread+0x10/0x10
+[   63.912263]  kthread+0x106/0x140
+[   63.912266]  ? __pfx_kthread+0x10/0x10
+[   63.912268]  ret_from_fork+0x29/0x50
+[   63.912273]  </TASK>
+[   63.912274] Modules linked in: nvme nvme_core snd_hda_codec_hdmi snd_sof=
+_pci_intel_cnl snd_sof_intel_hda_common snd_hda_codec_realtek snd_hda_codec=
+_generic snd_soc_hdac_hda soundwire_intel ledtrig_audio nls_iso8859_1 sound=
+wire_generic_allocation soundwire_cadence snd_sof_intel_hda_mlink snd_sof_i=
+ntel_hda snd_sof_pci snd_sof_xtensa_dsp snd_sof snd_sof_utils snd_hda_ext_c=
+ore snd_soc_acpi_intel_match snd_soc_acpi soundwire_bus snd_soc_core snd_co=
+mpress ac97_bus snd_pcm_dmaengine snd_hda_intel i915 snd_intel_dspcfg snd_i=
+ntel_sdw_acpi intel_rapl_msr snd_hda_codec intel_rapl_common snd_hda_core x=
+86_pkg_temp_thermal intel_powerclamp snd_hwdep coretemp snd_pcm kvm_intel d=
+rm_buddy ttm mei_hdcp kvm drm_display_helper snd_seq_midi snd_seq_midi_even=
+t cec crct10dif_pclmul ghash_clmulni_intel sha512_ssse3 aesni_intel crypto_=
+simd rc_core cryptd rapl snd_rawmidi drm_kms_helper binfmt_misc intel_cstat=
+e i2c_algo_bit joydev snd_seq snd_seq_device syscopyarea wmi_bmof snd_timer=
+ sysfillrect input_leds snd ee1004 sysimgblt mei_me soundcore
+[   63.912324]  mei intel_pch_thermal mac_hid acpi_tad acpi_pad sch_fq_code=
+l msr parport_pc ppdev lp ramoops drm parport reed_solomon efi_pstore ip_ta=
+bles x_tables autofs4 hid_generic usbhid hid rtsx_pci_sdmmc crc32_pclmul ah=
+ci e1000e i2c_i801 i2c_smbus rtsx_pci xhci_pci libahci xhci_pci_renesas vid=
+eo wmi
+[   63.912346] CR2: ffffb24d403e5010
+[   63.912348] ---[ end trace 0000000000000000 ]---
+
+This happens because scheduled pm_runtime_idle() is not cancelled.
+
+So use pm_runtime_barrier() to ensure all devices on the bus stops
+runtime power management actions.
+
+Link: https://lore.kernel.org/all/2ce258f371234b1f8a1a470d5488d00e@realtek.=
+com/
+Tested-by: Ricky Wu <ricky_wu@realtek.com>
+Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
+---
+ drivers/pci/hotplug/pciehp_pci.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pci/hotplug/pciehp_pci.c b/drivers/pci/hotplug/pciehp_=
+pci.c
+index ad12515a4a12..9ae4fa95c8c1 100644
+--- a/drivers/pci/hotplug/pciehp_pci.c
++++ b/drivers/pci/hotplug/pciehp_pci.c
+@@ -18,9 +18,18 @@
+ #include <linux/kernel.h>
+ #include <linux/types.h>
+ #include <linux/pci.h>
++#include <linux/pm_runtime.h>
+ #include "../pci.h"
+ #include "pciehp.h"
+=20
++int pci_dev_disconnect(struct pci_dev *pdev, void *unused)
++{
++	pm_runtime_barrier(&pdev->dev);
++	pci_dev_set_disconnected(pdev, NULL);
++
++	return 0;
++}
++
+ /**
+  * pciehp_configure_device() - enumerate PCI devices below a hotplug bridge
+  * @ctrl: PCIe hotplug controller
+@@ -98,7 +107,7 @@ void pciehp_unconfigure_device(struct controller *ctrl, =
+bool presence)
+ 		 __func__, pci_domain_nr(parent), parent->number);
+=20
+ 	if (!presence)
+-		pci_walk_bus(parent, pci_dev_set_disconnected, NULL);
++		pci_walk_bus(parent, pci_dev_disconnect, NULL);
+=20
+ 	pci_lock_rescan_remove();
+=20
+--=20
+2.34.1
+
