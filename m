@@ -2,138 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62637CDB474
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 11:35:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 533D7CDB482
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 11:40:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234147AbjJQLfJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Oct 2023 07:35:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41006 "EHLO
+        id S234819AbjJQLkQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Oct 2023 07:40:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45598 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232134AbjJQLfI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 07:35:08 -0400
-Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEB259F
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 04:35:06 -0700 (PDT)
-Received: by mail-yb1-xb29.google.com with SMTP id 3f1490d57ef6-d84c24a810dso6507494276.2
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 04:35:06 -0700 (PDT)
+        with ESMTP id S1343592AbjJQLkP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 07:40:15 -0400
+Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59953F0
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 04:40:14 -0700 (PDT)
+Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-d9a4c0d89f7so6504743276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 04:40:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1697542506; x=1698147306; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1697542813; x=1698147613; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Jh+5aQU0pWh4M7KFBM2yAImrXdsiEPZTnqVA8vzwMs4=;
-        b=eW0YDAW2YSLpZjyx6JZEEeogo/XdoINkNTPHfyWzziwmx4mnRTEPPtsDv+xGx76G1o
-         z4n/xnybWBA4Il5VetUImLFrG8GYU95QROw7AYHGF0BJJidkKzmc8IFfSPsCCjQnY7I1
-         95rcoT5jjC+dNOoi4lry01bFIbQhU/qQS8JMtvnkzNT2NnmOxTD85bOV5XFpa7Yx5Am+
-         TCrNoogpJGib1jEKIw/YYAjmn3gHd5zCi5Y4q83baKraLGeMSBcfJqSG7HJzUF6SsqUQ
-         qUtSW9tYftCY5HIRRlGqi9DcF6b0ecs14YKrDExqaJOBxYh8CoR9bb/v1bUtMO1peomh
-         11JQ==
+        bh=KXDyMdltPzLTsZkp8ftWuE4NIQhI/BZYDqBTjUXxHpg=;
+        b=pRNhleR3aqv2gUp2ILsT0DWoTVxJ7f80X+IfEmYUuS1rHqYY2YBvG3gconO8idqzqe
+         5UO0tUJMti7Xag10emIfznJTMfHXZ0OTmEegq3X9EHHgDqegBf+mpDG3lH3ZOvdS5TqB
+         I6umH968YdhDjK3fSZVipZSauCSMGcRfVPaDhIKRNOou8nH7nZnKcsoiF7k5bQgjAWYP
+         x3hBt0geZ+TZS0Vn3WtZxlhTNMtN50BoabwwgfkG/Oxe3VgxpSLi8fwafmewCOQ8a1AU
+         GsHE6BMk28P7q3NUJDIqgg+/7d7p/ufVxlcn9SugBcB41al4M4o2impCCSF61KLuXmNn
+         LHsg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697542506; x=1698147306;
+        d=1e100.net; s=20230601; t=1697542813; x=1698147613;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Jh+5aQU0pWh4M7KFBM2yAImrXdsiEPZTnqVA8vzwMs4=;
-        b=F2WJKlDc+BFumddFAhMSykBm4rQEzgidGmUlrk11sToePOzEp5KH1ggdrH9uTNE0MC
-         p2I8lLp/apkLXHJ7qp8dXwQUexKnom1YrL5HewSNUGV4OdamAhgvnbRxFfKvI1sQVeoX
-         kH52trY5wNcZbEmQSSux4yayHaHfxQZMdHfOTEqQF4elAcUiW4UdJ8IBUhI3rCSt2neY
-         svFWhSq8k3BGelnEmS+8E0bP01qXH50/vpmBVuSAKVYyFozdTp1h/GKrDchsSryDeD9g
-         C+ajqf1RGcJz9Sjo17Q+2wpM6i0jhnIT6Tu6FUdw7Vd/0lWc7yY9WQmCQ68/J202j3R6
-         JJWg==
-X-Gm-Message-State: AOJu0Yx+ckJK21Ah1TxPq2Kucesgq6xUibjtGOPzCnGs2zm2l3gBhllD
-        2AthKZpdJAmcOUdptNrWud2dMeJ6LRGUtETp3BOkJP/go4MDCGf2G9Q=
-X-Google-Smtp-Source: AGHT+IGHdjJGGj0qOIsIHXU7mAj9gkYSebk88P1C0BYV3GvOngTvN/VwF0VvcpRKS5V4O53REvIJzXBcmxAK8iZXhI8=
-X-Received: by 2002:a25:ec09:0:b0:d78:6f1:41b4 with SMTP id
- j9-20020a25ec09000000b00d7806f141b4mr1627528ybh.30.1697542506166; Tue, 17 Oct
- 2023 04:35:06 -0700 (PDT)
+        bh=KXDyMdltPzLTsZkp8ftWuE4NIQhI/BZYDqBTjUXxHpg=;
+        b=mOnjTaAeYO3DcjTwhTbtSTW9yK/VfSVX17s3sbNyrth/8rakk4Iuum7LlnkQxOJ9Nj
+         A125JoCsGQ3Z6WEIEQ0g7SH9Wz8MMxQcPYxWxSsdKUndTj0WtCsY98a7qUhkdxaZxfHi
+         JP3SLG6Tmp+bof2SKSqy4c2Env43Tw6mL0ORYux8xKMsWarn3knpT4Rd4moyFBT/FAXo
+         qK6ZiKS3EXPbLDLu0+DbRbtnTaX972fmOOinIBTp2CDN++z1XuI4NR3bAuBGVfoDP0E5
+         YXP9O/2+Nbb6sMQg7twJ6BkovBFsMYX5Ma4Y6jYyNi69WdYHjxDFS6iaM8FTRkQUfg7b
+         7/2Q==
+X-Gm-Message-State: AOJu0YwqugDhnXG8LNmz7IfOOdP4JL/jkzhlvKRaLClGj4nVt5tlcbMv
+        qpsHnnZTTBCLUSNod2Z5dVCV5XV5f8wHp+1ftJ9BMQ==
+X-Google-Smtp-Source: AGHT+IFED1xyGlNdLMZQbNUNCAPdsokCDKZpZ2zi02FKoDWhkno3Kz5zKfe5mf26mU7SR7ZYm6ok6EHAjVDTg6uMokg=
+X-Received: by 2002:a25:7352:0:b0:d71:6b6e:1071 with SMTP id
+ o79-20020a257352000000b00d716b6e1071mr1697738ybc.32.1697542813581; Tue, 17
+ Oct 2023 04:40:13 -0700 (PDT)
 MIME-Version: 1.0
-References: <20231017073129.1406748-1-haibo.chen@nxp.com>
-In-Reply-To: <20231017073129.1406748-1-haibo.chen@nxp.com>
+References: <20231017061336.9355-1-quic_sartgarg@quicinc.com>
+In-Reply-To: <20231017061336.9355-1-quic_sartgarg@quicinc.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 17 Oct 2023 13:34:30 +0200
-Message-ID: <CAPDyKFrffRvM51ZSzEffH9iHOWr7A0tu_e7aub7GiXdG49-iNA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: sdhci-esdhc-imx: let usr to config the wakeup
- for gpio cd pin through sysfs
-To:     haibo.chen@nxp.com
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-imx@nxp.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
-        kernel@pengutronix.de, festevam@gmail.com
+Date:   Tue, 17 Oct 2023 13:39:37 +0200
+Message-ID: <CAPDyKFrxf4wAyJ94g5LYymSZgDJRWvSCy6C73xyYBfxiV+L83g@mail.gmail.com>
+Subject: Re: [PATCH V3 0/3] mmc: Add partial initialization support
+To:     Sarthak Garg <quic_sartgarg@quicinc.com>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com,
+        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
+        kernel@quicinc.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 17 Oct 2023 at 09:26, <haibo.chen@nxp.com> wrote:
+On Tue, 17 Oct 2023 at 08:13, Sarthak Garg <quic_sartgarg@quicinc.com> wrote:
 >
-> From: Haibo Chen <haibo.chen@nxp.com>
+> Add the ability to partially initialize the MMC device by
+> using device sleep/awake sequence (CMD5).
+> Device will be sent to sleep state during mmc runtime/system suspend
+> and will be woken up during mmc runtime/system resume.
+> By using this sequence the device doesn't need full initialization
+> which gives 25% time reduction in system/runtime resume path.
+> Also enable this feature along with mmc runtime PM for qualcomm
+> controllers.
 >
-> Currently default enable the gpio cd pin wakeup, this will waste
-> power after system suspend if usr do not need this cd pin wakeup
-> feature. Now let usr to config the wakeup for gpio cd pin through
-> sysfs.
+> Sarthak Garg (3):
+>   mmc: core: Add partial initialization support
+>   mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for Qualcomm controllers
+>   mmc: sdhci-msm: Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers
 >
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++++----
->  1 file changed, 10 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 40a6e2f8145a..2e46648344ba 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1797,9 +1797,12 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->         /*
->          * Setup the wakeup capability here, let user to decide
->          * whether need to enable this wakeup through sysfs interface.
-> +        * First check the SDIO device, second check the gpio CD pin.
->          */
-> -       if ((host->mmc->pm_caps & MMC_PM_KEEP_POWER) &&
-> -                       (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ))
-> +       if (((host->mmc->pm_caps & MMC_PM_KEEP_POWER) &&
-> +                       (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)) ||
-> +           ((host->mmc->caps & MMC_CAP_CD_WAKE) &&
-> +                        host->mmc->slot.cd_irq >= 0))
->                 device_set_wakeup_capable(&pdev->dev, true);
+>  drivers/mmc/core/mmc.c       | 163 +++++++++++++++++++++++++++++++++--
+>  drivers/mmc/host/sdhci-msm.c |   2 +
+>  include/linux/mmc/card.h     |   4 +
+>  include/linux/mmc/host.h     |   2 +
+>  4 files changed, 162 insertions(+), 9 deletions(-)
 
-If the wakeup is GPIO based, it doesn't mean that the device is wakeup
-capable, so this is wrong.
-
-In principle this must be managed through the GPIO irqchip driver instead.
-
->
->         pm_runtime_set_active(&pdev->dev);
-> @@ -1878,7 +1881,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
->         if (ret)
->                 return ret;
->
-> -       ret = mmc_gpio_set_cd_wake(host->mmc, true);
-> +       if (device_may_wakeup(dev))
-
-As I indicated above. It's not really the device that corresponds to
-the mmc controller that can wake up the system, but rather the gpio
-irqchip.
-
-> +               ret = mmc_gpio_set_cd_wake(host->mmc, true);
->
->         return ret;
->  }
-> @@ -1901,8 +1905,10 @@ static int sdhci_esdhc_resume(struct device *dev)
->
->         if (host->mmc->caps2 & MMC_CAP2_CQE)
->                 ret = cqhci_resume(host->mmc);
-> +       if (ret)
-> +               return ret;
->
-> -       if (!ret)
-> +       if (device_may_wakeup(dev))
-
-Ditto.
-
->                 ret = mmc_gpio_set_cd_wake(host->mmc, false);
->
->         return ret;
-> --
-> 2.34.1
->
+Would mind resending this version and while doing that, please add
+some version information to each patch in the series. This helps while
+reviewing.
 
 Kind regards
 Uffe
