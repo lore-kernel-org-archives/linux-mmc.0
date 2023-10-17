@@ -2,105 +2,76 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20636CDB487
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 06:13:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDD75C46CA1
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 07:10:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234544AbjJQGN6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Oct 2023 02:13:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35516 "EHLO
+        id S234539AbjJQHKY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Oct 2023 03:10:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234535AbjJQGN6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 02:13:58 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B91ECAB;
-        Mon, 16 Oct 2023 23:13:56 -0700 (PDT)
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 39H4qhHo013255;
-        Tue, 17 Oct 2023 06:13:51 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references; s=qcppdkim1;
- bh=CUQyzaS/rAzu/i//gN/H3XFAidpt6/VMRPrMfGI20Zw=;
- b=KNEOJtIvJAA8UyOirlkHCY18PZDnWVaUoZ29A+J3iTq89lQxJDokVECHI42mvnon5odO
- mYXqLSplcaKoleEvA/177fy0ouWyC3utunKip0H6ZgB3euBeDOZQRrq90JqYWf79V7KJ
- avWJ0F8W7dtIA8HODe9CF1ZKz7CLgOg/mvN2G7JFk233q+0B3ktlZPcccJtSvZJyUexV
- Dwui9YE9rdR7UIhCn8ksp31ZP/4LlOqUTdFOzL80XYKN64o+wdrZnCBea8ONwEReLlmk
- 1B44CDfUMmhs4B2byKP+LLgB+BeVsSux9FwpnET9qzJjfUi3qpSTaZ5FVLulSf6jebFU qg== 
-Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3tsaf0s7ry-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 17 Oct 2023 06:13:51 +0000
-Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-        by APBLRPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTP id 39H6DlAO029592;
-        Tue, 17 Oct 2023 06:13:48 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3tqm2m0cc5-1;
-        Tue, 17 Oct 2023 06:13:48 +0000
-Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 39H6DmIT029600;
-        Tue, 17 Oct 2023 06:13:48 GMT
-Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
-        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 39H6DlWo029599;
-        Tue, 17 Oct 2023 06:13:48 +0000
-Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
-        id 59EBF57132F; Tue, 17 Oct 2023 11:43:47 +0530 (+0530)
-From:   Sarthak Garg <quic_sartgarg@quicinc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com,
-        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
-        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
-        kernel@quicinc.com, Sarthak Garg <quic_sartgarg@quicinc.com>
-Subject: [PATCH V3 3/3] mmc: sdhci-msm: Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers
-Date:   Tue, 17 Oct 2023 11:43:36 +0530
-Message-Id: <20231017061336.9355-4-quic_sartgarg@quicinc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20231017061336.9355-1-quic_sartgarg@quicinc.com>
-References: <20231017061336.9355-1-quic_sartgarg@quicinc.com>
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: rCLz6Mac_WWNiJ_Lp2mQv3xIOlHvUHAA
-X-Proofpoint-ORIG-GUID: rCLz6Mac_WWNiJ_Lp2mQv3xIOlHvUHAA
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-10-16_13,2023-10-12_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 suspectscore=0
- priorityscore=1501 bulkscore=0 adultscore=0 mlxlogscore=959 malwarescore=0
- mlxscore=0 impostorscore=0 spamscore=0 lowpriorityscore=0 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2309180000
- definitions=main-2310170049
+        with ESMTP id S229666AbjJQHKW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 03:10:22 -0400
+Received: from bmailout1.hostsharing.net (bmailout1.hostsharing.net [IPv6:2a01:37:1000::53df:5f64:0])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B6488E;
+        Tue, 17 Oct 2023 00:10:21 -0700 (PDT)
+Received: from h08.hostsharing.net (h08.hostsharing.net [IPv6:2a01:37:1000::53df:5f1c:0])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256
+         client-signature RSA-PSS (4096 bits) client-digest SHA256)
+        (Client CN "*.hostsharing.net", Issuer "RapidSSL Global TLS RSA4096 SHA256 2022 CA1" (verified OK))
+        by bmailout1.hostsharing.net (Postfix) with ESMTPS id D6555300000A6;
+        Tue, 17 Oct 2023 09:10:14 +0200 (CEST)
+Received: by h08.hostsharing.net (Postfix, from userid 100393)
+        id CE0DA4DD3C9; Tue, 17 Oct 2023 09:10:14 +0200 (CEST)
+Date:   Tue, 17 Oct 2023 09:10:14 +0200
+From:   Lukas Wunner <lukas@wunner.de>
+To:     Ricky WU <ricky_wu@realtek.com>
+Cc:     Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        "bhelgaas@google.com" <bhelgaas@google.com>,
+        "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+        "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on
+ PCIe Link Down
+Message-ID: <20231017071014.GA4592@wunner.de>
+References: <20231016040132.23824-1-kai.heng.feng@canonical.com>
+ <20231016093210.GA22952@wunner.de>
+ <CAAd53p7gbWSkRbng205z2U0_kU42JeFw8qThcBuXuVwCC+Y_VQ@mail.gmail.com>
+ <24f72eea9fba45c4b1cd85836b17f251@realtek.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <24f72eea9fba45c4b1cd85836b17f251@realtek.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers to let them use
-sleep/awake functionality for faster eMMC resume instead of
-doing full initialization.
+[cc -= unrelated mailing lists bpf, kernel-hardening]
 
-Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
----
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
+On Tue, Oct 17, 2023 at 05:44:13AM +0000, Ricky WU wrote:
+> > From: Kai-Heng Feng <kai.heng.feng@canonical.com>
+> > On Mon, Oct 16, 2023 at 5:32???PM Lukas Wunner <lukas@wunner.de> wrote:
+> > > On Mon, Oct 16, 2023 at 12:01:31PM +0800, Kai-Heng Feng wrote:
+> > > > When inserting an SD7.0 card to Realtek card reader, it can trigger
+> > > > PCI slot Link down and causes the following error:
+> > >
+> > > Why does *inserting* a card cause a Link Down?
+> > 
+> > Ricky, do you know the reason why Link Down happens?
+> 
+> Because SD7.0 card is use pcie-nvme driver, reader need to re-link
+> then just do the pcie channel
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 93c662e28b3b..edcf18c02bf7 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2628,6 +2628,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 
- 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
- 	msm_host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
-+	msm_host->mmc->caps2 |= MMC_CAP2_SLEEP_AWAKE;
- 
- 	/* Set the timeout value to max possible */
- 	host->max_timeout_count = 0xF;
--- 
-2.17.1
+I don't quite follow.  I don't see a pcie-nvme driver in Linus'
+current master branch.  Which driver are you referring to?
 
+What does "re-link" mean?  Rebind to a different driver?
+
+Thanks,
+
+Lukas
