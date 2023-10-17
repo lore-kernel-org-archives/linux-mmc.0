@@ -2,98 +2,194 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 533D7CDB482
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 11:40:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75171CDB474
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 20:45:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234819AbjJQLkQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Oct 2023 07:40:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45598 "EHLO
+        id S235053AbjJQUpW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Oct 2023 16:45:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56108 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343592AbjJQLkP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 07:40:15 -0400
-Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59953F0
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 04:40:14 -0700 (PDT)
-Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-d9a4c0d89f7so6504743276.1
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 04:40:14 -0700 (PDT)
+        with ESMTP id S234861AbjJQUpV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 16:45:21 -0400
+Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D05C9F
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 13:45:18 -0700 (PDT)
+Received: by mail-pj1-x1036.google.com with SMTP id 98e67ed59e1d1-27d087c4276so3974795a91.0
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 13:45:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1697542813; x=1698147613; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=KXDyMdltPzLTsZkp8ftWuE4NIQhI/BZYDqBTjUXxHpg=;
-        b=pRNhleR3aqv2gUp2ILsT0DWoTVxJ7f80X+IfEmYUuS1rHqYY2YBvG3gconO8idqzqe
-         5UO0tUJMti7Xag10emIfznJTMfHXZ0OTmEegq3X9EHHgDqegBf+mpDG3lH3ZOvdS5TqB
-         I6umH968YdhDjK3fSZVipZSauCSMGcRfVPaDhIKRNOou8nH7nZnKcsoiF7k5bQgjAWYP
-         x3hBt0geZ+TZS0Vn3WtZxlhTNMtN50BoabwwgfkG/Oxe3VgxpSLi8fwafmewCOQ8a1AU
-         GsHE6BMk28P7q3NUJDIqgg+/7d7p/ufVxlcn9SugBcB41al4M4o2impCCSF61KLuXmNn
-         LHsg==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1697575518; x=1698180318; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=LxSIBmQz2nzN43tuJvXgr33AyYK24pg3YInpukZ8g2Y=;
+        b=B9y2TqsSYT6/6+G+1/RsWCVwv9khIshp+yAoaoh7JocCjM5A6AK9jrGKPkAQ8rErzQ
+         vNqhEnK/Kky5b9k3Bme8b327MAk0LqAhssQMERMtfcRCQ3f6gtbrvUNdCaDFFnHrvVDD
+         0ffRgp957HvYVtH9KU+i6zc/DT8KEiaRR30B+8+W2K7zfDAAyuplB5r4GnF+ld5diBl3
+         j1qGd1vMgJ5Jmw2PRUarRZaEebZSMBuoGZoMaNA+RbDNLGfMOiYP+5aIk+jKuzzfSXSU
+         owfQVgtAblKD++6C3oGQ9DeXbSRym67yJ6VjZZrmkoCycJrNI4NgYUocIsm85jEmErjF
+         VfUA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697542813; x=1698147613;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1697575518; x=1698180318;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=KXDyMdltPzLTsZkp8ftWuE4NIQhI/BZYDqBTjUXxHpg=;
-        b=mOnjTaAeYO3DcjTwhTbtSTW9yK/VfSVX17s3sbNyrth/8rakk4Iuum7LlnkQxOJ9Nj
-         A125JoCsGQ3Z6WEIEQ0g7SH9Wz8MMxQcPYxWxSsdKUndTj0WtCsY98a7qUhkdxaZxfHi
-         JP3SLG6Tmp+bof2SKSqy4c2Env43Tw6mL0ORYux8xKMsWarn3knpT4Rd4moyFBT/FAXo
-         qK6ZiKS3EXPbLDLu0+DbRbtnTaX972fmOOinIBTp2CDN++z1XuI4NR3bAuBGVfoDP0E5
-         YXP9O/2+Nbb6sMQg7twJ6BkovBFsMYX5Ma4Y6jYyNi69WdYHjxDFS6iaM8FTRkQUfg7b
-         7/2Q==
-X-Gm-Message-State: AOJu0YwqugDhnXG8LNmz7IfOOdP4JL/jkzhlvKRaLClGj4nVt5tlcbMv
-        qpsHnnZTTBCLUSNod2Z5dVCV5XV5f8wHp+1ftJ9BMQ==
-X-Google-Smtp-Source: AGHT+IFED1xyGlNdLMZQbNUNCAPdsokCDKZpZ2zi02FKoDWhkno3Kz5zKfe5mf26mU7SR7ZYm6ok6EHAjVDTg6uMokg=
-X-Received: by 2002:a25:7352:0:b0:d71:6b6e:1071 with SMTP id
- o79-20020a257352000000b00d716b6e1071mr1697738ybc.32.1697542813581; Tue, 17
- Oct 2023 04:40:13 -0700 (PDT)
+        bh=LxSIBmQz2nzN43tuJvXgr33AyYK24pg3YInpukZ8g2Y=;
+        b=c9KU/KeRFCx+DBUvRPz97I97kya8lfIIRAxKc+nFelrJFJ3KRWyz+YjJjiz/pRKDuU
+         yX6m13lUZS2MmcpOS8hE08R+yyUgHeWLz2PVrsCAymIbD6YU8IxOVgAVaVb9jW49BVh8
+         HIhIiOkT0/KNuxGMLR/kpsq0SyhOhy7vAKh+r7Ie20mp4nztVeWOJcseQsrEoQdld/Gk
+         g2/O9m6QIrrFg50YG/YVpi04p+0gYZOzCc1PXauWj3TWTvX+l/AKPDz6yHfEYHvsCMt3
+         sJtuGZBiu4dQyH27CqhB0JaZG7exwuJuW/yCEB1eDetBKODhJMXAVUrhc+dF8503+O6I
+         YS0Q==
+X-Gm-Message-State: AOJu0YykCnLYr7HDM27QXVdToXHF14Jy7D5ZWRH+isTBlqHyht8cIViZ
+        09nlDE+DdmZBcPyY4MBWFc0jQA==
+X-Google-Smtp-Source: AGHT+IFzJBpA/osTxmw5CvOrsRL5plxYtpf8lG+Mm3dt4Rotbz+ybbQ/LDywALGz5jTJgjIGw8pp0w==
+X-Received: by 2002:a17:90a:f016:b0:27d:5562:7e13 with SMTP id bt22-20020a17090af01600b0027d55627e13mr3240948pjb.39.1697575517762;
+        Tue, 17 Oct 2023 13:45:17 -0700 (PDT)
+Received: from [127.0.1.1] ([2601:1c2:1800:f680:51d6:dcd6:63ef:52e9])
+        by smtp.gmail.com with ESMTPSA id w3-20020a17090a6b8300b0027b168cb011sm1906553pjj.56.2023.10.17.13.45.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Oct 2023 13:45:17 -0700 (PDT)
+From:   Drew Fustini <dfustini@baylibre.com>
+Subject: [PATCH v2 0/7] RISC-V: Add eMMC support for TH1520 boards
+Date:   Tue, 17 Oct 2023 13:43:46 -0700
+Message-Id: <20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com>
 MIME-Version: 1.0
-References: <20231017061336.9355-1-quic_sartgarg@quicinc.com>
-In-Reply-To: <20231017061336.9355-1-quic_sartgarg@quicinc.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 17 Oct 2023 13:39:37 +0200
-Message-ID: <CAPDyKFrxf4wAyJ94g5LYymSZgDJRWvSCy6C73xyYBfxiV+L83g@mail.gmail.com>
-Subject: Re: [PATCH V3 0/3] mmc: Add partial initialization support
-To:     Sarthak Garg <quic_sartgarg@quicinc.com>
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAALyLmUC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyjHQUlJIzE
+ vPSU3UzU4B8JSMDI2NDA0Nz3ZIMQ1MjA93c3GTdJPNkc6Mk8zRTs+QUJaCGgqLUtMwKsGHRsbW
+ 1AASy3pBcAAAA
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com,
-        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
-        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
-        kernel@quicinc.com
-Content-Type: text/plain; charset="UTF-8"
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>
+Cc:     Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org,
+        Drew Fustini <dfustini@baylibre.com>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1697575515; l=5162;
+ i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
+ bh=K6rdsAPr1vXHC5xTVFVy88n0dRbfsZMxmc2k9uxN7lo=;
+ b=Lt9RrBX66jSFJmoddQy70k+my3zF/pfH9E0S2dA14umnHcFtXPuS1Wjqv6MwoMNDeEykaC5+Q
+ ahCGi0feIs3CMydlzfeYmCl0KyGCaaVc9QrO4s3LkP0nvKdmrDwKwkY
+X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
+ pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 17 Oct 2023 at 08:13, Sarthak Garg <quic_sartgarg@quicinc.com> wrote:
->
-> Add the ability to partially initialize the MMC device by
-> using device sleep/awake sequence (CMD5).
-> Device will be sent to sleep state during mmc runtime/system suspend
-> and will be woken up during mmc runtime/system resume.
-> By using this sequence the device doesn't need full initialization
-> which gives 25% time reduction in system/runtime resume path.
-> Also enable this feature along with mmc runtime PM for qualcomm
-> controllers.
->
-> Sarthak Garg (3):
->   mmc: core: Add partial initialization support
->   mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for Qualcomm controllers
->   mmc: sdhci-msm: Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers
->
->  drivers/mmc/core/mmc.c       | 163 +++++++++++++++++++++++++++++++++--
->  drivers/mmc/host/sdhci-msm.c |   2 +
->  include/linux/mmc/card.h     |   4 +
->  include/linux/mmc/host.h     |   2 +
->  4 files changed, 162 insertions(+), 9 deletions(-)
+This series adds support for the eMMC on the BeagleV Ahead and the
+Sipeed LicheePi 4A. This allows the kernel to boot with the rootfs on
+eMMC.
 
-Would mind resending this version and while doing that, please add
-some version information to each patch in the series. This helps while
-reviewing.
+I tested on top of v6.6-rc6 with riscv defconfig. I was able to boot
+both the Ahead [1] and LPi4a [2] from eMMC. The following prerequisites
+are required:
 
-Kind regards
-Uffe
+  [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [3]
+
+I pushed a branch [4] with this patch series and the above patch for
+those that find a git branch easier to test.
+
+Please note that only the MMC controller connected to the eMMC device
+is enabled in the device trees for these two boards. I did not yet
+attempt to configure and use the microSD card slot. My preference is to
+address that in a future patch series.
+
+References:
+[1] https://gist.github.com/pdp7/7850027e8d256b6fd9cd53080240f0f6
+[2] https://gist.github.com/pdp7/fae4637378426723508b679420a0a5a1
+[3] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
+[4] https://github.com/pdp7/linux/tree/b4/th1520-mmc
+
+Changes in PATCH v2:
+- make use of BIT(), GENMASK(), FIELD_PREP(), FIELD_GET()
+- add EXPORT_SYMBOL_GPL(__sdhci_execute_tuning)
+- call th1520_phy_1_8v_init() when FLAG_IO_FIXED_1V8 is set
+- set DWCMSHC_CARD_IS_EMMC when mmc caps contains MMC_CAP_NONREMOVABLE
+- remove manipulation of AT_CTRL_AT_EN from th1520_set_uhs_signaling()
+- remove unneccessary cycle of enabling and disabling AT_CTRL_AT_EN in
+  th1520_execute_tuning()
+- remove th1520_phy_1_8v_init_no_pull()
+- remove th1520_phy_3_3v_init_no_pull()
+- remove FLAG_PULL_UP_EN from priv->flags
+- remove thead,phy-pull-up device tree property
+
+Changes in PACH v1:
+https://lore.kernel.org/all/20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com/
+- ADMA mode now works correctly due to a patch from Jisheng on the list
+  ("riscv: dts: thead: set dma-noncoherent to soc bus") and this commit
+  from Icenowy that is now merged: 8eb8fe67e2c8 ("riscv: errata: fix
+  T-Head dcache.cva encoding").
+- Expose __sdhci_execute_tuning from sdhci.c so that it can be called
+  from th1520_execute_tuning()
+- Refactor the define macros for all the PHY related registers to make
+  it easier to understand the bit fields that the code is manipulating
+- Replace magic numbers in the PHY register writes with proper defines 
+- Replace non_removable in dwcmshc_priv with check of mmc_host.caps
+- Drop dt prop "thead,io-fixed-1v8" and instead check for existing
+  properties: "mmc-ddr-1_8v", "mmc-hs200-1_8v", or "mmc-hs400-1_8v"
+- Rename dt prop from "thead,pull-up" to "thead,phy-pull-up" and
+  improve the description in the dt binding
+- Replace pull_up_en in dwcmshc_priv with bit field in new flags field
+- Create th1520_set_uhs_signaling() and call dwcmshc_set_uhs_signaling()
+  from it instead of adding th1520 code to dwcmshc_set_uhs_signaling()
+- Return -EIO instead of -1 upon errors in th1520_execute_tuning()
+
+Changes in RFC v2:
+https://lore.kernel.org/linux-riscv/20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com/
+- Expand dwcmshc_priv based on driver in the T-Head 5.10 kernel:
+  delay_line, non_removable, pull_up_en, io_fixed_1v8
+- New boolean property "thead,pull-up" indicates phy pull-up config
+- New boolean property "thead,io-fixed-1v8" indicates that io voltage
+  should be set to 1.8V during reset
+- Add th1520_phy_1_8v_init() as voltage_switch op
+- Add th1520_execute_tuning() as the platform_execute_tuning op
+- Added th1520_sdhci_reset() as the .reset op. This function will set
+  io voltage to 1.8V after calling the standard sdhci_reset() function.
+- Modified dwcmshc_set_uhs_signaling() to enable SDHCI_CTRL_VDD_180 when
+  io_fixed_1v8 is true
+- Add many defines for register offsets and settings based on the mmc
+  support in the T-Head downstream v5.10 kernel
+
+RFC v1 series:
+https://lore.kernel.org/r/20230724-th1520-emmc-v1-0-cca1b2533da2@baylibre.com
+
+Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+---
+Drew Fustini (7):
+      dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head TH1520 support
+      mmc: sdhci: add __sdhci_execute_tuning() to header
+      mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520
+      riscv: defconfig: Enable mmc and dma drivers for T-Head TH1520
+      riscv: dts: thead: Add TH1520 mmc controller and sdhci clock
+      riscv: dts: thead: Enable BeagleV Ahead eMMC controller
+      riscv: dts: thead: Enable LicheePi 4A eMMC controller
+
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |   1 +
+ arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts |  14 +
+ .../boot/dts/thead/th1520-lichee-module-4a.dtsi    |  14 +
+ arch/riscv/boot/dts/thead/th1520.dtsi              |  15 +
+ arch/riscv/configs/defconfig                       |   2 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c                | 358 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c                           |   3 +-
+ drivers/mmc/host/sdhci.h                           |   1 +
+ 8 files changed, 407 insertions(+), 1 deletion(-)
+---
+base-commit: f4c03b3d6c4bdafbb7885ccb84b095001eab1b88
+change-id: 20231017-th1520-mmc-b7c72b7f56cd
+
+Best regards,
+-- 
+Drew Fustini <dfustini@baylibre.com>
+
