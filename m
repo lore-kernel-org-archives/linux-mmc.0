@@ -2,110 +2,102 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68790C41513
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 05:45:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79777CDB483
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 06:13:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234546AbjJQFpd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Oct 2023 01:45:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39952 "EHLO
+        id S234490AbjJQGN4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Oct 2023 02:13:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234471AbjJQFpZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 01:45:25 -0400
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79247EA;
-        Mon, 16 Oct 2023 22:45:20 -0700 (PDT)
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 39H5iEadD3730461, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-        by rtits2.realtek.com.tw (8.15.2/2.93/5.92) with ESMTPS id 39H5iEadD3730461
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 17 Oct 2023 13:44:15 +0800
-Received: from RTEXMBS02.realtek.com.tw (172.21.6.95) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.32; Tue, 17 Oct 2023 13:44:13 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXMBS02.realtek.com.tw (172.21.6.95) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Tue, 17 Oct 2023 13:44:13 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b]) by
- RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b%5]) with mapi id
- 15.01.2375.007; Tue, 17 Oct 2023 13:44:13 +0800
-From:   Ricky WU <ricky_wu@realtek.com>
-To:     Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        Lukas Wunner <lukas@wunner.de>
-CC:     "bhelgaas@google.com" <bhelgaas@google.com>,
-        "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        Tony Luck <tony.luck@intel.com>,
-        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
-        "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-hardening@vger.kernel.org" <linux-hardening@vger.kernel.org>,
-        "bpf@vger.kernel.org" <bpf@vger.kernel.org>
-Subject: RE: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on PCIe Link Down
-Thread-Topic: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on
- PCIe Link Down
-Thread-Index: AQHZ/+WX29Sx+yjN7keHtkFSV38Z/LBLoV4AgAE/YwCAAJeMcA==
-Date:   Tue, 17 Oct 2023 05:44:13 +0000
-Message-ID: <24f72eea9fba45c4b1cd85836b17f251@realtek.com>
-References: <20231016040132.23824-1-kai.heng.feng@canonical.com>
- <20231016093210.GA22952@wunner.de>
- <CAAd53p7gbWSkRbng205z2U0_kU42JeFw8qThcBuXuVwCC+Y_VQ@mail.gmail.com>
-In-Reply-To: <CAAd53p7gbWSkRbng205z2U0_kU42JeFw8qThcBuXuVwCC+Y_VQ@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-x-originating-ip: [172.22.81.100]
-x-kse-serverinfo: RTEXMBS02.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+        with ESMTP id S234440AbjJQGNz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 02:13:55 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 558DCAB;
+        Mon, 16 Oct 2023 23:13:54 -0700 (PDT)
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 39H4mdLo016056;
+        Tue, 17 Oct 2023 06:13:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id; s=qcppdkim1;
+ bh=w1Mol4MP7APj2xbyT9s28I1re0Vh9rW7ZHhQs98Rm90=;
+ b=OiIYU1Dqh7gIZ2o5cL370nHrWF/t7z3ZODP2hz5I01dhcce9ZBJGaFOQSojOTG9PM6pj
+ bvu2pzQpfWi3izJNFW/BMG87IwWfTWG4P5/1rkyMwKhwLNxHvcx/B2kuRXyIhQ2jrill
+ ej+lJF73rY1qHIbqSLscHEhpR4eWIKYgUWPHuYQX6eAVpTdG9UCXeuAlWgVq+KMUz+WC
+ fQRtr3jz/u59/ew27Ze3ekJeuO1qw7Lc7OPS1CV+vLdVI3C2eQlYsxgPWrYoBA8BReGO
+ lFInd8LlwMCsnRLtxYQ4W7qe6Rn8vA5rnWh5DtReTOXx8HLR6lIrWcmmiAojObDtH2pa 3A== 
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3ts49wac3d-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 17 Oct 2023 06:13:47 +0000
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+        by APBLRPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTP id 39H6Dicd029560;
+        Tue, 17 Oct 2023 06:13:44 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3tqm2m0cbj-1;
+        Tue, 17 Oct 2023 06:13:44 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 39H6Dixp029555;
+        Tue, 17 Oct 2023 06:13:44 GMT
+Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 39H6DhKG029554;
+        Tue, 17 Oct 2023 06:13:44 +0000
+Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
+        id 2978A57132F; Tue, 17 Oct 2023 11:43:43 +0530 (+0530)
+From:   Sarthak Garg <quic_sartgarg@quicinc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com,
+        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
+        kernel@quicinc.com, Sarthak Garg <quic_sartgarg@quicinc.com>
+Subject: [PATCH V3 0/3] mmc: Add partial initialization support
+Date:   Tue, 17 Oct 2023 11:43:33 +0530
+Message-Id: <20231017061336.9355-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.17.1
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: ksO7E3iGxCc4HGDtSEFQvulYDgbIc0bl
+X-Proofpoint-ORIG-GUID: ksO7E3iGxCc4HGDtSEFQvulYDgbIc0bl
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-10-16_13,2023-10-12_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 impostorscore=0
+ clxscore=1015 malwarescore=0 priorityscore=1501 mlxscore=0 spamscore=0
+ lowpriorityscore=0 mlxlogscore=630 bulkscore=0 suspectscore=0 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2309180000
+ definitions=main-2310170049
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogS2FpLUhlbmcgRmVuZyA8
-a2FpLmhlbmcuZmVuZ0BjYW5vbmljYWwuY29tPg0KPiANCj4gT24gTW9uLCBPY3QgMTYsIDIwMjMg
-YXQgNTozMuKAr1BNIEx1a2FzIFd1bm5lciA8bHVrYXNAd3VubmVyLmRlPiB3cm90ZToNCj4gPg0K
-PiA+IE9uIE1vbiwgT2N0IDE2LCAyMDIzIGF0IDEyOjAxOjMxUE0gKzA4MDAsIEthaS1IZW5nIEZl
-bmcgd3JvdGU6DQo+ID4gPiBXaGVuIGluc2VydGluZyBhbiBTRDcuMCBjYXJkIHRvIFJlYWx0ZWsg
-Y2FyZCByZWFkZXIsIGl0IGNhbiB0cmlnZ2VyDQo+ID4gPiBQQ0kgc2xvdCBMaW5rIGRvd24gYW5k
-IGNhdXNlcyB0aGUgZm9sbG93aW5nIGVycm9yOg0KPiA+DQo+ID4gV2h5IGRvZXMgKmluc2VydGlu
-ZyogYSBjYXJkIGNhdXNlIGEgTGluayBEb3duPw0KPiANCj4gUmlja3ksIGRvIHlvdSBrbm93IHRo
-ZSByZWFzb24gd2h5IExpbmsgRG93biBoYXBwZW5zPw0KPiANCg0KQmVjYXVzZSBTRDcuMCBjYXJk
-IGlzIHVzZSBwY2llLW52bWUgZHJpdmVyLCByZWFkZXIgbmVlZCB0byByZS1saW5rIHRoZW4ganVz
-dCBkbyB0aGUgcGNpZSBjaGFubmVsIA0KDQo+ID4NCj4gPg0KPiA+ID4gWyAgIDYzLjg5ODg2MV0g
-cGNpZXBvcnQgMDAwMDowMDoxYy4wOiBwY2llaHA6IFNsb3QoOCk6IExpbmsgRG93bg0KPiA+ID4g
-WyAgIDYzLjkxMjExOF0gQlVHOiB1bmFibGUgdG8gaGFuZGxlIHBhZ2UgZmF1bHQgZm9yIGFkZHJl
-c3M6DQo+IGZmZmZiMjRkNDAzZTUwMTANCj4gPiBbLi4uXQ0KPiA+ID4gWyAgIDYzLjkxMjE5OF0g
-ID8gYXNtX2V4Y19wYWdlX2ZhdWx0KzB4MjcvMHgzMA0KPiA+ID4gWyAgIDYzLjkxMjIwM10gID8g
-aW9yZWFkMzIrMHgyZS8weDcwDQo+ID4gPiBbICAgNjMuOTEyMjA2XSAgPyBydHN4X3BjaV93cml0
-ZV9yZWdpc3RlcisweDViLzB4OTAgW3J0c3hfcGNpXQ0KPiA+ID4gWyAgIDYzLjkxMjIxN10gIHJ0
-c3hfc2V0X2wxb2ZmX3N1YisweDFjLzB4MzAgW3J0c3hfcGNpXQ0KPiA+ID4gWyAgIDYzLjkxMjIy
-Nl0gIHJ0czUyNjFfc2V0X2wxb2ZmX2NmZ19zdWJfZDArMHgzNi8weDQwIFtydHN4X3BjaV0NCj4g
-PiA+IFsgICA2My45MTIyMzRdICBydHN4X3BjaV9ydW50aW1lX2lkbGUrMHhjNy8weDE2MCBbcnRz
-eF9wY2ldDQo+ID4gPiBbICAgNjMuOTEyMjQzXSAgPyBfX3BmeF9wY2lfcG1fcnVudGltZV9pZGxl
-KzB4MTAvMHgxMA0KPiA+ID4gWyAgIDYzLjkxMjI0Nl0gIHBjaV9wbV9ydW50aW1lX2lkbGUrMHgz
-NC8weDcwDQo+ID4gPiBbICAgNjMuOTEyMjQ4XSAgcnBtX2lkbGUrMHhjNC8weDJiMA0KPiA+ID4g
-WyAgIDYzLjkxMjI1MV0gIHBtX3J1bnRpbWVfd29yaysweDkzLzB4YzANCj4gPiA+IFsgICA2My45
-MTIyNTRdICBwcm9jZXNzX29uZV93b3JrKzB4MjFhLzB4NDMwDQo+ID4gPiBbICAgNjMuOTEyMjU4
-XSAgd29ya2VyX3RocmVhZCsweDRhLzB4M2MwDQo+ID4NCj4gPiBUaGlzIGxvb2tzIGxpa2UgcGNy
-LT5yZW1hcF9hZGRyIGlzIGFjY2Vzc2VkIGFmdGVyIGl0IGhhcyBiZWVuDQo+ID4gaW91bm1hcCdl
-ZCBpbiBydHN4X3BjaV9yZW1vdmUoKSBvciBiZWZvcmUgaXQgaGFzIGJlZW4gaW9tYXAnZWQgaW4N
-Cj4gcnRzeF9wY2lfcHJvYmUoKS4NCj4gPg0KPiA+IElzIHRoZSBjYXJkIHJlYWRlciBpdHNlbGYg
-bG9jYXRlZCBiZWxvdyBhIGhvdHBsdWcgcG9ydCBhbmQgdW5wbHVnZ2VkIGhlcmU/DQo+ID4gT3Ig
-aXMgdGhpcyBhYm91dCB0aGUgY2FyZCBiZWluZyByZW1vdmVkIGZyb20gdGhlIGNhcmQgcmVhZGVy
-Pw0KPiA+DQo+ID4gSGF2aW5nIGZ1bGwgZG1lc2cgb3V0cHV0IGFuZCBsc3BjaSAtdnZ2IG91dHB1
-dCBhdHRhY2hlZCB0byBhIGJ1Z3ppbGxhDQo+ID4gd291bGQgaGVscCB0byB1bmRlcnN0YW5kIHdo
-YXQgaXMgZ29pbmcgb24uDQo+IA0KPiBJIGRvbid0IGhhdmUgdGhlIGhhcmR3YXJlIHNvIHdlIG5l
-ZWQgUmlja3kgdG8gcHJvdmlkZSBtb3JlIGluZm9ybWF0aW9uIGhlcmUuDQo+IA0KPiBSZWdhcmRs
-ZXNzIG9mIHRoZSBjYXJkcmVhZGVyIGlzc3VlLCBkbyB5b3UgaGF2ZSBhbnkgY29uY2VybiBvbiB0
-aGUgcGF0Y2gNCj4gaXRzZWxmPw0KPiANCj4gS2FpLUhlbmcNCj4gDQo+ID4NCj4gPiBUaGFua3Ms
-DQo+ID4NCj4gPiBMdWthcw0K
+Add the ability to partially initialize the MMC device by
+using device sleep/awake sequence (CMD5).
+Device will be sent to sleep state during mmc runtime/system suspend
+and will be woken up during mmc runtime/system resume.
+By using this sequence the device doesn't need full initialization
+which gives 25% time reduction in system/runtime resume path.
+Also enable this feature along with mmc runtime PM for qualcomm
+controllers.
+
+Sarthak Garg (3):
+  mmc: core: Add partial initialization support
+  mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for Qualcomm controllers
+  mmc: sdhci-msm: Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers
+
+ drivers/mmc/core/mmc.c       | 163 +++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/sdhci-msm.c |   2 +
+ include/linux/mmc/card.h     |   4 +
+ include/linux/mmc/host.h     |   2 +
+ 4 files changed, 162 insertions(+), 9 deletions(-)
+
+-- 
+2.17.1
+
