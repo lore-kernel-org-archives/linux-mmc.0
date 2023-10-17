@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42227CDB474
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 20:45:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A148CDB484
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Oct 2023 20:45:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344321AbjJQUpq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Oct 2023 16:45:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33140 "EHLO
+        id S230056AbjJQUpy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Oct 2023 16:45:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33122 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235130AbjJQUpj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 16:45:39 -0400
-Received: from mail-pf1-x431.google.com (mail-pf1-x431.google.com [IPv6:2607:f8b0:4864:20::431])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53DEB11A
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 13:45:29 -0700 (PDT)
-Received: by mail-pf1-x431.google.com with SMTP id d2e1a72fcca58-6b36e1fcea0so3351626b3a.1
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 13:45:29 -0700 (PDT)
+        with ESMTP id S1344447AbjJQUpm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Oct 2023 16:45:42 -0400
+Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7306918C
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 13:45:34 -0700 (PDT)
+Received: by mail-pf1-x432.google.com with SMTP id d2e1a72fcca58-6b3c2607d9bso3599714b3a.1
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Oct 2023 13:45:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1697575528; x=1698180328; darn=vger.kernel.org;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1697575533; x=1698180333; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=FhR9frpmu/yAUsLJSS2gpg1w0JSCDYrDF2EFLnkclH4=;
-        b=AFT+/dHWRxUR3sfND5zipJY/NIX4nZu0FNYNEO7TwwgUoUEd48u/yqbF60YsZEZJ9w
-         4B0wyVWF5Pu+GipcJGNm/+pEUXYXWjHAlbCSDh5IbgZBmHzuK8DBR9J5+UfCdgwGJ9/7
-         mn+rOcV34Xce7DlT39xll4bXjhJ7IwZtFsRQT3Dt0XOAeObngJVhCqZPACVevlcCHBeQ
-         ANwBKrxJ0l7BeJi0pm2KOyQGlhFaOuKXfexHNmnDkVllv47gnp4uWFTvXiS5m49KJBMQ
-         UiowSchR0e8k/ix3UNLMdm/YX1z4pyA+ae7CT14Bb8sZLmxcLyYwtGAGlt4X5b0t8F1M
-         a6yA==
+        bh=nNiz/16GiKwF18nTvqrbS8bwq2F/L9RlRg7oWtEwZWs=;
+        b=IpKs7/swJqbXipEND0s1Z2aY/uAQELev+WpcjVNxhzdu01NfYOqwAr58VNRVHhWm6y
+         waY+z7DhfC4cV1aWpjN/RI+MmMD57fOgXKtem8rAX1lPWsUHqPwJdx6HeXJpjBhMFSKf
+         H7+N23XeB7+XjwgQLaywxIIdlO13P59j/D4bTDSezMmdiEw5BKWQelPsChZSomvBxU/B
+         PVdn8JfqSMpYfRQ4/cfv9FR+rYFkiupw24LHfRrRJ5hAsjJ8Dxaks+kiqdLO8LeRkrkl
+         mYPC7ITcm2t5VCri/BfFkEFn8RQPA/4miD6rbhBgvHGECNactqT3C61aOkNGE9YcPaoU
+         4elQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697575528; x=1698180328;
+        d=1e100.net; s=20230601; t=1697575533; x=1698180333;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=FhR9frpmu/yAUsLJSS2gpg1w0JSCDYrDF2EFLnkclH4=;
-        b=fyqtJ2EDORPTP4zTeIbi/DHCNPEAQ94J01cNRzy4FTPWNhB2c4qTGTUkQTDGiIVEnP
-         NFDNce67pTF4eOLnZQ5xySCHWqF+fgmoUy2tSa+5OUkwYtnesEm9g2RZw7e6NmfDYiG3
-         vfAqSZM0CGEGwteXnfTQEq/jc3YdHzVGCxIQtxIxOKoDmGYR2ldV2CYHuXelNXUpLFiz
-         BK5WVrXen/ktvJwmyJBW7LwsFIU3Z0X4HjqR6AQpn+EvZd6B0rdq9YDobEn11/yZbhGz
-         8Se4CmvfkKR7LolYfPdUjlTC/YWHAY8vSdasNytmyFZFw7XR5DYN9mUClocYmTuzpvNG
-         YXCg==
-X-Gm-Message-State: AOJu0YyaGJbQaRpuKJWccUyErmGCXmGXilgguwdx2odI5rLtioSBLWIx
-        /eym+K3Vtn5ZKebFhbEX+Qhtcw==
-X-Google-Smtp-Source: AGHT+IE7E/rW2mbc6xNEhKDqX9w4aYvx/W8/zfByPnf9rcrtNEjn1LkUl36z7pQ7qVPNU4UJBZy+Cw==
-X-Received: by 2002:a05:6a20:72ab:b0:15d:684d:f514 with SMTP id o43-20020a056a2072ab00b0015d684df514mr3481188pzk.6.1697575528704;
-        Tue, 17 Oct 2023 13:45:28 -0700 (PDT)
+        bh=nNiz/16GiKwF18nTvqrbS8bwq2F/L9RlRg7oWtEwZWs=;
+        b=jsdU+tXeoyI5ltXuPBqpf6eAhjTPmHVvtCQ101AMS0n4hM7VWYliJS0ZEfvsIlGPvw
+         EaxOk7J4ziCNgVqg185SCzA9YJ8SatWAUOg+U7JtqNw8T/BDgWdypu37/V2qaB0FZLh8
+         lCfD2THB1SPpJqe8eyBb1IaRyPEs7tEUm+pXJ8fYcTQY/epwHBo4fwI9Gkspg5YEiW64
+         P6tmS7886ArHciQG4GWt2ZkW9AyoAdjy9qA8O37ReG7Zq0CYvMXwwYt9iYSnRsGOkTSc
+         VIN8xWfQi/bwXdfjFdKVPQO7IrewP7SEFDoMOidwk73fwTyIclQx5vRLZ+Ojy+esDFIY
+         UzFQ==
+X-Gm-Message-State: AOJu0Yyvxfbuh9Wz/VmDhg6/OOaHP8Id4b4IXeIiJUEQppSgs1Dm/tnE
+        gY44799C3to1J/bQoCELYHVYsg==
+X-Google-Smtp-Source: AGHT+IEnhSQy2mXL6KTfLBhYz1ApnwfXeWRnJ9dLuptY6RRHFhHrPL3MUgmW3VKl54Wgp6BUsyffSQ==
+X-Received: by 2002:a05:6a20:7351:b0:14c:910d:972d with SMTP id v17-20020a056a20735100b0014c910d972dmr3485455pzc.12.1697575533216;
+        Tue, 17 Oct 2023 13:45:33 -0700 (PDT)
 Received: from [127.0.1.1] ([2601:1c2:1800:f680:51d6:dcd6:63ef:52e9])
-        by smtp.gmail.com with ESMTPSA id w3-20020a17090a6b8300b0027b168cb011sm1906553pjj.56.2023.10.17.13.45.26
+        by smtp.gmail.com with ESMTPSA id w3-20020a17090a6b8300b0027b168cb011sm1906553pjj.56.2023.10.17.13.45.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 Oct 2023 13:45:28 -0700 (PDT)
+        Tue, 17 Oct 2023 13:45:33 -0700 (PDT)
 From:   Drew Fustini <dfustini@baylibre.com>
-Date:   Tue, 17 Oct 2023 13:43:51 -0700
-Subject: [PATCH v2 5/7] riscv: dts: thead: Add TH1520 mmc controller and
- sdhci clock
+Date:   Tue, 17 Oct 2023 13:43:53 -0700
+Subject: [PATCH v2 7/7] riscv: dts: thead: Enable LicheePi 4A eMMC
+ controller
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20231017-th1520-mmc-v2-5-4678c8cc4048@baylibre.com>
+Message-Id: <20231017-th1520-mmc-v2-7-4678c8cc4048@baylibre.com>
 References: <20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com>
 In-Reply-To: <20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -78,58 +78,54 @@ Cc:     Robert Nelson <robertcnelson@beagleboard.org>,
         linux-riscv@lists.infradead.org,
         Drew Fustini <dfustini@baylibre.com>
 X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1697575515; l=1256;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1697575515; l=972;
  i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
- bh=BOuTsoiS4wD+cP61c2nYQjChDl2neNVnlaTjhPPnjNo=;
- b=dcjpH9D4/iuzxXetEkXlXo86ynK58hWjYsp59cgxdD/sG0SgXrxZ439+HwU+bql+QBAfc0iv0
- l9K6iCBFRIzATnT9moU6vrLC7rmog09qtMRbIBbp7o96+Fr82mQl/EW
+ bh=fP0X7H2ev/K5EsIr1ajuR3Wl40rAHHxMMZR5DlF6EQU=;
+ b=zzNGRi480ZBM5jq5QFMXYG/fMcO+yA74L+HUirBBNxAziVp61WiOPvolxmJJ3FfkTdUEllXn1
+ T0Hl+mS034yATbcHCEq3lYgVdwBJXjkOiBymPsItzNlzSLVMYbyYY/L
 X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
  pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add nodes for the SDHCI fixed clock and the first mmc controller which
-is typically connected to the eMMC device.
+Add properties to the emmc node and enable it and set the frequency for
+the sdhci clock.
 
 Signed-off-by: Drew Fustini <dfustini@baylibre.com>
 ---
- arch/riscv/boot/dts/thead/th1520.dtsi | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
+ arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/arch/riscv/boot/dts/thead/th1520.dtsi b/arch/riscv/boot/dts/thead/th1520.dtsi
-index ff364709a6df..ee0711352790 100644
---- a/arch/riscv/boot/dts/thead/th1520.dtsi
-+++ b/arch/riscv/boot/dts/thead/th1520.dtsi
-@@ -134,6 +134,13 @@ uart_sclk: uart-sclk-clock {
- 		#clock-cells = <0>;
- 	};
+diff --git a/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi b/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi
+index a802ab110429..bc8f111571bc 100644
+--- a/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi
++++ b/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi
+@@ -29,6 +29,10 @@ &apb_clk {
+ 	clock-frequency = <62500000>;
+ };
  
-+	sdhci_clk: sdhci-clock {
-+		compatible = "fixed-clock";
-+		clock-frequency = <198000000>;
-+		clock-output-names = "sdhci_clk";
-+		#clock-cells = <0>;
-+	};
++&sdhci_clk {
++	clock-frequency = <198000000>;
++};
 +
- 	soc {
- 		compatible = "simple-bus";
- 		interrupt-parent = <&plic>;
-@@ -292,6 +299,14 @@ dmac0: dma-controller@ffefc00000 {
- 			status = "disabled";
- 		};
- 
-+		mmc0: mmc@ffe7080000 {
-+			compatible = "thead,th1520-dwcmshc";
-+			reg = <0xff 0xe7080000 0x0 0x10000>;
-+			interrupts = <62 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&sdhci_clk>;
-+			clock-names = "core";
-+		};
+ &uart_sclk {
+ 	clock-frequency = <100000000>;
+ };
+@@ -36,3 +40,13 @@ &uart_sclk {
+ &dmac0 {
+ 	status = "okay";
+ };
 +
- 		timer0: timer@ffefc32000 {
- 			compatible = "snps,dw-apb-timer";
- 			reg = <0xff 0xefc32000 0x0 0x14>;
++&mmc0 {
++	bus-width = <8>;
++	max-frequency = <198000000>;
++	mmc-hs400-1_8v;
++	non-removable;
++	no-sdio;
++	no-sd;
++	status = "okay";
++};
 
 -- 
 2.34.1
