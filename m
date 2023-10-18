@@ -2,63 +2,83 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9B72CDB47E
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Oct 2023 05:31:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B377CDB47E
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Oct 2023 05:53:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229572AbjJRFby (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Oct 2023 01:31:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53398 "EHLO
+        id S229585AbjJRFxr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Oct 2023 01:53:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229499AbjJRFbx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2023 01:31:53 -0400
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB897BA;
-        Tue, 17 Oct 2023 22:31:51 -0700 (PDT)
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 1099367373; Wed, 18 Oct 2023 07:31:47 +0200 (CEST)
-Date:   Wed, 18 Oct 2023 07:31:46 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     David Woodhouse <dwmw2@infradead.org>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Manuel Lauss <manuel.lauss@gmail.com>,
-        Yangbo Lu <yangbo.lu@nxp.com>,
-        Joshua Kinard <kumba@gentoo.org>,
-        Daniel Vetter <daniel.vetter@ffwll.ch>,
-        Arnd Bergmann <arnd@arndb.de>,
-        linux-arm-kernel@lists.infradead.org,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-modules@vger.kernel.org
-Subject: Re: [PATCH 5/5] modules: only allow symbol_get of
- EXPORT_SYMBOL_GPL modules
-Message-ID: <20231018053146.GA16765@lst.de>
-References: <20230801173544.1929519-1-hch@lst.de> <20230801173544.1929519-6-hch@lst.de> <bf555c2a4df5196533b6e614cc57638004dfb426.camel@infradead.org>
+        with ESMTP id S229517AbjJRFxq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2023 01:53:46 -0400
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E2F2C4;
+        Tue, 17 Oct 2023 22:53:42 -0700 (PDT)
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 39I5rTbP51104474, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+        by rtits2.realtek.com.tw (8.15.2/2.93/5.92) with ESMTPS id 39I5rTbP51104474
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 18 Oct 2023 13:53:29 +0800
+Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.32; Wed, 18 Oct 2023 13:53:29 +0800
+Received: from RTEXH36505.realtek.com.tw (172.21.6.25) by
+ RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Wed, 18 Oct 2023 13:53:29 +0800
+Received: from localhost.localdomain (172.21.252.101) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server id
+ 15.1.2375.32 via Frontend Transport; Wed, 18 Oct 2023 13:53:29 +0800
+From:   Jyan Chou <jyanchou@realtek.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <jh80.chung@samsung.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <benchuanggli@gmail.com>, <jyanchou@realtek.com>
+Subject: [PATCH V2][0/4] Add DesignWare Mobile mmc driver
+Date:   Wed, 18 Oct 2023 13:53:20 +0800
+Message-ID: <20231018055326.18256-1-jyanchou@realtek.com>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bf555c2a4df5196533b6e614cc57638004dfb426.camel@infradead.org>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-KSE-ServerInfo: RTEXDAG02.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 18, 2023 at 01:30:18AM +0100, David Woodhouse wrote:
-> 
-> But if we're going to tolerate the core kernel still exporting some
-> stuff with EXPORT_SYMBOL, why isn't OK for a GPL-licensed module do to
-> the same? Even an *in-tree* GPL-licensed module now can't export
-> functionality with EXPORT_SYMBOL and have it used with symbol_get().
+We added Synopsys DesignWare mmc cmdq driver and also added
+Realtek mmc driver to make good use of it.
 
-Anything using symbol_get is by intent very deeply internal for tightly
-coupled modules working together, and thus not a non-GPL export.
+Jyan Chou (4):
+  mmc: solve DMA boundary limitation of CQHCI driver
+  mmc: Add Synopsys DesignWare mmc cmdq host driver
+  mmc: Add dw mobile mmc cmdq rtk driver
+  mmc: Add dt-bindings for realtek mmc driver
 
-In fact the current series is just a stepping stone.  Once some mess
-in the kvm/vfio integration is fixed up we'll require a new explicit
-EXPORT_SYMBOL variant as symbol_get wasn't ever intended to be used
-on totally random symbols not exported for use by symbol_get.
+ .../bindings/mmc/realtek-dw-mshc.yaml         |  119 ++
+ drivers/mmc/host/Kconfig                      |   22 +
+ drivers/mmc/host/Makefile                     |    2 +
+ drivers/mmc/host/cqhci-core.c                 |    8 +-
+ drivers/mmc/host/cqhci.h                      |    2 +
+ drivers/mmc/host/dw_mmc_cqe-rtk.c             |  998 ++++++++++
+ drivers/mmc/host/dw_mmc_cqe-rtk.h             |  159 ++
+ drivers/mmc/host/dw_mmc_cqe.c                 | 1619 +++++++++++++++++
+ drivers/mmc/host/dw_mmc_cqe.h                 |  444 +++++
+ 9 files changed, 3372 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe-rtk.c
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe-rtk.h
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe.c
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe.h
+
+-- 
+2.42.0
+
