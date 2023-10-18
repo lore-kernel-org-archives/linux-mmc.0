@@ -2,173 +2,129 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29B75CDB482
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Oct 2023 16:05:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6252CDB483
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Oct 2023 18:00:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231267AbjJRQFU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Oct 2023 12:05:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42084 "EHLO
+        id S1344742AbjJRSAc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Oct 2023 14:00:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229456AbjJRQFS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2023 12:05:18 -0400
-Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com [64.147.123.25])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84340A4;
-        Wed, 18 Oct 2023 09:05:16 -0700 (PDT)
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-        by mailout.west.internal (Postfix) with ESMTP id 953FD3200B98;
-        Wed, 18 Oct 2023 12:05:13 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute5.internal (MEProxy); Wed, 18 Oct 2023 12:05:14 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=beims.me; h=cc
-        :cc:content-transfer-encoding:content-type:content-type:date
-        :date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-        :references:reply-to:sender:subject:subject:to:to; s=fm2; t=
-        1697645113; x=1697731513; bh=OcI7K146pnoJnjGn0F28VwM8IGY10AUfkq0
-        k1lyol4c=; b=cvczwF4GhPO/4SKndYOZJK0ARPLjGDCh4ZpHmVkq4iJrzlzCVSd
-        QcDqVvuAnbRgW0koEA47wZUKAbR4yBXqZW0dDexDbxZomMMHu/sJyQQnhxN4Rwgz
-        F0X08QU/zgMgRLPfcRw+8YztBvfiAP+zTxdFDUo0zcYV9RWNeibxCOdAtlmM7m+R
-        kk10g3l+H2BZcFT/HVfLDx/dEKy3P7GRki0hdLspdc55Z2pJYzct+1PL7OSSxCkN
-        D1w1Koi4KaOcwUmrnLJ/b2mYgH2Lo/aC+smaD0UPF/GI4dp3Fhswi0BQsXvdwGN6
-        MOKRm6ddRyYh5Oh6TQiyh6WZUacPUkjZ9BQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-transfer-encoding
-        :content-type:content-type:date:date:feedback-id:feedback-id
-        :from:from:in-reply-to:in-reply-to:message-id:mime-version
-        :references:reply-to:sender:subject:subject:to:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=
-        1697645113; x=1697731513; bh=OcI7K146pnoJnjGn0F28VwM8IGY10AUfkq0
-        k1lyol4c=; b=RyMEzjT6mItxa7fHgAXyqmnzTPecbr6sdllVgRQTzU9aZgaZlkF
-        thULbVVaJ892hC3t1B3ZjaScjeEH1MpdUoWnmxzkcj+GZuOlGAwuHXj+SMxmEFmA
-        i+s+Rk7AQ0fTTUfEvohoQsKpB++6Lk0W5NDo1oLBJd9Z76/who0qcEd2n9WSCTld
-        nkczK5Ri8iMiWAJn8QAd4BR8y0JahbRCnYrLuHn0Fik8urDmaKUPW1dhb3WNphpW
-        VnK3T4094pyyGwtElMB6kmL3NAwwkKOlb0YI6FrURr0e91vd2BmE/uHhf5irs//J
-        I19Mmf3ILG3yoKuVfWvN3mXjgZ837QbVw+g==
-X-ME-Sender: <xms:OAIwZbie5CEjxYuu_lyJNzSQZ1TrS2xNupuDcxiMQh4pUNjWxwxGtA>
-    <xme:OAIwZYAAh_5RMr_Z6wvsp_noFlQdItrlA7BGL0CHOCA4AOykmOlyF9YmIp4LtAT7G
-    ZYm0EogdR-ZvNXNgsM>
-X-ME-Received: <xmr:OAIwZbGOThdgk8va4wwdARD4UoDCQkXZ8-u0sBeQDWzwf60DQb8LZSGmATgRYPsP7w>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrjeeggdelgecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpefkffggfgfuvfevfhfhjggtgfesthejredttddvjeenucfhrhhomheptfgrfhgr
-    vghluceuvghimhhsuceorhgrfhgrvghlsegsvghimhhsrdhmvgeqnecuggftrfgrthhtvg
-    hrnhepjeeijedvleegudevjeegledtveeifeetjeelieeijeegiefhleelhedtgeduieei
-    necuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprhgrfh
-    grvghlsegsvghimhhsrdhmvg
-X-ME-Proxy: <xmx:OAIwZYQztc4SzvSQRq_bEnh0wIRM02_eNBIBtHY-5JoEuv16XvF2lQ>
-    <xmx:OAIwZYxLYwFWpfh7D0q7F4uvx6UR3uOOucpq8Lu7Ry7PGnfhefqSkA>
-    <xmx:OAIwZe6OHVtmAKjg0sdTIGVmdV3FAau7ATyHIpUpIIS6PkeD97g-8Q>
-    <xmx:OQIwZbyqsdr4NUiC601AX8uC9wsFhNHr0L6ag_TOe8CJejSl9iZLrA>
-Feedback-ID: idc214666:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 18 Oct 2023 12:05:10 -0400 (EDT)
-Message-ID: <fbb29b88-7a16-4d3d-a96a-0256f6bcfc05@beims.me>
-Date:   Wed, 18 Oct 2023 13:05:09 -0300
+        with ESMTP id S1344720AbjJRSAM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2023 14:00:12 -0400
+Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D69FF113
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Oct 2023 10:59:47 -0700 (PDT)
+Received: by mail-pl1-x633.google.com with SMTP id d9443c01a7336-1bdf4752c3cso45879415ad.2
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Oct 2023 10:59:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1697651987; x=1698256787; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=KIX8roHs6Y2xfB0yyrc9fz1uKsUCw1ugcleeV2Jgmg8=;
+        b=IVi8JOrRGInH9OWBomhXtdus3PvgOWYQZG9XrtiREWZ+AsTsBl0ZFFeK4dtI33x31s
+         TPKTPi8OFCH7pOlVs+y0yjGxf7rDb6NQrqY5lnrSZXXLc+f4mb7LYT8rz5bHliVwcgXk
+         TFAQZ/DMvyqpgj8oTx/wDe9fteQvWEBoHoG3oZMUf1EtnnegfZht2URaHDW4D4HgEboE
+         UAiUV+55vMim6OGef1x/lK1JGam0eCoxnSjZw7r4hm0QTbYnGsIcSQg7zEqW5foF930C
+         sf9Yb8Rkr1P+/NALj7XrZnkdRZv0V+kD5NzW6IAMlYed0tA1x4fNVIj/fCNfcIXm3sRw
+         +HVw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1697651987; x=1698256787;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KIX8roHs6Y2xfB0yyrc9fz1uKsUCw1ugcleeV2Jgmg8=;
+        b=LeykDYWWmcTLECrg2vVJbu5ZwIM02pfT3Q207kYdyL/7tLzMi1nz18DdzLDvrElNwM
+         yYLn+/nCGtHdmcFayYZNwt0pEDkZSxc3v1qsKiLRfkRxxmfHKgvLJYceb91j901a2ZNL
+         +YyfhgMsvofy1KtvvelZeut1YwzSqrr9gr6q0QV1SNP8pFD4d+DV/6JfeZOPn1Ly/waB
+         RyuwLyuj4iHNCCY41l4pnIKTu3u0Gkmv2yoQ2nj01TnLAjkADx2BuHPqcDRQyrEUssYX
+         ZSrXEFYDkZMq78Z1e28YVGsg0VZlDMgx8/CL2Fr6UDLiNC/m9yWOEh5fO3ljRGCxKus5
+         ca6w==
+X-Gm-Message-State: AOJu0YyEZl5Ji3Ew5bQRaWl8JysDycUxrA11Nhy9huesGY6zch/ehaRP
+        alAPnNgrEomKZhOPKQDC53wA8A==
+X-Google-Smtp-Source: AGHT+IFuRZYdlOYu8jcYT7a+dm4yo2n/AMX0UeXuajz4t3w2UbaA9ylak4iJyUvNX3BWgaHQgHTx6Q==
+X-Received: by 2002:a17:903:1110:b0:1c8:9832:827f with SMTP id n16-20020a170903111000b001c89832827fmr102594plh.20.1697651986953;
+        Wed, 18 Oct 2023 10:59:46 -0700 (PDT)
+Received: from x1 ([2601:1c2:1800:f680:3b92:d9c:239b:cd56])
+        by smtp.gmail.com with ESMTPSA id d9-20020a170902cec900b001c5f7e06256sm214183plg.152.2023.10.18.10.59.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Oct 2023 10:59:46 -0700 (PDT)
+Date:   Wed, 18 Oct 2023 10:59:43 -0700
+From:   Drew Fustini <dfustini@baylibre.com>
+To:     Conor Dooley <conor@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org
+Subject: Re: [PATCH v2 6/7] riscv: dts: thead: Enable BeagleV Ahead eMMC
+ controller
+Message-ID: <ZTAdD/28PTNCWvWp@x1>
+References: <20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com>
+ <20231017-th1520-mmc-v2-6-4678c8cc4048@baylibre.com>
+ <20231018-dating-yogurt-d7f3a65a873e@spud>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for Micron
- eMMC Q2J54A
-Content-Language: pt-BR
-To:     Ulf Hansson <ulf.hansson@linaro.org>, Bean Huo <beanhuo@iokpp.de>
-Cc:     adrian.hunter@intel.com, beanhuo@micron.com,
-        jakub.kwapisz@toradex.com, rafael.beims@toradex.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        stable@vger.kernel.org
-References: <20231001194943.658299-1-beanhuo@iokpp.de>
- <CAPDyKFpgPEhVuTbxe5YhYQ0W6907SwJRxSQLB1F2FbVW3zKHxg@mail.gmail.com>
- <254df9b8ca7475ad9dbd3a303c60e1f99eca9c56.camel@iokpp.de>
- <CAPDyKFofJR0xtpmjCQXM7=VzUeN5jQLD2AZYEWocuyCnYNObYw@mail.gmail.com>
-From:   Rafael Beims <rafael@beims.me>
-In-Reply-To: <CAPDyKFofJR0xtpmjCQXM7=VzUeN5jQLD2AZYEWocuyCnYNObYw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231018-dating-yogurt-d7f3a65a873e@spud>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/10/2023 18:04, Ulf Hansson wrote:
-> On Tue, 10 Oct 2023 at 17:33, Bean Huo <beanhuo@iokpp.de> wrote:
->> Hi Ulf,
->>
->> thanks for your comments, I didn't quite get your points:
->>
->> On Tue, 2023-10-10 at 16:20 +0200, Ulf Hansson wrote:
->>>> @@ -2381,8 +2381,11 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct
->>>> mmc_queue *mq, struct request *req)
->>>>                           }
->>>>                           ret = mmc_blk_cqe_issue_flush(mq, req);
->>>>                           break;
->>>> -               case REQ_OP_READ:
->>>>                   case REQ_OP_WRITE:
->>>> +                       if (mmc_card_broken_cache_flush(card) &&
->>>> !card->written_flag)
->>> It looks superfluous to me to check mmc_card_broken_cache_flush() and
->>> !card->written_flag. Just set the card->written_flag unconditionally.
->> what did you mean "Just set the card->written_flag unconditionally."?
->> This means I just need to check card->written_flag and set card-
->>> written_flag to true and false in the case
->> MMC_QUIRK_BROKEN_CACHE_FLUSH? or don't need to call
->> mmc_card_broken_cache_flush()?
-> I mean skip the checks above and just do the assignment below.
->
->>>> +                               card->written_flag = true;
->>>> +                       fallthrough;
->>>> +               case REQ_OP_READ:
->>>>                           if (host->cqe_enabled)
->>>>                                   ret = mmc_blk_cqe_issue_rw_rq(mq,
->>>> req);
->>>>                           else
->>>> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
->>>> index 4edf9057fa79..b7754a1b8d97 100644
->>>> --- a/drivers/mmc/core/card.h
->>>> +++ b/drivers/mmc/core/card.h
->>>> @@ -280,4 +280,8 @@ static inline int
->>>> mmc_card_broken_sd_cache(const struct mmc_card *c)
->>>>           return c->quirks & MMC_QUIRK_BROKEN_SD_CACHE;
->>>>    }
->>>>
->>>> +static inline int mmc_card_broken_cache_flush(const struct
->>>> mmc_card *c)
->>>> +{
->>>> +       return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
->>>> +}
->>>>    #endif
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index 89cd48fcec79..47896c32086e 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -1929,6 +1929,8 @@ static int mmc_init_card(struct mmc_host
->>>> *host, u32 ocr,
->>>>           if (!oldcard)
->>>>                   host->card = card;
->>>>
->>>> +       card->written_flag = false;
->>>> +
->>> How about doing this after a successful flush operation instead? In
->>> other words in _mmc_flush_cache().
->> Here initializes flag and the patch is intenting to eliminate the cache
->> flush command before writing. what do you mean adding in
->> mmc_flush_cache()?
-> mmc_init_card() is called while initializing and re-initializing the
-> card. So, it certainly works to reset the flag from here.
->
-> However, _mmc_flush_cache() is called before powering off the card,
-> which then would work similarly to the above, but also gets called for
-> REQ_OP_FLUSH. Wouldn't that mean that we may be able to skip some
-> unnecessary/troublesome cache flush requests if we would reset the
-> flag from  mmc_flush_cache(), rather than from mmc_init_card()?
->
-> Kind regards
-> Uffe
-Forgive me if I'm misunderstanding something, but wouldn't resetting the 
-flag on _mmc_flush_cache()
-essentially disable cache when the MMC_QUIRK_BROKEN_CACHE_FLUSH is active?
+On Wed, Oct 18, 2023 at 02:57:50PM +0100, Conor Dooley wrote:
+> On Tue, Oct 17, 2023 at 01:43:52PM -0700, Drew Fustini wrote:
+> > Add properties to the emmc node and enable it and set the frequency for
+> > the sdhci clock.
+> > 
+> > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> > ---
+> >  arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts | 14 ++++++++++++++
+> >  1 file changed, 14 insertions(+)
+> > 
+> > diff --git a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
+> > index 70e8042c8304..bf55319ba950 100644
+> > --- a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
+> > +++ b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
+> > @@ -52,6 +52,10 @@ &uart_sclk {
+> >  	clock-frequency = <100000000>;
+> >  };
+> >  
+> > +&sdhci_clk {
+> > +	clock-frequency = <198000000>;
+> > +};
+> > +
+> >  &dmac0 {
+> >  	status = "okay";
+> >  };
+> > @@ -59,3 +63,13 @@ &dmac0 {
+> >  &uart0 {
+> >  	status = "okay";
+> >  };
+> > +
+> > +&mmc0 {
+> > +	bus-width = <8>;
+> > +	max-frequency = <198000000>;
+> > +	mmc-hs400-1_8v;
+> > +	non-removable;
+> > +	no-sdio;
+> > +	no-sd;
+> > +	status = "okay";
+> > +};
+> 
+> Is this file meant to be in alphanumerical order?
+> 
 
- From what I see, the card->written flag is supposed to stay true until 
-we need to reinitialize the
-eMMC again, otherwise we would be skipping cache flushes we don't want 
-to skip. It's only before
-writing for the first time that we want to skip the flush.
+Good point, I should add the new nodes in alphabetical order.
 
-Regards,
-Rafael
+Thanks,
+Drew
