@@ -2,582 +2,192 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFD6CCDB47E
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Oct 2023 23:36:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B960BCDB482
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 01:11:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231349AbjJRXgq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Oct 2023 19:36:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44254 "EHLO
+        id S231341AbjJSBLL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Oct 2023 21:11:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229694AbjJRXgq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2023 19:36:46 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DEE25FA;
-        Wed, 18 Oct 2023 16:36:42 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B9B5DC433C7;
-        Wed, 18 Oct 2023 23:36:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1697672202;
-        bh=8wVfc8NbH+7id5Zl5ZABlu+N0hh8HEQ4tiEz9YR2Whc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=eIM4OEUI9EXLl9YfhHnsh8qhmziyLCzwn6d8KLRB4l7do/UD6/uRqqTPc/hWUFXYD
-         34sHJwXU0QHOKdI9qbGRTv5tXDYmisWknCjffB+rhmCIfNbxthYAW+rVcg7064/68u
-         2yszhrXBA8l8LKcwj9oL/9YiAhWjPJNe7IGxlhOvMOms9RDzByyHPKgPFByp730JVh
-         xL5521wReePD/EmLJM335DSJ7+S0i0k5e7+iTM5LlC8EXC6q9kVUvwslvUqAIEbTdN
-         S4j76PsSZvvy+qrJBcmAuhwN7XTrrJIyIHEvEhpW+FY9RWon4moHVVoGEmqU/BsDb8
-         BsGpdKaCFpZ8A==
-Date:   Thu, 19 Oct 2023 07:24:29 +0800
-From:   Jisheng Zhang <jszhang@kernel.org>
-To:     Drew Fustini <dfustini@baylibre.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org
-Subject: Re: [PATCH v2 3/7] mmc: sdhci-of-dwcmshc: Add support for T-Head
- TH1520
-Message-ID: <ZTBpLRDIzm+eMJAl@xhacker>
-References: <20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com>
- <20231017-th1520-mmc-v2-3-4678c8cc4048@baylibre.com>
- <ZS/9y1kRyuRzznVk@xhacker>
- <ZTAjjju/Ymn7Svyn@x1>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+        with ESMTP id S229456AbjJSBLJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Oct 2023 21:11:09 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.115])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0261A113;
+        Wed, 18 Oct 2023 18:11:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1697677868; x=1729213868;
+  h=date:from:to:cc:subject:message-id:in-reply-to:
+   mime-version;
+  bh=7/wWhp5WZzNZkPgaV7hrekuTzYgsc1/Vjk365oAFFsg=;
+  b=TUVz44Ezmc19Y9sE5sPre+im5bX4/7wLLZFdhkEV47gvSYxYoOKHkL+v
+   aUKo4jayGjAQwKJe5r8Rsgp61RlquEHFKPViNzsmi+CiVTupx/nKzUg9t
+   6yc5ccr5xFVc/xG3kzhzyLCI36TZdQJoQloDL7xFdiqRpzLh45AlsGcLh
+   Sc7ZxZGGlC4UDiPGvr4gDvaJC/LSWrVgw5BjF2mDVVPigu+udk1NPj5Ua
+   lP0Lhpuw8MRF8E4Of6ZGf1c+DXsyYxy/66hnMAfgxYXT2M1Ckde3+XOsA
+   aogMx+N3LaZz+TuSZIejCmFZV1r2sbULzTSLk16tjnECzvc+vnZvTPBPW
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10867"; a="385972853"
+X-IronPort-AV: E=Sophos;i="6.03,236,1694761200"; 
+   d="scan'208";a="385972853"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Oct 2023 18:11:07 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10867"; a="930414261"
+X-IronPort-AV: E=Sophos;i="6.03,236,1694761200"; 
+   d="scan'208";a="930414261"
+Received: from orsmsx602.amr.corp.intel.com ([10.22.229.15])
+  by orsmga005.jf.intel.com with ESMTP/TLS/AES256-GCM-SHA384; 18 Oct 2023 18:11:07 -0700
+Received: from orsmsx610.amr.corp.intel.com (10.22.229.23) by
+ ORSMSX602.amr.corp.intel.com (10.22.229.15) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.32; Wed, 18 Oct 2023 18:11:06 -0700
+Received: from orsedg603.ED.cps.intel.com (10.7.248.4) by
+ orsmsx610.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.32 via Frontend Transport; Wed, 18 Oct 2023 18:11:06 -0700
+Received: from NAM12-DM6-obe.outbound.protection.outlook.com (104.47.59.169)
+ by edgegateway.intel.com (134.134.137.100) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.32; Wed, 18 Oct 2023 18:11:05 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=nAoqJ4rK/MpC7onMJK3QG0Ma2LsYddLskflHfj56lNTH/Mi9PorCHMvq77dKWVlb+zGMMHNQF+MTlBlq6xxLNChb2NqaKBs5RamtEyIFGk0IGJEn2nfwayjuNUjU+DAGNKY3wv4MREhMH0Pw47Z7Mn/B2PZzWGCYmyMYr49knEKH5uzeoRu/6FWnNKVgs8YS0098wwuqFkx6S7I3rY3qG2gC9hOQbsfdsTiFQe6zBKubYHi19MovxWCzs7Hon4AWt9nh4LnONYkPYHImE5roxlH8h7TV0mLQ+4iVX3GjVTA3CzYxxXeghWnkWw/s+VFhVudKPHzjbn41GOyTjY00tQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=jj6cD4W4BRp9U9iPcpiL6QM6Sy6uZ6e0do5bvHeVB4o=;
+ b=Gtn85rQC1imIlKb4ujXzIkVxvrJ/RfxbYHSlGBbAqyryuykfEul1XtTY/of4PKnhI9I1u6idxGsv5FNkXG1WyS3ZhzO4GcJ9eqYaILM9AGVeLYfagOour3SZsrzGtUWZTls1eLubICimXFXKS458NnNnbJWNntGBJn4dAX9FQuF7C+zBa2S0jvGiTZdoqiuGDfpM+29ffoa3rm7/mu33qzH7+CbmPlG1VRSlGCqlLSWo6HekQGrs9ibGKQHgisyVXdFYammhI2IETwKE6WaVLuc2siO5Zgh2uhDkTU+VNh9yyqdmKwtqucQTexS1SOJH4bkpFCpuaL2Btd/5xpoWEQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=intel.com;
+Received: from CY5PR11MB6392.namprd11.prod.outlook.com (2603:10b6:930:37::15)
+ by SA2PR11MB4923.namprd11.prod.outlook.com (2603:10b6:806:fa::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6907.23; Thu, 19 Oct
+ 2023 01:11:03 +0000
+Received: from CY5PR11MB6392.namprd11.prod.outlook.com
+ ([fe80::21f8:775f:a94d:e1c0]) by CY5PR11MB6392.namprd11.prod.outlook.com
+ ([fe80::21f8:775f:a94d:e1c0%4]) with mapi id 15.20.6907.022; Thu, 19 Oct 2023
+ 01:11:03 +0000
+Date:   Thu, 19 Oct 2023 09:06:10 +0800
+From:   kernel test robot <yujie.liu@intel.com>
+To:     Kai-Heng Feng <kai.heng.feng@canonical.com>, <bhelgaas@google.com>
+CC:     <oe-kbuild-all@lists.linux.dev>, <linux-pm@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Ricky Wu <ricky_wu@realtek.com>,
+        Kees Cook <keescook@chromium.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+        "Lukas Wunner" <lukas@wunner.de>, <linux-pci@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-hardening@vger.kernel.org>,
+        <bpf@vger.kernel.org>
+Subject: Re: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on
+ PCIe Link Down
+Message-ID: <202310171955.hlish6FZ-lkp@intel.com>
+Content-Type: text/plain; charset="us-ascii"
 Content-Disposition: inline
-In-Reply-To: <ZTAjjju/Ymn7Svyn@x1>
+In-Reply-To: <20231016040132.23824-1-kai.heng.feng@canonical.com>
+X-ClientProxiedBy: KL1PR01CA0139.apcprd01.prod.exchangelabs.com
+ (2603:1096:820:4::31) To CY5PR11MB6392.namprd11.prod.outlook.com
+ (2603:10b6:930:37::15)
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CY5PR11MB6392:EE_|SA2PR11MB4923:EE_
+X-MS-Office365-Filtering-Correlation-Id: 956edf23-e6cb-4789-1101-08dbd040435c
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: z+Sg8aILu9u/J9+OBib5/MF5mtCDYQJ5XnKTWFWonx0SJrIWzHdwLCdom5YL5mzkKqIpLhR9jFs+LGGKkohEuQXaIiYJM+uK26jIRuOoZ6P8fpnORuq6c1kqf53QjETHYL60AQ3npZEGNYTzmDWIu9drj2MpDmKrP181wzHqLcwnsqWBJpPG5Gf+kD+LGCM1pBhozBobsOmco8BKtQLlv77rBHrUFE1B7jfKksR8+JmowhF2SBfaBJLVneo+ZwGWzd3DTfqCX1521Fkp7iT6irPIZYZemRyHGJKD29XLdFQfRh48Ty1QWuTsexMhGlVpaZKR7NxicCoJ7kED6BZ5Zj52icEL4fUahfP1Ej6bv5kA/XFZ5NNSQ8oGMNhixYw4deLDQxBfsussVHzctf8+dKI3i4r9XuLQX0kAHrG7oP4b6JdlOq+nem1pvhNPFTrMjKWQR71j3HTPMLyeM+u9/2AemG7TiqU9wApPVfrQOhPWNA+rmA3RvAeZxBzAXvUg8fV/wFgbZhQ2/QY4UwycmRZum9xt5u5vt+SP2eesrGEWaooDr7BQT6v69eSq9lAFCbNYWf1OQvKCgS0MdR+P5Q==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CY5PR11MB6392.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376002)(39860400002)(346002)(136003)(366004)(396003)(230922051799003)(451199024)(1800799009)(186009)(64100799003)(2616005)(26005)(6666004)(6512007)(6506007)(83380400001)(4001150100001)(5660300002)(8676002)(8936002)(4326008)(41300700001)(7416002)(2906002)(966005)(6486002)(316002)(478600001)(66476007)(66556008)(66946007)(54906003)(1076003)(86362001)(82960400001)(38100700002)(36756003);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?e3kWUdarVcUqybapBbJnlu1d3nIlTjyoBlhpXUP+lRqpGu/bivZNEnfdsKVd?=
+ =?us-ascii?Q?XK8mGmejbrG6CnSrJgGkyKcnCGoV0cChg5j8TOiNSUUxhZKZgcN0GsCzb8iu?=
+ =?us-ascii?Q?KWJMrHKQwdWM6pmsgSfJLqY/MOFhqasDNv0VxYJTlK7eSHyupEipftpYk0NB?=
+ =?us-ascii?Q?iwLr1mfRVH4QEICnou9CKPVRyo26hBdWLdcCBdTmgQ+sa/agc17rXuOTMZuZ?=
+ =?us-ascii?Q?oMSmtRjuvzRV4Pstyiqa29HVz8e8dbAxj18G3yf11w2qxk+paCUmC+DQo35+?=
+ =?us-ascii?Q?+OnKdpQNMHdlKeNJhprzfiA88/qM3IrABXqKPvyJ+NBKjlkKb59js17oLdM+?=
+ =?us-ascii?Q?kMg7d+aZlEwcqZSssZVHOXzc6micQE0xij8rYSOQMT4id5A6SQrPaRTE9CQL?=
+ =?us-ascii?Q?aLfllEsM4pqe/LIWoWTUovRipOaZP7S5c42iKbtP4paVghRNyocy7R0LkEFq?=
+ =?us-ascii?Q?uqTi0CFJaO3mTrXScYw4PQzCq5OuvNmIXOmyFgJfFwZow1AIMjNqVguGvKIb?=
+ =?us-ascii?Q?8E8yV2k3Fdxp2rZdj7Qv/zKc6v4ftUy27yaMtIWgl4Q3mCH8IxaMscKxKMZI?=
+ =?us-ascii?Q?SRLGjPgwjynKxSKfvSs3oIEOn0m9p7pzj61w8ZhRwZ8F6TzWQRTHmMNwhj8J?=
+ =?us-ascii?Q?9KxDCwu1OkZi8qm9xLbdSkxkdcnquftnH20W7F4aykW9WWDQBxfCBxGAPPL1?=
+ =?us-ascii?Q?aRDIAPvUg2QEP7snkU7zDT0ISLkoOnD/w1V1Uxmw0ks0JTQ8koQFSQBJHMzU?=
+ =?us-ascii?Q?WnHGr/w8Tsmr7qj0QEz/L90+GKycGP9RVsvW2xr7c42yAdqEujDEHGHf8tfI?=
+ =?us-ascii?Q?ln0WBQ9/qgz/MwscNr90884Wi6pgw/UmYwuwK2esH7gVeW6d9hLPZtlzjXK6?=
+ =?us-ascii?Q?Fbzz4TKlrL3a1Bh2OzDrQyyLF+Negi1ro0WLtMp9ET2WoRMUOepJDH4hPBLi?=
+ =?us-ascii?Q?sjIOOkehY1qyhjiE2DAJ7kfb9h3ERcj3kC5RkNUbBRUTDYFh7fjFpjwqCCZe?=
+ =?us-ascii?Q?fC/hTa2dry29JnHrl6LJnQaYZjH4opzKR1EstvST4+6PjNxPfLGBRS74dVeH?=
+ =?us-ascii?Q?FoUdDtGsCApdSMez4qD4SOweJNFoB/KB4TI8E10yauYcRZ8Z/a6J7xsCIFJ6?=
+ =?us-ascii?Q?0WAxoi/OuS62qNJznECW23Sa+jVRBxOf1FfJyzo1puiW96oaSIL8aw/exNb0?=
+ =?us-ascii?Q?BFWmjAXZOF7jBI7GR31MlI+tf5pJiz9tP4GPxyEJXxOx+MF1r3V/RE1HSbRj?=
+ =?us-ascii?Q?sEn88TDGmc/Jja3kJt5lzqVDZGFrB9zj9BqGpC3MOpjoB4s8WjA1BGcIz9bQ?=
+ =?us-ascii?Q?wME2epNA7zF7EtEZFYuMrnGwozJmA4/XwkGaoj5I4J6y7Gmjq270NO5x/QVx?=
+ =?us-ascii?Q?ipBqmXWBWxb1U4ZXZJHkGmwMXq1CLTZnDaVH8lEgoLms6+UpRV+lL6RrqfDN?=
+ =?us-ascii?Q?RR1JriEgk19bvICk+XXc/OQZ71bOM1pmO6jyOm3fx3RwzWlK4bvJVIFrFNTG?=
+ =?us-ascii?Q?vt86wtgAZyGVWhTTSPEg9BCFt81ghEvkuPsVvm9P413FemB4OduafN69bMmi?=
+ =?us-ascii?Q?mURfwyHq+28lPBkKMKXpHRQ/w1qFBhyeHLhnzW8I?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: 956edf23-e6cb-4789-1101-08dbd040435c
+X-MS-Exchange-CrossTenant-AuthSource: CY5PR11MB6392.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Oct 2023 01:11:03.1101
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: okgbq8PFLaYwqWb6n4eq/o4z+hNRyzhqnY5rdj3UI3xslnVROdzo0roBb95rtCQMRPscEiUWYA8qTtA0UwGTpw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA2PR11MB4923
+X-OriginatorOrg: intel.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 18, 2023 at 11:27:26AM -0700, Drew Fustini wrote:
-> On Wed, Oct 18, 2023 at 11:46:19PM +0800, Jisheng Zhang wrote:
-> > On Tue, Oct 17, 2023 at 01:43:49PM -0700, Drew Fustini wrote:
-> > > Add support for the mmc controller in the T-Head TH1520 with the new
-> > > compatible "thead,th1520-dwcmshc". Implement custom sdhci_ops for
-> > > set_uhs_signaling, reset, voltage_switch, and platform_execute_tuning.
-> > > 
-> > > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> > > ---
-> > >  drivers/mmc/host/sdhci-of-dwcmshc.c | 358 ++++++++++++++++++++++++++++++++++++
-> > >  1 file changed, 358 insertions(+)
-> > > 
-> > > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > > index 3a3bae6948a8..88ed0937c4e9 100644
-> > > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > > @@ -8,6 +8,7 @@
-> > >   */
-> > >  
-> > >  #include <linux/acpi.h>
-> > > +#include <linux/bitfield.h>
-> > >  #include <linux/clk.h>
-> > >  #include <linux/dma-mapping.h>
-> > >  #include <linux/iopoll.h>
-> > > @@ -35,6 +36,21 @@
-> > >  #define DWCMSHC_CARD_IS_EMMC		BIT(0)
-> > >  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
-> > >  #define DWCMSHC_EMMC_ATCTRL		0x40
-> > > +/* Tuning and auto-tuning fields in AT_CTRL_R control register */
-> > > +#define AT_CTRL_AT_EN			BIT(0) /* autotuning is enabled */
-> > > +#define AT_CTRL_CI_SEL			BIT(1) /* interval to drive center phase select */
-> > > +#define AT_CTRL_SWIN_TH_EN		BIT(2) /* sampling window threshold enable */
-> > > +#define AT_CTRL_RPT_TUNE_ERR		BIT(3) /* enable reporting framing errors */
-> > > +#define AT_CTRL_SW_TUNE_EN		BIT(4) /* enable software managed tuning */
-> > > +#define AT_CTRL_WIN_EDGE_SEL_MASK	GENMASK(11, 8) /* bits [11:8] */
-> > > +#define AT_CTRL_WIN_EDGE_SEL		0xf /* sampling window edge select */
-> > > +#define AT_CTRL_TUNE_CLK_STOP_EN	BIT(16) /* clocks stopped during phase code change */
-> > > +#define AT_CTRL_PRE_CHANGE_DLY_MASK	GENMASK(18, 17) /* bits [18:17] */
-> > > +#define AT_CTRL_PRE_CHANGE_DLY		0x1  /* 2-cycle latency */
-> > > +#define AT_CTRL_POST_CHANGE_DLY_MASK	GENMASK(20, 19) /* bits [20:19] */
-> > > +#define AT_CTRL_POST_CHANGE_DLY		0x3  /* 4-cycle latency */
-> > > +#define AT_CTRL_SWIN_TH_VAL_MASK	GENMASK(31, 24) /* bits [31:24] */
-> > > +#define AT_CTRL_SWIN_TH_VAL		0x9  /* sampling window threshold */
-> > >  
-> > >  /* Rockchip specific Registers */
-> > >  #define DWCMSHC_EMMC_DLL_CTRL		0x800
-> > > @@ -72,6 +88,82 @@
-> > >  	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
-> > >  #define RK35xx_MAX_CLKS 3
-> > >  
-> > > +/* PHY register area pointer */
-> > > +#define DWC_MSHC_PTR_PHY_R	0x300
-> > > +
-> > > +/* PHY general configuration */
-> > > +#define PHY_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x00)
-> > > +#define PHY_CNFG_RSTN_DEASSERT	0x1  /* Deassert PHY reset */
-> > > +#define PHY_CNFG_PAD_SP_MASK	GENMASK(19, 16) /* bits [19:16] */
-> > > +#define PHY_CNFG_PAD_SP		0x0c /* PMOS TX drive strength */
-> > > +#define PHY_CNFG_PAD_SN_MASK	GENMASK(23, 20) /* bits [23:20] */
-> > > +#define PHY_CNFG_PAD_SN		0x0c /* NMOS TX drive strength */
-> > > +
-> > > +/* PHY command/response pad settings */
-> > > +#define PHY_CMDPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x04)
-> > > +
-> > > +/* PHY data pad settings */
-> > > +#define PHY_DATAPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x06)
-> > > +
-> > > +/* PHY clock pad settings */
-> > > +#define PHY_CLKPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x08)
-> > > +
-> > > +/* PHY strobe pad settings */
-> > > +#define PHY_STBPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0a)
-> > > +
-> > > +/* PHY reset pad settings */
-> > > +#define PHY_RSTNPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0c)
-> > > +
-> > > +/* Bitfields are common for all pad settings */
-> > > +#define PHY_PAD_RXSEL_1V8		0x1 /* Receiver type select for 1.8V */
-> > > +#define PHY_PAD_RXSEL_3V3		0x2 /* Receiver type select for 3.3V */
-> > > +
-> > > +#define PHY_PAD_WEAKPULL_MASK		GENMASK(4, 3) /* bits [4:3] */
-> > > +#define PHY_PAD_WEAKPULL_PULLUP		0x1 /* Weak pull down enabled */
-> > > +#define PHY_PAD_WEAKPULL_PULLDOWN	0x2 /* Weak pull down enabled */
-> > > +
-> > > +#define PHY_PAD_TXSLEW_CTRL_P_MASK	GENMASK(8, 5) /* bits [8:5] */
-> > > +#define PHY_PAD_TXSLEW_CTRL_P		0x3 /* Slew control for P-Type pad TX */
-> > > +#define PHY_PAD_TXSLEW_CTRL_N_MASK	GENMASK(12, 9) /* bits [12:9] */
-> > > +#define PHY_PAD_TXSLEW_CTRL_N		0x3 /* Slew control for N-Type pad TX */
-> > > +
-> > > +/* PHY CLK delay line settings */
-> > > +#define PHY_SDCLKDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x1d)
-> > > +#define PHY_SDCLKDL_CNFG_UPDATE	BIT(4) /* set before writing to SDCLKDL_DC */
-> > > +
-> > > +/* PHY CLK delay line delay code */
-> > > +#define PHY_SDCLKDL_DC_R		(DWC_MSHC_PTR_PHY_R + 0x1e)
-> > > +#define PHY_SDCLKDL_DC_INITIAL		0x40 /* initial delay code */
-> > > +#define PHY_SDCLKDL_DC_DEFAULT		0x32 /* default delay code */
-> > > +#define PHY_SDCLKDL_DC_HS400		0x18 /* delay code for HS400 mode */
-> > > +
-> > > +/* PHY drift_cclk_rx delay line configuration setting */
-> > > +#define PHY_ATDL_CNFG_R			(DWC_MSHC_PTR_PHY_R + 0x21)
-> > > +#define PHY_ATDL_CNFG_INPSEL_MASK	GENMASK(3, 2) /* bits [3:2] */
-> > > +#define PHY_ATDL_CNFG_INPSEL		0x3 /* delay line input source */
-> > > +
-> > > +/* PHY DLL control settings */
-> > > +#define PHY_DLL_CTRL_R			(DWC_MSHC_PTR_PHY_R + 0x24)
-> > > +#define PHY_DLL_CTRL_DISABLE		0x0 /* PHY DLL is enabled */
-> > > +#define PHY_DLL_CTRL_ENABLE		0x1 /* PHY DLL is disabled */
-> > > +
-> > > +/* PHY DLL  configuration register 1 */
-> > > +#define PHY_DLL_CNFG1_R			(DWC_MSHC_PTR_PHY_R + 0x25)
-> > > +#define PHY_DLL_CNFG1_SLVDLY_MASK	GENMASK(5, 4) /* bits [5:4] */
-> > > +#define PHY_DLL_CNFG1_SLVDLY		0x2 /* DLL slave update delay input */
-> > > +#define PHY_DLL_CNFG1_WAITCYCLE		0x5 /* DLL wait cycle input */
-> > > +
-> > > +/* PHY DLL configuration register 2 */
-> > > +#define PHY_DLL_CNFG2_R			(DWC_MSHC_PTR_PHY_R + 0x26)
-> > > +#define PHY_DLL_CNFG2_JUMPSTEP		0xa /* DLL jump step input */
-> > > +
-> > > +/* PHY DLL master and slave delay line configuration settings */
-> > > +#define PHY_DLLDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x28)
-> > > +#define PHY_DLLDL_CNFG_SLV_INPSEL_MASK	GENMASK(6, 5) /* bits [6:5] */
-> > > +#define PHY_DLLDL_CNFG_SLV_INPSEL	0x3 /* clock source select for slave DL */
-> > > +
-> > > +#define FLAG_IO_FIXED_1V8	BIT(0)
-> > > +
-> > >  #define BOUNDARY_OK(addr, len) \
-> > >  	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
-> > >  
-> > > @@ -92,6 +184,8 @@ struct dwcmshc_priv {
-> > >  	struct clk	*bus_clk;
-> > >  	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
-> > >  	void *priv; /* pointer to SoC private stuff */
-> > > +	u16 delay_line;
-> > > +	u16 flags;
-> > >  };
-> > >  
-> > >  /*
-> > > @@ -157,6 +251,129 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> > >  	sdhci_request(mmc, mrq);
-> > >  }
-> > >  
-> > > +static void th1520_phy_1_8v_init(struct sdhci_host *host)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > > +	u32 val;
-> > > +
-> > > +	if (!priv)
-> > > +		return;
-> > 
-> > this is impossible, can be removed.
-> 
-> Thanks, will do.
-> 
-> > 
-> > > +
-> > > +	/* deassert phy reset & set tx drive strength */
-> > > +	val = PHY_CNFG_RSTN_DEASSERT;
-> > > +	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
-> > > +	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN);
-> > > +	sdhci_writel(host, val, PHY_CNFG_R);
-> > > +
-> > > +	/* disable delay line */
-> > > +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE, PHY_SDCLKDL_CNFG_R);
-> > > +
-> > > +	/* set delay line */
-> > > +	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-> > > +	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
-> > > +
-> > > +	/* enable delay lane */
-> > > +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> > > +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
-> > > +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> > > +
-> > > +	/* configure phy pads */
-> > > +	val = PHY_PAD_RXSEL_1V8;
-> > > +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> > > +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> > > +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> > > +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> > > +
-> > > +	val = FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> > > +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> > > +
-> > > +	val = PHY_PAD_RXSEL_1V8;
-> > > +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> > > +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> > > +
-> > > +	/* enable data strobe mode */
-> > > +	sdhci_writeb(host, FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK, PHY_DLLDL_CNFG_SLV_INPSEL),
-> > > +		     PHY_DLLDL_CNFG_R);
-> > > +
-> > > +	/* enable phy dll */
-> > > +	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> > > +}
-> > > +
-> > > +static void th1520_phy_3_3v_init(struct sdhci_host *host)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > > +	u32 val;
-> > > +
-> > > +	/* deassert phy reset & set tx drive strength */
-> > > +	val = PHY_CNFG_RSTN_DEASSERT;
-> > > +	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
-> > > +	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN);
-> > > +	sdhci_writel(host, val, PHY_CNFG_R);
-> > > +
-> > > +	/* disable delay line */
-> > > +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE, PHY_SDCLKDL_CNFG_R);
-> > > +
-> > > +	/* set delay line */
-> > > +	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-> > > +	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
-> > > +
-> > > +	/* enable delay lane */
-> > > +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> > > +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
-> > > +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> > > +
-> > > +	/* configure phy pads */
-> > > +	val = PHY_PAD_RXSEL_3V3;
-> > > +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> > > +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> > > +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> > > +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> > > +
-> > > +	val = FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> > > +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> > > +
-> > > +	val = PHY_PAD_RXSEL_3V3;
-> > > +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> > > +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> > > +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> > > +
-> > > +	/* enable phy dll */
-> > > +	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> > > +}
-> > > +
-> > > +static void th1520_sdhci_set_phy(struct sdhci_host *host)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > > +	u16 emmc_ctrl;
-> > > +
-> > > +	/* Before power on, set PHY configs */
-> > > +	if (priv->flags & FLAG_IO_FIXED_1V8)
-> > > +		th1520_phy_1_8v_init(host);
-> > > +	else
-> > > +		th1520_phy_3_3v_init(host);
-> > > +
-> > > +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
-> > 
-> > Hi Drew,
-> > 
-> > IMHO, this doesn't work for sdio. Normally, for a sdio wifi,
-> > "non-removable" is set, then the EMMC bit will be set below unexpectedly.
-> > So I suggested trying cap2 & (MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO)
-> > and reflect this fact in the dt-binding, I.E if this host is for emmc
-> > then no-sd and no-sdio is a must. I didn't see other
-> > solutions.
-> 
-> Thank you for explaining. I will change the code to test that instead.
+Hi Kai-Heng,
 
-FYI, my patch in my local repo looks like:
+kernel test robot noticed the following build warnings:
 
-u32 tmp = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
-if ((cap2 & tmp) == tmp) {
-	blablabla...
-}
+[auto build test WARNING on pci/next]
+[also build test WARNING on pci/for-linus linus/master v6.6-rc6 next-20231017]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-> 
-> > 
-> > PS: can sd and sdio work with this patch?
-> 
-> After sending v2, I tried enabling the sdhci nodes. Initially, the
-> microSD card was not recognized. Then I realized I needed to change
-> th1520_set_uhs_signaling() so that it calls th1520_sdhci_set_phy()
-> for all devices and not just for MMC_TIMING_MMC_HS400.
-> 
-> With that change, the microSD card did appear as a block device and
-> I was able to mount the vfat partition that was on the card.
-> 
-> I did not try enabling sdio for the wifi module yet.
-> 
-> > 
-> > Thanks
-> > 
-> > > +		emmc_ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> > > +		emmc_ctrl |= DWCMSHC_CARD_IS_EMMC;
-> > > +		sdhci_writew(host, emmc_ctrl, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> > > +	}
-> > > +
-> > > +	sdhci_writeb(host, FIELD_PREP(PHY_DLL_CNFG1_SLVDLY_MASK, PHY_DLL_CNFG1_SLVDLY) |
-> > > +		     PHY_DLL_CNFG1_WAITCYCLE, PHY_DLL_CNFG1_R);
-> > > +}
-> > > +
-> > >  static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
-> > >  				      unsigned int timing)
-> > >  {
-> > > @@ -189,9 +406,26 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
-> > >  		ctrl_2 |= DWCMSHC_CTRL_HS400;
-> > >  	}
-> > >  
-> > > +	if (priv->flags & FLAG_IO_FIXED_1V8)
-> > > +		ctrl_2 |= SDHCI_CTRL_VDD_180;
-> > >  	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> > >  }
-> > >  
-> > > +static void th1520_set_uhs_signaling(struct sdhci_host *host,
-> > > +				     unsigned int timing)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > > +
-> > > +	dwcmshc_set_uhs_signaling(host, timing);
-> > > +	if (timing == MMC_TIMING_MMC_HS400) {
-> > > +		priv->delay_line = PHY_SDCLKDL_DC_HS400;
-> > > +		th1520_sdhci_set_phy(host);
-> > > +	} else {
-> > > +		sdhci_writeb(host, 0, PHY_DLLDL_CNFG_R);
-> > > +	}
-> > > +}
-> > > +
-> > >  static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
-> > >  					  struct mmc_ios *ios)
-> > >  {
-> > > @@ -338,6 +572,85 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
-> > >  	sdhci_reset(host, mask);
-> > >  }
-> > >  
-> > > +static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > > +	u32 val = 0;
-> > > +
-> > > +	if (host->flags & SDHCI_HS400_TUNING)
-> > > +		return 0;
-> > > +
-> > > +	sdhci_writeb(host, FIELD_PREP(PHY_ATDL_CNFG_INPSEL_MASK, PHY_ATDL_CNFG_INPSEL),
-> > > +		     PHY_ATDL_CNFG_R);
-> > > +	val = sdhci_readl(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > > +
-> > > +	/*
-> > > +	 * configure tuning settings:
-> > > +	 *  - center phase select code driven in block gap interval
-> > > +	 *  - disable reporting of framing errors
-> > > +	 *  - disable software managed tuning
-> > > +	 *  - disable user selection of sampling window edges,
-> > > +	 *    instead tuning calculated edges are used
-> > > +	 */
-> > > +	val &= ~(AT_CTRL_CI_SEL | AT_CTRL_RPT_TUNE_ERR | AT_CTRL_SW_TUNE_EN |
-> > > +		 FIELD_PREP(AT_CTRL_WIN_EDGE_SEL_MASK, AT_CTRL_WIN_EDGE_SEL));
-> > > +
-> > > +	/*
-> > > +	 * configure tuning settings:
-> > > +	 *  - enable auto-tuning
-> > > +	 *  - enable sampling window threshold
-> > > +	 *  - stop clocks during phase code change
-> > > +	 *  - set max latency in cycles between tx and rx clocks
-> > > +	 *  - set max latency in cycles to switch output phase
-> > > +	 *  - set max sampling window threshold value
-> > > +	 */
-> > > +	val |= AT_CTRL_AT_EN | AT_CTRL_SWIN_TH_EN | AT_CTRL_TUNE_CLK_STOP_EN;
-> > > +	val |= FIELD_PREP(AT_CTRL_PRE_CHANGE_DLY_MASK, AT_CTRL_PRE_CHANGE_DLY);
-> > > +	val |= FIELD_PREP(AT_CTRL_POST_CHANGE_DLY_MASK, AT_CTRL_POST_CHANGE_DLY);
-> > > +	val |= FIELD_PREP(AT_CTRL_SWIN_TH_VAL_MASK, AT_CTRL_SWIN_TH_VAL);
-> > > +
-> > > +	sdhci_writel(host, val, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > > +	val = sdhci_readl(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > > +
-> > > +	/* check if is possible to enable auto-tuning */
-> > 
-> > I'm not sure why do we need to check auto tuning is supported. Does this
-> > mean some of the sdhci hosts in th1520 don't support auto tuing while
-> > others support it?
-> 
-> I agree that this doesn't seem to make sense. This was logic I found in
-> the T-Head kernel. I've never seen that message print thus far during my
-> testing, so I think this if() block is probably unnecessary.
-> 
-> I just removed that if() block and I found that eMMC an microSD still
-> work okay. I will remove this in the next revision.
-> 
-> > 
-> > > +	if (!(val & AT_CTRL_AT_EN)) {
-> > > +		dev_err(mmc_dev(host->mmc), "failed to enable auto tuning\n");
-> > > +		return -EIO;
-> > 
-> > FWICT, the controller can make use of sw tuning if AT isn't supported
-> > but I think that could be an improvement in the future. We can focuse on
-> > AT now.
-> 
-> Yes, I believe software controller tuning is an option, and I agree it
-> would be preferable to add that functionality later.
-> > 
-> > > +	}
-> > > +
-> > > +	/* perform tuning */
-> > > +	sdhci_start_tuning(host);
-> > > +	host->tuning_err = __sdhci_execute_tuning(host, opcode);
-> > > +	if (host->tuning_err) {
-> > > +		/* disable auto-tuning upon tuning error */
-> > > +		val &= ~AT_CTRL_AT_EN;
-> > > +		sdhci_writel(host, val, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> > > +		dev_err(mmc_dev(host->mmc), "tuning failed: %d\n", host->tuning_err);
-> > > +		return -EIO;
-> > > +	}
-> > > +	sdhci_end_tuning(host);
-> > > +
-> > > +	return 0;
-> > > +}
-> > > +
-> > > +static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > > +	u16 ctrl_2;
-> > > +
-> > > +	sdhci_reset(host, mask);
-> > > +
-> > > +	if (priv->flags & FLAG_IO_FIXED_1V8) {
-> > > +		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > > +		if (!(ctrl_2 & SDHCI_CTRL_VDD_180)) {
-> > > +			ctrl_2 |= SDHCI_CTRL_VDD_180;
-> > > +			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> > > +		}
-> > > +	}
-> > > +}
-> > > +
-> > >  static const struct sdhci_ops sdhci_dwcmshc_ops = {
-> > >  	.set_clock		= sdhci_set_clock,
-> > >  	.set_bus_width		= sdhci_set_bus_width,
-> > > @@ -356,6 +669,17 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
-> > >  	.adma_write_desc	= dwcmshc_adma_write_desc,
-> > >  };
-> > >  
-> > > +static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
-> > > +	.set_clock		= sdhci_set_clock,
-> > > +	.set_bus_width		= sdhci_set_bus_width,
-> > > +	.set_uhs_signaling	= th1520_set_uhs_signaling,
-> > > +	.get_max_clock		= dwcmshc_get_max_clock,
-> > > +	.reset			= th1520_sdhci_reset,
-> > > +	.adma_write_desc	= dwcmshc_adma_write_desc,
-> > > +	.voltage_switch		= th1520_phy_1_8v_init,
-> > > +	.platform_execute_tuning = &th1520_execute_tuning,
-> > > +};
-> > > +
-> > >  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-> > >  	.ops = &sdhci_dwcmshc_ops,
-> > >  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> > > @@ -379,6 +703,12 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
-> > >  		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-> > >  };
-> > >  
-> > > +static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
-> > > +	.ops = &sdhci_dwcmshc_th1520_ops,
-> > > +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> > > +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> > > +};
-> > > +
-> > >  static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-> > >  {
-> > >  	int err;
-> > > @@ -447,6 +777,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
-> > >  		.compatible = "snps,dwcmshc-sdhci",
-> > >  		.data = &sdhci_dwcmshc_pdata,
-> > >  	},
-> > > +	{
-> > > +		.compatible = "thead,th1520-dwcmshc",
-> > > +		.data = &sdhci_dwcmshc_th1520_pdata,
-> > > +	},
-> > >  	{},
-> > >  };
-> > >  MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
-> > > @@ -542,6 +876,30 @@ static int dwcmshc_probe(struct platform_device *pdev)
-> > >  			goto err_clk;
-> > >  	}
-> > >  
-> > > +	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-> > > +		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> > > +
-> > > +		if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
-> > > +		    (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
-> > > +		    (device_property_read_bool(dev, "mmc-hs400-1_8v")))
-> > > +			priv->flags |= FLAG_IO_FIXED_1V8;
-> > > +		else
-> > > +			priv->flags &= ~FLAG_IO_FIXED_1V8;
-> > > +
-> > > +		/*
-> > > +		 * start_signal_voltage_switch() will try 3.3V first
-> > > +		 * then 1.8V. Use SDHCI_SIGNALING_180 ranther than
-> > > +		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> > > +		 * in sdhci_start_signal_voltage_switch().
-> > > +		 */
-> > > +		if (priv->flags & FLAG_IO_FIXED_1V8) {
-> > > +			host->flags &= ~SDHCI_SIGNALING_330;
-> > > +			host->flags |=  SDHCI_SIGNALING_180;
-> > > +		}
-> > > +
-> > > +		sdhci_enable_v4_mode(host);
-> > > +	}
-> > > +
-> > >  #ifdef CONFIG_ACPI
-> > >  	if (pltfm_data == &sdhci_dwcmshc_bf3_pdata)
-> > >  		sdhci_enable_v4_mode(host);
-> > > 
-> > > -- 
-> > > 2.34.1
-> > > 
+url:    https://github.com/intel-lab-lkp/linux/commits/Kai-Heng-Feng/PCI-pciehp-Prevent-child-devices-from-doing-RPM-on-PCIe-Link-Down/20231017-142208
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/pci/pci.git next
+patch link:    https://lore.kernel.org/r/20231016040132.23824-1-kai.heng.feng%40canonical.com
+patch subject: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on PCIe Link Down
+config: alpha-allyesconfig (https://download.01.org/0day-ci/archive/20231017/202310171955.hlish6FZ-lkp@intel.com/config)
+compiler: alpha-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231017/202310171955.hlish6FZ-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <yujie.liu@intel.com>
+| Closes: https://lore.kernel.org/r/202310171955.hlish6FZ-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+>> drivers/pci/hotplug/pciehp_pci.c:25:5: warning: no previous prototype for 'pci_dev_disconnect' [-Wmissing-prototypes]
+      25 | int pci_dev_disconnect(struct pci_dev *pdev, void *unused)
+         |     ^~~~~~~~~~~~~~~~~~
+
+
+vim +/pci_dev_disconnect +25 drivers/pci/hotplug/pciehp_pci.c
+
+^1da177e4c3f41 Linus Torvalds 2005-04-16  24  
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16 @25  int pci_dev_disconnect(struct pci_dev *pdev, void *unused)
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16  26  {
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16  27  	pm_runtime_barrier(&pdev->dev);
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16  28  	pci_dev_set_disconnected(pdev, NULL);
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16  29  
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16  30  	return 0;
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16  31  }
+2bd1cb5c4e6711 Kai-Heng Feng  2023-10-16  32  
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
+
