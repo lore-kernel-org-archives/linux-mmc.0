@@ -2,105 +2,102 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F84EC41513
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 05:46:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87E43CDB465
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 08:34:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232698AbjJSFqg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Oct 2023 01:46:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44986 "EHLO
+        id S232788AbjJSIeY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Oct 2023 04:34:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232694AbjJSFqc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 01:46:32 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6339113;
-        Wed, 18 Oct 2023 22:46:30 -0700 (PDT)
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 39J46XtH025115;
-        Thu, 19 Oct 2023 05:46:22 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references; s=qcppdkim1;
- bh=CUQyzaS/rAzu/i//gN/H3XFAidpt6/VMRPrMfGI20Zw=;
- b=GG384XzD7Kz4ZbMxclb9rUGf7IexjRTKzGV5/2h0Mis6FGFYscEGoE181ky4EuG6VY9y
- M6VQvbPcAO3zSmhExXcczAiNQtgrsfSkfLLwTYsD64s/sgtzFr1ztmhRUtrcohVm506z
- d7GWij5J5T14NOQZ0rzG41AF2qiT4zYCfByRh5xmIGCcZpmoGc+CbMq8gjTLPXyioIkl
- +qVnk0W16I6mCIGkMnClmppysHiSqPwBTr9wvQUfnuQj57zw7Pb+WvD5fdDHaQeZPYai
- 5/6JJYjzUdrejJFMkHNpV0j2va34G8x2Oj5nImvYRHLe/BOlBAicuQYhDYUC+0tEECPZ Xw== 
-Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3tt6mw34w6-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 19 Oct 2023 05:46:22 +0000
-Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-        by APBLRPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTP id 39J5kJS3012592;
-        Thu, 19 Oct 2023 05:46:19 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3tqm2mbdph-1;
-        Thu, 19 Oct 2023 05:46:19 +0000
-Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 39J5kIYU012566;
-        Thu, 19 Oct 2023 05:46:19 GMT
-Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
-        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 39J5kIPi012564;
-        Thu, 19 Oct 2023 05:46:19 +0000
-Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
-        id 522FC5714EA; Thu, 19 Oct 2023 11:16:18 +0530 (+0530)
-From:   Sarthak Garg <quic_sartgarg@quicinc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com,
-        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
-        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
-        kernel@quicinc.com, Sarthak Garg <quic_sartgarg@quicinc.com>
-Subject: [PATCH V3 3/3] mmc: sdhci-msm: Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers
-Date:   Thu, 19 Oct 2023 11:16:12 +0530
-Message-Id: <20231019054612.9192-4-quic_sartgarg@quicinc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20231019054612.9192-1-quic_sartgarg@quicinc.com>
-References: <20231019054612.9192-1-quic_sartgarg@quicinc.com>
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: c1DqPkXGYZnRvU7NdplHJu0mvwWkDGHA
-X-Proofpoint-GUID: c1DqPkXGYZnRvU7NdplHJu0mvwWkDGHA
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-10-19_04,2023-10-18_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 impostorscore=0
- mlxscore=0 lowpriorityscore=0 clxscore=1015 priorityscore=1501
- suspectscore=0 mlxlogscore=958 phishscore=0 adultscore=0 malwarescore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2309180000 definitions=main-2310190049
+        with ESMTP id S232383AbjJSIeY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 04:34:24 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B7B611B;
+        Thu, 19 Oct 2023 01:34:22 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2400DC43397;
+        Thu, 19 Oct 2023 08:34:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1697704462;
+        bh=NhE5UIsqUJ4efk9oQr6qapwxmbKSoNoKRWUzC+fdU/U=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=mfOJFjvNTwSFckxY8HVYKBdkuAvKK2M1sGBFjPYxaefFJOs25rTAhU+Rz/XkzUDsP
+         7ZG6NVlLtrmyh2UnWdcTTvKnv0Ri9cTPDKnnP8QKgoDoQte2xDFxuqHh+2CFJni6OH
+         UnpSCujhj0HqMbcfS4yyAemzQCrEcGslxDqcd+joFCb/HlB9dYh+6QLIzjscIvWMCB
+         h0p3a4ysggwrxmCyWDOHqdti1U9h9XmWwvUKhrItqUaZSFYQRW3xh6eG5Uyags4OOl
+         kIpJPJHJDIEKQp20gjbHYBc0ytizLGA52FaVFGs5LAn97piCYpUebHipa9tJal98Oi
+         rmq6AhSP9zb8w==
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-53b32dca0bfso1158721a12.0;
+        Thu, 19 Oct 2023 01:34:22 -0700 (PDT)
+X-Gm-Message-State: AOJu0YwYzLsNEpIaQBHWwnvuYjBWZI2B5DxhBz2HwcPrOHMEGlxjfD0k
+        XcqqZXTuAprq99czDj8J8lFjF4tjsa5SDnpDVzE=
+X-Google-Smtp-Source: AGHT+IG1scZ789rr7dQG139RsrK3rRMsLv+J/dEBVZhjOtJ1+/tUHJQBuLx63Z1s4dB1EVoakod2MaMhPSLUphq3mAo=
+X-Received: by 2002:a50:9353:0:b0:53d:a18d:73b4 with SMTP id
+ n19-20020a509353000000b0053da18d73b4mr998683eda.12.1697704460540; Thu, 19 Oct
+ 2023 01:34:20 -0700 (PDT)
+MIME-Version: 1.0
+References: <20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com> <20231017-th1520-mmc-v2-1-4678c8cc4048@baylibre.com>
+In-Reply-To: <20231017-th1520-mmc-v2-1-4678c8cc4048@baylibre.com>
+From:   Guo Ren <guoren@kernel.org>
+Date:   Thu, 19 Oct 2023 16:34:08 +0800
+X-Gmail-Original-Message-ID: <CAJF2gTSZPR1Gxj8sCB6Q7KiJiYot60qryEzt8GFwtwMubFBWsQ@mail.gmail.com>
+Message-ID: <CAJF2gTSZPR1Gxj8sCB6Q7KiJiYot60qryEzt8GFwtwMubFBWsQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/7] dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head
+ TH1520 support
+To:     Drew Fustini <dfustini@baylibre.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>,
+        Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Enable MMC_CAP2_SLEEP_AWAKE for Qualcomm controllers to let them use
-sleep/awake functionality for faster eMMC resume instead of
-doing full initialization.
+On Wed, Oct 18, 2023 at 4:45=E2=80=AFAM Drew Fustini <dfustini@baylibre.com=
+> wrote:
+>
+> Add compatible value for the T-Head TH1520 dwcmshc controller.
+>
+> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yam=
+l b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> index a43eb837f8da..42804d955293 100644
+> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> @@ -19,6 +19,7 @@ properties:
+>        - rockchip,rk3568-dwcmshc
+>        - rockchip,rk3588-dwcmshc
+>        - snps,dwcmshc-sdhci
+> +      - thead,th1520-dwcmshc
+Acked-by: Guo Ren <guoren@kernel.org>
 
-Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
----
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
+>
+>    reg:
+>      maxItems: 1
+>
+> --
+> 2.34.1
+>
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 93c662e28b3b..edcf18c02bf7 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2628,6 +2628,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 
- 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
- 	msm_host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
-+	msm_host->mmc->caps2 |= MMC_CAP2_SLEEP_AWAKE;
- 
- 	/* Set the timeout value to max possible */
- 	host->max_timeout_count = 0xF;
--- 
-2.17.1
 
+--=20
+Best Regards
+ Guo Ren
