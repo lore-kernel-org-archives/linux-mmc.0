@@ -2,133 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88BA3CDB465
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 11:42:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC70ACDB484
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 13:03:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235249AbjJSLmA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Oct 2023 07:42:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36808 "EHLO
+        id S1345472AbjJSNDL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Oct 2023 09:03:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235244AbjJSLl7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 07:41:59 -0400
-Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69386131
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Oct 2023 04:41:57 -0700 (PDT)
-Received: by mail-yb1-xb2c.google.com with SMTP id 3f1490d57ef6-d9a7a3e17d1so9130770276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Oct 2023 04:41:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1697715716; x=1698320516; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=TGiL/+7v3o1x68ttyGPtRHltt+XNK187tB89lDdG1nc=;
-        b=jOm3/KhX7RqQ3CaiTLvHtdU2quhIqCQt41QY6lMDZQbdI4cAMhvsvqp2F9ghBSvx5i
-         X0s16SVJ5zSAmQpz9BgkMlNJ34HLA/bn8khzzI0QO7i61svvwCiLTlSWcUuIhohxAj4v
-         9cC2d1yzyX9mXZs98Trt0Ja9Ddf66Kc0qB/ObNunz1BTJ8qj3Dv1X+pYHHynrRZSRxnZ
-         9Po3+5jWaVyI5uyyNRfHpENSc7yzgJwaKMRo7ZqrcKqYvbQaUmf8sI9+0vlSdH7hLktC
-         /OLlrV8d6z+LypNRqM4WsPHOAsrhaRR7RztsX62b2wr/rgH2+LfKOU+YP1beVaQNgmU1
-         8D8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697715716; x=1698320516;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=TGiL/+7v3o1x68ttyGPtRHltt+XNK187tB89lDdG1nc=;
-        b=lvTBOSxeLgLHMcx61TP+ZNwz3FcSDZBwfwQJ4Vaqifg5bJkclx1R4CUKp6udOgfJzS
-         I578Dmi9yPfjX9nLNMBsPwk7Yt7Acob8BAcvvOcCZlAULLegEyqT70NkBesVk4XJcSK0
-         48xiLj2sAkdbvbx+dhjTDOTaP5hrlk7D2+tJpnJqkrDviDX1AzHm92MDwnD9z1Zs7Fuo
-         5ml64iq/HLJ9YtVy36jFkwZov7pq9O0pVj3+Iuq0GUVQX8Vna1WqDZhfCi9eXz9uRt66
-         yAcnomvJ11PJMKG//Me4fnY6b5CguT9XQBfLAsAOScgP/d15g6FtBYITNmFlMNW4utSU
-         F0Ig==
-X-Gm-Message-State: AOJu0YwNk2TYtiNj1MxUFYvcFTiO0UwCbUtSlupvpWrLG095XBbYVyqX
-        aS7kEhRbRLMKdrTDBT01tDGS9CdhlqL0ptbTDE8406rov11Bs1n9
-X-Google-Smtp-Source: AGHT+IGlt7hzb+MeY42d0/BXzUGLA1J54UUaBUV7CnjW88OazHYdq5SUlmUQ758w0j6yMywc0mxbSPMhC1W9mneTaL8=
-X-Received: by 2002:a5b:a8e:0:b0:d85:df88:a7c4 with SMTP id
- h14-20020a5b0a8e000000b00d85df88a7c4mr1937717ybq.18.1697715716577; Thu, 19
- Oct 2023 04:41:56 -0700 (PDT)
+        with ESMTP id S1345728AbjJSNC7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 09:02:59 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 575BA358E;
+        Thu, 19 Oct 2023 06:02:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1697720560; x=1729256560;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=rDnZi9G5d5uexel2sxQUZZEEoNpw2t5H0NMTMij6acI=;
+  b=hGaPV1prkU1WRylJd0fWOMPc7fZnHTONQQkBgpRzdLYtNA9w2eDuUBpm
+   E7jjyvq//SIbHMy0mFL6Cgda58VMYpx26/phy0O9zCl2SYJiSGh+i4m1d
+   CuChb3NLZdu9Sh7ChAA7Hr67koe48H0scFWQg6GqP27v2iYfPKGBBhspO
+   SSI/f0tikMwhFx9PMQ8OSkXqsZp7sMgUGLSggZfTPvflc/pAuDzbYALtH
+   E2ZnA7hAG8tZ28M3VuWOshnzzoHsSbB8g5Ejegy28jHZJRkxLdpihIQAd
+   x+HZLy22yTfv//veCwdwtiqTzMreE9buCF+KwD7MPCDg/qnLgDYTPhfv3
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10868"; a="385115530"
+X-IronPort-AV: E=Sophos;i="6.03,237,1694761200"; 
+   d="scan'208";a="385115530"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2023 06:01:13 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.03,237,1694761200"; 
+   d="scan'208";a="4943789"
+Received: from lkp-server01.sh.intel.com (HELO 8917679a5d3e) ([10.239.97.150])
+  by fmviesa001.fm.intel.com with ESMTP; 19 Oct 2023 06:01:12 -0700
+Received: from kbuild by 8917679a5d3e with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1qtSeC-00027c-1o;
+        Thu, 19 Oct 2023 13:01:08 +0000
+Date:   Thu, 19 Oct 2023 21:00:31 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Jyan Chou <jyanchou@realtek.com>, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, jh80.chung@samsung.com
+Cc:     llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, jyanchou@realtek.com
+Subject: Re: [PATCH V2][1/4] mmc: solve DMA boundary limitation of CQHCI
+ driver
+Message-ID: <202310192006.ZUfTNe5e-lkp@intel.com>
+References: <20231018055326.18256-2-jyanchou@realtek.com>
 MIME-Version: 1.0
-References: <1143f3d4d26b4e7a8b3cc0d68caaa5ba@realtek.com>
-In-Reply-To: <1143f3d4d26b4e7a8b3cc0d68caaa5ba@realtek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 19 Oct 2023 13:41:20 +0200
-Message-ID: <CAPDyKFrmeDGvRMQ8CsueJhxPoFNWDLTEpx3OFRkWozrgT3tU1w@mail.gmail.com>
-Subject: Re: [PATCH v3 2/2] mmc: rtsx: add rts5264 to support sd express card
-To:     Ricky WU <ricky_wu@realtek.com>
-Cc:     "frank.li@vivo.com" <frank.li@vivo.com>,
-        "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
-        "yangyingliang@huawei.com" <yangyingliang@huawei.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231018055326.18256-2-jyanchou@realtek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 19 Oct 2023 at 05:01, Ricky WU <ricky_wu@realtek.com> wrote:
->
-> add rts5264 register setting when sd express card insert
->
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+Hi Jyan,
 
-I wasn't cc'd patch1 and not the mmc-list. Can you please resubmit so
-we can see the complete series?
+kernel test robot noticed the following build warnings:
 
-Kind regards
-Uffe
+[auto build test WARNING on linus/master]
+[also build test WARNING on v6.6-rc6 next-20231019]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-> ---
-> v3: split up mmc part from v2 patch
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 17 ++++++++++++++++-
->  1 file changed, 16 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 87d78432a1e0..7dfe7c4e0077 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -7,6 +7,7 @@
->   *   Wei WANG <wei_wang@realsil.com.cn>
->   */
->
-> +#include <linux/pci.h>
->  #include <linux/module.h>
->  #include <linux/slab.h>
->  #include <linux/highmem.h>
-> @@ -947,7 +948,7 @@ static int sd_power_on(struct realtek_pci_sdmmc *host, unsigned char power_mode)
->         /* send at least 74 clocks */
->         rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
->
-> -       if (PCI_PID(pcr) == PID_5261) {
-> +       if ((PCI_PID(pcr) == PID_5261) || (PCI_PID(pcr) == PID_5264)) {
->                 /*
->                  * If test mode is set switch to SD Express mandatorily,
->                  * this is only for factory testing.
-> @@ -1364,6 +1365,14 @@ static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
->         struct realtek_pci_sdmmc *host = mmc_priv(mmc);
->         struct rtsx_pcr *pcr = host->pcr;
->
-> +       if (PCI_PID(pcr) == PID_5264) {
-> +               pcie_capability_clear_and_set_word(pcr->pci, PCI_EXP_LNKCTL2,
-> +                               PCI_EXP_LNKCTL2_TLS, PCI_EXP_LNKCTL2_TLS_2_5GT);
-> +               pci_write_config_byte(pcr->pci, 0x80e, 0x02);
-> +               pcie_capability_clear_and_set_word(pcr->pci, PCI_EXP_LNKCTL2,
-> +                               PCI_EXP_LNKCTL2_TLS, PCI_EXP_LNKCTL2_TLS_5_0GT);
-> +       }
-> +
->         /* Set relink_time for changing to PCIe card */
->         relink_time = 0x8FFF;
->
-> @@ -1379,6 +1388,12 @@ static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
->         if (pcr->ops->disable_auto_blink)
->                 pcr->ops->disable_auto_blink(pcr);
->
-> +       if (PCI_PID(pcr) == PID_5264) {
-> +               rtsx_pci_write_register(pcr, RTS5264_AUTOLOAD_CFG2,
-> +                       RTS5264_CHIP_RST_N_SEL, RTS5264_CHIP_RST_N_SEL);
-> +               rtsx_pci_write_register(pcr, GPIO_CTL, 0x02, 0x00);
-> +       }
-> +
->         /* For PCIe/NVMe mode can't enter delink issue */
->         pcr->hw_param.interrupt_en &= ~(SD_INT_EN);
->         rtsx_pci_writel(pcr, RTSX_BIER, pcr->hw_param.interrupt_en);
-> --
-> 2.25.1
+url:    https://github.com/intel-lab-lkp/linux/commits/Jyan-Chou/mmc-solve-DMA-boundary-limitation-of-CQHCI-driver/20231018-135532
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231018055326.18256-2-jyanchou%40realtek.com
+patch subject: [PATCH V2][1/4] mmc: solve DMA boundary limitation of CQHCI driver
+config: x86_64-rhel-8.3-rust (https://download.01.org/0day-ci/archive/20231019/202310192006.ZUfTNe5e-lkp@intel.com/config)
+compiler: clang version 16.0.4 (https://github.com/llvm/llvm-project.git ae42196bc493ffe877a7e3dff8be32035dea4d07)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231019/202310192006.ZUfTNe5e-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202310192006.ZUfTNe5e-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+>> drivers/mmc/host/cqhci-core.c:477:6: warning: no previous prototype for function 'cqhci_set_tran_desc' [-Wmissing-prototypes]
+   void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+        ^
+   drivers/mmc/host/cqhci-core.c:477:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
+   void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+   ^
+   static 
+   1 warning generated.
+
+
+vim +/cqhci_set_tran_desc +477 drivers/mmc/host/cqhci-core.c
+
+   476	
+ > 477	void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+   478					bool dma64)
+   479	{
+   480		__le32 *attr = (__le32 __force *)desc;
+   481	
+   482		*attr = (CQHCI_VALID(1) |
+   483			 CQHCI_END(end ? 1 : 0) |
+   484			 CQHCI_INT(0) |
+   485			 CQHCI_ACT(0x4) |
+   486			 CQHCI_DAT_LENGTH(len));
+   487	
+   488		if (dma64) {
+   489			__le64 *dataddr = (__le64 __force *)(desc + 4);
+   490	
+   491			dataddr[0] = cpu_to_le64(addr);
+   492		} else {
+   493			__le32 *dataddr = (__le32 __force *)(desc + 4);
+   494	
+   495			dataddr[0] = cpu_to_le32(addr);
+   496		}
+   497	}
+   498	EXPORT_SYMBOL(cqhci_set_tran_desc);
+   499	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
