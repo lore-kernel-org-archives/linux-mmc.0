@@ -2,112 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8565ECDB465
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 08:37:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4B1ECDB482
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 09:02:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232935AbjJSIhS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Oct 2023 04:37:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50620 "EHLO
+        id S1344967AbjJSJCS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Oct 2023 05:02:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41676 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235146AbjJSIhR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 04:37:17 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F3D9130;
-        Thu, 19 Oct 2023 01:37:15 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EB51DC433C9;
-        Thu, 19 Oct 2023 08:37:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1697704635;
-        bh=JiPNNgrjBECZwV7Y41hs/uNTObKyCCpK7ADnbCSAHfE=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=g99AoHz9se+ybdS2uYK5ZWykPZwQohb/GpZDuoK+jIlKB3dO0wkfmdUsruQ9uxfa6
-         fjj0XUJNLdXJFDUicOxeO6VPK0cH7AUEUiCPgdKAgFag1DrQY7oEzDtd6wXKD9z3Cg
-         uHdWE75C9/T90lRKVXmOUnABClbQ0I8SedCExHjljJCOKAxRG+bsufa004kCKIBwg4
-         ZCw54hIw2dgveVOSrQ7UPkyIxRrhp919AnJ2dq7+mgYU8PcBkfklqxsb97Xo7RuFFi
-         Ra1s6R9z7rMdV36KtVeFVwcK2+k5rqZIRdfaxdmFjn9S8T00oZ0YS0XyrlK0+S9MIC
-         Y0rfmrNsYNytw==
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-51e28cac164so1104387a12.1;
-        Thu, 19 Oct 2023 01:37:14 -0700 (PDT)
-X-Gm-Message-State: AOJu0YwAA+W7w1I5tg/0zSrYH+TFDZg8/PEymgkv2SqOsUrR8xJS30xe
-        XgcpJCYGVl7zNx0X60x6elb22Lu+7Ssrywk/fMU=
-X-Google-Smtp-Source: AGHT+IFE8SPujeMGxsN/7/AxLK5l9xARaEwY/dEF9MzBT6K6SFkjre6r11SbkHuEdtS3YOTy5xs38AL4+I6A7H3C5jc=
-X-Received: by 2002:a17:907:d312:b0:9a9:9d19:b250 with SMTP id
- vg18-20020a170907d31200b009a99d19b250mr899792ejc.17.1697704633410; Thu, 19
- Oct 2023 01:37:13 -0700 (PDT)
+        with ESMTP id S1344941AbjJSJCQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 05:02:16 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84A68129;
+        Thu, 19 Oct 2023 02:02:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1697706134; x=1729242134;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=2/4AyS1e2tjsGBL4YIeikHIx8MmAhIxdN+ZKAi+aHQs=;
+  b=XcpblU8xISCc3a8aPW/vEYxuYsfSdL9ySpvh5NWK7ozRqpnQrq49VCIO
+   wh3TaJXimaiZyhyqimTfJelabkLmdzK/DSbhjyVbRKXX1xNr/ofv35Y07
+   E5O0rYiHjou6nI1uOZ0CVzczXGBxPoOAeZGD9Xf3I58nInZ0uiGO3B2I1
+   jKZzpjaDWbrYeEf+U3vyOMPBzEwwVZV1PXZF9tp0yVpfuyVx2SWQkDxL9
+   Ww2rCDGFHPcegwTTtCZKq7s4eRr0BQw2k+Wbt37EZIcrGXxvTHxg0lleY
+   17TjyMfmekflgaVA/mmuJcBZncflZf2S9TAwOKGLoDa0nZctAG3qAvQlN
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10867"; a="376581661"
+X-IronPort-AV: E=Sophos;i="6.03,236,1694761200"; 
+   d="scan'208";a="376581661"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2023 02:01:52 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10867"; a="750446625"
+X-IronPort-AV: E=Sophos;i="6.03,236,1694761200"; 
+   d="scan'208";a="750446625"
+Received: from lkp-server01.sh.intel.com (HELO 8917679a5d3e) ([10.239.97.150])
+  by orsmga007.jf.intel.com with ESMTP; 19 Oct 2023 02:01:02 -0700
+Received: from kbuild by 8917679a5d3e with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1qtOto-0001tj-0R;
+        Thu, 19 Oct 2023 09:01:00 +0000
+Date:   Thu, 19 Oct 2023 17:00:29 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Jyan Chou <jyanchou@realtek.com>, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, jh80.chung@samsung.com
+Cc:     oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        jyanchou@realtek.com
+Subject: Re: [PATCH V2][1/4] mmc: solve DMA boundary limitation of CQHCI
+ driver
+Message-ID: <202310191631.Hp1KsdtD-lkp@intel.com>
+References: <20231018055326.18256-2-jyanchou@realtek.com>
 MIME-Version: 1.0
-References: <20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com> <20231017-th1520-mmc-v2-4-4678c8cc4048@baylibre.com>
-In-Reply-To: <20231017-th1520-mmc-v2-4-4678c8cc4048@baylibre.com>
-From:   Guo Ren <guoren@kernel.org>
-Date:   Thu, 19 Oct 2023 16:37:02 +0800
-X-Gmail-Original-Message-ID: <CAJF2gTQ_sa8pu9G1chP-ZbsCAba_a5yriuEu-0rKR==b24KUnQ@mail.gmail.com>
-Message-ID: <CAJF2gTQ_sa8pu9G1chP-ZbsCAba_a5yriuEu-0rKR==b24KUnQ@mail.gmail.com>
-Subject: Re: [PATCH v2 4/7] riscv: defconfig: Enable mmc and dma drivers for
- T-Head TH1520
-To:     Drew Fustini <dfustini@baylibre.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Fu Wei <wefu@redhat.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
-        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231018055326.18256-2-jyanchou@realtek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 18, 2023 at 4:45=E2=80=AFAM Drew Fustini <dfustini@baylibre.com=
-> wrote:
->
-> Enable the mmc controller driver and dma controller driver needed for
-> T-Head TH1520 based boards, like the LicheePi 4A and BeagleV-Ahead, to
-> boot from eMMC storage.
-Yes, it's necessary to add this config for th1520.
+Hi Jyan,
 
-Reviewed-by: Guo Ren <guoren@kernel.org>
+kernel test robot noticed the following build warnings:
 
->
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> ---
->  arch/riscv/configs/defconfig | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/arch/riscv/configs/defconfig b/arch/riscv/configs/defconfig
-> index ab86ec3b9eab..c5a8583236d0 100644
-> --- a/arch/riscv/configs/defconfig
-> +++ b/arch/riscv/configs/defconfig
-> @@ -168,12 +168,14 @@ CONFIG_MMC=3Dy
->  CONFIG_MMC_SDHCI=3Dy
->  CONFIG_MMC_SDHCI_PLTFM=3Dy
->  CONFIG_MMC_SDHCI_CADENCE=3Dy
-> +CONFIG_MMC_SDHCI_OF_DWCMSHC=3Dy
->  CONFIG_MMC_SPI=3Dy
->  CONFIG_MMC_SUNXI=3Dy
->  CONFIG_RTC_CLASS=3Dy
->  CONFIG_RTC_DRV_SUN6I=3Dy
->  CONFIG_DMADEVICES=3Dy
->  CONFIG_DMA_SUN6I=3Dm
-> +CONFIG_DW_AXI_DMAC=3Dy
->  CONFIG_VIRTIO_PCI=3Dy
->  CONFIG_VIRTIO_BALLOON=3Dy
->  CONFIG_VIRTIO_INPUT=3Dy
->
-> --
-> 2.34.1
->
+[auto build test WARNING on linus/master]
+[also build test WARNING on ulf-hansson-mmc-mirror/next v6.6-rc6 next-20231018]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Jyan-Chou/mmc-solve-DMA-boundary-limitation-of-CQHCI-driver/20231018-135532
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231018055326.18256-2-jyanchou%40realtek.com
+patch subject: [PATCH V2][1/4] mmc: solve DMA boundary limitation of CQHCI driver
+config: csky-randconfig-001-20231019 (https://download.01.org/0day-ci/archive/20231019/202310191631.Hp1KsdtD-lkp@intel.com/config)
+compiler: csky-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231019/202310191631.Hp1KsdtD-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202310191631.Hp1KsdtD-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+   In file included from drivers/mmc/host/sdhci_am654.c:17:
+>> drivers/mmc/host/cqhci.h:292:40: warning: 'struct mmc_data' declared inside parameter list will not be visible outside of this definition or declaration
+     292 |         void (*setup_tran_desc)(struct mmc_data *data,
+         |                                        ^~~~~~~~
+--
+>> drivers/mmc/host/cqhci-core.c:477:6: warning: no previous prototype for 'cqhci_set_tran_desc' [-Wmissing-prototypes]
+     477 | void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+         |      ^~~~~~~~~~~~~~~~~~~
 
 
---=20
-Best Regards
- Guo Ren
+vim +292 drivers/mmc/host/cqhci.h
+
+   281	
+   282	struct cqhci_host_ops {
+   283		void (*dumpregs)(struct mmc_host *mmc);
+   284		void (*write_l)(struct cqhci_host *host, u32 val, int reg);
+   285		u32 (*read_l)(struct cqhci_host *host, int reg);
+   286		void (*enable)(struct mmc_host *mmc);
+   287		void (*disable)(struct mmc_host *mmc, bool recovery);
+   288		void (*update_dcmd_desc)(struct mmc_host *mmc, struct mmc_request *mrq,
+   289					 u64 *data);
+   290		void (*pre_enable)(struct mmc_host *mmc);
+   291		void (*post_disable)(struct mmc_host *mmc);
+ > 292		void (*setup_tran_desc)(struct mmc_data *data,
+   293			struct cqhci_host *cq_host, u8 *desc, int sg_count);
+   294	#ifdef CONFIG_MMC_CRYPTO
+   295		int (*program_key)(struct cqhci_host *cq_host,
+   296				   const union cqhci_crypto_cfg_entry *cfg, int slot);
+   297	#endif
+   298	};
+   299	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
