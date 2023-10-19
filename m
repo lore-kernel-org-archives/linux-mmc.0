@@ -2,151 +2,92 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91EEFCDB482
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 16:59:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEA7FCDB465
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 19:58:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235441AbjJSQ71 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Oct 2023 12:59:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37372 "EHLO
+        id S235527AbjJST6m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Oct 2023 15:58:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235465AbjJSQ70 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 12:59:26 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42284131
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Oct 2023 09:59:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1697734763; x=1729270763;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=U5l8EMoeFClPUXQoTsPciKJNyr3KpYQ2NHd/ubIZX90=;
-  b=n7mKjKzJYdl7VzOcpCocavAwd4UebvvjlkVECD8Y92uVZjSEHy7TAeYQ
-   2Q83xIQwU7+jeNVGxstx0HSOy8y+3XnDYURvY5MVpYJ2wFHTyk/ZwfhMl
-   qs3/u8cl9tdm4pvSJ9ue2/+VJtsKaxzHcb/KeHv4cXHH7wUsPgibxWAXu
-   bZV1p61+USFIfCna0SXtsJ7g2+s+jXmFXrJPBL13d2qhFfoVeBLcPkf96
-   qK9oAvV4kpO4XnpFVW2xQcdsBHKCu0W9UfPiwzgensl+Q02+LcnzWG3uc
-   R0syA1V5pk7owgxtUzu9c5fHmdyFSz91HPkzJ1Kjzi4gdRBOdjng6OgkK
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10868"; a="365657289"
-X-IronPort-AV: E=Sophos;i="6.03,237,1694761200"; 
-   d="scan'208";a="365657289"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2023 09:59:22 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.03,237,1694761200"; 
-   d="scan'208";a="5050701"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.39.14])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2023 09:59:22 -0700
-Message-ID: <4bf5699e-c89c-455a-9e74-415509faf055@intel.com>
-Date:   Thu, 19 Oct 2023 19:59:18 +0300
+        with ESMTP id S229598AbjJST6m (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 15:58:42 -0400
+Received: from mail-vk1-xa2e.google.com (mail-vk1-xa2e.google.com [IPv6:2607:f8b0:4864:20::a2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 742D7CA;
+        Thu, 19 Oct 2023 12:58:40 -0700 (PDT)
+Received: by mail-vk1-xa2e.google.com with SMTP id 71dfb90a1353d-49d39f07066so24707e0c.0;
+        Thu, 19 Oct 2023 12:58:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1697745519; x=1698350319; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=GvkRB+olAWmsGyPWRkTPV22lAdd6kaLG5H3LrhMq4VY=;
+        b=KliUWx8j15vtxskywCwUpuCkRJlShQwtv5CH1MpVaK+uySy8kyilDZiSNuwIvR0RTG
+         21mbdgdAD/ZVb7OHr6Fk90NvJfo4wZT9q8M93zaoyjG4dqYIoKNgeTam2oQ8LoBbQ2wD
+         nGNh8/33+479dEeogu7apptA6TZt0rhohlpPV/svln211wyJ0VSHtlnn9dGl94fSqlQ+
+         rZ1Je0ZbjyVAYKfIzfzgrctujzzlWtbtT6/VkFPnzfR+NREX5//xOUDN+5gyP5WCUQC4
+         cRDc6B2Mi0xEVcvYupTk1f8P8RnWovFc2PxTdF4Yq1nWf5XMptnG+ByorXnMUkx03vJn
+         JiEg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1697745519; x=1698350319;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=GvkRB+olAWmsGyPWRkTPV22lAdd6kaLG5H3LrhMq4VY=;
+        b=wrFBIB8jwe/PIYQnLiIe5GkYmbF2y1V4KlT8OCb2hLTHF3ECFzaLXQaiwiQ+Y7O6li
+         F1Qeniw57amkbYiy9t8W5433Oq6bpE9SRveoiK+UOBsSNRs5VGZ+SJe/jlzCxFE7HOfx
+         QV2iRobRF3Rp0RkqRCVxsmcNrgtDpj0VgjesivT+J/vgLZihFa9FDe6zxfEvmLVAHMBS
+         pbAskNAO857vdukDRj0DKC3wt4MiLKsVVKseUKb1Pzky2wIoXp7JqbFg6NJCMV3vg09z
+         YPMDx8Fe4Wx9LhYaGlPUQd2M1nnRol4VUCvUn7MUj+7d5pNrjYO3XcYG77HqRr7yIJZI
+         zyjw==
+X-Gm-Message-State: AOJu0Yw8b9T3d662AumQCcuahZ4ezXAsFhOiQqPM8Lw5aJDaTwl3ruT3
+        WMWiKjqxoFNunE4tuAswGxk=
+X-Google-Smtp-Source: AGHT+IEF2LkUso/N87vJU+7pzjGTriwnJvL37YO8xbkRA7it1JuGa2Gx6nBfJSVobPhZr+91+hmgZA==
+X-Received: by 2002:a05:6102:23f7:b0:457:60df:a30a with SMTP id p23-20020a05610223f700b0045760dfa30amr3386394vsc.30.1697745519530;
+        Thu, 19 Oct 2023 12:58:39 -0700 (PDT)
+Received: from policorp.cardumecowork.local ([177.91.232.53])
+        by smtp.gmail.com with ESMTPSA id d18-20020a056102041200b0045255981807sm46752vsq.0.2023.10.19.12.58.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Oct 2023 12:58:39 -0700 (PDT)
+From:   Edson Juliano Drosdeck <edson.drosdeck@gmail.com>
+To:     ulf.hansson@linaro.org
+Cc:     adrian.hunter@intel.com, CLoehle@hyperstone.com,
+        brauner@kernel.org, axboe@kernel.dk,
+        victor.shih@genesyslogic.com.tw, f.fainelli@gmail.com,
+        asuk4.q@gmail.com, yibin.ding@unisoc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        edson.drosdeck@gmail.com
+Subject: [PATCH] mmc: block: Use octal for file permissions
+Date:   Thu, 19 Oct 2023 16:57:52 -0300
+Message-Id: <20231019195752.62692-1-edson.drosdeck@gmail.com>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: host: sdhci-esdhc-imx: let usr to config the wakeup
- for gpio cd pin through sysfs
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Bough Chen <haibo.chen@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "shawnguo@kernel.org" <shawnguo@kernel.org>,
-        "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
-        "kernel@pengutronix.de" <kernel@pengutronix.de>,
-        "festevam@gmail.com" <festevam@gmail.com>
-References: <20231017073129.1406748-1-haibo.chen@nxp.com>
- <CAPDyKFrffRvM51ZSzEffH9iHOWr7A0tu_e7aub7GiXdG49-iNA@mail.gmail.com>
- <DB7PR04MB40100BAA35662C888819E05590D5A@DB7PR04MB4010.eurprd04.prod.outlook.com>
- <CAPDyKFpvvk_yiUWKfxTAWwsDvEG6PS8rSv6kpmE5emANzYe_AA@mail.gmail.com>
- <4bcb3eb7-e204-4aef-bebc-575627d58127@intel.com>
- <CAPDyKFohqPexaKvsi091KqGj2WQYSQgx0Dr5g2x+bSZ2j71zHg@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAPDyKFohqPexaKvsi091KqGj2WQYSQgx0Dr5g2x+bSZ2j71zHg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/10/23 18:24, Ulf Hansson wrote:
-> On Thu, 19 Oct 2023 at 16:48, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 18/10/23 17:42, Ulf Hansson wrote:
->>> On Wed, 18 Oct 2023 at 04:07, Bough Chen <haibo.chen@nxp.com> wrote:
->>>>
->>>>> -----Original Message-----
->>>>> From: Ulf Hansson <ulf.hansson@linaro.org>
->>>>> Sent: 2023年10月17日 19:35
->>>>> To: Bough Chen <haibo.chen@nxp.com>
->>>>> Cc: adrian.hunter@intel.com; linux-mmc@vger.kernel.org; dl-linux-imx
->>>>> <linux-imx@nxp.com>; shawnguo@kernel.org; s.hauer@pengutronix.de;
->>>>> kernel@pengutronix.de; festevam@gmail.com
->>>>> Subject: Re: [PATCH] mmc: host: sdhci-esdhc-imx: let usr to config the wakeup
->>>>> for gpio cd pin through sysfs
->>>>>
->>>>> On Tue, 17 Oct 2023 at 09:26, <haibo.chen@nxp.com> wrote:
->>>>>>
->>>>>> From: Haibo Chen <haibo.chen@nxp.com>
->>>>>>
->>>>>> Currently default enable the gpio cd pin wakeup, this will waste power
->>>>>> after system suspend if usr do not need this cd pin wakeup feature.
->>>>>> Now let usr to config the wakeup for gpio cd pin through sysfs.
->>>>>>
->>>>>> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
->>>>>> ---
->>>>>>  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++++----
->>>>>>  1 file changed, 10 insertions(+), 4 deletions(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
->>>>>> b/drivers/mmc/host/sdhci-esdhc-imx.c
->>>>>> index 40a6e2f8145a..2e46648344ba 100644
->>>>>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->>>>>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->>>>>> @@ -1797,9 +1797,12 @@ static int sdhci_esdhc_imx_probe(struct
->>>>> platform_device *pdev)
->>>>>>         /*
->>>>>>          * Setup the wakeup capability here, let user to decide
->>>>>>          * whether need to enable this wakeup through sysfs interface.
->>>>>> +        * First check the SDIO device, second check the gpio CD pin.
->>>>>>          */
->>>>>> -       if ((host->mmc->pm_caps & MMC_PM_KEEP_POWER) &&
->>>>>> -                       (host->mmc->pm_caps &
->>>>> MMC_PM_WAKE_SDIO_IRQ))
->>>>>> +       if (((host->mmc->pm_caps & MMC_PM_KEEP_POWER) &&
->>>>>> +                       (host->mmc->pm_caps &
->>>>> MMC_PM_WAKE_SDIO_IRQ)) ||
->>>>>> +           ((host->mmc->caps & MMC_CAP_CD_WAKE) &&
->>>>>> +                        host->mmc->slot.cd_irq >= 0))
->>>>>>                 device_set_wakeup_capable(&pdev->dev, true);
->>>>>
->>>>> If the wakeup is GPIO based, it doesn't mean that the device is wakeup capable,
->>>>> so this is wrong.
->>>>>
->>>>> In principle this must be managed through the GPIO irqchip driver instead.
->>>>
->>>> Yes, I know GPIO and USDHC are different device, combine GPIO wakeup to USDHC is not that reasonable.
->>>> I send this patch because I notice there is similar code in sdhci-pci-core.c, refer to sdhci_pci_suspend_host()
->>>>
->>>> Seems PCI subsystem combine GPIO wakeup to PCI controller.
->>>
->>> Good point! I am not sure that is the correct way to do it either, but
->>> maybe it's fine for PCI based devices. Adrian probably knows this
->>> better.
->>
->> PCI / ACPI layers handle configuration of wakeup signaling, so a
->> device will be put to the appropriate power state.  It won't be
->> forced to be "on" by registering a wakeup source.
->>
-> 
-> Okay, I see.
-> 
-> So you are saying that PCI bus/layers are aware of the GPIO pin/irq
-> being used for wakeup for the device in question?
+Octal permissions are preferred as stated in
+Documentation/dev-tools/checkpatch.rst. Replace symbolic permissions
+with octal permissions when creating the files.
 
-No, it is more like PCI / ACPI take care of most things but the
-wakeup framework provides sysfs wakeup API.  We can add that and
-use it to determine if wakeup is enabled (by the user) to then
-enable the CD GPIO IRQ wakeup.  That way, the sysfs wakeup API is
-on the correct device, and the user doesn't need to know anything
-about GPIO.
+Signed-off-by: Edson Juliano Drosdeck <edson.drosdeck@gmail.com>
+---
+ drivers/mmc/core/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index b5b414a71e0b..edb653d8fbfa 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2916,7 +2916,7 @@ static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+ 
+ 	if (mmc_card_mmc(card)) {
+ 		md->ext_csd_dentry =
+-			debugfs_create_file("ext_csd", S_IRUSR, root, card,
++			debugfs_create_file("ext_csd", 0400, root, card,
+ 					    &mmc_dbg_ext_csd_fops);
+ 	}
+ }
+-- 
+2.39.2
 
