@@ -2,126 +2,117 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC70ACDB484
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 13:03:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C7D6CDB483
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Oct 2023 14:35:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345472AbjJSNDL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Oct 2023 09:03:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44164 "EHLO
+        id S1346117AbjJSOfO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Oct 2023 10:35:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345728AbjJSNC7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 09:02:59 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 575BA358E;
-        Thu, 19 Oct 2023 06:02:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1697720560; x=1729256560;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=rDnZi9G5d5uexel2sxQUZZEEoNpw2t5H0NMTMij6acI=;
-  b=hGaPV1prkU1WRylJd0fWOMPc7fZnHTONQQkBgpRzdLYtNA9w2eDuUBpm
-   E7jjyvq//SIbHMy0mFL6Cgda58VMYpx26/phy0O9zCl2SYJiSGh+i4m1d
-   CuChb3NLZdu9Sh7ChAA7Hr67koe48H0scFWQg6GqP27v2iYfPKGBBhspO
-   SSI/f0tikMwhFx9PMQ8OSkXqsZp7sMgUGLSggZfTPvflc/pAuDzbYALtH
-   E2ZnA7hAG8tZ28M3VuWOshnzzoHsSbB8g5Ejegy28jHZJRkxLdpihIQAd
-   x+HZLy22yTfv//veCwdwtiqTzMreE9buCF+KwD7MPCDg/qnLgDYTPhfv3
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10868"; a="385115530"
-X-IronPort-AV: E=Sophos;i="6.03,237,1694761200"; 
-   d="scan'208";a="385115530"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2023 06:01:13 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.03,237,1694761200"; 
-   d="scan'208";a="4943789"
-Received: from lkp-server01.sh.intel.com (HELO 8917679a5d3e) ([10.239.97.150])
-  by fmviesa001.fm.intel.com with ESMTP; 19 Oct 2023 06:01:12 -0700
-Received: from kbuild by 8917679a5d3e with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1qtSeC-00027c-1o;
-        Thu, 19 Oct 2023 13:01:08 +0000
-Date:   Thu, 19 Oct 2023 21:00:31 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Jyan Chou <jyanchou@realtek.com>, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, jh80.chung@samsung.com
-Cc:     llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, jyanchou@realtek.com
-Subject: Re: [PATCH V2][1/4] mmc: solve DMA boundary limitation of CQHCI
- driver
-Message-ID: <202310192006.ZUfTNe5e-lkp@intel.com>
-References: <20231018055326.18256-2-jyanchou@realtek.com>
+        with ESMTP id S1346103AbjJSOfN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Oct 2023 10:35:13 -0400
+Received: from bmailout2.hostsharing.net (bmailout2.hostsharing.net [83.223.78.240])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EAFA132;
+        Thu, 19 Oct 2023 07:35:11 -0700 (PDT)
+Received: from h08.hostsharing.net (h08.hostsharing.net [IPv6:2a01:37:1000::53df:5f1c:0])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256
+         client-signature RSA-PSS (4096 bits) client-digest SHA256)
+        (Client CN "*.hostsharing.net", Issuer "RapidSSL Global TLS RSA4096 SHA256 2022 CA1" (verified OK))
+        by bmailout2.hostsharing.net (Postfix) with ESMTPS id 1BDC82800A261;
+        Thu, 19 Oct 2023 16:35:04 +0200 (CEST)
+Received: by h08.hostsharing.net (Postfix, from userid 100393)
+        id 113305F021; Thu, 19 Oct 2023 16:35:04 +0200 (CEST)
+Date:   Thu, 19 Oct 2023 16:35:04 +0200
+From:   Lukas Wunner <lukas@wunner.de>
+To:     Ricky WU <ricky_wu@realtek.com>
+Cc:     Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        "bhelgaas@google.com" <bhelgaas@google.com>,
+        "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+        "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on
+ PCIe Link Down
+Message-ID: <20231019143504.GA25140@wunner.de>
+References: <20231016040132.23824-1-kai.heng.feng@canonical.com>
+ <20231016093210.GA22952@wunner.de>
+ <263982e90fc046cf977ecb8727003690@realtek.com>
+ <20231018094435.GA21090@wunner.de>
+ <02ee7e47166a463d8d4e491b61cdd33f@realtek.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231018055326.18256-2-jyanchou@realtek.com>
+In-Reply-To: <02ee7e47166a463d8d4e491b61cdd33f@realtek.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Jyan,
+On Thu, Oct 19, 2023 at 01:49:50AM +0000, Ricky WU wrote:
+> [    0.267813] pci 0000:00:1c.0: [8086:a33c] type 01 class 0x060400
 
-kernel test robot noticed the following build warnings:
+Cannon Lake PCH Root Port
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on v6.6-rc6 next-20231019]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+> [    0.275241] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
+> [    0.275315] pci 0000:01:00.0: reg 0x10: [mem 0xa3b00000-0xa3b00fff]
+> [    0.275782] pci 0000:01:00.0: supports D1 D2
+> [    0.275784] pci 0000:01:00.0: PME# supported from D1 D2 D3hot D3cold
+> [    0.276490] pci 0000:00:1c.0: PCI bridge to [bus 01]
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Jyan-Chou/mmc-solve-DMA-boundary-limitation-of-CQHCI-driver/20231018-135532
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20231018055326.18256-2-jyanchou%40realtek.com
-patch subject: [PATCH V2][1/4] mmc: solve DMA boundary limitation of CQHCI driver
-config: x86_64-rhel-8.3-rust (https://download.01.org/0day-ci/archive/20231019/202310192006.ZUfTNe5e-lkp@intel.com/config)
-compiler: clang version 16.0.4 (https://github.com/llvm/llvm-project.git ae42196bc493ffe877a7e3dff8be32035dea4d07)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231019/202310192006.ZUfTNe5e-lkp@intel.com/reproduce)
+Device below Root Port is initially a Realtek RTS5261 card reader.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202310192006.ZUfTNe5e-lkp@intel.com/
+> [    0.395968] pcieport 0000:00:1c.0: PME: Signaling with IRQ 122
+> [    0.396009] pcieport 0000:00:1c.0: pciehp: Slot #8 AttnBtn- PwrCtrl- MRL- AttnInd- PwrInd- HotPlug+ Surprise+ Interlock- NoCompl+ IbPresDis- LLActRep+
 
-All warnings (new ones prefixed by >>):
+Root Port is hotplug-capable.
 
->> drivers/mmc/host/cqhci-core.c:477:6: warning: no previous prototype for function 'cqhci_set_tran_desc' [-Wmissing-prototypes]
-   void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
-        ^
-   drivers/mmc/host/cqhci-core.c:477:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-   void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
-   ^
-   static 
-   1 warning generated.
+> [   43.180701] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> [   43.180709] pcieport 0000:00:1c.0: pciehp: Slot(8): Card not present
+> [   44.403768] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> [   44.403772] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> [   44.540631] pci 0000:01:00.0: [15b7:5007] type 00 class 0x010802
 
+Card reader is unplugged and replaced by SanDisk SN530 NVMe SSD.
 
-vim +/cqhci_set_tran_desc +477 drivers/mmc/host/cqhci-core.c
+> [   51.682628] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> [   51.716800] nvme0n1: detected capacity change from 495050752 to 0
+> [   51.793382] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> [   51.793392] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> [   51.928633] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
 
-   476	
- > 477	void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
-   478					bool dma64)
-   479	{
-   480		__le32 *attr = (__le32 __force *)desc;
-   481	
-   482		*attr = (CQHCI_VALID(1) |
-   483			 CQHCI_END(end ? 1 : 0) |
-   484			 CQHCI_INT(0) |
-   485			 CQHCI_ACT(0x4) |
-   486			 CQHCI_DAT_LENGTH(len));
-   487	
-   488		if (dma64) {
-   489			__le64 *dataddr = (__le64 __force *)(desc + 4);
-   490	
-   491			dataddr[0] = cpu_to_le64(addr);
-   492		} else {
-   493			__le32 *dataddr = (__le32 __force *)(desc + 4);
-   494	
-   495			dataddr[0] = cpu_to_le32(addr);
-   496		}
-   497	}
-   498	EXPORT_SYMBOL(cqhci_set_tran_desc);
-   499	
+NVMe SSD replaced by the card reader again.
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+> [   54.872928] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> [   56.146581] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> [   56.146584] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> [   56.284632] pci 0000:01:00.0: [15b7:5007] type 00 class 0x010802
+
+Card reader replaced by NVMe SSD, second time.
+
+> [   60.635845] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> [   60.676842] nvme0n1: detected capacity change from 495050752 to 0
+> [   60.748953] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> [   60.748958] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> [   60.884619] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
+
+NVMe SSD replaced by the card reader, second time.
+
+> [   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> [   63.912118] BUG: unable to handle page fault for address: ffffb24d403e5010
+
+Card reader replaced with NVMe SSD, third time.
+
+So it took three tries to reproduce the page fault.
+
+Thanks for the log, the issue is a little less murky now.
+But it's still unclear what the root cause is and thus
+what the proper solution is.  I think this needs more
+in-depth debugging, see my previous e-mail.
+
+Hope that helps!  Thanks,
+
+Lukas
