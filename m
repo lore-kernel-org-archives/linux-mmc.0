@@ -2,63 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39481CDB474
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Oct 2023 07:36:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7B9FCDB474
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Oct 2023 07:41:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376420AbjJTHgX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Oct 2023 03:36:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49402 "EHLO
+        id S1376426AbjJTHlC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Oct 2023 03:41:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46290 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376317AbjJTHgU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Oct 2023 03:36:20 -0400
-Received: from mail.okerlenbiz.com (mail.okerlenbiz.com [54.36.101.41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D479991
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Oct 2023 00:36:17 -0700 (PDT)
-Received: by mail.okerlenbiz.com (Postfix, from userid 1002)
-        id 0C8B5A29B1; Fri, 20 Oct 2023 07:36:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=okerlenbiz.com;
-        s=mail; t=1697787376;
-        bh=sxkamsLepnJSy5ikFDKOiyq8RChcIfs44Djo0bti1MM=;
-        h=Date:From:To:Subject:From;
-        b=BmVnipxYIide/6Jeknt9oL2b3PxgCb6ctQyPxOTLqYaKsJmVpF9wm196rs5DV1tEE
-         351vis4IzTyw+fUbcVKr3G1qf4eze14tcGfgkFJ4OoiXhz9RJZiz+uCjr0YytUCKxl
-         IArr6gvEShVoAN50Cm8/Vb3zgsSx8TvYfLIWTlPUWHnUAC0c2n8RvFH5AO4gTvVI46
-         k5SWpbGktawGh8reKwceHDaXdFHsz3x7G6zAfAEWuRyEZhWKwIAjIzfV0kdDjCv705
-         bRMzmmmhRzoGAw4lEP1Iv3HG2RZX9gZtQDrupiwfcdmLbhkUxf/lEgHXvaPN0VXzla
-         1gH/ktHNUQ8fg==
-Received: by mail.okerlenbiz.com for <linux-mmc@vger.kernel.org>; Fri, 20 Oct 2023 07:36:04 GMT
-Message-ID: <20231020064500-0.1.6e.8mrk.0.1s428b0oo3@okerlenbiz.com>
-Date:   Fri, 20 Oct 2023 07:36:04 GMT
-From:   "Philipp Raber" <philipp.raber@okerlenbiz.com>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Metalworking and welding
-X-Mailer: mail.okerlenbiz.com
+        with ESMTP id S1376317AbjJTHlB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Oct 2023 03:41:01 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39AAF93;
+        Fri, 20 Oct 2023 00:41:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1697787660; x=1729323660;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=fS62KeVFtHKj3IzMszL8FfoyimzWJ7T3TmklfnrmAnk=;
+  b=BCxt5KraMbWQnOCN9YpgwNy2AC+TU6/sZN+hyB+FxkUKZd/nm/qV8Kth
+   5K5Av4/tVCoYfP3rtxJSt/vjtUsWOR7HT2P1jX+TOn/rxKmSyZ7olrkmx
+   OcMb1ZT4NuUiGSzT7MCh4mEKTzvaxK8ohUlgL2MOKGBPY6tLhGKm8z7fd
+   Wp1/VZrnBhmbwcABa77kS/MdMVoxiXJx4i1ncTprSyGPw/6261QJ2gFEf
+   gvhgUAfQ/BBbaABsOvlkKYyppcfzC51cfOD+Crwhaq7oid4+MRHlcdRjq
+   P2W3vWjPtB8vreAcOmvIldqqrHb9c1rpohYtCZnzVQnCSsva9fhsiZm9M
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10868"; a="376829458"
+X-IronPort-AV: E=Sophos;i="6.03,238,1694761200"; 
+   d="scan'208";a="376829458"
+Received: from orviesa001.jf.intel.com ([10.64.159.141])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Oct 2023 00:40:59 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.03,238,1694761200"; 
+   d="scan'208";a="5028885"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.209.150])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Oct 2023 00:39:46 -0700
+Message-ID: <613c51f0-c32e-4de5-9627-525d92fb06ed@intel.com>
+Date:   Fri, 20 Oct 2023 10:40:52 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: cqhci: Be more verbose in error irq handler
+Content-Language: en-US
+To:     =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <quic_asutoshd@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Radoslaw Biernacki <biernacki@google.com>,
+        Guenter Roeck <groeck@chromium.org>,
+        Gwendal Grignou <gwendal@chromium.org>, upstream@semihalf.com
+References: <20231016095610.1095084-1-korneld@chromium.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20231016095610.1095084-1-korneld@chromium.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Good morning,
+On 16/10/23 12:56, Kornel Dulęba wrote:
+> There are several reasons for controller to generate an error interrupt.
+> They include controller<->card timeout, and CRC mismatch error.
+> Right now we only get one line in the logs stating that CQE recovery was
+> triggered, but with no information about what caused it.
+> To figure out what happened be more verbose and dump the registers from
+> irq error handler logic.
+> This matches the behaviour of the software timeout logic, see
+> cqhci_timeout.
+> 
+> Signed-off-by: Kornel Dulęba <korneld@chromium.org>
+> ---
+>  drivers/mmc/host/cqhci-core.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+> index b3d7d6d8d654..33abb4bd53b5 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -700,8 +700,9 @@ static void cqhci_error_irq(struct mmc_host *mmc, u32 status, int cmd_error,
+>  
+>  	terri = cqhci_readl(cq_host, CQHCI_TERRI);
+>  
+> -	pr_debug("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d TERRI: 0x%08x\n",
+> -		 mmc_hostname(mmc), status, cmd_error, data_error, terri);
+> +	pr_warn("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d\n",
+> +		 mmc_hostname(mmc), status, cmd_error, data_error);
+> +	cqhci_dumpregs(cq_host);
 
-We specialize in serial production of metal elements.
+For debugging, isn't dynamic debug seems more appropriate?
 
-You do not have to resort to the services of subcontractors - we offer yo=
-u comprehensive services
-Support from design to production to transportation, which guarantees sho=
-rt delivery times orders and lower costs.
+>  
+>  	/* Forget about errors when recovery has already been triggered */
+>  	if (cq_host->recovery_halt)
 
-We have an extensive machine park and a large team of specialists, thanks=
- to which we can offer services such as laser sheet metal cutting, pipe a=
-nd profile bending, welding and powder coating.
-
-The main area of our production is currently storage and transport trolle=
-ys. We produce transport pallets, scissor lifts, furniture elements, buil=
-ding formwork and much more.
-
-If you have any need regarding this, please send me a message.
-
-
-Greetings
-Philipp Raber
