@@ -2,131 +2,479 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 771C3C001DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Oct 2023 08:53:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F79FCDB474
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Oct 2023 09:23:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376521AbjJTIxU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Oct 2023 04:53:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54678 "EHLO
+        id S1376575AbjJTJXm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Oct 2023 05:23:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33610 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376520AbjJTIxT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Oct 2023 04:53:19 -0400
-Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D89ACD41
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Oct 2023 01:53:16 -0700 (PDT)
-Received: by mail-vs1-xe2b.google.com with SMTP id ada2fe7eead31-457bac7c3f5so230939137.2
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Oct 2023 01:53:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1697791996; x=1698396796; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=SZMWQONtyhFjJunBgu/jOPJGbtthXaYLNhoitCzo7fs=;
-        b=Tw9J9ESCN8MSuL0Ne8uMvx/ua8IXwrU5vWsfMKUkb7UYTn1+zZXFSFoARGX11X4hzM
-         JqGMSkgxRYUPVHLYuGVKgI1cNYRCBwGLaLXSJZknI5zEkKrTxg6u2JbmOFoTPcPdTfhz
-         UuJdMLSyP3oM5MTze1kjaas0q7WWPe5QtICSA=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697791996; x=1698396796;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=SZMWQONtyhFjJunBgu/jOPJGbtthXaYLNhoitCzo7fs=;
-        b=G/Roe3DOHS0t9TTDZhJriAMbkEBpzdaWWJNVWeFkHjrK4rgoeDL3pPyNUhFJ9XUEvQ
-         ryA+wKiNEq1op77OJz1baLoTa3KKXvRETT+78QyavijEeXo0PbqoTAFcI/lnFxl6AIB3
-         8UYJU/fzOggUFiDe9SJKwhGEUmfuoqB3SA0Az96+tQbmeWpY/H5fBBFzyi7qNOHLS1fp
-         TVTG5WH4KBsZgFffE3bP/sXzCjjjSeBfU/jV3SEwoANuMODojc/SmX5Dqsh7vWzCRsQ6
-         vtdSUL5iy7kuf+s4vvPqM14icfkLYoUjVbMnzlD8y+iOBo9eoGInSqfZdiRJ3+5okUbu
-         rvcQ==
-X-Gm-Message-State: AOJu0YzdhzD0RnXMA6c+FYWzsYrlgdNEdPtOYAKe+ZUtt7Tdankzxk1J
-        liig9cU0FtGPVSKBZrMkAZb6kJ/76wFv0Ep88a8pPrg3ebUl8DgtbKA=
-X-Google-Smtp-Source: AGHT+IF/9v09ejtT7WOJ+R59iHKAUAji60nr+jZO6dVu70l9KhmTZQed9oVHK0LEUnZdn29k5NTRKoNF31AGFjGrE2o=
-X-Received: by 2002:a05:6102:1051:b0:44e:d6c3:51d4 with SMTP id
- h17-20020a056102105100b0044ed6c351d4mr1324954vsq.18.1697791995934; Fri, 20
- Oct 2023 01:53:15 -0700 (PDT)
+        with ESMTP id S1376546AbjJTJXl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Oct 2023 05:23:41 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D0E0AB;
+        Fri, 20 Oct 2023 02:23:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1697793818; x=1729329818;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=qiYw9KhzxB4orQaqBs1XQfjHHQ9JFB0GJUWCdGReTzM=;
+  b=EtBB6bOAp8QVY4NadktjiIPIKGtePsirNnZk7KPEb6q0dTPLCszat1ff
+   6R6JluyxGkcnJOmF0kL9x+J5FzKZcUcHLRAqBzX3H+tp87g0Q0Ima/BeO
+   jN6u4dY/m2uSLL6RxnyqkcDgI5YXcYCGZWqyV/37ZocunYCBbCIJvQMbP
+   1yYiMwkNCJq3wzKFBMXntzAryfFwWD4ofKvAllJtJAjF3K1BY2yIQR6Lh
+   sRSZ3e/lkYbG7seG39eEA7VyUwws30AD6b59pGWhKGKqC460IVG3/oaZg
+   vAQf2HqeZl5gBK8FiQcpgQa4kU1GiqBo4tIaGZts1rRLXrMV74kyAS2R5
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10868"; a="390347683"
+X-IronPort-AV: E=Sophos;i="6.03,238,1694761200"; 
+   d="scan'208";a="390347683"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Oct 2023 02:23:37 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.03,238,1694761200"; 
+   d="scan'208";a="5326783"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.209.150])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Oct 2023 02:23:36 -0700
+Message-ID: <9c1c6352-c392-4d14-8907-860e6c15c654@intel.com>
+Date:   Fri, 20 Oct 2023 12:23:32 +0300
 MIME-Version: 1.0
-References: <20231016095610.1095084-1-korneld@chromium.org> <613c51f0-c32e-4de5-9627-525d92fb06ed@intel.com>
-In-Reply-To: <613c51f0-c32e-4de5-9627-525d92fb06ed@intel.com>
-From:   =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
-Date:   Fri, 20 Oct 2023 10:53:05 +0200
-Message-ID: <CAD=NsqybNrf-=9=5wvoj+9MT3xK3SbX7nDk3N3VLBMyA_u3KTQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: cqhci: Be more verbose in error irq handler
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <quic_asutoshd@quicinc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Radoslaw Biernacki <biernacki@google.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Gwendal Grignou <gwendal@chromium.org>, upstream@semihalf.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 2/2] Implement SDHCI CQE support for DesignWare SDHCI.
+Content-Language: en-US
+To:     Sergey Khimich <serghox@gmail.com>, linux-kernel@vger.kernel.org
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Jyan Chou <jyanchou@realtek.com>
+References: <20231002113301.1531717-1-serghox@gmail.com>
+ <20231002113301.1531717-3-serghox@gmail.com>
+ <0932b124-16da-495c-9706-bbadadb3b076@intel.com>
+ <0a3f634b-62d4-475d-9cb0-d7eb5ee12b17@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <0a3f634b-62d4-475d-9cb0-d7eb5ee12b17@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 20, 2023 at 9:41=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
->
-> On 16/10/23 12:56, Kornel Dul=C4=99ba wrote:
-> > There are several reasons for controller to generate an error interrupt=
-.
-> > They include controller<->card timeout, and CRC mismatch error.
-> > Right now we only get one line in the logs stating that CQE recovery wa=
-s
-> > triggered, but with no information about what caused it.
-> > To figure out what happened be more verbose and dump the registers from
-> > irq error handler logic.
-> > This matches the behaviour of the software timeout logic, see
-> > cqhci_timeout.
-> >
-> > Signed-off-by: Kornel Dul=C4=99ba <korneld@chromium.org>
-> > ---
-> >  drivers/mmc/host/cqhci-core.c | 5 +++--
-> >  1 file changed, 3 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-cor=
-e.c
-> > index b3d7d6d8d654..33abb4bd53b5 100644
-> > --- a/drivers/mmc/host/cqhci-core.c
-> > +++ b/drivers/mmc/host/cqhci-core.c
-> > @@ -700,8 +700,9 @@ static void cqhci_error_irq(struct mmc_host *mmc, u=
-32 status, int cmd_error,
-> >
-> >       terri =3D cqhci_readl(cq_host, CQHCI_TERRI);
-> >
-> > -     pr_debug("%s: cqhci: error IRQ status: 0x%08x cmd error %d data e=
-rror %d TERRI: 0x%08x\n",
-> > -              mmc_hostname(mmc), status, cmd_error, data_error, terri)=
-;
-> > +     pr_warn("%s: cqhci: error IRQ status: 0x%08x cmd error %d data er=
-ror %d\n",
-> > +              mmc_hostname(mmc), status, cmd_error, data_error);
-> > +     cqhci_dumpregs(cq_host);
->
-> For debugging, isn't dynamic debug seems more appropriate?
+On 16/10/23 14:42, Sergey Khimich wrote:
+> Hello Adrian!
+> 
+> Thanks for review and comments! There are few questions I`d like to clarify:
+> 
+> On 09.10.2023 18:39, Adrian Hunter wrote:
+>> On 2/10/23 14:33, Sergey Khimich wrote:
+>>> From: Sergey Khimich <serghox@gmail.com>
+>>>
+>>> For enabling CQE support just set 'supports-cqe' in your DevTree file
+>>> for appropriate mmc node.
+>>>
+>>> Signed-off-by: Sergey Khimich <serghox@gmail.com>
+>>> ---
+>>>   drivers/mmc/host/Kconfig            |   1 +
+>>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 233 +++++++++++++++++++++++++++-
+>>>   2 files changed, 232 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>>> index 554e67103c1a..f3380b014ca9 100644
+>>> --- a/drivers/mmc/host/Kconfig
+>>> +++ b/drivers/mmc/host/Kconfig
+>>> @@ -233,6 +233,7 @@ config MMC_SDHCI_OF_DWCMSHC
+>>>       depends on MMC_SDHCI_PLTFM
+>>>       depends on OF
+>>>       depends on COMMON_CLK
+>>> +    select MMC_CQHCI
+>>>       help
+>>>         This selects Synopsys DesignWare Cores Mobile Storage Controller
+>>>         support.
+>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> index 3a3bae6948a8..7d43ae011811 100644
+>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> @@ -20,6 +20,7 @@
+>>>   #include <linux/sizes.h>
+>>>     #include "sdhci-pltfm.h"
+>>> +#include "cqhci.h"
+>>>     #define SDHCI_DWCMSHC_ARG2_STUFF    GENMASK(31, 16)
+>>>   @@ -36,6 +37,9 @@
+>>>   #define DWCMSHC_ENHANCED_STROBE        BIT(8)
+>>>   #define DWCMSHC_EMMC_ATCTRL        0x40
+>>>   +/* DWC IP vendor area 2 pointer */
+>>> +#define DWCMSHC_P_VENDOR_AREA2        0xea
+>>> +
+>>>   /* Rockchip specific Registers */
+>>>   #define DWCMSHC_EMMC_DLL_CTRL        0x800
+>>>   #define DWCMSHC_EMMC_DLL_RXCLK        0x804
+>>> @@ -75,6 +79,10 @@
+>>>   #define BOUNDARY_OK(addr, len) \
+>>>       ((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+>>>   +#define DWCMSHC_SDHCI_CQE_TRNS_MODE    (SDHCI_TRNS_MULTI | \
+>>> +                     SDHCI_TRNS_BLK_CNT_EN | \
+>>> +                     SDHCI_TRNS_DMA)
+>>> +
+>>>   enum dwcmshc_rk_type {
+>>>       DWCMSHC_RK3568,
+>>>       DWCMSHC_RK3588,
+>>> @@ -90,7 +98,8 @@ struct rk35xx_priv {
+>>>     struct dwcmshc_priv {
+>>>       struct clk    *bus_clk;
+>>> -    int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
+>>> +    int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA1 reg */
+>>> +    int vendor_specific_area2; /* P_VENDOR_SPECIFIC_AREA2 reg */
+>>>       void *priv; /* pointer to SoC private stuff */
+>>>   };
+>>>   @@ -210,6 +219,147 @@ static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
+>>>       sdhci_writel(host, vendor, reg);
+>>>   }
+>>>   +static u32 dwcmshc_cqe_irq_handler(struct sdhci_host *host, u32 intmask)
+>>> +{
+>>> +    int cmd_error = 0;
+>>> +    int data_error = 0;
+>>> +
+>>> +    if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>>> +        return intmask;
+>>> +
+>>> +    cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+>>> +
+>>> +    return 0;
+>>> +}
+>>> +
+>>> +static void dwcmshc_sdhci_cqe_enable(struct mmc_host *mmc)
+>>> +{
+>>> +    struct sdhci_host *host = mmc_priv(mmc);
+>>> +    u32 pstate;
+>>> +    u8 ctrl;
+>>> +    int count = 10;
+>>> +
+>>> +    /*
+>>> +     * CQE gets stuck if it sees Buffer Read Enable bit set, which can be
+>>> +     * the case after tuning, so ensure the buffer is drained.
+>>> +     */
+>>> +    pstate = sdhci_readl(host, SDHCI_PRESENT_STATE);
+>>> +    while (pstate & SDHCI_DATA_AVAILABLE) {
+>>> +        sdhci_readl(host, SDHCI_BUFFER);
+>>> +        pstate = sdhci_readl(host, SDHCI_PRESENT_STATE);
+>>> +        if (count-- == 0) {
+>>> +            dev_warn(mmc_dev(host->mmc),
+>>> +                 "CQE may get stuck because the Buffer Read Enable bit is set\n");
+>>> +            break;
+>>> +        }
+>>> +        mdelay(1);
+>>> +    }
+>> An alternative, which might be easier, is to do a
+>> data reset which may also help allow the device to
+>> subsequently enter low power states.
+>> Refer commit f8870ae6e2d6be75b1accc2db981169fdfbea7ab
+>> and commit 7b7d57fd1b773d25d8358c6017592b4928bf76ce
+> 
+> Thanks, I'll fix it in the next version of the patch.
+> 
+>>
+>>> +
+>>> +    sdhci_writew(host, DWCMSHC_SDHCI_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
+>>> +
+>>> +    sdhci_cqe_enable(mmc);
+>>> +
+>>> +    /*
+>>> +     * The "DesignWare Cores Mobile Storage Host Controller
+>>> +     * DWC_mshc / DWC_mshc_lite Databook" says:
+>>> +     * when Host Version 4 Enable" is 1 in Host Control 2 register,
+>>> +     * SDHCI_CTRL_ADMA32 bit means ADMA2 is selected.
+>>> +     * Selection of 32-bit/64-bit System Addressing:
+>>> +     * either 32-bit or 64-bit system addressing is selected by
+>>> +     * 64-bit Addressing bit in Host Control 2 register.
+>>> +     *
+>>> +     * On the other hand the "DesignWare Cores Mobile Storage Host
+>>> +     * Controller DWC_mshc / DWC_mshc_lite User Guide" says, that we have to
+>>> +     * set DMA_SEL to ADMA2 _only_ mode in the Host Control 2 register.
+>>> +     */
+>>> +    ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>>> +    ctrl &= ~SDHCI_CTRL_DMA_MASK;
+>>> +    ctrl |= SDHCI_CTRL_ADMA32;
+>>> +    sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>>> +}
+>>> +
+>>> +static void dwcmshc_sdhci_cqe_disable(struct mmc_host *mmc, bool recovery)
+>>> +{
+>>> +    /*
+>>> +     * If an ioctl was issued, cqe_disable will be called.
+>>> +     * For CQE of sdhci-of-dwcmshc, the previous in-flight cmd will be lost quietly.
+>>> +     * So wait for mmc idle state.
+>> This sounds like it should be fixed in the mmc block driver.
+>> Can you provide an example of when this happens?
+> Unfortunately I can't provide an example.
+> But this part of the patch is updated by me on the advice of Shawn Lin after his reviewing V1 of the patch.
+> Please find his message here:
+> https://patchwork.kernel.org/project/linux-mmc/patch/20230825143525.869906-2-serghox@gmail.com/
+> 
+> Just in case here I also quote the part of his comment that refers to this part of the patch:
+> "And another issue was found when Rockchip added CQE support for
+> sdhci-of-dwcmshc internally, is that if a ioctl was issued, cqe_disable
+> will be called. For CQE of sdhci-of-dwcmshc, the previous in-flight cmd
+> will be lost quietly. So a mmc->cqe_ops->cqe_wait_for_idle(mmc) should
+> be added before sdhci_cqe_disable(), so you need a dwcmshc specified
+> cqe_disable hook in sdhci-of-dwcmshc."
 
-Dynamic debug is an option, but my personal preference would be to
-just log more info in the error handler.
-To give you some background.
-We're seeing some "running CQE recovery" lines in the logs, followed
-by a dm_verity mismatch error.
-The reports come from the field, with no feasible way to reproduce the
-issue locally.
+mmc block driver already does a wait for idle before ioctl commands,
+refer mmc_blk_mq_issue_rq() case MMC_ISSUE_SYNC.
 
-I'd argue that logging only the info that CQE recovery was executed is
-not particularly helpful for someone looking into those logs.
-Ideally we would have more data about the state the controller was in
-when the error happened, or at least what caused the recovery to be
-triggered.
-The question here is how verbose should we be in this error scenario.
-Looking at other error scenarios, in the case of a software timeout
-we're dumping the controller registers. (cqhci_timeout)
-Hence I thought that I'd be appropriate to match that and do the same
-in CQE recovery logic.
+Without more informaton we cannot assume the upstream kernel has
+a problem with this.
 
->
-> >
-> >       /* Forget about errors when recovery has already been triggered *=
-/
-> >       if (cq_host->recovery_halt)
->
+> 
+>>
+>>> +     */
+>>> +    mmc->cqe_ops->cqe_wait_for_idle(mmc);
+>>> +
+>>> +    return sdhci_cqe_disable(mmc, recovery);
+>>> +}
+>>> +
+>>> +static void dwcmshc_cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+>>> +                    bool dma64)
+>>> +{
+>>> +    __le32 *attr = (__le32 __force *)desc;
+>>> +
+>>> +    *attr = (CQHCI_VALID(1) |
+>>> +         CQHCI_END(end ? 1 : 0) |
+>>> +         CQHCI_INT(0) |
+>>> +         CQHCI_ACT(0x4) |
+>>> +         CQHCI_DAT_LENGTH(len));
+>>> +
+>>> +    if (dma64) {
+>>> +        __le64 *dataddr = (__le64 __force *)(desc + 4);
+>>> +
+>>> +        dataddr[0] = cpu_to_le64(addr);
+>>> +    } else {
+>>> +        __le32 *dataddr = (__le32 __force *)(desc + 4);
+>>> +
+>>> +        dataddr[0] = cpu_to_le32(addr);
+>>> +    }
+>>> +}
+>> This is the same as cqhci_set_tran_desc(). Might as well export that
+>> instead.
+> Thanks, I'll fix it in the next version of the patch.
+>>> +
+>>> +static void dwcmshc_cqhci_prep_tran_desc(struct mmc_data *data,
+>>> +                     struct cqhci_host *cq_host,
+>>> +                     u8 *desc, int sg_count)
+>>> +{
+>>> +    int i, len, tmplen, offset;
+>>> +    bool end = false;
+>>> +    bool dma64 = cq_host->dma64;
+>>> +    dma_addr_t addr;
+>>> +    struct scatterlist *sg;
+>>> +
+>>> +    for_each_sg(data->sg, sg, sg_count, i) {
+>>> +        addr = sg_dma_address(sg);
+>>> +        len = sg_dma_len(sg);
+>>> +
+>>> +        /*
+>>> +         * According to the "DesignWare Cores Mobile Storage Host Controller
+>>> +         * DWC_mshc / DWC_mshc_lite Databook" the host memory data buffer size
+>>> +         * and start address must not exceed 128 Mb. If it exceeds,
+>>> +         * the data buffer must be split using two descritors.
+>>> +         */
+>>> +
+>>> +        if (likely(BOUNDARY_OK(addr, len))) {
+>>> +            if ((i + 1) == sg_count)
+>>> +                end = true;
+>>> +            dwcmshc_cqhci_set_tran_desc(desc, addr, len, end, dma64);
+>>> +            desc += cq_host->trans_desc_len;
+>>> +        } else {
+>>> +            offset = addr & (SZ_128M - 1);
+>>> +            tmplen = SZ_128M - offset;
+>>> +            dwcmshc_cqhci_set_tran_desc(desc, addr, tmplen, end, dma64);
+>>> +            desc += cq_host->trans_desc_len;
+>>> +
+>>> +            if ((i + 1) == sg_count)
+>>> +                end = true;
+>>> +
+>>> +            addr += tmplen;
+>>> +            len -= tmplen;
+>>> +            dwcmshc_cqhci_set_tran_desc(desc, addr, len, end, dma64);
+>>> +            desc += cq_host->trans_desc_len;
+>>> +        }
+>>> +    }
+>>> +}
+>> Could this be done more like dwcmshc_adma_write_desc()
+> Actually I'm not sure what do you mean. I reused checking boundary construction with
+> "BOUNDARY_OK" macro and used the same variable names. I would appreciate it if you could clarify
+> what does mean "more like dwcmshc_adma_write_desc()"
+
+Provide a hook for cqhci_set_tran_desc() instead of cqhci_prep_tran_desc()
+You'll need to check the details, but something like:
+
+
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index b3d7d6d8d654..98e7e9d3030d 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -522,7 +522,10 @@ static int cqhci_prep_tran_desc(struct mmc_request *mrq,
+ 
+ 		if ((i+1) == sg_count)
+ 			end = true;
+-		cqhci_set_tran_desc(desc, addr, len, end, dma64);
++		if (cq_host->ops->set_tran_desc)
++			cq_host->ops->set_tran_desc(&desc, addr, len, end, dma64);
++		else
++			cqhci_set_tran_desc(desc, addr, len, end, dma64);
+ 		desc += cq_host->trans_desc_len;
+ 	}
+
+And:
+
+static void dwcmshc_set_tran_desc(u8 **desc, dma_addr_t addr, int len, bool end, bool dma64)
+{
+	int tmplen, offset;
+
+	if (likely(!len || BOUNDARY_OK(addr, len))) {
+		cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+		return;
+	}
+
+	offset = addr & (SZ_128M - 1);
+	tmplen = SZ_128M - offset;
+	cqhci_set_tran_desc(*desc, addr, tmplen, false, dma64);
+
+	addr += tmplen;
+	len -= tmplen;
+	*desc += cq_host->trans_desc_len;
+	cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+}
+
+
+
+>>
+>>> +
+>>> +static void dwcmshc_cqhci_dumpregs(struct mmc_host *mmc)
+>>> +{
+>>> +    sdhci_dumpregs(mmc_priv(mmc));
+>>> +}
+>>> +
+>>>   static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>   {
+>>>       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>> @@ -345,6 +495,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+>>>       .get_max_clock        = dwcmshc_get_max_clock,
+>>>       .reset            = sdhci_reset,
+>>>       .adma_write_desc    = dwcmshc_adma_write_desc,
+>>> +    .irq            = dwcmshc_cqe_irq_handler,
+>>>   };
+>>>     static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
+>>> @@ -379,6 +530,70 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+>>>              SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>>>   };
+>>>   +static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
+>>> +    .enable        = dwcmshc_sdhci_cqe_enable,
+>>> +    .disable    = dwcmshc_sdhci_cqe_disable,
+>>> +    .dumpregs    = dwcmshc_cqhci_dumpregs,
+>>> +    .prep_tran_desc    = dwcmshc_cqhci_prep_tran_desc,
+>>> +};
+>>> +
+>>> +static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *pdev)
+>>> +{
+>>> +    struct cqhci_host *cq_host;
+>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>> +    struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>>> +    bool dma64 = false;
+>>> +    u16 clk;
+>>> +    int err;
+>>> +
+>>> +    host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+>>> +    cq_host = devm_kzalloc(&pdev->dev, sizeof(*cq_host), GFP_KERNEL);
+>>> +    if (!cq_host) {
+>>> +        dev_err(mmc_dev(host->mmc), "Unable to setup CQE: not enough memory\n");
+>>> +        return;
+>>> +    }
+>>> +
+>>> +    /*
+>>> +     * For dwcmshc host controller we have to enable internal clock
+>>> +     * before access to some registers from Vendor Specific Aria 2.
+>>> +     */
+>>> +    clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>>> +    clk |= SDHCI_CLOCK_INT_EN;
+>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>> +    clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>>> +    if (!(clk & SDHCI_CLOCK_INT_EN)) {
+>>> +        dev_err(mmc_dev(host->mmc), "Unable to setup CQE: internal clock enable error\n");
+>>> +        goto free_cq_host;
+>>> +    }
+>>> +
+>>> +    cq_host->mmio = host->ioaddr + priv->vendor_specific_area2;
+>>> +    cq_host->ops = &dwcmshc_cqhci_ops;
+>>> +
+>>> +    /* Enable using of 128-bit task descriptors */
+>>> +    dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+>>> +    if (dma64) {
+>>> +        dev_dbg(mmc_dev(host->mmc), "128-bit task descriptors\n");
+>>> +        cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+>>> +    }
+>>> +    err = cqhci_init(cq_host, host->mmc, dma64);
+>>> +    if (err) {
+>>> +        dev_err(mmc_dev(host->mmc), "Unable to setup CQE: error %d\n", err);
+>>> +        goto int_clok_disable;
+>>> +    }
+>>> +
+>>> +    dev_dbg(mmc_dev(host->mmc), "CQE init done\n");
+>>> +
+>>> +    return;
+>>> +
+>>> +int_clok_disable:
+>> 'clok' is an odd abbreviation of 'clock'.  Perhaps 'clk' or just 'clock'
+> Thanks, I'll fix it in the next version of the patch.
+>>
+>>> +    clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>>> +    clk &= ~SDHCI_CLOCK_INT_EN;
+>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>> +
+>>> +free_cq_host:
+>>> +    devm_kfree(&pdev->dev, cq_host);
+>>> +}
+>>> +
+>>>   static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+>>>   {
+>>>       int err;
+>>> @@ -471,7 +686,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>       struct rk35xx_priv *rk_priv = NULL;
+>>>       const struct sdhci_pltfm_data *pltfm_data;
+>>>       int err;
+>>> -    u32 extra;
+>>> +    u32 extra, caps;
+>>>         pltfm_data = device_get_match_data(&pdev->dev);
+>>>       if (!pltfm_data) {
+>>> @@ -519,6 +734,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>         priv->vendor_specific_area1 =
+>>>           sdhci_readl(host, DWCMSHC_P_VENDOR_AREA1) & DWCMSHC_AREA1_MASK;
+>>> +    priv->vendor_specific_area2 =
+>>> +        sdhci_readw(host, DWCMSHC_P_VENDOR_AREA2);
+>>>         host->mmc_host_ops.request = dwcmshc_request;
+>>>       host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
+>>> @@ -547,6 +764,10 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>           sdhci_enable_v4_mode(host);
+>>>   #endif
+>>>   +    caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+>>> +    if (caps & SDHCI_CAN_64BIT_V4)
+>>> +        sdhci_enable_v4_mode(host);
+>>> +
+>>>       host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>>>         pm_runtime_get_noresume(dev);
+>>> @@ -557,6 +778,14 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>       if (err)
+>>>           goto err_rpm;
+>>>   +    /* Setup Command Queue Engine if enabled */
+>>> +    if (device_property_read_bool(&pdev->dev, "supports-cqe")) {
+>>> +        if (caps & SDHCI_CAN_64BIT_V4)
+>>> +            dwcmshc_cqhci_init(host, pdev);
+>>> +        else
+>>> +            dev_warn(dev, "Cannot enable CQE without V4 mode support\n");
+>>> +    }
+>>> +
+>>>       if (rk_priv)
+>>>           dwcmshc_rk35xx_postinit(host, priv);
+>>>   
+
