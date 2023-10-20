@@ -2,405 +2,354 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D9CBCDB474
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Oct 2023 06:25:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE9A8CDB474
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Oct 2023 06:50:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346970AbjJTGZH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Oct 2023 02:25:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50502 "EHLO
+        id S1376344AbjJTGua (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Oct 2023 02:50:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235634AbjJTGZG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Oct 2023 02:25:06 -0400
-Received: from out1-smtp.messagingengine.com (out1-smtp.messagingengine.com [66.111.4.25])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65143D55;
-        Thu, 19 Oct 2023 23:25:01 -0700 (PDT)
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-        by mailout.nyi.internal (Postfix) with ESMTP id 85F2D5C0BCA;
-        Fri, 20 Oct 2023 02:25:00 -0400 (EDT)
-Received: from imap51 ([10.202.2.101])
-  by compute5.internal (MEProxy); Fri, 20 Oct 2023 02:25:00 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:content-type:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm2; t=1697783100; x=1697869500; bh=a8
-        6LnDRuk28PigZ4CQHO6r+juEkdcI+21r+nqmdw2G8=; b=KHBkVaokj/3gMEVhdx
-        JHIT9hQU8Y6sZQAX5H8Hg1zaPgQgtXZogD++y0XDlc9ue46YCdF8ozPFr1OiNmh7
-        rvRt23iMrDcJrlxcUr9N+PmMeg2660qzHm6fnKgilO5O86smhTc8+QhFbgT6J8pE
-        o9x1bzfDO7p9ZlkrYyC+/3+cLYW1E1SqLxpHMD5oQnzswxZXLppf55krYJNew7cA
-        K0XS3hH1P9F+uUe8beslmnomGFfBWCLINEqyY9qc+BqqxQCwIXNii+5l30uF2tc9
-        O/0/QsDKPvQBN6PgS0bCKhmZCi67NttlPTVjO8j4fjVjotoHbWJRw9FCf8FAZGUd
-        eS4w==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:content-type:date:date
-        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-        :x-sasl-enc; s=fm3; t=1697783100; x=1697869500; bh=a86LnDRuk28Pi
-        gZ4CQHO6r+juEkdcI+21r+nqmdw2G8=; b=IMcIBLgi7/eAgvampo9Yuyf/Owe7z
-        SsjCq/GNbMySXyjAheEZ+MgI8t9a77FcHYVWct2MY5PIQC1uDn4/ymlZ+Umts6qP
-        U0+W7omXFPUkBPowJge5uIlTQGwZU+w5PxYdjx4rzlnAOZOoEHdJDrK3eytTwS9q
-        ORV5/o22yjaa7mugSAki0IhIJ5vSjBi7aZedwgcCekj4QrTrVRUQSAyh8WL89u/f
-        GH7U6Uk2UCdkLgKJ77Tx1zfvG1yAMF/GhejP0khV6UOdoU/4+k/YSORgvFGiV/IR
-        CIGj6zgmTlqceApZKm0rwsf6aK6zM0awZSDw9yxLMBtYzTD8I1IZEZwRw==
-X-ME-Sender: <xms:Oh0yZRn5qL7HM7mkM9cv0U9NwlW6bkZ6BX23inCg7TvmTf0Un4iQ9w>
-    <xme:Oh0yZc2hwJYYZU9HpiGF5MPj5KdL6O4JDIENSABDyf80czrL0Yc_olis6Rw3PpudC
-    09BruipHvUkAODQFXg>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrjeejgddutdegucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
-    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
-    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
-    hrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:Oh0yZXpqvyf_qyFYqF-vg4HI-fWCzYKA4-HGbkNASB5z4JaPPAESMQ>
-    <xmx:Oh0yZRlehR_g2u1ZgxunQv9TWhJvn9L0bnHi6MXGOIdfYmeqDn2lHQ>
-    <xmx:Oh0yZf1Ko-e4m4YGrGHluKOdK5fHqdf03ek2Zg8KhKN99NnN3muWgg>
-    <xmx:PB0yZW3FwOotApXKRKJxg9Su5pgNNVVqD3iU0gJd6GxcxrqU3UEdkQ>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id D44F0B60089; Fri, 20 Oct 2023 02:24:58 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.9.0-alpha0-1048-g9229b632c5-fm-20231019.001-g9229b632
+        with ESMTP id S1376357AbjJTGu3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Oct 2023 02:50:29 -0400
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EA7CD51
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Oct 2023 23:50:26 -0700 (PDT)
+Received: by mail-ed1-x52c.google.com with SMTP id 4fb4d7f45d1cf-53e70b0a218so600548a12.2
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Oct 2023 23:50:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1697784624; x=1698389424; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=azmV7W5JW8zyudwbWsHoiqbA0mwuihx4qdiSEKPNByo=;
+        b=aumhktJglf9ZdZAombpLUUM5+yWe1otrmuUKsYwnrRXAqAhgP2yW931F8eFzhVnNar
+         5PM8dYft1s9YdpQi409xMvUN3xiKJSZHiO9Efec0l/3+n9K1VIBvq6zNUXfxyfx7nRjD
+         Z8950jNH56TZqVNERhd/B9ImYxnn+s/FrSgOGeVxPx+C4FsIUbH8VRKpMJf+eaZqLhVQ
+         sluvtGBOBl/65rXCCl9S7uPZFHtWvEMzIMgknTsy8zNYgt5E+ZvfNU77IkJGNhKdpx9W
+         MohgNrsoXbRIPk860s1i6jVhGQrts+VzHo7WwkZGZu9cjLwbQrikwLekWo79a++tQHWd
+         PUsg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1697784624; x=1698389424;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=azmV7W5JW8zyudwbWsHoiqbA0mwuihx4qdiSEKPNByo=;
+        b=cBZRVSEtzf9TPs8NaFlP5LdfdbsiX9XSdkZwsUC5P8/eTHPZyttLWx27fKk84aVQL5
+         /lW8ucTyIMZPXad1I9ndYUo7Rs2u/TT46moOzZ+i/VrO+74VpUgktmoGUmdUiDuKWJcb
+         2lVk5aNKyvfWTNjz3SCOnioPmoGZn+DFqvoAOnk6+C9FpzcePB9OIKTFqmrURhkrlqcL
+         iED5BnahGpEUQ7/+O2fsTh87kjhdm5R7CljPTuk+xAUTS0Gkk8t3LMtvC6Q7fEFG3oiW
+         GghxrJ9hmV5CLXfKNtfLrtRU3NHNnVDHZD9fTXyWV/lEuHNg6v4FeDDkKnK+vhBj7st+
+         ctEA==
+X-Gm-Message-State: AOJu0Yxn6OXW438CpMMy8K+8JCMbZw0BkD3W6lbxyoVVslVvO5zWlQ3W
+        QOAKloNLIiWSG/V1jA9wCG/gLYeaIAzmZoSyh8U=
+X-Google-Smtp-Source: AGHT+IHzNTB5ez1wTApnbaEdDTRR3FdZPFm8heQPvy1GJP1r1aAfGyv8vaghrNWDAqhMBOMeRoioZw==
+X-Received: by 2002:aa7:d787:0:b0:53e:538e:3b70 with SMTP id s7-20020aa7d787000000b0053e538e3b70mr903035edq.29.1697784624469;
+        Thu, 19 Oct 2023 23:50:24 -0700 (PDT)
+Received: from [192.168.1.20] ([178.197.218.126])
+        by smtp.gmail.com with ESMTPSA id 23-20020a508e17000000b0053df23511b0sm875259edw.29.2023.10.19.23.50.22
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 19 Oct 2023 23:50:24 -0700 (PDT)
+Message-ID: <c779d973-2f3e-44b5-91e0-1ad0910fa016@linaro.org>
+Date:   Fri, 20 Oct 2023 08:50:22 +0200
 MIME-Version: 1.0
-Message-Id: <a07d417f-c2b5-4418-b788-ec37ccad513a@app.fastmail.com>
-In-Reply-To: <20231020034921.1179-3-jyanchou@realtek.com>
-References: <20231020034921.1179-1-jyanchou@realtek.com>
- <20231020034921.1179-3-jyanchou@realtek.com>
-Date:   Fri, 20 Oct 2023 08:24:37 +0200
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Jyan Chou" <jyanchou@realtek.com>,
-        "Adrian Hunter" <adrian.hunter@intel.com>, jh80.chung@samsung.com,
-        "Ulf Hansson" <ulf.hansson@linaro.org>
-Cc:     riteshh@codeaurora.org, "Rob Herring" <robh+dt@kernel.org>,
-        krzysztof.kozlowski+dt@linaro.org,
-        "Conor Dooley" <conor+dt@kernel.org>, asutoshd@codeaurora.org,
-        "Philipp Zabel" <p.zabel@pengutronix.de>,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Brian Norris" <briannorris@chromium.org>,
-        "Doug Brown" <doug@schmorgal.com>,
-        "Tony Huang" <tonyhuang.sunplus@gmail.com>, abel.vesa@linaro.org,
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V3][4/4] dt-bindings: mmc: Add dt-bindings for realtek mmc
+ driver
+To:     Jyan Chou <jyanchou@realtek.com>, adrian.hunter@intel.com,
+        jh80.chung@samsung.com, ulf.hansson@linaro.org
+Cc:     riteshh@codeaurora.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        asutoshd@codeaurora.org, p.zabel@pengutronix.de,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, arnd@arndb.de,
+        briannorris@chromium.org, doug@schmorgal.com,
+        tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
         william.qiu@starfivetech.com
-Subject: Re: [PATCH V3][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
-Content-Type: text/plain
+References: <20231020034921.1179-1-jyanchou@realtek.com>
+ <20231020034921.1179-5-jyanchou@realtek.com>
+Content-Language: en-US
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
+ 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
+ D2GYIS41Kv4Isx2dEFh+/Q==
+In-Reply-To: <20231020034921.1179-5-jyanchou@realtek.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 20, 2023, at 05:49, Jyan Chou wrote:
-> We implemented cmdq feature on Synopsys DesignWare mmc driver.
-> The difference between dw_mmc.c and dw_mmc_cqe.c were distinct
-> register definitions, mmc user flow and the addition of cmdq.
->
-> New version of User Guide had modify mmc driver's usage flow,
-> we may need to renew code to precisely follow user guide.
->
-> More over, We added a wait status function to satisfy synopsys
-> user guide's description, since this flow might be specific in
-> synopsys host driver only.
->
+On 20/10/2023 05:49, Jyan Chou wrote:
+> Document the device-tree bindings for Realtek SoCs mmc driver.
+> 
 > Signed-off-by: Jyan Chou <jyanchou@realtek.com>
-
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 159a3e9490ae..894b89a396bb 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -762,6 +762,19 @@ config MMC_DW_PLTFM
 > 
->  	  If unsure, say Y.
+> ---
+> v2 -> v3:
+> - Modify dt-bindings' content and description.
+> - Fix coding style.
+> - Update the list of maintainers.
 > 
-> +config MMC_DW_CQE
-> +	tristate "Synopsys DesignWare Memory Card with CQE Interface"
-> +	depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
+> v0 -> v2:
+> - Add dt-bindings.
+> ---
+> ---
+>  .../bindings/mmc/realtek-dw-mshc.yaml         | 150 ++++++++++++++++++
+>  1 file changed, 150 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
+> new file mode 100644
+> index 000000000000..b1e37fb37be9
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
 
-Why do you need these specific architectures? For a generic
-driver, it should not make a difference which architecture it
-is built for, and it seems silly to exclude e.g. RISCV here.
+Filename matching compatible.
 
-Maybe just use 'depends on OF'.
+BTW, before you respond, be sure you have fixed your email client. In
+your last response everything was not properly wrapped (not matching
+mailing list discussion style).
 
-> +DECLARE_COMPLETION(dw_mci_wait);
-
-I'm worried by the use of all these blocking and busy-waiting
-primitives in the driver. In addition to the completion, I see
-a tasklet, a timer, various readl_poll_timeout, and more.
-
-In an ideal block device implementation, none of these should
-be needed, as the block requests should get queued up from
-the blk_mq logic and completed when an interrupt happens.
-
-In mmc, this is traditionally a bit more complex, but I would
-hope we can avoid most of the additional deferral in new
-drivers, and explain why the other ones are needed when this
-is not possible.
-
-Let's have a look at them individually.
-
-> +#if defined(CONFIG_DEBUG_FS)
-> +static int dw_mci_cqe_req_show(struct seq_file *s, void *v)
-> +{
-> +	struct dw_mci_slot *slot = s->private;
-> +	struct mmc_request *mrq;
-> +	struct mmc_command *cmd;
-> +	struct mmc_command *stop;
-> +	struct mmc_data	*data;
+> @@ -0,0 +1,150 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/realtek-dw-mshc.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
 > +
+> +title: Realtek designware mobile storage host controller
 
-You should not need an #ifdef around the debugfs helpers, if you
-use the registration interface correctly, it all gets dropped
-by dead code elimination.
 
-> +static int dw_mci_cqe_start_command(struct dw_mci *host,
-> +				    struct mmc_command *cmd, u32 cmd_flags)
-> +{
-....
-> +
-> +	host->int_waiting = &dw_mci_wait;
-> +	end = jiffies + msecs_to_jiffies(DW_MCI_TIMEOUT_Ms);
-> +	mod_timer(&host->timer, end);
-
-This is just a timeout that happens when the command does not
-complete within the expected time, right? If so that is probably
-fine.
-
-> +		spin_lock_irqsave(&host->irq_lock, flags);
-> +		mcq_writew(host, CMD_R, cmd_flags);
-> +		spin_unlock_irqrestore(&host->irq_lock, flags);
-> +
-> +		wait_for_completion(host->int_waiting);
-
-This is odd for a couple of reasons:
-
-- an MMIO write is not serialized by a spinlock because the
-  bus fabric between the CPU and the device has no concept
-  of locking, so if you actually rely on the lock to do something
-  here, that is likely broken
-
-- Using spin_lock_irqsave() implies that this function can be called
-  from both atomic and non-atomic context, but then you have a blocking
-  function right after it, so you could have used the much cheaper
-  spin_lock_irq() here, if the lock is in fact useful
-
-- The function is named ..._start_command(), which to me implies
-  that it just pushes an operation to the device, but does not
-  actually wait for it, so the wait_for_completion() seems
-  misplaced here.
-
-> +		if (xfer_flag == 1) {
-> +			ret = readl_poll_timeout(host->regs + SDMMC_NORMAL_INT_STAT_R, 
-> status,
-> +						 (status & SDMMC_XFER_COMPLETE) ==
-> +						 SDMMC_XFER_COMPLETE, 10, DW_MCI_TIMEOUT);
-> +			if (ret) {
-> +				/*error interrupt detected*/
-> +				if ((mcq_readw(host, NORMAL_INT_STAT_R) & SDMMC_ERR_INTERRUPT) &&
-> +				    host->tuning)
-> +					dev_info(host->dev, "Tuning error ... keep tuning\n");
-> +				else
-> +					dev_err(host->dev, "Timeout waiting xfer complete, status = 
-> 0x%x\n",
-> +						(status & 0xffff));
-> +			}
-> +		} else {
-> +			ret = readl_poll_timeout(host->regs + SDMMC_NORMAL_INT_STAT_R, 
-> status,
-> +						 (status & SDMMC_CMD_COMPLETE) ==
-> +						SDMMC_CMD_COMPLETE, 10, DW_MCI_TIMEOUT);
-> +			if (ret)
-> +				dev_err(host->dev, "Timeout waiting cmd request complete\n");
-> +		}
-
-And these appear to defer the operation even more: regardless of
-the xfer_flag, you always end up in an expensive poll loop
-that starts a timer. If these are expected to not need the timer
-in normal operation, please add some comments to explain the logic,
-otherwise this may need to be restructured in a way that waits for
-an interrupt instead of a slow timer.
+DesignWare
 
 > +
-> +static int dw_mci_cqe_wait_status(struct dw_mci *host, struct 
-> mmc_command *cmd, u32 *status)
-> +{
-> +	struct mmc_command wait;
-> +	u32 cmdr;
-> +	u32 cur_state;
-> +	unsigned long timeend;
-> +	int err = 0;
-> +
-> +	/* According to Synopsys userguide, we need to send wait command after
-> +	 * stop cmd to check current status
-> +	 */
-> +
-> +	wait = host->stat_ready;
-> +	memset(&wait, 0, sizeof(struct mmc_command));
-> +
-> +	timeend = jiffies + msecs_to_jiffies(500);
-> +	do {
-> +		wait.opcode = MMC_SEND_STATUS;
-> +		wait.arg = 1 << 16;
-> +		wait.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
-> +		wait.data = NULL;
-> +		cmdr = (wait.opcode << 8) | SDMMC_RESP_LEN_48 |
-> +			SDMMC_CMD_CHK_RESP_CRC | SDMMC_CMD_IDX_CHK_ENABLE;
-> +
-> +		mcq_writew(host, XFER_MODE_R, 0);
-> +		mcq_writel(host, ARGUMENT_R, wait.arg);
-> +		err = dw_mci_cqe_start_command(host, &wait, cmdr);
-> +		if (err) {
-> +			dw_mci_cqe_reset(host);
-> +			break;
-> +		}
-> +
-> +		dw_mci_cqe_read_rsp(host, &wait, wait.resp);
-> +		*status = wait.resp[0];
-> +		cur_state = R1_CURRENT_STATE(wait.resp[0]);
-> +		err = -DW_MCI_NOT_READY;
-> +		if (cur_state == R1_STATE_TRAN) {
-> +			if (wait.resp[0] & R1_READY_FOR_DATA) {
-> +				err = 0;
-> +				break;
-> +			}
-> +		}
-> +	} while (time_before(jiffies, timeend));
-> +
-> +	return err;
-> +}
+> +description:
+> +  Realtek uses the Synopsys designware mobile storage host controller
 
-My first impression here was that this is a 500ms busy loop,
-which would have been crazy, but I now see that it actually
-blocks in the dw_mci_cqe_start_command() function I commented
-on above, so it probably does the right thing here.
+DesignWare
 
-This would still be clearer if you changed the ..._start_command()
-function to just start the command without blocking and then had
-the waiting bit in the function called ...wait_status().
+> +  to interface a SoC with storage medium. This file documents the Realtek
+> +  specific extensions.
+> +
+> +allOf:
+> +  - $ref: synopsys-dw-mshc-common.yaml#
+> +
+> +maintainers:
+> +  - Jyan Chou <jyanchou@realtek.com>
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - realtek,rtd-dw-cqe-emmc
 
-> +static void dw_mci_cqe_submit_data(struct dw_mci *host, struct 
-> mmc_data *data)
-> +{
-> +	u32 dir = 0;
-> +
-> +	host->sg = NULL;
-> +	host->data = data;
-> +
-> +	if (data->flags & MMC_DATA_READ)
-> +		dir = DMA_FROM_DEVICE;
-> +	else
-> +		dir = DMA_TO_DEVICE;
-> +
-> +	host->dma_nents = dma_map_sg(mmc_dev(host->slot->mmc),
-> +				     data->sg, data->sg_len, dir);
-> +	host->sg = data->sg;
-> +
-> +	host->using_dma = 1;
-> +
-> +	dw_mci_cqe_submit_data_dma(host);
-> +}
+Compatibles should have SoC-specific part. It does not look like you
+have one here.
 
-I think this is based on what the mmc layer expects
-you to do, but I would point out that dma_map_sg() is
-a fairly expensive operation on some chips, so it would
-be nice to be able to map the buffers in advance and
-not at the time when they are about to be submitted.
+Missing blank line
 
-> +static void dw_mci_cqe_request(struct mmc_host *mmc, struct 
-> mmc_request *mrq)
-> +{
-> +	struct dw_mci_slot *slot = mmc_priv(mmc);
-> +	struct dw_mci *host = slot->host;
-> +
-> +	WARN_ON(slot->mrq);
-> +
-> +	/*
-> +	 * The check for card presence and queueing of the request must be
-> +	 * atomic, otherwise the card could be removed in between and the
-> +	 * request wouldn't fail until another card was inserted.
-> +	 */
-> +
-> +	if (!dw_mci_cqe_get_cd(mmc)) {
-> +		mrq->cmd->error = -ENOMEDIUM;
-> +		mmc_request_done(mmc, mrq);
-> +		return;
-> +	}
-> +
-> +	down_write(&host->cr_rw_sem);
-> +
-> +	slot->mrq = mrq;
-> +	host->mrq = mrq;
-> +
-> +	dw_mci_cqe_start_request(host, slot);
-> +
-> +	tasklet_schedule(&host->tasklet);
-> +
-> +	up_write(&host->cr_rw_sem);
-> +}
+> +  reg:
+> +    maxItems: 2
 
-The tasklet function pretty much only calls mmc_request_done(),
-which I think can be called from any context, so why do you
-need to defer to a tasklet here?
+You need to describe the items.
 
 > +
-> +/* Register access macros */
-> +#define mcq_readl(dev, reg)                     \
-> +	readl_relaxed((dev)->regs + SDMMC_##reg)
-> +#define mcq_writel(dev, reg, value)                     \
-> +	writel_relaxed((value), (dev)->regs + SDMMC_##reg)
+> +  reg-names:
+> +    maxItems: 2
+
+You need to describe the items.
+
 > +
-> +#define mcq_readw(dev, reg)                     \
-> +	readw_relaxed((dev)->regs + SDMMC_##reg)
-> +#define mcq_writew(dev, reg, value)                     \
-> +	writew_relaxed((value), (dev)->regs + SDMMC_##reg)
+> +  interrupts:
+> +    maxItems: 1
 > +
-> +#define mcq_readb(dev, reg)                     \
-> +	readb_relaxed((dev)->regs + SDMMC_##reg)
-> +#define mcq_writeb(dev, reg, value)                     \
-> +	writeb_relaxed((value), (dev)->regs + SDMMC_##reg)
+> +  cqe:
+> +    maxItems: 1
 
-The use of _relaxed MMIO helpers is probably a bug here, as this
-skips the serialization against DMA and leads to incorrect data.
+Looks like some custom property. If it is a generic one, where is it
+documented? If it is custom, missing vendor prefix and description.
+Detailed description.
 
-Anything that is not performance critical or that interacts
-with DMA should use the normal readl/writel functions instead
-of the relaxed ones.
-
-> +#define dw_mci_get_int(dev)    \
-> +	do {    \
-> +		dev->normal_interrupt = mcq_readw(dev, NORMAL_INT_STAT_R);   \
-> +		dev->error_interrupt = mcq_readw(dev, ERROR_INT_STAT_R);   \
-> +		dev->auto_error_interrupt = mcq_readw(dev, AUTO_CMD_STAT_R);     \
-> +	} while (0)
-
-You only have two callers of this, so I think this would
-be clearer when you open-code it.
-
-> +/*clear status register, we always keep the card interrupt*/
-> +#define dw_mci_clr_int(dev)                                            
->  \
-> +	do {                                                            \
-> +		mcq_writew(dev, ERROR_INT_STAT_R, mcq_readw(dev, ERROR_INT_STAT_R) & 
-> 0xffff); \
-> +		mcq_writew(dev, NORMAL_INT_STAT_R, mcq_readw(dev, NORMAL_INT_STAT_R) 
-> & 0xffff); \
-> +	} while (0)
-
-Same here.
-
-> +/* Board platform data */
-> +struct dw_mci_board {
-> +	unsigned int bus_hz; /* Clock speed at the cclk_in pad */
-> +	u32 caps;       /* Capabilities */
-> +	u32 caps2;      /* More capabilities */
-> +	u32 pm_caps;    /* PM capabilities */
 > +
-> +	/* delay in mS before detecting cards after interrupt */
-> +	u32 detect_delay_ms;
+> +  clocks:
+> +    minItems: 2
+> +    maxItems: 4
+
+
+No. This is variable. You need fixed number of items (because why
+exactly the same device would have different number of clocks?) and you
+need to describe them.
+
 > +
-> +	struct reset_control *rstc;
-> +};
+> +  clock-names:
+> +    minItems: 2
+> +    maxItems: 4
 
-This looks like an artifact from pre-DT days, just fold this into the
-dw_mci structure directly.
+You need to describe the items.
 
-     Arnd
+> +
+> +  clock-freq-min-max:
+> +    description:
+> +      Clk frequency should be in the interval.
+
+No, drop property.
+
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +  reset-names:
+> +    const: reset
+
+And here you describe the item? The only place when it is not needed?
+Drop entierly.
+
+> +
+> +  speed-step:
+> +    maxItems: 1
+
+Drop.
+
+> +
+> +  pinctrl-0:
+> +    description:
+> +      should contain default/high speed pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-1:
+> +    description:
+> +      should contain sdr50 mode pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-2:
+> +    description:
+> +      should contain ddr50 mode pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-3:
+> +    description:
+> +      should contain hs200 speed pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-4:
+> +    description:
+> +      should contain hs400 speed pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-5:
+> +    description:
+> +      should contain tune0 pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-6:
+> +    description:
+> +      should contain tune1 pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-7:
+> +    description:
+> +      should contain tune2 pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-8:
+> +    description:
+> +      should contain tune3 pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-9:
+> +    description:
+> +      should contain tune4 pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-names:
+> +    maxItems: 10
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - reg-names
+> +  - interrupts
+> +  - clocks
+> +  - clock-names
+> +  - pinctrl-names
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    emmc: mmc@12000 {
+> +        compatible = "realtek,rtd-dw-cqe-emmc";
+> +        reg = <0x00012000 0x00600>,
+> +              <0x00012180 0x00060>;
+> +        reg-names = "emmc", "cqhci";
+> +        interrupts = <0 42 4>;
+> +        clocks = <&cc 22>, <&cc 26>, <&cc 121>, <&cc 122>;
+> +        clock-names = "biu", "ciu", "vp0", "vp1";
+> +        clock-freq-min-max = <300000 400000000>;
+> +        clock-frequency = <400000>;
+> +        vmmc-supply = <&reg_vcc1v8>;
+> +        resets = <&rst 20>;
+> +        reset-names = "reset";
+> +        speed-step = <3>;
+> +        cqe = <1>;
+> +        pinctrl-names = "default", "sdr50", "ddr50", "hs200", "hs400",
+> +                        "tune0", "tune1", "tune2", "tune3", "tune4";
+> +        pinctrl-0 = <&emmc_pins_sdr50>;
+> +        pinctrl-1 = <&emmc_pins_sdr50>;
+> +        pinctrl-2 = <&emmc_pins_ddr50>;
+> +        pinctrl-3 = <&emmc_pins_hs200>;
+> +        pinctrl-4 = <&emmc_pins_hs400>;
+> +        pinctrl-5 = <&emmc_pins_tune0>;
+> +        pinctrl-6 = <&emmc_pins_tune1>;
+> +        pinctrl-7 = <&emmc_pins_tune2>;
+> +        pinctrl-8 = <&emmc_pins_tune3>;
+> +        pinctrl-9 = <&emmc_pins_tune4>;
+> +        };
+
+Fix indentation.
+
+
+Best regards,
+Krzysztof
+
