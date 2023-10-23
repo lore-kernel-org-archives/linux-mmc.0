@@ -2,163 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66FF6C004C0
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 11:38:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25B0FC001E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 11:43:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234192AbjJWLiS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Oct 2023 07:38:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36584 "EHLO
+        id S234314AbjJWLnO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Oct 2023 07:43:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234194AbjJWLiS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 07:38:18 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 212B9FD;
-        Mon, 23 Oct 2023 04:38:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1698061096; x=1729597096;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=WI0PePkdjm80l6TXZuuvvHh3AmbwA3xAEz4yXz4Whpo=;
-  b=DjHywYZvovT8amsyr1X+HY5UxAk9vcWbK7Z2mw7LSrOWHUkijgLI/2RF
-   GrDxVsuR/uMsQQr0AH3+E62BgzLUyNbf05WV4g8pwvO7Y8spOfl31W3lP
-   syc31KoDfFCeB0yb+kbjgoBbuvHoHMuhGyX2tHCBcoG515dg9o8T8LJbb
-   cVTdhTbKX7l8XrKXDjIw/+F6h8AZQ/BGB5wXctf9RxuKHxlYVphpyaJy9
-   sYhzfCdy3TIxz6I+NoSlrn5/uJockg1niEAV+F2yIloduwOH61Q4IxTX2
-   bygL6cyBa/i+0obqzJxW+33u9YutfPzEw30UmryIc66C2ohz8Xb63XynI
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10871"; a="389667036"
-X-IronPort-AV: E=Sophos;i="6.03,244,1694761200"; 
-   d="scan'208";a="389667036"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Oct 2023 04:38:15 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10871"; a="793099976"
-X-IronPort-AV: E=Sophos;i="6.03,244,1694761200"; 
-   d="scan'208";a="793099976"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.40.60])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Oct 2023 04:38:12 -0700
-Message-ID: <78bb4ad2-853a-4ed4-9998-c4e1122545b6@intel.com>
-Date:   Mon, 23 Oct 2023 14:38:09 +0300
+        with ESMTP id S234356AbjJWLnG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 07:43:06 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C064B10E5
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 04:42:57 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-5a7b91faf40so31648717b3.1
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 04:42:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1698061377; x=1698666177; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=SHpOrdrjUq/RCpEv0rxQXUbu6fq2w6SkA9rTlRoXwdQ=;
+        b=M+qe/nZOuAFgg4z2E81XWD/9yNz10ufKCHIU6ggwE4UTwrnm3xPhxVaguo9i9ToDb5
+         o5ScsvGEEBlNRa3w5gptS/yVRB9YAJPeSCBWVa1F486/UhrvAjj9d5y+TFCu35ogRmFq
+         ATPCyxMfxAm9HLP+A3K6A4CLsNNYdnz+s5o+RxIYzgh5hs4BI7D+lp/h251yh3xQgpOO
+         WK+p+bPHuMlGJqj9T8Yhn6mrYdyshq4KWM5bzhF+CDE6KM6RhtlwOHMcY/Zy/1mm+L8s
+         NfdXfQ9mMd3Be/4njrLl4cLENidIkgSsYtsgrRnTJyx8TLiSXxwD197tBJvqxG5u5tux
+         tUdQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698061377; x=1698666177;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=SHpOrdrjUq/RCpEv0rxQXUbu6fq2w6SkA9rTlRoXwdQ=;
+        b=ErOWruZSTE7S9f3DZDNiyVFs20zfOAQh7l3A5uH4IPCnTJ8snMYxKm9oJZ+HZmdSqb
+         zwxRLX7DyVuOQ30yz4dX+suKsDPsUtYEs885R/eDKaH8YX5fbSTaGVjMpfYlQY85rsnq
+         NyqH6vmDkctRu9H10QAPNrHXABuR5Mi/FHXn/82Jvc/KEEasx7B1HleKN9KHWdH1BkOJ
+         ++9E5Nrj4Jk0tkwgN1llLkfpQwtBXSWlSa9XgYUew/OZnVBmy8VqImT6Mb+vHx1TQnhd
+         jaYQCS75dzt1E+PtaUArhtMPvCXgMHUuoAGN/JZofS+/SOzKUOcYrsdgp+FlIC+4t+8h
+         lcmw==
+X-Gm-Message-State: AOJu0YwiuPk2FhTT+DO1YKEq+mElQcfEPmSSTiiMFqDBjHzdX18btBCJ
+        3Q+fTJqzVofHkqA2Xe+wUHHWiqX3OkR+8XHkNDoRHQ==
+X-Google-Smtp-Source: AGHT+IE3/2ZI0BAAgKeahHy0bltN+bgn69act0vLj5jmqXpHgASUMtPiWCTt97Rumz+LhvcD4bX6c/AKBBiunSB2yA0=
+X-Received: by 2002:a81:8943:0:b0:5a8:1058:5d97 with SMTP id
+ z64-20020a818943000000b005a810585d97mr8762458ywf.45.1698061376807; Mon, 23
+ Oct 2023 04:42:56 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: cqhci: Be more verbose in error irq handler
-Content-Language: en-US
-To:     =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Asutosh Das <quic_asutoshd@quicinc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Radoslaw Biernacki <biernacki@google.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Gwendal Grignou <gwendal@chromium.org>, upstream@semihalf.com
-References: <20231016095610.1095084-1-korneld@chromium.org>
- <613c51f0-c32e-4de5-9627-525d92fb06ed@intel.com>
- <CAD=NsqybNrf-=9=5wvoj+9MT3xK3SbX7nDk3N3VLBMyA_u3KTQ@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAD=NsqybNrf-=9=5wvoj+9MT3xK3SbX7nDk3N3VLBMyA_u3KTQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20231019195752.62692-1-edson.drosdeck@gmail.com>
+In-Reply-To: <20231019195752.62692-1-edson.drosdeck@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 23 Oct 2023 13:42:20 +0200
+Message-ID: <CAPDyKFoeuVHu+Rt7kg1zbz1oFW8aCkQJ5swCbmSnA_Xrhx0eYw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: Use octal for file permissions
+To:     Edson Juliano Drosdeck <edson.drosdeck@gmail.com>
+Cc:     adrian.hunter@intel.com, CLoehle@hyperstone.com,
+        brauner@kernel.org, axboe@kernel.dk,
+        victor.shih@genesyslogic.com.tw, f.fainelli@gmail.com,
+        asuk4.q@gmail.com, yibin.ding@unisoc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/10/23 11:53, Kornel Dulęba wrote:
-> On Fri, Oct 20, 2023 at 9:41 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 16/10/23 12:56, Kornel Dulęba wrote:
->>> There are several reasons for controller to generate an error interrupt.
->>> They include controller<->card timeout, and CRC mismatch error.
->>> Right now we only get one line in the logs stating that CQE recovery was
->>> triggered, but with no information about what caused it.
->>> To figure out what happened be more verbose and dump the registers from
->>> irq error handler logic.
->>> This matches the behaviour of the software timeout logic, see
->>> cqhci_timeout.
->>>
->>> Signed-off-by: Kornel Dulęba <korneld@chromium.org>
->>> ---
->>>  drivers/mmc/host/cqhci-core.c | 5 +++--
->>>  1 file changed, 3 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
->>> index b3d7d6d8d654..33abb4bd53b5 100644
->>> --- a/drivers/mmc/host/cqhci-core.c
->>> +++ b/drivers/mmc/host/cqhci-core.c
->>> @@ -700,8 +700,9 @@ static void cqhci_error_irq(struct mmc_host *mmc, u32 status, int cmd_error,
->>>
->>>       terri = cqhci_readl(cq_host, CQHCI_TERRI);
->>>
->>> -     pr_debug("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d TERRI: 0x%08x\n",
->>> -              mmc_hostname(mmc), status, cmd_error, data_error, terri);
->>> +     pr_warn("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d\n",
->>> +              mmc_hostname(mmc), status, cmd_error, data_error);
->>> +     cqhci_dumpregs(cq_host);
->>
->> For debugging, isn't dynamic debug seems more appropriate?
-> 
-> Dynamic debug is an option, but my personal preference would be to
-> just log more info in the error handler.
+On Thu, 19 Oct 2023 at 21:58, Edson Juliano Drosdeck
+<edson.drosdeck@gmail.com> wrote:
+>
+> Octal permissions are preferred as stated in
+> Documentation/dev-tools/checkpatch.rst. Replace symbolic permissions
+> with octal permissions when creating the files.
+>
+> Signed-off-by: Edson Juliano Drosdeck <edson.drosdeck@gmail.com>
 
-Interrupt handlers can get called very rapidly, so some kind of rate
-limiting should be used if the message is unconditional.  Also you need
-to provide actual reasons for your preference.
+Thanks for your patch!
 
-For dynamic debug of the register dump, something like below is
-possible.
+Replacing symbolic permissions with octal permissions makes sense to
+me. However, I don't want one patch per line that needs to be changed.
 
-#define cqhci_dynamic_dumpregs(cqhost) \
-	_dynamic_func_call_no_desc("cqhci_dynamic_dumpregs", cqhci_dumpregs, cqhost)
+Instead, please go over all the files in drivers/mmc/core and fix all
+of them in one patch. Another patch can be done for
+drivers/mmc/hosts/*
 
-> To give you some background.
-> We're seeing some "running CQE recovery" lines in the logs, followed
-> by a dm_verity mismatch error.
-> The reports come from the field, with no feasible way to reproduce the
-> issue locally.
+Kind regards
+Uffe
 
-If it is a software error, some kind of error injection may well
-reproduce it.  Also if it is a hardware error that only happens
-during recovery, error injection could increase the likelihood of
-reproducing it.
-
-> 
-> I'd argue that logging only the info that CQE recovery was executed is
-> not particularly helpful for someone looking into those logs.
-
-As the comment says, that message is there because recovery reduces
-performance, it is not to aid debugging per se.
-
-> Ideally we would have more data about the state the controller was in
-> when the error happened, or at least what caused the recovery to be
-> triggered.
-> The question here is how verbose should we be in this error scenario.
-> Looking at other error scenarios, in the case of a software timeout
-> we're dumping the controller registers. (cqhci_timeout)
-
-Timeout means something is broken - either the driver, the cq engine
-or the card.  On the other hand, an error interrupt is most likely a
-CRC error which is not unexpected occasionally, due to thermal drift
-or perhaps interference.
-
-> Hence I thought that I'd be appropriate to match that and do the same
-> in CQE recovery logic.
-
-It needs to be consistent. There are other pr_debugs, such as:
-
-		pr_debug("%s: cqhci: Failed to clear tasks\n",
-		pr_debug("%s: cqhci: Failed to halt\n", mmc_hostname(mmc));
-		pr_debug("%s: cqhci: disable / re-enable\n", mmc_hostname(mmc));
-
-which should perhaps be treated the same.
-
-And there are no messages for errors from the commands in
-mmc_cqe_recovery().
-
-> 
->>
->>>
->>>       /* Forget about errors when recovery has already been triggered */
->>>       if (cq_host->recovery_halt)
->>
-
+> ---
+>  drivers/mmc/core/block.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index b5b414a71e0b..edb653d8fbfa 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2916,7 +2916,7 @@ static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+>
+>         if (mmc_card_mmc(card)) {
+>                 md->ext_csd_dentry =
+> -                       debugfs_create_file("ext_csd", S_IRUSR, root, card,
+> +                       debugfs_create_file("ext_csd", 0400, root, card,
+>                                             &mmc_dbg_ext_csd_fops);
+>         }
+>  }
+> --
+> 2.39.2
+>
