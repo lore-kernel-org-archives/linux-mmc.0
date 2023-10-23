@@ -2,166 +2,147 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 974A9CDB474
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 09:53:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E9A5CDB474
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 11:15:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232994AbjJWJx7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Oct 2023 05:53:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57998 "EHLO
+        id S233703AbjJWLPF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Oct 2023 07:15:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53894 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229575AbjJWJxw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 05:53:52 -0400
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1466AD6;
-        Mon, 23 Oct 2023 02:53:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1698054830; x=1729590830;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=FNoNvvtB5z3IcYR2ZH7MUAtY5BnL5fBLxuEiKxvDcbc=;
-  b=TYfRc7HyOmu9gEuS5hRHTrlJhfEMM9iGGabSXYtzjU3k/mvVW9/Lmp8Q
-   WbblR9HW+NOkwbRIzhw9R3mrQYlQ6O2WHgQlcalohZNy9O5hLuQ0wGBR+
-   tz9oT8eiS341oS83gLQ4YJua+OzbBGyY4A7NCcBtwg1RGyhcgmw6oP869
-   1g8DNcl+vr0kcKQX9XE99rTXrTCG5V4bgYxHDl7qY01IYhUnq/tZaJ6K2
-   qymXbjusUWbXNuM4QK1O30hN1pEyHlZ9Xv6nUvDO/rdr0j2lTMZVWY/0b
-   GKbI43Kw1b7xr21FiXaWJ/sFatkU/NzieJpeLG5vo+PTRkWnTR6m6rsTV
-   Q==;
-X-CSE-ConnectionGUID: TBx8bJLWSmuGIqpOLwUp8w==
-X-CSE-MsgGUID: r6Pda/ZvQYCTNQ/C5Ofa5g==
-X-ThreatScanner-Verdict: Negative
-X-IronPort-AV: E=Sophos;i="6.03,244,1694761200"; 
-   d="scan'208";a="241192355"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 23 Oct 2023 02:53:50 -0700
-Received: from chn-vm-ex02.mchp-main.com (10.10.87.72) by
- chn-vm-ex02.mchp-main.com (10.10.87.72) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.21; Mon, 23 Oct 2023 02:53:49 -0700
-Received: from [10.159.245.205] (10.10.85.11) by chn-vm-ex02.mchp-main.com
- (10.10.85.144) with Microsoft SMTP Server id 15.1.2507.21 via Frontend
- Transport; Mon, 23 Oct 2023 02:53:47 -0700
-Message-ID: <db866599-3143-43a6-801d-012cdfd23019@microchip.com>
-Date:   Mon, 23 Oct 2023 11:53:19 +0200
+        with ESMTP id S233701AbjJWLPD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 07:15:03 -0400
+Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FF12A4
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 04:15:00 -0700 (PDT)
+Received: by mail-yb1-xb34.google.com with SMTP id 3f1490d57ef6-d9fe0a598d8so656495276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 04:15:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1698059699; x=1698664499; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=6hu9rh6KgAvsKfYXXWL8zYTarr8RBDwNjZxBfWtY8rc=;
+        b=jhJdqTgG6cuxZgiMwNG6i7xc7PU5cqdtV6LM1qD+GztmAFymK7qG5xFJmz3uIJC+KK
+         hS65xNfgvvCvi7UMeXmnszp+eHXFOKD24oGaLgE/J9dsjRtxH25Zh+HJ6kl81himaf9F
+         V8ZxLdxxdvnoTA1L91gSMN48R6DfMdJtfkSoYAo52os7K+7jhCIHrvQqFRIZx119vLx2
+         zHRNEiDWWCLlfNPOOKtowb+wIghE9Br1o/gAEImZB6E26WHAziimA2nveYxOIvUngwpi
+         5AEjzQojpTynXf8HOR3kYGKZCKYO0aeKqZI1yJIh7xfjF2ovyH/DlGvEC5mEvklnxoaa
+         niIg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698059699; x=1698664499;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=6hu9rh6KgAvsKfYXXWL8zYTarr8RBDwNjZxBfWtY8rc=;
+        b=opk/S+GR6pj2AziyFCsDa+IEO2xQeitS4Ro8MF59uY8/pO6WbnhndQlSAxMCUviu4Q
+         NqgR7eOuEb9cXaJAmdUtQpjn2DW28VeYurCSV2iKqanm8ZT64mmXkwCBSa7i4/R65f0s
+         c4DQxmmJVKpVZ6U+1kceH64PikqIz6UHN9mkJAxiWAR0rHCVuvVR5rUM/wxudwkJJ2uV
+         Tb0wbHh9kMlewNmOdnvnukDuttnmDrny2QsyTXka/joBZHqdm2+fTaPufqINt3MmLWXJ
+         xKGiPV0AF9/7QGHQcfGh2j3KztgiuGFOtqUPKeUU5hLmCKJeNI/H8MOZe9sDS+0xeI4F
+         ZfhA==
+X-Gm-Message-State: AOJu0YyNqM0tA+goZwij7nIdvZrU3oQyTQuQl4mUR4ZIALkjKWcJ2q9V
+        NHD9KAnfVtn7nG3ErI/Er1Lx0vFVzQ5rkA3euXhECw==
+X-Google-Smtp-Source: AGHT+IHp30gB+Nvus0ZLdoTwDy/MryEBQA4AcnzU9gz/ai6P20jZzANHatsRweskKd+aafcJHUWnH2n5rq8Ic2Zl5eQ=
+X-Received: by 2002:a5b:608:0:b0:d9a:e947:447b with SMTP id
+ d8-20020a5b0608000000b00d9ae947447bmr8427971ybq.14.1698059699399; Mon, 23 Oct
+ 2023 04:14:59 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] MAINTAINERS: mmc: take over as maintainer of MCI & SDHCI
- MICROCHIP DRIVERS
-To:     Eugen Hristev <eugen.hristev@collabora.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <aubin.constans@microchip.com>, <Ludovic.Desroches@microchip.com>
-CC:     <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <Hari.PrasathGE@microchip.com>,
-        <alexandre.belloni@bootlin.com>, <claudiu.beznea@tuxon.dev>
-References: <20230911153246.137148-1-aubin.constans@microchip.com>
- <fd02d42e-7b24-4f50-849e-b0c752d1f011@microchip.com>
- <CAPDyKFpYzgwPvrWntgDQCZo97OZr2qd2FaVXpi7OnNc7i_gYtw@mail.gmail.com>
- <c4f43487-da93-4e67-0389-e31dde550d40@microchip.com>
- <55e85f31-fab6-07f9-0ffe-8ebcd2a56489@collabora.com>
-Content-Language: en-US, fr-FR
-From:   Nicolas Ferre <nicolas.ferre@microchip.com>
-Organization: microchip
-In-Reply-To: <55e85f31-fab6-07f9-0ffe-8ebcd2a56489@collabora.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <TYZPR01MB5556B56D834E02F41C44D81DC95FA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
+ <TYZPR01MB5556A3E71554A2EC08597EA4C9CDA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
+In-Reply-To: <TYZPR01MB5556A3E71554A2EC08597EA4C9CDA@TYZPR01MB5556.apcprd01.prod.exchangelabs.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 23 Oct 2023 13:14:23 +0200
+Message-ID: <CAPDyKFrLUf+dcZbPtXFncu_KO_SgzKSN1KCW8ds4=OUGpT8+Gg@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: meson-mx-sdhc: Fix initialization frozen issue
+To:     Ziyang Huang <hzyitc@outlook.com>,
+        Thorsten Leemhuis <regressions@leemhuis.info>
+Cc:     neil.armstrong@linaro.org, khilman@baylibre.com,
+        jbrunet@baylibre.com, martin.blumenstingl@googlemail.com,
+        yinxin_1989@aliyun.com, briannorris@chromium.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ulf,
++ Thorsten
 
-On 18/09/2023 at 13:03, Eugen Hristev wrote:
-> On 9/14/23 20:01, Nicolas Ferre wrote:
->> On 14/09/2023 at 16:21, Ulf Hansson wrote:
->>> On Tue, 12 Sept 2023 at 07:21, <Ludovic.Desroches@microchip.com> wrote:
->>>>
->>>> On 9/11/23 17:32, Aubin Constans wrote:
->>>>> On the one hand Eugen has taken responsibilities outside Microchip,
->>>>> on the other hand I have some experience with the Microchip SDMMC
->>>>> SDHCI controller.
->>>>> Change Eugen as reviewer and take over maintainership of the SDHCI
->>>>> MICROCHIP DRIVER.
->>>>> Also, take over maintainership of its predecessor, that is the MCI
->>>>> MICROCHIP DRIVER.
->>>>>
->>>>> Cc: Eugen Hristev <eugen.hristev@collabora.com>
->>>>> Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
->>>>> Signed-off-by: Aubin Constans <aubin.constans@microchip.com>
->>>>
->>>> For atmel-mci:
->>>> Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
->>>
->>> Sounds like the patch could be split up, as there is an agreement on
->>> the atmel-mci part.
->>>
->>> Aubin, can you make a separate patch for the atmel-mci part and add
->>> Ludovic's ack to it?
->>>
->>> In regards to the sdhci driver, I suggest you just add yourself as a
->>> maintainer too, along with Eugen.
->>
->> For adding more background to this patch, in fact it was created in
->> coordination with Eugen. We can wait a bit for him to catch-up with
->> emails, no hurry there as Aubin won't have access to emails for a few
->> days anyway.
->>
->> If it has an interest you can add my:
->> Acked-by: Nicolas Ferre <nicolas.ferre@microchip.com>
->> But definitively, no problem to delay this change.
-> 
-> Hi,
-> 
-> I am fine with this change, as Nicolas has already discussed this with me.
-> 
-> Acked-by: Eugen Hristev <eugen.hristev@collabora.com>
+On Tue, 10 Oct 2023 at 18:44, Ziyang Huang <hzyitc@outlook.com> wrote:
+>
+> Commit 4bc31edebde5 ("mmc: core: Set HS clock speed before sending
+> HS CMD13") set HS clock (52MHz) before switching to HS mode. For this
+> freq, FCLK_DIV5 will be selected and div value is 10 (reg value is 9).
+> Then we set rx_clk_phase to 11 or 15 which is out of range and make
+> hardware frozen. After we send command request, no irq will be
+> interrupted and the mmc driver will keep to wait for request finished,
+> even durning rebooting.
+>
+> So let's set it to Phase 90 which should work in most cases. Then let
+> meson_mx_sdhc_execute_tuning() to find the accurate value for data
+> transfer.
+>
+> If this doesn't work, maybe need to define a factor in dts.
+>
+> Fixes: e4bf1b0970ef ("mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host")
+> Signed-off-by: Ziyang Huang <hzyitc@outlook.com>
 
-I think we have all the required tags since Eugen email: aka ping...
+I have re-added Thorsten to see if he has some time to test this on his end.
 
-Tell me if you prefer that we use another route to Mainline (as you may 
-not have remaining changes to queue). Best regards,
-   Nicolas
+Kind regards
+Uffe
 
-> P.S. I have a mailmap entry for the new e-mail so the change is not
-> compulsory, you can change as you see fit.
-> 
-> Eugen
-> 
->>
->> Thanks for your understanding. Best regards,
->>     Nicolas
->>
->>>>> ---
->>>>>     MAINTAINERS | 5 +++--
->>>>>     1 file changed, 3 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/MAINTAINERS b/MAINTAINERS
->>>>> index 2833e2da63e0..52beaf4f7fbb 100644
->>>>> --- a/MAINTAINERS
->>>>> +++ b/MAINTAINERS
->>>>> @@ -14022,7 +14022,7 @@ F:
->>>>> Documentation/devicetree/bindings/iio/adc/microchip,mcp3911.yaml
->>>>>     F:  drivers/iio/adc/mcp3911.c
->>>>>
->>>>>     MICROCHIP MMC/SD/SDIO MCI DRIVER
->>>>> -M:   Ludovic Desroches <ludovic.desroches@microchip.com>
->>>>> +M:   Aubin Constans <aubin.constans@microchip.com>
->>>>>     S:  Maintained
->>>>>     F:  drivers/mmc/host/atmel-mci.c
->>>>>
->>>>> @@ -19235,7 +19235,8 @@ F:
->>>>> Documentation/devicetree/bindings/mmc/sdhci-common.yaml
->>>>>     F:  drivers/mmc/host/sdhci*
->>>>>
->>>>>     SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) MICROCHIP DRIVER
->>>>> -M:   Eugen Hristev <eugen.hristev@microchip.com>
->>>>> +M:   Aubin Constans <aubin.constans@microchip.com>
->>>>> +R:   Eugen Hristev <eugen.hristev@collabora.com>
->>>>>     L:  linux-mmc@vger.kernel.org
->>>>>     S:  Supported
->>>>>     F:  drivers/mmc/host/sdhci-of-at91.c
->>>>
->>
-> 
-
+> ---
+> Changes since v1:
+>   Use Phase 90 instand of value 1
+>
+>  drivers/mmc/host/meson-mx-sdhc-mmc.c | 26 +++++---------------------
+>  1 file changed, 5 insertions(+), 21 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-mx-sdhc-mmc.c b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+> index 97168cdfa8e9..29698fceb89c 100644
+> --- a/drivers/mmc/host/meson-mx-sdhc-mmc.c
+> +++ b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+> @@ -269,7 +269,7 @@ static int meson_mx_sdhc_enable_clks(struct mmc_host *mmc)
+>  static int meson_mx_sdhc_set_clk(struct mmc_host *mmc, struct mmc_ios *ios)
+>  {
+>         struct meson_mx_sdhc_host *host = mmc_priv(mmc);
+> -       u32 rx_clk_phase;
+> +       u32 val, rx_clk_phase;
+>         int ret;
+>
+>         meson_mx_sdhc_disable_clks(mmc);
+> @@ -290,27 +290,11 @@ static int meson_mx_sdhc_set_clk(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 mmc->actual_clock = clk_get_rate(host->sd_clk);
+>
+>                 /*
+> -                * according to Amlogic the following latching points are
+> -                * selected with empirical values, there is no (known) formula
+> -                * to calculate these.
+> +                * Phase 90 should work in most cases. For data transmission,
+> +                * meson_mx_sdhc_execute_tuning() will find a accurate value
+>                  */
+> -               if (mmc->actual_clock > 100000000) {
+> -                       rx_clk_phase = 1;
+> -               } else if (mmc->actual_clock > 45000000) {
+> -                       if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
+> -                               rx_clk_phase = 15;
+> -                       else
+> -                               rx_clk_phase = 11;
+> -               } else if (mmc->actual_clock >= 25000000) {
+> -                       rx_clk_phase = 15;
+> -               } else if (mmc->actual_clock > 5000000) {
+> -                       rx_clk_phase = 23;
+> -               } else if (mmc->actual_clock > 1000000) {
+> -                       rx_clk_phase = 55;
+> -               } else {
+> -                       rx_clk_phase = 1061;
+> -               }
+> -
+> +               regmap_read(host->regmap, MESON_SDHC_CLKC, &val);
+> +               rx_clk_phase = FIELD_GET(MESON_SDHC_CLKC_CLK_DIV, val) / 4;
+>                 regmap_update_bits(host->regmap, MESON_SDHC_CLK2,
+>                                    MESON_SDHC_CLK2_RX_CLK_PHASE,
+>                                    FIELD_PREP(MESON_SDHC_CLK2_RX_CLK_PHASE,
+> --
+> 2.34.1
+>
