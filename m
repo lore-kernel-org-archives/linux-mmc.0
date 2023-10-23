@@ -2,123 +2,91 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D19EC001E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 11:51:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0D8BCDB474
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 13:25:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234626AbjJWLvK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Oct 2023 07:51:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60884 "EHLO
+        id S231207AbjJWNZR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Oct 2023 09:25:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33828 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233758AbjJWLvI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 07:51:08 -0400
-Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7575E8
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 04:51:05 -0700 (PDT)
-Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-5a7c08b7744so31552167b3.3
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 04:51:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698061865; x=1698666665; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Pj2+Gc/tcBXDbia3+UIXbheoVCOn899YQdDlUVcmlIo=;
-        b=vnke0QLxQBqb/ILqVk4aUwfBWa1x617MtUiWsRMfY48iZiAdWz7mAeT+QLpQuiDYl3
-         dHYIu07AcAQBJ8kLwnyKYHNjoM2EnwubG7TlSAu7ub5d3U4jeyH5U322sfoSe4zguQZP
-         /tWeFw+MDTdqtFTJ4Qf4Pe+UbfYxbFaxP9uYZEu+rYTljscECGtJJ0OUI+UAJ6WorMzP
-         KI+WAy3PrLpoWK1z3LckOxVtQpGBpYKx+bi9EbBMZ2Cg8McPHvfBRDN08dMkiaLP7hoI
-         oP+JsMPnhONNQSWT6SyWrDDqz63WxfUXcyG8vueWKVYr/wmLia4dxI2JrtlU1mjMscKd
-         mzXA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698061865; x=1698666665;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Pj2+Gc/tcBXDbia3+UIXbheoVCOn899YQdDlUVcmlIo=;
-        b=tQ2bXDvl1KEUcGGcQj0HD8U6sBulu0pftrGxlG0CScoH5a9FunymQ63X4R4lKLpADm
-         qjbIpamWk4JbeoHMskDps52qaiIrXrOQ462FHQjFEg5B9AImabdkFoL3bchjWGsNTn6P
-         KMcpUII5pGvqpJm7emoQCeRsUzx1y5kHZ/xcRibmdMNVz/ITZFPy8kp3deL9DHdIozt+
-         JdF5siQ3+DTMR9TB9HX0nPyv8a+lDiQtYGpkmEj+5KNzOoCn4M0f7xhHvypZgOz3sJsL
-         Mh5uXpKDNNC/2Sl7K50lZ9T93noIJg6ho99thpPnkZb8Ps7ha4oP8ERUb7dkNaAzfSci
-         GH0Q==
-X-Gm-Message-State: AOJu0Yyvkxpp+tS7QRloRDnJp5I78IHPHIFmFZxE4a4TFrusgJiIzSTS
-        FiKq8i1N8tLJo3C3m9bYvtVzvB4QTpw5y3ps5ilX6A==
-X-Google-Smtp-Source: AGHT+IEwvU+/pk0AxYWqEzRPVjjkPdAkURGQidrpdHtxY/1Fddbs6AX51+cZAUDGouaOttT5eQe5wFBBC/i2td/pjBQ=
-X-Received: by 2002:a05:690c:f11:b0:5a7:d937:6f27 with SMTP id
- dc17-20020a05690c0f1100b005a7d9376f27mr11004991ywb.19.1698061864957; Mon, 23
- Oct 2023 04:51:04 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230911153246.137148-1-aubin.constans@microchip.com>
-In-Reply-To: <20230911153246.137148-1-aubin.constans@microchip.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 23 Oct 2023 13:50:29 +0200
-Message-ID: <CAPDyKFoFjZOOzTM_vMxoNTph2nx=0WR0pyBqco44v8YacjOixw@mail.gmail.com>
-Subject: Re: [PATCH] MAINTAINERS: mmc: take over as maintainer of MCI & SDHCI
- MICROCHIP DRIVERS
-To:     Aubin Constans <aubin.constans@microchip.com>
+        with ESMTP id S231259AbjJWNZB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 09:25:01 -0400
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 351F1269F
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 06:23:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1698067387; x=1729603387;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=lZlVBXf8PHqZNRSdkiV4MN9OZKd3ctxHutCkpnNXOxk=;
+  b=W0S6b3lNDgb7em9DoEnhX78Z8e5ggmiwkLyeShhzP27d7tmk2Hst/pWo
+   5Uj9PJK3HctsnmR3lrlF43+471hPk9StIlOCJLneT4ZnfLLdJcS0IL9Xr
+   8o5c5ZIZPDWmhsDG7x75KKEh8yz6QoAwdFeV5cGYoJzbdl9ToSA+xO3v8
+   A3Vw4mBIkmOwQcdnOlTyHe6mcJGXOz27/I3N45amYHssoronLKIoZ617h
+   g3mwYog2fyiIK3HZlc8Wf5tFGdmRPvG5t1OI5pzbymPbWzQEUjOeTv2bQ
+   ftndkQCS7YCwZj5OVzyJEO62Ego3+9sFCXWgZ9qWTbrui5Pn21SVXjaVj
+   A==;
+X-CSE-ConnectionGUID: yEINwuDAQxSWdhdDlYWz9Q==
+X-CSE-MsgGUID: Jw2cMA2ET16CclGhWpqtvg==
+X-IronPort-AV: E=Sophos;i="6.03,244,1694707200"; 
+   d="scan'208";a="413914"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 23 Oct 2023 21:23:07 +0800
+IronPort-SDR: MKFbuG4a/0cchpTMt2G7CO31pt251CS0BZwyOZwSVYS4Zym9IChYg6B5HHrPICXavrQtgFUG+C
+ BiC4FN70X9hHSBntZS/R5nU5XJOKqiTq1oOdOlD+vt0kR+0Bedwgyw14zWD0OXR7drmJSbKp6W
+ BBEHCghFs5JaqexkQV4ym0N5UNbIpbS+4DWwVnDbA/f6Z2qHxqdOYjDqQHG2e4+iE6GaXqpVWt
+ yNE4ZTTxhFnVhY/uZJwGo92O0BfYoXCPMIwuo/nh2z95zotwTenS96G35BKFE3fDyaGVrwK+Dm
+ JKI=
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 23 Oct 2023 05:29:20 -0700
+IronPort-SDR: 50bkOdP6rGHmQAvKW7dpx3UwA6hR6OdjQVfzO76yqsxv15xJE1IgQlZBvdLikKqTmY6lTsB+x6
+ FVEAAi0eoGP++5EJttzuQM9QgLklhW2B57qayDV4U3zYrZ+j+/j/Fbl5S+9cMUkjsBYXLV+3/8
+ KIqkmNuL4yhxNz2nPq8TNHZjQfJZXeoZvcB46qXs9GVPBJdRhTh2icKIhKo912DBCgP2EpvYIe
+ /relmbtol+IjntykB857XbjLUVYpmnHHj2Y3XVHV+Mj+nBWjhMyNHV9OetuTqQIU45CqiT0eMw
+ J/k=
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip01.wdc.com with ESMTP; 23 Oct 2023 06:23:04 -0700
+From:   Avri Altman <avri.altman@wdc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Eugen Hristev <eugen.hristev@collabora.com>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Hari Prasath Gujulan Elango <hari.prasathge@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Claudiu Beznea <claudiu.beznea@tuxon.dev>
-Content-Type: text/plain; charset="UTF-8"
+        Daniil Lunev <dlunev@google.com>,
+        Asutosh Das <quic_asutoshd@quicinc.com>,
+        Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH v2 0/2] mmc: host: Disable auto-cmd12 during ffu
+Date:   Mon, 23 Oct 2023 16:21:26 +0300
+Message-Id: <20231023132128.1871269-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 11 Sept 2023 at 17:33, Aubin Constans
-<aubin.constans@microchip.com> wrote:
->
-> On the one hand Eugen has taken responsibilities outside Microchip,
-> on the other hand I have some experience with the Microchip SDMMC
-> SDHCI controller.
-> Change Eugen as reviewer and take over maintainership of the SDHCI
-> MICROCHIP DRIVER.
-> Also, take over maintainership of its predecessor, that is the MCI
-> MICROCHIP DRIVER.
->
-> Cc: Eugen Hristev <eugen.hristev@collabora.com>
-> Cc: Ludovic Desroches <ludovic.desroches@microchip.com>
-> Signed-off-by: Aubin Constans <aubin.constans@microchip.com>
+Field Firmware Update (ffu) may use close-ended or open ended sequence.
+Each such sequence is comprised of a write commands enclosed between 2
+switch commands - to and from ffu mode.
 
-Thanks for volunteering to help out with the maintenance!
+Some platforms generate auto command error interrupt when it shouldn't,
+e.g. auto-cmd12 while in close-ended ffu sequence.  I encountered  this
+issue while testing fwupd (github.com/fwupd/fwupd) on HP Chromebook x2,
+a qualcomm based QC-7c, code name - strongbad. Instead of a quirk, make
+sure it disable auto-cmd12 while close-ended ffu is in progress.
 
-Applied for next.
+v1->v2:
+ - Attend Adrian's suggestions
 
-Kind regards
-Uffe
+Avri Altman (2):
+  mmc: core: Mark close-ended ffu in progress
+  mmc: host: msm: Disable auto-cmd12 during ffu
 
+ drivers/mmc/core/block.c     | 34 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-msm.c | 26 ++++++++++++++++++++++++++
+ include/linux/mmc/host.h     |  1 +
+ include/linux/mmc/mmc.h      |  1 +
+ 4 files changed, 62 insertions(+)
 
+-- 
+2.42.0
 
-> ---
->  MAINTAINERS | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 2833e2da63e0..52beaf4f7fbb 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -14022,7 +14022,7 @@ F:      Documentation/devicetree/bindings/iio/adc/microchip,mcp3911.yaml
->  F:     drivers/iio/adc/mcp3911.c
->
->  MICROCHIP MMC/SD/SDIO MCI DRIVER
-> -M:     Ludovic Desroches <ludovic.desroches@microchip.com>
-> +M:     Aubin Constans <aubin.constans@microchip.com>
->  S:     Maintained
->  F:     drivers/mmc/host/atmel-mci.c
->
-> @@ -19235,7 +19235,8 @@ F:      Documentation/devicetree/bindings/mmc/sdhci-common.yaml
->  F:     drivers/mmc/host/sdhci*
->
->  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) MICROCHIP DRIVER
-> -M:     Eugen Hristev <eugen.hristev@microchip.com>
-> +M:     Aubin Constans <aubin.constans@microchip.com>
-> +R:     Eugen Hristev <eugen.hristev@collabora.com>
->  L:     linux-mmc@vger.kernel.org
->  S:     Supported
->  F:     drivers/mmc/host/sdhci-of-at91.c
-> --
-> 2.39.2
->
