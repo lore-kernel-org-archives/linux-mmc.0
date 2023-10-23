@@ -2,125 +2,201 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B31ECDB474
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 13:25:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9674C25B47
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Oct 2023 21:07:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230335AbjJWNZ1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Oct 2023 09:25:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54968 "EHLO
+        id S230050AbjJWVHM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Oct 2023 17:07:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233459AbjJWNZI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 09:25:08 -0400
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A68A26B1
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 06:23:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1698067400; x=1729603400;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=L5IMAX9aRp+HcRHxDO5rQd41FNFFoVGqSLJizDd68FU=;
-  b=Y968Ngm8g+SpQ+U5WXPCJxuOkySkWlyGTFxZEmv3MNzlY0OCpADZa8wu
-   LiGgVBTGjyCu5y8ApCorL11PgRVD5gMEtilP3yC2DGni+DsEK1sifd1w/
-   a/7d2D9u37avJkVYpZt/6xpIQx0iCtbfIABwkqoBTe1iCzdykEqROP16O
-   JVWZfRZEsIY4QWCSfqEd0orMMIiRIRIdrlw681IB1ltui91ysDzF+bd16
-   MAW+Oa7Bntw1v8IY/1PsxEsrJnet1OWY05XG4iSSGooDCdEj0AQ+0rGX/
-   zDwfP9TUgWcj6cHiJLTUBb4t7rOW4pvILJLQ6RyTcLcIQZ1zK0dpS0iqK
-   g==;
-X-CSE-ConnectionGUID: BX8UbkMpRo+UtLket+upoA==
-X-CSE-MsgGUID: 0vtjWC9xQeu0yFGCLUb6eQ==
-X-IronPort-AV: E=Sophos;i="6.03,244,1694707200"; 
-   d="scan'208";a="393867"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 23 Oct 2023 21:23:19 +0800
-IronPort-SDR: xuZtXEA8ZRR8V6E/xCZautS+N0oMoe0C8F+0LB3gTwylMQEy9UHCuwg7vwL0h5AW43cpvB2c3V
- 5jOs1zKKwh2veex68mIZ9tUwwUlw1qlmeBtp19qw0HY7kSWNLMvjY2OfmYrzp8GI/ofjR+KlkI
- ioeFkpjV5elcC221+RoSpmMWYF3BfVov5FnLt9HicQX2sS+Eoe02WjUNO7V02KWPRm4ikqijzu
- 6m7sfZUUGPqfcGKiG5o8t9fUcBahb3o2U/yZ/39FVAkX/6EFVxy/FjhurrhCegUU2PTCtZveTY
- Cc4=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 23 Oct 2023 05:29:33 -0700
-IronPort-SDR: dkaWLLu2ZzlNEEHTW7TJgrAgunxgV9AvwP7acOzrB33Ior/wNAsREIzzbZR8BEMc3FuJwyguz7
- KsHrgWTafQ4WpgvM4KjopP7zofLiXX9hF/1+0aW/snQES+Xb3UI+AHJ+2y1GnhnuO5auJQuaJQ
- 5deDyo9nLKoa99NBTZSFvsCLWcea3LW3k6uqOkQHt7cHMe39Ghug58sV5x5BQMb8pk/y0G6E/h
- YiTFFWXvvVp+L5EsJAEVY9Jd2lyIxD0G6L4h9GcOmXcfqW4bi15IhU+oshLj19iJJZJwPzre2f
- KyY=
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip01.wdc.com with ESMTP; 23 Oct 2023 06:23:17 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Daniil Lunev <dlunev@google.com>,
-        Asutosh Das <quic_asutoshd@quicinc.com>,
-        Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v2 2/2] mmc: host: msm: Disable auto-cmd12 during ffu
-Date:   Mon, 23 Oct 2023 16:21:28 +0300
-Message-Id: <20231023132128.1871269-3-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20231023132128.1871269-1-avri.altman@wdc.com>
-References: <20231023132128.1871269-1-avri.altman@wdc.com>
+        with ESMTP id S229441AbjJWVHL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Oct 2023 17:07:11 -0400
+Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B32CF10A
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 14:07:06 -0700 (PDT)
+Received: by mail-pf1-x430.google.com with SMTP id d2e1a72fcca58-6ba172c5f3dso3089859b3a.0
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Oct 2023 14:07:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1698095226; x=1698700026; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=rxRjmIExa0NCWi/ierGnShMAGgwQw0v6YfA7TKsSgfk=;
+        b=FOl4AiAcvKTumIcCd5WLaavvPNy0XGjKPHf7w03zxKRFKL+fztriNU8Bira+SwJPp5
+         BrNTKfvnE3nNcXxbSBbgFsQd/t6bHD3rnBOtrr0UP0tLxN/MBAWwaf8i5pN6jHqvMovg
+         dlokkBmiqFOd3p5k09nYw7Ydl6no6/Zpi02ifUS3/DJXaWYFXtmeIKKy0xu2ivdkb0va
+         GHny/xObvBcF3EVB/B6P2loC6SWsaXB7QNlKqc2tk2xTJbpuym32qn1nSNnALvDS94AM
+         mEVnIFsW+uEhnT9vFOfp7BT9XvZfvkZkHwUBqLjQzNZfiX09Em7KcLF4v3rzdB5F+3dV
+         Dgug==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698095226; x=1698700026;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=rxRjmIExa0NCWi/ierGnShMAGgwQw0v6YfA7TKsSgfk=;
+        b=Nh1B7hFXS0mk5mMVKkBy0gBJ4g+Iup6bmIsW8XcahsCBsRuk5RtRDyx5hfcU1tsX6I
+         mgW7daraslVHj/ZoMWq92B8qWOiwChlr9XVIKknTDscX/BpZC74yG8Rx+8mSlaODYn8h
+         k4qM25eaWYhB7KDiT0n3KWocsNtwscRg9qOkKKY9FlCZFMcJSZojVxN3NQbRtT1Qgd2s
+         EQiX8ARpacnyJX5+8CyYSuV2AaGNECbFY63xCiPW93N/V4KFrPJZQEf7QM323cKFcgsV
+         8rqa8+jC8bhcUP5zM4Np9Abs9cRUqXt12Jagbu/AeGjG8O0+lnMYPUUuBkfWFCYrPLFM
+         XppQ==
+X-Gm-Message-State: AOJu0YwaFjwcjYW6oX8HtJnQnjChDQKg4Ne39r92hnXRfuJKo2/5dTCY
+        piMciigMoyVT/4bUUKot+D3J9A==
+X-Google-Smtp-Source: AGHT+IEoVvEEKGNGxVa0n9CRdhi7Ihz0IMoJxlBRs0dTzoIAAFxOorZeJxrH4V6npo3yp+XogKZ02w==
+X-Received: by 2002:a05:6a00:2295:b0:68a:4103:9938 with SMTP id f21-20020a056a00229500b0068a41039938mr9387407pfe.0.1698095226097;
+        Mon, 23 Oct 2023 14:07:06 -0700 (PDT)
+Received: from [127.0.1.1] ([2601:1c2:1800:f680:b9a0:8714:407c:4146])
+        by smtp.gmail.com with ESMTPSA id k28-20020aa79d1c000000b006bde2480806sm6573066pfp.47.2023.10.23.14.07.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Oct 2023 14:07:05 -0700 (PDT)
+From:   Drew Fustini <dfustini@baylibre.com>
+Subject: [PATCH v3 0/7] RISC-V: Add MMC support for TH1520 boards
+Date:   Mon, 23 Oct 2023 14:07:01 -0700
+Message-Id: <20231023-th1520-mmc-v3-0-abc5e7491166@baylibre.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAHXgNmUC/23MQQ6DIBCF4auYWZcGEIV01Xs0LmTEMknRBgypM
+ dy91HWX/0ved0BykVyCW3NAdJkSrUuN9tIA+nF5OkZTbZBctoILzTYvOslZCMisRi2tnrseJ6i
+ Hd3QzfU7sMdT2lLY17qed5W/9y2TJOFO9NmgQFVfmbsf9RTa6K64BhlLKF/3IbDinAAAA
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>
+Cc:     Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org,
+        Drew Fustini <dfustini@baylibre.com>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1698095224; l=5536;
+ i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
+ bh=GA2saEZ7Ng9DFUZVB2Ta7tnKvGxz/8BX1kSEaH8UI2g=;
+ b=XrIwcdiSWadi5ZFufTxN6I76b4sqwaR/ja7juxyXW9ipudXcCdVIhttKyXXwNm2H79zio3rXz
+ UaNyohV5nkYDCPnXvPc2lVUqETp9jMxbv1GT/qAlOQiVdQnx88moi2t
+X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
+ pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some platforms generate auto command error interrupt when it shouldn't,
-e.g. auto-cmd12 while in close-ended ffu sequence.
+This series adds support for the MMC controller in the T-Head TH1520
+SoC, and it enables the eMMC and microSD slot on both the BeagleV
+Ahead and the Sipeed LicheePi 4A.
 
-I encounterd this issue while testing fwup on HP Chromebook x2, qualcomm
-based QC-7c, code name for board - strongbad.
+I tested on top of v6.6-rc6 with riscv defconfig. I was able to boot
+both the Ahead [1] and LPi4a [2] from eMMC. The following prerequisites
+are required:
 
-Instead of a quirk, hook the request function of the msm ops, so it'll
-disable auto-cmd12 while close-ended ffu is in progress.
+  [PATCH v2] riscv: dts: thead: set dma-noncoherent to soc bus [3]
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
+I pushed a branch [4] with this patch series and the above patch for
+those that find a git branch easier to test.
+
+Note: I have only tested eMMC and microSD. I have not yet configured
+or tested the mmc controller used for SDIO WiFi yet.
+
+References:
+[1] https://gist.github.com/pdp7/7850027e8d256b6fd9cd53080240f0f6
+[2] https://gist.github.com/pdp7/fae4637378426723508b679420a0a5a1
+[3] https://lore.kernel.org/linux-riscv/20230912072232.2455-1-jszhang@kernel.org/
+[4] https://github.com/pdp7/linux/tree/b4/th1520-mmc
+
+Changes in PATCH v3:
+- always call th1520_sdhci_set_phy() in th1520_set_uhs_signaling()
+  and not only when timing is MMC_TIMING_MMC_HS400. This allows the
+  microSD slot to work as th1520_phy_3_3v_init() is called from
+  th1520_sdhci_set_phy().
+- add mmc1 node for mmc controller connected to the microSD slot
+- add enable mmc1 and add properties for microSD on the Ahead and LPi4A
+
+Changes in PATCH v2:
+https://lore.kernel.org/r/20231017-th1520-mmc-v2-0-4678c8cc4048@baylibre.com
+- make use of BIT(), GENMASK(), FIELD_PREP(), FIELD_GET()
+- add EXPORT_SYMBOL_GPL(__sdhci_execute_tuning)
+- call th1520_phy_1_8v_init() when FLAG_IO_FIXED_1V8 is set
+- set DWCMSHC_CARD_IS_EMMC when mmc caps contains MMC_CAP_NONREMOVABLE
+- remove manipulation of AT_CTRL_AT_EN from th1520_set_uhs_signaling()
+- remove unneccessary cycle of enabling and disabling AT_CTRL_AT_EN in
+  th1520_execute_tuning()
+- remove th1520_phy_1_8v_init_no_pull()
+- remove th1520_phy_3_3v_init_no_pull()
+- remove FLAG_PULL_UP_EN from priv->flags
+- remove thead,phy-pull-up device tree property
+
+Changes in PACH v1:
+https://lore.kernel.org/all/20230921-th1520-mmc-v1-0-49f76c274fb3@baylibre.com/
+- ADMA mode now works correctly due to a patch from Jisheng on the list
+  ("riscv: dts: thead: set dma-noncoherent to soc bus") and this commit
+  from Icenowy that is now merged: 8eb8fe67e2c8 ("riscv: errata: fix
+  T-Head dcache.cva encoding").
+- Expose __sdhci_execute_tuning from sdhci.c so that it can be called
+  from th1520_execute_tuning()
+- Refactor the define macros for all the PHY related registers to make
+  it easier to understand the bit fields that the code is manipulating
+- Replace magic numbers in the PHY register writes with proper defines 
+- Replace non_removable in dwcmshc_priv with check of mmc_host.caps
+- Drop dt prop "thead,io-fixed-1v8" and instead check for existing
+  properties: "mmc-ddr-1_8v", "mmc-hs200-1_8v", or "mmc-hs400-1_8v"
+- Rename dt prop from "thead,pull-up" to "thead,phy-pull-up" and
+  improve the description in the dt binding
+- Replace pull_up_en in dwcmshc_priv with bit field in new flags field
+- Create th1520_set_uhs_signaling() and call dwcmshc_set_uhs_signaling()
+  from it instead of adding th1520 code to dwcmshc_set_uhs_signaling()
+- Return -EIO instead of -1 upon errors in th1520_execute_tuning()
+
+Changes in RFC v2:
+https://lore.kernel.org/linux-riscv/20230724-th1520-emmc-v2-0-132ed2e2171e@baylibre.com/
+- Expand dwcmshc_priv based on driver in the T-Head 5.10 kernel:
+  delay_line, non_removable, pull_up_en, io_fixed_1v8
+- New boolean property "thead,pull-up" indicates phy pull-up config
+- New boolean property "thead,io-fixed-1v8" indicates that io voltage
+  should be set to 1.8V during reset
+- Add th1520_phy_1_8v_init() as voltage_switch op
+- Add th1520_execute_tuning() as the platform_execute_tuning op
+- Added th1520_sdhci_reset() as the .reset op. This function will set
+  io voltage to 1.8V after calling the standard sdhci_reset() function.
+- Modified dwcmshc_set_uhs_signaling() to enable SDHCI_CTRL_VDD_180 when
+  io_fixed_1v8 is true
+- Add many defines for register offsets and settings based on the mmc
+  support in the T-Head downstream v5.10 kernel
+
+RFC v1 series:
+https://lore.kernel.org/r/20230724-th1520-emmc-v1-0-cca1b2533da2@baylibre.com
+
+Signed-off-by: Drew Fustini <dfustini@baylibre.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
+Drew Fustini (7):
+      dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head TH1520 support
+      mmc: sdhci: add __sdhci_execute_tuning() to header
+      mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520
+      riscv: defconfig: Enable mmc and dma drivers for T-Head TH1520
+      riscv: dts: thead: Add TH1520 mmc controllers and sdhci clock
+      riscv: dts: thead: Enable BeagleV Ahead eMMC and microSD
+      riscv: dts: thead: Enable LicheePi 4A eMMC and microSD
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 668e0aceeeba..c0d816c4f770 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2245,6 +2245,27 @@ static int sdhci_msm_start_signal_voltage_switch(struct mmc_host *mmc,
- 	return -EAGAIN;
- }
- 
-+static void sdhci_msm_check_auto_cmd12(struct mmc_host *mmc,
-+				       struct mmc_request *mrq)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	bool auto_cmd12 = (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12);
-+
-+	if (mrq->data && auto_cmd12) {
-+		if (mmc_is_ffu_cmd(mrq->cmd))
-+			host->flags &= ~SDHCI_AUTO_CMD12;
-+		else
-+			host->flags |= SDHCI_AUTO_CMD12;
-+	}
-+}
-+
-+static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	sdhci_msm_check_auto_cmd12(mmc, mrq);
-+
-+	sdhci_request(mmc, mrq);
-+}
-+
- #define DRIVER_NAME "sdhci_msm"
- #define SDHCI_MSM_DUMP(f, x...) \
- 	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
-@@ -2638,6 +2659,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 					 MSM_MMC_AUTOSUSPEND_DELAY_MS);
- 	pm_runtime_use_autosuspend(&pdev->dev);
- 
-+	host->mmc_host_ops.request = sdhci_msm_request;
-+
- 	host->mmc_host_ops.start_signal_voltage_switch =
- 		sdhci_msm_start_signal_voltage_switch;
- 	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |   1 +
+ arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts |  20 ++
+ .../boot/dts/thead/th1520-lichee-module-4a.dtsi    |  20 ++
+ arch/riscv/boot/dts/thead/th1520.dtsi              |  23 ++
+ arch/riscv/configs/defconfig                       |   2 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c                | 357 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c                           |   3 +-
+ drivers/mmc/host/sdhci.h                           |   1 +
+ 8 files changed, 426 insertions(+), 1 deletion(-)
+---
+base-commit: f4c03b3d6c4bdafbb7885ccb84b095001eab1b88
+change-id: 20231017-th1520-mmc-b7c72b7f56cd
+
+Best regards,
 -- 
-2.42.0
+Drew Fustini <dfustini@baylibre.com>
 
