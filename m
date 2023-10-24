@@ -2,149 +2,174 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ADA36C00A8F
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Oct 2023 12:16:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 341AEC25B70
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Oct 2023 16:40:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231713AbjJXMQh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Oct 2023 08:16:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57746 "EHLO
+        id S1344009AbjJXQkF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Oct 2023 12:40:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231801AbjJXMQg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Oct 2023 08:16:36 -0400
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B05E186
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Oct 2023 05:16:33 -0700 (PDT)
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 85DAD3FA94
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Oct 2023 12:16:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1698149787;
-        bh=thwvxYYMUVPSY3nzBc7xApM08Kssn5NAFL9o/BCJG0g=;
-        h=From:In-Reply-To:References:Mime-Version:Date:Message-ID:Subject:
-         To:Cc:Content-Type;
-        b=nZSj4IliyasfjvdC4ZPXWVk4QNzAZMC4s2MadTa0AMCKlyPrLhK5znrt/M9U7BPKg
-         tt3gZObdEneza01sXSXHsFl8poxyaUo/w3/1gTrrVuhqwvqXvSt1o2XNtq9TIotWGB
-         3GojfzMSgSTFbLTmAb8j1jO68hOuNuGdA6XbDwDiATUqzkHTEpq3fDVbbeSOufbWHN
-         ggvkIkgmtifj5iYtmbaxWf47IIOtt0mRRMM/TCqfTrV+f6BLrYbqcgR4nPBvtei3DF
-         IABJGa3LgNJ/wKyvo/jBIE6qFWswb+OKhGCiBNuGJZXHaH7VJVlIE8NkGLW4oDdHjG
-         mG36JgrDIcadw==
-Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-41cca916954so59897031cf.2
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Oct 2023 05:16:27 -0700 (PDT)
+        with ESMTP id S1343912AbjJXQkD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Oct 2023 12:40:03 -0400
+Received: from mail-oo1-f49.google.com (mail-oo1-f49.google.com [209.85.161.49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3ACFBD7D;
+        Tue, 24 Oct 2023 09:40:00 -0700 (PDT)
+Received: by mail-oo1-f49.google.com with SMTP id 006d021491bc7-5845213c583so1594680eaf.0;
+        Tue, 24 Oct 2023 09:40:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698149786; x=1698754586;
-        h=cc:to:subject:message-id:date:mime-version:references:in-reply-to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=thwvxYYMUVPSY3nzBc7xApM08Kssn5NAFL9o/BCJG0g=;
-        b=YM7P6eQEWcnfpRWXr9fxI0S+xQ4ckAe4C1u6AJM+BIrs/Lk6oD8GfNFWgKzjwue1mr
-         8CgO2j4YJgl7pnA9qKnsCjfRcKwStNi1KFDwnjZEYKbgkElNfPqM5ni6YHxdWJtXBAtH
-         kdXMEUaPSf/CZNUTkxVTB769TGU8tipFTHb6Jd0ni8DYmEgrXz8UXVoPGYwYlNxlOX1L
-         f27056/w6/VCJdFiaMM1+7sGRVfmJTgpPfk1tsZ3J6DugujMht7c8mV3ku3fkUOxl3Ru
-         99PWoJdTW9mNSPMwjWVLkPqep7WagJpcDCDuDr8CKjk8WC+SpAqnjm/O+/OkbT4BjzIr
-         qB7A==
-X-Gm-Message-State: AOJu0Yw6vNwy25UxxJxfiz88bIzCgU4h5qPjNrEBvZ62KT6Owq91/XNy
-        Qae0zq9FyxrL7rYksbAS2jVv3G0EUMR03hyr46VBqWoSiOtFrMTKVpQAieskad4uEM80/K2hKwc
-        CamoFjnkxHbbVWKRlrgwtICSiTQwEH4pkeGT39j0YZXmIwWcsg5soEg==
-X-Received: by 2002:a05:622a:2d2:b0:418:152d:bf4 with SMTP id a18-20020a05622a02d200b00418152d0bf4mr13460086qtx.51.1698149786498;
-        Tue, 24 Oct 2023 05:16:26 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEOE0qGS2pSUMsJf2A8W5Ex0DMIs+jJV1IcL5+p/qejHg+bJIzitFRzRk24ZJkjngpmMhUlqv5mwknRsepuX1A=
-X-Received: by 2002:a05:622a:2d2:b0:418:152d:bf4 with SMTP id
- a18-20020a05622a02d200b00418152d0bf4mr13460067qtx.51.1698149786276; Tue, 24
- Oct 2023 05:16:26 -0700 (PDT)
-Received: from 348282803490 named unknown by gmailapi.google.com with
- HTTPREST; Tue, 24 Oct 2023 05:16:25 -0700
-From:   Emil Renner Berthing <emil.renner.berthing@canonical.com>
-In-Reply-To: <20231023-th1520-mmc-v3-6-abc5e7491166@baylibre.com>
-References: <20231023-th1520-mmc-v3-0-abc5e7491166@baylibre.com> <20231023-th1520-mmc-v3-6-abc5e7491166@baylibre.com>
-Mime-Version: 1.0
-Date:   Tue, 24 Oct 2023 05:16:25 -0700
-Message-ID: <CAJM55Z-OBUsnybSLTxB8RHwsYuWhsMKVH3x8ana4=LeZ98Yv1Q@mail.gmail.com>
-Subject: Re: [PATCH v3 6/7] riscv: dts: thead: Enable BeagleV Ahead eMMC and microSD
-To:     Drew Fustini <dfustini@baylibre.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Conor Dooley <conor@kernel.org>
-Cc:     devicetree@vger.kernel.org, Han Gao <gaohan@iscas.ac.cn>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Robert Nelson <robertcnelson@beagleboard.org>,
-        Jason Kridner <jkridner@beagleboard.org>,
-        Xi Ruoyao <xry111@xry111.site>, linux-riscv@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+        d=1e100.net; s=20230601; t=1698165599; x=1698770399;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4dgLAi1M/nR9fJIQpQVSn3gxY5AOxSN1+8PQWp2ZK3E=;
+        b=dJEL+fgbBkqa2Hxr8owONWDH6pO4QAKL8M6N0LblYDn0D+mvusaM9LI019LIX+Wr3i
+         SBvjWPRMymU3blibDCev3SK/2zggSLh7i4IpkcLL7+56UwaN+3Q+SvbKam8pCpGxanbT
+         He27KYjc4yS6cs4vdNENuanBRdI3kaR7tLAO5bj36M1FDWyM3CJw3cp0SmL52BmqFpit
+         BdEzxk39cE/f7g8NzIovM7D42nhpblBaxWAThWlKCuq1CXkrmypanbfJwfKuwEnp/Q8S
+         InLGUYhaL1tKdHvTD1oRCIWiQ8RKhoO9Sv7r+HPRugFqxsbmNwjwBGYgYl7NZvibTWWM
+         mHUQ==
+X-Gm-Message-State: AOJu0YxSrNVMn+fgX2LQrUQlYDXBSzDJcV9rjwPhKfF+AMIxCWFlyWiP
+        Fy1vX2SNzu3oZN9A3IdBaw==
+X-Google-Smtp-Source: AGHT+IH7r1RypTRYYRKdrh1wNi7leTTNBWI9FBY2oTxpLiREvX3LYW7p4YgROHwYcoRP/a6v+9+WQw==
+X-Received: by 2002:a4a:df11:0:b0:582:28e:93a8 with SMTP id i17-20020a4adf11000000b00582028e93a8mr12468463oou.3.1698165599325;
+        Tue, 24 Oct 2023 09:39:59 -0700 (PDT)
+Received: from herring.priv (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id f22-20020a4ad816000000b0057aef3cab33sm2002659oov.21.2023.10.24.09.39.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 24 Oct 2023 09:39:58 -0700 (PDT)
+Received: (nullmailer pid 4062523 invoked by uid 1000);
+        Tue, 24 Oct 2023 16:39:56 -0000
+Date:   Tue, 24 Oct 2023 11:39:56 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
+Cc:     Oleksii_Moisieiev@epam.com, gregkh@linuxfoundation.org,
+        herbert@gondor.apana.org.au, davem@davemloft.net,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        alexandre.torgue@foss.st.com, vkoul@kernel.org, jic23@kernel.org,
+        olivier.moysan@foss.st.com, arnaud.pouliquen@foss.st.com,
+        mchehab@kernel.org, fabrice.gasnier@foss.st.com,
+        andi.shyti@kernel.org, ulf.hansson@linaro.org, edumazet@google.com,
+        kuba@kernel.org, pabeni@redhat.com, hugues.fruchet@foss.st.com,
+        lee@kernel.org, will@kernel.org, catalin.marinas@arm.com,
+        arnd@kernel.org, richardcochran@gmail.com,
+        Frank Rowand <frowand.list@gmail.com>, peng.fan@oss.nxp.com,
+        linux-crypto@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org, linux-p.hy@lists.infradead.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH v6 10/11] ARM: dts: stm32: add ETZPC as a system bus for
+ STM32MP15x boards
+Message-ID: <20231024163956.GA4049342-robh@kernel.org>
+References: <20231010125719.784627-1-gatien.chevallier@foss.st.com>
+ <20231010125719.784627-11-gatien.chevallier@foss.st.com>
+ <20231010184212.GA1221641-robh@kernel.org>
+ <8f1b6915-68be-a525-c5d5-37f0983c14de@foss.st.com>
+ <20231012153012.GA698406-robh@kernel.org>
+ <b16ed06f-66fd-457b-9610-a67ad07deb60@foss.st.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b16ed06f-66fd-457b-9610-a67ad07deb60@foss.st.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Drew Fustini wrote:
-> Add mmc0 properties for the eMMC device and add mmc1 properties for
-> the microSD slot. Set the frequency for the sdhci clock.
->
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> ---
->  arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
->
-> diff --git a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
-> index 70e8042c8304..c4e748827889 100644
-> --- a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
-> +++ b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
-> @@ -52,6 +52,10 @@ &uart_sclk {
->  	clock-frequency = <100000000>;
->  };
->
-> +&sdhci_clk {
-> +	clock-frequency = <198000000>;
-> +};
-> +
->  &dmac0 {
->  	status = "okay";
->  };
-> @@ -59,3 +63,19 @@ &dmac0 {
->  &uart0 {
->  	status = "okay";
->  };
-> +
-> +&mmc0 {
-> +	bus-width = <8>;
-> +	max-frequency = <198000000>;
-> +	mmc-hs400-1_8v;
-> +	non-removable;
-> +	no-sdio;
-> +	no-sd;
-> +	status = "okay";
-> +};
-> +
-> +&mmc1 {
-> +	max-frequency = <198000000>;
-> +	bus-width = <4>;
-> +	status = "okay";
-> +};
+On Mon, Oct 16, 2023 at 02:02:39PM +0200, Gatien CHEVALLIER wrote:
+> Hi Rob,
+> 
+> On 10/12/23 17:30, Rob Herring wrote:
+> > On Wed, Oct 11, 2023 at 10:49:58AM +0200, Gatien CHEVALLIER wrote:
+> > > Hi Rob,
+> > > 
+> > > On 10/10/23 20:42, Rob Herring wrote:
+> > > > On Tue, Oct 10, 2023 at 02:57:18PM +0200, Gatien Chevallier wrote:
+> > > > > ETZPC is a firewall controller. Put all peripherals filtered by the
+> > > > > ETZPC as ETZPC subnodes and reference ETZPC as an
+> > > > > access-control-provider.
+> > > > > 
+> > > > > For more information on which peripheral is securable or supports MCU
+> > > > > isolation, please read the STM32MP15 reference manual.
+> > > > > 
+> > > > > Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+> > > > > ---
+> > > > > 
+> > > > > Changes in V6:
+> > > > >       	- Renamed access-controller to access-controllers
+> > > > >       	- Removal of access-control-provider property
+> > > > > 
+> > > > > Changes in V5:
+> > > > >       	- Renamed feature-domain* to access-control*
+> > > > > 
+> > > > >    arch/arm/boot/dts/st/stm32mp151.dtsi  | 2756 +++++++++++++------------
+> > > > >    arch/arm/boot/dts/st/stm32mp153.dtsi  |   52 +-
+> > > > >    arch/arm/boot/dts/st/stm32mp15xc.dtsi |   19 +-
+> > > > >    3 files changed, 1450 insertions(+), 1377 deletions(-)
+> > > > 
+> > > > This is not reviewable. Change the indentation and any non-functional
+> > > > change in one patch and then actual changes in another.
+> > > 
+> > > Ok, I'll make it easier to read.
+> > > 
+> > > > 
+> > > > This is also an ABI break. Though I'm not sure it's avoidable. All the
+> > > > devices below the ETZPC node won't probe on existing kernel. A
+> > > > simple-bus fallback for ETZPC node should solve that.
+> > > > 
+> > > 
+> > > I had one issue when trying with a simple-bus fallback that was the
+> > > drivers were probing even though the access rights aren't correct.
+> > > Hence the removal of the simple-bus compatible in the STM32MP25 patch.
+> > 
+> > But it worked before, right? So the difference is you have either added
+> > new devices which need setup or your firmware changed how devices are
+> > setup (or not setup). Certainly can't fix the latter case. You just need
+> > to be explicit about what you are doing to users.
+> > 
+> 
+> I should've specified it was during a test where I deliberately set
+> incorrect rights on a peripheral and enabled its node to see if the
+> firewall would allow the creation of the device.
+> 
+> > 
+> > > Even though a node is tagged with the OF_POPULATED flag when checking
+> > > the access rights with the firewall controller, it seems that when
+> > > simple-bus is probing, there's no check of this flag.
+> > 
+> > It shouldn't. Those flags are for creating the devices (or not) and
+> > removing only devices of_platform_populate() created.
+> > 
+> 
+> About the "simple-bus" being a fallback, I think I understood why I saw
+> that the devices were created.
+> 
+> All devices under a node whose compatible is "simple-bus" are created
+> in of_platform_device_create_pdata(), called by
+> of_platform_default_populate_init() at arch_initcall level. This
+> before the firewall-controller has a chance to populate it's bus.
+> 
+> Therefore, when I flag nodes when populating the firewall-bus, the
+> devices are already created. The "simple-bus" mechanism is not a
+> fallback here as it precedes the driver probe.
+> 
+> Is there a safe way to safely remove/disable a device created this way?
 
-Hi Drew,
+There's 2 ways to handle this. Either controlling creating the device or 
+controlling probing the device. The latter should just work with 
+fw_devlink dependency. The former probably needs some adjustment to 
+simple-pm-bus driver if you have 'simple-bus' compatible. You want it to 
+probe on old kernels and not probe on new kernels with your firewall 
+driver. Look at the commit history for simple-pm-bus. There was some 
+discussion on it as well.
 
-For the StarFive device tree files we've agreed on sorting by / node, clock
-references, and then other node references alphabetically. I'm not
-insisting you should do the same, but it would be nice with some system to make
-it clear where new node refences should go. Or maybe I'm just not seeing the
-system you're already following.
+> Devices that are under the firewall controller (simple-bus) node
+> should not be probed before it as they're child of it.
 
-/Emil
+fw_devlink should take care of parent/child dependencies without any 
+explicit handling of the access ctrl binding.
 
->
-> --
-> 2.34.1
->
->
-> _______________________________________________
-> linux-riscv mailing list
-> linux-riscv@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-riscv
+Rob
