@@ -2,96 +2,121 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC0B9C07545
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Oct 2023 01:42:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5DCBC0032E
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Oct 2023 07:29:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229498AbjJYBms (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Oct 2023 21:42:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35544 "EHLO
+        id S233039AbjJYH3w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Oct 2023 03:29:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49886 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229453AbjJYBmq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Oct 2023 21:42:46 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D170B1B3
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Oct 2023 18:42:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1698198164; x=1729734164;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=/yjOGSG/zxjaMJ7kW13P0KfSRDPFA8lg85Qo6TNJwqA=;
-  b=cYyE32S31P+Vie6LteDlc/iWtzJ3pLjR9+4mTfbLfIva5SId0STFA0Jf
-   9vMUDc2Q7JobNqBMC7Mo4gI+OohNaofECwEM16/aJkPLFTGuiEpGtnZpe
-   mbLOqXJul0in1nsovcGLv0smItHlBhh8Q2CZF6mif0tqgPa/8LdDTp/pc
-   UOuq4UOCp3pHdBNgI0diSYyCRbyA3JkK5fSeJQR1oRVTM+wLuxwuHzyPC
-   zf4KVrn6F+SF5jAXMoEfIr1W/VNHXJTrnrc91US6UrqPyMQ9ddcLDRTIt
-   JJne1hzyNAw7apf6ZCw9k2lseiDt/KqLLsHGLp04T1BGe+zpL0+Hi0a5S
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10873"; a="451441123"
-X-IronPort-AV: E=Sophos;i="6.03,249,1694761200"; 
-   d="scan'208";a="451441123"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2023 18:42:44 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10873"; a="762295737"
-X-IronPort-AV: E=Sophos;i="6.03,249,1694761200"; 
-   d="scan'208";a="762295737"
-Received: from lkp-server01.sh.intel.com (HELO 8917679a5d3e) ([10.239.97.150])
-  by fmsmga007.fm.intel.com with ESMTP; 24 Oct 2023 18:42:41 -0700
-Received: from kbuild by 8917679a5d3e with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1qvSut-0008VZ-15;
-        Wed, 25 Oct 2023 01:42:39 +0000
-Date:   Wed, 25 Oct 2023 09:42:34 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Avri Altman <avri.altman@wdc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     oe-kbuild-all@lists.linux.dev,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Daniil Lunev <dlunev@google.com>,
-        Asutosh Das <quic_asutoshd@quicinc.com>,
-        Avri Altman <avri.altman@wdc.com>
-Subject: Re: [PATCH v2 2/2] mmc: host: msm: Disable auto-cmd12 during ffu
-Message-ID: <202310250913.ri6qqodu-lkp@intel.com>
-References: <20231023132128.1871269-3-avri.altman@wdc.com>
+        with ESMTP id S232976AbjJYH3r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Oct 2023 03:29:47 -0400
+Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67D32185
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Oct 2023 00:29:44 -0700 (PDT)
+Received: by mail-wm1-x334.google.com with SMTP id 5b1f17b1804b1-40859c466efso31309725e9.3
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Oct 2023 00:29:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1698218983; x=1698823783; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Mx8IlXiAIz+L/8v+7piI1N8I5OaioAed75m9CEhnWTA=;
+        b=WenC67Y4VvDnxSFzOLv4ALAE1hRVwviPLNn5cA4Ndis8EO23iatv7mV6GFBZYkFH/V
+         p+8TlDdVQ+VtJbtjePDRtB9Da64RXkowbKJOdznLpOAW3utmDdxou9BDN8rBidmHEIu/
+         vvyDTYXU7eXt+tAhOARgEAOrz4RbyD9yYepOp5KUfd+VB4VEprueZyDiYPd3SF3kxHx4
+         kCIi2THuHHsXg0cY4k6KQnY2wFvnrT99s7zMlfRoVDnXVftb9KyhDPULB+ITn2ny9WFM
+         qHFfech/JH6BSQ+Bg1CEfe4zhiItPBwBzPvcPQRAar89VFc33C3ye0paIWuw2f+1BcQ7
+         Nf4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698218983; x=1698823783;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Mx8IlXiAIz+L/8v+7piI1N8I5OaioAed75m9CEhnWTA=;
+        b=w30YClsntTgD19QnN2UmmhV9Z/Ml7yVU6Lg5Gy9AJC0S/YisDYO2mzoiOSU434i9o+
+         NfV+u7EGuk5lRQSDjvOwPARiB2b0F+12OQ2dA2Qc9idtxe+ACdscgWzzWE8JMUCG3PVU
+         69yrvZkDqzSRccWIvrIh6wrklzDkuLIh7wuA3fyligM9sISK+JMrojnB9k37MF/hdlFr
+         lQvxMeRE0UD0pxwQcaDLyvyIWPn47Ty9iAC5BenAF6AaBldFs9x6fgj8ytFWDVgUyJQN
+         eI8AI9hJxv2H7sYobxawsgpwhSzKvPWjsIBsFDCdMN791FmFJmAZFO7ia7AI2LwWmKza
+         0Y9Q==
+X-Gm-Message-State: AOJu0Yz0n3Y1mAjP+OdzfeppFejKXA2s53zwE5a2wnR6oTM09cCHDRSM
+        tw+MokEwkUa3q4Kwh+LMjUoEKQ==
+X-Google-Smtp-Source: AGHT+IFN5mFuPW14bv86l1Vsoyp/x0jnZX72hYe92hmdCXQSsFSxDIaqaDCZEu9HzA/Yy+g2Q6zaRg==
+X-Received: by 2002:a05:600c:468d:b0:409:ca6:d79d with SMTP id p13-20020a05600c468d00b004090ca6d79dmr3563471wmo.18.1698218982647;
+        Wed, 25 Oct 2023 00:29:42 -0700 (PDT)
+Received: from arrakeen.starnux.net ([2a01:e0a:982:cbb0:8261:5fff:fe11:bdda])
+        by smtp.gmail.com with ESMTPSA id p10-20020a05600c05ca00b004083729fc14sm18296389wmd.20.2023.10.25.00.29.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Oct 2023 00:29:42 -0700 (PDT)
+From:   Neil Armstrong <neil.armstrong@linaro.org>
+Date:   Wed, 25 Oct 2023 09:29:41 +0200
+Subject: [PATCH] dt-bindings: mmc: sdhci-msm: document the SM8560 SDHCI
+ Controller
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231023132128.1871269-3-avri.altman@wdc.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20231025-topic-sm8650-upstream-bindings-sdhci-v1-1-e644cf937321@linaro.org>
+X-B4-Tracking: v=1; b=H4sIAOTDOGUC/x3NPQ6DMAxA4asgz7Xk8BfEVaoOaWLAAyGKKUJC3
+ L0R47e8d4FyFlYYqwsyH6KyxQLzqsAvLs6MEoqhproxZHrctyQedR36jvCXdM/sVvxKDBJnRQ2
+ LF2xcayeyA1nHUFIp8yTns3l/7vsPPqlhMHYAAAA=
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Neil Armstrong <neil.armstrong@linaro.org>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1161;
+ i=neil.armstrong@linaro.org; h=from:subject:message-id;
+ bh=Lp3aRQCBhCwDMKgoBNmH8yh9tFS8RCfk68sTwAA5uDA=;
+ b=owEBbQKS/ZANAwAKAXfc29rIyEnRAcsmYgBlOMPllkefyT4L6D+1VxS5Ucjjq0DIWvEoqE2oBsed
+ sq8T96GJAjMEAAEKAB0WIQQ9U8YmyFYF/h30LIt33NvayMhJ0QUCZTjD5QAKCRB33NvayMhJ0fScD/
+ 9kK5I7YhZUaNpUzQVrbRuUI0ymazzepsuA6HAZI+fWkqIEXL669t+GkL87G4XJ5l9/D4+jrNnD+rSz
+ RsxlPoZejBBHS7LDdg4zt6cietq0geSiD6Om0u9enxAm1cQROV8LFefIodN1CnlH3aqjgWNgGqqXbP
+ YaGdrkoGwP+KDe/FSSipEJEJ2DQiB54LCPmumTvofHkETlT7X/b/T+A24ULLRfnrF6tXeZXWiys6LC
+ FAwtHwxuZdjwBcrlzHo2MYQmT4U+TmSmT5vcHB3niP4LZggBeYiWeWkxTyNNCZuec9/NbnX8qR5kzq
+ x8+JUdw1QUlX0qj/8vZiPvgUKrTBlSQ/pl/SyaqQ2n2MfVsQ5ZmO7AmbxxhlgS1VWln9vcLEQdhFPJ
+ 1QSRMAS0PjaP1DcckK4ckunF1KYH2s4a1krz40iKcjahm9lzDWQARG2/bT1juyapA0j/0JbGYghuYZ
+ Ck5Cz9+zgRzJNATyL2ChPXIyfi+9gAbeqCiiFHmhWrH1dXqT5tPSMmg1syPiEZi0kjnxd3rOasvuAJ
+ hF+P+6k2WNicL4MnhEV0VNcrKNYE/O74JiVnKp9bgvHuupErSoy1tbrQvohNVdz5J+V7OYfZsAK2Ye
+ Ph4e/Y7iKtkqqYSYvXzBkkCmcLOu1SC+deAEo2KW+ZsLMR7xxKHGcjTuJ1Ug==
+X-Developer-Key: i=neil.armstrong@linaro.org; a=openpgp;
+ fpr=89EC3D058446217450F22848169AB7B1A4CFF8AE
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Avri,
+Document the SDHCI Controller on the SM8650 Platform.
 
-kernel test robot noticed the following build errors:
+Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+---
+For convenience, a regularly refreshed linux-next based git tree containing
+all the SM8650 related work is available at:
+https://git.codelinaro.org/neil.armstrong/linux/-/tree/topic/sm85650/upstream/integ
+---
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on ulf-hansson-mmc-mirror/next v6.6-rc7 next-20231024]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+index 69a213965089..86fae733d9a0 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+@@ -58,6 +58,7 @@ properties:
+               - qcom,sm8350-sdhci
+               - qcom,sm8450-sdhci
+               - qcom,sm8550-sdhci
++              - qcom,sm8650-sdhci
+           - const: qcom,sdhci-msm-v5 # for sdcc version 5.0
+ 
+   reg:
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Avri-Altman/mmc-core-Mark-close-ended-ffu-in-progress/20231023-212707
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20231023132128.1871269-3-avri.altman%40wdc.com
-patch subject: [PATCH v2 2/2] mmc: host: msm: Disable auto-cmd12 during ffu
-config: csky-randconfig-001-20231025 (https://download.01.org/0day-ci/archive/20231025/202310250913.ri6qqodu-lkp@intel.com/config)
-compiler: csky-linux-gcc (GCC) 13.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231025/202310250913.ri6qqodu-lkp@intel.com/reproduce)
+---
+base-commit: fe1998aa935b44ef873193c0772c43bce74f17dc
+change-id: 20231016-topic-sm8650-upstream-bindings-sdhci-3a47f07807ae
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202310250913.ri6qqodu-lkp@intel.com/
-
-All errors (new ones prefixed by >>):
-
-   csky-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `sdhci_msm_request':
->> sdhci-msm.c:(.text+0x540): undefined reference to `mmc_is_ffu_cmd'
-   csky-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `sdhci_and_cqhci_reset':
-   sdhci-msm.c:(.text+0x5c0): undefined reference to `mmc_is_ffu_cmd'
-
+Best regards,
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Neil Armstrong <neil.armstrong@linaro.org>
+
