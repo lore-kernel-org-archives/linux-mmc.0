@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2046DC0032E
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Oct 2023 11:32:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79838C0032E
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Oct 2023 11:32:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232363AbjJYLci (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Oct 2023 07:32:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59402 "EHLO
+        id S233280AbjJYLcl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Oct 2023 07:32:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234114AbjJYLce (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Oct 2023 07:32:34 -0400
-Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 822E810A
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Oct 2023 04:32:31 -0700 (PDT)
+        with ESMTP id S232688AbjJYLck (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Oct 2023 07:32:40 -0400
+Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9B1F10A
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Oct 2023 04:32:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1698233551; x=1729769551;
+  t=1698233558; x=1729769558;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=eX2QT7XSaQaGHWlVuxvJpuzRAtfCOuekHhNcVZMqbGY=;
-  b=QZg1In8/GiVkxgKFf01z2wMSWgWZ9oV5qNh8qHbfpegR59o3NH1ref/l
-   WTCTv64CnTr+Ao+Ax3QDnlCtGqfJ8HzIw+OfhG9tETyAHiL3MyVo3Cxir
-   OrNwGG6a/7biStfKIcxJk/Zp8734hRZXrN0y1T5nqoWBnyAEP3UomKvsX
-   H6hvzfaI2D6z2nOnD3Odh6dVs6wH0ZYV4mAyq584IUm3uZrKjm1duZ+g+
-   DI1VSZbApHlYgm0+ZkZjOZ8R6cMygn84nH0JTo07aixnNvsbV3KJrZyY1
-   M4PGHUvZbmoFjCLaJ0spqFwOvRnrrjZzTk7sC7mpt9dBYdI5rFQPLWEQj
-   w==;
-X-CSE-ConnectionGUID: Or3O3trVTXOfxyykUIxV8g==
-X-CSE-MsgGUID: VPGH31keRnuL7/84M9BWUw==
+  bh=Hl4PrdPXJrjE4ec1/3ATbOlzGHhALw4UwttrTZBRSPI=;
+  b=XMaaFu9FhjqOPYLjGSjAGDY0/shO0hcv7nOgJqjvmB5vbokN3UQ88xEN
+   T7cbh3nzLW+3e8BB25p/XMShFDIP2SrS588xZDCtkL/AQzlymaMej+ofy
+   Zu3trxMPsGC3Iv/XiODUaEQzXPxY8gBwju3h+S2KZA3+N4Iz6mFpNhQpx
+   gkGKvESe0vLooLQ/S067fAVqq9VQtBMTXTB0nAISwpNwrqI34abNCr11Y
+   8FNVIDC6EiBIasP2FxZiQwRv19kPhwtKHabBzZ64WFZqetww1wTxzUs2k
+   wolB4OdqAIPLuglHQTACHMatywSqEJsa/dKKDQxfKQ9F7GFZPb0QFTXaY
+   A==;
+X-CSE-ConnectionGUID: uS4KPFKpTJuLHJlc0TTYXQ==
+X-CSE-MsgGUID: 2pGZdP1URFCMdI1jDlUlxA==
 X-IronPort-AV: E=Sophos;i="6.03,250,1694707200"; 
-   d="scan'208";a="597347"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 25 Oct 2023 19:32:31 +0800
-IronPort-SDR: mq+94rODAAJKtHvYZtHVM+Qe6w/M4Fti1yBt0iqmKjxmAeMMzcTzyJM36vyfRBISe/1zbPjMuj
- f2/linMlQs7gUhekz10+mMLvcM2bbfhkfwxs4kFg/fZrgZdYS/ilvdhEgOyuguDBezAS0+3wC2
- pxI6jXx+Zcd1oTO/kbx74CGdHikEOzrH5xFzQl0OzgBnwjNVTHA3XhaU72ykjlX+gwmm/g5U4i
- Gop4K1NSaSoc1EVJqc7dvj/hO6+rJUc1lzrw4PJJ54f/BQGqca0XSV1Ci5kGlWR8869SjvQbIA
- fyA=
+   d="scan'208";a="580252"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 25 Oct 2023 19:32:37 +0800
+IronPort-SDR: yC4uJCYjclt/JVmGFK8nBxrAgzbRngEy4wceJlwo1xuC+/Yp+quhRgPFzPEsL96BX2IzqlpgPY
+ GciXHT7MQzM0bQOwChV2TeFlDr3rD6fHuSq3UbgSVwMYAe6Y2MEl8EudcEefcd57vm1vo0iL2i
+ CtzD0ZuBQWZ4dc+md3Azy1dydEMRx1Y/9MKJrP0YZipPKph4N0RfWLNs6+LBWxagorZ77k1Fjl
+ w2CLmGnQBhGRKbw7qwZf+R+SiUWzLmDwTqP3HBJREDR1fVuep819A41p7vh+WZZlo1PVf4l+z/
+ UQk=
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Oct 2023 03:38:42 -0700
-IronPort-SDR: rQ3DddXVai906K9mTeg4WcCrxMp3dJ3wjBszVGjsCiqGltVVeEsXDnWFCvG7+Y9N4NtJZDIKhi
- A2uRucUlIqZAO5In/u6Zv1XOaKRQ4+y/n83ucBRia+w+igwFFNNv587CCoxvC6wsZAyH5j2bSW
- UL9/jO1HDOma5DacTpJZEMxyi+I24VA0Gsncew8zHz7OqpOjev4A7DHdVK4ICg4xDdrfaxMsO1
- 5CHqeVLAFKUWvbTZ5HOk8PNGE2TPFg0X5N9WLpaUHzdin+nuLqntPJdv9AZtCize/e+hUIw1fU
- AiY=
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Oct 2023 03:44:30 -0700
+IronPort-SDR: txTDt/K8kUAi3ZSqZiKVFfaMjlyHMfLJvGwHoovhtVJ5IzwRau4cCYB29dkAtSJJ24yRWOJ8zu
+ R5y9bd9UYdYYbEa/Wfm73VMOvm5Pp3/wwCo1Ssn6rap7SstMa0YB4POgTjUgCGtU0elAZ/3NdM
+ Fjb2J1lpllK8m54kUJ1q+yyQvtZ73FFSannOrHE6wqifvrX1jEPcO5dX1FVwuvnhCWrWWgeV1Y
+ teB3MtcCD1O8hCTCZszk8GjCTXjJayJ93Uftmtir7lq/03gRQSM6IRWs2FWBW8z9dMtGlELcR4
+ MQE=
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP; 25 Oct 2023 04:32:30 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP; 25 Oct 2023 04:32:37 -0700
 From:   Avri Altman <avri.altman@wdc.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Daniil Lunev <dlunev@google.com>,
         Asutosh Das <quic_asutoshd@quicinc.com>,
         Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v3 1/2] mmc: core: Mark close-ended ffu in progress
-Date:   Wed, 25 Oct 2023 14:30:34 +0300
-Message-Id: <20231025113035.1881418-2-avri.altman@wdc.com>
+Subject: [PATCH v3 2/2] mmc: host: msm: Disable auto-cmd12 during ffu
+Date:   Wed, 25 Oct 2023 14:30:35 +0300
+Message-Id: <20231025113035.1881418-3-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20231025113035.1881418-1-avri.altman@wdc.com>
 References: <20231025113035.1881418-1-avri.altman@wdc.com>
@@ -66,103 +66,69 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Field Firmware Update (ffu) may use close-ended or open ended sequence.
-Each such sequence is comprised of a write commands enclosed between 2
-switch commands - to and from ffu mode. So for the close-ended case, it
-will be: cmd6->cmd23-cmd25-cmd6.
+Some platforms generate auto command error interrupt when it shouldn't,
+e.g. auto-cmd12 while in close-ended ffu sequence.
 
-Capture this sequence and make it available for the host modules, should
-it is needed.
+I encounterd this issue while testing fwup on HP Chromebook x2, qualcomm
+based QC-7c, code name for board - strongbad.
+
+Instead of a quirk, hook the request function of the msm ops, so it'll
+disable auto-cmd12 while close-ended ffu is in progress.
 
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- drivers/mmc/core/block.c | 34 ++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h |  1 +
- include/linux/mmc/mmc.h  |  1 +
- 3 files changed, 36 insertions(+)
+ drivers/mmc/host/sdhci-msm.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 3a8f27c3e310..ee5ec4686582 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -96,6 +96,10 @@ static int max_devices;
- static DEFINE_IDA(mmc_blk_ida);
- static DEFINE_IDA(mmc_rpmb_ida);
- 
-+static unsigned int ffu_progress;
-+#define MMC_FFU_START	BIT(0)	/* FFU in progress */
-+#define MMC_FFU_SBC	BIT(1)	/* close-ended FFU in progress */
-+
- struct mmc_blk_busy_data {
- 	struct mmc_card *card;
- 	u32 status;
-@@ -464,6 +468,34 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
- 	return 0;
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 668e0aceeeba..99d6cac335a4 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -8,6 +8,7 @@
+ #include <linux/module.h>
+ #include <linux/delay.h>
+ #include <linux/mmc/mmc.h>
++#include <linux/mmc/host.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/pm_opp.h>
+ #include <linux/slab.h>
+@@ -2245,6 +2246,27 @@ static int sdhci_msm_start_signal_voltage_switch(struct mmc_host *mmc,
+ 	return -EAGAIN;
  }
  
-+bool mmc_is_ffu_cmd(struct mmc_command *cmd)
++static void sdhci_msm_check_auto_cmd12(struct mmc_host *mmc,
++				       struct mmc_request *mrq)
 +{
-+	return ((ffu_progress & MMC_FFU_SBC) &&
-+		cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK);
-+}
++	struct sdhci_host *host = mmc_priv(mmc);
++	bool auto_cmd12 = (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12);
 +
-+static void mmc_blk_ffu_progress(struct mmc_command *cmd)
-+{
-+	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd->arg) != EXT_CSD_MODE_CONFIG &&
-+	    ffu_progress == 0)
-+		return;
-+
-+	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd->arg) == EXT_CSD_MODE_CONFIG) &&
-+	    (cmd->opcode == MMC_SWITCH)) {
-+		u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd->arg);
-+
-+		if (value == 1)
-+			ffu_progress = MMC_FFU_START;
++	if (mrq->data && auto_cmd12) {
++		if (mmc_is_ffu_cmd(mrq->cmd))
++			host->flags &= ~SDHCI_AUTO_CMD12;
 +		else
-+			ffu_progress = 0;
-+
-+		return;
-+	} else if (ffu_progress == MMC_FFU_START &&
-+		   cmd->opcode == MMC_SET_BLOCK_COUNT) {
-+		ffu_progress |= MMC_FFU_SBC;
++			host->flags |= SDHCI_AUTO_CMD12;
 +	}
 +}
 +
- static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 			       struct mmc_blk_ioc_data *idata)
- {
-@@ -548,6 +580,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	    (cmd.opcode == MMC_SWITCH))
- 		return mmc_sanitize(card, idata->ic.cmd_timeout_ms);
- 
-+	mmc_blk_ffu_progress(&cmd);
++static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	sdhci_msm_check_auto_cmd12(mmc, mrq);
 +
- 	/* If it's an R1B response we need some more preparations. */
- 	busy_timeout_ms = idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS;
- 	r1b_resp = (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 2f445c651742..e2cb20f7c50c 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -677,5 +677,6 @@ int mmc_send_status(struct mmc_card *card, u32 *status);
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
-+bool mmc_is_ffu_cmd(struct mmc_command *cmd);
++	sdhci_request(mmc, mrq);
++}
++
+ #define DRIVER_NAME "sdhci_msm"
+ #define SDHCI_MSM_DUMP(f, x...) \
+ 	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
+@@ -2638,6 +2660,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 					 MSM_MMC_AUTOSUSPEND_DELAY_MS);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
  
- #endif /* LINUX_MMC_HOST_H */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 6f7993803ee7..d4d10cabaa57 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -254,6 +254,7 @@ static inline bool mmc_ready_for_data(u32 status)
-  */
- 
- #define EXT_CSD_CMDQ_MODE_EN		15	/* R/W */
-+#define EXT_CSD_MODE_CONFIG		30	/* R/W */
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
++	host->mmc_host_ops.request = sdhci_msm_request;
++
+ 	host->mmc_host_ops.start_signal_voltage_switch =
+ 		sdhci_msm_start_signal_voltage_switch;
+ 	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
 -- 
 2.42.0
 
