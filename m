@@ -2,266 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E348EC25B48
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 07:56:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9B4EC25B6F
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 07:58:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229882AbjJZH4s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Oct 2023 03:56:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36308 "EHLO
+        id S229638AbjJZH64 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Oct 2023 03:58:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53734 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229638AbjJZH4s (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 03:56:48 -0400
-Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EC37C1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 00:56:45 -0700 (PDT)
-Received: by mail-qv1-xf36.google.com with SMTP id 6a1803df08f44-66d2f3bb312so4451096d6.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 00:56:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1698307004; x=1698911804; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=FOTWVtFh69rU4iR3aQ9uKhPjpIZGYVo87NlJ2rI11+w=;
-        b=AGqMbwvxGqhKMW+cugkNL5Cgd10LS1XM1tZ3BCo5WvFJ+6DbJGmBKGH2A7x43DTpTs
-         IL9nQxvY+AFCVJnkBf8JlC3G802+xhbI2yt4FsPZCFhW9CXesPLUschybnlZZlS4BvjZ
-         za89HSh9jYR6N2eIOAJdkNW+67AOPgmFm5XF0=
+        with ESMTP id S1344466AbjJZH6y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 03:58:54 -0400
+X-Greylist: delayed 362 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 26 Oct 2023 00:58:51 PDT
+Received: from gw.atmark-techno.com (gw.atmark-techno.com [13.115.124.170])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 267A2191
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 00:58:50 -0700 (PDT)
+Received: from gw.atmark-techno.com (localhost [127.0.0.1])
+        by gw.atmark-techno.com (Postfix) with ESMTP id BF60C6013D
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 16:52:48 +0900 (JST)
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
+        by gw.atmark-techno.com (Postfix) with ESMTPS id 0C7DA6013B
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 16:52:48 +0900 (JST)
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-27d4606e8d8so599376a91.1
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 00:52:48 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698307004; x=1698911804;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=FOTWVtFh69rU4iR3aQ9uKhPjpIZGYVo87NlJ2rI11+w=;
-        b=dexCOKPbR2MwxP8CVOFXU18HgAflbs3DvP7ynK0GQ6bRAce+x6esdLkH+nnBh2EY31
-         9Bto09zGymCOxeJVAW5bhnjd9TVLO2x7peRwiYxd0M+3bseylNK245OFJRYFo6BnE/PM
-         wn22UtAkRJL/7tcAE9ZzjSIfsdb+sKwYFmwmWkWGehXiBHcxUofCUDg4c9Juxnu8PRoq
-         rXhqPds+/bpiQRiZN1VlVxjHpyxRuphbuA5m5/pXiLtm2OjcKw2Ywj5GPiE7QXNbvbb7
-         FOl7wXhiUwUD9042V/Em3ZryzNbOzzO1Zq4coPUvVgrXv/RjLpzRnpKukieL/dElhKNF
-         COTQ==
-X-Gm-Message-State: AOJu0YwC8871bqrTVjaDVvX92nIhssiAyg1UpZc7/Y/023mdmlb6DVsN
-        1+xkxYuxq+is1LEc6mMrKM0P/Ws/K2Vzs28EONwC3A==
-X-Google-Smtp-Source: AGHT+IHTiKcEhAJNGBIwi2q8NaFIqui3GdnxJEYKWks3gjgt433nr/gIcb+56ZLJ8QP/WEnpiIbVb5BOV5jI8Db8kUE=
-X-Received: by 2002:a05:6214:27e8:b0:66d:63d6:3600 with SMTP id
- jt8-20020a05621427e800b0066d63d63600mr20561784qvb.55.1698307004573; Thu, 26
- Oct 2023 00:56:44 -0700 (PDT)
-MIME-Version: 1.0
-References: <20231016095610.1095084-1-korneld@chromium.org>
- <613c51f0-c32e-4de5-9627-525d92fb06ed@intel.com> <CAD=NsqybNrf-=9=5wvoj+9MT3xK3SbX7nDk3N3VLBMyA_u3KTQ@mail.gmail.com>
- <78bb4ad2-853a-4ed4-9998-c4e1122545b6@intel.com> <CAD=NsqxDA=usDRa-KV48RkeEROARsw8JqBF5vyJcEEV5r_Fg1w@mail.gmail.com>
- <f0aecb28-6f82-456e-a319-8d13a2e313b6@intel.com>
-In-Reply-To: <f0aecb28-6f82-456e-a319-8d13a2e313b6@intel.com>
-From:   =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
-Date:   Thu, 26 Oct 2023 09:56:33 +0200
-Message-ID: <CAD=NsqyJHv4nrtrqU4igtaMR=u6xmUtCpoYk66XzarLpu95idA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: cqhci: Be more verbose in error irq handler
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Asutosh Das <quic_asutoshd@quicinc.com>,
+        d=1e100.net; s=20230601; t=1698306767; x=1698911567;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+lAIq6u9pTYK8uuKU3nuhyjh5nuKNcKCButdhJ6GhKA=;
+        b=XxT0KG/7dfzX7yY87O1ORPV4VUHz1OzbR+heX2JvMUAqrekPEj21iAn5r5hxBC1J4G
+         eD4OaCQAI5izan9xhs/B1KMLYr4giwS6zGLR/GXAOHQlIQ8TFN7tVgVflpXA3du4CtF4
+         QSDFo2skoGYh/znk1mS6pGKWMkDtdcBigmcK+poLSLvaq9oULsEzGp4+MGUCqeVM0jlR
+         TgU1H41XpGbXuBdBjcnLGNoOIMNA0pbu6ETcPRVKfCMCXbBpG26UsqauaNWKYjnHYFgI
+         diC42gq3CrcFFHG4yZphTzvVTqRyZ9RG6uhF/aX4ul2XGLk1TgW37g0TFzqkZHPU6M3B
+         e/Pw==
+X-Gm-Message-State: AOJu0YxTBEnOd7qhBHAcf8dgB4oPmIAIRdnCsqy+LsrhS5+ZjT8bFZuC
+        OvANseYWwOXN2g8prru/7YqZ674yY60eAcEjaufxel2ETvbRgQOB1V9ADqIpeiCTEBypMOCSBgZ
+        Ai2Q09A8+T30+cwVI5f3Ml2+2ThKPYmTz
+X-Received: by 2002:a17:90a:5308:b0:27d:1521:11a1 with SMTP id x8-20020a17090a530800b0027d152111a1mr18119156pjh.31.1698306767109;
+        Thu, 26 Oct 2023 00:52:47 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHYjAebEebd5s3f2Q/gDhYTnmbig3+22DHmCgM72YUnNgQa1fDDTe+PmrXhOW2eC4l/isBOCA==
+X-Received: by 2002:a17:90a:5308:b0:27d:1521:11a1 with SMTP id x8-20020a17090a530800b0027d152111a1mr18119145pjh.31.1698306766820;
+        Thu, 26 Oct 2023 00:52:46 -0700 (PDT)
+Received: from pc-zest.atmarktech (76.125.194.35.bc.googleusercontent.com. [35.194.125.76])
+        by smtp.gmail.com with ESMTPSA id g19-20020a170902869300b001b9e86e05b7sm10417565plo.0.2023.10.26.00.52.46
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 26 Oct 2023 00:52:46 -0700 (PDT)
+Received: from [::1] (helo=pc-zest.atmark.tech)
+        by pc-zest.atmarktech with esmtp (Exim 4.96)
+        (envelope-from <dominique.martinet@atmark-techno.com>)
+        id 1qvvAb-001jsj-13;
+        Thu, 26 Oct 2023 16:52:45 +0900
+From:   Dominique Martinet <dominique.martinet@atmark-techno.com>
+Cc:     Dominique Martinet <asmadeus@codewreck.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Dominique Martinet <dominique.martinet@atmark-techno.com>,
+        stable@vger.kernel.org, Avri Altman <avri.altman@wdc.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Radoslaw Biernacki <biernacki@google.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Gwendal Grignou <gwendal@chromium.org>, upstream@semihalf.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Alex Fetters <Alex.Fetters@garmin.com>
+Subject: [PATCH] mmc: truncate quirks' oemid to 8 bits
+Date:   Thu, 26 Oct 2023 16:52:30 +0900
+Message-Id: <20231026075230.414685-1-dominique.martinet@atmark-techno.com>
+X-Mailer: git-send-email 2.39.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 26, 2023 at 8:25=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
->
-> On 25/10/23 11:01, Kornel Dul=C4=99ba wrote:
-> > On Mon, Oct 23, 2023 at 1:38=E2=80=AFPM Adrian Hunter <adrian.hunter@in=
-tel.com> wrote:
-> >>
-> >> On 20/10/23 11:53, Kornel Dul=C4=99ba wrote:
-> >>> On Fri, Oct 20, 2023 at 9:41=E2=80=AFAM Adrian Hunter <adrian.hunter@=
-intel.com> wrote:
-> >>>>
-> >>>> On 16/10/23 12:56, Kornel Dul=C4=99ba wrote:
-> >>>>> There are several reasons for controller to generate an error inter=
-rupt.
-> >>>>> They include controller<->card timeout, and CRC mismatch error.
-> >>>>> Right now we only get one line in the logs stating that CQE recover=
-y was
-> >>>>> triggered, but with no information about what caused it.
-> >>>>> To figure out what happened be more verbose and dump the registers =
-from
-> >>>>> irq error handler logic.
-> >>>>> This matches the behaviour of the software timeout logic, see
-> >>>>> cqhci_timeout.
-> >>>>>
-> >>>>> Signed-off-by: Kornel Dul=C4=99ba <korneld@chromium.org>
-> >>>>> ---
-> >>>>>  drivers/mmc/host/cqhci-core.c | 5 +++--
-> >>>>>  1 file changed, 3 insertions(+), 2 deletions(-)
-> >>>>>
-> >>>>> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci=
--core.c
-> >>>>> index b3d7d6d8d654..33abb4bd53b5 100644
-> >>>>> --- a/drivers/mmc/host/cqhci-core.c
-> >>>>> +++ b/drivers/mmc/host/cqhci-core.c
-> >>>>> @@ -700,8 +700,9 @@ static void cqhci_error_irq(struct mmc_host *mm=
-c, u32 status, int cmd_error,
-> >>>>>
-> >>>>>       terri =3D cqhci_readl(cq_host, CQHCI_TERRI);
-> >>>>>
-> >>>>> -     pr_debug("%s: cqhci: error IRQ status: 0x%08x cmd error %d da=
-ta error %d TERRI: 0x%08x\n",
-> >>>>> -              mmc_hostname(mmc), status, cmd_error, data_error, te=
-rri);
-> >>>>> +     pr_warn("%s: cqhci: error IRQ status: 0x%08x cmd error %d dat=
-a error %d\n",
-> >>>>> +              mmc_hostname(mmc), status, cmd_error, data_error);
-> >>>>> +     cqhci_dumpregs(cq_host);
-> >>>>
-> >>>> For debugging, isn't dynamic debug seems more appropriate?
-> >>>
-> >>> Dynamic debug is an option, but my personal preference would be to
-> >>> just log more info in the error handler.
-> >>
-> >> Interrupt handlers can get called very rapidly, so some kind of rate
-> >> limiting should be used if the message is unconditional.  Also you nee=
-d
-> >> to provide actual reasons for your preference.
-> >>
-> >> For dynamic debug of the register dump, something like below is
-> >> possible.
-> >>
-> >> #define cqhci_dynamic_dumpregs(cqhost) \
-> >>         _dynamic_func_call_no_desc("cqhci_dynamic_dumpregs", cqhci_dum=
-pregs, cqhost)
-> >>
-> > Fair point.
-> > The reason I'm not a fan of using dynamic debug for this is that my
-> > goal here is to improve the warning/error logging information that we
-> > get from systems running in production.
-> > I.e. if we get a lot of "running CQE recovery" messages, at the very
-> > least I'd like to know what is causing them.
->
-> So you are saying you want to collect debug information from production
-> systems, but don't want to use dynamic debug to do it?
->
-> >>> To give you some background.
-> >>> We're seeing some "running CQE recovery" lines in the logs, followed
-> >>> by a dm_verity mismatch error.
-> >>> The reports come from the field, with no feasible way to reproduce th=
-e
-> >>> issue locally.
-> >>
-> >> If it is a software error, some kind of error injection may well
-> >> reproduce it.  Also if it is a hardware error that only happens
-> >> during recovery, error injection could increase the likelihood of
-> >> reproducing it.
-> >
-> > We tried software injection and it didn't yield any results.
-> > We're currently looking into "injecting" hw errors by using a small
-> > burst field generator to interfere with transfers on the data line
-> > directly.
->
-> I just tried instrumenting a driver to inject CRC errors and it
-> revealed several CQE recovery issues, including spurious TCN for
-> tag 31.  I will send some patches when they are ready.
+We now only capture 8 bits for oemid in card->cid.oemid, so quirks that
+were filling up the full 16 bits up till now would no longer apply.
 
-Sorry, what I meant by it didn't yield results is that Ii didn't
-trigger the dm-verity error that we're seeing on production.
-With SW injection there are two potential issues that come to my mind:
+Work around the problem by only checking for the bottom 8 bits when
+checking if quirks should be applied
 
-1. In the cqhci_error_irq when TERRI is not valid only a single,
-"random" task is marked as bad.
-Then in cqhci_recover_mrq we're marking all pending requests as done.
-For data transfers this is somewhat bening as it will return with
-bytes_xfered=3D0.
-IIUC this will then cause the upper layer to re-enqueue this request.
-The bigger problem is a CMD only mrq, which will be mistakenly marked
-as completed successfully.
+Fixes: 84ee19bffc93 ("mmc: core: Capture correct oemid-bits for eMMC cards")
+Link: https://lkml.kernel.org/r/ZToJsSLHr8RnuTHz@codewreck.org
+Signed-off-by: Dominique Martinet <dominique.martinet@atmark-techno.com>
+Cc: stable@vger.kernel.org
+Cc: Avri Altman <avri.altman@wdc.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alex Fetters <Alex.Fetters@garmin.com>
+---
+Notes:
+ - mmc_fixup_device() was rewritten in 5.17, so older stable kernels
+   will need a separate patch... I suppose I can send it to stable
+   after this is merged if we go this way
+ - struct mmc_cid's and mmc_fixup's oemid fields are unsigned shorts,
+   we probably just want to make them unsigned char instead in which
+   case we don't need that check anymore?
+   But it's kind of nice to have a wider type so CID_OEMID_ANY can never
+   be a match.... Which unfortunately my patch makes moot as
+   ((unsigned short)-1) & 0xff will be 0xff which can match anything...
+ - this could also be worked around in the _FIXUP_EXT macro that builds
+   the fixup structs, but we're getting ugly here... Or we can just go
+   for the big boom and try to fix all MMC_FIXUP() users in tree and
+   call it a day, but that'll also be fun to backport.
 
-2. As for the spurious task completion warning.
-I initially thought that it was bening.
-The check for !mrq is done before checking if we're currently doing recover=
-y.
-So if it's called just right at the end of recovery, right after the
-cqhci_recover_mrqs is executed that would explain it.
-With that being said if that irq handler is run right after the
-recovery is finished we'll end up with a race where a new request,
-that was just enqueued, might be mistakenly marked as done.
-This would explain the dm-verity errors we're seeing.
+ drivers/mmc/core/quirks.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
->
-> >>
-> >>>
-> >>> I'd argue that logging only the info that CQE recovery was executed i=
-s
-> >>> not particularly helpful for someone looking into those logs.
-> >>
-> >> As the comment says, that message is there because recovery reduces
-> >> performance, it is not to aid debugging per se.
-> >>
-> >>> Ideally we would have more data about the state the controller was in
-> >>> when the error happened, or at least what caused the recovery to be
-> >>> triggered.
-> >>> The question here is how verbose should we be in this error scenario.
-> >>> Looking at other error scenarios, in the case of a software timeout
-> >>> we're dumping the controller registers. (cqhci_timeout)
-> >>
-> >> Timeout means something is broken - either the driver, the cq engine
-> >> or the card.  On the other hand, an error interrupt is most likely a
-> >> CRC error which is not unexpected occasionally, due to thermal drift
-> >> or perhaps interference.
-> >
-> > Right, but my point is that we don't know what triggered CQE recovery.
->
-> True, although probably a CRC error.
->
-> >
-> >>
-> >>> Hence I thought that I'd be appropriate to match that and do the same
-> >>> in CQE recovery logic.
-> >>
-> >> It needs to be consistent. There are other pr_debugs, such as:
-> >>
-> >>                 pr_debug("%s: cqhci: Failed to clear tasks\n",
-> >>                 pr_debug("%s: cqhci: Failed to halt\n", mmc_hostname(m=
-mc));
-> >>                 pr_debug("%s: cqhci: disable / re-enable\n", mmc_hostn=
-ame(mmc));
-> >>
-> >> which should perhaps be treated the same.
-> >>
-> >> And there are no messages for errors from the commands in
-> >> mmc_cqe_recovery().
-> >
-> > How about this.
-> > As a compromise would it be okay to just do a single pr_warn directly
-> > from cqhci_error_irq.
->
-> Sure, printk_ratelimited() or __ratelimit()
->
-> > We could simply promote the existing pr_debug to pr_warn at the
-> > beginning of that function.
-> > This would tell us what triggered the recovery. (controller timeout,
-> > CRC mismatch)
-> > We can also consider removing the "running CQE recovery" print for the
-> > sake of brevity.
->
-> No, that serves a different purpose.
->
-> > The only downside of this that I can see is that we'd be running the
-> > logic from the interrupt handler directly, but I can't see an easy way
-> > around that.
-> > What do you think?
->
-> Should be OK with rate limiting.
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 32b64b564fb1..27e0349e176d 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -211,8 +211,9 @@ static inline void mmc_fixup_device(struct mmc_card *card,
+ 		if (f->manfid != CID_MANFID_ANY &&
+ 		    f->manfid != card->cid.manfid)
+ 			continue;
++		/* Only the bottom 8bits are valid in JESD84-B51 */
+ 		if (f->oemid != CID_OEMID_ANY &&
+-		    f->oemid != card->cid.oemid)
++		     (f->oemid & 0xff) != (card->cid.oemid & 0xff))
+ 			continue;
+ 		if (f->name != CID_NAME_ANY &&
+ 		    strncmp(f->name, card->cid.prod_name,
+-- 
+2.39.2
 
-OK, I'll look into the rate limiting and will send a v2.
 
->
-> >>
-> >>>
-> >>>>
-> >>>>>
-> >>>>>       /* Forget about errors when recovery has already been trigger=
-ed */
-> >>>>>       if (cq_host->recovery_halt)
-> >>>>
-> >>
->
