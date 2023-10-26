@@ -2,99 +2,349 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DF7BC25B6B
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 09:05:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 591B2C25B48
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 09:33:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230029AbjJZJFU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Oct 2023 05:05:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60342 "EHLO
+        id S230029AbjJZJdF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Oct 2023 05:33:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229639AbjJZJFS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 05:05:18 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD4A210E
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 02:05:15 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id 2adb3069b0e04-507c5249d55so920229e87.3
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 02:05:15 -0700 (PDT)
+        with ESMTP id S230008AbjJZJdD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 05:33:03 -0400
+Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C11D2195
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 02:33:00 -0700 (PDT)
+Received: by mail-qv1-xf2a.google.com with SMTP id 6a1803df08f44-66d0169cf43so4798526d6.3
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 02:33:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1698311114; x=1698915914; darn=vger.kernel.org;
-        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
-         :user-agent:references:from:to:cc:subject:date:message-id:reply-to;
-        bh=2oJ1jlhG9oorUzXX4oCyrJv+zqn7eGeLFSxbQPDqXZA=;
-        b=ESKih3a57luFdaSENN83jzufTDZnZFreqhyMIaY3HwW3yOCS8bGmDeM8yW1IDWrwMe
-         HQCT+V2CKMdIy1K3qsAURH0m8iTAFzbqQ/vWInQ9DtRb0faDxRkus9eu/bVnbHaGzHip
-         bDuYbkLLX+k+398lKiK3Zr3z/E9ULiL8+CwkbLAPzQvtmrhoZuVOQsVES1K7k1iKsCOv
-         6R5rAAfe4uVcD6sVoZP67vFAD6Ocl0lJnINVdfCdCTLoBja5iLFiq9z88iHfXnZtjugw
-         +iEUKQrui/+ozLxAejZnxPX4wfV33gYS0Dc9khZmiVScuHVFlHI9iC4I5z7MEnZN/ykF
-         cL9A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698311114; x=1698915914;
-        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
-         :user-agent:references:x-gm-message-state:from:to:cc:subject:date
+        d=chromium.org; s=google; t=1698312780; x=1698917580; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2oJ1jlhG9oorUzXX4oCyrJv+zqn7eGeLFSxbQPDqXZA=;
-        b=WP00DK5bbGIi3ITbjab0+i3ZPWh1M7cOATJ/KbL8i1OJUy+bFPVCD3s6Do+HI7QZn3
-         wVd/dLbGaDm38eFUeitpm8QJL1iVCk61JAXaM8JL00wy7Wfh1/U3rPvrCSIJ6h3e99/b
-         pu5XLnVXMK1IhirGwyVTTt+pt6lgTBIKZCC2S3Q4iCbpwEMqoxYfMkH4bU34m2nviQ2R
-         R4aqDb6XKa/F1JKOJchLE4jX/rBxgRigbrGY2hbxTxCkGNl0csvryrsgWr21Wb12wOaX
-         Zl58Z1TLcOgxGLU9wdYOgWnJCFGw+F/PdPpgI+V954f3gQDn1WNjAE75Yh4hTv6Y0u8m
-         zclQ==
-X-Gm-Message-State: AOJu0YxiuBcBJe0+keapurJ4vlXNcnNTtt5Cm9XGQAslcScr6hhF274G
-        g6LKMCylZib3ZepDwa5gZVwH4w==
-X-Google-Smtp-Source: AGHT+IEcCo3MOL+v7ls4UAXtPy1Nexq4e+KJmgrR62ctOhHdOSO3Z3oUqSIP3cFHn7yVMZtyqgo36Q==
-X-Received: by 2002:ac2:538b:0:b0:507:ae8b:a573 with SMTP id g11-20020ac2538b000000b00507ae8ba573mr12792622lfh.51.1698311113795;
-        Thu, 26 Oct 2023 02:05:13 -0700 (PDT)
-Received: from localhost ([2a01:e0a:3c5:5fb1:d5c0:32f3:899b:123c])
-        by smtp.gmail.com with ESMTPSA id az32-20020a05600c602000b004053e9276easm2005317wmb.32.2023.10.26.02.05.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Oct 2023 02:05:13 -0700 (PDT)
-References: <20231026073156.2868310-1-rong.chen@amlogic.com>
-User-agent: mu4e 1.8.13; emacs 29.1
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     "Rong.Chen" <rong.chen@amlogic.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: meson-gx: Remove setting of CMD_CFG_ERROR
-Date:   Thu, 26 Oct 2023 11:01:53 +0200
-In-reply-to: <20231026073156.2868310-1-rong.chen@amlogic.com>
-Message-ID: <1j34xx4uuv.fsf@starbuckisacylon.baylibre.com>
+        bh=8QnzvHljoQK/wJ5DGmho6Kn8XEghwIxtbxfaqrnbWOA=;
+        b=GCzXK2hPHua+XSayW+xE+2fyZROYNUG0bCkzuuaj5HQNnu1nqFbZUZC8LwGMYL3iZt
+         coBW0iAwGJmsIGN2P1ebjt7AnTrthwRC4xrBPVCwFEXtsMe/OPdCtJUwJ/hsdHEz8LYq
+         IBn6ekGK1oQ8ByYUTOM/xxk60R7i2cKomBzW8=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698312780; x=1698917580;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=8QnzvHljoQK/wJ5DGmho6Kn8XEghwIxtbxfaqrnbWOA=;
+        b=Yx5dqTGKkuDCCcYZCtluSP1xRzdbFm+3L/wlKPKzBCygdqHCEiIX0+zrGodvR30iYb
+         cNWuBEFQDpva3V3lztRpRLvj0yv221GO8c1To8XbrBJgNRrvEIGzm4okC4dD4IJIjg19
+         BKHvujLGzQFX3T0mex5jav+xFHu9TnUGSl1pFiwBA8dLVUF2iYGQfC223o9k0PgZsyg8
+         ST6YwVQa10gclGJP5+NFf6fho8uLqpuIxHCUEZNbbkkRI8zxSqkQhfNyspAfgrP8JghN
+         10foUPzvMlCV9ChiulS9Ad7ip7ciX90d/TkJX55WT3EWeHoJVhtTQqUCDomHtbbHU4wc
+         OOPA==
+X-Gm-Message-State: AOJu0YzZj59FqmwBJD+7TvqtVJzeQfx7UYW6EMacgswNXUWHBlUirp80
+        5UaBOAm3QeMqyIvT/qX+U3gXs0XCA+jFST/83RlgGQ==
+X-Google-Smtp-Source: AGHT+IF80lstIgX6hCwQkudW7uP9KGjzyJuL2EcTR8jSvozl+A/cKDMws42mMr+uWnJ72O7GuiVVG5mUS6itxQcFUGc=
+X-Received: by 2002:a05:6214:2602:b0:66d:44b6:8aa7 with SMTP id
+ gu2-20020a056214260200b0066d44b68aa7mr21390279qvb.24.1698312779620; Thu, 26
+ Oct 2023 02:32:59 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20231016095610.1095084-1-korneld@chromium.org>
+ <613c51f0-c32e-4de5-9627-525d92fb06ed@intel.com> <CAD=NsqybNrf-=9=5wvoj+9MT3xK3SbX7nDk3N3VLBMyA_u3KTQ@mail.gmail.com>
+ <78bb4ad2-853a-4ed4-9998-c4e1122545b6@intel.com> <CAD=NsqxDA=usDRa-KV48RkeEROARsw8JqBF5vyJcEEV5r_Fg1w@mail.gmail.com>
+ <f0aecb28-6f82-456e-a319-8d13a2e313b6@intel.com> <CAD=NsqyJHv4nrtrqU4igtaMR=u6xmUtCpoYk66XzarLpu95idA@mail.gmail.com>
+ <cf207da8-8ec4-4b9c-8f01-00e1a8a46238@intel.com> <CAD=NsqyvGvbtyMim=Otp-Q-zWW9-+hAh95SOkgvnRusQC_--hQ@mail.gmail.com>
+ <4221120e-61bb-4672-8775-e7c1512d824b@intel.com>
+In-Reply-To: <4221120e-61bb-4672-8775-e7c1512d824b@intel.com>
+From:   =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
+Date:   Thu, 26 Oct 2023 11:32:48 +0200
+Message-ID: <CAD=Nsqy-JOdcYXiWYkJ+zw_e5Ox0ur0XGnNLrBg6R-Tihna2rA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: cqhci: Be more verbose in error irq handler
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Asutosh Das <quic_asutoshd@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Radoslaw Biernacki <biernacki@google.com>,
+        Guenter Roeck <groeck@chromium.org>,
+        Gwendal Grignou <gwendal@chromium.org>, upstream@semihalf.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Thu 26 Oct 2023 at 15:31, "Rong.Chen" <rong.chen@amlogic.com> wrote:
-
-> From: Rong Chen <rong.chen@amlogic.com>
+On Thu, Oct 26, 2023 at 10:52=E2=80=AFAM Adrian Hunter <adrian.hunter@intel=
+.com> wrote:
 >
-> For the t7 and older SoC families, the CMD_CFG_ERROR has no effect.
-> Starting from SoC family C3, setting this bit without SG LINK data
-> address will cause the controller to generate an IRQ and stop working.
+> On 26/10/23 11:29, Kornel Dul=C4=99ba wrote:
+> > On Thu, Oct 26, 2023 at 10:14=E2=80=AFAM Adrian Hunter <adrian.hunter@i=
+ntel.com> wrote:
+> >>
+> >> On 26/10/23 10:56, Kornel Dul=C4=99ba wrote:
+> >>> On Thu, Oct 26, 2023 at 8:25=E2=80=AFAM Adrian Hunter <adrian.hunter@=
+intel.com> wrote:
+> >>>>
+> >>>> On 25/10/23 11:01, Kornel Dul=C4=99ba wrote:
+> >>>>> On Mon, Oct 23, 2023 at 1:38=E2=80=AFPM Adrian Hunter <adrian.hunte=
+r@intel.com> wrote:
+> >>>>>>
+> >>>>>> On 20/10/23 11:53, Kornel Dul=C4=99ba wrote:
+> >>>>>>> On Fri, Oct 20, 2023 at 9:41=E2=80=AFAM Adrian Hunter <adrian.hun=
+ter@intel.com> wrote:
+> >>>>>>>>
+> >>>>>>>> On 16/10/23 12:56, Kornel Dul=C4=99ba wrote:
+> >>>>>>>>> There are several reasons for controller to generate an error i=
+nterrupt.
+> >>>>>>>>> They include controller<->card timeout, and CRC mismatch error.
+> >>>>>>>>> Right now we only get one line in the logs stating that CQE rec=
+overy was
+> >>>>>>>>> triggered, but with no information about what caused it.
+> >>>>>>>>> To figure out what happened be more verbose and dump the regist=
+ers from
+> >>>>>>>>> irq error handler logic.
+> >>>>>>>>> This matches the behaviour of the software timeout logic, see
+> >>>>>>>>> cqhci_timeout.
+> >>>>>>>>>
+> >>>>>>>>> Signed-off-by: Kornel Dul=C4=99ba <korneld@chromium.org>
+> >>>>>>>>> ---
+> >>>>>>>>>  drivers/mmc/host/cqhci-core.c | 5 +++--
+> >>>>>>>>>  1 file changed, 3 insertions(+), 2 deletions(-)
+> >>>>>>>>>
+> >>>>>>>>> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/c=
+qhci-core.c
+> >>>>>>>>> index b3d7d6d8d654..33abb4bd53b5 100644
+> >>>>>>>>> --- a/drivers/mmc/host/cqhci-core.c
+> >>>>>>>>> +++ b/drivers/mmc/host/cqhci-core.c
+> >>>>>>>>> @@ -700,8 +700,9 @@ static void cqhci_error_irq(struct mmc_host=
+ *mmc, u32 status, int cmd_error,
+> >>>>>>>>>
+> >>>>>>>>>       terri =3D cqhci_readl(cq_host, CQHCI_TERRI);
+> >>>>>>>>>
+> >>>>>>>>> -     pr_debug("%s: cqhci: error IRQ status: 0x%08x cmd error %=
+d data error %d TERRI: 0x%08x\n",
+> >>>>>>>>> -              mmc_hostname(mmc), status, cmd_error, data_error=
+, terri);
+> >>>>>>>>> +     pr_warn("%s: cqhci: error IRQ status: 0x%08x cmd error %d=
+ data error %d\n",
+> >>>>>>>>> +              mmc_hostname(mmc), status, cmd_error, data_error=
+);
+> >>>>>>>>> +     cqhci_dumpregs(cq_host);
+> >>>>>>>>
+> >>>>>>>> For debugging, isn't dynamic debug seems more appropriate?
+> >>>>>>>
+> >>>>>>> Dynamic debug is an option, but my personal preference would be t=
+o
+> >>>>>>> just log more info in the error handler.
+> >>>>>>
+> >>>>>> Interrupt handlers can get called very rapidly, so some kind of ra=
+te
+> >>>>>> limiting should be used if the message is unconditional.  Also you=
+ need
+> >>>>>> to provide actual reasons for your preference.
+> >>>>>>
+> >>>>>> For dynamic debug of the register dump, something like below is
+> >>>>>> possible.
+> >>>>>>
+> >>>>>> #define cqhci_dynamic_dumpregs(cqhost) \
+> >>>>>>         _dynamic_func_call_no_desc("cqhci_dynamic_dumpregs", cqhci=
+_dumpregs, cqhost)
+> >>>>>>
+> >>>>> Fair point.
+> >>>>> The reason I'm not a fan of using dynamic debug for this is that my
+> >>>>> goal here is to improve the warning/error logging information that =
+we
+> >>>>> get from systems running in production.
+> >>>>> I.e. if we get a lot of "running CQE recovery" messages, at the ver=
+y
+> >>>>> least I'd like to know what is causing them.
+> >>>>
+> >>>> So you are saying you want to collect debug information from product=
+ion
+> >>>> systems, but don't want to use dynamic debug to do it?
+> >>>>
+> >>>>>>> To give you some background.
+> >>>>>>> We're seeing some "running CQE recovery" lines in the logs, follo=
+wed
+> >>>>>>> by a dm_verity mismatch error.
+> >>>>>>> The reports come from the field, with no feasible way to reproduc=
+e the
+> >>>>>>> issue locally.
+> >>>>>>
+> >>>>>> If it is a software error, some kind of error injection may well
+> >>>>>> reproduce it.  Also if it is a hardware error that only happens
+> >>>>>> during recovery, error injection could increase the likelihood of
+> >>>>>> reproducing it.
+> >>>>>
+> >>>>> We tried software injection and it didn't yield any results.
+> >>>>> We're currently looking into "injecting" hw errors by using a small
+> >>>>> burst field generator to interfere with transfers on the data line
+> >>>>> directly.
+> >>>>
+> >>>> I just tried instrumenting a driver to inject CRC errors and it
+> >>>> revealed several CQE recovery issues, including spurious TCN for
+> >>>> tag 31.  I will send some patches when they are ready.
+> >>>
+> >>> Sorry, what I meant by it didn't yield results is that Ii didn't
+> >>> trigger the dm-verity error that we're seeing on production.
+> >>> With SW injection there are two potential issues that come to my mind=
+:
+> >>>
+> >>> 1. In the cqhci_error_irq when TERRI is not valid only a single,
+> >>> "random" task is marked as bad.
+> >>> Then in cqhci_recover_mrq we're marking all pending requests as done.
+> >>> For data transfers this is somewhat bening as it will return with
+> >>> bytes_xfered=3D0.
+> >>> IIUC this will then cause the upper layer to re-enqueue this request.
+> >>
+> >> Yes
+> >>
+> >>> The bigger problem is a CMD only mrq, which will be mistakenly marked
+> >>> as completed successfully.
+> >>
+> >> I noticed that also.  Notably the only non-data CMD is cache flush.
+> >>
+> >> There are several other issues, but patches will describe
+> >> them better.
+> >
+> > Sure. :)
+> >
+> > jfyi, I've just managed to inject CRC errors by using a burst field gen=
+erator.
+> > (Langer P23 if you're interested.)
+> > I'm using it by touching the D0 MMC line directly, and it yields
+> > surprisingly good results.
+> > I've changed the spurious TCN WARN_ONCE to pr_warn and got the followin=
+g:
+> >
+> > [   71.885698] mmc1: cqhci: error IRQ status: 0x00000000 cmd error 0
+> > data error -84 TERRI: 0x972e0000
+> > [   71.885730] mmc1: running CQE recovery
+> > [   71.888135] cqhci_recovery_finish: TCN: 0x00000000
+> > [   71.888141] mmc1: cqhci: recovery done
+> > [   71.888223] mmc1: cqhci: spurious TCN for tag 23
+> > (...)
+> > [   95.558736] mmc1: cqhci: error IRQ status: 0x00000000 cmd error 0
+> > data error -84 TERRI: 0x822e0000
+> > [   95.558768] mmc1: running CQE recovery
+> > [   95.561073] cqhci_recovery_finish: TCN: 0x00000000
+> > [   95.561078] mmc1: cqhci: recovery done
+> > [   95.561288] device-mapper: verity: 179:3: data block 712181 is corru=
+pted
+> >
+> > Now I get a spurious TCN after every recovery, with the only exception
+> > being the one that ends up with dm-verity error.
+> > So it'd seem that there's a race in which the "spurious" TCN hits a
+> > pending request, enqueued right after recovery was completed.
+> > I'm currently looking into how to fix it, but if you beat me to it I
+> > can also test your patches and see if it fixes the dm-verity issue.
 >
-> To fix it, don't set the bit CMD_CFG_ERROR anymore.
+> OK, but here are some hacks to try:
+(snip)
+Thanks, fyi, with them applied I can see the exact same behaviour,
+including what I'm seeing in the logs.
 >
-> Fixes: 18f92bc02f17 ("mmc: meson-gx: make sure the descriptor is stopped on errors")
-> Signed-off-by: Rong Chen <rong.chen@amlogic.com>
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 1 -
->  1 file changed, 1 deletion(-)
+> >
+> >>
+> >>>
+> >>> 2. As for the spurious task completion warning.
+> >>> I initially thought that it was bening.
+> >>> The check for !mrq is done before checking if we're currently doing r=
+ecovery.
+> >>> So if it's called just right at the end of recovery, right after the
+> >>> cqhci_recover_mrqs is executed that would explain it.
+> >>> With that being said if that irq handler is run right after the
+> >>> recovery is finished we'll end up with a race where a new request,
+> >>> that was just enqueued, might be mistakenly marked as done.
+> >>> This would explain the dm-verity errors we're seeing.
+> >>>
+> >>>>
+> >>>>>>
+> >>>>>>>
+> >>>>>>> I'd argue that logging only the info that CQE recovery was execut=
+ed is
+> >>>>>>> not particularly helpful for someone looking into those logs.
+> >>>>>>
+> >>>>>> As the comment says, that message is there because recovery reduce=
+s
+> >>>>>> performance, it is not to aid debugging per se.
+> >>>>>>
+> >>>>>>> Ideally we would have more data about the state the controller wa=
+s in
+> >>>>>>> when the error happened, or at least what caused the recovery to =
+be
+> >>>>>>> triggered.
+> >>>>>>> The question here is how verbose should we be in this error scena=
+rio.
+> >>>>>>> Looking at other error scenarios, in the case of a software timeo=
+ut
+> >>>>>>> we're dumping the controller registers. (cqhci_timeout)
+> >>>>>>
+> >>>>>> Timeout means something is broken - either the driver, the cq engi=
+ne
+> >>>>>> or the card.  On the other hand, an error interrupt is most likely=
+ a
+> >>>>>> CRC error which is not unexpected occasionally, due to thermal dri=
+ft
+> >>>>>> or perhaps interference.
+> >>>>>
+> >>>>> Right, but my point is that we don't know what triggered CQE recove=
+ry.
+> >>>>
+> >>>> True, although probably a CRC error.
+> >>>>
+> >>>>>
+> >>>>>>
+> >>>>>>> Hence I thought that I'd be appropriate to match that and do the =
+same
+> >>>>>>> in CQE recovery logic.
+> >>>>>>
+> >>>>>> It needs to be consistent. There are other pr_debugs, such as:
+> >>>>>>
+> >>>>>>                 pr_debug("%s: cqhci: Failed to clear tasks\n",
+> >>>>>>                 pr_debug("%s: cqhci: Failed to halt\n", mmc_hostna=
+me(mmc));
+> >>>>>>                 pr_debug("%s: cqhci: disable / re-enable\n", mmc_h=
+ostname(mmc));
+> >>>>>>
+> >>>>>> which should perhaps be treated the same.
+> >>>>>>
+> >>>>>> And there are no messages for errors from the commands in
+> >>>>>> mmc_cqe_recovery().
+> >>>>>
+> >>>>> How about this.
+> >>>>> As a compromise would it be okay to just do a single pr_warn direct=
+ly
+> >>>>> from cqhci_error_irq.
+> >>>>
+> >>>> Sure, printk_ratelimited() or __ratelimit()
+> >>>>
+> >>>>> We could simply promote the existing pr_debug to pr_warn at the
+> >>>>> beginning of that function.
+> >>>>> This would tell us what triggered the recovery. (controller timeout=
+,
+> >>>>> CRC mismatch)
+> >>>>> We can also consider removing the "running CQE recovery" print for =
+the
+> >>>>> sake of brevity.
+> >>>>
+> >>>> No, that serves a different purpose.
+> >>>>
+> >>>>> The only downside of this that I can see is that we'd be running th=
+e
+> >>>>> logic from the interrupt handler directly, but I can't see an easy =
+way
+> >>>>> around that.
+> >>>>> What do you think?
+> >>>>
+> >>>> Should be OK with rate limiting.
+> >>>
+> >>> OK, I'll look into the rate limiting and will send a v2.
+> >>>
+> >>>>
+> >>>>>>
+> >>>>>>>
+> >>>>>>>>
+> >>>>>>>>>
+> >>>>>>>>>       /* Forget about errors when recovery has already been tri=
+ggered */
+> >>>>>>>>>       if (cq_host->recovery_halt)
+> >>>>>>>>
+> >>>>>>
+> >>>>
+> >>
 >
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 9837dab096e6..c7c067b9415a 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -801,7 +801,6 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->  
->  	cmd_cfg |= FIELD_PREP(CMD_CFG_CMD_INDEX_MASK, cmd->opcode);
->  	cmd_cfg |= CMD_CFG_OWNER;  /* owned by CPU */
-> -	cmd_cfg |= CMD_CFG_ERROR; /* stop in case of error */
->  
->  	meson_mmc_set_response_bits(cmd, &cmd_cfg);
-
-Reviewed-by: Jerome Brunet <jbrunet@baylibre.com>
