@@ -2,175 +2,257 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BFA2C25B6B
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 11:58:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BEF9BC25B6F
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 12:08:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230146AbjJZL6q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Oct 2023 07:58:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57200 "EHLO
+        id S231168AbjJZMIi convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Oct 2023 08:08:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35382 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230434AbjJZL6o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 07:58:44 -0400
-Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2057.outbound.protection.outlook.com [40.107.21.57])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CC001A6
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Oct 2023 04:58:40 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=QhPYvM8Z7NQmUYV7MgYNIv3WfMGNrwF7oL/KuN3Lr98P1G1Smxvm81MnCxKHaiIw4jQ3/BwDV1GT9jPMpdzNHH2yGdnSKHAXMOOA7gBODdish0Qqi5+1K/hMfryi2jeoouaTNpA1d1w+sAA+/3IF3v8nB/zHLIswdSCM/uUhHQ5euE2KxwHdIiDjK45b5gbPO+7Jf4T3u4Ma0uRO3PVriRJE5cXWFMKvZMNfDpBV/d5z0NlNSOa0V3VkRKyEk79QN5M6QaqN1FlqHCoPTHxjiAwxV4IWEEbxNSLHjiiOsVqLkB0Yfq/xDz1SU6dND6IuFKCqTU9i4cbCEIrKxFlsqg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=sXqCTdCPJax9FUccqifvX31P7Vq5X240nCTnYKWqRYM=;
- b=h3bScvEOyPuE7mtofeJriDBDkaguILpuSvtiw+xOrtSzf7DtQSr8cBFOZLwzFHNEaL8MzR035wWVJUcXWE2MaUi50/hNeq+dyowGzhXdcqO83T32+7WLMq+KuL8dRrIN8WtZRJnWQW8g1S6jRgh1h/zulFBEYNt65RibpX71wkWTrFlFj92pw0Q5AxxXQogqqrB1jA4iA59EPT1/WZAuYBa7q//NN/RFujy84HQqlb16rvOuxXGja9Juuj9PEOIoFycZkCJxcgP8IQVuRzMncPdugv468xfamNOUXMQHyvwjWruPn1ND1uo9tuJ0RNiEnmymKk5N3lOlvKjCn8I+4Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=sXqCTdCPJax9FUccqifvX31P7Vq5X240nCTnYKWqRYM=;
- b=kneM7XI6x2JUj1BymH9T+z1LDspOSbgAqV5/bbGjSCJDeeu1KIkXXVSGybU0khQkHUiIapl7gtZrErxXZfgB8FHth8AZphP2nNU4Uuj0GG7oZMKEGVvleU1cuAS7vtvbJoJD/5LCDu3hsHZsaH6trHgvCuTey77Gp9gOsPTt/RM=
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
- AM9PR04MB8922.eurprd04.prod.outlook.com (2603:10a6:20b:409::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6954.8; Thu, 26 Oct
- 2023 11:58:36 +0000
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::2952:7c98:bd3d:ef6b]) by DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::2952:7c98:bd3d:ef6b%6]) with mapi id 15.20.6933.016; Thu, 26 Oct 2023
- 11:58:36 +0000
-From:   Bough Chen <haibo.chen@nxp.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "hkallweit1@gmail.com" <hkallweit1@gmail.com>
-Subject: RE: [PATCH] mmc: core: sdio: hold retuning if sdio in 1-bit mode
-Thread-Topic: [PATCH] mmc: core: sdio: hold retuning if sdio in 1-bit mode
-Thread-Index: AQHZ2yVAPHzNo/yXokSwCK3W0R3Ss7AaYTmAgEHncTA=
-Date:   Thu, 26 Oct 2023 11:58:36 +0000
-Message-ID: <DB7PR04MB4010F86F40CA1E8E0B900D9390DDA@DB7PR04MB4010.eurprd04.prod.outlook.com>
-References: <20230830093922.3095850-1-haibo.chen@nxp.com>
- <CAPDyKFpTP-r-eg2L1BoAG5ia2N2640VR2s2Vtbemyyu4MuKS=w@mail.gmail.com>
-In-Reply-To: <CAPDyKFpTP-r-eg2L1BoAG5ia2N2640VR2s2Vtbemyyu4MuKS=w@mail.gmail.com>
-Accept-Language: zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DB7PR04MB4010:EE_|AM9PR04MB8922:EE_
-x-ms-office365-filtering-correlation-id: 592d10b1-35bb-410c-842a-08dbd61ae2b6
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 5JqvQx0To4XTpl0ogQGpDReUrmyKXY07ETSkIr3i9o+cxULpZ4SLbIEPeeiosaYZdlC6jxcesm2cpkqr+K9PepaCh8/kL9qUqO8FOTaXaWOODSKoCpBznIbcgO7kcjnnA0gBb+XvktZyIsX6AtoxxUCzoCaxGSTKsK+8hQ1iLn0TwDQZJ68vVQnwUbP2cEJ6adVwBgdfdCnvtCtX0GnT7BgNWFBbRXo68KFp4fN57nY+iZBpIvuNk2TmIxNS1g//xCviUFCjHXTb9WikkdhbG3J422Woym8K3sbbx2eknjh+/vVbynmzXq12VYx/5UQRRY6bZteyD1OkP7jUqN21p5TLQYkOcJp9WYCyMf7/o1KuglPeOOi/2qLkJMRM07aALVA5u3t8UJikddPRibooRKS/or3thx7stu/NXrKFpEOeZXe4DnTZ0G2SIrxBR5BZxTlmf/SeW2AyXBLOjSd5w+vXROaFACUlVsX/ZJn/1FmV9h6Ot078RaSH8yCpWDKU7QqJnPtC5NUSJO+JBLWJ/zOzijHXypsCC/wB664zG95fLVekKxtJJplSoE0iwn+O4kaxDV7Hb3f0OZDBY0JqwH2NCHRW/N1CsZ+jJrTYYkunl8g3uHKkUf7fmiCcunof
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366004)(39860400002)(136003)(376002)(346002)(396003)(230922051799003)(64100799003)(451199024)(186009)(1800799009)(38070700009)(122000001)(38100700002)(6506007)(478600001)(7696005)(9686003)(53546011)(66946007)(4326008)(54906003)(64756008)(66446008)(66556008)(316002)(76116006)(66476007)(8676002)(8936002)(6916009)(52536014)(5660300002)(2906002)(41300700001)(83380400001)(71200400001)(26005)(55016003)(33656002)(86362001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?T2NSMXJ4bStVQnltK0greDl0WUwzYitxQ0Vld24xQlBKWUg0ZS9WRE1SUDln?=
- =?utf-8?B?Tk94eGhnUFArWFZsd0JIcUNaeitVTXdmcFlQbUlQK2tXRnZiZDdSdUxxZmFN?=
- =?utf-8?B?bXM3UXNxTWdIOWNTRVQvT3BRK1lGTE9yOU9TamhBeWhva0NjWmpaRDRIamF3?=
- =?utf-8?B?VVllSnV4L1dPYTRhL2UvVnFsWG1acmlwbmZsL0Ntd3VtM0R6R01KUkVSRm8x?=
- =?utf-8?B?ZEVJMDR0NFJDSEVJZXM1ZC9nSDdRSjhTQzYrbHl4bEpCMGFvdG5KbHdWNHJq?=
- =?utf-8?B?VjdrTnpIK1dCblJsZzZ3Q1dxTGhIc2hjNDlzYXBGOUdPSHprdUFpR3V1cmZD?=
- =?utf-8?B?dXZHQ3labStkYzZ6UnVzeEp0T0Vaa3N3UkFFcHFUcFJScVZpd056cnJJMVVK?=
- =?utf-8?B?V2JyVExzRWlNdzhBemdLSDZEeVljNHl1b29sdE1vZ2hsclN0bCtTdWY4dDhE?=
- =?utf-8?B?dFljNldoWW1zNVREN1d6WnhjTDJySW1DNzIvblArLzRmMHV5ZU1iZFhQNXU5?=
- =?utf-8?B?YWJzZFB2UCtZWGhhb2lab3Z1QzRDekY2SnZUenRVdVdjbWNiRjhMN3ZVQm1R?=
- =?utf-8?B?UHZEZWtZMDlLOFgvclI0aWJIRWFRR0JqMnZzVFg1UzRxb0V6YVJtelNWT0JO?=
- =?utf-8?B?TEdOS2FNd1J1QmtXb2hmbVVkbUFVajhoaVJTYXV1dnVpODZFbFdwOHZHdTJM?=
- =?utf-8?B?QXQ2YytrNTZIY1d2cFVJZDVnaEhkQlV4T1c0TmlWaXRWT2ZGT1NLVnJ3U3Uy?=
- =?utf-8?B?a240ZDA3enAvVGtHTXo5eTdxSGh4TUo2ajdqV0NuSGgvOWd3ZUxrNnhNRmZ1?=
- =?utf-8?B?ZjAwVUp4Y2lNUzJQZHpNOExjWTNMRGsrVWxKdnpSeFl6c1doNDQrQTJWMnZP?=
- =?utf-8?B?OFVQN1dQMTlMRkRVUkJGbnZ4NVlTd3QyMHNqSkg1a0Z5Wk1qN2g2Z00vOFoz?=
- =?utf-8?B?U0Yvdm5aRHA2ODkrWG1Kc1dFMTlRMU9waVVLNFJUeDFrSmYxM1EvZ05OdGpt?=
- =?utf-8?B?ck5SWStaenY1bjN6VUhxejNTMXE5ZkFldWl5cHd1T041dnozMGFCczV2emtT?=
- =?utf-8?B?MFA4dGJQSGdKbmVnNFUyS29QaDl0eVdsK3RJZUpVZHIvOE43c1FkdnVsM3l2?=
- =?utf-8?B?WCs2ZDlQOExpZDNYV1VyZDhXeWtPVU5ES2xQSENrNVJVeUJhdnhOcTBXa09v?=
- =?utf-8?B?RkJ1NDVEMVBORXQxTy8rNDVzQnN6WENOU0ZUM2NPZHFiQ1MremVCRzhEMXI2?=
- =?utf-8?B?d0c3STk0aVk2Yjd6aHc0dU9yUytTYTBIL3NWNDhEVGZia2IwUUI1MVZ2am5G?=
- =?utf-8?B?M1g1OWpNZjd4MzdWZlVsQ3dBdGtaOEJaVWVjVzBZKzgrRWhFZlJwYWJIcXB2?=
- =?utf-8?B?V3BqN3JvRjl1cDR1YktuWlZVUmxPb1pWT2hkN2dmRmlZOTZXUjBVMUdIZG1C?=
- =?utf-8?B?S3d2clVaOWFFSjlCbFNITS9qMEtyYkIxY3FQbHNheGNmeFJCaGdoTVIyQXBN?=
- =?utf-8?B?ZFh3b1B1dlZkeG50ZUtHcjlOYWl6OVZyNnBXSnNmejV1bDAwa05pV0ZHMnFD?=
- =?utf-8?B?L0syT2NDWllybjRONmQ2N0NhMGlMaFdIYTFObDVxeUNHMDRMTUtuQk5OcW1Q?=
- =?utf-8?B?cHBLalowY25MS2U0ZzFMU1AzS29EcG1GZjQzRXlBMTRjcm1PSEQzUVdxMGJ1?=
- =?utf-8?B?dVlVOGJrK0NEMjN4TmdDdTltc0tXSXNsdGZra29zcjFsWkhrUE1yNFRvMG4w?=
- =?utf-8?B?L2I1K0hTNkNlN1dxUnNLQ2t6cXV2Ukk2RjlsM1VDcFVUVGlaMlBnYnZwNE9E?=
- =?utf-8?B?aTlaVW50M0VNOFdsbUVHZ0g5YzhLRm9RdVA2MlczaHdDd21udmtnTzIxaWFm?=
- =?utf-8?B?ZGRhOERBbTBDMHNteTNiL0cwK1hjYnowY2YyVVFScVRvNEZGdUQ3aU1WdFdX?=
- =?utf-8?B?c0MrRmNYdkkrUmUySFpPMDU0ek1ncWM3TUNFT3dpd1h1S0NWUDd0cVE0eEN2?=
- =?utf-8?B?ejBFc2NpOTNqUm01VkRTOVh4cjlzbFdudXp2SGhSN3UydnRjNHpmc1kyb0Yr?=
- =?utf-8?B?aUhVTmpHU1hTekQzc1c0eDJkQnhGUm12NHJMYU5TUVdIVldsS1N3QVVGS2VP?=
- =?utf-8?Q?cWKY=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        with ESMTP id S229642AbjJZMIh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 08:08:37 -0400
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E4A21A6;
+        Thu, 26 Oct 2023 05:08:35 -0700 (PDT)
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-5a7a80a96dbso17192987b3.0;
+        Thu, 26 Oct 2023 05:08:35 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698322114; x=1698926914;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=3KKbxpaRdKQQQLvpY2x+Hdf2Y5BAYNzBsK+Et59KcX8=;
+        b=ADxCBZjkuPmbALPFjGI0cRx5TBP6YQYRzuMWM8y3VNYdibuyVDxwu/dZruIXPN0JlL
+         MDqmSV+lzBsKEKJQgmcVqrBfRbgsi36IroW3865gzKvSl1mYnLfbwduO+e/XyI04mHxT
+         Lig7rPWmRU8nphSuyqGl//Zb/tL8+x5aIv8OdogZKYLODd1AvE3z1cfFM2Sp3BkIVeYF
+         C3j3EFhm2N9w/dt0znjgvv5ygj2drJNwapnUaGlR2Y9ziAmbcb3HZ1AQSrKtydoaV8/8
+         mDbRofo+V0wF2o94fxMYphPxMc0h9XT+oWixewvyRROzG7WAct2Gejw3VSd4fdetzDHA
+         BgXQ==
+X-Gm-Message-State: AOJu0Yx1q4SuiDSOBfV+4DdCpbTGFTeDsFjuxad9ILP1980lfTfzeKfT
+        zFJbbb1206JmxdTdf7+TDWV/bB/Srk6FbQ==
+X-Google-Smtp-Source: AGHT+IGKOtB5Vdi4SScA8sBNSp1erZ9WAmvPnQ2C3ohONPE3QNZ6GzYGBtj5vdT5/zgcz9CsqJT+kg==
+X-Received: by 2002:a0d:e682:0:b0:5a7:dac8:2fa with SMTP id p124-20020a0de682000000b005a7dac802famr4070833ywe.24.1698322114027;
+        Thu, 26 Oct 2023 05:08:34 -0700 (PDT)
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com. [209.85.128.172])
+        by smtp.gmail.com with ESMTPSA id f5-20020a0ddc05000000b005a7bf2aff15sm5976139ywe.95.2023.10.26.05.08.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 26 Oct 2023 05:08:33 -0700 (PDT)
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-59e88a28b98so7109127b3.1;
+        Thu, 26 Oct 2023 05:08:33 -0700 (PDT)
+X-Received: by 2002:a81:eb04:0:b0:5a7:a896:3f54 with SMTP id
+ n4-20020a81eb04000000b005a7a8963f54mr3275652ywm.26.1698322113544; Thu, 26 Oct
+ 2023 05:08:33 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 592d10b1-35bb-410c-842a-08dbd61ae2b6
-X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Oct 2023 11:58:36.3640
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: lZohh6tL8Q3U+diyiYMSx6rN4+jA96p/BMliGElQueBkmoDtp6IKwaoUAw1hnM/ZKREC1k4ZPNZ0OPcmmiuIpQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM9PR04MB8922
+References: <20231009130126.697995596@linuxfoundation.org> <ZSRVgj5AqJbDXqZU@duo.ucw.cz>
+ <ZSRe78MAQwbBdyFP@duo.ucw.cz> <ZSUy+zA0+Chm6dFb@duo.ucw.cz>
+ <ZSU+GHl1q7T/TBp5@duo.ucw.cz> <ZSWg1fv3gOyV5t+h@shikoro> <2023101057-runny-pellet-8952@gregkh>
+ <ZTgZa1ic1iFbdaTM@duo.ucw.cz> <CAMuHMdXQApuOPfU1zNKcHKN5=fCuLBSDiLtF06U7e4Tx0+noyA@mail.gmail.com>
+ <CAMuHMdVrdmBgopnPnJK_ij52wz2WVBdYRHur2KfosFnT945ULw@mail.gmail.com>
+ <CAMuHMdWZvTGrFgx_o3g3usOwkDvD2rw5QH9_ibo=OKdw17sAzg@mail.gmail.com>
+ <CAMuHMdXvpiGQ7jqAG69Zo=10wV-E0bioC9AYUHwwhRGmLXygWA@mail.gmail.com>
+ <7d7a5a15-3349-adce-02cd-82b6cb4bebde@roeck-us.net> <CAMuHMdXbPZ0uz0NnE1xhUD=QtaAq+TinSW-PrWPMpGe4h=7Spg@mail.gmail.com>
+ <CAMuHMdXNjopzEFCFBxxuYNCFMmj4SvMQ2PmZ4hZDHLGZGUHf=w@mail.gmail.com>
+In-Reply-To: <CAMuHMdXNjopzEFCFBxxuYNCFMmj4SvMQ2PmZ4hZDHLGZGUHf=w@mail.gmail.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 26 Oct 2023 14:08:20 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdU7-5R4NkwMdbLxovBY4=ePtPDs2SYXjWeGc_Yz3JcjPg@mail.gmail.com>
+Message-ID: <CAMuHMdU7-5R4NkwMdbLxovBY4=ePtPDs2SYXjWeGc_Yz3JcjPg@mail.gmail.com>
+Subject: Re: renesas_sdhi problems in 5.10-stable was Re: [PATCH 5.10 000/226]
+ 5.10.198-rc1 review
+To:     Guenter Roeck <linux@roeck-us.net>
+Cc:     Pavel Machek <pavel@denx.de>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        niklas.soderlund+renesas@ragnatech.se,
+        yoshihiro.shimoda.uh@renesas.com, biju.das.jz@bp.renesas.com,
+        Chris.Paterson2@renesas.com, stable@vger.kernel.org,
+        patches@lists.linux.dev, linux-kernel@vger.kernel.org,
+        torvalds@linux-foundation.org, akpm@linux-foundation.org,
+        shuah@kernel.org, patches@kernelci.org,
+        lkft-triage@lists.linaro.org, jonathanh@nvidia.com,
+        f.fainelli@gmail.com, sudipm.mukherjee@gmail.com,
+        srw@sladewatkins.net, rwarsow@gmx.de, conor@kernel.org,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3NvbiA8dWxmLmhh
-bnNzb25AbGluYXJvLm9yZz4NCj4gU2VudDogMjAyM+W5tDnmnIgxNOaXpSAyMTowMw0KPiBUbzog
-Qm91Z2ggQ2hlbiA8aGFpYm8uY2hlbkBueHAuY29tPg0KPiBDYzogYWRyaWFuLmh1bnRlckBpbnRl
-bC5jb207IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IGRsLWxpbnV4LWlteA0KPiA8bGludXgt
-aW14QG54cC5jb20+OyBoa2FsbHdlaXQxQGdtYWlsLmNvbQ0KPiBTdWJqZWN0OiBSZTogW1BBVENI
-XSBtbWM6IGNvcmU6IHNkaW86IGhvbGQgcmV0dW5pbmcgaWYgc2RpbyBpbiAxLWJpdCBtb2RlDQo+
-IA0KPiBPbiBXZWQsIDMwIEF1ZyAyMDIzIGF0IDExOjM1LCA8aGFpYm8uY2hlbkBueHAuY29tPiB3
-cm90ZToNCj4gPg0KPiA+IEZyb206IEhhaWJvIENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT4NCj4g
-Pg0KPiA+IHR1bmluZyBvbmx5IHN1cHBvcnQgaW4gNC1iaXQgbW9kZSBvciA4IGJpdCBtb2RlLCBz
-byBpbiAxLWJpdCBtb2RlLA0KPiA+IG5lZWQgdG8gaG9sZCByZXR1bmluZy4NCj4gPg0KPiA+IEZp
-bmQgdGhpcyBpc3N1ZSB3aGVuIHVzZSBtYW51YWwgdHVuaW5nIG1ldGhvZCBvbiBpbXg5My4gV2hl
-biBzeXN0ZW0NCj4gPiByZXN1bWUgYmFjaywgU0RJTyBXSUZJIHRyeSB0byBzd2l0Y2ggYmFjayB0
-byA0IGJpdCBtb2RlLCBmaXJzdCB3aWxsDQo+ID4gdHJpZ2dlciByZXR1bmluZywgYW5kIGFsbCB0
-dW5pbmcgY29tbWFuZCBmYWlsZWQuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBIYWlibyBDaGVu
-IDxoYWliby5jaGVuQG54cC5jb20+DQo+IA0KPiBBcHBsaWVkIGZvciBmaXhlcyBhbmQgYnkgYWRk
-aW5nIGEgZml4ZXMgdGFnIChGaXhlczogZGZhMTNlYmJlMzM0DQo+ICgibW1jOiBob3N0OiBBZGQg
-ZmFjaWxpdHkgdG8gc3VwcG9ydCByZS10dW5pbmciKSkgYW5kIGEgc3RhYmxlIHRhZywgdGhhbmtz
-IQ0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCj4gDQo+IA0KPiA+IC0tLQ0KPiA+ICBkcml2
-ZXJzL21tYy9jb3JlL3NkaW8uYyB8IDggKysrKysrKy0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDcg
-aW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZl
-cnMvbW1jL2NvcmUvc2Rpby5jIGIvZHJpdmVycy9tbWMvY29yZS9zZGlvLmMgaW5kZXgNCj4gPiBm
-NjRiOWFjNzZhNWMuLjU5MTQ1MTZkZjJmNyAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9j
-b3JlL3NkaW8uYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvc2Rpby5jDQo+ID4gQEAgLTEw
-ODksOCArMTA4OSwxNCBAQCBzdGF0aWMgaW50IG1tY19zZGlvX3Jlc3VtZShzdHJ1Y3QgbW1jX2hv
-c3QNCj4gKmhvc3QpDQo+ID4gICAgICAgICAgICAgICAgIH0NCj4gPiAgICAgICAgICAgICAgICAg
-ZXJyID0gbW1jX3NkaW9fcmVpbml0X2NhcmQoaG9zdCk7DQo+ID4gICAgICAgICB9IGVsc2UgaWYg
-KG1tY19jYXJkX3dha2Vfc2Rpb19pcnEoaG9zdCkpIHsNCj4gPiAtICAgICAgICAgICAgICAgLyog
-V2UgbWF5IGhhdmUgc3dpdGNoZWQgdG8gMS1iaXQgbW9kZSBkdXJpbmcgc3VzcGVuZCAqLw0KPiA+
-ICsgICAgICAgICAgICAgICAvKg0KPiA+ICsgICAgICAgICAgICAgICAgKiBXZSBtYXkgaGF2ZSBz
-d2l0Y2hlZCB0byAxLWJpdCBtb2RlIGR1cmluZyBzdXNwZW5kLA0KPiA+ICsgICAgICAgICAgICAg
-ICAgKiBuZWVkIHRvIGhvbGQgcmV0dW5pbmcsIGJlY2F1c2UgdHVuaW5nIG9ubHkgc3VwcHJ0DQo+
-ID4gKyAgICAgICAgICAgICAgICAqIDQtYml0IG1vZGUgb3IgOCBiaXQgbW9kZS4NCj4gPiArICAg
-ICAgICAgICAgICAgICovDQo+ID4gKyAgICAgICAgICAgICAgIG1tY19yZXR1bmVfaG9sZF9ub3co
-aG9zdCk7DQo+ID4gICAgICAgICAgICAgICAgIGVyciA9IHNkaW9fZW5hYmxlXzRiaXRfYnVzKGhv
-c3QtPmNhcmQpOw0KDQpIaSBVbGYsDQoNCkhlcmUgc3RpbGwgY29udGFpbiBvbmUgYnVnLCBpZiBu
-b3cgaW4gVUhTLUkgbW9kZSwgY2FyZCBjbG9jayBtYXliZSBpcyAyMDBNSHosIHdpdGhvdXQgdHVu
-aW5nLCBzZGlvX2VuYWJsZV80Yml0X2J1cygpIG1heSByZXR1cm4gZXJyb3IgaWYgaG9zdCBjYW4n
-dCBzYW1wbGUgdGhlIGNtZCByZXNwb25zZSBjb3JyZWN0bHkuDQoNClNvIGhlcmUsIGluIHN1c3Bl
-bmQgYmV0dGVyIHRvIHN3aXRjaCBvdXQgdGhlIFVIUy1JIG1vZGUgZmlyc3QsIGFuZCBkb3duZ3Jh
-ZGUgdGhlIGNhcmQgY2xvY2sgcmF0ZSg8NTBNSHopLCB0aGVuIHN3aXRjaCBmcm9tIDRiaXQgdG8g
-MSBiaXQgbW9kZS4NClRoZW4gaW4gcmVzdW1lLCBzZW5kIGNvbW1hbmQgdG8gc3dpdGNoIGJhY2sg
-dG8gNCBiaXQgbW9kZSBjYW4gZXhlY3V0ZSBzYWZlbHkgd2l0aG91dCB0dW5pbmcuDQoNCkkganVz
-dCBtZWV0IHRoaXMgaXNzdWUgd2hlbiBkbyBzeXN0ZW0gUE0gb24gaS5NWDZVTEwuICB1c2RoYyBp
-biBpLk1YNlVMTCB3aWxsIHRvdGFsbHkgbG9zdCBwb3dlciBhZnRlciBzeXN0ZW0gc3VzcGVuZCwg
-d2hpY2ggbWVhbnMgdGhlIHByZXZpb3VzIHR1bmluZyBzdGF0dXMgd2lsbCBsb3N0IHdoZW4gcmVz
-dW1lIGJhY2suDQpXaGVuIHNlbmQgY21kIHRvIHN3aXRjaCBiYWNrIHRvIDQgYml0IG1vZGUgZHVy
-aW5nIHN5c3RlbSByZXN1bWUsIHdpdGhvdXQgdHVuaW5nLCB1c2RoYyBjYW4ndCBzYW1wbGUgdGhl
-IGNtZCByZXNwb25zZSBjb3JyZWN0bHkgdW5kZXIgMjAwTUh6LCB3aWxsIHRyaWdnZXIgY21kIGVy
-cm9yLCBjYXVzZSB0aGUgc2RpbyByZXN1bWUgZmFpbC4NCg0KSnVzdCBhcyBBZHJpYW4gbWVudGlv
-bmVkIGJlZm9yZSwgaGVyZSBhZGQgdGhlIG1vZGUgc3dpdGNoIG1heWJlIHJpc2t5LiBBbnkgY29u
-Y2Vybj8gT3IgYW55IHdheSB0byBwcmUtc2V0IHRoZSB0dW5pbmcgY29uZmlnIGluIGhvc3QgY29u
-dHJvbGxlciByZXN1bWU/DQoNCkJlc3QgUmVnYXJkcw0KSGFpYm8gQ2hlbg0KDQo+ID4gKyAgICAg
-ICAgICAgICAgIG1tY19yZXR1bmVfcmVsZWFzZShob3N0KTsNCj4gPiAgICAgICAgIH0NCj4gPg0K
-PiA+ICAgICAgICAgaWYgKGVycikNCj4gPiAtLQ0KPiA+IDIuMzQuMQ0KPiA+DQo=
+On Wed, Oct 25, 2023 at 11:26 PM Geert Uytterhoeven
+<geert@linux-m68k.org> wrote:
+> On Wed, Oct 25, 2023 at 9:53 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> > On Wed, Oct 25, 2023 at 8:39 PM Guenter Roeck <linux@roeck-us.net> wrote:
+> > > On 10/25/23 10:05, Geert Uytterhoeven wrote:
+> > > > On Wed, Oct 25, 2023 at 2:35 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> > > >> On Wed, Oct 25, 2023 at 12:53 PM Geert Uytterhoeven
+> > > >> <geert@linux-m68k.org> wrote:
+> > > >>> On Wed, Oct 25, 2023 at 12:47 PM Geert Uytterhoeven
+> > > >>> <geert@linux-m68k.org> wrote:
+> > > >>>> On Tue, Oct 24, 2023 at 9:22 PM Pavel Machek <pavel@denx.de> wrote:
+> > > >>>>> But we still have failures on Renesas with 5.10.199-rc2:
+> > > >>>>>
+> > > >>>>> https://gitlab.com/cip-project/cip-testing/linux-stable-rc-ci/-/pipelines/1047368849
+> > > >>>>>
+> > > >>>>> And they still happed during MMC init:
+> > > >>>>>
+> > > >>>>>      2.638013] renesas_sdhi_internal_dmac ee100000.mmc: Got CD GPIO
+> > > >>>>> [    2.638846] INFO: trying to register non-static key.
+> > > >>>>> [    2.644192] ledtrig-cpu: registered to indicate activity on CPUs
+> > > >>>>> [    2.649066] The code is fine but needs lockdep annotation, or maybe
+> > > >>>>> [    2.649069] you didn't initialize this object before use?
+> > > >>>>> [    2.649071] turning off the locking correctness validator.
+> > > >>>>> [    2.649080] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 5.10.199-rc2-arm64-renesas-ge31b6513c43d #1
+> > > >>>>> [    2.649082] Hardware name: HopeRun HiHope RZ/G2M with sub board (DT)
+> > > >>>>> [    2.649086] Call trace:
+> > > >>>>> [    2.655106] SMCCC: SOC_ID: ARCH_SOC_ID not implemented, skipping ....
+> > > >>>>> [    2.661354]  dump_backtrace+0x0/0x194
+> > > >>>>> [    2.661361]  show_stack+0x14/0x20
+> > > >>>>> [    2.667430] usbcore: registered new interface driver usbhid
+> > > >>>>> [    2.672230]  dump_stack+0xe8/0x130
+> > > >>>>> [    2.672238]  register_lock_class+0x480/0x514
+> > > >>>>> [    2.672244]  __lock_acquire+0x74/0x20ec
+> > > >>>>> [    2.681113] usbhid: USB HID core driver
+> > > >>>>> [    2.687450]  lock_acquire+0x218/0x350
+> > > >>>>> [    2.687456]  _raw_spin_lock+0x58/0x80
+> > > >>>>> [    2.687464]  tmio_mmc_irq+0x410/0x9ac
+> > > >>>>> [    2.688556] renesas_sdhi_internal_dmac ee160000.mmc: mmc0 base at 0x00000000ee160000, max clock rate 200 MHz
+> > > >>>>> [    2.744936]  __handle_irq_event_percpu+0xbc/0x340
+> > > >>>>> [    2.749635]  handle_irq_event+0x60/0x100
+> > > >>>>> [    2.753553]  handle_fasteoi_irq+0xa0/0x1ec
+> > > >>>>> [    2.757644]  __handle_domain_irq+0x7c/0xdc
+> > > >>>>> [    2.761736]  efi_header_end+0x4c/0xd0
+> > > >>>>> [    2.765393]  el1_irq+0xcc/0x180
+> > > >>>>> [    2.768530]  arch_cpu_idle+0x14/0x2c
+> > > >>>>> [    2.772100]  default_idle_call+0x58/0xe4
+> > > >>>>> [    2.776019]  do_idle+0x244/0x2c0
+> > > >>>>> [    2.779242]  cpu_startup_entry+0x20/0x6c
+> > > >>>>> [    2.783160]  rest_init+0x164/0x28c
+> > > >>>>> [    2.786561]  arch_call_rest_init+0xc/0x14
+> > > >>>>> [    2.790565]  start_kernel+0x4c4/0x4f8
+> > > >>>>> [    2.794233] Unable to handle kernel NULL pointer dereference at virtual address 0000000000000014
+> > > >>>>> [    2.803011] Mem abort info:
+> > > >>>>>
+> > > >>>>> from https://lava.ciplatform.org/scheduler/job/1025535
+> > > >>>>> from
+> > > >>>>> https://gitlab.com/cip-project/cip-testing/linux-stable-rc-ci/-/jobs/5360973735 .
+> > > >>>>>
+> > > >>>>> Is there something else missing?
+> > > >>
+> > > >> It seems to be an intermittent issue. Investigating...
+> > > >
+> > > > After spending too much time on bisecting, the bad guy turns out to
+> > > > be commit 6d3745bbc3341d3b ("mmc: renesas_sdhi: register irqs before
+> > > > registering controller") in v5.10.198.
+> > > >
+> > > > Adding debug information shows the lock is mmc_host.lock.
+> > > >
+> > > > It is definitely initialized:
+> > > >
+> > > >      renesas_sdhi_probe()
+> > > >      {
+> > > >          ...
+> > > >          tmio_mmc_host_alloc()
+> > > >              mmc_alloc_host
+> > > >                  spin_lock_init(&host->lock);
+>
+> Initializing mmc_host.lock.
+>
+> > > >          ...
+> > > >          devm_request_irq()
+> > > >          -> tmio_mmc_irq
+> > > >              tmio_mmc_cmd_irq()
+> > > >                  spin_lock(&host->lock);
+>
+> Locking tmio_mmc_host.lock, but ...
+>
+> > > >          ...
+> > > >      }
+> > > >
+> > > > That leaves us with a missing lockdep annotation?
+> > >
+> > > Is it possible that the lock initialization is overwritten ?
+> > > I seem to recall a recent case where this happens.
+> > >
+> > > Also, there is
+> > >         spin_lock_init(&_host->lock);
+> > > in tmio_mmc_host_probe(), and tmio_mmc_host_probe() is called after
+> > > devm_request_irq().
+> >
+> > Unless I am missing something, that is initializing tmio_mmc_host.lock,
+> > which is a different lock than mmc_host.lock?
+>
+> ... tmio_mmc_host.lock is initialized only here.
+>
+> Now the question remains why this is not triggered in mainline.
+> More investigation to do tomorrow...
+
+| --- a/drivers/mmc/host/renesas_sdhi_core.c
+| +++ b/drivers/mmc/host/renesas_sdhi_core.c
+| @@ -1011,6 +1011,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+|                         renesas_sdhi_start_signal_voltage_switch;
+|                 host->sdcard_irq_setbit_mask = TMIO_STAT_ALWAYS_SET_27;
+|                 host->reset = renesas_sdhi_reset;
+
+host->sdcard_irq_mask_all is not initialized in this branch
+
+| +       } else {
+| +               host->sdcard_irq_mask_all = TMIO_MASK_ALL;
+|         }
+
+|         /* Orginally registers were 16 bit apart, could be 32 or 64
+nowadays */
+| @@ -1098,9 +1100,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+|                 host->ops.hs400_complete = renesas_sdhi_hs400_complete;
+|         }
+
+| -       ret = tmio_mmc_host_probe(host);
+| -       if (ret < 0)
+| -               goto edisclk;
+| +       sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK,
+host->sdcard_irq_mask_all);
+
+Fails to disable interrupts for real as host->sdcard_irq_mask_all is
+still zero.
+
+|         num_irqs = platform_irq_count(pdev);
+|         if (num_irqs < 0) {
+| @@ -1127,6 +1127,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+|                         goto eirq;
+|         }
+
+| +       ret = tmio_mmc_host_probe(host);
+
+Initializes host->sdcard_irq_mask_all when needed and disables
+interrupts:
+
+        if (!_host->sdcard_irq_mask_all)
+                _host->sdcard_irq_mask_all = TMIO_MASK_ALL;
+        tmio_mmc_disable_mmc_irqs(_host, _host->sdcard_irq_mask_all);
+
+If the interrupt came in before, we have an issue.
+
+| +       if (ret < 0)
+| +               goto edisclk;
+| +
+|         dev_info(&pdev->dev, "%s base at %pa, max clock rate %u MHz\n",
+|                  mmc_hostname(host->mmc), &res->start,
+host->mmc->f_max / 1000000);
+
+The solution is to backport commit 9f12cac1bb88e329 ("mmc: renesas_sdhi:
+use custom mask for TMIO_MASK_ALL") in v5.13.
+As this doesn't backport cleanly, I'll submit a (tested) patch.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
