@@ -2,82 +2,217 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2855FC25B48
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 06:15:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4965EC25B6B
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 06:25:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229638AbjJZGPF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Oct 2023 02:15:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49806 "EHLO
+        id S231383AbjJZGZW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Oct 2023 02:25:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34026 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230478AbjJZGPF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 02:15:05 -0400
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F4051186;
-        Wed, 25 Oct 2023 23:15:02 -0700 (PDT)
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 39Q6F022075460;
-        Thu, 26 Oct 2023 01:15:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1698300900;
-        bh=LftDA9Y+XGl1ONXZCRa+9Wt1QWlpdij0YsK3eYAGaSc=;
-        h=From:To:CC:Subject:Date;
-        b=RuB+8Z2LEDXTj5njYbYMSrz9NKe/JkDT4gAPOqVWobuXyAjA8K0R3uJWbPYYCqqO8
-         2grBp5gQG29ka4RP8yWP4ZbOkf8e9tfl7IOtpgn7y9iPIB+0MafI3+Q82iLf1t9/Oo
-         0CPxq0bLfNoA8Bq1ciqPa+ABDDXhGveaEpFTmR+I=
-Received: from DLEE106.ent.ti.com (dlee106.ent.ti.com [157.170.170.36])
-        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 39Q6F0jh030506
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 26 Oct 2023 01:15:00 -0500
-Received: from DLEE113.ent.ti.com (157.170.170.24) by DLEE106.ent.ti.com
- (157.170.170.36) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 26
- Oct 2023 01:15:00 -0500
-Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE113.ent.ti.com
- (157.170.170.24) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Thu, 26 Oct 2023 01:15:00 -0500
-Received: from localhost (ileaxei01-snat2.itg.ti.com [10.180.69.6])
-        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 39Q6ExsW104152;
-        Thu, 26 Oct 2023 01:14:59 -0500
-From:   Nitin Yadav <n-yadav@ti.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-Subject: [PATCH] mmc: sdhci_am654: fix start loop index for TAP value parsing
-Date:   Thu, 26 Oct 2023 11:44:58 +0530
-Message-ID: <20231026061458.1116276-1-n-yadav@ti.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S229638AbjJZGZW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 02:25:22 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CA72189;
+        Wed, 25 Oct 2023 23:25:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1698301520; x=1729837520;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=9dwbtHL/Eb13EI84Wvbp0wfhWl3liifdx/FKkioH6mA=;
+  b=F9atq2u77tFrIZNDO7CQwDMVUcWaxn1MkT7a3dLWNV0PX4jBWeLVdU1c
+   tZdrDVlYAVnFKEpEHQ0n7RPHCeWoVJWc1Q2aSE79k2PlKkI9QO9POOgAW
+   rzba+wi4mKSZF4TgIri+rdX867n9dSzIqP2/t+b2GXzWr/qxJi4ybZQcb
+   SZdyLh9QiAnMsy4qqfqs4oRG5Lq1DbUkkdUoCsUCtlyxG7tGLzCzfK/A8
+   eZM9AeLA8KzHALf7FeVskvacV+POc4jdoEd0jm3DvAgq/fZ2oPrQ+Biz4
+   B6iBTqKPu0eRTUPNxSUJOIqOdfWlF7KTXoQ+Gww3K+Ovr25c79kMi/4+Y
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10874"; a="418597908"
+X-IronPort-AV: E=Sophos;i="6.03,253,1694761200"; 
+   d="scan'208";a="418597908"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2023 23:25:19 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.03,253,1694761200"; 
+   d="scan'208";a="393267"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.211.218])
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2023 23:25:06 -0700
+Message-ID: <f0aecb28-6f82-456e-a319-8d13a2e313b6@intel.com>
+Date:   Thu, 26 Oct 2023 09:25:08 +0300
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: cqhci: Be more verbose in error irq handler
+To:     =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Asutosh Das <quic_asutoshd@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Radoslaw Biernacki <biernacki@google.com>,
+        Guenter Roeck <groeck@chromium.org>,
+        Gwendal Grignou <gwendal@chromium.org>, upstream@semihalf.com
+References: <20231016095610.1095084-1-korneld@chromium.org>
+ <613c51f0-c32e-4de5-9627-525d92fb06ed@intel.com>
+ <CAD=NsqybNrf-=9=5wvoj+9MT3xK3SbX7nDk3N3VLBMyA_u3KTQ@mail.gmail.com>
+ <78bb4ad2-853a-4ed4-9998-c4e1122545b6@intel.com>
+ <CAD=NsqxDA=usDRa-KV48RkeEROARsw8JqBF5vyJcEEV5r_Fg1w@mail.gmail.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CAD=NsqxDA=usDRa-KV48RkeEROARsw8JqBF5vyJcEEV5r_Fg1w@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-ti,otap-del-sel-legacy/ti,itap-del-sel-legacy passed from DT
-are currently ignored for all SD/MMC and eMMC modes. Fix this
-by making start loop index to MMC_TIMING_LEGACY.
+On 25/10/23 11:01, Kornel Dulęba wrote:
+> On Mon, Oct 23, 2023 at 1:38 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> On 20/10/23 11:53, Kornel Dulęba wrote:
+>>> On Fri, Oct 20, 2023 at 9:41 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>
+>>>> On 16/10/23 12:56, Kornel Dulęba wrote:
+>>>>> There are several reasons for controller to generate an error interrupt.
+>>>>> They include controller<->card timeout, and CRC mismatch error.
+>>>>> Right now we only get one line in the logs stating that CQE recovery was
+>>>>> triggered, but with no information about what caused it.
+>>>>> To figure out what happened be more verbose and dump the registers from
+>>>>> irq error handler logic.
+>>>>> This matches the behaviour of the software timeout logic, see
+>>>>> cqhci_timeout.
+>>>>>
+>>>>> Signed-off-by: Kornel Dulęba <korneld@chromium.org>
+>>>>> ---
+>>>>>  drivers/mmc/host/cqhci-core.c | 5 +++--
+>>>>>  1 file changed, 3 insertions(+), 2 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+>>>>> index b3d7d6d8d654..33abb4bd53b5 100644
+>>>>> --- a/drivers/mmc/host/cqhci-core.c
+>>>>> +++ b/drivers/mmc/host/cqhci-core.c
+>>>>> @@ -700,8 +700,9 @@ static void cqhci_error_irq(struct mmc_host *mmc, u32 status, int cmd_error,
+>>>>>
+>>>>>       terri = cqhci_readl(cq_host, CQHCI_TERRI);
+>>>>>
+>>>>> -     pr_debug("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d TERRI: 0x%08x\n",
+>>>>> -              mmc_hostname(mmc), status, cmd_error, data_error, terri);
+>>>>> +     pr_warn("%s: cqhci: error IRQ status: 0x%08x cmd error %d data error %d\n",
+>>>>> +              mmc_hostname(mmc), status, cmd_error, data_error);
+>>>>> +     cqhci_dumpregs(cq_host);
+>>>>
+>>>> For debugging, isn't dynamic debug seems more appropriate?
+>>>
+>>> Dynamic debug is an option, but my personal preference would be to
+>>> just log more info in the error handler.
+>>
+>> Interrupt handlers can get called very rapidly, so some kind of rate
+>> limiting should be used if the message is unconditional.  Also you need
+>> to provide actual reasons for your preference.
+>>
+>> For dynamic debug of the register dump, something like below is
+>> possible.
+>>
+>> #define cqhci_dynamic_dumpregs(cqhost) \
+>>         _dynamic_func_call_no_desc("cqhci_dynamic_dumpregs", cqhci_dumpregs, cqhost)
+>>
+> Fair point.
+> The reason I'm not a fan of using dynamic debug for this is that my
+> goal here is to improve the warning/error logging information that we
+> get from systems running in production.
+> I.e. if we get a lot of "running CQE recovery" messages, at the very
+> least I'd like to know what is causing them.
 
-Fixes: 8ee5fc0e0b3be ("mmc: sdhci_am654: Update OTAPDLY writes")
+So you are saying you want to collect debug information from production
+systems, but don't want to use dynamic debug to do it?
 
-Signed-off-by: Nitin Yadav <n-yadav@ti.com>
----
- drivers/mmc/host/sdhci_am654.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+>>> To give you some background.
+>>> We're seeing some "running CQE recovery" lines in the logs, followed
+>>> by a dm_verity mismatch error.
+>>> The reports come from the field, with no feasible way to reproduce the
+>>> issue locally.
+>>
+>> If it is a software error, some kind of error injection may well
+>> reproduce it.  Also if it is a hardware error that only happens
+>> during recovery, error injection could increase the likelihood of
+>> reproducing it.
+> 
+> We tried software injection and it didn't yield any results.
+> We're currently looking into "injecting" hw errors by using a small
+> burst field generator to interfere with transfers on the data line
+> directly.
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 544aaaf5cb0f..aae9d255c6a1 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -606,7 +606,7 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
- 		return 0;
- 	}
- 
--	for (i = MMC_TIMING_MMC_HS; i <= MMC_TIMING_MMC_HS400; i++) {
-+	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
- 
- 		ret = device_property_read_u32(dev, td[i].otap_binding,
- 					       &sdhci_am654->otap_del_sel[i]);
--- 
-2.25.1
+I just tried instrumenting a driver to inject CRC errors and it
+revealed several CQE recovery issues, including spurious TCN for
+tag 31.  I will send some patches when they are ready.
+
+>>
+>>>
+>>> I'd argue that logging only the info that CQE recovery was executed is
+>>> not particularly helpful for someone looking into those logs.
+>>
+>> As the comment says, that message is there because recovery reduces
+>> performance, it is not to aid debugging per se.
+>>
+>>> Ideally we would have more data about the state the controller was in
+>>> when the error happened, or at least what caused the recovery to be
+>>> triggered.
+>>> The question here is how verbose should we be in this error scenario.
+>>> Looking at other error scenarios, in the case of a software timeout
+>>> we're dumping the controller registers. (cqhci_timeout)
+>>
+>> Timeout means something is broken - either the driver, the cq engine
+>> or the card.  On the other hand, an error interrupt is most likely a
+>> CRC error which is not unexpected occasionally, due to thermal drift
+>> or perhaps interference.
+> 
+> Right, but my point is that we don't know what triggered CQE recovery.
+
+True, although probably a CRC error.
+
+> 
+>>
+>>> Hence I thought that I'd be appropriate to match that and do the same
+>>> in CQE recovery logic.
+>>
+>> It needs to be consistent. There are other pr_debugs, such as:
+>>
+>>                 pr_debug("%s: cqhci: Failed to clear tasks\n",
+>>                 pr_debug("%s: cqhci: Failed to halt\n", mmc_hostname(mmc));
+>>                 pr_debug("%s: cqhci: disable / re-enable\n", mmc_hostname(mmc));
+>>
+>> which should perhaps be treated the same.
+>>
+>> And there are no messages for errors from the commands in
+>> mmc_cqe_recovery().
+> 
+> How about this.
+> As a compromise would it be okay to just do a single pr_warn directly
+> from cqhci_error_irq.
+
+Sure, printk_ratelimited() or __ratelimit()
+
+> We could simply promote the existing pr_debug to pr_warn at the
+> beginning of that function.
+> This would tell us what triggered the recovery. (controller timeout,
+> CRC mismatch)
+> We can also consider removing the "running CQE recovery" print for the
+> sake of brevity.
+
+No, that serves a different purpose.
+
+> The only downside of this that I can see is that we'd be running the
+> logic from the interrupt handler directly, but I can't see an easy way
+> around that.
+> What do you think?
+
+Should be OK with rate limiting.
+
+>>
+>>>
+>>>>
+>>>>>
+>>>>>       /* Forget about errors when recovery has already been triggered */
+>>>>>       if (cq_host->recovery_halt)
+>>>>
+>>
 
