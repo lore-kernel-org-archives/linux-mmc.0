@@ -2,103 +2,96 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C7D3C25B6B
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 06:40:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9822C25B48
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 07:00:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232431AbjJZGkO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Oct 2023 02:40:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39678 "EHLO
+        id S230029AbjJZHAa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Oct 2023 03:00:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39148 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229638AbjJZGkN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 02:40:13 -0400
-Received: from nautica.notk.org (ipv6.notk.org [IPv6:2001:41d0:1:7a93::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 688FC9C;
-        Wed, 25 Oct 2023 23:40:10 -0700 (PDT)
-Received: by nautica.notk.org (Postfix, from userid 108)
-        id 28AA2C020; Thu, 26 Oct 2023 08:40:06 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
-        t=1698302406; bh=un9bFkKkDnEO5ds9VDjL40Q+CLVHMEVuBkDazZsoQ34=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=k4jkhMGWgX814U3jnpwffJXj2X+v5p0YHOHAQxebGelITeuDqw5IqEGa8rUBR2Mpp
-         0XkTne/HcYL9XNAS2hoYhC4otzVmyEu8v76R633vqfaFamqrhP7dUZ/7MB7Ve0WSz3
-         9yY1ZgEb1KUoR9B5+fD3IUiqOqs6dHsnGthEaIlm2uzcbMMul6Ot+3oE44TL7L3h/8
-         TubYmBI9hL0tl4OlQuobvruqEFg8rRX2oR5txGDnZ8WqnQqbt/bTX74WIJavIsX75R
-         vVRF72J4mRD5D2rTbPi0Wf5CY2E0yW+8RdmNPM+R4TqAcMI1tmAgB/Y6uz/q5mXEus
-         QVo89dZHm499A==
-Received: from gaia (localhost [127.0.0.1])
-        by nautica.notk.org (Postfix) with ESMTPS id E56AAC01C;
-        Thu, 26 Oct 2023 08:40:03 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
-        t=1698302405; bh=un9bFkKkDnEO5ds9VDjL40Q+CLVHMEVuBkDazZsoQ34=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=qEurB/ZUuAxvpeq6jFETqHITBC+GX+LBkmynBB1kdBuRaA+LPKUmWXwmJyDFrK0WJ
-         Gh83MQuOKSuow2SDeakgleSaODXphx3ngRZAvmdr8tLU3VDMKHw7/PBsux2A0gA1N0
-         snLOxIGEPXGacgW8EePhKTY08LfkPwccTUN9u5fXpC+4Lfvd+uzF9NIV43xbDuabbj
-         Ab4BrcEjyOw71IjbUjNdfTFMioE39yRUBSnGURYuYSCXejUW3l3EQIENat90EqQLdA
-         5S0V38yFDBhqwPKAvBvlZlEq75DGLbGVrdphRJWWArAKBn5PcYAj5cIuaZIa7ccoUo
-         YTi/0ncKhe7iQ==
-Received: from localhost (gaia [local])
-        by gaia (OpenSMTPD) with ESMTPA id b554c8bf;
-        Thu, 26 Oct 2023 06:40:00 +0000 (UTC)
-Date:   Thu, 26 Oct 2023 15:39:45 +0900
-From:   Dominique Martinet <asmadeus@codewreck.org>
-To:     Avri Altman <avri.altman@wdc.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        Alex Fetters <Alex.Fetters@garmin.com>, stable@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: Capture correct oemid
-Message-ID: <ZToJsSLHr8RnuTHz@codewreck.org>
-References: <20230927071500.1791882-1-avri.altman@wdc.com>
+        with ESMTP id S230478AbjJZHA3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 03:00:29 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BD07195;
+        Thu, 26 Oct 2023 00:00:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1698303626; x=1729839626;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=pabscxDh3+k+vXfOWBPcczqxA4HyNYCb+3z61Dqq4NM=;
+  b=hF3fKrsZTjw6OYEXgnOzTUDY4UcL/hV2yT6tfOmExbOdug0nW868BpVg
+   r5VHWtcYDnn0LrX3dIcikehx0Sf1rdw71J7nRc6RGghDWzDvYJafqYLCF
+   dNYBuO+U6J8pIPF/XG666G6VcdHel+d0mvLJG0sgQXo9T+1+h+yy3Mw2u
+   JpN+IPajwa52hdCOWMtYezxX0x1LgW6UqRNBJOzBs9PRJcRsPfrBnomWW
+   6vRdSkqon4pLQtisWGMxMA4G1Qg9WeEBiDIHexJQmxB2/d/5eIlYEokHy
+   3TO7Wpzd04Ttuvm5hx5p8h2mdXNOXIAPTAB5Zhha0/fVt8Os/m1iyus5K
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10874"; a="453942829"
+X-IronPort-AV: E=Sophos;i="6.03,253,1694761200"; 
+   d="scan'208";a="453942829"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Oct 2023 00:00:23 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10874"; a="882721828"
+X-IronPort-AV: E=Sophos;i="6.03,253,1694761200"; 
+   d="scan'208";a="882721828"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.211.218])
+  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Oct 2023 00:00:19 -0700
+Message-ID: <8b7f948d-316c-4135-875a-de455ff4849c@intel.com>
+Date:   Thu, 26 Oct 2023 10:00:15 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20230927071500.1791882-1-avri.altman@wdc.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sdhci_am654: fix start loop index for TAP value
+ parsing
+Content-Language: en-US
+To:     Nitin Yadav <n-yadav@ti.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20231026061458.1116276-1-n-yadav@ti.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20231026061458.1116276-1-n-yadav@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[note this has been applied to all -stable branches as well -- sorry for
-noticing this after explicitly testing the 5.10.199-rc1...]
+On 26/10/23 09:14, Nitin Yadav wrote:
+> ti,otap-del-sel-legacy/ti,itap-del-sel-legacy passed from DT
+> are currently ignored for all SD/MMC and eMMC modes. Fix this
+> by making start loop index to MMC_TIMING_LEGACY.
+> 
+> Fixes: 8ee5fc0e0b3be ("mmc: sdhci_am654: Update OTAPDLY writes")
+> 
 
-Avri Altman wrote on Wed, Sep 27, 2023 at 10:15:00AM +0300:
-> It is important to fix it because we are using it as one of our quirk's
-> token, as well as other tools, e.g. the LVFS
-> (https://github.com/fwupd/fwupd/)
+There isn't usually a blank line here
 
-On the other hand there are many quirks in drivers/mmc/core/quirks.h
-that relied on the value being a short -- I noticed because our MMC
-started to show some hangs that were worked around in a quirk that is
-apparently no longer applied.
+Perhaps a Cc: stable@vger.kernel.org tag?
 
-Unfortunately almost none of these are using defines so it's stray 0x100
-0x5048 0x200 .. in MMC_FIXUP (3rd arg is oemid), so it'll be difficult
-to fix -- especially as embedded downstreams often add their own quirks
-and you can't fix that for them.
+> Signed-off-by: Nitin Yadav <n-yadav@ti.com>
 
-I'd suggest something like this instead:
--------
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 1e14cc69e0ab..892a5bba36ec 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -189,7 +189,7 @@ static inline void mmc_fixup_device(struct mmc_card *card,
- 		if ((f->manfid == CID_MANFID_ANY ||
- 		     f->manfid == card->cid.manfid) &&
- 		    (f->oemid == CID_OEMID_ANY ||
--		     f->oemid == card->cid.oemid) &&
-+		     (f->oemid & 0xff) == (card->cid.oemid & 0xff)) &&
- 		    (f->name == CID_NAME_ANY ||
- 		     !strncmp(f->name, card->cid.prod_name,
- 			      sizeof(card->cid.prod_name))) &&
--------
-(whether to mask cid.oemid or not is up for debate, but that leaves less
-room for error)
+Nevertheless:
 
-I'm testing this right now for our board, will submit as a proper patch
-later today if it works -- but feel free to comment first.
-Missing quirks on certain sd/mmc can cause some trouble so might want to
-revert this patch on stable kernels unless there's immediate agreement
-on this patch
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks,
--- 
-Dominique Martinet | Asmadeus
+
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 544aaaf5cb0f..aae9d255c6a1 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -606,7 +606,7 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
+>  		return 0;
+>  	}
+>  
+> -	for (i = MMC_TIMING_MMC_HS; i <= MMC_TIMING_MMC_HS400; i++) {
+> +	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
+>  
+>  		ret = device_property_read_u32(dev, td[i].otap_binding,
+>  					       &sdhci_am654->otap_del_sel[i]);
+
