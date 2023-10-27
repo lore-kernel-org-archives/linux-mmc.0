@@ -2,109 +2,138 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4606C25B47
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Oct 2023 10:03:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81E8FC25B70
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Oct 2023 10:54:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345667AbjJ0KD6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Oct 2023 06:03:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45656 "EHLO
+        id S1345686AbjJ0Ky7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Oct 2023 06:54:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235111AbjJ0KDy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Oct 2023 06:03:54 -0400
-Received: from mail-oa1-x29.google.com (mail-oa1-x29.google.com [IPv6:2001:4860:4864:20::29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49035194
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Oct 2023 03:03:52 -0700 (PDT)
-Received: by mail-oa1-x29.google.com with SMTP id 586e51a60fabf-1e19cb7829bso1095411fac.1
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Oct 2023 03:03:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698401031; x=1699005831; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=zsWK1OgDjICTXVg+y2fnxE5fIMnUa5Iiz/sVKW4pjEI=;
-        b=AjQtDNbL3Y5LL0A/UP5QJoWPZXnsCLfbohGC2fs3tSrqLYQyhgLiFe4E5xn8YuhtZ7
-         xN/TJkCDIcOG8DVFXWuyOHcnMKRPkM4yzY6xl1Z2oHImZAbChwohgdKeQ5KQit6+h2MC
-         aUt34fOPw98Qg+xaoFYSGyjeDfO7j9sf66OsCziwDVXC40X24M1e5EM3qKC/aDJz9DQz
-         1RnO3xjezCDWpwlVG8nRAgcx72MyIjkCjSdaOibDm13wd+rmLCpfDb7HzAbDTDxqe7E6
-         2oOmxQAN9oYX5y056QIOAw92EsJom1ffNTeqirrjdOfCfMC3XCCBK280w6cbLfxq07yN
-         SE4g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698401031; x=1699005831;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=zsWK1OgDjICTXVg+y2fnxE5fIMnUa5Iiz/sVKW4pjEI=;
-        b=Ib8NfwdAGBRhqOFeHRdh3XygH0mRDs0+Y6r04fd46hBkrAed/SEpWdz+DuETR5D1w0
-         EyWRupJcm9dHwLboO3DlFnvdu+4obZeW9iX4lSyisQbGVVO/gCsdTB52XvHfo1yPLM8V
-         S8Kb7LqI9QfaE6/hS7ZY/dPrGiHQo3CR7MEe/FI1tVKd9bDxDk9ExVkXkHtTWVirfqhs
-         WNTo/+/Y37xSY53K5l2LzxyPKhuC7d6stFIWEdu3gdjOCcBmWWRWwtNgubcATY3D11IB
-         6IBZL3x1dSRJ3uAWafTjGTJfn0fV8swMtSonJGkYqAFNm56UaASjP8Q9CK1GXsffItTG
-         y4lA==
-X-Gm-Message-State: AOJu0YyQIpo/7Wc1Oik6/vi6hANjtm6z+jcJ0wjmeOtUfROVeDTF9FKX
-        1iE6HUkWVhOUn+dp+Kf8tOEGiHW65p2ngsZYaoW6jw==
-X-Google-Smtp-Source: AGHT+IH7wI4TactJw4Ii9UHtb52uYCU7O9TJ6Nhj5u3wLFU+xns7qj5V3PuIa87IFs656AW02q6QPGJSuZZSsMoGVjY=
-X-Received: by 2002:a05:6870:f619:b0:1ea:2506:3e90 with SMTP id
- ek25-20020a056870f61900b001ea25063e90mr2405935oab.35.1698401030962; Fri, 27
- Oct 2023 03:03:50 -0700 (PDT)
+        with ESMTP id S1345696AbjJ0Ky6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Oct 2023 06:54:58 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50188129
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Oct 2023 03:54:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1698404096; x=1729940096;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=69RkpwK0EJZDbOQqPNYE5notdzn/1hr5bS5Lli/Ct00=;
+  b=kqnsFlQ3zpS3U3Fm3ZYf9uh3iP81Jaq5qDnIpcsHQbt3McQzZy/NkiaH
+   KjEdWttjI33bg6QjEpdDS34J4+Aeo/+kYhOv2gqBIKAGem+D3iY5tiIA7
+   +JcRJoKZnhaVaQEz5XTL5EMSru3rFFlnl4RSycdOcypId7f09gxMOd3H4
+   3zzsX2Zple14NCSKEJ3dclCPkJOkHa+vTB7MF3DQWOmI/SKaPxHOpld2M
+   rR1Rd5Um7F60xZtRrZuigP5Ei56jgYh5zXjBmtaH3GL9g6FzMS5t6AF3W
+   wy8lh1/xwHvbTxoDD0Naw3eXFKXmfn31/kuOdXkehHqK5NcdrsM11iDkP
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10875"; a="384961603"
+X-IronPort-AV: E=Sophos;i="6.03,256,1694761200"; 
+   d="scan'208";a="384961603"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Oct 2023 03:54:56 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10875"; a="903232568"
+X-IronPort-AV: E=Sophos;i="6.03,256,1694761200"; 
+   d="scan'208";a="903232568"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.41.10])
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Oct 2023 03:52:26 -0700
+Message-ID: <77d61d32-70ee-4343-a21e-fae69d2247d7@intel.com>
+Date:   Fri, 27 Oct 2023 13:54:48 +0300
 MIME-Version: 1.0
-References: <20231025-topic-sm8650-upstream-bindings-sdhci-v2-1-0406fca99033@linaro.org>
-In-Reply-To: <20231025-topic-sm8650-upstream-bindings-sdhci-v2-1-0406fca99033@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 27 Oct 2023 12:03:15 +0200
-Message-ID: <CAPDyKFoeONhEK9BjEpmEvHXzHHxZZPU5TgmBu8dP-m8DsR3NGg@mail.gmail.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: sdhci-msm: document the SM8650 SDHCI Controller
-To:     Neil Armstrong <neil.armstrong@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 0/2] mmc: host: Disable auto-cmd12 during ffu
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Avri Altman <Avri.Altman@wdc.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Daniil Lunev <dlunev@google.com>,
+        Asutosh Das <quic_asutoshd@quicinc.com>
+References: <20231025113035.1881418-1-avri.altman@wdc.com>
+ <afdada50-cdcb-4edb-a026-c872e1914e43@intel.com>
+ <DM6PR04MB6575743E1EBDC899206E9A9AFCDDA@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <CAPDyKFqHV02EaSMDgLZHG51DT-smhWcc7=EvUG9+N5g7ns1HJg@mail.gmail.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CAPDyKFqHV02EaSMDgLZHG51DT-smhWcc7=EvUG9+N5g7ns1HJg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 25 Oct 2023 at 10:28, Neil Armstrong <neil.armstrong@linaro.org> wrote:
->
-> Document the SDHCI Controller on the SM8650 Platform.
->
-> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+On 27/10/23 12:41, Ulf Hansson wrote:
+> On Thu, 26 Oct 2023 at 12:07, Avri Altman <Avri.Altman@wdc.com> wrote:
+>>
+>>> On 25/10/23 14:30, Avri Altman wrote:
+>>>> Field Firmware Update (ffu) may use close-ended or open ended sequence.
+>>>> Each such sequence is comprised of a write commands enclosed between 2
+>>>> switch commands - to and from ffu mode.
+>>>>
+>>>> Some platforms generate auto command error interrupt when it shouldn't,
+>>>> e.g. auto-cmd12 while in close-ended ffu sequence.  I encountered  this
+>>>> issue while testing fwupd (github.com/fwupd/fwupd) on HP Chromebook
+>>> x2,
+>>>> a qualcomm based QC-7c, code name - strongbad. Instead of a quirk, make
+>>>> sure it disable auto-cmd12 while close-ended ffu is in progress.
+>>>
+>>> I think I misunderstood this because I was thinking that auto-cmd12
+>>> was being used with an open-ended sequence, and that it wasn't
+>>> working with FFU.  However it seems mmc-utils is using a closed-ended
+>>> sequence.
+>> Yes, mmc-utils, fwupd, as well as others - uses close-ended,
+>> And unlike rpmb - it sends cmd23 as part of the ffu sequence.
+>>
+>>>
+>>> It looks like the the host controller driver doesn't know that,
+>>> because the ioctl interface does not use mrq.sbc and the
+>>> SET_BLOCK_COUNT command is sent separately.  Then when the
+>>> MULTI_WRITE
+>>> command is issued, the host controller driver treats it as open-ended
+>>> and will enable auto-cmd12 if the controller supports it.
+>>>
+>>> If that is the case, it would be better to fix the ioctl handling
+>>> and make it use mrq.sbc instead of issuing SET_BLOCK_COUNT separately.
+>> We can do that.
+>> On the other hand, this doesn't happen on other platforms.
+>> Fwupd has just recently switched to close-ended, but mmc-utils is using close-ended mode for many years,
+>> Performing ffu successfully on many different platforms.
+>> My understanding is, that the hw should realize that cmd23 has just sent prior to cmd25 and avoid this auto-cmd12.
+> 
+> Yes, in principle that's correct.
+> 
+> In fact, I think that most host drivers should already support this
+> behavior, although it relies on the CMD23 to be incorporated within
+> the same mmc request (mrq) as the CMD25. We use "mrq.sbc" for this and
+> the host driver uses MMC_CAP_CMD23 to inform the MMC core whether it
+> supports this or not.
+> 
+>>
+>> Going back to your proposal, we can ignore cmd23 in close-ended ffu, but eventually,
+>> we will need to change mmc-utils and fwupd to stop send cmd23.
+> 
+> This is not what we proposed, at least if I understood Adrian correctly.
+> 
+> Instead, the idea that could make better sense, is to fix the mmc
+> ioctl handling in the mmc core, so that it can discover that a CMD23
+> command is followed by another CMD18/25 (multiple read/write). And in
+> this case, it should boundle the commands together, using mrq.sbc so
+> that one request gets sent to the mmc host driver instead of two.
 
-Applied for next, thanks!
+Yes that is what I was thinking.  Perhaps look at
+__mmc_blk_ioctl_cmd() first.  It doesn't have enough information
+to decide what to do, so either something needs to be added to
+struct mmc_blk_ioc_data and set up before hand, or it needs to
+be passed struct mmc_queue_req *mq_rq.
 
-Kind regards
-Uffe
+> 
+> In this way, there should be no need for any specific changes to any
+> of the host drivers (assuming they have the CMD23 support implemented
+> correctly), they should just work.
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
 
-> ---
-> For convenience, a regularly refreshed linux-next based git tree containing
-> all the SM8650 related work is available at:
-> https://git.codelinaro.org/neil.armstrong/linux/-/tree/topic/sm85650/upstream/integ
-> ---
-> Changes in v2:
-> - Fixed typo in subject
-> - Link to v1: https://lore.kernel.org/r/20231025-topic-sm8650-upstream-bindings-sdhci-v1-1-e644cf937321@linaro.org
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 69a213965089..86fae733d9a0 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -58,6 +58,7 @@ properties:
->                - qcom,sm8350-sdhci
->                - qcom,sm8450-sdhci
->                - qcom,sm8550-sdhci
-> +              - qcom,sm8650-sdhci
->            - const: qcom,sdhci-msm-v5 # for sdcc version 5.0
->
->    reg:
->
-> ---
-> base-commit: fe1998aa935b44ef873193c0772c43bce74f17dc
-> change-id: 20231016-topic-sm8650-upstream-bindings-sdhci-3a47f07807ae
->
-> Best regards,
-> --
-> Neil Armstrong <neil.armstrong@linaro.org>
->
