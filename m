@@ -2,100 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F407BC25B6B
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Oct 2023 12:20:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA31FC25B47
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Oct 2023 06:11:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235056AbjJZMUy convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Oct 2023 08:20:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41816 "EHLO
+        id S229604AbjJ0GLq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Oct 2023 02:11:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231168AbjJZMUr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Oct 2023 08:20:47 -0400
-Received: from mail-ot1-f66.google.com (mail-ot1-f66.google.com [209.85.210.66])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 486AB116;
-        Thu, 26 Oct 2023 05:20:45 -0700 (PDT)
-Received: by mail-ot1-f66.google.com with SMTP id 46e09a7af769-6ce322b62aeso474245a34.3;
-        Thu, 26 Oct 2023 05:20:45 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698322844; x=1698927644;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=rwfH/fI/oq7RyoHmXtZ7J/iC1NW7ZB+6I+gOPXF7UYQ=;
-        b=SWpPbSesxpT4s8OQXSPZgnsVJ7i7uObJtGGpfCcZMuE4xdybDB3WT9AN5B1qZuW7Rr
-         Ke7nOT+Z1pBm6919l7IhDkyGayYAbovSCoMN2Sdlfs/1owSNDDOeLl0+mDEMfC2BFJBx
-         5PBeCmkpIason5ujTMiI001XtIntkF1zdy+JpvRBiiZqRY66jrniV9blpyNgDsIcla2q
-         TR51OU/y3rBTuMgvS044a4sdqt+p3nvZkoKIPCbj0SKJiz4wcqRhrXP8pU/DIa5PFrNo
-         xC+4cqvMFeoS+51MoseoQOUR3M9iyCo01M0TBHccPqabQ3FxWfT/0wU7HylCqMmrsEhV
-         8jJQ==
-X-Gm-Message-State: AOJu0YwqA7QMTwCHMvpIamOkbIhcsNLDxV8xPXgPqH5cBNFu+YBYGRw7
-        7DYdYwnFssRdou2nfL7M4YF7uGxQwm2Xq8wo
-X-Google-Smtp-Source: AGHT+IGptDwl41gUQ/bkDbV9wZgRJKx5mnDR8dxNnO8m3ssskGl5XISLS2YYdgdzYF/hjRPae4JjEw==
-X-Received: by 2002:a05:6870:1081:b0:1d6:5133:2f37 with SMTP id 1-20020a056870108100b001d651332f37mr16817789oaq.48.1698322844518;
-        Thu, 26 Oct 2023 05:20:44 -0700 (PDT)
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com. [209.85.128.178])
-        by smtp.gmail.com with ESMTPSA id w64-20020a0dd443000000b00577269ba9e9sm5955996ywd.86.2023.10.26.05.20.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 26 Oct 2023 05:20:44 -0700 (PDT)
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-5a7dd65052aso6709797b3.0;
-        Thu, 26 Oct 2023 05:20:44 -0700 (PDT)
-X-Received: by 2002:a5b:608:0:b0:d9a:e947:447b with SMTP id
- d8-20020a5b0608000000b00d9ae947447bmr18024321ybq.14.1698322843939; Thu, 26
- Oct 2023 05:20:43 -0700 (PDT)
+        with ESMTP id S229590AbjJ0GLp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Oct 2023 02:11:45 -0400
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D1631AD;
+        Thu, 26 Oct 2023 23:11:42 -0700 (PDT)
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 39R6Bb6C010971;
+        Fri, 27 Oct 2023 01:11:37 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1698387097;
+        bh=NA4L4brfJcyEh6tN4VGt18esOxDUl5IjCG/PrXygxBE=;
+        h=Date:Subject:To:CC:References:From:In-Reply-To;
+        b=YMxH9GITElSn2Do/BU+meNMI6xdntssDoCvl+bwlrO8fOAQJEIzWht1084M1HNynW
+         wgWeKOMG8L8+7FQsbCIwApyg6jg4nRy3ZZlaPkHVTtO/dHx8ENfThPTscHYE+cVVxt
+         BSiV1xrQ+gu2GQVcQshd2aRIjCH9ftMWLwE4ZvUU=
+Received: from DLEE113.ent.ti.com (dlee113.ent.ti.com [157.170.170.24])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 39R6Bb34029277
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 27 Oct 2023 01:11:37 -0500
+Received: from DLEE105.ent.ti.com (157.170.170.35) by DLEE113.ent.ti.com
+ (157.170.170.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 27
+ Oct 2023 01:11:36 -0500
+Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE105.ent.ti.com
+ (157.170.170.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Fri, 27 Oct 2023 01:11:36 -0500
+Received: from [10.24.69.29] (ileaxei01-snat2.itg.ti.com [10.180.69.6])
+        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 39R6BYbE120724;
+        Fri, 27 Oct 2023 01:11:35 -0500
+Message-ID: <7054b3bb-de99-3fb0-5f17-78249f31c53f@ti.com>
+Date:   Fri, 27 Oct 2023 11:41:34 +0530
 MIME-Version: 1.0
-References: <20231009130126.697995596@linuxfoundation.org> <ZSRVgj5AqJbDXqZU@duo.ucw.cz>
- <ZSRe78MAQwbBdyFP@duo.ucw.cz> <ZSUy+zA0+Chm6dFb@duo.ucw.cz>
- <ZSU+GHl1q7T/TBp5@duo.ucw.cz> <ZSWg1fv3gOyV5t+h@shikoro> <2023101057-runny-pellet-8952@gregkh>
- <ZTgZa1ic1iFbdaTM@duo.ucw.cz> <CAMuHMdXQApuOPfU1zNKcHKN5=fCuLBSDiLtF06U7e4Tx0+noyA@mail.gmail.com>
- <CAMuHMdVrdmBgopnPnJK_ij52wz2WVBdYRHur2KfosFnT945ULw@mail.gmail.com>
- <CAMuHMdWZvTGrFgx_o3g3usOwkDvD2rw5QH9_ibo=OKdw17sAzg@mail.gmail.com>
- <CAMuHMdXvpiGQ7jqAG69Zo=10wV-E0bioC9AYUHwwhRGmLXygWA@mail.gmail.com>
- <7d7a5a15-3349-adce-02cd-82b6cb4bebde@roeck-us.net> <CAMuHMdXbPZ0uz0NnE1xhUD=QtaAq+TinSW-PrWPMpGe4h=7Spg@mail.gmail.com>
- <CAMuHMdXNjopzEFCFBxxuYNCFMmj4SvMQ2PmZ4hZDHLGZGUHf=w@mail.gmail.com> <CAMuHMdU7-5R4NkwMdbLxovBY4=ePtPDs2SYXjWeGc_Yz3JcjPg@mail.gmail.com>
-In-Reply-To: <CAMuHMdU7-5R4NkwMdbLxovBY4=ePtPDs2SYXjWeGc_Yz3JcjPg@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 26 Oct 2023 14:20:31 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdU=O=gYEA_qOh7Unr8ovtnKJi12qxWb447KxvkhqyRshw@mail.gmail.com>
-Message-ID: <CAMuHMdU=O=gYEA_qOh7Unr8ovtnKJi12qxWb447KxvkhqyRshw@mail.gmail.com>
-Subject: Re: renesas_sdhi problems in 5.10-stable was Re: [PATCH 5.10 000/226]
- 5.10.198-rc1 review
-To:     Guenter Roeck <linux@roeck-us.net>
-Cc:     Pavel Machek <pavel@denx.de>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        niklas.soderlund+renesas@ragnatech.se,
-        yoshihiro.shimoda.uh@renesas.com, biju.das.jz@bp.renesas.com,
-        Chris.Paterson2@renesas.com, stable@vger.kernel.org,
-        patches@lists.linux.dev, linux-kernel@vger.kernel.org,
-        torvalds@linux-foundation.org, akpm@linux-foundation.org,
-        shuah@kernel.org, patches@kernelci.org,
-        lkft-triage@lists.linaro.org, jonathanh@nvidia.com,
-        f.fainelli@gmail.com, sudipm.mukherjee@gmail.com,
-        srw@sladewatkins.net, rwarsow@gmx.de, conor@kernel.org,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH] mmc: sdhci_am654: fix start loop index for TAP value
+ parsing
+Content-Language: en-US
+To:     Adrian Hunter <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+References: <20231026061458.1116276-1-n-yadav@ti.com>
+ <8b7f948d-316c-4135-875a-de455ff4849c@intel.com>
+ <8148dae9-e3fc-4589-ba57-a3f7a3e63b80@intel.com>
+From:   Nitin Yadav <n-yadav@ti.com>
+In-Reply-To: <8148dae9-e3fc-4589-ba57-a3f7a3e63b80@intel.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 26, 2023 at 2:08 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> The solution is to backport commit 9f12cac1bb88e329 ("mmc: renesas_sdhi:
-> use custom mask for TMIO_MASK_ALL") in v5.13.
-> As this doesn't backport cleanly, I'll submit a (tested) patch.
+Hi Adrian,
 
-https://lore.kernel.org/r/1b9fda30f2d86fab50341a947d17b5206a2c7507.1698321354.git.geert+renesas@glider.be
-
-Gr{oetje,eeting}s,
-
-                        Geert
+On 26/10/23 12:33, Adrian Hunter wrote:
+> On 26/10/23 10:00, Adrian Hunter wrote:
+>> On 26/10/23 09:14, Nitin Yadav wrote:
+>>> ti,otap-del-sel-legacy/ti,itap-del-sel-legacy passed from DT
+>>> are currently ignored for all SD/MMC and eMMC modes. Fix this
+>>> by making start loop index to MMC_TIMING_LEGACY.
+>>>
+>>> Fixes: 8ee5fc0e0b3be ("mmc: sdhci_am654: Update OTAPDLY writes")
+>>>
+>>
+>> There isn't usually a blank line here
+>>
+>> Perhaps a Cc: stable@vger.kernel.org tag?
+>>
+>>> Signed-off-by: Nitin Yadav <n-yadav@ti.com>
+>>
+>> Nevertheless:
+>>
+>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+> Sorry, sent that prematurely - see comment below
+> 
+>>
+>>
+>>> ---
+>>>  drivers/mmc/host/sdhci_am654.c | 2 +-
+>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+>>> index 544aaaf5cb0f..aae9d255c6a1 100644
+>>> --- a/drivers/mmc/host/sdhci_am654.c
+>>> +++ b/drivers/mmc/host/sdhci_am654.c
+>>> @@ -606,7 +606,7 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
+>>>  		return 0;
+>>>  	}
+>>>  
+> 
+> Isn't the MMC_TIMING_LEGACY information read at the top of
+> sdhci_am654_get_otap_delay()?
+Loop also take care of ITAP. Looks like at some point single property
+ti,otap-del-sel was used for all modes and then we moved to one property
+per mode:
+https://lore.kernel.org/r/20200108150920.14547-3-faiz_abbas@ti.com
+(since v5.7)
+> 
+>>> -	for (i = MMC_TIMING_MMC_HS; i <= MMC_TIMING_MMC_HS400; i++) {
+>>> +	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
+>>>  
+>>>  		ret = device_property_read_u32(dev, td[i].otap_binding,
+>>>  					       &sdhci_am654->otap_del_sel[i]);
+>>
+> 
 
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Regards,
+Nitin
