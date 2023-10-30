@@ -2,104 +2,160 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 689D1C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 04:18:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1061C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 06:22:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230338AbjJ3ESp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 00:18:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37654 "EHLO
+        id S231375AbjJ3GWn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 02:22:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229514AbjJ3ESo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 00:18:44 -0400
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CDDFB4;
-        Sun, 29 Oct 2023 21:18:42 -0700 (PDT)
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 39U4IQ5x82683577, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-        by rtits2.realtek.com.tw (8.15.2/2.93/5.92) with ESMTPS id 39U4IQ5x82683577
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 30 Oct 2023 12:18:26 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.32; Mon, 30 Oct 2023 12:18:27 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXMBS04.realtek.com.tw (172.21.6.97) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Mon, 30 Oct 2023 12:18:26 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b]) by
- RTEXMBS01.realtek.com.tw ([fe80::9cb8:8d5:b6b3:213b%5]) with mapi id
- 15.01.2375.007; Mon, 30 Oct 2023 12:18:26 +0800
-From:   Ricky WU <ricky_wu@realtek.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "frank.li@vivo.com" <frank.li@vivo.com>,
-        "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Ricky WU <ricky_wu@realtek.com>
-CC:     "arnd@arndb.de" <arnd@arndb.de>,
-        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
-Subject: [PATCH v4 3/3] mmc: rtsx: add rts5264 to support sd express card
-Thread-Topic: [PATCH v4 3/3] mmc: rtsx: add rts5264 to support sd express card
-Thread-Index: AQHaCufLAWNCViBwOEmC803+Z0Ff0w==
-Date:   Mon, 30 Oct 2023 04:18:26 +0000
-Message-ID: <2ba6662162b343e186839abedb8e98c1@realtek.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-x-originating-ip: [172.22.81.102]
-x-kse-serverinfo: RTEXMBS04.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
-Content-Type: text/plain; charset="big5"
-Content-Transfer-Encoding: base64
+        with ESMTP id S231393AbjJ3GWm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 02:22:42 -0400
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69F8FC1
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Oct 2023 23:22:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1698646960; x=1730182960;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=xwQQiJz3r6MkImdDJ73RhT+2aEKHqcVjy2pbPS9h2X8=;
+  b=WmTrTDoSor7Hf4nbcwiTiEVN7usG6+u2S8MNVgWgZULOTBYQu669faNc
+   7bQhMYQEJbEvO8wTPIntIA9xOoEKHYrf7mbK+fyBoN0uK06Q24EIDUhEt
+   lmRFzw84zbNveRq42VYGa/z/jz4Xk7SjwnyzsHJ5o/OQ8P6371Yj+eIYM
+   wbYLN/PxZpE6r5lmZNygecrW1CbsXOHTXvRqfZyRbtgtVK3/9S/o/BtgT
+   y2u5Nt6G+bRXUTGWcGe8RtXp56c5zLSSe2LmGitjrYhqcOtYSGPeqByk2
+   AAgyJVbVMJ7fzGiQ8faEYewdEIIumwmnJyuMUVQrSmWVcf+KseHzZJiFP
+   g==;
+X-CSE-ConnectionGUID: wdA6cdHqTwuM1T2uJvYZuA==
+X-CSE-MsgGUID: UUUwVQ3iTNidmNMCt81Jyg==
+X-IronPort-AV: E=Sophos;i="6.03,262,1694707200"; 
+   d="scan'208";a="1036977"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 30 Oct 2023 14:22:38 +0800
+IronPort-SDR: Vrr8mqiv1gM6kshda6vIC+dXv7XrKrj2YW7bizHtRvYcdAWK7dSeL6IQPV+rozy5EkeB7B8Ak9
+ eftOyFU0PpHMJToFINwnqbYB5pny2kLSi8rkIKqUroOcyxb4iyVrCMBTMSlzQXfhylHzAiiR5J
+ s7GEpstq34d8n3p0MqAVEpyofhSIs/ergPUJORf6clQPGYtAhL3r/CMt67e6w5p4sWeepUg1YR
+ JItXGS8pcpvr7Nw7wamaSgZmdZV2cM/AV/aQNyNWUR91HK7823hmlQwsJak5SDYrs9/i94wWtp
+ RbI=
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Oct 2023 22:34:25 -0700
+IronPort-SDR: /mTdG0tIWlmzxoHpqmbes44BRurAvlIrqGCXAsydAOuN7mp5F3VEnh9OdwGlWE/BbcedBem0j2
+ tSDP4rwFLjBhD53yV++mVlvWV4QKbE0g3ZTL+Ou/SJEWt2KhEqMKhMdL3+r1fhQWIrvjE+sWkV
+ LqZB3vYSQq58+8aoeKdHKRbfr8lpik1hdwmZ7eBWyFmG13OTf1dZMBIhnWElaMSDuSho7SOuHm
+ MJBuhl9yxEkTrEKOQFThuNfwAiZ2+zkDuD9BVYGyLPk+V4Rv7+CrSoEhDpGwopHJ0mJfAiLhGa
+ yUA=
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP; 29 Oct 2023 23:22:38 -0700
+From:   Avri Altman <avri.altman@wdc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH] mmc: core: Remove packed command leftovers
+Date:   Mon, 30 Oct 2023 08:22:26 +0200
+Message-Id: <20231030062226.1895692-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-YWRkIHJ0czUyNjQgcmVnaXN0ZXIgc2V0dGluZyB3aGVuIHNkIGV4cHJlc3MgY2FyZCBpbnNlcnQN
-Cg0KU2lnbmVkLW9mZi1ieTogUmlja3kgV3UgPHJpY2t5X3d1QHJlYWx0ZWsuY29tPg0KLS0tDQp2
-Mzogc3BsaXQgdXAgbW1jIHBhcnQgZnJvbSB2MiBwYXRjaA0KdjQ6IHNwbGl0IG5ldyBkZWZpbml0
-aW9uIHVwIGZyb20gdjMNCi0tLQ0KIGRyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYyB8
-IDE3ICsrKysrKysrKysrKysrKystDQogMSBmaWxlIGNoYW5nZWQsIDE2IGluc2VydGlvbnMoKyks
-IDEgZGVsZXRpb24oLSkNCg0KZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lf
-c2RtbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0KaW5kZXggODdkNzg0
-MzJhMWUwLi43ZGZlN2M0ZTAwNzcgMTAwNjQ0DQotLS0gYS9kcml2ZXJzL21tYy9ob3N0L3J0c3hf
-cGNpX3NkbW1jLmMNCisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0KQEAg
-LTcsNiArNyw3IEBADQogICogICBXZWkgV0FORyA8d2VpX3dhbmdAcmVhbHNpbC5jb20uY24+DQog
-ICovDQogDQorI2luY2x1ZGUgPGxpbnV4L3BjaS5oPg0KICNpbmNsdWRlIDxsaW51eC9tb2R1bGUu
-aD4NCiAjaW5jbHVkZSA8bGludXgvc2xhYi5oPg0KICNpbmNsdWRlIDxsaW51eC9oaWdobWVtLmg+
-DQpAQCAtOTQ3LDcgKzk0OCw3IEBAIHN0YXRpYyBpbnQgc2RfcG93ZXJfb24oc3RydWN0IHJlYWx0
-ZWtfcGNpX3NkbW1jICpob3N0LCB1bnNpZ25lZCBjaGFyIHBvd2VyX21vZGUpDQogCS8qIHNlbmQg
-YXQgbGVhc3QgNzQgY2xvY2tzICovDQogCXJ0c3hfcGNpX3dyaXRlX3JlZ2lzdGVyKHBjciwgU0Rf
-QlVTX1NUQVQsIFNEX0NMS19UT0dHTEVfRU4sIFNEX0NMS19UT0dHTEVfRU4pOw0KIA0KLQlpZiAo
-UENJX1BJRChwY3IpID09IFBJRF81MjYxKSB7DQorCWlmICgoUENJX1BJRChwY3IpID09IFBJRF81
-MjYxKSB8fCAoUENJX1BJRChwY3IpID09IFBJRF81MjY0KSkgew0KIAkJLyoNCiAJCSAqIElmIHRl
-c3QgbW9kZSBpcyBzZXQgc3dpdGNoIHRvIFNEIEV4cHJlc3MgbWFuZGF0b3JpbHksDQogCQkgKiB0
-aGlzIGlzIG9ubHkgZm9yIGZhY3RvcnkgdGVzdGluZy4NCkBAIC0xMzY0LDYgKzEzNjUsMTQgQEAg
-c3RhdGljIGludCBzZG1tY19pbml0X3NkX2V4cHJlc3Moc3RydWN0IG1tY19ob3N0ICptbWMsIHN0
-cnVjdCBtbWNfaW9zICppb3MpDQogCXN0cnVjdCByZWFsdGVrX3BjaV9zZG1tYyAqaG9zdCA9IG1t
-Y19wcml2KG1tYyk7DQogCXN0cnVjdCBydHN4X3BjciAqcGNyID0gaG9zdC0+cGNyOw0KIA0KKwlp
-ZiAoUENJX1BJRChwY3IpID09IFBJRF81MjY0KSB7DQorCQlwY2llX2NhcGFiaWxpdHlfY2xlYXJf
-YW5kX3NldF93b3JkKHBjci0+cGNpLCBQQ0lfRVhQX0xOS0NUTDIsDQorCQkJCVBDSV9FWFBfTE5L
-Q1RMMl9UTFMsIFBDSV9FWFBfTE5LQ1RMMl9UTFNfMl81R1QpOw0KKwkJcGNpX3dyaXRlX2NvbmZp
-Z19ieXRlKHBjci0+cGNpLCAweDgwZSwgMHgwMik7DQorCQlwY2llX2NhcGFiaWxpdHlfY2xlYXJf
-YW5kX3NldF93b3JkKHBjci0+cGNpLCBQQ0lfRVhQX0xOS0NUTDIsDQorCQkJCVBDSV9FWFBfTE5L
-Q1RMMl9UTFMsIFBDSV9FWFBfTE5LQ1RMMl9UTFNfNV8wR1QpOw0KKwl9DQorDQogCS8qIFNldCBy
-ZWxpbmtfdGltZSBmb3IgY2hhbmdpbmcgdG8gUENJZSBjYXJkICovDQogCXJlbGlua190aW1lID0g
-MHg4RkZGOw0KIA0KQEAgLTEzNzksNiArMTM4OCwxMiBAQCBzdGF0aWMgaW50IHNkbW1jX2luaXRf
-c2RfZXhwcmVzcyhzdHJ1Y3QgbW1jX2hvc3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykNCiAJ
-aWYgKHBjci0+b3BzLT5kaXNhYmxlX2F1dG9fYmxpbmspDQogCQlwY3ItPm9wcy0+ZGlzYWJsZV9h
-dXRvX2JsaW5rKHBjcik7DQogDQorCWlmIChQQ0lfUElEKHBjcikgPT0gUElEXzUyNjQpIHsNCisJ
-CXJ0c3hfcGNpX3dyaXRlX3JlZ2lzdGVyKHBjciwgUlRTNTI2NF9BVVRPTE9BRF9DRkcyLA0KKwkJ
-CVJUUzUyNjRfQ0hJUF9SU1RfTl9TRUwsIFJUUzUyNjRfQ0hJUF9SU1RfTl9TRUwpOw0KKwkJcnRz
-eF9wY2lfd3JpdGVfcmVnaXN0ZXIocGNyLCBHUElPX0NUTCwgMHgwMiwgMHgwMCk7DQorCX0NCisN
-CiAJLyogRm9yIFBDSWUvTlZNZSBtb2RlIGNhbid0IGVudGVyIGRlbGluayBpc3N1ZSAqLw0KIAlw
-Y3ItPmh3X3BhcmFtLmludGVycnVwdF9lbiAmPSB+KFNEX0lOVF9FTik7DQogCXJ0c3hfcGNpX3dy
-aXRlbChwY3IsIFJUU1hfQklFUiwgcGNyLT5od19wYXJhbS5pbnRlcnJ1cHRfZW4pOw0KLS0gDQoy
-LjI1LjENCg==
+Packed commands support was removed long time ago, but some bits got
+left behind. Remove them.
+
+Fixes: 03d640ae1f9b (mmc: block: delete packed command support)
+Signed-off-by: Avri Altman <avri.altman@wdc.com>
+---
+ drivers/mmc/core/mmc.c   |  5 -----
+ include/linux/mmc/card.h |  3 ---
+ include/linux/mmc/core.h |  1 -
+ include/linux/mmc/mmc.h  | 10 ----------
+ 4 files changed, 19 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 8180983bd402..5e577aa31bf2 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -613,11 +613,6 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		} else {
+ 			card->ext_csd.data_tag_unit_size = 0;
+ 		}
+-
+-		card->ext_csd.max_packed_writes =
+-			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
+-		card->ext_csd.max_packed_reads =
+-			ext_csd[EXT_CSD_MAX_PACKED_READS];
+ 	} else {
+ 		card->ext_csd.data_sector_size = 512;
+ 	}
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index daa2f40d9ce6..24aaa819f9f0 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -52,9 +52,6 @@ struct mmc_ext_csd {
+ 	u8			part_config;
+ 	u8			cache_ctrl;
+ 	u8			rst_n_function;
+-	u8			max_packed_writes;
+-	u8			max_packed_reads;
+-	u8			packed_event_en;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
+ 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 6efec0b9820c..2c7928a50907 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -27,7 +27,6 @@ struct mmc_command {
+ 	u32			opcode;
+ 	u32			arg;
+ #define MMC_CMD23_ARG_REL_WR	(1 << 31)
+-#define MMC_CMD23_ARG_PACKED	((0 << 31) | (1 << 30))
+ #define MMC_CMD23_ARG_TAG_REQ	(1 << 29)
+ 	u32			resp[4];
+ 	unsigned int		flags;		/* expected response type */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 6f7993803ee7..cf2bcb5da30d 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -257,8 +257,6 @@ static inline bool mmc_ready_for_data(u32 status)
+ #define EXT_CSD_FLUSH_CACHE		32      /* W */
+ #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+ #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+-#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
+-#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
+ #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+ #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
+ #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
+@@ -321,8 +319,6 @@ static inline bool mmc_ready_for_data(u32 status)
+ #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
+ #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+ #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
+-#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
+-#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
+ #define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
+ #define EXT_CSD_HPI_FEATURES		503	/* RO */
+ 
+@@ -402,18 +398,12 @@ static inline bool mmc_ready_for_data(u32 status)
+ #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
+ #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
+ 
+-#define EXT_CSD_PACKED_EVENT_EN	BIT(3)
+-
+ /*
+  * EXCEPTION_EVENT_STATUS field
+  */
+ #define EXT_CSD_URGENT_BKOPS		BIT(0)
+ #define EXT_CSD_DYNCAP_NEEDED		BIT(1)
+ #define EXT_CSD_SYSPOOL_EXHAUSTED	BIT(2)
+-#define EXT_CSD_PACKED_FAILURE		BIT(3)
+-
+-#define EXT_CSD_PACKED_GENERIC_ERROR	BIT(0)
+-#define EXT_CSD_PACKED_INDEXED_ERROR	BIT(1)
+ 
+ /*
+  * BKOPS status level
+-- 
+2.42.0
+
