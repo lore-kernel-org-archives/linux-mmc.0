@@ -2,58 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD820C4167B
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 07:47:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB9C9C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 07:59:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229688AbjJ3HrY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 03:47:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39342 "EHLO
+        id S231751AbjJ3H7w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 03:59:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57068 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231956AbjJ3HrX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 03:47:23 -0400
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDE47BD
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:47:19 -0700 (PDT)
-Received: by mail-ed1-x531.google.com with SMTP id 4fb4d7f45d1cf-53e70b0a218so6426574a12.2
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:47:19 -0700 (PDT)
+        with ESMTP id S231978AbjJ3HfT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 03:35:19 -0400
+Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1A0CC0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:35:16 -0700 (PDT)
+Received: by mail-wm1-x32e.google.com with SMTP id 5b1f17b1804b1-40836ea8cbaso31738595e9.0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:35:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698652038; x=1699256838; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1698651315; x=1699256115; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=9PfgkgvvABG15UH16Td4Dt2qOGQzNMfh+o+HMOp78Ug=;
-        b=i9mpLsM4fiR5MaT99MZyBGvrjbPpmapvsYHXgywzdYoFqV5pwW0Jx+G0pMHptzudhN
-         YbutxAcyRFCjpYWWGbXPl66gdfh2rpk+hILMwA7Al4jCJWreA/RT1AjuBJktKBXXeIbr
-         J6ji+pDHKEKf8kIyQNWvKIrfDRmH1dSxi3vCUpSI8cuJlIpaqyXCsbiEY5X7//FvryYl
-         y2GAW7sP1IgeQerSUHZ2pY2QhRHRGSTjYoVf6YWS3sX2I4lsPktYFG/bUvc6kiMKAbiO
-         hhQFf1yrREA30nqJu4FWm/ogs/5yB4+ACUdbwVqMhjSfWGlaRGgmgijn7lo4mVBcT1E+
-         qxRg==
+        bh=f97Y/pF6GfJC32Gc9bd7nAUI+uBePdpFVeCObiA5WWk=;
+        b=CV75ipwQQo2kJ11W8Y1fATE+Q3cymViHmAUTYfh1yX3gNk6VEJn0v68egnoi3zbzjs
+         3hwqVaHTpq59o0a66nK3QM/D9tiJz8woyR2Qy5qfaDXfXgu0L/50lUBP9i5Yh/WUOpS4
+         LySHvy9nH+sUIROAykP1XGIkdoDYaWZam4vlhcYGtwOf08FE65gK7EE6j4Rcrn/e3V9/
+         r9TQ0IVRZftYW5MLq9iTQWgGuWWi11Tz6BQai5NLECEdxtizTEdNVZgIzh+teKuiGP83
+         HIEhrtro1/DsvUw1txfTOXNo2NxONAeo4CfW486iDWjPAggYT4aCM0ljF82XMbu1Xo8I
+         TUPw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698652038; x=1699256838;
+        d=1e100.net; s=20230601; t=1698651315; x=1699256115;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=9PfgkgvvABG15UH16Td4Dt2qOGQzNMfh+o+HMOp78Ug=;
-        b=Q31bVOFpcKXh8ydkd9L25MFZtmuQ1qhUnf006WmSBLBnBz1O81J2sW8XELUZ4rojIS
-         OacnpKRHukHAQddV40S2F1k7aTE0pAhlXzSkucNhgdLXljIP+z1czlmfFDzH9vKiuFnK
-         oMvSUf811r0F4zLYbWIy3TFg1cwd4wo6XGSLYUhxbg+ac0mgKlvZUmoj6247GhmMCN6/
-         1USgDYV7bhMm5LYqKO9Gv7WSkQlBdab1z3nIsZ1mxBiTC5KxrjGy2Gp67sjvkbG9Ecwi
-         D6uDeB438MjtbrMXq7IscYNehJ3qSxUvsYZUFnF/BcDOwK/21zJ2nMUjKEuk/B9mcfjA
-         GJ3Q==
-X-Gm-Message-State: AOJu0YzL31v3KIYphgmeZq4qW6kxAvfAWFtSqFOH5FNgNRa0wchS0M6u
-        Qol7b5C5bVSN2CahwjdkfVSdLA==
-X-Google-Smtp-Source: AGHT+IG/GBvva3wFMTWJDHpXAEIg1yU5curoLnX+rzC0pehpxnQOwiWxjneh4SYHE3V6fbJ8HLqZAg==
-X-Received: by 2002:aa7:c494:0:b0:540:f0d8:d748 with SMTP id m20-20020aa7c494000000b00540f0d8d748mr7880706edq.23.1698652038194;
-        Mon, 30 Oct 2023 00:47:18 -0700 (PDT)
+        bh=f97Y/pF6GfJC32Gc9bd7nAUI+uBePdpFVeCObiA5WWk=;
+        b=lRBgijtDZew+pyTDx+AIH2EJ2yh7QDAa4wnur8ECsGcHjOYIPowNwvRxSnrYFm1TzL
+         +MUeS4mLqEqhX2H13k8BcU192FvpddX/cf4aakYTR2+6tagLzWLCThJVlqf5sImywuRQ
+         /JWVF+0sj7AaqcUbwgCVhmTA1Co/rT2U09zDgYvZmMhViFQeXYC2vMM37qw6ReFNPQrj
+         K4PZIJZMXKVn4/p2amI1hi+/NPS27ew15kwDLAhlIttSEn7MJbWiMYH/LTarKZ3C7vuI
+         wYs9z4XO4HNrNLYHf7EUTY2RbKVQah7DXcSbLD/LNq6zldVD+Q3BBTdN9Rugebu+f7z7
+         l8Bw==
+X-Gm-Message-State: AOJu0YzT/d9W7sBus7E3r2SmJ18rd2Gd7mjRaTJlqil6oxlg17W1zWCH
+        slK6edommQmqyON7mk67NokLIw==
+X-Google-Smtp-Source: AGHT+IF789qdL+Zbc2tA+RA+WyMvXNHyagw19RM5XdsgJaqN/f9Yvwt0258CiFbBwrJgoGa2vGu48A==
+X-Received: by 2002:a05:600c:4445:b0:3fe:1af6:6542 with SMTP id v5-20020a05600c444500b003fe1af66542mr7432336wmn.33.1698651315072;
+        Mon, 30 Oct 2023 00:35:15 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id 16-20020a508750000000b00534e791296bsm5798173edv.37.2023.10.30.00.47.16
+        by smtp.gmail.com with ESMTPSA id ay32-20020a05600c1e2000b004065daba6casm11907165wmb.46.2023.10.30.00.35.12
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 30 Oct 2023 00:47:17 -0700 (PDT)
-Message-ID: <b116d46f-f28b-4b7c-afd2-0061b523b00d@linaro.org>
-Date:   Mon, 30 Oct 2023 08:47:15 +0100
+        Mon, 30 Oct 2023 00:35:14 -0700 (PDT)
+Message-ID: <0843027c-88ed-4c7e-a054-15277e2a0cb5@linaro.org>
+Date:   Mon, 30 Oct 2023 08:35:12 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V4][4/4] dt-bindings: mmc: Add dt-bindings for realtek mmc
+Subject: Re: [PATCH V4][1/4] mmc: solve DMA boundary limitation of CQHCI
  driver
 Content-Language: en-US
 To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
@@ -67,7 +67,7 @@ Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
         william.qiu@starfivetech.com
 References: <20231030062749.2840-1-jyanchou@realtek.com>
- <20231030062749.2840-5-jyanchou@realtek.com>
+ <20231030062749.2840-2-jyanchou@realtek.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -113,7 +113,7 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231030062749.2840-5-jyanchou@realtek.com>
+In-Reply-To: <20231030062749.2840-2-jyanchou@realtek.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -121,238 +121,50 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 30/10/2023 07:27, Jyan Chou wrote:
-> Document the device-tree bindings for Realtek SoCs mmc driver.
+> Due to synopsys data book's description, it had a limitation
+> while using DMA that buffer size and start address must not
+> exceed 128 MB.
+> 
+> We add an option setup_tran_desc to make tran_desc setting flexible.
 > 
 > Signed-off-by: Jyan Chou <jyanchou@realtek.com>
 > 
 > ---
-> v3 -> v4:
-> - Rename compatible(add SoC-specific part) to be different from filename.
-
-What? I asked to be the same.
-
-> - Describe the items to make properties and item easy to understand.
-> - Fix examples' indentation and compiling error.
-> - Drop useless properties.
-> 
 > v2 -> v3:
-> - Modify dt-bindings' content and description.
-> - Fix coding style.
-> - Update the list of maintainers.
+> - Fix auto test compile warning.
 > 
-> v0 -> v2:
-> - Add dt-bindings.
+> v1 -> v2:
+> - Export cqhci_set_tran_desc for setting the descriptor's callback function.
+> 
+> v0 -> v1:
+> - Separate different patch supports into single patch.
 > ---
 > ---
->  .../bindings/mmc/realtek-dw-mshc.yaml         | 161 ++++++++++++++++++
->  1 file changed, 161 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
-
-Compatible should match filename.
-
-This is a friendly reminder during the review process.
-
-It seems my or other reviewer's previous comments were not fully
-addressed. Maybe the feedback got lost between the quotes, maybe you
-just forgot to apply it. Please go back to the previous discussion and
-either implement all requested changes or keep discussing them.
-
-Thank you.
-
-
+>  drivers/mmc/host/cqhci-core.c | 8 +++++++-
+>  drivers/mmc/host/cqhci.h      | 5 +++++
+>  2 files changed, 12 insertions(+), 1 deletion(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
-> new file mode 100644
-> index 000000000000..d238cf3b8b47
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
-> @@ -0,0 +1,161 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/realtek-dw-mshc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Realtek DesignWare mobile storage host controller
-> +
-> +description:
-> +  Realtek uses the Synopsys DesignWare mobile storage host controller
-> +  to interface a SoC with storage medium. This file documents the Realtek
-> +  specific extensions.
-> +
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
-> +
-> +maintainers:
-> +  - Jyan Chou <jyanchou@realtek.com>
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - realtek,rtd1325-dw-cqe-emmc
-> +
-> +  reg:
-> +    maxItems: 2
-> +    description:
-> +      Two regs are required, first reg specifies emmc base address, second reg
-> +      specifies cqhci base register address.
-> +
-> +  reg-names:
-> +    maxItems: 2
-> +    items:
-> +      - const: emmc
-> +      - const: cqhci
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  cqe:
-> +    maxItems: 1
-> +    description:
-> +      Cqe should set to 1 while using command queue feature, and set to 0 while
-> +      in legacy mode.
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+> index b3d7d6d8d654..5560329d2a7d 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -474,7 +474,7 @@ static int cqhci_dma_map(struct mmc_host *host, struct mmc_request *mrq)
+>  	return sg_count;
+>  }
+>  
+> -static void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+> +void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+>  				bool dma64)
+>  {
+>  	__le32 *attr = (__le32 __force *)desc;
+> @@ -495,6 +495,7 @@ static void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
+>  		dataddr[0] = cpu_to_le32(addr);
+>  	}
+>  }
+> +EXPORT_SYMBOL(cqhci_set_tran_desc);
 
-Did you just ignore Rob's comment?
+EXPORT_SYMBOL_GPL
 
-Please point me where and how did you address it?
-
-> +
-> +  clocks:
-> +    minItems: 2
-
-No, why?
-
-> +    items:
-> +      - description: bus interface unit clock
-> +      - description: card interface unit clock
-> +      - description: select the phase for vpclk0 in realtek chip specified
-> +      - description: select the phase for vpclk1 in realtek chip specified
-> +
-> +  clock-names:
-> +    minItems: 2
-
-No, why?
-
-> +    items:
-> +      - const: biu
-> +      - const: ciu
-> +      - const: vp0
-> +      - const: vp1
-> +
-> +  resets:
-> +    maxItems: 1
-> +
-> +  reset-names:
-> +    const: reset
-
-You ignored my feedback. NAK.
-
-> +
-> +  pinctrl-0:
-> +    description:
-> +      should contain default/high speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-1:
-> +    description:
-> +      should contain sdr50 mode pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-2:
-> +    description:
-> +      should contain ddr50 mode pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-3:
-> +    description:
-> +      should contain hs200 speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-4:
-> +    description:
-> +      should contain hs400 speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-5:
-> +    description:
-> +      should contain tune0 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-6:
-> +    description:
-> +      should contain tune1 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-7:
-> +    description:
-> +      should contain tune2 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-8:
-> +    description:
-> +      should contain tune3 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-9:
-> +    description:
-> +      should contain tune4 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-names:
-> +    maxItems: 10
-> +
-> +  required:
-
-This wasn't even tested.
-
-Do not send untested, broken code. Please run `make dt_binding_check`
-(see Documentation/devicetree/bindings/writing-schema.rst for
-instructions). Maybe you need to update your dtschema and yamllint.
-
-> +    - compatible
-> +    - reg
-> +    - reg-names
-> +    - interrupts
-> +    - clocks
-> +    - clock-names
-> +    - pinctrl-names
-> +
-> +  unevaluatedProperties: false
-> +
-> +  examples:
-
-
-> +    - |
-> +      emmc: mmc@12000 {
-> +        compatible = "realtek,rtd1325-dw-cqe-emmc";
-> +        reg = <0x00012000 0x00600>,
-> +              <0x00012180 0x00060>;
-> +        reg-names = "emmc", "cqhci";
-> +        interrupts = <0 42 4>;
-> +        clocks = <&cc 22>, <&cc 26>, <&cc 121>, <&cc 122>;
-> +        clock-names = "biu", "ciu", "vp0", "vp1";
-> +        clock-freq-min-max = <300000 400000000>;
-> +        clock-frequency = <400000>;
-> +        vmmc-supply = <&reg_vcc1v8>;
-> +        resets = <&rst 20>;
-> +        reset-names = "reset";
-> +        speed-step = <3>;
-> +        cqe = <1>;
-> +        pinctrl-names = "default", "sdr50", "ddr50", "hs200", "hs400",
-> +                        "tune0","tune1", "tune2","tune3", "tune4";
-> +        pinctrl-0 = <&emmc_pins_sdr50>;
-> +        pinctrl-1 = <&emmc_pins_sdr50>;
-> +        pinctrl-2 = <&emmc_pins_ddr50>;
-> +        pinctrl-3 = <&emmc_pins_hs200>;
-> +        pinctrl-4 = <&emmc_pins_hs400>;
-> +        pinctrl-5 = <&emmc_pins_tune0>;
-> +        pinctrl-6 = <&emmc_pins_tune1>;
-> +        pinctrl-7 = <&emmc_pins_tune2>;
-> +        pinctrl-8 = <&emmc_pins_tune3>;
-> +        pinctrl-9 = <&emmc_pins_tune4>;
-> +        };
-
-Broken indentation.
 
 Best regards,
 Krzysztof
