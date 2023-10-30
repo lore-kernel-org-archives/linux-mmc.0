@@ -2,58 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EF26C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 07:39:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 304CDC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 07:44:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232127AbjJ3Hjd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 03:39:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39440 "EHLO
+        id S231641AbjJ3Hol (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 03:44:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231956AbjJ3Hjc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 03:39:32 -0400
-Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9A50B7
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:39:28 -0700 (PDT)
-Received: by mail-ej1-x62d.google.com with SMTP id a640c23a62f3a-9c5b313b3ffso614019366b.0
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:39:28 -0700 (PDT)
+        with ESMTP id S229688AbjJ3Hok (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 03:44:40 -0400
+Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 723D0C0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:44:33 -0700 (PDT)
+Received: by mail-ed1-x534.google.com with SMTP id 4fb4d7f45d1cf-5401bab7525so6929576a12.2
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:44:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698651567; x=1699256367; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1698651871; x=1699256671; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=un1B+HdCY4rb6l+yNfK1fdIrKdS9fURStbp/Gin4628=;
-        b=YL2zWM4SBRfjz3WDVAlK3i7bukpWyy3ZEoNjHVJ9YmlQTcmbFy8e+JyBxByeeL8Oc0
-         9uWqvtODjE+W4++cgVXuyyHX7+pC9aeWKaGMtZMxSU8XKvTNW3OKdHaYIQ0yXbxLjsqg
-         B1Fv1XdR2RhYblU/vZriE1JqNR/yNST59hvFcZDn5ELne8yI76wUbCYf133+KCppuXQ9
-         il3Ornc1Bxg6N1Fe8GQk5PO7g69ojqsZhUQhIc4KVATSOSoZboT4jRh02jFa5gnnOD0O
-         oLrL/Oc4LdaFSXMGXsEMmMuhwqxvTyp8e/XrLLWwSe8EWsz92Doh+hoNcsAiujvorvEd
-         ngIA==
+        bh=Z8VaN6a4ya0DXMWsYW2kM9ryYhNEgaYXgGcUUpaZgDs=;
+        b=wXqdv8y/NS/GEzbvuPfBGSRvi5JW/vtApLxHc3McAb1XlRF5W5x2fZE4aFZYgT/ZPa
+         Af8xx6zyQs/ppcnjXnv4lQzqM10Pn4URH+Dsz8rBA7UNztTMu7LVvTLpXxtQz+r4QsEt
+         gtFk70YAHZNkuOk1UXhD84L3fNhBR/ZAUSvuFHZWZgY6upHhvyubJ035y2f48MBhxXIt
+         wwUD4YF+QoJldaKnZ38VH0hKK7uUIQz6NjYFrqpkPeOD1sirfCTpBsOpQk6Do++ehc4L
+         ZftcRPP9WU3lGetfMouZ9RlUf+fY2/2xCrJEUs2kXes7y2HtApPJlVSwHe1vbiZwyteO
+         ya3A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698651567; x=1699256367;
+        d=1e100.net; s=20230601; t=1698651871; x=1699256671;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=un1B+HdCY4rb6l+yNfK1fdIrKdS9fURStbp/Gin4628=;
-        b=TEyuapbuTCgtCCfEofxZXBCYo3A83tOAwS74JHoEf7y6mPhuDBm9EM5RQzYhDPh5SB
-         GU0bY3ZO7SO7jOH2IrH0LlC0MakqxyD0y322jvu7FSCpOSFbztBcmjdTuvdg2MDeQZVe
-         n03rO8zlm9R1SDMJPi3EGkacU01S4NlvM2eYEq1Cqf68U+fUjSCW3exccko5b3OqvK1e
-         cXqXsSqq+tzFeAm79dfr9fXM+ybWm2uswi87StxvNeBCfSPxmwvFN5euL8AxH8ciFxsl
-         0RxizrGKz636lhd++exKvWizgl/fKRZ/qmIFVqAN7o5ruV8p7PbYQGTOIwao7Kj+dwB4
-         bTfQ==
-X-Gm-Message-State: AOJu0YxCJK0L/w1nq+wPgs2CfHvcu+mA2HRbhoOma9lB4zCwYnYwhxh6
-        ZqiTMfsjlMC2AH1RlFzpiTy4SA==
-X-Google-Smtp-Source: AGHT+IF8Ef++OJHXVJllrD3R72IaUiIgCv3FiU91UCPPrjv6o6Nke2xQzDc/J+zev/lhkV/+SQoJDw==
-X-Received: by 2002:a17:907:2910:b0:9be:51ce:e91b with SMTP id eq16-20020a170907291000b009be51cee91bmr5536966ejc.68.1698651567082;
-        Mon, 30 Oct 2023 00:39:27 -0700 (PDT)
+        bh=Z8VaN6a4ya0DXMWsYW2kM9ryYhNEgaYXgGcUUpaZgDs=;
+        b=Cjzachrm3u3TSxoxdDq4SRpSJKYujuPQ9rJ6p2IimFk3ECejjQ3n1fnm4hH5ag+K6x
+         iPHo7YMUEnk/zP8TV+N3xhD9sAMENNAVMAVg7Bpcvz3H3k3s/uO5uyiGAgAirmg7HsuI
+         HhVnAqZhoVwoh9VF8Wlm9sxR226js/MbnrJJhnk+u+v0Rlib5+oNreyfdL7BJSX//tpl
+         KjhuH11ykjAI05umbYKCrmwf5pd+C10qaiK6mFLCC9wH/01AXnS1NvTjdwrbPNUnFlMS
+         /3EIQdrUbgnCu92iY5sn0I6p8LmwHoSBOo05J06fAZ9ea0oZg1i/zqLsm49QKCyS31NK
+         cSIg==
+X-Gm-Message-State: AOJu0Yw1uud1T8AHO48c9AuM9X/HTgg6KZDdiuYbHkkkMX2oF+5MLrDa
+        ijFmDgosUizpogS3z74fgszHuA==
+X-Google-Smtp-Source: AGHT+IGmCG5g33B0DCnziedQFTBTigoiF1f7ySYkvgSgVXqPvNHy0HeHqM9KAxB8ql5ppreM1CyXZg==
+X-Received: by 2002:a50:d593:0:b0:53e:3b8f:8ce1 with SMTP id v19-20020a50d593000000b0053e3b8f8ce1mr7854816edi.23.1698651871168;
+        Mon, 30 Oct 2023 00:44:31 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id x22-20020a170906149600b009b2b47cd757sm5490088ejc.9.2023.10.30.00.39.25
+        by smtp.gmail.com with ESMTPSA id z22-20020a50cd16000000b005402a0c9784sm5760741edi.40.2023.10.30.00.44.29
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 30 Oct 2023 00:39:26 -0700 (PDT)
-Message-ID: <baf6a0c3-e76a-4d9d-8866-b3f4fdae162e@linaro.org>
-Date:   Mon, 30 Oct 2023 08:39:24 +0100
+        Mon, 30 Oct 2023 00:44:30 -0700 (PDT)
+Message-ID: <ebbbed14-ad93-4981-96f9-8cc344b63448@linaro.org>
+Date:   Mon, 30 Oct 2023 08:44:28 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V4][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
+Subject: Re: [PATCH V4][3/4] mmc: Add dw mobile mmc cmdq rtk driver
 Content-Language: en-US
 To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
         adrian.hunter@intel.com, jh80.chung@samsung.com,
@@ -66,7 +66,7 @@ Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
         william.qiu@starfivetech.com
 References: <20231030062749.2840-1-jyanchou@realtek.com>
- <20231030062749.2840-3-jyanchou@realtek.com>
+ <20231030062749.2840-4-jyanchou@realtek.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -112,238 +112,369 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231030062749.2840-3-jyanchou@realtek.com>
+In-Reply-To: <20231030062749.2840-4-jyanchou@realtek.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 30/10/2023 07:27, Jyan Chou wrote:
-> We implemented cmdq feature on Synopsys DesignWare mmc driver.
-> The difference between dw_mmc.c and dw_mmc_cqe.c were distinct
-> register definitions, mmc user flow and the addition of cmdq.
-> 
-> New version of User Guide had modify mmc driver's usage flow,
-> we may need to renew code to precisely follow user guide.
-> 
-> More over, We added a wait status function to satisfy synopsys
-> user guide's description, since this flow might be specific in
-> synopsys host driver only.
+> Add Realtek mmc driver to make good use Synopsys
+> DesignWare mmc cmdq host driver.
 > 
 > Signed-off-by: Jyan Chou <jyanchou@realtek.com>
 > 
-> —--
+> ---
 > v3 -> v4:
-> - Modify dma mode selection and dma addressing bit to statisfy
->   linux coding style.
-> 
+> - Modify dma setting's code to fix linux coding style.
 
-I asked to fix several coding style issues so it will look a bit as
-matching Linux coding style. I don't see improvements.
+And coding style of all other parts were ignored. You must fix it
+everywhere in your code.
 
-Please read carefully, more than once, the Linux coding style. Then
-document in changelog what you fixed. If you document nothing, means you
-ignored the feedback.
-
-Fix every warning from checkpatch --strict. Then document in changelog
-what you fixed. If you document nothing, means you ignored the feedback.
+...
 
 > +
-> +	if (!host->bus_hz) {
-> +		dev_err(host->dev,
-> +			"Platform data must supply bus speed\n");
-> +		ret = -ENODEV;
-> +		goto err_clk_ciu;
-> +	}
-> +
-> +	if (!IS_ERR(host->pdata->rstc)) {
-> +		reset_control_assert(host->pdata->rstc);
-> +		usleep_range(10, 50);
-> +		reset_control_deassert(host->pdata->rstc);
-> +	}
-> +
-> +	timer_setup(&host->timer, dw_mci_cqe_cto_timer, 0);
-> +
-> +	spin_lock_init(&host->lock);
-> +	spin_lock_init(&host->irq_lock);
-> +	init_rwsem(&host->cr_rw_sem);
-> +	tasklet_init(&host->tasklet, dw_mci_cqe_tasklet_func, (unsigned long)host);
-> +
-> +	/*pio mode's parameters should be initialized here*/
-
-Nothing improved.
-
-> +
-> +	/*Initialize the eMMC IP related attribute*/
-> +	dw_mci_cqe_setup(host);
-> +
-> +	dw_mci_cqe_init_dma(host);
-> +
-> +	/* This flag will be set 1 when doing tuning,
-
-Nothing improved.
-
-> +	 * we add this flag because
-> +	 * some vendors might use other cmd instead of 21
-> +	 * to tune phase under high speed interface.
-> +	 * we use this flag to recognize if the system is under tuning stage.
+> +static void dw_mci_rtk_init_card(struct mmc_host *host, struct mmc_card *card)
+> +{
+> +	/* In Realtek Platform, we need to attach eMMC card onto mmc host
+> +	 * during eMMC initialization because of the following reason:
+> +	 * When system cannot run the hs400, we need to down speed to hs200
+> +	 * and call mmc_hw_reset and modify the mmc card attribute through mmc host.
+> +	 * At this moment, system will show errors if host->card = NULL.
 > +	 */
-> +	host->tuning = 0;
+> +	host->card = card;
+> +}
 > +
-> +	/*Timing_setting is to avoid sending command
-
-Nothing improved.
-
-> +	 *before setting phase in hs200, hs400
-> +	 */
-> +	host->current_speed = 0;
+> +static int dw_mci_rtk_parse_dt(struct dw_mci *host)
+> +{
+> +	struct dw_mci_rtkemmc_host *priv;
+> +	const u32 *prop;
+> +	int size;
 > +
-> +	/*Do the rest of init for specific*/
-> +	if (drv_data && drv_data->init) {
-> +		ret = drv_data->init(host);
-> +		if (ret) {
-> +			dev_err(host->dev,
-> +				"implementation specific init failed\n");
-> +			goto err_dmaunmap;
-> +		}
+> +	priv = devm_kzalloc(host->dev, sizeof(struct dw_mci_rtkemmc_host), GFP_KERNEL);
+
+sizeof(*)
+
+> +	if (!priv)
+> +		return -ENOMEM;
+> +
+> +	priv->pinctrl = devm_pinctrl_get(host->dev);
+> +	if (IS_ERR(priv->pinctrl))
+> +		dev_dbg(host->dev, "no pinctrl\n");
+> +
+> +	priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
+> +						  PINCTRL_STATE_DEFAULT);
+> +	if (IS_ERR(priv->pins_default))
+> +		dev_warn(host->dev, "could not get default state\n");
+> +
+
+So this is required by the driver but not by the bindings.
+
+> +	priv->pins_sdr50 = pinctrl_lookup_state(priv->pinctrl,
+> +						"sdr50");
+> +	if (IS_ERR(priv->pins_sdr50))
+> +		dev_warn(host->dev, "could not get sdr50 state\n");
+> +
+> +	priv->pins_hs200 = pinctrl_lookup_state(priv->pinctrl,
+> +						"hs200");
+> +	if (IS_ERR(priv->pins_hs200))
+> +		dev_warn(host->dev, "could not get hs200 state\n");
+> +
+> +	priv->pins_hs400 = pinctrl_lookup_state(priv->pinctrl,
+> +						"hs400");
+> +	if (IS_ERR(priv->pins_hs400))
+> +		dev_warn(host->dev, "could not get hs400 state\n");
+> +
+> +	priv->pins_tune0 = pinctrl_lookup_state(priv->pinctrl,
+> +						"tune0");
+> +	if (IS_ERR(priv->pins_tune0))
+> +		dev_warn(host->dev, "could not get tune0 state\n");
+> +
+> +	priv->pins_tune1 = pinctrl_lookup_state(priv->pinctrl,
+> +						"tune1");
+> +	if (IS_ERR(priv->pins_tune1))
+> +		dev_warn(host->dev, "could not get tune1 state\n");
+> +
+> +	priv->pins_tune2 = pinctrl_lookup_state(priv->pinctrl,
+> +						"tune2");
+> +	if (IS_ERR(priv->pins_tune2))
+> +		dev_warn(host->dev, "could not get tune2 state\n");
+> +
+> +	priv->pins_tune3 = pinctrl_lookup_state(priv->pinctrl,
+> +						"tune3");
+> +	if (IS_ERR(priv->pins_tune3))
+> +		dev_warn(host->dev, "could not get tune3 state\n");
+> +
+> +	priv->pins_tune4 = pinctrl_lookup_state(priv->pinctrl,
+> +						"tune4");
+> +
+> +	if (IS_ERR(priv->pins_tune4))
+> +		dev_warn(host->dev, "could not get tune4 state\n");
+> +
+> +	priv->vp0 = devm_clk_get(host->dev, "vp0");
+> +	if (IS_ERR(priv->vp0))
+> +		dev_err(host->dev, "could not get vp0 clk\n");
+> +
+> +	priv->vp1 = devm_clk_get(host->dev, "vp1");
+> +	if (IS_ERR(priv->vp1))
+> +		dev_err(host->dev, "could not get vp1 clk\n");
+
+dev_err_probe. Everywhere where applicable.
+
+> +
+> +	priv->emmc_mode = 0;
+> +	prop = of_get_property(host->dev->of_node, "speed-step", &size);
+> +	if (prop) {
+> +		priv->emmc_mode = of_read_number(prop, 1);
+> +		dev_info(host->dev, "emmc mode : %d\n", priv->emmc_mode);
+
+Drop
+
+> +	} else {
+> +		dev_info(host->dev, "use default emmc sdr50 mode !\n");
+
+Drop, why is this a problem?
+
 > +	}
 > +
-> +	ret = dw_mci_cqe_init_slot(host);
-> +	if (ret) {
-> +		dev_err(host->dev, "slot 0 init failed\n");
-> +		goto err_dmaunmap;
+> +	priv->is_cqe = 0;
+> +	prop = of_get_property(host->dev->of_node, "cqe", &size);
+> +	if (prop) {
+> +		priv->is_cqe = of_read_number(prop, 1);
+> +		dev_info(host->dev, "cmdq mode : %d\n", priv->is_cqe);
+
+Drop
+
+
+> +	} else {
+> +		dev_info(host->dev, "use default eMMC legacy mode !\n");
+
+Drop
+
+
 > +	}
 > +
-> +	ret = devm_request_irq(host->dev, host->irq, dw_mci_cqe_interrupt,
-> +			       host->irq_flags, "dw-mci-cqe", host);
-> +	if (ret)
-> +		goto err_dmaunmap;
+> +	prop = of_get_property(host->dev->of_node, "rdq-ctrl", &size);
+> +	if (prop) {
+> +		priv->rdq_ctrl = of_read_number(prop, 1);
+> +		dev_info(host->dev, "get rdq-ctrl : %u\n", priv->rdq_ctrl);
+
+Drop
+
+
+> +	} else {
+> +		priv->rdq_ctrl = 0;
+> +		dev_info(host->dev, "no dqs_dly_tape switch node, use default 0x0 !!\n");
+
+Drop
+
+> +	}
 > +
-> +	/*After the slot initialization,
-
-Nothing improved.
-
-> +	 *now we have mmc data and can initialize cmdq if user enabled
-> +	 */
-> +	dw_mci_cqhci_init(host);
+> +	priv->m2tmx = syscon_regmap_lookup_by_phandle(host->dev->of_node, "realtek,m2tmx");
+> +	if (IS_ERR_OR_NULL(priv->m2tmx))
+> +		dev_err(host->dev, "can not get m2mtx node.\n");
+> +
+> +	host->priv = priv;
 > +
 > +	return 0;
-> +
-> +err_dmaunmap:
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
-> +err_clk_ciu:
-> +	clk_disable_unprepare(host->ciu_clk);
-> +
-> +err_clk_biu:
-> +	clk_disable_unprepare(host->biu_clk);
-> +
-> +	return ret;
 > +}
-> +EXPORT_SYMBOL(dw_mci_cqe_probe);
 > +
-> +void dw_mci_cqe_remove(struct dw_mci *host)
+> +static int dw_mci_rtk_init(struct dw_mci *host)
 > +{
-> +	dev_dbg(host->dev, "remove slot\n");
-
-Nothing improved.
-
-> +	if (host->slot)
-> +		dw_mci_cqe_cleanup_slot(host->slot);
+> +	struct dw_mci_rtkemmc_host *priv = host->priv;
 > +
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
+> +	host->pdata->caps2 = MMC_CAP2_NO_SDIO | MMC_CAP2_NO_SD;
 > +
-> +	clk_disable_unprepare(host->ciu_clk);
-> +	clk_disable_unprepare(host->biu_clk);
+> +	if (priv->emmc_mode >= 2)
+> +		host->pdata->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+> +	if (priv->emmc_mode >= 3) {
+> +		host->pdata->caps |= MMC_CAP_1_8V_DDR;
+> +		host->pdata->caps2 |= MMC_CAP2_HS400_1_8V;
+> +	}
+> +
+> +	if (priv->is_cqe > 0)
+> +		host->pdata->caps2 |= (MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD);
+> +
+> +	host->irq_flags = IRQF_SHARED;
+> +
+> +	mcq_writel(host, CP, 0x0);
+> +
+> +	/*Enable L4 gated*/
+
+Read Linux coding style. Multiple times if needed.
+
+> +	mcq_writel(host, OTHER1, mcq_readl(host, OTHER1) &
+> +		~(SDMMC_L4_GATED_DIS | SDMMC_L4_GATED_DIS1));
+> +
+> +	mcq_writel(host, OTHER1, mcq_readl(host, OTHER1) &
+> +		   (~(SDMMC_DQS_CTRL_GATE_DIS | SDMMC_DBUS_MAS_GATING_DIS)));
+> +
+> +	/*Set the eMMC wrapper little Endian*/
+> +	mcq_writel(host, AHB, mcq_readl(host, AHB) | SDMMC_AHB_BIG);
+> +
+> +	mcq_writel(host, OTHER1,
+> +		   mcq_readl(host, OTHER1) | SDMMC_STARK_CARD_STOP_ENABLE);
+> +
+> +	/*set eMMC instead of nand*/
+> +	regmap_update_bits_base(priv->m2tmx, SDMMC_NAND_DMA_SEL,
+> +				SDMMC_SRAM_DMA_SEL, SDMMC_SRAM_DMA_SEL, NULL, false, true);
+> +
+> +	/*Set the clk initial phase*/
+> +	dw_mci_rtk_phase_tuning(host, 0, 0);
+> +
+> +	return 0;
 > +}
-> +EXPORT_SYMBOL(dw_mci_cqe_remove);
 > +
 > +#ifdef CONFIG_PM
-> +int dw_mci_cqe_runtime_suspend(struct device *dev)
+> +static int dw_mci_rtk_suspend(struct device *dev)
 > +{
 > +	struct dw_mci *host = dev_get_drvdata(dev);
 > +	int ret = 0;
 > +
-> +	if (host->pdata && (host->pdata->caps2 & MMC_CAP2_CQE)) {
-> +		if (host->slot) {
-> +			dev_info(host->dev, "cqe suspend\n");
-
-Nothing improved.
-
-> +			ret = cqhci_suspend(host->slot->mmc);
-> +			if (ret) {
-> +				dev_err(host->dev, "cqe suspend failed\n");
-
-Nothing improved.
-
-> +				return ret;
-> +			}
-> +		}
-> +	}
-> +
-> +	clk_disable_unprepare(host->ciu_clk);
+> +	ret = dw_mci_cqe_runtime_suspend(dev);
+> +	mcq_writel(host, AHB, 0);
 > +
 > +	return ret;
 > +}
-> +EXPORT_SYMBOL(dw_mci_cqe_runtime_suspend);
 > +
-> +int dw_mci_cqe_runtime_resume(struct device *dev)
+> +static int dw_mci_rtk_resume(struct device *dev)
 > +{
 > +	struct dw_mci *host = dev_get_drvdata(dev);
-> +	const struct dw_mci_drv_data *drv_data = host->drv_data;
 > +	int ret = 0;
 > +
-> +	clk_prepare_enable(host->ciu_clk);
-> +
-> +	dw_mci_cqe_setup(host);
-> +	if (drv_data && drv_data->init) {
-> +		ret = drv_data->init(host);
-> +		if (ret)
-> +			dev_err(host->dev, "implementation specific init failed\n");
-> +	}
-> +
-> +	init_completion(host->int_waiting);
-> +
-> +	if (host->pdata && (host->pdata->caps2 & MMC_CAP2_CQE)) {
-> +		if (host->slot) {
-> +			dev_info(host->dev, "cqe resume\n");
-> +			ret = cqhci_resume(host->slot->mmc);
-> +			if (ret)
-> +				dev_err(host->dev, "cqe resume failed\n");
-
-
-Nothing improved.
-
-> +		}
-> +	}
-> +
-> +	dw_mci_cqe_setup_bus(host->slot, true);
+> +	mcq_writel(host, AHB, mcq_readl(host, AHB) | SDMMC_AHB_BIG);
+> +	ret = dw_mci_cqe_runtime_resume(dev);
 > +
 > +	return ret;
 > +}
-> +EXPORT_SYMBOL(dw_mci_cqe_runtime_resume);
-> +#endif /* CONFIG_PM */
-> +
-> +static int __init dw_mci_cqe_init(void)
+> +#else
+> +static int dw_mci_rtk_suspend(struct device *dev)
 > +{
-> +	pr_info("Synopsys Designware Multimedia Card Interface Driver\n");
+> +	dev_info(dev, "User should enable CONFIG_PM kernel config\n");
 
+NAK, come on. I asked to drop it. Did you just ignore the feedback? Yep...
 
-Nothing improved.
-
+> +
 > +	return 0;
 > +}
 > +
-> +static void __exit dw_mci_cqe_exit(void)
+> +static int dw_mci_rtk_resume(struct device *dev)
 > +{
+> +	dev_info(dev, "User should enable CONFIG_PM kernel config\n");
+
+NAK
+
+> +
+> +	return 0;
+> +}
+> +#endif /*CONFIG_PM*/
+> +static const struct dev_pm_ops rtk_dev_pm_ops = {
+> +	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_rtk_suspend,
+> +				dw_mci_rtk_resume)
+> +	SET_RUNTIME_PM_OPS(dw_mci_cqe_runtime_suspend,
+> +			   dw_mci_cqe_runtime_resume,
+> +			   NULL)
+> +};
+> +
+> +static void dw_mci_rtk_shutdown(struct platform_device *pdev)
+> +{
+> +	dev_info(&pdev->dev, "[eMMC] Shutdown\n");
+
+NAK
+
+> +	dw_mci_cqe_runtime_resume(&pdev->dev);
 > +}
 > +
-> +module_init(dw_mci_cqe_init);
-> +module_exit(dw_mci_cqe_exit);
+> +static unsigned long dw_mci_rtk_dwmmc_caps[1] = {
+> +	MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA |
+> +	MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+> +	MMC_CAP_NONREMOVABLE | MMC_CAP_CMD23,
+> +};
+> +
+> +static const struct dw_mci_drv_data rtk_drv_data = {
+> +	.caps                   = dw_mci_rtk_dwmmc_caps,
+> +	.num_caps               = ARRAY_SIZE(dw_mci_rtk_dwmmc_caps),
+> +	.set_ios                = dw_mci_rtk_set_ios,
+> +	.execute_tuning         = dw_mci_rtk_execute_tuning,
+> +	.parse_dt               = dw_mci_rtk_parse_dt,
+> +	.init                   = dw_mci_rtk_init,
+> +	.prepare_hs400_tuning	= dw_mci_rtk_prepare_hs400_tuning,
+> +	.hs400_complete         = dw_mci_rtk_hs400_complete,
+> +	.init_card		= dw_mci_rtk_init_card,
+> +};
+> +
+> +static const struct of_device_id dw_mci_rtk_match[] = {
+> +	{ .compatible = "realtek,rtd1325-dw-cqe-emmc",
+> +		.data = &rtk_drv_data },
+> +	{},
+> +};
+> +MODULE_DEVICE_TABLE(of, dw_mci_rtk_match);
+> +
+> +int dw_mci_cqe_pltfm_register(struct platform_device *pdev,
+> +			      const struct dw_mci_drv_data *drv_data)
+> +{
+> +	struct dw_mci *host;
+> +	struct resource	*regs;
+> +
+> +	host = devm_kzalloc(&pdev->dev, sizeof(struct dw_mci), GFP_KERNEL);
 
-This part of code is just useless.
+sizeof(*)
+
+> +	if (!host)
+> +		return -ENOMEM;
+> +
+> +	host->irq = platform_get_irq(pdev, 0);
+> +	if (host->irq < 0)
+> +		return host->irq;
+> +
+> +	host->drv_data = drv_data;
+> +	host->pdev = pdev;
+> +	host->dev = &pdev->dev;
+> +	host->irq_flags = 0;
+> +	host->pdata = pdev->dev.platform_data;
+> +
+> +	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +	host->regs = devm_ioremap_resource(&pdev->dev, regs);
+
+Use helper for this.
+
+Open existing, recent drivers and use the them as template or some set
+of patterns. Sorry, but upstreaming your vendor code will be painful,
+because you started from some old, buggier version.
+
+> +	if (IS_ERR(host->regs))
+> +		return PTR_ERR(host->regs);
+> +
+> +	/* Get registers' physical base address */
+> +	host->phy_regs = regs->start;
+> +
+> +	platform_set_drvdata(pdev, host);
+> +
+> +	return dw_mci_cqe_probe(host);
+> +}
+> +
+> +static int dw_mci_rtk_probe(struct platform_device *pdev)
+> +{
+> +	const struct dw_mci_drv_data *drv_data;
+> +	const struct of_device_id *match;
+> +
+> +	if (!pdev->dev.of_node)
+> +		return -ENODEV;
+> +
+> +	match = of_match_node(dw_mci_rtk_match, pdev->dev.of_node);
+> +	drv_data = match->data;
+> +
+> +	return dw_mci_cqe_pltfm_register(pdev, drv_data);
+> +}
+> +
+> +int dw_mci_rtk_remove(struct platform_device *pdev)
+> +{
+> +	struct dw_mci *host = platform_get_drvdata(pdev);
+> +
+> +	dw_mci_cqe_remove(host);
+> +	return 0;
+
 
 Best regards,
 Krzysztof
