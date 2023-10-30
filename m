@@ -2,204 +2,197 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AA3FC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 19:31:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C22CAC4167B
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 22:48:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229684AbjJ3TbA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 15:31:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35058 "EHLO
+        id S230352AbjJ3Wsi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 18:48:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37048 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229510AbjJ3TbA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 15:31:00 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 282B2A9;
-        Mon, 30 Oct 2023 12:30:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1698694256; x=1730230256;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=oE5glMctpbfYlLJs53M3TJqVUGKgwDxVjEE0ZRcfHpM=;
-  b=NV3cAfTKh5BNgEUMPp5/yH4Fu+uaNWL6hMCxcDUDyKIVFToxMyQKw0T4
-   G19bKDnjCm9fTEQ37RLj9x6x8QQ9RO1wzht3pRIO/V2inW5cIzKpM0a0T
-   6RPoxQqsyekTEShaUBH9VMskv9fJ/6PJ0TyTkRbxeLmyX7z7kh8n7SkPU
-   9enC7YRS9Q2keXSsAJHc0yEIZ5V4yIS5G5XQIGei/10qIOIYazgDG4PSB
-   Z9dMar8ubxnNh8r0xpdhkaeX+e3VRP37xdV1F7bBxnpCdwHL+QM5ja4ah
-   YcnXOhbthPVrGsMlKyvs7ikuJTvYmvLe3x7FAf3i1IfIEQrXJeh1j6Tho
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10879"; a="387965408"
-X-IronPort-AV: E=Sophos;i="6.03,263,1694761200"; 
-   d="scan'208";a="387965408"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Oct 2023 12:30:56 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10879"; a="1007520505"
-X-IronPort-AV: E=Sophos;i="6.03,263,1694761200"; 
-   d="scan'208";a="1007520505"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.41.161])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Oct 2023 12:30:54 -0700
-Message-ID: <e7c12e07-7540-47ea-8891-2cec73d58df1@intel.com>
-Date:   Mon, 30 Oct 2023 21:30:48 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] mmc: cqhci: Add a quirk to clear stale TC
-Content-Language: en-US
-To:     =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
+        with ESMTP id S229646AbjJ3Wsh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 18:48:37 -0400
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.52])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12271E1;
+        Mon, 30 Oct 2023 15:48:32 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1698706105; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=kZBYoZChuCK8CR9lbKS4snbL9NzakTXIPj9YUQNH5yaZITrymmug6QfsUSZEBMYIj0
+    5cPfquV2vr1r5tEHqvu3tkrnG8gy8FGtGr/pGbI9Xg5X9WMA8zWm+veVtsh56bR4DjSb
+    gWAvU5lXiVSCD2XU+wAXf2jNXSYDTH5hV7N0I20As4C0ws2mFxDvE29LY4wrvUjGvmx1
+    4CcXew4tvZFfZ2asuYIgGBewAeSVaHs96BsIFWcdrY3PezLV2OELQhv/gtB1Iq04sxRq
+    y4SppF1j2gj4winiYsyIf5VkzeQqa5KRluwAwhsjOxjw/0Y/CHgdtGFEakQjfHKuJOFo
+    E6Uw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1698706105;
+    s=strato-dkim-0002; d=strato.com;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=NLfEces4BfsEWbaKYovgafBvpx5rnI42aFAQwYNElhE=;
+    b=eGG1Q0AfdtJq3wIxT4BXFgMRZNkWZUlRAXjLAVOxE/wrdXs1NwwJqK0ooqCqMemwey
+    IormpZ+FDUa3rzacchSp9cNgcX2U4sDRkagHueDcIRcy205m2sVShQXm1sCd1GyTHmBV
+    q+gEqzzUFMl5KV9sp/0vDeoc+we9qdcFyLtkjWe8RhBRDHf8LVhgnPyAYUsLy8vGO5iY
+    3+wB9M7RhZ/zXwHNNUpKnpA6Xw7ysmTZMZvJu2L907b1F7LAK4/MFMRHhWSDp+IW+Yeg
+    xwnnRufhnkLb6ktJi1sI245sD9ATy9egz1xXg8Xna5GqX/j3MWEmq9siTtidgkQwiKSC
+    RMCw==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo01
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1698706105;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=NLfEces4BfsEWbaKYovgafBvpx5rnI42aFAQwYNElhE=;
+    b=kjrTCfJhmXXKVLSuHyRGqUXmqb+5pAnicDdC/pstc5pb4i2Gvp71/4ZShKlOxy+Uh4
+    PMaaQ9dyWRhR6jOlYHT0vm+QxKi2CQntks/42rvxpGDEpf+IgxT/Xe18BMBEqs4XuuI9
+    fn4tJ6YfK7jWHo8BLOAMQDCoklMZ7fHSQoXYz4LyXvF2tI3JfSKZlXaAoSFN4P1EfuoC
+    K6YQMJuzilIes51z/CcTDfbjIjbv6uHxGyf9oYsfekHMEo1KlEJJih5BYTkIUhvvPaRE
+    IdoIFgoNXJTo1gKoNCBOQQBBFg58JX9lbzcTiaqmEbMctPt8MSkUVJUEukQV4OAOOoFl
+    OjGw==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1698706105;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=NLfEces4BfsEWbaKYovgafBvpx5rnI42aFAQwYNElhE=;
+    b=yR5hIyiBI8Y+O0JuNH52hbVnEBESOimD9DeB/evAmclgtkqE8jeQQFjN4/HLa6S3KM
+    l0N1h9AoVpZt5gOU4sAw==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSedrgBzPc9DUyubU4DD1XjJKt+IXM0qv4S/D"
+Received: from Munilab01-lab..
+    by smtp.strato.de (RZmta 49.9.1 AUTH)
+    with ESMTPSA id zd0181z9UMmPGWd
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+        (Client did not present a certificate);
+    Mon, 30 Oct 2023 23:48:25 +0100 (CET)
+From:   Bean Huo <beanhuo@iokpp.de>
+To:     ulf.hansson@linaro.org, cLoehle@hyperstone.com,
+        adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Radoslaw Biernacki <biernacki@google.com>,
-        Gwendal Grignou <gwendal@chromium.org>
-References: <20231027145623.2258723-1-korneld@chromium.org>
- <20231027145623.2258723-2-korneld@chromium.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20231027145623.2258723-2-korneld@chromium.org>
-Content-Type: text/plain; charset=UTF-8
+        Bean Huo <beanhuo@micron.com>,
+        Rafael Beims <rafael.beims@toradex.com>, stable@vger.kernel.org
+Subject: [v5] mmc: Add quirk MMC_QUIRK_BROKEN_CACHE_FLUSH for Micron eMMC Q2J54A
+Date:   Mon, 30 Oct 2023 23:48:09 +0100
+Message-Id: <20231030224809.59245-1-beanhuo@iokpp.de>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27/10/23 17:56, Kornel Dulęba wrote:
-> This fix addresses a stale task completion event issued right after the
-> CQE recovery. As it's a hardware issue the fix is done in form of a
-> quirk.
-> 
-> When error interrupt is received the driver runs recovery logic is run.
-> It halts the controller, clears all pending tasks, and then re-enables
-> it. On some platforms a stale task completion event is observed,
-> regardless of the CQHCI_CLEAR_ALL_TASKS bit being set.
-> 
-> This results in either:
-> a) Spurious TC completion event for an empty slot.
-> b) Corrupted data being passed up the stack, as a result of premature
->    completion for a newly added task.
-> 
-> To fix that re-enable the controller, clear task completion bits,
-> interrupt status register and halt it again.
-> This is done at the end of the recovery process, right before interrupts
-> are re-enabled.
-> 
-> Signed-off-by: Kornel Dulęba <korneld@chromium.org>
-> ---
->  drivers/mmc/host/cqhci-core.c | 42 +++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/cqhci.h      |  1 +
->  2 files changed, 43 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index b3d7d6d8d654..e534222df90c 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -1062,6 +1062,45 @@ static void cqhci_recover_mrqs(struct cqhci_host *cq_host)
->  /* CQHCI could be expected to clear it's internal state pretty quickly */
->  #define CQHCI_CLEAR_TIMEOUT		20
->  
-> +/*
-> + * During CQE recovery all pending tasks are cleared from the
-> + * controller and its state is being reset.
-> + * On some platforms the controller sets a task completion bit for
-> + * a stale(previously cleared) task right after being re-enabled.
-> + * This results in a spurious interrupt at best and corrupted data
-> + * being passed up the stack at worst. The latter happens when
-> + * the driver enqueues a new request on the problematic task slot
-> + * before the "spurious" task completion interrupt is handled.
-> + * To fix it:
-> + * 1. Re-enable controller by clearing the halt flag.
-> + * 2. Clear interrupt status and the task completion register.
-> + * 3. Halt the controller again to be consistent with quirkless logic.
-> + *
-> + * This assumes that there are no pending requests on the queue.
-> + */
-> +static void cqhci_quirk_clear_stale_tc(struct cqhci_host *cq_host)
-> +{
-> +	u32 reg;
-> +
-> +	WARN_ON(cq_host->qcnt);
-> +	cqhci_writel(cq_host, 0, CQHCI_CTL);
-> +	if ((cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)) {
-> +		pr_err("%s: cqhci: CQE failed to exit halt state\n",
-> +			mmc_hostname(cq_host->mmc));
-> +	}
-> +	reg = cqhci_readl(cq_host, CQHCI_TCN);
-> +	cqhci_writel(cq_host, reg, CQHCI_TCN);
-> +	reg = cqhci_readl(cq_host, CQHCI_IS);
-> +	cqhci_writel(cq_host, reg, CQHCI_IS);
-> +
-> +	/*
-> +	 * Halt the controller again.
-> +	 * This is only needed so that we're consistent across quirk
-> +	 * and quirkless logic.
-> +	 */
-> +	cqhci_halt(cq_host->mmc, CQHCI_FINISH_HALT_TIMEOUT);
-> +}
+From: Bean Huo <beanhuo@micron.com>
 
-Thanks a lot for tracking this down!
+Micron MTFC4GACAJCN eMMC supports cache but requires that flush cache
+operation be allowed only after a write has occurred. Otherwise, the
+cache flush command or subsequent commands will time out.
 
-It could be that the "un-halt" starts a task, so it would be
-better to force the "clear" to work if possible, which
-should be the case if CQE is disabled.
+Signed-off-by: Bean Huo <beanhuo@micron.com>
+Signed-off-by: Rafael Beims <rafael.beims@toradex.com>
+Cc: stable@vger.kernel.org
+---
 
-Would you mind trying the code below?  Note the increased
-CQHCI_START_HALT_TIMEOUT helps avoid trying to clear tasks
-when CQE has not halted.
+Changelog:
+v4--v5:
+    1. In the case of a successful flush, set writing_flag in _mmc_flush_cache()
+v3--v4:
+    1. Add helper function for this quirk in drivers/mmc/core/card.h.
+    2. Set card->written_flag only for REQ_OP_WRITE.
+v2--v3:
+    1. Set card->written_flag in mmc_blk_mq_issue_rq().
+v1--v2:
+    1. Add Rafael's test-tag, and Co-developed-by.
+    2. Check host->card whether NULL or not in __mmc_start_request() before asserting host->card->->quirks
+---
+ drivers/mmc/core/block.c  | 4 +++-
+ drivers/mmc/core/card.h   | 4 ++++
+ drivers/mmc/core/mmc.c    | 8 ++++++--
+ drivers/mmc/core/quirks.h | 7 ++++---
+ include/linux/mmc/card.h  | 2 ++
+ 5 files changed, 19 insertions(+), 6 deletions(-)
 
-
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index b3d7d6d8d654..534c13069833 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -987,7 +987,7 @@ static bool cqhci_halt(struct mmc_host *mmc, unsigned int timeout)
-  * layers will need to send a STOP command), so we set the timeout based on a
-  * generous command timeout.
-  */
--#define CQHCI_START_HALT_TIMEOUT	5
-+#define CQHCI_START_HALT_TIMEOUT	500
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 3a8f27c3e310..152dfe593c43 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2381,8 +2381,10 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
+ 			}
+ 			ret = mmc_blk_cqe_issue_flush(mq, req);
+ 			break;
+-		case REQ_OP_READ:
+ 		case REQ_OP_WRITE:
++			card->written_flag = true;
++			fallthrough;
++		case REQ_OP_READ:
+ 			if (host->cqe_enabled)
+ 				ret = mmc_blk_cqe_issue_rw_rq(mq, req);
+ 			else
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index 4edf9057fa79..b7754a1b8d97 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -280,4 +280,8 @@ static inline int mmc_card_broken_sd_cache(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BROKEN_SD_CACHE;
+ }
  
- static void cqhci_recovery_start(struct mmc_host *mmc)
++static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
++}
+ #endif
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 8180983bd402..11053f920ac4 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -2086,13 +2086,17 @@ static int _mmc_flush_cache(struct mmc_host *host)
  {
-@@ -1075,28 +1075,27 @@ static void cqhci_recovery_finish(struct mmc_host *mmc)
+ 	int err = 0;
  
- 	ok = cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
++	if (mmc_card_broken_cache_flush(host->card) && !host->card->written_flag)
++		return err;
++
+ 	if (_mmc_cache_enabled(host)) {
+ 		err = mmc_switch(host->card, EXT_CSD_CMD_SET_NORMAL,
+ 				 EXT_CSD_FLUSH_CACHE, 1,
+ 				 CACHE_FLUSH_TIMEOUT_MS);
+ 		if (err)
+-			pr_err("%s: cache flush error %d\n",
+-			       mmc_hostname(host), err);
++			pr_err("%s: cache flush error %d\n", mmc_hostname(host), err);
++		else
++			host->card->written_flag = false;
+ 	}
  
--	if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
--		ok = false;
--
+ 	return err;
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 32b64b564fb1..5e68c8b4cdca 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -110,11 +110,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
  	/*
- 	 * The specification contradicts itself, by saying that tasks cannot be
- 	 * cleared if CQHCI does not halt, but if CQHCI does not halt, it should
- 	 * be disabled/re-enabled, but not to disable before clearing tasks.
- 	 * Have a go anyway.
+-	 * Micron MTFC4GACAJCN-1M advertises TRIM but it does not seems to
+-	 * support being used to offload WRITE_ZEROES.
++	 * Micron MTFC4GACAJCN-1M supports TRIM but does not appear to suppor
++	 * WRITE_ZEROES offloading. It also supports caching, but the cache can
++	 * only be flushed after a write has occurred.
  	 */
--	if (!ok) {
--		pr_debug("%s: cqhci: disable / re-enable\n", mmc_hostname(mmc));
--		cqcfg = cqhci_readl(cq_host, CQHCI_CFG);
--		cqcfg &= ~CQHCI_ENABLE;
--		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
--		cqcfg |= CQHCI_ENABLE;
--		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
--		/* Be sure that there are no tasks */
--		ok = cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
--		if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
--			ok = false;
--		WARN_ON(!ok);
--	}
-+	if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
-+		ok = false;
-+
-+	cqcfg = cqhci_readl(cq_host, CQHCI_CFG);
-+	cqcfg &= ~CQHCI_ENABLE;
-+	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
-+
-+	cqcfg = cqhci_readl(cq_host, CQHCI_CFG);
-+	cqcfg |= CQHCI_ENABLE;
-+	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
-+
-+	cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
-+
-+	if (!ok)
-+		cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT);
+ 	MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
+-		  MMC_QUIRK_TRIM_BROKEN),
++		  MMC_QUIRK_TRIM_BROKEN | MMC_QUIRK_BROKEN_CACHE_FLUSH),
  
- 	cqhci_recover_mrqs(cq_host);
+ 	/*
+ 	 * Kingston EMMC04G-M627 advertises TRIM but it does not seems to
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index daa2f40d9ce6..7b12eebc5586 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -295,7 +295,9 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ #define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
+ #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
++#define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
  
++	bool			written_flag;	/* Indicates eMMC has been written since power on */
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+-- 
+2.34.1
 
