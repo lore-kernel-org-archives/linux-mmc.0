@@ -2,160 +2,253 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1061C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 06:22:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D653C4167B
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 06:29:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231375AbjJ3GWn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 02:22:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58948 "EHLO
+        id S229620AbjJ3G3o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 02:29:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46722 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231393AbjJ3GWm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 02:22:42 -0400
-Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69F8FC1
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Oct 2023 23:22:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1698646960; x=1730182960;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=xwQQiJz3r6MkImdDJ73RhT+2aEKHqcVjy2pbPS9h2X8=;
-  b=WmTrTDoSor7Hf4nbcwiTiEVN7usG6+u2S8MNVgWgZULOTBYQu669faNc
-   7bQhMYQEJbEvO8wTPIntIA9xOoEKHYrf7mbK+fyBoN0uK06Q24EIDUhEt
-   lmRFzw84zbNveRq42VYGa/z/jz4Xk7SjwnyzsHJ5o/OQ8P6371Yj+eIYM
-   wbYLN/PxZpE6r5lmZNygecrW1CbsXOHTXvRqfZyRbtgtVK3/9S/o/BtgT
-   y2u5Nt6G+bRXUTGWcGe8RtXp56c5zLSSe2LmGitjrYhqcOtYSGPeqByk2
-   AAgyJVbVMJ7fzGiQ8faEYewdEIIumwmnJyuMUVQrSmWVcf+KseHzZJiFP
-   g==;
-X-CSE-ConnectionGUID: wdA6cdHqTwuM1T2uJvYZuA==
-X-CSE-MsgGUID: UUUwVQ3iTNidmNMCt81Jyg==
-X-IronPort-AV: E=Sophos;i="6.03,262,1694707200"; 
-   d="scan'208";a="1036977"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 30 Oct 2023 14:22:38 +0800
-IronPort-SDR: Vrr8mqiv1gM6kshda6vIC+dXv7XrKrj2YW7bizHtRvYcdAWK7dSeL6IQPV+rozy5EkeB7B8Ak9
- eftOyFU0PpHMJToFINwnqbYB5pny2kLSi8rkIKqUroOcyxb4iyVrCMBTMSlzQXfhylHzAiiR5J
- s7GEpstq34d8n3p0MqAVEpyofhSIs/ergPUJORf6clQPGYtAhL3r/CMt67e6w5p4sWeepUg1YR
- JItXGS8pcpvr7Nw7wamaSgZmdZV2cM/AV/aQNyNWUR91HK7823hmlQwsJak5SDYrs9/i94wWtp
- RbI=
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Oct 2023 22:34:25 -0700
-IronPort-SDR: /mTdG0tIWlmzxoHpqmbes44BRurAvlIrqGCXAsydAOuN7mp5F3VEnh9OdwGlWE/BbcedBem0j2
- tSDP4rwFLjBhD53yV++mVlvWV4QKbE0g3ZTL+Ou/SJEWt2KhEqMKhMdL3+r1fhQWIrvjE+sWkV
- LqZB3vYSQq58+8aoeKdHKRbfr8lpik1hdwmZ7eBWyFmG13OTf1dZMBIhnWElaMSDuSho7SOuHm
- MJBuhl9yxEkTrEKOQFThuNfwAiZ2+zkDuD9BVYGyLPk+V4Rv7+CrSoEhDpGwopHJ0mJfAiLhGa
- yUA=
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP; 29 Oct 2023 23:22:38 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH] mmc: core: Remove packed command leftovers
-Date:   Mon, 30 Oct 2023 08:22:26 +0200
-Message-Id: <20231030062226.1895692-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S231497AbjJ3G3l (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 02:29:41 -0400
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58C20C6;
+        Sun, 29 Oct 2023 23:29:34 -0700 (PDT)
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 39U6S3h842780490, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+        by rtits2.realtek.com.tw (8.15.2/2.93/5.92) with ESMTPS id 39U6S3h842780490
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 30 Oct 2023 14:28:03 +0800
+Received: from RTEXMBS03.realtek.com.tw (172.21.6.96) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.17; Mon, 30 Oct 2023 14:28:03 +0800
+Received: from RTEXH36506.realtek.com.tw (172.21.6.27) by
+ RTEXMBS03.realtek.com.tw (172.21.6.96) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Mon, 30 Oct 2023 14:28:02 +0800
+Received: from localhost.localdomain (172.21.252.101) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server id
+ 15.1.2507.17 via Frontend Transport; Mon, 30 Oct 2023 14:28:02 +0800
+From:   Jyan Chou <jyanchou@realtek.com>
+To:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <jh80.chung@samsung.com>, <riteshh@codeaurora.org>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <conor+dt@kernel.org>, <asutoshd@codeaurora.org>,
+        <p.zabel@pengutronix.de>
+CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <arnd@arndb.de>,
+        <briannorris@chromium.org>, <doug@schmorgal.com>,
+        <tonyhuang.sunplus@gmail.com>, <abel.vesa@linaro.org>,
+        <william.qiu@starfivetech.com>, <jyanchou@realtek.com>
+Subject: [PATCH V4][4/4] dt-bindings: mmc: Add dt-bindings for realtek mmc driver
+Date:   Mon, 30 Oct 2023 14:27:49 +0800
+Message-ID: <20231030062749.2840-5-jyanchou@realtek.com>
+X-Mailer: git-send-email 2.42.0
+In-Reply-To: <20231030062749.2840-1-jyanchou@realtek.com>
+References: <20231030062749.2840-1-jyanchou@realtek.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-KSE-ServerInfo: RTEXMBS03.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Packed commands support was removed long time ago, but some bits got
-left behind. Remove them.
+Document the device-tree bindings for Realtek SoCs mmc driver.
 
-Fixes: 03d640ae1f9b (mmc: block: delete packed command support)
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
+Signed-off-by: Jyan Chou <jyanchou@realtek.com>
+
 ---
- drivers/mmc/core/mmc.c   |  5 -----
- include/linux/mmc/card.h |  3 ---
- include/linux/mmc/core.h |  1 -
- include/linux/mmc/mmc.h  | 10 ----------
- 4 files changed, 19 deletions(-)
+v3 -> v4:
+- Rename compatible(add SoC-specific part) to be different from filename.
+- Describe the items to make properties and item easy to understand.
+- Fix examples' indentation and compiling error.
+- Drop useless properties.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 8180983bd402..5e577aa31bf2 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -613,11 +613,6 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		} else {
- 			card->ext_csd.data_tag_unit_size = 0;
- 		}
--
--		card->ext_csd.max_packed_writes =
--			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
--		card->ext_csd.max_packed_reads =
--			ext_csd[EXT_CSD_MAX_PACKED_READS];
- 	} else {
- 		card->ext_csd.data_sector_size = 512;
- 	}
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index daa2f40d9ce6..24aaa819f9f0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -52,9 +52,6 @@ struct mmc_ext_csd {
- 	u8			part_config;
- 	u8			cache_ctrl;
- 	u8			rst_n_function;
--	u8			max_packed_writes;
--	u8			max_packed_reads;
--	u8			packed_event_en;
- 	unsigned int		part_time;		/* Units: ms */
- 	unsigned int		sa_timeout;		/* Units: 100ns */
- 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 6efec0b9820c..2c7928a50907 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -27,7 +27,6 @@ struct mmc_command {
- 	u32			opcode;
- 	u32			arg;
- #define MMC_CMD23_ARG_REL_WR	(1 << 31)
--#define MMC_CMD23_ARG_PACKED	((0 << 31) | (1 << 30))
- #define MMC_CMD23_ARG_TAG_REQ	(1 << 29)
- 	u32			resp[4];
- 	unsigned int		flags;		/* expected response type */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 6f7993803ee7..cf2bcb5da30d 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -257,8 +257,6 @@ static inline bool mmc_ready_for_data(u32 status)
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
--#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
--#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
- #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
- #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
- #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
-@@ -321,8 +319,6 @@ static inline bool mmc_ready_for_data(u32 status)
- #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
- #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
- #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
--#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
--#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
- #define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
- #define EXT_CSD_HPI_FEATURES		503	/* RO */
- 
-@@ -402,18 +398,12 @@ static inline bool mmc_ready_for_data(u32 status)
- #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
- #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
- 
--#define EXT_CSD_PACKED_EVENT_EN	BIT(3)
--
- /*
-  * EXCEPTION_EVENT_STATUS field
-  */
- #define EXT_CSD_URGENT_BKOPS		BIT(0)
- #define EXT_CSD_DYNCAP_NEEDED		BIT(1)
- #define EXT_CSD_SYSPOOL_EXHAUSTED	BIT(2)
--#define EXT_CSD_PACKED_FAILURE		BIT(3)
--
--#define EXT_CSD_PACKED_GENERIC_ERROR	BIT(0)
--#define EXT_CSD_PACKED_INDEXED_ERROR	BIT(1)
- 
- /*
-  * BKOPS status level
+v2 -> v3:
+- Modify dt-bindings' content and description.
+- Fix coding style.
+- Update the list of maintainers.
+
+v0 -> v2:
+- Add dt-bindings.
+---
+---
+ .../bindings/mmc/realtek-dw-mshc.yaml         | 161 ++++++++++++++++++
+ 1 file changed, 161 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
+
+diff --git a/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
+new file mode 100644
+index 000000000000..d238cf3b8b47
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/realtek-dw-mshc.yaml
+@@ -0,0 +1,161 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/realtek-dw-mshc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Realtek DesignWare mobile storage host controller
++
++description:
++  Realtek uses the Synopsys DesignWare mobile storage host controller
++  to interface a SoC with storage medium. This file documents the Realtek
++  specific extensions.
++
++allOf:
++  - $ref: synopsys-dw-mshc-common.yaml#
++
++maintainers:
++  - Jyan Chou <jyanchou@realtek.com>
++
++properties:
++  compatible:
++    enum:
++      - realtek,rtd1325-dw-cqe-emmc
++
++  reg:
++    maxItems: 2
++    description:
++      Two regs are required, first reg specifies emmc base address, second reg
++      specifies cqhci base register address.
++
++  reg-names:
++    maxItems: 2
++    items:
++      - const: emmc
++      - const: cqhci
++
++  interrupts:
++    maxItems: 1
++
++  cqe:
++    maxItems: 1
++    description:
++      Cqe should set to 1 while using command queue feature, and set to 0 while
++      in legacy mode.
++
++  clocks:
++    minItems: 2
++    items:
++      - description: bus interface unit clock
++      - description: card interface unit clock
++      - description: select the phase for vpclk0 in realtek chip specified
++      - description: select the phase for vpclk1 in realtek chip specified
++
++  clock-names:
++    minItems: 2
++    items:
++      - const: biu
++      - const: ciu
++      - const: vp0
++      - const: vp1
++
++  resets:
++    maxItems: 1
++
++  reset-names:
++    const: reset
++
++  pinctrl-0:
++    description:
++      should contain default/high speed pin ctrl.
++    maxItems: 1
++
++  pinctrl-1:
++    description:
++      should contain sdr50 mode pin ctrl.
++    maxItems: 1
++
++  pinctrl-2:
++    description:
++      should contain ddr50 mode pin ctrl.
++    maxItems: 1
++
++  pinctrl-3:
++    description:
++      should contain hs200 speed pin ctrl.
++    maxItems: 1
++
++  pinctrl-4:
++    description:
++      should contain hs400 speed pin ctrl.
++    maxItems: 1
++
++  pinctrl-5:
++    description:
++      should contain tune0 pin ctrl.
++    maxItems: 1
++
++  pinctrl-6:
++    description:
++      should contain tune1 pin ctrl.
++    maxItems: 1
++
++  pinctrl-7:
++    description:
++      should contain tune2 pin ctrl.
++    maxItems: 1
++
++  pinctrl-8:
++    description:
++      should contain tune3 pin ctrl.
++    maxItems: 1
++
++  pinctrl-9:
++    description:
++      should contain tune4 pin ctrl.
++    maxItems: 1
++
++  pinctrl-names:
++    maxItems: 10
++
++  required:
++    - compatible
++    - reg
++    - reg-names
++    - interrupts
++    - clocks
++    - clock-names
++    - pinctrl-names
++
++  unevaluatedProperties: false
++
++  examples:
++    - |
++      emmc: mmc@12000 {
++        compatible = "realtek,rtd1325-dw-cqe-emmc";
++        reg = <0x00012000 0x00600>,
++              <0x00012180 0x00060>;
++        reg-names = "emmc", "cqhci";
++        interrupts = <0 42 4>;
++        clocks = <&cc 22>, <&cc 26>, <&cc 121>, <&cc 122>;
++        clock-names = "biu", "ciu", "vp0", "vp1";
++        clock-freq-min-max = <300000 400000000>;
++        clock-frequency = <400000>;
++        vmmc-supply = <&reg_vcc1v8>;
++        resets = <&rst 20>;
++        reset-names = "reset";
++        speed-step = <3>;
++        cqe = <1>;
++        pinctrl-names = "default", "sdr50", "ddr50", "hs200", "hs400",
++                        "tune0","tune1", "tune2","tune3", "tune4";
++        pinctrl-0 = <&emmc_pins_sdr50>;
++        pinctrl-1 = <&emmc_pins_sdr50>;
++        pinctrl-2 = <&emmc_pins_ddr50>;
++        pinctrl-3 = <&emmc_pins_hs200>;
++        pinctrl-4 = <&emmc_pins_hs400>;
++        pinctrl-5 = <&emmc_pins_tune0>;
++        pinctrl-6 = <&emmc_pins_tune1>;
++        pinctrl-7 = <&emmc_pins_tune2>;
++        pinctrl-8 = <&emmc_pins_tune3>;
++        pinctrl-9 = <&emmc_pins_tune4>;
++        };
 -- 
 2.42.0
 
