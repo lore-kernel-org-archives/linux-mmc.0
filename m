@@ -2,84 +2,71 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F4172C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 07:34:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EF26C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 07:39:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231815AbjJ3Hen (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 03:34:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52426 "EHLO
+        id S232127AbjJ3Hjd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 03:39:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39440 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231752AbjJ3Hem (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 03:34:42 -0400
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DE55A7
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:34:39 -0700 (PDT)
-Received: by mail-lj1-x22f.google.com with SMTP id 38308e7fff4ca-2c504a5e1deso60091251fa.2
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:34:39 -0700 (PDT)
+        with ESMTP id S231956AbjJ3Hjc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 03:39:32 -0400
+Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9A50B7
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:39:28 -0700 (PDT)
+Received: by mail-ej1-x62d.google.com with SMTP id a640c23a62f3a-9c5b313b3ffso614019366b.0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:39:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698651278; x=1699256078; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1698651567; x=1699256367; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=5pa4dby/8JwYM97NqAMx2Dp0QBnoAbYBFM9x+csgj/k=;
-        b=L+sMjL06oPACtfBBiC9MTX6WoJ+UvTe9fwcn9Lu16jQqDrahTBGKqJZI76y8En6E78
-         PhzahJZeNOOSlcsmmS9ibQrJqeSIaYqhL03GxQFnW+EZN3Z3X0TwJgtw7gkaz6yWDWdl
-         vUbKYv7B7XOpQamCha3V5m4Gj8t1FmoA0uvveOXqCDl6mtXEj1Yx7VOnpbTjQGk2+gHa
-         n/YI4cfjHiy9wSDhPjK7AssfPAZrmq01yV918IQqxWlByC88eXWqdkm2CsZYDQfmEA6c
-         mAgWXz1Kgog1ETsj3KPlW3GZSLZJMkPNdNFaQbyNEr5o9KwFZcAcPXAQzQn+MCSc7Ar0
-         9+lg==
+        bh=un1B+HdCY4rb6l+yNfK1fdIrKdS9fURStbp/Gin4628=;
+        b=YL2zWM4SBRfjz3WDVAlK3i7bukpWyy3ZEoNjHVJ9YmlQTcmbFy8e+JyBxByeeL8Oc0
+         9uWqvtODjE+W4++cgVXuyyHX7+pC9aeWKaGMtZMxSU8XKvTNW3OKdHaYIQ0yXbxLjsqg
+         B1Fv1XdR2RhYblU/vZriE1JqNR/yNST59hvFcZDn5ELne8yI76wUbCYf133+KCppuXQ9
+         il3Ornc1Bxg6N1Fe8GQk5PO7g69ojqsZhUQhIc4KVATSOSoZboT4jRh02jFa5gnnOD0O
+         oLrL/Oc4LdaFSXMGXsEMmMuhwqxvTyp8e/XrLLWwSe8EWsz92Doh+hoNcsAiujvorvEd
+         ngIA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698651278; x=1699256078;
+        d=1e100.net; s=20230601; t=1698651567; x=1699256367;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=5pa4dby/8JwYM97NqAMx2Dp0QBnoAbYBFM9x+csgj/k=;
-        b=izRv/OnCEkVRn0fKYSP72eB+Zr91xZAz0mt4pLc2Un2ZOBCAjvWZJdbZviWENh5glU
-         Xsd2YrBhWQWtd5TcswhiOA8wWkQblixt007OLSh3X7Htx2ooXOnpAiEUB45F3dCLOfAx
-         it+3y7rifkKHCy5lB7bv9QR7S4sGU0OnzIhDqIQc8V8AUrk6rkHSWinl2Vm8EiY6wPOo
-         cGy6ywJiBDYrdO1buU2vhtbUa8tFLGqLr3jvavBCssT0QMFqSgRVm5NarGod9b4ULwxG
-         ro517CiKoaBbk4FmJGGBYmUtZw0jT69fCBkTBgdHPRwJhMVtAWZ28+XEKEt6fAp4KbJK
-         dcYg==
-X-Gm-Message-State: AOJu0YybCvrzlzECM1ydQaUBjlQhZsomV7LJGJvgUBEr2tDliKhToOGM
-        ULfXwMUSDQqN/UXAc7xsEW7f2w==
-X-Google-Smtp-Source: AGHT+IFClab2CGOT7WcNzsudckLb5HVdvWSPDOayHaeqCCju9bD/roXblb+CT3A4N7R0t9lA+Is5Zg==
-X-Received: by 2002:a05:651c:1986:b0:2bc:b9c7:7ba8 with SMTP id bx6-20020a05651c198600b002bcb9c77ba8mr8159099ljb.43.1698651277734;
-        Mon, 30 Oct 2023 00:34:37 -0700 (PDT)
+        bh=un1B+HdCY4rb6l+yNfK1fdIrKdS9fURStbp/Gin4628=;
+        b=TEyuapbuTCgtCCfEofxZXBCYo3A83tOAwS74JHoEf7y6mPhuDBm9EM5RQzYhDPh5SB
+         GU0bY3ZO7SO7jOH2IrH0LlC0MakqxyD0y322jvu7FSCpOSFbztBcmjdTuvdg2MDeQZVe
+         n03rO8zlm9R1SDMJPi3EGkacU01S4NlvM2eYEq1Cqf68U+fUjSCW3exccko5b3OqvK1e
+         cXqXsSqq+tzFeAm79dfr9fXM+ybWm2uswi87StxvNeBCfSPxmwvFN5euL8AxH8ciFxsl
+         0RxizrGKz636lhd++exKvWizgl/fKRZ/qmIFVqAN7o5ruV8p7PbYQGTOIwao7Kj+dwB4
+         bTfQ==
+X-Gm-Message-State: AOJu0YxCJK0L/w1nq+wPgs2CfHvcu+mA2HRbhoOma9lB4zCwYnYwhxh6
+        ZqiTMfsjlMC2AH1RlFzpiTy4SA==
+X-Google-Smtp-Source: AGHT+IF8Ef++OJHXVJllrD3R72IaUiIgCv3FiU91UCPPrjv6o6Nke2xQzDc/J+zev/lhkV/+SQoJDw==
+X-Received: by 2002:a17:907:2910:b0:9be:51ce:e91b with SMTP id eq16-20020a170907291000b009be51cee91bmr5536966ejc.68.1698651567082;
+        Mon, 30 Oct 2023 00:39:27 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id ay32-20020a05600c1e2000b004065daba6casm11907165wmb.46.2023.10.30.00.34.35
+        by smtp.gmail.com with ESMTPSA id x22-20020a170906149600b009b2b47cd757sm5490088ejc.9.2023.10.30.00.39.25
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 30 Oct 2023 00:34:37 -0700 (PDT)
-Message-ID: <76b68a17-9cd8-4a65-bc56-2170fc7fd363@linaro.org>
-Date:   Mon, 30 Oct 2023 08:34:34 +0100
+        Mon, 30 Oct 2023 00:39:26 -0700 (PDT)
+Message-ID: <baf6a0c3-e76a-4d9d-8866-b3f4fdae162e@linaro.org>
+Date:   Mon, 30 Oct 2023 08:39:24 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3][3/4] mmc: Add dw mobile mmc cmdq rtk driver
+Subject: Re: [PATCH V4][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
 Content-Language: en-US
-To:     =?UTF-8?B?SnlhbiBDaG91IFvlkajoirflrold?= <jyanchou@realtek.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "jh80.chung@samsung.com" <jh80.chung@samsung.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc:     "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "krzysztof.kozlowski+dt@linaro.org" 
-        <krzysztof.kozlowski+dt@linaro.org>,
-        "conor+dt@kernel.org" <conor+dt@kernel.org>,
-        "asutoshd@codeaurora.org" <asutoshd@codeaurora.org>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "briannorris@chromium.org" <briannorris@chromium.org>,
-        "doug@schmorgal.com" <doug@schmorgal.com>,
-        "tonyhuang.sunplus@gmail.com" <tonyhuang.sunplus@gmail.com>,
-        "abel.vesa@linaro.org" <abel.vesa@linaro.org>,
-        "william.qiu@starfivetech.com" <william.qiu@starfivetech.com>
-References: <20231020034921.1179-1-jyanchou@realtek.com>
- <20231020034921.1179-4-jyanchou@realtek.com>
- <5bc8fd15-9ae7-449d-9625-6e8c87876b06@kernel.org>
- <67ac1f7e28ba42d8a1d2315c26f26106@realtek.com>
+To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com, jh80.chung@samsung.com,
+        riteshh@codeaurora.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        asutoshd@codeaurora.org, p.zabel@pengutronix.de
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, arnd@arndb.de,
+        briannorris@chromium.org, doug@schmorgal.com,
+        tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
+        william.qiu@starfivetech.com
+References: <20231030062749.2840-1-jyanchou@realtek.com>
+ <20231030062749.2840-3-jyanchou@realtek.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -125,47 +112,238 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <67ac1f7e28ba42d8a1d2315c26f26106@realtek.com>
+In-Reply-To: <20231030062749.2840-3-jyanchou@realtek.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/10/2023 08:30, Jyan Chou [周芷安] wrote:
-> Hi Krzysztof,
+On 30/10/2023 07:27, Jyan Chou wrote:
+> We implemented cmdq feature on Synopsys DesignWare mmc driver.
+> The difference between dw_mmc.c and dw_mmc_cqe.c were distinct
+> register definitions, mmc user flow and the addition of cmdq.
 > 
->> Use Linux coding style. This driver looks like one for staging, not ready for submission. :/
+> New version of User Guide had modify mmc driver's usage flow,
+> we may need to renew code to precisely follow user guide.
 > 
-> We had modified our code to match Linux coding style.
+> More over, We added a wait status function to satisfy synopsys
+> user guide's description, since this flow might be specific in
+> synopsys host driver only.
+> 
+> Signed-off-by: Jyan Chou <jyanchou@realtek.com>
+> 
+> —--
+> v3 -> v4:
+> - Modify dma mode selection and dma addressing bit to statisfy
+>   linux coding style.
+> 
 
-Unfortunately, not much...
+I asked to fix several coding style issues so it will look a bit as
+matching Linux coding style. I don't see improvements.
 
-> 
->>> +     mcq_writel(host, AHB, 0);
->>> +     dev_info(dev, "AHB=0x%x, dw_mci_cqe_suspend ret=%d\n",
->>> +              mcq_readl(host, AHB), ret);
->> Drop useless success/function entry/exit messages..
-> 
-> We had drop useless function.
-> 
->> Why? This is not an error. If it were, then it should be build stage error.
-> 
-> It was our mistake to use dev_err here, we had corrected it.
+Please read carefully, more than once, the Linux coding style. Then
+document in changelog what you fixed. If you document nothing, means you
+ignored the feedback.
 
-I have no clue what you are referring to. Respond inline as requested by
-mailing list etiquette.
+Fix every warning from checkpatch --strict. Then document in changelog
+what you fixed. If you document nothing, means you ignored the feedback.
 
-> 
->> You should not need MODULE_ALIAS() in normal cases. If you need it, usually it means your device ID table is wrong.
-> 
-> We had removed MODULE_ALIAS().
-> Please check our new post below, thanks.
-> https://patchwork.kernel.org/project/linux-mmc/patch/20231030062749.2840-4-jyanchou@realtek.com/
+> +
+> +	if (!host->bus_hz) {
+> +		dev_err(host->dev,
+> +			"Platform data must supply bus speed\n");
+> +		ret = -ENODEV;
+> +		goto err_clk_ciu;
+> +	}
+> +
+> +	if (!IS_ERR(host->pdata->rstc)) {
+> +		reset_control_assert(host->pdata->rstc);
+> +		usleep_range(10, 50);
+> +		reset_control_deassert(host->pdata->rstc);
+> +	}
+> +
+> +	timer_setup(&host->timer, dw_mci_cqe_cto_timer, 0);
+> +
+> +	spin_lock_init(&host->lock);
+> +	spin_lock_init(&host->irq_lock);
+> +	init_rwsem(&host->cr_rw_sem);
+> +	tasklet_init(&host->tasklet, dw_mci_cqe_tasklet_func, (unsigned long)host);
+> +
+> +	/*pio mode's parameters should be initialized here*/
 
-Please rework the driver from scratch to look like Linux driver. It was
-not looking at the beginning at all.
+Nothing improved.
 
+> +
+> +	/*Initialize the eMMC IP related attribute*/
+> +	dw_mci_cqe_setup(host);
+> +
+> +	dw_mci_cqe_init_dma(host);
+> +
+> +	/* This flag will be set 1 when doing tuning,
+
+Nothing improved.
+
+> +	 * we add this flag because
+> +	 * some vendors might use other cmd instead of 21
+> +	 * to tune phase under high speed interface.
+> +	 * we use this flag to recognize if the system is under tuning stage.
+> +	 */
+> +	host->tuning = 0;
+> +
+> +	/*Timing_setting is to avoid sending command
+
+Nothing improved.
+
+> +	 *before setting phase in hs200, hs400
+> +	 */
+> +	host->current_speed = 0;
+> +
+> +	/*Do the rest of init for specific*/
+> +	if (drv_data && drv_data->init) {
+> +		ret = drv_data->init(host);
+> +		if (ret) {
+> +			dev_err(host->dev,
+> +				"implementation specific init failed\n");
+> +			goto err_dmaunmap;
+> +		}
+> +	}
+> +
+> +	ret = dw_mci_cqe_init_slot(host);
+> +	if (ret) {
+> +		dev_err(host->dev, "slot 0 init failed\n");
+> +		goto err_dmaunmap;
+> +	}
+> +
+> +	ret = devm_request_irq(host->dev, host->irq, dw_mci_cqe_interrupt,
+> +			       host->irq_flags, "dw-mci-cqe", host);
+> +	if (ret)
+> +		goto err_dmaunmap;
+> +
+> +	/*After the slot initialization,
+
+Nothing improved.
+
+> +	 *now we have mmc data and can initialize cmdq if user enabled
+> +	 */
+> +	dw_mci_cqhci_init(host);
+> +
+> +	return 0;
+> +
+> +err_dmaunmap:
+> +	if (!IS_ERR(host->pdata->rstc))
+> +		reset_control_assert(host->pdata->rstc);
+> +err_clk_ciu:
+> +	clk_disable_unprepare(host->ciu_clk);
+> +
+> +err_clk_biu:
+> +	clk_disable_unprepare(host->biu_clk);
+> +
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL(dw_mci_cqe_probe);
+> +
+> +void dw_mci_cqe_remove(struct dw_mci *host)
+> +{
+> +	dev_dbg(host->dev, "remove slot\n");
+
+Nothing improved.
+
+> +	if (host->slot)
+> +		dw_mci_cqe_cleanup_slot(host->slot);
+> +
+> +	if (!IS_ERR(host->pdata->rstc))
+> +		reset_control_assert(host->pdata->rstc);
+> +
+> +	clk_disable_unprepare(host->ciu_clk);
+> +	clk_disable_unprepare(host->biu_clk);
+> +}
+> +EXPORT_SYMBOL(dw_mci_cqe_remove);
+> +
+> +#ifdef CONFIG_PM
+> +int dw_mci_cqe_runtime_suspend(struct device *dev)
+> +{
+> +	struct dw_mci *host = dev_get_drvdata(dev);
+> +	int ret = 0;
+> +
+> +	if (host->pdata && (host->pdata->caps2 & MMC_CAP2_CQE)) {
+> +		if (host->slot) {
+> +			dev_info(host->dev, "cqe suspend\n");
+
+Nothing improved.
+
+> +			ret = cqhci_suspend(host->slot->mmc);
+> +			if (ret) {
+> +				dev_err(host->dev, "cqe suspend failed\n");
+
+Nothing improved.
+
+> +				return ret;
+> +			}
+> +		}
+> +	}
+> +
+> +	clk_disable_unprepare(host->ciu_clk);
+> +
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL(dw_mci_cqe_runtime_suspend);
+> +
+> +int dw_mci_cqe_runtime_resume(struct device *dev)
+> +{
+> +	struct dw_mci *host = dev_get_drvdata(dev);
+> +	const struct dw_mci_drv_data *drv_data = host->drv_data;
+> +	int ret = 0;
+> +
+> +	clk_prepare_enable(host->ciu_clk);
+> +
+> +	dw_mci_cqe_setup(host);
+> +	if (drv_data && drv_data->init) {
+> +		ret = drv_data->init(host);
+> +		if (ret)
+> +			dev_err(host->dev, "implementation specific init failed\n");
+> +	}
+> +
+> +	init_completion(host->int_waiting);
+> +
+> +	if (host->pdata && (host->pdata->caps2 & MMC_CAP2_CQE)) {
+> +		if (host->slot) {
+> +			dev_info(host->dev, "cqe resume\n");
+> +			ret = cqhci_resume(host->slot->mmc);
+> +			if (ret)
+> +				dev_err(host->dev, "cqe resume failed\n");
+
+
+Nothing improved.
+
+> +		}
+> +	}
+> +
+> +	dw_mci_cqe_setup_bus(host->slot, true);
+> +
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL(dw_mci_cqe_runtime_resume);
+> +#endif /* CONFIG_PM */
+> +
+> +static int __init dw_mci_cqe_init(void)
+> +{
+> +	pr_info("Synopsys Designware Multimedia Card Interface Driver\n");
+
+
+Nothing improved.
+
+> +	return 0;
+> +}
+> +
+> +static void __exit dw_mci_cqe_exit(void)
+> +{
+> +}
+> +
+> +module_init(dw_mci_cqe_init);
+> +module_exit(dw_mci_cqe_exit);
+
+This part of code is just useless.
 
 Best regards,
 Krzysztof
