@@ -2,185 +2,186 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F5CFC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 08:07:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08D25C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 09:09:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232118AbjJ3IHa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 04:07:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52460 "EHLO
+        id S232296AbjJ3JJ2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 05:09:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39910 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232179AbjJ3IHa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 04:07:30 -0400
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 360F0C9;
-        Mon, 30 Oct 2023 01:07:27 -0700 (PDT)
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 39U87Owj088839;
-        Mon, 30 Oct 2023 03:07:24 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1698653244;
-        bh=ODz0sm3tFst2rQ5PTq9uui03oHrQZkgoaoB5cf+ILv8=;
-        h=Date:Subject:To:CC:References:From:In-Reply-To;
-        b=wTP32IrQMkkSBn9xTkoQcaQlFnXhVBZIuLrAPc1zgQJ41DDuSd3ivhSRHkwMWWy01
-         PSda22g/uya9t+pl15cuH4DHSegG+ExReyI/Y8LT9TVZxBKV73g8CCqjEYeaA8l2LZ
-         9Z9YfbZ1L/UTT+IfDlysQGFERaeasvSTG760xgqg=
-Received: from DFLE112.ent.ti.com (dfle112.ent.ti.com [10.64.6.33])
-        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 39U87OAg094512
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 30 Oct 2023 03:07:24 -0500
-Received: from DFLE103.ent.ti.com (10.64.6.24) by DFLE112.ent.ti.com
- (10.64.6.33) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 30
- Oct 2023 03:07:23 -0500
-Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE103.ent.ti.com
- (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Mon, 30 Oct 2023 03:07:23 -0500
-Received: from [172.24.227.94] (ileaxei01-snat2.itg.ti.com [10.180.69.6])
-        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 39U87LVw013556;
-        Mon, 30 Oct 2023 03:07:21 -0500
-Message-ID: <42f1b9a6-2dad-42ca-a41c-3a57f87323cc@ti.com>
-Date:   Mon, 30 Oct 2023 13:37:20 +0530
+        with ESMTP id S232384AbjJ3JJ1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 05:09:27 -0400
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62914DE
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 02:09:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1698656965; x=1730192965;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=o03i99xVc8QsCbapwxniTwGQnhmBZ4RhcvPzoIpy8G0=;
+  b=AsVKMewSXtKPioYvxJ8pucuA6RFtQEfMFILffk807aWB11s8bfVSLUjY
+   Q8c9al0eVSxMhGiwvAbVnk9MvNE5yWYJSbZQL8ANko3SP4UVdvAhMKA39
+   6fa8v3CdNHnkR2AT1WNGTRrrwX6+H8uim5niJ6SKZfO2B7yjQZ20F2+oz
+   BIwz+WDGa+axXftx08QD0AnZfpx+K49CcSE9l+o9sxXIl26riIxwsg9HT
+   g8DkpH8XhT4wEKh0a/sXLfrtDtlrh99hS+KkbNWIzugrrAn0/zoOonc4r
+   j1+PBQXJaMt2mdVZBmvDMB0st9kAFQwWLQ3kUkvFpZAwBAgKtOhfu4E9I
+   A==;
+X-CSE-ConnectionGUID: 3XEiIz7QTvWPtoiV7Rg5Cg==
+X-CSE-MsgGUID: Tmml7REYRGSqp3MVaLsbWw==
+X-IronPort-AV: E=Sophos;i="6.03,263,1694707200"; 
+   d="scan'208";a="1047125"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 30 Oct 2023 17:09:24 +0800
+IronPort-SDR: wHWwmGljlKb4yvBioC0yzN6ZgGzCCELUk2jTUkuQebolY7qx1JUPio4R18fRUszkkbg6LRZys7
+ ynsGeU0ORCGUHH4YIxiQg3uA1yEevfN6q8zeFcQGbcUKoUjiIs3C14hcn/QuS+K2z4D90xHm1N
+ cQ0oVYiQ42S7izz9bEq5haXD8fslFHZxkwc4wSH2p0DYTw1ZQNfvzg6/p7+iam59AJ19EIBtLM
+ f1WqhNBicnkEehNKiAHBj0/k+5xI/4dU754f+/VyurqEd84/PV7SCig7GrSpAKc0BM4+yVcbq2
+ SLo=
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 30 Oct 2023 01:15:30 -0700
+IronPort-SDR: 3dR2YDyjjjGDeZbQyYLymra7h8FkvvG6a9nsz4TSHXlivyxofImGdzcuQ+1hEbUblg7Jb6Xgom
+ weHVWKU0+qnleBwZYOVlMBoGfPZMtwvkY/a890hXZew9Z5benyzTccY8XFRNWAbxMa+n/wkTr7
+ Ezk/IGYECbMkzXtC83zCB/2qHj0dSXXZnwnEaUo6Cu/pmxtlW9/qM9Krq51v+xynzZIx7jA6MR
+ +jAIpxco7kr1Uu2ihAt9G4PkAltVvlVVZAQY7507RhGH1vLWPUWWz+ix+FoM2JopqK3KB5GebV
+ jYw=
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP; 30 Oct 2023 02:09:22 -0700
+From:   Avri Altman <avri.altman@wdc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Daniil Lunev <dlunev@google.com>,
+        Asutosh Das <quic_asutoshd@quicinc.com>,
+        Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH] mmc: core: Use mrq.sbc in close-ended ffu
+Date:   Mon, 30 Oct 2023 11:09:06 +0200
+Message-Id: <20231030090906.1897035-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci_am654: fix start loop index for TAP value
- parsing
-Content-Language: en-US
-To:     Nitin Yadav <n-yadav@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-References: <20231026061458.1116276-1-n-yadav@ti.com>
- <8b7f948d-316c-4135-875a-de455ff4849c@intel.com>
- <8148dae9-e3fc-4589-ba57-a3f7a3e63b80@intel.com>
- <7054b3bb-de99-3fb0-5f17-78249f31c53f@ti.com>
-From:   Vignesh Raghavendra <vigneshr@ti.com>
-In-Reply-To: <7054b3bb-de99-3fb0-5f17-78249f31c53f@ti.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Nitin, Adrian
+Field Firmware Update (ffu) may use close-ended or open ended sequence.
+Each such sequence is comprised of a write commands enclosed between 2
+switch commands - to and from ffu mode. So for the close-ended case, it
+will be: cmd6->cmd23-cmd25-cmd6.
 
-On 27/10/23 11:41, Nitin Yadav wrote:
-> Hi Adrian,
-> 
-> On 26/10/23 12:33, Adrian Hunter wrote:
->> On 26/10/23 10:00, Adrian Hunter wrote:
->>> On 26/10/23 09:14, Nitin Yadav wrote:
->>>> ti,otap-del-sel-legacy/ti,itap-del-sel-legacy passed from DT
->>>> are currently ignored for all SD/MMC and eMMC modes. Fix this
->>>> by making start loop index to MMC_TIMING_LEGACY.
->>>>
->>>> Fixes: 8ee5fc0e0b3be ("mmc: sdhci_am654: Update OTAPDLY writes")
->>>>
->>>
->>> There isn't usually a blank line here
->>>
->>> Perhaps a Cc: stable@vger.kernel.org tag?
->>>
->>>> Signed-off-by: Nitin Yadav <n-yadav@ti.com>
->>>
->>> Nevertheless:
->>>
->>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>
->> Sorry, sent that prematurely - see comment below
->>
->>>
->>>
->>>> ---
->>>>  drivers/mmc/host/sdhci_am654.c | 2 +-
->>>>  1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->>>> index 544aaaf5cb0f..aae9d255c6a1 100644
->>>> --- a/drivers/mmc/host/sdhci_am654.c
->>>> +++ b/drivers/mmc/host/sdhci_am654.c
->>>> @@ -606,7 +606,7 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
->>>>  		return 0;
->>>>  	}
->>>>  
->>
->> Isn't the MMC_TIMING_LEGACY information read at the top of
->> sdhci_am654_get_otap_delay()?
-> Loop also take care of ITAP. Looks like at some point single property
-> ti,otap-del-sel was used for all modes and then we moved to one property
-> per mode:
-> https://lore.kernel.org/r/20200108150920.14547-3-faiz_abbas@ti.com
-> (since v5.7)
+Some host controllers however, get confused when multi-block rw is sent
+without sbc, and may generate auto-cmd12 which breaks the ffu sequence.
+I encountered  this issue while testing fwupd (github.com/fwupd/fwupd)
+on HP Chromebook x2, a qualcomm based QC-7c, code name - strongbad.
 
-Looks like ti,otap-del-sel is deprecated for a while now (since v5.7+). 
-I think that's sufficient enough time to drop it now (don't see any in 
-kernel DT use this property). Lets drop the above code which handles 
-MMC_TIMING_LEGACY separately, so that below for() loop can handle the 
-whole set of bindings efficiently.
+Instead of a quirk, or hooking the request function of the msm ops,
+it would be better to fix the ioctl handling and make it use mrq.sbc
+instead of issuing SET_BLOCK_COUNT separately.
 
-Since this patch is marked for stable, can we get rid of the check for 
-deprecated property in a follow up patch?
+Signed-off-by: Avri Altman <avri.altman@wdc.com>
+---
+ drivers/mmc/core/block.c | 41 ++++++++++++++++++++++++++++++++++++++--
+ include/linux/mmc/mmc.h  |  1 +
+ 2 files changed, 40 insertions(+), 2 deletions(-)
 
-Something like below? (completely untested):
-
-
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index c125485ba80e..50c8d3051096 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -577,32 +577,17 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
- 	int i;
- 	int ret;
- 
--	ret = device_property_read_u32(dev, td[MMC_TIMING_LEGACY].otap_binding,
--				 &sdhci_am654->otap_del_sel[MMC_TIMING_LEGACY]);
--	if (ret) {
--		/*
--		 * ti,otap-del-sel-legacy is mandatory, look for old binding
--		 * if not found.
--		 */
--		ret = device_property_read_u32(dev, "ti,otap-del-sel",
--					       &sdhci_am654->otap_del_sel[0]);
--		if (ret) {
--			dev_err(dev, "Couldn't find otap-del-sel\n");
--
--			return ret;
--		}
--
--		dev_info(dev, "Using legacy binding ti,otap-del-sel\n");
--		sdhci_am654->legacy_otapdly = true;
--
--		return 0;
--	}
--
--	for (i = MMC_TIMING_MMC_HS; i <= MMC_TIMING_MMC_HS400; i++) {
-+	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
- 
- 		ret = device_property_read_u32(dev, td[i].otap_binding,
- 					       &sdhci_am654->otap_del_sel[i]);
- 		if (ret) {
-+			if (i == MMC_TIMING_LEGACY) {
-+				dev_err(dev, "ti,otap-del-sel-legacy is mandatory");
-+				return ret;
-+			}
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 3a8f27c3e310..6d94617ef206 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -400,6 +400,10 @@ struct mmc_blk_ioc_data {
+ 	struct mmc_ioc_cmd ic;
+ 	unsigned char *buf;
+ 	u64 buf_bytes;
++	unsigned int flags;
++#define MMC_BLK_IOC_DROP	BIT(0)	/* drop this mrq */
++#define MMC_BLK_IOC_SBC	BIT(1)	/* use mrq.sbc */
 +
- 			dev_dbg(dev, "Couldn't find %s\n",
- 				td[i].otap_binding);
- 			/*
-
-
-
->>
->>>> -	for (i = MMC_TIMING_MMC_HS; i <= MMC_TIMING_MMC_HS400; i++) {
->>>> +	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
->>>>  
->>>>  		ret = device_property_read_u32(dev, td[i].otap_binding,
->>>>  					       &sdhci_am654->otap_del_sel[i]);
->>>
->>
-> 
-
+ 	struct mmc_rpmb_data *rpmb;
+ };
+ 
+@@ -479,6 +483,9 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	if (!card || !md || !idata)
+ 		return -EINVAL;
+ 
++	if (idata->flags & MMC_BLK_IOC_DROP)
++		return 0;
++
+ 	/*
+ 	 * The RPMB accesses comes in from the character device, so we
+ 	 * need to target these explicitly. Else we just target the
+@@ -532,14 +539,19 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 			return err;
+ 	}
+ 
+-	if (idata->rpmb) {
++	if (idata->rpmb || (idata->flags & MMC_BLK_IOC_SBC)) {
++		u32 sbc_arg = data.blocks;
++
+ 		sbc.opcode = MMC_SET_BLOCK_COUNT;
+ 		/*
+ 		 * We don't do any blockcount validation because the max size
+ 		 * may be increased by a future standard. We just copy the
+ 		 * 'Reliable Write' bit here.
+ 		 */
+-		sbc.arg = data.blocks | (idata->ic.write_flag & BIT(31));
++		if (idata->rpmb)
++			sbc_arg |= (idata->ic.write_flag & BIT(31));
++
++		sbc.arg = sbc_arg;
+ 		sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
+ 		mrq.sbc = &sbc;
+ 	}
+@@ -1032,6 +1044,28 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+ 	md->reset_done &= ~type;
+ }
+ 
++/* close-ended ffu */
++static void mmc_blk_check_ce_ffu(struct mmc_queue_req *mq_rq)
++{
++	struct mmc_blk_ioc_data **idata = mq_rq->drv_op_data;
++
++	if (mq_rq->ioc_count != 4)
++		return;
++
++	if (idata[0]->ic.opcode != MMC_SWITCH)
++		return;
++
++	if (MMC_EXTRACT_INDEX_FROM_ARG(idata[0]->ic.arg) !=
++			EXT_CSD_MODE_CONFIG)
++		return;
++
++	if (idata[1]->ic.opcode == MMC_SET_BLOCK_COUNT &&
++	    idata[2]->ic.opcode == MMC_WRITE_MULTIPLE_BLOCK) {
++		idata[1]->flags |= MMC_BLK_IOC_DROP;
++		idata[2]->flags |= MMC_BLK_IOC_SBC;
++	}
++}
++
+ /*
+  * The non-block commands come back from the block layer after it queued it and
+  * processed it with all other requests and then they get issued in this
+@@ -1059,6 +1093,9 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 			if (ret)
+ 				break;
+ 		}
++
++		mmc_blk_check_ce_ffu(mq_rq);
++
+ 		fallthrough;
+ 	case MMC_DRV_OP_IOCTL_RPMB:
+ 		idata = mq_rq->drv_op_data;
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 6f7993803ee7..d4d10cabaa57 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -254,6 +254,7 @@ static inline bool mmc_ready_for_data(u32 status)
+  */
+ 
+ #define EXT_CSD_CMDQ_MODE_EN		15	/* R/W */
++#define EXT_CSD_MODE_CONFIG		30	/* R/W */
+ #define EXT_CSD_FLUSH_CACHE		32      /* W */
+ #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+ #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
 -- 
-Regards
-Vignesh
+2.42.0
+
