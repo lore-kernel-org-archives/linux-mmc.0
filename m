@@ -2,170 +2,185 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB9C9C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 07:59:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F5CFC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Oct 2023 08:07:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231751AbjJ3H7w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Oct 2023 03:59:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57068 "EHLO
+        id S232118AbjJ3IHa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Oct 2023 04:07:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231978AbjJ3HfT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 03:35:19 -0400
-Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1A0CC0
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:35:16 -0700 (PDT)
-Received: by mail-wm1-x32e.google.com with SMTP id 5b1f17b1804b1-40836ea8cbaso31738595e9.0
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Oct 2023 00:35:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698651315; x=1699256115; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=f97Y/pF6GfJC32Gc9bd7nAUI+uBePdpFVeCObiA5WWk=;
-        b=CV75ipwQQo2kJ11W8Y1fATE+Q3cymViHmAUTYfh1yX3gNk6VEJn0v68egnoi3zbzjs
-         3hwqVaHTpq59o0a66nK3QM/D9tiJz8woyR2Qy5qfaDXfXgu0L/50lUBP9i5Yh/WUOpS4
-         LySHvy9nH+sUIROAykP1XGIkdoDYaWZam4vlhcYGtwOf08FE65gK7EE6j4Rcrn/e3V9/
-         r9TQ0IVRZftYW5MLq9iTQWgGuWWi11Tz6BQai5NLECEdxtizTEdNVZgIzh+teKuiGP83
-         HIEhrtro1/DsvUw1txfTOXNo2NxONAeo4CfW486iDWjPAggYT4aCM0ljF82XMbu1Xo8I
-         TUPw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698651315; x=1699256115;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=f97Y/pF6GfJC32Gc9bd7nAUI+uBePdpFVeCObiA5WWk=;
-        b=lRBgijtDZew+pyTDx+AIH2EJ2yh7QDAa4wnur8ECsGcHjOYIPowNwvRxSnrYFm1TzL
-         +MUeS4mLqEqhX2H13k8BcU192FvpddX/cf4aakYTR2+6tagLzWLCThJVlqf5sImywuRQ
-         /JWVF+0sj7AaqcUbwgCVhmTA1Co/rT2U09zDgYvZmMhViFQeXYC2vMM37qw6ReFNPQrj
-         K4PZIJZMXKVn4/p2amI1hi+/NPS27ew15kwDLAhlIttSEn7MJbWiMYH/LTarKZ3C7vuI
-         wYs9z4XO4HNrNLYHf7EUTY2RbKVQah7DXcSbLD/LNq6zldVD+Q3BBTdN9Rugebu+f7z7
-         l8Bw==
-X-Gm-Message-State: AOJu0YzT/d9W7sBus7E3r2SmJ18rd2Gd7mjRaTJlqil6oxlg17W1zWCH
-        slK6edommQmqyON7mk67NokLIw==
-X-Google-Smtp-Source: AGHT+IF789qdL+Zbc2tA+RA+WyMvXNHyagw19RM5XdsgJaqN/f9Yvwt0258CiFbBwrJgoGa2vGu48A==
-X-Received: by 2002:a05:600c:4445:b0:3fe:1af6:6542 with SMTP id v5-20020a05600c444500b003fe1af66542mr7432336wmn.33.1698651315072;
-        Mon, 30 Oct 2023 00:35:15 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id ay32-20020a05600c1e2000b004065daba6casm11907165wmb.46.2023.10.30.00.35.12
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 30 Oct 2023 00:35:14 -0700 (PDT)
-Message-ID: <0843027c-88ed-4c7e-a054-15277e2a0cb5@linaro.org>
-Date:   Mon, 30 Oct 2023 08:35:12 +0100
+        with ESMTP id S232179AbjJ3IHa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Oct 2023 04:07:30 -0400
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 360F0C9;
+        Mon, 30 Oct 2023 01:07:27 -0700 (PDT)
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 39U87Owj088839;
+        Mon, 30 Oct 2023 03:07:24 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1698653244;
+        bh=ODz0sm3tFst2rQ5PTq9uui03oHrQZkgoaoB5cf+ILv8=;
+        h=Date:Subject:To:CC:References:From:In-Reply-To;
+        b=wTP32IrQMkkSBn9xTkoQcaQlFnXhVBZIuLrAPc1zgQJ41DDuSd3ivhSRHkwMWWy01
+         PSda22g/uya9t+pl15cuH4DHSegG+ExReyI/Y8LT9TVZxBKV73g8CCqjEYeaA8l2LZ
+         9Z9YfbZ1L/UTT+IfDlysQGFERaeasvSTG760xgqg=
+Received: from DFLE112.ent.ti.com (dfle112.ent.ti.com [10.64.6.33])
+        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 39U87OAg094512
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 30 Oct 2023 03:07:24 -0500
+Received: from DFLE103.ent.ti.com (10.64.6.24) by DFLE112.ent.ti.com
+ (10.64.6.33) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 30
+ Oct 2023 03:07:23 -0500
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE103.ent.ti.com
+ (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Mon, 30 Oct 2023 03:07:23 -0500
+Received: from [172.24.227.94] (ileaxei01-snat2.itg.ti.com [10.180.69.6])
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 39U87LVw013556;
+        Mon, 30 Oct 2023 03:07:21 -0500
+Message-ID: <42f1b9a6-2dad-42ca-a41c-3a57f87323cc@ti.com>
+Date:   Mon, 30 Oct 2023 13:37:20 +0530
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V4][1/4] mmc: solve DMA boundary limitation of CQHCI
- driver
+Subject: Re: [PATCH] mmc: sdhci_am654: fix start loop index for TAP value
+ parsing
 Content-Language: en-US
-To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
-        adrian.hunter@intel.com, jh80.chung@samsung.com,
-        riteshh@codeaurora.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        asutoshd@codeaurora.org, p.zabel@pengutronix.de
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, arnd@arndb.de,
-        briannorris@chromium.org, doug@schmorgal.com,
-        tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
-        william.qiu@starfivetech.com
-References: <20231030062749.2840-1-jyanchou@realtek.com>
- <20231030062749.2840-2-jyanchou@realtek.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231030062749.2840-2-jyanchou@realtek.com>
-Content-Type: text/plain; charset=UTF-8
+To:     Nitin Yadav <n-yadav@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+References: <20231026061458.1116276-1-n-yadav@ti.com>
+ <8b7f948d-316c-4135-875a-de455ff4849c@intel.com>
+ <8148dae9-e3fc-4589-ba57-a3f7a3e63b80@intel.com>
+ <7054b3bb-de99-3fb0-5f17-78249f31c53f@ti.com>
+From:   Vignesh Raghavendra <vigneshr@ti.com>
+In-Reply-To: <7054b3bb-de99-3fb0-5f17-78249f31c53f@ti.com>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/10/2023 07:27, Jyan Chou wrote:
-> Due to synopsys data book's description, it had a limitation
-> while using DMA that buffer size and start address must not
-> exceed 128 MB.
-> 
-> We add an option setup_tran_desc to make tran_desc setting flexible.
-> 
-> Signed-off-by: Jyan Chou <jyanchou@realtek.com>
-> 
-> ---
-> v2 -> v3:
-> - Fix auto test compile warning.
-> 
-> v1 -> v2:
-> - Export cqhci_set_tran_desc for setting the descriptor's callback function.
-> 
-> v0 -> v1:
-> - Separate different patch supports into single patch.
-> ---
-> ---
->  drivers/mmc/host/cqhci-core.c | 8 +++++++-
->  drivers/mmc/host/cqhci.h      | 5 +++++
->  2 files changed, 12 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index b3d7d6d8d654..5560329d2a7d 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -474,7 +474,7 @@ static int cqhci_dma_map(struct mmc_host *host, struct mmc_request *mrq)
->  	return sg_count;
->  }
->  
-> -static void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
-> +void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
->  				bool dma64)
->  {
->  	__le32 *attr = (__le32 __force *)desc;
-> @@ -495,6 +495,7 @@ static void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
->  		dataddr[0] = cpu_to_le32(addr);
->  	}
->  }
-> +EXPORT_SYMBOL(cqhci_set_tran_desc);
+Hi Nitin, Adrian
 
-EXPORT_SYMBOL_GPL
+On 27/10/23 11:41, Nitin Yadav wrote:
+> Hi Adrian,
+> 
+> On 26/10/23 12:33, Adrian Hunter wrote:
+>> On 26/10/23 10:00, Adrian Hunter wrote:
+>>> On 26/10/23 09:14, Nitin Yadav wrote:
+>>>> ti,otap-del-sel-legacy/ti,itap-del-sel-legacy passed from DT
+>>>> are currently ignored for all SD/MMC and eMMC modes. Fix this
+>>>> by making start loop index to MMC_TIMING_LEGACY.
+>>>>
+>>>> Fixes: 8ee5fc0e0b3be ("mmc: sdhci_am654: Update OTAPDLY writes")
+>>>>
+>>>
+>>> There isn't usually a blank line here
+>>>
+>>> Perhaps a Cc: stable@vger.kernel.org tag?
+>>>
+>>>> Signed-off-by: Nitin Yadav <n-yadav@ti.com>
+>>>
+>>> Nevertheless:
+>>>
+>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>>
+>> Sorry, sent that prematurely - see comment below
+>>
+>>>
+>>>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci_am654.c | 2 +-
+>>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+>>>> index 544aaaf5cb0f..aae9d255c6a1 100644
+>>>> --- a/drivers/mmc/host/sdhci_am654.c
+>>>> +++ b/drivers/mmc/host/sdhci_am654.c
+>>>> @@ -606,7 +606,7 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
+>>>>  		return 0;
+>>>>  	}
+>>>>  
+>>
+>> Isn't the MMC_TIMING_LEGACY information read at the top of
+>> sdhci_am654_get_otap_delay()?
+> Loop also take care of ITAP. Looks like at some point single property
+> ti,otap-del-sel was used for all modes and then we moved to one property
+> per mode:
+> https://lore.kernel.org/r/20200108150920.14547-3-faiz_abbas@ti.com
+> (since v5.7)
+
+Looks like ti,otap-del-sel is deprecated for a while now (since v5.7+). 
+I think that's sufficient enough time to drop it now (don't see any in 
+kernel DT use this property). Lets drop the above code which handles 
+MMC_TIMING_LEGACY separately, so that below for() loop can handle the 
+whole set of bindings efficiently.
+
+Since this patch is marked for stable, can we get rid of the check for 
+deprecated property in a follow up patch?
+
+Something like below? (completely untested):
 
 
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index c125485ba80e..50c8d3051096 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -577,32 +577,17 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
+ 	int i;
+ 	int ret;
+ 
+-	ret = device_property_read_u32(dev, td[MMC_TIMING_LEGACY].otap_binding,
+-				 &sdhci_am654->otap_del_sel[MMC_TIMING_LEGACY]);
+-	if (ret) {
+-		/*
+-		 * ti,otap-del-sel-legacy is mandatory, look for old binding
+-		 * if not found.
+-		 */
+-		ret = device_property_read_u32(dev, "ti,otap-del-sel",
+-					       &sdhci_am654->otap_del_sel[0]);
+-		if (ret) {
+-			dev_err(dev, "Couldn't find otap-del-sel\n");
+-
+-			return ret;
+-		}
+-
+-		dev_info(dev, "Using legacy binding ti,otap-del-sel\n");
+-		sdhci_am654->legacy_otapdly = true;
+-
+-		return 0;
+-	}
+-
+-	for (i = MMC_TIMING_MMC_HS; i <= MMC_TIMING_MMC_HS400; i++) {
++	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
+ 
+ 		ret = device_property_read_u32(dev, td[i].otap_binding,
+ 					       &sdhci_am654->otap_del_sel[i]);
+ 		if (ret) {
++			if (i == MMC_TIMING_LEGACY) {
++				dev_err(dev, "ti,otap-del-sel-legacy is mandatory");
++				return ret;
++			}
++
+ 			dev_dbg(dev, "Couldn't find %s\n",
+ 				td[i].otap_binding);
+ 			/*
 
+
+
+>>
+>>>> -	for (i = MMC_TIMING_MMC_HS; i <= MMC_TIMING_MMC_HS400; i++) {
+>>>> +	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
+>>>>  
+>>>>  		ret = device_property_read_u32(dev, td[i].otap_binding,
+>>>>  					       &sdhci_am654->otap_del_sel[i]);
+>>>
+>>
+> 
+
+-- 
+Regards
+Vignesh
