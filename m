@@ -2,200 +2,228 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 606D4C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 10:26:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18677C4167D
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 11:31:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233631AbjKAK0q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Nov 2023 06:26:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41204 "EHLO
+        id S235207AbjKALbU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Nov 2023 07:31:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234963AbjKAK0p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 06:26:45 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92C0D92
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Nov 2023 03:26:39 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id 2adb3069b0e04-507a3b8b113so9491273e87.0
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Nov 2023 03:26:39 -0700 (PDT)
+        with ESMTP id S234882AbjKALbT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 07:31:19 -0400
+Received: from mail-qk1-x72c.google.com (mail-qk1-x72c.google.com [IPv6:2607:f8b0:4864:20::72c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99018FD
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Nov 2023 04:31:13 -0700 (PDT)
+Received: by mail-qk1-x72c.google.com with SMTP id af79cd13be357-7788fb06997so467184985a.0
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Nov 2023 04:31:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698834398; x=1699439198; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=tCsnTw9G/N7+9b/5OyCWnwytBb//hdrqvpTAVBVTcjs=;
-        b=wg3/+ebk8ebV+NKavBjY7c8BZKYuqsNh2J53mKuEKag+mWOJpNz+aNqumfpCYQCmIQ
-         QW3zksgJ+KeefTyJEZ5SAIqx0IZ8bEP2VEOVHqQJ2HUcpf+hCwr6XdOfSZ+dEXAKhgOd
-         Hw24RRnVytJzYA6p5m53nMH2Kd4/9p+ZeWRSqVH5b3W6N4qOMVFFijdvjGafECHg+/6p
-         O1xQz6CVTipWUehvVI5e73FYQQaFGTWcr4IsuycboEGcse0hUY2xlyzOsfaLimFUeUj/
-         1N7Y/UBa+tFRI1Kn3bNEtd+ir3KOiOO/ZheObjOpcotJCZY8y+3wluV/jal77zVcJOxr
-         15pA==
+        d=chromium.org; s=google; t=1698838272; x=1699443072; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5GLyp5FUS2qPs528dNdoTbrsbRrAppICUBpffUvX+tg=;
+        b=bLbaUnavCfhTqoQra0/LwwSuSzXE/lzWII6uTfolMZuySw1ibvN3Lu3dcICmVjx2iQ
+         /oojfgLHsczj78CwbLfUJ6y19g2hm/VcMQ2wRlf03UzILzJx09RLbVkChCmTFTdrmyay
+         g2ooi9ccxI9ALUzxHTja3pJ4SSpNnS7K3A17w=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698834398; x=1699439198;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=tCsnTw9G/N7+9b/5OyCWnwytBb//hdrqvpTAVBVTcjs=;
-        b=Lq210Xr1CiTFZCmjj/E2YeV1RE5sHNaEXXJPBfX9+LESfRB2xPQGTQVox5seSXHpWy
-         XnsI4C24uRDFl/aeh0MD3roAtaptkcIj9xIwN0UeCF1DesCNQRFbAiC+nNYO+XNTZCOY
-         C50XhPsB0Y+BUOAA/orsds8zaJmi7cI8UiqnX7ZskWkS8ydwBoWSoxjiFubv4drsbEvN
-         FBdfEj1p31Cz3Tk+DRQlJoP6U/YW1YOP7CEavMfM5K7fuPLZaBpJCKlTyZpx2Cqgpv3V
-         UTm1XCZ/muyruFi8CZfwn1G+YDel2DOh5aHs1uMDWvQNqZtasgsPKK4nhBy084UKnjTv
-         MsIw==
-X-Gm-Message-State: AOJu0YxB/1d3WOkvIrWUU9SO/mXwq94oz9GrIgwEjfE+7tZFMvPnA75s
-        qm5SQv3HtiAOmHU3SIPh/c2FFN2K2j+0hLX982I=
-X-Google-Smtp-Source: AGHT+IGDHSmTRMp+DQPCwPp1iEl0Z60JF5+pwDLeqsrAC1axXeyH0dDWC5jptYR1GCcL3n/lnZdCvg==
-X-Received: by 2002:a19:ca49:0:b0:507:9a8c:a8fe with SMTP id h9-20020a19ca49000000b005079a8ca8femr10219765lfj.53.1698834397802;
-        Wed, 01 Nov 2023 03:26:37 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
-        by smtp.gmail.com with ESMTPSA id w4-20020ac25d44000000b00507b869b068sm177139lfd.302.2023.11.01.03.26.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 01 Nov 2023 03:26:37 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK updates for v6.7
-Date:   Wed,  1 Nov 2023 11:26:36 +0100
-Message-Id: <20231101102636.5155-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        d=1e100.net; s=20230601; t=1698838272; x=1699443072;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=5GLyp5FUS2qPs528dNdoTbrsbRrAppICUBpffUvX+tg=;
+        b=ZpCOWKl2WwktGPEVwFUQM+eEt0rCBH2pFGUgQsWA+ni3RzonBboGKLqest/Nq1JI5x
+         rNxJaR0WusOfbqKo3bEva5xzK7iEZm5w/eRpJC2OGF5ibVA54mSMedLV4JRk0G/4/HKi
+         6LxGQyBuk/KyvAUiv8V+HbfbNRJY4upvW1kI/o+KpEPQ+5KjQ7tT3KRdEF3xpWGsmauW
+         gmeI/PXQKYskckjWRevWCgRJgYcJpk3LeKk18o2/fhG5KlPj0EwJo/GzxOp0Vd0eUTUv
+         JQnuBbdzuJpDjEUBcSzC5w5JMriOPUE1Z/9creoTQ4HkJEt/lA30MmQErYUlSRC9VCwG
+         iasw==
+X-Gm-Message-State: AOJu0Yy080eBX6GN2WdvidCoKsqObrDBT2GJlsaA7BRth5XjGp7rMyUq
+        +4GlkCINrACYYnTtlsfwF9BwXzKtDoNGOF1B9uKL2g==
+X-Google-Smtp-Source: AGHT+IFG4X8QM361Sf/0Q/7MOPJJHCzWC8R0BKkb4R1PusMcHP7Wb9dL/evBOeNc8g7HpQr4smGnhb1ryn3veTht5jQ=
+X-Received: by 2002:a0c:e2c5:0:b0:672:7fe3:7aae with SMTP id
+ t5-20020a0ce2c5000000b006727fe37aaemr7995774qvl.56.1698838272664; Wed, 01 Nov
+ 2023 04:31:12 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20231027145623.2258723-1-korneld@chromium.org>
+ <20231027145623.2258723-2-korneld@chromium.org> <e7c12e07-7540-47ea-8891-2cec73d58df1@intel.com>
+In-Reply-To: <e7c12e07-7540-47ea-8891-2cec73d58df1@intel.com>
+From:   =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
+Date:   Wed, 1 Nov 2023 12:31:01 +0100
+Message-ID: <CAD=NsqxXP+SjH-ud8sjHD5y_LxZGUDnwHNPbzr_0RPwqVrwpPw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: cqhci: Add a quirk to clear stale TC
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Radoslaw Biernacki <biernacki@google.com>,
+        Gwendal Grignou <gwendal@chromium.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Mon, Oct 30, 2023 at 8:31=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
+com> wrote:
+>
+> On 27/10/23 17:56, Kornel Dul=C4=99ba wrote:
+> > This fix addresses a stale task completion event issued right after the
+> > CQE recovery. As it's a hardware issue the fix is done in form of a
+> > quirk.
+> >
+> > When error interrupt is received the driver runs recovery logic is run.
+> > It halts the controller, clears all pending tasks, and then re-enables
+> > it. On some platforms a stale task completion event is observed,
+> > regardless of the CQHCI_CLEAR_ALL_TASKS bit being set.
+> >
+> > This results in either:
+> > a) Spurious TC completion event for an empty slot.
+> > b) Corrupted data being passed up the stack, as a result of premature
+> >    completion for a newly added task.
+> >
+> > To fix that re-enable the controller, clear task completion bits,
+> > interrupt status register and halt it again.
+> > This is done at the end of the recovery process, right before interrupt=
+s
+> > are re-enabled.
+> >
+> > Signed-off-by: Kornel Dul=C4=99ba <korneld@chromium.org>
+> > ---
+> >  drivers/mmc/host/cqhci-core.c | 42 +++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/cqhci.h      |  1 +
+> >  2 files changed, 43 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-cor=
+e.c
+> > index b3d7d6d8d654..e534222df90c 100644
+> > --- a/drivers/mmc/host/cqhci-core.c
+> > +++ b/drivers/mmc/host/cqhci-core.c
+> > @@ -1062,6 +1062,45 @@ static void cqhci_recover_mrqs(struct cqhci_host=
+ *cq_host)
+> >  /* CQHCI could be expected to clear it's internal state pretty quickly=
+ */
+> >  #define CQHCI_CLEAR_TIMEOUT          20
+> >
+> > +/*
+> > + * During CQE recovery all pending tasks are cleared from the
+> > + * controller and its state is being reset.
+> > + * On some platforms the controller sets a task completion bit for
+> > + * a stale(previously cleared) task right after being re-enabled.
+> > + * This results in a spurious interrupt at best and corrupted data
+> > + * being passed up the stack at worst. The latter happens when
+> > + * the driver enqueues a new request on the problematic task slot
+> > + * before the "spurious" task completion interrupt is handled.
+> > + * To fix it:
+> > + * 1. Re-enable controller by clearing the halt flag.
+> > + * 2. Clear interrupt status and the task completion register.
+> > + * 3. Halt the controller again to be consistent with quirkless logic.
+> > + *
+> > + * This assumes that there are no pending requests on the queue.
+> > + */
+> > +static void cqhci_quirk_clear_stale_tc(struct cqhci_host *cq_host)
+> > +{
+> > +     u32 reg;
+> > +
+> > +     WARN_ON(cq_host->qcnt);
+> > +     cqhci_writel(cq_host, 0, CQHCI_CTL);
+> > +     if ((cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)) {
+> > +             pr_err("%s: cqhci: CQE failed to exit halt state\n",
+> > +                     mmc_hostname(cq_host->mmc));
+> > +     }
+> > +     reg =3D cqhci_readl(cq_host, CQHCI_TCN);
+> > +     cqhci_writel(cq_host, reg, CQHCI_TCN);
+> > +     reg =3D cqhci_readl(cq_host, CQHCI_IS);
+> > +     cqhci_writel(cq_host, reg, CQHCI_IS);
+> > +
+> > +     /*
+> > +      * Halt the controller again.
+> > +      * This is only needed so that we're consistent across quirk
+> > +      * and quirkless logic.
+> > +      */
+> > +     cqhci_halt(cq_host->mmc, CQHCI_FINISH_HALT_TIMEOUT);
+> > +}
+>
+> Thanks a lot for tracking this down!
+>
+> It could be that the "un-halt" starts a task, so it would be
+> better to force the "clear" to work if possible, which
+> should be the case if CQE is disabled.
+>
+> Would you mind trying the code below?  Note the increased
+> CQHCI_START_HALT_TIMEOUT helps avoid trying to clear tasks
+> when CQE has not halted.
 
-Here's the pull-request with the MMC and MEMSTICK updates for v6.7. Details
-about the highlights are as usual found in the signed tag.
+Sure, I'll try it out tomorrow, as I don't have access to the DUT today.
+BTW do we even need to halt the controller in the recovery_finish logic?
+It has already been halted in recovery_start, I guess it could be
+there in case the recovery_start halt didn't work.
+But in that case shouldn't we do this disable/re-enable dance in recovery_s=
+tart?
 
-Please pull this in!
-
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit 84ee19bffc9306128cd0f1c650e89767079efeff:
-
-  mmc: core: Capture correct oemid-bits for eMMC cards (2023-09-27 12:17:04 +0200)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.7
-
-for you to fetch changes up to 5428a40a308f220dbbffda66cb01b212f88e9a06:
-
-  mmc: Merge branch fixes into next (2023-10-27 12:00:35 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Enable host caps to be modified via debugfs to test speed-modes
- - Improve random I/O writes for 4k buffers for hsq enabled hosts
-
-MMC host:
- - atmel-mci/sdhci-of-at91: Aubin Constans takes over as maintainer
- - dw_mmc-starfive: Re-work tuning support
- - meson-gx: Fix bogus IRQ when using CMD_CFG_ERROR
- - mmci: Use peripheral flow control for the STM32 variant
- - renesas,sdhi: Add support for the RZ/G3S variant
- - sdhci-esdhc-imx: Optimize the manual tuning logic
- - sdhci-msm: Add support for the SM8650 variant
- - sdhci-npcm: Add driver to support the Nuvoton NPCM BMC variant
- - sdhci-pci-gli: Add workaround to allow GL9750 to enter ASPM L1.2
-
-----------------------------------------------------------------
-Andy Shevchenko (3):
-      mmc: sdhci-pci: Switch to use acpi_evaluate_dsm_typed()
-      mmc: sdhci-pltfm: Drop unnecessary error messages in sdhci_pltfm_init()
-      mmc: sdhci-pltfm: Make driver OF independent
-
-Aubin Constans (1):
-      MAINTAINERS: mmc: take over as maintainer of MCI & SDHCI MICROCHIP DRIVERS
-
-Balamanikandan Gunasundar (1):
-      mmc: atmel-mci: Add description for struct member
-
-Ben Wolsieffer (1):
-      mmc: mmci: use peripheral flow control for STM32
-
-Claudiu Beznea (1):
-      dt-bindings: mmc: renesas,sdhi: Document RZ/G3S support
-
-Haibo Chen (1):
-      mmc: sdhci-esdhc-imx: optimize the manual tuing logic to get the best timing
-
-Julia Lawall (1):
-      mmc: atmel-mci: add missing of_node_put
-
-Justin Stitt (1):
-      mmc: vub300: replace deprecated strncpy with strscpy
-
-Kees Cook (1):
-      memstick: jmb38x_ms: Annotate struct jmb38x_ms with __counted_by
-
-Krzysztof Kozlowski (1):
-      dt-bindings: mmc: sdhci-msm: allow flexible order of optional clocks
-
-Lad Prabhakar (1):
-      mmc: host: Kconfig: Make MMC_SDHI_INTERNAL_DMAC config option dependant on ARCH_RENESAS
-
-Neil Armstrong (1):
-      dt-bindings: mmc: sdhci-msm: document the SM8650 SDHCI Controller
-
-Rob Herring (1):
-      mmc: jz4740: Use device_get_match_data()
-
-Rong Chen (1):
-      mmc: meson-gx: Remove setting of CMD_CFG_ERROR
-
-Tomer Maimon (2):
-      dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI controller
-      mmc: sdhci-npcm: Add NPCM SDHCI driver
-
-Ulf Hansson (3):
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-
-Victor Shih (1):
-      mmc: sdhci-pci-gli: A workaround to allow GL9750 to enter ASPM L1.2
-
-Vincent Whitchurch (2):
-      mmc: core: Always reselect card type
-      mmc: debugfs: Allow host caps to be modified
-
-Wenchao Chen (2):
-      mmc: core: Allow dynamical updates of the number of requests for hsq
-      mmc: hsq: Improve random I/O write performance for 4k buffers
-
-William Qiu (2):
-      dt-bindings: mmc: starfive: Remove properties from required
-      mmc: starfive: Change tuning implementation
-
- .../devicetree/bindings/mmc/npcm,sdhci.yaml        |  45 +++++++
- .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   2 +
- .../devicetree/bindings/mmc/sdhci-msm.yaml         |   9 +-
- .../bindings/mmc/starfive,jh7110-mmc.yaml          |   2 -
- MAINTAINERS                                        |   5 +-
- drivers/memstick/host/jmb38x_ms.c                  |   2 +-
- drivers/mmc/core/debugfs.c                         |  51 +++++++-
- drivers/mmc/core/mmc.c                             |   7 +-
- drivers/mmc/core/queue.c                           |   6 +-
- drivers/mmc/host/Kconfig                           |  12 +-
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/atmel-mci.c                       |   9 +-
- drivers/mmc/host/dw_mmc-starfive.c                 | 137 ++++++---------------
- drivers/mmc/host/jz4740_mmc.c                      |  15 +--
- drivers/mmc/host/meson-gx-mmc.c                    |   1 -
- drivers/mmc/host/mmc_hsq.c                         |  22 ++++
- drivers/mmc/host/mmc_hsq.h                         |  11 ++
- drivers/mmc/host/mmci.c                            |   3 +-
- drivers/mmc/host/mmci.h                            |   2 +
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  52 +++++---
- drivers/mmc/host/sdhci-npcm.c                      |  94 ++++++++++++++
- drivers/mmc/host/sdhci-pci-core.c                  |   5 +-
- drivers/mmc/host/sdhci-pci-gli.c                   |  14 +++
- drivers/mmc/host/sdhci-pltfm.c                     |  38 ++----
- drivers/mmc/host/vub300.c                          |  22 ++--
- include/linux/mmc/host.h                           |   1 +
- 26 files changed, 384 insertions(+), 184 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
- create mode 100644 drivers/mmc/host/sdhci-npcm.c
+>
+>
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.=
+c
+> index b3d7d6d8d654..534c13069833 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -987,7 +987,7 @@ static bool cqhci_halt(struct mmc_host *mmc, unsigned=
+ int timeout)
+>   * layers will need to send a STOP command), so we set the timeout based=
+ on a
+>   * generous command timeout.
+>   */
+> -#define CQHCI_START_HALT_TIMEOUT       5
+> +#define CQHCI_START_HALT_TIMEOUT       500
+>
+>  static void cqhci_recovery_start(struct mmc_host *mmc)
+>  {
+> @@ -1075,28 +1075,27 @@ static void cqhci_recovery_finish(struct mmc_host=
+ *mmc)
+>
+>         ok =3D cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
+>
+> -       if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
+> -               ok =3D false;
+> -
+>         /*
+>          * The specification contradicts itself, by saying that tasks can=
+not be
+>          * cleared if CQHCI does not halt, but if CQHCI does not halt, it=
+ should
+>          * be disabled/re-enabled, but not to disable before clearing tas=
+ks.
+>          * Have a go anyway.
+>          */
+> -       if (!ok) {
+> -               pr_debug("%s: cqhci: disable / re-enable\n", mmc_hostname=
+(mmc));
+> -               cqcfg =3D cqhci_readl(cq_host, CQHCI_CFG);
+> -               cqcfg &=3D ~CQHCI_ENABLE;
+> -               cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+> -               cqcfg |=3D CQHCI_ENABLE;
+> -               cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+> -               /* Be sure that there are no tasks */
+> -               ok =3D cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
+> -               if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
+> -                       ok =3D false;
+> -               WARN_ON(!ok);
+> -       }
+> +       if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
+> +               ok =3D false;
+> +
+> +       cqcfg =3D cqhci_readl(cq_host, CQHCI_CFG);
+> +       cqcfg &=3D ~CQHCI_ENABLE;
+> +       cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+> +
+> +       cqcfg =3D cqhci_readl(cq_host, CQHCI_CFG);
+> +       cqcfg |=3D CQHCI_ENABLE;
+> +       cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+> +
+> +       cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
+> +
+> +       if (!ok)
+> +               cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT);
+>
+>         cqhci_recover_mrqs(cq_host);
+>
+>
