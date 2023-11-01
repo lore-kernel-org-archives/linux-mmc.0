@@ -2,24 +2,25 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F5FCC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 15:38:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9213AC4167B
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 15:49:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233861AbjKAPiJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Nov 2023 11:38:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48692 "EHLO
+        id S231311AbjKAPtu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Nov 2023 11:49:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbjKAPiI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 11:38:08 -0400
+        with ESMTP id S229731AbjKAPts (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 11:49:48 -0400
 Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69AA810D;
-        Wed,  1 Nov 2023 08:37:57 -0700 (PDT)
-X-UUID: 9d3ab8a878cc11ee8051498923ad61e6-20231101
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE76510C;
+        Wed,  1 Nov 2023 08:49:40 -0700 (PDT)
+X-UUID: 41e5068278ce11ee8051498923ad61e6-20231101
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
         h=Content-Type:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=Ov9TiPDknb6R9yF2IVYZFuRm6kOrz1Qf6/9qeS+Jpgw=;
-        b=eRKHuDNR7dwvvJC73Gf2FnXBKgTtvdU2LnK0b/TF9b04figWWQG0nT55jpzRc63BdYeulD1QNeCi7J/BirD08Ye9h1aeFYDNAzXlj5abPelL2N1B4DAjuS+D3WkKujoZy4g79VhTkECX9hKXLsjrDDIDDO0qsW4lnvdDg0q4h0M=;
+        b=tn1FxN3s2FjIgUDdiAJzn5pnR/1n9IYeqXV652hLmM9ru50zq1/xEx+1JcA7P787YHkiA0SXF4MAgwlhwENK5MqoBb6jC3W/Bas1/cd0IjjmpVyj/0aCAlwC4ajot/X/QpbVSqV70weS6mNe6NExJtAkFkJB4q8/hFeT/Jug6hI=;
+X-CID-CACHE: Type:Local,Time:202311012337+08,HitQuantity:1
 X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.33,REQID:87dc641d-91c5-4a60-8fba-ffdd6673450b,IP:0,U
+X-CID-O-INFO: VERSION:1.1.33,REQID:5f823a4a-bafd-4a1a-bd5d-938640fa097f,IP:0,U
         RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
         :release,TS:-5
 X-CID-META: VersionHash:364b77b,CLOUDID:eb9c2872-1bd3-4f48-b671-ada88705968c,B
@@ -29,18 +30,18 @@ X-CID-META: VersionHash:364b77b,CLOUDID:eb9c2872-1bd3-4f48-b671-ada88705968c,B
 X-CID-BVR: 0,NGT
 X-CID-BAS: 0,NGT,0,_
 X-CID-FACTOR: TF_CID_SPAM_SNR
-X-UUID: 9d3ab8a878cc11ee8051498923ad61e6-20231101
-Received: from mtkmbs14n1.mediatek.inc [(172.21.101.75)] by mailgw02.mediatek.com
+X-UUID: 41e5068278ce11ee8051498923ad61e6-20231101
+Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw02.mediatek.com
         (envelope-from <bo.ye@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 950611372; Wed, 01 Nov 2023 23:37:50 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
- mtkmbs13n1.mediatek.inc (172.21.101.193) with Microsoft SMTP Server
+        with ESMTP id 554406059; Wed, 01 Nov 2023 23:49:35 +0800
+Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Wed, 1 Nov 2023 23:37:49 +0800
+ 15.2.1118.26; Wed, 1 Nov 2023 23:49:34 +0800
 Received: from mcddlt001.gcn.mediatek.inc (10.19.240.15) by
- mtkmbs11n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Wed, 1 Nov 2023 23:37:48 +0800
+ mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Wed, 1 Nov 2023 23:49:33 +0800
 From:   Bo Ye <bo.ye@mediatek.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Matthias Brugger <matthias.bgg@gmail.com>,
@@ -52,11 +53,25 @@ CC:     <yongdong.zhang@mediatek.com>, <browse.zhang@mediatek.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>
 Subject: [PATCH] mmc: add wp_grp_size node
-Date:   Wed, 1 Nov 2023 23:37:37 +0800
-Message-ID: <20231101153738.118659-1-bo.ye@mediatek.com>
+Date:   Wed, 1 Nov 2023 23:49:26 +0800
+Message-ID: <20231101154927.119312-1-bo.ye@mediatek.com>
 X-Mailer: git-send-email 2.17.0
 MIME-Version: 1.0
 Content-Type: text/plain
+X-TM-AS-Product-Ver: SMEX-14.0.0.3152-9.1.1006-23728.005
+X-TM-AS-Result: No-10--9.192800-8.000000
+X-TMASE-MatchedRID: th1XRPLu1HNGlhjnipkGEAwfhKwa9GwD+lX/RcQoG2FX4H/AHZTAKiQH
+        YX2qyjfSlB6IdnaWhV1I7JPsZpNRgcL2WgOVZLNHhDqIQb7sQecK3n1SHen81VeilmPI7oJlf8S
+        IQrqULYwLYtJsevMdjZZLxtyQINIccMMjBRRYYhwflhDI6DvVlkJfxXUWJFGS31GU/N5W5BBLR6
+        I6ytdxONZKQinVddBT3D2hj0hvDabf0vAzbUUm26am63kopwnT57kkHY8cvsS6Kbobcv5luFpqk
+        DNHM8v+nFqPTSvsB8lzQ71/lVVm1vJMF6pylZNW1tU7lyp9XhEoPUUDFlEi1db1HR1TV5h03x8z
+        1cIgGiHi8zVgXoAltsIJ+4gwXrEtIAcCikR3vq9j6bKbLCMItm8ICwgw12VPO6dim/ocNbcn4VX
+        tjVje77MxnEq2nQWr
+X-TM-AS-User-Approved-Sender: No
+X-TM-AS-User-Blocked-Sender: No
+X-TMASE-Result: 10--9.192800-8.000000
+X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
+X-TM-SNTS-SMTP: 0F899615BDE2A6CD307BF16FE736E603887F1EBB5A91C4D58CC90BFFF96AE5642000:8
 X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
