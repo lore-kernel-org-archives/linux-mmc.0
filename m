@@ -2,159 +2,166 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D1C0C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 12:00:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F5FCC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 15:38:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235459AbjKAMAy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Nov 2023 08:00:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58120 "EHLO
+        id S233861AbjKAPiJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Nov 2023 11:38:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48692 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235419AbjKAMAx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 08:00:53 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0454E120;
-        Wed,  1 Nov 2023 05:00:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1698840046; x=1730376046;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=E+Uh1OHEdBFabkdiVD2/Wli1AlPdaNL2ak9CEXe2Saw=;
-  b=B4rdbg+Nsd8ncXuV/Txkhm8DXuf0vSQ6A+fnDXu9IfoNXTWNGrVftjeR
-   OWvyMAX5JolsgmndvGwyI5vOdDo0nUjt6fP7sS97l5FFgR8Fi0uohlBTO
-   sI5dmOuS25Mw55GIcK017srB1TL+lqA/6SitF5qFAbKzVnVSDLZjjA2ej
-   73I4oWzgdGkHtsINSf1b0aHEs9Mp4Eodg0wljPLNYf6fhe9yisddF9b7Y
-   5RpvaKoBipNi33toXMjVBdyValfXOJdF2CW0AU3JHSzHMl21LEc7FEhwe
-   iaPuayl9QD8HT42dbl9w0nzliidBUhZ5RXQVQDaoeadw0LMxJkOYiXfC2
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10880"; a="373522179"
-X-IronPort-AV: E=Sophos;i="6.03,268,1694761200"; 
-   d="scan'208";a="373522179"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 05:00:45 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10880"; a="1092330528"
-X-IronPort-AV: E=Sophos;i="6.03,268,1694761200"; 
-   d="scan'208";a="1092330528"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.34.17])
-  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 05:00:43 -0700
-Message-ID: <638bb5ac-6543-477c-8dd1-bff8ac8d29cb@intel.com>
-Date:   Wed, 1 Nov 2023 14:00:39 +0200
+        with ESMTP id S229603AbjKAPiI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 11:38:08 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69AA810D;
+        Wed,  1 Nov 2023 08:37:57 -0700 (PDT)
+X-UUID: 9d3ab8a878cc11ee8051498923ad61e6-20231101
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Type:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=Ov9TiPDknb6R9yF2IVYZFuRm6kOrz1Qf6/9qeS+Jpgw=;
+        b=eRKHuDNR7dwvvJC73Gf2FnXBKgTtvdU2LnK0b/TF9b04figWWQG0nT55jpzRc63BdYeulD1QNeCi7J/BirD08Ye9h1aeFYDNAzXlj5abPelL2N1B4DAjuS+D3WkKujoZy4g79VhTkECX9hKXLsjrDDIDDO0qsW4lnvdDg0q4h0M=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.33,REQID:87dc641d-91c5-4a60-8fba-ffdd6673450b,IP:0,U
+        RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+        :release,TS:-5
+X-CID-META: VersionHash:364b77b,CLOUDID:eb9c2872-1bd3-4f48-b671-ada88705968c,B
+        ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
+        RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,
+        DKR:0,DKP:0,BRR:0,BRE:0
+X-CID-BVR: 0,NGT
+X-CID-BAS: 0,NGT,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-UUID: 9d3ab8a878cc11ee8051498923ad61e6-20231101
+Received: from mtkmbs14n1.mediatek.inc [(172.21.101.75)] by mailgw02.mediatek.com
+        (envelope-from <bo.ye@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 950611372; Wed, 01 Nov 2023 23:37:50 +0800
+Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
+ mtkmbs13n1.mediatek.inc (172.21.101.193) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.26; Wed, 1 Nov 2023 23:37:49 +0800
+Received: from mcddlt001.gcn.mediatek.inc (10.19.240.15) by
+ mtkmbs11n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Wed, 1 Nov 2023 23:37:48 +0800
+From:   Bo Ye <bo.ye@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+CC:     <yongdong.zhang@mediatek.com>, <browse.zhang@mediatek.com>,
+        <lin.gui@mediatek.com>, <qilin.tan@mediatek.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>
+Subject: [PATCH] mmc: add wp_grp_size node
+Date:   Wed, 1 Nov 2023 23:37:37 +0800
+Message-ID: <20231101153738.118659-1-bo.ye@mediatek.com>
+X-Mailer: git-send-email 2.17.0
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] mmc: cqhci: Add a quirk to clear stale TC
-Content-Language: en-US
-To:     =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Radoslaw Biernacki <biernacki@google.com>,
-        Gwendal Grignou <gwendal@chromium.org>
-References: <20231027145623.2258723-1-korneld@chromium.org>
- <20231027145623.2258723-2-korneld@chromium.org>
- <e7c12e07-7540-47ea-8891-2cec73d58df1@intel.com>
- <CAD=NsqxXP+SjH-ud8sjHD5y_LxZGUDnwHNPbzr_0RPwqVrwpPw@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAD=NsqxXP+SjH-ud8sjHD5y_LxZGUDnwHNPbzr_0RPwqVrwpPw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/11/23 13:31, Kornel Dulęba wrote:
-> On Mon, Oct 30, 2023 at 8:31 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 27/10/23 17:56, Kornel Dulęba wrote:
->>> This fix addresses a stale task completion event issued right after the
->>> CQE recovery. As it's a hardware issue the fix is done in form of a
->>> quirk.
->>>
->>> When error interrupt is received the driver runs recovery logic is run.
->>> It halts the controller, clears all pending tasks, and then re-enables
->>> it. On some platforms a stale task completion event is observed,
->>> regardless of the CQHCI_CLEAR_ALL_TASKS bit being set.
->>>
->>> This results in either:
->>> a) Spurious TC completion event for an empty slot.
->>> b) Corrupted data being passed up the stack, as a result of premature
->>>    completion for a newly added task.
->>>
->>> To fix that re-enable the controller, clear task completion bits,
->>> interrupt status register and halt it again.
->>> This is done at the end of the recovery process, right before interrupts
->>> are re-enabled.
->>>
->>> Signed-off-by: Kornel Dulęba <korneld@chromium.org>
->>> ---
->>>  drivers/mmc/host/cqhci-core.c | 42 +++++++++++++++++++++++++++++++++++
->>>  drivers/mmc/host/cqhci.h      |  1 +
->>>  2 files changed, 43 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
->>> index b3d7d6d8d654..e534222df90c 100644
->>> --- a/drivers/mmc/host/cqhci-core.c
->>> +++ b/drivers/mmc/host/cqhci-core.c
->>> @@ -1062,6 +1062,45 @@ static void cqhci_recover_mrqs(struct cqhci_host *cq_host)
->>>  /* CQHCI could be expected to clear it's internal state pretty quickly */
->>>  #define CQHCI_CLEAR_TIMEOUT          20
->>>
->>> +/*
->>> + * During CQE recovery all pending tasks are cleared from the
->>> + * controller and its state is being reset.
->>> + * On some platforms the controller sets a task completion bit for
->>> + * a stale(previously cleared) task right after being re-enabled.
->>> + * This results in a spurious interrupt at best and corrupted data
->>> + * being passed up the stack at worst. The latter happens when
->>> + * the driver enqueues a new request on the problematic task slot
->>> + * before the "spurious" task completion interrupt is handled.
->>> + * To fix it:
->>> + * 1. Re-enable controller by clearing the halt flag.
->>> + * 2. Clear interrupt status and the task completion register.
->>> + * 3. Halt the controller again to be consistent with quirkless logic.
->>> + *
->>> + * This assumes that there are no pending requests on the queue.
->>> + */
->>> +static void cqhci_quirk_clear_stale_tc(struct cqhci_host *cq_host)
->>> +{
->>> +     u32 reg;
->>> +
->>> +     WARN_ON(cq_host->qcnt);
->>> +     cqhci_writel(cq_host, 0, CQHCI_CTL);
->>> +     if ((cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)) {
->>> +             pr_err("%s: cqhci: CQE failed to exit halt state\n",
->>> +                     mmc_hostname(cq_host->mmc));
->>> +     }
->>> +     reg = cqhci_readl(cq_host, CQHCI_TCN);
->>> +     cqhci_writel(cq_host, reg, CQHCI_TCN);
->>> +     reg = cqhci_readl(cq_host, CQHCI_IS);
->>> +     cqhci_writel(cq_host, reg, CQHCI_IS);
->>> +
->>> +     /*
->>> +      * Halt the controller again.
->>> +      * This is only needed so that we're consistent across quirk
->>> +      * and quirkless logic.
->>> +      */
->>> +     cqhci_halt(cq_host->mmc, CQHCI_FINISH_HALT_TIMEOUT);
->>> +}
->>
->> Thanks a lot for tracking this down!
->>
->> It could be that the "un-halt" starts a task, so it would be
->> better to force the "clear" to work if possible, which
->> should be the case if CQE is disabled.
->>
->> Would you mind trying the code below?  Note the increased
->> CQHCI_START_HALT_TIMEOUT helps avoid trying to clear tasks
->> when CQE has not halted.
-> 
-> Sure, I'll try it out tomorrow, as I don't have access to the DUT today.
-> BTW do we even need to halt the controller in the recovery_finish logic?
-> It has already been halted in recovery_start, I guess it could be
-> there in case the recovery_start halt didn't work.
-> But in that case shouldn't we do this disable/re-enable dance in recovery_start?
+From: "lin.gui" <lin.gui@mediatek.com>
 
-"Halt" might be waiting on an operation to finish, so the STOP
-command is meant to help bring that to a conclusion.
+Detail:
+Add node "wp_grp_size", corresponding to WP_GRP_SIZE
+(write protect group size) of eMMC's CSD register.
+
+Scenario:
+The eMMC card can be set into write-protected mode to
+prevent data from being accidentally modified or deleted.
+Wp_grp_size (Write Protect Group Size) refers to an
+attribute of the eMMC card, used to manage write protection,
+and is the CSD register  [36:32] of the eMMC device.
+Wp_grp_size (Write Protect Group Size) indicates how many
+eMMC blocks are contained in each write protection group on the eMMC card.
+
+Final rendered file:
+"/sys/class/mmc_host/mmc0/mmc0:0001/wp_grp_size"
+
+Signed-off-by: lin.gui <lin.gui@mediatek.com>
+Change-Id: I73952dbde2db375ba918daadb3264380b7863096
+---
+ drivers/mmc/core/mmc.c   | 16 +++++++++++++++-
+ include/linux/mmc/card.h |  2 ++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 4a4bab9aa726..9b67e49a9e63 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -136,6 +136,17 @@ static void mmc_set_erase_size(struct mmc_card *card)
+ 	mmc_init_erase(card);
+ }
+ 
++
++static void mmc_set_wp_grp_size(struct mmc_card *card)
++{
++	if (card->ext_csd.erase_group_def & 1)
++		card->wp_grp_size = card->ext_csd.hc_erase_size *
++			card->ext_csd.raw_hc_erase_gap_size;
++	else
++		card->wp_grp_size = card->csd.erase_size *
++			(card->csd.wp_grp_size + 1);
++}
++
+ /*
+  * Given a 128-bit response, decode to our card CSD structure.
+  */
+@@ -186,6 +197,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 		b = UNSTUFF_BITS(resp, 37, 5);
+ 		csd->erase_size = (a + 1) * (b + 1);
+ 		csd->erase_size <<= csd->write_blkbits - 9;
++		csd->wp_grp_size = UNSTUFF_BITS(resp, 32, 5);
+ 	}
+ 
+ 	return 0;
+@@ -791,6 +803,7 @@ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
+ MMC_DEV_ATTR(date, "%02d/%04d\n", card->cid.month, card->cid.year);
+ MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
+ MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
++MMC_DEV_ATTR(wp_grp_size, "%u\n", card->wp_grp_size << 9);
+ MMC_DEV_ATTR(ffu_capable, "%d\n", card->ext_csd.ffu_capable);
+ MMC_DEV_ATTR(hwrev, "0x%x\n", card->cid.hwrev);
+ MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+@@ -851,6 +864,7 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_date.attr,
+ 	&dev_attr_erase_size.attr,
+ 	&dev_attr_preferred_erase_size.attr,
++	&dev_attr_wp_grp_size.attr,
+ 	&dev_attr_fwrev.attr,
+ 	&dev_attr_ffu_capable.attr,
+ 	&dev_attr_hwrev.attr,
+@@ -1759,7 +1773,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			mmc_set_erase_size(card);
+ 		}
+ 	}
+-
++	mmc_set_wp_grp_size(card);
+ 	/*
+ 	 * Ensure eMMC user default partition is enabled
+ 	 */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index daa2f40d9ce6..62873ecc52f1 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -32,6 +32,7 @@ struct mmc_csd {
+ 	unsigned int		r2w_factor;
+ 	unsigned int		max_dtr;
+ 	unsigned int		erase_size;		/* In sectors */
++	unsigned int		wp_grp_size;
+ 	unsigned int		read_blkbits;
+ 	unsigned int		write_blkbits;
+ 	unsigned int		capacity;
+@@ -304,6 +305,7 @@ struct mmc_card {
+ 	unsigned int		eg_boundary;	/* don't cross erase-group boundaries */
+ 	unsigned int		erase_arg;	/* erase / trim / discard */
+  	u8			erased_byte;	/* value of erased bytes */
++	unsigned int		wp_grp_size; /* write group size in sectors */
+ 
+ 	u32			raw_cid[4];	/* raw card CID */
+ 	u32			raw_csd[4];	/* raw card CSD */
+-- 
+2.17.0
 
