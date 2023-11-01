@@ -2,102 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EEF3C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 04:38:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9EF3C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 07:15:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345242AbjKAEiD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Nov 2023 00:38:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34302 "EHLO
+        id S229656AbjKAHP2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Nov 2023 03:15:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346855AbjKAEiA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 00:38:00 -0400
-Received: from nautica.notk.org (ipv6.notk.org [IPv6:2001:41d0:1:7a93::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18783F3;
-        Tue, 31 Oct 2023 21:37:54 -0700 (PDT)
-Received: by nautica.notk.org (Postfix, from userid 108)
-        id EC2A3C01B; Wed,  1 Nov 2023 05:37:45 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
-        t=1698813465; bh=j+mg0+uxBvTuBRWF4ptxdU82Fb+1k2fxHgCCXiVcZQA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=k4awi9G+mg0+EAiKXCXRJdb+1a8p9CfMbHvFn3a8oVq2cYQBKM4nvx0VzA178oTRK
-         SXk05BcSid5LR2bq/i9X9cd3Q8ZgF8EYBaR5urwNi0EYcJPGhvBta9zE13cQSHWbe6
-         cA8TeBCKOmLoaQUoaeHn5/aFcpebdLAu7EoswMS5xk2PgLQfYpKV+WkX8zPkEbExv1
-         mmJmqULWawJScFdD87a3dLdcCAF05KJ+8Yse8wzLnBVUgHtikf7fMtsp9zE/qEihHm
-         ZVieNDqTiq6BNdFg7k61V5k6kJlBVh1pTUqr+51bFeAxH2PCsCmHUyy3pic9xTTbQC
-         Q/DfyEnCEUaFQ==
-Received: from gaia (localhost [127.0.0.1])
-        by nautica.notk.org (Postfix) with ESMTPS id AC94BC009;
-        Wed,  1 Nov 2023 05:37:33 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
-        t=1698813455; bh=j+mg0+uxBvTuBRWF4ptxdU82Fb+1k2fxHgCCXiVcZQA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=GrYPsiWrkRCUcn9s2MkFLg31xqxTmwQ1Tm4if+GBYb8fG34lFc7Iztqp6C1KKbclx
-         T6gcJFZrjEYqGzP2dK+HhKxVK/hvZUQFEP5xVQLBRQPli2Ekd23oC70xH0OsEMtIF+
-         yE/i3PX6sgdgnjTga6oZVr9k4AO1o5cFlevbYUcq03sVYSX6dyv6mP2q2uNmYsTz3g
-         dxejHEfnu/Gu60nGzWQjRg32VvKIP40RYvx/ad6UoeuD1lmTWXlKvHacFqt7XI6lcA
-         ihpRJqLOxHAaQ73XCwDcX0oI+gOvO0d01ZUSZyJ1OIF+SR5T+zMlcp5MVWNXoDoCem
-         2m4ptISHOVnNQ==
-Received: from localhost (gaia [local])
-        by gaia (OpenSMTPD) with ESMTPA id 532b5c2b;
-        Wed, 1 Nov 2023 04:37:30 +0000 (UTC)
-Date:   Wed, 1 Nov 2023 13:37:15 +0900
-From:   Dominique Martinet <asmadeus@codewreck.org>
-To:     Avri Altman <Avri.Altman@wdc.com>
-Cc:     Dominique Martinet <dominique.martinet@atmark-techno.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "stable@vger.kernel.org" <stable@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Alex Fetters <Alex.Fetters@garmin.com>
-Subject: Re: [PATCH] mmc: truncate quirks' oemid to 8 bits
-Message-ID: <ZUHV-wduEf12M86U@codewreck.org>
-References: <20231026075230.414685-1-dominique.martinet@atmark-techno.com>
- <DM6PR04MB657596E19EF3D7976197660EFCDDA@DM6PR04MB6575.namprd04.prod.outlook.com>
+        with ESMTP id S229445AbjKAHP1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 03:15:27 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 945DDE4;
+        Wed,  1 Nov 2023 00:15:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1698822922; x=1730358922;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=YOamUtZBvPGFSqT3bJhAUQfsVZzAHn/s7THLW6Z58ac=;
+  b=VSRldrmCVUGDArECpCQC9ivs+24d3vxD5FiS9uZpT5BU4Ip3LcybJEr9
+   AQI+M6GAOrI4ebsEIAAV5gTCe0JrXPmzgkKLzMUJUdTdn5PfaA6z5keHr
+   dF8y3sVX7wrFcWZdYG5nwlmQb+MARD6xLAWgFCOvN73DQKVFBzVstfA+y
+   Csz1uVVNL/wtpMIXEde0jgb7YFoOpt8E2A3knIuoUeNn0E3AInRtl7ZNH
+   lZnu4OjfEfC3rvhZzC9TyHvJN9sFvYy/or5evlcxqdqrRXgv1NVQtgt1r
+   URHLRED4SWJ8GNPh4sRhoVU4U9GqJuRiMScQeVrht7tCQXio5QEZEso5h
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10880"; a="7075759"
+X-IronPort-AV: E=Sophos;i="6.03,267,1694761200"; 
+   d="scan'208";a="7075759"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 00:15:22 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10880"; a="831280524"
+X-IronPort-AV: E=Sophos;i="6.03,267,1694761200"; 
+   d="scan'208";a="831280524"
+Received: from lkp-server01.sh.intel.com (HELO 17d9e85e5079) ([10.239.97.150])
+  by fmsmga004.fm.intel.com with ESMTP; 01 Nov 2023 00:15:16 -0700
+Received: from kbuild by 17d9e85e5079 with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1qy5RZ-0000f2-2m;
+        Wed, 01 Nov 2023 07:15:13 +0000
+Date:   Wed, 1 Nov 2023 15:15:04 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com, jh80.chung@samsung.com,
+        riteshh@codeaurora.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+        asutoshd@codeaurora.org, p.zabel@pengutronix.de
+Cc:     oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        arnd@arndb.de, briannorris@chromium.org, doug@schmorgal.com,
+        tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
+        william.qiu@starfivetech.com, jyanchou@realtek.com
+Subject: Re: [PATCH V4][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
+Message-ID: <202311011551.QtHtdWmG-lkp@intel.com>
+References: <20231030062749.2840-3-jyanchou@realtek.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <DM6PR04MB657596E19EF3D7976197660EFCDDA@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <20231030062749.2840-3-jyanchou@realtek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Avri Altman wrote on Thu, Oct 26, 2023 at 10:16:53AM +0000:
-> Reviewed-by: Avri Altman <avri.altman@wdc.com>
+Hi Jyan,
 
-Thanks for the review!
+kernel test robot noticed the following build errors:
 
-> > ---
-> > Notes:
-> >  - mmc_fixup_device() was rewritten in 5.17, so older stable kernels
-> >    will need a separate patch... I suppose I can send it to stable
-> >    after this is merged if we go this way
-> >  - struct mmc_cid's and mmc_fixup's oemid fields are unsigned shorts,
-> >    we probably just want to make them unsigned char instead in which
-> >    case we don't need that check anymore?
-> >    But it's kind of nice to have a wider type so CID_OEMID_ANY can never
-> >    be a match.... Which unfortunately my patch makes moot as
-> >    ((unsigned short)-1) & 0xff will be 0xff which can match anything...
-> >  - this could also be worked around in the _FIXUP_EXT macro that builds
-> >    the fixup structs, but we're getting ugly here... Or we can just go
-> >    for the big boom and try to fix all MMC_FIXUP() users in tree and
-> >    call it a day, but that'll also be fun to backport.
-> To me, your fix is clean, elegant and does the job.
-> I would let the quirk owners to fix that hard-coded bogus oemid - should they choose to.
-> I guess Sandisk would need to do that as well.
+[auto build test ERROR on linus/master]
+[also build test ERROR on ulf-hansson-mmc-mirror/next v6.6 next-20231031]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-Yes, this was exactly my intention - leave the workaround in place for a
-while while owners fix their quirks then eventually fix types and remove
-this when it is no longer needed.
+url:    https://github.com/intel-lab-lkp/linux/commits/Jyan-Chou/mmc-Add-Synopsys-DesignWare-mmc-cmdq-host-driver/20231030-144300
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231030062749.2840-3-jyanchou%40realtek.com
+patch subject: [PATCH V4][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
+config: sparc64-allyesconfig (https://download.01.org/0day-ci/archive/20231101/202311011551.QtHtdWmG-lkp@intel.com/config)
+compiler: sparc64-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231101/202311011551.QtHtdWmG-lkp@intel.com/reproduce)
 
-Meanwhile, all stable kernels including the newly released 6.6 have many
-broken quirks and at the very least the MMC I have here would
-periodically hang when issuing a flush, so as a selfish user I'd
-appreciate if this (or something equivalent) could be making its way
-towards Linus' tree.
-Ulf, would you have a bit of time to move this forward, or should I ask
-Greg to temporarily revert Avri's "mmc: core: Capture correct oemid-bits
-for eMMC cards" commit in stable trees until the way forward is decided?
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202311011551.QtHtdWmG-lkp@intel.com/
 
-Thanks!
+All errors (new ones prefixed by >>):
+
+>> drivers/mmc/host/dw_mmc_cqe.c:227:10: error: 'const struct cqhci_host_ops' has no member named 'setup_tran_desc'
+     227 |         .setup_tran_desc = dw_mci_cqe_setup_tran_desc,
+         |          ^~~~~~~~~~~~~~~
+>> drivers/mmc/host/dw_mmc_cqe.c:227:28: error: initialization of 'int (*)(struct cqhci_host *, const union cqhci_crypto_cfg_entry *, int)' from incompatible pointer type 'void (*)(struct mmc_data *, struct cqhci_host *, u8 *, int)' {aka 'void (*)(struct mmc_data *, struct cqhci_host *, unsigned char *, int)'} [-Werror=incompatible-pointer-types]
+     227 |         .setup_tran_desc = dw_mci_cqe_setup_tran_desc,
+         |                            ^~~~~~~~~~~~~~~~~~~~~~~~~~
+   drivers/mmc/host/dw_mmc_cqe.c:227:28: note: (near initialization for 'dw_mci_cqhci_host_ops.program_key')
+   In file included from include/linux/debugfs.h:16,
+                    from drivers/mmc/host/dw_mmc_cqe.c:12:
+   drivers/mmc/host/dw_mmc_cqe.c:96:23: warning: 'dw_mci_cqe_req_fops' defined but not used [-Wunused-const-variable=]
+      96 | DEFINE_SHOW_ATTRIBUTE(dw_mci_cqe_req);
+         |                       ^~~~~~~~~~~~~~
+   include/linux/seq_file.h:202:37: note: in definition of macro 'DEFINE_SHOW_ATTRIBUTE'
+     202 | static const struct file_operations __name ## _fops = {                 \
+         |                                     ^~~~~~
+   cc1: some warnings being treated as errors
+
+
+vim +227 drivers/mmc/host/dw_mmc_cqe.c
+
+   221	
+   222	static const struct cqhci_host_ops dw_mci_cqhci_host_ops = {
+   223		.enable = dw_mci_cqe_enable,
+   224		.dumpregs = dw_mci_cqe_dumpregs,
+   225		.pre_enable = dw_mci_cqe_pre_enable,
+   226		.post_disable = dw_mci_cqe_post_disable,
+ > 227		.setup_tran_desc = dw_mci_cqe_setup_tran_desc,
+   228	};
+   229	
+
 -- 
-Dominique Martinet | Asmadeus
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
