@@ -2,129 +2,102 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 427F7C41535
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Oct 2023 19:46:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EEF3C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 04:38:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235271AbjJaTqv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 Oct 2023 15:46:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48328 "EHLO
+        id S1345242AbjKAEiD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Nov 2023 00:38:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34302 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231253AbjJaTqv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Oct 2023 15:46:51 -0400
-Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8341C83;
-        Tue, 31 Oct 2023 12:46:48 -0700 (PDT)
-Received: by mail-lj1-x234.google.com with SMTP id 38308e7fff4ca-2c518a1d83fso85530641fa.3;
-        Tue, 31 Oct 2023 12:46:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1698781607; x=1699386407; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=purwZ105GsEhgtQHpkdP9umavsYHSc4ApWwflAbtrrc=;
-        b=EHc4OcE56l85l0RGlsWNTcov1sWKT63o3L/Of/LUVeBPCFjuo5SPXQ/7Rbd0U/3NmD
-         wsm81iz/kxwbKU6ZzRlIlC0UcPjjc2akCn221EPsk0aM0XE+8eJKNVGdsIRJoZ7LVWaO
-         rO3JhfHNFaDAswKuuPnm9wFZ0jElgeQOvaO7p6B7X0yxgeyfRUGHD02rf+KYJM9H+tiG
-         /INcKvOKyIUD3p0RU5tcZcbXDrBmm1bphMc6Ll3kBJmokqVwO1b+mpDsfcJW7uoaf7LR
-         tOJZDdvaHSi18gwxAXz6V+WHhhYh7y4WSfAfArx9/zmTBjX7JeAEm2irPeTa4ySTPh1Z
-         qkYg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698781607; x=1699386407;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=purwZ105GsEhgtQHpkdP9umavsYHSc4ApWwflAbtrrc=;
-        b=UKojw2NaElWuJAFqAQ7TEyzuD3J+VFlsTHUeuZX241gp/Orkv6L565QS83/YGUyhTN
-         3x4aGBp6uO52Tt1Uy1xKYuGfGlpjXLmuALkKVXk/kiUPyzcGDvTdB2/AdEWkcw1qXth2
-         Dw0rextBrqA483qrRcMyUpy6z3DbugrW5mfjBfGwX1TXa1TzETaraf9qhSbYV6V6hOXz
-         Ao8rHXMh9YV9MjvI5QEyWVXUti+4EXVPUbuu71YVIOHiAirfIGOlN5DPqPKxy64BgLrZ
-         ksGGjZzMNJgbXCqogpG1M8b7haw6gtxavnKVPbQZfWGedfGeauqOkjMLtDG4BM1cQELZ
-         WgAQ==
-X-Gm-Message-State: AOJu0Yx678i6I8abs+jAVd93dATUO8eS3oRDBUa78y8j5wRgC5ZgSnLX
-        SnMqpFUmUdfoLbACcYGPJI0=
-X-Google-Smtp-Source: AGHT+IEOLRiyG9O+qr6AzZRS5vIZx/36cYDoFO/IMWC9eGiCVgGOswCJxAHnc67RSaD+pLKgSCkFgQ==
-X-Received: by 2002:a05:651c:1a20:b0:2c5:1808:4aa4 with SMTP id by32-20020a05651c1a2000b002c518084aa4mr12208174ljb.12.1698781606309;
-        Tue, 31 Oct 2023 12:46:46 -0700 (PDT)
-Received: from [192.168.3.32] (cpezg-94-253-131-198-cbl.xnet.hr. [94.253.131.198])
-        by smtp.gmail.com with ESMTPSA id 9-20020a2e0f09000000b002b6cd89a3fcsm7524ljp.118.2023.10.31.12.46.43
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 31 Oct 2023 12:46:45 -0700 (PDT)
-Message-ID: <65cc630c-1d71-48e1-b639-b92221a8d7b1@gmail.com>
-Date:   Tue, 31 Oct 2023 20:46:42 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/3] arm64: dts: qcom: ipq6018: add SDHCI node
-To:     Mantas Pucka <mantas@8devices.com>,
+        with ESMTP id S1346855AbjKAEiA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 00:38:00 -0400
+Received: from nautica.notk.org (ipv6.notk.org [IPv6:2001:41d0:1:7a93::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18783F3;
+        Tue, 31 Oct 2023 21:37:54 -0700 (PDT)
+Received: by nautica.notk.org (Postfix, from userid 108)
+        id EC2A3C01B; Wed,  1 Nov 2023 05:37:45 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
+        t=1698813465; bh=j+mg0+uxBvTuBRWF4ptxdU82Fb+1k2fxHgCCXiVcZQA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=k4awi9G+mg0+EAiKXCXRJdb+1a8p9CfMbHvFn3a8oVq2cYQBKM4nvx0VzA178oTRK
+         SXk05BcSid5LR2bq/i9X9cd3Q8ZgF8EYBaR5urwNi0EYcJPGhvBta9zE13cQSHWbe6
+         cA8TeBCKOmLoaQUoaeHn5/aFcpebdLAu7EoswMS5xk2PgLQfYpKV+WkX8zPkEbExv1
+         mmJmqULWawJScFdD87a3dLdcCAF05KJ+8Yse8wzLnBVUgHtikf7fMtsp9zE/qEihHm
+         ZVieNDqTiq6BNdFg7k61V5k6kJlBVh1pTUqr+51bFeAxH2PCsCmHUyy3pic9xTTbQC
+         Q/DfyEnCEUaFQ==
+Received: from gaia (localhost [127.0.0.1])
+        by nautica.notk.org (Postfix) with ESMTPS id AC94BC009;
+        Wed,  1 Nov 2023 05:37:33 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
+        t=1698813455; bh=j+mg0+uxBvTuBRWF4ptxdU82Fb+1k2fxHgCCXiVcZQA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=GrYPsiWrkRCUcn9s2MkFLg31xqxTmwQ1Tm4if+GBYb8fG34lFc7Iztqp6C1KKbclx
+         T6gcJFZrjEYqGzP2dK+HhKxVK/hvZUQFEP5xVQLBRQPli2Ekd23oC70xH0OsEMtIF+
+         yE/i3PX6sgdgnjTga6oZVr9k4AO1o5cFlevbYUcq03sVYSX6dyv6mP2q2uNmYsTz3g
+         dxejHEfnu/Gu60nGzWQjRg32VvKIP40RYvx/ad6UoeuD1lmTWXlKvHacFqt7XI6lcA
+         ihpRJqLOxHAaQ73XCwDcX0oI+gOvO0d01ZUSZyJ1OIF+SR5T+zMlcp5MVWNXoDoCem
+         2m4ptISHOVnNQ==
+Received: from localhost (gaia [local])
+        by gaia (OpenSMTPD) with ESMTPA id 532b5c2b;
+        Wed, 1 Nov 2023 04:37:30 +0000 (UTC)
+Date:   Wed, 1 Nov 2023 13:37:15 +0900
+From:   Dominique Martinet <asmadeus@codewreck.org>
+To:     Avri Altman <Avri.Altman@wdc.com>
+Cc:     Dominique Martinet <dominique.martinet@atmark-techno.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "stable@vger.kernel.org" <stable@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc:     Abhishek Sahu <absahu@codeaurora.org>,
-        Anusha Canchi Ramachandra Rao <anusharao@codeaurora.org>,
-        Sricharan R <sricharan@codeaurora.org>,
-        Sivaprakash Murugesan <sivaprak@codeaurora.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <1682338412-15420-1-git-send-email-mantas@8devices.com>
- <1682338412-15420-3-git-send-email-mantas@8devices.com>
-Content-Language: en-US
-From:   Robert Marko <robimarko@gmail.com>
-In-Reply-To: <1682338412-15420-3-git-send-email-mantas@8devices.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        Alex Fetters <Alex.Fetters@garmin.com>
+Subject: Re: [PATCH] mmc: truncate quirks' oemid to 8 bits
+Message-ID: <ZUHV-wduEf12M86U@codewreck.org>
+References: <20231026075230.414685-1-dominique.martinet@atmark-techno.com>
+ <DM6PR04MB657596E19EF3D7976197660EFCDDA@DM6PR04MB6575.namprd04.prod.outlook.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <DM6PR04MB657596E19EF3D7976197660EFCDDA@DM6PR04MB6575.namprd04.prod.outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Avri Altman wrote on Thu, Oct 26, 2023 at 10:16:53AM +0000:
+> Reviewed-by: Avri Altman <avri.altman@wdc.com>
 
-On 24. 04. 2023. 14:13, Mantas Pucka wrote:
-> IPQ6018 has one SD/eMMC controller, add node for it.
->
-> Signed-off-by: Mantas Pucka <mantas@8devices.com>
+Thanks for the review!
 
-Tested-by: Robert Marko <robimarko@gmail.com>
+> > ---
+> > Notes:
+> >  - mmc_fixup_device() was rewritten in 5.17, so older stable kernels
+> >    will need a separate patch... I suppose I can send it to stable
+> >    after this is merged if we go this way
+> >  - struct mmc_cid's and mmc_fixup's oemid fields are unsigned shorts,
+> >    we probably just want to make them unsigned char instead in which
+> >    case we don't need that check anymore?
+> >    But it's kind of nice to have a wider type so CID_OEMID_ANY can never
+> >    be a match.... Which unfortunately my patch makes moot as
+> >    ((unsigned short)-1) & 0xff will be 0xff which can match anything...
+> >  - this could also be worked around in the _FIXUP_EXT macro that builds
+> >    the fixup structs, but we're getting ugly here... Or we can just go
+> >    for the big boom and try to fix all MMC_FIXUP() users in tree and
+> >    call it a day, but that'll also be fun to backport.
+> To me, your fix is clean, elegant and does the job.
+> I would let the quirk owners to fix that hard-coded bogus oemid - should they choose to.
+> I guess Sandisk would need to do that as well.
 
-> ---
->   arch/arm64/boot/dts/qcom/ipq6018.dtsi | 23 +++++++++++++++++++++++
->   1 file changed, 23 insertions(+)
->
-> diff --git a/arch/arm64/boot/dts/qcom/ipq6018.dtsi b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-> index 9ff4e9d45065..b129b23d68b1 100644
-> --- a/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-> @@ -414,6 +414,29 @@
->   			};
->   		};
->   
-> +		sdhc_1: mmc@7804000 {
-> +			compatible = "qcom,ipq6018-sdhci", "qcom,sdhci-msm-v5";
-> +			reg = <0x0 0x07804000 0x0 0x1000>,
-> +			      <0x0 0x07805000 0x0 0x1000>,
-> +			      <0x0 0x07808000 0x0 0x2000>;
-> +			reg-names = "hc", "cqhci", "ice";
-> +
-> +			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> +				 <&gcc GCC_SDCC1_APPS_CLK>,
-> +				 <&xo>,
-> +				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-> +			clock-names = "iface", "core", "xo", "ice";
-> +
-> +			resets = <&gcc GCC_SDCC1_BCR>;
-> +			supports-cqe;
-> +			bus-width = <8>;
-> +			status = "disabled";
-> +		};
-> +
->   		blsp_dma: dma-controller@7884000 {
->   			compatible = "qcom,bam-v1.7.0";
->   			reg = <0x0 0x07884000 0x0 0x2b000>;
+Yes, this was exactly my intention - leave the workaround in place for a
+while while owners fix their quirks then eventually fix types and remove
+this when it is no longer needed.
+
+Meanwhile, all stable kernels including the newly released 6.6 have many
+broken quirks and at the very least the MMC I have here would
+periodically hang when issuing a flush, so as a selfish user I'd
+appreciate if this (or something equivalent) could be making its way
+towards Linus' tree.
+Ulf, would you have a bit of time to move this forward, or should I ask
+Greg to temporarily revert Avri's "mmc: core: Capture correct oemid-bits
+for eMMC cards" commit in stable trees until the way forward is decided?
+
+Thanks!
+-- 
+Dominique Martinet | Asmadeus
