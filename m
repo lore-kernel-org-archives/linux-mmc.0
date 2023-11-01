@@ -2,111 +2,200 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCFD8C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 07:39:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 606D4C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Nov 2023 10:26:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231712AbjKAHjf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Nov 2023 03:39:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50636 "EHLO
+        id S233631AbjKAK0q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Nov 2023 06:26:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41204 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232090AbjKAHjY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 03:39:24 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.7])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F446138;
-        Wed,  1 Nov 2023 00:39:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1698824355; x=1730360355;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=rTwdYfLJeq6qzplpdM8wdKPNTVjN4KmxEwCf/vATSGo=;
-  b=HhhnBPDyVXooeT+AbCIYT1zvjvu0mqStiyq9EkluV78EPXTq5BUjoE3j
-   dLDwOyOqqvYG1ytCoqyuITjBrB7+mNHT2tlRFP5Qw8BLSjBWd5jckvxK+
-   iVmb+NYg7Ts5EiGPgIPA8iyRvag00+Mz5UkSNygDUzIPcA0dVUbs80kF8
-   fJce9rOVHubU+kYKryyo/vFjBljHB7G1p7fBNsCbE7sFIm8Cr4z4aeTBy
-   0veoYCi3fh37xuIIieXSj+SemUwSvjxlLiklb2fAGkFYbgOuSPYc8mOO8
-   3agwbVdDQIunPg9H7U0UWWM5IdpQ711587UfvxvuXx7ziBprNRqDrrIzf
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10880"; a="9982771"
-X-IronPort-AV: E=Sophos;i="6.03,267,1694761200"; 
-   d="scan'208";a="9982771"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmvoesa101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 00:39:15 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10880"; a="934357581"
-X-IronPort-AV: E=Sophos;i="6.03,267,1694761200"; 
-   d="scan'208";a="934357581"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO ahunter-VirtualBox.home\044ger.corp.intel.com) ([10.252.34.17])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 00:39:08 -0700
-From:   Adrian Hunter <adrian.hunter@intel.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?q?Kornel=20Dul=C4=99ba?= <korneld@chromium.org>,
-        Radoslaw Biernacki <biernacki@google.com>,
-        Gwendal Grignou <gwendal@chromium.org>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <quic_asutoshd@quicinc.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Aswath Govindraju <a-govindraju@ti.com>,
-        Bhavya Kapoor <b-kapoor@ti.com>,
-        Kamal Dasu <kamal.dasu@broadcom.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
-        Swati Agarwal <swati.agarwal@amd.com>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Aniruddha Tvs Rao <anrao@nvidia.com>,
-        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 5/5] mmc: cqhci: Warn of halt or task clear failure
-Date:   Wed,  1 Nov 2023 09:38:27 +0200
-Message-Id: <20231101073827.4772-6-adrian.hunter@intel.com>
+        with ESMTP id S234963AbjKAK0p (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Nov 2023 06:26:45 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92C0D92
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Nov 2023 03:26:39 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id 2adb3069b0e04-507a3b8b113so9491273e87.0
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Nov 2023 03:26:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1698834398; x=1699439198; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=tCsnTw9G/N7+9b/5OyCWnwytBb//hdrqvpTAVBVTcjs=;
+        b=wg3/+ebk8ebV+NKavBjY7c8BZKYuqsNh2J53mKuEKag+mWOJpNz+aNqumfpCYQCmIQ
+         QW3zksgJ+KeefTyJEZ5SAIqx0IZ8bEP2VEOVHqQJ2HUcpf+hCwr6XdOfSZ+dEXAKhgOd
+         Hw24RRnVytJzYA6p5m53nMH2Kd4/9p+ZeWRSqVH5b3W6N4qOMVFFijdvjGafECHg+/6p
+         O1xQz6CVTipWUehvVI5e73FYQQaFGTWcr4IsuycboEGcse0hUY2xlyzOsfaLimFUeUj/
+         1N7Y/UBa+tFRI1Kn3bNEtd+ir3KOiOO/ZheObjOpcotJCZY8y+3wluV/jal77zVcJOxr
+         15pA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698834398; x=1699439198;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=tCsnTw9G/N7+9b/5OyCWnwytBb//hdrqvpTAVBVTcjs=;
+        b=Lq210Xr1CiTFZCmjj/E2YeV1RE5sHNaEXXJPBfX9+LESfRB2xPQGTQVox5seSXHpWy
+         XnsI4C24uRDFl/aeh0MD3roAtaptkcIj9xIwN0UeCF1DesCNQRFbAiC+nNYO+XNTZCOY
+         C50XhPsB0Y+BUOAA/orsds8zaJmi7cI8UiqnX7ZskWkS8ydwBoWSoxjiFubv4drsbEvN
+         FBdfEj1p31Cz3Tk+DRQlJoP6U/YW1YOP7CEavMfM5K7fuPLZaBpJCKlTyZpx2Cqgpv3V
+         UTm1XCZ/muyruFi8CZfwn1G+YDel2DOh5aHs1uMDWvQNqZtasgsPKK4nhBy084UKnjTv
+         MsIw==
+X-Gm-Message-State: AOJu0YxB/1d3WOkvIrWUU9SO/mXwq94oz9GrIgwEjfE+7tZFMvPnA75s
+        qm5SQv3HtiAOmHU3SIPh/c2FFN2K2j+0hLX982I=
+X-Google-Smtp-Source: AGHT+IGDHSmTRMp+DQPCwPp1iEl0Z60JF5+pwDLeqsrAC1axXeyH0dDWC5jptYR1GCcL3n/lnZdCvg==
+X-Received: by 2002:a19:ca49:0:b0:507:9a8c:a8fe with SMTP id h9-20020a19ca49000000b005079a8ca8femr10219765lfj.53.1698834397802;
+        Wed, 01 Nov 2023 03:26:37 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id w4-20020ac25d44000000b00507b869b068sm177139lfd.302.2023.11.01.03.26.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 01 Nov 2023 03:26:37 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC and MEMSTICK updates for v6.7
+Date:   Wed,  1 Nov 2023 11:26:36 +0100
+Message-Id: <20231101102636.5155-1-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20231101073827.4772-1-adrian.hunter@intel.com>
-References: <20231101073827.4772-1-adrian.hunter@intel.com>
 MIME-Version: 1.0
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-A correctly operating controller should successfully halt and clear tasks.
-Failure may result in errors elsewhere, so promote messages from debug to
-warnings.
+Hi Linus,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/cqhci-core.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+Here's the pull-request with the MMC and MEMSTICK updates for v6.7. Details
+about the highlights are as usual found in the signed tag.
 
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index 15f5a069af1f..948799a0980c 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -942,8 +942,8 @@ static bool cqhci_clear_all_tasks(struct mmc_host *mmc, unsigned int timeout)
- 	ret = cqhci_tasks_cleared(cq_host);
- 
- 	if (!ret)
--		pr_debug("%s: cqhci: Failed to clear tasks\n",
--			 mmc_hostname(mmc));
-+		pr_warn("%s: cqhci: Failed to clear tasks\n",
-+			mmc_hostname(mmc));
- 
- 	return ret;
- }
-@@ -976,7 +976,7 @@ static bool cqhci_halt(struct mmc_host *mmc, unsigned int timeout)
- 	ret = cqhci_halted(cq_host);
- 
- 	if (!ret)
--		pr_debug("%s: cqhci: Failed to halt\n", mmc_hostname(mmc));
-+		pr_warn("%s: cqhci: Failed to halt\n", mmc_hostname(mmc));
- 
- 	return ret;
- }
--- 
-2.34.1
+Please pull this in!
 
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 84ee19bffc9306128cd0f1c650e89767079efeff:
+
+  mmc: core: Capture correct oemid-bits for eMMC cards (2023-09-27 12:17:04 +0200)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.7
+
+for you to fetch changes up to 5428a40a308f220dbbffda66cb01b212f88e9a06:
+
+  mmc: Merge branch fixes into next (2023-10-27 12:00:35 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Enable host caps to be modified via debugfs to test speed-modes
+ - Improve random I/O writes for 4k buffers for hsq enabled hosts
+
+MMC host:
+ - atmel-mci/sdhci-of-at91: Aubin Constans takes over as maintainer
+ - dw_mmc-starfive: Re-work tuning support
+ - meson-gx: Fix bogus IRQ when using CMD_CFG_ERROR
+ - mmci: Use peripheral flow control for the STM32 variant
+ - renesas,sdhi: Add support for the RZ/G3S variant
+ - sdhci-esdhc-imx: Optimize the manual tuning logic
+ - sdhci-msm: Add support for the SM8650 variant
+ - sdhci-npcm: Add driver to support the Nuvoton NPCM BMC variant
+ - sdhci-pci-gli: Add workaround to allow GL9750 to enter ASPM L1.2
+
+----------------------------------------------------------------
+Andy Shevchenko (3):
+      mmc: sdhci-pci: Switch to use acpi_evaluate_dsm_typed()
+      mmc: sdhci-pltfm: Drop unnecessary error messages in sdhci_pltfm_init()
+      mmc: sdhci-pltfm: Make driver OF independent
+
+Aubin Constans (1):
+      MAINTAINERS: mmc: take over as maintainer of MCI & SDHCI MICROCHIP DRIVERS
+
+Balamanikandan Gunasundar (1):
+      mmc: atmel-mci: Add description for struct member
+
+Ben Wolsieffer (1):
+      mmc: mmci: use peripheral flow control for STM32
+
+Claudiu Beznea (1):
+      dt-bindings: mmc: renesas,sdhi: Document RZ/G3S support
+
+Haibo Chen (1):
+      mmc: sdhci-esdhc-imx: optimize the manual tuing logic to get the best timing
+
+Julia Lawall (1):
+      mmc: atmel-mci: add missing of_node_put
+
+Justin Stitt (1):
+      mmc: vub300: replace deprecated strncpy with strscpy
+
+Kees Cook (1):
+      memstick: jmb38x_ms: Annotate struct jmb38x_ms with __counted_by
+
+Krzysztof Kozlowski (1):
+      dt-bindings: mmc: sdhci-msm: allow flexible order of optional clocks
+
+Lad Prabhakar (1):
+      mmc: host: Kconfig: Make MMC_SDHI_INTERNAL_DMAC config option dependant on ARCH_RENESAS
+
+Neil Armstrong (1):
+      dt-bindings: mmc: sdhci-msm: document the SM8650 SDHCI Controller
+
+Rob Herring (1):
+      mmc: jz4740: Use device_get_match_data()
+
+Rong Chen (1):
+      mmc: meson-gx: Remove setting of CMD_CFG_ERROR
+
+Tomer Maimon (2):
+      dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI controller
+      mmc: sdhci-npcm: Add NPCM SDHCI driver
+
+Ulf Hansson (3):
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+
+Victor Shih (1):
+      mmc: sdhci-pci-gli: A workaround to allow GL9750 to enter ASPM L1.2
+
+Vincent Whitchurch (2):
+      mmc: core: Always reselect card type
+      mmc: debugfs: Allow host caps to be modified
+
+Wenchao Chen (2):
+      mmc: core: Allow dynamical updates of the number of requests for hsq
+      mmc: hsq: Improve random I/O write performance for 4k buffers
+
+William Qiu (2):
+      dt-bindings: mmc: starfive: Remove properties from required
+      mmc: starfive: Change tuning implementation
+
+ .../devicetree/bindings/mmc/npcm,sdhci.yaml        |  45 +++++++
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   2 +
+ .../devicetree/bindings/mmc/sdhci-msm.yaml         |   9 +-
+ .../bindings/mmc/starfive,jh7110-mmc.yaml          |   2 -
+ MAINTAINERS                                        |   5 +-
+ drivers/memstick/host/jmb38x_ms.c                  |   2 +-
+ drivers/mmc/core/debugfs.c                         |  51 +++++++-
+ drivers/mmc/core/mmc.c                             |   7 +-
+ drivers/mmc/core/queue.c                           |   6 +-
+ drivers/mmc/host/Kconfig                           |  12 +-
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/atmel-mci.c                       |   9 +-
+ drivers/mmc/host/dw_mmc-starfive.c                 | 137 ++++++---------------
+ drivers/mmc/host/jz4740_mmc.c                      |  15 +--
+ drivers/mmc/host/meson-gx-mmc.c                    |   1 -
+ drivers/mmc/host/mmc_hsq.c                         |  22 ++++
+ drivers/mmc/host/mmc_hsq.h                         |  11 ++
+ drivers/mmc/host/mmci.c                            |   3 +-
+ drivers/mmc/host/mmci.h                            |   2 +
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |  52 +++++---
+ drivers/mmc/host/sdhci-npcm.c                      |  94 ++++++++++++++
+ drivers/mmc/host/sdhci-pci-core.c                  |   5 +-
+ drivers/mmc/host/sdhci-pci-gli.c                   |  14 +++
+ drivers/mmc/host/sdhci-pltfm.c                     |  38 ++----
+ drivers/mmc/host/vub300.c                          |  22 ++--
+ include/linux/mmc/host.h                           |   1 +
+ 26 files changed, 384 insertions(+), 184 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
+ create mode 100644 drivers/mmc/host/sdhci-npcm.c
