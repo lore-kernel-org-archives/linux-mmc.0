@@ -2,251 +2,226 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 254E1C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Nov 2023 08:57:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA278C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Nov 2023 09:22:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229497AbjKBI5Y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Nov 2023 04:57:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46226 "EHLO
+        id S1344988AbjKBJWM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Nov 2023 05:22:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57440 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230097AbjKBI5W (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Nov 2023 04:57:22 -0400
-Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36387133
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Nov 2023 01:57:16 -0700 (PDT)
-Received: by mail-ej1-x62b.google.com with SMTP id a640c23a62f3a-9a6190af24aso101473966b.0
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Nov 2023 01:57:16 -0700 (PDT)
+        with ESMTP id S229762AbjKBJWL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Nov 2023 05:22:11 -0400
+Received: from mail-qv1-xf2b.google.com (mail-qv1-xf2b.google.com [IPv6:2607:f8b0:4864:20::f2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12610FB
+        for <linux-mmc@vger.kernel.org>; Thu,  2 Nov 2023 02:22:06 -0700 (PDT)
+Received: by mail-qv1-xf2b.google.com with SMTP id 6a1803df08f44-66d13ac2796so4190316d6.2
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Nov 2023 02:22:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1698915434; x=1699520234; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Ti8VRK44rRpfNSXAtpGWqBsh2GV0GvDCSbxVBHE7LHU=;
-        b=yYfx0z+6NmJspUHdVYQfqQ2QO5EBDy7hbpyDqi3ttFJvq8CC96TQhFhXFzZtxC1mNb
-         c6+ys//CiaW79E8hits65t+NIY/x7pCDDSqjtuPNX2RRaxw9i2bocNYxZO9Yni/IET+e
-         tVYs7CXscXMWiuaYiXsxN1+9t4BHU1nHoVi4L1/fgvIP1JSaukYDi7bSb3864Hx3B1DR
-         fwUEjGU28U311oeafV+sO0ascPdR9ibiGBdzk9Z53WllOz6abdWiXBxAI08ylqBjAcu9
-         U7RFdQxpY1NBHKCwPhP4Aj9qa8X8GG5tXylH22ZC6FpHBq9JPLbaaz2+EJ5m7usDoFx3
-         ilGQ==
+        d=chromium.org; s=google; t=1698916925; x=1699521725; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=NwkMZjlqi/ySQgpiQTFMX2kM/+8KoGXXMWDaNv9YbZc=;
+        b=MFIuB0ezDHO+KU2QW4UcdxMijuvuD1q9GKFuM+2w7B4WMaY+bdSMixM0CKEx51aw04
+         TIoRbqNbOwH9GGMcbIeo2rRJjsxBkib5QMwtg0Iez3sYvJxbThKoNtHnKkUFyAMZRzOJ
+         cmlBrfoQhLgf5bqqBG+Y5g6OAq8Wn0nJeNdJY=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698915434; x=1699520234;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ti8VRK44rRpfNSXAtpGWqBsh2GV0GvDCSbxVBHE7LHU=;
-        b=rqu/J0YHEhjGT0clg48tXxCQf9WSHzBV9LlUB4xph5oajzH7CiiPSVFqlUGiD9jR4b
-         Sy0v+6kjFWi6Ev4p6/Cz4qvtUtbCetzYVpmBWfIQJhjmvY29kelo4HFmPEuJ4sqlnjlg
-         bTrIaUyH+qZdGeG9kG40aVg4hs1rlbNnd27OppU4zciQMQnhGYQzMIlhmyk4A0a0XixE
-         DoN5/QZjLFmrsMa7/DQGHMCTEvWgdYaMQcdzfhEVO/a+3C+fOwg/YTkL9TwygAn/XqXQ
-         xbfrui3jcupBleYROUOLUue3ybcjWTN3dOGG8i/eyrO/WjkBhattQFIBoM+7Qi7/yNyJ
-         g0FQ==
-X-Gm-Message-State: AOJu0YzlDdNbbggU63aH5XYUwSRhfafBWixBbz/AR1c4d3oWlM+pPIYa
-        NkpZEcAK4duKOtU2HD9On8tB0Q==
-X-Google-Smtp-Source: AGHT+IF+eiox49ggCtBVRyaFXSqOif7UUxrSxAuvywhajNlQ/L5vdqEjYxiyZHOrXcAKtd2vPahgrA==
-X-Received: by 2002:a17:906:fd89:b0:9ce:24d0:8a01 with SMTP id xa9-20020a170906fd8900b009ce24d08a01mr4203821ejb.60.1698915434658;
-        Thu, 02 Nov 2023 01:57:14 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id t24-20020a170906065800b009b2b47cd757sm866237ejb.9.2023.11.02.01.57.12
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Nov 2023 01:57:14 -0700 (PDT)
-Message-ID: <9c083c35-a8fb-4ee3-90a3-96af7efec11f@linaro.org>
-Date:   Thu, 2 Nov 2023 09:57:11 +0100
+        d=1e100.net; s=20230601; t=1698916925; x=1699521725;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=NwkMZjlqi/ySQgpiQTFMX2kM/+8KoGXXMWDaNv9YbZc=;
+        b=E9NPrMldxXGMFcCz5RvQ3fdhE2GwMnuZJbOB/1v/lQyK+DzCRTa/RKw3nZZX/VGCNw
+         wJY7w2Yo8Ln2oSm9Y0GBjRMShx3F1tX84r8HXvCJgUNAsdLBX3az3AqJ87bh6PMSDRYp
+         hqHW2FLW0wv39kkAjuIWIEPXCLoVPYSu9xqwovdV9szacoXuNvQds19tg12/TfFZpI3Q
+         mQNMHC5MauLji0y4fky0mdBZT360vwos0tNpBgdqt11vKiIzf1rX/7AeQ3fPBExh1HOd
+         ct5+R6p1MK3M3EzLUsO2WhTgRMVTccRvqIIjUlVoM4tTbVhuiF6QSNPZ2EsefUJ5WzNf
+         lP4Q==
+X-Gm-Message-State: AOJu0YyoKo7rXvux4tIlm2tOQKCbwBfIFAcVfQ5wcZyhOT8C2K22EBxr
+        CfcUtaikhXNBJHFwDrDOFzhwpQPS4xBrb8GCU5actQ==
+X-Google-Smtp-Source: AGHT+IHf7xc04fU251ojm8cT61SiTJmMh145aunUgvAEhAQNIg66HzzltaY1gDenjs3eQzwfHezjkUqgJEk5ZKJalJI=
+X-Received: by 2002:a05:6214:268d:b0:65b:216f:2d65 with SMTP id
+ gm13-20020a056214268d00b0065b216f2d65mr19351907qvb.5.1698916924854; Thu, 02
+ Nov 2023 02:22:04 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V5][3/4] mmc: Add dw mobile mmc cmdq rtk driver
-Content-Language: en-US
-To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
-        adrian.hunter@intel.com, jh80.chung@samsung.com,
-        riteshh@codeaurora.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-        asutoshd@codeaurora.org
-Cc:     p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        arnd@arndb.de, briannorris@chromium.org, doug@schmorgal.com,
-        tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
-        william.qiu@starfivetech.com
-References: <20231102081514.22945-1-jyanchou@realtek.com>
- <20231102081514.22945-4-jyanchou@realtek.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231102081514.22945-4-jyanchou@realtek.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20231027145623.2258723-1-korneld@chromium.org>
+ <20231027145623.2258723-2-korneld@chromium.org> <e7c12e07-7540-47ea-8891-2cec73d58df1@intel.com>
+In-Reply-To: <e7c12e07-7540-47ea-8891-2cec73d58df1@intel.com>
+From:   =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
+Date:   Thu, 2 Nov 2023 10:21:53 +0100
+Message-ID: <CAD=Nsqzg2zRNFx7E800vnpNH6bZeHv9zdAnZksJjiRcXOQ4t=A@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: cqhci: Add a quirk to clear stale TC
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Radoslaw Biernacki <biernacki@google.com>,
+        Gwendal Grignou <gwendal@chromium.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 02/11/2023 09:15, Jyan Chou wrote:
-> Add Realtek mmc driver to make good use Synopsys
-> DesignWare mmc cmdq host driver.
-> 
-> Signed-off-by: Jyan Chou <jyanchou@realtek.com>
-> 
-> ---
-> v4 -> v5:
-> - Fix linux coding style issues.
-> - Modify the use of sizeof(*).
-> - Remove useless function and parameter passing.
-> - Replace platform_get_resource by devm_platform_ioremap_resource().
+On Mon, Oct 30, 2023 at 8:31=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
+com> wrote:
+>
+> On 27/10/23 17:56, Kornel Dul=C4=99ba wrote:
+> > This fix addresses a stale task completion event issued right after the
+> > CQE recovery. As it's a hardware issue the fix is done in form of a
+> > quirk.
+> >
+> > When error interrupt is received the driver runs recovery logic is run.
+> > It halts the controller, clears all pending tasks, and then re-enables
+> > it. On some platforms a stale task completion event is observed,
+> > regardless of the CQHCI_CLEAR_ALL_TASKS bit being set.
+> >
+> > This results in either:
+> > a) Spurious TC completion event for an empty slot.
+> > b) Corrupted data being passed up the stack, as a result of premature
+> >    completion for a newly added task.
+> >
+> > To fix that re-enable the controller, clear task completion bits,
+> > interrupt status register and halt it again.
+> > This is done at the end of the recovery process, right before interrupt=
+s
+> > are re-enabled.
+> >
+> > Signed-off-by: Kornel Dul=C4=99ba <korneld@chromium.org>
+> > ---
+> >  drivers/mmc/host/cqhci-core.c | 42 +++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/cqhci.h      |  1 +
+> >  2 files changed, 43 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-cor=
+e.c
+> > index b3d7d6d8d654..e534222df90c 100644
+> > --- a/drivers/mmc/host/cqhci-core.c
+> > +++ b/drivers/mmc/host/cqhci-core.c
+> > @@ -1062,6 +1062,45 @@ static void cqhci_recover_mrqs(struct cqhci_host=
+ *cq_host)
+> >  /* CQHCI could be expected to clear it's internal state pretty quickly=
+ */
+> >  #define CQHCI_CLEAR_TIMEOUT          20
+> >
+> > +/*
+> > + * During CQE recovery all pending tasks are cleared from the
+> > + * controller and its state is being reset.
+> > + * On some platforms the controller sets a task completion bit for
+> > + * a stale(previously cleared) task right after being re-enabled.
+> > + * This results in a spurious interrupt at best and corrupted data
+> > + * being passed up the stack at worst. The latter happens when
+> > + * the driver enqueues a new request on the problematic task slot
+> > + * before the "spurious" task completion interrupt is handled.
+> > + * To fix it:
+> > + * 1. Re-enable controller by clearing the halt flag.
+> > + * 2. Clear interrupt status and the task completion register.
+> > + * 3. Halt the controller again to be consistent with quirkless logic.
+> > + *
+> > + * This assumes that there are no pending requests on the queue.
+> > + */
+> > +static void cqhci_quirk_clear_stale_tc(struct cqhci_host *cq_host)
+> > +{
+> > +     u32 reg;
+> > +
+> > +     WARN_ON(cq_host->qcnt);
+> > +     cqhci_writel(cq_host, 0, CQHCI_CTL);
+> > +     if ((cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)) {
+> > +             pr_err("%s: cqhci: CQE failed to exit halt state\n",
+> > +                     mmc_hostname(cq_host->mmc));
+> > +     }
+> > +     reg =3D cqhci_readl(cq_host, CQHCI_TCN);
+> > +     cqhci_writel(cq_host, reg, CQHCI_TCN);
+> > +     reg =3D cqhci_readl(cq_host, CQHCI_IS);
+> > +     cqhci_writel(cq_host, reg, CQHCI_IS);
+> > +
+> > +     /*
+> > +      * Halt the controller again.
+> > +      * This is only needed so that we're consistent across quirk
+> > +      * and quirkless logic.
+> > +      */
+> > +     cqhci_halt(cq_host->mmc, CQHCI_FINISH_HALT_TIMEOUT);
+> > +}
+>
+> Thanks a lot for tracking this down!
+>
+> It could be that the "un-halt" starts a task, so it would be
+> better to force the "clear" to work if possible, which
+> should be the case if CQE is disabled.
+>
+> Would you mind trying the code below?  Note the increased
+> CQHCI_START_HALT_TIMEOUT helps avoid trying to clear tasks
+> when CQE has not halted.
 
-It's merge window. Sending big patchset every day won't get you far.
+I've run a quick test and it works just fine.
+Your approach looks better than what I proposed, since as you
+mentioned, doing it like this avoids some weird side effects, e.g. DMA
+to freed memory.
+Do you plan to include it in the other series that you posted yesterday?
 
-> 
-> v3 -> v4:
-> - Modify dma setting's code to fix linux coding style.
-> - Drop useless function messages.
-> - Remove MODULE_ALIAS().
-> 
-> v0 -> v1:
-> - Seperate different support into single patch.
-> - Fix the compiler complains.
-> ---
-
-
+>
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.=
+c
+> index b3d7d6d8d654..534c13069833 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -987,7 +987,7 @@ static bool cqhci_halt(struct mmc_host *mmc, unsigned=
+ int timeout)
+>   * layers will need to send a STOP command), so we set the timeout based=
+ on a
+>   * generous command timeout.
+>   */
+> -#define CQHCI_START_HALT_TIMEOUT       5
+> +#define CQHCI_START_HALT_TIMEOUT       500
+>
+>  static void cqhci_recovery_start(struct mmc_host *mmc)
+>  {
+> @@ -1075,28 +1075,27 @@ static void cqhci_recovery_finish(struct mmc_host=
+ *mmc)
+>
+>         ok =3D cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
+>
+> -       if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
+> -               ok =3D false;
+> -
+>         /*
+>          * The specification contradicts itself, by saying that tasks can=
+not be
+>          * cleared if CQHCI does not halt, but if CQHCI does not halt, it=
+ should
+>          * be disabled/re-enabled, but not to disable before clearing tas=
+ks.
+>          * Have a go anyway.
+>          */
+> -       if (!ok) {
+> -               pr_debug("%s: cqhci: disable / re-enable\n", mmc_hostname=
+(mmc));
+> -               cqcfg =3D cqhci_readl(cq_host, CQHCI_CFG);
+> -               cqcfg &=3D ~CQHCI_ENABLE;
+> -               cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+> -               cqcfg |=3D CQHCI_ENABLE;
+> -               cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+> -               /* Be sure that there are no tasks */
+> -               ok =3D cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
+> -               if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
+> -                       ok =3D false;
+> -               WARN_ON(!ok);
+> -       }
+> +       if (!cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT))
+> +               ok =3D false;
 > +
-> +static int dw_mci_rtk_parse_dt(struct dw_mci *host)
-> +{
-> +	struct dw_mci_rtkemmc_host *priv;
-> +	const u32 *prop;
-> +	int size, ret;
+> +       cqcfg =3D cqhci_readl(cq_host, CQHCI_CFG);
+> +       cqcfg &=3D ~CQHCI_ENABLE;
+> +       cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
 > +
-> +	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> +	if (!priv)
-> +		return -ENOMEM;
+> +       cqcfg =3D cqhci_readl(cq_host, CQHCI_CFG);
+> +       cqcfg |=3D CQHCI_ENABLE;
+> +       cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
 > +
-> +	priv->pinctrl = devm_pinctrl_get(host->dev);
-> +	if (IS_ERR(priv->pinctrl))
-> +		dev_dbg(host->dev, "no pinctrl\n");
+> +       cqhci_halt(mmc, CQHCI_FINISH_HALT_TIMEOUT);
 > +
-> +	priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
-> +						  PINCTRL_STATE_DEFAULT);
-> +	if (IS_ERR(priv->pins_default))
-> +		dev_warn(host->dev, "could not get default state\n");
-> +
-> +	priv->pins_sdr50 = pinctrl_lookup_state(priv->pinctrl,
-> +						"sdr50");
-> +	if (IS_ERR(priv->pins_sdr50))
-> +		dev_warn(host->dev, "could not get sdr50 state\n");
-> +
-> +	priv->pins_hs200 = pinctrl_lookup_state(priv->pinctrl,
-> +						"hs200");
-> +	if (IS_ERR(priv->pins_hs200))
-> +		dev_warn(host->dev, "could not get hs200 state\n");
-> +
-> +	priv->pins_hs400 = pinctrl_lookup_state(priv->pinctrl,
-> +						"hs400");
-> +	if (IS_ERR(priv->pins_hs400))
-> +		dev_warn(host->dev, "could not get hs400 state\n");
-> +
-> +	priv->pins_tune0 = pinctrl_lookup_state(priv->pinctrl,
-> +						"tune0");
-> +	if (IS_ERR(priv->pins_tune0))
-> +		dev_warn(host->dev, "could not get tune0 state\n");
-> +
-> +	priv->pins_tune1 = pinctrl_lookup_state(priv->pinctrl,
-> +						"tune1");
-> +	if (IS_ERR(priv->pins_tune1))
-> +		dev_warn(host->dev, "could not get tune1 state\n");
-> +
-> +	priv->pins_tune2 = pinctrl_lookup_state(priv->pinctrl,
-> +						"tune2");
-> +	if (IS_ERR(priv->pins_tune2))
-> +		dev_warn(host->dev, "could not get tune2 state\n");
-> +
-> +	priv->pins_tune3 = pinctrl_lookup_state(priv->pinctrl,
-> +						"tune3");
-> +	if (IS_ERR(priv->pins_tune3))
-> +		dev_warn(host->dev, "could not get tune3 state\n");
-> +
-> +	priv->pins_tune4 = pinctrl_lookup_state(priv->pinctrl,
-> +						"tune4");
-> +
-> +	if (IS_ERR(priv->pins_tune4))
-> +		dev_warn(host->dev, "could not get tune4 state\n");
-> +
-> +	priv->vp0 = devm_clk_get(host->dev, "vp0");
-> +	if (IS_ERR(priv->vp0))
-> +		dev_err_probe(host->dev, ret, "could not get vp0 clk\n");
-> +
-> +	priv->vp1 = devm_clk_get(host->dev, "vp1");
-> +	if (IS_ERR(priv->vp1))
-> +		dev_err_probe(host->dev, ret, "could not get vp1 clk\n");
-> +
-> +	if (of_property_read_bool(host->dev->of_node, "supports-cqe"))
-> +		priv->is_cqe = 1;
-> +	else
-> +		priv->is_cqe = 0;
-> +
-> +	prop = of_get_property(host->dev->of_node, "rdq-ctrl", &size);
-
-NAK
-
-> +	if (prop)
-> +		priv->rdq_ctrl = of_read_number(prop, 1);
-> +	else
-> +		priv->rdq_ctrl = 0;
-> +
-> +	priv->emmc_mode = 3;
-> +
-> +	priv->m2tmx = syscon_regmap_lookup_by_phandle(host->dev->of_node, "realtek,m2tmx");
-
-NAK, for the same reasons I mentioned for other patch.
-
-I will keep NAK-ing till you start testing your DTS.
-
-
-> +	if (IS_ERR_OR_NULL(priv->m2tmx))
-> +		dev_err_probe(host->dev, ret, "can not get m2mtx node.\n");
-> +
-> +	host->priv = priv;
-> +
-> +	return 0;
-> +}
-
-
-Best regards,
-Krzysztof
-
+> +       if (!ok)
+> +               cqhci_clear_all_tasks(mmc, CQHCI_CLEAR_TIMEOUT);
+>
+>         cqhci_recover_mrqs(cq_host);
+>
+>
