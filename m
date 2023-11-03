@@ -2,89 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1607C4167D
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Nov 2023 21:02:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 199DAC4167B
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Nov 2023 00:33:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233774AbjKBVCZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Nov 2023 17:02:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42560 "EHLO
+        id S232251AbjKCAdq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Nov 2023 20:33:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53140 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232106AbjKBVCZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Nov 2023 17:02:25 -0400
-Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B455E196
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Nov 2023 14:02:20 -0700 (PDT)
-Received: by mail-pf1-x430.google.com with SMTP id d2e1a72fcca58-6c34e87b571so417624b3a.3
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Nov 2023 14:02:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1698958940; x=1699563740; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=IPuGtKMPlEfvRS+P+xBusUQd48EgHVGydBMy1D5IEL4=;
-        b=eCOLRmCofS/3Ru4fUr+jV98QuZNjY+W6xFtaZwYepsCQIxArwfbuDQtmNEpEOK5cTT
-         vVvdYi7xaY9tdvuo89d0dVnJbpjFeo/XHDI1vrF1d6JsgU0DgDwF6sJ72LnCVxzbpBVR
-         4mPBusHKhtyx7b+9gynEH8ygpwxsHfjoG6gSk=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698958940; x=1699563740;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IPuGtKMPlEfvRS+P+xBusUQd48EgHVGydBMy1D5IEL4=;
-        b=OVOXgy3ZPI/Sn+lQaYyCg8aHtB+W+eXgCijid0UZ3LJLgknvp0Rp1xCugqdUwrbviY
-         34SibYm0vavEzxKPaG+PKkf5G0FO9mDbLBLtC0IB0WivANt7hMXQuCbjcxwBkVtghy90
-         hgYClSv+GjGQwbf3BhGFe7uc2P6J2Dw4AXSyW1sFybxiasmV1aCcxzZHfebhfv5MhTBk
-         qLgGos+estOAKG0N0pJ7ehFdIVHjmQAK8RXhbfE+BIwOIh/Tr//m4Q1nppLLETjTH3Pq
-         5tnrQgEQ5VZGGKsLeWaL7KqeZDKEsbsYaYQr8NlbotxjWsAeSjfhNg4B+SJNAQSkk4WL
-         9w3w==
-X-Gm-Message-State: AOJu0Yyo1DlufPkruJY6GqMtxOs1fvVzWiqdHCx/znch5V/5A6ZvmsNN
-        JMFfTL9pgwHATw1scDF9u/hH/Q==
-X-Google-Smtp-Source: AGHT+IFYvdfRwpri72fkum0U8llMGbXB5T3T/b0kSk4KbqyH+3NrsK9gYNXQO1FoJxEDxjHW0gjP7w==
-X-Received: by 2002:a05:6a00:2d0b:b0:692:6d3f:485b with SMTP id fa11-20020a056a002d0b00b006926d3f485bmr18420114pfb.3.1698958940181;
-        Thu, 02 Nov 2023 14:02:20 -0700 (PDT)
-Received: from localhost ([2620:15c:9d:2:a601:95c2:1e12:1936])
-        by smtp.gmail.com with UTF8SMTPSA id fh21-20020a056a00391500b006b22218cb92sm172254pfb.43.2023.11.02.14.02.18
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Nov 2023 14:02:19 -0700 (PDT)
-Date:   Thu, 2 Nov 2023 14:02:18 -0700
-From:   Brian Norris <briannorris@chromium.org>
-To:     Karel Balej <balejk@matfyz.cz>
-Cc:     Kalle Valo <kvalo@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        Duje =?utf-8?Q?Mihanovi=C4=87?= <duje.mihanovic@skole.hr>,
-        ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org
-Subject: Re: [PATCH 1/2] dt-bindings: mwifiex: document use with the SD8777
- chipset
-Message-ID: <ZUQOWtIofdSDHi3t@google.com>
-References: <20231029111807.19261-1-balejk@matfyz.cz>
- <20231029111807.19261-2-balejk@matfyz.cz>
+        with ESMTP id S229741AbjKCAdp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Nov 2023 20:33:45 -0400
+Received: from nautica.notk.org (ipv6.notk.org [IPv6:2001:41d0:1:7a93::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73F4D136;
+        Thu,  2 Nov 2023 17:33:39 -0700 (PDT)
+Received: by nautica.notk.org (Postfix, from userid 108)
+        id DAF07C01B; Fri,  3 Nov 2023 01:33:36 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
+        t=1698971616; bh=/MJZ9C7RKPB/RlBz8fZGhhwSSkmv7eGeKoqSA++bXEo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Laxif8cFeFoIrghfcmNngzBUeK6QJUuQhgt2QM93ipCUQ9A/UbpcW4I9CmxvOdBYs
+         Gya7Ss24GZ5nkH++UWsO7YLxy6TH9WK2pXpecu1CaSRlL+GM+AS5V2x7V3bQNl9R0v
+         PJL8Lii3uYEGRv7EeFtl0Fy64no4juaU3Net7orCkYS2XdGQocUtBuX/f5lYauBy8b
+         sAFM/YXmjXki1sUZrKvjg5/UcO5YqKPEb6hjUVpN6jgCVZ4scz27ufWnLleulCtX2U
+         NKbtfIRRxgf8+J0SridlURcSLAdXlyNrjLg15J4SeD7ToGJGBgO4E4MmpIqpjN9YA2
+         HiHOSN+4lki5g==
+Received: from gaia (localhost [127.0.0.1])
+        by nautica.notk.org (Postfix) with ESMTPS id 931D5C009;
+        Fri,  3 Nov 2023 01:33:24 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=codewreck.org; s=2;
+        t=1698971606; bh=/MJZ9C7RKPB/RlBz8fZGhhwSSkmv7eGeKoqSA++bXEo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ziSwTLqpvBCbkOG3YevGUd55nv9mPIke4sHuKV6L7JwohCulWYyuCw3ir3VfbJF58
+         v/ICuKfWpeP/voHtHU4BmyTjm2uFjbUwI+SVmRqDDni++8ETVjTWqgAp5LEZSGbRgF
+         1eurIDg2X7llo8YLtvYxY+KqW61CKiN/5SxHWEAFQ6+2NDVnVq18eI7EQv/Uk3KFdG
+         dUMDx33hAP5eG5V0mdb3aSDBwJxhzRRwj/Ghl/o8adK9emfbHGWc8e13LFZWy1WLID
+         qlYOf9i6I1QP2/Y76CNi0uiKeRD5i/Z82W5MDCOiRmsQPKu/XKbx4T7EYm6LAdWIG+
+         pq1SAyOxZyF3Q==
+Received: from localhost (gaia [local])
+        by gaia (OpenSMTPD) with ESMTPA id c8812187;
+        Fri, 3 Nov 2023 00:33:21 +0000 (UTC)
+Date:   Fri, 3 Nov 2023 09:33:06 +0900
+From:   Dominique Martinet <asmadeus@codewreck.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Avri Altman <avri.altman@wdc.com>,
+        Dominique Martinet <dominique.martinet@atmark-techno.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org, Alex Fetters <Alex.Fetters@garmin.com>
+Subject: Re: [PATCH] mmc: truncate quirks' oemid to 8 bits
+Message-ID: <ZUQ_wm22gO7lLZ3N@codewreck.org>
+References: <20231026075230.414685-1-dominique.martinet@atmark-techno.com>
+ <CAPDyKFqkKibcXnwjnhc3+W1iJBHLeqQ9BpcZrSwhW2u9K2oUtg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20231029111807.19261-2-balejk@matfyz.cz>
+In-Reply-To: <CAPDyKFqkKibcXnwjnhc3+W1iJBHLeqQ9BpcZrSwhW2u9K2oUtg@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Oct 29, 2023 at 12:08:16PM +0100, Karel Balej wrote:
-> Document the corresponding compatible string for the use of this driver
-> with the Marvell SD8777 wireless chipset.
+Ulf Hansson wrote on Thu, Nov 02, 2023 at 02:25:09PM +0100:
+> > Fixes: 84ee19bffc93 ("mmc: core: Capture correct oemid-bits for eMMC cards")
 > 
-> Signed-off-by: Karel Balej <balejk@matfyz.cz>
+> [...]
+> 
+> It looks to me that the offending commit (84ee19bffc93) should be
+> reverted instead of trying to introduce some weird parsing of the card
+> quirks.
 
-FWIW, the binding looks fine from mwifiex point of view, so:
+I agree that's better -- that's what I did on our stable tree until the
+dust settles down, I probably should have sent that instead.
 
-Acked-by: Brian Norris <briannorris@chromium.org>
+As Avri pointed out the offending commit was picked up to stable, but
+the revert should apply cleanly so if we send Greg a mail after Linus
+picked it up it can be reverted on all stable branches quickly.
 
-But see cover letter. We can't merge driver support without a
-linux-firmware-compatible (or otherwise redistributable) firmware, so
-NAK for the series.
+There's little value in me resending this as a revert, but process-wise
+I guess it's easier if someone sends it as a mail so I'll whip up a
+commit message and send that now.
+
+> In fact, up until v5.1 it seems not to be a problem to use 16-bits for
+> the OID, as the CBX and the reserved bits are probably just given some
+> fixed values by the vendors, right?
+
+Right, it's possible that using 8 bits here would apply the quirks to
+more devices than what was intended if the other 8 bits made a
+difference... Unfortunately that's something only vendors would know.
+
+> Beyond v5.1A, we may have a problem as the BIN may actually be used
+> for something valuable. Maybe Avri knows more here?
+> 
+> That said, if the offending commit is really needed to fix a problem,
+> we need to figure out exactly what that problem is. The EXT_CSD_REV
+> doesn't provide us with the exact version that the card is supporting,
+> but at least we know if v5.1 and onwards is supported, so perhaps that
+> can be used to fixup/improve the OID/CBX/BIN parsing.
+
+Keep filling the full 16 bits unless rev is higher, in which case we
+read half?
+At this point (mmc_decode_cid) we can use card's ext_csd.rev so if v5.1A
+bumped it then it's a possibility; I don't have access to the jedec
+standard to check right now.
+
+-- 
+Dominique Martinet | Asmadeus
