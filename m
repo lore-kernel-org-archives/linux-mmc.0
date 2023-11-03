@@ -2,97 +2,116 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A2D6C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Nov 2023 11:17:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5AA6C41535
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Nov 2023 11:17:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346616AbjKCLRQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Nov 2023 07:17:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58130 "EHLO
+        id S1346858AbjKCLRT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Nov 2023 07:17:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346626AbjKCLRJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Nov 2023 07:17:09 -0400
-Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92D6E18B
-        for <linux-mmc@vger.kernel.org>; Fri,  3 Nov 2023 04:16:57 -0700 (PDT)
-Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-5a7fb84f6ceso23348077b3.1
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Nov 2023 04:16:57 -0700 (PDT)
+        with ESMTP id S1346671AbjKCLRP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Nov 2023 07:17:15 -0400
+Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F8C4D68
+        for <linux-mmc@vger.kernel.org>; Fri,  3 Nov 2023 04:17:01 -0700 (PDT)
+Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-5a81ab75f21so23327127b3.2
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Nov 2023 04:17:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1699010216; x=1699615016; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1699010220; x=1699615020; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=9eA8efKOPXzUzYKsuUX5NbXDmCYD0utTiCrivhgq71I=;
-        b=clreFg0cxUHkmLnUkW1GWW/RDuUk/AJ88WfNAMQOakldVXHuvub6iO0D9EdpEjvQtB
-         qxjxn0XKCBzoA/Kb3DXotsZy4S8gHo3mmpX8YiF7MK5IGMUgZO5IIgW2r6ZClqlFqaE0
-         jwJuxYXZOHhCRwjiH1h8jQxZsK4m3pL5ZiQAn/RaS+l59bBosyO2B8txdd626wo0DWOW
-         yvQGPQoqhT0E8Ys2snUl4W38hUd1ruJiuI4mLtNzvxXQ/Yo9wfy7TY1TGcTj2XhVMMIZ
-         FGJODgBGbtztT4TujvO0RhxI9n+omro05/roxWK2QM0MfCN7hTipmneKtqigDKvO2geM
-         l5kw==
+        bh=oWqvGHOpDjXeJF4gaG5FvSChunLowe+31JAI0Z5rk34=;
+        b=aTAeo++ufcpuOK6ygynGRX8GpEjrCX4iIsxGeSzbXaI/UKqI822QKIIZ7KYNfbZL6W
+         q7ZuC/BGDP7M7RxUi84roEW10U/GV3F1+ITWIErXRQD7d0j86xRq3eztwsU6C+B3NVki
+         SUgg4HVAQX2aBtJmbJosEktwRXGkmr4D/HuzOB5Sc7MOUXRz8HZRPnFfLfCbGlWsJysp
+         XZlmDIEfk4O228DHLlYe1dGixLQAYCmwmbvNEzQn+j6KRRaUUTEJwWxVJeR8agxVBhnS
+         dVbfe993pSvGL8axGrZTLwphROUuFWh/dULncYfyOZRy0xo/WE6tvlqIMpA0iG042yZ8
+         7K6A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699010216; x=1699615016;
+        d=1e100.net; s=20230601; t=1699010220; x=1699615020;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=9eA8efKOPXzUzYKsuUX5NbXDmCYD0utTiCrivhgq71I=;
-        b=BGZ3WjHuTyhLps2C3096Kw8i43wNkDfaheSMasVaIT993uQzq57YAsb3EO8E6TWBzy
-         AGTCaSU9v0mhdsSqo/VlXPCPw3R2S1wTj4xEBx2heCToXh9YdPgLXZKhI7aeFRK9Nv9i
-         iYB2AdsK589r6V1MFLK4MoPMXbw+V8wTBGx/TFcQyWBa/q6BSgS7AXjf/mSmXvOMrbcz
-         mXpY6lks1iWQhoEtmLRQt5yfSq1Zr5i6ST7q8/FsYnHp4H0dsc3W0S2StMesjBIQzxs5
-         Q9bo5RGz7SUlVFLU1Yo8drv3fNEF4kcHQxUAGoK9DsZIut+hONEvPJ+2GQkOAb0tpcks
-         jwTw==
-X-Gm-Message-State: AOJu0YzqoKFt35sZ+P/tqG/Vkw/AnL91BEmAF7mqu3yEihH967HYnz/2
-        ExF0+1YBHPVvS16mGch0X9Jl8FxRzFd3xRSNnCfSoQ==
-X-Google-Smtp-Source: AGHT+IGFr/4fnxq3hTHWQYUSTvNr3iWFzoC5V9kIq8qHxBgrMwioqwRQgDyzjZNIOBCQDjh83t+jl6o/P71DDEgT8Io=
-X-Received: by 2002:a81:7c03:0:b0:59f:535b:52a7 with SMTP id
- x3-20020a817c03000000b0059f535b52a7mr2128058ywc.48.1699010216748; Fri, 03 Nov
- 2023 04:16:56 -0700 (PDT)
+        bh=oWqvGHOpDjXeJF4gaG5FvSChunLowe+31JAI0Z5rk34=;
+        b=pfJyTrPEiZIWwcvD9kqcDSUY8FZz8pjUC7hvqLEXF5QSwTB2uHLcdBJv6mRX87Vxtq
+         UyjtLroYmuH+SboCPGvGV5jTiPWm20CiZJAuw2aCLKFshTtKSWrCDOT4wPRM9z7McdVB
+         RRm7ux2+po6mLd2rnT8CPxH8NMRUBOfQ+yWEPX8prK5Wz29Kdh/iLIYknGGYL9meIYSK
+         Z/M38M/4f+VBV1dYpE9YJGr/+6ya7Nz5kv//juWGMyJJJXXYGWGpCXjpO5Wqg7sUYpcH
+         1fzY/xon34i43z53ZaQ5/uR1N1x9xlyVMpAvfRkyUYA/ykRRW9J2zCashh1Ybml17/sW
+         tmdQ==
+X-Gm-Message-State: AOJu0YwvVB8XmNDErx/CdW0JY91GF0cSryTPG2Lvip3I4KGwxs8X2wOu
+        uxKIjG7TmhbbRqb1jx40WluvOBJRAAkF1NBWf9aWGg==
+X-Google-Smtp-Source: AGHT+IFLVZi6pW8xuPrCXex8Mha8wM8l8BM1AAWvvxpzrUbGuBa0q1spsqLLCOnrl8AxOXZ62UTRQpiJM5P5rka57OE=
+X-Received: by 2002:a81:4f04:0:b0:5a7:e5b8:997a with SMTP id
+ d4-20020a814f04000000b005a7e5b8997amr2573913ywb.10.1699010220701; Fri, 03 Nov
+ 2023 04:17:00 -0700 (PDT)
 MIME-Version: 1.0
-References: <0769d30c-ad80-421b-bf5d-7d6f5d85604e@moroto.mountain>
-In-Reply-To: <0769d30c-ad80-421b-bf5d-7d6f5d85604e@moroto.mountain>
+References: <20231103004220.1666641-1-asmadeus@codewreck.org>
+In-Reply-To: <20231103004220.1666641-1-asmadeus@codewreck.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 3 Nov 2023 12:16:20 +0100
-Message-ID: <CAPDyKFoYUtQzMCPKhEHrzxAA5_zk8KiwR-Knj30X+9FebdxW5A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: vub300: fix an error code
-To:     Dan Carpenter <dan.carpenter@linaro.org>
-Cc:     Tony Olech <tony.olech@elandigitalsystems.com>,
-        Deren Wu <deren.wu@mediatek.com>, Bo Liu <liubo03@inspur.com>,
-        Justin Stitt <justinstitt@google.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org,
-        kernel-janitors@vger.kernel.org
+Date:   Fri, 3 Nov 2023 12:16:25 +0100
+Message-ID: <CAPDyKFrPaScaQE340g8cD_xR+KoX=JuSc9xtCW=B+HZKYjf1aQ@mail.gmail.com>
+Subject: Re: [PATCH] Revert "mmc: core: Capture correct oemid-bits for eMMC cards"
+To:     Dominique Martinet <asmadeus@codewreck.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Dominique Martinet <dominique.martinet@atmark-techno.com>,
+        stable@vger.kernel.org, Avri Altman <avri.altman@wdc.com>,
+        Alex Fetters <Alex.Fetters@garmin.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2 Nov 2023 at 08:51, Dan Carpenter <dan.carpenter@linaro.org> wrote:
+On Fri, 3 Nov 2023 at 01:42, Dominique Martinet <asmadeus@codewreck.org> wrote:
 >
-> This error path should return -EINVAL instead of success.
+> From: Dominique Martinet <dominique.martinet@atmark-techno.com>
 >
-> Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
-> Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+> This reverts commit 84ee19bffc9306128cd0f1c650e89767079efeff.
+>
+> The commit above made quirks with an OEMID fail to be applied, as they
+> were checking card->cid.oemid for the full 16 bits defined in MMC_FIXUP
+> macros but the field would only contain the bottom 8 bits.
+>
+> eMMC v5.1A might have bogus values in OEMID's higher bits so another fix
+> will be made, but it has been decided to revert this until that is ready.
+>
+> Fixes: 84ee19bffc93 ("mmc: core: Capture correct oemid-bits for eMMC cards")
+> Link: https://lkml.kernel.org/r/ZToJsSLHr8RnuTHz@codewreck.org
+> Link: https://lkml.kernel.org/r/CAPDyKFqkKibcXnwjnhc3+W1iJBHLeqQ9BpcZrSwhW2u9K2oUtg@mail.gmail.com
+> Signed-off-by: Dominique Martinet <dominique.martinet@atmark-techno.com>
+> Cc: stable@vger.kernel.org
+> Cc: Avri Altman <avri.altman@wdc.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Alex Fetters <Alex.Fetters@garmin.com>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/vub300.c | 1 +
->  1 file changed, 1 insertion(+)
+> Here's the revert as discussed in "mmc: truncate quirks' oemid to 8
+> bits"' patch thread.
+> Feel free to ignore if you already have something, I just checked your
+> -next branch quickly and might have missed it.
 >
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index de3f443f5fdc..fd67c0682b38 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2309,6 +2309,7 @@ static int vub300_probe(struct usb_interface *interface,
->                 vub300->read_only =
->                         (0x0010 & vub300->system_port_status.port_flags) ? 1 : 0;
->         } else {
-> +               retval = -EINVAL;
->                 goto error5;
->         }
->         usb_set_intfdata(interface, vub300);
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 4a4bab9aa726..89cd48fcec79 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -104,7 +104,7 @@ static int mmc_decode_cid(struct mmc_card *card)
+>         case 3: /* MMC v3.1 - v3.3 */
+>         case 4: /* MMC v4 */
+>                 card->cid.manfid        = UNSTUFF_BITS(resp, 120, 8);
+> -               card->cid.oemid         = UNSTUFF_BITS(resp, 104, 8);
+> +               card->cid.oemid         = UNSTUFF_BITS(resp, 104, 16);
+>                 card->cid.prod_name[0]  = UNSTUFF_BITS(resp, 96, 8);
+>                 card->cid.prod_name[1]  = UNSTUFF_BITS(resp, 88, 8);
+>                 card->cid.prod_name[2]  = UNSTUFF_BITS(resp, 80, 8);
 > --
-> 2.42.0
+> 2.41.0
 >
