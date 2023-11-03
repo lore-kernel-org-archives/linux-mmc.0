@@ -2,189 +2,165 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E54E7C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Nov 2023 06:40:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9307C4167D
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Nov 2023 08:27:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231698AbjKCGkv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Nov 2023 02:40:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46028 "EHLO
+        id S235875AbjKCI1l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Nov 2023 04:27:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230502AbjKCGku (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Nov 2023 02:40:50 -0400
-Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 990A9CA;
-        Thu,  2 Nov 2023 23:40:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1698993644; x=1730529644;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=0H8uF6uRphhgAW1p0wYu2vVQFz4P/6cLqDRwxZeXSFg=;
-  b=rsnRsJjkZGqOkPWzUuNF4Um60pROJyxl/oy+CTCBkGYG90YVNtE8SkOP
-   SMeYYIu/C6egBDe6qQQNwzkS+QO5F4C2s5VvQteYw+1ocfqd9mlOBsbTE
-   YJ2We99u6esSgMwfTRcxdxpKUca7oaGksr0SyvfjzD+Vcd9LxZwvrX1j1
-   fRG/3MZzkgqC/xy+DC5HfsGuiD2/zcm5r6thH+bhRxuv/Js0vFjzTUPsa
-   mAmzQ8SPGetb5B7SSrhaCs8oP3aNapgDWQB0K5Lx49b/MNRJbmi3xPUqu
-   QzTSG+K4oP+e2TC2JBEnHh+HkYiDHq6aC+nVzhszPp6uUga1QqbrBhsnR
-   Q==;
-X-CSE-ConnectionGUID: oXSkYV8YTcGmSNO/AeMgPA==
-X-CSE-MsgGUID: fy1ME5LkS1uTBlyKzn0P3g==
-X-IronPort-AV: E=Sophos;i="6.03,273,1694707200"; 
-   d="scan'208";a="1450049"
-Received: from mail-dm6nam04lp2041.outbound.protection.outlook.com (HELO NAM04-DM6-obe.outbound.protection.outlook.com) ([104.47.73.41])
-  by ob1.hgst.iphmx.com with ESMTP; 03 Nov 2023 14:40:43 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=XHsLhJqtNQo+Gy/SQ0pk4PDIrb+OXXg3Ce6TlxyaBjelit/m9GaN8gpC8R1x/BKJgWREWNIwz+UDAfvAbPjohwtul1U/+NQLgKx3Zx7rsLCqJSqSAsUNg+tvtxi8Dgdqmsilf+tg5cIjOkR82rUDtxvmrkL4IpdfMYDQnMk0SP1DnYniHx/K1LgCa3g30uJWAoZoto/yeNtjID5WCvucEiSoOaeqSiVHBvJxmTZG8zAu4+8VtkhAhlAUoVdHNpUwRp20ZDBPd+Dc8ME1Vs8PB1JixjonXQdpDb3MhczRU9s/Wghy8fl6E6VZFZa2HoFoQaR/FQdiPKBegvbdSch+Vg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=9JplVVXdViekdH5PgGZ7q3SPGySzB0BSBe9ChXVg3XI=;
- b=Nu3FLEk2TAj6WbYVeh0+FyDVdJ+xPo6DlCl1llVLTR754LAjXsUv2FGEnfuncxsvG7pyBCt9rIGRDLZg/u/fidA+Xoh0xaMMyjMRVDVKeIyMTnh7F+viE7gihdNDe1HAvUm82mzf5fSJfrWZQqjxA1heHjcfHp4y1i6UINIcqcJzdMcW0fWEw18PTZE4IcbzrBly4Kx4Mx0J2rOeuK383TsSSt9xo3V/0cCGjvJPaB9gOdqyHhd/YIjZN9mJPZyKVCvMXhn1QF+ZXQfjBeIZ867MmnDdDN9k6i6WmgMhskYFvAlzkaDb5DAVDjZIV79UmkNx7MkdUBj48os10AwZKw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=9JplVVXdViekdH5PgGZ7q3SPGySzB0BSBe9ChXVg3XI=;
- b=KSiuGLMENpN9rHhNLvF4VluylbTiGYwGygRpcnFB/kvGTjBTBG+6FEE581xnl1Ifcuf207TupOblEp6psPQqu0j1QAO2WCkRStyFO5764HSmQMmaZN0znPSNYokYqa6G0mzFe6hVTrTMQz4V/Kuj7E2HFoMznIcLV/0F+i2KNAo=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- CH0PR04MB8034.namprd04.prod.outlook.com (2603:10b6:610:f8::9) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6954.21; Fri, 3 Nov 2023 06:40:41 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::83bc:d5e1:c29:88dd]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::83bc:d5e1:c29:88dd%5]) with mapi id 15.20.6954.021; Fri, 3 Nov 2023
- 06:40:41 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Dominique Martinet <asmadeus@codewreck.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Dominique Martinet <dominique.martinet@atmark-techno.com>,
-        "stable@vger.kernel.org" <stable@vger.kernel.org>,
-        Alex Fetters <Alex.Fetters@garmin.com>
-Subject: RE: [PATCH] Revert "mmc: core: Capture correct oemid-bits for eMMC
- cards"
-Thread-Topic: [PATCH] Revert "mmc: core: Capture correct oemid-bits for eMMC
- cards"
-Thread-Index: AQHaDe6wuGa60xkLQE+wyC+Jey7ipbBoJUEA
-Date:   Fri, 3 Nov 2023 06:40:41 +0000
-Message-ID: <DM6PR04MB657502AC388792B93D17E79DFCA5A@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20231103004220.1666641-1-asmadeus@codewreck.org>
-In-Reply-To: <20231103004220.1666641-1-asmadeus@codewreck.org>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|CH0PR04MB8034:EE_
-x-ms-office365-filtering-correlation-id: 2dfda5ec-e896-4989-0c7b-08dbdc37ccb3
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: cVREeU0JYIlQPdPlf2iLnzcpn/Q3Q9qG0BFSoNdZnBixYFEfLVmkmIoqObWi0pRVDIKqZqCCh0e5pZetlHNyy/IQ2ILiSC6pIy/0qM021ux4v6SwLyDsdn2s+qEfhOBJUiU15YJ7FDu9eTlsOA8U94+jhtwPmcG9SnODkV8iqjj6qmCm75gdb7gLX+G/pa81yWK0AAAU1RZ2iJkKjNmd7ppt1CWannvgT+1x/dffoh/UI7qeOyXcFIiLozfgp1Ha+65zHnZ3YUqdj256HyBypheR23RPDtZIbQGvNgiYJsgnA6miEYIT+PwSTkp9S2RPZ2fXvpj6+xOlH0tayInFZDgcjhKXlT5Ip2qb67pboBBT4bMnwjj9ukWvzEdJ8dhnTCUM+KfDdxmj0LonAnTUuhXNx5z6xqWRU6EDghAerBRcdAc1C35BFbFFjiEn4k5j5W/JC74ECknyYgAn+0bCSdzEzibiyD7luaonsUYAfaAH7ZEkmk7HZiWI8KddcNl4MW9wXgpzXH0zTSgxAq/l8eSHiHBFj7Lc2z30VoCuJO7AALxCjnDL1gUmNqsNIKDlS9c0M3jVAPuVehRMkvzE+CBz8WuL7coYk3BlzWWlD8iKDXJANs6iCMKCfXQj0UfJ5APA5JLwW9pJS5j7OeeR+g==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(136003)(366004)(396003)(346002)(39860400002)(376002)(230922051799003)(451199024)(186009)(64100799003)(1800799009)(71200400001)(122000001)(8936002)(26005)(38070700009)(2906002)(33656002)(41300700001)(8676002)(966005)(110136005)(86362001)(5660300002)(82960400001)(478600001)(54906003)(4326008)(76116006)(66446008)(66946007)(316002)(64756008)(66476007)(66556008)(52536014)(9686003)(6506007)(7696005)(55016003)(83380400001)(38100700002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?uZKOCArLMu0jdd8+07Naoe/6jfwP1OjsR4FqLXu7oO2ms4XemESlprSNraP4?=
- =?us-ascii?Q?9SAkFLruKktdwJe5eAFs5BPhqRGOuv1Il89pE0IxXcplIJ1RXbwXk1ytqcip?=
- =?us-ascii?Q?TyyBIDsv/Z2op31RewOpbuRqkkMopVZek32HpXO/x2wcW1CC0PSOgf/TYhA3?=
- =?us-ascii?Q?qKT/T9DQGBXn6Fa0MDe4qt4CsG9zaSaYI638sp0iwNCIMEFpjijhHke++isr?=
- =?us-ascii?Q?ajbAx/lf27Z8jWfEvskmndr3ZAzC1/mdie00RSIPeiqUP6wCPmuBOXtHYenj?=
- =?us-ascii?Q?f+tPWfwLG38yx7LVhACvJLk7y15Scv/TbsUrNmXKtoSkJVe9LANsLxBfGtju?=
- =?us-ascii?Q?KFOOySDNcAGQUVTRqwJTgisNGRV5vI99IFTWq4DKwdl2urNiS0sCGruMN+v8?=
- =?us-ascii?Q?rgxiJECVUCA3uYNm1wPyavhn6A6AXPzh3vKZqGK/Fn7+fiufkjLLd8/50LgH?=
- =?us-ascii?Q?gtdjxxk5Rf2ffHhXAbTqk+E+nCT5iHiXf8A5ncJ6Uf7d7DpNtpKZnpV/wDLp?=
- =?us-ascii?Q?NtJKDBKLNitUIhVjyEyYPH458A/UE88Wg4nugtR647Ae18c7cZFjm54tq+QD?=
- =?us-ascii?Q?qNyjybXA7sq9yd0Ou+nK3elWNws+yDLJeFHLeJbTLuL3riufGSLCV2UuAbvW?=
- =?us-ascii?Q?Y1xut5RbFgc9/wI+A+9XUZAnbVyXm+GOP1QlR9fstRKOqG2ZIBwxN0Ram8nX?=
- =?us-ascii?Q?x6hD2FiqN65zVmVa9Nx1bB1HAo4irtFzwYaP/s03SjxvXw/td6u3UCmpFgGK?=
- =?us-ascii?Q?VXUYWj1DVix3aW840grf2bMrMPvfhCbimXNFtT9kkworIgoMTI/Dee2pINl/?=
- =?us-ascii?Q?qtf77vAyCKKEcm7Ssx7sru5OaCU9su5VH7Twbq1zzsGzgSyPFLTc9DkyKdMK?=
- =?us-ascii?Q?QSlFfnjxbOcz6KqSM42b2swGC10gummCI9/wLG0IbzGA/yNhto6RayEkUeBf?=
- =?us-ascii?Q?oN+NbeDeYor3DM4nE+kYAo8/QZAvs18p0Vkl6Qzu0vRWFP1RRgpHmW4yznhe?=
- =?us-ascii?Q?IE8I1GKbfDZZNEEO1TnOnlH7QN1FC0JaIQDaaMnQKuA5MyT3njlLOzq4XPqA?=
- =?us-ascii?Q?atrgjDwfDwWQ4Pw8QFo4gBxQ3Va78lFCssdUcoOg/TKiS3eAr3W2PntcUg0/?=
- =?us-ascii?Q?g76gToLjXEa7Pah6Gjiysr5ZVc1APDF6Y8u5y0XWH3pTeqyFRRTTvUJI43gQ?=
- =?us-ascii?Q?BCg0xsl0KFwKAfxUlLAhMko9MKSAbAeB0MEXCmstVvMMSydqc1UBpNZ2miHW?=
- =?us-ascii?Q?waQRK9ZZAPLRIwHn782McbyAxLszK7natc4as2s6QDa6a1XJ3FGZ3NurWTrR?=
- =?us-ascii?Q?oIVayhaJyRp1NU55OcTbY9mlyPKmM4W0mdKIUsgHUnyIg14TzTdn+QFqTwpg?=
- =?us-ascii?Q?yPAFjhzIKbgnTOhmdCiQvFm5aZfc57OfuCiEovE76P1G2MR5RoRTIFVYngaG?=
- =?us-ascii?Q?KM3G7xewQu7Ntf0D9rmiCLJovuu3M/CVsvT3UQHt++cSx61XP8u1BeqXHc/0?=
- =?us-ascii?Q?/pV+fb0YbRi36j1+h4EDKh0rCQhX0+NIu0ds1x1eqzwgGoJeFQlQsNitt3gU?=
- =?us-ascii?Q?jsY3p9Uj3SUL4uHJo7e0Najq2DYNWId7b87KsPMM?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S235853AbjKCI1j (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Nov 2023 04:27:39 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA0BD131;
+        Fri,  3 Nov 2023 01:27:33 -0700 (PDT)
+Received: from [100.107.97.3] (cola.collaboradmins.com [195.201.22.229])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 54DB166073C9;
+        Fri,  3 Nov 2023 08:27:31 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1699000052;
+        bh=kQYtpasdSDbX4pdFU8I6JnSdF+myp1yFX1gld+RQjmY=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=YrFnO0gM0RKayDoldHI+mOt2OVS1jGHJ58/eDn/yls7tAqxKN2lNovb72cQU2pgWM
+         Yv1Hj9nv+DMZ0xuJ+VLAL3rDEngS5gLiOMoXJsF9eKrhbHqr2ggNP2/sLCIcjtNnP4
+         QZI3WK0IMLLWE/dJbso8SKy6yAE/YACux2PGoHI+1nv1mBewgg/i1osRfPxQpOEu//
+         Y/pxwZSjvTqTCVdBPruojF6B6CAaC6wSKaSEp/NeLCQlGfmvllHXhlaZbWwIEYwIlI
+         Z6AoGWaQNsqfW3l1eDKqb8mZ4BLjgD571nH1ImiIXRuN2ko/ZxrH8VQy4m8ryJDPBv
+         7VYZs3q8V4DwA==
+Message-ID: <63fecefb-61bf-4232-ab91-db04e3212f14@collabora.com>
+Date:   Fri, 3 Nov 2023 09:27:27 +0100
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: hiFTqCEX9n8Eo3R/ZO95E0rWJNzB+Ri9ZcdKhjlgkKs3d2Wo/NZlfSQ1DZ2XaDhwgifIk1pX9sLIO8H8ticrlELqdeZv5MJ0MxZn8XqLyQAT/W2KhH64THf30vGUwzlzBMbUvjOgeT1IuLR3YdJL16DbRaejbxTdM+3onPqiqRWRM9yVMl1ONegPSNkGBZ0qLTen1IzzyODCk6ReWxyETWqqKlHZ0cgEEd4OI8BruftXK+WUfKSosU8tX+VPLa2+ADPF8ij9JFWaA0bZyRDOoPCZ83hyzGa/+Do7VviAV6scWyaLalKwfKfrs7aV1iJaigw/ydSm8q67mCuVoF66exMXuDtz9+/MX01F6aR08JZVBPYqqLK1Vd8z3R3aRC4gOqeOwpi9eSQfCHFs8dw8P5e3uyDc0sMDVVQNrGUNumZFvA2S5Fes9WWzwnwkdbJZ/8I85BzquoTsHZSx8lpOorB8f5gheqKFfp9qSRNiR4v+ilWOT86KxokRJx3Lgg4sQrIpeyj4OjAPUzaGVyVIjLMU3xuz8J7se1pQNN/PeMBdx8DiR3+v1bccnQs6YOA94k9Rh8ZbhanE6G2cdiE58ZI+OVOPv4hmhLpGyoiMKxOkYQ81x4MClssiMacCMCclJI+bvO2EAyAP9ywWmmW4mgYe2spxnAQBHvoEDzPZtT3nPM8ndOavjugSk3rZQuooMznNakLqs4SuPlgZdv0MtD0Ld7t+uO9dKdbrytv48da3D44Um6KtozhztCuy39VQyjCI2T3VicQFKvEwAkR+GYFrPDTC9U9erRcwccnXBEWn6A86mzVN77fTGBl47N4YEkowrVMxNCbhoAx6ud9DKt8BlvV5Bp3/Cx2Irkgup7F9EeoxDJoh9WIE2Hn4EATUi7tQg/o8X/HFzG1RQrIiIRGLLYH55WUi59A51+7J1vU=
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2dfda5ec-e896-4989-0c7b-08dbdc37ccb3
-X-MS-Exchange-CrossTenant-originalarrivaltime: 03 Nov 2023 06:40:41.8372
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: mRmE4t/z++4BqsL0kCKdC3PxI9d6L1EONtvgDYeUYVkQIlNvw7N0ZaWCAbPEMltrxQK5PTMrOSdPf/9/pqFxwA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR04MB8034
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: add wp_grp_size node
+To:     Bo Ye <bo.ye@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>
+Cc:     yongdong.zhang@mediatek.com, browse.zhang@mediatek.com,
+        lin.gui@mediatek.com, qilin.tan@mediatek.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
+References: <20231101154927.119312-1-bo.ye@mediatek.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+Content-Language: en-US
+In-Reply-To: <20231101154927.119312-1-bo.ye@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> From: Dominique Martinet <dominique.martinet@atmark-techno.com>
->=20
-> This reverts commit 84ee19bffc9306128cd0f1c650e89767079efeff.
->=20
-> The commit above made quirks with an OEMID fail to be applied, as they
-> were checking card->cid.oemid for the full 16 bits defined in MMC_FIXUP
-> macros but the field would only contain the bottom 8 bits.
->=20
-> eMMC v5.1A might have bogus values in OEMID's higher bits so another fix
-> will be made, but it has been decided to revert this until that is ready.
->=20
-> Fixes: 84ee19bffc93 ("mmc: core: Capture correct oemid-bits for eMMC
-> cards")
-> Link: https://lkml.kernel.org/r/ZToJsSLHr8RnuTHz@codewreck.org
-> Link:
-> https://lkml.kernel.org/r/CAPDyKFqkKibcXnwjnhc3+W1iJBHLeqQ9BpcZrSwh
-> W2u9K2oUtg@mail.gmail.com
-> Signed-off-by: Dominique Martinet <dominique.martinet@atmark-
-> techno.com>
-> Cc: stable@vger.kernel.org
-> Cc: Avri Altman <avri.altman@wdc.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Alex Fetters <Alex.Fetters@garmin.com>
-Reviewed-by: Avri Altman <avri.altman@wdc.com>
+Il 01/11/23 16:49, Bo Ye ha scritto:
+> From: "lin.gui" <lin.gui@mediatek.com>
+> 
+> Detail:
+> Add node "wp_grp_size", corresponding to WP_GRP_SIZE
+> (write protect group size) of eMMC's CSD register.
+> 
+> Scenario:
+> The eMMC card can be set into write-protected mode to
+> prevent data from being accidentally modified or deleted.
+> Wp_grp_size (Write Protect Group Size) refers to an
+> attribute of the eMMC card, used to manage write protection,
+> and is the CSD register  [36:32] of the eMMC device.
+> Wp_grp_size (Write Protect Group Size) indicates how many
+> eMMC blocks are contained in each write protection group on the eMMC card.
+> 
+> Final rendered file:
+> "/sys/class/mmc_host/mmc0/mmc0:0001/wp_grp_size"
+> 
+> Signed-off-by: lin.gui <lin.gui@mediatek.com>
+> Change-Id: I73952dbde2db375ba918daadb3264380b7863096
+
+The change-id tag means nothing upstream. Please remove.
+
+Also, the recipients list doesn't look right. Please use scripts/get_maintainer.pl
+to get the right recipients list, or your patch will be ignored.
 
 > ---
-> Here's the revert as discussed in "mmc: truncate quirks' oemid to 8 bits"=
-'
-> patch thread.
-> Feel free to ignore if you already have something, I just checked your -n=
-ext
-> branch quickly and might have missed it.
->=20
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
-> 4a4bab9aa726..89cd48fcec79 100644
+>   drivers/mmc/core/mmc.c   | 16 +++++++++++++++-
+>   include/linux/mmc/card.h |  2 ++
+>   2 files changed, 17 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 4a4bab9aa726..9b67e49a9e63 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -104,7 +104,7 @@ static int mmc_decode_cid(struct mmc_card *card)
->         case 3: /* MMC v3.1 - v3.3 */
->         case 4: /* MMC v4 */
->                 card->cid.manfid        =3D UNSTUFF_BITS(resp, 120, 8);
-> -               card->cid.oemid         =3D UNSTUFF_BITS(resp, 104, 8);
-> +               card->cid.oemid         =3D UNSTUFF_BITS(resp, 104, 16);
->                 card->cid.prod_name[0]  =3D UNSTUFF_BITS(resp, 96, 8);
->                 card->cid.prod_name[1]  =3D UNSTUFF_BITS(resp, 88, 8);
->                 card->cid.prod_name[2]  =3D UNSTUFF_BITS(resp, 80, 8);
-> --
-> 2.41.0
+> @@ -136,6 +136,17 @@ static void mmc_set_erase_size(struct mmc_card *card)
+>   	mmc_init_erase(card);
+>   }
+>   
+> +
+> +static void mmc_set_wp_grp_size(struct mmc_card *card)
+> +{
+> +	if (card->ext_csd.erase_group_def & 1)
+> +		card->wp_grp_size = card->ext_csd.hc_erase_size *
+> +			card->ext_csd.raw_hc_erase_gap_size;
+> +	else
+> +		card->wp_grp_size = card->csd.erase_size *
+> +			(card->csd.wp_grp_size + 1);
+> +}
+> +
+>   /*
+>    * Given a 128-bit response, decode to our card CSD structure.
+>    */
+> @@ -186,6 +197,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+>   		b = UNSTUFF_BITS(resp, 37, 5);
+>   		csd->erase_size = (a + 1) * (b + 1);
+>   		csd->erase_size <<= csd->write_blkbits - 9;
+> +		csd->wp_grp_size = UNSTUFF_BITS(resp, 32, 5);
+>   	}
+>   
+>   	return 0;
+> @@ -791,6 +803,7 @@ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
+>   MMC_DEV_ATTR(date, "%02d/%04d\n", card->cid.month, card->cid.year);
+>   MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
+>   MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
+> +MMC_DEV_ATTR(wp_grp_size, "%u\n", card->wp_grp_size << 9);
+>   MMC_DEV_ATTR(ffu_capable, "%d\n", card->ext_csd.ffu_capable);
+>   MMC_DEV_ATTR(hwrev, "0x%x\n", card->cid.hwrev);
+>   MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+> @@ -851,6 +864,7 @@ static struct attribute *mmc_std_attrs[] = {
+>   	&dev_attr_date.attr,
+>   	&dev_attr_erase_size.attr,
+>   	&dev_attr_preferred_erase_size.attr,
+> +	&dev_attr_wp_grp_size.attr,
+>   	&dev_attr_fwrev.attr,
+>   	&dev_attr_ffu_capable.attr,
+>   	&dev_attr_hwrev.attr,
+> @@ -1759,7 +1773,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>   			mmc_set_erase_size(card);
+>   		}
+>   	}
+> -
+> +	mmc_set_wp_grp_size(card);
+>   	/*
+>   	 * Ensure eMMC user default partition is enabled
+>   	 */
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index daa2f40d9ce6..62873ecc52f1 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -32,6 +32,7 @@ struct mmc_csd {
+>   	unsigned int		r2w_factor;
+>   	unsigned int		max_dtr;
+>   	unsigned int		erase_size;		/* In sectors */
+> +	unsigned int		wp_grp_size;
+>   	unsigned int		read_blkbits;
+>   	unsigned int		write_blkbits;
+>   	unsigned int		capacity;
+> @@ -304,6 +305,7 @@ struct mmc_card {
+>   	unsigned int		eg_boundary;	/* don't cross erase-group boundaries */
+>   	unsigned int		erase_arg;	/* erase / trim / discard */
+>    	u8			erased_byte;	/* value of erased bytes */
+> +	unsigned int		wp_grp_size; /* write group size in sectors */
+
+There should be a tabulation before the comment, not a space.
+
+Regards,
+Angelo
 
