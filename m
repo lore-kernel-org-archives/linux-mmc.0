@@ -2,144 +2,121 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AACFAC4167B
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 11:57:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C749CC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 12:26:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231458AbjKFL5I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Nov 2023 06:57:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33680 "EHLO
+        id S230192AbjKFM06 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 07:26:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229689AbjKFL5I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 06:57:08 -0500
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 467E794
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Nov 2023 03:57:02 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1699271822; x=1730807822;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=ePoN6spqjWBF4gQJvIyZw692UQtYka4nPR77oQgaEe0=;
-  b=CTquTeEfSnRJhUjkWO8J43Mn+c6ZlMqylWMViR005w73ZxTOqOFLN2FJ
-   NR/hP/9r16jtgGJ3PuN+x6DuatS/hBAyswo8RMVUt4b7sruggK75OGZwB
-   EajTzb0TF5U/d+sGQmlEGRhY4UmhVeyIekUThHiofd1d4aOKnJYio85tx
-   yoERinks4BmU/7T0yOBtCwhPRkXeiXAQm33okUwxAVEW0HHft4aJug3WD
-   hXvErx/PjZbP0tIho+/4IAOmpor4JkT5UvqzrY25Q2iTR2j3amnXgMRmC
-   noVNq7qQPu3NZ1K+1sbWxsj+0E9SWp5MMvYRtu3QcKkH18aSJg49ozj3p
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10885"; a="420372426"
-X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
-   d="scan'208";a="420372426"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 03:57:01 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
-   d="scan'208";a="3427706"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.215.231])
-  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 03:56:59 -0800
-Message-ID: <9238e419-3400-4b70-8537-690db1730cf0@intel.com>
-Date:   Mon, 6 Nov 2023 13:56:56 +0200
+        with ESMTP id S229583AbjKFM05 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 07:26:57 -0500
+Received: from out28-2.mail.aliyun.com (out28-2.mail.aliyun.com [115.124.28.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E750BBB;
+        Mon,  6 Nov 2023 04:26:52 -0800 (PST)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07470094|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0336601-0.000693695-0.965646;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=12;RT=12;SR=0;TI=SMTPD_---.VGP97NC_1699273606;
+Received: from 192.168.220.129(mailfrom:michael@allwinnertech.com fp:SMTPD_---.VGP97NC_1699273606)
+          by smtp.aliyun-inc.com;
+          Mon, 06 Nov 2023 20:26:48 +0800
+Message-ID: <aa657a1d-a25d-21a8-4093-ec8fbe298ca2@allwinnertech.com>
+Date:   Mon, 6 Nov 2023 20:26:45 +0800
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: core: sdio: hold retuning if sdio in 1-bit mode
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.0
+Subject: Re: [PATCH] mmc: core: Add new flag to force hardware reset
 Content-Language: en-US
-To:     Bough Chen <haibo.chen@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "hkallweit1@gmail.com" <hkallweit1@gmail.com>
-References: <20230830093922.3095850-1-haibo.chen@nxp.com>
- <CAPDyKFpTP-r-eg2L1BoAG5ia2N2640VR2s2Vtbemyyu4MuKS=w@mail.gmail.com>
- <DB7PR04MB4010F86F40CA1E8E0B900D9390DDA@DB7PR04MB4010.eurprd04.prod.outlook.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <DB7PR04MB4010F86F40CA1E8E0B900D9390DDA@DB7PR04MB4010.eurprd04.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenchao Chen <wenchao.chen666@gmail.com>
+Cc:     adrian.hunter@intel.com, jinpu.wang@ionos.com,
+        victor.shih@genesyslogic.com.tw, avri.altman@wdc.com,
+        asuk4.q@gmail.com, f.fainelli@gmail.com, beanhuo@micron.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Sarthak Garg <quic_sartgarg@quicinc.com>
+References: <20230914000348.25790-1-michael@allwinnertech.com>
+ <CA+Da2qzr0SBu-kUtFTnBqT+OObFOSTFgmU30L3B-Rjv3rYbGKw@mail.gmail.com>
+ <CAPDyKFpHw+6vovHRWbhsDwre81U4Uu_X-Wy_viQCZp6nj=5Jkw@mail.gmail.com>
+From:   Michael Wu <michael@allwinnertech.com>
+In-Reply-To: <CAPDyKFpHw+6vovHRWbhsDwre81U4Uu_X-Wy_viQCZp6nj=5Jkw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/10/23 14:58, Bough Chen wrote:
->> -----Original Message-----
->> From: Ulf Hansson <ulf.hansson@linaro.org>
->> Sent: 2023年9月14日 21:03
->> To: Bough Chen <haibo.chen@nxp.com>
->> Cc: adrian.hunter@intel.com; linux-mmc@vger.kernel.org; dl-linux-imx
->> <linux-imx@nxp.com>; hkallweit1@gmail.com
->> Subject: Re: [PATCH] mmc: core: sdio: hold retuning if sdio in 1-bit mode
+On 9/25/2023 9:59 PM, Ulf Hansson wrote:
+> - trimmed cc-list, + Sartak Garg
+> 
+> On Thu, 14 Sept 2023 at 10:00, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
 >>
->> On Wed, 30 Aug 2023 at 11:35, <haibo.chen@nxp.com> wrote:
+>> On Thu, 14 Sept 2023 at 08:04, Michael Wu <michael@allwinnertech.com> wrote:
 >>>
->>> From: Haibo Chen <haibo.chen@nxp.com>
+>>> Entering the recovery system itself indicates a transmission error.
+>>> In this situation, we intend to execute the mmc_blk_reset function
+>>> to clear any anomalies that may be caused by errors. We have previously
+>>> discussed with several MMC device manufacturers, and they expressed
+>>> their desire for us to reset the device when errors occur to ensure
+>>> stable operation. We aim to make this code compatible with all devices
+>>> and ensure its stable performance, so we would like to add this patch
 >>>
->>> tuning only support in 4-bit mode or 8 bit mode, so in 1-bit mode,
->>> need to hold retuning.
->>>
->>> Find this issue when use manual tuning method on imx93. When system
->>> resume back, SDIO WIFI try to switch back to 4 bit mode, first will
->>> trigger retuning, and all tuning command failed.
->>>
->>> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+>>> Signed-off-by: Michael Wu <michael@allwinnertech.com>
 >>
->> Applied for fixes and by adding a fixes tag (Fixes: dfa13ebbe334
->> ("mmc: host: Add facility to support re-tuning")) and a stable tag, thanks!
+>> like: https://lore.kernel.org/linux-mmc/20220603051534.22672-1-quic_sartgarg@quicinc.com/
+> 
+> Looks like this series didn't make it. I was awaiting a rebase from
+> Sartak to apply it, but apparently something got in his way for a new
+> submission.
+> 
 >>
->> Kind regards
->> Uffe
->>
+>> You should enable it in the vendor host.
+> 
+> Yes! We don't want unused code in the core. We need a user of it too.
+> 
+> May I suggest that you pick up Sartak's patch for the core and thus
+> add another patch for the host driver you care about and then
+> re-submit it as a small series.
+> 
+> Kind regards
+> Uffe
+> 
 >>
 >>> ---
->>>  drivers/mmc/core/sdio.c | 8 +++++++-
->>>  1 file changed, 7 insertions(+), 1 deletion(-)
+>>>   drivers/mmc/core/block.c | 2 +-
+>>>   include/linux/mmc/host.h | 1 +
+>>>   2 files changed, 2 insertions(+), 1 deletion(-)
 >>>
->>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c index
->>> f64b9ac76a5c..5914516df2f7 100644
->>> --- a/drivers/mmc/core/sdio.c
->>> +++ b/drivers/mmc/core/sdio.c
->>> @@ -1089,8 +1089,14 @@ static int mmc_sdio_resume(struct mmc_host
->> *host)
->>>                 }
->>>                 err = mmc_sdio_reinit_card(host);
->>>         } else if (mmc_card_wake_sdio_irq(host)) {
->>> -               /* We may have switched to 1-bit mode during suspend */
->>> +               /*
->>> +                * We may have switched to 1-bit mode during suspend,
->>> +                * need to hold retuning, because tuning only supprt
->>> +                * 4-bit mode or 8 bit mode.
->>> +                */
->>> +               mmc_retune_hold_now(host);
->>>                 err = sdio_enable_4bit_bus(host->card);
-> 
-> Hi Ulf,
-> 
-> Here still contain one bug, if now in UHS-I mode, card clock maybe is 200MHz, without tuning, sdio_enable_4bit_bus() may return error if host can't sample the cmd response correctly.
-> 
-> So here, in suspend better to switch out the UHS-I mode first, and downgrade the card clock rate(<50MHz), then switch from 4bit to 1 bit mode.
-
-For eMMC and their host controllers, changing down modes has often required special support in host controller drivers, with the creation of a number of a callbacks.  UHS-I could be just as problematic.
-
-> Then in resume, send command to switch back to 4 bit mode can execute safely without tuning.
-> 
-> I just meet this issue when do system PM on i.MX6ULL.  usdhc in i.MX6ULL will totally lost power after system suspend, which means the previous tuning status will lost when resume back.
-> When send cmd to switch back to 4 bit mode during system resume, without tuning, usdhc can't sample the cmd response correctly under 200MHz, will trigger cmd error, cause the sdio resume fail.
-> 
-> Just as Adrian mentioned before, here add the mode switch maybe risky. Any concern? Or any way to pre-set the tuning config in host controller resume?
-
-Some drivers do save and restore the tuning value.  That is definitely worth investigating.
-
-Another possibility is to see whether it is possible to make a version of the switch to 4-bit that is resilient to CRC errors so it still works without tuning.
-
-> 
-> Best Regards
-> Haibo Chen
-> 
->>> +               mmc_retune_release(host);
->>>         }
+>>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>>> index b5b414a71e0b..29fbe0ddeadb 100644
+>>> --- a/drivers/mmc/core/block.c
+>>> +++ b/drivers/mmc/core/block.c
+>>> @@ -1503,7 +1503,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
+>>>          pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
 >>>
->>>         if (err)
+>>>          err = mmc_cqe_recovery(host);
+>>> -       if (err)
+>>> +       if (err || host->cqe_recovery_reset_always)
+>>>                  mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
+>>>          mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
+>>>
+>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>>> index 62a6847a3b6f..f578541a06b5 100644
+>>> --- a/include/linux/mmc/host.h
+>>> +++ b/include/linux/mmc/host.h
+>>> @@ -518,6 +518,7 @@ struct mmc_host {
+>>>          int                     cqe_qdepth;
+>>>          bool                    cqe_enabled;
+>>>          bool                    cqe_on;
+>>> +       bool                    cqe_recovery_reset_always;
+>>>
+>>>          /* Inline encryption support */
+>>>   #ifdef CONFIG_MMC_CRYPTO
 >>> --
->>> 2.34.1
+>>> 2.29.0
 >>>
+Dear Ulf,
+I have tested Sartak's patch and it is also able to resolve the issue we 
+are currently facing. Therefore, I would like to inquire about the 
+expected timeline for merging Sartak's patch.
 
+-- 
+Regards,
+Michael Wu
