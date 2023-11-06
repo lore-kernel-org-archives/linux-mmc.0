@@ -2,217 +2,190 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D61C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 07:38:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C083C0018A
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 08:56:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230509AbjKFHij (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Nov 2023 02:38:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44480 "EHLO
+        id S231322AbjKFI4K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 03:56:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231166AbjKFHii (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 02:38:38 -0500
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02E5093;
-        Sun,  5 Nov 2023 23:38:35 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1699256316; x=1730792316;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=/g2wdQpyUWgHrZj5inbiOvgajFAZhVKDHTzQSlWLPFM=;
-  b=RX1fjMurW7aaaIk4YuG0KxdcXkfe+BSITR8KgPlf2KoVOHs7PKFdgC3K
-   s/XtM8cXd36CBW5PQfCGhLn8pC+eFmVSFFCqu7uZ/JdCM9Mbt82MqClaI
-   aI/qL8gGeQA5Zuc6ZmuuoeE/+MW9BwWJDYOlRgoG38kaF6NL0ef/rK5IT
-   0+cdBf1u8PyHNHvC7Vv7zBi+/w1/67Sft1RVge0qW6Zbcu1SQWTDcHIrK
-   XltAC1cIzoWJ+UaaK53UfYN9NX7NmNboMBcMWm8XlKJDcnw7W2h/6tE2M
-   g+Q5w9VIrU+IzGczzUzz53V7oElg9NNZuT9RJueyVXoNTIWnP7uytZbmj
-   w==;
-X-CSE-ConnectionGUID: E4dhKfebSxCDfS1Onv830A==
-X-CSE-MsgGUID: szLCIuMLQnSdp3dGjuiz9A==
-X-IronPort-AV: E=Sophos;i="6.03,280,1694707200"; 
-   d="scan'208";a="1439081"
-Received: from mail-dm6nam11lp2169.outbound.protection.outlook.com (HELO NAM11-DM6-obe.outbound.protection.outlook.com) ([104.47.57.169])
-  by ob1.hgst.iphmx.com with ESMTP; 06 Nov 2023 15:38:33 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=WOMah5pAe0K+9CopEuZmFVMgI+l68F9xrFREykH5MhvrjKQcIAisfLVhfB3V/t196J84bzS9Vx1lm28ABl1Ga4F+97SmwwGRmGVhCYx5y1t+nCu0LwsvegSDpTZXMIqfiZNeKw5gpugyGcFopwgU3iQGP+TAnsyB9dXaepV/Snevy+oR94I9mLkTHJ57u8IsCimQ2bP8D52eJrHAOXxT4MbFvNtmBRq/RNqmYdSrFwkqS377mUWGH4UWOplzDu1QcwBWjPX5R4qRL2oOoo416f37V2QT+J5VhGryJbLepSAoO3sg4je4bcAYbv3YJA+mwemSu9mlkmscAAlmpnz3RQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=gaOk/Psau8KJuMTWKfy16TZGsxYdUPNYGhOyJgsDFJQ=;
- b=PoidfViAqQLsjBn+T26cwnWiaK2U5NxN9erFxaDmJWYiQ8YtL/atwYNLZr+X//tnbjnicdViJpGgYRkBBobf/4mYzpDHSovGvBZ/9/N0yAXQuxwjcR3hwV1ye3yAz5lx9xBGUqB9br0z0r/28TdBNhZisOwZQfUvzIKC+o4w881V2q3vBg3CElVehO11pQZg04gj+F4F3KStYCMr6HakJ9hWuRj0mVl361aIIhuiSPee/xFPoMotqWVkNYfOkNCBv17GF9iV8eCcOmE8Il2LBtCC28xRW8HT8zO28VWL/rst457fxHZFYr4FLou4R84xV6rFTRjzxWVX9PsCOKC+gA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+        with ESMTP id S231181AbjKFI4J (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 03:56:09 -0500
+Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A51C1DB;
+        Mon,  6 Nov 2023 00:56:06 -0800 (PST)
+Received: by mail-vs1-xe2f.google.com with SMTP id ada2fe7eead31-45d8c405696so625145137.3;
+        Mon, 06 Nov 2023 00:56:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=gaOk/Psau8KJuMTWKfy16TZGsxYdUPNYGhOyJgsDFJQ=;
- b=jWsRwWBPlyLNIWgKfTE50HBAJgp6ct5ZpmZngzXmAC0S25DkLo7WaFiU1ssU7NYwElfZ42IXkjb2FqPskwgUUO2EBu/SfI/mP9Kp2vI1BVxQemwOI7l4NlHgpxuxFBNBbqR6oYtLiHhSECqzKv5QfWMWCH4+3y0IWslkRPo2GK0=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- BN8PR04MB6337.namprd04.prod.outlook.com (2603:10b6:408:dd::21) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6954.28; Mon, 6 Nov 2023 07:38:32 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::83bc:d5e1:c29:88dd]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::83bc:d5e1:c29:88dd%5]) with mapi id 15.20.6954.027; Mon, 6 Nov 2023
- 07:38:32 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        =?iso-8859-2?Q?Kornel_Dul=EAba?= <korneld@chromium.org>,
-        Radoslaw Biernacki <biernacki@google.com>,
-        Gwendal Grignou <gwendal@chromium.org>,
-        Asutosh Das <quic_asutoshd@quicinc.com>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Bhavya Kapoor <b-kapoor@ti.com>,
-        Kamal Dasu <kamal.dasu@broadcom.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Aniruddha Tvs Rao <anrao@nvidia.com>,
-        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH V2 5/6] mmc: cqhci: Warn of halt or task clear failure
-Thread-Topic: [PATCH V2 5/6] mmc: cqhci: Warn of halt or task clear failure
-Thread-Index: AQHaDjLZw7S/sDZV6UOnOsoxT8d19LBs6+yw
-Date:   Mon, 6 Nov 2023 07:38:32 +0000
-Message-ID: <DM6PR04MB6575B4B1FD9565A3DC5B7DF1FCAAA@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20231103084720.6886-1-adrian.hunter@intel.com>
- <20231103084720.6886-6-adrian.hunter@intel.com>
-In-Reply-To: <20231103084720.6886-6-adrian.hunter@intel.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|BN8PR04MB6337:EE_
-x-ms-office365-filtering-correlation-id: ebce004e-c559-4ba3-93d6-08dbde9b6085
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: ETFjBhE7Ai7Xn4lK9uuibkw2BBZQca9OJF76qMbPnlCLArCymKEx1MD4AywE4usVjO7FocJ7IB8TSflpWlU4SvE3vswoyEZv3L0JWILAmyPt54AVdnvW5nZ7GoCosHe9yPz6bX13ClXtPrt1YNCKFFDq/4zQzIdsg14yhyNQmdS7/GLCyJjaK20CZz2/uev2TOCHB6wMD5HYxE7PArvXXep7KJK+bP9zXfca1BfUB+5JXGtnbrRpXgQSd3ON9JwmeCOQgZhQr2DVmJ+PnPFlcSrephlpzEQg+ZzoCMiWFBO5MLz/yPjraf8eVQlcOp4f+iT9ocwcG88fcAV4F2goeN5q4/ihcjGcABIN4oYOjoyZzGq++E6HFPTN6aV5h/t/DuoY23TXBqVfkh0rNf7zal4Qf1r67DNP9bATwKLLbEuR24tz83SFMsThEOdJv4TtnyCyTcrR9HmnbzpyCVxZgDbjJfTGHbNyELjbKCG5MLT/EAs8geYodsQpJEFseoYixa1LD8CTyVIq2wTFrvLA3Di1Q3nxHtdZ815Io18AOcd5KdZV5KbDfizHRKlrZ8olwSBTnHhl2JMy1k62FxUxRdxbG3zFQHd5reMLeKJlw1pM69Xa9r7VK1D+j6EzbkgWC5hRozP+93LQxwiNxNAtoUpR9QXJDwYzHXYFq5+uwdg=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(136003)(396003)(376002)(366004)(346002)(39860400002)(230273577357003)(230173577357003)(230922051799003)(186009)(64100799003)(1800799009)(451199024)(4326008)(8676002)(8936002)(41300700001)(2906002)(38100700002)(5660300002)(55016003)(66556008)(9686003)(33656002)(316002)(54906003)(64756008)(66476007)(66446008)(86362001)(7416002)(52536014)(110136005)(76116006)(66946007)(83380400001)(26005)(82960400001)(38070700009)(122000001)(6506007)(478600001)(71200400001)(7696005);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?iso-8859-2?Q?h656EVXlZG8skE1u4qaadJ3+/Q63J9bFngyzur1sUGJ45v7yW+4PHInbBB?=
- =?iso-8859-2?Q?5Rj39/Vq0Ls6azjwqx+ltM9civXRPfLYPh+wKkKXjDk+z0yTtivR/DzUA/?=
- =?iso-8859-2?Q?FgjQ+PrqnZeJLTtFB8D3YDs/HoSTrDf5t2R50wbaHNran/S+RdB9eHHZTk?=
- =?iso-8859-2?Q?Il5puvG9bAavEZcWRykynqFL7O17OrpFEig7H74rMWV5CxtWWPH5zFJMGN?=
- =?iso-8859-2?Q?1X3QSibHRgCX+RvnIoRvIZvLXHx9kSerLsc/ZjSl1MesurttFtMesguRSD?=
- =?iso-8859-2?Q?zWAf7lFOpmbJCvAC0hTR/m5MG/omAUR5Xqocm9Uma2+xYkxY/wxd/vAQON?=
- =?iso-8859-2?Q?DbidDINnxzGWw/SzJFwRTEVPavzAnTcwDUzBZNRO/KLnMUrfKyJ0/GFJP3?=
- =?iso-8859-2?Q?xCCcklHVdIkccVk7SRfrfw9s2hWaHWt8CGJRzpH/j4lVDihoAOMs8RbFY3?=
- =?iso-8859-2?Q?//nZnD8A97eMaurSNb/CummH6TmPs+zaxHRurCV3TTjXXSZezl3vqK4biI?=
- =?iso-8859-2?Q?82z6wJ0O2uolg1AVyPKp93raflVeiMdaE1F2FI4ccJYXShSyegOBvReU/1?=
- =?iso-8859-2?Q?BH79L7Ob7VRmge2YcBB9xuiqsSh3KwR1NmCyUrtDR+R9G+AXj5y1FLqEb5?=
- =?iso-8859-2?Q?LkFn3TGwkmFxy5XgYjhEoDCUceNAt6L63CtedNMOwEPnBglnxj8kFO8fXY?=
- =?iso-8859-2?Q?S83cSXjD0H+yznq/IEGpBgFacDGEMHY8SwX+nB6v2uTiOvS7xtXiZjQLBd?=
- =?iso-8859-2?Q?pb164gt3awWxKR43zhAlxbaOt7qMV0xycf8MxdB5kjGPn19xkxmeOdiwc3?=
- =?iso-8859-2?Q?UP0JVM1nTFo1ouODJg2vFoDvHeFKzbCLCJPkqw8AwDtxdOY5r2YR5iUM2V?=
- =?iso-8859-2?Q?UsP3aUFWf+eCg6uhsMDrOL41zM3f3dGV/99S8bSyxqQNk42oN6qBjKSG+D?=
- =?iso-8859-2?Q?eR89xpBs1RvrDWBUQIRH8E2gWHeTEUwiKwLe+AL4cwGuCPMPS6zG6ujJLz?=
- =?iso-8859-2?Q?gx2EXXhK8345xdV6VgSzn+bMJByXEL9KwTmsW4o6c2zRp3r9Z1i8ufGBCm?=
- =?iso-8859-2?Q?L3YepSJz4/9cVQZ/pj52RkquxkNVZyD0OXWjlo80jsXBjuLKZAH1yHYjIy?=
- =?iso-8859-2?Q?h4eiAPr0IUlkV/UvPRu/6Ps39nR0iX8N4wc6xYvRd1K0+cyCf2A5ZqHBVn?=
- =?iso-8859-2?Q?0eFpUZdLnZ3oeNeNMPvHHLUi6W1hFlf7SWjmbT+u3LAYMiM2XJp4pvAqt1?=
- =?iso-8859-2?Q?oSSn6W9UjUO2++ECH/kDYbgdrBYj59eA10BIpLUyo9KIFrhqQ3+gdVRzJ/?=
- =?iso-8859-2?Q?Rsz+EvsZFapUeVApTtI6B2CmeKKKf7J+MbfNHV/ixlHc7eJZNJYOumpbUo?=
- =?iso-8859-2?Q?cwK60sjxcLPPtvGho3UL9rJlyhdAcn6YDOrk3NKiDcWYpelB9nyQ7yOsJO?=
- =?iso-8859-2?Q?W57/2pFOzgKrzfiCsJZnOKFcHFVfQnGDOZJojeHTHMvBkn7EYOd/qGbUP5?=
- =?iso-8859-2?Q?I7am0TNA2AIHY1aYgn8jk4QL5rOl92JxdTTHHWo+3FyAVtp1HbVN8L7TIN?=
- =?iso-8859-2?Q?lgAbG3ULHBLeNl3xYnYmoIUzRuyQsr2/+wOkNlvV2Nub0CzWy1On3u1Ikh?=
- =?iso-8859-2?Q?iK/m0NDDj3McVoWznKNkHENiSI+IdslxS3?=
-Content-Type: text/plain; charset="iso-8859-2"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20230601; t=1699260965; x=1699865765; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+FnA2dK5iXOLJoNUoBlFMyMH+VRerj2a3nUAndixNdc=;
+        b=FTBaHCQMS32KGLMLFkQEKS3dAp31+fBpyccwmhWwxuZM4FEZCL0M7wgdaYiDptgKjP
+         +nNvx5Gu2v2VCGPqrCBUUuuiilyR5G7OFfnchfcGCwWsNw1gzlTi9Ya+tYUJoldxRh8I
+         rsHGdsvLcSiMDm3KI/goXtncEWank31oRznyK4WOZrPjuzeXq9G5Um5bziAVgf5hsszr
+         5Mgw/DDSLS7yQlYorgdNmVhbZkAKnl7SO7teve+QUI53rztvYwb6NLQeuB4T203vJHOH
+         TjgLEJWarp6lX9R2HR5Of8R6lZoG2RVsqFyXWU8tnbV7YNRjzffWnaunccDdDHiSdDdR
+         X0rg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1699260965; x=1699865765;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+FnA2dK5iXOLJoNUoBlFMyMH+VRerj2a3nUAndixNdc=;
+        b=llwQfIizmIkPyOWgziDgVvwBf2+4pXEpKNq7viUFIRvWM1bZpUpXXv/ar8PrOVw+68
+         EmAM8P5R7/x6hQAqysYzQeK7JDWq5NVDW2VucuuRhwUieeX0NtnRcMYhDpevkT091zTZ
+         T5TMqMCUcKwWEOWZyrKBdb8j0i4/GXkjwKDr1AQ7Wrh+ibYVj/QjXG9fnpZz778voSjj
+         g30NzJq4pRoKuS4KXtbJb59gwShecGOpMqlNROkQXzBSQUnw4OBnjEprXGJm1121CV70
+         zmw3AzGL5Q5e5xa4PjVOZkvdybbZKRH0/qgNDde0dwkHXWo+UrNd5KXHx48GEPciWGWg
+         uSPg==
+X-Gm-Message-State: AOJu0Yz6vRrh2MpWY5VWi3AZHqgWg/fRA0JG/ITTFtT3IyW2Luvx72xX
+        ugGakuWV09HLlxBdQX3yChOfgd744wFZYXeTcEg=
+X-Google-Smtp-Source: AGHT+IH9SPCQhzFMng7GRyRX8tLnYkjisz8wyL6iUDjopfYuO/7NX9MHdWFqZadleaKU3uituxsNHPbxJ85ClM3Jl5o=
+X-Received: by 2002:a67:e08d:0:b0:45f:398:aba5 with SMTP id
+ f13-20020a67e08d000000b0045f0398aba5mr2690748vsl.32.1699260965375; Mon, 06
+ Nov 2023 00:56:05 -0800 (PST)
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: =?iso-8859-2?Q?xtwumyvQoiMkwn0bhz6KnTQpiJQokUa3fauICVtNa/gdetmOTUFneSVGLx?=
- =?iso-8859-2?Q?gWOeYcE7eoJD78ywILP+EF+2ijojbuYGDKQHJ23BopxwVA/11aShBHV4jb?=
- =?iso-8859-2?Q?t59FFVwRfmAVSsJUx9EQ+yWa+/n/ce0oHgpRB5bjJXTgYKyiPYKu0fvSNd?=
- =?iso-8859-2?Q?Oo5YmXYrMO7X0RWvhqlum+jScbZHqWiWmTRx63h1iaAYZc7qISorNXKOqK?=
- =?iso-8859-2?Q?5fcG3bJzAeNHMJ4uf66XINhwCbBFW9oZ8MHotUYijhBbBZwtLu3x2mtgLb?=
- =?iso-8859-2?Q?2FgUP8wsrSnHezI3X2PgD4GeuLo+1OhDVP0NsLGoCkI/0XcvfqflK1o56Y?=
- =?iso-8859-2?Q?yYqJsNacoZg9geOyk3T+R1NHftQ+zpn5ZDnNBjze+E3zf0e7E66ImoCP6B?=
- =?iso-8859-2?Q?xWlTz4fNIlG9a5RQrL682tpvsZmOEnq4hMcl1XVVMHseBLdhcHM+D2si+n?=
- =?iso-8859-2?Q?IZvMykhZz4zciopxpaslVYvAfiE7eXZmK+g9Sj+Gvk3wloJKWlqD6v49Qa?=
- =?iso-8859-2?Q?BbuY/ifhZI7PQdAO4Ss1Zg+VwnZQ/3YhXQe8Yoq/HfVskaEXYmrYxL+zAx?=
- =?iso-8859-2?Q?0RjxMc8u3c8x2RFfI9a8XqRk7qWPU495CyIcEiewrAV/ZE+t9JhnwcjsTB?=
- =?iso-8859-2?Q?cse6bSc091KnaYiFs7qvMl7ywONH0yr0+Sd47aMVJElRKd2cYQ9ik9rI92?=
- =?iso-8859-2?Q?YFMYkN+GOB58Xfuri/McyLMQCofIa6IQ2Bi7IOUxEo+mTD6RWVTfphcilP?=
- =?iso-8859-2?Q?dpH5UXhRCbFP59dxnfZKHJkqNVlHxDI6V5bUA9hzb2bAG8x/2KIBrNDwQ+?=
- =?iso-8859-2?Q?WhZMDAH4KlBfcQAdQqaKsrFuSMaFtYX85+hmgpcSaY7KoCt9Hm4ZIyEwgP?=
- =?iso-8859-2?Q?ob7d05bQ/BUQwxV5QYmGlsbD9Hk71vsFVXVoGtg17+CGLxc4DJhl5/dPvo?=
- =?iso-8859-2?Q?uTSLt33b4BAZbOtwovX4RsAgskASfaEoQPVUATy7dd+LzUOjFL8ssZdxjn?=
- =?iso-8859-2?Q?6Q36ECfn+gmEm7HqfiYXhMPE/V7m9ih0JczeUB4YpuV82cHoOHvtv2sx5I?=
- =?iso-8859-2?Q?jTYqrpg03hNR/tvv2+IYpll7xBZkYLYoeCMi1t4+a3brH3iPapfW1T01Vm?=
- =?iso-8859-2?Q?IY/MjD6zoFxmLOcx8Y23qL+ksG8AeSCri0Rlusn5rcuK5bSJzKTIQydTkG?=
- =?iso-8859-2?Q?2VQ0T/M0slo2HI8sZC4cqZwIWupfO13Sv98=3D?=
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ebce004e-c559-4ba3-93d6-08dbde9b6085
-X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Nov 2023 07:38:32.3221
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 6RfFGgDKX1uNqaZT40saLyMiyiTIQasRPg9fGiV1Qmx90qjKqGmnzNseW9FxGxUM8dn8hVF/kWn6ccse9GmG8g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN8PR04MB6337
+References: <20231018103337.34622-1-victorshihgli@gmail.com>
+ <CAK00qKBH5P3naXUHhbQ3zgMzQrUxy=v8r84a8RCcdNORVoRPkA@mail.gmail.com> <CAPDyKFob14Tc4c0UxRfj2qbXJkDn7NRwNwRuYQ6m9t3c27Kp=Q@mail.gmail.com>
+In-Reply-To: <CAPDyKFob14Tc4c0UxRfj2qbXJkDn7NRwNwRuYQ6m9t3c27Kp=Q@mail.gmail.com>
+From:   Victor Shih <victorshihgli@gmail.com>
+Date:   Mon, 6 Nov 2023 16:55:53 +0800
+Message-ID: <CAK00qKDvdDBJ9zrBh=9anCArOZUis8-kE5bRx=owjD_pe4ZDCg@mail.gmail.com>
+Subject: Re: [PATCH V2] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
+ timeout of AER
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        SeanHY.Chen@genesyslogic.com.tw, kai.heng.feng@canonical.com,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> A correctly operating controller should successfully halt and clear tasks=
-.
-> Failure may result in errors elsewhere, so promote messages from debug to
-> warnings.
->=20
-> Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled
-> host")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Avri Altman <avri.altman@wdc.com>
+On Fri, Nov 3, 2023 at 6:28=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
+>
+> On Fri, 3 Nov 2023 at 11:13, Victor Shih <victorshihgli@gmail.com> wrote:
+> >
+> > Hi, Ulf
+> >
+> > Please help review this patch and give me some advice.
+> > I look forward to your reply.
+> >
+> > Thanks, Victor Shih
+>
+> I don't have in-depth knowledge of how to properly solve this for pci,
+> so I am relying on Kai and others to help review.
+>
 
-> ---
->  drivers/mmc/host/cqhci-core.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.=
-c
-> index 15f5a069af1f..948799a0980c 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -942,8 +942,8 @@ static bool cqhci_clear_all_tasks(struct mmc_host
-> *mmc, unsigned int timeout)
->         ret =3D cqhci_tasks_cleared(cq_host);
->=20
->         if (!ret)
-> -               pr_debug("%s: cqhci: Failed to clear tasks\n",
-> -                        mmc_hostname(mmc));
-> +               pr_warn("%s: cqhci: Failed to clear tasks\n",
-> +                       mmc_hostname(mmc));
->=20
->         return ret;
->  }
-> @@ -976,7 +976,7 @@ static bool cqhci_halt(struct mmc_host *mmc,
-> unsigned int timeout)
->         ret =3D cqhci_halted(cq_host);
->=20
->         if (!ret)
-> -               pr_debug("%s: cqhci: Failed to halt\n", mmc_hostname(mmc)=
+Hi, Ulf
+
+This is a standalone patch, this patch only solves the warning
+messages that will
+ often appear in the system log when the system accesses the GL975x PCI con=
+fig.
+
+As I discussed with Kai-Heng at the end of
+[V1] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer timeout of AER,
+Kai-Heng will be submitting a patch for the PCIe layer to solve the
+situation he encountered.
+I will also help Kai-Heng test when he submits the patch.
+
+Thanks, Victor Shih
+
+> >
+> > On Wed, Oct 18, 2023 at 6:33=E2=80=AFPM Victor Shih <victorshihgli@gmai=
+l.com> wrote:
+> > >
+> > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > >
+> > > Due to a flaw in the hardware design, the GL975x replay timer frequen=
+tly
+> > > times out when ASPM is enabled. As a result, the warning messages tha=
+t will
+> > > often appear in the system log when the system accesses the GL975x
+> > > PCI config. Therefore, the replay timer timeout must be masked.
+> > >
+> > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+>
+> The code looks good to me, but let's allow Kai to get some time to
+> come back to this before I apply it.
+>
+> Kind regards
+> Uffe
+>
+> > > ---
+> > >
+> > > Updates in V2:
+> > >  - Modify the commit message.
+> > >
+> > > ---
+> > >
+> > >  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
+> > >  1 file changed, 16 insertions(+)
+> > >
+> > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhc=
+i-pci-gli.c
+> > > index d83261e857a5..d8a991b349a8 100644
+> > > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > > @@ -28,6 +28,9 @@
+> > >  #define PCI_GLI_9750_PM_CTRL   0xFC
+> > >  #define   PCI_GLI_9750_PM_STATE          GENMASK(1, 0)
+> > >
+> > > +#define PCI_GLI_9750_CORRERR_MASK                              0x214
+> > > +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT         BIT=
+(12)
+> > > +
+> > >  #define SDHCI_GLI_9750_CFG2          0x848
+> > >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+> > >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+> > > @@ -152,6 +155,9 @@
+> > >  #define PCI_GLI_9755_PM_CTRL     0xFC
+> > >  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> > >
+> > > +#define PCI_GLI_9755_CORRERR_MASK                              0x214
+> > > +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT         BIT=
+(12)
+> > > +
+> > >  #define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
+> > >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT(8)
+> > >
+> > > @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_host =
+*host)
+> > >         value &=3D ~PCI_GLI_9750_PM_STATE;
+> > >         pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
+> > >
+> > > +       /* mask the replay timer timeout of AER */
+> > > +       pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &value=
 );
-> +               pr_warn("%s: cqhci: Failed to halt\n",
-> + mmc_hostname(mmc));
->=20
->         return ret;
->  }
-> --
-> 2.34.1
-
+> > > +       value |=3D PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
+> > > +       pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, value=
+);
+> > > +
+> > >         gl9750_wt_off(host);
+> > >  }
+> > >
+> > > @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_pci_s=
+lot *slot)
+> > >         value &=3D ~PCI_GLI_9755_PM_STATE;
+> > >         pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+> > >
+> > > +       /* mask the replay timer timeout of AER */
+> > > +       pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &value=
+);
+> > > +       value |=3D PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
+> > > +       pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, value=
+);
+> > > +
+> > >         gl9755_wt_off(pdev);
+> > >  }
+> > >
+> > > --
+> > > 2.25.1
+> > >
