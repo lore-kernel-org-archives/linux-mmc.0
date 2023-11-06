@@ -2,50 +2,188 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55C60C4167D
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 14:23:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5745FC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 14:26:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231593AbjKFOXk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Nov 2023 09:23:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49356 "EHLO
+        id S231799AbjKFO0Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 09:26:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231573AbjKFOXj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 09:23:39 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2713FDF
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Nov 2023 06:23:37 -0800 (PST)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 861F7C43395;
-        Mon,  6 Nov 2023 14:23:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1699280616;
-        bh=w7dHNHjVy1TLGhtSBU8lxIvvnDGwwAXNk5o9pZ5Er9k=;
-        h=Date:From:To:Subject:From;
-        b=y718qBrRvpAFGy67Shy8zZqWBGFXEokB/Od9iKKgk0H2OLfHB5AALN3hZp8zdD9wW
-         ixNL3OxGLbiBsSRUEKgM+XdsyPSLvjLFGtWnVE36tMxK3jE9LLBGLe3v1mPDYRAPMo
-         64uUQSvvEOaz43MxSR9LktzQSLVlD71di5fVZOw0=
-Date:   Mon, 6 Nov 2023 09:23:35 -0500
-From:   Konstantin Ryabitsev <konstantin@linuxfoundation.org>
-To:     linux-mmc@vger.kernel.org
-Subject: PSA: migrating linux-mmc to new vger infrastructure
-Message-ID: <20231106-tricky-dachshund-of-fame-7a9414@nitro>
+        with ESMTP id S231803AbjKFO0N (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 09:26:13 -0500
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0DE5191
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Nov 2023 06:26:09 -0800 (PST)
+Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-da7ea62e76cso3135198276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Nov 2023 06:26:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1699280768; x=1699885568; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=clebCQm1+LBapUz3ORAAhgjPSPUNZu8n0M4MtoluA3A=;
+        b=izHuTFs6nSpiQocOEUbAdQQKi4oY4J15jeSfl0MlKsXZYQKc3UrqoKx79JMsTyRgXx
+         TOConcjbYjTFxxpn7hf+ldOklrF/hQoWLvvO+m58dP5TFGHPIMU0M75iANxJxJ7qRePf
+         tGvJEcqQwO5LFClfAyMHBmD33Fe7mJDS/8xpFKqW2YeqIWaOq2ThySgTeCy+ws9Ld6LC
+         kmC7S7vpxwQi2Lro8i5wxVi7IcGeXuJjOuXf7dQRelL2M5L5kff3g3RyuUCFyc9zZ0/6
+         16l7YpiwykFe+maFkBB4c8N+GtrdazjpWEVtyApx5ORvZazBriQOP4vUihCn/CE9JqkR
+         nppQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1699280768; x=1699885568;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=clebCQm1+LBapUz3ORAAhgjPSPUNZu8n0M4MtoluA3A=;
+        b=W7iJsp7L0rWV2nYoirgodrRGyQL4d2n+Vfd0x7tFhjeh/2IZXFIbaagmG4E+OBlbuE
+         pgX1Xm8X5yLO1k0o/sCJAP3/lrDv9owqCRwfxJgJb2lY351O/YyjEf7FMfn10ZPGC9h0
+         4RYdlmEGtbQIs+RGIDjh04Y+Cq3ezcYDzfwXGguu1Zf4V7ZC7AP8Nqela3gkIg6R2IXp
+         HgD9If4S1cutPW3GFd0bvI+5rtf5NAF3ye2erfp5tKmVOgzJHAFlu1VDrk7Ln0wQz7Br
+         wh3u/ch/p45bJIMC/rNak1Xo02IqkcjTnes7vkyNtg8pur229hU/GyySz3qbyT2s//UR
+         2HgA==
+X-Gm-Message-State: AOJu0Yw4/383Rsd79PHn/x7LH+FoV43HJuqbBqdVojveT4RfZyNainq/
+        4Om3QFdb79pdlQuRNQ9Z1q/baes/QGIp6SqseKSxSA==
+X-Google-Smtp-Source: AGHT+IF5BH9O6Ws3yKpEkBHytetsUIpUzn9flJjQzqMC5RNQD4AQcnOdSNKrmQ5eAT0CoDKg5+dINR8k2R6zA+yCKi4=
+X-Received: by 2002:a25:db11:0:b0:da0:4c63:f648 with SMTP id
+ g17-20020a25db11000000b00da04c63f648mr28557922ybf.6.1699280768250; Mon, 06
+ Nov 2023 06:26:08 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+References: <20231106104018.29179-1-wenchao.chen@unisoc.com>
+In-Reply-To: <20231106104018.29179-1-wenchao.chen@unisoc.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 6 Nov 2023 15:25:32 +0100
+Message-ID: <CAPDyKFrJ=hGbeQzAHwk1KA_Wn=W7oVFy56V6kCisb_BkXRq7ew@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-sprd: Fix the clock switch
+To:     Wenchao Chen <wenchao.chen@unisoc.com>
+Cc:     zhang.lyra@gmail.com, orsonzhai@gmail.com,
+        baolin.wang@linux.alibaba.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, wenchao.chen666@gmail.com,
+        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Good day!
+On Mon, 6 Nov 2023 at 11:40, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+>
+> Some SOCs have a "1x_enable" clock that needs to be turned on and off
+> in probe, remove and runtime pm.
 
-I plan to migrate the linux-mmc@vger.kernel.org list to the new infrastructure
-this week. We're still doing it list-by-list to make sure that we don't run
-into scaling issues with the new infra.
+Well, first of all, what is a "1x_enable" clock and why do we need it?
 
-The migration will be performed live and should not require any downtime.
-There will be no changes to how anyone interacts with the list after
-migration is completed, so no action is required on anyone's part.
+Moreover, the clock needs to be described as a part of the DT bindings
+for the sdhci-sprd mmc controller. That said, it looks like the
+binding for the sdhci-sprd controller needs to be converted to the
+yaml format first, can you please have a look at that too?
 
-Please let me know if you have any concerns.
+>
+> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
+> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Best wishes,
--K
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-sprd.c | 29 +++++++++++++++++++++++++----
+>  1 file changed, 25 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index 6b84ba27e6ab..3367f924dc5b 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -83,6 +83,7 @@ struct sdhci_sprd_host {
+>         u32 version;
+>         struct clk *clk_sdio;
+>         struct clk *clk_enable;
+> +       struct clk *clk_1x_enable;
+>         struct clk *clk_2x_enable;
+>         struct pinctrl *pinctrl;
+>         struct pinctrl_state *pins_uhs;
+> @@ -784,6 +785,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>         }
+>         sprd_host->clk_enable = clk;
+>
+> +       clk = devm_clk_get(&pdev->dev, "1x_enable");
+> +       if (!IS_ERR(clk))
+> +               sprd_host->clk_1x_enable = clk;
+> +
+>         clk = devm_clk_get(&pdev->dev, "2x_enable");
+>         if (!IS_ERR(clk))
+>                 sprd_host->clk_2x_enable = clk;
+> @@ -793,12 +798,16 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>                 goto pltfm_free;
+>
+>         ret = clk_prepare_enable(sprd_host->clk_enable);
+> +       if (ret)
+> +               goto clk_sdio_disable;
+> +
+> +       ret = clk_prepare_enable(sprd_host->clk_1x_enable);
+>         if (ret)
+>                 goto clk_disable;
+>
+>         ret = clk_prepare_enable(sprd_host->clk_2x_enable);
+>         if (ret)
+> -               goto clk_disable2;
+> +               goto clk_1x_disable;
+>
+>         sdhci_sprd_init_config(host);
+>         host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
+> @@ -858,10 +867,13 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>
+>         clk_disable_unprepare(sprd_host->clk_2x_enable);
+>
+> -clk_disable2:
+> -       clk_disable_unprepare(sprd_host->clk_enable);
+> +clk_1x_disable:
+> +       clk_disable_unprepare(sprd_host->clk_1x_enable);
+>
+>  clk_disable:
+> +       clk_disable_unprepare(sprd_host->clk_enable);
+> +
+> +clk_sdio_disable:
+>         clk_disable_unprepare(sprd_host->clk_sdio);
+>
+>  pltfm_free:
+> @@ -878,6 +890,7 @@ static void sdhci_sprd_remove(struct platform_device *pdev)
+>
+>         clk_disable_unprepare(sprd_host->clk_sdio);
+>         clk_disable_unprepare(sprd_host->clk_enable);
+> +       clk_disable_unprepare(sprd_host->clk_1x_enable);
+>         clk_disable_unprepare(sprd_host->clk_2x_enable);
+>
+>         sdhci_pltfm_free(pdev);
+> @@ -900,6 +913,7 @@ static int sdhci_sprd_runtime_suspend(struct device *dev)
+>
+>         clk_disable_unprepare(sprd_host->clk_sdio);
+>         clk_disable_unprepare(sprd_host->clk_enable);
+> +       clk_disable_unprepare(sprd_host->clk_1x_enable);
+>         clk_disable_unprepare(sprd_host->clk_2x_enable);
+>
+>         return 0;
+> @@ -915,10 +929,14 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
+>         if (ret)
+>                 return ret;
+>
+> -       ret = clk_prepare_enable(sprd_host->clk_enable);
+> +       ret = clk_prepare_enable(sprd_host->clk_1x_enable);
+>         if (ret)
+>                 goto clk_2x_disable;
+>
+> +       ret = clk_prepare_enable(sprd_host->clk_enable);
+> +       if (ret)
+> +               goto clk_1x_disable;
+> +
+>         ret = clk_prepare_enable(sprd_host->clk_sdio);
+>         if (ret)
+>                 goto clk_disable;
+> @@ -931,6 +949,9 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
+>  clk_disable:
+>         clk_disable_unprepare(sprd_host->clk_enable);
+>
+> +clk_1x_disable:
+> +       clk_disable_unprepare(sprd_host->clk_1x_enable);
+> +
+>  clk_2x_disable:
+>         clk_disable_unprepare(sprd_host->clk_2x_enable);
+>
+> --
+> 2.17.1
+>
