@@ -2,201 +2,128 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49BF7C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 14:53:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90432C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 18:32:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231332AbjKFOxf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Nov 2023 09:53:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34744 "EHLO
+        id S232896AbjKFScs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 13:32:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230405AbjKFOxe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 09:53:34 -0500
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05E1BB6
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Nov 2023 06:53:32 -0800 (PST)
+        with ESMTP id S232893AbjKFScj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 13:32:39 -0500
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBCF210C1;
+        Mon,  6 Nov 2023 10:32:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1699282412; x=1730818412;
+  t=1699295543; x=1730831543;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=pfk4eFeRtF9zoWcqHKRJ6q46xvsN0e0PE5IXuKZotXI=;
-  b=jYC0Y7IFfHzpNrPKaZxptXQh+Sg83avcy3yjioQvN95pLBPQ7bhOry6/
-   WOjpHDNt3kcfXMAUdcI8G00HCjwGX6qyIlEE3e5atdIgzfdbKs/vl+QLx
-   EgM5+O83e7NRFgd62nBFjY3t9TqNaWV1Cbjx4tuplMQI3Gd+mS17AM0Yn
-   kMMzGJUdSzLti2hyP06lLAfhZBQy3Y93y6vl/o1N2JQ4lmaZjptZHfmcG
-   z1EaqyS1V5bHmlLg1EUm8D3DOXuuPHPK937nallRbjD6QOciN/oTbgfI2
-   BJIVh9FSEyb6Cz5SHfMBdkc5dTf77T2dTjKbp+bm1Mj6ixI/G7CkuNRv6
+  bh=xB9O68mNc90W92yqVxu/OruoUG4dfgmMYk3mdXUmL80=;
+  b=j28deEqaUYbjA4zBGUrw2NMsUgjrbtDwqkw0qHctlXqyfbJQG9A9cFhO
+   nE8xEKcVgurEDDeeuz+/efDrYAaiDCFYbZKARc+gvgDD8hPYIJTVj9oGO
+   Uctc1rmQp1pKA06TMeDu4q90D480RZ1CNH49UcmszBKxpi67auP/uHcoM
+   j/oxYJXnGnEsKGg5djSKyQYEinUFFyrRjMoB8um8ZG4m1kyPKs4l2Di//
+   8FJBUZ0ADIAfq+DXcuWTuKYLF8zKjMDK3JTkri020AbHKXhPx9gLo/h2Q
+   0ckplijPE8gE5ZcPR2V4s47DeawmInSTm0QDeZ1sdGTB38Nih6awVxDmk
    A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10886"; a="475523011"
-X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
-   d="scan'208";a="475523011"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 06:53:30 -0800
+X-IronPort-AV: E=McAfee;i="6600,9927,10886"; a="2333943"
+X-IronPort-AV: E=Sophos;i="6.03,282,1694761200"; 
+   d="scan'208";a="2333943"
+Received: from orviesa001.jf.intel.com ([10.64.159.141])
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 10:32:05 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10886"; a="797327255"
-X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
-   d="scan'208";a="797327255"
+X-IronPort-AV: E=Sophos;i="6.03,282,1694761200"; 
+   d="scan'208";a="10159225"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.215.231])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 06:53:28 -0800
-Message-ID: <557eb489-3e1d-4cbd-b62d-d3046870a4cc@intel.com>
-Date:   Mon, 6 Nov 2023 16:53:26 +0200
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 10:32:00 -0800
+Message-ID: <ef8032ea-4cc8-411e-b2c5-07353cabbe9e@intel.com>
+Date:   Mon, 6 Nov 2023 20:31:56 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: core: Use mrq.sbc in close-ended ffu
+Subject: Re: [PATCH v4 2/7] mmc: sdhci: add __sdhci_execute_tuning() to header
 Content-Language: en-US
-To:     Avri Altman <avri.altman@wdc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Daniil Lunev <dlunev@google.com>,
-        Asutosh Das <quic_asutoshd@quicinc.com>
-References: <20231030090906.1897035-1-avri.altman@wdc.com>
+To:     Drew Fustini <dfustini@baylibre.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor@kernel.org>
+Cc:     Robert Nelson <robertcnelson@beagleboard.org>,
+        Jason Kridner <jkridner@beagleboard.org>,
+        Xi Ruoyao <xry111@xry111.site>, Han Gao <gaohan@iscas.ac.cn>,
+        Icenowy Zheng <uwu@icenowy.me>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org
+References: <20231101-th1520-mmc-v4-0-86e0216b5994@baylibre.com>
+ <20231101-th1520-mmc-v4-2-86e0216b5994@baylibre.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20231030090906.1897035-1-avri.altman@wdc.com>
+In-Reply-To: <20231101-th1520-mmc-v4-2-86e0216b5994@baylibre.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/10/23 11:09, Avri Altman wrote:
-> Field Firmware Update (ffu) may use close-ended or open ended sequence.
-> Each such sequence is comprised of a write commands enclosed between 2
-> switch commands - to and from ffu mode. So for the close-ended case, it
-> will be: cmd6->cmd23-cmd25-cmd6.
+On 2/11/23 04:48, Drew Fustini wrote:
+> Expose __sdhci_execute_tuning() so that it can be called from the
+> mmc host controller drivers.
 > 
-> Some host controllers however, get confused when multi-block rw is sent
-> without sbc, and may generate auto-cmd12 which breaks the ffu sequence.
-> I encountered  this issue while testing fwupd (github.com/fwupd/fwupd)
-> on HP Chromebook x2, a qualcomm based QC-7c, code name - strongbad.
+> In the sdhci-of-dwcmshc driver, sdhci_dwcmshc_th1520_ops sets
+> platform_execute_tuning to th1520_execute_tuning(). That function has
+> to manipulate phy registers before tuning can be performed. To avoid
+> copying the code verbatim from __sdhci_execute_tuning() into
+> th1520_execute_tuning(), make it possible for __sdhci_execute_tuning()
+> to be called from sdhci-of-dwcmshc.
 > 
-> Instead of a quirk, or hooking the request function of the msm ops,
-> it would be better to fix the ioctl handling and make it use mrq.sbc
-> instead of issuing SET_BLOCK_COUNT separately.
-> 
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/core/block.c | 41 ++++++++++++++++++++++++++++++++++++++--
->  include/linux/mmc/mmc.h  |  1 +
->  2 files changed, 40 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  drivers/mmc/host/sdhci.h | 1 +
+>  2 files changed, 3 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 3a8f27c3e310..6d94617ef206 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -400,6 +400,10 @@ struct mmc_blk_ioc_data {
->  	struct mmc_ioc_cmd ic;
->  	unsigned char *buf;
->  	u64 buf_bytes;
-> +	unsigned int flags;
-> +#define MMC_BLK_IOC_DROP	BIT(0)	/* drop this mrq */
-> +#define MMC_BLK_IOC_SBC	BIT(1)	/* use mrq.sbc */
-> +
->  	struct mmc_rpmb_data *rpmb;
->  };
->  
-> @@ -479,6 +483,9 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->  	if (!card || !md || !idata)
->  		return -EINVAL;
->  
-> +	if (idata->flags & MMC_BLK_IOC_DROP)
-> +		return 0;
-> +
->  	/*
->  	 * The RPMB accesses comes in from the character device, so we
->  	 * need to target these explicitly. Else we just target the
-> @@ -532,14 +539,19 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->  			return err;
->  	}
->  
-> -	if (idata->rpmb) {
-> +	if (idata->rpmb || (idata->flags & MMC_BLK_IOC_SBC)) {
-> +		u32 sbc_arg = data.blocks;
-> +
->  		sbc.opcode = MMC_SET_BLOCK_COUNT;
->  		/*
->  		 * We don't do any blockcount validation because the max size
->  		 * may be increased by a future standard. We just copy the
->  		 * 'Reliable Write' bit here.
->  		 */
-> -		sbc.arg = data.blocks | (idata->ic.write_flag & BIT(31));
-> +		if (idata->rpmb)
-> +			sbc_arg |= (idata->ic.write_flag & BIT(31));
-
-What about supporting more generic use-cases with other information
-in the arg of CMD23 idata, such as reliable write etc?  Perhaps
-link the other idata and populate sbc opcode and arg from that.
-
-> +
-> +		sbc.arg = sbc_arg;
->  		sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
->  		mrq.sbc = &sbc;
-
-Also could copy the sbc response back to the "CMD23" idata
-after mmc_wait_for_req().
-
->  	}
-> @@ -1032,6 +1044,28 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
->  	md->reset_done &= ~type;
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ff41aa56564e..c79f73459915 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2841,7 +2841,7 @@ void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
 >  }
+>  EXPORT_SYMBOL_GPL(sdhci_send_tuning);
 >  
-> +/* close-ended ffu */
-> +static void mmc_blk_check_ce_ffu(struct mmc_queue_req *mq_rq)
-> +{
-> +	struct mmc_blk_ioc_data **idata = mq_rq->drv_op_data;
-> +
-> +	if (mq_rq->ioc_count != 4)
-> +		return;
-> +
-> +	if (idata[0]->ic.opcode != MMC_SWITCH)
-> +		return;
-> +
-> +	if (MMC_EXTRACT_INDEX_FROM_ARG(idata[0]->ic.arg) !=
-> +			EXT_CSD_MODE_CONFIG)
-> +		return;
-> +
-> +	if (idata[1]->ic.opcode == MMC_SET_BLOCK_COUNT &&
-> +	    idata[2]->ic.opcode == MMC_WRITE_MULTIPLE_BLOCK) {
-> +		idata[1]->flags |= MMC_BLK_IOC_DROP;
-> +		idata[2]->flags |= MMC_BLK_IOC_SBC;
-> +	}
-
-Could this be more generic e.g. simply
-
-	for (i = 1; i < mq_rq->ioc_count; i++)
-		if (idata[i - 1]->ic.opcode == MMC_SET_BLOCK_COUNT &&
-		    mmc_op_multi(idata[i + 1]->ic.opcode)) {
-			idata[i - 1]->flags |= MMC_BLK_IOC_DROP;
-			idata[i]->flags |= MMC_BLK_IOC_SBC;
-		}
-
-with no need to check for 4 cmds, MMC_SWITCH or EXT_CSD_MODE_CONFIG
-
-> +}
-> +
->  /*
->   * The non-block commands come back from the block layer after it queued it and
->   * processed it with all other requests and then they get issued in this
-> @@ -1059,6 +1093,9 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
->  			if (ret)
->  				break;
->  		}
-> +
-> +		mmc_blk_check_ce_ffu(mq_rq);
-> +
->  		fallthrough;
->  	case MMC_DRV_OP_IOCTL_RPMB:
->  		idata = mq_rq->drv_op_data;
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 6f7993803ee7..d4d10cabaa57 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -254,6 +254,7 @@ static inline bool mmc_ready_for_data(u32 status)
->   */
+> -static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> +int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  {
+>  	int i;
 >  
->  #define EXT_CSD_CMDQ_MODE_EN		15	/* R/W */
-> +#define EXT_CSD_MODE_CONFIG		30	/* R/W */
->  #define EXT_CSD_FLUSH_CACHE		32      /* W */
->  #define EXT_CSD_CACHE_CTRL		33      /* R/W */
->  #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+> @@ -2879,6 +2879,7 @@ static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  	sdhci_reset_tuning(host);
+>  	return -EAGAIN;
+>  }
+> +EXPORT_SYMBOL_GPL(__sdhci_execute_tuning);
+>  
+>  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index f219bdea8f28..a20864fc0641 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -793,6 +793,7 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+>  void sdhci_reset(struct sdhci_host *host, u8 mask);
+>  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+>  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+> +int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
+>  void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+>  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  				      struct mmc_ios *ios);
+> 
 
