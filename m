@@ -2,190 +2,133 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C083C0018A
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 08:56:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 177BAC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 09:29:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231322AbjKFI4K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Nov 2023 03:56:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33038 "EHLO
+        id S231377AbjKFJ3P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 04:29:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231181AbjKFI4J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 03:56:09 -0500
-Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A51C1DB;
-        Mon,  6 Nov 2023 00:56:06 -0800 (PST)
-Received: by mail-vs1-xe2f.google.com with SMTP id ada2fe7eead31-45d8c405696so625145137.3;
-        Mon, 06 Nov 2023 00:56:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1699260965; x=1699865765; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+FnA2dK5iXOLJoNUoBlFMyMH+VRerj2a3nUAndixNdc=;
-        b=FTBaHCQMS32KGLMLFkQEKS3dAp31+fBpyccwmhWwxuZM4FEZCL0M7wgdaYiDptgKjP
-         +nNvx5Gu2v2VCGPqrCBUUuuiilyR5G7OFfnchfcGCwWsNw1gzlTi9Ya+tYUJoldxRh8I
-         rsHGdsvLcSiMDm3KI/goXtncEWank31oRznyK4WOZrPjuzeXq9G5Um5bziAVgf5hsszr
-         5Mgw/DDSLS7yQlYorgdNmVhbZkAKnl7SO7teve+QUI53rztvYwb6NLQeuB4T203vJHOH
-         TjgLEJWarp6lX9R2HR5Of8R6lZoG2RVsqFyXWU8tnbV7YNRjzffWnaunccDdDHiSdDdR
-         X0rg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699260965; x=1699865765;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+FnA2dK5iXOLJoNUoBlFMyMH+VRerj2a3nUAndixNdc=;
-        b=llwQfIizmIkPyOWgziDgVvwBf2+4pXEpKNq7viUFIRvWM1bZpUpXXv/ar8PrOVw+68
-         EmAM8P5R7/x6hQAqysYzQeK7JDWq5NVDW2VucuuRhwUieeX0NtnRcMYhDpevkT091zTZ
-         T5TMqMCUcKwWEOWZyrKBdb8j0i4/GXkjwKDr1AQ7Wrh+ibYVj/QjXG9fnpZz778voSjj
-         g30NzJq4pRoKuS4KXtbJb59gwShecGOpMqlNROkQXzBSQUnw4OBnjEprXGJm1121CV70
-         zmw3AzGL5Q5e5xa4PjVOZkvdybbZKRH0/qgNDde0dwkHXWo+UrNd5KXHx48GEPciWGWg
-         uSPg==
-X-Gm-Message-State: AOJu0Yz6vRrh2MpWY5VWi3AZHqgWg/fRA0JG/ITTFtT3IyW2Luvx72xX
-        ugGakuWV09HLlxBdQX3yChOfgd744wFZYXeTcEg=
-X-Google-Smtp-Source: AGHT+IH9SPCQhzFMng7GRyRX8tLnYkjisz8wyL6iUDjopfYuO/7NX9MHdWFqZadleaKU3uituxsNHPbxJ85ClM3Jl5o=
-X-Received: by 2002:a67:e08d:0:b0:45f:398:aba5 with SMTP id
- f13-20020a67e08d000000b0045f0398aba5mr2690748vsl.32.1699260965375; Mon, 06
- Nov 2023 00:56:05 -0800 (PST)
+        with ESMTP id S231250AbjKFJ3O (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 04:29:14 -0500
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AAECAB;
+        Mon,  6 Nov 2023 01:29:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1699262952; x=1730798952;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=n7Pg7QEUgF0AOa0JoeE8yu+anEa9R0Webe/V+kY/BHM=;
+  b=fO9AdEK11/Cp4d1rGFPVrRXvuZwXmVWfELpZRxT7a6G/c7EO4BrEH1tF
+   Tf18W1SkXjREHAOZ0LAKSLgfNLDVedfyDUJhn7FDyfaFu2EjfpS01Dww7
+   Klwzrj7xtNzPTi06m8pCUmRqmhd0WN6GVxXu2TJ/RAfHo6y+O1pw3RA3a
+   d2x0t9IidZZm/XlosRlXczkNqGmgaH48b+3rpzKlWN6YvXn1Phv7e5gYc
+   r94Ht/7gNedoct2C+tsZgLQHiL5KJgZAoom5BhjlaYybAix+35d5XhpBD
+   uQ77+0DswNYlRi2tbXHV9RgoERpFILtJtGtzLDBdJ9rOScfb5BImMWYE6
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10885"; a="453547815"
+X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
+   d="scan'208";a="453547815"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 01:29:11 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
+   d="scan'208";a="10404050"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.215.231])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 01:29:08 -0800
+Message-ID: <d18a2569-ebc3-484f-927a-5e3682457469@intel.com>
+Date:   Mon, 6 Nov 2023 11:29:07 +0200
 MIME-Version: 1.0
-References: <20231018103337.34622-1-victorshihgli@gmail.com>
- <CAK00qKBH5P3naXUHhbQ3zgMzQrUxy=v8r84a8RCcdNORVoRPkA@mail.gmail.com> <CAPDyKFob14Tc4c0UxRfj2qbXJkDn7NRwNwRuYQ6m9t3c27Kp=Q@mail.gmail.com>
-In-Reply-To: <CAPDyKFob14Tc4c0UxRfj2qbXJkDn7NRwNwRuYQ6m9t3c27Kp=Q@mail.gmail.com>
-From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Mon, 6 Nov 2023 16:55:53 +0800
-Message-ID: <CAK00qKDvdDBJ9zrBh=9anCArOZUis8-kE5bRx=owjD_pe4ZDCg@mail.gmail.com>
+User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH V2] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
  timeout of AER
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        SeanHY.Chen@genesyslogic.com.tw, kai.heng.feng@canonical.com,
+Content-Language: en-US
+To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw,
+        kai.heng.feng@canonical.com,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+References: <20231018103337.34622-1-victorshihgli@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20231018103337.34622-1-victorshihgli@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Nov 3, 2023 at 6:28=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
- wrote:
->
-> On Fri, 3 Nov 2023 at 11:13, Victor Shih <victorshihgli@gmail.com> wrote:
-> >
-> > Hi, Ulf
-> >
-> > Please help review this patch and give me some advice.
-> > I look forward to your reply.
-> >
-> > Thanks, Victor Shih
->
-> I don't have in-depth knowledge of how to properly solve this for pci,
-> so I am relying on Kai and others to help review.
->
+On 18/10/23 13:33, Victor Shih wrote:
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> 
+> Due to a flaw in the hardware design, the GL975x replay timer frequently
+> times out when ASPM is enabled. As a result, the warning messages that will
+> often appear in the system log when the system accesses the GL975x
+> PCI config. Therefore, the replay timer timeout must be masked.
+> 
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Hi, Ulf
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-This is a standalone patch, this patch only solves the warning
-messages that will
- often appear in the system log when the system accesses the GL975x PCI con=
-fig.
+> ---
+> 
+> Updates in V2:
+>  - Modify the commit message.
+> 
+> ---
+> 
+>  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index d83261e857a5..d8a991b349a8 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -28,6 +28,9 @@
+>  #define PCI_GLI_9750_PM_CTRL	0xFC
+>  #define   PCI_GLI_9750_PM_STATE	  GENMASK(1, 0)
+>  
+> +#define PCI_GLI_9750_CORRERR_MASK				0x214
+> +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT	  BIT(12)
+> +
+>  #define SDHCI_GLI_9750_CFG2          0x848
+>  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+>  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+> @@ -152,6 +155,9 @@
+>  #define PCI_GLI_9755_PM_CTRL     0xFC
+>  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+>  
+> +#define PCI_GLI_9755_CORRERR_MASK				0x214
+> +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT	  BIT(12)
+> +
+>  #define SDHCI_GLI_9767_GM_BURST_SIZE			0x510
+>  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET	  BIT(8)
+>  
+> @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_host *host)
+>  	value &= ~PCI_GLI_9750_PM_STATE;
+>  	pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
+>  
+> +	/* mask the replay timer timeout of AER */
+> +	pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &value);
+> +	value |= PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
+> +	pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, value);
+> +
+>  	gl9750_wt_off(host);
+>  }
+>  
+> @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+>  	value &= ~PCI_GLI_9755_PM_STATE;
+>  	pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+>  
+> +	/* mask the replay timer timeout of AER */
+> +	pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &value);
+> +	value |= PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
+> +	pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, value);
+> +
+>  	gl9755_wt_off(pdev);
+>  }
+>  
 
-As I discussed with Kai-Heng at the end of
-[V1] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer timeout of AER,
-Kai-Heng will be submitting a patch for the PCIe layer to solve the
-situation he encountered.
-I will also help Kai-Heng test when he submits the patch.
-
-Thanks, Victor Shih
-
-> >
-> > On Wed, Oct 18, 2023 at 6:33=E2=80=AFPM Victor Shih <victorshihgli@gmai=
-l.com> wrote:
-> > >
-> > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > >
-> > > Due to a flaw in the hardware design, the GL975x replay timer frequen=
-tly
-> > > times out when ASPM is enabled. As a result, the warning messages tha=
-t will
-> > > often appear in the system log when the system accesses the GL975x
-> > > PCI config. Therefore, the replay timer timeout must be masked.
-> > >
-> > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> The code looks good to me, but let's allow Kai to get some time to
-> come back to this before I apply it.
->
-> Kind regards
-> Uffe
->
-> > > ---
-> > >
-> > > Updates in V2:
-> > >  - Modify the commit message.
-> > >
-> > > ---
-> > >
-> > >  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
-> > >  1 file changed, 16 insertions(+)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhc=
-i-pci-gli.c
-> > > index d83261e857a5..d8a991b349a8 100644
-> > > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > > @@ -28,6 +28,9 @@
-> > >  #define PCI_GLI_9750_PM_CTRL   0xFC
-> > >  #define   PCI_GLI_9750_PM_STATE          GENMASK(1, 0)
-> > >
-> > > +#define PCI_GLI_9750_CORRERR_MASK                              0x214
-> > > +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT         BIT=
-(12)
-> > > +
-> > >  #define SDHCI_GLI_9750_CFG2          0x848
-> > >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
-> > >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
-> > > @@ -152,6 +155,9 @@
-> > >  #define PCI_GLI_9755_PM_CTRL     0xFC
-> > >  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
-> > >
-> > > +#define PCI_GLI_9755_CORRERR_MASK                              0x214
-> > > +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT         BIT=
-(12)
-> > > +
-> > >  #define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
-> > >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT(8)
-> > >
-> > > @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_host =
-*host)
-> > >         value &=3D ~PCI_GLI_9750_PM_STATE;
-> > >         pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
-> > >
-> > > +       /* mask the replay timer timeout of AER */
-> > > +       pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &value=
-);
-> > > +       value |=3D PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-> > > +       pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, value=
-);
-> > > +
-> > >         gl9750_wt_off(host);
-> > >  }
-> > >
-> > > @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_pci_s=
-lot *slot)
-> > >         value &=3D ~PCI_GLI_9755_PM_STATE;
-> > >         pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
-> > >
-> > > +       /* mask the replay timer timeout of AER */
-> > > +       pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &value=
-);
-> > > +       value |=3D PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-> > > +       pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, value=
-);
-> > > +
-> > >         gl9755_wt_off(pdev);
-> > >  }
-> > >
-> > > --
-> > > 2.25.1
-> > >
