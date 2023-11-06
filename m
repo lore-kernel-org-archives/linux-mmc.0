@@ -2,175 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3107C4332F
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Nov 2023 10:30:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F65CC4167D
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 06:35:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229527AbjKEKaC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 5 Nov 2023 05:30:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49796 "EHLO
+        id S229485AbjKFGfe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 01:35:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229447AbjKEKaC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Nov 2023 05:30:02 -0500
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9E11E9
-        for <linux-mmc@vger.kernel.org>; Sun,  5 Nov 2023 02:29:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1699180199; x=1730716199;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=VggkHKDLYeblpM18nra18nF7SG37uGsrbCNlvqPYx8Y=;
-  b=m75pBly3y+AHEeKg1zNLFwDl12pNymtZxxvNeKbfu4YFcYJFW99YTipD
-   BYFXwAjDfkyuKTdsATwbcwdufPXEAB2a4I3tKe/CtsJE9vndu59vOaeyN
-   id2Z/ZHfhguGuCkVMmHZBPG/I9WuXmHy1Z6SZakn9ORNaObOhmN247euP
-   7XPTArFLxbENeZ2J+e/DB4qdcB2p2hxVQKONT4qIRQ4PsHMY/yTuu2l8W
-   j6YhWPoFqT5hMrBhKR6Yru5u/n2bUlOoHXXW8rCeLwgjSw5TJjTWFPLWa
-   gRjHu8GAwM7m9urD26UqgSn7zcN062+fGM94pbsOc15J4MjrrRvrV/VA7
-   Q==;
-X-CSE-ConnectionGUID: /1uDGNgYQA2vwTMXlX50Ng==
-X-CSE-MsgGUID: U3gZmjoFQEaeddWHGL0VsQ==
-X-IronPort-AV: E=Sophos;i="6.03,279,1694707200"; 
-   d="scan'208";a="1391310"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 05 Nov 2023 18:29:57 +0800
-IronPort-SDR: V8C+cEWGf3/xzN0FVeDT+RTo6qI/Qc+WMgWPEf+Mbe90oRs0EMnGH4KkqUAPcfR41pCjBo98S5
- 0rpyH/UsDBf6arR4B4C62l/80AuVzNnofVRfcErpC0uVlmI8GQ6v7CwqfZzzCz09+ayfcclZra
- c58LRsAlx7LLAWe3tZewH4dNTLZbabRXFVaLiAyCVT9WlYvNbOBXSgjKyWmWppnqOrAn0b+MTg
- G+Kw93l3fZ2ideEwDuI6iKtOZ3gsAqM5nC1YRIiiag6zSVnPjEHOQOsGfP+Skc/w0rsfnoTc6I
- /Lo=
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Nov 2023 01:41:36 -0800
-IronPort-SDR: Dd0Pvl7Cykevt7x8aXMzXzici1ZYA6Gx4F8Ehuy1JvNhZEiD29iMxxlYTwJ3CdhGkdTNfmWunt
- FCzojHJhyRNX6NxhMeM9U+4bnA8PJTARcHpsW6fPKEcuyRwjuuFOIVxR3Yn17KKIp5xvMPS9sH
- UAypbnXwyW3gKYpQzp1q1TK3vu7z1qBhY4+oYN6O4FORQGEqPEllOrZC4dOZCBvH2+fzEV3WDp
- QU+EDfVJlJB3UfsNm4GXCZdh2A+sf4N/WewAer58I/AYFiZRgFT2ZonnzEzxO8WOVq27rNY0BL
- zf4=
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP; 05 Nov 2023 02:29:52 -0800
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Dominique Martinet <asmadeus@codewreck.org>,
-        Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH] mmc: core: Remove obsolete quirk for Sandisk cards
-Date:   Sun,  5 Nov 2023 12:29:44 +0200
-Message-Id: <20231105102944.1974512-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S230252AbjKFGfd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 01:35:33 -0500
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57C1CE1;
+        Sun,  5 Nov 2023 22:35:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1699252531; x=1730788531;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=rkeD9beioJ3ZQPx/PpMCCYUgdpP+5HTzczEs3MjCoL0=;
+  b=N+fJEjNGomtHDq0ioDX+5rik1lxdJXOwtQR2Kl8WC40ZfNap2Sqnhbwa
+   /PY/NKnM+dEyvyJMqRQhfEceac+3D8xhPGShwj8dEBczdEnHEdnAso6Q1
+   Uinq+0y21mkOjbBjvvXyJjL9C+goBzTGr7uVch8v6uwJa84Uy/0O9kcLt
+   6CdgJAMC1Q0IXCd2SBXam5nRHthIAffEAWPoWxp6urt0KKRop4TGoFyx0
+   7X312ppxC39l4Mtw4+wHNtlxWDdKgTMuPN80n5sB5LmiN7UsNnIPd8dSI
+   AjcB0IXhEFwNGPuyiAfnqhuYZl4y7yUMWQEH1kQFKxHzAdYbkC1ccaDJf
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10885"; a="388098764"
+X-IronPort-AV: E=Sophos;i="6.03,280,1694761200"; 
+   d="scan'208";a="388098764"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Nov 2023 22:35:31 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10885"; a="765857678"
+X-IronPort-AV: E=Sophos;i="6.03,280,1694761200"; 
+   d="scan'208";a="765857678"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.215.231])
+  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Nov 2023 22:35:26 -0800
+Message-ID: <8bc2daa3-55ad-44ea-9205-40fb09852561@intel.com>
+Date:   Mon, 6 Nov 2023 08:35:24 +0200
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V2 3/6] mmc: block: Be sure to wait while busy in CQE
+ error recovery
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>,
+        Radoslaw Biernacki <biernacki@google.com>,
+        Gwendal Grignou <gwendal@chromium.org>,
+        Asutosh Das <quic_asutoshd@quicinc.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Bhavya Kapoor <b-kapoor@ti.com>,
+        Kamal Dasu <kamal.dasu@broadcom.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
+        Victor Shih <victor.shih@genesyslogic.com.tw>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Aniruddha Tvs Rao <anrao@nvidia.com>,
+        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <20231103084720.6886-1-adrian.hunter@intel.com>
+ <20231103084720.6886-4-adrian.hunter@intel.com>
+ <DM6PR04MB65753B3B797430DF05959210FCA5A@DM6PR04MB6575.namprd04.prod.outlook.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <DM6PR04MB65753B3B797430DF05959210FCA5A@DM6PR04MB6575.namprd04.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This quirk applies to an old set of Sandisk cards that are no longer
-being sold for many years now, and it is vanishingly unlikely that will
-ever meet a V6.7 kernel.
+On 3/11/23 12:48, Avri Altman wrote:
+>> STOP command does not guarantee to wait while busy, but subsequent
+>> command MMC_CMDQ_TASK_MGMT to discard the queue will fail if the
+>> card is busy, so be sure to wait by employing mmc_poll_for_busy().
+> Doesn't the Task Discard Sequence expects you to check CQDPT[i]==1
+> before sending MMC_CMDQ_TASK_MGMT to discard task id i?
 
-I came across those old cards when I tried to decide what to do with
-Sandisk cards that their quirk is designated by OEM id. For many years
-we read wrong oemid, reading 16 bits instead of 8. Fixing it however,
-turned out to be impractical, and it's better that each eMMC vendor will
-handle its own devices.
+We do not clear individual tasks.  Instead the MMC_CMDQ_TASK_MGMT is
+sent with the op-code to "discard entire queue", which will also
+work even if the queue is empty. Refer JESD84-B51A,
+6.6.39.6 CMDQ_TASK_MGMT and Table 43 — Task Management op-codes.
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- drivers/mmc/core/block.c  | 32 +-------------------------------
- drivers/mmc/core/quirks.h | 12 ------------
- include/linux/mmc/card.h  |  1 -
- 3 files changed, 1 insertion(+), 44 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 152dfe593c43..6aa68ac1129e 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1122,17 +1122,7 @@ static void mmc_blk_issue_erase_rq(struct mmc_queue *mq, struct request *req,
- 	nr = blk_rq_sectors(req);
- 
- 	do {
--		err = 0;
--		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
--			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--					 INAND_CMD38_ARG_EXT_CSD,
--					 erase_arg == MMC_TRIM_ARG ?
--					 INAND_CMD38_ARG_TRIM :
--					 INAND_CMD38_ARG_ERASE,
--					 card->ext_csd.generic_cmd6_time);
--		}
--		if (!err)
--			err = mmc_erase(card, from, nr, erase_arg);
-+		err = mmc_erase(card, from, nr, erase_arg);
- 	} while (err == -EIO && !mmc_blk_reset(md, card->host, type));
- 	if (err)
- 		status = BLK_STS_IOERR;
-@@ -1182,17 +1172,6 @@ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 		arg = MMC_SECURE_ERASE_ARG;
- 
- retry:
--	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				 INAND_CMD38_ARG_EXT_CSD,
--				 arg == MMC_SECURE_TRIM1_ARG ?
--				 INAND_CMD38_ARG_SECTRIM1 :
--				 INAND_CMD38_ARG_SECERASE,
--				 card->ext_csd.generic_cmd6_time);
--		if (err)
--			goto out_retry;
--	}
--
- 	err = mmc_erase(card, from, nr, arg);
- 	if (err == -EIO)
- 		goto out_retry;
-@@ -1202,15 +1181,6 @@ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 	}
- 
- 	if (arg == MMC_SECURE_TRIM1_ARG) {
--		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
--			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--					 INAND_CMD38_ARG_EXT_CSD,
--					 INAND_CMD38_ARG_SECTRIM2,
--					 card->ext_csd.generic_cmd6_time);
--			if (err)
--				goto out_retry;
--		}
--
- 		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
- 		if (err == -EIO)
- 			goto out_retry;
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index cca71867bc4a..028f55f07ba3 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -22,18 +22,6 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
- #define INAND_CMD38_ARG_SECERASE 0x80
- #define INAND_CMD38_ARG_SECTRIM1 0x81
- #define INAND_CMD38_ARG_SECTRIM2 0x88
--	/* CMD38 argument is passed through EXT_CSD[113] */
--	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
--		  MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,
--		  MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM08G", CID_MANFID_SANDISK, 0x100, add_quirk,
--		  MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM16G", CID_MANFID_SANDISK, 0x100, add_quirk,
--		  MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM32G", CID_MANFID_SANDISK, 0x100, add_quirk,
--		  MMC_QUIRK_INAND_CMD38),
--
- 	/*
- 	 * Some MMC cards experience performance degradation with CMD23
- 	 * instead of CMD12-bounded multiblock transfers. For now we'll
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 7b12eebc5586..edb27f3c6489 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -284,7 +284,6 @@ struct mmc_card {
- 						/* (missing CIA registers) */
- #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
- #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
--#define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
- #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
- #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512 bytes in */
- 						/* byte mode */
--- 
-2.42.0
+> 
+> Thanks,
+> Avri
+> 
+>>
+>> Fixes: 72a5af554df8 ("mmc: core: Add support for handling CQE requests")
+>> Cc: stable@vger.kernel.org
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/core/core.c | 2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+>> 3d3e0ca52614..befde2bd26d3 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -553,6 +553,8 @@ int mmc_cqe_recovery(struct mmc_host *host)
+>>         cmd.busy_timeout = MMC_CQE_RECOVERY_TIMEOUT;
+>>         mmc_wait_for_cmd(host, &cmd, 0);
+>>
+>> +       mmc_poll_for_busy(host->card, MMC_CQE_RECOVERY_TIMEOUT,
+>> true,
+>> + MMC_BUSY_IO);
+>> +
+>>         memset(&cmd, 0, sizeof(cmd));
+>>         cmd.opcode       = MMC_CMDQ_TASK_MGMT;
+>>         cmd.arg          = 1; /* Discard entire queue */
+>> --
+>> 2.34.1
+> 
 
