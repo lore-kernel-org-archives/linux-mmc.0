@@ -2,133 +2,156 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 177BAC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 09:29:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70AB1C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 10:40:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231377AbjKFJ3P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Nov 2023 04:29:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59378 "EHLO
+        id S229583AbjKFKk7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 05:40:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231250AbjKFJ3O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 04:29:14 -0500
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AAECAB;
-        Mon,  6 Nov 2023 01:29:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1699262952; x=1730798952;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=n7Pg7QEUgF0AOa0JoeE8yu+anEa9R0Webe/V+kY/BHM=;
-  b=fO9AdEK11/Cp4d1rGFPVrRXvuZwXmVWfELpZRxT7a6G/c7EO4BrEH1tF
-   Tf18W1SkXjREHAOZ0LAKSLgfNLDVedfyDUJhn7FDyfaFu2EjfpS01Dww7
-   Klwzrj7xtNzPTi06m8pCUmRqmhd0WN6GVxXu2TJ/RAfHo6y+O1pw3RA3a
-   d2x0t9IidZZm/XlosRlXczkNqGmgaH48b+3rpzKlWN6YvXn1Phv7e5gYc
-   r94Ht/7gNedoct2C+tsZgLQHiL5KJgZAoom5BhjlaYybAix+35d5XhpBD
-   uQ77+0DswNYlRi2tbXHV9RgoERpFILtJtGtzLDBdJ9rOScfb5BImMWYE6
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10885"; a="453547815"
-X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
-   d="scan'208";a="453547815"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 01:29:11 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.03,281,1694761200"; 
-   d="scan'208";a="10404050"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.215.231])
-  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Nov 2023 01:29:08 -0800
-Message-ID: <d18a2569-ebc3-484f-927a-5e3682457469@intel.com>
-Date:   Mon, 6 Nov 2023 11:29:07 +0200
+        with ESMTP id S229874AbjKFKk7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 05:40:59 -0500
+Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11134FA;
+        Mon,  6 Nov 2023 02:40:53 -0800 (PST)
+Received: from dlp.unisoc.com ([10.29.3.86])
+        by SHSQR01.spreadtrum.com with ESMTP id 3A6AeZRI049532;
+        Mon, 6 Nov 2023 18:40:35 +0800 (+08)
+        (envelope-from Wenchao.Chen@unisoc.com)
+Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
+        by dlp.unisoc.com (SkyGuard) with ESMTPS id 4SP76T0Zynz2M0tVJ;
+        Mon,  6 Nov 2023 18:35:45 +0800 (CST)
+Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
+ (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Mon, 6 Nov
+ 2023 18:40:33 +0800
+From:   Wenchao Chen <wenchao.chen@unisoc.com>
+To:     <ulf.hansson@linaro.org>, <zhang.lyra@gmail.com>,
+        <orsonzhai@gmail.com>, <baolin.wang@linux.alibaba.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
+        <yuelin.tang@unisoc.com>, Wenchao Chen <wenchao.chen@unisoc.com>
+Subject: [PATCH] mmc: sdhci-sprd: Fix the clock switch
+Date:   Mon, 6 Nov 2023 18:40:18 +0800
+Message-ID: <20231106104018.29179-1-wenchao.chen@unisoc.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V2] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
- timeout of AER
-Content-Language: en-US
-To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw,
-        kai.heng.feng@canonical.com,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20231018103337.34622-1-victorshihgli@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20231018103337.34622-1-victorshihgli@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-Originating-IP: [10.13.2.29]
+X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
+ shmbx05.spreadtrum.com (10.29.1.56)
+X-MAIL: SHSQR01.spreadtrum.com 3A6AeZRI049532
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/10/23 13:33, Victor Shih wrote:
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> 
-> Due to a flaw in the hardware design, the GL975x replay timer frequently
-> times out when ASPM is enabled. As a result, the warning messages that will
-> often appear in the system log when the system accesses the GL975x
-> PCI config. Therefore, the replay timer timeout must be masked.
-> 
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+Some SOCs have a "1x_enable" clock that needs to be turned on and off
+in probe, remove and runtime pm.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
+Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+---
+ drivers/mmc/host/sdhci-sprd.c | 29 +++++++++++++++++++++++++----
+ 1 file changed, 25 insertions(+), 4 deletions(-)
 
-> ---
-> 
-> Updates in V2:
->  - Modify the commit message.
-> 
-> ---
-> 
->  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index d83261e857a5..d8a991b349a8 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -28,6 +28,9 @@
->  #define PCI_GLI_9750_PM_CTRL	0xFC
->  #define   PCI_GLI_9750_PM_STATE	  GENMASK(1, 0)
->  
-> +#define PCI_GLI_9750_CORRERR_MASK				0x214
-> +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT	  BIT(12)
-> +
->  #define SDHCI_GLI_9750_CFG2          0x848
->  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
->  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
-> @@ -152,6 +155,9 @@
->  #define PCI_GLI_9755_PM_CTRL     0xFC
->  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
->  
-> +#define PCI_GLI_9755_CORRERR_MASK				0x214
-> +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT	  BIT(12)
-> +
->  #define SDHCI_GLI_9767_GM_BURST_SIZE			0x510
->  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET	  BIT(8)
->  
-> @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_host *host)
->  	value &= ~PCI_GLI_9750_PM_STATE;
->  	pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
->  
-> +	/* mask the replay timer timeout of AER */
-> +	pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &value);
-> +	value |= PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-> +	pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, value);
-> +
->  	gl9750_wt_off(host);
->  }
->  
-> @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
->  	value &= ~PCI_GLI_9755_PM_STATE;
->  	pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
->  
-> +	/* mask the replay timer timeout of AER */
-> +	pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &value);
-> +	value |= PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
-> +	pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, value);
-> +
->  	gl9755_wt_off(pdev);
->  }
->  
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 6b84ba27e6ab..3367f924dc5b 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -83,6 +83,7 @@ struct sdhci_sprd_host {
+ 	u32 version;
+ 	struct clk *clk_sdio;
+ 	struct clk *clk_enable;
++	struct clk *clk_1x_enable;
+ 	struct clk *clk_2x_enable;
+ 	struct pinctrl *pinctrl;
+ 	struct pinctrl_state *pins_uhs;
+@@ -784,6 +785,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 	}
+ 	sprd_host->clk_enable = clk;
+ 
++	clk = devm_clk_get(&pdev->dev, "1x_enable");
++	if (!IS_ERR(clk))
++		sprd_host->clk_1x_enable = clk;
++
+ 	clk = devm_clk_get(&pdev->dev, "2x_enable");
+ 	if (!IS_ERR(clk))
+ 		sprd_host->clk_2x_enable = clk;
+@@ -793,12 +798,16 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 		goto pltfm_free;
+ 
+ 	ret = clk_prepare_enable(sprd_host->clk_enable);
++	if (ret)
++		goto clk_sdio_disable;
++
++	ret = clk_prepare_enable(sprd_host->clk_1x_enable);
+ 	if (ret)
+ 		goto clk_disable;
+ 
+ 	ret = clk_prepare_enable(sprd_host->clk_2x_enable);
+ 	if (ret)
+-		goto clk_disable2;
++		goto clk_1x_disable;
+ 
+ 	sdhci_sprd_init_config(host);
+ 	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
+@@ -858,10 +867,13 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(sprd_host->clk_2x_enable);
+ 
+-clk_disable2:
+-	clk_disable_unprepare(sprd_host->clk_enable);
++clk_1x_disable:
++	clk_disable_unprepare(sprd_host->clk_1x_enable);
+ 
+ clk_disable:
++	clk_disable_unprepare(sprd_host->clk_enable);
++
++clk_sdio_disable:
+ 	clk_disable_unprepare(sprd_host->clk_sdio);
+ 
+ pltfm_free:
+@@ -878,6 +890,7 @@ static void sdhci_sprd_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(sprd_host->clk_sdio);
+ 	clk_disable_unprepare(sprd_host->clk_enable);
++	clk_disable_unprepare(sprd_host->clk_1x_enable);
+ 	clk_disable_unprepare(sprd_host->clk_2x_enable);
+ 
+ 	sdhci_pltfm_free(pdev);
+@@ -900,6 +913,7 @@ static int sdhci_sprd_runtime_suspend(struct device *dev)
+ 
+ 	clk_disable_unprepare(sprd_host->clk_sdio);
+ 	clk_disable_unprepare(sprd_host->clk_enable);
++	clk_disable_unprepare(sprd_host->clk_1x_enable);
+ 	clk_disable_unprepare(sprd_host->clk_2x_enable);
+ 
+ 	return 0;
+@@ -915,10 +929,14 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = clk_prepare_enable(sprd_host->clk_enable);
++	ret = clk_prepare_enable(sprd_host->clk_1x_enable);
+ 	if (ret)
+ 		goto clk_2x_disable;
+ 
++	ret = clk_prepare_enable(sprd_host->clk_enable);
++	if (ret)
++		goto clk_1x_disable;
++
+ 	ret = clk_prepare_enable(sprd_host->clk_sdio);
+ 	if (ret)
+ 		goto clk_disable;
+@@ -931,6 +949,9 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
+ clk_disable:
+ 	clk_disable_unprepare(sprd_host->clk_enable);
+ 
++clk_1x_disable:
++	clk_disable_unprepare(sprd_host->clk_1x_enable);
++
+ clk_2x_disable:
+ 	clk_disable_unprepare(sprd_host->clk_2x_enable);
+ 
+-- 
+2.17.1
 
