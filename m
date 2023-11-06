@@ -2,121 +2,161 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C749CC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 12:26:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84903C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Nov 2023 12:46:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230192AbjKFM06 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Nov 2023 07:26:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51878 "EHLO
+        id S232024AbjKFMqS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Nov 2023 07:46:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229583AbjKFM05 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 07:26:57 -0500
-Received: from out28-2.mail.aliyun.com (out28-2.mail.aliyun.com [115.124.28.2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E750BBB;
-        Mon,  6 Nov 2023 04:26:52 -0800 (PST)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07470094|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0336601-0.000693695-0.965646;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047211;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=12;RT=12;SR=0;TI=SMTPD_---.VGP97NC_1699273606;
-Received: from 192.168.220.129(mailfrom:michael@allwinnertech.com fp:SMTPD_---.VGP97NC_1699273606)
-          by smtp.aliyun-inc.com;
-          Mon, 06 Nov 2023 20:26:48 +0800
-Message-ID: <aa657a1d-a25d-21a8-4093-ec8fbe298ca2@allwinnertech.com>
-Date:   Mon, 6 Nov 2023 20:26:45 +0800
+        with ESMTP id S232056AbjKFMqC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Nov 2023 07:46:02 -0500
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2560E10FE
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Nov 2023 04:45:35 -0800 (PST)
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 302D33F129
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Nov 2023 12:45:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1699274734;
+        bh=Kv5qXMtHe1RqB/IAdF3q285FqfuFYmP+L0xdtku424s=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=ohC+2P6eIz9UEIwqG6CI5nbi37GUpZWibYGKuK0mqBUXK9lqBp5dMM9a7qEAOh0WC
+         bVy4uj2NJkOQ6aapoLUAQ8Y2RP9Eh+r8C39Hx/FHc6lBodK7R+0I9/EO3sccLQ8Z8d
+         A6s8N/K5l1JZQb6ZBGDQpoMn3fvGvoZhgHRlKlZPFd8bEE8savuzluty0VK01QCcUx
+         iABS0tlFpFUwOSPuPcZ+n+hoMJOCk92KxqdOGQKMgm0n94ojIVHrxaqGG/KWsLA4ty
+         //OJNFdsOKy0vUjOfFxB+QBTVXEKChzZdQ+0AbRjUQdFTDl1xF8t81t2Sq96c+WCFJ
+         /cZlw4R1v5k+Q==
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2803256bc44so3333972a91.1
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Nov 2023 04:45:34 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1699274732; x=1699879532;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Kv5qXMtHe1RqB/IAdF3q285FqfuFYmP+L0xdtku424s=;
+        b=PMH56iXF4TtsDyk8S7BeeA6arPEtDFe4ceD+oi88BOMQmYWPx59KdZ0C6riqsmF8kC
+         +P4E304U4l3z6RjIpooeFwG18hvAOtfLJzFQPrjF089fOMmNi7bbx465YMcMJYIGEROD
+         voUiHM7DdCImzH2iM8NJqrYJR/uGgxyD/cYZB/UfgksvKbVt8XtwnF5a3XCIihrOYgeq
+         nVNS9nCduKwxn8BGXZaOOFUgbJkXA3uOpHxgyjBGgPgvlhYU/V3evAJ9cTiGPWQkqI02
+         It7oAn4rb3tsaJ5gt5OFWkIm0FGPYY3EjHVx5oqmDBLmrun71HWFuuaotQIu8MeGiu0C
+         nMJA==
+X-Gm-Message-State: AOJu0YwLfkzLTE+xRxusYhXZv8Fh26pbBWVrHvjTvhUjbz0uJdbykhbb
+        FyXVO/WiZbKEMdunCOPo6OMJebpQtRY4ARdo1O0SkvFVJYoSECAHbde9CxlxBM24jHOUlYcKxtV
+        KTXiT77rUVorMyo4hF1gWKQY3hDq5kxgf8HdD1P+5M/3Tihv9/yOvwQ==
+X-Received: by 2002:a17:90a:319:b0:280:c7c:3069 with SMTP id 25-20020a17090a031900b002800c7c3069mr20802008pje.7.1699274732423;
+        Mon, 06 Nov 2023 04:45:32 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEh2XiLPI3ndF2x/X6bn2IJNKH5McXJDdk/jTsZOxEv6ay1/WonhiHxfGBgkouzA8kJ3g5is6gUmNd6KZOSgt4=
+X-Received: by 2002:a17:90a:319:b0:280:c7c:3069 with SMTP id
+ 25-20020a17090a031900b002800c7c3069mr20801988pje.7.1699274732095; Mon, 06 Nov
+ 2023 04:45:32 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.0
-Subject: Re: [PATCH] mmc: core: Add new flag to force hardware reset
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     adrian.hunter@intel.com, jinpu.wang@ionos.com,
-        victor.shih@genesyslogic.com.tw, avri.altman@wdc.com,
-        asuk4.q@gmail.com, f.fainelli@gmail.com, beanhuo@micron.com,
+References: <20231018103337.34622-1-victorshihgli@gmail.com> <d18a2569-ebc3-484f-927a-5e3682457469@intel.com>
+In-Reply-To: <d18a2569-ebc3-484f-927a-5e3682457469@intel.com>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Mon, 6 Nov 2023 14:45:18 +0200
+Message-ID: <CAAd53p5Q5-RVHWytst7=tCNW+A+Sc_swAgUQemQLF27CLbH7+A@mail.gmail.com>
+Subject: Re: [PATCH V2] mmc: sdhci-pci-gli: GL975[05]: Mask the replay timer
+ timeout of AER
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Sarthak Garg <quic_sartgarg@quicinc.com>
-References: <20230914000348.25790-1-michael@allwinnertech.com>
- <CA+Da2qzr0SBu-kUtFTnBqT+OObFOSTFgmU30L3B-Rjv3rYbGKw@mail.gmail.com>
- <CAPDyKFpHw+6vovHRWbhsDwre81U4Uu_X-Wy_viQCZp6nj=5Jkw@mail.gmail.com>
-From:   Michael Wu <michael@allwinnertech.com>
-In-Reply-To: <CAPDyKFpHw+6vovHRWbhsDwre81U4Uu_X-Wy_viQCZp6nj=5Jkw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/25/2023 9:59 PM, Ulf Hansson wrote:
-> - trimmed cc-list, + Sartak Garg
-> 
-> On Thu, 14 Sept 2023 at 10:00, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
->>
->> On Thu, 14 Sept 2023 at 08:04, Michael Wu <michael@allwinnertech.com> wrote:
->>>
->>> Entering the recovery system itself indicates a transmission error.
->>> In this situation, we intend to execute the mmc_blk_reset function
->>> to clear any anomalies that may be caused by errors. We have previously
->>> discussed with several MMC device manufacturers, and they expressed
->>> their desire for us to reset the device when errors occur to ensure
->>> stable operation. We aim to make this code compatible with all devices
->>> and ensure its stable performance, so we would like to add this patch
->>>
->>> Signed-off-by: Michael Wu <michael@allwinnertech.com>
->>
->> like: https://lore.kernel.org/linux-mmc/20220603051534.22672-1-quic_sartgarg@quicinc.com/
-> 
-> Looks like this series didn't make it. I was awaiting a rebase from
-> Sartak to apply it, but apparently something got in his way for a new
-> submission.
-> 
->>
->> You should enable it in the vendor host.
-> 
-> Yes! We don't want unused code in the core. We need a user of it too.
-> 
-> May I suggest that you pick up Sartak's patch for the core and thus
-> add another patch for the host driver you care about and then
-> re-submit it as a small series.
-> 
-> Kind regards
-> Uffe
-> 
->>
->>> ---
->>>   drivers/mmc/core/block.c | 2 +-
->>>   include/linux/mmc/host.h | 1 +
->>>   2 files changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->>> index b5b414a71e0b..29fbe0ddeadb 100644
->>> --- a/drivers/mmc/core/block.c
->>> +++ b/drivers/mmc/core/block.c
->>> @@ -1503,7 +1503,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
->>>          pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
->>>
->>>          err = mmc_cqe_recovery(host);
->>> -       if (err)
->>> +       if (err || host->cqe_recovery_reset_always)
->>>                  mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
->>>          mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
->>>
->>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>> index 62a6847a3b6f..f578541a06b5 100644
->>> --- a/include/linux/mmc/host.h
->>> +++ b/include/linux/mmc/host.h
->>> @@ -518,6 +518,7 @@ struct mmc_host {
->>>          int                     cqe_qdepth;
->>>          bool                    cqe_enabled;
->>>          bool                    cqe_on;
->>> +       bool                    cqe_recovery_reset_always;
->>>
->>>          /* Inline encryption support */
->>>   #ifdef CONFIG_MMC_CRYPTO
->>> --
->>> 2.29.0
->>>
-Dear Ulf,
-I have tested Sartak's patch and it is also able to resolve the issue we 
-are currently facing. Therefore, I would like to inquire about the 
-expected timeline for merging Sartak's patch.
+On Mon, Nov 6, 2023 at 11:29=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
+com> wrote:
+>
+> On 18/10/23 13:33, Victor Shih wrote:
+> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> >
+> > Due to a flaw in the hardware design, the GL975x replay timer frequentl=
+y
+> > times out when ASPM is enabled. As a result, the warning messages that =
+will
+> > often appear in the system log when the system accesses the GL975x
+> > PCI config. Therefore, the replay timer timeout must be masked.
+> >
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
--- 
-Regards,
-Michael Wu
+Acked-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
+
+I'll send another patch to address the issue I am seeing.
+
+Kai-Heng
+
+>
+> > ---
+> >
+> > Updates in V2:
+> >  - Modify the commit message.
+> >
+> > ---
+> >
+> >  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
+> >  1 file changed, 16 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
+pci-gli.c
+> > index d83261e857a5..d8a991b349a8 100644
+> > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > @@ -28,6 +28,9 @@
+> >  #define PCI_GLI_9750_PM_CTRL 0xFC
+> >  #define   PCI_GLI_9750_PM_STATE        GENMASK(1, 0)
+> >
+> > +#define PCI_GLI_9750_CORRERR_MASK                            0x214
+> > +#define   PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT       BIT(12)
+> > +
+> >  #define SDHCI_GLI_9750_CFG2          0x848
+> >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+> >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+> > @@ -152,6 +155,9 @@
+> >  #define PCI_GLI_9755_PM_CTRL     0xFC
+> >  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> >
+> > +#define PCI_GLI_9755_CORRERR_MASK                            0x214
+> > +#define   PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT       BIT(12)
+> > +
+> >  #define SDHCI_GLI_9767_GM_BURST_SIZE                 0x510
+> >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET          BIT(8)
+> >
+> > @@ -561,6 +567,11 @@ static void gl9750_hw_setting(struct sdhci_host *h=
+ost)
+> >       value &=3D ~PCI_GLI_9750_PM_STATE;
+> >       pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
+> >
+> > +     /* mask the replay timer timeout of AER */
+> > +     pci_read_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, &value);
+> > +     value |=3D PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
+> > +     pci_write_config_dword(pdev, PCI_GLI_9750_CORRERR_MASK, value);
+> > +
+> >       gl9750_wt_off(host);
+> >  }
+> >
+> > @@ -770,6 +781,11 @@ static void gl9755_hw_setting(struct sdhci_pci_slo=
+t *slot)
+> >       value &=3D ~PCI_GLI_9755_PM_STATE;
+> >       pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+> >
+> > +     /* mask the replay timer timeout of AER */
+> > +     pci_read_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, &value);
+> > +     value |=3D PCI_GLI_9755_CORRERR_MASK_REPLAY_TIMER_TIMEOUT;
+> > +     pci_write_config_dword(pdev, PCI_GLI_9755_CORRERR_MASK, value);
+> > +
+> >       gl9755_wt_off(pdev);
+> >  }
+> >
+>
