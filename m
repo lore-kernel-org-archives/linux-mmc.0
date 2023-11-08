@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBDB6C41535
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:45:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D783C0018C
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:46:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344592AbjKHKpt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Nov 2023 05:45:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59692 "EHLO
+        id S1344626AbjKHKqB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Nov 2023 05:46:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46774 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344508AbjKHKpI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:45:08 -0500
-Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D372B25A2
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:44:30 -0800 (PST)
-Received: by mail-wm1-x336.google.com with SMTP id 5b1f17b1804b1-4079ed65582so49889645e9.1
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:44:30 -0800 (PST)
+        with ESMTP id S235580AbjKHKpV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:45:21 -0500
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87FB125B9
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:44:34 -0800 (PST)
+Received: by mail-wm1-x32a.google.com with SMTP id 5b1f17b1804b1-4079ed65582so49890145e9.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:44:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1699440269; x=1700045069; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1699440273; x=1700045073; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=KctpUSdWE/54mxPRyNTPmujVIdTxIZHiWXcrFdF3THY=;
-        b=ccDWKSsepNdzxAZzpSRff3RpSbOw2z7uL893OeJIi7hJ1ZtgFqkPD1eMgHxVpIxjm4
-         Noy93WRG3BA7xhDgXSwydj/LTBimwrM9Z5KdMzfKde2gJm+f/8N12qUzUyzoqwxYoTjw
-         1u3LISa3YXeAvdfRzCwXljWUz5vFttcCMBvWb3db1lx3gIxkS6TDDeEd8W5ycCPxzbRs
-         DmdnHiUd936F1RArK0GGITNyj5tlFLQtEXSf4KWn4mnbJRAFnW3dUfFTs0vz+A0ktqsv
-         h0u69rLe1JhcFsMcgJJVmLZq8aS6j+0Opvf+dkgwFGiIvLPEn9CIePWpZ3+0IHaocrSa
-         6yog==
+        bh=tkEvXWcKUOWY7MDhsApmZqSz9A9BrLzom2ZllyUYJqs=;
+        b=CmtpJmVlCM4syMknWUpWHAKoK/hAaKOC7nKz1YdbPATq3QoV5ZniZtdasH9YXba1d3
+         Oidzw9HrSEldko3wgSnvsglDZmh/S1DyfTYwMI6nJvXs/63+iBbSI8rg3FvcOfqUeaZX
+         JIf1rA84zGmA9G/OwOoboCT/BBFUKfxnqHt6fdux5mtz3yIzNyKcCzlTJZYqPCagBEeF
+         ifRDedM4yOl20AUWk/bM1L28QOVVQMkpfyK+PvASkpWnKTClenEnkZhrwD2P5l7mUpPF
+         QyzRxHYmIKmbwpQopmL1SHTzW84630oij9Enqbkhkb0HVzG+NANHwgLJ26/EkiCBSbMd
+         BfxQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699440269; x=1700045069;
+        d=1e100.net; s=20230601; t=1699440273; x=1700045073;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=KctpUSdWE/54mxPRyNTPmujVIdTxIZHiWXcrFdF3THY=;
-        b=uemsOKWAWB7NksFgDrggM/8p0csKySHUeNLE/vMQeovDxxq0n7CcLoyVZeIr6nEtkV
-         oiwoiDKac7Ii2Vgz//8qy9UAYSiQAoQ5uYz1UyVtyN+d6QSJb+j8e5sAYchPUF3Ejav8
-         c715sOG985meauv5L1D9lEpsyMKyH9zCghjzbibOYy1UC5z5vHbAypLXVZaf2dxC/PqG
-         +jCniKPec8AEG7uBEysOBZkyzWHsSddXPIxQ6MW37G0ThqhPY9NH8Shzs1SJoLI1a3a9
-         1oDSis2PbEkM3Q2CYqZKW8uFle7e6eaCWX5tABQhSkpqYqTt5y3/QNV7epaKoerQIb6z
-         gQIQ==
-X-Gm-Message-State: AOJu0Yzm/99ZAWKtAUydbIYoVvHG3FL1Abfwl3yDaRGfs1XEIdLTzCMK
-        +W3zMRbkaqZGZrA4lw51zZb5kA==
-X-Google-Smtp-Source: AGHT+IHzwZ3ZbfxwsqY/KR9bhuCoW2rtwV2Pv+17xFR8bqeY33bUZ7438zeD8MQhwfV4phLl2aoutg==
-X-Received: by 2002:a05:600c:1c82:b0:406:53aa:7a5f with SMTP id k2-20020a05600c1c8200b0040653aa7a5fmr1423336wms.10.1699440269098;
-        Wed, 08 Nov 2023 02:44:29 -0800 (PST)
+        bh=tkEvXWcKUOWY7MDhsApmZqSz9A9BrLzom2ZllyUYJqs=;
+        b=GuITr5LsDccnZpdhFT0s/7/y4wgzxE70dawU8pZlUPTm1QoYHqxhHOejTeJExI7qOJ
+         fGhbFz/08aomMOdR3qbx+cirD18UO8Lp52liY8wWlXT3HZ+bG2BTkK/IB8oYKa84NraI
+         6AB6fznjLPhBbF9ajIwCFpR+n3+2tjQVGmtj59DW1eTvh5fYDISCX7xWp8Xq/d8u8fVx
+         fj7BPryKzKlAdrL2Tu4t9/Eh9iAb/NNlPBhaCiMo0h7cMv4hXT5zwmKTWZIHKjWB6CJ7
+         oTmcaVpI1jznWpAmPQZ1QrGxJQH+S8TQUwBAese1QbbBZFSBZ6d0vjve5zNgMXnMjAXh
+         SVPg==
+X-Gm-Message-State: AOJu0YwLc2AYjP2vKkiwmmcAnsiKSkQQOTV59cMgw4JwN8X+WMLL45Jb
+        1Bv3GJNP4P7/d+F6/IfSNsAlDQ==
+X-Google-Smtp-Source: AGHT+IGkZ0Z/MGipPYgtciee5bgssBjyKrV3vFjgQq9aKLpthGkLg1gMgK3YX3rqUB7np5d3fs06BQ==
+X-Received: by 2002:a05:600c:4fcd:b0:407:8e85:89ad with SMTP id o13-20020a05600c4fcd00b004078e8589admr1286513wmq.14.1699440272758;
+        Wed, 08 Nov 2023 02:44:32 -0800 (PST)
 Received: from krzk-bin.. ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id fj12-20020a05600c0c8c00b004094c5d92bdsm19377377wmb.31.2023.11.08.02.44.25
+        by smtp.gmail.com with ESMTPSA id fj12-20020a05600c0c8c00b004094c5d92bdsm19377377wmb.31.2023.11.08.02.44.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Nov 2023 02:44:28 -0800 (PST)
+        Wed, 08 Nov 2023 02:44:32 -0800 (PST)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 To:     David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
         Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
@@ -85,9 +85,9 @@ To:     David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         alsa-devel@alsa-project.org, linux-sound@vger.kernel.org
 Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH 09/17] dt-bindings: gpu: arm,mali-midgard: add specific compatibles for existing Exynos SoC
-Date:   Wed,  8 Nov 2023 11:43:35 +0100
-Message-Id: <20231108104343.24192-10-krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 10/17] dt-bindings: iio: samsung,exynos-adc: add specific compatibles for existing SoC
+Date:   Wed,  8 Nov 2023 11:43:36 +0100
+Message-Id: <20231108104343.24192-11-krzysztof.kozlowski@linaro.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
 References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
@@ -114,25 +114,49 @@ Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 I propose to take the patch through Samsung SoC (me). See cover letter
 for explanation.
 ---
- Documentation/devicetree/bindings/gpu/arm,mali-midgard.yaml | 5 +++++
- 1 file changed, 5 insertions(+)
+ .../bindings/iio/adc/samsung,exynos-adc.yaml  | 29 +++++++++++--------
+ 1 file changed, 17 insertions(+), 12 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/gpu/arm,mali-midgard.yaml b/Documentation/devicetree/bindings/gpu/arm,mali-midgard.yaml
-index ca02baba5526..0801da33a385 100644
---- a/Documentation/devicetree/bindings/gpu/arm,mali-midgard.yaml
-+++ b/Documentation/devicetree/bindings/gpu/arm,mali-midgard.yaml
-@@ -40,6 +40,11 @@ properties:
-               - rockchip,rk3288-mali
-               - samsung,exynos5433-mali
-           - const: arm,mali-t760
+diff --git a/Documentation/devicetree/bindings/iio/adc/samsung,exynos-adc.yaml b/Documentation/devicetree/bindings/iio/adc/samsung,exynos-adc.yaml
+index 582d0a03b814..4e40f6bed5db 100644
+--- a/Documentation/devicetree/bindings/iio/adc/samsung,exynos-adc.yaml
++++ b/Documentation/devicetree/bindings/iio/adc/samsung,exynos-adc.yaml
+@@ -11,18 +11,23 @@ maintainers:
+ 
+ properties:
+   compatible:
+-    enum:
+-      - samsung,exynos-adc-v1                 # Exynos5250
+-      - samsung,exynos-adc-v2
+-      - samsung,exynos3250-adc
+-      - samsung,exynos4212-adc                # Exynos4212 and Exynos4412
+-      - samsung,exynos7-adc
+-      - samsung,s3c2410-adc
+-      - samsung,s3c2416-adc
+-      - samsung,s3c2440-adc
+-      - samsung,s3c2443-adc
+-      - samsung,s3c6410-adc
+-      - samsung,s5pv210-adc
++    oneOf:
++      - enum:
++          - samsung,exynos-adc-v1                 # Exynos5250
++          - samsung,exynos-adc-v2
++          - samsung,exynos3250-adc
++          - samsung,exynos4212-adc                # Exynos4212 and Exynos4412
++          - samsung,exynos7-adc
++          - samsung,s3c2410-adc
++          - samsung,s3c2416-adc
++          - samsung,s3c2440-adc
++          - samsung,s3c2443-adc
++          - samsung,s3c6410-adc
++          - samsung,s5pv210-adc
 +      - items:
 +          - enum:
-+              - samsung,exynos7-mali
-+          - const: samsung,exynos5433-mali
-+          - const: arm,mali-t760
-       - items:
-           - enum:
-               - rockchip,rk3399-mali
++              - samsung,exynos5433-adc
++          - const: samsung,exynos7-adc
+ 
+   reg:
+     maxItems: 1
 -- 
 2.34.1
 
