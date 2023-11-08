@@ -2,181 +2,186 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DFCFC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:29:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26CB8C4167B
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:43:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232332AbjKHK3y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Nov 2023 05:29:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44512 "EHLO
+        id S1344139AbjKHKn7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Nov 2023 05:43:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41532 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230045AbjKHK3x (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:29:53 -0500
-Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D1031BD8
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:29:51 -0800 (PST)
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 3E895409DC
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 10:29:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1699439388;
-        bh=JPnUP2dhK6rq2OT2zp59qDXCzcw2C/MeNwbO6irKsM8=;
-        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-         To:Cc:Content-Type;
-        b=QxjeHl3HuUYSKwAg8nm/gLIGxyOT/SuAWmmnzT2SXQh3+eSE56aRVttDXBF5jmP0b
-         OZnFnOabjENcix6k6Nl/lpcxoU193Vk9RoE5LkOhDoQR58KOBGpYgrWjx88p6VOioZ
-         gg426JUdKOSnxWqXB1Buuq0JWQoOmP+0ep87Hiklt1IzPlwlfPmGgy2HZrw0RGiINh
-         XQ4zuoOzp5PxWIGaBcDYswLPc/IWO6Fr01SayMmEMvV2iDNcwNjdh5yUqlkcMuEOar
-         lE2gXRLZQNx+dQBr2bKygIcecePq8lyHoaJ4FgLjMweLcfFawyTiSSWuN5v4RHgzE6
-         ZkB95gQZo4sQA==
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-6c334d2fd40so6263910b3a.2
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:29:48 -0800 (PST)
+        with ESMTP id S235540AbjKHKn6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:43:58 -0500
+Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8897A1BD5
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:43:56 -0800 (PST)
+Received: by mail-wm1-x333.google.com with SMTP id 5b1f17b1804b1-4083cd3917eso51187035e9.3
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:43:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1699440235; x=1700045035; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=VTczEAqOVbvVARsgwQf+QqYx6Pwq1efdiOYWiIKMhjk=;
+        b=rdROhjws0/ICfjI1ewaE9rSOKrgp9O/V+UucX2YHu6XtDYgYjJexraF0QxdyqGEMvV
+         NI9D+yg28fNdaqsQkHCOoeZFcrnJiWCA2yVWICdmNHK/rnDC51Jl3Y+yLpK3nJapNHFA
+         wLrltqMv4A8u3klaS5I3S6Kcb5/cKWNKMw+kgg2lH9YE9xHIp6sKvE4p7dug72fNT9Ch
+         PdYD6nbk+TBK6S/xZPJAGZdOP/WHXVTOlV8sxPSesFydHWnOELMJiqCFWdukyiD8/GlF
+         JdBVdJy9ResoWu4L2eH7DN5kkXykn+aLE5Sn1cfUBTeN86PvADRQuSpJwdL0ukEmizBQ
+         fwEA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699439387; x=1700044187;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=JPnUP2dhK6rq2OT2zp59qDXCzcw2C/MeNwbO6irKsM8=;
-        b=wetU4rluoRurtLARED2vlvksKHiRvafkY4/0GB9op2H4R+TNug75GyWI4OIii6X7V0
-         jHYiS6VmX3jP2s/qObH4H5J85bZcPZybrheG9uQiFI/ePHqhSXb8eVwwaR+7vIh//QWV
-         yybhaxc71OQ0T4o9BvIF1UVybOGMiajldgzZuJRV1KoYJ5pDqhU+fMcSLMRfoZaFf23g
-         izpaBQe1B5k3ZEvd/7b2jWTcc7Web97ZFtxuhsUL9cnL3CQ6Vjbm6V3BVIvXEp8660PW
-         IP0uvFyYPQqQaGNs8Hdl4V2076X/XDGKIfLwklcnfOrDEsN3zNePA2+MDLDiRRYu05+O
-         j0iA==
-X-Gm-Message-State: AOJu0YyGXKwLyJ+nL0S2+8wVigXPKXNzABjqys475gQeXRI5z0o6hEUN
-        bt6/IMwdwpgTGbtfrw572BLQk+kYJ3932hleqr63cdwmdznXMiWMdOdB+GMvk6QdJamkqsM6ecs
-        1TF8ylcTBh1xrXcjOT0W7gZFIl3RxGm5abxgzYF+cVf4GFJzANrEFu444Y65NpxmOAQY=
-X-Received: by 2002:a05:6a20:441d:b0:14c:c393:692 with SMTP id ce29-20020a056a20441d00b0014cc3930692mr2027846pzb.7.1699439386902;
-        Wed, 08 Nov 2023 02:29:46 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFboe2yTK4xo9PqvpxUzC3jlXy/epT3vmB6XsIMqWHzujx8gpq9+ZMU6Xblm9e+XufQk7xJ3brIYpcN30jCvUY=
-X-Received: by 2002:a05:6a20:441d:b0:14c:c393:692 with SMTP id
- ce29-20020a056a20441d00b0014cc3930692mr2027833pzb.7.1699439386603; Wed, 08
- Nov 2023 02:29:46 -0800 (PST)
+        d=1e100.net; s=20230601; t=1699440235; x=1700045035;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VTczEAqOVbvVARsgwQf+QqYx6Pwq1efdiOYWiIKMhjk=;
+        b=c/9fT/PJ/motmh5GMl74sMqq58YEYI5wK0nF949OMIoQ0ET+Vb+O6ND/1ufDXByxu3
+         MtG7jdcxeic419Q3RCd8tITPkWUbQs8Zb2fe0NM0AY/bFytMeKmrlY0jiIIGEufFHaA9
+         oSBeHWaHRPZG1jN0Ne6wJXzVUZD3qV2pPxOqmX6KdZ0x1K4S4/fmu2ISXw83kzJ9pWDn
+         8+xY77DLAxyK+C4nW6sr+hFHFWRl7/VFYybSzJqpEzPYCRL+ED6Ee5zYL1GTVeBVHpEk
+         +r+UKMzCVigoLKzFKMvhIfFPaZUBFewjmTZegxG5KBFtFg0UfYcMxilHvip5Rvc8iCnP
+         R7vw==
+X-Gm-Message-State: AOJu0Yx9mZB56nOmT+bF1Qdi7nVqBMXehijTsGPqVGfPcHKyjF9j1Bcv
+        UiDLbqI09crbmU+hySRCnJeuKA==
+X-Google-Smtp-Source: AGHT+IHiDWmBeuBOZUqxDCJkN9irswNWvo/qNXRb1omqiS2LAbu6ncxcqqv9pqzxYLbz6uacwStwug==
+X-Received: by 2002:a05:600c:5113:b0:405:336b:8307 with SMTP id o19-20020a05600c511300b00405336b8307mr1360908wms.7.1699440234966;
+        Wed, 08 Nov 2023 02:43:54 -0800 (PST)
+Received: from krzk-bin.. ([178.197.218.126])
+        by smtp.gmail.com with ESMTPSA id fj12-20020a05600c0c8c00b004094c5d92bdsm19377377wmb.31.2023.11.08.02.43.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Nov 2023 02:43:54 -0800 (PST)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To:     David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
+        Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+        Maxime Ripard <mripard@kernel.org>,
+        Thomas Zimmermann <tzimmermann@suse.de>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Andi Shyti <andi.shyti@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Lee Jones <lee@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Tomasz Figa <tomasz.figa@gmail.com>,
+        Sylwester Nawrocki <s.nawrocki@samsung.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Sam Protsenko <semen.protsenko@linaro.org>,
+        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-sound@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 00/17] dt-bindings: samsung: add specific compatibles for existing SoC
+Date:   Wed,  8 Nov 2023 11:43:26 +0100
+Message-Id: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20231016040132.23824-1-kai.heng.feng@canonical.com>
- <20231016093210.GA22952@wunner.de> <263982e90fc046cf977ecb8727003690@realtek.com>
- <20231018094435.GA21090@wunner.de> <02ee7e47166a463d8d4e491b61cdd33f@realtek.com>
- <20231019143504.GA25140@wunner.de>
-In-Reply-To: <20231019143504.GA25140@wunner.de>
-From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
-Date:   Wed, 8 Nov 2023 12:29:34 +0200
-Message-ID: <CAAd53p7jx=_Yh8sPwdsu-6Bc-hNgiExscMNGhgcbH=rzOBMOXQ@mail.gmail.com>
-Subject: Re: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on PCIe
- Link Down
-To:     Lukas Wunner <lukas@wunner.de>
-Cc:     Ricky WU <ricky_wu@realtek.com>,
-        "bhelgaas@google.com" <bhelgaas@google.com>,
-        "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        Tony Luck <tony.luck@intel.com>,
-        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
-        "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Lukas and Ricky,
+Hi,
 
-On Thu, Oct 19, 2023 at 5:35=E2=80=AFPM Lukas Wunner <lukas@wunner.de> wrot=
-e:
->
-> On Thu, Oct 19, 2023 at 01:49:50AM +0000, Ricky WU wrote:
-> > [    0.267813] pci 0000:00:1c.0: [8086:a33c] type 01 class 0x060400
->
-> Cannon Lake PCH Root Port
->
-> > [    0.275241] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
-> > [    0.275315] pci 0000:01:00.0: reg 0x10: [mem 0xa3b00000-0xa3b00fff]
-> > [    0.275782] pci 0000:01:00.0: supports D1 D2
-> > [    0.275784] pci 0000:01:00.0: PME# supported from D1 D2 D3hot D3cold
-> > [    0.276490] pci 0000:00:1c.0: PCI bridge to [bus 01]
->
-> Device below Root Port is initially a Realtek RTS5261 card reader.
->
-> > [    0.395968] pcieport 0000:00:1c.0: PME: Signaling with IRQ 122
-> > [    0.396009] pcieport 0000:00:1c.0: pciehp: Slot #8 AttnBtn- PwrCtrl-=
- MRL- AttnInd- PwrInd- HotPlug+ Surprise+ Interlock- NoCompl+ IbPresDis- LL=
-ActRep+
->
-> Root Port is hotplug-capable.
->
-> > [   43.180701] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> > [   43.180709] pcieport 0000:00:1c.0: pciehp: Slot(8): Card not present
-> > [   44.403768] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
-> > [   44.403772] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
-> > [   44.540631] pci 0000:01:00.0: [15b7:5007] type 00 class 0x010802
->
-> Card reader is unplugged and replaced by SanDisk SN530 NVMe SSD.
->
-> > [   51.682628] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> > [   51.716800] nvme0n1: detected capacity change from 495050752 to 0
-> > [   51.793382] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
-> > [   51.793392] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
-> > [   51.928633] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
->
-> NVMe SSD replaced by the card reader again.
->
-> > [   54.872928] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> > [   56.146581] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
-> > [   56.146584] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
-> > [   56.284632] pci 0000:01:00.0: [15b7:5007] type 00 class 0x010802
->
-> Card reader replaced by NVMe SSD, second time.
->
-> > [   60.635845] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> > [   60.676842] nvme0n1: detected capacity change from 495050752 to 0
-> > [   60.748953] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
-> > [   60.748958] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
-> > [   60.884619] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
->
-> NVMe SSD replaced by the card reader, second time.
->
-> > [   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> > [   63.912118] BUG: unable to handle page fault for address: ffffb24d40=
-3e5010
->
-> Card reader replaced with NVMe SSD, third time.
->
-> So it took three tries to reproduce the page fault.
->
-> Thanks for the log, the issue is a little less murky now.
-> But it's still unclear what the root cause is and thus
-> what the proper solution is.  I think this needs more
-> in-depth debugging, see my previous e-mail.
->
-> Hope that helps!  Thanks,
+Merging
+=======
+I propose to take entire patchset through my tree (Samsung SoC), because:
+1. Next cycle two new SoCs will be coming (Google GS101 and ExynosAutov920), so
+   they will touch the same lines in some of the DT bindings (not all, though).
+   It is reasonable for me to take the bindings for the new SoCs, to have clean
+   `make dtbs_check` on the new DTS.
+2. Having it together helps me to have clean `make dtbs_check` within my tree
+   on the existing DTS.
+3. No drivers are affected by this change.
+4. I plan to do the same for Tesla FSD and Exynos ARM32 SoCs, thus expect
+   follow up patchsets.
 
-I think the following approach should cover all the cases?
-Ricky, can you please give it a try?
+If folks agree, please kindly Ack the patches.
 
-diff --git a/drivers/pci/remove.c b/drivers/pci/remove.c
-index d749ea8250d6..907d60587227 100644
---- a/drivers/pci/remove.c
-+++ b/drivers/pci/remove.c
-@@ -1,6 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0
- #include <linux/pci.h>
- #include <linux/module.h>
-+#include <linux/pm_runtime.h>
- #include "pci.h"
+Description
+===========
+Samsung Exynos SoCs reuse several devices from older designs, thus historically
+we kept the old (block's) compatible only.  This works fine and there is no bug
+here, however guidelines expressed in
+Documentation/devicetree/bindings/writing-bindings.rst state that:
+1. Compatibles should be specific.
+2. We should add new compatibles in case of bugs or features.
 
- static void pci_free_resources(struct pci_dev *dev)
-@@ -89,6 +90,8 @@ static void pci_remove_bus_device(struct pci_dev *dev)
-        struct pci_bus *bus =3D dev->subordinate;
-        struct pci_dev *child, *tmp;
+Add compatibles specific to each SoC in front of all old-SoC-like compatibles.
+This will also help reviews of new code using existing DTS as template.  No
+functional impact on Linux drivers behavior.
 
-+       pm_runtime_barrier(&dev->dev);
-+
-        if (bus) {
-                list_for_each_entry_safe(child, tmp,
-                                         &bus->devices, bus_list)
+Future
+======
+If reasonable, I will do similar work for Tesla FSD and ARMv7/ARM32 Exynos
+bindings and DTS.
 
+Best regards,
+Krzysztof
 
->
-> Lukas
+Krzysztof Kozlowski (17):
+  dt-bindings: hwinfo: samsung,exynos-chipid: add specific compatibles
+    for existing SoC
+  dt-bindings: i2c: exynos5: add specific compatibles for existing SoC
+  dt-bindings: i2c: samsung,s3c2410-i2c: add specific compatibles for
+    existing SoC
+  dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatibles for
+    existing SoC
+  dt-bindings: pinctrl: samsung: add specific compatibles for existing
+    SoC
+  dt-bindings: rtc: s3c-rtc: add specific compatibles for existing SoC
+  dt-bindings: serial: samsung: add specific compatibles for existing
+    SoC
+  dt-bindings: samsung: exynos-pmu: add specific compatibles for
+    existing SoC
+  dt-bindings: gpu: arm,mali-midgard: add specific compatibles for
+    existing Exynos SoC
+  dt-bindings: iio: samsung,exynos-adc: add specific compatibles for
+    existing SoC
+  ASoC: dt-bindings: samsung-i2s: add specific compatibles for existing
+    SoC
+  dt-bindings: pwm: samsung: add specific compatibles for existing SoC
+  arm64: dts: exynos5433: add specific compatibles to several blocks
+  arm64: dts: exynos7: add specific compatibles to several blocks
+  arm64: dts: exynos7885: add specific compatibles to several blocks
+  arm64: dts: exynos850: add specific compatibles to several blocks
+  arm64: dts: exynosautov9: add specific compatibles to several blocks
+
+ .../bindings/gpu/arm,mali-midgard.yaml        |  5 ++
+ .../hwinfo/samsung,exynos-chipid.yaml         | 17 +++++-
+ .../devicetree/bindings/i2c/i2c-exynos5.yaml  | 10 +++-
+ .../bindings/i2c/samsung,s3c2410-i2c.yaml     | 22 ++++---
+ .../bindings/iio/adc/samsung,exynos-adc.yaml  | 29 +++++----
+ .../mfd/samsung,exynos5433-lpass.yaml         |  2 +-
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml  | 25 +++++---
+ .../samsung,pinctrl-wakeup-interrupt.yaml     | 24 +++++---
+ .../bindings/pinctrl/samsung,pinctrl.yaml     |  3 +-
+ .../devicetree/bindings/pwm/pwm-samsung.yaml  |  2 +
+ .../devicetree/bindings/rtc/s3c-rtc.yaml      |  5 ++
+ .../bindings/serial/samsung_uart.yaml         | 14 ++++-
+ .../bindings/soc/samsung/exynos-pmu.yaml      |  6 ++
+ .../bindings/soc/samsung/exynos-usi.yaml      |  2 +-
+ .../bindings/sound/samsung-i2s.yaml           | 19 +++---
+ arch/arm64/boot/dts/exynos/exynos5433.dtsi    | 60 ++++++++++++-------
+ arch/arm64/boot/dts/exynos/exynos7.dtsi       | 18 +++---
+ arch/arm64/boot/dts/exynos/exynos7885.dtsi    | 45 +++++++++-----
+ arch/arm64/boot/dts/exynos/exynos850.dtsi     | 34 ++++++-----
+ arch/arm64/boot/dts/exynos/exynosautov9.dtsi  |  6 +-
+ 20 files changed, 233 insertions(+), 115 deletions(-)
+
+-- 
+2.34.1
+
