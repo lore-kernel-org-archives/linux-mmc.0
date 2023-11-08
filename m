@@ -2,97 +2,181 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB939C0018C
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Nov 2023 12:15:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DFCFC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:29:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234140AbjKGMPy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Nov 2023 07:15:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41008 "EHLO
+        id S232332AbjKHK3y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Nov 2023 05:29:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44512 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234053AbjKGMPI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Nov 2023 07:15:08 -0500
-Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CFE5448E
-        for <linux-mmc@vger.kernel.org>; Tue,  7 Nov 2023 04:11:26 -0800 (PST)
-Received: by mail-yb1-xb33.google.com with SMTP id 3f1490d57ef6-d9ad90e1038so5820036276.3
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Nov 2023 04:11:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1699359085; x=1699963885; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=qBsaoWhr2znf8wvyVHsUac05BAGwf4F6oqcvXZtUp/8=;
-        b=iXMkBoQoLgWKkzBZiOv+sDzqltnXDA88Ik0w9dbJytsRyMYtCb0LG2wDl94RFq/lVJ
-         AmXh3VGPX17KdiZuCsbS5NAp6CH8XeRfEowFcbuIan1DkNJpQK3HI1eRlPwZRDT4AZC/
-         orlK4K34LFGBC5Q6GgQzdbQBi2cfbAtTAbwVSjQKSWPJWPZXtB09YTahdZ/4CDJFI/jL
-         Dy/OBTD+Nw007JpCtsK5+Z3Jb9QQNT4/rrUIyxo8TKqx6R/RB15IaH520MYQ9Z0GEDgh
-         AfhU4j+Yca9KansunGFkshE9e5T6FtrTickKD+1lUoPlH05uV9ujA5bgU9ZsKxWbCF7N
-         N/sQ==
+        with ESMTP id S230045AbjKHK3x (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:29:53 -0500
+Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D1031BD8
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:29:51 -0800 (PST)
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 3E895409DC
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 10:29:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1699439388;
+        bh=JPnUP2dhK6rq2OT2zp59qDXCzcw2C/MeNwbO6irKsM8=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=QxjeHl3HuUYSKwAg8nm/gLIGxyOT/SuAWmmnzT2SXQh3+eSE56aRVttDXBF5jmP0b
+         OZnFnOabjENcix6k6Nl/lpcxoU193Vk9RoE5LkOhDoQR58KOBGpYgrWjx88p6VOioZ
+         gg426JUdKOSnxWqXB1Buuq0JWQoOmP+0ep87Hiklt1IzPlwlfPmGgy2HZrw0RGiINh
+         XQ4zuoOzp5PxWIGaBcDYswLPc/IWO6Fr01SayMmEMvV2iDNcwNjdh5yUqlkcMuEOar
+         lE2gXRLZQNx+dQBr2bKygIcecePq8lyHoaJ4FgLjMweLcfFawyTiSSWuN5v4RHgzE6
+         ZkB95gQZo4sQA==
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-6c334d2fd40so6263910b3a.2
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:29:48 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699359085; x=1699963885;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=qBsaoWhr2znf8wvyVHsUac05BAGwf4F6oqcvXZtUp/8=;
-        b=LzBMRL0jlfgA9Nl6vWnxtUlQyv1SKDPAaVaB8Mf1CEsFhPtxV8C5YLwam8kKUM0zsV
-         XgzvGlsPtUAwqKVIF8o2FDLOyQ6VWDrU25SMy5UC7XoCJJzMm2J8dvs/Bcn+LjQZkYHf
-         +4+Y8Lf85x3I1IbT4Jh46p1Jfq5i+rdkd/ohZp4L8DhqL287GQEdam9ZQgVpvRCnRvtY
-         7gFgED4/UUnL6exNOkR94jQHuPwxyhTWLagK7cehVOgJZW/4ZESURDjvU4zC+PrNIYfq
-         QXa5XEnUz3ApPmxck7LZt32yg3MAbFFO6bAmZx86zSwR7J8+t2zBarlanQtP4aiGdChH
-         u6hQ==
-X-Gm-Message-State: AOJu0YxYQAwIWXqLLnICSE6lNCYQ8/G+T7woU43uDohNzGgpbiHyD53A
-        4C2jvXOVzxb2Q5cDfJthhMPvSJg/i2VwlCAZ9wtUKg==
-X-Google-Smtp-Source: AGHT+IHDMrKkSc1YppgWblP5EWz8Z1JpAjj1O5XSYjWz9AyzWl+KPwEz68afvy4+rSnZBmueG6VR2NfhaMpio9halj0=
-X-Received: by 2002:a25:1955:0:b0:d85:abce:3f43 with SMTP id
- 82-20020a251955000000b00d85abce3f43mr26728461ybz.38.1699359085155; Tue, 07
- Nov 2023 04:11:25 -0800 (PST)
+        d=1e100.net; s=20230601; t=1699439387; x=1700044187;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=JPnUP2dhK6rq2OT2zp59qDXCzcw2C/MeNwbO6irKsM8=;
+        b=wetU4rluoRurtLARED2vlvksKHiRvafkY4/0GB9op2H4R+TNug75GyWI4OIii6X7V0
+         jHYiS6VmX3jP2s/qObH4H5J85bZcPZybrheG9uQiFI/ePHqhSXb8eVwwaR+7vIh//QWV
+         yybhaxc71OQ0T4o9BvIF1UVybOGMiajldgzZuJRV1KoYJ5pDqhU+fMcSLMRfoZaFf23g
+         izpaBQe1B5k3ZEvd/7b2jWTcc7Web97ZFtxuhsUL9cnL3CQ6Vjbm6V3BVIvXEp8660PW
+         IP0uvFyYPQqQaGNs8Hdl4V2076X/XDGKIfLwklcnfOrDEsN3zNePA2+MDLDiRRYu05+O
+         j0iA==
+X-Gm-Message-State: AOJu0YyGXKwLyJ+nL0S2+8wVigXPKXNzABjqys475gQeXRI5z0o6hEUN
+        bt6/IMwdwpgTGbtfrw572BLQk+kYJ3932hleqr63cdwmdznXMiWMdOdB+GMvk6QdJamkqsM6ecs
+        1TF8ylcTBh1xrXcjOT0W7gZFIl3RxGm5abxgzYF+cVf4GFJzANrEFu444Y65NpxmOAQY=
+X-Received: by 2002:a05:6a20:441d:b0:14c:c393:692 with SMTP id ce29-20020a056a20441d00b0014cc3930692mr2027846pzb.7.1699439386902;
+        Wed, 08 Nov 2023 02:29:46 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFboe2yTK4xo9PqvpxUzC3jlXy/epT3vmB6XsIMqWHzujx8gpq9+ZMU6Xblm9e+XufQk7xJ3brIYpcN30jCvUY=
+X-Received: by 2002:a05:6a20:441d:b0:14c:c393:692 with SMTP id
+ ce29-20020a056a20441d00b0014cc3930692mr2027833pzb.7.1699439386603; Wed, 08
+ Nov 2023 02:29:46 -0800 (PST)
 MIME-Version: 1.0
-References: <20231107095741.8832-1-victorshihgli@gmail.com>
-In-Reply-To: <20231107095741.8832-1-victorshihgli@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 7 Nov 2023 13:10:48 +0100
-Message-ID: <CAPDyKFrr91qxxdYLiC4jeL+igYmJXpcfqvV1svWW-o7y4d9Kqw@mail.gmail.com>
-Subject: Re: [PATCH V3 0/2] mmc: sdhci-pci-gli: GL975[05]: Mask the replay
- timer timeout of AER
-To:     Victor Shih <victorshihgli@gmail.com>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        SeanHY.Chen.tu@genesyslogic.com.tw, kai.heng.feng@canonical.com,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20231016040132.23824-1-kai.heng.feng@canonical.com>
+ <20231016093210.GA22952@wunner.de> <263982e90fc046cf977ecb8727003690@realtek.com>
+ <20231018094435.GA21090@wunner.de> <02ee7e47166a463d8d4e491b61cdd33f@realtek.com>
+ <20231019143504.GA25140@wunner.de>
+In-Reply-To: <20231019143504.GA25140@wunner.de>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Wed, 8 Nov 2023 12:29:34 +0200
+Message-ID: <CAAd53p7jx=_Yh8sPwdsu-6Bc-hNgiExscMNGhgcbH=rzOBMOXQ@mail.gmail.com>
+Subject: Re: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on PCIe
+ Link Down
+To:     Lukas Wunner <lukas@wunner.de>
+Cc:     Ricky WU <ricky_wu@realtek.com>,
+        "bhelgaas@google.com" <bhelgaas@google.com>,
+        "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+        "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 7 Nov 2023 at 10:57, Victor Shih <victorshihgli@gmail.com> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> Summary
-> =======
-> Due to a flaw in the hardware design, the GL975x replay timer frequently
-> times out when ASPM is enabled. As a result, the warning messages that will
-> often appear in the system log when the system accesses the GL975x
-> PCI config. Therefore, the replay timer timeout must be masked.
->
-> Patch structure
-> ===============
-> patch#1: for GL9750
-> patch#2: for GL9755
->
-> Changes in v3 (November. 7, 2023)
-> * Split patch in two patches. One patch for GL9750 and another for GL9755.
-> * Add fixes tag to corresponding patches.
->
-> Victor Shih (2):
->   mmc: sdhci-pci-gli: GL9750: Mask the replay timer timeout of AER
->   mmc: sdhci-pci-gli: GL9755: Mask the replay timer timeout of AER
->
->  drivers/mmc/host/sdhci-pci-gli.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
->
+Hi Lukas and Ricky,
 
-Applied for fixes and by adding stable tags, thanks!
+On Thu, Oct 19, 2023 at 5:35=E2=80=AFPM Lukas Wunner <lukas@wunner.de> wrot=
+e:
+>
+> On Thu, Oct 19, 2023 at 01:49:50AM +0000, Ricky WU wrote:
+> > [    0.267813] pci 0000:00:1c.0: [8086:a33c] type 01 class 0x060400
+>
+> Cannon Lake PCH Root Port
+>
+> > [    0.275241] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
+> > [    0.275315] pci 0000:01:00.0: reg 0x10: [mem 0xa3b00000-0xa3b00fff]
+> > [    0.275782] pci 0000:01:00.0: supports D1 D2
+> > [    0.275784] pci 0000:01:00.0: PME# supported from D1 D2 D3hot D3cold
+> > [    0.276490] pci 0000:00:1c.0: PCI bridge to [bus 01]
+>
+> Device below Root Port is initially a Realtek RTS5261 card reader.
+>
+> > [    0.395968] pcieport 0000:00:1c.0: PME: Signaling with IRQ 122
+> > [    0.396009] pcieport 0000:00:1c.0: pciehp: Slot #8 AttnBtn- PwrCtrl-=
+ MRL- AttnInd- PwrInd- HotPlug+ Surprise+ Interlock- NoCompl+ IbPresDis- LL=
+ActRep+
+>
+> Root Port is hotplug-capable.
+>
+> > [   43.180701] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> > [   43.180709] pcieport 0000:00:1c.0: pciehp: Slot(8): Card not present
+> > [   44.403768] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> > [   44.403772] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> > [   44.540631] pci 0000:01:00.0: [15b7:5007] type 00 class 0x010802
+>
+> Card reader is unplugged and replaced by SanDisk SN530 NVMe SSD.
+>
+> > [   51.682628] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> > [   51.716800] nvme0n1: detected capacity change from 495050752 to 0
+> > [   51.793382] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> > [   51.793392] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> > [   51.928633] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
+>
+> NVMe SSD replaced by the card reader again.
+>
+> > [   54.872928] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> > [   56.146581] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> > [   56.146584] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> > [   56.284632] pci 0000:01:00.0: [15b7:5007] type 00 class 0x010802
+>
+> Card reader replaced by NVMe SSD, second time.
+>
+> > [   60.635845] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> > [   60.676842] nvme0n1: detected capacity change from 495050752 to 0
+> > [   60.748953] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
+> > [   60.748958] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
+> > [   60.884619] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
+>
+> NVMe SSD replaced by the card reader, second time.
+>
+> > [   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
+> > [   63.912118] BUG: unable to handle page fault for address: ffffb24d40=
+3e5010
+>
+> Card reader replaced with NVMe SSD, third time.
+>
+> So it took three tries to reproduce the page fault.
+>
+> Thanks for the log, the issue is a little less murky now.
+> But it's still unclear what the root cause is and thus
+> what the proper solution is.  I think this needs more
+> in-depth debugging, see my previous e-mail.
+>
+> Hope that helps!  Thanks,
 
-Kind regards
-Uffe
+I think the following approach should cover all the cases?
+Ricky, can you please give it a try?
+
+diff --git a/drivers/pci/remove.c b/drivers/pci/remove.c
+index d749ea8250d6..907d60587227 100644
+--- a/drivers/pci/remove.c
++++ b/drivers/pci/remove.c
+@@ -1,6 +1,7 @@
+ // SPDX-License-Identifier: GPL-2.0
+ #include <linux/pci.h>
+ #include <linux/module.h>
++#include <linux/pm_runtime.h>
+ #include "pci.h"
+
+ static void pci_free_resources(struct pci_dev *dev)
+@@ -89,6 +90,8 @@ static void pci_remove_bus_device(struct pci_dev *dev)
+        struct pci_bus *bus =3D dev->subordinate;
+        struct pci_dev *child, *tmp;
+
++       pm_runtime_barrier(&dev->dev);
++
+        if (bus) {
+                list_for_each_entry_safe(child, tmp,
+                                         &bus->devices, bus_list)
+
+
+>
+> Lukas
