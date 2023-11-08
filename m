@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71E25C04A92
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:44:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 980E6C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:45:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235635AbjKHKox (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Nov 2023 05:44:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37578 "EHLO
+        id S1344544AbjKHKpG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Nov 2023 05:45:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344455AbjKHKo2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:44:28 -0500
-Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD96C1FD2
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:44:15 -0800 (PST)
-Received: by mail-wm1-x336.google.com with SMTP id 5b1f17b1804b1-4083dbc43cfso42168465e9.3
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:44:15 -0800 (PST)
+        with ESMTP id S1344571AbjKHKoo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:44:44 -0500
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E57151FFF
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:44:19 -0800 (PST)
+Received: by mail-wm1-x32a.google.com with SMTP id 5b1f17b1804b1-4083f61322fso48637485e9.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:44:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1699440254; x=1700045054; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1699440258; x=1700045058; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=jaIBx0Az35AgmK0hmQ6KD07E3PCcuw+SeUDmsLqHS7Q=;
-        b=C86cKyLVHMSNiuARVDdTsIhu1bikbR/K1axeSIn64CBcsOV6oZ9hWoWYAsdIiPpkS+
-         Z0DLTluUmrh1z+pMUaBkjq7hyFpay3hOY0VPQ/18fdo325HM9C2w9Gwy7HSKLt4m4pTo
-         qF2nZ7uzCWxOMQ2biHutk5630xWet8r9pfJbIxQu+bpsqt4o5f9HmoKh7rlJLqVzRDuC
-         NeITvbCKWryfQwiptv3HSRi7QBxdfpqSqzFuLCUKdAUCnY0TP/EPL89G8f41PpP6GVKo
-         khymXT1hegSPib2gx0eij2q5kBEyKssjAKQeuJvGUD+yNNy26SL74sCuizOzeMtOdkPV
-         NCtQ==
+        bh=TGrUPXldQQyi7i1y6HTuSgGxtg81Z3Wiq2G+ebaMhpQ=;
+        b=RRyZ2DsumWDob59sxIhP4NZ0+PB9uqb9zZOUEOANQYdG++ZFy2VRMKtljHlKQz2N/b
+         FWyNXAM90moRZUT9eT6+Uv5TbS7CPe9q7c3KOcLjxxzOBrfyWbaAqMDtmXsDpoRHWolZ
+         nNHIs3XfkQeqER0jUAusgARPrNPvSZ/cIxQT0M4y9KHtLyq8xxD2j4XSRCPRHVhLgkDT
+         fUZhaESpUcxCaH3amqo7JEmuqdlsvW/u71otvwXtUgpq/xDNfHn69aF7IovJ39IZgWy+
+         /UUa+J1L1aoAxKISj9Ttf0SEkrQTTFoRgxfETPWH1CVy5Tys9WnF6BKIBEH3NY2qfdRo
+         IwiA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699440254; x=1700045054;
+        d=1e100.net; s=20230601; t=1699440258; x=1700045058;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=jaIBx0Az35AgmK0hmQ6KD07E3PCcuw+SeUDmsLqHS7Q=;
-        b=dF68spmzLDsXj1apT215U0TryDD7ZZf5FF+Dr9LVXaeh2TReB54Dwg8xyXeAddfxcM
-         Z25oegFXe/rcbFb9D83rMjHYgaA40db1fQz3abJgsApOD0ThjxUkeUNQ2HdaNXjm8gaB
-         lHlGycoGuMz19e2G3pGPgrN3reu+Caanpfmo6xfAeZf7lsAYoSDNTwV2i4IhnTA7YSvB
-         C0g0OSKaPTGIwy969Lq+MKokJ+S1Gv6o5Pv4LMSaW+IeZ3kyveTiwipu4eLNGtM3LjC3
-         hk50Cx4YCRQO+GIqR76rizU/1o0OQriBsMk5IrQ3PA1WCbikFfnLsLRbCtwDwdKiHi8z
-         UAOQ==
-X-Gm-Message-State: AOJu0YwX47Q+PFNDtm3PI2pashRNAWCBfp7nVlxePPU1gec3uxudT+Hy
-        KsctH6nYgkYZMi7iuM8HqqzWZw==
-X-Google-Smtp-Source: AGHT+IGJlG/0ZP5DkScPVOMejPSATBvkrEgkimXiOn6arKw3sdBhLlR3KhZAKEWBPjharUEFMBueGw==
-X-Received: by 2002:a05:600c:4f11:b0:406:5344:4212 with SMTP id l17-20020a05600c4f1100b0040653444212mr1447121wmq.41.1699440254278;
-        Wed, 08 Nov 2023 02:44:14 -0800 (PST)
+        bh=TGrUPXldQQyi7i1y6HTuSgGxtg81Z3Wiq2G+ebaMhpQ=;
+        b=Lyv/MV1kTwR+UYTJtGmLkLcb4RnWJWiWfMiIRVMBixLC3Knn46twaiDdKc8AVTPVlM
+         HkBWL75yJjCAe6ryT8A8pmaawqlUL9x/PaOKHyY4wqhwHMnEojYtYUpalnTUIMinDRuf
+         182tSRqGdDZTWNIZYXk54h6AVirXxmsWzixiZCChBbCoTvrIjldEd+om0Wd+Y2y6IOnk
+         hkJPKem3aC4SJzER0TVGmbIlFPJHNHIohaqRXF0O2m/segFXIuDBETkwpSuD66XcORWU
+         o9l5OALjncQN+sTVl1HlP/bvf+mnEzFCsClZWolsTbgh5J6Yo18jgQVvdiQWQiu7+r6U
+         WdOA==
+X-Gm-Message-State: AOJu0Yzu4Cw1muBnPLOj7KrIh7eZbkoB6+gBj9Wx3TLD9EsIPLpaM842
+        4Mk9iwvmPK7yyfXO42RPqBInDw==
+X-Google-Smtp-Source: AGHT+IGzkWzdSSfC10gvMcrdr+HWpovdFD2tWKhVyooAAzLg7iLljfH0hHjLNTv+Bpu3NP726JCxaA==
+X-Received: by 2002:a05:600c:3553:b0:406:c6de:2bea with SMTP id i19-20020a05600c355300b00406c6de2beamr1367091wmq.17.1699440257975;
+        Wed, 08 Nov 2023 02:44:17 -0800 (PST)
 Received: from krzk-bin.. ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id fj12-20020a05600c0c8c00b004094c5d92bdsm19377377wmb.31.2023.11.08.02.44.10
+        by smtp.gmail.com with ESMTPSA id fj12-20020a05600c0c8c00b004094c5d92bdsm19377377wmb.31.2023.11.08.02.44.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Nov 2023 02:44:13 -0800 (PST)
+        Wed, 08 Nov 2023 02:44:17 -0800 (PST)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 To:     David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
         Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
@@ -85,9 +85,9 @@ To:     David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         alsa-devel@alsa-project.org, linux-sound@vger.kernel.org
 Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH 05/17] dt-bindings: pinctrl: samsung: add specific compatibles for existing SoC
-Date:   Wed,  8 Nov 2023 11:43:31 +0100
-Message-Id: <20231108104343.24192-6-krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 06/17] dt-bindings: rtc: s3c-rtc: add specific compatibles for existing SoC
+Date:   Wed,  8 Nov 2023 11:43:32 +0100
+Message-Id: <20231108104343.24192-7-krzysztof.kozlowski@linaro.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
 References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
@@ -114,58 +114,24 @@ Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 I propose to take the patch through Samsung SoC (me). See cover letter
 for explanation.
 ---
- .../samsung,pinctrl-wakeup-interrupt.yaml     | 24 ++++++++++++-------
- .../bindings/pinctrl/samsung,pinctrl.yaml     |  3 ++-
- 2 files changed, 17 insertions(+), 10 deletions(-)
+ Documentation/devicetree/bindings/rtc/s3c-rtc.yaml | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl-wakeup-interrupt.yaml b/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl-wakeup-interrupt.yaml
-index 1de91a51234d..1c07af24d6cf 100644
---- a/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl-wakeup-interrupt.yaml
-+++ b/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl-wakeup-interrupt.yaml
-@@ -28,15 +28,21 @@ description: |
- 
- properties:
-   compatible:
--    enum:
--      - samsung,s3c2410-wakeup-eint
--      - samsung,s3c2412-wakeup-eint
--      - samsung,s3c64xx-wakeup-eint
--      - samsung,s5pv210-wakeup-eint
--      - samsung,exynos4210-wakeup-eint
--      - samsung,exynos7-wakeup-eint
--      - samsung,exynos850-wakeup-eint
--      - samsung,exynosautov9-wakeup-eint
-+    oneOf:
-+      - enum:
-+          - samsung,s3c2410-wakeup-eint
-+          - samsung,s3c2412-wakeup-eint
-+          - samsung,s3c64xx-wakeup-eint
-+          - samsung,s5pv210-wakeup-eint
-+          - samsung,exynos4210-wakeup-eint
-+          - samsung,exynos7-wakeup-eint
-+          - samsung,exynos850-wakeup-eint
-+          - samsung,exynosautov9-wakeup-eint
+diff --git a/Documentation/devicetree/bindings/rtc/s3c-rtc.yaml b/Documentation/devicetree/bindings/rtc/s3c-rtc.yaml
+index d51b236939bf..bf4e11d6dffb 100644
+--- a/Documentation/devicetree/bindings/rtc/s3c-rtc.yaml
++++ b/Documentation/devicetree/bindings/rtc/s3c-rtc.yaml
+@@ -17,6 +17,11 @@ properties:
+           - samsung,s3c2416-rtc
+           - samsung,s3c2443-rtc
+           - samsung,s3c6410-rtc
 +      - items:
 +          - enum:
-+              - samsung,exynos5433-wakeup-eint
-+              - samsung,exynos7885-wakeup-eint
-+          - const: samsung,exynos7-wakeup-eint
- 
-   interrupts:
-     description:
-diff --git a/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl.yaml
-index 26614621774a..7509dc36af93 100644
---- a/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl.yaml
-+++ b/Documentation/devicetree/bindings/pinctrl/samsung,pinctrl.yaml
-@@ -313,7 +313,8 @@ examples:
-         pinctrl-0 = <&initial_alive>;
- 
-         wakeup-interrupt-controller {
--            compatible = "samsung,exynos7-wakeup-eint";
-+            compatible = "samsung,exynos5433-wakeup-eint",
-+                         "samsung,exynos7-wakeup-eint";
-             interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
-         };
++              - samsung,exynos7-rtc
++              - samsung,exynos850-rtc
++          - const: samsung,s3c6410-rtc
+       - const: samsung,exynos3250-rtc
+         deprecated: true
  
 -- 
 2.34.1
