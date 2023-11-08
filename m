@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B4DCC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:46:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9F52C4167B
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Nov 2023 10:46:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344670AbjKHKqe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Nov 2023 05:46:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44956 "EHLO
+        id S1344725AbjKHKq7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Nov 2023 05:46:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344565AbjKHKpr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:45:47 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99CF92715
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:44:41 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id 38308e7fff4ca-2c50ec238aeso92615691fa.0
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:44:41 -0800 (PST)
+        with ESMTP id S1344703AbjKHKqS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Nov 2023 05:46:18 -0500
+Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F01802D51
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Nov 2023 02:44:48 -0800 (PST)
+Received: by mail-wm1-x336.google.com with SMTP id 5b1f17b1804b1-40806e4106dso3797545e9.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Nov 2023 02:44:48 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1699440279; x=1700045079; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1699440287; x=1700045087; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=eLncO1ADQq/KYbPV1LBS+813XGTk7ajEpj3gEwbCXmE=;
-        b=EiBfrUd21IZaF6eVcNL0xmIRkJV/sq/4Lk/RDXWk8gxc6LaEnnRaILWx4D6Mh7cDYX
-         +rPBtBlRUyO55Wvf0FMD6MoSbRbOrt0pt2s45bbP/FUB76Rkr8TIr8LvI7MyIyh4sAaq
-         0NE+K7lYYKEkfkRhO4XlzfVysjV/ycJFX+kFHpfmLfGHzcsPn3jOxPE/G+EOA1m0HuAD
-         smsYSIiVd1pytAVCL4HIjHbDRPSt+lSewvLNear494xDmhYR+RoMXzOgD0oZdVtQ+5Ig
-         W1o22vZWGd0+LsgBtJOjGCo12Ho0UhGNHxGWoPMe90E2PJ4GbErAPlpC4m0veTMsJNXt
-         btMg==
+        bh=Maq2+L1Y42eLIp6jLOTQKPo6JnaiX6HnytDKQ9hLP3M=;
+        b=g9XQA9rzym40Y/5WeB9duG4RMsqs9UF/7dkpw3q5vzWlYDbrqOKsj9eBBgqYyAFYZi
+         gyR1mPsCVJC1UhOmdpSEBIwUTqGldBj2wlsn25TiVkBvkGsyJbWBI4alYtlRe3N03U8R
+         xD8L9Sl5lRB5gr1m/LNfDOzTvZzoy0ijBYGn9a+al1dxR1xfOGbd+DQVtyBFX4hUd89Q
+         rhOavNd5h0MuYO3vKFNxWyhiF5ubb5a+XMOwcBmzUHmGxlg0cZwOX4gUIw0kHDcGAw4/
+         N03ZZE9IOmnxtEi6Z4pdVfq3MjBRBO1xwVCmrfUxU/h4lGFfjEYaTS1HxNeIHIUmcOzN
+         Zkuw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699440279; x=1700045079;
+        d=1e100.net; s=20230601; t=1699440287; x=1700045087;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=eLncO1ADQq/KYbPV1LBS+813XGTk7ajEpj3gEwbCXmE=;
-        b=J4bniIod1x4OAzWMJ78Z7jDeNf4jXOYwHmS0kiOvkfBsSM1h9nI2ziGnWfKmPMB7pp
-         svm5DeSXFDPd6gEMDFV5XcV+KfKD5f9/n69ljKliH77/ed9bK54rrIt2WfBsdvb6DknG
-         oXCecOUrF0yqDvXUGzbSFp4NR6H4EqpZDCiLsgJiek0sOhm39ErrK9RVCvA8LB9MoiVi
-         trkQvnrUqrVB0d0XM6awudA0o+ebup40HRABl4hV20bEIk37Fm1+6XCPgvrS6Mar4JtB
-         IR41eaJalkKsPPIngZQrTZNoSXhTSQ3LX0csbixUIsqrRIBjtjCqwnM+4+jVjygv36HJ
-         szsw==
-X-Gm-Message-State: AOJu0YxQ1f9Qa9BEdSORN0okC24BYBcvTv4aRs+lFOoSV1xwLgJ/6ZAT
-        PJLly0IYqIPPgXAY6MigJoxbew==
-X-Google-Smtp-Source: AGHT+IE9e7WdZJcWzB5Gf22P43YL/3qsWhZ9UWDtVmtmQ2zCC7QEZqOnQRFgEbbvc33FYHTz/Q1w1g==
-X-Received: by 2002:a2e:81a:0:b0:2c5:7afd:75a1 with SMTP id 26-20020a2e081a000000b002c57afd75a1mr1229802lji.44.1699440279685;
-        Wed, 08 Nov 2023 02:44:39 -0800 (PST)
+        bh=Maq2+L1Y42eLIp6jLOTQKPo6JnaiX6HnytDKQ9hLP3M=;
+        b=rr36Qi5oyIddoiDumAAJTMRtk3AfvPqH43EiQ6mh/aQGAYv8SJr9+lOQrWVfoPEDu9
+         bjHhYJ5xFjqvRcX4tQIp8ya398IhgHKqr8oncJXB3azIpk6qFk7xSrs9rgviPZYaLZ02
+         ldliOy38j33BjB1eata0CU7OOWcXchcvYjYui7NQNXAuOMhwNlHnGXyu2Dq3wbJweizx
+         1DC4I12MlgM1u5c6kaw6h6VtwLJl8KyH0IVS4a5AloPqpTJI1DwXDH5JFr7DALZUNe7c
+         HUBA5VmRC8il1vyubMUCzOfWFMcUbvk+NIY2NacTi7jo9kcrVtM1Hk1y6SQC2Qbe4KcY
+         C1zA==
+X-Gm-Message-State: AOJu0Yys7Qk3FTip2ThRDC3bLBMgNn2SLKrMNjdFBac5o911Tlc6nIfF
+        nqIZcW4daNj9w9WfwH04zT4qXw==
+X-Google-Smtp-Source: AGHT+IHfnKTLAUfozAkfKQV4GR2Fej9TWilPKyjgZI/joMTpp1hOhiecaU9SQRw9m85EcpIoxEyIjw==
+X-Received: by 2002:a05:600c:4512:b0:406:44fc:65c9 with SMTP id t18-20020a05600c451200b0040644fc65c9mr1775482wmo.8.1699440287419;
+        Wed, 08 Nov 2023 02:44:47 -0800 (PST)
 Received: from krzk-bin.. ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id fj12-20020a05600c0c8c00b004094c5d92bdsm19377377wmb.31.2023.11.08.02.44.36
+        by smtp.gmail.com with ESMTPSA id fj12-20020a05600c0c8c00b004094c5d92bdsm19377377wmb.31.2023.11.08.02.44.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Nov 2023 02:44:39 -0800 (PST)
+        Wed, 08 Nov 2023 02:44:46 -0800 (PST)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 To:     David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
         Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
@@ -85,9 +85,9 @@ To:     David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         alsa-devel@alsa-project.org, linux-sound@vger.kernel.org
 Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH 12/17] dt-bindings: pwm: samsung: add specific compatibles for existing SoC
-Date:   Wed,  8 Nov 2023 11:43:38 +0100
-Message-Id: <20231108104343.24192-13-krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 14/17] arm64: dts: exynos7: add specific compatibles to several blocks
+Date:   Wed,  8 Nov 2023 11:43:40 +0100
+Message-Id: <20231108104343.24192-15-krzysztof.kozlowski@linaro.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
 References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
@@ -97,39 +97,100 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Samsung Exynos SoC reuses several devices from older designs, thus
-historically we kept the old (block's) compatible only.  This works fine
-and there is no bug here, however guidelines expressed in
+Exynos7 reuses several devices from older designs, thus historically
+we kept the old (block's) compatible only.  This works fine and there is
+no bug here, however guidelines expressed in
 Documentation/devicetree/bindings/writing-bindings.rst state that:
 1. Compatibles should be specific.
 2. We should add new compatibles in case of bugs or features.
 
-Add compatibles specific to each SoC in front of all old-SoC-like
-compatibles.
+Add compatibles specific to Exynos7 in front of all old-SoC-like
+compatibles.  This will also help reviews of new code using existing
+DTS as template.  No functional impact on Linux drivers behavior.
 
 Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
 ---
+ arch/arm64/boot/dts/exynos/exynos7.dtsi | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
 
-I propose to take the patch through Samsung SoC (me). See cover letter
-for explanation.
----
- Documentation/devicetree/bindings/pwm/pwm-samsung.yaml | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/pwm/pwm-samsung.yaml b/Documentation/devicetree/bindings/pwm/pwm-samsung.yaml
-index 2162f661ed5a..89a3875cb50a 100644
---- a/Documentation/devicetree/bindings/pwm/pwm-samsung.yaml
-+++ b/Documentation/devicetree/bindings/pwm/pwm-samsung.yaml
-@@ -29,6 +29,8 @@ properties:
-           - samsung,exynos4210-pwm          # 32-bit, Exynos
-       - items:
-           - enum:
-+              - samsung,exynos5433-pwm
-+              - samsung,exynos7-pwm
-               - samsung,exynosautov9-pwm
-           - const: samsung,exynos4210-pwm
+diff --git a/arch/arm64/boot/dts/exynos/exynos7.dtsi b/arch/arm64/boot/dts/exynos/exynos7.dtsi
+index 6ed80ddf3369..9cb6bd61262e 100644
+--- a/arch/arm64/boot/dts/exynos/exynos7.dtsi
++++ b/arch/arm64/boot/dts/exynos/exynos7.dtsi
+@@ -128,7 +128,8 @@ soc: soc@0 {
+ 		ranges = <0 0 0 0x18000000>;
  
+ 		chipid@10000000 {
+-			compatible = "samsung,exynos4210-chipid";
++			compatible = "samsung,exynos7-chipid",
++				     "samsung,exynos4210-chipid";
+ 			reg = <0x10000000 0x100>;
+ 		};
+ 
+@@ -279,7 +280,7 @@ clock_fsys1: clock-controller@156e0000 {
+ 		};
+ 
+ 		serial_0: serial@13630000 {
+-			compatible = "samsung,exynos4210-uart";
++			compatible = "samsung,exynos7-uart", "samsung,exynos4210-uart";
+ 			reg = <0x13630000 0x100>;
+ 			interrupts = <GIC_SPI 440 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&clock_peric0 PCLK_UART0>,
+@@ -289,7 +290,7 @@ serial_0: serial@13630000 {
+ 		};
+ 
+ 		serial_1: serial@14c20000 {
+-			compatible = "samsung,exynos4210-uart";
++			compatible = "samsung,exynos7-uart", "samsung,exynos4210-uart";
+ 			reg = <0x14c20000 0x100>;
+ 			interrupts = <GIC_SPI 456 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&clock_peric1 PCLK_UART1>,
+@@ -299,7 +300,7 @@ serial_1: serial@14c20000 {
+ 		};
+ 
+ 		serial_2: serial@14c30000 {
+-			compatible = "samsung,exynos4210-uart";
++			compatible = "samsung,exynos7-uart", "samsung,exynos4210-uart";
+ 			reg = <0x14c30000 0x100>;
+ 			interrupts = <GIC_SPI 457 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&clock_peric1 PCLK_UART2>,
+@@ -309,7 +310,7 @@ serial_2: serial@14c30000 {
+ 		};
+ 
+ 		serial_3: serial@14c40000 {
+-			compatible = "samsung,exynos4210-uart";
++			compatible = "samsung,exynos7-uart", "samsung,exynos4210-uart";
+ 			reg = <0x14c40000 0x100>;
+ 			interrupts = <GIC_SPI 458 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&clock_peric1 PCLK_UART3>,
+@@ -539,7 +540,7 @@ pmu_system_controller: system-controller@105c0000 {
+ 		};
+ 
+ 		rtc: rtc@10590000 {
+-			compatible = "samsung,s3c6410-rtc";
++			compatible = "samsung,exynos7-rtc", "samsung,s3c6410-rtc";
+ 			reg = <0x10590000 0x100>;
+ 			interrupts = <GIC_SPI 355 IRQ_TYPE_LEVEL_HIGH>,
+ 				     <GIC_SPI 356 IRQ_TYPE_LEVEL_HIGH>;
+@@ -559,7 +560,8 @@ watchdog: watchdog@101d0000 {
+ 		};
+ 
+ 		gpu: gpu@14ac0000 {
+-			compatible = "samsung,exynos5433-mali", "arm,mali-t760";
++			compatible = "samsung,exynos7-mali",
++				     "samsung,exynos5433-mali", "arm,mali-t760";
+ 			reg = <0x14ac0000 0x5000>;
+ 			interrupts = <GIC_SPI 241 IRQ_TYPE_LEVEL_HIGH>,
+ 				     <GIC_SPI 242 IRQ_TYPE_LEVEL_HIGH>,
+@@ -619,7 +621,7 @@ adc: adc@13620000 {
+ 		};
+ 
+ 		pwm: pwm@136c0000 {
+-			compatible = "samsung,exynos4210-pwm";
++			compatible = "samsung,exynos7-pwm", "samsung,exynos4210-pwm";
+ 			reg = <0x136c0000 0x100>;
+ 			interrupts = <GIC_SPI 449 IRQ_TYPE_LEVEL_HIGH>,
+ 				     <GIC_SPI 450 IRQ_TYPE_LEVEL_HIGH>,
 -- 
 2.34.1
 
