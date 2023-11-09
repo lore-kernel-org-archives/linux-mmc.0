@@ -2,238 +2,87 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B050C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Nov 2023 16:22:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E3E8C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Nov 2023 17:52:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230185AbjKIQWx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Nov 2023 11:22:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51030 "EHLO
+        id S1344843AbjKIRwK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Nov 2023 12:52:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35786 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229770AbjKIQWx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Nov 2023 11:22:53 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 368F335A9
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Nov 2023 08:22:50 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id 2adb3069b0e04-507a3b8b113so1310390e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Nov 2023 08:22:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1699546968; x=1700151768; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=SlrCzGct6Lpx6z7xP3//KDAUNER14xBsUIT3wpM4fpg=;
-        b=WWZ7Mi9soEY9bKFbOc0hRDkFKZLWH3eHuZ8C2uxFGvbtPfppw5HqLU7d3D3atR9tvO
-         yfsMhPzmx3sPg6PGdhvyCCt2CzxbYtc7xN5ysvSnFDGtBLQt7Lypte10Mh9R52rIdRHu
-         I3gTBXugKlqLWoeQ9Lg8tbqsRMV1W7p7v8rr2beby04EIcaVT++KV8Bi4S/f+KW1IlPU
-         AFTr3H4wy8Bc9pXt6X6fcDajduJq8LlWUGPWm8ehT46q4b8RGxD9oamyjcekfZBlSlu0
-         evS/BYgvKO1br9+iQA9+6ETfvhZ/EqVou6I6KvpEFI6VTGNq6j3aK79Rg8GNlbaE02Xo
-         xqhQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699546968; x=1700151768;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=SlrCzGct6Lpx6z7xP3//KDAUNER14xBsUIT3wpM4fpg=;
-        b=QPNoGERM9t31wd3G3SN57LUwfLuExrjfN4Gx/R80WzyG/c5ZTzGYQhHpLil4DudSXX
-         3WYGjfsU4aafvJ7Tq5FyXgPxEFuAfugI/m/622h1dWzpYEUZhIkE30PVjtYEBqOsSgmr
-         ZDJ4zTLX6AfOd78e9kH6ZECTz7tYgSFdDUM+TWkZi0DaVNdLX62mW4BYVHxJNrQQFsBY
-         +HSL/99UwhAqXI5Xbol/OGDnkIVniP1wgaRCJAxSMQ7uD6XJd5RjiDyh6juBl1rHLGjq
-         WpXLKrT9X2w4N/+GUiBB0p//leWN9ye0fvQy39QnhBWOoE5PFnm+YZlp+ZZvbfhR688v
-         NyaA==
-X-Gm-Message-State: AOJu0YxoqKRNTkdMNQ4GYY69H3ZqWjf+x/YAOE+N6tjlidG6IiSw5AKJ
-        8oqZUYbRGEnKr4SFPT+MXmSyjg==
-X-Google-Smtp-Source: AGHT+IGgXqc0yMAFIHY2eRZZaHei8dFOjeflGpnumK7lKqJOvNpDKPNJ2WXN+DZgGTnpSkONhXMARg==
-X-Received: by 2002:a19:505a:0:b0:509:4ab3:a8a3 with SMTP id z26-20020a19505a000000b005094ab3a8a3mr1850064lfj.22.1699546968366;
-        Thu, 09 Nov 2023 08:22:48 -0800 (PST)
-Received: from [192.168.1.20] ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id j14-20020a05600c190e00b004094c5d929asm2586094wmq.10.2023.11.09.08.22.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Nov 2023 08:22:47 -0800 (PST)
-Message-ID: <71ca3812-9226-4a83-a655-78401e4ed33f@linaro.org>
-Date:   Thu, 9 Nov 2023 17:22:45 +0100
+        with ESMTP id S1344884AbjKIRwH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Nov 2023 12:52:07 -0500
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94ABA3A86;
+        Thu,  9 Nov 2023 09:52:05 -0800 (PST)
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 3A9Hq0hv024616;
+        Thu, 9 Nov 2023 11:52:00 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1699552320;
+        bh=5uOTxlYJS8MKhrUcUPhByjmbsu/a445xJkB8+qsp8GI=;
+        h=Date:From:To:CC:Subject:References:In-Reply-To;
+        b=JVusmdSdav3/3Cik+gbFqmx+AEt5MrDoSqk+c+fvN/WVXubztZVToukz0LmyTBqNv
+         WGE3XIc8eNvbb2xa3h0xnMUtQhaZco24f4AhPc6uxSZ8CK5JCAGOskweOgfrtzc9/m
+         /99YufiVrkWKs/+CifH+P/UtqBpeFNWDd5YzX8iI=
+Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 3A9Hq0Yi038288
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Thu, 9 Nov 2023 11:52:00 -0600
+Received: from DLEE110.ent.ti.com (157.170.170.21) by DLEE112.ent.ti.com
+ (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 9
+ Nov 2023 11:51:59 -0600
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE110.ent.ti.com
+ (157.170.170.21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Thu, 9 Nov 2023 11:52:00 -0600
+Received: from localhost (ileaxei01-snat2.itg.ti.com [10.180.69.6])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 3A9Hpx4u031373;
+        Thu, 9 Nov 2023 11:51:59 -0600
+Date:   Thu, 9 Nov 2023 11:51:59 -0600
+From:   Nishanth Menon <nm@ti.com>
+To:     =?utf-8?Q?Jo=C3=A3o_Paulo_Silva_Gon=C3=A7alves?= 
+        <joao.goncalves@toradex.com>
+CC:     "faiz_abbas@ti.com" <faiz_abbas@ti.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        Francesco Dolcini <francesco.dolcini@toradex.com>
+Subject: Re: SDHCI AM654 driver delaying boot time
+Message-ID: <20231109175159.wylup6z45h7mgxji@clump>
+References: <0e81af80de3d55e72f79af83fa5db87f5c9938f8.camel@toradex.com>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V6][4/4] dt-bindings: mmc: Add dt-bindings for realtek mmc
- driver
-Content-Language: en-US
-To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
-        adrian.hunter@intel.com, jh80.chung@samsung.com,
-        riteshh@codeaurora.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org
-Cc:     conor+dt@kernel.org, asutoshd@codeaurora.org,
-        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        arnd@arndb.de, briannorris@chromium.org, doug@schmorgal.com,
-        tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
-        william.qiu@starfivetech.com
-References: <20231109082043.27147-1-jyanchou@realtek.com>
- <20231109082043.27147-5-jyanchou@realtek.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231109082043.27147-5-jyanchou@realtek.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <0e81af80de3d55e72f79af83fa5db87f5c9938f8.camel@toradex.com>
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09/11/2023 09:20, Jyan Chou wrote:
-> Document the device-tree bindings for Realtek SoCs mmc driver.
-
-Subject and commit msg - drop driver and describe hardware instead.
-s/mmc/MMC/
-
+On 18:56-20231108, João Paulo Silva Gonçalves wrote:
+> Hello all, 
 > 
-> Signed-off-by: Jyan Chou <jyanchou@realtek.com>
-> 
-> ---
-> v5 -> v6:
-> - Drop the incorrect, generic compatible and modify it to specific.
-> - Drop useless properties.
+> We are trying to minimize boot time for our AM62 devices. Unfortunately, we have identified a delay of approximately 1.5 seconds caused by the
+> sdhci_am654 driver. This delay is a result of a timeout within the driver (MAX_POWER_ON_TIMEOUT) and was introduced in commit 7ca0f16 ("mmc:
+> sdhci_am654: Add workaround for card detect debounce timer"). This issue arises only when there is no SD card present in the MMC slot.  We tested the
+> driver with a lower timeout value and everything worked. However, as indicated in the commit message, this timeout may be related to the way the sdhci
+> controller hardware IP works. Currently, the driver employs a sort of a "busy loop" to wait for this timeout to pass delaying the boot. Why is
+> need to busy loop for this timeout? Is it possible to wait for it in the backgroud? Am I am missing something here? 
 
-Which ones?
+I am not an mmc expert, but, Isn't this sequence part of the programmer
+manual in the TRM[1]? Either way, one additional issue I did end up with
+when I was doing beagleplay[2] was when i booted off emmc and runtime PM
+disabled SD/MMC interface, the MMC IP's CD mode would'nt work since the
+IP isn't clocked. So I switched the mux mode to GPIO to use mmc CD
+there. I haven't timed that approach where
+SDHCI_AM654_QUIRK_FORCE_CDTEST would get set.
 
-> - Modify bindings to make DTS and driver match.
-> 
-> v4 -> v5:
-> - Remove unused property, e.g.,cqe, resets, clock-freq-min-max.
-> - Fix indentation.
-> 
-> v3 -> v4:
-> - Describe the items to make properties and item easy to understand.
-> - Fix examples' indentation and compiling error.
-> - Drop useless properties.
-> 
-> v2 -> v3:
-> - Modify dt-bindings' content and description.
-> - Fix coding style.
-> - Update the list of maintainers.
-> 
-> v1 -> v2:
-> - Add dt-bindings.
-> ---
->  .../bindings/mmc/realtek,rtd-dw-cqe-emmc.yaml | 162 ++++++++++++++++++
->  1 file changed, 162 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/realtek,rtd-dw-cqe-emmc.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/realtek,rtd-dw-cqe-emmc.yaml b/Documentation/devicetree/bindings/mmc/realtek,rtd-dw-cqe-emmc.yaml
-> new file mode 100644
-> index 000000000000..d7118cf457e8
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/realtek,rtd-dw-cqe-emmc.yaml
-> @@ -0,0 +1,162 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/realtek,rtd-dw-cqe-emmc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Realtek DesignWare mobile storage host controller
-> +
-> +description:
-> +  Realtek uses the Synopsys DesignWare mobile storage host controller
-> +  to interface a SoC with storage medium. This file documents the Realtek
-> +  specific extensions.
-> +
-> +maintainers:
-> +  - Jyan Chou <jyanchou@realtek.com>
-> +
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - realtek,rtd1325-dw-cqe-emmc
-> +      - realtek,rtd1319-dw-cqe-emmc
-> +      - realtek,rtd1315e-dw-cqe-emmc
-> +      - realtek,rtd1619b-dw-cqe-emmc
-> +
-> +  reg:
-> +    items:
-> +      - description: emmc base address
-> +      - description: cqhci base address
-> +
-> +  reg-names:
-> +    items:
-> +      - const: emmc
-> +      - const: cqhci
-> +
-> +  realtek,m2tmx:
-> +    $ref: /schemas/types.yaml#/definitions/phandle
-> +    description: Phandle to m2tmx syscon register region.
-
-There is no such stuff as "syscon register region". Syscon is Linux
-term. Please write here instead the full name of the hardware block and
-describe its purpose (for what is it needed for).
-
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 4
-> +
-> +  clock-names:
-> +    items:
-> +      - const: biu
-> +      - const: ciu
-> +      - const: vp0
-> +      - const: vp1
-> +
-> +  resets:
-> +    maxItems: 1
-> +
-> +  reset-names:
-> +    const: reset
-
-Nothing improved here.
-
-Go back to previous versions and implement the feedback you received.
-
-Best regards,
-Krzysztof
-
+[1] https://www.ti.com/lit/pdf/spruiv7
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts#n835
+-- 
+Regards,
+Nishanth Menon
+Key (0xDDB5849D1736249D) / Fingerprint: F8A2 8693 54EB 8232 17A3  1A34 DDB5 849D 1736 249D
