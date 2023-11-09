@@ -2,132 +2,147 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03AFFC4167D
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Nov 2023 11:20:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B643CC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Nov 2023 15:23:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232062AbjKILUZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Nov 2023 06:20:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53226 "EHLO
+        id S234550AbjKIPXR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Nov 2023 10:23:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46306 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231944AbjKILUY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Nov 2023 06:20:24 -0500
-Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A9D42D5F
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Nov 2023 03:20:22 -0800 (PST)
-Received: by mail-wm1-x32b.google.com with SMTP id 5b1f17b1804b1-40853c639abso5050455e9.0
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Nov 2023 03:20:22 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1699528820; x=1700133620; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=cavHVFQJ8PuwkxFyTFM+8LZM+EGSpdqZcaFZ4JxFv24=;
-        b=VqXCCZpdpLUggHfPfSJ3lpJeiMUPXeDq52DMwPPO6JZL2diU5xdEzJey1pxB8CqV8e
-         Vt504GkPy3OPP1NyO0ccINbWgCA4gzMRm5OQjmc74zshpAIObvRxrRL+MbPBx2xmrGYT
-         BXEUHsm6XperJBlmBH8XfRR4FiIHnjdl8sHyU=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699528820; x=1700133620;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=cavHVFQJ8PuwkxFyTFM+8LZM+EGSpdqZcaFZ4JxFv24=;
-        b=odIeksNO4dQMK9VMyWul3nYHcVQRg09WYjw+E7GXlJzjJaPVP+6N4cTRqeGL+cafML
-         lT3vRLpE5AXDbijgQrLVl05QY3YWFTHaxkjOODNxq3G984IexMQhLs95++yMn/O74uY2
-         K3MlXF34frSPRIzA0hdDYWP4eFYlFQ2ap5ZDvl16ZxCMkmBqKFgkG2RuDGh8qTQO20ST
-         /jbids3MCkkAubvIZilSWZvi58v1fpd6deDbGZmtBr+VrKHAbPWvTLI+XLa3hJfpvDOx
-         c+2bP7ilhq0CCc7ZpRxxr9VfxfTxM0fkeyohF5O6oYEuw0k+P7SBEXxW5/w0QmC986B0
-         huTA==
-X-Gm-Message-State: AOJu0Yyk2pG59Fa3xyN1buOyEENIp0Gew5zdVOTK6IYNpvojmGqHcU3L
-        VVtNINJ13pPVWuBjoD8Q9apOPQ==
-X-Google-Smtp-Source: AGHT+IFIoKr4jf0DscVS8+8kKDG9HyfDOFkGaLnalGFWGoyHWVF/fIEqh8WekzQytB0dT3wDRD3ArA==
-X-Received: by 2002:a05:600c:4181:b0:408:39d3:a26b with SMTP id p1-20020a05600c418100b0040839d3a26bmr4133544wmh.40.1699528820536;
-        Thu, 09 Nov 2023 03:20:20 -0800 (PST)
-Received: from orzel1.c.googlers.com.com (110.121.148.146.bc.googleusercontent.com. [146.148.121.110])
-        by smtp.gmail.com with ESMTPSA id f6-20020a05600c44c600b00401d8181f8bsm1755732wmo.25.2023.11.09.03.20.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Nov 2023 03:20:20 -0800 (PST)
-From:   =?UTF-8?q?Kornel=20Dul=C4=99ba?= <korneld@chromium.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Sven van Ashbrook <svenva@google.com>,
-        Jason Lai <jasonlai.genesyslogic@gmail.com>
-Cc:     Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        =?UTF-8?q?Stanis=C5=82aw=20Kardach?= <skardach@google.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        stable@vger.kernel.org,
-        =?UTF-8?q?Kornel=20Dul=C4=99ba?= <korneld@chromium.org>
-Subject: [PATCH] mmc: sdhci-pci-gli: Disable LPM during initialization
-Date:   Thu,  9 Nov 2023 11:19:34 +0000
-Message-ID: <20231109111934.4172565-1-korneld@chromium.org>
-X-Mailer: git-send-email 2.42.0.869.gea05f2083d-goog
+        with ESMTP id S232294AbjKIPXR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Nov 2023 10:23:17 -0500
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D918B30DC;
+        Thu,  9 Nov 2023 07:23:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1699543395; x=1731079395;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=Dca00f8u/HRqNH6WddJ2+DC+wgMmjo7ZhH+sIjOxTuI=;
+  b=mDafDizY9Z9e859ixzS7YYfRT/mMyXOcEFVGKypNVj8NnmBdaltdaFBJ
+   vp2mmHrGn/8YbynRLlHW2YjdDv+2lIZzy9T/W82XhGTjmqU4RourXS+rr
+   ZLvIt2xKrGZ0jZV7QCrHtLvy7Pufrnp5jAE/duQS+qCt0+ZyQB3nvPJSF
+   BA2x/z/8U4QSeCMQK0H1ZImOIVvUpNyhae6EZs9h3+gpXXAzFrAmZZfbU
+   6mckWqQULsgGXjH71VJMV4kOtoRoHwQSxfqV035IdpNJpg5mwMUz1Sfbo
+   LvFVmz6ZzSO6K/9A4bJo35exTPCA2EviTIGnxI8Jb3Ky/r7c74q9l5vev
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10889"; a="2972920"
+X-IronPort-AV: E=Sophos;i="6.03,289,1694761200"; 
+   d="scan'208";a="2972920"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2023 07:23:14 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10889"; a="907148487"
+X-IronPort-AV: E=Sophos;i="6.03,289,1694761200"; 
+   d="scan'208";a="907148487"
+Received: from lkp-server01.sh.intel.com (HELO 17d9e85e5079) ([10.239.97.150])
+  by fmsmga001.fm.intel.com with ESMTP; 09 Nov 2023 07:23:10 -0800
+Received: from kbuild by 17d9e85e5079 with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1r16s7-0008q8-2g;
+        Thu, 09 Nov 2023 15:23:07 +0000
+Date:   Thu, 9 Nov 2023 23:22:23 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com, jh80.chung@samsung.com,
+        riteshh@codeaurora.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org
+Cc:     oe-kbuild-all@lists.linux.dev, conor+dt@kernel.org,
+        asutoshd@codeaurora.org, p.zabel@pengutronix.de,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, arnd@arndb.de,
+        briannorris@chromium.org, doug@schmorgal.com,
+        tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
+        william.qiu@starfivetech.com, jyanchou@realtek.com
+Subject: Re: [PATCH V6][1/4] mmc: solve DMA boundary limitation of CQHCI
+ driver
+Message-ID: <202311092347.9A8MgzyN-lkp@intel.com>
+References: <20231109082043.27147-2-jyanchou@realtek.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231109082043.27147-2-jyanchou@realtek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To address IO performance commit f9e5b33934ce
-("mmc: host: Improve I/O read/write performance for GL9763E")
-limited LPM negotiation to runtime suspend state.
-The problem is that it only flips the switch in the runtime PM
-resume/suspend logic.
+Hi Jyan,
 
-Disable LPM negotiation in gl9763e_add_host.
-This helps in two ways:
-1. It was found that the LPM switch stays in the same position after
-   warm reboot. Having it set in init helps with consistency.
-2. Disabling LPM during the first runtime resume leaves us susceptible
-   to the performance issue in the time window between boot and the
-   first runtime suspend.
+kernel test robot noticed the following build errors:
 
-Fixes: f9e5b33934ce ("mmc: host: Improve I/O read/write performance for GL9763E")
-Cc: stable@vger.kernel.org
-Signed-off-by: Kornel Dulęba <korneld@chromium.org>
----
- drivers/mmc/host/sdhci-pci-gli.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+[auto build test ERROR on linus/master]
+[also build test ERROR on ulf-hansson-mmc-mirror/next v6.6 next-20231109]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index d83261e857a5..ce91d1e63a8e 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -220,6 +220,9 @@
- 
- #define GLI_MAX_TUNING_LOOP 40
- 
-+static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot,
-+					      bool enable);
-+
- /* Genesys Logic chipset */
- static inline void gl9750_wt_on(struct sdhci_host *host)
- {
-@@ -1281,6 +1284,9 @@ static int gl9763e_add_host(struct sdhci_pci_slot *slot)
- 	if (ret)
- 		goto cleanup;
- 
-+	/* Disable LPM negotiation to avoid entering L1 state. */
-+	gl9763e_set_low_power_negotiation(slot, false);
-+
- 	return 0;
- 
- cleanup:
-@@ -1323,7 +1329,6 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
- }
- 
--#ifdef CONFIG_PM
- static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
- {
- 	struct pci_dev *pdev = slot->chip->pdev;
-@@ -1349,6 +1354,7 @@ static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
- }
- 
-+#ifdef CONFIG_PM
- static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
- {
- 	struct sdhci_pci_slot *slot = chip->slots[0];
+url:    https://github.com/intel-lab-lkp/linux/commits/Jyan-Chou/mmc-solve-DMA-boundary-limitation-of-CQHCI-driver/20231109-190435
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231109082043.27147-2-jyanchou%40realtek.com
+patch subject: [PATCH V6][1/4] mmc: solve DMA boundary limitation of CQHCI driver
+config: arc-randconfig-002-20231109 (https://download.01.org/0day-ci/archive/20231109/202311092347.9A8MgzyN-lkp@intel.com/config)
+compiler: arc-elf-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231109/202311092347.9A8MgzyN-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202311092347.9A8MgzyN-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+   drivers/mmc/host/cqhci-core.c: In function 'cqhci_prep_tran_desc':
+>> drivers/mmc/host/cqhci-core.c:519:25: error: 'const struct cqhci_host_ops' has no member named 'setup_tran_desc'
+     519 |         if (cq_host->ops->setup_tran_desc) {
+         |                         ^~
+   drivers/mmc/host/cqhci-core.c:520:29: error: 'const struct cqhci_host_ops' has no member named 'setup_tran_desc'
+     520 |                 cq_host->ops->setup_tran_desc(data, cq_host, desc, sg_count);
+         |                             ^~
+
+
+vim +519 drivers/mmc/host/cqhci-core.c
+
+   498	
+   499	static int cqhci_prep_tran_desc(struct mmc_request *mrq,
+   500					struct cqhci_host *cq_host, int tag)
+   501	{
+   502		struct mmc_data *data = mrq->data;
+   503		int i, sg_count, len;
+   504		bool end = false;
+   505		bool dma64 = cq_host->dma64;
+   506		dma_addr_t addr;
+   507		u8 *desc;
+   508		struct scatterlist *sg;
+   509	
+   510		sg_count = cqhci_dma_map(mrq->host, mrq);
+   511		if (sg_count < 0) {
+   512			pr_err("%s: %s: unable to map sg lists, %d\n",
+   513					mmc_hostname(mrq->host), __func__, sg_count);
+   514			return sg_count;
+   515		}
+   516	
+   517		desc = get_trans_desc(cq_host, tag);
+   518	
+ > 519		if (cq_host->ops->setup_tran_desc) {
+   520			cq_host->ops->setup_tran_desc(data, cq_host, desc, sg_count);
+   521			return 0;
+   522		}
+   523	
+   524		for_each_sg(data->sg, sg, sg_count, i) {
+   525			addr = sg_dma_address(sg);
+   526			len = sg_dma_len(sg);
+   527	
+   528			if ((i+1) == sg_count)
+   529				end = true;
+   530			cqhci_set_tran_desc(desc, addr, len, end, dma64);
+   531			desc += cq_host->trans_desc_len;
+   532		}
+   533	
+   534		return 0;
+   535	}
+   536	
+
 -- 
-2.42.0.869.gea05f2083d-goog
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
