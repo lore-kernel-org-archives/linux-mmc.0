@@ -2,169 +2,104 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68AEDC4167B
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:45:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0F1FC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:46:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235107AbjKJRpe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Nov 2023 12:45:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46546 "EHLO
+        id S235280AbjKJRqG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Nov 2023 12:46:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234956AbjKJRoS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Nov 2023 12:44:18 -0500
-Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F9C82B7BF
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 03:10:39 -0800 (PST)
-Received: by mail-ej1-x630.google.com with SMTP id a640c23a62f3a-9dbb3e0ff65so305264066b.1
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 03:10:38 -0800 (PST)
+        with ESMTP id S1345745AbjKJRpa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Nov 2023 12:45:30 -0500
+Received: from mail-oi1-x234.google.com (mail-oi1-x234.google.com [IPv6:2607:f8b0:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08DBD42C02
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 08:58:36 -0800 (PST)
+Received: by mail-oi1-x234.google.com with SMTP id 5614622812f47-3b4145e887bso1190555b6e.3
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 08:58:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1699614637; x=1700219437; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=a5+pLgFcuQzVB7VyT/mmdvsCQPmXOBYaF3kVg/yi6FE=;
-        b=Aj4ThSX2xx8ayyhCZiGDgg5b1PQUNZPwxrvWMS39GMYpg1jcfef3wVtc0lonoVNGm0
-         8PjZMQbO3L0P+oXtYq1SXw27Me+ATYjNpu7qgpBQOd+1FS9eOP3OHmu86BJcD/I/6tsz
-         ADCne5lh9As7J2GKuhPT9Ajsk18f241aBMo2oA+cgcp0cjmtblhAbeMgZP35A5geiguc
-         ZFBYBbJfkRUPl/PbUKnCMf0roZfM8ykdH30bYEaiJP3gOh6w/jr8a+5EVah7IxSwP6Li
-         1/BJ+TtgzcjMldMOZQ0gxNYtAZTlcG0LXCL9rkPFuMdJK3VNT12OrQw5XnZLahaO3RJ5
-         Smmg==
+        d=chromium.org; s=google; t=1699635515; x=1700240315; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=OPyzMEiq0OMJGTTMaw3BonYyWiqjoS8aDWEJ5pjLZhk=;
+        b=mYsFxk0JZUcfN6yOJ/90lyUslR0iNdDLtJMVMz23SQuI6LMfu3BLdVyGbb5KcEFROd
+         ieIMuuPU3sy5j0O83AklSR1NFAaymjou+qLTqZt6EupJ8e2Y75KwWnZTzHwWkKy0da/D
+         XfmF/XgIvk+Hh85WnKg5wXeeQ3yx0Jy0FKt3o=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699614637; x=1700219437;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=a5+pLgFcuQzVB7VyT/mmdvsCQPmXOBYaF3kVg/yi6FE=;
-        b=ZzFdF+/dXheop8L4VCIqDf1N50x0gb5mc5gLmWSeaBvVy4pUVlfsBQvnnxjY3L+oR+
-         EYXm3U+uVuzfpir7/+cV1pgw8HD1v7A6zc1N18BbKgu83iBs67LWbJ68f3nK1uLFKdwA
-         /W9dE0BhAsWhiSseKn+5wwv2Ow02PxA2mAQwvsINJIZM1w82bp7z01B88QwuRVW8++zH
-         Z/Zkr49hUnIKjlibd1i1bK8RbH0fv6ZUDGorgD/EwVDO2EdCYGr1hr8q6TfrI5z1ffQI
-         Ocqwmmp5R8MXVIhOhmYGsZH46P7m65YAD7/GjWrr2MO5bYPL+pFQSGmSpsxGSkqlMiBE
-         tx6g==
-X-Gm-Message-State: AOJu0YxKt+D/ywv1cm07jnQ9mCJX0cot+rykFEptPDwkNhGhuXL+r79D
-        jHGINMcZgv9sKCON+A7pPpPrXQ==
-X-Google-Smtp-Source: AGHT+IE+y5aZiqh+tzEhpycSmG8UkDXJ2gMeavrh9mL6aSrPqkPVStsyQfjAwVwwbTj7wfwtgcvNlw==
-X-Received: by 2002:a17:907:7fac:b0:9bf:6200:fe33 with SMTP id qk44-20020a1709077fac00b009bf6200fe33mr7651309ejc.16.1699614637414;
-        Fri, 10 Nov 2023 03:10:37 -0800 (PST)
-Received: from [192.168.1.20] ([178.197.218.126])
-        by smtp.gmail.com with ESMTPSA id r20-20020aa7cb94000000b00543597cd190sm978412edt.47.2023.11.10.03.10.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 10 Nov 2023 03:10:36 -0800 (PST)
-Message-ID: <4cf3d481-c16d-4b1c-ab45-3ceff80b0b1b@linaro.org>
-Date:   Fri, 10 Nov 2023 12:10:34 +0100
+        d=1e100.net; s=20230601; t=1699635515; x=1700240315;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=OPyzMEiq0OMJGTTMaw3BonYyWiqjoS8aDWEJ5pjLZhk=;
+        b=Qd7MikVR8FkLNIPhHPRiYsWXn/Roe7UfhceTowUXCr6WNxV0vNwr55rfihu3WQVou5
+         GXGM1ihHTsSWYFZkRterVPWdiphQNQTXQra9/6FLN1jC+K2025+WnAfgmhsEW/p3ow/6
+         mg8kU6SZZQ1NuF0LC9rAspuCgeuLLkkQ4QI4lwM3opMqTR6YfTnzboibD7dcuuoLgbyo
+         WI3fK80SUgNyrvexeHQE5e4yFkmeEoHXrZ3abFvbfqWCJk7d184PnNKuw39SVrwkb9w7
+         TYecPPE/WDkEfk+FonCtn1jB+I6jfq5zIGeq/O9Z5OM8Mc+0O1EFZvJF7/bsk38SLZpk
+         9xfA==
+X-Gm-Message-State: AOJu0YyrJM3aaDgBSMAkFxR6jBCNX82h2wzzxUMdvLxCbkd5vnwDuNnT
+        zxSEAOqsuFpZ2RgOkwFjB5B0OyhJyRB4kCb4lwPqyg==
+X-Google-Smtp-Source: AGHT+IHiCqr12OtjoFNzFwzdT0LpIrrrIR3C93lqXaIs3Tm02E7BpbEfMfc8XDLvGEfKj3czVReou6/cz9WI7bTZKO8=
+X-Received: by 2002:a54:4407:0:b0:3b2:e9ab:68e2 with SMTP id
+ k7-20020a544407000000b003b2e9ab68e2mr4992086oiw.7.1699635514959; Fri, 10 Nov
+ 2023 08:58:34 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 5/7] riscv: dts: thead: Add TH1520 mmc controllers and
- sdhci clock
-Content-Language: en-US
-To:     Drew Fustini <dfustini@baylibre.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Jisheng Zhang <jszhang@kernel.org>,
+References: <20231109111934.4172565-1-korneld@chromium.org>
+ <CAG-rBijqw2VO8AQbwBh5Cu47gBbDsOGwPgw-8hSXMWCHXi6GLw@mail.gmail.com> <ZU3pTY0qbA6cDB7f@google.com>
+In-Reply-To: <ZU3pTY0qbA6cDB7f@google.com>
+From:   Sven van Ashbrook <svenva@chromium.org>
+Date:   Fri, 10 Nov 2023 11:58:24 -0500
+Message-ID: <CAG-rBiiXPzcMndhvT=vV7W--6i0O+26hgMcHL3wbCyKrnw6LsQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci-gli: Disable LPM during initialization
+To:     =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>,
+        Rafael J Wysocki <rafael@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>, Guo Ren <guoren@kernel.org>,
-        Fu Wei <wefu@redhat.com>, Conor Dooley <conor@kernel.org>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org
-References: <20231109-th1520-mmc-v5-0-018bd039cf17@baylibre.com>
- <20231109-th1520-mmc-v5-5-018bd039cf17@baylibre.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231109-th1520-mmc-v5-5-018bd039cf17@baylibre.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        Jason Lai <jasonlai.genesyslogic@gmail.com>,
+        Victor Shih <victor.shih@genesyslogic.com.tw>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        =?UTF-8?Q?Stanis=C5=82aw_Kardach?= <skardach@google.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/11/2023 06:41, Drew Fustini wrote:
-> Add node for the SDHCI fixed clock. Add mmc0 node for the first mmc
-> controller instance which is typically connected to the eMMC device.
-> Add mmc1 node for the second mmc controller instance which is typically
-> connected to microSD slot.
-> 
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
-> ---
->  arch/riscv/boot/dts/thead/th1520.dtsi | 23 +++++++++++++++++++++++
->  1 file changed, 23 insertions(+)
-> 
-> diff --git a/arch/riscv/boot/dts/thead/th1520.dtsi b/arch/riscv/boot/dts/thead/th1520.dtsi
-> index ff364709a6df..f5ec9326c4b8 100644
-> --- a/arch/riscv/boot/dts/thead/th1520.dtsi
-> +++ b/arch/riscv/boot/dts/thead/th1520.dtsi
-> @@ -134,6 +134,13 @@ uart_sclk: uart-sclk-clock {
->  		#clock-cells = <0>;
->  	};
->  
-> +	sdhci_clk: sdhci-clock {
-> +		compatible = "fixed-clock";
-> +		clock-frequency = <198000000>;
-> +		clock-output-names = "sdhci_clk";
-> +		#clock-cells = <0>;
-> +	};
-> +
->  	soc {
->  		compatible = "simple-bus";
->  		interrupt-parent = <&plic>;
-> @@ -292,6 +299,22 @@ dmac0: dma-controller@ffefc00000 {
->  			status = "disabled";
->  		};
->  
-> +		mmc0: mmc@ffe7080000 {
-> +			compatible = "thead,th1520-dwcmshc";
-> +			reg = <0xff 0xe7080000 0x0 0x10000>;
-> +			interrupts = <62 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks = <&sdhci_clk>;
-> +			clock-names = "core";
+There's something happening in this driver that doesn't
+make much sense to me.
 
-You miss disable in each mmc node.
+According to the pm runtime docs [1] the initial runtime pm
+status of all devices is 'suspended'. Which I presume, means:
+if the driver doesn't use any of the pm_runtime_*() functions
+to tell the core "actually, I am active after probe", then the
+device remains suspended until explicitly going active, at which
+point the runtime_resume() callback is invoked.
 
-Best regards,
-Krzysztof
+That's the theory. In practice, what do I see on a device
+containing this bridge?
+Intel SoC <-> PCIe bus <-> gl9763e bridge <-> eMMC bus <-> eMMC drive
 
+at probe() (does not exist in this driver so I stubbed it):
+[ 0.601542] runtime pm is enabled = 1 (disable_depth == 0)
+[ 0.601552] runtime pm is active = 2 (usage_count)
+
+at probe_slot():
+[ 0.602024] runtime pm is enabled = 1
+[ 0.602027] runtime pm is active = 2
+
+At add_host():
+[ 0.602804] runtime pm is enabled = 1
+[ 0.602809] runtime pm is active = 3
+
+It looks like:
+- nowhere does the gl9763e driver inform runtime pm it's active
+- the device is active in probe(), probe_slot() and add_host()
+- the runtime_resume() callback did not get called before
+probe(), probe_slot(), or add_host().
+
+Why is the runtime_resume() callback not invoked?
+Does the driver have a runtime_pm misconfiguration issue here?
+
+Perhaps Rafael could clarify?
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/power/runtime_pm.rst?h=v6.6.1#n563
