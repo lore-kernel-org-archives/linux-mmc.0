@@ -1,147 +1,161 @@
-Return-Path: <linux-mmc+bounces-9-linux-mmc=archiver.kernel.org@vger.kernel.org>
+Return-Path: <linux-mmc+bounces-10-linux-mmc=archiver.kernel.org@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from sy.mirrors.kernel.org (sy.mirrors.kernel.org [147.75.48.161])
+Received: from sv.mirrors.kernel.org (sv.mirrors.kernel.org [139.178.88.99])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 3C87BC4167B
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:49:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTPS id D02A1C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:49:20 +0000 (UTC)
 Received: from smtp.subspace.kernel.org (wormhole.subspace.kernel.org [52.25.139.140])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by sy.mirrors.kernel.org (Postfix) with ESMTPS id BB1DAB21017
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:49:07 +0000 (UTC)
+	by sv.mirrors.kernel.org (Postfix) with ESMTPS id 8F0482818EA
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:49:20 +0000 (UTC)
 Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id DC2BB3C69D;
-	Fri, 10 Nov 2023 17:46:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 07C4B3C6BB;
+	Fri, 10 Nov 2023 17:46:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="i1cK7we5"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="lsoLL6te"
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 155943A29A
-	for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 17:46:51 +0000 (UTC)
-Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DBD2524C
-	for <linux-mmc@vger.kernel.org>; Thu,  9 Nov 2023 22:14:07 -0800 (PST)
-Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-da2e786743aso1862530276.0
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Nov 2023 22:14:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1699596846; x=1700201646; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=uSa6NAVY2VMgd1nmwOwphCO64qKVXCiZUmGbVj1XUeM=;
-        b=i1cK7we5DTt214a5ulPm2LtIJ8geLPzN7OpKOFSzM5A7mfs4zlQVveyfoSmsxg6KWV
-         sKZIRAHojJ1mOh2lfxzRFJAUE4s2MTpCxH7opJu6OPeMD8Kds5+4uAGhvJFK/1GgkgN4
-         n8Z88ZSwrOH1Ro4PN1I9vJDJad44Ev+e6tzP7/jBxYll24Mmr7FsU24TBEnya7JmgqYh
-         FwQkTV39oSHrD1M6pmLJg8NvK3bbaSCAtv2i6i5/Ro0vY+pQEeQK9BVNU8ZYSqv1Orhd
-         NKG3uPjsnM3Xv2c7VwBv8tgOaWDU5S3TgX83nKoMvKuYQSo6DdDDpJiQYe0yyIThPwKe
-         Ejeg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699596846; x=1700201646;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=uSa6NAVY2VMgd1nmwOwphCO64qKVXCiZUmGbVj1XUeM=;
-        b=BJv3GQQQwq8nQ/Cq5uSa6dmU2jlNvggEYa8+DYYaNBzuVswgZ9FrXwkiAVOUk0q21T
-         XkQBb2KUyKkgXFhEoacNwXPPP8OXz8uXNZSp8Na+NHVgdP5P95i4zzUFIK92xRV659t4
-         tsOlM8BGP/+nzxAKXTkU1/syMfaV0B3knK2EyuEgH0gFthZLroWi+LmJPjEImcRvS9ey
-         5TYAbVrlatTr6z0y/lmxM53r1UJJKKjBfa6NJ9gIupRnwhbXXL9yVCDzhPsnSpe35MKa
-         F/TFVNPMIhfKQ2eWlSP60FgFcBbKGepVXGg22WVHpl5K+4cnJIYf6F3nU+JH34s7sEEr
-         JiBg==
-X-Gm-Message-State: AOJu0Yw6yCFsPzsB1dK6bRQ0Z72IZ3BkcLwEDpuaKf1DthAEYBKpiJ5u
-	la/WEp91AdEYJD1ivSLhRINJvkapmiKZhtsPyQeo9w==
-X-Google-Smtp-Source: AGHT+IHc2dzth6LKzC6h7TBn2/SL7V+OAEY7bksLZRGZnVrvIoOC/yuSFZMolHtPmyTWRt1rlElQlA==
-X-Received: by 2002:a9d:7a83:0:b0:6c4:897a:31d0 with SMTP id l3-20020a9d7a83000000b006c4897a31d0mr7519725otn.24.1699594956388;
-        Thu, 09 Nov 2023 21:42:36 -0800 (PST)
-Received: from [127.0.1.1] ([2601:1c2:1800:f680:2071:4479:98b8:cc69])
-        by smtp.gmail.com with ESMTPSA id ix22-20020a170902f81600b001b8a00d4f7asm4498845plb.9.2023.11.09.21.42.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Nov 2023 21:42:36 -0800 (PST)
-From: Drew Fustini <dfustini@baylibre.com>
-Date: Thu, 09 Nov 2023 21:41:16 -0800
-Subject: [PATCH v5 6/7] riscv: dts: thead: Enable BeagleV Ahead eMMC and
- microSD
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F4AE3C08B
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 17:46:53 +0000 (UTC)
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.65])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C0A02B7F2;
+	Fri, 10 Nov 2023 01:17:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1699607850; x=1731143850;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=0OaHHlwLItjCt3c5YKtM0WKbl6EAt2dHV4q+Vl4Xx3o=;
+  b=lsoLL6tefeOOacmGgP8QkW7W2rpqD4kwEtkBEJUUhBgIri62WyB3HpFc
+   t5qYEXV0wa0qgO66w4Vudyd/ajw8yDIV85/Xf08bLlT1IH8oTzdSDxUCB
+   Op5GrpvxNDocWRI5zGiXCTLGOIiXN8j62rNiJEMjKbq2ZkAmHvvf/lLOT
+   qUxzwUzjJsWl57B0nMC4Y/71X6Z/Kx5XIZNvLljrKX9z70fpfVSC4UhKA
+   owspbt3e3q0wpEava1e7dQsxTD1FSaNFRvG5Qon1X0zALVFJIwRupZoqz
+   egeSrEKxAO49+DNYybD7M4rtZTKyxWS9Xlf4jzJqfTCrkOaKKbG2tnU2x
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10889"; a="394064250"
+X-IronPort-AV: E=Sophos;i="6.03,291,1694761200"; 
+   d="scan'208";a="394064250"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Nov 2023 01:17:29 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10889"; a="854347489"
+X-IronPort-AV: E=Sophos;i="6.03,291,1694761200"; 
+   d="scan'208";a="854347489"
+Received: from lkp-server01.sh.intel.com (HELO 17d9e85e5079) ([10.239.97.150])
+  by FMSMGA003.fm.intel.com with ESMTP; 10 Nov 2023 01:17:24 -0800
+Received: from kbuild by 17d9e85e5079 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1r1Ndi-0009WM-1t;
+	Fri, 10 Nov 2023 09:17:22 +0000
+Date: Fri, 10 Nov 2023 17:16:57 +0800
+From: kernel test robot <lkp@intel.com>
+To: Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
+	adrian.hunter@intel.com, jh80.chung@samsung.com,
+	riteshh@codeaurora.org, robh+dt@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	conor+dt@kernel.org, asutoshd@codeaurora.org,
+	p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	arnd@arndb.de, briannorris@chromium.org, doug@schmorgal.com,
+	tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
+	william.qiu@starfivetech.com, jyanchou@realtek.com
+Subject: Re: [PATCH V6][1/4] mmc: solve DMA boundary limitation of CQHCI
+ driver
+Message-ID: <202311101711.FFnMF7iH-lkp@intel.com>
+References: <20231109082043.27147-2-jyanchou@realtek.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20231109-th1520-mmc-v5-6-018bd039cf17@baylibre.com>
-References: <20231109-th1520-mmc-v5-0-018bd039cf17@baylibre.com>
-In-Reply-To: <20231109-th1520-mmc-v5-0-018bd039cf17@baylibre.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, 
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
- Conor Dooley <conor+dt@kernel.org>, Jisheng Zhang <jszhang@kernel.org>, 
- Adrian Hunter <adrian.hunter@intel.com>, 
- Paul Walmsley <paul.walmsley@sifive.com>, 
- Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
- Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>, 
- Conor Dooley <conor@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
- Drew Fustini <dfustini@baylibre.com>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1699594943; l=1108;
- i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
- bh=4bgo3aK3cuR26cRWBbMVA6MrvhUqOJ8As8gzvmDCzhs=;
- b=lALKEKj8Qm8uCPZT94ZeDZCapEMna2PJb7qYfmxdtsiIiPu5ZBsq1ZTsCjmwM7LQeHswhFuMT
- bUj9CkooLlrCm59R+vpdz5OfJa2nhKLJZ6dvleve4V8ZDgXFGGMNDkz
-X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
- pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231109082043.27147-2-jyanchou@realtek.com>
 
-Add mmc0 properties for the eMMC device and add mmc1 properties for
-the microSD slot. Set the frequency for the sdhci clock.
+Hi Jyan,
 
-Signed-off-by: Drew Fustini <dfustini@baylibre.com>
----
- arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+kernel test robot noticed the following build errors:
 
-diff --git a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
-index 70e8042c8304..f91d94f95510 100644
---- a/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
-+++ b/arch/riscv/boot/dts/thead/th1520-beaglev-ahead.dts
-@@ -48,6 +48,10 @@ &apb_clk {
- 	clock-frequency = <62500000>;
- };
- 
-+&sdhci_clk {
-+	clock-frequency = <198000000>;
-+};
-+
- &uart_sclk {
- 	clock-frequency = <100000000>;
- };
-@@ -56,6 +60,22 @@ &dmac0 {
- 	status = "okay";
- };
- 
-+&mmc0 {
-+	bus-width = <8>;
-+	max-frequency = <198000000>;
-+	mmc-hs400-1_8v;
-+	non-removable;
-+	no-sdio;
-+	no-sd;
-+	status = "okay";
-+};
-+
-+&mmc1 {
-+	max-frequency = <198000000>;
-+	bus-width = <4>;
-+	status = "okay";
-+};
-+
- &uart0 {
- 	status = "okay";
- };
+[auto build test ERROR on linus/master]
+[also build test ERROR on v6.6 next-20231110]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Jyan-Chou/mmc-solve-DMA-boundary-limitation-of-CQHCI-driver/20231109-190435
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231109082043.27147-2-jyanchou%40realtek.com
+patch subject: [PATCH V6][1/4] mmc: solve DMA boundary limitation of CQHCI driver
+config: x86_64-rhel-8.3-rust (https://download.01.org/0day-ci/archive/20231110/202311101711.FFnMF7iH-lkp@intel.com/config)
+compiler: clang version 16.0.4 (https://github.com/llvm/llvm-project.git ae42196bc493ffe877a7e3dff8be32035dea4d07)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231110/202311101711.FFnMF7iH-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202311101711.FFnMF7iH-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+>> drivers/mmc/host/cqhci-core.c:519:20: error: no member named 'setup_tran_desc' in 'struct cqhci_host_ops'
+           if (cq_host->ops->setup_tran_desc) {
+               ~~~~~~~~~~~~  ^
+   drivers/mmc/host/cqhci-core.c:520:17: error: no member named 'setup_tran_desc' in 'struct cqhci_host_ops'
+                   cq_host->ops->setup_tran_desc(data, cq_host, desc, sg_count);
+                   ~~~~~~~~~~~~  ^
+   2 errors generated.
+
+
+vim +519 drivers/mmc/host/cqhci-core.c
+
+   498	
+   499	static int cqhci_prep_tran_desc(struct mmc_request *mrq,
+   500					struct cqhci_host *cq_host, int tag)
+   501	{
+   502		struct mmc_data *data = mrq->data;
+   503		int i, sg_count, len;
+   504		bool end = false;
+   505		bool dma64 = cq_host->dma64;
+   506		dma_addr_t addr;
+   507		u8 *desc;
+   508		struct scatterlist *sg;
+   509	
+   510		sg_count = cqhci_dma_map(mrq->host, mrq);
+   511		if (sg_count < 0) {
+   512			pr_err("%s: %s: unable to map sg lists, %d\n",
+   513					mmc_hostname(mrq->host), __func__, sg_count);
+   514			return sg_count;
+   515		}
+   516	
+   517		desc = get_trans_desc(cq_host, tag);
+   518	
+ > 519		if (cq_host->ops->setup_tran_desc) {
+   520			cq_host->ops->setup_tran_desc(data, cq_host, desc, sg_count);
+   521			return 0;
+   522		}
+   523	
+   524		for_each_sg(data->sg, sg, sg_count, i) {
+   525			addr = sg_dma_address(sg);
+   526			len = sg_dma_len(sg);
+   527	
+   528			if ((i+1) == sg_count)
+   529				end = true;
+   530			cqhci_set_tran_desc(desc, addr, len, end, dma64);
+   531			desc += cq_host->trans_desc_len;
+   532		}
+   533	
+   534		return 0;
+   535	}
+   536	
 
 -- 
-2.34.1
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
 
