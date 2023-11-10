@@ -1,68 +1,67 @@
-Return-Path: <linux-mmc+bounces-1-linux-mmc=archiver.kernel.org@vger.kernel.org>
+Return-Path: <linux-mmc+bounces-3-linux-mmc=archiver.kernel.org@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from sv.mirrors.kernel.org (sv.mirrors.kernel.org [139.178.88.99])
+Received: from sy.mirrors.kernel.org (sy.mirrors.kernel.org [147.75.48.161])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id D37A4C05021
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:47:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTPS id E7029C04A95
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:47:10 +0000 (UTC)
 Received: from smtp.subspace.kernel.org (wormhole.subspace.kernel.org [52.25.139.140])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by sv.mirrors.kernel.org (Postfix) with ESMTPS id 8F900281252
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:47:07 +0000 (UTC)
+	by sy.mirrors.kernel.org (Postfix) with ESMTPS id 6271AB21336
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:47:09 +0000 (UTC)
 Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id AA4403A268;
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id DD0B23A26F;
 	Fri, 10 Nov 2023 17:46:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="c5xfLzwu"
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="BeGcmYAZ"
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3AB22231E
-	for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 17:46:30 +0000 (UTC)
-Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2989E7DB9
-	for <linux-mmc@vger.kernel.org>; Thu,  9 Nov 2023 22:51:13 -0800 (PST)
-Received: by mail-qt1-x82b.google.com with SMTP id d75a77b69052e-421ae930545so3508281cf.0
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Nov 2023 22:51:13 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD81031A9E
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 17:46:32 +0000 (UTC)
+Received: from mail-pf1-x42a.google.com (mail-pf1-x42a.google.com [IPv6:2607:f8b0:4864:20::42a])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 363CB7D83
+	for <linux-mmc@vger.kernel.org>; Thu,  9 Nov 2023 22:43:06 -0800 (PST)
+Received: by mail-pf1-x42a.google.com with SMTP id d2e1a72fcca58-6bee11456baso1587786b3a.1
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Nov 2023 22:43:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1699599072; x=1700203872; darn=vger.kernel.org;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1699598585; x=1700203385; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=xY9e61NSBd34WKgwLiextVdIl1pEHWCBao7kYEHaYbc=;
-        b=c5xfLzwukrMfaL4QkPmGsRC5Pds0mvQuCyrigOCwOT9e5Ycdk3WGzTQbmNjElJvY6K
-         a7sT3K98D7+zs8IuQE64XG4LWgg5b0GaVQUEtYUwNciazzzdzv93ZT6TEY9voSlckUNs
-         wbLllWB2zUvtmXB6cUIhWYmu4BNeqt7dRP/uLUmKqBMtvpPPLlcUN0oIzS7lwjI40VA+
-         TxDwj2v1V1nFUSjTPKQ26pdxixK/ejPDmI6KhFCZHor2MOLihEv9LoUO8fR/pE7sC6xm
-         YLmYB3zof215O7mDBA7dgipw/9vRmP6A5IPqgHSoH7Yo7G8lNnAjcszMTdqOed4raoPu
-         dYjw==
+        bh=Uci5Rd8hU8lrREOeKMYxmj/9fXU4uXy75tEQ4ik3o2A=;
+        b=BeGcmYAZp8vECCpGIn1r9BpM0co1GSQZza9R/GC+yY/3IrIEKQzQLNFsx7p8dyD8zE
+         FicTB4v94cAukEFg6B1CogYmCD7LhY+RrnrkWKHkXwcssB8HuovzCgHMzmyaYbTr4bRW
+         ieu3bYS9yfw3AMMIC5YDtypxpQJndGqvedTuX68Sb1geNGxC6LHq7fQF6BWHy9fi7CTK
+         cNgT9m7Kn8G8zC5UU+8Tdz7Ed+hb6/uXaD7LhBR5XPB3Bn/2waexPzwEMd6vhcug0I3M
+         jhlxRACBG0AGc/nDvhKfPZNcfmOKEFgq0EkEGYjZv8V9AoRTQFkb+WZxE5tAzr93GYGK
+         RrCg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699599072; x=1700203872;
+        d=1e100.net; s=20230601; t=1699598585; x=1700203385;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=xY9e61NSBd34WKgwLiextVdIl1pEHWCBao7kYEHaYbc=;
-        b=K8Wl14iRO1SUN1er66aBMOrutQ9plV+n7fmY3v2ssq1jIb6AvOqrrCLCKF+mpfMrN+
-         +WVf2mnOaDNc76TbS7DQ6Z0Blugq4tE98Gx28Lq7djmQURbtySQcDfoFXUuVwY1uP57s
-         c8nHa5UsPTrDY8+iRwt5ZUVJUvCCuMqBZ3VpjnQuj+0lLX/21GWe2ns0rwwrKsksV6N5
-         zKlD+9VkemONLADWGcFeVKM42hnbAjiW9Em45Vmy2AoGHmOpBPEeKE5OW17u9su3RqeB
-         f2xfyJ9UJmqj0PVPrHQ1ZM6ZKUhrso6SPAyYjykXv+knzJZc+XigKyq6NoUdWqJijB8J
-         Qjzw==
-X-Gm-Message-State: AOJu0YxoqezgtH4k076byjhp7VKZV4rLVjYAXK9oXZHLfaIMbeRCb4kw
-	OTUkTIs/giOmEmL61NjHffNk9YRMcS1uUl4YV2wA0Q==
-X-Google-Smtp-Source: AGHT+IGXmrfa4qbmD8PufQBo8ECvg8/RA13eLrik89guDJz1lWQRgT5GoM06ddfpEcVwZ1Qo931DgQ==
-X-Received: by 2002:a17:902:8c92:b0:1ca:8b90:1cbd with SMTP id t18-20020a1709028c9200b001ca8b901cbdmr6854012plo.0.1699594952706;
-        Thu, 09 Nov 2023 21:42:32 -0800 (PST)
+        bh=Uci5Rd8hU8lrREOeKMYxmj/9fXU4uXy75tEQ4ik3o2A=;
+        b=Pd0aLAxY2hhRWkoY8mdhBQzBbEUA1vq5GfhZeQWsNeSE4l+kU8JTAwt6PQON8n+xPI
+         KaM5jEW8yVcnChBRQiP24kY7kSRgFFZ/WMEHW/bsIZVcS2ccaMwBoQmjdc5FP5NaBO/W
+         rL+webV4criYW2jneHjJFzQtumJvGX6QkCCKzRiIUI5xVg4YfMHYd5FZdqUDnKeoAkVP
+         2YWUuotj+X7w0DTCaVVemkFSLEVYimx9lU0SYHbIHEZoNmoz6UPyrL79NGszCeyKYadp
+         Tl+a+ZxUhLEK52c65e1NnGpUEV6HjLBhxLGwe1fTzYHm3Zeh9dZUMwRnfmohIF8ve/03
+         2W2g==
+X-Gm-Message-State: AOJu0Ywl/flfgsXmPZZd+xzHzhmHvwQApNwQG6ZYCP9fvhL6vHySoRkZ
+	jDPT0tBDfyrw47oRKCaYbY6IgR+IyNgyhZoPedFgUw==
+X-Google-Smtp-Source: AGHT+IEm6KXk26L3ye2gZwOvNYVy1AjnP5ci3hCfE3ga9E1mFtlkQmutISdGpl9sbvobplDpccZsqw==
+X-Received: by 2002:a17:902:d506:b0:1cc:3825:7ba2 with SMTP id b6-20020a170902d50600b001cc38257ba2mr8168039plg.4.1699594949041;
+        Thu, 09 Nov 2023 21:42:29 -0800 (PST)
 Received: from [127.0.1.1] ([2601:1c2:1800:f680:2071:4479:98b8:cc69])
-        by smtp.gmail.com with ESMTPSA id ix22-20020a170902f81600b001b8a00d4f7asm4498845plb.9.2023.11.09.21.42.31
+        by smtp.gmail.com with ESMTPSA id ix22-20020a170902f81600b001b8a00d4f7asm4498845plb.9.2023.11.09.21.42.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Nov 2023 21:42:32 -0800 (PST)
+        Thu, 09 Nov 2023 21:42:28 -0800 (PST)
 From: Drew Fustini <dfustini@baylibre.com>
-Date: Thu, 09 Nov 2023 21:41:14 -0800
-Subject: [PATCH v5 4/7] riscv: defconfig: Enable mmc and dma drivers for
- T-Head TH1520
+Date: Thu, 09 Nov 2023 21:41:12 -0800
+Subject: [PATCH v5 2/7] mmc: sdhci: add __sdhci_execute_tuning() to header
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -71,7 +70,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20231109-th1520-mmc-v5-4-018bd039cf17@baylibre.com>
+Message-Id: <20231109-th1520-mmc-v5-2-018bd039cf17@baylibre.com>
 References: <20231109-th1520-mmc-v5-0-018bd039cf17@baylibre.com>
 In-Reply-To: <20231109-th1520-mmc-v5-0-018bd039cf17@baylibre.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, 
@@ -86,43 +85,64 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
  Drew Fustini <dfustini@baylibre.com>
 X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1699594943; l=915;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1699594943; l=2108;
  i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
- bh=ht5Rt9iMCRM1t5yThjxoCTbuOVz3OXmRTAYLzzfd3/s=;
- b=81YrMX/6Pup0Mk4t9Mpny542tULxqVs1k+13xNQqBbmGqkaQgZCsQjsJdqcuxcUGHQdm9Sdy0
- DormnbG2KwrClt9J1tjQHZ3FwqQMqAeqmWYK1a5r2HceKW/UQkdU9DC
+ bh=vV7D9g0JyI+aykknduEYFaEeV4K8xwyLfp1qBkgVUvA=;
+ b=wiXFL4D9Q3411BhcGKUB1ePUooVyFCo6lIXJGCjVRVhgVo/MthWkxzFvbNGGV91mDj8tIZhb9
+ 3ad00+5H/oQC96F88xLLDDeHjyQTU7R4MEvXiEmQLL2+zlo1saaRuND
 X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
  pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
 
-Enable the mmc controller driver and dma controller driver needed for
-T-Head TH1520 based boards, like the LicheePi 4A and BeagleV-Ahead, to
-boot from eMMC storage.
+Expose __sdhci_execute_tuning() so that it can be called from the
+mmc host controller drivers.
 
-Reviewed-by: Guo Ren <guoren@kernel.org>
+In the sdhci-of-dwcmshc driver, sdhci_dwcmshc_th1520_ops sets
+platform_execute_tuning to th1520_execute_tuning(). That function has
+to manipulate phy registers before tuning can be performed. To avoid
+copying the code verbatim from __sdhci_execute_tuning() into
+th1520_execute_tuning(), make it possible for __sdhci_execute_tuning()
+to be called from sdhci-of-dwcmshc.
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Drew Fustini <dfustini@baylibre.com>
 ---
- arch/riscv/configs/defconfig | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci.c | 3 ++-
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/arch/riscv/configs/defconfig b/arch/riscv/configs/defconfig
-index ab86ec3b9eab..c5a8583236d0 100644
---- a/arch/riscv/configs/defconfig
-+++ b/arch/riscv/configs/defconfig
-@@ -168,12 +168,14 @@ CONFIG_MMC=y
- CONFIG_MMC_SDHCI=y
- CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_SDHCI_CADENCE=y
-+CONFIG_MMC_SDHCI_OF_DWCMSHC=y
- CONFIG_MMC_SPI=y
- CONFIG_MMC_SUNXI=y
- CONFIG_RTC_CLASS=y
- CONFIG_RTC_DRV_SUN6I=y
- CONFIG_DMADEVICES=y
- CONFIG_DMA_SUN6I=m
-+CONFIG_DW_AXI_DMAC=y
- CONFIG_VIRTIO_PCI=y
- CONFIG_VIRTIO_BALLOON=y
- CONFIG_VIRTIO_INPUT=y
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ff41aa56564e..c79f73459915 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2841,7 +2841,7 @@ void sdhci_send_tuning(struct sdhci_host *host, u32 opcode)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_send_tuning);
+ 
+-static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
++int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	int i;
+ 
+@@ -2879,6 +2879,7 @@ static int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 	sdhci_reset_tuning(host);
+ 	return -EAGAIN;
+ }
++EXPORT_SYMBOL_GPL(__sdhci_execute_tuning);
+ 
+ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index f219bdea8f28..a20864fc0641 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -793,6 +793,7 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+ void sdhci_reset(struct sdhci_host *host, u8 mask);
+ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
++int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
+ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 				      struct mmc_ios *ios);
 
 -- 
 2.34.1
