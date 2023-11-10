@@ -2,124 +2,169 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FB8CC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:45:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68AEDC4167B
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Nov 2023 17:45:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344613AbjKJRpB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Nov 2023 12:45:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46578 "EHLO
+        id S235107AbjKJRpe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Nov 2023 12:45:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345921AbjKJRoH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Nov 2023 12:44:07 -0500
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ECF983FD;
-        Thu,  9 Nov 2023 23:26:11 -0800 (PST)
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 3AA7Pnl0074187;
-        Fri, 10 Nov 2023 01:25:49 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1699601149;
-        bh=JCUS06QaMlEG1bwuFXka0dGKEOVlkAppxM8sVyRCbSE=;
-        h=From:To:CC:Subject:Date;
-        b=dpJ6H80EpkEOXn0KXbLIE/P2W3OGNc3pSc+sviA4hNdcWvLgurwVbFOoP5hZ6n+ml
-         RS04ZvQiN8ZYN7z07mNS72f0uvYuKjVsr7YElcgHleeCBEu2rHPPyOyHuPKh0znhRj
-         ays+63QQQXpGg7dg7Gm9XGkG1DvAgLSakkmtkCmw=
-Received: from DFLE109.ent.ti.com (dfle109.ent.ti.com [10.64.6.30])
-        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 3AA7PnsX023724
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 10 Nov 2023 01:25:49 -0600
-Received: from DFLE105.ent.ti.com (10.64.6.26) by DFLE109.ent.ti.com
- (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 10
- Nov 2023 01:25:49 -0600
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DFLE105.ent.ti.com
- (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Fri, 10 Nov 2023 01:25:49 -0600
-Received: from uda0132425.dhcp.ti.com (ileaxei01-snat.itg.ti.com [10.180.69.5])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 3AA7PkSu102695;
-        Fri, 10 Nov 2023 01:25:46 -0600
-From:   Vignesh Raghavendra <vigneshr@ti.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        <linux-arm-kernel@lists.infradead.org>,
+        with ESMTP id S234956AbjKJRoS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Nov 2023 12:44:18 -0500
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F9C82B7BF
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 03:10:39 -0800 (PST)
+Received: by mail-ej1-x630.google.com with SMTP id a640c23a62f3a-9dbb3e0ff65so305264066b.1
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 03:10:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1699614637; x=1700219437; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=a5+pLgFcuQzVB7VyT/mmdvsCQPmXOBYaF3kVg/yi6FE=;
+        b=Aj4ThSX2xx8ayyhCZiGDgg5b1PQUNZPwxrvWMS39GMYpg1jcfef3wVtc0lonoVNGm0
+         8PjZMQbO3L0P+oXtYq1SXw27Me+ATYjNpu7qgpBQOd+1FS9eOP3OHmu86BJcD/I/6tsz
+         ADCne5lh9As7J2GKuhPT9Ajsk18f241aBMo2oA+cgcp0cjmtblhAbeMgZP35A5geiguc
+         ZFBYBbJfkRUPl/PbUKnCMf0roZfM8ykdH30bYEaiJP3gOh6w/jr8a+5EVah7IxSwP6Li
+         1/BJ+TtgzcjMldMOZQ0gxNYtAZTlcG0LXCL9rkPFuMdJK3VNT12OrQw5XnZLahaO3RJ5
+         Smmg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1699614637; x=1700219437;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=a5+pLgFcuQzVB7VyT/mmdvsCQPmXOBYaF3kVg/yi6FE=;
+        b=ZzFdF+/dXheop8L4VCIqDf1N50x0gb5mc5gLmWSeaBvVy4pUVlfsBQvnnxjY3L+oR+
+         EYXm3U+uVuzfpir7/+cV1pgw8HD1v7A6zc1N18BbKgu83iBs67LWbJ68f3nK1uLFKdwA
+         /W9dE0BhAsWhiSseKn+5wwv2Ow02PxA2mAQwvsINJIZM1w82bp7z01B88QwuRVW8++zH
+         Z/Zkr49hUnIKjlibd1i1bK8RbH0fv6ZUDGorgD/EwVDO2EdCYGr1hr8q6TfrI5z1ffQI
+         Ocqwmmp5R8MXVIhOhmYGsZH46P7m65YAD7/GjWrr2MO5bYPL+pFQSGmSpsxGSkqlMiBE
+         tx6g==
+X-Gm-Message-State: AOJu0YxKt+D/ywv1cm07jnQ9mCJX0cot+rykFEptPDwkNhGhuXL+r79D
+        jHGINMcZgv9sKCON+A7pPpPrXQ==
+X-Google-Smtp-Source: AGHT+IE+y5aZiqh+tzEhpycSmG8UkDXJ2gMeavrh9mL6aSrPqkPVStsyQfjAwVwwbTj7wfwtgcvNlw==
+X-Received: by 2002:a17:907:7fac:b0:9bf:6200:fe33 with SMTP id qk44-20020a1709077fac00b009bf6200fe33mr7651309ejc.16.1699614637414;
+        Fri, 10 Nov 2023 03:10:37 -0800 (PST)
+Received: from [192.168.1.20] ([178.197.218.126])
+        by smtp.gmail.com with ESMTPSA id r20-20020aa7cb94000000b00543597cd190sm978412edt.47.2023.11.10.03.10.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 10 Nov 2023 03:10:36 -0800 (PST)
+Message-ID: <4cf3d481-c16d-4b1c-ab45-3ceff80b0b1b@linaro.org>
+Date:   Fri, 10 Nov 2023 12:10:34 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 5/7] riscv: dts: thead: Add TH1520 mmc controllers and
+ sdhci clock
+Content-Language: en-US
+To:     Drew Fustini <dfustini@baylibre.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Conor Dooley <conor+dt@kernel.org>,
-        <devicetree@vger.kernel.org>
-Subject: [PATCH] mmc: sdhci_am654: Drop lookup for deprecated ti,otap-del-sel
-Date:   Fri, 10 Nov 2023 12:55:35 +0530
-Message-ID: <20231110072535.2695134-1-vigneshr@ti.com>
-X-Mailer: git-send-email 2.42.0
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+        Jisheng Zhang <jszhang@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>, Guo Ren <guoren@kernel.org>,
+        Fu Wei <wefu@redhat.com>, Conor Dooley <conor@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org
+References: <20231109-th1520-mmc-v5-0-018bd039cf17@baylibre.com>
+ <20231109-th1520-mmc-v5-5-018bd039cf17@baylibre.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
+ 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
+ D2GYIS41Kv4Isx2dEFh+/Q==
+In-Reply-To: <20231109-th1520-mmc-v5-5-018bd039cf17@baylibre.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-ti,otap-del-sel has been deprecated since v5.7 and there are no users of
-this property and no documentation in the DT bindings either.
-Drop the fallback code looking for this property, this makes
-sdhci_am654_get_otap_delay() much easier to read as all the TAP values
-can be handled via a single iterator loop.
+On 10/11/2023 06:41, Drew Fustini wrote:
+> Add node for the SDHCI fixed clock. Add mmc0 node for the first mmc
+> controller instance which is typically connected to the eMMC device.
+> Add mmc1 node for the second mmc controller instance which is typically
+> connected to microSD slot.
+> 
+> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> ---
+>  arch/riscv/boot/dts/thead/th1520.dtsi | 23 +++++++++++++++++++++++
+>  1 file changed, 23 insertions(+)
+> 
+> diff --git a/arch/riscv/boot/dts/thead/th1520.dtsi b/arch/riscv/boot/dts/thead/th1520.dtsi
+> index ff364709a6df..f5ec9326c4b8 100644
+> --- a/arch/riscv/boot/dts/thead/th1520.dtsi
+> +++ b/arch/riscv/boot/dts/thead/th1520.dtsi
+> @@ -134,6 +134,13 @@ uart_sclk: uart-sclk-clock {
+>  		#clock-cells = <0>;
+>  	};
+>  
+> +	sdhci_clk: sdhci-clock {
+> +		compatible = "fixed-clock";
+> +		clock-frequency = <198000000>;
+> +		clock-output-names = "sdhci_clk";
+> +		#clock-cells = <0>;
+> +	};
+> +
+>  	soc {
+>  		compatible = "simple-bus";
+>  		interrupt-parent = <&plic>;
+> @@ -292,6 +299,22 @@ dmac0: dma-controller@ffefc00000 {
+>  			status = "disabled";
+>  		};
+>  
+> +		mmc0: mmc@ffe7080000 {
+> +			compatible = "thead,th1520-dwcmshc";
+> +			reg = <0xff 0xe7080000 0x0 0x10000>;
+> +			interrupts = <62 IRQ_TYPE_LEVEL_HIGH>;
+> +			clocks = <&sdhci_clk>;
+> +			clock-names = "core";
 
-Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
----
+You miss disable in each mmc node.
 
-Based on discussions at [1]
-https://lore.kernel.org/linux-mmc/CAPDyKFrCSTW3G6H7qS89d+UQ6RJcAYcKSPULVT8J7XKsUDpHdw@mail.gmail.com/
-
-CC'ing DT maintainers to see if there any objection to remove
-undocumented and deprecated property.
-
- drivers/mmc/host/sdhci_am654.c | 25 ++++---------------------
- 1 file changed, 4 insertions(+), 21 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 967bd2dfcda1..402fba0fa418 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -577,32 +577,15 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
- 	int i;
- 	int ret;
- 
--	ret = device_property_read_u32(dev, td[MMC_TIMING_LEGACY].otap_binding,
--				 &sdhci_am654->otap_del_sel[MMC_TIMING_LEGACY]);
--	if (ret) {
--		/*
--		 * ti,otap-del-sel-legacy is mandatory, look for old binding
--		 * if not found.
--		 */
--		ret = device_property_read_u32(dev, "ti,otap-del-sel",
--					       &sdhci_am654->otap_del_sel[0]);
--		if (ret) {
--			dev_err(dev, "Couldn't find otap-del-sel\n");
--
--			return ret;
--		}
--
--		dev_info(dev, "Using legacy binding ti,otap-del-sel\n");
--		sdhci_am654->legacy_otapdly = true;
--
--		return 0;
--	}
--
- 	for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
- 
- 		ret = device_property_read_u32(dev, td[i].otap_binding,
- 					       &sdhci_am654->otap_del_sel[i]);
- 		if (ret) {
-+			if (i == MMC_TIMING_LEGACY) {
-+				dev_err(dev, "Couldn't find mandatory ti,otap-del-sel-legacy\n");
-+				return ret;
-+			}
- 			dev_dbg(dev, "Couldn't find %s\n",
- 				td[i].otap_binding);
- 			/*
--- 
-2.42.0
+Best regards,
+Krzysztof
 
