@@ -1,55 +1,122 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D41B3A27E
-	for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 20:05:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F8DF3B786;
+	Fri, 10 Nov 2023 20:14:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uv6ogq/e"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id AF9B9C433C7;
-	Fri, 10 Nov 2023 20:05:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1699646739;
-	bh=/jl6i8srD7waf9oj8kIBuYntX4MMxg67ik6LqMlQt4o=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=uv6ogq/ep7kvaTAkjmLYG31miH+TwSz11LAq7kzHhtgXjQDqy3W4EFq1xve6foHvM
-	 GYP4V1s9w+/8BT2zNNauBXvElC2EsmCCF/ZQ2OPUtG3nWBCSHtNoNBR5LO4I5qDizV
-	 l2JW61l3xyg8lram8RahyIc5+T4IbXJVTpbfQrXsxP1ZCqg/8KK5t7Mt3Ju3kxbPax
-	 W6N9Mn0ntLj19u5QAwTxx0N68eqL7T6Nbc+3oX6HUngv1DH11b9WfxUHbhUHIOjbkq
-	 d7IzagE/l+IE8Ck8sJ7F9KLIdVE6W3Dc1fJVvp+FL2ihrZEo6hxiQvKHa9waDZjH6i
-	 0hacM5KgHOPWQ==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 9CAB9C43158;
-	Fri, 10 Nov 2023 20:05:39 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.7-rc1
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20231110122638.21897-1-ulf.hansson@linaro.org>
-References: <20231110122638.21897-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20231110122638.21897-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.7-2
-X-PR-Tracked-Commit-Id: 015c9cbcf0ad709079117d27c2094a46e0eadcdb
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: b456259e1544daa337fa00cda8bd3bea04c8d914
-Message-Id: <169964673963.27739.1534219333572049881.pr-tracker-bot@kernel.org>
-Date: Fri, 10 Nov 2023 20:05:39 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="yspVliIE"
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E771344B3;
+	Fri, 10 Nov 2023 12:14:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1699647268; x=1731183268;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=3tVJsMHXywNdu/lxHtHGdXO/ugKIDxyuytYpSVUfKts=;
+  b=yspVliIEvC72nf4ymJFr8xgS/GAWLOuvkFBgoHVOi30hgX1Nt4uysqv5
+   Irf6T8MKuOONJvZa96PMFaQ1kw+PyHubwbZgXX9Lt6r6VRS1MBJnCGbHC
+   mSgcS3P/fJShA/RoAuXU9FQSGK3obrFFg06TQgwjS5B8wDy2inpiq67V3
+   SMQlTkNLkpDk+q4hF4m64s2qFkRTQrzgsyMuJ96crS+19mOnsnNG/2eBE
+   X2yNwFJeRbWDEYoL5YpAlNiQQbBq5KfLhrg4k5INjO8WH3APYsZFtKta0
+   0oeKnBcRQDOLc7NBdNJtiE2rsYkRj6o8G2OXnHSP2+VKESjJjASdJ7Lub
+   Q==;
+X-CSE-ConnectionGUID: 0pnlH8zCQBubqT4ZdDxfxw==
+X-CSE-MsgGUID: AfSEwpGkSOCGbhn+rfs0fA==
+X-ThreatScanner-Verdict: Negative
+X-IronPort-AV: E=Sophos;i="6.03,293,1694761200"; 
+   d="scan'208";a="11796744"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa2.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Nov 2023 13:14:27 -0700
+Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.21; Fri, 10 Nov 2023 13:13:46 -0700
+Received: from [10.171.248.20] (10.10.85.11) by chn-vm-ex01.mchp-main.com
+ (10.10.85.143) with Microsoft SMTP Server id 15.1.2507.21 via Frontend
+ Transport; Fri, 10 Nov 2023 13:13:44 -0700
+Message-ID: <4d505dd3-b289-4191-95f2-4a6eaa647e81@microchip.com>
+Date: Fri, 10 Nov 2023 21:13:43 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: atmel-mci: Use common error handling code in
+ atmci_of_init()
+Content-Language: en-US, fr
+To: Markus Elfring <Markus.Elfring@web.de>, Julia Lawall
+	<Julia.Lawall@inria.fr>, Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>, Nicolas Ferre
+	<nicolas.ferre@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+	<linux-mmc@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+	<kernel-janitors@vger.kernel.org>
+CC: <cocci@inria.fr>, LKML <linux-kernel@vger.kernel.org>
+References: <c70c100a-ebfd-442e-875f-738593faf0dc@web.de>
+From: Aubin Constans <aubin.constans@microchip.com>
+In-Reply-To: <c70c100a-ebfd-442e-875f-738593faf0dc@web.de>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 
-The pull request you sent on Fri, 10 Nov 2023 13:26:38 +0100:
+On 05/11/2023 16:50, Markus Elfring wrote:
+> Add a jump target so that a bit of exception handling can be better
+> reused at the end of this function.
+> 
+> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.7-2
+Acked-by: Aubin Constans <aubin.constans@microchip.com>
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/b456259e1544daa337fa00cda8bd3bea04c8d914
+> ---
+>   drivers/mmc/host/atmel-mci.c | 18 ++++++++++--------
+>   1 file changed, 10 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index dba826db739a..1e83119d1dcb 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -675,10 +675,9 @@ atmci_of_init(struct platform_device *pdev)
+>                                                "cd", GPIOD_IN, "cd-gpios");
+>                  err = PTR_ERR_OR_ZERO(pdata->slot[slot_id].detect_pin);
+>                  if (err) {
+> -                       if (err != -ENOENT) {
+> -                               of_node_put(cnp);
+> -                               return ERR_PTR(err);
+> -                       }
+> +                       if (err != -ENOENT)
+> +                               goto put_node;
+> +
+>                          pdata->slot[slot_id].detect_pin = NULL;
+>                  }
+> 
+> @@ -690,15 +689,18 @@ atmci_of_init(struct platform_device *pdev)
+>                                                "wp", GPIOD_IN, "wp-gpios");
+>                  err = PTR_ERR_OR_ZERO(pdata->slot[slot_id].wp_pin);
+>                  if (err) {
+> -                       if (err != -ENOENT) {
+> -                               of_node_put(cnp);
+> -                               return ERR_PTR(err);
+> -                       }
+> +                       if (err != -ENOENT)
+> +                               goto put_node;
+> +
+>                          pdata->slot[slot_id].wp_pin = NULL;
+>                  }
+>          }
+> 
+>          return pdata;
+> +
+> +put_node:
+> +       of_node_put(cnp);
+> +       return ERR_PTR(err);
+>   }
+>   #else /* CONFIG_OF */
+>   static inline struct mci_platform_data*
+> --
+> 2.42.0
+> 
 
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Best regards,
+Aubin
