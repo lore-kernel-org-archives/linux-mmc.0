@@ -1,66 +1,67 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A58A3C084;
-	Fri, 10 Nov 2023 20:43:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from mail-ot1-f54.google.com (mail-ot1-f54.google.com [209.85.210.54])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E00E15596;
-	Fri, 10 Nov 2023 12:43:37 -0800 (PST)
-Received: by mail-ot1-f54.google.com with SMTP id 46e09a7af769-6ce2fc858feso1340548a34.3;
-        Fri, 10 Nov 2023 12:43:37 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3086AEBB
+	for <linux-mmc@vger.kernel.org>; Sat, 11 Nov 2023 00:07:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="VpwjBREL"
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 802563C3D
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 16:07:48 -0800 (PST)
+Received: by mail-pg1-x52f.google.com with SMTP id 41be03b00d2f7-5b99bfca064so1928563a12.3
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Nov 2023 16:07:48 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1699661268; x=1700266068; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=oZOLx6piJ84WzMT/cgtNzYXyAwxaq83dr7vI8k16AOs=;
+        b=VpwjBRELtn3hl/lwknWR2q5pKLw7AUqGVcSQIfIb3qH/Qp95CSael2LxODcQZFRqy/
+         j7gzlGE/my7dcbuTVo+zsF2j61gF+6j0bUGh3AdBDsMVgiP21fvNWp0C9huXKnVov/yB
+         GkrhYD1E91olWVUjdLeto15o49XcVEi2SmCsPlV16hMpIzDX84m2K2nlvaAqSOD6zLBY
+         M0ZX0Iea1/MmQ8CwaWx3rENOe0xmnaGhuClBqSULxm9Lv8LGQwBcM5+eSnf0jA9c3R2D
+         NG4a0UsXXwAYY8JEZfzxhifRoxxd9y8P2JWVWbmC31KAEbq9mrB0o5fr5u1vi3uo6I3E
+         8dcw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699649017; x=1700253817;
+        d=1e100.net; s=20230601; t=1699661268; x=1700266068;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8JelqBtasuctrFq8aA1lg5BQxbworEzE8yTnhOMjZkc=;
-        b=g3Z97gzxwzroBwBn23TrnQrTUU3yKB7lZPzm5LZHjrMTEThjfDkrn5X1FgQ2ji5wSi
-         dLpjzbjr0MX+pa5hlTfiBCSBDTKpYvcjvXan/UMF9dlTe9/OK0E++X/IgtqG/xQD84bs
-         oPQkgOebb3OhqCXYQzYgdXMsC5rzwFLGqPhAOF73R8mttCR09Ouc8yoK8+Kk8DNMu2pO
-         ymd6Py26ZN0E69vK0K/SNu26ZE+6/7LaeMZBHh2DQFuS4nMLZ7hofnLBixHPq+RzLg5x
-         KgCil5ReM8VEjqqA6HoM+OSfFFCSlnGIE96eNvevfmgtL3Jz8zChfHStWbrIp6NV0Z4j
-         2a7Q==
-X-Gm-Message-State: AOJu0Yxe3D0xrPc72/W/HPK4Crsvew2EY5B8uc9E9/3CjsLf6jHCPsdT
-	EEgPHtYC4eUwj2ageZhd8A==
-X-Google-Smtp-Source: AGHT+IHvxcWxE9DKzdafhiZ3HFcZS9N0tFj/iDRHQnxnirdx157d/x13I8sAnvTh754BbGSMSLyN9Q==
-X-Received: by 2002:a05:6830:3492:b0:6b8:dc53:9efd with SMTP id c18-20020a056830349200b006b8dc539efdmr345339otu.3.1699649017102;
-        Fri, 10 Nov 2023 12:43:37 -0800 (PST)
-Received: from herring.priv (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id l19-20020a056830269300b006ce2fce83cbsm52941otu.25.2023.11.10.12.43.35
+        bh=oZOLx6piJ84WzMT/cgtNzYXyAwxaq83dr7vI8k16AOs=;
+        b=A31DDqGtqppSY0cZ/wP0qALWvBO2cGBTGJmb4OATQg3oHL1CyLqHerxWN9PxSQ6dDB
+         gmpKL7hjYiqzntsvyWKfIDH68xenUpJm9o9CSEl49LAxvOd0nIIBNOciEQliYqrI11qz
+         wAdQN2LkRQLpbiBIjkJ+UtEjiQWcs0imdMSe3deKCoq03OhXqjaLa0WRFfGNthHaBR8Z
+         2hvWgeBXUbBvtsL4OC37bQ0hPO+ad/Wh1sKOV4Yx6ATYQFrEKZ+JTAZtsjteEdhzyw45
+         iLb2GTJOwRVLoJtvK4Xa4zTTtNbuQqW9sVuBzg4NYY22pQDEhx71+ckaLVJqa/0k7LgM
+         ysOQ==
+X-Gm-Message-State: AOJu0Yz7XIhSsFSDKsMDJ+k7tmWoeThb0M2qXbCeqxdY+vZX9JAUUC1o
+	5qjek63P6nep73gpKrYICFBoAQ==
+X-Google-Smtp-Source: AGHT+IEf3RnQ6vghHFIDkcaI3xfo22n0ICD/Y7dXSaL4pgL+HjLTqobf8F4Ab5nqLI350QpkYuW/Ow==
+X-Received: by 2002:a05:6a20:daa3:b0:14e:a1f0:a8ea with SMTP id iy35-20020a056a20daa300b0014ea1f0a8eamr792191pzb.3.1699661267932;
+        Fri, 10 Nov 2023 16:07:47 -0800 (PST)
+Received: from x1 ([2601:1c2:1800:f680:e564:eb78:dbd8:6618])
+        by smtp.gmail.com with ESMTPSA id p47-20020a056a0026ef00b00692754580f0sm272439pfw.187.2023.11.10.16.07.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 10 Nov 2023 12:43:36 -0800 (PST)
-Received: (nullmailer pid 399226 invoked by uid 1000);
-	Fri, 10 Nov 2023 20:43:34 -0000
-Date: Fri, 10 Nov 2023 14:43:34 -0600
-From: Rob Herring <robh@kernel.org>
+        Fri, 10 Nov 2023 16:07:47 -0800 (PST)
+Date: Fri, 10 Nov 2023 16:07:45 -0800
+From: Drew Fustini <dfustini@baylibre.com>
 To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, linux-pwm@vger.kernel.org, 
-	dri-devel@lists.freedesktop.org, linux-mmc@vger.kernel.org, 
-	Sylwester Nawrocki <s.nawrocki@samsung.com>, linux-arm-kernel@lists.infradead.org, 
-	Liam Girdwood <lgirdwood@gmail.com>, Tomasz Figa <tomasz.figa@gmail.com>, 
-	=?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, 
-	linux-gpio@vger.kernel.org, Jonathan Cameron <jic23@kernel.org>, linux-kernel@vger.kernel.org, 
-	Andi Shyti <andi.shyti@kernel.org>, linux-sound@vger.kernel.org, 
-	linux-iio@vger.kernel.org, Sam Protsenko <semen.protsenko@linaro.org>, 
-	Jiri Slaby <jirislaby@kernel.org>, linux-serial@vger.kernel.org, 
-	Daniel Vetter <daniel@ffwll.ch>, Thierry Reding <thierry.reding@gmail.com>, 
-	Jaehoon Chung <jh80.chung@samsung.com>, linux-i2c@vger.kernel.org, 
-	Thomas Zimmermann <tzimmermann@suse.de>, Alim Akhtar <alim.akhtar@samsung.com>, 
-	Rob Herring <robh+dt@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Maxime Ripard <mripard@kernel.org>, alsa-devel@alsa-project.org, linux-rtc@vger.kernel.org, 
-	Mark Brown <broonie@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	linux-samsung-soc@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>, 
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Alexandre Belloni <alexandre.belloni@bootlin.com>, devicetree@vger.kernel.org, 
-	Alessandro Zummo <a.zummo@towertech.it>, 
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, David Airlie <airlied@gmail.com>, 
-	Lee Jones <lee@kernel.org>
-Subject: Re: [PATCH 12/17] dt-bindings: pwm: samsung: add specific
- compatibles for existing SoC
-Message-ID: <169964901433.399188.3619478168082919994.robh@kernel.org>
-References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
- <20231108104343.24192-13-krzysztof.kozlowski@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Guo Ren <guoren@kernel.org>,
+	Fu Wei <wefu@redhat.com>, Conor Dooley <conor@kernel.org>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org
+Subject: Re: [PATCH v5 5/7] riscv: dts: thead: Add TH1520 mmc controllers and
+ sdhci clock
+Message-ID: <ZU7F0d+MCefRskPn@x1>
+References: <20231109-th1520-mmc-v5-0-018bd039cf17@baylibre.com>
+ <20231109-th1520-mmc-v5-5-018bd039cf17@baylibre.com>
+ <4cf3d481-c16d-4b1c-ab45-3ceff80b0b1b@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,30 +70,55 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231108104343.24192-13-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <4cf3d481-c16d-4b1c-ab45-3ceff80b0b1b@linaro.org>
 
+On Fri, Nov 10, 2023 at 12:10:34PM +0100, Krzysztof Kozlowski wrote:
+> On 10/11/2023 06:41, Drew Fustini wrote:
+> > Add node for the SDHCI fixed clock. Add mmc0 node for the first mmc
+> > controller instance which is typically connected to the eMMC device.
+> > Add mmc1 node for the second mmc controller instance which is typically
+> > connected to microSD slot.
+> > 
+> > Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+> > ---
+> >  arch/riscv/boot/dts/thead/th1520.dtsi | 23 +++++++++++++++++++++++
+> >  1 file changed, 23 insertions(+)
+> > 
+> > diff --git a/arch/riscv/boot/dts/thead/th1520.dtsi b/arch/riscv/boot/dts/thead/th1520.dtsi
+> > index ff364709a6df..f5ec9326c4b8 100644
+> > --- a/arch/riscv/boot/dts/thead/th1520.dtsi
+> > +++ b/arch/riscv/boot/dts/thead/th1520.dtsi
+> > @@ -134,6 +134,13 @@ uart_sclk: uart-sclk-clock {
+> >  		#clock-cells = <0>;
+> >  	};
+> >  
+> > +	sdhci_clk: sdhci-clock {
+> > +		compatible = "fixed-clock";
+> > +		clock-frequency = <198000000>;
+> > +		clock-output-names = "sdhci_clk";
+> > +		#clock-cells = <0>;
+> > +	};
+> > +
+> >  	soc {
+> >  		compatible = "simple-bus";
+> >  		interrupt-parent = <&plic>;
+> > @@ -292,6 +299,22 @@ dmac0: dma-controller@ffefc00000 {
+> >  			status = "disabled";
+> >  		};
+> >  
+> > +		mmc0: mmc@ffe7080000 {
+> > +			compatible = "thead,th1520-dwcmshc";
+> > +			reg = <0xff 0xe7080000 0x0 0x10000>;
+> > +			interrupts = <62 IRQ_TYPE_LEVEL_HIGH>;
+> > +			clocks = <&sdhci_clk>;
+> > +			clock-names = "core";
+> 
+> You miss disable in each mmc node.
+> 
+> Best regards,
+> Krzysztof
 
-On Wed, 08 Nov 2023 11:43:38 +0100, Krzysztof Kozlowski wrote:
-> Samsung Exynos SoC reuses several devices from older designs, thus
-> historically we kept the old (block's) compatible only.  This works fine
-> and there is no bug here, however guidelines expressed in
-> Documentation/devicetree/bindings/writing-bindings.rst state that:
-> 1. Compatibles should be specific.
-> 2. We should add new compatibles in case of bugs or features.
-> 
-> Add compatibles specific to each SoC in front of all old-SoC-like
-> compatibles.
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> 
-> ---
-> 
-> I propose to take the patch through Samsung SoC (me). See cover letter
-> for explanation.
-> ---
->  Documentation/devicetree/bindings/pwm/pwm-samsung.yaml | 2 ++
->  1 file changed, 2 insertions(+)
-> 
+Thank you for reviewing. I will add 'status = "disabled"' to each node.
 
-Acked-by: Rob Herring <robh@kernel.org>
-
+Drew
+> 
