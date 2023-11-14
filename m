@@ -1,232 +1,148 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92A3D3FB03
-	for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 16:30:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B7462AF1D
+	for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 16:31:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ci6cLuko"
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33AFD116;
-	Tue, 14 Nov 2023 08:30:03 -0800 (PST)
-Received: by mail-pj1-x1032.google.com with SMTP id 98e67ed59e1d1-280cc5f3fdcso4806032a91.1;
-        Tue, 14 Nov 2023 08:30:03 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="h0oLxdom"
+Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7EA6C12C
+	for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 08:31:35 -0800 (PST)
+Received: by mail-yb1-xb2c.google.com with SMTP id 3f1490d57ef6-da819902678so5932256276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 08:31:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1699979402; x=1700584202; darn=vger.kernel.org;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2mA7XwlcatU7gUDkrGIiKAdIf+3aKT9w1vU3A08xUmM=;
-        b=ci6cLukobyobjdG3Z/oqxfKZ0osDbb7kIvrMnJx/no5GY/xtKVkBKttGWuNQrc3fzb
-         vVOqMP4Wvd4SpSLCkFxHT0oBbPgtf1wbGPJH1/YXZ48HbBpMdc/eHM9bJ/k6JrQzymKe
-         BUK0udhGSO18kqnF35UyXoN5NjvAcHnCkbxpNLI4++wUHrA4GeT/Mr+pJKgvjYEkp+lk
-         d+EHiEGk1f6ItOV0c4z5Vo0g/n0vn6B7bkB98CEPL0w/rcSypT1YwGalKoMs0uDuCOn0
-         54wewd94C1EF7IGVRU8m4kn+lqXp2g1Lwah/ZNpPTEsWekSWzGS0cOOaVlLNC7CbdKQS
-         Ci7g==
+        d=linaro.org; s=google; t=1699979494; x=1700584294; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=fr9fBrNQghS3PnJBIgxqFuQ3YV89v+EkFP5jOeoN9BI=;
+        b=h0oLxdombhcX61+QbhS50eWQ1gC2f7ymvb1PrvifsdEPOzbPWhmUfqTvCB5ONhKbwE
+         8HGwRvgNRrOtf+Kq6WjmsHHlyuDPxTlYVOLw91Ubg8YlhSkuGZr7OkVwiZJCL1sRVPtt
+         uxre0gBseJrRX39kQ9CfX1n4jRAFQVbWEKMWvlvIRKPPUt0kkWjDsz0KkxZNmvRIzcfQ
+         ZcA6SwWneWcCFlBw0AMBL+JtUNsWYwrxP+bXDpgfkZFp8a73MtUxUFH5gRHW9xY1LBmx
+         PSSf7tba6HmEucd6ABJIaEbLHPigHH16xlU/s7ImXFqGAa+p4l0mCmbheKvphCuqLqIo
+         009g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699979402; x=1700584202;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2mA7XwlcatU7gUDkrGIiKAdIf+3aKT9w1vU3A08xUmM=;
-        b=MaxAvXL8CMjas9FiC9FdJAjcVr6/Jgq6OxBeW3Q9wGbkXcjDzKuOgKY3hUEVTED6Q0
-         kVl15USfzyuagv4boheGkWfd2xwYUPqQziReAuNavLs8v5wSychRMtf/4+vZPee5czLg
-         XuRWLw48EQQura78rk/wAZm1+qCAKBlvOHtREHat3bF0zQwgrhmH5vBitqeG5gnkWqp/
-         9m0qbPjvyBkrnMkcU198ZQVJmK5ATolPbVPpVVnbwELjTB9mTyLzzltyIHMwNB4HNZjS
-         FjqH7ZPpPmz+fTULodWmpxCtOQcUhRYSoZRUUm9mRJgI5Ll/Hv2jqBSSg5I9AMExK/IS
-         RcSw==
-X-Gm-Message-State: AOJu0YzJ9+Gq38o8/tVz93bGoT8vji2z9h+3lr2VVAdf39Oq9WFO5Aiw
-	K4hGp+4LrtTGYb13jQgZDg0OuhKSiGTKTspUFNTkd3IkFPg=
-X-Google-Smtp-Source: AGHT+IHPMfOIB3pt2yppEFnXV+Am5KDg/wVpvER69Fp1doqI1K935tMxBLXp1i4pNpjeG6bCOf6pOgVFENO4x34bYlE=
-X-Received: by 2002:a17:90a:1951:b0:27d:669e:5a10 with SMTP id
- 17-20020a17090a195100b0027d669e5a10mr8754862pjh.13.1699979402348; Tue, 14 Nov
- 2023 08:30:02 -0800 (PST)
+        d=1e100.net; s=20230601; t=1699979494; x=1700584294;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=fr9fBrNQghS3PnJBIgxqFuQ3YV89v+EkFP5jOeoN9BI=;
+        b=Snqxj9zC0zc7ilKnHWJhJZuyPq4Z9hvFVrEwgAADYT2np3mi4W4JwzOmbdM61YlLgg
+         VQT2lCggeXRbTtLwaflxzApfOIyhtFcNGpfRILfW9eK+jkADf1t2w1CkV9nvT2Yk/n2k
+         CXHeZVjHKYIlG3r0g4MSTuOi+WqbOAb442c6xC8ueUoiH8Gv/yU6Xi3XHytY3fNBUENy
+         8TI0Xbq0DpjvAvpf71J0BlSodSQ5UEAfj/5LSBmoWuTTjXRRKPujcstF7j7zbV1+gQCZ
+         opuFUF2cMpickcj87rLIrCG14b4gTTr/WXxlkojAxvtk8WYqwGOXLBal95MpaOoxpZ+A
+         +g6g==
+X-Gm-Message-State: AOJu0Yzz3cfaBjynBg+ZXNTSRzCn/aIDDbgF2ge7FQJY6BZ/8C1p0ZJF
+	CV8PhjGmFzHQSc8La/95Zol0D/Fv6e7Oe/hPLZw42g==
+X-Google-Smtp-Source: AGHT+IE5JRixOjxRGUF+c61qIeYY24wdOAvccV78T4FRZCSUWSvo//Cy7fL+VTmLpOHSicQnDTECRUPpp9z3C1BQ8uY=
+X-Received: by 2002:a25:1646:0:b0:daf:579a:79cd with SMTP id
+ 67-20020a251646000000b00daf579a79cdmr7364262ybw.27.1699979494683; Tue, 14 Nov
+ 2023 08:31:34 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20230531070049.11806-1-wsa+renesas@sang-engineering.com>
- <CAHCN7xJxROk6RU66PjbGH4M-R7PbUG-4y_2BHyCeGx_hTeUprw@mail.gmail.com>
- <ZHeHx/rUE7ORf3V2@shikoro> <CAHCN7x+hVSC=uCtaQx0tLZ6UdkYvf8B0DGQJ52Xr8WjWU=jGpA@mail.gmail.com>
- <ZI/viJ52TttqFveH@ninjato> <CAHCN7xL6Xskd_5qcgtWbVw42reP2Z4o7+KyTPD64=8AO_fCxvw@mail.gmail.com>
-In-Reply-To: <CAHCN7xL6Xskd_5qcgtWbVw42reP2Z4o7+KyTPD64=8AO_fCxvw@mail.gmail.com>
-From: Adam Ford <aford173@gmail.com>
-Date: Tue, 14 Nov 2023 10:29:51 -0600
-Message-ID: <CAHCN7xKsPMcBYeF1NWi4nkFPTtQO123VeAhigpzMYf19BeXNNw@mail.gmail.com>
-Subject: Re: [RFC/RFT PATCH] mmc: renesas_sdhi: add delay between tuning cmds
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Adam Ford <aford173@gmail.com>, 
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org> <20231108104343.24192-5-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20231108104343.24192-5-krzysztof.kozlowski@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 14 Nov 2023 17:30:58 +0100
+Message-ID: <CAPDyKFrynEEd+y6Qkv_9aTSJy1iLO4bhg-Jg8hEP0CZiWnRJ0w@mail.gmail.com>
+Subject: Re: [PATCH 04/17] dt-bindings: mmc: samsung,exynos-dw-mshc: add
+ specific compatibles for existing SoC
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Alim Akhtar <alim.akhtar@samsung.com>, Andi Shyti <andi.shyti@kernel.org>, 
+	Jonathan Cameron <jic23@kernel.org>, Lars-Peter Clausen <lars@metafoo.de>, Lee Jones <lee@kernel.org>, 
+	Tomasz Figa <tomasz.figa@gmail.com>, Sylwester Nawrocki <s.nawrocki@samsung.com>, 
+	Linus Walleij <linus.walleij@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, 
+	=?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, 
+	Alessandro Zummo <a.zummo@towertech.it>, Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jirislaby@kernel.org>, 
+	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
+	Jaehoon Chung <jh80.chung@samsung.com>, Sam Protsenko <semen.protsenko@linaro.org>, 
+	dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-samsung-soc@vger.kernel.org, linux-i2c@vger.kernel.org, 
+	linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org, 
+	linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org, 
+	alsa-devel@alsa-project.org, linux-sound@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jun 19, 2023 at 5:39=E2=80=AFAM Adam Ford <aford173@gmail.com> wrot=
-e:
+On Wed, 8 Nov 2023 at 11:44, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> On Mon, Jun 19, 2023 at 1:02=E2=80=AFAM Wolfram Sang
-> <wsa+renesas@sang-engineering.com> wrote:
-> >
-> > Hi Adam,
-> >
-> > > > U-Boot has a 1ms delay. Could you increase the delay to 1ms, please=
-?
-> > >
-> > > Sorry for the delay, but I increased this to  usleep_range(1000, 2500=
-)
-> > > and it still hangs.
-> >
-> > Sigh, back to the drawing board... But still thanks for trying! I'll tr=
-y
-> > to come up with something better after EOSS in Prague (will you be ther=
-e
-> > by any chance?)
-
-Wolfram,
-
-I wanted to test the 6.7-rc1 on the microSD cards to see if there has
-been any improvement.  In the process, I found yet another card which
-appears to have a similar issue where U-Boot can initialize a microSD
-card in SDR104 mode, but Linux fails.  I think this brings the total
-to 3 cards.  These same cards work on other platforms, so I don't
-think there is anything wrong with the cards, especially since they
-work on this platform in U-Boot.
-
- I added some debug code to indicate when when the priv->taps and
-priv->smpcmp bits are set when executing the timing command.  FWICT,
-the priv-taps never get set, and smpcmp appears to always be
-successful.
-
-[    3.741462] priv->smpcmp set bit 0
-[    3.747404] mmc_send_tuning opcode 19
-[    3.751173] priv->smpcmp set bit 1
-[    3.757129] mmc_send_tuning opcode 19
-[    3.760860] priv->smpcmp set bit 2
-[    3.766815] mmc_send_tuning opcode 19
-[    3.770564] priv->smpcmp set bit 3
-[    3.776514] mmc_send_tuning opcode 19
-[    3.780262] priv->smpcmp set bit 4
-[    3.786213] mmc_send_tuning opcode 19
-[    3.789966] priv->smpcmp set bit 5
-[    3.795915] mmc_send_tuning opcode 19
-[    3.799662] priv->smpcmp set bit 6
-[    3.805611] mmc_send_tuning opcode 19
-[    3.809364] priv->smpcmp set bit 7
-[    3.815294] mmc_send_tuning opcode 19
-[    3.819040] priv->smpcmp set bit 8
-[    3.824988] mmc_send_tuning opcode 19
-[    3.828735] priv->smpcmp set bit 9
-[    3.834685] mmc_send_tuning opcode 19
-[    3.838432] priv->smpcmp set bit 10
-[    3.844466] mmc_send_tuning opcode 19
-[    3.848214] priv->smpcmp set bit 11
-[    3.854251] mmc_send_tuning opcode 19
-[    3.857997] priv->smpcmp set bit 12
-[    3.864032] mmc_send_tuning opcode 19
-[    3.867778] priv->smpcmp set bit 13
-[    3.873820] mmc_send_tuning opcode 19
-[    3.877566] priv->smpcmp set bit 14
-[    3.883582] mmc_send_tuning opcode 19
-[    3.887328] priv->smpcmp set bit 15
-[    3.893361] priv->tap_num =3D 8
-[    3.896332] taps_size =3D 16
-[    3.899059] tap_cnt =3D 0
-[    3.901518] min_tap_row =3D 3
-[    3.904312] renesas_sdhi_select_tuning failed
-[    3.908732] mmc1: tuning execution failed: -5
-
-When I compare the values of taps and smpcmp in U-Boot vs linux, I get
-U-Boot Shows:
-taps =3D dfdf
-priv->smpcmp =3D dfdf
-Sometimes,  priv->smpcmp =3D df9f
-
-Linux shows:
-priv->taps =3D 0
-priv->smpcmp =3D ffff
-
-And the Linux values are consistent.
-
-Another thing that is interesting to me is that U-Boot explicitly
-forces PIO when tuning and it only happens when executing "ret =3D
-mmc_send_tuning(mmc, opcode, NULL);"  Is there a proper way to
-temporarily switch to PIO in the Linux driver to see if I can
-accomplish the same thing?
-
-If I eject the card before it's mounted, it waits for the card to be
-inserted.  If I insert the card, it enumerates:
-
-[    3.701926] renesas_sdhi_start_signal_voltage_switch: 0
-[    3.869834] renesas_sdhi_start_signal_voltage_switch: 1
-[    3.898030] mmc_send_tuning opcode 19
-[    3.907006] priv->taps set bit 0
-[    3.910232] priv->smpcmp set bit 0
-[    3.916160] mmc_send_tuning opcode 19
-[    3.919901] priv->taps set bit 1
-[    3.923142] priv->smpcmp set bit 1
-[    3.929054] mmc_send_tuning opcode 19
-[    3.932793] priv->taps set bit 2
-[    3.936034] priv->smpcmp set bit 2
-[    3.941953] mmc_send_tuning opcode 19
-[    3.945697] priv->taps set bit 3
-[    3.948938] priv->smpcmp set bit 3
-[    3.954857] mmc_send_tuning opcode 19
-[    3.958596] priv->taps set bit 4
-[    3.961836] priv->smpcmp set bit 4
-[    3.967756] mmc_send_tuning opcode 19
-[    3.974009] mmc_send_tuning opcode 19
-[    3.977749] priv->taps set bit 6
-[    3.980987] priv->smpcmp set bit 6
-[    3.986910] mmc_send_tuning opcode 19
-[    3.990636] priv->taps set bit 7
-[    3.993876] priv->smpcmp set bit 7
-[    3.999797] mmc_send_tuning opcode 19
-[    4.003535] priv->taps set bit 8
-[    4.006760] priv->smpcmp set bit 8
-[    4.012688] mmc_send_tuning opcode 19
-[    4.016427] priv->taps set bit 9
-[    4.019668] priv->smpcmp set bit 9
-[    4.025587] mmc_send_tuning opcode 19
-[    4.029326] priv->taps set bit 10
-[    4.032654] priv->smpcmp set bit 10
-[    4.038689] mmc_send_tuning opcode 19
-[    4.042422] priv->taps set bit 11
-[    4.045745] priv->smpcmp set bit 11
-[    4.051748] mmc_send_tuning opcode 19
-[    4.055484] priv->taps set bit 12
-[    4.058795] priv->smpcmp set bit 12
-[    4.064803] mmc_send_tuning opcode 19
-[    4.071044] mmc_send_tuning opcode 19
-[    4.074752] priv->taps set bit 14
-[    4.078075] priv->smpcmp set bit 14
-[    4.084077] mmc_send_tuning opcode 19
-[    4.087832] priv->taps set bit 15
-[    4.091157] priv->smpcmp set bit 15
-[    4.097152] priv->tap_num =3D 8
-[    4.100127] taps_size =3D 16
-[    4.102828] priv->taps =3D dfdf
-[    4.105800] priv->smpcmp =3D dfdf
-[    4.108947] tap_cnt =3D 7
-[    4.111395] min_tap_row =3D 3
-[    4.116003] mmc1: new ultra high speed SDR104 SDHC card at address 59b4
-[    4.123361] mmcblk1: mmc1:59b4 USD00 29.5 GiB
-[    4.129577]  mmcblk1: p1 p2
-
-
-Is there  some sort of reset or power-cycle that needs to be better configu=
-red?
-
-thanks,
-
-adam
+> Samsung Exynos SoC reuses several devices from older designs, thus
+> historically we kept the old (block's) compatible only.  This works fine
+> and there is no bug here, however guidelines expressed in
+> Documentation/devicetree/bindings/writing-bindings.rst state that:
+> 1. Compatibles should be specific.
+> 2. We should add new compatibles in case of bugs or features.
 >
-> I really tried to go, but my employer declined this time.  I was going
-> to go on my own, butI didn't have enough personal time off available
-> to fly out there.
+> Add compatibles specific to each SoC in front of all old-SoC-like
+> compatibles.
 >
-> adam
-> >
-> > Happy hacking,
-> >
-> >    Wolfram
-> >
+> While re-indenting the first enum, put also axis,artpec8-dw-mshc in
+> alphabetical order.
+>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Kind regards
+Uffe
+
+>
+> ---
+>
+> I propose to take the patch through Samsung SoC (me). See cover letter
+> for explanation.
+> ---
+>  .../bindings/mmc/samsung,exynos-dw-mshc.yaml  | 25 ++++++++++++-------
+>  1 file changed, 16 insertions(+), 9 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+> index 6ee78a38bd74..5fe65795f796 100644
+> --- a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+> @@ -14,15 +14,22 @@ maintainers:
+>
+>  properties:
+>    compatible:
+> -    enum:
+> -      - samsung,exynos4210-dw-mshc
+> -      - samsung,exynos4412-dw-mshc
+> -      - samsung,exynos5250-dw-mshc
+> -      - samsung,exynos5420-dw-mshc
+> -      - samsung,exynos5420-dw-mshc-smu
+> -      - samsung,exynos7-dw-mshc
+> -      - samsung,exynos7-dw-mshc-smu
+> -      - axis,artpec8-dw-mshc
+> +    oneOf:
+> +      - enum:
+> +          - axis,artpec8-dw-mshc
+> +          - samsung,exynos4210-dw-mshc
+> +          - samsung,exynos4412-dw-mshc
+> +          - samsung,exynos5250-dw-mshc
+> +          - samsung,exynos5420-dw-mshc
+> +          - samsung,exynos5420-dw-mshc-smu
+> +          - samsung,exynos7-dw-mshc
+> +          - samsung,exynos7-dw-mshc-smu
+> +      - items:
+> +          - enum:
+> +              - samsung,exynos5433-dw-mshc-smu
+> +              - samsung,exynos7885-dw-mshc-smu
+> +              - samsung,exynos850-dw-mshc-smu
+> +          - const: samsung,exynos7-dw-mshc-smu
+>
+>    reg:
+>      maxItems: 1
+> --
+> 2.34.1
+>
