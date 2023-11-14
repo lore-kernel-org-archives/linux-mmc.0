@@ -1,127 +1,82 @@
-Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5AF7733072
-	for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 21:08:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE5082FC27;
+	Tue, 14 Nov 2023 21:24:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="ahUIQNrs"
-Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58118C9
-	for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 13:08:15 -0800 (PST)
-Received: by mail-qt1-x830.google.com with SMTP id d75a77b69052e-41cb615c6fbso37006041cf.1
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 13:08:15 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1699996094; x=1700600894; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=DnDZGk512Fn6FcfRLVRqtgZTjSOOBJwTCzWACAW0uhY=;
-        b=ahUIQNrsWoqMCq7/jcJZF9gjodt+KWVgu7oTQbdahh0Zwj7k+F2areaVmEaaJJpLF1
-         94iQKu7HXxFbzApzkdQZrUIg1d26269iM9VQ1hHwU8EtCxEqxd0knnpE1AhgU2iOqAnZ
-         rbHpf6VkhLAVN68m6sINttmmVcl7vPhpbch3Y53WFfFylt+YKI2YA2ij1+UMia38/vDZ
-         WRYku4O9zA5BpwPXSKnUq4v/p7dG+FYcA/zwUmDY575/ZUIj+9Dz3fF5oe3HEgK6AXOJ
-         H1Fe0xJpinmADLTC2deSO9eV0deBnaX7/zaAcxKGKgHKafwYYCMXBdgNImvSFMjolEcm
-         8bsg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699996094; x=1700600894;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=DnDZGk512Fn6FcfRLVRqtgZTjSOOBJwTCzWACAW0uhY=;
-        b=BWqA8T0YCoJPfAV+/feIVBNSgu1pKMz3wA/SBmciH5/T0rTh/Wa68oaCHCOcwyKLkG
-         LQOjVOMdhikcEFFfL3L1svyRE6OJHG1HwNzcwf5v9w9YN5aaZUy/AE9KUrcapvHOvikQ
-         mpAp6vXci0qmpk5YMqUoKZB+Jr/TfiB6FlFIpj9PLKFFmfgC/nIVohokYXI7H/3q2rrS
-         iT3zaHXFqYHUZyzzHbDMbVBlf2hgqdgfADZLzcfJHmmuMLhkKZBO9zvXf7CuqYKHcKMY
-         iODLxSJGD/djJnmvf6DYPWn8S8M9lvQIvjYQWvodwlJO+23qbbx4PVHwVH1bzePfwafh
-         BfGw==
-X-Gm-Message-State: AOJu0Yw59zYtuwgOYgl341tTJqwCuK/ol1/Kz0hT/R8sEltJV0QAYzBy
-	Tw5PIezS6MLbpGv2N2yWaJ66W6gptmk1gpdwGz5anA==
-X-Google-Smtp-Source: AGHT+IEK7PlZMYuHkL/R+IsthoAOwkSQLBiE4nLJ04BntKaKYMZ7Xfo/U9ypzSKpZtZk+0pj5KANYA==
-X-Received: by 2002:ac8:5788:0:b0:40d:7ffd:fc61 with SMTP id v8-20020ac85788000000b0040d7ffdfc61mr3671284qta.23.1699996094414;
-        Tue, 14 Nov 2023 13:08:14 -0800 (PST)
-Received: from [127.0.1.1] ([12.186.190.1])
-        by smtp.gmail.com with ESMTPSA id x16-20020ac85390000000b004198d026be6sm3027549qtp.35.2023.11.14.13.08.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Nov 2023 13:08:13 -0800 (PST)
-From: Drew Fustini <dfustini@baylibre.com>
-Date: Tue, 14 Nov 2023 16:08:01 -0500
-Subject: [PATCH v6 7/7] riscv: dts: thead: Enable LicheePi 4A eMMC and
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HOMsLcbI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72B0FC433C7;
+	Tue, 14 Nov 2023 21:24:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1699997084;
+	bh=rU5BTK7MCrWJgidozp4gErYmRVfFdOvPFsoWYPOMOVA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=HOMsLcbIOCjcghFxtftq0kqj2pEDJqeoI+K/155mlqiI9bpBNLVkoDczf1gL/3qez
+	 pwHe4gt4RQxNMNXE/A11+HHD/DoCKmLjdCmawX7D86TjMMWxN1bHyvWecsofMKf1+n
+	 kl3SsV6DsuQyhFVcDU1/VVr5cdk6WkP6yOAh7I76LASv9baa8Jon3m+MyCdUvmb3iC
+	 BGYE+dWzYbB5egrR4sKDSEijrtYnUur8PIAf5jHYz9ypYcJXGHY48Qk2ceVhcqMCDR
+	 fWorUWkhm4i5Wd918ftpW7rd/r0wg4UFNeu8ElEa6gGJ6eiEH0dOCYmT+2i5Oqmdmp
+	 CzP9L3xr6b7Ww==
+Date: Tue, 14 Nov 2023 21:24:40 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Drew Fustini <dfustini@baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Guo Ren <guoren@kernel.org>,
+	Fu Wei <wefu@redhat.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-riscv@lists.infradead.org
+Subject: Re: [PATCH v6 6/7] riscv: dts: thead: Enable BeagleV Ahead eMMC and
  microSD
+Message-ID: <20231114-subsiding-tipoff-f3c15ef22985@squawk>
+References: <20231114-th1520-mmc-v6-0-3273c661a571@baylibre.com>
+ <20231114-th1520-mmc-v6-6-3273c661a571@baylibre.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20231114-th1520-mmc-v6-7-3273c661a571@baylibre.com>
-References: <20231114-th1520-mmc-v6-0-3273c661a571@baylibre.com>
-In-Reply-To: <20231114-th1520-mmc-v6-0-3273c661a571@baylibre.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, 
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
- Conor Dooley <conor+dt@kernel.org>, Jisheng Zhang <jszhang@kernel.org>, 
- Adrian Hunter <adrian.hunter@intel.com>, 
- Paul Walmsley <paul.walmsley@sifive.com>, 
- Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
- Guo Ren <guoren@kernel.org>, Fu Wei <wefu@redhat.com>, 
- Conor Dooley <conor@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
- Drew Fustini <dfustini@baylibre.com>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1699996086; l=1102;
- i=dfustini@baylibre.com; s=20230430; h=from:subject:message-id;
- bh=vZkA/Rp2zWEJvsAGA/badfpHmHgx6/3DqqLzYe2IxQc=;
- b=SjwF4UAXo6/VukqMwwjVNk1Bt2VTO2cQgXt/3XczOxw6M01DzJI5nFGgAMrBI3p5LGZYyeYHw
- ul3WhjbXZvaBlQ2tkLlrJa4Fs/mjbBvjVO7YJ8LK+2Qn7S2r0S0TXtz
-X-Developer-Key: i=dfustini@baylibre.com; a=ed25519;
- pk=p3GKE9XFmjhwAayAHG4U108yag7V8xQVd4zJLdW0g7g=
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="qL6YxW9uEMvtG3Cb"
+Content-Disposition: inline
+In-Reply-To: <20231114-th1520-mmc-v6-6-3273c661a571@baylibre.com>
 
-Add mmc0 properties for the eMMC device and add mmc1 properties for
-the microSD slot. Set the frequency for the sdhci clock.
 
-Signed-off-by: Drew Fustini <dfustini@baylibre.com>
----
- .../boot/dts/thead/th1520-lichee-module-4a.dtsi      | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+--qL6YxW9uEMvtG3Cb
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi b/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi
-index a802ab110429..94f1741435a5 100644
---- a/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi
-+++ b/arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi
-@@ -29,6 +29,10 @@ &apb_clk {
- 	clock-frequency = <62500000>;
- };
- 
-+&sdhci_clk {
-+	clock-frequency = <198000000>;
-+};
-+
- &uart_sclk {
- 	clock-frequency = <100000000>;
- };
-@@ -36,3 +40,19 @@ &uart_sclk {
- &dmac0 {
- 	status = "okay";
- };
-+
-+&mmc0 {
-+	bus-width = <8>;
-+	max-frequency = <198000000>;
-+	mmc-hs400-1_8v;
-+	non-removable;
-+	no-sdio;
-+	no-sd;
-+	status = "okay";
-+};
-+
-+&mmc1 {
-+	max-frequency = <198000000>;
-+	bus-width = <4>;
-+	status = "okay";
-+};
+On Tue, Nov 14, 2023 at 04:08:00PM -0500, Drew Fustini wrote:
 
--- 
-2.34.1
+> +&mmc0 {
+> +	bus-width = <8>;
+> +	max-frequency = <198000000>;
 
+> +&mmc1 {
+> +	max-frequency = <198000000>;
+> +	bus-width = <4>;
+
+If there's another iteration of this patchset, can you use a consistent
+ordering for your properties please?
+
+Cheers,
+Conor.
+
+--qL6YxW9uEMvtG3Cb
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZVPllQAKCRB4tDGHoIJi
+0sbHAQCV9T84dReER590s82MvicWkpUR4l10x54e8/+ODO+eqAD/VSf4O8IzwsIw
+xhsEnXZ9t0gQ0DPtoaAnudKdE8hG7gI=
+=Nvey
+-----END PGP SIGNATURE-----
+
+--qL6YxW9uEMvtG3Cb--
