@@ -1,95 +1,126 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC03633080
-	for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 22:30:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="xKbUDYIr"
-Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A3BFDB
-	for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 14:30:30 -0800 (PST)
-Received: by mail-qk1-x730.google.com with SMTP id af79cd13be357-77891c236fcso394517185a.3
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Nov 2023 14:30:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1700001029; x=1700605829; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=4XST0nJe2LTZ4oHvfVDx7eyej+3hWOw1VagBLPa3XUw=;
-        b=xKbUDYIrLlOI33Sp9f82M2rt6VNkOPlg5ByrRzr26yt/7G5zFKeYH1O6pBoZqAkfH7
-         vKZ4JGZR/azgL8e+X33N3ktQ29+Z9QmKdG0A94VsDCdmgDQeMkwrSWGWuNfCc/vyE7oH
-         45uVlJJaWYakhWIItOtwWtSKLt1242WiI5vqPfT6Zykwb+yeSz0KXhnMnbMDkZtQgYZ7
-         LJZqc6tcuZEFy+XY0npgygLf0anZN/l+rLqAFkSpWuWyXtsY2UKvXid7Szfb0S1VkO/l
-         tBraPztCx0bhucOavgCxrmPVW2npCP/QLMXkMuZqoq00yxVAAQALwqJ7XDiq9Tu5dU4g
-         SVww==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700001029; x=1700605829;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=4XST0nJe2LTZ4oHvfVDx7eyej+3hWOw1VagBLPa3XUw=;
-        b=CzFFyBfoYWLg+1W9HEWsDS22dVwn1RIfly3lvDukHk0xRfwRwOrF/5dC2blZ8JYowy
-         fivkC7TL3yQjYPq18xIS6zP7VwvECXT2xRthszzl5EjtI58/V/K/ZfX+yz/2ZfWnRHTi
-         IfUsYG3ehdaFU+1lN5hHV1jtHqooM37Mz8+piHbsf+BwviHn62jw0NyrexYsOpoMLhWR
-         xnQOq3ZyOFq6duoQsx/4Pf9qbp4tSEIjeD9dXTphzbHqYOIz4YjGeWvXGe7UkmNT1ghe
-         RiYQvomTH0XOTTbyp/izk2VBFlis2zrZ39npgyCwJc4Jzcvh90RfXDjXi92Axain+FVp
-         lCnQ==
-X-Gm-Message-State: AOJu0YxzWoR/3J7I+LQ0QhwtlfylZ5EqaB3b4QL2R1Ry9ozlLwHx9Mov
-	5PdT47Qlhz1WMR3/tQ5c9xgQnw==
-X-Google-Smtp-Source: AGHT+IFMKHaDQrXdjPlVZanAMM7n0JSJwglGmnqidJ3M4rjzD/Zj6FS0kt5MVg8MvJG467X+FEDorg==
-X-Received: by 2002:a0c:f9cc:0:b0:66d:5dd:26f6 with SMTP id j12-20020a0cf9cc000000b0066d05dd26f6mr4147253qvo.25.1700001029699;
-        Tue, 14 Nov 2023 14:30:29 -0800 (PST)
-Received: from x1 ([12.186.190.2])
-        by smtp.gmail.com with ESMTPSA id c14-20020a0cd60e000000b0066cf06339bcsm21546qvj.0.2023.11.14.14.30.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Nov 2023 14:30:29 -0800 (PST)
-Date: Tue, 14 Nov 2023 17:30:26 -0500
-From: Drew Fustini <dfustini@baylibre.com>
-To: Conor Dooley <conor@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Jisheng Zhang <jszhang@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Paul Walmsley <paul.walmsley@sifive.com>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Guo Ren <guoren@kernel.org>,
-	Fu Wei <wefu@redhat.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-riscv@lists.infradead.org
-Subject: Re: [PATCH v6 5/7] riscv: dts: thead: Add TH1520 mmc controllers and
- sdhci clock
-Message-ID: <ZVP1AoosripWj3gs@x1>
-References: <20231114-th1520-mmc-v6-0-3273c661a571@baylibre.com>
- <20231114-th1520-mmc-v6-5-3273c661a571@baylibre.com>
- <20231114-starring-swarm-0e1b641f888c@squawk>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B6132E835
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 08:34:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from SHSQR01.spreadtrum.com (unknown [222.66.158.135])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBB80F1;
+	Wed, 15 Nov 2023 00:34:44 -0800 (PST)
+Received: from dlp.unisoc.com ([10.29.3.86])
+	by SHSQR01.spreadtrum.com with ESMTP id 3AF8YECt071583;
+	Wed, 15 Nov 2023 16:34:14 +0800 (+08)
+	(envelope-from Wenchao.Chen@unisoc.com)
+Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
+	by dlp.unisoc.com (SkyGuard) with ESMTPS id 4SVbtC2D7lz2N1Kdv;
+	Wed, 15 Nov 2023 16:29:07 +0800 (CST)
+Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
+ (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Wed, 15 Nov
+ 2023 16:34:13 +0800
+From: Wenchao Chen <wenchao.chen@unisoc.com>
+To: <ulf.hansson@linaro.org>, <zhang.lyra@gmail.com>, <orsonzhai@gmail.com>,
+        <baolin.wang@linux.alibaba.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
+        <yuelin.tang@unisoc.com>, Wenchao Chen <wenchao.chen@unisoc.com>
+Subject: [PATCH V2] mmc: sprd: Fix vqmmc not shutting down after the card was pulled
+Date: Wed, 15 Nov 2023 16:34:06 +0800
+Message-ID: <20231115083406.7368-1-wenchao.chen@unisoc.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231114-starring-swarm-0e1b641f888c@squawk>
+Content-Type: text/plain
+X-Originating-IP: [10.13.2.29]
+X-ClientProxiedBy: SHCAS01.spreadtrum.com (10.0.1.201) To
+ shmbx05.spreadtrum.com (10.29.1.56)
+X-MAIL:SHSQR01.spreadtrum.com 3AF8YECt071583
 
-On Tue, Nov 14, 2023 at 09:27:44PM +0000, Conor Dooley wrote:
-> On Tue, Nov 14, 2023 at 04:07:59PM -0500, Drew Fustini wrote:
-> 
-> > +	sdhci_clk: sdhci-clock {
-> > +		compatible = "fixed-clock";
-> > +		clock-frequency = <198000000>;
-> > +		clock-output-names = "sdhci_clk";
-> > +		#clock-cells = <0>;
-> > +	};
-> 
-> If only you had a clock driver to provide these...
-> 
-> Is someone working on a resubmission of the clock driver?
+With cat regulator_summary, we found that vqmmc was not shutting
+down after the card was pulled.
 
-Yangtao Li posted an initial revision back [1] in May but I don't think
-there has been any follow up. It is for sure something we need to have
-in mainline so I'll take a look at getting that effort going again.
+cat /sys/kernel/debug/regulator/regulator_summary
+1.before fix
+1)Insert SD card
+ vddsdio		1    1  0 unknown  3500mV 0mA  1200mV  3750mV
+    71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
 
-Drew
+2)Pull out the SD card
+ vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
+    71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
 
-[1] https://lore.kernel.org/linux-riscv/20230515054402.27633-1-frank.li@vivo.com/
+2.after fix
+1)Insert SD cardt
+ vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
+    71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
+
+2)Pull out the SD card
+ vddsdio		0    1  0 unknown  3500mV 0mA  1200mV  3750mV
+    71100000.mmc-vqmmc  0                         0mA  3500mV  3600mV
+
+Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
+Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+
+Change in v2:
+- Remove useless sdhci_sprd_signal_voltage_switch and power_mode.
+- Use mmc_regulator_get_supply in probe to prevent sdhci_setup_host
+  from powering up vqmmc.
+---
+ drivers/mmc/host/sdhci-sprd.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 6b84ba27e6ab..6b8a57e2d20f 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -416,12 +416,33 @@ static void sdhci_sprd_request_done(struct sdhci_host *host,
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
++static void sdhci_sprd_set_power(struct sdhci_host *host, unsigned char mode,
++				 unsigned short vdd)
++{
++	struct mmc_host *mmc = host->mmc;
++
++	switch (mode) {
++	case MMC_POWER_OFF:
++		mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, 0);
++
++		mmc_regulator_disable_vqmmc(mmc);
++		break;
++	case MMC_POWER_ON:
++		mmc_regulator_enable_vqmmc(mmc);
++		break;
++	case MMC_POWER_UP:
++		mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
++		break;
++	}
++}
++
+ static struct sdhci_ops sdhci_sprd_ops = {
+ 	.read_l = sdhci_sprd_readl,
+ 	.write_l = sdhci_sprd_writel,
+ 	.write_w = sdhci_sprd_writew,
+ 	.write_b = sdhci_sprd_writeb,
+ 	.set_clock = sdhci_sprd_set_clock,
++	.set_power = sdhci_sprd_set_power,
+ 	.get_max_clock = sdhci_sprd_get_max_clock,
+ 	.get_min_clock = sdhci_sprd_get_min_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+@@ -823,6 +844,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+ 	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+ 			 SDHCI_SUPPORT_DDR50);
+ 
++	ret = mmc_regulator_get_supply(host->mmc);
++	if (ret)
++		goto pm_runtime_disable;
++
+ 	ret = sdhci_setup_host(host);
+ 	if (ret)
+ 		goto pm_runtime_disable;
+-- 
+2.17.1
+
