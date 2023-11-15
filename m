@@ -1,70 +1,66 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BF2C433AB
-	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 16:03:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D77B93173E
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 16:05:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="nUfT2tgM"
-Received: from mail-qk1-x72a.google.com (mail-qk1-x72a.google.com [IPv6:2607:f8b0:4864:20::72a])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D545E5
-	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 08:03:40 -0800 (PST)
-Received: by mail-qk1-x72a.google.com with SMTP id af79cd13be357-7789577b53fso426839085a.3
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 08:03:40 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="AeBXp3Fj"
+Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6647C194
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 08:05:07 -0800 (PST)
+Received: by mail-qv1-xf2a.google.com with SMTP id 6a1803df08f44-670e7ae4a2eso8964006d6.1
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 08:05:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1700064219; x=1700669019; darn=vger.kernel.org;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1700064306; x=1700669106; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=5tDYXry5Yt4gE435+5gScTv9ABMQHbckYhe3lM02emE=;
-        b=nUfT2tgMZteQ4oDEiu+lc8tSNFEpeM4gJrzawA3AQw7h67Dpb6tLhqxXPoKJlp0ilo
-         F2UyEFvItcuvwRKAr4TPXjNut9YzL1f/2NmhF6MKJw/LlNrA3djGtCfMec4uneeJ4vz4
-         hn0cLXu7VpuWvwZJhFHJ9AHJUHaHJQ9d9pZtPslzkHT2LZj911hkldcJrlvptQER0UHv
-         GdG3wWKrdlTTuDakaYInnsSmK8f8DYVPhGQKNQMgTsQfGDykktL8FAFmFu1ar3UybwRf
-         1ekFA0uhZHSmFnIzuJQVgtKAmGS59dVIFA4YVGYk71hiyGJJ7sXHNkVLtP8v7ymPYOcV
-         A4zQ==
+        bh=MejHG9v78thYt1KCbL5Bhup5VOWpNmj9HgzD1QZtMTA=;
+        b=AeBXp3FjmYcu6PwTQOMYiY6hY8V9m64eef4+yd7Rxcifr4LlNJezuuFpQ6wzh0RRVU
+         5F0kcaICBeyizPSoqFXOm7YVQ9ncSQ8shEeT2gflMsnNwjgD13OdLogs16Lt+ZJ5MDHV
+         TylzYiqzc2G2TZ7UW16OxKdxICpu9dyDFr4VnAFaDlr3OKo3fJDWDSJ7yyA2dh3JgTn1
+         ynpRgHQ2eds3c1A7uNohCtierwscpGZZGcy+OVF+APHbzCxCIlRVQVrJsBGfJsdSyL9Y
+         4w5TwJFVgU0gNjKnMNF8KAX9ZgvHrI4V/7NCBaZQWOXei0iZApimMfZx6m/9OUuOxup4
+         UmhA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700064219; x=1700669019;
+        d=1e100.net; s=20230601; t=1700064306; x=1700669106;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=5tDYXry5Yt4gE435+5gScTv9ABMQHbckYhe3lM02emE=;
-        b=qc0okubtVId6jTm80wClDNyeeVxLlt1AMUxz8SZVC01XgbI5Qejft9Ah9RNg0sZxHo
-         G/NoCPGAHLmJxoT0XDjvsmGDnc8YM+o573ZHyLaRb9gblhTl53rKL38sRzpGeTJdRPki
-         bP8Qn5yVDsqJOC+SD8EFWubNptF+AZ/ZsMpg/ZRJuXkBiOpMHF6SXbAZq0AdnKzzMpDH
-         xoGaPxnvSMXnOQ5WNMORcFlmEPqBXKt1aItKVWlk/cgJG3JVQr84HpsFbfAH5OO13wwW
-         J/Wk1boCqF6fIN/CTR4EdTnP3fP8FLtK3tyTWGP+YvT4qNroIZ70zGC4sX3o/RJiZNth
-         l3Xw==
-X-Gm-Message-State: AOJu0YzfWHR8LiHXnoaK8GhgmdXJ6ksD98n6qzueGClJ4F9IUD4fgjgj
-	OXQ2WrLR7JmjUv4jIA/O9uJaoQ==
-X-Google-Smtp-Source: AGHT+IF93JhWNlbYNdOEZtUE6mCjhq9mjRfXWGgqHnPrwHynLnLGWfpW+HW6XqPiTsquRivLQ2yAuw==
-X-Received: by 2002:a05:620a:3aca:b0:77a:35f:61fc with SMTP id ss10-20020a05620a3aca00b0077a035f61fcmr4931758qkn.24.1700064219254;
-        Wed, 15 Nov 2023 08:03:39 -0800 (PST)
+        bh=MejHG9v78thYt1KCbL5Bhup5VOWpNmj9HgzD1QZtMTA=;
+        b=cxsgte6nLYJq9YnZaymgLCD9XB7FYmTdbnhrbrNeTk31VyfAzZRTeytMDy/m2MRpkF
+         GS+EESLsCP/s3v3p3nUWVBo0quK3QLwbwHLPiBT0qjIwJ0F46beof/YTgmXKblJMxqeV
+         fG+dPXEroh3EDhmQR5uRti4ssttWcBZKzTWJhsmA9TORYBnfQImKFnBBX1fXi8bXK6CN
+         pJaWQWwoBe/jRavMsWVtQ41z6eWeSr8U3IsMn37jVNRfeU6vyoznQmmsz/xA2nNG7qz2
+         XPy0yfeSICjn7y5yRB+pNeFj8q4hY7drfkNM3nwwV0mdObScBDQ5hBzBliSKFmZCkj+c
+         6BJw==
+X-Gm-Message-State: AOJu0YyFBsMZOUCzRRIv4Aw1crcyXv4EW0BXwx1/K3HkglxjKHYFRYQt
+	wAmNkkc3BgsfGNr1dkp/pivgsw==
+X-Google-Smtp-Source: AGHT+IEcj6XcTZ0mNvYbPmKaVsfiFpIwuHA7OmpjgBlO36wsG12GpSde51/jSBEJuULlMiocskZovg==
+X-Received: by 2002:a05:6214:1706:b0:66d:6a92:16c2 with SMTP id db6-20020a056214170600b0066d6a9216c2mr10015972qvb.8.1700064306362;
+        Wed, 15 Nov 2023 08:05:06 -0800 (PST)
 Received: from x1 ([12.186.190.1])
-        by smtp.gmail.com with ESMTPSA id f5-20020ac84985000000b0041815bcea29sm3614057qtq.19.2023.11.15.08.03.38
+        by smtp.gmail.com with ESMTPSA id k9-20020a05621414e900b00671ab3da5d0sm617138qvw.105.2023.11.15.08.05.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Nov 2023 08:03:38 -0800 (PST)
-Date: Wed, 15 Nov 2023 11:03:37 -0500
+        Wed, 15 Nov 2023 08:05:06 -0800 (PST)
+Date: Wed, 15 Nov 2023 11:05:04 -0500
 From: Drew Fustini <dfustini@baylibre.com>
-To: Jisheng Zhang <jszhang@kernel.org>
-Cc: Conor Dooley <conor@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh+dt@kernel.org>,
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>,
 	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
 	Conor Dooley <conor+dt@kernel.org>,
+	Jisheng Zhang <jszhang@kernel.org>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Paul Walmsley <paul.walmsley@sifive.com>,
 	Palmer Dabbelt <palmer@dabbelt.com>,
 	Albert Ou <aou@eecs.berkeley.edu>, Guo Ren <guoren@kernel.org>,
-	Fu Wei <wefu@redhat.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-riscv@lists.infradead.org
-Subject: Re: [PATCH v6 5/7] riscv: dts: thead: Add TH1520 mmc controllers and
- sdhci clock
-Message-ID: <ZVTr2VaZPvE45zP1@x1>
+	Fu Wei <wefu@redhat.com>, Conor Dooley <conor@kernel.org>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
+	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH v6 0/7] RISC-V: Add MMC support for TH1520 boards
+Message-ID: <ZVTsMIHc50hkQ2fe@x1>
 References: <20231114-th1520-mmc-v6-0-3273c661a571@baylibre.com>
- <20231114-th1520-mmc-v6-5-3273c661a571@baylibre.com>
- <20231114-starring-swarm-0e1b641f888c@squawk>
- <ZVP1AoosripWj3gs@x1>
- <ZVTiFVHSsBxk3pLH@xhacker>
- <ZVTi3lvSQEXeTbUN@xhacker>
+ <CAPDyKFooGiv6fj+X9c4KXaBjvsTTRaHSrxinQYirTWXmX1Ht5Q@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -73,41 +69,35 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZVTi3lvSQEXeTbUN@xhacker>
+In-Reply-To: <CAPDyKFooGiv6fj+X9c4KXaBjvsTTRaHSrxinQYirTWXmX1Ht5Q@mail.gmail.com>
 
-On Wed, Nov 15, 2023 at 11:25:18PM +0800, Jisheng Zhang wrote:
-> On Wed, Nov 15, 2023 at 11:22:03PM +0800, Jisheng Zhang wrote:
-> > On Tue, Nov 14, 2023 at 05:30:26PM -0500, Drew Fustini wrote:
-> > > On Tue, Nov 14, 2023 at 09:27:44PM +0000, Conor Dooley wrote:
-> > > > On Tue, Nov 14, 2023 at 04:07:59PM -0500, Drew Fustini wrote:
-> > > > 
-> > > > > +	sdhci_clk: sdhci-clock {
-> > > > > +		compatible = "fixed-clock";
-> > > > > +		clock-frequency = <198000000>;
-> > > > > +		clock-output-names = "sdhci_clk";
-> > > > > +		#clock-cells = <0>;
-> > > > > +	};
-> > > > 
-> > > > If only you had a clock driver to provide these...
-> > > > 
-> > > > Is someone working on a resubmission of the clock driver?
-> > > 
-> > > Yangtao Li posted an initial revision back [1] in May but I don't think
-> > > there has been any follow up. It is for sure something we need to have
-> > > in mainline so I'll take a look at getting that effort going again.
-> > 
-> > Hi Drew,
-> > 
-> > Based on Yangtao's version, I cooked an updated version in last
-> > development window but still can't complete it and met some issues
-> > which need the clk/pll register document.
-> > IIRC, the document was released a few days ago before soc tree frozen.
-> > 
-> > It's nice if you can continue the effort! I'll read the sdhci driver
-> > soon.
+On Wed, Nov 15, 2023 at 04:51:30PM +0100, Ulf Hansson wrote:
+> On Tue, 14 Nov 2023 at 22:08, Drew Fustini <dfustini@baylibre.com> wrote:
+> >
+> > This series adds support for the MMC controller in the T-Head TH1520
+> > SoC, and it enables the eMMC and microSD slot on both the BeagleV
+> > Ahead and the Sipeed LicheePi 4A.
+> >
+> > I tested on top of v6.6 with riscv defconfig. I was able to boot the
+> > Ahead [1] and LPi4a [2] from eMMC. This patch series also exists as a
+> > git branch [3].
+> >
+> > Note: I have only tested eMMC and microSD. I have not yet configured
+> > or tested the mmc controller used for SDIO WiFi yet.
+> >
+> > References:
+> > [1] https://gist.github.com/pdp7/881342620ec1509685f23a387e2fc8d7
+> > [2] https://gist.github.com/pdp7/97017ad88d83fccac18eba69bff817b7
+> > [3] https://github.com/pdp7/linux/tree/b4/th1520-mmc
+> >
+> > Changes in PATCH v6:
+> > - set the mmc nodes to disabled in the th1520.dtsi
 > 
-> PS: I can send my updated version to you for reference tomorrow.
+> Patch 1 -> 3 , applied for next, thanks!
+> 
+> Kind regards
+> Uffe
 
-Thank you, that would be great!
+Thank you!
 
 Drew
