@@ -1,505 +1,164 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2835F1C6A3;
-	Wed, 15 Nov 2023 15:51:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07DCA1C6A3
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 15:51:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ENMmoIte"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 45EB2C433C7;
-	Wed, 15 Nov 2023 15:51:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700063488;
-	bh=JWLvffI3fjeST8KBRZa2hE/P+YzlWgmEkb8aCXm1z8w=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ENMmoIteH4NASgaZJ1znlercNU8PlMQEP96SN2j5bjRB/Yz3Z8JZRPd1irFTwoVbi
-	 v76LGoVYH34Vit4KUPvvICVxmJAuNX3xHEMgh56Itfc/CKMSPCwLMKNCOlJ8Q2vKI1
-	 +kW4I2M8EPzrHI0K81hWoIKHiXadEGBsUDM/0zwA8p4unhGcJ/eEQ6xuYFymjDnNu9
-	 wbxU9KDzC+AGKLRjE5kb55GQBtyidh1I5JcEPW/alsdwQy1ZyJ1GUIzT7JSCrJ6uNg
-	 L0ZIxse4nXGqdj36QgozJuTboVNW739ZzmFbonNVJnnPyRmIpnwXmGWjLN/0GqW93N
-	 iDMbszM3JCVsg==
-Date: Wed, 15 Nov 2023 23:39:06 +0800
-From: Jisheng Zhang <jszhang@kernel.org>
-To: Drew Fustini <dfustini@baylibre.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Paul Walmsley <paul.walmsley@sifive.com>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Guo Ren <guoren@kernel.org>,
-	Fu Wei <wefu@redhat.com>, Conor Dooley <conor@kernel.org>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org
-Subject: Re: [PATCH v6 3/7] mmc: sdhci-of-dwcmshc: Add support for T-Head
- TH1520
-Message-ID: <ZVTmGqW6Gl1s2wWr@xhacker>
-References: <20231114-th1520-mmc-v6-0-3273c661a571@baylibre.com>
- <20231114-th1520-mmc-v6-3-3273c661a571@baylibre.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="l0u5JlgW"
+Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8ABBD2706
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 07:51:44 -0800 (PST)
+Received: by mail-yb1-xb2d.google.com with SMTP id 3f1490d57ef6-d9abc069c8bso6811789276.3
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 07:51:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1700063503; x=1700668303; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=NVUEiYhT9QTGpoJea11QrcP/Cme2INTlTLciRBieU0M=;
+        b=l0u5JlgWM7npximMwdh1RG8id31C5DqCWFoQszEQ4fJDVIJ0AY/D8O9Tzb+hbpu8Tz
+         2YeIf1pOJSptIzSaoY38nBsii4vjOgNz3zki+9v77lR49iA/d6rizwlgXuLuz+2yO7tC
+         m10nTgOmHBIDXD1FIF9l4UNJqqln7q9IjMfxlcg6qWXB6+OuD9JBkcGHUI4mbGXpa5nb
+         bcuiG49i/uoqN194OtUTr6p4zoc6w5L3HmkZoTFh7pjsVJ9bSqq54yFlQ/lyxlxhX/ZC
+         N5+6I9hDmX1T7YkdpJx/yde/tkTpG4JD5EXUPZnfMNh8UB3CktavfEOSxMTVG0aNaJCX
+         foeQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1700063503; x=1700668303;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=NVUEiYhT9QTGpoJea11QrcP/Cme2INTlTLciRBieU0M=;
+        b=o4wy2hCLqlxO2QSRrOkWDDn4lYJb8xCFbEtkfL+XcdyOqPDbN2GV9R27VoEqrdSYmD
+         yVQe9KSqcVtkJfKqhTicRlntcG+Ju/RFbjkEHN22Lam8fTwFE0ozOsvI1RljMFHwFlGC
+         n5pfDDOaU3N6gfuC8YB26cPtwj28Zr8/juVGSJxEUSr5RNFAokyvTjKXXfNd7ypO+0K5
+         rtWT7FkO7U1AhhSMpQRTPkvOo1ngc7no8eh7Q/s/F/1vzWXpzpMEBy1Eb5w8NqQOiZwE
+         syMJBVACYFksqMYEUYdes/bERQUsGhwXfPDYoUYmmeSAmKHj9jOWdW5rXiW/Gw2drXxh
+         /D4w==
+X-Gm-Message-State: AOJu0YwA7kXeARXVJU2F7qCsoPutt8Ef7l6yVVGxlp8hz3V+E/U9J1Ju
+	26jMBQG8a2ziO+w1yTusP7z7enYei1JUeQPLJMSiqP64vj+saTV+B2U=
+X-Google-Smtp-Source: AGHT+IHTFTHFvhwHLNCXuf+NGuLV7xZ7niNbBW+KqVJpJIoTUotWzji6xRZRz/lqg7+7vgBLHJpzScvnlrBc2AffKLI=
+X-Received: by 2002:a25:adce:0:b0:db0:3039:2444 with SMTP id
+ d14-20020a25adce000000b00db030392444mr2222823ybe.41.1700063503677; Wed, 15
+ Nov 2023 07:51:43 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20231114-th1520-mmc-v6-3-3273c661a571@baylibre.com>
+References: <20231030062226.1895692-1-avri.altman@wdc.com>
+In-Reply-To: <20231030062226.1895692-1-avri.altman@wdc.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 15 Nov 2023 16:51:07 +0100
+Message-ID: <CAPDyKFpSk50AQ_WQ7Q52pKrOGPwZ+QVfRPiSftcB_wUJ4LS_SQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Remove packed command leftovers
+To: Avri Altman <avri.altman@wdc.com>
+Cc: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Tue, Nov 14, 2023 at 04:07:57PM -0500, Drew Fustini wrote:
-> Add support for the mmc controller in the T-Head TH1520 with the new
-> compatible "thead,th1520-dwcmshc". Implement custom sdhci_ops for
-> set_uhs_signaling, reset, voltage_switch, and platform_execute_tuning.
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Drew Fustini <dfustini@baylibre.com>
+On Mon, 30 Oct 2023 at 07:22, Avri Altman <avri.altman@wdc.com> wrote:
+>
+> Packed commands support was removed long time ago, but some bits got
+> left behind. Remove them.
+>
+> Fixes: 03d640ae1f9b (mmc: block: delete packed command support)
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-Reviewed-by: Jisheng Zhang <jszhang@kernel.org>
+Applied for next, thanks!
 
-Thank Drew!
+Kind regards
+Uffe
 
-PS: one FYI below.
+
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 349 ++++++++++++++++++++++++++++++++++++
->  1 file changed, 349 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 3a3bae6948a8..0eb72544c09e 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -8,6 +8,7 @@
->   */
->  
->  #include <linux/acpi.h>
-> +#include <linux/bitfield.h>
->  #include <linux/clk.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/iopoll.h>
-> @@ -35,6 +36,21 @@
->  #define DWCMSHC_CARD_IS_EMMC		BIT(0)
->  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
->  #define DWCMSHC_EMMC_ATCTRL		0x40
-> +/* Tuning and auto-tuning fields in AT_CTRL_R control register */
-> +#define AT_CTRL_AT_EN			BIT(0) /* autotuning is enabled */
-> +#define AT_CTRL_CI_SEL			BIT(1) /* interval to drive center phase select */
-> +#define AT_CTRL_SWIN_TH_EN		BIT(2) /* sampling window threshold enable */
-> +#define AT_CTRL_RPT_TUNE_ERR		BIT(3) /* enable reporting framing errors */
-> +#define AT_CTRL_SW_TUNE_EN		BIT(4) /* enable software managed tuning */
-> +#define AT_CTRL_WIN_EDGE_SEL_MASK	GENMASK(11, 8) /* bits [11:8] */
-> +#define AT_CTRL_WIN_EDGE_SEL		0xf /* sampling window edge select */
-> +#define AT_CTRL_TUNE_CLK_STOP_EN	BIT(16) /* clocks stopped during phase code change */
-> +#define AT_CTRL_PRE_CHANGE_DLY_MASK	GENMASK(18, 17) /* bits [18:17] */
-> +#define AT_CTRL_PRE_CHANGE_DLY		0x1  /* 2-cycle latency */
-> +#define AT_CTRL_POST_CHANGE_DLY_MASK	GENMASK(20, 19) /* bits [20:19] */
-> +#define AT_CTRL_POST_CHANGE_DLY		0x3  /* 4-cycle latency */
-> +#define AT_CTRL_SWIN_TH_VAL_MASK	GENMASK(31, 24) /* bits [31:24] */
-> +#define AT_CTRL_SWIN_TH_VAL		0x9  /* sampling window threshold */
->  
->  /* Rockchip specific Registers */
->  #define DWCMSHC_EMMC_DLL_CTRL		0x800
-> @@ -72,6 +88,82 @@
->  	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
->  #define RK35xx_MAX_CLKS 3
->  
-> +/* PHY register area pointer */
-> +#define DWC_MSHC_PTR_PHY_R	0x300
-> +
-> +/* PHY general configuration */
-> +#define PHY_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x00)
-> +#define PHY_CNFG_RSTN_DEASSERT	0x1  /* Deassert PHY reset */
-> +#define PHY_CNFG_PAD_SP_MASK	GENMASK(19, 16) /* bits [19:16] */
-> +#define PHY_CNFG_PAD_SP		0x0c /* PMOS TX drive strength */
-> +#define PHY_CNFG_PAD_SN_MASK	GENMASK(23, 20) /* bits [23:20] */
-> +#define PHY_CNFG_PAD_SN		0x0c /* NMOS TX drive strength */
-> +
-> +/* PHY command/response pad settings */
-> +#define PHY_CMDPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x04)
-> +
-> +/* PHY data pad settings */
-> +#define PHY_DATAPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x06)
-> +
-> +/* PHY clock pad settings */
-> +#define PHY_CLKPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x08)
-> +
-> +/* PHY strobe pad settings */
-> +#define PHY_STBPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0a)
-> +
-> +/* PHY reset pad settings */
-> +#define PHY_RSTNPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x0c)
-> +
-> +/* Bitfields are common for all pad settings */
-> +#define PHY_PAD_RXSEL_1V8		0x1 /* Receiver type select for 1.8V */
-> +#define PHY_PAD_RXSEL_3V3		0x2 /* Receiver type select for 3.3V */
-> +
-> +#define PHY_PAD_WEAKPULL_MASK		GENMASK(4, 3) /* bits [4:3] */
-> +#define PHY_PAD_WEAKPULL_PULLUP		0x1 /* Weak pull up enabled */
-> +#define PHY_PAD_WEAKPULL_PULLDOWN	0x2 /* Weak pull down enabled */
-> +
-> +#define PHY_PAD_TXSLEW_CTRL_P_MASK	GENMASK(8, 5) /* bits [8:5] */
-> +#define PHY_PAD_TXSLEW_CTRL_P		0x3 /* Slew control for P-Type pad TX */
-> +#define PHY_PAD_TXSLEW_CTRL_N_MASK	GENMASK(12, 9) /* bits [12:9] */
-> +#define PHY_PAD_TXSLEW_CTRL_N		0x3 /* Slew control for N-Type pad TX */
-> +
-> +/* PHY CLK delay line settings */
-> +#define PHY_SDCLKDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x1d)
-> +#define PHY_SDCLKDL_CNFG_UPDATE	BIT(4) /* set before writing to SDCLKDL_DC */
-> +
-> +/* PHY CLK delay line delay code */
-> +#define PHY_SDCLKDL_DC_R		(DWC_MSHC_PTR_PHY_R + 0x1e)
-> +#define PHY_SDCLKDL_DC_INITIAL		0x40 /* initial delay code */
-> +#define PHY_SDCLKDL_DC_DEFAULT		0x32 /* default delay code */
-> +#define PHY_SDCLKDL_DC_HS400		0x18 /* delay code for HS400 mode */
-> +
-> +/* PHY drift_cclk_rx delay line configuration setting */
-> +#define PHY_ATDL_CNFG_R			(DWC_MSHC_PTR_PHY_R + 0x21)
-> +#define PHY_ATDL_CNFG_INPSEL_MASK	GENMASK(3, 2) /* bits [3:2] */
-> +#define PHY_ATDL_CNFG_INPSEL		0x3 /* delay line input source */
-> +
-> +/* PHY DLL control settings */
-> +#define PHY_DLL_CTRL_R			(DWC_MSHC_PTR_PHY_R + 0x24)
-> +#define PHY_DLL_CTRL_DISABLE		0x0 /* PHY DLL is enabled */
-> +#define PHY_DLL_CTRL_ENABLE		0x1 /* PHY DLL is disabled */
-> +
-> +/* PHY DLL  configuration register 1 */
-> +#define PHY_DLL_CNFG1_R			(DWC_MSHC_PTR_PHY_R + 0x25)
-> +#define PHY_DLL_CNFG1_SLVDLY_MASK	GENMASK(5, 4) /* bits [5:4] */
-> +#define PHY_DLL_CNFG1_SLVDLY		0x2 /* DLL slave update delay input */
-> +#define PHY_DLL_CNFG1_WAITCYCLE		0x5 /* DLL wait cycle input */
-> +
-> +/* PHY DLL configuration register 2 */
-> +#define PHY_DLL_CNFG2_R			(DWC_MSHC_PTR_PHY_R + 0x26)
-> +#define PHY_DLL_CNFG2_JUMPSTEP		0xa /* DLL jump step input */
-> +
-> +/* PHY DLL master and slave delay line configuration settings */
-> +#define PHY_DLLDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x28)
-> +#define PHY_DLLDL_CNFG_SLV_INPSEL_MASK	GENMASK(6, 5) /* bits [6:5] */
-> +#define PHY_DLLDL_CNFG_SLV_INPSEL	0x3 /* clock source select for slave DL */
-> +
-> +#define FLAG_IO_FIXED_1V8	BIT(0)
-> +
->  #define BOUNDARY_OK(addr, len) \
->  	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
->  
-> @@ -92,6 +184,8 @@ struct dwcmshc_priv {
->  	struct clk	*bus_clk;
->  	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
->  	void *priv; /* pointer to SoC private stuff */
-> +	u16 delay_line;
-> +	u16 flags;
->  };
->  
+>  drivers/mmc/core/mmc.c   |  5 -----
+>  include/linux/mmc/card.h |  3 ---
+>  include/linux/mmc/core.h |  1 -
+>  include/linux/mmc/mmc.h  | 10 ----------
+>  4 files changed, 19 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 8180983bd402..5e577aa31bf2 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -613,11 +613,6 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                 } else {
+>                         card->ext_csd.data_tag_unit_size = 0;
+>                 }
+> -
+> -               card->ext_csd.max_packed_writes =
+> -                       ext_csd[EXT_CSD_MAX_PACKED_WRITES];
+> -               card->ext_csd.max_packed_reads =
+> -                       ext_csd[EXT_CSD_MAX_PACKED_READS];
+>         } else {
+>                 card->ext_csd.data_sector_size = 512;
+>         }
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index daa2f40d9ce6..24aaa819f9f0 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -52,9 +52,6 @@ struct mmc_ext_csd {
+>         u8                      part_config;
+>         u8                      cache_ctrl;
+>         u8                      rst_n_function;
+> -       u8                      max_packed_writes;
+> -       u8                      max_packed_reads;
+> -       u8                      packed_event_en;
+>         unsigned int            part_time;              /* Units: ms */
+>         unsigned int            sa_timeout;             /* Units: 100ns */
+>         unsigned int            generic_cmd6_time;      /* Units: 10ms */
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 6efec0b9820c..2c7928a50907 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -27,7 +27,6 @@ struct mmc_command {
+>         u32                     opcode;
+>         u32                     arg;
+>  #define MMC_CMD23_ARG_REL_WR   (1 << 31)
+> -#define MMC_CMD23_ARG_PACKED   ((0 << 31) | (1 << 30))
+>  #define MMC_CMD23_ARG_TAG_REQ  (1 << 29)
+>         u32                     resp[4];
+>         unsigned int            flags;          /* expected response type */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 6f7993803ee7..cf2bcb5da30d 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -257,8 +257,6 @@ static inline bool mmc_ready_for_data(u32 status)
+>  #define EXT_CSD_FLUSH_CACHE            32      /* W */
+>  #define EXT_CSD_CACHE_CTRL             33      /* R/W */
+>  #define EXT_CSD_POWER_OFF_NOTIFICATION 34      /* R/W */
+> -#define EXT_CSD_PACKED_FAILURE_INDEX   35      /* RO */
+> -#define EXT_CSD_PACKED_CMD_STATUS      36      /* RO */
+>  #define EXT_CSD_EXP_EVENTS_STATUS      54      /* RO, 2 bytes */
+>  #define EXT_CSD_EXP_EVENTS_CTRL                56      /* R/W, 2 bytes */
+>  #define EXT_CSD_DATA_SECTOR_SIZE       61      /* R */
+> @@ -321,8 +319,6 @@ static inline bool mmc_ready_for_data(u32 status)
+>  #define EXT_CSD_SUPPORTED_MODE         493     /* RO */
+>  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
+>  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
+> -#define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
+> -#define EXT_CSD_MAX_PACKED_READS       501     /* RO */
+>  #define EXT_CSD_BKOPS_SUPPORT          502     /* RO */
+>  #define EXT_CSD_HPI_FEATURES           503     /* RO */
+>
+> @@ -402,18 +398,12 @@ static inline bool mmc_ready_for_data(u32 status)
+>  #define EXT_CSD_PWR_CL_8BIT_SHIFT      4
+>  #define EXT_CSD_PWR_CL_4BIT_SHIFT      0
+>
+> -#define EXT_CSD_PACKED_EVENT_EN        BIT(3)
+> -
 >  /*
-> @@ -157,6 +251,127 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  	sdhci_request(mmc, mrq);
->  }
->  
-> +static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u32 val;
-> +
-> +	/* deassert phy reset & set tx drive strength */
-> +	val = PHY_CNFG_RSTN_DEASSERT;
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN);
-> +	sdhci_writel(host, val, PHY_CNFG_R);
-> +
-> +	/* disable delay line */
-> +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE, PHY_SDCLKDL_CNFG_R);
-> +
-> +	/* set delay line */
-> +	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-> +	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
-> +
-> +	/* enable delay lane */
-> +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
-> +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> +
-> +	/* configure phy pads */
-> +	val = PHY_PAD_RXSEL_1V8;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> +
-> +	val = FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> +
-> +	val = PHY_PAD_RXSEL_1V8;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> +
-> +	/* enable data strobe mode */
-> +	sdhci_writeb(host, FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK, PHY_DLLDL_CNFG_SLV_INPSEL),
-> +		     PHY_DLLDL_CNFG_R);
-> +
-> +	/* enable phy dll */
-> +	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> +}
-> +
-> +static void dwcmshc_phy_3_3v_init(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u32 val;
-> +
-> +	/* deassert phy reset & set tx drive strength */
-> +	val = PHY_CNFG_RSTN_DEASSERT;
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN);
-> +	sdhci_writel(host, val, PHY_CNFG_R);
-> +
-> +	/* disable delay line */
-> +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE, PHY_SDCLKDL_CNFG_R);
-> +
-> +	/* set delay line */
-> +	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-> +	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
-> +
-> +	/* enable delay lane */
-> +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
-> +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> +
-> +	/* configure phy pads */
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> +
-> +	val = FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> +
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> +
-> +	/* enable phy dll */
-> +	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> +}
-> +
-> +static void th1520_sdhci_set_phy(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
-> +	u16 emmc_ctrl;
-> +
-> +	/* Before power on, set PHY configs */
-> +	if (priv->flags & FLAG_IO_FIXED_1V8)
-> +		dwcmshc_phy_1_8v_init(host);
-> +	else
-> +		dwcmshc_phy_3_3v_init(host);
-> +
-> +	if ((host->mmc->caps2 & emmc_caps) == emmc_caps) {
-> +		emmc_ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> +		emmc_ctrl |= DWCMSHC_CARD_IS_EMMC;
-> +		sdhci_writew(host, emmc_ctrl, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> +	}
-> +
-> +	sdhci_writeb(host, FIELD_PREP(PHY_DLL_CNFG1_SLVDLY_MASK, PHY_DLL_CNFG1_SLVDLY) |
-> +		     PHY_DLL_CNFG1_WAITCYCLE, PHY_DLL_CNFG1_R);
-> +}
-> +
->  static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
->  				      unsigned int timing)
->  {
-> @@ -189,9 +404,25 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
->  		ctrl_2 |= DWCMSHC_CTRL_HS400;
->  	}
->  
-> +	if (priv->flags & FLAG_IO_FIXED_1V8)
-> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
->  	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->  }
->  
-> +static void th1520_set_uhs_signaling(struct sdhci_host *host,
-> +				     unsigned int timing)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	dwcmshc_set_uhs_signaling(host, timing);
-> +	if (timing == MMC_TIMING_MMC_HS400)
-> +		priv->delay_line = PHY_SDCLKDL_DC_HS400;
-> +	else
-> +		sdhci_writeb(host, 0, PHY_DLLDL_CNFG_R);
-> +	th1520_sdhci_set_phy(host);
-> +}
-> +
->  static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
->  					  struct mmc_ios *ios)
->  {
-> @@ -338,6 +569,79 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	sdhci_reset(host, mask);
->  }
->  
-> +static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
-
-I believe prefixing this with dwcmshc is better, but let's wait and see
-whether it can be shared with other SoCs which use the same phy IP.
-
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u32 val = 0;
-> +
-> +	if (host->flags & SDHCI_HS400_TUNING)
-> +		return 0;
-> +
-> +	sdhci_writeb(host, FIELD_PREP(PHY_ATDL_CNFG_INPSEL_MASK, PHY_ATDL_CNFG_INPSEL),
-> +		     PHY_ATDL_CNFG_R);
-> +	val = sdhci_readl(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> +
-> +	/*
-> +	 * configure tuning settings:
-> +	 *  - center phase select code driven in block gap interval
-> +	 *  - disable reporting of framing errors
-> +	 *  - disable software managed tuning
-> +	 *  - disable user selection of sampling window edges,
-> +	 *    instead tuning calculated edges are used
-> +	 */
-> +	val &= ~(AT_CTRL_CI_SEL | AT_CTRL_RPT_TUNE_ERR | AT_CTRL_SW_TUNE_EN |
-> +		 FIELD_PREP(AT_CTRL_WIN_EDGE_SEL_MASK, AT_CTRL_WIN_EDGE_SEL));
-> +
-> +	/*
-> +	 * configure tuning settings:
-> +	 *  - enable auto-tuning
-> +	 *  - enable sampling window threshold
-> +	 *  - stop clocks during phase code change
-> +	 *  - set max latency in cycles between tx and rx clocks
-> +	 *  - set max latency in cycles to switch output phase
-> +	 *  - set max sampling window threshold value
-> +	 */
-> +	val |= AT_CTRL_AT_EN | AT_CTRL_SWIN_TH_EN | AT_CTRL_TUNE_CLK_STOP_EN;
-> +	val |= FIELD_PREP(AT_CTRL_PRE_CHANGE_DLY_MASK, AT_CTRL_PRE_CHANGE_DLY);
-> +	val |= FIELD_PREP(AT_CTRL_POST_CHANGE_DLY_MASK, AT_CTRL_POST_CHANGE_DLY);
-> +	val |= FIELD_PREP(AT_CTRL_SWIN_TH_VAL_MASK, AT_CTRL_SWIN_TH_VAL);
-> +
-> +	sdhci_writel(host, val, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> +	val = sdhci_readl(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> +
-> +	/* perform tuning */
-> +	sdhci_start_tuning(host);
-> +	host->tuning_err = __sdhci_execute_tuning(host, opcode);
-> +	if (host->tuning_err) {
-> +		/* disable auto-tuning upon tuning error */
-> +		val &= ~AT_CTRL_AT_EN;
-> +		sdhci_writel(host, val, priv->vendor_specific_area1 + DWCMSHC_EMMC_ATCTRL);
-> +		dev_err(mmc_dev(host->mmc), "tuning failed: %d\n", host->tuning_err);
-> +		return -EIO;
-> +	}
-> +	sdhci_end_tuning(host);
-> +
-> +	return 0;
-> +}
-> +
-> +static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u16 ctrl_2;
-> +
-> +	sdhci_reset(host, mask);
-> +
-> +	if (priv->flags & FLAG_IO_FIXED_1V8) {
-> +		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +		if (!(ctrl_2 & SDHCI_CTRL_VDD_180)) {
-> +			ctrl_2 |= SDHCI_CTRL_VDD_180;
-> +			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> +		}
-> +	}
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
-> @@ -356,6 +660,17 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
->  	.adma_write_desc	= dwcmshc_adma_write_desc,
->  };
->  
-> +static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
-> +	.set_clock		= sdhci_set_clock,
-> +	.set_bus_width		= sdhci_set_bus_width,
-> +	.set_uhs_signaling	= th1520_set_uhs_signaling,
-> +	.get_max_clock		= dwcmshc_get_max_clock,
-> +	.reset			= th1520_sdhci_reset,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
-> +	.voltage_switch		= dwcmshc_phy_1_8v_init,
-> +	.platform_execute_tuning = &th1520_execute_tuning,
-> +};
-> +
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
->  	.ops = &sdhci_dwcmshc_ops,
->  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> @@ -379,6 +694,12 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
->  		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->  };
->  
-> +static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
-> +	.ops = &sdhci_dwcmshc_th1520_ops,
-> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +};
-> +
->  static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
->  {
->  	int err;
-> @@ -447,6 +768,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->  		.compatible = "snps,dwcmshc-sdhci",
->  		.data = &sdhci_dwcmshc_pdata,
->  	},
-> +	{
-> +		.compatible = "thead,th1520-dwcmshc",
-> +		.data = &sdhci_dwcmshc_th1520_pdata,
-> +	},
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
-> @@ -542,6 +867,30 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  			goto err_clk;
->  	}
->  
-> +	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-> +		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> +
-> +		if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
-> +		    (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
-> +		    (device_property_read_bool(dev, "mmc-hs400-1_8v")))
-> +			priv->flags |= FLAG_IO_FIXED_1V8;
-> +		else
-> +			priv->flags &= ~FLAG_IO_FIXED_1V8;
-> +
-> +		/*
-> +		 * start_signal_voltage_switch() will try 3.3V first
-> +		 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
-> +		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> +		 * in sdhci_start_signal_voltage_switch().
-> +		 */
-> +		if (priv->flags & FLAG_IO_FIXED_1V8) {
-> +			host->flags &= ~SDHCI_SIGNALING_330;
-> +			host->flags |=  SDHCI_SIGNALING_180;
-> +		}
-> +
-> +		sdhci_enable_v4_mode(host);
-> +	}
-> +
->  #ifdef CONFIG_ACPI
->  	if (pltfm_data == &sdhci_dwcmshc_bf3_pdata)
->  		sdhci_enable_v4_mode(host);
-> 
-> -- 
-> 2.34.1
-> 
+>   * EXCEPTION_EVENT_STATUS field
+>   */
+>  #define EXT_CSD_URGENT_BKOPS           BIT(0)
+>  #define EXT_CSD_DYNCAP_NEEDED          BIT(1)
+>  #define EXT_CSD_SYSPOOL_EXHAUSTED      BIT(2)
+> -#define EXT_CSD_PACKED_FAILURE         BIT(3)
+> -
+> -#define EXT_CSD_PACKED_GENERIC_ERROR   BIT(0)
+> -#define EXT_CSD_PACKED_INDEXED_ERROR   BIT(1)
+>
+>  /*
+>   * BKOPS status level
+> --
+> 2.42.0
+>
