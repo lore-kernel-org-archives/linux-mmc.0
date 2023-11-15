@@ -1,98 +1,82 @@
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D463141212;
+	Wed, 15 Nov 2023 21:59:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MmbnGpTZ"
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B175BC;
-	Wed, 15 Nov 2023 12:33:16 -0800 (PST)
-Received: by mail-wr1-x430.google.com with SMTP id ffacd0b85a97d-32d81864e3fso58256f8f.2;
-        Wed, 15 Nov 2023 12:33:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1700080394; x=1700685194; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=WgFBYcGPQDYXf02NhQPzl84IFV9IxtNIfQLd6kXiIbY=;
-        b=MmbnGpTZwAZzriduqTlOZxlb/2Sk1is2+eTW0eaqX84fo0aBfSyoLTP/LZqJbrq8vJ
-         kECISRBKql+vWy5IvXcpuKufWhktwBGEDUwuXAcWO+KKCtP2UHAMbuOGg+fta51oDCH/
-         /mZgcz7Wsr1xt1vZbXXb+q1E6okMufTIDkgE+ZyqOQ7oj+BLu371nrHmU7p+26xHXqQV
-         6GIRDdOKx7tqUYVRZddJVqqBTrezF9OPPf0onQzL+3L50Css5DGn8sa2uqlE6EPg43mk
-         p6GFE7Qy5jIOxqBaH1HeDsIjx85zep+vdjesoFfp5NBolcrB7Oo+lZ1zFydlpbqfKrhU
-         9hjQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700080394; x=1700685194;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=WgFBYcGPQDYXf02NhQPzl84IFV9IxtNIfQLd6kXiIbY=;
-        b=Bu42WUtLlplX3pYZjpi/MAEzmOQSlpmsztWs/TSLU3wVkzA6Z/JtcitFK5mWtFNd5k
-         5MGuxj01YPUMelC3M29iePvFA5N1PKm1893NF7X3ooJkqGre/7jGUSXLnWouAAvsS0Ju
-         +Ayt9GK3/ZnSFIk3VKRUsL6bOqFPiXueZpH5HjlNIHzhdpUxiZjjb5HDbFS37vxwuHJj
-         SQweFfmeCOPuHidBlIcjlmxm8rL3OQJs4v6UBeXcLGmBfifNiZ6HzXZzYjSW53EOyH2n
-         DLQ43dfnX8oL+tsTGMwONv1gBtIpcOO0ik3vNhxqIvyT9uVBdraP3qg5JDs3vj+hf79m
-         omoA==
-X-Gm-Message-State: AOJu0YwT26PRCMeRHH/KkO1it4XjTsjBR3GnljEnxzTJUpYJPy2FEU4b
-	qirJwf+M5OgeYxKornMdfJE=
-X-Google-Smtp-Source: AGHT+IG1hfi8DyYysteHnCViB3gjDSvmpwMQXy/6EOBx/h2ueo5MLt7Exxa/60WsDrxxN5BaXCEWYQ==
-X-Received: by 2002:a5d:4bc4:0:b0:32d:825d:f153 with SMTP id l4-20020a5d4bc4000000b0032d825df153mr9417652wrt.61.1700080394391;
-        Wed, 15 Nov 2023 12:33:14 -0800 (PST)
-Received: from prasmi.home ([2a00:23c8:2500:a01:e8e:4851:e049:93fd])
-        by smtp.gmail.com with ESMTPSA id dk14-20020a0560000b4e00b0032f7fab0712sm11437978wrb.52.2023.11.15.12.33.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Nov 2023 12:33:13 -0800 (PST)
-From: Prabhakar <prabhakar.csengg@gmail.com>
-X-Google-Original-From: Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh+dt@kernel.org>,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pJxc6FD9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 09CFCC433C8;
+	Wed, 15 Nov 2023 21:59:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1700085578;
+	bh=e7gQ4gWEv2q/y7H4JMRa3DaY6ldkh+8LPwN+tAmFvQE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=pJxc6FD94hnD45nsHcsyFzTNehlmAfHtPtfKHrcGxzCVFS+7ZOsWarllKIsfCuYST
+	 3VJ8qiIUD5AeMdnMsWCvaH2b3JI4row2+NwsamEScyjoW4EYaO/aZr6tXQNRqWD5G2
+	 NBBVxc0SNOFgQd8QeJx5XbgvtY1p9mI2b49IvpfSmUYwfz1sBkqgGUzZz1rMm1hgqj
+	 tCsseP5SNCpqfI7sGZtulxr240ReTaJiTWI60qSodlOPxaDGuJXsQAN8V684J+CIwd
+	 F7Vh+SZ2sGPoUYbhdlfKKpmwegqCe4kIoAJLY+EKSirZczd/MuL44V/WejMMeP1SJZ
+	 BarhvaA40WM7Q==
+Date: Wed, 15 Nov 2023 21:59:34 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
 	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
 	Conor Dooley <conor+dt@kernel.org>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Magnus Damm <magnus.damm@gmail.com>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-renesas-soc@vger.kernel.org,
-	Prabhakar <prabhakar.csengg@gmail.com>,
 	Biju Das <biju.das.jz@bp.renesas.com>,
 	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/Five SoC
-Date: Wed, 15 Nov 2023 20:32:54 +0000
-Message-Id: <20231115203254.30544-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-X-Mailer: git-send-email 2.34.1
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/Five SoC
+Message-ID: <20231115-coach-traffic-0db115549fa4@squawk>
+References: <20231115203254.30544-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="AW5hnqxGKYIjc4b7"
+Content-Disposition: inline
+In-Reply-To: <20231115203254.30544-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-The SDHI block on the RZ/Five SoC is identical to one found on the RZ/G2UL
-SoC. "renesas,sdhi-r9a07g043" compatible string will be used on the
-RZ/Five SoC so to make this clear and to keep this file consistent, update
-the comment to include RZ/Five SoC.
+--AW5hnqxGKYIjc4b7
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-No driver changes are required as generic compatible string
-"renesas,rcar-gen3-sdhi" will be used as a fallback on RZ/Five SoC.
+On Wed, Nov 15, 2023 at 08:32:54PM +0000, Prabhakar wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+>=20
+> The SDHI block on the RZ/Five SoC is identical to one found on the RZ/G2UL
+> SoC. "renesas,sdhi-r9a07g043" compatible string will be used on the
+> RZ/Five SoC so to make this clear and to keep this file consistent, update
+> the comment to include RZ/Five SoC.
+>=20
+> No driver changes are required as generic compatible string
+> "renesas,rcar-gen3-sdhi" will be used as a fallback on RZ/Five SoC.
+>=20
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
----
- Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 7756a8687eaf..27cd985b1006 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -56,7 +56,7 @@ properties:
-               - renesas,sdhi-r8a77980  # R-Car V3H
-               - renesas,sdhi-r8a77990  # R-Car E3
-               - renesas,sdhi-r8a77995  # R-Car D3
--              - renesas,sdhi-r9a07g043 # RZ/G2UL
-+              - renesas,sdhi-r9a07g043 # RZ/G2UL and RZ/Five
-               - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
-               - renesas,sdhi-r9a07g054 # RZ/V2L
-               - renesas,sdhi-r9a09g011 # RZ/V2M
--- 
-2.34.1
+Cheers,
+Conor.
 
+--AW5hnqxGKYIjc4b7
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEARYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZVU/QgAKCRB4tDGHoIJi
+0sPJAQDTRP45zgZCHxtCF7NmDhzc7n+VH4pJHNWPDy2ctVossgD/Yxv/FE3TMR93
+/mVJgMKIDv1RwI1mA5E8HHChlRXO3Qk=
+=nr00
+-----END PGP SIGNATURE-----
+
+--AW5hnqxGKYIjc4b7--
