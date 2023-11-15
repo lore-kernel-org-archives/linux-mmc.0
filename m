@@ -1,84 +1,98 @@
-Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90AAEA930;
-	Wed, 15 Nov 2023 16:29:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VlZd5o+L"
-Received: from mail-qk1-x72d.google.com (mail-qk1-x72d.google.com [IPv6:2607:f8b0:4864:20::72d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71EB0E6;
-	Wed, 15 Nov 2023 08:29:01 -0800 (PST)
-Received: by mail-qk1-x72d.google.com with SMTP id af79cd13be357-7781b176131so367239585a.1;
-        Wed, 15 Nov 2023 08:29:01 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MmbnGpTZ"
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B175BC;
+	Wed, 15 Nov 2023 12:33:16 -0800 (PST)
+Received: by mail-wr1-x430.google.com with SMTP id ffacd0b85a97d-32d81864e3fso58256f8f.2;
+        Wed, 15 Nov 2023 12:33:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1700065740; x=1700670540; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=qx3vpjTb9V9uPnz9xtV/2168OTukcHSXztsVSOdsyO0=;
-        b=VlZd5o+LjeCp8ta8ah8fxWow8Zry7xnqCfAcYu7GkUypmoMP/1VzJ+tYPkj5d2X5ra
-         qLh+ZV1SUOTnQ3YCRyUMHXuJekYIWrpp3n7HuOy5A9T73K2YxGlRl9mKMXJbULZ+XHv1
-         mfwrcBBRaR5d7LoN+6yUWl+md49LF3lY2e7kj+TqLS0igdkB3sHeqITrbPLwBpAJotoA
-         k+arGp3ENjWBFzVycke9P+z89646WRGcdw+aD3gRE8oKuHlPhuJFoGBBetK0Kol9S3Bi
-         s4p0M0nIEd3QPOIgLW+9Uie6Yl1NYSebQFwWbIDWgpMTzs7c0wUYgcw7l+hA9EZU1eNe
-         iQpQ==
+        d=gmail.com; s=20230601; t=1700080394; x=1700685194; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=WgFBYcGPQDYXf02NhQPzl84IFV9IxtNIfQLd6kXiIbY=;
+        b=MmbnGpTZwAZzriduqTlOZxlb/2Sk1is2+eTW0eaqX84fo0aBfSyoLTP/LZqJbrq8vJ
+         kECISRBKql+vWy5IvXcpuKufWhktwBGEDUwuXAcWO+KKCtP2UHAMbuOGg+fta51oDCH/
+         /mZgcz7Wsr1xt1vZbXXb+q1E6okMufTIDkgE+ZyqOQ7oj+BLu371nrHmU7p+26xHXqQV
+         6GIRDdOKx7tqUYVRZddJVqqBTrezF9OPPf0onQzL+3L50Css5DGn8sa2uqlE6EPg43mk
+         p6GFE7Qy5jIOxqBaH1HeDsIjx85zep+vdjesoFfp5NBolcrB7Oo+lZ1zFydlpbqfKrhU
+         9hjQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700065740; x=1700670540;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=qx3vpjTb9V9uPnz9xtV/2168OTukcHSXztsVSOdsyO0=;
-        b=TeY7IyN08jenKfTsO151sQV2dTW+JxLLqNbN2s3eSVgBmWmgqxY62Y0PXff5Lpzf2+
-         AsOTtHpCnQ5TJHtkRUdiOdGs3aTULZ2KujrhRrLP4QfPwdn2BdibQ21jMcahrphAIVJL
-         F3jCu2bjlGhuFlSR5q/SPSChbxkZyZFva6YI26E1feGGxBfCyNgwM4DeNxvtPk+WN5XH
-         soBUCKiCAjP8LkTpipMjrsom4N+R4eOGJ128HuR694Hzk4s8NHIHWCjkNe+xtQTJARU6
-         2XY6qiKwRRDJHjQYF9KFDfBKt/55Km5MIzaOsI//BGX2HovQdRKOrW8i4FVisMhVl0gb
-         Y08Q==
-X-Gm-Message-State: AOJu0Yw4GyiHUdZCCu7p0IhYey4B7XJqnMA4odXPzhGMiw7Hv1EkNf/J
-	dIA+C5DvDWyhES+deXUH00U=
-X-Google-Smtp-Source: AGHT+IF5NKClhj+lvUnav8OhyXMsa/XqFEZyXxK2HRXBTeJq9vJesW4uPM1z3QXPUZ+PqbfFyQPXLQ==
-X-Received: by 2002:a05:620a:24ca:b0:776:f5bb:f2fc with SMTP id m10-20020a05620a24ca00b00776f5bbf2fcmr7066286qkn.9.1700065740456;
-        Wed, 15 Nov 2023 08:29:00 -0800 (PST)
-Received: from google.com ([12.186.190.2])
-        by smtp.gmail.com with ESMTPSA id x3-20020a05620a0b4300b0076cda7eab11sm3550801qkg.133.2023.11.15.08.28.57
+        d=1e100.net; s=20230601; t=1700080394; x=1700685194;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=WgFBYcGPQDYXf02NhQPzl84IFV9IxtNIfQLd6kXiIbY=;
+        b=Bu42WUtLlplX3pYZjpi/MAEzmOQSlpmsztWs/TSLU3wVkzA6Z/JtcitFK5mWtFNd5k
+         5MGuxj01YPUMelC3M29iePvFA5N1PKm1893NF7X3ooJkqGre/7jGUSXLnWouAAvsS0Ju
+         +Ayt9GK3/ZnSFIk3VKRUsL6bOqFPiXueZpH5HjlNIHzhdpUxiZjjb5HDbFS37vxwuHJj
+         SQweFfmeCOPuHidBlIcjlmxm8rL3OQJs4v6UBeXcLGmBfifNiZ6HzXZzYjSW53EOyH2n
+         DLQ43dfnX8oL+tsTGMwONv1gBtIpcOO0ik3vNhxqIvyT9uVBdraP3qg5JDs3vj+hf79m
+         omoA==
+X-Gm-Message-State: AOJu0YwT26PRCMeRHH/KkO1it4XjTsjBR3GnljEnxzTJUpYJPy2FEU4b
+	qirJwf+M5OgeYxKornMdfJE=
+X-Google-Smtp-Source: AGHT+IG1hfi8DyYysteHnCViB3gjDSvmpwMQXy/6EOBx/h2ueo5MLt7Exxa/60WsDrxxN5BaXCEWYQ==
+X-Received: by 2002:a5d:4bc4:0:b0:32d:825d:f153 with SMTP id l4-20020a5d4bc4000000b0032d825df153mr9417652wrt.61.1700080394391;
+        Wed, 15 Nov 2023 12:33:14 -0800 (PST)
+Received: from prasmi.home ([2a00:23c8:2500:a01:e8e:4851:e049:93fd])
+        by smtp.gmail.com with ESMTPSA id dk14-20020a0560000b4e00b0032f7fab0712sm11437978wrb.52.2023.11.15.12.33.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Nov 2023 08:28:59 -0800 (PST)
-Date: Wed, 15 Nov 2023 16:28:54 +0000
-From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Jonathan Cameron <Jonathan.Cameron@huawei.com>,
-	Yang Yingliang <yangyingliang@huawei.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Mark Brown <broonie@kernel.org>, linux-input@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	netdev@vger.kernel.org, linux-usb@vger.kernel.org,
-	linux-spi@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>
-Subject: Re: [PATCH v1 1/1] treewide, spi: Get rid of SPI_MASTER_HALF_DUPLEX
-Message-ID: <ZVTxxrBgR708zC03@google.com>
-References: <20231113111249.3982461-1-andriy.shevchenko@linux.intel.com>
+        Wed, 15 Nov 2023 12:33:13 -0800 (PST)
+From: Prabhakar <prabhakar.csengg@gmail.com>
+X-Google-Original-From: Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Magnus Damm <magnus.damm@gmail.com>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Prabhakar <prabhakar.csengg@gmail.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/Five SoC
+Date: Wed, 15 Nov 2023 20:32:54 +0000
+Message-Id: <20231115203254.30544-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231113111249.3982461-1-andriy.shevchenko@linux.intel.com>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Nov 13, 2023 at 01:12:49PM +0200, Andy Shevchenko wrote:
-> The SPI_MASTER_HALF_DUPLEX is the legacy name of a definition
-> for a half duplex flag. Since all others had been replaced with
-> the respective SPI_CONTROLLER prefix get rid of the last one
-> as well. There is no functional change intended.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com> # for input
+The SDHI block on the RZ/Five SoC is identical to one found on the RZ/G2UL
+SoC. "renesas,sdhi-r9a07g043" compatible string will be used on the
+RZ/Five SoC so to make this clear and to keep this file consistent, update
+the comment to include RZ/Five SoC.
 
-Thanks.
+No driver changes are required as generic compatible string
+"renesas,rcar-gen3-sdhi" will be used as a fallback on RZ/Five SoC.
 
+Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+---
+ Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+index 7756a8687eaf..27cd985b1006 100644
+--- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
++++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+@@ -56,7 +56,7 @@ properties:
+               - renesas,sdhi-r8a77980  # R-Car V3H
+               - renesas,sdhi-r8a77990  # R-Car E3
+               - renesas,sdhi-r8a77995  # R-Car D3
+-              - renesas,sdhi-r9a07g043 # RZ/G2UL
++              - renesas,sdhi-r9a07g043 # RZ/G2UL and RZ/Five
+               - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
+               - renesas,sdhi-r9a07g054 # RZ/V2L
+               - renesas,sdhi-r9a09g011 # RZ/V2M
 -- 
-Dmitry
+2.34.1
+
