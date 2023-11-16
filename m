@@ -1,288 +1,419 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="Jigh+lt6"
-Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 917441A1
-	for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 21:22:25 -0800 (PST)
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id CC9D03F7F6
-	for <linux-mmc@vger.kernel.org>; Thu, 16 Nov 2023 05:22:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20210705; t=1700112143;
-	bh=fr9ynEVsHoa7ae6x3+SEy8aQYynppv18RGOoPksmpuo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type;
-	b=Jigh+lt6nqu0MfHUj6Eo1P/awKTb6ax8FLbo2YVCGhF0YQvTKoKowee0S+e/8xwTg
-	 Geu5ge9ziMtB8Oq6nCEDUo/QD0xoSeQW7dhIRIVwox6qr5y4efq5ycobjafNZt3NDz
-	 Kh6zVzfnrUOTMmCldwP0GXqBZf+rrQcyaTkZm5yNK9/SlE0pD8H7Zb6hE/2x8oGnII
-	 6tS0JQq/K8wkYOivZu7p7RFXgZ9DuF9Hz46b5IZWg12hKJn4w+QcYPiDqFDbDRhAaS
-	 iXov1X2V4oCCHqXN0EBX8njNWwXH0bOJY4XnrMM6v2xUBCuxtCS9BLqeLPPE5z9QH7
-	 coYUFSS5ThlPA==
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-27ffe79ec25so438450a91.2
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Nov 2023 21:22:23 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700112142; x=1700716942;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=fr9ynEVsHoa7ae6x3+SEy8aQYynppv18RGOoPksmpuo=;
-        b=Oo4JzHN/SApRV4KQWeDzAjTQIRCSccZjpiJ7LBhCGu8S5O0r6fyQbkPBv9wfAFdkzV
-         IlrQ6Xy1uqqDX2GnfPWoIl3tqoLQI9HlSUndOJhtWzg33drYzkbmPVPO9Czj9u1nnSVQ
-         DrNoAz2AvekV2YibndySJAbQ6V4xgP95L8EiBtFdSIVAqP3P6rTe2y5P28qfWfCcBNkV
-         z/bhMLtXNsgKyAlT1qq9VgnithpntclVXs1IPOO15J72SbViIdH68IvuCTAoBtQokN1n
-         Mqdn4S2gF4UO3SbJXBnvD7yVPY2QhZ7Zl5DF88Cv2MdfcHfgnTZwmYD90aOx4/hI2IvU
-         /nOg==
-X-Gm-Message-State: AOJu0Yx7WCUUAd/yXqf0snYzbSttiJiu7ICWCSLI1F5piF1IDlRShRPT
-	hkP77yI3hLRHa9PsE+HMxz+zvcvzQiY4Xu4QZQIPJvhs7hA+8wpIWu10qHSHhD6CGRQD4ADZdtZ
-	/hFPd+wUVA2OyJoI/+ymFrSXEj59o3wEy0xvhBtRWYLN1fjoWR4jZwh3GrFewrgYa
-X-Received: by 2002:a17:90b:38c8:b0:280:15a3:89c3 with SMTP id nn8-20020a17090b38c800b0028015a389c3mr12951093pjb.27.1700112142227;
-        Wed, 15 Nov 2023 21:22:22 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHLC/4acj0McErWz60wZejZap8B3iqii7Bt//IL+u/LsPxNLf+dbpSHr4r38hr46JezIPdNZztQhciZUIS2ZCc=
-X-Received: by 2002:a17:90b:38c8:b0:280:15a3:89c3 with SMTP id
- nn8-20020a17090b38c800b0028015a389c3mr12951075pjb.27.1700112141806; Wed, 15
- Nov 2023 21:22:21 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="jUiL7L6g"
+Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63A99182
+	for <linux-mmc@vger.kernel.org>; Thu, 16 Nov 2023 03:57:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
+	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
+	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
+	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
+	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
+	List-Archive; bh=GpQk14WUXPxnowga6cJFEOf8LpaENh7ADSMQm8rVa9c=; b=jUiL7L6gFk8t
+	IAo7TnE9EGze5x48CiN1xCM96IoFcYQJa9x0Fx9C6iBI3xiA5mtOoROZnUVaL4CTPbVDrMs8gpYcM
+	8WW1XqTuJ33RF6AcWFTvU4BuU/Ma3rqwxEIUNnJsFtXn/ckSPoIiChRdNPkYyB9tRQsAqBUtia6SE
+	MkT6k=;
+Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
+	(envelope-from <no-reply@musicianspage.com>)
+	id 1r3azZ-0002dk-LJ
+	for linux-mmc@vger.kernel.org; Thu, 16 Nov 2023 03:57:05 -0800
+To: linux-mmc@vger.kernel.org
+Subject: Music News and Site Updates (November 16, 2023)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231016040132.23824-1-kai.heng.feng@canonical.com>
- <20231016093210.GA22952@wunner.de> <263982e90fc046cf977ecb8727003690@realtek.com>
- <20231018094435.GA21090@wunner.de> <02ee7e47166a463d8d4e491b61cdd33f@realtek.com>
- <20231019143504.GA25140@wunner.de> <CAAd53p7jx=_Yh8sPwdsu-6Bc-hNgiExscMNGhgcbH=rzOBMOXQ@mail.gmail.com>
- <d7cc9e658b114da7a9c32b383f06adc9@realtek.com>
-In-Reply-To: <d7cc9e658b114da7a9c32b383f06adc9@realtek.com>
-From: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Date: Thu, 16 Nov 2023 13:22:09 +0800
-Message-ID: <CAAd53p6bRnhGOfLHBz4WyTQVKocZPK0d5m4oRdeLhWxkx-5tLw@mail.gmail.com>
-Subject: Re: [PATCH] PCI: pciehp: Prevent child devices from doing RPM on PCIe
- Link Down
-To: Ricky WU <ricky_wu@realtek.com>
-Cc: Lukas Wunner <lukas@wunner.de>, "bhelgaas@google.com" <bhelgaas@google.com>, 
-	"linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kees Cook <keescook@chromium.org>, 
-	Tony Luck <tony.luck@intel.com>, "Guilherme G. Piccoli" <gpiccoli@igalia.com>, 
-	"linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+From: Musicians Page <newsletter@musicianspage.com>
+Reply-To: Musicians Page <newsletter@musicianspage.com>
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
+Message-Id: <E1r3azZ-0002dk-LJ@list.virtualsheetmusic.com>
+Date: Thu, 16 Nov 2023 03:57:05 -0800
 
-Hi Ricky,
+Dear Musician and Music Lover,
 
-On Fri, Nov 10, 2023 at 10:41=E2=80=AFAM Ricky WU <ricky_wu@realtek.com> wr=
-ote:
->
-> > Hi Lukas and Ricky,
-> >
-> > I think the following approach should cover all the cases?
-> > Ricky, can you please give it a try?
-> >
->
-> This patch is invalid for this issue,
-> Problem reappears after plugging and unplugging twice
-> Dmesg as below,
+Here is the Newsletter from Musicians Page website:
 
-My bad. The pm_runtime_barrier() should be called earlier.
-Can you please give the following a try:
+http://www.musicianspage.com
 
-diff --git a/drivers/pci/remove.c b/drivers/pci/remove.c
-index d749ea8250d6..c69b4ce5dbfd 100644
---- a/drivers/pci/remove.c
-+++ b/drivers/pci/remove.c
-@@ -1,6 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0
- #include <linux/pci.h>
- #include <linux/module.h>
-+#include <linux/pm_runtime.h>
- #include "pci.h"
+As you have requested. Read on...
 
- static void pci_free_resources(struct pci_dev *dev)
-@@ -18,6 +19,7 @@ static void pci_stop_dev(struct pci_dev *dev)
-  pci_pme_active(dev, false);
-
-  if (pci_dev_is_added(dev)) {
-+ pm_runtime_barrier(&dev->dev);
-
-  device_release_driver(&dev->dev);
-  pci_proc_detach_device(dev);
+(If you are no longer interested in subscribing to this newsletter, you can=
+ unsubscribe by clicking the link at the bottom of this newsletter. Thanks!=
+)
 
 
-> [...]
-> [  360.771161] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> [  360.771165] pcieport 0000:00:1c.0: pciehp: Slot(8): Card not present
-> [  361.986932] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
-> [  361.986937] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
-> [  362.120635] pci 0000:01:00.0: [15b7:5007] type 00 class 0x010802
-> [  362.120691] pci 0000:01:00.0: reg 0x10: [mem 0x00000000-0x00003fff 64b=
-it]
-> [  362.120747] pci 0000:01:00.0: reg 0x20: [mem 0x00000000-0x000000ff 64b=
-it]
-> [  362.121606] pci 0000:01:00.0: BAR 0: assigned [mem 0xa3b00000-0xa3b03f=
-ff 64bit]
-> [  362.121646] pci 0000:01:00.0: BAR 4: assigned [mem 0xa3b04000-0xa3b040=
-ff 64bit]
-> [  362.121686] pcieport 0000:00:1c.0: PCI bridge to [bus 01]
-> [  362.121702] pcieport 0000:00:1c.0:   bridge window [io  0x4000-0x4fff]
-> [  362.121743] pcieport 0000:00:1c.0:   bridge window [mem 0xa3b00000-0xa=
-44fffff]
-> [  362.121761] pcieport 0000:00:1c.0:   bridge window [mem 0xa0a00000-0xa=
-13fffff 64bit pref]
-> [  362.171709] nvme nvme0: pci function 0000:01:00.0
-> [  362.171726] nvme 0000:01:00.0: enabling device (0000 -> 0002)
-> [  362.256724] nvme nvme0: 4/0/0 default/read/poll queues
-> [  362.261656]  nvme0n1: p1 p2
-> [  369.343246] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> [  369.457450] pcieport 0000:00:1c.0: pciehp: Slot(8): Card present
-> [  369.457462] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Up
-> [  369.592600] pci 0000:01:00.0: [10ec:5261] type 00 class 0xff0000
-> [  369.592654] pci 0000:01:00.0: reg 0x10: [mem 0xa3b00000-0xa3b00fff]
-> [  369.592776] pci 0000:01:00.0: Upstream bridge's Max Payload Size set t=
-o 128 (was 256, max 256)
-> [  369.592797] pci 0000:01:00.0: Max Payload Size set to 128 (was 128, ma=
-x 128)
-> [  369.592964] pci 0000:01:00.0: supports D1 D2
-> [  369.592970] pci 0000:01:00.0: PME# supported from D1 D2 D3hot D3cold
-> [  369.593642] pci 0000:01:00.0: BAR 0: assigned [mem 0xa3b00000-0xa3b00f=
-ff]
-> [  369.593662] pcieport 0000:00:1c.0: PCI bridge to [bus 01]
-> [  369.593679] pcieport 0000:00:1c.0:   bridge window [io  0x4000-0x4fff]
-> [  369.593692] pcieport 0000:00:1c.0:   bridge window [mem 0xa3b00000-0xa=
-44fffff]
-> [  369.593703] pcieport 0000:00:1c.0:   bridge window [mem 0xa0a00000-0xa=
-13fffff 64bit pref]
-> [  372.573757] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> [  372.586620] BUG: unable to handle page fault for address: ffffc9000008=
-9010
-> [  372.586624] #PF: supervisor read access in kernel mode
-> [  372.586626] #PF: error_code(0x0000) - not-present page
-> [  372.586627] PGD 100000067 P4D 100000067 PUD 10020a067 PMD 10020b067 PT=
-E 0
-> [  372.586632] Oops: 0000 [#1] PREEMPT SMP PTI
-> [  372.586634] CPU: 2 PID: 157 Comm: kworker/2:2 Not tainted 6.6.0-rc4 #1=
-2
-> [  372.586637] Hardware name: To Be Filled By O.E.M. To Be Filled By O.E.=
-M./H370M Pro4, BIOS P3.40 10/25/2018
-> [  372.586639] Workqueue: pm pm_runtime_work
-> [  372.586644] RIP: 0010:ioread32+0x2e/0x70
-> [  372.586647] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 98 a=
-c 52 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
-8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 f8 97 57 86 48
-> [  372.586649] RSP: 0018:ffffc90000543d50 EFLAGS: 00010296
-> [  372.586652] RAX: ffffc90000089000 RBX: 000000000000032f RCX: 000000000=
-000007f
-> [  372.586653] RDX: 000000000000ff00 RSI: ffffc90000089010 RDI: ffffc9000=
-0089010
-> [  372.586655] RBP: ffffc90000543d70 R08: ffffc90000089010 R09: ffff88816=
-a132368
-> [  372.586656] R10: 0000000000000000 R11: 0000000000000003 R12: 000000000=
-000007f
-> [  372.586657] R13: ffff8881060ed000 R14: ffff8881060ed100 R15: 000000000=
-0009003
-> [  372.586659] FS:  0000000000000000(0000) GS:ffff88816a100000(0000) knlG=
-S:0000000000000000
-> [  372.586661] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [  372.586662] CR2: ffffc90000089010 CR3: 0000000043032006 CR4: 000000000=
-03706e0
-> [  372.586664] Call Trace:
-> [  372.586665]  <TASK>
-> [  372.586667]  ? show_regs+0x68/0x70
-> [  372.586671]  ? __die_body+0x20/0x70
-> [  372.586674]  ? __die+0x2b/0x40
-> [  372.586677]  ? page_fault_oops+0x160/0x480
-> [  372.586680]  ? search_bpf_extables+0x63/0x90
-> [  372.586684]  ? ioread32+0x2e/0x70
-> [  372.586686]  ? search_exception_tables+0x5f/0x70
-> [  372.586689]  ? kernelmode_fixup_or_oops+0xa2/0x120
-> [  372.586692]  ? __bad_area_nosemaphore+0x179/0x230
-> [  372.586696]  ? bad_area_nosemaphore+0x16/0x20
-> [  372.586698]  ? do_kern_addr_fault+0x8b/0xa0
-> [  372.586701]  ? exc_page_fault+0xe5/0x180
-> [  372.586705]  ? asm_exc_page_fault+0x27/0x30
-> [  372.586710]  ? ioread32+0x2e/0x70
-> [  372.586714]  ? rtsx_pci_write_register+0x5b/0x90 [rtsx_pci]
-> [  372.586723]  rtsx_set_l1off_sub+0x1c/0x30 [rtsx_pci]
-> [  372.586731]  rts5261_set_l1off_cfg_sub_d0+0x36/0x40 [rtsx_pci]
-> [  372.586740]  rtsx_pci_runtime_idle+0xc7/0x160 [rtsx_pci]
-> [  372.586748]  ? __pfx_pci_pm_runtime_idle+0x10/0x10
-> [  372.586751]  pci_pm_runtime_idle+0x34/0x70
-> [  372.586753]  rpm_idle+0xc4/0x2b0
-> [  372.586756]  pm_runtime_work+0x93/0xc0
-> [  372.586759]  process_scheduled_works+0x9a/0x390
-> [  372.586762]  ? __pfx_worker_thread+0x10/0x10
-> [  372.586764]  worker_thread+0x15b/0x2d0
-> [  372.586767]  ? __pfx_worker_thread+0x10/0x10
-> [  372.586769]  kthread+0x106/0x140
-> [  372.586771]  ? __pfx_kthread+0x10/0x10
-> [  372.586774]  ret_from_fork+0x39/0x60
-> [  372.586776]  ? __pfx_kthread+0x10/0x10
-> [  372.586778]  ret_from_fork_asm+0x1b/0x30
-> [  372.586783]  </TASK>
-> [  372.586784] Modules linked in: nvme nvme_core snd_hda_codec_hdmi snd_h=
-da_codec_realtek snd_hda_codec_generic ledtrig_audio nls_iso8859_1 snd_sof_=
-pci_intel_cnl snd_sof_intel_hda_common snd_soc_hdac_hda soundwire_intel sou=
-ndwire_generic_allocation snd_sof_intel_hda_mlink soundwire_cadence snd_sof=
-_intel_hda snd_sof_pci snd_sof_xtensa_dsp snd_sof snd_sof_utils snd_hda_ext=
-_core snd_soc_acpi_intel_match snd_soc_acpi soundwire_bus intel_rapl_msr in=
-tel_rapl_common snd_soc_core x86_pkg_temp_thermal intel_powerclamp coretemp=
- snd_compress ac97_bus kvm_intel snd_pcm_dmaengine i915 snd_hda_intel snd_i=
-ntel_dspcfg snd_intel_sdw_acpi kvm snd_hda_codec snd_hda_core mei_hdcp crct=
-10dif_pclmul ghash_clmulni_intel snd_hwdep snd_pcm sha512_ssse3 aesni_intel=
- snd_seq_midi crypto_simd snd_seq_midi_event cryptd rapl snd_rawmidi intel_=
-cstate drm_buddy binfmt_misc ttm snd_seq drm_display_helper joydev input_le=
-ds cec snd_seq_device wmi_bmof snd_timer ee1004 mei_me rc_core snd drm_kms_=
-helper mei intel_pch_thermal i2c_algo_bit soundcore mac_hid
-> [  372.586834]  acpi_tad acpi_pad sch_fq_codel msr parport_pc ppdev lp pa=
-rport drm ramoops reed_solomon efi_pstore ip_tables x_tables autofs4 hid_ge=
-neric usbhid hid rtsx_pci_sdmmc ahci i2c_i801 e1000e crc32_pclmul rtsx_pci =
-i2c_smbus xhci_pci libahci xhci_pci_renesas video wmi
-> [  372.586856] CR2: ffffc90000089010
-> [  372.586858] ---[ end trace 0000000000000000 ]---
-> [  372.746808] RIP: 0010:ioread32+0x2e/0x70
-> [  372.746816] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 98 a=
-c 52 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
-8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 f8 97 57 86 48
-> [  372.746818] RSP: 0018:ffffc90000543d50 EFLAGS: 00010296
-> [  372.746821] RAX: ffffc90000089000 RBX: 000000000000032f RCX: 000000000=
-000007f
-> [  372.746823] RDX: 000000000000ff00 RSI: ffffc90000089010 RDI: ffffc9000=
-0089010
-> [  372.746825] RBP: ffffc90000543d70 R08: ffffc90000089010 R09: ffff88816=
-a132368
-> [  372.746826] R10: 0000000000000000 R11: 0000000000000003 R12: 000000000=
-000007f
-> [  372.746828] R13: ffff8881060ed000 R14: ffff8881060ed100 R15: 000000000=
-0009003
-> [  372.746830] FS:  0000000000000000(0000) GS:ffff88816a100000(0000) knlG=
-S:0000000000000000
-> [  372.746832] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [  372.746833] CR2: ffffc90000089010 CR3: 000000010a564004 CR4: 000000000=
-03706e0
-> [  372.746835] note: kworker/2:2[157] exited with irqs disabled
->
-> > diff --git a/drivers/pci/remove.c b/drivers/pci/remove.c index
-> > d749ea8250d6..907d60587227 100644
-> > --- a/drivers/pci/remove.c
-> > +++ b/drivers/pci/remove.c
-> > @@ -1,6 +1,7 @@
-> >  // SPDX-License-Identifier: GPL-2.0
-> >  #include <linux/pci.h>
-> >  #include <linux/module.h>
-> > +#include <linux/pm_runtime.h>
-> >  #include "pci.h"
-> >
-> >  static void pci_free_resources(struct pci_dev *dev) @@ -89,6 +90,8 @@
-> > static void pci_remove_bus_device(struct pci_dev *dev)
-> >         struct pci_bus *bus =3D dev->subordinate;
-> >         struct pci_dev *child, *tmp;
-> >
-> > +       pm_runtime_barrier(&dev->dev);
-> > +
-> >         if (bus) {
-> >                 list_for_each_entry_safe(child, tmp,
-> >                                          &bus->devices, bus_list)
-> >
-> >
->
+
+
+---------------------------------------------------------------------------=
+-
+
+If you are not yet registered as a Musician or Band/Ensemble, be sure to si=
+gn-up from the following page (it's free!):
+
+https://www.musicianspage.com/signup.php?email=3Dlinux-mmc@vger.kernel.org
+
+---------------------------------------------------------------------------=
+-
+
+
+
+
+Consider to join with a Standard or Pro Membership
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Either if you are a Musician or a Music Employer, have a look at our Member=
+ship Plans and sign up for the one that best fits your needs:
+
+
+http://www.musicianspage.com/membership.html
+
+
+A Standard or Pro Membership gives you the ability to upload unlimited audi=
+o, video, and sheet music files to your profile; as well as a more complete=
+ resume (or service/company info if you are an employer) and a creative pag=
+e with media content. If you are a musician, you will also have the chance =
+to get featured on the new Musicians Page radio:
+
+http://www.musicianspage.com/music/radio/
+
+
+Musicians Page gives you a professional space on the web to showcase your t=
+alent to potential employers or, for employers, to have a professional and =
+targeted space on the web where to showcase your products or services to po=
+tential prospects. Musicians Page gives you the chance to differentiate you=
+rself from other musicians or the competition who only use amateur channels=
+ such as MySpace, FaceBook, YouTube, or other free sites.
+
+Also, do you know that your profile on Musicians Page is Google optimized?
+
+This means that employers, other musicians or prospects can easily find you=
+ via Google. Our system automatically optimizes every Musician's profile to=
+ appear at the top of Google results for relevant keywords. Just another re=
+ason to take full advantage of all that the Standard and Pro Memberships ha=
+ve to offer, and not rely solely on free social networks that won't optimiz=
+e your profile for others to see at the top of the list!
+
+With a Standard or Pro Membership, you'll also be able to find and apply fo=
+r external jobs Musicians Page finds for you on the web (if you are a music=
+ian) and, with a Pro Membership, be notified via email as soon as a new ext=
+ernal jobs, matching your profile, are found. Or, if you are an employer, b=
+e featured prominently on any webpage of our site to over 2,000 unique user=
+s daily.
+
+Musicians Page is a network for professional musicians and music employers,=
+ built and planned to grow based on professional musicians' and music emplo=
+yers' needs. Don't miss the opportunity to jump on the band wagon from the =
+beginning.
+
+Membership fees are likely to be increased in the coming weeks, so join Mus=
+icians Page today and start networking the right way!
+
+https://www.musicianspage.com/signup.php
+
+
+
+
+Are you looking for musicians, a song writer, a lyricist, a composer?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If so, please post your music job or project on Musicians Page.
+To post a job/project is completely free and takes 5 minutes:
+
+http://www.musicianspage.com/login/panel.php?yourjobs=3D1&postnew=3D1
+
+
+REMEMBER: you can post a job even for a FREE project you need musicians for=
+!
+
+
+
+
+Latest Posted Jobs on Musicians Page
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Guitarist needed in Mexico for rock and roll music
+http://www.musicianspage.com/jobs/7720/
+
+KEYBOARD PLAYER
+http://www.musicianspage.com/jobs/7719/
+
+STEEL PAN SOLOIST FOR CRUISE SHIPS URGENT
+http://www.musicianspage.com/jobs/7715/
+
+Lauren Daigle Cover Singer
+http://www.musicianspage.com/jobs/7716/
+
+Violinist Wanted
+http://www.musicianspage.com/jobs/7717/
+
+Power rock/pop trio for cruises
+http://www.musicianspage.com/jobs/7713/
+
+Country Musicians for Cruises
+http://www.musicianspage.com/jobs/7712/
+
+Guitar Violin Duos for Cruises
+http://www.musicianspage.com/jobs/7710/
+
+Keys Player for Cruises
+http://www.musicianspage.com/jobs/7709/
+
+Jazz Trio for Cruises
+http://www.musicianspage.com/jobs/7711/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest External Jobs or Opportunities (found on the web)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hard Rockin Cover Band Seeking Guitarist
+http://www.musicianspage.com/extjobs/1253197/
+
+Keyboardist Wanted for Rock Fusion Group
+http://www.musicianspage.com/extjobs/1253196/
+
+Seeking Lead Singer/Frontman
+http://www.musicianspage.com/extjobs/1253195/
+
+Guitarist Needed for Alt Rock Band
+http://www.musicianspage.com/extjobs/1253194/
+
+Guitar Tech Needed
+http://www.musicianspage.com/extjobs/1253193/
+
+Singer Looking 4 Guitarist
+http://www.musicianspage.com/extjobs/1253192/
+
+JazzyFunky DRUMMER needed for Brooklyn Band
+http://www.musicianspage.com/extjobs/1253191/
+
+Amateur punk rock band looking for a drummer
+http://www.musicianspage.com/extjobs/1253190/
+
+Guitarist Wanted for Emo/Post-Hardcore Band (Sacramento, CA)
+http://www.musicianspage.com/extjobs/1253189/
+
+PANTERA STYLE GUITARIST WANTED
+http://www.musicianspage.com/extjobs/1253188/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest Forum Topics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Help: in which Latin genre would the be included? - by Ignacio Cobian Sanch=
+ez
+posted on the Latin Music forum
+http://www.musicianspage.com/forums/music/latinmusic/9038/
+
+
+Youtube Channel Recommendation/Suggestion - by Classical Music
+posted on the Classical Music forum
+http://www.musicianspage.com/forums/music/classicalmusic/9037/
+
+
+I can write for you any sheet music - by Carolina Escalona
+posted on the Introduce Yourself forum
+http://www.musicianspage.com/forums/general/introduceyou/9036/
+
+
+More forum topics:
+http://www.musicianspage.com/forums/
+
+
+
+
+Latest Uploaded Audio Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Cantao by Various (added by The Guitarist)
+Genre: Latin
+http://www.musicianspage.com/musicians/13086/audiofile/22917/
+
+
+Como Fue by Ernesto Duarte Brito (added by The Guitarist)
+Genre: Latin
+http://www.musicianspage.com/musicians/13086/audiofile/22916/
+
+
+Obsecion by Pedro Flores (added by The Guitarist)
+Genre: Latin
+http://www.musicianspage.com/musicians/13086/audiofile/22915/
+
+
+More audio files:
+http://www.musicianspage.com/audio/
+
+
+We are waiting for your comments and if you have any, please upload your
+own audio files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addaudiofiles=3D1
+
+
+
+
+Latest Uploaded Video Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Isolation - What a Crazy World by Anna Iachino - author/composer (added by =
+MonkeyRat)
+Genre: Rock
+http://www.musicianspage.com/musicians/53390/videofile/21149/
+
+
+The Cruise Guitarist by Various (added by The Guitarist)
+Genre: Latin
+http://www.musicianspage.com/musicians/13086/videofile/21148/
+
+
+Hotel California. By: The Cruise Guitarist by Don Felder, (added by The Gui=
+tarist)
+Genre: Rock
+http://www.musicianspage.com/musicians/13086/videofile/21147/
+
+
+More video files:
+http://www.musicianspage.com/video/
+
+
+We are waiting for your comments and if you have any, please upload your
+own video files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addvideofiles=3D1
+
+
+
+
+Latest Uploaded Sheet Music Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SOTF - Piano solo by Ronald Van Deurzen (added by Ronald Van Deurzen)
+Genre: Classical
+http://www.musicianspage.com/musicians/41617/sheetmusic/3274/
+
+
+LOG by Ronald Van Deurzen (added by Ronald Van Deurzen)
+Genre: Classical
+http://www.musicianspage.com/musicians/41617/sheetmusic/3272/
+
+
+Old Zaporizhian Cossack March. Score&amp;parts. by arr. Serhii Naum (added =
+by Grechanivsky)
+Genre: Folk
+http://www.musicianspage.com/musicians/9640/sheetmusic/3270/
+
+
+More sheet music files:
+http://www.musicianspage.com/sheetmusic/
+
+
+We are waiting for your comments and if you have any, please upload your
+own sheet music files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addsheetmusic=3D1
+
+
+
+
+Earn money with your website, FaceBook, YouTube or MySpace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you own a website or simply an account on FaceBook, YouTube, MySpace or =
+Twitter, be sure to check out the Virtual Sheet Music's Affiliate Program w=
+hich entitles you to earn 30% commission on any referred sale.
+
+It is completely free to join:
+
+https://affiliates.virtualsheetmusic.com/
+
+
+and once you have an account, start referring users using a special code to=
+ put on your website or social account (FaceBook, Twitter, etc).
+
+For any further questions, please reply to this email, we will be glad to h=
+elp you step by step.
+
+
+
+
+Join us on the major Social Networks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stay updated with our latest news on:
+
+1. on FaceBook:
+http://www.facebook.com/MusiciansPage
+
+2. on Twitter:
+http://twitter.com/MusiciansPage
+
+
+
+
+---------------------------------------------------------------------------=
+-----
+
+FEATURE YOURSELF ON MUSICIANS PAGE:
+=20
+If you have an upcoming concert, CD release, special Event, or just want to=
+ promote yourself and your activity, remember you can feature yourself in f=
+ront of thousands of musicians, music lovers, and music employers (includin=
+g music agents, artist management companies, etc.) by exclusively putting y=
+our picture and name on every page of Musicians Page, starting at just $10 =
+(that's right, just 10 bucks!):
+=20
+https://www.musicianspage.com/login/panel.php?featureyourself=3D1
+=20
+Your ad will be displayed exclusively for the duration of your campaign, gi=
+ving you maximum exposure to the Musicians Page community. Musicians Page i=
+s visited by thousands of musicians and people working in the music busines=
+s every day, so consider putting yourself in front of this specialized audi=
+ence.
+
+This is your chance to make new contacts and seize exciting opportunities i=
+n minutes! Don't miss this opportunity now!
+
+---------------------------------------------------------------------------=
+-----
+
+
+
+
+Please feel free to pass this Newsletter along to friends and other musicia=
+ns who might find this content valuable in the same way you do, and be sure=
+ to send us your ideas and thoughts by either replying to this email or by =
+posting your comments and feedback on the dedicated forum below:
+
+http://www.musicianspage.com/forums/general/feedback/
+
+Thank you!
+
+All the best,
+Fabrizio Ferrari, CEO
+Musicians Page
+http://www.musicianspage.com
+Virtual Sheet Music Inc.
+http://www.virtualsheetmusic.com
+29911 Niguel Road, #6992
+Laguna Niguel, CA 92677 (USA)
+Fax: +1 800 717 1876 or +1 973 273 2171
+----------------------------------------------
+This message was sent from Musicians Page
+http://www.musicianspage.com
+To unsubscribe, please go to:
+http://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
+=2Eorg
