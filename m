@@ -1,87 +1,99 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30B1F187;
-	Thu, 16 Nov 2023 05:58:10 -0800 (PST)
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-5ac376d311aso8777777b3.1;
-        Thu, 16 Nov 2023 05:58:10 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700143089; x=1700747889;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Lwc94K2A3+xRSxt0ijmFzS8lZWk11pXwatY3W49Ncx4=;
-        b=CAWUYhtleipfbULS0DBJzvVbmg9ad+LeLgpO92N0c58ULxXPsrXVEZWWgCfOqBL8NA
-         Ll7U5Nj9Mgo+lnf3VOcmb0yncBAtzIe4uZLvsCa0e+WVs+zqKrrVO3o1qMXKLoiZNjiS
-         1GLZdLbD0dvQVLb4JXwASsuOokWEoYiIkRAYc7Ju9cNUwa4W1XvkiXjPzgdfDp/Edd0l
-         Nl41i0E9JOcUA83dLxkou0YS3hll2rSoc/778BGhWPiMiqBB8z5pABRi/jjxkQb/WItE
-         vLeoggQAJYfkhUH5PAobbhj1/NpyGpom7LOZOcDIuLbTN1sysE4NnMfuCs+xk6EgU0Yz
-         +xrg==
-X-Gm-Message-State: AOJu0YxwNWFRso9xJxTKl6rHlp8Yhts1+tf80i+GS6RcR4nkwMd/mOxC
-	SMVu0qmolivACx2E7KkTiyXEg8kTcDFcFA==
-X-Google-Smtp-Source: AGHT+IH1xZWITsn5KY1joli91uail0bxhncz3cEkOuteo70SDGwUsDwrvCmf0ygR1Fkyph1FyFteIQ==
-X-Received: by 2002:a05:690c:368f:b0:5a7:a817:be43 with SMTP id fu15-20020a05690c368f00b005a7a817be43mr4838978ywb.6.1700143089016;
-        Thu, 16 Nov 2023 05:58:09 -0800 (PST)
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com. [209.85.219.174])
-        by smtp.gmail.com with ESMTPSA id w205-20020a0dd4d6000000b005af5ef0687fsm1016513ywd.6.2023.11.16.05.58.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 16 Nov 2023 05:58:08 -0800 (PST)
-Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-da041ffef81so854284276.0;
-        Thu, 16 Nov 2023 05:58:08 -0800 (PST)
-X-Received: by 2002:a25:3302:0:b0:d72:a54d:4b7 with SMTP id
- z2-20020a253302000000b00d72a54d04b7mr16291259ybz.1.1700143088634; Thu, 16 Nov
- 2023 05:58:08 -0800 (PST)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="lnN9EgIQ"
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C880B135
+	for <linux-mmc@vger.kernel.org>; Thu, 16 Nov 2023 06:01:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=VjTK
+	hEJKFxBOzIOPUeGVw1mOj5EUaqPgAJjVG/989Z8=; b=lnN9EgIQxAYtsn1nfDPH
+	txlpAQyOe7ElBMIWn/NLfVPy+GtGnpobwBRw2xTKRM7hLAmVyossxbLY4cun2n/p
+	OxLMZQp2r7gRa4i/am6ZFgrIWOwDecDsglC+bJ3Fg97XstNXilY4vSVJ1V9tKJhs
+	6cG0I/vChvK9/t8UxsH9OIXX4Stxsui5ofaq0yeGponGRBemPhxUsngZBnZAHl7e
+	x5nq/LcJLgxM3fp2HUwAHgJFHNDmmkO6bSVHV5yvmtxxk9mMtHhFMISxwJZQnJR+
+	V8Bl8l3DizfP+ra9DCn3N8k8/XHbgEw0QoLFgyFinU4bkrRh51CGFB3CFelv1qZZ
+	QQ==
+Received: (qmail 539594 invoked from network); 16 Nov 2023 15:01:00 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 16 Nov 2023 15:01:00 +0100
+X-UD-Smtp-Session: l3s3148p1@n8kMc0UK7NcMur4C
+Date: Thu, 16 Nov 2023 09:00:58 -0500
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/Five SoC
+Message-ID: <ZVYgmtxZP7/jGWAt@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Prabhakar <prabhakar.csengg@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20231115203254.30544-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231115203254.30544-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="96E3kriXuufB2vQk"
+Content-Disposition: inline
 In-Reply-To: <20231115203254.30544-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 16 Nov 2023 14:57:57 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdVWNn2jOx3CgBZx05Y-+Lvjt8ZuDELZZ7xc1hfcY+nrAg@mail.gmail.com>
-Message-ID: <CAMuHMdVWNn2jOx3CgBZx05Y-+Lvjt8ZuDELZZ7xc1hfcY+nrAg@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/Five SoC
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, 
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
+
+
+--96E3kriXuufB2vQk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Nov 15, 2023 at 9:33=E2=80=AFPM Prabhakar <prabhakar.csengg@gmail.c=
-om> wrote:
+On Wed, Nov 15, 2023 at 08:32:54PM +0000, Prabhakar wrote:
 > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
->
-> The SDHI block on the RZ/Five SoC is identical to one found on the RZ/G2U=
-L
+>=20
+> The SDHI block on the RZ/Five SoC is identical to one found on the RZ/G2UL
 > SoC. "renesas,sdhi-r9a07g043" compatible string will be used on the
-> RZ/Five SoC so to make this clear and to keep this file consistent, updat=
-e
+> RZ/Five SoC so to make this clear and to keep this file consistent, update
 > the comment to include RZ/Five SoC.
->
+>=20
 > No driver changes are required as generic compatible string
 > "renesas,rcar-gen3-sdhi" will be used as a fallback on RZ/Five SoC.
->
+>=20
 > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Gr{oetje,eeting}s,
 
-                        Geert
+--96E3kriXuufB2vQk
+Content-Type: application/pgp-signature; name="signature.asc"
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
+-----BEGIN PGP SIGNATURE-----
 
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmVWIJUACgkQFA3kzBSg
+KbYKkw/+M0CdqOrnWjDnKX35jk3CPokP12hBzNNr/dLgwqHhAW2ztEH6Z58+oEWQ
+OesI9IPl5HU+2Y+lEUNAzGuTwDolMa0zCNa0T8yoSO1gTuxizKZWmBo5F6HQdu6g
+qY7jg+z8hJ57bamkXazo8U0jHu6UIGD/jvgYESBI3pKiYkDhwqTf93ZtNuJbh1Y0
+Tz67UpwElEfbEneiVz6JFYMTiQAquu9DAW0Ye27P4TbnjYXYKH38hHvPEtI5VhYE
+2RGSUooksiXlzR46/3/4OhqvCvzbrDflRaipixrA/YprrD9dAs+6xJWis2OHu1mS
+QeS11uuDpp+EhLZHzhYWn7aJcjw0KJdoO4iNpJUKndJBHH6WyFswAkl0/XU1G5s5
+43i6fKsOsg9sqDNjEzkbCKHzf/UgA//mGgSzp8WgoJ2mznm/fRy6ngEr/+bJ5xZ3
+7Gf1SCTYR9qnisxyn//v7TA7BzPFHtz7A7/Cwio7qUGKe6aC6O9a2pMs8onoHPCZ
+TjDM0HQ+HSVsCzNcPYg3nl2ApUnlivKixS23u+hGhJ/2afG2O8rT6ciAzd80crTb
+ezbSmSszLItj4zMfwLA4r5NqtpINk7IQnWjr2DiIIli889U/clpX+08nLryOYfsh
+XDwnL+hdhLyWD3jOG1DB73xGYOUUgb/hk3KLv6kBdoARshYESaY=
+=0kzE
+-----END PGP SIGNATURE-----
+
+--96E3kriXuufB2vQk--
