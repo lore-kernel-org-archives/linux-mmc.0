@@ -1,40 +1,40 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ny4Y93/9"
-Received: from mail-ua1-x92f.google.com (mail-ua1-x92f.google.com [IPv6:2607:f8b0:4864:20::92f])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9B1CD72;
-	Fri, 17 Nov 2023 02:50:18 -0800 (PST)
-Received: by mail-ua1-x92f.google.com with SMTP id a1e0cc1a2514c-7bae0c07086so659386241.1;
-        Fri, 17 Nov 2023 02:50:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FrIjm3Pm"
+Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27D2C171A;
+	Fri, 17 Nov 2023 02:50:21 -0800 (PST)
+Received: by mail-vs1-xe31.google.com with SMTP id ada2fe7eead31-45d94e7759eso698501137.1;
+        Fri, 17 Nov 2023 02:50:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1700218218; x=1700823018; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1700218220; x=1700823020; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=3hRKG1stwhF50tHKySB/1EUg+yzYfiO+/pNDfaNiThs=;
-        b=Ny4Y93/9O3SS2HOubCCt9bmDSM+lCjT/oVeIrsOr9w2r/2zvKNS2pIBGjfGUkP54bh
-         98j2T+zn6wQgkSFLJlvDPbWy72nOsL+Wmda01BT6OQy6s4zwpYneHMzATFIp/gSxp0mt
-         O5/CTkveFLRG0DV9qQ/oin8JbcfKyxLUuEThQLPdBep1CYDQF2wtGa0ywD8JJgvvaL6n
-         5YJlzRMgZ4OUVbrwPhVgFCnTYOpkRQceqP0FFtcN1nhBfczfjCAZqHRxfbcTaXQ0/ogi
-         Jtr3MOtzhmV6UDxtNgBuJpdiXNGRRlypV3T45+5aYkMI23T5kK92fw8vQZPVdfnZtFNU
-         HyRA==
+        bh=i8WmvwzndIJ2FpexH1Q5hm/dVIrzFnnnzQRgY3kslO4=;
+        b=FrIjm3Pm/+QsD7LKlmmNDIJ9XOk2ksUFT+Z46EsV5HZpE3lj2ZHOLKK5GVkO8Ytt91
+         UjlvgbYJBwkT7Ajadxv9lS5EQtD0ZawOi2HN0yQf8MjXJPHs34I7MWsgKfY9BlFQe1kF
+         VIzy+jEA4x0cs3UjYm+xnPkSQ1eMkYobf8MBDwtFRlU7Y4mim7+NbIPFwhmTnfbUoTQS
+         OrEZIW9B8SuGBhW3srDQQtXHunqnRdLEASf7snga3Tf1F/pSa9GFoad/7yGQRlrxqZ6W
+         nfsiL3H1HBYxR4FClxz4E8oiuaxl73jtcBAsgUc6/xdMLOa08GIGJbyqP5j2LNwKgRVZ
+         GuLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700218218; x=1700823018;
+        d=1e100.net; s=20230601; t=1700218220; x=1700823020;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=3hRKG1stwhF50tHKySB/1EUg+yzYfiO+/pNDfaNiThs=;
-        b=SfDC4kzNVKNagHYcI7SgGrYA7SOsGV1yYnGUgiHfkpTEkVesCrRQMN4SZj/hFQXZJJ
-         fv7nM7A6ZrnZekWgp7rE6LxaeXS1KvZzYJCVKWY2YeJnilcUNNMph+2gnj3ztbayI9cU
-         svHO0dptYDwjfRq5cCK7Q4NXbTJtKLeEm43OP1CRdcCJxCbHJr02tXLilTAznUjK0H5G
-         YnGuQI9JtNQAiNy68/fdr1iSIogZCAL/MiUILtUkGFgE7/B6d9fSrKZRctQ3vv95wwKh
-         AUja69oV24evSpkZpv9WKe8mOZKbuEfkAskOCPXAkHbd7AuqLwHZPcimi4xbAZbHN9ZF
-         bmgg==
-X-Gm-Message-State: AOJu0Yw1dWL2V8viUHeu5UU3jl9D1p5vVRcbRWh8cPpkW8ZNhHIKihZY
-	BihEcySXhkNOPBdZtoouKvnAxr8rqfkeQbgh3cirlJu3/H0=
-X-Google-Smtp-Source: AGHT+IHHnAYCn9U+Rm4oB4MvWXl5T2hqYUt+znyFlNVww1ofFZNrGQrVRN0Nj4z69r7omLLlUobcK44jCPxHzwzjnM4=
-X-Received: by 2002:a67:c999:0:b0:45f:1d2:30d7 with SMTP id
- y25-20020a67c999000000b0045f01d230d7mr15862686vsk.8.1700218217756; Fri, 17
- Nov 2023 02:50:17 -0800 (PST)
+        bh=i8WmvwzndIJ2FpexH1Q5hm/dVIrzFnnnzQRgY3kslO4=;
+        b=JNgyYTcMm+CpQ7AG5PrhTFgodAkmnJSqjQkHkoze3gZM2BxGTaeXtWpayurUtOIB0d
+         kTjIbcnASe94aiAnVzMIRXvr8iypn6/fZKdlksJlHSHAKrx6Q9qaOWfGmqy0OV8qSKYM
+         7lXOopiVomwVtTUaE9VOLkguyUTJO7ZYLRQOkxx9RIxwWDB+mcifR4wSKhuq+og9Ad5Y
+         fkxucoNEOhzPcgdKye5vkBbroZmQR7KwiX3ZFgR1UaaZrgY8D2EG5V432pzDiqTgWS0H
+         d7YrE0WFvJluwKpsNq5WBVHnh9hwfC5Xwy4eLC8f1K+3a0OQSjlHHFswyyRTAJqMoRBz
+         64YA==
+X-Gm-Message-State: AOJu0YzfGQf6Qn2zqfkV192LTRSmVyN5J1uDs1xa2hrpzDrOHqGVJkcq
+	02/atPGXYBoIsVuZbJcz7q//djXyTJ9XpNPA7rQ=
+X-Google-Smtp-Source: AGHT+IEoTERJfg9M+q5VkePSlaz+Ski71DVnwWS4QP1EnAMHozwLXmGGKG3y9jXgpzgN7FGKhqMoeuHS3CAFnWy7x78=
+X-Received: by 2002:a67:c10d:0:b0:457:ddde:ba45 with SMTP id
+ d13-20020a67c10d000000b00457dddeba45mr18009149vsj.14.1700218220264; Fri, 17
+ Nov 2023 02:50:20 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -42,13 +42,12 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20230915094351.11120-1-victorshihgli@gmail.com>
- <20230915094351.11120-16-victorshihgli@gmail.com> <CAPDyKFpt-ZmSGUWBukLvYvY6DexOr6g23FMWdY14d3gBKxzAmA@mail.gmail.com>
-In-Reply-To: <CAPDyKFpt-ZmSGUWBukLvYvY6DexOr6g23FMWdY14d3gBKxzAmA@mail.gmail.com>
+ <20230915094351.11120-17-victorshihgli@gmail.com> <CAPDyKFoeBgoEyCg8GmZB718g1dg8dqi_kdLr-jLqWdEE5q4Oyg@mail.gmail.com>
+In-Reply-To: <CAPDyKFoeBgoEyCg8GmZB718g1dg8dqi_kdLr-jLqWdEE5q4Oyg@mail.gmail.com>
 From: Victor Shih <victorshihgli@gmail.com>
-Date: Fri, 17 Nov 2023 18:50:05 +0800
-Message-ID: <CAK00qKADX2+nfoPxtKu3dbftQreG5uQVs0OwVrtZ564jPZA93g@mail.gmail.com>
-Subject: Re: [PATCH V12 15/23] mmc: sdhci-uhs2: add detect_init() to detect
- the interface
+Date: Fri, 17 Nov 2023 18:50:08 +0800
+Message-ID: <CAK00qKBdkn2zqZx6Z-NO4Kx5GV4S94Wt3h1McZSJTqA7KcKhcQ@mail.gmail.com>
+Subject: Re: [PATCH V12 16/23] mmc: sdhci-uhs2: add clock operations
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
@@ -59,7 +58,7 @@ Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Oct 3, 2023 at 7:10=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
+On Tue, Oct 3, 2023 at 7:13=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
  wrote:
 >
 > On Fri, 15 Sept 2023 at 11:44, Victor Shih <victorshihgli@gmail.com> wrot=
@@ -67,25 +66,16 @@ e:
 > >
 > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
 > >
-> > Sdhci_uhs2_do_detect_init() is a sdhci version of mmc's uhs2_detect_ini=
-t
-> > operation. After detected, the host's UHS-II capabilities will be set u=
-p
-> > here and interrupts will also be enabled.
+> > This is a sdhci version of mmc's uhs2_[enable|disable]_clk operations.
+> >
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >
-> $subject patch is adding a bunch of static functions, which isn't
-> really being used until later. If you compile this patch it will
-> trigger warnings about unused function, we don't want that. Each patch
-> in the series should build nicely without warning and errors.
->
-> To deal with these problems, I suggest that you move the introduction
-> of the sdhci_uhs2_control() from patch17 to $subject patch - or
-> possibly make that as a standalone patch, preceeding $subject patch.
-> Step by step you can then add support for each of the "enum
-> sd_uhs2_operation" to sdhci_uhs2_control().
->
-> Moreover, please work at the commit message a bit, it's not entirely
-> easy to understand by reading what goes on here.
+> The similar comments as posted for patch 15 applies to $subject patch
+> too. Please have a look at those and fix these for the $subject patch
+> too.
 >
 
 Hi, Ulf
@@ -95,230 +85,73 @@ for version 13.
 
 Thanks, Victor Shih
 
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 > > ---
 > >
 > > Updates in V8:
-> >  - usleep_range() to instead of udelay() in sdhci_uhs2_interface_detect=
-().
+> >  - Remove unnecessary include file.
 > >  - read_poll_timeout() to instead of read_poll_timeout_atomic()
-> >    in sdhci_uhs2_interface_detect().
-> >  - Modify return value in sdhci_uhs2_do_detect_init().
-> >
-> > Updates in V7:
-> >  - Drop using uhs2_reset ops and use sdhci_uhs2_reset()
-> >    in sdhci_uhs2_do_detect_init().
+> >    in sdhci_uhs2_enable_clk().
+> >  - Put the comment on the end and put the lines in descending
+> >    line length in sdhci_uhs2_enable_clk().
+> >  - Modify return value in sdhci_uhs2_enable_clk().
 > >
 > > Updates in V6:
 > >  - Remove unnecessary functions.
-> >  - Wrap at 100 columns in some functions.
 > >
 > > ---
 > >
-> >  drivers/mmc/host/sdhci-uhs2.c | 112 ++++++++++++++++++++++++++++++++++
-> >  1 file changed, 112 insertions(+)
+> >  drivers/mmc/host/sdhci-uhs2.c | 30 ++++++++++++++++++++++++++++++
+> >  1 file changed, 30 insertions(+)
 > >
 > > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs=
 2.c
-> > index ad791c48f681..4c2a56629ab3 100644
+> > index 4c2a56629ab3..af1b0c5e48fd 100644
 > > --- a/drivers/mmc/host/sdhci-uhs2.c
 > > +++ b/drivers/mmc/host/sdhci-uhs2.c
-> > @@ -335,6 +335,118 @@ static int sdhci_uhs2_set_ios(struct mmc_host *mm=
-c, struct mmc_ios *ios)
-> >   *                                                                    =
-       *
-> >  \*********************************************************************=
-********/
+> > @@ -329,6 +329,36 @@ static int sdhci_uhs2_set_ios(struct mmc_host *mmc=
+, struct mmc_ios *ios)
+> >         return 0;
+> >  }
 > >
-> > +static int sdhci_uhs2_interface_detect(struct sdhci_host *host)
-> > +{
-> > +       int timeout =3D 100000; /* 100ms */
->
-> Please use define instead.
->
-
-Hi, Ulf
-
-I will update this in version 13.
-
-Thanks, Victor Shih
-
-> > +       u32 val;
-> > +
-> > +       usleep_range(50, 200); /* wait for 50us - 200us before check */
->
-> Why? Comment?
->
-> And use defines.
->
-
-Hi, Ulf
-
-I will drop this in version 13.
-
-Thanks, Victor Shih
-
-> > +
-> > +       if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_IF_DE=
-TECT),
-> > +                             100, timeout, true, host, SDHCI_PRESENT_S=
-TATE)) {
-> > +               pr_warn("%s: not detect UHS2 interface in 100ms.\n", mm=
-c_hostname(host->mmc));
-> > +               sdhci_dumpregs(host);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       /* Enable UHS2 error interrupts */
-> > +       sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI_UHS2_=
-INT_ERROR_MASK);
-> > +
-> > +       /* 150ms */
-> > +       timeout =3D 150000;
->
-> Ditto.
->
-
-Hi, Ulf
-
-I will update this in version 13.
-
-Thanks, Victor Shih
-
-> > +       if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_LANE_=
-SYNC),
-> > +                             100, timeout, true, host, SDHCI_PRESENT_S=
-TATE)) {
-> > +               pr_warn("%s: UHS2 Lane sync fail in 150ms.\n", mmc_host=
-name(host->mmc));
-> > +               sdhci_dumpregs(host);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       DBG("%s: UHS2 Lane synchronized in UHS2 mode, PHY is initialize=
-d.\n",
-> > +           mmc_hostname(host->mmc));
-> > +       return 0;
-> > +}
-> > +
-> > +static int sdhci_uhs2_init(struct sdhci_host *host)
-> > +{
-> > +       u16 caps_ptr =3D 0;
-> > +       u32 caps_gen =3D 0;
-> > +       u32 caps_phy =3D 0;
-> > +       u32 caps_tran[2] =3D {0, 0};
-> > +       struct mmc_host *mmc =3D host->mmc;
-> > +
-> > +       caps_ptr =3D sdhci_readw(host, SDHCI_UHS2_CAPS_PTR);
-> > +       if (caps_ptr < 0x100 || caps_ptr > 0x1FF) {
-> > +               pr_err("%s: SDHCI_UHS2_CAPS_PTR(%d) is wrong.\n",
-> > +                      mmc_hostname(mmc), caps_ptr);
-> > +               return -ENODEV;
-> > +       }
-> > +       caps_gen =3D sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_OFFSE=
-T);
-> > +       caps_phy =3D sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_PHY_O=
-FFSET);
-> > +       caps_tran[0] =3D sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_T=
-RAN_OFFSET);
-> > +       caps_tran[1] =3D sdhci_readl(host, caps_ptr + SDHCI_UHS2_CAPS_T=
-RAN_1_OFFSET);
-> > +
-> > +       /* General Caps */
-> > +       mmc->uhs2_caps.dap =3D caps_gen & SDHCI_UHS2_CAPS_DAP_MASK;
-> > +       mmc->uhs2_caps.gap =3D FIELD_GET(SDHCI_UHS2_CAPS_GAP_MASK, caps=
-_gen);
-> > +       mmc->uhs2_caps.n_lanes =3D FIELD_GET(SDHCI_UHS2_CAPS_LANE_MASK,=
- caps_gen);
-> > +       mmc->uhs2_caps.addr64 =3D (caps_gen & SDHCI_UHS2_CAPS_ADDR_64) =
-? 1 : 0;
-> > +       mmc->uhs2_caps.card_type =3D FIELD_GET(SDHCI_UHS2_CAPS_DEV_TYPE=
-_MASK, caps_gen);
-> > +
-> > +       /* PHY Caps */
-> > +       mmc->uhs2_caps.phy_rev =3D caps_phy & SDHCI_UHS2_CAPS_PHY_REV_M=
-ASK;
-> > +       mmc->uhs2_caps.speed_range =3D FIELD_GET(SDHCI_UHS2_CAPS_PHY_RA=
-NGE_MASK, caps_phy);
-> > +       mmc->uhs2_caps.n_lss_sync =3D FIELD_GET(SDHCI_UHS2_CAPS_PHY_N_L=
-SS_SYN_MASK, caps_phy);
-> > +       mmc->uhs2_caps.n_lss_dir =3D FIELD_GET(SDHCI_UHS2_CAPS_PHY_N_LS=
-S_DIR_MASK, caps_phy);
-> > +       if (mmc->uhs2_caps.n_lss_sync =3D=3D 0)
-> > +               mmc->uhs2_caps.n_lss_sync =3D 16 << 2;
-> > +       else
-> > +               mmc->uhs2_caps.n_lss_sync <<=3D 2;
-> > +       if (mmc->uhs2_caps.n_lss_dir =3D=3D 0)
-> > +               mmc->uhs2_caps.n_lss_dir =3D 16 << 3;
-> > +       else
-> > +               mmc->uhs2_caps.n_lss_dir <<=3D 3;
-> > +
-> > +       /* LINK/TRAN Caps */
-> > +       mmc->uhs2_caps.link_rev =3D caps_tran[0] & SDHCI_UHS2_CAPS_TRAN=
-_LINK_REV_MASK;
-> > +       mmc->uhs2_caps.n_fcu =3D FIELD_GET(SDHCI_UHS2_CAPS_TRAN_N_FCU_M=
-ASK, caps_tran[0]);
-> > +       if (mmc->uhs2_caps.n_fcu =3D=3D 0)
-> > +               mmc->uhs2_caps.n_fcu =3D 256;
-> > +       mmc->uhs2_caps.host_type =3D FIELD_GET(SDHCI_UHS2_CAPS_TRAN_HOS=
-T_TYPE_MASK, caps_tran[0]);
-> > +       mmc->uhs2_caps.maxblk_len =3D FIELD_GET(SDHCI_UHS2_CAPS_TRAN_BL=
-K_LEN_MASK, caps_tran[0]);
-> > +       mmc->uhs2_caps.n_data_gap =3D caps_tran[1] & SDHCI_UHS2_CAPS_TR=
-AN_1_N_DATA_GAP_MASK;
-> > +
-> > +       return 0;
-> > +}
-> > +
-> > +static int sdhci_uhs2_do_detect_init(struct mmc_host *mmc)
+> > +static int sdhci_uhs2_disable_clk(struct mmc_host *mmc)
 > > +{
 > > +       struct sdhci_host *host =3D mmc_priv(mmc);
+> > +       u16 clk =3D sdhci_readw(host, SDHCI_CLOCK_CONTROL);
 > > +
-> > +       DBG("Begin do uhs2 detect init.\n");
-> > +
-> > +       if (sdhci_uhs2_interface_detect(host)) {
-> > +               pr_warn("%s: cannot detect UHS2 interface.\n", mmc_host=
-name(host->mmc));
->
-> Does this really deserve a warning to be printed to the log?
->
-
-Hi, Ulf
-
-I have no special opinion on this part. What do you think?
-
-Thanks, Victor Shih
-
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       if (sdhci_uhs2_init(host)) {
-> > +               pr_warn("%s: UHS2 init fail.\n", mmc_hostname(host->mmc=
-));
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       /* Init complete, do soft reset and enable UHS2 error irqs. */
-> > +       sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
-> > +       sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI_UHS2_=
-INT_ERROR_MASK);
-> > +       /*
-> > +        * N.B SDHCI_INT_ENABLE and SDHCI_SIGNAL_ENABLE was cleared
-> > +        * by SDHCI_UHS2_SW_RESET_SD
-> > +        */
-> > +       sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> > +       sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> > +       clk &=3D ~SDHCI_CLOCK_CARD_EN;
+> > +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 > > +
 > > +       return 0;
 > > +}
 > > +
-> >  static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
-> >  {
-> >         host->mmc_host_ops.start_signal_voltage_switch =3D
+> > +static int sdhci_uhs2_enable_clk(struct mmc_host *mmc)
+> > +{
+> > +       struct sdhci_host *host =3D mmc_priv(mmc);
+> > +       u16 clk =3D sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > +       int timeout_us =3D 20000; /* 20ms */
+> > +       u32 val;
+> > +
+> > +       clk |=3D SDHCI_CLOCK_CARD_EN;
+> > +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> > +
+> > +       if (read_poll_timeout(sdhci_readw, val, (val & SDHCI_CLOCK_INT_=
+STABLE),
+> > +                             10, timeout_us, true, host, SDHCI_CLOCK_C=
+ONTROL)) {
+> > +               pr_err("%s: Internal clock never stabilised.\n", mmc_ho=
+stname(host->mmc));
+> > +               sdhci_dumpregs(host);
+> > +               return -EIO;
+> > +       }
+> > +       return 0;
+> > +}
+> > +
+> >  /*********************************************************************=
+********\
+> >   *                                                                    =
+       *
+> >   * Driver init/exit                                                   =
+       *
 >
 > Kind regards
 > Uffe
