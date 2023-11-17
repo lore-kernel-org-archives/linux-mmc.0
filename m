@@ -1,155 +1,139 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ldE4Ewcq"
-Received: from mail-vk1-xa2a.google.com (mail-vk1-xa2a.google.com [IPv6:2607:f8b0:4864:20::a2a])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61065D57;
-	Fri, 17 Nov 2023 02:50:33 -0800 (PST)
-Received: by mail-vk1-xa2a.google.com with SMTP id 71dfb90a1353d-4ac20c41e82so684094e0c.1;
-        Fri, 17 Nov 2023 02:50:33 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EoQx9SN7"
+Received: from mail-ot1-x32d.google.com (mail-ot1-x32d.google.com [IPv6:2607:f8b0:4864:20::32d])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6BFD130;
+	Fri, 17 Nov 2023 03:32:00 -0800 (PST)
+Received: by mail-ot1-x32d.google.com with SMTP id 46e09a7af769-6cd09f51fe0so1127503a34.1;
+        Fri, 17 Nov 2023 03:32:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1700218232; x=1700823032; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1700220720; x=1700825520; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=aOnhfMhQ8ywLqjdb9/65uRtIbUiORGE+C3/Bf4quGCw=;
-        b=ldE4EwcqbHvN+uMNqFPhdKRR0HVcsdQbxALMfJkmbG0xWWfym5Ex4he0wZAVm98I2c
-         HGXLxoKPQ5FlbV8MFRU6NQ0hf+CxLCsP2U3W9IzMLocoMCArg5CterQ9ZYhmU89GWyk9
-         R5aQB9ZdauhkVfIXSQRONlaWKePrqY8WBLTWnBXB5wxkmEt6ubzZESxCndBraSU7QeaD
-         xA+Sg0yGWNeaCYtFw/iAHkufj85pxUl8xhFIWTWTWYK7feq7ZDGwLBUU1XhI/wMAQQN/
-         L5KA8bpXuXG7snw+eBBLNfVl8uIBm3+TX05lfrbofjLaeS6bAlcOLMY6zoy49lizbGUk
-         MOKA==
+        bh=qUyhKz0IZnGv/kDPhh0zvtC7NPuBSxGKLGuzvFl9j+w=;
+        b=EoQx9SN79BuiZsY+bMqP0ZL3ubaOsEDn8ZKVY/t9JHLaIFtP+azgAJlvvTariYsdWq
+         eWoGh5RNhOua1/1KsDqtCKlgkRk2Aiqu/hUzkHVEcwCbWeehSM/WawwuLDD8DP3pbT7e
+         Uiutxdm7oS6XSbInRFutknAS2QQYe200KH1M7N6DBnTA1BtE/obNrQo8yC3lGAeXkqQe
+         wzA9s5pYyThtHgCGb9XuRJy5tay/fwMbyawngdw1jPjnoRRHjmtgFzgs64kLqA8w5VhI
+         AppGPdpWxXXBn1KoCA4aY5WTAngMloVmV+cKENQEmH2zN4QN9FSUKhG0Su83g6DKRPHa
+         Y0Cg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700218232; x=1700823032;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20230601; t=1700220720; x=1700825520;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=aOnhfMhQ8ywLqjdb9/65uRtIbUiORGE+C3/Bf4quGCw=;
-        b=dOBfn76UmPlG6tqSDYmJ2jcpE1sbxN1wlUqyImYz3YCPQ9H/TkdIIUVtYKOuRq9Wqv
-         9GA67SW2qKSOFZge8QAq1jixBnTHUKUxVQ7z8IMnXvt99clduI2xq32i7ZfaRhbykVm3
-         uC3TGN0a97wk9lSz7ElJx0nwUN2Pwq/dH49BPnWiXBuuASGTjlEg33P3V23c0Lj7MjFM
-         5s+LYFTtCWNy5oxouJHBoj6mbbMgL9pSa7sgNjCanlZo5w+muRcLmG3zYFHQ4KZUAJqT
-         9jTenaJO0F52AeXc1hMLT0Qj5UsQbDNCYLutkmP67tQxOLp9YmAwJzyeY0vPOZNm7P7V
-         0ebA==
-X-Gm-Message-State: AOJu0YwFe+I6c/XdzNqi2PMWKfjjqiLOwfssxc+bfizWFH9GzD2cg9it
-	3TUXSIllPIAUlVGTMRbD3/wMIwbEr3dDkJWNyOYvOC7lSOA=
-X-Google-Smtp-Source: AGHT+IEkZSbqoc7UsqoowK5CtgBgKiIpasDAKUE4zz/HcareLUHSCDhMJUn/3iyaudwpj8frX24fVPwtR/BiN6TPPu8=
-X-Received: by 2002:a05:6122:3125:b0:4a4:cd2:5ebe with SMTP id
- cg37-20020a056122312500b004a40cd25ebemr20392885vkb.12.1700218231823; Fri, 17
- Nov 2023 02:50:31 -0800 (PST)
+        bh=qUyhKz0IZnGv/kDPhh0zvtC7NPuBSxGKLGuzvFl9j+w=;
+        b=o65zasPsP0Rm9cyCJIs4oGyqTrGsu7e5ijomFUe1/bY97gl1tWIhffMMGwggfhUMcI
+         GwA9uqoOVRSG50gq0a7zqvcnOhTUZig1dCO3ymIo6Ptn/EgdT3obEAyej61Juxk6aG/z
+         m1Ndx67ws4ihYpuvcGk1B5b+0ygnGOxqp8/hot6Z4KLKVwwktG/r++b5uA+E3owpVmlf
+         3x5nyj8Tb2KQfPW8qhtlDHXVHI1RsAeSJgdddTQg1zrt7Sfo8p8cb8gUlAPfx/Fa4Qzh
+         LCVtrkotBQBGPCga0pV8wnjDcrCHCPDefy5PzOaCGd4yuTQxn+DnIDyfpXJFHVj3Ve/R
+         +0hg==
+X-Gm-Message-State: AOJu0YxooUS+8e+NpY3J7ax8BULT4nYRQLTvd5RQ3Nna1WRAzOY1kn9J
+	GRqnkShHauMUXro9YjMaxxo=
+X-Google-Smtp-Source: AGHT+IFhXbu1jRa1eUH6LMz92cFYwsrkrVPSFwCJg4h8TsNz6WZ4vrh4U2+8lkf61NIA3SLU1tRZhw==
+X-Received: by 2002:a9d:6283:0:b0:6b8:f588:2c79 with SMTP id x3-20020a9d6283000000b006b8f5882c79mr10994191otk.1.1700220720180;
+        Fri, 17 Nov 2023 03:32:00 -0800 (PST)
+Received: from localhost.localdomain (2001-b400-e286-d458-bc89-d4cd-bd42-ffb5.emome-ip6.hinet.net. [2001:b400:e286:d458:bc89:d4cd:bd42:ffb5])
+        by smtp.gmail.com with ESMTPSA id u2-20020a631402000000b005b4b70738e5sm1229224pgl.8.2023.11.17.03.31.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 17 Nov 2023 03:31:59 -0800 (PST)
+From: Victor Shih <victorshihgli@gmail.com>
+To: ulf.hansson@linaro.org,
+	adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	benchuanggli@gmail.com,
+	HL.Liu@genesyslogic.com.tw,
+	Greg.tu@genesyslogic.com.tw,
+	takahiro.akashi@linaro.org,
+	dlunev@chromium.org,
+	Victor Shih <victorshihgli@gmail.com>
+Subject: [PATCH V13 01/21] mmc: core: Cleanup printing of speed mode at card insertion
+Date: Fri, 17 Nov 2023 19:31:29 +0800
+Message-Id: <20231117113149.9069-2-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20231117113149.9069-1-victorshihgli@gmail.com>
+References: <20231117113149.9069-1-victorshihgli@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20230915094351.11120-1-victorshihgli@gmail.com>
- <20230915094351.11120-21-victorshihgli@gmail.com> <CAPDyKFr4C8woRLzzz9FnhDvL0n8RObHNWCTP3WYxvraVYWYWXA@mail.gmail.com>
-In-Reply-To: <CAPDyKFr4C8woRLzzz9FnhDvL0n8RObHNWCTP3WYxvraVYWYWXA@mail.gmail.com>
-From: Victor Shih <victorshihgli@gmail.com>
-Date: Fri, 17 Nov 2023 18:50:19 +0800
-Message-ID: <CAK00qKBWv4=gnmULgHg-McOPgwqKp2eTPtW3vD6+dnyF_iAH9Q@mail.gmail.com>
-Subject: Re: [PATCH V12 20/23] mmc: sdhci-uhs2: add add_host() and others to
- set up the driver
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
-	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, 
-	takahiro.akashi@linaro.org, dlunev@chromium.org, 
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Thu, Oct 5, 2023 at 7:39=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
- wrote:
->
-> On Fri, 15 Sept 2023 at 11:44, Victor Shih <victorshihgli@gmail.com> wrot=
-e:
-> >
-> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >
-> > This is a UHS-II version of sdhci's add_host/remove_host operation.
-> > Any sdhci drivers which are capable of handling UHS-II cards must
-> > call those functions instead of the corresponding sdhci's.
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->
-> [...]
->
-> Just a few nitpicks, see below.
->
-> > +static void __sdhci_uhs2_add_host_v4(struct sdhci_host *host, u32 caps=
-1)
-> > +{
-> > +       struct mmc_host *mmc;
-> > +       u32 max_current_caps2;
-> > +
-> > +       mmc =3D host->mmc;
-> > +
-> > +       /* Support UHS2 */
-> > +       if (caps1 & SDHCI_SUPPORT_UHS2)
-> > +               mmc->caps2 |=3D MMC_CAP2_SD_UHS2;
-> > +
-> > +       max_current_caps2 =3D sdhci_readl(host, SDHCI_MAX_CURRENT_1);
-> > +
-> > +       if ((caps1 & SDHCI_CAN_VDD2_180) &&
-> > +           !max_current_caps2 &&
-> > +           !IS_ERR(mmc->supply.vmmc2)) {
-> > +               /* UHS2 - VDD2 */
-> > +               int curr =3D regulator_get_current_limit(mmc->supply.vm=
-mc2);
->
-> As I also stated in another reply, please use vqmmc2 instead, which we
-> added in patch4.
->
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi, Ulf
+The current print of the bus speed mode in mmc_add_card() has grown over
+the years and is now difficult to parse. Let's clean up the code and also
+take the opportunity to properly announce "DDR" for eMMCs as
+"high speed DDR", which is according to the eMMC spec.
 
-I will update this in version 13.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/bus.c | 36 ++++++++++++++++++++----------------
+ 1 file changed, 20 insertions(+), 16 deletions(-)
 
-Thanks, Victor Shih
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 0af96548e7da..bd761e2858f1 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -299,6 +299,7 @@ int mmc_add_card(struct mmc_card *card)
+ {
+ 	int ret;
+ 	const char *type;
++	const char *speed_mode = "";
+ 	const char *uhs_bus_speed_mode = "";
+ 	static const char *const uhs_speeds[] = {
+ 		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
+@@ -340,27 +341,30 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
+ 
++	if (mmc_card_hs(card))
++		speed_mode = "high speed ";
++	else if (mmc_card_uhs(card))
++		speed_mode = "ultra high speed ";
++	else if	(mmc_card_ddr52(card))
++		speed_mode = "high speed DDR ";
++	else if (mmc_card_hs200(card))
++		speed_mode = "HS200 ";
++	else if (mmc_card_hs400es(card))
++		speed_mode = "HS400 Enhanced strobe ";
++	else if (mmc_card_hs400(card))
++		speed_mode = "HS400 ";
++
+ 	if (mmc_card_uhs(card) &&
+ 		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+ 		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+ 
+-	if (mmc_host_is_spi(card->host)) {
+-		pr_info("%s: new %s%s%s card on SPI\n",
+-			mmc_hostname(card->host),
+-			mmc_card_hs(card) ? "high speed " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
+-			type);
+-	} else {
+-		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+-			mmc_hostname(card->host),
+-			mmc_card_uhs(card) ? "ultra high speed " :
+-			(mmc_card_hs(card) ? "high speed " : ""),
+-			mmc_card_hs400(card) ? "HS400 " :
+-			(mmc_card_hs200(card) ? "HS200 " : ""),
+-			mmc_card_hs400es(card) ? "Enhanced strobe " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
++	if (mmc_host_is_spi(card->host))
++		pr_info("%s: new %s%s card on SPI\n",
++			mmc_hostname(card->host), speed_mode, type);
++	else
++		pr_info("%s: new %s%s%s card at address %04x\n",
++			mmc_hostname(card->host), speed_mode,
+ 			uhs_bus_speed_mode, type, card->rca);
+-	}
+ 
+ 	mmc_add_card_debugfs(card);
+ 	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
+-- 
+2.25.1
 
-> > +
-> > +               if (curr > 0) {
-> > +                       /* convert to SDHCI_MAX_CURRENT format */
-> > +                       curr =3D curr / 1000;  /* convert to mA */
-> > +                       curr =3D curr / SDHCI_MAX_CURRENT_MULTIPLIER;
-> > +                       curr =3D min_t(u32, curr, SDHCI_MAX_CURRENT_LIM=
-IT);
-> > +                       max_current_caps2 =3D curr;
-> > +               }
-> > +       }
-> > +
-> > +       if (!(caps1 & SDHCI_CAN_VDD2_180))
-> > +               mmc->caps2 &=3D ~MMC_CAP2_SD_UHS2;
-> > +}
-> > +
-> > +static int sdhci_uhs2_host_ops_init(struct sdhci_host *host);
->
-> Please try to re-order the code so this declaration isn't needed.
->
-
-Hi, Ulf
-
-I will update this in version 13.
-
-Thanks, Victor Shih
-
-> > +
-> > +static void __sdhci_uhs2_remove_host(struct sdhci_host *host, int dead=
-)
-> > +{
-> > +       if (!sdhci_uhs2_mode(host))
-> > +               return;
-> > +
-> > +       if (!dead)
-> > +               sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_FULL);
-> > +}
-> > +
->
-> [...]
->
-> Kind regards
-> Uffe
