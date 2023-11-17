@@ -1,40 +1,26 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E4094643C;
-	Thu, 16 Nov 2023 20:22:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F99C1FB0;
+	Fri, 17 Nov 2023 01:46:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OBGG+yXG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2552DC433CB;
-	Thu, 16 Nov 2023 20:22:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Amxnepe/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A3E5CC433C7;
+	Fri, 17 Nov 2023 01:46:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700166127;
-	bh=Tk4VsI3q7+2p/BjMyvGCqbKi/6B2IcPsL/NYpb93qWQ=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-	b=OBGG+yXG+xhEmE3lcKicd/ekzT1LDf0GFJQ8X07qXI/H+VXyHbLUZGhoarpaNKQIR
-	 xZCF4GKxuCLUorhVMFXggT/HubCG+9FxTCgX8+m3iR5mZ1BuFautofiPgF9zb87/xa
-	 PyKjMq9VQiKDFL1usaKyLgW+9RTkBjKwfyBYfA0lbNu80mKps8q5VC7bdHsS1fogQo
-	 SO0N/Hw+K+hx2179GY++mV0FI0uVUuuEZp7Q1kj88kxpXFRJdbPSejD6ycNpU7+8Qv
-	 CLtw+p2rfqqWfo+TewBhLwkXuU+Uh1NGGXkEWv/nnzffNfqxtxpDv5iCcd0/5fFy8O
-	 mxgMlawr4gA/A==
-From: Mark Brown <broonie@kernel.org>
-To: Jonathan Cameron <Jonathan.Cameron@huawei.com>, 
- Yang Yingliang <yangyingliang@huawei.com>, 
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
- linux-input@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-mmc@vger.kernel.org, netdev@vger.kernel.org, 
- linux-usb@vger.kernel.org, linux-spi@vger.kernel.org, 
- Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, 
- "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
- Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>
-In-Reply-To: <20231113111249.3982461-1-andriy.shevchenko@linux.intel.com>
-References: <20231113111249.3982461-1-andriy.shevchenko@linux.intel.com>
-Subject: Re: [PATCH v1 1/1] treewide, spi: Get rid of
- SPI_MASTER_HALF_DUPLEX
-Message-Id: <170016612386.72552.14423257472508429993.b4-ty@kernel.org>
-Date: Thu, 16 Nov 2023 20:22:03 +0000
+	s=k20201202; t=1700185564;
+	bh=/T3Fq3sbGsowJP8JXWAK9oXwo0jsSWTX63ohksCMzg4=;
+	h=From:Date:Subject:To:Cc:From;
+	b=Amxnepe/UgcZ+vO9zUiClmSyUdQmguz5bG98K2CsSt1zCQnWrHU79pMPrOaH/9mIc
+	 6fhZ1Xgd7nD5z2SiCpPwhSEZso5cvtDoFA+7SkkR5sjqVq7hahL+tuy92ZUi4QYLQa
+	 RT0UBqlXH8F3hJiWa7zQ5PDRJudtew8HAwBzG9RBY2Ev+9EXzTCu29+S7fkxC1v9cx
+	 5Z0aTuIqQCvQCKe+E6n3sjOtQCoJaUEHsC0fvyBIqydKn7Gg6DMEEfqB1A3Fi3+q4Z
+	 J60rxWy/thg6VwbTG3RIJoPeVBaC44RrPfe7OqES6ishUVf4Y6Diwz/tV/+LRaHP2D
+	 21vnQ+DLaKI/w==
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 16 Nov 2023 18:46:00 -0700
+Subject: [PATCH] mmc: sdhci-of-dwcmshc: Use logical OR instead of bitwise
+ OR in dwcmshc_probe()
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -43,41 +29,83 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.13-dev-0438c
+Message-Id: <20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-v1-1-7e1a7f4ccaab@kernel.org>
+X-B4-Tracking: v=1; b=H4sIANfFVmUC/x2NSwrDMAxErxK0rqBO6IdepXRh2XIsSO1ihboQc
+ veqXT5m3swGyk1Y4TZs0PgtKrUYuMMAIfsyM0o0hvE4Ts65M2rMQbAmjD08NQdM8sFOsnZRKxd
+ d2cdfvtRZgl+Q0jVxvEx0IgKbfTU25X95f+z7F9egyIaCAAAA
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: dfustini@baylibre.com, linux-mmc@vger.kernel.org, llvm@lists.linux.dev, 
+ patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>
+X-Mailer: b4 0.13-dev
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3363; i=nathan@kernel.org;
+ h=from:subject:message-id; bh=/T3Fq3sbGsowJP8JXWAK9oXwo0jsSWTX63ohksCMzg4=;
+ b=owGbwMvMwCUmm602sfCA1DTG02pJDKlhR29XKK076bpRIN3TqtPc7Ib6r+oG58ytdtfSuwqOL
+ OdU3JLXUcrCIMbFICumyFL9WPW4oeGcs4w3Tk2CmcPKBDKEgYtTACZSOInhr/Scix/27HCJMy8p
+ 82ma3yWoxDdpPVuB4tqOK3GdOksd7BkZFr/a81jg21mlE897rs94Lvvr+0bufdLnyp0cLyX7Pi2
+ s4AMA
+X-Developer-Key: i=nathan@kernel.org; a=openpgp;
+ fpr=2437CB76E544CB6AB3D9DFD399739260CB6CB716
 
-On Mon, 13 Nov 2023 13:12:49 +0200, Andy Shevchenko wrote:
-> The SPI_MASTER_HALF_DUPLEX is the legacy name of a definition
-> for a half duplex flag. Since all others had been replaced with
-> the respective SPI_CONTROLLER prefix get rid of the last one
-> as well. There is no functional change intended.
-> 
-> 
+Clang warns (or errors with CONFIG_WERROR=y):
 
-Applied to
+  drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: error: use of bitwise '|' with boolean operands [-Werror,-Wbitwise-instead-of-logical]
+    873 |                 if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
+        |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    874 |                     (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
+        |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        |                                                                        ||
+    875 |                     (device_property_read_bool(dev, "mmc-hs400-1_8v")))
+        |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: note: cast one or both operands to int to silence this warning
+  drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: error: use of bitwise '|' with boolean operands [-Werror,-Wbitwise-instead-of-logical]
+    873 |                 if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
+        |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        |                                                                      ||
+    874 |                     (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
+        |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: note: cast one or both operands to int to silence this warning
+  2 errors generated.
 
-   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git for-next
+There is little reason for this if statement to use bitwise ORs, as the
+short circuiting of logical OR does not need to be avoided in this
+context; it would be wasteful to call device_property_read_bool() three
+times if the first two calls returned true. Switch to logical OR to fix
+the warning.
 
-Thanks!
+While in the area, the parentheses around the calls to
+device_property_read_bool() are not necessary and make the if statement
+harder to read, so remove them.
 
-[1/1] treewide, spi: Get rid of SPI_MASTER_HALF_DUPLEX
-      commit: 3fc6350fc8470d42f5e700ecd1c3d90f9dd9fd2d
+Closes: https://github.com/ClangBuiltLinux/linux/issues/1960
+Fixes: aff35fbc7830 ("mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520")
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 0eb72544c09e..a1f57af6acfb 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -870,9 +870,9 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
+ 		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
+ 
+-		if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
+-		    (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
+-		    (device_property_read_bool(dev, "mmc-hs400-1_8v")))
++		if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
++		    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
++		    device_property_read_bool(dev, "mmc-hs400-1_8v"))
+ 			priv->flags |= FLAG_IO_FIXED_1V8;
+ 		else
+ 			priv->flags &= ~FLAG_IO_FIXED_1V8;
 
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
+---
+base-commit: 3f00051234f02d0d9d1f63b9a334d0fd4c65b6ca
+change-id: 20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-bf8fed73b5bb
 
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
-
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
-
-Thanks,
-Mark
+Best regards,
+-- 
+Nathan Chancellor <nathan@kernel.org>
 
