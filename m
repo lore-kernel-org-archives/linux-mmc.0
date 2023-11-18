@@ -1,99 +1,122 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="GcOGnHDs"
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D09E5C5
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Nov 2023 10:57:20 -0800 (PST)
-Received: by mail-pl1-x634.google.com with SMTP id d9443c01a7336-1ce5e76912aso7444565ad.2
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Nov 2023 10:57:20 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1700247440; x=1700852240; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=fW6308wA70VS87+E3o3wGRpIiX2Yqcpq2KYslJTEbcg=;
-        b=GcOGnHDshz5SfDfkU3qXfVFniV/ENuvu5FC9pl5vEmwk8k4xCRpyJhp2F1gqJA/JSH
-         QTQqcYl1bUKK8+pk13gRpj1zTbDI41EUxnYk7QN7LjF7DJSOwHGRAB7dOthrI5wg0JPo
-         WVg4GdOIk4YPdX3UIwbuUfpkuFgbJJdB2XddsYf/PLqx1Ssc2Rfce8cGip2nlYzDMVV6
-         2Vz1U9XT+LRScSJhNiVMV0oBUrAl82Le+CRv0X4uLvsfptrNlE/LlLu3zwRQB3V7d7Hh
-         WeMsp9OCHOYvAN+QEgeMJfCFCeaTx8U3oict1Lp4eQmD8h5Ji+dxEPw3jmp60FQ/VDUV
-         zRxg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700247440; x=1700852240;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fW6308wA70VS87+E3o3wGRpIiX2Yqcpq2KYslJTEbcg=;
-        b=u5NgD98qxKJHKFEb2MeLkPBRc8ujEnwPix1ug74INkxqOFRHHIoLAftPXvhGb1o78W
-         RXAAfaS8RLQlFj1aBiK3CgY/OD2pZzLL9Ms2wpztU7X7TOopmr2O+oi+jOtN4kTjSz1F
-         yXaD37tBPhXScSodVovwK5kVtYmFXuSJpCYG3nIbGT+2+qtkPAkcAq2UdpSSEIXfNj+l
-         iN+UQjA0Q0t4P9PcDmEMPgiWsOHHva6DtbINPgRPhbHZ0dB056FCTbhkgTbtw9P5FOrM
-         gHDbdh1Gew36eL8uizEPikVIZXfgwGQ0mGB1zxTQhOUagp59VBn92B72qGAuKO7N89Lp
-         X0kQ==
-X-Gm-Message-State: AOJu0Yx1ySo3EExRQAoiTsyc4mho48zmaekEG+OokHQftCD69Hpzjyev
-	SE1jHzJwwyJc4DkEbd/VfuqU0tcqet8hX9mrWErMqg==
-X-Google-Smtp-Source: AGHT+IFlQXHxTYyap15dGpZg51V8uPaQR4Cvd/FPwpEGVHdEHUzqvcw2KIXNqfb5kgJ+/8bjTQUCVw==
-X-Received: by 2002:a17:902:9a84:b0:1cc:4559:f5 with SMTP id w4-20020a1709029a8400b001cc455900f5mr475440plp.14.1700247440159;
-        Fri, 17 Nov 2023 10:57:20 -0800 (PST)
-Received: from x1 ([2601:1c2:1800:f680:813c:f3fa:3586:5465])
-        by smtp.gmail.com with ESMTPSA id e19-20020a170902ed9300b001cc40912649sm1695814plj.304.2023.11.17.10.57.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Nov 2023 10:57:19 -0800 (PST)
-Date: Fri, 17 Nov 2023 10:57:18 -0800
-From: Drew Fustini <dfustini@baylibre.com>
-To: Nathan Chancellor <nathan@kernel.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org, llvm@lists.linux.dev,
-	patches@lists.linux.dev
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Use logical OR instead of bitwise
- OR in dwcmshc_probe()
-Message-ID: <ZVe3jvuERZgkq0BB@x1>
-References: <20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-v1-1-7e1a7f4ccaab@kernel.org>
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="Assv0mts"
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2043.outbound.protection.outlook.com [40.107.93.43])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2F52131;
+	Sat, 18 Nov 2023 05:46:51 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Y2jw6xbPW+wQ6JCbY/WsIiMI01/GtY4hknTVRxuw38d0JWJwTni0O9RhKmXDipd9MT0/wjndY3CvdtCCaphqagK/wknJI/ALFFNwaI9pEpd18F/IYYEIOBXRXerrv6h9hG4853TdYTE6alcY1idFxf2Yw+M6beKbbSeoSjCLBRjU3M4qj1w6hTCHLl65Dpg2PgS2ezofmOVDTUMfyB/343zirGOUP0D8cxDB1TLgKm7dyctZrEcbpBdP+AeB/3WxK3x20Ql+O7+CMSLWdJrSXqQyXH2nMDKDi7Ll+dId4j4wKQ+zbwmP/tsVMHlqpRW7lX+waH5A9J5S0IGvQq30sw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=9KsypiKdqTvkjupfwpZNiFrAIZzYbdEyTTI0a6Ogywg=;
+ b=b+VZV0U3xpWvqZOOa4rZ+lx1xfMvhb63Qbb/lhrClWBef/O/WkMophH8apuvS/pt/1LzE9O+/aco7Ta0XOAnVNv/F2umobD16nCrCm3hMEwTQQNFS58qUjFV+DDON2BhfSTXDS67nVO2PkqCtm1xv589xcwOnGgYQPogcVbxBEgs2vb0PniE7al8J5ZMt/otN57fDRRH95DSjJiC3Gnr/UDEpZK4Fz4nvc9fXKkn/tDZMjo2WuEYYymTOHc/wSD05ntnY5sFJNFCABOmFIyYNBEfmspiD86S4PDeO72g3fdAlxMmwSepARA3bdj9fbIRoUi21v0zC3WyLSJMqWRsDw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.118.232) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=9KsypiKdqTvkjupfwpZNiFrAIZzYbdEyTTI0a6Ogywg=;
+ b=Assv0mtsHc2HxkxqxEvcDtS3C68CLhZZxlQ/+BUJs0V3H3bnCIK+uhSFrgEpUboygxjuOueh9dUlVHwfySZRebrDOxiWFNkxQD23eSUs/oY3R/WFAx2i9pMeOUoM7qIMzQAU1ZoOB+RRoYL2W3mTyc/62qbtYEilHT4IqgoVzWng2HcEGUwNuNC4IwoDpkj337G35Gm9KRAvEJ1LH2vsUXFToG1y0R9cUIphHrjHx0d6S81L+tN4IoIKJqp6D5ZtQfHjwh+yDxKlG6gMQZGlGDi8WRcOULvYs7jXbhJakQ7M/4cfdGQFcDOQX6c4EHnE1faZ+5S/nD9RhjeaMz1Tpg==
+Received: from CY8P220CA0010.NAMP220.PROD.OUTLOOK.COM (2603:10b6:930:46::22)
+ by DS0PR12MB9446.namprd12.prod.outlook.com (2603:10b6:8:192::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7002.25; Sat, 18 Nov
+ 2023 13:46:47 +0000
+Received: from CY4PEPF0000E9DC.namprd05.prod.outlook.com
+ (2603:10b6:930:46:cafe::66) by CY8P220CA0010.outlook.office365.com
+ (2603:10b6:930:46::22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7002.25 via Frontend
+ Transport; Sat, 18 Nov 2023 13:46:47 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.118.232)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.118.232 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.118.232; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.118.232) by
+ CY4PEPF0000E9DC.mail.protection.outlook.com (10.167.241.82) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7025.12 via Frontend Transport; Sat, 18 Nov 2023 13:46:47 +0000
+Received: from drhqmail201.nvidia.com (10.126.190.180) by mail.nvidia.com
+ (10.127.129.5) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.41; Sat, 18 Nov
+ 2023 05:46:46 -0800
+Received: from drhqmail202.nvidia.com (10.126.190.181) by
+ drhqmail201.nvidia.com (10.126.190.180) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.41; Sat, 18 Nov 2023 05:46:46 -0800
+Received: from vdi.nvidia.com (10.127.8.12) by mail.nvidia.com
+ (10.126.190.181) with Microsoft SMTP Server id 15.2.986.41 via Frontend
+ Transport; Sat, 18 Nov 2023 05:46:45 -0800
+From: Liming Sun <limings@nvidia.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, David Thompson <davthompson@nvidia.com>
+CC: Liming Sun <limings@nvidia.com>, <linux-mmc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>
+Subject: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Enable timeout quirk for BlueField-3 SoC
+Date: Sat, 18 Nov 2023 08:46:38 -0500
+Message-ID: <6082b74cbc681e8c24354828941361f4f4294242.1700315051.git.limings@nvidia.com>
+X-Mailer: git-send-email 2.30.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-v1-1-7e1a7f4ccaab@kernel.org>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-NV-OnPremToCloud: ExternallySecured
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CY4PEPF0000E9DC:EE_|DS0PR12MB9446:EE_
+X-MS-Office365-Filtering-Correlation-Id: 82c0db98-b13c-4320-4495-08dbe83ccf16
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info:
+	p3lzhZeAqc6UlhOok5U2reiVggBmg7TD4QsGiRm5SE7s9WOC9Wuvg5xqqQA3FP8AxKEfMEapYJn6gyXsTYGf+qajXhTkz4eWe60X/TFidIy++y5J2m2BX91t24fjuHfrXlXnY+9xEo88SDIgsJXhUIEnwiEFAmqFDhw/KKpPvaBDnl82+Rsx3udFO5AUTbJldjDzr7+xi566pRHLpSC8vGTFzNqbD2bxfE5XiokjGNJyV0mslF7CDG9ci685nI+GnRDM0p0DXLwgmQx6fusY489B4RFMUV27Jjn/WL70r3b0U/6sXNBhEvi2iIebVGsiEcOnhIna9GxVUufzZ6g7uPLZOVRhmTrbVSb4EddFIK60Nms/tBkslHLTtw84BnB1vJSCOeU5n+pKCKerEm2kh754WB8BuFW+2vH2xIOGh6fHtBXFZFfjBDXCjkAU7tfwZxY8v3leyQOlWAvRkIzG31V25w6YZKH5mZTkYss4u0a/xoAslPGQMILoiHN/3ti3tN/CrRhtTJ/i6BNY3EKIRzFGSQ9VuxQ2zaHo3b9p6WbYy727WI+Z3VvTO6hQklhJpKhaXSDq9iX+j4LIb6VC6Fr0GsvzsrrPXdB895WHhVZ7FQYrARyIOz93zu7yQivGrEtONK0Yrv6lMLlHaXdI+hb/BgoYhVaUEBuVU7WBLxybGzZVRVziGM6DFzmH8QIOCfrPzIc2dwTP2EoojZwkaL6SKqM8hZ/0FAJeMKdlTy63vRBJYE315ZdE5wqRxwyioZ699xkNgKecJAlZDAZtmQ==
+X-Forefront-Antispam-Report:
+	CIP:216.228.118.232;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc7edge1.nvidia.com;CAT:NONE;SFS:(13230031)(4636009)(136003)(39860400002)(396003)(346002)(376002)(230922051799003)(82310400011)(1800799012)(451199024)(64100799003)(186009)(46966006)(36840700001)(40470700004)(5660300002)(2906002)(4744005)(4326008)(8936002)(8676002)(316002)(41300700001)(6636002)(54906003)(70586007)(70206006)(110136005)(26005)(6666004)(478600001)(7696005)(40480700001)(2616005)(36756003)(336012)(426003)(86362001)(83380400001)(82740400003)(40460700003)(47076005)(7636003)(356005)(36860700001)(133343001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Nov 2023 13:46:47.1988
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 82c0db98-b13c-4320-4495-08dbe83ccf16
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.118.232];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	CY4PEPF0000E9DC.namprd05.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR12MB9446
 
-On Thu, Nov 16, 2023 at 06:46:00PM -0700, Nathan Chancellor wrote:
-> Clang warns (or errors with CONFIG_WERROR=y):
-> 
->   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: error: use of bitwise '|' with boolean operands [-Werror,-Wbitwise-instead-of-logical]
->     873 |                 if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
->         |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->     874 |                     (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
->         |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->         |                                                                        ||
->     875 |                     (device_property_read_bool(dev, "mmc-hs400-1_8v")))
->         |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: note: cast one or both operands to int to silence this warning
->   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: error: use of bitwise '|' with boolean operands [-Werror,-Wbitwise-instead-of-logical]
->     873 |                 if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
->         |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->         |                                                                      ||
->     874 |                     (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
->         |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: note: cast one or both operands to int to silence this warning
->   2 errors generated.
-> 
-> There is little reason for this if statement to use bitwise ORs, as the
-> short circuiting of logical OR does not need to be avoided in this
-> context; it would be wasteful to call device_property_read_bool() three
-> times if the first two calls returned true. Switch to logical OR to fix
-> the warning.
-> 
-> While in the area, the parentheses around the calls to
-> device_property_read_bool() are not necessary and make the if statement
-> harder to read, so remove them.
-> 
-> Closes: https://github.com/ClangBuiltLinux/linux/issues/1960
-> Fixes: aff35fbc7830 ("mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520")
-> Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+This commit enables SDHCI_QUIRK_BROKEN_TIMEOUT_VAL to solve the
+intermittent eMMC timeout issue reported on some cards under eMMC
+stress test.
 
-Tested-by: Drew Fustini <dfustini@baylibre.com>
+Reported error message:
+  dwcmshc MLNXBF30:00: __mmc_blk_ioctl_cmd: data error -110
 
-Thanks for fixing this. I'll add clang to my testing going forward.
+Signed-off-by: Liming Sun <limings@nvidia.com>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Drew
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 3a3bae6948a8..3c8fe8aec558 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -365,7 +365,8 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+ #ifdef CONFIG_ACPI
+ static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
+ 	.ops = &sdhci_dwcmshc_ops,
+-	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+ 		   SDHCI_QUIRK2_ACMD23_BROKEN,
+ };
+-- 
+2.30.1
+
