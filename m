@@ -1,126 +1,79 @@
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Tnnt7KuK"
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 603D210F;
-	Tue, 21 Nov 2023 00:09:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1700554167; x=1732090167;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=tGsju0ngCw+aQSwQpD5Iav/LAYk+iS8Jk1rUYC5r/Ew=;
-  b=Tnnt7KuKmkAG/P0Qwro/K0PnENU6o1X/iGtfNDx6W2fQL2NiIKpnU3Gl
-   ZwrdDcIj1xwiOycEFzhnUQZlt/X0phwfSUYzaJJAJbsU3LgqzhR0kkXhr
-   GpY+mgTeSP7hvC1pOZzFVabllf9SINNI/ug2cRNtSIJQGpAHZRGAXtWuK
-   AX+OKURRYTku7gR3t1J2e9Ffwv/Kyl6uff/Twni9PUa6vkRVvMN6RBPSR
-   0iGHVA+VRX9yeURkNqR/PCqf/3KHK4KlhIo6Oz8RbkHDuqwLeSqpNdFV0
-   6p3F4NL556MHQNMNnUs4zW7jhtDMY/jwLjILzDDc/f2+k/S96pDFtZ9l9
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10900"; a="390644773"
-X-IronPort-AV: E=Sophos;i="6.04,215,1695711600"; 
-   d="scan'208";a="390644773"
-Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Nov 2023 00:09:07 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.04,215,1695711600"; 
-   d="scan'208";a="8004754"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.56.230])
-  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Nov 2023 00:08:55 -0800
-Message-ID: <02251b86-d0ae-4e4a-af3c-b508a92e517f@intel.com>
-Date: Tue, 21 Nov 2023 10:08:51 +0200
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFAF3CA;
+	Tue, 21 Nov 2023 01:12:30 -0800 (PST)
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 3AL9B3eO41506345, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 3AL9B3eO41506345
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 21 Nov 2023 17:11:03 +0800
+Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.32; Tue, 21 Nov 2023 17:11:04 +0800
+Received: from RTEXH36506.realtek.com.tw (172.21.6.27) by
+ RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Tue, 21 Nov 2023 17:11:03 +0800
+Received: from localhost.localdomain (172.21.252.101) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server id
+ 15.1.2507.17 via Frontend Transport; Tue, 21 Nov 2023 17:11:03 +0800
+From: Jyan Chou <jyanchou@realtek.com>
+To: <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <jh80.chung@samsung.com>, <riteshh@codeaurora.org>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>
+CC: <conor+dt@kernel.org>, <asutoshd@codeaurora.org>, <p.zabel@pengutronix.de>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <arnd@arndb.de>,
+        <briannorris@chromium.org>, <doug@schmorgal.com>,
+        <tonyhuang.sunplus@gmail.com>, <abel.vesa@linaro.org>,
+        <william.qiu@starfivetech.com>, <jyanchou@realtek.com>
+Subject: [PATCH V7][0/4] Add DesignWare Mobile mmc driver
+Date: Tue, 21 Nov 2023 17:10:57 +0800
+Message-ID: <20231121091101.5540-1-jyanchou@realtek.com>
+X-Mailer: git-send-email 2.42.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Enable timeout quirk for
- BlueField-3 SoC
-Content-Language: en-US
-To: Liming Sun <limings@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- David Thompson <davthompson@nvidia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <6082b74cbc681e8c24354828941361f4f4294242.1700315051.git.limings@nvidia.com>
- <47367cdc-f512-4f0d-958f-2d8fbe450cbf@intel.com>
- <BN9PR12MB50688354602B03E9E637C02FD3B4A@BN9PR12MB5068.namprd12.prod.outlook.com>
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <BN9PR12MB50688354602B03E9E637C02FD3B4A@BN9PR12MB5068.namprd12.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-KSE-ServerInfo: RTEXDAG01.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-On 20/11/23 17:18, Liming Sun wrote:
-> 
-> 
->> -----Original Message-----
->> From: Adrian Hunter <adrian.hunter@intel.com>
->> Sent: Monday, November 20, 2023 1:49 AM
->> To: Liming Sun <limings@nvidia.com>; Ulf Hansson <ulf.hansson@linaro.org>;
->> David Thompson <davthompson@nvidia.com>
->> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
->> Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Enable timeout quirk for
->> BlueField-3 SoC
->>
->> On 18/11/23 15:46, Liming Sun wrote:
->>> This commit enables SDHCI_QUIRK_BROKEN_TIMEOUT_VAL to solve the
->>> intermittent eMMC timeout issue reported on some cards under eMMC
->>> stress test.
->>>
->>> Reported error message:
->>>   dwcmshc MLNXBF30:00: __mmc_blk_ioctl_cmd: data error -110
->>
->> Were you able to determine the root cause?  For example,
->> is the host controller timeout correct, is the eMMC
->> providing correct timeout values, is the mmc subsystem
->> calculating a correct value, is sdhci programming a correct
->> value?
->>
->> If there are problems outside the host controller then we
->> need to address them also.
-> 
-> It is caused by the host controller timeout, but is hard to tell whether the
-> configuration provided by the card is good enough since it's
-> intermittent under stress test the SoC needs to work with different eMMC vendors. 
-> In UEFI eMMC driver similar max timeout (0xe) is used to avoid such
-> issue. This commit tries to use existing quirk, which I think that it would work 
-> if there is another way to adjust the TOUT_CNT register. Any concern or suggestions?
+We added Synopsys DesignWare mmc cmdq driver and also added
+Realtek mmc driver to make good use of it.
 
-If cards are providing timeout values that are too low under stress,
-it would be better to fix it in the mmc subsystem so that all host
-controllers can benefit.
+Jyan Chou (4):
+  mmc: solve DMA boundary limitation of CQHCI driver
+  mmc: Add Synopsys DesignWare mmc cmdq host driver
+  mmc: Add dw mobile mmc cmdq rtk driver
+  dt-bindings: mmc: Add dt-bindings for realtek mmc driver
 
-> 
->>
->>>
->>> Signed-off-by: Liming Sun <limings@nvidia.com>
->>
->> Fixes tag?
-> 
-> Will update it in v2.
-> 
->>
->>> ---
->>>  drivers/mmc/host/sdhci-of-dwcmshc.c | 3 ++-
->>>  1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c
->> b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>> index 3a3bae6948a8..3c8fe8aec558 100644
->>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
->>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>> @@ -365,7 +365,8 @@ static const struct sdhci_pltfm_data
->> sdhci_dwcmshc_pdata = {
->>>  #ifdef CONFIG_ACPI
->>>  static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
->>>  	.ops = &sdhci_dwcmshc_ops,
->>> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->>> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
->>> +		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
->>>  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
->>>  		   SDHCI_QUIRK2_ACMD23_BROKEN,
->>>  };
-> 
+ .../bindings/mmc/realtek,rtd-dw-cqe-emmc.yaml |  153 ++
+ drivers/mmc/host/Kconfig                      |   22 +
+ drivers/mmc/host/Makefile                     |    2 +
+ drivers/mmc/host/cqhci-core.c                 |   13 +-
+ drivers/mmc/host/cqhci.h                      |    8 +
+ drivers/mmc/host/dw_mmc_cqe-rtk.c             |  768 +++++++++
+ drivers/mmc/host/dw_mmc_cqe-rtk.h             |  160 ++
+ drivers/mmc/host/dw_mmc_cqe.c                 | 1467 +++++++++++++++++
+ drivers/mmc/host/dw_mmc_cqe.h                 |  456 +++++
+ 9 files changed, 3046 insertions(+), 3 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/realtek,rtd-dw-cqe-emmc.yaml
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe-rtk.c
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe-rtk.h
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe.c
+ create mode 100644 drivers/mmc/host/dw_mmc_cqe.h
+
+-- 
+2.42.0
 
