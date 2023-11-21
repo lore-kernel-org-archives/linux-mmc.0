@@ -1,299 +1,260 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TUuqQNn+"
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F0CF94
-	for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2023 01:35:06 -0800 (PST)
-Received: by mail-wm1-x329.google.com with SMTP id 5b1f17b1804b1-40b29776977so2799945e9.2
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2023 01:35:06 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kGIlfsuW"
+Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC91FD50
+	for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2023 09:48:40 -0800 (PST)
+Received: by mail-pf1-x42f.google.com with SMTP id d2e1a72fcca58-6c3363a2b93so5544159b3a.3
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Nov 2023 09:48:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1700559305; x=1701164105; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Z8ygufI8trnFCuYYah7mlMCmLjI9OPWqU3S0PdqkpwY=;
-        b=TUuqQNn+L58yeXxGhOl/fAk1fOmIoZog+Lb/250fii/b++kPGW4TWqlL378sUUUe7a
-         y1ezjyD1BltuxVTI5zfQcnPjWZ8dPl3YSTde9n/+0RQ1Z8pHnWKdnmY5hYUsGy12uMTF
-         apYwZ0H0tGLe7zqff7ASoOF4llrWG03QPhcGTIZUNPDWAuVUEi4OHeHxHECweqoCEght
-         qtU3k9YiPQGIpsJ7PD3U1z+w7kbCkIKwqWqfym0tO5kbLU+scAodaY9ZODE+D0Z7F/Ax
-         9FP27tldNqfXvpjqeLdFJQ6DgQaHBH9MXYvW9T9oe/lwLw6xcMnahTra4tCpiS2yt0oL
-         GjNg==
+        d=linaro.org; s=google; t=1700588920; x=1701193720; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=EAK/ItuSDRPVMNR15AwNhdUvFP+x071LcAQ3w3yTJs0=;
+        b=kGIlfsuWV9pc67/zTpkfc8YdnXt2hAE3qr+ewTild/gLqpQ9CS9/PsmFolWYr0Re20
+         baGlZQTup9TPCYqBz2blkdq7pSK2JrFq6643iRt+jfyw1R/jU798ExGNdjQXWkJtUOc+
+         qJnOczBjgR6QdFJFMGCdoA+BEVkKXTRoWaMW/G4wWJimH1PmmJllb4EBPaJ4HdT/rB3w
+         feCv3oNiWOGIeuLqszBBQ/1EzYEuPo6unTnYDCBMkMCP5apxWosN8AjWCGqNfRhObimy
+         uOPX0fJ8KpyF0HfQ+M4Ub5D875vEt23/jIXPzBu9mL0he8lpXtR+EGB8ZiIM5FrlHbli
+         Pprw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700559305; x=1701164105;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Z8ygufI8trnFCuYYah7mlMCmLjI9OPWqU3S0PdqkpwY=;
-        b=OQAvg//fC4kvF9TxNXrhpEs7nTBY3ygoCm+Oem9NXo4rk3jSF5MY6OdBOzBOX1J6ff
-         irQ025cYC72HweVqBm59b8LimdzX+eBEQCu3tnApA7u/VkYSzAP14HMz5Xr2n3J6IoDQ
-         +PH9cLPT5nMc52Nx2yrGl3WeuZcr2LgkH/mp5yJK1fW5RwCsfRYdwXkLdPIxAy4/jYki
-         ttnWyIXHYNns7Ano/A0erCZp5qk66Zfkoe/zdKKITiE+SXc/IIO8vXMTr1bsEiC4scQ1
-         JgQm1fLxINXiYp2kr4drdDrBs3Uf7q0FDGMM9aasefjQBRbGjQ5RZz2rWUMNxD4EFKxv
-         8C2A==
-X-Gm-Message-State: AOJu0YyNTzD5ogl8YZrhOu5sASH0a+MOye0OxKTUD9W1VouLrj2sYwzf
-	Plt2MfjOGHcnUPvdqf4jX7H+/Q==
-X-Google-Smtp-Source: AGHT+IGkkjpD4LRddPS6Kmt0PBxAXab+YqOHesqf2qjwpt6ODoEw/H9YBbq5rwMCu+bn33lJ3HfqPQ==
-X-Received: by 2002:a05:600c:19d4:b0:40b:2aa9:21dd with SMTP id u20-20020a05600c19d400b0040b2aa921ddmr660590wmq.4.1700559304278;
-        Tue, 21 Nov 2023 01:35:04 -0800 (PST)
-Received: from [192.168.1.20] ([178.197.222.11])
-        by smtp.gmail.com with ESMTPSA id f16-20020a05600c155000b003fe1fe56202sm16589517wmg.33.2023.11.21.01.35.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 21 Nov 2023 01:35:03 -0800 (PST)
-Message-ID: <dde59498-440d-4faf-b878-2090342b52da@linaro.org>
-Date: Tue, 21 Nov 2023 10:35:02 +0100
+        d=1e100.net; s=20230601; t=1700588920; x=1701193720;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=EAK/ItuSDRPVMNR15AwNhdUvFP+x071LcAQ3w3yTJs0=;
+        b=vlKYm1Ca8BZ1p1Pz6wDIIbqqmjkGUKhyVJPEI6YbaLMdKGsAc+6ovjy8sMCfK8WhD3
+         BoG6BVtofIwkNVbmaqtwWkw2YBAWVBA0coJSaFzstQXzM9vbE1TK71Hw0B5CvehbuU/p
+         mKntycY294XTPutRaFKtlBsc70Oz4uzQC93+bQx3Ne85Xwsjm9NAp6GASHUiMvZr+9TB
+         5OViP4cHBv+EEYx9tCdXN3bTa+/iYrfuitMxJwKCYk0k41psTGBsb4e7p88V/hEUmSX7
+         MkVZbHgiYv+DDwkI+Dx3QWf2/Am0C1I5XhU3HwzPc30A0Lzs8tQEWKGhwLYlBnrcCzNt
+         q0eQ==
+X-Gm-Message-State: AOJu0YxBWZADe4Nw45vyAbVz2xfUYMLOewK+/MjK9uu5HqoEa4e4eXRX
+	55Qb+xqoBbUkkkepVHDP2Pq9Rqy7CfttePj+xXgMqw==
+X-Google-Smtp-Source: AGHT+IGsVYAziCjXoCBHiftycTLKlFRj+F3xZDSfXKxIguYqxWX7xqT/er/I16AqY0h4UFWzZ5qHqodRZyjJQpRXSA8=
+X-Received: by 2002:a05:6a20:4306:b0:187:5be4:67e2 with SMTP id
+ h6-20020a056a20430600b001875be467e2mr16406256pzk.53.1700588920073; Tue, 21
+ Nov 2023 09:48:40 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v7][4/4] dt-bindings: mmc: Add dt-bindings for realtek mmc
- driver
-Content-Language: en-US
-To: Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
- adrian.hunter@intel.com, jh80.chung@samsung.com, riteshh@codeaurora.org,
- robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org
-Cc: conor+dt@kernel.org, asutoshd@codeaurora.org, p.zabel@pengutronix.de,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, arnd@arndb.de, briannorris@chromium.org,
- doug@schmorgal.com, tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
- william.qiu@starfivetech.com
-References: <20231121091101.5540-1-jyanchou@realtek.com>
- <20231121091101.5540-5-jyanchou@realtek.com>
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231121091101.5540-5-jyanchou@realtek.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org> <20231108104343.24192-17-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20231108104343.24192-17-krzysztof.kozlowski@linaro.org>
+From: Sam Protsenko <semen.protsenko@linaro.org>
+Date: Tue, 21 Nov 2023 11:48:29 -0600
+Message-ID: <CAPLW+4nkrMwc9GiQyn7ojaPz_50NQ3vAcMt9+tOzpHfq7G7+Tg@mail.gmail.com>
+Subject: Re: [PATCH 16/17] arm64: dts: exynos850: add specific compatibles to
+ several blocks
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Alim Akhtar <alim.akhtar@samsung.com>, Andi Shyti <andi.shyti@kernel.org>, 
+	Jonathan Cameron <jic23@kernel.org>, Lars-Peter Clausen <lars@metafoo.de>, Lee Jones <lee@kernel.org>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Tomasz Figa <tomasz.figa@gmail.com>, 
+	Sylwester Nawrocki <s.nawrocki@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, 
+	Thierry Reding <thierry.reding@gmail.com>, 
+	=?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, 
+	Alessandro Zummo <a.zummo@towertech.it>, Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jirislaby@kernel.org>, 
+	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
+	Jaehoon Chung <jh80.chung@samsung.com>, dri-devel@lists.freedesktop.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, 
+	linux-i2c@vger.kernel.org, linux-iio@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
+	linux-pwm@vger.kernel.org, linux-rtc@vger.kernel.org, 
+	linux-serial@vger.kernel.org, alsa-devel@alsa-project.org, 
+	linux-sound@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 21/11/2023 10:11, Jyan Chou wrote:
-> Document the device-tree bindings for Realtek SoCs mmc driver.
-
-This is a friendly reminder during the review process.
-
-It seems my or other reviewer's previous comments were not fully
-addressed. Maybe the feedback got lost between the quotes, maybe you
-just forgot to apply it. Please go back to the previous discussion and
-either implement all requested changes or keep discussing them.
-
-Thank you.
-
-Additionally:
-
-A nit, subject: drop second/last, redundant "bindings for". The
-"dt-bindings" prefix is already stating that these are bindings.
-
-> 
-> Signed-off-by: Jyan Chou <jyanchou@realtek.com>
-> 
-> ---
-> v6 -> v7:
-> - Drop reset-names and realtek,m2tmx since it is not needed in our driver.
-> 
-> v5 -> v6:
-> - Drop the incorrect, generic compatible and modify it to specific.
-> - Drop useless properties.
-
-I asked which ones. I still do not see that information here.
-
-
-> - Modify bindings to make DTS and driver match.
-> 
-> v4 -> v5:
-> - Remove unused property, e.g.,cqe, resets, clock-freq-min-max.
-> - Fix indentation.
-> 
-
-...
-
-> +
-> +maintainers:
-> +  - Jyan Chou <jyanchou@realtek.com>
-> +
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - realtek,rtd1325-dw-cqe-emmc
-> +      - realtek,rtd1319-dw-cqe-emmc
-> +      - realtek,rtd1315e-dw-cqe-emmc
-> +      - realtek,rtd1619b-dw-cqe-emmc
-
-That's not what is present in your driver. Why other compatibles are not
-there? What do you want to express here?
-
-> +
-> +  reg:
-> +    items:
-> +      - description: emmc base address
-> +      - description: cqhci base address
-> +
-> +  reg-names:
-> +    items:
-> +      - const: emmc
-> +      - const: cqhci
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 4
-> +
-> +  clock-names:
-> +    items:
-> +      - const: biu
-> +      - const: ciu
-> +      - const: vp0
-> +      - const: vp1
-> +
-> +  resets:
-> +    maxItems: 1
-> +
-> +  pinctrl-0:
-> +    description:
-> +      should contain default/high speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-1:
-> +    description:
-> +      should contain sdr50 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-2:
-> +    description:
-> +      should contain ddr50 mode pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-3:
-> +    description:
-> +      should contain hs200 speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-4:
-> +    description:
-> +      should contain hs400 speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-5:
-> +    description:
-> +      should contain tune0 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-6:
-> +    description:
-> +      should contain tune1 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-7:
-> +    description:
-> +      should contain tune2 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-8:
-> +    description:
-> +      should contain tune3 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-9:
-> +    description:
-> +      should contain tune4 pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-names:
-> +    maxItems: 10
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - reg-names
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +  - vmmc-supply
-> +  - pinctrl-names
-> +  - pinctrl-0
-> +  - pinctrl-1
-> +  - pinctrl-3
-> +  - pinctrl-4
-> +  - pinctrl-5
-> +  - pinctrl-6
-> +  - pinctrl-7
-> +  - pinctrl-8
-> +  - pinctrl-9
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    emmc: mmc@12000 {
-> +      compatible = "realtek,rtd1315e-dw-cqe-emmc";
-> +      reg = <0x00012000 0x00600>,
-> +            <0x00012180 0x00060>;
-> +      reg-names = "emmc", "cqhci";
-> +      interrupts = <0 42 4>;
-
-Use proper interrupt defines instead of raw values.
-
-> +      clocks = <&cc 22>, <&cc 26>, <&cc 121>, <&cc 122>;
-> +      clock-names = "biu", "ciu", "vp0", "vp1";
-
-Where is the DTS implementing this binding?
-
-I said it once:
-
-> I asked you to test the bindings. This also means that you must test
-> your DTS against bindings. Your bindings, DTS and driver do not match,
-> therefore let's be a bit more clear:
+On Wed, Nov 8, 2023 at 4:44=E2=80=AFAM Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> NAK, till you upstream your DTS.
+> Exynos850 reuses several devices from older designs, thus historically
+> we kept the old (block's) compatible only.  This works fine and there is
+> no bug here, however guidelines expressed in
+> Documentation/devicetree/bindings/writing-bindings.rst state that:
+> 1. Compatibles should be specific.
+> 2. We should add new compatibles in case of bugs or features.
+>
+> Add compatibles specific to Exynos850 in front of all old-SoC-like
+> compatibles.  This will also help reviews of new code using existing
+> DTS as template.  No functional impact on Linux drivers behavior.
+>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
 
-I still do not see DTS anywhere. Please link it.
+Reviewed-by: Sam Protsenko <semen.protsenko@linaro.org>
 
-Best regards,
-Krzysztof
-
+>  arch/arm64/boot/dts/exynos/exynos850.dtsi | 34 +++++++++++++----------
+>  1 file changed, 20 insertions(+), 14 deletions(-)
+>
+> diff --git a/arch/arm64/boot/dts/exynos/exynos850.dtsi b/arch/arm64/boot/=
+dts/exynos/exynos850.dtsi
+> index 53104e65b9c6..df5ea43ebcad 100644
+> --- a/arch/arm64/boot/dts/exynos/exynos850.dtsi
+> +++ b/arch/arm64/boot/dts/exynos/exynos850.dtsi
+> @@ -396,7 +396,7 @@ pinctrl_aud: pinctrl@14a60000 {
+>                 };
+>
+>                 rtc: rtc@11a30000 {
+> -                       compatible =3D "samsung,s3c6410-rtc";
+> +                       compatible =3D "samsung,exynos850-rtc", "samsung,=
+s3c6410-rtc";
+>                         reg =3D <0x11a30000 0x100>;
+>                         interrupts =3D <GIC_SPI 57 IRQ_TYPE_LEVEL_HIGH>,
+>                                      <GIC_SPI 58 IRQ_TYPE_LEVEL_HIGH>;
+> @@ -406,7 +406,8 @@ rtc: rtc@11a30000 {
+>                 };
+>
+>                 mmc_0: mmc@12100000 {
+> -                       compatible =3D "samsung,exynos7-dw-mshc-smu";
+> +                       compatible =3D "samsung,exynos850-dw-mshc-smu",
+> +                                    "samsung,exynos7-dw-mshc-smu";
+>                         reg =3D <0x12100000 0x2000>;
+>                         interrupts =3D <GIC_SPI 452 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -419,7 +420,7 @@ mmc_0: mmc@12100000 {
+>                 };
+>
+>                 i2c_0: i2c@13830000 {
+> -                       compatible =3D "samsung,s3c2440-i2c";
+> +                       compatible =3D "samsung,exynos850-i2c", "samsung,=
+s3c2440-i2c";
+>                         reg =3D <0x13830000 0x100>;
+>                         interrupts =3D <GIC_SPI 196 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -432,7 +433,7 @@ i2c_0: i2c@13830000 {
+>                 };
+>
+>                 i2c_1: i2c@13840000 {
+> -                       compatible =3D "samsung,s3c2440-i2c";
+> +                       compatible =3D "samsung,exynos850-i2c", "samsung,=
+s3c2440-i2c";
+>                         reg =3D <0x13840000 0x100>;
+>                         interrupts =3D <GIC_SPI 197 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -445,7 +446,7 @@ i2c_1: i2c@13840000 {
+>                 };
+>
+>                 i2c_2: i2c@13850000 {
+> -                       compatible =3D "samsung,s3c2440-i2c";
+> +                       compatible =3D "samsung,exynos850-i2c", "samsung,=
+s3c2440-i2c";
+>                         reg =3D <0x13850000 0x100>;
+>                         interrupts =3D <GIC_SPI 198 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -458,7 +459,7 @@ i2c_2: i2c@13850000 {
+>                 };
+>
+>                 i2c_3: i2c@13860000 {
+> -                       compatible =3D "samsung,s3c2440-i2c";
+> +                       compatible =3D "samsung,exynos850-i2c", "samsung,=
+s3c2440-i2c";
+>                         reg =3D <0x13860000 0x100>;
+>                         interrupts =3D <GIC_SPI 199 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -471,7 +472,7 @@ i2c_3: i2c@13860000 {
+>                 };
+>
+>                 i2c_4: i2c@13870000 {
+> -                       compatible =3D "samsung,s3c2440-i2c";
+> +                       compatible =3D "samsung,exynos850-i2c", "samsung,=
+s3c2440-i2c";
+>                         reg =3D <0x13870000 0x100>;
+>                         interrupts =3D <GIC_SPI 200 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -485,7 +486,7 @@ i2c_4: i2c@13870000 {
+>
+>                 /* I2C_5 (also called CAM_PMIC_I2C in TRM) */
+>                 i2c_5: i2c@13880000 {
+> -                       compatible =3D "samsung,s3c2440-i2c";
+> +                       compatible =3D "samsung,exynos850-i2c", "samsung,=
+s3c2440-i2c";
+>                         reg =3D <0x13880000 0x100>;
+>                         interrupts =3D <GIC_SPI 201 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -499,7 +500,7 @@ i2c_5: i2c@13880000 {
+>
+>                 /* I2C_6 (also called MOTOR_I2C in TRM) */
+>                 i2c_6: i2c@13890000 {
+> -                       compatible =3D "samsung,s3c2440-i2c";
+> +                       compatible =3D "samsung,exynos850-i2c", "samsung,=
+s3c2440-i2c";
+>                         reg =3D <0x13890000 0x100>;
+>                         interrupts =3D <GIC_SPI 202 IRQ_TYPE_LEVEL_HIGH>;
+>                         #address-cells =3D <1>;
+> @@ -640,7 +641,8 @@ usi_hsi2c_0: usi@138a00c0 {
+>                         status =3D "disabled";
+>
+>                         hsi2c_0: i2c@138a0000 {
+> -                               compatible =3D "samsung,exynosautov9-hsi2=
+c";
+> +                               compatible =3D "samsung,exynos850-hsi2c",
+> +                                            "samsung,exynosautov9-hsi2c"=
+;
+>                                 reg =3D <0x138a0000 0xc0>;
+>                                 interrupts =3D <GIC_SPI 193 IRQ_TYPE_LEVE=
+L_HIGH>;
+>                                 #address-cells =3D <1>;
+> @@ -668,7 +670,8 @@ usi_hsi2c_1: usi@138b00c0 {
+>                         status =3D "disabled";
+>
+>                         hsi2c_1: i2c@138b0000 {
+> -                               compatible =3D "samsung,exynosautov9-hsi2=
+c";
+> +                               compatible =3D "samsung,exynos850-hsi2c",
+> +                                            "samsung,exynosautov9-hsi2c"=
+;
+>                                 reg =3D <0x138b0000 0xc0>;
+>                                 interrupts =3D <GIC_SPI 194 IRQ_TYPE_LEVE=
+L_HIGH>;
+>                                 #address-cells =3D <1>;
+> @@ -696,7 +699,8 @@ usi_hsi2c_2: usi@138c00c0 {
+>                         status =3D "disabled";
+>
+>                         hsi2c_2: i2c@138c0000 {
+> -                               compatible =3D "samsung,exynosautov9-hsi2=
+c";
+> +                               compatible =3D "samsung,exynos850-hsi2c",
+> +                                            "samsung,exynosautov9-hsi2c"=
+;
+>                                 reg =3D <0x138c0000 0xc0>;
+>                                 interrupts =3D <GIC_SPI 195 IRQ_TYPE_LEVE=
+L_HIGH>;
+>                                 #address-cells =3D <1>;
+> @@ -738,7 +742,8 @@ usi_cmgp0: usi@11d000c0 {
+>                         status =3D "disabled";
+>
+>                         hsi2c_3: i2c@11d00000 {
+> -                               compatible =3D "samsung,exynosautov9-hsi2=
+c";
+> +                               compatible =3D "samsung,exynos850-hsi2c",
+> +                                            "samsung,exynosautov9-hsi2c"=
+;
+>                                 reg =3D <0x11d00000 0xc0>;
+>                                 interrupts =3D <GIC_SPI 62 IRQ_TYPE_LEVEL=
+_HIGH>;
+>                                 #address-cells =3D <1>;
+> @@ -778,7 +783,8 @@ usi_cmgp1: usi@11d200c0 {
+>                         status =3D "disabled";
+>
+>                         hsi2c_4: i2c@11d20000 {
+> -                               compatible =3D "samsung,exynosautov9-hsi2=
+c";
+> +                               compatible =3D "samsung,exynos850-hsi2c",
+> +                                            "samsung,exynosautov9-hsi2c"=
+;
+>                                 reg =3D <0x11d20000 0xc0>;
+>                                 interrupts =3D <GIC_SPI 63 IRQ_TYPE_LEVEL=
+_HIGH>;
+>                                 #address-cells =3D <1>;
+> --
+> 2.34.1
+>
