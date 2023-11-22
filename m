@@ -1,26 +1,29 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [IPv6:2a0a:edc0:2:b01:1d::104])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71FC312A
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Nov 2023 03:22:36 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <ore@pengutronix.de>)
-	id 1r5lJ7-0007CM-Sz; Wed, 22 Nov 2023 12:22:13 +0100
-Received: from [2a0a:edc0:2:b01:1d::c0] (helo=ptx.whiteo.stw.pengutronix.de)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <ore@pengutronix.de>)
-	id 1r5lJ7-00AnbT-0P; Wed, 22 Nov 2023 12:22:13 +0100
-Received: from ore by ptx.whiteo.stw.pengutronix.de with local (Exim 4.92)
-	(envelope-from <ore@pengutronix.de>)
-	id 1r5lJ6-003I31-Ta; Wed, 22 Nov 2023 12:22:12 +0100
-Date: Wed, 22 Nov 2023 12:22:12 +0100
-From: Oleksij Rempel <o.rempel@pengutronix.de>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>
-Cc: Yang Yingliang <yangyingliang@huawei.com>, linux-mmc@vger.kernel.org,
-	kernel@pengutronix.de, Ye Bin <yebin10@huawei.com>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A867C1A58E;
+	Wed, 22 Nov 2023 12:26:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AhTOfsuJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F08AC433C7;
+	Wed, 22 Nov 2023 12:26:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1700656015;
+	bh=7C94KGgqCbAA+PUlPyfufke9xGPCyJuKoPOwMFmpILc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=AhTOfsuJH4uNL1dxrl8w5XllqdE/f5P54GaWxyRB4RLrlVOx4OyzJwbd6Gc4C0qoc
+	 2Xzg/stYnSjW+1yxZNxWDcAYThqfSNZGkvn072cy+9S7PCy1DxLfO5WnFrM4sglE4g
+	 EuZC1EWJwysoGdyUFGg5RLFi86qdKMxadsVE7CU1Jjc8qMWIzG4yHLhIuuE0rKZSQ7
+	 NqT314x2NNAPQt/bksxbzuhb5k9BmoxRKLTBS+b69yrPvvHLfymaaDCmqGBTY0NX4f
+	 cDXxKth36fatyNGSrEVz8QGzuXhCd95sNhXtTb/LABHPfeC2qDN6Jz2bV0b8GEMhAr
+	 ESh4d4/F0DKAg==
+Date: Wed, 22 Nov 2023 12:26:51 +0000
+From: Mark Brown <broonie@kernel.org>
+To: Oleksij Rempel <o.rempel@pengutronix.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Yang Yingliang <yangyingliang@huawei.com>,
+	linux-mmc@vger.kernel.org, kernel@pengutronix.de,
+	Ye Bin <yebin10@huawei.com>, Heiner Kallweit <hkallweit1@gmail.com>,
 	Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
 	Liam Girdwood <lgirdwood@gmail.com>,
 	Conor Dooley <conor+dt@kernel.org>, linux-kernel@vger.kernel.org,
@@ -28,86 +31,68 @@ Cc: Yang Yingliang <yangyingliang@huawei.com>, linux-mmc@vger.kernel.org,
 	Naresh Solanki <naresh.solanki@9elements.com>,
 	zev@bewilderbeest.net, Sebastian Reichel <sre@kernel.org>,
 	linux-pm@vger.kernel.org,
-	=?utf-8?B?U8O4cmVu?= Andersen <san@skov.dk>
+	=?iso-8859-1?Q?S=F8ren?= Andersen <san@skov.dk>
 Subject: Re: mmc: handling of Under-Voltage Events in eMMC
-Message-ID: <20231122112212.GA783262@pengutronix.de>
+Message-ID: <ZV3zi7jgkBa2W/Fc@finisterre.sirena.org.uk>
 References: <20230929130028.GB2825985@pengutronix.de>
  <CAPDyKFqUtNEbK2tzD+qOK+dFcDyBxvcNwOHWPJDLhTWGGkoHQw@mail.gmail.com>
+ <20231122112212.GA783262@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="GytIA0m4jn6r4+oY"
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqUtNEbK2tzD+qOK+dFcDyBxvcNwOHWPJDLhTWGGkoHQw@mail.gmail.com>
-X-Sent-From: Pengutronix Hildesheim
-X-URL: http://www.pengutronix.de/
-X-Accept-Language: de,en
-X-Accept-Content-Type: text/plain
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ore@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+In-Reply-To: <20231122112212.GA783262@pengutronix.de>
+X-Cookie: Slow day.  Practice crawling.
 
-Hi Ulf, Hi Mark,
 
-On Tue, Oct 10, 2023 at 04:48:24PM +0200, Ulf Hansson wrote:
-> On Fri, 29 Sept 2023 at 15:00, Oleksij Rempel <o.rempel@pengutronix.de> wrote:
-> >
-> > Hi,
-> >
-> > I'm working on a project aiming to protect eMMC during power loss. Our
-> > hardware setup includes an under-voltage detector, circuits to disable
-> > non-critical components, and enough capacitance to allow the CPU to run
-> > for 100ms.
-> >
-> > I've added an interrupt handler to the fixed regulator to emit
-> > REGULATOR_EVENT_UNDER_VOLTAGE events, and modified
-> > drivers/mmc/host/sdhci.c to receive these events. Currently, the handler
-> > only produces debug output.
-> >
-> > What is the recommended approach for handling under-voltage situations?
-> > Should the driver finish ongoing write commands, block new ones, and
-> > shut down the eMMC? I'm looking for direction here.
-> 
-> That's indeed a very good question. From a general point of view, I
-> think the best we can do is to stop any new I/O requests from being
-> managed - and try to complete only the last ongoing one, if any.
-> Exactly how to do that can be a bit tricky though.
-> 
-> Beyond that, we should probably try to send the eMMC specific commands
-> that allow us to inform the eMMC that it's about to be powered-off.
-> Although, I am not sure that we actually will be able to complete
-> these operations within 100ms, so maybe it's not really worth trying?
-> See mmc_poweroff_notify(), for example.
+--GytIA0m4jn6r4+oY
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Some puzzle parts are now mainline, for example regulator framework
-can be configured to detect under-voltage events and execute
-hw_protection_shutdown(). So far it worked good enough to complete
-mmc_poweroff_notify() withing 100ms window. The problem is, the chance to
-execute mmc_poweroff_notify() depends on kernel configuration. If there are too
-many drivers and devices, mmc_poweroff_notify() will be not executed in time.
+On Wed, Nov 22, 2023 at 12:22:12PM +0100, Oleksij Rempel wrote:
 
-For now, I workaround it by registering a reboot notifier for mmc shutdown.
-It works, because kernel_power_off() is executing all registered reboot
-notifiers at first place and there are no other slow reboot notifiers.
-But, it seems to be not reliable enough. Probably notifier prioritization
-is needed to make it more predictable.
+> Some puzzle parts are now mainline, for example regulator framework
+> can be configured to detect under-voltage events and execute
+> hw_protection_shutdown(). So far it worked good enough to complete
+> mmc_poweroff_notify() withing 100ms window. The problem is, the chance to
+> execute mmc_poweroff_notify() depends on kernel configuration. If there are too
+> many drivers and devices, mmc_poweroff_notify() will be not executed in time.
 
-So far, I have two variants to implement it in more predictable way:
-variant 1 - forward the under-voltage notification to the mmc framework and
-  execute mmc_poweroff_notify() or bus shutdown.
-variant 2 - use reboot notifier and introduce reboot notifier prioritization.
+> For now, I workaround it by registering a reboot notifier for mmc shutdown.
+> It works, because kernel_power_off() is executing all registered reboot
+> notifiers at first place and there are no other slow reboot notifiers.
+> But, it seems to be not reliable enough. Probably notifier prioritization
+> is needed to make it more predictable.
 
-Are there other options? What are your preferences?
+> So far, I have two variants to implement it in more predictable way:
+> variant 1 - forward the under-voltage notification to the mmc framework and
+>   execute mmc_poweroff_notify() or bus shutdown.
+> variant 2 - use reboot notifier and introduce reboot notifier prioritization.
 
-Regards,
-Oleksij
--- 
-Pengutronix e.K.                           |                             |
-Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
-31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+> Are there other options? What are your preferences?
+
+My instinct is that we want to have prioritisation scheme rather than
+something MMC specific, I'd guess that this issue applies in some way to
+at least most storage.  It's not a super strongly held opinion though.
+
+--GytIA0m4jn6r4+oY
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmVd84sACgkQJNaLcl1U
+h9Bf8wf/R6d4p2XKeuQW+1xTu9FLSsr7+z0oM/onpGR9JY0w2ky0IFjZjmbxN9U8
+YMxvuqD/mgLNzjJe7arFUiIpbNe7VNVSM56znjxHg8UadfPHYW9ImNUO14OwkCZN
+qXzMYsNpQhrc5/kNxs2pNso4Cg0Emm/8Hnk97vqFpR1d5AV9hlxsd7xjUlJ5Ah67
+3n+VSty5DszMvSQfxW93Xihv4V3BwQ8dRyCIYac+BUG+sXCrDp/VV3t+2EorXL76
+JLZizRhRKta002htsgAlqRNRZZL1NwI6JGlHD6Rm2WSSAEMDjudiPjJn5KNsEjuP
+bhqR/YN5SXZsTjHC3y/qmZJrkoYWsw==
+=WFJZ
+-----END PGP SIGNATURE-----
+
+--GytIA0m4jn6r4+oY--
