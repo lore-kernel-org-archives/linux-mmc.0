@@ -1,248 +1,315 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0221C90;
-	Tue, 21 Nov 2023 18:56:00 -0800 (PST)
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 3AM2s6AV11973433, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 3AM2s6AV11973433
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 22 Nov 2023 10:54:06 +0800
-Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.32; Wed, 22 Nov 2023 10:54:06 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Wed, 22 Nov 2023 10:54:06 +0800
-Received: from RTEXMBS04.realtek.com.tw ([fe80::40c2:6c24:2df4:e6c7]) by
- RTEXMBS04.realtek.com.tw ([fe80::40c2:6c24:2df4:e6c7%5]) with mapi id
- 15.01.2375.007; Wed, 22 Nov 2023 10:54:06 +0800
-From: =?utf-8?B?SnlhbiBDaG91IFvlkajoirflrold?= <jyanchou@realtek.com>
-To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "adrian.hunter@intel.com"
-	<adrian.hunter@intel.com>,
-        "jh80.chung@samsung.com" <jh80.chung@samsung.com>,
-        "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
-        "robh+dt@kernel.org"
-	<robh+dt@kernel.org>,
-        "krzysztof.kozlowski+dt@linaro.org"
-	<krzysztof.kozlowski+dt@linaro.org>
-CC: "conor+dt@kernel.org" <conor+dt@kernel.org>,
-        "asutoshd@codeaurora.org"
-	<asutoshd@codeaurora.org>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "briannorris@chromium.org"
-	<briannorris@chromium.org>,
-        "doug@schmorgal.com" <doug@schmorgal.com>,
-        "tonyhuang.sunplus@gmail.com" <tonyhuang.sunplus@gmail.com>,
-        "abel.vesa@linaro.org" <abel.vesa@linaro.org>,
-        "william.qiu@starfivetech.com"
-	<william.qiu@starfivetech.com>
-Subject: RE: [PATCH v7][4/4] dt-bindings: mmc: Add dt-bindings for realtek mmc driver
-Thread-Topic: [PATCH v7][4/4] dt-bindings: mmc: Add dt-bindings for realtek
- mmc driver
-Thread-Index: AQHaHFrVyvodMIdbokSAHFHsmkonY7CD/S4AgAGklqA=
-Date: Wed, 22 Nov 2023 02:54:05 +0000
-Message-ID: <4551fbf03e3349eb8eaa336d505a5384@realtek.com>
-References: <20231121091101.5540-1-jyanchou@realtek.com>
- <20231121091101.5540-5-jyanchou@realtek.com>
- <dde59498-440d-4faf-b878-2090342b52da@linaro.org>
-In-Reply-To: <dde59498-440d-4faf-b878-2090342b52da@linaro.org>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-x-kse-serverinfo: RTEXMBS06.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="SleFL9x8"
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DD1912A;
+	Tue, 21 Nov 2023 21:40:09 -0800 (PST)
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3AM4flow013046;
+	Wed, 22 Nov 2023 05:40:06 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding : content-type; s=qcppdkim1;
+ bh=HItz8YLAQyImiMMraY4duj15DxrVUwMYpvqWqQTnTjo=;
+ b=SleFL9x8cg+gFYtcMaa4PkM0kakLqtmsqMzGwhALwOHsIrLFhb+0k4J/yaqkNwdE3f3L
+ mqM8dXH+aAr/F2Ww8T4azEGdbnepVgODJi/Vc2eAfVOuW+NpAAh2FgswdRcySQrR78ep
+ 2j0L7uXVfZtYV5195f2cyIt1jTKv/EzLZNYE3CusX2qBroGHMHSnbutUOIVFEgG2Tnbd
+ vzQXP0NH+kvLG/WB1xCYikffGa2Rrhr0Y1UNi5tRsQ2+jFl308KqDwRB+HFyEQnoU9DF
+ VOsD2idIpkPui8Cfj+GSFXaMbnWayVJ4PJyABH0ifWR8twSPhNEua+D96LVhCyKtSEIZ kw== 
+Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3ugxn8hr68-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 22 Nov 2023 05:40:06 +0000
+Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
+	by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3AM5e5Ha021849
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 22 Nov 2023 05:40:05 GMT
+Received: from hu-gaurkash-lv.qualcomm.com (10.49.16.6) by
+ nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.40; Tue, 21 Nov 2023 21:40:00 -0800
+From: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+To: <linux-scsi@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <ebiggers@google.com>, <neil.armstrong@linaro.org>,
+        <srinivas.kandagatla@linaro.org>
+CC: <linux-mmc@vger.kernel.org>, <linux-block@vger.kernel.org>,
+        <linux-fscrypt@vger.kernel.org>, <omprsing@qti.qualcomm.com>,
+        <quic_psodagud@quicinc.com>, <abel.vesa@linaro.org>,
+        <quic_spuppala@quicinc.com>, <kernel@quicinc.com>,
+        Gaurav Kashyap
+	<quic_gaurkash@quicinc.com>
+Subject: [PATCH v3 01/12] ice, ufs, mmc: use blk_crypto_key for program_key
+Date: Tue, 21 Nov 2023 21:38:06 -0800
+Message-ID: <20231122053817.3401748-2-quic_gaurkash@quicinc.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20231122053817.3401748-1-quic_gaurkash@quicinc.com>
+References: <20231122053817.3401748-1-quic_gaurkash@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: nalasex01a.na.qualcomm.com (10.47.209.196) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: 6mVqMyrmfTNNesLQFfozcicuzewGdrgl
+X-Proofpoint-GUID: 6mVqMyrmfTNNesLQFfozcicuzewGdrgl
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.987,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-11-22_03,2023-11-21_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 malwarescore=0
+ suspectscore=0 priorityscore=1501 impostorscore=0 adultscore=0
+ mlxlogscore=999 clxscore=1011 spamscore=0 phishscore=0 mlxscore=0
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2311060000 definitions=main-2311220039
 
-Pj4gRG9jdW1lbnQgdGhlIGRldmljZS10cmVlIGJpbmRpbmdzIGZvciBSZWFsdGVrIFNvQ3MgbW1j
-IGRyaXZlci4NCg0KPiBUaGlzIGlzIGEgZnJpZW5kbHkgcmVtaW5kZXIgZHVyaW5nIHRoZSByZXZp
-ZXcgcHJvY2Vzcy4NCg0KPiBJdCBzZWVtcyBteSBvciBvdGhlciByZXZpZXdlcidzIHByZXZpb3Vz
-IGNvbW1lbnRzIHdlcmUgbm90IGZ1bGx5IGFkZHJlc3NlZC4gTWF5YmUgdGhlIGZlZWRiYWNrIGdv
-dCBsb3N0IGJldHdlZW4gdGhlIHF1b3RlcywgbWF5YmUgeW91IGp1c3QgZm9yZ290IHRvIGFwcGx5
-IGl0LiBQbGVhc2UgZ28gYmFjayB0byB0aGUgcHJldmlvdXMgZGlzY3Vzc2lvbiBhbmQgZWl0aGVy
-IGltcGxlbWVudCBhbGwgcmVxdWVzdGVkIGNoYW5nZXMgb3Iga2VlcCBkaXNjdXNzaW5nIHRoZW0u
-DQoNCj4gVGhhbmsgeW91Lg0KDQo+IEFkZGl0aW9uYWxseToNCg0KPiBBIG5pdCwgc3ViamVjdDog
-ZHJvcCBzZWNvbmQvbGFzdCwgcmVkdW5kYW50ICJiaW5kaW5ncyBmb3IiLiBUaGUgImR0LWJpbmRp
-bmdzIiBwcmVmaXggaXMgYWxyZWFkeSBzdGF0aW5nIHRoYXQgdGhlc2UgYXJlIGJpbmRpbmdzLg0K
-DQpPa2F5LCBJIHdpbGwgY2hlY2sgaWYgSSBtaXNzIHRvIGNvcnJlY3Qgc29tZSBwcmV2aW91cyBj
-b21tZW50cy4NCg0KPj4NCj4+IFNpZ25lZC1vZmYtYnk6IEp5YW4gQ2hvdSA8anlhbmNob3VAcmVh
-bHRlay5jb20+DQo+Pg0KPj4gLS0tDQo+PiB2NiAtPiB2NzoNCj4+IC0gRHJvcCByZXNldC1uYW1l
-cyBhbmQgcmVhbHRlayxtMnRteCBzaW5jZSBpdCBpcyBub3QgbmVlZGVkIGluIG91ciBkcml2ZXIu
-DQo+Pg0KPj4gdjUgLT4gdjY6DQo+PiAtIERyb3AgdGhlIGluY29ycmVjdCwgZ2VuZXJpYyBjb21w
-YXRpYmxlIGFuZCBtb2RpZnkgaXQgdG8gc3BlY2lmaWMuDQo+PiAtIERyb3AgdXNlbGVzcyBwcm9w
-ZXJ0aWVzLg0KDQo+IEkgYXNrZWQgd2hpY2ggb25lcy4gSSBzdGlsbCBkbyBub3Qgc2VlIHRoYXQg
-aW5mb3JtYXRpb24gaGVyZS4NCg0KT2theSwgSSB3aWxsIGxpc3QgaXQgaW4uDQoNCj4+IC0gTW9k
-aWZ5IGJpbmRpbmdzIHRvIG1ha2UgRFRTIGFuZCBkcml2ZXIgbWF0Y2guDQo+Pg0KPj4gdjQgLT4g
-djU6DQo+PiAtIFJlbW92ZSB1bnVzZWQgcHJvcGVydHksIGUuZy4sY3FlLCByZXNldHMsIGNsb2Nr
-LWZyZXEtbWluLW1heC4NCj4+IC0gRml4IGluZGVudGF0aW9uLg0KPj4NCg0KLi4uDQoNCj4+ICsN
-Cj4+ICttYWludGFpbmVyczoNCj4+ICsgIC0gSnlhbiBDaG91IDxqeWFuY2hvdUByZWFsdGVrLmNv
-bT4NCj4+ICsNCj4+ICthbGxPZjoNCj4+ICsgIC0gJHJlZjogc3lub3BzeXMtZHctbXNoYy1jb21t
-b24ueWFtbCMNCj4+ICsNCj4+ICtwcm9wZXJ0aWVzOg0KPj4gKyAgY29tcGF0aWJsZToNCj4+ICsg
-ICAgZW51bToNCj4+ICsgICAgICAtIHJlYWx0ZWsscnRkMTMyNS1kdy1jcWUtZW1tYw0KPj4gKyAg
-ICAgIC0gcmVhbHRlayxydGQxMzE5LWR3LWNxZS1lbW1jDQo+PiArICAgICAgLSByZWFsdGVrLHJ0
-ZDEzMTVlLWR3LWNxZS1lbW1jDQo+PiArICAgICAgLSByZWFsdGVrLHJ0ZDE2MTliLWR3LWNxZS1l
-bW1jDQoNCj4gVGhhdCdzIG5vdCB3aGF0IGlzIHByZXNlbnQgaW4geW91ciBkcml2ZXIuIFdoeSBv
-dGhlciBjb21wYXRpYmxlcyBhcmUgbm90IHRoZXJlPyBXaGF0IGRvIHlvdSB3YW50IHRvIGV4cHJl
-c3MgaGVyZT8NCg0KT3RoZXIgY29tcGF0aWJsZXMgYXJlIHN1cmVseSBuZWVkZWQgdG8gYmUgaW4g
-b3VyIGRyaXZlciwgSSB3aWxsIGNvcnJlY3QgaXQgaW4gb3VyIG5ldyB2ZXJzaW9uLCB0aGFua3Mu
-DQoNCj4+ICsNCj4+ICsgIHJlZzoNCj4+ICsgICAgaXRlbXM6DQo+PiArICAgICAgLSBkZXNjcmlw
-dGlvbjogZW1tYyBiYXNlIGFkZHJlc3MNCj4+ICsgICAgICAtIGRlc2NyaXB0aW9uOiBjcWhjaSBi
-YXNlIGFkZHJlc3MNCj4+ICsNCj4+ICsgIHJlZy1uYW1lczoNCj4+ICsgICAgaXRlbXM6DQo+PiAr
-ICAgICAgLSBjb25zdDogZW1tYw0KPj4gKyAgICAgIC0gY29uc3Q6IGNxaGNpDQo+PiArDQo+PiAr
-ICBpbnRlcnJ1cHRzOg0KPj4gKyAgICBtYXhJdGVtczogMQ0KPj4gKw0KPj4gKyAgY2xvY2tzOg0K
-Pj4gKyAgICBtYXhJdGVtczogNA0KPj4gKw0KPj4gKyAgY2xvY2stbmFtZXM6DQo+PiArICAgIGl0
-ZW1zOg0KPj4gKyAgICAgIC0gY29uc3Q6IGJpdQ0KPj4gKyAgICAgIC0gY29uc3Q6IGNpdQ0KPj4g
-KyAgICAgIC0gY29uc3Q6IHZwMA0KPj4gKyAgICAgIC0gY29uc3Q6IHZwMQ0KPj4gKw0KPj4gKyAg
-cmVzZXRzOg0KPj4gKyAgICBtYXhJdGVtczogMQ0KPj4gKw0KPj4gKyAgcGluY3RybC0wOg0KPj4g
-KyAgICBkZXNjcmlwdGlvbjoNCj4+ICsgICAgICBzaG91bGQgY29udGFpbiBkZWZhdWx0L2hpZ2gg
-c3BlZWQgcGluIGN0cmwuDQo+PiArICAgIG1heEl0ZW1zOiAxDQo+PiArDQo+PiArICBwaW5jdHJs
-LTE6DQo+PiArICAgIGRlc2NyaXB0aW9uOg0KPj4gKyAgICAgIHNob3VsZCBjb250YWluIHNkcjUw
-IHBpbiBjdHJsLg0KPj4gKyAgICBtYXhJdGVtczogMQ0KPj4gKw0KPj4gKyAgcGluY3RybC0yOg0K
-Pj4gKyAgICBkZXNjcmlwdGlvbjoNCj4+ICsgICAgICBzaG91bGQgY29udGFpbiBkZHI1MCBtb2Rl
-IHBpbiBjdHJsLg0KPj4gKyAgICBtYXhJdGVtczogMQ0KPj4gKw0KPj4gKyAgcGluY3RybC0zOg0K
-Pj4gKyAgICBkZXNjcmlwdGlvbjoNCj4+ICsgICAgICBzaG91bGQgY29udGFpbiBoczIwMCBzcGVl
-ZCBwaW4gY3RybC4NCj4+ICsgICAgbWF4SXRlbXM6IDENCj4+ICsNCj4+ICsgIHBpbmN0cmwtNDoN
-Cj4+ICsgICAgZGVzY3JpcHRpb246DQo+PiArICAgICAgc2hvdWxkIGNvbnRhaW4gaHM0MDAgc3Bl
-ZWQgcGluIGN0cmwuDQo+PiArICAgIG1heEl0ZW1zOiAxDQo+PiArDQo+PiArICBwaW5jdHJsLTU6
-DQo+PiArICAgIGRlc2NyaXB0aW9uOg0KPj4gKyAgICAgIHNob3VsZCBjb250YWluIHR1bmUwIHBp
-biBjdHJsLg0KPj4gKyAgICBtYXhJdGVtczogMQ0KPj4gKw0KPj4gKyAgcGluY3RybC02Og0KPj4g
-KyAgICBkZXNjcmlwdGlvbjoNCj4+ICsgICAgICBzaG91bGQgY29udGFpbiB0dW5lMSBwaW4gY3Ry
-bC4NCj4+ICsgICAgbWF4SXRlbXM6IDENCj4+ICsNCj4+ICsgIHBpbmN0cmwtNzoNCj4+ICsgICAg
-ZGVzY3JpcHRpb246DQo+PiArICAgICAgc2hvdWxkIGNvbnRhaW4gdHVuZTIgcGluIGN0cmwuDQo+
-PiArICAgIG1heEl0ZW1zOiAxDQo+PiArDQo+PiArICBwaW5jdHJsLTg6DQo+PiArICAgIGRlc2Ny
-aXB0aW9uOg0KPj4gKyAgICAgIHNob3VsZCBjb250YWluIHR1bmUzIHBpbiBjdHJsLg0KPj4gKyAg
-ICBtYXhJdGVtczogMQ0KPj4gKw0KPj4gKyAgcGluY3RybC05Og0KPj4gKyAgICBkZXNjcmlwdGlv
-bjoNCj4+ICsgICAgICBzaG91bGQgY29udGFpbiB0dW5lNCBwaW4gY3RybC4NCj4+ICsgICAgbWF4
-SXRlbXM6IDENCj4+ICsNCj4+ICsgIHBpbmN0cmwtbmFtZXM6DQo+PiArICAgIG1heEl0ZW1zOiAx
-MA0KPj4gKw0KPj4gK3JlcXVpcmVkOg0KPj4gKyAgLSBjb21wYXRpYmxlDQo+PiArICAtIHJlZw0K
-Pj4gKyAgLSByZWctbmFtZXMNCj4+ICsgIC0gaW50ZXJydXB0cw0KPj4gKyAgLSBjbG9ja3MNCj4+
-ICsgIC0gY2xvY2stbmFtZXMNCj4+ICsgIC0gdm1tYy1zdXBwbHkNCj4+ICsgIC0gcGluY3RybC1u
-YW1lcw0KPj4gKyAgLSBwaW5jdHJsLTANCj4+ICsgIC0gcGluY3RybC0xDQo+PiArICAtIHBpbmN0
-cmwtMw0KPj4gKyAgLSBwaW5jdHJsLTQNCj4+ICsgIC0gcGluY3RybC01DQo+PiArICAtIHBpbmN0
-cmwtNg0KPj4gKyAgLSBwaW5jdHJsLTcNCj4+ICsgIC0gcGluY3RybC04DQo+PiArICAtIHBpbmN0
-cmwtOQ0KPj4gKw0KPj4gK3VuZXZhbHVhdGVkUHJvcGVydGllczogZmFsc2UNCj4+ICsNCj4+ICtl
-eGFtcGxlczoNCj4+ICsgIC0gfA0KPj4gKyAgICBlbW1jOiBtbWNAMTIwMDAgew0KPj4gKyAgICAg
-IGNvbXBhdGlibGUgPSAicmVhbHRlayxydGQxMzE1ZS1kdy1jcWUtZW1tYyI7DQo+PiArICAgICAg
-cmVnID0gPDB4MDAwMTIwMDAgMHgwMDYwMD4sDQo+PiArICAgICAgICAgICAgPDB4MDAwMTIxODAg
-MHgwMDA2MD47DQo+PiArICAgICAgcmVnLW5hbWVzID0gImVtbWMiLCAiY3FoY2kiOw0KPj4gKyAg
-ICAgIGludGVycnVwdHMgPSA8MCA0MiA0PjsNCg0KPiBVc2UgcHJvcGVyIGludGVycnVwdCBkZWZp
-bmVzIGluc3RlYWQgb2YgcmF3IHZhbHVlcy4NCg0KT2theSwgSSB3aWxsIGNvcnJlY3QgaXQuDQoN
-Cj4gKyAgICAgIGNsb2NrcyA9IDwmY2MgMjI+LCA8JmNjIDI2PiwgPCZjYyAxMjE+LCA8JmNjIDEy
-Mj47DQo+ICsgICAgICBjbG9jay1uYW1lcyA9ICJiaXUiLCAiY2l1IiwgInZwMCIsICJ2cDEiOw0K
-DQo+IFdoZXJlIGlzIHRoZSBEVFMgaW1wbGVtZW50aW5nIHRoaXMgYmluZGluZz8NCg0KPiBJIHNh
-aWQgaXQgb25jZToNCg0KPj4gSSBhc2tlZCB5b3UgdG8gdGVzdCB0aGUgYmluZGluZ3MuIFRoaXMg
-YWxzbyBtZWFucyB0aGF0IHlvdSBtdXN0IHRlc3QgDQo+PiB5b3VyIERUUyBhZ2FpbnN0IGJpbmRp
-bmdzLiBZb3VyIGJpbmRpbmdzLCBEVFMgYW5kIGRyaXZlciBkbyBub3QgbWF0Y2gsIA0KPj4gdGhl
-cmVmb3JlIGxldCdzIGJlIGEgYml0IG1vcmUgY2xlYXI6DQo+Pg0KPj4gTkFLLCB0aWxsIHlvdSB1
-cHN0cmVhbSB5b3VyIERUUy4NCg0KPiBJIHN0aWxsIGRvIG5vdCBzZWUgRFRTIGFueXdoZXJlLiBQ
-bGVhc2UgbGluayBpdC4NCg0KU29ycnkgZm9yIGFza2luZy4gV2hpY2ggZHRzIGRvIHdlIG5lZWQg
-dG8gbGluayBpdD8gVGhlIGRldmljZSB0cmVlIHdlIHVzZSBmb3Igb3VyIFNPQz8NCg0Kb3IgcmVh
-bHRlayxydGQtZHctY3FlLWVtbWMuZXhhbXBsZS5kdHM/ICBUaGFua3MuDQoNCg0KQmVzdCBSZWdh
-cmRzLA0KDQpKeWFuDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogS3J6eXN6dG9m
-IEtvemxvd3NraSA8a3J6eXN6dG9mLmtvemxvd3NraUBsaW5hcm8ub3JnPiANClNlbnQ6IFR1ZXNk
-YXksIE5vdmVtYmVyIDIxLCAyMDIzIDU6MzUgUE0NClRvOiBKeWFuIENob3UgW+WRqOiKt+WuiV0g
-PGp5YW5jaG91QHJlYWx0ZWsuY29tPjsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgYWRyaWFuLmh1
-bnRlckBpbnRlbC5jb207IGpoODAuY2h1bmdAc2Ftc3VuZy5jb207IHJpdGVzaGhAY29kZWF1cm9y
-YS5vcmc7IHJvYmgrZHRAa2VybmVsLm9yZzsga3J6eXN6dG9mLmtvemxvd3NraStkdEBsaW5hcm8u
-b3JnDQpDYzogY29ub3IrZHRAa2VybmVsLm9yZzsgYXN1dG9zaGRAY29kZWF1cm9yYS5vcmc7IHAu
-emFiZWxAcGVuZ3V0cm9uaXguZGU7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IGRldmljZXRy
-ZWVAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyBhcm5kQGFy
-bmRiLmRlOyBicmlhbm5vcnJpc0BjaHJvbWl1bS5vcmc7IGRvdWdAc2NobW9yZ2FsLmNvbTsgdG9u
-eWh1YW5nLnN1bnBsdXNAZ21haWwuY29tOyBhYmVsLnZlc2FAbGluYXJvLm9yZzsgd2lsbGlhbS5x
-aXVAc3RhcmZpdmV0ZWNoLmNvbQ0KU3ViamVjdDogUmU6IFtQQVRDSCB2N11bNC80XSBkdC1iaW5k
-aW5nczogbW1jOiBBZGQgZHQtYmluZGluZ3MgZm9yIHJlYWx0ZWsgbW1jIGRyaXZlcg0KDQoNCkV4
-dGVybmFsIG1haWwuDQoNCg0KDQpPbiAyMS8xMS8yMDIzIDEwOjExLCBKeWFuIENob3Ugd3JvdGU6
-DQo+IERvY3VtZW50IHRoZSBkZXZpY2UtdHJlZSBiaW5kaW5ncyBmb3IgUmVhbHRlayBTb0NzIG1t
-YyBkcml2ZXIuDQoNClRoaXMgaXMgYSBmcmllbmRseSByZW1pbmRlciBkdXJpbmcgdGhlIHJldmll
-dyBwcm9jZXNzLg0KDQpJdCBzZWVtcyBteSBvciBvdGhlciByZXZpZXdlcidzIHByZXZpb3VzIGNv
-bW1lbnRzIHdlcmUgbm90IGZ1bGx5IGFkZHJlc3NlZC4gTWF5YmUgdGhlIGZlZWRiYWNrIGdvdCBs
-b3N0IGJldHdlZW4gdGhlIHF1b3RlcywgbWF5YmUgeW91IGp1c3QgZm9yZ290IHRvIGFwcGx5IGl0
-LiBQbGVhc2UgZ28gYmFjayB0byB0aGUgcHJldmlvdXMgZGlzY3Vzc2lvbiBhbmQgZWl0aGVyIGlt
-cGxlbWVudCBhbGwgcmVxdWVzdGVkIGNoYW5nZXMgb3Iga2VlcCBkaXNjdXNzaW5nIHRoZW0uDQoN
-ClRoYW5rIHlvdS4NCg0KQWRkaXRpb25hbGx5Og0KDQpBIG5pdCwgc3ViamVjdDogZHJvcCBzZWNv
-bmQvbGFzdCwgcmVkdW5kYW50ICJiaW5kaW5ncyBmb3IiLiBUaGUgImR0LWJpbmRpbmdzIiBwcmVm
-aXggaXMgYWxyZWFkeSBzdGF0aW5nIHRoYXQgdGhlc2UgYXJlIGJpbmRpbmdzLg0KDQo+DQo+IFNp
-Z25lZC1vZmYtYnk6IEp5YW4gQ2hvdSA8anlhbmNob3VAcmVhbHRlay5jb20+DQo+DQo+IC0tLQ0K
-PiB2NiAtPiB2NzoNCj4gLSBEcm9wIHJlc2V0LW5hbWVzIGFuZCByZWFsdGVrLG0ydG14IHNpbmNl
-IGl0IGlzIG5vdCBuZWVkZWQgaW4gb3VyIGRyaXZlci4NCj4NCj4gdjUgLT4gdjY6DQo+IC0gRHJv
-cCB0aGUgaW5jb3JyZWN0LCBnZW5lcmljIGNvbXBhdGlibGUgYW5kIG1vZGlmeSBpdCB0byBzcGVj
-aWZpYy4NCj4gLSBEcm9wIHVzZWxlc3MgcHJvcGVydGllcy4NCg0KSSBhc2tlZCB3aGljaCBvbmVz
-LiBJIHN0aWxsIGRvIG5vdCBzZWUgdGhhdCBpbmZvcm1hdGlvbiBoZXJlLg0KDQoNCj4gLSBNb2Rp
-ZnkgYmluZGluZ3MgdG8gbWFrZSBEVFMgYW5kIGRyaXZlciBtYXRjaC4NCj4NCj4gdjQgLT4gdjU6
-DQo+IC0gUmVtb3ZlIHVudXNlZCBwcm9wZXJ0eSwgZS5nLixjcWUsIHJlc2V0cywgY2xvY2stZnJl
-cS1taW4tbWF4Lg0KPiAtIEZpeCBpbmRlbnRhdGlvbi4NCj4NCg0KLi4uDQoNCj4gKw0KPiArbWFp
-bnRhaW5lcnM6DQo+ICsgIC0gSnlhbiBDaG91IDxqeWFuY2hvdUByZWFsdGVrLmNvbT4NCj4gKw0K
-PiArYWxsT2Y6DQo+ICsgIC0gJHJlZjogc3lub3BzeXMtZHctbXNoYy1jb21tb24ueWFtbCMNCj4g
-Kw0KPiArcHJvcGVydGllczoNCj4gKyAgY29tcGF0aWJsZToNCj4gKyAgICBlbnVtOg0KPiArICAg
-ICAgLSByZWFsdGVrLHJ0ZDEzMjUtZHctY3FlLWVtbWMNCj4gKyAgICAgIC0gcmVhbHRlayxydGQx
-MzE5LWR3LWNxZS1lbW1jDQo+ICsgICAgICAtIHJlYWx0ZWsscnRkMTMxNWUtZHctY3FlLWVtbWMN
-Cj4gKyAgICAgIC0gcmVhbHRlayxydGQxNjE5Yi1kdy1jcWUtZW1tYw0KDQpUaGF0J3Mgbm90IHdo
-YXQgaXMgcHJlc2VudCBpbiB5b3VyIGRyaXZlci4gV2h5IG90aGVyIGNvbXBhdGlibGVzIGFyZSBu
-b3QgdGhlcmU/IFdoYXQgZG8geW91IHdhbnQgdG8gZXhwcmVzcyBoZXJlPw0KDQo+ICsNCj4gKyAg
-cmVnOg0KPiArICAgIGl0ZW1zOg0KPiArICAgICAgLSBkZXNjcmlwdGlvbjogZW1tYyBiYXNlIGFk
-ZHJlc3MNCj4gKyAgICAgIC0gZGVzY3JpcHRpb246IGNxaGNpIGJhc2UgYWRkcmVzcw0KPiArDQo+
-ICsgIHJlZy1uYW1lczoNCj4gKyAgICBpdGVtczoNCj4gKyAgICAgIC0gY29uc3Q6IGVtbWMNCj4g
-KyAgICAgIC0gY29uc3Q6IGNxaGNpDQo+ICsNCj4gKyAgaW50ZXJydXB0czoNCj4gKyAgICBtYXhJ
-dGVtczogMQ0KPiArDQo+ICsgIGNsb2NrczoNCj4gKyAgICBtYXhJdGVtczogNA0KPiArDQo+ICsg
-IGNsb2NrLW5hbWVzOg0KPiArICAgIGl0ZW1zOg0KPiArICAgICAgLSBjb25zdDogYml1DQo+ICsg
-ICAgICAtIGNvbnN0OiBjaXUNCj4gKyAgICAgIC0gY29uc3Q6IHZwMA0KPiArICAgICAgLSBjb25z
-dDogdnAxDQo+ICsNCj4gKyAgcmVzZXRzOg0KPiArICAgIG1heEl0ZW1zOiAxDQo+ICsNCj4gKyAg
-cGluY3RybC0wOg0KPiArICAgIGRlc2NyaXB0aW9uOg0KPiArICAgICAgc2hvdWxkIGNvbnRhaW4g
-ZGVmYXVsdC9oaWdoIHNwZWVkIHBpbiBjdHJsLg0KPiArICAgIG1heEl0ZW1zOiAxDQo+ICsNCj4g
-KyAgcGluY3RybC0xOg0KPiArICAgIGRlc2NyaXB0aW9uOg0KPiArICAgICAgc2hvdWxkIGNvbnRh
-aW4gc2RyNTAgcGluIGN0cmwuDQo+ICsgICAgbWF4SXRlbXM6IDENCj4gKw0KPiArICBwaW5jdHJs
-LTI6DQo+ICsgICAgZGVzY3JpcHRpb246DQo+ICsgICAgICBzaG91bGQgY29udGFpbiBkZHI1MCBt
-b2RlIHBpbiBjdHJsLg0KPiArICAgIG1heEl0ZW1zOiAxDQo+ICsNCj4gKyAgcGluY3RybC0zOg0K
-PiArICAgIGRlc2NyaXB0aW9uOg0KPiArICAgICAgc2hvdWxkIGNvbnRhaW4gaHMyMDAgc3BlZWQg
-cGluIGN0cmwuDQo+ICsgICAgbWF4SXRlbXM6IDENCj4gKw0KPiArICBwaW5jdHJsLTQ6DQo+ICsg
-ICAgZGVzY3JpcHRpb246DQo+ICsgICAgICBzaG91bGQgY29udGFpbiBoczQwMCBzcGVlZCBwaW4g
-Y3RybC4NCj4gKyAgICBtYXhJdGVtczogMQ0KPiArDQo+ICsgIHBpbmN0cmwtNToNCj4gKyAgICBk
-ZXNjcmlwdGlvbjoNCj4gKyAgICAgIHNob3VsZCBjb250YWluIHR1bmUwIHBpbiBjdHJsLg0KPiAr
-ICAgIG1heEl0ZW1zOiAxDQo+ICsNCj4gKyAgcGluY3RybC02Og0KPiArICAgIGRlc2NyaXB0aW9u
-Og0KPiArICAgICAgc2hvdWxkIGNvbnRhaW4gdHVuZTEgcGluIGN0cmwuDQo+ICsgICAgbWF4SXRl
-bXM6IDENCj4gKw0KPiArICBwaW5jdHJsLTc6DQo+ICsgICAgZGVzY3JpcHRpb246DQo+ICsgICAg
-ICBzaG91bGQgY29udGFpbiB0dW5lMiBwaW4gY3RybC4NCj4gKyAgICBtYXhJdGVtczogMQ0KPiAr
-DQo+ICsgIHBpbmN0cmwtODoNCj4gKyAgICBkZXNjcmlwdGlvbjoNCj4gKyAgICAgIHNob3VsZCBj
-b250YWluIHR1bmUzIHBpbiBjdHJsLg0KPiArICAgIG1heEl0ZW1zOiAxDQo+ICsNCj4gKyAgcGlu
-Y3RybC05Og0KPiArICAgIGRlc2NyaXB0aW9uOg0KPiArICAgICAgc2hvdWxkIGNvbnRhaW4gdHVu
-ZTQgcGluIGN0cmwuDQo+ICsgICAgbWF4SXRlbXM6IDENCj4gKw0KPiArICBwaW5jdHJsLW5hbWVz
-Og0KPiArICAgIG1heEl0ZW1zOiAxMA0KPiArDQo+ICtyZXF1aXJlZDoNCj4gKyAgLSBjb21wYXRp
-YmxlDQo+ICsgIC0gcmVnDQo+ICsgIC0gcmVnLW5hbWVzDQo+ICsgIC0gaW50ZXJydXB0cw0KPiAr
-ICAtIGNsb2Nrcw0KPiArICAtIGNsb2NrLW5hbWVzDQo+ICsgIC0gdm1tYy1zdXBwbHkNCj4gKyAg
-LSBwaW5jdHJsLW5hbWVzDQo+ICsgIC0gcGluY3RybC0wDQo+ICsgIC0gcGluY3RybC0xDQo+ICsg
-IC0gcGluY3RybC0zDQo+ICsgIC0gcGluY3RybC00DQo+ICsgIC0gcGluY3RybC01DQo+ICsgIC0g
-cGluY3RybC02DQo+ICsgIC0gcGluY3RybC03DQo+ICsgIC0gcGluY3RybC04DQo+ICsgIC0gcGlu
-Y3RybC05DQo+ICsNCj4gK3VuZXZhbHVhdGVkUHJvcGVydGllczogZmFsc2UNCj4gKw0KPiArZXhh
-bXBsZXM6DQo+ICsgIC0gfA0KPiArICAgIGVtbWM6IG1tY0AxMjAwMCB7DQo+ICsgICAgICBjb21w
-YXRpYmxlID0gInJlYWx0ZWsscnRkMTMxNWUtZHctY3FlLWVtbWMiOw0KPiArICAgICAgcmVnID0g
-PDB4MDAwMTIwMDAgMHgwMDYwMD4sDQo+ICsgICAgICAgICAgICA8MHgwMDAxMjE4MCAweDAwMDYw
-PjsNCj4gKyAgICAgIHJlZy1uYW1lcyA9ICJlbW1jIiwgImNxaGNpIjsNCj4gKyAgICAgIGludGVy
-cnVwdHMgPSA8MCA0MiA0PjsNCg0KVXNlIHByb3BlciBpbnRlcnJ1cHQgZGVmaW5lcyBpbnN0ZWFk
-IG9mIHJhdyB2YWx1ZXMuDQoNCj4gKyAgICAgIGNsb2NrcyA9IDwmY2MgMjI+LCA8JmNjIDI2Piwg
-PCZjYyAxMjE+LCA8JmNjIDEyMj47DQo+ICsgICAgICBjbG9jay1uYW1lcyA9ICJiaXUiLCAiY2l1
-IiwgInZwMCIsICJ2cDEiOw0KDQpXaGVyZSBpcyB0aGUgRFRTIGltcGxlbWVudGluZyB0aGlzIGJp
-bmRpbmc/DQoNCkkgc2FpZCBpdCBvbmNlOg0KDQo+IEkgYXNrZWQgeW91IHRvIHRlc3QgdGhlIGJp
-bmRpbmdzLiBUaGlzIGFsc28gbWVhbnMgdGhhdCB5b3UgbXVzdCB0ZXN0IA0KPiB5b3VyIERUUyBh
-Z2FpbnN0IGJpbmRpbmdzLiBZb3VyIGJpbmRpbmdzLCBEVFMgYW5kIGRyaXZlciBkbyBub3QgbWF0
-Y2gsIA0KPiB0aGVyZWZvcmUgbGV0J3MgYmUgYSBiaXQgbW9yZSBjbGVhcjoNCj4NCj4gTkFLLCB0
-aWxsIHlvdSB1cHN0cmVhbSB5b3VyIERUUy4NCg0KSSBzdGlsbCBkbyBub3Qgc2VlIERUUyBhbnl3
-aGVyZS4gUGxlYXNlIGxpbmsgaXQuDQoNCkJlc3QgcmVnYXJkcywNCktyenlzenRvZg0KDQo=
+The program key ops in the storage controller does not
+pass on the blk crypto key structure to ice, this is okay
+when wrapped keys are not supported and keys are standard
+AES XTS sizes. However, wrapped keyblobs can be of any size
+and in preparation for that, modify the ICE and storage
+controller APIs to accept blk_crypto_key.
+
+Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+---
+ drivers/mmc/host/cqhci-crypto.c  | 7 ++++---
+ drivers/mmc/host/cqhci.h         | 2 ++
+ drivers/mmc/host/sdhci-msm.c     | 6 ++++--
+ drivers/soc/qcom/ice.c           | 6 +++---
+ drivers/ufs/core/ufshcd-crypto.c | 7 ++++---
+ drivers/ufs/host/ufs-qcom.c      | 6 ++++--
+ include/soc/qcom/ice.h           | 5 +++--
+ include/ufs/ufshcd.h             | 1 +
+ 8 files changed, 25 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/mmc/host/cqhci-crypto.c b/drivers/mmc/host/cqhci-crypto.c
+index 6652982410ec..91da6de1d650 100644
+--- a/drivers/mmc/host/cqhci-crypto.c
++++ b/drivers/mmc/host/cqhci-crypto.c
+@@ -32,6 +32,7 @@ cqhci_host_from_crypto_profile(struct blk_crypto_profile *profile)
+ }
+ 
+ static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
++				    const struct blk_crypto_key *bkey,
+ 				    const union cqhci_crypto_cfg_entry *cfg,
+ 				    int slot)
+ {
+@@ -39,7 +40,7 @@ static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
+ 	int i;
+ 
+ 	if (cq_host->ops->program_key)
+-		return cq_host->ops->program_key(cq_host, cfg, slot);
++		return cq_host->ops->program_key(cq_host, bkey, cfg, slot);
+ 
+ 	/* Clear CFGE */
+ 	cqhci_writel(cq_host, 0, slot_offset + 16 * sizeof(cfg->reg_val[0]));
+@@ -99,7 +100,7 @@ static int cqhci_crypto_keyslot_program(struct blk_crypto_profile *profile,
+ 		memcpy(cfg.crypto_key, key->raw, key->size);
+ 	}
+ 
+-	err = cqhci_crypto_program_key(cq_host, &cfg, slot);
++	err = cqhci_crypto_program_key(cq_host, key, &cfg, slot);
+ 
+ 	memzero_explicit(&cfg, sizeof(cfg));
+ 	return err;
+@@ -113,7 +114,7 @@ static int cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
+ 	 */
+ 	union cqhci_crypto_cfg_entry cfg = {};
+ 
+-	return cqhci_crypto_program_key(cq_host, &cfg, slot);
++	return cqhci_crypto_program_key(cq_host, NULL, &cfg, slot);
+ }
+ 
+ static int cqhci_crypto_keyslot_evict(struct blk_crypto_profile *profile,
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index 1a12e40a02e6..949ebbe05773 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -12,6 +12,7 @@
+ #include <linux/completion.h>
+ #include <linux/wait.h>
+ #include <linux/irqreturn.h>
++#include <linux/blk-crypto.h>
+ #include <asm/io.h>
+ 
+ /* registers */
+@@ -291,6 +292,7 @@ struct cqhci_host_ops {
+ 	void (*post_disable)(struct mmc_host *mmc);
+ #ifdef CONFIG_MMC_CRYPTO
+ 	int (*program_key)(struct cqhci_host *cq_host,
++			   const struct blk_crypto_key *bkey,
+ 			   const union cqhci_crypto_cfg_entry *cfg, int slot);
+ #endif
+ };
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 668e0aceeeba..7d956fad27c7 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1859,6 +1859,7 @@ static __maybe_unused int sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
+  * vendor-specific SCM calls for this; it doesn't support the standard way.
+  */
+ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
++				 const struct blk_crypto_key_type *bkey,
+ 				 const union cqhci_crypto_cfg_entry *cfg,
+ 				 int slot)
+ {
+@@ -1866,6 +1867,7 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+ 	union cqhci_crypto_cap_entry cap;
++	u8 ice_key_size;
+ 
+ 	/* Only AES-256-XTS has been tested so far. */
+ 	cap = cq_host->crypto_cap_array[cfg->crypto_cap_idx];
+@@ -1873,11 +1875,11 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+ 		cap.key_size != CQHCI_CRYPTO_KEY_SIZE_256)
+ 		return -EINVAL;
+ 
++	ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
+ 	if (cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE)
+ 		return qcom_ice_program_key(msm_host->ice,
+ 					    QCOM_ICE_CRYPTO_ALG_AES_XTS,
+-					    QCOM_ICE_CRYPTO_KEY_SIZE_256,
+-					    cfg->crypto_key,
++					    ice_key_size, bkey,
+ 					    cfg->data_unit_size, slot);
+ 	else
+ 		return qcom_ice_evict_key(msm_host->ice, slot);
+diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+index fbab7fe5c652..6f941d32fffb 100644
+--- a/drivers/soc/qcom/ice.c
++++ b/drivers/soc/qcom/ice.c
+@@ -163,8 +163,8 @@ EXPORT_SYMBOL_GPL(qcom_ice_suspend);
+ 
+ int qcom_ice_program_key(struct qcom_ice *ice,
+ 			 u8 algorithm_id, u8 key_size,
+-			 const u8 crypto_key[], u8 data_unit_size,
+-			 int slot)
++			 const struct blk_crypto_key *bkey,
++			 u8 data_unit_size, int slot)
+ {
+ 	struct device *dev = ice->dev;
+ 	union {
+@@ -183,7 +183,7 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+ 		return -EINVAL;
+ 	}
+ 
+-	memcpy(key.bytes, crypto_key, AES_256_XTS_KEY_SIZE);
++	memcpy(key.bytes, bkey->raw, AES_256_XTS_KEY_SIZE);
+ 
+ 	/* The SCM call requires that the key words are encoded in big endian */
+ 	for (i = 0; i < ARRAY_SIZE(key.words); i++)
+diff --git a/drivers/ufs/core/ufshcd-crypto.c b/drivers/ufs/core/ufshcd-crypto.c
+index f4cc54d82281..34537cbac622 100644
+--- a/drivers/ufs/core/ufshcd-crypto.c
++++ b/drivers/ufs/core/ufshcd-crypto.c
+@@ -18,6 +18,7 @@ static const struct ufs_crypto_alg_entry {
+ };
+ 
+ static int ufshcd_program_key(struct ufs_hba *hba,
++			      const struct blk_crypto_key *bkey,
+ 			      const union ufs_crypto_cfg_entry *cfg, int slot)
+ {
+ 	int i;
+@@ -27,7 +28,7 @@ static int ufshcd_program_key(struct ufs_hba *hba,
+ 	ufshcd_hold(hba);
+ 
+ 	if (hba->vops && hba->vops->program_key) {
+-		err = hba->vops->program_key(hba, cfg, slot);
++		err = hba->vops->program_key(hba, bkey, cfg, slot);
+ 		goto out;
+ 	}
+ 
+@@ -89,7 +90,7 @@ static int ufshcd_crypto_keyslot_program(struct blk_crypto_profile *profile,
+ 		memcpy(cfg.crypto_key, key->raw, key->size);
+ 	}
+ 
+-	err = ufshcd_program_key(hba, &cfg, slot);
++	err = ufshcd_program_key(hba, key, &cfg, slot);
+ 
+ 	memzero_explicit(&cfg, sizeof(cfg));
+ 	return err;
+@@ -103,7 +104,7 @@ static int ufshcd_clear_keyslot(struct ufs_hba *hba, int slot)
+ 	 */
+ 	union ufs_crypto_cfg_entry cfg = {};
+ 
+-	return ufshcd_program_key(hba, &cfg, slot);
++	return ufshcd_program_key(hba, NULL, &cfg, slot);
+ }
+ 
+ static int ufshcd_crypto_keyslot_evict(struct blk_crypto_profile *profile,
+diff --git a/drivers/ufs/host/ufs-qcom.c b/drivers/ufs/host/ufs-qcom.c
+index 96cb8b5b4e66..7bec2b99b1df 100644
+--- a/drivers/ufs/host/ufs-qcom.c
++++ b/drivers/ufs/host/ufs-qcom.c
+@@ -146,6 +146,7 @@ static inline int ufs_qcom_ice_suspend(struct ufs_qcom_host *host)
+ }
+ 
+ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
++				    const struct blk_crypto_key *bkey,
+ 				    const union ufs_crypto_cfg_entry *cfg,
+ 				    int slot)
+ {
+@@ -153,6 +154,7 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+ 	union ufs_crypto_cap_entry cap;
+ 	bool config_enable =
+ 		cfg->config_enable & UFS_CRYPTO_CONFIGURATION_ENABLE;
++	u8 ice_key_size;
+ 
+ 	/* Only AES-256-XTS has been tested so far. */
+ 	cap = hba->crypto_cap_array[cfg->crypto_cap_idx];
+@@ -160,11 +162,11 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+ 	    cap.key_size != UFS_CRYPTO_KEY_SIZE_256)
+ 		return -EINVAL;
+ 
++	ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
+ 	if (config_enable)
+ 		return qcom_ice_program_key(host->ice,
+ 					    QCOM_ICE_CRYPTO_ALG_AES_XTS,
+-					    QCOM_ICE_CRYPTO_KEY_SIZE_256,
+-					    cfg->crypto_key,
++					    ice_key_size, bkey,
+ 					    cfg->data_unit_size, slot);
+ 	else
+ 		return qcom_ice_evict_key(host->ice, slot);
+diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+index 5870a94599a2..9dd835dba2a7 100644
+--- a/include/soc/qcom/ice.h
++++ b/include/soc/qcom/ice.h
+@@ -7,6 +7,7 @@
+ #define __QCOM_ICE_H__
+ 
+ #include <linux/types.h>
++#include <linux/blk-crypto.h>
+ 
+ struct qcom_ice;
+ 
+@@ -30,8 +31,8 @@ int qcom_ice_resume(struct qcom_ice *ice);
+ int qcom_ice_suspend(struct qcom_ice *ice);
+ int qcom_ice_program_key(struct qcom_ice *ice,
+ 			 u8 algorithm_id, u8 key_size,
+-			 const u8 crypto_key[], u8 data_unit_size,
+-			 int slot);
++			 const struct blk_crypto_key *bkey,
++			 u8 data_unit_size, int slot);
+ int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+ struct qcom_ice *of_qcom_ice_get(struct device *dev);
+ #endif /* __QCOM_ICE_H__ */
+diff --git a/include/ufs/ufshcd.h b/include/ufs/ufshcd.h
+index 7f0b2c5599cd..e1184ccc0508 100644
+--- a/include/ufs/ufshcd.h
++++ b/include/ufs/ufshcd.h
+@@ -362,6 +362,7 @@ struct ufs_hba_variant_ops {
+ 				struct devfreq_dev_profile *profile,
+ 				struct devfreq_simple_ondemand_data *data);
+ 	int	(*program_key)(struct ufs_hba *hba,
++			       const struct blk_crypto_key *bkey,
+ 			       const union ufs_crypto_cfg_entry *cfg, int slot);
+ 	void	(*event_notify)(struct ufs_hba *hba,
+ 				enum ufs_event_type evt, void *data);
+-- 
+2.25.1
+
