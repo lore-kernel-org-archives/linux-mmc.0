@@ -1,32 +1,32 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="AmY9ox3E"
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="N1RphbI4"
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8FB712A;
-	Tue, 21 Nov 2023 21:40:17 -0800 (PST)
-Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3AM4gYFQ005861;
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32C3718C;
+	Tue, 21 Nov 2023 21:40:18 -0800 (PST)
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3AM5Lv8x014702;
 	Wed, 22 Nov 2023 05:40:15 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
  subject : date : message-id : in-reply-to : references : mime-version :
  content-transfer-encoding : content-type; s=qcppdkim1;
- bh=AAJoxpdaUffiCAunX+fZ0lrVAqo9MTSADa7gjopRCjw=;
- b=AmY9ox3EFFYKALwigyJ9jjSG6r2qfu8n7CeT60oQr9SHs3VXmS6AGSjk/6fFNw7GIA8L
- sY/PAr7GMx5aHeT0/qo6jVzA8bu9onMUvGojgoem9g37VBbC5EjcCpvnTXuwqST2l9/e
- 2KYDdYIwx8MN9NOXCo+3ud+loIPYRp6sqarTOekZZqceSC8SYXOwX0+juMmQrq/gVypK
- OPzFn3h0sGFPekVbwbatHl7YrkvPJ0ZFX3FJDt4MSOmh1EjqtEdbIkmCilRRmhkYeOQs
- FPYKMZfSBEFnPhBPiz8uVxIApgz4pTfU2+s+0/gBa4YyMcIp9LUdVaxwMvg1sJsRWcST Rw== 
+ bh=etN9BmCGVK6qWSj0u+zI+8SnqfFHLrr5R1mxkOkbXhI=;
+ b=N1RphbI4rp7BVhyUtu35OotDt9YUoL3gFch2I25iFa2Iwyi1GZf1gOylCsgsYoXfhghh
+ hPkMHh7cZi+oZntzg89FAa9A3RfDvqkru1ElDN5fE17NQgkN1PyFhSGBVA/eCJlZhlNY
+ BeVb+4oMeF+yrdZY/sMdS5V1FrkYQNEBccqo6KLpDo/1a0dufybjaDzlrBU30CjgteWt
+ +7ljmpjEUELzNEiqa+tpSktKMni7tmDekzZhmlGTLjUfImv0Yw3Ub9FYaAMvV0mgfuYw
+ cCndk09ocPTRGcLi+ja5VhaEK/WX88rr7DZStu1ci6XWjXUa4mRcRqbtZDKdt8SYQpa7 5A== 
 Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3uh0b49cv8-1
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3ugk6x3qtp-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
 	Wed, 22 Nov 2023 05:40:15 +0000
 Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-	by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3AM5eEKw025905
+	by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3AM5eEKt025905
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
 	Wed, 22 Nov 2023 05:40:14 GMT
 Received: from hu-gaurkash-lv.qualcomm.com (10.49.16.6) by
  nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.40; Tue, 21 Nov 2023 21:40:03 -0800
+ 15.2.1118.40; Tue, 21 Nov 2023 21:40:02 -0800
 From: Gaurav Kashyap <quic_gaurkash@quicinc.com>
 To: <linux-scsi@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
         <ebiggers@google.com>, <neil.armstrong@linaro.org>,
@@ -37,9 +37,9 @@ CC: <linux-mmc@vger.kernel.org>, <linux-block@vger.kernel.org>,
         <quic_spuppala@quicinc.com>, <kernel@quicinc.com>,
         Gaurav Kashyap
 	<quic_gaurkash@quicinc.com>
-Subject: [PATCH v3 11/12] arm64: dts: qcom: sm8650: add hwkm support to ufs ice
-Date: Tue, 21 Nov 2023 21:38:16 -0800
-Message-ID: <20231122053817.3401748-12-quic_gaurkash@quicinc.com>
+Subject: [PATCH v3 08/12] ufs: core: add support for generate, import and prepare keys
+Date: Tue, 21 Nov 2023 21:38:13 -0800
+Message-ID: <20231122053817.3401748-9-quic_gaurkash@quicinc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20231122053817.3401748-1-quic_gaurkash@quicinc.com>
 References: <20231122053817.3401748-1-quic_gaurkash@quicinc.com>
@@ -55,40 +55,114 @@ X-ClientProxiedBy: nalasex01a.na.qualcomm.com (10.47.209.196) To
  nalasex01a.na.qualcomm.com (10.47.209.196)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: kC3wuowlLOCVCVPKJB7-_2UY0tajXtOg
-X-Proofpoint-GUID: kC3wuowlLOCVCVPKJB7-_2UY0tajXtOg
+X-Proofpoint-GUID: 1eSn0g_xlJQSjazbb9TbX6wZ541WH7Fq
+X-Proofpoint-ORIG-GUID: 1eSn0g_xlJQSjazbb9TbX6wZ541WH7Fq
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.272,Aquarius:18.0.987,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-11-22_03,2023-11-21_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- mlxlogscore=646 malwarescore=0 bulkscore=0 clxscore=1015 phishscore=0
- spamscore=0 impostorscore=0 mlxscore=0 adultscore=0 priorityscore=1501
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ definitions=2023-11-22_02,2023-11-21_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 mlxscore=0
+ impostorscore=0 spamscore=0 clxscore=1015 adultscore=0 malwarescore=0
+ bulkscore=0 phishscore=0 priorityscore=1501 mlxlogscore=999
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2311060000 definitions=main-2311220040
 
-The Inline Crypto Engine (ICE) for UFS supports the
-Hardware Key Manager (hwkm) to securely manage storage
-keys. Enable using this hardware on sm8650.
+This patch contains two changes in UFS for wrapped keys.
+1. Implements the blk_crypto_profile ops for generate, import
+   and prepare key apis.
+2. Defines UFS vops for generate, import and prepare keys so
+   that vendors can hook into them.
 
 Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
 ---
- arch/arm64/boot/dts/qcom/sm8650.dtsi | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/ufs/core/ufshcd-crypto.c | 41 ++++++++++++++++++++++++++++++++
+ include/ufs/ufshcd.h             | 11 +++++++++
+ 2 files changed, 52 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/qcom/sm8650.dtsi b/arch/arm64/boot/dts/qcom/sm8650.dtsi
-index bbebe15437aa..b61066210e09 100644
---- a/arch/arm64/boot/dts/qcom/sm8650.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm8650.dtsi
-@@ -763,7 +763,8 @@ rng: rng@10c3000 {
- 		ice: crypto@1d88000 {
- 			compatible = "qcom,sm8650-inline-crypto-engine",
- 				     "qcom,inline-crypto-engine";
--			reg = <0 0x01d88000 0 0x8000>;
-+			reg = <0 0x01d88000 0 0x10000>;
-+			qcom,ice-use-hwkm;
+diff --git a/drivers/ufs/core/ufshcd-crypto.c b/drivers/ufs/core/ufshcd-crypto.c
+index 3edbca87c322..cf34f4a9cda8 100644
+--- a/drivers/ufs/core/ufshcd-crypto.c
++++ b/drivers/ufs/core/ufshcd-crypto.c
+@@ -143,10 +143,51 @@ static int ufshcd_crypto_derive_sw_secret(struct blk_crypto_profile *profile,
+ 	return -EOPNOTSUPP;
+ }
  
- 			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
- 		};
++static int ufshcd_crypto_generate_key(struct blk_crypto_profile *profile,
++				      u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
++{
++	struct ufs_hba *hba =
++		container_of(profile, struct ufs_hba, crypto_profile);
++
++	if (hba->vops && hba->vops->generate_key)
++		return  hba->vops->generate_key(hba, lt_key);
++
++	return -EOPNOTSUPP;
++}
++
++static int ufshcd_crypto_prepare_key(struct blk_crypto_profile *profile,
++				     const u8 *lt_key, size_t lt_key_size,
++				     u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
++{
++	struct ufs_hba *hba =
++		container_of(profile, struct ufs_hba, crypto_profile);
++
++	if (hba->vops && hba->vops->prepare_key)
++		return  hba->vops->prepare_key(hba, lt_key, lt_key_size, eph_key);
++
++	return -EOPNOTSUPP;
++}
++
++static int ufshcd_crypto_import_key(struct blk_crypto_profile *profile,
++				    const u8 *imp_key, size_t imp_key_size,
++				    u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
++{
++	struct ufs_hba *hba =
++		container_of(profile, struct ufs_hba, crypto_profile);
++
++	if (hba->vops && hba->vops->import_key)
++		return  hba->vops->import_key(hba, imp_key, imp_key_size, lt_key);
++
++	return -EOPNOTSUPP;
++}
++
+ static const struct blk_crypto_ll_ops ufshcd_crypto_ops = {
+ 	.keyslot_program	= ufshcd_crypto_keyslot_program,
+ 	.keyslot_evict		= ufshcd_crypto_keyslot_evict,
+ 	.derive_sw_secret	= ufshcd_crypto_derive_sw_secret,
++	.generate_key		= ufshcd_crypto_generate_key,
++	.prepare_key		= ufshcd_crypto_prepare_key,
++	.import_key		= ufshcd_crypto_import_key,
+ };
+ 
+ static enum blk_crypto_mode_num
+diff --git a/include/ufs/ufshcd.h b/include/ufs/ufshcd.h
+index 86677788b5bd..49657a5d1e34 100644
+--- a/include/ufs/ufshcd.h
++++ b/include/ufs/ufshcd.h
+@@ -321,6 +321,9 @@ struct ufs_pwr_mode_info {
+  * @config_scaling_param: called to configure clock scaling parameters
+  * @program_key: program or evict an inline encryption key
+  * @derive_sw_secret: derive sw secret from a wrapped key
++ * @generate_key: generate a storage key and return longterm wrapped key
++ * @prepare_key: unwrap longterm key and return ephemeral wrapped key
++ * @import_key: import sw storage key and return longterm wrapped key
+  * @event_notify: called to notify important events
+  * @reinit_notify: called to notify reinit of UFSHCD during max gear switch
+  * @mcq_config_resource: called to configure MCQ platform resources
+@@ -368,6 +371,14 @@ struct ufs_hba_variant_ops {
+ 	int	(*derive_sw_secret)(struct ufs_hba *hba, const u8 wkey[],
+ 				    unsigned int wkey_size,
+ 				    u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE]);
++	int	(*generate_key)(struct ufs_hba *hba,
++				u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE]);
++	int	(*prepare_key)(struct ufs_hba *hba,
++			       const u8 *lt_key, size_t lt_key_size,
++			       u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE]);
++	int	(*import_key)(struct ufs_hba *hba,
++			      const u8 *imp_key, size_t imp_key_size,
++			      u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE]);
+ 	void	(*event_notify)(struct ufs_hba *hba,
+ 				enum ufs_event_type evt, void *data);
+ 	void	(*reinit_notify)(struct ufs_hba *);
 -- 
 2.25.1
 
