@@ -1,98 +1,125 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A867C1A58E;
-	Wed, 22 Nov 2023 12:26:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AhTOfsuJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F08AC433C7;
-	Wed, 22 Nov 2023 12:26:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700656015;
-	bh=7C94KGgqCbAA+PUlPyfufke9xGPCyJuKoPOwMFmpILc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=AhTOfsuJH4uNL1dxrl8w5XllqdE/f5P54GaWxyRB4RLrlVOx4OyzJwbd6Gc4C0qoc
-	 2Xzg/stYnSjW+1yxZNxWDcAYThqfSNZGkvn072cy+9S7PCy1DxLfO5WnFrM4sglE4g
-	 EuZC1EWJwysoGdyUFGg5RLFi86qdKMxadsVE7CU1Jjc8qMWIzG4yHLhIuuE0rKZSQ7
-	 NqT314x2NNAPQt/bksxbzuhb5k9BmoxRKLTBS+b69yrPvvHLfymaaDCmqGBTY0NX4f
-	 cDXxKth36fatyNGSrEVz8QGzuXhCd95sNhXtTb/LABHPfeC2qDN6Jz2bV0b8GEMhAr
-	 ESh4d4/F0DKAg==
-Date: Wed, 22 Nov 2023 12:26:51 +0000
-From: Mark Brown <broonie@kernel.org>
-To: Oleksij Rempel <o.rempel@pengutronix.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	Yang Yingliang <yangyingliang@huawei.com>,
-	linux-mmc@vger.kernel.org, kernel@pengutronix.de,
-	Ye Bin <yebin10@huawei.com>, Heiner Kallweit <hkallweit1@gmail.com>,
-	Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Conor Dooley <conor+dt@kernel.org>, linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	Naresh Solanki <naresh.solanki@9elements.com>,
-	zev@bewilderbeest.net, Sebastian Reichel <sre@kernel.org>,
-	linux-pm@vger.kernel.org,
-	=?iso-8859-1?Q?S=F8ren?= Andersen <san@skov.dk>
-Subject: Re: mmc: handling of Under-Voltage Events in eMMC
-Message-ID: <ZV3zi7jgkBa2W/Fc@finisterre.sirena.org.uk>
-References: <20230929130028.GB2825985@pengutronix.de>
- <CAPDyKFqUtNEbK2tzD+qOK+dFcDyBxvcNwOHWPJDLhTWGGkoHQw@mail.gmail.com>
- <20231122112212.GA783262@pengutronix.de>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="CWaDKTq9"
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.65])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8ACE11BD;
+	Wed, 22 Nov 2023 06:49:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1700664593; x=1732200593;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:content-transfer-encoding:in-reply-to;
+  bh=Nfdr0Ooij/TeetoP3qp69zSstmzeKd/kvnng0AiVoSg=;
+  b=CWaDKTq9fpTulO1SVf6E7+b0SvMprR3qYGwoUpd60dRKzWESUnfCNFt/
+   kck80+b1T8krkoArlgPFcg0LYcKD3WDVPwmwRB18kD0wUZ/2U3hHGe249
+   vDAcWgeHS1HKEBP7tiYIbuoEyzAhN0YuiOAIiF7DdqghV8wG+JqZCVnql
+   dxlkmwUcUYMPXUh+CjyQVlIHB55iY2P+MSysxAt2P2qFoQop39eg1odDY
+   Dop/mfvmgaYGPEn1hXiF7YugMNtcvypPIewo5ZC5Ut7hrmyjooQ52Nmsy
+   0nQEBs5QB01ese0HsGGJuf48Qe9WGwQ4JPPGJYE1mrhuO2mxu+QbCZ0ul
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10902"; a="395989808"
+X-IronPort-AV: E=Sophos;i="6.04,219,1695711600"; 
+   d="scan'208";a="395989808"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Nov 2023 06:49:05 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10902"; a="884635683"
+X-IronPort-AV: E=Sophos;i="6.04,219,1695711600"; 
+   d="scan'208";a="884635683"
+Received: from lkp-server01.sh.intel.com (HELO d584ee6ebdcc) ([10.239.97.150])
+  by fmsmga002.fm.intel.com with ESMTP; 22 Nov 2023 06:48:59 -0800
+Received: from kbuild by d584ee6ebdcc with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1r5oXB-0000ZI-1X;
+	Wed, 22 Nov 2023 14:48:57 +0000
+Date: Wed, 22 Nov 2023 22:48:47 +0800
+From: kernel test robot <lkp@intel.com>
+To: Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org,
+	adrian.hunter@intel.com, jh80.chung@samsung.com,
+	riteshh@codeaurora.org, robh+dt@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org
+Cc: Paul Gazzillo <paul@pgazz.com>,
+	Necip Fazil Yildiran <fazilyildiran@gmail.com>,
+	oe-kbuild-all@lists.linux.dev, conor+dt@kernel.org,
+	asutoshd@codeaurora.org, p.zabel@pengutronix.de,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, arnd@arndb.de,
+	briannorris@chromium.org, doug@schmorgal.com,
+	tonyhuang.sunplus@gmail.com, abel.vesa@linaro.org,
+	william.qiu@starfivetech.com, jyanchou@realtek.com
+Subject: Re: [PATCH v7][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
+Message-ID: <202311221803.TyaHE7Ik-lkp@intel.com>
+References: <20231121091101.5540-3-jyanchou@realtek.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="GytIA0m4jn6r4+oY"
-Content-Disposition: inline
-In-Reply-To: <20231122112212.GA783262@pengutronix.de>
-X-Cookie: Slow day.  Practice crawling.
-
-
---GytIA0m4jn6r4+oY
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20231121091101.5540-3-jyanchou@realtek.com>
 
-On Wed, Nov 22, 2023 at 12:22:12PM +0100, Oleksij Rempel wrote:
+Hi Jyan,
 
-> Some puzzle parts are now mainline, for example regulator framework
-> can be configured to detect under-voltage events and execute
-> hw_protection_shutdown(). So far it worked good enough to complete
-> mmc_poweroff_notify() withing 100ms window. The problem is, the chance to
-> execute mmc_poweroff_notify() depends on kernel configuration. If there are too
-> many drivers and devices, mmc_poweroff_notify() will be not executed in time.
+kernel test robot noticed the following build warnings:
 
-> For now, I workaround it by registering a reboot notifier for mmc shutdown.
-> It works, because kernel_power_off() is executing all registered reboot
-> notifiers at first place and there are no other slow reboot notifiers.
-> But, it seems to be not reliable enough. Probably notifier prioritization
-> is needed to make it more predictable.
+[auto build test WARNING on linus/master]
+[also build test WARNING on ulf-hansson-mmc-mirror/next v6.7-rc2 next-20231=
+122]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-> So far, I have two variants to implement it in more predictable way:
-> variant 1 - forward the under-voltage notification to the mmc framework and
->   execute mmc_poweroff_notify() or bus shutdown.
-> variant 2 - use reboot notifier and introduce reboot notifier prioritization.
+url:    https://github.com/intel-lab-lkp/linux/commits/Jyan-Chou/mmc-Add-Sy=
+nopsys-DesignWare-mmc-cmdq-host-driver/20231121-171551
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231121091101.5540-3-jyanchou%40r=
+ealtek.com
+patch subject: [PATCH v7][2/4] mmc: Add Synopsys DesignWare mmc cmdq host d=
+river
+config: m68k-kismet-CONFIG_MMC_CQHCI-CONFIG_MMC_DW_CQE-0-0 (https://downloa=
+d.01.org/0day-ci/archive/20231122/202311221803.TyaHE7Ik-lkp@intel.com/confi=
+g)
+reproduce: (https://download.01.org/0day-ci/archive/20231122/202311221803.T=
+yaHE7Ik-lkp@intel.com/reproduce)
 
-> Are there other options? What are your preferences?
+If you fix the issue in a separate patch/commit (i.e. not just a new versio=
+n of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202311221803.TyaHE7Ik-lkp@i=
+ntel.com/
 
-My instinct is that we want to have prioritisation scheme rather than
-something MMC specific, I'd guess that this issue applies in some way to
-at least most storage.  It's not a super strongly held opinion though.
+kismet warnings: (new ones prefixed by >>)
+>> kismet: WARNING: unmet direct dependencies detected for MMC_CQHCI when s=
+elected by MMC_DW_CQE
+   /usr/bin/grep: /db/releases/20231122101355/kernel-tests/etc/kcflags: No =
+such file or directory
+   {"timestamp":"2023-11-22 18:07:24 +0800", "level":"WARN", "event":"kbuil=
+d.sh:3942:in `add_etc_kcflags': grep exit 2 (ShellError)", "detail":"cmd: '=
+/usr/bin/grep' '-v' '-e' '^#' '-e' '^$' '/db/releases/20231122101355/kernel=
+-tests/etc/kcflags' \nstderr: /usr/bin/grep: /db/releases/20231122101355/ke=
+rnel-tests/etc/kcflags: No such file or directory\n\n", "hostname":"communi=
+ty-kbuild-consumer-181", "host_hostname":"lkp-worker74", "call_stack":"/zda=
+y/kernel-tests/lib/kbuild.sh:3942:in `add_etc_kcflags': /usr/bin/grep: /db/=
+releases/20231122101355/kernel-tests/etc/kcflags: No such file or directory=
+ (ShellError 2)\n  from /zday/kernel-tests/lib/kbuild.sh:3971: setup_kcflag=
+s\n  from /zday/kernel-tests/lib/kbuild.sh:4016: invoke_make\n  from /zday/=
+kernel-tests/lib/kbuild.sh:4122: make\n  from /zday/kernel-tests/lib/kbuild=
+=2Esh:5623: make_config_allyes\n  from /zday/kernel-tests/common.sh:209: re=
+direct_error_to_screen\n  from /zday/kernel-tests/common.sh:217: redirect_c=
+ommand_errors\n  from /zday/kernel-tests/lib/kbuild.sh:5630: make_config\n =
+ from /zday/kernel-tests/lib/builder/kismet.sh:156: generate_make_olddefcon=
+fig_warnings\n  from /zday/kernel-tests/lib/builder/kismet.sh:297: builder_=
+compile\n  from /zday/kernel-tests/bisect-test-build-error.sh:94: main\n"}
+  =20
+   WARNING: unmet direct dependencies detected for MMC_CQHCI
+     Depends on [n]: MMC [=3Dy] && HAS_DMA [=3Dn]
+     Selected by [y]:
+     - MMC_DW_CQE [=3Dy] && MMC [=3Dy] && (ARC || ARM || ARM64 || MIPS || C=
+OMPILE_TEST [=3Dy])
 
---GytIA0m4jn6r4+oY
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmVd84sACgkQJNaLcl1U
-h9Bf8wf/R6d4p2XKeuQW+1xTu9FLSsr7+z0oM/onpGR9JY0w2ky0IFjZjmbxN9U8
-YMxvuqD/mgLNzjJe7arFUiIpbNe7VNVSM56znjxHg8UadfPHYW9ImNUO14OwkCZN
-qXzMYsNpQhrc5/kNxs2pNso4Cg0Emm/8Hnk97vqFpR1d5AV9hlxsd7xjUlJ5Ah67
-3n+VSty5DszMvSQfxW93Xihv4V3BwQ8dRyCIYac+BUG+sXCrDp/VV3t+2EorXL76
-JLZizRhRKta002htsgAlqRNRZZL1NwI6JGlHD6Rm2WSSAEMDjudiPjJn5KNsEjuP
-bhqR/YN5SXZsTjHC3y/qmZJrkoYWsw==
-=WFJZ
------END PGP SIGNATURE-----
-
---GytIA0m4jn6r4+oY--
+--=20
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
