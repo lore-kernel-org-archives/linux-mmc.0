@@ -1,182 +1,149 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="d/7DGhrS"
-Received: from mail-yw1-x1130.google.com (mail-yw1-x1130.google.com [IPv6:2607:f8b0:4864:20::1130])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D64CE10E4
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:18:58 -0800 (PST)
-Received: by mail-yw1-x1130.google.com with SMTP id 00721157ae682-5ccf64439bdso10051887b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:18:58 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vdH9/viM"
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D42F810D4
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:02 -0800 (PST)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-5cce3010367so10403987b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1700759938; x=1701364738; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=DleoyAdHHxKmC5iQz+I0VB+4K+wFzgG4eGMYLWbfRJ8=;
-        b=d/7DGhrSDB5OFSd4TQvQadc/mGHkurGDXzzNj5pJmqB8FydikWuIsoa16nWpXshGHu
-         JuhJ2jiQKobeYbuFrW8sBbIavXb1SkXam8G8dc5+9br2H7RrC/GO1IAjE9n83PaULAMi
-         l6ImiPtDV2fMf6cfPsYGrQyPp0l9EVvFsgD03LfTzrRYJOeb1GW8VdBGXL34F+QTI/iC
-         /bSV2Z5ThY0lRpZQjqUhuOQtDWG+Fgi63EualApfPi0S0MkJ9pOumVD/cB9Z0bvSoEZa
-         oXB4T4gU0CdloED0J9VPAHTVPGjB1qUzL2sAnG5+bJRaPgrP+J+nRhZEXOOPwMnGAxh2
-         iXVg==
+        d=linaro.org; s=google; t=1700759942; x=1701364742; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=bRIUp/X6KH94V1dmHPajzonMFWyN0k2R15HuLH0rxE0=;
+        b=vdH9/viMXZopA/i6o/AofO0nYc9zKPydxWYyd2rwmq8ZUjciWsFEoI0d7WgJGNh46I
+         wLAiPyk0FSSoaorM7/J9G6ht4IGxBcj1y8mTYDbHgD6teYPf0OgWNBiCDLjg99ejs7u0
+         IJU8+r22tPLpnFHpHRxbshaf5P0rKkNJAAR9jE+04zmL2WriT+YCbIOdf5WQoGMBTTq9
+         ndsUQ1iNfvXHl8kB4ldnXFt3OLSRK7kDVECh4KhrdRft2qeP1xSLHmuaicjqauQCuNwW
+         dIJ2QBwkGe+FVUcFyYW30m6F8FQxHdFGQzgikWDWHRqobJFIr9FGhBAZcyubXFszw4IG
+         OAog==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700759938; x=1701364738;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=DleoyAdHHxKmC5iQz+I0VB+4K+wFzgG4eGMYLWbfRJ8=;
-        b=c1IxB1LAFB3KpfT+/TSeRVgUsFyLn1aLrlP5y1jT2QYuU5VdW7Wu8LOhF8Ta1aoEww
-         zLxakq9zcvH/Uf4u+M6Yiok6CkydkQs3mFcCjb957hEuRtN0L43iunOW0ogLFZr4EsIv
-         jWNLiQ+WbyVOnbBcS52FQtr5ldIEQAsLV1IkgYIE8zuT+47YKmI9H2wYfBsm2NfCiC2S
-         OWBb480qv063YImslWY/auYvydIIGK1NMNO5kxvfJ/HKtlpOOm2rTyptOFpPqoD6bNRt
-         qsEG7SpoyE4GmqLaKJ1CG7NhsH8P2GK/U2tdNanfoJTdMA7poJV9ahTh0EBsCbpvBIOq
-         t+gQ==
-X-Gm-Message-State: AOJu0YzL9Ad860CmWMBtouH/DBdU+h9nDUgl7bVwKRz+n7vZ/qOvVKI+
-	nmL23UE5//gSKMO56qNfPhdudgLjYwNTP2uXF97kaQ==
-X-Google-Smtp-Source: AGHT+IHfghaaZdA4ZT8Xx3Ju62k8RIFQp0fk0TMsrwoEV2UYRwle9HP2pqtqxG3fQHfuDvvctVA0pwf97KLNYu4uqnc=
-X-Received: by 2002:a0d:dd01:0:b0:5ca:263e:dead with SMTP id
- g1-20020a0ddd01000000b005ca263edeadmr2740792ywe.14.1700759938020; Thu, 23 Nov
- 2023 09:18:58 -0800 (PST)
+        d=1e100.net; s=20230601; t=1700759942; x=1701364742;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=bRIUp/X6KH94V1dmHPajzonMFWyN0k2R15HuLH0rxE0=;
+        b=qHcdlwuKDV2cq/52Hry6t69q1OrsMdj0BwZmTORc/x4IzUkq+QZhDDvNsYFpvbelQk
+         ix3LXNBMPpLT4c2wng/v7JgXlgtfC6kL1nggivCh+Imfnr5FbKEp6uSoqvn66wa5qo9A
+         X3cFdQHYSeiLcwNGOvW+YnSVKmvQkqqIszwZLzMwMvI5k1WJBNA8A4nHM2O97lRj0dVZ
+         qHkDiz1tY5Xn5iTOOCWROXlwS6lxKVdFhGjzKEljC0ABeHGnxiLF1KlYvZNgZ2Vv9PD5
+         HXvcYn8s8kvNZbQmJ3P4JA3HbwxWFkBQJW5cCyR813L8DLbGKw87nSLE4+fS+tgmgj/F
+         I+hw==
+X-Gm-Message-State: AOJu0YyARgLyoJ/4/Et3OlM1q6lPZHyVihPMFS93kBQVkq4eg5uZ5yfn
+	9UQPnRtkdftY2ejHQMB3s7GIo3amYgPvck/g5VOOYA==
+X-Google-Smtp-Source: AGHT+IFXzKMZeuvW1BPKO8joBFVKPsKfpM2I/+f/wsTRT3THsVsSAwM69EGwF7PtesQFhk7BaXI4Y8hMBA/Tv2oP78c=
+X-Received: by 2002:a25:3746:0:b0:da3:76d7:ddbf with SMTP id
+ e67-20020a253746000000b00da376d7ddbfmr6099448yba.33.1700759941864; Thu, 23
+ Nov 2023 09:19:01 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231114115516.1585361-1-korneld@chromium.org>
-In-Reply-To: <20231114115516.1585361-1-korneld@chromium.org>
+References: <20231115083406.7368-1-wenchao.chen@unisoc.com>
+In-Reply-To: <20231115083406.7368-1-wenchao.chen@unisoc.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 23 Nov 2023 18:18:22 +0100
-Message-ID: <CAPDyKFooOy95UFS46BGOrFWhEYHkf2j4jFPuF7_7ZOF3KFgj1g@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: Disable LPM during initialization
-To: =?UTF-8?Q?Kornel_Dul=C4=99ba?= <korneld@chromium.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Sven van Ashbrook <svenva@google.com>, 
-	Jason Lai <jasonlai.genesyslogic@gmail.com>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>, 
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>, =?UTF-8?Q?Stanis=C5=82aw_Kardach?= <skardach@google.com>, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	stable@vger.kernel.org
+Date: Thu, 23 Nov 2023 18:18:26 +0100
+Message-ID: <CAPDyKFqJmPEps7tSxuOnerFLohzaTFXjmDo+Mb8nGVODhNE0+A@mail.gmail.com>
+Subject: Re: [PATCH V2] mmc: sprd: Fix vqmmc not shutting down after the card
+ was pulled
+To: Wenchao Chen <wenchao.chen@unisoc.com>
+Cc: zhang.lyra@gmail.com, orsonzhai@gmail.com, baolin.wang@linux.alibaba.com, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	wenchao.chen666@gmail.com, zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, 14 Nov 2023 at 12:55, Kornel Dul=C4=99ba <korneld@chromium.org> wro=
-te:
+On Wed, 15 Nov 2023 at 09:34, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
 >
-> To address IO performance commit f9e5b33934ce
-> ("mmc: host: Improve I/O read/write performance for GL9763E")
-> limited LPM negotiation to runtime suspend state.
-> The problem is that it only flips the switch in the runtime PM
-> resume/suspend logic.
+> With cat regulator_summary, we found that vqmmc was not shutting
+> down after the card was pulled.
 >
-> Disable LPM negotiation in gl9763e_add_host.
-> This helps in two ways:
-> 1. It was found that the LPM switch stays in the same position after
->    warm reboot. Having it set in init helps with consistency.
-> 2. Disabling LPM during the first runtime resume leaves us susceptible
->    to the performance issue in the time window between boot and the
->    first runtime suspend.
+> cat /sys/kernel/debug/regulator/regulator_summary
+> 1.before fix
+> 1)Insert SD card
+>  vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
+>     71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
 >
-> Fixes: f9e5b33934ce ("mmc: host: Improve I/O read/write performance for G=
-L9763E")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Kornel Dul=C4=99ba <korneld@chromium.org>
+> 2)Pull out the SD card
+>  vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
+>     71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
+>
+> 2.after fix
+> 1)Insert SD cardt
+>  vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
+>     71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
+>
+> 2)Pull out the SD card
+>  vddsdio                0    1  0 unknown  3500mV 0mA  1200mV  3750mV
+>     71100000.mmc-vqmmc  0                         0mA  3500mV  3600mV
+>
+> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
+> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Applied for fixes, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
+>
+> Change in v2:
+> - Remove useless sdhci_sprd_signal_voltage_switch and power_mode.
+> - Use mmc_regulator_get_supply in probe to prevent sdhci_setup_host
+>   from powering up vqmmc.
 > ---
-> v2: Move up gl9763e_set_low_power_negotiation to avoid having to forward
->     declare it.
+>  drivers/mmc/host/sdhci-sprd.c | 25 +++++++++++++++++++++++++
+>  1 file changed, 25 insertions(+)
 >
->  drivers/mmc/host/sdhci-pci-gli.c | 54 +++++++++++++++++---------------
->  1 file changed, 29 insertions(+), 25 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pc=
-i-gli.c
-> index d8a991b349a8..77911a57b12c 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -1189,6 +1189,32 @@ static void gl9763e_hs400_enhanced_strobe(struct m=
-mc_host *mmc,
->         sdhci_writel(host, val, SDHCI_GLI_9763E_HS400_ES_REG);
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index 6b84ba27e6ab..6b8a57e2d20f 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -416,12 +416,33 @@ static void sdhci_sprd_request_done(struct sdhci_host *host,
+>         mmc_request_done(host->mmc, mrq);
 >  }
 >
-> +static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slo=
-t,
-> +                                             bool enable)
+> +static void sdhci_sprd_set_power(struct sdhci_host *host, unsigned char mode,
+> +                                unsigned short vdd)
 > +{
-> +       struct pci_dev *pdev =3D slot->chip->pdev;
-> +       u32 value;
+> +       struct mmc_host *mmc = host->mmc;
 > +
-> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> +       value &=3D ~GLI_9763E_VHS_REV;
-> +       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
-> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +       switch (mode) {
+> +       case MMC_POWER_OFF:
+> +               mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, 0);
 > +
-> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
-> +
-> +       if (enable)
-> +               value &=3D ~GLI_9763E_CFG_LPSN_DIS;
-> +       else
-> +               value |=3D GLI_9763E_CFG_LPSN_DIS;
-> +
-> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
-> +
-> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> +       value &=3D ~GLI_9763E_VHS_REV;
-> +       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
-> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +               mmc_regulator_disable_vqmmc(mmc);
+> +               break;
+> +       case MMC_POWER_ON:
+> +               mmc_regulator_enable_vqmmc(mmc);
+> +               break;
+> +       case MMC_POWER_UP:
+> +               mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
+> +               break;
+> +       }
 > +}
 > +
->  static void sdhci_set_gl9763e_signaling(struct sdhci_host *host,
->                                         unsigned int timing)
->  {
-> @@ -1297,6 +1323,9 @@ static int gl9763e_add_host(struct sdhci_pci_slot *=
-slot)
->         if (ret)
->                 goto cleanup;
+>  static struct sdhci_ops sdhci_sprd_ops = {
+>         .read_l = sdhci_sprd_readl,
+>         .write_l = sdhci_sprd_writel,
+>         .write_w = sdhci_sprd_writew,
+>         .write_b = sdhci_sprd_writeb,
+>         .set_clock = sdhci_sprd_set_clock,
+> +       .set_power = sdhci_sprd_set_power,
+>         .get_max_clock = sdhci_sprd_get_max_clock,
+>         .get_min_clock = sdhci_sprd_get_min_clock,
+>         .set_bus_width = sdhci_set_bus_width,
+> @@ -823,6 +844,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>         host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+>                          SDHCI_SUPPORT_DDR50);
 >
-> +       /* Disable LPM negotiation to avoid entering L1 state. */
-> +       gl9763e_set_low_power_negotiation(slot, false);
+> +       ret = mmc_regulator_get_supply(host->mmc);
+> +       if (ret)
+> +               goto pm_runtime_disable;
 > +
->         return 0;
->
->  cleanup:
-> @@ -1340,31 +1369,6 @@ static void gli_set_gl9763e(struct sdhci_pci_slot =
-*slot)
->  }
->
->  #ifdef CONFIG_PM
-> -static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slo=
-t, bool enable)
-> -{
-> -       struct pci_dev *pdev =3D slot->chip->pdev;
-> -       u32 value;
-> -
-> -       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> -       value &=3D ~GLI_9763E_VHS_REV;
-> -       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
-> -       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> -
-> -       pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
-> -
-> -       if (enable)
-> -               value &=3D ~GLI_9763E_CFG_LPSN_DIS;
-> -       else
-> -               value |=3D GLI_9763E_CFG_LPSN_DIS;
-> -
-> -       pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
-> -
-> -       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> -       value &=3D ~GLI_9763E_VHS_REV;
-> -       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
-> -       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> -}
-> -
->  static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
->  {
->         struct sdhci_pci_slot *slot =3D chip->slots[0];
+>         ret = sdhci_setup_host(host);
+>         if (ret)
+>                 goto pm_runtime_disable;
 > --
-> 2.43.0.rc0.421.g78406f8d94-goog
+> 2.17.1
 >
