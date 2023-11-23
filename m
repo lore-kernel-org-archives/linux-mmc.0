@@ -1,149 +1,126 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vdH9/viM"
-Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D42F810D4
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:02 -0800 (PST)
-Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-5cce3010367so10403987b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:02 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KniiwsuA"
+Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 342BA10EF
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:09 -0800 (PST)
+Received: by mail-yb1-xb2f.google.com with SMTP id 3f1490d57ef6-db4364ecd6aso737295276.2
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1700759942; x=1701364742; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1700759948; x=1701364748; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=bRIUp/X6KH94V1dmHPajzonMFWyN0k2R15HuLH0rxE0=;
-        b=vdH9/viMXZopA/i6o/AofO0nYc9zKPydxWYyd2rwmq8ZUjciWsFEoI0d7WgJGNh46I
-         wLAiPyk0FSSoaorM7/J9G6ht4IGxBcj1y8mTYDbHgD6teYPf0OgWNBiCDLjg99ejs7u0
-         IJU8+r22tPLpnFHpHRxbshaf5P0rKkNJAAR9jE+04zmL2WriT+YCbIOdf5WQoGMBTTq9
-         ndsUQ1iNfvXHl8kB4ldnXFt3OLSRK7kDVECh4KhrdRft2qeP1xSLHmuaicjqauQCuNwW
-         dIJ2QBwkGe+FVUcFyYW30m6F8FQxHdFGQzgikWDWHRqobJFIr9FGhBAZcyubXFszw4IG
-         OAog==
+        bh=QzfEo5WBvdgfB1Az5F9u3yyf28qwDoy9yb7+zzh0FnU=;
+        b=KniiwsuAsvX0yhKsMeWdT+gmcdXMIT8hXtlOyxALu1WfVFR4zxkjMUohbae9SqDytg
+         ZShCrzsiYKnsqLT2yJ2EiiSVZC3tnY5ARTsMkgr0873wGdKsfkijuNAM77KZbSKQiEMi
+         4S64+pQMCyZlREQwJpPSedBfwEDybDkuEMLkEuOJmHpf+TCa3CUNtw4VVkIsUJM609zh
+         8EJpHJjlQb6Qj4BX2KPaR/Q2HNtmFQV4dIjsWxdZBdZGdV88dNYyiGVtsHvjMZWOJkiG
+         LdQHPL/txurlIcPecZmMUYAfbXGznf9EWrTtpJNcuBehBBXh3lomkAwpFkMUrHzjkbHN
+         5YrA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700759942; x=1701364742;
+        d=1e100.net; s=20230601; t=1700759948; x=1701364748;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=bRIUp/X6KH94V1dmHPajzonMFWyN0k2R15HuLH0rxE0=;
-        b=qHcdlwuKDV2cq/52Hry6t69q1OrsMdj0BwZmTORc/x4IzUkq+QZhDDvNsYFpvbelQk
-         ix3LXNBMPpLT4c2wng/v7JgXlgtfC6kL1nggivCh+Imfnr5FbKEp6uSoqvn66wa5qo9A
-         X3cFdQHYSeiLcwNGOvW+YnSVKmvQkqqIszwZLzMwMvI5k1WJBNA8A4nHM2O97lRj0dVZ
-         qHkDiz1tY5Xn5iTOOCWROXlwS6lxKVdFhGjzKEljC0ABeHGnxiLF1KlYvZNgZ2Vv9PD5
-         HXvcYn8s8kvNZbQmJ3P4JA3HbwxWFkBQJW5cCyR813L8DLbGKw87nSLE4+fS+tgmgj/F
-         I+hw==
-X-Gm-Message-State: AOJu0YyARgLyoJ/4/Et3OlM1q6lPZHyVihPMFS93kBQVkq4eg5uZ5yfn
-	9UQPnRtkdftY2ejHQMB3s7GIo3amYgPvck/g5VOOYA==
-X-Google-Smtp-Source: AGHT+IFXzKMZeuvW1BPKO8joBFVKPsKfpM2I/+f/wsTRT3THsVsSAwM69EGwF7PtesQFhk7BaXI4Y8hMBA/Tv2oP78c=
-X-Received: by 2002:a25:3746:0:b0:da3:76d7:ddbf with SMTP id
- e67-20020a253746000000b00da376d7ddbfmr6099448yba.33.1700759941864; Thu, 23
- Nov 2023 09:19:01 -0800 (PST)
+        bh=QzfEo5WBvdgfB1Az5F9u3yyf28qwDoy9yb7+zzh0FnU=;
+        b=s8EQYrq7MgqdTz9eNi4VKitS/jyFbYwYpSvlG252Elz3SJkuVVufS4cUF755W0JpUx
+         dsWgl/W4A/88TbqBQmWBFJC129TGygy5SRI1bH5fSZK29E6gQILEk4sFItLWN7oGM3mq
+         blYrEpKAeZJc3do2meih6ulZ24HJ1T6zHZzIdXrlIL/LZYPwFbkWiEiIQwY7DtJe8Ar0
+         8Ccz2Xc5icBsdNz8wbTUfeBaqytEJV8QVgjMC73Ki1DSoDWmfiV38EPZmfiNn8XT2I3A
+         SBEG/WhCPiqHwNc17rlz2LMOkTCFKZ4OwP4XosiiLVv13c+jTx2jTEzgZG7IHlACvALW
+         +RZw==
+X-Gm-Message-State: AOJu0YxVcKqgQgGUVb6YQiSQurBdEx9lsRfER2CNdqWCm/HGhvBBMqdG
+	ypiY/E/tMKcPO/+0QEK1IaTIVAnDmKkRI5ke/yvq5A==
+X-Google-Smtp-Source: AGHT+IEmXW41Yp+RFIjdjtRm1iq8rHwdxF6zrXwjU0rUmegEetlfzR0xiq7PtKWXXUYlM7wUx54oeIEvylixkhQM9x4=
+X-Received: by 2002:a25:24e:0:b0:d9a:485f:5852 with SMTP id
+ 75-20020a25024e000000b00d9a485f5852mr5831926ybc.13.1700759948302; Thu, 23 Nov
+ 2023 09:19:08 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231115083406.7368-1-wenchao.chen@unisoc.com>
-In-Reply-To: <20231115083406.7368-1-wenchao.chen@unisoc.com>
+References: <20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-v1-1-7e1a7f4ccaab@kernel.org>
+In-Reply-To: <20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-v1-1-7e1a7f4ccaab@kernel.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 23 Nov 2023 18:18:26 +0100
-Message-ID: <CAPDyKFqJmPEps7tSxuOnerFLohzaTFXjmDo+Mb8nGVODhNE0+A@mail.gmail.com>
-Subject: Re: [PATCH V2] mmc: sprd: Fix vqmmc not shutting down after the card
- was pulled
-To: Wenchao Chen <wenchao.chen@unisoc.com>
-Cc: zhang.lyra@gmail.com, orsonzhai@gmail.com, baolin.wang@linux.alibaba.com, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	wenchao.chen666@gmail.com, zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com
+Date: Thu, 23 Nov 2023 18:18:32 +0100
+Message-ID: <CAPDyKFosve2awkdzzsCJb38tt2154kKKKneXiaBNqQATwdUupw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Use logical OR instead of bitwise
+ OR in dwcmshc_probe()
+To: Nathan Chancellor <nathan@kernel.org>
+Cc: adrian.hunter@intel.com, dfustini@baylibre.com, linux-mmc@vger.kernel.org, 
+	llvm@lists.linux.dev, patches@lists.linux.dev
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 15 Nov 2023 at 09:34, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+On Fri, 17 Nov 2023 at 02:46, Nathan Chancellor <nathan@kernel.org> wrote:
 >
-> With cat regulator_summary, we found that vqmmc was not shutting
-> down after the card was pulled.
+> Clang warns (or errors with CONFIG_WERROR=y):
 >
-> cat /sys/kernel/debug/regulator/regulator_summary
-> 1.before fix
-> 1)Insert SD card
->  vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
->     71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
+>   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: error: use of bitwise '|' with boolean operands [-Werror,-Wbitwise-instead-of-logical]
+>     873 |                 if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
+>         |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>     874 |                     (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
+>         |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>         |                                                                        ||
+>     875 |                     (device_property_read_bool(dev, "mmc-hs400-1_8v")))
+>         |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: note: cast one or both operands to int to silence this warning
+>   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: error: use of bitwise '|' with boolean operands [-Werror,-Wbitwise-instead-of-logical]
+>     873 |                 if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
+>         |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>         |                                                                      ||
+>     874 |                     (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
+>         |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   drivers/mmc/host/sdhci-of-dwcmshc.c:873:7: note: cast one or both operands to int to silence this warning
+>   2 errors generated.
 >
-> 2)Pull out the SD card
->  vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
->     71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
+> There is little reason for this if statement to use bitwise ORs, as the
+> short circuiting of logical OR does not need to be avoided in this
+> context; it would be wasteful to call device_property_read_bool() three
+> times if the first two calls returned true. Switch to logical OR to fix
+> the warning.
 >
-> 2.after fix
-> 1)Insert SD cardt
->  vddsdio                1    1  0 unknown  3500mV 0mA  1200mV  3750mV
->     71100000.mmc-vqmmc  1                         0mA  3500mV  3600mV
+> While in the area, the parentheses around the calls to
+> device_property_read_bool() are not necessary and make the if statement
+> harder to read, so remove them.
 >
-> 2)Pull out the SD card
->  vddsdio                0    1  0 unknown  3500mV 0mA  1200mV  3750mV
->     71100000.mmc-vqmmc  0                         0mA  3500mV  3600mV
->
-> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> Closes: https://github.com/ClangBuiltLinux/linux/issues/1960
+> Fixes: aff35fbc7830 ("mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520")
+> Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
->
-> Change in v2:
-> - Remove useless sdhci_sprd_signal_voltage_switch and power_mode.
-> - Use mmc_regulator_get_supply in probe to prevent sdhci_setup_host
->   from powering up vqmmc.
 > ---
->  drivers/mmc/host/sdhci-sprd.c | 25 +++++++++++++++++++++++++
->  1 file changed, 25 insertions(+)
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index 6b84ba27e6ab..6b8a57e2d20f 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -416,12 +416,33 @@ static void sdhci_sprd_request_done(struct sdhci_host *host,
->         mmc_request_done(host->mmc, mrq);
->  }
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 0eb72544c09e..a1f57af6acfb 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -870,9 +870,9 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>         if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
+>                 priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
 >
-> +static void sdhci_sprd_set_power(struct sdhci_host *host, unsigned char mode,
-> +                                unsigned short vdd)
-> +{
-> +       struct mmc_host *mmc = host->mmc;
-> +
-> +       switch (mode) {
-> +       case MMC_POWER_OFF:
-> +               mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, 0);
-> +
-> +               mmc_regulator_disable_vqmmc(mmc);
-> +               break;
-> +       case MMC_POWER_ON:
-> +               mmc_regulator_enable_vqmmc(mmc);
-> +               break;
-> +       case MMC_POWER_UP:
-> +               mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
-> +               break;
-> +       }
-> +}
-> +
->  static struct sdhci_ops sdhci_sprd_ops = {
->         .read_l = sdhci_sprd_readl,
->         .write_l = sdhci_sprd_writel,
->         .write_w = sdhci_sprd_writew,
->         .write_b = sdhci_sprd_writeb,
->         .set_clock = sdhci_sprd_set_clock,
-> +       .set_power = sdhci_sprd_set_power,
->         .get_max_clock = sdhci_sprd_get_max_clock,
->         .get_min_clock = sdhci_sprd_get_min_clock,
->         .set_bus_width = sdhci_set_bus_width,
-> @@ -823,6 +844,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
->         host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
->                          SDHCI_SUPPORT_DDR50);
+> -               if ((device_property_read_bool(dev, "mmc-ddr-1_8v")) |
+> -                   (device_property_read_bool(dev, "mmc-hs200-1_8v")) |
+> -                   (device_property_read_bool(dev, "mmc-hs400-1_8v")))
+> +               if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
+> +                   device_property_read_bool(dev, "mmc-hs200-1_8v") ||
+> +                   device_property_read_bool(dev, "mmc-hs400-1_8v"))
+>                         priv->flags |= FLAG_IO_FIXED_1V8;
+>                 else
+>                         priv->flags &= ~FLAG_IO_FIXED_1V8;
 >
-> +       ret = mmc_regulator_get_supply(host->mmc);
-> +       if (ret)
-> +               goto pm_runtime_disable;
-> +
->         ret = sdhci_setup_host(host);
->         if (ret)
->                 goto pm_runtime_disable;
+> ---
+> base-commit: 3f00051234f02d0d9d1f63b9a334d0fd4c65b6ca
+> change-id: 20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-bf8fed73b5bb
+>
+> Best regards,
 > --
-> 2.17.1
+> Nathan Chancellor <nathan@kernel.org>
 >
