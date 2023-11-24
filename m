@@ -1,157 +1,84 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lgPEgfot"
-Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7569D65
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:17 -0800 (PST)
-Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-5cc86fcea4fso9504547b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Nov 2023 09:19:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1700759957; x=1701364757; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZWk/RgHbKOlFY39aGIpjm5vZs/TIaAEJUzezOamB9tA=;
-        b=lgPEgfotXMvzK8cXSTLkl0svVRTVi/N2fmGN8N79B3nF4j50ZyNhAAxX2ryP9x/MtQ
-         v6gn9RCMR+hbA++nj3XzDwaVj7vI9qLrT+Qq/4JimW4u09V6+sDF0qVsk59LB7P/3emP
-         9e5yR1WePuJLUiqVD0fqMbE4oMpsA8W88XxvdsrS2cMelUZT0IvEY+ayajr7AlS6j4SB
-         +TZRUSOfO0xPAvxdK+vdDWUTtJN0D0yYZOnAuypa1bqPvXzzitD1A/2yvO/sR+WcGf8Q
-         LGh2CX5/7MBomZOvWVx3LQHnH3DVLVuTymicPoCTPhm5f8+PzRNILyWSW6H+TXNdmVs+
-         k1QQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700759957; x=1701364757;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ZWk/RgHbKOlFY39aGIpjm5vZs/TIaAEJUzezOamB9tA=;
-        b=d7GRiz7/B3Iz7jqGlyzs1vmSFJYBjd5hCRvbLoXllFrRa9yu4Ke7qzrGdXyw9atzZz
-         pGseJBQHtZiFMz+F1zZauDFjdL0BF1wWhSDfwf8HRiuPl+u7+FwqZbyKpqB3vOwuwJUB
-         QOlJdrQhV22D1+Hp3y8yLWBKevPQGHguGysmbK1/RAvq2y7TcSjJ2SznOo3FWO9DiUx+
-         LPhT6ie2ffLcyosoz3UwY33v0wSsRk6PDC5Hz73tORHWzu+Tq4rFNukBbgBb/3A6Qge6
-         kxjN96//sqqkEOlmwN0TBIW4s9mbdQshzq+Iso8mAdFtLvGmVp7KoF5KJWND4gfH6PA7
-         Hc4g==
-X-Gm-Message-State: AOJu0YzwRoUE+IIhHFoz4hcjlm9z8k0gYCjKFvA/xpim7g3n+/sn8Qd1
-	ebaYSU7W8DPfgESHH6HWuxTYoQlarQ4smA90Rdt17Q==
-X-Google-Smtp-Source: AGHT+IFwyFMR/NrdcChscDcLqQ70TVmEfxpocrRkYan5zonKuyVIeZHKpaW0fvUM00WVfJdfUBy1f7OPfUyE579mt2A=
-X-Received: by 2002:a0d:f986:0:b0:5c5:d898:e476 with SMTP id
- j128-20020a0df986000000b005c5d898e476mr17348ywf.33.1700759956922; Thu, 23 Nov
- 2023 09:19:16 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="swSfnQct"
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C60FCD41;
+	Thu, 23 Nov 2023 23:08:52 -0800 (PST)
+X-UUID: 4e54f2168a9811ee8051498923ad61e6-20231124
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=biIA5nolcnycLWZaSMxodwzv1zZqXFegizuysjjQ1Dg=;
+	b=swSfnQctm2+GAjYGziawP3gw9yMH2HjcJnJaUHep5nmPXrsmypZrZfEiTNZ1D2Zrgd+L19Ale+grtzUK2D2eQyMALGUXBwR/4st9AzibgEbSeUWmhI8LkVH2UmJ8H8aRA0AjG4gUGO7bdQrYb5hM74ZqKHp60uc3zT+dFAqg7Nw=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.33,REQID:a47b03b3-735e-440d-8dd2-864a67b2550d,IP:0,U
+	RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+	:release,TS:-5
+X-CID-META: VersionHash:364b77b,CLOUDID:406fc395-10ce-4e4b-85c2-c9b5229ff92b,B
+	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
+	RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,
+	DKR:0,DKP:0,BRR:0,BRE:0
+X-CID-BVR: 0
+X-CID-BAS: 0,_,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-UUID: 4e54f2168a9811ee8051498923ad61e6-20231124
+Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw02.mediatek.com
+	(envelope-from <axe.yang@mediatek.com>)
+	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+	with ESMTP id 1227275916; Fri, 24 Nov 2023 15:08:44 +0800
+Received: from mtkmbs13n2.mediatek.inc (172.21.101.108) by
+ MTKMBS14N1.mediatek.inc (172.21.101.75) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.26; Fri, 24 Nov 2023 15:08:42 +0800
+Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
+ mtkmbs13n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Fri, 24 Nov 2023 15:08:41 +0800
+From: Axe Yang <axe.yang@mediatek.com>
+To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, "Krzysztof
+ Kozlowski" <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley
+	<conor+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, "Wenbin
+ Mei" <wenbin.mei@mediatek.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+	<linux-mediatek@lists.infradead.org>,
+	<Project_Global_Chrome_Upstream_Group@mediatek.com>
+Subject: [PATCH v1 0/2] mmc: mediatek: add support for complete clock cycle tuning
+Date: Fri, 24 Nov 2023 15:08:37 +0800
+Message-ID: <20231124070839.12484-1-axe.yang@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231122060215.2074799-1-vigneshr@ti.com>
-In-Reply-To: <20231122060215.2074799-1-vigneshr@ti.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 23 Nov 2023 18:18:41 +0100
-Message-ID: <CAPDyKFrsXSwyU-VsPEt1tYCPWk99XaNZ7kJGGWPEDEYBWaPktg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci_am654: Drop lookup for deprecated ti,otap-del-sel
-To: Vignesh Raghavendra <vigneshr@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-TM-AS-Product-Ver: SMEX-14.0.0.3152-9.1.1006-23728.005
+X-TM-AS-Result: No-10--4.394300-8.000000
+X-TMASE-MatchedRID: tiRXYRqWr+s9S3IiQd+eNQUNJ/OP1hfdTJDl9FKHbrmdohxAwFG9tKPF
+	jJEFr+olKE0Je8DR/D4CU1PRf9o2s90H8LFZNFG7doMssNsUwYV3W1qHy8N3b+43JwG7OOXNPDY
+	iTTu2WpE5YJpG/jXVlKC1Q6bYV6FwaaeeX2Q5bK9+HGPweyal2mGdUezV59DHQZpgl3CshRSeqD
+	9WtJkSIw==
+X-TM-AS-User-Approved-Sender: No
+X-TM-AS-User-Blocked-Sender: No
+X-TMASE-Result: 10--4.394300-8.000000
+X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
+X-TM-SNTS-SMTP:
+	E95754AC5D9D43F15DE16F73CCF87387CB93DDE3ED625A8CFDA9C6099A14A6B92000:8
+X-MTK: N
 
-On Wed, 22 Nov 2023 at 07:05, Vignesh Raghavendra <vigneshr@ti.com> wrote:
->
-> ti,otap-del-sel has been deprecated since v5.7 and there are no users of
-> this property and no documentation in the DT bindings either.
-> Drop the fallback code looking for this property, this makes
-> sdhci_am654_get_otap_delay() much easier to read as all the TAP values
-> can be handled via a single iterator loop.
->
-> Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Add support for 64-steps tuning for better calibration result.
+In the past, msdc driver only tune 32-steps and may not achieve the
+globally optimal sampling delay.
 
-Applied for next, thanks!
+Axe Yang (2):
+  mmc: mediatek: add support for 64-steps tuning
+  dt-bindings: mmc: mtk-sd: add 64-steps tuning related property
 
-Kind regards
-Uffe
+ .../devicetree/bindings/mmc/mtk-sd.yaml       |   8 ++
+ drivers/mmc/host/mtk-sd.c                     | 133 +++++++++++++-----
+ 2 files changed, 105 insertions(+), 36 deletions(-)
 
+-- 
+2.25.1
 
-> ---
->
-> v2:
-> * Drop legacy_otapdly as pointed out by Adrian
->
-> v1: https://lore.kernel.org/r/20231110072535.2695134-1-vigneshr@ti.com
->
->  drivers/mmc/host/sdhci_am654.c | 37 ++++++----------------------------
->  1 file changed, 6 insertions(+), 31 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index 967bd2dfcda1..d659c59422e1 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -141,7 +141,6 @@ static const struct timing_data td[] = {
->
->  struct sdhci_am654_data {
->         struct regmap *base;
-> -       bool legacy_otapdly;
->         int otap_del_sel[ARRAY_SIZE(td)];
->         int itap_del_sel[ARRAY_SIZE(td)];
->         int clkbuf_sel;
-> @@ -272,11 +271,7 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
->         sdhci_set_clock(host, clock);
->
->         /* Setup DLL Output TAP delay */
-> -       if (sdhci_am654->legacy_otapdly)
-> -               otap_del_sel = sdhci_am654->otap_del_sel[0];
-> -       else
-> -               otap_del_sel = sdhci_am654->otap_del_sel[timing];
-> -
-> +       otap_del_sel = sdhci_am654->otap_del_sel[timing];
->         otap_del_ena = (timing > MMC_TIMING_UHS_SDR25) ? 1 : 0;
->
->         mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
-> @@ -314,10 +309,7 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
->         u32 mask, val;
->
->         /* Setup DLL Output TAP delay */
-> -       if (sdhci_am654->legacy_otapdly)
-> -               otap_del_sel = sdhci_am654->otap_del_sel[0];
-> -       else
-> -               otap_del_sel = sdhci_am654->otap_del_sel[timing];
-> +       otap_del_sel = sdhci_am654->otap_del_sel[timing];
->
->         mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
->         val = (0x1 << OTAPDLYENA_SHIFT) |
-> @@ -577,32 +569,15 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
->         int i;
->         int ret;
->
-> -       ret = device_property_read_u32(dev, td[MMC_TIMING_LEGACY].otap_binding,
-> -                                &sdhci_am654->otap_del_sel[MMC_TIMING_LEGACY]);
-> -       if (ret) {
-> -               /*
-> -                * ti,otap-del-sel-legacy is mandatory, look for old binding
-> -                * if not found.
-> -                */
-> -               ret = device_property_read_u32(dev, "ti,otap-del-sel",
-> -                                              &sdhci_am654->otap_del_sel[0]);
-> -               if (ret) {
-> -                       dev_err(dev, "Couldn't find otap-del-sel\n");
-> -
-> -                       return ret;
-> -               }
-> -
-> -               dev_info(dev, "Using legacy binding ti,otap-del-sel\n");
-> -               sdhci_am654->legacy_otapdly = true;
-> -
-> -               return 0;
-> -       }
-> -
->         for (i = MMC_TIMING_LEGACY; i <= MMC_TIMING_MMC_HS400; i++) {
->
->                 ret = device_property_read_u32(dev, td[i].otap_binding,
->                                                &sdhci_am654->otap_del_sel[i]);
->                 if (ret) {
-> +                       if (i == MMC_TIMING_LEGACY) {
-> +                               dev_err(dev, "Couldn't find mandatory ti,otap-del-sel-legacy\n");
-> +                               return ret;
-> +                       }
->                         dev_dbg(dev, "Couldn't find %s\n",
->                                 td[i].otap_binding);
->                         /*
-> --
-> 2.42.0
->
