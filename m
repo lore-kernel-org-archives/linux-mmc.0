@@ -1,93 +1,105 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B01D918027;
-	Mon, 27 Nov 2023 14:24:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P8p8fU0x"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 18C7AC433C7;
-	Mon, 27 Nov 2023 14:24:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1701095078;
-	bh=6o6WiiW5vMWoso1wugzB6W7zAENqZGxNfsw46EhA5Gc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=P8p8fU0xHZI1AT78w1hQe0jjlSkJjrwNVQq/L+MQE5tLmPq6aTL1T3u5P3vHRRPfG
-	 voyE9HYuCFj/fKyx9mjB9AzO38gX1ljTnl+gKfDWhl8DR1/Ff8iQLUld4uY5Ly+Zpf
-	 WCtIeYRwYPG6hFDHfFj3sO95UNcEsOJJoabPkX82UxPOMEJDEETv4EOi4vl0CH9HnE
-	 r74t01i88hlV1GQZNN8BwZHHNDfNp2HK9jN7pGqzp9f15y+g+me9cWIgqeP9R46gaO
-	 DfjyvkZP/fOpsc3tXsFOXQCah/1Etg9+FZ7FvRN6IUw0boP56OxnBHm0ng4KHkY/qj
-	 vXdFx3fmVWTKQ==
-Date: Mon, 27 Nov 2023 14:24:21 +0000
-From: Mark Brown <broonie@kernel.org>
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Matti Vaittinen <mazziesaccount@gmail.com>,
-	Oleksij Rempel <o.rempel@pengutronix.de>,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-pm@vger.kernel.org,
-	=?iso-8859-1?Q?S=F8ren?= Andersen <san@skov.dk>
-Subject: Re: [PATCH v1 0/3] introduce priority-based shutdown support
-Message-ID: <ZWSmlfWYSbQHVvOk@finisterre.sirena.org.uk>
-References: <20231124145338.3112416-1-o.rempel@pengutronix.de>
- <2023112403-laxative-lustiness-6a7f@gregkh>
- <ZWC/hKav0JANhWKM@finisterre.sirena.org.uk>
- <2023112458-stature-commuting-c66f@gregkh>
- <ZWDGGqsCq9iSnHtO@finisterre.sirena.org.uk>
- <2023112435-dazzler-crisped-04a6@gregkh>
- <20231124163234.GC819414@pengutronix.de>
- <2023112453-flagstick-bullring-8511@gregkh>
- <CANhJrGPop=tL8y+chvPwMpSZYF1pkeWeRp3xL+7JsuY=U0fyag@mail.gmail.com>
- <2023112722-headdress-kissing-8c9f@gregkh>
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="a7pYE2aW"
+Received: from mail-il1-x134.google.com (mail-il1-x134.google.com [IPv6:2607:f8b0:4864:20::134])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B671FA3
+	for <linux-mmc@vger.kernel.org>; Mon, 27 Nov 2023 06:48:50 -0800 (PST)
+Received: by mail-il1-x134.google.com with SMTP id e9e14a558f8ab-35c690f6e00so10135485ab.1
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Nov 2023 06:48:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google; t=1701096530; x=1701701330; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=E3FLX3YynhvX8mGBDXZEVUPH4OcHBZ2EUZ4Lk2rEt1c=;
+        b=a7pYE2aWifuoFRXSQ6zcnLuYt2Sy2I9bDprPt9EY4fq6088lhrMaYlFdNbO7UdURf7
+         svn+etxDHXIcX71dsZOmAVmFQI/zR8dEtVudgIu2SSouRSASnqUJKdMkyh1gVruPU4xV
+         NyEX8r06w72PHkJnYM5wZ7EvMOsMlpmXH2KN0=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701096530; x=1701701330;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=E3FLX3YynhvX8mGBDXZEVUPH4OcHBZ2EUZ4Lk2rEt1c=;
+        b=FUpS/doDsenZaRHPGZOZkg9lfdovzT8W+996qyK9u7Ir9BNLeNY2LkBxhy5FOIyCU6
+         +RpjJSzHMsse7WERYnrIde7/poT302qgtr9xSY8PU6shRqXjkT/VQefsQ4qGGT+QGGBY
+         xtwY78zumpat8jbulPy0GfIbO/X7NqaQzVYF9fUYz0bASU14qNsK75rAuuo19UCY1aBf
+         m9NUJ0LLJ4kFIDmKNrhBwhkeXM9UyvChocmBvYAkssEhW1ED/G92go5iPfo7FJoSmTl/
+         0wTj4a51I6iFrsodmPrhOwmpVDj1k3VkmiFoBsJf/FUhWxsF8d2zDTFac4IUwPnkmF13
+         YwJQ==
+X-Gm-Message-State: AOJu0Yz5xVZuS8n0TMCpz7JVYlFTmcXxLOkGrVKMVkN+c/ymxY/NRm1V
+	Cxki7ZzIGqNnH2Li7aV34VfAFI1wFV82bemZE7jFtw==
+X-Google-Smtp-Source: AGHT+IGcnqezwlGNDh2RQ7YHJ0GhpoAmyujmyGpF9m9aXpMS1mAWqIijhV4vdV0EDPLxT8+wxU+ENK4jUdVRZpXfG9I=
+X-Received: by 2002:a05:6e02:20eb:b0:35c:7b32:2425 with SMTP id
+ q11-20020a056e0220eb00b0035c7b322425mr11231186ilv.8.1701096530125; Mon, 27
+ Nov 2023 06:48:50 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="GnVq4IS3znoTYk/l"
-Content-Disposition: inline
-In-Reply-To: <2023112722-headdress-kissing-8c9f@gregkh>
-X-Cookie: Slow day.  Practice crawling.
+References: <20231117095531.1693753-1-treapking@chromium.org> <CAPDyKFqjcP2pAH8uo61Yc7wU76NM1aCMN6P1TaAoafCFfZSeWw@mail.gmail.com>
+In-Reply-To: <CAPDyKFqjcP2pAH8uo61Yc7wU76NM1aCMN6P1TaAoafCFfZSeWw@mail.gmail.com>
+From: Pin-yen Lin <treapking@chromium.org>
+Date: Mon, 27 Nov 2023 22:48:39 +0800
+Message-ID: <CAEXTbpd7qD4qzY0p3rDD92eTMVCeu+ZsOWBMwJA8cOYe8=JvgA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mtk-sd: Increase the verbosity of msdc_track_cmd_data
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, linux-kernel@vger.kernel.org, 
+	linux-mediatek@lists.infradead.org, Chen-Yu Tsai <wenst@chromium.org>, 
+	ot_shunxi.zhang@mediatek.corp-partner.google.com, 
+	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+Hi Ulf,
 
---GnVq4IS3znoTYk/l
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Fri, Nov 24, 2023 at 1:13=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+>
+> On Fri, 17 Nov 2023 at 10:55, Pin-yen Lin <treapking@chromium.org> wrote:
+> >
+> > This log message is necessary for debugging, so enable it by default to
+> > debug issues that are hard to reproduce locally.
+> >
+> > Signed-off-by: Pin-yen Lin <treapking@chromium.org>
+> >
+> > ---
+> >
+> >  drivers/mmc/host/mtk-sd.c | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > index 97f7c3d4be6e..4469003f571e 100644
+> > --- a/drivers/mmc/host/mtk-sd.c
+> > +++ b/drivers/mmc/host/mtk-sd.c
+> > @@ -1150,7 +1150,7 @@ static void msdc_recheck_sdio_irq(struct msdc_hos=
+t *host)
+> >  static void msdc_track_cmd_data(struct msdc_host *host, struct mmc_com=
+mand *cmd)
+> >  {
+> >         if (host->error)
+> > -               dev_dbg(host->dev, "%s: cmd=3D%d arg=3D%08X; host->erro=
+r=3D0x%08X\n",
+> > +               dev_err(host->dev, "%s: cmd=3D%d arg=3D%08X; host->erro=
+r=3D0x%08X\n",
+> >                         __func__, cmd->opcode, cmd->arg, host->error);
+>
+> How critical is this? Should we perhaps use a dev_warn instead?
 
-On Mon, Nov 27, 2023 at 01:08:24PM +0000, Greg Kroah-Hartman wrote:
+After rechecking the driver, I agree that dev_warn() is probably
+enough as the driver tries to reset the hardware to recover from the
+bad state when this error happens.
 
-> Yes, using device tree would be good, but now you have created something
-> that is device-tree-specific and not all the world is device tree :(
+I'll wait a few days before sending out v2 to see if Mediatek people
+can confirm this.
 
-AFAICT the idiomatic thing for ACPI would be platform quirks based on
-DMI information.  Yay ACPI.  If the system is more Linux targetted then
-you can use _DSD properties to store DT properties, these can then be
-parsed out in a firmware interface neutral way via the fwnode API.  I'm
-not sure there's any avoiding dealing with firmware interface specifics
-at some point if we need platform description.
-
-> Also, many devices are finally moving out to non-device-tree busses,
-> like PCI and USB, so how would you handle them in this type of scheme?
-
-DT does have bindings for devices on discoverable buses like PCI - I
-think the original thing was for vendors cheaping out on EEPROMs though
-it's also useful when things are soldered down in embedded systems.
-
---GnVq4IS3znoTYk/l
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmVkppQACgkQJNaLcl1U
-h9DzJgf/XZUIgoFfylrAspVzy9yXRhGFCwnuYJ3iQcB6u9nrbRn4Q23KaWhqcE0D
-jOJpQrRYwe5aO4uKTjd0aVhVrG1CxKduAiFumXEv4cklRha0Q+wL8KNakiP4RCJQ
-q48wd503qPV3zXpNrzTQiJfoP2um+AhLoy3b+xRAwkc+GH4r6m21KEfPQ55LVo1j
-34LrG9W97d/PsfdRyejjSbEl2iXD6Axs1z7/kCixJ4+6mckRgpgnpokNEav3RBoN
-DNkDOMZG88u8wtjnMiqupqw4SoWrK0LD+OjxITxu5O9PajfAlmzW2OHGsVmw5dBw
-7FynB37oyWMtsKfu+RUQz9rtt2McZg==
-=W9Ia
------END PGP SIGNATURE-----
-
---GnVq4IS3znoTYk/l--
+Thanks and regards,
+Pin-yen
+>
+> >  }
+> >
+>
+> Kind regards
+> Uffe
