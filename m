@@ -1,60 +1,91 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C02053033D
-	for <linux-mmc@vger.kernel.org>; Mon, 27 Nov 2023 13:54:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E50330F88;
+	Mon, 27 Nov 2023 14:09:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="MphXs9bt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4D53DC41679;
-	Mon, 27 Nov 2023 13:54:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1701093268;
-	bh=LgvZU5k7cgHeOMUcETAIPa4Pu0VIlDFzMv+d5VcByyY=;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="B48zSKFv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D4281C433CC;
+	Mon, 27 Nov 2023 14:09:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1701094176;
+	bh=Rzm1pffWSXspIZnYman5Fq3ZA6DmRbWYR/wrDSYJOAw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=MphXs9btSX61mRsNhuH7amT+CEyvbZGPGONeRjDm1bDwnQxl9FbO/xMVPVw8ZXQG2
-	 1+z2XV6Yf4mLvll0mvsHjNj1u6jHpBsRe1MqloE/lELxahquKtzbACVTwMQu6UvOdu
-	 nYl0ff4tkT1bcGyIwRTf3+R9xxTuh41nZMXUve34=
-Date: Mon, 27 Nov 2023 13:40:07 +0000
-From: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
-To: Ricky WU <ricky_wu@realtek.com>
-Cc: "arnd@arndb.de" <arnd@arndb.de>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-	"frank.li@vivo.com" <frank.li@vivo.com>,
-	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
-	"u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH v4 1/3] misc: rtsx: add to support new card reader
- rts5264 new  definition and function
-Message-ID: <2023112714-tarmac-reapprove-7f75@gregkh>
-References: <bf45a73f01cc43669dc3796ccff25598@realtek.com>
+	b=B48zSKFvCfDTu1F6pwsZ2SDK5DH8Cd9q7yYg1pMzuqVQ9ycLZ/kL5GunnlGuWLvZg
+	 LkLwo6oEmtk8t+hImaDCKhVzLLttkkQjD5tYCGJsAxSu2Gtk1DXlKrioF09SdTc+Jx
+	 rlcRGYrBPtFa8M4iRVu1223CXUj4Qd7vj6mckhQSuRiKjpt+hDD6FLEanWigKEPA2H
+	 p9YSSW6pe471F28DrI1iYQhrOYdvAlpRsqJKmJxCKc/JMhFgKnWItIf8KPYjmqVYe/
+	 Cocqlv3gx+14BMCGx2b/pSPAY+piCErvLWUd7haF/kgPP8FLc/dUdEmCjf6aS/EjrN
+	 S94trnx9DxVog==
+Date: Mon, 27 Nov 2023 14:09:33 +0000
+From: Mark Brown <broonie@kernel.org>
+To: Ferry Toth <fntoth@gmail.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Oleksij Rempel <o.rempel@pengutronix.de>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-pm@vger.kernel.org,
+	=?iso-8859-1?Q?S=F8ren?= Andersen <san@skov.dk>
+Subject: Re: [PATCH v1 0/3] introduce priority-based shutdown support
+Message-ID: <ZWSjHdupI4KT/w4A@finisterre.sirena.org.uk>
+References: <20231124185725.GA872366@pengutronix.de>
+ <2023112520-paper-image-ef5d@gregkh>
+ <20231125085038.GA877872@pengutronix.de>
+ <2023112506-unselfish-unkind-adcb@gregkh>
+ <ZWHM0lRPOp/efyD5@finisterre.sirena.org.uk>
+ <2023112541-uptown-tripping-05f3@gregkh>
+ <ZWIWBhBN8AmK7tAJ@finisterre.sirena.org.uk>
+ <2023112504-cathedral-pulmonary-83ce@gregkh>
+ <ZWMaMIGUo9DeyEH+@finisterre.sirena.org.uk>
+ <56823ff4-69fa-4c92-8912-51fbfd71403a@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="WNnJnhr0Ry+xKVz2"
+Content-Disposition: inline
+In-Reply-To: <56823ff4-69fa-4c92-8912-51fbfd71403a@gmail.com>
+X-Cookie: Slow day.  Practice crawling.
+
+
+--WNnJnhr0Ry+xKVz2
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <bf45a73f01cc43669dc3796ccff25598@realtek.com>
 
-On Mon, Oct 30, 2023 at 03:55:30AM +0000, Ricky WU wrote:
-> rts5264.h new definitions for new chip rts5264
-> rts5264.c new functions for new chip rts5264
+On Sun, Nov 26, 2023 at 08:42:02PM +0100, Ferry Toth wrote:
 
-I'm sorry, but I do not understand this changelog at all.
+> Funny discussion. As a hardware engineer (with no experience in automotive,
+> but actual experience in industrial applications and debugging issues
+> arising from bad shutdowns) let me add my 5ct at the end.
 
-As my bot would say:
+I suspect there's also a space here beyond systems that were designed
+with these failure modes in mind where people run into issues once they
+have the hardware and are trying to improve what they can after the fact.
 
-- You did not specify a description of why the patch is needed, or
-  possibly, any description at all, in the email body.  Please read the
-  section entitled "The canonical patch format" in the kernel file,
-  Documentation/process/submitting-patches.rst for what is needed in
-  order to properly describe the change.
+> Now, we do need to keep in mind that storing J in a supercap, executing a
+> CPU at GHz, storing GB data do not come free. So, after making sure things
+> shutdown in time, it often pays off to shorten that deadline, and indeed
+> make it faster.
 
-Please read that and fix up and resend this as a proper patch series
-(your patches are not connected somehow).
+Indeed.
 
-thanks,
+--WNnJnhr0Ry+xKVz2
+Content-Type: application/pgp-signature; name="signature.asc"
 
-greg k-h
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmVkoxwACgkQJNaLcl1U
+h9Bcygf+L5hzSTavWgidr0hhi4465zqbw6YHoR2jz/DNlD7AC58rPR5FEWs0ruwB
+dYLUl6i9VzuNAc9R7DXPwA1hlzqOMJSVLZdNKR8FN6oqaCQfkGAb2WEp8B+CVVhh
+SUq1PlZIbWA47Rgj42qjHd7etTeUrNiLH90R1mnon4PiJCQbbba0trpOO1Mf/IbP
+uQY0PMswnm+Vdq2FuNrDHjAmMYPn+5fpsfk60E9OZxONpxX8ElNZQ9bnluWbA0a2
+rDafPPNO2BBrIiJqRNrsmsZjQ7nCwUpcqih7JLsmAG/RKoDG9b0GmgD+vOsRBCus
+z2mNJo7Q5npN3R0aK/oDnOl/g/ymCw==
+=1hbz
+-----END PGP SIGNATURE-----
+
+--WNnJnhr0Ry+xKVz2--
