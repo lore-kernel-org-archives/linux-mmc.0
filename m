@@ -1,88 +1,45 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED4F335882;
-	Mon, 27 Nov 2023 16:25:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AD5726AC3;
+	Mon, 27 Nov 2023 17:32:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KXLzUMq0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F39B0C433C7;
-	Mon, 27 Nov 2023 16:25:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DXI7RxKK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F028CC433C7;
+	Mon, 27 Nov 2023 17:32:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1701102304;
-	bh=jc8FKRZZFa7tBi4FMGUMBS1Wxj4Lg8wGqG+jw+xitxY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=KXLzUMq0Pc8HJxv1LoZ2noEVGkJQhnUHrTFGCXfyiyz2VYT0BReNjuZvSDufyIdDl
-	 AxTgNzgihrxN8ikKBuBR8fczBzGMKOi8ie4eie/NJi+2ufkTkvH+wDjKcJEVfNiWUP
-	 ddwjfSwY77MEpfaiD+QhEn0UiNvsd4HQoBd7k2jE95jRgOSBZOg5IQ7ksU6mrusrit
-	 lBG/AY4xzQEIKwtqdkhQ1r3ym632CTZDz05FvtPcmY0yUjuRt5arIX3ugUJUtZ4ZFt
-	 BNBJ/bfxOiOKvJAcY7UiPOctOP4CdygFyTbSiZ3qhbEJ80n3QCwQJHA5ucXNiqoDo1
-	 xc7m/vIIGrVDg==
-Date: Mon, 27 Nov 2023 16:23:47 +0000
-From: Mark Brown <broonie@kernel.org>
-To: Matti Vaittinen <mazziesaccount@gmail.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Oleksij Rempel <o.rempel@pengutronix.de>,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-pm@vger.kernel.org,
-	=?iso-8859-1?Q?S=F8ren?= Andersen <san@skov.dk>
-Subject: Re: [PATCH v1 0/3] introduce priority-based shutdown support
-Message-ID: <ZWTCk7coYuZBe8me@finisterre.sirena.org.uk>
-References: <2023112403-laxative-lustiness-6a7f@gregkh>
- <ZWC/hKav0JANhWKM@finisterre.sirena.org.uk>
- <2023112458-stature-commuting-c66f@gregkh>
- <ZWDGGqsCq9iSnHtO@finisterre.sirena.org.uk>
- <2023112435-dazzler-crisped-04a6@gregkh>
- <20231124163234.GC819414@pengutronix.de>
- <2023112453-flagstick-bullring-8511@gregkh>
- <CANhJrGPop=tL8y+chvPwMpSZYF1pkeWeRp3xL+7JsuY=U0fyag@mail.gmail.com>
- <2023112722-headdress-kissing-8c9f@gregkh>
- <bb332c07-6cf6-4f38-99f5-657a48c332d9@gmail.com>
+	s=k20201202; t=1701106377;
+	bh=BgbaDnMC2tbzXy23qRFkhrncnNLb4XGkV4S41F/p7Yo=;
+	h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
+	b=DXI7RxKKeHC0GXYGmZOGMuRiMzmNk9RZRAk9d6TgCRObIqhjmUKxd7gpN9k7M15C6
+	 BPzw40RPJFMcJeMtdcbsa0yuQTewyQVevXDa88g95ZwmFlqabn9uk2nkWA26ALdEOz
+	 QSrvkAgaJVIHtFw3E1X4kpmAUQMdy+l9Qvui2ArtIPxgcc/6WEv8lRAXbUHD0E2gIc
+	 aXRSzPbd+ltAAmFemcwCSxQJsj5kH1BChAxnwpKAta+d3AUMERGy55J6Jl8pdQcyME
+	 JF3FG4ZxnUykx2HLRGmqbPeWFlt8V9xyPNUUnt/WN62CPMKOLuo+ercwqq3n4VfIhR
+	 vnWXMyo3dhZfQ==
+Message-ID: <b711a36c58455deeef5e1caa6669f546.sboyd@kernel.org>
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="CK63ajjUxdVN8+D6"
-Content-Disposition: inline
-In-Reply-To: <bb332c07-6cf6-4f38-99f5-657a48c332d9@gmail.com>
-X-Cookie: Slow day.  Practice crawling.
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20231124092121.16866-1-krzysztof.kozlowski@linaro.org>
+References: <20231124092121.16866-1-krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH] dt-bindings: correct white-spaces in examples
+From: Stephen Boyd <sboyd@kernel.org>
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To: Conor Dooley <conor+dt@kernel.org>, Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-clk@vger.kernel.org, linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, linux-pm@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, netdev@vger.kernel.org
+Date: Mon, 27 Nov 2023 09:32:54 -0800
+User-Agent: alot/0.10
 
+Quoting Krzysztof Kozlowski (2023-11-24 01:21:21)
+> Use only one and exactly one space around '=3D' in DTS example.
+>=20
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+>=20
+> ---
 
---CK63ajjUxdVN8+D6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Mon, Nov 27, 2023 at 04:49:49PM +0200, Matti Vaittinen wrote:
-> On 11/27/23 15:08, Greg Kroah-Hartman wrote:
-
-> > Yes, using device tree would be good, but now you have created something
-> > that is device-tree-specific and not all the world is device tree :(
-
-> True. However, my understanding is that the regulator subsystem is largely
-> written to work with DT-based systems. Hence supporting the DT-based
-> solution would probably fit to this specific use-case as source of problem
-> notifications is the regulator subsystem.
-
-Yes, ACPI has a strong model that things like regulators and clocks are
-not visible to the OS.
-
---CK63ajjUxdVN8+D6
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmVkwowACgkQJNaLcl1U
-h9BDiAf+KwCxhYlcA3uQ1atUaynwHjGNkgXo8Ut7HBI+cOgmFK1J8IsfAFBCvIgf
-lTsLgsELLWsxrXQi9WcasTONuH0ROLYTriDuLvnxwZxThHeTCjByNIl0S0QnTfge
-6BkXfwQUX087S+8e7lgaDgmM+JcX7kBYz/akL6bLlvk3zsHK/flRnc8O1G1Sx7Bl
-SZUMqpK+YftJZWv79pfMd8nQfA1BN6cvXx8+AzgfJ2hPdj0mjiA9JcYILa1UG2yT
-RAOufMpiJdSIBv+tiruE7ssd5ciFsX1Ips7oJpjqmWcPVe6JB5bJUyN4LJDY7TSy
-ALFwDSPvFjLQfwb8sv1EGqzUowg+EA==
-=4EY+
------END PGP SIGNATURE-----
-
---CK63ajjUxdVN8+D6--
+Acked-by: Stephen Boyd <sboyd@kernel.org>
