@@ -1,148 +1,145 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [IPv6:2a0a:edc0:2:b01:1d::104])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E79BDAA
-	for <linux-mmc@vger.kernel.org>; Mon, 27 Nov 2023 04:51:48 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <p.zabel@pengutronix.de>)
-	id 1r7b5A-0003Jf-Mc; Mon, 27 Nov 2023 13:51:24 +0100
-Received: from [2a0a:edc0:0:900:1d::4e] (helo=lupine)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <p.zabel@pengutronix.de>)
-	id 1r7b55-00Bwme-Ia; Mon, 27 Nov 2023 13:51:19 +0100
-Received: from pza by lupine with local (Exim 4.96)
-	(envelope-from <p.zabel@pengutronix.de>)
-	id 1r7b55-000C2j-1c;
-	Mon, 27 Nov 2023 13:51:19 +0100
-Message-ID: <23011695aafca595c3c8722fda2a8e194c5318df.camel@pengutronix.de>
-Subject: Re: [PATCH v7][2/4] mmc: Add Synopsys DesignWare mmc cmdq host
- driver
-From: Philipp Zabel <p.zabel@pengutronix.de>
-To: Jyan Chou <jyanchou@realtek.com>, ulf.hansson@linaro.org, 
-	adrian.hunter@intel.com, jh80.chung@samsung.com, riteshh@codeaurora.org, 
-	robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org
-Cc: conor+dt@kernel.org, asutoshd@codeaurora.org, linux-mmc@vger.kernel.org,
-  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, arnd@arndb.de, 
- briannorris@chromium.org, doug@schmorgal.com, tonyhuang.sunplus@gmail.com, 
- abel.vesa@linaro.org, william.qiu@starfivetech.com
-Date: Mon, 27 Nov 2023 13:51:19 +0100
-In-Reply-To: <20231121091101.5540-3-jyanchou@realtek.com>
-References: <20231121091101.5540-1-jyanchou@realtek.com>
-	 <20231121091101.5540-3-jyanchou@realtek.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.46.4-2 
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JNdWPsxR"
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 129899B;
+	Mon, 27 Nov 2023 04:54:36 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id 2adb3069b0e04-5079f3f3d7aso5956178e87.1;
+        Mon, 27 Nov 2023 04:54:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1701089674; x=1701694474; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=1oFnC0b1PtxuN5vYy6tuSprXuKKzLkI41CJlzuYtP+s=;
+        b=JNdWPsxRjsb8kSuM1S/nMIW3C1wYTjQtiKLEzJ5JYrvZhX06gJndPX/JLCr5y4fi/l
+         UidILhqEVxi8sBXquE/D7T4Z6u8qtwEXmTwy2I01vS0hF9xFQheQCyh/QNaEbWZKglXQ
+         zH03Oel/hT4xibOOyzFA89Lqr5UFMHY5CvaMWMojSZB1NtU7MoZBr9aK2YWJdvUu8IV1
+         XXm0ujufE1vsqf7rOR5SV730YJHvaLoAP5n2oAf9ynfhub64MBui+O/vfWrl9yTdw+Mg
+         ItAB0Xqk0lQ/pNRCKojfmuJzGyGXtG5fLBin5AREl8x/oS+9lnjF2vXnzvXtKCeiP/iY
+         Rzug==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701089674; x=1701694474;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=1oFnC0b1PtxuN5vYy6tuSprXuKKzLkI41CJlzuYtP+s=;
+        b=S4up0S4wqm+9obAP6QL2weHCVySfXpwJ+7PjYQdMdMEQSkSzQ1nUsCvk1Gi/DYXDnu
+         OOhEhpZmBKE5Op/CEZCV9/O367giCT4fddqy++MTNW8WRkeRP55GH9G1D3Bp0oV/8Hhr
+         mhZkRMrz6tVHdH4jRlW2X3XcwxpfSTQtqtf/Y/Ekthv7gow/YAG36Byy0m2W3Mh4neQS
+         y8GcN1J1HKX1dCDhGC/9S0j/hA5xeEtSAkc1RAjtefXf4ANtDwwuFCFdo1R2egjOnFPs
+         e619weIlfp70Ref+keUdCboEKJR+r3d/ApPIjsKxdy06cxQSyiIJEjmsyO7kjY1vWo66
+         6BjA==
+X-Gm-Message-State: AOJu0Yyhy3y5L4TtMj32DvNjk6tf7d9R1rzlTwwfUwe2S154gCgUzPQz
+	1yzHgR3hhqmdj9Wf99/WY8pZuAksUc156iZDKuM=
+X-Google-Smtp-Source: AGHT+IHbsz5S9GLjXVukyag7Z7DqnM31noufEXbZPS6p8+i8JuLaqElqH9fFPTvKQ0432SkhUuKRBupl7x546NUDWlA=
+X-Received: by 2002:a05:6512:2242:b0:50b:a995:24e2 with SMTP id
+ i2-20020a056512224200b0050ba99524e2mr5598790lfu.21.1701089674015; Mon, 27 Nov
+ 2023 04:54:34 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: p.zabel@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <20231124145338.3112416-1-o.rempel@pengutronix.de>
+ <2023112403-laxative-lustiness-6a7f@gregkh> <ZWC/hKav0JANhWKM@finisterre.sirena.org.uk>
+ <2023112458-stature-commuting-c66f@gregkh> <ZWDGGqsCq9iSnHtO@finisterre.sirena.org.uk>
+ <2023112435-dazzler-crisped-04a6@gregkh> <20231124163234.GC819414@pengutronix.de>
+ <2023112453-flagstick-bullring-8511@gregkh>
+In-Reply-To: <2023112453-flagstick-bullring-8511@gregkh>
+From: Matti Vaittinen <mazziesaccount@gmail.com>
+Date: Mon, 27 Nov 2023 14:54:21 +0200
+Message-ID: <CANhJrGPop=tL8y+chvPwMpSZYF1pkeWeRp3xL+7JsuY=U0fyag@mail.gmail.com>
+Subject: Re: [PATCH v1 0/3] introduce priority-based shutdown support
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Oleksij Rempel <o.rempel@pengutronix.de>, Mark Brown <broonie@kernel.org>, 
+	"Rafael J. Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-pm@vger.kernel.org, =?UTF-8?Q?S=C3=B8ren_Andersen?= <san@skov.dk>
+Content-Type: text/plain; charset="UTF-8"
 
-Hi,
+pe 24. marrask. 2023 klo 19.26 Greg Kroah-Hartman
+(gregkh@linuxfoundation.org) kirjoitti:
+>
+> On Fri, Nov 24, 2023 at 05:32:34PM +0100, Oleksij Rempel wrote:
+> > On Fri, Nov 24, 2023 at 03:56:19PM +0000, Greg Kroah-Hartman wrote:
+> > > On Fri, Nov 24, 2023 at 03:49:46PM +0000, Mark Brown wrote:
+> > > > On Fri, Nov 24, 2023 at 03:27:48PM +0000, Greg Kroah-Hartman wrote:
+> > > > > On Fri, Nov 24, 2023 at 03:21:40PM +0000, Mark Brown wrote:
+> > > >
+> > > > > > This came out of some discussions about trying to handle emergency power
+> > > > > > failure notifications.
+> > > >
+> > > > > I'm sorry, but I don't know what that means.  Are you saying that the
+> > > > > kernel is now going to try to provide a hard guarantee that some devices
+> > > > > are going to be shut down in X number of seconds when asked?  If so, why
+> > > > > not do this in userspace?
+> > > >
+> > > > No, it was initially (or when I initially saw it anyway) handling of
+> > > > notifications from regulators that they're in trouble and we have some
+> > > > small amount of time to do anything we might want to do about it before
+> > > > we expire.
+> > >
+> > > So we are going to guarantee a "time" in which we are going to do
+> > > something?  Again, if that's required, why not do it in userspace using
+> > > a RT kernel?
+> >
+> > For the HW in question I have only 100ms time before power loss. By
+> > doing it over use space some we will have even less time to react.
+>
+> Why can't userspace react that fast?  Why will the kernel be somehow
+> faster?  Speed should be the same, just get the "power is cut" signal
+> and have userspace flush and unmount the disk before power is gone.  Why
+> can the kernel do this any differently?
+>
+> > In fact, this is not a new requirement. It exist on different flavors of
+> > automotive Linux for about 10 years. Linux in cars should be able to
+> > handle voltage drops for example on ignition and so on. The only new thing is
+> > the attempt to mainline it.
+>
+> But your patch is not guaranteeing anything, it's just doing a "I want
+> this done before the other devices are handled", that's it.  There is no
+> chance that 100ms is going to be a requirement, or that some other
+> device type is not going to come along and demand to be ahead of your
+> device in the list.
+>
+> So you are going to have a constant fight among device types over the
+> years, and people complaining that the kernel is now somehow going to
+> guarantee that a device is shutdown in a set amount of time, which
+> again, the kernel can not guarantee here.
+>
+> This might work as a one-off for a specific hardware platform, which is
+> odd, but not anything you really should be adding for anyone else to use
+> here as your reasoning for it does not reflect what the code does.
 
-On Di, 2023-11-21 at 17:10 +0800, Jyan Chou wrote:
-> We implemented cmdq feature on Synopsys DesignWare mmc driver.
-> The difference between dw_mmc.c and dw_mmc_cqe.c were distinct
-> register definitions, mmc user flow and the addition of cmdq.
->=20
-> New version of User Guide had modify mmc driver's usage flow,
-> we may need to renew code to precisely follow user guide.
->=20
-> More over, We added a wait status function to satisfy synopsys
-> user guide's description, since this flow might be specific in
-> synopsys host driver only.
->=20
-> Signed-off-by: Jyan Chou <jyanchou@realtek.com>
->=20
-> =E2=80=94--
-[...]
-> diff --git a/drivers/mmc/host/dw_mmc_cqe.c b/drivers/mmc/host/dw_mmc_cqe.=
-c
-> new file mode 100644
-> index 000000000000..eb00d6a474b2
-> --- /dev/null
-> +++ b/drivers/mmc/host/dw_mmc_cqe.c
-> @@ -0,0 +1,1467 @@
-[...]
-> +#ifdef CONFIG_OF
-> +static struct dw_mci_board *dw_mci_cqe_parse_dt(struct dw_mci *host)
-> +{
-> +	struct dw_mci_board *pdata;
-> +	struct device *dev =3D host->dev;
-> +	const struct dw_mci_drv_data *drv_data =3D host->drv_data;
-> +	int ret;
-> +
-> +	pdata =3D devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
-> +	if (!pdata)
-> +		return ERR_PTR(-ENOMEM);
-> +
-> +	pdata->rstc =3D devm_reset_control_get_optional_exclusive(dev, NULL);
-> +	if (IS_ERR(pdata->rstc)) {
-> +		if (PTR_ERR(pdata->rstc) =3D=3D -EPROBE_DEFER)
-> +			return ERR_PTR(-EPROBE_DEFER);
+I was (am) interested in knowing how/where the regulator error
+notifications are utilized - hence I asked this in ELCE last summer.
+Replies indeed mostly pointed to automotive and handling the under
+voltage events.
 
-This should
+As to what has changed (I think this was asked in another mail on this
+topic) - I understood from the discussions that the demand of running
+systems with as low power as possible is even more
+important/desirable. Hence, the under-voltage events are more usual
+than they were when cars used to be working by burning flammable
+liquids :)
 
-		return ERR_CAST(pdata->rstc);
+Anyways, what I thought I'd comment on is that the severity of the
+regulator error notifications can be given from device-tree. Rationale
+behind this is that figuring out whether a certain detected problem is
+fatal or not (in embedded systems) should be done by the board
+designers, per board. Maybe the understanding which hardware should
+react first is also a property of hardware and could come from the
+device-tree? Eg, instead of having a "DEVICE_SHUTDOWN_PRIO_STORAGE"
+set unconditionally for EMMC, systems could set shutdown priority per
+board and per device explicitly using device-tree?
 
-instead.
+Yours,
+    -- Matti
 
-There is no reason to hide device tree parsing errors here, and I'd
-argue pdata should not be returned with rstc set to an error value.
-devm_reset_control_get_optional_exclusive() returns NULL if there are
-no errors and no reset is specified in the device tree.
+-- 
 
-Then you can just use dev_err_probe() at the call site in
-dw_mci_cqe_probe().
+Matti Vaittinen
+Linux kernel developer at ROHM Semiconductors
+Oulu Finland
 
-
-[...]
-> +int dw_mci_cqe_probe(struct dw_mci *host)
-> +{
-[...]
-> +	if (!IS_ERR(host->pdata->rstc)) {
-> +		reset_control_assert(host->pdata->rstc);
-> +		usleep_range(10, 50);
-> +		reset_control_deassert(host->pdata->rstc);
-> +	}
-
-This should be changed to
-
-	if (host->pdata->rstc) {
-		reset_control_assert(host->pdata->rstc);
-		usleep_range(10, 50);
-		reset_control_deassert(host->pdata->rstc);
-	}
-
-[...]
-> +	return 0;
-> +
-> +err_dmaunmap:
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
-
-This should be just
-
-	reset_control_assert(host->pdata->rstc);
-
-as reset_control_assert() is a no-op if host->pdata->rstc =3D=3D NULL.
-
-[...]
-> +void dw_mci_cqe_remove(struct dw_mci *host)
-> +{
-[...]
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
-
-	reset_control_assert(host->pdata->rstc);
-
-
-regards
-Philipp
+~~ When things go utterly wrong vim users can always type :help! ~~
