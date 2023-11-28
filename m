@@ -1,142 +1,118 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="XLQhRroj"
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76FF018F;
-	Tue, 28 Nov 2023 02:21:01 -0800 (PST)
-Received: from [100.107.97.3] (cola.collaboradmins.com [195.201.22.229])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by madras.collabora.co.uk (Postfix) with ESMTPSA id EEAD16606F5E;
-	Tue, 28 Nov 2023 10:20:58 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1701166860;
-	bh=54tD+0Tstg5j+b+ww3zATak7yvK6MgBTy7TZLjR9EQg=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=XLQhRroj4lwvhoB01HFE3noEy6wTtCG2wzTzBgATFEhAa8glnFAa0MpdeHrMwRPFF
-	 lsP6riICCUjv53diP5ZWmieIMlunMG1zaBInMPuqcuTm2Se3LRwmwigjUDMrF4EQgE
-	 VjxfBXeg4x0fwAxT0C7k3YpOcq9OMhhFRkio/6augFXbbBWepukZrsVrLZHPm4b1WB
-	 oy9mJGlMoAsp2uY9mXkh0pMAh0QFx8wH9y2EI+hb/jL5TS1dTwHMZNlN49nuzYbtoq
-	 GyJbMXaztuL99MOZ6yQV4AlMvwtF0hcDszY7KR0t4IHrZRJp/aVapZtAtO6Ayy8Rxn
-	 XiHbs4I8xTUGg==
-Message-ID: <36ba3f89-2bd0-45f0-8b61-59f5c6691427@collabora.com>
-Date: Tue, 28 Nov 2023 11:20:55 +0100
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="uQI6Gapi";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="As1Cexsk"
+Received: from wout4-smtp.messagingengine.com (wout4-smtp.messagingengine.com [64.147.123.20])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A0A3D4B;
+	Tue, 28 Nov 2023 02:53:42 -0800 (PST)
+Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
+	by mailout.west.internal (Postfix) with ESMTP id 303F03200AD4;
+	Tue, 28 Nov 2023 05:53:37 -0500 (EST)
+Received: from imap51 ([10.202.2.101])
+  by compute5.internal (MEProxy); Tue, 28 Nov 2023 05:53:39 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-type:content-type:date:date:from:from:in-reply-to
+	:in-reply-to:message-id:mime-version:references:reply-to:sender
+	:subject:subject:to:to; s=fm3; t=1701168816; x=1701255216; bh=de
+	ujBW49xIg4FWRLoDbae8+tD+YBI5tyJUGVOFWc1Ks=; b=uQI6GapiQMe6Hnopgt
+	8Kiup3r0xYvvDKyg3h3msdwC7QtfVjT7XDt3ddURo2LC79JmY0UZTph10T6qGT14
+	N1ZjqJBM1jrNf54paVb/bzomh11XPcCGnMnNB9g1VB8ZLQxg6WCbRmpKlYPMrHJf
+	ng8Vtpes1lJrhaOcNKlnR+K7woG3NlD5lkL7IvwPU3/rtAGufpzgzUCCwGJTglSe
+	4HzBBSS7cSIluloTD9cYleiGsjSgu+5X6srfs+JJx6MRkxi3N8oG1bugQC6vrQKu
+	nisMZAbaQvRPIuu8upJMcqxnPjonshhu5m2mSiTO6V5D9LYyUtKrIhwG3A44aCBJ
+	pC4A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:sender:subject
+	:subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
+	:x-sasl-enc; s=fm1; t=1701168816; x=1701255216; bh=deujBW49xIg4F
+	WRLoDbae8+tD+YBI5tyJUGVOFWc1Ks=; b=As1CexskTDECzC0Lps503ToibCtw1
+	ltQ3h0imB92EL2eCy/4DcT+pv4u96loKTX4IWW/m4jBslNtxIpPCLjtyL83P2u0c
+	R2UrSdzgg3eZIZRTS+whhau0y+OlLM2SL29rYe/l2iLAfxmQnq9WdQ7LZqCXQlpg
+	exwn3luBvwWZK94rxquByyto5Nedta52+VVoNMEZTZ8uM7u50K5AAk3QctxyB88l
+	ipbHWuFbw846X4e3LcnbCena6lDhAT/SlcWAcVxiqTNWWmtbpqmY5fHedwE0oQyW
+	VioKwD9wfG7U6HtpJWdgAmDXEWTPgEg61PmGbGva7NCPuKaVCVcfyhfGw==
+X-ME-Sender: <xms:r8ZlZQgHSqwGKPKL3nhFGAhcam4JDzWlYnWeZBJwjU-0OiBs0qFDFA>
+    <xme:r8ZlZZBKLJHErSyWAhsFIdhrvlegSaibzuNe0YdZJX0s47m-Embfkbcdh5p0t1g-E
+    xvG2SR2cm8u4wptHhY>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrudeifedgvdduucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
+    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
+    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
+    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:r8ZlZYF3-S4aGYw5_oR6ptcl8S0cfvVvehTktk7VC-yaRZZpL6ZLXw>
+    <xmx:r8ZlZRQ0ZW8fwQVk8HpoKhiRMSilB2AFQ6toxEsMylcZxWjbnhlinw>
+    <xmx:r8ZlZdzolPGJ86UeZt76v8-9ylhuY1zMoRJBgGEiR6ljdm53ccVUoQ>
+    <xmx:sMZlZVBycdOU7JeGfOzCzonwWbarikrNKQrBbOzKo6IIjNsX3jduIA>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+	id 37DA4B60089; Tue, 28 Nov 2023 05:53:35 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.9.0-alpha0-1234-gac66594aae-fm-20231122.001-gac66594a
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/2] mmc: mediatek: extend number of tuning steps
-Content-Language: en-US
-To: =?UTF-8?B?QXhlIFlhbmcgKOadqOejiik=?= <Axe.Yang@mediatek.com>,
- "robh+dt@kernel.org" <robh+dt@kernel.org>,
- =?UTF-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= <Wenbin.Mei@mediatek.com>,
- "conor+dt@kernel.org" <conor+dt@kernel.org>,
- =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?=
- <Chaotian.Jing@mediatek.com>,
- "krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
- "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
- "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org"
- <linux-arm-kernel@lists.infradead.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-mediatek@lists.infradead.org" <linux-mediatek@lists.infradead.org>,
- "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
- Project_Global_Chrome_Upstream_Group
- <Project_Global_Chrome_Upstream_Group@mediatek.com>
-References: <20231128070127.27442-1-axe.yang@mediatek.com>
- <20231128070127.27442-3-axe.yang@mediatek.com>
- <207c2f89-b1e7-448d-966f-0c403a9f9e8b@collabora.com>
- <ea1a82b07e98fa682140c460048901a9f962be2b.camel@mediatek.com>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <ea1a82b07e98fa682140c460048901a9f962be2b.camel@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Message-Id: <cf23b3a9-54cb-4c48-923e-8a05a8d4bc27@app.fastmail.com>
+In-Reply-To: <23011695aafca595c3c8722fda2a8e194c5318df.camel@pengutronix.de>
+References: <20231121091101.5540-1-jyanchou@realtek.com>
+ <20231121091101.5540-3-jyanchou@realtek.com>
+ <23011695aafca595c3c8722fda2a8e194c5318df.camel@pengutronix.de>
+Date: Tue, 28 Nov 2023 11:53:13 +0100
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "Philipp Zabel" <p.zabel@pengutronix.de>,
+ "Jyan Chou" <jyanchou@realtek.com>, "Ulf Hansson" <ulf.hansson@linaro.org>,
+ "Adrian Hunter" <adrian.hunter@intel.com>, jh80.chung@samsung.com,
+ riteshh@codeaurora.org, "Rob Herring" <robh+dt@kernel.org>,
+ krzysztof.kozlowski+dt@linaro.org
+Cc: "Conor Dooley" <conor+dt@kernel.org>, asutoshd@codeaurora.org,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ "Brian Norris" <briannorris@chromium.org>, "Doug Brown" <doug@schmorgal.com>,
+ "Tony Huang" <tonyhuang.sunplus@gmail.com>,
+ "Abel Vesa" <abel.vesa@linaro.org>, william.qiu@starfivetech.com
+Subject: Re: [PATCH v7][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
+Content-Type: text/plain
 
-Il 28/11/23 10:38, Axe Yang (杨磊) ha scritto:
->> On Tue, 2023-11-28 at 09:53 +0100, AngeloGioacchino Del Regno wrote:
->> Il 28/11/23 08:01, Axe Yang ha scritto:
->>> Previously, during the MSDC calibration process, a full clock cycle
->>> actually not be covered, which in some cases didn't yield the best
->>> results and could cause CRC errors. This problem is particularly
->>> evident when MSDC is used as an SDIO host. In fact, MSDC support
->>> tuning up to a maximum of 64 steps, but by default, the step number
->>> is 32. By increase the tuning step, we are more likely to cover
->>> more
->>> parts of a clock cycle, and get better calibration result.
->>>
->>> To illustrate, when tuning 32 steps, if the obtained window has a
->>> hole
->>> near the middle, like this: 0xffc07ff (hex), then the selected
->>> delay
->>> will be the 6 (counting from right to left).
->>>
->>> (32 <- 1)
->>> 1111 1111 1100 0000 0000 0111 11(1)1 1111
->>>
->>> However, if we tune 64 steps, the window obtained may look like
->>> this:
->>> 0xfffffffffffc07ff. The final selected delay will be 44, which is
->>> safer as it is further away from the hole:
->>>
->>> (64 <- 1)
->>> 1111 ... (1)111 1111 1111 1111 1111 1100 0000 0000 0111 1111 1111
->>>
->>> In this case, delay 6 selected through 32 steps tuning is obviously
->>> not optimal, and this delay is closer to the hole, using it would
->>> easily cause CRC problems.
->>>
->>> You will need to configure property "mediatek,tuning-step" in MSDC
->>> dts node to 64 to extend the steps.
->>>
->>
->> If we can run 64 tuning steps, why should we run 32?
->>
->> Why isn't it just better to *always* run 64 tuning steps, on SoCs
->> supporting that?
->>
->> Thanks,
->> Angelo
-> 
-> Hi Angelo,
-> 
-> That is a good question. The benefit of preserving 32 steps tuning is
-> that it can save time in certain scenarios.
-> 
-> On some platforms, when the delay selected through 64 steps tuning is
-> very close to that chosen through 32 steps, we can reduce the tuning
-> step from 64 to 32. This can save time sending the tuning block
-> commands.
-> 
-> Thus using 32 steps tuning can save kernel boot up time.
-> 
-> Another case where time can be saved is when accessing the RPMB
-> partition of eMMC. Each time switch to RPMB partition, there is a
-> retune action, causing a certain drop in performance. If we are certain
-> that the results of 32 steps tuning are usable and we use it, this can
-> in a sense also guarantee performance when accessing the RPMB
-> partition.
-> 
+On Mon, Nov 27, 2023, at 13:51, Philipp Zabel wrote:
+> On Di, 2023-11-21 at 17:10 +0800, Jyan Chou wrote:
+>> diff --git a/drivers/mmc/host/dw_mmc_cqe.c b/drivers/mmc/host/dw_mmc_cqe.c
+>> new file mode 100644
+>> index 000000000000..eb00d6a474b2
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/dw_mmc_cqe.c
+>> @@ -0,0 +1,1467 @@
+> [...]
+>> +#ifdef CONFIG_OF
+>> +static struct dw_mci_board *dw_mci_cqe_parse_dt(struct dw_mci *host)
+>> +{
+>> +	struct dw_mci_board *pdata;
+>> +	struct device *dev = host->dev;
+>> +	const struct dw_mci_drv_data *drv_data = host->drv_data;
+>> +	int ret;
+>> +
+>> +	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>> +	if (!pdata)
+>> +		return ERR_PTR(-ENOMEM);
+>> +
+>
+> There is no reason to hide device tree parsing errors here, and I'd
+> argue pdata should not be returned with rstc set to an error value.
+> devm_reset_control_get_optional_exclusive() returns NULL if there are
+> no errors and no reset is specified in the device tree.
+>
+> Then you can just use dev_err_probe() at the call site in
+> dw_mci_cqe_probe().
 
-Thanks for this explanation! Though, I have some more questions...
+I think ideally the dw_mci_board should be merged into the dw_mci
+structure, avoiding the extra kzalloc() step. Having separate
+structures here is likely an artifact from an old version of the
+driver that predates the use of devicetree, but since everything
+now uses DT, there is no point in the extra abstraction.
 
-...regarding boot up time, how much time are we talking about?
-
-I'm asking because while now I see - and agree - on using 32-steps tuning
-on eMMC to guarantee performance during RPMB access, as far as I know,
-there is no RPMB partition on SD/MicroSD cards (and, of course, SDIO devices).
-
-If the boot performance impact isn't big, as in, up to ~100 milliseconds is
-not big at all (especially with async probe!), we can definitely avoid the
-addition of a devicetree property for 32-steps tuning, hence use a dynamic
-selection strategy such that:
-  - On eMMC devices, always perform 32-steps tuning (hence no boot delay)
-  - On SD cards and SDIO, always perform 64-steps tuning
-
-Cheers,
-Angelo
-
+     Arnd
