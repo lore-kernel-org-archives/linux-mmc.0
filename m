@@ -1,189 +1,122 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="U9DKncnA"
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B16E619B7
-	for <linux-mmc@vger.kernel.org>; Tue, 28 Nov 2023 06:54:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1701183267; x=1732719267;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=VCFViaiORMQAGwmHIp4Pn6Z0lFs+bTg2B2CJB+BSqXI=;
-  b=U9DKncnAXdL8mGeuQw5HVNgUWuYXiAA0g7eAkvdNC0AbRmN3gumLS4zF
-   p6bAWC5flkx5onKFD3U3kcKpCFIHeY6gfwipl4CNfHh1M+XOCfRobAV+A
-   1iD6bRHzJ8xs4PZ0zEnHyLtU5/cabgloqQnYcFr04ZgLgtBU2qv54baVB
-   MCQrRO0fEaDF9PrFcCF8bD5aTHYy7iw2u8wpA+FR9mSSHorIE7xKxWw8H
-   xjZpoawCLa79y9bHdCXqSlTBLfvvDkN4c1xApP83GJQeOcDOsSMGRjqpu
-   lS4+TMaXtknzK3afxDl6To40BJZwSr6tEb/h92mMW0yGPv++Y9yW0YstN
-   A==;
-X-CSE-ConnectionGUID: sFMEKHZOR2qSYjGeYHLCFQ==
-X-CSE-MsgGUID: hUL2eOh9QKqeJQ5cewV4MA==
-X-IronPort-AV: E=Sophos;i="6.04,234,1695657600"; 
-   d="scan'208";a="3539133"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 28 Nov 2023 22:54:26 +0800
-IronPort-SDR: ew3OvOyLsQ7JxMt45xXf6CRzSrRUR36qTwOpQBNE9zifoIxNKBOiSScVtLkvqYVJoLlQ76yPRJ
- CsfbU1S/OhbQ==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Nov 2023 05:59:57 -0800
-IronPort-SDR: yqRg0nsUyichv4m4HqEFSTQZA5+CzeTxURjnCQEqIDUVDqeFDgndxIkeEyesdhCG848Cy0eSKT
- uu+8DlLNtZPA==
-WDCIronportException: Internal
-Received: from bxygm33.ad.shared ([10.45.31.229])
-  by uls-op-cesaip01.wdc.com with ESMTP; 28 Nov 2023 06:54:25 -0800
-From: Avri Altman <avri.altman@wdc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
-	Daniil Lunev <dlunev@google.com>,
-	Asutosh Das <quic_asutoshd@quicinc.com>,
-	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v3] mmc: core: Use mrq.sbc in close-ended ffu
-Date: Tue, 28 Nov 2023 16:54:21 +0200
-Message-ID: <20231128145421.1592-1-avri.altman@wdc.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="i6b5JWm/"
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AFBC93;
+	Tue, 28 Nov 2023 09:49:34 -0800 (PST)
+Received: by mail-ej1-x62b.google.com with SMTP id a640c23a62f3a-a03a900956dso2375566b.1;
+        Tue, 28 Nov 2023 09:49:33 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1701193772; x=1701798572; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=2Q6ar52kT12/oSOUgsQunGkK9992ePoRC0ssPbZWDgw=;
+        b=i6b5JWm/Osc81en8u5MDun6d2WX3T2lgYcXr6EDNsslp3MsrN9UGO1lIuwIsO8uelE
+         p7Ye+IxD1z8eu+soCqNKCvxuiMg8DllwymR/KoOEKthKXtgoLUaBz2EkJzUncZEgPqFL
+         Sl39VY27IQ2XgIsnnv5bBiV3NTmtWd22L6x+vDxo25aqiZ/dJiKEQjHIx8DLvZ1GOJL0
+         E0BI49DiZI7AczT8S3AbawIwwQ3LFiZg4c6AAtvQw9pQ63NPrCVpj4Qp4tP9PG8+mSg4
+         BW92EwaV8iwL+5vZsnTx7LFjyRcjZq/MTgzCBKw7Wg1PkCPsS416mBpjXwM/yqiHoGTN
+         iQ2A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701193772; x=1701798572;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=2Q6ar52kT12/oSOUgsQunGkK9992ePoRC0ssPbZWDgw=;
+        b=HSCHEJ9tx9fP3ac938yQCRyALwwkzSgU0NA2XKhLkTPBVT3SLcKA2SbDQdCiDA3ElQ
+         J6+1QM5AWhrwExibRUh94ftYAxKvkuWiqSTx+zCP25csTHSYn6Wl1MrWH3vT8Fus4w3q
+         I/d6URFXxgD8O3EU+pqxuMsF5TEyjahKkqBaN9jsrXL4gjKUD7B1ABiaXZO1blaWMm03
+         VYFK4x3mz0mkuQAcxy8HV9KEYEonaw/EiSfw3jw9qoZ04X/EoXy9YobU32SAWL++n5JW
+         ZIQtYZlesTy9mhmt1n9HztfNMSd0FOnE6JKa7KoEHYwe9NA1ldHsEbTUPwZ+g88AvhvB
+         uXCw==
+X-Gm-Message-State: AOJu0YyaouNdzjWolwYz7jj15SqcjG2MMD4Fv1ZHSLwK/6dsL6J+y662
+	coBwelqbex2xOQwHLA83h/8=
+X-Google-Smtp-Source: AGHT+IFegfjLsT1XNjq4u1dJkNE5gSVojRjltbsyE47RsYa/oKV+OirEmiPZK9QlSr1+eKKQQmVk8w==
+X-Received: by 2002:a17:906:f811:b0:a0f:1882:d5e with SMTP id kh17-20020a170906f81100b00a0f18820d5emr5384410ejb.37.1701193772296;
+        Tue, 28 Nov 2023 09:49:32 -0800 (PST)
+Received: from localhost (p200300e41f0fa600f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f0f:a600:f22f:74ff:fe1f:3a53])
+        by smtp.gmail.com with ESMTPSA id cm26-20020a0564020c9a00b0054ae75dcd6bsm5742280edb.95.2023.11.28.09.49.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 Nov 2023 09:49:30 -0800 (PST)
+From: Thierry Reding <thierry.reding@gmail.com>
+To: David Airlie <airlied@gmail.com>,
+	Daniel Vetter <daniel@ffwll.ch>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Jonathan Cameron <jic23@kernel.org>,
+	Lars-Peter Clausen <lars@metafoo.de>,
+	Lee Jones <lee@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Tomasz Figa <tomasz.figa@gmail.com>,
+	Sylwester Nawrocki <s.nawrocki@samsung.com>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
+	Alessandro Zummo <a.zummo@towertech.it>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Mark Brown <broonie@kernel.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Sam Protsenko <semen.protsenko@linaro.org>,
+	dri-devel@lists.freedesktop.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-samsung-soc@vger.kernel.org,
+	linux-i2c@vger.kernel.org,
+	linux-iio@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-gpio@vger.kernel.org,
+	linux-pwm@vger.kernel.org,
+	linux-rtc@vger.kernel.org,
+	linux-serial@vger.kernel.org,
+	alsa-devel@alsa-project.org,
+	linux-sound@vger.kernel.org,
+	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: (subset) [PATCH 00/17] dt-bindings: samsung: add specific compatibles for existing SoC
+Date: Tue, 28 Nov 2023 18:49:23 +0100
+Message-ID: <170119374454.445690.515311393756577368.b4-ty@gmail.com>
 X-Mailer: git-send-email 2.42.0
+In-Reply-To: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
+References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
-Field Firmware Update (ffu) may use close-ended or open ended sequence.
-Each such sequence is comprised of a write commands enclosed between 2
-switch commands - to and from ffu mode. So for the close-ended case, it
-will be: cmd6->cmd23-cmd25-cmd6.
 
-Some host controllers however, get confused when multi-block rw is sent
-without sbc, and may generate auto-cmd12 which breaks the ffu sequence.
-I encountered  this issue while testing fwupd (github.com/fwupd/fwupd)
-on HP Chromebook x2, a qualcomm based QC-7c, code name - strongbad.
+On Wed, 08 Nov 2023 11:43:26 +0100, Krzysztof Kozlowski wrote:
+> Merging
+> =======
+> I propose to take entire patchset through my tree (Samsung SoC), because:
+> 1. Next cycle two new SoCs will be coming (Google GS101 and ExynosAutov920), so
+>    they will touch the same lines in some of the DT bindings (not all, though).
+>    It is reasonable for me to take the bindings for the new SoCs, to have clean
+>    `make dtbs_check` on the new DTS.
+> 2. Having it together helps me to have clean `make dtbs_check` within my tree
+>    on the existing DTS.
+> 3. No drivers are affected by this change.
+> 4. I plan to do the same for Tesla FSD and Exynos ARM32 SoCs, thus expect
+>    follow up patchsets.
+> 
+> [...]
 
-Instead of a quirk, or hooking the request function of the msm ops,
-it would be better to fix the ioctl handling and make it use mrq.sbc
-instead of issuing SET_BLOCK_COUNT separately.
+Applied, thanks!
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
+[12/17] dt-bindings: pwm: samsung: add specific compatibles for existing SoC
+        commit: 5d67b8f81b9d598599366214e3b2eb5f84003c9f
 
-Changelog:
-v2--v3:
-	Adopt Adrian's proposal
-v1--v2:
-	remove redundant reference of reliable write
----
- drivers/mmc/core/block.c | 40 +++++++++++++++++++++++++++++++++++++---
- 1 file changed, 37 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f9a5cffa64b1..927257a5e8c2 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -400,6 +400,10 @@ struct mmc_blk_ioc_data {
- 	struct mmc_ioc_cmd ic;
- 	unsigned char *buf;
- 	u64 buf_bytes;
-+	unsigned int flags;
-+#define MMC_BLK_IOC_DROP	BIT(0)	/* drop this mrq */
-+#define MMC_BLK_IOC_SBC	BIT(1)	/* use mrq.sbc */
-+
- 	struct mmc_rpmb_data *rpmb;
- };
- 
-@@ -465,7 +469,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
- }
- 
- static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
--			       struct mmc_blk_ioc_data *idata)
-+			       struct mmc_blk_ioc_data **idatas, int i)
- {
- 	struct mmc_command cmd = {}, sbc = {};
- 	struct mmc_data data = {};
-@@ -475,10 +479,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	unsigned int busy_timeout_ms;
- 	int err;
- 	unsigned int target_part;
-+	struct mmc_blk_ioc_data *idata = idatas[i];
-+	struct mmc_blk_ioc_data *prev_idata = NULL;
- 
- 	if (!card || !md || !idata)
- 		return -EINVAL;
- 
-+	if (idata->flags & MMC_BLK_IOC_DROP)
-+		return 0;
-+
-+	if (idata->flags & MMC_BLK_IOC_SBC)
-+		prev_idata = idatas[i - 1];
-+
- 	/*
- 	 * The RPMB accesses comes in from the character device, so we
- 	 * need to target these explicitly. Else we just target the
-@@ -532,7 +544,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 			return err;
- 	}
- 
--	if (idata->rpmb) {
-+	if (idata->rpmb || prev_idata) {
- 		sbc.opcode = MMC_SET_BLOCK_COUNT;
- 		/*
- 		 * We don't do any blockcount validation because the max size
-@@ -540,6 +552,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 		 * 'Reliable Write' bit here.
- 		 */
- 		sbc.arg = data.blocks | (idata->ic.write_flag & BIT(31));
-+		if (prev_idata)
-+			sbc.arg = prev_idata->ic.arg;
- 		sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 		mrq.sbc = &sbc;
- 	}
-@@ -557,6 +571,9 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	mmc_wait_for_req(card->host, &mrq);
- 	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
- 
-+	if (prev_idata)
-+		memcpy(&prev_idata->ic.response, sbc.resp, sizeof(sbc.resp));
-+
- 	if (cmd.error) {
- 		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
- 						__func__, cmd.error);
-@@ -1032,6 +1049,20 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
- 	md->reset_done &= ~type;
- }
- 
-+static void mmc_blk_check_sbc(struct mmc_queue_req *mq_rq)
-+{
-+	struct mmc_blk_ioc_data **idata = mq_rq->drv_op_data;
-+	int i;
-+
-+	for (i = 1; i < mq_rq->ioc_count; i++) {
-+		if (idata[i - 1]->ic.opcode == MMC_SET_BLOCK_COUNT &&
-+		    mmc_op_multi(idata[i]->ic.opcode)) {
-+			idata[i - 1]->flags |= MMC_BLK_IOC_DROP;
-+			idata[i]->flags |= MMC_BLK_IOC_SBC;
-+		}
-+	}
-+}
-+
- /*
-  * The non-block commands come back from the block layer after it queued it and
-  * processed it with all other requests and then they get issued in this
-@@ -1059,11 +1090,14 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
- 			if (ret)
- 				break;
- 		}
-+
-+		mmc_blk_check_sbc(mq_rq);
-+
- 		fallthrough;
- 	case MMC_DRV_OP_IOCTL_RPMB:
- 		idata = mq_rq->drv_op_data;
- 		for (i = 0, ret = 0; i < mq_rq->ioc_count; i++) {
--			ret = __mmc_blk_ioctl_cmd(card, md, idata[i]);
-+			ret = __mmc_blk_ioctl_cmd(card, md, idata, i);
- 			if (ret)
- 				break;
- 		}
+Best regards,
 -- 
-2.42.0
-
+Thierry Reding <thierry.reding@gmail.com>
