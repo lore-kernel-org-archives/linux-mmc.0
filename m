@@ -1,27 +1,34 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="RfJ+7KZ6"
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DDE20A7;
-	Tue, 28 Nov 2023 00:53:47 -0800 (PST)
-Received: from [100.107.97.3] (cola.collaboradmins.com [195.201.22.229])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by madras.collabora.co.uk (Postfix) with ESMTPSA id 725A866072B4;
-	Tue, 28 Nov 2023 08:53:44 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1701161626;
-	bh=lqU97J14dyNbQfuGPI3DBzSk5f6hhk3SdPRlrhwNnpc=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=RfJ+7KZ662HMfIPZPO7Y5WjUIokD0yE16fjwmp+LiVgmrZecWbgK6gs3IVmKYQ7tD
-	 D8OXxcPyrt8+uTjKJN8sMz1s1TPLwQLZ0IMbr8TVgO+MTE17oSCWf4ZHwP045XVkyg
-	 gza0sTU5XWpXxiiCFoej+kbptGxCGkNeHvqGWHr527PbfhgSYyldRglm8ijH59/SdI
-	 V8FOsHg+EEsrvcQXMWx3jr+KQqA7dYmjWJA+WO8I7OCK4lc7idnXDd2LBdhivmO9pa
-	 tLnSGLHOauyrMuZI22hqxc8glV0522yvzym8yMMf/4ebP+5eyoCNerdhzB5M1HqQ89
-	 GU88w/2EKiL6A==
-Message-ID: <207c2f89-b1e7-448d-966f-0c403a9f9e8b@collabora.com>
-Date: Tue, 28 Nov 2023 09:53:41 +0100
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="OqTJ36Rp"
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.151])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1E7BD4C;
+	Tue, 28 Nov 2023 01:12:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1701162758; x=1732698758;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=HJCBhWau23olURkNwP9LFY4MkHCSEIKKCHNz47W5Qp0=;
+  b=OqTJ36RpaCe2ZK29RYBUFXX//WogFC71/dr6kYDi3RX91TDyHYcbjIEW
+   8+jQi+B1M/KYjj4O/PrmOrhD9K/tjBa8GQXHk79woKFP+3nwodSYpbdZH
+   3Gg3ATFz07QxG1xwZ7XClEsVVt1iS3RDnr538clxGhTu0NYo8Poml69sa
+   vw5vk4rxr44Rskf2oElkSxCr7fuzoWPIrw+QltE3wgtbez2eGwkFzPyrI
+   mcjGJq0dXpPBWt+CAIlt/XQbxEfgy2FEzycXvQucw0t6QZFwYwv2XPWYd
+   J+1badW9/62FwwcTk7tAp+5roH76rJrY2VxzbB7RJSGAuAUEYeYlKuc8B
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10907"; a="373053554"
+X-IronPort-AV: E=Sophos;i="6.04,233,1695711600"; 
+   d="scan'208";a="373053554"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Nov 2023 01:11:30 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10907"; a="1100025863"
+X-IronPort-AV: E=Sophos;i="6.04,233,1695711600"; 
+   d="scan'208";a="1100025863"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.221.84])
+  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Nov 2023 01:11:27 -0800
+Message-ID: <228dab31-8073-44f5-98ac-35aedb508e04@intel.com>
+Date: Tue, 28 Nov 2023 11:11:23 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -29,396 +36,133 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/2] mmc: mediatek: extend number of tuning steps
-To: Axe Yang <axe.yang@mediatek.com>,
- Chaotian Jing <chaotian.jing@mediatek.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>, Matthias Brugger
- <matthias.bgg@gmail.com>, Wenbin Mei <wenbin.mei@mediatek.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mediatek@lists.infradead.org,
- Project_Global_Chrome_Upstream_Group@mediatek.com
-References: <20231128070127.27442-1-axe.yang@mediatek.com>
- <20231128070127.27442-3-axe.yang@mediatek.com>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Subject: Re: [PATCH V13 11/21] mmc: sdhci-uhs2: add reset function and
+ uhs2_mode function
 Content-Language: en-US
-In-Reply-To: <20231128070127.27442-3-axe.yang@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+To: Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+ Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+ dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
+ Ben Chuang <ben.chuang@genesyslogic.com.tw>
+References: <20231117113149.9069-1-victorshihgli@gmail.com>
+ <20231117113149.9069-12-victorshihgli@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20231117113149.9069-12-victorshihgli@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-Il 28/11/23 08:01, Axe Yang ha scritto:
-> Previously, during the MSDC calibration process, a full clock cycle
-> actually not be covered, which in some cases didn't yield the best
-> results and could cause CRC errors. This problem is particularly
-> evident when MSDC is used as an SDIO host. In fact, MSDC support
-> tuning up to a maximum of 64 steps, but by default, the step number
-> is 32. By increase the tuning step, we are more likely to cover more
-> parts of a clock cycle, and get better calibration result.
+On 17/11/23 13:31, Victor Shih wrote:
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
 > 
-> To illustrate, when tuning 32 steps, if the obtained window has a hole
-> near the middle, like this: 0xffc07ff (hex), then the selected delay
-> will be the 6 (counting from right to left).
+> Sdhci_uhs2_reset() does a UHS-II specific reset operation.
 > 
-> (32 <- 1)
-> 1111 1111 1100 0000 0000 0111 11(1)1 1111
-> 
-> However, if we tune 64 steps, the window obtained may look like this:
-> 0xfffffffffffc07ff. The final selected delay will be 44, which is
-> safer as it is further away from the hole:
-> 
-> (64 <- 1)
-> 1111 ... (1)111 1111 1111 1111 1111 1100 0000 0000 0111 1111 1111
-> 
-> In this case, delay 6 selected through 32 steps tuning is obviously
-> not optimal, and this delay is closer to the hole, using it would
-> easily cause CRC problems.
-> 
-> You will need to configure property "mediatek,tuning-step" in MSDC
-> dts node to 64 to extend the steps.
-> 
-
-If we can run 64 tuning steps, why should we run 32?
-
-Why isn't it just better to *always* run 64 tuning steps, on SoCs supporting that?
-
-Thanks,
-Angelo
-
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 > ---
->   drivers/mmc/host/mtk-sd.c | 135 +++++++++++++++++++++++++++-----------
->   1 file changed, 97 insertions(+), 38 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 97f7c3d4be6e..c8297f501a1e 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -252,12 +252,16 @@
->   
->   #define MSDC_PAD_TUNE_DATWRDLY	  GENMASK(4, 0)		/* RW */
->   #define MSDC_PAD_TUNE_DATRRDLY	  GENMASK(12, 8)	/* RW */
-> +#define MSDC_PAD_TUNE_DATRRDLY2	  GENMASK(12, 8)	/* RW */
->   #define MSDC_PAD_TUNE_CMDRDLY	  GENMASK(20, 16)	/* RW */
-> +#define MSDC_PAD_TUNE_CMDRDLY2	  GENMASK(20, 16)	/* RW */
->   #define MSDC_PAD_TUNE_CMDRRDLY	  GENMASK(26, 22)	/* RW */
->   #define MSDC_PAD_TUNE_CLKTDLY	  GENMASK(31, 27)	/* RW */
->   #define MSDC_PAD_TUNE_RXDLYSEL	  BIT(15)   /* RW */
->   #define MSDC_PAD_TUNE_RD_SEL	  BIT(13)   /* RW */
->   #define MSDC_PAD_TUNE_CMD_SEL	  BIT(21)   /* RW */
-> +#define MSDC_PAD_TUNE_RD2_SEL	  BIT(13)   /* RW */
-> +#define MSDC_PAD_TUNE_CMD2_SEL	  BIT(21)   /* RW */
->   
->   #define PAD_DS_TUNE_DLY_SEL       BIT(0)	  /* RW */
->   #define PAD_DS_TUNE_DLY1	  GENMASK(6, 2)   /* RW */
-> @@ -325,7 +329,8 @@
->   
->   #define DEFAULT_DEBOUNCE	(8)	/* 8 cycles CD debounce */
->   
-> -#define PAD_DELAY_MAX	32 /* PAD delay cells */
-> +#define PAD_DELAY_HALF	32 /* PAD delay cells */
-> +#define PAD_DELAY_FULL	64
->   /*--------------------------------------------------------------------------*/
->   /* Descriptor Structure                                                     */
->   /*--------------------------------------------------------------------------*/
-> @@ -461,6 +466,7 @@ struct msdc_host {
->   	u32 hs400_ds_dly3;
->   	u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
->   	u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
-> +	u32 tuning_step;
->   	bool hs400_cmd_resp_sel_rising;
->   				 /* cmd response sample selection for HS400 */
->   	bool hs400_mode;	/* current eMMC will run at hs400 mode */
-> @@ -1615,7 +1621,7 @@ static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
->   	}
->   
->   	if (cmd_err || dat_err) {
-> -		dev_err(host->dev, "cmd_err = %d, dat_err =%d, intsts = 0x%x",
-> +		dev_err(host->dev, "cmd_err = %d, dat_err = %d, intsts = 0x%x",
->   			cmd_err, dat_err, intsts);
->   	}
->   
-> @@ -1780,10 +1786,20 @@ static void msdc_init_hw(struct msdc_host *host)
->   				     DATA_K_VALUE_SEL);
->   			sdr_set_bits(host->top_base + EMMC_TOP_CMD,
->   				     PAD_CMD_RD_RXDLY_SEL);
-> +			if (host->tuning_step > PAD_DELAY_HALF) {
-> +				sdr_set_bits(host->top_base + EMMC_TOP_CONTROL,
-> +					     PAD_DAT_RD_RXDLY2_SEL);
-> +				sdr_set_bits(host->top_base + EMMC_TOP_CMD,
-> +					     PAD_CMD_RD_RXDLY2_SEL);
-> +			}
->   		} else {
->   			sdr_set_bits(host->base + tune_reg,
->   				     MSDC_PAD_TUNE_RD_SEL |
->   				     MSDC_PAD_TUNE_CMD_SEL);
-> +			if (host->tuning_step > PAD_DELAY_HALF)
-> +				sdr_set_bits(host->base + tune_reg + 4,
-> +					     MSDC_PAD_TUNE_RD2_SEL |
-> +					     MSDC_PAD_TUNE_CMD2_SEL);
->   		}
->   	} else {
->   		/* choose clock tune */
-> @@ -1925,24 +1941,24 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->   		msdc_set_mclk(host, ios->timing, ios->clock);
->   }
->   
-> -static u32 test_delay_bit(u32 delay, u32 bit)
-> +static u64 test_delay_bit(u64 delay, u32 bit)
->   {
-> -	bit %= PAD_DELAY_MAX;
-> +	bit %= PAD_DELAY_FULL;
->   	return delay & BIT(bit);
->   }
->   
-> -static int get_delay_len(u32 delay, u32 start_bit)
-> +static int get_delay_len(u64 delay, u32 start_bit)
->   {
->   	int i;
->   
-> -	for (i = 0; i < (PAD_DELAY_MAX - start_bit); i++) {
-> +	for (i = 0; i < (PAD_DELAY_FULL - start_bit); i++) {
->   		if (test_delay_bit(delay, start_bit + i) == 0)
->   			return i;
->   	}
-> -	return PAD_DELAY_MAX - start_bit;
-> +	return PAD_DELAY_FULL - start_bit;
->   }
->   
-> -static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u32 delay)
-> +static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u64 delay)
->   {
->   	int start = 0, len = 0;
->   	int start_final = 0, len_final = 0;
-> @@ -1950,28 +1966,28 @@ static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u32 delay)
->   	struct msdc_delay_phase delay_phase = { 0, };
->   
->   	if (delay == 0) {
-> -		dev_err(host->dev, "phase error: [map:%x]\n", delay);
-> +		dev_err(host->dev, "phase error: [map:%llx]\n", delay);
->   		delay_phase.final_phase = final_phase;
->   		return delay_phase;
->   	}
->   
-> -	while (start < PAD_DELAY_MAX) {
-> +	while (start < PAD_DELAY_FULL) {
->   		len = get_delay_len(delay, start);
->   		if (len_final < len) {
->   			start_final = start;
->   			len_final = len;
->   		}
->   		start += len ? len : 1;
-> -		if (len >= 12 && start_final < 4)
-> +		if (!upper_32_bits(delay) && len >= 12 && start_final < 4)
->   			break;
->   	}
->   
->   	/* The rule is that to find the smallest delay cell */
->   	if (start_final == 0)
-> -		final_phase = (start_final + len_final / 3) % PAD_DELAY_MAX;
-> +		final_phase = (start_final + len_final / 3) % PAD_DELAY_FULL;
->   	else
-> -		final_phase = (start_final + len_final / 2) % PAD_DELAY_MAX;
-> -	dev_dbg(host->dev, "phase: [map:%x] [maxlen:%d] [final:%d]\n",
-> +		final_phase = (start_final + len_final / 2) % PAD_DELAY_FULL;
-> +	dev_dbg(host->dev, "phase: [map:%llx] [maxlen:%d] [final:%d]\n",
->   		delay, len_final, final_phase);
->   
->   	delay_phase.maxlen = len_final;
-> @@ -1984,30 +2000,68 @@ static inline void msdc_set_cmd_delay(struct msdc_host *host, u32 value)
->   {
->   	u32 tune_reg = host->dev_comp->pad_tune_reg;
->   
-> -	if (host->top_base)
-> -		sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
-> -			      value);
-> -	else
-> -		sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
-> -			      value);
-> +	if (host->top_base) {
-> +		if (value < PAD_DELAY_HALF) {
-> +			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
-> +				      value);
-> +			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY2,
-> +				      0);
-> +		} else {
-> +			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
-> +				      PAD_DELAY_HALF - 1);
-> +			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY2,
-> +				      value - PAD_DELAY_HALF);
-> +		}
-> +	} else {
-> +		if (value < PAD_DELAY_HALF) {
-> +			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
-> +				      value);
-> +			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_CMDRDLY2,
-> +				      0);
-> +		} else {
-> +			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
-> +				      PAD_DELAY_HALF - 1);
-> +			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_CMDRDLY2,
-> +				      value - PAD_DELAY_HALF);
-> +		}
-> +	}
->   }
->   
->   static inline void msdc_set_data_delay(struct msdc_host *host, u32 value)
->   {
->   	u32 tune_reg = host->dev_comp->pad_tune_reg;
->   
-> -	if (host->top_base)
-> -		sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-> -			      PAD_DAT_RD_RXDLY, value);
-> -	else
-> -		sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_DATRRDLY,
-> -			      value);
-> +	if (host->top_base) {
-> +		if (value < PAD_DELAY_HALF) {
-> +			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-> +				      PAD_DAT_RD_RXDLY, value);
-> +			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-> +				      PAD_DAT_RD_RXDLY2, 0);
-> +		} else {
-> +			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-> +				      PAD_DAT_RD_RXDLY, PAD_DELAY_HALF - 1);
-> +			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-> +				      PAD_DAT_RD_RXDLY2, value - PAD_DELAY_HALF);
-> +		}
-> +	} else {
-> +		if (value < PAD_DELAY_HALF) {
-> +			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_DATRRDLY,
-> +				      value);
-> +			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_DATRRDLY2,
-> +				      0);
-> +		} else {
-> +			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_DATRRDLY,
-> +				      PAD_DELAY_HALF - 1);
-> +			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_DATRRDLY2,
-> +				      value - PAD_DELAY_HALF);
-> +		}
-> +	}
->   }
->   
->   static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
->   {
->   	struct msdc_host *host = mmc_priv(mmc);
-> -	u32 rise_delay = 0, fall_delay = 0;
-> +	u64 rise_delay = 0, fall_delay = 0;
->   	struct msdc_delay_phase final_rise_delay, final_fall_delay = { 0,};
->   	struct msdc_delay_phase internal_delay_phase;
->   	u8 final_delay, final_maxlen;
-> @@ -2023,7 +2077,7 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
->   			      host->hs200_cmd_int_delay);
->   
->   	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
-> -	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < host->tuning_step; i++) {
->   		msdc_set_cmd_delay(host, i);
->   		/*
->   		 * Using the same parameters, it may sometimes pass the test,
-> @@ -2047,7 +2101,7 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
->   		goto skip_fall;
->   
->   	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
-> -	for (i = 0; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < host->tuning_step; i++) {
->   		msdc_set_cmd_delay(host, i);
->   		/*
->   		 * Using the same parameters, it may sometimes pass the test,
-> @@ -2082,7 +2136,7 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
->   	if (host->dev_comp->async_fifo || host->hs200_cmd_int_delay)
->   		goto skip_internal;
->   
-> -	for (i = 0; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < host->tuning_step; i++) {
->   		sdr_set_field(host->base + tune_reg,
->   			      MSDC_PAD_TUNE_CMDRRDLY, i);
->   		mmc_send_tuning(mmc, opcode, &cmd_err);
-> @@ -2121,7 +2175,8 @@ static int hs400_tune_response(struct mmc_host *mmc, u32 opcode)
->   		sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
->   	else
->   		sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
-> -	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
+> Updates in V13:
+>  - Use ios timing to stead MMC_UHS2_SUPPORT for indicate the UHS2 mode.
+> 
+> Updates in V8:
+>  - Adjust the position of matching brackets.
+> 
+> Updates in V6:
+>  - Remove unnecessary functions and simplify code.
+> 
+> ---
+> 
+>  drivers/mmc/host/sdhci-uhs2.c | 45 +++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-uhs2.h |  2 ++
+>  2 files changed, 47 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+> index e339821d3504..ef6f02583d61 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.c
+> +++ b/drivers/mmc/host/sdhci-uhs2.c
+> @@ -10,7 +10,9 @@
+>   *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+>   */
+>  
+> +#include <linux/delay.h>
+>  #include <linux/module.h>
+> +#include <linux/iopoll.h>
+>  
+>  #include "sdhci.h"
+>  #include "sdhci-uhs2.h"
+> @@ -21,6 +23,8 @@
+>  #define SDHCI_UHS2_DUMP(f, x...) \
+>  	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
+>  
+> +#define UHS2_RESET_TIMEOUT_100MS		100000
 > +
-> +	for (i = 0; i < PAD_DELAY_HALF; i++) {
->   		sdr_set_field(host->base + PAD_CMD_TUNE,
->   			      PAD_CMD_TUNE_RX_DLY3, i);
->   		/*
-> @@ -2151,7 +2206,7 @@ static int hs400_tune_response(struct mmc_host *mmc, u32 opcode)
->   static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
->   {
->   	struct msdc_host *host = mmc_priv(mmc);
-> -	u32 rise_delay = 0, fall_delay = 0;
-> +	u64 rise_delay = 0, fall_delay = 0;
->   	struct msdc_delay_phase final_rise_delay, final_fall_delay = { 0,};
->   	u8 final_delay, final_maxlen;
->   	int i, ret;
-> @@ -2160,7 +2215,7 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
->   		      host->latch_ck);
->   	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_DSPL);
->   	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_W_DSPL);
-> -	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < host->tuning_step; i++) {
->   		msdc_set_data_delay(host, i);
->   		ret = mmc_send_tuning(mmc, opcode, NULL);
->   		if (!ret)
-> @@ -2174,7 +2229,7 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
->   
->   	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_DSPL);
->   	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_W_DSPL);
-> -	for (i = 0; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < host->tuning_step; i++) {
->   		msdc_set_data_delay(host, i);
->   		ret = mmc_send_tuning(mmc, opcode, NULL);
->   		if (!ret)
-> @@ -2206,7 +2261,7 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
->   static int msdc_tune_together(struct mmc_host *mmc, u32 opcode)
->   {
->   	struct msdc_host *host = mmc_priv(mmc);
-> -	u32 rise_delay = 0, fall_delay = 0;
-> +	u64 rise_delay = 0, fall_delay = 0;
->   	struct msdc_delay_phase final_rise_delay, final_fall_delay = { 0,};
->   	u8 final_delay, final_maxlen;
->   	int i, ret;
-> @@ -2217,7 +2272,7 @@ static int msdc_tune_together(struct mmc_host *mmc, u32 opcode)
->   	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_Ron the supported SoCsSPL);
->   	sdr_clr_bits(host->base + MSDC_IOCON,
->   		     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
-> -	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < host->tuning_step; i++) {
->   		msdc_set_cmd_delay(host, i);
->   		msdc_set_data_delay(host, i);
->   		ret = mmc_send_tuning(mmc, opcode, NULL);
-> @@ -2233,7 +2288,7 @@ static int msdc_tune_together(struct mmc_host *mmc, u32 opcode)
->   	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
->   	sdr_set_bits(host->base + MSDC_IOCON,
->   		     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
-> -	for (i = 0; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < host->tuning_step; i++) {
->   		msdc_set_cmd_delay(host, i);
->   		msdc_set_data_delay(host, i);
->   		ret = mmc_send_tuning(mmc, opcode, NULL);
-> @@ -2346,7 +2401,7 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
->   	}
->   
->   	host->hs400_tuning = true;
-> -	for (i = 0; i < PAD_DELAY_MAX; i++) {
-> +	for (i = 0; i < PAD_DELAY_HALF; i++) {
->   		if (host->top_base)
->   			sdr_set_field(host->top_base + EMMC50_PAD_DS_TUNE,
->   				      PAD_DS_DLY1, i);
-> @@ -2601,6 +2656,10 @@ static void msdc_of_property_parse(struct platform_device *pdev,
->   	else
->   		host->hs400_cmd_resp_sel_rising = false;
->   
-> +	if (of_property_read_u32(pdev->dev.of_node, "mediatek,tuning-step",
-> +				 &host->tuning_step))
-> +		host->tuning_step = PAD_DELAY_HALF;
+>  void sdhci_uhs2_dump_regs(struct sdhci_host *host)
+>  {
+>  	if (!(sdhci_uhs2_mode(host)))
+> @@ -49,6 +53,47 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
+>  
+> +/*****************************************************************************\
+> + *                                                                           *
+> + * Low level functions                                                       *
+> + *                                                                           *
+> +\*****************************************************************************/
 > +
->   	if (of_property_read_bool(pdev->dev.of_node,
->   				  "supports-cqe"))
->   		host->cqhci = true;
+> +bool sdhci_uhs2_mode(struct sdhci_host *host)
+> +{
+> +	return	host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_A ||
+> +		host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B ||
+> +		host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_A_HD ||
+> +		host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD;
+> +}
 
+This is the same as mmc_card_uhs2(host->mmc)
 
+> +
+> +/**
+> + * sdhci_uhs2_reset - invoke SW reset
+> + * @host: SDHCI host
+> + * @mask: Control mask
+> + *
+> + * Invoke SW reset, depending on a bit in @mask and wait for completion.
+> + */
+> +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
+> +{
+> +	u32 val;
+> +
+> +	sdhci_writew(host, mask, SDHCI_UHS2_SW_RESET);
+> +
+> +	if (mask & SDHCI_UHS2_SW_RESET_FULL)
+> +		host->clock = 0;
+> +
+> +	/* hw clears the bit when it's done */
+> +	if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
+> +				     UHS2_RESET_TIMEOUT_100MS, true, host, SDHCI_UHS2_SW_RESET)) {
+> +		pr_warn("%s: %s: Reset 0x%x never completed. %s: clean reset bit.\n", __func__,
+> +			mmc_hostname(host->mmc), (int)mask, mmc_hostname(host->mmc));
+> +		sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
+> +		return;
+> +	}
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
+> +
+>  /*****************************************************************************\
+>   *                                                                           *
+>   * Driver init/exit                                                          *
+> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
+> index 2bfe18d29bca..8253d50f7852 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.h
+> +++ b/drivers/mmc/host/sdhci-uhs2.h
+> @@ -177,5 +177,7 @@
+>  struct sdhci_host;
+>  
+>  void sdhci_uhs2_dump_regs(struct sdhci_host *host);
+> +bool sdhci_uhs2_mode(struct sdhci_host *host);
+> +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
+>  
+>  #endif /* __SDHCI_UHS2_H */
 
