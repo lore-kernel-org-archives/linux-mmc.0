@@ -1,198 +1,184 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Oondal7M"
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.65])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D73659D
-	for <linux-mmc@vger.kernel.org>; Wed, 29 Nov 2023 05:31:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1701264700; x=1732800700;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=uZcv9aIvQUZwiTSb0GSz4lUFf5Umxqq3HewMBlMj5vg=;
-  b=Oondal7Ms2GEvurx3jyXIR4YIFYXOy7voIBjGT1Bl5cUFFl1B+2NybDJ
-   1lI9e6qIMG7PboOTYcy6k6fvopPqx3o6EYrEvNVGyj8uxnWfZB/HSfGwp
-   oYDOmusMb32YmT8YqEPlJSypjoA1/JpcN3M6YBNg6E07H8oVyxNRHHYbd
-   g9fga/vfyKkWozzfTbekaaBFlZ7NNr/hHK2AdIf8yDKqOGW3JQTmIumQ4
-   cmYCZqK/uLYKWPBH10RbgqCht6oFcS+KrjM7uoAZHCO58Bko4n1PCqY8c
-   yidCETnU/fmAhjsyPyd1M8Z3Cs6yvUVMu9QRWk1oBSQqo9F/Sd090JFME
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10908"; a="397059025"
-X-IronPort-AV: E=Sophos;i="6.04,235,1695711600"; 
-   d="scan'208";a="397059025"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Nov 2023 05:31:40 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10908"; a="803303566"
-X-IronPort-AV: E=Sophos;i="6.04,235,1695711600"; 
-   d="scan'208";a="803303566"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.43.226])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Nov 2023 05:31:38 -0800
-Message-ID: <071d9e4f-b936-4816-a652-bd0195799494@intel.com>
-Date: Wed, 29 Nov 2023 15:31:34 +0200
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="Kh3CC4hs"
+Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56F1610C0
+	for <linux-mmc@vger.kernel.org>; Wed, 29 Nov 2023 06:42:07 -0800 (PST)
+Received: by mail-wr1-x42d.google.com with SMTP id ffacd0b85a97d-332c0c32d19so4709534f8f.3
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Nov 2023 06:42:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=foundries.io; s=google; t=1701268926; x=1701873726; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=QDawgaKO9bOyEPEa/Yo3vIWZebyfrSgz6Xg0p2qhlTA=;
+        b=Kh3CC4hsZZDAv6ZEe5EdNL/qaNaaaOAmibPXcoEF7XUqZmeJ9TdLGDZ1qVPJAfJoUl
+         iWoklNYll2MFMbjBFi0QQKKlW4k3Pg+U+94w2ZcTL5Xv9x0q3qkYhxnlAb8gpE9myI7u
+         N3xnedfPnB/ivxbhpFX/2Uh68D0jSEeeu/T6V2UVOyuBOpGCqN4fnz7KC0/ECohYbib5
+         9a58oxdwqaZdr1LZOhkuF5EXxf6A+86lXsKbiw+Go45XRu/ElwQYAbQ8zMZWlSPspI8U
+         /NDCFCcvmPyREd3GtkgcCLjihiNqh3+7tjlPMuKQqCylg/d5IRs1dLzUWRsbFsTZk3bF
+         7FeQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701268926; x=1701873726;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=QDawgaKO9bOyEPEa/Yo3vIWZebyfrSgz6Xg0p2qhlTA=;
+        b=YtN/oa3acGoKJAPmRvhgMT1oKGIM77rqgKTCGi7+WzIVLVx8E2RuF/3C6ZsPSfbFkL
+         qlUGX9wx0Z/GbqcgMnc1BshEtE8r96tNvJMt+RW47ro7xMY8OQoMpPtMsZXGMRQphsUU
+         NVyXXmu0xBI689lC/Qx2rqiHax+onZLboC8fnLy3nmMzLI/wHno5MS9UuDOhckxq9tTE
+         aNARGAdSX+yaZGehFV9Gj8BW7BX/noS4azi+SpRXiRgeXtnfAj7yt36Ar5M5Kh6Ta3Zd
+         xeU1rpycQQZqs3+u9yQ0BVhiY2tiAMGOcHYyPITBoC8/g9UnrEuiwna254dN+hkiCebY
+         ECCA==
+X-Gm-Message-State: AOJu0YySYY/x2b/If4uAvUXxDaeixTTAAOv7fvartOdEOxm4rLXZRuTJ
+	W8EvBZRi0lknotF75sx5PCTI+A==
+X-Google-Smtp-Source: AGHT+IE1UstuUrCAEpJ83OsWvDZt3bUHv1jHnmiWwiUh+B63lX+u7BESc63x+3uJCo1ai4LlfTdNdA==
+X-Received: by 2002:a05:6000:180f:b0:332:f889:39f7 with SMTP id m15-20020a056000180f00b00332f88939f7mr9676195wrh.10.1701268925589;
+        Wed, 29 Nov 2023 06:42:05 -0800 (PST)
+Received: from trax (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
+        by smtp.gmail.com with ESMTPSA id e15-20020a5d594f000000b00332fda15055sm10106814wri.111.2023.11.29.06.42.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 29 Nov 2023 06:42:04 -0800 (PST)
+From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
+Date: Wed, 29 Nov 2023 15:42:03 +0100
+To: Christian Loehle <christian.loehle@arm.com>
+Cc: Jorge Ramirez-Ortiz <jorge@foundries.io>, ulf.hansson@linaro.org,
+	adrian.hunter@intel.com, CLoehle@hyperstone.com,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] mmc: rpmb: add quirk MMC_QUIRK_BROKEN_RPMB_RETUNE
+Message-ID: <ZWdNu5l8U++Z6h6t@trax>
+References: <20231129094350.2605322-1-jorge@foundries.io>
+ <e159b627-22d4-489d-89a0-4de3be9af99b@arm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4] mmc: core: Use mrq.sbc in close-ended ffu
-Content-Language: en-US
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-mmc@vger.kernel.org
-Cc: Daniil Lunev <dlunev@google.com>, Asutosh Das <quic_asutoshd@quicinc.com>
-References: <20231129092535.3278-1-avri.altman@wdc.com>
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20231129092535.3278-1-avri.altman@wdc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e159b627-22d4-489d-89a0-4de3be9af99b@arm.com>
 
-On 29/11/23 11:25, Avri Altman wrote:
-> Field Firmware Update (ffu) may use close-ended or open ended sequence.
-> Each such sequence is comprised of a write commands enclosed between 2
-> switch commands - to and from ffu mode. So for the close-ended case, it
-> will be: cmd6->cmd23-cmd25-cmd6.
-> 
-> Some host controllers however, get confused when multi-block rw is sent
-> without sbc, and may generate auto-cmd12 which breaks the ffu sequence.
-> I encountered  this issue while testing fwupd (github.com/fwupd/fwupd)
-> on HP Chromebook x2, a qualcomm based QC-7c, code name - strongbad.
-> 
-> Instead of a quirk, or hooking the request function of the msm ops,
-> it would be better to fix the ioctl handling and make it use mrq.sbc
-> instead of issuing SET_BLOCK_COUNT separately.
-> 
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+On 29/11/23 10:32:41, Christian Loehle wrote:
+> On 29/11/2023 09:43, Jorge Ramirez-Ortiz wrote:
+> > On the eMMC SanDisk iNAND 7250 configured with HS200, requesting a
+> > re-tune before switching to the RPMB partition would randomly cause
+> > subsequent RPMB requests to fail with EILSEQ:
+> > * data error -84, tigggered in __mmc_blk_ioctl_cmd()
+> >
+> > This commit skips the retune when switching to RPMB.
+> > Tested over several days with per minute RPMB reads.
+> >
+> > Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+> > ---
+> >  drivers/mmc/core/block.c  | 6 +++++-
+> >  drivers/mmc/core/card.h   | 7 +++++++
+> >  drivers/mmc/core/quirks.h | 7 +++++++
+> >  include/linux/mmc/card.h  | 1 +
+> >  4 files changed, 20 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index 152dfe593c43..9b7ba6562a3b 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -860,6 +860,11 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
+> >  				return ret;
+> >  		}
+> >  		mmc_retune_pause(card->host);
+> > +
+> > +		/* Do not force retune before RPMB switch */
+> > +		if (mmc_can_retune(card->host) &&
+> > +		    mmc_card_broken_rpmb_retune(card))
+> > +			card->host->need_retune = 0;
+> >  	}
+>
+> Is this just an issue for rpmb switches or did you try other non-rpmb
+> partition switches, too?
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+I only tried the reported failure case (ie, RPMB switch).This failure
+case came from a product verification team so I believe all the other
+scenarios should be functional - other than RPMB accesses (these tests
+started a few months ago), no other issues have been reported from eMMC
+validation in the last couple of years.
 
-> ---
-> 
-> Changelog:
-> v3--v4:
-> 	check sbc.error as well
-> v2--v3:
-> 	Adopt Adrian's proposal
-> v1--v2:
-> 	remove redundant reference of reliable write
-> ---
->  drivers/mmc/core/block.c | 46 +++++++++++++++++++++++++++++++++++++---
->  1 file changed, 43 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index f9a5cffa64b1..892e74e611a0 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -400,6 +400,10 @@ struct mmc_blk_ioc_data {
->  	struct mmc_ioc_cmd ic;
->  	unsigned char *buf;
->  	u64 buf_bytes;
-> +	unsigned int flags;
-> +#define MMC_BLK_IOC_DROP	BIT(0)	/* drop this mrq */
-> +#define MMC_BLK_IOC_SBC	BIT(1)	/* use mrq.sbc */
-> +
->  	struct mmc_rpmb_data *rpmb;
->  };
->  
-> @@ -465,7 +469,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
->  }
->  
->  static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
-> -			       struct mmc_blk_ioc_data *idata)
-> +			       struct mmc_blk_ioc_data **idatas, int i)
->  {
->  	struct mmc_command cmd = {}, sbc = {};
->  	struct mmc_data data = {};
-> @@ -475,10 +479,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->  	unsigned int busy_timeout_ms;
->  	int err;
->  	unsigned int target_part;
-> +	struct mmc_blk_ioc_data *idata = idatas[i];
-> +	struct mmc_blk_ioc_data *prev_idata = NULL;
->  
->  	if (!card || !md || !idata)
->  		return -EINVAL;
->  
-> +	if (idata->flags & MMC_BLK_IOC_DROP)
-> +		return 0;
-> +
-> +	if (idata->flags & MMC_BLK_IOC_SBC)
-> +		prev_idata = idatas[i - 1];
-> +
->  	/*
->  	 * The RPMB accesses comes in from the character device, so we
->  	 * need to target these explicitly. Else we just target the
-> @@ -532,7 +544,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->  			return err;
->  	}
->  
-> -	if (idata->rpmb) {
-> +	if (idata->rpmb || prev_idata) {
->  		sbc.opcode = MMC_SET_BLOCK_COUNT;
->  		/*
->  		 * We don't do any blockcount validation because the max size
-> @@ -540,6 +552,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->  		 * 'Reliable Write' bit here.
->  		 */
->  		sbc.arg = data.blocks | (idata->ic.write_flag & BIT(31));
-> +		if (prev_idata)
-> +			sbc.arg = prev_idata->ic.arg;
->  		sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
->  		mrq.sbc = &sbc;
->  	}
-> @@ -557,6 +571,15 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->  	mmc_wait_for_req(card->host, &mrq);
->  	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
->  
-> +	if (prev_idata) {
-> +		memcpy(&prev_idata->ic.response, sbc.resp, sizeof(sbc.resp));
-> +		if (sbc.error) {
-> +			dev_err(mmc_dev(card->host), "%s: sbc error %d\n",
-> +							__func__, sbc.error);
-> +			return sbc.error;
-> +		}
-> +	}
-> +
->  	if (cmd.error) {
->  		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
->  						__func__, cmd.error);
-> @@ -1032,6 +1055,20 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
->  	md->reset_done &= ~type;
->  }
->  
-> +static void mmc_blk_check_sbc(struct mmc_queue_req *mq_rq)
-> +{
-> +	struct mmc_blk_ioc_data **idata = mq_rq->drv_op_data;
-> +	int i;
-> +
-> +	for (i = 1; i < mq_rq->ioc_count; i++) {
-> +		if (idata[i - 1]->ic.opcode == MMC_SET_BLOCK_COUNT &&
-> +		    mmc_op_multi(idata[i]->ic.opcode)) {
-> +			idata[i - 1]->flags |= MMC_BLK_IOC_DROP;
-> +			idata[i]->flags |= MMC_BLK_IOC_SBC;
-> +		}
-> +	}
-> +}
-> +
->  /*
->   * The non-block commands come back from the block layer after it queued it and
->   * processed it with all other requests and then they get issued in this
-> @@ -1059,11 +1096,14 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
->  			if (ret)
->  				break;
->  		}
-> +
-> +		mmc_blk_check_sbc(mq_rq);
-> +
->  		fallthrough;
->  	case MMC_DRV_OP_IOCTL_RPMB:
->  		idata = mq_rq->drv_op_data;
->  		for (i = 0, ret = 0; i < mq_rq->ioc_count; i++) {
-> -			ret = __mmc_blk_ioctl_cmd(card, md, idata[i]);
-> +			ret = __mmc_blk_ioctl_cmd(card, md, idata, i);
->  			if (ret)
->  				break;
->  		}
+Is there some additional check/test you would like to see done? if so,
+please could you let me know how to trigger them?
 
+> And only HS200 or that's just what you tested with?
+
+Yes that is just the product configuration; so the only one I tested.
+
+The host controller is sdhci-of-arasan for xlnx,zynqmp-8.9a. I inspected
+the driver history and auto-tuning was extended to support ZynqMP (DLL
+reset) some years ago so I believe tuning itself should be fine.
+
+I am referring to commit 8d2e334377dbe645415fbe031711324bc2281907 "mmc:
+sdhci-of-arasan: Add support for DLL reset for ZynqMP platforms "
+
+>
+> >
+> >  	return ret;
+> > @@ -3143,4 +3148,3 @@ module_exit(mmc_blk_exit);
+> >
+> >  MODULE_LICENSE("GPL");
+> >  MODULE_DESCRIPTION("Multimedia Card (MMC) block device driver");
+> > -
+> > diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> > index b7754a1b8d97..1e1555a15de9 100644
+> > --- a/drivers/mmc/core/card.h
+> > +++ b/drivers/mmc/core/card.h
+> > @@ -85,6 +85,7 @@ struct mmc_fixup {
+> >  #define CID_MANFID_MICRON       0x13
+> >  #define CID_MANFID_SAMSUNG      0x15
+> >  #define CID_MANFID_APACER       0x27
+
+I had to add another ID for SanDisk - maybe 0x45 is for Industrial
+controllers? do you know?
+> > +#define CID_MANFID_SANDISK2     0x45
+
+> >  #define CID_MANFID_KINGSTON     0x70
+> >  #define CID_MANFID_HYNIX	0x90
+> >  #define CID_MANFID_KINGSTON_SD	0x9F
+> > @@ -284,4 +285,10 @@ static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
+> >  {
+> >  	return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
+> >  }
+> > +
+> > +static inline int mmc_card_broken_rpmb_retune(const struct mmc_card *c)
+> > +{
+> > +	return c->quirks & MMC_QUIRK_BROKEN_RPMB_RETUNE;
+> > +}
+> > +
+> >  #endif
+> > diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> > index cca71867bc4a..35dfc8437d29 100644
+> > --- a/drivers/mmc/core/quirks.h
+> > +++ b/drivers/mmc/core/quirks.h
+> > @@ -130,6 +130,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+> >  	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
+> >  		  MMC_QUIRK_BROKEN_SD_DISCARD),
+> >
+> > +	/*
+> > +	 * SanDisk iNAND 7250 DDG4064, this quirk shall disable the retune
+> > +	 * operation enforced by default when switching to RPMB.
+> > +	 */
+> > +	MMC_FIXUP("DG4064", CIF_MANFID_SANDISK2, 0x100, add_quirk_mmc,
+> > +		  MMC_QUIRK_BROKEN_RPMB_RETUNE),
+> > +
+> >  	END_FIXUP
+> >  };
+> >
+> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> > index 7b12eebc5586..bd6986189e8b 100644
+> > --- a/include/linux/mmc/card.h
+> > +++ b/include/linux/mmc/card.h
+> > @@ -296,6 +296,7 @@ struct mmc_card {
+> >  #define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
+> >  #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
+> >  #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
+> > +#define MMC_QUIRK_BROKEN_RPMB_RETUNE	(1<<17) /* Don't force a retune before switching to RPMB */
+> >
+> >  	bool			written_flag;	/* Indicates eMMC has been written since power on */
+> >  	bool			reenable_cmdq;	/* Re-enable Command Queue */
+> > --
+> > 2.34.1
+>
