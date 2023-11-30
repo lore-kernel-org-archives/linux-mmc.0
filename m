@@ -1,492 +1,135 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="nbFP7pX6"
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5F9D10D4;
-	Wed, 29 Nov 2023 22:15:29 -0800 (PST)
-X-UUID: d7ccbaac8f4711eea33bb35ae8d461a2-20231130
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=3M6A7k0XflTWsvj8siywxp0LXUsD7WlkZyI0hPYHAkc=;
-	b=nbFP7pX6th76uHZq9Sx10dn8P5lQi4qn5A5kGTTkxTWV7GkQ7NAyzwPZirj7dw/ryHJj+LTa3iXD8/9AP+cfdJFSfgbCwwFMQ48RibHY5Cnn/QcJMs2OOdMchZ6Ik7Tab9xiWfpnysVJxGDq/lu2hrvy355NHnXc4GBpf6ZrWI0=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.34,REQID:bde9ee02-2a03-4355-a186-443d26b88c1d,IP:0,U
-	RL:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
-	N:release,TS:-25
-X-CID-META: VersionHash:abefa75,CLOUDID:22c63d73-1bd3-4f48-b671-ada88705968c,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-	RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:NO,
-	DKR:0,DKP:0,BRR:0,BRE:0
-X-CID-BVR: 0
-X-CID-BAS: 0,_,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-UUID: d7ccbaac8f4711eea33bb35ae8d461a2-20231130
-Received: from mtkmbs13n1.mediatek.inc [(172.21.101.193)] by mailgw01.mediatek.com
-	(envelope-from <axe.yang@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 57539612; Thu, 30 Nov 2023 14:15:22 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Thu, 30 Nov 2023 14:15:20 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Thu, 30 Nov 2023 14:15:19 +0800
-From: Axe Yang <axe.yang@mediatek.com>
-To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, "Krzysztof
- Kozlowski" <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley
-	<conor+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, "Wenbin
- Mei" <wenbin.mei@mediatek.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-mediatek@lists.infradead.org>,
-	<Project_Global_Chrome_Upstream_Group@mediatek.com>, Axe Yang
-	<axe.yang@mediatek.com>
-Subject: [PATCH v3 2/2] mmc: mediatek: extend number of tuning steps
-Date: Thu, 30 Nov 2023 14:15:13 +0800
-Message-ID: <20231130061513.1296-3-axe.yang@mediatek.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20231130061513.1296-1-axe.yang@mediatek.com>
-References: <20231130061513.1296-1-axe.yang@mediatek.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="N9gY6RXD"
+Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FF1610EF
+	for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 01:07:01 -0800 (PST)
+Received: by mail-yb1-xb2b.google.com with SMTP id 3f1490d57ef6-db49ab94768so592418276.2
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 01:07:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1701335221; x=1701940021; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=qzc3U7sFDdtHUadGGzprUKVhVLAwC/gLPx8U/sb5Ft4=;
+        b=N9gY6RXDkWumRhx9vouBV3yMPGyw5jXA5XNERq4YTreF8GmSxntyHyj3hPmREWT/hl
+         nu2C0hSaOUHSpifnj7szzpFC/3+jXfFN4qG/K4h+wm/iRWXOqqqnjRmXiO5XNQegRHma
+         03UWSvFUFOO6wNcBmeUub42q46ldRWwDyWYWwQ1Z1tWSbwvbiUS5KlHH7spR64ikt8ne
+         iPGoEuMg6Xke9wL5Znb5tr9BXxMFjUUa8/l5UKSkXxwWNQwMrpQDzcTnhT+oOEZ5gyVc
+         cHx/uoccDvP+WzPldhqcvw3Bxj6VJj5o008JBTqD2+iw+Qm7/fVYJJGX/fnkAYPm8vKQ
+         nRWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701335221; x=1701940021;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=qzc3U7sFDdtHUadGGzprUKVhVLAwC/gLPx8U/sb5Ft4=;
+        b=wtjs5H770bgyBcEnVKjlCWLxYA28+lFzfIDRxZvKrPEKqXwqxgsvuHX/1zeM8Oc8ij
+         URUoW6ZyAKwBwQU2LWbMT4w9rCIZcz3wFG6cSnRhsoxv31a+npzf3jNuj1w6FwAtRsNP
+         UCKxZbUW05M9+YmNM1UjyeI3kq5g8Vb1Wj5L6Fuh9HQpYnbNSTd3RNGjC6v2Be7SYKNa
+         /AzGPrjtqLqYLaWFmNX4YAgFi1bXomcSbGFbeivfIdP9DD/Y/eALO6+A0iRH13nVV3rn
+         lwCC0AFmAgTf86HjlnVCSJNwplzZmGrKWcKAQRtf3Fpf2PkELMG2pOWCyLXfkqwsFbVG
+         yL/A==
+X-Gm-Message-State: AOJu0YxulRYKdKaOHAuQacNv/aHYT32EzvuZlTb1/wtm0m6b4XlE1cP+
+	HYyW9c0xkewNqnUEu7Na7BG+PFUbnuTVPP6UFKpRQg==
+X-Google-Smtp-Source: AGHT+IE2wHsXYey5GhKupzNswCMwI47ajmC1v7kGHta1ytzdpied8STHZJJIrUpWGsQJNpPuJQDIl8OPjlw4XfG8Ydk=
+X-Received: by 2002:a25:ce0e:0:b0:db5:4196:8125 with SMTP id
+ x14-20020a25ce0e000000b00db541968125mr311366ybe.17.1701335220510; Thu, 30 Nov
+ 2023 01:07:00 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-TM-AS-Product-Ver: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-AS-Result: No-10--8.977800-8.000000
-X-TMASE-MatchedRID: UNsncxXyULd80yFIYo0rRuGonqgs5zxBRjqOkKPmpa4UlWIKEoGBmc+/
-	a0S0vHt4WZy+62a7b19rOAp0kI1DP9H/WqWljGhSSDkh6bW+bcckMBkEieOjZi8ggN9+4AxXDk6
-	/c+jKAHFIl95haju6JaPNT9pmq5xZMZPj25j8CtwD2WXLXdz+ASlayzmQ9QV0LXc81qaZoAZ6BY
-	sNJ37NLlzcgkMGmqXJbaWmopg96Z1F/TNFimjSuL50lYduDghOEVhvB8sXyyN39JELjK+oYGpHK
-	tkQBynKW3gtfnNC/JHwlIRl/0urFbGynpy6kEvAM71h0SMVl8InKdHifmIw3NEsTITobgNEEUbg
-	QYFHh3i5G69xLZU4ggJ+2GmvVjyvQF24kZp9Ww+eAiCmPx4NwJuJ+Pb8n/VxSnQ4MjwaO9cqtq5
-	d3cxkNUSsCaCt2sGttFxY0DNCfMtlaJ/OXY3Hj82QbiiYbJ67obVfa1MZ60c=
-X-TM-AS-User-Approved-Sender: No
-X-TM-AS-User-Blocked-Sender: No
-X-TMASE-Result: 10--8.977800-8.000000
-X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-SNTS-SMTP: 5F28E17A81402823103F41B22B32169FC7BCC3BE05F2A7CE481E6F1EF01D7FA42000:8
-X-MTK: N
+References: <20230929130028.GB2825985@pengutronix.de> <CAPDyKFqUtNEbK2tzD+qOK+dFcDyBxvcNwOHWPJDLhTWGGkoHQw@mail.gmail.com>
+ <20231122112212.GA783262@pengutronix.de>
+In-Reply-To: <20231122112212.GA783262@pengutronix.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 30 Nov 2023 10:06:24 +0100
+Message-ID: <CAPDyKFpWL0aVH0pfUbDiSmu=dr1NjO+wVHcTyxbQqfb52mMq2g@mail.gmail.com>
+Subject: Re: mmc: handling of Under-Voltage Events in eMMC
+To: Oleksij Rempel <o.rempel@pengutronix.de>
+Cc: Mark Brown <broonie@kernel.org>, Yang Yingliang <yangyingliang@huawei.com>, 
+	linux-mmc@vger.kernel.org, kernel@pengutronix.de, Ye Bin <yebin10@huawei.com>, 
+	Heiner Kallweit <hkallweit1@gmail.com>, Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>, 
+	Liam Girdwood <lgirdwood@gmail.com>, Conor Dooley <conor+dt@kernel.org>, linux-kernel@vger.kernel.org, 
+	devicetree@vger.kernel.org, Naresh Solanki <naresh.solanki@9elements.com>, 
+	zev@bewilderbeest.net, Sebastian Reichel <sre@kernel.org>, linux-pm@vger.kernel.org, 
+	=?UTF-8?Q?S=C3=B8ren_Andersen?= <san@skov.dk>
+Content-Type: text/plain; charset="UTF-8"
 
-Previously, during the MSDC calibration process, a full clock cycle
-actually not be covered, which in some cases didn't yield the best
-results and could cause CRC errors. This problem is particularly
-evident when MSDC is used as an SDIO host. In fact, MSDC support
-tuning up to a maximum of 64 steps, but by default, the step number
-is 32. By increase the tuning step, we are more likely to cover more
-parts of a clock cycle, and get better calibration result.
+On Wed, 22 Nov 2023 at 12:22, Oleksij Rempel <o.rempel@pengutronix.de> wrote:
+>
+> Hi Ulf, Hi Mark,
+>
+> On Tue, Oct 10, 2023 at 04:48:24PM +0200, Ulf Hansson wrote:
+> > On Fri, 29 Sept 2023 at 15:00, Oleksij Rempel <o.rempel@pengutronix.de> wrote:
+> > >
+> > > Hi,
+> > >
+> > > I'm working on a project aiming to protect eMMC during power loss. Our
+> > > hardware setup includes an under-voltage detector, circuits to disable
+> > > non-critical components, and enough capacitance to allow the CPU to run
+> > > for 100ms.
+> > >
+> > > I've added an interrupt handler to the fixed regulator to emit
+> > > REGULATOR_EVENT_UNDER_VOLTAGE events, and modified
+> > > drivers/mmc/host/sdhci.c to receive these events. Currently, the handler
+> > > only produces debug output.
+> > >
+> > > What is the recommended approach for handling under-voltage situations?
+> > > Should the driver finish ongoing write commands, block new ones, and
+> > > shut down the eMMC? I'm looking for direction here.
+> >
+> > That's indeed a very good question. From a general point of view, I
+> > think the best we can do is to stop any new I/O requests from being
+> > managed - and try to complete only the last ongoing one, if any.
+> > Exactly how to do that can be a bit tricky though.
+> >
+> > Beyond that, we should probably try to send the eMMC specific commands
+> > that allow us to inform the eMMC that it's about to be powered-off.
+> > Although, I am not sure that we actually will be able to complete
+> > these operations within 100ms, so maybe it's not really worth trying?
+> > See mmc_poweroff_notify(), for example.
+>
+> Some puzzle parts are now mainline, for example regulator framework
+> can be configured to detect under-voltage events and execute
+> hw_protection_shutdown(). So far it worked good enough to complete
+> mmc_poweroff_notify() withing 100ms window. The problem is, the chance to
+> execute mmc_poweroff_notify() depends on kernel configuration. If there are too
+> many drivers and devices, mmc_poweroff_notify() will be not executed in time.
 
-To illustrate, when tuning 32 steps, if the obtained window has a hole
-near the middle, like this: 0xffc07ff (hex), then the selected delay
-will be the 6 (counting from right to left).
+Right. I have been monitoring the discussions around the series
+"[PATCH v1 0/3] introduce priority-based shutdown support", but wanted
+to give a reply to $subject patch first.
 
-(32 <- 1)
-1111 1111 1100 0000 0000 0111 11(1)1 1111
+I think the point here is not to *always make it*, but rather try our
+best to improve the situation.
 
-However, if we tune 64 steps, the window obtained may look like this:
-0xfffffffffffc07ff. The final selected delay will be 44, which is
-safer as it is further away from the hole:
+>
+> For now, I workaround it by registering a reboot notifier for mmc shutdown.
+> It works, because kernel_power_off() is executing all registered reboot
+> notifiers at first place and there are no other slow reboot notifiers.
+> But, it seems to be not reliable enough. Probably notifier prioritization
+> is needed to make it more predictable.
 
-(64 <- 1)
-1111 ... (1)111 1111 1111 1111 1111 1100 0000 0000 0111 1111 1111
+I think I need to have a closer look at the code for such an approach,
+to tell if that would work.
 
-In this case, delay 6 selected through 32 steps tuning is obviously
-not optimal, and this delay is closer to the hole, using it would
-easily cause CRC problems.
+My main concern with this, is that we need to make sure the block
+device queue needs to be flushed or made quiescent
+(mmc_blk_shutdown()) first, so we don't end up processing I/O requests
+beyond calling mmc_poweroff_notify().
 
-You will need to configure property "mediatek,tuning-step" in MSDC
-dts node to 64 to extend the steps.
+>
+> So far, I have two variants to implement it in more predictable way:
+> variant 1 - forward the under-voltage notification to the mmc framework and
+>   execute mmc_poweroff_notify() or bus shutdown.
+> variant 2 - use reboot notifier and introduce reboot notifier prioritization.
+>
+> Are there other options? What are your preferences?
 
-Signed-off-by: Axe Yang <axe.yang@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 155 ++++++++++++++++++++++++++------------
- 1 file changed, 107 insertions(+), 48 deletions(-)
+Something along the variant2 seems to make most sense to me, but I
+will continue to look at your other series in this regard.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 97f7c3d4be6e..4cd306b3b295 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -252,12 +252,16 @@
- 
- #define MSDC_PAD_TUNE_DATWRDLY	  GENMASK(4, 0)		/* RW */
- #define MSDC_PAD_TUNE_DATRRDLY	  GENMASK(12, 8)	/* RW */
-+#define MSDC_PAD_TUNE_DATRRDLY2	  GENMASK(12, 8)	/* RW */
- #define MSDC_PAD_TUNE_CMDRDLY	  GENMASK(20, 16)	/* RW */
-+#define MSDC_PAD_TUNE_CMDRDLY2	  GENMASK(20, 16)	/* RW */
- #define MSDC_PAD_TUNE_CMDRRDLY	  GENMASK(26, 22)	/* RW */
- #define MSDC_PAD_TUNE_CLKTDLY	  GENMASK(31, 27)	/* RW */
- #define MSDC_PAD_TUNE_RXDLYSEL	  BIT(15)   /* RW */
- #define MSDC_PAD_TUNE_RD_SEL	  BIT(13)   /* RW */
- #define MSDC_PAD_TUNE_CMD_SEL	  BIT(21)   /* RW */
-+#define MSDC_PAD_TUNE_RD2_SEL	  BIT(13)   /* RW */
-+#define MSDC_PAD_TUNE_CMD2_SEL	  BIT(21)   /* RW */
- 
- #define PAD_DS_TUNE_DLY_SEL       BIT(0)	  /* RW */
- #define PAD_DS_TUNE_DLY1	  GENMASK(6, 2)   /* RW */
-@@ -325,7 +329,8 @@
- 
- #define DEFAULT_DEBOUNCE	(8)	/* 8 cycles CD debounce */
- 
--#define PAD_DELAY_MAX	32 /* PAD delay cells */
-+#define PAD_DELAY_HALF	32 /* PAD delay cells */
-+#define PAD_DELAY_FULL	64
- /*--------------------------------------------------------------------------*/
- /* Descriptor Structure                                                     */
- /*--------------------------------------------------------------------------*/
-@@ -461,6 +466,7 @@ struct msdc_host {
- 	u32 hs400_ds_dly3;
- 	u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
- 	u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
-+	u32 tuning_step;
- 	bool hs400_cmd_resp_sel_rising;
- 				 /* cmd response sample selection for HS400 */
- 	bool hs400_mode;	/* current eMMC will run at hs400 mode */
-@@ -1615,7 +1621,7 @@ static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
- 	}
- 
- 	if (cmd_err || dat_err) {
--		dev_err(host->dev, "cmd_err = %d, dat_err =%d, intsts = 0x%x",
-+		dev_err(host->dev, "cmd_err = %d, dat_err = %d, intsts = 0x%x",
- 			cmd_err, dat_err, intsts);
- 	}
- 
-@@ -1780,10 +1786,20 @@ static void msdc_init_hw(struct msdc_host *host)
- 				     DATA_K_VALUE_SEL);
- 			sdr_set_bits(host->top_base + EMMC_TOP_CMD,
- 				     PAD_CMD_RD_RXDLY_SEL);
-+			if (host->tuning_step > PAD_DELAY_HALF) {
-+				sdr_set_bits(host->top_base + EMMC_TOP_CONTROL,
-+					     PAD_DAT_RD_RXDLY2_SEL);
-+				sdr_set_bits(host->top_base + EMMC_TOP_CMD,
-+					     PAD_CMD_RD_RXDLY2_SEL);
-+			}
- 		} else {
- 			sdr_set_bits(host->base + tune_reg,
- 				     MSDC_PAD_TUNE_RD_SEL |
- 				     MSDC_PAD_TUNE_CMD_SEL);
-+			if (host->tuning_step > PAD_DELAY_HALF)
-+				sdr_set_bits(host->base + tune_reg + 4,
-+					     MSDC_PAD_TUNE_RD2_SEL |
-+					     MSDC_PAD_TUNE_CMD2_SEL);
- 		}
- 	} else {
- 		/* choose clock tune */
-@@ -1925,24 +1941,24 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		msdc_set_mclk(host, ios->timing, ios->clock);
- }
- 
--static u32 test_delay_bit(u32 delay, u32 bit)
-+static u64 test_delay_bit(u64 delay, u32 bit)
- {
--	bit %= PAD_DELAY_MAX;
--	return delay & BIT(bit);
-+	bit %= PAD_DELAY_FULL;
-+	return delay & BIT_ULL(bit);
- }
- 
--static int get_delay_len(u32 delay, u32 start_bit)
-+static int get_delay_len(u64 delay, u32 start_bit)
- {
- 	int i;
- 
--	for (i = 0; i < (PAD_DELAY_MAX - start_bit); i++) {
-+	for (i = 0; i < (PAD_DELAY_FULL - start_bit); i++) {
- 		if (test_delay_bit(delay, start_bit + i) == 0)
- 			return i;
- 	}
--	return PAD_DELAY_MAX - start_bit;
-+	return PAD_DELAY_FULL - start_bit;
- }
- 
--static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u32 delay)
-+static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u64 delay)
- {
- 	int start = 0, len = 0;
- 	int start_final = 0, len_final = 0;
-@@ -1950,28 +1966,28 @@ static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u32 delay)
- 	struct msdc_delay_phase delay_phase = { 0, };
- 
- 	if (delay == 0) {
--		dev_err(host->dev, "phase error: [map:%x]\n", delay);
-+		dev_err(host->dev, "phase error: [map:%016llx]\n", delay);
- 		delay_phase.final_phase = final_phase;
- 		return delay_phase;
- 	}
- 
--	while (start < PAD_DELAY_MAX) {
-+	while (start < PAD_DELAY_FULL) {
- 		len = get_delay_len(delay, start);
- 		if (len_final < len) {
- 			start_final = start;
- 			len_final = len;
- 		}
- 		start += len ? len : 1;
--		if (len >= 12 && start_final < 4)
-+		if (!upper_32_bits(delay) && len >= 12 && start_final < 4)
- 			break;
- 	}
- 
- 	/* The rule is that to find the smallest delay cell */
- 	if (start_final == 0)
--		final_phase = (start_final + len_final / 3) % PAD_DELAY_MAX;
-+		final_phase = (start_final + len_final / 3) % PAD_DELAY_FULL;
- 	else
--		final_phase = (start_final + len_final / 2) % PAD_DELAY_MAX;
--	dev_dbg(host->dev, "phase: [map:%x] [maxlen:%d] [final:%d]\n",
-+		final_phase = (start_final + len_final / 2) % PAD_DELAY_FULL;
-+	dev_dbg(host->dev, "phase: [map:%016llx] [maxlen:%d] [final:%d]\n",
- 		delay, len_final, final_phase);
- 
- 	delay_phase.maxlen = len_final;
-@@ -1984,30 +2000,68 @@ static inline void msdc_set_cmd_delay(struct msdc_host *host, u32 value)
- {
- 	u32 tune_reg = host->dev_comp->pad_tune_reg;
- 
--	if (host->top_base)
--		sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
--			      value);
--	else
--		sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
--			      value);
-+	if (host->top_base) {
-+		if (value < PAD_DELAY_HALF) {
-+			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
-+				      value);
-+			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY2,
-+				      0);
-+		} else {
-+			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
-+				      PAD_DELAY_HALF - 1);
-+			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY2,
-+				      value - PAD_DELAY_HALF);
-+		}
-+	} else {
-+		if (value < PAD_DELAY_HALF) {
-+			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
-+				      value);
-+			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_CMDRDLY2,
-+				      0);
-+		} else {
-+			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
-+				      PAD_DELAY_HALF - 1);
-+			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_CMDRDLY2,
-+				      value - PAD_DELAY_HALF);
-+		}
-+	}
- }
- 
- static inline void msdc_set_data_delay(struct msdc_host *host, u32 value)
- {
- 	u32 tune_reg = host->dev_comp->pad_tune_reg;
- 
--	if (host->top_base)
--		sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
--			      PAD_DAT_RD_RXDLY, value);
--	else
--		sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_DATRRDLY,
--			      value);
-+	if (host->top_base) {
-+		if (value < PAD_DELAY_HALF) {
-+			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-+				      PAD_DAT_RD_RXDLY, value);
-+			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-+				      PAD_DAT_RD_RXDLY2, 0);
-+		} else {
-+			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-+				      PAD_DAT_RD_RXDLY, PAD_DELAY_HALF - 1);
-+			sdr_set_field(host->top_base + EMMC_TOP_CONTROL,
-+				      PAD_DAT_RD_RXDLY2, value - PAD_DELAY_HALF);
-+		}
-+	} else {
-+		if (value < PAD_DELAY_HALF) {
-+			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_DATRRDLY,
-+				      value);
-+			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_DATRRDLY2,
-+				      0);
-+		} else {
-+			sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_DATRRDLY,
-+				      PAD_DELAY_HALF - 1);
-+			sdr_set_field(host->base + tune_reg + 4, MSDC_PAD_TUNE_DATRRDLY2,
-+				      value - PAD_DELAY_HALF);
-+		}
-+	}
- }
- 
- static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
- {
- 	struct msdc_host *host = mmc_priv(mmc);
--	u32 rise_delay = 0, fall_delay = 0;
-+	u64 rise_delay = 0, fall_delay = 0;
- 	struct msdc_delay_phase final_rise_delay, final_fall_delay = { 0,};
- 	struct msdc_delay_phase internal_delay_phase;
- 	u8 final_delay, final_maxlen;
-@@ -2023,7 +2077,7 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
- 			      host->hs200_cmd_int_delay);
- 
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
--	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < host->tuning_step; i++) {
- 		msdc_set_cmd_delay(host, i);
- 		/*
- 		 * Using the same parameters, it may sometimes pass the test,
-@@ -2033,9 +2087,9 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
- 		for (j = 0; j < 3; j++) {
- 			mmc_send_tuning(mmc, opcode, &cmd_err);
- 			if (!cmd_err) {
--				rise_delay |= BIT(i);
-+				rise_delay |= BIT_ULL(i);
- 			} else {
--				rise_delay &= ~BIT(i);
-+				rise_delay &= ~BIT_ULL(i);
- 				break;
- 			}
- 		}
-@@ -2047,7 +2101,7 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
- 		goto skip_fall;
- 
- 	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
--	for (i = 0; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < host->tuning_step; i++) {
- 		msdc_set_cmd_delay(host, i);
- 		/*
- 		 * Using the same parameters, it may sometimes pass the test,
-@@ -2057,9 +2111,9 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
- 		for (j = 0; j < 3; j++) {
- 			mmc_send_tuning(mmc, opcode, &cmd_err);
- 			if (!cmd_err) {
--				fall_delay |= BIT(i);
-+				fall_delay |= BIT_ULL(i);
- 			} else {
--				fall_delay &= ~BIT(i);
-+				fall_delay &= ~BIT_ULL(i);
- 				break;
- 			}
- 		}
-@@ -2082,12 +2136,12 @@ static int msdc_tune_response(struct mmc_host *mmc, u32 opcode)
- 	if (host->dev_comp->async_fifo || host->hs200_cmd_int_delay)
- 		goto skip_internal;
- 
--	for (i = 0; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < host->tuning_step; i++) {
- 		sdr_set_field(host->base + tune_reg,
- 			      MSDC_PAD_TUNE_CMDRRDLY, i);
- 		mmc_send_tuning(mmc, opcode, &cmd_err);
- 		if (!cmd_err)
--			internal_delay |= BIT(i);
-+			internal_delay |= BIT_ULL(i);
- 	}
- 	dev_dbg(host->dev, "Final internal delay: 0x%x\n", internal_delay);
- 	internal_delay_phase = get_best_delay(host, internal_delay);
-@@ -2121,7 +2175,8 @@ static int hs400_tune_response(struct mmc_host *mmc, u32 opcode)
- 		sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
- 	else
- 		sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
--	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-+
-+	for (i = 0; i < PAD_DELAY_HALF; i++) {
- 		sdr_set_field(host->base + PAD_CMD_TUNE,
- 			      PAD_CMD_TUNE_RX_DLY3, i);
- 		/*
-@@ -2151,7 +2206,7 @@ static int hs400_tune_response(struct mmc_host *mmc, u32 opcode)
- static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
- {
- 	struct msdc_host *host = mmc_priv(mmc);
--	u32 rise_delay = 0, fall_delay = 0;
-+	u64 rise_delay = 0, fall_delay = 0;
- 	struct msdc_delay_phase final_rise_delay, final_fall_delay = { 0,};
- 	u8 final_delay, final_maxlen;
- 	int i, ret;
-@@ -2160,11 +2215,11 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
- 		      host->latch_ck);
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_DSPL);
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_W_DSPL);
--	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < host->tuning_step; i++) {
- 		msdc_set_data_delay(host, i);
- 		ret = mmc_send_tuning(mmc, opcode, NULL);
- 		if (!ret)
--			rise_delay |= BIT(i);
-+			rise_delay |= BIT_ULL(i);
- 	}
- 	final_rise_delay = get_best_delay(host, rise_delay);
- 	/* if rising edge has enough margin, then do not scan falling edge */
-@@ -2174,11 +2229,11 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
- 
- 	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_DSPL);
- 	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_W_DSPL);
--	for (i = 0; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < host->tuning_step; i++) {
- 		msdc_set_data_delay(host, i);
- 		ret = mmc_send_tuning(mmc, opcode, NULL);
- 		if (!ret)
--			fall_delay |= BIT(i);
-+			fall_delay |= BIT_ULL(i);
- 	}
- 	final_fall_delay = get_best_delay(host, fall_delay);
- 
-@@ -2206,7 +2261,7 @@ static int msdc_tune_data(struct mmc_host *mmc, u32 opcode)
- static int msdc_tune_together(struct mmc_host *mmc, u32 opcode)
- {
- 	struct msdc_host *host = mmc_priv(mmc);
--	u32 rise_delay = 0, fall_delay = 0;
-+	u64 rise_delay = 0, fall_delay = 0;
- 	struct msdc_delay_phase final_rise_delay, final_fall_delay = { 0,};
- 	u8 final_delay, final_maxlen;
- 	int i, ret;
-@@ -2217,12 +2272,12 @@ static int msdc_tune_together(struct mmc_host *mmc, u32 opcode)
- 	sdr_clr_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
- 	sdr_clr_bits(host->base + MSDC_IOCON,
- 		     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
--	for (i = 0 ; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < host->tuning_step; i++) {
- 		msdc_set_cmd_delay(host, i);
- 		msdc_set_data_delay(host, i);
- 		ret = mmc_send_tuning(mmc, opcode, NULL);
- 		if (!ret)
--			rise_delay |= BIT(i);
-+			rise_delay |= BIT_ULL(i);
- 	}
- 	final_rise_delay = get_best_delay(host, rise_delay);
- 	/* if rising edge has enough margin, then do not scan falling edge */
-@@ -2233,12 +2288,12 @@ static int msdc_tune_together(struct mmc_host *mmc, u32 opcode)
- 	sdr_set_bits(host->base + MSDC_IOCON, MSDC_IOCON_RSPL);
- 	sdr_set_bits(host->base + MSDC_IOCON,
- 		     MSDC_IOCON_DSPL | MSDC_IOCON_W_DSPL);
--	for (i = 0; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < host->tuning_step; i++) {
- 		msdc_set_cmd_delay(host, i);
- 		msdc_set_data_delay(host, i);
- 		ret = mmc_send_tuning(mmc, opcode, NULL);
- 		if (!ret)
--			fall_delay |= BIT(i);
-+			fall_delay |= BIT_ULL(i);
- 	}
- 	final_fall_delay = get_best_delay(host, fall_delay);
- 
-@@ -2346,7 +2401,7 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
- 	}
- 
- 	host->hs400_tuning = true;
--	for (i = 0; i < PAD_DELAY_MAX; i++) {
-+	for (i = 0; i < PAD_DELAY_HALF; i++) {
- 		if (host->top_base)
- 			sdr_set_field(host->top_base + EMMC50_PAD_DS_TUNE,
- 				      PAD_DS_DLY1, i);
-@@ -2601,6 +2656,10 @@ static void msdc_of_property_parse(struct platform_device *pdev,
- 	else
- 		host->hs400_cmd_resp_sel_rising = false;
- 
-+	if (of_property_read_u32(pdev->dev.of_node, "mediatek,tuning-step",
-+				 &host->tuning_step))
-+		host->tuning_step = PAD_DELAY_HALF;
-+
- 	if (of_property_read_bool(pdev->dev.of_node,
- 				  "supports-cqe"))
- 		host->cqhci = true;
--- 
-2.25.1
-
+Kind regards
+Uffe
