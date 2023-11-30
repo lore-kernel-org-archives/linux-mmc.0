@@ -1,108 +1,169 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="txRT9eUa"
-Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F40FD54
-	for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 01:57:43 -0800 (PST)
-Received: by mail-ej1-x633.google.com with SMTP id a640c23a62f3a-a00cbb83c80so101813266b.0
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 01:57:43 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="neGvdV0Q"
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F1D9D6C
+	for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 02:34:55 -0800 (PST)
+Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-db539f21712so327082276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 02:34:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701338262; x=1701943062; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1701340494; x=1701945294; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=0GKUjDUfFZBuJDqMk9wIf5InzkGujvf/hhx2Me3pUVQ=;
-        b=txRT9eUazb/LNZD1dzq52jBzCMPdwKERBADBkpNSpWV2E7KuZwU6EduBTDZzCuWgPM
-         sEPE9qYxG/3KHQELtTCdw5f69wNSJ6ujfG4qOYx6a2qTZTjwDGAu/kLkitvZjbrYW6hL
-         8cw7avpJ0Dc9K3a715tgdgsN0OTnKmJzHxolyCrpByti3Bgci1WPZ2SJOjcx5GTjLP6K
-         XMs42w3/RQHnbTW79kxeromhoSERuLh3QfyGIViNvALL/73TGIcpQz6zb9hiPXEA0rDb
-         soSb1oitnBblVgsjjKZMtVssXziSKNeGABBGSs7yagF+neVtIJvLZgrDe70tMeZv6Iqv
-         HaOw==
+        bh=j350QJDKEuHqSIhgnqrzjS7NiG3vRDy7K5wFB+bsbRE=;
+        b=neGvdV0QQLiEVpfl0eQmDr6ELBYno7YaSQTuOBwf12qNB3IdA1/PxvfOtSGkl11UO5
+         5lGGzMPGEuod6RqhbEICZ0Bjfp2oLnxkFQ4RKzKYacjJCOMQe/fEXs0EA0adW9ny+q1h
+         5Y90gAwsV0YNuJHh3OYDlSVMVKr3bAHwQz9sic6hV/f1i5gNzBvs5Z6u4OuSoMIiPxbx
+         wD70Ln/ecm9ts0DnrwziKZk4LKh8wXdquqIEIVWgd1FlD0BqFvxhObSXCUzeGE48SAdb
+         ft77Uz693+1lYXBmjnJwS58S0MJVvt/1cGopsVR/ngWcRhBTii/4VNs9wOyRqX1Nnahx
+         SDmw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701338262; x=1701943062;
+        d=1e100.net; s=20230601; t=1701340494; x=1701945294;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=0GKUjDUfFZBuJDqMk9wIf5InzkGujvf/hhx2Me3pUVQ=;
-        b=qUphCTEoxPbNlS8j5ub7U6rVu24jc1P17sYdJmG3LfX0M+IMRDnLjDdBFDxN6HCl6s
-         L0AP5uCaEiNxM9ghJdfbqTTOdXAJpejmjFL1JMaqxrFXAO1jlEY1cUZ3lvK4ExnN4GS8
-         CwvqVQ82N8hOmLvN1eAy2/gnw0oUtFJm4OwPKkpI/1Lba2UtFbcC0YAI6XNNwkTfvwOg
-         t2j9O/gOLSFrnAsK6g0ctqWWSwT/fV3VrY8sizpvIQ21IXbdc76spqRY/5AiAPHFxs5P
-         G5hyxbWH0aDDpljmEq6B6IoE63UiWd58sH1Q370MU0mtUitz0arBpJdrv+1yZGNlZvcP
-         aZig==
-X-Gm-Message-State: AOJu0YxmfniQCobPEs910ZrBaF9tiyxiItJF77bJA+p0JhH7D/XRjXss
-	vGiXt8QC0fmU6U4ARWVz8iGmM1qcEGiwaNMQ5UWFJA==
-X-Google-Smtp-Source: AGHT+IG4qEkSIJ504Yo38Pz2GRrAyEzoAa5jrCRG3buDq6H5FZQpoQPj3v49XCh89IDRO0xCqMqzXtfhveSHawkPSOE=
-X-Received: by 2002:a17:906:680a:b0:a19:1a0b:edb8 with SMTP id
- k10-20020a170906680a00b00a191a0bedb8mr134151ejr.67.1701338260873; Thu, 30 Nov
- 2023 01:57:40 -0800 (PST)
+        bh=j350QJDKEuHqSIhgnqrzjS7NiG3vRDy7K5wFB+bsbRE=;
+        b=n51J/oXqTWwiQTnQSz6kLGYDZf7goFUp7UyISWh1njnqWz9ewSk1mMyd0ZLDp5h0mC
+         kdrvD+gZIC5JuDmnwebQhMniH7rKRErYam3185oVaL1Oswu/XbX8FLaR2vFBJlnEcFDH
+         7fanokc6BIp0m3Hn0DmhwvetFGbN1hOSC15j6JRpmDVh3V0Lp3xideqEIfcqNkz77lLZ
+         ij+uuX3wM1QveGUUG+leWmJHB4ZGiMhxZ72v8F1HKSPs8+TRYIHjBtoGNpdfsxsAocI7
+         1ccJ0pptD4JsZUHtdH3DNig0Np+kNpsqkKKRLnKYOH8/okjclKglbEJIr5b5VJh9wzI4
+         9oJQ==
+X-Gm-Message-State: AOJu0YxUrCvdGG8Vsx+8emCE9NqSH7Cn30O/21PqBfP7RydQP576rrFK
+	qNx31d2S9uvwV4ASJnU0wNX6n3wgoXyIzciPfrwiQw==
+X-Google-Smtp-Source: AGHT+IHIGd5TmO3x8SVxvdIBwlzRcFlSXh5JGmBGlxogwl199SBDEnpsMYwlXtjGSw6Qw2kKIimMEWvc8SIZXKYejaM=
+X-Received: by 2002:a25:9708:0:b0:db4:354b:77b1 with SMTP id
+ d8-20020a259708000000b00db4354b77b1mr16979757ybo.32.1701340494561; Thu, 30
+ Nov 2023 02:34:54 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231124145338.3112416-1-o.rempel@pengutronix.de>
-In-Reply-To: <20231124145338.3112416-1-o.rempel@pengutronix.de>
+References: <20231129160533.2827458-1-jorge@foundries.io>
+In-Reply-To: <20231129160533.2827458-1-jorge@foundries.io>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 30 Nov 2023 10:57:03 +0100
-Message-ID: <CAPDyKFowioLLUi+4wvxz-9d3YGnMN=_sXBkFtUvMLb+tfQCEgg@mail.gmail.com>
-Subject: Re: [PATCH v1 0/3] introduce priority-based shutdown support
-To: Oleksij Rempel <o.rempel@pengutronix.de>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
-	Mark Brown <broonie@kernel.org>, kernel@pengutronix.de, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, 
-	=?UTF-8?Q?S=C3=B8ren_Andersen?= <san@skov.dk>
+Date: Thu, 30 Nov 2023 11:34:18 +0100
+Message-ID: <CAPDyKFpg+7W1ODGHw5oXy_wzWA1Qqzg9w_12rhQ8qW4o--6dWg@mail.gmail.com>
+Subject: Re: [PATCHv2] mmc: rpmb: add quirk MMC_QUIRK_BROKEN_RPMB_RETUNE
+To: Jorge Ramirez-Ortiz <jorge@foundries.io>
+Cc: CLoehle@hyperstone.com, adrian.hunter@intel.com, jinpu.wang@ionos.com, 
+	hare@suse.de, beanhuo@micron.com, yangyingliang@huawei.com, asuk4.q@gmail.com, 
+	yibin.ding@unisoc.com, victor.shih@genesyslogic.com.tw, marex@denx.de, 
+	rafael.beims@toradex.com, robimarko@gmail.com, ricardo@foundries.io, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 24 Nov 2023 at 15:53, Oleksij Rempel <o.rempel@pengutronix.de> wrote:
+On Wed, 29 Nov 2023 at 17:05, Jorge Ramirez-Ortiz <jorge@foundries.io> wrote:
 >
-> Hi,
+> On the eMMC SanDisk iNAND 7250 configured with HS200, requesting a
+> re-tune before switching to the RPMB partition would randomly cause
+> subsequent RPMB requests to fail with EILSEQ:
+> * data error -84, tigggered in __mmc_blk_ioctl_cmd()
 >
-> This patch series introduces support for prioritized device shutdown.
-> The main goal is to enable prioritization for shutting down specific
-> devices, particularly crucial in scenarios like power loss where
-> hardware damage can occur if not handled properly.
->
-> Oleksij Rempel (3):
->   driver core: move core part of device_shutdown() to a separate
->     function
->   driver core: introduce prioritized device shutdown sequence
->   mmc: core: increase shutdown priority for MMC devices
->
->  drivers/base/core.c    | 157 +++++++++++++++++++++++++++--------------
->  drivers/mmc/core/bus.c |   2 +
->  include/linux/device.h |  51 ++++++++++++-
->  kernel/reboot.c        |   4 +-
->  4 files changed, 157 insertions(+), 57 deletions(-)
->
+> This commit skips the retune when switching to RPMB.
+> Tested over several days with per minute RPMB reads.
 
-Sorry for joining the discussions a bit late! Besides the valuable
-feedback that you already received from others (which indicates that
-we have quite some work to do in the commit messages to better explain
-and justify these changes), I wanted to share my overall thoughts
-around this.
+This sounds weird to me and needs more testing/debugging in my
+opinion, especially at the host driver level. Perhaps add some new
+tests in mmc_test, that does a partition switch to/from any partition
+and then run regular I/O again to see if the problem is easier to
+reproduce?
 
-So, I fully understand the reason behind the $subject series, as we
-unfortunately can't rely on flash-based (NAND/NOR) storage devices
-being 100% tolerant to sudden-power failures. Besides for the reasons
-already discussed in the thread, the robustness simply depends on the
-"quality" of the FTL (flash translation layer) and the NAND/NOR/etc
-device it runs.
-
-For example, back in the days when Android showed up, we were testing
-YAFFS and UBIFS on rawNAND, which failed miserably after just a few
-thousands of power-cycles. It was even worse with ext3/4 on the early
-variants of eMMC devices, as those survived only a few hundreds of
-power-cycles. Now, I assume this has improved a lot over the years,
-but I haven't really verified this myself.
-
-That said, for eMMC and other flash-based storage devices, industrial
-or not, I think it would make sense to try to notify the device about
-the power-failure, if possible. This would add another level of
-mitigation, I think.
-
-From an implementation point of view, it looks to me that the approach
-in the $subject series has some potential. Although, rather than
-diving into the details, I will defer to review the next version.
+The point is, I wonder what is so special with RPMB here? Note that,
+it has been quite common that host drivers/controllers have had issues
+with their tuning support, so I would not be surprised if that is the
+case here too.  Certainly I would be surprised if the problem is at
+the eMMC card side, but I may be wrong.
 
 Kind regards
 Uffe
+
+>
+> Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+> ---
+>  Fixes v1: kernel test robot identified typo causing build failure
+>            CIF_MANFID_SANDISK_SD --> CID_MANFID_SANDISK_SD
+>
+>  drivers/mmc/core/block.c  | 6 +++++-
+>  drivers/mmc/core/card.h   | 7 +++++++
+>  drivers/mmc/core/quirks.h | 7 +++++++
+>  include/linux/mmc/card.h  | 1 +
+>  4 files changed, 20 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 152dfe593c43..9b7ba6562a3b 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -860,6 +860,11 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
+>                                 return ret;
+>                 }
+>                 mmc_retune_pause(card->host);
+> +
+> +               /* Do not force retune before RPMB switch */
+> +               if (mmc_can_retune(card->host) &&
+> +                   mmc_card_broken_rpmb_retune(card))
+> +                       card->host->need_retune = 0;
+>         }
+>
+>         return ret;
+> @@ -3143,4 +3148,3 @@ module_exit(mmc_blk_exit);
+>
+>  MODULE_LICENSE("GPL");
+>  MODULE_DESCRIPTION("Multimedia Card (MMC) block device driver");
+> -
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index b7754a1b8d97..1e1555a15de9 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -85,6 +85,7 @@ struct mmc_fixup {
+>  #define CID_MANFID_MICRON       0x13
+>  #define CID_MANFID_SAMSUNG      0x15
+>  #define CID_MANFID_APACER       0x27
+> +#define CID_MANFID_SANDISK2     0x45
+>  #define CID_MANFID_KINGSTON     0x70
+>  #define CID_MANFID_HYNIX       0x90
+>  #define CID_MANFID_KINGSTON_SD 0x9F
+> @@ -284,4 +285,10 @@ static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
+>  {
+>         return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
+>  }
+> +
+> +static inline int mmc_card_broken_rpmb_retune(const struct mmc_card *c)
+> +{
+> +       return c->quirks & MMC_QUIRK_BROKEN_RPMB_RETUNE;
+> +}
+> +
+>  #endif
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index cca71867bc4a..56c79b6b3537 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -130,6 +130,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+>         MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
+>                   MMC_QUIRK_BROKEN_SD_DISCARD),
+>
+> +       /*
+> +        * SanDisk iNAND 7250 DG4064, this quirk shall disable the retune
+> +        * operation enforced by default when switching to RPMB.
+> +        */
+> +       MMC_FIXUP("DG4064", CID_MANFID_SANDISK2, 0x100, add_quirk_mmc,
+> +                 MMC_QUIRK_BROKEN_RPMB_RETUNE),
+> +
+>         END_FIXUP
+>  };
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 7b12eebc5586..bd6986189e8b 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -296,6 +296,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_BROKEN_SD_DISCARD    (1<<14) /* Disable broken SD discard support */
+>  #define MMC_QUIRK_BROKEN_SD_CACHE      (1<<15) /* Disable broken SD cache support */
+>  #define MMC_QUIRK_BROKEN_CACHE_FLUSH   (1<<16) /* Don't flush cache until the write has occurred */
+> +#define MMC_QUIRK_BROKEN_RPMB_RETUNE   (1<<17) /* Don't force a retune before switching to RPMB */
+>
+>         bool                    written_flag;   /* Indicates eMMC has been written since power on */
+>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+> --
+> 2.34.1
