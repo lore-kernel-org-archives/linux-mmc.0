@@ -1,169 +1,208 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="neGvdV0Q"
-Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F1D9D6C
-	for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 02:34:55 -0800 (PST)
-Received: by mail-yb1-xb31.google.com with SMTP id 3f1490d57ef6-db539f21712so327082276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 02:34:55 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eAu/deUk"
+Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9268B1725
+	for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 02:36:47 -0800 (PST)
+Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-5cd0af4a7d3so8969287b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 02:36:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701340494; x=1701945294; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1701340606; x=1701945406; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=j350QJDKEuHqSIhgnqrzjS7NiG3vRDy7K5wFB+bsbRE=;
-        b=neGvdV0QQLiEVpfl0eQmDr6ELBYno7YaSQTuOBwf12qNB3IdA1/PxvfOtSGkl11UO5
-         5lGGzMPGEuod6RqhbEICZ0Bjfp2oLnxkFQ4RKzKYacjJCOMQe/fEXs0EA0adW9ny+q1h
-         5Y90gAwsV0YNuJHh3OYDlSVMVKr3bAHwQz9sic6hV/f1i5gNzBvs5Z6u4OuSoMIiPxbx
-         wD70Ln/ecm9ts0DnrwziKZk4LKh8wXdquqIEIVWgd1FlD0BqFvxhObSXCUzeGE48SAdb
-         ft77Uz693+1lYXBmjnJwS58S0MJVvt/1cGopsVR/ngWcRhBTii/4VNs9wOyRqX1Nnahx
-         SDmw==
+        bh=gD8Ayf1AYhbmM4fh3YeF8ox1Jjwazt6b4ZRYpU2f+DM=;
+        b=eAu/deUk8vj1QupJnhv9Nzwa4gQUaVvwPPqjJTYL0NiVVunUkL1zLBkUS8eGT42dYe
+         AnnLB17Ybn+0ihEVMKld7uws4o3YLuU0ZIwDqgX4edfHXyWNWLG+hXi7qv47Kv4LxnxZ
+         lcgqaCKdRAPz6D4ORYadXzdtOt6LCv/K0AHzdnoxuPx8BvBQ4rjiFE3ycTgKXbSJOIO/
+         SeSpNJ4lWDBOuVnpISFzzFIHBR6wAfyCwS+q9nTTNAfGZXsIRJQ2d351UMOMw2cZhzIQ
+         4BsgCn3XzXp6vKMQPr5xKt4IuurZRFFQ3Vl/11czGtfh3a1rftn8BBNOWGkxrjqaicOj
+         o7iQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701340494; x=1701945294;
+        d=1e100.net; s=20230601; t=1701340606; x=1701945406;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=j350QJDKEuHqSIhgnqrzjS7NiG3vRDy7K5wFB+bsbRE=;
-        b=n51J/oXqTWwiQTnQSz6kLGYDZf7goFUp7UyISWh1njnqWz9ewSk1mMyd0ZLDp5h0mC
-         kdrvD+gZIC5JuDmnwebQhMniH7rKRErYam3185oVaL1Oswu/XbX8FLaR2vFBJlnEcFDH
-         7fanokc6BIp0m3Hn0DmhwvetFGbN1hOSC15j6JRpmDVh3V0Lp3xideqEIfcqNkz77lLZ
-         ij+uuX3wM1QveGUUG+leWmJHB4ZGiMhxZ72v8F1HKSPs8+TRYIHjBtoGNpdfsxsAocI7
-         1ccJ0pptD4JsZUHtdH3DNig0Np+kNpsqkKKRLnKYOH8/okjclKglbEJIr5b5VJh9wzI4
-         9oJQ==
-X-Gm-Message-State: AOJu0YxUrCvdGG8Vsx+8emCE9NqSH7Cn30O/21PqBfP7RydQP576rrFK
-	qNx31d2S9uvwV4ASJnU0wNX6n3wgoXyIzciPfrwiQw==
-X-Google-Smtp-Source: AGHT+IHIGd5TmO3x8SVxvdIBwlzRcFlSXh5JGmBGlxogwl199SBDEnpsMYwlXtjGSw6Qw2kKIimMEWvc8SIZXKYejaM=
-X-Received: by 2002:a25:9708:0:b0:db4:354b:77b1 with SMTP id
- d8-20020a259708000000b00db4354b77b1mr16979757ybo.32.1701340494561; Thu, 30
- Nov 2023 02:34:54 -0800 (PST)
+        bh=gD8Ayf1AYhbmM4fh3YeF8ox1Jjwazt6b4ZRYpU2f+DM=;
+        b=Xc4FQThlCqDCN1YJ8fnuLguAXEUsQA8c68Nbdlns35bLAxkYXcWzmvJ7mR6rwKljS2
+         nPzsY3j6TzJT24aDljY7A0lVSa5I0I6pmSKs/rP1Iv+TZlwwwOr3FILivCVkF//e5Evx
+         Plo5QuW+93PEb9JGCaEHcZtx8eKawBN0OCC4x0LvustBiGc4bfogIrZe/iUnfRptplad
+         jybNXPgZMU3h9VbsB24bc+CARS0GnrIAvVvYl424espT0diAnVxAduDj8laLZAjFK2c1
+         VP5xjX73Ni/RPfndo1dzVgkVaCfQJ7X+KnnDe3ER3BEsBroU91vwl6gzD+BBJREB7+km
+         s7nQ==
+X-Gm-Message-State: AOJu0YxDkhqz5BDNFgeWRSP0xbAgpUKv2o91HwiN5FNDMeRMn5pntX/v
+	6yrc/qkrJGoPiY5eU4yc6XVKZW8OfbXzFvBwLbTgsQ==
+X-Google-Smtp-Source: AGHT+IErmhqOy3vJAJROQwvf8lOjylHakErCnyq0sWGAel0cDMr7y4YlM2EdT1OhLyT729SbyApyM90MsgLbSVM23GM=
+X-Received: by 2002:a0d:c287:0:b0:5c9:9815:b8ef with SMTP id
+ e129-20020a0dc287000000b005c99815b8efmr21996593ywd.49.1701340606411; Thu, 30
+ Nov 2023 02:36:46 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231129160533.2827458-1-jorge@foundries.io>
-In-Reply-To: <20231129160533.2827458-1-jorge@foundries.io>
+References: <20231129092535.3278-1-avri.altman@wdc.com>
+In-Reply-To: <20231129092535.3278-1-avri.altman@wdc.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 30 Nov 2023 11:34:18 +0100
-Message-ID: <CAPDyKFpg+7W1ODGHw5oXy_wzWA1Qqzg9w_12rhQ8qW4o--6dWg@mail.gmail.com>
-Subject: Re: [PATCHv2] mmc: rpmb: add quirk MMC_QUIRK_BROKEN_RPMB_RETUNE
-To: Jorge Ramirez-Ortiz <jorge@foundries.io>
-Cc: CLoehle@hyperstone.com, adrian.hunter@intel.com, jinpu.wang@ionos.com, 
-	hare@suse.de, beanhuo@micron.com, yangyingliang@huawei.com, asuk4.q@gmail.com, 
-	yibin.ding@unisoc.com, victor.shih@genesyslogic.com.tw, marex@denx.de, 
-	rafael.beims@toradex.com, robimarko@gmail.com, ricardo@foundries.io, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Thu, 30 Nov 2023 11:36:10 +0100
+Message-ID: <CAPDyKFqsyp=isawJKH0Q7Qqxqtkx=gmPZru9NnK-ndV20VRmFA@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: core: Use mrq.sbc in close-ended ffu
+To: Avri Altman <avri.altman@wdc.com>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
+	Daniil Lunev <dlunev@google.com>, Asutosh Das <quic_asutoshd@quicinc.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 29 Nov 2023 at 17:05, Jorge Ramirez-Ortiz <jorge@foundries.io> wrote:
+On Wed, 29 Nov 2023 at 10:25, Avri Altman <avri.altman@wdc.com> wrote:
 >
-> On the eMMC SanDisk iNAND 7250 configured with HS200, requesting a
-> re-tune before switching to the RPMB partition would randomly cause
-> subsequent RPMB requests to fail with EILSEQ:
-> * data error -84, tigggered in __mmc_blk_ioctl_cmd()
+> Field Firmware Update (ffu) may use close-ended or open ended sequence.
+> Each such sequence is comprised of a write commands enclosed between 2
+> switch commands - to and from ffu mode. So for the close-ended case, it
+> will be: cmd6->cmd23-cmd25-cmd6.
 >
-> This commit skips the retune when switching to RPMB.
-> Tested over several days with per minute RPMB reads.
+> Some host controllers however, get confused when multi-block rw is sent
+> without sbc, and may generate auto-cmd12 which breaks the ffu sequence.
+> I encountered  this issue while testing fwupd (github.com/fwupd/fwupd)
+> on HP Chromebook x2, a qualcomm based QC-7c, code name - strongbad.
+>
+> Instead of a quirk, or hooking the request function of the msm ops,
+> it would be better to fix the ioctl handling and make it use mrq.sbc
+> instead of issuing SET_BLOCK_COUNT separately.
+>
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-This sounds weird to me and needs more testing/debugging in my
-opinion, especially at the host driver level. Perhaps add some new
-tests in mmc_test, that does a partition switch to/from any partition
-and then run regular I/O again to see if the problem is easier to
-reproduce?
-
-The point is, I wonder what is so special with RPMB here? Note that,
-it has been quite common that host drivers/controllers have had issues
-with their tuning support, so I would not be surprised if that is the
-case here too.  Certainly I would be surprised if the problem is at
-the eMMC card side, but I may be wrong.
+Applied for next (to get it tested a bit more) and by adding a stable
+tag, thanks!
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+
 > ---
->  Fixes v1: kernel test robot identified typo causing build failure
->            CIF_MANFID_SANDISK_SD --> CID_MANFID_SANDISK_SD
 >
->  drivers/mmc/core/block.c  | 6 +++++-
->  drivers/mmc/core/card.h   | 7 +++++++
->  drivers/mmc/core/quirks.h | 7 +++++++
->  include/linux/mmc/card.h  | 1 +
->  4 files changed, 20 insertions(+), 1 deletion(-)
+> Changelog:
+> v3--v4:
+>         check sbc.error as well
+> v2--v3:
+>         Adopt Adrian's proposal
+> v1--v2:
+>         remove redundant reference of reliable write
+> ---
+>  drivers/mmc/core/block.c | 46 +++++++++++++++++++++++++++++++++++++---
+>  1 file changed, 43 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 152dfe593c43..9b7ba6562a3b 100644
+> index f9a5cffa64b1..892e74e611a0 100644
 > --- a/drivers/mmc/core/block.c
 > +++ b/drivers/mmc/core/block.c
-> @@ -860,6 +860,11 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
->                                 return ret;
->                 }
->                 mmc_retune_pause(card->host);
+> @@ -400,6 +400,10 @@ struct mmc_blk_ioc_data {
+>         struct mmc_ioc_cmd ic;
+>         unsigned char *buf;
+>         u64 buf_bytes;
+> +       unsigned int flags;
+> +#define MMC_BLK_IOC_DROP       BIT(0)  /* drop this mrq */
+> +#define MMC_BLK_IOC_SBC        BIT(1)  /* use mrq.sbc */
 > +
-> +               /* Do not force retune before RPMB switch */
-> +               if (mmc_can_retune(card->host) &&
-> +                   mmc_card_broken_rpmb_retune(card))
-> +                       card->host->need_retune = 0;
->         }
->
->         return ret;
-> @@ -3143,4 +3148,3 @@ module_exit(mmc_blk_exit);
->
->  MODULE_LICENSE("GPL");
->  MODULE_DESCRIPTION("Multimedia Card (MMC) block device driver");
-> -
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index b7754a1b8d97..1e1555a15de9 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -85,6 +85,7 @@ struct mmc_fixup {
->  #define CID_MANFID_MICRON       0x13
->  #define CID_MANFID_SAMSUNG      0x15
->  #define CID_MANFID_APACER       0x27
-> +#define CID_MANFID_SANDISK2     0x45
->  #define CID_MANFID_KINGSTON     0x70
->  #define CID_MANFID_HYNIX       0x90
->  #define CID_MANFID_KINGSTON_SD 0x9F
-> @@ -284,4 +285,10 @@ static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
->  {
->         return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
->  }
-> +
-> +static inline int mmc_card_broken_rpmb_retune(const struct mmc_card *c)
-> +{
-> +       return c->quirks & MMC_QUIRK_BROKEN_RPMB_RETUNE;
-> +}
-> +
->  #endif
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index cca71867bc4a..56c79b6b3537 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -130,6 +130,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
->         MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
->                   MMC_QUIRK_BROKEN_SD_DISCARD),
->
-> +       /*
-> +        * SanDisk iNAND 7250 DG4064, this quirk shall disable the retune
-> +        * operation enforced by default when switching to RPMB.
-> +        */
-> +       MMC_FIXUP("DG4064", CID_MANFID_SANDISK2, 0x100, add_quirk_mmc,
-> +                 MMC_QUIRK_BROKEN_RPMB_RETUNE),
-> +
->         END_FIXUP
+>         struct mmc_rpmb_data *rpmb;
 >  };
 >
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 7b12eebc5586..bd6986189e8b 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -296,6 +296,7 @@ struct mmc_card {
->  #define MMC_QUIRK_BROKEN_SD_DISCARD    (1<<14) /* Disable broken SD discard support */
->  #define MMC_QUIRK_BROKEN_SD_CACHE      (1<<15) /* Disable broken SD cache support */
->  #define MMC_QUIRK_BROKEN_CACHE_FLUSH   (1<<16) /* Don't flush cache until the write has occurred */
-> +#define MMC_QUIRK_BROKEN_RPMB_RETUNE   (1<<17) /* Don't force a retune before switching to RPMB */
+> @@ -465,7 +469,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
+>  }
 >
->         bool                    written_flag;   /* Indicates eMMC has been written since power on */
->         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+>  static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+> -                              struct mmc_blk_ioc_data *idata)
+> +                              struct mmc_blk_ioc_data **idatas, int i)
+>  {
+>         struct mmc_command cmd = {}, sbc = {};
+>         struct mmc_data data = {};
+> @@ -475,10 +479,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>         unsigned int busy_timeout_ms;
+>         int err;
+>         unsigned int target_part;
+> +       struct mmc_blk_ioc_data *idata = idatas[i];
+> +       struct mmc_blk_ioc_data *prev_idata = NULL;
+>
+>         if (!card || !md || !idata)
+>                 return -EINVAL;
+>
+> +       if (idata->flags & MMC_BLK_IOC_DROP)
+> +               return 0;
+> +
+> +       if (idata->flags & MMC_BLK_IOC_SBC)
+> +               prev_idata = idatas[i - 1];
+> +
+>         /*
+>          * The RPMB accesses comes in from the character device, so we
+>          * need to target these explicitly. Else we just target the
+> @@ -532,7 +544,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>                         return err;
+>         }
+>
+> -       if (idata->rpmb) {
+> +       if (idata->rpmb || prev_idata) {
+>                 sbc.opcode = MMC_SET_BLOCK_COUNT;
+>                 /*
+>                  * We don't do any blockcount validation because the max size
+> @@ -540,6 +552,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>                  * 'Reliable Write' bit here.
+>                  */
+>                 sbc.arg = data.blocks | (idata->ic.write_flag & BIT(31));
+> +               if (prev_idata)
+> +                       sbc.arg = prev_idata->ic.arg;
+>                 sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
+>                 mrq.sbc = &sbc;
+>         }
+> @@ -557,6 +571,15 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+>         mmc_wait_for_req(card->host, &mrq);
+>         memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
+>
+> +       if (prev_idata) {
+> +               memcpy(&prev_idata->ic.response, sbc.resp, sizeof(sbc.resp));
+> +               if (sbc.error) {
+> +                       dev_err(mmc_dev(card->host), "%s: sbc error %d\n",
+> +                                                       __func__, sbc.error);
+> +                       return sbc.error;
+> +               }
+> +       }
+> +
+>         if (cmd.error) {
+>                 dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
+>                                                 __func__, cmd.error);
+> @@ -1032,6 +1055,20 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+>         md->reset_done &= ~type;
+>  }
+>
+> +static void mmc_blk_check_sbc(struct mmc_queue_req *mq_rq)
+> +{
+> +       struct mmc_blk_ioc_data **idata = mq_rq->drv_op_data;
+> +       int i;
+> +
+> +       for (i = 1; i < mq_rq->ioc_count; i++) {
+> +               if (idata[i - 1]->ic.opcode == MMC_SET_BLOCK_COUNT &&
+> +                   mmc_op_multi(idata[i]->ic.opcode)) {
+> +                       idata[i - 1]->flags |= MMC_BLK_IOC_DROP;
+> +                       idata[i]->flags |= MMC_BLK_IOC_SBC;
+> +               }
+> +       }
+> +}
+> +
+>  /*
+>   * The non-block commands come back from the block layer after it queued it and
+>   * processed it with all other requests and then they get issued in this
+> @@ -1059,11 +1096,14 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+>                         if (ret)
+>                                 break;
+>                 }
+> +
+> +               mmc_blk_check_sbc(mq_rq);
+> +
+>                 fallthrough;
+>         case MMC_DRV_OP_IOCTL_RPMB:
+>                 idata = mq_rq->drv_op_data;
+>                 for (i = 0, ret = 0; i < mq_rq->ioc_count; i++) {
+> -                       ret = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+> +                       ret = __mmc_blk_ioctl_cmd(card, md, idata, i);
+>                         if (ret)
+>                                 break;
+>                 }
 > --
-> 2.34.1
+> 2.42.0
+>
