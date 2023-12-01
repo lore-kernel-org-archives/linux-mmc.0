@@ -1,104 +1,123 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cgJ+49/0"
-Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4464F469D
-	for <linux-mmc@vger.kernel.org>; Fri,  1 Dec 2023 01:29:06 -0800 (PST)
-Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-5d3687a6574so16359177b3.2
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Dec 2023 01:29:05 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="iGyUHwET"
+Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95C4A19A6
+	for <linux-mmc@vger.kernel.org>; Fri,  1 Dec 2023 01:39:04 -0800 (PST)
+Received: by mail-wm1-x335.google.com with SMTP id 5b1f17b1804b1-40b479ec4a3so16949255e9.2
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Dec 2023 01:39:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701422945; x=1702027745; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=CMJWPTMz3I601PDaKg2G9zUK8oGX7I/FmdndTXV+PEQ=;
-        b=cgJ+49/0UbaSjAIUhmS5SocHDBx5KjVQSIBtJrMHoKlfni5Q76uujUzQBPpBqh2pgz
-         CLhspyrejyhIj5Jnih4hoDikQ+kOaHTF2sXwGXboSVwdLQ7vEtHuWgtC0aW64a7Ybnw6
-         yZbmjKQcq4ZG5a329c7iubSwnUzjNz0f3T8vSjigMUp/j75uiF5k72ICj3OdagoPbhwj
-         UDe3VaURzy7E1ZJORcfnF6mM0CQBisKEIfyKNCe8zfRamQTL0dVgBvtHH7BinhaVAdtu
-         j0Ll7MhKQ5q3P7pYpRPUtbkq61hWzlqD64979xH6O3lRDodkChzRht7JURyaSAtfVPZj
-         h7dg==
+        d=foundries.io; s=google; t=1701423543; x=1702028343; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:date:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=jC3/MuCtGjepod8Zkfcj95KcJ99A6m3gq/BQ2t/6ZL4=;
+        b=iGyUHwETdWNYzY8Zfu300PY2PStD5FxNBr5dz/jjSUPRMRfDpONJiQp5/pKf/P4Glg
+         4mWd8mcwZcZxajpqhnMOOjXc0YsMw3/tARKVBc38sDKkvX7DiE287rDs8hOZdcuaQ60R
+         LlRqxzvz3LsbZGULZyreqYKthB+4SMCUktfFxLGRoBcNet5m/EyTveYfOrUxjPHkIdZH
+         BKuJCFkZfVphA9crns/Xz0nqPk3RcPgmq8ir1N5SwWi7BdUIeJAocQFEc9rXnW/aLJid
+         ITwzWg/M63zxN3DGqNcHCeB+HmeH5CVMXGnzCKJ2fPWuM8431j91c40BRWscmUUWykes
+         SFOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701422945; x=1702027745;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=CMJWPTMz3I601PDaKg2G9zUK8oGX7I/FmdndTXV+PEQ=;
-        b=FlVVr18W4pni8QnuAbZBM6xoV4nGhMNfvfLAfImg+nsBdhGthFPxjXoTPK+Tvgbutw
-         4x5RQE5q460Hnxji4BlJUnpvlf8p0Q4LI/Z+ziNMuVYKvV+RmJjbZ1DFnCGBYvzeVsTY
-         fXnC/J7rJO1VwhDuEhbHdfSgi2dQ1T41CCMuN/edKjmvYvmSzOaL631J83djdnQJnueU
-         B89vI2Y5hn2L/rtRNPwjlNhdFeO62qZougXW6yIiAVmu6usQymtaZzpXLSXnOz/BLLMC
-         ioIDcT9spTSaR/3v8L7CNuHRXHsnXTsbaQSLuxv3JgVzhcKCoSLvspR+SsRo+Ulaugwv
-         KnjA==
-X-Gm-Message-State: AOJu0Yy1BMExEhJTKuFGQnAuOg0FkxTKtzZUSBYCeD+ncQ0GPzV8WZh8
-	klW2y/+eCBs42ygqiF0sC7L0cSXTEMq289lDxsfxJg==
-X-Google-Smtp-Source: AGHT+IH7z5fSeuufF5Cxad9UDRaE+shZZJy1gQvx2kCB4e/jW1K7Fe5gWDdyHCZzHgjNd7epaL2M0znaAmC6vZYwWYo=
-X-Received: by 2002:a81:ae59:0:b0:5d4:313c:4b07 with SMTP id
- g25-20020a81ae59000000b005d4313c4b07mr937537ywk.23.1701422945075; Fri, 01 Dec
- 2023 01:29:05 -0800 (PST)
+        d=1e100.net; s=20230601; t=1701423543; x=1702028343;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:date:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=jC3/MuCtGjepod8Zkfcj95KcJ99A6m3gq/BQ2t/6ZL4=;
+        b=gFqZ3DPrmkIpHQtn/LryUcayN3pZ5e/umgwpiq8P/1sIY+RImbZpsHX2LZh7F5q/wD
+         iPChW+4NwTNp5Wb7TH6ueIxRMaFGVxtMVdNHhQdibOWzHyzqh1R0KYtlj3dDvd4Kc2bJ
+         lYTuTNw8MrXl2dz8ma5R712RCQqwTAxPFxU2AgZN1OeN82EAm9FbgQ5Xl+5HGqMue69c
+         OPanqbMVYQS2ozob9ZrjxtUSwgqYNBUtc3JvJ0lzjaUMQ5Bp+l6LL8uhvIu8Dbby4rZ7
+         RemQj8vHY3hx2BLWqub+h4YIVFgJucCF+8HR+T+muTAdHCvaqiEqsUOlt9Qtwqo6zFv6
+         TkRg==
+X-Gm-Message-State: AOJu0YzCL6pO9swQE9GhZW/ZCcGjnPXX7gvf6S47xdaXGhleSBpVXYPZ
+	E60Nl81QxIKm94ctYtDQKavf5A==
+X-Google-Smtp-Source: AGHT+IGGFG211CMQAO0FD6H20iz2R22iotO1esAB+JYQVA/jB2mqxb3nBclo8HnFNxnodjtaPjDieg==
+X-Received: by 2002:a7b:cc82:0:b0:40b:5e22:97f with SMTP id p2-20020a7bcc82000000b0040b5e22097fmr369829wma.110.1701423543053;
+        Fri, 01 Dec 2023 01:39:03 -0800 (PST)
+Received: from trax (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
+        by smtp.gmail.com with ESMTPSA id bd22-20020a05600c1f1600b004090798d29csm4877947wmb.15.2023.12.01.01.39.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Dec 2023 01:39:02 -0800 (PST)
+From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
+Date: Fri, 1 Dec 2023 10:39:01 +0100
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Jorge Ramirez-Ortiz <jorge@foundries.io>, ulf.hansson@linaro.org,
+	CLoehle@hyperstone.com, adrian.hunter@intel.com,
+	jinpu.wang@ionos.com, hare@suse.de, beanhuo@micron.com,
+	asuk4.q@gmail.com, yangyingliang@huawei.com, yibin.ding@unisoc.com,
+	victor.shih@genesyslogic.com.tw, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: rpmb: fixes pause retune on all RPMB partitions.
+Message-ID: <ZWmptatt60if9GBH@trax>
+References: <20231201091034.936441-1-jorge@foundries.io>
+ <CACRpkdaMnphBxvqpmvNG_72O02Umny3qdxfyrKdA4BsDwZmtfg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231201091034.936441-1-jorge@foundries.io>
-In-Reply-To: <20231201091034.936441-1-jorge@foundries.io>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Fri, 1 Dec 2023 10:28:52 +0100
-Message-ID: <CACRpkdaMnphBxvqpmvNG_72O02Umny3qdxfyrKdA4BsDwZmtfg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rpmb: fixes pause retune on all RPMB partitions.
-To: Jorge Ramirez-Ortiz <jorge@foundries.io>
-Cc: ulf.hansson@linaro.org, CLoehle@hyperstone.com, adrian.hunter@intel.com, 
-	jinpu.wang@ionos.com, hare@suse.de, beanhuo@micron.com, asuk4.q@gmail.com, 
-	yangyingliang@huawei.com, yibin.ding@unisoc.com, 
-	victor.shih@genesyslogic.com.tw, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CACRpkdaMnphBxvqpmvNG_72O02Umny3qdxfyrKdA4BsDwZmtfg@mail.gmail.com>
 
-Hi Jorge,
-
-thanks for your patch!
-
-On Fri, Dec 1, 2023 at 10:10=E2=80=AFAM Jorge Ramirez-Ortiz <jorge@foundrie=
-s.io> wrote:
-
-> When RPMB was converted to a character device, it added support for
-> multiple RPMB partitions (Commit 97548575bef3 ("mmc: block: Convert RPMB
-> to a character device").
+On 01/12/23 10:28:52, Linus Walleij wrote:
+> Hi Jorge,
 >
-> One of the changes in this commit was transforming the variable
-> target_part defined in __mmc_blk_ioctl_cmd into a bitmask.
+> thanks for your patch!
 >
-> This inadvertedly regressed the validation check done in
-> mmc_blk_part_switch_pre() and mmc_blk_part_switch_post().
+> On Fri, Dec 1, 2023 at 10:10 AM Jorge Ramirez-Ortiz <jorge@foundries.io> wrote:
 >
-> This commit fixes that regression.
+> > When RPMB was converted to a character device, it added support for
+> > multiple RPMB partitions (Commit 97548575bef3 ("mmc: block: Convert RPMB
+> > to a character device").
+> >
+> > One of the changes in this commit was transforming the variable
+> > target_part defined in __mmc_blk_ioctl_cmd into a bitmask.
+> >
+> > This inadvertedly regressed the validation check done in
+> > mmc_blk_part_switch_pre() and mmc_blk_part_switch_post().
+> >
+> > This commit fixes that regression.
+> >
+> > Fixes: 97548575bef3 ("mmc: block: Convert RPMB to a character device")
+> > Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
 >
-> Fixes: 97548575bef3 ("mmc: block: Convert RPMB to a character device")
-> Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+> My bug :/
+> Shouldn't we also add Cc: stable@vger.kernel.org?
 
-My bug :/
-Shouldn't we also add Cc: stable@vger.kernel.org?
+ack, will do.
 
-
-> +       const unsigned int mask =3D EXT_CSD_PART_CONFIG_ACC_RPMB;
->         int ret =3D 0;
 >
-> -       if (part_type =3D=3D EXT_CSD_PART_CONFIG_ACC_RPMB) {
-> +       if (part_type & mask =3D=3D mask) {
-
-That looks complex, can't we just:
-
-if (part_type & EXT_CSD_PART_CONFIG_ACC_RPMB)?
-
-> +       const unsigned int mask =3D EXT_CSD_PART_CONFIG_ACC_RPMB;
->         int ret =3D 0;
 >
-> -       if (part_type =3D=3D EXT_CSD_PART_CONFIG_ACC_RPMB) {
-> +       if (part_type & mask =3D=3D mask) {
+> > +       const unsigned int mask = EXT_CSD_PART_CONFIG_ACC_RPMB;
+> >         int ret = 0;
+> >
+> > -       if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
+> > +       if (part_type & mask == mask) {
+>
+> That looks complex, can't we just:
+>
+> if (part_type & EXT_CSD_PART_CONFIG_ACC_RPMB)?
 
-Dito here.
+I chose to mention the mask nature of the field for clarity - just in
+case - but I'd much rather do your suggestion. So will do :)
 
-Yours,
-Linus Walleij
+>
+> > +       const unsigned int mask = EXT_CSD_PART_CONFIG_ACC_RPMB;
+> >         int ret = 0;
+> >
+> > -       if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
+> > +       if (part_type & mask == mask) {
+>
+> Dito here.
+
+yep
+
+>
+> Yours,
+> Linus Walleij
+
+thanks !
