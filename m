@@ -1,251 +1,114 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="coBtj8fg"
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA2EC1717;
-	Fri,  1 Dec 2023 01:02:10 -0800 (PST)
-Received: from [100.107.97.3] (cola.collaboradmins.com [195.201.22.229])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by madras.collabora.co.uk (Postfix) with ESMTPSA id 4EDF86607345;
-	Fri,  1 Dec 2023 09:02:08 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1701421329;
-	bh=v3TKNhkObv/XTs6yCL7Y5rVi3TK/5jW37OhK7QsoYVA=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=coBtj8fgmcT8xc5CRpI4YtoFx4rRznFIIzUlh5q3upyGvJDmL4/r+5s1XVKHkR4M3
-	 snqu8XICNT7Yv/003pIzINB8+gQ4RQpuGH5Rw07Ky78Sq1AUjYkFe/kJWehoBg4Z4G
-	 3kUSOb7SZFvco59EKorP1M3c5hFBPW5RrgAC7UYs6lVgZKBRwKDY8Z4ZMrVA8IcsmI
-	 Aqmmmm+rXMFwAI2Y7t2Da8OB/3sbqa0wne9Qf2vZA2Qy8MeQIY0/p1BVl3/S5RAoHU
-	 THVeqJNGnC0p79bxurikBf03XgqoZ3sqra82UTpq2kUzRpJ/+sK/nFP3VXMPnCx4+y
-	 6CAQr+ECNCamw==
-Message-ID: <27313484-10a9-4a2f-93b1-9b5ce04ad9c6@collabora.com>
-Date: Fri, 1 Dec 2023 10:02:05 +0100
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="k5cxZLcH"
+Received: from mail-wr1-x42c.google.com (mail-wr1-x42c.google.com [IPv6:2a00:1450:4864:20::42c])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CA7F171C
+	for <linux-mmc@vger.kernel.org>; Fri,  1 Dec 2023 01:10:40 -0800 (PST)
+Received: by mail-wr1-x42c.google.com with SMTP id ffacd0b85a97d-33318b866a0so1659144f8f.3
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Dec 2023 01:10:40 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=foundries.io; s=google; t=1701421838; x=1702026638; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=BGkdE3ShZBtVYdzFjb0Caam+cQoN6A+OKXsRf0MTX64=;
+        b=k5cxZLcHul+zqe1oTBXN5DTyVF3kRq1KKkdCjX11fF7O3r5O1HDOUQJrR5rzYNN1qW
+         4ThLIEdy139OmQXXE+RCmcpQ/zOwzcsftXHkExfMH1VcXVRMJ2wy20TEJ0xCgzphB2Ll
+         jk0SJcImvYgYkP/fc7MkZur4qcVPUEXZB3P1GXI2ZqbD9rb7PIaKKaKjWIfpvOsjZZej
+         KIzXGJ2B4zqbLYWlXwMOGZ+HzWjnLFr3LA0IfltS/PHZsSiIZ99EpJoiqK2j/xwgUI4v
+         JD6ffM2j2Obh/YM7WBBvL8m3yciRnFYhG1kRaDmK2ixrhG2euO1ZiILNBqY6lGFg+1hG
+         6Srg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701421838; x=1702026638;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=BGkdE3ShZBtVYdzFjb0Caam+cQoN6A+OKXsRf0MTX64=;
+        b=tZSfRHo3eGAT8ma56Tp/aeE8tO6yKFGKiXQVOBcEKQM2Uc5r5+31jofRfJ/gLUJh/p
+         /85AOq8F3PppGIOp6zXkSCOLsF7GghstkAB7kHN2l2Qd/deBr9oSTpdaMzSWI5X5+zNJ
+         a0GIp1xxueHD+xA7whcXbTqi+MonLPbObkcngZeYc0Ex1ecOOKHnUEmapzDYDedsmVn/
+         GJKOxEAHLtlvlZPDit8YQg5mbqrhtzzSgU7sTZ4VnPbJLIknvmoi6qErbXcW1dHgC94l
+         Wi/XKCvTH2b7k2c+9dKWEf4M38Sq/Vn+FDBNEOWdiL1zOuIJfymr+X/MyaLJuuvb8YMd
+         DpJw==
+X-Gm-Message-State: AOJu0YzcWNUObvRAdgglnun/1+tRc4vWqiES2Y4krgX6lwVzm+Ng3pyA
+	H4GRaJYINsj5lVKsWLK7PYOgCQ==
+X-Google-Smtp-Source: AGHT+IHZonxthapqsbWJUZ2LZiH+1fCsdg6XXK042uL4XQkFvWOB7sgRe1iNUmtIsZENwisK8aLtFw==
+X-Received: by 2002:a05:6000:12c6:b0:333:3be:2d44 with SMTP id l6-20020a05600012c600b0033303be2d44mr534769wrx.45.1701421838421;
+        Fri, 01 Dec 2023 01:10:38 -0800 (PST)
+Received: from trax.. (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
+        by smtp.gmail.com with ESMTPSA id q13-20020adffecd000000b0033334410d01sm157126wrs.36.2023.12.01.01.10.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Dec 2023 01:10:37 -0800 (PST)
+From: Jorge Ramirez-Ortiz <jorge@foundries.io>
+To: jorge@foundries.io,
+	ulf.hansson@linaro.org,
+	CLoehle@hyperstone.com,
+	adrian.hunter@intel.com,
+	jinpu.wang@ionos.com,
+	hare@suse.de,
+	beanhuo@micron.com,
+	asuk4.q@gmail.com,
+	yangyingliang@huawei.com,
+	yibin.ding@unisoc.com,
+	victor.shih@genesyslogic.com.tw,
+	linus.walleij@linaro.org
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: rpmb: fixes pause retune on all RPMB partitions.
+Date: Fri,  1 Dec 2023 10:10:34 +0100
+Message-Id: <20231201091034.936441-1-jorge@foundries.io>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 2/2] mmc: mediatek: extend number of tuning steps
-To: Axe Yang <axe.yang@mediatek.com>,
- Chaotian Jing <chaotian.jing@mediatek.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>, Matthias Brugger
- <matthias.bgg@gmail.com>, Wenbin Mei <wenbin.mei@mediatek.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mediatek@lists.infradead.org,
- Project_Global_Chrome_Upstream_Group@mediatek.com
-References: <20231130061513.1296-1-axe.yang@mediatek.com>
- <20231130061513.1296-3-axe.yang@mediatek.com>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-Content-Language: en-US
-In-Reply-To: <20231130061513.1296-3-axe.yang@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-Il 30/11/23 07:15, Axe Yang ha scritto:
-> Previously, during the MSDC calibration process, a full clock cycle
-> actually not be covered, which in some cases didn't yield the best
-> results and could cause CRC errors. This problem is particularly
-> evident when MSDC is used as an SDIO host. In fact, MSDC support
-> tuning up to a maximum of 64 steps, but by default, the step number
-> is 32. By increase the tuning step, we are more likely to cover more
-> parts of a clock cycle, and get better calibration result.
-> 
-> To illustrate, when tuning 32 steps, if the obtained window has a hole
-> near the middle, like this: 0xffc07ff (hex), then the selected delay
-> will be the 6 (counting from right to left).
-> 
-> (32 <- 1)
-> 1111 1111 1100 0000 0000 0111 11(1)1 1111
-> 
-> However, if we tune 64 steps, the window obtained may look like this:
-> 0xfffffffffffc07ff. The final selected delay will be 44, which is
-> safer as it is further away from the hole:
-> 
-> (64 <- 1)
-> 1111 ... (1)111 1111 1111 1111 1111 1100 0000 0000 0111 1111 1111
-> 
-> In this case, delay 6 selected through 32 steps tuning is obviously
-> not optimal, and this delay is closer to the hole, using it would
-> easily cause CRC problems.
-> 
-> You will need to configure property "mediatek,tuning-step" in MSDC
-> dts node to 64 to extend the steps.
-> 
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> ---
->   drivers/mmc/host/mtk-sd.c | 155 ++++++++++++++++++++++++++------------
->   1 file changed, 107 insertions(+), 48 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 97f7c3d4be6e..4cd306b3b295 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -252,12 +252,16 @@
->   
->   #define MSDC_PAD_TUNE_DATWRDLY	  GENMASK(4, 0)		/* RW */
->   #define MSDC_PAD_TUNE_DATRRDLY	  GENMASK(12, 8)	/* RW */
-> +#define MSDC_PAD_TUNE_DATRRDLY2	  GENMASK(12, 8)	/* RW */
->   #define MSDC_PAD_TUNE_CMDRDLY	  GENMASK(20, 16)	/* RW */
-> +#define MSDC_PAD_TUNE_CMDRDLY2	  GENMASK(20, 16)	/* RW */
->   #define MSDC_PAD_TUNE_CMDRRDLY	  GENMASK(26, 22)	/* RW */
->   #define MSDC_PAD_TUNE_CLKTDLY	  GENMASK(31, 27)	/* RW */
->   #define MSDC_PAD_TUNE_RXDLYSEL	  BIT(15)   /* RW */
->   #define MSDC_PAD_TUNE_RD_SEL	  BIT(13)   /* RW */
->   #define MSDC_PAD_TUNE_CMD_SEL	  BIT(21)   /* RW */
-> +#define MSDC_PAD_TUNE_RD2_SEL	  BIT(13)   /* RW */
-> +#define MSDC_PAD_TUNE_CMD2_SEL	  BIT(21)   /* RW */
->   
->   #define PAD_DS_TUNE_DLY_SEL       BIT(0)	  /* RW */
->   #define PAD_DS_TUNE_DLY1	  GENMASK(6, 2)   /* RW */
-> @@ -325,7 +329,8 @@
->   
->   #define DEFAULT_DEBOUNCE	(8)	/* 8 cycles CD debounce */
->   
-> -#define PAD_DELAY_MAX	32 /* PAD delay cells */
-> +#define PAD_DELAY_HALF	32 /* PAD delay cells */
-> +#define PAD_DELAY_FULL	64
->   /*--------------------------------------------------------------------------*/
->   /* Descriptor Structure                                                     */
->   /*--------------------------------------------------------------------------*/
-> @@ -461,6 +466,7 @@ struct msdc_host {
->   	u32 hs400_ds_dly3;
->   	u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
->   	u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
-> +	u32 tuning_step;
->   	bool hs400_cmd_resp_sel_rising;
->   				 /* cmd response sample selection for HS400 */
->   	bool hs400_mode;	/* current eMMC will run at hs400 mode */
-> @@ -1615,7 +1621,7 @@ static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
->   	}
->   
->   	if (cmd_err || dat_err) {
-> -		dev_err(host->dev, "cmd_err = %d, dat_err =%d, intsts = 0x%x",
-> +		dev_err(host->dev, "cmd_err = %d, dat_err = %d, intsts = 0x%x",
->   			cmd_err, dat_err, intsts);
->   	}
->   
-> @@ -1780,10 +1786,20 @@ static void msdc_init_hw(struct msdc_host *host)
->   				     DATA_K_VALUE_SEL);
->   			sdr_set_bits(host->top_base + EMMC_TOP_CMD,
->   				     PAD_CMD_RD_RXDLY_SEL);
-> +			if (host->tuning_step > PAD_DELAY_HALF) {
-> +				sdr_set_bits(host->top_base + EMMC_TOP_CONTROL,
-> +					     PAD_DAT_RD_RXDLY2_SEL);
-> +				sdr_set_bits(host->top_base + EMMC_TOP_CMD,
-> +					     PAD_CMD_RD_RXDLY2_SEL);
-> +			}
->   		} else {
->   			sdr_set_bits(host->base + tune_reg,
->   				     MSDC_PAD_TUNE_RD_SEL |
->   				     MSDC_PAD_TUNE_CMD_SEL);
-> +			if (host->tuning_step > PAD_DELAY_HALF)
-> +				sdr_set_bits(host->base + tune_reg + 4,
+When RPMB was converted to a character device, it added support for
+multiple RPMB partitions (Commit 97548575bef3 ("mmc: block: Convert RPMB
+to a character device").
 
-`tune_reg + 4` is a different register, please define it.
+One of the changes in this commit was transforming the variable
+target_part defined in __mmc_blk_ioctl_cmd into a bitmask.
 
-Also, I can't find this in MT8192, MT8195 - as those bits seem to be undefined,
-so, which SoCs are actually compatible with this change?
+This inadvertedly regressed the validation check done in
+mmc_blk_part_switch_pre() and mmc_blk_part_switch_post().
 
+This commit fixes that regression.
 
-> +					     MSDC_PAD_TUNE_RD2_SEL |
-> +					     MSDC_PAD_TUNE_CMD2_SEL);
->   		}
->   	} else {
->   		/* choose clock tune */
-> @@ -1925,24 +1941,24 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->   		msdc_set_mclk(host, ios->timing, ios->clock);
->   }
->   
-> -static u32 test_delay_bit(u32 delay, u32 bit)
-> +static u64 test_delay_bit(u64 delay, u32 bit)
->   {
-> -	bit %= PAD_DELAY_MAX;
-> -	return delay & BIT(bit);
-> +	bit %= PAD_DELAY_FULL;
-> +	return delay & BIT_ULL(bit);
->   }
->   
-> -static int get_delay_len(u32 delay, u32 start_bit)
-> +static int get_delay_len(u64 delay, u32 start_bit)
->   {
->   	int i;
->   
-> -	for (i = 0; i < (PAD_DELAY_MAX - start_bit); i++) {
-> +	for (i = 0; i < (PAD_DELAY_FULL - start_bit); i++) {
->   		if (test_delay_bit(delay, start_bit + i) == 0)
->   			return i;
->   	}
-> -	return PAD_DELAY_MAX - start_bit;
-> +	return PAD_DELAY_FULL - start_bit;
->   }
->   
-> -static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u32 delay)
-> +static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u64 delay)
->   {
->   	int start = 0, len = 0;
->   	int start_final = 0, len_final = 0;
-> @@ -1950,28 +1966,28 @@ static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u32 delay)
->   	struct msdc_delay_phase delay_phase = { 0, };
->   
->   	if (delay == 0) {
-> -		dev_err(host->dev, "phase error: [map:%x]\n", delay);
-> +		dev_err(host->dev, "phase error: [map:%016llx]\n", delay);
->   		delay_phase.final_phase = final_phase;
->   		return delay_phase;
->   	}
->   
-> -	while (start < PAD_DELAY_MAX) {
-> +	while (start < PAD_DELAY_FULL) {
->   		len = get_delay_len(delay, start);
->   		if (len_final < len) {
->   			start_final = start;
->   			len_final = len;
->   		}
->   		start += len ? len : 1;
-> -		if (len >= 12 && start_final < 4)
-> +		if (!upper_32_bits(delay) && len >= 12 && start_final < 4)
->   			break;
->   	}
->   
->   	/* The rule is that to find the smallest delay cell */
->   	if (start_final == 0)
-> -		final_phase = (start_final + len_final / 3) % PAD_DELAY_MAX;
-> +		final_phase = (start_final + len_final / 3) % PAD_DELAY_FULL;
->   	else
-> -		final_phase = (start_final + len_final / 2) % PAD_DELAY_MAX;
-> -	dev_dbg(host->dev, "phase: [map:%x] [maxlen:%d] [final:%d]\n",
-> +		final_phase = (start_final + len_final / 2) % PAD_DELAY_FULL;
-> +	dev_dbg(host->dev, "phase: [map:%016llx] [maxlen:%d] [final:%d]\n",
->   		delay, len_final, final_phase);
->   
->   	delay_phase.maxlen = len_final;
-> @@ -1984,30 +2000,68 @@ static inline void msdc_set_cmd_delay(struct msdc_host *host, u32 value)
->   {
->   	u32 tune_reg = host->dev_comp->pad_tune_reg;
->   
-> -	if (host->top_base)
-> -		sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
-> -			      value);
-> -	else
-> -		sdr_set_field(host->base + tune_reg, MSDC_PAD_TUNE_CMDRDLY,
-> -			      value);
-> +	if (host->top_base) {
-> +		if (value < PAD_DELAY_HALF) {
-> +			sdr_set_field(host->top_base + EMMC_TOP_CMD, PAD_CMD_RXDLY,
-> +				      value);
+Fixes: 97548575bef3 ("mmc: block: Convert RPMB to a character device")
+Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+---
+ drivers/mmc/core/block.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-This goes up to 92 columns, and it's fine, so fits in one line and it's more
-readable like that.
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 152dfe593c43..8d29687635c4 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -851,9 +851,10 @@ static const struct block_device_operations mmc_bdops = {
+ static int mmc_blk_part_switch_pre(struct mmc_card *card,
+ 				   unsigned int part_type)
+ {
++	const unsigned int mask = EXT_CSD_PART_CONFIG_ACC_RPMB;
+ 	int ret = 0;
 
-I know that's not your fault, but since you're actually touching those lines
-it's a good occasion to also do that (not only here) :-)
+-	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++	if (part_type & mask == mask) {
+ 		if (card->ext_csd.cmdq_en) {
+ 			ret = mmc_cmdq_disable(card);
+ 			if (ret)
+@@ -868,9 +869,10 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
+ static int mmc_blk_part_switch_post(struct mmc_card *card,
+ 				    unsigned int part_type)
+ {
++	const unsigned int mask = EXT_CSD_PART_CONFIG_ACC_RPMB;
+ 	int ret = 0;
 
-Cheers,
-Angelo
+-	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++	if (part_type & mask == mask) {
+ 		mmc_retune_unpause(card->host);
+ 		if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
+ 			ret = mmc_cmdq_enable(card);
+--
+2.34.1
