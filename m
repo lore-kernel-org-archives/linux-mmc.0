@@ -1,237 +1,231 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="eZ+kK6OK"
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8AF910F3
-	for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 23:40:45 -0800 (PST)
-Received: by mail-wm1-x329.google.com with SMTP id 5b1f17b1804b1-40b31232bf0so16103175e9.1
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Nov 2023 23:40:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=foundries.io; s=google; t=1701416444; x=1702021244; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=DLRWZAxxkZP1tvtSK7R8vRvOQx92KAeCXPnyeVRGmnQ=;
-        b=eZ+kK6OKAFl5yb8VCofINzFu9HtBZ7enfd5dTFLw/gkgkxkNTg48ZwB303ziK9y7Nr
-         G4aXL8R0414N6NyaaM2hJWU7aXXHocRmXlhEMTPIC6ER2ZsAMcI6AqQ/2q2ST1sAutp1
-         jjuJ6UMoMM3a2uai2lLO2TXP80bQ+ew/kTUdc6gWVuvOlIbTIs+k7r+GQBltWvi8xg9b
-         M0kuc5fRK/J2tyRwqSoiVOS1JWCxAN4lYr+oDtiGs9o6aAYzUaeN8MmaRuj52O70k15x
-         T5XobREBNMaK2Zp74gshzgRsK/50vKe2S2i8voQl+//4gXHBrXUC54E1JHr22C8+bj8P
-         ibKA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701416444; x=1702021244;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=DLRWZAxxkZP1tvtSK7R8vRvOQx92KAeCXPnyeVRGmnQ=;
-        b=vARCxrRAxSGCd+jv4tjrt90pwMx3LNYXJtERdLZcUi/pdxE+IzosngqHMunHoP1yG9
-         r28lhz8z/y8bmWc9DZmkhWvMOoGripOKJunVRJYtoyBGrlsG257Oi3bTDS4OAIdzbbuV
-         5OvKrj94CdqvL/uuhCl1REMXa5b7ITmFySMQJVZFn7xOklOFY/CXfcAa4suNi49yi0pD
-         0sax6G8BukHibqvR4surMj2Eu8DQjpUB7CWBmMzwPKxjLQQ3HEH8akexEAFfrd4bHbHZ
-         Qf8XABkXp/Aj4EUmi6VjaLVTwBflBpH5WMGmyWBpX8IZFYiIY56eXYPVHPa/GaqmFtZE
-         qavA==
-X-Gm-Message-State: AOJu0YxiL/3THiKTWqP6yHFcqjJkAV2atK7LfQCXE4f7ocNF15sXocA8
-	rNon7nLWbuuH2vZActZ8f2lUXg==
-X-Google-Smtp-Source: AGHT+IFRjfzTZKVyHUHfdE8huFflVX1guxJbHFgDqdQy+NYOBXw8UBZgne4e0k2cdX+lb5JLoRzVGg==
-X-Received: by 2002:a1c:7716:0:b0:40b:50f5:3e6e with SMTP id t22-20020a1c7716000000b0040b50f53e6emr320867wmi.24.1701416444045;
-        Thu, 30 Nov 2023 23:40:44 -0800 (PST)
-Received: from trax (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
-        by smtp.gmail.com with ESMTPSA id n10-20020a05600c4f8a00b0040b4b2a15ebsm4419522wmq.28.2023.11.30.23.40.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 30 Nov 2023 23:40:43 -0800 (PST)
-From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
-Date: Fri, 1 Dec 2023 08:40:42 +0100
-To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, CLoehle@hyperstone.com,
-	jinpu.wang@ionos.com, hare@suse.de,
-	Ulf Hansson <ulf.hansson@linaro.org>, beanhuo@micron.com,
-	yangyingliang@huawei.com, asuk4.q@gmail.com, yibin.ding@unisoc.com,
-	victor.shih@genesyslogic.com.tw, marex@denx.de,
-	rafael.beims@toradex.com, robimarko@gmail.com, ricardo@foundries.io,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCHv2] mmc: rpmb: add quirk MMC_QUIRK_BROKEN_RPMB_RETUNE
-Message-ID: <ZWmN+k+wUWcXT5ID@trax>
-References: <20231129160533.2827458-1-jorge@foundries.io>
- <CAPDyKFpg+7W1ODGHw5oXy_wzWA1Qqzg9w_12rhQ8qW4o--6dWg@mail.gmail.com>
- <ZWiNDgUFF8ug7gZf@trax>
- <fbc82848-d402-4075-8176-de9ed0345d78@intel.com>
- <ZWkGZ7av1S4Clwdv@trax>
- <ZWkKgU+J9atnJdqT@trax>
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="lxFLfyuZ"
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 152C0171C;
+	Fri,  1 Dec 2023 00:53:43 -0800 (PST)
+Received: from [100.107.97.3] (cola.collaboradmins.com [195.201.22.229])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: kholk11)
+	by madras.collabora.co.uk (Postfix) with ESMTPSA id 271D06607345;
+	Fri,  1 Dec 2023 08:53:40 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+	s=mail; t=1701420821;
+	bh=fxsl6lAz5V0GFQqMOvyHTNLJsVUkj7i8CuG088hZQlc=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=lxFLfyuZJ+7YsUZoRX8wiI8tckAdgP4H0FjFFe6n3hOPz4dWPgmncj9Js2wksbjCm
+	 3mxU1sVy9iTAkb3h3g0jc0w2lArIB2XtuMtONuoxtj4BV2T1iFp1uoV9Q1Tv6OMuq1
+	 jNkCciWuZISeJG+LYpXJKgV/uKnFPpA8h7DP5ftPClFESmJ1l9f7DJy1qchcTQnRsL
+	 IpH/nFHFEAOaAIkBpkQxwxmKXqcTwVbhzLHrumuDcSdAPSN0W9Z//8BfsCKlT1vuqN
+	 o6PncgHjZNsIVeKKZkBti8HPe71ZFE2B51K8ID9cXO0KjjjT4N48xWuW87l2vI3VV3
+	 mEj7arRaH3cBw==
+Message-ID: <f14e8db1-5909-4733-99b1-2abe10c4ac7e@collabora.com>
+Date: Fri, 1 Dec 2023 09:53:37 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZWkKgU+J9atnJdqT@trax>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 2/2] mmc: mediatek: extend number of tuning steps
+Content-Language: en-US
+To: =?UTF-8?B?QXhlIFlhbmcgKOadqOejiik=?= <Axe.Yang@mediatek.com>,
+ "robh+dt@kernel.org" <robh+dt@kernel.org>,
+ =?UTF-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= <Wenbin.Mei@mediatek.com>,
+ =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?=
+ <Chaotian.Jing@mediatek.com>, "conor+dt@kernel.org" <conor+dt@kernel.org>,
+ "krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
+ "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
+ "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org"
+ <linux-arm-kernel@lists.infradead.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+ "linux-mediatek@lists.infradead.org" <linux-mediatek@lists.infradead.org>,
+ "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+ Project_Global_Chrome_Upstream_Group
+ <Project_Global_Chrome_Upstream_Group@mediatek.com>
+References: <20231128070127.27442-1-axe.yang@mediatek.com>
+ <20231128070127.27442-3-axe.yang@mediatek.com>
+ <207c2f89-b1e7-448d-966f-0c403a9f9e8b@collabora.com>
+ <ea1a82b07e98fa682140c460048901a9f962be2b.camel@mediatek.com>
+ <36ba3f89-2bd0-45f0-8b61-59f5c6691427@collabora.com>
+ <61afefc47b073d63f39972031be6a4dfbd3d45af.camel@mediatek.com>
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <61afefc47b073d63f39972031be6a4dfbd3d45af.camel@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On 30/11/23 23:19:45, Jorge Ramirez-Ortiz, Foundries wrote:
-> On 30/11/23 23:02:15, Jorge Ramirez-Ortiz, Foundries wrote:
-> > On 30/11/23 21:12:28, Adrian Hunter wrote:
-> > > On 30/11/23 15:24, Jorge Ramirez-Ortiz, Foundries wrote:
-> > > > On 30/11/23 11:34:18, Ulf Hansson wrote:
-> > > >> On Wed, 29 Nov 2023 at 17:05, Jorge Ramirez-Ortiz <jorge@foundries.io> wrote:
-> > > >>>
-> > > >>> On the eMMC SanDisk iNAND 7250 configured with HS200, requesting a
-> > > >>> re-tune before switching to the RPMB partition would randomly cause
-> > > >>> subsequent RPMB requests to fail with EILSEQ:
-> > > >>> * data error -84, tigggered in __mmc_blk_ioctl_cmd()
-> > > >>>
-> > > >>> This commit skips the retune when switching to RPMB.
-> > > >>> Tested over several days with per minute RPMB reads.
-> > > >>
-> > > >> This sounds weird to me and needs more testing/debugging in my
-> > > >> opinion, especially at the host driver level. Perhaps add some new
-> > > >> tests in mmc_test, that does a partition switch to/from any partition
-> > > >> and then run regular I/O again to see if the problem is easier to
-> > > >> reproduce?
-> > > >
-> > > > hi Uffe
-> > > >
-> > > > ok I'll have a look - I have never used this driver before, so if you
-> > > > have anything in the works I'll be glad to integrated and adapt.
-> > > >
-> > > >>
-> > > >> The point is, I wonder what is so special with RPMB here? Note that,
-> > > >> it has been quite common that host drivers/controllers have had issues
-> > > >> with their tuning support, so I would not be surprised if that is the
-> > > >> case here too.
-> > > >
-> > > > Right, it is just that the tuning function for of-arasan is the generic
-> > > > __sdhci_execute_tuning() - only wrapped around arasan DLL reset
-> > > > calls. Hence why I aimed for the card: __sdhci_execute_tuning and ZynqMP
-> > > > are not recent functions or architectures.
-> > > >
-> > > >
-> > > >> Certainly I would be surprised if the problem is at
-> > > >> the eMMC card side, but I may be wrong.
-> > > >
-> > > > How do maintainers test the tuning methods? is there anything else for
-> > > > me to do other than forcing a retune with different partitions?
-> > > >
-> > > >>
-> > > >> Kind regards
-> > > >> Uffe
-> > > >
-> > > > For completeness this is the error message - notice that we have a
-> > > > trusted application (fiovb) going through OP-TEE and back to the TEE
-> > > > supplicant issuing an rpmb read of a variable (pretty normal these days,
-> > > > we use it on many different platforms - ST, NXP, AMD/Xilinx, TI..).
-> > > >
-> > > > The issue on this Zynqmp platform is scarily simple to reproduce; you
-> > > > can ignore the OP-TEE trace, it is just the TEE way of reporting that
-> > > > the RPMB read failed.
-> > > >
-> > > > root@uz3cg-dwg-sec:/var/rootdirs/home/fio# fiovb_printenv m4hash
-> > > > [  461.775084] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
-> > > > E/TC:? 0
-> > > > E/TC:? 0 TA panicked with code 0xffff0000
-> > > > E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
-> > > > E/LD:   arch: aarch64
-> > > > E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
-> > > > E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
-> > > > E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
-> > > > E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
-> > > > E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
-> > > > E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
-> > > > E/LD:  region  6: va 0xc0019000 pa 0x816b31fc8 size 0x001000 flags rw-- (param)
-> > > > E/LD:  region  7: va 0xc001a000 pa 0x816aa1fc8 size 0x002000 flags rw-- (param)
-> > > > E/LD:  region  8: va 0xc006b000 pa 0x00001000 size 0x014000 flags r-xs [0]
-> > > > E/LD:  region  9: va 0xc007f000 pa 0x00015000 size 0x008000 flags rw-s [0]
-> > > > E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc006b000
-> > > > E/LD:  Call stack:
-> > > > E/LD:   0xc006de58
-> > > > E/LD:   0xc006b388
-> > > > E/LD:   0xc006ed40
-> > > > E/LD:   0xc006b624
-> > > > Read persistent value for m4hash failed: Exec format error
-> > >
-> > > Have you tried dynamic debug for mmc
-> > >
-> > >     Kernel must be configured:
-> > >
-> > >         CONFIG_DYNAMIC_DEBUG=y
-> > >
-> > >     To enable mmc debug via sysfs:
-> > >
-> > >         echo 'file drivers/mmc/core/* +p' > /sys/kernel/debug/dynamic_debug/control
-> > >         echo 'file drivers/mmc/host/* +p' > /sys/kernel/debug/dynamic_debug/control
-> > >
-> > >
-> >
-> > hi Adrian
-> >
-> > Sure, this is the output of the trace:
-> >
-> > [  422.018756] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.018789] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.018817] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.018848] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.018875] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.018902] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.018932] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.020013] mmc0: sdhci: IRQ status 0x00000001
-> > [  422.020027] mmc0: sdhci: IRQ status 0x00000002
-> > [  422.020034] mmc0: req done (CMD6): 0: 00000800 00000000 00000000 00000000
-> > [  422.020054] mmc0: starting CMD13 arg 00010000 flags 00000195
-> > [  422.020068] mmc0: sdhci: IRQ status 0x00000001
-> > [  422.020076] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-> > [  422.020092] <mmc0: starting CMD23 arg 00000001 flags 00000015>
-> > [  422.020101] mmc0: starting CMD25 arg 00000000 flags 00000035
-> > [  422.020108] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 400 ms nsac 0
-> > [  422.020124] mmc0: sdhci: IRQ status 0x00000001
-> > [  422.021671] mmc0: sdhci: IRQ status 0x00000002
-> > [  422.021691] mmc0: req done <CMD23>: 0: 00000000 00000000 00000000 00000000
-> > [  422.021700] mmc0: req done (CMD25): 0: 00000900 00000000 00000000 00000000
-> > [  422.021708] mmc0:     512 bytes transferred: 0
-> > [  422.021728] mmc0: starting CMD13 arg 00010000 flags 00000195
-> > [  422.021743] mmc0: sdhci: IRQ status 0x00000001
-> > [  422.021752] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-> > [  422.021771] <mmc0: starting CMD23 arg 00000001 flags 00000015>
-> > [  422.021779] mmc0: starting CMD18 arg 00000000 flags 00000035
-> > [  422.021785] mmc0:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
-> > [  422.021804] mmc0: sdhci: IRQ status 0x00000001
-> > [  422.022566] mmc0: sdhci: IRQ status 0x00208000 <---------------------------------- this doesnt seem right
-> > [  422.022629] mmc0: req done <CMD23>: 0: 00000000 00000000 00000000 00000000
-> > [  422.022639] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> > [  422.022647] mmc0:     0 bytes transferred: -84 < --------------------------------- it should have transfered 4096 bytes
-> > [  422.022669] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
-> > [  422.029619] mmc0: starting CMD6 arg 03b30001 flags 0000049d
-> > [  422.029636] mmc0: sdhci: IRQ status 0x00000001
-> > [  422.029652] mmc0: sdhci: IRQ status 0x00000002
-> > [  422.029660] mmc0: req done (CMD6): 0: 00000800 00000000 00000000 00000000
-> > [  422.029680] mmc0: starting CMD13 arg 00010000 flags 00000195
-> > [  422.029693] mmc0: sdhci: IRQ status 0x00000001
-> > [  422.029702] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-> > [  422.196996] <mmc0: starting CMD23 arg 00000400 flags 00000015>
-> > [  422.197051] mmc0: starting CMD25 arg 058160e0 flags 000000b5
-> > [  422.197079] mmc0:     blksz 512 blocks 1024 flags 00000100 tsac 400 ms nsac 0
-> > [  422.197110] mmc0:     CMD12 arg 00000000 flags 0000049d
-> > [  422.199455] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199526] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199585] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199641] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199695] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199753] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199811] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199865] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199919] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.199972] mmc0: sdhci: IRQ status 0x00000020
-> > [  422.200026] mmc0: sdhci: IRQ status 0x00000020
-> >
-> >
-> > does this help?
+Il 29/11/23 04:16, Axe Yang (杨磊) ha scritto:
+> On Tue, 2023-11-28 at 11:20 +0100, AngeloGioacchino Del Regno wrote:
+>> Il 28/11/23 10:38, Axe Yang (杨磊) ha scritto:
+>>>> On Tue, 2023-11-28 at 09:53 +0100, AngeloGioacchino Del Regno
+>>>> wrote:
+>>>> Il 28/11/23 08:01, Axe Yang ha scritto:
+>>>>> Previously, during the MSDC calibration process, a full clock
+>>>>> cycle
+>>>>> actually not be covered, which in some cases didn't yield the
+>>>>> best
+>>>>> results and could cause CRC errors. This problem is
+>>>>> particularly
+>>>>> evident when MSDC is used as an SDIO host. In fact, MSDC
+>>>>> support
+>>>>> tuning up to a maximum of 64 steps, but by default, the step
+>>>>> number
+>>>>> is 32. By increase the tuning step, we are more likely to cover
+>>>>> more
+>>>>> parts of a clock cycle, and get better calibration result.
+>>>>>
+>>>>> To illustrate, when tuning 32 steps, if the obtained window has
+>>>>> a
+>>>>> hole
+>>>>> near the middle, like this: 0xffc07ff (hex), then the selected
+>>>>> delay
+>>>>> will be the 6 (counting from right to left).
+>>>>>
+>>>>> (32 <- 1)
+>>>>> 1111 1111 1100 0000 0000 0111 11(1)1 1111
+>>>>>
+>>>>> However, if we tune 64 steps, the window obtained may look like
+>>>>> this:
+>>>>> 0xfffffffffffc07ff. The final selected delay will be 44, which
+>>>>> is
+>>>>> safer as it is further away from the hole:
+>>>>>
+>>>>> (64 <- 1)
+>>>>> 1111 ... (1)111 1111 1111 1111 1111 1100 0000 0000 0111 1111
+>>>>> 1111
+>>>>>
+>>>>> In this case, delay 6 selected through 32 steps tuning is
+>>>>> obviously
+>>>>> not optimal, and this delay is closer to the hole, using it
+>>>>> would
+>>>>> easily cause CRC problems.
+>>>>>
+>>>>> You will need to configure property "mediatek,tuning-step" in
+>>>>> MSDC
+>>>>> dts node to 64 to extend the steps.
+>>>>>
+>>>>
+>>>> If we can run 64 tuning steps, why should we run 32?
+>>>>
+>>>> Why isn't it just better to *always* run 64 tuning steps, on SoCs
+>>>> supporting that?
+>>>>
+>>>> Thanks,
+>>>> Angelo
+>>>
+>>> Hi Angelo,
+>>>
+>>> That is a good question. The benefit of preserving 32 steps tuning
+>>> is
+>>> that it can save time in certain scenarios.
+>>>
+>>> On some platforms, when the delay selected through 64 steps tuning
+>>> is
+>>> very close to that chosen through 32 steps, we can reduce the
+>>> tuning
+>>> step from 64 to 32. This can save time sending the tuning block
+>>> commands.
+>>>
+>>> Thus using 32 steps tuning can save kernel boot up time.
+>>>
+>>> Another case where time can be saved is when accessing the RPMB
+>>> partition of eMMC. Each time switch to RPMB partition, there is a
+>>> retune action, causing a certain drop in performance. If we are
+>>> certain
+>>> that the results of 32 steps tuning are usable and we use it, this
+>>> can
+>>> in a sense also guarantee performance when accessing the RPMB
+>>> partition.
+>>>
+>>
+>> Thanks for this explanation! Though, I have some more questions...
+>>
+>> ...regarding boot up time, how much time are we talking about?
+> 
+> Luckily, I have a platform at hand that can be used for experiments/
+> Below are the results from testing on this platform:
+> 
+> [    2.431993][T1200180] kworker/2:21: mtk-msdc bootdevice:
+> [name:mtk_sd&]Start tuning
+> [    2.434950][T1200180] kworker/2:21: mtk-msdc bootdevice:
+> [name:mtk_sd&]Tuning finished
+> [    2.435957][T1200180] kworker/2:21: mtk-msdc bootdevice:
+> [name:mtk_sd&]phase: [map:00000000ffffffc0] [maxlen:26] [final:19]
+> [    2.462375][T1200180] kworker/2:21: [name:mmc_core&]mmc0: new HS400
+> MMC card at address 0001
+> ...
+> [    2.519863][T1300069] kworker/3:1: mtk-msdc 11250000.mmc:
+> [name:mtk_sd&]Start tuning
+> [    2.526271][T1300069] kworker/3:1: mtk-msdc 11250000.mmc:
+> [name:mtk_sd&]Tuning finished
+> [    2.527288][T1300069] kworker/3:1: mtk-msdc 11250000.mmc:
+> [name:mtk_sd&]phase: [map:ffffffffffff003f] [maxlen:48] [final:40]
+> [    2.532269][T1300069] kworker/3:1: [name:mmc_core&]mmc2: new ultra
+> high speed SDR104 SDIO card at address 0001
+> 
+> As the kernel log indicates, it took 3 ms for eMMC to tune 32 steps,
+> while it took about 7 ms for SDIO to tune 64 steps. I have to admit,
+> when it comes to saving boot up time, the benefits of reducing step
+> form 64 to 32 are quite minimal. Just as you said, especially when
+> async probe is enabled.
+> 
 
-Just asking because it doesn't mean much to me other than the obvious CRC
-problem.
+That's great to know, and it's *truly* nice information that you can
+put into the commit message, as this completes the analysis of this
+commit.
 
-Being this issue so easy to trigger - and to fix - indicates a problem
-on the card more than on the algorithm (otherwise faults would be all
-over the place). But I am not an expert on this area.
+Can you mention that in the commit message for v4 of this commit?
 
-any additional suggestions welcome.
+"As per measurements taken on MT(xxxx), the tuning phase will take:
+  eMMC - 32 steps: ~3ms
+         64 steps: xxxx
+  SDIO - 32 steps: xxxx
+         64 steps: ~7ms
 
-> >
-> > thanks
-> > Jorge
+...but while this won't prolong boot times by any meaningful amount
+of time, for eMMC, it should still be preferred to use 32 steps tuning
+because otherwise we lose performance for RPMB I//O, which requires
+re-tuning for each access.
+"
+
+>>
+>> I'm asking because while now I see - and agree - on using 32-steps
+>> tuning
+>> on eMMC to guarantee performance during RPMB access, as far as I
+>> know,
+>> there is no RPMB partition on SD/MicroSD cards (and, of course, SDIO
+>> devices).
+>>
+>> If the boot performance impact isn't big, as in, up to ~100
+>> milliseconds is
+>> not big at all (especially with async probe!), we can definitely
+>> avoid the
+>> addition of a devicetree property for 32-steps tuning, hence use a
+>> dynamic
+>> selection strategy such that:
+>>    - On eMMC devices, always perform 32-steps tuning (hence no boot
+>> delay)
+>>    - On SD cards and SDIO, always perform 64-steps tuning
+> 
+> eMMC could also potentially have CRC issue if only tune 32-steps,
+> albeit with a lower likelihood. The precondition for using 32-steps
+> tuning is that it could provide roughly the same valid results as using
+> 64-steps tuning. So taking everything into account, controlling the
+> tuning step as needed through the use of dts property seems to be a
+> more flixible approach.
+> 
+
+Yes but since the only performance concern is about eMMC RPMB access,
+we could at least make this 64 steps as *default* for SD/SDIO, and
+32 steps as default for eMMC.
+Device tree would be an override of those default values.
+
+Can we set 64 as default for SD/SDIO, 32 as default for eMMC, and then use
+the device tree to override those defaults?
+
+Cheers,
+Angelo
