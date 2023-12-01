@@ -1,89 +1,78 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jDbTERif"
-Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5ACC10D0
-	for <linux-mmc@vger.kernel.org>; Fri,  1 Dec 2023 05:18:42 -0800 (PST)
-Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-5d41657b7a5so6363977b3.1
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Dec 2023 05:18:42 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="k7+YvcLW"
+Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C13110F9
+	for <linux-mmc@vger.kernel.org>; Fri,  1 Dec 2023 05:19:23 -0800 (PST)
+Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-5d3efc071e2so9615177b3.0
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Dec 2023 05:19:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701436722; x=1702041522; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1701436762; x=1702041562; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=09w7LW+cnqnlOMOkAO+xvtNckElk6wbrltpRZF7gZK8=;
-        b=jDbTERifj0EHk24e+bi818C0wkQpVbzuqsDVyzmn9V5jii+a5mYb0kUBmzkNtJTcIQ
-         5PBIQ0svSwnML2LGV5uiAD9Oj2Pgy9jzOM8k9YsEuFK7NfwK8iQggQg3lXkf7JYGRIfd
-         aVYsZG0tbWukeHJp6bCWo8azR7y+C8JqIaay6cDE2LDBNdUJkMW4egClcRb6MRkGDf+w
-         n7owctiCTjqOG0Zz8F3ChBQu5QwZ5ZmfPodF7Cem+VXB1JHZWSGy84U9/H1SEztF4h9h
-         dedISDAxoxEmmg1ogvBCo5Z3vXbxw6PdeQoBPkU/zC/I6MIOwvf7UFBK7nKoVw97rVHy
-         WLQQ==
+        bh=TV4RE4cHNpakye744+P99xHdpE2/iAr/FBdxm7x4r+g=;
+        b=k7+YvcLWgiIpFeZv4E6dFYbAwzp6qzf0OwdULmKHfCwnOeKRrERw+/fncxBdnWu6Mg
+         k+VFF/Y1hv4iGa+4Eo5VMZQEJin0y9769rCzYfwBL0W/u8UdtOn+5JLGKsm8E22hCObQ
+         QPwQFoZ1fxi2LvbyRfzKGfT6MtPqSAvdoPqiKbOLHusiGlyafxS2SYWz84N3jc5DaMys
+         gCeOQdQv3mEXA3hA699C5TpZU8tU6n2o/EJb1JXHQ1uqF0GUbQCf9X0m7nW1Dh6uZx2i
+         f5MX9ohIUwVDObiOcxD2zx4H8liQ2STNYQ6xvPLA9TCgvKsfNtpYRAedINwSORJlkoBn
+         a+rQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701436722; x=1702041522;
+        d=1e100.net; s=20230601; t=1701436762; x=1702041562;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=09w7LW+cnqnlOMOkAO+xvtNckElk6wbrltpRZF7gZK8=;
-        b=ZFnsTiQ796unyzU5nGXcZFYOJxoByLpe1jqvj6Bzn9m2OmP2Zt6zjagXyjIX8KplU1
-         9XAkRWbFGw/FIXkv0c2qaJUig0Cg6+FiBTTS9h7APDmwrnHt/TrzHOD4Ox1WalF08Hbo
-         qAFiHk0eoENqoLXr9QA8Vg+STtvj1jEPwqDOq9aC2qFHdTvbr+35NBgiMMdD3fK+lrit
-         PDWaCb9mSX1jIUcMfHFatncPr7VmVml/vRR8Xu46WPe0ySt3uho6XKQFE0lBAulM/kE0
-         QXDUNju68h2bvrvX7l0wDrjyfPKbqmkplVWaCAOPoDcVWMALFvdoTJ3fVeQoO2hoeCF7
-         +E3g==
-X-Gm-Message-State: AOJu0Ywx6KY/Rdg3cNm7a6zcYq8Lc5x5Z/Pfwn0aXJxWUW+8tnzLf2te
-	G06bicz3lIzXbQyLB2QklnbO+rKuhdtqNpjfdMkzkA==
-X-Google-Smtp-Source: AGHT+IED9fUj04DIXgJcAJDTj+imzR+T7qCQhh61mUs0nVQkvTLJCffTbDrbVbGT9xP07igPg64irBBooCwy4hbwxiw=
-X-Received: by 2002:a81:5743:0:b0:5d3:ba32:a10b with SMTP id
- l64-20020a815743000000b005d3ba32a10bmr3341733ywb.10.1701436721755; Fri, 01
- Dec 2023 05:18:41 -0800 (PST)
+        bh=TV4RE4cHNpakye744+P99xHdpE2/iAr/FBdxm7x4r+g=;
+        b=qgmHvN/Ly/nM98Xv+4Gd44QZ/p8/hyUuP7Q1UXVtfJ19mazHnZWMJ31kRhkZ98WWzM
+         NRr3GHYWluVs0V+V4LjT92QcYokljPVN9ZISG9v/VZIey2JftGxnGvrkp+TOLaI7qgjq
+         U8L6mMpbhcSJTwRXcAfGTQymDgz2vaE8dJZ6Lf9JFK732wrRvsN2d6eVyIoR2j7S8AiX
+         o646gsrbZtgs/cocxblHLiJTnZzwABCpACBumgBFpUxR48MtMwiIG5SQ81U8lc/AIE+1
+         ErkzGSj4OqaX4N6YrkyeAni3BZeRNOyoQSJQvcKZ1RhQVw/DADtN7ZjwlOPlRIsqUlmi
+         CINw==
+X-Gm-Message-State: AOJu0YxdOaD37NW6Sx+zubwkpoDe3ICkOBgd2ISaJCF3Jvaz4SlO/7z0
+	47dUgBtyen6vd3+ngq53CELl5ro7rz7tJDiswOwkZA==
+X-Google-Smtp-Source: AGHT+IFEWzRE5D+JX5v6BYxdEGsQDVSfXG3gspfyC4M3wp8CNF5TLeciexwuvK9psgzwpfJl7ggu9HKOx77eKmwNPuI=
+X-Received: by 2002:a81:9242:0:b0:5d3:cfc1:2df2 with SMTP id
+ j63-20020a819242000000b005d3cfc12df2mr3380112ywg.14.1701436762501; Fri, 01
+ Dec 2023 05:19:22 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231201091034.936441-1-jorge@foundries.io> <CACRpkdaMnphBxvqpmvNG_72O02Umny3qdxfyrKdA4BsDwZmtfg@mail.gmail.com>
- <ZWmptatt60if9GBH@trax> <CAJ1nHOW9T3yvFj5FFdOZYrdgfy0f=opiDri+2srE=yBp5vtVZw@mail.gmail.com>
-In-Reply-To: <CAJ1nHOW9T3yvFj5FFdOZYrdgfy0f=opiDri+2srE=yBp5vtVZw@mail.gmail.com>
+References: <20231201100527.1034292-1-jorge@foundries.io>
+In-Reply-To: <20231201100527.1034292-1-jorge@foundries.io>
 From: Linus Walleij <linus.walleij@linaro.org>
-Date: Fri, 1 Dec 2023 14:18:29 +0100
-Message-ID: <CACRpkdZHB4OETge9T6g5zHqMdd=uO3_-jbMMmzf+vRn=fJQHiQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rpmb: fixes pause retune on all RPMB partitions.
-To: Jorge Ramirez <jorge@foundries.io>
-Cc: ulf.hansson@linaro.org, CLoehle@hyperstone.com, adrian.hunter@intel.com, 
-	jinpu.wang@ionos.com, hare@suse.de, beanhuo@micron.com, asuk4.q@gmail.com, 
-	yangyingliang@huawei.com, yibin.ding@unisoc.com, 
-	victor.shih@genesyslogic.com.tw, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Fri, 1 Dec 2023 14:19:10 +0100
+Message-ID: <CACRpkdbbV_mCT-P6mK8=S4rR7=ZKV=LKYmoH1dGsG3PAR2HjaA@mail.gmail.com>
+Subject: Re: [PATCHv3] mmc: rpmb: fixes pause retune on all RPMB partitions.
+To: Jorge Ramirez-Ortiz <jorge@foundries.io>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Dec 1, 2023 at 10:47=E2=80=AFAM Jorge Ramirez <jorge@foundries.io> =
-wrote:
-> On Fri, Dec 1, 2023 at 10:39=E2=80=AFAM Jorge Ramirez-Ortiz, Foundries <j=
-orge@foundries.io> wrote:
->> On 01/12/23 10:28:52, Linus Walleij wrote:
+On Fri, Dec 1, 2023 at 11:05=E2=80=AFAM Jorge Ramirez-Ortiz <jorge@foundrie=
+s.io> wrote:
 
->> > > +       const unsigned int mask =3D EXT_CSD_PART_CONFIG_ACC_RPMB;
->> > >         int ret =3D 0;
->> > >
->> > > -       if (part_type =3D=3D EXT_CSD_PART_CONFIG_ACC_RPMB) {
->> > > +       if (part_type & mask =3D=3D mask) {
->> >
->> > That looks complex, can't we just:
->> >
->> > if (part_type & EXT_CSD_PART_CONFIG_ACC_RPMB)?
->>
->>
->> I chose to mention the mask nature of the field for clarity - just in
->> case - but I'd much rather do your suggestion. So will do :)
+> When RPMB was converted to a character device, it added support for
+> multiple RPMB partitions (Commit 97548575bef3 ("mmc: block: Convert RPMB
+> to a character device").
 >
+> One of the changes in this commit was transforming the variable
+> target_part defined in __mmc_blk_ioctl_cmd into a bitmask.
 >
-> sorry no, I mispoke  (I like clean code so yours looked neat)
-> we have to compare against EXT_CSD_PART_CONFIG_ACC_RPMB
-> bitfield since part_type could be EXT_CSD_PART_CONFIG_ACC_BOOT0 (0x1)
-> in which case we have to skip it.
+> This inadvertedly regressed the validation check done in
+> mmc_blk_part_switch_pre() and mmc_blk_part_switch_post().
+>
+> This commit fixes that regression.
+>
+> Fixes: 97548575bef3 ("mmc: block: Convert RPMB to a character device")
+> Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+> Cc: <stable@vger.kernel.org> # v6.0+
 
-Aha those defines are not flags but enumerators. I get it.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
 Linus Walleij
