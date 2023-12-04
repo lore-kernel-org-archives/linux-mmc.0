@@ -1,165 +1,152 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XHg6aGlB"
-Received: from mail-vk1-xa2d.google.com (mail-vk1-xa2d.google.com [IPv6:2607:f8b0:4864:20::a2d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D04CFD;
-	Mon,  4 Dec 2023 05:00:21 -0800 (PST)
-Received: by mail-vk1-xa2d.google.com with SMTP id 71dfb90a1353d-4b2d526a509so170957e0c.2;
-        Mon, 04 Dec 2023 05:00:21 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="Q/1b4G9J"
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75F4F83
+	for <linux-mmc@vger.kernel.org>; Mon,  4 Dec 2023 05:58:15 -0800 (PST)
+Received: by mail-wm1-x32a.google.com with SMTP id 5b1f17b1804b1-40b397793aaso27661825e9.0
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Dec 2023 05:58:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1701694820; x=1702299620; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=u7aJCeBo2guqu/RUQW0zkVfwd6W/nONHlzvSur6h+mg=;
-        b=XHg6aGlB/J9ijd2fKK/DyfM2mGeDHhQpUZzG72ePxj+Wgp4G3YLGq1CZXJzwOahG4t
-         7PVbZez7OyCtT1zpWu8au72kzCB6mXMkOjRHhFui2hbmxh14W/K0iPmhepDD22dz4lmo
-         C/kebn3y5rJpjHmznSGurtsbEve7rENYF+B6ls3hnPVClpuxzHAAk6MMPz5zzWb1i/OU
-         Kbv0Tq+YPnKhWiLTqT+ushTwbgBRrSzx5K3RzkKPQrW/qzSwM85/jQ8jpUPlqwC4Mmms
-         TU4zNJawCIroDOG4GtJOzh7J2FZzsFrkowqDpv95ddSM24DjSS+n5CMcEP6wMwDrvY2Y
-         r+6g==
+        d=foundries.io; s=google; t=1701698294; x=1702303094; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=1Wn71OJAsHrUsi0hi6qKz41BqzfeWUDfsnSD1MArV6Y=;
+        b=Q/1b4G9Jbcgp4blJSRV8N8/MiGLqKz6vACPg/45GSn0lbbVI7jpJ+RcXUGHTipmB2n
+         jdxZtzHvmJeBWVUqfsySdrz+pJRBloYP67Z6LdVCu8jv48nDwe8b5BczRyqhFQ8ONy8F
+         j+IwCbQVJTYJE7pCAvasUEMOUqSiO0KUYBeHSiC9vd26h/e1Ovpchy7xFJfZQEyjrUv/
+         mmRgZfck/kbiC3XyRygUxUGwXYQ4Dm6dxO04RwvaeYT8XAPfgDK7mWlFejORnMsdMXBO
+         wUnh09tf8oz9joIDKz4WorOrOIq4u2NjnW1ad3UNlQanbO7GjQyOcn0YPkRB30muTg/v
+         ylPQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701694820; x=1702299620;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=u7aJCeBo2guqu/RUQW0zkVfwd6W/nONHlzvSur6h+mg=;
-        b=D+eblzng7t+13HunIBFS9XKDRUugITsyHNCaH/cX3PnUpUe8oxRDSpFA+vS+lOiFpd
-         Fr2qzLDi7ZecGYOPzkK74jibpTo59MDdKO47DJCfOvcJGKp23ie1w3T0EAtv+GH4eBJf
-         Ozq7L45JwxD0SQaZrobZ+xmVddmh5I0eOd9zNLIHQvRA4idLm7+JhB1nuyMDiqTHSNK8
-         QKFQcnbdd2TsC8tJrpHTGzdMO9f7hLeTgLOEZ7JZx85BzFSvLcRgJiI99MIjZKTBfJxL
-         5dWSXEzfbhodCKLsEbz9q5di1r0pDsP4ZrPE0e/drDmYa0lrxN+GPAIEuHyAxz2Q0WUX
-         UwAw==
-X-Gm-Message-State: AOJu0YyunZpAcR3xW+nd9MhVFC6H7M4pZ7h42WAOzMjrWRxiPqPvia7V
-	WM4PvFn259MwU9FIDP3vwbgWcGKNF9NJ76GRZ5+IIHIiXwo=
-X-Google-Smtp-Source: AGHT+IGE2npKlsB5rnj3DkCMZSLRvpJrnSD0wKo8FdTtM/D3jLAOT3B9nLe5s9Y0fW0XOiax8rHgS+gYYv3uTUx/8UY=
-X-Received: by 2002:a05:6122:718:b0:4b2:c554:e3fe with SMTP id
- 24-20020a056122071800b004b2c554e3femr828907vki.30.1701694820422; Mon, 04 Dec
- 2023 05:00:20 -0800 (PST)
+        d=1e100.net; s=20230601; t=1701698294; x=1702303094;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1Wn71OJAsHrUsi0hi6qKz41BqzfeWUDfsnSD1MArV6Y=;
+        b=g1NCKcKK4bVCoLPG+I2+gr0RewSvsWt9h0ZdMayd5uuPavuULxb5ciEgXmXKTpIrQc
+         nHmBYjb93VmTpSmHnqBsmiKODEOGW61Pm0C3hn9+k5P3aYMNC7/w+pLJg9JWvRDBL58+
+         UutNkPVI6SR958eHE4ACdbU4BLXfrQY54yprIuu028MqTtlp7g6YBzTWnu5Co7y1hlry
+         zQzO4LsFkZMI4jiBEYoL1iQO1BAo1+M2GAMix+YkyhpWTRNNZPfHc52L2vNSAOJXnSvH
+         LTr1/fnD3PuWmJE3jfXdNleD7/dk7hplpPLXq3b32d2qf4jZpw9sQhLVqOuPVTF6MqLT
+         N7Tg==
+X-Gm-Message-State: AOJu0YwVyCyhAuQ6GOogXM5KQEwyxnavs7vGg9aXwOZYpIJwrO9Gx+GI
+	FtDtELs5icd3LGWlVq/bUBoORw==
+X-Google-Smtp-Source: AGHT+IFeAAaNKjmvQvyhXB/RWQ1dcGIG/iQq6n7LDgKtxGw4htbGbrcJ1cjYN0N4sspWHS2O6S8Peg==
+X-Received: by 2002:a05:600c:348a:b0:40b:5e26:2379 with SMTP id a10-20020a05600c348a00b0040b5e262379mr3046913wmq.42.1701698293953;
+        Mon, 04 Dec 2023 05:58:13 -0800 (PST)
+Received: from trax (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
+        by smtp.gmail.com with ESMTPSA id r11-20020a5d498b000000b0033339da02f9sm6773310wrq.110.2023.12.04.05.58.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 04 Dec 2023 05:58:13 -0800 (PST)
+From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
+Date: Mon, 4 Dec 2023 14:58:11 +0100
+To: Avri Altman <Avri.Altman@wdc.com>
+Cc: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	"CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
+	"jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
+	"hare@suse.de" <hare@suse.de>, Ulf Hansson <ulf.hansson@linaro.org>,
+	"beanhuo@micron.com" <beanhuo@micron.com>,
+	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
+	"asuk4.q@gmail.com" <asuk4.q@gmail.com>,
+	"yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
+	"victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
+	"marex@denx.de" <marex@denx.de>,
+	"rafael.beims@toradex.com" <rafael.beims@toradex.com>,
+	"robimarko@gmail.com" <robimarko@gmail.com>,
+	"ricardo@foundries.io" <ricardo@foundries.io>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCHv2] mmc: rpmb: add quirk MMC_QUIRK_BROKEN_RPMB_RETUNE
+Message-ID: <ZW3a8xneptC6y/N8@trax>
+References: <ZWkGZ7av1S4Clwdv@trax>
+ <ZWkKgU+J9atnJdqT@trax>
+ <ZWmN+k+wUWcXT5ID@trax>
+ <fecd033b-b2ea-4906-a320-22a5c2ede46c@intel.com>
+ <ZWoBqs/5m6tCuBGo@trax>
+ <ZWoTOm+8Y75TLz6q@trax>
+ <DM6PR04MB6575FF9532A9FC0EE91B5B37FC80A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <ZWysTPapFyGJdu5d@trax>
+ <DM6PR04MB6575F9EB1C3309F64EEE6BCCFC86A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <DM6PR04MB6575127DFCEC4C178F7E33B7FC86A@DM6PR04MB6575.namprd04.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <205dc4c91b47e31b64392fe2498c7a449e717b4b.1701689330.git.geert+renesas@glider.be>
-In-Reply-To: <205dc4c91b47e31b64392fe2498c7a449e717b4b.1701689330.git.geert+renesas@glider.be>
-From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Mon, 4 Dec 2023 12:59:54 +0000
-Message-ID: <CA+V-a8u6JGtidCd13HBQC9XJFedSetGS-H+tudzJ=azaMnW=Cg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: core: Cancel delayed work before releasing host
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <DM6PR04MB6575127DFCEC4C178F7E33B7FC86A@DM6PR04MB6575.namprd04.prod.outlook.com>
 
-On Mon, Dec 4, 2023 at 11:30=E2=80=AFAM Geert Uytterhoeven
-<geert+renesas@glider.be> wrote:
+On 04/12/23 12:59:07, Avri Altman wrote:
+> > > We could carry the patch internally (it seems harmless after all the
+> > > testing
+> > > done) but I'd much rather land it upstream if possible.
+> > Agreed.
+> Also, I am totally fine, and maybe it's even better, with adding this as a default behavior for all vendors.
+> I see no point in those tunings while accessing rpmb anyway.
 >
-> On RZ/Five SMARC EVK, where probing of SDHI is deferred due to probe
-> deferral of the vqmmc-supply regulator:
->
->     ------------[ cut here ]------------
->     WARNING: CPU: 0 PID: 0 at kernel/time/timer.c:1738 __run_timers.part.=
-0+0x1d0/0x1e8
->     Modules linked in:
->     CPU: 0 PID: 0 Comm: swapper Not tainted 6.7.0-rc4 #101
->     Hardware name: Renesas SMARC EVK based on r9a07g043f01 (DT)
->     epc : __run_timers.part.0+0x1d0/0x1e8
->      ra : __run_timers.part.0+0x134/0x1e8
->     epc : ffffffff800771a4 ra : ffffffff80077108 sp : ffffffc800003e60
->      gp : ffffffff814f5028 tp : ffffffff8140c5c0 t0 : ffffffc800000000
->      t1 : 0000000000000001 t2 : ffffffff81201300 s0 : ffffffc800003f20
->      s1 : ffffffd8023bc4a0 a0 : 00000000fffee6b0 a1 : 0004010000400000
->      a2 : ffffffffc0000016 a3 : ffffffff81488640 a4 : ffffffc800003e60
->      a5 : 0000000000000000 a6 : 0000000004000000 a7 : ffffffc800003e68
->      s2 : 0000000000000122 s3 : 0000000000200000 s4 : 0000000000000000
->      s5 : ffffffffffffffff s6 : ffffffff81488678 s7 : ffffffff814886c0
->      s8 : ffffffff814f49c0 s9 : ffffffff81488640 s10: 0000000000000000
->      s11: ffffffc800003e60 t3 : 0000000000000240 t4 : 0000000000000a52
->      t5 : ffffffd8024ae018 t6 : ffffffd8024ae038
->     status: 0000000200000100 badaddr: 0000000000000000 cause: 00000000000=
-00003
->     [<ffffffff800771a4>] __run_timers.part.0+0x1d0/0x1e8
->     [<ffffffff800771e0>] run_timer_softirq+0x24/0x4a
->     [<ffffffff80809092>] __do_softirq+0xc6/0x1fa
->     [<ffffffff80028e4c>] irq_exit_rcu+0x66/0x84
->     [<ffffffff80800f7a>] handle_riscv_irq+0x40/0x4e
->     [<ffffffff80808f48>] call_on_irq_stack+0x1c/0x28
->     ---[ end trace 0000000000000000 ]---
->
-> What happens?
->
->     renesas_sdhi_probe()
->     {
->         tmio_mmc_host_alloc()
->             mmc_alloc_host()
->                 INIT_DELAYED_WORK(&host->detect, mmc_rescan);
->
->         devm_request_irq(tmio_mmc_irq);
->
->         /*
->          * After this, the interrupt handler may be invoked at any time
->          *
->          *  tmio_mmc_irq()
->          *  {
->          *      __tmio_mmc_card_detect_irq()
->          *          mmc_detect_change()
->          *              _mmc_detect_change()
->          *                  mmc_schedule_delayed_work(&host->detect, dela=
-y);
->          *  }
->          */
->
->         tmio_mmc_host_probe()
->             tmio_mmc_init_ocr()
->                 -EPROBE_DEFER
->
->         tmio_mmc_host_free()
->             mmc_free_host()
->     }
->
-> When expire_timers() runs later, it warns because the MMC host structure
-> containing the delayed work was freed, and now contains an invalid work
-> function pointer.
->
-> Fix this by cancelling any pending delayed work before releasing the
-> MMC host structure.
->
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> ---
-> This is v2 of "[RFC] mmc: tmio: Cancel delayed work before freeing
-> host".
->
-> v2:
->   - Move cancel_delayed_work_sync() call from tmio_mmc_host_free() to
->     mmc_free_host(),
->   - Correct explanation from missing pin control to vqmmc-supply probe
->     deferral,
->   - Update backtrace.
-> ---
->  drivers/mmc/core/host.c | 1 +
->  1 file changed, 1 insertion(+)
->
-Tested-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-Cheers,
-Prabhakar
+I'll repost then without the quirk.
 
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 096093f7be006353..2f51db4df1a8571b 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -692,6 +692,7 @@ EXPORT_SYMBOL(mmc_remove_host);
->   */
->  void mmc_free_host(struct mmc_host *host)
->  {
-> +       cancel_delayed_work_sync(&host->detect);
->         mmc_pwrseq_free(host);
->         put_device(&host->class_dev);
->  }
-> --
-> 2.34.1
+In fact just this morning - I was about to update -  I was able to test
+on an early board revision with a different eMMC module (at the time
+RPMB wasnt validated) which upon reflashing also exhibited the issue
+
+see below:
+
+# cat /sys/class/mmc_host/mmc0/mmc0\:0001/csd
+d02700328f5903ffffffffef86400000
+
+# cat /sys/class/mmc_host/mmc0/mmc0\:0001/name
+064GB2
+
+[  218.759036] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
+E/TC:? 0
+E/TC:? 0 TA panicked with code 0xffff0000
+E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
+E/LD:   arch: aarch64
+E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
+E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
+E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
+E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
+E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
+E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
+E/LD:  region  6: va 0xc0019000 pa 0x80dc4e298 size 0x002000 flags rw-- (param)
+E/LD:  region  7: va 0xc001b000 pa 0x80dd1c298 size 0x001000 flags rw-- (param)
+E/LD:  region  8: va 0xc0091000 pa 0x00001000 size 0x014000 flags r-xs [0]
+E/LD:  region  9: va 0xc00a5000 pa 0x00015000 size 0x008000 flags rw-s [0]
+E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc0091000
+E/LD:  Call stack:
+E/LD:   0xc0093a14
+E/LD:   0xc009131c
+E/LD:   0xc0094d40
+E/LD:   0xc0091624
+Read persistent value for bootupgrade_available failed: Exec format error
+Cant print the environment
+Error: fiovb_printenv command failed. Exiting.
+
+> Thanks,
+> Avri
 >
->
+> >
+> > Thanks,
+> > Avri
+> > >
+> > > >
+> > > > Thanks a lot for fixing this,
+> > > > Avri
+> > >
+> > > thanks everyone for the support.
+> > >
+> > > >
+> > > > (btw - yes - our manufacturer id is 0x45 - it is set differently in
+> > > > the mmc driver for historic reasons - Thank you for adding this.)
+> > > >
+> > > > >
+> > > > >
+> > > > > >
+> > > > > > >
+> > > > >
+> > > >
