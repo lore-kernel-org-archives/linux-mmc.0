@@ -1,152 +1,141 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="Q/1b4G9J"
-Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75F4F83
-	for <linux-mmc@vger.kernel.org>; Mon,  4 Dec 2023 05:58:15 -0800 (PST)
-Received: by mail-wm1-x32a.google.com with SMTP id 5b1f17b1804b1-40b397793aaso27661825e9.0
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Dec 2023 05:58:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="am3RUfue"
+Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1227119B
+	for <linux-mmc@vger.kernel.org>; Mon,  4 Dec 2023 07:01:17 -0800 (PST)
+Received: by mail-wr1-x431.google.com with SMTP id ffacd0b85a97d-3334254cfa3so837526f8f.1
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Dec 2023 07:01:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=foundries.io; s=google; t=1701698294; x=1702303094; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=1Wn71OJAsHrUsi0hi6qKz41BqzfeWUDfsnSD1MArV6Y=;
-        b=Q/1b4G9Jbcgp4blJSRV8N8/MiGLqKz6vACPg/45GSn0lbbVI7jpJ+RcXUGHTipmB2n
-         jdxZtzHvmJeBWVUqfsySdrz+pJRBloYP67Z6LdVCu8jv48nDwe8b5BczRyqhFQ8ONy8F
-         j+IwCbQVJTYJE7pCAvasUEMOUqSiO0KUYBeHSiC9vd26h/e1Ovpchy7xFJfZQEyjrUv/
-         mmRgZfck/kbiC3XyRygUxUGwXYQ4Dm6dxO04RwvaeYT8XAPfgDK7mWlFejORnMsdMXBO
-         wUnh09tf8oz9joIDKz4WorOrOIq4u2NjnW1ad3UNlQanbO7GjQyOcn0YPkRB30muTg/v
-         ylPQ==
+        d=foundries.io; s=google; t=1701702075; x=1702306875; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=rgPZ+DR5mOzYLGtfqsPsf+e7PodlJSuSHyTq0J18X8Y=;
+        b=am3RUfuegii5eVDUogJSe9RmdsFDrDrl4YqMzob2mdguA2g3vpev/h3sdDeLuixDRv
+         imYHr7d5rucfotQFobCmX97Dy09HypZ5bgU81R6AmeOIVlOb1wzlEgtQg8G270UZBiUQ
+         Ub/zLZkotRp/BdITm7RAUYdS2GDFWbsKo96CLcEvraaAoxNXzafADZ1Cut9KIZgbj1gf
+         fAxo5BcKDBT7lr/h1+bAjbW3HRC3WjnR++O7OuTfL98vLTkavyoJ3a8XsPhdw2jb7fbe
+         m+5j60B30nlzbvR16/lDXrPohFsmKNyyxtzXo6JJuVMQfPGfqhxFV03msAWp7oT45sdX
+         ZUsg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701698294; x=1702303094;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1Wn71OJAsHrUsi0hi6qKz41BqzfeWUDfsnSD1MArV6Y=;
-        b=g1NCKcKK4bVCoLPG+I2+gr0RewSvsWt9h0ZdMayd5uuPavuULxb5ciEgXmXKTpIrQc
-         nHmBYjb93VmTpSmHnqBsmiKODEOGW61Pm0C3hn9+k5P3aYMNC7/w+pLJg9JWvRDBL58+
-         UutNkPVI6SR958eHE4ACdbU4BLXfrQY54yprIuu028MqTtlp7g6YBzTWnu5Co7y1hlry
-         zQzO4LsFkZMI4jiBEYoL1iQO1BAo1+M2GAMix+YkyhpWTRNNZPfHc52L2vNSAOJXnSvH
-         LTr1/fnD3PuWmJE3jfXdNleD7/dk7hplpPLXq3b32d2qf4jZpw9sQhLVqOuPVTF6MqLT
-         N7Tg==
-X-Gm-Message-State: AOJu0YwVyCyhAuQ6GOogXM5KQEwyxnavs7vGg9aXwOZYpIJwrO9Gx+GI
-	FtDtELs5icd3LGWlVq/bUBoORw==
-X-Google-Smtp-Source: AGHT+IFeAAaNKjmvQvyhXB/RWQ1dcGIG/iQq6n7LDgKtxGw4htbGbrcJ1cjYN0N4sspWHS2O6S8Peg==
-X-Received: by 2002:a05:600c:348a:b0:40b:5e26:2379 with SMTP id a10-20020a05600c348a00b0040b5e262379mr3046913wmq.42.1701698293953;
-        Mon, 04 Dec 2023 05:58:13 -0800 (PST)
-Received: from trax (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
-        by smtp.gmail.com with ESMTPSA id r11-20020a5d498b000000b0033339da02f9sm6773310wrq.110.2023.12.04.05.58.12
+        d=1e100.net; s=20230601; t=1701702075; x=1702306875;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=rgPZ+DR5mOzYLGtfqsPsf+e7PodlJSuSHyTq0J18X8Y=;
+        b=t/yPMVrsljVTekykwwq4XTkCZ9Xh7S3Dr2/1pDG4HqPo9ooh7c3M69yB178irFdnY9
+         q8b01Q/YGy9QAuueZv4iZA9EKlOsmLfI0WJd855EIYYBjbL88zc9GoGCBydCyrfkIdtJ
+         4sRSHfbxNgjOPXMUbegnfAqqVcOiX3U+nb8B0KuGnkoEO5eFhEBHVK8qjzOGFTME2+GH
+         AjebthT42NYr8YmOvYLzYJDnGnGiAgzBvm3gLfcnVSj3r8K1c2buh6+h8qI47/iuDaE5
+         leiXuCGi4S9rimd70P1oS6qrZ5Jm4sRBV9ffAgcY4EaTwE5a2vwLWjv1oYhjir2DE3qm
+         55CQ==
+X-Gm-Message-State: AOJu0Yy/GFWe0dBc8rG60KIrElmQFANAL6GjSYGeEeRYMBVIlG8PdXgn
+	wFFNcVKBC1sa86DNKIf/Hp/fBg==
+X-Google-Smtp-Source: AGHT+IHndVOnjS3Y47LWvFlJNubIK9E7wyJATVUdtJdZPOwFT1dYTgdG9daJCwr143p89FRQ07EVSg==
+X-Received: by 2002:adf:a4cf:0:b0:333:153f:3835 with SMTP id h15-20020adfa4cf000000b00333153f3835mr3278262wrb.7.1701702075390;
+        Mon, 04 Dec 2023 07:01:15 -0800 (PST)
+Received: from trax.. (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
+        by smtp.gmail.com with ESMTPSA id cm4-20020a5d5f44000000b003334a0513dbsm2968326wrb.67.2023.12.04.07.01.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 04 Dec 2023 05:58:13 -0800 (PST)
-From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
-Date: Mon, 4 Dec 2023 14:58:11 +0100
-To: Avri Altman <Avri.Altman@wdc.com>
-Cc: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	"CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
-	"jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
-	"hare@suse.de" <hare@suse.de>, Ulf Hansson <ulf.hansson@linaro.org>,
-	"beanhuo@micron.com" <beanhuo@micron.com>,
-	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
-	"asuk4.q@gmail.com" <asuk4.q@gmail.com>,
-	"yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
-	"victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
-	"marex@denx.de" <marex@denx.de>,
-	"rafael.beims@toradex.com" <rafael.beims@toradex.com>,
-	"robimarko@gmail.com" <robimarko@gmail.com>,
-	"ricardo@foundries.io" <ricardo@foundries.io>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCHv2] mmc: rpmb: add quirk MMC_QUIRK_BROKEN_RPMB_RETUNE
-Message-ID: <ZW3a8xneptC6y/N8@trax>
-References: <ZWkGZ7av1S4Clwdv@trax>
- <ZWkKgU+J9atnJdqT@trax>
- <ZWmN+k+wUWcXT5ID@trax>
- <fecd033b-b2ea-4906-a320-22a5c2ede46c@intel.com>
- <ZWoBqs/5m6tCuBGo@trax>
- <ZWoTOm+8Y75TLz6q@trax>
- <DM6PR04MB6575FF9532A9FC0EE91B5B37FC80A@DM6PR04MB6575.namprd04.prod.outlook.com>
- <ZWysTPapFyGJdu5d@trax>
- <DM6PR04MB6575F9EB1C3309F64EEE6BCCFC86A@DM6PR04MB6575.namprd04.prod.outlook.com>
- <DM6PR04MB6575127DFCEC4C178F7E33B7FC86A@DM6PR04MB6575.namprd04.prod.outlook.com>
+        Mon, 04 Dec 2023 07:01:14 -0800 (PST)
+From: Jorge Ramirez-Ortiz <jorge@foundries.io>
+To: jorge@foundries.io,
+	adrian.hunter@intel.com,
+	Avri.Altman@wdc.com,
+	ulf.hansson@linaro.org,
+	christian.loehle@arm.com
+Cc: jinpu.wang@ionos.com,
+	axboe@kernel.dk,
+	beanhuo@micron.com,
+	yibin.ding@unisoc.com,
+	victor.shih@genesyslogic.com.tw,
+	asuk4.q@gmail.com,
+	hkallweit1@gmail.com,
+	yangyingliang@huawei.com,
+	yebin10@huawei.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
+Date: Mon,  4 Dec 2023 16:01:11 +0100
+Message-Id: <20231204150111.3320071-1-jorge@foundries.io>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <DM6PR04MB6575127DFCEC4C178F7E33B7FC86A@DM6PR04MB6575.namprd04.prod.outlook.com>
+Content-Transfer-Encoding: 8bit
 
-On 04/12/23 12:59:07, Avri Altman wrote:
-> > > We could carry the patch internally (it seems harmless after all the
-> > > testing
-> > > done) but I'd much rather land it upstream if possible.
-> > Agreed.
-> Also, I am totally fine, and maybe it's even better, with adding this as a default behavior for all vendors.
-> I see no point in those tunings while accessing rpmb anyway.
->
+Requesting a retune before switching to the RPMB partition has been
+observed to cause CRC errors on the RPMB reads (-EILSEQ).
 
-I'll repost then without the quirk.
+Since RPMB reads can not be retried, the clients would be directly
+affected by the errors.
 
-In fact just this morning - I was about to update -  I was able to test
-on an early board revision with a different eMMC module (at the time
-RPMB wasnt validated) which upon reflashing also exhibited the issue
+This commit disables the request prior to RPMB switching while allowing
+the pause interface to still request a retune before the pause for other
+use cases.
 
-see below:
+This was verified with the sdhci-of-arasan driver (ZynqMP) configured
+for HS200 using two separate eMMC cards (DG4064 and 064GB2). In both
+cases, the error was easy to reproduce triggering every few tenths of
+reads.
 
-# cat /sys/class/mmc_host/mmc0/mmc0\:0001/csd
-d02700328f5903ffffffffef86400000
+Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+---
+ drivers/mmc/core/block.c | 2 +-
+ drivers/mmc/core/host.c  | 7 ++++---
+ drivers/mmc/core/host.h  | 2 +-
+ 3 files changed, 6 insertions(+), 5 deletions(-)
 
-# cat /sys/class/mmc_host/mmc0/mmc0\:0001/name
-064GB2
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index f9a5cffa64b1..1d69078ad9b2 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -859,7 +859,7 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
+ 			if (ret)
+ 				return ret;
+ 		}
+-		mmc_retune_pause(card->host);
++		mmc_retune_pause(card->host, false);
+ 	}
+ 
+ 	return ret;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 096093f7be00..a9b95aaa2235 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -119,13 +119,14 @@ void mmc_retune_enable(struct mmc_host *host)
+ 
+ /*
+  * Pause re-tuning for a small set of operations.  The pause begins after the
+- * next command and after first doing re-tuning.
++ * next command and, if retune is set, after first doing re-tuning.
+  */
+-void mmc_retune_pause(struct mmc_host *host)
++void mmc_retune_pause(struct mmc_host *host, bool retune)
+ {
+ 	if (!host->retune_paused) {
+ 		host->retune_paused = 1;
+-		mmc_retune_needed(host);
++		if (retune)
++			mmc_retune_needed(host);
+ 		mmc_retune_hold(host);
+ 	}
+ }
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 48c4952512a5..321776b52270 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -18,7 +18,7 @@ void mmc_retune_disable(struct mmc_host *host);
+ void mmc_retune_hold(struct mmc_host *host);
+ void mmc_retune_release(struct mmc_host *host);
+ int mmc_retune(struct mmc_host *host);
+-void mmc_retune_pause(struct mmc_host *host);
++void mmc_retune_pause(struct mmc_host *host, bool retune);
+ void mmc_retune_unpause(struct mmc_host *host);
+ 
+ static inline void mmc_retune_clear(struct mmc_host *host)
+-- 
+2.34.1
 
-[  218.759036] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
-E/TC:? 0
-E/TC:? 0 TA panicked with code 0xffff0000
-E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
-E/LD:   arch: aarch64
-E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
-E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
-E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
-E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
-E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
-E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
-E/LD:  region  6: va 0xc0019000 pa 0x80dc4e298 size 0x002000 flags rw-- (param)
-E/LD:  region  7: va 0xc001b000 pa 0x80dd1c298 size 0x001000 flags rw-- (param)
-E/LD:  region  8: va 0xc0091000 pa 0x00001000 size 0x014000 flags r-xs [0]
-E/LD:  region  9: va 0xc00a5000 pa 0x00015000 size 0x008000 flags rw-s [0]
-E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc0091000
-E/LD:  Call stack:
-E/LD:   0xc0093a14
-E/LD:   0xc009131c
-E/LD:   0xc0094d40
-E/LD:   0xc0091624
-Read persistent value for bootupgrade_available failed: Exec format error
-Cant print the environment
-Error: fiovb_printenv command failed. Exiting.
-
-> Thanks,
-> Avri
->
-> >
-> > Thanks,
-> > Avri
-> > >
-> > > >
-> > > > Thanks a lot for fixing this,
-> > > > Avri
-> > >
-> > > thanks everyone for the support.
-> > >
-> > > >
-> > > > (btw - yes - our manufacturer id is 0x45 - it is set differently in
-> > > > the mmc driver for historic reasons - Thank you for adding this.)
-> > > >
-> > > > >
-> > > > >
-> > > > > >
-> > > > > > >
-> > > > >
-> > > >
