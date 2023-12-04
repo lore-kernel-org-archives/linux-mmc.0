@@ -1,72 +1,132 @@
-Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 991FCD3;
-	Sun,  3 Dec 2023 22:50:06 -0800 (PST)
-Received: from dlp.unisoc.com ([10.29.3.86])
-	by SHSQR01.spreadtrum.com with ESMTP id 3B46niDT069714;
-	Mon, 4 Dec 2023 14:49:44 +0800 (+08)
-	(envelope-from Wenchao.Chen@unisoc.com)
-Received: from SHDLP.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
-	by dlp.unisoc.com (SkyGuard) with ESMTPS id 4SkDf83GJWz2Nr542;
-	Mon,  4 Dec 2023 14:44:00 +0800 (CST)
-Received: from xm9614pcu.spreadtrum.com (10.13.2.29) by shmbx05.spreadtrum.com
- (10.29.1.56) with Microsoft SMTP Server (TLS) id 15.0.1497.23; Mon, 4 Dec
- 2023 14:49:43 +0800
-From: Wenchao Chen <wenchao.chen@unisoc.com>
-To: <ulf.hansson@linaro.org>, <zhang.lyra@gmail.com>, <orsonzhai@gmail.com>,
-        <baolin.wang@linux.alibaba.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <wenchao.chen666@gmail.com>, <zhenxiong.lai@unisoc.com>,
-        <yuelin.tang@unisoc.com>, Wenchao Chen <wenchao.chen@unisoc.com>
-Subject: [PATCH] mmc: sprd: Fix eMMC init failure after hw reset
-Date: Mon, 4 Dec 2023 14:49:34 +0800
-Message-ID: <20231204064934.21236-1-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
+Received: from baptiste.telenet-ops.be (baptiste.telenet-ops.be [IPv6:2a02:1800:120:4::f00:13])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8F00F5
+	for <linux-mmc@vger.kernel.org>; Mon,  4 Dec 2023 03:30:03 -0800 (PST)
+Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed40:f143:dd2b:2cfe:eb7c])
+	by baptiste.telenet-ops.be with bizsmtp
+	id JBVz2B00R5Tnyl201BVzsb; Mon, 04 Dec 2023 12:30:00 +0100
+Received: from rox.of.borg ([192.168.97.57])
+	by ramsan.of.borg with esmtp (Exim 4.95)
+	(envelope-from <geert@linux-m68k.org>)
+	id 1rA78t-00Aw16-H5;
+	Mon, 04 Dec 2023 12:29:59 +0100
+Received: from geert by rox.of.borg with local (Exim 4.95)
+	(envelope-from <geert@linux-m68k.org>)
+	id 1rA79D-002BS4-EQ;
+	Mon, 04 Dec 2023 12:29:59 +0100
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc: linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH v2] mmc: core: Cancel delayed work before releasing host
+Date: Mon,  4 Dec 2023 12:29:53 +0100
+Message-Id: <205dc4c91b47e31b64392fe2498c7a449e717b4b.1701689330.git.geert+renesas@glider.be>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- shmbx05.spreadtrum.com (10.29.1.56)
-X-MAIL:SHSQR01.spreadtrum.com 3B46niDT069714
+Content-Transfer-Encoding: 8bit
 
-Some eMMC devices that do not close the auto clk gate
-after hw reset will cause eMMC initialization to fail.
+On RZ/Five SMARC EVK, where probing of SDHI is deferred due to probe
+deferral of the vqmmc-supply regulator:
 
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+    ------------[ cut here ]------------
+    WARNING: CPU: 0 PID: 0 at kernel/time/timer.c:1738 __run_timers.part.0+0x1d0/0x1e8
+    Modules linked in:
+    CPU: 0 PID: 0 Comm: swapper Not tainted 6.7.0-rc4 #101
+    Hardware name: Renesas SMARC EVK based on r9a07g043f01 (DT)
+    epc : __run_timers.part.0+0x1d0/0x1e8
+     ra : __run_timers.part.0+0x134/0x1e8
+    epc : ffffffff800771a4 ra : ffffffff80077108 sp : ffffffc800003e60
+     gp : ffffffff814f5028 tp : ffffffff8140c5c0 t0 : ffffffc800000000
+     t1 : 0000000000000001 t2 : ffffffff81201300 s0 : ffffffc800003f20
+     s1 : ffffffd8023bc4a0 a0 : 00000000fffee6b0 a1 : 0004010000400000
+     a2 : ffffffffc0000016 a3 : ffffffff81488640 a4 : ffffffc800003e60
+     a5 : 0000000000000000 a6 : 0000000004000000 a7 : ffffffc800003e68
+     s2 : 0000000000000122 s3 : 0000000000200000 s4 : 0000000000000000
+     s5 : ffffffffffffffff s6 : ffffffff81488678 s7 : ffffffff814886c0
+     s8 : ffffffff814f49c0 s9 : ffffffff81488640 s10: 0000000000000000
+     s11: ffffffc800003e60 t3 : 0000000000000240 t4 : 0000000000000a52
+     t5 : ffffffd8024ae018 t6 : ffffffd8024ae038
+    status: 0000000200000100 badaddr: 0000000000000000 cause: 0000000000000003
+    [<ffffffff800771a4>] __run_timers.part.0+0x1d0/0x1e8
+    [<ffffffff800771e0>] run_timer_softirq+0x24/0x4a
+    [<ffffffff80809092>] __do_softirq+0xc6/0x1fa
+    [<ffffffff80028e4c>] irq_exit_rcu+0x66/0x84
+    [<ffffffff80800f7a>] handle_riscv_irq+0x40/0x4e
+    [<ffffffff80808f48>] call_on_irq_stack+0x1c/0x28
+    ---[ end trace 0000000000000000 ]---
+
+What happens?
+
+    renesas_sdhi_probe()
+    {
+    	tmio_mmc_host_alloc()
+	    mmc_alloc_host()
+		INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+
+	devm_request_irq(tmio_mmc_irq);
+
+	/*
+	 * After this, the interrupt handler may be invoked at any time
+	 *
+	 *  tmio_mmc_irq()
+	 *  {
+	 *	__tmio_mmc_card_detect_irq()
+	 *	    mmc_detect_change()
+	 *		_mmc_detect_change()
+	 *		    mmc_schedule_delayed_work(&host->detect, delay);
+	 *  }
+	 */
+
+	tmio_mmc_host_probe()
+	    tmio_mmc_init_ocr()
+		-EPROBE_DEFER
+
+	tmio_mmc_host_free()
+	    mmc_free_host()
+    }
+
+When expire_timers() runs later, it warns because the MMC host structure
+containing the delayed work was freed, and now contains an invalid work
+function pointer.
+
+Fix this by cancelling any pending delayed work before releasing the
+MMC host structure.
+
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- drivers/mmc/host/sdhci-sprd.c | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+This is v2 of "[RFC] mmc: tmio: Cancel delayed work before freeing
+host".
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 6b8a57e2d20f..bed57a1c64b5 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -239,15 +239,19 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
- 	div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
- 	sdhci_enable_clk(host, div);
- 
-+	val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-+	mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN | SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
- 	/* Enable CLK_AUTO when the clock is greater than 400K. */
- 	if (clk > 400000) {
--		val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
--		mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
--			SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
- 		if (mask != (val & mask)) {
- 			val |= mask;
- 			sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
- 		}
-+	} else {
-+		if (val & mask) {
-+			val &= ~mask;
-+			sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
-+		}
- 	}
+v2:
+  - Move cancel_delayed_work_sync() call from tmio_mmc_host_free() to
+    mmc_free_host(),
+  - Correct explanation from missing pin control to vqmmc-supply probe
+    deferral,
+  - Update backtrace.
+---
+ drivers/mmc/core/host.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 096093f7be006353..2f51db4df1a8571b 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -692,6 +692,7 @@ EXPORT_SYMBOL(mmc_remove_host);
+  */
+ void mmc_free_host(struct mmc_host *host)
+ {
++	cancel_delayed_work_sync(&host->detect);
+ 	mmc_pwrseq_free(host);
+ 	put_device(&host->class_dev);
  }
- 
 -- 
-2.17.1
+2.34.1
 
