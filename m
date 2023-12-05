@@ -1,155 +1,229 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [IPv6:2a0a:edc0:2:b01:1d::104])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F373A122
-	for <linux-mmc@vger.kernel.org>; Tue,  5 Dec 2023 08:13:16 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1rAY21-00048v-Nv; Tue, 05 Dec 2023 17:12:21 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1rAY1z-00DmUU-DU; Tue, 05 Dec 2023 17:12:19 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1rAY1z-00EqaV-2n; Tue, 05 Dec 2023 17:12:19 +0100
-Date: Tue, 5 Dec 2023 17:12:18 +0100
-From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To: Thierry Reding <thierry.reding@gmail.com>
-Cc: David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Rob Herring <robh+dt@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Alim Akhtar <alim.akhtar@samsung.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	Jonathan Cameron <jic23@kernel.org>,
-	Lars-Peter Clausen <lars@metafoo.de>, Lee Jones <lee@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Tomasz Figa <tomasz.figa@gmail.com>,
-	Sylwester Nawrocki <s.nawrocki@samsung.com>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Alessandro Zummo <a.zummo@towertech.it>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Jiri Slaby <jirislaby@kernel.org>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Mark Brown <broonie@kernel.org>,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Sam Protsenko <semen.protsenko@linaro.org>,
-	dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-samsung-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-	linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
-	linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-	alsa-devel@alsa-project.org, linux-sound@vger.kernel.org,
-	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-	kernel@pengutronix.de
-Subject: Re: (subset) [PATCH 00/17] dt-bindings: samsung: add specific
- compatibles for existing SoC
-Message-ID: <20231205161218.wymlzvhk4pnnkwze@pengutronix.de>
-References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
- <170119374454.445690.515311393756577368.b4-ty@gmail.com>
- <20231128205841.al23ra5s34rn3muj@pengutronix.de>
- <ZW8ZNZ_FJSV8fq-U@orome.fritz.box>
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lYNsBBqo"
+Received: from mail-wm1-x32f.google.com (mail-wm1-x32f.google.com [IPv6:2a00:1450:4864:20::32f])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 134D01A5
+	for <linux-mmc@vger.kernel.org>; Tue,  5 Dec 2023 09:33:58 -0800 (PST)
+Received: by mail-wm1-x32f.google.com with SMTP id 5b1f17b1804b1-40b595bf5d2so63851205e9.2
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Dec 2023 09:33:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1701797636; x=1702402436; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VJL8PlMbGmUjOCL0RQsFaIVNSGNIFrU43ufyj8haIXI=;
+        b=lYNsBBqo9B8Cte2tUfX6FH4vb9yuQyZSjGYwKcQYwWNOVys6iNydTyGWfVXgWN8cKR
+         aMH5H35TxF/5jsW5SRqrWZgCttNtGxVl5qiZ8eoEHOkkBJH3tmzI2ctj7dFHNKLfyBQN
+         BkNFRWZ1gHD9w4ivw2bOnzYQLdis8SFjWhxnGWGmkjkRbjw91eDq4LK8vmu5pufd2QFd
+         V6eMwVkLEI8+OTfj7mXFlkCO/Znh4QxpFxK0VzPAqWwUOrIMV2rHDSZ6G8xvyfBcwYrV
+         yjqWNxBomTyev8o1BV+jMInp/nKPY/HdCzg9DhRMAAbG8NidF0SNJXJ+ypOKkfW4Lr2t
+         RM3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701797636; x=1702402436;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=VJL8PlMbGmUjOCL0RQsFaIVNSGNIFrU43ufyj8haIXI=;
+        b=Ob0qEujSqf+McSL3/VPY0I4XrQIpzL5a3faa1rcS5PtpzwYAsa4k0rgQn5QgSmYAgo
+         PhTKbfu4/8poIxGWbm426SVU3yjZ7f7bp54EUXzLnDbKSZnrDxy46BkNzukLUmQNMXYa
+         5B+hC1mPnKwVVq8qvYYAnldqlB3XrebgRPw/8fTwHwcDaKU9aQxkcYf5RlcBqonl2pcD
+         KR/skLTemhs3DQfBQbEnFFU+r9/0EwwNATOPno5bEjpztxQOWmzx70gHuhR5m7VRJdi+
+         udWCF0dXQ1HBLuLoZ3kdgablKiml3hDQ/jkom3HWYB6/MB7hcgyJKdZBALUFH0ZE0Czx
+         9g/w==
+X-Gm-Message-State: AOJu0YxwMapktQIVTrUIJz6NbU4ApLqg9Q0JbSKaN0IYpqk3rh1tO283
+	Jc5j7Z6HJUQnY8+IYxpp2DudVQ==
+X-Google-Smtp-Source: AGHT+IHBIsl3mYv3KXrgx9Ctqap8Zyx0kHI99w5JKnXrWg6CnRY/rCgHaZbjAHIbGhg00vREgMtCdQ==
+X-Received: by 2002:a05:600c:1d0b:b0:40c:90f:e51f with SMTP id l11-20020a05600c1d0b00b0040c090fe51fmr571638wms.172.1701797636303;
+        Tue, 05 Dec 2023 09:33:56 -0800 (PST)
+Received: from ?IPV6:2a01:e0a:982:cbb0:a215:77cd:3141:d5d0? ([2a01:e0a:982:cbb0:a215:77cd:3141:d5d0])
+        by smtp.gmail.com with ESMTPSA id a13-20020a05600c348d00b0040b5377cf03sm23144654wmq.1.2023.12.05.09.33.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 05 Dec 2023 09:33:55 -0800 (PST)
+Message-ID: <9ba9be67-93a3-4c08-8410-adc9de3e45b4@linaro.org>
+Date: Tue, 5 Dec 2023 18:33:54 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="dyjed4xxkou772mg"
-Content-Disposition: inline
-In-Reply-To: <ZW8ZNZ_FJSV8fq-U@orome.fritz.box>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+User-Agent: Mozilla Thunderbird
+From: neil.armstrong@linaro.org
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH v3 00/12] Hardware wrapped key support for qcom ice and
+ ufs
+To: Gaurav Kashyap <quic_gaurkash@quicinc.com>, linux-scsi@vger.kernel.org,
+ linux-arm-msm@vger.kernel.org, ebiggers@google.com,
+ srinivas.kandagatla@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+ linux-fscrypt@vger.kernel.org, omprsing@qti.qualcomm.com,
+ quic_psodagud@quicinc.com, abel.vesa@linaro.org, quic_spuppala@quicinc.com,
+ kernel@quicinc.com
+References: <20231122053817.3401748-1-quic_gaurkash@quicinc.com>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro Developer Services
+In-Reply-To: <20231122053817.3401748-1-quic_gaurkash@quicinc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+
+Hi Gaurav,
+
+On 22/11/2023 06:38, Gaurav Kashyap wrote:
+> These are the third iteration of patches that add support to Qualcomm ICE (Inline Crypto Engine) for hardware wrapped keys using Qualcomm Hardware Key Manager (HWKM)
+> 
+> They patches do the following:
+> - Address comments from v2 (Found here: https://lore.kernel.org/all/20230719170423.220033-1-quic_gaurkash@quicinc.com/)
+> - Rebased and tested on top of Eric's latest patchset: https://lore.kernel.org/all/20231104211259.17448-1-ebiggers@kernel.org/
+> - Rebased and tested on top of SM8650 patches from Linaro: https://lore.kernel.org/all/?q=sm8650
+> 
+> Information about patches copied over from v2:
+> 
+> "
+> Explanation and use of hardware-wrapped-keys can be found here:
+> Documentation/block/inline-encryption.rst
+> 
+> This patch is organized as follows:
+> 
+> Patch 1 - Prepares ICE and storage layers (UFS and EMMC) to pass around wrapped keys.
+> Patch 2 - Adds a new SCM api to support deriving software secret when wrapped keys are used
+> Patch 3-4 - Adds support for wrapped keys in the ICE driver. This includes adding HWKM support
+> Patch 5-6 - Adds support for wrapped keys in UFS
+> Patch 7-10 - Supports generate, prepare and import functionality in ICE and UFS
+> 
+> NOTE: MMC will have similar changes to UFS and will be uploaded in a different patchset
+>        Patch 3, 4, 8, 10 will have MMC equivalents.
+> "
+> 
+> Testing:
+> Test platform: SM8650 MTP
+> 
+> The changes were tested by mounting initramfs and running the fscryptctl
+> tool (Ref: https://github.com/ebiggers/fscryptctl/tree/wip-wrapped-keys) to
+> generate and prepare keys, as well as to set policies on folders, which
+> consequently invokes disk encryption flows through UFS.
+> 
+> Tested both standard and wrapped keys (Removing qcom,ice-use-hwkm from dtsi will support using standard keys)
+> 
+> Steps to test:
+> 
+> The following configs were enabled:
+> CONFIG_BLK_INLINE_ENCRYPTION=y
+> CONFIG_QCOM_INLINE_CRYPTO_ENGINE=m
+> CONFIG_FS_ENCRYPTION_INLINE_CRYPT=y
+> CONFIG_SCSI_UFS_CRYPTO=y
+> 
+> Flash boot image, boot to shell and run the following commands
+> 
+> Creating and preparing keys
+> - mkfs.ext4 -F -O encrypt,stable_inodes /dev/disk/by-partlabel/userdata
+> - mount /dev/disk/by-partlabel/userdata -o inlinecrypt /mnt
+> - ./fscryptctl generate_hw_wrapped_key /dev/disk/by-partlabel/userdata > /mnt/key.longterm
+> Note: import_hw_wrapped_key currently has a big which just got fixed, so it will be functional in the next SM8650 release
+> (It might already be available by the time the boards are available to public)
+> - ./fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/userdata < /mnt/key.longterm > /tmp/key.ephemeral
+> - ./fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt
+> 
+> Create a folder and associate created keys with the folder
+> - rm -rf /mnt/dir
+> - mkdir /mnt/dir
+> - ./fscryptctl set_policy --hw-wrapped-key --iv-ino-lblk-64 "$keyid" /mnt/dir
+> - dmesg > /mnt/dir/test.txt
+> - sync
+> 
+> - Reboot
+> - mount /dev/disk/by-partlabel/userdata -o inlinecrypt /mnt
+> - ls /mnt/dir (You should see an encrypted file)
+> - ./fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/userdata < /mnt/key.longterm > /tmp/key.ephemeral
+> - ./fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt
+> - cat /mnt/dir/test.txt
+
+I successfully tested with those instructions on the SM8650 QRD,
+
+Tested-by: Neil Armstrong <neil.armstrong@linaro.org> # on SM8650-QRD
+
+however I got some build errors on sdhci-msm:
+
+drivers/mmc/host/sdhci-msm.c:1862:19: error: ‘blk_crypto_key_type’ defined as wrong kind of tag
+  1862 |      const struct blk_crypto_key_type *bkey,
+       |                   ^~~~~~~~~~~~~~~~~~~
+drivers/mmc/host/sdhci-msm.c:1862:19: warning: ‘struct blk_crypto_key_type’ declared inside parameter list will not be visible outside of thi
+s definition or declaration
+drivers/mmc/host/sdhci-msm.c: In function ‘sdhci_msm_program_key’:
+drivers/mmc/host/sdhci-msm.c:1882:24: error: passing argument 4 of ‘qcom_ice_program_key’ from incompatible pointer type [-Werror=incompatibl
+e-pointer-types]
+  1882 |          ice_key_size, bkey,
+       |                        ^~~~
+       |                        |
+       |                        const struct blk_crypto_key_type *
+In file included from drivers/mmc/host/sdhci-msm.c:21:
+include/soc/qcom/ice.h:35:34: note: expected ‘const struct blk_crypto_key *’ but argument is of type ‘const struct blk_crypto_key_type *’
+    35 |     const struct blk_crypto_key *bkey,
+       |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+drivers/mmc/host/sdhci-msm.c: At top level:
+drivers/mmc/host/sdhci-msm.c:1993:17: error: initialization of ‘int (*)(struct cqhci_host *, const struct blk_crypto_key *, const union cqhci
+_crypto_cfg_entry *, int)’ from incompatible pointer type ‘int (*)(struct cqhci_host *, const struct blk_crypto_key_type *, const union cqhci_crypto_cfg_entry *, int)’ [-Werro
+r=incompatible-pointer-types]
+  1993 |  .program_key = sdhci_msm_program_key,
+       |                 ^~~~~~~~~~~~~~~~~~~~~
+drivers/mmc/host/sdhci-msm.c:1993:17: note: (near initialization for ‘sdhci_msm_cqhci_ops.program_key’)
+
+Thanks,
+Neil
 
 
---dyjed4xxkou772mg
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> 
+> Gaurav Kashyap (12):
+>    ice, ufs, mmc: use blk_crypto_key for program_key
+>    qcom_scm: scm call for deriving a software secret
+>    soc: qcom: ice: add hwkm support in ice
+>    soc: qcom: ice: support for hardware wrapped keys
+>    ufs: core: support wrapped keys in ufs core
+>    ufs: host: wrapped keys support in ufs qcom
+>    qcom_scm: scm call for create, prepare and import keys
+>    ufs: core: add support for generate, import and prepare keys
+>    soc: qcom: support for generate, import and prepare key
+>    ufs: host: support for generate, import and prepare key
+>    arm64: dts: qcom: sm8650: add hwkm support to ufs ice
+>    dt-bindings: crypto: ice: document the hwkm property
+> 
+>   .../crypto/qcom,inline-crypto-engine.yaml     |   7 +
+>   arch/arm64/boot/dts/qcom/sm8650.dtsi          |   3 +-
+>   drivers/firmware/qcom/qcom_scm.c              | 276 +++++++++++++++
+>   drivers/firmware/qcom/qcom_scm.h              |   4 +
+>   drivers/mmc/host/cqhci-crypto.c               |   7 +-
+>   drivers/mmc/host/cqhci.h                      |   2 +
+>   drivers/mmc/host/sdhci-msm.c                  |   6 +-
+>   drivers/soc/qcom/ice.c                        | 321 +++++++++++++++++-
+>   drivers/ufs/core/ufshcd-crypto.c              |  87 ++++-
+>   drivers/ufs/host/ufs-qcom.c                   |  61 +++-
+>   include/linux/firmware/qcom/qcom_scm.h        |   7 +
+>   include/soc/qcom/ice.h                        |  18 +-
+>   include/ufs/ufshcd.h                          |  22 ++
+>   13 files changed, 784 insertions(+), 37 deletions(-)
+> 
 
-Hello Thierry,
-
-On Tue, Dec 05, 2023 at 01:36:05PM +0100, Thierry Reding wrote:
-> On Tue, Nov 28, 2023 at 09:58:41PM +0100, Uwe Kleine-K=F6nig wrote:
-> > On Tue, Nov 28, 2023 at 06:49:23PM +0100, Thierry Reding wrote:
-> > >=20
-> > > On Wed, 08 Nov 2023 11:43:26 +0100, Krzysztof Kozlowski wrote:
-> > > > Merging
-> > > > =3D=3D=3D=3D=3D=3D=3D
-> > > > I propose to take entire patchset through my tree (Samsung SoC), be=
-cause:
-> >     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> >=20
-> > > > 1. Next cycle two new SoCs will be coming (Google GS101 and ExynosA=
-utov920), so
-> > > >    they will touch the same lines in some of the DT bindings (not a=
-ll, though).
-> > > >    It is reasonable for me to take the bindings for the new SoCs, t=
-o have clean
-> > > >    `make dtbs_check` on the new DTS.
-> > > > 2. Having it together helps me to have clean `make dtbs_check` with=
-in my tree
-> > > >    on the existing DTS.
-> > > > 3. No drivers are affected by this change.
-> > > > 4. I plan to do the same for Tesla FSD and Exynos ARM32 SoCs, thus =
-expect
-> > > >    follow up patchsets.
-> > > >=20
-> > > > [...]
-> > >=20
-> > > Applied, thanks!
-> > >=20
-> > > [12/17] dt-bindings: pwm: samsung: add specific compatibles for exist=
-ing SoC
-> > >         commit: 5d67b8f81b9d598599366214e3b2eb5f84003c9f
-> >=20
-> > You didn't honor (or even comment) Krzysztof's proposal to take the
-> > whole patchset via his tree (marked above). Was there some off-list
-> > agreement?
->=20
-> I had read all that and then looking at patchwork saw that you had
-> marked all other patches in the series as "handled-elsewhere" and only
-> this one was left as "new", so I assumed that, well, everything else was
-> handled elsewhere and I was supposed to pick this one up...
-
-I didn't mark it as handled-elsewhere, but my expectation was that you
-might want to send an Ack only.
-
-For today's series by Krzysztof I acked and marked the patch as
-handled-elsewhere (together with the rest of the series that isn't pwm
-related). So you have to consult your inbox if you still want to send an
-Ack for that one.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---dyjed4xxkou772mg
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmVvS+IACgkQj4D7WH0S
-/k4wwAf6AlMbQoIitSxoLyL8EPf/AFm1OReNOJVSWyeoYnXJ6AOvGwmxAqCesfcV
-8NCugoHjF1JiraIJPpyVgrmmas8T0uk5v4N32GPcL7ld1hBZGsH8B9GsuTioS5R7
-+pMOUKwLPmf+vPiDCjkvAL9B3HOBCCSHjU6g9vf2b4O0dNvJK+vVFOuKPF5r+GQr
-fFPsuCRnPkkHNn8PWA6HWPUR+0V1rsyiabnsgxlnC6PPyu64tC9aD2Xto0+kM0D0
-WAdt4elH5P373tccyXATCZK4xaJWO4eHbzJTeVOCeEqcjB55BwuzMgVP8xQ85Mrx
-RHto9piBhu5zc5d4EcBjLTp4QpooUg==
-=k470
------END PGP SIGNATURE-----
-
---dyjed4xxkou772mg--
