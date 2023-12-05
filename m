@@ -1,135 +1,155 @@
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="Ba5MuIdF"
-Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BE2218D
-	for <linux-mmc@vger.kernel.org>; Tue,  5 Dec 2023 08:10:06 -0800 (PST)
-Received: by mail-wr1-x42d.google.com with SMTP id ffacd0b85a97d-332c7d4a6a7so5120755f8f.2
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Dec 2023 08:10:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=foundries.io; s=google; t=1701792604; x=1702397404; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=cdrpO8C0nU4ljU4ooPjskl+QNi6RFyVvcGgF3Sty5jA=;
-        b=Ba5MuIdF4U+NnpyoFjfElzDxb9c5FXXRQ1M49oAh1CfjMDF079zjnJRRwxaxjWoRWv
-         RArBWuMaQ5oJYiYq+hhCK+bwo23gsLV5NfMglE3fqQvEkEh0XQ6pORaU6lS459FMH2D0
-         KlHvd6aOTR2OJJe6v28AA0vzxRB598Ck8Nyi9edLQdSRW8DvRPSQHwPvVbxVEbCvX6Z/
-         G9DouKbQChX5KYmvjXRIlw9dvfOT12xDw5nxrc7FdGpV6UHi5Ebv9zO/AwXuYdw6GAGH
-         qwMJsZ+WN3hJjXR4AMwQ/tnB42DVnvDjMhWQst3nmaGTqnPze5TLk5qJ/2tIVmR3tGYx
-         Afsg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701792604; x=1702397404;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cdrpO8C0nU4ljU4ooPjskl+QNi6RFyVvcGgF3Sty5jA=;
-        b=kGzFPUHxyAEXvs8Cekx5tBYs86IQuR+x6hMmHIOJIecxaIWlyoXMjKQfUYHUUg1CfJ
-         XNFLXTysaSIbCQiKYyqTd3QmwP4vCOVlLfFWa+BRJX7FTYUTO6yBBOj1cGRawvM2Rh+L
-         nkGTmII5b50SI2zuashRbQo8zx7InQJY4eWInqEEs0Pq3VjouZ4DStCV6MOqicCxre2y
-         cA955c9qcFNyw3AjzN/oviowrZMx37wjeamOxA0IPzBbJoXyzXAMWwWFES97vCcvYXTo
-         2LR2vhK80ZkzOnoNv++vmgt3ap5VsDVT5GCZXGxoDNrR8hT5+W7Hy2Fc0zbAaS9P8Tlf
-         Bh9w==
-X-Gm-Message-State: AOJu0Yy59QQzLWa3G8cBuHH7VGpz7CAR3lJU/G9knJ1n/v9SiEcPxN8r
-	IZr8ajF8Ru7N82l/bE/j4azB4Q==
-X-Google-Smtp-Source: AGHT+IGzKI/9qgICgI6hzaCZ6WXjGUwnD39wKIQydbCs838fDoa9j5N4kkchpcnNi9FNxJDE48HHUw==
-X-Received: by 2002:a5d:5691:0:b0:332:ffdb:e9ad with SMTP id f17-20020a5d5691000000b00332ffdbe9admr3124222wrv.46.1701792604504;
-        Tue, 05 Dec 2023 08:10:04 -0800 (PST)
-Received: from trax (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
-        by smtp.gmail.com with ESMTPSA id l7-20020a05600002a700b00332eb16d215sm14913576wry.23.2023.12.05.08.10.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 05 Dec 2023 08:10:04 -0800 (PST)
-From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
-Date: Tue, 5 Dec 2023 17:10:02 +0100
-To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-Cc: Avri Altman <Avri.Altman@wdc.com>,
-	"adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-	"christian.loehle@arm.com" <christian.loehle@arm.com>,
-	"jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
-	"axboe@kernel.dk" <axboe@kernel.dk>,
-	"beanhuo@micron.com" <beanhuo@micron.com>,
-	"yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
-	"victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
-	"asuk4.q@gmail.com" <asuk4.q@gmail.com>,
-	"hkallweit1@gmail.com" <hkallweit1@gmail.com>,
-	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
-	"yebin10@huawei.com" <yebin10@huawei.com>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
-Message-ID: <ZW9LWrlYa2+lUcVc@trax>
-References: <20231204150111.3320071-1-jorge@foundries.io>
- <DM6PR04MB657532850510D64BA7D62297FC86A@DM6PR04MB6575.namprd04.prod.outlook.com>
- <ZW4W6aZq+0DCmVTi@trax>
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [IPv6:2a0a:edc0:2:b01:1d::104])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F373A122
+	for <linux-mmc@vger.kernel.org>; Tue,  5 Dec 2023 08:13:16 -0800 (PST)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <ukl@pengutronix.de>)
+	id 1rAY21-00048v-Nv; Tue, 05 Dec 2023 17:12:21 +0100
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <ukl@pengutronix.de>)
+	id 1rAY1z-00DmUU-DU; Tue, 05 Dec 2023 17:12:19 +0100
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+	(envelope-from <ukl@pengutronix.de>)
+	id 1rAY1z-00EqaV-2n; Tue, 05 Dec 2023 17:12:19 +0100
+Date: Tue, 5 Dec 2023 17:12:18 +0100
+From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Jonathan Cameron <jic23@kernel.org>,
+	Lars-Peter Clausen <lars@metafoo.de>, Lee Jones <lee@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Tomasz Figa <tomasz.figa@gmail.com>,
+	Sylwester Nawrocki <s.nawrocki@samsung.com>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	Alessandro Zummo <a.zummo@towertech.it>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Mark Brown <broonie@kernel.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Sam Protsenko <semen.protsenko@linaro.org>,
+	dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-samsung-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+	linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
+	linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+	alsa-devel@alsa-project.org, linux-sound@vger.kernel.org,
+	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+	kernel@pengutronix.de
+Subject: Re: (subset) [PATCH 00/17] dt-bindings: samsung: add specific
+ compatibles for existing SoC
+Message-ID: <20231205161218.wymlzvhk4pnnkwze@pengutronix.de>
+References: <20231108104343.24192-1-krzysztof.kozlowski@linaro.org>
+ <170119374454.445690.515311393756577368.b4-ty@gmail.com>
+ <20231128205841.al23ra5s34rn3muj@pengutronix.de>
+ <ZW8ZNZ_FJSV8fq-U@orome.fritz.box>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="dyjed4xxkou772mg"
 Content-Disposition: inline
-In-Reply-To: <ZW4W6aZq+0DCmVTi@trax>
+In-Reply-To: <ZW8ZNZ_FJSV8fq-U@orome.fritz.box>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-On 04/12/23 19:14:01, Jorge Ramirez-Ortiz, Foundries wrote:
-> On 04/12/23 17:58:45, Avri Altman wrote:
-> > >
-> > > Requesting a retune before switching to the RPMB partition has been
-> > > observed to cause CRC errors on the RPMB reads (-EILSEQ).
-> > >
-> > > Since RPMB reads can not be retried, the clients would be directly affected by
-> > > the errors.
-> > >
-> > > This commit disables the request prior to RPMB switching while allowing the
-> > > pause interface to still request a retune before the pause for other use cases.
-> > >
-> > > This was verified with the sdhci-of-arasan driver (ZynqMP) configured for
-> > > HS200 using two separate eMMC cards (DG4064 and 064GB2). In both cases,
-> > > the error was easy to reproduce triggering every few tenths of reads.
-> > >
-> > > Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
-> > > ---
-> > >  drivers/mmc/core/block.c | 2 +-
-> > >  drivers/mmc/core/host.c  | 7 ++++---
-> > >  drivers/mmc/core/host.h  | 2 +-
-> > >  3 files changed, 6 insertions(+), 5 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index
-> > > f9a5cffa64b1..1d69078ad9b2 100644
-> > > --- a/drivers/mmc/core/block.c
-> > > +++ b/drivers/mmc/core/block.c
-> > > @@ -859,7 +859,7 @@ static int mmc_blk_part_switch_pre(struct mmc_card
-> > > *card,
-> > >                         if (ret)
-> > >                                 return ret;
-> > >                 }
-> > > -               mmc_retune_pause(card->host);
-> > > +               mmc_retune_pause(card->host, false);
-> > >         }
-> > >
-> > >         return ret;
-> > > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c index
-> > > 096093f7be00..a9b95aaa2235 100644
-> > > --- a/drivers/mmc/core/host.c
-> > > +++ b/drivers/mmc/core/host.c
-> > > @@ -119,13 +119,14 @@ void mmc_retune_enable(struct mmc_host *host)
-> > >
-> > >  /*
-> > >   * Pause re-tuning for a small set of operations.  The pause begins after the
-> > > - * next command and after first doing re-tuning.
-> > > + * next command and, if retune is set, after first doing re-tuning.
-> > >   */
-> > > -void mmc_retune_pause(struct mmc_host *host)
-> > > +void mmc_retune_pause(struct mmc_host *host, bool retune)
-> > >  {
-> > Since mmc_blk_part_switch_pre is the only caller of mmc_retune_pause,
-> > How about just move those lines into it?
->
-> +1 from me
->
-> I wasnt sure if there was some other plan for mmc_retune_pause in the
-> future hence why I didnt remove it and extended it instead.
->
-> Should I wait for Adrian's confirmation or just go ahead?.
 
-just making sure this is not falling through the cracks.
+--dyjed4xxkou772mg
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hello Thierry,
+
+On Tue, Dec 05, 2023 at 01:36:05PM +0100, Thierry Reding wrote:
+> On Tue, Nov 28, 2023 at 09:58:41PM +0100, Uwe Kleine-K=F6nig wrote:
+> > On Tue, Nov 28, 2023 at 06:49:23PM +0100, Thierry Reding wrote:
+> > >=20
+> > > On Wed, 08 Nov 2023 11:43:26 +0100, Krzysztof Kozlowski wrote:
+> > > > Merging
+> > > > =3D=3D=3D=3D=3D=3D=3D
+> > > > I propose to take entire patchset through my tree (Samsung SoC), be=
+cause:
+> >     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> >=20
+> > > > 1. Next cycle two new SoCs will be coming (Google GS101 and ExynosA=
+utov920), so
+> > > >    they will touch the same lines in some of the DT bindings (not a=
+ll, though).
+> > > >    It is reasonable for me to take the bindings for the new SoCs, t=
+o have clean
+> > > >    `make dtbs_check` on the new DTS.
+> > > > 2. Having it together helps me to have clean `make dtbs_check` with=
+in my tree
+> > > >    on the existing DTS.
+> > > > 3. No drivers are affected by this change.
+> > > > 4. I plan to do the same for Tesla FSD and Exynos ARM32 SoCs, thus =
+expect
+> > > >    follow up patchsets.
+> > > >=20
+> > > > [...]
+> > >=20
+> > > Applied, thanks!
+> > >=20
+> > > [12/17] dt-bindings: pwm: samsung: add specific compatibles for exist=
+ing SoC
+> > >         commit: 5d67b8f81b9d598599366214e3b2eb5f84003c9f
+> >=20
+> > You didn't honor (or even comment) Krzysztof's proposal to take the
+> > whole patchset via his tree (marked above). Was there some off-list
+> > agreement?
+>=20
+> I had read all that and then looking at patchwork saw that you had
+> marked all other patches in the series as "handled-elsewhere" and only
+> this one was left as "new", so I assumed that, well, everything else was
+> handled elsewhere and I was supposed to pick this one up...
+
+I didn't mark it as handled-elsewhere, but my expectation was that you
+might want to send an Ack only.
+
+For today's series by Krzysztof I acked and marked the patch as
+handled-elsewhere (together with the rest of the series that isn't pwm
+related). So you have to consult your inbox if you still want to send an
+Ack for that one.
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--dyjed4xxkou772mg
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmVvS+IACgkQj4D7WH0S
+/k4wwAf6AlMbQoIitSxoLyL8EPf/AFm1OReNOJVSWyeoYnXJ6AOvGwmxAqCesfcV
+8NCugoHjF1JiraIJPpyVgrmmas8T0uk5v4N32GPcL7ld1hBZGsH8B9GsuTioS5R7
++pMOUKwLPmf+vPiDCjkvAL9B3HOBCCSHjU6g9vf2b4O0dNvJK+vVFOuKPF5r+GQr
+fFPsuCRnPkkHNn8PWA6HWPUR+0V1rsyiabnsgxlnC6PPyu64tC9aD2Xto0+kM0D0
+WAdt4elH5P373tccyXATCZK4xaJWO4eHbzJTeVOCeEqcjB55BwuzMgVP8xQ85Mrx
+RHto9piBhu5zc5d4EcBjLTp4QpooUg==
+=k470
+-----END PGP SIGNATURE-----
+
+--dyjed4xxkou772mg--
