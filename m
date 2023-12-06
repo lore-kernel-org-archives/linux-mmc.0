@@ -1,38 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EE7110A25;
-	Wed,  6 Dec 2023 07:37:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13CE510A25;
+	Wed,  6 Dec 2023 07:37:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eRlvlu/l"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EAC18C433C7;
-	Wed,  6 Dec 2023 07:37:26 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AII4ZFvk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7AA96C43391;
+	Wed,  6 Dec 2023 07:37:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1701848249;
-	bh=YBWUFqOAhQYvAfOCxrjSoMu61oZulwiM8oxn+ueFF5E=;
+	s=k20201202; t=1701848273;
+	bh=sL9jADnOH5s9rXM78Nf+CIz2brDSijTdhq+NDPBkjUk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=eRlvlu/lJ4h/JFsaezO85sUEgvb7C+8piV61wdrD5QvERroxh3GYgVDDrvE8kOgxr
-	 BmhFaeDd5Xeni1GvMhA/yjqYbWtjNmYo4CkffRYRL/W9fQrRo4BzJJcPc4oIOQ5W/6
-	 frO8Iiv+js1PGz1ermFXBGZ+tC0rQ0W77OFDbamQycRCO5Vn3UuZ8X8nLv3ZYIyR3k
-	 wFqJ9ClH9IwPCft7PGEpDPuEqrOCkPWhubLeiLkoYLacjijazfboPzGZaxXLNqUvjy
-	 6FrFKxhfqQYv7voDp0miMVB+Yg80NlG0q8d+3+VbmyhjGhfdQcGkwpKLOJ0wCn7QAs
-	 b9vQVkyeAXICw==
+	b=AII4ZFvk5eHb0lgbdW0f+lYVXKurtgSL/1tSJ7gtopSCrC7Fpkwiq1yWfg7XHLh45
+	 L32NfbbtWCZpdml4zrjxwLKv8CXgBEZ4R6/gpCTVoa4Mn8dryRO8hTvnCenEh1zhR/
+	 PwL+BUlb3LyiMs1+x9/LoSPDfgayqvnJ3lruwsSpnG+R94MBSZqFLqjhgYKdUUh+7d
+	 FfvpodAenm6UEjzS8awFwPCeXTcBgsCw7IOUAlh2pL1iJ/eSQa1/N/iBnWEdDfRyhL
+	 646oO2lSNqMllxML3quTiZ0Jd6NSOU4roAa+o4ytL8CeFM+VsSp2cThv8zboKLDOHN
+	 DIZmZu1AzsQgA==
 From: "Jiri Slaby (SUSE)" <jirislaby@kernel.org>
 To: gregkh@linuxfoundation.org
 Cc: linux-serial@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	"Jiri Slaby (SUSE)" <jirislaby@kernel.org>,
-	Karsten Keil <isdn@linux-pingi.de>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	Marcel Holtmann <marcel@holtmann.org>,
-	Johan Hedberg <johan.hedberg@gmail.com>,
-	Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-	netdev@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-bluetooth@vger.kernel.org
-Subject: [PATCH 04/27] tty: make tty_operations::send_xchar accept u8 char
-Date: Wed,  6 Dec 2023 08:36:49 +0100
-Message-ID: <20231206073712.17776-5-jirislaby@kernel.org>
+	linux-mmc@vger.kernel.org
+Subject: [PATCH 16/27] tty: mmc: sdio: use u8 for flag
+Date: Wed,  6 Dec 2023 08:37:01 +0100
+Message-ID: <20231206073712.17776-17-jirislaby@kernel.org>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20231206073712.17776-1-jirislaby@kernel.org>
 References: <20231206073712.17776-1-jirislaby@kernel.org>
@@ -44,145 +38,34 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-tty_operations::send_xchar is one of the last users of 'char' type for
-characters in the tty layer. Convert it to u8 now.
+Switch character types to u8. To conform to characters in the rest of
+the tty layer.
 
 Signed-off-by: Jiri Slaby (SUSE) <jirislaby@kernel.org>
-Cc: Karsten Keil <isdn@linux-pingi.de>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Marcel Holtmann <marcel@holtmann.org>
-Cc: Johan Hedberg <johan.hedberg@gmail.com>
-Cc: Luiz Augusto von Dentz <luiz.dentz@gmail.com>
-Cc: netdev@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org
-Cc: linux-bluetooth@vger.kernel.org
 ---
- drivers/isdn/capi/capi.c         | 4 ++--
- drivers/mmc/core/sdio_uart.c     | 2 +-
- drivers/tty/amiserial.c          | 2 +-
- drivers/tty/serial/serial_core.c | 2 +-
- drivers/tty/tty_io.c             | 2 +-
- include/linux/tty.h              | 2 +-
- include/linux/tty_driver.h       | 4 ++--
- net/bluetooth/rfcomm/tty.c       | 2 +-
- 8 files changed, 10 insertions(+), 10 deletions(-)
+ drivers/mmc/core/sdio_uart.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/isdn/capi/capi.c b/drivers/isdn/capi/capi.c
-index 2f3789515445..6e80d7bd3c4d 100644
---- a/drivers/isdn/capi/capi.c
-+++ b/drivers/isdn/capi/capi.c
-@@ -1231,9 +1231,9 @@ static void capinc_tty_hangup(struct tty_struct *tty)
- 	tty_port_hangup(&mp->port);
- }
- 
--static void capinc_tty_send_xchar(struct tty_struct *tty, char ch)
-+static void capinc_tty_send_xchar(struct tty_struct *tty, u8 ch)
- {
--	pr_debug("capinc_tty_send_xchar(%d)\n", ch);
-+	pr_debug("capinc_tty_send_xchar(%u)\n", ch);
- }
- 
- static const struct tty_operations capinc_ops = {
 diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
-index a05322f15771..370fadf1d6d1 100644
+index 370fadf1d6d1..575ebbce378e 100644
 --- a/drivers/mmc/core/sdio_uart.c
 +++ b/drivers/mmc/core/sdio_uart.c
-@@ -792,7 +792,7 @@ static unsigned int sdio_uart_chars_in_buffer(struct tty_struct *tty)
- 	return kfifo_len(&port->xmit_fifo);
- }
+@@ -354,12 +354,11 @@ static void sdio_uart_stop_rx(struct sdio_uart_port *port)
  
--static void sdio_uart_send_xchar(struct tty_struct *tty, char ch)
-+static void sdio_uart_send_xchar(struct tty_struct *tty, u8 ch)
+ static void sdio_uart_receive_chars(struct sdio_uart_port *port, u8 *status)
  {
- 	struct sdio_uart_port *port = tty->driver_data;
+-	unsigned int flag;
+ 	int max_count = 256;
  
-diff --git a/drivers/tty/amiserial.c b/drivers/tty/amiserial.c
-index a80f059f77bf..a30dc054ffbf 100644
---- a/drivers/tty/amiserial.c
-+++ b/drivers/tty/amiserial.c
-@@ -811,7 +811,7 @@ static void rs_flush_buffer(struct tty_struct *tty)
-  * This function is used to send a high-priority XON/XOFF character to
-  * the device
-  */
--static void rs_send_xchar(struct tty_struct *tty, char ch)
-+static void rs_send_xchar(struct tty_struct *tty, u8 ch)
- {
- 	struct serial_state *info = tty->driver_data;
-         unsigned long flags;
-diff --git a/drivers/tty/serial/serial_core.c b/drivers/tty/serial/serial_core.c
-index 0393853b9947..80085b151b34 100644
---- a/drivers/tty/serial/serial_core.c
-+++ b/drivers/tty/serial/serial_core.c
-@@ -687,7 +687,7 @@ EXPORT_SYMBOL_GPL(uart_xchar_out);
-  * This function is used to send a high-priority XON/XOFF character to
-  * the device
-  */
--static void uart_send_xchar(struct tty_struct *tty, char ch)
-+static void uart_send_xchar(struct tty_struct *tty, u8 ch)
- {
- 	struct uart_state *state = tty->driver_data;
- 	struct uart_port *port;
-diff --git a/drivers/tty/tty_io.c b/drivers/tty/tty_io.c
-index 005d91c63707..6a502110da61 100644
---- a/drivers/tty/tty_io.c
-+++ b/drivers/tty/tty_io.c
-@@ -1149,7 +1149,7 @@ ssize_t redirected_tty_write(struct kiocb *iocb, struct iov_iter *iter)
-  *
-  * Locking: none for xchar method, write ordering for write method.
-  */
--int tty_send_xchar(struct tty_struct *tty, char ch)
-+int tty_send_xchar(struct tty_struct *tty, u8 ch)
- {
- 	bool was_stopped = tty->flow.stopped;
+ 	do {
+ 		u8 ch = sdio_in(port, UART_RX);
+-		flag = TTY_NORMAL;
++		u8 flag = TTY_NORMAL;
+ 		port->icount.rx++;
  
-diff --git a/include/linux/tty.h b/include/linux/tty.h
-index e96c85f4f91e..d3bedcc08738 100644
---- a/include/linux/tty.h
-+++ b/include/linux/tty.h
-@@ -410,7 +410,7 @@ void tty_wait_until_sent(struct tty_struct *tty, long timeout);
- void stop_tty(struct tty_struct *tty);
- void start_tty(struct tty_struct *tty);
- void tty_write_message(struct tty_struct *tty, char *msg);
--int tty_send_xchar(struct tty_struct *tty, char ch);
-+int tty_send_xchar(struct tty_struct *tty, u8 ch);
- int tty_put_char(struct tty_struct *tty, unsigned char c);
- unsigned int tty_chars_in_buffer(struct tty_struct *tty);
- unsigned int tty_write_room(struct tty_struct *tty);
-diff --git a/include/linux/tty_driver.h b/include/linux/tty_driver.h
-index f428c1b784a2..7372124fbf90 100644
---- a/include/linux/tty_driver.h
-+++ b/include/linux/tty_driver.h
-@@ -242,7 +242,7 @@ struct serial_struct;
-  *	Optional: If not provided, the device is assumed to have no FIFO.
-  *	Usually correct to invoke via tty_wait_until_sent(). May sleep.
-  *
-- * @send_xchar: ``void ()(struct tty_struct *tty, char ch)``
-+ * @send_xchar: ``void ()(struct tty_struct *tty, u8 ch)``
-  *
-  *	This routine is used to send a high-priority XON/XOFF character (@ch)
-  *	to the @tty device.
-@@ -374,7 +374,7 @@ struct tty_operations {
- 	void (*flush_buffer)(struct tty_struct *tty);
- 	void (*set_ldisc)(struct tty_struct *tty);
- 	void (*wait_until_sent)(struct tty_struct *tty, int timeout);
--	void (*send_xchar)(struct tty_struct *tty, char ch);
-+	void (*send_xchar)(struct tty_struct *tty, u8 ch);
- 	int (*tiocmget)(struct tty_struct *tty);
- 	int (*tiocmset)(struct tty_struct *tty,
- 			unsigned int set, unsigned int clear);
-diff --git a/net/bluetooth/rfcomm/tty.c b/net/bluetooth/rfcomm/tty.c
-index 94ec913dfb76..69c75c041fe1 100644
---- a/net/bluetooth/rfcomm/tty.c
-+++ b/net/bluetooth/rfcomm/tty.c
-@@ -1041,7 +1041,7 @@ static void rfcomm_tty_flush_buffer(struct tty_struct *tty)
- 	tty_wakeup(tty);
- }
- 
--static void rfcomm_tty_send_xchar(struct tty_struct *tty, char ch)
-+static void rfcomm_tty_send_xchar(struct tty_struct *tty, u8 ch)
- {
- 	BT_DBG("tty %p ch %c", tty, ch);
- }
+ 		if (unlikely(*status & (UART_LSR_BI | UART_LSR_PE |
 -- 
 2.43.0
 
