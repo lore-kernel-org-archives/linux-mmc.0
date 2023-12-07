@@ -1,92 +1,159 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NXQ5OSNO"
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9155310F7
-	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 06:11:01 -0800 (PST)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-5d400779f16so5672387b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Dec 2023 06:11:01 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gPl/N/Fh"
+Received: from mail-yw1-x112a.google.com (mail-yw1-x112a.google.com [IPv6:2607:f8b0:4864:20::112a])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4059210F7
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 06:17:13 -0800 (PST)
+Received: by mail-yw1-x112a.google.com with SMTP id 00721157ae682-5d3d5b10197so7119467b3.2
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Dec 2023 06:17:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701958261; x=1702563061; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1701958632; x=1702563432; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=4c23Qqi3a2Hf5J7gfxXHXb1GanE4tjJ0ZroI12SpwMs=;
-        b=NXQ5OSNOnqA77nlisp9QyvczrnhUlBDnnrCuklXZdo1xqSlkZg4KCMWQfVzcJWgTVu
-         jasb1iQBzcgsDbpcEzrwBlJ/El9QpO43rFhXWBZC5lmRN1oLeWIB9nvx6IqlhmbLRMCO
-         Y9ziWMTOHCTgUATkd2S8t3PTIs3AU13RT4dPHALnXIJKx5DqY8QuojSN7ZiuzzpJ7C15
-         9lEhnqgTXxh7hmOzvTkfbsM0yoUce7SgDjZIUXaxeuMXMH8KUk3oMI9gXFjeUbqbSbbO
-         IUA6jkxFZ+7qWoAzgCnM5vnnYfN1PSbiI2ba3KHshTv2aGHWyo465ARgHISze2V/+9dj
-         J7/w==
+        bh=TIqBeZRl8y1XOtBXYU9T4wX38+aoN3n1Nv3+KCL0QkQ=;
+        b=gPl/N/FhNHdiGN4IQOE6mwS1nimV9MmU7a13XTLeIcGKqQdQIl/lhuTHll+ue5pLcM
+         lpYTAWml+ZPdCq4xOjdVaF0ezmLJi2i3COSPXO4Cvus38F3GqXGSZwmOV1Yw0ZL0iO9n
+         LvGNMzhK3vlEZqovtSadgK/4rVp9Ci9XfeegH6YHuf2cCM3KwdlOGPRBTEwBPvChS0/H
+         mZO+JQugpDSvkLAjCNKE8jYcTM0Jo+0BJxit9IUDleUZYP8GYuGbiaTXlAQ24wasyGvW
+         z7IKwVb7h2AB5CK5WPojzEmM25OAjnEnPzvjdyilssu2esrAfsmxnz76w/J0Szc/7wex
+         Y1Qg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701958261; x=1702563061;
+        d=1e100.net; s=20230601; t=1701958632; x=1702563432;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=4c23Qqi3a2Hf5J7gfxXHXb1GanE4tjJ0ZroI12SpwMs=;
-        b=vw6I6mSe5VraOMue9RKEzQOtKEal/jQlipnwQNjNk/0UDpvPLd7Z8npvGYCnR6tEJn
-         1HDao8ynkX17cZMMVloR4RC8eOH+i46yABQKP11hKE8Q1vJBY/FkZ1tNpHowuElir4Jk
-         b71vPuhm73B93M/shqiw3oEEHMBh0qoBo5zHzlMaVJjporkgXBNOuqd08DrF2e7jp6+Y
-         ScYiLKHScS4f4/p2GGvCxLet+7ygUXc/CgbuB/IioKjVtCH8/tR/wLzYxLqcSmoNFaY9
-         UjUkOP5N+/tIgxLX5i2WI4IlZ8a3j36NVtp1XYLLqs3i0zLltrDv0NzB5L8YHL5LYFX+
-         RDuQ==
-X-Gm-Message-State: AOJu0YxEDsZ48GaMyjkYHWeWucRKC908utlH050aFkZ0u5zEOooPN8Fl
-	wRVxEI/rEA6oW7ZpRKtPrgu+HDFbGV+CrhAqeuMu4g==
-X-Google-Smtp-Source: AGHT+IHfZOsvWx7k5rwa8TLVbgwGAOeipHp5OxEj3mr89LZ/jCXwE4d7P8+lZhGKK91ejVX5+Ylua/a48gfeqRdku6s=
-X-Received: by 2002:a0d:df15:0:b0:5d7:f0fe:2258 with SMTP id
- i21-20020a0ddf15000000b005d7f0fe2258mr3385408ywe.39.1701958260622; Thu, 07
- Dec 2023 06:11:00 -0800 (PST)
+        bh=TIqBeZRl8y1XOtBXYU9T4wX38+aoN3n1Nv3+KCL0QkQ=;
+        b=oCKxZcJ0VNVKtlxNAzRP+6gUuJb0SSEWPT6eJo2/zr40ThvGwmpMXwIJXbXPehRMI7
+         XHCEHquGbx89TMb0Rpo1FT/JZm7dUoxuHCeJ6iFk4i1Ss1CLvdVBMpEYLM2+N4G2MYaE
+         1ayj9S/LayEUQ3r450cqcv7L7wt6r+YHKzemQkCDs3/CwrkoPACnGknCmTGlgMVWxjdv
+         HO94OaDsxv0QVDmqkSbXxNfaPM5rC9sEkB/rrHoW0doYNlrNfzeN9f+M99HwJXUjfglS
+         h0ZQAFQjBvLj1oSQW9p9AEIa/jY7te11mzLnYEvqxc/yeplc92xMtl0tYoLjbQoddEdI
+         gE+A==
+X-Gm-Message-State: AOJu0YxP+Q99Z2Qk+3PhxhvYuuHqfckH0j5o0ZvorgfjyrnRBHv49Z88
+	1fp0EiLSDnDwgQ2BdbcLU9Lafuy/0Vmm+X1bBT3Ulg==
+X-Google-Smtp-Source: AGHT+IEu7VXq5ZT/2mJX0V5VPdEWT29iVTokSzStSwQ9aCi8OknKE2Q1X+GPcGt4/5HXuZV9QPu4giDYzZyGl+tNPLk=
+X-Received: by 2002:a81:4310:0:b0:5d7:1941:aa4 with SMTP id
+ q16-20020a814310000000b005d719410aa4mr2439204ywa.63.1701958632406; Thu, 07
+ Dec 2023 06:17:12 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231206073712.17776-1-jirislaby@kernel.org> <20231206073712.17776-17-jirislaby@kernel.org>
-In-Reply-To: <20231206073712.17776-17-jirislaby@kernel.org>
+References: <205dc4c91b47e31b64392fe2498c7a449e717b4b.1701689330.git.geert+renesas@glider.be>
+In-Reply-To: <205dc4c91b47e31b64392fe2498c7a449e717b4b.1701689330.git.geert+renesas@glider.be>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 7 Dec 2023 15:10:24 +0100
-Message-ID: <CAPDyKFo2TPVqd_1_SvQL0xiqgn8ipUq4Z1txxo5nFNsYYk4CZg@mail.gmail.com>
-Subject: Re: [PATCH 16/27] tty: mmc: sdio: use u8 for flag
-To: "Jiri Slaby (SUSE)" <jirislaby@kernel.org>
-Cc: gregkh@linuxfoundation.org, linux-serial@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Date: Thu, 7 Dec 2023 15:16:36 +0100
+Message-ID: <CAPDyKFrw24WfQA2yh-PmoRcJR=+KP2Efo5DyWhBwpx2NC3k7Og@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: Cancel delayed work before releasing host
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 6 Dec 2023 at 08:37, Jiri Slaby (SUSE) <jirislaby@kernel.org> wrote:
+On Mon, 4 Dec 2023 at 12:30, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
 >
-> Switch character types to u8. To conform to characters in the rest of
-> the tty layer.
+> On RZ/Five SMARC EVK, where probing of SDHI is deferred due to probe
+> deferral of the vqmmc-supply regulator:
 >
-> Signed-off-by: Jiri Slaby (SUSE) <jirislaby@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
+>     ------------[ cut here ]------------
+>     WARNING: CPU: 0 PID: 0 at kernel/time/timer.c:1738 __run_timers.part.0+0x1d0/0x1e8
+>     Modules linked in:
+>     CPU: 0 PID: 0 Comm: swapper Not tainted 6.7.0-rc4 #101
+>     Hardware name: Renesas SMARC EVK based on r9a07g043f01 (DT)
+>     epc : __run_timers.part.0+0x1d0/0x1e8
+>      ra : __run_timers.part.0+0x134/0x1e8
+>     epc : ffffffff800771a4 ra : ffffffff80077108 sp : ffffffc800003e60
+>      gp : ffffffff814f5028 tp : ffffffff8140c5c0 t0 : ffffffc800000000
+>      t1 : 0000000000000001 t2 : ffffffff81201300 s0 : ffffffc800003f20
+>      s1 : ffffffd8023bc4a0 a0 : 00000000fffee6b0 a1 : 0004010000400000
+>      a2 : ffffffffc0000016 a3 : ffffffff81488640 a4 : ffffffc800003e60
+>      a5 : 0000000000000000 a6 : 0000000004000000 a7 : ffffffc800003e68
+>      s2 : 0000000000000122 s3 : 0000000000200000 s4 : 0000000000000000
+>      s5 : ffffffffffffffff s6 : ffffffff81488678 s7 : ffffffff814886c0
+>      s8 : ffffffff814f49c0 s9 : ffffffff81488640 s10: 0000000000000000
+>      s11: ffffffc800003e60 t3 : 0000000000000240 t4 : 0000000000000a52
+>      t5 : ffffffd8024ae018 t6 : ffffffd8024ae038
+>     status: 0000000200000100 badaddr: 0000000000000000 cause: 0000000000000003
+>     [<ffffffff800771a4>] __run_timers.part.0+0x1d0/0x1e8
+>     [<ffffffff800771e0>] run_timer_softirq+0x24/0x4a
+>     [<ffffffff80809092>] __do_softirq+0xc6/0x1fa
+>     [<ffffffff80028e4c>] irq_exit_rcu+0x66/0x84
+>     [<ffffffff80800f7a>] handle_riscv_irq+0x40/0x4e
+>     [<ffffffff80808f48>] call_on_irq_stack+0x1c/0x28
+>     ---[ end trace 0000000000000000 ]---
+>
+> What happens?
+>
+>     renesas_sdhi_probe()
+>     {
+>         tmio_mmc_host_alloc()
+>             mmc_alloc_host()
+>                 INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+>
+>         devm_request_irq(tmio_mmc_irq);
+>
+>         /*
+>          * After this, the interrupt handler may be invoked at any time
+>          *
+>          *  tmio_mmc_irq()
+>          *  {
+>          *      __tmio_mmc_card_detect_irq()
+>          *          mmc_detect_change()
+>          *              _mmc_detect_change()
+>          *                  mmc_schedule_delayed_work(&host->detect, delay);
+>          *  }
+>          */
+>
+>         tmio_mmc_host_probe()
+>             tmio_mmc_init_ocr()
+>                 -EPROBE_DEFER
+>
+>         tmio_mmc_host_free()
+>             mmc_free_host()
+>     }
+>
+> When expire_timers() runs later, it warns because the MMC host structure
+> containing the delayed work was freed, and now contains an invalid work
+> function pointer.
+>
+> Fix this by cancelling any pending delayed work before releasing the
+> MMC host structure.
+>
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Applied for next and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/sdio_uart.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+> This is v2 of "[RFC] mmc: tmio: Cancel delayed work before freeing
+> host".
 >
-> diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
-> index 370fadf1d6d1..575ebbce378e 100644
-> --- a/drivers/mmc/core/sdio_uart.c
-> +++ b/drivers/mmc/core/sdio_uart.c
-> @@ -354,12 +354,11 @@ static void sdio_uart_stop_rx(struct sdio_uart_port *port)
+> v2:
+>   - Move cancel_delayed_work_sync() call from tmio_mmc_host_free() to
+>     mmc_free_host(),
+>   - Correct explanation from missing pin control to vqmmc-supply probe
+>     deferral,
+>   - Update backtrace.
+> ---
+>  drivers/mmc/core/host.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
->  static void sdio_uart_receive_chars(struct sdio_uart_port *port, u8 *status)
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 096093f7be006353..2f51db4df1a8571b 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -692,6 +692,7 @@ EXPORT_SYMBOL(mmc_remove_host);
+>   */
+>  void mmc_free_host(struct mmc_host *host)
 >  {
-> -       unsigned int flag;
->         int max_count = 256;
->
->         do {
->                 u8 ch = sdio_in(port, UART_RX);
-> -               flag = TTY_NORMAL;
-> +               u8 flag = TTY_NORMAL;
->                 port->icount.rx++;
->
->                 if (unlikely(*status & (UART_LSR_BI | UART_LSR_PE |
+> +       cancel_delayed_work_sync(&host->detect);
+>         mmc_pwrseq_free(host);
+>         put_device(&host->class_dev);
+>  }
 > --
-> 2.43.0
+> 2.34.1
 >
