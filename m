@@ -1,64 +1,135 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="iOSzA8mj"
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C3241701;
-	Thu,  7 Dec 2023 04:38:03 -0800 (PST)
-Received: from [100.113.186.2] (cola.collaboradmins.com [195.201.22.229])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by madras.collabora.co.uk (Postfix) with ESMTPSA id 0C5356607394;
-	Thu,  7 Dec 2023 12:38:00 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1701952682;
-	bh=hb6z2Q9CYyAeDNhwbTzdfMk0lfdKi2GgZN0PWnVEr7Q=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=iOSzA8mj3cT7Vug+lBFst481/o3Jw4y8+7P/jZnj7NAenxNxL3BmwAdje2a+4uv9L
-	 hWMUqjaOmgEKfErzODvCOQSHVcJCdVsLAUyN6S+fy/KZLmkbWCD2ekUiUkeXCfB3Ez
-	 +KpuytKTWzXg7P8LRckyNFogNCt59M1D95ZPEk6ukh7qvcaohEyrHdZxFOMcSCWkFI
-	 KLTUaUNtGSZUgk8vhuhcOna5SYNPgBcFe+QlQfcW5b6m1aRDhPw6jWcSyB2iskUrca
-	 fM3PQe0iDG9Ci5uRrS9wTzQfvNS6mLF0N6+bIHJl9LUOgyM0oFmKBRS+mDSTvVXcxw
-	 GRh7d5kf70SHA==
-Message-ID: <8dbd5913-8448-468e-b99d-6e3820ff0c72@collabora.com>
-Date: Thu, 7 Dec 2023 13:37:58 +0100
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xmxbajQB"
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC46310C2
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 05:38:34 -0800 (PST)
+Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-da7ea62e76cso1066847276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Dec 2023 05:38:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1701956314; x=1702561114; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=lAVV2qiEK5RCktShx/Q1QMv0e5n63Am5gtpRCSYF1Yc=;
+        b=xmxbajQBGxbyTM3tMWXpxibo5+FikWAk/fYAheLrvMrR15nZJNIrT5h7n2qqHGtRHb
+         cGosfGpm8r8rkttxq3Wa0ZnyXsIJHCHoGtIWz/x278e3XIkOQyRyHPrSw91lAGolZnyF
+         BLOO/EZjHYjq32wQda1WzaJwYhcd8HVCkoRh6z/TVJAzo34XGI8sA6c+VN0DaSvRwAmJ
+         d9kmF1sVMQKpNTe3CsSMUZj9HBChqvacPHA/OH2XqcWdOPN7gXkA8jdvckymKiOSPqgg
+         xYZ057XBzgrGPvuSBMaWhsnJBB1PTCNJEaTbtF9UJo0Ojz6vFQfasLOSn9hGb/kuoYXw
+         2qyw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701956314; x=1702561114;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=lAVV2qiEK5RCktShx/Q1QMv0e5n63Am5gtpRCSYF1Yc=;
+        b=GA5ML/2pzvPcnOQBpGIc1pl/CdXQFtlXngTKuqPnMoVVvj6F17CP1yg77wTfqUoIBt
+         CAJpkecao+eCC75yy09FVHqP2YhKvKl3InElXBSV+0KyOZaIpeDDcIA97GQMs/+2CWgn
+         OWlR0islk9lX24OA7WADouuM7pxxy/uP/UE/sxTDTRM51q3LNLzYn+RoalxaaNtkydcA
+         98lIC/3yAJLClCmt/a+AXHmxtQZUzq6FgNejwFeC3rexipsN50cogCXySdR7zP89SwbD
+         ztMJXA3hFxVVmnsRKOpLyDfdtwsox5nTcM9cGj29EB70RsXOYiOIvMrCkg04D3k3Yr0c
+         119w==
+X-Gm-Message-State: AOJu0YwWbDyAeBBqBEfBzfxbYA7vJh2NPpMXstMe7yVO2azOfTpEqNxz
+	ZRNfk9CjL2n5sYLaRzibGD9xRWOTHoVBKzhQtF0gQw==
+X-Google-Smtp-Source: AGHT+IEJUzzF+mqKM2cMqlMkgSJjy8gNx2I3xz0+xRFeMN9n4FIMMoQJYpoutX6EOtTJPaW4EAm6phj5PJecY/TvrDE=
+X-Received: by 2002:a25:bc84:0:b0:db5:43e7:47b7 with SMTP id
+ e4-20020a25bc84000000b00db543e747b7mr2249653ybk.48.1701956314164; Thu, 07 Dec
+ 2023 05:38:34 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: mtk-sd: add tuning steps related
- property
-To: Axe Yang <axe.yang@mediatek.com>,
- Chaotian Jing <chaotian.jing@mediatek.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>, Matthias Brugger
- <matthias.bgg@gmail.com>, Wenbin Mei <wenbin.mei@mediatek.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mediatek@lists.infradead.org,
- Project_Global_Chrome_Upstream_Group@mediatek.com,
- Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-References: <20231207063535.29546-1-axe.yang@mediatek.com>
- <20231207063535.29546-2-axe.yang@mediatek.com>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-Content-Language: en-US
-In-Reply-To: <20231207063535.29546-2-axe.yang@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20231201030547.11553-1-mengqi.zhang@mediatek.com>
+In-Reply-To: <20231201030547.11553-1-mengqi.zhang@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 7 Dec 2023 14:37:57 +0100
+Message-ID: <CAPDyKFqhGULWp3P2EpxUMLvdiijqu7qxPrY40GU2m3FM7XVCVQ@mail.gmail.com>
+Subject: Re: [v1,1/1] mmc: core: Add HS400es support in retune and
+ initialization flow
+To: Mengqi Zhang <mengqi.zhang@mediatek.com>
+Cc: chaotian.jing@mediatek.com, matthias.bgg@gmail.com, 
+	wenbin.mei@mediatek.com, yangyingliang@huawei.com, adrian.hunter@intel.com, 
+	avri.altman@wdc.com, vincent.whitchurch@axis.com, linux-mmc@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Il 07/12/23 07:35, Axe Yang ha scritto:
-> Add 'mediatek,tuning-steps' setting. This property will give MSDC
-> a chance to extend tuning steps up to 64. With more tuning steps,
-> MSDC may achieve a more optimal calibration result, thus avoiding
-> potential CRC issues.
-> 
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+On Fri, 1 Dec 2023 at 04:06, Mengqi Zhang <mengqi.zhang@mediatek.com> wrote:
+>
+> In HS400es mode, when we enter mmc_retune(), we will be forced to
+> the HS400 mode instead of HS400es mode. So we decided to add support
+> for HS400es in the mmc_retune() process.
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Hmm, I was under the impression that we really don't need to do
+re-tuning at all, when using HS400es mode.
 
+Are we calling mmc_retune_enable() from a place that we shouldn't?
 
+>
+> Additionally, during the initialization to the HS400es stage, add
+> hs400 tuning as an optional process.
+>
+> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/core/host.c | 11 ++++++++++-
+>  drivers/mmc/core/mmc.c  | 10 +++++++++-
+>  2 files changed, 19 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 096093f7be00..4bddbbb3d539 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -179,7 +179,7 @@ EXPORT_SYMBOL(mmc_retune_release);
+>  int mmc_retune(struct mmc_host *host)
+>  {
+>         bool return_to_hs400 = false;
+> -       int err;
+> +       int err = 0;
+>
+>         if (host->retune_now)
+>                 host->retune_now = 0;
+> @@ -194,6 +194,15 @@ int mmc_retune(struct mmc_host *host)
+>         host->doing_retune = 1;
+>
+>         if (host->ios.timing == MMC_TIMING_MMC_HS400) {
+> +               if (host->ios.enhanced_strobe) {
+> +                       if (host->ops->execute_hs400_tuning) {
+> +                               mmc_retune_disable(host);
+> +                               err = host->ops->execute_hs400_tuning(host, host->card);
+> +                               mmc_retune_enable(host);
+> +                       }
+> +                       goto out;
+> +               }
+> +
+>                 err = mmc_hs400_to_hs200(host->card);
+>                 if (err)
+>                         goto out;
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 705942edacc6..9760eea2c104 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1823,7 +1823,15 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>                 if (err)
+>                         goto free_card;
+>
+> -       } else if (!mmc_card_hs400es(card)) {
+> +       } else if (mmc_card_hs400es(card)) {
+> +               if (host->ops->execute_hs400_tuning) {
+> +                       mmc_retune_disable(host);
+> +                       err = host->ops->execute_hs400_tuning(host, card);
+> +                       mmc_retune_enable(host);
+> +                       if (err)
+> +                               goto free_card;
+> +               }
+> +       } else {
+>                 /* Select the desired bus width optionally */
+>                 err = mmc_select_bus_width(card);
+>                 if (err > 0 && mmc_card_hs(card)) {
+> --
+> 2.25.1
+>
