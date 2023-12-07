@@ -1,127 +1,206 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lR8w7jqf"
-Received: from mail-yw1-x112a.google.com (mail-yw1-x112a.google.com [IPv6:2607:f8b0:4864:20::112a])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF43110F3
-	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 06:02:06 -0800 (PST)
-Received: by mail-yw1-x112a.google.com with SMTP id 00721157ae682-5d8e816f77eso7950167b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Dec 2023 06:02:06 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fnZ4NFJ9"
+Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8662910F2
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 06:09:57 -0800 (PST)
+Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-db54ec0c7b8so902297276.0
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Dec 2023 06:09:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701957726; x=1702562526; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1701958197; x=1702562997; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=8G9fbOrQ4XzSAmbK144ee010XvpvgmM3YlNhRHIsD0Y=;
-        b=lR8w7jqfx3Vp7uClprER2dUrPddo9nZOVCcmmmmrQusIt9ZoZk3hgHt/6GFd6h/u6/
-         eSgHCCcrNuhxUGOyXSDbW0+XzRAc8h0shXzudNxCRL0ARLw/EUNqviNuCAMz7Ky+0Xl7
-         WD6leWW4+bG5lypgp0QKCHKtukQQYWJdLzjVEE7jhL7lGcxlE/iiAiX4BELzwvGm6AE0
-         DDRcUF9xt5IsIcS0lYvtyD1P2GF2pcm3/7hx/WS1yWrcuhlpR0LHYJ+ijHCiKPlBZpfL
-         hJ90+RXChycPYag6wgbEUNR+mwjBt0We/E5b6rHZ25grL+SawIvLBt+V4p4aKpkkk5vV
-         ArYw==
+        bh=5qgF3sSIvHz1zfLicY+6TVgFqCZEC8QJz84mVPu4JT0=;
+        b=fnZ4NFJ9NmR/qCxRU79NGewBCmU7WI2JOWueNsfu/tGjssI98afaJBefSldy5rTbjA
+         I6dt3qLGEfi5JZJOHJvNhdjzYesH1X9AZqJ833az11x/7zhV0vVMFKu6TYogMeM50u9g
+         MdWDBLOkD58SigGjVLyno5hvFxq3wLLFOTf4O9CYd1WcqVwhYJvSvtZiDg3obQGjm7Pk
+         MzitHMFWByZOQNz7S278KiKOjmImUw+AmwYEeUd71kSNvnGLWTJBkXveNZRbeflhp17e
+         3QjW0g3dxQY905+3Ke3tC4qsoSHDQKPmUVSqSsY8WumxOzMxvT1OOgFbv/kxAI/QX6sm
+         /AHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701957726; x=1702562526;
+        d=1e100.net; s=20230601; t=1701958197; x=1702562997;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=8G9fbOrQ4XzSAmbK144ee010XvpvgmM3YlNhRHIsD0Y=;
-        b=K8DjoV3HBNPGeE6m1A+wIi5AK8xRzdfcYk8qJdl9RFm3R2C+zI0eUzYw5hguPLhnlU
-         4aydCAuPmjM0RJ2jFaxVgw/6jDzhDXj/TfMYg7DU19i7XsNuMZ+0AJjVMGYY9A+Xm0Ug
-         WhxpJ0eAP0iMd8UEcZbBCLrIuaBOmjYfoYkeGosHB9F73gmnX8YyymSvZZb/K1jVx2nB
-         z3jFOAHUUoSz/DXlMv15xwVMAXPe1B2NxUGhCpIJ36u2hWp+FSHeUnG25MoGExZ0+QZI
-         cFW5XZ0xGFEypHXQvPLZ0OMNCphncW60rTQu9DaCyX+gZw/1BoiD1E2JHfbTaW417d6R
-         4Bug==
-X-Gm-Message-State: AOJu0Yz5oBhosxzs3yBsV6TiCzxwdwwxq383vUyvsmTCN/vHpmF7DUjt
-	Og6ZRu1tJCRY3scwEzaTt0YVvcHWqHoT1FLI4HAEyw==
-X-Google-Smtp-Source: AGHT+IHNpZnNhVo3xArPaV4ih/YPMpwg+IyPULyN7ddI6LxkxEThpwK+5zFMwyykgb8b+mZL6gHUbxduL3+w0s0syb8=
-X-Received: by 2002:a05:690c:f85:b0:5d7:1940:b38b with SMTP id
- df5-20020a05690c0f8500b005d71940b38bmr2721173ywb.87.1701957725928; Thu, 07
- Dec 2023 06:02:05 -0800 (PST)
+        bh=5qgF3sSIvHz1zfLicY+6TVgFqCZEC8QJz84mVPu4JT0=;
+        b=oo3TcKDRKjcjLEiUhLXEwxA5iGnB7h+zB5uWX4/v46s2agj/l0liCAqKz4SIG4LgIS
+         /FBd+qKjeCIkLXuhpmcVxO6OStUamOXpQd9Zf97Se2wNZuptg/PgflMVOvGkJzcsnmc9
+         WyLdyjVykTre/PKYWWJ6hBIooccpj9Br9UaW/RaWitfnHsw+TtigJl4VLk4tcfgRIkxL
+         8WBdZ01iM5LwFrDPBIINXDHHAh749hNTDm0lZGbs9xpG0Jy7kv5JhNOaAupZ6FcXjBkp
+         h0/6snnEG+wlsI9SppFLQhBzHBMqahu1kZfeVxsy51RlE42EZ1BZW2DCNDe96S2uGybA
+         YK9Q==
+X-Gm-Message-State: AOJu0Yy/dC/DtdVSV5Mq+8gsfMmXtT6xOt5ULRKkObjAGIQ+h/LqgjH7
+	7CVv72izNFhl6ZTls1+bxBxpODfgg3LbcfQcl191Fw==
+X-Google-Smtp-Source: AGHT+IHVRH9O+e/jlUGrQAx9xh4VLn2kxitHRh22/vDYDil0LX+cgDdw2m9RceCZ/RhFJs4fR36Mbayjmu8hE8wtVMY=
+X-Received: by 2002:a25:da49:0:b0:db4:5cdd:f6b4 with SMTP id
+ n70-20020a25da49000000b00db45cddf6b4mr3336991ybf.14.1701958196710; Thu, 07
+ Dec 2023 06:09:56 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231201153143.1449753-1-jorge@foundries.io>
-In-Reply-To: <20231201153143.1449753-1-jorge@foundries.io>
+References: <20231206073712.17776-1-jirislaby@kernel.org> <20231206073712.17776-5-jirislaby@kernel.org>
+In-Reply-To: <20231206073712.17776-5-jirislaby@kernel.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 7 Dec 2023 15:01:30 +0100
-Message-ID: <CAPDyKFrkX-=72=cQKd_3Yand-9ovcvXbFNA3uLKFSCccqBgT4Q@mail.gmail.com>
-Subject: Re: [PATCHv4] mmc: rpmb: fixes pause retune on all RPMB partitions.
-To: Jorge Ramirez-Ortiz <jorge@foundries.io>
-Cc: linus.walleij@linaro.org, adrian.hunter@intel.com, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org
+Date: Thu, 7 Dec 2023 15:09:21 +0100
+Message-ID: <CAPDyKFo=X+ESxuYov1TDvLEWk1XCSU2o98=+5Y8LvHWr2nKF6Q@mail.gmail.com>
+Subject: Re: [PATCH 04/27] tty: make tty_operations::send_xchar accept u8 char
+To: "Jiri Slaby (SUSE)" <jirislaby@kernel.org>
+Cc: gregkh@linuxfoundation.org, linux-serial@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Karsten Keil <isdn@linux-pingi.de>, 
+	Marcel Holtmann <marcel@holtmann.org>, Johan Hedberg <johan.hedberg@gmail.com>, 
+	Luiz Augusto von Dentz <luiz.dentz@gmail.com>, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-bluetooth@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 1 Dec 2023 at 16:31, Jorge Ramirez-Ortiz <jorge@foundries.io> wrote:
+On Wed, 6 Dec 2023 at 08:37, Jiri Slaby (SUSE) <jirislaby@kernel.org> wrote:
 >
-> When RPMB was converted to a character device, it added support for
-> multiple RPMB partitions (Commit 97548575bef3 ("mmc: block: Convert RPMB
-> to a character device").
+> tty_operations::send_xchar is one of the last users of 'char' type for
+> characters in the tty layer. Convert it to u8 now.
 >
-> One of the changes in this commit was transforming the variable
-> target_part defined in __mmc_blk_ioctl_cmd into a bitmask.
->
-> This inadvertedly regressed the validation check done in
-> mmc_blk_part_switch_pre() and mmc_blk_part_switch_post().
->
-> This commit fixes that regression.
->
-> Fixes: 97548575bef3 ("mmc: block: Convert RPMB to a character device")
-> Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> Cc: <stable@vger.kernel.org> # v4.14+
+> Signed-off-by: Jiri Slaby (SUSE) <jirislaby@kernel.org>
+> Cc: Karsten Keil <isdn@linux-pingi.de>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Marcel Holtmann <marcel@holtmann.org>
+> Cc: Johan Hedberg <johan.hedberg@gmail.com>
+> Cc: Luiz Augusto von Dentz <luiz.dentz@gmail.com>
+> Cc: netdev@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-bluetooth@vger.kernel.org
 
-Applied for fixes, thanks!
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
 
 Kind regards
 Uffe
 
-
 > ---
+>  drivers/isdn/capi/capi.c         | 4 ++--
+>  drivers/mmc/core/sdio_uart.c     | 2 +-
+>  drivers/tty/amiserial.c          | 2 +-
+>  drivers/tty/serial/serial_core.c | 2 +-
+>  drivers/tty/tty_io.c             | 2 +-
+>  include/linux/tty.h              | 2 +-
+>  include/linux/tty_driver.h       | 4 ++--
+>  net/bluetooth/rfcomm/tty.c       | 2 +-
+>  8 files changed, 10 insertions(+), 10 deletions(-)
 >
->   v2:
->      fixes parenthesis around condition
->   v3:
->      adds stable to commit header
->   v4:
->      fixes the stable version to v4.14
->      adds Reviewed-by
+> diff --git a/drivers/isdn/capi/capi.c b/drivers/isdn/capi/capi.c
+> index 2f3789515445..6e80d7bd3c4d 100644
+> --- a/drivers/isdn/capi/capi.c
+> +++ b/drivers/isdn/capi/capi.c
+> @@ -1231,9 +1231,9 @@ static void capinc_tty_hangup(struct tty_struct *tty)
+>         tty_port_hangup(&mp->port);
+>  }
 >
->  drivers/mmc/core/block.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 152dfe593c43..13093d26bf81 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -851,9 +851,10 @@ static const struct block_device_operations mmc_bdops = {
->  static int mmc_blk_part_switch_pre(struct mmc_card *card,
->                                    unsigned int part_type)
+> -static void capinc_tty_send_xchar(struct tty_struct *tty, char ch)
+> +static void capinc_tty_send_xchar(struct tty_struct *tty, u8 ch)
 >  {
-> +       const unsigned int mask = EXT_CSD_PART_CONFIG_ACC_RPMB;
->         int ret = 0;
+> -       pr_debug("capinc_tty_send_xchar(%d)\n", ch);
+> +       pr_debug("capinc_tty_send_xchar(%u)\n", ch);
+>  }
 >
-> -       if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
-> +       if ((part_type & mask) == mask) {
->                 if (card->ext_csd.cmdq_en) {
->                         ret = mmc_cmdq_disable(card);
->                         if (ret)
-> @@ -868,9 +869,10 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
->  static int mmc_blk_part_switch_post(struct mmc_card *card,
->                                     unsigned int part_type)
+>  static const struct tty_operations capinc_ops = {
+> diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
+> index a05322f15771..370fadf1d6d1 100644
+> --- a/drivers/mmc/core/sdio_uart.c
+> +++ b/drivers/mmc/core/sdio_uart.c
+> @@ -792,7 +792,7 @@ static unsigned int sdio_uart_chars_in_buffer(struct tty_struct *tty)
+>         return kfifo_len(&port->xmit_fifo);
+>  }
+>
+> -static void sdio_uart_send_xchar(struct tty_struct *tty, char ch)
+> +static void sdio_uart_send_xchar(struct tty_struct *tty, u8 ch)
 >  {
-> +       const unsigned int mask = EXT_CSD_PART_CONFIG_ACC_RPMB;
->         int ret = 0;
+>         struct sdio_uart_port *port = tty->driver_data;
 >
-> -       if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
-> +       if ((part_type & mask) == mask) {
->                 mmc_retune_unpause(card->host);
->                 if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
->                         ret = mmc_cmdq_enable(card);
-> @@ -3143,4 +3145,3 @@ module_exit(mmc_blk_exit);
+> diff --git a/drivers/tty/amiserial.c b/drivers/tty/amiserial.c
+> index a80f059f77bf..a30dc054ffbf 100644
+> --- a/drivers/tty/amiserial.c
+> +++ b/drivers/tty/amiserial.c
+> @@ -811,7 +811,7 @@ static void rs_flush_buffer(struct tty_struct *tty)
+>   * This function is used to send a high-priority XON/XOFF character to
+>   * the device
+>   */
+> -static void rs_send_xchar(struct tty_struct *tty, char ch)
+> +static void rs_send_xchar(struct tty_struct *tty, u8 ch)
+>  {
+>         struct serial_state *info = tty->driver_data;
+>          unsigned long flags;
+> diff --git a/drivers/tty/serial/serial_core.c b/drivers/tty/serial/serial_core.c
+> index 0393853b9947..80085b151b34 100644
+> --- a/drivers/tty/serial/serial_core.c
+> +++ b/drivers/tty/serial/serial_core.c
+> @@ -687,7 +687,7 @@ EXPORT_SYMBOL_GPL(uart_xchar_out);
+>   * This function is used to send a high-priority XON/XOFF character to
+>   * the device
+>   */
+> -static void uart_send_xchar(struct tty_struct *tty, char ch)
+> +static void uart_send_xchar(struct tty_struct *tty, u8 ch)
+>  {
+>         struct uart_state *state = tty->driver_data;
+>         struct uart_port *port;
+> diff --git a/drivers/tty/tty_io.c b/drivers/tty/tty_io.c
+> index 005d91c63707..6a502110da61 100644
+> --- a/drivers/tty/tty_io.c
+> +++ b/drivers/tty/tty_io.c
+> @@ -1149,7 +1149,7 @@ ssize_t redirected_tty_write(struct kiocb *iocb, struct iov_iter *iter)
+>   *
+>   * Locking: none for xchar method, write ordering for write method.
+>   */
+> -int tty_send_xchar(struct tty_struct *tty, char ch)
+> +int tty_send_xchar(struct tty_struct *tty, u8 ch)
+>  {
+>         bool was_stopped = tty->flow.stopped;
 >
->  MODULE_LICENSE("GPL");
->  MODULE_DESCRIPTION("Multimedia Card (MMC) block device driver");
-> -
+> diff --git a/include/linux/tty.h b/include/linux/tty.h
+> index e96c85f4f91e..d3bedcc08738 100644
+> --- a/include/linux/tty.h
+> +++ b/include/linux/tty.h
+> @@ -410,7 +410,7 @@ void tty_wait_until_sent(struct tty_struct *tty, long timeout);
+>  void stop_tty(struct tty_struct *tty);
+>  void start_tty(struct tty_struct *tty);
+>  void tty_write_message(struct tty_struct *tty, char *msg);
+> -int tty_send_xchar(struct tty_struct *tty, char ch);
+> +int tty_send_xchar(struct tty_struct *tty, u8 ch);
+>  int tty_put_char(struct tty_struct *tty, unsigned char c);
+>  unsigned int tty_chars_in_buffer(struct tty_struct *tty);
+>  unsigned int tty_write_room(struct tty_struct *tty);
+> diff --git a/include/linux/tty_driver.h b/include/linux/tty_driver.h
+> index f428c1b784a2..7372124fbf90 100644
+> --- a/include/linux/tty_driver.h
+> +++ b/include/linux/tty_driver.h
+> @@ -242,7 +242,7 @@ struct serial_struct;
+>   *     Optional: If not provided, the device is assumed to have no FIFO.
+>   *     Usually correct to invoke via tty_wait_until_sent(). May sleep.
+>   *
+> - * @send_xchar: ``void ()(struct tty_struct *tty, char ch)``
+> + * @send_xchar: ``void ()(struct tty_struct *tty, u8 ch)``
+>   *
+>   *     This routine is used to send a high-priority XON/XOFF character (@ch)
+>   *     to the @tty device.
+> @@ -374,7 +374,7 @@ struct tty_operations {
+>         void (*flush_buffer)(struct tty_struct *tty);
+>         void (*set_ldisc)(struct tty_struct *tty);
+>         void (*wait_until_sent)(struct tty_struct *tty, int timeout);
+> -       void (*send_xchar)(struct tty_struct *tty, char ch);
+> +       void (*send_xchar)(struct tty_struct *tty, u8 ch);
+>         int (*tiocmget)(struct tty_struct *tty);
+>         int (*tiocmset)(struct tty_struct *tty,
+>                         unsigned int set, unsigned int clear);
+> diff --git a/net/bluetooth/rfcomm/tty.c b/net/bluetooth/rfcomm/tty.c
+> index 94ec913dfb76..69c75c041fe1 100644
+> --- a/net/bluetooth/rfcomm/tty.c
+> +++ b/net/bluetooth/rfcomm/tty.c
+> @@ -1041,7 +1041,7 @@ static void rfcomm_tty_flush_buffer(struct tty_struct *tty)
+>         tty_wakeup(tty);
+>  }
+>
+> -static void rfcomm_tty_send_xchar(struct tty_struct *tty, char ch)
+> +static void rfcomm_tty_send_xchar(struct tty_struct *tty, u8 ch)
+>  {
+>         BT_DBG("tty %p ch %c", tty, ch);
+>  }
 > --
-> 2.34.1
+> 2.43.0
+>
