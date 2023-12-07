@@ -1,103 +1,97 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B16B210A00
-	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 06:51:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="KVgdL2ki"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 44387C433C9;
-	Thu,  7 Dec 2023 06:51:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1701931897;
-	bh=L1TtivioL0Lps3vy6WPsQqR1XcD3JmC00x4u49IX1Tk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=KVgdL2kinFybPXfvwdF0P8bEKZTAAsbQBGWfczZMQ+GU2b8rz+nqzmTZAAq6aHvMc
-	 rpoWwDa//JVszP3CNaDNv4HbNXooqziBc1krn36s19I6k9Bnhc0KgkPkhZrO7vQgay
-	 yTitdxi4x7DZOFyop7tjoXRX9v1RO0GGapzK5U9U=
-Date: Thu, 7 Dec 2023 11:14:32 +0900
-From: Greg KH <gregkh@linuxfoundation.org>
-To: Ricky Wu <ricky_wu@realtek.com>
-Cc: arnd@arndb.de, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
-	frank.li@vivo.com, u.kleine-koenig@pengutronix.de,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v6 1/3] misc: rtsx: add to support new card reader
- rts5264 new definition and function
-Message-ID: <2023120715-reenact-repose-906c@gregkh>
-References: <20231129034856.2001223-1-ricky_wu@realtek.com>
- <20231129034856.2001223-2-ricky_wu@realtek.com>
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="BWy5jkpB"
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF0E310F0;
+	Thu,  7 Dec 2023 04:38:01 -0800 (PST)
+Received: from [100.113.186.2] (cola.collaboradmins.com [195.201.22.229])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: kholk11)
+	by madras.collabora.co.uk (Postfix) with ESMTPSA id 4B8BC660738E;
+	Thu,  7 Dec 2023 12:37:59 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+	s=mail; t=1701952680;
+	bh=4FannGmPzD8CTNLgg1c0SxMxDgNTQfia5dxSGdeJOck=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=BWy5jkpBBuyQgLvhL5xgoDA6sGW8Hh0NrDwPp+9690sCYRgTkbe5jzuTtvVauJv9C
+	 E6zkCC1unRdDhsh1YjP7p8wIVi+MoxzXbDeHBbw+ZXr4wKpzUafWyqZh7wqlOOoPcN
+	 wN5Oer8NUorVHwS6sW9Y6l5LNMaddcevFU9eeMEZfUz8TUECdMcmOQYINpQ2EwHc9b
+	 2hwAbOQ6UYUT3nPYB2vDne/g0l17Kf8Nd0vknwqR5R1YQqP02jE21d+wEzp50D90Uv
+	 8a9LZBfe93dhdYQyW+vcV5fJ07yNtMvAvcBBFTRpzSFaN5V5Yno2ijptpi2/rLOLKo
+	 kwsqlGAEKKI/A==
+Message-ID: <6c7c65a1-1398-43fc-8036-d901e8bc0934@collabora.com>
+Date: Thu, 7 Dec 2023 13:37:57 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20231129034856.2001223-2-ricky_wu@realtek.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 2/2] mmc: mediatek: extend number of tuning steps
+Content-Language: en-US
+To: Axe Yang <axe.yang@mediatek.com>,
+ Chaotian Jing <chaotian.jing@mediatek.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+ Conor Dooley <conor+dt@kernel.org>, Matthias Brugger
+ <matthias.bgg@gmail.com>, Wenbin Mei <wenbin.mei@mediatek.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-mediatek@lists.infradead.org,
+ Project_Global_Chrome_Upstream_Group@mediatek.com
+References: <20231207063535.29546-1-axe.yang@mediatek.com>
+ <20231207063535.29546-3-axe.yang@mediatek.com>
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <20231207063535.29546-3-axe.yang@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Wed, Nov 29, 2023 at 11:48:54AM +0800, Ricky Wu wrote:
-> in order to support NEW chip rts5264, the definitions of some internal
-> registers are define in new file rts5264.h, and some callback functions 
-> and the workflow for rts5264 are define in new file rts5264.c
+Il 07/12/23 07:35, Axe Yang ha scritto:
+> Previously, during the MSDC calibration process, a full clock cycle
+> actually not be covered, which in some cases didn't yield the best
+> results and could cause CRC errors. This problem is particularly
+> evident when MSDC is used as an SDIO host. In fact, MSDC support
+> tuning up to a maximum of 64 steps, but by default, the step number
+> is 32. By increase the tuning step, we are more likely to cover more
+> parts of a clock cycle, and get better calibration result.
 > 
-> also add rts5264.o to Makefile
+> To illustrate, when tuning 32 steps, if the obtained window has a hole
+> near the middle, like this: 0xffc07ff (hex), then the selected delay
+> will be the 6 (counting from right to left).
 > 
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> ---
-> v4: split new definition part up from v3
-> ---
->  drivers/misc/cardreader/Makefile  |   2 +-
->  drivers/misc/cardreader/rts5264.c | 886 ++++++++++++++++++++++++++++++
->  drivers/misc/cardreader/rts5264.h | 278 ++++++++++
->  3 files changed, 1165 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/misc/cardreader/rts5264.c
->  create mode 100644 drivers/misc/cardreader/rts5264.h
+> (32 <- 1)
+> 1111 1111 1100 0000 0000 0111 11(1)1 1111
+> 
+> However, if we tune 64 steps, the window obtained may look like this:
+> 0xfffffffffffc07ff. The final selected delay will be 44, which is
+> safer as it is further away from the hole:
+> 
+> (64 <- 1)
+> 1111 ... (1)111 1111 1111 1111 1111 1100 0000 0000 0111 1111 1111
+> 
+> In this case, delay 6 selected through 32 steps tuning is obviously
+> not optimal, and this delay is closer to the hole, using it would
+> easily cause CRC problems.
+> 
+> As per mesaurements taken on mediatek SoC platform, the tuning phase
+> will take:
+> 	eMMC	- 32 steps: ~3ms
+> 		- 64 steps: ~6ms
+> 	SDIO	- 32 steps: ~4ms
+> 		- 64 steos: ~7ms
+> Tuning more steps won't prolong boot times by any meaningful amount
+> of time, so for SD/SDIO the default tuning steps will be adjust to
+> 64. But for eMMC, it is still preferred to use 32 steps tuning as
+> otherwise there would be performance lose when accessing the RPMB
+> partition(requiring retuning each time).
+> 
+> You can configure property "mediatek,tuning-step" in MSDC dts node
+> to adjust the step number.
+> 
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 
-When building with this change applied, I get lots of build errors.  How
-did you test this?
-
-My errors are:
-
-  CC [M]  drivers/misc/cardreader/rts5264.o
-drivers/misc/cardreader/rts5264.c: In function ‘rts5264_process_ocp’:
-drivers/misc/cardreader/rts5264.c:398:40: error: ‘struct rtsx_pcr’ has no member named ‘ovp_stat’; did you mean ‘ocp_stat’?
-  398 |         rts5264_get_ovpstat(pcr, &pcr->ovp_stat);
-      |                                        ^~~~~~~~
-      |                                        ocp_stat
-drivers/misc/cardreader/rts5264.c:402:31: error: ‘struct rtsx_pcr’ has no member named ‘ovp_stat’; did you mean ‘ocp_stat’?
-  402 |                         (pcr->ovp_stat & (RTS5264_OVP_NOW | RTS5264_OVP_EVER))) {
-      |                               ^~~~~~~~
-      |                               ocp_stat
-drivers/misc/cardreader/rts5264.c:408:22: error: ‘struct rtsx_pcr’ has no member named ‘ovp_stat’; did you mean ‘ocp_stat’?
-  408 |                 pcr->ovp_stat = 0;
-      |                      ^~~~~~~~
-      |                      ocp_stat
-drivers/misc/cardreader/rts5264.c: In function ‘rts5264_extra_init_hw’:
-drivers/misc/cardreader/rts5264.c:534:38: error: ‘RTS5264_AUTOLOAD_CFG2’ undeclared (first use in this function); did you mean ‘RTS5264_AUTOLOAD_CFG3’?
-  534 |         rtsx_pci_write_register(pcr, RTS5264_AUTOLOAD_CFG2,
-      |                                      ^~~~~~~~~~~~~~~~~~~~~
-      |                                      RTS5264_AUTOLOAD_CFG3
-drivers/misc/cardreader/rts5264.c:534:38: note: each undeclared identifier is reported only once for each function it appears in
-drivers/misc/cardreader/rts5264.c:535:25: error: ‘RTS5264_CHIP_RST_N_SEL’ undeclared (first use in this function); did you mean ‘RTS5264_NON_XTAL_SEL’?
-  535 |                         RTS5264_CHIP_RST_N_SEL, 0);
-      |                         ^~~~~~~~~~~~~~~~~~~~~~
-      |                         RTS5264_NON_XTAL_SEL
-drivers/misc/cardreader/rts5264.c:538:38: error: ‘CDGW’ undeclared (first use in this function)
-  538 |         rtsx_pci_write_register(pcr, CDGW, 0xFF, 0x01);
-      |                                      ^~~~
-drivers/misc/cardreader/rts5264.c: In function ‘rts5264_init_params’:
-drivers/misc/cardreader/rts5264.c:883:51: error: ‘SD_OVP_INT_EN’ undeclared (first use in this function); did you mean ‘SD_OCP_INT_EN’?
-  883 |         hw_param->interrupt_en |= (SD_OC_INT_EN | SD_OVP_INT_EN);
-      |                                                   ^~~~~~~~~~~~~
-      |                                                   SD_OCP_INT_EN
-make[5]: *** [scripts/Makefile.build:243: drivers/misc/cardreader/rts5264.o] Error 1
+Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 
 
-
-Remember, each commit can not break the build.  Please fix up this series to
-build properly at each commit.
-
-thanks,
-
-greg k-h
