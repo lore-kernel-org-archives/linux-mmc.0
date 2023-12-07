@@ -1,101 +1,104 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hVm3rQYW"
-Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4634C10F4
-	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 05:59:34 -0800 (PST)
-Received: by mail-yb1-xb2e.google.com with SMTP id 3f1490d57ef6-db54ec0c7b8so890646276.0
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Dec 2023 05:59:34 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kxLlZvpq"
+Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A71BE10F4
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Dec 2023 06:02:02 -0800 (PST)
+Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-5d3644ca426so7673857b3.1
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Dec 2023 06:02:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1701957573; x=1702562373; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1701957721; x=1702562521; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=s0vyvlC9eF+1wpIASte+MSRLcH7gFX9ras58OkHQG/I=;
-        b=hVm3rQYWBYyVQ0uW9eomnQO118KuY8vUU5VT4x04hP4lwY/YCAllr9jgjyqbys8MMG
-         dj5meFr1Q6g9GwKFI+aj/ETYowxBtv9DxpESvA39YToX0TZBA1f5VqmJSddQgkZw+LK7
-         OLKG9E1fC4Hd25hUdm62w4Kq1xiGMpy2RzRbQZ2nfudJmh5iuf0rEC30I31odzu1fEAh
-         iXxLhaJ2DAb3TStrVXEf2feDxqCqzJgkAXfn6pKPHepKGm5WzIDB9V7+EPadsh6IrFjF
-         V5a1QAWXP2xr30KhT3/gRK3RXQXUVTXmjLQ5tayalxVWCET2c3J2y2SiYoA0xLEHdUOJ
-         JtAQ==
+        bh=xqSN2wz/zGfROIqFiurJMPD+/BJpUqBprXGsU0gwv9Q=;
+        b=kxLlZvpqxT4FoowXREhO+D/r3/lncVGKrOhheT1Q8TsbSJG5FAscSUOWyLGiyBXgDH
+         mtmKRe+GT6p40OIScxDv5Nki87K9XWRs+a8/NiLa54PMSfrNc4CTuHrpjZvkspPw37/5
+         2e8JGMElffVGJCb+cZ/uQW0fewQclDYAykaxesgj5OazgG6HoziVZTbvSm4cXrN3iOk0
+         hfKk5z3dJLdrtBv8VROAMNKMGkIx+CyA8StbXGEfneD1zEWfcPZJYTsnuahuEVaWB430
+         3YaHCYz8Om6T1+GrIqhSrqoLQn8HRzqj9Odn9FApmIt18lQ9WRdyxs8xhjHuX+APk2+J
+         Q16g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701957573; x=1702562373;
+        d=1e100.net; s=20230601; t=1701957721; x=1702562521;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=s0vyvlC9eF+1wpIASte+MSRLcH7gFX9ras58OkHQG/I=;
-        b=GEu1HEyrY1+LYDFhNmE7uBo2qMfDOvkXd24F0XKL/39VOfzshAwen88750N2xmSpur
-         cpU9E/jU8L1qJ7QHcL7J7dd5lft14RocE3RYMylrLDf4gsWHqCtWWheGywkUqyM6qz7L
-         vz5cW62NlPEf5LKit8bGvHFnaXWNUErTzvuSjbexmUXyH4NG6wLJ7Rhg6K4VrzQrqBO3
-         TFjx6MwlBm672Dw2KTHcDj0E96qBb8A8LyDqA0OZMdFeaDrKNqXs6GSy2II9V2iFdNhO
-         TJRbpGrC5KzFNqNiikZkknLpSeVoF4476FvD+vIE5/XVdG8PgmIn+ztDwUqA/eMScLSg
-         tDFw==
-X-Gm-Message-State: AOJu0Yx2ynh3Dnd3c8G1zmrDuWFtdKWjSEGUS5R9LRyS+xQlKK8mD3xz
-	sM8w+7b6lpQAiyCUGGPvvXzmzKNFlaGvWH8v3wsA8g==
-X-Google-Smtp-Source: AGHT+IHSzJy22Mg0xsZufbVMZodywBof+OeL81fih15QUTaArLRA1CZHrXP2uf+xRD0tejTll3DYbVjpXHsu/UtirCw=
-X-Received: by 2002:a25:e64e:0:b0:db9:52dc:62c1 with SMTP id
- d75-20020a25e64e000000b00db952dc62c1mr3391214ybh.65.1701957573313; Thu, 07
- Dec 2023 05:59:33 -0800 (PST)
+        bh=xqSN2wz/zGfROIqFiurJMPD+/BJpUqBprXGsU0gwv9Q=;
+        b=Gkd+9xI1mVTcKh2Q6hUSPagy9MjSmiNFEDCc7b6ENPBxMOJ+G3LS9G4QE0aWlN9ary
+         di/R9l3GyfR4Tk0KMcSQL8rwLeFQWjavaI5q+sbbvOYJgXkemMxu8TQnQAf1aYtPUbHw
+         UOORk7UORONpnlbA5lGcRzrPpmkpw7XXV++/03woOs3kkp6Tc3HXkELHf6eE9p5VY7SO
+         L2Ikps25Nc7sU94qoYfTIbxxTyGaHuB2384Kf3ShTwcGkrnCwksmY9B9Vu2rCppNEscb
+         NSCCxtJ5OZWUo3YTprUmxR/EWtnZ0of8eqgS4yRdiM8dM07GZM9agnspfhLBiKYd84Ol
+         Dh1w==
+X-Gm-Message-State: AOJu0YzBcxlToKIDjFXm76I2INa/0OP0pem10Hj4uaqhgSYXNlHEC5WH
+	Iv2cg7qZP2HvRiHBGBXul4Zk2i7VWNDKx8FevOPZwQ==
+X-Google-Smtp-Source: AGHT+IH3A+kfMVFWXCHHzW1EoiuSi/T1nkVcCCM0Y1P3XBgusQEyXxhBLp9MTbatm83rnaE5ppyGAiBDsLZJiNAzu+I=
+X-Received: by 2002:a0d:d88b:0:b0:5d7:1941:3556 with SMTP id
+ a133-20020a0dd88b000000b005d719413556mr2618248ywe.61.1701957721714; Thu, 07
+ Dec 2023 06:02:01 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231204064934.21236-1-wenchao.chen@unisoc.com>
-In-Reply-To: <20231204064934.21236-1-wenchao.chen@unisoc.com>
+References: <20231201102747.3854573-1-treapking@chromium.org>
+In-Reply-To: <20231201102747.3854573-1-treapking@chromium.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 7 Dec 2023 14:58:56 +0100
-Message-ID: <CAPDyKFpK2Yjj2oDWCUKHpht6PC9uNG-x2rPYO3EBD6GGWg4VZg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sprd: Fix eMMC init failure after hw reset
-To: Wenchao Chen <wenchao.chen@unisoc.com>
-Cc: zhang.lyra@gmail.com, orsonzhai@gmail.com, baolin.wang@linux.alibaba.com, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	wenchao.chen666@gmail.com, zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com
+Date: Thu, 7 Dec 2023 15:01:25 +0100
+Message-ID: <CAPDyKFrAvkzgHUttY_mVAHK3HXCV_eE6=KhQkdQyLq22zstX8A@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: mtk-sd: Increase the verbosity of msdc_track_cmd_data
+To: Pin-yen Lin <treapking@chromium.org>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	ot_shunxi.zhang@mediatek.corp-partner.google.com, 
+	linux-mediatek@lists.infradead.org, Chen-Yu Tsai <wenst@chromium.org>, 
+	linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 4 Dec 2023 at 07:50, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+On Fri, 1 Dec 2023 at 11:27, Pin-yen Lin <treapking@chromium.org> wrote:
 >
-> Some eMMC devices that do not close the auto clk gate
-> after hw reset will cause eMMC initialization to fail.
+> This log message is necessary for debugging, so enable it by default to
+> debug issues that are hard to reproduce locally.
 >
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> Signed-off-by: Pin-yen Lin <treapking@chromium.org>
 
-I assume we want this tagged for stable kernels too, but do we have a
-corresponding fixes commit that we can point out?
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
+>
 > ---
->  drivers/mmc/host/sdhci-sprd.c | 10 +++++++---
->  1 file changed, 7 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index 6b8a57e2d20f..bed57a1c64b5 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -239,15 +239,19 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
->         div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
->         sdhci_enable_clk(host, div);
+> Changes in v3:
+> - Only print the warning when -ETIMEDOUT or not in tuning process
 >
-> +       val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-> +       mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN | SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
->         /* Enable CLK_AUTO when the clock is greater than 400K. */
->         if (clk > 400000) {
-> -               val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-> -               mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
-> -                       SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
->                 if (mask != (val & mask)) {
->                         val |= mask;
->                         sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
->                 }
-> +       } else {
-> +               if (val & mask) {
-> +                       val &= ~mask;
-> +                       sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
-> +               }
->         }
+> Changes in v2:
+> - Use dev_warn() instead of dev_err()
+>
+>  drivers/mmc/host/mtk-sd.c | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 97f7c3d4be6e..6ae5e0a9fca9 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1149,9 +1149,11 @@ static void msdc_recheck_sdio_irq(struct msdc_host *host)
+>
+>  static void msdc_track_cmd_data(struct msdc_host *host, struct mmc_command *cmd)
+>  {
+> -       if (host->error)
+> -               dev_dbg(host->dev, "%s: cmd=%d arg=%08X; host->error=0x%08X\n",
+> -                       __func__, cmd->opcode, cmd->arg, host->error);
+> +       if (host->error &&
+> +           ((!mmc_op_tuning(cmd->opcode) && !host->hs400_tuning) ||
+> +            cmd->error == -ETIMEDOUT))
+> +               dev_warn(host->dev, "%s: cmd=%d arg=%08X; host->error=0x%08X\n",
+> +                        __func__, cmd->opcode, cmd->arg, host->error);
 >  }
 >
+>  static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
 > --
-> 2.17.1
+> 2.43.0.rc2.451.g8631bc7472-goog
 >
