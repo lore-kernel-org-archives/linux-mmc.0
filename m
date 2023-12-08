@@ -1,181 +1,96 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="Klsm5AGt"
-Received: from mail-io1-xd2d.google.com (mail-io1-xd2d.google.com [IPv6:2607:f8b0:4864:20::d2d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C2521720
-	for <linux-mmc@vger.kernel.org>; Fri,  8 Dec 2023 12:50:53 -0800 (PST)
-Received: by mail-io1-xd2d.google.com with SMTP id ca18e2360f4ac-7b72192f7a1so2501939f.1
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Dec 2023 12:50:53 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="UZfjrvet"
+Received: from mail-qk1-x72a.google.com (mail-qk1-x72a.google.com [IPv6:2607:f8b0:4864:20::72a])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 280401738
+	for <linux-mmc@vger.kernel.org>; Fri,  8 Dec 2023 13:03:10 -0800 (PST)
+Received: by mail-qk1-x72a.google.com with SMTP id af79cd13be357-77f35009e78so117889185a.1
+        for <linux-mmc@vger.kernel.org>; Fri, 08 Dec 2023 13:03:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1702068652; x=1702673452; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=UXg26pKX3lvs1vWaPnx9pc82uFcibvp6uYU0Ge8uEdY=;
-        b=Klsm5AGtLOS906MHH3X21cogNxPilgyA52SImV31OQWDM6wH2ALLV0rQAWkRcZc6tv
-         OgMczkADHMO7XbGvqZd7QO26TaNoViSZ0zJ43szF/te5IXfUEeqhmmKyi0VDCyTUlDxQ
-         LFBetNFwjgTwNYDMvCwpNw8S4WSfqAiWjRmTM=
+        d=broadcom.com; s=google; t=1702069389; x=1702674189; darn=vger.kernel.org;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=LtIHTh0hehNu06ztsUeRifwavUEy6dr1rPiDSeWoO0A=;
+        b=UZfjrvetbK4nEC81kI3jmMEL9I/M8zDpMebR3UgHLC+AOciLQDHY3ebxmOBJ4GWfA4
+         HMcQUwupTOX/T1fveoZAmOD9o1KVePWZX4ZKPnsriQzhXU2hUo/4D7LZtDZ4ratJCCiL
+         wKAdwj1Ff6FNcaMsv9FthdyCLFt5Zy2IFTvqI=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702068652; x=1702673452;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=UXg26pKX3lvs1vWaPnx9pc82uFcibvp6uYU0Ge8uEdY=;
-        b=e1lMHiz9z/4GRrNMkCCSzaVgtsC8rKVjmhUoBSfKMlFaPQPhO76IRUYqyuQlGWGqyY
-         SaXbFQ83rZT7Cs+SEPDVrftkF6JFcnjMK3ewRNVOKCLZX0abvcZY5zGp7aIeyRQ1Pnya
-         K8MQp0KWQPQrpwUzwITgEiT9Gqf0jHlBbwPLaRuypl/czg+SZ7IU6s6Cu20rbxpy53wl
-         8Gb4wPNJpyx8LSJeg7WcfqkalGLc4qSQxbNZERz01gBK8dChYnQJQRnUnW7fZ9NCRnYI
-         a61kp/o4UcqJrOV7xagt4mxKraSzwx9mc32qURsQ2fE4SgrCMyxuiJHH2Yfhf6IYZt81
-         htfA==
-X-Gm-Message-State: AOJu0Yy+B9euOoTacLiHSB820f/MeqR9S1pzQ+9+yr8xyzsjz+W5WMZ6
-	SaezJh38EtZGfzV4JiqoenQWUnO4/juV3rYd2XjiKA==
-X-Google-Smtp-Source: AGHT+IF8voVooVkU2cjlTivb4y8mDU7eVt2A6pWqgAeFgslUmQJft+2wa2TnsRmJmEgTomFsojqMyZdsPfdgf+8vMP0=
-X-Received: by 2002:a05:6e02:1805:b0:35d:6e59:e9d3 with SMTP id
- a5-20020a056e02180500b0035d6e59e9d3mr729298ilv.6.1702068652425; Fri, 08 Dec
- 2023 12:50:52 -0800 (PST)
+        d=1e100.net; s=20230601; t=1702069389; x=1702674189;
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=LtIHTh0hehNu06ztsUeRifwavUEy6dr1rPiDSeWoO0A=;
+        b=S8ZArRTkHgyPgo4dGhNlP6u4kZmBNDLVtTxpljwX3NNvhHRXkSZtXyww/z6ceEq1q0
+         P3Zkf0SlEMhKDYaS1p8eQySmDKuU1WO35QWN6jbXqj27OVdZlIfyPOBTPDpNr5MAR7++
+         2k8r/BuMa9NqY82hadHZnndwc3bouP98mK+Q6NvZ7wnL5TBtCRHAZ+o36dIKviXOKMgM
+         LCfwu61mggddqvO8MIRy1l8WQImK6zVe6VkTfD5idkOKHl7LGuLtRyR9kau6zMYOq8nZ
+         obdxGJrhMEBKvE+IRSmz97H0PtmRP4yK/AlrShz4pGHTqLneCUNadeQcBvkvt7sTZ9nb
+         gsxg==
+X-Gm-Message-State: AOJu0YytVLcLuqO0P0jj7sHQx76K/eB265bFhQvzYNbdXJYJZ2DVjn12
+	acF0A6NZBFiZ6iKpyYGc3Oq+FQ==
+X-Google-Smtp-Source: AGHT+IHH+3zmpx+VSRDNGwsVcJe+bSc9b7ao//tkqLuLc/qcFmbtI43WHa2ma9W5zKa4XrT0DiiGDQ==
+X-Received: by 2002:a05:620a:46aa:b0:76f:1268:9e26 with SMTP id bq42-20020a05620a46aa00b0076f12689e26mr909108qkb.24.1702069389136;
+        Fri, 08 Dec 2023 13:03:09 -0800 (PST)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id g3-20020a05620a278300b0077efd1e3e52sm957289qkp.24.2023.12.08.13.03.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 08 Dec 2023 13:03:08 -0800 (PST)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+To: ulf.hansson@linaro.org,
+	linux-kernel@vger.kernel.org,
+	alcooperx@gmail.com,
+	linux-arm-kernel@lists.infradead.org,
+	adrian.hunter@intel.com,
+	linux-mmc@vger.kernel.org,
+	robh+dt@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org,
+	conor+dt@kernel.org,
+	devicetree@vger.kernel.org
+Cc: f.fainelli@gmail.com,
+	bcm-kernel-feedback-list@broadcom.com,
+	Kamal Dasu <kdasu@broadcom.com>
+Subject: [V2, 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for 74165b0
+Date: Fri,  8 Dec 2023 16:02:30 -0500
+Message-Id: <20231208210230.8191-1-kamal.dasu@broadcom.com>
+X-Mailer: git-send-email 2.17.1
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+	boundary="000000000000583776060c05e90d"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20231208202108.7468-1-kamal.dasu@broadcom.com> <12b3dce8-92c4-4084-9cc2-4e0d6432c6f3@linaro.org>
-In-Reply-To: <12b3dce8-92c4-4084-9cc2-4e0d6432c6f3@linaro.org>
-From: Kamal Dasu <kamal.dasu@broadcom.com>
-Date: Fri, 8 Dec 2023 15:50:15 -0500
-Message-ID: <CAKekbesbYZWVVDd46B_JJ0QWUY++OHS+4_zJ2ogZ7OvHLV6ptw@mail.gmail.com>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for 74165b0
-To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc: ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, alcooperx@gmail.com, 
-	linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com, 
-	linux-mmc@vger.kernel.org, robh+dt@kernel.org, 
-	krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, 
-	devicetree@vger.kernel.org, f.fainelli@gmail.com, 
-	bcm-kernel-feedback-list@broadcom.com, Kamal Dasu <kdasu@broadcom.com>
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-	boundary="0000000000006cbf23060c05bde0"
 
---0000000000006cbf23060c05bde0
-Content-Type: multipart/alternative; boundary="000000000000695af0060c05bd66"
+--000000000000583776060c05e90d
 
---000000000000695af0060c05bd66
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+From: Kamal Dasu <kdasu@broadcom.com>
 
-On Fri, Dec 8, 2023 at 3:28=E2=80=AFPM Krzysztof Kozlowski <
-krzysztof.kozlowski@linaro.org> wrote:
+With newer sdio controller core used for 74165b0 we need to update
+the compatibility with "brcm,bcm74165b0-sdhci".
 
-> On 08/12/2023 21:21, Kamal Dasu wrote:
-> > From: Kamal Dasu <kdasu@broadcom.com>
-> >
-> > With newer sdio controller core used for 74165b0 we need to update
-> > the compatibility with "brcm,bcm74165b0-sdhci".
-> >
-> > Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
-> > ---
-> >  .../devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml          | 5 +++++
-> >  1 file changed, 5 insertions(+)
-> >
-> > diff --git
-> a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> > index c028039bc477..cec9ff063794 100644
-> > --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> > @@ -13,6 +13,11 @@ maintainers:
-> >  properties:
-> >    compatible:
-> >      oneOf:
-> > +      - items:
-> > +          - enum:
-> > +              - brcm,bcm74165b0-sdhci
-> > +          - const: brcm,bcm74165-sdhci
->
-> What is exactly the difference between bcm74165b0 and bcm74165? Your
-> driver does not use bcm74165, so I wonder what its purpose is.
->
-> Few days ago, for different patchset, I was asking "why", because the
-> motivation was not clear from the code. Here you said "we need to", but
-> I would argue: no you do not need to add bcm74165 if it means nothing,
-> thus this commit msg has similar problem. Does not answer why it is done
-> like this.
->
-> I agree it can be removed in this case, it is just a convention that we
-have the base chip id without the a0, b0 postfix in general. However since
-this compatibility is just used by the sdhci core it's not necessary. let
-me send a v2 version with the change.
+Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
+---
+ Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+index c028039bc477..178d47ed65ca 100644
+--- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
++++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+@@ -13,6 +13,10 @@ maintainers:
+ properties:
+   compatible:
+     oneOf:
++      - items:
++          - enum:
++              - brcm,bcm74165b0-sdhci
++          - const: brcm,sdhci-brcmstb
+       - items:
+           - enum:
+               - brcm,bcm7216-sdhci
+-- 
+2.17.1
 
 
-
-> Best regards,
-> Krzysztof
->
->
-
---000000000000695af0060c05bd66
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
-<div dir=3D"ltr" class=3D"gmail_attr">On Fri, Dec 8, 2023 at 3:28=E2=80=AFP=
-M Krzysztof Kozlowski &lt;<a href=3D"mailto:krzysztof.kozlowski@linaro.org"=
->krzysztof.kozlowski@linaro.org</a>&gt; wrote:<br></div><blockquote class=
-=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rg=
-b(204,204,204);padding-left:1ex">On 08/12/2023 21:21, Kamal Dasu wrote:<br>
-&gt; From: Kamal Dasu &lt;<a href=3D"mailto:kdasu@broadcom.com" target=3D"_=
-blank">kdasu@broadcom.com</a>&gt;<br>
-&gt; <br>
-&gt; With newer sdio controller core used for 74165b0 we need to update<br>
-&gt; the compatibility with &quot;brcm,bcm74165b0-sdhci&quot;.<br>
-&gt; <br>
-&gt; Signed-off-by: Kamal Dasu &lt;<a href=3D"mailto:kdasu@broadcom.com" ta=
-rget=3D"_blank">kdasu@broadcom.com</a>&gt;<br>
-&gt; ---<br>
-&gt;=C2=A0 .../devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml=C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 | 5 +++++<br>
-&gt;=C2=A0 1 file changed, 5 insertions(+)<br>
-&gt; <br>
-&gt; diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.=
-yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml<br>
-&gt; index c028039bc477..cec9ff063794 100644<br>
-&gt; --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml<br=
->
-&gt; +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml<br=
->
-&gt; @@ -13,6 +13,11 @@ maintainers:<br>
-&gt;=C2=A0 properties:<br>
-&gt;=C2=A0 =C2=A0 compatible:<br>
-&gt;=C2=A0 =C2=A0 =C2=A0 oneOf:<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0 - items:<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 - enum:<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 - brcm,bcm74165b0-sd=
-hci<br>
-&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 - const: brcm,bcm74165-sdhci<br>
-<br>
-What is exactly the difference between bcm74165b0 and bcm74165? Your<br>
-driver does not use bcm74165, so I wonder what its purpose is.<br>
-<br>
-Few days ago, for different patchset, I was asking &quot;why&quot;, because=
- the<br>
-motivation was not clear from the code. Here you said &quot;we need to&quot=
-;, but<br>
-I would argue: no you do not need to add bcm74165 if it means nothing,<br>
-thus this commit msg has similar problem. Does not answer why it is done<br=
->
-like this.<br>
-<br></blockquote><div>I agree it can be removed in this case, it is just a =
-convention that we have the base chip id without the a0, b0 postfix in gene=
-ral. However since this compatibility is just used by the sdhci core it&#39=
-;s not necessary. let me send a v2 version with the change.=C2=A0</div><div=
-><br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"marg=
-in:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1e=
-x">
-Best regards,<br>
-Krzysztof<br>
-<br>
-</blockquote></div></div>
-
---000000000000695af0060c05bd66--
-
---0000000000006cbf23060c05bde0
+--000000000000583776060c05e90d
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -246,13 +161,13 @@ NxffjNkeAdgfN/SS9S9Rj4WXD7pF1M0Xq8gPLCLyXrx1i2KkYOYJsj0PWlC6VRg6E1xXkYDte0VL
 fAAG4QsETU27E1HBNQyp5zF1PoPCPvq3EnWQnbLgYk+Jz2iwIUwiqwr/bDgxggJtMIICaQIBATBr
 MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
 YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgw89WX2Pp7ue922QVkwDQYJYIZI
-AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIK3oVWywZdm6xjAjpxrHzXId5NuBd59y8wmnfaQN
-BZ3uMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMTIwODIwNTA1
-MlowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIPeK5UFK4fYdD6IqM6DQ1NVEsRc+db+FnwfV57Qc
+pxXtMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMTIwODIxMDMw
+OVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
 AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
-hkiG9w0BAQEFAASCAQB5ivpjzDoMWER5mZ5rMF0cYwcnwY6mvEiEL/VPhdFXChfdzcx7fML0Blyp
-01Ve1YUAukpLVyiaeaDuW05fFqpaLFLrXVTCu4+pTnDs1hyGSHDzEZwOKSDkg2e4qk4kDsJpYT4X
-T1M0nn/oYn3dDmaUyhTphkaicbx5l2C/RiW76iOZn/0yGwOIH4p4yYpClOOYPB7ALrHU2HC/iRD3
-aIXWcQjwYB1xuo8HHvQmTXx2LY+1CI3iqcKw5ATeEAaoSB5HdsrC/xBkrkhFZNNPFbsJSVspocln
-KEiApztp3gnd3WrDDGZ9Va/n/ZmpfRTzxA27qWkCRCun/N6mXfINFJ4u
---0000000000006cbf23060c05bde0--
+hkiG9w0BAQEFAASCAQCda+ue8nqrAAFc4XYpwclu7ea+S/D6ho5Edclo4WVovP82DnmIj6zTUves
+8SS8tfUfqirnmT48UGmoT0JOju3ng0vn4YO+ueGmJU053Kd9HlpsC2ad1iw2WoQS3jHh/fiayl7g
+V6tFSMFZDpb9FOxixTi8e35cbDvwL2MFnFDJVnrwHM41P1nKhnaMgrAu036cYiPwghFHdTsKDlsy
+j07Qa8fglGJHE7clIpehxCpl5zs/zKTl2rIGQjOg6I8bHfj+23RO9M4YLqA7fP0Ns7PTZbjFXRbY
+uJvB6Dc7h/5G+n0Pori4Hss42fxG+E7ACwiD7EVZeRF+a7Ai5dbVIrGP
+--000000000000583776060c05e90d--
