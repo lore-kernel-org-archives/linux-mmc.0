@@ -1,119 +1,113 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="TqUnNlwp"
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 075BA171C;
-	Fri,  8 Dec 2023 00:47:54 -0800 (PST)
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3B88haBG031366;
-	Fri, 8 Dec 2023 08:47:47 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=sJFSWpBix3ucYjDy7sX1k4wYmjCFS/pCIXxw8fhDtOs=;
- b=TqUnNlwpjnKpeH/rMRGMV0Nuw2EsvaCC4S322rEDPn+EwqdU1zjXLzJhSzEFLEoq44He
- DdSer7SE2FrF4+bC4AZPoNhfQKya0XLvGsADmO4oG9Iw+5KAOoPAjsRWHsTIxosCXJiD
- 3GLnGqKVPzVBsoCAIhmMv8JB64RYqhb+7Gnz8l+6v/vguRPgCc85YdD60kDSEvUwbTpc
- J9Jd/oTL2BdySy6Cjqm4HJr+yDgYEcfJ0B3NPHluxn9FmAXPpP1Q2D7BzWAKJ5+q4lxp
- IXlZ5bMDw1Nw31ZVVJRa8UuPd9zRcQ8GpLJqKeI/QFBbByQIr4Dosmf8I0jfoIIqvGtw QA== 
-Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3uuphg9154-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 08 Dec 2023 08:47:47 +0000
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3B88lkGD008964
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 8 Dec 2023 08:47:46 GMT
-Received: from [10.216.14.21] (10.80.80.8) by nalasex01b.na.qualcomm.com
- (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.40; Fri, 8 Dec
- 2023 00:45:59 -0800
-Message-ID: <c8885f86-1bb5-4322-9a0a-1a6227e34fa3@quicinc.com>
-Date: Fri, 8 Dec 2023 14:15:55 +0530
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ibOSUrKE"
+Received: from mail-qt1-x829.google.com (mail-qt1-x829.google.com [IPv6:2607:f8b0:4864:20::829])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8AEEC171F;
+	Fri,  8 Dec 2023 03:52:24 -0800 (PST)
+Received: by mail-qt1-x829.google.com with SMTP id d75a77b69052e-425430fe8d1so12125771cf.1;
+        Fri, 08 Dec 2023 03:52:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1702036343; x=1702641143; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=LWwkDICaANTCLBkKNyjRtb2b7p1OpvE2Uyw4u3EGEOc=;
+        b=ibOSUrKEPX0W3RLnoVT7TR4db3EOkFiiq8lg8K+55BQXjaicPZLxoAk+m1iGNc9mfQ
+         l0RN5Tl5HaJ2k7Nd5yPS/JH52zOUEe358JaaWR0HHHPBuADB0y0QWkdjOK+Y+4IsdLGg
+         GR50Gp/HMxfoP07OcrZvth4BePhg/ZNqGm814k0GijkLIJhxHNsuD+kP/X2VMUFOlzt6
+         oE1Omf1X5P6Y23AnX3MPzUMvo8pBRvf5sZfM40iI1Ib23H9Ixdk7cpCgVMrEo8H+js3k
+         H3TXIvG5qGyGaofDPCotrz0L8aMgdXfG4HGWUDjvDkI0/mBhPIt1oRq/tinmVjsNSb3t
+         17eA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1702036343; x=1702641143;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=LWwkDICaANTCLBkKNyjRtb2b7p1OpvE2Uyw4u3EGEOc=;
+        b=WxeTuPSg5Kf9f0IpWtG51huz0eUu9uqaMHH2ndWfFogqwbxRN3Kcmn+qKOPw9OTyEg
+         ABrV3GNuHjww60+yaDDGtBG1g3fHjUxf+GS18sWtbDhXf936nDdbwRx8SAxJkq/avy51
+         ZGK822PIRt/y6Axmd9eH7+T1HWaroZeCnUP1DMTQa8AB0ZS8TiwUaNCf+V1SHbFxmfAr
+         mUhc2KDGBaBhIa6Q0Rety0zTCv5M4So0cHQ5+w46HScG5KDqo4PhhaaVSh6f8S8M6Duc
+         bIQbcO/6dUki6qSI4n1G/jgxe0WnbZRhTltlqheO/rwpKGrLiRXlF/TJfx5ilQnO/0ij
+         XoDw==
+X-Gm-Message-State: AOJu0YwQE7rTJwU8OZxO87YKhbENE8CE3ooiQwUAUJxO1TpNHARN/vLp
+	A6I3nt9whA0oOScXwJqzKaFaq0czPnnQNS4SHV4=
+X-Google-Smtp-Source: AGHT+IFvzSllLQfPV5Ta3QUEkfcC0/yZFxXlw1MHSdHhbpAAcNaDB42ZLxb2BVvXPfNRTGMyUQE4P95id9DbuiAG13U=
+X-Received: by 2002:a05:6214:92:b0:67a:a721:782f with SMTP id
+ n18-20020a056214009200b0067aa721782fmr3493346qvr.84.1702036343619; Fri, 08
+ Dec 2023 03:52:23 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 11/12] arm64: dts: qcom: sm8650: add hwkm support to
- ufs ice
-Content-Language: en-US
-To: Bjorn Andersson <andersson@kernel.org>,
-        Gaurav Kashyap
-	<quic_gaurkash@quicinc.com>
-CC: <linux-scsi@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <ebiggers@google.com>, <neil.armstrong@linaro.org>,
-        <srinivas.kandagatla@linaro.org>, <linux-mmc@vger.kernel.org>,
-        <linux-block@vger.kernel.org>, <linux-fscrypt@vger.kernel.org>,
-        <omprsing@qti.qualcomm.com>, <quic_psodagud@quicinc.com>,
-        <abel.vesa@linaro.org>, <quic_spuppala@quicinc.com>,
-        <kernel@quicinc.com>
-References: <20231122053817.3401748-1-quic_gaurkash@quicinc.com>
- <20231122053817.3401748-12-quic_gaurkash@quicinc.com>
- <blzia6asujby2xsfg2na6piwcgfkorodugebvflstjfexeyfvj@t5ifq3kxquhw>
-From: Om Prakash Singh <quic_omprsing@quicinc.com>
-In-Reply-To: <blzia6asujby2xsfg2na6piwcgfkorodugebvflstjfexeyfvj@t5ifq3kxquhw>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: YFtx0sXkLhCp189oQP_LKcLjktbtQuCB
-X-Proofpoint-GUID: YFtx0sXkLhCp189oQP_LKcLjktbtQuCB
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-12-08_04,2023-12-07_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- spamscore=0 impostorscore=0 clxscore=1011 lowpriorityscore=0 phishscore=0
- adultscore=0 malwarescore=0 mlxlogscore=920 suspectscore=0 mlxscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2311290000 definitions=main-2312080071
+References: <20231204064934.21236-1-wenchao.chen@unisoc.com> <CAPDyKFpK2Yjj2oDWCUKHpht6PC9uNG-x2rPYO3EBD6GGWg4VZg@mail.gmail.com>
+In-Reply-To: <CAPDyKFpK2Yjj2oDWCUKHpht6PC9uNG-x2rPYO3EBD6GGWg4VZg@mail.gmail.com>
+From: Wenchao Chen <wenchao.chen666@gmail.com>
+Date: Fri, 8 Dec 2023 19:52:12 +0800
+Message-ID: <CA+Da2qyB2tQjq5wxoqNwjb5HXhdPHMsWN08Ot7nMEkZzOgQ9LA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sprd: Fix eMMC init failure after hw reset
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wenchao Chen <wenchao.chen@unisoc.com>, zhang.lyra@gmail.com, orsonzhai@gmail.com, 
+	baolin.wang@linux.alibaba.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com, 
+	yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
 
-
-
-On 12/8/2023 9:21 AM, Bjorn Andersson wrote:
-> On Tue, Nov 21, 2023 at 09:38:16PM -0800, Gaurav Kashyap wrote:
->> The Inline Crypto Engine (ICE) for UFS supports the
->> Hardware Key Manager (hwkm) to securely manage storage
->> keys. Enable using this hardware on sm8650.
-> 
-> I'm unable to understand why the size of the reg changes based on this
-> motivation.
-> 
-> Regards,
-> Bjorn
+On Thu, 7 Dec 2023 at 21:59, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-Actual size of register space size is 0x18000 (as per IPCAT). But all 
-registers space are not used.
+> On Mon, 4 Dec 2023 at 07:50, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+> >
+> > Some eMMC devices that do not close the auto clk gate
+> > after hw reset will cause eMMC initialization to fail.
+> >
+> > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+>
+> I assume we want this tagged for stable kernels too, but do we have a
+> corresponding fixes commit that we can point out?
+>
+> Kind regards
+> Uffe
+>
 
-HWKM register offset is start at 0x8000. Hence needed to expand reg map 
-size.
+Hi Uffe
+Sorry, I forgot to add fixes commit.
 
+Fixes: ff874dbc4f86 ("mmc: sdhci-sprd: Disable CLK_AUTO when the clock
+is less than 400K")
 
->>
->> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
->> ---
->>   arch/arm64/boot/dts/qcom/sm8650.dtsi | 3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/arch/arm64/boot/dts/qcom/sm8650.dtsi b/arch/arm64/boot/dts/qcom/sm8650.dtsi
->> index bbebe15437aa..b61066210e09 100644
->> --- a/arch/arm64/boot/dts/qcom/sm8650.dtsi
->> +++ b/arch/arm64/boot/dts/qcom/sm8650.dtsi
->> @@ -763,7 +763,8 @@ rng: rng@10c3000 {
->>   		ice: crypto@1d88000 {
->>   			compatible = "qcom,sm8650-inline-crypto-engine",
->>   				     "qcom,inline-crypto-engine";
->> -			reg = <0 0x01d88000 0 0x8000>;
->> +			reg = <0 0x01d88000 0 0x10000>;
->> +			qcom,ice-use-hwkm;
->>   
->>   			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
->>   		};
->> -- 
->> 2.25.1
->>
->>
-> 
+Thanks
+
+> > ---
+> >  drivers/mmc/host/sdhci-sprd.c | 10 +++++++---
+> >  1 file changed, 7 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> > index 6b8a57e2d20f..bed57a1c64b5 100644
+> > --- a/drivers/mmc/host/sdhci-sprd.c
+> > +++ b/drivers/mmc/host/sdhci-sprd.c
+> > @@ -239,15 +239,19 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
+> >         div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
+> >         sdhci_enable_clk(host, div);
+> >
+> > +       val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
+> > +       mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN | SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
+> >         /* Enable CLK_AUTO when the clock is greater than 400K. */
+> >         if (clk > 400000) {
+> > -               val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
+> > -               mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
+> > -                       SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
+> >                 if (mask != (val & mask)) {
+> >                         val |= mask;
+> >                         sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
+> >                 }
+> > +       } else {
+> > +               if (val & mask) {
+> > +                       val &= ~mask;
+> > +                       sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
+> > +               }
+> >         }
+> >  }
+> >
+> > --
+> > 2.17.1
+> >
