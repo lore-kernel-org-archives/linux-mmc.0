@@ -1,111 +1,125 @@
 Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8CF51715;
-	Thu,  7 Dec 2023 19:22:24 -0800 (PST)
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 3B83MCfpC576501, This message is accepted by code: ctloc85258
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10E8910CA;
+	Thu,  7 Dec 2023 19:27:31 -0800 (PST)
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 3B83RHyP4577203, This message is accepted by code: ctloc85258
 Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 3B83MCfpC576501
+	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 3B83RHyP4577203
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 8 Dec 2023 11:22:12 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+	Fri, 8 Dec 2023 11:27:17 +0800
+Received: from RTEXMBS03.realtek.com.tw (172.21.6.96) by
  RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2375.32; Fri, 8 Dec 2023 11:22:12 +0800
-Received: from localhost (172.22.81.102) by RTEXMBS01.realtek.com.tw
- (172.21.6.94) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.1.2507.34; Fri, 8 Dec
- 2023 11:22:11 +0800
-From: Ricky Wu <ricky_wu@realtek.com>
-To: <arnd@arndb.de>, <gregkh@linuxfoundation.org>,
-        <linux-kernel@vger.kernel.org>, <ulf.hansson@linaro.org>,
-        <frank.li@vivo.com>, <u.kleine-koenig@pengutronix.de>,
-        <linux-mmc@vger.kernel.org>
-CC: <ricky_wu@realtek.com>
-Subject: [PATCH v7 3/3] mmc: rtsx: add rts5264 to support sd express card
-Date: Fri, 8 Dec 2023 11:21:45 +0800
-Message-ID: <20231208032145.2143580-4-ricky_wu@realtek.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20231208032145.2143580-1-ricky_wu@realtek.com>
-References: <20231208032145.2143580-1-ricky_wu@realtek.com>
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.32; Fri, 8 Dec 2023 11:27:18 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXMBS03.realtek.com.tw (172.21.6.96) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Fri, 8 Dec 2023 11:27:17 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::540c:c8d6:1d0f:ab9f]) by
+ RTEXMBS01.realtek.com.tw ([fe80::540c:c8d6:1d0f:ab9f%5]) with mapi id
+ 15.01.2507.034; Fri, 8 Dec 2023 11:27:17 +0800
+From: Ricky WU <ricky_wu@realtek.com>
+To: Greg KH <gregkh@linuxfoundation.org>
+CC: "arnd@arndb.de" <arnd@arndb.de>,
+        "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>,
+        "ulf.hansson@linaro.org"
+	<ulf.hansson@linaro.org>,
+        "frank.li@vivo.com" <frank.li@vivo.com>,
+        "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH v6 1/3] misc: rtsx: add to support new card reader rts5264 new definition and function
+Thread-Topic: [PATCH v6 1/3] misc: rtsx: add to support new card reader
+ rts5264 new definition and function
+Thread-Index: AQHaIncLHE1XODAr1k6MteWilVyRCrCcmzAAgAIrsxA=
+Date: Fri, 8 Dec 2023 03:27:17 +0000
+Message-ID: <6241bf49d5cb40329640e759cecd8f06@realtek.com>
+References: <20231129034856.2001223-1-ricky_wu@realtek.com>
+ <20231129034856.2001223-2-ricky_wu@realtek.com>
+ <2023120715-reenact-repose-906c@gregkh>
+In-Reply-To: <2023120715-reenact-repose-906c@gregkh>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+x-kse-serverinfo: RTEXMBS03.realtek.com.tw, 9
+x-kse-antispam-interceptor-info: fallback
+x-kse-antivirus-interceptor-info: fallback
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: RTEXH36506.realtek.com.tw (172.21.6.27) To
- RTEXMBS01.realtek.com.tw (172.21.6.94)
-X-KSE-ServerInfo: RTEXMBS01.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
 X-KSE-AntiSpam-Interceptor-Info: fallback
 X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
 X-KSE-AntiSpam-Interceptor-Info: fallback
 X-KSE-Antivirus-Interceptor-Info: fallback
 X-KSE-AntiSpam-Interceptor-Info: fallback
 
-rts5264 can support sd express card, so add the id in sd express card init
-to do rts5264 register setting when the sd express card insert
-
-Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
----
-v3: split up mmc part from v2 patch
-v4: split new definition up from v3
----
----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 17 ++++++++++++++++-
- 1 file changed, 16 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 87d78432a1e0..7dfe7c4e0077 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -7,6 +7,7 @@
-  *   Wei WANG <wei_wang@realsil.com.cn>
-  */
- 
-+#include <linux/pci.h>
- #include <linux/module.h>
- #include <linux/slab.h>
- #include <linux/highmem.h>
-@@ -947,7 +948,7 @@ static int sd_power_on(struct realtek_pci_sdmmc *host, unsigned char power_mode)
- 	/* send at least 74 clocks */
- 	rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
- 
--	if (PCI_PID(pcr) == PID_5261) {
-+	if ((PCI_PID(pcr) == PID_5261) || (PCI_PID(pcr) == PID_5264)) {
- 		/*
- 		 * If test mode is set switch to SD Express mandatorily,
- 		 * this is only for factory testing.
-@@ -1364,6 +1365,14 @@ static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
- 	struct rtsx_pcr *pcr = host->pcr;
- 
-+	if (PCI_PID(pcr) == PID_5264) {
-+		pcie_capability_clear_and_set_word(pcr->pci, PCI_EXP_LNKCTL2,
-+				PCI_EXP_LNKCTL2_TLS, PCI_EXP_LNKCTL2_TLS_2_5GT);
-+		pci_write_config_byte(pcr->pci, 0x80e, 0x02);
-+		pcie_capability_clear_and_set_word(pcr->pci, PCI_EXP_LNKCTL2,
-+				PCI_EXP_LNKCTL2_TLS, PCI_EXP_LNKCTL2_TLS_5_0GT);
-+	}
-+
- 	/* Set relink_time for changing to PCIe card */
- 	relink_time = 0x8FFF;
- 
-@@ -1379,6 +1388,12 @@ static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (pcr->ops->disable_auto_blink)
- 		pcr->ops->disable_auto_blink(pcr);
- 
-+	if (PCI_PID(pcr) == PID_5264) {
-+		rtsx_pci_write_register(pcr, RTS5264_AUTOLOAD_CFG2,
-+			RTS5264_CHIP_RST_N_SEL, RTS5264_CHIP_RST_N_SEL);
-+		rtsx_pci_write_register(pcr, GPIO_CTL, 0x02, 0x00);
-+	}
-+
- 	/* For PCIe/NVMe mode can't enter delink issue */
- 	pcr->hw_param.interrupt_en &= ~(SD_INT_EN);
- 	rtsx_pci_writel(pcr, RTSX_BIER, pcr->hw_param.interrupt_en);
--- 
-2.25.1
-
+PiA+IGluIG9yZGVyIHRvIHN1cHBvcnQgTkVXIGNoaXAgcnRzNTI2NCwgdGhlIGRlZmluaXRpb25z
+IG9mIHNvbWUgaW50ZXJuYWwNCj4gPiByZWdpc3RlcnMgYXJlIGRlZmluZSBpbiBuZXcgZmlsZSBy
+dHM1MjY0LmgsIGFuZCBzb21lIGNhbGxiYWNrDQo+ID4gZnVuY3Rpb25zIGFuZCB0aGUgd29ya2Zs
+b3cgZm9yIHJ0czUyNjQgYXJlIGRlZmluZSBpbiBuZXcgZmlsZQ0KPiA+IHJ0czUyNjQuYw0KPiA+
+DQo+ID4gYWxzbyBhZGQgcnRzNTI2NC5vIHRvIE1ha2VmaWxlDQo+ID4NCj4gPiBTaWduZWQtb2Zm
+LWJ5OiBSaWNreSBXdSA8cmlja3lfd3VAcmVhbHRlay5jb20+DQo+ID4gLS0tDQo+ID4gdjQ6IHNw
+bGl0IG5ldyBkZWZpbml0aW9uIHBhcnQgdXAgZnJvbSB2Mw0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJz
+L21pc2MvY2FyZHJlYWRlci9NYWtlZmlsZSAgfCAgIDIgKy0NCj4gPiAgZHJpdmVycy9taXNjL2Nh
+cmRyZWFkZXIvcnRzNTI2NC5jIHwgODg2DQo+ID4gKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrICBkcml2ZXJzL21pc2MvY2FyZHJlYWRlci9ydHM1MjY0LmggfA0KPiA+IDI3OCArKysrKysr
+KysrDQo+ID4gIDMgZmlsZXMgY2hhbmdlZCwgMTE2NSBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9u
+KC0pICBjcmVhdGUgbW9kZQ0KPiA+IDEwMDY0NCBkcml2ZXJzL21pc2MvY2FyZHJlYWRlci9ydHM1
+MjY0LmMgIGNyZWF0ZSBtb2RlIDEwMDY0NA0KPiA+IGRyaXZlcnMvbWlzYy9jYXJkcmVhZGVyL3J0
+czUyNjQuaA0KPiANCj4gV2hlbiBidWlsZGluZyB3aXRoIHRoaXMgY2hhbmdlIGFwcGxpZWQsIEkg
+Z2V0IGxvdHMgb2YgYnVpbGQgZXJyb3JzLiAgSG93IGRpZCB5b3UNCj4gdGVzdCB0aGlzPw0KPiAN
+Cj4gTXkgZXJyb3JzIGFyZToNCj4gDQo+ICAgQ0MgW01dICBkcml2ZXJzL21pc2MvY2FyZHJlYWRl
+ci9ydHM1MjY0Lm8NCj4gZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTI2NC5jOiBJbiBmdW5j
+dGlvbiDigJhydHM1MjY0X3Byb2Nlc3Nfb2Nw4oCZOg0KPiBkcml2ZXJzL21pc2MvY2FyZHJlYWRl
+ci9ydHM1MjY0LmM6Mzk4OjQwOiBlcnJvcjog4oCYc3RydWN0IHJ0c3hfcGNy4oCZIGhhcyBubw0K
+PiBtZW1iZXIgbmFtZWQg4oCYb3ZwX3N0YXTigJk7IGRpZCB5b3UgbWVhbiDigJhvY3Bfc3RhdOKA
+mT8NCj4gICAzOTggfCAgICAgICAgIHJ0czUyNjRfZ2V0X292cHN0YXQocGNyLCAmcGNyLT5vdnBf
+c3RhdCk7DQo+ICAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+Xn5+fn5+fn4NCj4gICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBvY3Bfc3RhdA0KPiBkcml2ZXJzL21pc2MvY2FyZHJlYWRlci9ydHM1MjY0LmM6NDAyOjMxOiBl
+cnJvcjog4oCYc3RydWN0IHJ0c3hfcGNy4oCZIGhhcyBubw0KPiBtZW1iZXIgbmFtZWQg4oCYb3Zw
+X3N0YXTigJk7IGRpZCB5b3UgbWVhbiDigJhvY3Bfc3RhdOKAmT8NCj4gICA0MDIgfCAgICAgICAg
+ICAgICAgICAgICAgICAgICAocGNyLT5vdnBfc3RhdCAmIChSVFM1MjY0X09WUF9OT1cgfA0KPiBS
+VFM1MjY0X09WUF9FVkVSKSkpIHsNCj4gICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICBefn5+fn5+fg0KPiAgICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9j
+cF9zdGF0DQo+IGRyaXZlcnMvbWlzYy9jYXJkcmVhZGVyL3J0czUyNjQuYzo0MDg6MjI6IGVycm9y
+OiDigJhzdHJ1Y3QgcnRzeF9wY3LigJkgaGFzIG5vDQo+IG1lbWJlciBuYW1lZCDigJhvdnBfc3Rh
+dOKAmTsgZGlkIHlvdSBtZWFuIOKAmG9jcF9zdGF04oCZPw0KPiAgIDQwOCB8ICAgICAgICAgICAg
+ICAgICBwY3ItPm92cF9zdGF0ID0gMDsNCj4gICAgICAgfCAgICAgICAgICAgICAgICAgICAgICBe
+fn5+fn5+fg0KPiAgICAgICB8ICAgICAgICAgICAgICAgICAgICAgIG9jcF9zdGF0DQo+IGRyaXZl
+cnMvbWlzYy9jYXJkcmVhZGVyL3J0czUyNjQuYzogSW4gZnVuY3Rpb24g4oCYcnRzNTI2NF9leHRy
+YV9pbml0X2h34oCZOg0KPiBkcml2ZXJzL21pc2MvY2FyZHJlYWRlci9ydHM1MjY0LmM6NTM0OjM4
+OiBlcnJvcjog4oCYUlRTNTI2NF9BVVRPTE9BRF9DRkcy4oCZDQo+IHVuZGVjbGFyZWQgKGZpcnN0
+IHVzZSBpbiB0aGlzIGZ1bmN0aW9uKTsgZGlkIHlvdSBtZWFuDQo+IOKAmFJUUzUyNjRfQVVUT0xP
+QURfQ0ZHM+KAmT8NCj4gICA1MzQgfCAgICAgICAgIHJ0c3hfcGNpX3dyaXRlX3JlZ2lzdGVyKHBj
+ciwgUlRTNTI2NF9BVVRPTE9BRF9DRkcyLA0KPiAgICAgICB8DQo+IF5+fn5+fn5+fn5+fn5+fn5+
+fn5+fg0KPiAgICAgICB8DQo+IFJUUzUyNjRfQVVUT0xPQURfQ0ZHMw0KPiBkcml2ZXJzL21pc2Mv
+Y2FyZHJlYWRlci9ydHM1MjY0LmM6NTM0OjM4OiBub3RlOiBlYWNoIHVuZGVjbGFyZWQgaWRlbnRp
+ZmllciBpcw0KPiByZXBvcnRlZCBvbmx5IG9uY2UgZm9yIGVhY2ggZnVuY3Rpb24gaXQgYXBwZWFy
+cyBpbg0KPiBkcml2ZXJzL21pc2MvY2FyZHJlYWRlci9ydHM1MjY0LmM6NTM1OjI1OiBlcnJvcjog
+4oCYUlRTNTI2NF9DSElQX1JTVF9OX1NFTOKAmQ0KPiB1bmRlY2xhcmVkIChmaXJzdCB1c2UgaW4g
+dGhpcyBmdW5jdGlvbik7IGRpZCB5b3UgbWVhbg0KPiDigJhSVFM1MjY0X05PTl9YVEFMX1NFTOKA
+mT8NCj4gICA1MzUgfCAgICAgICAgICAgICAgICAgICAgICAgICBSVFM1MjY0X0NISVBfUlNUX05f
+U0VMLCAwKTsNCj4gICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICBefn5+fn5+fn5+fn5+
+fn5+fn5+fn5+DQo+ICAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgUlRTNTI2NF9OT05f
+WFRBTF9TRUwNCj4gZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRzNTI2NC5jOjUzODozODogZXJy
+b3I6IOKAmENER1figJkgdW5kZWNsYXJlZCAoZmlyc3QNCj4gdXNlIGluIHRoaXMgZnVuY3Rpb24p
+DQo+ICAgNTM4IHwgICAgICAgICBydHN4X3BjaV93cml0ZV9yZWdpc3RlcihwY3IsIENER1csIDB4
+RkYsIDB4MDEpOw0KPiAgICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBefn5+DQo+IGRyaXZlcnMvbWlzYy9jYXJkcmVhZGVyL3J0czUyNjQuYzogSW4gZnVuY3Rpb24g
+4oCYcnRzNTI2NF9pbml0X3BhcmFtc+KAmToNCj4gZHJpdmVycy9taXNjL2NhcmRyZWFkZXIvcnRz
+NTI2NC5jOjg4Mzo1MTogZXJyb3I6IOKAmFNEX09WUF9JTlRfRU7igJkNCj4gdW5kZWNsYXJlZCAo
+Zmlyc3QgdXNlIGluIHRoaXMgZnVuY3Rpb24pOyBkaWQgeW91IG1lYW4g4oCYU0RfT0NQX0lOVF9F
+TuKAmT8NCj4gICA4ODMgfCAgICAgICAgIGh3X3BhcmFtLT5pbnRlcnJ1cHRfZW4gfD0gKFNEX09D
+X0lOVF9FTiB8DQo+IFNEX09WUF9JTlRfRU4pOw0KPiAgICAgICB8DQo+IF5+fn5+fn5+fn5+fn4N
+Cj4gICAgICAgfA0KPiBTRF9PQ1BfSU5UX0VODQo+IG1ha2VbNV06ICoqKiBbc2NyaXB0cy9NYWtl
+ZmlsZS5idWlsZDoyNDM6IGRyaXZlcnMvbWlzYy9jYXJkcmVhZGVyL3J0czUyNjQub10NCj4gRXJy
+b3IgMQ0KPiANCj4gDQo+IA0KPiBSZW1lbWJlciwgZWFjaCBjb21taXQgY2FuIG5vdCBicmVhayB0
+aGUgYnVpbGQuICBQbGVhc2UgZml4IHVwIHRoaXMgc2VyaWVzIHRvDQo+IGJ1aWxkIHByb3Blcmx5
+IGF0IGVhY2ggY29tbWl0Lg0KPiANCg0KU29ycnkgZm9yIHRoYXQsIEkgc2VudCB0aGUgdjcgdG8g
+Zml4IHRoaXMgaXNzdWUsIHNvbWUgZGVmaW5pdGlvbnMgYXJlIGRlZmluZWQgaW4NClBhdGNoIzIs
+IEkgbW92ZWQgdGhlIGZpbGUgdG8gUGF0Y2gjMSBpbiB2Nw0KDQpUaGFuayB5b3UNCg0KPiB0aGFu
+a3MsDQo+IA0KPiBncmVnIGstaA0K
