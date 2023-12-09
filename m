@@ -1,38 +1,38 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="TYkpt2zi"
-Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52BF710E6
-	for <linux-mmc@vger.kernel.org>; Sat,  9 Dec 2023 08:58:30 -0800 (PST)
-Received: by mail-pl1-x633.google.com with SMTP id d9443c01a7336-1d0538d9bbcso28512745ad.3
-        for <linux-mmc@vger.kernel.org>; Sat, 09 Dec 2023 08:58:30 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="axQkH7CO"
+Received: from mail-il1-x136.google.com (mail-il1-x136.google.com [IPv6:2607:f8b0:4864:20::136])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46A0010E6
+	for <linux-mmc@vger.kernel.org>; Sat,  9 Dec 2023 08:58:37 -0800 (PST)
+Received: by mail-il1-x136.google.com with SMTP id e9e14a558f8ab-35d624b0415so11833895ab.2
+        for <linux-mmc@vger.kernel.org>; Sat, 09 Dec 2023 08:58:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1702141110; x=1702745910; darn=vger.kernel.org;
-        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Dnn3O6aIvsz3y3LnCC4kdJwmd/mEDWrb/r5EsXHYkm4=;
-        b=TYkpt2zi1SMs3jXst3O4kIMImJYD7R2uAtgfFbCkzUyqd0owROzvdyXmDytFQHfAwF
-         BQTuAKFFL587AOvSbNVkMvD9frYKBe8XKv6Sg+yCkyw0WRwEs2qN/oc7bR912ZssxjgG
-         GBV8HwdWZIjdyNzK7GZkWW1aVCU3UKLSbe6go=
+        d=broadcom.com; s=google; t=1702141116; x=1702745916; darn=vger.kernel.org;
+        h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=IQ3AtN8UDxInie2DiZab+Gz4Qtrs5BQr4YpGe4LHLik=;
+        b=axQkH7CO2/QG6qSe4uU5nUcTqP6PRSVoWTyR5IjTsdzkYGjYjH5iZGt+LUpq5qS91L
+         mrTTkw3YEDcMBCxgWF5P/n841N09EZrrRiwxTuytJUWu67yJvf/jaanweXmUwcuRP0dn
+         GJ773o9mFyi4HqWod6ped7miihR+2CVt+CZgY=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702141110; x=1702745910;
-        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Dnn3O6aIvsz3y3LnCC4kdJwmd/mEDWrb/r5EsXHYkm4=;
-        b=kNz1c3nbibGwpUfnKHM8IdstJ2oeaBixtq57u8wnhR4kFi8kMjTLa5njOaSmi+1I9X
-         NVNBVVAt17aOnnLvZEEOjeOitDqrnyEhbe7WUPetj5ZpKkIgrukt498/s/wdbrp8zZA1
-         9sN1UxTr2fb6ACIK32PmCqa+t1rpNGNj9RztJ63un7kgkOq1DtxESsHn2Sq3TO7debTj
-         SGEa9Oz1UP8pJQmcUfFblFm931Xf8H/VT1J8ia4qq+cT13qzsOlrmhX2FUP7TXbxhxii
-         PoOw0ASP2tIkFQDOIozoK2GZP2dMndANWmOPuUjM9ySY/Z2GLz5oSh2lKGSkRSOTm2JO
-         8ZQg==
-X-Gm-Message-State: AOJu0YzAF+Tcehg+5UwWc2BEk4NvslS540fgc60IOalmzPmJcjQ39x0B
-	ArdpTT1tgC6kjs9T3HLH9gNl/w==
-X-Google-Smtp-Source: AGHT+IHcQAll+6RBdoaI9xqowSd4iAMH94edPPoza2G3EZtrwYRhfEi5smHB6Z0sUyHEfFWfkKxWzQ==
-X-Received: by 2002:a17:902:e74d:b0:1ce:6669:3260 with SMTP id p13-20020a170902e74d00b001ce66693260mr1510628plf.67.1702141109722;
-        Sat, 09 Dec 2023 08:58:29 -0800 (PST)
+        d=1e100.net; s=20230601; t=1702141116; x=1702745916;
+        h=references:in-reply-to:message-id:date:subject:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=IQ3AtN8UDxInie2DiZab+Gz4Qtrs5BQr4YpGe4LHLik=;
+        b=sBCBUhy7hMdK7dmTJcA/0l2PxqzcHk8ofFNUveCT+0uwJ/6Pp8B49T2WYIspqUbWV0
+         Bhqa9WyB/Wttkvxywbz4U8a8VDo1SsTtcQkUqcellqmybpE/DTUKH87DIReHYO8tOgaf
+         7N91aGIXHugUEGAW+9hUFZ/4KMs0fTtos1FRqPcd/oYx+WMG+Qh2uozDisVoJiJzPJ05
+         QB2N4KsQKq//FmcG0MuazsZBkxA9bU/9twVkUIdBRVCgS4U81/9cDbUr+JEQWQgPU5Wy
+         j47eQQzKOA9vnKOJ/RR+qEOIqdKkRs10z6ejtr9xyKnuawvR/06DWlMT948y+bYhuP5T
+         V5qQ==
+X-Gm-Message-State: AOJu0Ywggu18tEesyCCY/kAXwq8pdXksbZ1rsjYCUQumZ8nEtN7PXviv
+	E9LklBT2ZSqgZTTTF1+knj4Cng==
+X-Google-Smtp-Source: AGHT+IEg2FQaVJzNVobrBW9oAxleXv69J8grfcOKMeIz4/uPytCFl1HS/Ks2ekI8XaQ/s+JdJS0NNA==
+X-Received: by 2002:a05:6e02:180b:b0:35d:6aa4:d5d8 with SMTP id a11-20020a056e02180b00b0035d6aa4d5d8mr3184087ilv.37.1702141116529;
+        Sat, 09 Dec 2023 08:58:36 -0800 (PST)
 Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id g14-20020a1709029f8e00b001cf7c07be50sm3595751plq.58.2023.12.09.08.58.26
+        by smtp.gmail.com with ESMTPSA id g14-20020a1709029f8e00b001cf7c07be50sm3595751plq.58.2023.12.09.08.58.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 09 Dec 2023 08:58:28 -0800 (PST)
+        Sat, 09 Dec 2023 08:58:35 -0800 (PST)
 From: Kamal Dasu <kamal.dasu@broadcom.com>
 To: ulf.hansson@linaro.org,
 	linux-kernel@vger.kernel.org,
@@ -47,53 +47,155 @@ To: ulf.hansson@linaro.org,
 Cc: f.fainelli@gmail.com,
 	bcm-kernel-feedback-list@broadcom.com,
 	Kamal Dasu <kdasu@broadcom.com>
-Subject: [V3, 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for 74165b0
-Date: Sat,  9 Dec 2023 11:58:15 -0500
-Message-Id: <20231209165816.39044-1-kamal.dasu@broadcom.com>
+Subject: [V3, 2/2] mmc: add new sdhci reset sequence for brcm 74165b0
+Date: Sat,  9 Dec 2023 11:58:16 -0500
+Message-Id: <20231209165816.39044-2-kamal.dasu@broadcom.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20231209165816.39044-1-kamal.dasu@broadcom.com>
+References: <20231209165816.39044-1-kamal.dasu@broadcom.com>
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-	boundary="000000000000395805060c169c23"
+	boundary="000000000000a11ece060c169c09"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
---000000000000395805060c169c23
+--000000000000a11ece060c169c09
 
 From: Kamal Dasu <kdasu@broadcom.com>
 
-With newer sdio controller core used for 74165b0 we need to update
-the compatibility with "brcm,bcm74165b0-sdhci".
+74165b0 shall use a new sdio controller core version which
+requires a different reset sequence. For core reset we use
+sdhci_reset. For CMD and/or DATA reset added a new function
+to also enable SDCHI clocks SDHCI_CLOCK_CARD_EN
+SDHCI_CLOCK_INT_EN along with the SDHCI_RESET_CMD and/or
+SDHCI_RESET_DATA fields.
 
 Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/oe-kbuild-all/202312091608.0VbkRxlh-lkp@intel.com/
+Closes:
+https://lore.kernel.org/oe-kbuild-all/202312091905.UGzltx8A-lkp@intel.com/``````````````
 ---
- .../devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml         | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-brcmstb.c | 69 +++++++++++++++++++++++++++++---
+ 1 file changed, 64 insertions(+), 5 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-index c028039bc477..ea97b8c5a283 100644
---- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-+++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-@@ -20,11 +20,9 @@ properties:
-           - const: brcm,sdhci-brcmstb
-       - items:
-           - enum:
-+              - brcm,bcm74165b0-sdhci
-               - brcm,bcm7445-sdhci
--          - const: brcm,sdhci-brcmstb
--      - items:
--          - enum:
--              - brcm,bcm7425-sdhci
-+	      - brcm,bcm7425-sdhci
-           - const: brcm,sdhci-brcmstb
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index c23251bb95f3..d4bd5b3c0fa4 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -44,8 +44,13 @@ struct brcmstb_match_priv {
  
-   reg:
+ static inline void enable_clock_gating(struct sdhci_host *host)
+ {
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
+ 	u32 reg;
+ 
++	if (!(priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK))
++		return;
++
+ 	reg = sdhci_readl(host, SDHCI_VENDOR);
+ 	reg |= SDHCI_VENDOR_GATE_SDCLK_EN;
+ 	sdhci_writel(host, reg, SDHCI_VENDOR);
+@@ -53,14 +58,54 @@ static inline void enable_clock_gating(struct sdhci_host *host)
+ 
+ static void brcmstb_reset(struct sdhci_host *host, u8 mask)
+ {
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
+-
+ 	sdhci_and_cqhci_reset(host, mask);
+ 
+ 	/* Reset will clear this, so re-enable it */
+-	if (priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK)
+-		enable_clock_gating(host);
++	enable_clock_gating(host);
++}
++
++static void brcmstb_sdhci_reset_cmd_data(struct sdhci_host *host, u8 mask)
++{
++	ktime_t timeout;
++	u32 reg;
++	u32 new_mask = (mask &  (SDHCI_RESET_CMD | SDHCI_RESET_DATA)) << 24;
++
++	new_mask |= SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN;
++	reg = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
++	sdhci_writel(host, reg | new_mask, SDHCI_CLOCK_CONTROL);
++
++	/* Wait max 10 ms */
++	timeout = ktime_add_ms(ktime_get(), 10);
++
++	/* hw clears the bit when it's done */
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
++
++		if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
++			break;
++		if (timedout) {
++			pr_err("%s: Reset 0x%x never completed.\n",
++				mmc_hostname(host->mmc), (int)mask);
++			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
++			sdhci_dumpregs(host);
++			return;
++		}
++		udelay(10);
++	}
++}
++
++static void brcmstb_reset_74165b0(struct sdhci_host *host, u8 mask)
++{
++	/* take care of RESET_ALL as usual */
++	if (mask & SDHCI_RESET_ALL)
++		sdhci_and_cqhci_reset(host, SDHCI_RESET_ALL);
++
++	/* cmd and/or data treated differently on this core */
++	if (mask & (SDHCI_RESET_CMD | SDHCI_RESET_DATA))
++		brcmstb_sdhci_reset_cmd_data(host, mask);
++
++	/* Reset will clear this, so re-enable it */
++	enable_clock_gating(host);
+ }
+ 
+ static void sdhci_brcmstb_hs400es(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -162,6 +207,13 @@ static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
+ 	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
+ };
+ 
++static struct sdhci_ops sdhci_brcmstb_ops_74165b0 = {
++	.set_clock = sdhci_brcmstb_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = brcmstb_reset_74165b0,
++	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
++};
++
+ static struct brcmstb_match_priv match_priv_7425 = {
+ 	.flags = BRCMSTB_MATCH_FLAGS_NO_64BIT |
+ 	BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
+@@ -179,10 +231,17 @@ static const struct brcmstb_match_priv match_priv_7216 = {
+ 	.ops = &sdhci_brcmstb_ops_7216,
+ };
+ 
++static struct brcmstb_match_priv match_priv_74165b0 = {
++	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
++	.hs400es = sdhci_brcmstb_hs400es,
++	.ops = &sdhci_brcmstb_ops_74165b0,
++};
++
+ static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
+ 	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
+ 	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
+ 	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
++	{ .compatible = "brcm,bcm74165b0-sdhci", .data = &match_priv_74165b0 },
+ 	{},
+ };
+ 
 -- 
 2.17.1
 
 
---000000000000395805060c169c23
+--000000000000a11ece060c169c09
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -164,13 +266,13 @@ NxffjNkeAdgfN/SS9S9Rj4WXD7pF1M0Xq8gPLCLyXrx1i2KkYOYJsj0PWlC6VRg6E1xXkYDte0VL
 fAAG4QsETU27E1HBNQyp5zF1PoPCPvq3EnWQnbLgYk+Jz2iwIUwiqwr/bDgxggJtMIICaQIBATBr
 MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
 YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgw89WX2Pp7ue922QVkwDQYJYIZI
-AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIIyJJ8dUqd7DDnVPV1SE7aTLagxRtodCxKFBhycF
-FqlUMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMTIwOTE2NTgz
-MFowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEICHydvS6+mHIxHomf0eI6wrrQFweuDrOc6uL6Led
+PL3SMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMTIwOTE2NTgz
+NlowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
 AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
-hkiG9w0BAQEFAASCAQBhMlHLtdOdi/b7G4LrBDlYehKhMhGSzPILAyIh4OQKN5tkfwV98PHdqzd9
-FMi1NZGVig+5ZLlIPZKzf9wagxX1beNEOOzD45C3LhEnccy/X+Dq3TQYjzDS8Ze10m/mdlmA4JoS
-5NUO24PcP0lo72vpb9D9g7nXnyrD9VnJFJy/IuhiXLaovg3c1X53vJWMKcKF5EviJwGZdMoWygh9
-iFHXXbg01E/yZs5ZlIPR9lVhTvoyUFF93OzjCNghS1Ss+TwK2hi5UZ/WMcYsG5yAsKtww7TfDzOB
-Y9dTdBPjc5H8/9PfQwy+KAeu5uQvyTFEu8gG07Do9fdvGHOTUD2QVdAW
---000000000000395805060c169c23--
+hkiG9w0BAQEFAASCAQCU/WijFIOjIn1QrjltmZgZ6eioAPbkYGJXDTdeVHkAbytPzpkOnSJUGqqe
+k7Ojclo706fA0JZHnP3exrG1jcrHP9YBuj2lzTJZOqJx0HrkijKTvyUPnBLsSvG/B/p7E4Bev5wr
+5hzIVPJB7cDMjRdWg8mJSD92uankwwuPswCFt/iDlLKuNQmjYFY7veH+3C/qI6zq4QRmy5/87sVn
+q4vcN5o0PtNqU+H6BJcXaD8nidbesx90XDqsuRas4kTXnzRaUrWW230fMEVT51GUdVcfWPr2YaxD
+yorHe3ETTVz8oVbbdR9bkYd3iiOuLoCqRphvld5++lHSHFABWVr4LaVp
+--000000000000a11ece060c169c09--
