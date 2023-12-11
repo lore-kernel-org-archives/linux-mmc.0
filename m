@@ -1,108 +1,97 @@
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2EAF44E601;
+	Mon, 11 Dec 2023 17:39:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="EjLLYJw5"
-Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 505C2B3
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 08:55:06 -0800 (PST)
-Received: by mail-wm1-x32b.google.com with SMTP id 5b1f17b1804b1-40c29f7b068so44457665e9.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 08:55:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=foundries.io; s=google; t=1702313705; x=1702918505; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=/aQB4e679gg004POwfDoV2M+ylGjdoOtKaUmuhlaWT0=;
-        b=EjLLYJw5XlWyzBT+kpo7j21MJw739hZc81Lm5NGFyrqjQERXKhu555UiuMw9xUvj/7
-         2VJ+RuAJR9rnZYFHFjDnnEpwoYZRhqswDxfn2r2K5pDmuin3J+ehOLZk6s98K9bKenQI
-         Qksa+UGI9+KuSQjSbkv0XmkiMgN1VGWrPoUNyhf1oP+j3wlk+NC4TX2zOU+r9lkA6hRp
-         bPId+zIfwjJ1pZJDOJ7IuV9xf7FjRjcXOYGkcWVlpJPhBnDIpkVgipsFH0KwKuCx5X/+
-         //6ufxCc2C4Sc/V8eOiY840qOhhuwDFBOvQ6kJ67tHmNF1QIHuWhDeaAN9lCJUrwPzt1
-         sATg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702313705; x=1702918505;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=/aQB4e679gg004POwfDoV2M+ylGjdoOtKaUmuhlaWT0=;
-        b=cwHqt2J6+yMCUgvcI5QW3iRstJHnkckyl97x40AsnztGL9smtoS4Brp0TXUHfQP1k9
-         yrIY+Qt/tPVhHv6xkhXLpGoxLqDBCx1RetZC96gA6OB+EQLw1snySiBcaKMRovX/lctZ
-         idGh6Ieu8jbr6uvZJBJKZQu1ZqZpdNrw1d651yrm/QS599bydZe/lZQyraCB932tP80u
-         hqR87+nNXwXrTG80VG7JYVFTeSO6eL1Dy7pg36o5xeap0F4onNCYnyPqIgJeuNj9ih9W
-         9i8aKDl+NEuJQ3+8Kpefj7TuBET4x7tEUMVInn7UkedUAvIO1xZ+wY7AqD/Lc8VpTfvU
-         2paQ==
-X-Gm-Message-State: AOJu0YzG3VwY86mqk4V9CxMYKfkCDGON+IXEkmO2VxAZwJ9T/sPqfr6e
-	qOMlRmKvX5lONj9mCkXUf2u3krKq64xOopuQhYG3Ow==
-X-Google-Smtp-Source: AGHT+IErwDWQj6vbRb9WM5dwKMENhbE9O5oHBCsCa5WlJd/1Ls68OegcT8VxTfUkgkad9quChVl8CA==
-X-Received: by 2002:a05:600c:4285:b0:40c:1df2:c9a2 with SMTP id v5-20020a05600c428500b0040c1df2c9a2mr2430291wmc.126.1702313704714;
-        Mon, 11 Dec 2023 08:55:04 -0800 (PST)
-Received: from trax.. (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
-        by smtp.gmail.com with ESMTPSA id g10-20020a05600c4eca00b0040c11fbe581sm13374370wmq.27.2023.12.11.08.55.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Dec 2023 08:55:04 -0800 (PST)
-From: Jorge Ramirez-Ortiz <jorge@foundries.io>
-To: jorge@foundries.io,
-	adrian.hunter@intel.com,
-	Avri.Altman@wdc.com,
-	ulf.hansson@linaro.org,
-	christian.loehle@arm.com,
-	ricardo@foundries.io
-Cc: linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
-Date: Mon, 11 Dec 2023 17:55:00 +0100
-Message-Id: <20231211165500.310097-1-jorge@foundries.io>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dr1tUscW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5EAB1C433C8;
+	Mon, 11 Dec 2023 17:39:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1702316370;
+	bh=O6AOhUXq8XE/FHy4bPs9tLe8C7adGEEQpi6qHeKwxvI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=dr1tUscWRDFTAj58M2+OjPEC0HEZ/kAi6sHKEk24hQ2XyZBlKHO8vrVOZt3N+0znC
+	 n/G2QIuH6lJtUFPvfBfBKIS0m+kJCjCmnIItUEztD31mT60ezJrEjOXluhigcPeVR3
+	 1CxSuiB51PXHJwn2AS0wTLRUcD/+FEB/s2k1AzoJfyDB1U49pibrM7d5NKmpZdoz7t
+	 pMLIiY+III374wx1Ji+BZpS9BlkG+e0dW/kiS7z3/KvHpfeRnczOGqgyNaRVu70+Cv
+	 GBh/bDhh09tnJ3CBdTv+qSKXgYVQ4j7ndooxAtzWhg9Yv2BwlJmm6A71q1RGd9Q0KJ
+	 0GW/yvOWLp/iA==
+Date: Mon, 11 Dec 2023 17:39:25 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>, Andy Gross <agross@kernel.org>,
+	Bjorn Andersson <andersson@kernel.org>,
+	Konrad Dybcio <konrad.dybcio@linaro.org>,
+	Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-msm: document dedicated
+ IPQ4019 and IPQ8074
+Message-ID: <20231211-blurb-colonist-af57c8c74ff2@spud>
+References: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="y3JNkiG3IRiGRNIN"
+Content-Disposition: inline
+In-Reply-To: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
 
-Requesting a retune before switching to the RPMB partition has been
-observed to cause CRC errors on the RPMB reads (-EILSEQ).
 
-Since RPMB reads can not be retried, the clients would be directly
-affected by the errors.
+--y3JNkiG3IRiGRNIN
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This commit disables the retune request prior to switching to the RPMB
-partition: mmc_retune_pause() no longer triggers a retune before the
-pause period begins.
+On Mon, Dec 11, 2023 at 09:58:28AM +0100, Krzysztof Kozlowski wrote:
+> Add dedicated compatibles for the Qualcomm IPQ4019 and IPQ8074 SoCs,
+> because usage of generic qcom,sdhci-msm-v4 compatible alone is
+> deprecated.
+>=20
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-This was verified with the sdhci-of-arasan driver (ZynqMP) configured
-for HS200 using two separate eMMC cards (DG4064 and 064GB2). In both
-cases, the error was easy to reproduce triggering every few tenths of
-reads.
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
 
-Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
-Acked-by: Avri Altman <avri.altman@wdc.com>
----
- v2:
-    mmc_retune_pause() no longer can trigger a retune.
-    Keeping Avri Altman Acked-by since they are functionally equivalent.
- v1:
-    modify mmc_retune_pause to optionally trigger a retune.
+Cheers,
+Conor.
 
- drivers/mmc/core/host.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Docum=
+entation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index 86fae733d9a0..c24c537f62b1 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -22,6 +22,8 @@ properties:
+>        - items:
+>            - enum:
+>                - qcom,apq8084-sdhci
+> +              - qcom,ipq4019-sdhci
+> +              - qcom,ipq8074-sdhci
+>                - qcom,msm8226-sdhci
+>                - qcom,msm8953-sdhci
+>                - qcom,msm8974-sdhci
+> --=20
+> 2.34.1
+>=20
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 096093f7be00..ed44920e92df 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -119,13 +119,12 @@ void mmc_retune_enable(struct mmc_host *host)
+--y3JNkiG3IRiGRNIN
+Content-Type: application/pgp-signature; name="signature.asc"
 
- /*
-  * Pause re-tuning for a small set of operations.  The pause begins after the
-- * next command and after first doing re-tuning.
-+ * next command.
-  */
- void mmc_retune_pause(struct mmc_host *host)
- {
- 	if (!host->retune_paused) {
- 		host->retune_paused = 1;
--		mmc_retune_needed(host);
- 		mmc_retune_hold(host);
- 	}
- }
---
-2.34.1
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZXdJTQAKCRB4tDGHoIJi
+0tXvAQC0yIMoEs0QjZaKYhKOM/7LGjW+c2GpVAf8yCG/qgw8wQEAxw3wwBBHVtsK
+VUjNIMFzAEUlM5nFZyczrZIYAKoZCQ8=
+=0Z1o
+-----END PGP SIGNATURE-----
+
+--y3JNkiG3IRiGRNIN--
