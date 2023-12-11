@@ -1,172 +1,193 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="MpeKQgpG"
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC64FF2;
-	Sat,  9 Dec 2023 20:19:23 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1702181963; x=1733717963;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=asvKB3ReQvJ+jiqRWBtIOZ61VkP+wjyfmq7Jgp5pQkw=;
-  b=MpeKQgpGJ0z4uA1+f36OVE+zmhnX0Q2pN12/pvgyT0qw7+Zz2EUK36VJ
-   8hVCLfiINGnqfdirwaCbE/7AyWm2t02PISndqOkI+QN0tVXFnwGg5kcs0
-   u3lDLoJNi061LQgIAVmn3Qbtxjd+jLfD5G7Lm7d63+qeGFwxoRPKUk497
-   GVF68fJOlTHAzqW2WAW1YnFvS+v03/UOxL0VPov4Hfh0nheMoSuJbEwq7
-   spjGBya2YwBKiGQywYmOKwUhTynJgd7Wr+AB2Vs9N3Vrhd4/qNp78dJir
-   708053qtFLQuq0WnEhAFne1Exjx0pYobwcMK2pfRoiOZakH60NFUs4hyj
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10919"; a="458851117"
-X-IronPort-AV: E=Sophos;i="6.04,265,1695711600"; 
-   d="scan'208";a="458851117"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2023 20:19:23 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10919"; a="890647084"
-X-IronPort-AV: E=Sophos;i="6.04,265,1695711600"; 
-   d="scan'208";a="890647084"
-Received: from lkp-server02.sh.intel.com (HELO b07ab15da5fe) ([10.239.97.151])
-  by fmsmga002.fm.intel.com with ESMTP; 09 Dec 2023 20:19:19 -0800
-Received: from kbuild by b07ab15da5fe with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1rCBHh-000GNr-1g;
-	Sun, 10 Dec 2023 04:19:17 +0000
-Date: Sun, 10 Dec 2023 12:18:36 +0800
-From: kernel test robot <lkp@intel.com>
-To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
-	linux-kernel@vger.kernel.org, alcooperx@gmail.com,
-	linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com,
-	linux-mmc@vger.kernel.org, robh+dt@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
-	devicetree@vger.kernel.org
-Cc: oe-kbuild-all@lists.linux.dev, f.fainelli@gmail.com,
-	bcm-kernel-feedback-list@broadcom.com,
-	Kamal Dasu <kdasu@broadcom.com>
-Subject: Re: [V3, 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for
- 74165b0
-Message-ID: <202312101146.IK4Nrw1S-lkp@intel.com>
-References: <20231209165816.39044-1-kamal.dasu@broadcom.com>
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="ZoWE1gjZ"
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F98C101
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 00:00:11 -0800 (PST)
+Received: by mail-wr1-x430.google.com with SMTP id ffacd0b85a97d-32f8441dfb5so3964576f8f.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 00:00:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=foundries.io; s=google; t=1702281609; x=1702886409; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:date:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=oc+kSt8rWQbkM0yZPeMYjkTQnSao1UOl1shLAF/Yyis=;
+        b=ZoWE1gjZxUk2gWak4URI4v83X25wzoR/mH8MBaWCHf0DbaFp9mwWCnJkkpN9bZ7vvm
+         8pRh4DI/nd9uyEZ8fP01FOGqW/nQR4cy+36kTdwj0q7HVEvplFuWzL6Ua6ynuryvd1Yu
+         F7LmoxWZAsR9hcWCfs/dZiUpCjf5i3Bf7Dv3SqZiHR1UFyVx4Y2TiHjUEG41GYlm2XW3
+         ZrZ+Yfv3glcOR2loJ0BtI5qDK+R74ZCuXJdkol3ucq0WmizSq1bTchfKEnBQd11G/1xJ
+         819zcHSVbwesMimSzgxximUIrIsgUEt/2TVfXnKcDH9KVDbfp4HCuWsKP9XNNvonIXtN
+         lY0Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1702281609; x=1702886409;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:date:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=oc+kSt8rWQbkM0yZPeMYjkTQnSao1UOl1shLAF/Yyis=;
+        b=umxGORtYZmQ5Ql/Lq5/wNRdmW2qGWDw9GOphyN/bfHs0VlPfhdiMxGNlpFYPFLW8++
+         znr2oR4vPfpPRmoHU51dAOJn8d13+p3kN6mh/VKzBWbkoQnY3pbviGTBezluDmjoQh4G
+         XOIrVl77cEDeDuXnx3ISW1cNxIbywuuKTI0JCZQrF8wionc/KZQvuOPpXc6gcNTZXOtK
+         5WD6Vu8chbah3q7+yt57Y/dvsGoYlAl4JE+A3J6zML6cxT+Pv64eA7urX6AhrvTY0cIo
+         FC/CvyazrjV0m8vSt3sYuf6cvOMds8FHsBAzLYome8QEQUIlSFKwkPbnSDff9KJlQ9zQ
+         WzUQ==
+X-Gm-Message-State: AOJu0YyKSsc3bQ7m7tBGhJ1vjFxdhgtEaJOxXt32XBpYGdt/zUzOxTLE
+	z/AGtmxcs/UoTVOnh7bSz4XhQQ==
+X-Google-Smtp-Source: AGHT+IHA5uP3vo9EvqFZGzdj/GbBWKwvHC1fPgKQVZA/rixpi2guCL7bWzm5VHbFHy3dcvLqB5Bw+w==
+X-Received: by 2002:a05:6000:506:b0:333:6cf:2b5 with SMTP id a6-20020a056000050600b0033306cf02b5mr1844363wrf.46.1702281608817;
+        Mon, 11 Dec 2023 00:00:08 -0800 (PST)
+Received: from trax (139.red-79-144-198.dynamicip.rima-tde.net. [79.144.198.139])
+        by smtp.gmail.com with ESMTPSA id a9-20020a5d5709000000b003332aa97101sm7911222wrv.38.2023.12.11.00.00.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Dec 2023 00:00:08 -0800 (PST)
+From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
+Date: Mon, 11 Dec 2023 09:00:06 +0100
+To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+Cc: Avri Altman <Avri.Altman@wdc.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+	"christian.loehle@arm.com" <christian.loehle@arm.com>,
+	"jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
+	"axboe@kernel.dk" <axboe@kernel.dk>,
+	"beanhuo@micron.com" <beanhuo@micron.com>,
+	"yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
+	"victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
+	"asuk4.q@gmail.com" <asuk4.q@gmail.com>,
+	"hkallweit1@gmail.com" <hkallweit1@gmail.com>,
+	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
+	"yebin10@huawei.com" <yebin10@huawei.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
+Message-ID: <ZXbBhjZIn5sj6EYO@trax>
+References: <20231204150111.3320071-1-jorge@foundries.io>
+ <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
+ <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <ZXBGTxS7sUSILtLs@trax>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20231209165816.39044-1-kamal.dasu@broadcom.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <ZXBGTxS7sUSILtLs@trax>
 
-Hi Kamal,
+On 06/12/23 11:00:47, Jorge Ramirez-Ortiz, Foundries wrote:
+> On 06/12/23 07:02:43, Avri Altman wrote:
+> > >
+> > > On 4/12/23 17:01, Jorge Ramirez-Ortiz wrote:
+> > > > Requesting a retune before switching to the RPMB partition has been
+> > > > observed to cause CRC errors on the RPMB reads (-EILSEQ).
+> > >
+> > > There are still 2 concerns:
+> > > 1) We don't really know the root cause.  Have you determined if here are
+> > > CRC errors in the main partition also?
+>
+> right, and I don't disagree with that.
+>
+> As a test I created a 4GB file from /dev/random which I then copied
+> several times (dd if= ....)
+>
+> root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0# cat err_stats
+> # Command Timeout Occurred:      0
+> # Command CRC Errors Occurred:   0
+> # Data Timeout Occurred:         0
+> # Data CRC Errors Occurred:      0
+> # Auto-Cmd Error Occurred:       0
+> # ADMA Error Occurred:   0
+> # Tuning Error Occurred:         0
+> # CMDQ RED Errors:       0
+> # CMDQ GCE Errors:       0
+> # CMDQ ICCE Errors:      0
+> # Request Timedout:      0
+> # CMDQ Request Timedout:         0
+> # ICE Config Errors:     0
+> # Controller Timedout errors:    0
+> # Unexpected IRQ errors:         0
+>
+> However as soon as I access RPMB and fails (it takes just a few tries) I see:
+>
+> I/TC: RPMB: Using generated key
+> [   86.902118] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
+> E/TC:? 0
+> E/TC:? 0 TA panicked with code 0xffff0000
+> E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
+> E/LD:   arch: aarch64
+> E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
+> E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
+> E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
+> E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
+> E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
+> E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
+> E/LD:  region  6: va 0xc0019000 pa 0x818ea9ba8 size 0x002000 flags rw-- (param)
+> E/LD:  region  7: va 0xc001b000 pa 0x818e97ba8 size 0x001000 flags rw-- (param)
+> E/LD:  region  8: va 0xc004f000 pa 0x00001000 size 0x014000 flags r-xs [0]
+> E/LD:  region  9: va 0xc0063000 pa 0x00015000 size 0x008000 flags rw-s [0]
+> E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc004f000
+> E/LD:  Call stack:
+> E/LD:   0xc0051a14
+> E/LD:   0xc004f31c
+> E/LD:   0xc0052d40
+> E/LD:   0xc004f624
+>
+> root@uz3cg-dwg-sec:/var/rootdirs/home/fio# cat /sys/kernel/debug/mmc0/err_stats
+> # Command Timeout Occurred:      0
+> # Command CRC Errors Occurred:   0
+> # Data Timeout Occurred:         0
+> # Data CRC Errors Occurred:      1
+> # Auto-Cmd Error Occurred:       0
+> # ADMA Error Occurred:   0
+> # Tuning Error Occurred:         0
+> # CMDQ RED Errors:       0
+> # CMDQ GCE Errors:       0
+> # CMDQ ICCE Errors:      0
+> # Request Timedout:      0
+> # CMDQ Request Timedout:         0
+> # ICE Config Errors:     0
+> # Controller Timedout errors:    0
+> # Unexpected IRQ errors:         0
+>
+> > > 2) Forcing this on everyone
+> > >
+> > > The original idea was that because re-tuning cannot be done in RPMB, the
+> > > need to re-rune in RPMB could be avoided by always re-tuning before
+> > > switching to RPMB and then switching straight back. IIRC re-tuning should
+> > > guarantee at least 4MB more I/O without issue.
+> > Performance is hardly an issue in the context of RPMB access -
+> > For most cases it’s a single frame.
+>
+> Yes, the security use case typically stores hashes, variables
+> (bootcount, upgrade_available, versions, that sort of thing) and
+> certificates in RPMB.
+>
+> Since you mentioned, I am seeing that tuning before switching to RPMB
+> has an impact on performance. As a practical test, just reading a 6 byte
+> variable incurs in 50ms penalty in kernel space due to the need to
+> retune 5 times. Not great since the request is coming from a Trusted
+> Application via OP-TEE through the supplicant meaning this TEE thread
+> (they are statically allocated CFG_NUM_THREADS) will be reserved for
+> quite a bit of time.
+>
+> Roughly:
+> TA --> OP-TEE (core) --> TEE-supplicant --> Kernel (>50ms) --> OP-TEE --> TA
 
-kernel test robot noticed the following build warnings:
+To add more detail to the timing above, when using RPMB, OP-TEE stores
+the secure filesystem on RPMB as well, so accessing one of the variables
+stored in the filesystem consists on a number (~5) of individual RPMB
+requests (each one forcing a retune, each retune taking around 10ms).
 
-[auto build test WARNING on robh/for-next]
-[also build test WARNING on soc/for-next linus/master v6.7-rc4 next-20231208]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+BTW, I also tried delaying the timing between those consecutive retunes
+(up to 1 second), but the issue still persisted.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Kamal-Dasu/mmc-add-new-sdhci-reset-sequence-for-brcm-74165b0/20231210-010145
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-patch link:    https://lore.kernel.org/r/20231209165816.39044-1-kamal.dasu%40broadcom.com
-patch subject: [V3, 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for 74165b0
-compiler: loongarch64-linux-gcc (GCC) 13.2.0
-reproduce: (https://download.01.org/0day-ci/archive/20231210/202312101146.IK4Nrw1S-lkp@intel.com/reproduce)
+>
+> Adrian, I couldn't find the original performance justification for
+> enabling this feature globally. At which point do you think it becomes
+> beneficial to retune before accessing RPMB?
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202312101146.IK4Nrw1S-lkp@intel.com/
+How should we proceed with this patch then? can it be merged as I
+proposed? should I rewrite it differently? not sure what is next
 
-dtcheck warnings: (new ones prefixed by >>)
->> Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml:25:1: [error] syntax error: found character '\t' that cannot start any token (syntax)
---
->> Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml:25:1: found a tab character that violates indentation
-   Documentation/devicetree/bindings/iio/pressure/honeywell,mprls0025pa.yaml: properties:honeywell,pmin-pascal: '$ref' should not be valid under {'const': '$ref'}
-   	hint: Standard unit suffix properties don't need a type $ref
-   	from schema $id: http://devicetree.org/meta-schemas/core.yaml#
-   Documentation/devicetree/bindings/iio/pressure/honeywell,mprls0025pa.yaml: properties:honeywell,pmax-pascal: '$ref' should not be valid under {'const': '$ref'}
-   	hint: Standard unit suffix properties don't need a type $ref
-   	from schema $id: http://devicetree.org/meta-schemas/core.yaml#
---
->> Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml: ignoring, error parsing file
-
-vim +25 Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07   8  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07   9  maintainers:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  10    - Al Cooper <alcooperx@gmail.com>
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  11    - Florian Fainelli <f.fainelli@gmail.com>
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  12  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  13  properties:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  14    compatible:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  15      oneOf:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  16        - items:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  17            - enum:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  18                - brcm,bcm7216-sdhci
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  19            - const: brcm,bcm7445-sdhci
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  20            - const: brcm,sdhci-brcmstb
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  21        - items:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  22            - enum:
-48e24385c58e80 Kamal Dasu          2023-12-09  23                - brcm,bcm74165b0-sdhci
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  24                - brcm,bcm7445-sdhci
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07 @25  	      - brcm,bcm7425-sdhci
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  26            - const: brcm,sdhci-brcmstb
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  27  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  28    reg:
-b16ebda6d00361 Krzysztof Kozlowski 2022-04-28  29      maxItems: 2
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  30  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  31    reg-names:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  32      items:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  33        - const: host
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  34        - const: cfg
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  35  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  36    interrupts:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  37      maxItems: 1
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  38  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  39    clocks:
-2f8690ef64128b Kamal Dasu          2022-05-20  40      minItems: 1
-2f8690ef64128b Kamal Dasu          2022-05-20  41      items:
-2f8690ef64128b Kamal Dasu          2022-05-20  42        - description: handle to core clock for the sdhci controller
-2f8690ef64128b Kamal Dasu          2022-05-20  43        - description: handle to improved 150Mhz clock for sdhci controller (Optional clock)
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  44  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  45    clock-names:
-2f8690ef64128b Kamal Dasu          2022-05-20  46      minItems: 1
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  47      items:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  48        - const: sw_sdio
-2f8690ef64128b Kamal Dasu          2022-05-20  49        - const: sdio_freq # Optional clock
-2f8690ef64128b Kamal Dasu          2022-05-20  50  
-2f8690ef64128b Kamal Dasu          2022-05-20  51    clock-frequency:
-2f8690ef64128b Kamal Dasu          2022-05-20  52      description:
-2f8690ef64128b Kamal Dasu          2022-05-20  53        Maximum operating frequency of sdio_freq sdhci controller clock
-2f8690ef64128b Kamal Dasu          2022-05-20  54      $ref: /schemas/types.yaml#/definitions/uint32
-2f8690ef64128b Kamal Dasu          2022-05-20  55      minimum: 100000000
-2f8690ef64128b Kamal Dasu          2022-05-20  56      maximum: 150000000
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  57  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  58    sdhci,auto-cmd12:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  59      type: boolean
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  60      description: Specifies that controller should use auto CMD12
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  61  
-2f8690ef64128b Kamal Dasu          2022-05-20  62  allOf:
-2f8690ef64128b Kamal Dasu          2022-05-20  63    - $ref: mmc-controller.yaml#
-2f8690ef64128b Kamal Dasu          2022-05-20  64    - if:
-2f8690ef64128b Kamal Dasu          2022-05-20  65        properties:
-2f8690ef64128b Kamal Dasu          2022-05-20  66          clock-names:
-2f8690ef64128b Kamal Dasu          2022-05-20  67            contains:
-2f8690ef64128b Kamal Dasu          2022-05-20  68              const: sdio_freq
-2f8690ef64128b Kamal Dasu          2022-05-20  69  
-2f8690ef64128b Kamal Dasu          2022-05-20  70      then:
-2f8690ef64128b Kamal Dasu          2022-05-20  71        required:
-2f8690ef64128b Kamal Dasu          2022-05-20  72          - clock-frequency
-2f8690ef64128b Kamal Dasu          2022-05-20  73  
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  74  required:
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  75    - compatible
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  76    - reg
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  77    - interrupts
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  78    - clocks
-2f8690ef64128b Kamal Dasu          2022-05-20  79    - clock-names
-50c4ef6b8ab7d1 Florian Fainelli    2021-12-07  80  
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+TIA
+Jorge
