@@ -1,94 +1,112 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fESYPOZq"
-Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B37F9F3
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 00:58:37 -0800 (PST)
-Received: by mail-wm1-x332.google.com with SMTP id 5b1f17b1804b1-40c3fe6c08fso18461095e9.1
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 00:58:37 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="r4Zhlf61"
+Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CCF5F5
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:00 -0800 (PST)
+Received: by mail-ej1-x629.google.com with SMTP id a640c23a62f3a-a00cbb83c80so475258266b.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1702285116; x=1702889916; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Xndb3S0aJ33QuSezQAhJtJok3tQar4xBD7H+FypbxGQ=;
-        b=fESYPOZqQRo4exK22pcFuRV9GYGoEGUAE32whSmB9c341eUJQVGCSPY9z/qllqQl+I
-         kpGlYxYuah0edkqZoxIFHUt9CYp8cBP1eQyl1RvkyMreaywc3jtbQfWowofwnrTQPa+H
-         Z5SUMayA3XGNttxsXLjYJckZl+36jxkysSaIfZtylsu43WaIKehJrR8LvEHeXPhfCJ1+
-         NCaXYp1UTxvQrI8Qj9+gSkamq6NzeD+ldbJ6uB7vb3VCefRbwpsfwjCgn1L6R26rMCjL
-         wJ81gE4xuNmKv6KAJQAsNNkT7o3GO/SyhBvPy78417v6UYL0eBauHf4gdUY+RGMXTlbl
-         L5TA==
+        d=linaro.org; s=google; t=1702286459; x=1702891259; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=hN+CJ3w7q/df9bALZ7g35NJQaW3e9h8XttYQl2GGtCE=;
+        b=r4Zhlf61PUBDW0mExe7WJg8RjydKno7T4otG8B7SQBbvnsaHrkfIFsXPOVUqxPKwGM
+         qf2XlmVpl2e6G2f/i5lUCUN1qRj2ZTY8PrzAt0DiqEJuyMK2iN5VRgGeQ3j2BDf9XrCZ
+         BQDbBg/v2VUf873dcIs9tlb5vFfOfncWX+xLPTK07IPcLPub6fPL2zDA2W2zgAWqoUk5
+         2dT5S9fKTlUsJcXTZFcQJtSWVVqrHRBFFOOfP2D/2vYzXtCP+yMT9TNH4q5wc5vJ5nm4
+         u/OvePxYTWuJqPaevj/y7y/dKcWFL3uQuFaE4uS9UNZzj6Hf83uCC6FBYsebvBW5oyMK
+         2XQQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702285116; x=1702889916;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Xndb3S0aJ33QuSezQAhJtJok3tQar4xBD7H+FypbxGQ=;
-        b=wh2lJCBwOMQY8X1wLjvlFo+mBYehh0YVb3A/j4JywuJFf5ZBMMcR0oCTFhwbI4wIaI
-         wnc3gUBkqOD0A+T1NnDo61kip9pqOlgPgzgYOO3S78sEeq0pJ/a7Ytjkiy/CF6rmJHCP
-         DV+41OOOpXt+kmT1XCALbz7xCGwdUDPGGe5RT9BHlVGxjJrVCzEtrxmn9d709X0JIWcl
-         5JeXygNIefBvzeGiwMrGflMqXubznvs+L+fj757dDistJT8DVUG5iqR0C7OTN48KraQ5
-         a0fSwG76nWvyg+CMXhj6xiYbfkBMXj1QVQU775gRi2nyJoy3qurQ+P8glHqXH5jPWEH/
-         msFA==
-X-Gm-Message-State: AOJu0YwLlaiY4UrmbkqgRYMucrQvV7miZPWwVEiYcnBgAdmqo+MQOWsT
-	r2x0dxApgOwxKTnz9MChI2Frvg==
-X-Google-Smtp-Source: AGHT+IFj7nAJyqu+vNt9O5FvQS/Z/HfcaRXMdNaRLjM9frtJGn8AOK1htzp5C1UgMbr5OAVzW2Flfw==
-X-Received: by 2002:a05:600c:2184:b0:40b:5e21:c5af with SMTP id e4-20020a05600c218400b0040b5e21c5afmr1423973wme.125.1702285116186;
-        Mon, 11 Dec 2023 00:58:36 -0800 (PST)
-Received: from krzk-bin.. ([178.197.218.27])
-        by smtp.gmail.com with ESMTPSA id fl9-20020a05600c0b8900b0040b43da0bbasm12315067wmb.30.2023.12.11.00.58.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Dec 2023 00:58:35 -0800 (PST)
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh+dt@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Andy Gross <agross@kernel.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konrad.dybcio@linaro.org>,
-	Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org
-Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-	Chukun Pan <amadeus@jmu.edu.cn>
-Subject: [PATCH 3/3] arm64: dts: qcom: ipq8074: add dedicated SDHCI compatible
-Date: Mon, 11 Dec 2023 09:58:30 +0100
-Message-Id: <20231211085830.25380-3-krzysztof.kozlowski@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
-References: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
+        d=1e100.net; s=20230601; t=1702286459; x=1702891259;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=hN+CJ3w7q/df9bALZ7g35NJQaW3e9h8XttYQl2GGtCE=;
+        b=wUl07UXBRRwHAJ+w5G18LX6HkGsvmNYNwMrEZkoit9KwkEhdOnVne4iaGevUsHlhI4
+         SSHuirJyJ2HpOICA/crPTdylmk0Ubu+2J+qwZeBwJ7VvRif6FH4mQPY7Kz+ZGchUZD8l
+         yVFSwnx94ZhnIgVXS/cQlTY4ijp5eNz4GOB6Ht19WcGqBZbDX7Ed1vEslgL8cvo+XhkF
+         9ghfve3j1qhOSryhM4gQpomzcnWB3XD70JXWnRAKjpjyUVJCPJyjEGbhGa/7BJkuP60e
+         2UKj+K6UbqaKJnLriEw0r4D2CRd/KUgq6PhijRDZy+Gow4l8OmUMZxEA2arL7L2mt+NL
+         MbZw==
+X-Gm-Message-State: AOJu0YxCtNr5S+OPR1f2wnDw/iEps+/4FEJbdf/zEswSWksmKULJwi06
+	esCPtI2kWBiVWJfDwQwstGFMxw==
+X-Google-Smtp-Source: AGHT+IGy8jlvdTQNrWexyIWNv7QFqUyuj5rIKOgxc8G3VH+P6wwuj5BChQ8ExgA2U6UPeA1HdzQw2A==
+X-Received: by 2002:a17:906:3f5b:b0:a19:a19a:eab5 with SMTP id f27-20020a1709063f5b00b00a19a19aeab5mr1726017ejj.110.1702286459020;
+        Mon, 11 Dec 2023 01:20:59 -0800 (PST)
+Received: from [192.168.36.128] (178235179179.dynamic-4-waw-k-1-3-0.vectranet.pl. [178.235.179.179])
+        by smtp.gmail.com with ESMTPSA id uv6-20020a170907cf4600b00a1e443bc037sm4562265ejc.147.2023.12.11.01.20.56
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 11 Dec 2023 01:20:58 -0800 (PST)
+Message-ID: <71469a1c-ab6b-4463-99ee-5000e490db3d@linaro.org>
+Date: Mon, 11 Dec 2023 10:20:56 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/3] ARM: dts: qcom: ipq4019: add dedicated SDHCI
+ compatible
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+ Conor Dooley <conor+dt@kernel.org>, Andy Gross <agross@kernel.org>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Bhupesh Sharma <bhupesh.sharma@linaro.org>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-arm-msm@vger.kernel.org
+References: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
+ <20231211085830.25380-2-krzysztof.kozlowski@linaro.org>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@linaro.org>
+Autocrypt: addr=konrad.dybcio@linaro.org; keydata=
+ xsFNBF9ALYUBEADWAhxdTBWrwAgDQQzc1O/bJ5O7b6cXYxwbBd9xKP7MICh5YA0DcCjJSOum
+ BB/OmIWU6X+LZW6P88ZmHe+KeyABLMP5s1tJNK1j4ntT7mECcWZDzafPWF4F6m4WJOG27kTJ
+ HGWdmtO+RvadOVi6CoUDqALsmfS3MUG5Pj2Ne9+0jRg4hEnB92AyF9rW2G3qisFcwPgvatt7
+ TXD5E38mLyOPOUyXNj9XpDbt1hNwKQfiidmPh5e7VNAWRnW1iCMMoKqzM1Anzq7e5Afyeifz
+ zRcQPLaqrPjnKqZGL2BKQSZDh6NkI5ZLRhhHQf61fkWcUpTp1oDC6jWVfT7hwRVIQLrrNj9G
+ MpPzrlN4YuAqKeIer1FMt8cq64ifgTzxHzXsMcUdclzq2LTk2RXaPl6Jg/IXWqUClJHbamSk
+ t1bfif3SnmhA6TiNvEpDKPiT3IDs42THU6ygslrBxyROQPWLI9IL1y8S6RtEh8H+NZQWZNzm
+ UQ3imZirlPjxZtvz1BtnnBWS06e7x/UEAguj7VHCuymVgpl2Za17d1jj81YN5Rp5L9GXxkV1
+ aUEwONM3eCI3qcYm5JNc5X+JthZOWsbIPSC1Rhxz3JmWIwP1udr5E3oNRe9u2LIEq+wH/toH
+ kpPDhTeMkvt4KfE5m5ercid9+ZXAqoaYLUL4HCEw+HW0DXcKDwARAQABzShLb25yYWQgRHli
+ Y2lvIDxrb25yYWQuZHliY2lvQGxpbmFyby5vcmc+wsGOBBMBCAA4FiEEU24if9oCL2zdAAQV
+ R4cBcg5dfFgFAmQ5bqwCGwMFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AACgkQR4cBcg5dfFjO
+ BQ//YQV6fkbqQCceYebGg6TiisWCy8LG77zV7DB0VMIWJv7Km7Sz0QQrHQVzhEr3trNenZrf
+ yy+o2tQOF2biICzbLM8oyQPY8B///KJTWI2khoB8IJSJq3kNG68NjPg2vkP6CMltC/X3ohAo
+ xL2UgwN5vj74QnlNneOjc0vGbtA7zURNhTz5P/YuTudCqcAbxJkbqZM4WymjQhe0XgwHLkiH
+ 5LHSZ31MRKp/+4Kqs4DTXMctc7vFhtUdmatAExDKw8oEz5NbskKbW+qHjW1XUcUIrxRr667V
+ GWH6MkVceT9ZBrtLoSzMLYaQXvi3sSAup0qiJiBYszc/VOu3RbIpNLRcXN3KYuxdQAptacTE
+ mA+5+4Y4DfC3rUSun+hWLDeac9z9jjHm5rE998OqZnOU9aztbd6zQG5VL6EKgsVXAZD4D3RP
+ x1NaAjdA3MD06eyvbOWiA5NSzIcC8UIQvgx09xm7dThCuQYJR4Yxjd+9JPJHI6apzNZpDGvQ
+ BBZzvwxV6L1CojUEpnilmMG1ZOTstktWpNzw3G2Gis0XihDUef0MWVsQYJAl0wfiv/0By+XK
+ mm2zRR+l/dnzxnlbgJ5pO0imC2w0TVxLkAp0eo0LHw619finad2u6UPQAkZ4oj++iIGrJkt5
+ Lkn2XgB+IW8ESflz6nDY3b5KQRF8Z6XLP0+IEdLOOARkOW7yEgorBgEEAZdVAQUBAQdAwmUx
+ xrbSCx2ksDxz7rFFGX1KmTkdRtcgC6F3NfuNYkYDAQgHwsF2BBgBCAAgFiEEU24if9oCL2zd
+ AAQVR4cBcg5dfFgFAmQ5bvICGwwACgkQR4cBcg5dfFju1Q//Xta1ShwL0MLSC1KL1lXGXeRM
+ 8arzfyiB5wJ9tb9U/nZvhhdfilEDLe0jKJY0RJErbdRHsalwQCrtq/1ewQpMpsRxXzAjgfRN
+ jc4tgxRWmI+aVTzSRpywNahzZBT695hMz81cVZJoZzaV0KaMTlSnBkrviPz1nIGHYCHJxF9r
+ cIu0GSIyUjZ/7xslxdvjpLth16H27JCWDzDqIQMtg61063gNyEyWgt1qRSaK14JIH/DoYRfn
+ jfFQSC8bffFjat7BQGFz4ZpRavkMUFuDirn5Tf28oc5ebe2cIHp4/kajTx/7JOxWZ80U70mA
+ cBgEeYSrYYnX+UJsSxpzLc/0sT1eRJDEhI4XIQM4ClIzpsCIN5HnVF76UQXh3a9zpwh3dk8i
+ bhN/URmCOTH+LHNJYN/MxY8wuukq877DWB7k86pBs5IDLAXmW8v3gIDWyIcgYqb2v8QO2Mqx
+ YMqL7UZxVLul4/JbllsQB8F/fNI8AfttmAQL9cwo6C8yDTXKdho920W4WUR9k8NT/OBqWSyk
+ bGqMHex48FVZhexNPYOd58EY9/7mL5u0sJmo+jTeb4JBgIbFPJCFyng4HwbniWgQJZ1WqaUC
+ nas9J77uICis2WH7N8Bs9jy0wQYezNzqS+FxoNXmDQg2jetX8en4bO2Di7Pmx0jXA4TOb9TM
+ izWDgYvmBE8=
+In-Reply-To: <20231211085830.25380-2-krzysztof.kozlowski@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Add dedicated compatible for the SDHCI MMC controller, because usage of
-generic qcom,sdhci-msm-v4 compatible alone is deprecated.
+On 11.12.2023 09:58, Krzysztof Kozlowski wrote:
+> Add dedicated compatible for the SDHCI MMC controller, because usage of
+> generic qcom,sdhci-msm-v4 compatible alone is deprecated.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+Reviewed-by: Konrad Dybcio <konrad.dybcio@linaro.org>
 
-Cc: Chukun Pan <amadeus@jmu.edu.cn>
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
----
- arch/arm64/boot/dts/qcom/ipq8074.dtsi | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/arm64/boot/dts/qcom/ipq8074.dtsi b/arch/arm64/boot/dts/qcom/ipq8074.dtsi
-index dca7005c0a9d..915c22b0f270 100644
---- a/arch/arm64/boot/dts/qcom/ipq8074.dtsi
-+++ b/arch/arm64/boot/dts/qcom/ipq8074.dtsi
-@@ -400,7 +400,7 @@ spmi_bus: spmi@200f000 {
- 		};
- 
- 		sdhc_1: mmc@7824900 {
--			compatible = "qcom,sdhci-msm-v4";
-+			compatible = "qcom,ipq8074-sdhci", "qcom,sdhci-msm-v4";
- 			reg = <0x7824900 0x500>, <0x7824000 0x800>;
- 			reg-names = "hc", "core";
- 
--- 
-2.34.1
-
+Konrad
