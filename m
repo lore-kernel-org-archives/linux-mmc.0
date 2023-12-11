@@ -1,46 +1,45 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="r4Zhlf61"
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CCF5F5
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:00 -0800 (PST)
-Received: by mail-ej1-x629.google.com with SMTP id a640c23a62f3a-a00cbb83c80so475258266b.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:00 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wgxtVzuU"
+Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BE7F100
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:12 -0800 (PST)
+Received: by mail-ed1-x531.google.com with SMTP id 4fb4d7f45d1cf-54c5ed26cf6so5450704a12.3
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1702286459; x=1702891259; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=hN+CJ3w7q/df9bALZ7g35NJQaW3e9h8XttYQl2GGtCE=;
-        b=r4Zhlf61PUBDW0mExe7WJg8RjydKno7T4otG8B7SQBbvnsaHrkfIFsXPOVUqxPKwGM
-         qf2XlmVpl2e6G2f/i5lUCUN1qRj2ZTY8PrzAt0DiqEJuyMK2iN5VRgGeQ3j2BDf9XrCZ
-         BQDbBg/v2VUf873dcIs9tlb5vFfOfncWX+xLPTK07IPcLPub6fPL2zDA2W2zgAWqoUk5
-         2dT5S9fKTlUsJcXTZFcQJtSWVVqrHRBFFOOfP2D/2vYzXtCP+yMT9TNH4q5wc5vJ5nm4
-         u/OvePxYTWuJqPaevj/y7y/dKcWFL3uQuFaE4uS9UNZzj6Hf83uCC6FBYsebvBW5oyMK
-         2XQQ==
+        d=linaro.org; s=google; t=1702286470; x=1702891270; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=1SbmfLEzjKbthq64XC/LhuFWlDXYqPegUiye/3fAgdE=;
+        b=wgxtVzuUjwLhYgIwpv/pBsWe9kNI2YbzoZoOUwe/DOaUEq02mgKGc1Cck/eU9dNw0r
+         UliGtY8Ia4yakmRf/ivDSnKL8nNsJi4gusIey54Zx3N3hH+M5QmrkIXj4w56fMr3xGtX
+         aeDUwGYdDnMroRtjTuHMhEw5UqrYDStAAncVFzkhkWitqqAtjeveerjdcT007QJ2g/MF
+         7b16qeZTmteGpHQ3ITC+fW/qaFwI1kV4PAzCAqW4xYl42cLzOpSi6BkvZ+ZngJSl8tfc
+         nmwDra5Cuu7rA+vuUF841Z+daJbjmzqepIh3PGAK+Wdtli5/tnUjjxh2B0w3cNKmvNqs
+         Dhuw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702286459; x=1702891259;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=hN+CJ3w7q/df9bALZ7g35NJQaW3e9h8XttYQl2GGtCE=;
-        b=wUl07UXBRRwHAJ+w5G18LX6HkGsvmNYNwMrEZkoit9KwkEhdOnVne4iaGevUsHlhI4
-         SSHuirJyJ2HpOICA/crPTdylmk0Ubu+2J+qwZeBwJ7VvRif6FH4mQPY7Kz+ZGchUZD8l
-         yVFSwnx94ZhnIgVXS/cQlTY4ijp5eNz4GOB6Ht19WcGqBZbDX7Ed1vEslgL8cvo+XhkF
-         9ghfve3j1qhOSryhM4gQpomzcnWB3XD70JXWnRAKjpjyUVJCPJyjEGbhGa/7BJkuP60e
-         2UKj+K6UbqaKJnLriEw0r4D2CRd/KUgq6PhijRDZy+Gow4l8OmUMZxEA2arL7L2mt+NL
-         MbZw==
-X-Gm-Message-State: AOJu0YxCtNr5S+OPR1f2wnDw/iEps+/4FEJbdf/zEswSWksmKULJwi06
-	esCPtI2kWBiVWJfDwQwstGFMxw==
-X-Google-Smtp-Source: AGHT+IGy8jlvdTQNrWexyIWNv7QFqUyuj5rIKOgxc8G3VH+P6wwuj5BChQ8ExgA2U6UPeA1HdzQw2A==
-X-Received: by 2002:a17:906:3f5b:b0:a19:a19a:eab5 with SMTP id f27-20020a1709063f5b00b00a19a19aeab5mr1726017ejj.110.1702286459020;
-        Mon, 11 Dec 2023 01:20:59 -0800 (PST)
+        d=1e100.net; s=20230601; t=1702286470; x=1702891270;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=1SbmfLEzjKbthq64XC/LhuFWlDXYqPegUiye/3fAgdE=;
+        b=LIucwMNZEZQvcs4Jfym/GqQ3i8QXQ064uvVYyCEHlf2/xi9WKK7lBXxnNDCaRn3sX+
+         Vb7aYwqb7ilaDFGr1fIBX68vwlN4fjuIfSG6rdtOHKrAVr7fM7Hp6I6mNclyanL1ILfv
+         V9f46b/NFuRIg+2CfIhbHum8iM6969zvvIzPi/XrgoFjEMpTcAzbRrL4ip8d28Gz6vaP
+         V6+wl7gOb+gF7k1mdhcuZcwj58bIXD0zo4upV0ZRhE9SoZ15qK4zRC8fFe9l2zny/eAr
+         yEquC3fyD5FkAISjiiQGmB8AhiWvsVoXND1JflkqFZuxZdzE1U1P35myOdttznjtpULG
+         EibA==
+X-Gm-Message-State: AOJu0YzQ52G2x9fy08D38fIhe1pDVMm2kqur4w6R694Dnamc8iit+Rsr
+	i5oJoXN0Wc/PEV6nN2kP6Cbnbw==
+X-Google-Smtp-Source: AGHT+IGQZgtPaeVbwXi6qE9eUb02HBIaYq8qYKp/tJ2C6c9uesVMeOp2gIyEqj/gGvKxeK1G0da+ow==
+X-Received: by 2002:a17:906:b389:b0:a01:c1f9:2f54 with SMTP id uh9-20020a170906b38900b00a01c1f92f54mr1968779ejc.21.1702286470540;
+        Mon, 11 Dec 2023 01:21:10 -0800 (PST)
 Received: from [192.168.36.128] (178235179179.dynamic-4-waw-k-1-3-0.vectranet.pl. [178.235.179.179])
-        by smtp.gmail.com with ESMTPSA id uv6-20020a170907cf4600b00a1e443bc037sm4562265ejc.147.2023.12.11.01.20.56
+        by smtp.gmail.com with ESMTPSA id uv6-20020a170907cf4600b00a1e443bc037sm4562265ejc.147.2023.12.11.01.21.09
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 Dec 2023 01:20:58 -0800 (PST)
-Message-ID: <71469a1c-ab6b-4463-99ee-5000e490db3d@linaro.org>
-Date: Mon, 11 Dec 2023 10:20:56 +0100
+        Mon, 11 Dec 2023 01:21:10 -0800 (PST)
+Message-ID: <55205fd4-50e7-4b6e-bb8b-e4be1a7b00bf@linaro.org>
+Date: Mon, 11 Dec 2023 10:21:08 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -48,8 +47,9 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/3] ARM: dts: qcom: ipq4019: add dedicated SDHCI
+Subject: Re: [PATCH 3/3] arm64: dts: qcom: ipq8074: add dedicated SDHCI
  compatible
+Content-Language: en-US
 To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
  Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -58,9 +58,9 @@ To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
  Bhupesh Sharma <bhupesh.sharma@linaro.org>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-arm-msm@vger.kernel.org
+Cc: Chukun Pan <amadeus@jmu.edu.cn>
 References: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
- <20231211085830.25380-2-krzysztof.kozlowski@linaro.org>
-Content-Language: en-US
+ <20231211085830.25380-3-krzysztof.kozlowski@linaro.org>
 From: Konrad Dybcio <konrad.dybcio@linaro.org>
 Autocrypt: addr=konrad.dybcio@linaro.org; keydata=
  xsFNBF9ALYUBEADWAhxdTBWrwAgDQQzc1O/bJ5O7b6cXYxwbBd9xKP7MICh5YA0DcCjJSOum
@@ -97,7 +97,7 @@ Autocrypt: addr=konrad.dybcio@linaro.org; keydata=
  bGqMHex48FVZhexNPYOd58EY9/7mL5u0sJmo+jTeb4JBgIbFPJCFyng4HwbniWgQJZ1WqaUC
  nas9J77uICis2WH7N8Bs9jy0wQYezNzqS+FxoNXmDQg2jetX8en4bO2Di7Pmx0jXA4TOb9TM
  izWDgYvmBE8=
-In-Reply-To: <20231211085830.25380-2-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20231211085830.25380-3-krzysztof.kozlowski@linaro.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
@@ -105,6 +105,7 @@ On 11.12.2023 09:58, Krzysztof Kozlowski wrote:
 > Add dedicated compatible for the SDHCI MMC controller, because usage of
 > generic qcom,sdhci-msm-v4 compatible alone is deprecated.
 > 
+> Cc: Chukun Pan <amadeus@jmu.edu.cn>
 > Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 > ---
 Reviewed-by: Konrad Dybcio <konrad.dybcio@linaro.org>
