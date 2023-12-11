@@ -1,45 +1,34 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wgxtVzuU"
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BE7F100
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:12 -0800 (PST)
-Received: by mail-ed1-x531.google.com with SMTP id 4fb4d7f45d1cf-54c5ed26cf6so5450704a12.3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Dec 2023 01:21:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1702286470; x=1702891270; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=1SbmfLEzjKbthq64XC/LhuFWlDXYqPegUiye/3fAgdE=;
-        b=wgxtVzuUjwLhYgIwpv/pBsWe9kNI2YbzoZoOUwe/DOaUEq02mgKGc1Cck/eU9dNw0r
-         UliGtY8Ia4yakmRf/ivDSnKL8nNsJi4gusIey54Zx3N3hH+M5QmrkIXj4w56fMr3xGtX
-         aeDUwGYdDnMroRtjTuHMhEw5UqrYDStAAncVFzkhkWitqqAtjeveerjdcT007QJ2g/MF
-         7b16qeZTmteGpHQ3ITC+fW/qaFwI1kV4PAzCAqW4xYl42cLzOpSi6BkvZ+ZngJSl8tfc
-         nmwDra5Cuu7rA+vuUF841Z+daJbjmzqepIh3PGAK+Wdtli5/tnUjjxh2B0w3cNKmvNqs
-         Dhuw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702286470; x=1702891270;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=1SbmfLEzjKbthq64XC/LhuFWlDXYqPegUiye/3fAgdE=;
-        b=LIucwMNZEZQvcs4Jfym/GqQ3i8QXQ064uvVYyCEHlf2/xi9WKK7lBXxnNDCaRn3sX+
-         Vb7aYwqb7ilaDFGr1fIBX68vwlN4fjuIfSG6rdtOHKrAVr7fM7Hp6I6mNclyanL1ILfv
-         V9f46b/NFuRIg+2CfIhbHum8iM6969zvvIzPi/XrgoFjEMpTcAzbRrL4ip8d28Gz6vaP
-         V6+wl7gOb+gF7k1mdhcuZcwj58bIXD0zo4upV0ZRhE9SoZ15qK4zRC8fFe9l2zny/eAr
-         yEquC3fyD5FkAISjiiQGmB8AhiWvsVoXND1JflkqFZuxZdzE1U1P35myOdttznjtpULG
-         EibA==
-X-Gm-Message-State: AOJu0YzQ52G2x9fy08D38fIhe1pDVMm2kqur4w6R694Dnamc8iit+Rsr
-	i5oJoXN0Wc/PEV6nN2kP6Cbnbw==
-X-Google-Smtp-Source: AGHT+IGQZgtPaeVbwXi6qE9eUb02HBIaYq8qYKp/tJ2C6c9uesVMeOp2gIyEqj/gGvKxeK1G0da+ow==
-X-Received: by 2002:a17:906:b389:b0:a01:c1f9:2f54 with SMTP id uh9-20020a170906b38900b00a01c1f92f54mr1968779ejc.21.1702286470540;
-        Mon, 11 Dec 2023 01:21:10 -0800 (PST)
-Received: from [192.168.36.128] (178235179179.dynamic-4-waw-k-1-3-0.vectranet.pl. [178.235.179.179])
-        by smtp.gmail.com with ESMTPSA id uv6-20020a170907cf4600b00a1e443bc037sm4562265ejc.147.2023.12.11.01.21.09
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 Dec 2023 01:21:10 -0800 (PST)
-Message-ID: <55205fd4-50e7-4b6e-bb8b-e4be1a7b00bf@linaro.org>
-Date: Mon, 11 Dec 2023 10:21:08 +0100
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="n9BArrKK"
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.93])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9D4FCB;
+	Mon, 11 Dec 2023 02:25:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1702290326; x=1733826326;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=OgH2Ii4TMi5UPL6lkYbLTLXe+FxbxtmlREmovQ2xGVY=;
+  b=n9BArrKKp4f4pTrqFQOWBEI7N/HIWTQ5obY8kT8I2nLiAbTZulVYT4C9
+   kggns4z/ENRCAgZ47v9FI8vJvpkcBI3UAFkqXi28vLuuQMDWXnkq2JbRK
+   dRQIaCWTdJktJO/haESBAU4Cq6HLuKVGN7hmNPzWADVWpnCjYnhIFx5xu
+   MO9dlfrx2jOBvMIjYkXMuSmVh47cC8FYTZCMIkqdPvx1veDCRQpZfo2Eh
+   NA5TieADI3muhGI4QdLx+mbCSx0Mn0ySeWtyDAIsMK53CGV0V5rsMF0/3
+   fzry/L/7WwBbCPt6frWors7tZxvE/vX+WyzQNt+tOqPjdWEiq4MGpmmkF
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10920"; a="391793000"
+X-IronPort-AV: E=Sophos;i="6.04,267,1695711600"; 
+   d="scan'208";a="391793000"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Dec 2023 02:25:26 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10920"; a="843456507"
+X-IronPort-AV: E=Sophos;i="6.04,267,1695711600"; 
+   d="scan'208";a="843456507"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.46.23])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Dec 2023 02:25:22 -0800
+Message-ID: <7443a730-411a-4dd3-b911-241356493516@intel.com>
+Date: Mon, 11 Dec 2023 12:25:19 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,67 +36,167 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/3] arm64: dts: qcom: ipq8074: add dedicated SDHCI
- compatible
+Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
 Content-Language: en-US
-To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>, Andy Gross <agross@kernel.org>,
- Bjorn Andersson <andersson@kernel.org>,
- Bhupesh Sharma <bhupesh.sharma@linaro.org>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-arm-msm@vger.kernel.org
-Cc: Chukun Pan <amadeus@jmu.edu.cn>
-References: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
- <20231211085830.25380-3-krzysztof.kozlowski@linaro.org>
-From: Konrad Dybcio <konrad.dybcio@linaro.org>
-Autocrypt: addr=konrad.dybcio@linaro.org; keydata=
- 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
- izWDgYvmBE8=
-In-Reply-To: <20231211085830.25380-3-krzysztof.kozlowski@linaro.org>
+To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+Cc: Avri Altman <Avri.Altman@wdc.com>,
+ "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+ "christian.loehle@arm.com" <christian.loehle@arm.com>,
+ "jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
+ "axboe@kernel.dk" <axboe@kernel.dk>, "beanhuo@micron.com"
+ <beanhuo@micron.com>, "yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
+ "victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
+ "asuk4.q@gmail.com" <asuk4.q@gmail.com>,
+ "hkallweit1@gmail.com" <hkallweit1@gmail.com>,
+ "yangyingliang@huawei.com" <yangyingliang@huawei.com>,
+ "yebin10@huawei.com" <yebin10@huawei.com>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <20231204150111.3320071-1-jorge@foundries.io>
+ <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
+ <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <ZXBGTxS7sUSILtLs@trax> <ZXbBhjZIn5sj6EYO@trax>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <ZXbBhjZIn5sj6EYO@trax>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 11.12.2023 09:58, Krzysztof Kozlowski wrote:
-> Add dedicated compatible for the SDHCI MMC controller, because usage of
-> generic qcom,sdhci-msm-v4 compatible alone is deprecated.
+On 11/12/23 10:00, Jorge Ramirez-Ortiz, Foundries wrote:
+> On 06/12/23 11:00:47, Jorge Ramirez-Ortiz, Foundries wrote:
+>> On 06/12/23 07:02:43, Avri Altman wrote:
+>>>>
+>>>> On 4/12/23 17:01, Jorge Ramirez-Ortiz wrote:
+>>>>> Requesting a retune before switching to the RPMB partition has been
+>>>>> observed to cause CRC errors on the RPMB reads (-EILSEQ).
+>>>>
+>>>> There are still 2 concerns:
+>>>> 1) We don't really know the root cause.  Have you determined if here are
+>>>> CRC errors in the main partition also?
+>>
+>> right, and I don't disagree with that.
+>>
+>> As a test I created a 4GB file from /dev/random which I then copied
+>> several times (dd if= ....)
+>>
+>> root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0# cat err_stats
+>> # Command Timeout Occurred:      0
+>> # Command CRC Errors Occurred:   0
+>> # Data Timeout Occurred:         0
+>> # Data CRC Errors Occurred:      0
+>> # Auto-Cmd Error Occurred:       0
+>> # ADMA Error Occurred:   0
+>> # Tuning Error Occurred:         0
+>> # CMDQ RED Errors:       0
+>> # CMDQ GCE Errors:       0
+>> # CMDQ ICCE Errors:      0
+>> # Request Timedout:      0
+>> # CMDQ Request Timedout:         0
+>> # ICE Config Errors:     0
+>> # Controller Timedout errors:    0
+>> # Unexpected IRQ errors:         0
+>>
+>> However as soon as I access RPMB and fails (it takes just a few tries) I see:
+>>
+>> I/TC: RPMB: Using generated key
+>> [   86.902118] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
+>> E/TC:? 0
+>> E/TC:? 0 TA panicked with code 0xffff0000
+>> E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
+>> E/LD:   arch: aarch64
+>> E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
+>> E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
+>> E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
+>> E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
+>> E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
+>> E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
+>> E/LD:  region  6: va 0xc0019000 pa 0x818ea9ba8 size 0x002000 flags rw-- (param)
+>> E/LD:  region  7: va 0xc001b000 pa 0x818e97ba8 size 0x001000 flags rw-- (param)
+>> E/LD:  region  8: va 0xc004f000 pa 0x00001000 size 0x014000 flags r-xs [0]
+>> E/LD:  region  9: va 0xc0063000 pa 0x00015000 size 0x008000 flags rw-s [0]
+>> E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc004f000
+>> E/LD:  Call stack:
+>> E/LD:   0xc0051a14
+>> E/LD:   0xc004f31c
+>> E/LD:   0xc0052d40
+>> E/LD:   0xc004f624
+>>
+>> root@uz3cg-dwg-sec:/var/rootdirs/home/fio# cat /sys/kernel/debug/mmc0/err_stats
+>> # Command Timeout Occurred:      0
+>> # Command CRC Errors Occurred:   0
+>> # Data Timeout Occurred:         0
+>> # Data CRC Errors Occurred:      1
+>> # Auto-Cmd Error Occurred:       0
+>> # ADMA Error Occurred:   0
+>> # Tuning Error Occurred:         0
+>> # CMDQ RED Errors:       0
+>> # CMDQ GCE Errors:       0
+>> # CMDQ ICCE Errors:      0
+>> # Request Timedout:      0
+>> # CMDQ Request Timedout:         0
+>> # ICE Config Errors:     0
+>> # Controller Timedout errors:    0
+>> # Unexpected IRQ errors:         0
+>>
+>>>> 2) Forcing this on everyone
+>>>>
+>>>> The original idea was that because re-tuning cannot be done in RPMB, the
+>>>> need to re-rune in RPMB could be avoided by always re-tuning before
+>>>> switching to RPMB and then switching straight back. IIRC re-tuning should
+>>>> guarantee at least 4MB more I/O without issue.
+>>> Performance is hardly an issue in the context of RPMB access -
+>>> For most cases it’s a single frame.
+>>
+>> Yes, the security use case typically stores hashes, variables
+>> (bootcount, upgrade_available, versions, that sort of thing) and
+>> certificates in RPMB.
+>>
+>> Since you mentioned, I am seeing that tuning before switching to RPMB
+>> has an impact on performance. As a practical test, just reading a 6 byte
+>> variable incurs in 50ms penalty in kernel space due to the need to
+>> retune 5 times. Not great since the request is coming from a Trusted
+>> Application via OP-TEE through the supplicant meaning this TEE thread
+>> (they are statically allocated CFG_NUM_THREADS) will be reserved for
+>> quite a bit of time.
+>>
+>> Roughly:
+>> TA --> OP-TEE (core) --> TEE-supplicant --> Kernel (>50ms) --> OP-TEE --> TA
 > 
-> Cc: Chukun Pan <amadeus@jmu.edu.cn>
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> ---
-Reviewed-by: Konrad Dybcio <konrad.dybcio@linaro.org>
+> To add more detail to the timing above, when using RPMB, OP-TEE stores
+> the secure filesystem on RPMB as well, so accessing one of the variables
+> stored in the filesystem consists on a number (~5) of individual RPMB
+> requests (each one forcing a retune, each retune taking around 10ms).
+> 
+> BTW, I also tried delaying the timing between those consecutive retunes
+> (up to 1 second), but the issue still persisted.
+> 
+>>
+>> Adrian, I couldn't find the original performance justification for
+>> enabling this feature globally. At which point do you think it becomes
+>> beneficial to retune before accessing RPMB?
+> 
+> How should we proceed with this patch then? can it be merged as I
+> proposed? should I rewrite it differently? not sure what is next
 
-Konrad
+It would be good to try to determine if the error happens when the
+switch command comes immediately after tuning.  For example, add
+a delay after tuning and see if that makes any difference. e.g.
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c79f73459915..6b168659282a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2867,8 +2867,10 @@ int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
+-			if (ctrl & SDHCI_CTRL_TUNED_CLK)
++			if (ctrl & SDHCI_CTRL_TUNED_CLK) {
++				msleep(10);
+ 				return 0; /* Success! */
++			}
+ 			break;
+ 		}
+ 
+
