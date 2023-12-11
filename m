@@ -1,202 +1,104 @@
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="n9BArrKK"
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.93])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9D4FCB;
-	Mon, 11 Dec 2023 02:25:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1702290326; x=1733826326;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=OgH2Ii4TMi5UPL6lkYbLTLXe+FxbxtmlREmovQ2xGVY=;
-  b=n9BArrKKp4f4pTrqFQOWBEI7N/HIWTQ5obY8kT8I2nLiAbTZulVYT4C9
-   kggns4z/ENRCAgZ47v9FI8vJvpkcBI3UAFkqXi28vLuuQMDWXnkq2JbRK
-   dRQIaCWTdJktJO/haESBAU4Cq6HLuKVGN7hmNPzWADVWpnCjYnhIFx5xu
-   MO9dlfrx2jOBvMIjYkXMuSmVh47cC8FYTZCMIkqdPvx1veDCRQpZfo2Eh
-   NA5TieADI3muhGI4QdLx+mbCSx0Mn0ySeWtyDAIsMK53CGV0V5rsMF0/3
-   fzry/L/7WwBbCPt6frWors7tZxvE/vX+WyzQNt+tOqPjdWEiq4MGpmmkF
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10920"; a="391793000"
-X-IronPort-AV: E=Sophos;i="6.04,267,1695711600"; 
-   d="scan'208";a="391793000"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Dec 2023 02:25:26 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10920"; a="843456507"
-X-IronPort-AV: E=Sophos;i="6.04,267,1695711600"; 
-   d="scan'208";a="843456507"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.46.23])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Dec 2023 02:25:22 -0800
-Message-ID: <7443a730-411a-4dd3-b911-241356493516@intel.com>
-Date: Mon, 11 Dec 2023 12:25:19 +0200
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFFD0A9;
+	Mon, 11 Dec 2023 02:39:49 -0800 (PST)
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 3BBAboiQ72682855, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 3BBAboiQ72682855
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 11 Dec 2023 18:37:50 +0800
+Received: from RTEXMBS02.realtek.com.tw (172.21.6.95) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.17; Mon, 11 Dec 2023 18:37:50 +0800
+Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
+ RTEXMBS02.realtek.com.tw (172.21.6.95) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Mon, 11 Dec 2023 18:37:50 +0800
+Received: from RTEXMBS04.realtek.com.tw ([fe80::40c2:6c24:2df4:e6c7]) by
+ RTEXMBS04.realtek.com.tw ([fe80::40c2:6c24:2df4:e6c7%5]) with mapi id
+ 15.01.2375.007; Mon, 11 Dec 2023 18:37:50 +0800
+From: =?utf-8?B?SnlhbiBDaG91IFvlkajoirflrold?= <jyanchou@realtek.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        "ulf.hansson@linaro.org"
+	<ulf.hansson@linaro.org>,
+        "jh80.chung@samsung.com" <jh80.chung@samsung.com>,
+        "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
+        "robh+dt@kernel.org"
+	<robh+dt@kernel.org>,
+        "krzysztof.kozlowski+dt@linaro.org"
+	<krzysztof.kozlowski+dt@linaro.org>
+CC: "conor+dt@kernel.org" <conor+dt@kernel.org>,
+        "asutoshd@codeaurora.org"
+	<asutoshd@codeaurora.org>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "arnd@arndb.de" <arnd@arndb.de>,
+        "briannorris@chromium.org"
+	<briannorris@chromium.org>,
+        "doug@schmorgal.com" <doug@schmorgal.com>,
+        "tonyhuang.sunplus@gmail.com" <tonyhuang.sunplus@gmail.com>,
+        "abel.vesa@linaro.org" <abel.vesa@linaro.org>,
+        "william.qiu@starfivetech.com"
+	<william.qiu@starfivetech.com>
+Subject: RE: [PATCH v7][2/4] mmc: Add Synopsys DesignWare mmc cmdq host driver
+Thread-Topic: [PATCH v7][2/4] mmc: Add Synopsys DesignWare mmc cmdq host
+ driver
+Thread-Index: AQHaHFq+bFd/3O/jHUaixlBEulhIvbCPjA6AgArwJkD//6DXgIAJ4hcQ
+Date: Mon, 11 Dec 2023 10:37:49 +0000
+Message-ID: <49d0b19c5ec741638e41ee6f970d057b@realtek.com>
+References: <20231121091101.5540-1-jyanchou@realtek.com>
+ <20231121091101.5540-3-jyanchou@realtek.com>
+ <655c5964-0917-4021-b254-7917b368b05f@intel.com>
+ <7b4b7219c2b6430b9c320c8d9ac1cc8b@realtek.com>
+ <8e7b6ac2-9d92-4f37-97c4-ae295f7cdbd4@intel.com>
+In-Reply-To: <8e7b6ac2-9d92-4f37-97c4-ae295f7cdbd4@intel.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+x-kse-serverinfo: RTEXMBS02.realtek.com.tw, 9
+x-kse-antispam-interceptor-info: fallback
+x-kse-antivirus-interceptor-info: fallback
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
-Content-Language: en-US
-To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-Cc: Avri Altman <Avri.Altman@wdc.com>,
- "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
- "christian.loehle@arm.com" <christian.loehle@arm.com>,
- "jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
- "axboe@kernel.dk" <axboe@kernel.dk>, "beanhuo@micron.com"
- <beanhuo@micron.com>, "yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
- "victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
- "asuk4.q@gmail.com" <asuk4.q@gmail.com>,
- "hkallweit1@gmail.com" <hkallweit1@gmail.com>,
- "yangyingliang@huawei.com" <yangyingliang@huawei.com>,
- "yebin10@huawei.com" <yebin10@huawei.com>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <20231204150111.3320071-1-jorge@foundries.io>
- <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
- <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
- <ZXBGTxS7sUSILtLs@trax> <ZXbBhjZIn5sj6EYO@trax>
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <ZXbBhjZIn5sj6EYO@trax>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-On 11/12/23 10:00, Jorge Ramirez-Ortiz, Foundries wrote:
-> On 06/12/23 11:00:47, Jorge Ramirez-Ortiz, Foundries wrote:
->> On 06/12/23 07:02:43, Avri Altman wrote:
->>>>
->>>> On 4/12/23 17:01, Jorge Ramirez-Ortiz wrote:
->>>>> Requesting a retune before switching to the RPMB partition has been
->>>>> observed to cause CRC errors on the RPMB reads (-EILSEQ).
->>>>
->>>> There are still 2 concerns:
->>>> 1) We don't really know the root cause.  Have you determined if here are
->>>> CRC errors in the main partition also?
->>
->> right, and I don't disagree with that.
->>
->> As a test I created a 4GB file from /dev/random which I then copied
->> several times (dd if= ....)
->>
->> root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0# cat err_stats
->> # Command Timeout Occurred:      0
->> # Command CRC Errors Occurred:   0
->> # Data Timeout Occurred:         0
->> # Data CRC Errors Occurred:      0
->> # Auto-Cmd Error Occurred:       0
->> # ADMA Error Occurred:   0
->> # Tuning Error Occurred:         0
->> # CMDQ RED Errors:       0
->> # CMDQ GCE Errors:       0
->> # CMDQ ICCE Errors:      0
->> # Request Timedout:      0
->> # CMDQ Request Timedout:         0
->> # ICE Config Errors:     0
->> # Controller Timedout errors:    0
->> # Unexpected IRQ errors:         0
->>
->> However as soon as I access RPMB and fails (it takes just a few tries) I see:
->>
->> I/TC: RPMB: Using generated key
->> [   86.902118] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
->> E/TC:? 0
->> E/TC:? 0 TA panicked with code 0xffff0000
->> E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
->> E/LD:   arch: aarch64
->> E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
->> E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
->> E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
->> E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
->> E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
->> E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
->> E/LD:  region  6: va 0xc0019000 pa 0x818ea9ba8 size 0x002000 flags rw-- (param)
->> E/LD:  region  7: va 0xc001b000 pa 0x818e97ba8 size 0x001000 flags rw-- (param)
->> E/LD:  region  8: va 0xc004f000 pa 0x00001000 size 0x014000 flags r-xs [0]
->> E/LD:  region  9: va 0xc0063000 pa 0x00015000 size 0x008000 flags rw-s [0]
->> E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc004f000
->> E/LD:  Call stack:
->> E/LD:   0xc0051a14
->> E/LD:   0xc004f31c
->> E/LD:   0xc0052d40
->> E/LD:   0xc004f624
->>
->> root@uz3cg-dwg-sec:/var/rootdirs/home/fio# cat /sys/kernel/debug/mmc0/err_stats
->> # Command Timeout Occurred:      0
->> # Command CRC Errors Occurred:   0
->> # Data Timeout Occurred:         0
->> # Data CRC Errors Occurred:      1
->> # Auto-Cmd Error Occurred:       0
->> # ADMA Error Occurred:   0
->> # Tuning Error Occurred:         0
->> # CMDQ RED Errors:       0
->> # CMDQ GCE Errors:       0
->> # CMDQ ICCE Errors:      0
->> # Request Timedout:      0
->> # CMDQ Request Timedout:         0
->> # ICE Config Errors:     0
->> # Controller Timedout errors:    0
->> # Unexpected IRQ errors:         0
->>
->>>> 2) Forcing this on everyone
->>>>
->>>> The original idea was that because re-tuning cannot be done in RPMB, the
->>>> need to re-rune in RPMB could be avoided by always re-tuning before
->>>> switching to RPMB and then switching straight back. IIRC re-tuning should
->>>> guarantee at least 4MB more I/O without issue.
->>> Performance is hardly an issue in the context of RPMB access -
->>> For most cases it’s a single frame.
->>
->> Yes, the security use case typically stores hashes, variables
->> (bootcount, upgrade_available, versions, that sort of thing) and
->> certificates in RPMB.
->>
->> Since you mentioned, I am seeing that tuning before switching to RPMB
->> has an impact on performance. As a practical test, just reading a 6 byte
->> variable incurs in 50ms penalty in kernel space due to the need to
->> retune 5 times. Not great since the request is coming from a Trusted
->> Application via OP-TEE through the supplicant meaning this TEE thread
->> (they are statically allocated CFG_NUM_THREADS) will be reserved for
->> quite a bit of time.
->>
->> Roughly:
->> TA --> OP-TEE (core) --> TEE-supplicant --> Kernel (>50ms) --> OP-TEE --> TA
-> 
-> To add more detail to the timing above, when using RPMB, OP-TEE stores
-> the secure filesystem on RPMB as well, so accessing one of the variables
-> stored in the filesystem consists on a number (~5) of individual RPMB
-> requests (each one forcing a retune, each retune taking around 10ms).
-> 
-> BTW, I also tried delaying the timing between those consecutive retunes
-> (up to 1 second), but the issue still persisted.
-> 
->>
->> Adrian, I couldn't find the original performance justification for
->> enabling this feature globally. At which point do you think it becomes
->> beneficial to retune before accessing RPMB?
-> 
-> How should we proceed with this patch then? can it be merged as I
-> proposed? should I rewrite it differently? not sure what is next
-
-It would be good to try to determine if the error happens when the
-switch command comes immediately after tuning.  For example, add
-a delay after tuning and see if that makes any difference. e.g.
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c79f73459915..6b168659282a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2867,8 +2867,10 @@ int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
- 
- 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 		if (!(ctrl & SDHCI_CTRL_EXEC_TUNING)) {
--			if (ctrl & SDHCI_CTRL_TUNED_CLK)
-+			if (ctrl & SDHCI_CTRL_TUNED_CLK) {
-+				msleep(10);
- 				return 0; /* Success! */
-+			}
- 			break;
- 		}
- 
-
+SGkgQWRyaWFuLA0KDQo+Pj4+ICsNCj4+Pj4gK3N0YXRpYyBpcnFyZXR1cm5fdCBkd19tY2lfY3Fl
+X2ludGVycnVwdChpbnQgaXJxLCB2b2lkICpkZXZfaWQpIHsNCj4+Pj4gKyAgICAgc3RydWN0IGR3
+X21jaSAqaG9zdCA9IGRldl9pZDsNCj4+Pj4gKyAgICAgc3RydWN0IG1tY19ob3N0ICptbWMgPSBo
+b3N0LT5zbG90LT5tbWM7DQo+Pj4+ICsgICAgIHN0cnVjdCBjcWhjaV9ob3N0ICpjcV9ob3N0ID0g
+TlVMTDsNCj4+Pj4gKyAgICAgaW50IGNtZF9lcnJvciA9IDAsIGRhdGFfZXJyb3IgPSAwOw0KPj4+
+PiArDQo+Pj4+ICsgICAgIGlmIChob3N0LT5wZGF0YSAmJiAoaG9zdC0+cGRhdGEtPmNhcHMyICYg
+TU1DX0NBUDJfQ1FFKSkNCj4+Pj4gKyAgICAgICAgICAgICBjcV9ob3N0ID0gbW1jLT5jcWVfcHJp
+dmF0ZTsNCj4+Pj4gKw0KPj4+PiArICAgICBkd19tY2lfZ2V0X2ludChob3N0KTsNCj4+Pj4gKw0K
+Pj4+PiArICAgICBpZiAoaG9zdC0+cGRhdGEgJiYgKGhvc3QtPnBkYXRhLT5jYXBzMiAmIE1NQ19D
+QVAyX0NRRSkpIHsNCj4+Pj4gKyAgICAgICAgICAgICBpZiAoIW1tYy0+Y3FlX29uICYmICFjcV9o
+b3N0LT5hY3RpdmF0ZWQpDQo+Pj4NCj4+PiBTaG91bGRuJ3QgcmVhbGx5IGxvb2sgYXQgaW50ZXJu
+YWxzIGxpa2UgbW1jLT5jcWVfb24gb3IgY3FfaG9zdC0+YWN0aXZhdGVkLg0KPj4+IFRoZXJlIGFy
+ZSB0aGUgY3FoY2lfaG9zdF9vcHMgLT5lbmFibGUoKSBhbmQgLT5kaXNhYmxlKCkgY2FsbGJhY2tz
+IHRvDQo+Pj4ga2VlcCB0cmFjayBvZiB3aGV0aGVyIGNxaGNpIGlzIGV4cGVjdGluZyBpbnRlcnJ1
+cHRzLg0KPj4NCj4+IERvZXMgdGhpcyBtZWFucyB3ZSBuZWVkIHRvIHVzZSBjcWhjaV9ob3N0X29w
+cyAtPmVuYWJsZSgpIGFuZA0KPj4gLT5kaXNhYmxlKCkgY2FsbGJhY2tzIGluc3RlYWQgb2YgbW1j
+LT5jcWVfb24gJiYgIWNxX2hvc3QtPmFjdGl2YXRlZD8NCj5UaGFua3MuDQo+DQo+WWVzLiAgLT5l
+bmFibGUoKSBpcyBhbHdheXMgY2FsbGVkIGJlZm9yZSBjcWhjaSBvcGVyYXRpb24gYW5kIC0+ZGlz
+YWJsZSgpIGJlZm9yZQ0KPm5vbi1jcWhjaSBvcGVyYXRpb24sIHNvIHRoZXkgY2FuIGJlIHVzZWQg
+dG8gZGV0ZXJtaW5lIGlmIGFuIGludGVycnVwdCBpcyBmb3INCj5jcWhjaS4NCg0KVGhhbmtzIGZv
+ciB5b3VyIGFkdmljZSwgYW5kIEkgZ290IHlvdXIgcG9pbnQgZm9yIGNhbGxpbmcgY3FoY2lfaG9z
+dF9vcHMgLT5lbmFibGUoKQ0KDQphbmQgLT5kaXNhYmxlKCkgY2FsbGJhY2tzLCBidXQgdGhlIHJl
+YXNvbiB3ZSB1c2VkICIgaWYgKCFtbWMtPmNxZV9vbiAmJiAhY3FfaG9zdC0+YWN0aXZhdGVkKSAi
+DQoNCmlzIHRoYXQgd2hlbiBzZW5kaW5nIGNvbW1hbmQgbGlrZSBjbWQwLCAxLCA3LCA4Li4uIGlu
+IG1tY19pbml0X2NhcmQgYmVmb3JlIG1tY19jbWRxX2VuYWJsZSwNCg0Kd2UgbmVlZCB0byB1c2Ug
+aW50ZXJydXB0IGluIGxlZ2FjeSBtb2RlLCBpdCBpcyBtdWNoIGJldHRlciB0byB3cml0ZSBpbiB0
+aGlzIHdheT8NCg0KKwlldmVudHMgPSBtY2lfcmVhZHcoaG9zdCwgTk9STUFMX0lOVF9TVEFUX1Ip
+Ow0KLSAJaWYgKGhvc3QtPnBkYXRhICYmIChob3N0LT5wZGF0YS0+Y2FwczIgJiBNTUNfQ0FQMl9D
+UUUpKSB7DQotIAkJaWYgKCFtbWMtPmNxZV9vbiAmJiAhY3FfaG9zdC0+YWN0aXZhdGVkKQ0KKwlp
+ZiAobW1jLT5jYXBzMiAmIE1NQ19DQVAyX0NRRSkgew0KKwkJaWYgKCEoZXZlbnRzICYgQ1FFX0VW
+RU5UKSkNCgkJCWR3X21jaV9jbHJfc2lnbmFsX2ludChob3N0KTsNCg0KVXNpbmcgQ1FFX0VWRU5U
+IHRvIGRldGVybWluZSB3aGV0aGVyIENvbW1hbmQgUXVldWUgZW5hYmxlIG9yIG5vdC4NCg0KTWFu
+eSB0aGFua3MuDQoNCkJlc3QgUmVnYXJkcywNCkp5YW4NCg==
