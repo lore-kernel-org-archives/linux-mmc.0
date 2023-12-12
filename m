@@ -1,35 +1,66 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="DS2xMuge"
-Received: from smtp-relay-canonical-1.canonical.com (smtp-relay-canonical-1.canonical.com [185.125.188.121])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE4E5A6;
-	Tue, 12 Dec 2023 06:10:37 -0800 (PST)
-Received: from HP-EliteBook-x360-830-G8-Notebook-PC.. (unknown [10.101.196.174])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-canonical-1.canonical.com (Postfix) with ESMTPSA id EC5683F6CB;
-	Tue, 12 Dec 2023 14:10:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20210705; t=1702390236;
-	bh=G7KJJKG7a1rFAa9okOTBeeQq/rysigJxkpYfoNGj4TY=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version;
-	b=DS2xMugenS6NrlohVsc3ICV4No6cdQfIseweWGgSzIjOinJAKFtASN/96fvXVmYBf
-	 36IvA2jqBeaV7YnRKmn37Sb8/26Rtw65CLoJSy3Rwanu3hR2ujfOOq89shpWU8UIoy
-	 /keXVPcKj3G+oEb9ZqK8EhLTQ63iUKEN0TNkFyWSqoHIKCA6p1E6DJWt3TPyxsvxj0
-	 BfSBikTD5BmN9AmKDJBX2RGLsqOqJ7UaCjs5gDxcjbnt5h7wZIwO3nPjN5r2eZwxWD
-	 0l5Muo+jdQ4Q9V/WwLVdPmBcp5UVcB1UMcEnG44NRhWezvtyCD6ZewHkHfdFh8iAB2
-	 l69U57g4uoDhg==
-From: Kai-Heng Feng <kai.heng.feng@canonical.com>
-To: adrian.hunter@intel.com,
-	ulf.hansson@linaro.org
-Cc: Kai-Heng Feng <kai.heng.feng@canonical.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-pci-gli: GL9750: Mask rootport's replay timer timeout during suspend
-Date: Tue, 12 Dec 2023 22:10:28 +0800
-Message-Id: <20231212141029.239235-1-kai.heng.feng@canonical.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b="P5a0uB+d"
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B74EB100;
+	Tue, 12 Dec 2023 07:25:03 -0800 (PST)
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+	by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 3BCCqu7T030022;
+	Tue, 12 Dec 2023 16:24:06 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
+	from:to:cc:subject:date:message-id:in-reply-to:references
+	:mime-version:content-transfer-encoding:content-type; s=
+	selector1; bh=JpXp2EJHxY+VtUUSPxkkTyJMNNq/ux4P17gSFHI+E8k=; b=P5
+	a0uB+dKMINb+zPuc568irPju8xw51gybAQYBQqrkUxMu3M/daUwzLeBEMD67Z2pW
+	ZH7PDLmlDrfr/B4lVLS62uSacZ8JiKYyAenA/x5fmTYwYB15heyGh8kTJgJvsuQD
+	nOz17WrlMaFrPtHehUiLXYUtOzkQH+B35JMddfZeBL7C1Y/9mRxvGId44wPvcQkH
+	ZdFozR/5Tbj7PdKW+F1yDiqRLPzvxFskqZmlwOKJrkldl/c9NYieo3Ea4A7LIhBO
+	Lb/s9OGh50jT5E2CVdlCnKbHlomgpaRMh5BHVyNnOTf9otZuPl/Nr+TMg4G/wCum
+	7XNZu/4Q52TZ8AlCCM3g==
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+	by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3uvg0gusvb-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 12 Dec 2023 16:24:06 +0100 (CET)
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 7F638100060;
+	Tue, 12 Dec 2023 16:24:05 +0100 (CET)
+Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
+	by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 7435A22F7B3;
+	Tue, 12 Dec 2023 16:24:05 +0100 (CET)
+Received: from localhost (10.252.7.20) by SHFDAG1NODE1.st.com (10.75.129.69)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Tue, 12 Dec
+ 2023 16:24:04 +0100
+From: Gatien Chevallier <gatien.chevallier@foss.st.com>
+To: <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
+        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <conor+dt@kernel.org>, <alexandre.torgue@foss.st.com>,
+        <vkoul@kernel.org>, <jic23@kernel.org>, <olivier.moysan@foss.st.com>,
+        <arnaud.pouliquen@foss.st.com>, <mchehab@kernel.org>,
+        <fabrice.gasnier@foss.st.com>, <andi.shyti@kernel.org>,
+        <ulf.hansson@linaro.org>, <edumazet@google.com>, <kuba@kernel.org>,
+        <pabeni@redhat.com>, <hugues.fruchet@foss.st.com>, <lee@kernel.org>,
+        <will@kernel.org>, <catalin.marinas@arm.com>, <arnd@kernel.org>,
+        <richardcochran@gmail.com>, Frank Rowand <frowand.list@gmail.com>,
+        <peng.fan@oss.nxp.com>, <lars@metafoo.de>, <rcsekar@samsung.com>,
+        <wg@grandegger.com>, <mkl@pengutronix.de>
+CC: <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
+        <dmaengine@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
+        <linux-iio@vger.kernel.org>, <alsa-devel@alsa-project.org>,
+        <linux-media@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <netdev@vger.kernel.org>, <linux-phy@lists.infradead.org>,
+        <linux-serial@vger.kernel.org>, <linux-spi@vger.kernel.org>,
+        <linux-usb@vger.kernel.org>,
+        Oleksii Moisieiev <oleksii_moisieiev@epam.com>,
+        Gatien Chevallier <gatien.chevallier@foss.st.com>
+Subject: [PATCH v8 01/13] dt-bindings: document generic access controllers
+Date: Tue, 12 Dec 2023 16:23:44 +0100
+Message-ID: <20231212152356.345703-2-gatien.chevallier@foss.st.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20231212152356.345703-1-gatien.chevallier@foss.st.com>
+References: <20231212152356.345703-1-gatien.chevallier@foss.st.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -37,123 +68,140 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: EQNCAS1NODE3.st.com (10.75.129.80) To SHFDAG1NODE1.st.com
+ (10.75.129.69)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-12-12_09,2023-12-12_01,2023-05-22_02
 
-Spamming `lspci -vv` can still observe the replay timer timeout error
-even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
-replay timer timeout of AER"), albeit with a lower reproduce rate.
+From: Oleksii Moisieiev <Oleksii_Moisieiev@epam.com>
 
-Such AER interrupt can still prevent the system from suspending, so let
-root port mask and unmask replay timer timeout during suspend and
-resume, respectively.
+Introducing of the generic access controllers bindings for the
+access controller provider and consumer devices. Those bindings are
+intended to allow a better handling of accesses to resources in a
+hardware architecture supporting several compartments.
 
-Cc: Victor Shih <victor.shih@genesyslogic.com.tw>
-Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
+This patch is based on [1]. It is integrated in this patchset as it
+provides a use-case for it.
+
+Diffs with [1]:
+	- Rename feature-domain* properties to access-control* to narrow
+	  down the scope of the binding
+	- YAML errors and typos corrected.
+	- Example updated
+	- Some rephrasing in the binding description
+
+[1]: https://lore.kernel.org/lkml/0c0a82bb-18ae-d057-562b
+
+Signed-off-by: Oleksii Moisieiev <oleksii_moisieiev@epam.com>
+Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c |  2 +-
- drivers/mmc/host/sdhci-pci-gli.c  | 50 +++++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci-pci.h      |  1 +
- 3 files changed, 50 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 025b31aa712c..59ae4da72974 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -68,7 +68,7 @@ static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
- 	return 0;
- }
- 
--static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-+int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
- {
- 	int i, ret;
- 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 77911a57b12c..7d1548c83742 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -1429,6 +1429,50 @@ static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
- 	return sdhci_pci_resume_host(chip);
- }
- 
-+static void mask_replay_timer_timeout(struct pci_dev *pdev)
-+{
-+	struct pci_dev *parent = pci_upstream_bridge(pdev);
-+	u32 val;
+Changes in V6:
+	- Renamed access-controller to access-controllers
+	- Example updated
+	- Removal of access-control-provider property
+
+Changes in V5:
+	- Diffs with [1]
+	- Discarded the [IGNORE] tag as the patch is now part of the
+	  patchset
+
+ .../access-controllers.yaml                   | 84 +++++++++++++++++++
+ 1 file changed, 84 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/access-controllers/access-controllers.yaml
+
+diff --git a/Documentation/devicetree/bindings/access-controllers/access-controllers.yaml b/Documentation/devicetree/bindings/access-controllers/access-controllers.yaml
+new file mode 100644
+index 000000000000..99e2865f0e46
+--- /dev/null
++++ b/Documentation/devicetree/bindings/access-controllers/access-controllers.yaml
+@@ -0,0 +1,84 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/access-controllers/access-controllers.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+	if (!parent || !parent->aer_cap)
-+		return;
++title: Generic Domain Access Controllers
 +
-+	pci_read_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MASK, &val);
-+	val |= PCI_ERR_COR_REP_TIMER;
-+	pci_write_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MASK, val);
-+}
++maintainers:
++  - Oleksii Moisieiev <oleksii_moisieiev@epam.com>
 +
-+static void unmask_replay_timer_timeout(struct pci_dev *pdev)
-+{
-+	struct pci_dev *parent = pci_upstream_bridge(pdev);
-+	u32 val;
++description: |+
++  Common access controllers properties
 +
-+	if (!parent || !parent->aer_cap)
-+		return;
++  Access controllers are in charge of stating which of the hardware blocks under
++  their responsibility (their domain) can be accesssed by which compartment. A
++  compartment can be a cluster of CPUs (or coprocessors), a range of addresses
++  or a group of hardware blocks. An access controller's domain is the set of
++  resources covered by the access controller.
 +
-+	pci_read_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK, &val);
-+	val &= ~PCI_ERR_COR_REP_TIMER;
-+	pci_write_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK, val);
-+}
++  This device tree binding can be used to bind devices to their access
++  controller provided by access-controllers property. In this case, the device
++  is a consumer and the access controller is the provider.
 +
-+static int sdhci_pci_gl975x_suspend(struct sdhci_pci_chip *chip)
-+{
-+	mask_replay_timer_timeout(chip->pdev);
++  An access controller can be represented by any node in the device tree and
++  can provide one or more configuration parameters, needed to control parameters
++  of the consumer device. A consumer node can refer to the provider by phandle
++  and a set of phandle arguments, specified by '#access-controller-cells'
++  property in the access controller node.
 +
-+	return sdhci_pci_suspend_host(chip);
-+}
++  Access controllers are typically used to set/read the permissions of a
++  hardware block and grant access to it. Any of which depends on the access
++  controller. The capabilities of each access controller are defined by the
++  binding of the access controller device.
 +
-+static int sdhci_pci_gl975x_resume(struct sdhci_pci_chip *chip)
-+{
-+	int ret;
++  Each node can be a consumer for the several access controllers.
 +
-+	ret = sdhci_pci_gli_resume(chip);
++# always select the core schema
++select: true
 +
-+	unmask_replay_timer_timeout(chip->pdev);
++properties:
++  "#access-controller-cells":
++    description:
++      Number of cells in an access-controllers specifier;
++      Can be any value as specified by device tree binding documentation
++      of a particular provider. The node is an access controller.
 +
-+	return ret;
-+}
++  access-controller-names:
++    $ref: /schemas/types.yaml#/definitions/string-array
++    description:
++      A list of access-controllers names, sorted in the same order as
++      access-controllers entries. Consumer drivers will use
++      access-controller-names to match with existing access-controllers entries.
 +
- static int gl9763e_resume(struct sdhci_pci_chip *chip)
- {
- 	struct sdhci_pci_slot *slot = chip->slots[0];
-@@ -1547,7 +1591,8 @@ const struct sdhci_pci_fixes sdhci_gl9755 = {
- 	.probe_slot	= gli_probe_slot_gl9755,
- 	.ops            = &sdhci_gl9755_ops,
- #ifdef CONFIG_PM_SLEEP
--	.resume         = sdhci_pci_gli_resume,
-+	.suspend	= sdhci_pci_gl975x_suspend,
-+	.resume         = sdhci_pci_gl975x_resume,
- #endif
- };
- 
-@@ -1570,7 +1615,8 @@ const struct sdhci_pci_fixes sdhci_gl9750 = {
- 	.probe_slot	= gli_probe_slot_gl9750,
- 	.ops            = &sdhci_gl9750_ops,
- #ifdef CONFIG_PM_SLEEP
--	.resume         = sdhci_pci_gli_resume,
-+	.suspend	= sdhci_pci_gl975x_suspend,
-+	.resume         = sdhci_pci_gl975x_resume,
- #endif
- };
- 
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 153704f812ed..19253dce687d 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -190,6 +190,7 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
- }
- 
- #ifdef CONFIG_PM_SLEEP
-+int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip);
- int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
- #endif
- int sdhci_pci_enable_dma(struct sdhci_host *host);
++  access-controllers:
++    $ref: /schemas/types.yaml#/definitions/phandle-array
++    description:
++      A list of access controller specifiers, as defined by the
++      bindings of the access-controllers provider.
++
++additionalProperties: true
++
++examples:
++  - |
++    clock_controller: access-controllers@50000 {
++        reg = <0x50000 0x400>;
++        #access-controller-cells = <2>;
++    };
++
++    bus_controller: bus@60000 {
++        reg = <0x60000 0x10000>;
++        #address-cells = <1>;
++        #size-cells = <1>;
++        ranges;
++        #access-controller-cells = <3>;
++
++        uart4: serial@60100 {
++            reg = <0x60100 0x400>;
++            clocks = <&clk_serial>;
++            access-controllers = <&clock_controller 1 2>,
++                                 <&bus_controller 1 3 5>;
++            access-controller-names = "clock", "bus";
++        };
++    };
 -- 
-2.34.1
+2.25.1
 
