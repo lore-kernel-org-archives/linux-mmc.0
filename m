@@ -1,119 +1,162 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ud4CNBpR"
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73DE6A3
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Dec 2023 23:42:25 -0800 (PST)
-Received: by mail-ed1-x535.google.com with SMTP id 4fb4d7f45d1cf-552231d9c1dso1957564a12.0
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Dec 2023 23:42:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1702539744; x=1703144544; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Z6d6GcNikJGiR5SToV5VakGHdIkVh2njpCHZXsBES18=;
-        b=Ud4CNBpRaPv4/fAd/u9FEkPPVMBvRPAohetGQSvgy8k+dYg7lHzjw6MQ/1jPldbdYU
-         ++yhIm/UYmr7NEca02d0e+v0yKlMJnK/RVCJNt0N/5MIskU4SJi5ehk9aJw1fxEUpZTV
-         NOi4m1N8JNoB5yXMrsYgX1kEamcVCTeUvIQE2aO6P2PXqHtnIldmT6XkxAOXOjOtOKb1
-         N28BSnmc8OT3inIZOl9//2mNG+XhqtdPuVXdyEwIGHLgAY+mOj8C0v/S+mHR10lwaeW2
-         VKk5EKEDA9dGuhn0bw0hdX32MaZg18jQSoKt6Q6TtC4kGu183BMznuRJZYOkQdLPAAzE
-         k8eg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702539744; x=1703144544;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Z6d6GcNikJGiR5SToV5VakGHdIkVh2njpCHZXsBES18=;
-        b=bdk5yhuzAVt9rWcAHSPEZWKqeHtUcLpw8WPlxIZTcrZHuAI1HDB2ITLmRLgZOkTKRd
-         peFT3lex0684eYBmtNR2izVWQnLmxvCynC2zYyFq6fwzVUawDsOIRaJ6VGUJHpdbVi3R
-         xV9ecwrNPlKvCmJZTidRvgVjrqgyMdduiXiXLQJH+JD3dNMEYmmcZmRjlJeDnntGCUdN
-         caOSCDq2yg2VYmLmgTRirOnh6TNGlg2qz/TmrLI40k782/8kxE7rNJzq0tnsGTUQWBAz
-         2hTh62A2eBbk+456ByH/g/h3u9Sy2aR/HwDwElIwRxVfw8lpCm8A5QeByUvwjBX9LHkQ
-         BRGw==
-X-Gm-Message-State: AOJu0Yx8i0cyMOkccHIuoYZsuTSW0dHpjRsvadGuwqtjEMrIWLC1dS8M
-	WoC2YqIYOHEWj4yICMjniTKQQw==
-X-Google-Smtp-Source: AGHT+IHW+dTuQ60ZFYJs7+lO9MU+ZWixbtRdX10A8hY4pf0w2xRnOU4FLG857hGBeWT0VQk0979/jg==
-X-Received: by 2002:a50:8ad7:0:b0:551:f959:c2b4 with SMTP id k23-20020a508ad7000000b00551f959c2b4mr1210424edk.79.1702539743939;
-        Wed, 13 Dec 2023 23:42:23 -0800 (PST)
-Received: from [192.168.1.20] ([178.197.218.27])
-        by smtp.gmail.com with ESMTPSA id ew12-20020a056402538c00b00552691fc7f9sm458868edb.66.2023.12.13.23.42.21
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 13 Dec 2023 23:42:23 -0800 (PST)
-Message-ID: <1fbbff6b-2e49-4ee1-ab7b-3ff490d3636e@linaro.org>
-Date: Thu, 14 Dec 2023 08:42:21 +0100
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Q3iIuWm1"
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFC4DA6
+	for <linux-mmc@vger.kernel.org>; Thu, 14 Dec 2023 01:09:28 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1702544968; x=1734080968;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=CkJELtNy2BOKr9Z2E7tJdK9lXGtU85jGdGKOcoRv21E=;
+  b=Q3iIuWm1SQhVXMywaMIU4j0qcivXZ7oVtJ0UxIux7BvkOTXf4Dlk8zZ9
+   AelEcOuSlKtRh1FxTyMTkNyxpRD/yHfNTSHd25aDvPoSjMSPPBBBHoWfz
+   Rd/M2cc8AUzfRMfpZqFFGXoSgqqbSGlA9U1aifyhFVP6QXcaxe7Q5J1nN
+   bxQXNP8EC2jRUi9M35WXhN/9R+MWf+4ej7yhxSqmQYzHovexFcHnXq1B3
+   bZb9hqSM92dOw7QGn3qI3qm0/9wZARhiZ11xkFtp1JicSejPh7CiOy7RM
+   MwsuzlPdh9YCKMD7kMWmb1cgm4J04X+SgGtFj5B3GLSgx0MGDSFcfNQm2
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10923"; a="393964696"
+X-IronPort-AV: E=Sophos;i="6.04,274,1695711600"; 
+   d="scan'208";a="393964696"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2023 01:09:28 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10923"; a="774282091"
+X-IronPort-AV: E=Sophos;i="6.04,275,1695711600"; 
+   d="scan'208";a="774282091"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO ahunter-VirtualBox.home\044ger.corp.intel.com) ([10.252.48.119])
+  by orsmga002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2023 01:09:15 -0800
+From: Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: jorge@foundries.io,
+	avri.altman@wdc.com,
+	christian.loehle@arm.com,
+	ricardo@foundries.io,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: mmc_test: Add re-tuning test
+Date: Thu, 14 Dec 2023 11:09:02 +0200
+Message-Id: <20231214090902.43628-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-pxa: Fix 'regs' typo
-Content-Language: en-US
-To: Rob Herring <robh@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>, Lubomir Rintel <lkundrak@v3.sk>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20231213224219.2191721-1-robh@kernel.org>
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
- cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
- JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
- gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
- J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
- NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
- BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
- vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
- Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
- TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzTRLcnp5c3p0b2Yg
- S296bG93c2tpIDxrcnp5c3p0b2Yua296bG93c2tpQGxpbmFyby5vcmc+wsGUBBMBCgA+FiEE
- m9B+DgxR+NWWd7dUG5NDfTtBYpsFAmI+BxMCGwMFCRRfreEFCwkIBwIGFQoJCAsCBBYCAwEC
- HgECF4AACgkQG5NDfTtBYptgbhAAjAGunRoOTduBeC7V6GGOQMYIT5n3OuDSzG1oZyM4kyvO
- XeodvvYv49/ng473E8ZFhXfrre+c1olbr1A8pnz9vKVQs9JGVa6wwr/6ddH7/yvcaCQnHRPK
- mnXyP2BViBlyDWQ71UC3N12YCoHE2cVmfrn4JeyK/gHCvcW3hUW4i5rMd5M5WZAeiJj3rvYh
- v8WMKDJOtZFXxwaYGbvFJNDdvdTHc2x2fGaWwmXMJn2xs1ZyFAeHQvrp49mS6PBQZzcx0XL5
- cU9ZjhzOZDn6Apv45/C/lUJvPc3lo/pr5cmlOvPq1AsP6/xRXsEFX/SdvdxJ8w9KtGaxdJuf
- rpzLQ8Ht+H0lY2On1duYhmro8WglOypHy+TusYrDEry2qDNlc/bApQKtd9uqyDZ+rx8bGxyY
- qBP6bvsQx5YACI4p8R0J43tSqWwJTP/R5oPRQW2O1Ye1DEcdeyzZfifrQz58aoZrVQq+innR
- aDwu8qDB5UgmMQ7cjDSeAQABdghq7pqrA4P8lkA7qTG+aw8Z21OoAyZdUNm8NWJoQy8m4nUP
- gmeeQPRc0vjp5JkYPgTqwf08cluqO6vQuYL2YmwVBIbO7cE7LNGkPDA3RYMu+zPY9UUi/ln5
- dcKuEStFZ5eqVyqVoZ9eu3RTCGIXAHe1NcfcMT9HT0DPp3+ieTxFx6RjY3kYTGLOwU0EVUNc
- NAEQAM2StBhJERQvgPcbCzjokShn0cRA4q2SvCOvOXD+0KapXMRFE+/PZeDyfv4dEKuCqeh0
- hihSHlaxTzg3TcqUu54w2xYskG8Fq5tg3gm4kh1Gvh1LijIXX99ABA8eHxOGmLPRIBkXHqJY
- oHtCvPc6sYKNM9xbp6I4yF56xVLmHGJ61KaWKf5KKWYgA9kfHufbja7qR0c6H79LIsiYqf92
- H1HNq1WlQpu/fh4/XAAaV1axHFt/dY/2kU05tLMj8GjeQDz1fHas7augL4argt4e+jum3Nwt
- yupodQBxncKAUbzwKcDrPqUFmfRbJ7ARw8491xQHZDsP82JRj4cOJX32sBg8nO2N5OsFJOcd
- 5IE9v6qfllkZDAh1Rb1h6DFYq9dcdPAHl4zOj9EHq99/CpyccOh7SrtWDNFFknCmLpowhct9
- 5ZnlavBrDbOV0W47gO33WkXMFI4il4y1+Bv89979rVYn8aBohEgET41SpyQz7fMkcaZU+ok/
- +HYjC/qfDxT7tjKXqBQEscVODaFicsUkjheOD4BfWEcVUqa+XdUEciwG/SgNyxBZepj41oVq
- FPSVE+Ni2tNrW/e16b8mgXNngHSnbsr6pAIXZH3qFW+4TKPMGZ2rZ6zITrMip+12jgw4mGjy
- 5y06JZvA02rZT2k9aa7i9dUUFggaanI09jNGbRA/ABEBAAHCwXwEGAEKACYCGwwWIQSb0H4O
- DFH41ZZ3t1Qbk0N9O0FimwUCYDzvagUJFF+UtgAKCRAbk0N9O0Fim9JzD/0auoGtUu4mgnna
- oEEpQEOjgT7l9TVuO3Qa/SeH+E0m55y5Fjpp6ZToc481za3xAcxK/BtIX5Wn1mQ6+szfrJQ6
- 59y2io437BeuWIRjQniSxHz1kgtFECiV30yHRgOoQlzUea7FgsnuWdstgfWi6LxstswEzxLZ
- Sj1EqpXYZE4uLjh6dW292sO+j4LEqPYr53hyV4I2LPmptPE9Rb9yCTAbSUlzgjiyyjuXhcwM
- qf3lzsm02y7Ooq+ERVKiJzlvLd9tSe4jRx6Z6LMXhB21fa5DGs/tHAcUF35hSJrvMJzPT/+u
- /oVmYDFZkbLlqs2XpWaVCo2jv8+iHxZZ9FL7F6AHFzqEFdqGnJQqmEApiRqH6b4jRBOgJ+cY
- qc+rJggwMQcJL9F+oDm3wX47nr6jIsEB5ZftdybIzpMZ5V9v45lUwmdnMrSzZVgC4jRGXzsU
- EViBQt2CopXtHtYfPAO5nAkIvKSNp3jmGxZw4aTc5xoAZBLo0OV+Ezo71pg3AYvq0a3/oGRG
- KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
- fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231213224219.2191721-1-robh@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 
-On 13/12/2023 23:42, Rob Herring wrote:
-> The correct property name is 'reg' not 'regs'.
-> 
-> Fixes: ae5c0585dfc2 ("dt-bindings: mmc: Convert sdhci-pxa to json-schema")
-> Signed-off-by: Rob Herring <robh@kernel.org>
-> ---
+Add a test to repeatedly re-tune in between random reads.  The test is
+non-destructive of data on the card and runs for 30 seconds.  The test
+can be repeated to test for longer durations.
 
+If re-tuning is not supported, the test is skipped.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Example:
 
-Best regards,
-Krzysztof
+  # echo 'mmc1:0001' >  /sys/bus/mmc/drivers/mmcblk/unbind
+  # echo 'mmc1:0001' > /sys/bus/mmc/drivers/mmc_test/bind
+  [   36.642257] mmc_test mmc1:0001: Card claimed for testing.
+  # cat /sys/kernel/debug/mmc1/mmc1\:0001/testlist | grep tuning
+  52:     Re-tuning reliability
+  # echo 52 > /sys/kernel/debug/mmc1/mmc1\:0001/test
+  [   91.522555] mmc1: Starting tests of card mmc1:0001...
+  [   91.528425] mmc1: Test case 52. Re-tuning reliability...
+  [  121.536682] mmc1: Result: OK
+  [  121.539572] mmc1: Tests completed.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/mmc_test.c | 33 +++++++++++++++++++++++++++------
+ 1 file changed, 27 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 0f6a563103fd..8f7f587a0025 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -1904,7 +1904,7 @@ static unsigned int mmc_test_rnd_num(unsigned int rnd_cnt)
+ }
+ 
+ static int mmc_test_rnd_perf(struct mmc_test_card *test, int write, int print,
+-			     unsigned long sz)
++			     unsigned long sz, int secs, int force_retuning)
+ {
+ 	unsigned int dev_addr, cnt, rnd_addr, range1, range2, last_ea = 0, ea;
+ 	unsigned int ssz;
+@@ -1921,7 +1921,7 @@ static int mmc_test_rnd_perf(struct mmc_test_card *test, int write, int print,
+ 	for (cnt = 0; cnt < UINT_MAX; cnt++) {
+ 		ktime_get_ts64(&ts2);
+ 		ts = timespec64_sub(ts2, ts1);
+-		if (ts.tv_sec >= 10)
++		if (ts.tv_sec >= secs)
+ 			break;
+ 		ea = mmc_test_rnd_num(range1);
+ 		if (ea == last_ea)
+@@ -1929,6 +1929,8 @@ static int mmc_test_rnd_perf(struct mmc_test_card *test, int write, int print,
+ 		last_ea = ea;
+ 		dev_addr = rnd_addr + test->card->pref_erase * ea +
+ 			   ssz * mmc_test_rnd_num(range2);
++		if (force_retuning)
++			mmc_retune_needed(test->card->host);
+ 		ret = mmc_test_area_io(test, sz, dev_addr, write, 0, 0);
+ 		if (ret)
+ 			return ret;
+@@ -1953,24 +1955,35 @@ static int mmc_test_random_perf(struct mmc_test_card *test, int write)
+ 		 */
+ 		if (write) {
+ 			next = rnd_next;
+-			ret = mmc_test_rnd_perf(test, write, 0, sz);
++			ret = mmc_test_rnd_perf(test, write, 0, sz, 10, 0);
+ 			if (ret)
+ 				return ret;
+ 			rnd_next = next;
+ 		}
+-		ret = mmc_test_rnd_perf(test, write, 1, sz);
++		ret = mmc_test_rnd_perf(test, write, 1, sz, 10, 0);
+ 		if (ret)
+ 			return ret;
+ 	}
+ 	sz = t->max_tfr;
+ 	if (write) {
+ 		next = rnd_next;
+-		ret = mmc_test_rnd_perf(test, write, 0, sz);
++		ret = mmc_test_rnd_perf(test, write, 0, sz, 10, 0);
+ 		if (ret)
+ 			return ret;
+ 		rnd_next = next;
+ 	}
+-	return mmc_test_rnd_perf(test, write, 1, sz);
++	return mmc_test_rnd_perf(test, write, 1, sz, 10, 0);
++}
++
++static int mmc_test_retuning(struct mmc_test_card *test)
++{
++	if (!mmc_can_retune(test->card->host)) {
++		pr_info("%s: No retuning - test skipped\n",
++			mmc_hostname(test->card->host));
++		return RESULT_UNSUP_HOST;
++	}
++
++	return mmc_test_rnd_perf(test, 0, 0, 8192, 30, 1);
+ }
+ 
+ /*
+@@ -2921,6 +2934,14 @@ static const struct mmc_test_case mmc_test_cases[] = {
+ 		.run = mmc_test_cmds_during_write_cmd23_nonblock,
+ 		.cleanup = mmc_test_area_cleanup,
+ 	},
++
++	{
++		.name = "Re-tuning reliability",
++		.prepare = mmc_test_area_prepare,
++		.run = mmc_test_retuning,
++		.cleanup = mmc_test_area_cleanup,
++	},
++
+ };
+ 
+ static DEFINE_MUTEX(mmc_test_lock);
+-- 
+2.34.1
 
