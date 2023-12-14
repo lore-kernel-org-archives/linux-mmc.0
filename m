@@ -1,199 +1,128 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jLmFwZu9"
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.7])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7EBBA11A;
-	Thu, 14 Dec 2023 03:51:11 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="bp0wZVC4"
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2681811D;
+	Thu, 14 Dec 2023 05:57:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1702554672; x=1734090672;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=BhZf7wz/FDt/FQmzz/IDWDH8og7hknv+Q19tZaOh3wA=;
-  b=jLmFwZu9TRdpJhDYpUwtdR/Ras5F9Mk//bdX9vsWVSbkGuPZ16yg/6W6
-   jSXmEGvJLCHgapGU3L+gQmIOX59DwFzsYklwX29DteDRfR1JX/djFE0dU
-   soUyJLS8YWV4jZgXkFV9w+qt3/Q7qyvTz75/v6M8Uj9wfPCBX2LD8/NSD
-   ejyKIqke6qqSHKUdY+zN2qzLolJ6gP6HfLe7O8iWElvLzpqcAzLEeJUvK
-   fyK5w6gh5fPOjTD7ljfBXpyMLwNBXWrwFO7dPbdRxD7caLdionG4DCfss
-   ETmArdn+golZBK2P5H16lYgV+onHBRaa6RIQtdSublPSnR0emzUKYBAcB
+  t=1702562255; x=1734098255;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=V/bhBmq7ENpJWYEcfVMJ6z98OicWGoiGjosbM1lXL9s=;
+  b=bp0wZVC45ErMtnSM2QQu8VNpQNitA8DzRs6xyEcBzReB+qlZlJFyMakJ
+   OaFJG5AXhUMS+cvTp2zkLUHkY8/1ClRUq2YXyJ/WycW2lZZdo0PtQlyyw
+   lSIPNwuQLHtgJQEQQbU42MAI/oyt8RpTy7wZ0lYVuNzVVzwfNycko4RJ4
+   9ivZWGoTK+M8BpQ2ogqJFhGJy0MrqB+qHgsrQI4v4X8s5/y5uVQUayg3d
+   s9UbUFg0S8KA308N3oCjn4cbdjjfNR4R/QagSFw4e0Eq9yhgkuXbCI9rr
+   IpnaN8QoI9NBGU4n62+1Cce/JWI+JcujFASGt5dSMPZn4SYZPWZKJ39Sw
    A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10923"; a="16658808"
+X-IronPort-AV: E=McAfee;i="6600,9927,10924"; a="380105800"
 X-IronPort-AV: E=Sophos;i="6.04,275,1695711600"; 
-   d="scan'208";a="16658808"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmvoesa101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2023 03:51:11 -0800
+   d="scan'208";a="380105800"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2023 05:57:34 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10923"; a="844679349"
+X-IronPort-AV: E=McAfee;i="6600,9927,10924"; a="897753673"
 X-IronPort-AV: E=Sophos;i="6.04,275,1695711600"; 
-   d="scan'208";a="844679349"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.48.119])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2023 03:51:07 -0800
-Message-ID: <e9ef79c4-c769-49d3-813b-0d78d1e4ede1@intel.com>
-Date: Thu, 14 Dec 2023 13:51:02 +0200
+   d="scan'208";a="897753673"
+Received: from lkp-server02.sh.intel.com (HELO b07ab15da5fe) ([10.239.97.151])
+  by orsmga004.jf.intel.com with ESMTP; 14 Dec 2023 05:57:32 -0800
+Received: from kbuild by b07ab15da5fe with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1rDmDS-000M98-17;
+	Thu, 14 Dec 2023 13:57:30 +0000
+Date: Thu, 14 Dec 2023 21:57:04 +0800
+From: kernel test robot <lkp@intel.com>
+To: Kai-Heng Feng <kai.heng.feng@canonical.com>, adrian.hunter@intel.com,
+	ulf.hansson@linaro.org
+Cc: oe-kbuild-all@lists.linux.dev,
+	Kai-Heng Feng <kai.heng.feng@canonical.com>,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-pci-gli: GL9750: Mask rootport's replay timer
+ timeout during suspend
+Message-ID: <202312142103.ADkXHq1r-lkp@intel.com>
+References: <20231212141029.239235-1-kai.heng.feng@canonical.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [V3, 2/2] mmc: add new sdhci reset sequence for brcm 74165b0
-Content-Language: en-US
-To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
- linux-kernel@vger.kernel.org, alcooperx@gmail.com,
- linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
- robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
- devicetree@vger.kernel.org
-Cc: f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
- Kamal Dasu <kdasu@broadcom.com>
-References: <20231209165816.39044-1-kamal.dasu@broadcom.com>
- <20231209165816.39044-2-kamal.dasu@broadcom.com>
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20231209165816.39044-2-kamal.dasu@broadcom.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231212141029.239235-1-kai.heng.feng@canonical.com>
 
-On 9/12/23 18:58, Kamal Dasu wrote:
-> From: Kamal Dasu <kdasu@broadcom.com>
-> 
-> 74165b0 shall use a new sdio controller core version which
-> requires a different reset sequence. For core reset we use
-> sdhci_reset. For CMD and/or DATA reset added a new function
-> to also enable SDCHI clocks SDHCI_CLOCK_CARD_EN
+Hi Kai-Heng,
 
-SDCHI -> SDHCI
+kernel test robot noticed the following build errors:
 
-> SDHCI_CLOCK_INT_EN along with the SDHCI_RESET_CMD and/or
-> SDHCI_RESET_DATA fields.
-> 
-> Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
-> Reported-by: kernel test robot <lkp@intel.com>
-> Closes: https://lore.kernel.org/oe-kbuild-all/202312091608.0VbkRxlh-lkp@intel.com/
-> Closes:
-> https://lore.kernel.org/oe-kbuild-all/202312091905.UGzltx8A-lkp@intel.com/``````````````
+[auto build test ERROR on linus/master]
+[also build test ERROR on v6.7-rc5 next-20231214]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-???
+url:    https://github.com/intel-lab-lkp/linux/commits/Kai-Heng-Feng/mmc-sdhci-pci-gli-GL9750-Mask-rootport-s-replay-timer-timeout-during-suspend/20231212-221223
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231212141029.239235-1-kai.heng.feng%40canonical.com
+patch subject: [PATCH] mmc: sdhci-pci-gli: GL9750: Mask rootport's replay timer timeout during suspend
+config: x86_64-randconfig-121-20231213 (https://download.01.org/0day-ci/archive/20231214/202312142103.ADkXHq1r-lkp@intel.com/config)
+compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231214/202312142103.ADkXHq1r-lkp@intel.com/reproduce)
 
-> ---
->  drivers/mmc/host/sdhci-brcmstb.c | 69 +++++++++++++++++++++++++++++---
->  1 file changed, 64 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index c23251bb95f3..d4bd5b3c0fa4 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -44,8 +44,13 @@ struct brcmstb_match_priv {
->  
->  static inline void enable_clock_gating(struct sdhci_host *host)
->  {
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
->  	u32 reg;
->  
-> +	if (!(priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK))
-> +		return;
-> +
->  	reg = sdhci_readl(host, SDHCI_VENDOR);
->  	reg |= SDHCI_VENDOR_GATE_SDCLK_EN;
->  	sdhci_writel(host, reg, SDHCI_VENDOR);
-> @@ -53,14 +58,54 @@ static inline void enable_clock_gating(struct sdhci_host *host)
->  
->  static void brcmstb_reset(struct sdhci_host *host, u8 mask)
->  {
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -
->  	sdhci_and_cqhci_reset(host, mask);
->  
->  	/* Reset will clear this, so re-enable it */
-> -	if (priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK)
-> -		enable_clock_gating(host);
-> +	enable_clock_gating(host);
-> +}
-> +
-> +static void brcmstb_sdhci_reset_cmd_data(struct sdhci_host *host, u8 mask)
-> +{
-> +	ktime_t timeout;
-> +	u32 reg;
-> +	u32 new_mask = (mask &  (SDHCI_RESET_CMD | SDHCI_RESET_DATA)) << 24;
-> +
-> +	new_mask |= SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN;
-> +	reg = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202312142103.ADkXHq1r-lkp@intel.com/
 
-Is it really necessary to write both registers together?  If
-so, maybe add a comment.
+All errors (new ones prefixed by >>):
 
-> +	sdhci_writel(host, reg | new_mask, SDHCI_CLOCK_CONTROL);
-> +
-> +	/* Wait max 10 ms */
-> +	timeout = ktime_add_ms(ktime_get(), 10);
-> +
-> +	/* hw clears the bit when it's done */
-> +	while (1) {
-> +		bool timedout = ktime_after(ktime_get(), timeout);
-> +
-> +		if (!(sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask))
-> +			break;
-> +		if (timedout) {
-> +			pr_err("%s: Reset 0x%x never completed.\n",
-> +				mmc_hostname(host->mmc), (int)mask);
-> +			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
-> +			sdhci_dumpregs(host);
-> +			return;
-> +		}
-> +		udelay(10);
-> +	}
+   drivers/mmc/host/sdhci-pci-gli.c: In function 'mask_replay_timer_timeout':
+>> drivers/mmc/host/sdhci-pci-gli.c:1437:33: error: 'struct pci_dev' has no member named 'aer_cap'; did you mean 'ats_cap'?
+    1437 |         if (!parent || !parent->aer_cap)
+         |                                 ^~~~~~~
+         |                                 ats_cap
+   drivers/mmc/host/sdhci-pci-gli.c:1440:47: error: 'struct pci_dev' has no member named 'aer_cap'; did you mean 'ats_cap'?
+    1440 |         pci_read_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MASK, &val);
+         |                                               ^~~~~~~
+         |                                               ats_cap
+   drivers/mmc/host/sdhci-pci-gli.c:1442:48: error: 'struct pci_dev' has no member named 'aer_cap'; did you mean 'ats_cap'?
+    1442 |         pci_write_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MASK, val);
+         |                                                ^~~~~~~
+         |                                                ats_cap
+   drivers/mmc/host/sdhci-pci-gli.c: In function 'unmask_replay_timer_timeout':
+   drivers/mmc/host/sdhci-pci-gli.c:1450:33: error: 'struct pci_dev' has no member named 'aer_cap'; did you mean 'ats_cap'?
+    1450 |         if (!parent || !parent->aer_cap)
+         |                                 ^~~~~~~
+         |                                 ats_cap
+   drivers/mmc/host/sdhci-pci-gli.c:1453:45: error: 'struct pci_dev' has no member named 'aer_cap'; did you mean 'ats_cap'?
+    1453 |         pci_read_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK, &val);
+         |                                             ^~~~~~~
+         |                                             ats_cap
+   drivers/mmc/host/sdhci-pci-gli.c:1455:46: error: 'struct pci_dev' has no member named 'aer_cap'; did you mean 'ats_cap'?
+    1455 |         pci_write_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK, val);
+         |                                              ^~~~~~~
+         |                                              ats_cap
 
-For new code we should try to use read_poll_timeout_atomic() or other.
 
-> +}
-> +
-> +static void brcmstb_reset_74165b0(struct sdhci_host *host, u8 mask)
-> +{
-> +	/* take care of RESET_ALL as usual */
-> +	if (mask & SDHCI_RESET_ALL)
-> +		sdhci_and_cqhci_reset(host, SDHCI_RESET_ALL);
-> +
-> +	/* cmd and/or data treated differently on this core */
-> +	if (mask & (SDHCI_RESET_CMD | SDHCI_RESET_DATA))
-> +		brcmstb_sdhci_reset_cmd_data(host, mask);
-> +
-> +	/* Reset will clear this, so re-enable it */
-> +	enable_clock_gating(host);
->  }
->  
->  static void sdhci_brcmstb_hs400es(struct mmc_host *mmc, struct mmc_ios *ios)
-> @@ -162,6 +207,13 @@ static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
->  	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
->  };
->  
-> +static struct sdhci_ops sdhci_brcmstb_ops_74165b0 = {
-> +	.set_clock = sdhci_brcmstb_set_clock,
-> +	.set_bus_width = sdhci_set_bus_width,
-> +	.reset = brcmstb_reset_74165b0,
-> +	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
-> +};
-> +
->  static struct brcmstb_match_priv match_priv_7425 = {
->  	.flags = BRCMSTB_MATCH_FLAGS_NO_64BIT |
->  	BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
-> @@ -179,10 +231,17 @@ static const struct brcmstb_match_priv match_priv_7216 = {
->  	.ops = &sdhci_brcmstb_ops_7216,
->  };
->  
-> +static struct brcmstb_match_priv match_priv_74165b0 = {
-> +	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
-> +	.hs400es = sdhci_brcmstb_hs400es,
-> +	.ops = &sdhci_brcmstb_ops_74165b0,
-> +};
-> +
->  static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
->  	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
->  	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
->  	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
-> +	{ .compatible = "brcm,bcm74165b0-sdhci", .data = &match_priv_74165b0 },
->  	{},
->  };
->  
+vim +1437 drivers/mmc/host/sdhci-pci-gli.c
 
+  1431	
+  1432	static void mask_replay_timer_timeout(struct pci_dev *pdev)
+  1433	{
+  1434		struct pci_dev *parent = pci_upstream_bridge(pdev);
+  1435		u32 val;
+  1436	
+> 1437		if (!parent || !parent->aer_cap)
+  1438			return;
+  1439	
+  1440		pci_read_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MASK, &val);
+  1441		val |= PCI_ERR_COR_REP_TIMER;
+  1442		pci_write_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MASK, val);
+  1443	}
+  1444	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
