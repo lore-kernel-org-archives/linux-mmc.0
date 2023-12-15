@@ -1,225 +1,172 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6499D65EB5;
-	Thu, 14 Dec 2023 17:16:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 806E514F93
+	for <linux-mmc@vger.kernel.org>; Fri, 15 Dec 2023 08:45:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ApmZLNNP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8915EC433C7;
-	Thu, 14 Dec 2023 17:16:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1702574184;
-	bh=bwu2w4zW//jHMjIvWeXohjLIYznHWt798OK1QLHQP+E=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:From;
-	b=ApmZLNNPCWjt45Cil7/WhQKoCwSbzsvi+W1c94IM9h7LaLjgspNrA4/TR6wyhetnE
-	 NJbG7FZmQSKfYb6swKJgX336iWnfWym7mgtpNkiC20NVCsmZIssdB36Y2mvKyC6adK
-	 DaB/nskKji6OUqWtqRAzVlwSXAViL+YcT/f/x/JZ9lt6uJEJGmNxfmE4pna+KcP+BE
-	 ZHcfY5qd3B0kj8AYbWLcDa3rLEBmUytLP8/KvA5tSgZ76hRXZ/wBkX3S8aVjEZx75T
-	 bqMz3p+Y+p2eTbk02i/6RdSTLotxxvKOOV5IGfAkU4N5bgft7fCo/RkDXHtc2a/CpW
-	 sv38fX7s2KGDg==
-Date: Thu, 14 Dec 2023 11:16:22 -0600
-From: Bjorn Helgaas <helgaas@kernel.org>
-To: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Cc: bhelgaas@google.com, linux-pm@vger.kernel.org,
-	linux-mmc@vger.kernel.org, Ricky Wu <ricky_wu@realtek.com>,
-	Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>,
-	"Guilherme G. Piccoli" <gpiccoli@igalia.com>,
-	linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-hardening@vger.kernel.org, bpf@vger.kernel.org,
-	"Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH v2] PCI: Prevent device from doing RPM when it's unplugged
-Message-ID: <20231214171622.GA1023469@bhelgaas>
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Gh3NL0Xm";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="yw3sLLHY"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1702629931; x=1734165931;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=GDqZkw7pKfrwAg5ycXB5kK0UTdLfa8oD6UiygbIQfGk=;
+  b=Gh3NL0Xmz1heIxP5bm8iDAkq+K8Em4i9O58NDfZSrLgJ2SWHkU5Wx94b
+   BHlavg7dbOprPGGVRnQby6jTwUMqpj7V34e5gotsFwAxm1kTWE/z8SqxZ
+   XiYOZ4EfqWXM2sGJuoXtXwuLWo8BofwaHouzk4Wy0cGj0zlyAD5+IyZGP
+   FJV0UZGCrBFrf5ecinzWnTRRuCPMo4HRtW85Eexnf0clsfXADTWSs79LP
+   G7FbLyBp012yg7WiZphI1WEjeKIH6qbJmSdX3IwISh13dwoRhN1vvca20
+   w32dupL5EYRZ8v2Nddjdreubp0hysPBFsAkwJmIZPWitNaeFH0uYT+pzi
+   A==;
+X-CSE-ConnectionGUID: ProrRPg1Sleqnk6dx2M2LA==
+X-CSE-MsgGUID: W8Pt+6J7RGO+uBkyXcaf1Q==
+X-IronPort-AV: E=Sophos;i="6.04,278,1695657600"; 
+   d="scan'208";a="4896805"
+Received: from mail-bn8nam04lp2040.outbound.protection.outlook.com (HELO NAM04-BN8-obe.outbound.protection.outlook.com) ([104.47.74.40])
+  by ob1.hgst.iphmx.com with ESMTP; 15 Dec 2023 16:45:29 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=BOQ5rk82Yx7mBLYv7P//wNN6Sq/3ngTDk4GukhFCntOpaUhOM4C0A4wksDZlLo0nNX2LfpF0VY5TlES8SRpZGByaWtGHfKwopVuWzYzB6J00uGDK2fQoErq6/S96b9i3XcVc+GHEAB6Gd4wD2gi2ySurH5ilHIViVfVlqzO0D4CT50S96j/d885mD0SPP1FrWnyfwHESMdwQP659cmNzP/GNdLzy3Ixon0J+Inki8H/VPQsaMeJ6UFsHUrVPV6s4jfeAZb/EQYiTRJ7ZZSgA2cqAgEd0U7frUZq4LewtbeSfdYurE2Tl4mF+6VOa5bDOh+MtIexoO9qbrCxl/KsBPA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=bSQPYpfps2R2Xe8hUhbpUsotAb/gqIcLnJ4xOA1T9eU=;
+ b=BgXzVtcsaK+BmMp6hXQPghTbd1BNPUIC+ozbudAu/vTtfmQ8VpAbRUPHhPZO8vnw0wGKKQGhB5H3iu3YZ7UogJ9JlTMobsai6O39+/QQ8MlSPGwp/z2a41UKvbuyD54jeSVNb8+dxi5UwfyXxdHJ9ZictgNP0RwR7HTso4KCsRt8ca+3Ps0PilN9CrygodMZZEiY+Cg5OS7WIc+I+jWwN3vcVqhVxhD7Csa2gBoEoSPQx5BjXERWZcvQrFiIDg7dgXZCUmAxoYPC69o/UZqX/mmZrCP0Q+khJ50TwtxJrP+uWQtjqQyojgWBmFOB6GahS0sbjdze5xe24WRDjn8TOg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=bSQPYpfps2R2Xe8hUhbpUsotAb/gqIcLnJ4xOA1T9eU=;
+ b=yw3sLLHYcs9SECd7y0fT3QdSn+iQlNneE/gp4b0JqjK4zFd5helYJB63UN+/yU0rY+6kvKes9IRUThc9u2FoB32i0kYlViHuwT15DrsZkJPd0gFzG+OCNZTmyvQwOZvNlF2MN9wN6Gcb5yHNyVQgjaJcbmGeLoTh0B16itXOCoQ=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ LV8PR04MB8958.namprd04.prod.outlook.com (2603:10b6:408:180::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7091.31; Fri, 15 Dec
+ 2023 08:45:28 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::7d7a:2cd1:54e5:ebc4]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::7d7a:2cd1:54e5:ebc4%6]) with mapi id 15.20.7091.028; Fri, 15 Dec 2023
+ 08:45:27 +0000
+From: Avri Altman <Avri.Altman@wdc.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>
+CC: "jorge@foundries.io" <jorge@foundries.io>, "christian.loehle@arm.com"
+	<christian.loehle@arm.com>, "ricardo@foundries.io" <ricardo@foundries.io>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH] mmc: mmc_test: Add re-tuning test
+Thread-Topic: [PATCH] mmc: mmc_test: Add re-tuning test
+Thread-Index: AQHaLm1B+viiDsKh0kqmx52JIeafPbCqCNxg
+Date: Fri, 15 Dec 2023 08:45:27 +0000
+Message-ID:
+ <DM6PR04MB6575F0CE62C510DB2853D404FC93A@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20231214090902.43628-1-adrian.hunter@intel.com>
+In-Reply-To: <20231214090902.43628-1-adrian.hunter@intel.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|LV8PR04MB8958:EE_
+x-ms-office365-filtering-correlation-id: 694b448c-1159-4a19-d597-08dbfd4a300c
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ 7Q+FRNeiiHrJ3+9p82+Wnt5TR4t3J/9zocQ0N1Hao6c5XQdWefpb3ta+rNyqQlWszs7GqtIv1BcN67SHd7KMQNPBTFHRYYW9RFWlNcPTsGx+7DZEc+XydzdEZYKV395cEkIcJlb5kxHfZ1xFPedWvhT5fnwQE7VPgHrkt9mFITMZiiK46jNytFL/adIF7FYIQB9hVcgjw6BjbaPyjx9qC/cF262vnQR39RyYPFYrJRLWQ1BPB5cicZZn4G8yj1FkhclK1YLoIFXS4bBtM1otGZoaoG0IcKlk1ps4uFswzVl/MeKwKWmCCpumYrjRBYbDbBU5v9Xxc5DZzT0DpoV5VUSpI4Zs9ft6sOIwol9CpgEkjPYsWUsxLAR8pmlzx7BH6vff0hgR9QLl9ldliCJ8ux+MD3oVBQH6oUKJL987f44lUr0h+5JrvXyPCmH1q3E9OOF/ZTXoUONMugXpysk8+iTT1EXyStZmJFlhWsO5fh8ZMBk4wrKlsCN+f05f4IjixS25ypj0Reb8Uz+J8RLSXS3RW8lNEGT2JI7tJ1b1FhBrb5XvMZEOTLzKtSWDMp3lvFBiZQKM5lwyhjLsSso3xiC6DUWs+cHp5RQJksnIdDmJOs4aGzl99YxUt2ofnBrS
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(396003)(346002)(136003)(39860400002)(366004)(376002)(230922051799003)(186009)(64100799003)(1800799012)(451199024)(38100700002)(9686003)(6506007)(7696005)(71200400001)(83380400001)(55016003)(82960400001)(26005)(478600001)(41300700001)(64756008)(66556008)(66946007)(76116006)(66446008)(66476007)(110136005)(8676002)(8936002)(54906003)(316002)(4326008)(4744005)(38070700009)(86362001)(52536014)(2906002)(122000001)(5660300002)(33656002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?q9gm4DaGbJ7YSvbA0SFc/Bi/znkyBXSkCYx85X+6tKrWlVdw7ZgehPIl4Ctf?=
+ =?us-ascii?Q?7KXbn4MEFQYfcflQbk/VpQlOgTsWbfI4Ba5mtdOgSh1ce1EC3Cwfl+pcYGs7?=
+ =?us-ascii?Q?B/G6iO0R2Ig8RpIh8eS4S5Q9mjJbFknVUqBaWUGsPiuB2Rw6t4Vqw6BoXNC9?=
+ =?us-ascii?Q?JzCXPD4Ed9lvXs6DaQQz6OoGnHeN3KWjuh0/JM9Ld+iDKr/pIzH+oPnueKax?=
+ =?us-ascii?Q?YQoBEGymXvDDjkuZuyVjhOVU2Kulsy3Hg5Shy3wq4fWJC8ycWARbE/89XHdr?=
+ =?us-ascii?Q?xvWbw4BPOFS+qnlCjPmHZXgZMuDgJjb9GtGZZbOfhSoO+d9zVKibgAUPe9LM?=
+ =?us-ascii?Q?dJdjgkxreaDVqxktOLfg1xVB+Kaj6szYtZLRgz9qOGn5+0viY61J0ot90JLU?=
+ =?us-ascii?Q?Mj4jcVxWEo2fqdvkbjPVqVG9oWaOrmmPv7QVE4XD/t1vtolou9sq2BrnV8MA?=
+ =?us-ascii?Q?ViNvHqGXYILBRL7Ti4IbcPnJZbiv4fTQVr+XX0EkPcevbYP/RUHkbqzBNOFG?=
+ =?us-ascii?Q?RRq4dC/INMrb88Xah30raevrblJ//A+TuHo+ebwxbVtPy++V85XUaZvAPJPk?=
+ =?us-ascii?Q?4KwmCANujfAA1XY0LhlwvQKp+aDGQ+DfJMYAX50Wj1XRzJxs2mRC7Fi4lpFW?=
+ =?us-ascii?Q?MlPB23pzV3XDgOtGIirPspaU+/cJ2cyT+DcTSrpp+ZsFttBJ1OLDP/Uqj4od?=
+ =?us-ascii?Q?cHdrJBvFnBt/wIT3V8dOIWkxXiqnQGYn9ndUYKbhqnXMkWCmmocxEs1udrQX?=
+ =?us-ascii?Q?GQWcPV73QeXJ0c/Fmwsj9D/7dFG1YXshR6p/M4RkOhvXm5V6naoimsKG9JHO?=
+ =?us-ascii?Q?xw/GX8JCjMP1Psb/Ipak5isaovA+VUrgjk653944+SkT+/clf/suj/HhEhSz?=
+ =?us-ascii?Q?weWmjqiBeF/FZpZZ9VXlMtoMAT0R/fBQT2OfKkwfCr27DaF0llVK9G7GL1A1?=
+ =?us-ascii?Q?4pScn8irDGqz0gTRnKIyHuv3yqwWFBPelzcoetfRQ4E6sm2JMdTm9EvP0nPL?=
+ =?us-ascii?Q?i3NrRbvnW4pH05/gijJYp8MAK94gZqs5k0VVlLpMn/G0xPUGrF5WOanHyfQN?=
+ =?us-ascii?Q?eU1RmLztxdJepvMOfk1JgO8IuiinSXZV2pqwy9G1IRlR1yOnYhWJof+KoiAK?=
+ =?us-ascii?Q?8BFMUNVEza+Y7F14zHQODQ+ceE16Q1NanIKqmHmutyoERbHZw7oeTLZ9rWTj?=
+ =?us-ascii?Q?+yUcQnHalCccDtNf4TlP7FUQsw8luASBB5bX11hAOLK/e0L2nv3ME8W1fA1C?=
+ =?us-ascii?Q?KMNEtZZdGAjCcNRStegWTMjeInQpMBBls0kchWEB7wqC6QuHSaYWBfW3mlU9?=
+ =?us-ascii?Q?bspcVIBA2bHUwcllfHINI77jNJtNaKCLJN6EqArUuSUih49oQUBJM1NA028W?=
+ =?us-ascii?Q?tcVXJXHKeIVgoz2XoS90VP3GvlsSs/4ec8lyE7BaFRjYMsY4g46T92jz46qf?=
+ =?us-ascii?Q?tQNDx6uPKVVIDv5DZKmba169KTuybcZnnaee8R6Z1XsvGYKQiiTdzcQNqjiD?=
+ =?us-ascii?Q?/Cvot9LA7LbujDc3ubAd9hwbz/4o5b70JPNWTskg6C2xqNPFgnpO8RfzJGSH?=
+ =?us-ascii?Q?zusH7OCeFQedrR0SZEgYRs+3AfQ5qC1suyDRS33h?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <20231212043808.212754-1-kai.heng.feng@canonical.com>
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	/hhVYBoROxNoXldMo05U/UTXK3FijlMrPHtrkAAtLSWXIqROyVBhfXe+Fgs55y+11JXG8kmurM4NFsUOHXfZ9pon9WVS/xfMwWMfF6UGdVIRXHP0HQ80RjoMalugMbWhg58JiL8gHRDmwj6v66heIwCYnZMIwOxZ6tEn5UT+HAOjR7oaXygTNTGdBJAUHOlME5yumQoZyC2xVin5+0BbId8yf+ZeD+C8CfObfm4rH7XB3aXjQuiAVHRXd2jLVD9XArgWnS07Qrbj/nzNG3BTDZC7MTr+c11nggvCkOyav1n8ednxaiwFXjPIPoB0wHTCtdsRhCoIYb7aAQWmUHkS01F4aVtY0OkvUjD1NE4wMkQu2oZiYKRmL9zF41MPn0tPzM3c/xAxMK29PkJHBR1QAUWoW8oN050BqV5h7qYk268lyKkENNeZVZLLVTNIPI+0iBytO3XR1tuoDyQcXssaOZeIPTJVbCBf4a8Wm3BGn0v3booAizKAf8L0RV7huH7LaavJRhnI4cB8KxgtGN3viA2p4kZ4UnjwUKPLCz5ZNihK7nn/2PCEruJigQM02CnDCGyjBqPgmRVFr9lMTJXLfjqF5zo/e/0ePamiQ7zZIMIdyRg50YSeT5/XrN4WPTjy
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 694b448c-1159-4a19-d597-08dbfd4a300c
+X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Dec 2023 08:45:27.8500
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: DimpRQap5vjfxjctX9qw5Fums1PjQdanQtJlG5727bLAO4fvxnGKdRx4NQ6EFIOuPlAI8x8c6if9e0lAfn7Wcg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV8PR04MB8958
 
-[+cc Rafael, runtime PM expert :)]
+> +static int mmc_test_retuning(struct mmc_test_card *test) {
+> +       if (!mmc_can_retune(test->card->host)) {
+> +               pr_info("%s: No retuning - test skipped\n",
+> +                       mmc_hostname(test->card->host));
+> +               return RESULT_UNSUP_HOST;
+> +       }
+> +
+> +       return mmc_test_rnd_perf(test, 0, 0, 8192, 30, 1);
+>  }
+I wonder if it would make sense to make a RPMB flavor for the re-tuning tes=
+t?
 
-On Tue, Dec 12, 2023 at 12:38:07PM +0800, Kai-Heng Feng wrote:
-> When inserting an SD7.0 card to Realtek card reader, the card reader
-> unplugs itself and morph into a NVMe device. The slot Link down on hot
-> unplugged can cause the following error:
+Thanks,
+Avri
 
-A page fault in a driver following a link down event sounds like
-either a driver defect or a PCI core defect that could affect any
-driver.  The rtsx power and ASPM management is very unusual, so I
-don't feel super confident in it.
-
-I guess the theory here is that while we're running
-rtsx_pci_runtime_idle(), the link down event happens and we run
-rtsx_pci_remove(), which unmaps the pcr->remap_addr page, and then
-rtsx_pci_readl(RTSX_HAIMR) in the rtsx_pci_runtime_idle() path
-references that unmapped page?
-
-I looked through other drivers that use runtime PM.  The typical
-pattern is:
-
-  *_probe()
-    pm_runtime_put
-    pm_runtime_allow
-
-  *_remove()
-    pm_runtime_forbid
-    pm_runtime_get
-
-rtsx does the put/allow and forbid/get in the reverse order:
-
-  rtsx_pci_probe()
-    pm_runtime_allow
-    pm_runtime_put
-
-  rtsx_pci_remove()
-    pm_runtime_get_sync
-    pm_runtime_forbid
-    iounmap(pcr->remap_addr)               # <-- unmap the page
-
-  rtsx_pci_runtime_idle()
-    ...
-      ioread32(pcr->remap_addr + reg)      # <-- read from unmapped page
-
-I don't know whether this is an issue, and isp_probe() and nhi_probe()
-also use this reverse order, so maybe it's all fine.  But I do wonder
-whether there's a reason to do it differently.
-
-> [   63.898861] pcieport 0000:00:1c.0: pciehp: Slot(8): Link Down
-> [   63.912118] BUG: unable to handle page fault for address: ffffb24d403e=
-5010
-> [   63.912122] #PF: supervisor read access in kernel mode
-> [   63.912125] #PF: error_code(0x0000) - not-present page
-> [   63.912126] PGD 100000067 P4D 100000067 PUD 1001fe067 PMD 100d97067 PT=
-E 0
-> [   63.912131] Oops: 0000 [#1] PREEMPT SMP PTI
-> [   63.912134] CPU: 3 PID: 534 Comm: kworker/3:10 Not tainted 6.4.0 #6
-> [   63.912137] Hardware name: To Be Filled By O.E.M. To Be Filled By O.E.=
-M./H370M Pro4, BIOS P3.40 10/25/2018
-> [   63.912138] Workqueue: pm pm_runtime_work
-> [   63.912144] RIP: 0010:ioread32+0x2e/0x70
-> [   63.912148] Code: ff 03 00 77 25 48 81 ff 00 00 01 00 77 14 8b 15 08 d=
-9 54 01 b8 ff ff ff ff 85 d2 75 14 c3 cc cc cc cc 89 fa ed c3 cc cc cc cc <=
-8b> 07 c3 cc cc cc cc 55 83 ea 01 48 89 fe 48 c7 c7 98 6f 15 99 48
-> [   63.912150] RSP: 0018:ffffb24d40a5bd78 EFLAGS: 00010296
-> [   63.912152] RAX: ffffb24d403e5000 RBX: 0000000000000152 RCX: 000000000=
-000007f
-> [   63.912153] RDX: 000000000000ff00 RSI: ffffb24d403e5010 RDI: ffffb24d4=
-03e5010
-> [   63.912155] RBP: ffffb24d40a5bd98 R08: ffffb24d403e5010 R09: 000000000=
-0000000
-> [   63.912156] R10: ffff9074cd95e7f4 R11: 0000000000000003 R12: 000000000=
-000007f
-> [   63.912158] R13: ffff9074e1a68c00 R14: ffff9074e1a68d00 R15: 000000000=
-0009003
-> [   63.912159] FS:  0000000000000000(0000) GS:ffff90752a180000(0000) knlG=
-S:0000000000000000
-> [   63.912161] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [   63.912162] CR2: ffffb24d403e5010 CR3: 0000000152832006 CR4: 000000000=
-03706e0
-> [   63.912164] Call Trace:
-> [   63.912165]  <TASK>
-> [   63.912167]  ? show_regs+0x68/0x70
-> [   63.912171]  ? __die_body+0x20/0x70
-> [   63.912173]  ? __die+0x2b/0x40
-> [   63.912175]  ? page_fault_oops+0x160/0x480
-> [   63.912177]  ? search_bpf_extables+0x63/0x90
-> [   63.912180]  ? ioread32+0x2e/0x70
-> [   63.912183]  ? search_exception_tables+0x5f/0x70
-> [   63.912186]  ? kernelmode_fixup_or_oops+0xa2/0x120
-> [   63.912189]  ? __bad_area_nosemaphore+0x179/0x230
-> [   63.912191]  ? bad_area_nosemaphore+0x16/0x20
-> [   63.912193]  ? do_kern_addr_fault+0x8b/0xa0
-> [   63.912195]  ? exc_page_fault+0xe5/0x180
-> [   63.912198]  ? asm_exc_page_fault+0x27/0x30
-> [   63.912203]  ? ioread32+0x2e/0x70
-> [   63.912206]  ? rtsx_pci_write_register+0x5b/0x90 [rtsx_pci]
-> [   63.912217]  rtsx_set_l1off_sub+0x1c/0x30 [rtsx_pci]
-> [   63.912226]  rts5261_set_l1off_cfg_sub_d0+0x36/0x40 [rtsx_pci]
-> [   63.912234]  rtsx_pci_runtime_idle+0xc7/0x160 [rtsx_pci]
-> [   63.912243]  ? __pfx_pci_pm_runtime_idle+0x10/0x10
-> [   63.912246]  pci_pm_runtime_idle+0x34/0x70
-> [   63.912248]  rpm_idle+0xc4/0x2b0
-> [   63.912251]  pm_runtime_work+0x93/0xc0
-> [   63.912254]  process_one_work+0x21a/0x430
-> [   63.912258]  worker_thread+0x4a/0x3c0
-> [   63.912261]  ? __pfx_worker_thread+0x10/0x10
-> [   63.912263]  kthread+0x106/0x140
-> [   63.912266]  ? __pfx_kthread+0x10/0x10
-> [   63.912268]  ret_from_fork+0x29/0x50
-> [   63.912273]  </TASK>
-
-Can you strip out the call trace stuff that's not relevant so the call
-path is clear?  I'm guessing we're in ioread32(), and nothing above
-do_kern_addr_fault() or below worker_thread() is relevant.
-
-> [   63.912274] Modules linked in: nvme nvme_core snd_hda_codec_hdmi snd_s=
-of_pci_intel_cnl snd_sof_intel_hda_common snd_hda_codec_realtek snd_hda_cod=
-ec_generic snd_soc_hdac_hda soundwire_intel ledtrig_audio nls_iso8859_1 sou=
-ndwire_generic_allocation soundwire_cadence snd_sof_intel_hda_mlink snd_sof=
-_intel_hda snd_sof_pci snd_sof_xtensa_dsp snd_sof snd_sof_utils snd_hda_ext=
-_core snd_soc_acpi_intel_match snd_soc_acpi soundwire_bus snd_soc_core snd_=
-compress ac97_bus snd_pcm_dmaengine snd_hda_intel i915 snd_intel_dspcfg snd=
-_intel_sdw_acpi intel_rapl_msr snd_hda_codec intel_rapl_common snd_hda_core=
- x86_pkg_temp_thermal intel_powerclamp snd_hwdep coretemp snd_pcm kvm_intel=
- drm_buddy ttm mei_hdcp kvm drm_display_helper snd_seq_midi snd_seq_midi_ev=
-ent cec crct10dif_pclmul ghash_clmulni_intel sha512_ssse3 aesni_intel crypt=
-o_simd rc_core cryptd rapl snd_rawmidi drm_kms_helper binfmt_misc intel_cst=
-ate i2c_algo_bit joydev snd_seq snd_seq_device syscopyarea wmi_bmof snd_tim=
-er sysfillrect input_leds snd ee1004 sysimgblt mei_me soundcore
-> [   63.912324]  mei intel_pch_thermal mac_hid acpi_tad acpi_pad sch_fq_co=
-del msr parport_pc ppdev lp ramoops drm parport reed_solomon efi_pstore ip_=
-tables x_tables autofs4 hid_generic usbhid hid rtsx_pci_sdmmc crc32_pclmul =
-ahci e1000e i2c_i801 i2c_smbus rtsx_pci xhci_pci libahci xhci_pci_renesas v=
-ideo wmi
-
-The module list doesn't look relevant here.  Nor the timestamps.
-
-> [   63.912346] CR2: ffffb24d403e5010
-> [   63.912348] ---[ end trace 0000000000000000 ]---
 >=20
-> This happens because scheduled pm_runtime_idle() is not cancelled.
+>  /*
+> @@ -2921,6 +2934,14 @@ static const struct mmc_test_case
+> mmc_test_cases[] =3D {
+>                 .run =3D mmc_test_cmds_during_write_cmd23_nonblock,
+>                 .cleanup =3D mmc_test_area_cleanup,
+>         },
+> +
+> +       {
+> +               .name =3D "Re-tuning reliability",
+> +               .prepare =3D mmc_test_area_prepare,
+> +               .run =3D mmc_test_retuning,
+> +               .cleanup =3D mmc_test_area_cleanup,
+> +       },
+> +
+>  };
 >=20
-> So before releasing the device, stop all runtime power managements by
-> using pm_runtime_barrier() to fix the issue.
->
-> Link: https://lore.kernel.org/all/2ce258f371234b1f8a1a470d5488d00e@realte=
-k.com/
-> Tested-by: Ricky Wu <ricky_wu@realtek.com>
-> ---
-> v2:
->   Cover more cases than just pciehp.
-> =20
->  drivers/pci/remove.c | 2 ++
->  1 file changed, 2 insertions(+)
->=20
-> diff --git a/drivers/pci/remove.c b/drivers/pci/remove.c
-> index d749ea8250d6..c69b4ce5dbfd 100644
-> --- a/drivers/pci/remove.c
-> +++ b/drivers/pci/remove.c
-> @@ -1,6 +1,7 @@
->  // SPDX-License-Identifier: GPL-2.0
->  #include <linux/pci.h>
->  #include <linux/module.h>
-> +#include <linux/pm_runtime.h>
->  #include "pci.h"
-> =20
->  static void pci_free_resources(struct pci_dev *dev)
-> @@ -18,6 +19,7 @@ static void pci_stop_dev(struct pci_dev *dev)
->  	pci_pme_active(dev, false);
-> =20
->  	if (pci_dev_is_added(dev)) {
-> +		pm_runtime_barrier(&dev->dev);
-
-If pm_runtime_barrier() is really the solution, it seems like this
-should go somewhere in pci-driver.c where we call the driver PM
-callbacks.
-
->  		device_release_driver(&dev->dev);
->  		pci_proc_detach_device(dev);
-> --=20
+>  static DEFINE_MUTEX(mmc_test_lock);
+> --
 > 2.34.1
->=20
+
