@@ -1,18 +1,19 @@
 Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBC8D49893;
-	Mon, 18 Dec 2023 22:48:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB23A7609D;
+	Mon, 18 Dec 2023 23:05:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="jTTi9TD/"
-X-UUID: 941ba5fc9df711eeba30773df0976c77-20231219
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="Ri+wefoJ"
+X-UUID: f63aea3e9df911eeba30773df0976c77-20231219
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=v9sJxu+peZKEvGLvTmMpiV6Tv/puBAp7n/rM5sIpeRQ=;
-	b=jTTi9TD/+OYGwTr2VSkioUKhzVzO53F35oZSmEVGyHCruJpgvdqxbCgCXjW4EVgPQiSUXnF1WZO3a1Fyk3IffQevYfuq8ERgQtBovhOzYU/58MFVPQgQHj/evMD5VXfD2DipAzqts3Xm2Y827PRehXu/rN77Rcw48CdaLAB8n4U=;
+	h=Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=v9sJxu+peZKEvGLvTmMpiV6Tv/puBAp7n/rM5sIpeRQ=;
+	b=Ri+wefoJkTLb2OxPhBxPR4szvHZ6zGawmGO+kyQcPof40+uD26P2cz0MFfpwxKI0y9NH7S5AWHmY6lXLRB594B4zraB4If1M//DWvL170Pk1dbR+XZCx6hzhZqrSoPo2+R4JyFulfaQ5+JopT01I1BD4VlsgLdW0ixSO+NCBmjQ=;
+X-CID-CACHE: Type:Local,Time:202312190648+08,HitQuantity:1
 X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.35,REQID:e1ae0cef-6abb-4071-a7fd-8f6779fe5a95,IP:0,U
+X-CID-O-INFO: VERSION:1.1.35,REQID:94aeeec4-f4ae-4976-9889-77135e8203e9,IP:0,U
 	RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
 	:release,TS:-5
 X-CID-META: VersionHash:5d391d7,CLOUDID:c62eef73-1bd3-4f48-b671-ada88705968c,B
@@ -22,30 +23,33 @@ X-CID-META: VersionHash:5d391d7,CLOUDID:c62eef73-1bd3-4f48-b671-ada88705968c,B
 X-CID-BVR: 0,NGT
 X-CID-BAS: 0,NGT,0,_
 X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULN
-X-UUID: 941ba5fc9df711eeba30773df0976c77-20231219
+X-UUID: f63aea3e9df911eeba30773df0976c77-20231219
 Received: from mtkmbs14n2.mediatek.inc [(172.21.101.76)] by mailgw02.mediatek.com
 	(envelope-from <bo.ye@mediatek.com>)
 	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 511681446; Tue, 19 Dec 2023 06:48:36 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
+	with ESMTP id 2084125728; Tue, 19 Dec 2023 07:05:39 +0800
+Received: from mtkmbs13n1.mediatek.inc (172.21.101.193) by
  mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Tue, 19 Dec 2023 06:48:33 +0800
+ 15.2.1118.26; Tue, 19 Dec 2023 07:05:38 +0800
 Received: from mcddlt001.gcn.mediatek.inc (10.19.240.15) by
- mtkmbs11n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Tue, 19 Dec 2023 06:48:33 +0800
+ mtkmbs13n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Tue, 19 Dec 2023 07:05:36 +0800
 From: Bo Ye <bo.ye@mediatek.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger
-	<matthias.bgg@gmail.com>, AngeloGioacchino Del Regno
-	<angelogioacchino.delregno@collabora.com>
+To: <avri.altman@wdc.com>, <dominique.martinet@atmark-techno.com>,
+	<rafael.beims@toradex.com>, <vincent.whitchurch@axis.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 CC: <yongdong.zhang@mediatek.com>, lin.gui <lin.gui@mediatek.com>, Bo Ye
 	<bo.ye@mediatek.com>, <linux-mmc@vger.kernel.org>,
 	<linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
 	<linux-mediatek@lists.infradead.org>
 Subject: [PATCH v2] mmc: add wp_grp_size node
-Date: Tue, 19 Dec 2023 06:48:29 +0800
-Message-ID: <20231218224832.81347-1-bo.ye@mediatek.com>
+Date: Tue, 19 Dec 2023 07:05:32 +0800
+Message-ID: <20231218230532.82427-1-bo.ye@mediatek.com>
 X-Mailer: git-send-email 2.17.0
+In-Reply-To: <20231218224832.81347-1-bo.ye@mediatek.com>
+References: <20231218224832.81347-1-bo.ye@mediatek.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -66,7 +70,7 @@ X-TM-AS-User-Approved-Sender: No
 X-TM-AS-User-Blocked-Sender: No
 X-TMASE-Result: 10--8.793700-8.000000
 X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-SNTS-SMTP: 4E964EB1473B3EB755A3FB3DD72D6712BE60E1BDEBE85B41496191B6C6DC46B52000:8
+X-TM-SNTS-SMTP: 5727A99A606388E051883DC4B6203A1CA60EBC100F0EC10313FF828558596EF02000:8
 X-MTK: N
 
 From: "lin.gui" <lin.gui@mediatek.com>
