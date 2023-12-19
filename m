@@ -1,49 +1,49 @@
-Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
+Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1E2E11700
-	for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2023 07:21:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6F92111BD
+	for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2023 07:22:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nwIsUAO9"
-Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-50e30b28c1aso3340954e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Dec 2023 23:21:21 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hu5x89Lp"
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-a235500d0e1so250445366b.2
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Dec 2023 23:22:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1702970480; x=1703575280; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1702970522; x=1703575322; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=+dIML0oZvBxYNoSKgkY6M0oM1WDmJX7GeEY9prJCus4=;
-        b=nwIsUAO9RcZHKUkAfR7IXKQnsD2lE2sOHfpcQ7NY7ufHRQcoPX/Bn+eUPPqitUuiSG
-         C3ftDblW5YI7yf/L1xKKejbnIQTvChnIPFBFL6QC2syjOOTsjx00cRzU5OXtDRuwDajH
-         694L2pNgq4kk9kyW1KTu2tUhkffQa+Hh6ShAmUu4+557+7+C65Xbx9dA9KvZ1uOcsR3r
-         RzO+cdEValAuloFe89sZgBCAEVGI6UcQdOjFPMB2PLjLMgK1RZDWEUTCnXcW/KAKVq0i
-         JkVbBxH9fa5ylVggJjFDQxvpbep1rFlvdr9egx8RbGAKiMxPL41sVGYz2RL1kRI4jpUf
-         gCVw==
+        bh=q2d956jQ4Jn2yMn5fgzPx6GZkZa19K3KM3F0UqXtKxk=;
+        b=hu5x89LpVzk4qUbC0OuQM3nU5BpSTnyLbWKXvXo70DtPnT49I0jMvxAUbWOGWU9xgK
+         INydVkyDV0DzO1hR4kl0PhJX1PxCHaEDF9OjGN/WTflfagvvs0q6UQlOI/xXClMY3rXb
+         Ho1qRS1/1stEQv0IHazBTNv3uUhXz7ThHdY8aKOvdZfUDUkZ9eg/BNhM3r19RG7OcyIY
+         SyHeYXCR44j204O7qmS6thrb8pZ+ohYUssJynWHgcEkhOryrd5bH1F1KrbZTe4E8B7yq
+         2tcki5gSuJKhFU3AP+3k7rNEv4w7AdO9exfljfud1KhgF5IjIxp61fBpZLr/9OgFpDjo
+         jduA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702970480; x=1703575280;
+        d=1e100.net; s=20230601; t=1702970522; x=1703575322;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=+dIML0oZvBxYNoSKgkY6M0oM1WDmJX7GeEY9prJCus4=;
-        b=P9ZjN0DroOx5mygkGqRv2bTsNUBQecfN7xJZs169wq2TN74bCGXue+YK5/FJcYdhpd
-         jKw3yt9OlRTjsrz2CnaJV8aKIvyRHEastvWeovX6pfkahpjiRavWXnbQ2foyzOL8gs/w
-         MX0nkqmbQAPSgE/qIzfTCHfQ4Wvag1Jz50LAjuL5VfaO64Fk77TOwBOo3A054O4OSqGl
-         gyA8FE9jkOGrVC794WH5eEfiJjXJOosiTweL8Y+e5qblJrTjWzjFB5qhMyeXAUqBFc/a
-         oq3Peh5VzZLSxw4Hp6ltXvTreuajyJB7vOxLp5Qm1wWK0N3m6K3dn8UI6tkJufg3aVsT
-         m/HA==
-X-Gm-Message-State: AOJu0Yxyl/nm/0Gr4Sh+Ru8XCTABUEJrb3dBm7ifabX8rDYk8G/rQmGD
-	Ir6ZR0iwyTa0pH+WnHJF9/AHkQ==
-X-Google-Smtp-Source: AGHT+IGf1lw1O2EXgwQVWPz+SkmsQcvtv374FxjrP5hSlPzHOpW3dA9Pf/02B52HH3maY2x/x/ldOQ==
-X-Received: by 2002:a05:6512:4013:b0:50e:1b50:fcec with SMTP id br19-20020a056512401300b0050e1b50fcecmr5757818lfb.70.1702970479936;
-        Mon, 18 Dec 2023 23:21:19 -0800 (PST)
+        bh=q2d956jQ4Jn2yMn5fgzPx6GZkZa19K3KM3F0UqXtKxk=;
+        b=h0X7yqmgrO4+wqi3tOlvlaDrjeWK3qWF9HkCEmw4viwSZGavjeC9DCyzNb9NjUOG+0
+         vTZh0QWC8s/m3ekY/1XqWxASbXh0NEFMUluXbQE9D+GO+DARKNsqpnlt4Gh65Rf0Jl0r
+         8uasl5C2WF46ZzC28KQ680HcKph9lf+h9F6mpFs8PrtzVk3JKaJOZgCGlQimfbQZTqXP
+         U5fX+ZR3+DSioclbaYPHoyHBOy4Lsfpybi9xAqLH4FXr28UgKVGYeVUmEl85zRoY+wab
+         y6KAxr7CLBITCvBzIJNSAYNUzMrXJcrafO4yrH7pfrzgfM/VISEUkvILR3PDntIwtf9V
+         xpcw==
+X-Gm-Message-State: AOJu0Yzfja4alMrC6WAZ/dG8ot017/3AscxVWYyx1vNmL+LTjyC5QoKk
+	Ri1/0Lkr2x019LkUX8JcuWhZ6A==
+X-Google-Smtp-Source: AGHT+IEnYt8wHMtxInCD5RB0KwUR61Z6V/xeJUjLsCEv5MbTD0exxywCKlNt5VMgmlthk7u+Wm40HA==
+X-Received: by 2002:a17:906:2259:b0:a23:5239:bcb3 with SMTP id 25-20020a170906225900b00a235239bcb3mr1774798ejr.147.1702970522052;
+        Mon, 18 Dec 2023 23:22:02 -0800 (PST)
 Received: from [192.168.1.20] ([178.197.218.27])
-        by smtp.gmail.com with ESMTPSA id mj16-20020a170906af9000b00a2368de9471sm1132449ejb.202.2023.12.18.23.21.18
+        by smtp.gmail.com with ESMTPSA id mj16-20020a170906af9000b00a2368de9471sm1132449ejb.202.2023.12.18.23.22.00
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 18 Dec 2023 23:21:19 -0800 (PST)
-Message-ID: <61c15b50-5bb9-4288-a2dd-efc695f4a6f6@linaro.org>
-Date: Tue, 19 Dec 2023 08:21:17 +0100
+        Mon, 18 Dec 2023 23:22:01 -0800 (PST)
+Message-ID: <a630b011-4ad0-49d1-8076-647bc44f9d08@linaro.org>
+Date: Tue, 19 Dec 2023 08:22:00 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -51,8 +51,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support
- for 74165b0
+Subject: Re: [PATCH v4 2/2] mmc: add new sdhci reset sequence for brcm 74165b0
 Content-Language: en-US
 To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
  linux-kernel@vger.kernel.org, alcooperx@gmail.com,
@@ -63,7 +62,7 @@ To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
 Cc: f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
  Kamal Dasu <kdasu@broadcom.com>
 References: <20231218210705.38201-1-kamal.dasu@broadcom.com>
- <20231218210705.38201-2-kamal.dasu@broadcom.com>
+ <20231218210705.38201-3-kamal.dasu@broadcom.com>
 From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -109,22 +108,27 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231218210705.38201-2-kamal.dasu@broadcom.com>
+In-Reply-To: <20231218210705.38201-3-kamal.dasu@broadcom.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 18/12/2023 22:07, Kamal Dasu wrote:
 > From: Kamal Dasu <kdasu@broadcom.com>
 > 
-> With newer sdio controller core used for 74165b0 we need to update
-> the compatibility with "brcm,bcm74165b0-sdhci".
+> 74165b0 shall use a new sdio controller core version which
+> requires a different reset sequence. For core reset we use
+> sdhci_reset. For CMD and/or DATA reset added a new function
+> to also enable SDHCI clocks SDHCI_CLOCK_CARD_EN
+> SDHCI_CLOCK_INT_EN along with the SDHCI_RESET_CMD and/or
+> SDHCI_RESET_DATA fields.
 > 
 > Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
 > Reported-by: kernel test robot <lkp@intel.com>
-> Closes: https://lore.kernel.org/oe-kbuild-all/202312101146.IK4Nrw1S-lkp@intel.com/
+> Closes: https://lore.kernel.org/oe-kbuild-all/202312091608.0VbkRxlh-lkp@intel.com/
+> Closes: https://lore.kernel.org/oe-kbuild-all/202312091905.UGzltx8A-lkp@intel.com/
 
-What was reported by robot? New SoC? You already received such feedback!
-This does not make any sense.
+So again: drop the tags. Please reach to your Broadcom folks to get some
+basic guidance on submission process.
 
 Best regards,
 Krzysztof
