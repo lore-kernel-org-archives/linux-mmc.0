@@ -1,182 +1,131 @@
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB23A7609D;
-	Mon, 18 Dec 2023 23:05:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1E2E11700
+	for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2023 07:21:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="Ri+wefoJ"
-X-UUID: f63aea3e9df911eeba30773df0976c77-20231219
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=v9sJxu+peZKEvGLvTmMpiV6Tv/puBAp7n/rM5sIpeRQ=;
-	b=Ri+wefoJkTLb2OxPhBxPR4szvHZ6zGawmGO+kyQcPof40+uD26P2cz0MFfpwxKI0y9NH7S5AWHmY6lXLRB594B4zraB4If1M//DWvL170Pk1dbR+XZCx6hzhZqrSoPo2+R4JyFulfaQ5+JopT01I1BD4VlsgLdW0ixSO+NCBmjQ=;
-X-CID-CACHE: Type:Local,Time:202312190648+08,HitQuantity:1
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.35,REQID:94aeeec4-f4ae-4976-9889-77135e8203e9,IP:0,U
-	RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
-	:release,TS:-5
-X-CID-META: VersionHash:5d391d7,CLOUDID:c62eef73-1bd3-4f48-b671-ada88705968c,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-	RL:11|1,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SPR:
-	NO,DKR:0,DKP:0,BRR:0,BRE:0
-X-CID-BVR: 0,NGT
-X-CID-BAS: 0,NGT,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULN
-X-UUID: f63aea3e9df911eeba30773df0976c77-20231219
-Received: from mtkmbs14n2.mediatek.inc [(172.21.101.76)] by mailgw02.mediatek.com
-	(envelope-from <bo.ye@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 2084125728; Tue, 19 Dec 2023 07:05:39 +0800
-Received: from mtkmbs13n1.mediatek.inc (172.21.101.193) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Tue, 19 Dec 2023 07:05:38 +0800
-Received: from mcddlt001.gcn.mediatek.inc (10.19.240.15) by
- mtkmbs13n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Tue, 19 Dec 2023 07:05:36 +0800
-From: Bo Ye <bo.ye@mediatek.com>
-To: <avri.altman@wdc.com>, <dominique.martinet@atmark-techno.com>,
-	<rafael.beims@toradex.com>, <vincent.whitchurch@axis.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-CC: <yongdong.zhang@mediatek.com>, lin.gui <lin.gui@mediatek.com>, Bo Ye
-	<bo.ye@mediatek.com>, <linux-mmc@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-mediatek@lists.infradead.org>
-Subject: [PATCH v2] mmc: add wp_grp_size node
-Date: Tue, 19 Dec 2023 07:05:32 +0800
-Message-ID: <20231218230532.82427-1-bo.ye@mediatek.com>
-X-Mailer: git-send-email 2.17.0
-In-Reply-To: <20231218224832.81347-1-bo.ye@mediatek.com>
-References: <20231218224832.81347-1-bo.ye@mediatek.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nwIsUAO9"
+Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-50e30b28c1aso3340954e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Dec 2023 23:21:21 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1702970480; x=1703575280; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=+dIML0oZvBxYNoSKgkY6M0oM1WDmJX7GeEY9prJCus4=;
+        b=nwIsUAO9RcZHKUkAfR7IXKQnsD2lE2sOHfpcQ7NY7ufHRQcoPX/Bn+eUPPqitUuiSG
+         C3ftDblW5YI7yf/L1xKKejbnIQTvChnIPFBFL6QC2syjOOTsjx00cRzU5OXtDRuwDajH
+         694L2pNgq4kk9kyW1KTu2tUhkffQa+Hh6ShAmUu4+557+7+C65Xbx9dA9KvZ1uOcsR3r
+         RzO+cdEValAuloFe89sZgBCAEVGI6UcQdOjFPMB2PLjLMgK1RZDWEUTCnXcW/KAKVq0i
+         JkVbBxH9fa5ylVggJjFDQxvpbep1rFlvdr9egx8RbGAKiMxPL41sVGYz2RL1kRI4jpUf
+         gCVw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1702970480; x=1703575280;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=+dIML0oZvBxYNoSKgkY6M0oM1WDmJX7GeEY9prJCus4=;
+        b=P9ZjN0DroOx5mygkGqRv2bTsNUBQecfN7xJZs169wq2TN74bCGXue+YK5/FJcYdhpd
+         jKw3yt9OlRTjsrz2CnaJV8aKIvyRHEastvWeovX6pfkahpjiRavWXnbQ2foyzOL8gs/w
+         MX0nkqmbQAPSgE/qIzfTCHfQ4Wvag1Jz50LAjuL5VfaO64Fk77TOwBOo3A054O4OSqGl
+         gyA8FE9jkOGrVC794WH5eEfiJjXJOosiTweL8Y+e5qblJrTjWzjFB5qhMyeXAUqBFc/a
+         oq3Peh5VzZLSxw4Hp6ltXvTreuajyJB7vOxLp5Qm1wWK0N3m6K3dn8UI6tkJufg3aVsT
+         m/HA==
+X-Gm-Message-State: AOJu0Yxyl/nm/0Gr4Sh+Ru8XCTABUEJrb3dBm7ifabX8rDYk8G/rQmGD
+	Ir6ZR0iwyTa0pH+WnHJF9/AHkQ==
+X-Google-Smtp-Source: AGHT+IGf1lw1O2EXgwQVWPz+SkmsQcvtv374FxjrP5hSlPzHOpW3dA9Pf/02B52HH3maY2x/x/ldOQ==
+X-Received: by 2002:a05:6512:4013:b0:50e:1b50:fcec with SMTP id br19-20020a056512401300b0050e1b50fcecmr5757818lfb.70.1702970479936;
+        Mon, 18 Dec 2023 23:21:19 -0800 (PST)
+Received: from [192.168.1.20] ([178.197.218.27])
+        by smtp.gmail.com with ESMTPSA id mj16-20020a170906af9000b00a2368de9471sm1132449ejb.202.2023.12.18.23.21.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 18 Dec 2023 23:21:19 -0800 (PST)
+Message-ID: <61c15b50-5bb9-4288-a2dd-efc695f4a6f6@linaro.org>
+Date: Tue, 19 Dec 2023 08:21:17 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-TM-AS-Product-Ver: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-AS-Result: No-10--8.793700-8.000000
-X-TMASE-MatchedRID: HI0v3Fgc2rNGlhjnipkGEAwfhKwa9GwD+lX/RcQoG2FX4H/AHZTAKiQH
-	YX2qyjfSlB6IdnaWhV1I7JPsZpNRgcL2WgOVZLNHhDqIQb7sQecK3n1SHen81VeilmPI7oJlf8S
-	IQrqULYwLYtJsevMdjZZLxtyQINIcxzvHgMQjo/aEryjhqiyzyitovaaHxlUrXFNHTRKzg/r5WK
-	Feqf3EsSNfw7OZ1vFwDx215gVwcojLJhhr8sBh+jNdJzhXekT2r4ukWaaTegDdPCHlFNPO/7K3o
-	/jvHhd/z0if0vMXZ3Thyvjhw0nKvqtL0wBaA/G+syw+ZJnFumTeDOoY8z6DT8gYL9oUjHj+EPrQ
-	9ei0HsbGhcwVapF2+oAy6p60ZV62fJ5/bZ6npdg7AFczfjr/7DBO8LavgWJ5Hm17+SOHjgqwxZ+
-	f6eSsGVBAmUDF4FZTXrw8q3AM+fg=
-X-TM-AS-User-Approved-Sender: No
-X-TM-AS-User-Blocked-Sender: No
-X-TMASE-Result: 10--8.793700-8.000000
-X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-SNTS-SMTP: 5727A99A606388E051883DC4B6203A1CA60EBC100F0EC10313FF828558596EF02000:8
-X-MTK: N
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support
+ for 74165b0
+Content-Language: en-US
+To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
+ linux-kernel@vger.kernel.org, alcooperx@gmail.com,
+ linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com,
+ linux-mmc@vger.kernel.org, robh+dt@kernel.org,
+ krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+ devicetree@vger.kernel.org
+Cc: f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
+ Kamal Dasu <kdasu@broadcom.com>
+References: <20231218210705.38201-1-kamal.dasu@broadcom.com>
+ <20231218210705.38201-2-kamal.dasu@broadcom.com>
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
+ 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
+ D2GYIS41Kv4Isx2dEFh+/Q==
+In-Reply-To: <20231218210705.38201-2-kamal.dasu@broadcom.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-From: "lin.gui" <lin.gui@mediatek.com>
+On 18/12/2023 22:07, Kamal Dasu wrote:
+> From: Kamal Dasu <kdasu@broadcom.com>
+> 
+> With newer sdio controller core used for 74165b0 we need to update
+> the compatibility with "brcm,bcm74165b0-sdhci".
+> 
+> Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Closes: https://lore.kernel.org/oe-kbuild-all/202312101146.IK4Nrw1S-lkp@intel.com/
 
-Detail:
-Add node "wp_grp_size", corresponding to WP_GRP_SIZE
-(write protect group size) of eMMC's CSD register.
+What was reported by robot? New SoC? You already received such feedback!
+This does not make any sense.
 
-Scenario:
-The eMMC card can be set into write-protected mode to
-prevent data from being accidentally modified or deleted.
-Wp_grp_size (Write Protect Group Size) refers to an
-attribute of the eMMC card, used to manage write protection,
-and is the CSD register  [36:32] of the eMMC device.
-Wp_grp_size (Write Protect Group Size) indicates how many
-eMMC blocks are contained in each write protection group on the eMMC card.
-
-Final rendered file:
-"/sys/class/mmc_host/mmc0/mmc0:0001/wp_grp_size"
-
-Signed-off-by: Lin Gui <lin.gui@mediatek.com>
-Signed-off-by: Bo Ye <bo.ye@mediatek.com>
----
-Change in v2: 
--remove Change-Id
--replace space with tabulation
----
- drivers/mmc/core/mmc.c   | 16 +++++++++++++++-
- include/linux/mmc/card.h |  2 ++
- 2 files changed, 17 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 705942edacc6..e0d72378ac77 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -136,6 +136,17 @@ static void mmc_set_erase_size(struct mmc_card *card)
- 	mmc_init_erase(card);
- }
- 
-+
-+static void mmc_set_wp_grp_size(struct mmc_card *card)
-+{
-+	if (card->ext_csd.erase_group_def & 1)
-+		card->wp_grp_size = card->ext_csd.hc_erase_size *
-+			card->ext_csd.raw_hc_erase_gap_size;
-+	else
-+		card->wp_grp_size = card->csd.erase_size *
-+			(card->csd.wp_grp_size + 1);
-+}
-+
- /*
-  * Given a 128-bit response, decode to our card CSD structure.
-  */
-@@ -186,6 +197,7 @@ static int mmc_decode_csd(struct mmc_card *card)
- 		b = UNSTUFF_BITS(resp, 37, 5);
- 		csd->erase_size = (a + 1) * (b + 1);
- 		csd->erase_size <<= csd->write_blkbits - 9;
-+		csd->wp_grp_size = UNSTUFF_BITS(resp, 32, 5);
- 	}
- 
- 	return 0;
-@@ -790,6 +802,7 @@ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
- MMC_DEV_ATTR(date, "%02d/%04d\n", card->cid.month, card->cid.year);
- MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
- MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
-+MMC_DEV_ATTR(wp_grp_size, "%u\n", card->wp_grp_size << 9);
- MMC_DEV_ATTR(ffu_capable, "%d\n", card->ext_csd.ffu_capable);
- MMC_DEV_ATTR(hwrev, "0x%x\n", card->cid.hwrev);
- MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
-@@ -850,6 +863,7 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_date.attr,
- 	&dev_attr_erase_size.attr,
- 	&dev_attr_preferred_erase_size.attr,
-+	&dev_attr_wp_grp_size.attr,
- 	&dev_attr_fwrev.attr,
- 	&dev_attr_ffu_capable.attr,
- 	&dev_attr_hwrev.attr,
-@@ -1764,7 +1778,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			mmc_set_erase_size(card);
- 		}
- 	}
--
-+	mmc_set_wp_grp_size(card);
- 	/*
- 	 * Ensure eMMC user default partition is enabled
- 	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 7b12eebc5586..b9c3c6303a22 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -32,6 +32,7 @@ struct mmc_csd {
- 	unsigned int		r2w_factor;
- 	unsigned int		max_dtr;
- 	unsigned int		erase_size;		/* In sectors */
-+	unsigned int		wp_grp_size;
- 	unsigned int		read_blkbits;
- 	unsigned int		write_blkbits;
- 	unsigned int		capacity;
-@@ -306,6 +307,7 @@ struct mmc_card {
- 	unsigned int		eg_boundary;	/* don't cross erase-group boundaries */
- 	unsigned int		erase_arg;	/* erase / trim / discard */
-  	u8			erased_byte;	/* value of erased bytes */
-+	unsigned int		wp_grp_size;	/* write group size in sectors */
- 
- 	u32			raw_cid[4];	/* raw card CID */
- 	u32			raw_csd[4];	/* raw card CSD */
--- 
-2.18.0
+Best regards,
+Krzysztof
 
