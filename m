@@ -1,104 +1,185 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9EE53FE3D;
-	Wed, 20 Dec 2023 13:59:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87DE73FE32
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Dec 2023 15:30:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WeVgKMHU"
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-33662243274so464594f8f.1;
-        Wed, 20 Dec 2023 05:59:55 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="bFrCrBxu"
+Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-1d3ab37d0d1so20668835ad.0
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Dec 2023 07:30:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1703080794; x=1703685594; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=broadcom.com; s=google; t=1703086246; x=1703691046; darn=vger.kernel.org;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1luSLAowvvRtdMQZpU+cNi6jQOPA0wTcpry6O/W+TOQ=;
-        b=WeVgKMHUcT+VWe6yjx1xpwWOU2bgzx3lWvSHAU9bo6KpjZWKlUZRc+czjAtAIq20CL
-         yzZDmuKeLnvfecN4HPbVbf+ZmstRRLKS31iHxG1au/L063WVFB3RsOFE/ciHER/iuUYp
-         LVC9ntI1RK3+w1sXQNmxVccwJw3zNCLB6yP+C14O5OpJbWOR/HqZdWUr5FGDZji4+ZXL
-         D3C/+iaQBqyf0OYVEM9jh3DHzM8EDWMCfX0oZqxEOx+CnoWGHH9Zp2yQn7jEh39qOzrV
-         wuYd0acTb8AsbBA+QItQnx+dl0dQdSSD/CY27d3jc20JofREQ2YbpC7+AhChvWkWI7qH
-         O2kg==
+        bh=KyU/VadlYCAZvFtmwvpRDG1OglHe6oUXl+71UytSNR8=;
+        b=bFrCrBxupvsKB0YqRmSUywTWwOyUtXmGWNt822Nhu6ktj+Z/G6LAVncMsdKCba3mss
+         5F0L7XqkISOvSLxSMtRdyjgqHy1ZuLuZTKAZDarORFNgiY5PxjQa77R1zM0pZK+zGFBA
+         xRgCLjxawu4IzwGHbsA7k5On3DiXZRzYWp/zs=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1703080794; x=1703685594;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20230601; t=1703086246; x=1703691046;
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=1luSLAowvvRtdMQZpU+cNi6jQOPA0wTcpry6O/W+TOQ=;
-        b=BBrXJCJYD9ChpCzEstu8z8SgAeuQjY2iterWNAzGlO0MDmQeCk8lXJSfNWg3MbvFQF
-         IVrNE+iL2K2y//8FVHtBb+N3pf5EL4syDN/bGNz30T3RlPfAt/AIUylWW4xr9Zkhsw1+
-         mkoRaLCidMbBdbSyHidWkAE6czrcKO6ihVo9GeD/Yq0Ot9s7gdCuBebARhQXZsYwRd0V
-         FmtK6rNCUO0UaUIdSb0zOkwX654HE9rilfkRB46F1Qsvn1IZG1DJh9XR9LJFOqbhmeIl
-         G0mAgDyYZ8DqCVLZkKbMhTlaj8tV3hhUfv0DYmgFTsYIdR9D6Ra4sZcvJyWsegvoetHm
-         cPYA==
-X-Gm-Message-State: AOJu0Yw9C0939cDUKGq7g4YlawEn/dGR9Hr/ezesPKdoHfABt2Yx67E4
-	JMKLdjMOQZdwJRvDSUfTyBg=
-X-Google-Smtp-Source: AGHT+IHZLxcIpS9u3riJAcmw8sb3s9Qg9hXaZW5mKtW8ORqAOpWEK+tYa/PBN9psW/5xtADJlENvhw==
-X-Received: by 2002:a05:600c:3798:b0:40d:3141:8086 with SMTP id o24-20020a05600c379800b0040d31418086mr830531wmr.101.1703080793927;
-        Wed, 20 Dec 2023 05:59:53 -0800 (PST)
-Received: from morpheus.home.roving-it.com (2.1.9.e.d.3.3.1.6.1.e.d.5.3.a.e.1.8.6.2.1.1.b.f.0.b.8.0.1.0.0.2.ip6.arpa. [2001:8b0:fb11:2681:ea35:de16:133d:e912])
-        by smtp.googlemail.com with ESMTPSA id t3-20020a05600c450300b0040c4acaa4bfsm7513588wmo.19.2023.12.20.05.59.53
+        bh=KyU/VadlYCAZvFtmwvpRDG1OglHe6oUXl+71UytSNR8=;
+        b=Ccgo9Ra5b+14qzU75Fkist9hxEwqR7TWYkeQeUmOE21JIVKFR7AHiZDI2NKHxa7rus
+         H3ZbAxBZLlp57ru2OgI6b416Hft1SDSZnHXgt5o7WEQGWGCKNWVzysg6JZFqOdlAYGIK
+         HqHxtgjzsq+iusQYJERaNBN4hXn3GX0LhxpZU8BiTYRKBMdYv4Xn5mHy072A+S0FQ3fc
+         C5g7gDZ27VzTieh9J6E8vWBwLTVfDuEyS6dcbn487EXvk+K+BTi1FJJU4+HA0KSDpd1U
+         J3LNyj4o24Do+p8EBZbDNUlEq1HksKuu04nYnStbhsD72pcEkNBdaNC9ERjReaIkYXs7
+         B8mw==
+X-Gm-Message-State: AOJu0YymeW6G1SGVuMSR1BIxjA5n8W21n32+bfO/P6T9R6tRHVuQFOxU
+	4wHyWLovbhWmwC3L4Z/N1pQ3Pw==
+X-Google-Smtp-Source: AGHT+IEEXvVVT4c0e093/XHRLPYAxG91ewd33obdXIxEIlCdqoj9veXFugNeIDjEKmXw75CMuRWreQ==
+X-Received: by 2002:a17:902:d38d:b0:1d0:4778:fb3f with SMTP id e13-20020a170902d38d00b001d04778fb3fmr3601007pld.32.1703086245751;
+        Wed, 20 Dec 2023 07:30:45 -0800 (PST)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id j15-20020a170903024f00b001d0b080c7e6sm23041395plh.208.2023.12.20.07.30.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Dec 2023 05:59:53 -0800 (PST)
-From: Peter Robinson <pbrobinson@gmail.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Faiz Abbas <faiz_abbas@ti.com>,
-	Kishon Vijay Abraham I <kishon@ti.com>,
-	Tony Lindgren <tony@atomide.com>,
+        Wed, 20 Dec 2023 07:30:44 -0800 (PST)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+To: ulf.hansson@linaro.org,
+	linux-kernel@vger.kernel.org,
+	alcooperx@gmail.com,
+	linux-arm-kernel@lists.infradead.org,
+	adrian.hunter@intel.com,
 	linux-mmc@vger.kernel.org,
-	linux-omap@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org
-Cc: Peter Robinson <pbrobinson@gmail.com>
-Subject: [PATCH 2/2] mmc: sdhci_omap: Fix TI SoC dependencies
-Date: Wed, 20 Dec 2023 13:59:47 +0000
-Message-ID: <20231220135950.433588-2-pbrobinson@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20231220135950.433588-1-pbrobinson@gmail.com>
-References: <20231220135950.433588-1-pbrobinson@gmail.com>
+	robh+dt@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org,
+	conor+dt@kernel.org,
+	devicetree@vger.kernel.org
+Cc: f.fainelli@gmail.com,
+	bcm-kernel-feedback-list@broadcom.com,
+	Kamal Dasu <kamal.dasu@broadcom.com>
+Subject: [PATCH v6 0/2] mmc: add new sdhci reset sequence for brcm 74165b0
+Date: Wed, 20 Dec 2023 10:30:29 -0500
+Message-Id: <20231220153031.38678-1-kamal.dasu@broadcom.com>
+X-Mailer: git-send-email 2.17.1
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+	boundary="000000000000b95d98060cf2aafb"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-The sdhci_omap is specific to  older TI SoCs, update the
-dependencies for those SoCs and compile testing. While we're
-at it update the text to reflect the wider range of
-supported TI SoCS the driver now supports.
+--000000000000b95d98060cf2aafb
 
-Fixes: 7d326930d352 ("mmc: sdhci-omap: Add OMAP SDHCI driver")
-Signed-off-by: Peter Robinson <pbrobinson@gmail.com>
----
- drivers/mmc/host/Kconfig | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+v6 changes:
+ - PATCH 1/2 Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+ - PATCH 2/2 replaced readb_poll_timeout() with readb_poll_timeout_atomic()
+   based on Review comments
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 24ce5576b61a..81f2c4e05287 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -1026,14 +1026,15 @@ config MMC_SDHCI_XENON
+v5 changes:
+ - got rid of  'Reported by:' and 'Closes:' tags for all patches
+   
+v4 changes:
+ - Fix for v3 changes that introduced dt schema errors
+ - Fix for v3 changes that introduced sdhci-brcmstb build warnings 
+ - Added proper PATCH format and cleanup commit messages as per
+   review comments. Added proper 'Reported-by' and 'Closes' tags
+ - Added comments for 32-bit register access as per review comments
+ - Replaced wait loop polling with readb_poll_timeout() helper as per
+   review comments for the sdhci-brcmstb driver changes
  
- config MMC_SDHCI_OMAP
- 	tristate "TI SDHCI Controller Support"
-+	depends on ARCH_OMAP2PLUS || ARCH_KEYSTONE || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM && OF
- 	select THERMAL
- 	imply TI_SOC_THERMAL
- 	select MMC_SDHCI_EXTERNAL_DMA if DMA_ENGINE
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
--	  support present in TI's DRA7 SOCs. The controller supports
--	  SD/MMC/SDIO devices.
-+	  support present in TI's Keystone/OMAP2+/DRA7 SOCs. The controller
-+	  supports SD/MMC/SDIO devices.
- 
- 	  If you have a controller with this interface, say Y or M here.
- 
+v3 changes:
+ - Removed extra emun arrayfor possible compatible strings
+ - shdci-brcmstb checkpatch warning fixes 
+
+v2 changes:
+ - Fixed devicetree bindings for shdci-brcmstb and removed 74165 compatible
+   string as per review comments
+
+Kamal Dasu (2):
+  dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for 74165b0
+  mmc: add new sdhci reset sequence for brcm 74165b0
+
+ .../bindings/mmc/brcm,sdhci-brcmstb.yaml      |  4 +-
+ drivers/mmc/host/sdhci-brcmstb.c              | 67 +++++++++++++++++--
+ 2 files changed, 63 insertions(+), 8 deletions(-)
+
 -- 
-2.43.0
+2.17.1
 
+
+--000000000000b95d98060cf2aafb
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
+
+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
+DxuNuBlySpn/GYqPcDcRZd8EENWqnZrjtjHMk0j7ZfrPGXq8sQkbG3OX+DOwSaefPRq1pLGWBZaZ
+YuUo5O7CNHo7h7Hc9GgjiW+6X9BjKAzSaDy8jwIDAQABo4IB2DCCAdQwDgYDVR0PAQH/BAQDAgWg
+MIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
+LmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUFBzABhjVo
+dHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAyMDBNBgNV
+HSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xvYmFsc2ln
+bi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRwOi8vY3Js
+Lmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAiBgNVHREEGzAZ
+gRdrYW1hbC5kYXN1QGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAfBgNVHSMEGDAW
+gBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUcRYSWvAVyA3hgTrQ2c4AFquBsG0wDQYJ
+KoZIhvcNAQELBQADggEBAIKB2IOweF2sIYGBZTDm+Hwmhga+sjekM167Sk/KwxxvQFwZYP6i0SnR
+7aR59vbfVQVaAiZH/a+35EYxP/sXaIM4+E3bFykBuXwcGEnYyEn6MceiOCkjkWQq1Co2JyOdNvkP
+nAxyPoWlsJtr+N/MF1EYKGpYMdPM7S2T/gujjO9N56BCGu9yJElszWcXHmBl5IsaQqMS36vhsV0b
+NxffjNkeAdgfN/SS9S9Rj4WXD7pF1M0Xq8gPLCLyXrx1i2KkYOYJsj0PWlC6VRg6E1xXkYDte0VL
+fAAG4QsETU27E1HBNQyp5zF1PoPCPvq3EnWQnbLgYk+Jz2iwIUwiqwr/bDgxggJtMIICaQIBATBr
+MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
+YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgw89WX2Pp7ue922QVkwDQYJYIZI
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIE/6rxJ8Svqba9MJWxZcxUUnwwJe/BfTjEc0FX3W
+5hAuMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMTIyMDE1MzA0
+NlowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
+hkiG9w0BAQEFAASCAQCnAYWoYeebM5DAQWBQHKE38dABcLsxc0hdXVi6KqsraC71xYCnb6yzPIp4
+AurDVi6D4jYOGIT+CDWrGJge9s3zpQa8jKWqZmAscLbFAlP7vWM6g2TKQC70NBDEqgJMTpP2vWbi
+DKUrkCVh8sX5XGl/K7gKm+6nZ2R90T3Q3JwS2ciuybZu22Gh8HR4kkFl+7L3RnWMLL3p3FivZgnO
+L/KRq7X6M9A3zUO4x2JERfr9FSfaiLMsRo3FR0yjRBREKWhtYfchYRv8uEjHJUZe1H1vXG1r6I4G
+zOBvK5Sb08x9rWN/q0WV9pDLs81S/V2SId3rNYHSEcoIq+aeupIaqYwA
+--000000000000b95d98060cf2aafb--
