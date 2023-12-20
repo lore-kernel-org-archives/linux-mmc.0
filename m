@@ -1,155 +1,133 @@
-Received: from mail-oi1-f180.google.com (mail-oi1-f180.google.com [209.85.167.180])
+Received: from mail-qt1-f171.google.com (mail-qt1-f171.google.com [209.85.160.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 854423B2BF
-	for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2023 21:55:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E9907497
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Dec 2023 02:07:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="AgBwN2cT"
-Received: by mail-oi1-f180.google.com with SMTP id 5614622812f47-3b9ef61b6b8so3999595b6e.3
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2023 13:55:47 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="HOEiSrK0"
+Received: by mail-qt1-f171.google.com with SMTP id d75a77b69052e-4260b6eaae9so50129801cf.1
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Dec 2023 18:07:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1703022946; x=1703627746; darn=vger.kernel.org;
-        h=in-reply-to:autocrypt:from:references:cc:to:subject:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=I8xx0RNLdLZLpH5+6VKvxE33LF89JRmxeJyy0mFfxf0=;
-        b=AgBwN2cT5I0TCNpjtqPXwtyc/4d5m4uTSBvU+XVg6OprlzRnUMHTLCXDsKoFTmPeTK
-         N/cy37wMpsviv5Ca1G0koQ5S4pIuNO2m9y0M8qzYu3LVEgS6CWZ3Dv74uAOdzKKKSCFu
-         LidGrh5IiDm1QPLmLg+S7ynJZMkMbYZ58qy8E=
+        d=broadcom.com; s=google; t=1703038046; x=1703642846; darn=vger.kernel.org;
+        h=to:in-reply-to:cc:references:message-id:date:subject:mime-version
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=8LN/yuxYrEC7AB6DnmDEH9McnL/s6bDaJ1CabCoPuJU=;
+        b=HOEiSrK0mUhb5sCyhI1fPW09AZo4cNqTyvvhpyRRZq/0JAi885p1C5pYuEeUEm+p2R
+         J7mqkbAeMmsKSzsdy6NJl5iu0pnUUNgCmomYJBKSrx0nRqUB6wMeeugLIU5D0u+XLCAv
+         jRiL1t0HwA4Lk6vUkXEbFx7W0OkVlTuSi6WUY=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1703022946; x=1703627746;
-        h=in-reply-to:autocrypt:from:references:cc:to:subject:user-agent
-         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=I8xx0RNLdLZLpH5+6VKvxE33LF89JRmxeJyy0mFfxf0=;
-        b=Qofa7y9gDz3FKWpMLGipnz0X2E3ZkXY4RnRITeJxFaMbOXNYFMe8OMOcnkAfagQ3Tp
-         Cn/6t36rSn70C9G8jz3xk9djz8L1QTGlydbKw+Xz3XfKaqBysvLSnzxwecAVfad8x5Yv
-         OM0K+pFkZbqNGgznre7uf3RezYOpISWBvFmSdDfrW8/C7CdnEl9qp7DoXZcVp2BHcLSD
-         /aj933s+qyOu4QGoT//jbR4NatyRbv6r/dbeFWcrBNn3lNExwjg5zyVrQekfLreKMaiz
-         fFA0CZKxyf3xmSFKc0TeVgYm2O1oszmjvTjvojgWVjwnS3gde/zKeByKxLeYXdzcYF3g
-         FkyQ==
-X-Gm-Message-State: AOJu0YyRh1WZaPypn5WytaNk/s34fS0s07Qk0o6IT7jmYsFyFFrWQQ91
-	vZfmEOu5NEScnY6eWQBMjpPdKw==
-X-Google-Smtp-Source: AGHT+IFvzYozodkmcN2WZFNB7AMex1rw+XKpkdSVqVVOo8wlgakQP3zB8UqrB1Ym5r1LlqPAxqWL3A==
-X-Received: by 2002:a05:6808:11c7:b0:3b9:e858:996c with SMTP id p7-20020a05680811c700b003b9e858996cmr21959731oiv.58.1703022946491;
-        Tue, 19 Dec 2023 13:55:46 -0800 (PST)
-Received: from [192.168.159.133] ([37.175.73.215])
-        by smtp.gmail.com with ESMTPSA id i14-20020a0cf38e000000b0067a33133420sm10735230qvk.110.2023.12.19.13.55.41
+        d=1e100.net; s=20230601; t=1703038046; x=1703642846;
+        h=to:in-reply-to:cc:references:message-id:date:subject:mime-version
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=8LN/yuxYrEC7AB6DnmDEH9McnL/s6bDaJ1CabCoPuJU=;
+        b=nvmTV1bb98W15iXlXRzatdpEnQgcaZifPvZTqQFUFMr6JtIbNiPVU8/X0q6PHe4CZi
+         IQOsOhutG3jMz/ffrkP5YJ9HG9wFxfa6g2FjUUAbTFIvP7q0IhYofQOaSdkJEh4JAGgy
+         JNMvnw/HgAMCXQ00T0rlcJ8cEz6qH6q3vN2H4diAvlNTCBtMFTgsdpQNGfJkEczUdHvU
+         LBLLZtDurETRfavLnz/JnmGKq28K9pyoehgiZkjA+Dbc6FbnLqZ+pLpSKmqxPynYdhCg
+         jTC9fhiQmQBDYr9tzMFpuAOcpNt1b11aAVhiuxT4u6CyNhOqbr8VPKKoGyYbx2chPMBH
+         WFZw==
+X-Gm-Message-State: AOJu0YwRurWajJKuq+c5Kgk46+2SsQUuDhX5IM5NkgtlmBl/vW72aXGO
+	ANNnXRcctGC+HeXR9D1nJAeJqg==
+X-Google-Smtp-Source: AGHT+IHpcP64qQQ7Lo7j84O74Sjcd4A6jxNZg+kcuicQ10d9b7aJWUfoeS1cpuZhC3FK+GRuUuPFxg==
+X-Received: by 2002:a05:6214:401a:b0:67e:ff50:f2b1 with SMTP id kd26-20020a056214401a00b0067eff50f2b1mr14715031qvb.90.1703038046304;
+        Tue, 19 Dec 2023 18:07:26 -0800 (PST)
+Received: from smtpclient.apple (pool-173-76-218-122.bstnma.fios.verizon.net. [173.76.218.122])
+        by smtp.gmail.com with ESMTPSA id w7-20020a056214012700b0067aab230ed9sm4139229qvs.21.2023.12.19.18.07.25
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 19 Dec 2023 13:55:44 -0800 (PST)
-Message-ID: <45b785bd-9b60-4ab7-80f9-b179d932d04d@broadcom.com>
-Date: Tue, 19 Dec 2023 22:55:38 +0100
+        Tue, 19 Dec 2023 18:07:25 -0800 (PST)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
+Mime-Version: 1.0 (1.0)
 Subject: Re: [PATCH v5 2/2] mmc: add new sdhci reset sequence for brcm 74165b0
-To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
- linux-kernel@vger.kernel.org, alcooperx@gmail.com,
- linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com,
- linux-mmc@vger.kernel.org, robh+dt@kernel.org,
+Date: Tue, 19 Dec 2023 21:07:14 -0500
+Message-Id: <B98B7C63-E1C0-4E52-B6FE-8FB8258A1F6E@broadcom.com>
+References: <45b785bd-9b60-4ab7-80f9-b179d932d04d@broadcom.com>
+Cc: ulf.hansson@linaro.org, linux-kernel@vger.kernel.org,
+ alcooperx@gmail.com, linux-arm-kernel@lists.infradead.org,
+ adrian.hunter@intel.com, linux-mmc@vger.kernel.org, robh+dt@kernel.org,
  krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
- devicetree@vger.kernel.org
-Cc: f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
- Kamal Dasu <kdasu@broadcom.com>
-References: <20231219162236.36609-1-kamal.dasu@broadcom.com>
- <20231219162236.36609-3-kamal.dasu@broadcom.com>
-From: Florian Fainelli <florian.fainelli@broadcom.com>
-Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
- 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
-In-Reply-To: <20231219162236.36609-3-kamal.dasu@broadcom.com>
+ devicetree@vger.kernel.org, f.fainelli@gmail.com,
+ bcm-kernel-feedback-list@broadcom.com, Kamal Dasu <kdasu@broadcom.com>
+In-Reply-To: <45b785bd-9b60-4ab7-80f9-b179d932d04d@broadcom.com>
+To: Florian Fainelli <florian.fainelli@broadcom.com>
+X-Mailer: iPhone Mail (21B101)
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-	boundary="000000000000ca7f75060ce3ed34"
+	boundary="000000000000cdefe3060ce771de"
 
---000000000000ca7f75060ce3ed34
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+--000000000000cdefe3060ce771de
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Hi Kamal,
 
-On 12/19/2023 5:22 PM, Kamal Dasu wrote:
-> From: Kamal Dasu <kdasu@broadcom.com>
-> 
-> 74165b0 shall use a new sdio controller core version which
-> requires a different reset sequence. For core reset we use
-> sdhci_reset. For CMD and/or DATA reset added a new function
-> to also enable SDHCI clocks SDHCI_CLOCK_CARD_EN
-> SDHCI_CLOCK_INT_EN along with the SDHCI_RESET_CMD and/or
-> SDHCI_RESET_DATA fields.
-> 
-> Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
-> ---
 
-[snip]
 
-> +static void brcmstb_sdhci_reset_cmd_data(struct sdhci_host *host, u8 mask)
-> +{
-> +	int ret;
-> +	u32 reg;
-> +	u32 new_mask = (mask &  (SDHCI_RESET_CMD | SDHCI_RESET_DATA)) << 24;
-> +
-> +	/*
-> +	 * SDHCI_CLOCK_CONTROL register CARD_EN and CLOCK_INT_EN bits shall
-> +	 * be set along with SOFTWARE_RESET register RESET_CMD or RESET_DATA
-> +	 * bits, hence access SDHCI_CLOCK_CONTROL register as 32-bit register
-> +	 */
-> +	new_mask |= SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN;
-> +	reg = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
-> +	sdhci_writel(host, reg | new_mask, SDHCI_CLOCK_CONTROL);
-> +
-> +	reg = sdhci_readb(host, SDHCI_SOFTWARE_RESET);
-> +	ret = readb_poll_timeout(host->ioaddr + SDHCI_SOFTWARE_RESET,
-> +				 reg, reg & mask, 10, 10000);
 
-Does this need to be readb_poll_timeout_atomic() since this function can 
-be used in both atomic and non-atomic context AFAIR?
--- 
-Florian
 
---000000000000ca7f75060ce3ed34
+
+> On Dec 19, 2023, at 4:55=E2=80=AFPM, Florian Fainelli <florian.fainelli@br=
+oadcom.com> wrote:
+>=20
+> =EF=BB=BFHi Kamal,
+>=20
+>> On 12/19/2023 5:22 PM, Kamal Dasu wrote:
+>> From: Kamal Dasu <kdasu@broadcom.com>
+>> 74165b0 shall use a new sdio controller core version which
+>> requires a different reset sequence. For core reset we use
+>> sdhci_reset. For CMD and/or DATA reset added a new function
+>> to also enable SDHCI clocks SDHCI_CLOCK_CARD_EN
+>> SDHCI_CLOCK_INT_EN along with the SDHCI_RESET_CMD and/or
+>> SDHCI_RESET_DATA fields.
+>> Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
+>> ---
+>=20
+> [snip]
+>=20
+>> +static void brcmstb_sdhci_reset_cmd_data(struct sdhci_host *host, u8 mas=
+k)
+>> +{
+>> +    int ret;
+>> +    u32 reg;
+>> +    u32 new_mask =3D (mask &  (SDHCI_RESET_CMD | SDHCI_RESET_DATA)) << 2=
+4;
+>> +
+>> +    /*
+>> +     * SDHCI_CLOCK_CONTROL register CARD_EN and CLOCK_INT_EN bits shall
+>> +     * be set along with SOFTWARE_RESET register RESET_CMD or RESET_DATA=
+
+>> +     * bits, hence access SDHCI_CLOCK_CONTROL register as 32-bit registe=
+r
+>> +     */
+>> +    new_mask |=3D SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN;
+>> +    reg =3D sdhci_readl(host, SDHCI_CLOCK_CONTROL);
+>> +    sdhci_writel(host, reg | new_mask, SDHCI_CLOCK_CONTROL);
+>> +
+>> +    reg =3D sdhci_readb(host, SDHCI_SOFTWARE_RESET);
+>> +    ret =3D readb_poll_timeout(host->ioaddr + SDHCI_SOFTWARE_RESET,
+>> +                 reg, reg & mask, 10, 10000);
+>=20
+> Does this need to be readb_poll_timeout_atomic() since this function can b=
+e used in both atomic and non-atomic context AFAIR?
+
+Yes it does. Will send a v6
+> --
+> Florian
+
+Kamal=
+
+--000000000000cdefe3060ce771de
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
 Content-Description: S/MIME Cryptographic Signature
 
-MIIQeQYJKoZIhvcNAQcCoIIQajCCEGYCAQExDzANBglghkgBZQMEAgEFADALBgkqhkiG9w0BBwGg
-gg3QMIIFDTCCA/WgAwIBAgIQeEqpED+lv77edQixNJMdADANBgkqhkiG9w0BAQsFADBMMSAwHgYD
+MIIQZwYJKoZIhvcNAQcCoIIQWDCCEFQCAQExDzANBglghkgBZQMEAgEFADALBgkqhkiG9w0BBwGg
+gg2+MIIFDTCCA/WgAwIBAgIQeEqpED+lv77edQixNJMdADANBgkqhkiG9w0BAQsFADBMMSAwHgYD
 VQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMzETMBEGA1UEChMKR2xvYmFsU2lnbjETMBEGA1UE
 AxMKR2xvYmFsU2lnbjAeFw0yMDA5MTYwMDAwMDBaFw0yODA5MTYwMDAwMDBaMFsxCzAJBgNVBAYT
 AkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBS
@@ -187,40 +165,39 @@ M8pr5nS5ugAtrqQK0/Xx8Q+Kv3NnSoPHRHt44K9ubG8DKY4zOUXDjuS5V2yq/BKW7FPGLeQkbLmU
 Y/vcU2hnVj6DuM81IcPJaP7O2sJTqsyQiunwXUaMld16WCgaLx3ezQA3QY/tRG3XUyiXfvNnBB4V
 14qWtNPeTCekTBtzc3b0F5nCH3oO4y0IrQocLP88q1UOD5F+NuvDV0m+4S4tfGCLw0FREyOdzvcy
 a5QBqJnnLDMfOjsl0oZAzjsshnjJYS8Uuu7bVW/fhO4FCU29KNhyztNiUGUe65KXgzHZs7XKR1g/
-XzCCBVgwggRAoAMCAQICDBP8P9hKRVySg3Qv5DANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJC
+XzCCBUYwggQuoAMCAQICDDz1ZfY+nu573bZBWTANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJC
 RTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTExMC8GA1UEAxMoR2xvYmFsU2lnbiBHQ0MgUjMg
-UGVyc29uYWxTaWduIDIgQ0EgMjAyMDAeFw0yMjA5MTAxMjE4MTFaFw0yNTA5MTAxMjE4MTFaMIGW
+UGVyc29uYWxTaWduIDIgQ0EgMjAyMDAeFw0yMjA5MTAxMjIwMjFaFw0yNTA5MTAxMjIwMjFaMIGK
 MQswCQYDVQQGEwJJTjESMBAGA1UECBMJS2FybmF0YWthMRIwEAYDVQQHEwlCYW5nYWxvcmUxFjAU
-BgNVBAoTDUJyb2FkY29tIEluYy4xGTAXBgNVBAMTEEZsb3JpYW4gRmFpbmVsbGkxLDAqBgkqhkiG
-9w0BCQEWHWZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOC
-AQ8AMIIBCgKCAQEA+oi3jMmHltY4LMUy8Up5+1zjd1iSgUBXhwCJLj1GJQF+GwP8InemBbk5rjlC
-UwbQDeIlOfb8xGqHoQFGSW8p9V1XUw+cthISLkycex0AJ09ufePshLZygRLREU0H4ecNPMejxCte
-KdtB4COST4uhBkUCo9BSy1gkl8DJ8j/BQ1KNUx6oYe0CntRag+EnHv9TM9BeXBBLfmMRnWNhvOSk
-nSmRX0J3d9/G2A3FIC6WY2XnLW7eAZCQPa1Tz3n2B5BGOxwqhwKLGLNu2SRCPHwOdD6e0drURF7/
-Vax85/EqkVnFNlfxtZhS0ugx5gn2pta7bTdBm1IG4TX+A3B1G57rVwIDAQABo4IB3jCCAdowDgYD
-VR0PAQH/BAQDAgWgMIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3Vy
-ZS5nbG9iYWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEG
-CCsGAQUFBzABhjVodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWdu
-MmNhMjAyMDBNBgNVHSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93
-d3cuZ2xvYmFsc2lnbi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6
-hjhodHRwOi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNy
-bDAoBgNVHREEITAfgR1mbG9yaWFuLmZhaW5lbGxpQGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggr
-BgEFBQcDBDAfBgNVHSMEGDAWgBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUUwwfJ6/F
-KL0fRdVROal/Lp4lAF0wDQYJKoZIhvcNAQELBQADggEBAKBgfteDc1mChZjKBY4xAplC6uXGyBrZ
-kNGap1mHJ+JngGzZCz+dDiHRQKGpXLxkHX0BvEDZLW6LGOJ83ImrW38YMOo3ZYnCYNHA9qDOakiw
-2s1RH00JOkO5SkYdwCHj4DB9B7KEnLatJtD8MBorvt+QxTuSh4ze96Jz3kEIoHMvwGFkgObWblsc
-3/YcLBmCgaWpZ3Ksev1vJPr5n8riG3/N4on8gO5qinmmr9Y7vGeuf5dmZrYMbnb+yCBalkUmZQwY
-NxADYvcRBA0ySL6sZpj8BIIhWiXiuusuBmt2Mak2eEv0xDbovE6Z6hYyl/ZnRadbgK/ClgbY3w+O
-AfUXEZ0xggJtMIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52
-LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgwT
-/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIHe1TYoEj7xDqf+X
-ROOrGxVykXVfVVFYUeg8WBivFZ7AMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
-AQkFMQ8XDTIzMTIxOTIxNTU0NlowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
-AWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEH
-MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQAmuSzyWDT+PdGfv8dAOLnW92TO+mFB6MdG
-K36AmTz11p+RBDj01/fPLpB8/hJfBXXaJGpbF/hkKqu5fAbUZfnGmcQIl0mxG08gCN3qg94SdHF6
-imtInTh/R6rClAtlMS+xXk24mNVkbxOQJHU4bPVD3NBNeJwC3NMfHihPYJf19+fiPX2cY4ZVohvn
-ueL6bzkFS9aCjTS5tu05W4U2mqB5HW1HR/CbX9toePz69UhfkV4ozSY82OzK/TguUU/undwsydwF
-WL+af/uUbAQIsd00qvEW2k4gS49KxZ3XVxLLSYl6QHnJl/ZfUSQZCs1SCN83Bv8ogvQuRg3Rs5pe
-4zis
---000000000000ca7f75060ce3ed34--
+BgNVBAoTDUJyb2FkY29tIEluYy4xEzARBgNVBAMTCkthbWFsIERhc3UxJjAkBgkqhkiG9w0BCQEW
+F2thbWFsLmRhc3VAYnJvYWRjb20uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+qleMIXx8Zwh2WP/jpzRzyh3axDm5qIpwHevp+tTA7EztFd+5EoriRj5/goGYkJH+HbVOvY9bS1dJ
+swWsylPFAKpuHPnJb+W9ZTJZnmOd6GHO+37b4rcsxsmbw9IWIy7tPWrKaLQXNjwEp/dum+FWlB8L
+sCrKsoN6HxDhqzjLGMNy1lpKvkF/+5mDUeBn4hSdjLMRejcZnlnB/vk4aU/sBzFzK6gkhpoH1V+H
+DxuNuBlySpn/GYqPcDcRZd8EENWqnZrjtjHMk0j7ZfrPGXq8sQkbG3OX+DOwSaefPRq1pLGWBZaZ
+YuUo5O7CNHo7h7Hc9GgjiW+6X9BjKAzSaDy8jwIDAQABo4IB2DCCAdQwDgYDVR0PAQH/BAQDAgWg
+MIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
+LmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUFBzABhjVo
+dHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAyMDBNBgNV
+HSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xvYmFsc2ln
+bi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRwOi8vY3Js
+Lmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAiBgNVHREEGzAZ
+gRdrYW1hbC5kYXN1QGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAfBgNVHSMEGDAW
+gBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUcRYSWvAVyA3hgTrQ2c4AFquBsG0wDQYJ
+KoZIhvcNAQELBQADggEBAIKB2IOweF2sIYGBZTDm+Hwmhga+sjekM167Sk/KwxxvQFwZYP6i0SnR
+7aR59vbfVQVaAiZH/a+35EYxP/sXaIM4+E3bFykBuXwcGEnYyEn6MceiOCkjkWQq1Co2JyOdNvkP
+nAxyPoWlsJtr+N/MF1EYKGpYMdPM7S2T/gujjO9N56BCGu9yJElszWcXHmBl5IsaQqMS36vhsV0b
+NxffjNkeAdgfN/SS9S9Rj4WXD7pF1M0Xq8gPLCLyXrx1i2KkYOYJsj0PWlC6VRg6E1xXkYDte0VL
+fAAG4QsETU27E1HBNQyp5zF1PoPCPvq3EnWQnbLgYk+Jz2iwIUwiqwr/bDgxggJtMIICaQIBATBr
+MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
+YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgw89WX2Pp7ue922QVkwDQYJYIZI
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIKqCDXUSCZ24oav4GA0W/eTnwIL9WK5Qq1YAYQmK
+T1GZMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMTIyMDAyMDcy
+NlowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
+hkiG9w0BAQEFAASCAQB9VI+gKg0Q4P3FsOiHZ3Zmrtcu4g50s6so3geVIQqBX27GwHWMJUr1vYh9
+eKUqEEQdLvlyvI+BX5FAUU87SYwNbeDNc9ylp7HUiDZ9dpEGrnwUwl064rshuZccLDSW1ECxbYLy
+zMcdU+Q2jfkoCiuVpFU5TEDx0tU33/vwX3TDIWLmEoMe1sqlDVty8OAE/KUusvpvOhvDwp9U2h7q
+gkbHA5gyEaHvlD6ergmQITuItqguHa5IANqvPKMgZ3Bd4nZJyHSPaHMNUZ1eO38gtUzTW+yEhWqV
+pA69RR9Yhp7xtCDG2Bq2v92to2bCDvtiCrvy4NCARX4eDqTKR0kblUq0
+--000000000000cdefe3060ce771de--
