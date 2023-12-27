@@ -1,83 +1,88 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
+Received: from mout.web.de (mout.web.de [212.227.15.3])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0534F45BFE;
-	Wed, 27 Dec 2023 16:56:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9DEC46453;
+	Wed, 27 Dec 2023 17:28:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FHNOIsH0"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1703696214; x=1735232214;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:content-transfer-encoding:in-reply-to;
-  bh=2yJFTx4ZE8jECzs1+U6wqnReWCpAiewcEcFY9qdNd5A=;
-  b=FHNOIsH0qG4MTaBS5PX6RzIX0sOOsqc8vrcGDqmKKOAR3LAS6FgbDTmc
-   UPQlCkEmSkJdaqhJmmjClXBd8L71q8wGU2eOWDhiRmpzmqXaBh8ftCue9
-   uCqLPtZtClP1UHocXIqf01dTnd/7SBrSn+mL1wOAnqaRgcUvJhaftK1Vy
-   GaQuz8TF885IPrBp8VXUzGm0B7IZCi6Yb6mft/p2B2L48I8Dicgzzv3/h
-   zxJrDc1D1e6NEX+eZtRD4E8iaIT7aZ9NshygwmFvR23Tc9IPWlLrKgz8k
-   zv/JhAtNOdxUXA+0XA8N7JnloRdtYddMz2HhLRDmUB4nKqzBRmc1iE0BH
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10936"; a="15131643"
-X-IronPort-AV: E=Sophos;i="6.04,309,1695711600"; 
-   d="scan'208";a="15131643"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Dec 2023 08:56:54 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10936"; a="812572900"
-X-IronPort-AV: E=Sophos;i="6.04,309,1695711600"; 
-   d="scan'208";a="812572900"
-Received: from smile.fi.intel.com ([10.237.72.54])
-  by orsmga001.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Dec 2023 08:56:49 -0800
-Received: from andy by smile.fi.intel.com with local (Exim 4.97)
-	(envelope-from <andriy.shevchenko@linux.intel.com>)
-	id 1rIXD3-00000009T7I-33IT;
-	Wed, 27 Dec 2023 18:56:45 +0200
-Date: Wed, 27 Dec 2023 18:56:45 +0200
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: Markus Elfring <Markus.Elfring@web.de>
-Cc: linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org,
-	Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Paolo Abeni <pabeni@redhat.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Yang Yingliang <yangyingliang@huawei.com>,
-	LKML <linux-kernel@vger.kernel.org>, cocci@inria.fr
-Subject: Re: [PATCH] mmc: mmc_spi: Adjust error handling in mmc_spi_probe()
-Message-ID: <ZYxXTVpLfI-mgxF4@smile.fi.intel.com>
-References: <2aa6bd31-f3d8-41ac-abf1-9ec7cf7e064b@web.de>
+	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="u18bTJEc"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=web.de; s=s29768273;
+	t=1703698110; x=1704302910; i=markus.elfring@web.de;
+	bh=hrGMV7DS1Hq9z/Sx/zgTn8G7c+CCmRc26CbqvNt/lTY=;
+	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
+	 In-Reply-To;
+	b=u18bTJEcOAvYsxLq2lWLLpNPETzZtg5KKMv+5oPocaSc6yRIXH4aN75ZdeEoC2kz
+	 /A77l9JH7Dzu9Bij1azXZBQ3QhcVoIXbVr5ZzD6EZVaKgIKePcNboM9JBRAbNW8wo
+	 OrIm+TfWhtxy4YDmyx1sjJSQyhZ2LjJx9h9T87VyKDssasmDRWAg32/5ezt4pLxiF
+	 q+HX2KCT4GXxnSi7MZg4c1B8zTRkMgcG//XsrbGfm8jQJkh4I0Cyez1GpoTWyrKPr
+	 l5z6tsae39HqVj9n4VUIoOaQvyU5c7BhlLZoZdGOqJ0iwyZXIjxOTh2m2IAM29wvy
+	 5J/j3eUDOMRTqcEvnA==
+X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
+Received: from [192.168.178.21] ([94.31.85.95]) by smtp.web.de (mrweb005
+ [213.165.67.108]) with ESMTPSA (Nemesis) id 1MJWoe-1rXrfC2Un2-00KL1N; Wed, 27
+ Dec 2023 18:28:30 +0100
+Message-ID: <017f212f-fb55-42ca-bc1c-7f2522194a9f@web.de>
+Date: Wed, 27 Dec 2023 18:28:26 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <2aa6bd31-f3d8-41ac-abf1-9ec7cf7e064b@web.de>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+User-Agent: Mozilla Thunderbird
+Subject: Re: mmc: mmc_spi: Adjust error handling in mmc_spi_probe()
+Content-Language: en-GB
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+ linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org,
+ Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Paolo Abeni <pabeni@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Yang Yingliang <yangyingliang@huawei.com>,
+ LKML <linux-kernel@vger.kernel.org>, cocci@inria.fr
+References: <2aa6bd31-f3d8-41ac-abf1-9ec7cf7e064b@web.de>
+ <ZYxXTVpLfI-mgxF4@smile.fi.intel.com>
+From: Markus Elfring <Markus.Elfring@web.de>
+In-Reply-To: <ZYxXTVpLfI-mgxF4@smile.fi.intel.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:V9bNz1Vq4gc/izWZjmMc6xV8NhQ1cp41dBgf3I03DmYlY+8jTNt
+ X192lV3pIcnPwQbGPj2wre8044olcROF4pPcdNDRfwlDjgHf3K1j79LPHSmcGez3eS3dMGR
+ uFq/pFapverKkfXx0gTbHMdfVynoxGUlsl7xsLXH7/iQSKuPJIIQbEw5b+QqahJN8YLpC5F
+ gnHx15GAazW62NiqY25IA==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:ReUDYDxLwuE=;pQgvrz6qztCFdyc/FQRg/Nk1gqt
+ Vcj1nqZWWIYul35Q8rzZYlLrCemvCGgZER4teElf803vFXfeyFp410ZuyNUZnKMoD6a0IaNMl
+ VxjwpoJB8LWYeHuGZ1TXf1Ik1BsET0C54sT+23Xbx6gSO/iWcpPAv9EsdtLnCCfgQ3M8ZhRjZ
+ 6qdCN34hBlbTjPINFupc9J7zdM9EhH7b8CI+J5S8vGFUEcf/68hWmZQNoXpPX2CIlkgx0wcMl
+ 7ib4QIvoj00nMkT6ag164VQK/idITxIybYGYYUrRpODiS0sxVGMKZJbsvvc8ZTPJYvLtSjHdd
+ fziTLfGdoC7BbZLx+RlHjDTSldF/ZNhPSkxB0obRyCAvZJg6r43PXDDt5q/mH7JRXZrHzLqw7
+ jrmM0WqBsxxB8vCDjgZ/NVr8C0kQtiyWTimVycjot+3Ldcn8KlSNUJFopnNGn1jWrmIt66sNx
+ coIfA0/E3HgzLR2Xr/vZdZ53gyMmm62bHUQedstSGGgiNBRrB9Pt3D969jkjLTFRjR8WVB16Z
+ nLsMemmFK8NckbjtSr10ovnaVYvCvR/7q8nG31cRJYyayGTcx6qLAFiuCK4ronXs7RtNm6vLm
+ uk7rJxeOcuwtTSJn06fko8+Hviha7rIWkDVdXLlIIPYlushrsH+Bhl8wOSqCYnRsGTHhrJo01
+ CktMUBmjYLNq4NPTahjFFTFqTw5MCiQKIVNugIe2EacZEhbNBvtfKXU3+HVBEqNwKmHjRQkE8
+ HVTp5HjOqwxCKY6vLSwDVMtWJ3IxAIgFcTh9XEfh7jfSEmvtleNWpqAYe0efPs88Vy6kZ9mw6
+ Ree21vZugeZOS62MtL6K8H2OAuwbaKZSpV751jlP1L+rWmpbM6j3uUBVIvf8SrDMTgFquLrIH
+ 5a0pzAoR+9dXmeUSoHKhzL+dbDgvS/aSjwYmPpQyd4kkml3cOo94M2kHMVh9mXAQBFj0mC5mt
+ zorgMw==
 
-On Wed, Dec 27, 2023 at 12:50:50PM +0100, Markus Elfring wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Wed, 27 Dec 2023 12:23:20 +0100
-> 
-> The kfree() function was called in one case by
-> the mmc_spi_probe() function during error handling
-> even if the passed variable contained a null pointer.
-> This issue was detected by using the Coccinelle software.
+>> The kfree() function was called in one case by
+>> the mmc_spi_probe() function during error handling
+>> even if the passed variable contained a null pointer.
+>> This issue was detected by using the Coccinelle software.
+>
+>> * Thus return directly after a call of the function =E2=80=9Ckmalloc=E2=
+=80=9D failed
+>>   at the beginning.
+>>
+>> * Move an error code assignment into an if branch.
+>
+> How is this one better?
 
-> * Thus return directly after a call of the function “kmalloc” failed
->   at the beginning.
-> 
-> * Move an error code assignment into an if branch.
+I suggest to avoid a bit of redundant data processing also at this source =
+code place.
 
-How is this one better?
-
--- 
-With Best Regards,
-Andy Shevchenko
-
-
+Regards,
+Markus
