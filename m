@@ -1,49 +1,49 @@
-Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D275B44C70
-	for <linux-mmc@vger.kernel.org>; Wed, 27 Dec 2023 12:38:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5052A446C6
+	for <linux-mmc@vger.kernel.org>; Wed, 27 Dec 2023 12:41:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WnKMiRpS"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-40d4a7f0c4dso42847235e9.1
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Dec 2023 04:38:55 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Jf5SkwoL"
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-336788cb261so4679766f8f.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Dec 2023 04:41:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1703680734; x=1704285534; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1703680862; x=1704285662; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=qQNOV67MdhID3408uOfgccIq2xpxNnna5O8nMs9Vl0o=;
-        b=WnKMiRpSG76wxSDOQTSs+UoH4jycqhjzBTPfYqH7IgaJGjsL/Wf3N8XQk7cOE8mNzv
-         qzJr407XvhWUSdqj6GGsZ8suyaTgW9/finEPhoIM/+jSUtf1BeDZi39QOEMCHANFsDqQ
-         4EyVsaKPr0Y6jcsE2tvqkac80+sDl3VFllp0egHXl52G9VBnkMfTg9pxc1EcScCgIJp0
-         EzM27ngCsCRvoLSbQaHGjG1cfBo8aKL1quodMqvhHBJgZs8edZtzfoIaetOu5ffvNCKR
-         0vtq9DuH1N+PCL44/45QW29gSPRJ893JxymbTqOjdF5lgTVNlsUwX0bNYXAdCkKZDjCG
-         FQoA==
+        bh=IobSWW9egD1J6lnzp7nWS1ewez0NIEgra4uxbagq4Ac=;
+        b=Jf5SkwoLMAFvf/JGyqZ3KBpNUzPyXmQJ06LQ1rvWGMU9hzLfZ8XyCFB1rAdAL8gy+d
+         jFWpZC/AIBZOtYd30+aMx2mnqvpQx0kEmYXpYaEy8fZl1WRweOyTkwbJPrrwmxZdhNPo
+         90oojrNuu75rDam/Wh1bx6APpYmwNfkM0U0wGR8MguThR/qZzVCjvYRvcmK43e99CNPA
+         x/LOre6RjPlI0p9VrH/BDPe2rR132UHRzk98QKDsIpmMjvACfl5fNUTB5BjyZQ2OhDpD
+         zOwmCLzIiU+Mq83JxUsYU02PQTs+Wlxb8ZQ3C894sr43aKsBB9xbaq8A5t4+xFgf2QJY
+         8GAg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1703680734; x=1704285534;
+        d=1e100.net; s=20230601; t=1703680862; x=1704285662;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=qQNOV67MdhID3408uOfgccIq2xpxNnna5O8nMs9Vl0o=;
-        b=p6PZ9RIInzy7u5Sdf+ONqu2itV/DabTecJmnTTZSV+BgWCEiuSew8G1ite/ukOW2N2
-         CXMktxChbE9S4nYwgOyD9jwP3JE88RaxJ32czKyD+SRrnTx0SnSgTUDCPXHy5zf6mC+Z
-         2joKmI2O20GM0Xer0lnak/IbfiXlwNprfQq6sVCQpUTSk5SnwCB6ES1dGYgH2+lkfoa/
-         zeinLLK8EGKB3tsvLZx4G585MYP3qGUzbwdxqpXE+rEP73VxGKbScRFsSEvIy+tFfAL4
-         5vKsKzheVHyBIpbi3C4HU3HQPUvj2s75DJSGHS183ZfMVLSGxnAbk9aMiKrq4ClZj6Ao
-         Flmg==
-X-Gm-Message-State: AOJu0YwUv/c2VOLVh4QUxXC3sRHs+4AxNImbFrEdryQB18Lm5ebUKWxA
-	rapjWF+YkKqBLDbZiRFTu/KAN0IrH7ZHTA==
-X-Google-Smtp-Source: AGHT+IEv9tgGQOa9iwvgkMwLyzK/Kf/5XcIbxOygixSFeR0V+nxc7Ch4aJlDc0Zz4ZRiymMpN4xWqQ==
-X-Received: by 2002:a05:600c:a04:b0:40d:60a4:4f81 with SMTP id z4-20020a05600c0a0400b0040d60a44f81mr123777wmp.100.1703680733930;
-        Wed, 27 Dec 2023 04:38:53 -0800 (PST)
+        bh=IobSWW9egD1J6lnzp7nWS1ewez0NIEgra4uxbagq4Ac=;
+        b=l/CPCxvNnOQy/ZVW6pYk8yIJdjdlGah1bcrD5mx7O7pfAbfgHczuEVgYgwVFy5SpXP
+         dKu77gkDi4sZU3HT1w1IU4fa+p6Getf4pFYnPb7LmPfUNOFENTuQcVlLMa4A6e4nAbzO
+         b7ZW2jx3r8dArwcd6tAEOFmh11oS4No3dhzpYCbcQMxW/G/gk9Gxu7daNI8CXWLDtthY
+         BjlPtsbpRTYLuOk6P8BROF+pu6tq/ihUA05N7z1nEedIQJFldCX+JgBm+YRI23Bth74w
+         1B614hzzxvtp2bHSa3ZTe1YZlOdKG8l4BjUR5rF93rpWjxvFWI7bChT8zMVYfCBqt/On
+         gSkw==
+X-Gm-Message-State: AOJu0Yxsq0uGsmfBC6uohSHg3dgnGRR2Roeqq3zD30tQMPtBaoPbNurZ
+	cv9tOF16+kXkY16gGx7FhRsOdYev7sge/Q==
+X-Google-Smtp-Source: AGHT+IGBt+TovOPy4NKH37QHcuLITaQxwt7XvM/pUisHh8D6fzAOz557SHXJpaJ2EtnQ67ZT0anVNw==
+X-Received: by 2002:a1c:7415:0:b0:40d:492d:c376 with SMTP id p21-20020a1c7415000000b0040d492dc376mr4720648wmc.114.1703680862515;
+        Wed, 27 Dec 2023 04:41:02 -0800 (PST)
 Received: from [192.168.1.20] ([178.197.218.27])
-        by smtp.gmail.com with ESMTPSA id m2-20020a05600c4f4200b0040d5c58c41dsm3569893wmq.24.2023.12.27.04.38.51
+        by smtp.gmail.com with ESMTPSA id j16-20020a05600c191000b0040c11fbe581sm24050242wmq.27.2023.12.27.04.41.00
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 27 Dec 2023 04:38:53 -0800 (PST)
-Message-ID: <6ff67469-2522-425a-a96a-25460e38beda@linaro.org>
-Date: Wed, 27 Dec 2023 13:38:51 +0100
+        Wed, 27 Dec 2023 04:41:01 -0800 (PST)
+Message-ID: <75fd794c-0366-445b-aa69-0975afb247c7@linaro.org>
+Date: Wed, 27 Dec 2023 13:40:59 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -51,7 +51,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/4] dt-bindings: mmc: add Marvell ac5
+Subject: Re: [PATCH 3/4] arm64: dts: ac5: add mmc node and clock
 Content-Language: en-US
 To: Elad Nachman <enachman@marvell.com>, robh+dt@kernel.org,
  krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, andrew@lunn.ch,
@@ -63,7 +63,7 @@ To: Elad Nachman <enachman@marvell.com>, robh+dt@kernel.org,
  linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: cyuval@marvell.com
 References: <20231227123257.1170590-1-enachman@marvell.com>
- <20231227123257.1170590-3-enachman@marvell.com>
+ <20231227123257.1170590-4-enachman@marvell.com>
 From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -109,37 +109,100 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20231227123257.1170590-3-enachman@marvell.com>
+In-Reply-To: <20231227123257.1170590-4-enachman@marvell.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 27/12/2023 13:32, Elad Nachman wrote:
 > From: Elad Nachman <enachman@marvell.com>
 > 
-> Add dt bindings for Marvell ac5 eMMC controller
+> Add mmc and mmc clock nodes to ac5 and ac5x device tree files
 > 
 > Signed-off-by: Elad Nachman <enachman@marvell.com>
 > ---
->  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 3 +++
->  1 file changed, 3 insertions(+)
+>  arch/arm64/boot/dts/marvell/ac5-98dx25xx.dtsi | 33 ++++++++++++++++++-
+>  1 file changed, 32 insertions(+), 1 deletion(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> index 3a8e74894ae0..50c6de8bf0bc 100644
-> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> @@ -34,6 +34,9 @@ properties:
->            - const: marvell,armada-3700-sdhci
->            - const: marvell,sdhci-xenon
+> diff --git a/arch/arm64/boot/dts/marvell/ac5-98dx25xx.dtsi b/arch/arm64/boot/dts/marvell/ac5-98dx25xx.dtsi
+> index b5e042b8e929..decad14d0db8 100644
+> --- a/arch/arm64/boot/dts/marvell/ac5-98dx25xx.dtsi
+> +++ b/arch/arm64/boot/dts/marvell/ac5-98dx25xx.dtsi
+> @@ -77,7 +77,6 @@ soc {
+>  		#address-cells = <2>;
+>  		#size-cells = <2>;
+>  		ranges;
+> -		dma-ranges;
 >  
-> +      - items:
-> +          - const: marvell,ac5-sdhci
+>  		internal-regs@7f000000 {
+>  			#address-cells = <1>;
+> @@ -204,6 +203,31 @@ gpio1: gpio@18140 {
+>  			};
+>  		};
+>  
+> +		mmc_dma: mmc-dma-peripherals@80500000 {
 
-Please make earlier const as enum and add it there.
+Generic node name, so bus@?
 
-> +          - const: marvell,armada-ap806-sdhci
+> +				compatible = "simple-bus";
+> +				#address-cells = <0x2>;
+> +				#size-cells = <0x2>;
+> +				ranges;
 
-You also missed here blank line, but that won't matter after above change.
+ranges is second.
 
+You have address/size cells, so are you sure dtbs W=1 does not complain?
+
+
+> +				dma-ranges = <0x0 0x0 0x2 0x0 0x0 0x80000000>;
+> +				dma-coherent;
+> +
+> +				sdhci: mmc@805c0000 {
+> +					compatible = "marvell,ac5-sdhci",
+> +						     "marvell,armada-ap806-sdhci";
+> +					reg = <0x0 0x805c0000 0x0 0x1000>;
+> +					interrupts = <GIC_SPI 92 IRQ_TYPE_LEVEL_HIGH>;
+> +					clocks = <&emmc_clock>, <&cnm_clock>;
+> +					clock-names = "core", "axi";
+> +					status = "okay";
+
+Drop
+
+> +					bus-width = <8>;
+> +					/*marvell,xenon-phy-slow-mode;*/
+
+Drop or explain why commented code should be here.
+
+> +					non-removable;
+> +					mmc-ddr-1_8v;
+> +					mmc-hs200-1_8v;
+> +					mmc-hs400-1_8v;
+> +				};
+> +		};
+> +
+>  		/*
+>  		 * Dedicated section for devices behind 32bit controllers so we
+>  		 * can configure specific DMA mapping for them
+> @@ -335,5 +359,12 @@ nand_clock: nand-clock {
+>  			#clock-cells = <0>;
+>  			clock-frequency = <400000000>;
+>  		};
+> +
+> +		emmc_clock: emmc_clock {
+
+No underscores in node names. I think you got such feedback before.
+
+But anyway, this looks like a fake clock.
+
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +			clock-frequency = <400000000>;
+> +		};
+> +
+
+Drop
+
+>  	};
+>  };
 
 Best regards,
 Krzysztof
