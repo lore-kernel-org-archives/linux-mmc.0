@@ -1,88 +1,83 @@
-Received: from mout.web.de (mout.web.de [212.227.15.3])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9DEC46453;
-	Wed, 27 Dec 2023 17:28:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="u18bTJEc"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=web.de; s=s29768273;
-	t=1703698110; x=1704302910; i=markus.elfring@web.de;
-	bh=hrGMV7DS1Hq9z/Sx/zgTn8G7c+CCmRc26CbqvNt/lTY=;
-	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
-	 In-Reply-To;
-	b=u18bTJEcOAvYsxLq2lWLLpNPETzZtg5KKMv+5oPocaSc6yRIXH4aN75ZdeEoC2kz
-	 /A77l9JH7Dzu9Bij1azXZBQ3QhcVoIXbVr5ZzD6EZVaKgIKePcNboM9JBRAbNW8wo
-	 OrIm+TfWhtxy4YDmyx1sjJSQyhZ2LjJx9h9T87VyKDssasmDRWAg32/5ezt4pLxiF
-	 q+HX2KCT4GXxnSi7MZg4c1B8zTRkMgcG//XsrbGfm8jQJkh4I0Cyez1GpoTWyrKPr
-	 l5z6tsae39HqVj9n4VUIoOaQvyU5c7BhlLZoZdGOqJ0iwyZXIjxOTh2m2IAM29wvy
-	 5J/j3eUDOMRTqcEvnA==
-X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
-Received: from [192.168.178.21] ([94.31.85.95]) by smtp.web.de (mrweb005
- [213.165.67.108]) with ESMTPSA (Nemesis) id 1MJWoe-1rXrfC2Un2-00KL1N; Wed, 27
- Dec 2023 18:28:30 +0100
-Message-ID: <017f212f-fb55-42ca-bc1c-7f2522194a9f@web.de>
-Date: Wed, 27 Dec 2023 18:28:26 +0100
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7948063AB;
+	Thu, 28 Dec 2023 06:53:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=starfivetech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starfivetech.com
+Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
+	by ex01.ufhost.com (Postfix) with ESMTP id CE72724DBFD;
+	Thu, 28 Dec 2023 14:53:30 +0800 (CST)
+Received: from EXMBX066.cuchost.com (172.16.7.66) by EXMBX165.cuchost.com
+ (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 28 Dec
+ 2023 14:53:30 +0800
+Received: from localhost.localdomain (202.188.176.82) by EXMBX066.cuchost.com
+ (172.16.6.66) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 28 Dec
+ 2023 14:53:25 +0800
+From: Alex Soo <yuklin.soo@starfivetech.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter
+	<adrian.hunter@intel.com>, Yangtao Li <frank.li@vivo.com>, Andy Shevchenko
+	<andriy.shevchenko@linux.intel.com>, Linus Walleij
+	<linus.walleij@linaro.org>, Rob Herring <robh+dt@kernel.org>, "Krzysztof
+ Kozlowski" <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley
+	<conor+dt@kernel.org>, Emil Renner Berthing <kernel@esmil.dk>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<devicetree@vger.kernel.org>, <linux-riscv@lists.infradead.org>, "Paul
+ Walmsley" <paul.walmsley@sifive.com>, Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alex Soo <yuklin.soo@starfivetech.com>
+Subject: [PATCH 0/3] Add driver for Cadence SD6HC SD/eMMC controller
+Date: Thu, 28 Dec 2023 14:53:19 +0800
+Message-ID: <20231228065322.1176351-1-yuklin.soo@starfivetech.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: mmc: mmc_spi: Adjust error handling in mmc_spi_probe()
-Content-Language: en-GB
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
- linux-mmc@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org,
- Dmitry Torokhov <dmitry.torokhov@gmail.com>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Paolo Abeni <pabeni@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Yang Yingliang <yangyingliang@huawei.com>,
- LKML <linux-kernel@vger.kernel.org>, cocci@inria.fr
-References: <2aa6bd31-f3d8-41ac-abf1-9ec7cf7e064b@web.de>
- <ZYxXTVpLfI-mgxF4@smile.fi.intel.com>
-From: Markus Elfring <Markus.Elfring@web.de>
-In-Reply-To: <ZYxXTVpLfI-mgxF4@smile.fi.intel.com>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
+X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX066.cuchost.com
+ (172.16.6.66)
+X-YovoleRuleAgent: yovoleflag
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:V9bNz1Vq4gc/izWZjmMc6xV8NhQ1cp41dBgf3I03DmYlY+8jTNt
- X192lV3pIcnPwQbGPj2wre8044olcROF4pPcdNDRfwlDjgHf3K1j79LPHSmcGez3eS3dMGR
- uFq/pFapverKkfXx0gTbHMdfVynoxGUlsl7xsLXH7/iQSKuPJIIQbEw5b+QqahJN8YLpC5F
- gnHx15GAazW62NiqY25IA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:ReUDYDxLwuE=;pQgvrz6qztCFdyc/FQRg/Nk1gqt
- Vcj1nqZWWIYul35Q8rzZYlLrCemvCGgZER4teElf803vFXfeyFp410ZuyNUZnKMoD6a0IaNMl
- VxjwpoJB8LWYeHuGZ1TXf1Ik1BsET0C54sT+23Xbx6gSO/iWcpPAv9EsdtLnCCfgQ3M8ZhRjZ
- 6qdCN34hBlbTjPINFupc9J7zdM9EhH7b8CI+J5S8vGFUEcf/68hWmZQNoXpPX2CIlkgx0wcMl
- 7ib4QIvoj00nMkT6ag164VQK/idITxIybYGYYUrRpODiS0sxVGMKZJbsvvc8ZTPJYvLtSjHdd
- fziTLfGdoC7BbZLx+RlHjDTSldF/ZNhPSkxB0obRyCAvZJg6r43PXDDt5q/mH7JRXZrHzLqw7
- jrmM0WqBsxxB8vCDjgZ/NVr8C0kQtiyWTimVycjot+3Ldcn8KlSNUJFopnNGn1jWrmIt66sNx
- coIfA0/E3HgzLR2Xr/vZdZ53gyMmm62bHUQedstSGGgiNBRrB9Pt3D969jkjLTFRjR8WVB16Z
- nLsMemmFK8NckbjtSr10ovnaVYvCvR/7q8nG31cRJYyayGTcx6qLAFiuCK4ronXs7RtNm6vLm
- uk7rJxeOcuwtTSJn06fko8+Hviha7rIWkDVdXLlIIPYlushrsH+Bhl8wOSqCYnRsGTHhrJo01
- CktMUBmjYLNq4NPTahjFFTFqTw5MCiQKIVNugIe2EacZEhbNBvtfKXU3+HVBEqNwKmHjRQkE8
- HVTp5HjOqwxCKY6vLSwDVMtWJ3IxAIgFcTh9XEfh7jfSEmvtleNWpqAYe0efPs88Vy6kZ9mw6
- Ree21vZugeZOS62MtL6K8H2OAuwbaKZSpV751jlP1L+rWmpbM6j3uUBVIvf8SrDMTgFquLrIH
- 5a0pzAoR+9dXmeUSoHKhzL+dbDgvS/aSjwYmPpQyd4kkml3cOo94M2kHMVh9mXAQBFj0mC5mt
- zorgMw==
 
->> The kfree() function was called in one case by
->> the mmc_spi_probe() function during error handling
->> even if the passed variable contained a null pointer.
->> This issue was detected by using the Coccinelle software.
->
->> * Thus return directly after a call of the function =E2=80=9Ckmalloc=E2=
-=80=9D failed
->>   at the beginning.
->>
->> * Move an error code assignment into an if branch.
->
-> How is this one better?
+Starfive JH8100 SoC consists of a Cadence SD/eMMC host controller
+(Version 6) with Combo PHY which provides DFI interface to SD/eMMC
+removable or embedded devices. This patch adds initial SD/eMMC support
+for JH8100 SoC by providing device drivers for Cadence SD/eMMC Version 6
+host controller and Combo PHY.  This patch series is depending on the
+JH8100 base patch series in [1], [2], and [3].
+The relevant dt-bindings documentation has been updated accordingly.
 
-I suggest to avoid a bit of redundant data processing also at this source =
-code place.
+[1] https://lore.kernel.org/lkml/20231201121410.95298-1-jeeheng.sia@starf=
+ivetech.com/
+[2] https://lore.kernel.org/lkml/20231206115000.295825-1-jeeheng.sia@star=
+fivetech.com/
+[3] https://lore.kernel.org/lkml/20231221083622.3445726-1-yuklin.soo@star=
+fivetech.com/=20
 
-Regards,
-Markus
+Alex Soo (3):
+  dt-bindings: mmc: sdhci-cadence6: add DT bindings documentation
+  mmc: sdhci-cadence6: add Cadence SD6HC support
+  riscv: dts: starfive: jh8100: Add SD/eMMC device tree nodes
+
+ .../devicetree/bindings/mmc/cdns,sd6hci.yaml  |  65 +++
+ MAINTAINERS                                   |   6 +
+ arch/riscv/boot/dts/starfive/jh8100.dtsi      |  34 ++
+ drivers/mmc/host/Kconfig                      |  11 +
+ drivers/mmc/host/Makefile                     |   2 +
+ drivers/mmc/host/sdhci-cadence6-phy.c         | 384 +++++++++++++
+ drivers/mmc/host/sdhci-cadence6.c             | 531 ++++++++++++++++++
+ drivers/mmc/host/sdhci-cadence6.h             | 148 +++++
+ 8 files changed, 1181 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/cdns,sd6hci.yam=
+l
+ create mode 100644 drivers/mmc/host/sdhci-cadence6-phy.c
+ create mode 100644 drivers/mmc/host/sdhci-cadence6.c
+ create mode 100644 drivers/mmc/host/sdhci-cadence6.h
+
+--=20
+2.25.1
+
