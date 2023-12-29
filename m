@@ -1,68 +1,125 @@
-Received: from host.seisbtcksmail.biz (seisbtcksmail.biz [92.48.89.25])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 553D2107BA
-	for <linux-mmc@vger.kernel.org>; Thu, 28 Dec 2023 21:20:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=seisbtcksmail.biz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=seisbtcksmail.biz
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 597C110A1B;
+	Fri, 29 Dec 2023 10:11:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=seisbtcksmail.biz header.i=@seisbtcksmail.biz header.b="M/sKqK9l";
-	dkim=pass (1024-bit key) header.d=seisbtcksmail.biz header.i=@seisbtcksmail.biz header.b="M/sKqK9l"
-Received: from seisbtcksmail.biz (ec2-51-20-95-35.eu-north-1.compute.amazonaws.com [51.20.95.35])
-	by host.seisbtcksmail.biz (Postfix) with ESMTPA id B12DC161B80F
-	for <linux-mmc@vger.kernel.org>; Thu, 28 Dec 2023 15:24:31 -0500 (EST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 host.seisbtcksmail.biz B12DC161B80F
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=seisbtcksmail.biz;
-	s=default; t=1703795072;
-	bh=zXPC8+89ol019YIaGI6CMrih955DkGbdDChHyjUR8lI=;
-	h=Reply-To:From:To:Subject:Date:From;
-	b=M/sKqK9lE07/2kd3H938Q5o6DcwwwL9aq4ptAI43LsP/BDIT6UjZqzmcH07iuPMGe
-	 JlG9QMNa+3gP6ZGA5xtWokMAudWA9hDETbXUO5wi2pvZZWWSda0olruE4N3FBs7VfL
-	 yIChwtr0RMieRLb5iFPviUCd1tB6hNhcbOgkDeo4=
-DKIM-Filter: OpenDKIM Filter v2.11.0 host.seisbtcksmail.biz B12DC161B80F
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=seisbtcksmail.biz;
-	s=default; t=1703795072;
-	bh=zXPC8+89ol019YIaGI6CMrih955DkGbdDChHyjUR8lI=;
-	h=Reply-To:From:To:Subject:Date:From;
-	b=M/sKqK9lE07/2kd3H938Q5o6DcwwwL9aq4ptAI43LsP/BDIT6UjZqzmcH07iuPMGe
-	 JlG9QMNa+3gP6ZGA5xtWokMAudWA9hDETbXUO5wi2pvZZWWSda0olruE4N3FBs7VfL
-	 yIChwtr0RMieRLb5iFPviUCd1tB6hNhcbOgkDeo4=
-Reply-To: hledwaba65@metropolitanassetsmanager.com
-From: H Ledwaba <hledwaba65@seisbtcksmail.biz>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XgsSt5PC"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-50e7b51b0ceso3452029e87.1;
+        Fri, 29 Dec 2023 02:11:37 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1703844695; x=1704449495; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+HveFA/qMiFQFg+iCyHUSw323L9d+b4jAzJ+pz8yYlk=;
+        b=XgsSt5PCeARQjc4PaofZW2EKUVjKtDEcuz5lcvGl6h4ZCVNR98ITlSoWDQ5L85LdxX
+         /B4cmy1KuQ4MeXzrL6A8BfQOY+KaK1XoBT5t4IDhRIyOUx3vrwT1jEtSJZkpKS2S6miY
+         YDT5+rsMTtpv1jJzDTIK/W372iOdYyCUdRSWYdrtPbZz+UcDFYLxW8YYJRBQ6FEgnk3U
+         lWdWTsM+bA9XczK48Fg0S/vdVseBeKF+8ouz9bGm+VFD+w/sf/a11TNw6qzQAyCiH4wy
+         U1N6J9PBdkw9+HrwDvJvxQINFDmZmZ71DWejb/ayXRDCgpfSsA68Tn7aruyGC2nYv0qD
+         l8fA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1703844695; x=1704449495;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+HveFA/qMiFQFg+iCyHUSw323L9d+b4jAzJ+pz8yYlk=;
+        b=bHrgszTkM98vXBsNirlyzyRnzDTzfTKRtFu+dQuX+J3OT0nwRHHaV1Xo5w95RxSW95
+         8CW2uGSatTjYEo0X62QvwspjCnTION6SJWzihb2wQZhZTgUbb0Xmc9y3d7DWbr8mRYCj
+         i/Wt4Yb610kYjoBTxHpFLUAC8cOWZ/U4QxOrDsV1wHY7FXh9eJDWj6r6UqdINaaachqX
+         or4aLUdzUnmUfM5VUbZp3ng6AYxWzR3eXTWFTMUqaQ79WwWsnVxPZF60bkQvLUAPdyZX
+         9p65WXIgvyAv0pPzkqcSEZIt9p3rx/qr9L4FpKo0h9SAx8UPrDhRc3HJV00TTRPFf8IO
+         cy+Q==
+X-Gm-Message-State: AOJu0Yz6xrWlGlg6h0Qy+NagxUBd/A2l/1QF/HUxssQblvpM7YvC8L4y
+	aFVBOSINh+L8hNj+QQSFd9ka2KcnbCM2Mw==
+X-Google-Smtp-Source: AGHT+IHE3pa9PVvC1Cma8PDZb3am/dCLMoecEwRWixC1755FUBEzjs3AMaM0LNs7YF2tnYiCWf7X2Q==
+X-Received: by 2002:a05:6512:2821:b0:50e:80d7:370f with SMTP id cf33-20020a056512282100b0050e80d7370fmr3759012lfb.32.1703844694810;
+        Fri, 29 Dec 2023 02:11:34 -0800 (PST)
+Received: from skhimich.dev.yadro.com ([185.15.172.210])
+        by smtp.gmail.com with ESMTPSA id a2-20020a19ca02000000b0050e6bf2b452sm2181734lfg.105.2023.12.29.02.11.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 29 Dec 2023 02:11:34 -0800 (PST)
+From: Sergey Khimich <serghox@gmail.com>
 To: linux-mmc@vger.kernel.org
-Subject: Investmen Project
-Date: 28 Dec 2023 20:24:31 +0000
-Message-ID: <20231228202431.B66F3EF49B035DA5@seisbtcksmail.biz>
+Cc: linux-kernel@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Jyan Chou <jyanchou@realtek.com>
+Subject: [PATCH v4 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
+Date: Fri, 29 Dec 2023 13:11:26 +0300
+Message-Id: <20231229101128.392089-1-serghox@gmail.com>
+X-Mailer: git-send-email 2.30.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-Hello there, I hope receive this message in good spirits. I am=20
-Henry Ledwaba, a private investment broker with a Wealth=20
-Management compapny in South Africa. I am contacting you=20
-privately because one of my high profile clients is interested in=20
-investing investing a very substantial amount abroad and has=20
-asked me to look for individuals and companies with prospective=20
-business ideas that he can invest in. I got your email contact=20
-through an online business directory and I thought I'd contact=20
-you to see if you are interested in this opportunity. Do you or=20
-your company have new or existing projects that requires funding?=20
-If so, please indicate your interest by replying back to this=20
-email. Your response should include the executive summary of the=20
-projects, the amount of funding required for the projects and the=20
-expected ROI.
+Hello!
 
-Once I get your response, we can go through the details of your=20
-projects to determine its viability and also make arrangements=20
-for securing the funding required to execute the projects.
+This is implementation of SDHCI CQE support for sdhci-of-dwcmshc driver.
+For enabling CQE support just set 'supports-cqe' in your DevTree file
+for appropriate mmc node.
 
-Please also send your direct mobile/whatsapp numbers for an=20
-easier communication. Looking forward to your response.
+Also, while implementing CQE support for the driver, I faced with a problem
+which I will describe below.
+According to the IP block documentation CQE works only with "AMDA-2 only"
+mode which is activated only with v4 mode enabled. I see in dwcmshc_probe()
+function that v4 mode gets enabled only for 'sdhci_dwcmshc_bf3_pdata'
+platform data.
 
-Best Regards,
+So my question is: is it correct to enable v4 mode for all platform data
+if 'SDHCI_CAN_64BIT_V4' bit is set in hw?
 
-Henry.
+Because I`m afraid that enabling v4 mode for some platforms could break
+them down. On the other hand, if host controller says that it can do v4
+(caps & SDHCI_CAN_64BIT_V4), lets do v4 or disable it manualy by some
+quirk. Anyway - RFC.
+
+
+v2:
+ - Added dwcmshc specific cqe_disable hook to prevent losing
+   in-flight cmd when an ioctl is issued and cqe_disable is called;
+
+ - Added processing 128Mb boundary for the host memory data buffer size
+   and the data buffer. For implementing this processing an extra
+   callback is added to the struct 'sdhci_ops'.
+
+ - Fixed typo.
+
+v3:
+ - Fix warning reported by kernel test robot:
+        | Reported-by: kernel test robot <lkp@intel.com>
+        | Closes: https://lore.kernel.org/oe-kbuild-all/202309270807.VoVn81m6-lkp@intel.com/
+        | Closes: https://lore.kernel.org/oe-kbuild-all/202309300806.dcR19kcE-lkp@intel.com/
+
+v4:
+ - Data reset moved to custom driver tuning hook.
+ - Removed unnecessary dwcmshc_sdhci_cqe_disable() func
+ - Removed unnecessary dwcmshc_cqhci_set_tran_desc. Export and use
+   cqhci_set_tran_desc() instead.
+ - Provide a hook for cqhci_set_tran_desc() instead of cqhci_prep_tran_desc().
+ - Fix typo: int_clok_disable --> int_clock_disable
+
+
+Thanks in advance, Sergey.
+
+
+Sergey Khimich (2):
+  mmc: cqhci: Add cqhci set_tran_desc() callback
+  mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+
+ drivers/mmc/host/Kconfig            |   1 +
+ drivers/mmc/host/cqhci-core.c       |  10 +-
+ drivers/mmc/host/cqhci.h            |   5 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 181 +++++++++++++++++++++++++++-
+ 4 files changed, 192 insertions(+), 5 deletions(-)
+
+-- 
+2.30.2
+
