@@ -1,38 +1,51 @@
-Received: from vps0.lunn.ch (vps0.lunn.ch [156.67.10.101])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB5F514A85;
-	Fri, 29 Dec 2023 21:56:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lunn.ch
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lunn.ch
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A8141C0F;
+	Sat, 30 Dec 2023 03:47:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="IJINq1l8"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
-	s=20171124; h=In-Reply-To:Content-Disposition:Content-Type:MIME-Version:
-	References:Message-ID:Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:
-	Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:
-	Content-ID:Content-Description:Content-Disposition:In-Reply-To:References;
-	bh=etdFH97WvsBkR0owkaKZOdN2H9+dmGLc93dDrGAaQ8k=; b=IJINq1l82c3AlsqY20wG3Yfg7z
-	F0hhcAz2m7wj/um2f59YtmF95WIY2pkXCporZ7LBiM3dI1EB+XwvexNmONlHulPVBaaGlUehjIPf0
-	zNfCqq1OuKNsLlzItOAl43Sq2BbhBjjGvH1mMvu/I9+YimhfAHVYyrpwgAXyNc8cdpYY=;
-Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
-	(envelope-from <andrew@lunn.ch>)
-	id 1rJKpu-003vNa-1x; Fri, 29 Dec 2023 22:56:10 +0100
-Date: Fri, 29 Dec 2023 22:56:10 +0100
-From: Andrew Lunn <andrew@lunn.ch>
-To: Elad Nachman <enachman@marvell.com>
-Cc: robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-	conor+dt@kernel.org, gregory.clement@bootlin.com,
-	sebastian.hesselbarth@gmail.com, huziji@marvell.com,
-	ulf.hansson@linaro.org, catalin.marinas@arm.com, will@kernel.org,
-	adrian.hunter@intel.com, thunder.leizhen@huawei.com, bhe@redhat.com,
-	akpm@linux-foundation.org, yajun.deng@linux.dev,
-	chris.zjh@huawei.com, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org, cyuval@marvell.com
-Subject: Re: [PATCH 0/4] mmc: xenon: add AC5 support
-Message-ID: <cfbbe706-5953-488c-9bff-f72f6d00b44f@lunn.ch>
-References: <20231227123257.1170590-1-enachman@marvell.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="UxABxi8A"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1703908031; x=1735444031;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=/w0dxcvHG3kPd09X7wm2kFFqz0nJSBG8fw0kDks3vVM=;
+  b=UxABxi8AGt+VASjL4iFuC7eFe9YWcqyCwrVa347j/4C7jBtRVKz7bqNV
+   PQ9DK0NPlGpi9OD0ImdOqR0td/LEsQ9SBF1JIbwuc8CkRzUxndUOwbWGP
+   PniEwDuujvM5T0FxzPdYD6WjPTCdTduTV/v/2nxTFTdgA2wp1uUvjqsOG
+   Srs9hiUica8omdXQfqpu25cugr7zNgPuTaokNo6BrJ3wnnYe9iM4ajucJ
+   Zp4Do/rX21cEtRbLJhq68ikETroV8j94PnzFFCrCD/ROQF88hixe/23Sn
+   0IYcfN9Uv9S6qsPPwDTw94k9WbEYFZBu2ATfSGMaPDKhK6wWhvI/t88L9
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10938"; a="10283376"
+X-IronPort-AV: E=Sophos;i="6.04,317,1695711600"; 
+   d="scan'208";a="10283376"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2023 19:47:11 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.04,317,1695711600"; 
+   d="scan'208";a="21017329"
+Received: from lkp-server02.sh.intel.com (HELO b07ab15da5fe) ([10.239.97.151])
+  by fmviesa001.fm.intel.com with ESMTP; 29 Dec 2023 19:47:08 -0800
+Received: from kbuild by b07ab15da5fe with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1rJQJV-000I1j-2X;
+	Sat, 30 Dec 2023 03:47:05 +0000
+Date: Sat, 30 Dec 2023 11:46:14 +0800
+From: kernel test robot <lkp@intel.com>
+To: Sergey Khimich <serghox@gmail.com>, linux-mmc@vger.kernel.org
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Jyan Chou <jyanchou@realtek.com>
+Subject: Re: [PATCH v4 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+Message-ID: <202312301130.itEZhhI5-lkp@intel.com>
+References: <20231229101128.392089-3-serghox@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -41,32 +54,66 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231227123257.1170590-1-enachman@marvell.com>
+In-Reply-To: <20231229101128.392089-3-serghox@gmail.com>
 
-On Wed, Dec 27, 2023 at 02:32:53PM +0200, Elad Nachman wrote:
-> From: Elad Nachman <enachman@marvell.com>
-> 
-> This patch series adds support for the Marvell AC5/X/IM series of SOCs.
-> The main hurdles in supporting these SOCs are the following limitations:
-> 1. DDR starts at offset 0x2_0000_0000
-> 2. mmc controller has only 31-bit path on the crossbar to the DDR.
-> 
-> Point number one is solved by the first patch, which targets the
-> arm64 subsystem, by taking into account the DDR start address when
-> calculating the DMA and DMA32 zones.
-> 
-> This yields the correct split between DMA, DMA32 and NORMAL zones
-> according to the device tree CPU address limitations.
-> 
-> Point number two is solved in the mmc xenon driver by detecting the memory
-> size, and when it is more than 2GB, disable ADMA and 64-bit DMA, which
-> effectively enables SDMA with a bounce buffer.
-> DMA mask is then set manually to 34 bit to account for the DDR starting
-> at offset 0x2_0000_0000 .
+Hi Sergey,
 
-You probably need to split this patchset up since the first patch will
-get merged via the arm64 core maintainers, the MMC driver change via
-the MMC maintainers, and maybe the DT changes for the
-ac5-98dx25xx.dtsi via the mvebu maintainers, or the MMC maintainer?
+kernel test robot noticed the following build warnings:
 
-	Andrew
+[auto build test WARNING on linus/master]
+[also build test WARNING on ulf-hansson-mmc-mirror/next v6.7-rc7]
+[cannot apply to next-20231222]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Sergey-Khimich/mmc-cqhci-Add-cqhci-set_tran_desc-callback/20231229-181345
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20231229101128.392089-3-serghox%40gmail.com
+patch subject: [PATCH v4 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+config: i386-buildonly-randconfig-001-20231230 (https://download.01.org/0day-ci/archive/20231230/202312301130.itEZhhI5-lkp@intel.com/config)
+compiler: ClangBuiltLinux clang version 17.0.6 (https://github.com/llvm/llvm-project 6009708b4367171ccdbf4b5905cb6a803753fe18)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231230/202312301130.itEZhhI5-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202312301130.itEZhhI5-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+>> drivers/mmc/host/sdhci-of-dwcmshc.c:224:5: warning: no previous prototype for function 'dwcmshc_execute_tuning' [-Wmissing-prototypes]
+     224 | int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+         |     ^
+   drivers/mmc/host/sdhci-of-dwcmshc.c:224:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
+     224 | int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+         | ^
+         | static 
+   1 warning generated.
+
+
+vim +/dwcmshc_execute_tuning +224 drivers/mmc/host/sdhci-of-dwcmshc.c
+
+   223	
+ > 224	int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+   225	{
+   226		int err = sdhci_execute_tuning(mmc, opcode);
+   227		struct sdhci_host *host = mmc_priv(mmc);
+   228	
+   229		if (err)
+   230			return err;
+   231	
+   232		/*
+   233		 * Tuning can leave the IP in an active state (Buffer Read Enable bit
+   234		 * set) which prevents the entry to low power states (i.e. S0i3). Data
+   235		 * reset will clear it.
+   236		 */
+   237		sdhci_reset(host, SDHCI_RESET_DATA);
+   238	
+   239		return 0;
+   240	}
+   241	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
