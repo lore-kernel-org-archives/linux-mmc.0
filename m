@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.115])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A8141C0F;
-	Sat, 30 Dec 2023 03:47:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A97694416;
+	Sat, 30 Dec 2023 03:57:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="UxABxi8A"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="nJkYXgpb"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1703908031; x=1735444031;
+  t=1703908631; x=1735444631;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=/w0dxcvHG3kPd09X7wm2kFFqz0nJSBG8fw0kDks3vVM=;
-  b=UxABxi8AGt+VASjL4iFuC7eFe9YWcqyCwrVa347j/4C7jBtRVKz7bqNV
-   PQ9DK0NPlGpi9OD0ImdOqR0td/LEsQ9SBF1JIbwuc8CkRzUxndUOwbWGP
-   PniEwDuujvM5T0FxzPdYD6WjPTCdTduTV/v/2nxTFTdgA2wp1uUvjqsOG
-   Srs9hiUica8omdXQfqpu25cugr7zNgPuTaokNo6BrJ3wnnYe9iM4ajucJ
-   Zp4Do/rX21cEtRbLJhq68ikETroV8j94PnzFFCrCD/ROQF88hixe/23Sn
-   0IYcfN9Uv9S6qsPPwDTw94k9WbEYFZBu2ATfSGMaPDKhK6wWhvI/t88L9
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10938"; a="10283376"
+  bh=7KTADohvzNzWSyBpmRRq9cn6nMwx5d/WtwPcUCMZsaA=;
+  b=nJkYXgpbXPq0JsH8CjGryDRNaPd5689AbgjQMGGaynDFy4rQdzFCK7j8
+   WUBDuVINPgiOYt2tPtOSOw3LjSom3+yUCkzYrgadYQs5xHG2j4xyf/p5D
+   8ycmssCfLZr7S1ZIE5kZ83vfBV3TBYcSkFF+sMaVz4CBMMJBT8rjxznh9
+   NXWxPFL5OWb4DYy7U7Ocrcakh3TbVVsD4ItZT47GGeyZP6A7APNpy2Sh6
+   G1daj3D8WmJ5HQ+mPnA0uIsRWSwL54LUTIFEp1ECHJ2BCgy8BiB6GMStX
+   ILAAjFTpa7GaPWx9Sj/cURKm9YOK7EtF5f7UtTuhLiEPIhH3hw8nZ3WhF
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10938"; a="396429681"
 X-IronPort-AV: E=Sophos;i="6.04,317,1695711600"; 
-   d="scan'208";a="10283376"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2023 19:47:11 -0800
+   d="scan'208";a="396429681"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2023 19:57:10 -0800
 X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10938"; a="778943952"
 X-IronPort-AV: E=Sophos;i="6.04,317,1695711600"; 
-   d="scan'208";a="21017329"
+   d="scan'208";a="778943952"
 Received: from lkp-server02.sh.intel.com (HELO b07ab15da5fe) ([10.239.97.151])
-  by fmviesa001.fm.intel.com with ESMTP; 29 Dec 2023 19:47:08 -0800
+  by orsmga002.jf.intel.com with ESMTP; 29 Dec 2023 19:57:08 -0800
 Received: from kbuild by b07ab15da5fe with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1rJQJV-000I1j-2X;
-	Sat, 30 Dec 2023 03:47:05 +0000
-Date: Sat, 30 Dec 2023 11:46:14 +0800
+	id 1rJQTC-000I2H-0C;
+	Sat, 30 Dec 2023 03:57:06 +0000
+Date: Sat, 30 Dec 2023 11:56:29 +0800
 From: kernel test robot <lkp@intel.com>
 To: Sergey Khimich <serghox@gmail.com>, linux-mmc@vger.kernel.org
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
+Cc: oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	Shawn Lin <shawn.lin@rock-chips.com>,
 	Jyan Chou <jyanchou@realtek.com>
 Subject: Re: [PATCH v4 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
-Message-ID: <202312301130.itEZhhI5-lkp@intel.com>
+Message-ID: <202312301155.5OSXAOG5-lkp@intel.com>
 References: <20231229101128.392089-3-serghox@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -71,25 +71,20 @@ url:    https://github.com/intel-lab-lkp/linux/commits/Sergey-Khimich/mmc-cqhci-
 base:   linus/master
 patch link:    https://lore.kernel.org/r/20231229101128.392089-3-serghox%40gmail.com
 patch subject: [PATCH v4 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
-config: i386-buildonly-randconfig-001-20231230 (https://download.01.org/0day-ci/archive/20231230/202312301130.itEZhhI5-lkp@intel.com/config)
-compiler: ClangBuiltLinux clang version 17.0.6 (https://github.com/llvm/llvm-project 6009708b4367171ccdbf4b5905cb6a803753fe18)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231230/202312301130.itEZhhI5-lkp@intel.com/reproduce)
+config: arm64-defconfig (https://download.01.org/0day-ci/archive/20231230/202312301155.5OSXAOG5-lkp@intel.com/config)
+compiler: aarch64-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231230/202312301155.5OSXAOG5-lkp@intel.com/reproduce)
 
 If you fix the issue in a separate patch/commit (i.e. not just a new version of
 the same patch/commit), kindly add following tags
 | Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202312301130.itEZhhI5-lkp@intel.com/
+| Closes: https://lore.kernel.org/oe-kbuild-all/202312301155.5OSXAOG5-lkp@intel.com/
 
 All warnings (new ones prefixed by >>):
 
->> drivers/mmc/host/sdhci-of-dwcmshc.c:224:5: warning: no previous prototype for function 'dwcmshc_execute_tuning' [-Wmissing-prototypes]
+>> drivers/mmc/host/sdhci-of-dwcmshc.c:224:5: warning: no previous prototype for 'dwcmshc_execute_tuning' [-Wmissing-prototypes]
      224 | int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-         |     ^
-   drivers/mmc/host/sdhci-of-dwcmshc.c:224:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-     224 | int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-         | ^
-         | static 
-   1 warning generated.
+         |     ^~~~~~~~~~~~~~~~~~~~~~
 
 
 vim +/dwcmshc_execute_tuning +224 drivers/mmc/host/sdhci-of-dwcmshc.c
