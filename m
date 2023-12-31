@@ -1,114 +1,129 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.115])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A97694416;
-	Sat, 30 Dec 2023 03:57:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C6046120;
+	Sun, 31 Dec 2023 14:46:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="nJkYXgpb"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1703908631; x=1735444631;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=7KTADohvzNzWSyBpmRRq9cn6nMwx5d/WtwPcUCMZsaA=;
-  b=nJkYXgpbXPq0JsH8CjGryDRNaPd5689AbgjQMGGaynDFy4rQdzFCK7j8
-   WUBDuVINPgiOYt2tPtOSOw3LjSom3+yUCkzYrgadYQs5xHG2j4xyf/p5D
-   8ycmssCfLZr7S1ZIE5kZ83vfBV3TBYcSkFF+sMaVz4CBMMJBT8rjxznh9
-   NXWxPFL5OWb4DYy7U7Ocrcakh3TbVVsD4ItZT47GGeyZP6A7APNpy2Sh6
-   G1daj3D8WmJ5HQ+mPnA0uIsRWSwL54LUTIFEp1ECHJ2BCgy8BiB6GMStX
-   ILAAjFTpa7GaPWx9Sj/cURKm9YOK7EtF5f7UtTuhLiEPIhH3hw8nZ3WhF
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10938"; a="396429681"
-X-IronPort-AV: E=Sophos;i="6.04,317,1695711600"; 
-   d="scan'208";a="396429681"
-Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2023 19:57:10 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10938"; a="778943952"
-X-IronPort-AV: E=Sophos;i="6.04,317,1695711600"; 
-   d="scan'208";a="778943952"
-Received: from lkp-server02.sh.intel.com (HELO b07ab15da5fe) ([10.239.97.151])
-  by orsmga002.jf.intel.com with ESMTP; 29 Dec 2023 19:57:08 -0800
-Received: from kbuild by b07ab15da5fe with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1rJQTC-000I2H-0C;
-	Sat, 30 Dec 2023 03:57:06 +0000
-Date: Sat, 30 Dec 2023 11:56:29 +0800
-From: kernel test robot <lkp@intel.com>
-To: Sergey Khimich <serghox@gmail.com>, linux-mmc@vger.kernel.org
-Cc: oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Peu4/Tsc"
+Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-2ccecef2631so22684651fa.2;
+        Sun, 31 Dec 2023 06:46:23 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1704033981; x=1704638781; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=69j3Yzp8lMszQFVq5HYjnhUYYy5SLwln9P4F4WepkCM=;
+        b=Peu4/TscI40vycaUcgOQ6cjWs8TBoFwREGbOQOMr+rPQex1O5Hi9VAZ1HqsXsWwLKb
+         aP+9o0LZBcv+QDSrSNUqnjAY3qcYDhXadTtItj1ua+2Iqb4sSjBFYaPz9ScibWcOc6UJ
+         rsWNA+yyFgjG/RAA2my8ARWn6iMJ/BFdAf8v6iGj78J/vPsefhOpQhiPRv9lGRB/jutU
+         11o5DHK+aduChRKyubTQdRXvcegqveIiaH8TcQfZAIGDi1vQgsdBeg691XtlzJLl/efc
+         Bx/jIvQSHM3NNlh5igAJQoiBU7sSr6tJ15qOC6DFrKgsIinBI/XH7JBok8WXIB0Qdaal
+         cZ/w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1704033981; x=1704638781;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=69j3Yzp8lMszQFVq5HYjnhUYYy5SLwln9P4F4WepkCM=;
+        b=sDlPhS5Sj+Ye4S0ZNBgvKqrv1CBEddE/xq/GeF1wB1a7Abh99hKhMfGPi9jTRaZTGl
+         XRx5F3zBB3sCfFNE+9CJ9k8AT27dq5XUbtLS4bvZIaraUZwjSfP9Qimb33G5yJJgODDq
+         g/QduFoRN712F1mxp0LTPn4Q+qMWnaihcmoMXoYhkogyiLvbrHAVZrY4eCTsbVr5/KWa
+         7uzC0eRIcu/BTrcCT6OIVC42edICYl3wQXkYCkUGv5LCz6adSmCgFbOrnTYix7dgpFhv
+         Nw/CKftLVGqaUM5jAE8zsPIKXVeud5HxHJ/Jlj4IneUHOXtTfk9mH5lgVCob6clAyOc3
+         n6Mw==
+X-Gm-Message-State: AOJu0YzG4J8hdcuaCgHK1GAoh0JgzkBNOtJSxR6IeGhPSPkPVr+BRlo1
+	mwe+eWpD2toM22WCKZHOz6/5zDic0WJV0Q==
+X-Google-Smtp-Source: AGHT+IHshuk3+kc/U/MYtgdjWzgmSBvm7V6YCjepbGgffymbUvjePLJ94m6N6zgqb1uEriNOvMhUFA==
+X-Received: by 2002:a05:6512:159a:b0:50e:7c0e:57d0 with SMTP id bp26-20020a056512159a00b0050e7c0e57d0mr4483888lfb.7.1704033980610;
+        Sun, 31 Dec 2023 06:46:20 -0800 (PST)
+Received: from skhimich.dev.yadro.com ([185.15.172.210])
+        by smtp.gmail.com with ESMTPSA id l9-20020ac24a89000000b0050e7ec49881sm1854423lfp.21.2023.12.31.06.46.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 31 Dec 2023 06:46:20 -0800 (PST)
+From: Sergey Khimich <serghox@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	Shawn Lin <shawn.lin@rock-chips.com>,
 	Jyan Chou <jyanchou@realtek.com>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
-Message-ID: <202312301155.5OSXAOG5-lkp@intel.com>
-References: <20231229101128.392089-3-serghox@gmail.com>
+Subject: [PATCH v5 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
+Date: Sun, 31 Dec 2023 17:46:17 +0300
+Message-Id: <20231231144619.758290-1-serghox@gmail.com>
+X-Mailer: git-send-email 2.30.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231229101128.392089-3-serghox@gmail.com>
+Content-Transfer-Encoding: 8bit
 
-Hi Sergey,
+Hello!
 
-kernel test robot noticed the following build warnings:
+This is implementation of SDHCI CQE support for sdhci-of-dwcmshc driver.
+For enabling CQE support just set 'supports-cqe' in your DevTree file
+for appropriate mmc node.
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on ulf-hansson-mmc-mirror/next v6.7-rc7]
-[cannot apply to next-20231222]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Also, while implementing CQE support for the driver, I faced with a problem
+which I will describe below.
+According to the IP block documentation CQE works only with "AMDA-2 only"
+mode which is activated only with v4 mode enabled. I see in dwcmshc_probe()
+function that v4 mode gets enabled only for 'sdhci_dwcmshc_bf3_pdata'
+platform data.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Sergey-Khimich/mmc-cqhci-Add-cqhci-set_tran_desc-callback/20231229-181345
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20231229101128.392089-3-serghox%40gmail.com
-patch subject: [PATCH v4 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
-config: arm64-defconfig (https://download.01.org/0day-ci/archive/20231230/202312301155.5OSXAOG5-lkp@intel.com/config)
-compiler: aarch64-linux-gcc (GCC) 13.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20231230/202312301155.5OSXAOG5-lkp@intel.com/reproduce)
+So my question is: is it correct to enable v4 mode for all platform data
+if 'SDHCI_CAN_64BIT_V4' bit is set in hw?
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202312301155.5OSXAOG5-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
->> drivers/mmc/host/sdhci-of-dwcmshc.c:224:5: warning: no previous prototype for 'dwcmshc_execute_tuning' [-Wmissing-prototypes]
-     224 | int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-         |     ^~~~~~~~~~~~~~~~~~~~~~
+Because I`m afraid that enabling v4 mode for some platforms could break
+them down. On the other hand, if host controller says that it can do v4
+(caps & SDHCI_CAN_64BIT_V4), lets do v4 or disable it manualy by some
+quirk. Anyway - RFC.
 
 
-vim +/dwcmshc_execute_tuning +224 drivers/mmc/host/sdhci-of-dwcmshc.c
+v2:
+ - Added dwcmshc specific cqe_disable hook to prevent losing
+   in-flight cmd when an ioctl is issued and cqe_disable is called;
 
-   223	
- > 224	int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-   225	{
-   226		int err = sdhci_execute_tuning(mmc, opcode);
-   227		struct sdhci_host *host = mmc_priv(mmc);
-   228	
-   229		if (err)
-   230			return err;
-   231	
-   232		/*
-   233		 * Tuning can leave the IP in an active state (Buffer Read Enable bit
-   234		 * set) which prevents the entry to low power states (i.e. S0i3). Data
-   235		 * reset will clear it.
-   236		 */
-   237		sdhci_reset(host, SDHCI_RESET_DATA);
-   238	
-   239		return 0;
-   240	}
-   241	
+ - Added processing 128Mb boundary for the host memory data buffer size
+   and the data buffer. For implementing this processing an extra
+   callback is added to the struct 'sdhci_ops'.
+
+ - Fixed typo.
+
+v3:
+ - Fix warning reported by kernel test robot:
+        | Reported-by: kernel test robot <lkp@intel.com>
+        | Closes: https://lore.kernel.org/oe-kbuild-all/202309270807.VoVn81m6-lkp@intel.com/
+        | Closes: https://lore.kernel.org/oe-kbuild-all/202309300806.dcR19kcE-lkp@intel.com/
+
+v4:
+ - Data reset moved to custom driver tuning hook.
+ - Removed unnecessary dwcmshc_sdhci_cqe_disable() func
+ - Removed unnecessary dwcmshc_cqhci_set_tran_desc. Export and use
+   cqhci_set_tran_desc() instead.
+ - Provide a hook for cqhci_set_tran_desc() instead of cqhci_prep_tran_desc().
+ - Fix typo: int_clok_disable --> int_clock_disable
+
+v5:
+ - Fix warning reported by kernel test robot:
+	| Reported-by: kernel test robot <lkp@intel.com>
+	| Closes: https://lore.kernel.org/oe-kbuild-all/202312301130.itEZhhI5-lkp@intel.com/
+
+
+
+
+Sergey Khimich (2):
+  mmc: cqhci: Add cqhci set_tran_desc() callback
+  mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+
+ drivers/mmc/host/Kconfig            |   1 +
+ drivers/mmc/host/cqhci-core.c       |  10 +-
+ drivers/mmc/host/cqhci.h            |   5 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 181 +++++++++++++++++++++++++++-
+ 4 files changed, 192 insertions(+), 5 deletions(-)
 
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.30.2
+
