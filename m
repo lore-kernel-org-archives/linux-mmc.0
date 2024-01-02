@@ -1,69 +1,71 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CD2A14F8F
-	for <linux-mmc@vger.kernel.org>; Tue,  2 Jan 2024 16:57:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A30D15484
+	for <linux-mmc@vger.kernel.org>; Tue,  2 Jan 2024 16:57:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FKc1lGke"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-5ed10316e22so51338107b3.3
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2024 08:57:32 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GoCxToQu"
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-5f0c0ca5ef1so22623507b3.2
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2024 08:57:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1704214651; x=1704819451; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1704214654; x=1704819454; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=5wk4N7lmV0VhLdq0PkFpCuSEzkzGL6KduOmoT0VC7jU=;
-        b=FKc1lGkeg8eQUAf6ZYO/awJ698ZYqSDZ2eMApS3EYT9POdtFRO8JKtdj+IhE6KUKxs
-         6lvAhdxSdYQXdM7n/oW3kG8R2qFPRN8c5AY31V3Q1WplllbLNC67xUDAZbvAYDH+YfIN
-         od+62RTT051UjPS9eUETm7Nq5wTcLdUvW1n1frbXLxETqEb8Vh6B7GLKiB5ENRnSmMsn
-         JWkh3MxePMCjielYxJTqYiPNLG2VWWAxbG3dpvpwcYV4Tcro4cuDdf70ppYQTrCK31bk
-         QfU04h0Bz8s1qGsqeVwaTTj91gr4ZjRhX8GLLJhj9Llu2CTBfsOOGERJJ6n0WN5EjzQU
-         wYdQ==
+        bh=VVh7m29Ky9WukziqxPzevKkxIvdB0PDoPjGRWVMZV14=;
+        b=GoCxToQuXJ99CCfr5iMWA63EfTF0f/Yimi0ufjs5iv0aNPM+SOh68DIHyKv3N6r9oB
+         DD3OuGiufNXVYbFiaQ1xfyaqG4OpssyYv66cWnLwjKu83WHE/gAmRxp+HkORBOAGJCWx
+         JTkm5CpVfYlNjm3COcY7U3xJi/5md8Qwqv9VIa3i8QBgFSZRKh+pUtGGe9f2E1bKQJsY
+         uVcTGXsAMzVN4ihifHLHWv0fotUw9v9zwCKVl3Db5I5nX2BCj43O8u/LQMp6lDa+25mo
+         L9fAKUXezj7kBFmPxL92XOW3v6Te+vXKAx2n9asNlRIY+GmtMAYG3kKJthQnVdUEKsxP
+         pTjg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704214651; x=1704819451;
+        d=1e100.net; s=20230601; t=1704214654; x=1704819454;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=5wk4N7lmV0VhLdq0PkFpCuSEzkzGL6KduOmoT0VC7jU=;
-        b=lQr6ch0C2hKYStDFeV9EGGgI5XMzSJBceO8gQ7Us3J2BXvkR7wzfQyZPmJ5XEhlcwN
-         /j8KeCbUJ/mOnkMqXId089MEOqYL3Se0BRRU5iCUUqjN9/j8ZfXlcLWn4g5O8GCPcYXr
-         8E4nlxKw4dQwJwMz0hnDbMuOIEvj4OqyoI3/O2N6tkqQaGrnjnw1tOHcEvVni3p9qIgT
-         kDuaQTc3g5sm/0FAJnhKjM3rMmqCVhWUR1cgnsCFmT0gXSPIDC3/PWoqpYNOeDyyHoiY
-         xnSdQ8z4GGzrVgtOecUREisRX9DzioSBfYJxe/EJ3aZNW3zjmFcxYAjvn+LcHvxPslGn
-         d97g==
-X-Gm-Message-State: AOJu0YxpzIkj4ZJKzN+XMS2I/EtqA0w12/j2gQQIl6fIObwKYsfGfAWy
-	OvviEOEkx31MRFww7ISBMsMmPuxyMbZHkb1yPBDWK7qFOQOcQg==
-X-Google-Smtp-Source: AGHT+IEjtOPKsRyajYMxbHL80czYGam47afsRAbV0f6T2b+vZzSF+3Mk2d2iP/UGzBJAnyxqycP9y0gExlgC+LvRYdI=
-X-Received: by 2002:a05:690c:12:b0:5f4:c40:1265 with SMTP id
- bc18-20020a05690c001200b005f40c401265mr466633ywb.68.1704214650754; Tue, 02
- Jan 2024 08:57:30 -0800 (PST)
+        bh=VVh7m29Ky9WukziqxPzevKkxIvdB0PDoPjGRWVMZV14=;
+        b=H7uaofcZNnpaEr7pJMXBH8EEbAAuge55LHoyr4qGPOOnzuifyAU1d9cxmJzMvuM6ds
+         NAG546ywomYh6RpeiudWrxI1dwwNVW9f7VZiRreSY9elmandghtjSNTP0SdVjlsUy9Ia
+         X15YSdV4XC+C/JjRNKu/6DkVAKWxBoXYQLHlU5SNljEdDHJSSXFXTvELGT6DU4hd2wlP
+         TLLTsCxNLnTSH65rvcZn/chetsXOw+C5BnNWkWcApyxTF9dDAdV5U+gy+qq6PJ6pfmXY
+         B8DdNo7qlv1KBLs1le0crmcgpLaihnY09MO1f9762U2bBJMYFrF83IUDZepnNuPmqLkl
+         566g==
+X-Gm-Message-State: AOJu0YzAX8XpKoFr/whYEE9MO4rGM+ZpQ8MjL084tzomvyKOYUyV1CDG
+	BMXi5LFpSoL2TIqWiiE3WOg/zhTUvvoL9jueR1btKnzliRbD6Q==
+X-Google-Smtp-Source: AGHT+IG3cKejQU1lw6kB8D1slP13fhxQrPArTQrPYYY9m76Qm4R78xwRcBK6XSjxNJfA9eOGogYLST+VoA5oeAJFa5c=
+X-Received: by 2002:a81:b718:0:b0:5eb:bfac:69c with SMTP id
+ v24-20020a81b718000000b005ebbfac069cmr8701530ywh.45.1704214654000; Tue, 02
+ Jan 2024 08:57:34 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231209171013.249972-1-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20231209171013.249972-1-krzysztof.kozlowski@linaro.org>
+References: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20231211085830.25380-1-krzysztof.kozlowski@linaro.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 2 Jan 2024 17:56:55 +0100
-Message-ID: <CAPDyKFo6xh8k_NjAziEEuj_us_n9GMgdwVGMKXodVLHq-TbS7w@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: synopsys-dw-mshc: add iommus for Intel SocFPGA
+Date: Tue, 2 Jan 2024 17:56:58 +0100
+Message-ID: <CAPDyKFo3kpTrKctYX0oZeCxSeBF1ehLmEtFoE4HQfvG0wnEh=w@mail.gmail.com>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-msm: document dedicated
+ IPQ4019 and IPQ8074
 To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Cc: Rob Herring <robh+dt@kernel.org>, 
 	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Andy Gross <agross@kernel.org>, Bjorn Andersson <andersson@kernel.org>, 
+	Konrad Dybcio <konrad.dybcio@linaro.org>, Bhupesh Sharma <bhupesh.sharma@linaro.org>, 
 	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sat, 9 Dec 2023 at 18:10, Krzysztof Kozlowski
+On Mon, 11 Dec 2023 at 09:58, Krzysztof Kozlowski
 <krzysztof.kozlowski@linaro.org> wrote:
 >
-> The DW MSHC node in Intel SocFPGA ARM64 DTS has iommus property, so
-> allow it to silence dtbs_check warnings:
->
->   socfpga_n5x_socdk.dtb: mmc@ff808000: Unevaluated properties are not allowed ('iommus' was unexpected)
+> Add dedicated compatibles for the Qualcomm IPQ4019 and IPQ8074 SoCs,
+> because usage of generic qcom,sdhci-msm-v4 compatible alone is
+> deprecated.
 >
 > Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
@@ -73,36 +75,23 @@ Kind regards
 Uffe
 
 
->
 > ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> I assume the DTS represents the hardware, thus iommus is real.
-> ---
->  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> index b13b5166d20a..a6292777e376 100644
-> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> @@ -35,6 +35,9 @@ properties:
->        - const: biu
->        - const: ciu
->
-> +  iommus:
-> +    maxItems: 1
-> +
->    altr,sysmgr-syscon:
->      $ref: /schemas/types.yaml#/definitions/phandle-array
->      items:
-> @@ -62,6 +65,7 @@ allOf:
->          altr,sysmgr-syscon: true
->      else:
->        properties:
-> +        iommus: false
->          altr,sysmgr-syscon: false
->
->  required:
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index 86fae733d9a0..c24c537f62b1 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -22,6 +22,8 @@ properties:
+>        - items:
+>            - enum:
+>                - qcom,apq8084-sdhci
+> +              - qcom,ipq4019-sdhci
+> +              - qcom,ipq8074-sdhci
+>                - qcom,msm8226-sdhci
+>                - qcom,msm8953-sdhci
+>                - qcom,msm8974-sdhci
 > --
 > 2.34.1
 >
