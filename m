@@ -1,78 +1,108 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BD9314F92
-	for <linux-mmc@vger.kernel.org>; Tue,  2 Jan 2024 16:55:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CD2A14F8F
+	for <linux-mmc@vger.kernel.org>; Tue,  2 Jan 2024 16:57:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IOGHtBB+"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-5f15a1052b3so18736557b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2024 08:55:52 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FKc1lGke"
+Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-5ed10316e22so51338107b3.3
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2024 08:57:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1704214552; x=1704819352; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1704214651; x=1704819451; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=CNqL3syd8tajxdXP6DeZWAspQXGwstc+HdsQhu/G50A=;
-        b=IOGHtBB+A2YpRHNpVLTI+6mbYTwnFix6w/wUEiZPom/SAbpYZ4gCQPuvmSFwfAqH8V
-         nAwxMmNLNL5R7Mx4nyttoVxe10h5dt6cxgKskDuPTIcGXov+zcHaHWSNsuCv9qJMoTCf
-         CSTPVOxoD0GnV9fCpY/uMRFXkqoXkFfpJCkLD6VWX5lHkfD+xhHh7jKu3qTVXRualz9G
-         jb9FLzFdMP7Thm5MioKoo3qHoN9F3VWVyyfqa6/3k1DrJIzCdxy9rjRICqLrMs8y2tsy
-         xeR2yFiGsDDPw9rOCph04n8prtnZcfsF4rpH43BFnsophlzjc/LGIpJxcunob/gC2W3C
-         L3nA==
+        bh=5wk4N7lmV0VhLdq0PkFpCuSEzkzGL6KduOmoT0VC7jU=;
+        b=FKc1lGkeg8eQUAf6ZYO/awJ698ZYqSDZ2eMApS3EYT9POdtFRO8JKtdj+IhE6KUKxs
+         6lvAhdxSdYQXdM7n/oW3kG8R2qFPRN8c5AY31V3Q1WplllbLNC67xUDAZbvAYDH+YfIN
+         od+62RTT051UjPS9eUETm7Nq5wTcLdUvW1n1frbXLxETqEb8Vh6B7GLKiB5ENRnSmMsn
+         JWkh3MxePMCjielYxJTqYiPNLG2VWWAxbG3dpvpwcYV4Tcro4cuDdf70ppYQTrCK31bk
+         QfU04h0Bz8s1qGsqeVwaTTj91gr4ZjRhX8GLLJhj9Llu2CTBfsOOGERJJ6n0WN5EjzQU
+         wYdQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704214552; x=1704819352;
+        d=1e100.net; s=20230601; t=1704214651; x=1704819451;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=CNqL3syd8tajxdXP6DeZWAspQXGwstc+HdsQhu/G50A=;
-        b=Kd8qJd2TWLyK6L6LBYrYUCymRjr2rPSzob0F5QxPabZlip+m0dsuyQdErNxoIjfTts
-         43SO+pzxRfKUpb9r34D0NspdUVZXMkJtSFypu2LbPQcdddHgIRkw8y9qCwqKdsIWLd8I
-         2xRsnSo4hwJw5Fh3xp7oVCc7vIQyopeVJW94rXygd9oL45i8lzZmSV2pvQXoT6hDpuqk
-         EnmaDwkL1wdcTEKwt4JMXsqJhiL/etUcF0MHzFp8z5C0YbCRHmyC4a7sy1tUJLkH669w
-         J6YP3aaCxzapPM2FAPf32LgBhknaR1f5Dn5Bt9ZAIEJBp7n4tlo3CvxAjy0WeV93cwQF
-         EZrA==
-X-Gm-Message-State: AOJu0YyepVI6TQf7B1KP8rAb0bhWq9cWEtq62ziwnQ97W1OQ0iCJagGl
-	nAu2alW/FKD6iCsyCDagU2+BCUHJWtqDW0LahK0ooTbZlIYYNw==
-X-Google-Smtp-Source: AGHT+IH38GyzntASw7CHnKSqj+ZQZUAgzv27O4Az+xAQMxD5JqXuBWTwK69lQ4VL7IfiINHMXODTxxSi7cIGSCiDaF4=
-X-Received: by 2002:a81:4a44:0:b0:5d7:1940:7d8a with SMTP id
- x65-20020a814a44000000b005d719407d8amr10235618ywa.97.1704214552024; Tue, 02
- Jan 2024 08:55:52 -0800 (PST)
+        bh=5wk4N7lmV0VhLdq0PkFpCuSEzkzGL6KduOmoT0VC7jU=;
+        b=lQr6ch0C2hKYStDFeV9EGGgI5XMzSJBceO8gQ7Us3J2BXvkR7wzfQyZPmJ5XEhlcwN
+         /j8KeCbUJ/mOnkMqXId089MEOqYL3Se0BRRU5iCUUqjN9/j8ZfXlcLWn4g5O8GCPcYXr
+         8E4nlxKw4dQwJwMz0hnDbMuOIEvj4OqyoI3/O2N6tkqQaGrnjnw1tOHcEvVni3p9qIgT
+         kDuaQTc3g5sm/0FAJnhKjM3rMmqCVhWUR1cgnsCFmT0gXSPIDC3/PWoqpYNOeDyyHoiY
+         xnSdQ8z4GGzrVgtOecUREisRX9DzioSBfYJxe/EJ3aZNW3zjmFcxYAjvn+LcHvxPslGn
+         d97g==
+X-Gm-Message-State: AOJu0YxpzIkj4ZJKzN+XMS2I/EtqA0w12/j2gQQIl6fIObwKYsfGfAWy
+	OvviEOEkx31MRFww7ISBMsMmPuxyMbZHkb1yPBDWK7qFOQOcQg==
+X-Google-Smtp-Source: AGHT+IEjtOPKsRyajYMxbHL80czYGam47afsRAbV0f6T2b+vZzSF+3Mk2d2iP/UGzBJAnyxqycP9y0gExlgC+LvRYdI=
+X-Received: by 2002:a05:690c:12:b0:5f4:c40:1265 with SMTP id
+ bc18-20020a05690c001200b005f40c401265mr466633ywb.68.1704214650754; Tue, 02
+ Jan 2024 08:57:30 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231213224219.2191721-1-robh@kernel.org> <170421203410.2946186.5030215776329721242.robh@kernel.org>
-In-Reply-To: <170421203410.2946186.5030215776329721242.robh@kernel.org>
+References: <20231209171013.249972-1-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20231209171013.249972-1-krzysztof.kozlowski@linaro.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 2 Jan 2024 17:55:15 +0100
-Message-ID: <CAPDyKFrOc9MnvjOjA8Wg_zFg9G2rtxoTs_iEY1oLWME59v1jiw@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-pxa: Fix 'regs' typo
-To: Rob Herring <robh@kernel.org>
-Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
-	devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Lubomir Rintel <lkundrak@v3.sk>
+Date: Tue, 2 Jan 2024 17:56:55 +0100
+Message-ID: <CAPDyKFo6xh8k_NjAziEEuj_us_n9GMgdwVGMKXodVLHq-TbS7w@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: synopsys-dw-mshc: add iommus for Intel SocFPGA
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 2 Jan 2024 at 17:30, Rob Herring <robh@kernel.org> wrote:
+On Sat, 9 Dec 2023 at 18:10, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
+> The DW MSHC node in Intel SocFPGA ARM64 DTS has iommus property, so
+> allow it to silence dtbs_check warnings:
 >
-> On Wed, 13 Dec 2023 16:42:19 -0600, Rob Herring wrote:
-> > The correct property name is 'reg' not 'regs'.
-> >
-> > Fixes: ae5c0585dfc2 ("dt-bindings: mmc: Convert sdhci-pxa to json-schema")
-> > Signed-off-by: Rob Herring <robh@kernel.org>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml | 4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> >
+>   socfpga_n5x_socdk.dtb: mmc@ff808000: Unevaluated properties are not allowed ('iommus' was unexpected)
 >
-> Applied, thanks!
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-I was just about to apply this, sorry for the delay. Anyway, let's
-keep this in your tree this time.
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+>
+> ---
+>
+> I assume the DTS represents the hardware, thus iommus is real.
+> ---
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+> index b13b5166d20a..a6292777e376 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+> @@ -35,6 +35,9 @@ properties:
+>        - const: biu
+>        - const: ciu
+>
+> +  iommus:
+> +    maxItems: 1
+> +
+>    altr,sysmgr-syscon:
+>      $ref: /schemas/types.yaml#/definitions/phandle-array
+>      items:
+> @@ -62,6 +65,7 @@ allOf:
+>          altr,sysmgr-syscon: true
+>      else:
+>        properties:
+> +        iommus: false
+>          altr,sysmgr-syscon: false
+>
+>  required:
+> --
+> 2.34.1
+>
