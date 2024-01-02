@@ -1,127 +1,221 @@
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31D50D285;
-	Tue,  2 Jan 2024 10:29:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3CB36DDC1
+	for <linux-mmc@vger.kernel.org>; Tue,  2 Jan 2024 10:41:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=foundries.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foundries.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YlbPXPUx"
-Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-55590da560dso3725364a12.0;
-        Tue, 02 Jan 2024 02:29:36 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="O2Ph709A"
+Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-33678156e27so8596384f8f.1
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2024 02:41:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1704191375; x=1704796175; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nFPe9D0y3N44X6lYNDVVER2vuR/CtkvdNpqm9Z/uUds=;
-        b=YlbPXPUxCAd7+gRVGMAXr+Y+dHJ5i8TC89VNFG2Gs6jiW6F2Q9wG3aH6VBZZMSZU6n
-         bgBefrY6W8BGpl4TCH438jTaUx3Dtf8LQUNW00owNvASlWXM9b2DUXppVgdZoDowzhI5
-         KOTCZYSh/zWGkiF9JtnLHDVMFMsuL3MSCeAMB9Ot7cLduYkg9tBzxjnEnPph+LXcAMLH
-         qkr9WOMV1uMscpBaQgy7G1A9kSlE5+8voK+U87vZdbbwj1fKGcEn1fezR/osc6W18yfr
-         ids2H5FOPus8RjczsGRgPVkl/8/f8Y+aBiK1V0luYdx1AkyxOmGI7W5oH7Dt5DTotlu+
-         P4Og==
+        d=foundries.io; s=google; t=1704192070; x=1704796870; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:date:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=2MAPFTi+4S5JKfd2/tApv6PVoH1Mz3Cadap0S8Gv4lM=;
+        b=O2Ph709AGEi4GDcY94/DqfXTX6VBkzrzyrCy6twkIMiZ/aPFYR9eRA759Hl9C8RQ3e
+         qRPjvKrylJJRUdewRLYxc4zccixsM2P16LaDqjERrwC62hgtWyFS12EljKfn3qc9s2hU
+         u6fIpXZl+z/GKLtwsnY8V/7FqCXrq2TsQxEKQrYmdDghA87op0fYNtY0njCbdaxTR8Nr
+         nTV0Cu+4S3sUXrF65JITjIrv463kUp+h8iB5UWx+CGGP+gmfLcOv/wPkXiUY1hPSzg6J
+         ywdaZEHJaS1Y8zyrIi9vNIMMRIHCMMgire3ZsnYQ0SL3oJnW9JEfJWzJal0+g5MrgJdY
+         RYtw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704191375; x=1704796175;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=nFPe9D0y3N44X6lYNDVVER2vuR/CtkvdNpqm9Z/uUds=;
-        b=cjISXiDPVNe6sdSeKlhCCmw+qpqoR5BfdM9FFFYKto91qKdbKPzIAyMCyO4k5w92Js
-         hG9aXg/rJuV875VEVd4TywjBrrivFlWsLD860GMXyELmJgnDNrFRmbaVaohnxf/yaekk
-         8DyyaNg27Utu868VI42tU+NwwlkslDHjj05ivKO0L4YAkKdQ88cnclfGNZaVU8/vhQF9
-         Np67xPUl2RKYw1sE1euwbZjdoB3a7nKEqig6bh5BsvvmvbLIBxIWwRJJpqgFQ9ZdyE+p
-         +bSORqjbxaDOSKk+jpamH9RKvfrQqaqKMcRMhfXVY3FcErpADsT+I1cCG4VehZwKoZ6W
-         Hc1Q==
-X-Gm-Message-State: AOJu0Yy4M5nWV6PUTKFklAc+0Mcv8nAepFC0ktxJeiCzoJrHndQ4Thb7
-	Tvo7RySyBhmTa9gmlch9VKyM9OWQ4bR2+wgxciA=
-X-Google-Smtp-Source: AGHT+IHlGEClh4mlgzqVZYchEiPuyBzKwKQ3rG0kyEeJi/RZJsGUkJ+PJ4sZZ+WIa3zX9WzKBUA+Ui7lvM1O576hUJY=
-X-Received: by 2002:aa7:dd19:0:b0:556:8ef1:a173 with SMTP id
- i25-20020aa7dd19000000b005568ef1a173mr551026edv.78.1704191375172; Tue, 02 Jan
- 2024 02:29:35 -0800 (PST)
+        d=1e100.net; s=20230601; t=1704192070; x=1704796870;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:date:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=2MAPFTi+4S5JKfd2/tApv6PVoH1Mz3Cadap0S8Gv4lM=;
+        b=nI1ZaeP4H+xjVskQRjl5iRVSwRchzgEPRWBARWQsA34iAIru5m8XIqXBDlArBNe8TA
+         +GHO2/ef9L+8uYAWwpZbiIosGWGVzuZPRdbYGVjE9vwG6ZWM1FEejAYTq29Q0jhzniQs
+         5LL2+jpIWumxL8qbENc5VIP+MM2Jq7KUp6ojECYKwtT+s9Vy0tHNngTvzWh7SqjuwkRP
+         8xCVGORjsHxJk1uOePwoQfbJm+3aaArn3ZrRXIzbIgnigK/8JoDtjBocGSOydUr3UiED
+         gInhYWTuNV8t7+5fV55zIQ9ali++kLQ3NydU/yql7jY07Jht4bvkE/R77iQ7iKoYqqS8
+         80TA==
+X-Gm-Message-State: AOJu0YxH7BtoX58vKke0/j5F65svoN7q/BNo1gIaA67D6Z/x+YZwtfFG
+	Nb+sOhevre8zQj/ec7rETU2jxLDSP008Fg==
+X-Google-Smtp-Source: AGHT+IGRdbBJpMBVIUdY41oJKUR9S3ADStW53prFLTDwSdYjXW1RIsTNb/k5Rrws8JiTmSIIqXhOiw==
+X-Received: by 2002:a5d:52cd:0:b0:336:c9ac:3518 with SMTP id r13-20020a5d52cd000000b00336c9ac3518mr5467756wrv.106.1704192070425;
+        Tue, 02 Jan 2024 02:41:10 -0800 (PST)
+Received: from trax (96.red-79-144-190.dynamicip.rima-tde.net. [79.144.190.96])
+        by smtp.gmail.com with ESMTPSA id q17-20020adfcd91000000b003362d0eefd3sm27946268wrj.20.2024.01.02.02.41.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 02 Jan 2024 02:41:09 -0800 (PST)
+From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
+Date: Tue, 2 Jan 2024 11:41:08 +0100
+To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+Cc: Avri Altman <Avri.Altman@wdc.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+	"christian.loehle@arm.com" <christian.loehle@arm.com>,
+	"jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
+	"axboe@kernel.dk" <axboe@kernel.dk>,
+	"beanhuo@micron.com" <beanhuo@micron.com>,
+	"yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
+	"victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
+	"asuk4.q@gmail.com" <asuk4.q@gmail.com>,
+	"hkallweit1@gmail.com" <hkallweit1@gmail.com>,
+	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
+	"yebin10@huawei.com" <yebin10@huawei.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
+Message-ID: <ZZPoRPxdWXuT+cEo@trax>
+References: <20231204150111.3320071-1-jorge@foundries.io>
+ <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
+ <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <ZXBGTxS7sUSILtLs@trax>
+ <ZXbBhjZIn5sj6EYO@trax>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231220135950.433588-1-pbrobinson@gmail.com> <0fe97709-6b6c-4c66-82a1-ecf58dde5b3f@intel.com>
- <CALeDE9Ndke9YTCeiJJWBtHAbrShEEr1bv67Cwu1LWJAXs6Ad2A@mail.gmail.com> <cb726c1c-4ce3-454e-b8cb-fd14d18b8359@intel.com>
-In-Reply-To: <cb726c1c-4ce3-454e-b8cb-fd14d18b8359@intel.com>
-From: Peter Robinson <pbrobinson@gmail.com>
-Date: Tue, 2 Jan 2024 10:29:24 +0000
-Message-ID: <CALeDE9OECYC2Brx1Hzfy6X6sKUaokFBJdvxSYhYaOGB9CnhBUw@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci_am654: Fix TI SoC dependencies
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Faiz Abbas <faiz_abbas@ti.com>, 
-	Kishon Vijay Abraham I <kishon@ti.com>, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, 
-	linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <ZXbBhjZIn5sj6EYO@trax>
 
-On Tue, Jan 2, 2024 at 10:22=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
->
-> On 2/01/24 12:10, Peter Robinson wrote:
-> > On Tue, Jan 2, 2024 at 10:06=E2=80=AFAM Adrian Hunter <adrian.hunter@in=
-tel.com> wrote:
-> >>
-> >> On 20/12/23 15:59, Peter Robinson wrote:
-> >>> The sdhci_am654 is specific to recent TI SoCs, update the
-> >>> dependencies for those SoCs and compile testing. While we're
-> >>> at it update the text to reflect the wider range of
-> >>> supported TI SoCS the driver now supports.
-> >>>
-> >>> Fixes: 41fd4caeb00b ("mmc: sdhci_am654: Add Initial Support for AM654=
- SDHCI driver")
-> >>
-> >> Is this really a fix?  Seems like a minor improvement.
-> >> Same question for patch 2/2.
+On 11/12/23 09:00:06, Jorge Ramirez-Ortiz, Foundries wrote:
+> On 06/12/23 11:00:47, Jorge Ramirez-Ortiz, Foundries wrote:
+> > On 06/12/23 07:02:43, Avri Altman wrote:
+> > > >
+> > > > On 4/12/23 17:01, Jorge Ramirez-Ortiz wrote:
+> > > > > Requesting a retune before switching to the RPMB partition has been
+> > > > > observed to cause CRC errors on the RPMB reads (-EILSEQ).
+> > > >
+> > > > There are still 2 concerns:
+> > > > 1) We don't really know the root cause.  Have you determined if here are
+> > > > CRC errors in the main partition also?
 > >
-> > It is for distro kernels at least :)
->
-> Distros ship thousands of modules.  I am not sure one more or
-> less makes any difference?
-
-I added the fixes because that's what a lot of other similar patches
-do, see 4920bded3e and 1f223208e in CAN drivers I was looking at
-recently, if you want to drop the fixes tag I don't mind but I was
-mostly just following what numerous other similar patches do :)
-
+> > right, and I don't disagree with that.
 > >
-> >>> Signed-off-by: Peter Robinson <pbrobinson@gmail.com>
-> >>
-> >> It would be good to get an Ack from a TI person.
-> >> Same for patch 2/2.
-> >>
-> >>> ---
-> >>>  drivers/mmc/host/Kconfig | 5 +++--
-> >>>  1 file changed, 3 insertions(+), 2 deletions(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> >>> index 58bd5fe4cd25..24ce5576b61a 100644
-> >>> --- a/drivers/mmc/host/Kconfig
-> >>> +++ b/drivers/mmc/host/Kconfig
-> >>> @@ -1041,14 +1041,15 @@ config MMC_SDHCI_OMAP
-> >>>
-> >>>  config MMC_SDHCI_AM654
-> >>>       tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
-> >>> +     depends on ARCH_K3 || COMPILE_TEST
-> >>>       depends on MMC_SDHCI_PLTFM && OF
-> >>>       select MMC_SDHCI_IO_ACCESSORS
-> >>>       select MMC_CQHCI
-> >>>       select REGMAP_MMIO
-> >>>       help
-> >>>         This selects the Secure Digital Host Controller Interface (SD=
-HCI)
-> >>> -       support present in TI's AM654 SOCs. The controller supports
-> >>> -       SD/MMC/SDIO devices.
-> >>> +       support present in TI's AM65x/AM64x/AM62x/J721E SOCs. The con=
-troller
-> >>> +       supports SD/MMC/SDIO devices.
-> >>>
-> >>>         If you have a controller with this interface, say Y or M here=
-.
-> >>>
-> >>
+> > As a test I created a 4GB file from /dev/random which I then copied
+> > several times (dd if= ....)
+> >
+> > root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0# cat err_stats
+> > # Command Timeout Occurred:      0
+> > # Command CRC Errors Occurred:   0
+> > # Data Timeout Occurred:         0
+> > # Data CRC Errors Occurred:      0
+> > # Auto-Cmd Error Occurred:       0
+> > # ADMA Error Occurred:   0
+> > # Tuning Error Occurred:         0
+> > # CMDQ RED Errors:       0
+> > # CMDQ GCE Errors:       0
+> > # CMDQ ICCE Errors:      0
+> > # Request Timedout:      0
+> > # CMDQ Request Timedout:         0
+> > # ICE Config Errors:     0
+> > # Controller Timedout errors:    0
+> > # Unexpected IRQ errors:         0
+> >
+> > However as soon as I access RPMB and fails (it takes just a few tries) I see:
+> >
+> > I/TC: RPMB: Using generated key
+> > [   86.902118] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
+> > E/TC:? 0
+> > E/TC:? 0 TA panicked with code 0xffff0000
+> > E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
+> > E/LD:   arch: aarch64
+> > E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
+> > E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
+> > E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
+> > E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
+> > E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
+> > E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
+> > E/LD:  region  6: va 0xc0019000 pa 0x818ea9ba8 size 0x002000 flags rw-- (param)
+> > E/LD:  region  7: va 0xc001b000 pa 0x818e97ba8 size 0x001000 flags rw-- (param)
+> > E/LD:  region  8: va 0xc004f000 pa 0x00001000 size 0x014000 flags r-xs [0]
+> > E/LD:  region  9: va 0xc0063000 pa 0x00015000 size 0x008000 flags rw-s [0]
+> > E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc004f000
+> > E/LD:  Call stack:
+> > E/LD:   0xc0051a14
+> > E/LD:   0xc004f31c
+> > E/LD:   0xc0052d40
+> > E/LD:   0xc004f624
+> >
+> > root@uz3cg-dwg-sec:/var/rootdirs/home/fio# cat /sys/kernel/debug/mmc0/err_stats
+> > # Command Timeout Occurred:      0
+> > # Command CRC Errors Occurred:   0
+> > # Data Timeout Occurred:         0
+> > # Data CRC Errors Occurred:      1
+> > # Auto-Cmd Error Occurred:       0
+> > # ADMA Error Occurred:   0
+> > # Tuning Error Occurred:         0
+> > # CMDQ RED Errors:       0
+> > # CMDQ GCE Errors:       0
+> > # CMDQ ICCE Errors:      0
+> > # Request Timedout:      0
+> > # CMDQ Request Timedout:         0
+> > # ICE Config Errors:     0
+> > # Controller Timedout errors:    0
+> > # Unexpected IRQ errors:         0
+> >
+> > > > 2) Forcing this on everyone
+> > > >
+> > > > The original idea was that because re-tuning cannot be done in RPMB, the
+> > > > need to re-rune in RPMB could be avoided by always re-tuning before
+> > > > switching to RPMB and then switching straight back. IIRC re-tuning should
+> > > > guarantee at least 4MB more I/O without issue.
+> > > Performance is hardly an issue in the context of RPMB access -
+> > > For most cases it’s a single frame.
+> >
+> > Yes, the security use case typically stores hashes, variables
+> > (bootcount, upgrade_available, versions, that sort of thing) and
+> > certificates in RPMB.
+> >
+> > Since you mentioned, I am seeing that tuning before switching to RPMB
+> > has an impact on performance. As a practical test, just reading a 6 byte
+> > variable incurs in 50ms penalty in kernel space due to the need to
+> > retune 5 times. Not great since the request is coming from a Trusted
+> > Application via OP-TEE through the supplicant meaning this TEE thread
+> > (they are statically allocated CFG_NUM_THREADS) will be reserved for
+> > quite a bit of time.
+> >
+> > Roughly:
+> > TA --> OP-TEE (core) --> TEE-supplicant --> Kernel (>50ms) --> OP-TEE --> TA
 >
+> To add more detail to the timing above, when using RPMB, OP-TEE stores
+> the secure filesystem on RPMB as well, so accessing one of the variables
+> stored in the filesystem consists on a number (~5) of individual RPMB
+> requests (each one forcing a retune, each retune taking around 10ms).
+
+Adrian, please could you comment on the above.
+
+The current code is a performance drag for systems that implement their
+secure filesystems on RPMB (i.e: OP-TEE) causing each read operation (of
+variables consisting of a few bytes stored in such a filesystem) to
+perform 5 consecutive retune requests.
+
+I am just thinking whether the original use case that forces a call to
+retune prior to processing the RPMB request remains valid.
+
+Independently of the fact that not doing so fixes the problem I was
+working on - and with the information I have - I dont think RPMB is
+generally used to store larger files (maybe you have more information
+about the average use case? are you aware of systems using RPMB to store
+binaries or images?)
+
+I still I have to execute the test you shared some weeks ago. Bit of a
+pain to NFS boot this system...will try to do it this week.
+
+TIA
+
+>
+> BTW, I also tried delaying the timing between those consecutive retunes
+> (up to 1 second), but the issue still persisted.
+>
+> >
+> > Adrian, I couldn't find the original performance justification for
+> > enabling this feature globally. At which point do you think it becomes
+> > beneficial to retune before accessing RPMB?
+>
+> How should we proceed with this patch then? can it be merged as I
+> proposed? should I rewrite it differently? not sure what is next
+>
+> TIA
+> Jorge
