@@ -1,221 +1,207 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.115])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3CB36DDC1
-	for <linux-mmc@vger.kernel.org>; Tue,  2 Jan 2024 10:41:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=foundries.io
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foundries.io
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF9BBDDB6;
+	Tue,  2 Jan 2024 10:55:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="O2Ph709A"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-33678156e27so8596384f8f.1
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jan 2024 02:41:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=foundries.io; s=google; t=1704192070; x=1704796870; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:date:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=2MAPFTi+4S5JKfd2/tApv6PVoH1Mz3Cadap0S8Gv4lM=;
-        b=O2Ph709AGEi4GDcY94/DqfXTX6VBkzrzyrCy6twkIMiZ/aPFYR9eRA759Hl9C8RQ3e
-         qRPjvKrylJJRUdewRLYxc4zccixsM2P16LaDqjERrwC62hgtWyFS12EljKfn3qc9s2hU
-         u6fIpXZl+z/GKLtwsnY8V/7FqCXrq2TsQxEKQrYmdDghA87op0fYNtY0njCbdaxTR8Nr
-         nTV0Cu+4S3sUXrF65JITjIrv463kUp+h8iB5UWx+CGGP+gmfLcOv/wPkXiUY1hPSzg6J
-         ywdaZEHJaS1Y8zyrIi9vNIMMRIHCMMgire3ZsnYQ0SL3oJnW9JEfJWzJal0+g5MrgJdY
-         RYtw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704192070; x=1704796870;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:date:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=2MAPFTi+4S5JKfd2/tApv6PVoH1Mz3Cadap0S8Gv4lM=;
-        b=nI1ZaeP4H+xjVskQRjl5iRVSwRchzgEPRWBARWQsA34iAIru5m8XIqXBDlArBNe8TA
-         +GHO2/ef9L+8uYAWwpZbiIosGWGVzuZPRdbYGVjE9vwG6ZWM1FEejAYTq29Q0jhzniQs
-         5LL2+jpIWumxL8qbENc5VIP+MM2Jq7KUp6ojECYKwtT+s9Vy0tHNngTvzWh7SqjuwkRP
-         8xCVGORjsHxJk1uOePwoQfbJm+3aaArn3ZrRXIzbIgnigK/8JoDtjBocGSOydUr3UiED
-         gInhYWTuNV8t7+5fV55zIQ9ali++kLQ3NydU/yql7jY07Jht4bvkE/R77iQ7iKoYqqS8
-         80TA==
-X-Gm-Message-State: AOJu0YxH7BtoX58vKke0/j5F65svoN7q/BNo1gIaA67D6Z/x+YZwtfFG
-	Nb+sOhevre8zQj/ec7rETU2jxLDSP008Fg==
-X-Google-Smtp-Source: AGHT+IGRdbBJpMBVIUdY41oJKUR9S3ADStW53prFLTDwSdYjXW1RIsTNb/k5Rrws8JiTmSIIqXhOiw==
-X-Received: by 2002:a5d:52cd:0:b0:336:c9ac:3518 with SMTP id r13-20020a5d52cd000000b00336c9ac3518mr5467756wrv.106.1704192070425;
-        Tue, 02 Jan 2024 02:41:10 -0800 (PST)
-Received: from trax (96.red-79-144-190.dynamicip.rima-tde.net. [79.144.190.96])
-        by smtp.gmail.com with ESMTPSA id q17-20020adfcd91000000b003362d0eefd3sm27946268wrj.20.2024.01.02.02.41.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Jan 2024 02:41:09 -0800 (PST)
-From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
-Date: Tue, 2 Jan 2024 11:41:08 +0100
-To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-Cc: Avri Altman <Avri.Altman@wdc.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-	"christian.loehle@arm.com" <christian.loehle@arm.com>,
-	"jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
-	"axboe@kernel.dk" <axboe@kernel.dk>,
-	"beanhuo@micron.com" <beanhuo@micron.com>,
-	"yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
-	"victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
-	"asuk4.q@gmail.com" <asuk4.q@gmail.com>,
-	"hkallweit1@gmail.com" <hkallweit1@gmail.com>,
-	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
-	"yebin10@huawei.com" <yebin10@huawei.com>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
-Message-ID: <ZZPoRPxdWXuT+cEo@trax>
-References: <20231204150111.3320071-1-jorge@foundries.io>
- <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
- <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
- <ZXBGTxS7sUSILtLs@trax>
- <ZXbBhjZIn5sj6EYO@trax>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="OLRwXiX8"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1704192900; x=1735728900;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=ernVMvHIdMmRyXTlOPbkeyMa4Sia/syaBuLWXeGaLU4=;
+  b=OLRwXiX8sBgIM3KaMwC90tnIY/z4vpvpGUZ03moqhmwVixJu1kB/kzeZ
+   3B+H/six6cVal5u8aZiCQvNXhzq1XnRzT4pb+/ovl3TQ16bL5odJlINtU
+   Q9nJTqXUd+zVfw0JphnWcvazIbpfbDU+cTphs1uYPmeQE/BG/HQjGAdi2
+   Cw0eqgbwZrXrPbRm9f3Dtxk526UQcCYcNhiaXtLqWsjNYCFLstm23fsXH
+   STX6cf35340gPvELB9hircQQ6vs4x2BZprOgLo5P6rdfeghBNg52XwGGL
+   0pMZxYNhvnV9LHBjuVosfrC4RI8BYCBWy0UWZGSEzXDpNgH/eoY614QQK
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10940"; a="396596699"
+X-IronPort-AV: E=Sophos;i="6.04,324,1695711600"; 
+   d="scan'208";a="396596699"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jan 2024 02:54:59 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10940"; a="779660508"
+X-IronPort-AV: E=Sophos;i="6.04,324,1695711600"; 
+   d="scan'208";a="779660508"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.83])
+  by orsmga002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jan 2024 02:54:55 -0800
+Message-ID: <92621539-4ec5-4aa0-a7da-c6eb87ee1a52@intel.com>
+Date: Tue, 2 Jan 2024 12:54:54 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <ZXbBhjZIn5sj6EYO@trax>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v6 2/2] mmc: add new sdhci reset sequence for brcm 74165b0
+Content-Language: en-US
+To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
+ linux-kernel@vger.kernel.org, alcooperx@gmail.com,
+ linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+ robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+ devicetree@vger.kernel.org
+Cc: f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
+ Kamal Dasu <kdasu@broadcom.com>
+References: <20231220153031.38678-1-kamal.dasu@broadcom.com>
+ <20231220153031.38678-3-kamal.dasu@broadcom.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20231220153031.38678-3-kamal.dasu@broadcom.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On 11/12/23 09:00:06, Jorge Ramirez-Ortiz, Foundries wrote:
-> On 06/12/23 11:00:47, Jorge Ramirez-Ortiz, Foundries wrote:
-> > On 06/12/23 07:02:43, Avri Altman wrote:
-> > > >
-> > > > On 4/12/23 17:01, Jorge Ramirez-Ortiz wrote:
-> > > > > Requesting a retune before switching to the RPMB partition has been
-> > > > > observed to cause CRC errors on the RPMB reads (-EILSEQ).
-> > > >
-> > > > There are still 2 concerns:
-> > > > 1) We don't really know the root cause.  Have you determined if here are
-> > > > CRC errors in the main partition also?
-> >
-> > right, and I don't disagree with that.
-> >
-> > As a test I created a 4GB file from /dev/random which I then copied
-> > several times (dd if= ....)
-> >
-> > root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0# cat err_stats
-> > # Command Timeout Occurred:      0
-> > # Command CRC Errors Occurred:   0
-> > # Data Timeout Occurred:         0
-> > # Data CRC Errors Occurred:      0
-> > # Auto-Cmd Error Occurred:       0
-> > # ADMA Error Occurred:   0
-> > # Tuning Error Occurred:         0
-> > # CMDQ RED Errors:       0
-> > # CMDQ GCE Errors:       0
-> > # CMDQ ICCE Errors:      0
-> > # Request Timedout:      0
-> > # CMDQ Request Timedout:         0
-> > # ICE Config Errors:     0
-> > # Controller Timedout errors:    0
-> > # Unexpected IRQ errors:         0
-> >
-> > However as soon as I access RPMB and fails (it takes just a few tries) I see:
-> >
-> > I/TC: RPMB: Using generated key
-> > [   86.902118] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
-> > E/TC:? 0
-> > E/TC:? 0 TA panicked with code 0xffff0000
-> > E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
-> > E/LD:   arch: aarch64
-> > E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
-> > E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
-> > E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
-> > E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
-> > E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
-> > E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
-> > E/LD:  region  6: va 0xc0019000 pa 0x818ea9ba8 size 0x002000 flags rw-- (param)
-> > E/LD:  region  7: va 0xc001b000 pa 0x818e97ba8 size 0x001000 flags rw-- (param)
-> > E/LD:  region  8: va 0xc004f000 pa 0x00001000 size 0x014000 flags r-xs [0]
-> > E/LD:  region  9: va 0xc0063000 pa 0x00015000 size 0x008000 flags rw-s [0]
-> > E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc004f000
-> > E/LD:  Call stack:
-> > E/LD:   0xc0051a14
-> > E/LD:   0xc004f31c
-> > E/LD:   0xc0052d40
-> > E/LD:   0xc004f624
-> >
-> > root@uz3cg-dwg-sec:/var/rootdirs/home/fio# cat /sys/kernel/debug/mmc0/err_stats
-> > # Command Timeout Occurred:      0
-> > # Command CRC Errors Occurred:   0
-> > # Data Timeout Occurred:         0
-> > # Data CRC Errors Occurred:      1
-> > # Auto-Cmd Error Occurred:       0
-> > # ADMA Error Occurred:   0
-> > # Tuning Error Occurred:         0
-> > # CMDQ RED Errors:       0
-> > # CMDQ GCE Errors:       0
-> > # CMDQ ICCE Errors:      0
-> > # Request Timedout:      0
-> > # CMDQ Request Timedout:         0
-> > # ICE Config Errors:     0
-> > # Controller Timedout errors:    0
-> > # Unexpected IRQ errors:         0
-> >
-> > > > 2) Forcing this on everyone
-> > > >
-> > > > The original idea was that because re-tuning cannot be done in RPMB, the
-> > > > need to re-rune in RPMB could be avoided by always re-tuning before
-> > > > switching to RPMB and then switching straight back. IIRC re-tuning should
-> > > > guarantee at least 4MB more I/O without issue.
-> > > Performance is hardly an issue in the context of RPMB access -
-> > > For most cases it’s a single frame.
-> >
-> > Yes, the security use case typically stores hashes, variables
-> > (bootcount, upgrade_available, versions, that sort of thing) and
-> > certificates in RPMB.
-> >
-> > Since you mentioned, I am seeing that tuning before switching to RPMB
-> > has an impact on performance. As a practical test, just reading a 6 byte
-> > variable incurs in 50ms penalty in kernel space due to the need to
-> > retune 5 times. Not great since the request is coming from a Trusted
-> > Application via OP-TEE through the supplicant meaning this TEE thread
-> > (they are statically allocated CFG_NUM_THREADS) will be reserved for
-> > quite a bit of time.
-> >
-> > Roughly:
-> > TA --> OP-TEE (core) --> TEE-supplicant --> Kernel (>50ms) --> OP-TEE --> TA
->
-> To add more detail to the timing above, when using RPMB, OP-TEE stores
-> the secure filesystem on RPMB as well, so accessing one of the variables
-> stored in the filesystem consists on a number (~5) of individual RPMB
-> requests (each one forcing a retune, each retune taking around 10ms).
+On 20/12/23 17:30, Kamal Dasu wrote:
+> From: Kamal Dasu <kdasu@broadcom.com>
+> 
+> 74165b0 shall use a new sdio controller core version which
+> requires a different reset sequence. For core reset we use
+> sdhci_reset. For CMD and/or DATA reset added a new function
+> to also enable SDHCI clocks SDHCI_CLOCK_CARD_EN
+> SDHCI_CLOCK_INT_EN along with the SDHCI_RESET_CMD and/or
+> SDHCI_RESET_DATA fields.
+> 
+> Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
+> ---
+>  drivers/mmc/host/sdhci-brcmstb.c | 67 +++++++++++++++++++++++++++++---
+>  1 file changed, 62 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+> index c23251bb95f3..f171980b014e 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -6,6 +6,7 @@
+>   */
+>  
+>  #include <linux/io.h>
+> +#include <linux/iopoll.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+> @@ -44,8 +45,13 @@ struct brcmstb_match_priv {
+>  
+>  static inline void enable_clock_gating(struct sdhci_host *host)
+>  {
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>  	u32 reg;
+>  
+> +	if (!(priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK))
+> +		return;
+> +
+>  	reg = sdhci_readl(host, SDHCI_VENDOR);
+>  	reg |= SDHCI_VENDOR_GATE_SDCLK_EN;
+>  	sdhci_writel(host, reg, SDHCI_VENDOR);
+> @@ -53,14 +59,51 @@ static inline void enable_clock_gating(struct sdhci_host *host)
+>  
+>  static void brcmstb_reset(struct sdhci_host *host, u8 mask)
+>  {
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> -
+>  	sdhci_and_cqhci_reset(host, mask);
+>  
+>  	/* Reset will clear this, so re-enable it */
+> -	if (priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK)
+> -		enable_clock_gating(host);
+> +	enable_clock_gating(host);
+> +}
+> +
+> +static void brcmstb_sdhci_reset_cmd_data(struct sdhci_host *host, u8 mask)
+> +{
+> +	int ret;
+> +	u32 reg;
+> +	u32 new_mask = (mask &  (SDHCI_RESET_CMD | SDHCI_RESET_DATA)) << 24;
 
-Adrian, please could you comment on the above.
+It looks slightly neater if longer lines comes first i.e.
 
-The current code is a performance drag for systems that implement their
-secure filesystems on RPMB (i.e: OP-TEE) causing each read operation (of
-variables consisting of a few bytes stored in such a filesystem) to
-perform 5 consecutive retune requests.
+	u32 new_mask = (mask &  (SDHCI_RESET_CMD | SDHCI_RESET_DATA)) << 24;
+	u32 reg;
+	int ret;
 
-I am just thinking whether the original use case that forces a call to
-retune prior to processing the RPMB request remains valid.
+> +
+> +	/*
+> +	 * SDHCI_CLOCK_CONTROL register CARD_EN and CLOCK_INT_EN bits shall
+> +	 * be set along with SOFTWARE_RESET register RESET_CMD or RESET_DATA
+> +	 * bits, hence access SDHCI_CLOCK_CONTROL register as 32-bit register
+> +	 */
+> +	new_mask |= SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN;
+> +	reg = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
+> +	sdhci_writel(host, reg | new_mask, SDHCI_CLOCK_CONTROL);
+> +
+> +	reg = sdhci_readb(host, SDHCI_SOFTWARE_RESET);
+> +	ret = readb_poll_timeout_atomic(host->ioaddr + SDHCI_SOFTWARE_RESET,
+> +					reg, reg & mask, 10, 10000);
 
-Independently of the fact that not doing so fixes the problem I was
-working on - and with the information I have - I dont think RPMB is
-generally used to store larger files (maybe you have more information
-about the average use case? are you aware of systems using RPMB to store
-binaries or images?)
+The break condition does not seem the right way around.
+Also read_poll_timeout_atomic() seems neater e.g.
 
-I still I have to execute the test you shared some weeks ago. Bit of a
-pain to NFS boot this system...will try to do it this week.
+	ret = read_poll_timeout_atomic(sdhci_readb, reg, !(reg & mask),
+				       10, 10000, false,
+				       host, SDHCI_SOFTWARE_RESET);
 
-TIA
 
->
-> BTW, I also tried delaying the timing between those consecutive retunes
-> (up to 1 second), but the issue still persisted.
->
-> >
-> > Adrian, I couldn't find the original performance justification for
-> > enabling this feature globally. At which point do you think it becomes
-> > beneficial to retune before accessing RPMB?
->
-> How should we proceed with this patch then? can it be merged as I
-> proposed? should I rewrite it differently? not sure what is next
->
-> TIA
-> Jorge
+> +
+> +	if (ret) {
+> +		pr_err("%s: Reset 0x%x never completed.\n",
+> +		       mmc_hostname(host->mmc), (int)mask);
+> +		sdhci_err_stats_inc(host, CTRL_TIMEOUT);
+> +		sdhci_dumpregs(host);
+> +	}
+> +}
+> +
+> +static void brcmstb_reset_74165b0(struct sdhci_host *host, u8 mask)
+> +{
+> +	/* take care of RESET_ALL as usual */
+> +	if (mask & SDHCI_RESET_ALL)
+> +		sdhci_and_cqhci_reset(host, SDHCI_RESET_ALL);
+> +
+> +	/* cmd and/or data treated differently on this core */
+> +	if (mask & (SDHCI_RESET_CMD | SDHCI_RESET_DATA))
+> +		brcmstb_sdhci_reset_cmd_data(host, mask);
+> +
+> +	/* Reset will clear this, so re-enable it */
+> +	enable_clock_gating(host);
+>  }
+>  
+>  static void sdhci_brcmstb_hs400es(struct mmc_host *mmc, struct mmc_ios *ios)
+> @@ -162,6 +205,13 @@ static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
+>  	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
+>  };
+>  
+> +static struct sdhci_ops sdhci_brcmstb_ops_74165b0 = {
+> +	.set_clock = sdhci_brcmstb_set_clock,
+> +	.set_bus_width = sdhci_set_bus_width,
+> +	.reset = brcmstb_reset_74165b0,
+> +	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
+> +};
+> +
+>  static struct brcmstb_match_priv match_priv_7425 = {
+>  	.flags = BRCMSTB_MATCH_FLAGS_NO_64BIT |
+>  	BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
+> @@ -179,10 +229,17 @@ static const struct brcmstb_match_priv match_priv_7216 = {
+>  	.ops = &sdhci_brcmstb_ops_7216,
+>  };
+>  
+> +static struct brcmstb_match_priv match_priv_74165b0 = {
+> +	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
+> +	.hs400es = sdhci_brcmstb_hs400es,
+> +	.ops = &sdhci_brcmstb_ops_74165b0,
+> +};
+> +
+>  static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
+>  	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
+>  	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
+>  	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
+> +	{ .compatible = "brcm,bcm74165b0-sdhci", .data = &match_priv_74165b0 },
+>  	{},
+>  };
+>  
+
