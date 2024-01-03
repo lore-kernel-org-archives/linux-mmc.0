@@ -1,143 +1,141 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8FA018622
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Jan 2024 09:20:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=foundries.io
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foundries.io
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C060318C15
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Jan 2024 10:27:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="R3fwunVT"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-40d5f40ce04so56636025e9.2
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2024 01:20:46 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AAcaFfEL"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-5ef7c6f4cfcso1982187b3.1
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2024 02:27:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=foundries.io; s=google; t=1704273645; x=1704878445; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=QaFoN/jrgLx0tAxN9/O+jklrUdQXJQRgijDTkOtoZpU=;
-        b=R3fwunVTlNHugGOSzFZiFfPZG0pPkGrEFFwQbvawU01YiNyX4KJy41SbirLdcoqXPO
-         rXJrkvz+Pi1QioqO9hNXfCbAU4dPKFCQ+4/BIJNUgUlgfXl5a32dZuRUEpzO2c4Cj80R
-         eXgFGBgrkekIHJZb5LYSlKGj9otWAmpfBqh1PXQEdNrMNTF0r1R8cz07gMu+xDkc4gUb
-         pf8O+lkp3qyfcyBOs2jQB2rMp84fK3bkLiBhBWMtS6Kzm43fM5zugq53E3G/5x6aANd2
-         9FHK3kWn6e2faLPhETM5y2u/DO8kRrc/9orFUDTR0JFFdkLRb3jtNzprsNKAis7+nXoO
-         7CAA==
+        d=linaro.org; s=google; t=1704277673; x=1704882473; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=L8nUGwMGmcdQ37anP4pXbySXho8ZvOsvtGKAUVKkBoE=;
+        b=AAcaFfEL/zc+DPcuT8WIV6yyWCd4JyyIjNw7C+plFq4U91Bpyq7huqFrp1FfoIK0TX
+         zn8ddkK030kUmth5Rfszt3bkN2SXF5GAB2WA1ADLIO0xIWGH1OapIID8wz4QR5AyyTu1
+         CCXuCCKo7R8ho6P2apU63W7LysB3FIDFTA/X8b9g3V6cM3p6xqFQqOvJrnR/z/nMZPO/
+         SfEOgZvlkzupgP5aERbaiAfTGqjAryxUZHsgQH7gBLcqTgHSw/cQiQGEnJL5oINe1ji8
+         LMtRxRWRmmtg7/FQSiC/bCtBGxslUAmZdg0qXyK0MBbTuc2AHhX2U5dQZ1tx/6Ky9fBg
+         shvg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704273645; x=1704878445;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QaFoN/jrgLx0tAxN9/O+jklrUdQXJQRgijDTkOtoZpU=;
-        b=JbIAJoXnPJvHUSenhR2VfDjXAwNjFE5qZRwtSq4OICbn9sHtREUNVhqq9ag8I8oOtJ
-         7PMg1vY3YRJWHTEvi3rcT+PIzlpaU2+2psX6dsqciE5nExjHxiubuTlocGH6ZM/Cjmsp
-         d6H5+6kB0+jhnH7q002DPeUXO+kYwz3bCExozvU40oRYjon3pydoQEv3/VMeTIznjR1a
-         yaSWnQ9/wJ9pVxH6eGotz7OiIAteCEZfn5nJ6EYGG0IUi0SnFyp2F6nJaEm6flBlTVwS
-         5+v6AU/iFlfe4DdL040gBPVJiF+1c/OcSjwcY+EAmksBjNIMgTcT5lal1+wjkQ+z8PgK
-         g0ZQ==
-X-Gm-Message-State: AOJu0YzS4FNMWAaV7w19Bq9i4Cm1EtL0cZ4L5tuJB8QGb0jVIn0x39Dw
-	S1cIHb+fWlxGHvJhtDXciV0O7efHr58g5Q==
-X-Google-Smtp-Source: AGHT+IHiBz/L4Qtu3Jhubv2tPR2oIpN1xMVHZRndxbxeJpPbMBfUrDGa5MHFTCOK8JLCYDjZFIMwLw==
-X-Received: by 2002:a05:600c:4f4d:b0:40d:5b34:18b4 with SMTP id m13-20020a05600c4f4d00b0040d5b3418b4mr6077742wmq.91.1704273645100;
-        Wed, 03 Jan 2024 01:20:45 -0800 (PST)
-Received: from trux (96.red-79-144-190.dynamicip.rima-tde.net. [79.144.190.96])
-        by smtp.gmail.com with ESMTPSA id 8-20020a05600c024800b0040d87100733sm1687878wmj.39.2024.01.03.01.20.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Jan 2024 01:20:44 -0800 (PST)
-From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
-X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
-Date: Wed, 3 Jan 2024 10:20:43 +0100
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>,
-	Avri Altman <Avri.Altman@wdc.com>,
-	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-	"christian.loehle@arm.com" <christian.loehle@arm.com>,
-	"jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
-	"axboe@kernel.dk" <axboe@kernel.dk>,
-	"beanhuo@micron.com" <beanhuo@micron.com>,
-	"yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
-	"victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
-	"asuk4.q@gmail.com" <asuk4.q@gmail.com>,
-	"hkallweit1@gmail.com" <hkallweit1@gmail.com>,
-	"yangyingliang@huawei.com" <yangyingliang@huawei.com>,
-	"yebin10@huawei.com" <yebin10@huawei.com>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
-Message-ID: <ZZUm68tU9zHsC+X+@trux>
-References: <20231204150111.3320071-1-jorge@foundries.io>
- <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
- <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
- <ZXBGTxS7sUSILtLs@trax>
- <ZXbBhjZIn5sj6EYO@trax>
- <ZZPoRPxdWXuT+cEo@trax>
- <b88eca08-7f20-4287-802c-ae1c8e3cd5cf@intel.com>
- <ZZSH1ykwP45fZaLh@trax>
- <d1fac554-4a51-409e-bc52-100a6bb4f5dd@intel.com>
+        d=1e100.net; s=20230601; t=1704277673; x=1704882473;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=L8nUGwMGmcdQ37anP4pXbySXho8ZvOsvtGKAUVKkBoE=;
+        b=QJYtVX3v1FBxIBhhIad5sf+fXrUnDDnHDN5FkdXWpjI1OVTG0exzjKJwEQlpZXmTXd
+         C8JvY3zWQVW52SaFHe5Lcljm9T+81K6skJslrYrvAA9PCaIGGhYhnA8vbcqQq07f3Tpj
+         6PS4Zg+fdJgpUD6SJAowOzaCb274yuNusxrpAWYlFcyaBYe7Xdh6NmRS0wSGyNb/Km+u
+         ECx4o+WQ97EvmGzjLSyFUHIB3QYM/R3BjMmVE1KYoyhTShsFsJGUzVMQ7S5MZ2y1vfj3
+         u9bq1Jj0C9myNKXsj8ZIhlQmCKqqoPLAElG4xRv1z2Y0QQCvRPn+QP2l6giw1v3w3r5a
+         7rDQ==
+X-Gm-Message-State: AOJu0Yx1SBZ+EisHCctBPb4IDOTH7+1FBMkMFufrqRUmIDes1xHl3Yst
+	M+dl9oHwJl3h65A8puH8on8dNVDs7vUytMOyuq0tbcVVczbdNw==
+X-Google-Smtp-Source: AGHT+IEUPNT2HMmW05/SR8MDqddWqlAS7vZ7shNJ7I7uIXlGR59qr5DBqeSRyt9sBZpoCJ9vUnoT8h2VTVj2ohvsU6U=
+X-Received: by 2002:a25:8a88:0:b0:dbd:998:5fbd with SMTP id
+ h8-20020a258a88000000b00dbd09985fbdmr449597ybl.32.1704277672737; Wed, 03 Jan
+ 2024 02:27:52 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <d1fac554-4a51-409e-bc52-100a6bb4f5dd@intel.com>
+References: <20231204064934.21236-1-wenchao.chen@unisoc.com>
+ <CAPDyKFpK2Yjj2oDWCUKHpht6PC9uNG-x2rPYO3EBD6GGWg4VZg@mail.gmail.com>
+ <CA+Da2qyB2tQjq5wxoqNwjb5HXhdPHMsWN08Ot7nMEkZzOgQ9LA@mail.gmail.com>
+ <7541f17a-f0a7-486b-9664-3573623d7154@linux.alibaba.com> <CA+Da2qy7Rwkx-SXORi8DB5ptaTm1TuME+CgsCDk2Bs-rJo6gsg@mail.gmail.com>
+In-Reply-To: <CA+Da2qy7Rwkx-SXORi8DB5ptaTm1TuME+CgsCDk2Bs-rJo6gsg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 3 Jan 2024 11:27:16 +0100
+Message-ID: <CAPDyKFocwf2pc4h+Ua4meP90RegSmXdV1De5jVJ50UnxRzWYmw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sprd: Fix eMMC init failure after hw reset
+To: Wenchao Chen <wenchao.chen666@gmail.com>
+Cc: Baolin Wang <baolin.wang@linux.alibaba.com>, Wenchao Chen <wenchao.chen@unisoc.com>, 
+	zhang.lyra@gmail.com, orsonzhai@gmail.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com, 
+	yuelin.tang@unisoc.com
+Content-Type: text/plain; charset="UTF-8"
 
-On 03/01/24 10:03:38, Adrian Hunter wrote:
-> Thanks for doing that!  That seems to explain the mystery.
+On Wed, 3 Jan 2024 at 02:41, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
 >
-> You could hack the test to get an idea of how many successful
-> iterations there are before getting an error.
+> Gentle ping.
+
+Thanks for pinging and sorry for the delay!
+
+Patch applied for fixes and by adding a stable tag, thanks!
+
+Kind regards
+Uffe
+
 >
-> For SDHCI, one difference between tuning and re-tuning is the
-> setting of bit-7 "Sampling Clock Select" of "Host Control 2 Register".
-> It is initially 0 and then set to 1 after the successful tuning.
-> Essentially, leaving it set to 1 is meant to speed up the re-tuning.
-> You could try setting it to zero instead, and see if that helps.
-> e.g.
+> Thanks,
+> Wenchao.Chen
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c79f73459915..714d8cc39709 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2732,6 +2732,7 @@ void sdhci_start_tuning(struct sdhci_host *host)
->  	ctrl |= SDHCI_CTRL_EXEC_TUNING;
->  	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
->  		ctrl |= SDHCI_CTRL_TUNED_CLK;
-> +	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
->  	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->
->  	/*
->
-
-
-Yes with that change, the re-tuning reliability test does pass.
-
-root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0#  echo 52 > /sys/kernel/debug/mmc0/mmc0\:0001/test
-[  237.833585] mmc0: Starting tests of card mmc0:0001...
-[  237.838759] mmc0: Test case 52. Re-tuning reliability...
-[  267.845403] mmc0: Result: OK
-[  267.848365] mmc0: Tests completed.
-
-
-Unfortunately I still see the error when looping on RPMB reads.
-
-For instance with this test script
- $ while true; do rpmb_read m4hash; usleep 300; done
-
-I can see the error triggering on the serial port after a minute or so.
-[  151.682907] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
-
-Causing OP-TEE to panic since the RPMB read returns an error
-E/TC:? 0
-E/TC:? 0 TA panicked with code 0xffff0000
-E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
-E/LD:   arch: aarch64
-[...]
-
-if anything else springs to your mind I am happy to test of course - there are
-so many tunnables in this subsystem that experience is this area has exponential
-value (and I dont have much).
-
-Would it make sense if re-tuning requests are rejected unless a minimum number
-of jiffies have passed? should I try that as a change?
-
-or maybe delay a bit longer the RPMB access after a retune request?
+> On Tue, 12 Dec 2023 at 10:57, Baolin Wang <baolin.wang@linux.alibaba.com> wrote:
+> >
+> >
+> >
+> > On 12/8/2023 7:52 PM, Wenchao Chen wrote:
+> > > On Thu, 7 Dec 2023 at 21:59, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > >>
+> > >> On Mon, 4 Dec 2023 at 07:50, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+> > >>>
+> > >>> Some eMMC devices that do not close the auto clk gate
+> > >>> after hw reset will cause eMMC initialization to fail.
+> > >>>
+> > >>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> > >>
+> > >> I assume we want this tagged for stable kernels too, but do we have a
+> > >> corresponding fixes commit that we can point out?
+> > >>
+> > >> Kind regards
+> > >> Uffe
+> > >>
+> > >
+> > > Hi Uffe
+> > > Sorry, I forgot to add fixes commit.
+> > >
+> > > Fixes: ff874dbc4f86 ("mmc: sdhci-sprd: Disable CLK_AUTO when the clock
+> > > is less than 400K")
+> >
+> > With the Fixes tag, looks goo to me.
+> > Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
+> >
+> > >>> ---
+> > >>>   drivers/mmc/host/sdhci-sprd.c | 10 +++++++---
+> > >>>   1 file changed, 7 insertions(+), 3 deletions(-)
+> > >>>
+> > >>> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> > >>> index 6b8a57e2d20f..bed57a1c64b5 100644
+> > >>> --- a/drivers/mmc/host/sdhci-sprd.c
+> > >>> +++ b/drivers/mmc/host/sdhci-sprd.c
+> > >>> @@ -239,15 +239,19 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
+> > >>>          div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
+> > >>>          sdhci_enable_clk(host, div);
+> > >>>
+> > >>> +       val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
+> > >>> +       mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN | SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
+> > >>>          /* Enable CLK_AUTO when the clock is greater than 400K. */
+> > >>>          if (clk > 400000) {
+> > >>> -               val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
+> > >>> -               mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
+> > >>> -                       SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
+> > >>>                  if (mask != (val & mask)) {
+> > >>>                          val |= mask;
+> > >>>                          sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
+> > >>>                  }
+> > >>> +       } else {
+> > >>> +               if (val & mask) {
+> > >>> +                       val &= ~mask;
+> > >>> +                       sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
+> > >>> +               }
+> > >>>          }
+> > >>>   }
+> > >>>
+> > >>> --
+> > >>> 2.17.1
+> > >>>
