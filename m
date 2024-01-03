@@ -1,161 +1,355 @@
-Received: from mx0b-0016f401.pphosted.com (mx0a-0016f401.pphosted.com [67.231.148.174])
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D43131C69D;
-	Wed,  3 Jan 2024 17:35:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mx0b-0016f401.pphosted.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFEE21CA86;
+	Wed,  3 Jan 2024 18:52:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b="Eq6XdzTh"
-Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
-	by mx0a-0016f401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 4032THEs005675;
-	Wed, 3 Jan 2024 09:35:49 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=
-	from:to:cc:subject:date:message-id:mime-version
-	:content-transfer-encoding:content-type; s=pfpt0220; bh=QtaJSWsE
-	JTNUz9p29xBwXZsSB1Org89UHEZ7k9tdeeE=; b=Eq6XdzThntSfmd1r1DZoPXTw
-	Mmhk3ExJSXI61uEy2dTmvQvQbpf1Kgmy9QGWKdC6Ei0IUgnqutRNFuP2F75T4B9/
-	b7zwl0kf0/GtqFFrzw9WHjzrTSLgrH2dMReVMUCNK1hHXDfY7ux+7E4xA96I03em
-	Oen+GNfG1XoJMq1p78A8A3n7DeAdsfeW2UUAt2Nn1Ud4sCeCT28EhRdG71vEM2iJ
-	u4YUazKBpOL/oFRj6rFqo+QV3NKLUVKz8MqVb0GwrWatSFSO509a20dQvgAwRCuL
-	fOlr5K4fiYgcdRMIiH6KDjXnnzBKUYqOfyu9OnndLDKxMSVHjdIKD+RzWjwXZg==
-Received: from dc5-exch02.marvell.com ([199.233.59.182])
-	by mx0a-0016f401.pphosted.com (PPS) with ESMTPS id 3vcxu5unhk-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-	Wed, 03 Jan 2024 09:35:47 -0800 (PST)
-Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Wed, 3 Jan
- 2024 09:35:46 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
- Transport; Wed, 3 Jan 2024 09:35:46 -0800
-Received: from dc3lp-swdev041.marvell.com (dc3lp-swdev041.marvell.com [10.6.60.191])
-	by maili.marvell.com (Postfix) with ESMTP id 94E045B6931;
-	Wed,  3 Jan 2024 09:35:44 -0800 (PST)
-From: Elad Nachman <enachman@marvell.com>
-To: <huziji@marvell.com>, <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-CC: <enachman@marvell.com>
-Subject: [PATCH] mmc: xenon: Add ac5 support via bounce buffer
-Date: Wed, 3 Jan 2024 19:35:41 +0200
-Message-ID: <20240103173541.1835166-1-enachman@marvell.com>
-X-Mailer: git-send-email 2.25.1
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="eghqorrE"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1704307978; x=1735843978;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=eQbs7x9ViQQ3AdE9gveThq22Yr0RNmMxc1ihuW30/+8=;
+  b=eghqorrEs9DnkN+lEe+A9sFWYwCuul/ZHl5WT8JG2zBccteZRaU0MgEl
+   +9x1ZTS3ZJARDKT7huPt96u8gQmXsuO2m1kzxKHzDyjIQnycNHfUkdM1M
+   FDNhMTHQ82ut2hA7JHx8wtaZrLH1R+2ZSzv9eiBIMGjUZtBXFFk00E5Tb
+   uVc+vHFUhBdx/vFCRlpc9UP52Is4ro22CWdCz7MmdmGzhfpmZvV8Or/pQ
+   VXiW8JWY8P4OEFu2B8uVT8nzo0uXGi+TpLnGevolsRYDb1Vi4f9TO6SAn
+   qbtRRnChF7iyzrOi1RW4vghymbf90p8gPdky/tqBavT1BSl/iVorqG19d
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10942"; a="382009506"
+X-IronPort-AV: E=Sophos;i="6.04,328,1695711600"; 
+   d="scan'208";a="382009506"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jan 2024 10:52:58 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10942"; a="850508452"
+X-IronPort-AV: E=Sophos;i="6.04,328,1695711600"; 
+   d="scan'208";a="850508452"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.162])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jan 2024 10:52:55 -0800
+Message-ID: <8eecede9-23b6-48dd-90e2-68e1f2722830@intel.com>
+Date: Wed, 3 Jan 2024 20:52:50 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Proofpoint-ORIG-GUID: LvIhS-xD5PP_syi32eiOwJvqelREBfVU
-X-Proofpoint-GUID: LvIhS-xD5PP_syi32eiOwJvqelREBfVU
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-12-09_02,2023-12-07_01,2023-05-22_02
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+Content-Language: en-US
+To: Sergey Khimich <serghox@gmail.com>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+ Shawn Lin <shawn.lin@rock-chips.com>, Jyan Chou <jyanchou@realtek.com>
+References: <20231231144619.758290-1-serghox@gmail.com>
+ <20231231144619.758290-3-serghox@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20231231144619.758290-3-serghox@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-From: Elad Nachman <enachman@marvell.com>
+On 31/12/23 16:46, Sergey Khimich wrote:
+> From: Sergey Khimich <serghox@gmail.com>
+> 
+> For enabling CQE support just set 'supports-cqe' in your DevTree file
+> for appropriate mmc node.
+> 
+> Signed-off-by: Sergey Khimich <serghox@gmail.com>
+> ---
+>  drivers/mmc/host/Kconfig            |   1 +
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 181 +++++++++++++++++++++++++++-
+>  2 files changed, 180 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 58bd5fe4cd25..f7594705b013 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -233,6 +233,7 @@ config MMC_SDHCI_OF_DWCMSHC
+>  	depends on MMC_SDHCI_PLTFM
+>  	depends on OF
+>  	depends on COMMON_CLK
+> +	select MMC_CQHCI
+>  	help
+>  	  This selects Synopsys DesignWare Cores Mobile Storage Controller
+>  	  support.
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 3a3bae6948a8..0ba1df4bcf36 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -20,6 +20,7 @@
+>  #include <linux/sizes.h>
+>  
+>  #include "sdhci-pltfm.h"
+> +#include "cqhci.h"
+>  
+>  #define SDHCI_DWCMSHC_ARG2_STUFF	GENMASK(31, 16)
+>  
+> @@ -36,6 +37,9 @@
+>  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
+>  #define DWCMSHC_EMMC_ATCTRL		0x40
+>  
+> +/* DWC IP vendor area 2 pointer */
+> +#define DWCMSHC_P_VENDOR_AREA2		0xea
+> +
+>  /* Rockchip specific Registers */
+>  #define DWCMSHC_EMMC_DLL_CTRL		0x800
+>  #define DWCMSHC_EMMC_DLL_RXCLK		0x804
+> @@ -75,6 +79,11 @@
+>  #define BOUNDARY_OK(addr, len) \
+>  	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+>  
+> +#define DWCMSHC_SDHCI_CQE_TRNS_MODE	(SDHCI_TRNS_MULTI | \
+> +					 SDHCI_TRNS_BLK_CNT_EN | \
+> +					 SDHCI_TRNS_DMA)
+> +
+> +
+>  enum dwcmshc_rk_type {
+>  	DWCMSHC_RK3568,
+>  	DWCMSHC_RK3588,
+> @@ -90,7 +99,9 @@ struct rk35xx_priv {
+>  
+>  struct dwcmshc_priv {
+>  	struct clk	*bus_clk;
+> -	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
+> +	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA1 reg */
+> +	int vendor_specific_area2; /* P_VENDOR_SPECIFIC_AREA2 reg */
+> +
+>  	void *priv; /* pointer to SoC private stuff */
+>  };
+>  
+> @@ -210,6 +221,90 @@ static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
+>  	sdhci_writel(host, vendor, reg);
+>  }
+>  
+> +static int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +{
+> +	int err = sdhci_execute_tuning(mmc, opcode);
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +
+> +	if (err)
+> +		return err;
+> +
+> +	/*
+> +	 * Tuning can leave the IP in an active state (Buffer Read Enable bit
+> +	 * set) which prevents the entry to low power states (i.e. S0i3). Data
+> +	 * reset will clear it.
+> +	 */
+> +	sdhci_reset(host, SDHCI_RESET_DATA);
+> +
+> +	return 0;
+> +}
+> +
+> +static u32 dwcmshc_cqe_irq_handler(struct sdhci_host *host, u32 intmask)
+> +{
+> +	int cmd_error = 0;
+> +	int data_error = 0;
+> +
+> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+> +		return intmask;
+> +
+> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +
+> +	return 0;
+> +}
+> +
+> +static void dwcmshc_sdhci_cqe_enable(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	u8 ctrl;
+> +
+> +	sdhci_writew(host, DWCMSHC_SDHCI_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
+> +
+> +	sdhci_cqe_enable(mmc);
+> +
+> +	/*
+> +	 * The "DesignWare Cores Mobile Storage Host Controller
+> +	 * DWC_mshc / DWC_mshc_lite Databook" says:
+> +	 * when Host Version 4 Enable" is 1 in Host Control 2 register,
+> +	 * SDHCI_CTRL_ADMA32 bit means ADMA2 is selected.
+> +	 * Selection of 32-bit/64-bit System Addressing:
+> +	 * either 32-bit or 64-bit system addressing is selected by
+> +	 * 64-bit Addressing bit in Host Control 2 register.
+> +	 *
+> +	 * On the other hand the "DesignWare Cores Mobile Storage Host
+> +	 * Controller DWC_mshc / DWC_mshc_lite User Guide" says, that we have to
+> +	 * set DMA_SEL to ADMA2 _only_ mode in the Host Control 2 register.
+> +	 */
+> +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +	ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> +	ctrl |= SDHCI_CTRL_ADMA32;
+> +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +}
+> +
+> +static void dwcmshc_set_tran_desc(struct cqhci_host *cq_host, u8 **desc,
+> +				  dma_addr_t addr, int len, bool end, bool dma64)
+> +{
+> +	int tmplen, offset;
+> +
+> +	if (likely(!len || BOUNDARY_OK(addr, len))) {
+> +		cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+> +		return;
+> +	}
+> +
+> +	offset = addr & (SZ_128M - 1);
+> +	tmplen = SZ_128M - offset;
+> +	cqhci_set_tran_desc(*desc, addr, tmplen, false, dma64);
+> +
+> +	addr += tmplen;
+> +	len -= tmplen;
+> +	*desc += cq_host->trans_desc_len;
+> +	cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+> +}
+> +
+> +static void dwcmshc_cqhci_dumpregs(struct mmc_host *mmc)
+> +{
+> +	sdhci_dumpregs(mmc_priv(mmc));
+> +}
+> +
+>  static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -345,6 +440,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+>  	.get_max_clock		= dwcmshc_get_max_clock,
+>  	.reset			= sdhci_reset,
+>  	.adma_write_desc	= dwcmshc_adma_write_desc,
+> +	.irq			= dwcmshc_cqe_irq_handler,
+>  };
+>  
+>  static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
+> @@ -379,6 +475,71 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+>  		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>  };
+>  
+> +static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
+> +	.enable		= dwcmshc_sdhci_cqe_enable,
+> +	.disable	= sdhci_cqe_disable,
+> +	.dumpregs	= dwcmshc_cqhci_dumpregs,
+> +	.set_tran_desc	= dwcmshc_set_tran_desc,
+> +};
+> +
+> +static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *pdev)
+> +{
+> +	struct cqhci_host *cq_host;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	bool dma64 = false;
+> +	u16 clk;
+> +	int err;
+> +
+> +	host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+> +	cq_host = devm_kzalloc(&pdev->dev, sizeof(*cq_host), GFP_KERNEL);
+> +	if (!cq_host) {
+> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: not enough memory\n");
+> +		return;
+> +	}
+> +
+> +	/*
+> +	 * For dwcmshc host controller we have to enable internal clock
+> +	 * before access to some registers from Vendor Specific Aria 2.
 
-AC5/X/IM SOCs has a variant of the Xenon eMMC controller,
-in which only 31-bit of addressing pass from the controller
-on the AXI bus.
-Since we cannot guarantee that only buffers from the first 2GB
-of memory will reach the driver, the driver is configured for
-SDMA mode, without 64-bit mode, overriding the DMA mask to 34-bit
-to support the DDR memory mapping, which starts at offset 8GB.
+Aria -> Area
 
-Signed-off-by: Elad Nachman <enachman@marvell.com>
----
- drivers/mmc/host/sdhci-xenon.c | 33 ++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-xenon.h |  3 ++-
- 2 files changed, 34 insertions(+), 2 deletions(-)
+> +	 */
+> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	clk |= SDHCI_CLOCK_INT_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	if (!(clk & SDHCI_CLOCK_INT_EN)) {
+> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: internal clock enable error\n");
+> +		goto free_cq_host;
+> +	}
+> +
+> +	cq_host->mmio = host->ioaddr + priv->vendor_specific_area2;
+> +	cq_host->ops = &dwcmshc_cqhci_ops;
+> +
+> +	/* Enable using of 128-bit task descriptors */
+> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+> +	if (dma64) {
+> +		dev_dbg(mmc_dev(host->mmc), "128-bit task descriptors\n");
+> +		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+> +	}
+> +	err = cqhci_init(cq_host, host->mmc, dma64);
+> +	if (err) {
+> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: error %d\n", err);
+> +		goto int_clock_disable;
+> +	}
+> +
+> +	dev_dbg(mmc_dev(host->mmc), "CQE init done\n");
+> +
+> +	return;
+> +
+> +int_clock_disable:
+> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	clk &= ~SDHCI_CLOCK_INT_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +
+> +free_cq_host:
+> +	devm_kfree(&pdev->dev, cq_host);
+> +}
+> +
+> +
+>  static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+>  {
+>  	int err;
+> @@ -471,7 +632,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  	struct rk35xx_priv *rk_priv = NULL;
+>  	const struct sdhci_pltfm_data *pltfm_data;
+>  	int err;
+> -	u32 extra;
+> +	u32 extra, caps;
+>  
+>  	pltfm_data = device_get_match_data(&pdev->dev);
+>  	if (!pltfm_data) {
+> @@ -519,9 +680,12 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  
+>  	priv->vendor_specific_area1 =
+>  		sdhci_readl(host, DWCMSHC_P_VENDOR_AREA1) & DWCMSHC_AREA1_MASK;
+> +	priv->vendor_specific_area2 =
+> +		sdhci_readw(host, DWCMSHC_P_VENDOR_AREA2);
 
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 25ba7aecc3be..4d6df1815da1 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -18,6 +18,8 @@
- #include <linux/of.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-+#include <linux/mm.h>
-+#include <linux/dma-mapping.h>
- 
- #include "sdhci-pltfm.h"
- #include "sdhci-xenon.h"
-@@ -422,6 +424,7 @@ static int xenon_probe_params(struct platform_device *pdev)
- 	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	u32 sdhc_id, nr_sdhc;
- 	u32 tuning_count;
-+	struct sysinfo si;
- 
- 	/* Disable HS200 on Armada AP806 */
- 	if (priv->hw_version == XENON_AP806)
-@@ -450,6 +453,23 @@ static int xenon_probe_params(struct platform_device *pdev)
- 	}
- 	priv->tuning_count = tuning_count;
- 
-+	/*
-+	 * AC5/X/IM HW has only 31-bits passed in the crossbar switch.
-+	 * If we have more than 2GB of memory, this means we might pass
-+	 * memory pointers which are above 2GB and which cannot be properly
-+	 * represented. In this case, disable ADMA, 64-bit DMA and allow only SDMA.
-+	 * This effectively will enable bounce buffer quirk in the
-+	 * generic SDHCI driver, which will make sure DMA is only done
-+	 * from supported memory regions:
-+	 */
-+	if (priv->hw_version == XENON_AC5) {
-+		si_meminfo(&si);
-+		if (si.totalram * si.mem_unit > SZ_2G) {
-+			host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-+			host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
-+		}
-+	}
-+
- 	return xenon_phy_parse_params(dev, host);
- }
- 
-@@ -562,7 +582,17 @@ static int xenon_probe(struct platform_device *pdev)
- 		goto remove_sdhc;
- 
- 	pm_runtime_put_autosuspend(&pdev->dev);
--
-+	/*
-+	 * If we previously detected AC5 with over 2GB of memory,
-+	 * then we disable ADMA and 64-bit DMA.
-+	 * This means generic SDHCI driver has set the DMA mask to
-+	 * 32-bit. Since DDR starts at 0x2_0000_0000, we must use
-+	 * 34-bit DMA mask to access this DDR memory:
-+	 */
-+	if (priv->hw_version == XENON_AC5) {
-+		if (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA)
-+			dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(34));
-+	}
- 	return 0;
- 
- remove_sdhc:
-@@ -680,6 +710,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
- 	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
- 	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
- 	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
-+	{ .compatible = "marvell,ac5-sdhci",	     .data =  (void *)XENON_AC5},
- 	{}
- };
- MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
-diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-index 3e9c6c908a79..0460d97aad26 100644
---- a/drivers/mmc/host/sdhci-xenon.h
-+++ b/drivers/mmc/host/sdhci-xenon.h
-@@ -57,7 +57,8 @@ enum xenon_variant {
- 	XENON_A3700,
- 	XENON_AP806,
- 	XENON_AP807,
--	XENON_CP110
-+	XENON_CP110,
-+	XENON_AC5
- };
- 
- struct xenon_priv {
--- 
-2.25.1
+Is this OK for all IPs? ie. do they all have DWCMSHC_P_VENDOR_AREA2 register?
+
+>  
+>  	host->mmc_host_ops.request = dwcmshc_request;
+>  	host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
+> +	host->mmc_host_ops.execute_tuning = dwcmshc_execute_tuning;
+>  
+>  	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
+>  		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
+> @@ -547,6 +711,10 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  		sdhci_enable_v4_mode(host);
+>  #endif
+>  
+> +	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +	if (caps & SDHCI_CAN_64BIT_V4)
+> +		sdhci_enable_v4_mode(host);
+> +
+>  	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>  
+>  	pm_runtime_get_noresume(dev);
+> @@ -557,6 +725,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  	if (err)
+>  		goto err_rpm;
+>  
+> +	/* Setup Command Queue Engine if enabled */
+> +	if (device_property_read_bool(&pdev->dev, "supports-cqe")) {
+> +		if (caps & SDHCI_CAN_64BIT_V4)
+> +			dwcmshc_cqhci_init(host, pdev);
+> +		else
+> +			dev_warn(dev, "Cannot enable CQE without V4 mode support\n");
+> +	}
+> +
+> +
+
+Double blank line.
+
+>  	if (rk_priv)
+>  		dwcmshc_rk35xx_postinit(host, priv);
+>  
 
