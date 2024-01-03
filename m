@@ -1,130 +1,315 @@
-Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABD1810FE;
-	Wed,  3 Jan 2024 01:41:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA784182A1;
+	Wed,  3 Jan 2024 08:03:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XG5wXB+K"
-Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-28ce9a0e544so146013a91.3;
-        Tue, 02 Jan 2024 17:41:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1704246066; x=1704850866; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Fsry+veA0BH9pQQgtym3vQ1xpw5YN/FTLuIDJlPaT/M=;
-        b=XG5wXB+KD7PJ+JeTu94f18/1QjLLpjdTcNTJWT6qwNYEr6svx+gaU4s743w/TDxPk9
-         LnlOumWItDWuPwwpIIC3CqGpJflk+KxThuzS3Dd5kPN8X9l+8rxa/mW0XEyYIO9YNJXn
-         r6zSrbeqVZnFBq57ySuzxAqXNHG/gXDOsg4L1iEbgoJdK1EyED9V5FSgbPOC1EXnCXmx
-         ySQYjKR4xq2BbNJK/RG+B62BLnZSKlhkrzEtg5aLh0l841RZsfPL30xHl094OMVuxJLQ
-         vfbNcUJIQJVMbx2x+LaGhdTNiB+nPRRgOXlOiiyqsyuPMHDen5NGveRz5tQusoN71er5
-         rz5A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704246066; x=1704850866;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Fsry+veA0BH9pQQgtym3vQ1xpw5YN/FTLuIDJlPaT/M=;
-        b=HS7ssEB18JQZ6Q1g859aJOSDnv5VnzMPl/NUEYs7kQ+bGVOnmCoWGpCWffprdA5HOG
-         lBoaDauI5j7CrqFeqLUD5u7xtqrxNUdyQCkc/q69/hvF+Uj41Fuls7bHjRmyiwPgWCKv
-         vt/kcGVtleHwDp4IFIenVxutnZ3UHND2xKDEm1P/HYDJOQqJEd8JhIe328OWdmM3NGMG
-         lR6+XWjcICS9OfqeoVFRPy6vk+Cgwq2lRPeeQlV2PoUETjeIf4dqrrcodBfcKCV+S1C6
-         t2sWbvvx9xvkHa5RlHSLQiaf7xSeBCe7mXXPlBXVAEHvqbP41ic70+KX3Ug8bvQARG1v
-         WONw==
-X-Gm-Message-State: AOJu0YwjlFyYO81gLhYDBVaTGSPuS73d5Q+VUj/Zjb464VKlarJOTu+G
-	4697likbWfAejgDvPpCBLPJsN7kej5Nake1JJNRGfLXYXcx+mw==
-X-Google-Smtp-Source: AGHT+IEFA1WPqXBDf6TZ9sAPvWMZnLP1mKpQSnenwwwlgbRJFCw1RJsRUvloVhcxfRR496mPMA+HdaNkqeQLbJbJQe8=
-X-Received: by 2002:a17:90a:7186:b0:28c:d9b:5983 with SMTP id
- i6-20020a17090a718600b0028c0d9b5983mr8760421pjk.48.1704246065933; Tue, 02 Jan
- 2024 17:41:05 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GnAfYUUb"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1704269027; x=1735805027;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=l5+EuJwYQuWGCdbDvh2EC5LTG8OCKVkqFz6/bxydejg=;
+  b=GnAfYUUbdC408XCXKaNQTv5VFgSBHky5aHOsUjqJD2B5YGqeB9KvG4QZ
+   gaIKhPJ6Ru4BwQ+xNSWoYyzW1DJUdIIESiNkn2DA+W5efLZlVC8RGBl73
+   OdOHbH2gF/tBUL+TGiJOoHYgy158vmHyPhMlIeYOtST/98EhmUCl2C12p
+   IDaL6ZpaOAwuQoFZgL6tYlVjHvWVqNX8EsGxTx6LDLHw+G4Q+llz5IyrN
+   Zhb1Mr8I1RlhvOCAn2+PrQ/TJxf92t3F2Ml/mvrS6Dd9mOQKcCT/4YVwb
+   oQ+wMIEXjr5id9so7+yNRvauYsFAdG57Qq8+kqKQzGtaXWDUCyiBgrDDP
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10941"; a="387431571"
+X-IronPort-AV: E=Sophos;i="6.04,327,1695711600"; 
+   d="scan'208";a="387431571"
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jan 2024 00:03:46 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10941"; a="756149623"
+X-IronPort-AV: E=Sophos;i="6.04,327,1695711600"; 
+   d="scan'208";a="756149623"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.162])
+  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jan 2024 00:03:42 -0800
+Message-ID: <d1fac554-4a51-409e-bc52-100a6bb4f5dd@intel.com>
+Date: Wed, 3 Jan 2024 10:03:38 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231204064934.21236-1-wenchao.chen@unisoc.com>
- <CAPDyKFpK2Yjj2oDWCUKHpht6PC9uNG-x2rPYO3EBD6GGWg4VZg@mail.gmail.com>
- <CA+Da2qyB2tQjq5wxoqNwjb5HXhdPHMsWN08Ot7nMEkZzOgQ9LA@mail.gmail.com> <7541f17a-f0a7-486b-9664-3573623d7154@linux.alibaba.com>
-In-Reply-To: <7541f17a-f0a7-486b-9664-3573623d7154@linux.alibaba.com>
-From: Wenchao Chen <wenchao.chen666@gmail.com>
-Date: Wed, 3 Jan 2024 09:40:54 +0800
-Message-ID: <CA+Da2qy7Rwkx-SXORi8DB5ptaTm1TuME+CgsCDk2Bs-rJo6gsg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sprd: Fix eMMC init failure after hw reset
-To: Baolin Wang <baolin.wang@linux.alibaba.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wenchao Chen <wenchao.chen@unisoc.com>, 
-	zhang.lyra@gmail.com, orsonzhai@gmail.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com, 
-	yuelin.tang@unisoc.com
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
+To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+Cc: Avri Altman <Avri.Altman@wdc.com>,
+ "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+ "christian.loehle@arm.com" <christian.loehle@arm.com>,
+ "jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
+ "axboe@kernel.dk" <axboe@kernel.dk>, "beanhuo@micron.com"
+ <beanhuo@micron.com>, "yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
+ "victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
+ "asuk4.q@gmail.com" <asuk4.q@gmail.com>,
+ "hkallweit1@gmail.com" <hkallweit1@gmail.com>,
+ "yangyingliang@huawei.com" <yangyingliang@huawei.com>,
+ "yebin10@huawei.com" <yebin10@huawei.com>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <20231204150111.3320071-1-jorge@foundries.io>
+ <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
+ <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <ZXBGTxS7sUSILtLs@trax> <ZXbBhjZIn5sj6EYO@trax> <ZZPoRPxdWXuT+cEo@trax>
+ <b88eca08-7f20-4287-802c-ae1c8e3cd5cf@intel.com> <ZZSH1ykwP45fZaLh@trax>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <ZZSH1ykwP45fZaLh@trax>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Gentle ping.
+On 3/01/24 00:01, Jorge Ramirez-Ortiz, Foundries wrote:
+> On 02/01/24 21:01:52, Adrian Hunter wrote:
+>> On 2/01/24 12:41, Jorge Ramirez-Ortiz, Foundries wrote:
+>>> On 11/12/23 09:00:06, Jorge Ramirez-Ortiz, Foundries wrote:
+>>>> On 06/12/23 11:00:47, Jorge Ramirez-Ortiz, Foundries wrote:
+>>>>> On 06/12/23 07:02:43, Avri Altman wrote:
+>>>>>>>
+>>>>>>> On 4/12/23 17:01, Jorge Ramirez-Ortiz wrote:
+>>>>>>>> Requesting a retune before switching to the RPMB partition has been
+>>>>>>>> observed to cause CRC errors on the RPMB reads (-EILSEQ).
+>>>>>>>
+>>>>>>> There are still 2 concerns:
+>>>>>>> 1) We don't really know the root cause.  Have you determined if here are
+>>>>>>> CRC errors in the main partition also?
+>>>>>
+>>>>> right, and I don't disagree with that.
+>>>>>
+>>>>> As a test I created a 4GB file from /dev/random which I then copied
+>>>>> several times (dd if= ....)
+>>>>>
+>>>>> root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0# cat err_stats
+>>>>> # Command Timeout Occurred:      0
+>>>>> # Command CRC Errors Occurred:   0
+>>>>> # Data Timeout Occurred:         0
+>>>>> # Data CRC Errors Occurred:      0
+>>>>> # Auto-Cmd Error Occurred:       0
+>>>>> # ADMA Error Occurred:   0
+>>>>> # Tuning Error Occurred:         0
+>>>>> # CMDQ RED Errors:       0
+>>>>> # CMDQ GCE Errors:       0
+>>>>> # CMDQ ICCE Errors:      0
+>>>>> # Request Timedout:      0
+>>>>> # CMDQ Request Timedout:         0
+>>>>> # ICE Config Errors:     0
+>>>>> # Controller Timedout errors:    0
+>>>>> # Unexpected IRQ errors:         0
+>>>>>
+>>>>> However as soon as I access RPMB and fails (it takes just a few tries) I see:
+>>>>>
+>>>>> I/TC: RPMB: Using generated key
+>>>>> [   86.902118] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
+>>>>> E/TC:? 0
+>>>>> E/TC:? 0 TA panicked with code 0xffff0000
+>>>>> E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
+>>>>> E/LD:   arch: aarch64
+>>>>> E/LD:  region  0: va 0xc0004000 pa 0x7e200000 size 0x002000 flags rw-s (ldelf)
+>>>>> E/LD:  region  1: va 0xc0006000 pa 0x7e202000 size 0x008000 flags r-xs (ldelf)
+>>>>> E/LD:  region  2: va 0xc000e000 pa 0x7e20a000 size 0x001000 flags rw-s (ldelf)
+>>>>> E/LD:  region  3: va 0xc000f000 pa 0x7e20b000 size 0x004000 flags rw-s (ldelf)
+>>>>> E/LD:  region  4: va 0xc0013000 pa 0x7e20f000 size 0x001000 flags r--s
+>>>>> E/LD:  region  5: va 0xc0014000 pa 0x7e22c000 size 0x005000 flags rw-s (stack)
+>>>>> E/LD:  region  6: va 0xc0019000 pa 0x818ea9ba8 size 0x002000 flags rw-- (param)
+>>>>> E/LD:  region  7: va 0xc001b000 pa 0x818e97ba8 size 0x001000 flags rw-- (param)
+>>>>> E/LD:  region  8: va 0xc004f000 pa 0x00001000 size 0x014000 flags r-xs [0]
+>>>>> E/LD:  region  9: va 0xc0063000 pa 0x00015000 size 0x008000 flags rw-s [0]
+>>>>> E/LD:   [0] 22250a54-0bf1-48fe-8002-7b20f1c9c9b1 @ 0xc004f000
+>>>>> E/LD:  Call stack:
+>>>>> E/LD:   0xc0051a14
+>>>>> E/LD:   0xc004f31c
+>>>>> E/LD:   0xc0052d40
+>>>>> E/LD:   0xc004f624
+>>>>>
+>>>>> root@uz3cg-dwg-sec:/var/rootdirs/home/fio# cat /sys/kernel/debug/mmc0/err_stats
+>>>>> # Command Timeout Occurred:      0
+>>>>> # Command CRC Errors Occurred:   0
+>>>>> # Data Timeout Occurred:         0
+>>>>> # Data CRC Errors Occurred:      1
+>>>>> # Auto-Cmd Error Occurred:       0
+>>>>> # ADMA Error Occurred:   0
+>>>>> # Tuning Error Occurred:         0
+>>>>> # CMDQ RED Errors:       0
+>>>>> # CMDQ GCE Errors:       0
+>>>>> # CMDQ ICCE Errors:      0
+>>>>> # Request Timedout:      0
+>>>>> # CMDQ Request Timedout:         0
+>>>>> # ICE Config Errors:     0
+>>>>> # Controller Timedout errors:    0
+>>>>> # Unexpected IRQ errors:         0
+>>>>>
+>>>>>>> 2) Forcing this on everyone
+>>>>>>>
+>>>>>>> The original idea was that because re-tuning cannot be done in RPMB, the
+>>>>>>> need to re-rune in RPMB could be avoided by always re-tuning before
+>>>>>>> switching to RPMB and then switching straight back. IIRC re-tuning should
+>>>>>>> guarantee at least 4MB more I/O without issue.
+>>>>>> Performance is hardly an issue in the context of RPMB access -
+>>>>>> For most cases it’s a single frame.
+>>>>>
+>>>>> Yes, the security use case typically stores hashes, variables
+>>>>> (bootcount, upgrade_available, versions, that sort of thing) and
+>>>>> certificates in RPMB.
+>>>>>
+>>>>> Since you mentioned, I am seeing that tuning before switching to RPMB
+>>>>> has an impact on performance. As a practical test, just reading a 6 byte
+>>>>> variable incurs in 50ms penalty in kernel space due to the need to
+>>>>> retune 5 times. Not great since the request is coming from a Trusted
+>>>>> Application via OP-TEE through the supplicant meaning this TEE thread
+>>>>> (they are statically allocated CFG_NUM_THREADS) will be reserved for
+>>>>> quite a bit of time.
+>>>>>
+>>>>> Roughly:
+>>>>> TA --> OP-TEE (core) --> TEE-supplicant --> Kernel (>50ms) --> OP-TEE --> TA
+>>>>
+>>>> To add more detail to the timing above, when using RPMB, OP-TEE stores
+>>>> the secure filesystem on RPMB as well, so accessing one of the variables
+>>>> stored in the filesystem consists on a number (~5) of individual RPMB
+>>>> requests (each one forcing a retune, each retune taking around 10ms).
+>>>
+>>> Adrian, please could you comment on the above.
+>>>
+>>> The current code is a performance drag for systems that implement their
+>>> secure filesystems on RPMB (i.e: OP-TEE) causing each read operation (of
+>>> variables consisting of a few bytes stored in such a filesystem) to
+>>> perform 5 consecutive retune requests.
+>>>
+>>> I am just thinking whether the original use case that forces a call to
+>>> retune prior to processing the RPMB request remains valid.
+>>
+>> I am not sure what you are asking.
+>>
+>> For some transfer modes, re-tuning is expected to deal with sampling
+>> point drift over time, mainly due to temperature changes.  It is done
+>> either periodically (tuning timer) or after a CRC error.
+>>
+>> There is no reason to assume RPMB is immune from that.
+>>
+>> Certainly re-tuning before switching to RPMB is not optimal for
+>> performance, and we can leave that out, but a CRC error before
+>> or during RPMB operations will *still* result in re-tuning
+>> after switching back from RPMB.
+>>
+>> In your case, re-tuning makes things worse, which is a bit of a
+>> mystery.  Running the new re-tuning test would tell us whether
+>> it makes things worse in general, or only for RPMB.
+>>
+>>>
+>>> Independently of the fact that not doing so fixes the problem I was
+>>> working on - and with the information I have - I dont think RPMB is
+>>> generally used to store larger files (maybe you have more information
+>>> about the average use case? are you aware of systems using RPMB to store
+>>> binaries or images?)
+>>>
+>>> I still I have to execute the test you shared some weeks ago. Bit of a
+>>> pain to NFS boot this system...will try to do it this week.
+>>
+>> Other options are to boot with an initrd only, or after boot switch
+>> to a RAM-based file system.
+>>
+>> I was waiting for this, since it is good to try to get closer to a
+>> root cause, but as you point out, the change is good for performance
+>> also, so I will Ack it.
+> 
+> great, thanks!
+> I was finally able to nfs mount this project (was a bit of a pain since
+> the board is using ostree).
+> 
+> The test failed. See below
+> 
+> root@uz3cg-dwg-sec:/# uname -a
+> Linux uz3cg-dwg-sec 5.15.64-lmp-standard #1 SMP Thu Sep 1 02:40:19 UTC 2022 aarch64 GNU/Linux
+> 
+> root@uz3cg-dwg-sec:/# cat /proc/cmdline
+> earlycon console=ttyPS0,115200 clk_ignore_unused root=/dev/nfs nfsroot=192.168.1.9:/srv/nfs/rootfs rootwait rw nfsrootdebug ip=dhcp rootfstype=ext4 ostree=ostree/boot.1.1/lmp/5c73dc21eb70c12363747b90c04302115715fa46063a9099841cf23cc70c09a6/0
+> 
+> root@uz3cg-dwg-sec:/sys/bus/mmc/drivers# cd mmcblk/
+> 
+> root@uz3cg-dwg-sec:/sys/bus/mmc/drivers/mmcblk# ls
+> bind       mmc0:0001  uevent     unbind
+> 
+> root@uz3cg-dwg-sec:/sys/bus/mmc/drivers/mmcblk# echo 'mmc0:0001' > unbind
+> 
+> root@uz3cg-dwg-sec:/sys/bus/mmc/drivers# echo 'mmc0:0001' > mmc_test/bind
+> [  284.253261] mmc_test mmc0:0001: Card claimed for testing.
+> 
+> root@uz3cg-dwg-sec:/sys/bus/mmc/drivers# cd ..
+> root@uz3cg-dwg-sec:/sys/bus/mmc# ls
+> devices            drivers            drivers_autoprobe  drivers_probe      uevent
+> 
+> root@uz3cg-dwg-sec:/sys/bus/mmc# cd /
+> 
+> root@uz3cg-dwg-sec:/# cat /sys/kernel/debug/mmc0/mmc0\:0001/test
+> test      testlist
+> 
+> root@uz3cg-dwg-sec:/# cat /sys/kernel/debug/mmc0/mmc0\:0001/testlist | grep tuning
+> 52:     Re-tuning reliability
+> 
+> root@uz3cg-dwg-sec:/# echo 52 > /sys/kernel/debug/mmc0/mmc0\:0001/test
+> [  352.283447] mmc0: Starting tests of card mmc0:0001...
+> [  352.288597] mmc0: Test case 52. Re-tuning reliability...
+> [  354.265441] mmc0: Result: ERROR (-84)
+> [  354.269142] mmc0: Tests completed.
+> 
+> root@uz3cg-dwg-sec:/#
 
-Thanks,
-Wenchao.Chen
+Thanks for doing that!  That seems to explain the mystery.
 
-On Tue, 12 Dec 2023 at 10:57, Baolin Wang <baolin.wang@linux.alibaba.com> wrote:
->
->
->
-> On 12/8/2023 7:52 PM, Wenchao Chen wrote:
-> > On Thu, 7 Dec 2023 at 21:59, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >>
-> >> On Mon, 4 Dec 2023 at 07:50, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
-> >>>
-> >>> Some eMMC devices that do not close the auto clk gate
-> >>> after hw reset will cause eMMC initialization to fail.
-> >>>
-> >>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> >>
-> >> I assume we want this tagged for stable kernels too, but do we have a
-> >> corresponding fixes commit that we can point out?
-> >>
-> >> Kind regards
-> >> Uffe
-> >>
-> >
-> > Hi Uffe
-> > Sorry, I forgot to add fixes commit.
-> >
-> > Fixes: ff874dbc4f86 ("mmc: sdhci-sprd: Disable CLK_AUTO when the clock
-> > is less than 400K")
->
-> With the Fixes tag, looks goo to me.
-> Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
->
-> >>> ---
-> >>>   drivers/mmc/host/sdhci-sprd.c | 10 +++++++---
-> >>>   1 file changed, 7 insertions(+), 3 deletions(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> >>> index 6b8a57e2d20f..bed57a1c64b5 100644
-> >>> --- a/drivers/mmc/host/sdhci-sprd.c
-> >>> +++ b/drivers/mmc/host/sdhci-sprd.c
-> >>> @@ -239,15 +239,19 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
-> >>>          div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
-> >>>          sdhci_enable_clk(host, div);
-> >>>
-> >>> +       val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-> >>> +       mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN | SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
-> >>>          /* Enable CLK_AUTO when the clock is greater than 400K. */
-> >>>          if (clk > 400000) {
-> >>> -               val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-> >>> -               mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
-> >>> -                       SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
-> >>>                  if (mask != (val & mask)) {
-> >>>                          val |= mask;
-> >>>                          sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
-> >>>                  }
-> >>> +       } else {
-> >>> +               if (val & mask) {
-> >>> +                       val &= ~mask;
-> >>> +                       sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
-> >>> +               }
-> >>>          }
-> >>>   }
-> >>>
-> >>> --
-> >>> 2.17.1
-> >>>
+You could hack the test to get an idea of how many successful
+iterations there are before getting an error.
+
+For SDHCI, one difference between tuning and re-tuning is the
+setting of bit-7 "Sampling Clock Select" of "Host Control 2 Register".
+It is initially 0 and then set to 1 after the successful tuning.
+Essentially, leaving it set to 1 is meant to speed up the re-tuning.
+You could try setting it to zero instead, and see if that helps.
+e.g.
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c79f73459915..714d8cc39709 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2732,6 +2732,7 @@ void sdhci_start_tuning(struct sdhci_host *host)
+ 	ctrl |= SDHCI_CTRL_EXEC_TUNING;
+ 	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
+ 		ctrl |= SDHCI_CTRL_TUNED_CLK;
++	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+ 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
+ 	/*
+
+
+> 
+> 
+> 
+> 
+>>
+>>
+>>>
+>>> TIA
+>>>
+>>>>
+>>>> BTW, I also tried delaying the timing between those consecutive retunes
+>>>> (up to 1 second), but the issue still persisted.
+>>>>
+>>>>>
+>>>>> Adrian, I couldn't find the original performance justification for
+>>>>> enabling this feature globally. At which point do you think it becomes
+>>>>> beneficial to retune before accessing RPMB?
+>>>>
+>>>> How should we proceed with this patch then? can it be merged as I
+>>>> proposed? should I rewrite it differently? not sure what is next
+>>>>
+>>>> TIA
+>>>> Jorge
+>>
+
