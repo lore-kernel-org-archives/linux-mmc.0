@@ -1,159 +1,139 @@
-Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BF2A286B1;
-	Thu,  4 Jan 2024 17:31:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mx0b-0016f401.pphosted.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40CE328E06;
+	Thu,  4 Jan 2024 18:34:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b="ReDjxyv1"
-Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
-	by mx0b-0016f401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 404AF2II021043;
-	Thu, 4 Jan 2024 09:30:41 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=
-	from:to:cc:subject:date:message-id:mime-version
-	:content-transfer-encoding:content-type; s=pfpt0220; bh=+WG/kg7A
-	naWaSZdtZa4RS3yirZT8LfAXiAzW6sHOpEo=; b=ReDjxyv1s61tzxxsZy3wa1l6
-	udlB20uavMm+g7ySvSlX4F8pB7fSQQ1zi+OuYU5AkeVOXuay5pEniZL58y7vq6SR
-	ioIQi7mJGvS5CUj0dLXn9Un5nXOtPNGYuWRARZ3o++BUFA1kBGFO91HTwcXOB+xF
-	tsrDX4mTYJHVaNCaNHLPwQajAAp5J1iTu+hfom7Th8qq7ACXbG9Su/1bz0SsRX3A
-	h4fS0vHxXe8r5fjBw6mOW+YoZZmpB5riU8z0w8xZoToaN3SZlyP+TJRk9A5R46ay
-	BuFoIvUYzgNVbHdPpobgy1oNqeIeBXH5i6qwW9aJdjroSfsUc4oW9SZjSj3JRg==
-Received: from dc5-exch01.marvell.com ([199.233.59.181])
-	by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3vd39qfped-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-	Thu, 04 Jan 2024 09:30:41 -0800 (PST)
-Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Thu, 4 Jan
- 2024 09:30:39 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
- Transport; Thu, 4 Jan 2024 09:30:39 -0800
-Received: from dc3lp-swdev041.marvell.com (dc3lp-swdev041.marvell.com [10.6.60.191])
-	by maili.marvell.com (Postfix) with ESMTP id 7C58E3F7089;
-	Thu,  4 Jan 2024 09:30:37 -0800 (PST)
-From: Elad Nachman <enachman@marvell.com>
-To: <huziji@marvell.com>, <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-CC: <enachman@marvell.com>
-Subject: [PATCH v2] mmc: xenon: Add ac5 support via bounce buffer
-Date: Thu, 4 Jan 2024 19:30:33 +0200
-Message-ID: <20240104173033.2836110-1-enachman@marvell.com>
-X-Mailer: git-send-email 2.25.1
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Gto5M3Hf"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1704393260; x=1735929260;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=Y5ZQ7s14+htsLTJ2CXBXwYk88AqUJQslodDbp6R4bpA=;
+  b=Gto5M3HfEypJ+ZiifwIViGA/ybx3FCpNOF2GF/2xmvaXfi4Olh0QFa6a
+   hptFOXtHg/oDmXhYXmyuPjS9VJaEimzjc3qNJczvbemohe8ugzFAvHStm
+   R6ShHEh/UB5aYR7GytRXkKeq6ZhABHmIk7lZbIa+a37MaGpWvMFQ0e6Wd
+   NOD2jxBB5YuHv7vgLC5vGOAjgfk9EvwZ3DdegmgvJUWvbJeOrCocgCBra
+   kqEgpyJn4kXqeplOQV0crCJoptZ+dNaf4G3ELEKqTRwCYnlW8QoJIL4S0
+   UINl2LEK+LbrXt3jsB0a2au3fKpTw5jV3DeCFop2pVPB1074v4nPnKCtA
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10943"; a="10717824"
+X-IronPort-AV: E=Sophos;i="6.04,331,1695711600"; 
+   d="scan'208";a="10717824"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2024 10:34:19 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10943"; a="773615135"
+X-IronPort-AV: E=Sophos;i="6.04,331,1695711600"; 
+   d="scan'208";a="773615135"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.85])
+  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2024 10:34:14 -0800
+Message-ID: <29dc26a4-b95c-42d5-94f8-fbd23c589eaa@intel.com>
+Date: Thu, 4 Jan 2024 20:34:09 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Proofpoint-ORIG-GUID: n50KVCbTpi0aMhP8-GEBvRh6kMk7havc
-X-Proofpoint-GUID: n50KVCbTpi0aMhP8-GEBvRh6kMk7havc
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-12-09_02,2023-12-07_01,2023-05-22_02
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
+Content-Language: en-US
+To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+Cc: Avri Altman <Avri.Altman@wdc.com>,
+ "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+ "christian.loehle@arm.com" <christian.loehle@arm.com>,
+ "jinpu.wang@ionos.com" <jinpu.wang@ionos.com>,
+ "axboe@kernel.dk" <axboe@kernel.dk>, "beanhuo@micron.com"
+ <beanhuo@micron.com>, "yibin.ding@unisoc.com" <yibin.ding@unisoc.com>,
+ "victor.shih@genesyslogic.com.tw" <victor.shih@genesyslogic.com.tw>,
+ "asuk4.q@gmail.com" <asuk4.q@gmail.com>,
+ "hkallweit1@gmail.com" <hkallweit1@gmail.com>,
+ "yangyingliang@huawei.com" <yangyingliang@huawei.com>,
+ "yebin10@huawei.com" <yebin10@huawei.com>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <20231204150111.3320071-1-jorge@foundries.io>
+ <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
+ <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <ZXBGTxS7sUSILtLs@trax> <ZXbBhjZIn5sj6EYO@trax> <ZZPoRPxdWXuT+cEo@trax>
+ <b88eca08-7f20-4287-802c-ae1c8e3cd5cf@intel.com> <ZZSH1ykwP45fZaLh@trax>
+ <d1fac554-4a51-409e-bc52-100a6bb4f5dd@intel.com> <ZZUm68tU9zHsC+X+@trux>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <ZZUm68tU9zHsC+X+@trux>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-From: Elad Nachman <enachman@marvell.com>
+On 3/01/24 11:20, Jorge Ramirez-Ortiz, Foundries wrote:
+> On 03/01/24 10:03:38, Adrian Hunter wrote:
+>> Thanks for doing that!  That seems to explain the mystery.
+>>
+>> You could hack the test to get an idea of how many successful
+>> iterations there are before getting an error.
+>>
+>> For SDHCI, one difference between tuning and re-tuning is the
+>> setting of bit-7 "Sampling Clock Select" of "Host Control 2 Register".
+>> It is initially 0 and then set to 1 after the successful tuning.
+>> Essentially, leaving it set to 1 is meant to speed up the re-tuning.
+>> You could try setting it to zero instead, and see if that helps.
+>> e.g.
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index c79f73459915..714d8cc39709 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -2732,6 +2732,7 @@ void sdhci_start_tuning(struct sdhci_host *host)
+>>  	ctrl |= SDHCI_CTRL_EXEC_TUNING;
+>>  	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
+>>  		ctrl |= SDHCI_CTRL_TUNED_CLK;
+>> +	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+>>  	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>>
+>>  	/*
+>>
+> 
+> 
+> Yes with that change, the re-tuning reliability test does pass.
+> 
+> root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0#  echo 52 > /sys/kernel/debug/mmc0/mmc0\:0001/test
+> [  237.833585] mmc0: Starting tests of card mmc0:0001...
+> [  237.838759] mmc0: Test case 52. Re-tuning reliability...
+> [  267.845403] mmc0: Result: OK
+> [  267.848365] mmc0: Tests completed.
+> 
+> 
+> Unfortunately I still see the error when looping on RPMB reads.
+> 
+> For instance with this test script
+>  $ while true; do rpmb_read m4hash; usleep 300; done
+> 
+> I can see the error triggering on the serial port after a minute or so.
+> [  151.682907] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
+> 
+> Causing OP-TEE to panic since the RPMB read returns an error
+> E/TC:? 0
+> E/TC:? 0 TA panicked with code 0xffff0000
+> E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
+> E/LD:   arch: aarch64
+> [...]
+> 
+> if anything else springs to your mind I am happy to test of course - there are
+> so many tunnables in this subsystem that experience is this area has exponential
+> value (and I dont have much).
+> 
+> Would it make sense if re-tuning requests are rejected unless a minimum number
+> of jiffies have passed? should I try that as a change?
+> 
+> or maybe delay a bit longer the RPMB access after a retune request?
 
-AC5/X/IM SOCs has a variant of the Xenon eMMC controller,
-in which only 31-bit of addressing pass from the controller
-on the AXI bus.
-Since we cannot guarantee that only buffers from the first 2GB
-of memory will reach the driver, the driver is configured for
-SDMA mode, without 64-bit mode, overriding the DMA mask to 34-bit
-to support the DDR memory mapping, which starts at offset 8GB.
+It seems re-tuning is not working properly, so ideally the
+SoC vendor / driver implementer would provide a solution.
 
-Signed-off-by: Elad Nachman <enachman@marvell.com>
----
- drivers/mmc/host/sdhci-xenon.c | 31 +++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-xenon.h |  3 ++-
- 2 files changed, 33 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 25ba7aecc3be..0e52867f6e91 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -18,6 +18,8 @@
- #include <linux/of.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-+#include <linux/mm.h>
-+#include <linux/dma-mapping.h>
- 
- #include "sdhci-pltfm.h"
- #include "sdhci-xenon.h"
-@@ -422,6 +424,7 @@ static int xenon_probe_params(struct platform_device *pdev)
- 	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	u32 sdhc_id, nr_sdhc;
- 	u32 tuning_count;
-+	struct sysinfo si;
- 
- 	/* Disable HS200 on Armada AP806 */
- 	if (priv->hw_version == XENON_AP806)
-@@ -450,6 +453,23 @@ static int xenon_probe_params(struct platform_device *pdev)
- 	}
- 	priv->tuning_count = tuning_count;
- 
-+	/*
-+	 * AC5/X/IM HW has only 31-bits passed in the crossbar switch.
-+	 * If we have more than 2GB of memory, this means we might pass
-+	 * memory pointers which are above 2GB and which cannot be properly
-+	 * represented. In this case, disable ADMA, 64-bit DMA and allow only SDMA.
-+	 * This effectively will enable bounce buffer quirk in the
-+	 * generic SDHCI driver, which will make sure DMA is only done
-+	 * from supported memory regions:
-+	 */
-+	if (priv->hw_version == XENON_AC5) {
-+		si_meminfo(&si);
-+		if (si.totalram * si.mem_unit > SZ_2G) {
-+			host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-+			host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
-+		}
-+	}
-+
- 	return xenon_phy_parse_params(dev, host);
- }
- 
-@@ -562,6 +582,16 @@ static int xenon_probe(struct platform_device *pdev)
- 		goto remove_sdhc;
- 
- 	pm_runtime_put_autosuspend(&pdev->dev);
-+	/*
-+	 * If we previously detected AC5 with over 2GB of memory,
-+	 * then we disable ADMA and 64-bit DMA.
-+	 * This means generic SDHCI driver has set the DMA mask to
-+	 * 32-bit. Since DDR starts at 0x2_0000_0000, we must use
-+	 * 34-bit DMA mask to access this DDR memory:
-+	 */
-+	if (priv->hw_version == XENON_AC5 &&
-+	    host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA)
-+		dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(34));
- 
- 	return 0;
- 
-@@ -680,6 +710,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
- 	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
- 	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
- 	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
-+	{ .compatible = "marvell,ac5-sdhci",	     .data =  (void *)XENON_AC5},
- 	{}
- };
- MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
-diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
-index 3e9c6c908a79..0460d97aad26 100644
---- a/drivers/mmc/host/sdhci-xenon.h
-+++ b/drivers/mmc/host/sdhci-xenon.h
-@@ -57,7 +57,8 @@ enum xenon_variant {
- 	XENON_A3700,
- 	XENON_AP806,
- 	XENON_AP807,
--	XENON_CP110
-+	XENON_CP110,
-+	XENON_AC5
- };
- 
- struct xenon_priv {
--- 
-2.25.1
+There is also mmc_doing_retune() which could be used to skip
+tuning execution entirely in the case of re-tuning.
 
