@@ -1,199 +1,232 @@
-Received: from mail-qk1-f181.google.com (mail-qk1-f181.google.com [209.85.222.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A4992032E
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Jan 2024 22:25:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 312FAB648
+	for <linux-mmc@vger.kernel.org>; Thu,  4 Jan 2024 04:10:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="C7hscbA3"
-Received: by mail-qk1-f181.google.com with SMTP id af79cd13be357-7811c02cfecso713654685a.2
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2024 14:25:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1704320725; x=1704925525; darn=vger.kernel.org;
-        h=in-reply-to:autocrypt:from:references:cc:to:subject:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=+kxiOt6Iud6ed+vEDsOlEzj9VTAYs0vJayJHFHtEg20=;
-        b=C7hscbA3E5IC2KnkZLt+pTJpGDnFAKrm0RXl3G5Y75/t0HRY1gFEeMRyS7vQC+UH8c
-         Quu5NGxuOXNhc6PWmXzulRsXfP8bFYFpHj+5Rm4MgBfMIte7FUT22C0XOiQ6jOVJIiMx
-         AsKiZfRjihi26PA2+yfSMj96ZTWLvcrB3JfWk=
+	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="rwLBuq1t"
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com [209.85.210.198])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 25EBD3F3EE
+	for <linux-mmc@vger.kernel.org>; Thu,  4 Jan 2024 04:10:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+	s=20210705; t=1704341433;
+	bh=r0hcB3RaDLd8lTvJ9no/dztI+HIZc74x3uNUcPsxxEg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type;
+	b=rwLBuq1tG6LZmsmOzdh/rycbMhCrFy8n2p9Mv7drC0PTpCKYqF2XiUqipAGZ+ic+8
+	 3F4wVs5i1+CRlikUq/CsqScGyMomwyUoHhBDIniwiA+1Ykqo0Rz56X7bJazLuAaA3b
+	 auBYhYM2lgCIxViKj/zAav1sKPJwEpgazwmaAhbYGpud5WanCeksfVoEdwV7P2cCrv
+	 EVtzd0Fb3Dz4zHEcKbltyWdbPvTxEFICpdbWSPdNmGmJsu+dBpCqRcqjlAxWVqX/vz
+	 Ljra87jFyMQwfnVH8F1d6FtCzWur0d4a4H1FODpoqmdX/4/peo7Q7x8BekL0Bdbvgm
+	 iinoRp/YyaU9w==
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6d9eb5c8d18so99431b3a.0
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2024 20:10:33 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704320725; x=1704925525;
-        h=in-reply-to:autocrypt:from:references:cc:to:subject:user-agent
-         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=+kxiOt6Iud6ed+vEDsOlEzj9VTAYs0vJayJHFHtEg20=;
-        b=oceTOB1G/deCPGD4Ykusjyf6jgqq09f09em1z+5C+O4xRNomqjd+pVImnO3sH66h9C
-         g3GzwwvFE2FyIWXYeasUE+a78xyB086G+w8pwiqXS+n/q9M9w725CE9qYbTGjMHzrrZC
-         /P4Qd+fPbvi9ZYNXH3okYEyLw7y4EAbA8khupNt7EzmdyypfMjXQvdtIcW2uVPdzVWoo
-         0hWoT/CzXNFHvVeTIgE44vyFcuIOPH6i5HhwcCJDhuLGG/rryiI36qDE5LuCSDxXvptJ
-         jSODytC6lNn4pRXHGBFEw3jZtPnipcSZ6IwFHPrJnajOoa4SRTGxmoz3JGPCKzNnrp+9
-         tSwQ==
-X-Gm-Message-State: AOJu0YwTBj6VQwH2++N8qrmYq0QUsp1ofY+nF4vxO9BGKg3udNyt0pN2
-	IYbMVIbJtIzAaQDUexamj9rG8PnjLiLp
-X-Google-Smtp-Source: AGHT+IFkTRKLsmfBRKkI5iDV4A6u3IJFnz7y7r4854ozq8b8/jgewOA29WE6/yH36IZ0GBX0CdafRA==
-X-Received: by 2002:a05:620a:1441:b0:781:1d50:b4ab with SMTP id i1-20020a05620a144100b007811d50b4abmr19572431qkl.152.1704320725043;
-        Wed, 03 Jan 2024 14:25:25 -0800 (PST)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id d6-20020a37c406000000b007816e4e9bf8sm5376327qki.102.2024.01.03.14.25.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 03 Jan 2024 14:25:24 -0800 (PST)
-Message-ID: <ee90408f-84a0-4039-9c77-2dbdfa1c21fc@broadcom.com>
-Date: Wed, 3 Jan 2024 14:25:22 -0800
+        d=1e100.net; s=20230601; t=1704341432; x=1704946232;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=r0hcB3RaDLd8lTvJ9no/dztI+HIZc74x3uNUcPsxxEg=;
+        b=dcpW/k0XE7Xzx2Ggqfoej5Rd8Ecq+MnMvVYO9R/4rCcRb/s3Qq7qBorhg6qEafhhmg
+         BfOedHA3vJ10uACH+9d1DIEckkNq+rHg7x5scaJzpKIZV7LqFErC+OMwnNh3Y3c4A628
+         Dbqqio55k5eFsxHxfMGj3BhnZwpULnps5lz1mLlA9MPUaxqj5qTdvPC+2xtXJoflCDT/
+         HVAT6CcQVek1mDEEdcGruOy6QOlRj78mTpNBYS2zx8YzLbJDMrnDwGzhj5dTGnGFxBdM
+         COJmp3uncXBE+xMGfQo0JO7lwqKxZfQo8MDmBHA8o/ov1gmMXMkgf0WVBV+vnkX29e6S
+         6QDw==
+X-Gm-Message-State: AOJu0YxnVE9FG/ut0Ux4JvvlCdjMeIz4EnvkoXEB4J7ekfgLwrL7E1K+
+	N9huTOPDiOb7ntta9dp1ACNEdZGFuvUEEzjCenw9vixaJMLjkZbdCr/G42tyHvddzYFhfJjfD9o
+	EI7qNLIaqfmxOWh37xztKpvATBdidtJCRqoM7BU5omzXgXezJtOatC8L3cwvx
+X-Received: by 2002:aa7:8512:0:b0:6d9:beca:3a40 with SMTP id v18-20020aa78512000000b006d9beca3a40mr47647pfn.56.1704341431768;
+        Wed, 03 Jan 2024 20:10:31 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFNEuakNecLb5I0jdMO/2YQk/qQnJr9SDhVt28JjX3J/rSl2zWkKm3UZMldAMtDVv3swCv/K0x5oVbeQ5gy6cQ=
+X-Received: by 2002:aa7:8512:0:b0:6d9:beca:3a40 with SMTP id
+ v18-20020aa78512000000b006d9beca3a40mr47642pfn.56.1704341431443; Wed, 03 Jan
+ 2024 20:10:31 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v8 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: Add support
- for 74165b0
-To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
- linux-kernel@vger.kernel.org, alcooperx@gmail.com,
- linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com,
- linux-mmc@vger.kernel.org, robh+dt@kernel.org,
- krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
- devicetree@vger.kernel.org
-Cc: bcm-kernel-feedback-list@broadcom.com, Kamal Dasu <kdasu@broadcom.com>
-References: <20240103222338.31447-1-kamal.dasu@broadcom.com>
- <20240103222338.31447-2-kamal.dasu@broadcom.com>
-From: Florian Fainelli <florian.fainelli@broadcom.com>
-Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
- 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
-In-Reply-To: <20240103222338.31447-2-kamal.dasu@broadcom.com>
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-	boundary="0000000000006aaa84060e12172e"
+References: <20231221032147.434647-1-kai.heng.feng@canonical.com> <CAPDyKFo6SGV=Zsqmq=dO09tGNsJAURXuvXfbzLwf-4J3KUsC+w@mail.gmail.com>
+In-Reply-To: <CAPDyKFo6SGV=Zsqmq=dO09tGNsJAURXuvXfbzLwf-4J3KUsC+w@mail.gmail.com>
+From: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date: Thu, 4 Jan 2024 12:10:19 +0800
+Message-ID: <CAAd53p7k2oBkzKv_RrNUm9rhJB5htV79sUjbdRxWHHJ46ps6HQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
+ timer timeout during suspend
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: adrian.hunter@intel.com, Victor Shih <victor.shih@genesyslogic.com.tw>, 
+	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
---0000000000006aaa84060e12172e
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+On Wed, Jan 3, 2024 at 6:53=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
+>
+> On Thu, 21 Dec 2023 at 04:23, Kai-Heng Feng <kai.heng.feng@canonical.com>=
+ wrote:
+> >
+> > Spamming `lspci -vv` can still observe the replay timer timeout error
+> > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
+> > replay timer timeout of AER"), albeit with a lower reproduce rate.
+> >
+> > Such AER interrupt can still prevent the system from suspending, so let
+> > root port mask and unmask replay timer timeout during suspend and
+> > resume, respectively.
+> >
+> > Cc: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > Cc: Ben Chuang <benchuanggli@gmail.com>
+> > Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
+> > ---
+> > v2:
+> >  - Change subject to reflect it works on GL9750 & GL9755
+> >  - Fix when aer_cap is missing
+> >
+> >  drivers/mmc/host/sdhci-pci-core.c |  2 +-
+> >  drivers/mmc/host/sdhci-pci-gli.c  | 55 +++++++++++++++++++++++++++++--
+> >  drivers/mmc/host/sdhci-pci.h      |  1 +
+> >  3 files changed, 55 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci=
+-pci-core.c
+> > index 025b31aa712c..59ae4da72974 100644
+> > --- a/drivers/mmc/host/sdhci-pci-core.c
+> > +++ b/drivers/mmc/host/sdhci-pci-core.c
+> > @@ -68,7 +68,7 @@ static int sdhci_pci_init_wakeup(struct sdhci_pci_chi=
+p *chip)
+> >         return 0;
+> >  }
+> >
+> > -static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
+> > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
+> >  {
+> >         int i, ret;
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
+pci-gli.c
+> > index 77911a57b12c..54943e9df835 100644
+> > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > @@ -1429,6 +1429,55 @@ static int sdhci_pci_gli_resume(struct sdhci_pci=
+_chip *chip)
+> >         return sdhci_pci_resume_host(chip);
+> >  }
+> >
+> > +#ifdef CONFIG_PCIEAER
+> > +static void mask_replay_timer_timeout(struct pci_dev *pdev)
+> > +{
+> > +       struct pci_dev *parent =3D pci_upstream_bridge(pdev);
+> > +       u32 val;
+> > +
+> > +       if (!parent || !parent->aer_cap)
+>
+> Wouldn't it be more correct to use pci_aer_available(), rather than
+> just checking the aer_cap?
 
-On 1/3/24 14:23, Kamal Dasu wrote:
-> From: Kamal Dasu <kdasu@broadcom.com>
-> 
-> With newer sdio controller core used for 74165b0 we need to update
-> the compatibility with "brcm,bcm74165b0-sdhci".
-> 
-> Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
-> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+pci_aer_available() is more of a global check, so checking aer_cap is
+still required for the device.
 
-Reviewed-by: Florian Fainelli <florian.fainelli@broadcom.com>
--- 
-Florian
+>
+> If pci_aer_available() can be used, we wouldn't even need the stubs as
+> the is already stubs for pci_aer_available().
 
+A helper that checks both aer_cap and  pci_aer_available() can be
+added for such purpose, but there aren't many users of that.
 
---0000000000006aaa84060e12172e
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
+Kai-Heng
 
-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
-riBJ/K1AFUjRAjFhGV64l++td7dkmnq/X8ET75ti+w1s4FRpFqkD2m7pg5NxdsZphYIXAgMBAAGj
-QjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBSP8Et/qC5FJK5N
-UPpjmove4t0bvDANBgkqhkiG9w0BAQsFAAOCAQEAS0DbwFCq/sgM7/eWVEVJu5YACUGssxOGhigH
-M8pr5nS5ugAtrqQK0/Xx8Q+Kv3NnSoPHRHt44K9ubG8DKY4zOUXDjuS5V2yq/BKW7FPGLeQkbLmU
-Y/vcU2hnVj6DuM81IcPJaP7O2sJTqsyQiunwXUaMld16WCgaLx3ezQA3QY/tRG3XUyiXfvNnBB4V
-14qWtNPeTCekTBtzc3b0F5nCH3oO4y0IrQocLP88q1UOD5F+NuvDV0m+4S4tfGCLw0FREyOdzvcy
-a5QBqJnnLDMfOjsl0oZAzjsshnjJYS8Uuu7bVW/fhO4FCU29KNhyztNiUGUe65KXgzHZs7XKR1g/
-XzCCBVgwggRAoAMCAQICDBP8P9hKRVySg3Qv5DANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJC
-RTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTExMC8GA1UEAxMoR2xvYmFsU2lnbiBHQ0MgUjMg
-UGVyc29uYWxTaWduIDIgQ0EgMjAyMDAeFw0yMjA5MTAxMjE4MTFaFw0yNTA5MTAxMjE4MTFaMIGW
-MQswCQYDVQQGEwJJTjESMBAGA1UECBMJS2FybmF0YWthMRIwEAYDVQQHEwlCYW5nYWxvcmUxFjAU
-BgNVBAoTDUJyb2FkY29tIEluYy4xGTAXBgNVBAMTEEZsb3JpYW4gRmFpbmVsbGkxLDAqBgkqhkiG
-9w0BCQEWHWZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOC
-AQ8AMIIBCgKCAQEA+oi3jMmHltY4LMUy8Up5+1zjd1iSgUBXhwCJLj1GJQF+GwP8InemBbk5rjlC
-UwbQDeIlOfb8xGqHoQFGSW8p9V1XUw+cthISLkycex0AJ09ufePshLZygRLREU0H4ecNPMejxCte
-KdtB4COST4uhBkUCo9BSy1gkl8DJ8j/BQ1KNUx6oYe0CntRag+EnHv9TM9BeXBBLfmMRnWNhvOSk
-nSmRX0J3d9/G2A3FIC6WY2XnLW7eAZCQPa1Tz3n2B5BGOxwqhwKLGLNu2SRCPHwOdD6e0drURF7/
-Vax85/EqkVnFNlfxtZhS0ugx5gn2pta7bTdBm1IG4TX+A3B1G57rVwIDAQABo4IB3jCCAdowDgYD
-VR0PAQH/BAQDAgWgMIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3Vy
-ZS5nbG9iYWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEG
-CCsGAQUFBzABhjVodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWdu
-MmNhMjAyMDBNBgNVHSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93
-d3cuZ2xvYmFsc2lnbi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6
-hjhodHRwOi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNy
-bDAoBgNVHREEITAfgR1mbG9yaWFuLmZhaW5lbGxpQGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggr
-BgEFBQcDBDAfBgNVHSMEGDAWgBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUUwwfJ6/F
-KL0fRdVROal/Lp4lAF0wDQYJKoZIhvcNAQELBQADggEBAKBgfteDc1mChZjKBY4xAplC6uXGyBrZ
-kNGap1mHJ+JngGzZCz+dDiHRQKGpXLxkHX0BvEDZLW6LGOJ83ImrW38YMOo3ZYnCYNHA9qDOakiw
-2s1RH00JOkO5SkYdwCHj4DB9B7KEnLatJtD8MBorvt+QxTuSh4ze96Jz3kEIoHMvwGFkgObWblsc
-3/YcLBmCgaWpZ3Ksev1vJPr5n8riG3/N4on8gO5qinmmr9Y7vGeuf5dmZrYMbnb+yCBalkUmZQwY
-NxADYvcRBA0ySL6sZpj8BIIhWiXiuusuBmt2Mak2eEv0xDbovE6Z6hYyl/ZnRadbgK/ClgbY3w+O
-AfUXEZ0xggJtMIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52
-LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgwT
-/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIFJJ0t9fiAgUCI04
-/NYH59c3KL4vfW4nSSRIicOmREzLMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
-AQkFMQ8XDTI0MDEwMzIyMjUyNVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
-AWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEH
-MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQC+eh2lqnd/dBpM13hQgWQ1Plh8BLNJyegK
-WtQylAnLmst9/NBHlsDvS+ETX53sZk9GctDuDHQrHYFBW2OT4FYLCn+b7fo5d6TRak/VK8sv9p1T
-gbtL0ijNZK5BXDF5Pm6hcuqmkloPCkwX0vb4vrmkJ+Nd9P2M2elZxVN2x5sSzmUKkFoOV+hhGs1g
-cPObm1TlPVF6wDylrcqpMvHSXhDBukAiTLx+/y/FRuQ3Ik9aLxqCa10lCTrkCc+UEsuAGKjxFpqd
-0jOvymVvJRxxP/vhscSjkIMJGkFPxUmaKZb9eErZQHjAGL6HmYrM01fZxGlyeypIiPVydTVQB5UI
-Txf1
---0000000000006aaa84060e12172e--
+>
+> > +               return;
+> > +
+> > +       pci_read_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MAS=
+K, &val);
+> > +       val |=3D PCI_ERR_COR_REP_TIMER;
+> > +       pci_write_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MA=
+SK, val);
+> > +}
+> > +
+> > +static void unmask_replay_timer_timeout(struct pci_dev *pdev)
+> > +{
+> > +       struct pci_dev *parent =3D pci_upstream_bridge(pdev);
+> > +       u32 val;
+> > +
+> > +       if (!parent || !parent->aer_cap)
+> > +               return;
+> > +
+> > +       pci_read_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK,=
+ &val);
+> > +       val &=3D ~PCI_ERR_COR_REP_TIMER;
+> > +       pci_write_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK=
+, val);
+> > +}
+> > +#else
+> > +static inline void mask_replay_timer_timeout(struct pci_dev *pdev) { }
+> > +static inline void unmask_replay_timer_timeout(struct pci_dev *pdev) {=
+  }
+> > +#endif
+> > +
+> > +static int sdhci_pci_gl975x_suspend(struct sdhci_pci_chip *chip)
+> > +{
+> > +       mask_replay_timer_timeout(chip->pdev);
+> > +
+> > +       return sdhci_pci_suspend_host(chip);
+> > +}
+> > +
+> > +static int sdhci_pci_gl975x_resume(struct sdhci_pci_chip *chip)
+> > +{
+> > +       int ret;
+> > +
+> > +       ret =3D sdhci_pci_gli_resume(chip);
+> > +
+> > +       unmask_replay_timer_timeout(chip->pdev);
+> > +
+> > +       return ret;
+> > +}
+> > +
+> >  static int gl9763e_resume(struct sdhci_pci_chip *chip)
+> >  {
+> >         struct sdhci_pci_slot *slot =3D chip->slots[0];
+> > @@ -1547,7 +1596,8 @@ const struct sdhci_pci_fixes sdhci_gl9755 =3D {
+> >         .probe_slot     =3D gli_probe_slot_gl9755,
+> >         .ops            =3D &sdhci_gl9755_ops,
+> >  #ifdef CONFIG_PM_SLEEP
+> > -       .resume         =3D sdhci_pci_gli_resume,
+> > +       .suspend        =3D sdhci_pci_gl975x_suspend,
+> > +       .resume         =3D sdhci_pci_gl975x_resume,
+> >  #endif
+> >  };
+> >
+> > @@ -1570,7 +1620,8 @@ const struct sdhci_pci_fixes sdhci_gl9750 =3D {
+> >         .probe_slot     =3D gli_probe_slot_gl9750,
+> >         .ops            =3D &sdhci_gl9750_ops,
+> >  #ifdef CONFIG_PM_SLEEP
+> > -       .resume         =3D sdhci_pci_gli_resume,
+> > +       .suspend        =3D sdhci_pci_gl975x_suspend,
+> > +       .resume         =3D sdhci_pci_gl975x_resume,
+> >  #endif
+> >  };
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.=
+h
+> > index 153704f812ed..19253dce687d 100644
+> > --- a/drivers/mmc/host/sdhci-pci.h
+> > +++ b/drivers/mmc/host/sdhci-pci.h
+> > @@ -190,6 +190,7 @@ static inline void *sdhci_pci_priv(struct sdhci_pci=
+_slot *slot)
+> >  }
+> >
+> >  #ifdef CONFIG_PM_SLEEP
+> > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip);
+> >  int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
+> >  #endif
+> >  int sdhci_pci_enable_dma(struct sdhci_host *host);
+>
+> Kind regards
+> Uffe
