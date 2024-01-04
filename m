@@ -1,232 +1,348 @@
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+Received: from mail-m12746.qiye.163.com (mail-m12746.qiye.163.com [115.236.127.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 312FAB648
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Jan 2024 04:10:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 309811DFE5;
+	Thu,  4 Jan 2024 06:40:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="rwLBuq1t"
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com [209.85.210.198])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 25EBD3F3EE
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Jan 2024 04:10:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20210705; t=1704341433;
-	bh=r0hcB3RaDLd8lTvJ9no/dztI+HIZc74x3uNUcPsxxEg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type;
-	b=rwLBuq1tG6LZmsmOzdh/rycbMhCrFy8n2p9Mv7drC0PTpCKYqF2XiUqipAGZ+ic+8
-	 3F4wVs5i1+CRlikUq/CsqScGyMomwyUoHhBDIniwiA+1Ykqo0Rz56X7bJazLuAaA3b
-	 auBYhYM2lgCIxViKj/zAav1sKPJwEpgazwmaAhbYGpud5WanCeksfVoEdwV7P2cCrv
-	 EVtzd0Fb3Dz4zHEcKbltyWdbPvTxEFICpdbWSPdNmGmJsu+dBpCqRcqjlAxWVqX/vz
-	 Ljra87jFyMQwfnVH8F1d6FtCzWur0d4a4H1FODpoqmdX/4/peo7Q7x8BekL0Bdbvgm
-	 iinoRp/YyaU9w==
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6d9eb5c8d18so99431b3a.0
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2024 20:10:33 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704341432; x=1704946232;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=r0hcB3RaDLd8lTvJ9no/dztI+HIZc74x3uNUcPsxxEg=;
-        b=dcpW/k0XE7Xzx2Ggqfoej5Rd8Ecq+MnMvVYO9R/4rCcRb/s3Qq7qBorhg6qEafhhmg
-         BfOedHA3vJ10uACH+9d1DIEckkNq+rHg7x5scaJzpKIZV7LqFErC+OMwnNh3Y3c4A628
-         Dbqqio55k5eFsxHxfMGj3BhnZwpULnps5lz1mLlA9MPUaxqj5qTdvPC+2xtXJoflCDT/
-         HVAT6CcQVek1mDEEdcGruOy6QOlRj78mTpNBYS2zx8YzLbJDMrnDwGzhj5dTGnGFxBdM
-         COJmp3uncXBE+xMGfQo0JO7lwqKxZfQo8MDmBHA8o/ov1gmMXMkgf0WVBV+vnkX29e6S
-         6QDw==
-X-Gm-Message-State: AOJu0YxnVE9FG/ut0Ux4JvvlCdjMeIz4EnvkoXEB4J7ekfgLwrL7E1K+
-	N9huTOPDiOb7ntta9dp1ACNEdZGFuvUEEzjCenw9vixaJMLjkZbdCr/G42tyHvddzYFhfJjfD9o
-	EI7qNLIaqfmxOWh37xztKpvATBdidtJCRqoM7BU5omzXgXezJtOatC8L3cwvx
-X-Received: by 2002:aa7:8512:0:b0:6d9:beca:3a40 with SMTP id v18-20020aa78512000000b006d9beca3a40mr47647pfn.56.1704341431768;
-        Wed, 03 Jan 2024 20:10:31 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFNEuakNecLb5I0jdMO/2YQk/qQnJr9SDhVt28JjX3J/rSl2zWkKm3UZMldAMtDVv3swCv/K0x5oVbeQ5gy6cQ=
-X-Received: by 2002:aa7:8512:0:b0:6d9:beca:3a40 with SMTP id
- v18-20020aa78512000000b006d9beca3a40mr47642pfn.56.1704341431443; Wed, 03 Jan
- 2024 20:10:31 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="K6TsTIX4"
+DKIM-Signature: a=rsa-sha256;
+	b=K6TsTIX4TaA83bO7yJMwivg11xmfitXtEk6R3b7jRBmWjgGrJDN/E71L+YisiFfZu541Q8iSSuuRNH56IHxNKbqZck5dZnQY3E4NJWF1Dl7rRkoghky7UL3l7Hea+nqi/Zqs4TK1BFkKdPmTPmBicTSQUcNBXrfKYkYZZeVhhhw=;
+	s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=9EAWngpmrjmIVASbpi542X7zUSHejpcQvkpGhWlQL2s=;
+	h=date:mime-version:subject:message-id:from;
+Received: from [172.16.12.69] (unknown [58.22.7.114])
+	by mail-m11877.qiye.163.com (Hmail) with ESMTPA id 5AD08400335;
+	Thu,  4 Jan 2024 11:01:47 +0800 (CST)
+Message-ID: <b1b1f215-738d-4d4d-90cf-0ea5cea11c14@rock-chips.com>
+Date: Thu, 4 Jan 2024 11:01:47 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231221032147.434647-1-kai.heng.feng@canonical.com> <CAPDyKFo6SGV=Zsqmq=dO09tGNsJAURXuvXfbzLwf-4J3KUsC+w@mail.gmail.com>
-In-Reply-To: <CAPDyKFo6SGV=Zsqmq=dO09tGNsJAURXuvXfbzLwf-4J3KUsC+w@mail.gmail.com>
-From: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Date: Thu, 4 Jan 2024 12:10:19 +0800
-Message-ID: <CAAd53p7k2oBkzKv_RrNUm9rhJB5htV79sUjbdRxWHHJ46ps6HQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
- timer timeout during suspend
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: adrian.hunter@intel.com, Victor Shih <victor.shih@genesyslogic.com.tw>, 
-	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-kernel@vger.kernel.org,
+ Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson
+ <ulf.hansson@linaro.org>, Jyan Chou <jyanchou@realtek.com>,
+ linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v5 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+Content-Language: en-GB
+To: Sergey Khimich <serghox@gmail.com>
+References: <20231231144619.758290-1-serghox@gmail.com>
+ <20231231144619.758290-3-serghox@gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20231231144619.758290-3-serghox@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGkNMGlYYGklMTkhDHk9NSB1VEwETFh
+	oSFyQUDg9ZV1kYEgtZQVlOQ1VJSVVMVUpKT1lXWRYaDxIVHRRZQVlPS0hVSk1PSUxOVUpLS1VKQk
+	tLWQY+
+X-HM-Tid: 0a8cd26b77a72eb3kusn5ad08400335
+X-HM-MType: 1
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6PE06Shw6Pzw9EUMzIkMqMTdP
+	SyEwCQ1VSlVKTEtPSEhMSEtDSU5CVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
+	C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUpKSEJDNwY+
 
-On Wed, Jan 3, 2024 at 6:53=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
- wrote:
->
-> On Thu, 21 Dec 2023 at 04:23, Kai-Heng Feng <kai.heng.feng@canonical.com>=
- wrote:
-> >
-> > Spamming `lspci -vv` can still observe the replay timer timeout error
-> > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
-> > replay timer timeout of AER"), albeit with a lower reproduce rate.
-> >
-> > Such AER interrupt can still prevent the system from suspending, so let
-> > root port mask and unmask replay timer timeout during suspend and
-> > resume, respectively.
-> >
-> > Cc: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > Cc: Ben Chuang <benchuanggli@gmail.com>
-> > Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
-> > ---
-> > v2:
-> >  - Change subject to reflect it works on GL9750 & GL9755
-> >  - Fix when aer_cap is missing
-> >
-> >  drivers/mmc/host/sdhci-pci-core.c |  2 +-
-> >  drivers/mmc/host/sdhci-pci-gli.c  | 55 +++++++++++++++++++++++++++++--
-> >  drivers/mmc/host/sdhci-pci.h      |  1 +
-> >  3 files changed, 55 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci=
--pci-core.c
-> > index 025b31aa712c..59ae4da72974 100644
-> > --- a/drivers/mmc/host/sdhci-pci-core.c
-> > +++ b/drivers/mmc/host/sdhci-pci-core.c
-> > @@ -68,7 +68,7 @@ static int sdhci_pci_init_wakeup(struct sdhci_pci_chi=
-p *chip)
-> >         return 0;
-> >  }
-> >
-> > -static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-> > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-> >  {
-> >         int i, ret;
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
-pci-gli.c
-> > index 77911a57b12c..54943e9df835 100644
-> > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > @@ -1429,6 +1429,55 @@ static int sdhci_pci_gli_resume(struct sdhci_pci=
-_chip *chip)
-> >         return sdhci_pci_resume_host(chip);
-> >  }
-> >
-> > +#ifdef CONFIG_PCIEAER
-> > +static void mask_replay_timer_timeout(struct pci_dev *pdev)
-> > +{
-> > +       struct pci_dev *parent =3D pci_upstream_bridge(pdev);
-> > +       u32 val;
-> > +
-> > +       if (!parent || !parent->aer_cap)
->
-> Wouldn't it be more correct to use pci_aer_available(), rather than
-> just checking the aer_cap?
+Hi Sergey
 
-pci_aer_available() is more of a global check, so checking aer_cap is
-still required for the device.
+On 2023/12/31 22:46, Sergey Khimich wrote:
+> From: Sergey Khimich <serghox@gmail.com>
+> 
+> For enabling CQE support just set 'supports-cqe' in your DevTree file
+> for appropriate mmc node.
+> 
 
->
-> If pci_aer_available() can be used, we wouldn't even need the stubs as
-> the is already stubs for pci_aer_available().
+I have tested this patchset and it seems work fine on Rockchip SoCs when 
+I removed sdhci_enable_v4_mode as we don't have SDHCI_CAN_64BIT_V4 
+support. Why do we force to enable v4?
 
-A helper that checks both aer_cap and  pci_aer_available() can be
-added for such purpose, but there aren't many users of that.
+And I found it breaks s2r, since the patch didn't call cqhci_suspend
+and cqhci_resume.
 
-Kai-Heng
-
->
-> > +               return;
-> > +
-> > +       pci_read_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MAS=
-K, &val);
-> > +       val |=3D PCI_ERR_COR_REP_TIMER;
-> > +       pci_write_config_dword(parent, parent->aer_cap + PCI_ERR_COR_MA=
-SK, val);
-> > +}
-> > +
-> > +static void unmask_replay_timer_timeout(struct pci_dev *pdev)
-> > +{
-> > +       struct pci_dev *parent =3D pci_upstream_bridge(pdev);
-> > +       u32 val;
-> > +
-> > +       if (!parent || !parent->aer_cap)
-> > +               return;
-> > +
-> > +       pci_read_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK,=
- &val);
-> > +       val &=3D ~PCI_ERR_COR_REP_TIMER;
-> > +       pci_write_config_dword(pdev, parent->aer_cap + PCI_ERR_COR_MASK=
-, val);
-> > +}
-> > +#else
-> > +static inline void mask_replay_timer_timeout(struct pci_dev *pdev) { }
-> > +static inline void unmask_replay_timer_timeout(struct pci_dev *pdev) {=
-  }
-> > +#endif
-> > +
-> > +static int sdhci_pci_gl975x_suspend(struct sdhci_pci_chip *chip)
-> > +{
-> > +       mask_replay_timer_timeout(chip->pdev);
-> > +
-> > +       return sdhci_pci_suspend_host(chip);
-> > +}
-> > +
-> > +static int sdhci_pci_gl975x_resume(struct sdhci_pci_chip *chip)
-> > +{
-> > +       int ret;
-> > +
-> > +       ret =3D sdhci_pci_gli_resume(chip);
-> > +
-> > +       unmask_replay_timer_timeout(chip->pdev);
-> > +
-> > +       return ret;
-> > +}
-> > +
-> >  static int gl9763e_resume(struct sdhci_pci_chip *chip)
-> >  {
-> >         struct sdhci_pci_slot *slot =3D chip->slots[0];
-> > @@ -1547,7 +1596,8 @@ const struct sdhci_pci_fixes sdhci_gl9755 =3D {
-> >         .probe_slot     =3D gli_probe_slot_gl9755,
-> >         .ops            =3D &sdhci_gl9755_ops,
-> >  #ifdef CONFIG_PM_SLEEP
-> > -       .resume         =3D sdhci_pci_gli_resume,
-> > +       .suspend        =3D sdhci_pci_gl975x_suspend,
-> > +       .resume         =3D sdhci_pci_gl975x_resume,
-> >  #endif
-> >  };
-> >
-> > @@ -1570,7 +1620,8 @@ const struct sdhci_pci_fixes sdhci_gl9750 =3D {
-> >         .probe_slot     =3D gli_probe_slot_gl9750,
-> >         .ops            =3D &sdhci_gl9750_ops,
-> >  #ifdef CONFIG_PM_SLEEP
-> > -       .resume         =3D sdhci_pci_gli_resume,
-> > +       .suspend        =3D sdhci_pci_gl975x_suspend,
-> > +       .resume         =3D sdhci_pci_gl975x_resume,
-> >  #endif
-> >  };
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.=
-h
-> > index 153704f812ed..19253dce687d 100644
-> > --- a/drivers/mmc/host/sdhci-pci.h
-> > +++ b/drivers/mmc/host/sdhci-pci.h
-> > @@ -190,6 +190,7 @@ static inline void *sdhci_pci_priv(struct sdhci_pci=
-_slot *slot)
-> >  }
-> >
-> >  #ifdef CONFIG_PM_SLEEP
-> > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip);
-> >  int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
-> >  #endif
-> >  int sdhci_pci_enable_dma(struct sdhci_host *host);
->
-> Kind regards
-> Uffe
+> Signed-off-by: Sergey Khimich <serghox@gmail.com>
+> ---
+>   drivers/mmc/host/Kconfig            |   1 +
+>   drivers/mmc/host/sdhci-of-dwcmshc.c | 181 +++++++++++++++++++++++++++-
+>   2 files changed, 180 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 58bd5fe4cd25..f7594705b013 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -233,6 +233,7 @@ config MMC_SDHCI_OF_DWCMSHC
+>   	depends on MMC_SDHCI_PLTFM
+>   	depends on OF
+>   	depends on COMMON_CLK
+> +	select MMC_CQHCI
+>   	help
+>   	  This selects Synopsys DesignWare Cores Mobile Storage Controller
+>   	  support.
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 3a3bae6948a8..0ba1df4bcf36 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -20,6 +20,7 @@
+>   #include <linux/sizes.h>
+>   
+>   #include "sdhci-pltfm.h"
+> +#include "cqhci.h"
+>   
+>   #define SDHCI_DWCMSHC_ARG2_STUFF	GENMASK(31, 16)
+>   
+> @@ -36,6 +37,9 @@
+>   #define DWCMSHC_ENHANCED_STROBE		BIT(8)
+>   #define DWCMSHC_EMMC_ATCTRL		0x40
+>   
+> +/* DWC IP vendor area 2 pointer */
+> +#define DWCMSHC_P_VENDOR_AREA2		0xea
+> +
+>   /* Rockchip specific Registers */
+>   #define DWCMSHC_EMMC_DLL_CTRL		0x800
+>   #define DWCMSHC_EMMC_DLL_RXCLK		0x804
+> @@ -75,6 +79,11 @@
+>   #define BOUNDARY_OK(addr, len) \
+>   	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+>   
+> +#define DWCMSHC_SDHCI_CQE_TRNS_MODE	(SDHCI_TRNS_MULTI | \
+> +					 SDHCI_TRNS_BLK_CNT_EN | \
+> +					 SDHCI_TRNS_DMA)
+> +
+> +
+>   enum dwcmshc_rk_type {
+>   	DWCMSHC_RK3568,
+>   	DWCMSHC_RK3588,
+> @@ -90,7 +99,9 @@ struct rk35xx_priv {
+>   
+>   struct dwcmshc_priv {
+>   	struct clk	*bus_clk;
+> -	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
+> +	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA1 reg */
+> +	int vendor_specific_area2; /* P_VENDOR_SPECIFIC_AREA2 reg */
+> +
+>   	void *priv; /* pointer to SoC private stuff */
+>   };
+>   
+> @@ -210,6 +221,90 @@ static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
+>   	sdhci_writel(host, vendor, reg);
+>   }
+>   
+> +static int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +{
+> +	int err = sdhci_execute_tuning(mmc, opcode);
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +
+> +	if (err)
+> +		return err;
+> +
+> +	/*
+> +	 * Tuning can leave the IP in an active state (Buffer Read Enable bit
+> +	 * set) which prevents the entry to low power states (i.e. S0i3). Data
+> +	 * reset will clear it.
+> +	 */
+> +	sdhci_reset(host, SDHCI_RESET_DATA);
+> +
+> +	return 0;
+> +}
+> +
+> +static u32 dwcmshc_cqe_irq_handler(struct sdhci_host *host, u32 intmask)
+> +{
+> +	int cmd_error = 0;
+> +	int data_error = 0;
+> +
+> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+> +		return intmask;
+> +
+> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +
+> +	return 0;
+> +}
+> +
+> +static void dwcmshc_sdhci_cqe_enable(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	u8 ctrl;
+> +
+> +	sdhci_writew(host, DWCMSHC_SDHCI_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
+> +
+> +	sdhci_cqe_enable(mmc);
+> +
+> +	/*
+> +	 * The "DesignWare Cores Mobile Storage Host Controller
+> +	 * DWC_mshc / DWC_mshc_lite Databook" says:
+> +	 * when Host Version 4 Enable" is 1 in Host Control 2 register,
+> +	 * SDHCI_CTRL_ADMA32 bit means ADMA2 is selected.
+> +	 * Selection of 32-bit/64-bit System Addressing:
+> +	 * either 32-bit or 64-bit system addressing is selected by
+> +	 * 64-bit Addressing bit in Host Control 2 register.
+> +	 *
+> +	 * On the other hand the "DesignWare Cores Mobile Storage Host
+> +	 * Controller DWC_mshc / DWC_mshc_lite User Guide" says, that we have to
+> +	 * set DMA_SEL to ADMA2 _only_ mode in the Host Control 2 register.
+> +	 */
+> +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +	ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> +	ctrl |= SDHCI_CTRL_ADMA32;
+> +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +}
+> +
+> +static void dwcmshc_set_tran_desc(struct cqhci_host *cq_host, u8 **desc,
+> +				  dma_addr_t addr, int len, bool end, bool dma64)
+> +{
+> +	int tmplen, offset;
+> +
+> +	if (likely(!len || BOUNDARY_OK(addr, len))) {
+> +		cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+> +		return;
+> +	}
+> +
+> +	offset = addr & (SZ_128M - 1);
+> +	tmplen = SZ_128M - offset;
+> +	cqhci_set_tran_desc(*desc, addr, tmplen, false, dma64);
+> +
+> +	addr += tmplen;
+> +	len -= tmplen;
+> +	*desc += cq_host->trans_desc_len;
+> +	cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+> +}
+> +
+> +static void dwcmshc_cqhci_dumpregs(struct mmc_host *mmc)
+> +{
+> +	sdhci_dumpregs(mmc_priv(mmc));
+> +}
+> +
+>   static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock)
+>   {
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -345,6 +440,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+>   	.get_max_clock		= dwcmshc_get_max_clock,
+>   	.reset			= sdhci_reset,
+>   	.adma_write_desc	= dwcmshc_adma_write_desc,
+> +	.irq			= dwcmshc_cqe_irq_handler,
+>   };
+>   
+>   static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
+> @@ -379,6 +475,71 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+>   		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>   };
+>   
+> +static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
+> +	.enable		= dwcmshc_sdhci_cqe_enable,
+> +	.disable	= sdhci_cqe_disable,
+> +	.dumpregs	= dwcmshc_cqhci_dumpregs,
+> +	.set_tran_desc	= dwcmshc_set_tran_desc,
+> +};
+> +
+> +static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *pdev)
+> +{
+> +	struct cqhci_host *cq_host;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	bool dma64 = false;
+> +	u16 clk;
+> +	int err;
+> +
+> +	host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+> +	cq_host = devm_kzalloc(&pdev->dev, sizeof(*cq_host), GFP_KERNEL);
+> +	if (!cq_host) {
+> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: not enough memory\n");
+> +		return;
+> +	}
+> +
+> +	/*
+> +	 * For dwcmshc host controller we have to enable internal clock
+> +	 * before access to some registers from Vendor Specific Aria 2.
+> +	 */
+> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	clk |= SDHCI_CLOCK_INT_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	if (!(clk & SDHCI_CLOCK_INT_EN)) {
+> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: internal clock enable error\n");
+> +		goto free_cq_host;
+> +	}
+> +
+> +	cq_host->mmio = host->ioaddr + priv->vendor_specific_area2;
+> +	cq_host->ops = &dwcmshc_cqhci_ops;
+> +
+> +	/* Enable using of 128-bit task descriptors */
+> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+> +	if (dma64) {
+> +		dev_dbg(mmc_dev(host->mmc), "128-bit task descriptors\n");
+> +		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+> +	}
+> +	err = cqhci_init(cq_host, host->mmc, dma64);
+> +	if (err) {
+> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: error %d\n", err);
+> +		goto int_clock_disable;
+> +	}
+> +
+> +	dev_dbg(mmc_dev(host->mmc), "CQE init done\n");
+> +
+> +	return;
+> +
+> +int_clock_disable:
+> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	clk &= ~SDHCI_CLOCK_INT_EN;
+> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> +
+> +free_cq_host:
+> +	devm_kfree(&pdev->dev, cq_host);
+> +}
+> +
+> +
+>   static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+>   {
+>   	int err;
+> @@ -471,7 +632,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>   	struct rk35xx_priv *rk_priv = NULL;
+>   	const struct sdhci_pltfm_data *pltfm_data;
+>   	int err;
+> -	u32 extra;
+> +	u32 extra, caps;
+>   
+>   	pltfm_data = device_get_match_data(&pdev->dev);
+>   	if (!pltfm_data) {
+> @@ -519,9 +680,12 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>   
+>   	priv->vendor_specific_area1 =
+>   		sdhci_readl(host, DWCMSHC_P_VENDOR_AREA1) & DWCMSHC_AREA1_MASK;
+> +	priv->vendor_specific_area2 =
+> +		sdhci_readw(host, DWCMSHC_P_VENDOR_AREA2);
+>   
+>   	host->mmc_host_ops.request = dwcmshc_request;
+>   	host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
+> +	host->mmc_host_ops.execute_tuning = dwcmshc_execute_tuning;
+>   
+>   	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
+>   		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
+> @@ -547,6 +711,10 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>   		sdhci_enable_v4_mode(host);
+>   #endif
+>   
+> +	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +	if (caps & SDHCI_CAN_64BIT_V4)
+> +		sdhci_enable_v4_mode(host);
+> +
+>   	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>   
+>   	pm_runtime_get_noresume(dev);
+> @@ -557,6 +725,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>   	if (err)
+>   		goto err_rpm;
+>   
+> +	/* Setup Command Queue Engine if enabled */
+> +	if (device_property_read_bool(&pdev->dev, "supports-cqe")) {
+> +		if (caps & SDHCI_CAN_64BIT_V4)
+> +			dwcmshc_cqhci_init(host, pdev);
+> +		else
+> +			dev_warn(dev, "Cannot enable CQE without V4 mode support\n");
+> +	}
+> +
+> +
+>   	if (rk_priv)
+>   		dwcmshc_rk35xx_postinit(host, priv);
+>   
