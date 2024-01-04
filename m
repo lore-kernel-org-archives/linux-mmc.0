@@ -1,49 +1,38 @@
-Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.65])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B8011F5F0
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Jan 2024 07:37:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63D002031C;
+	Thu,  4 Jan 2024 09:25:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gCRrxT6h"
-Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-a28ee72913aso5163166b.1
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jan 2024 23:37:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1704353864; x=1704958664; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=XcmxxauYbfKJDqvFNCXACuCIGrw/Uc+4qzPY1VHZt9A=;
-        b=gCRrxT6hiBPxXsAY03uiaxvwWXIq+oOqa4r8I8lbz3MYWMGvuZjWX31etE0PmCauqh
-         b9GBiah+3q0SLODP/V+jn7ck6Bz3sda5/n/ypU7x8u4yrIWzBWYIilTewqYkQ22hZs6B
-         CXp1u7b4VnuDxDP4XUi1/QRJ1nZGOoSfu6HZtpSNhWfnuLopt+YzzpyCgMz9fU9pp8mB
-         fS1Awx2OkXSmGgcRY7In+Fhh7nmEj1XBdy1Nxfj1u47TFqa+RU90xkQ6YM3vOOrGOPul
-         6+a/jZfOzDZ8yuUGKfqp0xi3avwFKkP/B2UTAMqI6BQy61/VEWr9L76SUphW5ZBpXFzQ
-         w6AA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704353864; x=1704958664;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XcmxxauYbfKJDqvFNCXACuCIGrw/Uc+4qzPY1VHZt9A=;
-        b=fJymEe2hm/6IEOmu1bF4soqsnxCrgmlx8yf5eA5E0ZNQB0zg0ilqSKScZPjPjxyTJy
-         KgP2MsuIpRh5tRzYf3UGDqLJ2/L+gTXNY7zF5me6uK6Ikw7nXqNkaJu7hY/bb8HMv/Ps
-         m+ltkakwKiIuPko0+kuZJX4A2fmbONqkuOYM2HgH21lWUbrIGQl+FNL5m6jif9ufydoN
-         cy4FgUSIOZ/bbzofufK+uIlnwcoiqEcWy8FbvS7UPkbI1a5hy3ikkraSaj8CqrI57rzx
-         sTc7RGFMjhoO9FgeaepJpq2iJT0WcUv6mFgQbI7PTnOy5rRktqoE3DFgWsOdybePhk86
-         cdMw==
-X-Gm-Message-State: AOJu0YwByrOeXeq64RBnfawFbPUdR7O6MW+My2INMDjKD22IFBfhkgL4
-	0qJQG1SJBSOU7f3h0WgjKUnSN0jmU3JnIQwuIiw7pRvyGbE=
-X-Google-Smtp-Source: AGHT+IF7EXuxwSlHTY5javAEI9SH4fqaYbbA3qEZhIO8Ef01OIU3T8e0S9VOYlK0L07mInkTxs8Byw==
-X-Received: by 2002:a17:906:ee81:b0:a28:ac72:4570 with SMTP id wt1-20020a170906ee8100b00a28ac724570mr218580ejb.21.1704353863819;
-        Wed, 03 Jan 2024 23:37:43 -0800 (PST)
-Received: from [192.168.1.20] ([178.197.218.27])
-        by smtp.gmail.com with ESMTPSA id fw34-20020a170907502200b00a27aabff0dcsm5328306ejc.179.2024.01.03.23.37.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 03 Jan 2024 23:37:43 -0800 (PST)
-Message-ID: <c343e7f5-ea90-4bfb-a837-0cc6fd9a3488@linaro.org>
-Date: Thu, 4 Jan 2024 08:37:41 +0100
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="MDVLS0hr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1704360306; x=1735896306;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=iH8mZfy4z3bXeluQ3SiXbNx9xlfsEzn+JeEJgF3IPfM=;
+  b=MDVLS0hruaVcxV9n/BbPgU6mwXCRm56pnERFCT9Mnu2MDJmQiK17FwTn
+   FPt2C/tyvMAtg4k928Q5BB/Gu5JaXn4Y4YkALih7cdAzyxx19artVDbUt
+   aoz1oWOVoL/0giMh09utFks6t5AkFI/JqM92+/GvXoRet7Mp+0OP6DPUr
+   Tdx43dh1USryRjHY7QK3hyQXArKze3WoscbVK1Ms9TSO/hdDDlyqOvMq9
+   tJx70DVGmOOz1v2R49yHmxPid7bqSCjxlKx1e2pRlEfGlu5WLnenJ/2Pf
+   MUhACQY/dX5tEQSpQC3WczeEcOFizWjEtpywDxrei/eo7V9WJBKpXIcqg
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10942"; a="400972584"
+X-IronPort-AV: E=Sophos;i="6.04,330,1695711600"; 
+   d="scan'208";a="400972584"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2024 01:25:05 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10942"; a="814571457"
+X-IronPort-AV: E=Sophos;i="6.04,330,1695711600"; 
+   d="scan'208";a="814571457"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.85])
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2024 01:25:03 -0800
+Message-ID: <a7e6cf13-1873-47b1-a3d8-75d958edafe7@intel.com>
+Date: Thu, 4 Jan 2024 11:24:59 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -51,96 +40,108 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: add Marvell ac5
+Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Enable timeout quirk for
+ BlueField-3 SoC
 Content-Language: en-US
-To: Elad Nachman <enachman@marvell.com>, robh+dt@kernel.org,
- krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, andrew@lunn.ch,
- gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com,
- huziji@marvell.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org
-References: <20240103172803.1826113-1-enachman@marvell.com>
- <20240103172803.1826113-2-enachman@marvell.com>
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20240103172803.1826113-2-enachman@marvell.com>
+To: Liming Sun <limings@nvidia.com>,
+ Christian Loehle <christian.loehle@arm.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, David Thompson <davthompson@nvidia.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <6082b74cbc681e8c24354828941361f4f4294242.1700315051.git.limings@nvidia.com>
+ <3912dd1e-b15b-49a9-9c91-88e00e986efd@arm.com>
+ <BN9PR12MB506854D38EA7E2702319F1AAD382A@BN9PR12MB5068.namprd12.prod.outlook.com>
+ <66aa74f5-0613-49eb-80d3-ce4381f717ae@intel.com>
+ <BN9PR12MB50682F406ABEF9999CEEF1D0D397A@BN9PR12MB5068.namprd12.prod.outlook.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <BN9PR12MB50682F406ABEF9999CEEF1D0D397A@BN9PR12MB5068.namprd12.prod.outlook.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 03/01/2024 18:28, Elad Nachman wrote:
-> From: Elad Nachman <enachman@marvell.com>
+On 19/12/23 23:18, Liming Sun wrote:
 > 
-> Add dt bindings for Marvell AC5/X/IM eMMC controller.
-> This compatibility string covers the differences in the
-> AC5/X version of the driver: 31-bit bus limitation and
-> DDR memory starting at address 0x2_0000_0000, which are handled
-> by usage of a bounce buffer plus a different DMA mask.
 > 
-> Signed-off-by: Elad Nachman <enachman@marvell.com>
-> ---
->  .../devicetree/bindings/mmc/marvell,xenon-sdhci.yaml          | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>> -----Original Message-----
+>> From: Adrian Hunter <adrian.hunter@intel.com>
+>> Sent: Monday, December 11, 2023 6:39 AM
+>> To: Liming Sun <limings@nvidia.com>; Christian Loehle
+>> <christian.loehle@arm.com>; Ulf Hansson <ulf.hansson@linaro.org>; David
+>> Thompson <davthompson@nvidia.com>
+>> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+>> Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Enable timeout quirk for
+>> BlueField-3 SoC
+>>
+>> On 30/11/23 15:19, Liming Sun wrote:
+>>>
+>>>
+>>>> -----Original Message-----
+>>>> From: Christian Loehle <christian.loehle@arm.com>
+>>>> Sent: Monday, November 27, 2023 8:36 AM
+>>>> To: Liming Sun <limings@nvidia.com>; Adrian Hunter
+>>>> <adrian.hunter@intel.com>; Ulf Hansson <ulf.hansson@linaro.org>; David
+>>>> Thompson <davthompson@nvidia.com>
+>>>> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+>>>> Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Enable timeout quirk
+>> for
+>>>> BlueField-3 SoC
+>>>>
+>>>> On 18/11/2023 13:46, Liming Sun wrote:
+>>>>> This commit enables SDHCI_QUIRK_BROKEN_TIMEOUT_VAL to solve the
+>>>>> intermittent eMMC timeout issue reported on some cards under eMMC
+>>>>> stress test.
+>>>>>
+>>>>> Reported error message:
+>>>>>   dwcmshc MLNXBF30:00: __mmc_blk_ioctl_cmd: data error -110
+>>>>>
+>>>>> Signed-off-by: Liming Sun <limings@nvidia.com>
+>>>>> ---
+>>>>>  drivers/mmc/host/sdhci-of-dwcmshc.c | 3 ++-
+>>>>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>> b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>>> index 3a3bae6948a8..3c8fe8aec558 100644
+>>>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>>> @@ -365,7 +365,8 @@ static const struct sdhci_pltfm_data
+>>>> sdhci_dwcmshc_pdata = {
+>>>>>  #ifdef CONFIG_ACPI
+>>>>>  static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
+>>>>>  	.ops = &sdhci_dwcmshc_ops,
+>>>>> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>>>>> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+>>>>> +		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+>>>>>  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+>>>>>  		   SDHCI_QUIRK2_ACMD23_BROKEN,
+>>>>>  };
+>>>>
+>>>> __mmc_blk_ioctl_cmd: data error ?
+>>>> What stresstest are you running that issues ioctl commands?
+>>>> On which commands does the timeout occur?
+>>>> Anyway you should be able to increase the timeout in ioctl structure
+>>>> directly, i.e. in userspace, or does that not work?
+>>>
+>>> It's running stress test with tool like "fio --name=randrw_stress_round_1 --
+>> ioengine=libaio --direct=1 --time_based=1 --end_fsync=1 --ramp_time=5 --
+>> norandommap=1 --randrepeat=0 --group_reporting=1 --numjobs=4 --
+>> iodepth=128 --rw=randrw --overwrite=1 --runtime=36000 --
+>> bssplit=4K/44:8K/1:12K/1:16K/1:24K/1:28K/1:32K/1:40K/32:64K/5:68K/7:72K
+>> /3:76K/3 --filename=/dev/mmcblk0"
+>>> The tool(application) is owned by user or with some standard tool.
+>>
+>> fio does not send mmc ioctls, so I am also a bit confused about
+>> how you get "__mmc_blk_ioctl_cmd: data error -110" ?
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> index 3a8e74894ae0..cfe6237716f4 100644
-> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> @@ -27,7 +27,9 @@ properties:
->            - marvell,armada-ap806-sdhci
->  
->        - items:
-> -          - const: marvell,armada-ap807-sdhci
-> +          - enum:
-> +              - marvell,armada-ap807-sdhci
-> +              - marvell,ac5-sdhci
+> There are other activities or background task going on. I assume it's other
+> MMC access which are affected by the stress FIO and got timeout. Would it make sense?
+> 
 
-Order entries alphabetically if there is going to be resend/new version.
-
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-Best regards,
-Krzysztof
+It depends on whether the IOCTL is overriding the timeout.  In
+struct mmc_ioc_cmd there is data_timeout_ns which overrides the
+mmc core data timeout calculated by mmc_set_data_timeout().  There
+is also cmd_timeout_ms for commands.  You need to check whether
+"__mmc_blk_ioctl_cmd: data error -110" is because data_timeout_ns
+was set too low (but non-zero) by the caller of the IOCTL.
 
