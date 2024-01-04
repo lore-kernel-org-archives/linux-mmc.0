@@ -1,421 +1,159 @@
-Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
+Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FCDB21359
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Jan 2024 11:56:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=musicianspage.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BF2A286B1;
+	Thu,  4 Jan 2024 17:31:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mx0b-0016f401.pphosted.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="ZHjl2u6s"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
-	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
-	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
-	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
-	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
-	List-Archive; bh=jfhJJYaFkuuEMtpuV+8bS3ooaRJlhOgExoSUwThAEqU=; b=ZHjl2u6sOX6Z
-	bXjFbpDVJyqHiDbNVA7yEA1QkNl9lIkQW5F/821WUTBmuScCZkbimHrvSgv2QikEOJllNcZ5MUlnT
-	2Nz4BrHJkuZ4sE13MlQXUqPf+v30rGH2nzav9CSkz38rGIi1MirmxWJHchT3VedSABr2mPUE/Yo+2
-	mFfc0=;
-Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
-	(envelope-from <no-reply@musicianspage.com>)
-	id 1rLMKT-0000aq-TZ
-	for linux-mmc@vger.kernel.org; Thu, 04 Jan 2024 03:56:05 -0800
-To: linux-mmc@vger.kernel.org
-Subject: Music News and Site Updates (January 4, 2024)
+	dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b="ReDjxyv1"
+Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
+	by mx0b-0016f401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 404AF2II021043;
+	Thu, 4 Jan 2024 09:30:41 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=
+	from:to:cc:subject:date:message-id:mime-version
+	:content-transfer-encoding:content-type; s=pfpt0220; bh=+WG/kg7A
+	naWaSZdtZa4RS3yirZT8LfAXiAzW6sHOpEo=; b=ReDjxyv1s61tzxxsZy3wa1l6
+	udlB20uavMm+g7ySvSlX4F8pB7fSQQ1zi+OuYU5AkeVOXuay5pEniZL58y7vq6SR
+	ioIQi7mJGvS5CUj0dLXn9Un5nXOtPNGYuWRARZ3o++BUFA1kBGFO91HTwcXOB+xF
+	tsrDX4mTYJHVaNCaNHLPwQajAAp5J1iTu+hfom7Th8qq7ACXbG9Su/1bz0SsRX3A
+	h4fS0vHxXe8r5fjBw6mOW+YoZZmpB5riU8z0w8xZoToaN3SZlyP+TJRk9A5R46ay
+	BuFoIvUYzgNVbHdPpobgy1oNqeIeBXH5i6qwW9aJdjroSfsUc4oW9SZjSj3JRg==
+Received: from dc5-exch01.marvell.com ([199.233.59.181])
+	by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3vd39qfped-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+	Thu, 04 Jan 2024 09:30:41 -0800 (PST)
+Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Thu, 4 Jan
+ 2024 09:30:39 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
+ Transport; Thu, 4 Jan 2024 09:30:39 -0800
+Received: from dc3lp-swdev041.marvell.com (dc3lp-swdev041.marvell.com [10.6.60.191])
+	by maili.marvell.com (Postfix) with ESMTP id 7C58E3F7089;
+	Thu,  4 Jan 2024 09:30:37 -0800 (PST)
+From: Elad Nachman <enachman@marvell.com>
+To: <huziji@marvell.com>, <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC: <enachman@marvell.com>
+Subject: [PATCH v2] mmc: xenon: Add ac5 support via bounce buffer
+Date: Thu, 4 Jan 2024 19:30:33 +0200
+Message-ID: <20240104173033.2836110-1-enachman@marvell.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Musicians Page <newsletter@musicianspage.com>
-Reply-To: Musicians Page <newsletter@musicianspage.com>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <E1rLMKT-0000aq-TZ@list.virtualsheetmusic.com>
-Date: Thu, 04 Jan 2024 03:56:05 -0800
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Proofpoint-ORIG-GUID: n50KVCbTpi0aMhP8-GEBvRh6kMk7havc
+X-Proofpoint-GUID: n50KVCbTpi0aMhP8-GEBvRh6kMk7havc
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-12-09_02,2023-12-07_01,2023-05-22_02
+
+From: Elad Nachman <enachman@marvell.com>
+
+AC5/X/IM SOCs has a variant of the Xenon eMMC controller,
+in which only 31-bit of addressing pass from the controller
+on the AXI bus.
+Since we cannot guarantee that only buffers from the first 2GB
+of memory will reach the driver, the driver is configured for
+SDMA mode, without 64-bit mode, overriding the DMA mask to 34-bit
+to support the DDR memory mapping, which starts at offset 8GB.
+
+Signed-off-by: Elad Nachman <enachman@marvell.com>
+---
+ drivers/mmc/host/sdhci-xenon.c | 31 +++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-xenon.h |  3 ++-
+ 2 files changed, 33 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 25ba7aecc3be..0e52867f6e91 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -18,6 +18,8 @@
+ #include <linux/of.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
++#include <linux/mm.h>
++#include <linux/dma-mapping.h>
+ 
+ #include "sdhci-pltfm.h"
+ #include "sdhci-xenon.h"
+@@ -422,6 +424,7 @@ static int xenon_probe_params(struct platform_device *pdev)
+ 	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+ 	u32 sdhc_id, nr_sdhc;
+ 	u32 tuning_count;
++	struct sysinfo si;
+ 
+ 	/* Disable HS200 on Armada AP806 */
+ 	if (priv->hw_version == XENON_AP806)
+@@ -450,6 +453,23 @@ static int xenon_probe_params(struct platform_device *pdev)
+ 	}
+ 	priv->tuning_count = tuning_count;
+ 
++	/*
++	 * AC5/X/IM HW has only 31-bits passed in the crossbar switch.
++	 * If we have more than 2GB of memory, this means we might pass
++	 * memory pointers which are above 2GB and which cannot be properly
++	 * represented. In this case, disable ADMA, 64-bit DMA and allow only SDMA.
++	 * This effectively will enable bounce buffer quirk in the
++	 * generic SDHCI driver, which will make sure DMA is only done
++	 * from supported memory regions:
++	 */
++	if (priv->hw_version == XENON_AC5) {
++		si_meminfo(&si);
++		if (si.totalram * si.mem_unit > SZ_2G) {
++			host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
++			host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
++		}
++	}
++
+ 	return xenon_phy_parse_params(dev, host);
+ }
+ 
+@@ -562,6 +582,16 @@ static int xenon_probe(struct platform_device *pdev)
+ 		goto remove_sdhc;
+ 
+ 	pm_runtime_put_autosuspend(&pdev->dev);
++	/*
++	 * If we previously detected AC5 with over 2GB of memory,
++	 * then we disable ADMA and 64-bit DMA.
++	 * This means generic SDHCI driver has set the DMA mask to
++	 * 32-bit. Since DDR starts at 0x2_0000_0000, we must use
++	 * 34-bit DMA mask to access this DDR memory:
++	 */
++	if (priv->hw_version == XENON_AC5 &&
++	    host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA)
++		dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(34));
+ 
+ 	return 0;
+ 
+@@ -680,6 +710,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+ 	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
+ 	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
+ 	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
++	{ .compatible = "marvell,ac5-sdhci",	     .data =  (void *)XENON_AC5},
+ 	{}
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
+diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+index 3e9c6c908a79..0460d97aad26 100644
+--- a/drivers/mmc/host/sdhci-xenon.h
++++ b/drivers/mmc/host/sdhci-xenon.h
+@@ -57,7 +57,8 @@ enum xenon_variant {
+ 	XENON_A3700,
+ 	XENON_AP806,
+ 	XENON_AP807,
+-	XENON_CP110
++	XENON_CP110,
++	XENON_AC5
+ };
+ 
+ struct xenon_priv {
+-- 
+2.25.1
 
-Dear Musician and Music Lover,
-
-Here is the Newsletter from Musicians Page website:
-
-http://www.musicianspage.com
-
-As you have requested. Read on...
-
-(If you are no longer interested in subscribing to this newsletter, you can=
- unsubscribe by clicking the link at the bottom of this newsletter. Thanks!=
-)
-
-
-
-
----------------------------------------------------------------------------=
--
-
-If you are not yet registered as a Musician or Band/Ensemble, be sure to si=
-gn-up from the following page (it's free!):
-
-https://www.musicianspage.com/signup.php?email=3Dlinux-mmc@vger.kernel.org
-
----------------------------------------------------------------------------=
--
-
-
-
-
-Consider to join with a Standard or Pro Membership
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Either if you are a Musician or a Music Employer, have a look at our Member=
-ship Plans and sign up for the one that best fits your needs:
-
-
-http://www.musicianspage.com/membership.html
-
-
-A Standard or Pro Membership gives you the ability to upload unlimited audi=
-o, video, and sheet music files to your profile; as well as a more complete=
- resume (or service/company info if you are an employer) and a creative pag=
-e with media content. If you are a musician, you will also have the chance =
-to get featured on the new Musicians Page radio:
-
-http://www.musicianspage.com/music/radio/
-
-
-Musicians Page gives you a professional space on the web to showcase your t=
-alent to potential employers or, for employers, to have a professional and =
-targeted space on the web where to showcase your products or services to po=
-tential prospects. Musicians Page gives you the chance to differentiate you=
-rself from other musicians or the competition who only use amateur channels=
- such as MySpace, FaceBook, YouTube, or other free sites.
-
-Also, do you know that your profile on Musicians Page is Google optimized?
-
-This means that employers, other musicians or prospects can easily find you=
- via Google. Our system automatically optimizes every Musician's profile to=
- appear at the top of Google results for relevant keywords. Just another re=
-ason to take full advantage of all that the Standard and Pro Memberships ha=
-ve to offer, and not rely solely on free social networks that won't optimiz=
-e your profile for others to see at the top of the list!
-
-With a Standard or Pro Membership, you'll also be able to find and apply fo=
-r external jobs Musicians Page finds for you on the web (if you are a music=
-ian) and, with a Pro Membership, be notified via email as soon as a new ext=
-ernal jobs, matching your profile, are found. Or, if you are an employer, b=
-e featured prominently on any webpage of our site to over 2,000 unique user=
-s daily.
-
-Musicians Page is a network for professional musicians and music employers,=
- built and planned to grow based on professional musicians' and music emplo=
-yers' needs. Don't miss the opportunity to jump on the band wagon from the =
-beginning.
-
-Membership fees are likely to be increased in the coming weeks, so join Mus=
-icians Page today and start networking the right way!
-
-https://www.musicianspage.com/signup.php
-
-
-
-
-Are you looking for musicians, a song writer, a lyricist, a composer?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If so, please post your music job or project on Musicians Page.
-To post a job/project is completely free and takes 5 minutes:
-
-http://www.musicianspage.com/login/panel.php?yourjobs=3D1&postnew=3D1
-
-
-REMEMBER: you can post a job even for a FREE project you need musicians for=
-!
-
-
-
-
-Latest Posted Jobs on Musicians Page
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Music Duo
-http://www.musicianspage.com/jobs/7721/
-
-Guitarist needed in Mexico for rock and roll music
-http://www.musicianspage.com/jobs/7720/
-
-KEYBOARD PLAYER
-http://www.musicianspage.com/jobs/7719/
-
-STEEL PAN SOLOIST FOR CRUISE SHIPS URGENT
-http://www.musicianspage.com/jobs/7715/
-
-Lauren Daigle Cover Singer
-http://www.musicianspage.com/jobs/7716/
-
-Violinist Wanted
-http://www.musicianspage.com/jobs/7717/
-
-Power rock/pop trio for cruises
-http://www.musicianspage.com/jobs/7713/
-
-Country Musicians for Cruises
-http://www.musicianspage.com/jobs/7712/
-
-Guitar Violin Duos for Cruises
-http://www.musicianspage.com/jobs/7710/
-
-Keys Player for Cruises
-http://www.musicianspage.com/jobs/7709/
-
-
-More jobs:
-http://www.musicianspage.com/jobs/
-
-
-
-
-Latest External Jobs or Opportunities (found on the web)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Looking for Electric violinist
-http://www.musicianspage.com/extjobs/1257433/
-
-Seeking drummer and keyboardist to jam to The Cure
-http://www.musicianspage.com/extjobs/1257432/
-
-Drummer and bass player looking for guitar player/leadvocals
-http://www.musicianspage.com/extjobs/1257431/
-
-Sea Caves looking for keyboardist
-http://www.musicianspage.com/extjobs/1257430/
-
-Twangy Western Post Punk looking for drummer and Guitarist/ Keys
-http://www.musicianspage.com/extjobs/1257429/
-
-Drummer Needed
-http://www.musicianspage.com/extjobs/1257428/
-
-Psychedelic/ rock drummer wanted!!!
-http://www.musicianspage.com/extjobs/1257427/
-
-GRATEFUL DEAD RHYTHM GUITARIST NEEDED FOR JAMS and gigs asap
-http://www.musicianspage.com/extjobs/1257426/
-
-Experienced Blues Lead Guitarist seeking blues band
-http://www.musicianspage.com/extjobs/1257425/
-
-Bass player needed for live shows and touring
-http://www.musicianspage.com/extjobs/1257424/
-
-
-More jobs:
-http://www.musicianspage.com/jobs/
-
-
-
-
-Latest Forum Topics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Help: in which Latin genre would the be included? - by Ignacio Cobian Sanch=
-ez
-posted on the Latin Music forum
-http://www.musicianspage.com/forums/music/latinmusic/9038/
-
-
-Youtube Channel Recommendation/Suggestion - by Classical Music
-posted on the Classical Music forum
-http://www.musicianspage.com/forums/music/classicalmusic/9037/
-
-
-I can write for you any sheet music - by Carolina Escalona
-posted on the Introduce Yourself forum
-http://www.musicianspage.com/forums/general/introduceyou/9036/
-
-
-More forum topics:
-http://www.musicianspage.com/forums/
-
-
-
-
-Latest Uploaded Audio Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Eye Of The Hurricane by roxanne hall (added by Roxanne Hall)
-Genre: Other...
-http://www.musicianspage.com/musicians/53862/audiofile/22923/
-
-
-Agenda by Gary Justice &amp; Moka Only (added by Gary Justice)
-Genre: R&B/Soul
-http://www.musicianspage.com/musicians/53859/audiofile/22921/
-
-
-Ringtone by Ray Rosa (added by Ray Rosa)
-Genre: Pop
-http://www.musicianspage.com/musicians/9397/audiofile/22920/
-
-
-More audio files:
-http://www.musicianspage.com/audio/
-
-
-We are waiting for your comments and if you have any, please upload your
-own audio files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addaudiofiles=3D1
-
-
-
-
-Latest Uploaded Video Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Lattino by Leonneli Guitar (added by Leonneli Guitar)
-Genre: Latin
-http://www.musicianspage.com/musicians/5459/videofile/21174/
-
-
-Duorphe promo video by Duorphe (added by Duorphe)
-Genre: Pop
-http://www.musicianspage.com/musicians/53836/videofile/21169/
-
-
-Master Blues by ARTIZZATE music (added by Orgazzly Organ)
-Genre: World
-http://www.musicianspage.com/musicians/7983/videofile/21163/
-
-
-More video files:
-http://www.musicianspage.com/video/
-
-
-We are waiting for your comments and if you have any, please upload your
-own video files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addvideofiles=3D1
-
-
-
-
-Latest Uploaded Sheet Music Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-XLIII Memoriam Vivere by Marisol Jimenez (added by Marisol Jimenez)
-Genre: Contemporary
-http://www.musicianspage.com/musicians/11620/sheetmusic/3278/
-
-
-Symphonic Suite for Concert Band, First Draft by William Malcolm Jones (add=
-ed by William Jones)
-Genre: Classical
-http://www.musicianspage.com/musicians/10888/sheetmusic/3277/
-
-
-SOTF - Piano solo by Ronald Van Deurzen (added by Ronald Van Deurzen)
-Genre: Classical
-http://www.musicianspage.com/musicians/41617/sheetmusic/3274/
-
-
-More sheet music files:
-http://www.musicianspage.com/sheetmusic/
-
-
-We are waiting for your comments and if you have any, please upload your
-own sheet music files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addsheetmusic=3D1
-
-
-
-
-Earn money with your website, FaceBook, YouTube or MySpace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you own a website or simply an account on FaceBook, YouTube, MySpace or =
-Twitter, be sure to check out the Virtual Sheet Music's Affiliate Program w=
-hich entitles you to earn 30% commission on any referred sale.
-
-It is completely free to join:
-
-https://affiliates.virtualsheetmusic.com/
-
-
-and once you have an account, start referring users using a special code to=
- put on your website or social account (FaceBook, Twitter, etc).
-
-For any further questions, please reply to this email, we will be glad to h=
-elp you step by step.
-
-
-
-
-Join us on the major Social Networks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Stay updated with our latest news on:
-
-1. on FaceBook:
-http://www.facebook.com/MusiciansPage
-
-2. on Twitter:
-http://twitter.com/MusiciansPage
-
-
-
-
----------------------------------------------------------------------------=
------
-
-FEATURE YOURSELF ON MUSICIANS PAGE:
-=20
-If you have an upcoming concert, CD release, special Event, or just want to=
- promote yourself and your activity, remember you can feature yourself in f=
-ront of thousands of musicians, music lovers, and music employers (includin=
-g music agents, artist management companies, etc.) by exclusively putting y=
-our picture and name on every page of Musicians Page, starting at just $10 =
-(that's right, just 10 bucks!):
-=20
-https://www.musicianspage.com/login/panel.php?featureyourself=3D1
-=20
-Your ad will be displayed exclusively for the duration of your campaign, gi=
-ving you maximum exposure to the Musicians Page community. Musicians Page i=
-s visited by thousands of musicians and people working in the music busines=
-s every day, so consider putting yourself in front of this specialized audi=
-ence.
-
-This is your chance to make new contacts and seize exciting opportunities i=
-n minutes! Don't miss this opportunity now!
-
----------------------------------------------------------------------------=
------
-
-
-
-
-Please feel free to pass this Newsletter along to friends and other musicia=
-ns who might find this content valuable in the same way you do, and be sure=
- to send us your ideas and thoughts by either replying to this email or by =
-posting your comments and feedback on the dedicated forum below:
-
-http://www.musicianspage.com/forums/general/feedback/
-
-Thank you!
-
-All the best,
-Fabrizio Ferrari, CEO
-Musicians Page
-http://www.musicianspage.com
-Virtual Sheet Music Inc.
-http://www.virtualsheetmusic.com
-29911 Niguel Road, #6992
-Laguna Niguel, CA 92677 (USA)
-Fax: +1 800 717 1876 or +1 973 273 2171
-----------------------------------------------
-This message was sent from Musicians Page
-http://www.musicianspage.com
-To unsubscribe, please go to:
-http://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
-=2Eorg
