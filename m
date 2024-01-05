@@ -1,110 +1,132 @@
-Received: from mail-lj1-f172.google.com (mail-lj1-f172.google.com [209.85.208.172])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E16A924B48
-	for <linux-mmc@vger.kernel.org>; Fri,  5 Jan 2024 09:51:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB4B824B54
+	for <linux-mmc@vger.kernel.org>; Fri,  5 Jan 2024 10:17:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="os72KPp3"
-Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-2cce6bb9b48so16793251fa.1
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jan 2024 01:51:58 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="P1ppLLM/"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-5e54d40cca2so12774797b3.3
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jan 2024 02:17:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1704448317; x=1705053117; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=izsGUyQXMG/NnxMCJxiUuvXnyxes7bnjdWRoga0i3bU=;
-        b=os72KPp32jpBjgi8/0kfK/y4OJP8KEPu1ZoH2j2fdCcwdndciCOFqqN2KC4CDNIjcE
-         aDU5gWahx75lQ/V9FrXOFhFRDwcLZ3yLJYHPACXSH7ZnbjdDAngqxddd1nre15iXhZdY
-         fUp8emO/FEaQCpXqpYp+CWn0If9iOUiSs5jdn3vOXK8i/ZG16qd6w60cvS+ipg/7LEJY
-         WL04iT/mT9aDO+xzPE559L8VW/LhAfOwH/c7njHB9F9EGn73tXKvkk4BnkOBLBujnCVv
-         c3g5RsoWp5m/ycBhfaWu8SYzXhytikx3Rtbi0UBqLyZ8kLkJNHg3v1FqeLuAxIDa4JF7
-         94tw==
+        d=linaro.org; s=google; t=1704449849; x=1705054649; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=RhTPtiU3ebbMMUs+zK0c151tFKxnFYC6rMwGCcNmmuI=;
+        b=P1ppLLM/4BVEJepjLPbdzolZo65gPkWdkol7g/CZ87xhVuBnxsOJbArN3tpx2Z+CSn
+         t0g40p2y1+pQRBBBYhVbXsYezGPf6EZk7Of/+W8ZafAlcWES2fItTVSVZQweUJhOAXCg
+         053HTeAV2oGSWeQAbsED7wx1ZAIKAxscCwXqefs8rUzmG8UPkCAwOcc5pQUEeUOkT0DQ
+         C+YMKGsdA2+arSqUsCyAMo+lW9VXIdozFu/nz6p+Hy64bev2wjpsyRtBNk6dYg8QiXEz
+         ShxytcF6L4DJgl8Nwy/zOaqERqvIpaYxZzM17f6n8tgyIVZdB1H9vzvl7je+3gK2wWUG
+         ZBAA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704448317; x=1705053117;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1704449849; x=1705054649;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=izsGUyQXMG/NnxMCJxiUuvXnyxes7bnjdWRoga0i3bU=;
-        b=prXzHfoB69IiyNhRNk6Cs3kkBjQRM9JMBisaj6KWm/FnAB3NPEueBQZS+sOuKOSZqF
-         uKv3EIIsyFWFvOZnJ79vhdQbPd3mc/vacAPStNMXwg7Lxuoe9dHLIBwwwiwC6oZ19cM7
-         9plENOt/Uji0MeKs7P1sotRs4ERukBPXzbHJK/m81qnsKbeA1IZq/fYqOVeEk2BiOWES
-         Rapfa48pRIG0Onk2RZXKF7zTiDaeTMFjmoGBZ4NLv/laNqB8nvBTCzzHPxuHtmgx6btB
-         kEmmT3qYHll4ngh/WsYOIh6oVt2fOiYHBu/9A81kHGY7kgqugoVbYPigf7tatLCuUSc0
-         EeiA==
-X-Gm-Message-State: AOJu0Yyfp7KWbi51d/rVQyKWuLGL8ekbRgpMm71VZ57nyOxNXXFbfPQQ
-	e48g2wyVz51Zwd7BO1g/nAnaqj8Q2muGqA==
-X-Google-Smtp-Source: AGHT+IFXW7kpjxw8MPfUS55tkhlWETu0Ev+A8PuzwCw/174XPrtLey/D0IV/HvEa3SpZOxxTsnIeog==
-X-Received: by 2002:a2e:87c7:0:b0:2cc:6af7:880e with SMTP id v7-20020a2e87c7000000b002cc6af7880emr473365ljj.160.1704448316945;
-        Fri, 05 Jan 2024 01:51:56 -0800 (PST)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 7-20020a05651c12c700b002cce6095241sm263006lje.62.2024.01.05.01.51.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 05 Jan 2024 01:51:56 -0800 (PST)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.7-rc9
-Date: Fri,  5 Jan 2024 10:51:55 +0100
-Message-Id: <20240105095155.141473-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        bh=RhTPtiU3ebbMMUs+zK0c151tFKxnFYC6rMwGCcNmmuI=;
+        b=T4fn/33j6faqeaFMlp5ArO4DtFZmi+Obnc8MCc1MZdVhDovPsFGvfb0+gM7yGAr45Q
+         kjzTvL/I2DNbpQ6rrmafJSy54+g1m4yL/fBPgsvSivM+rMfR86SHrL7y/7Pv1n4Vl8XD
+         c3ZqIycBcfQVvABuXA3ug0IusjLz9KV0MxGegV0XZJGqygXH5fP3tnHck+HbD2xFpdbx
+         /Wi/+XyYfkEccf5EKm0b+Qtpu3BbSawaz0VjjEWqmW1XlnsaZRpmY/R4JlLv9jMHuehn
+         oQ4vJ9+0E6OU17/SHe+PnnREg+Nsvmr9TXUpyyPVufAQdzdxM0Bh996ZiU21lB/Qi7n4
+         SsXw==
+X-Gm-Message-State: AOJu0YxETTVBwg8vT15EfwXii00riF5434GNw7TcK3jV5NrzpJ5U4giq
+	WwyUXdjKW1VLz9dI0RdhTDILSzIO0YEttdweGcWpWc1LGZwazA==
+X-Google-Smtp-Source: AGHT+IGKL1ZE/btE1pbZWUoVkU6B5UzlJPmzxOF6Klg0Ce9+oqf2cNXwRxwkKPLOwFRjsyv1s0XB0EvHD3md0oZ192k=
+X-Received: by 2002:a05:690c:4287:b0:5f5:6038:bebe with SMTP id
+ gj7-20020a05690c428700b005f56038bebemr1311343ywb.53.1704449848844; Fri, 05
+ Jan 2024 02:17:28 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20231208032145.2143580-1-ricky_wu@realtek.com> <20231208032145.2143580-4-ricky_wu@realtek.com>
+In-Reply-To: <20231208032145.2143580-4-ricky_wu@realtek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 5 Jan 2024 11:16:52 +0100
+Message-ID: <CAPDyKFrcUPtPrENW_0_H9F8Hq4YBuK_MTpMSi+CdnNycQ6LDFw@mail.gmail.com>
+Subject: Re: [PATCH v7 3/3] mmc: rtsx: add rts5264 to support sd express card
+To: Ricky Wu <ricky_wu@realtek.com>, gregkh@linuxfoundation.org
+Cc: arnd@arndb.de, linux-kernel@vger.kernel.org, frank.li@vivo.com, 
+	u.kleine-koenig@pengutronix.de, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Linus,
+On Fri, 8 Dec 2023 at 04:22, Ricky Wu <ricky_wu@realtek.com> wrote:
+>
+> rts5264 can support sd express card, so add the id in sd express card init
+> to do rts5264 register setting when the sd express card insert
+>
+> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
 
-Here's a PR with a couple of MMC fixes intended for v6.7-rc9. Details about the
-highlights are as usual found in the signed tag.
+Greg, unless you think it's too late to get this in for v6.8, feel
+free to pick this mmc patch too as a part of the series.
 
-Please pull this in!
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit 33cc938e65a98f1d29d0a18403dbbee050dcad9a:
-
-  Linux 6.7-rc4 (2023-12-03 18:52:56 +0900)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.7-rc4
-
-for you to fetch changes up to 8abf77c88929b6d20fa4f9928b18d6448d64e293:
-
-  mmc: sdhci-sprd: Fix eMMC init failure after hw reset (2024-01-03 11:24:03 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix path when releasing the host by canceling the delayed work
- - Fix pause retune on all RPMB partitions
-
-MMC host:
- - meson-mx-sdhc: Fix HW hang during card initialization
- - sdhci-sprd: Fix eMMC init failure after HW reset
-
-----------------------------------------------------------------
-Geert Uytterhoeven (1):
-      mmc: core: Cancel delayed work before releasing host
-
-Jorge Ramirez-Ortiz (1):
-      mmc: rpmb: fixes pause retune on all RPMB partitions.
-
-Wenchao Chen (1):
-      mmc: sdhci-sprd: Fix eMMC init failure after hw reset
-
-Ziyang Huang (1):
-      mmc: meson-mx-sdhc: Fix initialization frozen issue
-
- drivers/mmc/core/block.c             |  7 ++++---
- drivers/mmc/core/host.c              |  1 +
- drivers/mmc/host/meson-mx-sdhc-mmc.c | 26 +++++---------------------
- drivers/mmc/host/sdhci-sprd.c        | 10 +++++++---
- 4 files changed, 17 insertions(+), 27 deletions(-)
+> ---
+> v3: split up mmc part from v2 patch
+> v4: split new definition up from v3
+> ---
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 17 ++++++++++++++++-
+>  1 file changed, 16 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 87d78432a1e0..7dfe7c4e0077 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -7,6 +7,7 @@
+>   *   Wei WANG <wei_wang@realsil.com.cn>
+>   */
+>
+> +#include <linux/pci.h>
+>  #include <linux/module.h>
+>  #include <linux/slab.h>
+>  #include <linux/highmem.h>
+> @@ -947,7 +948,7 @@ static int sd_power_on(struct realtek_pci_sdmmc *host, unsigned char power_mode)
+>         /* send at least 74 clocks */
+>         rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
+>
+> -       if (PCI_PID(pcr) == PID_5261) {
+> +       if ((PCI_PID(pcr) == PID_5261) || (PCI_PID(pcr) == PID_5264)) {
+>                 /*
+>                  * If test mode is set switch to SD Express mandatorily,
+>                  * this is only for factory testing.
+> @@ -1364,6 +1365,14 @@ static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
+>         struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+>         struct rtsx_pcr *pcr = host->pcr;
+>
+> +       if (PCI_PID(pcr) == PID_5264) {
+> +               pcie_capability_clear_and_set_word(pcr->pci, PCI_EXP_LNKCTL2,
+> +                               PCI_EXP_LNKCTL2_TLS, PCI_EXP_LNKCTL2_TLS_2_5GT);
+> +               pci_write_config_byte(pcr->pci, 0x80e, 0x02);
+> +               pcie_capability_clear_and_set_word(pcr->pci, PCI_EXP_LNKCTL2,
+> +                               PCI_EXP_LNKCTL2_TLS, PCI_EXP_LNKCTL2_TLS_5_0GT);
+> +       }
+> +
+>         /* Set relink_time for changing to PCIe card */
+>         relink_time = 0x8FFF;
+>
+> @@ -1379,6 +1388,12 @@ static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
+>         if (pcr->ops->disable_auto_blink)
+>                 pcr->ops->disable_auto_blink(pcr);
+>
+> +       if (PCI_PID(pcr) == PID_5264) {
+> +               rtsx_pci_write_register(pcr, RTS5264_AUTOLOAD_CFG2,
+> +                       RTS5264_CHIP_RST_N_SEL, RTS5264_CHIP_RST_N_SEL);
+> +               rtsx_pci_write_register(pcr, GPIO_CTL, 0x02, 0x00);
+> +       }
+> +
+>         /* For PCIe/NVMe mode can't enter delink issue */
+>         pcr->hw_param.interrupt_en &= ~(SD_INT_EN);
+>         rtsx_pci_writel(pcr, RTSX_BIER, pcr->hw_param.interrupt_en);
+> --
+> 2.25.1
+>
