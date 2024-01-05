@@ -1,169 +1,150 @@
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99ABA20DC8;
-	Fri,  5 Jan 2024 08:20:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foss.st.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foss.st.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BC6821A10
+	for <linux-mmc@vger.kernel.org>; Fri,  5 Jan 2024 08:49:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=foundries.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foundries.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b="tT6cNXeG"
-Received: from pps.filterd (m0369458.ppops.net [127.0.0.1])
-	by mx07-00178001.pphosted.com (8.17.1.22/8.17.1.22) with ESMTP id 4052tkx3028984;
-	Fri, 5 Jan 2024 09:19:56 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-	message-id:date:mime-version:subject:to:cc:references:from
-	:in-reply-to:content-type:content-transfer-encoding; s=
-	selector1; bh=gxrbGKGX0buop+PvuAmG2IkLu4G/QjEo0CpiUPjSvQ4=; b=tT
-	6cNXeGAKaJftgTWYQ4btXPz25NJkoN6rwQ97Z+A70hxVGPC2EACwY9KlFCdwin7x
-	T0eGIn7cyZvSTfTKL9FDgLEXwhSfQvbd3x/0RqhDxui/1vUCSEUHuwwZr9vaSZe9
-	VdlGf5MOsb+NyVQ6ko42YO9d1nlPanGwO/RF/J4coZ/A/Hk91SlDoU+TcPWpChjc
-	VMqXebLXrELMYSyaqHnkwRK2oyoxdP/Ov8ew4yZ4CDuu4GeqUPTeGL0AxMTR94Qn
-	lXgr3Z1OrXzqkGP1ijFxHO1uxSOuRA4iapRhe6ZvvoZRpbUBJFP4zW8Cc7oNPSVD
-	QPxxMGTmlyF9GBQaTcIw==
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-	by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ve9dss0v4-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 05 Jan 2024 09:19:56 +0100 (CET)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 086FC10002A;
-	Fri,  5 Jan 2024 09:19:52 +0100 (CET)
-Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
-	by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id C8B17210587;
-	Fri,  5 Jan 2024 09:19:52 +0100 (CET)
-Received: from [10.201.20.32] (10.201.20.32) by SHFDAG1NODE1.st.com
- (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Fri, 5 Jan
- 2024 09:19:50 +0100
-Message-ID: <9b66bc71-08de-43bd-b7e1-4e7c9defd400@foss.st.com>
-Date: Fri, 5 Jan 2024 09:19:47 +0100
+	dkim=pass (2048-bit key) header.d=foundries.io header.i=@foundries.io header.b="i+isjrXW"
+Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-337520892f7so166789f8f.0
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jan 2024 00:49:51 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=foundries.io; s=google; t=1704444590; x=1705049390; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=reHGhYuAGKcqAhGeJnWgN4NgEOHejYDl2w91uwuMMDY=;
+        b=i+isjrXW1BWOOyDQ69eyuHNn34tJNHXAKRTzaE/vqCfve7sXt7TnOWi32h6If6DRij
+         CUJxhL0a6e/lYX+6qTzCnWvIMK9VBRkvMkNwDTq6q6cNuJ3U25/95LnDKjlIv4wT2Rqm
+         XfC5bL3bIybzszsofRfOtYo8jt7sFfFm/adf6SqjWl84I4lux6p2hc56YD+j1iU5+dI1
+         TVaNRJIr59XBitwEBgSZV45ikvoEfEOIyXt2ZTXn4Nl8xr0Z+rqreb80JnsVlcopo5xc
+         TsYzcN4MEOm9Qw43IjtNonqBB+2QTCdV1XH1TKjkrBMU7Qx+XbmIeFllOk0o5fQtTpUP
+         AK/Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1704444590; x=1705049390;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=reHGhYuAGKcqAhGeJnWgN4NgEOHejYDl2w91uwuMMDY=;
+        b=irgvD3N770hdah12HvrcNB6coywVFd76DPjOeRope4xks4/QU6mQcjLHv3Q5Wf7aVt
+         6k6n/WeW/yBXmz8HLeDmLFMgAvNgF/pJGjsjrTfnjcDnbPNk2QfAvC+83b0GE3kCXuep
+         8oCbiYc/uZKkricW+jHhejyXvJHzstfpY/vFlUT1iTOHIlpaK0q75DE4j54pEsg8jAg1
+         UHDxKxEW77GjvcNtWEO0khMNk+sg50xl7tld4uHTE5MinBpBtwcw5S0A5eK57xHR2/mW
+         6K2gMVFGaVCYLFoBHKzGPPVBJFH/b15GWrGJZseK4DR1dfSu3PNhU/RK044GO7NMeDmZ
+         FQPw==
+X-Gm-Message-State: AOJu0YzVY8gW1oXcskV5+eegvllJPzHft9EZlyB8g3RFxnZn0bHNbC27
+	Q8/70e+GesU5TLOeZphZDcQKMopP1sD/dA==
+X-Google-Smtp-Source: AGHT+IHfTU7QurLJjtMbnGCgFvuGMUV2a3bX0a00tqPcADj7+g59IMqBXOOCg/CPVrHhjMx0hy97Eg==
+X-Received: by 2002:adf:a31c:0:b0:336:d24d:3c76 with SMTP id c28-20020adfa31c000000b00336d24d3c76mr797899wrb.28.1704444590133;
+        Fri, 05 Jan 2024 00:49:50 -0800 (PST)
+Received: from trux (96.red-79-144-190.dynamicip.rima-tde.net. [79.144.190.96])
+        by smtp.gmail.com with ESMTPSA id o7-20020adfeac7000000b003372818f4ddsm1002760wrn.0.2024.01.05.00.49.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 05 Jan 2024 00:49:49 -0800 (PST)
+From: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+X-Google-Original-From: "Jorge Ramirez-Ortiz, Foundries" <JorgeRamirez-Ortiz>
+Date: Fri, 5 Jan 2024 09:49:48 +0100
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>,
+	Avri Altman <Avri.Altman@wdc.com>,
+	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+	michal.simek@amd.com, neal.frager@amd.com,
+	sai.krishna.potthuri@amd.com,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] mmc: rpmb: do not force a retune before RPMB switch
+Message-ID: <ZZfCrLr5isWF/bwN@trux>
+References: <f83933d3-6426-425c-903e-abbd2691e84a@intel.com>
+ <DM6PR04MB6575A30D162378E82B4D7DDEFC84A@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <ZXBGTxS7sUSILtLs@trax>
+ <ZXbBhjZIn5sj6EYO@trax>
+ <ZZPoRPxdWXuT+cEo@trax>
+ <b88eca08-7f20-4287-802c-ae1c8e3cd5cf@intel.com>
+ <ZZSH1ykwP45fZaLh@trax>
+ <d1fac554-4a51-409e-bc52-100a6bb4f5dd@intel.com>
+ <ZZUm68tU9zHsC+X+@trux>
+ <29dc26a4-b95c-42d5-94f8-fbd23c589eaa@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v8 03/13] dt-bindings: bus: document RIFSC
-To: Rob Herring <robh@kernel.org>
-CC: <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
-        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
-        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
-        <alexandre.torgue@foss.st.com>, <vkoul@kernel.org>, <jic23@kernel.org>,
-        <olivier.moysan@foss.st.com>, <arnaud.pouliquen@foss.st.com>,
-        <mchehab@kernel.org>, <fabrice.gasnier@foss.st.com>,
-        <andi.shyti@kernel.org>, <ulf.hansson@linaro.org>,
-        <edumazet@google.com>, <kuba@kernel.org>, <pabeni@redhat.com>,
-        <hugues.fruchet@foss.st.com>, <lee@kernel.org>, <will@kernel.org>,
-        <catalin.marinas@arm.com>, <arnd@kernel.org>,
-        <richardcochran@gmail.com>, Frank Rowand <frowand.list@gmail.com>,
-        <peng.fan@oss.nxp.com>, <lars@metafoo.de>, <rcsekar@samsung.com>,
-        <wg@grandegger.com>, <mkl@pengutronix.de>,
-        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
-        <dmaengine@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
-        <linux-iio@vger.kernel.org>, <alsa-devel@alsa-project.org>,
-        <linux-medi.a@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <netdev@vger.kernel.org>, <linux-phy@lists.infradead.org>,
-        <linux-serial@vger.kernel.org>, <linux-spi@vger.kernel.org>,
-        <linux-usb@vger.kernel.org>
-References: <20231212152356.345703-1-gatien.chevallier@foss.st.com>
- <20231212152356.345703-4-gatien.chevallier@foss.st.com>
- <20231221215316.GA155023-robh@kernel.org>
-Content-Language: en-US
-From: Gatien CHEVALLIER <gatien.chevallier@foss.st.com>
-In-Reply-To: <20231221215316.GA155023-robh@kernel.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: EQNCAS1NODE3.st.com (10.75.129.80) To SHFDAG1NODE1.st.com
- (10.75.129.69)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-01-05_04,2024-01-05_01,2023-05-22_02
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <29dc26a4-b95c-42d5-94f8-fbd23c589eaa@intel.com>
 
-Hi Rob,
+On 04/01/24 20:34:09, Adrian Hunter wrote:
+> On 3/01/24 11:20, Jorge Ramirez-Ortiz, Foundries wrote:
+> > On 03/01/24 10:03:38, Adrian Hunter wrote:
+> >> Thanks for doing that!  That seems to explain the mystery.
+> >>
+> >> You could hack the test to get an idea of how many successful
+> >> iterations there are before getting an error.
+> >>
+> >> For SDHCI, one difference between tuning and re-tuning is the
+> >> setting of bit-7 "Sampling Clock Select" of "Host Control 2 Register".
+> >> It is initially 0 and then set to 1 after the successful tuning.
+> >> Essentially, leaving it set to 1 is meant to speed up the re-tuning.
+> >> You could try setting it to zero instead, and see if that helps.
+> >> e.g.
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >> index c79f73459915..714d8cc39709 100644
+> >> --- a/drivers/mmc/host/sdhci.c
+> >> +++ b/drivers/mmc/host/sdhci.c
+> >> @@ -2732,6 +2732,7 @@ void sdhci_start_tuning(struct sdhci_host *host)
+> >>  	ctrl |= SDHCI_CTRL_EXEC_TUNING;
+> >>  	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
+> >>  		ctrl |= SDHCI_CTRL_TUNED_CLK;
+> >> +	ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+> >>  	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> >>
+> >>  	/*
+> >>
+> >
+> >
+> > Yes with that change, the re-tuning reliability test does pass.
+> >
+> > root@uz3cg-dwg-sec:/sys/kernel/debug/mmc0#  echo 52 > /sys/kernel/debug/mmc0/mmc0\:0001/test
+> > [  237.833585] mmc0: Starting tests of card mmc0:0001...
+> > [  237.838759] mmc0: Test case 52. Re-tuning reliability...
+> > [  267.845403] mmc0: Result: OK
+> > [  267.848365] mmc0: Tests completed.
+> >
+> >
+> > Unfortunately I still see the error when looping on RPMB reads.
+> >
+> > For instance with this test script
+> >  $ while true; do rpmb_read m4hash; usleep 300; done
+> >
+> > I can see the error triggering on the serial port after a minute or so.
+> > [  151.682907] sdhci-arasan ff160000.mmc: __mmc_blk_ioctl_cmd: data error -84
+> >
+> > Causing OP-TEE to panic since the RPMB read returns an error
+> > E/TC:? 0
+> > E/TC:? 0 TA panicked with code 0xffff0000
+> > E/LD:  Status of TA 22250a54-0bf1-48fe-8002-7b20f1c9c9b1
+> > E/LD:   arch: aarch64
+> > [...]
+> >
+> > if anything else springs to your mind I am happy to test of course - there are
+> > so many tunnables in this subsystem that experience is this area has exponential
+> > value (and I dont have much).
+> >
+> > Would it make sense if re-tuning requests are rejected unless a minimum number
+> > of jiffies have passed? should I try that as a change?
+> >
+> > or maybe delay a bit longer the RPMB access after a retune request?
+>
+> It seems re-tuning is not working properly, so ideally the
+> SoC vendor / driver implementer would provide a solution.
 
-On 12/21/23 22:53, Rob Herring wrote:
-> On Tue, Dec 12, 2023 at 04:23:46PM +0100, Gatien Chevallier wrote:
->> Document RIFSC (RIF security controller). RIFSC is a firewall controller
->> composed of different kinds of hardware resources.
->>
->> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
->> ---
->>
->> Changes in V6:
->> 	- Renamed access-controller to access-controllers
->> 	- Removal of access-control-provider property
->> 	- Removal of access-controller and access-controller-names
->> 	  declaration in the patternProperties field. Add
->> 	  additionalProperties: true in this field.
->>
->> Changes in V5:
->> 	- Renamed feature-domain* to access-control*
->>
->> Changes in V2:
->> 	- Corrected errors highlighted by Rob's robot
->> 	- No longer define the maxItems for the "feature-domains"
->> 	  property
->> 	- Fix example (node name, status)
->> 	- Declare "feature-domain-names" as an optional
->> 	  property for child nodes
->> 	- Fix description of "feature-domains" property
->>
->>   .../bindings/bus/st,stm32mp25-rifsc.yaml      | 96 +++++++++++++++++++
->>   1 file changed, 96 insertions(+)
->>   create mode 100644 Documentation/devicetree/bindings/bus/st,stm32mp25-rifsc.yaml
->>
->> diff --git a/Documentation/devicetree/bindings/bus/st,stm32mp25-rifsc.yaml b/Documentation/devicetree/bindings/bus/st,stm32mp25-rifsc.yaml
->> new file mode 100644
->> index 000000000000..95aa7f04c739
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/bus/st,stm32mp25-rifsc.yaml
->> @@ -0,0 +1,96 @@
->> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/bus/st,stm32mp25-rifsc.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: STM32 Resource isolation framework security controller
->> +
->> +maintainers:
->> +  - Gatien Chevallier <gatien.chevallier@foss.st.com>
->> +
->> +description: |
->> +  Resource isolation framework (RIF) is a comprehensive set of hardware blocks
->> +  designed to enforce and manage isolation of STM32 hardware resources like
->> +  memory and peripherals.
->> +
->> +  The RIFSC (RIF security controller) is composed of three sets of registers,
->> +  each managing a specific set of hardware resources:
->> +    - RISC registers associated with RISUP logic (resource isolation device unit
->> +      for peripherals), assign all non-RIF aware peripherals to zero, one or
->> +      any security domains (secure, privilege, compartment).
->> +    - RIMC registers: associated with RIMU logic (resource isolation master
->> +      unit), assign all non RIF-aware bus master to one security domain by
->> +      setting secure, privileged and compartment information on the system bus.
->> +      Alternatively, the RISUP logic controlling the device port access to a
->> +      peripheral can assign target bus attributes to this peripheral master port
->> +      (supported attribute: CID).
->> +    - RISC registers associated with RISAL logic (resource isolation device unit
->> +      for address space - Lite version), assign address space subregions to one
->> +      security domains (secure, privilege, compartment).
->> +
->> +properties:
->> +  compatible:
->> +    contains:
->> +      const: st,stm32mp25-rifsc
-> 
-> This needs to be exact and include 'simple-bus'. You'll need a custom
-> 'select' with the above to avoid matching all other 'simple-bus' cases.
-> 
-> With that,
-> 
-> Reviewed-by: Rob Herring <robh@kernel.org>
 
-Thank you for the review,
-I'll update this for the next version whilst applying your tag
+Makes sense to me too. I am copying Michal on the DL.
 
-Gatien
+
+>
+> There is also mmc_doing_retune() which could be used to skip
+> tuning execution entirely in the case of re-tuning.
+>
