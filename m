@@ -1,71 +1,71 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD2C228E20
-	for <linux-mmc@vger.kernel.org>; Fri,  5 Jan 2024 10:19:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB6862C869
+	for <linux-mmc@vger.kernel.org>; Fri,  5 Jan 2024 10:19:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pbJ96XpP"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-5f00bef973aso14375597b3.0
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jan 2024 02:19:26 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JDHtesv+"
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-dbd739853easo1214625276.0
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jan 2024 02:19:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1704449966; x=1705054766; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1704449969; x=1705054769; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=n0YT8OLceLy11zfmMxqjz6DIdrrqG0STUuPfEB7KbAk=;
-        b=pbJ96XpPZvRtt9VeV9GJ/L82cjAz2iLL1vQZZPYtTITK58x+TPnnkp2Wh9G8BQzaeK
-         GxHsn22kOiDoisD3FYLZ3gHfi5yVHZSboUkysgE8Ir9ZDXzVrlxH67BFQ5Xr3q9M8+VZ
-         xyvQJVEYdj6R3Y2OsBR7zVML4Mp2Bs05uEXK73p+/6YwJNxnwRBaW1Tnb9xY8KxIk83T
-         eQ28Y7tGNoKidCxNZqV89z7jfULuJoGvnrKBL0Ht/X++QR6MkPQK3ga1PiolyprwuB5+
-         25euam7QVqsn9H2kLbdrwkAn3czDL+hBVFZfDm/+S4SoEm3hODFRNKSOPHafmKoWHz7H
-         D59w==
+        bh=eN3mm0CyL5f2TZeRq2cvai8N3s8ehzSOlLnk4WHpwLs=;
+        b=JDHtesv+1x7Fu0jpky3GGD1tqZ9oHUCErljDRVfPJwdFoaYmVX0QxqUqS/TipDQA05
+         IZycT3uIZmJuXjwfOXMu9t8FMcV+MlLxtb9BUHUsHzy5zILuVlmTK3zPLAjOA/r+KBik
+         FVj7Hf9GpW1z9BmuGfU25GtMDmk1s1VHWC0PBnSFd5BHBuPNcq/tja8kpamuEcUz/HrZ
+         Yi4pBRjb4b07DjBHp3nh9T40GkBVSDehlrftfrcDOHu2VqDF4nX3Yd1n8rqQ7gPDnmbK
+         uekCM+gnYVKbmDf/U4k7F9lBAoEy5CbpzaadWjbUOlhP3IP3KsM2JkJW39ZWY/GjAoGg
+         peZA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704449966; x=1705054766;
+        d=1e100.net; s=20230601; t=1704449969; x=1705054769;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=n0YT8OLceLy11zfmMxqjz6DIdrrqG0STUuPfEB7KbAk=;
-        b=h1BlG9I95fyPZEkFUz3EChqbhdNPsXhOkBVeQGD1N141lPOA1EtCbaePJ5kRv+hcm0
-         gZ8IemKZ65xe6t99/+mw4kYqViNXquj8oyZaFHAVIojYC7wccbP1h4qWosS3crgEaY8f
-         SJviwDyHGjNpOd+HRs0VHZthH/CzOmagkaw34mLplJ3Oze3n9i4SPmivRvTQoNK6EUst
-         6Kn/4DOgcUa+Le3hfT+SoOOrYEqoejDt03+/lmP9IHMLaH0z+kYXCcINTFmWKLLYmYNE
-         Rg/Qt0oykLEXnSxKoD2V0hc78S94B7TdEGO9TNs5XTAYKYwLe8NBiZgHiYbD+4r2an4o
-         Betg==
-X-Gm-Message-State: AOJu0Yz1Rj9q1wgo0JEG3eccOXGkcjh2Zsk1ukixBMcv8CKhQgFBD70I
-	p4aY8NEf2vdEoTu99Y4Iu2crvhy+sa7qVmuBenAME8/SahMEew==
-X-Google-Smtp-Source: AGHT+IF39mWmdi9EttHUPrPz0qa0RofK5Aeroz/5zWy6qxI2/WB/zFMhxJQRo4rg0D0YydUCWDG0tVu59cgW0BXkfko=
-X-Received: by 2002:a0d:c985:0:b0:5f0:d8f7:f999 with SMTP id
- l127-20020a0dc985000000b005f0d8f7f999mr1762853ywd.82.1704449965938; Fri, 05
- Jan 2024 02:19:25 -0800 (PST)
+        bh=eN3mm0CyL5f2TZeRq2cvai8N3s8ehzSOlLnk4WHpwLs=;
+        b=sjSLAbq+9OkLXzxnRoIy1NCV+6H9L4/UOKvR9oOWNBiQJETigdW0PUtOryQOVLobv+
+         y7VKxC6daQkM7qQlpV4xi1jOc7OqHk2tBW2QDsx4hB814mNLHZ7jd9W0o/bweWnOpKNI
+         k58UWiAspnQSf8Lnp27ToljrosinaQG4d0GoyRjkplyQJT3vm+bCRkUnKg/xDBMB8d/A
+         aiTvvKnD1uxKasar0wAlVDFG6p4VuZ05rB4OdrVvH7rkn+TBrl3a5ea6pObl91ttXknN
+         LMcCI8IhRLF9pdn0atNYr4qlgD+yuiHWxWcM/CTb6oMibIXfdwip8ZlSeYYryi71b6HW
+         H5Rw==
+X-Gm-Message-State: AOJu0Yxh8TIVG5qEtbM47xPjXWu0758UZYpWbd+AdOqdPmF41uTwfTod
+	OhCn+av+IXHPV0L4xum1XMuuoJIPW7LmD2R/7Pz0XEx0Qz4yh0HHyNJ4Ni5Z
+X-Google-Smtp-Source: AGHT+IHCvMu4Pe3bJppU23iOJDYwvcbQ7DD/NNMVSoWGtk4WWytfur5c/bhfaMYzPR5HC1C9H1Ycpj4Ow2Fc5Y15Rkg=
+X-Received: by 2002:a05:6902:3c9:b0:db5:9004:cf5b with SMTP id
+ g9-20020a05690203c900b00db59004cf5bmr1578144ybs.64.1704449968904; Fri, 05 Jan
+ 2024 02:19:28 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240103172803.1826113-1-enachman@marvell.com> <20240103172803.1826113-2-enachman@marvell.com>
-In-Reply-To: <20240103172803.1826113-2-enachman@marvell.com>
+References: <20240104173033.2836110-1-enachman@marvell.com>
+In-Reply-To: <20240104173033.2836110-1-enachman@marvell.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 5 Jan 2024 11:18:50 +0100
-Message-ID: <CAPDyKFoi=AzMveZUpdx_+k8_MnqK9pgM=QvpZcstc5-RzCc_CQ@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: add Marvell ac5
+Date: Fri, 5 Jan 2024 11:18:53 +0100
+Message-ID: <CAPDyKFoJffGOu1cBeUi=Lg5u+MNxg6Xbp5qpjisHWM5oxXW6BA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: xenon: Add ac5 support via bounce buffer
 To: Elad Nachman <enachman@marvell.com>
-Cc: robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, 
-	andrew@lunn.ch, gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com, 
-	huziji@marvell.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: huziji@marvell.com, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 3 Jan 2024 at 18:28, Elad Nachman <enachman@marvell.com> wrote:
+On Thu, 4 Jan 2024 at 18:31, Elad Nachman <enachman@marvell.com> wrote:
 >
 > From: Elad Nachman <enachman@marvell.com>
 >
-> Add dt bindings for Marvell AC5/X/IM eMMC controller.
-> This compatibility string covers the differences in the
-> AC5/X version of the driver: 31-bit bus limitation and
-> DDR memory starting at address 0x2_0000_0000, which are handled
-> by usage of a bounce buffer plus a different DMA mask.
+> AC5/X/IM SOCs has a variant of the Xenon eMMC controller,
+> in which only 31-bit of addressing pass from the controller
+> on the AXI bus.
+> Since we cannot guarantee that only buffers from the first 2GB
+> of memory will reach the driver, the driver is configured for
+> SDMA mode, without 64-bit mode, overriding the DMA mask to 34-bit
+> to support the DDR memory mapping, which starts at offset 8GB.
 >
 > Signed-off-by: Elad Nachman <enachman@marvell.com>
 
@@ -75,27 +75,95 @@ Kind regards
 Uffe
 
 
-
-
 > ---
->  .../devicetree/bindings/mmc/marvell,xenon-sdhci.yaml          | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-xenon.c | 31 +++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-xenon.h |  3 ++-
+>  2 files changed, 33 insertions(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> index 3a8e74894ae0..cfe6237716f4 100644
-> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> @@ -27,7 +27,9 @@ properties:
->            - marvell,armada-ap806-sdhci
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index 25ba7aecc3be..0e52867f6e91 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -18,6 +18,8 @@
+>  #include <linux/of.h>
+>  #include <linux/pm.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/mm.h>
+> +#include <linux/dma-mapping.h>
 >
->        - items:
-> -          - const: marvell,armada-ap807-sdhci
-> +          - enum:
-> +              - marvell,armada-ap807-sdhci
-> +              - marvell,ac5-sdhci
->            - const: marvell,armada-ap806-sdhci
+>  #include "sdhci-pltfm.h"
+>  #include "sdhci-xenon.h"
+> @@ -422,6 +424,7 @@ static int xenon_probe_params(struct platform_device *pdev)
+>         struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>         u32 sdhc_id, nr_sdhc;
+>         u32 tuning_count;
+> +       struct sysinfo si;
 >
->        - items:
+>         /* Disable HS200 on Armada AP806 */
+>         if (priv->hw_version == XENON_AP806)
+> @@ -450,6 +453,23 @@ static int xenon_probe_params(struct platform_device *pdev)
+>         }
+>         priv->tuning_count = tuning_count;
+>
+> +       /*
+> +        * AC5/X/IM HW has only 31-bits passed in the crossbar switch.
+> +        * If we have more than 2GB of memory, this means we might pass
+> +        * memory pointers which are above 2GB and which cannot be properly
+> +        * represented. In this case, disable ADMA, 64-bit DMA and allow only SDMA.
+> +        * This effectively will enable bounce buffer quirk in the
+> +        * generic SDHCI driver, which will make sure DMA is only done
+> +        * from supported memory regions:
+> +        */
+> +       if (priv->hw_version == XENON_AC5) {
+> +               si_meminfo(&si);
+> +               if (si.totalram * si.mem_unit > SZ_2G) {
+> +                       host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+> +                       host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
+> +               }
+> +       }
+> +
+>         return xenon_phy_parse_params(dev, host);
+>  }
+>
+> @@ -562,6 +582,16 @@ static int xenon_probe(struct platform_device *pdev)
+>                 goto remove_sdhc;
+>
+>         pm_runtime_put_autosuspend(&pdev->dev);
+> +       /*
+> +        * If we previously detected AC5 with over 2GB of memory,
+> +        * then we disable ADMA and 64-bit DMA.
+> +        * This means generic SDHCI driver has set the DMA mask to
+> +        * 32-bit. Since DDR starts at 0x2_0000_0000, we must use
+> +        * 34-bit DMA mask to access this DDR memory:
+> +        */
+> +       if (priv->hw_version == XENON_AC5 &&
+> +           host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA)
+> +               dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(34));
+>
+>         return 0;
+>
+> @@ -680,6 +710,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+>         { .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
+>         { .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
+>         { .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
+> +       { .compatible = "marvell,ac5-sdhci",         .data =  (void *)XENON_AC5},
+>         {}
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> index 3e9c6c908a79..0460d97aad26 100644
+> --- a/drivers/mmc/host/sdhci-xenon.h
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -57,7 +57,8 @@ enum xenon_variant {
+>         XENON_A3700,
+>         XENON_AP806,
+>         XENON_AP807,
+> -       XENON_CP110
+> +       XENON_CP110,
+> +       XENON_AC5
+>  };
+>
+>  struct xenon_priv {
 > --
 > 2.25.1
 >
