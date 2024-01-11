@@ -1,392 +1,156 @@
-Received: from mail-vs1-f44.google.com (mail-vs1-f44.google.com [209.85.217.44])
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 09E57250F5;
-	Mon,  8 Jan 2024 10:46:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BACD2101;
+	Thu, 11 Jan 2024 06:05:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gnTOVb8i"
-Received: by mail-vs1-f44.google.com with SMTP id ada2fe7eead31-46781bd40f8so328645137.1;
-        Mon, 08 Jan 2024 02:46:02 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q+HKG1xL"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-1d3e8a51e6bso39835755ad.3;
+        Wed, 10 Jan 2024 22:05:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1704710762; x=1705315562; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=XlOM9uFTWiV/ILSzIqM0wAx12hGFckgtaUWN6aC3Cpc=;
-        b=gnTOVb8ixMFKIFzF/ZvyQSGrSS006WipXdfdZHmHVytnKVbp90ZGLISYpA2RyUrOxb
-         4IJwV+XrkHcED86m2cIfr5fu8djriVLmZ/r7PRBDl19wT4Vhx1GPh6jCwHZiMuKJ/QIq
-         s3BBGqWqhnHbgO0ZxGikJTazlXrA6QwaQd+TLBAEEkBpT87hB0ZJK3+eSCiVeAL71bl6
-         if7pXQS4G7tXPOPkFIU6r18YlNF/mnT6Np8kVhOGyjOa2r1BcxqibRx276rhNLs26hxj
-         snbvT9XK2ESxPbFNqAS3rfhe2m4i63CIdTBF9G2IZHEMHxh1qtftE3M1npZxlBw6GT9u
-         jdhw==
+        d=gmail.com; s=20230601; t=1704953146; x=1705557946; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=lHGoXIC2FCB2mAKhVqh6NZDuE4LJRbl6RDfBQ0QRmmo=;
+        b=Q+HKG1xLsbBoITDb4YUFsnxMoHpaDEpTOCJwjCqbddCUCI4vcDZ7UWEgokaZHIemXP
+         un/ycE8w5aj6RZVA4Uty5xrL1AZa2RFkgkC5nu8UK1oWcQ2TR5iz86JypqfDWf5MipTX
+         NLFg6XbjJodNGzrMGxeJFg3KHfXBuMbzfWHA4w/yZStQ0amfQWJ6Dwr2GCGKzxf1Jbho
+         PuWcBMlzal+ng/l/TroO4A4/4scy+izDdJ4Fg7Q3H+i3S4nqZXdhbbU/izuMshttjEGh
+         8skdF1g/78HIRkGEJFntsY/Mc+CKX0KxnOdzlE54lfI46sOAhPcDChR53caCOj6vJ8g7
+         SeRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704710762; x=1705315562;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=XlOM9uFTWiV/ILSzIqM0wAx12hGFckgtaUWN6aC3Cpc=;
-        b=IFcVHmR6lX4lbKbqrJsrKU95g1npVdPIVBciOgUQj44qxpoA86O1nqW1Z1/+QdK6kc
-         t1tJJHXcwDu1yoJte3hFROCfTdEs8D7ChJDpw0gW2hvcZnw6/3tzEFDAdDwjUkqlirwS
-         8XOcNZ9aIv4p3XgR9khYCrXTJzZJpjrShzYgz5X9OiD6mXdhkUr8l8KCj4bjuo/MxNgh
-         4SKNntRnZ0JLNCzMAKbIQMXubmSgBlFPiDBbxCpsW0T9sj/JOU/uWbDqdWGDvjT1OA3q
-         R0o1Ts6/eJ7kpaU3pmrfdS2zmLOaJD8svpcgi2XtpKBk4FihvSfs3iMrkINWPIicKIO4
-         bfRw==
-X-Gm-Message-State: AOJu0YxsIYNmPKKjNXpRzeLr99lTIsb683P0YKFp0VnxOty7AvPuoSJM
-	5ojpdmGWgJCh6T1+017HOosvZPu0ZhlG98vxfNk0zIBKiiM=
-X-Google-Smtp-Source: AGHT+IF0FlGMJAZxmUR5MFwdl5kpNj/YkCekkySoc7cKQ2G3uySGcuPFlTOpXJ+EUE4vCVeyWKZMHBHt5AlgVDnoD6A=
-X-Received: by 2002:a05:6102:f9a:b0:467:c276:57be with SMTP id
- e26-20020a0561020f9a00b00467c27657bemr1242088vsv.8.1704710761912; Mon, 08 Jan
- 2024 02:46:01 -0800 (PST)
+        d=1e100.net; s=20230601; t=1704953146; x=1705557946;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=lHGoXIC2FCB2mAKhVqh6NZDuE4LJRbl6RDfBQ0QRmmo=;
+        b=SHGuloj9jn+Oye+Q8eOMnFQYivjuQHjdPhBVziyY8I8lt04B/61eqKSWe6sjPbrAZB
+         pqobOceuHXtZSijPbQmTWsfJM5W6zd4+U9MvsKtErAQeCIZs9E062silyriS+u1nK0a/
+         qhiq0RUPpeA/ssFnqaMXBx1EcjgYutkVRCPWSNgGyilk+wLC7r47EF2uzrN/v2GFROSu
+         DD7wFwPPjY+sLMvQ9pThBEJ4yIJZcEu7gCCvgr2xBmkt1v132kahboPnMcy8tFC9h5j6
+         ohejipr0T/bArW7v/5Go7NVrXzfir/t7TBMt7q9Igyt4zdRBZzN5PdCG2ePwtQQw7uF1
+         T2VQ==
+X-Gm-Message-State: AOJu0YxmExeGcZFS2ZtPZQCYQEU+xZZI0+8lOYUIiDDWqpsLbL2QJ3YB
+	fH777uQEg9NpKnkE2LNJDZjizKmHRsUIvp9YsZ4=
+X-Google-Smtp-Source: AGHT+IH+1q73uvlfGT5vqj6l9FlxKHf19BKYpA8MaR24y+5FzlsjZZl9SiLbskLUCzdqOP3lbR6IitsAoaAGQSftlCY=
+X-Received: by 2002:a17:90a:f513:b0:28d:b4f8:5104 with SMTP id
+ cs19-20020a17090af51300b0028db4f85104mr498035pjb.48.1704953146596; Wed, 10
+ Jan 2024 22:05:46 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231117113149.9069-1-victorshihgli@gmail.com>
- <20231117113149.9069-15-victorshihgli@gmail.com> <66166245-f906-4057-8b44-16ec5a33e6e2@intel.com>
-In-Reply-To: <66166245-f906-4057-8b44-16ec5a33e6e2@intel.com>
-From: Victor Shih <victorshihgli@gmail.com>
-Date: Mon, 8 Jan 2024 18:45:50 +0800
-Message-ID: <CAK00qKCFwBEjvhXFxkQ-wsHugio3sTVy6jW5oh-n2B7kQGpSkw@mail.gmail.com>
-Subject: Re: [PATCH V13 14/21] mmc: sdhci-uhs2: add set_ios()
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
-	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, 
-	takahiro.akashi@linaro.org, dlunev@chromium.org, 
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20230914000348.25790-1-michael@allwinnertech.com>
+ <CA+Da2qzr0SBu-kUtFTnBqT+OObFOSTFgmU30L3B-Rjv3rYbGKw@mail.gmail.com>
+ <CAPDyKFpHw+6vovHRWbhsDwre81U4Uu_X-Wy_viQCZp6nj=5Jkw@mail.gmail.com>
+ <aa657a1d-a25d-21a8-4093-ec8fbe298ca2@allwinnertech.com> <CAPDyKFoJpKdsey8dxbs+NpTDDU5fR7h_=JK+aEdD2oeO5W33WQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFoJpKdsey8dxbs+NpTDDU5fR7h_=JK+aEdD2oeO5W33WQ@mail.gmail.com>
+From: Wenchao Chen <wenchao.chen666@gmail.com>
+Date: Thu, 11 Jan 2024 14:05:35 +0800
+Message-ID: <CA+Da2qzsJyy08dfHDK6h0aVfgzbmCM9A=1XE9nkNkr7NQems_Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Add new flag to force hardware reset
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Michael Wu <michael@allwinnertech.com>, adrian.hunter@intel.com, 
+	jinpu.wang@ionos.com, victor.shih@genesyslogic.com.tw, avri.altman@wdc.com, 
+	asuk4.q@gmail.com, f.fainelli@gmail.com, beanhuo@micron.com, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Sarthak Garg <quic_sartgarg@quicinc.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Nov 28, 2023 at 5:12=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
+On Mon, 6 Nov 2023 at 22:20, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> On 17/11/23 13:31, Victor Shih wrote:
-> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> On Mon, 6 Nov 2023 at 13:26, Michael Wu <michael@allwinnertech.com> wrote:
 > >
-> > This is a sdhci version of mmc's set_ios operation.
-> > THis is used to handle basic IO bus setting.
-> > It covers both UHS-I and UHS-II.
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > ---
-> >
-> > Updates in V13:
-> >  - Add judgment condition for power mode in the __sdhci_uhs2_set_ios().
-> >  - Modify comment message.
-> >
-> > Updates in V9:
-> >  - Simplity the turning_on_clk in sdhci_set_ios().
-> >
-> > Updates in V8:
-> >  - Add the judgment formula for MMC_TIMING_SPEED_A_HD, MMC_TIMING_SPEED=
-_B
-> >    and MMC_TIMING_SPEED_B_HD in __sdhci_uhs2_set_ios().
-> >  - Add the switch case for MMC_TIMING_SPEED_A_HD, MMC_TIMING_SPEED_B
-> >    and MMC_TIMING_SPEED_B_HD in sdhci_get_preset_value().
-> >  - mmc_opt_regulator_set_ocr() to instead of mmc_regulator_set_ocr()
-> >    in sdhci_uhs2_set_ios().
-> >
-> > Updates in V7:
-> >  - Remove unnecessary functions.
-> >
-> > Updates in V6:
-> >  - Modify return value in some functions.
-> >  - Remove unnecessary functions.
-> >
-> > ---
-> >
-> >  drivers/mmc/host/sdhci-uhs2.c | 95 +++++++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci-uhs2.h |  1 +
-> >  drivers/mmc/host/sdhci.c      | 55 ++++++++++++--------
-> >  drivers/mmc/host/sdhci.h      |  2 +
-> >  4 files changed, 132 insertions(+), 21 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs=
-2.c
-> > index 5a79dd29aa38..a55b910f3615 100644
-> > --- a/drivers/mmc/host/sdhci-uhs2.c
-> > +++ b/drivers/mmc/host/sdhci-uhs2.c
-> > @@ -214,6 +214,101 @@ void sdhci_uhs2_set_timeout(struct sdhci_host *ho=
-st, struct mmc_command *cmd)
-> >  }
-> >  EXPORT_SYMBOL_GPL(sdhci_uhs2_set_timeout);
-> >
-> > +/**
-> > + * sdhci_uhs2_clear_set_irqs - set Error Interrupt Status Enable regis=
-ter
-> > + * @host:    SDHCI host
-> > + * @clear:   bit-wise clear mask
-> > + * @set:     bit-wise set mask
-> > + *
-> > + * Set/unset bits in UHS-II Error Interrupt Status Enable register
-> > + */
-> > +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32=
- set)
-> > +{
-> > +     u32 ier;
-> > +
-> > +     ier =3D sdhci_readl(host, SDHCI_UHS2_INT_STATUS_ENABLE);
-> > +     ier &=3D ~clear;
-> > +     ier |=3D set;
-> > +     sdhci_writel(host, ier, SDHCI_UHS2_INT_STATUS_ENABLE);
-> > +     sdhci_writel(host, ier, SDHCI_UHS2_INT_SIGNAL_ENABLE);
-> > +}
-> > +EXPORT_SYMBOL_GPL(sdhci_uhs2_clear_set_irqs);
-> > +
-> > +static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios =
-*ios)
-> > +{
-> > +     struct sdhci_host *host =3D mmc_priv(mmc);
-> > +     u8 cmd_res, dead_lock;
-> > +     u16 ctrl_2;
-> > +
-> > +     /* UHS2 Timeout Control */
-> > +     sdhci_calc_timeout_uhs2(host, &cmd_res, &dead_lock);
-> > +
-> > +     /* change to use calculate value */
-> > +     cmd_res |=3D FIELD_PREP(SDHCI_UHS2_TIMER_CTRL_DEADLOCK_MASK, dead=
-_lock);
-> > +
-> > +     sdhci_uhs2_clear_set_irqs(host,
-> > +                               SDHCI_UHS2_INT_CMD_TIMEOUT |
-> > +                               SDHCI_UHS2_INT_DEADLOCK_TIMEOUT,
-> > +                               0);
-> > +     sdhci_writeb(host, cmd_res, SDHCI_UHS2_TIMER_CTRL);
-> > +     sdhci_uhs2_clear_set_irqs(host, 0,
-> > +                               SDHCI_UHS2_INT_CMD_TIMEOUT |
-> > +                               SDHCI_UHS2_INT_DEADLOCK_TIMEOUT);
-> > +
-> > +     /* UHS2 timing. Note, UHS2 timing is disabled when powering off *=
-/
-> > +     ctrl_2 =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > +     if (ios->power_mode !=3D MMC_POWER_OFF &&
-> > +         (ios->timing =3D=3D MMC_TIMING_UHS2_SPEED_A ||
-> > +          ios->timing =3D=3D MMC_TIMING_UHS2_SPEED_A_HD ||
-> > +          ios->timing =3D=3D MMC_TIMING_UHS2_SPEED_B ||
-> > +          ios->timing =3D=3D MMC_TIMING_UHS2_SPEED_B_HD))
-> > +             ctrl_2 |=3D SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE;
-> > +     else
-> > +             ctrl_2 &=3D ~(SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE);
-> > +     sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> > +     host->timing =3D ios->timing;
-> > +
-> > +     if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
-> > +             sdhci_enable_preset_value(host, true);
-> > +
-> > +     if (host->ops->set_power)
-> > +             host->ops->set_power(host, ios->power_mode, ios->vdd);
-> > +     else
-> > +             sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
-> > +
-> > +     sdhci_set_clock(host, host->clock);
-> > +}
-> > +
-> > +static int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *io=
-s)
-> > +{
-> > +     struct sdhci_host *host =3D mmc_priv(mmc);
-> > +
-> > +     pr_debug("%s: clock %uHz powermode %u Vdd %u timing %u\n",
-> > +              mmc_hostname(mmc), ios->clock, ios->power_mode, ios->vdd=
-, ios->timing);
-> > +
-> > +     if (!sdhci_uhs2_mode(host)) {
-> > +             sdhci_set_ios(mmc, ios);
-> > +             return 0;
-> > +     }
-> > +
-> > +     if (ios->power_mode =3D=3D MMC_POWER_UNDEFINED)
-> > +             return 0;
-> > +
-> > +     if (host->flags & SDHCI_DEVICE_DEAD) {
-> > +             if (ios->power_mode =3D=3D MMC_POWER_OFF) {
-> > +                     mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc, =
-0);
-> > +                     mmc_regulator_set_vqmmc2(mmc, ios);
+> > On 9/25/2023 9:59 PM, Ulf Hansson wrote:
+> > > - trimmed cc-list, + Sartak Garg
+> > >
+> > > On Thu, 14 Sept 2023 at 10:00, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
+> > >>
+> > >> On Thu, 14 Sept 2023 at 08:04, Michael Wu <michael@allwinnertech.com> wrote:
+> > >>>
+> > >>> Entering the recovery system itself indicates a transmission error.
+> > >>> In this situation, we intend to execute the mmc_blk_reset function
+> > >>> to clear any anomalies that may be caused by errors. We have previously
+> > >>> discussed with several MMC device manufacturers, and they expressed
+> > >>> their desire for us to reset the device when errors occur to ensure
+> > >>> stable operation. We aim to make this code compatible with all devices
+> > >>> and ensure its stable performance, so we would like to add this patch
+> > >>>
+> > >>> Signed-off-by: Michael Wu <michael@allwinnertech.com>
+> > >>
+> > >> like: https://lore.kernel.org/linux-mmc/20220603051534.22672-1-quic_sartgarg@quicinc.com/
+> > >
+> > > Looks like this series didn't make it. I was awaiting a rebase from
+> > > Sartak to apply it, but apparently something got in his way for a new
+> > > submission.
+> > >
+> > >>
+> > >> You should enable it in the vendor host.
+> > >
+> > > Yes! We don't want unused code in the core. We need a user of it too.
+> > >
+> > > May I suggest that you pick up Sartak's patch for the core and thus
+> > > add another patch for the host driver you care about and then
+> > > re-submit it as a small series.
+> > >
+> > > Kind regards
+> > > Uffe
+> > >
+> > >>
+> > >>> ---
+> > >>>   drivers/mmc/core/block.c | 2 +-
+> > >>>   include/linux/mmc/host.h | 1 +
+> > >>>   2 files changed, 2 insertions(+), 1 deletion(-)
+> > >>>
+> > >>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > >>> index b5b414a71e0b..29fbe0ddeadb 100644
+> > >>> --- a/drivers/mmc/core/block.c
+> > >>> +++ b/drivers/mmc/core/block.c
+> > >>> @@ -1503,7 +1503,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
+> > >>>          pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
+> > >>>
+> > >>>          err = mmc_cqe_recovery(host);
+> > >>> -       if (err)
+> > >>> +       if (err || host->cqe_recovery_reset_always)
+> > >>>                  mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
+> > >>>          mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
+> > >>>
+> > >>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > >>> index 62a6847a3b6f..f578541a06b5 100644
+> > >>> --- a/include/linux/mmc/host.h
+> > >>> +++ b/include/linux/mmc/host.h
+> > >>> @@ -518,6 +518,7 @@ struct mmc_host {
+> > >>>          int                     cqe_qdepth;
+> > >>>          bool                    cqe_enabled;
+> > >>>          bool                    cqe_on;
+> > >>> +       bool                    cqe_recovery_reset_always;
+> > >>>
+> > >>>          /* Inline encryption support */
+> > >>>   #ifdef CONFIG_MMC_CRYPTO
+> > >>> --
+> > >>> 2.29.0
+> > >>>
+> > Dear Ulf,
+> > I have tested Sartak's patch and it is also able to resolve the issue we
+> > are currently facing. Therefore, I would like to inquire about the
+> > expected timeline for merging Sartak's patch.
 >
-> mmc_regulator_set_vqmmc2() only sets the voltage, it doesn't
-> disable the regulator.
+Hi Sartak
+
+Any updates?
+
+> Hi Michael,
 >
-
-Hi, Ulf
-
-Would you have any idea about using the  mmc_regulator_set_vqmmc2()
-to disable the regulator?
-
-Thanks, Victor Shih
-
-> > +             }
-> > +             return -1;
-> > +     }
-> > +
-> > +     sdhci_set_ios_common(mmc, ios);
-> > +
-> > +     __sdhci_uhs2_set_ios(mmc, ios);
-> > +
-> > +     return 0;
-> > +}
-> > +
-> >  /*********************************************************************=
-********\
-> >   *                                                                    =
-       *
-> >   * Driver init/exit                                                   =
-       *
-> > diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs=
-2.h
-> > index ccf4e1834c2d..a3641c5f8c77 100644
-> > --- a/drivers/mmc/host/sdhci-uhs2.h
-> > +++ b/drivers/mmc/host/sdhci-uhs2.h
-> > @@ -181,5 +181,6 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host);
-> >  bool sdhci_uhs2_mode(struct sdhci_host *host);
-> >  void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
-> >  void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_comman=
-d *cmd);
-> > +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32=
- set);
-> >
-> >  #endif /* __SDHCI_UHS2_H */
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 4d50cac7717d..64704f6537e0 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -47,8 +47,6 @@
-> >  static unsigned int debug_quirks =3D 0;
-> >  static unsigned int debug_quirks2;
-> >
-> > -static void sdhci_enable_preset_value(struct sdhci_host *host, bool en=
-able);
-> > -
-> >  static bool sdhci_send_command(struct sdhci_host *host, struct mmc_com=
-mand *cmd);
-> >
-> >  void sdhci_dumpregs(struct sdhci_host *host)
-> > @@ -1877,6 +1875,12 @@ static u16 sdhci_get_preset_value(struct sdhci_h=
-ost *host)
-> >       case MMC_TIMING_MMC_HS400:
-> >               preset =3D sdhci_readw(host, SDHCI_PRESET_FOR_HS400);
-> >               break;
-> > +     case MMC_TIMING_UHS2_SPEED_A:
-> > +     case MMC_TIMING_UHS2_SPEED_A_HD:
-> > +     case MMC_TIMING_UHS2_SPEED_B:
-> > +     case MMC_TIMING_UHS2_SPEED_B_HD:
-> > +             preset =3D sdhci_readw(host, SDHCI_PRESET_FOR_UHS2);
-> > +             break;
-> >       default:
-> >               pr_warn("%s: Invalid UHS-I mode selected\n",
-> >                       mmc_hostname(host->mmc));
-> > @@ -2323,24 +2327,9 @@ static bool sdhci_presetable_values_change(struc=
-t sdhci_host *host, struct mmc_i
-> >              (sdhci_preset_needed(host, ios->timing) || host->drv_type =
-!=3D ios->drv_type);
-> >  }
-> >
-> > -void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  {
-> >       struct sdhci_host *host =3D mmc_priv(mmc);
-> > -     bool reinit_uhs =3D host->reinit_uhs;
-> > -     bool turning_on_clk =3D false;
-> > -     u8 ctrl;
-> > -
-> > -     host->reinit_uhs =3D false;
-> > -
-> > -     if (ios->power_mode =3D=3D MMC_POWER_UNDEFINED)
-> > -             return;
-> > -
-> > -     if (host->flags & SDHCI_DEVICE_DEAD) {
-> > -             if (!IS_ERR(mmc->supply.vmmc) &&
-> > -                 ios->power_mode =3D=3D MMC_POWER_OFF)
-> > -                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> > -             return;
-> > -     }
-> >
-> >       /*
-> >        * Reset the chip on each power off.
-> > @@ -2357,8 +2346,6 @@ void sdhci_set_ios(struct mmc_host *mmc, struct m=
-mc_ios *ios)
-> >               sdhci_enable_preset_value(host, false);
-> >
-> >       if (!ios->clock || ios->clock !=3D host->clock) {
-> > -             turning_on_clk =3D ios->clock && !host->clock;
-> > -
-> >               host->ops->set_clock(host, ios->clock);
-> >               host->clock =3D ios->clock;
-> >
-> > @@ -2374,6 +2361,31 @@ void sdhci_set_ios(struct mmc_host *mmc, struct =
-mmc_ios *ios)
-> >                       mmc->max_busy_timeout /=3D host->timeout_clk;
-> >               }
-> >       }
-> > +}
-> > +EXPORT_SYMBOL_GPL(sdhci_set_ios_common);
-> > +
-> > +void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > +{
-> > +     struct sdhci_host *host =3D mmc_priv(mmc);
-> > +     bool reinit_uhs =3D host->reinit_uhs;
-> > +     bool turning_on_clk;
-> > +     u8 ctrl;
-> > +
-> > +     host->reinit_uhs =3D false;
-> > +
-> > +     if (ios->power_mode =3D=3D MMC_POWER_UNDEFINED)
-> > +             return;
-> > +
-> > +     if (host->flags & SDHCI_DEVICE_DEAD) {
-> > +             if (!IS_ERR(mmc->supply.vmmc) &&
-> > +                 ios->power_mode =3D=3D MMC_POWER_OFF)
-> > +                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> > +             return;
-> > +     }
-> > +
-> > +     turning_on_clk =3D ios->clock !=3D host->clock && ios->clock && !=
-host->clock;
-> > +
-> > +     sdhci_set_ios_common(mmc, ios);
-> >
-> >       if (host->ops->set_power)
-> >               host->ops->set_power(host, ios->power_mode, ios->vdd);
-> > @@ -2958,7 +2970,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u3=
-2 opcode)
-> >  }
-> >  EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
-> >
-> > -static void sdhci_enable_preset_value(struct sdhci_host *host, bool en=
-able)
-> > +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
-> >  {
-> >       /* Host Controller v3.00 defines preset value registers */
-> >       if (host->version < SDHCI_SPEC_300)
-> > @@ -2986,6 +2998,7 @@ static void sdhci_enable_preset_value(struct sdhc=
-i_host *host, bool enable)
-> >               host->preset_enabled =3D enable;
-> >       }
-> >  }
-> > +EXPORT_SYMBOL_GPL(sdhci_enable_preset_value);
-> >
-> >  static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *m=
-rq,
-> >                               int err)
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index cdb418d97c4d..b2e425dfac95 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -848,6 +848,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask);
-> >  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)=
-;
-> >  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
-> >  int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
-> > +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> > +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios);
-> >  void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
-> >  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> >                                     struct mmc_ios *ios);
+> There is another series [1] that Adrian is working on that is related
+> to the problem in $subject patch. Perhaps you can take a look and try
+> it out instead of Sartak's patch, which seems to have gotten stalled.
 >
+> Kind regards
+> Uffe
+>
+> [1]
+> https://lore.kernel.org/all/20231103084720.6886-1-adrian.hunter@intel.com/
