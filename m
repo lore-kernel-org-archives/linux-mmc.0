@@ -1,156 +1,417 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BACD2101;
-	Thu, 11 Jan 2024 06:05:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C547154A7
+	for <linux-mmc@vger.kernel.org>; Thu, 11 Jan 2024 11:56:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=musicianspage.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q+HKG1xL"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-1d3e8a51e6bso39835755ad.3;
-        Wed, 10 Jan 2024 22:05:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1704953146; x=1705557946; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=lHGoXIC2FCB2mAKhVqh6NZDuE4LJRbl6RDfBQ0QRmmo=;
-        b=Q+HKG1xLsbBoITDb4YUFsnxMoHpaDEpTOCJwjCqbddCUCI4vcDZ7UWEgokaZHIemXP
-         un/ycE8w5aj6RZVA4Uty5xrL1AZa2RFkgkC5nu8UK1oWcQ2TR5iz86JypqfDWf5MipTX
-         NLFg6XbjJodNGzrMGxeJFg3KHfXBuMbzfWHA4w/yZStQ0amfQWJ6Dwr2GCGKzxf1Jbho
-         PuWcBMlzal+ng/l/TroO4A4/4scy+izDdJ4Fg7Q3H+i3S4nqZXdhbbU/izuMshttjEGh
-         8skdF1g/78HIRkGEJFntsY/Mc+CKX0KxnOdzlE54lfI46sOAhPcDChR53caCOj6vJ8g7
-         SeRw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704953146; x=1705557946;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=lHGoXIC2FCB2mAKhVqh6NZDuE4LJRbl6RDfBQ0QRmmo=;
-        b=SHGuloj9jn+Oye+Q8eOMnFQYivjuQHjdPhBVziyY8I8lt04B/61eqKSWe6sjPbrAZB
-         pqobOceuHXtZSijPbQmTWsfJM5W6zd4+U9MvsKtErAQeCIZs9E062silyriS+u1nK0a/
-         qhiq0RUPpeA/ssFnqaMXBx1EcjgYutkVRCPWSNgGyilk+wLC7r47EF2uzrN/v2GFROSu
-         DD7wFwPPjY+sLMvQ9pThBEJ4yIJZcEu7gCCvgr2xBmkt1v132kahboPnMcy8tFC9h5j6
-         ohejipr0T/bArW7v/5Go7NVrXzfir/t7TBMt7q9Igyt4zdRBZzN5PdCG2ePwtQQw7uF1
-         T2VQ==
-X-Gm-Message-State: AOJu0YxmExeGcZFS2ZtPZQCYQEU+xZZI0+8lOYUIiDDWqpsLbL2QJ3YB
-	fH777uQEg9NpKnkE2LNJDZjizKmHRsUIvp9YsZ4=
-X-Google-Smtp-Source: AGHT+IH+1q73uvlfGT5vqj6l9FlxKHf19BKYpA8MaR24y+5FzlsjZZl9SiLbskLUCzdqOP3lbR6IitsAoaAGQSftlCY=
-X-Received: by 2002:a17:90a:f513:b0:28d:b4f8:5104 with SMTP id
- cs19-20020a17090af51300b0028db4f85104mr498035pjb.48.1704953146596; Wed, 10
- Jan 2024 22:05:46 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="CFZK1LKL"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
+	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
+	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
+	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
+	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
+	List-Archive; bh=CGI1G2rq2bfI7fBm8g7GaEM5US4hZ2XjyQuqsVHboDA=; b=CFZK1LKLBTX7
+	ZhK8nOreWFr+fzlLZ53K6AIgJxX7n2sszUHsmQ9ma50Gf3E8vFaYdJsha5wih1Ye61mLF3gWVllA0
+	a1IezkbNWhQYBbmnhTmizgsN2fEvdUUoFlaGhNsdlDq8q22YWxTID7UwemBfH9470kC6YOcM79tQ+
+	T4WWE=;
+Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
+	(envelope-from <no-reply@musicianspage.com>)
+	id 1rNtfJ-00024l-Kn
+	for linux-mmc@vger.kernel.org; Thu, 11 Jan 2024 03:56:05 -0800
+To: linux-mmc@vger.kernel.org
+Subject: Music News and Site Updates (January 11, 2024)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20230914000348.25790-1-michael@allwinnertech.com>
- <CA+Da2qzr0SBu-kUtFTnBqT+OObFOSTFgmU30L3B-Rjv3rYbGKw@mail.gmail.com>
- <CAPDyKFpHw+6vovHRWbhsDwre81U4Uu_X-Wy_viQCZp6nj=5Jkw@mail.gmail.com>
- <aa657a1d-a25d-21a8-4093-ec8fbe298ca2@allwinnertech.com> <CAPDyKFoJpKdsey8dxbs+NpTDDU5fR7h_=JK+aEdD2oeO5W33WQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFoJpKdsey8dxbs+NpTDDU5fR7h_=JK+aEdD2oeO5W33WQ@mail.gmail.com>
-From: Wenchao Chen <wenchao.chen666@gmail.com>
-Date: Thu, 11 Jan 2024 14:05:35 +0800
-Message-ID: <CA+Da2qzsJyy08dfHDK6h0aVfgzbmCM9A=1XE9nkNkr7NQems_Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Add new flag to force hardware reset
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Michael Wu <michael@allwinnertech.com>, adrian.hunter@intel.com, 
-	jinpu.wang@ionos.com, victor.shih@genesyslogic.com.tw, avri.altman@wdc.com, 
-	asuk4.q@gmail.com, f.fainelli@gmail.com, beanhuo@micron.com, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Sarthak Garg <quic_sartgarg@quicinc.com>
-Content-Type: text/plain; charset="UTF-8"
+From: Musicians Page <newsletter@musicianspage.com>
+Reply-To: Musicians Page <newsletter@musicianspage.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <E1rNtfJ-00024l-Kn@list.virtualsheetmusic.com>
+Date: Thu, 11 Jan 2024 03:56:05 -0800
 
-On Mon, 6 Nov 2023 at 22:20, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Mon, 6 Nov 2023 at 13:26, Michael Wu <michael@allwinnertech.com> wrote:
-> >
-> > On 9/25/2023 9:59 PM, Ulf Hansson wrote:
-> > > - trimmed cc-list, + Sartak Garg
-> > >
-> > > On Thu, 14 Sept 2023 at 10:00, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
-> > >>
-> > >> On Thu, 14 Sept 2023 at 08:04, Michael Wu <michael@allwinnertech.com> wrote:
-> > >>>
-> > >>> Entering the recovery system itself indicates a transmission error.
-> > >>> In this situation, we intend to execute the mmc_blk_reset function
-> > >>> to clear any anomalies that may be caused by errors. We have previously
-> > >>> discussed with several MMC device manufacturers, and they expressed
-> > >>> their desire for us to reset the device when errors occur to ensure
-> > >>> stable operation. We aim to make this code compatible with all devices
-> > >>> and ensure its stable performance, so we would like to add this patch
-> > >>>
-> > >>> Signed-off-by: Michael Wu <michael@allwinnertech.com>
-> > >>
-> > >> like: https://lore.kernel.org/linux-mmc/20220603051534.22672-1-quic_sartgarg@quicinc.com/
-> > >
-> > > Looks like this series didn't make it. I was awaiting a rebase from
-> > > Sartak to apply it, but apparently something got in his way for a new
-> > > submission.
-> > >
-> > >>
-> > >> You should enable it in the vendor host.
-> > >
-> > > Yes! We don't want unused code in the core. We need a user of it too.
-> > >
-> > > May I suggest that you pick up Sartak's patch for the core and thus
-> > > add another patch for the host driver you care about and then
-> > > re-submit it as a small series.
-> > >
-> > > Kind regards
-> > > Uffe
-> > >
-> > >>
-> > >>> ---
-> > >>>   drivers/mmc/core/block.c | 2 +-
-> > >>>   include/linux/mmc/host.h | 1 +
-> > >>>   2 files changed, 2 insertions(+), 1 deletion(-)
-> > >>>
-> > >>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> > >>> index b5b414a71e0b..29fbe0ddeadb 100644
-> > >>> --- a/drivers/mmc/core/block.c
-> > >>> +++ b/drivers/mmc/core/block.c
-> > >>> @@ -1503,7 +1503,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
-> > >>>          pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
-> > >>>
-> > >>>          err = mmc_cqe_recovery(host);
-> > >>> -       if (err)
-> > >>> +       if (err || host->cqe_recovery_reset_always)
-> > >>>                  mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
-> > >>>          mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
-> > >>>
-> > >>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > >>> index 62a6847a3b6f..f578541a06b5 100644
-> > >>> --- a/include/linux/mmc/host.h
-> > >>> +++ b/include/linux/mmc/host.h
-> > >>> @@ -518,6 +518,7 @@ struct mmc_host {
-> > >>>          int                     cqe_qdepth;
-> > >>>          bool                    cqe_enabled;
-> > >>>          bool                    cqe_on;
-> > >>> +       bool                    cqe_recovery_reset_always;
-> > >>>
-> > >>>          /* Inline encryption support */
-> > >>>   #ifdef CONFIG_MMC_CRYPTO
-> > >>> --
-> > >>> 2.29.0
-> > >>>
-> > Dear Ulf,
-> > I have tested Sartak's patch and it is also able to resolve the issue we
-> > are currently facing. Therefore, I would like to inquire about the
-> > expected timeline for merging Sartak's patch.
->
-Hi Sartak
+Dear Musician and Music Lover,
 
-Any updates?
+Here is the Newsletter from Musicians Page website:
 
-> Hi Michael,
->
-> There is another series [1] that Adrian is working on that is related
-> to the problem in $subject patch. Perhaps you can take a look and try
-> it out instead of Sartak's patch, which seems to have gotten stalled.
->
-> Kind regards
-> Uffe
->
-> [1]
-> https://lore.kernel.org/all/20231103084720.6886-1-adrian.hunter@intel.com/
+http://www.musicianspage.com
+
+As you have requested. Read on...
+
+(If you are no longer interested in subscribing to this newsletter, you can=
+ unsubscribe by clicking the link at the bottom of this newsletter. Thanks!=
+)
+
+
+
+
+---------------------------------------------------------------------------=
+-
+
+If you are not yet registered as a Musician or Band/Ensemble, be sure to si=
+gn-up from the following page (it's free!):
+
+https://www.musicianspage.com/signup.php?email=3Dlinux-mmc@vger.kernel.org
+
+---------------------------------------------------------------------------=
+-
+
+
+
+
+Consider to join with a Standard or Pro Membership
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Either if you are a Musician or a Music Employer, have a look at our Member=
+ship Plans and sign up for the one that best fits your needs:
+
+
+http://www.musicianspage.com/membership.html
+
+
+A Standard or Pro Membership gives you the ability to upload unlimited audi=
+o, video, and sheet music files to your profile; as well as a more complete=
+ resume (or service/company info if you are an employer) and a creative pag=
+e with media content. If you are a musician, you will also have the chance =
+to get featured on the new Musicians Page radio:
+
+http://www.musicianspage.com/music/radio/
+
+
+Musicians Page gives you a professional space on the web to showcase your t=
+alent to potential employers or, for employers, to have a professional and =
+targeted space on the web where to showcase your products or services to po=
+tential prospects. Musicians Page gives you the chance to differentiate you=
+rself from other musicians or the competition who only use amateur channels=
+ such as MySpace, FaceBook, YouTube, or other free sites.
+
+Also, do you know that your profile on Musicians Page is Google optimized?
+
+This means that employers, other musicians or prospects can easily find you=
+ via Google. Our system automatically optimizes every Musician's profile to=
+ appear at the top of Google results for relevant keywords. Just another re=
+ason to take full advantage of all that the Standard and Pro Memberships ha=
+ve to offer, and not rely solely on free social networks that won't optimiz=
+e your profile for others to see at the top of the list!
+
+With a Standard or Pro Membership, you'll also be able to find and apply fo=
+r external jobs Musicians Page finds for you on the web (if you are a music=
+ian) and, with a Pro Membership, be notified via email as soon as a new ext=
+ernal jobs, matching your profile, are found. Or, if you are an employer, b=
+e featured prominently on any webpage of our site to over 2,000 unique user=
+s daily.
+
+Musicians Page is a network for professional musicians and music employers,=
+ built and planned to grow based on professional musicians' and music emplo=
+yers' needs. Don't miss the opportunity to jump on the band wagon from the =
+beginning.
+
+Membership fees are likely to be increased in the coming weeks, so join Mus=
+icians Page today and start networking the right way!
+
+https://www.musicianspage.com/signup.php
+
+
+
+
+Are you looking for musicians, a song writer, a lyricist, a composer?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If so, please post your music job or project on Musicians Page.
+To post a job/project is completely free and takes 5 minutes:
+
+http://www.musicianspage.com/login/panel.php?yourjobs=3D1&postnew=3D1
+
+
+REMEMBER: you can post a job even for a FREE project you need musicians for=
+!
+
+
+
+
+Latest Posted Jobs on Musicians Page
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Music Duo
+http://www.musicianspage.com/jobs/7721/
+
+Guitarist needed in Mexico for rock and roll music
+http://www.musicianspage.com/jobs/7720/
+
+KEYBOARD PLAYER
+http://www.musicianspage.com/jobs/7719/
+
+STEEL PAN SOLOIST FOR CRUISE SHIPS URGENT
+http://www.musicianspage.com/jobs/7715/
+
+Lauren Daigle Cover Singer
+http://www.musicianspage.com/jobs/7716/
+
+Violinist Wanted
+http://www.musicianspage.com/jobs/7717/
+
+Power rock/pop trio for cruises
+http://www.musicianspage.com/jobs/7713/
+
+Country Musicians for Cruises
+http://www.musicianspage.com/jobs/7712/
+
+Guitar Violin Duos for Cruises
+http://www.musicianspage.com/jobs/7710/
+
+Keys Player for Cruises
+http://www.musicianspage.com/jobs/7709/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest External Jobs or Opportunities (found on the web)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Metal Guitarist Wanted
+http://www.musicianspage.com/extjobs/1258182/
+
+Looking to start a post rock tribute cover band and needs cellist,VOX
+http://www.musicianspage.com/extjobs/1258181/
+
+Professional Piano Tuner Wanted
+http://www.musicianspage.com/extjobs/1258180/
+
+Bass player seeking alt country/southern/rock band
+http://www.musicianspage.com/extjobs/1258179/
+
+Drummer wanted for creative 3-piece hard rock/punk band
+http://www.musicianspage.com/extjobs/1258178/
+
+Drummer SoulFul Drummer Needed for New Soul Jazz Funky Music
+http://www.musicianspage.com/extjobs/1258177/
+
+Metal Band seeking DRUMMER &amp; SINGER
+http://www.musicianspage.com/extjobs/1258176/
+
+Looking for Pop Punk Keyboard Player
+http://www.musicianspage.com/extjobs/1258175/
+
+Looking for a drummer alternative punk
+http://www.musicianspage.com/extjobs/1258174/
+
+LOOKING FOR MATURE DRUMMER
+http://www.musicianspage.com/extjobs/1258173/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest Forum Topics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Help: in which Latin genre would the be included? - by Ignacio Cobian Sanch=
+ez
+posted on the Latin Music forum
+http://www.musicianspage.com/forums/music/latinmusic/9038/
+
+
+Youtube Channel Recommendation/Suggestion - by Classical Music
+posted on the Classical Music forum
+http://www.musicianspage.com/forums/music/classicalmusic/9037/
+
+
+I can write for you any sheet music - by Carolina Escalona
+posted on the Introduce Yourself forum
+http://www.musicianspage.com/forums/general/introduceyou/9036/
+
+
+More forum topics:
+http://www.musicianspage.com/forums/
+
+
+
+
+Latest Uploaded Audio Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Eye Of The Hurricane by roxanne hall (added by Roxanne Hall)
+Genre: Other...
+http://www.musicianspage.com/musicians/53862/audiofile/22923/
+
+
+Agenda by Gary Justice &amp; Moka Only (added by Gary Justice)
+Genre: R&B/Soul
+http://www.musicianspage.com/musicians/53859/audiofile/22921/
+
+
+Ringtone by Ray Rosa (added by Ray Rosa)
+Genre: Pop
+http://www.musicianspage.com/musicians/9397/audiofile/22920/
+
+
+More audio files:
+http://www.musicianspage.com/audio/
+
+
+We are waiting for your comments and if you have any, please upload your
+own audio files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addaudiofiles=3D1
+
+
+
+
+Latest Uploaded Video Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Teaser of my song Soy Latino by Eduardo Castillo (added by Eduardo Castillo=
+)
+Genre: Latin
+http://www.musicianspage.com/musicians/48465/videofile/21176/
+
+
+Lattino by Leonneli Guitar (added by Leonneli Guitar)
+Genre: Latin
+http://www.musicianspage.com/musicians/5459/videofile/21174/
+
+
+More video files:
+http://www.musicianspage.com/video/
+
+
+We are waiting for your comments and if you have any, please upload your
+own video files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addvideofiles=3D1
+
+
+
+
+Latest Uploaded Sheet Music Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+XLIII Memoriam Vivere by Marisol Jimenez (added by Marisol Jimenez)
+Genre: Contemporary
+http://www.musicianspage.com/musicians/11620/sheetmusic/3278/
+
+
+Symphonic Suite for Concert Band, First Draft by William Malcolm Jones (add=
+ed by William Jones)
+Genre: Classical
+http://www.musicianspage.com/musicians/10888/sheetmusic/3277/
+
+
+SOTF - Piano solo by Ronald Van Deurzen (added by Ronald Van Deurzen)
+Genre: Classical
+http://www.musicianspage.com/musicians/41617/sheetmusic/3274/
+
+
+More sheet music files:
+http://www.musicianspage.com/sheetmusic/
+
+
+We are waiting for your comments and if you have any, please upload your
+own sheet music files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addsheetmusic=3D1
+
+
+
+
+Earn money with your website, FaceBook, YouTube or MySpace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you own a website or simply an account on FaceBook, YouTube, MySpace or =
+Twitter, be sure to check out the Virtual Sheet Music's Affiliate Program w=
+hich entitles you to earn 30% commission on any referred sale.
+
+It is completely free to join:
+
+https://affiliates.virtualsheetmusic.com/
+
+
+and once you have an account, start referring users using a special code to=
+ put on your website or social account (FaceBook, Twitter, etc).
+
+For any further questions, please reply to this email, we will be glad to h=
+elp you step by step.
+
+
+
+
+Join us on the major Social Networks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stay updated with our latest news on:
+
+1. on FaceBook:
+http://www.facebook.com/MusiciansPage
+
+2. on Twitter:
+http://twitter.com/MusiciansPage
+
+
+
+
+---------------------------------------------------------------------------=
+-----
+
+FEATURE YOURSELF ON MUSICIANS PAGE:
+=20
+If you have an upcoming concert, CD release, special Event, or just want to=
+ promote yourself and your activity, remember you can feature yourself in f=
+ront of thousands of musicians, music lovers, and music employers (includin=
+g music agents, artist management companies, etc.) by exclusively putting y=
+our picture and name on every page of Musicians Page, starting at just $10 =
+(that's right, just 10 bucks!):
+=20
+https://www.musicianspage.com/login/panel.php?featureyourself=3D1
+=20
+Your ad will be displayed exclusively for the duration of your campaign, gi=
+ving you maximum exposure to the Musicians Page community. Musicians Page i=
+s visited by thousands of musicians and people working in the music busines=
+s every day, so consider putting yourself in front of this specialized audi=
+ence.
+
+This is your chance to make new contacts and seize exciting opportunities i=
+n minutes! Don't miss this opportunity now!
+
+---------------------------------------------------------------------------=
+-----
+
+
+
+
+Please feel free to pass this Newsletter along to friends and other musicia=
+ns who might find this content valuable in the same way you do, and be sure=
+ to send us your ideas and thoughts by either replying to this email or by =
+posting your comments and feedback on the dedicated forum below:
+
+http://www.musicianspage.com/forums/general/feedback/
+
+Thank you!
+
+All the best,
+Fabrizio Ferrari, CEO
+Musicians Page
+http://www.musicianspage.com
+Virtual Sheet Music Inc.
+http://www.virtualsheetmusic.com
+29911 Niguel Road, #6992
+Laguna Niguel, CA 92677 (USA)
+Fax: +1 800 717 1876 or +1 973 273 2171
+----------------------------------------------
+This message was sent from Musicians Page
+http://www.musicianspage.com
+To unsubscribe, please go to:
+http://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
+=2Eorg
