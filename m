@@ -1,202 +1,195 @@
-Received: from mail-lf1-f68.google.com (mail-lf1-f68.google.com [209.85.167.68])
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5D5F67E90
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jan 2024 12:12:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="sa/xTFpq"
-Received: by mail-lf1-f68.google.com with SMTP id 2adb3069b0e04-50eaabc36bcso7915522e87.2
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Jan 2024 04:12:38 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1705061557; x=1705666357; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=4MkwOOsCiR5/RKAzG+EikPytxaE3upASjfe6P8xL2Qw=;
-        b=sa/xTFpqx5jg/+r99ODplLblhilPc3vXYErFyA8Chw6Tu1SKnEtC5XoUClZ1skN5aD
-         Vw/dINGDNLCFF4jUlyuKFNybHhWyV5B5PXd1MNf1t+5+MhUYRe1I1qpcp9c9bKGuPu2d
-         oKt6g0DOyw941ebiyIXRsjdAqrCNywz7fDPoUUPo4ugSe5J5a3V9J4EL06jN9BE8ny77
-         BDKr52lRhNZSfymm2FU3VLrirpzsWRl1dy/5Ej5AykzL/gXmE9lnyCD/gpJPPThdujFG
-         40ydKJkrLUncbNRa51ehv5iDEk9GME0/HilIzO0zjD/P0nNKWi4OuvVwAimEc9Ek4y9l
-         Qi2A==
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B70E11F5F3;
+	Fri, 12 Jan 2024 12:29:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-5edfcba97e3so69534417b3.2;
+        Fri, 12 Jan 2024 04:29:21 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705061557; x=1705666357;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=4MkwOOsCiR5/RKAzG+EikPytxaE3upASjfe6P8xL2Qw=;
-        b=jCkDe2aofsM3fK8jT/+8x41QcJylPyl//Xkjan2khjUa0pqYhWVqr4+yM6f5jrDcbK
-         dqhNCqr49dofNf7zSfd8dj8EuX8tn5UQYiPUMoSPoEq2DfvGffKNINntqPKb67IAgn+G
-         ja0ohu0mCoGZROCcj2PoKc4BEuHD2vtS66hM7P6pvMwFZDjTmNOShiVe37sDCMd0Oop1
-         zoiLpV6HWy8KM18FnPKluAOYHjnSte4h7v9WQ8ImfoV83cXx7ab9kYVktvcrENF5ec1N
-         S5bhQkXT/Z1qDMYD+mlv2MJ7BvZhKkaR/p2oilkJ2OFc/OzLFqCrZp6jIapyswZ9UpqO
-         VhHw==
-X-Gm-Message-State: AOJu0YyrCkSXYMIffmilMN+ZvBeesZswJO4Ko1taAS8Gq18yfVdKzG9m
-	D/1jJ5W/nfBewBkHGOe7zxxqqpvzKh527Q==
-X-Google-Smtp-Source: AGHT+IFTQuTYKQF+f1XSTsvFgJINYyqAciSMLhz666upJ9DgYyyaOXOA+MPx1Sf4rrBgfkQCwjkkEQ==
-X-Received: by 2002:a05:6512:3b22:b0:50e:7555:ddf4 with SMTP id f34-20020a0565123b2200b0050e7555ddf4mr805863lfv.20.1705061556872;
-        Fri, 12 Jan 2024 04:12:36 -0800 (PST)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id br5-20020a056512400500b0050e84a3d75bsm482376lfb.254.2024.01.12.04.12.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Jan 2024 04:12:36 -0800 (PST)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC updates for v6.8
-Date: Fri, 12 Jan 2024 13:12:35 +0100
-Message-Id: <20240112121235.48296-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        d=1e100.net; s=20230601; t=1705062560; x=1705667360;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=61+Evgg1Vmw2HkVJsOdUzlpSbrHkjczepzLoD8ftGEw=;
+        b=DSJ79EjAA0rakUyh4pJqJIB/PynAs/OAIUtzQQwjiy+PzzbL16WQYfRJjAmWZEyDJi
+         x+pqn4cmjkQZ6+/SyxXU6n7/bdaWV6eO/kNRJB/7SJhuYKOJ9iQ71ANgNidPiJJfKzAw
+         5D1/2ol176WmPC3eqf4NHfNPN4jazPnVKYmGO0iQJMwmRlKWfj1fT8griSMIaOSnCm7T
+         CBs4FQJt/8roqnp3//ZZkziCt/yBLvcZttpcPBMGrJ0OMaD1xyd3NVir7mCqXW63j80N
+         zJTauHeg2CBI7geFkKfy8Sag+k+O3STmDXJ+i+QMglKBSN732aprnfMj0bjq0F+vFiDq
+         zZIw==
+X-Gm-Message-State: AOJu0Yy+nBMwWC0lcIVo4Fd64DGI+gN5UQcn9mJ73vGV+ZROAyvBgQlh
+	HIGTsIgU4kxwLuAniaDND/uNLKQCja+k+g==
+X-Google-Smtp-Source: AGHT+IE7+0PduRjPzpJ/9+GpEHxwQCZvLhbY27qoAw0WoFGliebEuHaLNIs8x5ENbsk1CZWFAUG/Ag==
+X-Received: by 2002:a81:790a:0:b0:5ec:38b5:3f8c with SMTP id u10-20020a81790a000000b005ec38b53f8cmr1092836ywc.91.1705062560542;
+        Fri, 12 Jan 2024 04:29:20 -0800 (PST)
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com. [209.85.128.177])
+        by smtp.gmail.com with ESMTPSA id cd10-20020a05690c088a00b005fb56881fa9sm1097336ywb.15.2024.01.12.04.29.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 12 Jan 2024 04:29:20 -0800 (PST)
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-5f3da7ba2bfso65697527b3.3;
+        Fri, 12 Jan 2024 04:29:20 -0800 (PST)
+X-Received: by 2002:a0d:d616:0:b0:5ec:ab18:ba7e with SMTP id
+ y22-20020a0dd616000000b005ecab18ba7emr1276247ywd.3.1705062559134; Fri, 12 Jan
+ 2024 04:29:19 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20240112114147.1977955-1-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20240112114147.1977955-1-claudiu.beznea.uj@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Fri, 12 Jan 2024 13:29:07 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdUoDhZSmD5rxhZ7t_DydsZ13UX3eHD3i-OaxDs9P6awAg@mail.gmail.com>
+Message-ID: <CAMuHMdUoDhZSmD5rxhZ7t_DydsZ13UX3eHD3i-OaxDs9P6awAg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: Fix change point of data handling
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org, 
+	yoshihiro.shimoda.uh@renesas.com, takeshi.saito.xv@renesas.com, 
+	masaharu.hayakawa.ry@renesas.com, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Linus,
+Hi Claudiu,
 
-Here's the pull-request with the MMC updates for v6.8. No MEMSTICK updates this
-time. Details about the highlights are as usual found in the signed tag.
+On Fri, Jan 12, 2024 at 12:42=E2=80=AFPM Claudiu <claudiu.beznea@tuxon.dev>=
+ wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>
+> On latest kernel revisions it has been noticed (on a RZ/G3S system) that
+> when booting Linux and root file system is on eMMC, at some point in
+> the booting process, when the systemd applications are started, the
+> "mmc0: tuning execution failed: -5" message is displayed on console.
+> On kernel v6.7-rc5 this is reproducible in 90% of the boots. This was
+> missing on the same system with kernel v6.5.0-rc1. It was also noticed on
+> kernel revisions v6.6-rcX on a RZ/G2UL based system but not on the kernel
+> this fix is based on (v6.7-rc5).
+>
+> Investigating it on RZ/G3S lead to the conclusion that every time the iss=
+ue
+> is reproduced all the probed TAPs are OK. According to datasheet, when th=
+is
+> happens the change point of data need to be considered for tuning.
+>
+> Previous code considered the change point of data happens when the conten=
+t
+> of the SMPCMP register is zero. According to RZ/V2M hardware manual,
+> chapter "Change Point of the Input Data" (as this is the most clear
+> description that I've found about change point of the input data and all
+> RZ hardware manual are similar on this chapter), at the time of tuning,
+> data is captured by the previous and next TAPs and the result is stored i=
+n
+> the SMPCMP register (previous TAP in bits 22..16, next TAP in bits 7..0).
+> If there is a mismatch b/w the previous and the next TAPs, it indicates
+> that there is a change point of the input data.
+>
+> To comply with this, the code checks if this mismatch is present and
+> updates the priv->smpcmp mask.
+>
+> This change has been checked on the devices with the following DTSes by
+> doing 50 consecutive reboots and checking for the tuning failure message:
+> - r9a08g045s33-smarc.dts
+> - r8a7742-iwg21d-q7.dts
+> - r8a7743-iwg20d-q7.dts
+> - r8a7744-iwg20d-q7.dts
+> - r8a7745-iwg22d-sodimm.dts
+> - r8a77470-iwg23s-sbc.dts
+> - r8a774a1-hihope-rzg2m-ex.dts
+> - r8a774b1-hihope-rzg2n-ex.dts
+> - r8a774c0-ek874.dts
+> - r8a774e1-hihope-rzg2h-ex.dts
+> - r9a07g043u11-smarc-rzg2ul.dts
+> - r9a07g044c2-smarc-rzg2lc.dts
+> - r9a07g044l2-smarc-rzg2l.dts
+> - r9a07g054l2-smarc-rzv2l.dts
+>
+> On r8a774a1-hihope-rzg2m-ex, even though the hardware manual doesn't say
+> anything special about it in the "Change Point of the Input Data" chapter
+> or SMPCMP register description, it has been noticed that although all TAP=
+s
+> probed in the tuning process are OK the SMPCMP is zero. For this updated
+> the renesas_sdhi_select_tuning() function to use priv->taps in case all
+> TAPs are OK.
+>
+> Fixes: 5fb6bf51f6d1 ("mmc: renesas_sdhi: improve TAP selection if all TAP=
+s are good")
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-Please pull this in!
+Thanks for your patch!
 
-Kind regards
-Ulf Hansson
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -641,7 +645,14 @@ static int renesas_sdhi_select_tuning(struct tmio_mm=
+c_host *host)
+>          * identifying the change point of data.
+>          */
+>         if (bitmap_full(priv->taps, taps_size)) {
+> -               bitmap =3D priv->smpcmp;
+> +               /*
+> +                * On some setups it happens that all TAPS are OK but
+> +                * no change point of data. Any tap should be OK for this=
+.
+> +                */
+> +               if (bitmap_empty(priv->smpcmp, taps_size))
+> +                       bitmap =3D priv->taps;
+> +               else
+> +                       bitmap =3D priv->smpcmp;
+>                 min_tap_row =3D 1;
 
+I know nothing about tuning, but should min_tap_row still be 1?
+Or can you fall back to the else case if priv->smpcmp is empty?
+I.e. can this be simplified to:
 
-The following changes since commit 8abf77c88929b6d20fa4f9928b18d6448d64e293:
+    if (!bitmap_empty(priv->smpcmp, taps_size) &&
+        bitmap_full(priv->taps, taps_size)) {
+            ...
+    } else {
+            ...
+    }
 
-  mmc: sdhci-sprd: Fix eMMC init failure after hw reset (2024-01-03 11:24:03 +0100)
+>         } else {
+>                 bitmap =3D priv->taps;
+> @@ -706,7 +718,10 @@ static int renesas_sdhi_execute_tuning(struct mmc_ho=
+st *mmc, u32 opcode)
+>                 if (mmc_send_tuning(mmc, opcode, &cmd_error) =3D=3D 0)
+>                         set_bit(i, priv->taps);
+>
+> -               if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP) =
+=3D=3D 0)
+> +               val =3D sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPC=
+MP);
 
-are available in the Git repository at:
+The SH_MOBILE_SDHI_SCC_SMPCMP register is read even if its value is
+not used below.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.8
+> +               cmpngu_data =3D FIELD_GET(SH_MOBILE_SDHI_SCC_SMPCMP_CMPNG=
+U_DATA, val);
+> +               cmpngd_data =3D FIELD_GET(SH_MOBILE_SDHI_SCC_SMPCMP_CMPNG=
+D_DATA, val);
+> +               if (!cmd_error && cmpngu_data !=3D cmpngd_data)
+>                         set_bit(i, priv->smpcmp);
 
-for you to fetch changes up to 5d40213347480e3ab903d5438dbd0d6b0110e6b8:
+So better move the SH_MOBILE_SDHI_SCC_SMPCMP register access
+inside the if (), and change the below to else.
 
-  mmc: xenon: Add ac5 support via bounce buffer (2024-01-05 11:03:56 +0100)
+>
+>                 if (cmd_error)
 
-----------------------------------------------------------------
-MMC core:
- - Don't force a retune before eMMC RPMB switch
- - Add optional HS400 tuning in HS400es initialization
- - Add a sysfs node to for write-protect-group-size
- - Add re-tuning test to the mmc-test module
- - Use mrq.sbc to support close-ended ioctl requests
+Gr{oetje,eeting}s,
 
-MMC host:
- - mmci: Add support for SDIO in-band irqs for the stm32 variant
- - mmc_spi: Remove broken support custom DMA mapped buffers
- - mtk-sd: Improve and extend the support for tunings
- - renesas_sdhi: Document support for the RZ/Five variant
- - sdhci_am654: Drop support for the ti,otap-del-sel DT property
- - sdhci-brcmstb: Add support for the brcm 74165b0 variant
- - sdhci-msm: Add compatibles for IPQ4019 and IPQ8074
- - sdhci-of-dwcmshc: Add support for the T-Head TH1520 variant
- - sdhci-xenon: Add support for the Marvell ac5 variant
+                        Geert
 
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: mmc_test: Add re-tuning test
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
-Andy Shevchenko (1):
-      mmc: mmc_spi: remove custom DMA mapped buffers
-
-Avri Altman (2):
-      mmc: core: Remove packed command leftovers
-      mmc: core: Use mrq.sbc in close-ended ffu
-
-Axe Yang (2):
-      dt-bindings: mmc: mtk-sd: add tuning steps related property
-      mmc: mtk-sd: Extend number of tuning steps
-
-Christophe Kerello (1):
-      mmc: mmci: stm32: add SDIO in-band interrupt mode
-
-Drew Fustini (3):
-      dt-bindings: mmc: sdhci-of-dwcmhsc: Add T-Head TH1520 support
-      mmc: sdhci: add __sdhci_execute_tuning() to header
-      mmc: sdhci-of-dwcmshc: Add support for T-Head TH1520
-
-Elad Nachman (2):
-      dt-bindings: mmc: add Marvell ac5
-      mmc: xenon: Add ac5 support via bounce buffer
-
-Jorge Ramirez-Ortiz (1):
-      mmc: core: Do not force a retune before RPMB switch
-
-Kamal Dasu (2):
-      dt-bindings: mmc: brcm,sdhci-brcmstb: Add support for 74165b0
-      mmc: sdhci-brcmstb: add new sdhci reset sequence for brcm 74165b0
-
-Krzysztof Kozlowski (2):
-      dt-bindings: mmc: synopsys-dw-mshc: add iommus for Intel SocFPGA
-      dt-bindings: mmc: sdhci-msm: document dedicated IPQ4019 and IPQ8074
-
-Lad Prabhakar (1):
-      dt-bindings: mmc: renesas,sdhi: Document RZ/Five SoC
-
-Lin Gui (1):
-      mmc: core: Add wp_grp_size sysfs node
-
-Mengqi Zhang (1):
-      mmc: core: Add HS400 tuning in HS400es initialization
-
-Nathan Chancellor (1):
-      mmc: sdhci-of-dwcmshc: Use logical OR instead of bitwise OR in dwcmshc_probe()
-
-Peter Robinson (2):
-      mmc: sdhci_am654: Fix TI SoC dependencies
-      mmc: sdhci_omap: Fix TI SoC dependencies
-
-Pin-yen Lin (1):
-      mmc: mtk-sd: Increase the verbosity of msdc_track_cmd_data
-
-Randy Dunlap (1):
-      mmc: sdhci-omap: don't misuse kernel-doc marker
-
-Swati Agarwal (1):
-      dt-bindings: mmc: arasan,sdci: Add gate property for Xilinx platforms
-
-Ulf Hansson (3):
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-
-Vignesh Raghavendra (1):
-      mmc: sdhci_am654: Drop lookup for deprecated ti,otap-del-sel
-
- .../devicetree/bindings/mmc/arasan,sdhci.yaml      |   8 +-
- .../bindings/mmc/brcm,sdhci-brcmstb.yaml           |   4 +-
- .../bindings/mmc/marvell,xenon-sdhci.yaml          |   4 +-
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |   9 +
- .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   2 +-
- .../devicetree/bindings/mmc/sdhci-msm.yaml         |   2 +
- .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |   1 +
- .../devicetree/bindings/mmc/synopsys-dw-mshc.yaml  |   4 +
- drivers/mmc/core/block.c                           |  46 ++-
- drivers/mmc/core/host.c                            |   3 +-
- drivers/mmc/core/mmc.c                             |  30 +-
- drivers/mmc/core/mmc_test.c                        |  33 +-
- drivers/mmc/host/Kconfig                           |  10 +-
- drivers/mmc/host/mmc_spi.c                         | 186 +----------
- drivers/mmc/host/mmci.c                            |  69 +++-
- drivers/mmc/host/mmci.h                            |   2 +
- drivers/mmc/host/mtk-sd.c                          | 166 +++++++---
- drivers/mmc/host/sdhci-brcmstb.c                   |  69 +++-
- drivers/mmc/host/sdhci-of-dwcmshc.c                | 349 +++++++++++++++++++++
- drivers/mmc/host/sdhci-omap.c                      |   2 +-
- drivers/mmc/host/sdhci-xenon.c                     |  31 ++
- drivers/mmc/host/sdhci-xenon.h                     |   3 +-
- drivers/mmc/host/sdhci.c                           |   3 +-
- drivers/mmc/host/sdhci.h                           |   1 +
- drivers/mmc/host/sdhci_am654.c                     |  37 +--
- include/linux/mmc/card.h                           |   5 +-
- include/linux/mmc/core.h                           |   1 -
- include/linux/mmc/mmc.h                            |  10 -
- 28 files changed, 771 insertions(+), 319 deletions(-)
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
