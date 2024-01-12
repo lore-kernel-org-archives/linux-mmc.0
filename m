@@ -1,84 +1,124 @@
-Received: from mail-io1-f47.google.com (mail-io1-f47.google.com [209.85.166.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79E2D5731D
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jan 2024 16:10:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9ED722601;
+	Fri, 12 Jan 2024 17:37:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="XPZGz+ja"
-Received: by mail-io1-f47.google.com with SMTP id ca18e2360f4ac-7bb06f56fe9so79873839f.0
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Jan 2024 08:10:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1705075845; x=1705680645; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=NFWfwHygc2tLtqaZ9kmrB7jXlZ0tclJm6WoKHkdH7fk=;
-        b=XPZGz+jaZFS4t2ooJLCdCoQd5eh1V0fJ5CUlVcq1sPAlhk8/gLMs6LY+TmI2a7For2
-         bLtDH23MmSRuzgjFKhKOcWo8DG119j3h+iJjS+u3UFF0fEUvr6BINhUs5vRflBcRjTHF
-         3xvVm2d+QzMc1hLWkf8dQRG4deMtNWpKFVkaHR6XolUiqxrlZ2jSdCJ/HgnDZ7iw83A/
-         MKyXzSX2Ebk5zBXd8ZdO/PhtO1mBbaODd94sSe+ns6zQV3e3cRMZrwes3STg6a/AtkL8
-         bd18x6ZAjWaIfzhfRYu9FdRb7lK2BEqI3y4+TruuEmBbNfxGpggvthh+IlE3aRtWvjA4
-         b/vg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705075845; x=1705680645;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=NFWfwHygc2tLtqaZ9kmrB7jXlZ0tclJm6WoKHkdH7fk=;
-        b=sRD9/xvWjA1ZCC7EfsByoH8VzgZ/iSkQynFoJHQ0tg0vmvEep/lLQCDKURTX0RetVp
-         0ra0s6aCJECBDhqMDM11XU6HgLUQYydDZ4XsuRR8KcYzR080N/jNehcj+2L7eli47s02
-         RyC1wlRpvGA7FswpCjQMfJl2r2QVHjk2KnY1HRndVpmh6vGF+8QRdyhEvwUZdEV2bXyl
-         ICAZxFoX/7XMGNTTDUNVcqnNGbmL3DRjqlO5ROhK69By+gjK4dIWaetUBSdQMTT7gWo1
-         jDl/ZL9pz0quM1WlvycxkzMpd2rmOkdn+FjLgAU/E6v5iFmL3aYe9vglKxbU+ErHB1Js
-         BRaA==
-X-Gm-Message-State: AOJu0Yz7lL0NiT4R4yLkL+vUSadznsKw+ZMNe90pkT9L40t+02tR5eOW
-	TxwOxtDGY9V6uBeriulato6i88/dQ86UnQ==
-X-Google-Smtp-Source: AGHT+IE5HSi9IwRSj+Eoiwy+OtCZgGENx3FKGiQyFSFBSLtYiehianEJtjDF35mgK6CVa1fFWXukmA==
-X-Received: by 2002:a05:6602:2558:b0:7be:f413:e410 with SMTP id cg24-20020a056602255800b007bef413e410mr2103714iob.2.1705075845625;
-        Fri, 12 Jan 2024 08:10:45 -0800 (PST)
-Received: from [192.168.1.116] ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id dn15-20020a056638090f00b0046e300e90d5sm937976jab.152.2024.01.12.08.10.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 12 Jan 2024 08:10:44 -0800 (PST)
-Message-ID: <d495b5da-3bdb-4548-9876-78f2080e15e0@kernel.dk>
-Date: Fri, 12 Jan 2024 09:10:44 -0700
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YhsvjCmA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49E37C433F1;
+	Fri, 12 Jan 2024 17:37:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1705081026;
+	bh=kyspuGF+/jomofVPFKqvjOWn53WkC65k3SpM8uRR2V8=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:From;
+	b=YhsvjCmAGkzhLHpefGxQfZI0s9oyOxD4Xx3IegbwDSErHF+O8QvdO5G7G2rOR1Bpv
+	 zdO3dQtzEnJsHDG/RiTpxMPc8Afq87IDF36FFm2/rt/AUf67ykCEEZ+xXtHh8xMst0
+	 32IzMtpxyANQFfmzij4zEnoCCauAKE69fsPUq3fAyuvNwgH7NHi0G300bDDDjKoCM7
+	 jty4ce++AsFyIkuGZrdSv2wtQTTVvv+YeweOAfBw/1CCKQvy1j2C9ayZ64UTQ7K2uD
+	 UJWhOrDdHekwwQmQYUnSbw7xqct69HaXS5DvQok/jNREfTNyhXq3H+jiy3VNxxolus
+	 4jATA4s9igCFQ==
+Date: Fri, 12 Jan 2024 11:37:04 -0600
+From: Bjorn Helgaas <helgaas@kernel.org>
+To: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
+ timer timeout during suspend
+Message-ID: <20240112173704.GA2272968@bhelgaas>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] blk-mq: ensure a q_usage_counter reference is held
- when splitting bios
-Content-Language: en-US
-To: Christoph Hellwig <hch@lst.de>
-Cc: Ming Lei <ming.lei@redhat.com>, linux-block@vger.kernel.org,
- Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-References: <20240112054449.GA6829@lst.de>
- <9eb0f18e-f3ce-497c-931d-339efee2190d@kernel.dk>
- <20240112142509.GA6899@lst.de>
-From: Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20240112142509.GA6899@lst.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAAd53p7ZwYNau1c=SDpGd+cqP2qO_7km9Q3-bow-Jqzo6STVFA@mail.gmail.com>
 
-On 1/12/24 7:25 AM, Christoph Hellwig wrote:
-> On Fri, Jan 12, 2024 at 07:22:18AM -0700, Jens Axboe wrote:
->> Yep it is pretty cheap, but it's not free. Here's a test where we just
->> grab a ref and drop it, which should arguably be cheaper than doing a
->> ref at the top and dropping it at the bottom due to temporal locality:
->>
->>      5.01%     +0.86%  [kernel.vmlinux]  [k] blk_mq_submit_bio
+On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
+> On Sat, Jan 6, 2024 at 5:19 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> >
+> > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote:
+> > > Spamming `lspci -vv` can still observe the replay timer timeout error
+> > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
+> > > replay timer timeout of AER"), albeit with a lower reproduce rate.
+> >
+> > I'm not sure what this is telling me.  By "spamming `lspci -vv`, do
+> > you mean that if you run lspci continually, you still see Replay Timer
+> > Timeout logged, e.g.,
+> >
+> >   CESta:        ... Timeout+
 > 
-> Ok.  Do you want to send out your version formally?
+> Yes it's logged and the AER IRQ is raised.
 
-Sure, can do. I'll pick your first patch here as that one makes
-sense separately.
+IIUC the AER IRQ is the important thing.
 
--- 
-Jens Axboe
+Neither 015c9cbcf0ad nor this patch affects logging in
+PCI_ERR_COR_STATUS, so the lspci output won't change and mentioning it
+here doesn't add useful information.
 
+I'd suggest more specific wording than "spamming `lspci -vv`", e.g.,
 
+  015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the replay timer
+  timeout of AER") masks Replay Timer Timeout errors at the GL975x
+  Endpoint.  When the Endpoint detects these errors, it still logs
+  them in its PCI_ERR_COR_STATUS, but masking prevents it from sending
+  ERR_COR messages upstream.
+
+  The Downstream Port leading to a GL975x Endpoint is unaffected by
+  015c9cbcf0ad.  Previously, when that Port detected a Replay Timer
+  Timeout, it sent an ERR_COR message upstream, which eventually
+  caused an AER IRQ, which prevented the system from suspending.
+
+  Mask Replay Timer Timeout errors at the Downstream Port.  The errors
+  will still be logged in PCI_ERR_COR_STATUS, but no ERR_COR will be
+  sent.
+
+> > 015c9cbcf0ad uses hard-coded PCI_GLI_9750_CORRERR_MASK offset and
+> > PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT value, which look like
+> > they *could* be PCI_ERR_COR_MASK and PCI_ERR_COR_REP_TIMER, but
+> > without the lspci output I can't tell for sure.  If they are, it would
+> > be nice to use the generic macros instead of defining new ones so it's
+> > easier to analyze PCI_ERR_COR_MASK usage.
+> >
+> > If 015c9cbcf0ad is updating the generic PCI_ERR_COR_MASK, it should
+> > only prevent sending ERR_COR.  It should not affect the *logging* in
+> > PCI_ERR_COR_STATUS (see PCIe r6.0, sec 6.2.3.2.2), so it shouldn't
+> > affect the lspci output.
+> 
+> PCI_GLI_9750_CORRERR_MASK is specific to GLI 975x devices, so it
+> doesn't conform to generic PCI_ERR_COR_STATUS behavior.
+
+*Could* 015c9cbcf0ad have used the generic PCI_ERR_COR_MASK to
+accomplish the same effect?  Is there an advantage to using the
+device-specific PCI_GLI_9750_CORRERR_MASK?
+
+If masking via PCI_ERR_COR_MASK would work, that would be much better
+because the PCI core can see, manage, and make that visible, e.g., via
+sysfs.  The core doesn't do that today, but people are working on it.
+
+> > If 015c9cbcf0ad is actually updating PCI_ERR_COR_MASK, it would be
+> > nice to clean that up, too.  And maybe PCI_ERR_COR_REP_TIMER should be
+> > masked/restored at the same place for both the Downstream Port and the
+> > Endpoint?
+> 
+> Since PCI_ERR_COR_REP_TIMER is already masked before 015c9cbcf0ad,
+> so I didn't think that's necessary.  Do you think it should still be
+> masked just to be safe?
+
+Did you mean "PCI_ERR_COR_REP_TIMER is already masked *by*
+015c9cbcf0ad"?
+
+If masking PCI_ERR_COR_REP_TIMER using the generic PCI_ERR_COR_MASK in
+the GL975x would have the same effect as masking it with
+PCI_GLI_9750_CORRERR_MASK, then I think you should *only* use the
+generic PCI_ERR_COR_MASK.
+
+No need to do both if the generic one is sufficient.  And I think both
+should be done in the same place since they're basically solving the
+same problem, just at both ends of the link.
+
+Bjorn
