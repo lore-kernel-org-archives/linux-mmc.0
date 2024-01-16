@@ -1,141 +1,162 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+Received: from us-smtp-delivery-195.mimecast.com (us-smtp-delivery-195.mimecast.com [170.10.133.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 540381BF5F
-	for <linux-mmc@vger.kernel.org>; Tue, 16 Jan 2024 15:21:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1rPlD8-0000tu-OV; Tue, 16 Jan 2024 16:18:42 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1rPlD0-000Gxt-VX; Tue, 16 Jan 2024 16:18:34 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.96)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1rPlD0-0011AW-2X;
-	Tue, 16 Jan 2024 16:18:34 +0100
-Date: Tue, 16 Jan 2024 16:18:34 +0100
-From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To: Mark Brown <broonie@kernel.org>
-Cc: Heiko Stuebner <heiko@sntech.de>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, Linus Walleij <linus.walleij@linaro.org>, 
-	dri-devel@lists.freedesktop.org, Miquel Raynal <miquel.raynal@bootlin.com>, 
-	Ronald Wahl <ronald.wahl@raritan.com>, Stefan Schmidt <stefan@datenfreihafen.org>, 
-	libertas-dev@lists.infradead.org, Javier Martinez Canillas <javierm@redhat.com>, 
-	Alex Elder <elder@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, linux-spi@vger.kernel.org, 
-	kernel@pengutronix.de, linux-media@vger.kernel.org, linux-wpan@vger.kernel.org, 
-	Amit Kumar Mahapatra via Alsa-devel <alsa-devel@alsa-project.org>, linux-doc@vger.kernel.org, Dmitry Antipov <dmantipov@yandex.ru>, 
-	Max Filippov <jcmvbkbc@gmail.com>, Eric Dumazet <edumazet@google.com>, 
-	James Clark <james.clark@arm.com>, Guenter Roeck <groeck@chromium.org>, 
-	Dario Binacchi <dario.binacchi@amarulasolutions.com>, chrome-platform@lists.linux.dev, 
-	Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, 
-	Viresh Kumar <vireshk@kernel.org>, Helge Deller <deller@gmx.de>, Wu Hao <hao.wu@intel.com>, 
-	Amit Kumar Mahapatra <amit.kumar-mahapatra@amd.com>, Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
-	linux-arm-msm@vger.kernel.org, greybus-dev@lists.linaro.org, 
-	Bjorn Helgaas <bhelgaas@google.com>, Michal Simek <michal.simek@amd.com>, 
-	linux-arm-kernel@lists.infradead.org, Aaro Koskinen <aaro.koskinen@iki.fi>, 
-	"David S. Miller" <davem@davemloft.net>, Jarkko Sakkinen <jarkko@kernel.org>, 
-	linux-integrity@vger.kernel.org, Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>, 
-	Jonathan Cameron <jic23@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Herve Codina <herve.codina@bootlin.com>, linux-iio@vger.kernel.org, Tom Rix <trix@redhat.com>, 
-	linux-fpga@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-mtd@lists.infradead.org, 
-	Sam Ravnborg <sam@ravnborg.org>, Rob Herring <robh@kernel.org>, Jonathan Corbet <corbet@lwn.net>, 
-	linux-staging@lists.linux.dev, Jernej Skrabec <jernej.skrabec@gmail.com>, 
-	linux-input@vger.kernel.org, Paolo Abeni <pabeni@redhat.com>, Arnd Bergmann <arnd@arndb.de>, 
-	Yang Yingliang <yangyingliang@huawei.com>, Moritz Fischer <mdf@kernel.org>, 
-	Mauro Carvalho Chehab <mchehab@kernel.org>, Benson Leung <bleung@chromium.org>, 
-	Rayyan Ansari <rayyan@ansari.sh>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
-	linux-mmc@vger.kernel.org, Konrad Dybcio <konrad.dybcio@linaro.org>, 
-	Martin Tuma <martin.tuma@digiteqautomotive.com>, Xu Yilun <yilun.xu@intel.com>, 
-	Alexander Aring <alex.aring@gmail.com>, Vignesh Raghavendra <vigneshr@ti.com>, 
-	Peter Huewe <peterhuewe@gmx.de>, Sergey Kozlov <serjk@netup.ru>, 
-	Richard Weinberger <richard@nod.at>, Jason Gunthorpe <jgg@ziepe.ca>, Jakub Kicinski <kuba@kernel.org>, 
-	Kalle Valo <kvalo@kernel.org>, Johan Hovold <johan@kernel.org>, 
-	Rui Miguel Silva <rmfrfs@gmail.com>, linux-mediatek@lists.infradead.org, 
-	Tzung-Bi Shih <tzungbi@kernel.org>, Jonathan Cameron <Jonathan.Cameron@huawei.com>, 
-	Matthias Brugger <matthias.bgg@gmail.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, netdev@vger.kernel.org, Bjorn Andersson <andersson@kernel.org>, 
-	Nicolas Ferre <nicolas.ferre@microchip.com>, Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>, 
-	Thomas Zimmermann <tzimmermann@suse.de>
-Subject: Re: [PATCH 00/33] spi: get rid of some legacy macros
-Message-ID: <l4azekfj7hduzi4wcyphispst46fi3m5ams65nzer2ai6upoxw@3p2uki626ytt>
-References: <cover.1705348269.git.u.kleine-koenig@pengutronix.de>
- <3404c9af-6c11-45d7-9ba4-a120e21e407e@sirena.org.uk>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B97B425553
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Jan 2024 20:48:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.195
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1705438111; cv=none; b=J61O1FQZrMR9Y9xCiy4HQEJXIKhIp4oLZYldQO10sHAXj2zDrcAciKju8cQntVsy+6wS979pf2WXXnuDYp0btPDY+imnHxievHjIqUMRCrNER87QsLRdo3TI1h/sAfUXLHvYx4tKe6T2Iset18suSkVKjpJUf3Rb00RhJfnARnw=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1705438111; c=relaxed/simple;
+	bh=XU2de0bL5iZc/XR29GdbO7F835X1pnpxwYHeBVW7gxw=;
+	h=Received:X-MC-Unique:Received:X-Virus-Scanned:Received:Received:
+	 Received:From:Subject:To:Organization:Message-ID:Date:User-Agent:
+	 MIME-Version:X-Clacks-Overhead:X-Mimecast-Spam-Score:
+	 X-Mimecast-Originator:Content-Type:Content-Transfer-Encoding; b=DJZ6pJ9IqlvWFTFBnKXDZo2cihQcDjiwJVYngfW078Wgtj/YJw2+5us7XXIB90DjaX+HAlhG0lar0ztOVajy/ftLhQ+RPvxP+s7eljzS5lrSH6i+h/KBRv1pLSOu45sHkx1uElajn4C+z9NgZeklDPvX8eOLZxXPaUjhOQ7Ga7U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mbari.org; spf=pass smtp.mailfrom=mbari.org; arc=none smtp.client-ip=170.10.133.195
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mbari.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mbari.org
+Received: from sleet.shore.mbari.org (sleet.shore.mbari.org [134.89.12.10])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-628-z3veNk-ZNOCiVWvH_c0i9A-1; Tue,
+ 16 Jan 2024 15:48:27 -0500
+X-MC-Unique: z3veNk-ZNOCiVWvH_c0i9A-1
+Received: from localhost (localhost [127.0.0.1])
+	by sleet.shore.mbari.org (Postfix) with ESMTP id A013281288C4B
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Jan 2024 12:48:26 -0800 (PST)
+X-Virus-Scanned: amavis at sleet.shore.mbari.org
+Received: from sleet.shore.mbari.org ([127.0.0.1])
+ by localhost (sleet.shore.mbari.org [127.0.0.1]) (amavis, port 10026)
+ with ESMTP id y9St2jHHPjSB for <linux-mmc@vger.kernel.org>;
+ Tue, 16 Jan 2024 12:48:26 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by sleet.shore.mbari.org (Postfix) with ESMTP id 8834E81288C49
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Jan 2024 12:48:26 -0800 (PST)
+Received: from [192.168.6.194] (raven.shore.mbari.org [134.89.10.221])
+	by sleet.shore.mbari.org (Postfix) with ESMTPSA
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Jan 2024 12:48:26 -0800 (PST)
+From: Brent Roman <brent@mbari.org>
+Subject: Regression in sdhci-pci-o2micro.c
+To: linux-mmc@vger.kernel.org
+Organization: MBARI
+Message-ID: <890a5a17-5ebf-4d59-c71f-a5e37a601cbd@mbari.org>
+Date: Tue, 16 Jan 2024 12:48:26 -0800
+User-Agent: Mozilla/5.0 (X11; Linux i686; rv:46.0) Gecko/20100101 Firefox/46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ojpgqs276usvjple"
-Content-Disposition: inline
-In-Reply-To: <3404c9af-6c11-45d7-9ba4-a120e21e407e@sirena.org.uk>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
-
-
---ojpgqs276usvjple
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+X-Clacks-Overhead: GNU Terry Pratchett
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: mbari.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: quoted-printable
 
-Hello Mark,
+Hi,
 
-On Tue, Jan 16, 2024 at 02:40:39PM +0000, Mark Brown wrote:
-> On Mon, Jan 15, 2024 at 09:12:46PM +0100, Uwe Kleine-K=F6nig wrote:
->=20
-> > In commit 8caab75fd2c2 ("spi: Generalize SPI "master" to "controller"")
-> > some functions were renamed. Further some compat defines were introduced
-> > to map the old names to the new ones.
->=20
-> > Patch #18 and #19 touch the same driver, otherwise the patches #1 - #31
-> > are pairwise independent and could be applied by their respective
-> > maintainers. The alternative is to let all patches go via the spi tree.
-> > Mark, what's your preference here?
->=20
-> I don't have a strong preference here, I'm happy to take all the patches
-> if the maintainers for the other subsystem are OK with that - ideally
-> I'd apply things at -rc1 but the timeline is a bit tight there.  I think
-> my plan here unless anyone objects (or I notice something myself) will
-> be to queue things at -rc3, please shout if that doesn't seem
-> reasonable.
+I have an Intel Hades Canyon NUC (NUC8i7HVK)
+whose O2 Micro based SD-Card reader is no longer identified when its=20
+Linux kernel is updated past 5.12
 
-=46rom my side there is no rush, we lived with these defines since
-4.13-rc1. Applying them during the next merge window is fine for me.
+I "fixed" this by reverting a change from 5/9/21=C2=A0 (git=20
+efc58a96adcd29cc37487a60582d9d08b34f6640)
+that inserted proper error checking after all the PCI config space reads=20
+in the device probe.
+This would be code removed enclosed in #if 0 below:
 
-Anyhow, I intend to resend the series for the feedback I received after
--rc1. Up to you when you want to apply it. Watching out for offending
-patches using lore shouldn't be a big thing and I can do that.
+ =C2=A0=C2=A0=C2=A0 case PCI_DEVICE_ID_O2_SEABIRD0:
+ =C2=A0=C2=A0=C2=A0 case PCI_DEVICE_ID_O2_SEABIRD1:
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 /* UnLock WP */
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 ret =3D pci_read_config_byte(chip->p=
+dev,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 O2_SD_LOCK_WP, &scratch);
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (ret)
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 return ret;
 
-Best regards
-Uwe
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 scratch &=3D 0x7f;
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 pci_write_config_byte(chip->pdev, O2=
+_SD_LOCK_WP, scratch);
+
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 ret =3D pci_read_config_dword(chip->=
+pdev,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 O2_SD_PLL_SETTING, &scratch_32);
+#if 0
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (ret)
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 return ret;
+#endif
+
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if ((scratch_32 & 0xff000000) =3D=3D=
+ 0x01000000) {
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 scratch_32 &=3D 0=
+x0000FFFF;
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 scratch_32 |=3D 0=
+x1F340000;
+
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 pci_write_config_=
+dword(chip->pdev,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 O2_SD_PLL_SETTI=
+NG, scratch_32);
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 } else {
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 scratch_32 &=3D 0=
+x0000FFFF;
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 scratch_32 |=3D 0=
+x25100000;
+
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 pci_write_config_=
+dword(chip->pdev,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 O2_SD_PLL_SETTI=
+NG, scratch_32);
+
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 ret =3D pci_read_=
+config_dword(chip->pdev,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 O2_SD_FUNC_REG=
+4,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 &scratch_32);
+#if 0
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (ret)
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 return ret;
+#endif
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 scratch_32 |=3D (=
+1 << 22);
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 pci_write_config_=
+dword(chip->pdev,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 O2_SD_FUNC_REG4=
+, scratch_32);
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 }
+
+Both those pci_read_config_dword() calls return -EINVAL on my machine.
+The driver had been working earlier precisely because it was ignoring=20
+these error returns from pci_read_config_dword.
+Have you seen this behavior before on any other hardware?
+
+The SDcard reader identifies as:
+03:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller=20
+(rev 01)
+03:00.0 0805: 1217:8621 (rev 01)
+
+I've been unable to find /any/ information on this chip.
+Do you have any you could share?=C2=A0 A datasheet would be ideal :-)
+
+Also:
+I've always had to operate this driver with debug_quirks2=3D4 to disable=20
+ultra high-speed support.
+Is this a known issue?
+Or, could it be a symptom of the failing pci_read_configs curing probe?
+
+Thanks for your attention,
 
 --=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+  Brent Roman                                   MBARI
+  Software Engineer               Tel: (831) 775-1808
+  mailto:brent@mbari.org   http://www.mbari.org/~brent
 
---ojpgqs276usvjple
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmWmnkkACgkQj4D7WH0S
-/k7Jlgf/bxg8PBfYKKX7PvDPgT3ZVpLLtWReyLQDBjEkSddRCSKzwPE5dQsE6TGF
-pkpgz7Za7CnFfHKtW25alERgnrqA9inDitGvBoBIVgSHPf6GJsGOPVLhziEMU9t1
-tBlCUkInYGMvS/Gn5tOoSjNLmapgV8tiNzeos6MHWZzdKpWIzj6SBNH72Bof8kUq
-R287GggNJ2PLZa24vL2Pct4BZIfpbD+n1o6O62edEmpGe17xuDkSNfjirG7MojjX
-vAtAlEpsLidT0eabHr4XkgyBSQZLwlh1OdReMiXhtK5GM3Oh9R4Y2XVhUq83hKSl
-5zzsBEXwEe1w3pKgGJnCD1jxAAcJ9A==
-=Sz6E
------END PGP SIGNATURE-----
-
---ojpgqs276usvjple--
