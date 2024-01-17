@@ -1,156 +1,149 @@
-Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD8831DFCF
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Jan 2024 12:18:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9704D2030D
+	for <linux-mmc@vger.kernel.org>; Wed, 17 Jan 2024 14:06:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705493907; cv=none; b=HSW7zrXUgu2O4AqiecbWbS+Dh9Elo873j7/EQkZkX9b8lvuxWSKWkU8X2VITuT6QHXM6Ea38JfZAHnb+SppNWqU8ObqPsaK9SHgKsSIQpmwikl69SZdWzaX17ytS+QcWR/kZTT+IqKy3ktRGxVMN0Rf61CTHjxtUSv2BzFtTTko=
+	t=1705500390; cv=none; b=Va0SLicclM+wcMjCfIXBnhPAIr2iDn1c9yTu2b8Lyjdy6A9LIUAndNt+BGYMM6NU323oIJhsDC7JtzEw5xGitAOpZzIL0S8Z9KOBSmmX3iA1+3jkP/GERo1Tz1gazkrhM/MkMFdHwCY12hTdf79zga4dVtSqwWtJmO6dKfRYVEk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705493907; c=relaxed/simple;
-	bh=ozlp9MYLiFG0H/z5XT4qmI2n0HW8WEbtbc8XCfDnuXY=;
-	h=Received:DKIM-Signature:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Google-Smtp-Source:X-Received:MIME-Version:
-	 References:In-Reply-To:From:Date:Message-ID:Subject:To:Cc:
-	 Content-Type; b=Da4qzHyckDh7g6GoFoMCdkYxFkyrk0Ns8w82QAJO/zw3nEIEW23O+CIL/GVmDLeSNw1sZbk0X65/dV1b0jNAtUk3tYdUgYkK77sejgn0Xb0x38xaD2nWalA2kaQaEBuRay6TeOIcBzmihJzGjHyoLP3/3EXdcDvlMEdGhJy5tD8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=EFxdxXfX; arc=none smtp.client-ip=209.85.219.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1705500390; c=relaxed/simple;
+	bh=PTHnESe9ESqNEunWVFmNfZH+FSFfQXuYiifMq02P0lU=;
+	h=DKIM-Signature:Received:Received:X-UD-Smtp-Session:Date:From:To:
+	 Cc:Subject:Message-ID:Mail-Followup-To:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=o1NFOVurJVqjyE1w2mNmuNxt8rfHXcdprv0llNJsYyy4fRY+wiWnW3RS45mfxpkyi+dBVYFg06XoYIoZ1tKn5SoGdi9eMnxl6xQSMs1yjBFONf3UZjvWjy32XI/Ne2UlUcLTkzfQf/jAbF6faOodZZ3p5iSnjNFWRX/Yv5E9Y1Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=OhgLN0kj; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EFxdxXfX"
-Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dc226bad48cso1457533276.3
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Jan 2024 04:18:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1705493905; x=1706098705; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=cl4Kd9OohLvkHDSeBNrFT+VNQtt1JqKCJVjVDZI4sS4=;
-        b=EFxdxXfXtJlpT49DhZfUt1yiLpSv7r2EtlC0X2tJDQWnOpZDOXu58wQREXD8Sru9U1
-         NRBr124DjV491itHgOXLklxu7QgiTju2AxMwjpAuBSejwn6ZGophrjg7p1/AKuPBALcc
-         0wY+HISwoxcQgGn0V43ykNIGlI4AFBwhIdAvOW3OoqUkhpHVJXQreOC5VDu+w30oP0oS
-         8aEaA0pLE6sBxiKv05TyvoOtByx9xLLKAEXRmJvsVR+k5edmeum3aHyj45T7ZrJhCPP5
-         ebRrdpoPhgvEF2z0VvrmP0ALtzGg6x1eG1tVxpsqyHqgKl2OEzx75RmKZ7aYZaxm5+Pr
-         S6jw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705493905; x=1706098705;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=cl4Kd9OohLvkHDSeBNrFT+VNQtt1JqKCJVjVDZI4sS4=;
-        b=sI6p0dyYCZmgm79Eaj26WMh5WhuuSrJwYBfd9tRBg7XSMAETh0KS5FoX6fBGGpyBHK
-         IlNv9W4WTDu2fAzS//OqqEvoHFRXpvoLBw3fX3i7R4XWnCOzk2fys1EBeo7aTx+Bkeen
-         9ERxZ3Izrw59KBzi2Jgz9DNrVeVFV7h7cRL+d7JXJLNGvOhgKv6w//a6QGCzmfo9WLS9
-         IpaibAZB52RlnQpNk9Qcv5EMzlPK0+YGXjsfFxqECLW81cfWf0rUZeRwdJLz0DIm0pCu
-         WQDzURry8+o5bycj+NHj1LhEtk3F2GqfYsIuOvOvKhynzmc++MQ0rx6bnKAMQMSbAjX7
-         IsNw==
-X-Gm-Message-State: AOJu0YxEdF1waqDTFZGAYdmBEXJo9qc7M9fYXhJQ/Ume5hrsMuWZXV8Q
-	3xzG3AbD0n7TzKtylTglCtWrj0M7E+UvhpGG0APucK6AC5sQHA==
-X-Google-Smtp-Source: AGHT+IHolaOGc5Eoev8VSekLK7+jZgqQCZR6qyRV+O0v5uDqHf5zAT9wzqYb+SJsEXCjVVJ3+J68Gd7vCTbRVK/EO60=
-X-Received: by 2002:a25:ac57:0:b0:dc2:48af:bf05 with SMTP id
- r23-20020a25ac57000000b00dc248afbf05mr69881ybd.63.1705493904829; Wed, 17 Jan
- 2024 04:18:24 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="OhgLN0kj"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=PTHn
+	ESe9ESqNEunWVFmNfZH+FSFfQXuYiifMq02P0lU=; b=OhgLN0kj0hggsnUXH9Z5
+	5OFqwSqKMEFsi0HD5vB7WciPWsW6xHDayCrIXdIVaPZuWitUnM2AQ6LJ37XSI+0r
+	p5FIPuDDOOcgPg8MSPrzuvYgF7jAut0ovUaWOdryRmn9M2LssGfn+oX1y0KFbrBh
+	HyZwS0NwH88czRpvQp381nytA2P5o5XH2Vd9vJf4f6JH/3XR/7mCm3H1RFj9nS07
+	OaeuV0kc1t4sRovEC+jBZEMFnxsothywETAz9HWGZEPTZdqmVJE0X29AYDXiQUL/
+	co9GkMh8cqKeEnN+NCxAhdmhzmQ1fGvlGOOtj+mOlY7MAML1YkeMG2CF8PhE44Y1
+	1w==
+Received: (qmail 2768604 invoked from network); 17 Jan 2024 15:06:25 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 17 Jan 2024 15:06:25 +0100
+X-UD-Smtp-Session: l3s3148p1@oo6hwCQPZNBehhtJ
+Date: Wed, 17 Jan 2024 15:06:25 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: ulf.hansson@linaro.org, takeshi.saito.xv@renesas.com,
+	masaharu.hayakawa.ry@renesas.com, yoshihiro.shimoda.uh@renesas.com,
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Subject: Re: [PATCH v2] mmc: renesas_sdhi: Fix change point of data handling
+Message-ID: <Zafe4do1sMVaV3rh@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Claudiu <claudiu.beznea@tuxon.dev>, ulf.hansson@linaro.org,
+	takeshi.saito.xv@renesas.com, masaharu.hayakawa.ry@renesas.com,
+	yoshihiro.shimoda.uh@renesas.com, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20240117110646.1317843-1-claudiu.beznea.uj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <890a5a17-5ebf-4d59-c71f-a5e37a601cbd@mbari.org>
-In-Reply-To: <890a5a17-5ebf-4d59-c71f-a5e37a601cbd@mbari.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 17 Jan 2024 13:17:49 +0100
-Message-ID: <CAPDyKFqsRounzo1Ns0dDdCS9Qu0doq82ivYwEUNWgOiMtDS0Xg@mail.gmail.com>
-Subject: Re: Regression in sdhci-pci-o2micro.c
-To: Brent Roman <brent@mbari.org>, Chevron Li <chevron.li@bayhubtech.com>, 
-	fred <fred.ai@bayhubtech.com>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="9kRSAflqCj+rMp96"
+Content-Disposition: inline
+In-Reply-To: <20240117110646.1317843-1-claudiu.beznea.uj@bp.renesas.com>
 
-+ Fred, Chevron Li, Adrian
 
-On Tue, 16 Jan 2024 at 23:18, Brent Roman <brent@mbari.org> wrote:
->
-> Hi,
->
-> I have an Intel Hades Canyon NUC (NUC8i7HVK)
-> whose O2 Micro based SD-Card reader is no longer identified when its
-> Linux kernel is updated past 5.12
->
-> I "fixed" this by reverting a change from 5/9/21  (git
-> efc58a96adcd29cc37487a60582d9d08b34f6640)
-> that inserted proper error checking after all the PCI config space reads
-> in the device probe.
-> This would be code removed enclosed in #if 0 below:
->
->      case PCI_DEVICE_ID_O2_SEABIRD0:
->      case PCI_DEVICE_ID_O2_SEABIRD1:
->          /* UnLock WP */
->          ret = pci_read_config_byte(chip->pdev,
->                  O2_SD_LOCK_WP, &scratch);
->          if (ret)
->              return ret;
->
->          scratch &= 0x7f;
->          pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
->
->          ret = pci_read_config_dword(chip->pdev,
->                          O2_SD_PLL_SETTING, &scratch_32);
-> #if 0
->          if (ret)
->              return ret;
-> #endif
->
->          if ((scratch_32 & 0xff000000) == 0x01000000) {
->              scratch_32 &= 0x0000FFFF;
->              scratch_32 |= 0x1F340000;
->
->              pci_write_config_dword(chip->pdev,
->                             O2_SD_PLL_SETTING, scratch_32);
->          } else {
->              scratch_32 &= 0x0000FFFF;
->              scratch_32 |= 0x25100000;
->
->              pci_write_config_dword(chip->pdev,
->                             O2_SD_PLL_SETTING, scratch_32);
->
->              ret = pci_read_config_dword(chip->pdev,
->                              O2_SD_FUNC_REG4,
->                              &scratch_32);
-> #if 0
->              if (ret)
->                  return ret;
-> #endif
->              scratch_32 |= (1 << 22);
->              pci_write_config_dword(chip->pdev,
->                             O2_SD_FUNC_REG4, scratch_32);
->          }
->
-> Both those pci_read_config_dword() calls return -EINVAL on my machine.
-> The driver had been working earlier precisely because it was ignoring
-> these error returns from pci_read_config_dword.
-> Have you seen this behavior before on any other hardware?
->
-> The SDcard reader identifies as:
-> 03:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller
-> (rev 01)
-> 03:00.0 0805: 1217:8621 (rev 01)
->
-> I've been unable to find /any/ information on this chip.
-> Do you have any you could share?  A datasheet would be ideal :-)
->
-> Also:
-> I've always had to operate this driver with debug_quirks2=4 to disable
-> ultra high-speed support.
-> Is this a known issue?
-> Or, could it be a symptom of the failing pci_read_configs curing probe?
->
-> Thanks for your attention,
+--9kRSAflqCj+rMp96
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Looks like the offending commit efc58a96adcd ("mmc: sdhci-pci-o2micro:
-Add missing checks in sdhci_pci_o2_probe"), may not have been
-thoroughly tested. Perhaps a revert is needed.
+On Wed, Jan 17, 2024 at 01:06:46PM +0200, Claudiu wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>=20
+> On latest kernel revisions it has been noticed (on a RZ/G3S system) that
+> when booting Linux and root file system is on eMMC, at some point in
+> the booting process, when the systemd applications are started, the
+> "mmc0: tuning execution failed: -5" message is displayed on console.
+> On kernel v6.7-rc5 this is reproducible in 90% of the boots. This was
+> missing on the same system with kernel v6.5.0-rc1. It was also noticed on
+> kernel revisions v6.6-rcX on a RZ/G2UL based system but not on the kernel
+> this fix is based on (v6.7-rc5).
+>=20
+> Investigating it on RZ/G3S lead to the conclusion that every time the iss=
+ue
+> is reproduced all the probed TAPs are OK. According to datasheet, when th=
+is
+> happens the change point of data need to be considered for tuning.
+>=20
+> Previous code considered the change point of data happens when the content
+> of the SMPCMP register is zero. According to RZ/V2M hardware manual,
+> chapter "Change Point of the Input Data" (as this is the most clear
+> description that I've found about change point of the input data and all
+> RZ hardware manual are similar on this chapter), at the time of tuning,
+> data is captured by the previous and next TAPs and the result is stored in
+> the SMPCMP register (previous TAP in bits 22..16, next TAP in bits 7..0).
+> If there is a mismatch b/w the previous and the next TAPs, it indicates
+> that there is a change point of the input data.
+>=20
+> To comply with this, the code checks if this mismatch is present and
+> updates the priv->smpcmp mask.
+>=20
+> This change has been checked on the devices with the following DTSes by
+> doing 50 consecutive reboots and checking for the tuning failure message:
+> - r9a08g045s33-smarc.dts
+> - r8a7742-iwg21d-q7.dts
+> - r8a7743-iwg20d-q7.dts
+> - r8a7744-iwg20d-q7.dts
+> - r8a7745-iwg22d-sodimm.dts
+> - r8a77470-iwg23s-sbc.dts
+> - r8a774a1-hihope-rzg2m-ex.dts
+> - r8a774b1-hihope-rzg2n-ex.dts
+> - r8a774c0-ek874.dts
+> - r8a774e1-hihope-rzg2h-ex.dts
+> - r9a07g043u11-smarc-rzg2ul.dts
+> - r9a07g044c2-smarc-rzg2lc.dts
+> - r9a07g044l2-smarc-rzg2l.dts
+> - r9a07g054l2-smarc-rzv2l.dts
+>=20
+> On r8a774a1-hihope-rzg2m-ex, even though the hardware manual doesn't say
+> anything special about it in the "Change Point of the Input Data" chapter
+> or SMPCMP register description, it has been noticed that although all TAPs
+> probed in the tuning process are OK the SMPCMP is zero. For this updated
+> the renesas_sdhi_select_tuning() function to use priv->taps in case all
+> TAPs are OK.
+>=20
+> Fixes: 5fb6bf51f6d1 ("mmc: renesas_sdhi: improve TAP selection if all TAP=
+s are good")
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-Let's see if Fred/Chevron Li has some thoughts around this.
+Very interesting patch! Please give me a few days to review/test it.
 
-Kind regards
-Uffe
+
+--9kRSAflqCj+rMp96
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmWn3t0ACgkQFA3kzBSg
+KbZDtw//YCGJZH4XsO3R9K/PpKOha0LHIw0wMXNaPvunIqcGbzHimaxi8B0W9Tej
++ds0L2vV85p/x6V0cOY3YtjVjs8r8rrWuVUSTzfzsjzQx+LPQVIGzOf5hXsZWFTy
+Qfyop9TvZAeW44/xUccJX9pye8D4bohXO9pN1IabKmm5bzvSkohJd63Pg1BmNCuw
+CqOdl7j23LwQmmXw9yu7s1UOZ/9CRAzB0NqAwDyP849TbyFNUAVNCLTGSZXubWcf
+wuze2er2pIPS8O+EPsHyVoqrsFDtwT4v3CUOg/71PPJLJh2PSg+dCZt13eanf2YJ
+mVem6vAD3PBb37mB/xo2v7PXxobVvf55dTdABiPMijKUAOqip7qGh9kYs4ssyj8k
+D5Neriju+g0QhJqf2b5+zTT+6XvBhFdgsKCua/rL7jeH80g6FLIlc4wccc9Xrm/u
+xguV/l9oI7qQU8H3nwtitrKtDCVrALcGpMh0QA4YyLNSiJUiLxBeAx3SZ9sf6w6E
+CKJcG0H6bOpjFC/XonVlGYsewTfpa49NOSe0pwY6os7eyN+hbv1IWzN793lgD+ts
+qaTJBSnYDRcDxVQP6mIofmP6Emgv5BqhQtfYe6lLH6TqRUGsmABHvbW5ahshiDoV
+AQ1fl7RDmYzTrZeetmwbvpJyO3fdzwOBw9qNRTlGF648N1rdJM8=
+=BjW7
+-----END PGP SIGNATURE-----
+
+--9kRSAflqCj+rMp96--
