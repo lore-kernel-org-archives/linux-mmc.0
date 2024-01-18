@@ -1,201 +1,154 @@
-Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2102.outbound.protection.outlook.com [40.107.93.102])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACBF7BE47
-	for <linux-mmc@vger.kernel.org>; Thu, 18 Jan 2024 06:41:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.125.188.123
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705560074; cv=none; b=uPZf7ZS9uhAQLxB3cG4YWvUVrvlCQH28yCnhOxz/NlA9bvi/rv/edGDSaHFEvpnZ4BhYdWj8wHmgN+116WGx6UcOSEhpMpcT2l6snrmCsT55bOZYcWSwxNOOSI1b8FXrUFojqjIS5PxlJHKHfkNHbL+uLO0k4oedhn1R74BjynU=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705560074; c=relaxed/simple;
-	bh=1cC9leEGTGc4x6fHOxemTcDD5JFxZ+j1edv29HJ9AUg=;
-	h=Received:DKIM-Signature:Received:X-Google-DKIM-Signature:
-	 X-Gm-Message-State:X-Received:X-Google-Smtp-Source:X-Received:
-	 MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type:Content-Transfer-Encoding; b=H78Jwt8tW2Ymuqm8ewL/76IyMNcikIPIddvccCQi3Ac2BBKEj4tyWxcvDpnNqlz3LuOm7Z5tuJRdL0RAGwvg+qEGGphgyVgbVT5scNCNKK3cYY/YL11NqlCwB6G6BQ9h1/Setjf4uHbUjqnwHbFB6T5s39he+DcUnBbjQjJimRA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com; spf=pass smtp.mailfrom=canonical.com; dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b=H51l1XWa; arc=none smtp.client-ip=185.125.188.123
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1BD9B645
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Jan 2024 06:51:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.93.102
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1705560696; cv=fail; b=Fqb0o7i1ngJZKEqg3DDV/My/l1PHKx/x7LSX+m91v5sGTzFxFhKbwEFJV8BY60v44+qVK6V/5S3Rs72Ln6awLsACm7W8Nz2G7KP/1NJegjh0vIKmW7R9irv4NEGURjBys/yjtlAjEyYJ9K30FP9QhfAcbBBhA7JSS+c2GoIPofo=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1705560696; c=relaxed/simple;
+	bh=o0DFx0rUW5wDwHnpccL6yLiRaynNPA0Z1b4nG9jezPM=;
+	h=ARC-Message-Signature:ARC-Authentication-Results:DKIM-Signature:
+	 Received:Received:From:To:CC:Subject:Thread-Topic:Thread-Index:
+	 X-CallingTelephoneNumber:X-VoiceMessageDuration:X-FaxNumberOfPages:
+	 Date:Message-ID:Accept-Language:Content-Language:X-MS-Has-Attach:
+	 X-MS-TNEF-Correlator:x-ms-publictraffictype:
+	 x-ms-traffictypediagnostic:x-ms-office365-filtering-correlation-id:
+	 x-ms-exchange-recallreportgenerated:
+	 x-ms-exchange-recallreportcfmgenerated:x-ms-exchange-senderadcheck:
+	 x-ms-exchange-antispam-relay:x-microsoft-antispam:
+	 x-microsoft-antispam-message-info:x-forefront-antispam-report:
+	 x-ms-exchange-antispam-messagedata-chunkcount:
+	 x-ms-exchange-antispam-messagedata-0:Content-Type:
+	 Content-Transfer-Encoding:MIME-Version:X-OriginatorOrg:
+	 X-MS-Exchange-CrossTenant-AuthAs:
+	 X-MS-Exchange-CrossTenant-AuthSource:
+	 X-MS-Exchange-CrossTenant-Network-Message-Id:
+	 X-MS-Exchange-CrossTenant-originalarrivaltime:
+	 X-MS-Exchange-CrossTenant-fromentityheader:
+	 X-MS-Exchange-CrossTenant-id:X-MS-Exchange-CrossTenant-mailboxtype:
+	 X-MS-Exchange-CrossTenant-userprincipalname:
+	 X-MS-Exchange-Transport-CrossTenantHeadersStamped; b=AUT6w/v0cjfpjWwvHYINWB5PrLn1YP48FoukyB2VKz+XvucG5qDieTmy2dxw/rMakaD7UDqsUQzcLz4RJndIgykM9A/W4/Y4tPxWvp5VZaNW+B49zzxtGOPtHHUTsadhR0sfei/idNj3ZaSDhbbse5DMSFqZL1ruWo0O5F3SLk8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bayhubtech.com; spf=pass smtp.mailfrom=bayhubtech.com; dkim=pass (1024-bit key) header.d=towerbridgetechnology.onmicrosoft.com header.i=@towerbridgetechnology.onmicrosoft.com header.b=Wpn3gArb; arc=fail smtp.client-ip=40.107.93.102
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bayhubtech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bayhubtech.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="H51l1XWa"
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com [209.85.216.70])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 3DA123F273
-	for <linux-mmc@vger.kernel.org>; Thu, 18 Jan 2024 06:41:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20210705; t=1705560064;
-	bh=+ovjldvH3e07lZ8Vs4tOwzS5lzJ5LEH+FujyOCK9DFM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type;
-	b=H51l1XWaHzSDOOkEDLoomsUzWrQjMjXuuLza/poX/d6f1wDGqqF1439U4iG18D10q
-	 X8V0DKbN0WIptxaLcZCB3D5diCV6Wwzlnl1nW26AgDKLgxD+55BMYmxpxJ38TjudYm
-	 l3ZbOj8ANsV5tF0HCvbX6TrdHVoz5S8owHdXy+z2OkVKD3m59KfWucjAz7yxRea3XJ
-	 n3VSqmkEUITYf6gALTyqsXgJDiDJfsxJcprh8LxiWcv6zESJX7n63cM5agZvfJMPfb
-	 6XoAatQyU3F6C9W5vMYmaqyIERJau+o1BrywX6zHfQddaL5Cf/XiLDha/EZzheRKZr
-	 AnXjmMoqW+hLA==
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-28b88d79b87so8363347a91.1
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Jan 2024 22:41:04 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705560063; x=1706164863;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+ovjldvH3e07lZ8Vs4tOwzS5lzJ5LEH+FujyOCK9DFM=;
-        b=KYunm981569mG+0IgY/iz46WYIjnP5Zs2ucU1mA/aHJD5S7NCg4NdL2F37+r2h8ZXD
-         cVn2FcUPF76zaKEnIETw/DQg1kyZXvbyOYCJ7Nq0lI0/A3RlQZMhVc2JGzyysomBgXQn
-         5X5rmuCO4Pisdo65AwKV8meBRgze0WBA+peYgy4Fg3pau0z1vubkXrlNRn+zl2S/njEs
-         lrk/E4M8Vy21qID10b0Q0a+tH9yPX099ltKCRYj3o33C4sWOOSCVFjY14fYGmKtF2fcB
-         lprbEv2rZ6bc3Rx4p5lAXdesWX6U6I71ONZfpyFrb70+8EyPzAVQlVlDBU9vdZqHK1Tb
-         0l+A==
-X-Gm-Message-State: AOJu0YyXQ4TNPb2qBxgIdItvfSDLJhWqWzZIMRozaJ9+3yI3XELzZD9Q
-	4We1tQn1sxOLehKQuse7Z327xAmRl7wQK1mrBFN4f6O6NEcyGuJfIZAF4Dfb/EqdVHNGyLLEOO5
-	APMNYCC3GNCPo0mLEH9bYZGq0Ao7OnbeS4v9vz3kzFWu/4N7X8ynJ49aIfFQIDId4XFfI1w4Q6j
-	is5hon/BkvI2waJznTokT1U2kfoVJv5ewbZka/eDvAG+Qv6Ein
-X-Received: by 2002:a17:90a:fa0e:b0:290:28de:7bd4 with SMTP id cm14-20020a17090afa0e00b0029028de7bd4mr127944pjb.14.1705560062790;
-        Wed, 17 Jan 2024 22:41:02 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IH48tQ184w0nzKZbSlBIyAL//E5b/XRoUqFvU5JEAKRVnmqWFY8U/+n7XwITj/4re0JT/MwaOdxCzO3I+2KrJY=
-X-Received: by 2002:a17:90a:fa0e:b0:290:28de:7bd4 with SMTP id
- cm14-20020a17090afa0e00b0029028de7bd4mr127939pjb.14.1705560062512; Wed, 17
- Jan 2024 22:41:02 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=towerbridgetechnology.onmicrosoft.com header.i=@towerbridgetechnology.onmicrosoft.com header.b="Wpn3gArb"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=g2ixTnMFSXMi5f5z+tEAkoZGIJ9ErINC/8bwcOfmXrq2HdpwuI00bpkGhD3Pa06hvqASUWUWX/PiMsCugJgAQTWg5SvIJfi5T/su1RtGt9wAmWP5fns0bX58bKfdFFUChNEuxooaMgDzyk4czuRhiy3SMtfxO9928WrtJfbT8sEH10Pj2X76/ioXenRSFsUe+24oe6pSGMVBt+BWun7sFxdUsLMtuz1i2zC0zeWh154Bwx+AI4S0eEOaIljo6e2b/v4z3kwZchpssiebVqJguqhwfq9JuhEOMYat29PJPfOe3vFZflZiJ1RNa5uyosz+nKZsvrahXi145jBxb5kwDg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=o0DFx0rUW5wDwHnpccL6yLiRaynNPA0Z1b4nG9jezPM=;
+ b=g1dL1wF94FCxlEN/OBoJ4kIy6SHkedovmswPY1QcuyYlrFjUhUnddxGuCSnNOZRNxlACUBKgjHkLOZK3tKI1DRb2hROwJUrbbwIXrsaODgexN7RQjPHJW0hH2BOBSMVpngySd0fnXU1mexXBquG76NUt0wJcvQNdEQwaXxSaEczSMfDcLabnTZg2ubkP0NRdI5wH/zgOrskehErjelt5SMBpD7qiDLgi1PiT4wrdSNgM8XhFGWnM7dWaa6PVfXX89KNZtCF61QE6qC/E5fNST6ErQzDJWVlUocn/e3JKMYOhdcDLAHzWHO8l0cQA4zAM3ofB9/1F3x2pqYWOut+Yww==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bayhubtech.com; dmarc=pass action=none
+ header.from=bayhubtech.com; dkim=pass header.d=bayhubtech.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=towerbridgetechnology.onmicrosoft.com;
+ s=selector2-towerbridgetechnology-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=o0DFx0rUW5wDwHnpccL6yLiRaynNPA0Z1b4nG9jezPM=;
+ b=Wpn3gArbvf42gOMSyyj5dQ24eF3rWvDm2WicapY2xu7G2freKPKmr/wcPWohGql5F8qjGO/8oV0jrEqi5W00K9XtIjQ8sVsbXpMUHflUwyzulNGHXj//pqYlUbtX0fowHwSOTw62Qc543K1hjZseGeqEYqeWjpE2kV++M/l4E1Y=
+Received: from DM4PR16MB5004.namprd16.prod.outlook.com (2603:10b6:8:43::15) by
+ SN7PR16MB5228.namprd16.prod.outlook.com (2603:10b6:806:351::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7202.24; Thu, 18 Jan
+ 2024 06:51:32 +0000
+Received: from DM4PR16MB5004.namprd16.prod.outlook.com
+ ([fe80::17e9:205d:e39b:6666]) by DM4PR16MB5004.namprd16.prod.outlook.com
+ ([fe80::17e9:205d:e39b:6666%5]) with mapi id 15.20.7181.026; Thu, 18 Jan 2024
+ 06:51:31 +0000
+From: "Chevron Li (WH)" <chevron.li@bayhubtech.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Brent Roman <brent@mbari.org>, "Fred
+ Ai(WH)" <fred.ai@bayhubtech.com>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter
+	<adrian.hunter@intel.com>
+Subject: =?gb2312?B?s7e72DogUmVncmVzc2lvbiBpbiBzZGhjaS1wY2ktbzJtaWNyby5j?=
+Thread-Topic: Regression in sdhci-pci-o2micro.c
+Thread-Index: AQHaSdrENomMRlZR0kS6j59vPMUCfg==
+X-CallingTelephoneNumber: IPM.Note
+X-VoiceMessageDuration: 17
+X-FaxNumberOfPages: 0
+Date: Thu, 18 Jan 2024 06:51:31 +0000
+Message-ID:
+ <DM4PR16MB5004B1DFD0A70A89584CA3DAEA712@DM4PR16MB5004.namprd16.prod.outlook.com>
+Accept-Language: zh-CN, en-US
+Content-Language: zh-CN
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=bayhubtech.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM4PR16MB5004:EE_|SN7PR16MB5228:EE_
+x-ms-office365-filtering-correlation-id: 24e261f9-e562-4c0c-45a2-08dc17f1e741
+x-ms-exchange-recallreportgenerated: true
+x-ms-exchange-recallreportcfmgenerated: true
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ 0gCJqsTPrLXe5RR4olAj3y8KOz5K5hHWH27gsgcgfIUufLcmwANl2qT7walswLjIk71mdJdZWY0kP6por20DOLfjmPE+4yByF84mvprKYzyS+kznNcr+u6NMEHpXay4+Bv8JyCCeMSsB4yIzRHbrihwjQ/fdInpE1OnH2DR3JiScbLae+7wcyap7oemkWqnIVqWOGmjFwbEQtrruXPIVtB5JfjWY5gDvJypBaVaoHU935lRYrG+un4hiMTxYz6P7m/h0J9HmGPkORNg9wbjtfTxw3VMZcEBBC8D5rnTkit8oyHerke4FDSdT7GrT2pMcj0gRCFfcfScuAUaSt6lN5K36CjncxC2JjKBzwWxLksJ4XB3rqY104EJEAv2DeOP0/r7qm/NCL8BX9RDB8pzOn/Pp7hoR8RCe3ooqYgd+McAMVW8xqVJsSr2jVcHH14Rdvy2cX2iQ9AyGGMpSNT4njukopny6lkW9voozyC1pCrfeWvXb38NL6cyc8Vq42rCGclQIzVTJHUAHi/RIYp8PteGeaOoeW7cJT9Z+p24wJTAcMfqTYs9cmyHOMeqyx5lg5pk3pnR4JQlLFLcDr4hVT7I6tZcx26Ctf3wUQJem7e6BP1Pbqn+R4PjQyr/6RPiq
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR16MB5004.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366004)(396003)(136003)(39840400004)(376002)(346002)(230922051799003)(64100799003)(186009)(451199024)(1800799012)(55016003)(41300700001)(26005)(9686003)(86362001)(558084003)(33656002)(224303003)(38070700009)(8936002)(52536014)(4326008)(5660300002)(7696005)(6506007)(122000001)(38100700002)(64756008)(54906003)(76116006)(66946007)(66556008)(66476007)(66446008)(6636002)(316002)(110136005)(2906002)(71200400001)(478600001);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?gb2312?B?WUR4Q29TZkkwMHFkV0JCTFJTcVdzeFl2Rk1nMGtEaGZKdGNCd2ptMGpFeDdG?=
+ =?gb2312?B?eDlsbWlJdUpnVmVEelNDRUdBWDhhUXdzdFo2QVVsc2lYNjh4UXBTZTRReVBo?=
+ =?gb2312?B?dmkxWkRBTkUrWmlHSllvODZCcHhpT0pEcXF2Z3lZQlFXSll3YStBeDJndWJr?=
+ =?gb2312?B?RVdlOCs2ejY1RndvTmNJYmd2cHhqNUM4R0MxQmVtMzl3MDdjbmluRFgyM1lw?=
+ =?gb2312?B?eW1NVEk3T3NMcUVUNCtubG1ZL244cW82MDd6VEcwMnlwdktnalUvZ2Z0UDhX?=
+ =?gb2312?B?N2xxSnEzdzlkaDJGdVArbEg3SXRvVytVTFFnaDJLY3U0Y1BycVFDY2w0UXRX?=
+ =?gb2312?B?UGlYUyszT2Yxa0FzbWpLUzJoYjNPR0NrRkFYMDJXdTJtbnZFMGcvZU41MVFm?=
+ =?gb2312?B?UUVCVlRSRVFWMHhud2FyU3BTSkd5MnJyYkVHSkRUVllQUGxycDBFZlZGZVdL?=
+ =?gb2312?B?N3dDYmlRZ29UQ3RtVk1RUnNTc0tPMEZmRjBYNW1icXV0OGJHNVEyOWlJZjNk?=
+ =?gb2312?B?MFl3emplSVU3Z0hWa1JTSmgyRzdpVk85QXk0bWx3eTVxdVBWdUtwY1B2Q0lK?=
+ =?gb2312?B?MEFaUERRbWN2TkVIVTlHbDhmTEh0d3lzUU1lbmFHd2VvMGEveGlxQitXa2Qr?=
+ =?gb2312?B?eVJGdzBhd3JNakx4Z3VkOUJyNUdZMDdDamJSZE8zbUpRY3l6M1p0a2F6UkRn?=
+ =?gb2312?B?N2dGbjRYSzF4azgrbU4xTEkxUnQ5NWdaalp2NVk5d1lXRXhLMytKUkF5Yk85?=
+ =?gb2312?B?L3loOHByb3VsYUZ1dTRLd2ZHQUx2SXkxa04veVJhK2NtdEFFSy9Dbkt4aWNP?=
+ =?gb2312?B?SCttNzRmbDZtVFg4ZEdERzRBd3pEMEY1MVl6TGNHOXp3elREeFdNMnFWS0tJ?=
+ =?gb2312?B?NENKT1RnRmFFOFVwMGF0a1FQTStyWHY4dnc0dkNrUWFqRldJNWZiYkx5a3k0?=
+ =?gb2312?B?aWJvV2RyR2NrbVFDeDZhRWxMcTVvRjYxT0NKQkhMK3pSN3BQRFRSSzBpdVMx?=
+ =?gb2312?B?ODR0dDFBVnJHTjVBbGRTWW5EYjYxdG9ZRC91blNnMnQ2RkJWN3RuMEwxdGs3?=
+ =?gb2312?B?eDhyemFGNTZoeXljRHJjclVWUUR2d0VLUk9xQlFiVk5vMS9MMkR4Ry9qQmMx?=
+ =?gb2312?B?K0t3YXF4Um9rWDlvSVd6VFhQRXlHcHhHaUVwem4xVHFnR3lwQkZJcGdxWW5r?=
+ =?gb2312?B?V2lHWXAvRExCQ0gvNWxYc09INGxBMGFySTFSNTM2Ykx6S1hkZlFNeTQ3RHA2?=
+ =?gb2312?B?WlE0S0N3dW44K25WNi85ckdNMUVMV3U1L1RLTGRxQXE2YVlSZG9KbTBJMmxn?=
+ =?gb2312?B?S3NLMkhoRkp6VDY0N2VYdzRvYS82OWFxR0dLT2xtd1Vucy9zaHlXMFlHTExO?=
+ =?gb2312?B?SmxHWHhRV0EzYWM5enRYWFR2M3BJWE1KYm1GZDJiL2pza201QjhVNG1weE5P?=
+ =?gb2312?B?aVozbEFUNWR0blordWFXTGpCSERiUXBqbzRlNE5VOURNOFpkcVlMbkh6V1dD?=
+ =?gb2312?B?bzR1bXN6R2k1akVURG1SWTVHT3lwTHhybmdCaVA2UHpRWUVDUndRRlJYV21N?=
+ =?gb2312?B?eElOVUcrOGczZHpsb291dTNoZWJJdjhXTjEycWdFVlV0R05HeFFMYkkrN0R1?=
+ =?gb2312?B?UzFVOVRjYW1SWXUzNHFJK0ZNN3RERW8zNXFWTHQrTzcrdmx0THJvci9teVdH?=
+ =?gb2312?B?VmtZdThCME50dlpTVkxnYzNVcjRVbDRpczVxM3lmVFZ0RWUycmFNRFV2bWRO?=
+ =?gb2312?B?S2FtYXhpL2xTWXpSa2JiOE9TeFdVTy80eUo0dmJlK3M2ZmV1VEZvTE1zbkdD?=
+ =?gb2312?B?SXNXL1VSSVZkNTN6eXIzenMwNEpvWGxicURWWmlTTnMxUEhBWWNrRFdYcUxM?=
+ =?gb2312?B?ZWZ6cktQZjFlMFk3QVFXNFB3c0FLZEpVQjVqMkxHOHJLRVRPVjBiN05zdWJ4?=
+ =?gb2312?B?RllqcnRBellJVlF0ZG52cGoyNk1MVFlNZlJmcWd3Zm5vTVRKZE92anptZnI4?=
+ =?gb2312?B?LzhISHIxZWNzTDVkZ0RpU3A4cE9rYTM3Wk15Qm4vNCtvTy9DelZuelVXeHlE?=
+ =?gb2312?B?R1lmdWJCUWJDYTRuVDhISWM1djdwaGJVT0I0TkgvaFFRS3VMdkltcUZsY21M?=
+ =?gb2312?Q?KdyfPk6maaEdd88KY3EbDVxLI?=
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAAd53p7ZwYNau1c=SDpGd+cqP2qO_7km9Q3-bow-Jqzo6STVFA@mail.gmail.com>
- <20240112173704.GA2272968@bhelgaas>
-In-Reply-To: <20240112173704.GA2272968@bhelgaas>
-From: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Date: Thu, 18 Jan 2024 14:40:50 +0800
-Message-ID: <CAAd53p6qE76QjJmjr5ei0mU8xcSNE32hJMOE9Frwz-BuC3gDkA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
- timer timeout during suspend
-To: Bjorn Helgaas <helgaas@kernel.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>, Ben Chuang <benchuanggli@gmail.com>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-OriginatorOrg: bayhubtech.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM4PR16MB5004.namprd16.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 24e261f9-e562-4c0c-45a2-08dc17f1e741
+X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Jan 2024 06:51:31.3644
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 0a7aae2b-8f2e-44df-ba2f-42de7f93c642
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: cWiWqbDEa2lCQjWftfXbv+3IwHzAIPOUVr/Rp2vjkKasOy0rsvjjHmA/GAh/r4JChyghPdVf5y5O7mLlwZrong/WMpotBArGvL1onJ2kkNc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN7PR16MB5228
 
-On Sat, Jan 13, 2024 at 1:37=E2=80=AFAM Bjorn Helgaas <helgaas@kernel.org> =
-wrote:
->
-> On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
-> > On Sat, Jan 6, 2024 at 5:19=E2=80=AFAM Bjorn Helgaas <helgaas@kernel.or=
-g> wrote:
-> > >
-> > > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote:
-> > > > Spamming `lspci -vv` can still observe the replay timer timeout err=
-or
-> > > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask t=
-he
-> > > > replay timer timeout of AER"), albeit with a lower reproduce rate.
-> > >
-> > > I'm not sure what this is telling me.  By "spamming `lspci -vv`, do
-> > > you mean that if you run lspci continually, you still see Replay Time=
-r
-> > > Timeout logged, e.g.,
-> > >
-> > >   CESta:        ... Timeout+
-> >
-> > Yes it's logged and the AER IRQ is raised.
->
-> IIUC the AER IRQ is the important thing.
->
-> Neither 015c9cbcf0ad nor this patch affects logging in
-> PCI_ERR_COR_STATUS, so the lspci output won't change and mentioning it
-> here doesn't add useful information.
-
-You are right. That's just a way to access config space to reproduce the is=
-sue.
-
->
-> I'd suggest more specific wording than "spamming `lspci -vv`", e.g.,
->
->   015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the replay timer
->   timeout of AER") masks Replay Timer Timeout errors at the GL975x
->   Endpoint.  When the Endpoint detects these errors, it still logs
->   them in its PCI_ERR_COR_STATUS, but masking prevents it from sending
->   ERR_COR messages upstream.
->
->   The Downstream Port leading to a GL975x Endpoint is unaffected by
->   015c9cbcf0ad.  Previously, when that Port detected a Replay Timer
->   Timeout, it sent an ERR_COR message upstream, which eventually
->   caused an AER IRQ, which prevented the system from suspending.
->
->   Mask Replay Timer Timeout errors at the Downstream Port.  The errors
->   will still be logged in PCI_ERR_COR_STATUS, but no ERR_COR will be
->   sent.
-
-That's phrased much better then mine :)
-
->
-> > > 015c9cbcf0ad uses hard-coded PCI_GLI_9750_CORRERR_MASK offset and
-> > > PCI_GLI_9750_CORRERR_MASK_REPLAY_TIMER_TIMEOUT value, which look like
-> > > they *could* be PCI_ERR_COR_MASK and PCI_ERR_COR_REP_TIMER, but
-> > > without the lspci output I can't tell for sure.  If they are, it woul=
-d
-> > > be nice to use the generic macros instead of defining new ones so it'=
-s
-> > > easier to analyze PCI_ERR_COR_MASK usage.
-> > >
-> > > If 015c9cbcf0ad is updating the generic PCI_ERR_COR_MASK, it should
-> > > only prevent sending ERR_COR.  It should not affect the *logging* in
-> > > PCI_ERR_COR_STATUS (see PCIe r6.0, sec 6.2.3.2.2), so it shouldn't
-> > > affect the lspci output.
-> >
-> > PCI_GLI_9750_CORRERR_MASK is specific to GLI 975x devices, so it
-> > doesn't conform to generic PCI_ERR_COR_STATUS behavior.
->
-> *Could* 015c9cbcf0ad have used the generic PCI_ERR_COR_MASK to
-> accomplish the same effect?  Is there an advantage to using the
-> device-specific PCI_GLI_9750_CORRERR_MASK?
->
-> If masking via PCI_ERR_COR_MASK would work, that would be much better
-> because the PCI core can see, manage, and make that visible, e.g., via
-> sysfs.  The core doesn't do that today, but people are working on it.
-
-I don't think so. Please see below.
-
->
-> > > If 015c9cbcf0ad is actually updating PCI_ERR_COR_MASK, it would be
-> > > nice to clean that up, too.  And maybe PCI_ERR_COR_REP_TIMER should b=
-e
-> > > masked/restored at the same place for both the Downstream Port and th=
-e
-> > > Endpoint?
-> >
-> > Since PCI_ERR_COR_REP_TIMER is already masked before 015c9cbcf0ad,
-> > so I didn't think that's necessary.  Do you think it should still be
-> > masked just to be safe?
->
-> Did you mean "PCI_ERR_COR_REP_TIMER is already masked *by*
-> 015c9cbcf0ad"?
-
-No. The PCI_ERR_COR_REP_TIMER is masked with or without 015c9cbcf0ad.
-That means before 015c9cbcf0ad, Reply Timeout error was reported with
-PCI_ERR_COR_REP_TIMER masked.
-
-So using PCI_GLI_9750_CORRERR_MASK is necessary for the endpoint.
-
->
-> If masking PCI_ERR_COR_REP_TIMER using the generic PCI_ERR_COR_MASK in
-> the GL975x would have the same effect as masking it with
-> PCI_GLI_9750_CORRERR_MASK, then I think you should *only* use the
-> generic PCI_ERR_COR_MASK.
->
-> No need to do both if the generic one is sufficient.  And I think both
-> should be done in the same place since they're basically solving the
-> same problem, just at both ends of the link.
-
-Do you mean only mask PCI_GLI_9750_CORRERR_MASK during suspend?
-That will not be ideal because accessing its config space (e.g. `lspci
--vv`) will have many errors logged.
-
-Kai-Heng
-
->
-> Bjorn
+Q2hldnJvbiBMaSAoV0gpIL2rs7e72NPKvP6hsFJlZ3Jlc3Npb24gaW4gc2RoY2ktcGNpLW8ybWlj
+cm8uY6GxoaM=
