@@ -1,128 +1,102 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F42B56475;
-	Fri, 19 Jan 2024 22:06:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D0E81E48B;
+	Fri, 19 Jan 2024 22:40:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705702012; cv=none; b=tzk3U0rANN31aUWhTaaOsX0G1P+gH9goe3Oe80zCB/cAnTdaOMTVeh5fuBYUK400cxdGO0BgvF3ZiE/qAh3B3vTfwyw7AdwOsqeZgw4RuH3We2WhigUBch8ooYmfmVmMdNYdGMf8o31CaEBIjoGtyUESr/A2iyaIH2sitvGpyXA=
+	t=1705704056; cv=none; b=uIUO5iTqp/hu0zHckMxcC3S0WJI5vMOtP8iBj73+l/9LUwGRjTHuUi+2SbgmMctNFy6fz5yU9AwMImApdymPeW7+9ZKs0V8KTPI/JFoGr+9xrINb86VmOYQKeHsQmhZNpv9SahmrQtElFQR250KixEPKcXVMUO1RvKH3hCRPbDE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705702012; c=relaxed/simple;
-	bh=bAiP8neWkuFOr1UcviXY9sGWpEscgq5SMLZxG3s9Dt8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IyzRQGp+4KX2Pj6c32h+wj95+6zaxG1UOJCjiRayKBL9I6TUynaRuY0R1gFkRXr78u5z51p3zW1NXaOOlaNGICQjvTIJJGQr0y19zLuu7E36vWtk3MPLlv0lSSP4pdfGo2wogj6hWe1WAQSUWYF3els0TihSxDjuwQsZsN3YozI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H0eg5u8Q; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1705704056; c=relaxed/simple;
+	bh=nz9TfAIKTDYYfKIsjPDHg+tXyY7yGKcv76BL1axJAno=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=g7HGCT60dBW9UgIMO083Q2HytVMtrdnc8bG/0ilHvYC1GZLJC22vL0+2MZsFVYL9kjmoLSocao1ZgtgCYmxUgvHpAI6GaxKdlYobNfxR2mOW6QrtTlQ3CuRwOvgQmriVn0C8PfK9AatREptb5g392f7AK2mTM9GeaGmtFARqiOU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=j4wd/D3L; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H0eg5u8Q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E8E49C433F1;
-	Fri, 19 Jan 2024 22:06:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="j4wd/D3L"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 598D7C433F1;
+	Fri, 19 Jan 2024 22:40:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1705702012;
-	bh=bAiP8neWkuFOr1UcviXY9sGWpEscgq5SMLZxG3s9Dt8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=H0eg5u8QwEQ6ypQgu+Ro/nkwaVoSk6fZjoWXqYEmXDBBypv3SaURpbSvuGPnkUm9o
-	 0iLO54XqFDrY5SKuQZx1PtWWdbaWIgzQTzV0z70555OEw/cl0wpl9rZN9FKfkiyBAu
-	 SnG9Ko2Xb/Ck170Mviz7ss9Pl+yNAe9Xg7Gdjqf86+CfI4wXVZ78Auk6i3XkpHvEn8
-	 o34tv8O0Sbg6s3KM1vurE0tBmVLz8HbPfZTpKnkQxTLGN+n1rFaTju4cEt2Sd0Ic8a
-	 RkPd0onKWlpH1K9oGo+Gggwbv4VFEK2eJRyldbIWTPpp09a5rhij2/rv2jp9evvYPK
-	 wyA/FwbQHedSA==
-Date: Fri, 19 Jan 2024 16:06:48 -0600
-From: Rob Herring <robh@kernel.org>
-To: Gatien Chevallier <gatien.chevallier@foss.st.com>
-Cc: olivier.moysan@foss.st.com, gregkh@linuxfoundation.org,
-	richardcochran@gmail.com, arnd@kernel.org,
-	alsa-devel@alsa-project.org, devicetree@vger.kernel.org,
-	linux-usb@vger.kernel.org, mchehab@kernel.org, peng.fan@oss.nxp.com,
-	pabeni@redhat.com, rcsekar@samsung.com,
-	alexandre.torgue@foss.st.com, fabrice.gasnier@foss.st.com,
-	linux-serial@vger.kernel.org, Oleksii_Moisieiev@epam.com,
-	linux-spi@vger.kernel.org, will@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org, lars@metafoo.de,
-	conor+dt@kernel.org, linux-mmc@vger.kernel.org, kuba@kernel.org,
-	linux-media@vger.kernel.org, arnaud.pouliquen@foss.st.com,
-	andi.shyti@kernel.org, ulf.hansson@linaro.org,
-	Frank Rowand <frowand.list@gmail.com>,
-	linux-stm32@st-md-mailman.stormreply.com,
-	linux-phy@lists.infradead.org, jic23@kernel.org,
-	linux-iio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org, robh+dt@kernel.org, lee@kernel.org,
-	catalin.marinas@arm.com, mkl@pengutronix.de,
-	herbert@gondor.apana.org.au, linux-crypto@vger.kernel.org,
-	dmaengine@vger.kernel.org, hugues.fruchet@foss.st.com,
-	edumazet@google.com, netdev@vger.kernel.org, vkoul@kernel.org,
-	wg@grandegger.com, linux-i2c@vger.kernel.org, davem@davemloft.net
-Subject: Re: [PATCH v9 02/13] dt-bindings: treewide: add access-controllers
- description
-Message-ID: <170570200425.1132338.1743644162144723458.robh@kernel.org>
-References: <20240105130404.301172-1-gatien.chevallier@foss.st.com>
- <20240105130404.301172-3-gatien.chevallier@foss.st.com>
+	s=k20201202; t=1705704055;
+	bh=nz9TfAIKTDYYfKIsjPDHg+tXyY7yGKcv76BL1axJAno=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:From;
+	b=j4wd/D3Lv8cYHiOsEE907KBlNaTbtxYev4dGj+w6L2X8eoVqCRgu0pzY6Sr6jDv8B
+	 a5wscl+4Dlbf/EVr6PjxSj/otwwWSTsj6izfoHhAkfIl39cIfb0/w3Q+CHGYhcEQrC
+	 f/4eDJ8XEH4ggAnw35848tpWYQtTda335GSGPYyY9T8aY7Wm5GMYgiRmukEZZgNIiN
+	 0YL05mAtsOMeLaQYdaaeImCqRXHthh39HzxBRN2SZcQ8ZIcRZq/m68pS1VVcvaUv+D
+	 pwYk/i8oegrrUEvXZXIL1tMUwaXSpFADiGoDALqffcZ5oxdru2EILr6+/QRmJdIOT/
+	 taUUcFcXwU2ow==
+Date: Fri, 19 Jan 2024 16:40:53 -0600
+From: Bjorn Helgaas <helgaas@kernel.org>
+To: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
+ timer timeout during suspend
+Message-ID: <20240119224053.GA187501@bhelgaas>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20240105130404.301172-3-gatien.chevallier@foss.st.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAAd53p6qE76QjJmjr5ei0mU8xcSNE32hJMOE9Frwz-BuC3gDkA@mail.gmail.com>
 
+On Thu, Jan 18, 2024 at 02:40:50PM +0800, Kai-Heng Feng wrote:
+> On Sat, Jan 13, 2024 at 1:37 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
+> > > On Sat, Jan 6, 2024 at 5:19 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > > > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote:
+> > > > > Spamming `lspci -vv` can still observe the replay timer timeout error
+> > > > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
+> > > > > replay timer timeout of AER"), albeit with a lower reproduce rate.
+> > > >
+> > > > I'm not sure what this is telling me.  By "spamming `lspci -vv`, do
+> > > > you mean that if you run lspci continually, you still see Replay Timer
+> > > > Timeout logged, e.g.,
+> > > >
+> > > >   CESta:        ... Timeout+
+> > >
+> > > Yes it's logged and the AER IRQ is raised.
+> >
+> > IIUC the AER IRQ is the important thing.
+> >
+> > Neither 015c9cbcf0ad nor this patch affects logging in
+> > PCI_ERR_COR_STATUS, so the lspci output won't change and mentioning it
+> > here doesn't add useful information.
+> 
+> You are right. That's just a way to access config space to reproduce
+> the issue.
 
-On Fri, 05 Jan 2024 14:03:53 +0100, Gatien Chevallier wrote:
-> access-controllers is an optional property that allows a peripheral to
-> refer to one or more domain access controller(s).
-> 
-> Description of this property is added to all peripheral binding files of
-> the peripheral under the STM32 firewall controller. It allows an accurate
-> representation of the hardware, where various peripherals are connected
-> to a firewall bus. The firewall can then check the peripheral accesses
-> before allowing its device to probe.
-> 
-> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
-> ---
-> 
-> Changes in V6:
-> 	- Minor changes in commit message
-> 	- Renamed access-controller to access-controllers
-> 
-> Changes in V5:
-> 	- Discarded review tags as the content has changed
-> 	- Renamed feature-domains to access-controller
-> 
-> Changes in V4:
-> 	- Added Jonathan's tag for IIO
-> 
-> Changes in V2:
-> 	- Add missing "feature-domains" property declaration
-> 	  in bosch,m_can.yaml and st,stm32-cryp.yaml files
-> 
->  Documentation/devicetree/bindings/crypto/st,stm32-cryp.yaml   | 4 ++++
->  Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml   | 4 ++++
->  Documentation/devicetree/bindings/dma/st,stm32-dma.yaml       | 4 ++++
->  Documentation/devicetree/bindings/dma/st,stm32-dmamux.yaml    | 4 ++++
->  Documentation/devicetree/bindings/i2c/st,stm32-i2c.yaml       | 4 ++++
->  Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml   | 4 ++++
->  .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml       | 4 ++++
->  Documentation/devicetree/bindings/iio/dac/st,stm32-dac.yaml   | 4 ++++
->  Documentation/devicetree/bindings/media/cec/st,stm32-cec.yaml | 4 ++++
->  Documentation/devicetree/bindings/media/st,stm32-dcmi.yaml    | 4 ++++
->  .../bindings/memory-controllers/st,stm32-fmc2-ebi.yaml        | 4 ++++
->  Documentation/devicetree/bindings/mfd/st,stm32-lptimer.yaml   | 4 ++++
->  Documentation/devicetree/bindings/mfd/st,stm32-timers.yaml    | 4 ++++
->  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml          | 4 ++++
->  Documentation/devicetree/bindings/net/can/bosch,m_can.yaml    | 4 ++++
->  Documentation/devicetree/bindings/net/stm32-dwmac.yaml        | 4 ++++
->  Documentation/devicetree/bindings/phy/phy-stm32-usbphyc.yaml  | 4 ++++
->  .../devicetree/bindings/regulator/st,stm32-vrefbuf.yaml       | 4 ++++
->  Documentation/devicetree/bindings/rng/st,stm32-rng.yaml       | 4 ++++
->  Documentation/devicetree/bindings/serial/st,stm32-uart.yaml   | 4 ++++
->  Documentation/devicetree/bindings/sound/st,stm32-i2s.yaml     | 4 ++++
->  Documentation/devicetree/bindings/sound/st,stm32-sai.yaml     | 4 ++++
->  Documentation/devicetree/bindings/sound/st,stm32-spdifrx.yaml | 4 ++++
->  Documentation/devicetree/bindings/spi/st,stm32-qspi.yaml      | 4 ++++
->  Documentation/devicetree/bindings/spi/st,stm32-spi.yaml       | 4 ++++
->  Documentation/devicetree/bindings/usb/dwc2.yaml               | 4 ++++
->  26 files changed, 104 insertions(+)
-> 
+Oh, I think I completely misunderstood you!  I thought you were saying
+that suspending the device caused the PCI_ERR_COR_REP_TIMER error, and
+you happened to see that it was logged when you ran lspci.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+But I guess you mean that running lspci actually *causes* the error?
+I.e., lspci does a config access while we're suspending the device
+causes the error, and the config access itself causes the error, which
+causes the ERR_COR message and ultimately the AER interrupt, and that
+interrupt prevents the system suspend.
 
+If that's the case, I wonder if this is a generic problem that could
+happen with *any* device, not just GL975x.
+
+What power state do we put the GL975x in during system suspend?
+D3hot?  D3cold?  Is there anything that prevents config access while
+we suspend it?
+
+We do have dev->block_cfg_access, and there's a comment that says
+"we're required to prevent config accesses during D-state
+transitions," but I don't see it being used during D-state
+transitions.
+
+Also, it doesn't seem suitable for preventing config accesses during
+suspend because pci_wait_cfg() just busy-waits and never returns an
+error.
+
+Bjorn
