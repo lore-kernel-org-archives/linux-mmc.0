@@ -1,433 +1,153 @@
-Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
+Received: from mailout2.samsung.com (mailout2.samsung.com [203.254.224.25])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 484958484
-	for <linux-mmc@vger.kernel.org>; Thu, 18 Jan 2024 11:56:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.249.201.71
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEA93D51C
+	for <linux-mmc@vger.kernel.org>; Fri, 19 Jan 2024 07:30:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.25
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705578974; cv=none; b=Bh0ki8PvNEP1Zyv0CX8dYF4Ed8ViIqszzP3RQOFWWDZk+f1/Hf+InNREAQbEkmxAHN/w2FxHQKProNiAVNq/JOJcnzzE2NOvbbSF0E3LxpbbX81GxbZte9da62e2IlUia81MvaGi+yoxkt6yMUBE3GurOkeTAI1x34cutZy1zd4=
+	t=1705649417; cv=none; b=SnwFnmyTdXUGYZbgpOiNc4dsxN915DaXH0No2x0JV7FihBaAO8bhdP9XoUE7/+M7DBwLTPgFRFCNJdRopSEvwtrqpmIM5aiDmfNDk137dhDwPKiZtFijnW5aci5S+0I+qq5eOcSlgI1qSZW0lUr7N2udI4zusR8HtFwzLe1q0EM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705578974; c=relaxed/simple;
-	bh=OAWUgEVR6dOVL2/gElmKUTplpsIBb2vWr9xpfrJ8rf4=;
-	h=DKIM-Signature:Received:To:Subject:MIME-Version:From:Reply-To:
-	 Content-Type:Content-Transfer-Encoding:Message-Id:Date; b=K84YKtqzoerxbM534POextrXpUSs9q2vfUWOruadbifrP+xkXkrg/ExQcGst3jBtLNsrE9WRpdPYgln9+zt8yFGIxDBED5wDgDG24fbt1r4lm1dc6xnmCcNm6Hobu4YuPMgSevDTFWZYBIM794/K0F8xJuvGatz2p53zH1sqFoU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com; spf=pass smtp.mailfrom=musicianspage.com; dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b=MKnyqK4h; arc=none smtp.client-ip=170.249.201.71
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=musicianspage.com
+	s=arc-20240116; t=1705649417; c=relaxed/simple;
+	bh=d0nzALVx5Huz1UxcaTbDiEGhUtQ5tZ8N/WWCfalo100=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type:
+	 References; b=K4/zRlf8ZvBvhQC54APFFWq0boies3qYSa4mboMY8VqeaDJZtK5Vi/x/n/P1yGkVS3yHOQi7h46RZohAK40NZAkobmut8rCQLJ3dc5YDOJQx+xf0G16tRVPwEmiaK0dIBQfiL5ZaRyRkB3GT7BirwcPBQMDghxlxliOB4bTMZL8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=az0d+tTn; arc=none smtp.client-ip=203.254.224.25
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="MKnyqK4h"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
-	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
-	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
-	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
-	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
-	List-Archive; bh=OAWUgEVR6dOVL2/gElmKUTplpsIBb2vWr9xpfrJ8rf4=; b=MKnyqK4h+NPA
-	I81r7hiwqmFyBOeEfDMaRXye0TAYITEtCaHCAJpHNWBnQE+KE9ArS8NUrQWrnVet+i2v+kLQxqqWo
-	AOmiB2rBZuI4r4RkeGFVbGZJ6+m97SPXJ18NizNl4pi7jlixhwDFppRPCPsZ4afvr0TWBJTf3xDEE
-	shilQ=;
-Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
-	(envelope-from <no-reply@musicianspage.com>)
-	id 1rQR08-00065b-Rz
-	for linux-mmc@vger.kernel.org; Thu, 18 Jan 2024 03:56:04 -0800
-To: linux-mmc@vger.kernel.org
-Subject: Music News and Site Updates (January 18, 2024)
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="az0d+tTn"
+Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
+	by mailout2.samsung.com (KnoxPortal) with ESMTP id 20240119073012epoutp02191fb0d04734bc50352993094278cc27~rrxqKDjxy1300613006epoutp02I
+	for <linux-mmc@vger.kernel.org>; Fri, 19 Jan 2024 07:30:12 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20240119073012epoutp02191fb0d04734bc50352993094278cc27~rrxqKDjxy1300613006epoutp02I
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1705649412;
+	bh=6N9+i2zBdw87P2pvQtZNgxaco3hwd3DwBXjFeRUkiZI=;
+	h=From:To:Cc:Subject:Date:References:From;
+	b=az0d+tTnArZsUEgb5Y5rTHV27mrPdhXBVC14mMrJC9drlOZwZ9vJ9rZCRxpWhRsrZ
+	 We12UInvu2SwHQhsgcoflwLPDXRNQboYnnxULyjIbTxXhGSy7emmGYuLhGTehDX5+y
+	 tXK5BQxwuJOgC/daXcLFwcTW1WAPxasySQVmuCmI=
+Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
+	epcas1p4.samsung.com (KnoxPortal) with ESMTP id
+	20240119073011epcas1p46c1a93c0ee81cddc29dbd436d94106d6~rrxptATOz0138101381epcas1p4w;
+	Fri, 19 Jan 2024 07:30:11 +0000 (GMT)
+Received: from epsmges1p4.samsung.com (unknown [182.195.36.222]) by
+	epsnrtp3.localdomain (Postfix) with ESMTP id 4TGWVC3nPSz4x9QL; Fri, 19 Jan
+	2024 07:30:11 +0000 (GMT)
+Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
+	epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
+	26.E0.10211.3052AA56; Fri, 19 Jan 2024 16:30:11 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+	epcas1p1.samsung.com (KnoxPortal) with ESMTPA id
+	20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0~rrxo8wYtD0610906109epcas1p1j;
+	Fri, 19 Jan 2024 07:30:11 +0000 (GMT)
+Received: from epsmgms1p2new.samsung.com (unknown [182.195.42.42]) by
+	epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+	20240119073011epsmtrp1e0b73ff32fb1a601ad574230243e8335~rrxo749Hn3009230092epsmtrp1W;
+	Fri, 19 Jan 2024 07:30:11 +0000 (GMT)
+X-AuditID: b6c32a38-463ff700000027e3-f2-65aa2503c01d
+Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
+	epsmgms1p2new.samsung.com (Symantec Messaging Gateway) with SMTP id
+	A9.65.08817.2052AA56; Fri, 19 Jan 2024 16:30:10 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.253.101.71]) by
+	epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
+	20240119073010epsmtip138dc9e69262c0f67e2c1334577c8685f~rrxopMZht1212312123epsmtip1T;
+	Fri, 19 Jan 2024 07:30:10 +0000 (GMT)
+From: Seunghui Lee <sh043.lee@samsung.com>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	ulf.hansson@linaro.org, gregkh@linuxfoundation.org, avri.altman@wdc.com
+Cc: grant.jung@samsung.com, jt77.jang@samsung.com, dh0421.hwang@samsung.com,
+	junwoo80.lee@samsung.com, jangsub.yi@samsung.com, cw9316.lee@samsung.com,
+	sh8267.baek@samsung.com, wkon.kim@samsung.com, Seunghui Lee
+	<sh043.lee@samsung.com>
+Subject: [PATCH] mmc: core: Fix null pointer dereference in bus_shutdown
+Date: Fri, 19 Jan 2024 16:32:47 +0900
+Message-Id: <20240119073247.7441-1-sh043.lee@samsung.com>
+X-Mailer: git-send-email 2.29.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Musicians Page <newsletter@musicianspage.com>
-Reply-To: Musicians Page <newsletter@musicianspage.com>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <E1rQR08-00065b-Rz@list.virtualsheetmusic.com>
-Date: Thu, 18 Jan 2024 03:56:04 -0800
+Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprOJsWRmVeSWpSXmKPExsWy7bCmvi6z6qpUg2NbZCxe/rzKZjHjVBur
+	xb5rJ9ktfv1dz27RvHg9m0XH1slMFjuen2G32PW3mcni8q45bBZH/vczWjT92cdice3MCVaL
+	42vDLTZf+sbiwOdx59oeNo/9c9ewe/RtWcXo8XmTnEf7gW6mANaobJuM1MSU1CKF1Lzk/JTM
+	vHRbJe/geOd4UzMDQ11DSwtzJYW8xNxUWyUXnwBdt8wcoEOVFMoSc0qBQgGJxcVK+nY2Rfml
+	JakKGfnFJbZKqQUpOQVmBXrFibnFpXnpenmpJVaGBgZGpkCFCdkZhw+3sxX0cFS8mnGUuYHx
+	PFsXIyeHhICJxMkrX1m6GLk4hAR2MEo0n94H5XxilHjXew/K+cYo8eL1YnaYlo19k1hAbCGB
+	vYwS+5eaQNifGSVWb+cHsdkEtCSmb9rCBNIsItDGKNG34jHYJGaBD4wSv/pWAmU4OIQFPCTO
+	nC0CaWARUJU4//sK2FBeAUuJY28eQC2Tl/hzv4cZIi4ocXLmE7AaZqB489bZzCAzJQQaOSRu
+	vF7OAtHgInHv9WZGCFtY4tXxLVCDpCRe9rexQzQ0M0q0NUB8LSEwAei3Ba+YIKrsJZpbm9lA
+	rmMW0JRYv0sfYhufxLuvPawgYQkBXomONiGIamWJl4+WQXVKSixpv8UMYXtIXF16ghkSKrES
+	j363MU9glJuF5IdZSH6YhbBsASPzKkax1ILi3PTUYsMCE3hUJufnbmIEp1Atix2Mc99+0DvE
+	yMTBeIhRgoNZSYTX32BZqhBvSmJlVWpRfnxRaU5q8SFGU2CoTmSWEk3OBybxvJJ4QxNLAxMz
+	IxMLY0tjMyVx3jNXylKFBNITS1KzU1MLUotg+pg4OKUamMK3eyUb6vQnvE1y2uRUZpB7aebZ
+	2MKHUzufrhA7/v5ue7BaZwvHI6OsPw1egpvMxTa4KgRe/3nq1i25r0lb0n+dFUsLXCae8Moq
+	NVjRv/SXZo58bknb3yymSYkB+l6fc0OUbtXNYXE6F/N8akHqjuJ1Jr/e/Hs9Y9K+nAOFNQuX
+	LXh73Kj0x/TeVQoGsx6efCv02zBt0mMj1393TpbGTbx9xuWs9Jf8xzWL3u+8lDHPPiHFx+Yv
+	3/yjr6OVHuflS30JnfGke0HcBt5Y86OTp0wPl/mfNb/2CM+TJdvXqczSkf3JcmK53Iw0rX1m
+	Rf7cF/vddmwI91wmaf9QRU/docDE63/ev7xNun5BSeePXVNiKc5INNRiLipOBADsGfkIKgQA
+	AA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrALMWRmVeSWpSXmKPExsWy7bCSnC6T6qpUg5sfLS1e/rzKZjHjVBur
+	xb5rJ9ktfv1dz27RvHg9m0XH1slMFjuen2G32PW3mcni8q45bBZH/vczWjT92cdice3MCVaL
+	42vDLTZf+sbiwOdx59oeNo/9c9ewe/RtWcXo8XmTnEf7gW6mANYoLpuU1JzMstQifbsErozD
+	h9vZCno4Kl7NOMrcwHierYuRk0NCwERiY98kli5GLg4hgd2MEnM6/rJAJCQlFj96CFTEAWQL
+	Sxw+XAxR85FR4tS5d4wgNWwCWhLTN21hArFFBHoYJfp25YEUMQv8YpTYMXUZWLOwgIfEmbNF
+	IDUsAqoS539fAZvPK2ApcezNA3aIXfISf+73MEPEBSVOznwCVsMMFG/eOpt5AiPfLCSpWUhS
+	CxiZVjFKphYU56bnFhsWGOWllusVJ+YWl+al6yXn525iBAe6ltYOxj2rPugdYmTiYDzEKMHB
+	rCTC62+wLFWINyWxsiq1KD++qDQntfgQozQHi5I477fXvSlCAumJJanZqakFqUUwWSYOTqkG
+	pu06Lb416fqHMpL36S5Osj/t7V28MdZ4i0vBtncep7bqbjDe4v8j7nrInXzv+ylLHzJ9//VB
+	wHm+3Iney5VrMhoklY5qbDUIW5DyO0kx/cq9745KUZs7XnBzKdqrsTgz1x7ab6Un21R+O+ED
+	s6vyl65a1ZeLHQ4faNAK6RP8aarqwvrxwtMrXTsOVavNmugY1PVrw/2+neJOW3bP7ihQF2pa
+	cEvH9dbPD7HfDnC37nO+8NG3emNfRK3txIymr89Wr0x0qCn7d+8hy68X69JDV/eYG3xRLpzy
+	dnLZuj/vQ73X/joqe0hR8I/Bc9UH1dy2wTs5V1uHc/THKCoL2/U73JI7d3N2jNS306tDublZ
+	lFiKMxINtZiLihMBrTkCSOMCAAA=
+X-CMS-MailID: 20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0
+References: <CGME20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0@epcas1p1.samsung.com>
+
+When shutting down removable device,
+it can be occurred null pointer dereference.
+
+To prevent null pointer dereference,
+At first, check null pointer.
+Next, block rescan worker to scan removable device during shutdown.
+
+Signed-off-by: Seunghui Lee <sh043.lee@samsung.com>
+---
+ drivers/mmc/core/bus.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 0af96548e7da..4f370a6577aa 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -143,9 +143,17 @@ static void mmc_bus_shutdown(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+-	struct mmc_host *host = card->host;
++	struct mmc_host *host;
+ 	int ret;
+ 
++	if (!drv || !card) {
++		pr_debug("%s: drv or card is NULL.\n", dev_name(dev));
++		return;
++	}
++
++	host = card->host;
++	host->rescan_disable = 1;
++
+ 	if (dev->driver && drv->shutdown)
+ 		drv->shutdown(card);
+ 
+-- 
+2.29.0
 
-Dear Musician and Music Lover,
-
-Here is the Newsletter from Musicians Page website:
-
-http://www.musicianspage.com
-
-As you have requested. Read on...
-
-(If you are no longer interested in subscribing to this newsletter, you can=
- unsubscribe by clicking the link at the bottom of this newsletter. Thanks!=
-)
-
-
-
-
----------------------------------------------------------------------------=
--
-
-If you are not yet registered as a Musician or Band/Ensemble, be sure to si=
-gn-up from the following page (it's free!):
-
-https://www.musicianspage.com/signup.php?email=3Dlinux-mmc@vger.kernel.org
-
----------------------------------------------------------------------------=
--
-
-
-
-
-Consider to join with a Standard or Pro Membership
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Either if you are a Musician or a Music Employer, have a look at our Member=
-ship Plans and sign up for the one that best fits your needs:
-
-
-http://www.musicianspage.com/membership.html
-
-
-A Standard or Pro Membership gives you the ability to upload unlimited audi=
-o, video, and sheet music files to your profile; as well as a more complete=
- resume (or service/company info if you are an employer) and a creative pag=
-e with media content. If you are a musician, you will also have the chance =
-to get featured on the new Musicians Page radio:
-
-http://www.musicianspage.com/music/radio/
-
-
-Musicians Page gives you a professional space on the web to showcase your t=
-alent to potential employers or, for employers, to have a professional and =
-targeted space on the web where to showcase your products or services to po=
-tential prospects. Musicians Page gives you the chance to differentiate you=
-rself from other musicians or the competition who only use amateur channels=
- such as MySpace, FaceBook, YouTube, or other free sites.
-
-Also, do you know that your profile on Musicians Page is Google optimized?
-
-This means that employers, other musicians or prospects can easily find you=
- via Google. Our system automatically optimizes every Musician's profile to=
- appear at the top of Google results for relevant keywords. Just another re=
-ason to take full advantage of all that the Standard and Pro Memberships ha=
-ve to offer, and not rely solely on free social networks that won't optimiz=
-e your profile for others to see at the top of the list!
-
-With a Standard or Pro Membership, you'll also be able to find and apply fo=
-r external jobs Musicians Page finds for you on the web (if you are a music=
-ian) and, with a Pro Membership, be notified via email as soon as a new ext=
-ernal jobs, matching your profile, are found. Or, if you are an employer, b=
-e featured prominently on any webpage of our site to over 2,000 unique user=
-s daily.
-
-Musicians Page is a network for professional musicians and music employers,=
- built and planned to grow based on professional musicians' and music emplo=
-yers' needs. Don't miss the opportunity to jump on the band wagon from the =
-beginning.
-
-Membership fees are likely to be increased in the coming weeks, so join Mus=
-icians Page today and start networking the right way!
-
-https://www.musicianspage.com/signup.php
-
-
-
-
-Are you looking for musicians, a song writer, a lyricist, a composer?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If so, please post your music job or project on Musicians Page.
-To post a job/project is completely free and takes 5 minutes:
-
-http://www.musicianspage.com/login/panel.php?yourjobs=3D1&postnew=3D1
-
-
-REMEMBER: you can post a job even for a FREE project you need musicians for=
-!
-
-
-
-
-Latest Posted Jobs on Musicians Page
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Female singer,rapper to Collab Remotely
-http://www.musicianspage.com/jobs/7724/
-
-Music Duo
-http://www.musicianspage.com/jobs/7721/
-
-Guitarist needed in Mexico for rock and roll music
-http://www.musicianspage.com/jobs/7720/
-
-KEYBOARD PLAYER
-http://www.musicianspage.com/jobs/7719/
-
-STEEL PAN SOLOIST FOR CRUISE SHIPS URGENT
-http://www.musicianspage.com/jobs/7715/
-
-Lauren Daigle Cover Singer
-http://www.musicianspage.com/jobs/7716/
-
-Violinist Wanted
-http://www.musicianspage.com/jobs/7717/
-
-Power rock/pop trio for cruises
-http://www.musicianspage.com/jobs/7713/
-
-Country Musicians for Cruises
-http://www.musicianspage.com/jobs/7712/
-
-Guitar Violin Duos for Cruises
-http://www.musicianspage.com/jobs/7710/
-
-
-More jobs:
-http://www.musicianspage.com/jobs/
-
-
-
-
-Latest External Jobs or Opportunities (found on the web)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-LA Rock Band Seeks Bassist
-http://www.musicianspage.com/extjobs/1258935/
-
-Variety Band looking for Bassist/vocalist and guitarist/vocalist
-http://www.musicianspage.com/extjobs/1258934/
-
-Lead or Strong Second Guitar Needed
-http://www.musicianspage.com/extjobs/1258933/
-
-Seeking Whitney Houston/ Adele belting type singer for wedding band
-http://www.musicianspage.com/extjobs/1258932/
-
-Guitar player WANTED: 70=E2=80=99s Rock &amp; Roll-Jeff Beck, Frampton, Bri=
-an May
-http://www.musicianspage.com/extjobs/1258931/
-
-Seeking drummer, bassist and lead guitarist to reestablish band
-http://www.musicianspage.com/extjobs/1258930/
-
-Hard-hitting DRUMMER Needed/PEARL JAM
-http://www.musicianspage.com/extjobs/1258929/
-
-Group seeks Cellist
-http://www.musicianspage.com/extjobs/1258928/
-
-Bass with vocals wanted
-http://www.musicianspage.com/extjobs/1258927/
-
-60s 70s Rock Tribute Band Seeks Second Guitar Player
-http://www.musicianspage.com/extjobs/1258926/
-
-
-More jobs:
-http://www.musicianspage.com/jobs/
-
-
-
-
-Latest Forum Topics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-New Release - by KonstantinDobriak
-posted on the Introduce Yourself forum
-http://www.musicianspage.com/forums/general/introduceyou/9039/
-
-
-Help: in which Latin genre would the be included? - by Ignacio Cobian Sanch=
-ez
-posted on the Latin Music forum
-http://www.musicianspage.com/forums/music/latinmusic/9038/
-
-
-Youtube Channel Recommendation/Suggestion - by Classical Music
-posted on the Classical Music forum
-http://www.musicianspage.com/forums/music/classicalmusic/9037/
-
-
-More forum topics:
-http://www.musicianspage.com/forums/
-
-
-
-
-Latest Uploaded Audio Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-No Soy Bandera by DKlaC (added by DKlaC)
-Genre: Latin
-http://www.musicianspage.com/musicians/14510/audiofile/22949/
-
-
-Eso Tambien Es De Cuba by DKlaC (added by DKlaC)
-Genre: Latin
-http://www.musicianspage.com/musicians/14510/audiofile/22948/
-
-
-Todo se Acaba by DKlaC (added by DKlaC)
-Genre: Latin
-http://www.musicianspage.com/musicians/14510/audiofile/22947/
-
-
-More audio files:
-http://www.musicianspage.com/audio/
-
-
-We are waiting for your comments and if you have any, please upload your
-own audio files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addaudiofiles=3D1
-
-
-
-
-Latest Uploaded Video Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-HOT STAFF LIVE REEL by HOT STAFF (added by Hot Staff Party Band)
-Genre: Pop
-http://www.musicianspage.com/musicians/53896/videofile/21181/
-
-
-HOT STAFF VIDEO REEL by HOT STAFF (added by Hot Staff Party Band)
-Genre: Pop
-http://www.musicianspage.com/musicians/53896/videofile/21180/
-
-
-What do I owe you by Ronaldo Chagas &amp; Georgina hilton (added by Ronaldo=
- Chagas)
-Genre: Pop
-http://www.musicianspage.com/musicians/51921/videofile/21178/
-
-
-More video files:
-http://www.musicianspage.com/video/
-
-
-We are waiting for your comments and if you have any, please upload your
-own video files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addvideofiles=3D1
-
-
-
-
-Latest Uploaded Sheet Music Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Respighi. Vetrate di Chiesa. Parts. by Ottorino Respighi (added by Grechani=
-vsky)
-Genre: Classical/Contemporary
-http://www.musicianspage.com/musicians/9640/sheetmusic/3280/
-
-
-XLIII Memoriam Vivere by Marisol Jimenez (added by Marisol Jimenez)
-Genre: Contemporary
-http://www.musicianspage.com/musicians/11620/sheetmusic/3278/
-
-
-Symphonic Suite for Concert Band, First Draft by William Malcolm Jones (add=
-ed by William Jones)
-Genre: Classical
-http://www.musicianspage.com/musicians/10888/sheetmusic/3277/
-
-
-More sheet music files:
-http://www.musicianspage.com/sheetmusic/
-
-
-We are waiting for your comments and if you have any, please upload your
-own sheet music files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addsheetmusic=3D1
-
-
-
-
-Earn money with your website, FaceBook, YouTube or MySpace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you own a website or simply an account on FaceBook, YouTube, MySpace or =
-Twitter, be sure to check out the Virtual Sheet Music's Affiliate Program w=
-hich entitles you to earn 30% commission on any referred sale.
-
-It is completely free to join:
-
-https://affiliates.virtualsheetmusic.com/
-
-
-and once you have an account, start referring users using a special code to=
- put on your website or social account (FaceBook, Twitter, etc).
-
-For any further questions, please reply to this email, we will be glad to h=
-elp you step by step.
-
-
-
-
-Join us on the major Social Networks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Stay updated with our latest news on:
-
-1. on FaceBook:
-http://www.facebook.com/MusiciansPage
-
-2. on Twitter:
-http://twitter.com/MusiciansPage
-
-
-
-
----------------------------------------------------------------------------=
------
-
-FEATURE YOURSELF ON MUSICIANS PAGE:
-=20
-If you have an upcoming concert, CD release, special Event, or just want to=
- promote yourself and your activity, remember you can feature yourself in f=
-ront of thousands of musicians, music lovers, and music employers (includin=
-g music agents, artist management companies, etc.) by exclusively putting y=
-our picture and name on every page of Musicians Page, starting at just $10 =
-(that's right, just 10 bucks!):
-=20
-https://www.musicianspage.com/login/panel.php?featureyourself=3D1
-=20
-Your ad will be displayed exclusively for the duration of your campaign, gi=
-ving you maximum exposure to the Musicians Page community. Musicians Page i=
-s visited by thousands of musicians and people working in the music busines=
-s every day, so consider putting yourself in front of this specialized audi=
-ence.
-
-This is your chance to make new contacts and seize exciting opportunities i=
-n minutes! Don't miss this opportunity now!
-
----------------------------------------------------------------------------=
------
-
-
-
-
-Please feel free to pass this Newsletter along to friends and other musicia=
-ns who might find this content valuable in the same way you do, and be sure=
- to send us your ideas and thoughts by either replying to this email or by =
-posting your comments and feedback on the dedicated forum below:
-
-http://www.musicianspage.com/forums/general/feedback/
-
-Thank you!
-
-All the best,
-Fabrizio Ferrari, CEO
-Musicians Page
-http://www.musicianspage.com
-Virtual Sheet Music Inc.
-http://www.virtualsheetmusic.com
-29911 Niguel Road, #6992
-Laguna Niguel, CA 92677 (USA)
-Fax: +1 800 717 1876 or +1 973 273 2171
-----------------------------------------------
-This message was sent from Musicians Page
-http://www.musicianspage.com
-To unsubscribe, please go to:
-http://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
-=2Eorg
