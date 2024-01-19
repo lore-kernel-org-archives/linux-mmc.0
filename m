@@ -1,41 +1,61 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 526E96AA0;
-	Fri, 19 Jan 2024 08:21:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F42B56475;
+	Fri, 19 Jan 2024 22:06:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705652463; cv=none; b=giYBxXH3/YzJwozds+gUnf+h4uqnSIRVHrG7jKcfv6mBulUGGawN1oTRRQuko5Aext3DuJt5bF4pGYItr6n5sHjAopJc7L0Vz0IBLgkF2RqZNBX1PL1Mb9o2m4dAz0f3YBvQnQ/IFFXUSKsMf39Qm5rIYniTQu80bgyFGdJIqUY=
+	t=1705702012; cv=none; b=tzk3U0rANN31aUWhTaaOsX0G1P+gH9goe3Oe80zCB/cAnTdaOMTVeh5fuBYUK400cxdGO0BgvF3ZiE/qAh3B3vTfwyw7AdwOsqeZgw4RuH3We2WhigUBch8ooYmfmVmMdNYdGMf8o31CaEBIjoGtyUESr/A2iyaIH2sitvGpyXA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705652463; c=relaxed/simple;
-	bh=VN3W5znShoWe5oBeYGybruQe/c44tyaC01yxzyq2waw=;
+	s=arc-20240116; t=1705702012; c=relaxed/simple;
+	bh=bAiP8neWkuFOr1UcviXY9sGWpEscgq5SMLZxG3s9Dt8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=T8pAh0BzdD/3dmpa/3sLbS3LcLMTK6cUmuxW6sQCsn5eWKxJ8vsXuPHMi5KGIpesv7a58VxwQkhfVa/JcwXPY7hleueAImvTNnZnWU59vI8iawE9ObtS5aBMZv/t2hF4EIihK1tRvsO7kIdpVsc1uZGNSD3TNm8Ab+/q+oyB5gQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=kYTYHsAM; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=IyzRQGp+4KX2Pj6c32h+wj95+6zaxG1UOJCjiRayKBL9I6TUynaRuY0R1gFkRXr78u5z51p3zW1NXaOOlaNGICQjvTIJJGQr0y19zLuu7E36vWtk3MPLlv0lSSP4pdfGo2wogj6hWe1WAQSUWYF3els0TihSxDjuwQsZsN3YozI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H0eg5u8Q; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="kYTYHsAM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 44155C433F1;
-	Fri, 19 Jan 2024 08:21:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1705652461;
-	bh=VN3W5znShoWe5oBeYGybruQe/c44tyaC01yxzyq2waw=;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H0eg5u8Q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E8E49C433F1;
+	Fri, 19 Jan 2024 22:06:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1705702012;
+	bh=bAiP8neWkuFOr1UcviXY9sGWpEscgq5SMLZxG3s9Dt8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=kYTYHsAM1iECuefu1ZuF4y+7PSu+rg4407HYxsFREPBuJgLsOIVBqZgKiaaLvq0lv
-	 1DA2e5q7gPsLyPQSmRp9SPd7GU3/3Psu1lwg2hgj81skjrygs85zXirppBHv2XuZJt
-	 1s9qmfC8iUOyJheshudhWTm6E9t6uX8xPeDS1NRw=
-Date: Fri, 19 Jan 2024 09:20:59 +0100
-From: Greg KH <gregkh@linuxfoundation.org>
-To: Seunghui Lee <sh043.lee@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	ulf.hansson@linaro.org, avri.altman@wdc.com, grant.jung@samsung.com,
-	jt77.jang@samsung.com, dh0421.hwang@samsung.com,
-	junwoo80.lee@samsung.com, jangsub.yi@samsung.com,
-	cw9316.lee@samsung.com, sh8267.baek@samsung.com,
-	wkon.kim@samsung.com
-Subject: Re: [PATCH] mmc: core: Fix null pointer dereference in bus_shutdown
-Message-ID: <2024011945-studio-smitten-300e@gregkh>
-References: <CGME20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0@epcas1p1.samsung.com>
- <20240119073247.7441-1-sh043.lee@samsung.com>
+	b=H0eg5u8QwEQ6ypQgu+Ro/nkwaVoSk6fZjoWXqYEmXDBBypv3SaURpbSvuGPnkUm9o
+	 0iLO54XqFDrY5SKuQZx1PtWWdbaWIgzQTzV0z70555OEw/cl0wpl9rZN9FKfkiyBAu
+	 SnG9Ko2Xb/Ck170Mviz7ss9Pl+yNAe9Xg7Gdjqf86+CfI4wXVZ78Auk6i3XkpHvEn8
+	 o34tv8O0Sbg6s3KM1vurE0tBmVLz8HbPfZTpKnkQxTLGN+n1rFaTju4cEt2Sd0Ic8a
+	 RkPd0onKWlpH1K9oGo+Gggwbv4VFEK2eJRyldbIWTPpp09a5rhij2/rv2jp9evvYPK
+	 wyA/FwbQHedSA==
+Date: Fri, 19 Jan 2024 16:06:48 -0600
+From: Rob Herring <robh@kernel.org>
+To: Gatien Chevallier <gatien.chevallier@foss.st.com>
+Cc: olivier.moysan@foss.st.com, gregkh@linuxfoundation.org,
+	richardcochran@gmail.com, arnd@kernel.org,
+	alsa-devel@alsa-project.org, devicetree@vger.kernel.org,
+	linux-usb@vger.kernel.org, mchehab@kernel.org, peng.fan@oss.nxp.com,
+	pabeni@redhat.com, rcsekar@samsung.com,
+	alexandre.torgue@foss.st.com, fabrice.gasnier@foss.st.com,
+	linux-serial@vger.kernel.org, Oleksii_Moisieiev@epam.com,
+	linux-spi@vger.kernel.org, will@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org, lars@metafoo.de,
+	conor+dt@kernel.org, linux-mmc@vger.kernel.org, kuba@kernel.org,
+	linux-media@vger.kernel.org, arnaud.pouliquen@foss.st.com,
+	andi.shyti@kernel.org, ulf.hansson@linaro.org,
+	Frank Rowand <frowand.list@gmail.com>,
+	linux-stm32@st-md-mailman.stormreply.com,
+	linux-phy@lists.infradead.org, jic23@kernel.org,
+	linux-iio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org, robh+dt@kernel.org, lee@kernel.org,
+	catalin.marinas@arm.com, mkl@pengutronix.de,
+	herbert@gondor.apana.org.au, linux-crypto@vger.kernel.org,
+	dmaengine@vger.kernel.org, hugues.fruchet@foss.st.com,
+	edumazet@google.com, netdev@vger.kernel.org, vkoul@kernel.org,
+	wg@grandegger.com, linux-i2c@vger.kernel.org, davem@davemloft.net
+Subject: Re: [PATCH v9 02/13] dt-bindings: treewide: add access-controllers
+ description
+Message-ID: <170570200425.1132338.1743644162144723458.robh@kernel.org>
+References: <20240105130404.301172-1-gatien.chevallier@foss.st.com>
+ <20240105130404.301172-3-gatien.chevallier@foss.st.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -44,62 +64,65 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240119073247.7441-1-sh043.lee@samsung.com>
+In-Reply-To: <20240105130404.301172-3-gatien.chevallier@foss.st.com>
 
-On Fri, Jan 19, 2024 at 04:32:47PM +0900, Seunghui Lee wrote:
-> When shutting down removable device,
-> it can be occurred null pointer dereference.
 
-How?
-
-And please wrap your lines properly.
-
-> To prevent null pointer dereference,
-> At first, check null pointer.
-> Next, block rescan worker to scan removable device during shutdown.
-
-Why do two things?
-
+On Fri, 05 Jan 2024 14:03:53 +0100, Gatien Chevallier wrote:
+> access-controllers is an optional property that allows a peripheral to
+> refer to one or more domain access controller(s).
 > 
-> Signed-off-by: Seunghui Lee <sh043.lee@samsung.com>
+> Description of this property is added to all peripheral binding files of
+> the peripheral under the STM32 firewall controller. It allows an accurate
+> representation of the hardware, where various peripherals are connected
+> to a firewall bus. The firewall can then check the peripheral accesses
+> before allowing its device to probe.
+> 
+> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
 > ---
->  drivers/mmc/core/bus.c | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 0af96548e7da..4f370a6577aa 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -143,9 +143,17 @@ static void mmc_bus_shutdown(struct device *dev)
->  {
->  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
->  	struct mmc_card *card = mmc_dev_to_card(dev);
-> -	struct mmc_host *host = card->host;
-> +	struct mmc_host *host;
->  	int ret;
->  
-> +	if (!drv || !card) {
-> +		pr_debug("%s: drv or card is NULL.\n", dev_name(dev));
+> Changes in V6:
+> 	- Minor changes in commit message
+> 	- Renamed access-controller to access-controllers
+> 
+> Changes in V5:
+> 	- Discarded review tags as the content has changed
+> 	- Renamed feature-domains to access-controller
+> 
+> Changes in V4:
+> 	- Added Jonathan's tag for IIO
+> 
+> Changes in V2:
+> 	- Add missing "feature-domains" property declaration
+> 	  in bosch,m_can.yaml and st,stm32-cryp.yaml files
+> 
+>  Documentation/devicetree/bindings/crypto/st,stm32-cryp.yaml   | 4 ++++
+>  Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml   | 4 ++++
+>  Documentation/devicetree/bindings/dma/st,stm32-dma.yaml       | 4 ++++
+>  Documentation/devicetree/bindings/dma/st,stm32-dmamux.yaml    | 4 ++++
+>  Documentation/devicetree/bindings/i2c/st,stm32-i2c.yaml       | 4 ++++
+>  Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml   | 4 ++++
+>  .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml       | 4 ++++
+>  Documentation/devicetree/bindings/iio/dac/st,stm32-dac.yaml   | 4 ++++
+>  Documentation/devicetree/bindings/media/cec/st,stm32-cec.yaml | 4 ++++
+>  Documentation/devicetree/bindings/media/st,stm32-dcmi.yaml    | 4 ++++
+>  .../bindings/memory-controllers/st,stm32-fmc2-ebi.yaml        | 4 ++++
+>  Documentation/devicetree/bindings/mfd/st,stm32-lptimer.yaml   | 4 ++++
+>  Documentation/devicetree/bindings/mfd/st,stm32-timers.yaml    | 4 ++++
+>  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml          | 4 ++++
+>  Documentation/devicetree/bindings/net/can/bosch,m_can.yaml    | 4 ++++
+>  Documentation/devicetree/bindings/net/stm32-dwmac.yaml        | 4 ++++
+>  Documentation/devicetree/bindings/phy/phy-stm32-usbphyc.yaml  | 4 ++++
+>  .../devicetree/bindings/regulator/st,stm32-vrefbuf.yaml       | 4 ++++
+>  Documentation/devicetree/bindings/rng/st,stm32-rng.yaml       | 4 ++++
+>  Documentation/devicetree/bindings/serial/st,stm32-uart.yaml   | 4 ++++
+>  Documentation/devicetree/bindings/sound/st,stm32-i2s.yaml     | 4 ++++
+>  Documentation/devicetree/bindings/sound/st,stm32-sai.yaml     | 4 ++++
+>  Documentation/devicetree/bindings/sound/st,stm32-spdifrx.yaml | 4 ++++
+>  Documentation/devicetree/bindings/spi/st,stm32-qspi.yaml      | 4 ++++
+>  Documentation/devicetree/bindings/spi/st,stm32-spi.yaml       | 4 ++++
+>  Documentation/devicetree/bindings/usb/dwc2.yaml               | 4 ++++
+>  26 files changed, 104 insertions(+)
+> 
 
-What is this going to help with?  And why not use dev_dbg()?
+Reviewed-by: Rob Herring <robh@kernel.org>
 
-How can drv ever be NULL?  That looks impossible to me based on just the
-code shown here.
-
-> +		return;
-> +	}
-> +
-> +	host = card->host;
-
-Why is this change needed?  This line can go back to the top just fine,
-right?
-
-> +	host->rescan_disable = 1;
-
-Shouldn't this be a separate change?  And what happens if the check for
-this is right before you set it?  Where is the locking to prevent the
-issue you are attempting to solve?
-
-thanks,
-
-greg k-h
