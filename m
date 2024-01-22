@@ -1,102 +1,66 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D0E81E48B;
-	Fri, 19 Jan 2024 22:40:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 196FB175B0;
+	Mon, 22 Jan 2024 07:34:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705704056; cv=none; b=uIUO5iTqp/hu0zHckMxcC3S0WJI5vMOtP8iBj73+l/9LUwGRjTHuUi+2SbgmMctNFy6fz5yU9AwMImApdymPeW7+9ZKs0V8KTPI/JFoGr+9xrINb86VmOYQKeHsQmhZNpv9SahmrQtElFQR250KixEPKcXVMUO1RvKH3hCRPbDE=
+	t=1705908871; cv=none; b=maPQ7icgXi+5rg1X2rS5nLrRprR68cVyBB0amAJvGmQnCEZKk/Upm3NYlclByHIe17J9QnyFgYfPVBE/wIeKen+/mqRy3wyLPSK/dTWb4Ck65DT07KZNYmCdyD58J2RsQq8H/hOJDdu2n/Wdrg2LlSC9QHtmzntQQamYjVvwOHY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705704056; c=relaxed/simple;
-	bh=nz9TfAIKTDYYfKIsjPDHg+tXyY7yGKcv76BL1axJAno=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To; b=g7HGCT60dBW9UgIMO083Q2HytVMtrdnc8bG/0ilHvYC1GZLJC22vL0+2MZsFVYL9kjmoLSocao1ZgtgCYmxUgvHpAI6GaxKdlYobNfxR2mOW6QrtTlQ3CuRwOvgQmriVn0C8PfK9AatREptb5g392f7AK2mTM9GeaGmtFARqiOU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=j4wd/D3L; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="j4wd/D3L"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 598D7C433F1;
-	Fri, 19 Jan 2024 22:40:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1705704055;
-	bh=nz9TfAIKTDYYfKIsjPDHg+tXyY7yGKcv76BL1axJAno=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:From;
-	b=j4wd/D3Lv8cYHiOsEE907KBlNaTbtxYev4dGj+w6L2X8eoVqCRgu0pzY6Sr6jDv8B
-	 a5wscl+4Dlbf/EVr6PjxSj/otwwWSTsj6izfoHhAkfIl39cIfb0/w3Q+CHGYhcEQrC
-	 f/4eDJ8XEH4ggAnw35848tpWYQtTda335GSGPYyY9T8aY7Wm5GMYgiRmukEZZgNIiN
-	 0YL05mAtsOMeLaQYdaaeImCqRXHthh39HzxBRN2SZcQ8ZIcRZq/m68pS1VVcvaUv+D
-	 pwYk/i8oegrrUEvXZXIL1tMUwaXSpFADiGoDALqffcZ5oxdru2EILr6+/QRmJdIOT/
-	 taUUcFcXwU2ow==
-Date: Fri, 19 Jan 2024 16:40:53 -0600
-From: Bjorn Helgaas <helgaas@kernel.org>
-To: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
- timer timeout during suspend
-Message-ID: <20240119224053.GA187501@bhelgaas>
+	s=arc-20240116; t=1705908871; c=relaxed/simple;
+	bh=m8c/1bcEcp6mfBMonS4CM9yFd3xSx/LZIzq7d4Zj1co=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RPHCck8r8xZzYz3h/+vecPdnoRNvM1YMwDP/V5kDzZoVFZW/vc3+5iaNozKh48uYVAIKruZN764VE7rA0lvVJpRQMspQBZxK3hLHjOnGkrANgIch2On1tgGX+UHj+JBlnDQB8QnbvHTvxIc+VjlmwEURaRy528mdLJcW03a+gWE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 9114C68B05; Mon, 22 Jan 2024 08:34:23 +0100 (CET)
+Date: Mon, 22 Jan 2024 08:34:23 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
+	Ming Lei <ming.lei@redhat.com>, linux-block@vger.kernel.org,
+	linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+	Linus Walleij <linus.walleij@linaro.org>
+Subject: mmc vs highmem, was: Re: [PATCH 2/2] blk-mq: ensure a
+ q_usage_counter reference is held when splitting bios
+Message-ID: <20240122073423.GA25859@lst.de>
+References: <20240112054449.GA6829@lst.de> <9eb0f18e-f3ce-497c-931d-339efee2190d@kernel.dk> <CAPDyKFpmEB9FGAmGAQNdEH+DtRtcCNnFszfv_ewihzUU9du+Xg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAAd53p6qE76QjJmjr5ei0mU8xcSNE32hJMOE9Frwz-BuC3gDkA@mail.gmail.com>
+In-Reply-To: <CAPDyKFpmEB9FGAmGAQNdEH+DtRtcCNnFszfv_ewihzUU9du+Xg@mail.gmail.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Thu, Jan 18, 2024 at 02:40:50PM +0800, Kai-Heng Feng wrote:
-> On Sat, Jan 13, 2024 at 1:37 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
-> > > On Sat, Jan 6, 2024 at 5:19 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > > > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote:
-> > > > > Spamming `lspci -vv` can still observe the replay timer timeout error
-> > > > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
-> > > > > replay timer timeout of AER"), albeit with a lower reproduce rate.
-> > > >
-> > > > I'm not sure what this is telling me.  By "spamming `lspci -vv`, do
-> > > > you mean that if you run lspci continually, you still see Replay Timer
-> > > > Timeout logged, e.g.,
-> > > >
-> > > >   CESta:        ... Timeout+
-> > >
-> > > Yes it's logged and the AER IRQ is raised.
-> >
-> > IIUC the AER IRQ is the important thing.
-> >
-> > Neither 015c9cbcf0ad nor this patch affects logging in
-> > PCI_ERR_COR_STATUS, so the lspci output won't change and mentioning it
-> > here doesn't add useful information.
+On Mon, Jan 15, 2024 at 12:20:50PM +0100, Ulf Hansson wrote:
+> Not sure exactly what problem you are trying to solve here, but I am
+> certainly happy to help, if I can.
 > 
-> You are right. That's just a way to access config space to reproduce
-> the issue.
+> Can you perhaps point me to a couple of drivers that need to be converted?
 
-Oh, I think I completely misunderstood you!  I thought you were saying
-that suspending the device caused the PCI_ERR_COR_REP_TIMER error, and
-you happened to see that it was logged when you ran lspci.
+Sure.
 
-But I guess you mean that running lspci actually *causes* the error?
-I.e., lspci does a config access while we're suspending the device
-causes the error, and the config access itself causes the error, which
-causes the ERR_COR message and ultimately the AER interrupt, and that
-interrupt prevents the system suspend.
+mmc_alloc_disk sets BLK_BOUNCE_HIGH for any mmc host that doesn't have a
+DMA mask set, which is a bit odd as all proper devices should have a
+valid DMA mask.  I suspect platform devices might sometimes not have
+one, which historically was the wild west.
 
-If that's the case, I wonder if this is a generic problem that could
-happen with *any* device, not just GL975x.
+A better indicator might be the use of page_address in the I/O path,
+which usually comes in the form of using the sg_virt() helper.
+For drivers/mmc/ that seems to be: davinci_mmc, moxart-mmc, mvsdio,
+mxcmmc, omap, sdhci-esdhc-mcf and sh_mmcif.
 
-What power state do we put the GL975x in during system suspend?
-D3hot?  D3cold?  Is there anything that prevents config access while
-we suspend it?
+tmio_mmc_core on the other hand seems to have code properly kmapping
+a scatterlist, which might be worth lifting into a common helper to
+help the above drivers.
 
-We do have dev->block_cfg_access, and there's a comment that says
-"we're required to prevent config accesses during D-state
-transitions," but I don't see it being used during D-state
-transitions.
-
-Also, it doesn't seem suitable for preventing config accesses during
-suspend because pci_wait_cfg() just busy-waits and never returns an
-error.
-
-Bjorn
+> 
+> Kind regards
+> Uffe
+---end quoted text---
