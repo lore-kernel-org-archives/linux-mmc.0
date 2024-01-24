@@ -1,121 +1,99 @@
-Received: from wout1-smtp.messagingengine.com (wout1-smtp.messagingengine.com [64.147.123.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76C0C60DE6;
-	Wed, 24 Jan 2024 11:59:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.24
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B86B77647
+	for <linux-mmc@vger.kernel.org>; Wed, 24 Jan 2024 12:33:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706097593; cv=none; b=G3yrBX4vJ6BbXkhpAjm4tz/e0HBjnyRJ01e9QcdOVODwD1sMlUEUiBvdDDFGiyu7SWNSNuqcvnclVT6TaBHJyff/U8iL/PJPdM6Xe0fZ3UgG0ztYDGKXci31SdQmGkKzHb7YLuP6l3qB5TRwL5gizzKPmsJYNH+JbB+9oumvNl8=
+	t=1706099626; cv=none; b=kPE2XZLhe+BnDR4/N6p3f9ukziYb5uiUytD3eYV/jacCeNBJi/+idy/c1misM+jYtyDhrpnOBbe57e931D06xlwRdWLF7Me8o3+keNpprKZUkkp/fTmk7r1Lr0VM8oyt00ALTq5jKReK1utZurhMqc95vRX/tnj0YWH9s0NCQYY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706097593; c=relaxed/simple;
-	bh=UX+V6m3P/BH5d0y63xcfewjjX/2BPQOrDlQlcjtdifw=;
-	h=MIME-Version:Message-Id:In-Reply-To:References:Date:From:To:Cc:
-	 Subject:Content-Type; b=tTBW61Bv+iJDYMg2379D2MiQOrn6iYULTsc509Vzbul04CrumUYJt4cCn8OX5nj+Z7+r3CCKCwAB6Zz7DEWCreKUjzh3eVgH4wCSaTC28mk+we//mXxLL6oeN9nTfTWjz2+lt50bPNEcvcLLLNL1bUHFu5z2+Vyc4lqy6TtT7GA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=lUF7A/gL; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=LgjGdE5i; arc=none smtp.client-ip=64.147.123.24
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	s=arc-20240116; t=1706099626; c=relaxed/simple;
+	bh=cpiNwEE9Ah0hc4FhtcV39/dK+x1ukcBmQrZAT5YgkPY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=KU7uTRW7TVtSkJXcxnlLGoGSbBdUc7lS9qw0RyEfspYBCB8Jj9HFNgMdRnS/b4S4fJHZE6HtC+DzPtXr7EOAF59njWA8gYs0bZ34cHagozcEKfMIysROEOBX/kmWQyzwRgeEUoQxAz2XkOtIJOGPdYty+lIDYRw0Fp4w0t4xSl8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JPqDJ8Hz; arc=none smtp.client-ip=209.85.128.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="lUF7A/gL";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="LgjGdE5i"
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-	by mailout.west.internal (Postfix) with ESMTP id 8B9873200ABB;
-	Wed, 24 Jan 2024 06:59:49 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute5.internal (MEProxy); Wed, 24 Jan 2024 06:59:50 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-type:content-type:date:date:from:from:in-reply-to
-	:in-reply-to:message-id:mime-version:references:reply-to:subject
-	:subject:to:to; s=fm2; t=1706097589; x=1706183989; bh=i7tME4Obkq
-	6tIWMZkSqVPdKH8Vwld2eBrrHRmGPBcEg=; b=lUF7A/gLVNogk++qHxhU7CMiCa
-	4Iz9/+dWPnRLN9kwPxwoZLPJSmq/F4sHvp6pOLCIuOc+A33dhk1smvZujex8Xb11
-	JeODSdLwWXljXJGVPVbEwEQ3geG8Wcj3WbsJEwrxu+dDvVUW00o/vq/mgH8Wgl91
-	iJNTm6PZ6B4Vex+HaX9lVLig3m9rVB7ykwR514+Ox0bNx2JpaRAqoZyVVzJZrlHn
-	PJxnFTwuHCx8k/3R7SU6xSejHFwlbpbwtjYY+sXAjIHckhn/K7Fkt2b1kMl/uJU3
-	9CKwqoj4Ybvf0oFJIENyuw+J2E1XQ38w5IQZRGc2yIScKuA8Tk8kKDAuYCVg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-type:content-type:date:date
-	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-	:message-id:mime-version:references:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-	fm3; t=1706097589; x=1706183989; bh=i7tME4Obkq6tIWMZkSqVPdKH8Vwl
-	d2eBrrHRmGPBcEg=; b=LgjGdE5iSU6UttzIRJ32e8TgCXim3gKmCUWDUIHeoc6W
-	3mee0wEJ/yR3sKhU833OAtZIaLZEaS6188sZfii8olktlsDFUIEI27nPISxPnsDB
-	i8P9GwwXT8G3+mnTqQ+xd5BvVFaqveaiXzZTUcCHa5xEm2bQS8xOAl4rSXnvp1AH
-	d5VFU8bozBOqYwQR1+JInBuQzbzHNfXxfcnqXKPkqt9FA92td4Taxb2RlyuImRO3
-	f8HX6vVF/y9oSloqEsjc+UkBPv5AiTsPSzeBmsDYQZlMEMHdE2HPM2E98Da3Kcvq
-	AYpiV/rd0Uj6Fp6aOzt+D0qDTdDBMMohg2ol+ZNQ+g==
-X-ME-Sender: <xms:tPuwZXPlZobUrrOiGdNo7H2eQO12x_8QAvDOFX2-FoXeAdif5P9VCA>
-    <xme:tPuwZR8g7zMuYTMBcMj7wcWWm5-PQMVVRIYhzoQBdedNatsJ3xs9_2aS6vQB7_-t-
-    0mweLaSJju-jmCMyig>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrvdeluddgfedvucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
-    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
-    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
-    hrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:tPuwZWTfoGk77YbXTUKgtNT8fAPmFPSZ6i1cXG1D-rZB-OKCmnSPhg>
-    <xmx:tPuwZbthRm9LKdSjRP0ajyLV-v2NjPXf755cN7vC4HNMj2hyFFo4yA>
-    <xmx:tPuwZfdibRsnzTWH6uN_wD-H0nEow74c2Mslnxuo3OHY4wGBorai9A>
-    <xmx:tfuwZRvwbC4JYsFBFV8JzlPggEPJNysNtvVT5uDEQ08wAnJ1uStK4w>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-	id 594DAB6008D; Wed, 24 Jan 2024 06:59:48 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.11.0-alpha0-119-ga8b98d1bd8-fm-20240108.001-ga8b98d1b
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JPqDJ8Hz"
+Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-5ffd5620247so35944107b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Jan 2024 04:33:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1706099622; x=1706704422; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cpiNwEE9Ah0hc4FhtcV39/dK+x1ukcBmQrZAT5YgkPY=;
+        b=JPqDJ8Hz9cyFI46ot9hxvaldzvP+s0zx5lPm0bVIu86wAWgtl/nerjM7HEAH23HckJ
+         CqT3Og6zZ4jQDs/76ECEBk9R5fwTOs17XYDwonrpjy3CmtL4n3yDrfcIuYMvY4CKcKEq
+         v6I67T6AnztQOFWYvcsbJ8j8xLXR/jFeG/RbNtx+9s13Vn27ltOAOlzs2av9Glq/F4L7
+         Wg4l/6TqlKJyc94frK11RhJGLsMXQjyvVXIXIvW+W/y3U9rBH5PGPXma9FVwOFxNcACH
+         oa+r46NAo0eQihg8mrOIAfY4ccpHdKeBD6/nC6GQjNlJ+Lu9PBykQnLhvNoEljx79A9X
+         7v3w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706099622; x=1706704422;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=cpiNwEE9Ah0hc4FhtcV39/dK+x1ukcBmQrZAT5YgkPY=;
+        b=p8usmVrXtIDAou0JSgktzK84jYwUOWBCJ23i4ltjgqHzuxAA0W9jnT4/+7coyiHCda
+         qbaUmN4etrS+IA19KUTrL5FBeEM7y3tHMdJDmSytWI/hYnicPw4BZhR6h4dgxWp1FiAR
+         FPyF7cbpYdas80u5kZPphmkK6Q7wxjniL6sJ7D09TlAs93xuRSPW4xx+cvA8Y2kHO/jG
+         TT2KmXbMIN3p32TrqrnG7iWKVlwix8aKhlHDckTFO3mNgTmyAuPzk3yU9Abw8Qu891hI
+         8zSGm+Cr0tjC6L9CojjEs0/KoMJwdJusmqAMXcUmGg66H/uq1/zqoE90F93cAiD2rmsI
+         YO6w==
+X-Gm-Message-State: AOJu0YzHpBHeuWI572SkD6XXtxLhR3hQCSMRFD2U7S2+y4XrCtuV9B+6
+	GE17U7PuR8jerwvKw5hnayDofwmBM3CZzO4exNHDoytKDYXV0KLnwV7YiPJgo3n0D8phfRWzdN1
+	mgOEifeFE3XoYnPKAFiyA8NvxNzlI7Y3HdHsn0Q==
+X-Google-Smtp-Source: AGHT+IGXhJVktNCrSQyrVAN71joYl0WypGRlCmXcHS57rQZYf6hotNeQTOyL6Gftjs03r/GvLl8hSFKy/sc2u6x244U=
+X-Received: by 2002:a81:52d8:0:b0:5ff:620a:5773 with SMTP id
+ g207-20020a8152d8000000b005ff620a5773mr633377ywb.26.1706099622005; Wed, 24
+ Jan 2024 04:33:42 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Message-Id: <6f38c2db-3aae-42fe-ab97-dd027b90b690@app.fastmail.com>
-In-Reply-To: <20240123091132.GA32056@lst.de>
-References: <20240112054449.GA6829@lst.de>
- <9eb0f18e-f3ce-497c-931d-339efee2190d@kernel.dk>
+References: <20240112054449.GA6829@lst.de> <9eb0f18e-f3ce-497c-931d-339efee2190d@kernel.dk>
  <CAPDyKFpmEB9FGAmGAQNdEH+DtRtcCNnFszfv_ewihzUU9du+Xg@mail.gmail.com>
- <20240122073423.GA25859@lst.de>
- <14ea6933-763f-4ba7-9109-1eea580e1c29@app.fastmail.com>
- <20240122133932.GB20434@lst.de>
- <d2289b38-f463-43e6-a60c-486fd479d275@app.fastmail.com>
- <20240123091132.GA32056@lst.de>
-Date: Wed, 24 Jan 2024 12:59:27 +0100
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "Christoph Hellwig" <hch@lst.de>
-Cc: "Ulf Hansson" <ulf.hansson@linaro.org>, "Jens Axboe" <axboe@kernel.dk>,
- "Ming Lei" <ming.lei@redhat.com>, linux-block@vger.kernel.org,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- "Linus Walleij" <linus.walleij@linaro.org>, "Andrew Lunn" <andrew@lunn.ch>,
- "Gregory Clement" <gregory.clement@bootlin.com>,
- "Sebastian Hesselbarth" <sebastian.hesselbarth@gmail.com>
-Subject: Re: mmc vs highmem, was: Re: [PATCH 2/2] blk-mq: ensure a q_usage_counter
- reference is held when splitting bios
-Content-Type: text/plain
+ <20240122073423.GA25859@lst.de> <14ea6933-763f-4ba7-9109-1eea580e1c29@app.fastmail.com>
+ <20240122133932.GB20434@lst.de> <d2289b38-f463-43e6-a60c-486fd479d275@app.fastmail.com>
+ <20240123091132.GA32056@lst.de> <6f38c2db-3aae-42fe-ab97-dd027b90b690@app.fastmail.com>
+In-Reply-To: <6f38c2db-3aae-42fe-ab97-dd027b90b690@app.fastmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Wed, 24 Jan 2024 13:33:29 +0100
+Message-ID: <CACRpkdbw8mGBUOh9W_E=KZQsOpc3TefL3QWApB+t5Z6w6wNRdA@mail.gmail.com>
+Subject: Re: mmc vs highmem, was: Re: [PATCH 2/2] blk-mq: ensure a
+ q_usage_counter reference is held when splitting bios
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, 
+	Ming Lei <ming.lei@redhat.com>, linux-block@vger.kernel.org, 
+	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>, Andrew Lunn <andrew@lunn.ch>, 
+	Gregory Clement <gregory.clement@bootlin.com>, 
+	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Jan 23, 2024, at 10:11, Christoph Hellwig wrote:
-> On Mon, Jan 22, 2024 at 03:57:16PM +0100, Arnd Bergmann wrote:
->> > It would be good to fix the one or two that could use highmem and add a
->> > depends on !HIGHMEM for the others
->> 
->> I would prefer a runtime check here, as one might still have a
->> multiplatform kernel where one machine can use highmem and
->> another machine can use one of these drivers, e.g. in
->> imx_v6_v7_defconfig.
->
-> Well, if someone can come up with a good runtime check that's fine with me.
+On Wed, Jan 24, 2024 at 12:59=E2=80=AFPM Arnd Bergmann <arnd@arndb.de> wrot=
+e:
 
-I assumed there was a generic way already, but it looks like
-there is not, and adding one across nine architectures would be
-nontrivial.
+> Let's use your initial suggestion then and use a Kconfig
+> dependency.
 
-Let's use your initial suggestion then and use a Kconfig
-dependency. I still don't like how this may impact users that
-currently enable highmem and use one of these drivers, but
-on a more positive note this might help us kill off HIGHMEM
-in the future if users instead choose to go with
-CONFIG_VMSPLIT_3G_OPT or similar.
+I'm looking into this.
 
-The Marvell driver still needs some other solution of course.
+> I still don't like how this may impact users that
+> currently enable highmem and use one of these drivers,
 
-    Arnd
+I'm taking it on a machine-by-machine basis.
+
+For example it
+turns out all OMAP2 that use mmci-omap are Nokia n800, n810
+and the H4 reference design.
+
+So I am seeing if these can be excluded from the "most omap2plus
+systems" list.
+
+Yours,
+Linus Walleij
