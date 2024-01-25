@@ -1,126 +1,136 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 797C6133985;
-	Wed, 24 Jan 2024 20:02:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD5541B954
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 08:50:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706126562; cv=none; b=iF8NcSRmX5jYJfEKs2DSY3wb2nvf0BvuIrnHMxBn8K3c1G1gYmsKf6wwbrWx/SGKAxc1mLDlyaIDtOT8FgiUVOj6p4O59UwZdAarm+Za7iscpku3F2yhWWc3c6Ql7zwPzewIvCAKsR9cdyBiJo1NO8gxVHryMUW0IO0Qr42y1yI=
+	t=1706172628; cv=none; b=VrRLorGWVAASHXl5n0u9KIrj5L2GCZlHVT8j1kiQELrVtNrB/XYU6bMH0Ud2AUQnBx0Q9ygKtYdlEqEW7Yw3P2Py07Jkm9b8JkGcioLmqua0c70Xdc+HO4kTZgPkJALn5yres0dK29qgyO+cx6LOlv357LtotEGKQkVIQOHvdhg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706126562; c=relaxed/simple;
-	bh=jfXWrPM5ALhDnKgFnFkdz4CMio32hmCt3xWSsf12HKU=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=C57I24B3iGHxq4RC1uR7Z4VOqayNXANOWtpZUKYn/jWdtALZMmthT64kMeDRf+r5j8VM4gqMsyADXVZqlj+XzBYowmN0G/oEOP7N4OPbfF32hOAuymA8mvoJUEPk/uZjeb5+EVmjchaXdsDD3LOKC9Sks3n+UKF5BI9SgTDN6uw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TIXWtyFH; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1706172628; c=relaxed/simple;
+	bh=EH+77AGVJlszAEz96TBhp+qKRmGjcsF5K96WCfJ8o8I=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=gmsf9kpEPCH18NngOofXYoZqL1sldmE9DhM4lQtE3zorkUGoGzycLAS/JUz+e42GWGEYfc8IzHmLcGGH3leeJy/oOhzOBtOAKrg75ZS0swpTElvk45X9+sAlLjYbjQgFRp9U4WSgDrifLd8Zgm/aNUOd7QGPSXs04W5O+iZaBsw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=M7k6wnvA; arc=none smtp.client-ip=209.85.167.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TIXWtyFH"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D9C4C433F1;
-	Wed, 24 Jan 2024 20:02:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1706126562;
-	bh=jfXWrPM5ALhDnKgFnFkdz4CMio32hmCt3xWSsf12HKU=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-	b=TIXWtyFH5yxUa2sKS25qW3wOvsP8Ed2klnxIK0jQEvMXqnYVHZWCU0zqLjO7+ilCR
-	 JWdnVZmbglYShezSvqIcZWDN/Vh46HywERZIGBwdalc9QELX9rTL+upLtWfATkdWgT
-	 WOJSdLKuC7J9/6NYjh+DNGAalqkPr+gBHAK+jK1uAFFeeu8RJwLSBlu58kMYFUoEl1
-	 Yp7MPDfACwXPwjaV1u4/U968HoLm30T94Tl/mdr2QRYc4fOG1E9E30BuK8sKFpJ4U8
-	 n+9CHV5JSYN6y7zhCegxJ1IM+OVstyfug/6ZJ17Jvqz0l9lgm0LjUJl94LQR9K86D2
-	 ni5ld1wGOGq1w==
-Date: Wed, 24 Jan 2024 20:02:07 +0000
-From: Jonathan Cameron <jic23@kernel.org>
-To: Mark Brown <broonie@kernel.org>, linux-spi@vger.kernel.org
-Cc: Uwe =?UTF-8?B?S2xlaW5lLUvDtm5pZw==?= <u.kleine-koenig@pengutronix.de>,
- kernel@pengutronix.de, Moritz Fischer <mdf@kernel.org>, Wu Hao
- <hao.wu@intel.com>, Xu Yilun <yilun.xu@intel.com>, Tom Rix
- <trix@redhat.com>, linux-fpga@vger.kernel.org,
- linux-kernel@vger.kernel.org, Alexander Aring <alex.aring@gmail.com>,
- Stefan Schmidt <stefan@datenfreihafen.org>, Miquel Raynal
- <miquel.raynal@bootlin.com>, "David S. Miller" <davem@davemloft.net>, Eric
- Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>, Paolo
- Abeni <pabeni@redhat.com>, linux-wpan@vger.kernel.org,
- netdev@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>, Michael
- Hennerich <Michael.Hennerich@analog.com>, linux-iio@vger.kernel.org, Dmitry
- Torokhov <dmitry.torokhov@gmail.com>, linux-input@vger.kernel.org, Ulf
- Hansson <ulf.hansson@linaro.org>, Rayyan Ansari <rayyan@ansari.sh>, Andy
- Shevchenko <andriy.shevchenko@linux.intel.com>, Jonathan Cameron
- <Jonathan.Cameron@huawei.com>, Martin Tuma
- <martin.tuma@digiteqautomotive.com>, Mauro Carvalho Chehab
- <mchehab@kernel.org>, linux-media@vger.kernel.org, Sergey Kozlov
- <serjk@netup.ru>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman
- <gregkh@linuxfoundation.org>, Yang Yingliang <yangyingliang@huawei.com>,
- linux-mmc@vger.kernel.org, Richard Weinberger <richard@nod.at>, Vignesh
- Raghavendra <vigneshr@ti.com>, Rob Herring <robh@kernel.org>, Heiko
- Stuebner <heiko@sntech.de>, Michal Simek <michal.simek@amd.com>, Amit Kumar
- Mahapatra via Alsa-devel <alsa-devel@alsa-project.org>,
- linux-mtd@lists.infradead.org, Martin Blumenstingl
- <martin.blumenstingl@googlemail.com>, Geert Uytterhoeven
- <geert+renesas@glider.be>, Pali =?UTF-8?B?Um9ow6Fy?= <pali@kernel.org>,
- Simon Horman <horms@kernel.org>, Ronald Wahl <ronald.wahl@raritan.com>,
- Benson Leung <bleung@chromium.org>, Tzung-Bi Shih <tzungbi@kernel.org>,
- Guenter Roeck <groeck@chromium.org>, chrome-platform@lists.linux.dev, Max
- Filippov <jcmvbkbc@gmail.com>, linux-arm-kernel@lists.infradead.org, Bjorn
- Andersson <andersson@kernel.org>, Konrad Dybcio <konrad.dybcio@linaro.org>,
- linux-arm-msm@vger.kernel.org, Matthias Brugger <matthias.bgg@gmail.com>,
- AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
- linux-mediatek@lists.infradead.org, Thomas Zimmermann
- <tzimmermann@suse.de>, Javier Martinez Canillas <javierm@redhat.com>, Amit
- Kumar Mahapatra <amit.kumar-mahapatra@amd.com>,
- dri-devel@lists.freedesktop.org, linux-fbdev@vger.kernel.org,
- linux-staging@lists.linux.dev, Viresh Kumar <vireshk@kernel.org>, Rui
- Miguel Silva <rmfrfs@gmail.com>, Johan Hovold <johan@kernel.org>, Alex
- Elder <elder@kernel.org>, greybus-dev@lists.linaro.org, Peter Huewe
- <peterhuewe@gmx.de>, Jarkko Sakkinen <jarkko@kernel.org>, Jason Gunthorpe
- <jgg@ziepe.ca>, linux-integrity@vger.kernel.org, Herve Codina
- <herve.codina@bootlin.com>, Alan Stern <stern@rowland.harvard.edu>, Aaro
- Koskinen <aaro.koskinen@iki.fi>, Krzysztof Kozlowski
- <krzysztof.kozlowski@linaro.org>, linux-usb@vger.kernel.org, Helge Deller
- <deller@gmx.de>, Dario Binacchi <dario.binacchi@amarulasolutions.com>,
- Kalle Valo <kvalo@kernel.org>, Dmitry Antipov <dmantipov@yandex.ru>,
- libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, Jonathan
- Corbet <corbet@lwn.net>, James Clark <james.clark@arm.com>, Bjorn Helgaas
- <bhelgaas@google.com>, linux-doc@vger.kernel.org
-Subject: Re: [PATCH v2 00/33] spi: get rid of some legacy macros
-Message-ID: <20240124200207.7e02b501@jic23-huawei>
-In-Reply-To: <20240122192343.148a0b6d@jic23-huawei>
-References: <cover.1705944943.git.u.kleine-koenig@pengutronix.de>
-	<e62cdf7f-ce58-4f46-a0a0-25ce9fb271b1@sirena.org.uk>
-	<20240122192343.148a0b6d@jic23-huawei>
-X-Mailer: Claws Mail 4.2.0 (GTK 3.24.40; x86_64-pc-linux-gnu)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="M7k6wnvA"
+Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-50e7ddd999bso7283657e87.1
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 00:50:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1706172624; x=1706777424; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=9nzIZ26hgws2/hotMw7rC6A6aDLu0kuLVowyhBFtTbQ=;
+        b=M7k6wnvAPH8H2FZTR0S0qE1xM49BOh2/xL5+jjzcRufqlzb9pZ7If9Kw6SECA3VvzU
+         /bp9r0+D0xIS+UEEM21K4auvqHADzAmXJ/FHHbIB0ZHyv+tKeskARgDmwC6Jm3cAiFgm
+         ofnYXVfjbMlX9tM+ECfeUEWm1Ce5sQgOetTa4ia7RiCTcoZxOlOa+c6iQUTSnOdW9dON
+         a/O36/5ISThtaZF9/NFKxD5qm+yQl2Vj1yj3NOcOzWlyBqCYNWg7FfVvJsdxl2CyXsUg
+         Es2+Yfalzg6WTWYdbQbzxxnzelvBq713ib6kBhGoKRyPcqUw2mVdoM3+cOuK1CtmKKbp
+         Jr6A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706172624; x=1706777424;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=9nzIZ26hgws2/hotMw7rC6A6aDLu0kuLVowyhBFtTbQ=;
+        b=RUIp3XGh4pUgmtSQvgCy12vYi/92aHZ+kYlhTZiFfsAcvA0isQA+s+DdaoxToe+UJN
+         mUCfothW137qM4Qme/woaeeRcbHWZGH8hsjYD8P6WBZg4uONAXxzrIWZQh55yI1xw/UF
+         AuuOx7ThmGGUDL9z3FkBNnoceqQNy2E5qAfXtQ/ze9iENYFdCpB0bnSH5QGCSrHTgVJN
+         msooj9TZhxVxV9Nr/JpcoaN0ZQy8ytABjFrwn85SiqaFpCTYXVvF4jlHcz11S7v1VfB9
+         bzvY5VFHoDZ+Tj9v5XGJytBAv4j/DSXV47lbQZIp7NtzXMd9Rde0F/IAmZluUzidIsx+
+         PuqA==
+X-Gm-Message-State: AOJu0Yw46cwgfBKzJwAGiuK7nMSO1GWM+YE2THtatUsIVcA6h+41a2lN
+	9z0gkXfyIoAhqO1v9U+vlXT5qFNLZ+QeZeWQlPlGzAguluibHYe3+wDMQKHnSrHluq/AGR42Kwm
+	V
+X-Google-Smtp-Source: AGHT+IHJWD3jYEqjozXgzWqcokqJicSTE9IHnA8mciO79pYDUDuyeYTZkSPRMPQqEFQzjJkNW8gzTg==
+X-Received: by 2002:a19:8c1e:0:b0:50e:7a04:2229 with SMTP id o30-20020a198c1e000000b0050e7a042229mr356615lfd.25.1706172624565;
+        Thu, 25 Jan 2024 00:50:24 -0800 (PST)
+Received: from [127.0.1.1] ([85.235.12.238])
+        by smtp.gmail.com with ESMTPSA id a6-20020a194f46000000b00510189e1581sm201522lfk.249.2024.01.25.00.50.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 25 Jan 2024 00:50:24 -0800 (PST)
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Thu, 25 Jan 2024 09:50:23 +0100
+Subject: [PATCH] mmc: core Drop BLK_BOUNCE_HIGH
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20240125-mmc-no-blk-bounce-high-v1-1-d0f92a30e085@linaro.org>
+X-B4-Tracking: v=1; b=H4sIAM4gsmUC/x3MQQqAIBBA0avErBswEbKuEi3KJh1KDaUIorsnL
+ d/i/wcyJaYMffVAooszx1DQ1BUYNwVLyEsxSCGVaKRC7w2GiPO+4RzPYAgdW4eLVqR1p00rWij
+ xkWjl+x8P4/t+a5/YAGgAAAA=
+To: Arnd Bergmann <arnd@arndb.de>, Christoph Hellwig <hch@lst.de>, 
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Linus Walleij <linus.walleij@linaro.org>
+X-Mailer: b4 0.12.4
 
-On Mon, 22 Jan 2024 19:23:43 +0000
-Jonathan Cameron <jic23@kernel.org> wrote:
+The MMC core sets BLK_BOUNCE_HIGH for devices where dma_mask
+is unassigned.
 
-> On Mon, 22 Jan 2024 18:18:22 +0000
-> Mark Brown <broonie@kernel.org> wrote:
->=20
-> > On Mon, Jan 22, 2024 at 07:06:55PM +0100, Uwe Kleine-K=C3=B6nig wrote:
-> >  =20
-> > > Note that Jonathan Cameron has already applied patch 3 to his tree, it
-> > > didn't appear in a public tree though yet. I still included it here to
-> > > make the kernel build bots happy.   =20
-> >=20
-> > It's also going to be needed for buildability of the end of the series.=
- =20
->=20
-> Ah.  I thought intent was to split this across all the different trees
-> then do the final patch only after they were all gone?
->=20
-> I'm fine with it going all in one go if people prefer that.
->=20
-> My tree will be out in a few mins. Was just waiting to rebase on rc1
-> which I've just done.
->=20
-> Jonathan
->=20
+For the majority of MMC hosts this path is never taken: the
+OF core will unconditionally assign a 32-bit mask to any
+OF device, and most MMC hosts are probed from device tree,
+see drivers/of/platform.c:
 
-Dropped from my tree.
+of_platform_device_create_pdata()
+        dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+        if (!dev->dev.dma_mask)
+                dev->dev.dma_mask = &dev->dev.coherent_dma_mask;
 
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+of_amba_device_create()
+        dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+        dev->dev.dma_mask = &dev->dev.coherent_dma_mask;
+
+MMC devices that are probed from ACPI or PCI will likewise
+have a proper dma_mask assigned.
+
+The only remaining devices that could have a blank dma_mask
+are platform devices instantiated from board files.
+
+These are mostly used on systems without CONFIG_HIGHMEM
+enabled which means the block layer will not bounce, and in
+the few cases where it is enabled it is not used anyway:
+for example some OMAP2 systems such as Nokia n800/n810 will
+create a platform_device and not assign a dma_mask, however
+they do not have any highmem, so no bouncing will happen
+anyway: the block core checks if max_low_pfn >= max_pfn
+and this will always be false.
+
+Should it turn out there is a platform_device with blank
+DMA mask actually using CONFIG_HIGHMEM somewhere out there
+we should set dma_mask for it, not do this trickery.
+
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/core/queue.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index a0a2412f62a7..316415588a77 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -351,8 +351,6 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+ 	if (mmc_can_erase(card))
+ 		mmc_queue_setup_discard(mq->queue, card);
+ 
+-	if (!mmc_dev(host)->dma_mask || !*mmc_dev(host)->dma_mask)
+-		blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_HIGH);
+ 	blk_queue_max_hw_sectors(mq->queue,
+ 		min(host->max_blk_count, host->max_req_size / 512));
+ 	if (host->can_dma_map_merge)
+
+---
+base-commit: 6613476e225e090cc9aad49be7fa504e290dd33d
+change-id: 20240124-mmc-no-blk-bounce-high-d84e8898c707
+
+Best regards,
+-- 
+Linus Walleij <linus.walleij@linaro.org>
+
