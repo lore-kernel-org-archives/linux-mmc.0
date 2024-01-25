@@ -1,255 +1,91 @@
-Received: from us-smtp-delivery-195.mimecast.com (us-smtp-delivery-195.mimecast.com [170.10.129.195])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0BFC745F9
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 20:36:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7E4B171A2
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 23:18:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706214980; cv=none; b=QAKP8v4G08Z3jLzpa5UWjUVFLxCKNBqtbp6nwRS123ecImIsroV8QirUU3q5ix0MEG5EOwjvzzd3ytyPGJZ7r0a//VeVr7OzB61AcS9bD4cKolH4nz/jXfWz2s333IVlU5o+38YjK4x6wE0hz3bharJuLhPL+Xd620Lvpyfz9FM=
+	t=1706224737; cv=none; b=adgO42Zp5oC+Jh3I8pjtDkh57r6+tfb0No/75XnWo5g4w7BHA6/CdVeOqK3kpasBwXfhEqyU/10+S4hZWwi/nqIymPJ1278wYKYJND7a1QwUxHncmBlvth1rXTemzanef3J3fIaAxwGm2MY3kMvgJ3riGnci3nWfrzvwnfMhWzQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706214980; c=relaxed/simple;
-	bh=0XQtDm61nEWRjPhOME01CDkA4Zyj9StQqWszUPp+8ws=;
-	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
-	 In-Reply-To:Content-Type; b=DAyA5trttibz171Z4LoVUp+b89J7WB+WJMni4UTpaYAQGFvdsJh1HJX0e4SHYFv6CgV4LpAhQ6XA4a4lGuXYe0ijxhnLXfGN4O9fA1l0qVJJGTZhp1YBtKcS2FnKSFqI03o4CuhaU5NiY1rn/FByWXT3AqDkHpTk3NQ68lyj/QE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mbari.org; spf=pass smtp.mailfrom=mbari.org; arc=none smtp.client-ip=170.10.129.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mbari.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mbari.org
-Received: from sleet.shore.mbari.org (sleet.shore.mbari.org [134.89.12.10])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-481-4M4DQKSEPha-a36yQO2r1w-1; Thu,
- 25 Jan 2024 15:36:15 -0500
-X-MC-Unique: 4M4DQKSEPha-a36yQO2r1w-1
-Received: from localhost (localhost [127.0.0.1])
-	by sleet.shore.mbari.org (Postfix) with ESMTP id C54A381077A50;
-	Thu, 25 Jan 2024 12:36:13 -0800 (PST)
-X-Virus-Scanned: amavis at sleet.shore.mbari.org
-Received: from sleet.shore.mbari.org ([127.0.0.1])
- by localhost (sleet.shore.mbari.org [127.0.0.1]) (amavis, port 10026)
- with ESMTP id 9bwDME-Sv8hS; Thu, 25 Jan 2024 12:36:13 -0800 (PST)
-Received: from localhost (localhost [127.0.0.1])
-	by sleet.shore.mbari.org (Postfix) with ESMTP id AE2468106024F;
-	Thu, 25 Jan 2024 12:36:13 -0800 (PST)
-Received: from [192.168.6.194] (raven.shore.mbari.org [134.89.10.221])
-	by sleet.shore.mbari.org (Postfix) with ESMTPSA;
-	Thu, 25 Jan 2024 12:36:13 -0800 (PST)
-Subject: Re: Regression in sdhci-pci-o2micro.c
-To: "Chevron Li (WH)" <chevron.li@bayhubtech.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, "Fred Ai(WH)" <fred.ai@bayhubtech.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- Adrian Hunter <adrian.hunter@intel.com>
-References: <890a5a17-5ebf-4d59-c71f-a5e37a601cbd@mbari.org>
- <CAPDyKFqsRounzo1Ns0dDdCS9Qu0doq82ivYwEUNWgOiMtDS0Xg@mail.gmail.com>
- <DM4PR16MB50049CE307E3B479D80EFD95EA712@DM4PR16MB5004.namprd16.prod.outlook.com>
- <DM4PR16MB50041AB09DA48C7FB8C41C57EA712@DM4PR16MB5004.namprd16.prod.outlook.com>
- <DM4PR16MB50042D4CCB7AF6715F9AEBEFEA7A2@DM4PR16MB5004.namprd16.prod.outlook.com>
-From: Brent Roman <brent@mbari.org>
-Organization: MBARI
-Message-ID: <a26809ca-0160-a03c-0aac-b2b772070fe7@mbari.org>
-Date: Thu, 25 Jan 2024 12:36:13 -0800
-User-Agent: Mozilla/5.0 (X11; Linux i686; rv:46.0) Gecko/20100101 Firefox/46.0
+	s=arc-20240116; t=1706224737; c=relaxed/simple;
+	bh=7uvqzJiFOH7CqK9D/XE9qIcs6f8P8aqvGseDf75yXXM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=NmwMjZXCuXUUTNzWrfYEOcidBhVA20m1wGv4X6ePRLx//agyXhdAQ1EqUpK3nYViHfLgr3ekzEOcc/IXGweim/cY5AsBBhPcvHCCTE2dzDd9j0aAXWx6uI3zbPvjANzMeMLKFJbFPkwKdew1f1AmqNiLryJ5MV0n/7/lrt05SRw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZsSCs86a; arc=none smtp.client-ip=209.85.128.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZsSCs86a"
+Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-5ff7ec8772dso2725127b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 15:18:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1706224734; x=1706829534; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=7uvqzJiFOH7CqK9D/XE9qIcs6f8P8aqvGseDf75yXXM=;
+        b=ZsSCs86a/S2lz8chareQY9wVV7h/sZwKG7z3FaRYk2qI7Plqd1cVedCVgy07OdHtrU
+         X823lr3pENXGI3wijqr7ejCytYOwlL1+WZkhRm4sIDQKWJYlOP9rCm4Jc5eWvzfTW/ox
+         Rxvh5eh1BJv+5PqtvNdEZ5Xk0zQxmLUnTQZ9efZGubshZFTVIGAFJkOMKCW5vbVxzH4y
+         ZmkL2gazF3rb9ejhMOw5D1B4TW1zRu28+bsv+fwyq8uyrhHEDrWJmF+J1ETDArQYkkKW
+         BtpnPhBRf7GnX2ju0BQPIm+r8F3HZ1KNuddnuiwRSbB9/U08aNnLjQZW3RbRT6mFVSgp
+         ty4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706224734; x=1706829534;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=7uvqzJiFOH7CqK9D/XE9qIcs6f8P8aqvGseDf75yXXM=;
+        b=PTcQ/ePbMNFnUEQQ9TgkxUJpNpLbz91cuIFLMeeQyFYNQowY4g3GtioJnU46PvGnhH
+         vElEsfHKY1NgS2M83yrewHnci4XX4EKmdAAB/LhZdQiGx5gGMWpYM9Wuos9XQr9Ykuhe
+         95osHDvN3A22LLjAiG5wXRI+JxYdt8bRT7WP1mksPXZDLE9mmPpbuLjOFY7sy2yoI9DS
+         LhKp0cOKNyECaNd6lk+9sm7T/IjcJtWm1XDp5ZGV6rajxRh1FEN8+WK9+3bVPuSigOQ4
+         GYdgYo+y2nQ+bwLUiWMaWGQ+6HVCymVLgpzPdFrFclK4YbBWly7hxOWqCpRlgyLwzR90
+         G0pQ==
+X-Gm-Message-State: AOJu0YxmX35Fq2ymTY/5Dmd7Xr3wi04RjALMNkz5tgasqSY+fq/yA3A3
+	Gj83yiSq9e/m277WufeHz9GwaLfXMppGfbd6t3THx9qf9JCeTyGfCMYzS9RiTjWpoxSeoPeIHgg
+	Jtuw9JkO9U16aTr/I6hBqNuqDm7VXUhB477DgFw==
+X-Google-Smtp-Source: AGHT+IGYkPRYDSlscKRk4G+SfhQLgKGn3yOaS30O2gXXD5Tt9NYFdgvgNJQJQsN4IwIhaD5odaQS198rhu6R/5DbH+Y=
+X-Received: by 2002:a81:aa4c:0:b0:5ff:35f1:714b with SMTP id
+ z12-20020a81aa4c000000b005ff35f1714bmr601737ywk.12.1706224734637; Thu, 25 Jan
+ 2024 15:18:54 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <DM4PR16MB50042D4CCB7AF6715F9AEBEFEA7A2@DM4PR16MB5004.namprd16.prod.outlook.com>
-X-Clacks-Overhead: GNU Terry Pratchett
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: mbari.org
-Content-Type: text/plain; charset=UTF-8; format=flowed
+References: <20240125-mmc-proper-kmap-v1-0-ba953c1ac3f9@linaro.org>
+ <20240125-mmc-proper-kmap-v1-1-ba953c1ac3f9@linaro.org> <7ca13324-ac47-4648-9b3c-c616de515625@app.fastmail.com>
+In-Reply-To: <7ca13324-ac47-4648-9b3c-c616de515625@app.fastmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Fri, 26 Jan 2024 00:18:43 +0100
+Message-ID: <CACRpkdZWrRCoG_HL4WxpcauP_ipvfekg3j67fUHewUuMxGzBeA@mail.gmail.com>
+Subject: Re: [PATCH 1/7] mmc: davinci_mmc: Map the virtual page for PIO
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Pitre <nico@fluxnic.net>, 
+	Aaro Koskinen <aaro.koskinen@iki.fi>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Angelo Dureghello <angelo.dureghello@timesys.com>, 
+	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, 
+	Linux-OMAP <linux-omap@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Hello Chevron,
+On Thu, Jan 25, 2024 at 5:37=E2=80=AFPM Arnd Bergmann <arnd@arndb.de> wrote=
+:
 
-Ignoring the errors at the probe stage will get the driver working as=20
-well as it did before kernel version 5.12, however, it is still incorrect.
-Because, if the read errors are ignored, the values returned in the=20
-"scratch_32" variable will be invalid.
-Those invalid values are then used to compute a mask that written back=20
-to the chip's O2_SD_PLL_SETTING register.
+> I think to do this properly, the driver would have to
+> use struct sg_mapping_iter like the cb710 driver does,
+> but the conversion is not as simple as your patch here.
 
-Would it be possible to power the chip at the start of the probe call,=20
-so its registers could be properly read?
+Ack, how typical, so that is what I write in the cover letter
+that I wanted to avoid but it seems there is no avoiding it then.
 
-Alternatively, could one delay the configuration of these registers=20
-until after the chip had been properly powered?
-(Could one turn on the power in probe, delaying the rest of the=20
-initialization until after power had stabilized?)
+It's a bit trickier but I guess I can pull it off, it better get some
+testing.
 
-Note that even when this driver functioned, it required
+Thanks Arnd!
 
-debug_quirks2=3D4
-
-to disable ultra high-speed support.
-
-Also, note that the PCI_DEVICE_ID_O2_SDS0, SDS1 and FUJIN2
-cases of the probe function in version 5.10 ignored the results form readin=
-g O2_SD_FUNC_REG0 and O2_SD_FUNC_REG4.
-I don't have those chip types to test, but I must assume the results, in th=
-ese cases, were ignored for similar reasons.
-
-- brent
-
-Chevron Li (WH) wrote:
-> Hi, Ulf/Adrian,
->
-> Sorry for response late.
->
-> After checked some documents internal, we think it's necessary to regress=
-ion "mmc: sdhci-pci-o2micro: Add missing checks in sdhci_pci_o2_probe" in s=
-dhci-pci-o2micro.c .
-> Below is the reason:
-> Some chip of this hardware(O2_SEABIRD0/O2_SEABIRD1) main power may be not=
- ready when access it at driver probe stage.
-> So, the pci_read_config_dword() calls errors should be ignored at probe s=
-tage.
->
-> BR,
-> Chevron
->
-> -----Original Message-----
-> From: Chevron Li (WH)
-> Sent: Thursday, January 18, 2024 16:53
-> To: 'Ulf Hansson' <ulf.hansson@linaro.org>; 'Brent Roman' <brent@mbari.or=
-g>; Fred Ai(WH) <fred.ai@bayhubtech.com>
-> Cc: 'linux-mmc@vger.kernel.org' <linux-mmc@vger.kernel.org>; 'Adrian Hunt=
-er' <adrian.hunter@intel.com>
-> Subject: RE: Regression in sdhci-pci-o2micro.c
->
-> Hi, Ulf/Adrian,
->
-> Please ignore former email.
-> I confused it with another issue.
->
-> I agree Regression "mmc: sdhci-pci-o2micro: Add missing checks in sdhci_p=
-ci_o2_probe" in sdhci-pci-o2micro.c
->
-> For the issue Brent reported, we will check it internal first.
->
-> BR,
-> Chevron
->
-> -----Original Message-----
-> From: Chevron Li (WH)
-> Sent: Thursday, January 18, 2024 11:53
-> To: Ulf Hansson <ulf.hansson@linaro.org>; Brent Roman <brent@mbari.org>; =
-Fred Ai(WH) <fred.ai@bayhubtech.com>
-> Cc: linux-mmc@vger.kernel.org; Adrian Hunter <adrian.hunter@intel.com>
-> Subject: RE: Regression in sdhci-pci-o2micro.c
->
-> Hi, Ulf/Adrian,
->
-> We tried to implement the "remove_slot" at "sdhci_pci_fixes" and recover =
-some changed PCR configure value for next reboot at BIOS stage.
-> But I'm not sure that the added patch in "remove_slot" will be called whe=
-n OS reboot.
-> If there are callback for o2micro host driver when OS reboot.
->
-> Attachment is a sample code which implemented the "remove_slot" at "sdhci=
-_pci_fixes".
->
-> Any suggestions will be appreciated.
->
-> BR,
-> Chevron
->
-> -----Original Message-----
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> Sent: Wednesday, January 17, 2024 20:18
-> To: Brent Roman <brent@mbari.org>; Chevron Li (WH) <chevron.li@bayhubtech=
-.com>; Fred Ai(WH) <fred.ai@bayhubtech.com>
-> Cc: linux-mmc@vger.kernel.org; Adrian Hunter <adrian.hunter@intel.com>
-> Subject: Re: Regression in sdhci-pci-o2micro.c
->
-> + Fred, Chevron Li, Adrian
->
-> On Tue, 16 Jan 2024 at 23:18, Brent Roman <brent@mbari.org> wrote:
->> Hi,
->>
->> I have an Intel Hades Canyon NUC (NUC8i7HVK) whose O2 Micro based
->> SD-Card reader is no longer identified when its Linux kernel is
->> updated past 5.12
->>
->> I "fixed" this by reverting a change from 5/9/21  (git
->> efc58a96adcd29cc37487a60582d9d08b34f6640)
->> that inserted proper error checking after all the PCI config space
->> reads in the device probe.
->> This would be code removed enclosed in #if 0 below:
->>
->>       case PCI_DEVICE_ID_O2_SEABIRD0:
->>       case PCI_DEVICE_ID_O2_SEABIRD1:
->>           /* UnLock WP */
->>           ret =3D pci_read_config_byte(chip->pdev,
->>                   O2_SD_LOCK_WP, &scratch);
->>           if (ret)
->>               return ret;
->>
->>           scratch &=3D 0x7f;
->>           pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
->>
->>           ret =3D pci_read_config_dword(chip->pdev,
->>                           O2_SD_PLL_SETTING, &scratch_32); #if 0
->>           if (ret)
->>               return ret;
->> #endif
->>
->>           if ((scratch_32 & 0xff000000) =3D=3D 0x01000000) {
->>               scratch_32 &=3D 0x0000FFFF;
->>               scratch_32 |=3D 0x1F340000;
->>
->>               pci_write_config_dword(chip->pdev,
->>                              O2_SD_PLL_SETTING, scratch_32);
->>           } else {
->>               scratch_32 &=3D 0x0000FFFF;
->>               scratch_32 |=3D 0x25100000;
->>
->>               pci_write_config_dword(chip->pdev,
->>                              O2_SD_PLL_SETTING, scratch_32);
->>
->>               ret =3D pci_read_config_dword(chip->pdev,
->>                               O2_SD_FUNC_REG4,
->>                               &scratch_32); #if 0
->>               if (ret)
->>                   return ret;
->> #endif
->>               scratch_32 |=3D (1 << 22);
->>               pci_write_config_dword(chip->pdev,
->>                              O2_SD_FUNC_REG4, scratch_32);
->>           }
->>
->> Both those pci_read_config_dword() calls return -EINVAL on my machine.
->> The driver had been working earlier precisely because it was ignoring
->> these error returns from pci_read_config_dword.
->> Have you seen this behavior before on any other hardware?
->>
->> The SDcard reader identifies as:
->> 03:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader
->> Controller (rev 01)
->> 03:00.0 0805: 1217:8621 (rev 01)
->>
->> I've been unable to find /any/ information on this chip.
->> Do you have any you could share?  A datasheet would be ideal :-)
->>
->> Also:
->> I've always had to operate this driver with debug_quirks2=3D4 to disable
->> ultra high-speed support.
->> Is this a known issue?
->> Or, could it be a symptom of the failing pci_read_configs curing probe?
->>
->> Thanks for your attention,
-> Looks like the offending commit efc58a96adcd ("mmc: sdhci-pci-o2micro:
-> Add missing checks in sdhci_pci_o2_probe"), may not have been thoroughly =
-tested. Perhaps a revert is needed.
->
-> Let's see if Fred/Chevron Li has some thoughts around this.
->
-> Kind regards
-> Uffe
-
-
---=20
-  Brent Roman                                   MBARI
-  Software Engineer               Tel: (831) 775-1808
-  mailto:brent@mbari.org  http://www.mbari.org/~brent
-
+Yours,
+Linus Walleij
