@@ -1,140 +1,255 @@
-Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
+Received: from us-smtp-delivery-195.mimecast.com (us-smtp-delivery-195.mimecast.com [170.10.129.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 665327CF13;
-	Thu, 25 Jan 2024 16:37:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0BFC745F9
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 20:36:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706200667; cv=none; b=LOQe9c5+gZEeAlj0IC4TK9/4kJpv79TA8PyT/dJyo5T0JaUlz/RoOxLnwwrzM9hXgZ0ABWtU3B2q9U3F9A7zryo5OriUDc1NPy6XFuQacb5nWzVbMpm7VSAiASVwTzDft7wTRUTN4dKPD+F7xB6Sjyqu7gSV7o3OlbvG2pMYqA0=
+	t=1706214980; cv=none; b=QAKP8v4G08Z3jLzpa5UWjUVFLxCKNBqtbp6nwRS123ecImIsroV8QirUU3q5ix0MEG5EOwjvzzd3ytyPGJZ7r0a//VeVr7OzB61AcS9bD4cKolH4nz/jXfWz2s333IVlU5o+38YjK4x6wE0hz3bharJuLhPL+Xd620Lvpyfz9FM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706200667; c=relaxed/simple;
-	bh=8fOPIjHVb90c7CRguRNiFQ8VqTpSNg82Bt7oXHc10n0=;
-	h=MIME-Version:Message-Id:In-Reply-To:References:Date:From:To:Cc:
-	 Subject:Content-Type; b=ebE2BTSTA8I5rAJJnYKyMqsvugKh4gwMCsZ9lAEoiF6pjTzjXhRQt5Qq7bQF44EQbjCRZ49Psz8Ch+t08h1nb7RE5SUIb2WtmIChYW626y2LGcVN1ZABSnjWAxpqtmTlFwSMBoExEgtsK8/FspSfKySB8sxUUuWcODkMUo9pN+E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=n4shag+V; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=aqPlbphJ; arc=none smtp.client-ip=64.147.123.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="n4shag+V";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="aqPlbphJ"
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-	by mailout.west.internal (Postfix) with ESMTP id 825643200B08;
-	Thu, 25 Jan 2024 11:37:43 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute5.internal (MEProxy); Thu, 25 Jan 2024 11:37:44 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-type:content-type:date:date:from:from:in-reply-to
-	:in-reply-to:message-id:mime-version:references:reply-to:subject
-	:subject:to:to; s=fm2; t=1706200663; x=1706287063; bh=J5VRdZ5Wrh
-	/dRaVmPUXcvh82GOraLIduVTWkeuUJFbU=; b=n4shag+VqaeUJhDNLSjR9TUSyX
-	mAn9cxpCCuEPUB8eH+KvngqOdKK3ZLxDAcWhjJVM/BIqvYV1yz6Zf6bR+sCqMSVy
-	syctT8VoIQoN+zN+1AOruKbw+qT/4Fw2odpQMK9Vlr4ZuMveDvch0ECoc+4bdv79
-	U8UA/hCoGvhOyup7Wr48hfOayk3PLor9oA6jUoohmNCAJYPS2cUVhWyqr1KOCXqx
-	Emhc70Xd9hHtn4SDQKV+F4bLj8VUbbxCzoz6jJs7JOfr6dCUG0AjeSbjjp5oKeeM
-	pj0fvjX3u/oyuF7vjfC9ebLxY6tP5IiSb45wiPmYyuFo6Gey0wm+BBGM5zdA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-type:content-type:date:date
-	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-	:message-id:mime-version:references:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-	fm3; t=1706200663; x=1706287063; bh=J5VRdZ5Wrh/dRaVmPUXcvh82GOra
-	LIduVTWkeuUJFbU=; b=aqPlbphJhWHMQjdedoU7ZRJmdXfsrAwXBis/SyhkSp65
-	ZQ2BUcPfalbo9gr9jesOg0lj9fXNdtpKHFoP3ZiIqLEmLSql++srx0dhAijNlCss
-	zVYG0KxKd2NMdWJi8b3w3D8YG/xYTdk+hqFPFUTQtKTvMHEQQF0w2gMRhs4fZOfj
-	DGECoiF6RWVF/IhI7NNuJwRVEUC18IMUo5DQs7Z02+9V6a9vsbI9KySWuRBE4b9z
-	X/Gfbyym5xkv7MhEmXS2tEJHU2EVwaaYknznio2l9hT0Z9fzi70UecbRJ9JUwK3n
-	R6SMMe7owtNVXca/cV0et7cPpwnAfp7Hr8KiDlVE0A==
-X-ME-Sender: <xms:Vo6yZbnam_W0ANRv1TjXGUm4qyL3EhHW59_aaqosk3LCt5j60FEiDQ>
-    <xme:Vo6yZe1yYPLx_yuIF8pi3OOY3d_9tSvVK9PJsucgHVKXcUlHhshmnFd-YVunYN8Ns
-    CI6MMC0mWFxKmHebpM>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrvdelgedgieefucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
-    htvghrnhepvefhffeltdegheeffffhtdegvdehjedtgfekueevgfduffettedtkeekueef
-    hedunecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucevlhhushhtvghrufhiiigvpe
-    dtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnugesrghrnhgusgdruggv
-X-ME-Proxy: <xmx:Vo6yZRo1LkrxEhYyI-DFbbbZdx8tb0IaMbP6sfg8DMN9W4LNTpXC3g>
-    <xmx:Vo6yZTlkPd64S2eP45kt2cGe04z14oOCpLgHxGGLj9YqKweTkAAxFA>
-    <xmx:Vo6yZZ2m_taDGKWkwSphpb2QbSVP29-mrypkTHprhs8aDzgfsPRP1Q>
-    <xmx:V46yZTwFSM8_9HKXzg4FILbZoph0a1S964FLaUBsnEuTLsg53IIIfQ>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-	id 65321B6008D; Thu, 25 Jan 2024 11:37:42 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.11.0-alpha0-119-ga8b98d1bd8-fm-20240108.001-ga8b98d1b
+	s=arc-20240116; t=1706214980; c=relaxed/simple;
+	bh=0XQtDm61nEWRjPhOME01CDkA4Zyj9StQqWszUPp+8ws=;
+	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=DAyA5trttibz171Z4LoVUp+b89J7WB+WJMni4UTpaYAQGFvdsJh1HJX0e4SHYFv6CgV4LpAhQ6XA4a4lGuXYe0ijxhnLXfGN4O9fA1l0qVJJGTZhp1YBtKcS2FnKSFqI03o4CuhaU5NiY1rn/FByWXT3AqDkHpTk3NQ68lyj/QE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mbari.org; spf=pass smtp.mailfrom=mbari.org; arc=none smtp.client-ip=170.10.129.195
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mbari.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mbari.org
+Received: from sleet.shore.mbari.org (sleet.shore.mbari.org [134.89.12.10])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-481-4M4DQKSEPha-a36yQO2r1w-1; Thu,
+ 25 Jan 2024 15:36:15 -0500
+X-MC-Unique: 4M4DQKSEPha-a36yQO2r1w-1
+Received: from localhost (localhost [127.0.0.1])
+	by sleet.shore.mbari.org (Postfix) with ESMTP id C54A381077A50;
+	Thu, 25 Jan 2024 12:36:13 -0800 (PST)
+X-Virus-Scanned: amavis at sleet.shore.mbari.org
+Received: from sleet.shore.mbari.org ([127.0.0.1])
+ by localhost (sleet.shore.mbari.org [127.0.0.1]) (amavis, port 10026)
+ with ESMTP id 9bwDME-Sv8hS; Thu, 25 Jan 2024 12:36:13 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+	by sleet.shore.mbari.org (Postfix) with ESMTP id AE2468106024F;
+	Thu, 25 Jan 2024 12:36:13 -0800 (PST)
+Received: from [192.168.6.194] (raven.shore.mbari.org [134.89.10.221])
+	by sleet.shore.mbari.org (Postfix) with ESMTPSA;
+	Thu, 25 Jan 2024 12:36:13 -0800 (PST)
+Subject: Re: Regression in sdhci-pci-o2micro.c
+To: "Chevron Li (WH)" <chevron.li@bayhubtech.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, "Fred Ai(WH)" <fred.ai@bayhubtech.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ Adrian Hunter <adrian.hunter@intel.com>
+References: <890a5a17-5ebf-4d59-c71f-a5e37a601cbd@mbari.org>
+ <CAPDyKFqsRounzo1Ns0dDdCS9Qu0doq82ivYwEUNWgOiMtDS0Xg@mail.gmail.com>
+ <DM4PR16MB50049CE307E3B479D80EFD95EA712@DM4PR16MB5004.namprd16.prod.outlook.com>
+ <DM4PR16MB50041AB09DA48C7FB8C41C57EA712@DM4PR16MB5004.namprd16.prod.outlook.com>
+ <DM4PR16MB50042D4CCB7AF6715F9AEBEFEA7A2@DM4PR16MB5004.namprd16.prod.outlook.com>
+From: Brent Roman <brent@mbari.org>
+Organization: MBARI
+Message-ID: <a26809ca-0160-a03c-0aac-b2b772070fe7@mbari.org>
+Date: Thu, 25 Jan 2024 12:36:13 -0800
+User-Agent: Mozilla/5.0 (X11; Linux i686; rv:46.0) Gecko/20100101 Firefox/46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Message-Id: <7ca13324-ac47-4648-9b3c-c616de515625@app.fastmail.com>
-In-Reply-To: <20240125-mmc-proper-kmap-v1-1-ba953c1ac3f9@linaro.org>
-References: <20240125-mmc-proper-kmap-v1-0-ba953c1ac3f9@linaro.org>
- <20240125-mmc-proper-kmap-v1-1-ba953c1ac3f9@linaro.org>
-Date: Thu, 25 Jan 2024 17:37:21 +0100
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "Linus Walleij" <linus.walleij@linaro.org>,
- "Christoph Hellwig" <hch@lst.de>, "Jens Axboe" <axboe@kernel.dk>,
- "Ming Lei" <ming.lei@redhat.com>, "Ulf Hansson" <ulf.hansson@linaro.org>,
- "Nicolas Pitre" <nico@fluxnic.net>, "Aaro Koskinen" <aaro.koskinen@iki.fi>,
- "Adrian Hunter" <adrian.hunter@intel.com>,
- "Angelo Dureghello" <angelo.dureghello@timesys.com>
-Cc: "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- linux-block@vger.kernel.org, Linux-OMAP <linux-omap@vger.kernel.org>
-Subject: Re: [PATCH 1/7] mmc: davinci_mmc: Map the virtual page for PIO
-Content-Type: text/plain
+In-Reply-To: <DM4PR16MB50042D4CCB7AF6715F9AEBEFEA7A2@DM4PR16MB5004.namprd16.prod.outlook.com>
+X-Clacks-Overhead: GNU Terry Pratchett
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: mbari.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jan 25, 2024, at 15:37, Linus Walleij wrote:
-> Use kmap_local_page() instead of sg_virt() to obtain a page
-> from the scatterlist: sg_virt() will not perform bounce
-> buffering if the page happens to be located in high memory,
-> which the driver may or may not be using.
+Hello Chevron,
+
+Ignoring the errors at the probe stage will get the driver working as=20
+well as it did before kernel version 5.12, however, it is still incorrect.
+Because, if the read errors are ignored, the values returned in the=20
+"scratch_32" variable will be invalid.
+Those invalid values are then used to compute a mask that written back=20
+to the chip's O2_SD_PLL_SETTING register.
+
+Would it be possible to power the chip at the start of the probe call,=20
+so its registers could be properly read?
+
+Alternatively, could one delay the configuration of these registers=20
+until after the chip had been properly powered?
+(Could one turn on the power in probe, delaying the rest of the=20
+initialization until after power had stabilized?)
+
+Note that even when this driver functioned, it required
+
+debug_quirks2=3D4
+
+to disable ultra high-speed support.
+
+Also, note that the PCI_DEVICE_ID_O2_SDS0, SDS1 and FUJIN2
+cases of the probe function in version 5.10 ignored the results form readin=
+g O2_SD_FUNC_REG0 and O2_SD_FUNC_REG4.
+I don't have those chip types to test, but I must assume the results, in th=
+ese cases, were ignored for similar reasons.
+
+- brent
+
+Chevron Li (WH) wrote:
+> Hi, Ulf/Adrian,
 >
-> Suggested-by: Christoph Hellwig <hch@lst.de>
-> Link: https://lore.kernel.org/linux-mmc/20240122073423.GA25859@lst.de/
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/host/davinci_mmc.c | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
+> Sorry for response late.
 >
-> diff --git a/drivers/mmc/host/davinci_mmc.c 
-> b/drivers/mmc/host/davinci_mmc.c
-> index ee3b1a4e0848..4e9f96b1caf3 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -216,7 +216,7 @@ static irqreturn_t mmc_davinci_irq(int irq, void 
-> *dev_id);
->  static void mmc_davinci_sg_to_buf(struct mmc_davinci_host *host)
->  {
->  	host->buffer_bytes_left = sg_dma_len(host->sg);
-> -	host->buffer = sg_virt(host->sg);
-> +	host->buffer = kmap_local_page(sg_page(host->sg));
->  	if (host->buffer_bytes_left > host->bytes_left)
->  		host->buffer_bytes_left = host->bytes_left;
->  }
+> After checked some documents internal, we think it's necessary to regress=
+ion "mmc: sdhci-pci-o2micro: Add missing checks in sdhci_pci_o2_probe" in s=
+dhci-pci-o2micro.c .
+> Below is the reason:
+> Some chip of this hardware(O2_SEABIRD0/O2_SEABIRD1) main power may be not=
+ ready when access it at driver probe stage.
+> So, the pci_read_config_dword() calls errors should be ignored at probe s=
+tage.
+>
+> BR,
+> Chevron
+>
+> -----Original Message-----
+> From: Chevron Li (WH)
+> Sent: Thursday, January 18, 2024 16:53
+> To: 'Ulf Hansson' <ulf.hansson@linaro.org>; 'Brent Roman' <brent@mbari.or=
+g>; Fred Ai(WH) <fred.ai@bayhubtech.com>
+> Cc: 'linux-mmc@vger.kernel.org' <linux-mmc@vger.kernel.org>; 'Adrian Hunt=
+er' <adrian.hunter@intel.com>
+> Subject: RE: Regression in sdhci-pci-o2micro.c
+>
+> Hi, Ulf/Adrian,
+>
+> Please ignore former email.
+> I confused it with another issue.
+>
+> I agree Regression "mmc: sdhci-pci-o2micro: Add missing checks in sdhci_p=
+ci_o2_probe" in sdhci-pci-o2micro.c
+>
+> For the issue Brent reported, we will check it internal first.
+>
+> BR,
+> Chevron
+>
+> -----Original Message-----
+> From: Chevron Li (WH)
+> Sent: Thursday, January 18, 2024 11:53
+> To: Ulf Hansson <ulf.hansson@linaro.org>; Brent Roman <brent@mbari.org>; =
+Fred Ai(WH) <fred.ai@bayhubtech.com>
+> Cc: linux-mmc@vger.kernel.org; Adrian Hunter <adrian.hunter@intel.com>
+> Subject: RE: Regression in sdhci-pci-o2micro.c
+>
+> Hi, Ulf/Adrian,
+>
+> We tried to implement the "remove_slot" at "sdhci_pci_fixes" and recover =
+some changed PCR configure value for next reboot at BIOS stage.
+> But I'm not sure that the added patch in "remove_slot" will be called whe=
+n OS reboot.
+> If there are callback for o2micro host driver when OS reboot.
+>
+> Attachment is a sample code which implemented the "remove_slot" at "sdhci=
+_pci_fixes".
+>
+> Any suggestions will be appreciated.
+>
+> BR,
+> Chevron
+>
+> -----Original Message-----
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Sent: Wednesday, January 17, 2024 20:18
+> To: Brent Roman <brent@mbari.org>; Chevron Li (WH) <chevron.li@bayhubtech=
+.com>; Fred Ai(WH) <fred.ai@bayhubtech.com>
+> Cc: linux-mmc@vger.kernel.org; Adrian Hunter <adrian.hunter@intel.com>
+> Subject: Re: Regression in sdhci-pci-o2micro.c
+>
+> + Fred, Chevron Li, Adrian
+>
+> On Tue, 16 Jan 2024 at 23:18, Brent Roman <brent@mbari.org> wrote:
+>> Hi,
+>>
+>> I have an Intel Hades Canyon NUC (NUC8i7HVK) whose O2 Micro based
+>> SD-Card reader is no longer identified when its Linux kernel is
+>> updated past 5.12
+>>
+>> I "fixed" this by reverting a change from 5/9/21  (git
+>> efc58a96adcd29cc37487a60582d9d08b34f6640)
+>> that inserted proper error checking after all the PCI config space
+>> reads in the device probe.
+>> This would be code removed enclosed in #if 0 below:
+>>
+>>       case PCI_DEVICE_ID_O2_SEABIRD0:
+>>       case PCI_DEVICE_ID_O2_SEABIRD1:
+>>           /* UnLock WP */
+>>           ret =3D pci_read_config_byte(chip->pdev,
+>>                   O2_SD_LOCK_WP, &scratch);
+>>           if (ret)
+>>               return ret;
+>>
+>>           scratch &=3D 0x7f;
+>>           pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+>>
+>>           ret =3D pci_read_config_dword(chip->pdev,
+>>                           O2_SD_PLL_SETTING, &scratch_32); #if 0
+>>           if (ret)
+>>               return ret;
+>> #endif
+>>
+>>           if ((scratch_32 & 0xff000000) =3D=3D 0x01000000) {
+>>               scratch_32 &=3D 0x0000FFFF;
+>>               scratch_32 |=3D 0x1F340000;
+>>
+>>               pci_write_config_dword(chip->pdev,
+>>                              O2_SD_PLL_SETTING, scratch_32);
+>>           } else {
+>>               scratch_32 &=3D 0x0000FFFF;
+>>               scratch_32 |=3D 0x25100000;
+>>
+>>               pci_write_config_dword(chip->pdev,
+>>                              O2_SD_PLL_SETTING, scratch_32);
+>>
+>>               ret =3D pci_read_config_dword(chip->pdev,
+>>                               O2_SD_FUNC_REG4,
+>>                               &scratch_32); #if 0
+>>               if (ret)
+>>                   return ret;
+>> #endif
+>>               scratch_32 |=3D (1 << 22);
+>>               pci_write_config_dword(chip->pdev,
+>>                              O2_SD_FUNC_REG4, scratch_32);
+>>           }
+>>
+>> Both those pci_read_config_dword() calls return -EINVAL on my machine.
+>> The driver had been working earlier precisely because it was ignoring
+>> these error returns from pci_read_config_dword.
+>> Have you seen this behavior before on any other hardware?
+>>
+>> The SDcard reader identifies as:
+>> 03:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader
+>> Controller (rev 01)
+>> 03:00.0 0805: 1217:8621 (rev 01)
+>>
+>> I've been unable to find /any/ information on this chip.
+>> Do you have any you could share?  A datasheet would be ideal :-)
+>>
+>> Also:
+>> I've always had to operate this driver with debug_quirks2=3D4 to disable
+>> ultra high-speed support.
+>> Is this a known issue?
+>> Or, could it be a symptom of the failing pci_read_configs curing probe?
+>>
+>> Thanks for your attention,
+> Looks like the offending commit efc58a96adcd ("mmc: sdhci-pci-o2micro:
+> Add missing checks in sdhci_pci_o2_probe"), may not have been thoroughly =
+tested. Perhaps a revert is needed.
+>
+> Let's see if Fred/Chevron Li has some thoughts around this.
+>
+> Kind regards
+> Uffe
 
-I see multiple problems here:
 
- - you are missing the offset within the page, which you
-   get by adding sg->offset
+--=20
+  Brent Roman                                   MBARI
+  Software Engineer               Tel: (831) 775-1808
+  mailto:brent@mbari.org  http://www.mbari.org/~brent
 
- - kmap_local_page() only maps one page at a time, so
-   this will fail if the scatterlist entry spans one or
-   more pages.
-
- - the first call to mmc_davinci_sg_to_buf() may happen
-   in mmc_davinci_prepare_data(), while the rest is done
-   in the interrupt handler, and you can't hold the
-   kmap reference across multiple contexts
-
- - It looks like you are missing the unmap inside of
-   loop when moving to the next sg element.
-
-I think to do this properly, the driver would have to
-use struct sg_mapping_iter like the cb710 driver does,
-but the conversion is not as simple as your patch here.
-
-       Arnd
