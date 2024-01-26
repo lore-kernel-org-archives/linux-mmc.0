@@ -1,197 +1,103 @@
-Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
+Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FC01BE68
-	for <linux-mmc@vger.kernel.org>; Fri, 26 Jan 2024 05:17:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9A5D21A04;
+	Fri, 26 Jan 2024 19:01:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.249
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706246230; cv=none; b=gZYF9CxxKV+0LZqW9G0Z+IXVJp81sq32L5V4qBdM3FH4IRbkWcBcuJfqYui6tZUcUj6aX6Q955wFEoU0kuoNiWDmxr5hTTDJrRwkgg28nXiRPxlDmcp+BzAoRCB+vDebI9HbpMH6mDth1lLq8vHaQgaJUBnGvhn+bsZeFC6/3XI=
+	t=1706295685; cv=none; b=FN9OGtKo6IRB3k1Ph/eSRQSKbLGl3oJNi9tghQToS5KUiBCGKleep1HRjTPzkJgNp8L5UheO/wj9bKVNhzYkdhBLEwIjr39Ay17vm/tYVy0js6TM4RRm0/2TM0zMOWFRMD7qOd32f+pfDXpUHhm7ESBYzgN1jJbZQraEvN874CY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706246230; c=relaxed/simple;
-	bh=dluYRm5dDqJX3x1PpybFwwjdGdtUDXPxQdQ+lhoK3K4=;
-	h=From:To:Cc:In-Reply-To:Subject:Date:Message-ID:MIME-Version:
-	 Content-Type:References; b=Sa7RtlJGvVSphjtVVKV8Q/5rTZ5mr+RjGY0mLjY7YhAmruxvcHK8ksJ71UW3tnso6Gss/xtt4NxVWNymv/TdZfSAEjrnmdhh5LRqXOuSrHhUkYGocpdg1tKxWvUWxCio1SO/jzpjFi0Dop9x/eLBoHrPM1ZWUS5kbU9SffdnGpE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=n3iykupB; arc=none smtp.client-ip=203.254.224.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1706295685; c=relaxed/simple;
+	bh=85dAb/dDmFrF4oFSp1ZL2gDWKRF1dNwmGB3QvaBcPws=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=gpkP7V6jpk0e6Ml0zC+ZXi+PeW0OIXFMt89cTwYDT9NEbf9YA87kee4KDwnTgnPoQ/cIx0GGg8L6kQWXFPctpBcZc3mawA0GOU4Dah9XcqdGFdV1kaiB2QKeBs1ndOYt83pkQNCPpeHDmioWgV7XNoTXGOsfwqLHID1TWIVNYds=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=hnNMvmH6; arc=none smtp.client-ip=198.47.23.249
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="n3iykupB"
-Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
-	by mailout3.samsung.com (KnoxPortal) with ESMTP id 20240126051659epoutp03255b53242f3010c8d6001e28ae82c66a~tzeWGTxyE0428004280epoutp03X
-	for <linux-mmc@vger.kernel.org>; Fri, 26 Jan 2024 05:16:59 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20240126051659epoutp03255b53242f3010c8d6001e28ae82c66a~tzeWGTxyE0428004280epoutp03X
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1706246219;
-	bh=hploZXGnvBGsUE/XjNOrpqF9wf/z30BTogioatvLJhE=;
-	h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
-	b=n3iykupBw4wDN9Xda5ayg6wtltgWC/i5zLIu6Flz+GbETCbOvk1kaAeLB3Z+e99Ix
-	 WvlsZ1HWOQzdzjVjJQarErhVtve6YPuFc3HX6v8AfV2qF7cUmja50x1uYvYE5glqA3
-	 mUTdxK4v6E9MXgNu6I18Fxp3jSdQVElkvzHWAJog=
-Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
-	epcas1p1.samsung.com (KnoxPortal) with ESMTP id
-	20240126051658epcas1p12b0f26fd1012c44dc30e496d7a85df07~tzeVdTCGC2708127081epcas1p16;
-	Fri, 26 Jan 2024 05:16:58 +0000 (GMT)
-Received: from epsmges1p4.samsung.com (unknown [182.195.38.247]) by
-	epsnrtp2.localdomain (Postfix) with ESMTP id 4TLmCG2hm1z4x9Q4; Fri, 26 Jan
-	2024 05:16:58 +0000 (GMT)
-Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
-	epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
-	79.A3.10211.A4043B56; Fri, 26 Jan 2024 14:16:58 +0900 (KST)
-Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
-	epcas1p3.samsung.com (KnoxPortal) with ESMTPA id
-	20240126051657epcas1p30a4936302e1fa9aa492fecccb83a9220~tzeUjJXSr2041220412epcas1p3x;
-	Fri, 26 Jan 2024 05:16:57 +0000 (GMT)
-Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
-	epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
-	20240126051657epsmtrp29f9e3866700f5ab4d8291a39a6f4d689~tzeUiOk1r1200812008epsmtrp25;
-	Fri, 26 Jan 2024 05:16:57 +0000 (GMT)
-X-AuditID: b6c32a38-463ff700000027e3-8c-65b3404ad8fa
-Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
-	epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-	00.9B.08755.94043B56; Fri, 26 Jan 2024 14:16:57 +0900 (KST)
-Received: from sh043lee03 (unknown [10.253.101.72]) by epsmtip1.samsung.com
-	(KnoxPortal) with ESMTPA id
-	20240126051657epsmtip1455d5a21e5c6d1dd44654bdeda62145b~tzeUTxayL3021230212epsmtip1F;
-	Fri, 26 Jan 2024 05:16:57 +0000 (GMT)
-From: "Seunghui Lee" <sh043.lee@samsung.com>
-To: "'Greg KH'" <gregkh@linuxfoundation.org>
-Cc: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<ulf.hansson@linaro.org>, <avri.altman@wdc.com>, <grant.jung@samsung.com>,
-	<jt77.jang@samsung.com>, <dh0421.hwang@samsung.com>,
-	<junwoo80.lee@samsung.com>, <jangsub.yi@samsung.com>,
-	<cw9316.lee@samsung.com>, <sh8267.baek@samsung.com>, <wkon.kim@samsung.com>
-In-Reply-To: <2024011945-studio-smitten-300e@gregkh>
-Subject: RE: [PATCH] mmc: core: Fix null pointer dereference in bus_shutdown
-Date: Fri, 26 Jan 2024 14:16:57 +0900
-Message-ID: <011a01da5016$e23f41f0$a6bdc5d0$@samsung.com>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="hnNMvmH6"
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40QJ1BIB095643;
+	Fri, 26 Jan 2024 13:01:11 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1706295671;
+	bh=NwF79J4QERfbFo+oO9aZ7C3Ltm7a+qI/pEWqX7Hx6fA=;
+	h=From:To:CC:Subject:Date;
+	b=hnNMvmH6b8VmM6hHqk57ZfNx9ezkYLMLYZurIy8++gnVII33BgVVTbJ7vjKFUJoWI
+	 GWnU6UQ+CWwvzCGZ2SxER5Jwujgdi+/roMWg1DyjV7yApgsv5h3YTkdDYFm7SwWkZp
+	 opxSnwqJZ1BKKmArDT0pqK5yTfoB67hrSVa+hHaA=
+Received: from DLEE113.ent.ti.com (dlee113.ent.ti.com [157.170.170.24])
+	by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40QJ1Blh057870
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Fri, 26 Jan 2024 13:01:11 -0600
+Received: from DLEE111.ent.ti.com (157.170.170.22) by DLEE113.ent.ti.com
+ (157.170.170.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 26
+ Jan 2024 13:01:11 -0600
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE111.ent.ti.com
+ (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Fri, 26 Jan 2024 13:01:11 -0600
+Received: from lelvsmtp5.itg.ti.com ([10.249.42.149])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40QJ1A8L013671;
+	Fri, 26 Jan 2024 13:01:11 -0600
+From: Andrew Davis <afd@ti.com>
+To: Marek Szyprowski <m.szyprowski@samsung.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, Yangtao Li <frank.li@vivo.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Andrew Davis
+	<afd@ti.com>
+Subject: [PATCH] mmc: pwrseq: Use proper reboot notifier path
+Date: Fri, 26 Jan 2024 13:01:10 -0600
+Message-ID: <20240126190110.148599-1-afd@ti.com>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 7bit
-X-Mailer: Microsoft Outlook 16.0
-Thread-Index: AQGcsgXp9LDtdNDOGMR+ItI0KSVqWgF7z+l9ASFv/iSxTS4YIA==
-Content-Language: ko
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrJJsWRmVeSWpSXmKPExsWy7bCmvq6Xw+ZUg3/dAhYvf15ls5hxqo3V
-	Yt+1k+wWv/6uZ7doXryezaJj62Qmix3Pz7Bb7PrbzGRxedccNosj//sZLa6dOcFqcXxtuMXm
-	S99YHHg97lzbw+axf+4ado++LasYPT5vkvNoP9DNFMAalW2TkZqYklqkkJqXnJ+SmZduq+Qd
-	HO8cb2pmYKhraGlhrqSQl5ibaqvk4hOg65aZA3SjkkJZYk4pUCggsbhYSd/Opii/tCRVISO/
-	uMRWKbUgJafArECvODG3uDQvXS8vtcTK0MDAyBSoMCE741XHFPaCp0IVE3f/ZW9g/MnXxcjJ
-	ISFgIrHz0ReWLkYuDiGBHYwSK/YsgXI+MUp82fiMGcL5xiixc+VfZpiWy1tgWvYySnxvvgXl
-	vGCUWLCnlRWkik1AR+LNp/9gtgiQ3XHmBFgRs8ApJombEzvYQBKcQKOe3HjLBGILC/hIzDg8
-	B8xmEVCV+P7iFpjNK2ApsXz3cnYIW1Di5MwnLCA2s4CBxPtz85khbHmJ7W/nQJ2nIPHz6TKo
-	xU4SE68tYoWoEZGY3dkGVXOAQ6LteQqE7SIx4cxsqLiwxKvjW9ghbCmJz+/2soEcLSHQzCjR
-	1vCVBcKZwCjxYsErJogqe4nm1mY2iA18Eu++9gBt4wCK80p0tAlBlChLvHy0DKpcUmJJ+y2o
-	ZR4SV5eeYJ7AqDgLyW+zkPw2C8lvs5D8sICRZRWjWGpBcW56arFhgQk8xpPzczcxgtOwlsUO
-	xrlvP+gdYmTiYDzEKMHBrCTCa2K6MVWINyWxsiq1KD++qDQntfgQoykwuCcyS4km5wMzQV5J
-	vKGJpYGJmZGJhbGlsZmSOO+ZK2WpQgLpiSWp2ampBalFMH1MHJxSDUy65R3LhfK3/22a/Z51
-	/s7anm/F8Uf+ev86sDnu7sm57zg3y144an3h2SUny/kzffJW+26t3HWBgXdWf37kf2nPRSt+
-	9jRLvNYX+aRXOnfNd+VtYb+Es2q3tO19dkAxYbZQe15fbW/BhxXv8vYWPw798sBDPsjS+q9O
-	v5xZf6jIxNPWXNsFo3gUTb80B5gya74Qbs7onTlNlXXVg7kXirc/eiDX2Phs2pb38grBEz0j
-	/p2Zdqp0ydE536xfdHXyB0n1HZJ0V9D4/eT24hqPuBKHLP6tApNfKalvmavc3eDTFv7zfOvn
-	Ev6zvmX7gywj/HwmfBTuC3X/HP+4ushS9mbi7sPNh32z07hsOkN3pCuxFGckGmoxFxUnAgDq
-	If9aTAQAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrIIsWRmVeSWpSXmKPExsWy7bCSnK6nw+ZUg+7VuhYvf15ls5hxqo3V
-	Yt+1k+wWv/6uZ7doXryezaJj62Qmix3Pz7Bb7PrbzGRxedccNosj//sZLa6dOcFqcXxtuMXm
-	S99YHHg97lzbw+axf+4ado++LasYPT5vkvNoP9DNFMAaxWWTkpqTWZZapG+XwJXxqmMKe8FT
-	oYqJu/+yNzD+5Oti5OSQEDCRuLzlC0sXIxeHkMBuRokzyzuYIRKSEosfPWTrYuQAsoUlDh8u
-	hqh5BlQz5wYbSA2bgI7Em0//WUFsESC748wJsEHMAjeYJK4t380G0bGZUaLvz3R2kCpOoHVP
-	brxlArGFBXwkZhyeA2azCKhKfH9xC8zmFbCUWL57OTuELShxcuYTFhCbWcBI4tyh/WwQtrzE
-	9rdzoC5VkPj5dBnUFU4SE68tYoWoEZGY3dnGPIFReBaSUbOQjJqFZNQsJC0LGFlWMUqmFhTn
-	pucWGxYY5qWW6xUn5haX5qXrJefnbmIEx6KW5g7G7as+6B1iZOJgPMQowcGsJMJrYroxVYg3
-	JbGyKrUoP76oNCe1+BCjNAeLkjiv+IveFCGB9MSS1OzU1ILUIpgsEwenVANT7PIZJaUL+uyL
-	3OaW7ZVw1XhmcXFi5NQ77naegRcf5hln7U3Znzm/waTVaMsqz9uua+sMZJV3NDe7Kr2y0TqT
-	++ff07qcWbvCtkslrNH59m377vVB30OsG5+fSsxbKXJp30Ux9y8vRWYs2rNf5SyTRHbsm8qA
-	ctfH81sy1LfsPR/Mfm8+c+HbfLEiqxOKb85/cAznFG1XCUud0HMiYNnNn6tlumeKfc14tW7V
-	eRtri6n7GiZP6sjwUvj50cN/xZLdFtu5cs9kGTdLxU94+pmt50SP0EU3tojqaobtGuYqrNmS
-	JqfVIjw0X59dcvIDr7kQQ2jZ7Me7zyf5XlU4IvdHesnSoJusino/mT5t2s+lxFKckWioxVxU
-	nAgAvKu7vTQDAAA=
-X-CMS-MailID: 20240126051657epcas1p30a4936302e1fa9aa492fecccb83a9220
-X-Msg-Generator: CA
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0
-References: <CGME20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0@epcas1p1.samsung.com>
-	<20240119073247.7441-1-sh043.lee@samsung.com>
-	<2024011945-studio-smitten-300e@gregkh>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-> -----Original Message-----
-> From: Greg KH <gregkh@linuxfoundation.org>
-> Sent: Friday, January 19, 2024 5:21 PM
-> To: Seunghui Lee <sh043.lee@samsung.com>
-> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
-> ulf.hansson@linaro.org; avri.altman@wdc.com; grant.jung@samsung.com;
-> jt77.jang@samsung.com; dh0421.hwang@samsung.com; junwoo80.lee@samsung.com;
-> jangsub.yi@samsung.com; cw9316.lee@samsung.com; sh8267.baek@samsung.com;
-> wkon.kim@samsung.com
-> Subject: Re: [PATCH] mmc: core: Fix null pointer dereference in
-> bus_shutdown
-> 
-> On Fri, Jan 19, 2024 at 04:32:47PM +0900, Seunghui Lee wrote:
-> > When shutting down removable device,
-> > it can be occurred null pointer dereference.
-> 
-> How?
-> 
-> And please wrap your lines properly.
-> 
-> > To prevent null pointer dereference,
-> > At first, check null pointer.
-> > Next, block rescan worker to scan removable device during shutdown.
-> 
-> Why do two things?
-> 
-> >
-> > Signed-off-by: Seunghui Lee <sh043.lee@samsung.com>
-> > ---
-> >  drivers/mmc/core/bus.c | 10 +++++++++-
-> >  1 file changed, 9 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c index
-> > 0af96548e7da..4f370a6577aa 100644
-> > --- a/drivers/mmc/core/bus.c
-> > +++ b/drivers/mmc/core/bus.c
-> > @@ -143,9 +143,17 @@ static void mmc_bus_shutdown(struct device *dev)
-> > {
-> >  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
-> >  	struct mmc_card *card = mmc_dev_to_card(dev);
-> > -	struct mmc_host *host = card->host;
-> > +	struct mmc_host *host;
-> >  	int ret;
-> >
-> > +	if (!drv || !card) {
-> > +		pr_debug("%s: drv or card is NULL.\n", dev_name(dev));
-> 
-> What is this going to help with?  And why not use dev_dbg()?
-> 
-> How can drv ever be NULL?  That looks impossible to me based on just the
-> code shown here.
-> 
-> > +		return;
-> > +	}
-> > +
-> > +	host = card->host;
-> 
-> Why is this change needed?  This line can go back to the top just fine,
-> right?
-> 
-> > +	host->rescan_disable = 1;
-> 
-> Shouldn't this be a separate change?  And what happens if the check for
-> this is right before you set it?  Where is the locking to prevent the
-> issue you are attempting to solve?
-> 
-> thanks,
-> 
-> greg k-h
+This driver registers itself as a reboot handler, which means it claims
+it can reboot the system. It does this so it is called during the system
+reboot sequence. The correct way to be notified during the reboot
+sequence is to register a notifier with register_reboot_notifier().
+Do this here.
 
-I've checked the issue again.
-This patch is not the proper solution.
-I'll reject this patch.
-Hi, Thank you for your comment.
+Note this will be called during normal reboots but not emergency reboots.
+This is the expected behavior, emergency reboot means emergency, not go
+do some cleanup with emmc pins.. The reboot notifiers are intentionally
+not called in the emergency path for a reason and working around that by
+pretending to be a reboot handler is a hack.
 
+Signed-off-by: Andrew Davis <afd@ti.com>
+---
+ drivers/mmc/core/pwrseq_emmc.c | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+index 3b6d69cefb4eb..d5045fd1a02c1 100644
+--- a/drivers/mmc/core/pwrseq_emmc.c
++++ b/drivers/mmc/core/pwrseq_emmc.c
+@@ -70,14 +70,8 @@ static int mmc_pwrseq_emmc_probe(struct platform_device *pdev)
+ 		return PTR_ERR(pwrseq->reset_gpio);
+ 
+ 	if (!gpiod_cansleep(pwrseq->reset_gpio)) {
+-		/*
+-		 * register reset handler to ensure emmc reset also from
+-		 * emergency_reboot(), priority 255 is the highest priority
+-		 * so it will be executed before any system reboot handler.
+-		 */
+ 		pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
+-		pwrseq->reset_nb.priority = 255;
+-		register_restart_handler(&pwrseq->reset_nb);
++		register_reboot_notifier(&pwrseq->reset_nb);
+ 	} else {
+ 		dev_notice(dev, "EMMC reset pin tied to a sleepy GPIO driver; reset on emergency-reboot disabled\n");
+ 	}
+-- 
+2.39.2
 
