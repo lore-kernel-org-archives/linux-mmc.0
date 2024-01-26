@@ -1,91 +1,197 @@
-Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7E4B171A2
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 23:18:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FC01BE68
+	for <linux-mmc@vger.kernel.org>; Fri, 26 Jan 2024 05:17:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706224737; cv=none; b=adgO42Zp5oC+Jh3I8pjtDkh57r6+tfb0No/75XnWo5g4w7BHA6/CdVeOqK3kpasBwXfhEqyU/10+S4hZWwi/nqIymPJ1278wYKYJND7a1QwUxHncmBlvth1rXTemzanef3J3fIaAxwGm2MY3kMvgJ3riGnci3nWfrzvwnfMhWzQ=
+	t=1706246230; cv=none; b=gZYF9CxxKV+0LZqW9G0Z+IXVJp81sq32L5V4qBdM3FH4IRbkWcBcuJfqYui6tZUcUj6aX6Q955wFEoU0kuoNiWDmxr5hTTDJrRwkgg28nXiRPxlDmcp+BzAoRCB+vDebI9HbpMH6mDth1lLq8vHaQgaJUBnGvhn+bsZeFC6/3XI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706224737; c=relaxed/simple;
-	bh=7uvqzJiFOH7CqK9D/XE9qIcs6f8P8aqvGseDf75yXXM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=NmwMjZXCuXUUTNzWrfYEOcidBhVA20m1wGv4X6ePRLx//agyXhdAQ1EqUpK3nYViHfLgr3ekzEOcc/IXGweim/cY5AsBBhPcvHCCTE2dzDd9j0aAXWx6uI3zbPvjANzMeMLKFJbFPkwKdew1f1AmqNiLryJ5MV0n/7/lrt05SRw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZsSCs86a; arc=none smtp.client-ip=209.85.128.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1706246230; c=relaxed/simple;
+	bh=dluYRm5dDqJX3x1PpybFwwjdGdtUDXPxQdQ+lhoK3K4=;
+	h=From:To:Cc:In-Reply-To:Subject:Date:Message-ID:MIME-Version:
+	 Content-Type:References; b=Sa7RtlJGvVSphjtVVKV8Q/5rTZ5mr+RjGY0mLjY7YhAmruxvcHK8ksJ71UW3tnso6Gss/xtt4NxVWNymv/TdZfSAEjrnmdhh5LRqXOuSrHhUkYGocpdg1tKxWvUWxCio1SO/jzpjFi0Dop9x/eLBoHrPM1ZWUS5kbU9SffdnGpE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=n3iykupB; arc=none smtp.client-ip=203.254.224.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZsSCs86a"
-Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-5ff7ec8772dso2725127b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Jan 2024 15:18:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706224734; x=1706829534; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=7uvqzJiFOH7CqK9D/XE9qIcs6f8P8aqvGseDf75yXXM=;
-        b=ZsSCs86a/S2lz8chareQY9wVV7h/sZwKG7z3FaRYk2qI7Plqd1cVedCVgy07OdHtrU
-         X823lr3pENXGI3wijqr7ejCytYOwlL1+WZkhRm4sIDQKWJYlOP9rCm4Jc5eWvzfTW/ox
-         Rxvh5eh1BJv+5PqtvNdEZ5Xk0zQxmLUnTQZ9efZGubshZFTVIGAFJkOMKCW5vbVxzH4y
-         ZmkL2gazF3rb9ejhMOw5D1B4TW1zRu28+bsv+fwyq8uyrhHEDrWJmF+J1ETDArQYkkKW
-         BtpnPhBRf7GnX2ju0BQPIm+r8F3HZ1KNuddnuiwRSbB9/U08aNnLjQZW3RbRT6mFVSgp
-         ty4A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706224734; x=1706829534;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=7uvqzJiFOH7CqK9D/XE9qIcs6f8P8aqvGseDf75yXXM=;
-        b=PTcQ/ePbMNFnUEQQ9TgkxUJpNpLbz91cuIFLMeeQyFYNQowY4g3GtioJnU46PvGnhH
-         vElEsfHKY1NgS2M83yrewHnci4XX4EKmdAAB/LhZdQiGx5gGMWpYM9Wuos9XQr9Ykuhe
-         95osHDvN3A22LLjAiG5wXRI+JxYdt8bRT7WP1mksPXZDLE9mmPpbuLjOFY7sy2yoI9DS
-         LhKp0cOKNyECaNd6lk+9sm7T/IjcJtWm1XDp5ZGV6rajxRh1FEN8+WK9+3bVPuSigOQ4
-         GYdgYo+y2nQ+bwLUiWMaWGQ+6HVCymVLgpzPdFrFclK4YbBWly7hxOWqCpRlgyLwzR90
-         G0pQ==
-X-Gm-Message-State: AOJu0YxmX35Fq2ymTY/5Dmd7Xr3wi04RjALMNkz5tgasqSY+fq/yA3A3
-	Gj83yiSq9e/m277WufeHz9GwaLfXMppGfbd6t3THx9qf9JCeTyGfCMYzS9RiTjWpoxSeoPeIHgg
-	Jtuw9JkO9U16aTr/I6hBqNuqDm7VXUhB477DgFw==
-X-Google-Smtp-Source: AGHT+IGYkPRYDSlscKRk4G+SfhQLgKGn3yOaS30O2gXXD5Tt9NYFdgvgNJQJQsN4IwIhaD5odaQS198rhu6R/5DbH+Y=
-X-Received: by 2002:a81:aa4c:0:b0:5ff:35f1:714b with SMTP id
- z12-20020a81aa4c000000b005ff35f1714bmr601737ywk.12.1706224734637; Thu, 25 Jan
- 2024 15:18:54 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="n3iykupB"
+Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
+	by mailout3.samsung.com (KnoxPortal) with ESMTP id 20240126051659epoutp03255b53242f3010c8d6001e28ae82c66a~tzeWGTxyE0428004280epoutp03X
+	for <linux-mmc@vger.kernel.org>; Fri, 26 Jan 2024 05:16:59 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20240126051659epoutp03255b53242f3010c8d6001e28ae82c66a~tzeWGTxyE0428004280epoutp03X
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1706246219;
+	bh=hploZXGnvBGsUE/XjNOrpqF9wf/z30BTogioatvLJhE=;
+	h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
+	b=n3iykupBw4wDN9Xda5ayg6wtltgWC/i5zLIu6Flz+GbETCbOvk1kaAeLB3Z+e99Ix
+	 WvlsZ1HWOQzdzjVjJQarErhVtve6YPuFc3HX6v8AfV2qF7cUmja50x1uYvYE5glqA3
+	 mUTdxK4v6E9MXgNu6I18Fxp3jSdQVElkvzHWAJog=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+	epcas1p1.samsung.com (KnoxPortal) with ESMTP id
+	20240126051658epcas1p12b0f26fd1012c44dc30e496d7a85df07~tzeVdTCGC2708127081epcas1p16;
+	Fri, 26 Jan 2024 05:16:58 +0000 (GMT)
+Received: from epsmges1p4.samsung.com (unknown [182.195.38.247]) by
+	epsnrtp2.localdomain (Postfix) with ESMTP id 4TLmCG2hm1z4x9Q4; Fri, 26 Jan
+	2024 05:16:58 +0000 (GMT)
+Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
+	epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
+	79.A3.10211.A4043B56; Fri, 26 Jan 2024 14:16:58 +0900 (KST)
+Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
+	epcas1p3.samsung.com (KnoxPortal) with ESMTPA id
+	20240126051657epcas1p30a4936302e1fa9aa492fecccb83a9220~tzeUjJXSr2041220412epcas1p3x;
+	Fri, 26 Jan 2024 05:16:57 +0000 (GMT)
+Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
+	epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
+	20240126051657epsmtrp29f9e3866700f5ab4d8291a39a6f4d689~tzeUiOk1r1200812008epsmtrp25;
+	Fri, 26 Jan 2024 05:16:57 +0000 (GMT)
+X-AuditID: b6c32a38-463ff700000027e3-8c-65b3404ad8fa
+Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
+	epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
+	00.9B.08755.94043B56; Fri, 26 Jan 2024 14:16:57 +0900 (KST)
+Received: from sh043lee03 (unknown [10.253.101.72]) by epsmtip1.samsung.com
+	(KnoxPortal) with ESMTPA id
+	20240126051657epsmtip1455d5a21e5c6d1dd44654bdeda62145b~tzeUTxayL3021230212epsmtip1F;
+	Fri, 26 Jan 2024 05:16:57 +0000 (GMT)
+From: "Seunghui Lee" <sh043.lee@samsung.com>
+To: "'Greg KH'" <gregkh@linuxfoundation.org>
+Cc: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<ulf.hansson@linaro.org>, <avri.altman@wdc.com>, <grant.jung@samsung.com>,
+	<jt77.jang@samsung.com>, <dh0421.hwang@samsung.com>,
+	<junwoo80.lee@samsung.com>, <jangsub.yi@samsung.com>,
+	<cw9316.lee@samsung.com>, <sh8267.baek@samsung.com>, <wkon.kim@samsung.com>
+In-Reply-To: <2024011945-studio-smitten-300e@gregkh>
+Subject: RE: [PATCH] mmc: core: Fix null pointer dereference in bus_shutdown
+Date: Fri, 26 Jan 2024 14:16:57 +0900
+Message-ID: <011a01da5016$e23f41f0$a6bdc5d0$@samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240125-mmc-proper-kmap-v1-0-ba953c1ac3f9@linaro.org>
- <20240125-mmc-proper-kmap-v1-1-ba953c1ac3f9@linaro.org> <7ca13324-ac47-4648-9b3c-c616de515625@app.fastmail.com>
-In-Reply-To: <7ca13324-ac47-4648-9b3c-c616de515625@app.fastmail.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Fri, 26 Jan 2024 00:18:43 +0100
-Message-ID: <CACRpkdZWrRCoG_HL4WxpcauP_ipvfekg3j67fUHewUuMxGzBeA@mail.gmail.com>
-Subject: Re: [PATCH 1/7] mmc: davinci_mmc: Map the virtual page for PIO
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Pitre <nico@fluxnic.net>, 
-	Aaro Koskinen <aaro.koskinen@iki.fi>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Angelo Dureghello <angelo.dureghello@timesys.com>, 
-	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>, linux-block@vger.kernel.org, 
-	Linux-OMAP <linux-omap@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Thread-Index: AQGcsgXp9LDtdNDOGMR+ItI0KSVqWgF7z+l9ASFv/iSxTS4YIA==
+Content-Language: ko
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrJJsWRmVeSWpSXmKPExsWy7bCmvq6Xw+ZUg3/dAhYvf15ls5hxqo3V
+	Yt+1k+wWv/6uZ7doXryezaJj62Qmix3Pz7Bb7PrbzGRxedccNosj//sZLa6dOcFqcXxtuMXm
+	S99YHHg97lzbw+axf+4ado++LasYPT5vkvNoP9DNFMAalW2TkZqYklqkkJqXnJ+SmZduq+Qd
+	HO8cb2pmYKhraGlhrqSQl5ibaqvk4hOg65aZA3SjkkJZYk4pUCggsbhYSd/Opii/tCRVISO/
+	uMRWKbUgJafArECvODG3uDQvXS8vtcTK0MDAyBSoMCE741XHFPaCp0IVE3f/ZW9g/MnXxcjJ
+	ISFgIrHz0ReWLkYuDiGBHYwSK/YsgXI+MUp82fiMGcL5xiixc+VfZpiWy1tgWvYySnxvvgXl
+	vGCUWLCnlRWkik1AR+LNp/9gtgiQ3XHmBFgRs8ApJombEzvYQBKcQKOe3HjLBGILC/hIzDg8
+	B8xmEVCV+P7iFpjNK2ApsXz3cnYIW1Di5MwnLCA2s4CBxPtz85khbHmJ7W/nQJ2nIPHz6TKo
+	xU4SE68tYoWoEZGY3dkGVXOAQ6LteQqE7SIx4cxsqLiwxKvjW9ghbCmJz+/2soEcLSHQzCjR
+	1vCVBcKZwCjxYsErJogqe4nm1mY2iA18Eu++9gBt4wCK80p0tAlBlChLvHy0DKpcUmJJ+y2o
+	ZR4SV5eeYJ7AqDgLyW+zkPw2C8lvs5D8sICRZRWjWGpBcW56arFhgQk8xpPzczcxgtOwlsUO
+	xrlvP+gdYmTiYDzEKMHBrCTCa2K6MVWINyWxsiq1KD++qDQntfgQoykwuCcyS4km5wMzQV5J
+	vKGJpYGJmZGJhbGlsZmSOO+ZK2WpQgLpiSWp2ampBalFMH1MHJxSDUy65R3LhfK3/22a/Z51
+	/s7anm/F8Uf+ev86sDnu7sm57zg3y144an3h2SUny/kzffJW+26t3HWBgXdWf37kf2nPRSt+
+	9jRLvNYX+aRXOnfNd+VtYb+Es2q3tO19dkAxYbZQe15fbW/BhxXv8vYWPw798sBDPsjS+q9O
+	v5xZf6jIxNPWXNsFo3gUTb80B5gya74Qbs7onTlNlXXVg7kXirc/eiDX2Phs2pb38grBEz0j
+	/p2Zdqp0ydE536xfdHXyB0n1HZJ0V9D4/eT24hqPuBKHLP6tApNfKalvmavc3eDTFv7zfOvn
+	Ev6zvmX7gywj/HwmfBTuC3X/HP+4ushS9mbi7sPNh32z07hsOkN3pCuxFGckGmoxFxUnAgDq
+	If9aTAQAAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrIIsWRmVeSWpSXmKPExsWy7bCSnK6nw+ZUg+7VuhYvf15ls5hxqo3V
+	Yt+1k+wWv/6uZ7doXryezaJj62Qmix3Pz7Bb7PrbzGRxedccNosj//sZLa6dOcFqcXxtuMXm
+	S99YHHg97lzbw+axf+4ado++LasYPT5vkvNoP9DNFMAaxWWTkpqTWZZapG+XwJXxqmMKe8FT
+	oYqJu/+yNzD+5Oti5OSQEDCRuLzlC0sXIxeHkMBuRokzyzuYIRKSEosfPWTrYuQAsoUlDh8u
+	hqh5BlQz5wYbSA2bgI7Em0//WUFsESC748wJsEHMAjeYJK4t380G0bGZUaLvz3R2kCpOoHVP
+	brxlArGFBXwkZhyeA2azCKhKfH9xC8zmFbCUWL57OTuELShxcuYTFhCbWcBI4tyh/WwQtrzE
+	9rdzoC5VkPj5dBnUFU4SE68tYoWoEZGY3dnGPIFReBaSUbOQjJqFZNQsJC0LGFlWMUqmFhTn
+	pucWGxYY5qWW6xUn5haX5qXrJefnbmIEx6KW5g7G7as+6B1iZOJgPMQowcGsJMJrYroxVYg3
+	JbGyKrUoP76oNCe1+BCjNAeLkjiv+IveFCGB9MSS1OzU1ILUIpgsEwenVANT7PIZJaUL+uyL
+	3OaW7ZVw1XhmcXFi5NQ77naegRcf5hln7U3Znzm/waTVaMsqz9uua+sMZJV3NDe7Kr2y0TqT
+	++ff07qcWbvCtkslrNH59m377vVB30OsG5+fSsxbKXJp30Ux9y8vRWYs2rNf5SyTRHbsm8qA
+	ctfH81sy1LfsPR/Mfm8+c+HbfLEiqxOKb85/cAznFG1XCUud0HMiYNnNn6tlumeKfc14tW7V
+	eRtri6n7GiZP6sjwUvj50cN/xZLdFtu5cs9kGTdLxU94+pmt50SP0EU3tojqaobtGuYqrNmS
+	JqfVIjw0X59dcvIDr7kQQ2jZ7Me7zyf5XlU4IvdHesnSoJusino/mT5t2s+lxFKckWioxVxU
+	nAgAvKu7vTQDAAA=
+X-CMS-MailID: 20240126051657epcas1p30a4936302e1fa9aa492fecccb83a9220
+X-Msg-Generator: CA
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0
+References: <CGME20240119073011epcas1p1841e79c8f673c3c69ef696edc9eb47b0@epcas1p1.samsung.com>
+	<20240119073247.7441-1-sh043.lee@samsung.com>
+	<2024011945-studio-smitten-300e@gregkh>
 
-On Thu, Jan 25, 2024 at 5:37=E2=80=AFPM Arnd Bergmann <arnd@arndb.de> wrote=
-:
+> -----Original Message-----
+> From: Greg KH <gregkh@linuxfoundation.org>
+> Sent: Friday, January 19, 2024 5:21 PM
+> To: Seunghui Lee <sh043.lee@samsung.com>
+> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
+> ulf.hansson@linaro.org; avri.altman@wdc.com; grant.jung@samsung.com;
+> jt77.jang@samsung.com; dh0421.hwang@samsung.com; junwoo80.lee@samsung.com;
+> jangsub.yi@samsung.com; cw9316.lee@samsung.com; sh8267.baek@samsung.com;
+> wkon.kim@samsung.com
+> Subject: Re: [PATCH] mmc: core: Fix null pointer dereference in
+> bus_shutdown
+> 
+> On Fri, Jan 19, 2024 at 04:32:47PM +0900, Seunghui Lee wrote:
+> > When shutting down removable device,
+> > it can be occurred null pointer dereference.
+> 
+> How?
+> 
+> And please wrap your lines properly.
+> 
+> > To prevent null pointer dereference,
+> > At first, check null pointer.
+> > Next, block rescan worker to scan removable device during shutdown.
+> 
+> Why do two things?
+> 
+> >
+> > Signed-off-by: Seunghui Lee <sh043.lee@samsung.com>
+> > ---
+> >  drivers/mmc/core/bus.c | 10 +++++++++-
+> >  1 file changed, 9 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c index
+> > 0af96548e7da..4f370a6577aa 100644
+> > --- a/drivers/mmc/core/bus.c
+> > +++ b/drivers/mmc/core/bus.c
+> > @@ -143,9 +143,17 @@ static void mmc_bus_shutdown(struct device *dev)
+> > {
+> >  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+> >  	struct mmc_card *card = mmc_dev_to_card(dev);
+> > -	struct mmc_host *host = card->host;
+> > +	struct mmc_host *host;
+> >  	int ret;
+> >
+> > +	if (!drv || !card) {
+> > +		pr_debug("%s: drv or card is NULL.\n", dev_name(dev));
+> 
+> What is this going to help with?  And why not use dev_dbg()?
+> 
+> How can drv ever be NULL?  That looks impossible to me based on just the
+> code shown here.
+> 
+> > +		return;
+> > +	}
+> > +
+> > +	host = card->host;
+> 
+> Why is this change needed?  This line can go back to the top just fine,
+> right?
+> 
+> > +	host->rescan_disable = 1;
+> 
+> Shouldn't this be a separate change?  And what happens if the check for
+> this is right before you set it?  Where is the locking to prevent the
+> issue you are attempting to solve?
+> 
+> thanks,
+> 
+> greg k-h
 
-> I think to do this properly, the driver would have to
-> use struct sg_mapping_iter like the cb710 driver does,
-> but the conversion is not as simple as your patch here.
+I've checked the issue again.
+This patch is not the proper solution.
+I'll reject this patch.
+Hi, Thank you for your comment.
 
-Ack, how typical, so that is what I write in the cover letter
-that I wanted to avoid but it seems there is no avoiding it then.
 
-It's a bit trickier but I guess I can pull it off, it better get some
-testing.
-
-Thanks Arnd!
-
-Yours,
-Linus Walleij
