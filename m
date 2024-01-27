@@ -1,59 +1,60 @@
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CBA11D695
-	for <linux-mmc@vger.kernel.org>; Sat, 27 Jan 2024 00:20:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDE9E3D6C
+	for <linux-mmc@vger.kernel.org>; Sat, 27 Jan 2024 00:20:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706314824; cv=none; b=sXH5cxrsKf/nBEhN4Xqmkw4+1JDJnAO7UdzbGHepUSrCtgGX21bxUoJTZysZJXlXhbEYm2dZr66zpXh7bvizFWrL3x4d7meo9BXG7dkbpVIDp0pB1vNq/dryt4P/C9SmCj4HmtYB75Dx95tCfl/T7KnkOd4N3HFccSKuywA15BE=
+	t=1706314825; cv=none; b=rIlS8PS0qPzg1NWpmj2r9F7u4YgccmXOr8WQTIqQkooXsuilFqfh3XyqIPoDl7bOpA3BLhXtbClIIR380OKYhisXKEeIZ4XJGkBPTLNzb7IXFdWalVgIy0mPtiWt7wkXwbk+f0HhW83va9GRry9E5oi1iLf0K2PHOw/U8ydMKLg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706314824; c=relaxed/simple;
-	bh=HYmGgaLgWEX6oEn5bgILT9HdCgPRXmSHSVRfD6iUtog=;
+	s=arc-20240116; t=1706314825; c=relaxed/simple;
+	bh=m64DINGtjwCb4sGpGFmOo+EROZNKY2mbmaeuUuBBRqU=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Gc3B8s3gWIYJKeYidJd21He127fG6FzxwhUJqvyIP1iHMwybycGdH1qYXeAV8TghxLWDDj8eMi/UXk5ORFaayOCiWabTFXKr2+hLOD+hABQ8AmYoqUqBAt8Grbc1jbIBHSIuPpbatOFM9vLfF99Z0PB3QssKBiskMNI1kvTDByw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=pN9WT0GY; arc=none smtp.client-ip=209.85.167.47
+	 In-Reply-To:To:Cc; b=GGxbd6YUexxYkgKrZqo1YgEPW/6nGHH7WNpHXXouIHpT0NkwVn1t9/3wppgbGXXvndtec0yC0hbS7ZSS+BWdxwxeZukEvSXNgIEOfDIzrMiUcat94Bu54y2U2G/qpTezbx99EnBmhw7tQ5Vw+N6XhVZqdGsAQXpVX4veBbg0JsM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=RYLiIB4A; arc=none smtp.client-ip=209.85.167.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pN9WT0GY"
-Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-50ea9daac4cso965146e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Jan 2024 16:20:20 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RYLiIB4A"
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-51025cafb51so1363745e87.2
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Jan 2024 16:20:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706314818; x=1706919618; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1706314822; x=1706919622; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=nXmkhj6L70OQxNCX7S7WA9V64VMJ9cP8ih0oj9vAqT4=;
-        b=pN9WT0GYU2aFARDqTA8f1jSGEHuuxnY1cye9moMOqpsqVUoIFW4eLFLkb3ISKDFjkf
-         yaKNdbO/HMpagsC/USLrIYGcZNwB6qmHI0h4axQw98kfKdk2vPVsqKYn8X3af3HQ8hrR
-         nzrrYh1r4Edzybn3T3ftJsTBgfL2px6fxo1kCOeH8KMAvOJeIAglyo84DhvZin5pCVZC
-         WvAPrdUxiLP8WEq1OZGEfqBpFarn3tDh6I5Ejqlk6/7q33FlJ9c05gdiXgAESFhKgYcN
-         DU5KxIGuwPI16wHnWm7nKvz0rmkzCOgqsPmpbdb49AVdktiNmHJ4Uuy1ZVNDviNXHq03
-         6JFw==
+        bh=H6xRTgWpwVbdQrYrVCpj0/5DkwYyjb0pfDixXSPxg08=;
+        b=RYLiIB4ADJHqpt3w+GfoD4jp2simx33+zgqY8KZJz2yIZURm2B9EXPDTS0/r0GfBTp
+         xKSC/l2vAZYkoflIvphhspZYegwjiakFVmaIMr6Lh/XupXMo+GtyOPkF6hSEK/Fuww1g
+         ynPuvL5xEfcWNh2MfR42Y49ks6xzvJi62OnfD6LtAa+IxTBM++2kba+JFO0Bfrlh3KdW
+         FhxK2Nd3DHIjXA8DaPVqlxznpSwwLZ75aLpAV/UN5quT5qev3QXAYIPcFshCb9GsUqUH
+         Qf4thQ0tg81raETEun2Em2qFHwQIO8vj3dvX814xTnGWb0q4ZQE/7v9hf12sUueYqV8H
+         yWlA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706314818; x=1706919618;
+        d=1e100.net; s=20230601; t=1706314822; x=1706919622;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=nXmkhj6L70OQxNCX7S7WA9V64VMJ9cP8ih0oj9vAqT4=;
-        b=ZnlpwobJeMKCgc6glDizJZuf11rCOIrvyU3o00ET+TmYJ4el//WkLiw6Bvjza8xzUL
-         koeRaPgNTDoC438iFgJ09o6xgMrwuIHX5JR8Cd5WVAt0YKyxnvzDFmTQ4ShxpPMjlVTx
-         iNX++U6vK+BEnAzJx/SugB8tgyKBEzr2OE17VF1/x10TkcGNb+zJPf7MYSksCLdqAW7K
-         Tj0JFSo3jaINvAePDfcARAeMrtQxg9LiI2zh6UETIr2ZplBmt4wIS69e4795EsmOQbU5
-         Bz+UISbynByR8WLdL4EWbQBI1hS5+BT2/euaj+q3qoF3fV9msN6nGfB33JcnVDjU/6Ca
-         LnVA==
-X-Gm-Message-State: AOJu0YzpaG55IpodX6LEf51+IgZhQ+TIwqkwCONOg4De2YKRfNc/g87i
-	GxPuamst0jCU4yYGulrpl+LqbAnongzKCF16SOT+T+tqCSbRzX13eKt3yWsNgoQ=
-X-Google-Smtp-Source: AGHT+IFLVN7BK0qbc3Zc65OltD6GZpGHMU9ydl9RCyNJ4EpmANWYgk2ANjlW0TtzuDB0dHkxtZ0FOw==
-X-Received: by 2002:a05:6512:3046:b0:510:67d:22c7 with SMTP id b6-20020a056512304600b00510067d22c7mr351403lfb.69.1706314818624;
-        Fri, 26 Jan 2024 16:20:18 -0800 (PST)
+        bh=H6xRTgWpwVbdQrYrVCpj0/5DkwYyjb0pfDixXSPxg08=;
+        b=tFWJfshGfMcQ64wDl16RagDSeba1Ak+Qeb/+ssekLYpmBOgHap8WdBfk/LtPZ+sB8R
+         8nTevsbee34PlF3erVI1gYlRT3nk3erre2CDQD0/3gX/I1Nmod1zWYd08T2x2ho30e4x
+         moELUwkjd+dEsX5hTJlSfE3UOO8QjpOqKtMcoc62tO+j5dAmY7tVKteSc2dW+Eqzz12r
+         AhvJwQzfGrLUJSitQYo60I14FyWvxJnTBuKrHdNgJX1yEG3tFvdc3/cJ2mwFEyeK4MoM
+         lkVFIu1SHFyxjc7nOxFBCQq53YpnJ9/7WtQwKSqvsJPSMaBIxk9Fq9O2PKEngj0VUc0W
+         pbtA==
+X-Gm-Message-State: AOJu0YyKH7VpSgYX6F+Ur9SWTWTggh1I6dpRxKDTpfBMRYFFfUVnPyn+
+	+j346Sem65BAhGOZl17ceksA4C2A2Mlly6XrSgUuCYKZJSf1AFue1l9BWTQqowHizviKt2YaZAD
+	H
+X-Google-Smtp-Source: AGHT+IFODti9q2E+Agfa3fBrMz3o9POZ0N1iM9LXhM4BVi8Jox9fI3RwAY18ghi+6oR5uiYdJhU9kQ==
+X-Received: by 2002:ac2:4907:0:b0:510:c62:d97b with SMTP id n7-20020ac24907000000b005100c62d97bmr305904lfi.45.1706314822099;
+        Fri, 26 Jan 2024 16:20:22 -0800 (PST)
 Received: from [127.0.1.1] ([85.235.12.238])
-        by smtp.gmail.com with ESMTPSA id x25-20020a19f619000000b0050e7f5cffa6sm325226lfe.273.2024.01.26.16.20.17
+        by smtp.gmail.com with ESMTPSA id x25-20020a19f619000000b0050e7f5cffa6sm325226lfe.273.2024.01.26.16.20.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Jan 2024 16:20:18 -0800 (PST)
+        Fri, 26 Jan 2024 16:20:21 -0800 (PST)
 From: Linus Walleij <linus.walleij@linaro.org>
-Date: Sat, 27 Jan 2024 01:19:53 +0100
-Subject: [PATCH v2 6/9] mmc: mxcmmc: Use sg_miter for PIO
+Date: Sat, 27 Jan 2024 01:19:56 +0100
+Subject: [PATCH v2 9/9] mmc: sh_mmcif: Use sg_miter for PIO
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,7 +63,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20240127-mmc-proper-kmap-v2-6-d8e732aa97d1@linaro.org>
+Message-Id: <20240127-mmc-proper-kmap-v2-9-d8e732aa97d1@linaro.org>
 References: <20240127-mmc-proper-kmap-v2-0-d8e732aa97d1@linaro.org>
 In-Reply-To: <20240127-mmc-proper-kmap-v2-0-d8e732aa97d1@linaro.org>
 To: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, 
@@ -75,123 +76,255 @@ Cc: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
  linux-omap@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 X-Mailer: b4 0.12.4
 
-Use the scatterlist memory iterator instead of just
-dereferencing virtual memory using sg_virt().
-This make highmem references work properly.
-
-Since this driver is using a worker, no atomic trickery
-is needed.
+Use sg_miter iterator instead of sg_virt() and custom code
+to loop over the scatterlist. The memory iterator will do
+bounce buffering if the page happens to be located in high memory,
+which the driver may or may not be using.
 
 Suggested-by: Christoph Hellwig <hch@lst.de>
 Link: https://lore.kernel.org/linux-mmc/20240122073423.GA25859@lst.de/
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mxcmmc.c | 53 +++++++++++++++++++++++++++++------------------
- 1 file changed, 33 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 102 +++++++++++++++++++++++++++-----------------
+ 1 file changed, 63 insertions(+), 39 deletions(-)
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 5b3ab0e20505..1edf65291354 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -266,11 +266,18 @@ static inline void buffer_swap32(u32 *buf, int len)
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 077d711e964e..1ef6e153e5a3 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -227,14 +227,12 @@ struct sh_mmcif_host {
+ 	bool dying;
+ 	long timeout;
+ 	void __iomem *addr;
+-	u32 *pio_ptr;
+ 	spinlock_t lock;		/* protect sh_mmcif_host::state */
+ 	enum sh_mmcif_state state;
+ 	enum sh_mmcif_wait_for wait_for;
+ 	struct delayed_work timeout_work;
+ 	size_t blocksize;
+-	int sg_idx;
+-	int sg_blkidx;
++	struct sg_mapping_iter sg_miter;
+ 	bool power;
+ 	bool ccs_enable;		/* Command Completion Signal support */
+ 	bool clk_ctrl2_enable;
+@@ -600,32 +598,17 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
+ 	return ret;
+ }
  
- static void mxcmci_swap_buffers(struct mmc_data *data)
+-static bool sh_mmcif_next_block(struct sh_mmcif_host *host, u32 *p)
+-{
+-	struct mmc_data *data = host->mrq->data;
+-
+-	host->sg_blkidx += host->blocksize;
+-
+-	/* data->sg->length must be a multiple of host->blocksize? */
+-	BUG_ON(host->sg_blkidx > data->sg->length);
+-
+-	if (host->sg_blkidx == data->sg->length) {
+-		host->sg_blkidx = 0;
+-		if (++host->sg_idx < data->sg_len)
+-			host->pio_ptr = sg_virt(++data->sg);
+-	} else {
+-		host->pio_ptr = p;
+-	}
+-
+-	return host->sg_idx != data->sg_len;
+-}
+-
+ static void sh_mmcif_single_read(struct sh_mmcif_host *host,
+ 				 struct mmc_request *mrq)
  {
--	struct scatterlist *sg;
--	int i;
-+	struct sg_mapping_iter sgm;
-+	u32 *buf;
++	struct mmc_data *data = mrq->data;
 +
-+	sg_miter_start(&sgm, data->sg, data->sg_len,
-+		       SG_MITER_TO_SG | SG_MITER_FROM_SG);
+ 	host->blocksize = (sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
+ 			   BLOCK_SIZE_MASK) + 3;
+ 
++	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
++		       SG_MITER_ATOMIC | SG_MITER_TO_SG);
 +
-+	while (sg_miter_next(&sgm)) {
-+		buf = sgm.addr;
-+		buffer_swap32(buf, sgm.length);
-+	}
+ 	host->wait_for = MMCIF_WAIT_FOR_READ;
  
--	for_each_sg(data->sg, sg, data->sg_len, i)
--		buffer_swap32(sg_virt(sg), sg->length);
-+	sg_miter_stop(&sgm);
- }
- #else
- static inline void mxcmci_swap_buffers(struct mmc_data *data) {}
-@@ -526,10 +533,9 @@ static int mxcmci_poll_status(struct mxcmci_host *host, u32 mask)
- 	} while (1);
- }
+ 	/* buf read enable */
+@@ -634,20 +617,32 @@ static void sh_mmcif_single_read(struct sh_mmcif_host *host,
  
--static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
-+static int mxcmci_pull(struct mxcmci_host *host, u32 *buf, int bytes)
+ static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
  {
- 	unsigned int stat;
--	u32 *buf = _buf;
++	struct sg_mapping_iter *sgm = &host->sg_miter;
+ 	struct device *dev = sh_mmcif_host_to_dev(host);
+ 	struct mmc_data *data = host->mrq->data;
+-	u32 *p = sg_virt(data->sg);
++	u32 *p;
+ 	int i;
  
- 	while (bytes > 3) {
- 		stat = mxcmci_poll_status(host,
-@@ -555,10 +561,9 @@ static int mxcmci_pull(struct mxcmci_host *host, void *_buf, int bytes)
- 	return 0;
- }
- 
--static int mxcmci_push(struct mxcmci_host *host, void *_buf, int bytes)
-+static int mxcmci_push(struct mxcmci_host *host, u32 *buf, int bytes)
- {
- 	unsigned int stat;
--	u32 *buf = _buf;
- 
- 	while (bytes > 3) {
- 		stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
-@@ -586,31 +591,39 @@ static int mxcmci_push(struct mxcmci_host *host, void *_buf, int bytes)
- static int mxcmci_transfer_data(struct mxcmci_host *host)
- {
- 	struct mmc_data *data = host->req->data;
--	struct scatterlist *sg;
--	int stat, i;
-+	struct sg_mapping_iter sgm;
-+	int stat;
-+	u32 *buf;
- 
- 	host->data = data;
- 	host->datasize = 0;
-+	sg_miter_start(&sgm, data->sg, data->sg_len,
-+		       (data->flags & MMC_DATA_READ) ? SG_MITER_TO_SG : SG_MITER_FROM_SG);
- 
- 	if (data->flags & MMC_DATA_READ) {
--		for_each_sg(data->sg, sg, data->sg_len, i) {
--			stat = mxcmci_pull(host, sg_virt(sg), sg->length);
-+		while (sg_miter_next(&sgm)) {
-+			buf = sgm.addr;
-+			stat = mxcmci_pull(host, buf, sgm.length);
- 			if (stat)
--				return stat;
--			host->datasize += sg->length;
-+				goto transfer_error;
-+			host->datasize += sgm.length;
- 		}
- 	} else {
--		for_each_sg(data->sg, sg, data->sg_len, i) {
--			stat = mxcmci_push(host, sg_virt(sg), sg->length);
-+		while (sg_miter_next(&sgm)) {
-+			buf = sgm.addr;
-+			stat = mxcmci_push(host, buf, sgm.length);
- 			if (stat)
--				return stat;
--			host->datasize += sg->length;
-+				goto transfer_error;
-+			host->datasize += sgm.length;
- 		}
- 		stat = mxcmci_poll_status(host, STATUS_WRITE_OP_DONE);
- 		if (stat)
--			return stat;
-+			goto transfer_error;
+ 	if (host->sd_error) {
++		sg_miter_stop(sgm);
+ 		data->error = sh_mmcif_error_manage(host);
+ 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
+ 		return false;
  	}
--	return 0;
+ 
++	if (!sg_miter_next(sgm)) {
++		/* This should not happen on single blocks */
++		sg_miter_stop(sgm);
++		return false;
++	}
 +
-+transfer_error:
-+	sg_miter_stop(&sgm);
-+	return stat;
++	p = sgm->addr;
++
+ 	for (i = 0; i < host->blocksize / 4; i++)
+ 		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
+ 
++	sg_miter_stop(&host->sg_miter);
++
+ 	/* buffer read end */
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
+ 	host->wait_for = MMCIF_WAIT_FOR_READ_END;
+@@ -666,34 +661,40 @@ static void sh_mmcif_multi_read(struct sh_mmcif_host *host,
+ 	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
+ 		BLOCK_SIZE_MASK;
+ 
++	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
++		       SG_MITER_ATOMIC | SG_MITER_TO_SG);
++
+ 	host->wait_for = MMCIF_WAIT_FOR_MREAD;
+-	host->sg_idx = 0;
+-	host->sg_blkidx = 0;
+-	host->pio_ptr = sg_virt(data->sg);
+ 
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
  }
  
- static void mxcmci_datawork(struct work_struct *work)
+ static bool sh_mmcif_mread_block(struct sh_mmcif_host *host)
+ {
++	struct sg_mapping_iter *sgm = &host->sg_miter;
+ 	struct device *dev = sh_mmcif_host_to_dev(host);
+ 	struct mmc_data *data = host->mrq->data;
+-	u32 *p = host->pio_ptr;
++	u32 *p;
+ 	int i;
+ 
+ 	if (host->sd_error) {
++		sg_miter_stop(sgm);
+ 		data->error = sh_mmcif_error_manage(host);
+ 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
+ 		return false;
+ 	}
+ 
+-	BUG_ON(!data->sg->length);
++	if (!sg_miter_next(sgm)) {
++		sg_miter_stop(sgm);
++		return false;
++	}
++
++	p = sgm->addr;
+ 
+ 	for (i = 0; i < host->blocksize / 4; i++)
+ 		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
+ 
+-	if (!sh_mmcif_next_block(host, p))
+-		return false;
++	sgm->consumed = host->blocksize;
+ 
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
+ 
+@@ -703,9 +704,14 @@ static bool sh_mmcif_mread_block(struct sh_mmcif_host *host)
+ static void sh_mmcif_single_write(struct sh_mmcif_host *host,
+ 					struct mmc_request *mrq)
+ {
++	struct mmc_data *data = mrq->data;
++
+ 	host->blocksize = (sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
+ 			   BLOCK_SIZE_MASK) + 3;
+ 
++	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
++		       SG_MITER_ATOMIC | SG_MITER_FROM_SG);
++
+ 	host->wait_for = MMCIF_WAIT_FOR_WRITE;
+ 
+ 	/* buf write enable */
+@@ -714,20 +720,32 @@ static void sh_mmcif_single_write(struct sh_mmcif_host *host,
+ 
+ static bool sh_mmcif_write_block(struct sh_mmcif_host *host)
+ {
++	struct sg_mapping_iter *sgm = &host->sg_miter;
+ 	struct device *dev = sh_mmcif_host_to_dev(host);
+ 	struct mmc_data *data = host->mrq->data;
+-	u32 *p = sg_virt(data->sg);
++	u32 *p;
+ 	int i;
+ 
+ 	if (host->sd_error) {
++		sg_miter_stop(sgm);
+ 		data->error = sh_mmcif_error_manage(host);
+ 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
+ 		return false;
+ 	}
+ 
++	if (!sg_miter_next(sgm)) {
++		/* This should not happen on single blocks */
++		sg_miter_stop(sgm);
++		return false;
++	}
++
++	p = sgm->addr;
++
+ 	for (i = 0; i < host->blocksize / 4; i++)
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
+ 
++	sg_miter_stop(&host->sg_miter);
++
+ 	/* buffer write end */
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
+ 	host->wait_for = MMCIF_WAIT_FOR_WRITE_END;
+@@ -746,34 +764,40 @@ static void sh_mmcif_multi_write(struct sh_mmcif_host *host,
+ 	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
+ 		BLOCK_SIZE_MASK;
+ 
++	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
++		       SG_MITER_ATOMIC | SG_MITER_FROM_SG);
++
+ 	host->wait_for = MMCIF_WAIT_FOR_MWRITE;
+-	host->sg_idx = 0;
+-	host->sg_blkidx = 0;
+-	host->pio_ptr = sg_virt(data->sg);
+ 
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
+ }
+ 
+ static bool sh_mmcif_mwrite_block(struct sh_mmcif_host *host)
+ {
++	struct sg_mapping_iter *sgm = &host->sg_miter;
+ 	struct device *dev = sh_mmcif_host_to_dev(host);
+ 	struct mmc_data *data = host->mrq->data;
+-	u32 *p = host->pio_ptr;
++	u32 *p;
+ 	int i;
+ 
+ 	if (host->sd_error) {
++		sg_miter_stop(sgm);
+ 		data->error = sh_mmcif_error_manage(host);
+ 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
+ 		return false;
+ 	}
+ 
+-	BUG_ON(!data->sg->length);
++	if (!sg_miter_next(sgm)) {
++		sg_miter_stop(sgm);
++		return false;
++	}
++
++	p = sgm->addr;
+ 
+ 	for (i = 0; i < host->blocksize / 4; i++)
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
+ 
+-	if (!sh_mmcif_next_block(host, p))
+-		return false;
++	sgm->consumed = host->blocksize;
+ 
+ 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
+ 
 
 -- 
 2.34.1
