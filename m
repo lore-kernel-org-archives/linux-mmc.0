@@ -1,331 +1,100 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from pb-smtp1.pobox.com (pb-smtp1.pobox.com [64.147.108.70])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDE9E3D6C
-	for <linux-mmc@vger.kernel.org>; Sat, 27 Jan 2024 00:20:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 428AF134AD;
+	Sat, 27 Jan 2024 03:51:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.108.70
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706314825; cv=none; b=rIlS8PS0qPzg1NWpmj2r9F7u4YgccmXOr8WQTIqQkooXsuilFqfh3XyqIPoDl7bOpA3BLhXtbClIIR380OKYhisXKEeIZ4XJGkBPTLNzb7IXFdWalVgIy0mPtiWt7wkXwbk+f0HhW83va9GRry9E5oi1iLf0K2PHOw/U8ydMKLg=
+	t=1706327508; cv=none; b=rEJ/jmLmNXXy1qGWCI5X7UA8UiwtaBEAyRzIuuO2y9VBSCKjY6u1q0esuxLD0cUif7aZj8s6epTOpoAPgVTfIxigfpBK1fZKB+vzBKUDS6SyL4d51yRrD7Nzgh0UJ2WHxge0BtIb3o04KG6hAHdk4wX6oUDwusCTtJjpDWi/BJU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706314825; c=relaxed/simple;
-	bh=m64DINGtjwCb4sGpGFmOo+EROZNKY2mbmaeuUuBBRqU=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=GGxbd6YUexxYkgKrZqo1YgEPW/6nGHH7WNpHXXouIHpT0NkwVn1t9/3wppgbGXXvndtec0yC0hbS7ZSS+BWdxwxeZukEvSXNgIEOfDIzrMiUcat94Bu54y2U2G/qpTezbx99EnBmhw7tQ5Vw+N6XhVZqdGsAQXpVX4veBbg0JsM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=RYLiIB4A; arc=none smtp.client-ip=209.85.167.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1706327508; c=relaxed/simple;
+	bh=ysSO9XRCPehfUIJw/feLeF2vBNwy/Ryu7hrqRS2y+vg=;
+	h=Date:From:To:cc:Subject:In-Reply-To:Message-ID:References:
+	 MIME-Version:Content-Type; b=KgDv3xrWlxQLP9pYD8EkOBDRFZC+Vgiu8o9fmJ/HeufpR2ny7pDIo3Fnh/S1/p0p6znVOS2SYHnA9vsYdGTzNuZYNyEygB9kipKCQ179X9mMEtYk+UVze1Agx0GqeV71OUf0aNz/cccJNrRTEWqZzdA1y9Xq273UXRZp59ghtrI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fluxnic.net; spf=pass smtp.mailfrom=fluxnic.net; dkim=pass (1024-bit key) header.d=pobox.com header.i=@pobox.com header.b=Ki1Xp4SC; dkim=pass (1024-bit key) header.d=fluxnic.net header.i=@fluxnic.net header.b=fjyg3c7k; arc=none smtp.client-ip=64.147.108.70
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fluxnic.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fluxnic.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RYLiIB4A"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-51025cafb51so1363745e87.2
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Jan 2024 16:20:23 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706314822; x=1706919622; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=H6xRTgWpwVbdQrYrVCpj0/5DkwYyjb0pfDixXSPxg08=;
-        b=RYLiIB4ADJHqpt3w+GfoD4jp2simx33+zgqY8KZJz2yIZURm2B9EXPDTS0/r0GfBTp
-         xKSC/l2vAZYkoflIvphhspZYegwjiakFVmaIMr6Lh/XupXMo+GtyOPkF6hSEK/Fuww1g
-         ynPuvL5xEfcWNh2MfR42Y49ks6xzvJi62OnfD6LtAa+IxTBM++2kba+JFO0Bfrlh3KdW
-         FhxK2Nd3DHIjXA8DaPVqlxznpSwwLZ75aLpAV/UN5quT5qev3QXAYIPcFshCb9GsUqUH
-         Qf4thQ0tg81raETEun2Em2qFHwQIO8vj3dvX814xTnGWb0q4ZQE/7v9hf12sUueYqV8H
-         yWlA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706314822; x=1706919622;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=H6xRTgWpwVbdQrYrVCpj0/5DkwYyjb0pfDixXSPxg08=;
-        b=tFWJfshGfMcQ64wDl16RagDSeba1Ak+Qeb/+ssekLYpmBOgHap8WdBfk/LtPZ+sB8R
-         8nTevsbee34PlF3erVI1gYlRT3nk3erre2CDQD0/3gX/I1Nmod1zWYd08T2x2ho30e4x
-         moELUwkjd+dEsX5hTJlSfE3UOO8QjpOqKtMcoc62tO+j5dAmY7tVKteSc2dW+Eqzz12r
-         AhvJwQzfGrLUJSitQYo60I14FyWvxJnTBuKrHdNgJX1yEG3tFvdc3/cJ2mwFEyeK4MoM
-         lkVFIu1SHFyxjc7nOxFBCQq53YpnJ9/7WtQwKSqvsJPSMaBIxk9Fq9O2PKEngj0VUc0W
-         pbtA==
-X-Gm-Message-State: AOJu0YyKH7VpSgYX6F+Ur9SWTWTggh1I6dpRxKDTpfBMRYFFfUVnPyn+
-	+j346Sem65BAhGOZl17ceksA4C2A2Mlly6XrSgUuCYKZJSf1AFue1l9BWTQqowHizviKt2YaZAD
-	H
-X-Google-Smtp-Source: AGHT+IFODti9q2E+Agfa3fBrMz3o9POZ0N1iM9LXhM4BVi8Jox9fI3RwAY18ghi+6oR5uiYdJhU9kQ==
-X-Received: by 2002:ac2:4907:0:b0:510:c62:d97b with SMTP id n7-20020ac24907000000b005100c62d97bmr305904lfi.45.1706314822099;
-        Fri, 26 Jan 2024 16:20:22 -0800 (PST)
-Received: from [127.0.1.1] ([85.235.12.238])
-        by smtp.gmail.com with ESMTPSA id x25-20020a19f619000000b0050e7f5cffa6sm325226lfe.273.2024.01.26.16.20.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Jan 2024 16:20:21 -0800 (PST)
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Sat, 27 Jan 2024 01:19:56 +0100
-Subject: [PATCH v2 9/9] mmc: sh_mmcif: Use sg_miter for PIO
+	dkim=pass (1024-bit key) header.d=pobox.com header.i=@pobox.com header.b="Ki1Xp4SC";
+	dkim=pass (1024-bit key) header.d=fluxnic.net header.i=@fluxnic.net header.b="fjyg3c7k"
+Received: from pb-smtp1.pobox.com (unknown [127.0.0.1])
+	by pb-smtp1.pobox.com (Postfix) with ESMTP id 8D0461CD838;
+	Fri, 26 Jan 2024 22:51:44 -0500 (EST)
+	(envelope-from nico@fluxnic.net)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed; d=pobox.com; h=date:from
+	:to:cc:subject:in-reply-to:message-id:references:mime-version
+	:content-type; s=sasl; bh=ysSO9XRCPehfUIJw/feLeF2vBNwy/Ryu7hrqRS
+	2y+vg=; b=Ki1Xp4SCoVw28DPTb6nSxIu6p1iJM54sMVTV4BIwPPIqGW2tihkOeO
+	57fm/CjOL+x3m8b8pLW+HQ4db28QMQu/TArAbvQNcma0OTzuFjM3Lex5ww2OL9xo
+	xfLkf6wYLcZVP+4A9sqZ3VirIF/0+Jo/DajESxbWKF24b3eNHpSHE=
+Received: from pb-smtp1.nyi.icgroup.com (unknown [127.0.0.1])
+	by pb-smtp1.pobox.com (Postfix) with ESMTP id 836DE1CD837;
+	Fri, 26 Jan 2024 22:51:44 -0500 (EST)
+	(envelope-from nico@fluxnic.net)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed; d=fluxnic.net;
+ h=date:from:to:cc:subject:in-reply-to:message-id:references:mime-version:content-type; s=2016-12.pbsmtp; bh=ysSO9XRCPehfUIJw/feLeF2vBNwy/Ryu7hrqRS2y+vg=; b=fjyg3c7kPXv7OMUxssxtQoDSN2KXXxVgR+OZh1QmPbkUshLB0HzksyNvCtjsx/dGkjoFNQbQtpbk65b8HfhXWc6Z/pMIfVgpNhUKODnnM85SpnO+wWI/digIpwmNk+fST9y1GH5N7pOr+B3pewN53A7dsnL5lPdqJvcVDOi1rFI=
+Received: from yoda.fluxnic.net (unknown [24.201.101.36])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by pb-smtp1.pobox.com (Postfix) with ESMTPSA id 052A01CD835;
+	Fri, 26 Jan 2024 22:51:44 -0500 (EST)
+	(envelope-from nico@fluxnic.net)
+Received: from xanadu (unknown [IPv6:fd17:d3d3:663b:0:9696:df8a:e3:af35])
+	by yoda.fluxnic.net (Postfix) with ESMTPSA id DACAAB06A39;
+	Fri, 26 Jan 2024 22:51:42 -0500 (EST)
+Date: Fri, 26 Jan 2024 22:51:42 -0500 (EST)
+From: Nicolas Pitre <nico@fluxnic.net>
+To: Linus Walleij <linus.walleij@linaro.org>
+cc: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
+Subject: Re: [PATCH v2 5/9] mmc: mvsdio: Use sg_miter for PIO
+In-Reply-To: <20240127-mmc-proper-kmap-v2-5-d8e732aa97d1@linaro.org>
+Message-ID: <qr2sr893-775p-9770-2441-4o02qqo105or@syhkavp.arg>
+References: <20240127-mmc-proper-kmap-v2-0-d8e732aa97d1@linaro.org> <20240127-mmc-proper-kmap-v2-5-d8e732aa97d1@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20240127-mmc-proper-kmap-v2-9-d8e732aa97d1@linaro.org>
-References: <20240127-mmc-proper-kmap-v2-0-d8e732aa97d1@linaro.org>
-In-Reply-To: <20240127-mmc-proper-kmap-v2-0-d8e732aa97d1@linaro.org>
-To: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, 
- Ming Lei <ming.lei@redhat.com>, Arnd Bergmann <arnd@arndb.de>, 
- Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Pitre <nico@fluxnic.net>, 
- Aaro Koskinen <aaro.koskinen@iki.fi>, 
- Adrian Hunter <adrian.hunter@intel.com>, 
- Angelo Dureghello <angelo.dureghello@timesys.com>
-Cc: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, 
- linux-omap@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
-X-Mailer: b4 0.12.4
+Content-Type: text/plain; charset=US-ASCII
+X-Pobox-Relay-ID:
+ 62FDFBE8-BCC7-11EE-8E23-78DCEB2EC81B-78420484!pb-smtp1.pobox.com
 
-Use sg_miter iterator instead of sg_virt() and custom code
-to loop over the scatterlist. The memory iterator will do
-bounce buffering if the page happens to be located in high memory,
-which the driver may or may not be using.
+On Sat, 27 Jan 2024, Linus Walleij wrote:
 
-Suggested-by: Christoph Hellwig <hch@lst.de>
-Link: https://lore.kernel.org/linux-mmc/20240122073423.GA25859@lst.de/
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/sh_mmcif.c | 102 +++++++++++++++++++++++++++-----------------
- 1 file changed, 63 insertions(+), 39 deletions(-)
+> Use the scatterlist memory iterator instead of just
+> dereferencing virtual memory using sg_virt().
+> This make highmem references work properly.
+> 
+> This driver also has a bug in the PIO sglist handling that
+> is fixed as part of the patch: it does not travers the
+> list of scatterbuffers: it will just process the first
+> item in the list. This is fixed by augmenting the logic
+> such that we do not process more than one sgitem
+> per IRQ instead of counting down potentially the whole
+> length of the request.
+> 
+> We can suspect that the PIO path is quite untested.
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 077d711e964e..1ef6e153e5a3 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -227,14 +227,12 @@ struct sh_mmcif_host {
- 	bool dying;
- 	long timeout;
- 	void __iomem *addr;
--	u32 *pio_ptr;
- 	spinlock_t lock;		/* protect sh_mmcif_host::state */
- 	enum sh_mmcif_state state;
- 	enum sh_mmcif_wait_for wait_for;
- 	struct delayed_work timeout_work;
- 	size_t blocksize;
--	int sg_idx;
--	int sg_blkidx;
-+	struct sg_mapping_iter sg_miter;
- 	bool power;
- 	bool ccs_enable;		/* Command Completion Signal support */
- 	bool clk_ctrl2_enable;
-@@ -600,32 +598,17 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
- 	return ret;
- }
- 
--static bool sh_mmcif_next_block(struct sh_mmcif_host *host, u32 *p)
--{
--	struct mmc_data *data = host->mrq->data;
--
--	host->sg_blkidx += host->blocksize;
--
--	/* data->sg->length must be a multiple of host->blocksize? */
--	BUG_ON(host->sg_blkidx > data->sg->length);
--
--	if (host->sg_blkidx == data->sg->length) {
--		host->sg_blkidx = 0;
--		if (++host->sg_idx < data->sg_len)
--			host->pio_ptr = sg_virt(++data->sg);
--	} else {
--		host->pio_ptr = p;
--	}
--
--	return host->sg_idx != data->sg_len;
--}
--
- static void sh_mmcif_single_read(struct sh_mmcif_host *host,
- 				 struct mmc_request *mrq)
- {
-+	struct mmc_data *data = mrq->data;
-+
- 	host->blocksize = (sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
- 			   BLOCK_SIZE_MASK) + 3;
- 
-+	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
-+		       SG_MITER_ATOMIC | SG_MITER_TO_SG);
-+
- 	host->wait_for = MMCIF_WAIT_FOR_READ;
- 
- 	/* buf read enable */
-@@ -634,20 +617,32 @@ static void sh_mmcif_single_read(struct sh_mmcif_host *host,
- 
- static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
- {
-+	struct sg_mapping_iter *sgm = &host->sg_miter;
- 	struct device *dev = sh_mmcif_host_to_dev(host);
- 	struct mmc_data *data = host->mrq->data;
--	u32 *p = sg_virt(data->sg);
-+	u32 *p;
- 	int i;
- 
- 	if (host->sd_error) {
-+		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
- 	}
- 
-+	if (!sg_miter_next(sgm)) {
-+		/* This should not happen on single blocks */
-+		sg_miter_stop(sgm);
-+		return false;
-+	}
-+
-+	p = sgm->addr;
-+
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
- 
-+	sg_miter_stop(&host->sg_miter);
-+
- 	/* buffer read end */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
- 	host->wait_for = MMCIF_WAIT_FOR_READ_END;
-@@ -666,34 +661,40 @@ static void sh_mmcif_multi_read(struct sh_mmcif_host *host,
- 	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
- 		BLOCK_SIZE_MASK;
- 
-+	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
-+		       SG_MITER_ATOMIC | SG_MITER_TO_SG);
-+
- 	host->wait_for = MMCIF_WAIT_FOR_MREAD;
--	host->sg_idx = 0;
--	host->sg_blkidx = 0;
--	host->pio_ptr = sg_virt(data->sg);
- 
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
- }
- 
- static bool sh_mmcif_mread_block(struct sh_mmcif_host *host)
- {
-+	struct sg_mapping_iter *sgm = &host->sg_miter;
- 	struct device *dev = sh_mmcif_host_to_dev(host);
- 	struct mmc_data *data = host->mrq->data;
--	u32 *p = host->pio_ptr;
-+	u32 *p;
- 	int i;
- 
- 	if (host->sd_error) {
-+		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
- 	}
- 
--	BUG_ON(!data->sg->length);
-+	if (!sg_miter_next(sgm)) {
-+		sg_miter_stop(sgm);
-+		return false;
-+	}
-+
-+	p = sgm->addr;
- 
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
- 
--	if (!sh_mmcif_next_block(host, p))
--		return false;
-+	sgm->consumed = host->blocksize;
- 
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
- 
-@@ -703,9 +704,14 @@ static bool sh_mmcif_mread_block(struct sh_mmcif_host *host)
- static void sh_mmcif_single_write(struct sh_mmcif_host *host,
- 					struct mmc_request *mrq)
- {
-+	struct mmc_data *data = mrq->data;
-+
- 	host->blocksize = (sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
- 			   BLOCK_SIZE_MASK) + 3;
- 
-+	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
-+		       SG_MITER_ATOMIC | SG_MITER_FROM_SG);
-+
- 	host->wait_for = MMCIF_WAIT_FOR_WRITE;
- 
- 	/* buf write enable */
-@@ -714,20 +720,32 @@ static void sh_mmcif_single_write(struct sh_mmcif_host *host,
- 
- static bool sh_mmcif_write_block(struct sh_mmcif_host *host)
- {
-+	struct sg_mapping_iter *sgm = &host->sg_miter;
- 	struct device *dev = sh_mmcif_host_to_dev(host);
- 	struct mmc_data *data = host->mrq->data;
--	u32 *p = sg_virt(data->sg);
-+	u32 *p;
- 	int i;
- 
- 	if (host->sd_error) {
-+		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
- 	}
- 
-+	if (!sg_miter_next(sgm)) {
-+		/* This should not happen on single blocks */
-+		sg_miter_stop(sgm);
-+		return false;
-+	}
-+
-+	p = sgm->addr;
-+
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
- 
-+	sg_miter_stop(&host->sg_miter);
-+
- 	/* buffer write end */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
- 	host->wait_for = MMCIF_WAIT_FOR_WRITE_END;
-@@ -746,34 +764,40 @@ static void sh_mmcif_multi_write(struct sh_mmcif_host *host,
- 	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
- 		BLOCK_SIZE_MASK;
- 
-+	sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
-+		       SG_MITER_ATOMIC | SG_MITER_FROM_SG);
-+
- 	host->wait_for = MMCIF_WAIT_FOR_MWRITE;
--	host->sg_idx = 0;
--	host->sg_blkidx = 0;
--	host->pio_ptr = sg_virt(data->sg);
- 
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
- }
- 
- static bool sh_mmcif_mwrite_block(struct sh_mmcif_host *host)
- {
-+	struct sg_mapping_iter *sgm = &host->sg_miter;
- 	struct device *dev = sh_mmcif_host_to_dev(host);
- 	struct mmc_data *data = host->mrq->data;
--	u32 *p = host->pio_ptr;
-+	u32 *p;
- 	int i;
- 
- 	if (host->sd_error) {
-+		sg_miter_stop(sgm);
- 		data->error = sh_mmcif_error_manage(host);
- 		dev_dbg(dev, "%s(): %d\n", __func__, data->error);
- 		return false;
- 	}
- 
--	BUG_ON(!data->sg->length);
-+	if (!sg_miter_next(sgm)) {
-+		sg_miter_stop(sgm);
-+		return false;
-+	}
-+
-+	p = sgm->addr;
- 
- 	for (i = 0; i < host->blocksize / 4; i++)
- 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
- 
--	if (!sh_mmcif_next_block(host, p))
--		return false;
-+	sgm->consumed = host->blocksize;
- 
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
- 
+It was tested for sure ... at least by myself ... some 17 years ago !
 
--- 
-2.34.1
+> Suggested-by: Christoph Hellwig <hch@lst.de>
+> Link: https://lore.kernel.org/linux-mmc/20240122073423.GA25859@lst.de/
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
+[...]
+
+>  		if (!nodma)
+> -			dev_dbg(host->dev, "fallback to PIO for data at 0x%p size %d\n",
+> -				host->pio_ptr, host->pio_size);
+> +			dev_dbg(host->dev, "fallback to PIO for data\n");
+
+Given this message is about telling you why PIO is used despite not 
+having asked for it, I think it would be nicer to preserve the 
+equivalent info responsible for this infliction i.e. data->sg->offset 
+and data->blksz.
+
+The rest looks sane to me ( ... I think).
+
+
+Nicolas
