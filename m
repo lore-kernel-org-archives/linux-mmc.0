@@ -1,48 +1,58 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com [209.85.208.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 919E24D11F;
-	Mon, 29 Jan 2024 06:50:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18D6852F72
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Jan 2024 08:15:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706511031; cv=none; b=jB4P4PPoe/SKnDVZOVbGugX/gAeewN7fqP1/CBsi9aWJeQQTMNPnvWMJV4ySpiV/6cva+wwuPjYj+iurbHPqrnTsy0vRe3R8uTnwj7zpOMqsp/SxSxOUkqnJ/5rqf7iit7ym1S+BQErfm4DXeLAMFZTl5LmkD+tWuYu4fgCEXvA=
+	t=1706516127; cv=none; b=rLfK8A2+5fdhOkWQRxzeLJY6kXq+hTCJTeA/rxBi4EktQSDUmSuL3C+rFTleU1SaheQ5lHAUo5wHoV2cQV7y9xDPaK0v/FhQvnl26m01zLknOe59KWwPmhWi4t0gojJ5ThydoNzEBipdPJRMx94BZxXzYpuF5EgX+JCMN0SfV/k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706511031; c=relaxed/simple;
-	bh=9Lqd0Wp9CWGCgQ+dzHt3vF/KMkDgZyHWiuF0t1cbXPs=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=PO65JIfJleSp0MG/vzjzA36aA1qr5XDJb0eT3fjDnIzEk5Wk3EdgbEVeSv1FWFrlytQrFK4JrnTzv9hZ0n3xMSDQNDtt51yPkIHK7ArGk0wMpfVXUgC98P2mavnpjE41QXc2fHTjBHoHFRMdRbuL17QoiN2YOSpIU56bUnh+1f8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=KFuUtS8U; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1706516127; c=relaxed/simple;
+	bh=bTMdAmM70iD8Skp4adPt1e6R4xGZ8keLZAYelVo6dXA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=fT8DrDwWFxvJWrUAjVbl7oKGSzz0cCZ135Zpfcv52Udc9p3C794UwfuAIgWLQhqOySrCUeeyTr0VyElvInok/PuqrtlqgpQSa9TiYgGGYvpdDP82pP+Ld8IpHpXb1mZbA2LTHts9oMZNeq7WDL/dCoRuIauQevMX6URGUZ04xww=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=h8LAfgQv; arc=none smtp.client-ip=209.85.208.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="KFuUtS8U"
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 40T6HEs6015884;
-	Mon, 29 Jan 2024 06:50:24 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	message-id:date:mime-version:subject:to:cc:references:from
-	:in-reply-to:content-type:content-transfer-encoding; s=
-	qcppdkim1; bh=vNIxtC/0z3l+0eOI0Cy/6uCXq7BnHzaxNCHgoNCSk4s=; b=KF
-	uUtS8UUApYyrYz3pWumhfDafA3qchrm2uCyMl942A4EQqzGdcBJ1TwntsTCoWrB5
-	UBDyN0U+HsbuTzfPByhV/o5fhWn5gnRIxHtZqPVn0pTBE/fNB0R47uvzCzh8y+rf
-	SMKqJdh9KedWfdbcCnEtK9vufiUjaSQRe8BD+HkC1TiqpZSEGpkFYYmFFcqWHnuO
-	L7xEz7fi0uaeC/qahg7RbAgDo8ZARhUzldvhNpHX1YlFzLFh5zjI0grNWb4uqIOy
-	yLEAuf3CahjgE80ZCdbbkvKZDVUZ4r9TzWwnSFgcR6cjKk8cUYGxWjdhq7Plp4tq
-	NMHhE+KXKFWe+gFyf7uA==
-Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3vvu4ctwsa-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 29 Jan 2024 06:50:23 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 40T6oNC2002546
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 29 Jan 2024 06:50:23 GMT
-Received: from [10.217.218.207] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.40; Sun, 28 Jan
- 2024 22:50:14 -0800
-Message-ID: <b59331a1-567f-403c-9173-b0919bdd0f8e@quicinc.com>
-Date: Mon, 29 Jan 2024 12:20:11 +0530
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="h8LAfgQv"
+Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-55f03ede12cso580150a12.0
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Jan 2024 00:15:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1706516123; x=1707120923; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=CZ37FTpWtxd+apLpbc3f/ZbNZv8NUkS8211DEAp7JYE=;
+        b=h8LAfgQvUC2rdUGfj1sBsgVZPAsuydP1MFnDvPdTACh8beSh/Al2Ky6BWAE/HZEOYc
+         Gya4QhMjXVSuVz+kCxOkrEvt5uEaDTmesMnvuvC9FUcKHYX4plkt35RwwF9FxMx2YjoN
+         76W5c6pFav6JyCIoP9/Pz5KjPBPgCvoxhmbfR79Cm0AX/X4IEC7dJwm79A+UunF3BXM+
+         zy6pB17k7jEqlqi30vx1E3YJGgPDjn9D4Zd0CNhjM9+Cmi6BNQW45xsyAWSK4UACwJYR
+         iVIvyq1QsSbTe0I2tvcR4zobHKBDJkM81FkgK4AmfYI6yh5jZS/oOJXsiG8va2ReWh2g
+         HX0Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706516123; x=1707120923;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=CZ37FTpWtxd+apLpbc3f/ZbNZv8NUkS8211DEAp7JYE=;
+        b=R2dmPg56UmGJEKYkLTB0qd9MGFYRVXiN9teFO41LCpSY1lOcR+X0O07XZ4nkOIOZOE
+         COWzhipxQTETd4g3gIWj+2qNkTg8LlLQc8BYJgY99tHbOj0AD1IF0Li6sszso476/5IR
+         v/jxmPNQhCFP24jgunNnOTFK1z5Jd98nvyToKMBoGRj8BSUAGRZoK8+zbS3Tnwg8FPPd
+         uwKbavHqDYygBxEkK9WdwvyYcVP14oPzss38UfxWa60VnVJCCKH74rSNrUU8OENn6QB7
+         E18f3aQebipnh0TT0MMEcz5/X2ocxDTlfbxK7IsSgBj1k1/E6VwFU+zC1XPShujgq2GH
+         IZKQ==
+X-Gm-Message-State: AOJu0Yy4PIUCyqv11rn46WYlLHp7/vDSrPveSaJhO/IOznLU36xhzy2v
+	DxdQK04vgzXK1ak9oIEC+GfSXrqgGLYnFRd7n72uDe5JzXubIs5wD38qpeB+MoE=
+X-Google-Smtp-Source: AGHT+IGq6hM25x7JO+csRoGfY9SrHjUj9tVt/PgVdiJnW4tND8ArgaPwpwQ0gpAxBtDpMJDT0pPnGg==
+X-Received: by 2002:a05:6402:35c4:b0:55d:20f2:11c9 with SMTP id z4-20020a05640235c400b0055d20f211c9mr3598720edc.25.1706516123326;
+        Mon, 29 Jan 2024 00:15:23 -0800 (PST)
+Received: from [192.168.1.20] ([178.197.222.62])
+        by smtp.gmail.com with ESMTPSA id g15-20020a056402090f00b0055e230fe75esm2743763edz.91.2024.01.29.00.15.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 29 Jan 2024 00:15:22 -0800 (PST)
+Message-ID: <cc28fc0e-0ef0-4194-ab1e-fcd98a7be903@linaro.org>
+Date: Mon, 29 Jan 2024 09:15:20 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,135 +60,104 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/3] mmc: core: Add partial initialization support
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Andy Gross <agross@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
-        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
-        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_sachgupt@quicinc.com>, <quic_bhaskarv@quicinc.com>,
-        <quic_narepall@quicinc.com>, <kernel@quicinc.com>,
-        Veerabhadrarao Badiganti
-	<quic_vbadigan@quicinc.com>
-References: <20231019054612.9192-1-quic_sartgarg@quicinc.com>
- <20231019054612.9192-2-quic_sartgarg@quicinc.com>
- <CAPDyKFofS16AsQeTVNiDi_PHUatGoQ3no-1+Azo+yqG0SPTe4Q@mail.gmail.com>
- <21208de0-79bc-42c7-b32f-355daf5b09f0@quicinc.com>
- <CAPDyKFrVNfqUxU2iGEDXrshOEKm1KROCHTPpSyDAgZPMPojfsg@mail.gmail.com>
+Subject: Re: [PATCH v4 14/15] arm64: dts: qcom: sm8650: add hwkm support to
+ ufs ice
 Content-Language: en-US
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-In-Reply-To: <CAPDyKFrVNfqUxU2iGEDXrshOEKm1KROCHTPpSyDAgZPMPojfsg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+To: Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+ linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org,
+ andersson@kernel.org, ebiggers@google.com, neil.armstrong@linaro.org,
+ srinivas.kandagatla@linaro.org, krzysztof.kozlowski+dt@linaro.org,
+ conor+dt@kernel.org, robh+dt@kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+ kernel@quicinc.com, linux-crypto@vger.kernel.org,
+ devicetree@vger.kernel.org, quic_omprsing@quicinc.com,
+ quic_nguyenb@quicinc.com, bartosz.golaszewski@linaro.org,
+ konrad.dybcio@linaro.org, ulf.hansson@linaro.org, jejb@linux.ibm.com,
+ martin.petersen@oracle.com, mani@kernel.org, davem@davemloft.net,
+ herbert@gondor.apana.org.au
+References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com>
+ <20240127232436.2632187-15-quic_gaurkash@quicinc.com>
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
+ 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
+ D2GYIS41Kv4Isx2dEFh+/Q==
+In-Reply-To: <20240127232436.2632187-15-quic_gaurkash@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 4RRZ3PVkPOHNZaSm6CJsg3skL3JrtV8D
-X-Proofpoint-ORIG-GUID: 4RRZ3PVkPOHNZaSm6CJsg3skL3JrtV8D
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-01-29_03,2024-01-25_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 impostorscore=0
- clxscore=1011 priorityscore=1501 lowpriorityscore=0 adultscore=0
- bulkscore=0 suspectscore=0 mlxlogscore=999 phishscore=0 malwarescore=0
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2401190000 definitions=main-2401290047
 
+On 28/01/2024 00:14, Gaurav Kashyap wrote:
+> The Inline Crypto Engine (ICE) for UFS/EMMC supports the
+> Hardware Key Manager (HWKM) to securely manage storage
+> keys. Enable using this hardware on sm8650.
+> 
+> This requires two changes:
+> 1. Register size increase: HWKM is an additional piece of hardware
+>    sitting alongside ICE, and extends the old ICE's register space.
+> 2. Explicitly tell the ICE driver to use HWKM with ICE so that
+>    wrapped keys are used in sm8650.
+> 
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> Reviewed-by: Om Prakash Singh <quic_omprsing@quicinc.com>
+> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+> ---
+>  arch/arm64/boot/dts/qcom/sm8650.dtsi | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/sm8650.dtsi b/arch/arm64/boot/dts/qcom/sm8650.dtsi
+> index 2df77123a8c7..c27daf576af5 100644
+> --- a/arch/arm64/boot/dts/qcom/sm8650.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sm8650.dtsi
+> @@ -2524,7 +2524,8 @@ &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
+>  		ice: crypto@1d88000 {
+>  			compatible = "qcom,sm8650-inline-crypto-engine",
+>  				     "qcom,inline-crypto-engine";
+> -			reg = <0 0x01d88000 0 0x8000>;
+> +			reg = <0 0x01d88000 0 0x10000>;
+> +			qcom,ice-use-hwkm;
 
+Vendor properties go to the end. Please consult DTS coding style.
 
-On 10/27/2023 3:23 PM, Ulf Hansson wrote:
-> [...]
-> 
->>>> +{
->>>> +       int err = 0;
->>>> +       struct mmc_card *card = host->card;
->>>> +
->>>> +       mmc_set_bus_width(host, host->cached_ios.bus_width);
->>>> +       mmc_set_timing(host, host->cached_ios.timing);
->>>> +       if (host->cached_ios.enhanced_strobe) {
->>>> +               host->ios.enhanced_strobe = true;
->>>> +               if (host->ops->hs400_enhanced_strobe)
->>>> +                       host->ops->hs400_enhanced_strobe(host, &host->ios);
->>>> +       }
->>>> +       mmc_set_clock(host, host->cached_ios.clock);
->>>> +       mmc_set_bus_mode(host, host->cached_ios.bus_mode);
->>>> +
->>>
->>> Rather than re-using the above APIs and the ->set_ios() callback in
->>> the host, I believe it would be better to add a new host ops to manage
->>> all of the above at once instead. Something along the lines of the
->>> below, would then replace all of the above.
->>>
->>> host->ops->restore_ios(host, &host->cached_ios)
->>> memcpy(&host->ios, &host->cached_ios, sizeof(host->ios));
->>>
->>> Would that make sense to you too?
->>>
->>
->>
->> I didn't get this completely. Do you mean that we should implement a new
->> restore_ios callback (e.g. sdhci_restore_ios) similar to sdhci_set_ios
->> and removing all the redundant code from sdhci_set_ios which should
->> achieve the behaviour same as calling all the above mmc_set_* API's ?
-> 
-> Correct. Would it not simply the things in the driver too?
-> 
->>
->>
->>>> +       if (!mmc_card_hs400es(card) &&
->>>> +                       (mmc_card_hs200(card) || mmc_card_hs400(card))) {
->>>> +               err = mmc_execute_tuning(card);
->>>> +               if (err) {
->>>> +                       pr_err("%s: %s: Tuning failed (%d)\n",
->>>> +                               mmc_hostname(host), __func__, err);
->>>
->>> There is already a print being done in mmc_execute_tuning() at
->>> failure. So, let's drop the above print.
->>>
->>
->> Sure will take care in V4.
->>
->>>> +                       goto out;
->>>> +               }
->>>> +       }
->>>> +
->>>> +       err = mmc_test_awake_ext_csd(host);
->>>
->>> Again, I don't get why this is needed, so let's discuss this more.
->>>
->>
->> This is just a safety check added because ext_csd has some W/E_P or
->> W/C_P registers which gets reset if any HW reset happens to the card.
->> So this will check for those cases if any other vendor is doing reset as
->> part of suspend and compare a subset of those W/E_P and W/C_P registers
->> and if they are changed then we will bail out of this partial init
->> feature and go for full initialization.
->> We are also fine with removing this function but just added for the
->> above mentioned case.
-> 
-> In that case, I would rather remove it as I think it's superfluous.
-> 
-> More precisely, I would expect that we fail to wake up the card with a
-> CMD5 (get an error response for the CMD) if there has been a HW reset
-> somewhere done before.
-> 
-> Another reason to *not* read the ext_csd would be to further improve
-> the resume time, as reading it takes time too. I would be curious to
-> know how much though. :-)
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
+Best regards,
+Krzysztof
 
-Hi ulf,
-
-Sorry for the delay but we are seeing some stability issues when testing 
-this feature with HS400 cards which I am debugging and may take some 
-time and will come back.
-Note: This feature is working perfectly fine with HS400ES cards.
