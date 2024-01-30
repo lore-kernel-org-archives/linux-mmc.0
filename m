@@ -1,58 +1,47 @@
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E37F54BC5
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Jan 2024 07:51:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FAE429D03;
+	Tue, 30 Jan 2024 09:36:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.55.52.120
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706601107; cv=none; b=MtsMmizM7fx5wX+D9MPKsp337TLlVcaL30gWh/1ddHSzbOUbW3TiSrlKPdQ6fH4VgAD3gDk/0/6vV7Q9zJK6vSqtlgVGyirosJK8mq2KzVrh14CfngHYDGHsL//3YQ8hEB/uUOl51dffJOQJbrCgla2Y8ud6MA02aSp3z9fCvzc=
+	t=1706607376; cv=none; b=A1eXk+bK5muglGI43gyCkzlV7yhB7ofNECabRevZuuKlqMqH/x94I86Tcfy+OHSvvSVaDSQd0WMDczLSQ1dPzdYZMGOShwq5jPDY3aL33v6JbqZZ0qXq8uZCBsuJzsMWTcPmc/9ELoXYAlISCQ/oOmAxmMXlqDex0FoVyqv305w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706601107; c=relaxed/simple;
-	bh=N1ix6n0OUSNUPPVa8QYErwWyocB1DYBMbthnSeb6xVI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=CryDTUbcMlcOKUUUxlQpaOAgh3cChLIya0O6bchcgjKf32lFDyvYnZYIbTswEmnNdIFpfh/G5/07VypIjuPngjB+qV5i3DoEZWjc2kliEXO7yflyjqvaFKjxxa+whEYocsbd2pOCdisFtZK635srz1yGJQqsI29Oypjc6JD5pxc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=lTO7k4HK; arc=none smtp.client-ip=209.85.218.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
+	s=arc-20240116; t=1706607376; c=relaxed/simple;
+	bh=aOwB0zg2aCrzmyRkBo9sIFOlWGHNkbvX/nE8gi1D/Vg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DA4sDVfEcqPXa+7vAD9uzsIIX3FVpnfDuJxWWAbImZK+NPwGJClcmQebl3roZSkvCdk9PsIXHj/HjIAN0NPsqeoFyyr9dagNk79KGmMMVvDcIFBueEtLno1vxvKVVOi0ci6KPpn1ldv/w5I5r/pXxnwraqjYcDf7MmldLc/cufc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ncSKDKBo; arc=none smtp.client-ip=192.55.52.120
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="lTO7k4HK"
-Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-a358ec50b7cso372117466b.0
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Jan 2024 23:51:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1706601103; x=1707205903; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=iEqlR+fJyGnaEM9aDQpCcAkAZfZ+490su0Pu8FiSISU=;
-        b=lTO7k4HKo9grtbliGalco5W98VXWPk5WZY5h6xAx3IsclcIwiGR8GYXlfHggLONHcn
-         pytj0reyeZIQ0E1B0ECry2aX2TxAW7CaWWoQxhYuNEjqfg3L2ZJVW06XD8FzQEMmYKp0
-         jYMO4QhfVOv+Bzw1knDLKsKfKPYxK9T9d9cUadBSLFR0fS3xsUquFs9obqvKohIFXttP
-         DInibpYrctXJM+po+ux/ObmANur9Q8owZmjLcYs3XujYffpns0d47mHM6/aZFt+jxCJU
-         +gFCY1Cqw6OsC2WkyaIa7mthUxHudIvKk8f8gKLdkULLovxRZk2m8bW6vIn6hFGTXMyh
-         PPHg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706601103; x=1707205903;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=iEqlR+fJyGnaEM9aDQpCcAkAZfZ+490su0Pu8FiSISU=;
-        b=DN9dmLgssyJedi/shMc1OUoQ9hzOP/hpthr7/KmPtgdy6T38RFyvow3XJ6AbeTxE7j
-         scjJwzxQNblW9yvaidf4njQ9yir2YNkml0tecgMBXrcj8fETO4wwFd9w+dmHzGALx+tr
-         2cHxLhu0tu1Yqs1+u21OQAi5/yPbmoAm9FuaoGJJVb2ASIHtLjQKTGNUBWXHtr0r03hS
-         VJKK0mdz6r7JGz1qN/8R2sdcefLIi+Sxb6HGPCulP+BsqD1f4mTp3L8P4hc1h/WlMAg/
-         UOhVsTZeniejCjcNn4KpqETA7f6MvA/bFFf3zcQUH46sUnk2hJqWRC0wpo0DYbzFTCd4
-         2LEg==
-X-Gm-Message-State: AOJu0Yx9oNSAxAFvzqL+f1MoyrImuPwvuVpMOgUL6RnM/z5GbVA9eP+c
-	si0xCRGJxFBo5HEBpuDs0pmq4k+0fg58MFlQLn5yVqt9+bM2Rb8nDO2ums5co74=
-X-Google-Smtp-Source: AGHT+IFStFSvAOXDX8wZSjE3jCOcKoDxqY9rT1us8tNNWM70GTRaDfAHBOARadsjTAnDlPQXoBZliA==
-X-Received: by 2002:a17:906:1296:b0:a31:6534:1da with SMTP id k22-20020a170906129600b00a31653401damr627464ejb.36.1706601103511;
-        Mon, 29 Jan 2024 23:51:43 -0800 (PST)
-Received: from [192.168.50.4] ([82.78.167.87])
-        by smtp.gmail.com with ESMTPSA id vb1-20020a170907d04100b00a34c07816e3sm4785771ejc.73.2024.01.29.23.51.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 29 Jan 2024 23:51:43 -0800 (PST)
-Message-ID: <7c4f6031-ac7b-407c-a223-e7b65ef8baa7@tuxon.dev>
-Date: Tue, 30 Jan 2024 09:51:41 +0200
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ncSKDKBo"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1706607375; x=1738143375;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=aOwB0zg2aCrzmyRkBo9sIFOlWGHNkbvX/nE8gi1D/Vg=;
+  b=ncSKDKBooddV+YB6j515C2DnWYhTH/L0cJL9CeBJAqNMthDcbk9CQbla
+   AkH6RrIyMd8E6NIK6loj+Ts7injrOqPj7A5xq8l9BhVsNRDhxQrp+k5iu
+   2bZuoZ5c6+pOQZa0Oa/2MRKnFlCSEK8RQZzzqq6mX4mSq2U9OniifWr5J
+   qXh1uBfIQBAIR0hbQt8ytf6tHXcF2WPv3rnhp6pN2ptnaX6kCQCmlYtYl
+   G2Mim+56oyN85EhVuJN5fH5y3Lu1N76WyR9TIQNSey7k26RRO17S0ULbO
+   vSXiHsVJomjF9CSNJxrDrf5gXwn44Ycfq+QaAgG1bzrwfas+5hEespb5q
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10968"; a="402092846"
+X-IronPort-AV: E=Sophos;i="6.05,707,1701158400"; 
+   d="scan'208";a="402092846"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jan 2024 01:36:14 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10968"; a="931388109"
+X-IronPort-AV: E=Sophos;i="6.05,707,1701158400"; 
+   d="scan'208";a="931388109"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.217.15])
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jan 2024 01:36:11 -0800
+Message-ID: <a81d0f82-ec9b-4ccf-b31b-9ef9d403ec6b@intel.com>
+Date: Tue, 30 Jan 2024 11:36:07 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -60,81 +49,244 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: renesas_sdhi: Fix change point of data handling
+Subject: Re: [PATCH V14 07/21] mmc: core: Support UHS-II card control and
+ access
 Content-Language: en-US
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, ulf.hansson@linaro.org,
- takeshi.saito.xv@renesas.com, masaharu.hayakawa.ry@renesas.com,
- yoshihiro.shimoda.uh@renesas.com, linux-mmc@vger.kernel.org,
- linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
- Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20240117110646.1317843-1-claudiu.beznea.uj@bp.renesas.com>
- <ZbeEPg1jc5qWJa5m@ninjato> <345bc392-cf28-479a-9453-5bc89f635759@tuxon.dev>
- <ZbikovLbujyGS1ub@ninjato>
-From: claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <ZbikovLbujyGS1ub@ninjato>
+To: Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+ Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+ dlunev@chromium.org, Jason Lai <jason.lai@genesyslogic.com.tw>,
+ Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20240123062827.8525-1-victorshihgli@gmail.com>
+ <20240123062827.8525-8-victorshihgli@gmail.com>
+ <CAK00qKBf24CMFygfutpfxQwaKEQEo+FKv2XU4X_oxv38un-YEg@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CAK00qKBf24CMFygfutpfxQwaKEQEo+FKv2XU4X_oxv38un-YEg@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+
+On 27/01/24 10:28, Victor Shih wrote:
+> On Tue, Jan 23, 2024 at 2:28 PM Victor Shih <victorshihgli@gmail.com> wrote:
+>>
+>> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+>>
+>> Embed UHS-II access/control functionality into the MMC request
+>> processing flow.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+>> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+>> ---
+>>
+>> Updates in V13:
+>>  - Separate __mmc_go_idle() into one patch for re-factorring the code.
+>>  - Move mmc_decode_scr declaration to sd.h.
+>>  - Ues uhs2_sd_tran to stead MMC_UHS2_SD_TRAN.
+>>  - Drop unnecessary comment.
+>>
+>> Updates in V12:
+>>  - Use mmc_op_multi() to check DCMD which supports multi read/write
+>>    in mmc_uhs2_prepare_cmd().
+>>
+>> Updates in V10:
+>>  - Move some definitions of PatchV9[02/23] to PatchV10[06/23].
+>>  - Move some definitions of PatchV9[05/23] to PatchV10[06/23].
+>>  - Drop do_multi in the mmc_blk_rw_rq_prep().
+>>  - Use tmode_half_duplex to instead of uhs2_tmode0_flag.
+>>  - Move entire control of the tmode into mmc_uhs2_prepare_cmd().
+>>
+>> Updates in V8:
+>>  - Add MMC_UHS2_SUPPORT to be cleared in sd_uhs2_detect().
+>>  - Modify return value in sd_uhs2_attach().
+>>
+>> Updates in V7:
+>>  - Add mmc_uhs2_card_prepare_cmd helper function in sd_ops.h.
+>>  - Drop uhs2_state in favor of ios->timing.
+>>  - Remove unnecessary functions.
+>>
+>> ---
+>>
+>>  drivers/mmc/core/core.c    |   10 +-
+>>  drivers/mmc/core/sd.c      |   10 +-
+>>  drivers/mmc/core/sd.h      |    5 +
+>>  drivers/mmc/core/sd_ops.c  |    9 +
+>>  drivers/mmc/core/sd_ops.h  |   17 +
+>>  drivers/mmc/core/sd_uhs2.c | 1115 ++++++++++++++++++++++++++++++++++--
+>>  include/linux/mmc/core.h   |   13 +
+>>  include/linux/mmc/host.h   |   15 +
+>>  8 files changed, 1155 insertions(+), 39 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 2edf31492a5d..be77cebe1fb8 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -334,6 +334,8 @@ static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
+>>
+>>  int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>  {
+>> +       struct uhs2_command uhs2_cmd;
+>> +       __be32 payload[4]; /* for maximum size */
+>>         int err;
+>>
+>>         init_completion(&mrq->cmd_completion);
+>> @@ -351,6 +353,8 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>         if (err)
+>>                 return err;
+>>
+>> +       mmc_uhs2_card_prepare_cmd(host, mrq, uhs2_cmd, payload);
+>> +
+>>         led_trigger_event(host->led, LED_FULL);
+>>         __mmc_start_request(host, mrq);
+>>
+> 
+> Hi, Adrian
+> 
+> I referenced your comments of the V9:
+> 
+> Refer:
+> https://patchwork.kernel.org/project/linux-mmc/patch/20230721101349.12387-7-victorshihgli@gmail.com/
+> 
+> My understanding is as follows, please correct me if there are any mistakes.
+> There is already "struct uhs2_command *uhs2_cmd" in struct mmc_command.
+> If I also put "__be32 payload[4]" in struct mmc_command.
+> The code will become:
+> mmc_uhs2_card_prepare_cmd(host, mrq, *mrq->cmd->uhs2_cmd, mrq->cmd->payload);
+> But a null pointer problem occurs when sending commands like COM0(mmc_go_idle).
+> In this case I just can only plan for the time being as follows:
+> 
+> if (mrq->cmd->uhs2_cmd)
+>      mmc_uhs2_card_prepare_cmd(host, mrq, *mrq->cmd->uhs2_cmd,
+> mrq->cmd->payload);
+> else
+>      mmc_uhs2_card_prepare_cmd(host, mrq, uhs2_cmd, payload);
+> 
+> Would you give me any other advice?
+
+struct uhs2_command uhs2_cmd should not be on the stack local to
+mmc_start_request().  Probably moving it to struct mmc_request
+is as good as any other option.  So starting like below and
+then with whatever other changes are needed to make it work.
+
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index be77cebe1fb8..68496c51a521 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -334,8 +334,6 @@ static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ {
+-	struct uhs2_command uhs2_cmd;
+-	__be32 payload[4]; /* for maximum size */
+ 	int err;
+ 
+ 	init_completion(&mrq->cmd_completion);
+@@ -353,7 +351,7 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		return err;
+ 
+-	mmc_uhs2_card_prepare_cmd(host, mrq, uhs2_cmd, payload);
++	mmc_uhs2_card_prepare_cmd(host, mrq);
+ 
+ 	led_trigger_event(host->led, LED_FULL);
+ 	__mmc_start_request(host, mrq);
+@@ -434,8 +432,6 @@ EXPORT_SYMBOL(mmc_wait_for_req_done);
+  */
+ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+-	struct uhs2_command uhs2_cmd;
+-	__be32 payload[4]; /* for maximum size */
+ 	int err;
+ 
+ 	/*
+@@ -456,7 +452,7 @@ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		goto out_err;
+ 
+-	mmc_uhs2_card_prepare_cmd(host, mrq, uhs2_cmd, payload);
++	mmc_uhs2_card_prepare_cmd(host, mrq);
+ 
+ 	err = host->cqe_ops->cqe_request(host, mrq);
+ 	if (err)
+diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+index d3a3465c7669..e3af68a52de8 100644
+--- a/drivers/mmc/core/sd_ops.h
++++ b/drivers/mmc/core/sd_ops.h
+@@ -24,14 +24,10 @@ int mmc_app_sd_status(struct mmc_card *card, void *ssr);
+ int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card);
+ void mmc_uhs2_prepare_cmd(struct mmc_host *host, struct mmc_request *mrq);
+ 
+-static inline void mmc_uhs2_card_prepare_cmd(struct mmc_host *host, struct mmc_request *mrq,
+-					     struct uhs2_command uhs2_cmd, __be32 payload[4])
++static inline void mmc_uhs2_card_prepare_cmd(struct mmc_host *host, struct mmc_request *mrq)
+ {
+-	if (host->uhs2_sd_tran) {
+-		uhs2_cmd.payload = payload;
+-		mrq->cmd->uhs2_cmd = &uhs2_cmd;
++	if (host->uhs2_sd_tran)
+ 		mmc_uhs2_prepare_cmd(host, mrq);
+-	}
+ }
+ 
+ static inline int mmc_sd_can_poweroff_notify(struct mmc_card *card)
+diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
+index c46729d85644..9cabb6937dc1 100644
+--- a/drivers/mmc/core/sd_uhs2.c
++++ b/drivers/mmc/core/sd_uhs2.c
+@@ -1194,6 +1194,7 @@ void mmc_uhs2_prepare_cmd(struct mmc_host *host, struct mmc_request *mrq)
+ 	u8 plen;
+ 
+ 	cmd = mrq->cmd;
++	cmd->uhs2_cmd = &mrq->uhs2_cmd;
+ 	header = host->card->uhs2_config.node_id;
+ 	if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC)
+ 		header |= UHS2_PACKET_TYPE_DCMD;
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index f30f6be86f66..83c901794c17 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -23,13 +23,18 @@ enum mmc_blk_status {
+ 	MMC_BLK_NEW_REQUEST,
+ };
+ 
++#define UHS2_MAX_PAYLOAD_LEN 2
++#define UHS2_MAX_RESP_LEN 20
++
+ struct uhs2_command {
+ 	u16	header;
+ 	u16	arg;
+-	__be32	*payload;
+-	u32	payload_len;
+-	u32	packet_len;
++	__be32	payload[UHS2_MAX_PAYLOAD_LEN];
++	u8	payload_len;
++	u8	packet_len;	// TODO: is this really needed?
+ 	u8	tmode_half_duplex;
++	u8	uhs2_resp_len;	/* UHS2 native cmd resp len */
++	u8	uhs2_resp[UHS2_MAX_RESP_LEN];	/* UHS2 native cmd resp */
+ };
+ 
+ struct mmc_command {
+@@ -119,8 +124,6 @@ struct mmc_command {
+ 	struct mmc_request	*mrq;		/* associated request */
+ 
+ 	struct uhs2_command	*uhs2_cmd;	/* UHS2 command */
+-	u8			*uhs2_resp;	/* UHS2 native cmd resp */
+-	u8			uhs2_resp_len;	/* UHS2 native cmd resp len */
+ };
+ 
+ struct mmc_data {
+@@ -179,6 +182,7 @@ struct mmc_request {
+ 	const struct bio_crypt_ctx *crypto_ctx;
+ 	int			crypto_key_slot;
+ #endif
++	struct uhs2_command	uhs2_cmd;
+ };
+ 
+ struct mmc_card;
 
 
 
-On 30.01.2024 09:26, Wolfram Sang wrote:
-> Hi Claudiu,
-> 
->> My understanding was the other way around from this statement found in
->> RZ/G3S hw manual:
->>
->> "If all of the TAP [i] is OK, the sampling clock position is selected by
->> identifying the change point of data.
-> 
-> Yes, it is easy to misunderstand. It should add "and avoid it" or
-> something. I got an internal diagram which makes it more clear. I just
-> asked if I can share it with you.
-> 
->>> I also have a chapter named like this. If you check the diagram, change
->>> point is between TAP2 and 3, so the suggested TAP to use is 6 or 7. As
->>> far away as possible from the change point.
->>
->> My understanding was different here as of the following hw manual statement:
->>
->> "As the width of the input data is 1 (UI), select TAP6 or TAP7 which is
->>
->> *the median* of next TAP3 from TAP3"
->>
->> I understand from this that the median value should be considered here.
-> 
-> Sorry, can't follow you here. "Select TAP6 or TAP7" is clear to me. But
-> it doesn't really matter why it was misleading...
-> 
->>> However, with some SD cards, I also see the EIO error you see. So, there
->>> might be room to improve TAP selection when all TAPs are good. I need to
->>> check if this is really is the same case for the SD cards in question.
->>
->> Maybe better would be to change this condition:
->>
->> 			if (cmpngu_data != cmpngd_data)
->> 				set_bit(i, priv->smpcmp);
->>
->> like this:
->> 			if (cmpngu_data == cmpngd_data)
->> 				set_bit(i, priv->smpcmp);
->>
->> ?
->>
->> I need to check it, though.
-> 
-> But isn't it equal to the current code then? (Except for one thing: the
-
-From my debugging session I remember the SMPCMP was not zero and this lead
-to my failure.
-
-I'm not sure (and I don't remember from my debugging session) if CMPNGU and
-CMPNGD are identical after the change point of the input data (CMPNGU  !=
-CMPNGD) has been signaled by the controller. I need to check it.
-
-> smpcmp bit is only set when there is no cmd error. I need to double
-> check but I think I like that.)
-> 
-> Happy hacking,
-> 
->    Wolfram
-> 
