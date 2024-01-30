@@ -1,141 +1,225 @@
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB0944CDE5
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Jan 2024 10:56:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0715376F2;
+	Tue, 30 Jan 2024 04:43:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706525765; cv=none; b=OGf+G20R67JQV887oU3fy0Z38Z9C/iQ3nTIRfVUEP5XYR13tdr5DyAVB6RE9vzJJqzLwXMrFJizaN4qZJT+1StvTDB7X2cgoHMNh/2+WbWhx0wIHPJEd+T+h4nS46zWJL0eS/s1loWl5wy9WFf3K7C+CqFCqoN3ajIjShcdk3pA=
+	t=1706589821; cv=none; b=RQXaNgCprAq6dHtchQPnn2P3gdyUdEVtg39bY6jra2jR2YYmg4On2fUb8xiBhsWkJs/0sPQvNWwNzygCLwB/zyDqw7qyr+apJflxMasO68YqexxGLCM43x4rlbaCoW6jSysdOFvpYwHiJgDl/r2TykMnQyMoXPHosjeaFV3ZTBg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706525765; c=relaxed/simple;
-	bh=gQ+bkqp1o7w6DpXGvLyO3qBfZJBn2zhyUnneYg5MOUI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MZdVYmLjQkYCM0A4TY/S7IL8GEwKnEAnretZ1+orkB27Hx8Ovp2mmy7VYvBXOzgjDDyZIwIDAZGeDlCgwsA9KZtxduGNFWJcX/wHgokqqAJBrwX6NqrAdbCvyvZilgL7fTl6aNdqiWO9ZiH29L9ripwE1yD+HYw5OIhlhb11hrE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=ij/fcDFH; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1706589821; c=relaxed/simple;
+	bh=JPoxPFTiVNeEELD0yioByjjkHwiYtb0bi/b574VfYY8=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lJL1487IG1SmjHmhqBQKdyz7PiIp6cS1kv3PnZN9DMaFGs5tRQvPHrBMkBTHowSAt8AB5W2zmouWYsd/VqWDzxLmPdgwEjPBu0kQUOmyvBnoxof0foRFQBhmG1yHNDvhN+uthTvg+W3+NTu7bCdTjKSzj057Rk2aK8+8LWKIwtI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=BSbwCH+a; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="ij/fcDFH"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=8Vds
-	N256lqT0aql6yEsOs12eHyuM7++ETK7rDRF3YI4=; b=ij/fcDFHetOFQcKrVOvV
-	0Qn79z/rMW7AOAtzX2mbgv68+NVz+4T0FZVtEYr+NCB6t/O3986dv6PPzJUm1zFL
-	1wro4VX0UNSyiL19hyjy6zDiLjs/OyW3ELPkuEHYN4rReSI+dD+Wy9+IzOmI0BYq
-	Z/+2AJqeSEf3EyV4cjIqOQ1XyabCHr0avzqcnkRSkPBiNAOT0FhEb2jSTFKmhC+y
-	egulRm47zDeqYzDvQpl+94qqRRhAdHKug8wXDRmH1yTrUsAPiLJHnAVxhlCdfdbO
-	/qvatcved4g9oD8KKiBwzX5LBb0hduw83gOBmP8cE3m/T6aKq++BdTaRc/CifAun
-	+g==
-Received: (qmail 2447710 invoked from network); 29 Jan 2024 11:55:59 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 29 Jan 2024 11:55:59 +0100
-X-UD-Smtp-Session: l3s3148p1@Ym6qfRMQYuRehhtJ
-Date: Mon, 29 Jan 2024 11:55:58 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Claudiu <claudiu.beznea@tuxon.dev>
-Cc: ulf.hansson@linaro.org, takeshi.saito.xv@renesas.com,
-	masaharu.hayakawa.ry@renesas.com, yoshihiro.shimoda.uh@renesas.com,
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Subject: Re: [PATCH v2] mmc: renesas_sdhi: Fix change point of data handling
-Message-ID: <ZbeEPg1jc5qWJa5m@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Claudiu <claudiu.beznea@tuxon.dev>, ulf.hansson@linaro.org,
-	takeshi.saito.xv@renesas.com, masaharu.hayakawa.ry@renesas.com,
-	yoshihiro.shimoda.uh@renesas.com, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20240117110646.1317843-1-claudiu.beznea.uj@bp.renesas.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="BSbwCH+a"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 40U3fFjC009188;
+	Tue, 30 Jan 2024 04:43:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	date:from:to:cc:subject:message-id:references:mime-version
+	:content-type:in-reply-to; s=qcppdkim1; bh=pWFEskhoP9oDG95LJo7cn
+	Oun93WuYdxPtgdyZ6WggcU=; b=BSbwCH+aul6dpJviCTrOZAwOKhxydxmo4iCNj
+	+4MSnmRiKKZajdtXePvftSbc9FUvJxK693Y0IeOXO2MhT3UHAxrWeZSgT0k5/DH9
+	U+lJXBstFBQHvE+M87e3aQYBV0OU9Skz9nFeb3mhuG/Pr9XUcKg5C0MxJgaVQ1GW
+	KHVg5grf6aR0URxxeLfybACXGMW4ueNIYzKnq16hx7aA8eJfm1vlE301c92ccj62
+	a/NqKgayFkK37KXjHbf+yLG4Eigr1MMcm+VmagM2S21F89wfZmjAtwF8yYu2nyOm
+	x0NB//58xdSbJ4iuaxP2klBypN5PuQ20VQKOVWhgkM/Uh2NnQ==
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3vxsc403rr-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 30 Jan 2024 04:43:25 +0000 (GMT)
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+	by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 40U4hOP1029937
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 30 Jan 2024 04:43:24 GMT
+Received: from hu-bjorande-lv.qualcomm.com (10.49.16.6) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.40; Mon, 29 Jan 2024 20:43:21 -0800
+Date: Mon, 29 Jan 2024 20:43:20 -0800
+From: Bjorn Andersson <quic_bjorande@quicinc.com>
+To: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+CC: <linux-arm-msm@vger.kernel.org>, <linux-scsi@vger.kernel.org>,
+        <andersson@kernel.org>, <ebiggers@google.com>,
+        <neil.armstrong@linaro.org>, <srinivas.kandagatla@linaro.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
+        <robh+dt@kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <kernel@quicinc.com>,
+        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <quic_omprsing@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <bartosz.golaszewski@linaro.org>, <konrad.dybcio@linaro.org>,
+        <ulf.hansson@linaro.org>, <jejb@linux.ibm.com>,
+        <martin.petersen@oracle.com>, <mani@kernel.org>, <davem@davemloft.net>,
+        <herbert@gondor.apana.org.au>
+Subject: Re: [PATCH v4 02/15] qcom_scm: scm call for deriving a software
+ secret
+Message-ID: <20240130044320.GV2936378@hu-bjorande-lv.qualcomm.com>
+References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com>
+ <20240127232436.2632187-3-quic_gaurkash@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="HF6yaJEjzgKGpRxK"
+Content-Type: text/plain; charset="us-ascii"
 Content-Disposition: inline
-In-Reply-To: <20240117110646.1317843-1-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20240127232436.2632187-3-quic_gaurkash@quicinc.com>
+X-ClientProxiedBy: nalasex01b.na.qualcomm.com (10.47.209.197) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 6Qi2lqNVEaExsDRler7rksB_ArMqefFy
+X-Proofpoint-ORIG-GUID: 6Qi2lqNVEaExsDRler7rksB_ArMqefFy
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-01-30_01,2024-01-29_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0
+ mlxlogscore=999 spamscore=0 suspectscore=0 impostorscore=0
+ lowpriorityscore=0 mlxscore=0 priorityscore=1501 clxscore=1011
+ adultscore=0 phishscore=0 bulkscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.19.0-2401190000 definitions=main-2401300031
 
+On Sat, Jan 27, 2024 at 03:14:00PM -0800, Gaurav Kashyap wrote:
 
---HF6yaJEjzgKGpRxK
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+The subject prefix does not match other changes to this file.
 
-Hi Claudiu,
+> Inline storage encryption may require deriving a software
+> secret from storage keys added to the kernel.
+> 
+> For non-wrapped keys, this can be directly done in the kernel as
+> keys are in the clear.
+> 
+> However, hardware wrapped keys can only be unwrapped by the wrapping
+> entity. In case of Qualcomm's wrapped key solution, this is done by
+> the Hardware Key Manager (HWKM) from Trustzone.
+> Hence, adding a new SCM call which in the end provides a hook
+> to the software secret crypto profile API provided by the block
+> layer.
+> 
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+> ---
+>  drivers/firmware/qcom/qcom_scm.c       | 65 ++++++++++++++++++++++++++
+>  drivers/firmware/qcom/qcom_scm.h       |  1 +
+>  include/linux/firmware/qcom/qcom_scm.h |  2 +
+>  3 files changed, 68 insertions(+)
+> 
+> diff --git a/drivers/firmware/qcom/qcom_scm.c b/drivers/firmware/qcom/qcom_scm.c
+> index 7e17fd662bda..4882f8a36453 100644
+> --- a/drivers/firmware/qcom/qcom_scm.c
+> +++ b/drivers/firmware/qcom/qcom_scm.c
+> @@ -1220,6 +1220,71 @@ int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
+>  }
+>  EXPORT_SYMBOL_GPL(qcom_scm_ice_set_key);
+>  
+> +/**
+> + * qcom_scm_derive_sw_secret() - Derive software secret from wrapped key
+> + * @wkey: the hardware wrapped key inaccessible to software
+> + * @wkey_size: size of the wrapped key
+> + * @sw_secret: the secret to be derived which is exactly the secret size
+> + * @sw_secret_size: size of the sw_secret
+> + *
+> + * Derive a software secret from a hardware wrapped key for software crypto
+> + * operations.
+> + * For wrapped keys, the key needs to be unwrapped, in order to derive a
+> + * software secret, which can be done in the hardware from a secure execution
+> + * environment.
+> + *
+> + * For more information on sw secret, please refer to "Hardware-wrapped keys"
+> + * section of Documentation/block/inline-encryption.rst.
+> + *
+> + * Return: 0 on success; -errno on failure.
+> + */
+> +int qcom_scm_derive_sw_secret(const u8 *wkey, size_t wkey_size,
+> +			      u8 *sw_secret, size_t sw_secret_size)
+> +{
+> +	struct qcom_scm_desc desc = {
+> +		.svc = QCOM_SCM_SVC_ES,
+> +		.cmd =  QCOM_SCM_ES_DERIVE_SW_SECRET,
+> +		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RW,
+> +					 QCOM_SCM_VAL, QCOM_SCM_RW,
+> +					 QCOM_SCM_VAL),
+> +		.args[1] = wkey_size,
+> +		.args[3] = sw_secret_size,
+> +		.owner = ARM_SMCCC_OWNER_SIP,
+> +	};
+> +
+> +	void *secret_buf;
+> +	void *wkey_buf;
+> +	int ret;
+> +
+> +	wkey_buf = qcom_tzmem_alloc(__scm->mempool, wkey_size, GFP_KERNEL);
+> +	if (!wkey_buf)
+> +		return -ENOMEM;
+> +
+> +	secret_buf = qcom_tzmem_alloc(__scm->mempool, sw_secret_size, GFP_KERNEL);
+> +	if (!secret_buf) {
+> +		ret = -ENOMEM;
+> +		goto err_free_wrapped;
+> +	}
+> +
+> +	memcpy(wkey_buf, wkey, wkey_size);
+> +	desc.args[0] = qcom_tzmem_to_phys(wkey_buf);
+> +	desc.args[2] = qcom_tzmem_to_phys(secret_buf);
+> +
+> +	ret = qcom_scm_call(__scm->dev, &desc, NULL);
+> +	if (!ret)
+> +		memcpy(sw_secret, secret_buf, sw_secret_size);
+> +
+> +	memzero_explicit(secret_buf, sw_secret_size);
+> +	qcom_tzmem_free(secret_buf);
+> +
+> +err_free_wrapped:
 
-but one thing I can ask already:
+This code path is shared between error path and normal path, prefixing
+it "err_" is not helpful to the reader. Please change this to
+out_free_wrapped:
 
-> Investigating it on RZ/G3S lead to the conclusion that every time the issue
-> is reproduced all the probed TAPs are OK. According to datasheet, when this
-> happens the change point of data need to be considered for tuning.
+The rest of the patch looks good to me.
 
-Yes, "considered" means here it should be *avoided*.
+Regards,
+Bjorn
 
-> Previous code considered the change point of data happens when the content
-> of the SMPCMP register is zero. According to RZ/V2M hardware manual,
-
-When SMPCMP is zero, there is *no* change point. Which is good.
-
-> chapter "Change Point of the Input Data" (as this is the most clear
-> description that I've found about change point of the input data and all
-> RZ hardware manual are similar on this chapter),
-
-I also have a chapter named like this. If you check the diagram, change
-point is between TAP2 and 3, so the suggested TAP to use is 6 or 7. As
-far away as possible from the change point.
-
-> at the time of tuning,
-> data is captured by the previous and next TAPs and the result is stored in
-> the SMPCMP register (previous TAP in bits 22..16, next TAP in bits 7..0).
-> If there is a mismatch b/w the previous and the next TAPs, it indicates
-> that there is a change point of the input data.
-
-This is correct.
-
-> To comply with this, the code checks if this mismatch is present and
-> updates the priv->smpcmp mask.
-
-That means you select the "change point" instead of avoiding it?
-
-> This change has been checked on the devices with the following DTSes by
-> doing 50 consecutive reboots and checking for the tuning failure message:
-
-Okay, you might not have a failure message, but you might have selected
-the worst TAP. Or?
-
-> +			if (cmpngu_data != cmpngd_data)
-> +				set_bit(i, priv->smpcmp);
-
-Really looks like you select the change point instead of avoiding it.
-
-However, with some SD cards, I also see the EIO error you see. So, there
-might be room to improve TAP selection when all TAPs are good. I need to
-check if this is really is the same case for the SD cards in question.
-
-Happy hacking,
-
-   Wolfram
-
-
---HF6yaJEjzgKGpRxK
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmW3hD4ACgkQFA3kzBSg
-Kbb8Dg/8DrowMh5CLHCBUWs2/pcKYYF4sJe4baRaxs4GocwbmVVc1hMMdKJ6BY1V
-beHVjZES8O4NnMzQqkmkMGWJEkd/M7XdKeZLT+R+SnupO3AtFcS3mBFyDSWF+wA7
-bAc5EuIyIZ4pPkrNf3f1a0xa7Dq1wpX2qGGud69e0ckprXn8xLh0f5L1Oy469L7s
-uj7xEsUxf4kgCsPtdIksFiubebBrf8GJ534R9d4byOMZap6BRNEBgrbFfRJeldkV
-U/9CH+WngENnRi+COcOjGQmPXc+9Kk/S5O4GeVS0V496Z1zMujUtQAK0S7akvLpo
-y+J1D34OyKBGcs6xf6LK6hXEPLxTrbTjV/CVope5PcO0XiEp2HsZ1SPcWT0r8OOZ
-cZe51zQWxms04J35ggkILJPAmbvvSpQLjDCANP2UvyAh63d7tXmUAdrA0qQqfbMZ
-OXREgvHNw6/+S0PkqdnS7U5vC5+PrvzS/rwM4QUCxBE5yHDZ+QPA4OXu7vNiciwL
-OZjwOxcuRXlOJf8oxgpHdFoInHVwy7SNG0716yTCEgVxpLsVCOdCzKJXet/2BWH3
-q5XspwgKQLIl/8eu78wcK81cZ4r6R6bmwrn3yV6urUzxdy0IWZVQmbY0HSaMzI6L
-q9qoNKj34IftkZVt0aTcZDy2F1jC2P33biFcYxQWzUxrJ6YT4UI=
-=jnUv
------END PGP SIGNATURE-----
-
---HF6yaJEjzgKGpRxK--
+> +	memzero_explicit(wkey_buf, wkey_size);
+> +	qcom_tzmem_free(wkey_buf);
+> +
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL_GPL(qcom_scm_derive_sw_secret);
+> +
+>  /**
+>   * qcom_scm_hdcp_available() - Check if secure environment supports HDCP.
+>   *
+> diff --git a/drivers/firmware/qcom/qcom_scm.h b/drivers/firmware/qcom/qcom_scm.h
+> index cb7273aa0a5e..56ff0806f5d2 100644
+> --- a/drivers/firmware/qcom/qcom_scm.h
+> +++ b/drivers/firmware/qcom/qcom_scm.h
+> @@ -127,6 +127,7 @@ struct qcom_tzmem_pool *qcom_scm_get_tzmem_pool(void);
+>  #define QCOM_SCM_SVC_ES			0x10	/* Enterprise Security */
+>  #define QCOM_SCM_ES_INVALIDATE_ICE_KEY	0x03
+>  #define QCOM_SCM_ES_CONFIG_SET_ICE_KEY	0x04
+> +#define QCOM_SCM_ES_DERIVE_SW_SECRET	0x07
+>  
+>  #define QCOM_SCM_SVC_HDCP		0x11
+>  #define QCOM_SCM_HDCP_INVOKE		0x01
+> diff --git a/include/linux/firmware/qcom/qcom_scm.h b/include/linux/firmware/qcom/qcom_scm.h
+> index 9b6054813f59..89358478ac67 100644
+> --- a/include/linux/firmware/qcom/qcom_scm.h
+> +++ b/include/linux/firmware/qcom/qcom_scm.h
+> @@ -103,6 +103,8 @@ bool qcom_scm_ice_available(void);
+>  int qcom_scm_ice_invalidate_key(u32 index);
+>  int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
+>  			 enum qcom_scm_ice_cipher cipher, u32 data_unit_size);
+> +int qcom_scm_derive_sw_secret(const u8 *wkey, size_t wkey_size,
+> +			      u8 *sw_secret, size_t sw_secret_size);
+>  
+>  bool qcom_scm_hdcp_available(void);
+>  int qcom_scm_hdcp_req(struct qcom_scm_hdcp_req *req, u32 req_cnt, u32 *resp);
+> -- 
+> 2.43.0
+> 
