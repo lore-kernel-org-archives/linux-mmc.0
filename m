@@ -1,47 +1,58 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18C523C689;
-	Tue, 30 Jan 2024 06:54:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AA0154668
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Jan 2024 07:03:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706597665; cv=none; b=t3uqxji1ls+JUIGXEZF4lzv98v6gpJ6uS67h0Uzclr9ahlzp/p38iq/NImtiDvDMgAdaNdV+B6HGCMBRxWdrbJ4wHdNktw516yOA8cM6G7GyhbDljkTCe9gn9d0BvzHw7zqdBBi9ollkNsiFeB9mHNScOySCtHXW4+k2De6CluQ=
+	t=1706598229; cv=none; b=W23NsimogQO0mBCgdzPW7x6zYQ8+Nr55fTbSD6s6FPCjBt468Qfpts261zLTGGlkPHYmKDPSM8Usyg7WmezDIXAS8yb5mFKaHDPqfX2E2KHqUeeuEnznyHHmzlndIlyfUHNltTPWyieeimGZRJySdgcXliMk/rMMibCiDHr04jY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706597665; c=relaxed/simple;
-	bh=QNAhnh/68uQzWvdCvNgp/thk2nlNcJE1SEfmw284rGc=;
+	s=arc-20240116; t=1706598229; c=relaxed/simple;
+	bh=vZf6m7RI1eROTzwOQTlH8TlWjwZoOveQcIvorFpjbgw=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=uTLXmgCFGSY7vn1TStKQ+7UDzWmvWHwkBxWvmR1KenR1bAS26TquYB6098u7dPw61khJlytVnRlL0VY6eT4LpOPj6h7z8MGM/OiUSXia51+qOKk9Bq2iBAwstxUPYv1WRoe2gUhUT17efNd8Wkz7rIG7MJnsUHmzNW247NUoz5U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=NUaw//+T; arc=none smtp.client-ip=198.175.65.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	 In-Reply-To:Content-Type; b=kuZLiCKyiLH0CyrQOBf11TIOeFLpxX76t/IaMneIPMKVA+I7Dxb4AU0XiMYzF31YvSKaNTnGsHOIVhu0FCpwrsv5kqILCMI2ewoNCR2mylpbVUnPlc9zRSN/AOIaw3wSsJxucD2D77K2IN9YU8myM8vocnKfchrrUpB/TGrXCX0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=CEybdmyF; arc=none smtp.client-ip=209.85.218.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="NUaw//+T"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1706597663; x=1738133663;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=QNAhnh/68uQzWvdCvNgp/thk2nlNcJE1SEfmw284rGc=;
-  b=NUaw//+TSdl8qLF+xFGIIbe5ST+pMYFni8zsFGnogT3QD3zSsoFMOzG3
-   49yOvVb+VIaM7pYlF3EILiufx3X50s4xuD5We9Y6iiR3zAKqNZpRR5A2w
-   G7+AhHsRxNZBGUTjnYnMePkrYffXPpdI/z5xie9oZG3Thz/C4ewWGIa+u
-   yz0LxhgcpZyK7IkFfAfBmcMEPF+J4XA3Tghgb+2mtw7OLb8ODycAtPrX6
-   8mjH57FirYSjOTMfFHRT0eWBglVMO0uJkKzmlvsGiq95r5Q6OwIdySME/
-   iAbU23mUzKOZ9eU+kxCmMuiq3qwFT3oM34g7HvWKgSwo8z9uWCTECQkyj
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10968"; a="3062893"
-X-IronPort-AV: E=Sophos;i="6.05,707,1701158400"; 
-   d="scan'208";a="3062893"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jan 2024 22:54:22 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10968"; a="737678149"
-X-IronPort-AV: E=Sophos;i="6.05,707,1701158400"; 
-   d="scan'208";a="737678149"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.217.15])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jan 2024 22:54:20 -0800
-Message-ID: <fdf7a8c3-3137-4090-ba41-a7b84e3a695a@intel.com>
-Date: Tue, 30 Jan 2024 08:54:15 +0200
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="CEybdmyF"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-a35d0764076so195292166b.1
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Jan 2024 23:03:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1706598225; x=1707203025; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=R3uX+Nzh7GD/qkGDd2hkrqkUgxPvy6pwsK/SiuinutU=;
+        b=CEybdmyFev54cg3wEbAo1PAZ2L8O3tucAkD5JSJKHqLPgiZTtH2ukGUZOE2pT9CmO/
+         Xy3qPFRVVJ7GdABkCPHL4s3nLFzOfxfwDOaOmfj8rNzHkqsoFAWPqSN+iuzgG02s7R9X
+         cA2K1Xxkywfn5LhfAFF3PKbABfJ9vpSfEdEEfzLClct7rTaouiAbaU6T0WjcOg1DVsvj
+         cJNliUqKLUernQp6etn9Nzz57EQvr5HYGGXnuc2vLZ5qon59GH12qNLsd5kidwQ0OA19
+         ptHzF6cQ2rzRc/MrI+DgzdSaUsOjlTXESTgIy/qMOBYva9D61B3mMe07dhcaKRVbqvGm
+         DYJQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706598225; x=1707203025;
+        h=content-transfer-encoding:in-reply-to:from:references:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=R3uX+Nzh7GD/qkGDd2hkrqkUgxPvy6pwsK/SiuinutU=;
+        b=QC6t5pLVNVPw6zkHIrzzngGjgwSEAmWdJMN1idJIuui+XxXjlO44r7audQzRo0JrDi
+         COXUQhAXV+QVzqr99mHOfgoNKM5f6jvUWiQt9CduNOsmnouWxgKakmHsvJtA8//XiMf2
+         3daixd2Ld3Uy15DNpDSuFNko6IN6fVZQTCb986KcOPw+s1BG17hHWMBx7KcXSZ4jbc6W
+         J5CgqxNBVfh242CtsY9wxUiNkC6M3Cfv/qHeZxnu9JfZscOhrWMp2Tix/15rbNtbgpPo
+         xrWL4/03Ee0m8VcO1BbRJ33CxNatJ71IpZZy8GWsQjYcVgHYF0a6mcaDSxJJAPM1VfNv
+         4CoA==
+X-Gm-Message-State: AOJu0Yz5nOawqLfZPuSyVGegW7t/YYiq3gj4Urp9lCajnUr9HDrvehCd
+	OHcMiqyeOAhaBCefalJaAHU7camGO0dAb101xWckKm4DP5Wrw/wOG2P1q+eq94Q=
+X-Google-Smtp-Source: AGHT+IF32AfkB/h3vblysAegHlLs+WOawjFp8f423iOnx9b8d8IDG3ZpuywWvYTwN4QZvJHwVwcuag==
+X-Received: by 2002:a17:906:1b0b:b0:a35:965d:5988 with SMTP id o11-20020a1709061b0b00b00a35965d5988mr4193192ejg.11.1706598225229;
+        Mon, 29 Jan 2024 23:03:45 -0800 (PST)
+Received: from [192.168.50.4] ([82.78.167.87])
+        by smtp.gmail.com with ESMTPSA id vb5-20020a170907d04500b00a351d62309esm4109108ejc.39.2024.01.29.23.03.44
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 29 Jan 2024 23:03:44 -0800 (PST)
+Message-ID: <345bc392-cf28-479a-9453-5bc89f635759@tuxon.dev>
+Date: Tue, 30 Jan 2024 09:03:43 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,162 +60,118 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1] mmc: sdhci: fix max req size based on spec
-To: Shengyu Qu <wiagn233@outlook.com>, ulf.hansson@linaro.org,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <TY3P286MB2611D07641D842BD373FD3A8987F2@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
+Subject: Re: [PATCH v2] mmc: renesas_sdhi: Fix change point of data handling
 Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <TY3P286MB2611D07641D842BD373FD3A8987F2@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, ulf.hansson@linaro.org,
+ takeshi.saito.xv@renesas.com, masaharu.hayakawa.ry@renesas.com,
+ yoshihiro.shimoda.uh@renesas.com, linux-mmc@vger.kernel.org,
+ linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20240117110646.1317843-1-claudiu.beznea.uj@bp.renesas.com>
+ <ZbeEPg1jc5qWJa5m@ninjato>
+From: claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <ZbeEPg1jc5qWJa5m@ninjato>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 28/01/24 12:01, Shengyu Qu wrote:
-> For almost 2 decades, the max allowed requests were limited to 512KB
-> because of SDMA's max 512KiB boundary limit.
+Hi, Wolfram,
 
-It is not limited by SDMA.  It is limited by choice.
+On 29.01.2024 12:55, Wolfram Sang wrote:
+> Hi Claudiu,
+> 
+> but one thing I can ask already:
+> 
+>> Investigating it on RZ/G3S lead to the conclusion that every time the issue
+>> is reproduced all the probed TAPs are OK. According to datasheet, when this
+>> happens the change point of data need to be considered for tuning.
+> 
+> Yes, "considered" means here it should be *avoided*.
+
+My understanding was the other way around from this statement found in
+RZ/G3S hw manual:
+
+"If all of the TAP [i] is OK, the sampling clock position is selected by
+identifying the change point of data.
+ Change point of the data can be found in the value of SCC_SMPCMP register.
+Usage example is Section 33.8.3, Change
+ point of the input data."
 
 > 
-> ADMA2 and ADMA3 do not have such limit and were effectively made so any
-> kind of block count would not impose interrupt and managing stress to the
-> host.
+>> Previous code considered the change point of data happens when the content
+>> of the SMPCMP register is zero. According to RZ/V2M hardware manual,
+> 
+> When SMPCMP is zero, there is *no* change point. Which is good.
 
-The main benefit of ADMA is that it provides scatter/gather and so does
-not need a bounce buffer.
+That was my understanding, too.
 
 > 
-> By limiting that to 512KiB, it effectively downgrades these DMA modes to
-> SDMA.
+>> chapter "Change Point of the Input Data" (as this is the most clear
+>> description that I've found about change point of the input data and all
+>> RZ hardware manual are similar on this chapter),
+> 
+> I also have a chapter named like this. If you check the diagram, change
+> point is between TAP2 and 3, so the suggested TAP to use is 6 or 7. As
+> far away as possible from the change point.
 
-Not really.
+My understanding was different here as of the following hw manual statement:
+
+"As the width of the input data is 1 (UI), select TAP6 or TAP7 which is
+
+*the median* of next TAP3 from TAP3"
+
+I understand from this that the median value should be considered here.
 
 > 
-> Fix that by actually following the spec:
-> When ADMA is selected tuning mode is advised. On lesser modes, 4MiB
-> transfer is selected as max, so re-tuning if timer trigger or if requested
-> by host interrupt, can be done in time. Otherwise, the only limit is the
-> variable size of types used. In this implementation, 16MiB is used as
-> maximum since tests showed that after that point, there are diminishing
-> returns.
+>> at the time of tuning,
+>> data is captured by the previous and next TAPs and the result is stored in
+>> the SMPCMP register (previous TAP in bits 22..16, next TAP in bits 7..0).
+>> If there is a mismatch b/w the previous and the next TAPs, it indicates
+>> that there is a change point of the input data.
 > 
-> Also 16MiB in worst case scenarios, when card is eMMC and its max speed is
-> a generous 350MiB/s, will generate interrupts every 45ms on huge data
-> transfers.
+> This is correct.
 > 
-> A new `adma_get_req_limit` sdhci host function was also introduced, to let
-> vendors override imposed limits by the generic implementation if needed.
+>> To comply with this, the code checks if this mismatch is present and
+>> updates the priv->smpcmp mask.
+> 
+> That means you select the "change point" instead of avoiding it?
+> 
+>> This change has been checked on the devices with the following DTSes by
+>> doing 50 consecutive reboots and checking for the tuning failure message:
+> 
+> Okay, you might not have a failure message, but you might have selected
+> the worst TAP. Or?
+> 
+>> +			if (cmpngu_data != cmpngd_data)
+>> +				set_bit(i, priv->smpcmp);
+> 
+> Really looks like you select the change point instead of avoiding it.
 
-Not in this patch?
-
-> 
-> For example, on local tests with rigorous CPU/GPU burn-in tests and abrupt
-> cut-offs to generate huge temperature changes (upwards/downwards) to the
-> card, tested host was fine up to 128MB/s transfers on slow cards that used
-> SDR104 bus timing without re-tuning.
-> In that case the 4MiB limit was overridden with a more than safe 8MiB
-> value.
-> 
-> In all testing cases and boards, that change brought the following:
-
-"all testing cases and boards" doesn't mean much to anyone else. You
-need to be more explicit.
+Looking again at it and digesting what you said about the tuning here, yes
+it seems I did it this way.
 
 > 
-> Depending on bus timing and eMMC/SD specs:
-> * Max Read throughput increased by 2-20%
-> * Max Write throughput increased by 50-200%
-> Depending on CPU frequency and transfer sizes:
-> * Reduced mmcqd cpu core usage by 4-50%
+> However, with some SD cards, I also see the EIO error you see. So, there
+> might be room to improve TAP selection when all TAPs are good. I need to
+> check if this is really is the same case for the SD cards in question.
 
-The main issue with increasing the request size is that it introduces much
-more latency for synchronous reads e.g. a synchronous read may have to wait
-for a large write operation.  Generally, that is probably a show-stopper
-for unconditionally increasing the maximum request size.
+Maybe better would be to change this condition:
 
-> 
-> Above commit message comes from original author whose id is CTCaer, with
-> SoB email address ctcaer@gmail.com. I tried to contact with the author 1
-> month ago to ask for sending it to mainline or get the authority to submit
-> by myself, but I didn't get any reply, so I decided to send this patch by
-> myself. Original commit is here[1].
+			if (cmpngu_data != cmpngd_data)
+				set_bit(i, priv->smpcmp);
 
-Ok, so it is not your patch and the original author is out of touch.
+like this:
+			if (cmpngu_data == cmpngd_data)
+				set_bit(i, priv->smpcmp);
 
-Is there a particular reason you wanted this patch?
+?
+
+I need to check it, though.
+
+Thanks for your input,
+Claudiu Beznea
 
 > 
-> The author also has a patch[2] applied after this patch, which overrides
-> adma size on tegra device from device tree property. But I don't have a
-> tegra device to actually test that, so it is not sent, and
-> adma_get_req_limit part is not included in this version of patch.
-
-Does that mean you haven't tested this patch yourself at all?
-
+> Happy hacking,
 > 
-> [1]: https://github.com/CTCaer/switch-l4t-kernel-4.9/commit/fa86ebbd56d30b3b6af26e1d1c3f9c411a47e98e
-> [2]: https://github.com/CTCaer/switch-l4t-kernel-4.9/commit/385f9335b9a60ce471ac3291f202b1326212be3e
+>    Wolfram
 > 
-> Signed-off-by: Shengyu Qu <wiagn233@outlook.com>
-> ---
->  drivers/mmc/host/sdhci.c | 17 ++++++++++++-----
->  drivers/mmc/host/sdhci.h |  4 ++--
->  2 files changed, 14 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c79f73459915..f546b675c7b9 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1081,7 +1081,7 @@ static void sdhci_initialize_data(struct sdhci_host *host,
->  	WARN_ON(host->data);
->  
->  	/* Sanity checks */
-> -	BUG_ON(data->blksz * data->blocks > 524288);
-> +	BUG_ON(data->blksz * data->blocks > host->mmc->max_req_size);
->  	BUG_ON(data->blksz > host->mmc->max_blk_size);
->  	BUG_ON(data->blocks > 65535);
->  
-> @@ -4690,11 +4690,18 @@ int sdhci_setup_host(struct sdhci_host *host)
->  
->  	/*
->  	 * Maximum number of sectors in one transfer. Limited by SDMA boundary
-> -	 * size (512KiB). Note some tuning modes impose a 4MiB limit, but this
-> -	 * is less anyway.
-> +	 * size and by tuning modes on ADMA. On tuning mode 3 16MiB is more than
-> +	 * enough to cover big data transfers.
->  	 */
-> -	mmc->max_req_size = 524288;
-> -
-> +	if (host->flags & SDHCI_USE_ADMA) {
-> +		if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> +			mmc->max_req_size = SZ_4M;
-> +		else
-> +			mmc->max_req_size = SZ_16M;
-> +	} else {
-> +		/* On PIO/SDMA use SDMA boundary size (512KiB). */
-> +		mmc->max_req_size = SZ_512K;
-> +	}
->  	/*
->  	 * Maximum number of segments. Depends on if the hardware
->  	 * can do scatter/gather or not.
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index a20864fc0641..98252c427feb 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -346,11 +346,11 @@ struct sdhci_adma2_64_desc {
->  #define ADMA2_END		0x2
->  
->  /*
-> - * Maximum segments assuming a 512KiB maximum requisition size and a minimum
-> + * Maximum segments assuming a 16MiB maximum requisition size and a minimum
->   * 4KiB page size. Note this also allows enough for multiple descriptors in
->   * case of PAGE_SIZE >= 64KiB.
->   */
-> -#define SDHCI_MAX_SEGS		128
-> +#define SDHCI_MAX_SEGS		4096
->  
->  /* Allow for a command request and a data request at the same time */
->  #define SDHCI_MAX_MRQS		2
-
