@@ -1,128 +1,332 @@
 Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16E273717F;
-	Wed, 31 Jan 2024 19:17:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB84E12CDB8;
+	Wed, 31 Jan 2024 20:27:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706728645; cv=none; b=UpTMnx/Rf+gJ0b/CDLunRAgfedHLL6J5hLefY6QTkzysTVenhMARtGEVtlC+ZU5fu0wWoTQH/d5vnA2pjoJnOSZXHE0Tth8ty4MZLQnM4lt9HQuw7uQLDvB80NjRE7oBZplHOGib0dtvLonD6bT5dVe5/D5xBhZ1mYh8qSA0pdk=
+	t=1706732857; cv=none; b=NC5YbGyQ7uSo9Lf3sYZDodyI7mTfieCDjFsbnt9D3HbvtkiLJCNQ1av3YYpx5j7SrgFunBVR6362S0KIEAESII7+gOJA6k/DEUaJDXUeAlW+iRoPr4WpEfNkX0J9UpC7c1opJBUB50jy4IavTLVVOqflPRirhVTJLOIj/6D4JPw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706728645; c=relaxed/simple;
-	bh=JIYnjpqR8UE/3gFI59D74DalCVAjAiNmvFR2SLeQRgU=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Vtn0sKyd5/rT4iTs5O6zLQF77SJNN2FxZn5Tn26OwRvwPt8n1OQTK+lVigobQ7aRTT9gH9RISxu32iXD/T4RBdVFNknVtVhT9y6wXCH0Ltvp+OvThoYILjeydcTlJeWBUkbbKzbDb2btZVYxSYurKAqfDmuvzIeLhKT638rAAFE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=b7eiom/A; arc=none smtp.client-ip=198.47.19.141
+	s=arc-20240116; t=1706732857; c=relaxed/simple;
+	bh=EDSC25MxfT3VwQVvB1cKWeyj8fj8c8rOouhDsv3PtL0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=P9zskjtYIgPrQD6U1RchNeqcK4DcjY6JQHIiur4VFMFKUPkDw54ibLWcWsUStF9FEbMky/CgYQ+u4BxG33EOW3dUqoTpmwQl92cHxg1TQ6P9gSnlTxWmeoDlC34qZZWvfMwsG3IjHakiMuBbtTyIu2A/oFUh3ssLgQLk4rHryd4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=iCGKsfnj; arc=none smtp.client-ip=198.47.19.141
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="b7eiom/A"
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40VJHIX5087175;
-	Wed, 31 Jan 2024 13:17:18 -0600
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="iCGKsfnj"
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40VKRSWr104325;
+	Wed, 31 Jan 2024 14:27:28 -0600
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1706728638;
-	bh=8FMoGz4wqJaPTnr7/dWM6UByHmBhMsNnlIBuI4F/lVQ=;
-	h=Date:From:To:CC:Subject:References:In-Reply-To;
-	b=b7eiom/ADq6UrIieMkMCMEpIBr9PPCuh1H2bk+SMA2jyIOEL9Tk1VWF2OsntqpnmW
-	 80AUV1ZGKE8xB8rjDpTntRCjJ0aeQZtW3Q+FlsyV4dlxR13x//0VtrxpaNAtSc613e
-	 KxvXxRSUyM90uVfmeET0OtN9xzmb2MtZCVdcoh5A=
-Received: from DFLE113.ent.ti.com (dfle113.ent.ti.com [10.64.6.34])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40VJHIoO020675
+	s=ti-com-17Q1; t=1706732848;
+	bh=gLgTAK8WhEm+yLJO13WUlqDWkbFST/FFeOdh5KfzNhk=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=iCGKsfnjd5+/qm4NGBAfnKqW9Dx+2G7F9YYnfDIle2JtFNGsNrvcpxvEt+MfC//Cs
+	 8iaR+sRSq0zk4AaokkAlgTkDCeduMsC2DoZi0OQAsvEZOsEg37iP/KsbwGJ8SBiUmj
+	 ME58imYSuqJIt2azOWzhjbO/+sAmtuJ1UPpqo2SA=
+Received: from DLEE103.ent.ti.com (dlee103.ent.ti.com [157.170.170.33])
+	by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40VKRSXT052544
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 31 Jan 2024 13:17:18 -0600
-Received: from DFLE106.ent.ti.com (10.64.6.27) by DFLE113.ent.ti.com
- (10.64.6.34) with Microsoft SMTP Server (version=TLS1_2,
+	Wed, 31 Jan 2024 14:27:28 -0600
+Received: from DLEE103.ent.ti.com (157.170.170.33) by DLEE103.ent.ti.com
+ (157.170.170.33) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 31
- Jan 2024 13:17:18 -0600
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE106.ent.ti.com
- (10.64.6.27) with Microsoft SMTP Server (version=TLS1_2,
+ Jan 2024 14:27:28 -0600
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE103.ent.ti.com
+ (157.170.170.33) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Wed, 31 Jan 2024 13:17:17 -0600
-Received: from localhost (uda0133052.dhcp.ti.com [128.247.81.232])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40VJHHFd067635;
-	Wed, 31 Jan 2024 13:17:17 -0600
-Date: Wed, 31 Jan 2024 13:17:17 -0600
-From: Nishanth Menon <nm@ti.com>
-To: Judith Mendez <jm@ti.com>
-CC: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley
-	<conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Vignesh
- Raghavendra <vigneshr@ti.com>,
-        Andrew Davis <afd@ti.com>, Udit Kumar
-	<u-kumar1@ti.com>,
-        Roger Quadros <rogerq@kernel.org>, <devicetree@vger.kernel.org>,
-        Randolph Sapp <rs@ti.com>
-Subject: Re: [RFC PATCH 06/13] arm64: dts: ti: k3-am62a-main: Add sdhci0
- instance
-Message-ID: <20240131191717.igbfpfchen7gmpam@headstand>
-References: <20240131003714.2779593-1-jm@ti.com>
- <20240131003714.2779593-7-jm@ti.com>
+ Frontend Transport; Wed, 31 Jan 2024 14:27:28 -0600
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40VKRSBF030672;
+	Wed, 31 Jan 2024 14:27:28 -0600
+Message-ID: <1bbefc95-a671-492d-8d66-42abecbc4db0@ti.com>
+Date: Wed, 31 Jan 2024 14:27:27 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <20240131003714.2779593-7-jm@ti.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH 01/13] drivers: mmc: host: sdhci_am654: Add tuning
+ algorithm for delay chain
+Content-Language: en-US
+To: Vignesh Raghavendra <vigneshr@ti.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof
+ Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley
+	<conor+dt@kernel.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
+        Andrew Davis
+	<afd@ti.com>, Udit Kumar <u-kumar1@ti.com>,
+        Roger Quadros
+	<rogerq@kernel.org>, <devicetree@vger.kernel.org>,
+        Randolph Sapp <rs@ti.com>
+References: <20240131003714.2779593-1-jm@ti.com>
+ <20240131003714.2779593-2-jm@ti.com>
+ <d58f1501-ea64-4964-ac32-a3604178dc6f@ti.com>
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <d58f1501-ea64-4964-ac32-a3604178dc6f@ti.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-On 18:37-20240130, Judith Mendez wrote:
-> From: Nitin Yadav <n-yadav@ti.com>
+On 1/31/24 5:04 AM, Vignesh Raghavendra wrote:
+> Hi Judith,
 > 
-> Add sdhci0 DT node in k3-am62a-main for eMMC support. Add otap/itap
-> values according to the datasheet[0], Refer to Table 7-79.
+> On 31/01/24 06:07, Judith Mendez wrote:
+>> Currently the sdhci_am654 driver only supports one tuning
+>> algorithm which should be used only when DLL is enabled. The
+>> ITAPDLY is selected from the largest passing window and the
+>> buffer is viewed as a circular buffer.
+>>
+>> The new algorithm should be used when the delay chain
+>> is enabled. The ITAPDLY is selected from the largest passing
+>> window and the buffer is not viewed as a circular buffer.
+>>
+>> This implementation is based off of the following paper: [1].
+>>
+>> Also add support for multiple failing windows.
+>>
+>> [1] https://www.ti.com/lit/an/spract9/spract9.pdf
+>>
+>> Signed-off-by: Judith Mendez <jm@ti.com>
+>> ---
 > 
-> [0] https://www.ti.com/lit/ds/symlink/am62a3.pdf
 > 
-> Signed-off-by: Judith Mendez <jm@ti.com>
-> Signed-off-by: Nitin Yadav <n-yadav@ti.com>
-> ---
+> $subject prefix should be
+> 
+>   mmc: sdhci_am654:
+> 
+> See git log --oneline drivers/mmc/host/sdhci_am654.c for precedence.
 
-Side note: will appreciate if the dt patches come via the SoC dt tree
-for TI K3 and not via mmc tree.
+Thanks, will add in v1.
 
->  arch/arm64/boot/dts/ti/k3-am62a-main.dtsi | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
 > 
-> diff --git a/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi b/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-> index f0b8c9ab1459..523dee78123a 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-> +++ b/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-> @@ -536,6 +536,24 @@ main_gpio1: gpio@601000 {
->  		status = "disabled";
->  	};
->  
-> +	sdhci0: mmc@fa10000 {
-> +		compatible = "ti,am62-sdhci";
-> +		reg = <0x00 0xfa10000 0x00 0x260>, <0x00 0xfa18000 0x00 0x134>;
-> +		interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
-> +		power-domains = <&k3_pds 57 TI_SCI_PD_EXCLUSIVE>;
-> +		clocks = <&k3_clks 57 5>, <&k3_clks 57 6>;
-> +		clock-names = "clk_ahb", "clk_xin";
-> +		assigned-clocks = <&k3_clks 57 6>;
-> +		assigned-clock-parents = <&k3_clks 57 8>;
-> +		bus-width = <8>;
-> +		mmc-hs200-1_8v;
-> +		ti,clkbuf-sel = <0x7>;
-> +		ti,otap-del-sel-legacy = <0x0>;
-> +		ti,otap-del-sel-mmc-hs = <0x0>;
-> +		ti,otap-del-sel-hs200 = <0x6>;
-> +		status = "disabled";
-> +	};
-> +
->  	sdhci1: mmc@fa00000 {
->  		compatible = "ti,am62-sdhci";
->  		reg = <0x00 0xfa00000 0x00 0x260>, <0x00 0xfa08000 0x00 0x134>;
-> -- 
-> 2.34.1
+>>   drivers/mmc/host/sdhci_am654.c | 128 +++++++++++++++++++++++++++------
+>>   1 file changed, 108 insertions(+), 20 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+>> index d659c59422e1..59d205511312 100644
+>> --- a/drivers/mmc/host/sdhci_am654.c
+>> +++ b/drivers/mmc/host/sdhci_am654.c
+>> @@ -149,10 +149,17 @@ struct sdhci_am654_data {
+>>   	int strb_sel;
+>>   	u32 flags;
+>>   	u32 quirks;
+>> +	bool dll_enable;
+>>   
+>>   #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+>>   };
+>>   
+>> +struct window {
+>> +	u8 start;
+>> +	u8 end;
+>> +	u8 length;
+>> +};
+>> +
+>>   struct sdhci_am654_driver_data {
+>>   	const struct sdhci_pltfm_data *pdata;
+>>   	u32 flags;
+>> @@ -290,10 +297,13 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>>   
+>>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
+>>   
+>> -	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ)
+>> +	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+>>   		sdhci_am654_setup_dll(host, clock);
+>> -	else
+>> +		sdhci_am654->dll_enable = true;
+>> +	} else {
+>>   		sdhci_am654_setup_delay_chain(sdhci_am654, timing);
+>> +		sdhci_am654->dll_enable = false;
+>> +	}
+>>   
+>>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL5, CLKBUFSEL_MASK,
+>>   			   sdhci_am654->clkbuf_sel);
+>> @@ -408,39 +418,117 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>>   	return 0;
+>>   }
+>>   
+>> -#define ITAP_MAX	32
+>> +#define ITAPDLY_LENGTH 32
+>> +#define ITAPDLY_LAST_INDEX 31
+>> +static u32 calculate_itap(struct sdhci_host *host, struct window *fail_window,
+>> +			  u8 num_fails, bool circular_buffer)
+> 
+> 
+> s/calculate_itap/sdhci_am654_calculate_itap/ to keep function naming
+> consistent within the file
+
+Will add.
+
+> 
+>> +{
+>> +	struct device *dev = mmc_dev(host->mmc);
+>> +	struct window pass_window, first_fail, last_fail;
+>> +	u8 itap = 0, start_fail = 0, end_fail = 0, pass_length = 0;
+>> +	int prev_end_fail = -1;
+>> +
+>> +	memset(&pass_window, 0, sizeof(pass_window));
+>> +	memset(&first_fail, 0, sizeof(first_fail));
+>> +	memset(&last_fail, 0, sizeof(last_fail));
+>> +
+>> +	if (!num_fails) {
+>> +		return ITAPDLY_LAST_INDEX >> 1;
+>> +	} else if (fail_window->length == ITAPDLY_LENGTH) {
+>> +		dev_warn(dev, "No passing ITAPDLY, return 0\n");
+> 
+> Drop return 0 in dev_warn()
+
+Good idea, will update itap value here then.
+
+> 
+>> +		return 0;
+> 
+> Should this be an error?
+
+It is an error, but I thought it was a good idea to return 0 in case all 
+ITAPDLY values fail and report this via dev_warn or dev_error. For now I 
+can use dev_error.
+
+> 
+>> +	} else {
+>> +		for (int i = 0; i < num_fails; i++) {
+> 
+> 
+> please avoid inline declaration to align with rest of the file.
+
+Will do.
+> 
+>> +			start_fail = fail_window[i].start;
+>> +			end_fail = fail_window[i].end;
+>> +
+>> +			if (i == 0) {
+>> +				first_fail.start = start_fail;
+>> +				first_fail.end = end_fail;
+>> +				first_fail.length = fail_window[0].length;
+>> +			}
+>> +
+>> +			if (i == num_fails - 1) {
+>> +				last_fail.start = start_fail;
+>> +				last_fail.end = end_fail;
+>> +				last_fail.length = fail_window[i].length;
+>> +			}
+>> +
+>> +			pass_length = start_fail - (prev_end_fail + 1);
+>> +			if (pass_length > pass_window.length) {
+>> +				pass_window.start = prev_end_fail + 1;
+>> +				pass_window.length = pass_length;
+>> +			}
+>> +			prev_end_fail = end_fail;
+>> +		}
+>> +
+>> +		if (!circular_buffer) {
+>> +			if (ITAPDLY_LAST_INDEX - end_fail > pass_window.length) {
+>> +				pass_window.start = end_fail + 1;
+>> +				pass_window.length = ITAPDLY_LAST_INDEX - end_fail;
+>> +			}
+>> +		} else {
+>> +			pass_length = ITAPDLY_LAST_INDEX - end_fail + first_fail.start;
+>> +			if (pass_length > pass_window.length) {
+>> +				pass_window.start = last_fail.end + 1;
+>> +				pass_window.length = pass_length;
+>> +			}
+>> +		}
+>> +	}
+>> +
+>> +	if (!circular_buffer)
+>> +		itap = pass_window.start + (pass_window.length >> 1);
+>> +	else
+>> +		itap = (pass_window.start + (pass_window.length >> 1)) % ITAPDLY_LENGTH;
+>> +
+>> +	if (itap < 0 || itap > ITAPDLY_LAST_INDEX)
+>> +		itap = 0;
+>> +
+>> +	return itap;
+>> +}
+>> +
+>>   static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>>   					       u32 opcode)
+>>   {
+>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+>> -	int cur_val, prev_val = 1, fail_len = 0, pass_window = 0, pass_len;
+>> -	u32 itap;
+>> +	struct window fail_window[ITAPDLY_LENGTH];
+>> +	u8 prev_pass = 1;
+>> +	u8 fail_index = 0;
+>> +	u8 curr_pass, itap, i;
+>> +
+>> +	for (i = 0; i < ITAPDLY_LENGTH; i++)
+>> +		memset(&fail_window[i], 0, sizeof(fail_window[0]));
+> 
+> Don't need for() loop, just memset entire array at once. Something like:
+> 
+> memset(fail_window, 0, sizeof(fail_window[0]) * ITAPDLY_LENGTH);
+
+Great, will add this, thanks.
+
+> 
+>>   
+>>   	/* Enable ITAPDLY */
+>>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPDLYENA_MASK,
+>>   			   1 << ITAPDLYENA_SHIFT);
+>>   
+>> -	for (itap = 0; itap < ITAP_MAX; itap++) {
+>> +	for (itap = 0; itap < ITAPDLY_LENGTH; itap++) {
+>>   		sdhci_am654_write_itapdly(sdhci_am654, itap);
+>>   
+>> -		cur_val = !mmc_send_tuning(host->mmc, opcode, NULL);
+>> -		if (cur_val && !prev_val)
+>> -			pass_window = itap;
+>> +		curr_pass = !mmc_send_tuning(host->mmc, opcode, NULL);
+>>   
+>> -		if (!cur_val)
+>> -			fail_len++;
+>> +		if (!curr_pass && prev_pass)
+>> +			fail_window[fail_index].start = itap;
+>>   
+>> -		prev_val = cur_val;
+>> +		if (!curr_pass) {
+>> +			fail_window[fail_index].end = itap;
+>> +			fail_window[fail_index].length++;
+>> +		}
+>> +
+>> +		if (curr_pass && !prev_pass)
+>> +			fail_index++;
+>> +
+>> +		prev_pass = curr_pass;
+>>   	}
+>> -	/*
+>> -	 * Having determined the length of the failing window and start of
+>> -	 * the passing window calculate the length of the passing window and
+>> -	 * set the final value halfway through it considering the range as a
+>> -	 * circular buffer
+>> -	 */
+>> -	pass_len = ITAP_MAX - fail_len;
+>> -	itap = (pass_window + (pass_len >> 1)) % ITAP_MAX;
+>> +
+>> +	if (fail_window[fail_index].length != 0)
+>> +        fail_index++;
+> 
+> These is some tab vs space mangling here.
+
+I will fix this. (:
+
+> 
+>> +
+>> +	itap = calculate_itap(host, &fail_window[0], fail_index,
+>> +			      (sdhci_am654->dll_enable ? true : false));
+>> +
+>>   	sdhci_am654_write_itapdly(sdhci_am654, itap);
+>>   
+>>   	return 0;
 > 
 
--- 
-Regards,
-Nishanth Menon
-Key (0xDDB5849D1736249D) / Fingerprint: F8A2 8693 54EB 8232 17A3  1A34 DDB5 849D 1736 249D
