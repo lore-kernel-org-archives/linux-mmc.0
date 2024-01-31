@@ -1,169 +1,117 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D6CE823B2;
-	Tue, 30 Jan 2024 15:31:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A96A363;
+	Wed, 31 Jan 2024 00:37:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706628702; cv=none; b=PeaFlqIsPujAaYmFB/9awAWcYwNtWihhdI3z39qFhjnZlXfsfcAwOl/nG0DI8jnY/m3u8BRcAtzSk/xpPouck6+0a3as3VvMSHBpObY+Oe8W8RVKjn2gUl1iGyvkk0QQgOMhszrxgJcrcMzLiTyAq69OLVfRmFhsDQl0EMX/s88=
+	t=1706661442; cv=none; b=aHrZotXivh9ktC2uKO27t6pnPbnf4iDnkley/+GntWl5Z149cwScBhwjB1NBx82tpDNrgsVl9XdqAqCTzKU18f/P4QTmuutpZI7pAf07bR/6ZVEruF3SFe+35qJHeG2f0zUmlJJpy3mmPg4t8+4d75m2BxhHqdgXF2h6ASBL0L4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706628702; c=relaxed/simple;
-	bh=VFfXaMuM13ijuWEdNiaaHRki070Tzjou8g7ItrpOecQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=W3+cUJ+c5m+DAh+f9gicPOnb7lFk3G++DX4AAerE4jwQXDw2Rl086PLIDHEvuEzKk9G5wwhA8kTHJOsvguvcIVMrYqxjPYP4Q1iMi2Qat47jWR/faXWLZjUvvX6YaZNjStFkGESoL6hcqp6Ze9x6cFtaKncKe8juE6JF8vIOq38=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=MTdPSF9a; arc=none smtp.client-ip=192.198.163.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1706661442; c=relaxed/simple;
+	bh=TRI76dxKaAg21+XKMTz2eTHyC73X3AcSx+5xJSrO0Q4=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=gVnlLLBFSoWvXhpAQS7fASmNyj/APv0EXff6SXjPWDDNQfJq65Ipr3wsxy6PM8NY/JzGCw8WvYYRl3s+xAOuc8bcHLyKo9HnTo79zUYzd1lVZ8rHOtqRbMC62yY7TRZ9OYWPT/mFrZdCb3xBJYoUc8HU7/uHkmH04Rk69ZggH/g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=t6VENNGx; arc=none smtp.client-ip=198.47.19.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="MTdPSF9a"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1706628700; x=1738164700;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=VFfXaMuM13ijuWEdNiaaHRki070Tzjou8g7ItrpOecQ=;
-  b=MTdPSF9aj0LkcJICMVwwWqTmh1G2vTU4moD2gwX+zdZAjSqK4QwPEvN/
-   HlJHQl+wZETDgmqeQ9f/3QJHH4P1nePUGqMl5JqZxYxQk/d95I0Ly5fDS
-   Be2RQ5eRpuguvXJcxlI/jaFJUL9UNsLbk6mXTIYJef4GU60SEp1KWRZms
-   wUIdODvHXduh2FvtLt0HTfRosHeOSNzRzjU9VotB063yxux/lLAWltJyN
-   qw+8fJ6k+sNouPXq4zKaanuitgc1kndnIEJBnZcaddbHnvBUu9l1h7Ejo
-   LXD8rj/cw+3a7V7CQLhD7ny4/qnQW5hr9j4EPA9noAMhvO6kAetAyFUZA
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10968"; a="10059014"
-X-IronPort-AV: E=Sophos;i="6.05,230,1701158400"; 
-   d="scan'208";a="10059014"
-Received: from fmviesa003.fm.intel.com ([10.60.135.143])
-  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jan 2024 07:31:36 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.05,230,1701158400"; 
-   d="scan'208";a="3749601"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.217.15])
-  by fmviesa003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jan 2024 07:31:32 -0800
-Message-ID: <e7d7a434-665b-4912-a2ae-a51e10e332d5@intel.com>
-Date: Tue, 30 Jan 2024 17:31:27 +0200
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="t6VENNGx"
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40V0bFKP038166;
+	Tue, 30 Jan 2024 18:37:15 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1706661435;
+	bh=KX5ixSYuqhTJGTqFFZNAXHuik1i9Vu58r7YXwjkwNqk=;
+	h=From:To:CC:Subject:Date:In-Reply-To:References;
+	b=t6VENNGxZ+4kVYI48GV/LXaMQVqkGjNUXHqffkGA4nMUzMf+Pu7hJI1++OyJjKTOG
+	 AiNhNCHJ7k2zyPs6kTgZVRxHzzqbUyUj9jCJaqIy4oM16tuH0JN0l1/Vn0T4yeRKlw
+	 +9Ej71sxLvOc8yxAM0gBRhZqCX3X5SJ4hcMFFo3w=
+Received: from DFLE114.ent.ti.com (dfle114.ent.ti.com [10.64.6.35])
+	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40V0bFio045574
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Tue, 30 Jan 2024 18:37:15 -0600
+Received: from DFLE100.ent.ti.com (10.64.6.21) by DFLE114.ent.ti.com
+ (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Tue, 30
+ Jan 2024 18:37:15 -0600
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE100.ent.ti.com
+ (10.64.6.21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Tue, 30 Jan 2024 18:37:15 -0600
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40V0bEwG026520;
+	Tue, 30 Jan 2024 18:37:15 -0600
+From: Judith Mendez <jm@ti.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley
+	<conor+dt@kernel.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
+        Vignesh
+ Raghavendra <vigneshr@ti.com>, Andrew Davis <afd@ti.com>,
+        Udit Kumar
+	<u-kumar1@ti.com>, Roger Quadros <rogerq@kernel.org>,
+        <devicetree@vger.kernel.org>, Randolph Sapp <rs@ti.com>
+Subject: [RFC PATCH 09/13] arm64: dts: ti: k3-am64-main: Update ITAP/OTAP values for MMC
+Date: Tue, 30 Jan 2024 18:37:10 -0600
+Message-ID: <20240131003714.2779593-10-jm@ti.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20240131003714.2779593-1-jm@ti.com>
+References: <20240131003714.2779593-1-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V14 16/21] mmc: sdhci-uhs2: add request() and others
-Content-Language: en-US
-To: Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
- Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
- dlunev@chromium.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>,
- Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20240123062827.8525-1-victorshihgli@gmail.com>
- <20240123062827.8525-17-victorshihgli@gmail.com>
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240123062827.8525-17-victorshihgli@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-On 23/01/24 08:28, Victor Shih wrote:
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> 
-> This is a sdhci version of mmc's request operation.
-> It covers both UHS-I and UHS-II.
-> 
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> ---
-> 
-> Updates in V14:
->  - Use mmc_card_uhs2() to stead sdhci_uhs2_mode() in the
->    sdhci_uhs2_request().
-> 
-> Updates in V13:
->  - Re-order function to avoid declaration.
->  - Remove unnecessary function.
-> 
-> Updates in V11:
->  - Drop the check mmc_card_uhs2_hd_mode(host->mmc)
->    in sdhci_uhs2_set_transfer_mode().
-> 
-> Updates in V10:
->  - Use tmode_half_duplex to instead of uhs2_tmode0_flag
->    in sdhci_uhs2_set_transfer_mode().
-> 
-> Updates in V9:
->  - Modify the annotations in __sdhci_uhs2_send_command().
-> 
-> Updates in V8:
->  - Adjust the position of matching brackets in
->    sdhci_uhs2_send_command_retry().
->  - Modify CameCase definition in __sdhci_uhs2_finish_command().
->  - Modify error message in __sdhci_uhs2_finish_command().
->  - sdhci_uhs2_send_command_retry() to instead of sdhci_uhs2_send_command()
->    in sdhci_uhs2_request().
->  - Use sdhci_uhs2_mode() to simplify code in sdhci_uhs2_request_atomic().
->  - Add forward declaration for sdhci_send_command().
-> 
-> Updates in V7:
->  - Cancel export state of some functions.
->  - Remove unnecessary whitespace changes.
-> 
-> Updates in V6:
->  - Add uhs2_dev_cmd() to simplify code.
->  - Remove unnecessary functions.
->  - Cancel export state of some functions.
->  - Drop use CONFIG_MMC_DEBUG().
->  - Wrap at 100 columns in some functions.
-> 
-> ---
-> 
->  drivers/mmc/host/sdhci-uhs2.c | 379 +++++++++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci.c      |  49 +++--
->  drivers/mmc/host/sdhci.h      |   8 +
->  3 files changed, 420 insertions(+), 16 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> index 0c543899ed6c..b47bcf6f890f 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.c
-> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -14,6 +14,8 @@
->  #include <linux/module.h>
->  #include <linux/iopoll.h>
->  #include <linux/bitfield.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/mmc/host.h>
->  
->  #include "sdhci.h"
->  #include "sdhci-uhs2.h"
-> @@ -29,6 +31,8 @@
->  #define UHS2_INTERFACE_DETECT_TIMEOUT_100MS	100000
->  #define UHS2_LANE_SYNC_TIMEOUT_150MS		150000
->  
-> +#define UHS2_ARG_IOADR_MASK 0xfff
-> +
->  void sdhci_uhs2_dump_regs(struct sdhci_host *host)
->  {
->  	if (!(mmc_card_uhs2(host->mmc)))
-> @@ -63,6 +67,11 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
->   *                                                                           *
->  \*****************************************************************************/
->  
-> +static inline u16 uhs2_dev_cmd(struct mmc_command *cmd)
-> +{
-> +	return be16_to_cpu((__be16)cmd->uhs2_cmd->arg) & UHS2_ARG_IOADR_MASK;
-> +}
-> +
->  static inline int mmc_opt_regulator_set_ocr(struct mmc_host *mmc,
->  					    struct regulator *supply,
->  					    unsigned short vdd_bit)
-> @@ -140,7 +149,7 @@ static void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, un
->  
->  static u8 sdhci_calc_timeout_uhs2(struct sdhci_host *host, u8 *cmd_res, u8 *dead_lock)
->  {
-> -	/* timeout in us */
-> +	/* timeout in us */#define UHS2_ARG_IOADR_MASK 0xfff
+Update MMC0/MMC1 OTAP/ITAP values according to the datasheet
+[0], refer to Table 7-68 for MMC0 and Table 7-77 for MMC1.
 
-Extraneous "#define UHS2_ARG_IOADR_MASK 0xfff"
+[0] https://www.ti.com/lit/ds/symlink/am6442.pdf
 
+Signed-off-by: Judith Mendez <jm@ti.com>
+---
+ arch/arm64/boot/dts/ti/k3-am64-main.dtsi | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/ti/k3-am64-main.dtsi b/arch/arm64/boot/dts/ti/k3-am64-main.dtsi
+index e348114f42e0..b355d0a715a9 100644
+--- a/arch/arm64/boot/dts/ti/k3-am64-main.dtsi
++++ b/arch/arm64/boot/dts/ti/k3-am64-main.dtsi
+@@ -633,6 +633,9 @@ sdhci0: mmc@fa10000 {
+ 		ti,otap-del-sel-mmc-hs = <0x0>;
+ 		ti,otap-del-sel-ddr52 = <0x6>;
+ 		ti,otap-del-sel-hs200 = <0x7>;
++		ti,itap-del-sel-legacy = <0x10>;
++		ti,itap-del-sel-mmc-hs = <0xa>;
++		ti,itap-del-sel-ddr52 = <0x3>;
+ 		status = "disabled";
+ 	};
+ 
+@@ -645,13 +648,17 @@ sdhci1: mmc@fa00000 {
+ 		clock-names = "clk_ahb", "clk_xin";
+ 		ti,trm-icp = <0x2>;
+ 		ti,otap-del-sel-legacy = <0x0>;
+-		ti,otap-del-sel-sd-hs = <0xf>;
++		ti,otap-del-sel-sd-hs = <0x0>;
+ 		ti,otap-del-sel-sdr12 = <0xf>;
+ 		ti,otap-del-sel-sdr25 = <0xf>;
+ 		ti,otap-del-sel-sdr50 = <0xc>;
+ 		ti,otap-del-sel-sdr104 = <0x6>;
+ 		ti,otap-del-sel-ddr50 = <0x9>;
+ 		ti,clkbuf-sel = <0x7>;
++		ti,itap-del-sel-legacy = <0x0>;
++		ti,itap-del-sel-sd-hs = <0x0>;
++		ti,itap-del-sel-sdr12 = <0x0>;
++		ti,itap-del-sel-sdr25 = <0x0>;
+ 		status = "disabled";
+ 	};
+ 
+-- 
+2.34.1
 
