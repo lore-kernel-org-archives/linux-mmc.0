@@ -1,151 +1,70 @@
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10C3720DE0;
-	Wed, 31 Jan 2024 20:41:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.142
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71DB438F99;
+	Wed, 31 Jan 2024 21:13:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706733704; cv=none; b=Ik1c32Jyn6IR98YlEhskW7mX9DsyEUcgzs4CzWOnRRBGTsIkiVYjh9t8FlDcjIj9cmw/xWvlhvzCvlP5LvSrth/gX3V7uoNktYNK/Zuj3qaucX9ztnF/gomnfSUvyi1bSd6aq+Op/g+Gb6sD3DUF7D/BINOg2L+MYGVlbEDLE4U=
+	t=1706735582; cv=none; b=GEU9ZbUo+Dr1d205iylenXvF983gSzDkEnAtKwZ2PQKdj8llKO/AZlAHZfKSsaGrPHDoXXuF0pXc6aT0FreWKdYEQDS9xWfjgP+0CjOKrGaG5ebuCHXeY8x7jgpXFF16YgFNKPXiWAKH0KVC0x+D1e0aNphy30d//hCiaf8KciY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706733704; c=relaxed/simple;
-	bh=i8BK1vul/D0h0q8NumttG0fZUxs7TYr/KsMBcuAt20o=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=qz2G5JGOBdvThzMnF/ODo4Pc0gX24y7h1YjWuNjzuOZsGIg5uD9DvOaGDNvPI8DvjBOy6NPKDBG1SWd/b7jVspJdWuaYcfiOuJXSmqLHuTT9Qg8Zz3nCS46KsE20in4vLb8kFDggFp5DcjrlEfhs/cnuzZhm1A4VcLX0AhzM6HM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=QNici0k+; arc=none smtp.client-ip=198.47.19.142
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1706735582; c=relaxed/simple;
+	bh=DoZ1YihdlAS/IIbEKJ6/i00j2rTLW7LkeFYXNRHaTSw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=pTovl5nMr0PVkWfr63blS4to9P9XUwoGATyAf4u5DqXHdsyF/tdLiNVS1g/VXwhp/UIhDvgnc39TQknmi4bRVpwAMUv1occoeKcwoTDOdTMhyIddZDMhEots7HvloBjcJYWZaE6/Lnu+Zuve5XQjJgnyDB7XKA3Y93eIOecRJ4I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=CINiIu8c; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="QNici0k+"
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-	by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40VKfVJQ112558;
-	Wed, 31 Jan 2024 14:41:31 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1706733691;
-	bh=MrbmAMsWZQgSlGEY4D41Ts6E5MpC5FPSiof4n6JfF0I=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=QNici0k+CZKoPLY1PbTFlYxWjOyml3wH/fCyP4h5jo/2Vv5YwUML3kmKl9RtI+MhO
-	 ELYsImRPtZ8XFYtybmFS/Rf25Rg/W52w8MILkGw6DQSRCK8bCVFYnzjePQkMvjLiNH
-	 RcPhxaqQhxuLc+a8GBRzk+MpKSZZpw5GrqGmzYPI=
-Received: from DLEE111.ent.ti.com (dlee111.ent.ti.com [157.170.170.22])
-	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40VKfVgL008187
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 31 Jan 2024 14:41:31 -0600
-Received: from DLEE112.ent.ti.com (157.170.170.23) by DLEE111.ent.ti.com
- (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 31
- Jan 2024 14:41:31 -0600
-Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE112.ent.ti.com
- (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Wed, 31 Jan 2024 14:41:31 -0600
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40VKfV0l099440;
-	Wed, 31 Jan 2024 14:41:31 -0600
-Message-ID: <989bcf17-114a-4f6c-84b9-1ff443cb01dc@ti.com>
-Date: Wed, 31 Jan 2024 14:41:31 -0600
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="CINiIu8c"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C539BC43399;
+	Wed, 31 Jan 2024 21:13:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+	s=korg; t=1706735581;
+	bh=DoZ1YihdlAS/IIbEKJ6/i00j2rTLW7LkeFYXNRHaTSw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=CINiIu8czP40RCAK7E4RK0aQ+zAFTvmZilfkEdTqdNBRgkdym/LBfFgUFWIxkSyqC
+	 UdV+OX0Der+1hMJg/aDvykJyveYus6z/NKcvdJjShIeiuvZFKNO36u1RruuogwTrNx
+	 x16fAy55u9VoK6JrJygC5hPLDuwY8TKDfm/wp9ts=
+Date: Wed, 31 Jan 2024 13:13:01 -0800
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Jens Wiklander <jens.wiklander@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	op-tee@lists.trustedfirmware.org,
+	Shyam Saini <shyamsaini@linux.microsoft.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Jerome Forissier <jerome.forissier@linaro.org>,
+	Sumit Garg <sumit.garg@linaro.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Bart Van Assche <bvanassche@acm.org>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+	Tomas Winkler <tomas.winkler@intel.com>,
+	Alex =?iso-8859-1?Q?Benn=E9e?= <alex.bennee@linaro.org>
+Subject: Re: [PATCH v2 1/3] rpmb: add Replay Protected Memory Block (RPMB)
+ subsystem
+Message-ID: <2024013108-hamster-audacious-9e3a@gregkh>
+References: <20240131174347.510961-1-jens.wiklander@linaro.org>
+ <20240131174347.510961-2-jens.wiklander@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH 00/13] Add tuning algorithm for delay chain
-Content-Language: en-US
-To: "Raghavendra, Vignesh" <vigneshr@ti.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof
- Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley
-	<conor+dt@kernel.org>
-CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
-        Andrew Davis
-	<afd@ti.com>, Udit Kumar <u-kumar1@ti.com>,
-        Roger Quadros
-	<rogerq@kernel.org>, <devicetree@vger.kernel.org>,
-        Randolph Sapp <rs@ti.com>
-References: <20240131003714.2779593-1-jm@ti.com>
- <5e03e867-b45f-482b-b734-7949e28fc97e@ti.com>
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <5e03e867-b45f-482b-b734-7949e28fc97e@ti.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240131174347.510961-2-jens.wiklander@linaro.org>
 
-On 1/31/24 7:35 AM, Raghavendra, Vignesh wrote:
-> Hi,
-> 
-> On 1/31/2024 6:07 AM, Judith Mendez wrote:
->> This patch series introduces a new tuning algorithm for
->> mmc. The new algorithm should be used when delay chain is
->> enabled. The ITAPDLY is selected from the largest passing
->> window and the buffer is not viewed as a circular buffer.
->> The new tuning algorithm is implemented as per the paper
->> published here [0] and has been tested on the following
->> platforms: AM62x SK, AM62A SK, AM62p SK, AM64x SK, and AM64x
->> EVM.
->>
->> The series also includes a few fixes in the sdhci_am654
->> driver on OTAPDLYEN/ITAPDLYEN and ITAPDELSEL. There are
->> also device tree node fixes for missing mmc nodes,
->> modifying DLL properties, and fixes for OTAP/ITAP delay
->> values.
->>
->> MMC0/MMC2 nodes are introduced for AM62ax in this series.
->>
->> This series is sent as a RFC mostly to get some feedback
->> and/or comments on the new tuning algorithm implementation.
->>
->> [0] https://www.ti.com/lit/an/spract9/spract9.pdf
->>
-> 
-> 
->> Judith Mendez (11):
->>    drivers: mmc: host: sdhci_am654: Add tuning algorithm for delay chain
->>    drivers: mmc: host: sdhci_am654: Write ITAPDLY for DDR52 timing
->>    drivers: mmc: host: sdhci_am654: Add missing OTAP/ITAP enable
->>    drivers: mmc: host: sdhci_am654: Add ITAPDLYSEL in
->>      sdhci_j721e_4bit_set_clock
->>    drivers: mmc: host: sdhci_am654: Fix ITAPDLY for HS400 timing
-> 
-> These patches needs to have Fixes: tag as they are bug fixes IMO.
+On Wed, Jan 31, 2024 at 06:43:45PM +0100, Jens Wiklander wrote:
+> +struct class rpmb_class = {
 
-Understood, will add.
+This structure should be marked as 'const', right?
 
-> 
->>    arm64: dts: ti: k3-am62a-main: Add sdhci2 instance
->>    arm64: dts: ti: k3-am64-main: Update ITAP/OTAP values for MMC
->>    arm64: dts: ti: k3-am62-main: Update ITAP/OTAP values for MMC
->>    arm64: dts: ti: k3-am62p: Add missing properties for MMC
->>    arm64: dts: ti: k3-am6*: Remove DLL properties for soft phys
->>    arm64: dts: ti: k3-am6*: Reorganize MMC properties
->>
->> Nitin Yadav (2):
->>    arm64: dts: ti: k3-am62a-main: Add sdhci0 instance
->>    arm64: dts: ti: k3-am62a7-sk: Enable eMMC support
->>
-> 
-> Can the driver changes be merged independent of DT changes? Or are they
-> meant to go together? Latter would be problematic as it creates cross
-> tree dependencies.
+> +	.name = "rpmb",
+> +	.dev_release = rpmb_dev_release,
+> +};
+> +EXPORT_SYMBOL(rpmb_class);
 
-The driver changes can be merged independently.
+EXPORT_SYMBOL_GPL() to match all the other exports in this file please.
 
-> 
->>   arch/arm64/boot/dts/ti/k3-am62-main.dtsi      |  57 +++--
->>   .../arm64/boot/dts/ti/k3-am625-beagleplay.dts |   5 -
->>   arch/arm64/boot/dts/ti/k3-am62a-main.dtsi     |  45 +++-
->>   arch/arm64/boot/dts/ti/k3-am62a7-sk.dts       |  27 ++-
->>   arch/arm64/boot/dts/ti/k3-am62p-main.dtsi     |  44 +++-
->>   arch/arm64/boot/dts/ti/k3-am62p5-sk.dts       |   7 +-
->>   .../arm64/boot/dts/ti/k3-am62x-sk-common.dtsi |   4 +-
->>   arch/arm64/boot/dts/ti/k3-am64-main.dtsi      |  17 +-
->>   arch/arm64/boot/dts/ti/k3-am642-evm.dts       |   4 +-
->>   arch/arm64/boot/dts/ti/k3-am642-sk.dts        |   2 -
->>   drivers/mmc/host/sdhci_am654.c                | 215 ++++++++++++++----
->>   11 files changed, 321 insertions(+), 106 deletions(-)
->>
+thanks,
 
+greg k-h
