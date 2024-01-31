@@ -1,70 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71DB438F99;
-	Wed, 31 Jan 2024 21:13:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 685353BB24;
+	Wed, 31 Jan 2024 21:50:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706735582; cv=none; b=GEU9ZbUo+Dr1d205iylenXvF983gSzDkEnAtKwZ2PQKdj8llKO/AZlAHZfKSsaGrPHDoXXuF0pXc6aT0FreWKdYEQDS9xWfjgP+0CjOKrGaG5ebuCHXeY8x7jgpXFF16YgFNKPXiWAKH0KVC0x+D1e0aNphy30d//hCiaf8KciY=
+	t=1706737849; cv=none; b=qwUTYZ2bTiQ5cGmMQAs01E8ge0pB39xHsJE4LmQWe5O7D5/dZdNXxR8quanfHcdMTr+l5+L+x5iyXCSswQ3oDpPLduJYbRYd8mjfkEbvBvYhvrq66PGW9oO1V3vQWfBnhBzDzzwC9OIRNrKYYoMD1Aomrp/kWOvwoWMwdWymaSo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706735582; c=relaxed/simple;
-	bh=DoZ1YihdlAS/IIbEKJ6/i00j2rTLW7LkeFYXNRHaTSw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pTovl5nMr0PVkWfr63blS4to9P9XUwoGATyAf4u5DqXHdsyF/tdLiNVS1g/VXwhp/UIhDvgnc39TQknmi4bRVpwAMUv1occoeKcwoTDOdTMhyIddZDMhEots7HvloBjcJYWZaE6/Lnu+Zuve5XQjJgnyDB7XKA3Y93eIOecRJ4I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=CINiIu8c; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1706737849; c=relaxed/simple;
+	bh=IVwl22V66+iZHjkuJII1kYOWnJyoRAFMYxv9KsU1hW8=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=u7h03EYPruh5/9fLP/UYw/WftNPTDH4kybKO40ais17eZ3a5WCfhVmei1CKBlFFcqhp02jhUoe8pSpd1XH6KdsxezhYTbcS6/oJlf8ypRbf5miADLB6iW+epCLtR94UiUxHa1sEC4vCwA+8I21eYgxvDQm3SGSM8SKnEWG1VC8Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=h6ZidhzT; arc=none smtp.client-ip=198.47.19.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="CINiIu8c"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C539BC43399;
-	Wed, 31 Jan 2024 21:13:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1706735581;
-	bh=DoZ1YihdlAS/IIbEKJ6/i00j2rTLW7LkeFYXNRHaTSw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=CINiIu8czP40RCAK7E4RK0aQ+zAFTvmZilfkEdTqdNBRgkdym/LBfFgUFWIxkSyqC
-	 UdV+OX0Der+1hMJg/aDvykJyveYus6z/NKcvdJjShIeiuvZFKNO36u1RruuogwTrNx
-	 x16fAy55u9VoK6JrJygC5hPLDuwY8TKDfm/wp9ts=
-Date: Wed, 31 Jan 2024 13:13:01 -0800
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: Jens Wiklander <jens.wiklander@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	op-tee@lists.trustedfirmware.org,
-	Shyam Saini <shyamsaini@linux.microsoft.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Jerome Forissier <jerome.forissier@linaro.org>,
-	Sumit Garg <sumit.garg@linaro.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Bart Van Assche <bvanassche@acm.org>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Tomas Winkler <tomas.winkler@intel.com>,
-	Alex =?iso-8859-1?Q?Benn=E9e?= <alex.bennee@linaro.org>
-Subject: Re: [PATCH v2 1/3] rpmb: add Replay Protected Memory Block (RPMB)
- subsystem
-Message-ID: <2024013108-hamster-audacious-9e3a@gregkh>
-References: <20240131174347.510961-1-jens.wiklander@linaro.org>
- <20240131174347.510961-2-jens.wiklander@linaro.org>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="h6ZidhzT"
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40VLoj6Q123748;
+	Wed, 31 Jan 2024 15:50:45 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1706737845;
+	bh=onc9QM9ukgmYukraFs8da86DAT/6E9TriZDUxBTiRZ8=;
+	h=From:To:CC:Subject:Date:In-Reply-To:References;
+	b=h6ZidhzToGBvckW3AtE7TWzfZFs/tveX1rn0W5eVWw0D+8nXkCsyVBC6qbHK4MZG/
+	 izTDWolbE8X1hOGd1s70XUAoSaLqggvz6CQ4GsMXT1R7Ms3sviEUL6SPYhMWJywO53
+	 EXZNnQq4VeuA2sY/bfeXwVJVxxkaPoFM9cR8h6+0=
+Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
+	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40VLojkx044713
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Wed, 31 Jan 2024 15:50:45 -0600
+Received: from DLEE104.ent.ti.com (157.170.170.34) by DLEE112.ent.ti.com
+ (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 31
+ Jan 2024 15:50:45 -0600
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE104.ent.ti.com
+ (157.170.170.34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Wed, 31 Jan 2024 15:50:44 -0600
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40VLoig6062479;
+	Wed, 31 Jan 2024 15:50:44 -0600
+From: Judith Mendez <jm@ti.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, Randolph Sapp <rs@ti.com>,
+        Vignesh
+ Raghavendra <vigneshr@ti.com>
+Subject: [PATCH v1 4/5] mmc: sdhci_am654: Add ITAPDLYSEL in sdhci_j721e_4bit_set_clock
+Date: Wed, 31 Jan 2024 15:50:43 -0600
+Message-ID: <20240131215044.3163469-5-jm@ti.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20240131215044.3163469-1-jm@ti.com>
+References: <20240131215044.3163469-1-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240131174347.510961-2-jens.wiklander@linaro.org>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-On Wed, Jan 31, 2024 at 06:43:45PM +0100, Jens Wiklander wrote:
-> +struct class rpmb_class = {
+Add ITAPDLYSEL to sdhci_j721e_4bit_set_clock function.
+This allows to set the correct ITAPDLY for timings that
+do not carry out tuning.
 
-This structure should be marked as 'const', right?
+Fixes: 1accbced1c32 ("mmc: sdhci_am654: Add Support for 4 bit IP on J721E")
+Signed-off-by: Judith Mendez <jm@ti.com>
+---
+ drivers/mmc/host/sdhci_am654.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-> +	.name = "rpmb",
-> +	.dev_release = rpmb_dev_release,
-> +};
-> +EXPORT_SYMBOL(rpmb_class);
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 5ac82bc70706..f5dc981c470d 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -321,6 +321,7 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	unsigned char timing = host->mmc->ios.timing;
+ 	u32 otap_del_sel;
+ 	u32 itap_del_ena;
++	u32 itap_del_sel;
+ 	u32 mask, val;
+ 
+ 	/* Setup Output TAP delay */
+@@ -329,12 +330,17 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
+ 	val = (0x1 << OTAPDLYENA_SHIFT) | (otap_del_sel << OTAPDLYSEL_SHIFT);
+ 
++	/* Setup Input TAP delay */
+ 	itap_del_ena = sdhci_am654->itap_del_ena[timing];
++	itap_del_sel = sdhci_am654->itap_del_sel[timing];
+ 
+-	mask |= ITAPDLYENA_MASK;
+-	val |= (itap_del_ena << ITAPDLYENA_SHIFT);
++	mask |= ITAPDLYENA_MASK | ITAPDLYSEL_MASK;
++	val |= (itap_del_ena << ITAPDLYENA_SHIFT) | (itap_del_sel << ITAPDLYSEL_SHIFT);
+ 
++	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPCHGWIN_MASK,
++			   1 << ITAPCHGWIN_SHIFT);
+ 	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
++	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPCHGWIN_MASK, 0);
+ 
+ 	regmap_update_bits(sdhci_am654->base, PHY_CTRL5, CLKBUFSEL_MASK,
+ 			   sdhci_am654->clkbuf_sel);
+-- 
+2.34.1
 
-EXPORT_SYMBOL_GPL() to match all the other exports in this file please.
-
-thanks,
-
-greg k-h
