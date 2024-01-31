@@ -1,45 +1,45 @@
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F03736D;
-	Wed, 31 Jan 2024 00:37:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.249
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 802C123A3;
+	Wed, 31 Jan 2024 00:37:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706661446; cv=none; b=Xxt9Wqb0QM3nzssrREZ/eQKrUR/B9fkBZga5L18694H1W1FLN87+kzje49s245LpHh1nz5b1HLFalaE5bGf9Vl2/FpfgbRTgf3vKu+AvZEyRtrQXCEztaGovo1lci5IqHbOdgRG7jHVAP5PZik6+IyAPBp26E/lRn0WSR7M6pAA=
+	t=1706661446; cv=none; b=uSdemH2FvOv2/VRSTM6EiD9vps3Btx3dePoVRB61UCgmBCHFvfQNLUtrQ7IpcTuxlVBugqiU4IuWTTLPmprTicoulTlA2hQXHsWKkUZmq3LmeTNjSD6qTEmnXfyEuR1VWEmbA87TKF1n1S8d7EBgI180WvlNQfYxeJWZOhLsXuk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1706661446; c=relaxed/simple;
-	bh=fbGnNeYHC8zY3a1uoZmwZ/hqQ7K+FI4IQ3ndJ0elgpg=;
+	bh=BOIMfpJd4wjoTPa05l1nYj4kGi90/ceQ2kjZ91/SPNc=;
 	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=V6SnuMKPPEnPLcP89HSXstvHv/j+D185yVR6UyoOCYKOKeLXwo/Q4q3if40rwV0UifyeoZPuGu2dFjkae7avgsNj0uEFmVL96Hb+MEGwqxQLbJoLzLf5k9nz1CMGsFScxC43r5iNhAr4beQL/70nWucWDo3UgvMELeOgUIlVOu0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=W8eqpP1v; arc=none smtp.client-ip=198.47.23.249
+	 MIME-Version:Content-Type; b=Xth93IyuNTsge4h98FMXEe6Nt8lUOeaU0VaKH8gIysu65HtDsVY5NaLN7YsX0OcrsJgddwO3S292XOGuNOcKbhYsNz2x37f6AyEy5NwONH4Fq6q3vGTmmZny01YVFW4HY/IetOcdI3J2CDYuO/J0gXPbxub8nSJR2pGQX4au7CE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=Kr591s/Y; arc=none smtp.client-ip=198.47.23.248
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="W8eqpP1v"
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40V0bFsk121331;
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Kr591s/Y"
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 40V0bF9O034651;
 	Tue, 30 Jan 2024 18:37:15 -0600
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
 	s=ti-com-17Q1; t=1706661435;
-	bh=xxI57RFhA7r8bRyDm0k+ooGHxeLdKBscUR5KUmBLBy4=;
+	bh=QWigbctVlzjkxsBbZQ1Y47XS9owR9Y5JqOgjf+q4VGI=;
 	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=W8eqpP1vqt/01If1kWf0TL6/kyi7kEcCm9cy1B0g+mzGSfa65kdreCDC5qrPEjsWI
-	 rR9/8aO10PMpbxzNWDq676WA2QiEZ+gm/WuWY8hPqZiFxDFVO7g0TNUUz+iWO577HX
-	 bX2Wivjx9NqFssYid3pAnTIh+v01MxZa2xZY7DEc=
-Received: from DLEE110.ent.ti.com (dlee110.ent.ti.com [157.170.170.21])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40V0bFRU045571
+	b=Kr591s/Y+VWQxGZjMzjiDsejRTtZiCsN9wHN/Sawlxg/NnFFu0Tvfrq0dShEUxZfq
+	 NpOIZAOtGwK9aL+PUZJyBypSS5SwxJuXMMTJVezt+12iWr5n3PU4AP3ZluVcXI9O8x
+	 Aq8iWnc0eQl/58P78xQ7FqyOxzB8qzHLJxSoULEg=
+Received: from DLEE108.ent.ti.com (dlee108.ent.ti.com [157.170.170.38])
+	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 40V0bFe4030604
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
 	Tue, 30 Jan 2024 18:37:15 -0600
-Received: from DLEE102.ent.ti.com (157.170.170.32) by DLEE110.ent.ti.com
- (157.170.170.21) with Microsoft SMTP Server (version=TLS1_2,
+Received: from DLEE108.ent.ti.com (157.170.170.38) by DLEE108.ent.ti.com
+ (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Tue, 30
  Jan 2024 18:37:15 -0600
-Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE102.ent.ti.com
- (157.170.170.32) with Microsoft SMTP Server (version=TLS1_2,
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE108.ent.ti.com
+ (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
  Frontend Transport; Tue, 30 Jan 2024 18:37:15 -0600
 Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40V0bEwD026520;
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 40V0bEwB026520;
 	Tue, 30 Jan 2024 18:37:15 -0600
 From: Judith Mendez <jm@ti.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
@@ -53,9 +53,9 @@ CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
         Udit Kumar
 	<u-kumar1@ti.com>, Roger Quadros <rogerq@kernel.org>,
         <devicetree@vger.kernel.org>, Randolph Sapp <rs@ti.com>
-Subject: [RFC PATCH 06/13] arm64: dts: ti: k3-am62a-main: Add sdhci0 instance
-Date: Tue, 30 Jan 2024 18:37:07 -0600
-Message-ID: <20240131003714.2779593-7-jm@ti.com>
+Subject: [RFC PATCH 04/13] drivers: mmc: host: sdhci_am654: Add ITAPDLYSEL in sdhci_j721e_4bit_set_clock
+Date: Tue, 30 Jan 2024 18:37:05 -0600
+Message-ID: <20240131003714.2779593-5-jm@ti.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20240131003714.2779593-1-jm@ti.com>
 References: <20240131003714.2779593-1-jm@ti.com>
@@ -69,48 +69,47 @@ Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-From: Nitin Yadav <n-yadav@ti.com>
-
-Add sdhci0 DT node in k3-am62a-main for eMMC support. Add otap/itap
-values according to the datasheet[0], Refer to Table 7-79.
-
-[0] https://www.ti.com/lit/ds/symlink/am62a3.pdf
+Add ITAPDLYSEL to sdhci_j721e_4bit_set_clock function.
+This allows to set the correct ITAPDLY for timings that
+do not carry out tuning.
 
 Signed-off-by: Judith Mendez <jm@ti.com>
-Signed-off-by: Nitin Yadav <n-yadav@ti.com>
 ---
- arch/arm64/boot/dts/ti/k3-am62a-main.dtsi | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ drivers/mmc/host/sdhci_am654.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi b/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-index f0b8c9ab1459..523dee78123a 100644
---- a/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-+++ b/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-@@ -536,6 +536,24 @@ main_gpio1: gpio@601000 {
- 		status = "disabled";
- 	};
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 35e02f4128a7..61f95aad3f80 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -321,6 +321,7 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	unsigned char timing = host->mmc->ios.timing;
+ 	u32 otap_del_sel;
+ 	u32 itap_del_ena;
++	u32 itap_del_sel;
+ 	u32 mask, val;
  
-+	sdhci0: mmc@fa10000 {
-+		compatible = "ti,am62-sdhci";
-+		reg = <0x00 0xfa10000 0x00 0x260>, <0x00 0xfa18000 0x00 0x134>;
-+		interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
-+		power-domains = <&k3_pds 57 TI_SCI_PD_EXCLUSIVE>;
-+		clocks = <&k3_clks 57 5>, <&k3_clks 57 6>;
-+		clock-names = "clk_ahb", "clk_xin";
-+		assigned-clocks = <&k3_clks 57 6>;
-+		assigned-clock-parents = <&k3_clks 57 8>;
-+		bus-width = <8>;
-+		mmc-hs200-1_8v;
-+		ti,clkbuf-sel = <0x7>;
-+		ti,otap-del-sel-legacy = <0x0>;
-+		ti,otap-del-sel-mmc-hs = <0x0>;
-+		ti,otap-del-sel-hs200 = <0x6>;
-+		status = "disabled";
-+	};
-+
- 	sdhci1: mmc@fa00000 {
- 		compatible = "ti,am62-sdhci";
- 		reg = <0x00 0xfa00000 0x00 0x260>, <0x00 0xfa08000 0x00 0x134>;
+ 	/* Setup Output TAP delay */
+@@ -329,12 +330,17 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
+ 	val = (0x1 << OTAPDLYENA_SHIFT) | (otap_del_sel << OTAPDLYSEL_SHIFT);
+ 
++	/* Setup Input TAP delay */
+ 	itap_del_ena = sdhci_am654->itap_del_ena[timing];
++	itap_del_sel = sdhci_am654->itap_del_sel[timing];
+ 
+-	mask |= ITAPDLYENA_MASK;
+-	val |= (itap_del_ena << ITAPDLYENA_SHIFT);
++	mask |= ITAPDLYENA_MASK | ITAPDLYSEL_MASK;
++	val |= (itap_del_ena << ITAPDLYENA_SHIFT) | (itap_del_sel << ITAPDLYSEL_SHIFT);
+ 
++	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPCHGWIN_MASK,
++			   1 << ITAPCHGWIN_SHIFT);
+ 	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
++	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPCHGWIN_MASK, 0);
+ 
+ 	regmap_update_bits(sdhci_am654->base, PHY_CTRL5, CLKBUFSEL_MASK,
+ 			   sdhci_am654->clkbuf_sel);
 -- 
 2.34.1
 
