@@ -1,137 +1,102 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f48.google.com (mail-oo1-f48.google.com [209.85.161.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1C4F4DA19;
-	Thu,  1 Feb 2024 09:59:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA7CA15B96D
+	for <linux-mmc@vger.kernel.org>; Thu,  1 Feb 2024 11:27:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706781601; cv=none; b=uFYN02pONOp6wWMkwYSkuNz96LjpN7+6LMNEdoWGtbw7SYcuW6MWep/jBECB3Nvkv4K9FXnWEwBTaldHEcNpsY0iiIUQSpjw1yK5HFuCw1IBPgJ2Zp1qOrGzM5erWG2YXI5xF6fa7aEl3hFOzHVmbDZoMSEnS1TqxHuzhye86jA=
+	t=1706786827; cv=none; b=JGkngt8JrGiVw5mcyHlBRCNr2jOUk0poZJlKoyoSl/DeOBechQPGHfkICIbYwFqEfx+m7455OnLntwGrQdATIel6cEGSRScfGNDHm/pzOW5dZs/ahH73vx0JgWCWoBH/moDZ+fqBMkZtX45F4bLI1yObzsRzr9a0bJyv+P0EnU0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706781601; c=relaxed/simple;
-	bh=MMcoYgAB2ObHPsGOhaFR/VarWNf9nlQOm0soMsGMKs0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=XdD+lV++i1lpMkx39t1DdhTWNQsi7rV7YoF9U9yxSr/beGzH1EUzhjI76aA4VMv6Ty96YyV8q8PuNVqB68FMYhQ1diORksEjni8bjS+rYmf0hHwIbjrRQoQlhNxwzTX0FjzPk6EMlZVHIxYf1ntitqo5YMEGdhokQhwOCjU/bGM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=fLfpZRTS; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1706786827; c=relaxed/simple;
+	bh=7t3cN4A5Nlnf8vbZj/GgzpI6OT/EQej8eCPkMolSN48=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=hrJtpYiWt6W20xjaJKmsvd5UwExqkIABl+ZsL10AnWK2jx0864rarO86yIW9tSGneFAjns8XKDYYgABkB8z73fAgOrkCeXbKfeQQFaDlmnTdkYcpFNAmfDn59zvYjLNQxTi69Juxc8avyPKkomaaI80yA89UPrlSIyMuUvz/lyA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=CQkKB6Iy; arc=none smtp.client-ip=209.85.161.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="fLfpZRTS"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 4116Q4P3017276;
-	Thu, 1 Feb 2024 09:55:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	message-id:date:mime-version:subject:to:cc:references:from
-	:in-reply-to:content-type:content-transfer-encoding; s=
-	qcppdkim1; bh=d/00M8Lg8HizPWB0AUqNUF9SIyclE0Lad3IoN8XDVEY=; b=fL
-	fpZRTSoiXw2uIGpnIRe1xrtx2fZGfrooXtvm1yD9YAm12k14EyNuDsxtgzdD3Ptb
-	okIQek/5Eo2UPr2oY8mRYZqY9oT0KfDoSzE+/T4XC4jUqrKcWo0uS+kDyeJ79jAr
-	05rNnuEJpVYzvUJM4Qc03dxWP9MgLY4n9tPQVnpyQO9QCi6cAz7cBv5ppgwPjeBN
-	KtaYJZyeN/L3eWwI8MpG1oquGRYfJ7JqWXHpfQ3mntjc551rwgrLmyKipTbSF16v
-	y0/vdS8u1ap4I7xdXP8ABA3AAn/jjkZlCuFGgXo6XXvL/AT7TAes8bIAGabZvl9C
-	WoXhbOrVm2vKPuhF6ZjA==
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3w0619gkma-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 01 Feb 2024 09:55:31 +0000 (GMT)
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 4119tU2P003675
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 1 Feb 2024 09:55:30 GMT
-Received: from [10.218.47.181] (10.80.80.8) by nalasex01b.na.qualcomm.com
- (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.40; Thu, 1 Feb
- 2024 01:55:20 -0800
-Message-ID: <a0bcca80-e91b-4b97-a548-b53ea2fe4cb5@quicinc.com>
-Date: Thu, 1 Feb 2024 15:25:16 +0530
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CQkKB6Iy"
+Received: by mail-oo1-f48.google.com with SMTP id 006d021491bc7-59a1a03d09aso310416eaf.3
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Feb 2024 03:27:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1706786825; x=1707391625; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6xvSwpoCaGMK0fP8eY36xc5e6rfWbJpXKZf4oFjUro4=;
+        b=CQkKB6Iy8WPZ1nc4Wy8M4ODGe592/Ur30qxkn2q5AzbcYqLL4xhe0NQJ8N/ALrM7a5
+         WJdlpOmBRRqJ8+ATJWgzfQ/OYI6nqCidoDNSvbgqVd0HVAOAb+t5ZaZS++C4yzAwx45k
+         q7CtX8LMWuH7ktZq8CE+ndw8gcU3MB3AswD+zPEhidqpvLtxKgYdXOv0GvL/rnIYI8NC
+         aT241XwR4WLiACswBf5aeHY8YKZ2iMJZN5NaLVHijTUd7Quyi1i83a1BfM+2iBSbB7vt
+         c4HAHYVax0QfeGenIu9ZJwrlNoDxjtm9ElGMr2R6P8sJuv91NOMZLaJssJDyWSgNOGoC
+         1T1w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706786825; x=1707391625;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=6xvSwpoCaGMK0fP8eY36xc5e6rfWbJpXKZf4oFjUro4=;
+        b=PJjz6gzX01Q/MdhKunV1k8pwQhqCfwUEjdtrj9SHMVkaDyDsse7OI2fgnmmSRj3n63
+         CwVMY9uAJ2JL/v1hQaSZDz9JTFcliWXPj/K44U4c8PRd4USbsV6SyYUZ5UrRGmo6hqyd
+         omv4pUVmM6oMn3QdfL0ywCX9lpzH/1nM8omcyGhmc9jHVZf7n+dHcRTxSCKCC1Rx26Df
+         aTiPobAeC8KZ145Osr3XhyQXxyq7PEbKbQXp26WH9sJPTT+hSb5rRqZn4HTg47KNjmuH
+         WhP5nUiTHLzzJF4KDti9VbAn/Ze5VgtFpfcuEmgUcjW3ZfG6UZlbrvGHfmwtwFCXSuds
+         sPMQ==
+X-Gm-Message-State: AOJu0YyhJDahBBT6kbVsB9PJLKaxctY/d6FjUt/EzQ2suvoXClkerjRD
+	aqm12gj4yF8wk8E4Ui8paH/CLgFAE3p3WJicG+dLBcRgzlpdqe8Zsi/I7NYk72vKF2mwz3PxWOf
+	InhsK4Zw5WC7mVZyGENvNimBzv+3moL4tuVUvzQ==
+X-Google-Smtp-Source: AGHT+IGzv5bqyac0Sl+E4Ott6FDfnvYUxR7kEJdGMC/RTOZsnHXv+0sPxgCUUESgqBg+PtcOcG5cX5u/cPC2w3/wXn0=
+X-Received: by 2002:a4a:a283:0:b0:59a:3c1b:70a1 with SMTP id
+ h3-20020a4aa283000000b0059a3c1b70a1mr4693871ool.1.1706786824672; Thu, 01 Feb
+ 2024 03:27:04 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 15/15] arm64: dts: qcom: sm8550: add hwkm support to
- ufs ice
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-        Gaurav Kashyap
-	<quic_gaurkash@quicinc.com>
-CC: <linux-arm-msm@vger.kernel.org>, <linux-scsi@vger.kernel.org>,
-        <andersson@kernel.org>, <ebiggers@google.com>,
-        <neil.armstrong@linaro.org>, <srinivas.kandagatla@linaro.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
-        <robh+dt@kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <kernel@quicinc.com>,
-        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <quic_nguyenb@quicinc.com>, <bartosz.golaszewski@linaro.org>,
-        <konrad.dybcio@linaro.org>, <ulf.hansson@linaro.org>,
-        <jejb@linux.ibm.com>, <martin.petersen@oracle.com>, <mani@kernel.org>,
-        <davem@davemloft.net>, <herbert@gondor.apana.org.au>
-References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com>
- <20240127232436.2632187-16-quic_gaurkash@quicinc.com>
- <CAA8EJpr5fLYR1v64-DtjOigkUy3579tx_gwHpFWr9k0GyGajGw@mail.gmail.com>
-Content-Language: en-US
-From: Om Prakash Singh <quic_omprsing@quicinc.com>
-In-Reply-To: <CAA8EJpr5fLYR1v64-DtjOigkUy3579tx_gwHpFWr9k0GyGajGw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: iH40zl2IaJawsG1TZcdGaShFIfYH7kZ-
-X-Proofpoint-ORIG-GUID: iH40zl2IaJawsG1TZcdGaShFIfYH7kZ-
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-01-31_10,2024-01-31_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- suspectscore=0 clxscore=1011 priorityscore=1501 phishscore=0
- impostorscore=0 bulkscore=0 mlxlogscore=643 malwarescore=0 spamscore=0
- adultscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2401190000 definitions=main-2402010079
+References: <20240131174347.510961-1-jens.wiklander@linaro.org>
+ <20240131174347.510961-2-jens.wiklander@linaro.org> <2024013108-hamster-audacious-9e3a@gregkh>
+In-Reply-To: <2024013108-hamster-audacious-9e3a@gregkh>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Thu, 1 Feb 2024 12:26:53 +0100
+Message-ID: <CAHUa44HFiShTKrY33iUsi0fq++4YrFva503wh1pJT4GZ7z7ocA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Tomas Winkler <tomas.winkler@intel.com>, =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+On Wed, Jan 31, 2024 at 10:13=E2=80=AFPM Greg Kroah-Hartman
+<gregkh@linuxfoundation.org> wrote:
+>
+> On Wed, Jan 31, 2024 at 06:43:45PM +0100, Jens Wiklander wrote:
+> > +struct class rpmb_class =3D {
+>
+> This structure should be marked as 'const', right?
 
+You're right, of course.
 
-On 1/28/2024 6:31 AM, Dmitry Baryshkov wrote:
-> On Sun, 28 Jan 2024 at 01:28, Gaurav Kashyap <quic_gaurkash@quicinc.com> wrote:
->>
->> The Inline Crypto Engine (ICE) for UFS/EMMC supports the
->> Hardware Key Manager (HWKM) to securely manage storage
->> keys. Enable using this hardware on sm8550.
->>
->> This requires two changes:
->> 1. Register size increase: HWKM is an additional piece of hardware
->>     sitting alongside ICE, and extends the old ICE's register space.
->> 2. Explicitly tell the ICE driver to use HWKM with ICE so that
->>     wrapped keys are used in sm8550.
->>
->> NOTE: Although wrapped keys cannot be independently generated and
->> tested on this platform using generate, prepare and import key calls,
->> there are non-kernel paths to create wrapped keys, and still use the
->> kernel to program them into ICE. Hence, enabling wrapped key support
->> on sm8550 too.
->>
->> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
->> ---
->>   arch/arm64/boot/dts/qcom/sm8550.dtsi | 3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/arch/arm64/boot/dts/qcom/sm8550.dtsi b/arch/arm64/boot/dts/qcom/sm8550.dtsi
->> index ee1ba5a8c8fc..b5b41d0a544c 100644
->> --- a/arch/arm64/boot/dts/qcom/sm8550.dtsi
->> +++ b/arch/arm64/boot/dts/qcom/sm8550.dtsi
->> @@ -1977,7 +1977,8 @@ ufs_mem_hc: ufs@1d84000 {
->>                  ice: crypto@1d88000 {
->>                          compatible = "qcom,sm8550-inline-crypto-engine",
->>                                       "qcom,inline-crypto-engine";
->> -                       reg = <0 0x01d88000 0 0x8000>;
->> +                       reg = <0 0x01d88000 0 0x10000>;
-> 
-> Does the driver fail gracefully with the old DT size? At least it
-> should not crash.
-When adding  qcom,ice-use-hwkm property, DT size needs to be updated.
-Without any DT change, there will be know issue.
+>
+> > +     .name =3D "rpmb",
+> > +     .dev_release =3D rpmb_dev_release,
+> > +};
+> > +EXPORT_SYMBOL(rpmb_class);
+>
+> EXPORT_SYMBOL_GPL() to match all the other exports in this file please.
 
-> 
->> +                       qcom,ice-use-hwkm;
->>                          clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-> 
+Sure, I'll fix it.
+
+Thanks,
+Jens
+
+>
+> thanks,
+>
+> greg k-h
