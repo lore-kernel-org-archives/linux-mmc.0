@@ -1,59 +1,48 @@
-Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E623485297
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Feb 2024 19:13:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6659084FCC;
+	Thu,  1 Feb 2024 19:24:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706814821; cv=none; b=Kt6zckXCXUSypVNMqSunGWV9gIppDAwVmMUntsPprcyq7TDO7SvdsNBUI6nbudpQF1XMc+73dzQYIMXpjCvBd/FBo/wnzH4YZZB57c34HiUm8V0oNyMa++9WWEufc8pcmYU5SSHAIZnHSTXXdhSyNQYvDwjYPO1p3rl+TZIf00c=
+	t=1706815480; cv=none; b=bcCTvGO/iRhl9vf5OvtDRL0JbCF6ewn9kKV5XwGebV/LBX4lfszK738CWak2xf3PQbHDlUuGZ0iCG8jdIXQiIQXGLrYl7K3eUJ9xVnm3Fa+J8imGQKIV/7iwaSBrWqeEmuI3BU6bA+qWDyc+XZ3he9/q/KivzZYklPaJscvrVwM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706814821; c=relaxed/simple;
-	bh=YH86kbr1cgKMKWPB4N2wbtOfMeUg2Y/vh+5jGXYIw4E=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=A7XQZgy98TOZUTwnULOJE0basCcq2hL4k99Ny3qsTfvixxLEAOEEWxJP3WXLri9mdexsi3v4NMsgvgEAY5ipuKXEM2L9zccgvRxkUwk78A9L7E3FHNHlRxOEkDpszI7vbAYcRzVD3+Gz2iz0PlwVag58YNeWEL37OmMH4TStUEg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Dh9YAkSe; arc=none smtp.client-ip=209.85.208.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1706815480; c=relaxed/simple;
+	bh=iUc2vkXqxWp29arSGr0Gv0qjGnyeHtj+r72KPm4qIoA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=sPSpfaaaiCvHILKdtlSzremN7VfKbyCtRj57CjSi+CHdufaNMBvfMzogXOl6HCoIaRa3HyzXqWz/FlaPA5rjBpY7I3Z8W6MC/KafDoPW9cys2BIMuqUqBTeeBaC7AHSmsFpjsr9skkctLs8RkyKgtaEAbOdQsRkGVDRdnur+YOY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=Q0omFkn4; arc=none smtp.client-ip=198.47.19.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Dh9YAkSe"
-Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-55783b7b47aso1847275a12.0
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Feb 2024 11:13:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706814818; x=1707419618; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Rs8bFhf5my2YnmgPHwdbtk4kh1nvJgyASEQNZng+sZE=;
-        b=Dh9YAkSeQjVT10nAo0DsykBzYY1OqFnwRm75BqTqJlk98XPnFy5krR686l7ydBaSCV
-         BRPPoNvZ+bPgKXYuMieoyBxoQC4iKuIB+oE2zYDlPGE9M+l3fhCYq6UtUqWPkzXrUotD
-         /QTEQwTudaDPaws0sYsvbAkY8RL1QsR8HlZJWtvNOqVmh4JCjom0o71LU3ZZ+IKoZLqg
-         8QTzR1keIXmKEfsYD5ZtLvzKxEIIjQwEpI1w04J+eTS+2esT3gNBPpdnh1/IRxwN+033
-         6S8TFDQy6tFbZxcMaUdWrIV3ezTeADqUoe1HJWkHez1dU4rSuyBTTiTGocdlPAjCa/Ll
-         Yi9Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706814818; x=1707419618;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Rs8bFhf5my2YnmgPHwdbtk4kh1nvJgyASEQNZng+sZE=;
-        b=QjP68kYJ6zKGngxi8ZW9CL4/sPSJdRkPq82q2Oqnb7NFhx4abO93N2IHVBjNNtfITQ
-         tRlSYIr8pCpFPghygTb9G+B/7gR+Mtr+PJs+m7qeantfH4MYeZM4yqzpG/xdScMIXyI8
-         4CrWFOSSWYOrUcBXDZhzTVyAbhafB527t3h4WB7Qf/8rcjSqdEEj+GqrYWFAEw8JnPif
-         jUUfDI/IoWsgOQaz+KIbWcFiU03K9aONPNwZ/wr8hJofIqilYPJKnRQNqpQuZV2dorBY
-         cen2XE5PXZer8gJ4rBAXZVhNkTm7R82sA1FFt1yCN/nzt9tsvPRQ3leLbjIKGvH5c+1H
-         CpWg==
-X-Gm-Message-State: AOJu0Yw7Gqy4zsjL8x5orHxEanXzEpXRlTeH8QFvRSCBX+Yv5SFzdwtQ
-	v7uD4UqfEAwjfzSzpPRJKRF3RVgHVGFfW33uoFuAu4TF+aXd9K6+dpaeo7KsUZY=
-X-Google-Smtp-Source: AGHT+IFH37wg9fTFzpFHD98Tr4CkdHn+eHxTd3BlVsEIFmM2D+8wwhDRim+spoFYFjlvzfGNZAEHJQ==
-X-Received: by 2002:a05:6402:696:b0:55d:35dd:4a48 with SMTP id f22-20020a056402069600b0055d35dd4a48mr4059760edy.36.1706814818106;
-        Thu, 01 Feb 2024 11:13:38 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCUImBA09Zc6s7ffIyKKncBLxUwit5T9HTfNJeTQiZ2dx4xCRlddL4PfRoyp0/4FXbeBhWX5AXfj5JyvnCaapDgt5/HYeMQ7DxXf5wNce4HPBG8yLt7j6y9E/T3myfYjzt5rAx4N8DCoxvKZoJ/ZbwZ7zoI+H+TPHwVRBKPJqTDMjN7xLXGfGcmmfB1u2GGoKy64zOWDYxK3u/XSft3HYaN3lgC8ec66KTXzCWd+x2wE/Rd/+6GEUor9EcJpwIR3Tv9JmjTN6CoS1MTysAGcauhYm0lsimtekx9MnskIUBHjf8V2Cy0OMwTr778k3ZLotQHBx0dm91qUxHhEOsSsxi9UgF/hYdfwP+ROIjI84Vuxf4/skLtCkowF/yosQfVlNj7LpRsLfS8/hIScv+gtbLhUf+TyZTip/i3fKBoDyMF3WCxEyeOSzUDzBaHulxXoNuezeA6ytocx103SYDJpeC+Mh95m0vWHh6eivpWsOyb9mrOyfIrUpdqy0XEPOA1MYXqtpoSHXYqbktSUHhohrHBLjAqNNPDrZ41qj5BCaepOUvkpxBcKxxxjrSmV2A7Dqc95c5V0ouIxTs5cybCeo1ASl5ZuufR/pCAuMluII5NfOrDxDwETtqKTn31aoWUQSLmBkSxuUZORPyD58VvB01VKUwoos6L1VhQ7crsKiYfBvobWsINJ4t1Ztpys+FUfbAPLaxukEGfirjEmhy7Kn2F2ZmvS87W87sVPS/L+023Rji+JeIHxJk0xuXnVRKfE9e+JQYjn3tzJ+O4DMKScGFhIBgYhXt1kF9IJaeni
-Received: from [192.168.159.104] (178235179129.dynamic-4-waw-k-1-3-0.vectranet.pl. [178.235.179.129])
-        by smtp.gmail.com with ESMTPSA id z17-20020aa7d411000000b0055c97f940fcsm92944edq.81.2024.02.01.11.13.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 01 Feb 2024 11:13:37 -0800 (PST)
-Message-ID: <dd219c40-33d5-43ff-b0da-16ccf0198bb9@linaro.org>
-Date: Thu, 1 Feb 2024 20:13:33 +0100
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Q0omFkn4"
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 411JOZ0P077704;
+	Thu, 1 Feb 2024 13:24:35 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1706815475;
+	bh=/VVmEmDR3nHp1FdRkgsPainh9V2zVUnFoExf5ZzRD7U=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=Q0omFkn4aN1mdfRx4JuVKCEuQJxhX4a09dd4UNGOw9U7Fj8lXTDy3BhF0YdGhXOiQ
+	 IOTTzGuKKGD7RGeXCAtII2G1OiGwq2VGxE2LRmkD0hvejHnz5YRWtzv8hnDQN5EnFH
+	 8rHN4SxIfPtviEsGTxtXWGuBB0IFcKHsWY3tQg9c=
+Received: from DLEE115.ent.ti.com (dlee115.ent.ti.com [157.170.170.26])
+	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 411JOZHb121891
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Thu, 1 Feb 2024 13:24:35 -0600
+Received: from DLEE100.ent.ti.com (157.170.170.30) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 1
+ Feb 2024 13:24:35 -0600
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE100.ent.ti.com
+ (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Thu, 1 Feb 2024 13:24:35 -0600
+Received: from [10.249.42.149] ([10.249.42.149])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 411JOYXI096854;
+	Thu, 1 Feb 2024 13:24:34 -0600
+Message-ID: <33851b29-bdc5-4fd1-9667-571486591591@ti.com>
+Date: Thu, 1 Feb 2024 13:24:34 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,104 +50,245 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 13/15] dt-bindings: crypto: ice: document the hwkm
- property
+Subject: Re: [PATCH v1 1/5] mmc: sdhci_am654: Add tuning algorithm for delay
+ chain
 Content-Language: en-US
-To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
- Gaurav Kashyap <quic_gaurkash@quicinc.com>, linux-arm-msm@vger.kernel.org,
- linux-scsi@vger.kernel.org, andersson@kernel.org, ebiggers@google.com,
- neil.armstrong@linaro.org, srinivas.kandagatla@linaro.org,
- krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, robh+dt@kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- kernel@quicinc.com, linux-crypto@vger.kernel.org,
- devicetree@vger.kernel.org, quic_omprsing@quicinc.com,
- quic_nguyenb@quicinc.com, bartosz.golaszewski@linaro.org,
- ulf.hansson@linaro.org, jejb@linux.ibm.com, martin.petersen@oracle.com,
- mani@kernel.org, davem@davemloft.net, herbert@gondor.apana.org.au
-References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com>
- <20240127232436.2632187-14-quic_gaurkash@quicinc.com>
- <301be6d8-b105-4bba-a154-9caebc8013e3@linaro.org>
-From: Konrad Dybcio <konrad.dybcio@linaro.org>
-Autocrypt: addr=konrad.dybcio@linaro.org; keydata=
- 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
- izWDgYvmBE8=
-In-Reply-To: <301be6d8-b105-4bba-a154-9caebc8013e3@linaro.org>
-Content-Type: text/plain; charset=UTF-8
+To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, Randolph Sapp <rs@ti.com>,
+        Vignesh
+ Raghavendra <vigneshr@ti.com>
+References: <20240131215044.3163469-1-jm@ti.com>
+ <20240131215044.3163469-2-jm@ti.com>
+From: Andrew Davis <afd@ti.com>
+In-Reply-To: <20240131215044.3163469-2-jm@ti.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-On 29.01.2024 09:18, Krzysztof Kozlowski wrote:
-> On 28/01/2024 00:14, Gaurav Kashyap wrote:
->> When Qualcomm's Inline Crypto Engine (ICE) contains Hardware
->> Key Manager (HWKM), and the 'HWKM' mode is enabled, it
->> supports wrapped keys. However, this also requires firmware
->> support in Trustzone to work correctly, which may not be available
->> on all chipsets. In the above scenario, ICE needs to support standard
->> keys even though HWKM is integrated from a hardware perspective.
->>
->> Introducing this property so that Hardware wrapped key support
->> can be enabled/disabled from software based on chipset firmware,
->> and not just based on hardware version.
->>
->> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
->> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
->> ---
->>  .../bindings/crypto/qcom,inline-crypto-engine.yaml     | 10 ++++++++++
->>  1 file changed, 10 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml b/Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
->> index 09e43157cc71..6415d7be9b73 100644
->> --- a/Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
->> +++ b/Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
->> @@ -25,6 +25,16 @@ properties:
->>    clocks:
->>      maxItems: 1
->>  
->> +  qcom,ice-use-hwkm:
->> +    type: boolean
->> +    description:
->> +      Use the supported Hardware Key Manager (HWKM) in Qualcomm ICE
->> +      to support wrapped keys. Having this entry helps scenarios where
->> +      the ICE hardware supports HWKM, but the Trustzone firmware does
->> +      not have the full capability to use this HWKM and support wrapped
+On 1/31/24 3:50 PM, Judith Mendez wrote:
+> Currently the sdhci_am654 driver only supports one tuning
+> algorithm which should be used only when DLL is enabled. The
+> ITAPDLY is selected from the largest passing window and the
+> buffer is viewed as a circular buffer.
 > 
-> How does it help in this scenario? You enable this property, Trustzone
-> does not support it, so what happens?
+> The new algorithm should be used when the delay chain
+> is enabled. The ITAPDLY is selected from the largest passing
+> window and the buffer is not viewed as a circular buffer.
 > 
-> Also, which SoCs have incomplete Trustzone support? I expect this to be
-> a quirk, thus limited to specific SoCs with issues.
+> This implementation is based off of the following paper: [1].
+> 
+> Also add support for multiple failing windows.
+> 
+> [1] https://www.ti.com/lit/an/spract9/spract9.pdf
+> 
+> Fixes: 13ebeae68ac9 ("mmc: sdhci_am654: Add support for software tuning")
+> Signed-off-by: Judith Mendez <jm@ti.com>
+> ---
+>   drivers/mmc/host/sdhci_am654.c | 128 +++++++++++++++++++++++++++------
+>   1 file changed, 108 insertions(+), 20 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index d659c59422e1..a3798c9912f6 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -149,10 +149,17 @@ struct sdhci_am654_data {
+>   	int strb_sel;
+>   	u32 flags;
+>   	u32 quirks;
+> +	bool dll_enable;
+>   
+>   #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+>   };
+>   
+> +struct window {
+> +	u8 start;
+> +	u8 end;
+> +	u8 length;
+> +};
+> +
+>   struct sdhci_am654_driver_data {
+>   	const struct sdhci_pltfm_data *pdata;
+>   	u32 flags;
+> @@ -290,10 +297,13 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>   
+>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
+>   
+> -	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ)
+> +	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+>   		sdhci_am654_setup_dll(host, clock);
+> -	else
+> +		sdhci_am654->dll_enable = true;
+> +	} else {
+>   		sdhci_am654_setup_delay_chain(sdhci_am654, timing);
+> +		sdhci_am654->dll_enable = false;
+> +	}
+>   
+>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL5, CLKBUFSEL_MASK,
+>   			   sdhci_am654->clkbuf_sel);
+> @@ -408,39 +418,117 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>   	return 0;
+>   }
+>   
+> -#define ITAP_MAX	32
+> +#define ITAPDLY_LENGTH 32
+> +#define ITAPDLY_LAST_INDEX 31
+> +static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
+> +			  *fail_window, u8 num_fails, bool circular_buffer)
+> +{
+> +	struct device *dev = mmc_dev(host->mmc);
+> +	struct window pass_window, first_fail, last_fail;
 
-Can we simply evaluate the return value of the secure calls?
+struct window pass_window = {}, ..
 
-Konrad
+Then you can drop the memset()s below.
+
+> +	u8 itap = 0, start_fail = 0, end_fail = 0, pass_length = 0;
+> +	int prev_end_fail = -1;
+> +	u8 i;
+> +
+> +	memset(&pass_window, 0, sizeof(pass_window));
+> +	memset(&first_fail, 0, sizeof(first_fail));
+> +	memset(&last_fail, 0, sizeof(last_fail));
+> +
+> +	if (!num_fails) {
+> +		itap = ITAPDLY_LAST_INDEX >> 1;
+
+return ITAPDLY_LAST_INDEX >> 1;
+
+> +	} else if (fail_window->length == ITAPDLY_LENGTH) {
+> +		dev_err(dev, "No passing ITAPDLY, return 0\n");
+> +		itap = 0;
+
+return 0;
+
+> +	} else {
+
+If you shortcut return directly in the above to branches, then
+this all below doesn't need to be in the else {} and you won't
+have to indent it all out so far.
+
+> +		for (i = 0; i < num_fails; i++) {
+> +			start_fail = fail_window[i].start;
+> +			end_fail = fail_window[i].end;
+> +
+> +			if (i == 0) {
+
+Move this first case to before the loop, we already know what
+first_fail will be filled with. No need to check i == 0 every iteration
+of the loop. Same for last_fail, just move to after the loop.
+
+> +				first_fail.start = start_fail;
+> +				first_fail.end = end_fail;
+> +				first_fail.length = fail_window[0].length;
+> +			}
+> +
+> +			if (i == num_fails - 1) {
+> +				last_fail.start = start_fail;
+> +				last_fail.end = end_fail;
+> +				last_fail.length = fail_window[i].length;
+> +			}
+> +
+> +			pass_length = start_fail - (prev_end_fail + 1);
+> +			if (pass_length > pass_window.length) {
+> +				pass_window.start = prev_end_fail + 1;
+> +				pass_window.length = pass_length;
+> +			}
+> +			prev_end_fail = end_fail;
+> +		}
+> +
+> +		if (!circular_buffer) {
+> +			if (ITAPDLY_LAST_INDEX - end_fail > pass_window.length) {
+> +				pass_window.start = end_fail + 1;
+> +				pass_window.length = ITAPDLY_LAST_INDEX - end_fail;
+> +			}
+> +		} else {
+> +			pass_length = ITAPDLY_LAST_INDEX - end_fail + first_fail.start;
+> +			if (pass_length > pass_window.length) {
+> +				pass_window.start = last_fail.end + 1;
+> +				pass_window.length = pass_length;
+> +			}
+> +		}
+> +
+> +		if (!circular_buffer)
+> +			itap = pass_window.start + (pass_window.length >> 1);
+> +		else
+> +			itap = (pass_window.start + (pass_window.length >> 1)) % ITAPDLY_LENGTH;
+> +
+> +		if (itap < 0 || itap > ITAPDLY_LAST_INDEX)
+> +			itap = 0;
+> +	}
+> +
+> +	return itap;
+> +}
+> +
+>   static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>   					       u32 opcode)
+>   {
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> -	int cur_val, prev_val = 1, fail_len = 0, pass_window = 0, pass_len;
+> -	u32 itap;
+> +	struct window fail_window[ITAPDLY_LENGTH];
+> +	u8 prev_pass = 1;
+> +	u8 fail_index = 0;
+> +	u8 curr_pass, itap;
+> +
+> +	memset(fail_window, 0, sizeof(fail_window[0]) * ITAPDLY_LENGTH);
+>   
+>   	/* Enable ITAPDLY */
+>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPDLYENA_MASK,
+>   			   1 << ITAPDLYENA_SHIFT);
+>   
+> -	for (itap = 0; itap < ITAP_MAX; itap++) {
+> +	for (itap = 0; itap < ITAPDLY_LENGTH; itap++) {
+>   		sdhci_am654_write_itapdly(sdhci_am654, itap);
+>   
+> -		cur_val = !mmc_send_tuning(host->mmc, opcode, NULL);
+> -		if (cur_val && !prev_val)
+> -			pass_window = itap;
+> +		curr_pass = !mmc_send_tuning(host->mmc, opcode, NULL);
+>   
+> -		if (!cur_val)
+> -			fail_len++;
+> +		if (!curr_pass && prev_pass)
+> +			fail_window[fail_index].start = itap;
+>   
+> -		prev_val = cur_val;
+> +		if (!curr_pass) {
+> +			fail_window[fail_index].end = itap;
+> +			fail_window[fail_index].length++;
+> +		}
+> +
+> +		if (curr_pass && !prev_pass)
+> +			fail_index++;
+> +
+> +		prev_pass = curr_pass;
+>   	}
+> -	/*
+> -	 * Having determined the length of the failing window and start of
+> -	 * the passing window calculate the length of the passing window and
+> -	 * set the final value halfway through it considering the range as a
+> -	 * circular buffer
+> -	 */
+> -	pass_len = ITAP_MAX - fail_len;
+> -	itap = (pass_window + (pass_len >> 1)) % ITAP_MAX;
+> +
+> +	if (fail_window[fail_index].length != 0)
+> +		fail_index++;
+> +
+> +	itap = sdhci_am654_calculate_itap(host, fail_window, fail_index,
+> +					  (sdhci_am654->dll_enable ? true : false));
+
+dll_enable is already a bool, the line:
+
+(sdhci_am654->dll_enable ? true : false)
+
+has no effect, just use sdhci_am654->dll_enable directly.
+
+Andrew
+
+> +
+>   	sdhci_am654_write_itapdly(sdhci_am654, itap);
+>   
+>   	return 0;
