@@ -1,59 +1,48 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 563756215A
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Feb 2024 16:11:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D54A8608E9;
+	Thu,  1 Feb 2024 16:20:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.249
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706803890; cv=none; b=eODjzaEcG3P99haXAUdtX/5uF+SD30gNrdZlOSArfNdqDCT4A0RjgJzLfmc5JbDOaze2wmZEBZgMsctDA+AsBMxe8T5YanrwJhtF6bXQw+p4gdW+9/8FIzyQF9ebvvOpGiTaMsTcyoSYXx3QDGnFPvv30u50rexms3JUgb8mjsw=
+	t=1706804456; cv=none; b=h4Y9J0UD1eim8uO3WXkUYu4uTY7XCOzg+k7Zh+gTkVGAI/Zw8p4PSFTO/ezqA186WjvN1vQ2iLda0v963St+n88s+kz38kbcF3A0QCRzCQL7lnDHKpon5FjJOVWQwIov3ADWsK64C7ASNlz2Nq6DZs5BCtX2d9I07vaO9g0qIkk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706803890; c=relaxed/simple;
-	bh=apJLdzMZKNqZkxhr/A8+CNCpsUOL9GHK5UhU9ZsNJTk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=JLBGcW91o07JmR9gnpquaon61kVQNQSj5I4UiwlAGAHRwwpD3TtyNX8dnrpbb7PFsBHcmzofskVjvBTpiGROgyJckFWoOOmkVbsR3AtsblsibSK0NGuy9BJGK8liuAzmlXt3myyZo0QCdHsS04WOHtfO9GygJW8T/15jI3OFfLk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=gf9N5JmE; arc=none smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1706804456; c=relaxed/simple;
+	bh=DBUwzX8KqGLX+c0Kq/oEzNmXLUwliME3QH7RqkjuAAI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=Mh5UUyy1dNEv9RkMZ78FSJgv73kpdnAVtji/w2K8arLOT6PNX2IMcTz4X4G+/w2M7sEMAt9HNLsII3L1bBhn2TGpbjSBltyFwWqtcfUzHRk0Hj44S/Fl9Xdg9X+G3ZSBc0RfaI7rPPpsCb8Gs9PDd63B4fi0MQKxFQe4mByu5fA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=o6OaG679; arc=none smtp.client-ip=198.47.23.249
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gf9N5JmE"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-a354408e6bfso382149666b.1
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Feb 2024 08:11:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706803885; x=1707408685; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=8pjHDOWqTPfZAnEZAI0E4Dw26mHdRawBX0HOJq1N4u8=;
-        b=gf9N5JmE4Cg19vElele8rOlai+vTyHCI1HvQuAOq2r4ekDwPWxOyVBsskf/ud04Z9o
-         wkrhmXBhFjPDyhAW0mXXh1GLEMXzJr6AgMaE1UWJH5jbH1W9Msn69cvC3BbQTiQZAJhJ
-         rtpj+nZ3gYzFJXGoV9ltvJ2Hp2YeMu+Lv4jnolOgjQgpg8LlR/hwQFnGHWDmgPrCrpTT
-         pxeSMSJzY4tsnSoSsWY1CuvnFmFy9AH29QNSAMKumvdfrM/Wj7YhY0Fbwk+GlLKDbeKI
-         p1p3wLuZi8BSI3vTtE+xt8ic1xH69QMGFl/w6H4arFrLyTdPb+4TkOyWCxZro7LuxYbM
-         GeCw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706803885; x=1707408685;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=8pjHDOWqTPfZAnEZAI0E4Dw26mHdRawBX0HOJq1N4u8=;
-        b=k1EqVLAyN14qzFz73+OtBtz+8YhX9uKFeK/IKN5i8U+xPF3bX/n9wY4erxZY+puhX4
-         xX+RhmEj3pgrLoeDl8horMqP+/BYMsvd2qXxga9cWXBObWhAhlDc1R7p/F7IIeCOiwT2
-         96niJTLpwgDauhkjF/AmJFkW3GNSxYw3q/fw3bH7cVzjk43wcIZhdF4Kmcirg5IsvmaQ
-         gVe4uGhe+BzlPj9qrYp4/a6LhRntbK67iC4NVISk1P5nXhcvHFEGzOynruJ032d6LgYM
-         R9JXRZ5SPRpJLRlJbshSc0RVT1OVwrhT9nTyPzkZDbJB+ognWEyNlRN23FeFx+99S1U9
-         kGLg==
-X-Gm-Message-State: AOJu0Yx0k1TaEDSkZyQ8AFTptEDQFY7LXKxIiU5Y5M/L7C7gcjPOfoC5
-	H/uVhupwFnmfhRCO8/QHlNHDvFcgk0YMMdRro31d6PzjoOL19Oz/sUywLZ6Phb8=
-X-Google-Smtp-Source: AGHT+IEuxOZ2oi/31tSTIMkkw25aN7dth0mVptYES/tdHDb9mAGvYyXsbecw2G/Xeve7QNqJa1stlg==
-X-Received: by 2002:a17:906:bf47:b0:a36:c3e3:9161 with SMTP id ps7-20020a170906bf4700b00a36c3e39161mr1985471ejb.2.1706803885632;
-        Thu, 01 Feb 2024 08:11:25 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCU/oxTWPCj5ijULfiynzTYVPiC/wr+Vzjr8rOv48rN16ZEY/9jMKGTf0kHr2muV7oKatpzSPKY5jUlC3zJoBGpF203jONzgtAZ1kjk1kwjLdSUT9/3HVfSOg/1AdJNvbLy5JrQe5ck3RxMLfZ29iEus+a42w3s+zwmQ4bYVuU4+TWLP343L120JeB9kB1arU5Sn7F4Y2jQsPXIyHF4wmcKchFwNj3AGSOXlpok9RbF7Pq7GINIifkNxamgEC3q3Llrocl0KyUKi84M6zaLjA8OCBEEuE7TMt6IsDMaIWvC16aiVhFsgNKwSQEiymKoi6yhn0NsCHM467dCtMSB5cCCEiOdrRPeT16RKZ9NEReEZF2JP53omadRzWjSeABfLyDht/4tbnYjh0jkfLHnk065+vGwYaQQdnrD6uY2UdJQ/OEPrs+qQBEJoQ278h9YKPMM6KYuUSS+P0/79uDwOESGASpyqV2s3yUayAAWhPdkHeuPSDp1FNPfd48gTgExO4dlWW+vVaE4SdaHoSCEqibNSZlUJPhiIe5K8Mf7yHR1Z+0xbuI6Y14akzpAWFVaFBWGRB6NzBdWK3imdrYXVfsqEGKfix4/wJw/bopl+admnZ8gc1fZ5dTrGFt2gkLYHDj6tDF8/ite+8YnEduzPFswC4qGYZgp2w8BpgeRDtblyOTdTptKb2O+/FQCQtGWp4H0AZBNRoeC8ylLr/qPGb7dQjcehNmOnc+Y8+GpciSDHQwxuB4uNZOKP7qaQ9bp2NNXImSGwdOL93ZbBL2fmF6hzPCc5eZ+ejLQ0FxFolVj0mqhAGaU=
-Received: from [192.168.159.104] (178235179129.dynamic-4-waw-k-1-3-0.vectranet.pl. [178.235.179.129])
-        by smtp.gmail.com with ESMTPSA id w15-20020a17090652cf00b00a2e81e4876dsm7299086ejn.44.2024.02.01.08.11.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 01 Feb 2024 08:11:25 -0800 (PST)
-Message-ID: <b06b3b13-3d61-4bf6-bc06-80ca1a189a4f@linaro.org>
-Date: Thu, 1 Feb 2024 17:11:22 +0100
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="o6OaG679"
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 411GKjHI100171;
+	Thu, 1 Feb 2024 10:20:45 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1706804445;
+	bh=XmEdIqW2hn/99WyNahpO6KjdxRh9z6fH4BH+17dUyUA=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=o6OaG6798fvb4ud2thQaY5btm5hHV+GYj6XnTNpjIJ+IUL+V6BSp3+JwauYHfma+j
+	 dNpJWiZ0q4hdE3UU+C5AytocmpdqucXMWsUMtk5aXAVEkh8vQkvIMNQDS/+cZCeSqK
+	 at33BT3kejWHT0uecZCwHAih/cqL89YSdUoExIK8=
+Received: from DFLE115.ent.ti.com (dfle115.ent.ti.com [10.64.6.36])
+	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 411GKjMS074566
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Thu, 1 Feb 2024 10:20:45 -0600
+Received: from DFLE113.ent.ti.com (10.64.6.34) by DFLE115.ent.ti.com
+ (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 1
+ Feb 2024 10:20:44 -0600
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE113.ent.ti.com
+ (10.64.6.34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Thu, 1 Feb 2024 10:20:44 -0600
+Received: from [10.249.42.149] ([10.249.42.149])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 411GKi4x106981;
+	Thu, 1 Feb 2024 10:20:44 -0600
+Message-ID: <d81a060f-3d8f-44b2-8140-eb8e7ce35d93@ti.com>
+Date: Thu, 1 Feb 2024 10:20:44 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,153 +50,123 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 02/15] qcom_scm: scm call for deriving a software
- secret
+Subject: Re: [PATCH] mmc: pwrseq: Use proper reboot notifier path
 Content-Language: en-US
-To: Gaurav Kashyap <quic_gaurkash@quicinc.com>,
- linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org,
- andersson@kernel.org, ebiggers@google.com, neil.armstrong@linaro.org,
- srinivas.kandagatla@linaro.org, krzysztof.kozlowski+dt@linaro.org,
- conor+dt@kernel.org, robh+dt@kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- kernel@quicinc.com, linux-crypto@vger.kernel.org,
- devicetree@vger.kernel.org, quic_omprsing@quicinc.com,
- quic_nguyenb@quicinc.com, bartosz.golaszewski@linaro.org,
- ulf.hansson@linaro.org, jejb@linux.ibm.com, martin.petersen@oracle.com,
- mani@kernel.org, davem@davemloft.net, herbert@gondor.apana.org.au
-References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com>
- <20240127232436.2632187-3-quic_gaurkash@quicinc.com>
-From: Konrad Dybcio <konrad.dybcio@linaro.org>
-Autocrypt: addr=konrad.dybcio@linaro.org; keydata=
- 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
- izWDgYvmBE8=
-In-Reply-To: <20240127232436.2632187-3-quic_gaurkash@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: Marek Szyprowski <m.szyprowski@samsung.com>,
+        Yangtao Li
+	<frank.li@vivo.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20240126190110.148599-1-afd@ti.com>
+ <CAPDyKFpc38-CFrzhnhutS7c78tZTLM6Bg6XsTKENP8oVT6SQXg@mail.gmail.com>
+From: Andrew Davis <afd@ti.com>
+In-Reply-To: <CAPDyKFpc38-CFrzhnhutS7c78tZTLM6Bg6XsTKENP8oVT6SQXg@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-On 28.01.2024 00:14, Gaurav Kashyap wrote:
-> Inline storage encryption may require deriving a software
-> secret from storage keys added to the kernel.
+On 1/30/24 6:04 AM, Ulf Hansson wrote:
+> On Fri, 26 Jan 2024 at 20:01, Andrew Davis <afd@ti.com> wrote:
+>>
+>> This driver registers itself as a reboot handler, which means it claims
+>> it can reboot the system. It does this so it is called during the system
+>> reboot sequence. The correct way to be notified during the reboot
+>> sequence is to register a notifier with register_reboot_notifier().
+>> Do this here.
+>>
+>> Note this will be called during normal reboots but not emergency reboots.
+>> This is the expected behavior, emergency reboot means emergency, not go
+>> do some cleanup with emmc pins.. The reboot notifiers are intentionally
+>> not called in the emergency path for a reason and working around that by
+>> pretending to be a reboot handler is a hack.
 > 
-> For non-wrapped keys, this can be directly done in the kernel as
-> keys are in the clear.
+> I understand the reason for the $subject patch, but it will not work,
+> unfortunately.
 > 
-> However, hardware wrapped keys can only be unwrapped by the wrapping
-> entity. In case of Qualcomm's wrapped key solution, this is done by
-> the Hardware Key Manager (HWKM) from Trustzone.
-> Hence, adding a new SCM call which in the end provides a hook
-> to the software secret crypto profile API provided by the block
-> layer.
-> 
-> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
-> ---
->  drivers/firmware/qcom/qcom_scm.c       | 65 ++++++++++++++++++++++++++
->  drivers/firmware/qcom/qcom_scm.h       |  1 +
->  include/linux/firmware/qcom/qcom_scm.h |  2 +
->  3 files changed, 68 insertions(+)
-> 
-> diff --git a/drivers/firmware/qcom/qcom_scm.c b/drivers/firmware/qcom/qcom_scm.c
-> index 7e17fd662bda..4882f8a36453 100644
-> --- a/drivers/firmware/qcom/qcom_scm.c
-> +++ b/drivers/firmware/qcom/qcom_scm.c
-> @@ -1220,6 +1220,71 @@ int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
->  }
->  EXPORT_SYMBOL_GPL(qcom_scm_ice_set_key);
->  
-> +/**
-> + * qcom_scm_derive_sw_secret() - Derive software secret from wrapped key
-> + * @wkey: the hardware wrapped key inaccessible to software
-> + * @wkey_size: size of the wrapped key
-> + * @sw_secret: the secret to be derived which is exactly the secret size
-> + * @sw_secret_size: size of the sw_secret
-> + *
-> + * Derive a software secret from a hardware wrapped key for software crypto
-> + * operations.
-> + * For wrapped keys, the key needs to be unwrapped, in order to derive a
-> + * software secret, which can be done in the hardware from a secure execution
-> + * environment.
-> + *
-> + * For more information on sw secret, please refer to "Hardware-wrapped keys"
-> + * section of Documentation/block/inline-encryption.rst.
-> + *
-> + * Return: 0 on success; -errno on failure.
-> + */
-> +int qcom_scm_derive_sw_secret(const u8 *wkey, size_t wkey_size,
-> +			      u8 *sw_secret, size_t sw_secret_size)
-> +{
-> +	struct qcom_scm_desc desc = {
-> +		.svc = QCOM_SCM_SVC_ES,
-> +		.cmd =  QCOM_SCM_ES_DERIVE_SW_SECRET,
-> +		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RW,
-> +					 QCOM_SCM_VAL, QCOM_SCM_RW,
-> +					 QCOM_SCM_VAL),
-> +		.args[1] = wkey_size,
-> +		.args[3] = sw_secret_size,
-> +		.owner = ARM_SMCCC_OWNER_SIP,
-> +	};
-> +
-> +	void *secret_buf;
-> +	void *wkey_buf;
-> +	int ret;
-> +
-> +	wkey_buf = qcom_tzmem_alloc(__scm->mempool, wkey_size, GFP_KERNEL);
-> +	if (!wkey_buf)
-> +		return -ENOMEM;
-> +
-> +	secret_buf = qcom_tzmem_alloc(__scm->mempool, sw_secret_size, GFP_KERNEL);
-> +	if (!secret_buf) {
-> +		ret = -ENOMEM;
-> +		goto err_free_wrapped;
-> +	}
-> +
-> +	memcpy(wkey_buf, wkey, wkey_size);
-> +	desc.args[0] = qcom_tzmem_to_phys(wkey_buf);
-> +	desc.args[2] = qcom_tzmem_to_phys(secret_buf);
-> +
-> +	ret = qcom_scm_call(__scm->dev, &desc, NULL);
-> +	if (!ret)
-> +		memcpy(sw_secret, secret_buf, sw_secret_size);
-> +
-> +	memzero_explicit(secret_buf, sw_secret_size);
-> +	qcom_tzmem_free(secret_buf);
-> +
-> +err_free_wrapped:
-> +	memzero_explicit(wkey_buf, wkey_size);
-> +	qcom_tzmem_free(wkey_buf);
-__free(qcom_tzmem) attribute instead?
+> For eMMC we need to manage emergency reboots too. The fiddling with
+> GPIOs isn't a "cleanup", but tries to move the eMMC into a clean reset
+> state. 
 
-Konrad
+That is by definition a "cleanup", even if the cleanup is really important.
 
+> This is needed on some platforms with broken bootloaders (ROM
+> code), that is expecting the eMMC to always start in a clean reset
+> state.
+> 
+
+I understand the reason, I don't agree with the method used to get
+the result.
+
+> So, we need both parts, as was discussed here [1] too.
+> 
+
+In this thread I see a lot of discussion about the priority of the
+handler. You want this to run before any real reboot handlers
+are run. Luckily for you, all reboot "notifiers" are run before
+any "handlers" are run. So if you register as a "notifier" as
+this patch does, you will be run first, no super high priority
+settings needed.
+
+The real issue is you want to be called even in the
+emergency_restart() path, which is fine. But from the
+docs for that function this type of restart is done:
+
+> Without shutting down any hardware 
+
+So we have two options:
+
+1. Add a new notifier list that *does* get called in the
+    emergency_restart() path. Then register this driver with
+    with that.
+
+2. Remove emergency_restart() from the kernel. It only has a
+    couple of callers, and most of those callers look like they
+    should instead be using hw_protection_reboot() or panic().
+    That way all reboot paths activate the reboot notifiers.
+    Kinda wondering why you think you need to handle the
+    emergency_restart() case at all, will even be a thing on
+    your hardware, i.e. is this a real problem at all?
+
+Having this driver claim to be a real reboot handler to sneak
+around doing one of the above is preventing some cleanup I am
+working on. So if either of the above two options work for you
+just let me know, I'll help out in implementing them for you.
+
+Thanks,
+Andrew
+
+> Kind regards
+> Uffe
+> 
+> [1]
+> https://lore.kernel.org/all/1445440540-21525-1-git-send-email-javier@osg.samsung.com/
+> 
+>>
+>> Signed-off-by: Andrew Davis <afd@ti.com>
+>> ---
+>>   drivers/mmc/core/pwrseq_emmc.c | 8 +-------
+>>   1 file changed, 1 insertion(+), 7 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+>> index 3b6d69cefb4eb..d5045fd1a02c1 100644
+>> --- a/drivers/mmc/core/pwrseq_emmc.c
+>> +++ b/drivers/mmc/core/pwrseq_emmc.c
+>> @@ -70,14 +70,8 @@ static int mmc_pwrseq_emmc_probe(struct platform_device *pdev)
+>>                  return PTR_ERR(pwrseq->reset_gpio);
+>>
+>>          if (!gpiod_cansleep(pwrseq->reset_gpio)) {
+>> -               /*
+>> -                * register reset handler to ensure emmc reset also from
+>> -                * emergency_reboot(), priority 255 is the highest priority
+>> -                * so it will be executed before any system reboot handler.
+>> -                */
+>>                  pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
+>> -               pwrseq->reset_nb.priority = 255;
+>> -               register_restart_handler(&pwrseq->reset_nb);
+>> +               register_reboot_notifier(&pwrseq->reset_nb);
+>>          } else {
+>>                  dev_notice(dev, "EMMC reset pin tied to a sleepy GPIO driver; reset on emergency-reboot disabled\n");
+>>          }
+>> --
+>> 2.39.2
+>>
