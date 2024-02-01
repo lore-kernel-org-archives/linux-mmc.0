@@ -1,60 +1,59 @@
-Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51DED1586DD
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Feb 2024 07:28:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65F1E15AAAA
+	for <linux-mmc@vger.kernel.org>; Thu,  1 Feb 2024 09:04:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706772495; cv=none; b=oviOunjGDIRLW6gDS14HCt5oK+ocRljwIfp9UgS/9kYJdCNJrzuqdAzXQ3K/r3pUNacKsfy9IhIyEtxtufow0V1mJTs22QZxprQOv2qh3fGHqlnjjLk9cRQPvTPnSnw67DEVBZwsyaXkJV5USF2HqJhWb9ZopPdamZQfrySMIpE=
+	t=1706778296; cv=none; b=WkXga5zp6qoen6U7OmzRMdrOtZXAOYAL0BOw2HbAJbIURmqW6Y546aYNgwFiua9BM/j4MXwsc7MyC/L4C7JozFDgC3T0iQ3N1eyLpDlKPL/gdQmtdAa23qJKAp77eJfSIBL1h0pAmJiuoMDVgHTopcegyNy6UCjQg/UZn8KabB8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706772495; c=relaxed/simple;
-	bh=xgmfRdi+vmVIFEyMbzoT4M+74qnB4rTtIeYeCABq/2w=;
+	s=arc-20240116; t=1706778296; c=relaxed/simple;
+	bh=y7prfCi3sw9Ij3JxGUa5abjnCVWmeBg0AHk6G1Z7mtk=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=FFxT/TKhQt4qAtVC8jAO5wV1Tm/2r28EFA/gStJLU8zwd74YR0zjMsYiYTq1fAdf6ntkAS7bTTkNDf2EZhWYa/cuxzVFODPZX9+lg5tiB4NGNzoUqt3U6fUpNsBxeZszn6P6/fu4EpFUXg2q4jmmWmL0RGxX5CtOrv93w+iy/OE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZwxausMh; arc=none smtp.client-ip=209.85.208.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 In-Reply-To:Content-Type; b=IflErJv/BWdAPuG6iwPJvQiZe1HMsVwesiee8mOA+OiOZjXNBuDOYRwrA4XjzzBRRMbrbJJtDpxQv/l9tINQhpuGqOe5oilSmHbqxauHjOOml2rD1U5tCijFqLYB4a8yMzY6XzEbl1UAKtMSxQYWZXq0KqHfyTpq6J+MH+Bw+Wo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr; spf=pass smtp.mailfrom=smile.fr; dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b=NL+eIPWm; arc=none smtp.client-ip=209.85.128.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=smile.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZwxausMh"
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-556c3f0d6c5so676740a12.2
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Jan 2024 23:28:13 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b="NL+eIPWm"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-40efcb37373so6224465e9.2
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Feb 2024 01:04:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706772491; x=1707377291; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=G3oTT5I9d4d+PQVGhDMSxWDkbgXuBkqCtCwmEt13epI=;
-        b=ZwxausMhfRC89tUB7pB7hZ1PXF/h6xOfMz2O4QHOH6tm6E7b8rnBcH4QgggGHCO/9W
-         HJ8ylWT9QL8fIe42HNR5C90/4byfgjaCDerjl54zoFjlkQdMbyUYRtDrT1W3hBjopOym
-         WUF64WUlkSGrqM/rsjmv+8a5kZUZKr4Gz0PGPCTXNZtbmdZPOSk9rkOvI8fnpJ0jEXuf
-         rSA1auJ3BZ46HOVAHSsN8XV2EuGednQFAIuOUfSwSRhlnPys0okwE6JH4VgSv3WxvdMh
-         eA5aGMdXN90HCgSG4i316effGgIKs2gp1jIlxDaLSelBMjAy54mnwlZ36/7uZRo7oIhE
-         hV0w==
+        d=smile-fr.20230601.gappssmtp.com; s=20230601; t=1706778291; x=1707383091; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=+H1OIrpl3M08ciasbj2GNCN1CROjBuQ13DmIa9Baa8k=;
+        b=NL+eIPWmTLdN3TleBJB4GYlK3u3NbGBBanPRMPdlOjcjtFaEuoJl1mvYmacO2SHIwQ
+         rfoT2bV+h6bzDs+GCrKUYJnjTyETwLBvA2zw5csC5vKjSXjhOt/q4A8MOB/pTRTqbv2c
+         hC+vFCCIUW6sYUaLjL6nO3kuhdD3+j4qXaPbz5uOnOJjd+IEPrnSnKYzV+6RL5djogGR
+         POhoZOtjwX5/jA5B6+29nbd4lOGJacHhGyxpNsqSmuolocoqSuvp0gW81Lx6L4V4zQwb
+         hBHyC8xB5w8W8+tURF7uEqJfoPR+J4IAg4Hbx5a2Lck/+S+lqAIti+JkWRvRcYXAskyI
+         ElUQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706772491; x=1707377291;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=G3oTT5I9d4d+PQVGhDMSxWDkbgXuBkqCtCwmEt13epI=;
-        b=EJ9TczfHlTo8sb5vRHYKOH83P3Jvmvocc99iex333VYeGRhPC9eaSlgIafOM5mbRqX
-         Y1UZz+rUyG74FtSWesMbpbU1MIbVkXUTrUMHzK6WeKL8HG7uyLnltT51VnqmbIr23NbC
-         ZvKdiB7+mYPBN3OCErAVdfFS+xM9poba0CLqJal3QQf0bwmM2GHE6X5g7VA7iYTmwmzo
-         65QqUE0HK9ehpEVEMEWjzNR1Fmp88u9Czo0lcZVX6YJUdbVlCMkU6SZYfC8b1zuczL+/
-         HRo6SOh/wEGcoM+hW9YaOJ5shlQxLJrTtfjLKn7catWp+MHLeCqaO/Ddh84MBbhU82Ti
-         ZFpw==
-X-Gm-Message-State: AOJu0YwrV83eioxfgXnohH7Cdn1DMBSe0AYBM68Q4iFWBgmQd3hQXgSg
-	Z2IirKptA2SMv66iVFxb4mzD3A+XsPSvq+GipvQSbE9UWzl8zWEFk5+aLmnTvhY=
-X-Google-Smtp-Source: AGHT+IF/etod/Ycuj7wIVL3tdK/+iudC9malvzx4LqBpiZFPRDMF6dlyDVoALCT7LUN1Q8xnNPFIJA==
-X-Received: by 2002:a17:906:81d1:b0:a35:3ce3:c492 with SMTP id e17-20020a17090681d100b00a353ce3c492mr975455ejx.26.1706772491340;
-        Wed, 31 Jan 2024 23:28:11 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCUmxqECc5dYVt0IwNFmNmKT+9u1RdYTzzEBE9AtOlU7k+e6CoyGVTXeM9JUHDwsrm7/e0Mn3+pnZedxyKHrri81elZ/I01F92MS2ZdWmbsNCuWSxzS/mMP0k5PLmMqrq9Cfzblnw1TY/Tq9CP7cmMgIGWaIKmrbG4ryZWz2hzkzHTyAx1Ll0SKXe5Yp5eJwYdhnV2QmC3XEMvQ1TIztV1LqUvHayeA3SI16K51cuC6pWNGCW2E5r9S1VIK0Jv+CZIuqCYkY8ukp79a4/gSy1TMabh1sGOTSIhN3RI1NXf5SoYVrrNgdL+pprMcG6dwv0hwS3bMdb/5j+ZvczHeVy6GjdUdCcMdajkGOOo4IGJqWSAD2JK5fanXEIqkdZS3BGcK9ATC24hsBhBhabOCcSH3LjyJ+8zXL1Jc=
-Received: from [192.168.1.20] ([178.197.222.62])
-        by smtp.gmail.com with ESMTPSA id vs6-20020a170907a58600b00a310c9d0cb9sm6847721ejc.121.2024.01.31.23.28.09
+        d=1e100.net; s=20230601; t=1706778291; x=1707383091;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=+H1OIrpl3M08ciasbj2GNCN1CROjBuQ13DmIa9Baa8k=;
+        b=PCInnErWVgf3cBOKqyDVkVTQIDLtyL3lq5GYvZil5Be0hjt6sZiPDcO0jQjKF3qdZM
+         Q/I65zJv/9dCxCm08wDGIME9BiZVzRO/tbs3Tc6vLX/YmuD+ZwSoq9qT6Gwe38hi3+lW
+         FNRxY1IAciUnahZ24nf96JMOVrZpaYHTHg3adr9V5XqLypPYNHC/40hOQd8ZIS4VB4JF
+         PX9fn53Jt1TFXMSnc0dfTw42Eaf4y37i10OWHzZFy8AB+BhLdppP0gQ7aC9NAeoOBIW1
+         dJo8ivUCyxS2Mh5xrn7dbKKEuVmBy13UB4cox2VqnExG0qJ07EkZ/E1YWvQxrKSJPSGV
+         M9nw==
+X-Gm-Message-State: AOJu0YzRfbWa2c/qqzPktX9/a38t0wHPpRAd5UnbQ2j9WyafRO++1IRp
+	J2GSkCYuV89xiUWnNS32bPe9DLpUS1WA0WZRaw3oWljfC86AptAWJ+ek4ROm1rk=
+X-Google-Smtp-Source: AGHT+IENVY53e3vd71M5iWs8FnSI1/2+FdngNAmk8ariuiYoWjfXzjK6vsOipyZfrnMxkbVSXhXHDw==
+X-Received: by 2002:a05:600c:46c7:b0:40e:fbdd:23a4 with SMTP id q7-20020a05600c46c700b0040efbdd23a4mr3261482wmo.26.1706778291512;
+        Thu, 01 Feb 2024 01:04:51 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCWwsyZy/51wTXfJa9lJHnQGWdZ4LrYmMg2McivUJsapr2gu2LGFBjTNwMtPFC40kuqXl8ZOE/Ucbv3GLDa/PrXPeg712t6MIr2yG6fdvAm5aQtAyhj+AwPfqFnRA1t1pgL2SnV1Vcu+qnUEswkAGu24Dv/TBlJebJyVMeOADtjsTPsSwckx
+Received: from ?IPV6:2a01:cb05:945b:7e00:9bdc:6887:23a2:4f31? (2a01cb05945b7e009bdc688723a24f31.ipv6.abo.wanadoo.fr. [2a01:cb05:945b:7e00:9bdc:6887:23a2:4f31])
+        by smtp.gmail.com with ESMTPSA id 18-20020a05600c025200b0040d4e1393dcsm3791761wmj.20.2024.02.01.01.04.51
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 31 Jan 2024 23:28:10 -0800 (PST)
-Message-ID: <b94df34e-938b-4f89-97e2-ebfe694c8e7a@linaro.org>
-Date: Thu, 1 Feb 2024 08:28:08 +0100
+        Thu, 01 Feb 2024 01:04:51 -0800 (PST)
+Message-ID: <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr>
+Date: Thu, 1 Feb 2024 10:04:50 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,115 +61,97 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH 00/13] Add tuning algorithm for delay chain
-To: "Raghavendra, Vignesh" <vigneshr@ti.com>, Judith Mendez <jm@ti.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, Nishanth Menon <nm@ti.com>,
- Andrew Davis <afd@ti.com>, Udit Kumar <u-kumar1@ti.com>,
- Roger Quadros <rogerq@kernel.org>, devicetree@vger.kernel.org,
- Randolph Sapp <rs@ti.com>
-References: <20240131003714.2779593-1-jm@ti.com>
- <5e03e867-b45f-482b-b734-7949e28fc97e@ti.com>
- <37af5a30-0e47-41f9-8d9f-f09a38d05fa5@linaro.org>
- <52b14b42-6e42-4435-b391-c3f48470e56c@ti.com>
-Content-Language: en-US
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <52b14b42-6e42-4435-b391-c3f48470e56c@ti.com>
+Subject: Re: sdhci-omap: issues with PM features since 5.16
+Content-Language: fr, en-US
+To: Tony Lindgren <tony@atomide.com>
+Cc: Linux-OMAP <linux-omap@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
+ linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+ Adrian Hunter <adrian.hunter@intel.com>
+References: <2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr>
+ <20240127044851.GW5185@atomide.com>
+ <d09925b3-83e6-4c52-878f-4c1db7670543@smile.fr>
+ <20240129111733.GX5185@atomide.com>
+ <f80b5390-8bfa-43d8-80ce-70b069aef947@smile.fr>
+ <7d72f3ee-bcfe-4197-b492-857dc49b2788@smile.fr>
+ <20240131103050.GZ5185@atomide.com>
+From: Romain Naour <romain.naour@smile.fr>
+In-Reply-To: <20240131103050.GZ5185@atomide.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 31/01/2024 14:53, Raghavendra, Vignesh wrote:
+Hello,
+
+Le 31/01/2024 à 11:30, Tony Lindgren a écrit :
+> Hi,
 > 
+> Adding the linux-mmc folks to Cc too.
 > 
-> On 1/31/2024 7:11 PM, Krzysztof Kozlowski wrote:
->> On 31/01/2024 14:35, Raghavendra, Vignesh wrote:
->>>> Judith Mendez (11):
->>>>   drivers: mmc: host: sdhci_am654: Add tuning algorithm for delay chain
->>>>   drivers: mmc: host: sdhci_am654: Write ITAPDLY for DDR52 timing
->>>>   drivers: mmc: host: sdhci_am654: Add missing OTAP/ITAP enable
->>>>   drivers: mmc: host: sdhci_am654: Add ITAPDLYSEL in
->>>>     sdhci_j721e_4bit_set_clock
->>>>   drivers: mmc: host: sdhci_am654: Fix ITAPDLY for HS400 timing
->>>
->>> These patches needs to have Fixes: tag as they are bug fixes IMO.
->>>
->>>>   arm64: dts: ti: k3-am62a-main: Add sdhci2 instance
->>>>   arm64: dts: ti: k3-am64-main: Update ITAP/OTAP values for MMC
->>>>   arm64: dts: ti: k3-am62-main: Update ITAP/OTAP values for MMC
->>>>   arm64: dts: ti: k3-am62p: Add missing properties for MMC
->>>>   arm64: dts: ti: k3-am6*: Remove DLL properties for soft phys
->>>>   arm64: dts: ti: k3-am6*: Reorganize MMC properties
->>>>
->>>> Nitin Yadav (2):
->>>>   arm64: dts: ti: k3-am62a-main: Add sdhci0 instance
->>>>   arm64: dts: ti: k3-am62a7-sk: Enable eMMC support
->>>>
->>>
->>> Can the driver changes be merged independent of DT changes? Or are they
->>> meant to go together? Latter would be problematic as it creates cross
->>> tree dependencies.
+> * Romain Naour <romain.naour@smile.fr> [240130 11:20]:
+>> Le 29/01/2024 à 18:42, Romain Naour a écrit :
+>>> Le 29/01/2024 à 12:17, Tony Lindgren a écrit :
+>>>> So I'm still guessing your issue is with emmc not getting reinitialized
+>>>> properly as there's no mmc-pwrseq-emmc configured. Can you give it a
+>>>> try? See am5729-beagleboneai.dts for an example.
 >>
->> DTS cannot depend on driver changes, because that would mean hardware
->> description is not really hardware but OS. So the answer to your
->> question must be "yes, can be merged independently".
+>> I can't add such mmc-pwrseq-emmc on the custom board, there is no gpio available
+>> to reset the emmc device.
 >>
+>> To resume:
+>> - the emmc doesn't work with mmc-hs200-1_8v mode with PM runtime enabled
+>> - the emmc works with mmc-hs200-1_8v mode without PM runtime (patch series reverted)
+>> - the emmc works with mmc-ddr-1_8v mode with PM runtime enabled
+>>
+>> AFAIU the hs200 mode requires some pin iodelay tuning (SDHCI_OMAP_REQUIRE_IODELAY)
+>> is sdhci_omap_runtime_{suspend,resume} needs to take care of that?
+>>
+>> The mmc2 clock seems idle when mmc-hs200-1_8v and PM runtime are used.
+>>
+>> omapconf dump prcm l3init
+>>
+>> (mmc2 clock idle)
+>> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01070000 |
+>>
+>> (mmc2 clock running)
+>> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01040002 |
+>>
+>> Thoughts?
 > 
-> Normally yes, but here I see update to tuning algorithm and timing
-> paramaters to the algorithm. DT updates seem to be nature of bug fixes
-> where in parameters have been refined due to more HW char
-> data/understanding being available.
+> OK so if the emmc reset gpio is not available, seems we should do something
+> like the following patch to not set MMC_CAP_POWER_OFF_CARD unless the
+> cap-power-off-card devicetree property is set.
+> 
+> Care to give it a try and see if it helps?
 
-Then the patchset should be probably split into fixes and new features,
-so it would be clear that new DTS features do not depend on driver code.
+Same problem without MMC_CAP_POWER_OFF_CARD flag (even by removing
+MMC_CAP_AGGRESSIVE_PM too).
 
+I did some test with mmc capabilities mask but no progress so far.
 
 Best regards,
-Krzysztof
+Romain
+
+
+> 
+> Regards,
+> 
+> Tony
+> 
+> 8< ----------------
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -1339,8 +1339,11 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+>  	/* R1B responses is required to properly manage HW busy detection. */
+>  	mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
+>  
+> -	/* Allow card power off and runtime PM for eMMC/SD card devices */
+> -	mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_AGGRESSIVE_PM;
+> +	/*
+> +	 * Allow runtime PM for eMMC/SD card devices. Note that to power off
+> +	 * the card, the devicetree property cap-power-off-card must be set.
+> +	 */
+> +	mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
+>  
+>  	ret = sdhci_setup_host(host);
+>  	if (ret)
 
