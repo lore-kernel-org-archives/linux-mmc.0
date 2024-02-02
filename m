@@ -1,248 +1,182 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vs1-f46.google.com (mail-vs1-f46.google.com [209.85.217.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC9B6487A7;
-	Fri,  2 Feb 2024 09:54:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 304ED60BBD
+	for <linux-mmc@vger.kernel.org>; Fri,  2 Feb 2024 09:59:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706867691; cv=none; b=YIC8885s62yG4lvC+gkmzYScdpQ13LCq0DnzOyQjwoENicyn2B84vgpDFb7Eb2rjhA4m+FHdlvPHsy7RjomuTTCaN0COlFsSAvzfcBrPvpzQsEZq+CHJrnBJMq7rRqcRAKCQe5Lcy+2amQYxf+GGptbI/Te/K/7rhCctMQpi/N0=
+	t=1706867985; cv=none; b=XbCAPZKJ+t/PA/D4X3MghaSWH/n4wXOkamopI83mRhjJ6On9zEAyIBxi51L9M0bXm1t2SYMplQSG9kcBZ5YkcMD3IwzslGZqvaqmgucQ9A/9cndpXg6pzFG/BEQvSY9bYRRcs3dML1/TuLQgjyMU28J+uTd/MGfG/2JQlgAlzwM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706867691; c=relaxed/simple;
-	bh=Wp6H4kX1lKHyIutWo3Ze/1OUO6DOsMZfBQQlx0oszbU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=GLjJ+YuGLrZL4Vq6wfEyvphACZtCv+hVzIr6B9GCCbLq0x1Q433MbLw0fmjelUHJQM8Au4CVAw9EKaO01BM0YGFdg5niMRFe5oQkXk1tKP0XyOfUawaXPcgwPwXo9+NHpzjyLeFlGOjTqLaE2A0eWnlZoDza6crxCzZAHsDY+tA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CQQe/mrQ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1706867985; c=relaxed/simple;
+	bh=dc8rQnh6PDoB1TWGzNuLOJkPoGzySAD7iS8TKBzVRPk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=MY4kHmfFoEnkcr4BPG0lK+1AvW83/C7BqeCmMjyvMLh2prQF4cXi/DZtggFzA4omSor4Eb9AveO3PKZ/QCZSpTXk8mEtQOv9Kd0iPTmo8jG58wPqh0YKBnRLJrRS3AP8O7clNgrM6AINqTfY+c4UEHleVr8qHrYXCS5RDIkn/zQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Z2i1QSxW; arc=none smtp.client-ip=209.85.217.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CQQe/mrQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BA7D4C433C7;
-	Fri,  2 Feb 2024 09:54:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1706867691;
-	bh=Wp6H4kX1lKHyIutWo3Ze/1OUO6DOsMZfBQQlx0oszbU=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=CQQe/mrQpxV6NU8EfEV2i0f5+F4mG4EE9YbFprtwRFZUxzud0ouYvBc0Eor9fOsR5
-	 S+Zqmunx9hHksCkAeEvt6oOXySfLSUs+4DV5iF2GxJUGJsd3goP7ZdLbx7BI94AV5y
-	 ou1XSyiSm0TBd61DcGEKCFm+Q/SclZgek9Rm6tGEg2srosk3BHkCaGTuo2KLhw3T5R
-	 1kMXuh44XEHfgrLJqwioOdRs7afKykqvzLdOSADp9FWCPow+RCIXtj7+j8bw6OP/DJ
-	 +Cc6niIVMhqVbRJ41wu3Eeh7uppvXWpdbBqaUuS1DL74EqgEwnRfhigNaxK/XFfwS0
-	 6bQ290loxcnXg==
-Message-ID: <9c78f4b5-8580-4679-ae65-60878221e00b@kernel.org>
-Date: Fri, 2 Feb 2024 11:54:45 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Z2i1QSxW"
+Received: by mail-vs1-f46.google.com with SMTP id ada2fe7eead31-46b3ff62223so1954163137.0
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Feb 2024 01:59:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1706867982; x=1707472782; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=mGyYTzfbWHLJ9icv+vr2JH/WdzWZ6KgDnIC2V14paRI=;
+        b=Z2i1QSxW7NutcqfA7Zy0AUOJOb6cderHycpxrrWTlI2QqmvKyvGFtJmcs+60jtVrr2
+         PNOsy2KHVdXdzCwRQi1kcXVCpWVFJTcPXJ+j3VyipMzRbDyxPF9cr5AOjp86LKKlSWJJ
+         yjZHj5oqT0O6WmoTvHBtRUB9s6PDWfCs4YWfZxEexMcgcFvR9nYEfVeI8aqfVoGZqqVD
+         x2MwCf4DsHtFhG6oJIRWptofVB29z4E7whwC1v7Od6oX9Nq1GcgZuo6+pzRo3rnC5bVM
+         z+WgMuLDKnlE1TD0FdoVWkpfMHZo7K4novF3xeqU8aenv/UA4yrNvRzG8nOlZ9nEw4OJ
+         Kvhg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706867982; x=1707472782;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=mGyYTzfbWHLJ9icv+vr2JH/WdzWZ6KgDnIC2V14paRI=;
+        b=XHoPNdE9E6VWcotjrK9/SMY+M7iDwfkgmo9KH94FLnsj1pH1f0u6eLZPYP9rf//bz6
+         /rH7RGA9EmRfVk+K7yvbV+Jc1UG5+fRiLXrIXK8h5oJH8EeEkWey3rWsB7p4ZfenzhYd
+         PLFRvf7xAbFwy5W4isiKSWK4N80ZFzZA1V6p4sc558s046B1zLlOmnQL3froOus2CgCb
+         klZBHonN2O1dq7y6Vk9y9kJWAn/vxpe7Mkx/HxQENKHfKHWuZ6jtQJFeM3oi3C0qAsR0
+         fXubUQHjBxnhA8IZoT9DL4pyrg41V7JXIbqEN2rDer9LytOCOwYPYz+r97LDOns48ci4
+         ANbw==
+X-Gm-Message-State: AOJu0Yw/D9n+wT1MazdxEK+8kWUQvLx+rPp+aT7JYARE3oJeSKy0JhyL
+	37ni423zb1vX/6KZsMewcowyGgLwNtSkI2tN2jiR+EgjchlVDrSVhm2gfkiIvzBv4veK1sWDxGZ
+	95ylsK456mxswernmP4U9PGi2TNKgnz1Q4nAKWQ==
+X-Google-Smtp-Source: AGHT+IGx011pU/uYoeRaO9GDRIyKMw5o70O5J6j1cmokVIok+jvPB4MJkIPn0wNMToA6OBf4Al+Gz7jgxs56x66TY0U=
+X-Received: by 2002:a67:f61a:0:b0:46c:fc76:7746 with SMTP id
+ k26-20020a67f61a000000b0046cfc767746mr1201018vso.2.1706867981911; Fri, 02 Feb
+ 2024 01:59:41 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH 13/13] arm64: dts: ti: k3-am6*: Reorganize MMC
- properties
-Content-Language: en-US
-To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, Nishanth Menon <nm@ti.com>,
- Vignesh Raghavendra <vigneshr@ti.com>, Andrew Davis <afd@ti.com>,
- Udit Kumar <u-kumar1@ti.com>, devicetree@vger.kernel.org,
- Randolph Sapp <rs@ti.com>
-References: <20240131003714.2779593-1-jm@ti.com>
- <20240131003714.2779593-14-jm@ti.com>
-From: Roger Quadros <rogerq@kernel.org>
-In-Reply-To: <20240131003714.2779593-14-jm@ti.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240131174347.510961-1-jens.wiklander@linaro.org>
+In-Reply-To: <20240131174347.510961-1-jens.wiklander@linaro.org>
+From: Sumit Garg <sumit.garg@linaro.org>
+Date: Fri, 2 Feb 2024 15:29:30 +0530
+Message-ID: <CAFA6WYORTtuRsoiDhjCdPwaDHyJ+ixZBu_-VQHPE2RhCprKQ0w@mail.gmail.com>
+Subject: Re: [PATCH v2 0/3] Replay Protected Memory Block (RPMB) subsystem
+To: Jens Wiklander <jens.wiklander@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Content-Type: text/plain; charset="UTF-8"
 
+Hi Jens,
 
+On Wed, 31 Jan 2024 at 23:14, Jens Wiklander <jens.wiklander@linaro.org> wrote:
+>
+> Hi,
+>
+> It's been a while since Shyam posted the last version [1] of this patch
+> set. I've pinged Shyam, but so far I've had no reply so I'm trying to make
+> another attempt with the RPMB subsystem. If Shyam has other changes in mind
+> than what I'm adding here I hope we'll find a way to cover that too. I'm
+> calling it version two of the patchset since I'm trying to address all
+> feedback on the previous version even if I'm starting a new thread.
+>
+> This patch set introduces a new RPMB subsystem, based on patches from [1],
+> [2], and [3]. The RPMB subsystem aims at providing access to RPMB
+> partitions to other kernel drivers, in particular the OP-TEE driver. A new
+> user space ABI isn't needed, we can instead continue using the already
+> present ABI when writing the RPMB key during production.
+>
+> I've added and removed things to keep only what is needed by the OP-TEE
+> driver. Since the posting of [3], there has been major changes in the MMC
+> subsystem so "mmc: block: register RPMB partition with the RPMB subsystem"
+> is in practice completely rewritten.
+>
+> With this OP-TEE can access RPMB during early boot instead of having to
+> wait for user space to become available as in the current design [4].
+> This will benefit the efi variables [5] since we wont rely on userspace as
+> well as some TPM issues [6] that were solved.
+>
+> The OP-TEE driver finds the correct RPMB device to interact with by
+> iterating over available devices until one is found with a programmed
+> authentication matching the one OP-TEE is using. This enables coexisting
+> users of other RPMBs since the owner can be determined by who knows the
+> authentication key.
+>
+> I've put myself as a maintainer for the RPMB subsystem as I have an
+> interest in the OP-TEE driver to keep this in good shape. However, if you'd
+> rather see someone else taking the maintainership that's fine too. I'll
+> help keep the subsystem updated regardless.
+>
+> [1] https://lore.kernel.org/lkml/20230722014037.42647-1-shyamsaini@linux.microsoft.com/
+> [2] https://lore.kernel.org/lkml/20220405093759.1126835-2-alex.bennee@linaro.org/
+> [3] https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-tomas.winkler@intel.com/
+> [4] https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#rpmb-secure-storage
+> [5] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c44b6be62e8dd4ee0a308c36a70620613e6fc55f
+> [6] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=7269cba53d906cf257c139d3b3a53ad272176bca
+>
+> Thanks,
+> Jens
+>
+> Changes since Shyam's RFC:
+> * Removed the remaining leftover rpmb_cdev_*() function calls
+> * Refactored the struct rpmb_ops with all the previous ops replaced, in
+>   some sense closer to [3] with the route_frames() op
+> * Added rpmb_route_frames()
+> * Added struct rpmb_frame, enum rpmb_op_result, and enum rpmb_type from [3]
+> * Removed all functions not needed in the OP-TEE use case
+> * Added "mmc: block: register RPMB partition with the RPMB subsystem", based
+>   on the commit with the same name in [3]
+> * Added "optee: probe RPMB device using RPMB subsystem" for integration
+>   with OP-TEE
+> * Moved the RPMB driver into drivers/misc/rpmb-core.c
+> * Added my name to MODULE_AUTHOR() in rpmb-core.c
+> * Added an rpmb_mutex to serialize access to the IDA
+> * Removed the target parameter from all rpmb_*() functions since it's
+>   currently unused
+>
 
-On 31/01/2024 02:37, Judith Mendez wrote:
-> Reorganize various MMC properties for MMC nodes to be
-> more uniform across devices.
-> 
-> Add ti,clkbuf-sel to MMC nodes that are missing this property.
-> 
-> Signed-off-by: Judith Mendez <jm@ti.com>
-> ---
->  arch/arm64/boot/dts/ti/k3-am62-main.dtsi       | 5 +++--
->  arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts | 2 --
->  arch/arm64/boot/dts/ti/k3-am62a-main.dtsi      | 4 ++--
->  arch/arm64/boot/dts/ti/k3-am62x-sk-common.dtsi | 2 ++
->  arch/arm64/boot/dts/ti/k3-am64-main.dtsi       | 7 +++++--
->  arch/arm64/boot/dts/ti/k3-am642-evm.dts        | 3 +--
->  arch/arm64/boot/dts/ti/k3-am642-sk.dts         | 1 -
->  7 files changed, 13 insertions(+), 11 deletions(-)
-> 
-> diff --git a/arch/arm64/boot/dts/ti/k3-am62-main.dtsi b/arch/arm64/boot/dts/ti/k3-am62-main.dtsi
-> index ca825088970f..32a8a68f1311 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am62-main.dtsi
-> +++ b/arch/arm64/boot/dts/ti/k3-am62-main.dtsi
-> @@ -559,9 +559,9 @@ sdhci0: mmc@fa10000 {
->  		clock-names = "clk_ahb", "clk_xin";
->  		assigned-clocks = <&k3_clks 57 6>;
->  		assigned-clock-parents = <&k3_clks 57 8>;
-> +		bus-width = <8>;
+Thanks for working on this. This is a huge step towards supporting TEE
+kernel client drivers. IIRC you mentioned offline to test it with
+virtio RPMB on Qemu. If it works then I would be happy to try it out
+as well.
 
-Is bus-width fix for this instance? If not then we don't really know here what
-bus-width is used by the board implementation. And it should come in the
-board DTS file.
+Along with that can you point me to the corresponding OP-TEE OS
+changes? I suppose as you are just adding 3 new RPC calls in patch#3,
+so we should be fine ABI wise although people have to uprev both
+OP-TEE and Linux kernel to get this feature enabled. However, OP-TEE
+should gate those RPCs behind a config flag or can just fallback to
+user-space supplicant if those aren't supported?
 
->  		mmc-ddr-1_8v;
->  		mmc-hs200-1_8v;
-> -		bus-width = <8>;
->  		ti,clkbuf-sel = <0x7>;
->  		ti,otap-del-sel-legacy = <0x0>;
->  		ti,otap-del-sel-mmc-hs = <0x0>;
-> @@ -576,8 +576,8 @@ sdhci1: mmc@fa00000 {
->  		power-domains = <&k3_pds 58 TI_SCI_PD_EXCLUSIVE>;
->  		clocks = <&k3_clks 58 5>, <&k3_clks 58 6>;
->  		clock-names = "clk_ahb", "clk_xin";
-> -		ti,clkbuf-sel = <0x7>;
->  		bus-width = <4>;
-> +		ti,clkbuf-sel = <0x7>;
->  		ti,otap-del-sel-legacy = <0x0>;
->  		ti,otap-del-sel-sd-hs = <0x0>;
->  		ti,otap-del-sel-sdr12 = <0xf>;
-> @@ -599,6 +599,7 @@ sdhci2: mmc@fa20000 {
->  		power-domains = <&k3_pds 184 TI_SCI_PD_EXCLUSIVE>;
->  		clocks = <&k3_clks 184 5>, <&k3_clks 184 6>;
->  		clock-names = "clk_ahb", "clk_xin";
-> +		bus-width = <4>;
->  		ti,clkbuf-sel = <0x7>;
->  		ti,otap-del-sel-legacy = <0x0>;
->  		ti,otap-del-sel-sd-hs = <0x0>;
-> diff --git a/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts b/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
-> index f69dbf9b8406..0422615e4d98 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
-> +++ b/arch/arm64/boot/dts/ti/k3-am625-beagleplay.dts
-> @@ -836,7 +836,6 @@ &sdhci1 {
->  	bootph-all;
->  	pinctrl-names = "default";
->  	pinctrl-0 = <&sd_pins_default>;
-> -
->  	vmmc-supply = <&vdd_3v3_sd>;
->  	vqmmc-supply = <&vdd_sd_dv>;
->  	disable-wp;
-> @@ -850,7 +849,6 @@ &sdhci2 {
->  	vmmc-supply = <&wlan_en>;
->  	pinctrl-names = "default";
->  	pinctrl-0 = <&wifi_pins_default>, <&wifi_32k_clk>;
-> -	bus-width = <4>;
+-Sumit
 
-I wouldn't remove this from here if bus-width is variable for this
-instance of MMC controller.
-
->  	non-removable;
->  	ti,fails-without-test-cd;
->  	cap-power-off-card;
-> diff --git a/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi b/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-> index db5a7746c82e..88b112e657c8 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-> +++ b/arch/arm64/boot/dts/ti/k3-am62a-main.dtsi
-> @@ -561,6 +561,8 @@ sdhci1: mmc@fa00000 {
->  		power-domains = <&k3_pds 58 TI_SCI_PD_EXCLUSIVE>;
->  		clocks = <&k3_clks 58 5>, <&k3_clks 58 6>;
->  		clock-names = "clk_ahb", "clk_xin";
-> +		bus-width = <4>;
-> +		ti,clkbuf-sel = <0x7>;
->  		ti,otap-del-sel-legacy = <0x0>;
->  		ti,otap-del-sel-sd-hs = <0x0>;
->  		ti,otap-del-sel-sdr12 = <0xf>;
-> @@ -572,8 +574,6 @@ sdhci1: mmc@fa00000 {
->  		ti,itap-del-sel-sd-hs = <0x0>;
->  		ti,itap-del-sel-sdr12 = <0x0>;
->  		ti,itap-del-sel-sdr25 = <0x0>;
-> -		ti,clkbuf-sel = <0x7>;
-> -		bus-width = <4>;
->  		no-1-8-v;
->  		status = "disabled";
->  	};
-> diff --git a/arch/arm64/boot/dts/ti/k3-am62x-sk-common.dtsi b/arch/arm64/boot/dts/ti/k3-am62x-sk-common.dtsi
-> index 6dd48c826f74..2b4c10b35db1 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am62x-sk-common.dtsi
-> +++ b/arch/arm64/boot/dts/ti/k3-am62x-sk-common.dtsi
-> @@ -407,10 +407,12 @@ &main_i2c2 {
->  };
->  
->  &sdhci0 {
-> +	/* eMMC */
->  	bootph-all;
->  	status = "okay";
->  	pinctrl-names = "default";
->  	pinctrl-0 = <&main_mmc0_pins_default>;
-> +	non-removable;
->  	disable-wp;
->  };
->  
-> diff --git a/arch/arm64/boot/dts/ti/k3-am64-main.dtsi b/arch/arm64/boot/dts/ti/k3-am64-main.dtsi
-> index 1842f05ac351..34706ab9f5fb 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am64-main.dtsi
-> +++ b/arch/arm64/boot/dts/ti/k3-am64-main.dtsi
-> @@ -626,9 +626,11 @@ sdhci0: mmc@fa10000 {
->  		power-domains = <&k3_pds 57 TI_SCI_PD_EXCLUSIVE>;
->  		clocks = <&k3_clks 57 0>, <&k3_clks 57 1>;
->  		clock-names = "clk_ahb", "clk_xin";
-> +		bus-width = <8>;
->  		mmc-ddr-1_8v;
->  		mmc-hs200-1_8v;
-> -		ti,trm-icp = <0x2>;
-> +		ti,clkbuf-sel = <0x7>;
-> +		ti,trm-icp = <0x8>;
->  		ti,otap-del-sel-legacy = <0x0>;
->  		ti,otap-del-sel-mmc-hs = <0x0>;
->  		ti,otap-del-sel-ddr52 = <0x6>;
-> @@ -646,6 +648,8 @@ sdhci1: mmc@fa00000 {
->  		power-domains = <&k3_pds 58 TI_SCI_PD_EXCLUSIVE>;
->  		clocks = <&k3_clks 58 3>, <&k3_clks 58 4>;
->  		clock-names = "clk_ahb", "clk_xin";
-> +		bus-width = <4>;
-> +		ti,clkbuf-sel = <0x7>;
->  		ti,otap-del-sel-legacy = <0x0>;
->  		ti,otap-del-sel-sd-hs = <0x0>;
->  		ti,otap-del-sel-sdr12 = <0xf>;
-> @@ -653,7 +657,6 @@ sdhci1: mmc@fa00000 {
->  		ti,otap-del-sel-sdr50 = <0xc>;
->  		ti,otap-del-sel-sdr104 = <0x6>;
->  		ti,otap-del-sel-ddr50 = <0x9>;
-> -		ti,clkbuf-sel = <0x7>;
->  		ti,itap-del-sel-legacy = <0x0>;
->  		ti,itap-del-sel-sd-hs = <0x0>;
->  		ti,itap-del-sel-sdr12 = <0x0>;
-> diff --git a/arch/arm64/boot/dts/ti/k3-am642-evm.dts b/arch/arm64/boot/dts/ti/k3-am642-evm.dts
-> index 0583ec3a9b52..572b98a217a6 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am642-evm.dts
-> +++ b/arch/arm64/boot/dts/ti/k3-am642-evm.dts
-> @@ -493,8 +493,8 @@ eeprom@0 {
->  
->  /* eMMC */
->  &sdhci0 {
-> +	bootph-all;
->  	status = "okay";
-> -	bus-width = <8>;
->  	non-removable;
->  	ti,driver-strength-ohm = <50>;
->  	disable-wp;
-> @@ -506,7 +506,6 @@ &sdhci1 {
->  	status = "okay";
->  	vmmc-supply = <&vdd_mmc1>;
->  	pinctrl-names = "default";
-> -	bus-width = <4>;
->  	pinctrl-0 = <&main_mmc1_pins_default>;
->  	disable-wp;
->  };
-> diff --git a/arch/arm64/boot/dts/ti/k3-am642-sk.dts b/arch/arm64/boot/dts/ti/k3-am642-sk.dts
-> index c3a77f6282cb..600056105874 100644
-> --- a/arch/arm64/boot/dts/ti/k3-am642-sk.dts
-> +++ b/arch/arm64/boot/dts/ti/k3-am642-sk.dts
-> @@ -469,7 +469,6 @@ &sdhci1 {
->  	status = "okay";
->  	vmmc-supply = <&vdd_mmc1>;
->  	pinctrl-names = "default";
-> -	bus-width = <4>;
->  	pinctrl-0 = <&main_mmc1_pins_default>;
->  	disable-wp;
->  };
-
--- 
-cheers,
--roger
+>
+>
+> Jens Wiklander (3):
+>   rpmb: add Replay Protected Memory Block (RPMB) subsystem
+>   mmc: block: register RPMB partition with the RPMB subsystem
+>   optee: probe RPMB device using RPMB subsystem
+>
+>  MAINTAINERS                       |   7 +
+>  drivers/misc/Kconfig              |   9 ++
+>  drivers/misc/Makefile             |   1 +
+>  drivers/misc/rpmb-core.c          | 247 ++++++++++++++++++++++++++++++
+>  drivers/mmc/core/block.c          | 177 +++++++++++++++++++++
+>  drivers/tee/optee/core.c          |   1 +
+>  drivers/tee/optee/ffa_abi.c       |   2 +
+>  drivers/tee/optee/optee_private.h |   6 +
+>  drivers/tee/optee/optee_rpc_cmd.h |  33 ++++
+>  drivers/tee/optee/rpc.c           | 221 ++++++++++++++++++++++++++
+>  drivers/tee/optee/smc_abi.c       |   2 +
+>  include/linux/rpmb.h              | 184 ++++++++++++++++++++++
+>  12 files changed, 890 insertions(+)
+>  create mode 100644 drivers/misc/rpmb-core.c
+>  create mode 100644 include/linux/rpmb.h
+>
+>
+> base-commit: 41bccc98fb7931d63d03f326a746ac4d429c1dd3
+> --
+> 2.34.1
+>
