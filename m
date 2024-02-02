@@ -1,142 +1,108 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C70271420CB;
-	Fri,  2 Feb 2024 14:13:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1DC046B8;
+	Fri,  2 Feb 2024 16:31:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706883202; cv=none; b=OEXaUiUJtPsHdu0QARE8X0AShaaNT8dQbE2LTv9IlmxKOSEuDogtL9912YS2DWzDkrxUsqxGvOLJo+dR5qWEzi34wtTZk7WfafkZI/g03KKmlLqlaeZr8EQcrD1iheDLs6LH2i/l8VoueuCcz6djJKx4MyHCz+HVlZrzrj3GhJ8=
+	t=1706891473; cv=none; b=Exdj93Ex/hKwobnhRGjZVnLFQLbxBVkzAv3fBbvzEAZl0KeCVvdItE4uOVy2X+kIlYRm8bgkJmWxMZ5OeFLkfXCRhkmcm4ahQ5jDnybP/iFz27dNmQQRUzyV07Fg5l+jI6M8zgv++u6Avq/BQVqPTT0UouvvARtHiOC7HU1sxGY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706883202; c=relaxed/simple;
-	bh=S3LedQhBgmTD6R5eN9UjImGBjiKSpLehAWdPt+u/N+w=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=otmdP3sPwX37fy18s145RaihR+nX4E2Zt892T6v0mW6mlqVZ38zefuexEhHCCky7+ajhjXPXHbPaTsOo7tOgbk2IToB7NaOqo64DBo9wD1x/bXj6NSvabEyn9rVr/c7zrZns/jLDtTj/02FEYVAZ1PQYI6PjWQueQzNSMY+7fuI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=Rsf/IvEP; arc=none smtp.client-ip=212.227.17.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
+	s=arc-20240116; t=1706891473; c=relaxed/simple;
+	bh=yKgE/9g7vRyNy30moyBXyF8aGfIwx1dSSGfkPJHiizQ=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=mgDsu9G+FDU5eHPZK+Dqk16jAT6HOPoZ4vMetsjKy4xz2MSv/QvQBIzTRjdHK9YlPvBqyKfJMLvvixWf0a1k/3MRnMMQCglPcXqGs4v+bdxYCv8ods1xqCsppWUWBx18dS6pLkCj8rt+LM04mFtsE62LcxIAYeUe/yY4lQP2n/E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=WQ/63cc8; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="Rsf/IvEP"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.de; s=s31663417;
-	t=1706883187; x=1707487987; i=fiona.klute@gmx.de;
-	bh=S3LedQhBgmTD6R5eN9UjImGBjiKSpLehAWdPt+u/N+w=;
-	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
-	 In-Reply-To;
-	b=Rsf/IvEP3BI1GfPRaJZuooHHZllX1sJEt68Q/ZI+R+BpmMmfIc//RsuPIo0Xfq4g
-	 zVZAPYEspCRxyq5mVaj5BsmWpIUtqYlAox0ndmg6GbwH612Lou7xnFYaKk104fKwe
-	 S+mYydd9sHI0zNXbGqsnGI7yKkw0NQU6Jr8XmEpfkUh17y3/ttaGdhTS3nEgMY+1k
-	 1gEo7bL/D4Z8wKX1Zc49s/j3elPcyN2/9fKrrxNdHbLt4URB2YbiKpWLBMFOjIjzm
-	 XtlVrAKMZxwWCUj688DUBhocewvfZwlnJdwUkNTM8F4Vp3nI4bZXxOzBQ4zRSuPM0
-	 z2X0D/tuCRvCPUPLxA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.7.2] ([85.22.17.32]) by mail.gmx.net (mrgmx105
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1Mz9Ux-1rAVsn3NIp-00wGQ7; Fri, 02
- Feb 2024 15:13:06 +0100
-Message-ID: <abafac2e-2fc2-44bb-815e-a4aa165f979e@gmx.de>
-Date: Fri, 2 Feb 2024 15:13:05 +0100
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="WQ/63cc8"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 412DvFgF002570;
+	Fri, 2 Feb 2024 16:31:09 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	from:to:cc:subject:date:message-id:mime-version
+	:content-transfer-encoding:content-type; s=qcppdkim1; bh=z22DRcp
+	b18EG3CYYYQQ2JSvxQk/U5MOIshn0k8Bbp50=; b=WQ/63cc8AjuksePMV8uIcoA
+	f2/mYRa0vpwxL6ApSczRJZaiGr4kVcbw1W9nd4D/ef3LXI8C9wCiazUbLUkGfDpj
+	eXMTh+WnOHMlwHb+rYmGE3T0wwzYEf2dpjiNgxfH/ovOkmkRAE6gm1fEid8Ii49v
+	6odudk1riWnlZ6dVkcDm2YUexkRStjMyGASTQyOa/PWxSJKpm0uZ5Nz6LVAq7ydz
+	g+5a3siLnVm+mJ8g0cDzNz26irSwF+L6LQCGGb6YWJ1GcHvKYg/JnOLZSM2mp/Rk
+	pQPaD2EMGcMHDhQHqnu2O4YPOBbvq16i0WORVSCbuv+z8B1E0qXrDVYADlbBh0A=
+	=
+Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3w0ptvhuff-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 02 Feb 2024 16:31:08 +0000 (GMT)
+Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
+	by NALASPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 412GV8Pm029920
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 2 Feb 2024 16:31:08 GMT
+Received: from jhugo-lnx.qualcomm.com (10.80.80.8) by
+ nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.40; Fri, 2 Feb 2024 08:31:07 -0800
+From: Jeffrey Hugo <quic_jhugo@quicinc.com>
+To: <adrian.hunter@intel.com>, <ritesh.list@gmail.com>,
+        <quic_asutoshd@quicinc.com>, <quic_bjorande@quicinc.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, Jeffrey Hugo <quic_jhugo@quicinc.com>
+Subject: [PATCH] MAINTAINERS: Update bouncing @codeaurora addresses
+Date: Fri, 2 Feb 2024 09:30:38 -0700
+Message-ID: <20240202163038.4080702-1-quic_jhugo@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-Content-Language: de-DE, en-US
-To: Dmitry Antipov <dmantipov@yandex.ru>
-Cc: Kalle Valo <kvalo@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-mmc@vger.kernel.org, Pavel Machek <pavel@ucw.cz>,
- =?UTF-8?Q?Ond=C5=99ej_Jirman?= <megi@xff.cz>,
- linux-wireless@vger.kernel.org, Ping-Ke Shih <pkshih@realtek.com>
-References: <20240202121050.977223-1-fiona.klute@gmx.de>
- <0a5c896a-6dab-4979-a6a3-344dc71bca98@yandex.ru>
- <b8c1a26e-13d9-405a-bbd5-70a7daf75323@gmx.de>
- <75c29fb8-587e-4b8d-98cc-80c8bdea99a0@yandex.ru>
-From: Fiona Klute <fiona.klute@gmx.de>
-Autocrypt: addr=fiona.klute@gmx.de; keydata=
- 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
-In-Reply-To: <75c29fb8-587e-4b8d-98cc-80c8bdea99a0@yandex.ru>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:QehIvh6qvrkn2GJn5RC1vr/zjt/8rKGeYIP9Ens5QEJQh3EoSKQ
- NesC0gDt7T8BPhyUoHXPwGBuzyZ8PuLCw04mghiQFdcoQU7C++MFOpuub6dRWlG6ZV0ihNS
- R7/3yugaTagaD/YAXO+hUSo5A/2h6srEyd8RJioZFzb6ONNkz0+afDKVZVq2aj4JCTl+8MS
- 4H0yhVE2Zz5zFoyLXP/WQ==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:2uTfB4zJWhI=;mBUZK3p/0pKrSKQQI+dOFd9sVqt
- TkGAN9Ody1SJ9lQee21fvcSKvJazWiNtn/467tijEeUdCLqFtX92qB8TliRyWW9dnLtoph3RO
- OBc7B8aRfDXoWNibxEWGiDAOqgn8/R1sygZTcXuEnhvSYLRKtNBoDKcD642xHvBbCjwqR2Rx0
- d2Pq2mzax6/dkXzEVRKRA0H4lxy2dYbeaXTsz8k3KY985YKU3Z/dyjZ2IM3E6z1iSXthtLhEi
- ojL1i4mxOooJQYv2EgmXkIKy0Jo4joH+WRE+cTNV/xboOENMZAS+0RxZqE5zXSNprVPlLcTGi
- Ni0J3S1WFfnABPtrXvV2+MXa0Bdqqa3JUP7h0KBAenYyziIEbdAa0OWR4q4YwJcHOI6r9CHUy
- uxF/ly9gyF8i0mI+8ThF6Zyl1ObGV4sVtWzZnfjpD82nXr4k0PV+BRF62YwRZYaBCDxtheZX6
- eskOWp99ivzsRpVQ6s0V7mq53SqXWHa7Oly7tCZLpzJdf8cFyoGD7BY0+FyfNKqryj6De9iIj
- Nj1vG8tsBJlCBSyxsgN54+w2Us7QMEhxVW0aCT1Ff0N4vHCKXipsnS4/WCo6vDfnz8LBn6bGR
- n+RTB1gFjeCTUr754QamL0P9eqkkayfhTBMb6mth0JPJhF9DjHIMHTxXaJcUoO3xGt1IU/tgm
- 7gUYyRjmIhEvIrAxLussozg5PXqwyKhzDAr1/VSGGfN6Z6qFm81efB8Q5EZkq1r294I/PrOFc
- ol5T3iwUQ5m6WmbziwaF4HGB4ly81A8vpE6uvIi0TJaDQA4x0pFXtqljbuPhYinvYn+9bUaEN
- 6BDS65L2UZ0TnTpnC3AKS2QgPQVlIMw2Wkl2rWxSTiogI=
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: YuGQw5Q0EFASQlS0bYrK1Rat7uABXYQo
+X-Proofpoint-ORIG-GUID: YuGQw5Q0EFASQlS0bYrK1Rat7uABXYQo
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-02-02_10,2024-01-31_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
+ adultscore=0 mlxlogscore=413 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 impostorscore=0
+ mlxscore=0 clxscore=1011 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2401310000 definitions=main-2402020119
 
-Am 02.02.24 um 14:54 schrieb Dmitry Antipov:
-> The only minor issue actually is:
->
-> drivers/net/wireless/realtek/rtw88/rtw8723x.c:314:6: warning: no previou=
-s
-> prototype for function '__rtw8723x_cfg_ldo25' [-Wmissing-prototypes]
->  =C2=A0 314 | void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool ena=
-ble)
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ^
-> drivers/net/wireless/realtek/rtw88/rtw8723x.c:314:1: note: declare 'stat=
-ic'
-> if the function is not intended to be used outside of this translation u=
-nit
->  =C2=A0 314 | void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool ena=
-ble)
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 | ^
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 | static
+The @codeaurora email domain's servers have been decommissioned for a
+long while now, and any emails addressed there will bounce.
 
-Looks like I forgot a static there, will fix that in the next version.
-Thank you!
+Asutosh has an entry in .mailmap pointing to a new address, but
+MAINTAINERS still lists an old @codeaurora address.  Update MAINTAINERS
+to match .mailmap for anyone reading the file directly.
 
-Fiona
+Ritesh appears to have changed jobs, but looks to be still active in the
+community.  Update Ritesh's address to the one used in recient community
+postings.
+
+Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+---
+ MAINTAINERS | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 1e5dfd169a19..ac7e524cd8f8 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -7803,8 +7803,8 @@ F:	drivers/media/usb/em28xx/
+ 
+ EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER
+ M:	Adrian Hunter <adrian.hunter@intel.com>
+-M:	Ritesh Harjani <riteshh@codeaurora.org>
+-M:	Asutosh Das <asutoshd@codeaurora.org>
++M:	Ritesh Harjani <ritesh.list@gmail.com>
++M:	Asutosh Das <quic_asutoshd@quicinc.com>
+ L:	linux-mmc@vger.kernel.org
+ S:	Supported
+ F:	drivers/mmc/host/cqhci*
+-- 
+2.34.1
 
