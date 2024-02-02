@@ -1,168 +1,117 @@
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail5.25mail.st (mail5.25mail.st [74.50.62.9])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3589E45018
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Feb 2024 22:57:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15048DDD6;
+	Fri,  2 Feb 2024 04:36:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.50.62.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706828235; cv=none; b=JfnUpPnEzObJVW0eP5wn3GNHKmRqTuei/QhTBCkFPLzglrm5P32/AHgcTz2x4ApxMQD026vi6hmU5AUjK3ilHpXcRRFR7wXHCoF/bzRF1vowRiq80JBaKH8Sgv+kmUncpOaC5vVjdcp4ZVkt5/7Ify3lsBzPcYbQNFNEFfLJjCk=
+	t=1706848585; cv=none; b=hwDve+wqV7/4mNrEdMR0gVU18WUHu6M/tif9nN6PkjEcegBmzP8Xj9uIBbSwEWg53D7qmyYOzvIHufT5BeiqjCp/J/vqphMIVyZwpVK7B03NmOb25lAtOeJL9sy40SYHR5uuNYL0nbXHLmEwfYiTjQmGstdbNCIxJorbvbm/zIs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706828235; c=relaxed/simple;
-	bh=ZlrLcIjeqRNOlSZ3HB/cwib/SPm5jN/0suNYrWYybrY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=XpOZWv/NWldGkkbYgnMEEBBJkcky9J4iNopiZd5yBeZRhVvYrUziaU6sYfGSDaLNpnIWMH2Tuc4/mysQtYind9a/aiaeMki/2cRBJrpVCVxjBUher3fOS3gZ75RsRtNwwaKdevzN0LArh/TJC2KjzDHIBiUW9I6JbMmVMOmxHLw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=EiW1VHAB; arc=none smtp.client-ip=209.85.128.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1706848585; c=relaxed/simple;
+	bh=nkmDbUQlq4zNwl6Jd/Vb+PA0uyv1xGA2FmONzdP1Sn4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=JLn6Ke1mQttxPHzYuyP1JTRza4nDWQF+cjB4q1PO2TqLMcXD69T1+JaUtY/4xFLce+I/cfZbqDr8xvycbtydgJrvGQpeCKlCXFKwfkl84oKToHBIjx2rUfuVuTmA+XobFJD2PZtK6qCsB9oFEsaCc/4zbHYw8yd/k78YXDtaPmo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com; spf=fail smtp.mailfrom=atomide.com; dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b=ArgEnzRR; arc=none smtp.client-ip=74.50.62.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=atomide.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EiW1VHAB"
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-603fdc46852so15439507b3.2
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Feb 2024 14:57:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706828233; x=1707433033; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=OdsnChKuomg6j4pblO0liMjiO73rsaOwpJVo7hYzRr4=;
-        b=EiW1VHABL0+atG6siOeo2hxBPqqTtplABWhtHEwlmI0JNWsZ02X2AtBqHbNp7uueTo
-         21gufUe2G7LS0mTmk5Qs40SlMWdhfv0bVUAYK4nL4dvj16qeVp1SghpAyTkeOxQInuq6
-         WHTrJYxCr5MdAMGp8B1p75S39OG2fGpl4sQOiyqs0dkQDwTy/VW34yANqRexQfCXvTuT
-         uwSg/B6Lj1uUEPRnaYQv3oUP2sjnntArj1JWWoi7GE2P5GIpHDj9A8ndtoZ4/yOvjQRz
-         WftEQy/OL7FxP9KRaedKq2I+qJV/0zOx5WqKNO1rgHCGXWZI832wQk7o3HluGBJKvRQz
-         MQYQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706828233; x=1707433033;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=OdsnChKuomg6j4pblO0liMjiO73rsaOwpJVo7hYzRr4=;
-        b=OnbeywG5hlMro2nL7iwTEh3sb855Ug36s8FSPNQdG/XB5fc0t97/hOp1I5qStDsJbG
-         BsLBlZl1u7c5NC/QqWBk1P9SK6M3D3ksQ/YakNJS/ZQaxVSS/ymk2aw7fYxGFRV5P9uU
-         r86odS+rffbSCXVLrfEgSO5VzPhIpgAd2o7pwK+g4zERfBUenoZIWMW5O2KZ+nxIeoyN
-         AYqsEfIFs/e/jRYHX8chHhQ518DjxuEX55xlqkNw3p4CA+cOMFgg5kIi3ya+bYT6lrW/
-         16foQYX9Gkgr7CIeVw5KNyb/h+BY7vSvlejIW16TNJMVuRjO574x3DSBalxaL0wOIrQ2
-         cppA==
-X-Gm-Message-State: AOJu0YwaGu8ny3pWv5gE9/+QsMv7LrtSGkjGCDyADu6kX1CrbL4Iu+Re
-	33Zl7g1bmD9ESXUSL0N6ohMnbA/1uV8dYe+GcCaWBow6kAzOV7Iuuapl8ZPIr6FoeTJbCqq+pzS
-	BmF4h9LDdis/MRZJo7qcELL2N0VOhnxRrFtYJfA==
-X-Google-Smtp-Source: AGHT+IHnePb0nUlh5xvqq3tQ9c0zd26s7DREpm3fiPu4htO3BCGcGIehlU3hlZvLTGzFauhIp7JoNs06N/IHfCVTlTo=
-X-Received: by 2002:a0d:e28a:0:b0:5f6:d2ee:2686 with SMTP id
- l132-20020a0de28a000000b005f6d2ee2686mr7022815ywe.2.1706828233099; Thu, 01
- Feb 2024 14:57:13 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b="ArgEnzRR"
+Received: from localhost (91-158-86-216.elisa-laajakaista.fi [91.158.86.216])
+	by mail5.25mail.st (Postfix) with ESMTPSA id 7793C60363;
+	Fri,  2 Feb 2024 04:36:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=atomide.com;
+	s=25mailst; t=1706848576;
+	bh=nkmDbUQlq4zNwl6Jd/Vb+PA0uyv1xGA2FmONzdP1Sn4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=ArgEnzRRe9ms4Josxbe+YGGWeYwx4jhbE5Mwx/eGYWy/niGPn8okDCDWzgZS/U/3G
+	 Fqlwy8VWlnBNsPwSN3+4/aMleaqsmouCRojQpae36sGl317/afEgvPIU8eKuoBXwzQ
+	 4Owiiu79KlW+3N815WAd1ZA77dV1UxlctB9wISJcDWPbigCUgOyiCOlwLD1hEnaioT
+	 RXAcjf96VNbL6GOq3ifQnjneXN1Q+Jg99tsu32dfvjDRZXvwp884S+HmhR/CVi2hu/
+	 xSw11Zr5FhB7MH03KmqC1/65wSpcekJyhyI5okhChFspfk3wE/79hL400zxDSmiREP
+	 72d1ZNaRvd+VA==
+Date: Fri, 2 Feb 2024 06:36:01 +0200
+From: Tony Lindgren <tony@atomide.com>
+To: Romain Naour <romain.naour@smile.fr>
+Cc: Linux-OMAP <linux-omap@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
+	linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: sdhci-omap: issues with PM features since 5.16
+Message-ID: <20240202043601.GA5185@atomide.com>
+References: <2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr>
+ <20240127044851.GW5185@atomide.com>
+ <d09925b3-83e6-4c52-878f-4c1db7670543@smile.fr>
+ <20240129111733.GX5185@atomide.com>
+ <f80b5390-8bfa-43d8-80ce-70b069aef947@smile.fr>
+ <7d72f3ee-bcfe-4197-b492-857dc49b2788@smile.fr>
+ <20240131103050.GZ5185@atomide.com>
+ <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240126190110.148599-1-afd@ti.com> <CAPDyKFpc38-CFrzhnhutS7c78tZTLM6Bg6XsTKENP8oVT6SQXg@mail.gmail.com>
- <d81a060f-3d8f-44b2-8140-eb8e7ce35d93@ti.com>
-In-Reply-To: <d81a060f-3d8f-44b2-8140-eb8e7ce35d93@ti.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 1 Feb 2024 23:56:37 +0100
-Message-ID: <CAPDyKFonWCJNWcBcUTW2xrqDwJAh0fvg8Ane-phWz64GZ6tcRQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: pwrseq: Use proper reboot notifier path
-To: Andrew Davis <afd@ti.com>
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, Yangtao Li <frank.li@vivo.com>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Oleksij Rempel <o.rempel@pengutronix.de>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr>
 
-+ Oleksij
-
-On Thu, 1 Feb 2024 at 17:20, Andrew Davis <afd@ti.com> wrote:
->
-> On 1/30/24 6:04 AM, Ulf Hansson wrote:
-> > On Fri, 26 Jan 2024 at 20:01, Andrew Davis <afd@ti.com> wrote:
+* Romain Naour <romain.naour@smile.fr> [240201 09:04]:
+> Le 31/01/2024 à 11:30, Tony Lindgren a écrit :
+> > * Romain Naour <romain.naour@smile.fr> [240130 11:20]:
+> >> Le 29/01/2024 à 18:42, Romain Naour a écrit :
+> >>> Le 29/01/2024 à 12:17, Tony Lindgren a écrit :
+> >>>> So I'm still guessing your issue is with emmc not getting reinitialized
+> >>>> properly as there's no mmc-pwrseq-emmc configured. Can you give it a
+> >>>> try? See am5729-beagleboneai.dts for an example.
 > >>
-> >> This driver registers itself as a reboot handler, which means it claims
-> >> it can reboot the system. It does this so it is called during the system
-> >> reboot sequence. The correct way to be notified during the reboot
-> >> sequence is to register a notifier with register_reboot_notifier().
-> >> Do this here.
+> >> I can't add such mmc-pwrseq-emmc on the custom board, there is no gpio available
+> >> to reset the emmc device.
 > >>
-> >> Note this will be called during normal reboots but not emergency reboots.
-> >> This is the expected behavior, emergency reboot means emergency, not go
-> >> do some cleanup with emmc pins.. The reboot notifiers are intentionally
-> >> not called in the emergency path for a reason and working around that by
-> >> pretending to be a reboot handler is a hack.
-> >
-> > I understand the reason for the $subject patch, but it will not work,
-> > unfortunately.
-> >
-> > For eMMC we need to manage emergency reboots too. The fiddling with
-> > GPIOs isn't a "cleanup", but tries to move the eMMC into a clean reset
-> > state.
->
-> That is by definition a "cleanup", even if the cleanup is really important.
->
-> > This is needed on some platforms with broken bootloaders (ROM
-> > code), that is expecting the eMMC to always start in a clean reset
-> > state.
-> >
->
-> I understand the reason, I don't agree with the method used to get
-> the result.
->
-> > So, we need both parts, as was discussed here [1] too.
-> >
->
-> In this thread I see a lot of discussion about the priority of the
-> handler. You want this to run before any real reboot handlers
-> are run. Luckily for you, all reboot "notifiers" are run before
-> any "handlers" are run. So if you register as a "notifier" as
-> this patch does, you will be run first, no super high priority
-> settings needed.
+> >> To resume:
+> >> - the emmc doesn't work with mmc-hs200-1_8v mode with PM runtime enabled
+> >> - the emmc works with mmc-hs200-1_8v mode without PM runtime (patch series reverted)
+> >> - the emmc works with mmc-ddr-1_8v mode with PM runtime enabled
+> >>
+> >> AFAIU the hs200 mode requires some pin iodelay tuning (SDHCI_OMAP_REQUIRE_IODELAY)
+> >> is sdhci_omap_runtime_{suspend,resume} needs to take care of that?
 
-Right, I didn't say the solution we use for mmc is perfect, but it was
-the easiest solution at hand at the introduction.
+On PM runtime resume, sdhci_omap_runtime_resume() gets called and calls
+sdhci_runtime_resume_host(), and calls mmc->ops->set_ios().
 
->
-> The real issue is you want to be called even in the
-> emergency_restart() path, which is fine. But from the
-> docs for that function this type of restart is done:
->
-> > Without shutting down any hardware
->
-> So we have two options:
->
-> 1. Add a new notifier list that *does* get called in the
->     emergency_restart() path. Then register this driver with
->     with that.
->
-> 2. Remove emergency_restart() from the kernel. It only has a
->     couple of callers, and most of those callers look like they
->     should instead be using hw_protection_reboot() or panic().
->     That way all reboot paths activate the reboot notifiers.
->     Kinda wondering why you think you need to handle the
->     emergency_restart() case at all, will even be a thing on
->     your hardware, i.e. is this a real problem at all?
+Then sdhci_omap_set_ios() calls sdhci_omap_set_timing() to set the iodelay.
+Maybe add some printk to sdhci_omap_set_timing() to verify the right modes
+get set on PM runtime resume?
 
-The "emergency reset" is needed, due to broken bootloaders, as I
-pointed out earlier.
+> >> The mmc2 clock seems idle when mmc-hs200-1_8v and PM runtime are used.
+> >>
+> >> omapconf dump prcm l3init
+> >>
+> >> (mmc2 clock idle)
+> >> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01070000 |
+> >>
+> >> (mmc2 clock running)
+> >> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01040002 |
+> >>
+> >> Thoughts?
 
-That said, I don't have any strong opinions around this, whatever
-option you pick to rework the code is fine by me. The important point
-is that we can continue to support the use cases we need for MMC.
+For the clocks above, that is as expected. The clocks get idled when the
+MMC controller is idle.
 
-BTW, there was a recent related discussion [1] that you may want to
-catch up with too, before you start doing the restructuring of the
-restart/reboot code. See the link below.
+> > OK so if the emmc reset gpio is not available, seems we should do something
+> > like the following patch to not set MMC_CAP_POWER_OFF_CARD unless the
+> > cap-power-off-card devicetree property is set.
+> > 
+> > Care to give it a try and see if it helps?
+> 
+> Same problem without MMC_CAP_POWER_OFF_CARD flag (even by removing
+> MMC_CAP_AGGRESSIVE_PM too).
+> 
+> I did some test with mmc capabilities mask but no progress so far.
 
->
-> Having this driver claim to be a real reboot handler to sneak
-> around doing one of the above is preventing some cleanup I am
-> working on. So if either of the above two options work for you
-> just let me know, I'll help out in implementing them for you.
+OK. So this issue seems to be related to the PM runtime resume not
+restoring something properly as you suggested earlier.
 
-That would be great, thanks!
+Regards,
 
->
-> Thanks,
-> Andrew
-
-Kind regards
-Uffe
-
-[1]
-PATCH v1 0/3] introduce priority-based shutdown support]
-https://lore.kernel.org/lkml/2023112520-paper-image-ef5d@gregkh/T/#mb45749c3bc9b89caecfeca6e66da8721d920191b
+Tony
