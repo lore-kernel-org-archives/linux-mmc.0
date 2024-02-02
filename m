@@ -1,59 +1,59 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
+Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A52E218021
-	for <linux-mmc@vger.kernel.org>; Fri,  2 Feb 2024 08:23:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0CD14199BC
+	for <linux-mmc@vger.kernel.org>; Fri,  2 Feb 2024 08:23:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706862220; cv=none; b=dL+v4l9r4jytjT/7OwoiEHAyoR5q1ofLTRxVD49Cwgv7+zEVlKB3ukzpLxP5w0p/7GCpCAmePd4ZVM0GBxu8WAa5Yj84IXJEnC0qAB9lZt3BcdnCB9cFKT4LYhuWxCSW6KZ3doronlqhUvU0kbMJnCgGWG6jXKJtZggh0inE5OU=
+	t=1706862227; cv=none; b=FLvJgHVDq071B/s3Qy/RJvu85I0LP7Q/4kglSMCgmkxLE86BBHBRQ1HGGxQQdk0P51pVHZr+hXXNfc0DUWdSx1LtKnLSW7G4Cg/RfrSzzbocvu5FzCKPkblXPAJifCAXx5ACQAOJCB7udSw6CL33iAxhAzShnJmGm9Xgoaamy+w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706862220; c=relaxed/simple;
-	bh=xewRIeaQFg1AbeZ7+QaAVaL2ZFfZQKRa5jlYYB9mxV0=;
+	s=arc-20240116; t=1706862227; c=relaxed/simple;
+	bh=Db8Srec2DP/U7ml0e4GE9L2z+58R0B70UoeQGUaihyQ=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=U20TJhjI6vMREyxOfD9vQ9DNxV5WA/LFKGs+ycwJUpigQmCuxAFKWdm+rdPrzRyQy0WGLLQkwJ1ZnukafKtbyrUZk1/oyEmuD/172LDUE52NrSLe+ne8XVjKaPdtKhcL+M7xOjPHXnzF5dqrHLJJzx6KupDU8FlFtPE3H4XKf/0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=G2QRVsnV; arc=none smtp.client-ip=209.85.214.175
+	 In-Reply-To:Content-Type; b=UWIpPWsN7GfWQ5skAbHYsCa6ePuZZIvtxdvXJa4Z5gS1Se5B2NNcYbNM5DGx3qhjIq7UnYvjZUOf2y0cjVXLR/f6Gva21wtesypi6l4idzj/oVfpf9OrB9E7RW6Evq716LhxsUSOF6c1ijG0HdW8vLZayr+RQUEvDWr16p8kpX8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=UQFYLklI; arc=none smtp.client-ip=209.85.167.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="G2QRVsnV"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-1d70b0e521eso13104355ad.1
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Feb 2024 00:23:38 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="UQFYLklI"
+Received: by mail-oi1-f182.google.com with SMTP id 5614622812f47-3bba0ac2e88so1689564b6e.0
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Feb 2024 00:23:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706862218; x=1707467018; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1706862225; x=1707467025; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=VuecZqHkgLflMmLgZf4ZSLRxGy52wVJ+1D0626OLoD0=;
-        b=G2QRVsnVGVb2dM/9hhy82DcLoVb/UP/xVncbWz3xcl/5rANq5hqpIamApznLAqOoNB
-         0xhVH5i0Um1LvOWAcdkePBM1CNPOsnL0Ao5ITxs8pB8jL6Uis/81EnIc1YPJwRC0RLKL
-         Rmm8zK8YsJXsgFfKrHNvmr0h2hNWv06oZsPPGkQkMSWcktCqpWjpwzVvSFgt/AZFy0Ge
-         StCJHBmkmrtP6BrX5XJfLfbP4Iep+0iKsoUTjt4sU/GwRAF++2wDOg9EX2HXc167AgLb
-         0l81A14gN3pYv1qzGEpy+ZnmWrW8STF4G1wdu4x537iG9YwEXal0Ky3lJGT3+ru01nbj
-         BgTw==
+        bh=ER65IywYIvJHyQc+F+Ka9tigNEb329nFaYD/j937Uu0=;
+        b=UQFYLklIkbfkrVxiVIaSBSNEe8Ah+Aa+gURuA+39b/sTgy5dh4b13fNU7bWO1n39In
+         8jSmNTWcGg7KfM/PWUWRYLkUuyIy8u1rTTMcGmH6OZKXF35OVKovhRmGhlY3fZ+5PwS0
+         Z44ftY16wobpsFD9hkMdJOiIznWLuMeM2DUNMOwpIYDAaaQkZ0QpwBGhDJLSBsXVF8qe
+         267Vdt8xJrar2eP9pV7pzpV7l7nStrofceV0VwKJHx8w0QeRrVBl/Fzatlk/IzNuF/e+
+         WpjSkj1yf9TMpQ4QFEWyz8sui8u+/7PmMwi1wdG50rNOfog2Hdiv6ZgXDxaXyyBPu50z
+         AkXQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706862218; x=1707467018;
+        d=1e100.net; s=20230601; t=1706862225; x=1707467025;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=VuecZqHkgLflMmLgZf4ZSLRxGy52wVJ+1D0626OLoD0=;
-        b=bcUgPOI12s7HRux3HJKjKnFDuj/egnnQZmV+uAd8crWf3O/vSLwtbHE4uo/t/OqO2L
-         cZai2alDJcFBwwTAoAtxta7fpAX09dMZJ19NqA+HE5C05TdAT8/tJMeWd1t6B89cH+T5
-         zYmB40VTYoN6SgVstanDTYzpsMKOZdb2pt81LV7t48BhH0khhoJGzUBLiK+Gd7dE/UmQ
-         bm5vtmBlmPxKS0TwBjCRqX4uaWoc9CuzKB/A1dikOK6kw0Psm31Xv841squ79tFyHZjs
-         tiYUuaaMC+AeyW31rlHsa7fdxF51jyAVKrcAK+Hb4+vbkLVYtTNlJMXA4vUySSbMSino
-         pz2g==
-X-Gm-Message-State: AOJu0YztDjvB4vk8ilyBnSs5nwK36R/e3V/h+9SOHAh0tSVVeJrZxs07
-	EYNPIF78g4pYR6bChY6LjwD4y0WQCL1+fspHcIN3vHpodpC3he4BZB16p9pKE5Y=
-X-Google-Smtp-Source: AGHT+IFvpjf5ic9pPp0I0oH89bz+61xCGdTv0feKA3rHpe9dJkxNwswGNwcn4VMZtl+YQQwVbYjWug==
-X-Received: by 2002:a17:902:650c:b0:1d7:5943:21b8 with SMTP id b12-20020a170902650c00b001d7594321b8mr1475938plk.16.1706862218012;
-        Fri, 02 Feb 2024 00:23:38 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCUkLr1nGCiRksBEdX3ay8JGVXW8xWK/+YOYV//B3uvgEgnB9jQQXWD41a8LOPZr0RYjFAqHwyFxC4kPYZg7o3gDo0p8gadhD2DkQdCCXiZnoOkcum6n320K0fhDj9GuFQi5PjcHE3qPxieAiGkOLxc6ibC0ibO0CcA87u5fA58L58KIP/8X1dc5ZScT78UVR5x6Bj/LV31GANDZBT18BsW8Hr80w2PVdDIzfLZJKMMSJlIEZzaB0qQvB5zsK8l2Zpc1+WT60VLTnSKVsf9vcwNMONFjYbBmtIhGZVuKk/eoFcXUybNqn392f5FufoAaqqNffpAeNJARWGuOcgBtNXKko3Hl6/l0+wWlcIypRmV1KLz+F+v4ltLJzfk661hKnqD8JD5F5j7ldAwRu/vwIJX3GSwYTpDu7UjLfPW3MkYn+OY53BJibMvYwuoH2w/HUkqbXkYtTJsAwV2i5+tTRXk1LNon6t+lY4iLFue/hRR7piSkGDPIBsC34PM50mv0D170ILsOgVd15Zq/rH9EJ4e7dpWdYyJ4vG9W1AtMO1X/k+sdqZHcw/prWU4C8M2D7kmfqWKEvAh8lmfOzIJ5e62orufAu4jbRiAsfA7gBVFgCIEA2b69Z3q9fpp79npTXjor1EgzP5o2BBZSvie0QobY1/nhgfm5e8+3t7kb3JA5wSEL0+cjKkDDNZfsNYRkaFQ5jmrDmedZ
+        bh=ER65IywYIvJHyQc+F+Ka9tigNEb329nFaYD/j937Uu0=;
+        b=wQa7+gsRFvfT5Yfk3XA/IS6AMn6on1Z6HvJ5jXIN6XCP2kAYyuM+Yc1MZ3HpWKYoB3
+         Do6mNkFZ4gH4MzUPOKTwSgEiilTbFHYX78mI5AYBZ3B7opYz8a742wfRikqvbzSyRf55
+         en3ukcvP/XzjW0EDM6hgYe6/kVU4uzUtDnnVniYjd2/jD50HjxHmVmj6eVtAu89Mf/zq
+         aliWTBRJAcdbf0XUOFMu7rHo85JBgBTq2RqhB2U92M7ZUtdVMOSZkslkZqGPChKfdNVl
+         CmDsP0FEfiTAmE14LayvTWxAmJRMGyiEU7zDeJRJIgTJYbEhjLLOxuPCow5v2dMvuhDS
+         dkrQ==
+X-Gm-Message-State: AOJu0Yz2EIxM9roYrxKZSqPOpoMZCDbbrQ7x81cjS+WiS2L8t7+faBdf
+	94P+CZ7St+izkx2HTaYKeCTi4Z1p9SgcHyrqTg71UmktnMxYTmLcKMiu5gQt5qo=
+X-Google-Smtp-Source: AGHT+IFJGxTg6JrHTx3B7BDK4GcZtd9mnvOvvoh8akd5QM7tPUvJi7pZXd8QSRYnBmeHqvBqooTYEA==
+X-Received: by 2002:a05:6808:189b:b0:3bc:d58:cb2e with SMTP id bi27-20020a056808189b00b003bc0d58cb2emr716422oib.18.1706862224997;
+        Fri, 02 Feb 2024 00:23:44 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCWWmD4J6+lyuEkj0J6GL4c64ioWbrU/BNvlYbfr8y8ogiy+WUxWyUXn03wxWRL+NqD3wq4iHLa/RVp4fjj/ZlgJ1uN2//++fem8qr1L28IWgCSVDkZzdUS/hdsReB3lEB4JYcS/unqU/HENkY2bR3oP+M5hgxSV4YM+y4KI7nRkWLJyHuS5ZloGBMBVOM3gjq9uzdXSlfxVkHePDC7PcNLIjQ5iVLZFNYmYaTxs31kKnEovdl+sVbOj4gkI8RbuTfDS6Jew1vLe4CxkAiu5Ghkc2HgUq2CxtAMv94hjjv5cW1uCjKe3DAkwRhi+khtMaBDNVzIXFUQtPsTHC/LpyGIYkAejmluen5y2ZlUmgy5GMYBvO4OvEcUo+nWopv/yRp4bUTybJG3+2hpZG6Ec+JcFYfzb37v0rkMmzAmwZhaaqGjTDGPCPa1pfEMRqWoxa2ACAKOmY6bAj6oLG/dAycvLwt6SvTcR7X8le4rO6pwqONGqH1GGDBokUDT78eKfDyEQwOovuC1upPgj91Xt0VN6p6g8AjHSM+ooWeIH/8NBRfcn15JTEoiU3ZYGjIrnFBuocJIiETpHbhgDhmuswib0s2/8LT4SsoIEUW1ztXUqKp4W2H/idL/XyMYCPHQ0eog9AqXC2dTxThg2hlOvL8YideS459JpNxU2e91RNs/KNRNmP8yZrYEsVm1/z1RRiYhiVWWvh7eu
 Received: from [192.168.1.20] ([178.197.222.62])
-        by smtp.gmail.com with ESMTPSA id jg3-20020a17090326c300b001d94871ba92sm1038374plb.239.2024.02.02.00.23.30
+        by smtp.gmail.com with ESMTPSA id f13-20020a4ace8d000000b0059c844e9045sm297997oos.36.2024.02.02.00.23.39
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 02 Feb 2024 00:23:37 -0800 (PST)
-Message-ID: <c519661e-c37d-45e2-99dc-22fb86a8e97b@linaro.org>
-Date: Fri, 2 Feb 2024 09:23:27 +0100
+        Fri, 02 Feb 2024 00:23:44 -0800 (PST)
+Message-ID: <49dbd0a2-a4b9-4c05-bb10-44f267672374@linaro.org>
+Date: Fri, 2 Feb 2024 09:23:37 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,8 +61,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: fsl-imx-esdhc: add iommus
- property
+Subject: Re: [PATCH v2 2/4] dt-bindings: net: fec: add iommus property
 Content-Language: en-US
 To: Frank Li <Frank.Li@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>,
  Rob Herring <robh+dt@kernel.org>,
@@ -79,7 +78,7 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
  netdev@vger.kernel.org, imx@lists.linux.dev
 References: <20240201-8qm_smmu-v2-0-3d12a80201a3@nxp.com>
- <20240201-8qm_smmu-v2-1-3d12a80201a3@nxp.com>
+ <20240201-8qm_smmu-v2-2-3d12a80201a3@nxp.com>
 From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -125,12 +124,12 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20240201-8qm_smmu-v2-1-3d12a80201a3@nxp.com>
+In-Reply-To: <20240201-8qm_smmu-v2-2-3d12a80201a3@nxp.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 01/02/2024 21:22, Frank Li wrote:
-> iMX95 and iMX8QM have smmu. Add property "iommus".
+> iMX8QM have iommu. Add proerty 'iommus'.
 > 
 > Signed-off-by: Frank Li <Frank.Li@nxp.com>
 > ---
