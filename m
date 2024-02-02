@@ -1,223 +1,150 @@
-Received: from mail-oo1-f45.google.com (mail-oo1-f45.google.com [209.85.161.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.19])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2E9113BEB6
-	for <linux-mmc@vger.kernel.org>; Fri,  2 Feb 2024 10:46:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6355213541C;
+	Fri,  2 Feb 2024 12:11:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706870790; cv=none; b=qw9VUex4oN0kLe2bs81XISHXKxS2GXiCLZ9vmKxwa0BP6AREv5CFN0GgGn5bjlIGMSlHIUj8uPsJjQmL2j4KlPBvhO5yx928MX2jXCBtk5ILVAQnX+vWndjfhNNl+aCP4iLl2DsLQBvf8BcB2025J2pzCUGLgz29VcNaB5KkylM=
+	t=1706875888; cv=none; b=HCW+/168rhH1aTneo7q9CAJ/KF9XLQcJVAOlGmEj04DOrOS2XSb2rW5iYrhOQckbKzMPOnIXhM6KEC1k7+p1gnu3PiZZDNd7ljhHohrs+gngFfyfyu9VHFmki/sx1CAFsLsxnUPaGjL9zh+kA/N//bS078q3Y83DA4JUku71mSU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706870790; c=relaxed/simple;
-	bh=oIT2OQmsLlzS8k1iK5DqvMwab4iQZFquFr3LbXzkkzA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Hrfu9u6PMP9k3qol0svlMiu6ZaE6IPBTlHo62Au4cI2DK9M0/LAaQD2h98bDLjjggUAtQ5sNXmIgiDHQ32IKPP/6Q7JpwoRFOCVql8/Os/VGhIHgH39DMsIa39vPV9ubUA4/5LklZG+qZZk5rOInkCTuObsO0YV5hjcjVs6ex88=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WyxllP+5; arc=none smtp.client-ip=209.85.161.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1706875888; c=relaxed/simple;
+	bh=4AhjPzXaUJ5bsF3nimywB/bT0/Vklgsm0DU2i4x7WXA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=SbjXhNTc0qV2haZY6RQQlaQwXYfRSg+hcVv84i1U6rXa0mlMYCkAHqeWZ68RjCK1ut3AX62rgbGX/yRTEmgMvvDPSeQOZZHMcgVNs8cmNFfOAxEAvTgNynM6i+050QfLVaHhm9sAubWyaoB59U/9pHDwbKLjcp8mIjDeOkA4QCs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=gpgu+1LA; arc=none smtp.client-ip=212.227.15.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WyxllP+5"
-Received: by mail-oo1-f45.google.com with SMTP id 006d021491bc7-59a27fbe832so889504eaf.3
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Feb 2024 02:46:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706870786; x=1707475586; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=BRi3pn+DeYpH9hRBU3X4kEEe9FeJxU463/du/+mtcAM=;
-        b=WyxllP+5AzUGW4RxRLQ2i298pl6lNUw2AxUgJCaxYaK4slCTxt2epHvMF901cEJvwP
-         KhGSONQqupBqWAsrvtKRoX/FNQy+Rz+pEGT1lULzJ2pwytQxE9hwyo13/ZDgyvSonuYc
-         gjUG94xR+jK6MT/GziQqRt2iJcMx78qAMysE72Q5l80k6dGs+7qeJm2d38zuIWDhnZW4
-         8eWfKkn8wSSxAQjdSR8miJuYyfUn3RmbRq0+BgoAOTZCc/vo66Ziu3wzke2m98nPFY5N
-         /nG6RGXkaUzJl6bcWut9udiUAMqEyTXU9Y40LWCr/UPvq6WBj7HSkLnNmF+KCKuVTcmd
-         qZuw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706870786; x=1707475586;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=BRi3pn+DeYpH9hRBU3X4kEEe9FeJxU463/du/+mtcAM=;
-        b=rymnSryvrORc6kSKD+7FgMRkAwxqr0fyHEpdGM7NYp77FRsQK9+RgEJy2JcaP9PHji
-         sBw0+Z8sQPIPy3uERFHH8dsznYAi/igARMUqVxrpme3464H8idFRs5GsHgbHBcNnkTZp
-         jpepfDCcLIMe0H8rxtUMAqPoMSkx/WCEYA/9zM1opANI7fb1LBO+EtGbHJ6ZUQbkESGb
-         hiDFod+QOz+WsqV9WwIIOs/P3lYF0C4gbeDTkQVJmuKNOTorizB8cileHAOSpZTvZigZ
-         uFnQmbB1DbGB72pHboRMbDkfIfFmDorIvuHdgJh/uWB3vVrPE9ruBxmjpnKTdPLaskLQ
-         mb6A==
-X-Gm-Message-State: AOJu0YyoRl8Guqlm+iTJ+2BFlfBIWIMTkW3SvfNcrDVlVwKoMCc/u9N/
-	3CFGYb+VKL7Z6t+U8Zf9wUVkkav2FjgMRPFLo4OfoogIRuagfTNJuIwW+/7J1e80wGlgzYhuqXe
-	7ARJZ8rmcR6bJIeTdXsFPXat0+ZsC/Tr7gRXIkQ==
-X-Google-Smtp-Source: AGHT+IEuTMbdIOzteufxZXeY/IYZgUAQuVpfuGo670XZGtUWRuASG9h19SSHfjhm84ZBYQ23pZPMGc4BnsnrM4x0w+I=
-X-Received: by 2002:a05:6820:22aa:b0:59a:1947:d3ec with SMTP id
- ck42-20020a05682022aa00b0059a1947d3ecmr6495658oob.5.1706870786631; Fri, 02
- Feb 2024 02:46:26 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="gpgu+1LA"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.de; s=s31663417;
+	t=1706875873; x=1707480673; i=fiona.klute@gmx.de;
+	bh=4AhjPzXaUJ5bsF3nimywB/bT0/Vklgsm0DU2i4x7WXA=;
+	h=X-UI-Sender-Class:From:To:Cc:Subject:Date;
+	b=gpgu+1LA7ax/lLpYm9BVhiX3dRGmjLCRAYhlqegKU/Cv3neb8FYKqWQSu+3An9/W
+	 eA5o5SWXN/BJvugypmRVWg4y6blegKBXi5KiAWrzNOruBkJqoZhXKvmV+VHdvfdb5
+	 ykerzqQH+Kpfk1gu2BjJAWpMfR62YPyDhELy18X2qANGT59saSyRdJBKl06hzqD51
+	 doHb82zJ60qWs79WCtVfy8P+ppGXeIGEUCBVthgF2hPONO+AVqDE43X81QLErSx2o
+	 3HcqMllK8vMYK5I9OKufwCMnAywxy9VTpIUvNTZm58W/iZK/E5dKQdjEcjnlHqNyT
+	 RdR7YqN6+97a2uAd2Q==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from haruka.lan ([85.22.17.32]) by mail.gmx.net (mrgmx004
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MQMyZ-1rjGNM0lN3-00MJz4; Fri, 02
+ Feb 2024 13:11:13 +0100
+From: Fiona Klute <fiona.klute@gmx.de>
+To: linux-wireless@vger.kernel.org,
+	Ping-Ke Shih <pkshih@realtek.com>
+Cc: Kalle Valo <kvalo@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org,
+	Pavel Machek <pavel@ucw.cz>,
+	=?UTF-8?q?Ond=C5=99ej=20Jirman?= <megi@xff.cz>,
+	Fiona Klute <fiona.klute@gmx.de>
+Subject: [PATCH 0/9] rtw88: Add support for RTL8723CS/RTL8703B
+Date: Fri,  2 Feb 2024 13:10:39 +0100
+Message-ID: <20240202121050.977223-1-fiona.klute@gmx.de>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240131174347.510961-1-jens.wiklander@linaro.org> <CAFA6WYORTtuRsoiDhjCdPwaDHyJ+ixZBu_-VQHPE2RhCprKQ0w@mail.gmail.com>
-In-Reply-To: <CAFA6WYORTtuRsoiDhjCdPwaDHyJ+ixZBu_-VQHPE2RhCprKQ0w@mail.gmail.com>
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Fri, 2 Feb 2024 11:46:15 +0100
-Message-ID: <CAHUa44FmrtsbssK_R_Pm9WLzrSPU++HOETfaVxHqoZyhSEM8jw@mail.gmail.com>
-Subject: Re: [PATCH v2 0/3] Replay Protected Memory Block (RPMB) subsystem
-To: Sumit Garg <sumit.garg@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	op-tee@lists.trustedfirmware.org, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Jerome Forissier <jerome.forissier@linaro.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:1F++Ow/K5+kHhUQ/XQf6G9ou6ba2ls07noywmqqqx8Y8WI4nnCn
+ xTnaQTr3DutqufWflKdcxQW5EvrV6XqfOWqDLUgh88OOLCbvoCLAJWcnwy6ovJJ5UFy9Vpt
+ m6SGwpCzo+UV3ko3cdaHQdpEFQ0T9I1zbdTBxfXxTHI2vBYcjPo05P0y6rSauIdpUO9tgvd
+ TvR5jZKSiOgF53eG1A9nQ==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:YkD51cJZ2QY=;uxO7GGG5JJcUpU5uS+Ys28DPW62
+ oKtF7GSdUWjN/InDDpf8wDUV8gxuCVXGFkK3/RWLTuac9t5tT5zCX7eFljeuq0UHkW4P6J30O
+ /vuUGMsIemLZcNKz29/QQLQVn7I2ih3dkdBfzb5L46XOCp7bzcREFj7X8hvRBEErF1LaIiFWG
+ JxBt8CTGfMvFUkZrN4l96WBIvX6moLYCK+FUX+MbU70lC2LLomeakg0ScV2pgzggtKoCL8QXJ
+ iCmSM2xhZ59Ahf6Bbr0xAHkWr18z3tnfweIgHrrBqlKpFwt4ywtr6lYGWTLRoI8fn417t7w9P
+ bgFwHWpUYGiSlj6/81lWLlRFh9CKxdXpxFPFZ88yNbCITmjfOp8LVQbvtXUJ/dPE/XYHTpnr2
+ NM1nhs88P+B/eZngobRYfUgPqBT9A8XlV0uEyci9jx3e2WULLVrg32zoGyIEnJmB6CpYxlTMd
+ vdR8AYD50IP3GKqNw3xi/SqXVXkVQrLoIhOwGLACo7uGcJTXz4KOFI4bvhLMBpt29Z3uX0Obd
+ biCU6rIA1fmPBVsol8M94tsnLqdROPfYn3zb/uWcSxuioDDSJhvk6WKiPsTiiYQ8nwAhKRMkR
+ fvItNIUVuBHi2pJs1GG4YYT9lwIvX82YlxdvRntZRuPRWbRgVE3dn+H60913pbXujbikePXpZ
+ 4DGRGzSo1sPXoOB+Qn9UzaUnypFF2xDsFtrp/AZFlnbx0+4AVYEenTz2Aan6Dc/sTFjAlxCrX
+ FDbhztRaIl8ueHd9EFHenk7av2qhcOSFv5v9JAs5jh/C3yHONZ8C5ETuKTpVSZe1UdHFFti6f
+ 1lgBcaSjTn9LUVyIWUIlbbzmbwpdeZ91YAJj5/miwgAyg=
 
-Hi Sumit,
+This patch set adds a driver for RTL8723CS, which is used in the
+Pinephone and a few other devices. It is a combined wifi/bluetooth
+device, the wifi part is called RTL8703B. There is already a mainline
+driver for the bluetooth part. RTL8703B is similar to the RTL8723D
+chip already supported by rtw88. I've been using the out-of-tree
+rtl8723cs driver as reference.
 
-On Fri, Feb 2, 2024 at 10:59=E2=80=AFAM Sumit Garg <sumit.garg@linaro.org> =
-wrote:
->
-> Hi Jens,
->
-> On Wed, 31 Jan 2024 at 23:14, Jens Wiklander <jens.wiklander@linaro.org> =
-wrote:
-> >
-> > Hi,
-> >
-> > It's been a while since Shyam posted the last version [1] of this patch
-> > set. I've pinged Shyam, but so far I've had no reply so I'm trying to m=
-ake
-> > another attempt with the RPMB subsystem. If Shyam has other changes in =
-mind
-> > than what I'm adding here I hope we'll find a way to cover that too. I'=
-m
-> > calling it version two of the patchset since I'm trying to address all
-> > feedback on the previous version even if I'm starting a new thread.
-> >
-> > This patch set introduces a new RPMB subsystem, based on patches from [=
-1],
-> > [2], and [3]. The RPMB subsystem aims at providing access to RPMB
-> > partitions to other kernel drivers, in particular the OP-TEE driver. A =
-new
-> > user space ABI isn't needed, we can instead continue using the already
-> > present ABI when writing the RPMB key during production.
-> >
-> > I've added and removed things to keep only what is needed by the OP-TEE
-> > driver. Since the posting of [3], there has been major changes in the M=
-MC
-> > subsystem so "mmc: block: register RPMB partition with the RPMB subsyst=
-em"
-> > is in practice completely rewritten.
-> >
-> > With this OP-TEE can access RPMB during early boot instead of having to
-> > wait for user space to become available as in the current design [4].
-> > This will benefit the efi variables [5] since we wont rely on userspace=
- as
-> > well as some TPM issues [6] that were solved.
-> >
-> > The OP-TEE driver finds the correct RPMB device to interact with by
-> > iterating over available devices until one is found with a programmed
-> > authentication matching the one OP-TEE is using. This enables coexistin=
-g
-> > users of other RPMBs since the owner can be determined by who knows the
-> > authentication key.
-> >
-> > I've put myself as a maintainer for the RPMB subsystem as I have an
-> > interest in the OP-TEE driver to keep this in good shape. However, if y=
-ou'd
-> > rather see someone else taking the maintainership that's fine too. I'll
-> > help keep the subsystem updated regardless.
-> >
-> > [1] https://lore.kernel.org/lkml/20230722014037.42647-1-shyamsaini@linu=
-x.microsoft.com/
-> > [2] https://lore.kernel.org/lkml/20220405093759.1126835-2-alex.bennee@l=
-inaro.org/
-> > [3] https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-=
-tomas.winkler@intel.com/
-> > [4] https://optee.readthedocs.io/en/latest/architecture/secure_storage.=
-html#rpmb-secure-storage
-> > [5] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/=
-commit/?id=3Dc44b6be62e8dd4ee0a308c36a70620613e6fc55f
-> > [6] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/=
-commit/?id=3D7269cba53d906cf257c139d3b3a53ad272176bca
-> >
-> > Thanks,
-> > Jens
-> >
-> > Changes since Shyam's RFC:
-> > * Removed the remaining leftover rpmb_cdev_*() function calls
-> > * Refactored the struct rpmb_ops with all the previous ops replaced, in
-> >   some sense closer to [3] with the route_frames() op
-> > * Added rpmb_route_frames()
-> > * Added struct rpmb_frame, enum rpmb_op_result, and enum rpmb_type from=
- [3]
-> > * Removed all functions not needed in the OP-TEE use case
-> > * Added "mmc: block: register RPMB partition with the RPMB subsystem", =
-based
-> >   on the commit with the same name in [3]
-> > * Added "optee: probe RPMB device using RPMB subsystem" for integration
-> >   with OP-TEE
-> > * Moved the RPMB driver into drivers/misc/rpmb-core.c
-> > * Added my name to MODULE_AUTHOR() in rpmb-core.c
-> > * Added an rpmb_mutex to serialize access to the IDA
-> > * Removed the target parameter from all rpmb_*() functions since it's
-> >   currently unused
-> >
->
-> Thanks for working on this. This is a huge step towards supporting TEE
-> kernel client drivers. IIRC you mentioned offline to test it with
-> virtio RPMB on Qemu. If it works then I would be happy to try it out
-> as well.
+Station and monitor mode work well enough for daily use on my
+Pinephone, I have not tested other modes yet. WOW firmware is
+declared, but WOW isn't implemented yet. RX rates stay fairly low
+still.
 
-I'm sorry, I didn't get far enough with that. I've been testing on a
-HiKey 620 with a removable HardKernel eMMC. So I have two RPMBs to
-test with.
+Ping-Ke Shih kindly offered to add the required s-o-b for the firmware
+and help get it into linux-firmware when it's time, for testing now
+please see the code I used to extract firmware from the out-of-tree
+driver [1].
 
->
-> Along with that can you point me to the corresponding OP-TEE OS
-> changes? I suppose as you are just adding 3 new RPC calls in patch#3,
-> so we should be fine ABI wise although people have to uprev both
-> OP-TEE and Linux kernel to get this feature enabled. However, OP-TEE
-> should gate those RPCs behind a config flag or can just fallback to
-> user-space supplicant if those aren't supported?
+I'm trying to follow the "one file per patch" rule for new drivers
+while integrating with the existing rtw88 code, please let me know if
+I should split it differently. I'll be including a few questions for
+reviewers in the relevant patch mails.
 
-Here are the OP-TEE OS patches
-https://github.com/jenswi-linaro/optee_os/tree/rpmb_probe .
-Yes, there's automatic fallback to the user-space supplicant if the
-kernel reports that the new RPCs aren't supported and the kernel will
-not use the in-kernel driver unless the new RPCs have been used.
+Thanks to Ping-Ke Shih for advice, and Ond=C5=99ej Jirman for debug logs!
 
-Cheers,
-Jens
+Requests for testers:
 
->
-> -Sumit
->
-> >
-> >
-> > Jens Wiklander (3):
-> >   rpmb: add Replay Protected Memory Block (RPMB) subsystem
-> >   mmc: block: register RPMB partition with the RPMB subsystem
-> >   optee: probe RPMB device using RPMB subsystem
-> >
-> >  MAINTAINERS                       |   7 +
-> >  drivers/misc/Kconfig              |   9 ++
-> >  drivers/misc/Makefile             |   1 +
-> >  drivers/misc/rpmb-core.c          | 247 ++++++++++++++++++++++++++++++
-> >  drivers/mmc/core/block.c          | 177 +++++++++++++++++++++
-> >  drivers/tee/optee/core.c          |   1 +
-> >  drivers/tee/optee/ffa_abi.c       |   2 +
-> >  drivers/tee/optee/optee_private.h |   6 +
-> >  drivers/tee/optee/optee_rpc_cmd.h |  33 ++++
-> >  drivers/tee/optee/rpc.c           | 221 ++++++++++++++++++++++++++
-> >  drivers/tee/optee/smc_abi.c       |   2 +
-> >  include/linux/rpmb.h              | 184 ++++++++++++++++++++++
-> >  12 files changed, 890 insertions(+)
-> >  create mode 100644 drivers/misc/rpmb-core.c
-> >  create mode 100644 include/linux/rpmb.h
-> >
-> >
-> > base-commit: 41bccc98fb7931d63d03f326a746ac4d429c1dd3
-> > --
-> > 2.34.1
-> >
+* I do not have any 8723d device. I made sure rtw88_8723d still
+  compiles, testing would be very welcome to make sure I didn't break
+  anything while moving common code to rtw8723x.
+
+* Does anyone actually get the "unexpected cck agc report type"
+  warning? The out-of-tree driver also logs a warning and handles the
+  3 bit LNA index in that case, but the code could be simpler without
+  the workaround if it isn't needed.
+
+* I've found mentions of RTL8703BS devices online which seem to be
+  wifi-only SDIO devices using RTL8703B, and posts telling people they
+  need to use the rtl8723cs driver to make them work. If anyone has
+  one of those I'd be curious if this driver works with it.
+
+[1] https://github.com/airtower-luna/rtw8703b-fw-extractor
+
+Fiona Klute (9):
+  wifi: rtw88: Shared module for rtw8723x devices
+  wifi: rtw88: Debug output for rtw8723x EFUSE
+  wifi: rtw88: Add definitions for 8703b chip
+  wifi: rtw88: Add rtw8703b.h
+  wifi: rtw88: Add rtw8703b.c
+  wifi: rtw88: Add rtw8703b_tables.h
+  wifi: rtw88: Add rtw8703b_tables.c
+  wifi: rtw88: Reset 8703b firmware before download
+  wifi: rtw88: SDIO device driver for RTL8723CS
+
+ drivers/net/wireless/realtek/rtw88/Kconfig    |   22 +
+ drivers/net/wireless/realtek/rtw88/Makefile   |    9 +
+ drivers/net/wireless/realtek/rtw88/mac.c      |    6 +
+ drivers/net/wireless/realtek/rtw88/main.h     |    3 +
+ drivers/net/wireless/realtek/rtw88/rtw8703b.c | 2106 +++++++++++++++++
+ drivers/net/wireless/realtek/rtw88/rtw8703b.h |   62 +
+ .../wireless/realtek/rtw88/rtw8703b_tables.c  |  901 +++++++
+ .../wireless/realtek/rtw88/rtw8703b_tables.h  |   14 +
+ .../net/wireless/realtek/rtw88/rtw8723cs.c    |   34 +
+ drivers/net/wireless/realtek/rtw88/rtw8723d.c |  673 +-----
+ drivers/net/wireless/realtek/rtw88/rtw8723d.h |  269 +--
+ drivers/net/wireless/realtek/rtw88/rtw8723x.c |  720 ++++++
+ drivers/net/wireless/realtek/rtw88/rtw8723x.h |  517 ++++
+ include/linux/mmc/sdio_ids.h                  |    1 +
+ 14 files changed, 4437 insertions(+), 900 deletions(-)
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8703b.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8703b.h
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8703b_tables.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8703b_tables.h
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8723cs.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8723x.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8723x.h
+
+=2D-
+2.43.0
+
