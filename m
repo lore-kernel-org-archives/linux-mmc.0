@@ -1,182 +1,269 @@
-Received: from mail-vs1-f46.google.com (mail-vs1-f46.google.com [209.85.217.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 304ED60BBD
-	for <linux-mmc@vger.kernel.org>; Fri,  2 Feb 2024 09:59:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D741161682;
+	Fri,  2 Feb 2024 10:00:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706867985; cv=none; b=XbCAPZKJ+t/PA/D4X3MghaSWH/n4wXOkamopI83mRhjJ6On9zEAyIBxi51L9M0bXm1t2SYMplQSG9kcBZ5YkcMD3IwzslGZqvaqmgucQ9A/9cndpXg6pzFG/BEQvSY9bYRRcs3dML1/TuLQgjyMU28J+uTd/MGfG/2JQlgAlzwM=
+	t=1706868056; cv=none; b=Gjyag6v34rGPU+rCcb+MNqI9nBx4rgf1jQgrlQveuGhsvO+DeLBZqYiRmOPI+yjXadw8BUqC60fabPh67qG7hwYWI4f9QrQ9BJiLs+GZ6aLGLDC5z12bpZNgjDXN8xVz9YBEae6BbUU5QYGdGYs7EAJPq9TsR49LqLjcOFnKCEc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706867985; c=relaxed/simple;
-	bh=dc8rQnh6PDoB1TWGzNuLOJkPoGzySAD7iS8TKBzVRPk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=MY4kHmfFoEnkcr4BPG0lK+1AvW83/C7BqeCmMjyvMLh2prQF4cXi/DZtggFzA4omSor4Eb9AveO3PKZ/QCZSpTXk8mEtQOv9Kd0iPTmo8jG58wPqh0YKBnRLJrRS3AP8O7clNgrM6AINqTfY+c4UEHleVr8qHrYXCS5RDIkn/zQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Z2i1QSxW; arc=none smtp.client-ip=209.85.217.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1706868056; c=relaxed/simple;
+	bh=V7I2689xpU2dX0rLsg9yxEZw1ZOg5TXlkDJscF+cnWE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=BV4UK82lDBKBOSU/2dgsTwHLEPppQ2CgyYdX8TLendG3WpifgNHqUgFALCCYx5noW52oh4lmnzcXfWmZIUwt2xyvT6wmdlsMbw2x1KHtlO9e52OOSZ7Y+48b7OnIGxX5MK3z+oJLHg0QO6TvwRBj+6WoeOUl+gmzeeHp05ipQg8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ewxJLt21; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Z2i1QSxW"
-Received: by mail-vs1-f46.google.com with SMTP id ada2fe7eead31-46b3ff62223so1954163137.0
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Feb 2024 01:59:42 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1706867982; x=1707472782; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mGyYTzfbWHLJ9icv+vr2JH/WdzWZ6KgDnIC2V14paRI=;
-        b=Z2i1QSxW7NutcqfA7Zy0AUOJOb6cderHycpxrrWTlI2QqmvKyvGFtJmcs+60jtVrr2
-         PNOsy2KHVdXdzCwRQi1kcXVCpWVFJTcPXJ+j3VyipMzRbDyxPF9cr5AOjp86LKKlSWJJ
-         yjZHj5oqT0O6WmoTvHBtRUB9s6PDWfCs4YWfZxEexMcgcFvR9nYEfVeI8aqfVoGZqqVD
-         x2MwCf4DsHtFhG6oJIRWptofVB29z4E7whwC1v7Od6oX9Nq1GcgZuo6+pzRo3rnC5bVM
-         z+WgMuLDKnlE1TD0FdoVWkpfMHZo7K4novF3xeqU8aenv/UA4yrNvRzG8nOlZ9nEw4OJ
-         Kvhg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706867982; x=1707472782;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=mGyYTzfbWHLJ9icv+vr2JH/WdzWZ6KgDnIC2V14paRI=;
-        b=XHoPNdE9E6VWcotjrK9/SMY+M7iDwfkgmo9KH94FLnsj1pH1f0u6eLZPYP9rf//bz6
-         /rH7RGA9EmRfVk+K7yvbV+Jc1UG5+fRiLXrIXK8h5oJH8EeEkWey3rWsB7p4ZfenzhYd
-         PLFRvf7xAbFwy5W4isiKSWK4N80ZFzZA1V6p4sc558s046B1zLlOmnQL3froOus2CgCb
-         klZBHonN2O1dq7y6Vk9y9kJWAn/vxpe7Mkx/HxQENKHfKHWuZ6jtQJFeM3oi3C0qAsR0
-         fXubUQHjBxnhA8IZoT9DL4pyrg41V7JXIbqEN2rDer9LytOCOwYPYz+r97LDOns48ci4
-         ANbw==
-X-Gm-Message-State: AOJu0Yw/D9n+wT1MazdxEK+8kWUQvLx+rPp+aT7JYARE3oJeSKy0JhyL
-	37ni423zb1vX/6KZsMewcowyGgLwNtSkI2tN2jiR+EgjchlVDrSVhm2gfkiIvzBv4veK1sWDxGZ
-	95ylsK456mxswernmP4U9PGi2TNKgnz1Q4nAKWQ==
-X-Google-Smtp-Source: AGHT+IGx011pU/uYoeRaO9GDRIyKMw5o70O5J6j1cmokVIok+jvPB4MJkIPn0wNMToA6OBf4Al+Gz7jgxs56x66TY0U=
-X-Received: by 2002:a67:f61a:0:b0:46c:fc76:7746 with SMTP id
- k26-20020a67f61a000000b0046cfc767746mr1201018vso.2.1706867981911; Fri, 02 Feb
- 2024 01:59:41 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ewxJLt21"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 431BCC43390;
+	Fri,  2 Feb 2024 10:00:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1706868055;
+	bh=V7I2689xpU2dX0rLsg9yxEZw1ZOg5TXlkDJscF+cnWE=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=ewxJLt21OtwgqH2BOw4HZa9su3fc4MZgi/Bujdi3RIUt4EJs44sA6/F8QN+eMc8qZ
+	 bfFL1KhnQ3aEXbTwUIZkVvdZsJofgQTlSFQJ0VdcBzA1nPuJC0cj0aen3yNDnvRVgN
+	 aTUtli/lT5rm7zBWmEPYRRe82Q5L9aVY68yaetpgZVJgWMqE492jFJo6aT5Tgsu8xZ
+	 vyQdHfmAJLuxQ0AG/cT9hGLk5CWdCgwtGW38atgLY7sAbLLCcOsh+gVsJMYSg/M/bM
+	 Mx2ALUsJO6m54cdOwv44j9Q6IU4SnQNAhhPp1svKgZ3LLUUD0nNFXsJqA+0N5nwif0
+	 OUdb3xuvOEJ5g==
+Message-ID: <52dd4327-2abb-4ff2-982d-8b02e381a34b@kernel.org>
+Date: Fri, 2 Feb 2024 12:00:49 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240131174347.510961-1-jens.wiklander@linaro.org>
-In-Reply-To: <20240131174347.510961-1-jens.wiklander@linaro.org>
-From: Sumit Garg <sumit.garg@linaro.org>
-Date: Fri, 2 Feb 2024 15:29:30 +0530
-Message-ID: <CAFA6WYORTtuRsoiDhjCdPwaDHyJ+ixZBu_-VQHPE2RhCprKQ0w@mail.gmail.com>
-Subject: Re: [PATCH v2 0/3] Replay Protected Memory Block (RPMB) subsystem
-To: Jens Wiklander <jens.wiklander@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	op-tee@lists.trustedfirmware.org, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Jerome Forissier <jerome.forissier@linaro.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH 01/13] drivers: mmc: host: sdhci_am654: Add tuning
+ algorithm for delay chain
+Content-Language: en-US
+To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Rob Herring <robh+dt@kernel.org>,
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+ Conor Dooley <conor+dt@kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, Nishanth Menon <nm@ti.com>,
+ Vignesh Raghavendra <vigneshr@ti.com>, Andrew Davis <afd@ti.com>,
+ Udit Kumar <u-kumar1@ti.com>, devicetree@vger.kernel.org,
+ Randolph Sapp <rs@ti.com>
+References: <20240131003714.2779593-1-jm@ti.com>
+ <20240131003714.2779593-2-jm@ti.com>
+From: Roger Quadros <rogerq@kernel.org>
+In-Reply-To: <20240131003714.2779593-2-jm@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi Jens,
 
-On Wed, 31 Jan 2024 at 23:14, Jens Wiklander <jens.wiklander@linaro.org> wrote:
->
-> Hi,
->
-> It's been a while since Shyam posted the last version [1] of this patch
-> set. I've pinged Shyam, but so far I've had no reply so I'm trying to make
-> another attempt with the RPMB subsystem. If Shyam has other changes in mind
-> than what I'm adding here I hope we'll find a way to cover that too. I'm
-> calling it version two of the patchset since I'm trying to address all
-> feedback on the previous version even if I'm starting a new thread.
->
-> This patch set introduces a new RPMB subsystem, based on patches from [1],
-> [2], and [3]. The RPMB subsystem aims at providing access to RPMB
-> partitions to other kernel drivers, in particular the OP-TEE driver. A new
-> user space ABI isn't needed, we can instead continue using the already
-> present ABI when writing the RPMB key during production.
->
-> I've added and removed things to keep only what is needed by the OP-TEE
-> driver. Since the posting of [3], there has been major changes in the MMC
-> subsystem so "mmc: block: register RPMB partition with the RPMB subsystem"
-> is in practice completely rewritten.
->
-> With this OP-TEE can access RPMB during early boot instead of having to
-> wait for user space to become available as in the current design [4].
-> This will benefit the efi variables [5] since we wont rely on userspace as
-> well as some TPM issues [6] that were solved.
->
-> The OP-TEE driver finds the correct RPMB device to interact with by
-> iterating over available devices until one is found with a programmed
-> authentication matching the one OP-TEE is using. This enables coexisting
-> users of other RPMBs since the owner can be determined by who knows the
-> authentication key.
->
-> I've put myself as a maintainer for the RPMB subsystem as I have an
-> interest in the OP-TEE driver to keep this in good shape. However, if you'd
-> rather see someone else taking the maintainership that's fine too. I'll
-> help keep the subsystem updated regardless.
->
-> [1] https://lore.kernel.org/lkml/20230722014037.42647-1-shyamsaini@linux.microsoft.com/
-> [2] https://lore.kernel.org/lkml/20220405093759.1126835-2-alex.bennee@linaro.org/
-> [3] https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-tomas.winkler@intel.com/
-> [4] https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#rpmb-secure-storage
-> [5] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c44b6be62e8dd4ee0a308c36a70620613e6fc55f
-> [6] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=7269cba53d906cf257c139d3b3a53ad272176bca
->
-> Thanks,
-> Jens
->
-> Changes since Shyam's RFC:
-> * Removed the remaining leftover rpmb_cdev_*() function calls
-> * Refactored the struct rpmb_ops with all the previous ops replaced, in
->   some sense closer to [3] with the route_frames() op
-> * Added rpmb_route_frames()
-> * Added struct rpmb_frame, enum rpmb_op_result, and enum rpmb_type from [3]
-> * Removed all functions not needed in the OP-TEE use case
-> * Added "mmc: block: register RPMB partition with the RPMB subsystem", based
->   on the commit with the same name in [3]
-> * Added "optee: probe RPMB device using RPMB subsystem" for integration
->   with OP-TEE
-> * Moved the RPMB driver into drivers/misc/rpmb-core.c
-> * Added my name to MODULE_AUTHOR() in rpmb-core.c
-> * Added an rpmb_mutex to serialize access to the IDA
-> * Removed the target parameter from all rpmb_*() functions since it's
->   currently unused
->
 
-Thanks for working on this. This is a huge step towards supporting TEE
-kernel client drivers. IIRC you mentioned offline to test it with
-virtio RPMB on Qemu. If it works then I would be happy to try it out
-as well.
+On 31/01/2024 02:37, Judith Mendez wrote:
+> Currently the sdhci_am654 driver only supports one tuning
+> algorithm which should be used only when DLL is enabled. The
 
-Along with that can you point me to the corresponding OP-TEE OS
-changes? I suppose as you are just adding 3 new RPC calls in patch#3,
-so we should be fine ABI wise although people have to uprev both
-OP-TEE and Linux kernel to get this feature enabled. However, OP-TEE
-should gate those RPCs behind a config flag or can just fallback to
-user-space supplicant if those aren't supported?
+What does DLL stand for?
 
--Sumit
+> ITAPDLY is selected from the largest passing window and the
+> buffer is viewed as a circular buffer.
+> 
+> The new algorithm should be used when the delay chain
+> is enabled. The ITAPDLY is selected from the largest passing
+> window and the buffer is not viewed as a circular buffer.
+> 
+> This implementation is based off of the following paper: [1].
+> 
+> Also add support for multiple failing windows.
+> 
+> [1] https://www.ti.com/lit/an/spract9/spract9.pdf
+> 
+> Signed-off-by: Judith Mendez <jm@ti.com>
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 128 +++++++++++++++++++++++++++------
+>  1 file changed, 108 insertions(+), 20 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index d659c59422e1..59d205511312 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -149,10 +149,17 @@ struct sdhci_am654_data {
+>  	int strb_sel;
+>  	u32 flags;
+>  	u32 quirks;
+> +	bool dll_enable;
+>  
+>  #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+>  };
+>  
+> +struct window {
+> +	u8 start;
+> +	u8 end;
+> +	u8 length;
+> +};
+> +
+>  struct sdhci_am654_driver_data {
+>  	const struct sdhci_pltfm_data *pdata;
+>  	u32 flags;
+> @@ -290,10 +297,13 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>  
+>  	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
+>  
+> -	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ)
+> +	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+>  		sdhci_am654_setup_dll(host, clock);
+> -	else
+> +		sdhci_am654->dll_enable = true;
+> +	} else {
+>  		sdhci_am654_setup_delay_chain(sdhci_am654, timing);
+> +		sdhci_am654->dll_enable = false;
+> +	}
+>  
+>  	regmap_update_bits(sdhci_am654->base, PHY_CTRL5, CLKBUFSEL_MASK,
+>  			   sdhci_am654->clkbuf_sel);
+> @@ -408,39 +418,117 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	return 0;
+>  }
+>  
+> -#define ITAP_MAX	32
+> +#define ITAPDLY_LENGTH 32
+> +#define ITAPDLY_LAST_INDEX 31
+> +static u32 calculate_itap(struct sdhci_host *host, struct window *fail_window,
+> +			  u8 num_fails, bool circular_buffer)
+> +{
+> +	struct device *dev = mmc_dev(host->mmc);
+> +	struct window pass_window, first_fail, last_fail;
+> +	u8 itap = 0, start_fail = 0, end_fail = 0, pass_length = 0;
+> +	int prev_end_fail = -1;
+> +
+> +	memset(&pass_window, 0, sizeof(pass_window));
+> +	memset(&first_fail, 0, sizeof(first_fail));
+> +	memset(&last_fail, 0, sizeof(last_fail));
+> +
+> +	if (!num_fails) {
+> +		return ITAPDLY_LAST_INDEX >> 1;
+> +	} else if (fail_window->length == ITAPDLY_LENGTH) {
+> +		dev_warn(dev, "No passing ITAPDLY, return 0\n");
 
->
->
-> Jens Wiklander (3):
->   rpmb: add Replay Protected Memory Block (RPMB) subsystem
->   mmc: block: register RPMB partition with the RPMB subsystem
->   optee: probe RPMB device using RPMB subsystem
->
->  MAINTAINERS                       |   7 +
->  drivers/misc/Kconfig              |   9 ++
->  drivers/misc/Makefile             |   1 +
->  drivers/misc/rpmb-core.c          | 247 ++++++++++++++++++++++++++++++
->  drivers/mmc/core/block.c          | 177 +++++++++++++++++++++
->  drivers/tee/optee/core.c          |   1 +
->  drivers/tee/optee/ffa_abi.c       |   2 +
->  drivers/tee/optee/optee_private.h |   6 +
->  drivers/tee/optee/optee_rpc_cmd.h |  33 ++++
->  drivers/tee/optee/rpc.c           | 221 ++++++++++++++++++++++++++
->  drivers/tee/optee/smc_abi.c       |   2 +
->  include/linux/rpmb.h              | 184 ++++++++++++++++++++++
->  12 files changed, 890 insertions(+)
->  create mode 100644 drivers/misc/rpmb-core.c
->  create mode 100644 include/linux/rpmb.h
->
->
-> base-commit: 41bccc98fb7931d63d03f326a746ac4d429c1dd3
-> --
-> 2.34.1
->
+This is a helper function, instead of printing a warning here,
+you should return an error value, and allow the caller to decide
+what to print and if this is serious enough to bail out.
+
+> +		return 0;
+> +	} else {
+> +		for (int i = 0; i < num_fails; i++) {
+> +			start_fail = fail_window[i].start;
+> +			end_fail = fail_window[i].end;
+> +
+> +			if (i == 0) {
+> +				first_fail.start = start_fail;
+> +				first_fail.end = end_fail;
+> +				first_fail.length = fail_window[0].length;
+> +			}
+> +
+> +			if (i == num_fails - 1) {
+> +				last_fail.start = start_fail;
+> +				last_fail.end = end_fail;
+> +				last_fail.length = fail_window[i].length;
+> +			}
+> +
+> +			pass_length = start_fail - (prev_end_fail + 1);
+> +			if (pass_length > pass_window.length) {
+> +				pass_window.start = prev_end_fail + 1;
+> +				pass_window.length = pass_length;
+> +			}
+> +			prev_end_fail = end_fail;
+> +		}
+> +
+> +		if (!circular_buffer) {
+> +			if (ITAPDLY_LAST_INDEX - end_fail > pass_window.length) {
+> +				pass_window.start = end_fail + 1;
+> +				pass_window.length = ITAPDLY_LAST_INDEX - end_fail;
+> +			}
+> +		} else {
+> +			pass_length = ITAPDLY_LAST_INDEX - end_fail + first_fail.start;
+> +			if (pass_length > pass_window.length) {
+> +				pass_window.start = last_fail.end + 1;
+> +				pass_window.length = pass_length;
+> +			}
+> +		}
+> +	}
+> +
+> +	if (!circular_buffer)
+> +		itap = pass_window.start + (pass_window.length >> 1);
+> +	else
+> +		itap = (pass_window.start + (pass_window.length >> 1)) % ITAPDLY_LENGTH;
+> +
+> +	if (itap < 0 || itap > ITAPDLY_LAST_INDEX)
+> +		itap = 0;
+> +
+> +	return itap;
+> +}
+> +
+>  static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>  					       u32 opcode)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> -	int cur_val, prev_val = 1, fail_len = 0, pass_window = 0, pass_len;
+> -	u32 itap;
+> +	struct window fail_window[ITAPDLY_LENGTH];
+> +	u8 prev_pass = 1;
+> +	u8 fail_index = 0;
+> +	u8 curr_pass, itap, i;
+> +
+> +	for (i = 0; i < ITAPDLY_LENGTH; i++)
+> +		memset(&fail_window[i], 0, sizeof(fail_window[0]));
+>  
+>  	/* Enable ITAPDLY */
+>  	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPDLYENA_MASK,
+>  			   1 << ITAPDLYENA_SHIFT);
+>  
+> -	for (itap = 0; itap < ITAP_MAX; itap++) {
+> +	for (itap = 0; itap < ITAPDLY_LENGTH; itap++) {
+>  		sdhci_am654_write_itapdly(sdhci_am654, itap);
+>  
+> -		cur_val = !mmc_send_tuning(host->mmc, opcode, NULL);
+> -		if (cur_val && !prev_val)
+> -			pass_window = itap;
+> +		curr_pass = !mmc_send_tuning(host->mmc, opcode, NULL);
+>  
+> -		if (!cur_val)
+> -			fail_len++;
+> +		if (!curr_pass && prev_pass)
+> +			fail_window[fail_index].start = itap;
+>  
+> -		prev_val = cur_val;
+> +		if (!curr_pass) {
+> +			fail_window[fail_index].end = itap;
+> +			fail_window[fail_index].length++;
+> +		}
+> +
+> +		if (curr_pass && !prev_pass)
+> +			fail_index++;
+> +
+> +		prev_pass = curr_pass;
+>  	}
+> -	/*
+> -	 * Having determined the length of the failing window and start of
+> -	 * the passing window calculate the length of the passing window and
+> -	 * set the final value halfway through it considering the range as a
+> -	 * circular buffer
+> -	 */
+> -	pass_len = ITAP_MAX - fail_len;
+> -	itap = (pass_window + (pass_len >> 1)) % ITAP_MAX;
+> +
+> +	if (fail_window[fail_index].length != 0)
+> +        fail_index++;
+> +
+> +	itap = calculate_itap(host, &fail_window[0], fail_index,
+> +			      (sdhci_am654->dll_enable ? true : false));
+> +
+
+If calculate_itap fails, you should return error
+so caller can decide what to do.
+
+>  	sdhci_am654_write_itapdly(sdhci_am654, itap);
+>  
+>  	return 0;
+
+-- 
+cheers,
+-roger
