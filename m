@@ -1,129 +1,123 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E80BB5D726;
-	Sat,  3 Feb 2024 11:33:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73E1F5DF16;
+	Sat,  3 Feb 2024 14:21:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706960015; cv=none; b=XtIm+rhncmLNx5ar7Mv1Tk38fWy7/1yDucyWNIyHAjITpAm6Uq3MtO1u3Rgisa86a+XKNU7frkCzFQMHdvlDAT8RAnsyYHYfBHf5XuMmo1rkJvGaOzgB1++Gr0lVuyOMS2NPuRdP6ZGkVmiYEhN0n9OzYyrPabbw31PNt5HULBs=
+	t=1706970097; cv=none; b=lgraUIGHSJ6gurGX/ncI8EBNq82cSl5YPSSLmptXJtCssRRQ9ABgX6AD2lJLZREQou9sGEyKTAsrjBboCkS1CpxXx/uSqQQEQEkw55ofgEoO4/F/A+f6KxV6JvfXhlJ+sEqs5E0qIsuAGQ2qBRg8dlCO3HDiu9E/P6OL28z2AeY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706960015; c=relaxed/simple;
-	bh=bgD8fPsD6rucRhfmj7UwDFyCl4hpGwh5qXgmHJFOZOk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=YnSxDQonjvQLtbMd0xe9kIh6REm9J/yZkkFwCjnHvafgKfD1VB71RCx+/SNQa7xJyeGkY44JlX7f7e8Xcbq8XBWlsz/Eb3Qw86Rga9eRq4lZbJ13jo5vAJtMX2rZkEQoBTHHbPgMnIwa1Q+hr4mTXx/vC3VWsafa8VRiWaXtPP4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=tmDtj0zZ; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
+	s=arc-20240116; t=1706970097; c=relaxed/simple;
+	bh=jbe1RCokte3s+lwYFj+Qw2J1gC36MNGy/9NJXF7DZPs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=tX1vnHbl5BVkJmVDSsegJiBJ3UKmnmGrhFxq9R3KNHmP3TUhToRJySFg/ZGSjbo9wenIqE5haXcnPWc+iKtLbNq9HDMs7Ig3zZJn/qM3CLx12BdFGC131ar0IAleMixmy02nd1Iij2XUw0qoXJx993X/b/5zbs1tmAmiz3rkjdg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=AfpCzIPj; arc=none smtp.client-ip=198.175.65.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="tmDtj0zZ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.de; s=s31663417;
-	t=1706959997; x=1707564797; i=fiona.klute@gmx.de;
-	bh=bgD8fPsD6rucRhfmj7UwDFyCl4hpGwh5qXgmHJFOZOk=;
-	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
-	 In-Reply-To;
-	b=tmDtj0zZR9Am+r9cU3IPT9h2xGFOxfddyewiP9Gh3EGvnFB+9qz1oxj1I6QBv1Xb
-	 OQVU4JHMvHMzChhkVqdErRUc3mCNNmFt28IwgpWfCeLSEGg/TP97hv5FiDwOn7v5b
-	 6dL1otCpWVY5p5HSsK2xSBGiPt7LEcQFERx7bhp4HtVSAGL4oTnL0n57Z4MP7APHQ
-	 u7XuKbWXoRMncyIrDfLsdZUty1gd44U5a55nDHVGXLCkI7iJiJuBmO67AJ5HOvxDv
-	 UApJQHl/XaKZ2ahyne17NY3U9Es1NwSE0/hRfhvrKx498MCo4tHKWd1Kn51cjw5so
-	 vSzMhHQ4HhYv43LNxQ==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.7.2] ([85.22.25.120]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1N7i8Y-1r14YQ3sLS-014gaL; Sat, 03
- Feb 2024 12:33:17 +0100
-Message-ID: <87369c01-500f-495e-9158-09578d582748@gmx.de>
-Date: Sat, 3 Feb 2024 12:33:15 +0100
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="AfpCzIPj"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1706970096; x=1738506096;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=jbe1RCokte3s+lwYFj+Qw2J1gC36MNGy/9NJXF7DZPs=;
+  b=AfpCzIPjOhlcfh1BTZm8txynmklamMqvWCwYNMCqSEtI8G24YLq/s90P
+   f2d7HxmuIETQJo6YjpfqgjZEewAAYDMWJM72S3DWmzz0May0JStw+7Dej
+   YHgD1AQ9AkK9Xz50kw5IgAV2/Rb1lqKmDVRbtlkmZgzR8/VCUzksDifW4
+   MwoxV3Vlnq462JgG9Ec+cBQiZI1AvbXGsesuU+vQHZYeBPwFPJ+7IVRug
+   JVReaO6mPcGECHTOxhgxjlHfksqYHBgkJYxn5SIeEsEWj5jZ/Jbp0+A3n
+   B/b+zTLJsWVeLUlXQF5JGkDZGnHZqFYLulUFRmD7qfvydaUK4cUSF1DJO
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10973"; a="11680506"
+X-IronPort-AV: E=Sophos;i="6.05,240,1701158400"; 
+   d="scan'208";a="11680506"
+Received: from fmviesa008.fm.intel.com ([10.60.135.148])
+  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Feb 2024 06:21:35 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.05,240,1701158400"; 
+   d="scan'208";a="540616"
+Received: from lkp-server02.sh.intel.com (HELO 59f4f4cd5935) ([10.239.97.151])
+  by fmviesa008.fm.intel.com with ESMTP; 03 Feb 2024 06:21:32 -0800
+Received: from kbuild by 59f4f4cd5935 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1rWGtd-00059M-28;
+	Sat, 03 Feb 2024 14:21:29 +0000
+Date: Sat, 3 Feb 2024 22:20:51 +0800
+From: kernel test robot <lkp@intel.com>
+To: Fiona Klute <fiona.klute@gmx.de>, linux-wireless@vger.kernel.org,
+	Ping-Ke Shih <pkshih@realtek.com>
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	Kalle Valo <kvalo@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org, Pavel Machek <pavel@ucw.cz>,
+	=?utf-8?Q?Ond=C5=99ej?= Jirman <megi@xff.cz>,
+	Fiona Klute <fiona.klute@gmx.de>
+Subject: Re: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
+Message-ID: <202402032222.kwUrsH9V-lkp@intel.com>
+References: <20240202121050.977223-2-fiona.klute@gmx.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-To: Pavel Machek <pavel@ucw.cz>
-Cc: linux-wireless@vger.kernel.org, Ping-Ke Shih <pkshih@realtek.com>,
- Kalle Valo <kvalo@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-mmc@vger.kernel.org, Ond??ej Jirman <megi@xff.cz>
-References: <20240202121050.977223-1-fiona.klute@gmx.de>
- <Zb1WGafVyr5cLPiH@mobian>
-Content-Language: de-DE, en-US
-From: Fiona Klute <fiona.klute@gmx.de>
-Autocrypt: addr=fiona.klute@gmx.de; keydata=
- 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
-In-Reply-To: <Zb1WGafVyr5cLPiH@mobian>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:t8CugUa/4WzDhgwXa02oZXNIe9N/+qzstiyX/UZKhmqETSBKTQR
- SIlM68Tu/Jh8436fw1BF90sB5SXW5NJIcMT60ZoZuDGax9dzLaRUC/c8pRhVd5VmJEO2tb/
- Qxul/OAMLwnMoTcbwONFq5BIApnEj5ucw8z/AAuaMJsrXLVrTNQqU/y9HpWpNarI7Pv6z0C
- fPaiJWdKEznPUh8/PlxaQ==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:+Jc3lH7bf/U=;ji98DuBxvgmHwnfppCGSUecl4/H
- coXwOlm8qJDbszlyy3QmGHN+o0AxAgTDKmmHNSVaXqKy222h4wTtxWcPOWiceo86a+QmnPhGC
- Xj7VwEi02/xHoYF4WtOvtuf6Brs7agoJpQhXEKgfHKSHyCzOuXZFoQr5TDrs5/q8dlap/QkYj
- gXmbnfJn1+2Rxp/xeyB2G7Tng0nByA42JY0vUOA/V8Z9yc7nY9L8PMSV1FsZkSG4X1BVokYkC
- mHYn7TUrAMEdbA7xLy/tz+KEc9i58JGfLsU0TVSpvNIZ1lo6EzAxXXP94aR/WDGHsqDcZRKmE
- jUXrOBkt08SCZHMU/3ea/sJfyzDkGw9yR4lYakwT1M0Nbh6hSuvK55U6+1CC1em7pPIIcKWx4
- nZnp+SG8ShEMQ3dVEP8xQXntnNKGSOWsAO0YjJYjtaBBFLVcYyIzRGlnk4ioadi6i6Bu8GqI+
- K39OU53JQA0bW59MY1lkhzUwRDKi5iQDr5huzSqj4BBNcNCxmXcf3tOCvWg+43YEVr7zubHWl
- NFPeNfswC4uPBLAOh40uIe/v5qqxtSkrGHHGahxrfvHcOxNz0lx/Qih/GJAYod1V/tryblpJg
- nn5/Ez83yeRJd2SJmUTSU2hOPvfUcTqVI91tsKAljwDz8NYu37Y2P6XxPoabTTdY78edW1eDg
- 6wXZaR3D9jgKQlbKEL8zh2tTdXsqNHEbZeeWbu5SwG4dZPlzdqxAAyJsOHUIK+S0/dZe2lT9u
- Gdx05FcPUvIbQWyKWOZ6G6F8Y+wqG06x5cXPBQdu0PjB2Cv/OB74ghjT1sX6qbnYLOcqRldyY
- Fjt5z3PuFTABVuBcRL2ZOJOjkNCPECvqsMJ2swyBgJBUg=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240202121050.977223-2-fiona.klute@gmx.de>
 
-Am 02.02.24 um 21:52 schrieb Pavel Machek:
-> I tried compiling *23cs into kernel (not modular), but that one fails,
-> with "multiple definition of rtw8723x_iqk_backup_path_ctrl" and
-> similar. Sorry, can't cut&paste right now, but it should be easy to
-> reproduce and fix.
+Hi Fiona,
 
-The IQK helper functions need to marked as static, after that (and
-adding firmware to the initramfs) the built-in driver works. Queued for
-v2, thank you!
+kernel test robot noticed the following build warnings:
 
-Best regards,
-Fiona
+[auto build test WARNING on wireless-next/main]
+[also build test WARNING on wireless/main linus/master v6.8-rc2 next-20240202]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
+url:    https://github.com/intel-lab-lkp/linux/commits/Fiona-Klute/wifi-rtw88-Shared-module-for-rtw8723x-devices/20240202-201428
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/wireless/wireless-next.git main
+patch link:    https://lore.kernel.org/r/20240202121050.977223-2-fiona.klute%40gmx.de
+patch subject: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
+config: x86_64-allyesconfig (https://download.01.org/0day-ci/archive/20240203/202402032222.kwUrsH9V-lkp@intel.com/config)
+compiler: clang version 17.0.6 (https://github.com/llvm/llvm-project 6009708b4367171ccdbf4b5905cb6a803753fe18)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240203/202402032222.kwUrsH9V-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202402032222.kwUrsH9V-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+>> drivers/net/wireless/realtek/rtw88/rtw8723x.c:156:6: warning: no previous prototype for function '__rtw8723x_cfg_ldo25' [-Wmissing-prototypes]
+     156 | void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool enable)
+         |      ^
+   drivers/net/wireless/realtek/rtw88/rtw8723x.c:156:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
+     156 | void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool enable)
+         | ^
+         | static 
+   1 warning generated.
+
+
+vim +/__rtw8723x_cfg_ldo25 +156 drivers/net/wireless/realtek/rtw88/rtw8723x.c
+
+   155	
+ > 156	void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool enable)
+   157	{
+   158		u8 ldo_pwr;
+   159	
+   160		ldo_pwr = rtw_read8(rtwdev, REG_LDO_EFUSE_CTRL + 3);
+   161		if (enable) {
+   162			ldo_pwr &= ~BIT_MASK_LDO25_VOLTAGE;
+   163			ldo_pwr |= (BIT_LDO25_VOLTAGE_V25 << 4) | BIT_LDO25_EN;
+   164		} else {
+   165			ldo_pwr &= ~BIT_LDO25_EN;
+   166		}
+   167		rtw_write8(rtwdev, REG_LDO_EFUSE_CTRL + 3, ldo_pwr);
+   168	}
+   169	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
