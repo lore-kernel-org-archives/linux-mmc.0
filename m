@@ -1,118 +1,120 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E35DF5EE91;
-	Sat,  3 Feb 2024 15:05:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 327831CAAB;
+	Sat,  3 Feb 2024 19:01:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706972755; cv=none; b=Ul5yu8wDsMPehjmBpyWqfzWwWn0dEtlUAG0MsyJe6b72SuB+fzGhQ9Xqb/AsNXVP5eg2HCc7TnyQQScj1rhYumijppqUbVVUhaC7rNeV2ZAOFqRJg0u3MYguzDco5YaaW51zRwWwOFbki77uDtjOhI+OIJI8EBwWtGVvhdr6A9s=
+	t=1706986902; cv=none; b=nAB+TVv4xcgtmlEgSaYvL48pOv6rWkD3vTP2wyrfiFPmunHW25RSiBkiZZgrXaTFJKhy7ika9/TQRa4MzO/4QBXShiti6vA82f7EE2X5FrU+0tkJgqSsBcpixcBfue/O3gXHNfpxEEJ8LmqBHzLkpZwZ9VGjJJYARR1hCJWLQuY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706972755; c=relaxed/simple;
-	bh=oN2Jtenyl16AJ73ZWHV33yxPWdeYESnQPTWfOUZIMcQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JRwHaSAXMr86VfrTfulpX7CjvxTrKDCARV0ni5IM8SeA7+9nBL5aSXL74/YOcuX8T4RjkgD4IxKgY7H1wt14+9a+mKk/6z3i4WZx9SOFnO6bLdHCObk5hyq4hTBRPKeHlz0KT6AJoJGv6opTjr+YCfJUGnIqyprl0Z/o1lWzAXk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=NVlBS4bu; arc=none smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1706986902; c=relaxed/simple;
+	bh=sq+ZL9RIGh+IbgMjvYUH7r5GPvPemFbYOcFJj+cwtGA=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=Gyj5KQ8UU5DNK5txQG02YTVxK2W0QNYhRmnl01lfI023RKb4Bay/sesjaHQ71CIZscQwCLDortwFVyNr2HlQXBXlWYVougyILEWpSztoEpciF2MvGleXiqANaYx0KXskiXyVxbjBL0DTCATSOP8oLCu8Eu1j89R7cyqiz6hgppE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=marliere.net; spf=pass smtp.mailfrom=gmail.com; dkim=fail (0-bit key) header.d=marliere.net header.i=@marliere.net header.b=HHyiN9Ph reason="key not found in DNS"; arc=none smtp.client-ip=209.85.216.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=marliere.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="NVlBS4bu"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1706972754; x=1738508754;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=oN2Jtenyl16AJ73ZWHV33yxPWdeYESnQPTWfOUZIMcQ=;
-  b=NVlBS4buvGuM/8vDVk2ApmXbo1i1WRUofwAPo3Cnh4w+QXa/auzKuEXL
-   oSJ3hQoFnJKPuJX6wcXU+9hZIEvDWJMpKHzNuHAmQtr43HtRCcoeAHO21
-   LVc5NdlgrJ51mNE312IPKw8Zz9UPlJBqAano/Ut1ZrtIJNG6jpdST0oXW
-   PrhZXAL6p/1IO27L51am9N4Upxsqz2xGtQC8T3s/lLm1hXzppKgFRNZ+K
-   Ou2TYTnnNcdikQbmTh4FaPjG5hthHZZ/G36YWQayWU/RCrcQiUbxzDF0O
-   RsFxPpO98NKFogZRB07+5PNztoSflK9XD3C3fcFELl2TJSsrcHxwaVbAh
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10973"; a="555412"
-X-IronPort-AV: E=Sophos;i="6.05,240,1701158400"; 
-   d="scan'208";a="555412"
-Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Feb 2024 07:05:53 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.05,240,1701158400"; 
-   d="scan'208";a="23607843"
-Received: from lkp-server02.sh.intel.com (HELO 59f4f4cd5935) ([10.239.97.151])
-  by fmviesa002.fm.intel.com with ESMTP; 03 Feb 2024 07:05:51 -0800
-Received: from kbuild by 59f4f4cd5935 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1rWHaV-0005DG-10;
-	Sat, 03 Feb 2024 15:05:48 +0000
-Date: Sat, 3 Feb 2024 23:04:49 +0800
-From: kernel test robot <lkp@intel.com>
-To: Fiona Klute <fiona.klute@gmx.de>, linux-wireless@vger.kernel.org,
-	Ping-Ke Shih <pkshih@realtek.com>
-Cc: oe-kbuild-all@lists.linux.dev, Kalle Valo <kvalo@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	Pavel Machek <pavel@ucw.cz>,
-	=?utf-8?Q?Ond=C5=99ej?= Jirman <megi@xff.cz>,
-	Fiona Klute <fiona.klute@gmx.de>
-Subject: Re: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
-Message-ID: <202402032249.cMZd6DxM-lkp@intel.com>
-References: <20240202121050.977223-2-fiona.klute@gmx.de>
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=marliere.net header.i=@marliere.net header.b="HHyiN9Ph"
+Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-2907a17fa34so2643225a91.1;
+        Sat, 03 Feb 2024 11:01:41 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706986900; x=1707591700;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:dkim-signature:from:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=yp6fcOVoR5itimDKz/A1G3eeTDdVr/bPXo8LW4dfxhY=;
+        b=w09+URq3O87D8OrStS4uB/M5HpAzqolnVvEh3ctZRZeDFu6zLT8czDB3wIvOUF4ubE
+         STfsTB2VBPDCTAzJ+HUNF2s6z0Buzxl2zC3bgPm/b3a3sWTmA8624C8ZyQLK5Q6gra0E
+         UcotUq/d8LbXz6FWHyBp0Z7AvwtL9Q5Rg1A3S2V5Msl6GQTfNrRIIBzS8CFLR/voO1y7
+         bjvf0S3m+ppijrrACp3783f+xtPSrIkASqfPoynB5R9YufvLK8iE6tLq3C7ow3Quc+j2
+         4DPNDckh4QXMrp4IB+0l/JojqvqCZ6+MF8FuolbrgZp0dzYL508lsGXgaRvQj61EsgRu
+         nQCg==
+X-Gm-Message-State: AOJu0YyICXAxSidqtcaE1wcaK2luXxMSNszejiWXB9v5kiRp/xJTgo6g
+	5w//P1aI26VzpFsMER+mNIdLpAYCzOAuBS716kLsjrPaLJanzOg4eZezzwgugd+nJQ==
+X-Google-Smtp-Source: AGHT+IG+ieRrN3RUCRwf5f/FnOQXyC1Lecvh4O7EyqQArxl7n7y5qzTqL8nv5tlUkx6KrdPrxwGnpQ==
+X-Received: by 2002:a17:90b:390b:b0:296:4f52:2698 with SMTP id ob11-20020a17090b390b00b002964f522698mr4184865pjb.20.1706986900477;
+        Sat, 03 Feb 2024 11:01:40 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCUpsSmlJ3eYfFT5ML3HVK4RhXGNhjdemGlvL4LWgetkliAY2iB1hmHbdigd4xuSodZ7zwQ4dPuKEyPp/4O03OEQix6th7O2sCYDVU9/9bqZj1+BwvNKki8Gak1E5lIx2FL9jW5s05Fihg==
+Received: from mail.marliere.net ([24.199.118.162])
+        by smtp.gmail.com with ESMTPSA id qd14-20020a17090b3cce00b00296715e391dsm892365pjb.24.2024.02.03.11.01.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 03 Feb 2024 11:01:39 -0800 (PST)
+From: "Ricardo B. Marliere" <ricardo@marliere.net>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marliere.net;
+	s=2023; t=1706986897;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=yp6fcOVoR5itimDKz/A1G3eeTDdVr/bPXo8LW4dfxhY=;
+	b=HHyiN9PhRKkSPdTqu6Ob/rXTmebJ8abSaInhmabMy78wju+SvQNQrsX4941OZYXUYkHS1b
+	Eci/m1F/PgA4fEsNv3t4YbxPPNu/RoNACDLYYLDo1pQHootfW12J1/E1443FLxJk3cjWaa
+	9rKFavvL3or9gzM3yGr0UTZtNZioZGmEcTD7hUgSslL3nQr4SvIEE2j4ut7EjAo6SkUY0d
+	iBKXoKHugy2577Q/d+lNpTjGQBJgw2NlDyszTVf7v641JQUQp4eyPLjkLggs5wPlu/Ett1
+	xiE2i1LsaaB6vi6xVhL150rATU8vCLAeBFSLbbbhwuWFzy3rXutt6UzLbdg1Aw==
+Authentication-Results: ORIGINATING;
+	auth=pass smtp.auth=ricardo@marliere.net smtp.mailfrom=ricardo@marliere.net
+Subject: [PATCH 0/3] drivers: mmc: struct bus_type cleanup
+Date: Sat, 03 Feb 2024 16:01:59 -0300
+Message-Id: <20240203-bus_cleanup-mmc-v1-0-ad054dce8dc3@marliere.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240202121050.977223-2-fiona.klute@gmx.de>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAKeNvmUC/x3MTQqAIBBA4avErBMmbRFdJSL8mWqgTBQjCO+et
+ PwW772QKDIlGJsXIt2c+PIVXduA3bXfSLCrBomyR4lKmJwWe5D2OYjztAJx0MYMaHvloFYh0sr
+ Pf5zmUj4MirxAYQAAAA==
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+ "Ricardo B. Marliere" <ricardo@marliere.net>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1117; i=ricardo@marliere.net;
+ h=from:subject:message-id; bh=sq+ZL9RIGh+IbgMjvYUH7r5GPvPemFbYOcFJj+cwtGA=;
+ b=owEBbQKS/ZANAwAKAckLinxjhlimAcsmYgBlvo2t8RRZLgsrr8eyok+c2PhiTwKWwpLnrp4iC
+ mDlP7OCO1WJAjMEAAEKAB0WIQQDCo6eQk7jwGVXh+HJC4p8Y4ZYpgUCZb6NrQAKCRDJC4p8Y4ZY
+ pm+4D/9Rbzk8OR2KxeaDCFr+RLq6G/YyO6M1QqDeRrvLyvLrBoCbq2ix4XxLY+TJQU61KgqYXBb
+ w3yqKQkaP0Vfv1OJjY5/mrCWbzLGY4Ihs0LuBUU2ZP6FoSiGCuxQmbgXgvCw8njRpFPjlrMkFYg
+ iovckU/oKcWBtdAqihlOh4bKHoIo8SsZRuvwbMwuzE4OzJ8yn8UcuH9HypVx+MH9HjaON3wAVdk
+ 1GIG8Hnrjpp4Aqla37czp5DOSH8haV5/gpplCGbNELM/RNMJoTvXjjpuKbSBhucFuPXgSSsHUpr
+ EXeM8dAYQBohMQyWzjKlvfb4c+JESOQdAibBJeOXpST/wqnIiI6MjMS/Qje5zSdYebwh5vfaebq
+ R+jXUGvLT2Rffav0OrtbXaiz5dWxSCccfA2vxBIB/jVEKtP7lfjtZbVMojElBczgIhpSIppNCDs
+ nBYb93FQC0FUxG+o0UKxH4LoZXPlsXk4CGR7x8/Ui3nakT/60QVC6CW4WjpHXZHdSdGSN57LETy
+ ArQOdqCrJIvsOsn5i9+UOye0SdK1YPWqUi1YwD27qNxFTx3uT4GCpnP4huZiam5KgCYjekTi/Jb
+ hloJAUs7pRQQGB9ywzCjBe3seK95rkuyJsG5mdE1WfmPd1MSba1Uo8W8kjy8FSmHDA/fVQqSj5L
+ DCPuIB6tKPDkmvg==
+X-Developer-Key: i=ricardo@marliere.net; a=openpgp;
+ fpr=030A8E9E424EE3C0655787E1C90B8A7C638658A6
 
-Hi Fiona,
+This series is part of an effort to cleanup the users of the driver
+core, as can be seen in many recent patches authored by Greg across the
+tree (e.g. [1]). Specifically, this series is part of the task of
+splitting one of his TODOs [2].
 
-kernel test robot noticed the following build warnings:
+---
+[1]: https://lore.kernel.org/lkml/?q=f%3Agregkh%40linuxfoundation.org+s%3A%22make%22+and+s%3A%22const%22
+[2]: https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/driver-core.git/commit/?h=bus_cleanup&id=26105f537f0c60eacfeb430abd2e05d7ddcdd8aa
 
-[auto build test WARNING on wireless-next/main]
-[also build test WARNING on wireless/main linus/master v6.8-rc2 next-20240202]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Ricardo B. Marliere <ricardo@marliere.net>
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Fiona-Klute/wifi-rtw88-Shared-module-for-rtw8723x-devices/20240202-201428
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/wireless/wireless-next.git main
-patch link:    https://lore.kernel.org/r/20240202121050.977223-2-fiona.klute%40gmx.de
-patch subject: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
-config: parisc-allmodconfig (https://download.01.org/0day-ci/archive/20240203/202402032249.cMZd6DxM-lkp@intel.com/config)
-compiler: hppa-linux-gcc (GCC) 13.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240203/202402032249.cMZd6DxM-lkp@intel.com/reproduce)
+---
+Ricardo B. Marliere (3):
+      mmc: core: make mmc_rpmb_bus_type const
+      mmc: core: make mmc_bus_type const
+      mmc: core: make sdio_bus_type const
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202402032249.cMZd6DxM-lkp@intel.com/
+ drivers/mmc/core/block.c    | 2 +-
+ drivers/mmc/core/bus.c      | 2 +-
+ drivers/mmc/core/sdio_bus.c | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+---
+base-commit: 4e99ffb173faaf38f010acb369bff57a20e9e531
+change-id: 20240203-bus_cleanup-mmc-008abb80c43d
 
-All warnings (new ones prefixed by >>):
-
->> drivers/net/wireless/realtek/rtw88/rtw8723x.c:156:6: warning: no previous prototype for '__rtw8723x_cfg_ldo25' [-Wmissing-prototypes]
-     156 | void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool enable)
-         |      ^~~~~~~~~~~~~~~~~~~~
-
-
-vim +/__rtw8723x_cfg_ldo25 +156 drivers/net/wireless/realtek/rtw88/rtw8723x.c
-
-   155	
- > 156	void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool enable)
-   157	{
-   158		u8 ldo_pwr;
-   159	
-   160		ldo_pwr = rtw_read8(rtwdev, REG_LDO_EFUSE_CTRL + 3);
-   161		if (enable) {
-   162			ldo_pwr &= ~BIT_MASK_LDO25_VOLTAGE;
-   163			ldo_pwr |= (BIT_LDO25_VOLTAGE_V25 << 4) | BIT_LDO25_EN;
-   164		} else {
-   165			ldo_pwr &= ~BIT_LDO25_EN;
-   166		}
-   167		rtw_write8(rtwdev, REG_LDO_EFUSE_CTRL + 3, ldo_pwr);
-   168	}
-   169	
-
+Best regards,
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Ricardo B. Marliere <ricardo@marliere.net>
+
