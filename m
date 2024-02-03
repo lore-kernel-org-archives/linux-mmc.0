@@ -1,59 +1,59 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.12])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73E1F5DF16;
-	Sat,  3 Feb 2024 14:21:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E35DF5EE91;
+	Sat,  3 Feb 2024 15:05:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706970097; cv=none; b=lgraUIGHSJ6gurGX/ncI8EBNq82cSl5YPSSLmptXJtCssRRQ9ABgX6AD2lJLZREQou9sGEyKTAsrjBboCkS1CpxXx/uSqQQEQEkw55ofgEoO4/F/A+f6KxV6JvfXhlJ+sEqs5E0qIsuAGQ2qBRg8dlCO3HDiu9E/P6OL28z2AeY=
+	t=1706972755; cv=none; b=Ul5yu8wDsMPehjmBpyWqfzWwWn0dEtlUAG0MsyJe6b72SuB+fzGhQ9Xqb/AsNXVP5eg2HCc7TnyQQScj1rhYumijppqUbVVUhaC7rNeV2ZAOFqRJg0u3MYguzDco5YaaW51zRwWwOFbki77uDtjOhI+OIJI8EBwWtGVvhdr6A9s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706970097; c=relaxed/simple;
-	bh=jbe1RCokte3s+lwYFj+Qw2J1gC36MNGy/9NJXF7DZPs=;
+	s=arc-20240116; t=1706972755; c=relaxed/simple;
+	bh=oN2Jtenyl16AJ73ZWHV33yxPWdeYESnQPTWfOUZIMcQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tX1vnHbl5BVkJmVDSsegJiBJ3UKmnmGrhFxq9R3KNHmP3TUhToRJySFg/ZGSjbo9wenIqE5haXcnPWc+iKtLbNq9HDMs7Ig3zZJn/qM3CLx12BdFGC131ar0IAleMixmy02nd1Iij2XUw0qoXJx993X/b/5zbs1tmAmiz3rkjdg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=AfpCzIPj; arc=none smtp.client-ip=198.175.65.12
+	 Content-Type:Content-Disposition:In-Reply-To; b=JRwHaSAXMr86VfrTfulpX7CjvxTrKDCARV0ni5IM8SeA7+9nBL5aSXL74/YOcuX8T4RjkgD4IxKgY7H1wt14+9a+mKk/6z3i4WZx9SOFnO6bLdHCObk5hyq4hTBRPKeHlz0KT6AJoJGv6opTjr+YCfJUGnIqyprl0Z/o1lWzAXk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=NVlBS4bu; arc=none smtp.client-ip=192.198.163.16
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="AfpCzIPj"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="NVlBS4bu"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1706970096; x=1738506096;
+  t=1706972754; x=1738508754;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=jbe1RCokte3s+lwYFj+Qw2J1gC36MNGy/9NJXF7DZPs=;
-  b=AfpCzIPjOhlcfh1BTZm8txynmklamMqvWCwYNMCqSEtI8G24YLq/s90P
-   f2d7HxmuIETQJo6YjpfqgjZEewAAYDMWJM72S3DWmzz0May0JStw+7Dej
-   YHgD1AQ9AkK9Xz50kw5IgAV2/Rb1lqKmDVRbtlkmZgzR8/VCUzksDifW4
-   MwoxV3Vlnq462JgG9Ec+cBQiZI1AvbXGsesuU+vQHZYeBPwFPJ+7IVRug
-   JVReaO6mPcGECHTOxhgxjlHfksqYHBgkJYxn5SIeEsEWj5jZ/Jbp0+A3n
-   B/b+zTLJsWVeLUlXQF5JGkDZGnHZqFYLulUFRmD7qfvydaUK4cUSF1DJO
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10973"; a="11680506"
+  bh=oN2Jtenyl16AJ73ZWHV33yxPWdeYESnQPTWfOUZIMcQ=;
+  b=NVlBS4buvGuM/8vDVk2ApmXbo1i1WRUofwAPo3Cnh4w+QXa/auzKuEXL
+   oSJ3hQoFnJKPuJX6wcXU+9hZIEvDWJMpKHzNuHAmQtr43HtRCcoeAHO21
+   LVc5NdlgrJ51mNE312IPKw8Zz9UPlJBqAano/Ut1ZrtIJNG6jpdST0oXW
+   PrhZXAL6p/1IO27L51am9N4Upxsqz2xGtQC8T3s/lLm1hXzppKgFRNZ+K
+   Ou2TYTnnNcdikQbmTh4FaPjG5hthHZZ/G36YWQayWU/RCrcQiUbxzDF0O
+   RsFxPpO98NKFogZRB07+5PNztoSflK9XD3C3fcFELl2TJSsrcHxwaVbAh
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10973"; a="555412"
 X-IronPort-AV: E=Sophos;i="6.05,240,1701158400"; 
-   d="scan'208";a="11680506"
-Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Feb 2024 06:21:35 -0800
+   d="scan'208";a="555412"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Feb 2024 07:05:53 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.05,240,1701158400"; 
-   d="scan'208";a="540616"
+   d="scan'208";a="23607843"
 Received: from lkp-server02.sh.intel.com (HELO 59f4f4cd5935) ([10.239.97.151])
-  by fmviesa008.fm.intel.com with ESMTP; 03 Feb 2024 06:21:32 -0800
+  by fmviesa002.fm.intel.com with ESMTP; 03 Feb 2024 07:05:51 -0800
 Received: from kbuild by 59f4f4cd5935 with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1rWGtd-00059M-28;
-	Sat, 03 Feb 2024 14:21:29 +0000
-Date: Sat, 3 Feb 2024 22:20:51 +0800
+	id 1rWHaV-0005DG-10;
+	Sat, 03 Feb 2024 15:05:48 +0000
+Date: Sat, 3 Feb 2024 23:04:49 +0800
 From: kernel test robot <lkp@intel.com>
 To: Fiona Klute <fiona.klute@gmx.de>, linux-wireless@vger.kernel.org,
 	Ping-Ke Shih <pkshih@realtek.com>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	Kalle Valo <kvalo@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org, Pavel Machek <pavel@ucw.cz>,
+Cc: oe-kbuild-all@lists.linux.dev, Kalle Valo <kvalo@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	Pavel Machek <pavel@ucw.cz>,
 	=?utf-8?Q?Ond=C5=99ej?= Jirman <megi@xff.cz>,
 	Fiona Klute <fiona.klute@gmx.de>
 Subject: Re: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
-Message-ID: <202402032222.kwUrsH9V-lkp@intel.com>
+Message-ID: <202402032249.cMZd6DxM-lkp@intel.com>
 References: <20240202121050.977223-2-fiona.klute@gmx.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -79,25 +79,20 @@ url:    https://github.com/intel-lab-lkp/linux/commits/Fiona-Klute/wifi-rtw88-Sh
 base:   https://git.kernel.org/pub/scm/linux/kernel/git/wireless/wireless-next.git main
 patch link:    https://lore.kernel.org/r/20240202121050.977223-2-fiona.klute%40gmx.de
 patch subject: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
-config: x86_64-allyesconfig (https://download.01.org/0day-ci/archive/20240203/202402032222.kwUrsH9V-lkp@intel.com/config)
-compiler: clang version 17.0.6 (https://github.com/llvm/llvm-project 6009708b4367171ccdbf4b5905cb6a803753fe18)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240203/202402032222.kwUrsH9V-lkp@intel.com/reproduce)
+config: parisc-allmodconfig (https://download.01.org/0day-ci/archive/20240203/202402032249.cMZd6DxM-lkp@intel.com/config)
+compiler: hppa-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240203/202402032249.cMZd6DxM-lkp@intel.com/reproduce)
 
 If you fix the issue in a separate patch/commit (i.e. not just a new version of
 the same patch/commit), kindly add following tags
 | Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202402032222.kwUrsH9V-lkp@intel.com/
+| Closes: https://lore.kernel.org/oe-kbuild-all/202402032249.cMZd6DxM-lkp@intel.com/
 
 All warnings (new ones prefixed by >>):
 
->> drivers/net/wireless/realtek/rtw88/rtw8723x.c:156:6: warning: no previous prototype for function '__rtw8723x_cfg_ldo25' [-Wmissing-prototypes]
+>> drivers/net/wireless/realtek/rtw88/rtw8723x.c:156:6: warning: no previous prototype for '__rtw8723x_cfg_ldo25' [-Wmissing-prototypes]
      156 | void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool enable)
-         |      ^
-   drivers/net/wireless/realtek/rtw88/rtw8723x.c:156:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-     156 | void __rtw8723x_cfg_ldo25(struct rtw_dev *rtwdev, bool enable)
-         | ^
-         | static 
-   1 warning generated.
+         |      ^~~~~~~~~~~~~~~~~~~~
 
 
 vim +/__rtw8723x_cfg_ldo25 +156 drivers/net/wireless/realtek/rtw88/rtw8723x.c
