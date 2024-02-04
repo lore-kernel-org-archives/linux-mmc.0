@@ -1,138 +1,140 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66CAC1B28D;
-	Sun,  4 Feb 2024 10:04:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83352249EE;
+	Sun,  4 Feb 2024 18:32:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707041065; cv=none; b=rsDWOmWz28OtCmnFBMVWEF7i6hPswSIBGa/C0BMtepqCl/ALbiONxrivTVals/JM2TQskU8VaTjMRuTHGsnlAEqJgiUmZcOhUD00g8aU7Ho5tmUlxPK6F0CBHfUYY3uhBKmYK3d6p7dDsc8dcJSt6ZZyPAuAwwU/HztJRI43Y0k=
+	t=1707071563; cv=none; b=ZuPt7597U8ny3KZPHT+jdJWKuJXPr39yW101VI5T2Pcc5antz/IZ5YaUvmq9lNT+8Di3kY8sVrivEe/kQyGdBpXnawfU5Myt41nX339nVlJASgL+rPQA0ha7cJpAtUBexLX4ZxQWwqfGKl/wwr0TOmmb3apnKEvRzmXWNovsOEk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707041065; c=relaxed/simple;
-	bh=C3sCyZJ3054h09DeOX4OGMuLHUT9azzEK0BMAB3avEw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=F1XhTj/WgcE3xddO6bAwDeHzMsTA3M3hyZzxjmCM1x96QZIJA6TUhjwU4mBPKPThTz+CcK5pNlZgarhhHHVWR3Yt8WOTG3nrIEfZoDk2NotzEBFLnm7/AvjaZVs04/9uh18fkC+VdCH38q6sVug0FVfC+T6nVJJqMNyIO44Y0vI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Z6cfa+/P; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1707071563; c=relaxed/simple;
+	bh=0+rTMhidwrziDNcAPA5ZtRDC2hGitSVJlE07G60n9N8=;
+	h=From:To:CC:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=qShD9XtWUVITc3Il4N4SCr4bbsKq/dV3vHZoR+rVTtkKBgJDoFXEQd3a7/Z/AbHpc1v5N3NaCm+UhYJmyt4YmxlmWMBZpOE7cCUhuM2zYuXoJnbnHryAxyptC4C1Zyrp5w/RHgZEVz1NLfhlH2+2qBlyBrXjbuc9Sg/ew2hGP+4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=NEtxkGF0; arc=none smtp.client-ip=198.47.19.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Z6cfa+/P"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1707041063; x=1738577063;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=C3sCyZJ3054h09DeOX4OGMuLHUT9azzEK0BMAB3avEw=;
-  b=Z6cfa+/P3zUZKqWcXILK+493NN6A00WMz9mp1IKBa+0kEA4NySovCltW
-   ohTOLQTBDK9P7YLmZKkujnOzMFpkCriNz/tNQkDh3v/wO3FQFtqsZAj1U
-   n3N+KuJ0BPziV9KH/ahNchVcMqPXlI3UQkWKsjjgw2UZT9kXCiqPhYnak
-   5AMVrFU+dxdDikwIIy8vfe9WWsh680qF3UqoeuXhoSXT3L1ncW8/0wPyX
-   lakbCSq198V8hfPr8bpgZlSvJKgi0eRKaHNoMSngcpFkBawAJgHX35fXb
-   xD3NRpnOD6i4DnaTeAN2GSELDOgeQjlA1DPplB702dBtOjpuAs7vclCr7
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10973"; a="531937"
-X-IronPort-AV: E=Sophos;i="6.05,242,1701158400"; 
-   d="scan'208";a="531937"
-Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Feb 2024 02:04:23 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.05,242,1701158400"; 
-   d="scan'208";a="799202"
-Received: from lkp-server02.sh.intel.com (HELO 59f4f4cd5935) ([10.239.97.151])
-  by orviesa008.jf.intel.com with ESMTP; 04 Feb 2024 02:04:20 -0800
-Received: from kbuild by 59f4f4cd5935 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1rWZMH-0006E4-2w;
-	Sun, 04 Feb 2024 10:04:17 +0000
-Date: Sun, 4 Feb 2024 18:03:45 +0800
-From: kernel test robot <lkp@intel.com>
-To: Fiona Klute <fiona.klute@gmx.de>, linux-wireless@vger.kernel.org,
-	Ping-Ke Shih <pkshih@realtek.com>
-Cc: oe-kbuild-all@lists.linux.dev, Kalle Valo <kvalo@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	Pavel Machek <pavel@ucw.cz>,
-	=?utf-8?Q?Ond=C5=99ej?= Jirman <megi@xff.cz>,
-	Fiona Klute <fiona.klute@gmx.de>
-Subject: Re: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
-Message-ID: <202402041702.OzA8uZKv-lkp@intel.com>
-References: <20240202121050.977223-2-fiona.klute@gmx.de>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="NEtxkGF0"
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 414IW9Ft020319;
+	Sun, 4 Feb 2024 12:32:09 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1707071529;
+	bh=s2TWXxbk1O39WIKgnGYQbW++dB7WqbpabTQYcEP9Epg=;
+	h=From:To:CC:Subject:In-Reply-To:References:Date;
+	b=NEtxkGF0LK9XaN9HqFJjU9aFr3taztUE4uxi+uN7w/z6xRWBwV/f5C1nBHVQUOsNW
+	 l2APL7p+wukyZK+oneR50K5qf3nPn8zPfiJ1y1sbJjJZiOI4epbkRk6XcpzUsAxHoS
+	 dquzwtolCOfUc11IG0xiylFmsBeN9TaCsknOPWVc=
+Received: from DFLE102.ent.ti.com (dfle102.ent.ti.com [10.64.6.23])
+	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 414IW9NI020112
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Sun, 4 Feb 2024 12:32:09 -0600
+Received: from DFLE111.ent.ti.com (10.64.6.32) by DFLE102.ent.ti.com
+ (10.64.6.23) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Sun, 4
+ Feb 2024 12:32:09 -0600
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE111.ent.ti.com
+ (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Sun, 4 Feb 2024 12:32:09 -0600
+Received: from localhost (kamlesh.dhcp.ti.com [172.24.227.123])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 414IW86i038451;
+	Sun, 4 Feb 2024 12:32:08 -0600
+From: Kamlesh Gurudasani <kamlesh@ti.com>
+To: Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+        <linux-arm-msm@vger.kernel.org>, <linux-scsi@vger.kernel.org>,
+        <andersson@kernel.org>, <ebiggers@google.com>,
+        <neil.armstrong@linaro.org>, <srinivas.kandagatla@linaro.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
+        <robh+dt@kernel.org>
+CC: <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <kernel@quicinc.com>, <linux-crypto@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <quic_omprsing@quicinc.com>,
+        <quic_nguyenb@quicinc.com>, <bartosz.golaszewski@linaro.org>,
+        <konrad.dybcio@linaro.org>, <ulf.hansson@linaro.org>,
+        <jejb@linux.ibm.com>, <martin.petersen@oracle.com>, <mani@kernel.org>,
+        <davem@davemloft.net>, <herbert@gondor.apana.org.au>,
+        Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Subject: Re: [EXTERNAL] [PATCH v4 04/15] soc: qcom: ice: add hwkm support in
+ ice
+In-Reply-To: <20240127232436.2632187-5-quic_gaurkash@quicinc.com>
+References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com>
+ <20240127232436.2632187-5-quic_gaurkash@quicinc.com>
+Date: Mon, 5 Feb 2024 00:02:07 +0530
+Message-ID: <87jznkytaw.fsf@kamlesh.i-did-not-set--mail-host-address--so-tickle-me>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240202121050.977223-2-fiona.klute@gmx.de>
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-Hi Fiona,
+Gaurav Kashyap <quic_gaurkash@quicinc.com> writes:
 
-kernel test robot noticed the following build errors:
+...
 
-[auto build test ERROR on wireless-next/main]
-[also build test ERROR on wireless/main linus/master v6.8-rc2 next-20240202]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+> +	/*
+> +	 * When ICE is in standard (hwkm) mode, it supports HW wrapped
+> +	 * keys, and when it is in legacy mode, it only supports standard
+> +	 * (non HW wrapped) keys.
+> +	 *
+> +	 * Put ICE in standard mode, ICE defaults to legacy mode.
+> +	 * Legacy mode - ICE HWKM slave not supported.
+> +	 * Standard mode - ICE HWKM slave supported.
+> +	 *
+> +	 * Depending on the version of HWKM, it is controlled by different
+> +	 * registers in ICE.
+> +	 */
+> +	if (ice->hwkm_version >= 2) {
+> +		val = qcom_ice_readl(ice, QCOM_ICE_REG_CONTROL);
+> +		val = val & 0xFFFFFFFE;
+From the code I understand that the last bit is used for setting the
+mode.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Fiona-Klute/wifi-rtw88-Shared-module-for-rtw8723x-devices/20240202-201428
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/wireless/wireless-next.git main
-patch link:    https://lore.kernel.org/r/20240202121050.977223-2-fiona.klute%40gmx.de
-patch subject: [PATCH 1/9] wifi: rtw88: Shared module for rtw8723x devices
-config: m68k-allyesconfig (https://download.01.org/0day-ci/archive/20240204/202402041702.OzA8uZKv-lkp@intel.com/config)
-compiler: m68k-linux-gcc (GCC) 13.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240204/202402041702.OzA8uZKv-lkp@intel.com/reproduce)
+Was wondering if it would make more sense to use ~BIT(0) or GENMASK
+to generate this value and #define this value to express the work it
+does.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202402041702.OzA8uZKv-lkp@intel.com/
+In this case, something like #define xx_SET_MODE_MASK (~BIT(0)) or use GENMASK
 
-All errors (new ones prefixed by >>):
+This would make it easier for a person who is taking a look at the code
+for first time. This is just my perspective.
 
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723d.o: in function `rtw8723x_iqk_backup_path_ctrl':
->> rtw8723d.c:(.text+0x3b0e): multiple definition of `rtw8723x_iqk_backup_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1114): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723d.o: in function `rtw8723x_iqk_config_path_ctrl':
->> rtw8723d.c:(.text+0x3b5a): multiple definition of `rtw8723x_iqk_config_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1160): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723d.o: in function `rtw8723x_iqk_restore_path_ctrl':
->> rtw8723d.c:(.text+0x3bf2): multiple definition of `rtw8723x_iqk_restore_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x11f8): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723d.o: in function `rtw8723x_iqk_backup_lte_path_gnt':
->> rtw8723d.c:(.text+0x3c6c): multiple definition of `rtw8723x_iqk_backup_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1272): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723d.o: in function `rtw8723x_iqk_config_lte_path_gnt':
->> rtw8723d.c:(.text+0x3d04): multiple definition of `rtw8723x_iqk_config_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x130a): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723d.o: in function `rtw8723x_iqk_restore_lte_path_gnt':
->> rtw8723d.c:(.text+0x3d90): multiple definition of `rtw8723x_iqk_restore_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1396): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723d.o: in function `rtw8723x_iqk_path_adda_on':
->> rtw8723d.c:(.text+0x3df0): multiple definition of `rtw8723x_iqk_path_adda_on'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x13f6): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723ds.o: in function `rtw8723x_iqk_backup_path_ctrl':
-   rtw8723ds.c:(.text+0x0): multiple definition of `rtw8723x_iqk_backup_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1114): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723ds.o: in function `rtw8723x_iqk_config_path_ctrl':
-   rtw8723ds.c:(.text+0x4c): multiple definition of `rtw8723x_iqk_config_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1160): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723ds.o: in function `rtw8723x_iqk_restore_path_ctrl':
-   rtw8723ds.c:(.text+0xe4): multiple definition of `rtw8723x_iqk_restore_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x11f8): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723ds.o: in function `rtw8723x_iqk_backup_lte_path_gnt':
-   rtw8723ds.c:(.text+0x15e): multiple definition of `rtw8723x_iqk_backup_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1272): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723ds.o: in function `rtw8723x_iqk_config_lte_path_gnt':
-   rtw8723ds.c:(.text+0x1f6): multiple definition of `rtw8723x_iqk_config_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x130a): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723ds.o: in function `rtw8723x_iqk_restore_lte_path_gnt':
-   rtw8723ds.c:(.text+0x282): multiple definition of `rtw8723x_iqk_restore_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1396): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723ds.o: in function `rtw8723x_iqk_path_adda_on':
-   rtw8723ds.c:(.text+0x2e2): multiple definition of `rtw8723x_iqk_path_adda_on'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x13f6): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723du.o: in function `rtw8723x_iqk_backup_path_ctrl':
-   rtw8723du.c:(.text+0x16): multiple definition of `rtw8723x_iqk_backup_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1114): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723du.o: in function `rtw8723x_iqk_config_path_ctrl':
-   rtw8723du.c:(.text+0x62): multiple definition of `rtw8723x_iqk_config_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1160): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723du.o: in function `rtw8723x_iqk_restore_path_ctrl':
-   rtw8723du.c:(.text+0xfa): multiple definition of `rtw8723x_iqk_restore_path_ctrl'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x11f8): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723du.o: in function `rtw8723x_iqk_backup_lte_path_gnt':
-   rtw8723du.c:(.text+0x174): multiple definition of `rtw8723x_iqk_backup_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1272): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723du.o: in function `rtw8723x_iqk_config_lte_path_gnt':
-   rtw8723du.c:(.text+0x20c): multiple definition of `rtw8723x_iqk_config_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x130a): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723du.o: in function `rtw8723x_iqk_restore_lte_path_gnt':
-   rtw8723du.c:(.text+0x298): multiple definition of `rtw8723x_iqk_restore_lte_path_gnt'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x1396): first defined here
-   m68k-linux-ld: drivers/net/wireless/realtek/rtw88/rtw8723du.o: in function `rtw8723x_iqk_path_adda_on':
-   rtw8723du.c:(.text+0x2f8): multiple definition of `rtw8723x_iqk_path_adda_on'; drivers/net/wireless/realtek/rtw88/rtw8723x.o:rtw8723x.c:(.text+0x13f6): first defined here
+If you do agree, you can change them at multiple places accross this
+patch, wherever magic numbers are used for val and masking the value.
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Regards,
+Kamlesh
+
+> +		qcom_ice_writel(ice, val, QCOM_ICE_REG_CONTROL);
+> +	} else {
+> +		qcom_ice_writel(ice, 0x7, HWKM_OFFSET(QCOM_ICE_REG_HWKM_TZ_KM_CTL));
+> +	}
+> +}
+> +
+> +static void qcom_ice_hwkm_init(struct qcom_ice *ice)
+> +{
+> +	/* Disable CRC checks. This HWKM feature is not used. */
+> +	qcom_ice_writel(ice, 0x6,
+> +			HWKM_OFFSET(QCOM_ICE_REG_HWKM_TZ_KM_CTL));
+> +
+> +	/*
+> +	 * Give register bank of the HWKM slave access to read and modify
+> +	 * the keyslots in ICE HWKM slave. Without this, trustzone will not
+> +	 * be able to program keys into ICE.
+> +	 */
+> +	qcom_ice_writel(ice, 0xFFFFFFFF, HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_0));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF, HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_1));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF, HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_2));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF, HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_3));
+> +	qcom_ice_writel(ice, 0xFFFFFFFF, HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_4));
+> +
+> +	/* Clear HWKM response FIFO before doing anything */
+> +	qcom_ice_writel(ice, 0x8, HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BANKN_IRQ_STATUS));
+> +	ice->hwkm_init_complete = true;
+> +}
+
+...
