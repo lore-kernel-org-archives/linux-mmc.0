@@ -1,148 +1,195 @@
-Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70DD6208CF
-	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 15:29:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF93232C96
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 16:07:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707146949; cv=none; b=qRwNUR/oB2HA6I3D90V/Az7V8ixjpWtKoij0Btcm62odX1eXzT4LtoVh5eKVkwXuDs3cPVLPOaKx8+vo64rgU/cDuj8q6MQYZZ2lnc1kf3mGXmknHNHWmKcIDT9HsVVRAc2zgpSwF2ZFnTT/aLhJHvPzQvh5w0U4WdKXERb1abM=
+	t=1707149278; cv=none; b=KSBadVT+MnH5eKCnLNC+EcqSx87KCQTfVqVnRsMYM4+lzAMd0iPbZyx646CbC+DNIBC5MW8+oX2RJENh4BNsSsfbeB76E1DPwZgXLWZ6YIU3nS6ybsC2drXk9V9sH8wfKHH2smIj9Unj+lkF1Mz9UrBrrsfN9nHhrZLWt7A4ADE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707146949; c=relaxed/simple;
-	bh=d6wbAM4aDdGGjpQwVdYrM+oOfAbd3RxgpP6Abo8fpgg=;
+	s=arc-20240116; t=1707149278; c=relaxed/simple;
+	bh=u/tdxtONYEe8qMQ5xAm9sEia0kTIy2tXT0RURmRTv0c=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=a6greeLfVTsh/78T8tKbG83AucojlRwsQ6xPLdtJlilXEzrcE+LX8bHvm6NIMxDvfS/iLurbZFHubwfcBUrRhz+ONmrk3SL/DHGH5GwtkT/Zs0jlPRCYtmi2aAwYqnet+R2APQ2SppWNJKnVFqwGrwhB2eLZmDbtabOWBUjZ2TY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oV9v9qBR; arc=none smtp.client-ip=209.85.219.177
+	 To:Cc:Content-Type; b=U6/BeLHW9+t6y2tlrzlBHv7F22ATpjKDej9RrKM/DtP9NliRRf2vsTmjS6FaDIpQPtgk9FI+4YcmBR2VsiigM9VvJWGu3nsRh62lTPt/H+5byaodMirx7xgWz+0mK2fE3yuUE9i0+DC+kQYX/s4KqBhlNDqC8imBqfLqclllDJ0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oPkkiTrC; arc=none smtp.client-ip=209.85.167.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oV9v9qBR"
-Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dbed179f0faso4150365276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 07:29:07 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oPkkiTrC"
+Received: by mail-oi1-f182.google.com with SMTP id 5614622812f47-3be78c26850so2906927b6e.0
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 08:07:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707146946; x=1707751746; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1707149276; x=1707754076; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=TrhbdBjpZYfHwabFxcHUce9eaBfUeDV85cQjXOpQbCI=;
-        b=oV9v9qBRPNqDuoRbB1xXmkMmcNi+m5WFW/4JVEv7v8RXu7DfSXj2+NZsaroUjfzGua
-         AlTZpJFnllXcx2ysCssF5Kcz9cwGbKVjFVO+mTeFWhnpXj2xzQE/POvbVthaQEgkuYco
-         QgAmQnGWc5K04wLPnpHssnizu/Afytrp3iGLYr8xracsCfPYOPiBvmy/qDRqqyvMGk0D
-         X9LOeeS9By/rVlmBmBBUKW9ukTdA/CAQZOkE89iVFlLgAcnNetx47ElyxYb6v9sBrV6s
-         TvwxBJTSCHh0EttjVJ+6Z6QTgaaeIVbHhIj+YAglmUxs3c71In8PD6jTwUlChM4lwedY
-         zEKw==
+        bh=GhsVM/adS9vpjWA6Lr2DjRuOomXm3++4vE/uCT9yL/I=;
+        b=oPkkiTrCl4LvOV9dtPA+cStkxKx0d0aicNuu9YjoKYIKpOByZxUa9V7Fz0kGBUbgBM
+         0AYeRycfYkXAbQKzV5vuM6kJingu9hLzWlPrz+D5HMCx6p/+x5dUUCCNZgl0P/aBAyKN
+         US/WjuoesNmcIcFK7UQv2C8bo3fotFGpFWfYOftzkRDdUFA/ZDBYjl8iDr0W7KNd5Imf
+         ho/PXeSzqKAwPDH7EWWkzFXhX1vsm09bwl5LsKqTX+o9qku6o6lhkuykXeYL+peaPT5d
+         XsPI++e6wneKBKO5sjIbh8O0HPUom5iv+fDL0XatkVZsePrXAGnriP+GugF3q72w/Yz6
+         4YWQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707146946; x=1707751746;
+        d=1e100.net; s=20230601; t=1707149276; x=1707754076;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=TrhbdBjpZYfHwabFxcHUce9eaBfUeDV85cQjXOpQbCI=;
-        b=nsxZ2LN+C02fIbFtDeiXX3PMHxrq9phSSdqUcsu7kZs0UV2f7+dNnjajLYFgdEXwIR
-         mYjGn4RJ7cS0ClzBprAJkDaXROtjY3foZfKStfN7CTN1fD5V6B5kyM3TW2Nnjk3Q2k7J
-         Xt8JAFh/izzMzbEhYssiNQTT+H4m8bgY1Fd4Alh8OARnewMXn41wt2fTdAWjFAOyYKTG
-         7TCVxO3zQ8rRNyHDx3n0hTOehg1AaMmYKyDYXpi01+StshnZvPhjSmfQU3j4xVRzDLGd
-         +0uSbWaWT2TybGYpzvXg0t/qXlXVi5Khu1wn/ykq5MO96HI3erWoxUst1ircSNUo4f5J
-         0emg==
-X-Gm-Message-State: AOJu0YxaKcVgCQQqSM3wMjlUjP77eHU/Yqoc3o23DtjmtveNWLYnLeys
-	Jp6W7swZzwCBx8dbsZ8GLwyEvvSIozsRVSrQ2DtI5B5h9++/+WLzOV5KSzN4T/wkJXr8qulkxP0
-	yYCwRiHG1uW1VCNPzO6PkJth+Tr7UVRKXF816nw==
-X-Google-Smtp-Source: AGHT+IGQelaOobngFU1ZPvjGKsCZvVU+JjK/jTUi8xxoCrI3yWT4zVOL05macztiXBw8WDb6KcVSC1q23xmXAsKu+PU=
-X-Received: by 2002:a05:6902:2784:b0:dc6:a072:bc8d with SMTP id
- eb4-20020a056902278400b00dc6a072bc8dmr3134ybb.21.1707146946296; Mon, 05 Feb
- 2024 07:29:06 -0800 (PST)
+        bh=GhsVM/adS9vpjWA6Lr2DjRuOomXm3++4vE/uCT9yL/I=;
+        b=MQtzUn3Iru5PsfURZzmVInkpsAGJjY8AeASXggWrlZrjIueLWMYCLcBLA65f8/jeU8
+         jlgK4RnoX5q1NPWgQODPEP5cIupFuSxtSWtTQ1/oNYZX7SBV1r4K0OiX4kIDfwkouKco
+         mHuw8fDBDYdqAqhVTwlkWLuzCxiXSdv9gJUZmiFugeTpmH5QRlHuynJJkMrqoaOras6u
+         E7kX6tzxAVlJy5h1zC2HsTZeyZRxl5tYUK9+EGxkVOIeJji2yCkjnkV09KgiUIYrJ/4O
+         VLIA3qXftR+3l59hC1MXfUTlEHvXNK+D5Wu5B1VMh9IXdpv3D9SgH8SM6oGFQpNLDyym
+         dPLw==
+X-Gm-Message-State: AOJu0YzRT8u6IkWHW2shXhk0+WpUiWcxBnuXVDj4iFNKQTp790IQSaX4
+	OAG5X1SzGLW5zxBDkRCTL6F3OmCgCM0/U6ztePeIUpQJD2GhUcObtVtBLvE9MgR4uxwMLyhf+Jq
+	OLwf7XAJwKwruPUMiFRYOfEyQbH9gz0VgLRhe6f2YAxrFdv07Cjs=
+X-Google-Smtp-Source: AGHT+IHZ2u/3DJCHrxp3p5K0kiW9ap5TEVnWFWWUOBXKP62k5AYYZH/Tv0b8MtAUMi2IwAMLCXfJASG4PMP3iwry+sg=
+X-Received: by 2002:a05:6359:428f:b0:178:bf01:1d with SMTP id
+ kp15-20020a056359428f00b00178bf01001dmr234543rwb.25.1707149275789; Mon, 05
+ Feb 2024 08:07:55 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240203102908.4683-1-fredaibayhubtech@126.com>
-In-Reply-To: <20240203102908.4683-1-fredaibayhubtech@126.com>
+References: <20240202121050.977223-1-fiona.klute@gmx.de> <20240202121050.977223-10-fiona.klute@gmx.de>
+In-Reply-To: <20240202121050.977223-10-fiona.klute@gmx.de>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 5 Feb 2024 16:28:29 +0100
-Message-ID: <CAPDyKFrt80WPeCGJZsQaCsN5a+95ru6rKnQb3kPODMkU1G6Ocw@mail.gmail.com>
-Subject: Re: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: Fix a warm reboot issue
- that disk can't be detected by BIOS
-To: fredaibayhubtech@126.com
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux.kernel@vger.kernel.org, shaper.liu@bayhubtech.com, 
-	chevron.li@bayhubtech.com, xiaoguang.yu@bayhubtech.com, 
-	Fred Ai <fred.ai@bayhubtech.com>
+Date: Mon, 5 Feb 2024 17:07:19 +0100
+Message-ID: <CAPDyKFqRjNTvApfKou1xQn0_x5C9LXGwFHMw4OyvFcgwsrA4Zg@mail.gmail.com>
+Subject: Re: [PATCH 9/9] wifi: rtw88: SDIO device driver for RTL8723CS
+To: Fiona Klute <fiona.klute@gmx.de>
+Cc: linux-wireless@vger.kernel.org, Ping-Ke Shih <pkshih@realtek.com>, 
+	Kalle Valo <kvalo@kernel.org>, linux-mmc@vger.kernel.org, Pavel Machek <pavel@ucw.cz>, 
+	=?UTF-8?Q?Ond=C5=99ej_Jirman?= <megi@xff.cz>
 Content-Type: text/plain; charset="UTF-8"
 
-On Sat, 3 Feb 2024 at 11:29, <fredaibayhubtech@126.com> wrote:
+On Fri, 2 Feb 2024 at 13:11, Fiona Klute <fiona.klute@gmx.de> wrote:
 >
-> From: Fred Ai <fred.ai@bayhubtech.com>
+> This driver uses the new rtw8703b chip driver code.
 >
-> Driver shall switch clock source from DLL clock to
-> OPE clock when power off card to ensure that card
-> can be identified with OPE clock by BIOS.
->
-> Signed-off-by: Fred Ai <fred.ai@bayhubtech.com>
+> Signed-off-by: Fiona Klute <fiona.klute@gmx.de>
 
-I assume we want a stable tag to be added to this, but perhaps we can
-also add a fixes tag? In that case, what is the commit this is fixing?
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For SDIO
 
 Kind regards
 Uffe
 
 > ---
-> Change in V1:
-> Implement the "set_power" callback in sdhci_ops,
-> then switch PCR register 0x354 clock source back to
-> OPE clock when power off card.
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 30 ++++++++++++++++++++++++++++
->  1 file changed, 30 insertions(+)
+>  drivers/net/wireless/realtek/rtw88/Kconfig    | 18 ++++++++++
+>  drivers/net/wireless/realtek/rtw88/Makefile   |  6 ++++
+>  .../net/wireless/realtek/rtw88/rtw8723cs.c    | 34 +++++++++++++++++++
+>  include/linux/mmc/sdio_ids.h                  |  1 +
+>  4 files changed, 59 insertions(+)
+>  create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8723cs.c
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 7bfee28116af..d4a02184784a 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -693,6 +693,35 @@ static int sdhci_pci_o2_init_sd_express(struct mmc_host *mmc, struct mmc_ios *io
->         return 0;
->  }
+> diff --git a/drivers/net/wireless/realtek/rtw88/Kconfig b/drivers/net/wireless/realtek/rtw88/Kconfig
+> index 07b5b2f6ee..22838ede03 100644
+> --- a/drivers/net/wireless/realtek/rtw88/Kconfig
+> +++ b/drivers/net/wireless/realtek/rtw88/Kconfig
+> @@ -31,6 +31,10 @@ config RTW88_8822C
+>  config RTW88_8723X
+>         tristate
 >
-> +static void sdhci_pci_o2_set_power(struct sdhci_host *host, unsigned char mode,  unsigned short vdd)
-> +{
-> +       struct sdhci_pci_chip *chip;
-> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
-> +       u32 scratch_32 = 0;
-> +       u8 scratch_8 = 0;
+> +config RTW88_8703B
+> +       tristate
+> +       select RTW88_8723X
 > +
-> +       chip = slot->chip;
-> +
-> +       if (mode == MMC_POWER_OFF) {
-> +               /* UnLock WP */
-> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-> +               scratch_8 &= 0x7f;
-> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-> +
-> +               /* Set PCR 0x354[16] to switch Clock Source back to OPE Clock */
-> +               pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
-> +               scratch_32 &= ~(O2_SD_SEL_DLL);
-> +               pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
-> +
-> +               /* Lock WP */
-> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-> +               scratch_8 |= 0x80;
-> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-> +       }
-> +
-> +       sdhci_set_power(host, mode, vdd);
-> +}
-> +
->  static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  {
->         struct sdhci_pci_chip *chip;
-> @@ -1051,6 +1080,7 @@ static const struct sdhci_ops sdhci_pci_o2_ops = {
->         .set_bus_width = sdhci_set_bus_width,
->         .reset = sdhci_reset,
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .set_power = sdhci_pci_o2_set_power,
->  };
+>  config RTW88_8723D
+>         tristate
+>         select RTW88_8723X
+> @@ -126,6 +130,20 @@ config RTW88_8723DS
 >
->  const struct sdhci_pci_fixes sdhci_o2 = {
+>           802.11n SDIO wireless network adapter
 >
-> base-commit: 56897d51886fa7e9f034ff26128eb09f1b811594
+> +config RTW88_8723CS
+> +       tristate "Realtek 8723CS SDIO wireless network adapter"
+> +       depends on MMC
+> +       select RTW88_CORE
+> +       select RTW88_SDIO
+> +       select RTW88_8703B
+> +       help
+> +         Select this option to enable support for 8723CS chipset (EXPERIMENTAL)
+> +
+> +         This module adds support for the 8723CS 802.11n SDIO
+> +         wireless network adapter.
+> +
+> +         If you choose to build a module, it'll be called rtw88_8723cs.
+> +
+>  config RTW88_8723DU
+>         tristate "Realtek 8723DU USB wireless network adapter"
+>         depends on USB
+> diff --git a/drivers/net/wireless/realtek/rtw88/Makefile b/drivers/net/wireless/realtek/rtw88/Makefile
+> index 22516c9846..8f47359b43 100644
+> --- a/drivers/net/wireless/realtek/rtw88/Makefile
+> +++ b/drivers/net/wireless/realtek/rtw88/Makefile
+> @@ -47,6 +47,12 @@ rtw88_8822cu-objs            := rtw8822cu.o
+>  obj-$(CONFIG_RTW88_8723X)      += rtw88_8723x.o
+>  rtw88_8723x-objs               := rtw8723x.o
+>
+> +obj-$(CONFIG_RTW88_8703B)      += rtw88_8703b.o
+> +rtw88_8703b-objs               := rtw8703b.o rtw8703b_tables.o
+> +
+> +obj-$(CONFIG_RTW88_8723CS)     += rtw88_8723cs.o
+> +rtw88_8723cs-objs              := rtw8723cs.o
+> +
+>  obj-$(CONFIG_RTW88_8723D)      += rtw88_8723d.o
+>  rtw88_8723d-objs               := rtw8723d.o rtw8723d_table.o
+>
+> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8723cs.c b/drivers/net/wireless/realtek/rtw88/rtw8723cs.c
+> new file mode 100644
+> index 0000000000..8d38d36be8
+> --- /dev/null
+> +++ b/drivers/net/wireless/realtek/rtw88/rtw8723cs.c
+> @@ -0,0 +1,34 @@
+> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+> +/* Copyright Fiona Klute <fiona.klute@gmx.de> */
+> +
+> +#include <linux/mmc/sdio_func.h>
+> +#include <linux/mmc/sdio_ids.h>
+> +#include <linux/module.h>
+> +#include "main.h"
+> +#include "rtw8703b.h"
+> +#include "sdio.h"
+> +
+> +static const struct sdio_device_id rtw_8723cs_id_table[] = {
+> +       {
+> +               SDIO_DEVICE(SDIO_VENDOR_ID_REALTEK,
+> +                           SDIO_DEVICE_ID_REALTEK_RTW8723CS),
+> +               .driver_data = (kernel_ulong_t)&rtw8703b_hw_spec,
+> +       },
+> +       {}
+> +};
+> +MODULE_DEVICE_TABLE(sdio, rtw_8723cs_id_table);
+> +
+> +static struct sdio_driver rtw_8723cs_driver = {
+> +       .name = "rtw8723cs",
+> +       .id_table = rtw_8723cs_id_table,
+> +       .probe = rtw_sdio_probe,
+> +       .remove = rtw_sdio_remove,
+> +       .drv = {
+> +               .pm = &rtw_sdio_pm_ops,
+> +               .shutdown = rtw_sdio_shutdown
+> +       }};
+> +module_sdio_driver(rtw_8723cs_driver);
+> +
+> +MODULE_AUTHOR("Fiona Klute <fiona.klute@gmx.de>");
+> +MODULE_DESCRIPTION("Realtek 802.11n wireless 8723cs driver");
+> +MODULE_LICENSE("Dual BSD/GPL");
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index 7fada7a714..7cddfdac2f 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -124,6 +124,7 @@
+>  #define SDIO_DEVICE_ID_REALTEK_RTW8723DS_2ANT  0xd723
+>  #define SDIO_DEVICE_ID_REALTEK_RTW8723DS_1ANT  0xd724
+>  #define SDIO_DEVICE_ID_REALTEK_RTW8821DS       0xd821
+> +#define SDIO_DEVICE_ID_REALTEK_RTW8723CS       0xb703
+>
+>  #define SDIO_VENDOR_ID_SIANO                   0x039a
+>  #define SDIO_DEVICE_ID_SIANO_NOVA_B0           0x0201
 > --
-> 2.25.1
+> 2.43.0
 >
