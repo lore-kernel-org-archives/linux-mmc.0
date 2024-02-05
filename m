@@ -1,162 +1,194 @@
-Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C02DC125B0
-	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 09:25:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 840661AACA
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 11:27:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707125153; cv=none; b=d5zRqHDKrOyz7wHBLSjBWZR65hDnXm71Gu/gji7U9gxo3/OlpYssNTuOPp5jGj7XBU6FNpZI593+pM/+bnNECzPtdkFovZnAtlNisTHzLSqWa4ICJZjtHcEBCMwCCBntRcCfudSQNzceDfbnXMZ/G3DzSWdJKylAUJXz0dCrvlU=
+	t=1707132435; cv=none; b=usySgO78NrEq1s0mDGzXbZdZxM8Q5bfiQrwxjNAkUQfiaE5/idfNjABhewlDWly1AQaOKGgt9l3wd6n4duIPiXci+LITz+jGR8hfgFtwAzG5XZ4kdCdh0ZA1+sIT2toVPSqqzMS0vuDDELv2C4ALGETHzXG3zRNnhc1+q8YKZZE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707125153; c=relaxed/simple;
-	bh=r8g+eHSgjiF9g0nmTgJ4mQPRVegtLVu4y9NnuyDYMr0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Ris67GkVxDDrLie9RwhlQIrAS2DkI+9tBwwFnRJY9mP+cPxcnJhK1TgGcjLhzitkPwmfVu0Zp6bKM/DP1AhlzZV5ZflFilm2z1bA60/XpJkR3RZbWXwkagM70mFisn+A+8ghHWGFT/pUxn4NPISuSjrBbDeZif61lpMX8es6HYs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iiYS8Wnh; arc=none smtp.client-ip=209.85.218.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1707132435; c=relaxed/simple;
+	bh=oIwZe9RU0D3Qpo3jI9l25eoxcPCLpwHLDJ53dfgtEp0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=iCg9TW0Wjbywz63Sekhs4NxDY4L7zhRRKFc1WwXxaowqt3Hp3hY0mNWw1jaIAxFwD4W9zDHsNKfahqjFGwcLo/xP0gU1Arxw/394SdMy9qxtB3Y3888vsn62eBueYqN3v/etWM8rX16xiwHRfm0FwVlb6lom9TfuiMR2L4L9rdU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=aOdlnuM8; arc=none smtp.client-ip=209.85.221.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iiYS8Wnh"
-Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-a271a28aeb4so589525366b.2
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 01:25:51 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="aOdlnuM8"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-33934567777so2872491f8f.1
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 03:27:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707125150; x=1707729950; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=6QV+XeC6ubFiQQJ74+6ol4pUfjV2yc7chI3YNp7Olo8=;
-        b=iiYS8WnhjBnz0FwZNXl+K3PprBbOC3mR71HUDOc1N0sAPbFKQ5D+N0M6JWY5adXcdU
-         dL46/RHYMIpgaZlCyT20xLwa7nKQiCw1uAj3iE15y8Uh2lNBY6qN1ORtVUXh2Hqfph2X
-         bchBpw/G69TivfZvzOrwCal8dgSoRogxd97nV/J0QOPz6wpozKHP0nc2U8eUBXQU4JYq
-         PpyoSWYwI3iwSElgxPUHBerHOs2UYUIj7sz207Lqd0hg888j5zadEdoNtjKRaP2u3Wsf
-         e8c+koA/EDmA/ZcD5DuwKZYl+/SBeZDL+qsKmlGcBojyMwpWRSpW+xy2hNM5/AtYvrjg
-         JRgQ==
+        d=tuxon.dev; s=google; t=1707132431; x=1707737231; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=AgLkeYSewJO91gFxycBIzZeXPSjAt47c7sE98GYG9gQ=;
+        b=aOdlnuM8zyCHDbHvnwJVIRjJcRJnmiZPGj34SVduj84K5ZqEnTUtNa8+uXL6iKy74X
+         1iJiBYmMu6qBAtIGDwRtveS0S6/bwo6WNAqQY427S18rgw6ePkcGwbFOw9uBOiwNQ/lS
+         42Hui8cVCHa7iREkzV3EJxP3f4pmt99gp9DelCRlN6UHd2ISwuL5/XSAEXk66M69WRqs
+         kxpcUlXOgYEiC5RM9Rx+jZ4H7PzGkxJEgKhDOcGZpSCfjfwrN6K23EwAz90zfYXUcokT
+         UJ5BxrFM0sNWRP04I2Y3p+NcmKHcFO9Hvs6Uwip3v2SGNu64eoc5FaDxzpUSmYgsRh8s
+         Ad1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707125150; x=1707729950;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=6QV+XeC6ubFiQQJ74+6ol4pUfjV2yc7chI3YNp7Olo8=;
-        b=trbYZzU1BuPPVR0ebXUyuLawQiJJltnkYlP/uqUXFbDWKrfDP7GKAZgcw2Erso+6Oe
-         ArhEvQSzzXdyXhnhrzqnarAGnIdOOjSAao85udvVtlultzsdwhXHoofYvV8872hgw9Hz
-         QxZBT1GmtPJ+7z0RbTsFFZ+w4fdi+cZNxRwR8C2x5emb1SR0wTIrJQ9L3LQ2qB3ckl/l
-         vTZ2aeJUQZhTdYSXGYEmc2sRpGTtA94xk6jhv8X78aK1p3Gx+cNJ2jesT3pC/wvM1cSf
-         AS4OmdKhkdeyHURNFvrImqynsbJmqPW2w39SUJ1UNoAQ8vSO1/10pvSrlCtajRX53HOu
-         y9Ew==
-X-Gm-Message-State: AOJu0Yw7j2Uq7zVMfUFNht2mbcTsfElddjVZjfXc3DzAG4i416RLX2X/
-	bBRynDyny3jbGdrEeYZgqf5TAGPMlyLp/RfAoUQRGsmjzSwgsGno+T+GeRGXk1c=
-X-Google-Smtp-Source: AGHT+IE2MQhoAt89scFHj/wrtjFO4zJ9cQnhg7w0vM91XGipr+7PW8DTnaFfV0jSE7oJzGm8lG0Tzw==
-X-Received: by 2002:a17:906:2811:b0:a35:8596:cdc7 with SMTP id r17-20020a170906281100b00a358596cdc7mr6875088ejc.31.1707125149973;
-        Mon, 05 Feb 2024 01:25:49 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCUDFi3Cn/azmODAVzhSKcUV6kDomsUgIBuf8gO8Idw7Ox6Y2wDURHVe9d5J9J+yu4RbzHMumjoeFtuEazZc3aF6SxYHB3wqPnin26XVRJwiDPqzhHjoi2RTGER37STwrtpBvesvDK0qMKzzBsGzV2auSyLuR709eJR6hKcurbm/CXerHokrD2+rodCqCgWFtBHogXSiKiZKc9aSXY/5ghC/YTHD9F3QizreGk34IJvuWX04nwmpK0IzsuPRi0Cw0OHdEcLsBbXuVlD/NZwMI5nrRB6/2xvBYCy1fURaaFOo09lNcqErgps2jjgumv9P0G4kcKqnF6DdX+lT3xZTs6G12CEr9GeUBOxD1b8U4NlszpyeN9JrfJdPz+uUtQSZ84KF1UYHTPKLInygcLv127xvVjVAw1b8YoUMpZukMRcQtHzC53ouV3YTIIFNaCOQolmMznovEy+oK72cx/Rfyt0gVycTeukcEmkbivTggdpsFtENPa5s5FBg95QabD3PsBq+UoZ5mzuEUukaL6PQuHoGx1stdBilgUsLC+mg/4cvfYVkHc9mtJLEplAehDk0TmyW7DXmAcOnrksEeYowSJvvFIEr4bb38MxTrBJ16ex45ZCGYw3nWI2UgkX8aItJxijXfOMJJpfdInQL/h5ECRIjJ9BrAwwHGH84ZbVXhYCXzRmPRFcNfPq30NsuFA41EhRo8p6mwHNVTnOL
-Received: from [192.168.1.20] ([178.197.222.62])
-        by smtp.gmail.com with ESMTPSA id tj13-20020a170907c24d00b00a370ea0ab84sm3780825ejc.124.2024.02.05.01.25.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 05 Feb 2024 01:25:49 -0800 (PST)
-Message-ID: <65097032-74d4-4617-8ef6-e1f76b41cce6@linaro.org>
-Date: Mon, 5 Feb 2024 10:25:46 +0100
+        d=1e100.net; s=20230601; t=1707132431; x=1707737231;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=AgLkeYSewJO91gFxycBIzZeXPSjAt47c7sE98GYG9gQ=;
+        b=hx8C7a/4rzSHBgZS74juXvdSOFHUzZwpAc84ZodFPkdXSSMCgwCOQMOs0bqza/3FRY
+         sblzZaCIeaa+EVMpP6DaB6/7woJbzCyKTA8PdcKKST7HCr/gYlo6T6yhQPFUadpFCmE5
+         /WA2Y4dNGqwZgnjkCOykuyBxXuR4xN2I2pAQ+oaatLKhqhhG7SedKoEYYl9jyU82BV8K
+         oZrNcIYglc3zJZsrsxSmcCq5XzAT2LPVfmk3eavyY0UkWuHZhNZK7dUhxaNs7mVls+nE
+         rDRcJI4kI1fkgUxZp90GUlGkLK1Ld7on3LSXvB94b2HhWf0ec2ca/NoMa4IQiH2Kbft8
+         TwUA==
+X-Gm-Message-State: AOJu0YxDXqQmDsgYmroHDYrvu2qwzfvk8gC6DIpwLZFdYEJ760dfhq1k
+	L5rHdPVmuRwg5Z05TTlVAKRqL2Irmc/lCG5V1FTEZfxC7xvgndJsnJ47OCSJmEc=
+X-Google-Smtp-Source: AGHT+IEaCy3xpOfjqYuRM0Ero89Ry6d64pSEQYJhbx0beqvovllfdu9Gk+ZJATBBThLPPsUR92E54g==
+X-Received: by 2002:a05:6000:1ac7:b0:33b:3d6f:6839 with SMTP id i7-20020a0560001ac700b0033b3d6f6839mr1496481wry.35.1707132430509;
+        Mon, 05 Feb 2024 03:27:10 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCUp0DSTbsMFgriJH4ZSWO+wwq6TtWgltTIeRPsXln0Bctn1hMfYfB1tMABUhU2tehUwqpaqjbt1lbVs8kaxAvrEKU29HnxvnPdlDRFvFOFRnMxZeRPuDGMbYDqTb2T4M/wpRRQFsiF3+B3pntw5I8k92cOfbxF9Z4dIT3GtPzb0AgmXHO3FUor/V6nCkBmsdrU//CddTRSUXy/1DpkSWxietwhcy5DARIOcdI6MJY7VEEpR9eZGV+kvpD967gVQ4s9y4/xIi80H2BW99U6isRlZwP5w0zallqxjQ6iO3kPTnxS3scTEl7TBeayz/P1Hp6SBbn+s9c4avdHW8Id8QwH16a71SMkEBmvp/aEKq69trPZQH9iNk/Yr9H0o/PqpDvi/B0XOoA==
+Received: from claudiu-X670E-Pro-RS.. ([82.78.167.154])
+        by smtp.gmail.com with ESMTPSA id l30-20020a05600c1d1e00b0040e541ddcb1sm8307234wms.33.2024.02.05.03.27.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 05 Feb 2024 03:27:10 -0800 (PST)
+From: Claudiu <claudiu.beznea@tuxon.dev>
+X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
+To: wsa+renesas@sang-engineering.com,
+	ulf.hansson@linaro.org,
+	yoshihiro.shimoda.uh@renesas.com,
+	masaharu.hayakawa.ry@renesas.com,
+	takeshi.saito.xv@renesas.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	claudiu.beznea@tuxon.dev,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Subject: [PATCH v3] mmc: renesas_sdhi: Fix change point of data handling
+Date: Mon,  5 Feb 2024 13:27:02 +0200
+Message-Id: <20240205112702.213050-1-claudiu.beznea.uj@bp.renesas.com>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 0/4] Add 8qm SMMU information
-Content-Language: en-US
-To: Frank Li <Frank.li@nxp.com>, Jakub Kicinski <kuba@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
- Sascha Hauer <s.hauer@pengutronix.de>,
- Pengutronix Kernel Team <kernel@pengutronix.de>,
- Fabio Estevam <festevam@gmail.com>, NXP Linux Team <linux-imx@nxp.com>,
- Wei Fang <wei.fang@nxp.com>, Shenwei Wang <shenwei.wang@nxp.com>,
- Clark Wang <xiaoning.wang@nxp.com>, "David S. Miller" <davem@davemloft.net>,
- Eric Dumazet <edumazet@google.com>, Paolo Abeni <pabeni@redhat.com>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- netdev@vger.kernel.org, imx@lists.linux.dev
-References: <20240201-8qm_smmu-v2-0-3d12a80201a3@nxp.com>
- <20240202110511.135d26b7@kernel.org>
- <Zb1sijexWGLG5gcH@lizhi-Precision-Tower-5810>
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <Zb1sijexWGLG5gcH@lizhi-Precision-Tower-5810>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 02/02/2024 23:28, Frank Li wrote:
-> On Fri, Feb 02, 2024 at 11:05:11AM -0800, Jakub Kicinski wrote:
->> On Thu, 01 Feb 2024 15:22:40 -0500 Frank Li wrote:
->>>       dt-bindings: mmc: fsl-imx-esdhc: add iommus property
->>>       dt-bindings: net: fec: add iommus property
->>>       arm64: dts: imx8qm: add smmu node
->>>       arm64: dts: imx8qm: add smmu stream id information
->>>
->>>  .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |  3 ++
->>>  Documentation/devicetree/bindings/net/fsl,fec.yaml |  3 ++
->>>  arch/arm64/boot/dts/freescale/imx8qm-ss-conn.dtsi  |  6 ++++
->>>  arch/arm64/boot/dts/freescale/imx8qm.dtsi          | 41 ++++++++++++++++++++++
->>
->> Any preference on whether all these go via a platform tree,
->> or should we pick up the net patch to netdev? I guess taking
->> the DTB via netdev would be the usual way to handle this?
-> 
-> Supposed dt-bindings go through netdev tree.
-> 
-> without dt-bindings, just DTB_CHECK warning. No strict dependence
-> relationship between dt-bindings doc and dts file. 
+From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-Please make it easier for maintainers and sent entirely independent
-patches for different subsystems in SEPARATE patchsets.
+On latest kernel revisions it has been noticed (on a RZ/G3S system) that
+when booting Linux and root file system is on eMMC, at some point in
+the booting process, when the systemd applications are started, the
+"mmc0: tuning execution failed: -5" message is displayed on console.
+On kernel v6.7-rc5 this is reproducible in 90% of the boots. This was
+missing on the same system with kernel v6.5.0-rc1. It was also noticed on
+kernel revisions v6.6-rcX on a RZ/G2UL based system but not on the kernel
+this fix is based on (v6.7-rc5).
 
-There is no dependency here between anything. Combining it, OTOH, brings
-the questions about such dependency and makes it a bit more difficult to
-apply for each maintainer.
+Investigating it on RZ/G3S lead to the conclusion that every time the issue
+is reproduced all the probed TAPs are OK. According to datasheet, when this
+happens the change point of data need to be considered for tuning.
 
-Best regards,
-Krzysztof
+Previous code considered the change point of data happens when the content
+of the SMPCMP register is zero. According to RZ/V2M hardware manual,
+chapter "Change Point of the Input Data" (as this is the most clear
+description that I've found about change point of the input data and all
+RZ hardware manual are similar on this chapter), at the time of tuning,
+data is captured by the previous and next TAPs and the result is stored in
+the SMPCMP register (previous TAP in bits 22..16, next TAP in bits 7..0).
+If there is a mismatch b/w the previous and the next TAPs, it indicates
+that there is a change point of the input data.
+
+To comply with this, the patch checks if this mismatch is present and
+updates the priv->smpcmp mask only if it is not. Previous code checked if
+the value of SMPCMP register was zero. However, on RZ/G3S, this leads to
+failues as it may happen, e.g., the following:
+CMPNGU=0x0e, CMPNGD=0x0e, SMPCMP=0x000e000e.
+
+Along with it, as mmc_send_tuning() may return with error even before the
+MMC command reach the controller (and because at that point cmd_error = 0),
+the update of priv->smpcmp mask has been done only if the return value of
+mmc_send_tuning(mmc, opcode, &cmd_error) is 0 (success).
+
+This change has been checked on the devices with the following DTSes by
+doing 100 consecutive boots and checking for the tuning failure message:
+- r9a08g045s33-smarc.dts
+- r8a7742-iwg21d-q7.dts
+- r8a7743-iwg20d-q7.dts
+- r8a7744-iwg20d-q7.dts
+- r8a7745-iwg22d-sodimm.dts
+- r8a77470-iwg23s-sbc.dts
+- r8a774a1-hihope-rzg2m-ex.dts
+- r8a774b1-hihope-rzg2n-ex.dts
+- r8a774c0-ek874.dts
+- r8a774e1-hihope-rzg2h-ex.dts
+- r9a07g043u11-smarc-rzg2ul.dts
+- r9a07g044c2-smarc-rzg2lc.dts
+- r9a07g044l2-smarc-rzg2l.dts
+- r9a07g054l2-smarc-rzv2l.dts
+
+Fixes: 5fb6bf51f6d1 ("mmc: renesas_sdhi: improve TAP selection if all TAPs are good")
+Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+---
+
+Changes in v3:
+- set priv->smpcmp if cmpngu_data == cmpngd_data and return code of
+  mmc_send_tuning() is zero
+- removed workaround introduced previously in
+  renesas_sdhi_select_tuning() as it is not needed with the code from v3
+- update patch description
+
+Changes in v2:
+- read the SH_MOBILE_SDHI_SCC_SMPCMP register only on success path of
+  mmc_send_tuning()
+
+ drivers/mmc/host/renesas_sdhi_core.c | 18 ++++++++++++++----
+ 1 file changed, 14 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index c675dec587ef..8871521e1274 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -18,6 +18,7 @@
+  *
+  */
+ 
++#include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/delay.h>
+ #include <linux/iopoll.h>
+@@ -312,6 +313,8 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_REQDOWN	BIT(8)
+ #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_REQUP	BIT(24)
+ #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_ERR	(BIT(8) | BIT(24))
++#define SH_MOBILE_SDHI_SCC_SMPCMP_CMPNGU_DATA	GENMASK(23, 16)
++#define SH_MOBILE_SDHI_SCC_SMPCMP_CMPNGD_DATA	GENMASK(7, 0)
+ 
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL	BIT(4)
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN	BIT(31)
+@@ -703,11 +706,18 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		/* Set sampling clock position */
+ 		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, i % priv->tap_num);
+ 
+-		if (mmc_send_tuning(mmc, opcode, &cmd_error) == 0)
+-			set_bit(i, priv->taps);
++		if (mmc_send_tuning(mmc, opcode, &cmd_error) == 0) {
++			u32 val, cmpngu_data, cmpngd_data;
++
++			val = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP);
++			cmpngu_data = FIELD_GET(SH_MOBILE_SDHI_SCC_SMPCMP_CMPNGU_DATA, val);
++			cmpngd_data = FIELD_GET(SH_MOBILE_SDHI_SCC_SMPCMP_CMPNGD_DATA, val);
++
++			if (cmpngu_data == cmpngd_data)
++				set_bit(i, priv->smpcmp);
+ 
+-		if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP) == 0)
+-			set_bit(i, priv->smpcmp);
++			set_bit(i, priv->taps);
++		}
+ 
+ 		if (cmd_error)
+ 			mmc_send_abort_tuning(mmc, opcode);
+-- 
+2.39.2
 
