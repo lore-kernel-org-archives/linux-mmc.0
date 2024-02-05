@@ -1,79 +1,83 @@
 Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9190D446BC
-	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 17:29:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A908747F60
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 17:29:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707154160; cv=none; b=EuHDhsxRY2hZgxUfP+MPBzrtV2MgwDE7c29qHgSf5ff0qP4FtV6xXWlNI1vAxHZ3JNQrjzVzWjrhk4i+qZ2UI0hcyddG8aYArGuzfdhGJkABEjq+thzaMet7FjVBFDE4+KLZjIUfo3li5s6CxFTiVnpXU2ODtITMcq5m4F7+BHY=
+	t=1707154166; cv=none; b=JJVR06dN5sQKSfKbbhdqF7Vb3dtSegkQuj6/qFXFgX+HDsSS1ulqCH7XNSxLbT3PC6nmcWmQqv505EjjsKOAyCFhRJkah2/dMe9AJjWbtfvRdhO14+RvK4V2gW5Dmj/9CleBWV+ECeP+VaDiGrFqeotA8F2KVWVo5pqf1RAUW/c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707154160; c=relaxed/simple;
-	bh=es3DktGPBh05dwkx5i2qdiSJVoOY1idADTS2y6a37gE=;
+	s=arc-20240116; t=1707154166; c=relaxed/simple;
+	bh=O4lFQwozpj8qAdWZazPZDdbBDVBBZtmrxmGiue5/8bI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HK5VxlvGiiLPTqwhGQSqXfnv3WfXNMm1MDeylXttwri1bXAujZkm/1Vv3y3SxcKFy9WuUq6fCeNrz1tUTetjvf7ctNLXmOnYu2R6CMF/qCbx5FbfuYrtU7XqEZnWjzaEaBFAbMYrrhqxwP2EUEmso0xTlIFcNi1f9B+zPpkMxdQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nwxhN6qm; arc=none smtp.client-ip=209.85.128.182
+	 To:Cc:Content-Type; b=J4KX3WzWx04NfloyEWATVwRe8Y4BZdVx36NnJzSLNpkxaTBVfrdu+jjVPAZpazDZBnadDTQcJR0crUjjCO8lXjYlXEngjlpDrDY9msZj8gQy9C/YcHTcsJMExZxpk/9KqMvxVb6lxV9ev+l/3G9QFMn9II7l10L9vz+YiVh3AG0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jGGHfDpI; arc=none smtp.client-ip=209.85.128.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nwxhN6qm"
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-6040d33380cso48010067b3.1
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 09:29:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jGGHfDpI"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-5edfcba97e3so46277857b3.2
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 09:29:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707154157; x=1707758957; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1707154164; x=1707758964; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=NinqwOuC4qMofgGjRx8zD+hwpAO/q3k3rjwTwr+rC8E=;
-        b=nwxhN6qmGHJZIBTWuKOheB7TBrDLJKo5yvmWT4YrwDo7RZxz5gD7y8YIxLWO2IvJ+y
-         XtEmRh77WfWvQofwWf70eQLm3b7oSNvG6Y3bCe4eGzZNl/DCC6Tqgyp/OeewEdP6fCem
-         qJua+psTMqrE7DfJIA3AvSaxSHpSzHZDCu9xmEevhEuVk8dplvzh7ph+3l8q0gFJ1ADC
-         RiDFFSGdZDC4ZhLEctdPa+LLfzJpeN56xtSv3IOJn0OGLLOoPDK7IuUHiMi5h3pVR3su
-         2yRfu735FB61uU2lVKdL5qZ7soMbUH5qFEHeDTD0Fbtm14QOhOWXMJdM6CeqJ0Av5kLi
-         ec4A==
+        bh=Ki2OMFRAxrlw+OBGxKHQKH7ycmBBVTQveh0bKzrpyb4=;
+        b=jGGHfDpIPKXwA/1gASJ6A3aLKhMqWOXGRuAxd5Ev85vpeBNRlZbVvfon9O/ZKBRzW1
+         0AAuxW+Ju+KNclgXBz+l6OfyzKGHvodtGPnjurVAgvnPAihz57JrJQbV35bNpS7MGlZy
+         DU1wapqW66LrNbbFqzHSoQR5iX4oxUjlgE5YUPVo0wfvPX1VOIpDQyy+NZjEUQu1xsJl
+         Z9YtCnfeIilxPcpOCzFREOFh/zkXUZr31o38EelOudaJ/fPfeegbvWxOgUZMrQM6dQFU
+         Mn0K1ZnUzuk22T1BSqtSJrqBm1r2CnBFFk7Sw2Bw75HkpZdOvi5eh7tpTh5pD6465AFR
+         1w/Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707154157; x=1707758957;
+        d=1e100.net; s=20230601; t=1707154164; x=1707758964;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=NinqwOuC4qMofgGjRx8zD+hwpAO/q3k3rjwTwr+rC8E=;
-        b=XN/1CS0gWHZvHE0oNhqCssTufK3ByWZGU7QL1X90ZUSL+bfq6l28Eq4gyCeRlL9i3r
-         FxauDjvwasXpGgoXwWNEv2yJ1vwnvxJX1vI8XR7gnahNnYQAAko5ZTthSc8HQ49Fjkyy
-         tMe9LdUzsmIr/rxeaWn75wt0DqLjYfDrPyCj2lRCv2x/Txn/eQYX9t0sWPQfHhFr0tsr
-         PgZuHdCKHQlmCZeYRerxGjk7hmXIVsJ14ZW+15Yo72DFe5M/UocRRotEaNma2FVlCWoH
-         pobFSxoJwhAaYrFQo8RIhkSsn9gFpz/4566UNDuGZ+D8cWdiFXrhFXiy7ZB4/jm5KUGw
-         hcrA==
-X-Gm-Message-State: AOJu0Yy/XTfzEQ2YYi0uuJYHLYVOiMR1zH71nIeucgsl1H6ltdrO+JEH
-	TnscbBNGQhkokPXC4eK9TpFRAtbggh/Jpc6R5vgvddLC019ZUblCS50KPPgeLXRVm282zBU6W4k
-	zaAjGlkxfGy3BljEQ6vRiApgs2l+2F8Fo/WDytg==
-X-Google-Smtp-Source: AGHT+IFO9mSeOm3Uy+itY0C+eVUHYH1eSpbF967sxuZKmQRI4cYGC/XH3XcvJFqRFVwgUMTe4eDN+Hg2UXv7cY+7tPM=
-X-Received: by 2002:a05:690c:3686:b0:600:3a38:a815 with SMTP id
- fu6-20020a05690c368600b006003a38a815mr274401ywb.35.1707154157600; Mon, 05 Feb
- 2024 09:29:17 -0800 (PST)
+        bh=Ki2OMFRAxrlw+OBGxKHQKH7ycmBBVTQveh0bKzrpyb4=;
+        b=rdQe1KsqMmfBvBzatpodvC4IOh6g3TBFxYkZLwsSUiXLF03b3pFILILBbUWPVxhGtN
+         5/bAhYC/EtmrC1dL449uEGQRpzcmhi0t6KaL4Fb00MVSKLCqCOlk+tpllvWR1IrY/Oq1
+         UyJHKiHz6NfjHs3G0Ye2ERFG8GX4kq8SujXoTE36IukdviT74hGvT8+YIpLb3aHlO7HW
+         jis49CNCtGv4WAUpRryl42beScgHzzBvQUaJkj5ReH2YosfvZR3p+Exqzm6wTlJ3EyYO
+         gViwU4zykTiN6j0Pg0M8F+1kX2NY5I1rLUFpojnqVcdAUYhDv6qSjnikNZ5KcwUEAEnV
+         X4eA==
+X-Gm-Message-State: AOJu0YwRuRapuZEbtOHTSU9S2xk5FKQzhK3ggitE+KVZ3qjXet2XZ4X1
+	ezo3IpSY61kYT1kKsAwWSp+9EBWlV3wk3tBjePc5bz7JHtJe+z7cznhjB3ApgM90IMD4cIgdk4z
+	7aC4dHU5I1dIHlf3XJa9HbjRKnzk4+56SABYfzA==
+X-Google-Smtp-Source: AGHT+IHJ0bSwgVgKi9CF80Bt1Cco6PZ9KNY0zznjDRrM1zGPsHC4Y3lV/AsXifZpn4hO8tJQZqwqC2/GIdcA4wM2N6Q=
+X-Received: by 2002:a0d:dbc5:0:b0:602:cf62:6590 with SMTP id
+ d188-20020a0ddbc5000000b00602cf626590mr151874ywe.34.1707154163772; Mon, 05
+ Feb 2024 09:29:23 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240204-bus_cleanup-memstick-v1-1-14809d4405d8@marliere.net>
-In-Reply-To: <20240204-bus_cleanup-memstick-v1-1-14809d4405d8@marliere.net>
+References: <20240201-8qm_smmu-v2-0-3d12a80201a3@nxp.com> <20240201-8qm_smmu-v2-1-3d12a80201a3@nxp.com>
+In-Reply-To: <20240201-8qm_smmu-v2-1-3d12a80201a3@nxp.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 5 Feb 2024 18:28:40 +0100
-Message-ID: <CAPDyKFqkJjdc5vNr-wisTPXqf+2ORsBkcOZUS+LyaktpN-cCKA@mail.gmail.com>
-Subject: Re: [PATCH] memstick: core: make memstick_bus_type const
-To: "Ricardo B. Marliere" <ricardo@marliere.net>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Mon, 5 Feb 2024 18:28:47 +0100
+Message-ID: <CAPDyKFqyQxo+SSYb_+Nf3zcPcmhzCJSp69gJ15qexbuD_mJ=Yg@mail.gmail.com>
+Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: fsl-imx-esdhc: add iommus property
+To: Frank Li <Frank.Li@nxp.com>
+Cc: Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, 
+	Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, 
+	NXP Linux Team <linux-imx@nxp.com>, Wei Fang <wei.fang@nxp.com>, 
+	Shenwei Wang <shenwei.wang@nxp.com>, Clark Wang <xiaoning.wang@nxp.com>, 
+	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org, netdev@vger.kernel.org, imx@lists.linux.dev
 Content-Type: text/plain; charset="UTF-8"
 
-On Sun, 4 Feb 2024 at 21:05, Ricardo B. Marliere <ricardo@marliere.net> wrote:
+On Thu, 1 Feb 2024 at 21:23, Frank Li <Frank.Li@nxp.com> wrote:
 >
-> Now that the driver core can properly handle constant struct bus_type,
-> move the memstick_bus_type variable to be a constant structure as well,
-> placing it into read-only memory which can not be modified at runtime.
+> iMX95 and iMX8QM have smmu. Add property "iommus".
 >
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Suggested-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Signed-off-by: Ricardo B. Marliere <ricardo@marliere.net>
+> Signed-off-by: Frank Li <Frank.Li@nxp.com>
 
 Applied for next, thanks!
 
@@ -82,28 +86,24 @@ Uffe
 
 
 > ---
->  drivers/memstick/core/memstick.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-> index bbfaf6536903..23fea51ecbdd 100644
-> --- a/drivers/memstick/core/memstick.c
-> +++ b/drivers/memstick/core/memstick.c
-> @@ -164,7 +164,7 @@ static struct attribute *memstick_dev_attrs[] = {
->  };
->  ATTRIBUTE_GROUPS(memstick_dev);
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index 82eb7a24c8578..0d8ed9d055ffe 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -162,6 +162,9 @@ properties:
+>        - const: ahb
+>        - const: per
 >
-> -static struct bus_type memstick_bus_type = {
-> +static const struct bus_type memstick_bus_type = {
->         .name           = "memstick",
->         .dev_groups     = memstick_dev_groups,
->         .match          = memstick_bus_match,
+> +  iommus:
+> +    maxItems: 1
+> +
+>    power-domains:
+>      maxItems: 1
 >
-> ---
-> base-commit: 4e99ffb173faaf38f010acb369bff57a20e9e531
-> change-id: 20240204-bus_cleanup-memstick-071b3564d808
 >
-> Best regards,
 > --
-> Ricardo B. Marliere <ricardo@marliere.net>
+> 2.34.1
 >
