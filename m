@@ -1,108 +1,162 @@
-Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
+Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D65DDBE6F;
-	Mon,  5 Feb 2024 06:39:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C02DC125B0
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 09:25:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707115162; cv=none; b=qLaf1U0HKp35QCSuZRMejRO5nzaaYmYHJUIzWc/NcGyK8lDKgu3yfuHByqFrDj6BQpg+U8m/87uCSH87yRb3StKUeKX0It3YSa9f6cI0x8mGdJlOV2/hE+Xdu0pmbJxJ1IWID/45K2lztrrsMrNsaUAOTAhD1TfUsjBkEEHH3EU=
+	t=1707125153; cv=none; b=d5zRqHDKrOyz7wHBLSjBWZR65hDnXm71Gu/gji7U9gxo3/OlpYssNTuOPp5jGj7XBU6FNpZI593+pM/+bnNECzPtdkFovZnAtlNisTHzLSqWa4ICJZjtHcEBCMwCCBntRcCfudSQNzceDfbnXMZ/G3DzSWdJKylAUJXz0dCrvlU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707115162; c=relaxed/simple;
-	bh=qcVWKH/3nEI/rvDatUuvcvvZ2wEo+Ck8BQmU0bFEq/I=;
-	h=Date:Message-Id:From:To:Cc:Subject:In-Reply-To; b=oSJUsFg1177H4h/TcsHIc7jUMCDZJrGsqy5MqavaDlIxbVmisTmyEPwvNeB032NM4MbKfd8wTNlLMNDkQexpS40/VZMj5r4XNbsfjgz8w3T/qT8X8gdZwtdnlcYuOiXvPhtuzm6RsxkOS7vvD1TO4PkqMcIB1Qx1ojz29RDlDqs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FqvqrhiY; arc=none smtp.client-ip=209.85.167.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1707125153; c=relaxed/simple;
+	bh=r8g+eHSgjiF9g0nmTgJ4mQPRVegtLVu4y9NnuyDYMr0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Ris67GkVxDDrLie9RwhlQIrAS2DkI+9tBwwFnRJY9mP+cPxcnJhK1TgGcjLhzitkPwmfVu0Zp6bKM/DP1AhlzZV5ZflFilm2z1bA60/XpJkR3RZbWXwkagM70mFisn+A+8ghHWGFT/pUxn4NPISuSjrBbDeZif61lpMX8es6HYs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iiYS8Wnh; arc=none smtp.client-ip=209.85.218.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FqvqrhiY"
-Received: by mail-oi1-f169.google.com with SMTP id 5614622812f47-3bfd3db19baso579240b6e.0;
-        Sun, 04 Feb 2024 22:39:20 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iiYS8Wnh"
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-a271a28aeb4so589525366b.2
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 01:25:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1707115160; x=1707719960; darn=vger.kernel.org;
-        h=in-reply-to:subject:cc:to:from:message-id:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=80B/WhGvs9pxwgltxy45DuyYHfhArxRc1gr5mE7Omfs=;
-        b=FqvqrhiYEBn0Ui9SSXIFZ/a/lvy4/0xA3Ob7lDw/8GAr86nl74mrrDc0jLU4kScwuW
-         i6mEKeOIEFP8F32MvD/O6YwgCP7EXhiNQRE+HTPyjnlegFOSUdCmJLkcQLwzETfuQ+PS
-         4aRsHg9pu55hqeNFPpEjF3AtSkUpbaqAXt7co2jUlLA8F1OQBRcikMjI8gGhmJBfVPJN
-         /g29XFWCcO/WxWVJIvq/wvnyoD5jq2WsekfpOHc2bif4FAKc75LwXAsjwA9tlnGmVvqO
-         qK6X0Fa/JdxYkL7hmsixhetf71U6mJz9wCXp+myntcn+ycqwUnO8VawwWhmqADiUYmz6
-         g5Xg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707115160; x=1707719960;
-        h=in-reply-to:subject:cc:to:from:message-id:date:x-gm-message-state
+        d=linaro.org; s=google; t=1707125150; x=1707729950; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=80B/WhGvs9pxwgltxy45DuyYHfhArxRc1gr5mE7Omfs=;
-        b=NSQ4N41mx+eI2JU9KvnYV+bXJtBNo7uN8/e4GAi27seYh0bvShh104fPn/goaddD+S
-         jAWTK/FMO8Ah+eaZGIPPsWMLFSvs7Fm2TlwbJeLIL1xGDKQ5WkNwBGj2v/j11L/E7NW7
-         aDOq4ZJc+GVilo8XrafOnrXqYTtaOcvNnw7huFsJ8ABwlJe/hVUCxZnLVbK3BSKJsoyT
-         Aw4H5JCMUYJ6qOLbn2j3T0QNl5yf9rA/D487DZNPKnWDycegH1SpcTAzqQ0CuwPlFLTS
-         dbo+XxRC6rTWbidYU6sTTaT7S0WibryPmfT2N+tsF9RTNLopQSLEn6hvtBjZ9E9r8OLE
-         4NGQ==
-X-Gm-Message-State: AOJu0YxkC0frUOQCDRzrft4Uxe4PJu0SR8AhZyuWVcmtw0vGzhK8mvLy
-	HSqVttq8YmvJGhBZrFGrd+Ehq6K+9JZ7sRu50dSZYsj0VH0SELBh
-X-Google-Smtp-Source: AGHT+IHN1X0Jw72TKls0GZditcDCS/YmNqJ23Qpuxd9U4fjssO1jlmoXlKipCftvKsP8I/4ymVibWw==
-X-Received: by 2002:a05:6808:19a:b0:3be:9c36:53c with SMTP id w26-20020a056808019a00b003be9c36053cmr10378659oic.49.1707115159718;
-        Sun, 04 Feb 2024 22:39:19 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCV37yf3qQUX/OafFFMHXgkwfylrPqCQGGFvs8TdFNnrp2Ef7EKSWB6UxapyyaUkIhSSzvrrVVYGltM46PQslcD0HcCGbQqVa1pn4IDv46UbefJmOHPt8eYS5tnGnoXOjTR2l+6Ri/Pc1pJlqiewsktPxYVzRZLP8ETRkjneYEqbOFAZyvHLsKBH4HnfqXBxDhq/NcFdYTFvaBVI3Os8u7FrThF49toIEo0dxi8qIPvTclKNuPO/ZfOVBug=
-Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id k7-20020aa788c7000000b006e03d955c6dsm1843778pff.60.2024.02.04.22.39.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Feb 2024 22:39:19 -0800 (PST)
-Date: Mon, 05 Feb 2024 12:09:08 +0530
-Message-Id: <87il33mn3n.fsf@doe.com>
-From: Ritesh Harjani <ritesh.list@gmail.com>
-To: Jeffrey Hugo <quic_jhugo@quicinc.com>, adrian.hunter@intel.com, quic_asutoshd@quicinc.com, quic_bjorande@quicinc.com
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, Jeffrey Hugo <quic_jhugo@quicinc.com>
-Subject: Re: [PATCH] MAINTAINERS: Update bouncing @codeaurora addresses
-In-Reply-To: <20240202163038.4080702-1-quic_jhugo@quicinc.com>
+        bh=6QV+XeC6ubFiQQJ74+6ol4pUfjV2yc7chI3YNp7Olo8=;
+        b=iiYS8WnhjBnz0FwZNXl+K3PprBbOC3mR71HUDOc1N0sAPbFKQ5D+N0M6JWY5adXcdU
+         dL46/RHYMIpgaZlCyT20xLwa7nKQiCw1uAj3iE15y8Uh2lNBY6qN1ORtVUXh2Hqfph2X
+         bchBpw/G69TivfZvzOrwCal8dgSoRogxd97nV/J0QOPz6wpozKHP0nc2U8eUBXQU4JYq
+         PpyoSWYwI3iwSElgxPUHBerHOs2UYUIj7sz207Lqd0hg888j5zadEdoNtjKRaP2u3Wsf
+         e8c+koA/EDmA/ZcD5DuwKZYl+/SBeZDL+qsKmlGcBojyMwpWRSpW+xy2hNM5/AtYvrjg
+         JRgQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1707125150; x=1707729950;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=6QV+XeC6ubFiQQJ74+6ol4pUfjV2yc7chI3YNp7Olo8=;
+        b=trbYZzU1BuPPVR0ebXUyuLawQiJJltnkYlP/uqUXFbDWKrfDP7GKAZgcw2Erso+6Oe
+         ArhEvQSzzXdyXhnhrzqnarAGnIdOOjSAao85udvVtlultzsdwhXHoofYvV8872hgw9Hz
+         QxZBT1GmtPJ+7z0RbTsFFZ+w4fdi+cZNxRwR8C2x5emb1SR0wTIrJQ9L3LQ2qB3ckl/l
+         vTZ2aeJUQZhTdYSXGYEmc2sRpGTtA94xk6jhv8X78aK1p3Gx+cNJ2jesT3pC/wvM1cSf
+         AS4OmdKhkdeyHURNFvrImqynsbJmqPW2w39SUJ1UNoAQ8vSO1/10pvSrlCtajRX53HOu
+         y9Ew==
+X-Gm-Message-State: AOJu0Yw7j2Uq7zVMfUFNht2mbcTsfElddjVZjfXc3DzAG4i416RLX2X/
+	bBRynDyny3jbGdrEeYZgqf5TAGPMlyLp/RfAoUQRGsmjzSwgsGno+T+GeRGXk1c=
+X-Google-Smtp-Source: AGHT+IE2MQhoAt89scFHj/wrtjFO4zJ9cQnhg7w0vM91XGipr+7PW8DTnaFfV0jSE7oJzGm8lG0Tzw==
+X-Received: by 2002:a17:906:2811:b0:a35:8596:cdc7 with SMTP id r17-20020a170906281100b00a358596cdc7mr6875088ejc.31.1707125149973;
+        Mon, 05 Feb 2024 01:25:49 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCUDFi3Cn/azmODAVzhSKcUV6kDomsUgIBuf8gO8Idw7Ox6Y2wDURHVe9d5J9J+yu4RbzHMumjoeFtuEazZc3aF6SxYHB3wqPnin26XVRJwiDPqzhHjoi2RTGER37STwrtpBvesvDK0qMKzzBsGzV2auSyLuR709eJR6hKcurbm/CXerHokrD2+rodCqCgWFtBHogXSiKiZKc9aSXY/5ghC/YTHD9F3QizreGk34IJvuWX04nwmpK0IzsuPRi0Cw0OHdEcLsBbXuVlD/NZwMI5nrRB6/2xvBYCy1fURaaFOo09lNcqErgps2jjgumv9P0G4kcKqnF6DdX+lT3xZTs6G12CEr9GeUBOxD1b8U4NlszpyeN9JrfJdPz+uUtQSZ84KF1UYHTPKLInygcLv127xvVjVAw1b8YoUMpZukMRcQtHzC53ouV3YTIIFNaCOQolmMznovEy+oK72cx/Rfyt0gVycTeukcEmkbivTggdpsFtENPa5s5FBg95QabD3PsBq+UoZ5mzuEUukaL6PQuHoGx1stdBilgUsLC+mg/4cvfYVkHc9mtJLEplAehDk0TmyW7DXmAcOnrksEeYowSJvvFIEr4bb38MxTrBJ16ex45ZCGYw3nWI2UgkX8aItJxijXfOMJJpfdInQL/h5ECRIjJ9BrAwwHGH84ZbVXhYCXzRmPRFcNfPq30NsuFA41EhRo8p6mwHNVTnOL
+Received: from [192.168.1.20] ([178.197.222.62])
+        by smtp.gmail.com with ESMTPSA id tj13-20020a170907c24d00b00a370ea0ab84sm3780825ejc.124.2024.02.05.01.25.47
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 05 Feb 2024 01:25:49 -0800 (PST)
+Message-ID: <65097032-74d4-4617-8ef6-e1f76b41cce6@linaro.org>
+Date: Mon, 5 Feb 2024 10:25:46 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 0/4] Add 8qm SMMU information
+Content-Language: en-US
+To: Frank Li <Frank.li@nxp.com>, Jakub Kicinski <kuba@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+ Conor Dooley <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
+ Sascha Hauer <s.hauer@pengutronix.de>,
+ Pengutronix Kernel Team <kernel@pengutronix.de>,
+ Fabio Estevam <festevam@gmail.com>, NXP Linux Team <linux-imx@nxp.com>,
+ Wei Fang <wei.fang@nxp.com>, Shenwei Wang <shenwei.wang@nxp.com>,
+ Clark Wang <xiaoning.wang@nxp.com>, "David S. Miller" <davem@davemloft.net>,
+ Eric Dumazet <edumazet@google.com>, Paolo Abeni <pabeni@redhat.com>,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+ netdev@vger.kernel.org, imx@lists.linux.dev
+References: <20240201-8qm_smmu-v2-0-3d12a80201a3@nxp.com>
+ <20240202110511.135d26b7@kernel.org>
+ <Zb1sijexWGLG5gcH@lizhi-Precision-Tower-5810>
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
+ 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
+ D2GYIS41Kv4Isx2dEFh+/Q==
+In-Reply-To: <Zb1sijexWGLG5gcH@lizhi-Precision-Tower-5810>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Jeffrey Hugo <quic_jhugo@quicinc.com> writes:
+On 02/02/2024 23:28, Frank Li wrote:
+> On Fri, Feb 02, 2024 at 11:05:11AM -0800, Jakub Kicinski wrote:
+>> On Thu, 01 Feb 2024 15:22:40 -0500 Frank Li wrote:
+>>>       dt-bindings: mmc: fsl-imx-esdhc: add iommus property
+>>>       dt-bindings: net: fec: add iommus property
+>>>       arm64: dts: imx8qm: add smmu node
+>>>       arm64: dts: imx8qm: add smmu stream id information
+>>>
+>>>  .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |  3 ++
+>>>  Documentation/devicetree/bindings/net/fsl,fec.yaml |  3 ++
+>>>  arch/arm64/boot/dts/freescale/imx8qm-ss-conn.dtsi  |  6 ++++
+>>>  arch/arm64/boot/dts/freescale/imx8qm.dtsi          | 41 ++++++++++++++++++++++
+>>
+>> Any preference on whether all these go via a platform tree,
+>> or should we pick up the net patch to netdev? I guess taking
+>> the DTB via netdev would be the usual way to handle this?
+> 
+> Supposed dt-bindings go through netdev tree.
+> 
+> without dt-bindings, just DTB_CHECK warning. No strict dependence
+> relationship between dt-bindings doc and dts file. 
 
-> The @codeaurora email domain's servers have been decommissioned for a
-> long while now, and any emails addressed there will bounce.
->
-> Asutosh has an entry in .mailmap pointing to a new address, but
-> MAINTAINERS still lists an old @codeaurora address.  Update MAINTAINERS
-> to match .mailmap for anyone reading the file directly.
->
-> Ritesh appears to have changed jobs, but looks to be still active in the
-> community.  Update Ritesh's address to the one used in recient community
-> postings.
->
+Please make it easier for maintainers and sent entirely independent
+patches for different subsystems in SEPARATE patchsets.
 
-Thanks Jeffrey for the cc. Since I am not really active in linux-mmc
-anymore, I would like to propose to have a Reviewer entry (R:) for
-myself which I can try to help with.
+There is no dependency here between anything. Combining it, OTOH, brings
+the questions about such dependency and makes it a bit more difficult to
+apply for each maintainer.
 
-Is that ok?
+Best regards,
+Krzysztof
 
-Thanks again for taking this up.
-
-> Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
-> ---
->  MAINTAINERS | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 1e5dfd169a19..ac7e524cd8f8 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -7803,8 +7803,8 @@ F:	drivers/media/usb/em28xx/
->  
->  EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER
->  M:	Adrian Hunter <adrian.hunter@intel.com>
-> -M:	Ritesh Harjani <riteshh@codeaurora.org>
-> -M:	Asutosh Das <asutoshd@codeaurora.org>
-> +M:	Ritesh Harjani <ritesh.list@gmail.com>
-> +M:	Asutosh Das <quic_asutoshd@quicinc.com>
->  L:	linux-mmc@vger.kernel.org
->  S:	Supported
->  F:	drivers/mmc/host/cqhci*
-> -- 
-> 2.34.1
