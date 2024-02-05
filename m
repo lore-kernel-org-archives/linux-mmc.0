@@ -1,127 +1,148 @@
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4A79224EC
-	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 14:51:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70DD6208CF
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Feb 2024 15:29:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707144694; cv=none; b=JKQjGMLulrDJOY0NUWad/JELG8JbfK9sTdC5y60ZN7EO7gptEgPt0T7NYMdXcxufzNJMSowEYFfz/7lrh9sj8nQHtQ9zQ0lWd+8bfTEd/dCSkeax9CuVnIH24httv2w6gRtMAsawLf1clPT2ZBZyn9q4MMHVV1tH2I6LwBZQRpM=
+	t=1707146949; cv=none; b=qRwNUR/oB2HA6I3D90V/Az7V8ixjpWtKoij0Btcm62odX1eXzT4LtoVh5eKVkwXuDs3cPVLPOaKx8+vo64rgU/cDuj8q6MQYZZ2lnc1kf3mGXmknHNHWmKcIDT9HsVVRAc2zgpSwF2ZFnTT/aLhJHvPzQvh5w0U4WdKXERb1abM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707144694; c=relaxed/simple;
-	bh=/evvuSLtY+5ZoydW8IlFA6frLXp7QJTRcPWzdwiRF8A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ltVUEiwtg3RJzUd1zmDwCcFPoaq813m72q6mF5ovGua6SBRfbr7zsZBvKxiVGPY62xbVneVhJcFRSFfmslGEnH0e1rsMlYe32/Mg5YSu0MlL49h7WTx95iXf5HGudkEG9mROcbMkuXil7FjKGK08ZO9TV+BuTd+sq/9YdGfr2pk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=ZItH0I+L; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1707146949; c=relaxed/simple;
+	bh=d6wbAM4aDdGGjpQwVdYrM+oOfAbd3RxgpP6Abo8fpgg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=a6greeLfVTsh/78T8tKbG83AucojlRwsQ6xPLdtJlilXEzrcE+LX8bHvm6NIMxDvfS/iLurbZFHubwfcBUrRhz+ONmrk3SL/DHGH5GwtkT/Zs0jlPRCYtmi2aAwYqnet+R2APQ2SppWNJKnVFqwGrwhB2eLZmDbtabOWBUjZ2TY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oV9v9qBR; arc=none smtp.client-ip=209.85.219.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="ZItH0I+L"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=/evv
-	uSLtY+5ZoydW8IlFA6frLXp7QJTRcPWzdwiRF8A=; b=ZItH0I+LEt56ufdr80j4
-	by/IqZPXbenTlzRFQ8Iem04x/XIQnFibX/QdvokHp1MZngLjcgUOkrWAUsxlk9yK
-	eHfeInVf121342z10nRmwqZu1DsnaVqSLPH2LDklpJYCKAKuW/A1v56odz3chvdz
-	x90npaS6OMhVfDB45jr+I+VLnAsfuGfwIzWIeVJZsL671EVRKl/LSli4G5y9XYlb
-	GcPw9I/IJsBp3i8Og7DNGDMcMFPXASqnkZIl3nsBX+Ek6Og7Lup54uLx+aDfTq5i
-	78O4+r9sJaXjrxspv38RFEAQdkYTiVFnTTViAU9tA+e9ilGxKttmF/sXUgXJ2+gT
-	fw==
-Received: (qmail 855922 invoked from network); 5 Feb 2024 15:51:27 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 5 Feb 2024 15:51:27 +0100
-X-UD-Smtp-Session: l3s3148p1@81qjmKMQyrcujnsZ
-Date: Mon, 5 Feb 2024 15:51:26 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: claudiu beznea <claudiu.beznea@tuxon.dev>
-Cc: ulf.hansson@linaro.org, yoshihiro.shimoda.uh@renesas.com,
-	masaharu.hayakawa.ry@renesas.com, takeshi.saito.xv@renesas.com,
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Subject: Re: [PATCH v3] mmc: renesas_sdhi: Fix change point of data handling
-Message-ID: <ZcD17mTRnfIaueAW@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	claudiu beznea <claudiu.beznea@tuxon.dev>, ulf.hansson@linaro.org,
-	yoshihiro.shimoda.uh@renesas.com, masaharu.hayakawa.ry@renesas.com,
-	takeshi.saito.xv@renesas.com, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20240205112702.213050-1-claudiu.beznea.uj@bp.renesas.com>
- <ZcDdn2AVz8FIXzak@shikoro>
- <237bd5c8-184d-4e46-ba66-253e3ef0c895@tuxon.dev>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oV9v9qBR"
+Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dbed179f0faso4150365276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Feb 2024 07:29:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1707146946; x=1707751746; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=TrhbdBjpZYfHwabFxcHUce9eaBfUeDV85cQjXOpQbCI=;
+        b=oV9v9qBRPNqDuoRbB1xXmkMmcNi+m5WFW/4JVEv7v8RXu7DfSXj2+NZsaroUjfzGua
+         AlTZpJFnllXcx2ysCssF5Kcz9cwGbKVjFVO+mTeFWhnpXj2xzQE/POvbVthaQEgkuYco
+         QgAmQnGWc5K04wLPnpHssnizu/Afytrp3iGLYr8xracsCfPYOPiBvmy/qDRqqyvMGk0D
+         X9LOeeS9By/rVlmBmBBUKW9ukTdA/CAQZOkE89iVFlLgAcnNetx47ElyxYb6v9sBrV6s
+         TvwxBJTSCHh0EttjVJ+6Z6QTgaaeIVbHhIj+YAglmUxs3c71In8PD6jTwUlChM4lwedY
+         zEKw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1707146946; x=1707751746;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=TrhbdBjpZYfHwabFxcHUce9eaBfUeDV85cQjXOpQbCI=;
+        b=nsxZ2LN+C02fIbFtDeiXX3PMHxrq9phSSdqUcsu7kZs0UV2f7+dNnjajLYFgdEXwIR
+         mYjGn4RJ7cS0ClzBprAJkDaXROtjY3foZfKStfN7CTN1fD5V6B5kyM3TW2Nnjk3Q2k7J
+         Xt8JAFh/izzMzbEhYssiNQTT+H4m8bgY1Fd4Alh8OARnewMXn41wt2fTdAWjFAOyYKTG
+         7TCVxO3zQ8rRNyHDx3n0hTOehg1AaMmYKyDYXpi01+StshnZvPhjSmfQU3j4xVRzDLGd
+         +0uSbWaWT2TybGYpzvXg0t/qXlXVi5Khu1wn/ykq5MO96HI3erWoxUst1ircSNUo4f5J
+         0emg==
+X-Gm-Message-State: AOJu0YxaKcVgCQQqSM3wMjlUjP77eHU/Yqoc3o23DtjmtveNWLYnLeys
+	Jp6W7swZzwCBx8dbsZ8GLwyEvvSIozsRVSrQ2DtI5B5h9++/+WLzOV5KSzN4T/wkJXr8qulkxP0
+	yYCwRiHG1uW1VCNPzO6PkJth+Tr7UVRKXF816nw==
+X-Google-Smtp-Source: AGHT+IGQelaOobngFU1ZPvjGKsCZvVU+JjK/jTUi8xxoCrI3yWT4zVOL05macztiXBw8WDb6KcVSC1q23xmXAsKu+PU=
+X-Received: by 2002:a05:6902:2784:b0:dc6:a072:bc8d with SMTP id
+ eb4-20020a056902278400b00dc6a072bc8dmr3134ybb.21.1707146946296; Mon, 05 Feb
+ 2024 07:29:06 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="qEqW1x4AbDvxYxZ7"
-Content-Disposition: inline
-In-Reply-To: <237bd5c8-184d-4e46-ba66-253e3ef0c895@tuxon.dev>
+References: <20240203102908.4683-1-fredaibayhubtech@126.com>
+In-Reply-To: <20240203102908.4683-1-fredaibayhubtech@126.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 5 Feb 2024 16:28:29 +0100
+Message-ID: <CAPDyKFrt80WPeCGJZsQaCsN5a+95ru6rKnQb3kPODMkU1G6Ocw@mail.gmail.com>
+Subject: Re: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: Fix a warm reboot issue
+ that disk can't be detected by BIOS
+To: fredaibayhubtech@126.com
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux.kernel@vger.kernel.org, shaper.liu@bayhubtech.com, 
+	chevron.li@bayhubtech.com, xiaoguang.yu@bayhubtech.com, 
+	Fred Ai <fred.ai@bayhubtech.com>
+Content-Type: text/plain; charset="UTF-8"
 
+On Sat, 3 Feb 2024 at 11:29, <fredaibayhubtech@126.com> wrote:
+>
+> From: Fred Ai <fred.ai@bayhubtech.com>
+>
+> Driver shall switch clock source from DLL clock to
+> OPE clock when power off card to ensure that card
+> can be identified with OPE clock by BIOS.
+>
+> Signed-off-by: Fred Ai <fred.ai@bayhubtech.com>
 
---qEqW1x4AbDvxYxZ7
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I assume we want a stable tag to be added to this, but perhaps we can
+also add a fixes tag? In that case, what is the commit this is fixing?
 
+Kind regards
+Uffe
 
-> > According to my understanding, we should only mark this TAP good if it
-> > is in the range 5-7. I need to double check with Renesas, though.
->=20
-> OK, my understanding is that it should be in the middle (beginning being
-> the tap that triggered change point of the input data, end being the next
-> tap with the same ID). This is what I understand from this: "As the width
-> of the input data is 1 (UI), select TAP6 or TAP7 which is
->=20
-> *the median* of next TAP3 from TAP3."
-
-Yes, I agree. With 0x0e, that means TAP1+2+3 are changing points and we
-should be far away from them, like 5-7.
-
-But: I am still waiting for Renesas to answer my questions regarding
-SMPCMP. I'd like to get that first, so we have clear facts then.
-
-> > Boot failure is one test. Read/write tests should be another, I think.
->=20
-> OK, I'll try also read/write. Do you have in mind something particular?
-
-Nope. Just consistency checks.
-
-> > Because if we select a bad TAP, bad things might happen later. To reduce
-> > the amount of testing, read/write testing could only be triggered if the
-> > new code path was excecuted?
->=20
-> I'm not sure how to trigger that (or maybe I haven't understood your
-> statement...)
-
-I thought something in the lines of:
-
-- print out when you needed SMPCMP to select a TAP
-- check the log for that printout
-- if (printout) do read_write_tests
-
-Dunno if that makes sense with your test setup.
-
-
---qEqW1x4AbDvxYxZ7
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmXA9eoACgkQFA3kzBSg
-KbZncQ//f/ax+lI9WQAUTFM3v2A9bA6nLjRcWJr9G/EpZeEtrNs4C0OakdRE8Gwi
-CLENdlS9pUSVUrHyfjv1LXo/SD+xcj3tHL42yDJ3m1zStuh2Vu3mvvvhcnFX+qcq
-5EUjvtHpGfSg5QokJ0AV0U22DXeJOHWOXJK/PS+OnR9He66Xm+PC9PxFea5rzVQw
-0xBqz/uUKC1jSqIWMHniAKsHh4sWMi+hgKdfdG9n1AbW89ofU8A3wN7PyggZIQz+
-vYJvQgVuhfcr7hgLVo3wrayWfZfPpolF2Sbe6ThIWTEm1ZmDUAmM8buJ6vWKZwbl
-e8k0JknLSRfrI+e09x57IbHDqx8O4e6kgIwQ5H/jlel3q236bWaLszRetw86IW+K
-t/2kiny7aPRM2msFGoaefXtwDNSTBzLS9HIjoWlZUAkEzNozv+PTsKAczXheI0bu
-ouZOPam/L9V49PaSrijs2d4+SKHiuRrP/QDA993SCIRmQ8eFTkGfpVpRnTyM6+Gd
-xqzBzWI/U89x5U0isr0lZDlfiFs3IyVIdnSa+thcdaaUzJOYnN6axGvR5vYhNujR
-zv7ptO3ZpetT7IodiYyIxXDo+zuesne9yj4X3HWnFiyuivBqauedUqtKHtgQeRqL
-kcav4NdwvzUdqRN/HxDgLu81KXlwibniQEK0edE/M26kCl4jMCs=
-=5JaQ
------END PGP SIGNATURE-----
-
---qEqW1x4AbDvxYxZ7--
+> ---
+> Change in V1:
+> Implement the "set_power" callback in sdhci_ops,
+> then switch PCR register 0x354 clock source back to
+> OPE clock when power off card.
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 30 ++++++++++++++++++++++++++++
+>  1 file changed, 30 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 7bfee28116af..d4a02184784a 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -693,6 +693,35 @@ static int sdhci_pci_o2_init_sd_express(struct mmc_host *mmc, struct mmc_ios *io
+>         return 0;
+>  }
+>
+> +static void sdhci_pci_o2_set_power(struct sdhci_host *host, unsigned char mode,  unsigned short vdd)
+> +{
+> +       struct sdhci_pci_chip *chip;
+> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
+> +       u32 scratch_32 = 0;
+> +       u8 scratch_8 = 0;
+> +
+> +       chip = slot->chip;
+> +
+> +       if (mode == MMC_POWER_OFF) {
+> +               /* UnLock WP */
+> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +               scratch_8 &= 0x7f;
+> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> +
+> +               /* Set PCR 0x354[16] to switch Clock Source back to OPE Clock */
+> +               pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
+> +               scratch_32 &= ~(O2_SD_SEL_DLL);
+> +               pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
+> +
+> +               /* Lock WP */
+> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +               scratch_8 |= 0x80;
+> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> +       }
+> +
+> +       sdhci_set_power(host, mode, vdd);
+> +}
+> +
+>  static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+>         struct sdhci_pci_chip *chip;
+> @@ -1051,6 +1080,7 @@ static const struct sdhci_ops sdhci_pci_o2_ops = {
+>         .set_bus_width = sdhci_set_bus_width,
+>         .reset = sdhci_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+> +       .set_power = sdhci_pci_o2_set_power,
+>  };
+>
+>  const struct sdhci_pci_fixes sdhci_o2 = {
+>
+> base-commit: 56897d51886fa7e9f034ff26128eb09f1b811594
+> --
+> 2.25.1
+>
