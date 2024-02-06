@@ -1,148 +1,331 @@
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEC9612F384
-	for <linux-mmc@vger.kernel.org>; Tue,  6 Feb 2024 11:59:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9004F131740
+	for <linux-mmc@vger.kernel.org>; Tue,  6 Feb 2024 12:34:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707220790; cv=none; b=nM3TN26d0Ayx63Y5pvBWIKKrVspO5AqRyrP+pmQ6scxOppz8N8x911P1mC/gBKAvH9jT0rJru+tX+IWqZtOojRrCDU6PqG+TqFu8HtRsetD7S6NsTI0P+U6+CSV0UqF9IsRaEW3iHmzc5qUgibx1/bWeVIlKT9zK8XrhMlosAvA=
+	t=1707222846; cv=none; b=FynrlbKsA8yUbqy0bvpmN4A3/4OjmxlKI0lasrrNEKEMhpaZLiDbkufW4HFbyDMnNwrbuZnOSGkXi8U3HdT6IaBxfPaMvz4AsIUuo5LS+lpjFUCnrIKNoTd5/6zDpMdFt9m3UYec2d8ViWor904amZZqs849VdBtdFNTxRvL30Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707220790; c=relaxed/simple;
-	bh=EtsT4PQhPQG5JWztb0+mi4R2d7ka72NiRj+QIgwDG5g=;
+	s=arc-20240116; t=1707222846; c=relaxed/simple;
+	bh=3sLJ2sl2D1Oah3+ouhgAEdp1SXatnOmvgV7IWT1hVDM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nmL5Kr3YNFxW6fN/pOhILLcI6nAwRPLmdZXdC47Vy5GCNQnJBvkMe1SqZpzKjw+kjjxdGgXWyxirhsV/OPUdQmShG2/0LvX7ZF9fWBWLKsKT/vc7qyKQTH13p3+Fn6mG8hnRWBcKPTo/w55wYSqg75eF7Y0XVF9MRtmDctjDj18=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GtTxLIMz; arc=none smtp.client-ip=209.85.128.178
+	 To:Cc:Content-Type; b=FPHxcPCeBEUqYPUyURtDdHEhk+q7vu04iTZFQ2uCTOKpMsOq9fnBWVrNzxnPKFFtDiHokm5kp1TxxQ0gW7XY6P07tUf2NatA5B7pSD558g+P8lYGqRdT1+Z/UBNSfSa3lw1H9FVVVu6+us6fUO+s3zMv1qlqUhgQC23VqPMx1cg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=AUUrpDz4; arc=none smtp.client-ip=209.85.128.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GtTxLIMz"
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-604713c4ee5so12218367b3.0
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Feb 2024 03:59:47 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AUUrpDz4"
+Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-6047a616bfeso5523377b3.3
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Feb 2024 04:34:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707220787; x=1707825587; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=CNhycZjEYpR/VohePuZrM34Prmw23zgM6uVQKrTP5kw=;
-        b=GtTxLIMzLdlaDjq/Bw5H46F0QD6Zysg6LeAx7+TINdOecjHhufuiBCKu3WYEAEL1tS
-         nbkE8nZT83JydFmCmwha0ZT3mKKDxDs2fYVBjlaHbbomFJc/QPbZjoKMd5Zra4gl72+K
-         +sTlNTtcj9sHUnkMFgwXqw+zaPRrx6/nSWpp54I5LwKF3pbvnAIXEeWfdIusrOX/777U
-         8WnOa1J0b3dZO4NhnqUbdaIwRPNEHsVpM6CEtfXrlI9zizyxVOxIriBnS4irdjrIpPc2
-         bpgaqOy+ZSO7+KY2pHW0112AITamvma9DRzckOjtpq1Ig3BxB/ywNJWx/1AkeXNu1HDH
-         qEqQ==
+        d=linaro.org; s=google; t=1707222843; x=1707827643; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=gFY/t9ZvMmydoyHyTCZk9/AaeOGiThxuGUqkKGbjuF4=;
+        b=AUUrpDz401hxkiKSY1LShgREcyavqVYM5oOgwFLBuu9bdRLK+oWIJbnXP4qL7tRuVc
+         IDyofd7C0bokN7TvTGO+bEzpVM3w8ZBvkDI0xm+HLsdqeniWTDnDg9RYTvmhQ/RrT8fg
+         ThCPHmYqPysVRBDoME6eGEYy739WmwCVneCDin+33YNPEa4ICeNAXGicz1r0LCyqmN+M
+         rhw3PrDe1yNvog07OUG4Py8sEYOUwBnza74LnJY+R0Ho65FGspECWZT0eeQCtZPg9FXb
+         aKMAPXkp0qZKUbbpaQAkkzGYx8c7MiPedQGAznjhoUsAGovg1R1wb8DyEgQN12Q7D2UD
+         VaOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707220787; x=1707825587;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=CNhycZjEYpR/VohePuZrM34Prmw23zgM6uVQKrTP5kw=;
-        b=pLFqGe9eOjCk1rLgeZHbau4wPGVfp34ve3nJmdWvcumNxntBgtLTtswAhCZ+bre6Ut
-         QUYy35NiJgU6+oZWgJMeieUM6zZO5/KzE4E8siYii7PrDlCbOj1TJg+pa0EIAoan6ECD
-         9on5rfWyNkPSBAKN8DeKOZQfflM1gjOI+7Sc3golvC2N6dmghdEdlOL4bwsj+hts9lAj
-         TYHdkkkEFBytJ1pnUACrdFO5AAJCE8HKJUxZU5EKOYUBZLlCT0THliTzwSzJl8vslDPT
-         mQ3ZAAmPjSUHF0WC/XsVVvuP9K5WxWVx/SxJCuoMxDL4gsCTb97zMeYHgPig0hsT3iqu
-         tF3Q==
-X-Gm-Message-State: AOJu0YxSfoQg7PCax2AxA15IBjWly8KfkL9JyPGRJXLg7nAzkQwBurEN
-	/ikS1Fyse4crmLhZA+HeJZfdqhst9Xp/PAmxl9xCmKY2gbgQOX/26TuxJdxh65C9oe0INbHrL1y
-	1OcsgKc5DrW+81Eq4MzJ6hs/YnijH6Z5e5fP+kw==
-X-Google-Smtp-Source: AGHT+IGp4zSfVN0bhdWn/BNXPVm1N0DQtGd+SBJSrjS/zOeOsHkJO47hbNHRq2jlyZogmxAAIrtYFkDNTHHiPQLWpKw=
-X-Received: by 2002:a81:b3c7:0:b0:603:bc00:b469 with SMTP id
- r190-20020a81b3c7000000b00603bc00b469mr1635531ywh.11.1707220786825; Tue, 06
- Feb 2024 03:59:46 -0800 (PST)
+        d=1e100.net; s=20230601; t=1707222843; x=1707827643;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=gFY/t9ZvMmydoyHyTCZk9/AaeOGiThxuGUqkKGbjuF4=;
+        b=h6e3pSPbSzRX/e8ArurGYxMsBC3iKXYtHPsmZ2pJwwBIzmjpIVv+R3EpKBk/AIW8ZC
+         f4RGARIj3md3LOOn5tfqxc0unEZabsqkEuEnllVZTwQvY5AiMEFbEYDOicG2vz0KO2cI
+         Xn6fI7zAr4xyqf1ojcVygL1uCfeZQYuHWkiKaR3Ju26qnVeXyO/xDSApZ58xJ0nkYOv4
+         hdCrPO+voRTC09kNh337qe+hDN2VovuPk4jBNonKnKnvp8/14hrs4A3t+MdPoP9kuG4r
+         zxe6xC7wRYxd7SsqKN0hVfhqyBR46rmnlqVcq7+amN4CeDlin6RgU7KTAU0W3GUBopHn
+         DasA==
+X-Gm-Message-State: AOJu0YzPc/9rnQ0fy5wgONrESlO67FXAy4GkfvG8JfaxW/XpInRGBxfk
+	sX1v9a/VzI+LmN58vUfvvqaZjg+OwuUs8ki9WwBBSPEHe9XeZCTWDfhqJoAQvX6BUR/UFXpkGWu
+	nUbd0SfByZQssTAelcxBRISUP6mezhnzee7lr2xqH9ytgNweHtEs=
+X-Google-Smtp-Source: AGHT+IFRBh8X15m6VgLIbkSPGJc+OX0ewE98A+qNzCNrmr7jOphNRhDfAeLWE9zEEP4I5O/hi5U3D44ZbgSbHS73lXs=
+X-Received: by 2002:a81:e808:0:b0:604:7bab:dacd with SMTP id
+ a8-20020a81e808000000b006047babdacdmr1392728ywm.0.1707222843467; Tue, 06 Feb
+ 2024 04:34:03 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com> <20240127232436.2632187-4-quic_gaurkash@quicinc.com>
-In-Reply-To: <20240127232436.2632187-4-quic_gaurkash@quicinc.com>
-From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
-Date: Tue, 6 Feb 2024 12:59:36 +0100
-Message-ID: <CACMJSetM_JQ+1bTEszc4EtaUwb2iKkbg3WFWVTsXa14KD_VKCA@mail.gmail.com>
-Subject: Re: [PATCH v4 03/15] qcom_scm: scm call for create, prepare and
- import keys
-To: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Cc: linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	andersson@kernel.org, ebiggers@google.com, neil.armstrong@linaro.org, 
-	srinivas.kandagatla@linaro.org, krzysztof.kozlowski+dt@linaro.org, 
-	conor+dt@kernel.org, robh+dt@kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, kernel@quicinc.com, linux-crypto@vger.kernel.org, 
-	devicetree@vger.kernel.org, quic_omprsing@quicinc.com, 
-	quic_nguyenb@quicinc.com, konrad.dybcio@linaro.org, ulf.hansson@linaro.org, 
-	jejb@linux.ibm.com, martin.petersen@oracle.com, mani@kernel.org, 
-	davem@davemloft.net, herbert@gondor.apana.org.au
+References: <20240131174347.510961-1-jens.wiklander@linaro.org> <20240131174347.510961-2-jens.wiklander@linaro.org>
+In-Reply-To: <20240131174347.510961-2-jens.wiklander@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 6 Feb 2024 13:33:27 +0100
+Message-ID: <CAPDyKFqNhGWKm=+7niNsjXOjEJE3U=o7dRNG=JqpptUSo9G-ug@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To: Jens Wiklander <jens.wiklander@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
+	=?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Sun, 28 Jan 2024 at 00:26, Gaurav Kashyap <quic_gaurkash@quicinc.com> wrote:
+On Wed, 31 Jan 2024 at 18:44, Jens Wiklander <jens.wiklander@linaro.org> wr=
+ote:
 >
-> Storage encryption has two IOCTLs for creating, importing
-> and preparing keys for encryption. For wrapped keys, these
-> IOCTLs need to interface with Qualcomm's Trustzone, which
-> require these SCM calls.
+> A number of storage technologies support a specialised hardware
+> partition designed to be resistant to replay attacks. The underlying
+> HW protocols differ but the operations are common. The RPMB partition
+> cannot be accessed via standard block layer, but by a set of specific
+> RPMB commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
+> partition provides authenticated and replay protected access, hence
+> suitable as a secure storage.
 >
-> generate_key: This is used to generate and return a longterm
->               wrapped key. Trustzone achieves this by generating
->               a key and then wrapping it using hwkm, returning
->               a wrapped keyblob.
-> import_key:   The functionality is similar to generate, but here,
->               a raw key is imported into hwkm and a longterm wrapped
->               keyblob is returned.
-> prepare_key:  The longterm wrapped key from import or generate
->               is made further secure by rewrapping it with a per-boot
->               ephemeral wrapped key before installing it to the linux
->               kernel for programming to ICE.
+> The initial aim of this patch is to provide a simple RPMB Driver which
+> can be accessed by the optee driver to facilitate early RPMB access to
+> OP-TEE OS (secure OS) during the boot time.
+
+How early do we expect OP-TEE to need RPMB access?
+
+The way things work for mmc today, is that the eMMC card gets
+discovered/probed via a workqueue. The work is punted by the mmc host
+driver (typically a module-platform-driver), when it has probed
+successfully.
+
+The point is, it looks like we need some kind of probe deferral
+mechanism too. Whether we want the OP-TEE driver to manage this itself
+or whether we should let rpmb_dev_find_device() deal with it, I don't
+know.
+
 >
-> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+> A TEE device driver can claim the RPMB interface, for example, via
+> class_interface_register() or rpmb_dev_find_device(). The RPMB driver
+> provides a callback to route RPMB frames to the RPMB device accessible
+> via rpmb_route_frames().
+
+By looking at the design of the interface, I do like it. It's simple
+and straightforward.
+
+However, I wonder if you considered avoiding using a class-device
+altogether? Even if it helps with lifecycle problems and the
+ops-lookup, we really don't need another struct device with a sysfs
+node, etc.
+
+To deal with the lifecycle issue, we could probably just add reference
+counting for the corresponding struct device that we already have at
+hand, which represents the eMMC/UFS/NVME card. That together with a
+simple list that contains the registered rpmb ops. But I may be
+overlooking something, so perhaps it's more complicated than that?
+
+>
+> The detailed operation of implementing the access is left to the TEE
+> device driver itself.
+>
+> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> Signed-off-by: Alex Benn=C3=A9e <alex.bennee@linaro.org>
+> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
+> Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
 > ---
->  drivers/firmware/qcom/qcom_scm.c       | 182 +++++++++++++++++++++++++
->  drivers/firmware/qcom/qcom_scm.h       |   3 +
->  include/linux/firmware/qcom/qcom_scm.h |   5 +
->  3 files changed, 190 insertions(+)
+>  MAINTAINERS              |   7 ++
+>  drivers/misc/Kconfig     |   9 ++
+>  drivers/misc/Makefile    |   1 +
+>  drivers/misc/rpmb-core.c | 247 +++++++++++++++++++++++++++++++++++++++
+>  include/linux/rpmb.h     | 184 +++++++++++++++++++++++++++++
+>  5 files changed, 448 insertions(+)
+>  create mode 100644 drivers/misc/rpmb-core.c
+>  create mode 100644 include/linux/rpmb.h
 >
-> diff --git a/drivers/firmware/qcom/qcom_scm.c b/drivers/firmware/qcom/qcom_scm.c
-> index 4882f8a36453..20dbab765c8e 100644
-> --- a/drivers/firmware/qcom/qcom_scm.c
-> +++ b/drivers/firmware/qcom/qcom_scm.c
-> @@ -1285,6 +1285,188 @@ int qcom_scm_derive_sw_secret(const u8 *wkey, size_t wkey_size,
->  }
->  EXPORT_SYMBOL_GPL(qcom_scm_derive_sw_secret);
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 8999497011a2..e83152c42499 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -19012,6 +19012,13 @@ T:     git git://linuxtv.org/media_tree.git
+>  F:     Documentation/devicetree/bindings/media/allwinner,sun8i-a83t-de2-=
+rotate.yaml
+>  F:     drivers/media/platform/sunxi/sun8i-rotate/
 >
-> +/**
-> + * qcom_scm_generate_ice_key() - Generate a wrapped key for encryption.
-> + * @lt_key: the wrapped key returned after key generation
-> + * @lt_key_size: size of the wrapped key to be returned.
-> + *
-> + * Qualcomm wrapped keys need to be generated in a trusted environment.
-> + * A generate key IOCTL call is used to achieve this. These are longterm
-> + * in nature as they need to be generated and wrapped only once per
-> + * requirement.
-> + *
-> + * Adds support for the create key IOCTL to interface
-> + * with the secure environment to generate and return a wrapped key..
-> + *
-> + * Return: longterm key size on success; -errno on failure.
+> +RPMB SUBSYSTEM
+> +M:     Jens Wiklander <jens.wiklander@linaro.org>
+> +L:     linux-kernel@vger.kernel.org
+> +S:     Supported
+> +F:     drivers/misc/rpmb-core.c
+> +F:     include/linux/rpmb.h
+> +
+>  RPMSG TTY DRIVER
+>  M:     Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
+>  L:     linux-remoteproc@vger.kernel.org
+> diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+> index 4fb291f0bf7c..891aa5763666 100644
+> --- a/drivers/misc/Kconfig
+> +++ b/drivers/misc/Kconfig
+> @@ -104,6 +104,15 @@ config PHANTOM
+>           If you choose to build module, its name will be phantom. If uns=
+ure,
+>           say N here.
+>
+> +config RPMB
+> +       tristate "RPMB partition interface"
+
+Should we add a "depends on MMC"? (We can add the other NVME and UFS
+later on too).
+
+> +       help
+> +         Unified RPMB unit interface for RPMB capable devices such as eM=
+MC and
+> +         UFS. Provides interface for in kernel security controllers to a=
+ccess
+> +         RPMB unit.
+> +
+> +         If unsure, select N.
+> +
+>  config TIFM_CORE
+>         tristate "TI Flash Media interface support"
+>         depends on PCI
+> diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+> index ea6ea5bbbc9c..8af058ad1df4 100644
+> --- a/drivers/misc/Makefile
+> +++ b/drivers/misc/Makefile
+> @@ -15,6 +15,7 @@ obj-$(CONFIG_LKDTM)           +=3D lkdtm/
+>  obj-$(CONFIG_TIFM_CORE)        +=3D tifm_core.o
+>  obj-$(CONFIG_TIFM_7XX1)        +=3D tifm_7xx1.o
+>  obj-$(CONFIG_PHANTOM)          +=3D phantom.o
+> +obj-$(CONFIG_RPMB)             +=3D rpmb-core.o
+>  obj-$(CONFIG_QCOM_COINCELL)    +=3D qcom-coincell.o
+>  obj-$(CONFIG_QCOM_FASTRPC)     +=3D fastrpc.o
+>  obj-$(CONFIG_SENSORS_BH1770)   +=3D bh1770glc.o
+> diff --git a/drivers/misc/rpmb-core.c b/drivers/misc/rpmb-core.c
+> new file mode 100644
+> index 000000000000..a3c289051687
+> --- /dev/null
+> +++ b/drivers/misc/rpmb-core.c
+> @@ -0,0 +1,247 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright(c) 2015 - 2019 Intel Corporation. All rights reserved.
+> + * Copyright(c) 2021 - 2024 Linaro Ltd.
 > + */
-> +int qcom_scm_generate_ice_key(u8 *lt_key, size_t lt_key_size)
+> +#include <linux/device.h>
+> +#include <linux/init.h>
+> +#include <linux/kernel.h>
+> +#include <linux/list.h>
+> +#include <linux/module.h>
+> +#include <linux/mutex.h>
+> +#include <linux/rpmb.h>
+> +#include <linux/slab.h>
+> +
+> +static DEFINE_IDA(rpmb_ida);
+> +static DEFINE_MUTEX(rpmb_mutex);
+> +
+> +/**
+> + * rpmb_dev_get() - increase rpmb device ref counter
+> + * @rdev: rpmb device
+> + */
+> +struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev)
 > +{
-> +       struct qcom_scm_desc desc = {
-> +               .svc = QCOM_SCM_SVC_ES,
-> +               .cmd =  QCOM_SCM_ES_GENERATE_ICE_KEY,
-> +               .arginfo = QCOM_SCM_ARGS(2, QCOM_SCM_RW, QCOM_SCM_VAL),
-> +               .args[1] = lt_key_size,
-> +               .owner = ARM_SMCCC_OWNER_SIP,
-> +       };
+> +       if (rdev)
+> +               get_device(&rdev->dev);
+> +       return rdev;
+> +}
+> +EXPORT_SYMBOL_GPL(rpmb_dev_get);
 > +
-> +       void *lt_key_buf;
-> +       int ret;
+> +/**
+> + * rpmb_dev_put() - decrease rpmb device ref counter
+> + * @rdev: rpmb device
+> + */
+> +void rpmb_dev_put(struct rpmb_dev *rdev)
+> +{
+> +       if (rdev)
+> +               put_device(&rdev->dev);
+> +}
+> +EXPORT_SYMBOL_GPL(rpmb_dev_put);
 > +
-> +       lt_key_buf = qcom_tzmem_alloc(__scm->mempool, lt_key_size, GFP_KERNEL);
+> +/**
+> + * rpmb_route_frames() - route rpmb frames to rpmb device
+> + * @rdev:      rpmb device
+> + * @req:       rpmb request frames
+> + * @req_len:   length of rpmb request frames in bytes
+> + * @rsp:       rpmb response frames
+> + * @rsp_len:   length of rpmb response frames in bytes
+> + *
+> + * @return < 0 on failure
+> + */
+> +int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
+> +                     unsigned int req_len, u8 *rsp, unsigned int rsp_len=
+)
+> +{
+> +       struct rpmb_frame *frm =3D (struct rpmb_frame *)req;
 
-Please use __free(qcom_tzmem) everywhere in this series. You can take
-a look at the calls I converted in the series adding this allocator.
-It's really useful - especially if the buffer is surely freed within
-the same scope.
+Is there a reason why we are passing an u8 *req, in favor of a
+"rpmb_frame *frame" directly as the in-parameter?
 
-Bart
+> +       u16 req_type;
+> +       bool write;
+> +
+> +       if (!req || req_len < sizeof(*frm) || !rsp || !rsp_len)
+> +               return -EINVAL;
+> +
+> +       req_type =3D be16_to_cpu(frm->req_resp);
+> +       switch (req_type) {
+> +       case RPMB_PROGRAM_KEY:
+> +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> +                   rsp_len !=3D sizeof(struct rpmb_frame))
+> +                       return -EINVAL;
+> +               write =3D true;
+> +               break;
+> +       case RPMB_GET_WRITE_COUNTER:
+> +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> +                   rsp_len !=3D sizeof(struct rpmb_frame))
+> +                       return -EINVAL;
+> +               write =3D false;
+> +               break;
+> +       case RPMB_WRITE_DATA:
+> +               if (req_len % sizeof(struct rpmb_frame) ||
+> +                   rsp_len !=3D sizeof(struct rpmb_frame))
+> +                       return -EINVAL;
+> +               write =3D true;
+> +               break;
+> +       case RPMB_READ_DATA:
+> +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> +                   rsp_len % sizeof(struct rpmb_frame))
+> +                       return -EINVAL;
+> +               write =3D false;
+> +               break;
+> +       default:
+> +               return -EINVAL;
+> +       }
+> +
+> +       return rdev->ops->route_frames(rdev->dev.parent, write,
+> +                                      req, req_len, rsp, rsp_len);
+> +}
+> +EXPORT_SYMBOL_GPL(rpmb_route_frames);
 
-[snip]
+[...]
+
+
+> +
+> +/**
+> + * enum rpmb_type - type of underlaying storage technology
+> + *
+> + * @RPMB_TYPE_EMMC  : emmc (JESD84-B50.1)
+> + * @RPMB_TYPE_UFS   : UFS (JESD220)
+> + * @RPMB_TYPE_NVME  : NVM Express
+> + */
+> +enum rpmb_type {
+> +       RPMB_TYPE_EMMC,
+> +       RPMB_TYPE_UFS,
+> +       RPMB_TYPE_NVME,
+> +};
+
+In what way do we expect these to be useful?
+
+Perhaps we should add some information about this, because currently
+in the series they seem not to be used. Maybe the OP-TEE driver needs
+it when extending support to NVME and UFS?
+
+[...]
+
+Kind regards
+Uffe
