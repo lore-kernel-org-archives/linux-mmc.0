@@ -1,205 +1,201 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
+Received: from mail-ua1-f54.google.com (mail-ua1-f54.google.com [209.85.222.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4639812F5A1
-	for <linux-mmc@vger.kernel.org>; Tue,  6 Feb 2024 11:11:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30FDA130AE9
+	for <linux-mmc@vger.kernel.org>; Tue,  6 Feb 2024 11:12:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707217905; cv=none; b=jmOjZSpjs+KxBwgzpTaZzIq7YTOX+BjKFF5Vmb3YgLV2jx6h54G78AKu4LS3yh7nh8wGvMtX7kV0ci6D52CLnxH4LzhF8J2PsqQ1SUclWQDaYmLSCLAV8dYKxRggNM4udS9GvRcv4nVhgbR2wdhfhE+IqkVWaHYvKjUHjjzdKDY=
+	t=1707217974; cv=none; b=L45mbbMa/j6IlEEXLCAJMPSnPYHpnXz39/6BaLonoSEm2v8vg6tNKUW132fMRchUoUMmJ6CuMHGWQ5X/LIbvPtKM12gB0gTkvtZvRQI1qstnvJRZWTv8xm57G4k3q9LpCE3lcezM8XTuI3c+zuBs8mhfYsEZJ7A1Ni2X5B3nODU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707217905; c=relaxed/simple;
-	bh=gmSIAQ9DDt05bVHI/NtIKKyGCA9vdcu0iTDtCnZuS08=;
+	s=arc-20240116; t=1707217974; c=relaxed/simple;
+	bh=eWGar3ehc9D3CTd1YwKjKYD86VEg4tR8XJ41GtCC418=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OHT7PRPv2vtJHPOf+QpNZddfLAkag+RJe7qUYaZAOCBJ+Z5XZouzA53ot0zn3IK3Bk/Zgfggn7MZUjLz/uqnIWTqO3By0YtWWSvalKhUqCY9e2t/y1tQbtOhhMH7Gf65CF30N06vbOcpRsBXLocHZaVpSoZV1qEB8HpB7z2dHhg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xo49biKp; arc=none smtp.client-ip=209.85.128.181
+	 To:Cc:Content-Type; b=BWd21Mw8BycfXr2zT56dbD7R99l5zN434lzGb/IaJtLL5raxGGIDhPhNc30PaWZjygBU0L37zsORsUDaEPjYoQof+Mua50WClQfA7API+zlNQRUtVh49N9lHM0LG0ktQLhbHOvF/QOTapN1DEJEdCwaRcr9MUFdunD48fTEOa8o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IOC+Dkv/; arc=none smtp.client-ip=209.85.222.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xo49biKp"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-6040a879e1eso56747977b3.3
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Feb 2024 03:11:42 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IOC+Dkv/"
+Received: by mail-ua1-f54.google.com with SMTP id a1e0cc1a2514c-7d643a40a91so1403760241.0
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Feb 2024 03:12:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707217902; x=1707822702; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=XszTxuvZN7yutGqIMAbw2TChYscmOcb11NQ6LeH5TfU=;
-        b=xo49biKp1DFUQiBdTI9//Hr2YX32SKwuenGeI49gOUCs1VvTxv76O4G0L8Zpyk4s3l
-         ca3uNaMXzDejadm/eeURQbbHQ0Wu5duRLELrRRVaZI/Lsy6HmHXVaKTkiINWlWdZo1mg
-         05BoMGGdlP53gQVcv3EuuoHa1N5iGchx0ANToSlppiHLi10pmSoKIxaPqYxJwj/uxeo8
-         0qrPaH3kzNe7w3pP0eMlBKqqaHTJoboz/bGTPsXJwgq3zuxl/QuKG7rXeDJrsHYiQvP2
-         xs8t5mDbHf/q/dqDO4BbX2OOYd8RRce9dRvUMU3tPnanlnlv2gEOw26g8qdOQluBPD7X
-         iWCg==
+        d=linaro.org; s=google; t=1707217972; x=1707822772; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=QWO9cv59VFMVcgxftdSchJ1bJs3AtyhEa4Wv6ViEgyM=;
+        b=IOC+Dkv/fTKSlBsKwIzuHGcrsUHKC3rqAHAcZU4jYVjjtfo1b4lovUfmV29C+yYHZ1
+         2ZYcz7Scz/auW6yKfbteFvFtDnuqwZ5bwZM70e3wuTfkuUkO/fBZApXnNaX1KCdj6pK6
+         Q1PS36RNfHepWVTKyEIAm6oSnkKE6ydNj+/fJgsk6SCyyG82YRnuSuL9fIOGAzfYlIBb
+         cmL6StHTWQ+6G78Yfko6Um9Xbk5n+EuT8TFLAZZyC1QQgEidtumGFE7KFByDJadsmeP/
+         MNyrmZE06QWzT296KsmouLHBFuLbVfQFowTBTs6DoKjWoxron8M8v6zxMJqZQz4UKP5u
+         T//g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707217902; x=1707822702;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=XszTxuvZN7yutGqIMAbw2TChYscmOcb11NQ6LeH5TfU=;
-        b=Kf7JO8n9q24+yeaXB/koY4kkXd9eSJqZjUCRqd/6Gcl3YFeaBdoW7tKJyPhDbzvJcQ
-         s4wN+PonJ0GqGSuc7hLBZzcpWWBZ6EoiHEXh4Z6XfmK+90b92b5vLbXX7OsbeGNllpja
-         x0v1GzvO2nD/Rc5HgnXIph6du6+FGgPYYWSzVxJ+mVAKyzoLVJbTg/h8JtVNPuvERIWv
-         3keonDLOsBDvum090CInOA2oqCbMdnTcSMvksaK+cUhx1CcAjnrNe6RgXlaMlY0IRVUm
-         aQa+2TVOfiiNx+31cljto1g2rWkA5qNFUWqdCoKcqstgmuhYTKsRfC/0ySiBwmLqZUPV
-         icMg==
-X-Gm-Message-State: AOJu0YyGHyTjqvg2LP06iCdNbSI+H86wC7rU16d7JHPQd5Kp8gFH89De
-	3jJC/Stvfnbk4PVrYvHuqbC4K6PCv+mPv5fvn3wD/zCHwGkNsuoR9bgJUPPTTUz5g8kuuYw4tTt
-	WSYezGgHB1LqFn/nyQctZ6sWokcKXYXN+CIR+Pw==
-X-Google-Smtp-Source: AGHT+IGgEXecA09I+DXSWsEDl7V9PWcXhzjau1SbZnCeOgepIMJn2tM0EGMqrpp6CMZ2C7FYvkOO0VuCrRyGOrOtdns=
-X-Received: by 2002:a81:4956:0:b0:5ff:a52b:55ac with SMTP id
- w83-20020a814956000000b005ffa52b55acmr1274510ywa.34.1707217902072; Tue, 06
- Feb 2024 03:11:42 -0800 (PST)
+        d=1e100.net; s=20230601; t=1707217972; x=1707822772;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=QWO9cv59VFMVcgxftdSchJ1bJs3AtyhEa4Wv6ViEgyM=;
+        b=FTUSbwJvXzTUcMy4QOJOk0qlTn31jCikpoJBc201Gpnfz5ZQySFhvivDF14qcRV52L
+         CzfiJQwNJTREEx8msZI35Y8LHmWVYc0/n74ZXEhXceTleb10bhwR1dyJ7RmXiTS/iWkq
+         nk88oMCjV0NICzxsFbGjtwvfLzayqPhocthYwUZAoQD2waPTft84UDRlAuV4BTHAApZw
+         +tFWE4rlB3EhkhpHaIEbG+Xch1yQWEgiOiue0aORC+ApiXprL4p0nHYXxDgzMVVL3FQV
+         ZSjL1WsKtd7DdPxWODmy8G2ORTgo57hh8H9wCPBPwvv3M2KWA/wXZtUfJezHcOayKswQ
+         4xAA==
+X-Gm-Message-State: AOJu0Yy/b6v+hnyFkj/98ipn89SueCvB4ZHalqR3Efyk8AmHS/NuhNsu
+	dPVX76JuipeNYHamSz9NsIQ40YtKBLxKL2Pv/YPwm0ULkezjpVIMh9w+pQ/u7AprrIG3xj4ZhCp
+	+G8JJPk2FSR72Hfjuq1+RZ/hW37H7OWKQfPMKwQ==
+X-Google-Smtp-Source: AGHT+IExt9KbOkFbxjIkwcdrbrIwP17LujEz8x7z/nHeSwCIo+gickjxcPx4b911VpEVokUFSS38lHkDtC7pDORrng4=
+X-Received: by 2002:a05:6102:38cd:b0:46d:49ac:6ec4 with SMTP id
+ k13-20020a05610238cd00b0046d49ac6ec4mr62190vst.19.1707217971860; Tue, 06 Feb
+ 2024 03:12:51 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240203102908.4683-1-fredaibayhubtech@126.com>
- <CAPDyKFrt80WPeCGJZsQaCsN5a+95ru6rKnQb3kPODMkU1G6Ocw@mail.gmail.com> <BL3PR16MB45709A1A9FC4BA160398E2E399462@BL3PR16MB4570.namprd16.prod.outlook.com>
-In-Reply-To: <BL3PR16MB45709A1A9FC4BA160398E2E399462@BL3PR16MB4570.namprd16.prod.outlook.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 6 Feb 2024 12:11:05 +0100
-Message-ID: <CAPDyKFqbERic78wnh_jWzzByd2+YmZJ_fJ=fqxrarRnB1m5RSA@mail.gmail.com>
-Subject: Re: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: Fix a warm reboot issue
- that disk can't be detected by BIOS
-To: "Fred Ai(WH)" <fred.ai@bayhubtech.com>
-Cc: "fredaibayhubtech@126.com" <fredaibayhubtech@126.com>, 
-	"adrian.hunter@intel.com" <adrian.hunter@intel.com>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"linux.kernel@vger.kernel.org" <linux.kernel@vger.kernel.org>, 
-	"Shaper Liu (WH)" <shaper.liu@bayhubtech.com>, "Chevron Li (WH)" <chevron.li@bayhubtech.com>, 
-	"XiaoGuang Yu (WH)" <xiaoguang.yu@bayhubtech.com>
+References: <20240131174347.510961-1-jens.wiklander@linaro.org> <20240131174347.510961-4-jens.wiklander@linaro.org>
+In-Reply-To: <20240131174347.510961-4-jens.wiklander@linaro.org>
+From: Sumit Garg <sumit.garg@linaro.org>
+Date: Tue, 6 Feb 2024 16:42:40 +0530
+Message-ID: <CAFA6WYPATEXUNfYHA1abup=kYBREJq7y=D9d1DdkJCxXqPhgAQ@mail.gmail.com>
+Subject: Re: [PATCH v2 3/3] optee: probe RPMB device using RPMB subsystem
+To: Jens Wiklander <jens.wiklander@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, 6 Feb 2024 at 07:43, Fred Ai(WH) <fred.ai@bayhubtech.com> wrote:
->
-> Hi Uffe
-> I fixed this issue was based on below commit history.
->
-> commit 4be33cf187036744b4ed84824e7157cfc09c6f4c (HEAD)
-> Author: Fred Ai <fred.ai@bayhubtech.com>
-> Date:   Mon Dec 20 20:09:40 2021 -0800
->
->     mmc: sdhci-pci-o2micro: Improve card input timing at SDR104/HS200 mod=
-e
->
->     Card input timing is margin, need to adjust the hold timing of card i=
-nput.
->
->     Signed-off-by: Fred Ai <fred.ai@bayhubtech.com>
->     Link: https://lore.kernel.org/r/20211221040940.484-1-fred.ai@bayhubte=
-ch.com
->     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->
-> Best regards
-> Fred
+Hi Jens,
 
-Thanks Fred,
+On Wed, 31 Jan 2024 at 23:14, Jens Wiklander <jens.wiklander@linaro.org> wrote:
+>
+> Adds support in the OP-TEE drivers (both SMC and FF-A ABIs) to probe and
+> use an RPMB device via the RPBM subsystem instead of passing the RPMB
+> frames via tee-supplicant in user space. A fallback mechanism is kept to
+> route RPMB frames via tee-supplicant if the RPMB subsystem isn't
+> available.
+>
+> The OP-TEE RPC ABI is extended to support iterating over all RPMB
+> devices until one is found with the expected RPMB key already
+> programmed.
+>
+> Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+> ---
+>  drivers/tee/optee/core.c          |   1 +
+>  drivers/tee/optee/ffa_abi.c       |   2 +
+>  drivers/tee/optee/optee_private.h |   6 +
+>  drivers/tee/optee/optee_rpc_cmd.h |  33 +++++
+>  drivers/tee/optee/rpc.c           | 221 ++++++++++++++++++++++++++++++
+>  drivers/tee/optee/smc_abi.c       |   2 +
+>  6 files changed, 265 insertions(+)
+>
 
-Patch applied for fixes with a fixes-tag according to the above and by
-adding a stable tag, thanks!
+[snip]
 
-Kind regards
-Uffe
+>  #endif /*__OPTEE_RPC_CMD_H*/
+> diff --git a/drivers/tee/optee/rpc.c b/drivers/tee/optee/rpc.c
+> index e69bc6380683..6fd6f99dafab 100644
+> --- a/drivers/tee/optee/rpc.c
+> +++ b/drivers/tee/optee/rpc.c
+> @@ -7,6 +7,7 @@
+>
+>  #include <linux/delay.h>
+>  #include <linux/i2c.h>
+> +#include <linux/rpmb.h>
+>  #include <linux/slab.h>
+>  #include <linux/tee_drv.h>
+>  #include "optee_private.h"
+> @@ -255,6 +256,217 @@ void optee_rpc_cmd_free_suppl(struct tee_context *ctx, struct tee_shm *shm)
+>         optee_supp_thrd_req(ctx, OPTEE_RPC_CMD_SHM_FREE, 1, &param);
+>  }
+>
+> +static void handle_rpc_func_rpmb_probe_reset(struct tee_context *ctx,
+> +                                            struct optee *optee,
+> +                                            struct optee_msg_arg *arg)
+> +{
+> +       struct tee_param params[1];
+> +
+> +       if (!IS_ENABLED(CONFIG_RPMB)) {
+> +               handle_rpc_supp_cmd(ctx, optee, arg);
+> +               return;
+> +       }
+> +
+> +       if (arg->num_params != ARRAY_SIZE(params) ||
+> +           optee->ops->from_msg_param(optee, params, arg->num_params,
+> +                                      arg->params) ||
+> +           params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT) {
+> +               arg->ret = TEEC_ERROR_BAD_PARAMETERS;
+> +               return;
+> +       }
+> +
+> +       params[0].u.value.a = OPTEE_RPC_SHM_TYPE_KERNEL;
+> +       params[0].u.value.b = 0;
+> +       params[0].u.value.c = 0;
+> +       if (optee->ops->to_msg_param(optee, arg->params,
+> +                                    arg->num_params, params)) {
+> +               arg->ret = TEEC_ERROR_BAD_PARAMETERS;
+> +               return;
+> +       }
+> +
+> +       mutex_lock(&optee->rpmb_dev_mutex);
+> +       rpmb_dev_put(optee->rpmb_dev);
+> +       optee->rpmb_dev = NULL;
+> +       mutex_unlock(&optee->rpmb_dev_mutex);
+> +
+> +       arg->ret = TEEC_SUCCESS;
+> +}
+> +
+> +static int rpc_rpmb_match(struct device *dev, const void *data)
+> +{
+> +       return 1;
+> +}
+> +
+> +static void handle_rpc_func_rpmb_probe_next(struct tee_context *ctx,
+> +                                           struct optee *optee,
+> +                                           struct optee_msg_arg *arg)
+> +{
+> +       struct rpmb_dev *start_rdev;
+> +       struct rpmb_dev *rdev;
+> +       struct tee_param params[2];
+> +       void *buf;
+> +
+> +       if (!IS_ENABLED(CONFIG_RPMB)) {
+> +               handle_rpc_supp_cmd(ctx, optee, arg);
+> +               return;
+> +       }
+> +
+> +       if (arg->num_params != ARRAY_SIZE(params) ||
+> +           optee->ops->from_msg_param(optee, params, arg->num_params,
+> +                                      arg->params) ||
+> +           params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT ||
+> +           params[1].attr != TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT) {
+> +               arg->ret = TEEC_ERROR_BAD_PARAMETERS;
+> +               return;
+> +       }
+> +       buf = tee_shm_get_va(params[1].u.memref.shm,
+> +                            params[1].u.memref.shm_offs);
+> +       if (!buf) {
+> +               arg->ret = TEEC_ERROR_BAD_PARAMETERS;
+> +               return;
+> +       }
+> +
+> +       mutex_lock(&optee->rpmb_dev_mutex);
+> +       start_rdev = optee->rpmb_dev;
+> +       rdev = rpmb_dev_find_device(NULL, start_rdev, rpc_rpmb_match);
+> +       rpmb_dev_put(start_rdev);
+> +       optee->rpmb_dev = rdev;
+> +       mutex_unlock(&optee->rpmb_dev_mutex);
+> +
+> +       if (!rdev) {
+> +               arg->ret = TEEC_ERROR_ITEM_NOT_FOUND;
 
->
-> -----=E9=82=AE=E4=BB=B6=E5=8E=9F=E4=BB=B6-----
-> =E5=8F=91=E4=BB=B6=E4=BA=BA: Ulf Hansson <ulf.hansson@linaro.org>
-> =E5=8F=91=E9=80=81=E6=97=B6=E9=97=B4: 2024=E5=B9=B42=E6=9C=885=E6=97=A5 2=
-3:28
-> =E6=94=B6=E4=BB=B6=E4=BA=BA: fredaibayhubtech@126.com
-> =E6=8A=84=E9=80=81: adrian.hunter@intel.com; linux-mmc@vger.kernel.org; l=
-inux.kernel@vger.kernel.org; Shaper Liu (WH) <shaper.liu@bayhubtech.com>; C=
-hevron Li (WH) <chevron.li@bayhubtech.com>; XiaoGuang Yu (WH) <xiaoguang.yu=
-@bayhubtech.com>; Fred Ai(WH) <fred.ai@bayhubtech.com>
-> =E4=B8=BB=E9=A2=98: Re: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: Fix a warm=
- reboot issue that disk can't be detected by BIOS
->
-> On Sat, 3 Feb 2024 at 11:29, <fredaibayhubtech@126.com> wrote:
-> >
-> > From: Fred Ai <fred.ai@bayhubtech.com>
-> >
-> > Driver shall switch clock source from DLL clock to OPE clock when
-> > power off card to ensure that card can be identified with OPE clock by
-> > BIOS.
-> >
-> > Signed-off-by: Fred Ai <fred.ai@bayhubtech.com>
->
-> I assume we want a stable tag to be added to this, but perhaps we can als=
-o add a fixes tag? In that case, what is the commit this is fixing?
->
-> Kind regards
-> Uffe
->
-> > ---
-> > Change in V1:
-> > Implement the "set_power" callback in sdhci_ops, then switch PCR
-> > register 0x354 clock source back to OPE clock when power off card.
-> > ---
-> >  drivers/mmc/host/sdhci-pci-o2micro.c | 30
-> > ++++++++++++++++++++++++++++
-> >  1 file changed, 30 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c
-> > b/drivers/mmc/host/sdhci-pci-o2micro.c
-> > index 7bfee28116af..d4a02184784a 100644
-> > --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> > +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> > @@ -693,6 +693,35 @@ static int sdhci_pci_o2_init_sd_express(struct mmc=
-_host *mmc, struct mmc_ios *io
-> >         return 0;
-> >  }
-> >
-> > +static void sdhci_pci_o2_set_power(struct sdhci_host *host, unsigned
-> > +char mode,  unsigned short vdd) {
-> > +       struct sdhci_pci_chip *chip;
-> > +       struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-> > +       u32 scratch_32 =3D 0;
-> > +       u8 scratch_8 =3D 0;
-> > +
-> > +       chip =3D slot->chip;
-> > +
-> > +       if (mode =3D=3D MMC_POWER_OFF) {
-> > +               /* UnLock WP */
-> > +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratc=
-h_8);
-> > +               scratch_8 &=3D 0x7f;
-> > +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP,
-> > + scratch_8);
-> > +
-> > +               /* Set PCR 0x354[16] to switch Clock Source back to OPE=
- Clock */
-> > +               pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOUR=
-CE_SWITCH, &scratch_32);
-> > +               scratch_32 &=3D ~(O2_SD_SEL_DLL);
-> > +               pci_write_config_dword(chip->pdev,
-> > + O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
-> > +
-> > +               /* Lock WP */
-> > +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratc=
-h_8);
-> > +               scratch_8 |=3D 0x80;
-> > +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratc=
-h_8);
-> > +       }
-> > +
-> > +       sdhci_set_power(host, mode, vdd); }
-> > +
-> >  static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)  {
-> >         struct sdhci_pci_chip *chip;
-> > @@ -1051,6 +1080,7 @@ static const struct sdhci_ops sdhci_pci_o2_ops =
-=3D {
-> >         .set_bus_width =3D sdhci_set_bus_width,
-> >         .reset =3D sdhci_reset,
-> >         .set_uhs_signaling =3D sdhci_set_uhs_signaling,
-> > +       .set_power =3D sdhci_pci_o2_set_power,
-> >  };
-> >
-> >  const struct sdhci_pci_fixes sdhci_o2 =3D {
-> >
-> > base-commit: 56897d51886fa7e9f034ff26128eb09f1b811594
-> > --
-> > 2.25.1
-> >
+One of the major comments I have here is regarding how this implicit
+dependency on eMMC driver probe is met here. What if OP-TEE based
+fTPM/EFI client driver probes before eMMC driver?
+
+-Sumit
