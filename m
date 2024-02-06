@@ -1,174 +1,354 @@
-Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
+Received: from mail-lj1-f172.google.com (mail-lj1-f172.google.com [209.85.208.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 241F5131732
-	for <linux-mmc@vger.kernel.org>; Tue,  6 Feb 2024 13:35:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04E05133429
+	for <linux-mmc@vger.kernel.org>; Tue,  6 Feb 2024 15:11:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707226527; cv=none; b=fx0xd1G58QeFIPyzXRBOs0SpuZVpuoFWX+zAbQNQIzioLIIuiKA4nHaW+6O4ruYvkU1LaQbN4GD/BoI2XNyR7C5CWUzhwCIthnKu428fG8RfmdRfrBuibFd53ghoGKgiNIMYMaKvSJHtXJvlW5r3aqlVlcjF6JulwKFa5q4DoGs=
+	t=1707232287; cv=none; b=eV4UjAVxNtcoD0ghlvaFzVDZ8vnLyGDLC9fpQU+AzDeT/TNMrOYmgQBqWlazZ5fL8XQ2Gdu+gOjIOUtxPJreIqB+elmssfrLqsDOV5hfy+gfYDj7F+i35du9yasJ1hEHlwnm+P6Gf7b8/sPgN71ui++3FeIhrOgLhHuPW7dth2Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707226527; c=relaxed/simple;
-	bh=p+OfDhPTU8aIRp2lfUmD23raHR9/ipQFZjR1AP4X+T0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=dVsomGUMUMIPFozxA+2XeJe4M1FvlBxS7bBODYjt7HOELdZ2vOI5pyc6SQnAkgoJ/Au9o304r/I9R0EZswBfWwcIPz+K+0daLZcYki+QQG4s/hHPFUC+7pISBsPEyt/IMw+9vIcKHUN1oKOxzRIEZ+tVtINI2X+tbq0k/herTAg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=IEdYksGM; arc=none smtp.client-ip=209.85.218.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
+	s=arc-20240116; t=1707232287; c=relaxed/simple;
+	bh=V+h7kNIOIk7uxK3ZmXxaIRjARIX9Tv14EifdrQQ3Fcg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=gE5he1Xaf/kX3PM7nyqcqSnQ8rLDQFAOj7MC86rwR3hxwrG6VJ0mM7hxLVybdpOzkkv/JgvEcxCt0CgMg49czIsyGJNlsI7smeJMNMBQnkVVFyZTagvWU3lc+GS+GUfxco3IHfGQ1N8zdDKy4RG8pVrKaNk2Tu1HfXVrvvPPONk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iD/wbw8z; arc=none smtp.client-ip=209.85.208.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="IEdYksGM"
-Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-a2a17f3217aso751216966b.2
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Feb 2024 05:35:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iD/wbw8z"
+Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-2d09b21a8bbso12250931fa.3
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Feb 2024 07:11:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1707226521; x=1707831321; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=j5OAI6HZF6A+v5DceKhvUJ83Vbu4EddAL1RlnqBsL38=;
-        b=IEdYksGMT5Ic6JNTAa9HUeAtlFHOQwMXt+4IwCeRkUB0Ox+95SI0/EEE5X/MoO/Oog
-         EbyGt3IdBZJTl3a22AnheJqx98g+0CEpoh6It1qIRbUge6oqIiDzag+jxJ9YMUW8fgG6
-         E61fakavFfABPaMImF3ANev60we2ZpDDCcvnugNVdmkdI8CU7vjcNVct5n/VIzyCbDk+
-         Oz9XrpDcGV6HS+t2ZrT1jks/ySYLMpzHO/04nFzRMQ0n6vYgHJ8FKLu0tzlK7Qae+RXO
-         FpyAV35/wfZ3XlYqmo9L0JzwDqB++5AiysGjOm4lZCl5mZWvDaovuDWNpuRQdWlxrhz+
-         NIyQ==
+        d=linaro.org; s=google; t=1707232283; x=1707837083; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=QQL4UgN2a82rxpcDP6lB1rkWj5e7indUsz81vK5JM04=;
+        b=iD/wbw8z2mhR7I6FU/scMrmfVUDANdzsvvavy8lmH7/v5eOcO+F3oRN3ouQODlWw+h
+         Br1wAMDcJ2ul/LFzeOQG/7n1RiF1PzSdMyScdnyBQSJAK5djtM0uMM4bJxu9tU7dam8l
+         Nl8JIAQzzq3Z10f13B+zks9YRZ6uMWEUIqTY5K1k4LzORpaxJxI92NdLXIqDpQ00eQnQ
+         HjWmI33txOyn5k7EB+BvsPAy1rl4pHanGGXmbs9hEPAknMh8ZOAl9iUz3uX8R5mOyAtm
+         bPP+EBvPtJpn5xx2/ayf4r01jQxAgntd72o4r8KbfJaQbllWtW16eQrYWjQBtHFstYjB
+         pR/Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707226521; x=1707831321;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=j5OAI6HZF6A+v5DceKhvUJ83Vbu4EddAL1RlnqBsL38=;
-        b=Powga1CzN6dzSJg/BFB672irEWDCvjRG29EH8IzjuE/6Fz7LxU+A38ud2wEARbeMOu
-         94OGFb8iixncvitXNeGh/THe9G5U+WGgKi8f1Yb6Yp4jprunSFw1+FVL3Gvi7AxFRNT6
-         U0lNVzq7XiTIgQbbjW6lT49Kcq8OEcnvI6xC3O5jHm5Zxmb55EZMIZ8RSpAS9tYmlFx4
-         kNNYKwmouD1wtnQUTv2vHzGDGOsOiDHG79pbZvQJerDAz1tsiriThld/8CyyVVhsyLBS
-         TOZRGE44etcUsuRZCnHClGBx/omkVsk7ezQGTtdobowfKnAPRzCOXps16K/CX06Mjsd0
-         m+8A==
-X-Gm-Message-State: AOJu0YxXIvb+QPyt8YLQFw4Qt9NoJOjynt9kTzPXbraS6JF6VrQCiSjx
-	cfeQejuJXw5voWPjyJemK8+VVV+vSMjZ+gJ1PuMfZ8f6dKop9rFUpv0AEW5g6Oh0KFfopW97Qoi
-	E
-X-Google-Smtp-Source: AGHT+IGDpxmSELvcZc8lP9XjrDzNiupLmVgUEVc1LQ+TuZCV+D30GC/kapRd+9cW+oMBqkGOH7ONEQ==
-X-Received: by 2002:a17:906:131a:b0:a38:a2f:c12a with SMTP id w26-20020a170906131a00b00a380a2fc12amr1416268ejb.64.1707226521015;
-        Tue, 06 Feb 2024 05:35:21 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCW2pysuXszpZ59eYVqN5JgOwGhLbzCxBbBaXC9kx9S3KtKx9H+LCpTt+J8XpyYNIbuPwfRMfQWr1hXVNJyNpJJefKa8v6NH/il0DTzQhYkmNobv5C981hT015F38IMMKaBDJfKA3VCiX0sTwx8ndZ7GoN4zabsKxPh/YjVu4OXyaFJyzSHXBYnAkMw3czvaXA/jTDQf+snUZES+wCy5JyqhvXhYTGNvzr/dSor8TJbhmLp8kYZTNBLrfGN/dFpS5+ES4fMcym2uSLQ5apRleJuAl2T4hsW0JxN4FendLZgZW0BA8FkhinwuMViF+F1gt6mi/SMrZbBTwl+4cC0LWc80rqs1mfZbyW8pgpWkquTg4ijh4TvRznG1p/mQSJk13p91pBLGF+5EvC92SrmY83zbkztS/csybkKLJgPWUWnZDg==
-Received: from [192.168.50.4] ([82.78.167.154])
-        by smtp.gmail.com with ESMTPSA id ig8-20020a1709072e0800b00a3758a1ca48sm1150753ejc.218.2024.02.06.05.35.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 06 Feb 2024 05:35:20 -0800 (PST)
-Message-ID: <63e1eabd-a484-48ee-b8db-1e460bce70ab@tuxon.dev>
-Date: Tue, 6 Feb 2024 15:35:19 +0200
+        d=1e100.net; s=20230601; t=1707232283; x=1707837083;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=QQL4UgN2a82rxpcDP6lB1rkWj5e7indUsz81vK5JM04=;
+        b=ugsMJt4FsOyl89h4S6irn6/8mtqYqaPZm3LpNqwFuLj8ExqRcKYvlylUOoyVcvolnC
+         3tTZEk2Dbqhdt+zQ6t4tOfAeTzo2THF1XlyvNjuVpUNfb2gYylatmZogQtyTc6vcVGz4
+         thtpLWXebFlaLg3K+vcH/50VlyWo01mjvl++NN5z9ecrUWHvhhTSQ3KOgBO/aVMUEIwO
+         cQVe6w9oSyfPc+z5c6CBa3yb5fYjaDo2RLa5IoEOWFIL5tg193W7pR1SeSC7ivA/bLJA
+         jXZnfXgzIrBUHXhp2h/WgfUlA84N8zwXrWdfW71DyIVAHKFn4iHsdknhNony+V4ml+0r
+         IEig==
+X-Gm-Message-State: AOJu0YzZcPHa8Bqbkar8h0pR8GXEhKplaG57jGpdT4JhkVWcdMJJTksk
+	o3ckVcHxt/6SejJGbHnhJaviv4PRZhnAo+Hpbq+36pjarLd4/K37fQZ+ddPbWXTZkattVqhikKn
+	qTnk+KJiWWlcSTcTwQToOxZu9+OQZ3fUnfF+cTDk+byf5g2hy
+X-Google-Smtp-Source: AGHT+IGBymJiPh8IHxokFPKYJFl5q2mdO6HeoFmrzMiiXCKkrRy/rFturaAsejiOyFaxvXsHX1lkkjPbtf6A3yyZOGE=
+X-Received: by 2002:a05:651c:c1:b0:2d0:aaa8:da8b with SMTP id
+ 1-20020a05651c00c100b002d0aaa8da8bmr2403372ljr.8.1707232282948; Tue, 06 Feb
+ 2024 07:11:22 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] mmc: renesas_sdhi: Fix change point of data handling
-Content-Language: en-US
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, ulf.hansson@linaro.org,
- yoshihiro.shimoda.uh@renesas.com, masaharu.hayakawa.ry@renesas.com,
- takeshi.saito.xv@renesas.com, linux-mmc@vger.kernel.org,
- linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
- Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20240205112702.213050-1-claudiu.beznea.uj@bp.renesas.com>
- <ZcDdn2AVz8FIXzak@shikoro> <237bd5c8-184d-4e46-ba66-253e3ef0c895@tuxon.dev>
- <ZcD17mTRnfIaueAW@shikoro>
-From: claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <ZcD17mTRnfIaueAW@shikoro>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240131174347.510961-1-jens.wiklander@linaro.org>
+ <20240131174347.510961-2-jens.wiklander@linaro.org> <CAPDyKFqNhGWKm=+7niNsjXOjEJE3U=o7dRNG=JqpptUSo9G-ug@mail.gmail.com>
+In-Reply-To: <CAPDyKFqNhGWKm=+7niNsjXOjEJE3U=o7dRNG=JqpptUSo9G-ug@mail.gmail.com>
+From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date: Tue, 6 Feb 2024 17:10:46 +0200
+Message-ID: <CAC_iWj+k_Vsz4ot=9pv-Gv7r11=vCunH5TSyOMTK4z-NZ2TeTA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jens Wiklander <jens.wiklander@linaro.org>, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, 
+	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
+	=?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi, Wolfram,
+Hi Ulf,
 
-On 05.02.2024 16:51, Wolfram Sang wrote:
-> 
->>> According to my understanding, we should only mark this TAP good if it
->>> is in the range 5-7. I need to double check with Renesas, though.
->>
->> OK, my understanding is that it should be in the middle (beginning being
->> the tap that triggered change point of the input data, end being the next
->> tap with the same ID). This is what I understand from this: "As the width
->> of the input data is 1 (UI), select TAP6 or TAP7 which is
->>
->> *the median* of next TAP3 from TAP3."
-> 
-> Yes, I agree. With 0x0e, that means TAP1+2+3 are changing points and we
-> should be far away from them, like 5-7.
+On Tue, 6 Feb 2024 at 14:34, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Wed, 31 Jan 2024 at 18:44, Jens Wiklander <jens.wiklander@linaro.org> =
+wrote:
+> >
+> > A number of storage technologies support a specialised hardware
+> > partition designed to be resistant to replay attacks. The underlying
+> > HW protocols differ but the operations are common. The RPMB partition
+> > cannot be accessed via standard block layer, but by a set of specific
+> > RPMB commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
+> > partition provides authenticated and replay protected access, hence
+> > suitable as a secure storage.
+> >
+> > The initial aim of this patch is to provide a simple RPMB Driver which
+> > can be accessed by the optee driver to facilitate early RPMB access to
+> > OP-TEE OS (secure OS) during the boot time.
+>
+> How early do we expect OP-TEE to need RPMB access?
 
-As of my understanding the TAP where cmpngu = 0x0e and cmpngd=0x0e is not
-considered change point of the input data. For that to happen it would mean
-that cmpngu != cmpngd.
+It depends on the requested services. I am currently aware of 2
+services that depend on the RPMB
+- FirmwareTPM
+- UEFI variables stored there via optee.
 
-From this snapshot, datasheet and our discussions:
+For the FirmwareTPM it depends on when you want to use it. This
+typically happens when the initramfs is loaded or systemd requests
+access to the TPM. I guess this is late enough to not cause problems?
 
-i=0, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-i=1, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-i=2, cmpngu=0000000e, cmpngd=0000000e, smpcmp=000e000e
-i=3, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-*i=4, cmpngu=00000000, cmpngd=00000002, smpcmp=00000002*
-*i=5, cmpngu=00000000, cmpngd=000000ff, smpcmp=000001ff*
-*i=6, cmpngu=000000ff, cmpngd=00000000, smpcmp=01ff0000*
-i=7, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-i=8, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-i=9, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-i=10, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-i=11, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
-*i=12, cmpngu=00000000, cmpngd=00000002, smpcmp=00000002*
-*i=13, cmpngu=00000000, cmpngd=000000ff, smpcmp=000001ff*
-*i=14, cmpngu=000000ff, cmpngd=00000000, smpcmp=01ff0000*
-i=15, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
+For the latter, we won't need the supplicant until a write is
+requested. This will only happen once the userspace is up and running.
+The UEFI driver that sits behind OP-TEE has an in-memory cache of the
+variables, so all the reads (the kernel invokes get_next_variable
+during boot) are working without it.
 
-I understand that TAP4,5,6 are change point of the input data and
-TAP8,0,1,2,3 are candidates for being selected, TAP 1,2 being the best
-(please correct me if I'm wrong).
-
-> 
-> But: I am still waiting for Renesas to answer my questions regarding
-> SMPCMP. I'd like to get that first, so we have clear facts then.
-> 
->>> Boot failure is one test. Read/write tests should be another, I think.
->>
->> OK, I'll try also read/write. Do you have in mind something particular?
-> 
-> Nope. Just consistency checks.
-> 
->>> Because if we select a bad TAP, bad things might happen later. To reduce
->>> the amount of testing, read/write testing could only be triggered if the
->>> new code path was excecuted?
->>
->> I'm not sure how to trigger that (or maybe I haven't understood your
->> statement...)
-> 
-> I thought something in the lines of:
-> 
-> - print out when you needed SMPCMP to select a TAP
-
-On my device (RZ/G3S) that triggered initially "mmc0: tuning execution
-failed" at probe, with this patch (when doing read/write tests) I have a
-lot of moment when cmpngu == cmpngd and thus the smpcmp bitmask is populated.
-
-With RZ/G3S+rootfs on eMMC and this patch I did the following read/write test:
-
-root@smarc-rzg3s:~# dd if=/dev/random of=out bs=1024 count=1048576
-1048576+0 records in
-1048576+0 records out
-root@smarc-rzg3s:~#
-root@smarc-rzg3s:~# dd if=out of=test bs=1024 count=1048576
-1048576+0 records in
-1048576+0 records out
-root@smarc-rzg3s:~#
-root@smarc-rzg3s:~#
-root@smarc-rzg3s:~#
-root@smarc-rzg3s:~# md5sum out test
-b053723af63801e665959d48cb7bd8e6  out
-b053723af63801e665959d48cb7bd8e6  test
-
-Do yo consider this enough?
-
-Thank you,
-Claudiu Beznea
-
-> - check the log for that printout
-> - if (printout) do read_write_tests
-> 
-> Dunno if that makes sense with your test setup.
-> 
+Thanks
+/Ilias
+>
+> The way things work for mmc today, is that the eMMC card gets
+> discovered/probed via a workqueue. The work is punted by the mmc host
+> driver (typically a module-platform-driver), when it has probed
+> successfully.
+>
+> The point is, it looks like we need some kind of probe deferral
+> mechanism too. Whether we want the OP-TEE driver to manage this itself
+> or whether we should let rpmb_dev_find_device() deal with it, I don't
+> know.
+>
+> >
+> > A TEE device driver can claim the RPMB interface, for example, via
+> > class_interface_register() or rpmb_dev_find_device(). The RPMB driver
+> > provides a callback to route RPMB frames to the RPMB device accessible
+> > via rpmb_route_frames().
+>
+> By looking at the design of the interface, I do like it. It's simple
+> and straightforward.
+>
+> However, I wonder if you considered avoiding using a class-device
+> altogether? Even if it helps with lifecycle problems and the
+> ops-lookup, we really don't need another struct device with a sysfs
+> node, etc.
+>
+> To deal with the lifecycle issue, we could probably just add reference
+> counting for the corresponding struct device that we already have at
+> hand, which represents the eMMC/UFS/NVME card. That together with a
+> simple list that contains the registered rpmb ops. But I may be
+> overlooking something, so perhaps it's more complicated than that?
+>
+> >
+> > The detailed operation of implementing the access is left to the TEE
+> > device driver itself.
+> >
+> > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> > Signed-off-by: Alex Benn=C3=A9e <alex.bennee@linaro.org>
+> > Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
+> > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+> > ---
+> >  MAINTAINERS              |   7 ++
+> >  drivers/misc/Kconfig     |   9 ++
+> >  drivers/misc/Makefile    |   1 +
+> >  drivers/misc/rpmb-core.c | 247 +++++++++++++++++++++++++++++++++++++++
+> >  include/linux/rpmb.h     | 184 +++++++++++++++++++++++++++++
+> >  5 files changed, 448 insertions(+)
+> >  create mode 100644 drivers/misc/rpmb-core.c
+> >  create mode 100644 include/linux/rpmb.h
+> >
+> > diff --git a/MAINTAINERS b/MAINTAINERS
+> > index 8999497011a2..e83152c42499 100644
+> > --- a/MAINTAINERS
+> > +++ b/MAINTAINERS
+> > @@ -19012,6 +19012,13 @@ T:     git git://linuxtv.org/media_tree.git
+> >  F:     Documentation/devicetree/bindings/media/allwinner,sun8i-a83t-de=
+2-rotate.yaml
+> >  F:     drivers/media/platform/sunxi/sun8i-rotate/
+> >
+> > +RPMB SUBSYSTEM
+> > +M:     Jens Wiklander <jens.wiklander@linaro.org>
+> > +L:     linux-kernel@vger.kernel.org
+> > +S:     Supported
+> > +F:     drivers/misc/rpmb-core.c
+> > +F:     include/linux/rpmb.h
+> > +
+> >  RPMSG TTY DRIVER
+> >  M:     Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
+> >  L:     linux-remoteproc@vger.kernel.org
+> > diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+> > index 4fb291f0bf7c..891aa5763666 100644
+> > --- a/drivers/misc/Kconfig
+> > +++ b/drivers/misc/Kconfig
+> > @@ -104,6 +104,15 @@ config PHANTOM
+> >           If you choose to build module, its name will be phantom. If u=
+nsure,
+> >           say N here.
+> >
+> > +config RPMB
+> > +       tristate "RPMB partition interface"
+>
+> Should we add a "depends on MMC"? (We can add the other NVME and UFS
+> later on too).
+>
+> > +       help
+> > +         Unified RPMB unit interface for RPMB capable devices such as =
+eMMC and
+> > +         UFS. Provides interface for in kernel security controllers to=
+ access
+> > +         RPMB unit.
+> > +
+> > +         If unsure, select N.
+> > +
+> >  config TIFM_CORE
+> >         tristate "TI Flash Media interface support"
+> >         depends on PCI
+> > diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+> > index ea6ea5bbbc9c..8af058ad1df4 100644
+> > --- a/drivers/misc/Makefile
+> > +++ b/drivers/misc/Makefile
+> > @@ -15,6 +15,7 @@ obj-$(CONFIG_LKDTM)           +=3D lkdtm/
+> >  obj-$(CONFIG_TIFM_CORE)        +=3D tifm_core.o
+> >  obj-$(CONFIG_TIFM_7XX1)        +=3D tifm_7xx1.o
+> >  obj-$(CONFIG_PHANTOM)          +=3D phantom.o
+> > +obj-$(CONFIG_RPMB)             +=3D rpmb-core.o
+> >  obj-$(CONFIG_QCOM_COINCELL)    +=3D qcom-coincell.o
+> >  obj-$(CONFIG_QCOM_FASTRPC)     +=3D fastrpc.o
+> >  obj-$(CONFIG_SENSORS_BH1770)   +=3D bh1770glc.o
+> > diff --git a/drivers/misc/rpmb-core.c b/drivers/misc/rpmb-core.c
+> > new file mode 100644
+> > index 000000000000..a3c289051687
+> > --- /dev/null
+> > +++ b/drivers/misc/rpmb-core.c
+> > @@ -0,0 +1,247 @@
+> > +// SPDX-License-Identifier: GPL-2.0
+> > +/*
+> > + * Copyright(c) 2015 - 2019 Intel Corporation. All rights reserved.
+> > + * Copyright(c) 2021 - 2024 Linaro Ltd.
+> > + */
+> > +#include <linux/device.h>
+> > +#include <linux/init.h>
+> > +#include <linux/kernel.h>
+> > +#include <linux/list.h>
+> > +#include <linux/module.h>
+> > +#include <linux/mutex.h>
+> > +#include <linux/rpmb.h>
+> > +#include <linux/slab.h>
+> > +
+> > +static DEFINE_IDA(rpmb_ida);
+> > +static DEFINE_MUTEX(rpmb_mutex);
+> > +
+> > +/**
+> > + * rpmb_dev_get() - increase rpmb device ref counter
+> > + * @rdev: rpmb device
+> > + */
+> > +struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev)
+> > +{
+> > +       if (rdev)
+> > +               get_device(&rdev->dev);
+> > +       return rdev;
+> > +}
+> > +EXPORT_SYMBOL_GPL(rpmb_dev_get);
+> > +
+> > +/**
+> > + * rpmb_dev_put() - decrease rpmb device ref counter
+> > + * @rdev: rpmb device
+> > + */
+> > +void rpmb_dev_put(struct rpmb_dev *rdev)
+> > +{
+> > +       if (rdev)
+> > +               put_device(&rdev->dev);
+> > +}
+> > +EXPORT_SYMBOL_GPL(rpmb_dev_put);
+> > +
+> > +/**
+> > + * rpmb_route_frames() - route rpmb frames to rpmb device
+> > + * @rdev:      rpmb device
+> > + * @req:       rpmb request frames
+> > + * @req_len:   length of rpmb request frames in bytes
+> > + * @rsp:       rpmb response frames
+> > + * @rsp_len:   length of rpmb response frames in bytes
+> > + *
+> > + * @return < 0 on failure
+> > + */
+> > +int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
+> > +                     unsigned int req_len, u8 *rsp, unsigned int rsp_l=
+en)
+> > +{
+> > +       struct rpmb_frame *frm =3D (struct rpmb_frame *)req;
+>
+> Is there a reason why we are passing an u8 *req, in favor of a
+> "rpmb_frame *frame" directly as the in-parameter?
+>
+> > +       u16 req_type;
+> > +       bool write;
+> > +
+> > +       if (!req || req_len < sizeof(*frm) || !rsp || !rsp_len)
+> > +               return -EINVAL;
+> > +
+> > +       req_type =3D be16_to_cpu(frm->req_resp);
+> > +       switch (req_type) {
+> > +       case RPMB_PROGRAM_KEY:
+> > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> > +                   rsp_len !=3D sizeof(struct rpmb_frame))
+> > +                       return -EINVAL;
+> > +               write =3D true;
+> > +               break;
+> > +       case RPMB_GET_WRITE_COUNTER:
+> > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> > +                   rsp_len !=3D sizeof(struct rpmb_frame))
+> > +                       return -EINVAL;
+> > +               write =3D false;
+> > +               break;
+> > +       case RPMB_WRITE_DATA:
+> > +               if (req_len % sizeof(struct rpmb_frame) ||
+> > +                   rsp_len !=3D sizeof(struct rpmb_frame))
+> > +                       return -EINVAL;
+> > +               write =3D true;
+> > +               break;
+> > +       case RPMB_READ_DATA:
+> > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> > +                   rsp_len % sizeof(struct rpmb_frame))
+> > +                       return -EINVAL;
+> > +               write =3D false;
+> > +               break;
+> > +       default:
+> > +               return -EINVAL;
+> > +       }
+> > +
+> > +       return rdev->ops->route_frames(rdev->dev.parent, write,
+> > +                                      req, req_len, rsp, rsp_len);
+> > +}
+> > +EXPORT_SYMBOL_GPL(rpmb_route_frames);
+>
+> [...]
+>
+>
+> > +
+> > +/**
+> > + * enum rpmb_type - type of underlaying storage technology
+> > + *
+> > + * @RPMB_TYPE_EMMC  : emmc (JESD84-B50.1)
+> > + * @RPMB_TYPE_UFS   : UFS (JESD220)
+> > + * @RPMB_TYPE_NVME  : NVM Express
+> > + */
+> > +enum rpmb_type {
+> > +       RPMB_TYPE_EMMC,
+> > +       RPMB_TYPE_UFS,
+> > +       RPMB_TYPE_NVME,
+> > +};
+>
+> In what way do we expect these to be useful?
+>
+> Perhaps we should add some information about this, because currently
+> in the series they seem not to be used. Maybe the OP-TEE driver needs
+> it when extending support to NVME and UFS?
+>
+> [...]
+>
+> Kind regards
+> Uffe
