@@ -1,204 +1,166 @@
-Received: from mail-oo1-f41.google.com (mail-oo1-f41.google.com [209.85.161.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70A54208C0
-	for <linux-mmc@vger.kernel.org>; Wed,  7 Feb 2024 08:11:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D42D87F462;
+	Wed,  7 Feb 2024 14:40:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.132.182.106
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707293508; cv=none; b=NfzJnF65cnUO/Eb6xXVSznd4+pLBAfktmo514FO4nIlPl6N2PdvIqAKEa/M9fYwl9igGJwQSBXuYiUTLbE400223RLgB1y6j8619pWK9RjxwrmA+irpFeBCryRQJ5lHXhuDnpCN7mcqnTXM6/YK1D9sP2L0mBPhyWy+kOkQahT4=
+	t=1707316816; cv=none; b=Ddgjz3F8yi728a6wkqPdhmH/rNvbws1Z6NrJvgSYWe3iZu02gHiruvhMRyj6DD3nRx7FY3gqdBP2mqO63aU/OqnvCAX502UMv96Os9teE2VKTjFimAYxQtyBP/2kavXb7OdTot2JBw2XOQuMEB8T1GPhCInFZVY/rHT6pLqdQsQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707293508; c=relaxed/simple;
-	bh=yM94QHmw1o0maJkiIwmeav8+O3mxI+fd1LvK6SRqfSs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nb9OEQ3HI8C/eaQoLygKKKxwrAle3V7hRbHGZ00YW84YV4z6pDOYFF3GvZ/lWpxb7fOVe4R7cE5A6rqoXCK1cH2jgJKLPsRcG24GN+kAhPId4fOXjKWBEh3erXpw+6FtEOieXJnfr0e032/xDXUOTZwYhW/VvAlqkkt6i6jciIY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LNiYmZzS; arc=none smtp.client-ip=209.85.161.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1707316816; c=relaxed/simple;
+	bh=4tr2qSeMuyecmok1jZeROECD97y61s1o/yoCPX/e63c=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=RlKvWbfPx0OEN1yOsTrdO9fD1A4Ev6t0s0FzulH2tIu8TuCfYyyGE7EMU86Stkb9aQwf6+MAlYq3Ugs9LBOjAB5L+DvLxyAbVkcNxnxAVe0fhQfYc2o//weCeW91VH3emXn/14S7HRaY9VV+f1CXpfzXPSd8RGvra0RbDoqqBjM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foss.st.com; spf=pass smtp.mailfrom=foss.st.com; dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b=04fb+g1I; arc=none smtp.client-ip=185.132.182.106
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foss.st.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foss.st.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LNiYmZzS"
-Received: by mail-oo1-f41.google.com with SMTP id 006d021491bc7-59a9a737273so86442eaf.1
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Feb 2024 00:11:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707293505; x=1707898305; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yM94QHmw1o0maJkiIwmeav8+O3mxI+fd1LvK6SRqfSs=;
-        b=LNiYmZzS6Ni+zqVUPWsmpsmC3jVVHEjuOMZ5gjF1ocbUviArUTu75cXOcUr2WWkbqa
-         zk174+NqXwjWH+wY6e8OFb4zog8vzX2BB0Hw5QhHNrZM2hMn56MlVavhCP/crGuW3Hde
-         mQ2/Mci9Nf5KM7EDUkUwDNJLmXlb7dI7s3noONYIKVHHal9F+rBGC5kWIDt7KnB9OW52
-         57lIUt4QNUG1hX+32X4f4BF2KLxPjEi5rtvop3UOyfeZdGr/2cySeq3FVCHRfyjxYQ92
-         b0Mmn+3PP/xJMEdEfWNnexno3ERYrQcnLNC/PCCXlBf+7hbkJzypdibB6+Bb+K7IzO2o
-         vV4g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707293505; x=1707898305;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=yM94QHmw1o0maJkiIwmeav8+O3mxI+fd1LvK6SRqfSs=;
-        b=fievAL+ze2R/QUhIwp2AAJlsx7JRq24UIGOIgCLdJ7BnaHZYAqgCekTf+43b1KDS9X
-         8tvkgJWFuy8ipG8WM93VeK1HrtX+3Q9l/i44GMWHntuoR5hwWZdFcW70hTyRcJsbfB7j
-         606gluImXUb7gsuroboUFTE0QjsO5/Pp/TdklU4m946abgmS8oWVbpmTJqV3W5Gjj3ra
-         4q8X/Ej7Kkbr9RKAW3FYjRZusH0poBmHZxAiR7Dqp/dpS2JLltOvPlpScmgKBFM4maz9
-         Vp6Ry2M5ga/E1CsM8Q3CFdNywv0ctJHqkFq4hLKi/eoJTEF4XRCiPQ7WK47BE7F0OXs8
-         xAXw==
-X-Gm-Message-State: AOJu0Yx5YZbK0NLJvh8xhKoHuEsweBskiotxk+Ty015VAsEZ4vhD6QQ+
-	jt3xlrjGofchepYf7pOhSX4ojW4Bhsy97f5Kv2504aqycAJCj1jmfN6OZlfYkCEPfXVbGDfzpoS
-	4hOgZuWyyKksb5I8broeIuAc2mu2heukWqhwZ9g==
-X-Google-Smtp-Source: AGHT+IEuemO4RMAs3P1oHJa1czqpTD9ZZBHAnPyIamPveYQRfYNzaybhglwqBHuWsckLtJi99FEj2qDyRPGZkAhDOBE=
-X-Received: by 2002:a4a:7650:0:b0:599:7389:967b with SMTP id
- w16-20020a4a7650000000b005997389967bmr5030396ooe.4.1707293505418; Wed, 07 Feb
- 2024 00:11:45 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b="04fb+g1I"
+Received: from pps.filterd (m0369458.ppops.net [127.0.0.1])
+	by mx07-00178001.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 417B6FV8014970;
+	Wed, 7 Feb 2024 15:40:05 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
+	from:to:cc:subject:date:message-id:mime-version
+	:content-transfer-encoding:content-type; s=selector1; bh=Sq7ZJbD
+	ZLAMy8T7FyyWWi2GOv8gIvDS+3jrvU7YRdaY=; b=04fb+g1IBhu2ruzJdlx07k+
+	tPs+febTod1nR0oFl7R5ZpK6VGAGlnEOkwKxZGq1Rg0lolAOs8/jjwYplUUbKIMo
+	SdOWEkhJcbog7wQtgtEGHPQSJJOLiHzoaYsAhoVAPcz+Cfga/osOUJjS4HhPJ8KB
+	g/Yvfp50n42NsFcRXQV7t0U8daAGks5Bp/Xx0VZeSsr9gtrKdMBE2J5lCkJoiix2
+	v1zyXEjg5VsEAcWo9zJWSlUIJK3OHKuM6h3taIluV64NI9IDJ8MBVUQH/IRM5bIw
+	G+4EC886zu3rG77wb+94+Y6uMPJ/I5CEFsDtb24hY0LQ4yFssq/77jb035ct7Xg=
+	=
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+	by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3w1yx46fr6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 07 Feb 2024 15:40:05 +0100 (CET)
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 0461D100058;
+	Wed,  7 Feb 2024 15:40:03 +0100 (CET)
+Received: from Webmail-eu.st.com (shfdag1node3.st.com [10.75.129.71])
+	by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id E77EA24259D;
+	Wed,  7 Feb 2024 15:40:02 +0100 (CET)
+Received: from localhost (10.201.22.200) by SHFDAG1NODE3.st.com (10.75.129.71)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Wed, 7 Feb
+ 2024 15:40:02 +0100
+From: Christophe Kerello <christophe.kerello@foss.st.com>
+To: <ulf.hansson@linaro.org>, <alexandre.torgue@foss.st.com>,
+        <yann.gautier@foss.st.com>, <linus.walleij@linaro.org>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        Christophe Kerello
+	<christophe.kerello@foss.st.com>
+Subject: [PATCH] mmc: mmci: stm32: fix DMA API overlapping mappings warning
+Date: Wed, 7 Feb 2024 15:39:51 +0100
+Message-ID: <20240207143951.938144-1-christophe.kerello@foss.st.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240131174347.510961-1-jens.wiklander@linaro.org>
- <20240131174347.510961-2-jens.wiklander@linaro.org> <CAPDyKFqNhGWKm=+7niNsjXOjEJE3U=o7dRNG=JqpptUSo9G-ug@mail.gmail.com>
- <CAC_iWj+k_Vsz4ot=9pv-Gv7r11=vCunH5TSyOMTK4z-NZ2TeTA@mail.gmail.com>
- <CAFA6WYNQoRg0PWgr1oCzrkMens7e0=m_zkBSXKvp8JVjmn2OZQ@mail.gmail.com>
- <CAHUa44G+7HMNztQyYAWEhLFJvDBHDxPnqm+FRSVavb0NCyoYzg@mail.gmail.com> <CAFA6WYMNyw5GPji8XMMcPNHSkX5zXubsuVhauWHyGvBBQ3Mefw@mail.gmail.com>
-In-Reply-To: <CAFA6WYMNyw5GPji8XMMcPNHSkX5zXubsuVhauWHyGvBBQ3Mefw@mail.gmail.com>
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Wed, 7 Feb 2024 09:11:34 +0100
-Message-ID: <CAHUa44EnKCHXoPdmnyn3JSthNH=tnLa_LEwk_u797yBk=mFRAw@mail.gmail.com>
-Subject: Re: [PATCH v2 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To: Sumit Garg <sumit.garg@linaro.org>
-Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	op-tee@lists.trustedfirmware.org, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, 
-	Jerome Forissier <jerome.forissier@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
-	=?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SHFCAS1NODE1.st.com (10.75.129.72) To SHFDAG1NODE3.st.com
+ (10.75.129.71)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-02-07_06,2024-01-31_01,2023-05-22_02
 
-On Wed, Feb 7, 2024 at 8:49=E2=80=AFAM Sumit Garg <sumit.garg@linaro.org> w=
-rote:
->
-> On Wed, 7 Feb 2024 at 12:56, Jens Wiklander <jens.wiklander@linaro.org> w=
-rote:
-> >
-> > H,
-> >
-> > On Wed, Feb 7, 2024 at 7:11=E2=80=AFAM Sumit Garg <sumit.garg@linaro.or=
-g> wrote:
-> > >
-> > > Hi Ilias, Ulf,
-> > >
-> > > On Tue, 6 Feb 2024 at 20:41, Ilias Apalodimas
-> > > <ilias.apalodimas@linaro.org> wrote:
-> > > >
-> > > > Hi Ulf,
-> > > >
-> > > > On Tue, 6 Feb 2024 at 14:34, Ulf Hansson <ulf.hansson@linaro.org> w=
-rote:
-> > > > >
-> > > > > On Wed, 31 Jan 2024 at 18:44, Jens Wiklander <jens.wiklander@lina=
-ro.org> wrote:
-> > > > > >
-> > > > > > A number of storage technologies support a specialised hardware
-> > > > > > partition designed to be resistant to replay attacks. The under=
-lying
-> > > > > > HW protocols differ but the operations are common. The RPMB par=
-tition
-> > > > > > cannot be accessed via standard block layer, but by a set of sp=
-ecific
-> > > > > > RPMB commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY.=
- Such a
-> > > > > > partition provides authenticated and replay protected access, h=
-ence
-> > > > > > suitable as a secure storage.
-> > > > > >
-> > > > > > The initial aim of this patch is to provide a simple RPMB Drive=
-r which
-> > > > > > can be accessed by the optee driver to facilitate early RPMB ac=
-cess to
-> > > > > > OP-TEE OS (secure OS) during the boot time.
-> > > > >
-> > > > > How early do we expect OP-TEE to need RPMB access?
-> > > >
-> > > > It depends on the requested services. I am currently aware of 2
-> > > > services that depend on the RPMB
-> > > > - FirmwareTPM
-> > > > - UEFI variables stored there via optee.
-> > > >
-> > > > For the FirmwareTPM it depends on when you want to use it. This
-> > > > typically happens when the initramfs is loaded or systemd requests
-> > > > access to the TPM. I guess this is late enough to not cause problem=
-s?
-> > >
-> > > Actually RPMB access is done as early as during fTPM probe, probably
-> > > to cache NVRAM from RPMB during fTPM init. Also, there is a kernel
-> > > user being IMA which would require fTPM access too. So we really need
-> > > to manage dependencies here.
-> > >
-> > > >
-> > > > For the latter, we won't need the supplicant until a write is
-> > > > requested. This will only happen once the userspace is up and runni=
-ng.
-> > > > The UEFI driver that sits behind OP-TEE has an in-memory cache of t=
-he
-> > > > variables, so all the reads (the kernel invokes get_next_variable
-> > > > during boot) are working without it.
-> > > >
-> > > > Thanks
-> > > > /Ilias
-> > > > >
-> > > > > The way things work for mmc today, is that the eMMC card gets
-> > > > > discovered/probed via a workqueue. The work is punted by the mmc =
-host
-> > > > > driver (typically a module-platform-driver), when it has probed
-> > > > > successfully.
-> > >
-> > > It would be nice if RPMB is available as early as possible but for th=
-e
-> > > time being we can try to see if probe deferral suffices for all
-> > > use-cases.
-> > >
-> > > > >
-> > > > > The point is, it looks like we need some kind of probe deferral
-> > > > > mechanism too. Whether we want the OP-TEE driver to manage this i=
-tself
-> > > > > or whether we should let rpmb_dev_find_device() deal with it, I d=
-on't
-> > > > > know.
-> > >
-> > > I wouldn't like to see the OP-TEE driver probe being deferred due to
-> > > this since there are other kernel drivers like OP-TEE RNG (should be
-> > > available as early as we can) etc. which don't have any dependency on
-> > > RPMB.
-> >
-> > I agree, the optee driver itself can probe without RPMB.
-> >
-> > >
-> > > How about for the time being we defer fTPM probe until RPMB is availa=
-ble?
-> >
-> > Sounds a bit like what we do with the
-> > optee_enumerate_devices(PTA_CMD_GET_DEVICES_SUPP) call when
-> > tee-supplicant has opened the supplicant device. It would perhaps work
-> > with a PTA_CMD_GET_DEVICES_RPMB or such.
->
-> That sounds much better, it will be like an OP-TEE driver callback
-> (optee_enumerate_devices(PTA_CMD_GET_DEVICES_RPMB)) registered with
-> the RPMB subsystem. But we should check if all the RPMB partitions are
-> registered before we invoke the callbacks such that OP-TEE will have a
-> chance to select the right one.
+Turning on CONFIG_DMA_API_DEBUG_SG results in the following warning:
 
-I agree, we should wait until OP-TEE has found an RPMB device
-programmed with the expected key as only OP-TEE should know that key.
+DMA-API: mmci-pl18x 48220000.mmc: cacheline tracking EEXIST,
+overlapping mappings aren't supported
+WARNING: CPU: 1 PID: 51 at kernel/dma/debug.c:568
+add_dma_entry+0x234/0x2f4
+Modules linked in:
+CPU: 1 PID: 51 Comm: kworker/1:2 Not tainted 6.1.28 #1
+Hardware name: STMicroelectronics STM32MP257F-EV1 Evaluation Board (DT)
+Workqueue: events_freezable mmc_rescan
+Call trace:
+add_dma_entry+0x234/0x2f4
+debug_dma_map_sg+0x198/0x350
+__dma_map_sg_attrs+0xa0/0x110
+dma_map_sg_attrs+0x10/0x2c
+sdmmc_idma_prep_data+0x80/0xc0
+mmci_prep_data+0x38/0x84
+mmci_start_data+0x108/0x2dc
+mmci_request+0xe4/0x190
+__mmc_start_request+0x68/0x140
+mmc_start_request+0x94/0xc0
+mmc_wait_for_req+0x70/0x100
+mmc_send_tuning+0x108/0x1ac
+sdmmc_execute_tuning+0x14c/0x210
+mmc_execute_tuning+0x48/0xec
+mmc_sd_init_uhs_card.part.0+0x208/0x464
+mmc_sd_init_card+0x318/0x89c
+mmc_attach_sd+0xe4/0x180
+mmc_rescan+0x244/0x320
 
-Thanks,
-Jens
+DMA API debug brings to light leaking dma-mappings as dma_map_sg and
+dma_unmap_sg are not correctly balanced.
 
->
-> -Sumit
->
-> >
-> > Thanks,
-> > Jens
+If an error occurs in mmci_cmd_irq function, only mmci_dma_error
+function is called and as this API is not managed on stm32 variant,
+dma_unmap_sg is never called in this error path.
+
+Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
+---
+ drivers/mmc/host/mmci_stm32_sdmmc.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+index 35067e1e6cd8..f5da7f9baa52 100644
+--- a/drivers/mmc/host/mmci_stm32_sdmmc.c
++++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+@@ -225,6 +225,8 @@ static int sdmmc_idma_start(struct mmci_host *host, unsigned int *datactrl)
+ 	struct scatterlist *sg;
+ 	int i;
+ 
++	host->dma_in_progress = true;
++
+ 	if (!host->variant->dma_lli || data->sg_len == 1 ||
+ 	    idma->use_bounce_buffer) {
+ 		u32 dma_addr;
+@@ -263,9 +265,30 @@ static int sdmmc_idma_start(struct mmci_host *host, unsigned int *datactrl)
+ 	return 0;
+ }
+ 
++static void sdmmc_idma_error(struct mmci_host *host)
++{
++	struct mmc_data *data = host->data;
++	struct sdmmc_idma *idma = host->dma_priv;
++
++	if (!dma_inprogress(host))
++		return;
++
++	writel_relaxed(0, host->base + MMCI_STM32_IDMACTRLR);
++	host->dma_in_progress = false;
++	data->host_cookie = 0;
++
++	if (!idma->use_bounce_buffer)
++		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++			     mmc_get_dma_dir(data));
++}
++
+ static void sdmmc_idma_finalize(struct mmci_host *host, struct mmc_data *data)
+ {
++	if (!dma_inprogress(host))
++		return;
++
+ 	writel_relaxed(0, host->base + MMCI_STM32_IDMACTRLR);
++	host->dma_in_progress = false;
+ 
+ 	if (!data->host_cookie)
+ 		sdmmc_idma_unprep_data(host, data, 0);
+@@ -676,6 +699,7 @@ static struct mmci_host_ops sdmmc_variant_ops = {
+ 	.dma_setup = sdmmc_idma_setup,
+ 	.dma_start = sdmmc_idma_start,
+ 	.dma_finalize = sdmmc_idma_finalize,
++	.dma_error = sdmmc_idma_error,
+ 	.set_clkreg = mmci_sdmmc_set_clkreg,
+ 	.set_pwrreg = mmci_sdmmc_set_pwrreg,
+ 	.busy_complete = sdmmc_busy_complete,
+-- 
+2.25.1
+
