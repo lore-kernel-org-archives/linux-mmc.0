@@ -1,207 +1,103 @@
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 610BD7D3F3
-	for <linux-mmc@vger.kernel.org>; Thu,  8 Feb 2024 16:38:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9705738F80
+	for <linux-mmc@vger.kernel.org>; Thu,  8 Feb 2024 20:21:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707410315; cv=none; b=BGlwmsZL9gccSXuP9P36BoCUgt4WRpIfwLjLkAq9oJgnyX8kNr86MGfzdEZ0xwLPuaRdjeJbttwX/0bjxytJ/h7OJ0xvlnYwJfkOthMaJvWHIwtVz/yzYEjFxjFjO2/HZDDculBwrFTzagG+M0QU/DzoUQrr7/4CWdbpoQ3izGk=
+	t=1707423704; cv=none; b=jHzR/dD1sfPv448Z7VUYkNjKzrXW8zLv7ZZpw4CkPsiPsMbObsGPSG2GduzhmF5E12EXXZYrNPgmUy9AYrsaj2GN/X5Wsunf3iMnoZRCnEVCqhwvi/SE+vG3gYojjHXCUojVqDy8aJdmf/WAx1tiVwc5nl0r0Q4BCMR68aUiD04=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707410315; c=relaxed/simple;
-	bh=9QGLWUnXjOEE0l9GehnJutnkj1I2sx1Pl8YobqZyvs4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=b37uIYwcUQttzuCXHGNvGNLfKmNPG6X9+38LjYL8IAy0GUxkWU0DetQMbgRzBja5JvJhwsNSvF1qJT4OrpGS4NzwkipncqbzbO6MN/kPddSta18G7SO6+Ol7qrj9NHiUQ4p5yGQM0pj5vEfcufDEe67xt0PquDgf8fyKYLBWsX4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=Zm041nd/; arc=none smtp.client-ip=209.85.128.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
+	s=arc-20240116; t=1707423704; c=relaxed/simple;
+	bh=tsee4NBKtAR96KWrN8Sd6UvcENo+6pEmAXhvCXNQMq0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=ZQGm3gHQ/WM/hOGU9s5+P4EPdpgJXzsXxPi959riWidjkgfNdOunkeZ5HNBY/wiwQmMzvPF9e6B8P7eZzJknpvayXWcFuazNzvoOU01t2QSd+O4aGvZEFHCmHssJytYdytQ2EKPNDdt6m3sn3ELxBYTGXOI7Ezj7HCQ6Br44f7I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=BVeZdwrr; arc=none smtp.client-ip=209.85.128.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="Zm041nd/"
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-40fe03cd1caso556305e9.0
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Feb 2024 08:38:33 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="BVeZdwrr"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-41059577f26so2422345e9.0
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Feb 2024 12:21:42 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1707410311; x=1708015111; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=d4jeruN/E/glf3Gv5XyYQqRCOQY8bjJkIw1GYmYaFgo=;
-        b=Zm041nd/eXG42xD4I/4j8Ss6FQ4+DxhitSUvJLSg+bVxqWVhvfxYi/6iHjIyMZorRn
-         D5PXmU7x7126T36sdR/DdL1K+/cVgYQrlroWGyePWOwn9Q353hlp6w97jsJDohCG2Boy
-         GiHERUmFz6qEfXp5riKWdOB4vdnRRhfWyiihZM1BTtPXWhHkysgUNfu9tEwAklJlutV7
-         RsMqXDwH8XAbntEMQMyLUbih1emjlXGXcj71qtZkluyIjUmWyYAW5TXPw31Rl8sCR5Ip
-         DJ4F37P96ePlaPixeVAeVsf54YTaaCkzsHYrFYNGaK/jXmchwohg2DfLFvKsIyYhXNCX
-         7vzw==
+        d=linaro.org; s=google; t=1707423701; x=1708028501; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=z3acf27u1UG3FXBRbQIS8gUvuFH8u3NdpIthkRuoAGs=;
+        b=BVeZdwrrCLaIVIFuK2LY9K5gYOpCsreks9oeZtLWj/NF4VNHELY4kYE9IXsjqUctJ/
+         9g1k8bHjHo7wWDf1aAsZSfFaAL9cwvNrk3w5Tu/NJ9fVVfw4LnR2M4qzxk0e88Ao831Y
+         niXLyt5q/O7/U4AW+hLVn+UF0xgHrzCNFCg3CytLOnB2U6GwjpzOx1dOG1MBk1drt+Ch
+         9deIiQKgrNaYNGnXP25Vf4S/4FLBJmzpNwwUXm7Lisf8qKvH0B/uVu0KcuWDWCJMdSeL
+         U4okl5jGkY5wZ40pfD67ppnstvZ/BmNvSxHIKL3PHhQVWBZBU5aUb1HY+wP+w55xKa4p
+         PRzA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707410311; x=1708015111;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=d4jeruN/E/glf3Gv5XyYQqRCOQY8bjJkIw1GYmYaFgo=;
-        b=K0X0wZ/DHENMU/F9Gym7CJgAjYTZ5DyONhTZeeHvIqqk3XaBKze0J375T3zxg4D/oB
-         4tUS/caRa8e1ML5ppFsbdKgc8xO9xhK9blpyQJKCBecpqjfknVNJa4jq+pvtF5BisHIU
-         GyEILMF5FTgceHC5f1E0JLaXSYzfvQ7dSeqmATNG8H7kBYo1Ot5X1gluwDOFOzevdF0T
-         sOg4mUsZvBfMJqmXblOyL0HdEB0fGWlLXwsqsC0alYifR+5hiDdKcnDeZHCED/B9t/ke
-         nOdyTJ/pB5AO0FytVZeU330gKG8CX6abV/s4nqKwSZ08P6wYrR+mdmBkNt+PxO01dJrb
-         /upA==
-X-Forwarded-Encrypted: i=1; AJvYcCVhp6GWIxP8hJjKiYygvmL/jlpvSRexcLswBCX0pN/FDjSjXmenbmcckRJPMvpZeI04FsGdJHbwOQS7jk1e8Zy4IEZHs/Uf5eNo
-X-Gm-Message-State: AOJu0YwtwnRgNZZG+zGIvOvPLKyFz+NGOXn7lFiwOiPlxIOBzCeoEp8D
-	n4xp5HsvcP1NaKudvQvOAJqMXd9T1hypvEcxax+Uu/Q/vlqF7f2BWjKUFmz6c+k=
-X-Google-Smtp-Source: AGHT+IGeczzJ6ulNuOfDeAkZzD4h/YxsrbGq/4YU7wzrrzqbNExodvuxGuysdztEqknj6gCR0G9FoQ==
-X-Received: by 2002:a05:600c:a384:b0:40f:e207:2e4f with SMTP id hn4-20020a05600ca38400b0040fe2072e4fmr5456881wmb.40.1707410311378;
-        Thu, 08 Feb 2024 08:38:31 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWPBRrzRZpG0QEm9u8butDqffuNPwzOAmIqysEx6IuG03LHiQbIbH/2HA3gxGXcduMd3NAB5mmYX8nfw324QhgXL+1BbocnqzTv8AwSH9m7Rvdmrts0acZtOW48ZJVqMj1hZ0Pkh1yWIe3HIruqy/jclQt6HcBUh1vBPEPgM4fufkV5qx+mWOqsV8vhWvg1aYi9ZTBBa3tIhk7RSr1QJke/j1XXaDUGM5eGj+YkVFAr8jyuB+Xwos0+fqIYnqRa15Tmfir5gLKg/MaJ5ZANQgZd4Ib7uvTR34TMVNXcqm7zilA8siPkeztgQRu20elP+k0SEBjN54PYNLr1iyg5F+wdThnUvPTHqd1vFihBDQ6MWwuZaXNAvQqCu5RyQSEFOxC/pf3zlX7tNoGG1jXUt+ksYyL19VXp0XtH6Ee7d3LAMw==
-Received: from [192.168.50.4] ([82.78.167.45])
-        by smtp.gmail.com with ESMTPSA id o30-20020a05600c511e00b0040ec8330c8asm2121522wms.39.2024.02.08.08.38.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 08 Feb 2024 08:38:30 -0800 (PST)
-Message-ID: <42b48f52-0d14-4f24-9eeb-38e68558eb8f@tuxon.dev>
-Date: Thu, 8 Feb 2024 18:38:29 +0200
+        d=1e100.net; s=20230601; t=1707423701; x=1708028501;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=z3acf27u1UG3FXBRbQIS8gUvuFH8u3NdpIthkRuoAGs=;
+        b=payU1Dws8+RnBPtZGcXqGe0mzy64Bsu4YpIuG1XTed0beAB6mky79DyyDNPbFpg75j
+         5L6rNBu8dga2Okui6vQLLzWJvgF+Zcpn/wpjkJUGEu4/L9CyZRqvvMo5vPUu/d2oob9b
+         W05TbamBs9cJBg2HjVXxd3pIGIPdHOP1EKP1F8GkeK6k1pAxyQR1Pr0UhqV9osZ7OtQm
+         kb21u6HZn9S7BiEfCrFAA3MNTqHmCHV04WThyus8i1tqaFoU0eSGout3ufQTxV+jf6bx
+         sZjZTRTFIPXmu2lljvubr7tVQrRlQ510xAT+2Fa9z88BuSTGPblX9pco0ZS9GDqJ/OXZ
+         xG+A==
+X-Gm-Message-State: AOJu0Yyk+Ii3mVAZ3raVyJd//jLFVexPK7yIsprKnEDDwyUdQFYvHZ2d
+	j8yrR3wOwYHbOfeeAz+KRYLfIWoiNta2EBTPPt+JPsX1YOmGQPJ1M8VdAgk84DE=
+X-Google-Smtp-Source: AGHT+IFUWsEumF3+dMYhr2VTrnxGuMPs8G4EV8UXVWSxI4vbqAdO8nTLkOk8hnwSe6Tv81llsq5ixQ==
+X-Received: by 2002:adf:f891:0:b0:33b:28c0:7c98 with SMTP id u17-20020adff891000000b0033b28c07c98mr349299wrp.61.1707423700730;
+        Thu, 08 Feb 2024 12:21:40 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCVWntY+LUqqaL/5/EQFIUEI5qSZCAvHwoNIb4PBn6lcNZRcol6KYHwLo3eRIa2UjHTXrWcyeyGLdv21pn4gWcBuGFBjLGWBk9gxpgtXfKt6l6kspZ9qvKBkF02ORU4wjY3i3IAPLeWkejOyjgiXpJ0LEUrnZUkgRkQeTlyDU0uE4W24d9iPWuT+yBSx3vy7XyYDo7u1Yibwa3WNRd5kx8QijQw=
+Received: from krzk-bin.. ([178.197.222.62])
+        by smtp.gmail.com with ESMTPSA id e5-20020a5d5305000000b0033af5086c2dsm102548wrv.58.2024.02.08.12.21.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 08 Feb 2024 12:21:40 -0800 (PST)
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH] mmc: renesas_sdhi: use typedef for dma_filter_fn
+Date: Thu,  8 Feb 2024 21:21:37 +0100
+Message-Id: <20240208202137.630281-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] mmc: renesas_sdhi: Fix change point of data handling
-Content-Language: en-US
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, ulf.hansson@linaro.org,
- yoshihiro.shimoda.uh@renesas.com, masaharu.hayakawa.ry@renesas.com,
- takeshi.saito.xv@renesas.com, linux-mmc@vger.kernel.org,
- linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
- Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20240205112702.213050-1-claudiu.beznea.uj@bp.renesas.com>
- <ZcDdn2AVz8FIXzak@shikoro> <237bd5c8-184d-4e46-ba66-253e3ef0c895@tuxon.dev>
- <ZcD17mTRnfIaueAW@shikoro> <63e1eabd-a484-48ee-b8db-1e460bce70ab@tuxon.dev>
- <ZcQmoEkv_1PVURrT@shikoro>
-From: claudiu beznea <claudiu.beznea@tuxon.dev>
-In-Reply-To: <ZcQmoEkv_1PVURrT@shikoro>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-Hi, Wolfram,
+Use existing typedef for dma_filter_fn to avoid duplicating type
+definition.
 
-On 08.02.2024 02:56, Wolfram Sang wrote:
-> Hi Claudiu,
-> 
-> I got more information about SMPCMP now. I had a misunderstanding there.
-> According to your patch description, you might have the same
-> misunderstanding? Let me quote again:
-> 
-> ===
-> RZ hardware manual are similar on this chapter), at the time of tuning,
-> data is captured by the previous and next TAPs and the result is stored in
-> the SMPCMP register (previous TAP in bits 22..16, next TAP in bits 7..0).
-> ===
-> 
-> It is not the previous and next TAP but the previous and next clock
-> cycle using the *same* TAP. And the bits in the register describe if
-> there was a mismatch in the data bits across these clock cycles.
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+ drivers/mmc/host/renesas_sdhi.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-That's something new for me, it's not described in HW manual (or at least I
-haven't found it).
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index c1fb9740eab0..586f94d4dbfd 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -9,6 +9,7 @@
+ #ifndef RENESAS_SDHI_H
+ #define RENESAS_SDHI_H
+ 
++#include <linux/dmaengine.h>
+ #include <linux/platform_device.h>
+ #include "tmio_mmc.h"
+ 
+@@ -63,7 +64,7 @@ struct renesas_sdhi_of_data_with_quirks {
+ struct renesas_sdhi_dma {
+ 	unsigned long end_flags;
+ 	enum dma_slave_buswidth dma_buswidth;
+-	bool (*filter)(struct dma_chan *chan, void *arg);
++	dma_filter_fn filter;
+ 	void (*enable)(struct tmio_mmc_host *host, bool enable);
+ 	struct completion dma_dataend;
+ 	struct tasklet_struct dma_complete;
+-- 
+2.34.1
 
-> 
-> So, we really want SMPCMP to be 0 because the data should be stable
-> across all three clock cycles of the same TAP.
-
-So, it means issues should be somewhere else on my setup.
-
-> 
->> As of my understanding the TAP where cmpngu = 0x0e and cmpngd=0x0e is not
->> considered change point of the input data. For that to happen it would mean
->> that cmpngu != cmpngd.
-> 
-> I am not sure you can assume that cmpngu != cmpngd is always true for a
-> change point. I'd think it is likely often the case. But always? I am
-> not convinced. 
-
-That's was my understanding from HW manual and since it fixed my issue I
-considered it valid at the point I wrote this statement. Maybe we need to
-understand this?
-
-> But I am convinced that if SMPCMP is 0, this is a good
-> TAP because it was stable over these clock cycles.
-> 
->> From this snapshot, datasheet and our discussions:
->>
->> i=0, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> i=1, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> i=2, cmpngu=0000000e, cmpngd=0000000e, smpcmp=000e000e
->> i=3, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> *i=4, cmpngu=00000000, cmpngd=00000002, smpcmp=00000002*
->> *i=5, cmpngu=00000000, cmpngd=000000ff, smpcmp=000001ff*
->> *i=6, cmpngu=000000ff, cmpngd=00000000, smpcmp=01ff0000*
->> i=7, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> i=8, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> i=9, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> i=10, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> i=11, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->> *i=12, cmpngu=00000000, cmpngd=00000002, smpcmp=00000002*
->> *i=13, cmpngu=00000000, cmpngd=000000ff, smpcmp=000001ff*
->> *i=14, cmpngu=000000ff, cmpngd=00000000, smpcmp=01ff0000*
->> i=15, cmpngu=00000000, cmpngd=00000000, smpcmp=00000000
->>
->> I understand that TAP4,5,6 are change point of the input data and
->> TAP8,0,1,2,3 are candidates for being selected, TAP 1,2 being the best
->> (please correct me if I'm wrong).
-> 
-> I agree that TAP4-6 are the change point. TAP2 could be a candidate. I
-> dunno why SMPCMP is non-zero at i == 2, maybe some glitch due to noise
-> on the board?
-
-Hm... it worth considering it...
-
-> 
-> I do really wonder why probing failed, though? TAP1 sounds like a good
-> choice as well. I mean we consider SMPCMP only if all TAPs are good. So,
-> if probing fails, that means that SMPCMP was non-zero all the time?
-
-Yes, that was my finding as well on my setup which leads to this patch.
-
-If we're taking as example the snapshot I dropped here in a previous email,
-and do not consider this patch, code at [1] should clear bit for TAP2 in
-smpcmp mask because in the 1st round SMPCMP was not zero (but 0x000e000e)
-and in the 2nd round it was zero.
-
-[1]
-https://elixir.bootlin.com/linux/latest/source/drivers/mmc/host/renesas_sdhi_core.c#L629
-
-> 
-> That being said, our code to select the best TAP from SMPCMP is really
-> not considering the change point :( It just picks the first one where
-> SMPCMP is 0.
-
-Hm... I thought code at [2] selects the TAP in the middle (in the snapshot
-I pointed, TAP1).
-
-[1]
-https://elixir.bootlin.com/linux/latest/source/drivers/mmc/host/renesas_sdhi_core.c#L656
-
-
-> We are not checking where the change point is and try to be
-> as far away as possible.
-> 
->> root@smarc-rzg3s:~# md5sum out test
->> b053723af63801e665959d48cb7bd8e6  out
->> b053723af63801e665959d48cb7bd8e6  test
->>
->> Do yo consider this enough?
-> 
-> Yes, if done 100 times ;)
-
-This may take a while...
-
-> 
-> I hope this mail was helpful?
-
-The tuning procedure it's better understand now. But I'm not sure in which
-direction should I dig further... :)
-
-Thank you for details and patience,
-Claudiu Beznea
-
-> 
-> Thanks and happy hacking,
-> 
->    Wolfram
-> 
