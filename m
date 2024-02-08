@@ -1,104 +1,246 @@
-Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EF646D1A8
-	for <linux-mmc@vger.kernel.org>; Thu,  8 Feb 2024 10:15:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF37E6EB51
+	for <linux-mmc@vger.kernel.org>; Thu,  8 Feb 2024 11:30:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707387361; cv=none; b=EbEIVJPpVqLzMtViomJCCdqRHMI8fTH0w9QBjEjYNkm60b/ZUnZUPg/lhSJuPb5q0McLOU2Kvj2+LAiisdK02oJj5TTNkYHR6X7eVbGSBlnLMqmGY/sdCSP822YIhBaLOwzANSN5r8YzBJfXMEbS1ukfGGWcvCJ9KLvDVkkXO6s=
+	t=1707391803; cv=none; b=GRh1rQlnVgfO01AZWfpetMo2u8rwes1+zOIckcDFznNMSIOrd5uZ+/bq81KitckxDy9oo1oyBgPoY+nfDh8as8TNttZ4ZuuTU3mdeumBJR8dwEq6Y1A2kZ83lGwwg+wmEeOIgJ6Uxp0kV5ggvZ+wV9yqCVqUSolL9A9lsBtrCD8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707387361; c=relaxed/simple;
-	bh=wWmGI5tZG2P8IH7ihOEYo2e78tNqbmXlxXlGNN8tImE=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=vAFHV40RtRKcXYYCtp5DFbMy5vQ0trEa5FC7nd5ThjScbgRUWwrOcYE+L2HJsHSxSsDrrAV9B4kLq8V6yOYKbdS5M2Sy1pjjsGnTagLErQkdZHHyenNIM29SDcvdzP0QEzboBJtR95koct5vNDDK5gl2eb0B/jjNyf5QekF1pns=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=N+ORxBoK; arc=none smtp.client-ip=209.85.218.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1707391803; c=relaxed/simple;
+	bh=A/9QDHOveTF5KwzqzneyZu01uq/HZbUuDGK1iuX0Q14=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=XSe0kfn4yQSMMMvaX+iP771E0bEro7BGUl50oh3L1mXVIjappEodnfvrrnJKoVZa4ZcrUvZWyI2bNG6z1xolP8xk6qxoVRIfQ1CE7XRId+l2mwNhuVOjlOQnAQ4fxv/VkGo/hdN1Ejcz+FLUIfEM+si5yjkJmv8GdTOOeEtjCos=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr; spf=pass smtp.mailfrom=smile.fr; dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b=SlOjy+jL; arc=none smtp.client-ip=209.85.128.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=smile.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="N+ORxBoK"
-Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-a3bbad234feso18176766b.0
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Feb 2024 02:15:59 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b="SlOjy+jL"
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-41047386d18so1741495e9.0
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Feb 2024 03:30:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707387358; x=1707992158; darn=vger.kernel.org;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+        d=smile-fr.20230601.gappssmtp.com; s=20230601; t=1707391799; x=1707996599; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=jH4bJbzV1Nelq6h1EwlmCainpWdSY+zm7Xx803mK3wQ=;
-        b=N+ORxBoKbeuKb4BVQeqftyLREO9aN7fGgnxxQDCf8BZvXFCV2W97rR5vsZk1GvOyoq
-         KctvjT/jp/uPpKqmQMGjn0AbA/Ju+NosvGUgbmlGQWot1iscf7uwd/UvDhK5xBG7GWrs
-         CPDl/1qcata0ZXbnpV0UFGbzs3uD+M1IAumZMAz8SaOyqnsuis7xbvWkv25lBuxLgr4O
-         x+W0KNJQW2QEuUy+iQLrmGh6ZgFPOS4GTxXqgEdkGCvydQxdNqrdO/wCHF77qyomwXeU
-         DqxsHJTth3WoL2pH/W+hkQsSp/kz591ceJxqJCQKognOdIXVwI+wC9Zl89nJi0KNmYTa
-         PoFQ==
+        bh=ENBamKSr18pgv2cENK3EgfJJXVVKjXw+PVr60UI5gP4=;
+        b=SlOjy+jLqBwIbgSXlb3VhD06kn6J550KHpt1ZMOMJJD1bVwbpETnKkUAUXQnOGXBZ3
+         fpon2eI93F+ronMz+2Hi8OsIHFRZ6BVvEH5SFSj743FHvS5nfyx7pFn6+ZBXhg7pj/9H
+         fz8WMrKK0y+yuXABjFN5Bccbs4QiAM4nXoD40ww3B3uTPH9OpVpFKDsN+C5Cuyc+RBT8
+         QZOKOAtugOYFmAJzNr4CZLpK1iO5Pjhcyt+ZRdwN2B5Rhq8JmgPGdGGPI2kxyNf7L1Pe
+         RQuQ/HLmJryHr7qIoKR8nKyvmqbJijqz+u43qPBbqUNYBQOtQJ863X9ZonvoKoWRpc7V
+         Ex5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707387358; x=1707992158;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+        d=1e100.net; s=20230601; t=1707391799; x=1707996599;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=jH4bJbzV1Nelq6h1EwlmCainpWdSY+zm7Xx803mK3wQ=;
-        b=msZMmUiT0CVqHEtFmSXPmoFzvIYJaN5nEFdb2M06l1rtAzJ9aSgk9u5xj74OJTZP5E
-         7NauXtsgLL4yyzbUM06LJNxl9miCM7iO+Xzb5Mx1RzJMs3xD3v+DjNitmXlYN3F5aB4O
-         djKScn6GEvASZUUAAa405BoSTUB/L9EVjcN5TLWpYDnJIjaoMyRRzTSST8GpRB69Zqgl
-         ezGwKVVDnLoF5lgJKRa4Ej6h1FxsFh7LfyvLX7fA+cEPgZrFfKDsYrj/Cif0Twnb0x2p
-         GdrU0cK6wnoE1PpUazgqSq+xXTLZMg6b7kgPfRpMzjcQTK8fDzeCA1HcD7zZcdljTTt+
-         qQ1A==
-X-Forwarded-Encrypted: i=1; AJvYcCUOT3l+ZvOIlMNwh8ZSZIMnl+heaUV7hHiS71622um92BnU+5sEMTWbSYwGxTCdA/grAAI9Y87a0778YVPNZG8f+mGsUmq7gQNd
-X-Gm-Message-State: AOJu0YxQu+5BQU8y5ySH+lZ83FbRCKH5RpmcMnvycTGPl6bHaB4HvR93
-	PrqYuztEoOiIaxZ8oz0RHypatsDUUMpkdOQir6d5YlWBASj242+lbcqvS+OpJW2qZdCSrU0RqKN
-	N
-X-Google-Smtp-Source: AGHT+IFhYSFGR5ljhdKF/XFxUw2ra8/x3jR5BcMqyICrrP9bb6dBsnECjuWXDdOUUFfEDBYsYtTwBQ==
-X-Received: by 2002:a17:906:1ecc:b0:a37:6aa8:6885 with SMTP id m12-20020a1709061ecc00b00a376aa86885mr6141221ejj.19.1707387357691;
-        Thu, 08 Feb 2024 02:15:57 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCXetXVGqH4KUKyruubya4GzkXBojO1WknszDBw+w3ahCSSkdwyGRCj8l4GB10lGNGT5jxe9uQU2vB8TC+4+1uKPYORgcBZW33xpYum9tp29on/PaeiXkMyYv9GSM7fDNSd6ZF4=
-Received: from localhost ([102.222.70.76])
-        by smtp.gmail.com with ESMTPSA id vo7-20020a170907a80700b00a37fbee48f8sm1724189ejc.133.2024.02.08.02.15.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 08 Feb 2024 02:15:57 -0800 (PST)
-Date: Thu, 8 Feb 2024 13:15:53 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: manfred@colorfullife.com
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [bug report] genirq: Add might_sleep() to disable_irq()
-Message-ID: <be6e9b02-0fe6-4731-bf0e-4691e2cd99ad@moroto.mountain>
+        bh=ENBamKSr18pgv2cENK3EgfJJXVVKjXw+PVr60UI5gP4=;
+        b=ViWUF+z8JVERQmoWf1ig3gpyhtgDI7B4WKi0TOYq5splZ//pSfVNtsnnFKQvZLfMd1
+         i6Cy4QKIuPIw7394HXE/5KuDAVcOaWXooCOZwyAC65sS2P5c7sQEg5yBeaigiRojxVPt
+         NfTEw8sywn7lH5fCMWSCZUNxMW7XszSriBiEkRWVyBCbI/fFNvJWmb+AOxi6vXqTLMAO
+         zmv7B7kiCp9XjFj5ZgqtvOGEXl33hoi51iq8xeigIL5XXjaIkqKW+s6VrhCIVeen6dr5
+         Yp6CKZYGivzDKijLX5wQAcX5dlGP29Bk7I+0pIismdmwEChtlxoYzgTcqqXuZ3N89DI8
+         L68Q==
+X-Gm-Message-State: AOJu0YzmuRmpqDkWZ+8KFEfS4rmBBB8jNuMAyJaKB+w5OYgRvIP6J63z
+	BV7Bi0BlT4fGn9h+ETamUtHHJ2Uhr0RE07W+lah5mD4CX9gcz3EKkut790oXEJI=
+X-Google-Smtp-Source: AGHT+IHPOHd6a0AkvrNfbmLAOFonzs2GMBV0wj0xVlXRgB1TISVRSGvv8X9jjK4rAgyo0b6nzpsMmg==
+X-Received: by 2002:a5d:4986:0:b0:33b:139e:9110 with SMTP id r6-20020a5d4986000000b0033b139e9110mr5587477wrq.36.1707391798897;
+        Thu, 08 Feb 2024 03:29:58 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXe/vzOJyYV0FKR2ZOg7iJDzGOvMNQl58dHCM0W+wCcQgqKUHkeNzzHeZQPiWkW4O9hsjAqoRvatAyr6/HSxa2Bd+T/qnYje1Yz3miY9Ahq/RVs1ST8Xv9WtSCzR5ijWFya+btJIKWOnYe1euIUkksLMVH776ZAL4foYEEdweacovhVZ25L
+Received: from ?IPV6:2a01:cb05:945b:7e00:9bdc:6887:23a2:4f31? (2a01cb05945b7e009bdc688723a24f31.ipv6.abo.wanadoo.fr. [2a01:cb05:945b:7e00:9bdc:6887:23a2:4f31])
+        by smtp.gmail.com with ESMTPSA id f2-20020a5d50c2000000b0033b4db744e5sm3406984wrt.12.2024.02.08.03.29.58
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 08 Feb 2024 03:29:58 -0800 (PST)
+Message-ID: <6eced20a-6454-4824-a149-ee331ebb7eec@smile.fr>
+Date: Thu, 8 Feb 2024 12:29:57 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: sdhci-omap: issues with PM features since 5.16
+Content-Language: fr, en-US
+To: Tony Lindgren <tony@atomide.com>
+Cc: Linux-OMAP <linux-omap@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
+ linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+ Adrian Hunter <adrian.hunter@intel.com>
+References: <2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr>
+ <20240127044851.GW5185@atomide.com>
+ <d09925b3-83e6-4c52-878f-4c1db7670543@smile.fr>
+ <20240129111733.GX5185@atomide.com>
+ <f80b5390-8bfa-43d8-80ce-70b069aef947@smile.fr>
+ <7d72f3ee-bcfe-4197-b492-857dc49b2788@smile.fr>
+ <20240131103050.GZ5185@atomide.com>
+ <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr>
+ <20240202043601.GA5185@atomide.com>
+From: Romain Naour <romain.naour@smile.fr>
+In-Reply-To: <20240202043601.GA5185@atomide.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Hello Manfred Spraul,
+Le 02/02/2024 à 05:36, Tony Lindgren a écrit :
+> * Romain Naour <romain.naour@smile.fr> [240201 09:04]:
+>> Le 31/01/2024 à 11:30, Tony Lindgren a écrit :
+>>> * Romain Naour <romain.naour@smile.fr> [240130 11:20]:
+>>>> Le 29/01/2024 à 18:42, Romain Naour a écrit :
+>>>>> Le 29/01/2024 à 12:17, Tony Lindgren a écrit :
+>>>>>> So I'm still guessing your issue is with emmc not getting reinitialized
+>>>>>> properly as there's no mmc-pwrseq-emmc configured. Can you give it a
+>>>>>> try? See am5729-beagleboneai.dts for an example.
+>>>>
+>>>> I can't add such mmc-pwrseq-emmc on the custom board, there is no gpio available
+>>>> to reset the emmc device.
+>>>>
+>>>> To resume:
+>>>> - the emmc doesn't work with mmc-hs200-1_8v mode with PM runtime enabled
+>>>> - the emmc works with mmc-hs200-1_8v mode without PM runtime (patch series reverted)
+>>>> - the emmc works with mmc-ddr-1_8v mode with PM runtime enabled
+>>>>
+>>>> AFAIU the hs200 mode requires some pin iodelay tuning (SDHCI_OMAP_REQUIRE_IODELAY)
+>>>> is sdhci_omap_runtime_{suspend,resume} needs to take care of that?
+> 
+> On PM runtime resume, sdhci_omap_runtime_resume() gets called and calls
+> sdhci_runtime_resume_host(), and calls mmc->ops->set_ios().
+> 
+> Then sdhci_omap_set_ios() calls sdhci_omap_set_timing() to set the iodelay.
+> Maybe add some printk to sdhci_omap_set_timing() to verify the right modes
+> get set on PM runtime resume?
+> 
+>>>> The mmc2 clock seems idle when mmc-hs200-1_8v and PM runtime are used.
+>>>>
+>>>> omapconf dump prcm l3init
+>>>>
+>>>> (mmc2 clock idle)
+>>>> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01070000 |
+>>>>
+>>>> (mmc2 clock running)
+>>>> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01040002 |
+>>>>
+>>>> Thoughts?
+> 
+> For the clocks above, that is as expected. The clocks get idled when the
+> MMC controller is idle.
+> 
+>>> OK so if the emmc reset gpio is not available, seems we should do something
+>>> like the following patch to not set MMC_CAP_POWER_OFF_CARD unless the
+>>> cap-power-off-card devicetree property is set.
+>>>
+>>> Care to give it a try and see if it helps?
+>>
+>> Same problem without MMC_CAP_POWER_OFF_CARD flag (even by removing
+>> MMC_CAP_AGGRESSIVE_PM too).
+>>
+>> I did some test with mmc capabilities mask but no progress so far.
+> 
+> OK. So this issue seems to be related to the PM runtime resume not
+> restoring something properly as you suggested earlier.
 
-The patch 17549b0f184d: "genirq: Add might_sleep() to disable_irq()"
-from Dec 16, 2022 (linux-next), leads to the following Smatch static
-checker warning:
+Adding your PM reply with the mailing list in Cc:
 
-	drivers/mmc/host/omap.c:647 mmc_omap_cmd_timer()
-	warn: sleeping in atomic context
+Le 06/02/2024 à 09:25, Tony Lindgren a écrit :
+> * Tony Lindgren <tony@atomide.com> [240202 10:30]:
+[...]
+>
+> When you get a chance, maybe give the following debug patch a try.
+> I'm mostly seeing value of 2 and sometimes 0, but that could be
+> for a different mmc controller instance as I just used pr_info.
+> So you may need to tweak the debug patch to use dev_dbg to leave
+> out other controllers.
+>
+> #define MMC_POWER_OFF           0
+> #define MMC_POWER_UP            1
+> #define MMC_POWER_ON            2
+> #define MMC_POWER_UNDEFINED     3
+>
+> So on MMC_POWER_OFF, in sdhci_runtime_resume_host() the flag
+> host->reinit_uhs = true does not get set, and maybe with hs200
+> that causes the failure?
 
-drivers/mmc/host/omap.c
-    638 static void
-    639 mmc_omap_cmd_timer(struct timer_list *t)
-    640 {
-    641         struct mmc_omap_host *host = from_timer(host, t, cmd_abort_timer);
-    642         unsigned long flags;
-    643 
-    644         spin_lock_irqsave(&host->slot_lock, flags);
-                ^^^^^^^^^^^^^^^^^
-Holding a spinlock.
+With the debug line added, I don't see any MMC_POWER_OFF for the emmc but only
+MMC_POWER_ON lines:
 
-    645         if (host->cmd != NULL && !host->abort) {
-    646                 OMAP_MMC_WRITE(host, IE, 0);
---> 647                 disable_irq(host->irq);
+XXX sdhci_runtime_resume_host: mmc->ios.power_mode: 2
 
-Manfred's patch just exposes the bug, and doesn't cause it.  However,
-disable_irq() is a might_sleep() function now.
+>
+> If you're seeing MMC_POWER_OFF values, maybe also try changing
+> sdhci_omap_runtime_resume() to call sdhci_runtime_resume_host(host, 1)
+> and see if that helps as requesting a soft reset causes sdhci_init() to
+> set host->reinit_uhs = true.. That change feels like a workaround
+> though.
 
-    648                 host->abort = 1;
-    649                 queue_work(host->mmc_omap_wq, &host->cmd_abort_work);
-    650         }
-    651         spin_unlock_irqrestore(&host->slot_lock, flags);
-    652 }
+I tried anyway with soft reset, the cache flush error is gone but now I have
+this dump in dmesg each time the emmc is reset:
 
-regards,
-dan carpenter
+[ 3978.852783] mmc1: Reset 0x6 never completed.
+[ 3978.852783] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[ 3978.852783] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
+[ 3978.852813] mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+[ 3978.852813] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+[ 3978.852813] mmc1: sdhci: Present:   0x01f00000 | Host ctl: 0x00000000
+[ 3978.852813] mmc1: sdhci: Power:     0x00000000 | Blk gap:  0x00000000
+[ 3978.852813] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000000
+[ 3978.852844] mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+[ 3978.852844] mmc1: sdhci: Int enab:  0x00000000 | Sig enab: 0x00000000
+[ 3978.852844] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[ 3978.852844] mmc1: sdhci: Caps:      0x24e90080 | Caps_1:   0x00000f77
+[ 3978.852844] mmc1: sdhci: Cmd:       0x00000000 | Max curr: 0x00000000
+[ 3978.852874] mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+[ 3978.852874] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[ 3978.852874] mmc1: sdhci: Host ctl2: 0x00000000
+[ 3978.852874] mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+[ 3978.852874] mmc1: sdhci: ============================================
+
+With sdhci soft reset enabled, there are some MMC_POWER_OFF in dmesg
+
+[ 3978.852905] XXX sdhci_runtime_resume_host: mmc->ios.power_mode: 0
+[ 3982.217590] XXX sdhci_runtime_resume_host: mmc->ios.power_mode: 2
+
+The iodelay pin setting is still applied after the emmc is reset:
+
+# omapconf dump 0x4A00348c 0x4A0034ac
+|----------------------------|
+| Address (hex) | Data (hex) |
+|----------------------------|
+| 0x4A00348C    | 0x00070101 |
+| 0x4A003490    | 0x00070101 |
+| 0x4A003494    | 0x00070101 |
+| 0x4A003498    | 0x00070101 |
+| 0x4A00349C    | 0x00060101 |
+| 0x4A0034A0    | 0x00070101 |
+| 0x4A0034A4    | 0x00070101 |
+| 0x4A0034A8    | 0x00070101 |
+| 0x4A0034AC    | 0x00070101 |
+|----------------------------|
+
+>
+> Regards,
+>
+> Tony
+>
+> 8< ------
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3848,6 +3848,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host,
+int soft_reset)
+>  	}
+>
+>  	sdhci_init(host, soft_reset);
+> +	pr_info("XXX %s: mmc->ios.power_mode: %i\n", __func__, mmc->ios.power_mode);
+>
+>  	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
+>  	    mmc->ios.power_mode != MMC_POWER_OFF) {
+
+
+Best regards,
+Romain
+
+
+> 
+> Regards,
+> 
+> Tony
+
