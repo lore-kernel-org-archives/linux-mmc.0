@@ -1,44 +1,48 @@
 Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18FA94C89
-	for <linux-mmc@vger.kernel.org>; Fri,  9 Feb 2024 01:58:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C46AD4C83
+	for <linux-mmc@vger.kernel.org>; Fri,  9 Feb 2024 01:58:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707443937; cv=none; b=nRxC1vl7ASihYKLLD3QSifQ7RZQnR9xxlHdDuUGt0UJ1ZcmneDT7j1opp+kj7Eo/ZrSR2wGP5rgR6gLjKPlMnkgNnc77cS+uRVoxyt7H0HqjjsE85R4RDSiY9ms7X+OD/FabOr1N8Sxk8khRw0AQE5sG3A0H/7+z9DY+OCDFgzI=
+	t=1707443939; cv=none; b=NA2Gi58y8U13CHNvpEFizSPjwlaLeyG3vsHEQ0dchE3JC9G48c92WkwPHy76lejFBgBlxqDHLzPVoc8rOONXX2Ob9Ph2sxSeOWfRvQwbt5EpUT9yHXEAAd8WKvJtZu4aPOjBU2+bwlrfbJ6MSKsSqUZEQRgr3fBW8xl8yh+XkV0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707443937; c=relaxed/simple;
-	bh=SPMEhHXZ2gMON2Fdo5+psoDe8TKEgrIzCRXmLgoZkEo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ihuFTJt2EXgIcR+zI8US4hI4SK/rJ1fInKpQg13YfbBQwGqlq5maIh5pduOfRqqAfiqkoIqyELDsiJTXZWJKF+yoBPP/3pL4QKFuNe1AzWguc3YntaWeFzLlk6nMK3Ju9j7845vs1ilpd9DAbrKLBFGfhcBElFR5uPPkdve+YAQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=c3DSh6zr; arc=none smtp.client-ip=194.117.254.33
+	s=arc-20240116; t=1707443939; c=relaxed/simple;
+	bh=eSZ0UF6f5wQGVbK3MfAk9QDVqW9e5WhVYigroBv8fqI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=uzBTsuqaOlFkSJY8XyRXXdaMBwTOacfRxoYYoVvdj/tPfgGLHIEjhmpTx6JHfaFk/IRENs8HVPO+9pMoHjvgKFrfSi5dz8isJ+muowGrwH399K9PVBycH/b1vKgiPIfr269znt55Pp2raRwhgAFQV5qsZalP7fm0B7xyNRm1XRs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=aRDeMm8c; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="c3DSh6zr"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="aRDeMm8c"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=from:to:cc:subject:date:message-id
-	:mime-version:content-transfer-encoding; s=k1; bh=JkJiI1zdweLmw5
-	Brm11cP7jfynZIq7IJZmwIfkRRQnI=; b=c3DSh6zrTbJpNGfC2mXlrduQsNlpSf
-	C1KH2X+l+7gzNtMC69FHqTeiQkGUoW2BimDdKRoGWn+J/50DvhojlV4OW1yMFWOC
-	O6BpRoGF+YftBK/l2LtBIPnXT1gUz8HJ86GkvTIkwC8by9mJMEXemQaYkoq3CbdS
-	UcQ60GfRSQa4gzucpuljhoNjaw/7F7Wvf0TVDPWdmPWTPoL0Vi7i0UM/E0THMRhp
-	xWKNFy+phsoHzC/LutXtrUtwsn3JkiCB4srGwV6/vGK069TYqHQf9VLILaOzhBJJ
-	vW6BrmdEbO/2FD5ISHMbpyoSq0tmelNsJxjVPTgNqbxADpe3G8SlyDhQ==
-Received: (qmail 2792257 invoked from network); 9 Feb 2024 02:58:43 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Feb 2024 02:58:43 +0100
-X-UD-Smtp-Session: l3s3148p1@sBmIROkQMuMujnsZ
+	:in-reply-to:references:mime-version:content-transfer-encoding;
+	 s=k1; bh=CIb4fU6aD0u2MIHraJnpW3RoUetuKj7I8/j6aS5bid0=; b=aRDeMm
+	8ckmE3LrbwdHQVF8R4F1jFHuz5IRDxgnWhnXMqBpjOCB0kRZTup//rVr8rWNHMA9
+	bBALwyWYF/ICF9XYrPM4YPNYyVtIu+dZl9ZmVVjH4psT3Gaa+nAcVGDw9DZl8KDX
+	NYGuntN7nJ3J/wPRzn6nW3bMfbxHPMNx3lBm9aMTW/gVgoCcmpn+Lhcc0Sfg9yXs
+	w9WVSY0gznAr7ru5iQA5s43oXZgDmvSoQByRQllkBBt8OvlZTAAskN+FWdStE8hm
+	fruHuYxSCGMr0BPFzBmX1UL5r6UQCvGDC6goizkzCUUe/6V3SJorfVH78C6Yg6KF
+	E6gea8JBxNcHg3oQ==
+Received: (qmail 2792359 invoked from network); 9 Feb 2024 02:58:47 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Feb 2024 02:58:47 +0100
+X-UD-Smtp-Session: l3s3148p1@I++6ROkQlLMujnsZ
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: linux-renesas-soc@vger.kernel.org
 Cc: Lee Jones <lee@kernel.org>,
 	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
+	kernel test robot <lkp@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org,
-	linux-sh@vger.kernel.org
-Subject: [PATCH 0/6] mfd: tmio: simplify header and move to platform_data
-Date: Fri,  9 Feb 2024 02:58:15 +0100
-Message-ID: <20240209015817.14627-8-wsa+renesas@sang-engineering.com>
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 3/6] mmc: tmio/sdhi: fix includes
+Date: Fri,  9 Feb 2024 02:58:18 +0100
+Message-ID: <20240209015817.14627-11-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20240209015817.14627-8-wsa+renesas@sang-engineering.com>
+References: <20240209015817.14627-8-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,49 +51,61 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The MFD parts of the TMIO have been removed by Arnd, so that only the
-SD/MMC related functionality is left. Remove the outdated remains in the
-public header file and then move it to platform_data as the data is now
-specific for the SD/MMC part.
+TMIO uses an of_* function, and SDHI uses pm_runtime functions. Add the
+includes directly, so we can clean up another header properly. Sort the
+pagemap include while we are here.
 
-Based on 6.8-rc3, build bot is happy. Branch is here:
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/oe-kbuild-all/202402070323.JpYfFtkQ-lkp@intel.com/
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 3 ++-
+ drivers/mmc/host/tmio_mmc_core.c              | 1 +
+ 3 files changed, 5 insertions(+), 2 deletions(-)
 
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/tmio-simplification
-
-I'd suggest this goes via the MFD tree, so the series would need acks
-from the MMC and SH maintainers. Is that okay with everyone?
-
-All the best!
-
-   Wolfram
-
-
-Wolfram Sang (6):
-  mfd: tmio: remove obsolete platform_data
-  mfd: tmio: remove obsolete io accessors
-  mmc: tmio/sdhi: fix includes
-  mfd: tmio: update include files
-  mfd: tmio: sanitize comments
-  mfd: tmio: move header to platform_data
-
- MAINTAINERS                                   |   2 +-
- arch/sh/boards/board-sh7757lcr.c              |   2 +-
- arch/sh/boards/mach-ap325rxa/setup.c          |   2 +-
- arch/sh/boards/mach-ecovec24/setup.c          |   2 +-
- arch/sh/boards/mach-kfr2r09/setup.c           |   2 +-
- arch/sh/boards/mach-migor/setup.c             |   2 +-
- arch/sh/boards/mach-se/7724/setup.c           |   2 +-
- drivers/mmc/host/renesas_sdhi_core.c          |   2 +-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |   5 +-
- drivers/mmc/host/renesas_sdhi_sys_dmac.c      |   5 +-
- drivers/mmc/host/tmio_mmc_core.c              |   3 +-
- drivers/mmc/host/uniphier-sd.c                |   2 +-
- include/linux/mfd/tmio.h                      | 133 ------------------
- include/linux/platform_data/tmio.h            |  64 +++++++++
- 14 files changed, 81 insertions(+), 147 deletions(-)
- delete mode 100644 include/linux/mfd/tmio.h
- create mode 100644 include/linux/platform_data/tmio.h
-
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 53d34c3eddce..24e1c17908d7 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -16,8 +16,9 @@
+ #include <linux/mod_devicetable.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/platform_device.h>
+ #include <linux/pagemap.h>
++#include <linux/platform_device.h>
++#include <linux/pm_runtime.h>
+ #include <linux/scatterlist.h>
+ #include <linux/sys_soc.h>
+ 
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 9cf7f9feab72..c18581897f8a 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -16,8 +16,9 @@
+ #include <linux/mod_devicetable.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/platform_device.h>
+ #include <linux/pagemap.h>
++#include <linux/platform_device.h>
++#include <linux/pm_runtime.h>
+ #include <linux/scatterlist.h>
+ #include <linux/sys_soc.h>
+ 
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index be7f18fd4836..c39141a5bd23 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -37,6 +37,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
++#include <linux/of.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_qos.h>
 -- 
 2.43.0
 
