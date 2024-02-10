@@ -1,95 +1,110 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6ECE2374FA
-	for <linux-mmc@vger.kernel.org>; Fri,  9 Feb 2024 23:42:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F538149E12;
+	Sat, 10 Feb 2024 03:00:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707522133; cv=none; b=H/QIpogxGVRj58zvorqWEwzMDvXl8sy2J8phZvE96Z2/MKYolzo+BjF78jPVTQUXcVuUxx4+HZftiC2Sy9mQVuSgK3hOQ624aLScb5GDVzyZVLipnuY0rD6tIE/9sgvO0LXSFxjzpfOiogwW6CJB8cxahB8rRTeTU+9pIYv2VYc=
+	t=1707534057; cv=none; b=MYI/YtlY8iQit8SnmUjyRqcZdlMCH41b8m81KC++wX0gpExgJqo3+mItwwyTIKn6HwpFu61DIWMFd5QdAbUKKIzE40X34P7fyNkvUg+yitauZVhWgDmA9bCAPuv5J3IhE4WBrXbTZOWfdpLy6ud0LtmlaNjtp+fgkpE5M5rijKg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707522133; c=relaxed/simple;
-	bh=36Bp5V3HrWBZbS46TYrpP52qQdL28XvTzmsXoRqxpGI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=j3v2SFRcJhxQKydbGp5KJwjSR4IT95pG15EAb04RT4gQIUEsaxM1pjXCwytaXTSD4t0gsXCaFT6Fp+fvBL3e/tw4I23K2Oi8jOSh50cE3tor/lteh2R0o+BPXmjvvlZ7B/8hv5WeoCkaWSAwruCWlUYO/X8u7tOYsn5/Sm3ir/w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=PcA3RQ2P; arc=none smtp.client-ip=209.85.128.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1707534057; c=relaxed/simple;
+	bh=s+6djX/WTXkTUm/OOJnyCT2c88+8AQe3/IE6cDatMww=;
+	h=Date:Message-Id:From:To:Cc:Subject:In-Reply-To; b=JfkdFkxXpiNVLVjRUEhrjhHnCtnl+6z2czb1h0IVOa/ZkZa+0WmBXwGEndWC6Xf5cmlUZnSzdtZBLm6WhNdxLRAmAjlYUDgkRHtAZHPTFjSPSMnSDvZaHcomn/HRymmEMhGtfT47qiuxmm/t0vXanob9GCkl2GnkYG/hSq5j5l4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Vq75Suos; arc=none smtp.client-ip=209.85.214.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="PcA3RQ2P"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-6049b115630so18267277b3.1
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Feb 2024 15:42:10 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Vq75Suos"
+Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-1d934c8f8f7so13912765ad.2;
+        Fri, 09 Feb 2024 19:00:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707522130; x=1708126930; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=36Bp5V3HrWBZbS46TYrpP52qQdL28XvTzmsXoRqxpGI=;
-        b=PcA3RQ2PJQ/gQKp5Cbpb6Iyf1ol8kyLN0c/63Z6kA6JiW4NDdE0EtJaJkT2NyxXXMy
-         Kyg5hdLAEPPNzB04lqr5hn0ILOjhm6/z7b3nh72UL9jePV13NKv6XRsNQ32UYHQX/sKc
-         Mmap00ZUMCx8I848Z2GGHIuBpal/DUZjBCBz7OSHOZYEiRPXkng1ZmBtr+C9h83QY3v7
-         2+limIbSa2U1/MlnGpPTyEYskY5d8oRshKsEVbSxvABbSzJ0y9Ld05H+5JDEiw+W/9Dz
-         rLw3MXxoCUbIEtd6uqs73wvDSKnO5Sxs61WxY6Pm1sh8lqIOlcEeMfGTxx+w1e9YqGvi
-         mC+A==
+        d=gmail.com; s=20230601; t=1707534054; x=1708138854; darn=vger.kernel.org;
+        h=in-reply-to:subject:cc:to:from:message-id:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=R3IJGWTJWIPw+M65843DklH9eyEFW7vwcdstM0zz4C4=;
+        b=Vq75Suosfs/NrgPk5JainipgJkiZwF9l9FL4LSzXz7jzZ+Pov7rWib8DreKFk4QQnF
+         7G5R+qh5NCoPKEwWEXN/d+fX8KOluV7BSmdJ8FcD0NMDu/AwgoZs4LT+ZPIcQwhh/gJV
+         tH+OLNsrHdAJDXUCB5hz3ipM7SDc8m+yJ5sf8LLclgN0GM7fQQ11BJSVyFHkJ6GqbrrX
+         ZwFqH0uTz1mZ6EC2RzLVtoTNUsHWV7QhuLs+AewZ20uenWaOwKmiIe52uTm8D61UBGEz
+         g0/KSZvQg5zp65TEzagIYBvuHs7Ka+hidh2pAK0Eo9FGbsOiwT/SJku9DfkL/kVyOuRe
+         GgaQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707522130; x=1708126930;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=36Bp5V3HrWBZbS46TYrpP52qQdL28XvTzmsXoRqxpGI=;
-        b=RneTLrCkk4yEGUDVun1eX/Y6zyv8ZAjecOMJt2BAM69DBYY6iRYE5BGeZVD/V8DB53
-         inCgc7GuYJRSoS/mdm6wRpy5xxd1/v1PG4hpwmR92rz0VsKwroivYCulAydEDV+ReYcJ
-         wZ//Rjl7N4d0FaCJ+BklIU93fXKrcnMICkAQeg7u6cW4AI9QVykZPFrzz8IRQlYiOaPV
-         fo9DhszJjB9ks+vYXDDv3Iqb4frrGxnXDzs0ZdCBjltqukNjsXBXF5Dnxju5R3cuWzC8
-         ngWkSShmO85AuRGgge4tEwf/4kIWhU+DC5O6IHG7LA+wYnoc+2RsnaQcgBgGwboaQ6y8
-         pKuA==
-X-Gm-Message-State: AOJu0Yys9aWyP/WJ0L0QsfBP5gVE8egKsqqI6FlgEuEr92JEpDd6mIAW
-	CebpwvMDYRwneewwFyyDwSqj59xJ5L/HPrWnsm1PdcKLJ4YyGUU0vxmc9bm8pWwZwdsyxRF3zA+
-	LaPpwQHmU2qB4ps3gwUCWA4W/ir/0kzS7nclJaA==
-X-Google-Smtp-Source: AGHT+IH7eTrIingP+ahCyJb1b55HFte2tzebTYQbAUv8STciXDuToLLW+b9233LY5KATmB4DKaN2RVXULUm1vcU1YrI=
-X-Received: by 2002:a25:7187:0:b0:dc2:2d55:4179 with SMTP id
- m129-20020a257187000000b00dc22d554179mr2436830ybc.17.1707522129933; Fri, 09
- Feb 2024 15:42:09 -0800 (PST)
+        d=1e100.net; s=20230601; t=1707534054; x=1708138854;
+        h=in-reply-to:subject:cc:to:from:message-id:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=R3IJGWTJWIPw+M65843DklH9eyEFW7vwcdstM0zz4C4=;
+        b=eX0nV4ZGhybU544rl9Mq0nwO4PYfy0o9x0rN1zqiamphiGzP8s9Yy7JwZuh/W4bfP7
+         Pz7rURB5HgZAutjVAXPcybbPQurRljumS3DegxyjaqwstrhqGs1GCogSL/pQrWZohUyC
+         kdVcm/5/EAM3KawTR9kABbjsBwWFVFWL9mfEhqmTEpFA+KS5iztd/GmtUJuVuG2xeH1p
+         r4KV/1/puhQUg3+on37f2i3rN1VR0UqQWHHv94JTA06BpVa80OMXxqsGde+K7KDyY6PR
+         ze3sOunf0o6aJzSHyBNvg6ntNpI3lkObBhSO/lqMWzseODrP8qJnwQMd2Z+NQw/Jz5V9
+         IPnw==
+X-Forwarded-Encrypted: i=1; AJvYcCXlGDH6HQAvgXoymRXefbhrsm8hpIIMFirI1xFjfcmEcVJF5NEtZ11UfK0blIIa1K8eS/sj3mJt8tkjmIoTKuR+wESosK7PhtkgtgxAM+hmDEqXJkjzbNlSIvsJXjqgz6SypLucxRmbsGMytA==
+X-Gm-Message-State: AOJu0YzhZ4yHhrujOsZqKU48GUiDwU1mjgBfOGoPj7T4vupsQCcInHIS
+	dNIZGv+xRHFztSnV00c/jX5NxItJn03v/ca28fAHO8da2a+otfzp
+X-Google-Smtp-Source: AGHT+IHUNt3lZOFNPsZ7DhYo9HuUfhWqlZhn6AHJ+/w7nIfoM+7ydXiUbGUVtQF9GQ2R73aeCQyPCQ==
+X-Received: by 2002:a17:902:b688:b0:1d9:c86c:39c2 with SMTP id c8-20020a170902b68800b001d9c86c39c2mr1115476pls.14.1707534054302;
+        Fri, 09 Feb 2024 19:00:54 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXtoL/jA1UuRhntMmsM4MTDQXi+O2ERiHQ92g3p5uymlaKsD5mJEmRvgXy9G6DDqfRkMytcfx9ZfgIudCR86GW2x/2gTg201T5LFcJxjXwecaP55iW9/WUJ/PKYrBYavGij35dSTDBg/BerrQa7UPU8YKLr6VVX6lEKwMW1wpZWNg18LS5su/7+0gRL6VkaOnSSayiazSpLnf6ARR8k1McJ+LGZ5+oVMr2J7qR4eQyjfoZ3ZZi6dC6H7+U=
+Received: from dw-tp ([171.76.84.200])
+        by smtp.gmail.com with ESMTPSA id q2-20020a170902edc200b001d91b617718sm2193534plk.98.2024.02.09.19.00.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 09 Feb 2024 19:00:53 -0800 (PST)
+Date: Sat, 10 Feb 2024 08:30:27 +0530
+Message-Id: <874jehc9bo.fsf@doe.com>
+From: Ritesh Harjani <ritesh.list@gmail.com>
+To: Jeffrey Hugo <quic_jhugo@quicinc.com>, adrian.hunter@intel.com, quic_asutoshd@quicinc.com, quic_bjorande@quicinc.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, Jeffrey Hugo <quic_jhugo@quicinc.com>
+Subject: Re: [PATCH v2] MAINTAINERS: Update bouncing @codeaurora addresses
+In-Reply-To: <20240209160934.3866475-1-quic_jhugo@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20240125-mmc-no-blk-bounce-high-v1-1-d0f92a30e085@linaro.org>
- <8ca6a46e-551a-4400-965f-f4ad60bff072@app.fastmail.com> <Zcaooa0bTKo3OdvV@qmqm.qmqm.pl>
-In-Reply-To: <Zcaooa0bTKo3OdvV@qmqm.qmqm.pl>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Sat, 10 Feb 2024 00:41:58 +0100
-Message-ID: <CACRpkdb=aDd+CuJhckE9xZjA4MXRS_BD=qd3sc3Qjnm7CNbATA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core Drop BLK_BOUNCE_HIGH
-To: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
-Cc: Arnd Bergmann <arnd@arndb.de>, Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Fri, Feb 9, 2024 at 11:35=E2=80=AFPM Micha=C5=82 Miros=C5=82aw <mirq-lin=
-ux@rere.qmqm.pl> wrote:
+Jeffrey Hugo <quic_jhugo@quicinc.com> writes:
 
-> > I think it's worth mentioning the cb710 example here, which
-> > uses a platform device as a child of a PCI device and
-> > does not assign a DMA mask nor use DMA.
-> >
-> > This one will see a change in behavior, meaning that the
-> > blockdev buffers are no longer bounced. As far as I can
-> > tell, this is fine because the driver appears to correctly
-> > use the sg_iter infrastructure for mapping data pages,
-> > but it would be good to have this confirmed by
-> > Micha=C5=82 Miros=C5=82aw because this code path has probably never
-> > been tested without BLK_BOUNCE_HIGH.
+> The @codeaurora email domain's servers have been decommissioned for a
+> long while now, and any emails addressed there will bounce.
 >
-> Hi, this driver doesn't do DMA at all, so having DMA mask set or not
-> it should be good as long as the CPU can read/write the buffers.
+> Asutosh has an entry in .mailmap pointing to a new address, but
+> MAINTAINERS still lists an old @codeaurora address.  Update MAINTAINERS
+> to match .mailmap for anyone reading the file directly.
+>
+> Ritesh appears to have changed jobs, but looks to be still active in the
+> community.  Update Ritesh's address to the one used in recient community
+> postings.  Also Ritesh has indicated their entry should be changed from
+> Maintainer (M:) to Reviewer (R:) so make that update while we are making
+> changes to the entry.
 
-The only difference is where the CPU have to read/write the
-buffers really, before the change those were all guaranteed to
-be in lowmem (bounced there by the block core), now they can
-also be in highmem, but sg_miter will deal with it for sure.
+Thank Jeffrey.
 
-Yours,
-Linus Wallej
+Acked-by: Ritesh Harjani <ritesh.list@gmail.com>
+
+>
+> Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+> ---
+>
+> v2: Change Ritesh to R: per Ritesh's suggestion
+>
+>  MAINTAINERS | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 4be2fd097f26..56b3311e51de 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -7832,8 +7832,8 @@ F:	drivers/media/usb/em28xx/
+>  
+>  EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER
+>  M:	Adrian Hunter <adrian.hunter@intel.com>
+> -M:	Ritesh Harjani <riteshh@codeaurora.org>
+> -M:	Asutosh Das <asutoshd@codeaurora.org>
+> +M:	Asutosh Das <quic_asutoshd@quicinc.com>
+> +R:	Ritesh Harjani <ritesh.list@gmail.com>
+>  L:	linux-mmc@vger.kernel.org
+>  S:	Supported
+>  F:	drivers/mmc/host/cqhci*
+> -- 
+> 2.34.1
