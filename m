@@ -1,90 +1,109 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5397A3F8C0;
-	Mon, 12 Feb 2024 17:32:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEF033CF4C;
+	Mon, 12 Feb 2024 17:33:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707759181; cv=none; b=ReofhJuumeImQ7ozxRiBAFJkff/odX+PJxUeFf2J+idUQEALFYKSafNcNuOzgK0HxrIlw7CP3t/qyyWEGLxBWz65Qk/8nBEx+6/7fu1o0f1X4o/zCAQXeZ8B+mf4ZE7UoxGmzj9W5JSmMaHlJ7tbBe/Qga16NyWD4Pq6IvZN/hM=
+	t=1707759231; cv=none; b=OpEWZZPOFQog3z4Hx2daCCoa9g8EAzvrvjzp7l1EcMC+hdjle000lWWCwP/ILZDr2+NRvU+qvGqiCZDsy7UNJ27jTJiFFOj72ciw1X+tSgk5Hiv6auL6C++nQ1sPAs26X5wJTWxEpDO9jji+frGEFiOZ1g4gcfu6o8gZnvN8ntA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707759181; c=relaxed/simple;
-	bh=ycASeXV3KO9wMFNSd8aZBjKIIjNypcWPT1rqnJjtTMk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Es9BPw1TpKmBDdC8vMkcXNm5OXYrObuZd0NQky5xN93Gz0ZV5GUh9FsAyc6pUmNEtt759RXJxsAylrhZr3uU+BYKu8CeiA61syYUlWBeh0W7RZ0OzLM4/wopSNvREF3LMgtTtT23B41reAlE1WXFShNwgzKnfzHHuk9b4zyT1wg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=AHwCVX/8; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
+	s=arc-20240116; t=1707759231; c=relaxed/simple;
+	bh=iRJ7tAGOQgkVUq7M6rHvy9JC7/8rL0PgRJi9YiFRE/g=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=Xfyb6Ut5yRFp7EuQtLk8JYtxVDa9JZRtb3wYf1QAntnSP6URey8zwBKgCKAUAZqz+CSx3zHs2Hwu43u8FXPtWmAIsoCx+Mpa2QW2mrahKX1ki8BDAdZ7Q9I2EsuqMgNbGVO7BsU5ZHVJQw3f1lMzpjS8UpOYCVxXnpPSpfsR3VQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=cs6s5zXo; arc=none smtp.client-ip=198.47.23.248
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="AHwCVX/8"
-Received: from francesco-nb (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
-	by mail11.truemail.it (Postfix) with ESMTPA id 7C79620A72;
-	Mon, 12 Feb 2024 18:32:48 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1707759168;
-	bh=zo/oDhSUJr68jp7VDpSrQdmexgxO3TUo2BA+NclIfvE=; h=From:To:Subject;
-	b=AHwCVX/8mUNbJNOyDHvMXI9rT+6UtiDnhIcR4yoXe1wSRGBe7WB7HQlyOSMtEqEZx
-	 4dUDpF2E+Y9WemvxE/0v7ZAnzuqgQtEAI1f9u58VZllNFAHeJIR2zRfIpqEtFFwftK
-	 SN58IRVbeDHBYSKjj1KGdbeTiaBWACmaNIA9/dsg/N9Pj0oqn9+JSOSxhb+dkhHODB
-	 DwzOU5tHFOD4twQ6TUCoqUVSaAg3kXUEniVyqqmvinFLZIRz2MCOgXAHaVcsRRO0DY
-	 Qw0utWevoPrjzeA2gUZXQazIQayqg7d6qIS1FJsxwRO+4vMEG95QK5OxdV/ErFQj6g
-	 RGjf9zkbNrFtQ==
-Date: Mon, 12 Feb 2024 18:32:44 +0100
-From: Francesco Dolcini <francesco@dolcini.it>
-To: Judith Mendez <jm@ti.com>
-Cc: Francesco Dolcini <francesco@dolcini.it>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 0/7] Add tuning algorithm for delay chain
-Message-ID: <20240212173244.GA17182@francesco-nb>
-References: <20240207011520.3128382-1-jm@ti.com>
- <20240211160232.GB4443@francesco-nb>
- <7482f19f-b340-482f-bdf6-a5a68aeaf09e@ti.com>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="cs6s5zXo"
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 41CHXlLP075758;
+	Mon, 12 Feb 2024 11:33:47 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1707759227;
+	bh=35DUwFLWme+hzB8+q74QL3X6NF4TbGrC9LI3N1F7HDc=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=cs6s5zXoHkP+USPh68w5JtiX4EKRDgEngF1H4jLKwBaOSop3UK8ynWiHUd0WvB6jm
+	 aF9gVJuByGyyBKFFmuOIb5f/Mx6QOFsEzLB1+KXRUKsnFKOrTahcxOKYw5XJ8uQEe2
+	 S1m4PkmRG83BBsvrBEPzonfWZxuHn2BPZWWNmj3w=
+Received: from DFLE114.ent.ti.com (dfle114.ent.ti.com [10.64.6.35])
+	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 41CHXleD125248
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Mon, 12 Feb 2024 11:33:47 -0600
+Received: from DFLE103.ent.ti.com (10.64.6.24) by DFLE114.ent.ti.com
+ (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 12
+ Feb 2024 11:33:47 -0600
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE103.ent.ti.com
+ (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Mon, 12 Feb 2024 11:33:47 -0600
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 41CHXl19077794;
+	Mon, 12 Feb 2024 11:33:47 -0600
+Message-ID: <a663ce39-d522-484d-a717-22ebd99a7d01@ti.com>
+Date: Mon, 12 Feb 2024 11:33:47 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <7482f19f-b340-482f-bdf6-a5a68aeaf09e@ti.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 2/7] mmc: sdhci_am654: Write ITAPDLY for DDR52 timing
+To: Andrew Davis <afd@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20240207011520.3128382-1-jm@ti.com>
+ <20240207011520.3128382-3-jm@ti.com>
+ <ccd51fa3-d944-42c3-9915-6c4fbe2b78a6@ti.com>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <ccd51fa3-d944-42c3-9915-6c4fbe2b78a6@ti.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-Hi Judith,
+Hi Andrew,
 
-On Mon, Feb 12, 2024 at 10:33:35AM -0600, Judith Mendez wrote:
-> Hi Francesco,
+On 2/12/24 11:13 AM, Andrew Davis wrote:
+> On 2/6/24 7:15 PM, Judith Mendez wrote:
+>> For DDR52 timing, DLL is enabled but tuning is not carried
+>> out, therefore the ITAPDLY value in PHY CTRL 4 register is
+>> not correct. Fix this by writing ITAPDLY after enabling DLL.
+>>
+>> Fixes: a161c45f2979 ("mmc: sdhci_am654: Enable DLL only for some speed 
+>> modes")
+>> Signed-off-by: Judith Mendez <jm@ti.com>
+>> ---
+>> Changelog:
+>> v1->v2:
+>> - Call sdhci_am654_write_itapdly() in sdhci_am654_set_clock()
+>>   instead of sdhci_am654_setup_dll()
+>> ---
+>>   drivers/mmc/host/sdhci_am654.c | 1 +
+>>   1 file changed, 1 insertion(+)
 > 
-> On 2/11/24 10:02 AM, Francesco Dolcini wrote:
-> > On Tue, Feb 06, 2024 at 07:15:13PM -0600, Judith Mendez wrote:
-> > > This patch series introduces a new tuning algorithm for
-> > > mmc. The new algorithm should be used when delay chain is
-> > > enabled. The ITAPDLY is selected from the largest passing
-> > > window and the buffer is not viewed as a circular buffer.
-> > > The new tuning algorithm is implemented as per the paper
-> > > published here [0] and has been tested on the following
-> > 
-> > Where is this `[0]`?
-> 
-> I must have missed linking the ref doc here, will add in next
-> iteration, thanks.
-> 
-> > 
-> > > platforms: AM62x SK, AM62A SK, AM62p SK, AM64x SK, and AM64x
-> > > EVM.
-> > 
-> > In the other patches you link some document, but I was not able to find
-> > anything related to AM62, can you provide some reference on this
-> > specific SOC?
-> 
-> This patch series fixes issues that affect all Sitara SoCs, not only
-> AM62x. However, I could use AM62x for reference, no problem.
+> See how much easier this patch is this way :)
 
-I am really looking for documentation here that is related to the AM62
-because I was not able to find anything and this is a topic of interest
-for me.
+Thanks for your review. :D It does look simpler.
 
-Can you share something?
-
-Francesco
+> 
+> Reviewed-by: Andrew Davis <afd@ti.com>
+> 
+>>
+>> diff --git a/drivers/mmc/host/sdhci_am654.c 
+>> b/drivers/mmc/host/sdhci_am654.c
+>> index 2c66a965c225..b50db5d4a452 100644
+>> --- a/drivers/mmc/host/sdhci_am654.c
+>> +++ b/drivers/mmc/host/sdhci_am654.c
+>> @@ -299,6 +299,7 @@ static void sdhci_am654_set_clock(struct 
+>> sdhci_host *host, unsigned int clock)
+>>       if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+>>           sdhci_am654_setup_dll(host, clock);
+>> +        sdhci_am654_write_itapdly(sdhci_am654, 
+>> sdhci_am654->itap_del_sel[timing]);
+>>           sdhci_am654->dll_enable = true;
+>>       } else {
+>>           sdhci_am654_setup_delay_chain(sdhci_am654, timing);
 
