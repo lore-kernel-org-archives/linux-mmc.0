@@ -1,204 +1,204 @@
-Received: from mail-pg1-f170.google.com (mail-pg1-f170.google.com [209.85.215.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2AE763FE47;
-	Mon, 12 Feb 2024 13:24:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 165C43C497;
+	Mon, 12 Feb 2024 15:33:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707744255; cv=none; b=WvYB0iXTu1gRm/foP7w3imEYmes7d2agqScOc+0P+vGwCQJq4/EklCEq5Qo/ZVLv4yv9+07U6wbgixt9qHlcGSnLdGgybj+uZtP+NyPYgZ4tMYLvODmnC8U+697DeRN89xIh0vnReeu39fQKEV+01kE6xL4GaXaJ/GpLSTZTbl0=
+	t=1707752001; cv=none; b=S/BayAzGdPR3klvxlZiO1LUgqlCfOoEDK3A4Q5FWj9HKntQaI5WEP5wrcajsUD+iJGMdGLRYWNeiOebLF3LNR+QMpOCI7NhG4AAw4yyZ+2tOT2kn2EJ5inMYbyhypL4z7qI0ixQmTI+BNrt1TEtTI09PH0PE9jDWT98ZI88VEbA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707744255; c=relaxed/simple;
-	bh=azfKRryA/5evvRBteKAwTwQ1pyCs+SCMNn/gPz1PA7M=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FMXnsYZfjovG08pNbw1vijsMpaiMvYy6NjD8+Id9IfuSMmBAwzI23iRUZxea15keweMlopGr5PtDcguC+B8mzaEpTbIeZjhV6um93OB+Q3ma8s/i4Yj0QURI+kbOXM+giVA8Yz0tiUbe0Dz2YIl3ssJOgC1UQlmK72LQ7XLdSRM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=T700Jya+; arc=none smtp.client-ip=209.85.215.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1707752001; c=relaxed/simple;
+	bh=GFsfkdOmJKsuZtWQAq7OhjxHg4IKHiDCDNVd+Gd58aw=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=MmRv28evJMFIXRjQdtHazGe3+puM5+3YvnVkl9fCoH/skTwqYCQ86cssWz3+SzaivKYcGElJhwYgM9XBfewGWXwDSbbf5wnCNfilgG3W8HgwIVomPFjg7leCuzwja53AP7K89FNPXItD6EjIsS9BRMsm2b2VPXa8qzx7eZd4tFE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Co2aU8UO; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="T700Jya+"
-Received: by mail-pg1-f170.google.com with SMTP id 41be03b00d2f7-5dbcfa0eb5dso3004231a12.3;
-        Mon, 12 Feb 2024 05:24:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1707744253; x=1708349053; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=vYG03SNu5Ej6DoBWs2uyYA9vOF4Bd91lNrwLVadd3VQ=;
-        b=T700Jya+pcWfGFDbjjh2UlBJiu4Wn7z3kjtWHrlNHUx4A5jmFxy3FC0UM7p0CH6gmD
-         41nPvtjZLrkVtF7sDH3mt+d3gmOEEmb+wEhsJT9spGagru3IpJKHH0o0pE+r3kWD4LW4
-         XgbUXLOBivijpAQWAaRt53rT18R5e5l5Pbv1W1cdS+8F4w1YylVP5hX3Qmg2+exHm/Jd
-         KlTgqU8jcEXDDXtIcs5QAy5+97Rsj3yUeSegiaJ1IhRMZnjS8vlHGhSQfQth8tio/nJi
-         3fcXygxPLG6Fyyn1HnLOBK+QX3LR93Fc4QgHVfH+sUn9qzAU9KSiESVrCLuvXeIJOGhb
-         Ep2A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707744253; x=1708349053;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=vYG03SNu5Ej6DoBWs2uyYA9vOF4Bd91lNrwLVadd3VQ=;
-        b=MN7N3PUUY5XaRVAoJtTslq68IVdwQZctGrRl+NhdywMGmByDKZhcNQ5CbxYffsmAbl
-         dAXOVfY6QHSc5885pYE0u/QN3heUPt3P5Dyf3C6hnaTkvYn4rYvB1OoxySKkvNifn23O
-         rCGRRKDFjTi5Zsuehyi7g4SbiZyPO7GG9h/4LIuEYY1onDwXlIyVBQiRyF4rQZODgbk4
-         BHVeSmRU+pvjGOzBg2dZIsnfWcJ1yo1rcowfFPE43RecOnM0mVpG8KQ/Z1BxliQZPhxB
-         u+YGNPSRYZLSzmRJGXQHsi2Oyz4TtTMXK5h+rK+ujSdSR+iei8LIWDYDXgE6gXTHrVmo
-         032Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWA4x8k81X/h6/J7fXzEP58/51AooeAg4Dj6393ZN3ijdBHM9k/pYnsjJxFrrVSVg7JzqBett3R9VOJz4sMEbcWsA/PZeJx9E2hNqw8greqrlI3AUoaQJYIc7ZqXAxjN2XxMGKd2w==
-X-Gm-Message-State: AOJu0YxWATRm8KIuQzcNBAAmPD5Tmg00vYkj5+f6bZKx0cIGgtwklIHO
-	LzB68OyMvIz9CEvadNQH1dXog3XI/yOisj+ZTGJuwcK3usVBsj7JLtjrxmyg5ovhWP5wvlMuLkV
-	q9hgM22X2QBrxebwrUVNNPEfcGck=
-X-Google-Smtp-Source: AGHT+IFHQXq9a2N99QTncLsV/aYCIuKT5iyDUEErqGCXrecPAWaSHQ1Iu1I0aoAMIv0oDNyvxVIYsAmh0Arb+j6p6pY=
-X-Received: by 2002:a17:90a:be17:b0:297:1775:d44e with SMTP id
- a23-20020a17090abe1700b002971775d44emr3452331pjs.18.1707744253147; Mon, 12
- Feb 2024 05:24:13 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Co2aU8UO"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0CD66C433F1;
+	Mon, 12 Feb 2024 15:33:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1707752000;
+	bh=GFsfkdOmJKsuZtWQAq7OhjxHg4IKHiDCDNVd+Gd58aw=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=Co2aU8UOdKL4W8SUaaEqV0BTVAuiZ9niMqI5QuXmkWRQqRD+bsuUp32djuJPfJQ7M
+	 J0AdS/WqPhUm+WDhNwj0PIl1NFZPSx4kaz74w8AVaBO2niEWSvmitVVz0AuwMwTUcd
+	 8MtOvRT2s7ojnBMUpDpCQjuzEzxH0//zOgasqtDHJDU6fjIDBJFEa6lJkzge7aVnIn
+	 65sRlXZGfvNWKRj6hhoF+/MvmClp/yoVXWTT6Lqc/PTFBqTwhuA4fpNCA+K8uTOths
+	 DH2aamg+A5g3aeMmWit1ZUc4X0oSEYy8EtlcvJyPFhdziLYkgWINAXOkx2oWF2pGNL
+	 vlKQQFPbdC2Dw==
+From: Mark Brown <broonie@kernel.org>
+To: =?utf-8?q?Uwe_Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Cc: kernel@pengutronix.de, Moritz Fischer <mdf@kernel.org>, 
+ Wu Hao <hao.wu@intel.com>, Xu Yilun <yilun.xu@intel.com>, 
+ Tom Rix <trix@redhat.com>, linux-fpga@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Alexander Aring <alex.aring@gmail.com>, 
+ Stefan Schmidt <stefan@datenfreihafen.org>, 
+ Miquel Raynal <miquel.raynal@bootlin.com>, 
+ "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+ Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
+ linux-wpan@vger.kernel.org, netdev@vger.kernel.org, 
+ Lars-Peter Clausen <lars@metafoo.de>, 
+ Michael Hennerich <Michael.Hennerich@analog.com>, 
+ Jonathan Cameron <jic23@kernel.org>, linux-iio@vger.kernel.org, 
+ Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-input@vger.kernel.org, 
+ Ulf Hansson <ulf.hansson@linaro.org>, Rayyan Ansari <rayyan@ansari.sh>, 
+ Andy Shevchenko <andriy.shevchenko@linux.intel.com>, 
+ Jonathan Cameron <Jonathan.Cameron@huawei.com>, 
+ Martin Tuma <martin.tuma@digiteqautomotive.com>, 
+ Mauro Carvalho Chehab <mchehab@kernel.org>, linux-media@vger.kernel.org, 
+ Sergey Kozlov <serjk@netup.ru>, Arnd Bergmann <arnd@arndb.de>, 
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+ Yang Yingliang <yangyingliang@huawei.com>, linux-mmc@vger.kernel.org, 
+ Richard Weinberger <richard@nod.at>, Vignesh Raghavendra <vigneshr@ti.com>, 
+ Rob Herring <robh@kernel.org>, Heiko Stuebner <heiko@sntech.de>, 
+ Michal Simek <michal.simek@amd.com>, 
+ Amit Kumar Mahapatra via Alsa-devel <alsa-devel@alsa-project.org>, 
+ linux-mtd@lists.infradead.org, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
+ Geert Uytterhoeven <geert+renesas@glider.be>, 
+ =?utf-8?q?Pali_Roh=C3=A1r?= <pali@kernel.org>, 
+ Simon Horman <horms@kernel.org>, Ronald Wahl <ronald.wahl@raritan.com>, 
+ Benson Leung <bleung@chromium.org>, Tzung-Bi Shih <tzungbi@kernel.org>, 
+ Guenter Roeck <groeck@chromium.org>, chrome-platform@lists.linux.dev, 
+ Max Filippov <jcmvbkbc@gmail.com>, linux-spi@vger.kernel.org, 
+ linux-arm-kernel@lists.infradead.org, 
+ Bjorn Andersson <andersson@kernel.org>, 
+ Konrad Dybcio <konrad.dybcio@linaro.org>, linux-arm-msm@vger.kernel.org, 
+ Matthias Brugger <matthias.bgg@gmail.com>, 
+ AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, 
+ linux-mediatek@lists.infradead.org, Thomas Zimmermann <tzimmermann@suse.de>, 
+ Javier Martinez Canillas <javierm@redhat.com>, 
+ Amit Kumar Mahapatra <amit.kumar-mahapatra@amd.com>, 
+ dri-devel@lists.freedesktop.org, linux-fbdev@vger.kernel.org, 
+ linux-staging@lists.linux.dev, Viresh Kumar <vireshk@kernel.org>, 
+ Rui Miguel Silva <rmfrfs@gmail.com>, Johan Hovold <johan@kernel.org>, 
+ Alex Elder <elder@kernel.org>, greybus-dev@lists.linaro.org, 
+ Peter Huewe <peterhuewe@gmx.de>, Jarkko Sakkinen <jarkko@kernel.org>, 
+ Jason Gunthorpe <jgg@ziepe.ca>, linux-integrity@vger.kernel.org, 
+ Herve Codina <herve.codina@bootlin.com>, 
+ Alan Stern <stern@rowland.harvard.edu>, 
+ Aaro Koskinen <aaro.koskinen@iki.fi>, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>, 
+ linux-usb@vger.kernel.org, Helge Deller <deller@gmx.de>, 
+ Dario Binacchi <dario.binacchi@amarulasolutions.com>, 
+ Kalle Valo <kvalo@kernel.org>, Dmitry Antipov <dmantipov@yandex.ru>, 
+ libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, 
+ Jonathan Corbet <corbet@lwn.net>, James Clark <james.clark@arm.com>, 
+ Bjorn Helgaas <bhelgaas@google.com>, linux-doc@vger.kernel.org
+In-Reply-To: <cover.1705944943.git.u.kleine-koenig@pengutronix.de>
+References: <cover.1705944943.git.u.kleine-koenig@pengutronix.de>
+Subject: Re: (subset) [PATCH v2 00/33] spi: get rid of some legacy macros
+Message-Id: <170775198078.46149.4700126128576800564.b4-ty@kernel.org>
+Date: Mon, 12 Feb 2024 15:33:00 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240127044851.GW5185@atomide.com> <d09925b3-83e6-4c52-878f-4c1db7670543@smile.fr>
- <20240129111733.GX5185@atomide.com> <f80b5390-8bfa-43d8-80ce-70b069aef947@smile.fr>
- <7d72f3ee-bcfe-4197-b492-857dc49b2788@smile.fr> <20240131103050.GZ5185@atomide.com>
- <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr> <20240202043601.GA5185@atomide.com>
- <6eced20a-6454-4824-a149-ee331ebb7eec@smile.fr> <CAHCN7xLUH7Qj_djEuMDAx2nNVqtS5WyoM_DN4zarCbmKh=te4Q@mail.gmail.com>
- <20240212072740.GC52537@atomide.com>
-In-Reply-To: <20240212072740.GC52537@atomide.com>
-From: Adam Ford <aford173@gmail.com>
-Date: Mon, 12 Feb 2024 07:24:01 -0600
-Message-ID: <CAHCN7xJZXVXxiwBXgGKhGmBQhCAFfa4Tn=tJcGLX3N==tgvFzQ@mail.gmail.com>
-Subject: Re: sdhci-omap: issues with PM features since 5.16
-To: Tony Lindgren <tony@atomide.com>
-Cc: Romain Naour <romain.naour@smile.fr>, Linux-OMAP <linux-omap@vger.kernel.org>, 
-	Nishanth Menon <nm@ti.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+X-Mailer: b4 0.13-dev-a684c
 
-On Mon, Feb 12, 2024 at 1:28=E2=80=AFAM Tony Lindgren <tony@atomide.com> wr=
-ote:
->
-> * Adam Ford <aford173@gmail.com> [240208 12:57]:
-> > I was testing the newer MMC driver on an AM3517 a few months ago, and
-> > I noticed that SD cards were returning weird or empty data after some
-> > indeterminate amount of time.  If I read the IOS file immediately
-> > after boot, it worked.  If I forced some sort of file IO, it might
-> > work, but after it went idle, it appeared to have strange data.  I
-> > don't think this bug is limited to one platform.
->
-> OK interesting. So the zero values for ios are expected when the card
-> is idle. What do you mean by weird values when idle?
+On Mon, 22 Jan 2024 19:06:55 +0100, Uwe Kleine-König wrote:
+> this is v2 of this patch set.
+> 
+> Changes since (implicit) v1, sent with Message-Id:
+> cover.1705348269.git.u.kleine-koenig@pengutronix.de:
+> 
+>  - Rebase to v6.8-rc1
+>  - Fix a build failure on sh
+>  - Added the tags received in (implicit) v1.
+> 
+> [...]
 
-I meant zero-values when I said weird.  It's weird to me, because
-other platforms don't return zero.
-If tha's normal, I'll likely submit an update to omap3.dtsi to migrate
-the MMC driver to the newer one.
-I'd been meaning to do that for a while, but this threw me off, then i
-forgot about it until I saw this thread.
+Applied to
 
->
-> Can you please try catch the weird values or a failure maybe with
-> something like:
->
-> while true; do
->       cat /sys/kernel/debug/mmc0/ios
->       fdisk -l /dev/mmcblk0
->       cat /sys/kernel/debug/mmc0/ios
->       sleep 20
-> done
+   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git for-next
 
-It appears the first time, that runs after fdisk, the values seems
-reasonable, but subsequent iterations, the values are zero again:
+Thanks!
 
-clock:          0 Hz
-vdd:            0 (invalid)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     0 (off)
-bus width:      0 (1 bits)
-timing spec:    0 (legacy)
-signal voltage: 0 (3.30 V)
-driver type:    0 (driver type B)
-Disk /dev/mmcblk0: 3.75 GiB, 4025483264 bytes, 7862272 sectors
-Units: sectors of 1 * 512 =3D 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disklabel type: dos
-Disk identifier: 0x00000000
+[01/33] fpga: ice40-spi: Follow renaming of SPI "master" to "controller"
+        commit: 227ab73b89d66e3064b3c2bcb5fe382b1815763d
+[02/33] ieee802154: ca8210: Follow renaming of SPI "master" to "controller"
+        commit: 167b78446706bb4d19f7dd93ca320aed25ae1bbd
+[03/33] iio: adc: ad_sigma_delta: Follow renaming of SPI "master" to "controller"
+        commit: 2780e7b716a605781dbee753ef4983d775a65427
+[04/33] Input: pxspad - follow renaming of SPI "master" to "controller"
+        commit: a78acec53b8524593afeed7258a442adc3450818
+[05/33] Input: synaptics-rmi4 - follow renaming of SPI "master" to "controller"
+        commit: 1245633c61baf159fcc1303d7f0855f49831b9c1
+[06/33] media: mgb4: Follow renaming of SPI "master" to "controller"
+        commit: 2c2f93fbfba7186cc081e23120f169eac3b5b62a
+[07/33] media: netup_unidvb: Follow renaming of SPI "master" to "controller"
+        commit: cfa13a64bd631d8f04a1c385923706fcef9a63ed
+[08/33] media: usb/msi2500: Follow renaming of SPI "master" to "controller"
+        commit: dd868ae646d5770f80f90dc056d06eb2e6d39c62
+[09/33] media: v4l2-subdev: Follow renaming of SPI "master" to "controller"
+        commit: d920b3a672b7f79cd13b341234aebd49233f836c
+[10/33] misc: gehc-achc: Follow renaming of SPI "master" to "controller"
+        commit: 26dcf09ee5d9ceba2c627ae3ba174a229f25638f
+[11/33] mmc: mmc_spi: Follow renaming of SPI "master" to "controller"
+        commit: b0a6776e53403aa380411f2a43cdefb9f00ff50a
+[12/33] mtd: dataflash: Follow renaming of SPI "master" to "controller"
+        commit: 44ee998db9eef84bf005c39486566a67cb018354
+[14/33] net: ks8851: Follow renaming of SPI "master" to "controller"
+        commit: 1cc711a72ae7fd44e90839f0c8d3226664de55a2
+[15/33] net: vertexcom: mse102x: Follow renaming of SPI "master" to "controller"
+        commit: 7969b98b80c0332f940c547f84650a20aab33841
+[16/33] platform/chrome: cros_ec_spi: Follow renaming of SPI "master" to "controller"
+        commit: 85ad0ec049a771c4910c8aebb2d0bd9ce9311fd9
+[17/33] spi: bitbang: Follow renaming of SPI "master" to "controller"
+        commit: 2259233110d90059187c5ba75537eb93eba8417b
+[18/33] spi: cadence-quadspi: Don't emit error message on allocation error
+        commit: e71011dacc3413bed4118d2c42f10736ffcd762c
+[19/33] spi: cadence-quadspi: Follow renaming of SPI "master" to "controller"
+        commit: 28e59d8bf1ace0ddf05f989a48d6824d75731267
+[20/33] spi: cavium: Follow renaming of SPI "master" to "controller"
+        commit: 1747fbdedba8b6b3fd459895ed5d57e534549884
+[21/33] spi: geni-qcom: Follow renaming of SPI "master" to "controller"
+        commit: 14cea92338a0776c1615994150e738ac0f5fbb2c
+[22/33] spi: loopback-test: Follow renaming of SPI "master" to "controller"
+        commit: 2c2310c17fac13aa7e78756d7f3780c7891f9397
+[23/33] spi: slave-mt27xx: Follow renaming of SPI "master" to "controller"
+        commit: 8197b136bbbe64a7cab1020a4b067020e5977d98
+[24/33] spi: spidev: Follow renaming of SPI "master" to "controller"
+        commit: d934cd6f0e5d0052772612db4b07df60cb9da387
+[25/33] staging: fbtft: Follow renaming of SPI "master" to "controller"
+        commit: bbd25d7260eeeaef89f7371cbadcd33dd7f7bff9
+[26/33] staging: greybus: spi: Follow renaming of SPI "master" to "controller"
+        commit: ee3c668dda3d2783b0fff4091461356fe000e4d8
+[27/33] tpm_tis_spi: Follow renaming of SPI "master" to "controller"
+        commit: b6af14eacc8814b0986e20507df423cebe9fd859
+[28/33] usb: gadget: max3420_udc: Follow renaming of SPI "master" to "controller"
+        commit: 8c716f4a3d4fcbec976247e3443d36cbc24c0512
+[29/33] video: fbdev: mmp: Follow renaming of SPI "master" to "controller"
+        commit: b23031e730e72ec9067b7c38c25e776c5e27e116
+[30/33] wifi: libertas: Follow renaming of SPI "master" to "controller"
+        commit: 30060d57cee194d6b70283f2faf787e2fdc61b6e
+[31/33] spi: fsl-lib: Follow renaming of SPI "master" to "controller"
+        commit: 801185efa2402dce57828930e9684884fc8d62da
+[32/33] spi: Drop compat layer from renaming "master" to "controller"
+        commit: 620d269f29a569ba37419cc03cf1da2d55f6252a
+[33/33] Documentation: spi: Update documentation for renaming "master" to "controller"
+        commit: 76b31eb4c2da3ddb3195cc14f6aad24908adf524
 
-Device         Boot  Start     End Sectors  Size Id Type
-/dev/mmcblk0p1 *         1  512000  512000  250M  c W95 FAT32 (LBA)
-/dev/mmcblk0p2      512001 1560576 1048576  512M 83 Linux
-clock:          50000000 Hz
-vdd:            21 (3.3 ~ 3.4 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      2 (4 bits)
-timing spec:    2 (sd high-speed)
-signal voltage: 0 (3.30 V)
-driver type:    0 (driver type B)
-clock:          0 Hz
-vdd:            0 (invalid)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     0 (off)
-bus width:      0 (1 bits)
-timing spec:    0 (legacy)
-signal voltage: 0 (3.30 V)
-driver type:    0 (driver type B)
-Disk /dev/mmcblk0: 3.75 GiB, 4025483264 bytes, 7862272 sectors
-Units: sectors of 1 * 512 =3D 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disklabel type: dos
-Disk identifier: 0x00000000
+All being well this means that it will be integrated into the linux-next
+tree (usually sometime in the next 24 hours) and sent to Linus during
+the next merge window (or sooner if it is a bug fix), however if
+problems are discovered then the patch may be dropped or reverted.
 
-Device         Boot  Start     End Sectors  Size Id Type
-/dev/mmcblk0p1 *         1  512000  512000  250M  c W95 FAT32 (LBA)
-/dev/mmcblk0p2      512001 1560576 1048576  512M 83 Linux
-clock:          0 Hz
-vdd:            0 (invalid)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     0 (off)
-bus width:      0 (1 bits)
-timing spec:    0 (legacy)
-signal voltage: 0 (3.30 V)
-driver type:    0 (driver type B)
-clock:          0 Hz
-vdd:            0 (invalid)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     0 (off)
-bus width:      0 (1 bits)
-timing spec:    0 (legacy)
-signal voltage: 0 (3.30 V)
-driver type:    0 (driver type B)
-Disk /dev/mmcblk0: 3.75 GiB, 4025483264 bytes, 7862272 sectors
-Units: sectors of 1 * 512 =3D 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disklabel type: dos
-Disk identifier: 0x00000000
+You may get further e-mails resulting from automated or manual testing
+and review of the tree, please engage with people reporting problems and
+send followup patches addressing any issues that are reported if needed.
 
-Device         Boot  Start     End Sectors  Size Id Type
-/dev/mmcblk0p1 *         1  512000  512000  250M  c W95 FAT32 (LBA)
-/dev/mmcblk0p2      512001 1560576 1048576  512M 83 Linux
-clock:          0 Hz
-vdd:            0 (invalid)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     0 (off)
-bus width:      0 (1 bits)
-timing spec:    0 (legacy)
-signal voltage: 0 (3.30 V)
-driver type:    0 (driver type B)
+If any updates are required or you are submitting further changes they
+should be sent as incremental updates against current git, existing
+patches will not be replaced.
 
-This was on an AM3517 with an SD card.  I don't have eMMC on this
-platform to try.
+Please add any relevant lists and maintainers to the CCs when replying
+to this mail.
 
-adam
->
-> Regards,
->
-> Tony
+Thanks,
+Mark
+
