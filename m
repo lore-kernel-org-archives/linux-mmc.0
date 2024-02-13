@@ -1,75 +1,96 @@
-Received: from mail5.25mail.st (mail5.25mail.st [74.50.62.9])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3058F42AB6;
-	Tue, 13 Feb 2024 12:58:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.50.62.9
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 7FB5956444;
+	Tue, 13 Feb 2024 13:35:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707829100; cv=none; b=se4STgK3TqTtbTBz2uvlZlpsaibXkE2BIyM4iy9umhjmMy0OVrlZJmXLCcy1abrNQqnPKa073sAU/fL6xZLWu4HkekkUl8sRNlZXOyNMMzOYuQKKtZd5GHJ5Z0voXx8i1K+d8iBFVtjWqeNyDRz26KOPYnS1z3dv6H3fJwGTlj0=
+	t=1707831308; cv=none; b=uTHdBg/77H24H5R/qEXVNgQEy04TzWR//79SPFRlNvQUPN3mlbNhjH2Yh/ijXu5jK7EX94gjSbJ3qQJq0lmObspUgDD2t6vizFPwqjhvp7fLwPWSYg3Tuqa4gH5wM84XB4aM4fZzIwgJbk0B0Y7aWsotbuMzcOjN7WFUks5Jh8M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707829100; c=relaxed/simple;
-	bh=7zntr/m9ZqAlNJWnlXbkDJ1hh4YxQh9Mg6LQbU4U1ns=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tNrvrjQDusZczgCKw5x5CJm07qmm+tHFYIpw+anWgViNvNZPO4jY2yzQNB+Zmp5eZrf4PK8RqXzOPGX3gx+1PUrSUcErbJ7jd+CdXQAi2ApFsFSSQnDfoe9jDkq3ZYhsqcpzDa653Myh2UxjlXkRXgOlbrAoqObsEriX9HdvYkw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com; spf=fail smtp.mailfrom=atomide.com; dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b=scGUBFV7; arc=none smtp.client-ip=74.50.62.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=atomide.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b="scGUBFV7"
-Received: from localhost (91-158-86-216.elisa-laajakaista.fi [91.158.86.216])
-	by mail5.25mail.st (Postfix) with ESMTPSA id 89A2A6033F;
-	Tue, 13 Feb 2024 12:58:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=atomide.com;
-	s=25mailst; t=1707829098;
-	bh=7zntr/m9ZqAlNJWnlXbkDJ1hh4YxQh9Mg6LQbU4U1ns=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=scGUBFV7SHqRsA+PN3Z68LoVYD820b0fV7/BIQhEElL29jYq6F1V7WgYQ/MZ/f/jy
-	 fvJbK5v3qxo/b4EVqEPr+2mV6THnIXINZ4pn04Fm+yz/WPwu05u96ink5MKg/Ow+Ak
-	 JMQ3bLC5unBDgRvae5Uo30PlkYFe8t6WGfzBOfg1h85/VpA827//FBErmOwSCep/A0
-	 ILM4YgJRt7Uu/ALkfkNjFudBsNnIB3HTpPlCZ8ajejeji4HCUpSB3G+a1VfFDwk5xa
-	 xvy4BYE1I/BmTSOuHJKIu06+2DTb74UyIs/e6ktUvUfydz6Gm8ndk24tczgFA0oqP4
-	 7N7l6FSFlvnxw==
-Date: Tue, 13 Feb 2024 14:58:01 +0200
-From: Tony Lindgren <tony@atomide.com>
-To: Adam Ford <aford173@gmail.com>
-Cc: Romain Naour <romain.naour@smile.fr>,
-	Linux-OMAP <linux-omap@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
-	linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: sdhci-omap: issues with PM features since 5.16
-Message-ID: <20240213125801.GH52537@atomide.com>
-References: <7d72f3ee-bcfe-4197-b492-857dc49b2788@smile.fr>
- <20240131103050.GZ5185@atomide.com>
- <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr>
- <20240202043601.GA5185@atomide.com>
- <6eced20a-6454-4824-a149-ee331ebb7eec@smile.fr>
- <CAHCN7xLUH7Qj_djEuMDAx2nNVqtS5WyoM_DN4zarCbmKh=te4Q@mail.gmail.com>
- <20240212072740.GC52537@atomide.com>
- <CAHCN7xJZXVXxiwBXgGKhGmBQhCAFfa4Tn=tJcGLX3N==tgvFzQ@mail.gmail.com>
- <20240213060302.GD52537@atomide.com>
- <CAHCN7x+Uswxzj3eTf1_9oqso0fpdVR5QHNQkd59zHSqx5CyeCw@mail.gmail.com>
+	s=arc-20240116; t=1707831308; c=relaxed/simple;
+	bh=0fLC0KnFKKogrD8BSsniO+ZMxs8BKJuQFY0rr2JzJhE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=jHk3WMLkmnF+861gRNJUWyxgPhyw9Us+jcMuUZqTvqghm3Mc5+2JDVaZhfRkpuY0oPBO1cdv2hKTBFVB5riz07eH4dKMRKdEeoLC0yN+ywoBLO+Bc0fSBAo0Yq4poTzFv59Trc/E1JVAlm5prq/t9suFrHVhGe9HzR+c7nkxUts=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 1071DDA7;
+	Tue, 13 Feb 2024 05:35:47 -0800 (PST)
+Received: from [10.1.30.52] (e133047.arm.com [10.1.30.52])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 5AC373F762;
+	Tue, 13 Feb 2024 05:35:03 -0800 (PST)
+Message-ID: <94199ff4-1511-4f67-9794-b93195f8bac9@arm.com>
+Date: Tue, 13 Feb 2024 13:35:01 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sd: Add a variable to check a faulty device
+Content-Language: en-US
+To: =?UTF-8?B?7J207Iq57Z2s?= <sh043.lee@samsung.com>,
+ 'Avri Altman' <Avri.Altman@wdc.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
+ gregkh@linuxfoundation.org
+Cc: grant.jung@samsung.com, jt77.jang@samsung.com, dh0421.hwang@samsung.com,
+ junwoo80.lee@samsung.com, jangsub.yi@samsung.com, cw9316.lee@samsung.com,
+ sh8267.baek@samsung.com, wkon.kim@samsung.com
+References: <CGME20240213051332epcas1p1f45d02dc34d1b95ea5608ab779d6b6cc@epcas1p1.samsung.com>
+ <20240213051716.6596-1-sh043.lee@samsung.com>
+ <BL0PR04MB65642D0389544F022A1D2222FC4F2@BL0PR04MB6564.namprd04.prod.outlook.com>
+ <000101da5e61$f97e8cf0$ec7ba6d0$@samsung.com>
+From: Christian Loehle <christian.loehle@arm.com>
+In-Reply-To: <000101da5e61$f97e8cf0$ec7ba6d0$@samsung.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAHCN7x+Uswxzj3eTf1_9oqso0fpdVR5QHNQkd59zHSqx5CyeCw@mail.gmail.com>
 
-* Adam Ford <aford173@gmail.com> [240213 12:43]:
-> On Tue, Feb 13, 2024 at 12:03 AM Tony Lindgren <tony@atomide.com> wrote:
-> > Assuming no issues and if the hs200 issue is a separate issue, maybe
-> > post the patches and then let's get some Tested-by for them before we
-> > put them into Linux next.
+On 13/02/2024 09:49, 이승희 wrote:
 > 
-> I just sent a patch against omap3.dtsi.
-> I am not sure how to handle the backwards compatible device tree breakage.
+> 
+>> -----Original Message-----
+>> From: Avri Altman <Avri.Altman@wdc.com>
+>> Sent: Tuesday, February 13, 2024 5:42 PM
+>> To: Seunghui Lee <sh043.lee@samsung.com>; linux-mmc@vger.kernel.org;
+>> linux-kernel@vger.kernel.org; ulf.hansson@linaro.org;
+>> gregkh@linuxfoundation.org
+>> Cc: grant.jung@samsung.com; jt77.jang@samsung.com;
+>> dh0421.hwang@samsung.com; junwoo80.lee@samsung.com; jangsub.yi@samsung.com;
+>> cw9316.lee@samsung.com; sh8267.baek@samsung.com; wkon.kim@samsung.com
+>> Subject: RE: [PATCH] mmc: sd: Add a variable to check a faulty device
+>>
+>>> In mobile devices, suspend/resume situations are frequent.
+>>> In the case of a defective SD card in which initialization fails,
+>>> unnecessary initialization time is consumed for each resume.
+>>> A field is needed to check that SD card initialization has failed on
+>>> the host. It could be used to remove unnecessary initialization.
+>> I don't see where you are using this new init_failed field?
+>> Maybe instead, elaborate the logic to free_card: to detect a broken sd.
+>> e.g. instead of just if (!oldcard), if (!oldcard || ! mmc_sd_alive(host))
+>> or something.
+>>
+>> Thanks,
+>> Avri
+>>
+> Thank you for your suggestion.
+> I'm going to use it in mmc_rescan as below.
+> 
+> e.g.
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index a8c17b4cd737..461cd75dc7ab 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2210,7 +2210,7 @@ void mmc_rescan(struct work_struct *work)
+>                 container_of(work, struct mmc_host, detect.work);
+>         int i;
+>  
+> -       if (host->rescan_disable)
+> +       if (host->rescan_disable || host->init_failed)
+>                 return;
 
-Thanks, I replied to the patch on the properties for sdhci.
+I've seen SD cards that fail the first initialization attempt for both
+'valid' reasons (e.g. weird insertion timing) and things like out-of-spec
+initialization time from the card, outright disabling these on the first
+fail is a bit too much IMO.
 
-Regards,
-
-Tony
+Kind Regards,
+Christian
