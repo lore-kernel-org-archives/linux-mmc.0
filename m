@@ -1,88 +1,78 @@
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C9ACB66F
-	for <linux-mmc@vger.kernel.org>; Tue, 13 Feb 2024 16:46:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88A995FEFF
+	for <linux-mmc@vger.kernel.org>; Tue, 13 Feb 2024 16:46:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707842785; cv=none; b=SS35TJssPrWXBZXd8k5OT+IIk8IFBgJ0gEOFvj2mR7t5DG+Hb5/Z1ckwsNiT3oRLYRABWdFBLxvCQMEKG+ubl0G5IKtPZ2bpCgrFA3CyFy+t/nZPJR0LaVu2/bdXG/7OwZLVewyByLZD7cjsXjnD90E1e7QnfKn2YPsVnZL7XjA=
+	t=1707842788; cv=none; b=YsPRuB0kLlNzX3abSPB+qd0+BikV/5VtZlLGexWOdM1oBJzQTnuXvZTqoXxQ6J3RXKIbmWzOlxxiCP9+qZ7JUQFO7ZJis3001HH34/uQCujHFOajcb20yLxHYTIrxP/6gjU2tquN6QO0pCDtwuqJC+H7mpKrNMX1AVONBgk2km8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707842785; c=relaxed/simple;
-	bh=qLwyUT1WDaJkmtc1ktAdhzGZdAoIw9Yxyb+2sQS97nQ=;
+	s=arc-20240116; t=1707842788; c=relaxed/simple;
+	bh=1ovtsfaMg8Lcn7chYH1W7UjE4PB2d2NiSPtnhsNJewU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Hx2iJptlHC4cBg5pUomO3lLR9XWHJO0pmpbUEALfPLdTEQA9Y0BuBRcc7707KBOE/1DA8UoN9zvFUug9xdMfJaX9VrE20cFWSH/i8TDiOEAl/NTgfupeHcjUnIFhrhQWSleiXMsnww7z7uFau0/ZgUdhZrenaD2Vwt0SBIjAY/k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TS99mw1i; arc=none smtp.client-ip=209.85.128.182
+	 To:Cc:Content-Type; b=GHX6ORmpMTQ/PvtD+5yQ09mNojFWSlCGst8xwgkFkxRrNjKgHeMYb70Ty8884ddD8CEO5FdSW/1pzusvZPP0uTvQL45W4OGbkbzeXdRDgQkCGS1O3fU1XrZNS162EvliSe06O9SDRsI8xklUnbRaw05Up+h1SnNVDmJal6slwlQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=O5gDcq2Z; arc=none smtp.client-ip=209.85.219.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TS99mw1i"
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-6077a1d441eso14127347b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Feb 2024 08:46:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="O5gDcq2Z"
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-d9b9adaf291so3274040276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Feb 2024 08:46:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1707842781; x=1708447581; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1707842784; x=1708447584; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=eoJh2tr4FRlgildwrsRsaxdcgRdL5qVvqZCjhMVH4Ko=;
-        b=TS99mw1ivCob+GNJBKb8uCCh9sAf8omFMpCDfJTy7W2v8sWUeRJP0vz9g0ikOBGMM7
-         GNuV/P0bTEca7+OlGy5nXSXig++5DVaK1olldsBDOcEohAHims2iFOvR8PBF2ooleiR8
-         CKYWYZKW80AdEH+047+ZpD5/IoAGtzVIVhVaHEHetbhs2E2sz3+S51aAuqON1+vDs+Ry
-         0A+kvl1bzZzAXUspvpm4aBXiPxa5p2CXC41Swnr0UpX87MTl5ovsjfeMSJ27tLUP8EF4
-         J0B8XZhp3rKZ4dezyxjEaisFc3kR9vpO9g3aM+LFoqo1zM23MVqEh0Q4Ug+qKAHdW8qV
-         4V2w==
+        bh=lExK6BFCXT7K47g38M6fcV4HVfSvaGgAkfoyjDKEgwg=;
+        b=O5gDcq2ZL3rytJ0daSoAd6Qr7gfxYl3ggPXUWr+C8q2xGwIGkAs37SdJ5SGoTD5XYy
+         Cyddt/fLY6QDatCF5o8hR2NkvwIF9Fc5Qnu1uVJ5nYkWVHNLpaM4FqyFdo+9GBfHR/X5
+         2GuGjcPUlBNeiTFlRAbUmrokhhe6laQ+1aMI2Rgim0ibfFqOCa7tOEztzncni/5dWp5s
+         NW7hmizpsV3cPKuYGLEpWxZantux/04u38R9wWhtK1BO+RQqXqW+v2wp90/RZCiFdV3D
+         sA4cQ/rdfjSDmQiMCpqdbXpAEIpxMZKbuKIHrGQP43c3MP0tZGZMAgFaQ67EXEtMHgKO
+         3brw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707842781; x=1708447581;
+        d=1e100.net; s=20230601; t=1707842784; x=1708447584;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=eoJh2tr4FRlgildwrsRsaxdcgRdL5qVvqZCjhMVH4Ko=;
-        b=DPMrC+uTXZZQJ5XfGXoOTPhsqdXepOzLCG+e9dyE1CBk1FchqmHPTThJGkvaCp3CP0
-         AzC2WOkPABwvS+G+/V/rVzz3a4YNgJ/zbGjYA9Exg6Vstb7VSKvnmWiHhDgQMODjoQ47
-         KDg96IUaIZy5ZnThtl9kPgkL1bwCtcpctFahECj4j2LCagLDrC5fRhodOHLAv+EXBBXa
-         ToPq/bfkFiin/eznb0P9gGbaaDztZNaOR282Mo8xPph0vzOYGh1fOj2508nzL25QF3Ua
-         KwJ7zlc1dLFNgCVD4nMrjLyTx0xu92X5Ey0gtEF3XxqYJ4AWZxyVz6OOMQ/ZInfCFY6L
-         lSQA==
-X-Forwarded-Encrypted: i=1; AJvYcCXmstTYpeBOkrQVX67fi72e2htwPJ/0pMWh/vUmM3wWkT7cXz1K6rrFtQw6KBprjEmUOKtv9/tNu1aFepb+wvzHFjQeRbJxJ/2J
-X-Gm-Message-State: AOJu0Ywsk0mhWxDFoeMJSd/n2bRcv25t7QQ0RUtxNQpho8fFSX37F2mz
-	xcmB22hiZZRgYD1sPGJYe1GvWNfxRU86yVFywoV71EkjhZkra8es+nhMvfVUEOpTrjNt5cyMvPl
-	U39yF04mdGwzqj9tcKjaKqvFRbF4f8boWmED2wQ==
-X-Google-Smtp-Source: AGHT+IFRerUNGbTgBU3wwf+oG/ehW5Ekk/0QwzhAC8Xq9yczIGeKWYHJlcAKuGRj+5ja1rh2Bcscw93PtgyqvkaSKmI=
-X-Received: by 2002:a0d:d382:0:b0:604:7b9e:f622 with SMTP id
- v124-20020a0dd382000000b006047b9ef622mr6848335ywd.30.1707842781524; Tue, 13
- Feb 2024 08:46:21 -0800 (PST)
+        bh=lExK6BFCXT7K47g38M6fcV4HVfSvaGgAkfoyjDKEgwg=;
+        b=iGcv/tpqMG/gLcYfv/67DYbsybXPoBekECWlWPcs2ymvnwO+agUIT95pNgOCsck1qo
+         eYPcELq3naowIccGqJBPzJMzdqRre/uCp19RB2qMxwhIoQ50wtXzStJU1IVUP0vNbevo
+         5TetAqY3iaS6Y2pHRroQVkl9yQFOoOIb8nfAzDtINZhKEvD8fPCyvN2BX1LnI7GdzufA
+         OGP9zQX5kui+FrRBhT6qGrJshNYV17l0o7bbD8s0dlQbVb9rVMhet8Ki3coQbmwJLADV
+         7IjPJGyBf91tnkh7Zre+0LST8vPyDLCCctVzU4yWuZqGes7obgWw/+N5YV+0+Oc6+rpi
+         Urwg==
+X-Forwarded-Encrypted: i=1; AJvYcCXFDQOi9gidugqrbqSisyWH/Lnk9AhOTI728DjZkRrPSS9M1mtv1LD/s6Tcx9WtkPZMk7K7nW7uBXYpMvTj/Oj2SZ66sM5pw9/O
+X-Gm-Message-State: AOJu0YwQq/7MbYNry5Y4HW4GNtfd5U2TOcsCTaT420Fv8bIBHlUa/Du/
+	wI1PjHb73C9qKFPc2TKdv4FSzl1CU3sbgDWHitqj54pVsuV8PsK77TFb3gNQCELx4D0giPVqMCN
+	vPHJQWuJpD/RVhsKgwZUlcU1deOBD6QwehUw+Nw==
+X-Google-Smtp-Source: AGHT+IHRRooe3gtkPr1s5cWmjVbznagamZWAqd7ZtWG+qKZWax9GEcI3/kCDob2wpJ1buhzfIBS4wIQwi8pfHnYQwK8=
+X-Received: by 2002:a5b:701:0:b0:dc6:18d0:95b0 with SMTP id
+ g1-20020a5b0701000000b00dc618d095b0mr7312298ybq.8.1707842784564; Tue, 13 Feb
+ 2024 08:46:24 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240209160934.3866475-1-quic_jhugo@quicinc.com>
-In-Reply-To: <20240209160934.3866475-1-quic_jhugo@quicinc.com>
+References: <20240208202137.630281-1-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20240208202137.630281-1-krzysztof.kozlowski@linaro.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 13 Feb 2024 17:45:45 +0100
-Message-ID: <CAPDyKFqjnsF44YRgr2vvdfWi6P9FxPuNkgfYFKbPWqECgY_eeA@mail.gmail.com>
-Subject: Re: [PATCH v2] MAINTAINERS: Update bouncing @codeaurora addresses
-To: Jeffrey Hugo <quic_jhugo@quicinc.com>
-Cc: adrian.hunter@intel.com, ritesh.list@gmail.com, quic_asutoshd@quicinc.com, 
-	quic_bjorande@quicinc.com, linux-mmc@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Tue, 13 Feb 2024 17:45:48 +0100
+Message-ID: <CAPDyKFqa8_j2-bxYa5VTzYTCqn9+Rm6X0KdS+F=NEwkqFu-5mw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: use typedef for dma_filter_fn
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 9 Feb 2024 at 17:10, Jeffrey Hugo <quic_jhugo@quicinc.com> wrote:
+On Thu, 8 Feb 2024 at 21:21, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> The @codeaurora email domain's servers have been decommissioned for a
-> long while now, and any emails addressed there will bounce.
+> Use existing typedef for dma_filter_fn to avoid duplicating type
+> definition.
 >
-> Asutosh has an entry in .mailmap pointing to a new address, but
-> MAINTAINERS still lists an old @codeaurora address.  Update MAINTAINERS
-> to match .mailmap for anyone reading the file directly.
->
-> Ritesh appears to have changed jobs, but looks to be still active in the
-> community.  Update Ritesh's address to the one used in recient community
-> postings.  Also Ritesh has indicated their entry should be changed from
-> Maintainer (M:) to Reviewer (R:) so make that update while we are making
-> changes to the entry.
->
-> Signed-off-by: Jeffrey Hugo <quic_jhugo@quicinc.com>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
 Applied for next, thanks!
 
@@ -91,28 +81,30 @@ Uffe
 
 
 > ---
+>  drivers/mmc/host/renesas_sdhi.h | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> v2: Change Ritesh to R: per Ritesh's suggestion
+> diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+> index c1fb9740eab0..586f94d4dbfd 100644
+> --- a/drivers/mmc/host/renesas_sdhi.h
+> +++ b/drivers/mmc/host/renesas_sdhi.h
+> @@ -9,6 +9,7 @@
+>  #ifndef RENESAS_SDHI_H
+>  #define RENESAS_SDHI_H
 >
->  MAINTAINERS | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> +#include <linux/dmaengine.h>
+>  #include <linux/platform_device.h>
+>  #include "tmio_mmc.h"
 >
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 4be2fd097f26..56b3311e51de 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -7832,8 +7832,8 @@ F:        drivers/media/usb/em28xx/
->
->  EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER
->  M:     Adrian Hunter <adrian.hunter@intel.com>
-> -M:     Ritesh Harjani <riteshh@codeaurora.org>
-> -M:     Asutosh Das <asutoshd@codeaurora.org>
-> +M:     Asutosh Das <quic_asutoshd@quicinc.com>
-> +R:     Ritesh Harjani <ritesh.list@gmail.com>
->  L:     linux-mmc@vger.kernel.org
->  S:     Supported
->  F:     drivers/mmc/host/cqhci*
+> @@ -63,7 +64,7 @@ struct renesas_sdhi_of_data_with_quirks {
+>  struct renesas_sdhi_dma {
+>         unsigned long end_flags;
+>         enum dma_slave_buswidth dma_buswidth;
+> -       bool (*filter)(struct dma_chan *chan, void *arg);
+> +       dma_filter_fn filter;
+>         void (*enable)(struct tmio_mmc_host *host, bool enable);
+>         struct completion dma_dataend;
+>         struct tasklet_struct dma_complete;
 > --
 > 2.34.1
->
 >
