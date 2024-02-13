@@ -1,140 +1,334 @@
-Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA4B540BFE;
-	Tue, 13 Feb 2024 12:43:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A227247A73
+	for <linux-mmc@vger.kernel.org>; Tue, 13 Feb 2024 12:49:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707828216; cv=none; b=W2vyglrrDDA2xzbqX8caguOVEMhn4/59GgtEslNYTgxdcrVk/JUQZH6QAo2YPV9NPyvkkGr2lzcjFayTrEOMQc21keogNqe4znnYOe7BKLgCp1DZpUhY+HiHSJ8tyhWLhmh2rmKC7zgaQMOY1oJftz89oJKpNVDCHHaE0seUIEM=
+	t=1707828582; cv=none; b=s1mulcL8xL/bxC92qpB7rf67nJDXyihH7aE1Lk6j6+MlI/J9EyDRHvReak52bnp3HozJcFz23LnoIgc12sE9DY38Om9AhhK7DnvOOnTDR41SdMwF1rO654j4FYej3U8jnzxrDTeIvkdjKjE9/CDBkXF/p6/qB6fPEIJAkqzXZoA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707828216; c=relaxed/simple;
-	bh=0wlm9P6o2rcc8cvXXNEmo3T+AzJDgfB1248ymcMTdJA=;
+	s=arc-20240116; t=1707828582; c=relaxed/simple;
+	bh=HSuK8gF8xqQlzSUAllq5D6X/pqFlN4vTdtHlcK5UeBs=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VUDOfVVSzoe8Rb0skmJoGDfZSMzJPkOY1jGeTN14w/YKibHZzkYyTL+kJH1vimTypGg5nAGjVyHsPBuIcCoFNFoUm7nnhBNjoyXjzOOhGGMpF17WPubLxlfK3PK2NUgHTfPz1euprnYfkzw0MCz3wuAGNbkLMPl44N92m92BoAQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=daUUPPrn; arc=none smtp.client-ip=209.85.216.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=ju42f+wPlc18gdrL0NN2EeZZK3+erkKqtw1HNruD1DM/sc+oDjf258wtMshRldgZ6v++2OTSLtkNLmZvi12Svbky/3VrUfV1GvdIpOpm7zBehtHMx4UoDzIFzd8Bi98MMmxMRzn9/jGB579WkkSaXJVNhmAMzQ/gMSGW+n5R8yA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GuE8QpI+; arc=none smtp.client-ip=209.85.128.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="daUUPPrn"
-Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-296dcd75be7so2505533a91.2;
-        Tue, 13 Feb 2024 04:43:34 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GuE8QpI+"
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-60792653b94so2992087b3.3
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Feb 2024 04:49:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1707828214; x=1708433014; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=JGu4HZdxVpF5D7HwjpFTQqfuRoTuDC9uByiyLARYoUk=;
-        b=daUUPPrn6EFKZL3baC9+lvuq73ZzPyDuiVJHORrwp7rRlGun/QLWRPJRrdYqF8jpYS
-         /Dpb1asGezIQVZHj/h0Sz0MdK4bcQXUnpo26V8d4W6f1FMGn6AAehSGFr2iOVFX/sDl5
-         dutBSJsw3B1dwiBLGK5TD+K0M6GOB4MwJHTiY7V6Vb4sHmBFwcOPAW9853xmt8MM8ikA
-         q0ZQ6CEO+YKN+eL5it5QdQdjiu36c5kSXhhBQx+mQTwchqtD709Hnw1BWX9ZMI1dl37g
-         xnYRBnrKC9ia6T4VVIx8qKjbL2o4hJHhLlMOITop5AV46znVLnL27bX1nkyhxgZtMyVs
-         rAgQ==
+        d=linaro.org; s=google; t=1707828578; x=1708433378; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=PltJZt/4GisbtWaUCig+Gxgvk8AtsQXf9mPTLTSgx3k=;
+        b=GuE8QpI+0/ucIeBnRWUmD3MUGddgsy4Fi+bKHJlY95ce6OMp8AZFYS3eqtN9XXQ3RK
+         kjPp1Zxk33Djzh+OMOxICL4pHUuTsOjTt+mQbpfxPMyK90ouE6JtCkOux3UIw5Jr78Fo
+         wTLkRafHxW42tkpCO2y3B4PBHtjYoLk5kWHRw1xrNSqIpOUNeI3tY6+726Zdge0TyuA9
+         x7YyO4QXigWuV3tkEXkrkmQjB3UtgDfNqsBpEncRmOtBtB/MKdCwsiptYDQpJx3+/5mp
+         5TVArc20cKYb4dFADsEM0FjUTiIceashe/6EY5ZW3O8P/bQYFCQ71OliHFLKZHOjr9ut
+         w1OQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707828214; x=1708433014;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=JGu4HZdxVpF5D7HwjpFTQqfuRoTuDC9uByiyLARYoUk=;
-        b=D0Hf4T/fCa0RcQ8qJpekEpal6Rj9ntSLBVrPLVPPTAywANBiCIaxeQgFs3NNBj2B6S
-         3dcTYVyqEtHJXGmT7LH5XOWTGKmDuNJN5TRzd9iQgVv0IafS93vW0Z685UlcZzj++LIL
-         fNNnZRPpOERoqHu1j61PnrA1j/M8M7ZpxhOR3s4S2avvI+phhP9fFaQw4Sdfnkvph70n
-         /bbIuqcHbkNgH4RGbk3JLuqIjDflyzHU6S3IcpgUuyl/y5v4/NkwD1bvSj+YVQ6RY3ek
-         3c3xN6hvOhcruKhUdccdXTkBU6g5uIGLYbaMtjnvi7B5AYrquwlIWMnDf1Hemt8bizrw
-         gXxw==
-X-Forwarded-Encrypted: i=1; AJvYcCW5VvE0jI0ykpX7WoQhDZBgKZtnDDN5AkBAwCH3ssYRkPlJkJMV55/Fw83Tz8aPJK9QAkcRI2y7C09E4VRywBDNCwjXeJ/ecK0ShDlbB5CGe0JGFItgC2qAUHOw5CBH3HbbAHAaZw==
-X-Gm-Message-State: AOJu0Yzcm5Pbf0SRI1qfeNfBsjVy9RyclMdqvxdwC01SmD8UKIQ/N+A4
-	p7QICBOUu77CNekHb2r1mIZ05MOv6kJMQCreqWAoyxS/fJjSXHaI/uIPs+WNwb8oklq5EhScLJd
-	D5OlcJ01q15II/2Y+22p8/SRx4gY=
-X-Google-Smtp-Source: AGHT+IEvwLuTvI7eqv7o0o8h1JeDHkpff30o3UN9EqA2G2k0i/Qt1291dW3Jv6fDor546AYO6APmSwRTLZweFkK86B0=
-X-Received: by 2002:a17:90a:a010:b0:296:2057:28c with SMTP id
- q16-20020a17090aa01000b002962057028cmr5839952pjp.31.1707828213714; Tue, 13
- Feb 2024 04:43:33 -0800 (PST)
+        d=1e100.net; s=20230601; t=1707828578; x=1708433378;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PltJZt/4GisbtWaUCig+Gxgvk8AtsQXf9mPTLTSgx3k=;
+        b=RMdx5VnQu1cOgrt3DtoJy19uigW+oTJIv7Ry3APTnuWCur/mf1EskmtkUPobdZhzJo
+         Nii9vEnT2DvDhPHKAJYwf09v7xvI5e8LBLTk9PNHNwBWWfghQNgYkTPvTxjFP5H86ZfF
+         wyEdER6tqYzIVHoOThreOBMskhbt7YA8U8PCRab0goSCkvoGT5Q3vMcmeohU96eoZ9Js
+         yZg3gZ88fDjv0upx8KMztpyn7cpfnKSylCkdDUuI+m3RvnTH7bNVKjDNAkPaz+3Hai6q
+         HqD3XKQpV7jCdzaCD43e9HgWVwulEYSdg+1/GMgHXKJ+wZvcm2Gh3WqlDJPPDaYZmCDK
+         IXBg==
+X-Forwarded-Encrypted: i=1; AJvYcCV7jfbl0FK6Y/47lhlb6NbfxBv8lyQe2yYaRTuyZbpq+CpjbGe6Bzv5b69+phy6Gh2CX+xPhr1WcWhTnYIiSyK0W0Eg1KDnU1IA
+X-Gm-Message-State: AOJu0YxRrkGk2F9LyYNn/vr1B5c/KVKDwKVZgt2y3Ick0UafH0Ra1frP
+	pwfI+ubxJFLnzLViPsxem6e8v17aP9lEzTDsaO6xNUrQOacFnD+rjOwRqzZHa0yqRh8Q7cZj+NT
+	vR6HJY67cWjUihYurzX1JY1R4R4s8GW+vGdFD3w==
+X-Google-Smtp-Source: AGHT+IFZTUR6t+Td46CAo+mAkCI61T1Bdp7THvEqZ4Rg9t47+KU4Vr4WFPYRN7MOfIsr49mG+Jk8Zfvv3InHXpEiTrE=
+X-Received: by 2002:a81:60c2:0:b0:604:45d:ddb4 with SMTP id
+ u185-20020a8160c2000000b00604045dddb4mr8648784ywb.43.1707828578552; Tue, 13
+ Feb 2024 04:49:38 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240129111733.GX5185@atomide.com> <f80b5390-8bfa-43d8-80ce-70b069aef947@smile.fr>
- <7d72f3ee-bcfe-4197-b492-857dc49b2788@smile.fr> <20240131103050.GZ5185@atomide.com>
- <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr> <20240202043601.GA5185@atomide.com>
- <6eced20a-6454-4824-a149-ee331ebb7eec@smile.fr> <CAHCN7xLUH7Qj_djEuMDAx2nNVqtS5WyoM_DN4zarCbmKh=te4Q@mail.gmail.com>
- <20240212072740.GC52537@atomide.com> <CAHCN7xJZXVXxiwBXgGKhGmBQhCAFfa4Tn=tJcGLX3N==tgvFzQ@mail.gmail.com>
- <20240213060302.GD52537@atomide.com>
-In-Reply-To: <20240213060302.GD52537@atomide.com>
-From: Adam Ford <aford173@gmail.com>
-Date: Tue, 13 Feb 2024 06:43:22 -0600
-Message-ID: <CAHCN7x+Uswxzj3eTf1_9oqso0fpdVR5QHNQkd59zHSqx5CyeCw@mail.gmail.com>
-Subject: Re: sdhci-omap: issues with PM features since 5.16
-To: Tony Lindgren <tony@atomide.com>
-Cc: Romain Naour <romain.naour@smile.fr>, Linux-OMAP <linux-omap@vger.kernel.org>, 
-	Nishanth Menon <nm@ti.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>
+References: <20240127232436.2632187-1-quic_gaurkash@quicinc.com> <20240127232436.2632187-2-quic_gaurkash@quicinc.com>
+In-Reply-To: <20240127232436.2632187-2-quic_gaurkash@quicinc.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 13 Feb 2024 13:49:02 +0100
+Message-ID: <CAPDyKFqyu4kDYg1Ac=bi4j-M2EYw3bDT602ytspw1KPG2UbS_Q@mail.gmail.com>
+Subject: Re: [PATCH v4 01/15] ice, ufs, mmc: use blk_crypto_key for program_key
+To: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Cc: linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	andersson@kernel.org, ebiggers@google.com, neil.armstrong@linaro.org, 
+	srinivas.kandagatla@linaro.org, krzysztof.kozlowski+dt@linaro.org, 
+	conor+dt@kernel.org, robh+dt@kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, kernel@quicinc.com, linux-crypto@vger.kernel.org, 
+	devicetree@vger.kernel.org, quic_omprsing@quicinc.com, 
+	quic_nguyenb@quicinc.com, bartosz.golaszewski@linaro.org, 
+	konrad.dybcio@linaro.org, jejb@linux.ibm.com, martin.petersen@oracle.com, 
+	mani@kernel.org, davem@davemloft.net, herbert@gondor.apana.org.au
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Feb 13, 2024 at 12:03=E2=80=AFAM Tony Lindgren <tony@atomide.com> w=
-rote:
+On Sun, 28 Jan 2024 at 00:26, Gaurav Kashyap <quic_gaurkash@quicinc.com> wrote:
 >
-> * Adam Ford <aford173@gmail.com> [240212 13:24]:
-> > On Mon, Feb 12, 2024 at 1:28=E2=80=AFAM Tony Lindgren <tony@atomide.com=
-> wrote:
-> > >
-> > > * Adam Ford <aford173@gmail.com> [240208 12:57]:
-> > > > I was testing the newer MMC driver on an AM3517 a few months ago, a=
-nd
-> > > > I noticed that SD cards were returning weird or empty data after so=
-me
-> > > > indeterminate amount of time.  If I read the IOS file immediately
-> > > > after boot, it worked.  If I forced some sort of file IO, it might
-> > > > work, but after it went idle, it appeared to have strange data.  I
-> > > > don't think this bug is limited to one platform.
-> > >
-> > > OK interesting. So the zero values for ios are expected when the card
-> > > is idle. What do you mean by weird values when idle?
-> >
-> > I meant zero-values when I said weird.  It's weird to me, because
-> > other platforms don't return zero.
-> > If tha's normal, I'll likely submit an update to omap3.dtsi to migrate
-> > the MMC driver to the newer one.
-> > I'd been meaning to do that for a while, but this threw me off, then i
-> > forgot about it until I saw this thread.
+> The program key ops in the storage controller does not
+> pass on the blk crypto key structure to ice, this is okay
+> when wrapped keys are not supported and keys are standard
+> AES XTS sizes. However, wrapped keyblobs can be of any size
+> and in preparation for that, modify the ICE and storage
+> controller APIs to accept blk_crypto_key.
 >
-> Yes I'd like to enable sdhci-omap and deprecate omap_hsmmc too.
->
-> Assuming no issues and if the hs200 issue is a separate issue, maybe
-> post the patches and then let's get some Tested-by for them before we
-> put them into Linux next.
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> Reviewed-by: Om Prakash Singh <quic_omprsing@quicinc.com>
+> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
 
-I just sent a patch against omap3.dtsi.
-I am not sure how to handle the backwards compatible device tree breakage.
+I assume this is better funneled via some other tree than the MMC, so:
 
-Maybe since it's been around long enough, it might be ok.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
 
-adam
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/cqhci-crypto.c  | 7 ++++---
+>  drivers/mmc/host/cqhci.h         | 2 ++
+>  drivers/mmc/host/sdhci-msm.c     | 6 ++++--
+>  drivers/soc/qcom/ice.c           | 6 +++---
+>  drivers/ufs/core/ufshcd-crypto.c | 7 ++++---
+>  drivers/ufs/host/ufs-qcom.c      | 6 ++++--
+>  include/soc/qcom/ice.h           | 5 +++--
+>  include/ufs/ufshcd.h             | 1 +
+>  8 files changed, 25 insertions(+), 15 deletions(-)
 >
-> > > Can you please try catch the weird values or a failure maybe with
-> > > something like:
-> > >
-> > > while true; do
-> > >       cat /sys/kernel/debug/mmc0/ios
-> > >       fdisk -l /dev/mmcblk0
-> > >       cat /sys/kernel/debug/mmc0/ios
-> > >       sleep 20
-> > > done
-> >
-> > It appears the first time, that runs after fdisk, the values seems
-> > reasonable, but subsequent iterations, the values are zero again:
+> diff --git a/drivers/mmc/host/cqhci-crypto.c b/drivers/mmc/host/cqhci-crypto.c
+> index 6652982410ec..91da6de1d650 100644
+> --- a/drivers/mmc/host/cqhci-crypto.c
+> +++ b/drivers/mmc/host/cqhci-crypto.c
+> @@ -32,6 +32,7 @@ cqhci_host_from_crypto_profile(struct blk_crypto_profile *profile)
+>  }
 >
-> Seems expected to me. Before fdisk -l the mmc controller may have
-> autoidled showing mostly zero values, and after any access to the mmc
-> card the card is enabled and the values are the normal enabled values.
+>  static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
+> +                                   const struct blk_crypto_key *bkey,
+>                                     const union cqhci_crypto_cfg_entry *cfg,
+>                                     int slot)
+>  {
+> @@ -39,7 +40,7 @@ static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
+>         int i;
 >
-> If, however, fdisk -l does not work, or the values right after fdisk -l
-> are mostly zero, then that would indicate a problem. I guess leaving
-> out the reading of ios before fdisk -l would make it easier to see.
+>         if (cq_host->ops->program_key)
+> -               return cq_host->ops->program_key(cq_host, cfg, slot);
+> +               return cq_host->ops->program_key(cq_host, bkey, cfg, slot);
 >
-> Regards,
+>         /* Clear CFGE */
+>         cqhci_writel(cq_host, 0, slot_offset + 16 * sizeof(cfg->reg_val[0]));
+> @@ -99,7 +100,7 @@ static int cqhci_crypto_keyslot_program(struct blk_crypto_profile *profile,
+>                 memcpy(cfg.crypto_key, key->raw, key->size);
+>         }
 >
-> Tony
+> -       err = cqhci_crypto_program_key(cq_host, &cfg, slot);
+> +       err = cqhci_crypto_program_key(cq_host, key, &cfg, slot);
+>
+>         memzero_explicit(&cfg, sizeof(cfg));
+>         return err;
+> @@ -113,7 +114,7 @@ static int cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
+>          */
+>         union cqhci_crypto_cfg_entry cfg = {};
+>
+> -       return cqhci_crypto_program_key(cq_host, &cfg, slot);
+> +       return cqhci_crypto_program_key(cq_host, NULL, &cfg, slot);
+>  }
+>
+>  static int cqhci_crypto_keyslot_evict(struct blk_crypto_profile *profile,
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index 1a12e40a02e6..949ebbe05773 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -12,6 +12,7 @@
+>  #include <linux/completion.h>
+>  #include <linux/wait.h>
+>  #include <linux/irqreturn.h>
+> +#include <linux/blk-crypto.h>
+>  #include <asm/io.h>
+>
+>  /* registers */
+> @@ -291,6 +292,7 @@ struct cqhci_host_ops {
+>         void (*post_disable)(struct mmc_host *mmc);
+>  #ifdef CONFIG_MMC_CRYPTO
+>         int (*program_key)(struct cqhci_host *cq_host,
+> +                          const struct blk_crypto_key *bkey,
+>                            const union cqhci_crypto_cfg_entry *cfg, int slot);
+>  #endif
+>  };
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 668e0aceeeba..529ea9f4fa07 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1859,6 +1859,7 @@ static __maybe_unused int sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
+>   * vendor-specific SCM calls for this; it doesn't support the standard way.
+>   */
+>  static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+> +                                const struct blk_crypto_key *bkey,
+>                                  const union cqhci_crypto_cfg_entry *cfg,
+>                                  int slot)
+>  {
+> @@ -1866,6 +1867,7 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>         union cqhci_crypto_cap_entry cap;
+> +       u8 ice_key_size;
+>
+>         /* Only AES-256-XTS has been tested so far. */
+>         cap = cq_host->crypto_cap_array[cfg->crypto_cap_idx];
+> @@ -1873,11 +1875,11 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+>                 cap.key_size != CQHCI_CRYPTO_KEY_SIZE_256)
+>                 return -EINVAL;
+>
+> +       ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
+>         if (cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE)
+>                 return qcom_ice_program_key(msm_host->ice,
+>                                             QCOM_ICE_CRYPTO_ALG_AES_XTS,
+> -                                           QCOM_ICE_CRYPTO_KEY_SIZE_256,
+> -                                           cfg->crypto_key,
+> +                                           ice_key_size, bkey,
+>                                             cfg->data_unit_size, slot);
+>         else
+>                 return qcom_ice_evict_key(msm_host->ice, slot);
+> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> index fbab7fe5c652..6f941d32fffb 100644
+> --- a/drivers/soc/qcom/ice.c
+> +++ b/drivers/soc/qcom/ice.c
+> @@ -163,8 +163,8 @@ EXPORT_SYMBOL_GPL(qcom_ice_suspend);
+>
+>  int qcom_ice_program_key(struct qcom_ice *ice,
+>                          u8 algorithm_id, u8 key_size,
+> -                        const u8 crypto_key[], u8 data_unit_size,
+> -                        int slot)
+> +                        const struct blk_crypto_key *bkey,
+> +                        u8 data_unit_size, int slot)
+>  {
+>         struct device *dev = ice->dev;
+>         union {
+> @@ -183,7 +183,7 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+>                 return -EINVAL;
+>         }
+>
+> -       memcpy(key.bytes, crypto_key, AES_256_XTS_KEY_SIZE);
+> +       memcpy(key.bytes, bkey->raw, AES_256_XTS_KEY_SIZE);
+>
+>         /* The SCM call requires that the key words are encoded in big endian */
+>         for (i = 0; i < ARRAY_SIZE(key.words); i++)
+> diff --git a/drivers/ufs/core/ufshcd-crypto.c b/drivers/ufs/core/ufshcd-crypto.c
+> index f4cc54d82281..34537cbac622 100644
+> --- a/drivers/ufs/core/ufshcd-crypto.c
+> +++ b/drivers/ufs/core/ufshcd-crypto.c
+> @@ -18,6 +18,7 @@ static const struct ufs_crypto_alg_entry {
+>  };
+>
+>  static int ufshcd_program_key(struct ufs_hba *hba,
+> +                             const struct blk_crypto_key *bkey,
+>                               const union ufs_crypto_cfg_entry *cfg, int slot)
+>  {
+>         int i;
+> @@ -27,7 +28,7 @@ static int ufshcd_program_key(struct ufs_hba *hba,
+>         ufshcd_hold(hba);
+>
+>         if (hba->vops && hba->vops->program_key) {
+> -               err = hba->vops->program_key(hba, cfg, slot);
+> +               err = hba->vops->program_key(hba, bkey, cfg, slot);
+>                 goto out;
+>         }
+>
+> @@ -89,7 +90,7 @@ static int ufshcd_crypto_keyslot_program(struct blk_crypto_profile *profile,
+>                 memcpy(cfg.crypto_key, key->raw, key->size);
+>         }
+>
+> -       err = ufshcd_program_key(hba, &cfg, slot);
+> +       err = ufshcd_program_key(hba, key, &cfg, slot);
+>
+>         memzero_explicit(&cfg, sizeof(cfg));
+>         return err;
+> @@ -103,7 +104,7 @@ static int ufshcd_clear_keyslot(struct ufs_hba *hba, int slot)
+>          */
+>         union ufs_crypto_cfg_entry cfg = {};
+>
+> -       return ufshcd_program_key(hba, &cfg, slot);
+> +       return ufshcd_program_key(hba, NULL, &cfg, slot);
+>  }
+>
+>  static int ufshcd_crypto_keyslot_evict(struct blk_crypto_profile *profile,
+> diff --git a/drivers/ufs/host/ufs-qcom.c b/drivers/ufs/host/ufs-qcom.c
+> index 39eef470f8fa..acf352594362 100644
+> --- a/drivers/ufs/host/ufs-qcom.c
+> +++ b/drivers/ufs/host/ufs-qcom.c
+> @@ -144,6 +144,7 @@ static inline int ufs_qcom_ice_suspend(struct ufs_qcom_host *host)
+>  }
+>
+>  static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+> +                                   const struct blk_crypto_key *bkey,
+>                                     const union ufs_crypto_cfg_entry *cfg,
+>                                     int slot)
+>  {
+> @@ -151,6 +152,7 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+>         union ufs_crypto_cap_entry cap;
+>         bool config_enable =
+>                 cfg->config_enable & UFS_CRYPTO_CONFIGURATION_ENABLE;
+> +       u8 ice_key_size;
+>
+>         /* Only AES-256-XTS has been tested so far. */
+>         cap = hba->crypto_cap_array[cfg->crypto_cap_idx];
+> @@ -158,11 +160,11 @@ static int ufs_qcom_ice_program_key(struct ufs_hba *hba,
+>             cap.key_size != UFS_CRYPTO_KEY_SIZE_256)
+>                 return -EOPNOTSUPP;
+>
+> +       ice_key_size = QCOM_ICE_CRYPTO_KEY_SIZE_256;
+>         if (config_enable)
+>                 return qcom_ice_program_key(host->ice,
+>                                             QCOM_ICE_CRYPTO_ALG_AES_XTS,
+> -                                           QCOM_ICE_CRYPTO_KEY_SIZE_256,
+> -                                           cfg->crypto_key,
+> +                                           ice_key_size, bkey,
+>                                             cfg->data_unit_size, slot);
+>         else
+>                 return qcom_ice_evict_key(host->ice, slot);
+> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+> index 5870a94599a2..9dd835dba2a7 100644
+> --- a/include/soc/qcom/ice.h
+> +++ b/include/soc/qcom/ice.h
+> @@ -7,6 +7,7 @@
+>  #define __QCOM_ICE_H__
+>
+>  #include <linux/types.h>
+> +#include <linux/blk-crypto.h>
+>
+>  struct qcom_ice;
+>
+> @@ -30,8 +31,8 @@ int qcom_ice_resume(struct qcom_ice *ice);
+>  int qcom_ice_suspend(struct qcom_ice *ice);
+>  int qcom_ice_program_key(struct qcom_ice *ice,
+>                          u8 algorithm_id, u8 key_size,
+> -                        const u8 crypto_key[], u8 data_unit_size,
+> -                        int slot);
+> +                        const struct blk_crypto_key *bkey,
+> +                        u8 data_unit_size, int slot);
+>  int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+>  struct qcom_ice *of_qcom_ice_get(struct device *dev);
+>  #endif /* __QCOM_ICE_H__ */
+> diff --git a/include/ufs/ufshcd.h b/include/ufs/ufshcd.h
+> index cb2afcebbdf5..582d5a747e84 100644
+> --- a/include/ufs/ufshcd.h
+> +++ b/include/ufs/ufshcd.h
+> @@ -363,6 +363,7 @@ struct ufs_hba_variant_ops {
+>                                 struct devfreq_dev_profile *profile,
+>                                 struct devfreq_simple_ondemand_data *data);
+>         int     (*program_key)(struct ufs_hba *hba,
+> +                              const struct blk_crypto_key *bkey,
+>                                const union ufs_crypto_cfg_entry *cfg, int slot);
+>         void    (*event_notify)(struct ufs_hba *hba,
+>                                 enum ufs_event_type evt, void *data);
+> --
+> 2.43.0
+>
