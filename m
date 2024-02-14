@@ -1,95 +1,94 @@
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C62CF52F99
-	for <linux-mmc@vger.kernel.org>; Wed, 14 Feb 2024 13:03:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DDCB5B5DB;
+	Wed, 14 Feb 2024 16:09:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707915812; cv=none; b=sAYOLR/HI4c/DAN0p/HOZUdGeHoMdZ0/n0+XpGdVk1FmLefXcoOf8ei1Cnk5orbi4hXr6MGucqKTRzLZMDG8ghiHtMX1amin0MwrFZfTYe0caUbKkz+hG8u3gyWqNHKXyMGYvJ7/xEFDXj75boRXzeMDshsPKY6Ish8z1kC+D/8=
+	t=1707926999; cv=none; b=VS7SxrZkloeq2eJ0qF+0rmZJ4gnGa0KdQZWUryV3tkJZAn9yqjtWpPaxW6Iq5eYfcOptpNYFr65e1//RDYTEFH9g97zB/p9tG5Ec8zHVZzkXMQbp5pMr6/Iwlf5VeMP3dCYyHZ1MmXhzAeVvZ5UXne3anJEo6wGVXC1u5JeDn2k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707915812; c=relaxed/simple;
-	bh=VazCOfpJEA7KeIqdMGJMMEhA/DGg07WQYUkeXbBf0zI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LtsQ+ktDhMXLIeyifG67/3O3Yvumgu9Vi7pPaCEh2OsFr7dtb0CngIBoes4dJgzTmwprEuHgEGVV0Sbcs2eS7s3SuyO4Vuh7yb2FAEX3vCCh0HhsjcaVnzt1NTcmA7V9TTPjyqobHwmzf2oOrjhlSZV4H0HO0n0+8+Z/XEjBEHw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=E2XCnMR4; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="E2XCnMR4"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=VazC
-	OfpJEA7KeIqdMGJMMEhA/DGg07WQYUkeXbBf0zI=; b=E2XCnMR4wOrNlZ4w6NaP
-	K7XCaByu+PPSzwmAH4ZO8UtuvQtAmjItNa7fn7+BfwFPczjPD4XPTXTnKItoIjEk
-	gycOG7iB7qVvkjHFQuP1GDbrC26qLf9VqKBGxuzbYdC9kVz1fE/WojzEw4C0GpDn
-	U/zTDVRxTKU1CGf7Z35FbImeaOS0KctkMU0LmlzPnr0F2UGbVIMdESaaScjbrmJF
-	/fid2ETTd5IxukxUJA7OTqXCT+jF2EuRM7On0u7RJCba6Y6zBTM7gzeNm9ljnlW/
-	QPew8x56FzpiPbW7UX/yKhXg/1UoyV1eaDrvKLffzWaXongDP9cG+QvJxZUwsKSq
-	7w==
-Received: (qmail 1429072 invoked from network); 14 Feb 2024 14:03:24 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 14 Feb 2024 14:03:24 +0100
-X-UD-Smtp-Session: l3s3148p1@6G/JIlcRnOAujnsZ
-Date: Wed, 14 Feb 2024 14:03:22 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document R-Car V4M
- support
-Message-ID: <Zcy6GggFaFiEQGr-@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-References: <fffc5a0a73c4cc8e8d7c5d93679531cc24e006ca.1707915511.git.geert+renesas@glider.be>
+	s=arc-20240116; t=1707926999; c=relaxed/simple;
+	bh=eczxNSPiw4p4CNj/PUhSH5mu4tDa6Gr1OgSTglWh40s=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=WQOnBARK+YsB67KXnmGmkFo2lwxL5vkOxLq1sjoBOu4uXQfXRu/FdG5malk0eOa77cLO5WmhdF6Db/yqt/k0FsxhaFC5CzvU+4I5MU2dIAU7Onw7nnZpo1FZ6Vb0bmYDj/DBsgQbEsYP3Q7Dl0jlaEK5VjXPI5MkXqdlQmYecJo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-607aafb2cb4so6542197b3.0;
+        Wed, 14 Feb 2024 08:09:58 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1707926995; x=1708531795;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=noAyHXMAvZWAemJey+xdD/xMfux7ZkmXm4kG5pidNbg=;
+        b=PbVWtHz5JW2NGZPUwbImWVqaHe+v3aVwA6VrRbd1vHPwN8EQu71tOdkQmu9UCIyHNc
+         GR+ce8q8Ho1rH23ADT53PLmh4rkVIS8XiB3QS3kmkbJ5y5OQ9KllPQ4Rw+TZgZbzeZK8
+         IvOyiP0TNVkd84BtW+8f66/F9QrBzOJmqTJzHTmwBmijXDpE0N9kozFOEZje4KCgaWbK
+         3AJEuv0vn4GH1REeXQhLpFd24uew6avrRXAN8WArLHOfPYOsN0I7VXtnpo4FwtaqzHeS
+         xQ6IvQm3aw0ELlq9LXPKIDhBb738z2K/bZhBsKPUsq1puonfIMtycE4GjDGdXk8UN1N8
+         9qMg==
+X-Forwarded-Encrypted: i=1; AJvYcCVqu8hTuj/qbYoHH3jeBMEW5cIRTsoBg7jliSdgPwsxKLThMwMQBed6OBKVHx3fd/8ZsExBo5q6WQCy1H7+Hso1uSiczfKvw9X6s2tZjKNiZdmaQ3zr/arytRsz3D2VXbJUegyNUfG7
+X-Gm-Message-State: AOJu0Yw/75RKE7sKTt8AvGwYuwEzjwxhFYNUxQoXudrU9NDsJEPmsbcw
+	sLJVI4CwN/9pQJp2QySL0VUkH3yV+pGDt9l658mBUYSR34zC5vIR3olEV4hKU/M=
+X-Google-Smtp-Source: AGHT+IFs8zig0grnwbTuSMfWqswTPyRG9TUyNTKNGiPtpDwGkKWY7Eu2rzsS+FmEf0BXCyUl9ezuEw==
+X-Received: by 2002:a81:a214:0:b0:607:83c3:c138 with SMTP id w20-20020a81a214000000b0060783c3c138mr2987900ywg.34.1707926994725;
+        Wed, 14 Feb 2024 08:09:54 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWw8aA9D9K+3ZqmF1I2oMpGOuI1ZYDxa4Y3vuBx/b1vYgGttm9o0VuX5yQYoVxSeqQKJ03jQdrrdKY4J6hdLjXniWgw0MZ8lxtZIITFtAPWGf5u9AqeNwSyz9BiAaF4dZu9VzV4jnq7
+Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com. [209.85.219.169])
+        by smtp.gmail.com with ESMTPSA id j75-20020a81924e000000b0060790d60113sm679957ywg.89.2024.02.14.08.09.53
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 14 Feb 2024 08:09:54 -0800 (PST)
+Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-dcc80d6006aso2007633276.0;
+        Wed, 14 Feb 2024 08:09:53 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUe8OlnfGacwSbapcX/rPAXBrOe6C1CJFadf/AmNI2yZOIgGGyk6lUyFvRNpNd+ZFKTgcNhlnAXv8C6olnCweLLqULeCUvEw+Kv66NK4gwWEVQ6/4/wuUKIHyKn9m/DQ5JXlNQ2jgi3
+X-Received: by 2002:a25:8251:0:b0:dc6:d6f6:cc13 with SMTP id
+ d17-20020a258251000000b00dc6d6f6cc13mr2893886ybn.20.1707926993726; Wed, 14
+ Feb 2024 08:09:53 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ZgB2wK3Gn78cFs4Q"
-Content-Disposition: inline
-In-Reply-To: <fffc5a0a73c4cc8e8d7c5d93679531cc24e006ca.1707915511.git.geert+renesas@glider.be>
-
-
---ZgB2wK3Gn78cFs4Q
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20240213220221.2380-8-wsa+renesas@sang-engineering.com> <20240213220221.2380-11-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20240213220221.2380-11-wsa+renesas@sang-engineering.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Wed, 14 Feb 2024 17:09:40 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdWVk3VL=E-DqZFuxSzXsGAeQGo0VHZXGtMiq2wi7oo05Q@mail.gmail.com>
+Message-ID: <CAMuHMdWVk3VL=E-DqZFuxSzXsGAeQGo0VHZXGtMiq2wi7oo05Q@mail.gmail.com>
+Subject: Re: [PATCH v2 3/6] mmc: tmio/sdhi: Fix includes
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-renesas-soc@vger.kernel.org, Lee Jones <lee@kernel.org>, 
+	kernel test robot <lkp@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Feb 14, 2024 at 01:59:57PM +0100, Geert Uytterhoeven wrote:
-> Document support for the SD Card/MMC Interface in the Renesas R-Car V4M
-> (R8A779H0) SoC.
->=20
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+On Tue, Feb 13, 2024 at 11:18=E2=80=AFPM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> TMIO uses an of_* function, and SDHI uses pm_runtime functions. Add the
+> includes directly, so we can clean up another header properly. Sort the
+> pagemap include while we are here.
+>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Closes: https://lore.kernel.org/oe-kbuild-all/202402070323.JpYfFtkQ-lkp@i=
+ntel.com/
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
+Gr{oetje,eeting}s,
 
---ZgB2wK3Gn78cFs4Q
-Content-Type: application/pgp-signature; name="signature.asc"
+                        Geert
 
------BEGIN PGP SIGNATURE-----
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmXMuhcACgkQFA3kzBSg
-Kbbf1xAArpRtQYgefOvNPbGU7V8ZX9RX6HP99h30GPsdkAkWAg3qEXTdM3iQQEY6
-y3rNMAZ6FpKPfujH60BHGyQjWDy+f7OMkKhPrZiUi7wrivJ+6ZVBapDOixFk+hL9
-ahiij7YwMNSP/1vF7KQR6ZJZK32W0Su98ptmGKhHj3rIWEItduUNngkO8z8qUQFy
-YZMWHacKNH138N19vpUbcS3vGUBcYaEYhyN8LD9xEi24z9LP0QsKkfNraL8vnnty
-UDsFQ++2ZAdEVN1JNrR0WY/xMFKJMIJ1C0pMraXZfYglVl/xRCwTBD0u7zSz0VC1
-F9nWESGtIjoywosnKr7UP4k+u1b0N7mN+mJ49nI10s1zo0NxAcyZ6sRA/4lH61B0
-dFhu2Gm21mewDvJGcSb9dGgmjQD0Od4K8RRqBefX6yfAyXaForJW7/mxo6OTwd08
-ao4grUuQajivWUJAvmA8g6PDWqINEZv1+fSaxkr9WtMBO4C3WjSjtmHsO9evUPCa
-qEbwSL7wjT1vy7AYiy0rUvDaBPCUPMaunXnFVAdptV6/R7TCar4PvjqRBZ7Q7bW+
-FyR11QRq8a/B3iuytQQY2P28j0Xt+LhEdIALqPpHb1KI7VX3OXL+svtwMh0TtV4k
-UH5FPpZfKyP2HC29GWfFRN+zyTlsSPAEILI9sbseX8mXo2QHQVo=
-=GS3v
------END PGP SIGNATURE-----
-
---ZgB2wK3Gn78cFs4Q--
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
