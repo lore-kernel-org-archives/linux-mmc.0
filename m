@@ -1,114 +1,87 @@
-Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EA9112D74D
-	for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 14:06:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E0FD134721;
+	Thu, 15 Feb 2024 16:16:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.156.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708006020; cv=none; b=fWKJrw3OQWESb1RwIScfPsePrRdI57XMvOYVPpKM7JmpNAWekEbVzopqd1qJuTpY7aB/8V7Iq4t6WNWqh9iCLn39hZVZfgqQAaOCBBoeleAV9UcLczby5YcrM2wKsjx2XEfnWgRroo1B8KhfCrGU0YpXE5HLcFL855U4CAQlMG4=
+	t=1708013789; cv=none; b=F3S4PDtP2hqjOum5uuZ8l6ZXkGdP5GUgxIgkoc9xz5WYQ7G4hlGF+wyYj6IYICNPKgenmtBrta79P3tK5rCXWzMV7gek/I0KOAG5WPsyu7EwxxxyNzwYn/5JaeL50tVH+drtluJpuqCGNT56iHLqD4OVEWsWLkXW6L+5UNFbPHY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708006020; c=relaxed/simple;
-	bh=O49GmFBEFJw1evYJI71geRk1H8X54jjO+we1/8XpdBk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LoKBhQgBb60fceYOXUkk+jckBl7jDkYw5YQe18Bv03dCj6MqybvzBym0kkjHSt/KRnoIzYWrj80Q+BaVOO7a65v/v5Hu02AC+n0IZGwVE6guSLv2M5vJeqgItjwZzjfqkkUJX17ko2GH9JSHNPzLhk0zyCGa1U0+BMOjin4lFZY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=d071UX7X; arc=none smtp.client-ip=209.85.128.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1708013789; c=relaxed/simple;
+	bh=K7/s9BrhrXjtwpTn1wH7BV9+VkoKECs58AQnNFAKXuw=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=aUBdI28YcQkXlGL8IbuAvQ0jGX7/V6rVEJ9NwBgFZd0TxZWbhN3ShWjxXfWtV4yzdSqxL844MB8wZutRPnziFoKYKbdFlGCZIwxc701hy3HZOVkiOVqzzZ7C+vsVXI1onFBYfOyeRI1noIlPyHVIR3CmRuyAOjZk6WUo93kH60I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com; spf=none smtp.helo=mx0b-0016f401.pphosted.com; dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b=UFYkEXX/; arc=none smtp.client-ip=67.231.156.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mx0b-0016f401.pphosted.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="d071UX7X"
-Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-6078c4cadd7so9585857b3.2
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 06:06:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1708006017; x=1708610817; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=wTyKyvN/7Akhe2ktPgbpToPejagjmVZVc+5gYu9vRkA=;
-        b=d071UX7Xg0ToRIkXmdEfvMWlLFMfqAtuegKd4cAB2DIm7E5UpIbvtIa1HwcObDfY8W
-         vNq7WO7uK1ALcZ4zncRd/n3WjG4xl8BAy+XJe7MOzoDdemlF24NEF9Wrnc6fAAYQtNYW
-         bghu4/aXZBr0pKh1MvJBFNGyH1VCGqdvIQMDh+o69MAmtB9S+eyQScjl1jAc2xcQDe7F
-         fnWqibBCMjtASRTh4V7QzD/rAmVr7CsqKK68tk1HejgOnDkbCkSwmnWrNTWdQrZfEpHd
-         KPRacKfI+OfpAjIIidGAETYc3tE6rcYGkahLFSvJEB7x37y9985IrDWHBvkfE1/xgohK
-         qW8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708006017; x=1708610817;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=wTyKyvN/7Akhe2ktPgbpToPejagjmVZVc+5gYu9vRkA=;
-        b=DPONYgCukz5Ie3O6hBSycQkxG6vv/LR/rqgBQ5IgWfAjOPriHVeGdxhOAGcfN05Bxo
-         PcazFZLoA52zfPd0r7hweUWNjXNvfDmoCbUbbcmQM4wjwOoeQxWW9AuofY4jvM2LNkED
-         riVhCm8HJRgXXNeoBGcuG94eoobSNRhoOXjehWnlZx89ilxRIhARYBuolwLxQhH1zJCS
-         aG2AJrT/0dVaNpGBbv9fK6b+jXYBUF0ahTruQWJt6CNb2BFXU/V9mN+0NT0nO8CjHu5g
-         +M8UyNKv5s0VB2PhmbBj5yK2y3X/rUQV/zqngFrurQnb4f64q8piB4qDC5HpJs6YmkKn
-         qSUQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVOkVpZY8lXFb51obOWT2DHrmhU7k7cOgwSRXOJ6yq/zAIciG2RVKEedLtdaMY4nSpiAgcSqu772refuEdGsnNog34F1e64EIHQ
-X-Gm-Message-State: AOJu0YyLaZvfLJSFNxkno0dLpoZvaWapjtE7KqEAA0Og1S3e3r91S5jH
-	TjiX5SFgKHJ+JZvxMHMWCInMQROQNpTpsxN4n7NTJ82lznpbyb3YPCn4PeAaoTBjeUAgDgm9b+/
-	esxBECVFLGKIKdMVJ+fUTFQ5N9TW7qer6yZ9dxQ==
-X-Google-Smtp-Source: AGHT+IEiCyF+JHk89EqcWCFh5S3vbjma3++fudpcHT+C0/fUt25LrhjmSlnQIO9axgVL4SJNSoiB2WRkw8PviOUyl5A=
-X-Received: by 2002:a0d:dd94:0:b0:603:c656:5e31 with SMTP id
- g142-20020a0ddd94000000b00603c6565e31mr1893830ywe.28.1708006017260; Thu, 15
- Feb 2024 06:06:57 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b="UFYkEXX/"
+Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
+	by mx0b-0016f401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 41FCk83k026995;
+	Thu, 15 Feb 2024 08:16:19 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=
+	from:to:cc:subject:date:message-id:mime-version
+	:content-transfer-encoding:content-type; s=pfpt0220; bh=j7NSDwb/
+	05g4ujivAOjTwmWiHN6UlrJeSt0vUbauOFA=; b=UFYkEXX/edsEL9R6b56IQlWR
+	oaTSYCJXUTrQ6Cua/+ATRc/cc0h1S62v0YAuL1l3uV7kNb5cIFrb50IMHDv9987v
+	9KDlbgofx96yTH/0IEmS3nZ+eWR6jSKjQVwGKmst/xX2zfywJtWu3lEwjH5rNJXm
+	+umgMAKLOsM4yz+Wm7H6ubxDGIn+Mry10A2GOsA5piOOsHPgO21XezOYjwcAyEE/
+	z+XEH6oRqn/948zGHdMsUrcPnYw5rdPAN+8ldyMkGxv5X13ru4RZAoBVRG/XO3HY
+	WSP0FXpSykEpqOiC4Gq+x5yNS2Qmmi9cH2iQY8DOBjQxLVk2KV6oDg/c8KD6Aw==
+Received: from dc5-exch02.marvell.com ([199.233.59.182])
+	by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3w9jw98uue-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+	Thu, 15 Feb 2024 08:16:19 -0800 (PST)
+Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Thu, 15 Feb
+ 2024 08:16:17 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
+ Transport; Thu, 15 Feb 2024 08:16:17 -0800
+Received: from dc3lp-swdev041.marvell.com (dc3lp-swdev041.marvell.com [10.6.60.191])
+	by maili.marvell.com (Postfix) with ESMTP id 6EBCC3F7085;
+	Thu, 15 Feb 2024 08:16:15 -0800 (PST)
+From: Elad Nachman <enachman@marvell.com>
+To: <huziji@marvell.com>, <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC: <enachman@marvell.com>
+Subject: [PATCH v2 0/2] Fix PHY init timeout issues
+Date: Thu, 15 Feb 2024 18:16:11 +0200
+Message-ID: <20240215161613.1736051-1-enachman@marvell.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240215-mmc-fix-davinci-v1-1-a593678ca7bf@linaro.org>
-In-Reply-To: <20240215-mmc-fix-davinci-v1-1-a593678ca7bf@linaro.org>
-From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
-Date: Thu, 15 Feb 2024 15:06:46 +0100
-Message-ID: <CACMJSevp-xG74Z2sfzmyXibHfh1zZa3AHuL14OKKO8HANrwHiw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: davinci_mmc: Drop dangling variable
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
-	kernel test robot <lkp@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Proofpoint-GUID: 9mdM5BoGD5ZAA_7IrjU_vhaJTdr82g34
+X-Proofpoint-ORIG-GUID: 9mdM5BoGD5ZAA_7IrjU_vhaJTdr82g34
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-02-15_15,2024-02-14_01,2023-05-22_02
 
-On Thu, 15 Feb 2024 at 14:28, Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> The sg_miter conversion left a dangling unused variable.
-> Drop it.
->
-> Reported-by: kernel test robot <lkp@intel.com>
-> Closes: https://lore.kernel.org/oe-kbuild-all/202402142042.vg0lnLdb-lkp@intel.com/
-> Fixes: ed01d210fd91 ("mmc: davinci_mmc: Use sg_miter for PIO")
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/host/davinci_mmc.c | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-> index c46577305138..8bd938919687 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -211,7 +211,6 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
->                                         unsigned int n)
->  {
->         struct sg_mapping_iter *sgm = &host->sg_miter;
-> -       size_t sglen;
->         u8 *p;
->         unsigned int i;
->
-> @@ -224,7 +223,6 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
->                 return;
->         }
->         p = sgm->addr;
-> -       sglen = sgm->length;
->
->         /* NOTE:  we never transfer more than rw_threshold bytes
->          * to/from the fifo here; there's no I/O overlap.
->
-> ---
-> base-commit: 26d7d52b6253574d5b6fec16a93e1110d1489cef
-> change-id: 20240215-mmc-fix-davinci-bda788e8ee69
->
-> Best regards,
-> --
-> Linus Walleij <linus.walleij@linaro.org>
->
+From: Elad Nachman <enachman@marvell.com>
 
-Good catch
+Fix PHY init timeout issues:
 
-Acked-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+1. Clock Stability issue causing PHY timeout
+
+2. Timeout taking longer than needed on AC5X.
+   Solve by constantly testing the PHY init bit
+   until it toggles, but up to 100X timeout factor.
+
+v2:
+    1) convert polling loop to read_poll_timeout()
+       for both patches.
+
+Elad Nachman (2):
+  mmc: xenon: fix PHY init clock stability
+  mmc: xenon: add timeout for PHY init complete
+
+ drivers/mmc/host/sdhci-xenon-phy.c | 48 ++++++++++++++++++++++++------
+ 1 file changed, 39 insertions(+), 9 deletions(-)
+
+-- 
+2.25.1
