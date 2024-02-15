@@ -1,99 +1,104 @@
-Received: from mail-yb1-f172.google.com (mail-yb1-f172.google.com [209.85.219.172])
+Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6881B132C10
-	for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 16:51:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81753138482
+	for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 16:54:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708015901; cv=none; b=kNpI14Vym2IEHptjCXS76jLg8kyCTRUzhtJN12HhLixstWW5rZJhERUxjW+o4HAVCMpFE3lLfL0TjeKWeH2YakxdabRZbN2k8PSLGIukXExT8mWFYH+vqxtQIG9Q4RWj0utfBAkXg+1a1Qb+jOBG3IsTFQkNxmpSQo8Ei4hyF+U=
+	t=1708016062; cv=none; b=iG31HZ7JY+wC0gvoVZ87i/F3Vy+mRA7gxIQFOcAnxG884FC66KP9r9APCJoAJP1B3p5Yhr1MXWzRNXncDSLLG2RPWEvF7k1HG47idCvc2l9fZ6wB7elY3PPkoxHOJhGhD4r5bgFIvIBJlLKrCwRjYx+euuztpAdHMobYYpm93G0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708015901; c=relaxed/simple;
-	bh=sha+65CRAruHZvHPgeTNMEaYyVy2ctkRi5VI/uxKmWQ=;
+	s=arc-20240116; t=1708016062; c=relaxed/simple;
+	bh=Qz4PPFUkifJGyaRWPKT8EHaiOM/kn2UbDqOefUgZCmM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=luvH33bxmIrMw98VniHCcx93jeI5W1VuYpleDkNU/BJl9s4QtWjeRRSynf4NRJSqwlwaKdmOrOizqJpCMSCYmPdg8fW+H67SV26guzYxbYMHyqJDD2HXez1kmxX9cwiTleu4bSjdGo9bMAKP9GiE0TQeILsGTwk+Vx3y1mwuQ/s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vQ0vNC5Y; arc=none smtp.client-ip=209.85.219.172
+	 To:Cc:Content-Type; b=UFOyJ8RVf3Ed22sm3UqoCtcFFphUOtTaUGa8FbTvwzQpO/7dS4RDln3du/3KRNGpwtqO3kYZOtp9dLkh6XgNxXzVPHGYJI45Z3kHS+mmnqXizAJY3s2NCm6LwXa3qQ/DjPwcI1RdGqyC4LNqAMJz19HeTIB5YeMah9H9nj6mScU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=pre7Mcfz; arc=none smtp.client-ip=209.85.219.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vQ0vNC5Y"
-Received: by mail-yb1-f172.google.com with SMTP id 3f1490d57ef6-dc6cbe1ac75so842367276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 08:51:39 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pre7Mcfz"
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-dbed179f0faso1599662276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 08:54:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1708015898; x=1708620698; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1708016059; x=1708620859; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=m3IoBRH0M+LFAe74HMw0Du/XeziGoU8xuI+b47PCA5M=;
-        b=vQ0vNC5Yidu4gMGYGqCLtj1i35wnsWqAGZTcl34/1OMY4rCPXkiO1WnxeEG/M6OdxZ
-         1ok9XTqVjNrdDzNrvD2h+K6Q73fgWHURb2sf8v/cERkb+J+AIBfpv3juwHUD3Tl1DvhE
-         kncEai4cGxXo8ccn/Vfg9E3bjKzXTStXFvBq86FVoeK/IpXkB9PWyaxcXlOYHLhbbKF7
-         cYAEvXaXhCzM0f2RrAEKPL5oavMnbOh56/WgE5eWsSBe4F/REzb662riyJg4E8DE2CAb
-         DfQ15ubow9IXgVsoTB6/44HJ/jpxahDCoTbTtErKiUL3INxABYSTQTjCI33qSb50TyJ0
-         Iwxg==
+        bh=vEQiCmvhKfS0/A0znECfTzFjRTV/dZsqotvM6rEKanU=;
+        b=pre7McfzotVVLA5sRjwMy2EQnVCLSkXeRtOFWwJdhon6KseboIF957xeL8jvjEQbuC
+         83P48RFGgvSLKtcvW8Faxk/3+hpwiNc2E26f2oM4oWWVgW3yqy3FzsPRqi8rklqZ8il5
+         sJIBJmfC476mwH3QuRT2sx6zo8YzUeqiHTOsz+EczCsA++VJX3CWBTFTNfWnLJlK49X+
+         vyfS4aEYNO5eYd4NGkBL1YEHDiCJW1LdR4RR/xaWNpFHmvQXIwH0x6bC0wB2Wnu5NgvM
+         MXu9+6r6mlPvmIBWs9oNpChgrhT0C0Xmob4klZmQRrjjNdemKJNRieQFabOeTfbbhU/v
+         yyEw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708015898; x=1708620698;
+        d=1e100.net; s=20230601; t=1708016059; x=1708620859;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=m3IoBRH0M+LFAe74HMw0Du/XeziGoU8xuI+b47PCA5M=;
-        b=eF8+jsPurgpuvW8AOUxmplgislnzYyOcnkTkWYNfqIxK4R7OKhGjH6upesiSTs26Gt
-         qXRqfoAhlk5o5uaHXCWzqzi9h0YmhbgEFvp3LOeBgwVVn+jCYLayuefdmkSZg1EPE14a
-         lKss9C4k3oLCRClhUAjCubJkdy0QG8YxDGMwjfhXtyJtG+qJyv7ffqP+AenDZS1vtO9Z
-         1JJGVoZEBjoBz7JKWXZl6on8vbNiriaNCUHoJg8arkdER+lZIRcg1SXXLNrXyesb5f6b
-         ai0hab/HtLx+k7oXjfGyQFBNOuVe20W1kG81j9Py6ZqxYkN1yYLrDswyi31Ysu4xjPm6
-         Wzmg==
-X-Forwarded-Encrypted: i=1; AJvYcCUNAdXOoxFWaDZt88L1qLYJIjhetbR5BZxU9DKXWdgta8zZAEHuxksmhj8zOu5c54SJA+tNYnH7WsVseHJc9B5+HKGIRtQiqoUO
-X-Gm-Message-State: AOJu0Yzutok4Wkya5DL/MGXgNtjjPt9Kjvjw7uMoa5mFNHqkuTwRhMPW
-	a77aGeQF1+TjYVwEly+GRnhyESb178xr/28duhTd8BCtgQq11KZEMuIaaLUY33AiHVntdlwAzfh
-	vLKk/A2rPo0hpcqshryAuzNwwttw2VofhUFWWpw==
-X-Google-Smtp-Source: AGHT+IEzADUxXzVHUebD8YQti/ikMzubDEe3ni3UKP6sMKE6WoX/CP5vqMWBdgFxA2yW2vHZvaJYaD+OiBuJd7jLqKU=
-X-Received: by 2002:a25:c202:0:b0:dc6:daa4:e808 with SMTP id
- s2-20020a25c202000000b00dc6daa4e808mr4555953ybf.12.1708015898386; Thu, 15 Feb
- 2024 08:51:38 -0800 (PST)
+        bh=vEQiCmvhKfS0/A0znECfTzFjRTV/dZsqotvM6rEKanU=;
+        b=Lg0qa02Jk22zAVAhzzK30TP6tu4pfI8xxr3EX/YtKYeC9gBj8oGns5PEIj5c4AAn61
+         06UiVm5BctNJV2u0FSXBt9ZGr4kLPvRk0BdBkp7kg6YCRiBpgwjtJL/ar1J812JCqrHP
+         +CdC6c8acrSCQbxF05WNpxXC5bczcqINZWeCtk826uGXZyqIsm9tKoxRfY5bLgwUefAc
+         G2VK3sXU8yMeYFmrsIGfycUrw0kd7ZWIv4306ExzbZjXlJTTCGUWMKwbQecG36g55Pth
+         erYXYZUGuiacJIyyBXz9iAr3ewAqEo1lwS+A9Fe/wgZ3COO6JvFzUKF1HwBfId5nmacj
+         7oow==
+X-Forwarded-Encrypted: i=1; AJvYcCXJ83yOp2A/CeW2ZiLcnC8GrMYnqdipcGOTR5jsj/yW/AJqDOjwSpyS3QRCyf3j4aPJ7GNUcHpZQLTGL3/j+hV/6H4nO6j85nGL
+X-Gm-Message-State: AOJu0Yy2qobeFIEwd92qB1K3i9uqHvx6KC52TccxZyX9Hgg0Hv2U8TF0
+	7+0zYn7DX4GCfSrezEYJ2bxzx/HleMhZAHO5PHbpd467ThqXDCAeGW3uHHQS0oG7aOC2wNwcedI
+	P9sUafswbjXWfOCHB5rkFJ91Yl/ukENF7JtXWpw==
+X-Google-Smtp-Source: AGHT+IF28WiAUAxb9BXDQ9j656YBYmKEubg2qRwCcoIKEiRoMN+j/rX1+ioqB8yOfGTSrxa8mYZDRwHKLR7BN/dl2kA=
+X-Received: by 2002:a81:b717:0:b0:607:c65a:ba02 with SMTP id
+ v23-20020a81b717000000b00607c65aba02mr1752372ywh.17.1708016059449; Thu, 15
+ Feb 2024 08:54:19 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240215161613.1736051-1-enachman@marvell.com>
-In-Reply-To: <20240215161613.1736051-1-enachman@marvell.com>
+References: <20240215070300.2200308-1-hch@lst.de> <20240215070300.2200308-18-hch@lst.de>
+ <CAPDyKFqPnC9jwWnoVz+UVJJ_SGYnB4CrB8jmJOSxCnT7AYQrKg@mail.gmail.com> <20240215164942.GA19722@lst.de>
+In-Reply-To: <20240215164942.GA19722@lst.de>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 15 Feb 2024 17:51:02 +0100
-Message-ID: <CAPDyKFpNL_zFgzSNgaSRqaH8tDNjwB16ZD1YGwqM64vcQ2oxtA@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] Fix PHY init timeout issues
-To: Elad Nachman <enachman@marvell.com>
-Cc: huziji@marvell.com, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Thu, 15 Feb 2024 17:53:43 +0100
+Message-ID: <CAPDyKFpSNL28sWqNMY9Y2+tP9VMd_Wabnw1hVjQ-g0RfKCUVgQ@mail.gmail.com>
+Subject: Re: [PATCH 17/17] mmc: pass queue_limits to blk_mq_alloc_disk
+To: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@kernel.dk>, Richard Weinberger <richard@nod.at>, 
+	Anton Ivanov <anton.ivanov@cambridgegreys.com>, Johannes Berg <johannes@sipsolutions.net>, 
+	Justin Sanders <justin@coraid.com>, Denis Efremov <efremov@linux.com>, 
+	Josef Bacik <josef@toxicpanda.com>, Geoff Levand <geoff@infradead.org>, 
+	Ilya Dryomov <idryomov@gmail.com>, "Md. Haris Iqbal" <haris.iqbal@ionos.com>, 
+	Jack Wang <jinpu.wang@ionos.com>, Ming Lei <ming.lei@redhat.com>, 
+	Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, 
+	Miquel Raynal <miquel.raynal@bootlin.com>, Vignesh Raghavendra <vigneshr@ti.com>, 
+	Vineeth Vijayan <vneethv@linux.ibm.com>, linux-block@vger.kernel.org, nbd@other.debian.org, 
+	ceph-devel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 15 Feb 2024 at 17:16, Elad Nachman <enachman@marvell.com> wrote:
+On Thu, 15 Feb 2024 at 17:49, Christoph Hellwig <hch@lst.de> wrote:
 >
-> From: Elad Nachman <enachman@marvell.com>
+> On Thu, Feb 15, 2024 at 05:40:37PM +0100, Ulf Hansson wrote:
+> > Looks like $subject patch, patch11 and patch12  have already been
+> > queued up as they are cooking linux-next. Normally I prefer to funnel
+> > these via my mmc tree, to avoid potential conflicts (mostly for mmc,
+> > where more active developments are ongoing).
 >
-> Fix PHY init timeout issues:
->
-> 1. Clock Stability issue causing PHY timeout
->
-> 2. Timeout taking longer than needed on AC5X.
->    Solve by constantly testing the PHY init bit
->    until it toggles, but up to 100X timeout factor.
->
-> v2:
->     1) convert polling loop to read_poll_timeout()
->        for both patches.
->
-> Elad Nachman (2):
->   mmc: xenon: fix PHY init clock stability
->   mmc: xenon: add timeout for PHY init complete
->
->  drivers/mmc/host/sdhci-xenon-phy.c | 48 ++++++++++++++++++++++++------
->  1 file changed, 39 insertions(+), 9 deletions(-)
->
+> None of this is in my fresh linux-next pull, which would be rather
+> surprising anyway as I've just sent them out and Jens isn't that
+> quick to merge unreviewed series :)
 
-The series looks good to me. Although, I assume we should tag this for
-stable kernels too and possibly add a fixes tag?
+Weird. :-)
 
-Moreover, it would be nice to get an ack from Hu Ziji.
+>
+> That being said it depends on prep patches in the block tree and thus
+> I'd prefer merging this entire series through that tree.
+
+Okay, in that case, np! Next time, it would be nice to get that
+information upfront in a cover-letter or similar.
+
+If not too late, feel free to add my acks on the three patches for mmc
+and memstick.
 
 Kind regards
 Uffe
