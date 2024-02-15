@@ -1,258 +1,95 @@
-Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 726A8EC7
-	for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 01:09:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53C1133C5;
+	Thu, 15 Feb 2024 07:03:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707959401; cv=none; b=ovaiKYezkq3sfxQ/xydn8VxfPiKYF/Rn8qQFbj8L7SMkvhq7GBgOsm1vq09cOdONDEPWGpH7CqybS2PFo71hSY4a3ywFqTGxp8WIzHNJSPHu7DE7MqqXO9IUEyJ2TTnCPYdLNs5mSnhepPee05LpQxFWmdumbw6unlTA2hxd67o=
+	t=1707980600; cv=none; b=kazT+qEQXyzI8piNAyShTHXYFtijqOkZeNfHQjMcxNzgxB5SduPE9Vn1WM6O95krLVyWQFGPHgx2GYLv2rHkYx48a0ICBTH1y9nk83uI7yFMvitmI10bIPyG/N6YSgNfDffJC6J/FgK1rR6HyScrgBhJs3nU4i489ymBMgLHRYE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707959401; c=relaxed/simple;
-	bh=2PVDH6jW0109s6p6kGyOYOQuv8W+sRln84nZu3PAMBo=;
-	h=From:To:Cc:In-Reply-To:Subject:Date:Message-ID:MIME-Version:
-	 Content-Type:References; b=p9AqWI5RNitqbKeoFhjbWcpLP7i8/TGB8XJVGxLrBRvEZIYxW1ozjsEtLsEMmG+Ai3gq1SUstOYq7887CUIEXUapcJc3h9YNfD209NlNlZtzV5QNSsr+2CcopvvTCz8bPrcvIllaHQRu0psXTOmBtSY0l9pOkyxkz1qZHKPCtDs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=rsfNA2qy; arc=none smtp.client-ip=203.254.224.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1707980600; c=relaxed/simple;
+	bh=U4yOpDeN09NExZEPN46FgqX+fcF5jxPj58pyagQwFFE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=RdJIgxSwdPWt619RUuf5XASsbK+A3+JenO3pYDlE9sKFAXil3LVa3d2okXkPSp6IaQx/xSHyymduQjwnDkjUCSFc2oLC4nyyQDyXux+Y+drjUFWKKENhXgp7lg3uoMNwjYrUIOf3rn4WUruEup8esxARWYqXJbaWfG64RezmjDQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=XY72oYnL; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="rsfNA2qy"
-Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
-	by mailout3.samsung.com (KnoxPortal) with ESMTP id 20240215010347epoutp03a18b75274db53a665f2e83364104493d~z46_bWHLy2146621466epoutp03K
-	for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 01:03:47 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20240215010347epoutp03a18b75274db53a665f2e83364104493d~z46_bWHLy2146621466epoutp03K
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1707959027;
-	bh=SEaTKZVMNZqX4WbPCSUwFOp2DSCqBOpjBL0zAanhWyc=;
-	h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
-	b=rsfNA2qynn8zy7yk7YHdIS3bHkaAydzkTvXmCSj6RPqXyEbTeNGhDvenFEgo74A3i
-	 df1iPvmn27hkHBFmrKAyP3wpwiJDyneVCvI9mThmCRkE8lVSJ9iDrLU7eORtkyw6on
-	 EdgHtlW+mUEnWJBqRSjLvdimHgSJJrko4dn9uelo=
-Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
-	epcas1p2.samsung.com (KnoxPortal) with ESMTP id
-	20240215010346epcas1p2d2d249043eff7da2ecdc06ef53b3f7bb~z4699Wg281073610736epcas1p2L;
-	Thu, 15 Feb 2024 01:03:46 +0000 (GMT)
-Received: from epsmgec1p1-new.samsung.com (unknown [182.195.36.227]) by
-	epsnrtp3.localdomain (Postfix) with ESMTP id 4TZxdt1KSnz4x9Pp; Thu, 15 Feb
-	2024 01:03:46 +0000 (GMT)
-Received: from epcas1p4.samsung.com ( [182.195.41.48]) by
-	epsmgec1p1-new.samsung.com (Symantec Messaging Gateway) with SMTP id
-	F9.F0.19104.2F26DC56; Thu, 15 Feb 2024 10:03:46 +0900 (KST)
-Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
-	epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
-	20240215010345epcas1p2948d76b10a1f990b50f14aed7a9322f0~z469Knguh1073610736epcas1p2H;
-	Thu, 15 Feb 2024 01:03:45 +0000 (GMT)
-Received: from epsmgmc1p1new.samsung.com (unknown [182.195.42.40]) by
-	epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
-	20240215010345epsmtrp26032de40800c2a6180a3c7a8f1efdf9f~z469J0Kd-3119431194epsmtrp2z;
-	Thu, 15 Feb 2024 01:03:45 +0000 (GMT)
-X-AuditID: b6c32a4c-e146fa8000004aa0-2e-65cd62f28616
-Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
-	epsmgmc1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-	03.C7.07368.1F26DC56; Thu, 15 Feb 2024 10:03:45 +0900 (KST)
-Received: from sh043lee04 (unknown [10.253.101.72]) by epsmtip2.samsung.com
-	(KnoxPortal) with ESMTPA id
-	20240215010345epsmtip25e225f6a45a8c1ce77db93f481f97359~z4686cTEH2952629526epsmtip2k;
-	Thu, 15 Feb 2024 01:03:45 +0000 (GMT)
-From: =?utf-8?B?7J207Iq57Z2s?= <sh043.lee@samsung.com>
-To: "'Ulf Hansson'" <ulf.hansson@linaro.org>
-Cc: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<gregkh@linuxfoundation.org>, <avri.altman@wdc.com>,
-	<grant.jung@samsung.com>, <jt77.jang@samsung.com>,
-	<dh0421.hwang@samsung.com>, <junwoo80.lee@samsung.com>,
-	<jangsub.yi@samsung.com>, <cw9316.lee@samsung.com>,
-	<sh8267.baek@samsung.com>, <wkon.kim@samsung.com>, <sh043.lee@samsung.com>
-In-Reply-To: <CAPDyKFrjZ4jRHAfXsvrEvezuHTxbA3SAniF8CuObyLuW=AUoeA@mail.gmail.com>
-Subject: RE: [PATCH] mmc: sd: Add a variable to check a faulty device
-Date: Thu, 15 Feb 2024 10:03:45 +0900
-Message-ID: <000001da5faa$d34e1600$79ea4200$@samsung.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="XY72oYnL"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=K2FgxI/Q5z39NeiH1eGPpjIbdu8553gMMeg+3F7f/g0=; b=XY72oYnL7yvCvK8xeQhtM8J9nH
+	GQ115g5bBxrJPMyB0kUAzpWVesmy/dAZHeFVEqkkVzviYdmEXVdln4vL7iZAyXAnMNSBAG2Ona+nB
+	ST3R9rDYwtkhlC/pNHvAyoa005k0tzhnlyb8v0ct42hSvgJ8PJyUJBa86eQ/vP3ipmXU8k60ydOor
+	FwM+vuChUf0fPpJ6dD1uhGK2VxiPc/U+IE7HiNpxbyWQKJavy2q2EoOo89EySCCYHotcNESZMslD4
+	PXcLVqhsnGgsShRW9HD4JMmDgWbJ0wlRD6egcjphmvGFg8Le812rGfhT345Z22C+NXJCjoj3pACXc
+	5h7l5ICg==;
+Received: from 2a02-8389-2341-5b80-39d3-4735-9a3c-88d8.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:39d3:4735:9a3c:88d8] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1raVlz-0000000FANl-1akg;
+	Thu, 15 Feb 2024 07:03:07 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Richard Weinberger <richard@nod.at>,
+	Anton Ivanov <anton.ivanov@cambridgegreys.com>,
+	Johannes Berg <johannes@sipsolutions.net>,
+	Justin Sanders <justin@coraid.com>,
+	Denis Efremov <efremov@linux.com>,
+	Josef Bacik <josef@toxicpanda.com>,
+	Geoff Levand <geoff@infradead.org>,
+	Ilya Dryomov <idryomov@gmail.com>,
+	"Md. Haris Iqbal" <haris.iqbal@ionos.com>,
+	Jack Wang <jinpu.wang@ionos.com>,
+	Ming Lei <ming.lei@redhat.com>,
+	Maxim Levitsky <maximlevitsky@gmail.com>,
+	Alex Dubov <oakad@yahoo.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Vineeth Vijayan <vneethv@linux.ibm.com>,
+	linux-block@vger.kernel.org,
+	nbd@other.debian.org,
+	ceph-devel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-mtd@lists.infradead.org,
+	linux-s390@vger.kernel.org
+Subject: pass queue_limits to blk_mq_alloc_disk for simple drivers
+Date: Thu, 15 Feb 2024 08:02:43 +0100
+Message-Id: <20240215070300.2200308-1-hch@lst.de>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-Mailer: Microsoft Outlook 16.0
-Thread-Index: AQI2QrZr/hQwBfLmGOt++EZEApv72gJjevE2AeL7/EiwMJcOEA==
-Content-Language: ko
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrPJsWRmVeSWpSXmKPExsWy7bCmge6npLOpBvd2sVu8/HmVzWLGqTZW
-	i33XTrJb/Pq7nt2iefF6NouOrZOZLHY8P8NusetvM5PF5V1z2CyO/O9ntGj6s4/F4tqZE6wW
-	x9eGW2y+9I3Fgc/jzrU9bB77565h9+jbsorR4/MmOY/2A91MAaxR2TYZqYkpqUUKqXnJ+SmZ
-	eem2St7B8c7xpmYGhrqGlhbmSgp5ibmptkouPgG6bpk5QIcqKZQl5pQChQISi4uV9O1sivJL
-	S1IVMvKLS2yVUgtScgrMCvSKE3OLS/PS9fJSS6wMDQyMTIEKE7IzTr5TKziqUfH67HaWBsYW
-	+S5GTg4JAROJ9yeus3UxcnEICexhlJjx8SAzhPOJUaLj5jsmCOcbo8TCL4dYYVrmz58FldjL
-	KLG8aT4LhPOCUeJYw2Wgfg4ONgEzied3gkAaRAR0JGa8aWYFqWEWeMkk8efDOxaQBKdAoMSb
-	3weYQWxhAVeJ02fWg9ksAqoSF9Y8YgSxeQUsJfp729khbEGJkzOfgPUyC2hLLFv4mhniIgWJ
-	n0+XsUIsc5LoebyZFaJGRGJ2ZxvYPxICJzgkDt46B9XgIrH/31UmCFtY4tXxLewQtpTE53d7
-	2SAamhkl2hq+skA4ExglXix4BdVhL9Hc2swG8iazgKbE+l36ENv4JN597WEFCUsI8Ep0tAlB
-	VCtLvHy0DKpTUmJJ+y2oGzwkLq/vZZvAqDgLyW+zkPw2C8kPsxCWLWBkWcUolVpQnJuemmxY
-	YKibl1oOj/Lk/NxNjOCUrOWzg/H7+r96hxiZOBgPMUpwMCuJ8E7qPZMqxJuSWFmVWpQfX1Sa
-	k1p8iNEUGOITmaVEk/OBWSGvJN7QxNLAxMzIxMLY0thMSZz3zJWyVCGB9MSS1OzU1ILUIpg+
-	Jg5OqQamknOObkL1YYrHRea9Xu0pPzvP9Pcv6ySb5UsqWhM8A5aYn0iXEzu1UDX2ytu0z0e6
-	VecnRTZXpc3trjj9+lwu2+VL2kU9LEYNzVcY3ij8q6nPap4Rel3Y03lh3DGbsOnNGWn2vVlR
-	B6/a9a+68eBrMvcF0aanxfvF9VyZUh55zA67I5Tkll8/7S7Xno6Smfopxt5fxI/VXp/QFv3c
-	u6hA4ueDT2oXlQ/uOqS/++V/24vfPu7fXXFkRbtWWODui69qS7mjq44ct/hx6PIy2ybxp2XP
-	Fky8yM/hfzXq8cs+tcRTTe8WMKWv2fp9M1dQjd+zyb3lPVczEq2SCxX15jQ3SuUKzEz4Y70h
-	au3hg4lKLMUZiYZazEXFiQDDMXrXUgQAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrKIsWRmVeSWpSXmKPExsWy7bCSvO7HpLOpBp9mq1i8/HmVzWLGqTZW
-	i33XTrJb/Pq7nt2iefF6NouOrZOZLHY8P8NusetvM5PF5V1z2CyO/O9ntGj6s4/F4tqZE6wW
-	x9eGW2y+9I3Fgc/jzrU9bB77565h9+jbsorR4/MmOY/2A91MAaxRXDYpqTmZZalF+nYJXBl3
-	/y5lLHikXrHlVjtLA+NsuS5GTg4JAROJ+fNnMXUxcnEICexmlLjZe5ARIiEpsfjRQ7YuRg4g
-	W1ji8OFiiJpnjBLHZ01gBYmzCZhJPL8TBFIuIqAjMeNNMytIDbPAdyaJnhV3oIZeYJSYf+MK
-	O0gVp0CgxJvfB5hBbGEBV4nTZ9aD2SwCqhIX1jwCW8wrYCnR39vODmELSpyc+YQFxGYW0JZ4
-	evMpnL1s4WtmiEMVJH4+XcYKcYWTRM/jzawQNSISszvbmCcwCs9CMmoWklGzkIyahaRlASPL
-	KkbJ1ILi3PTcZMMCw7zUcr3ixNzi0rx0veT83E2M4JjU0tjBeG/+P71DjEwcjIcYJTiYlUR4
-	J/WeSRXiTUmsrEotyo8vKs1JLT7EKM3BoiTOazhjdoqQQHpiSWp2ampBahFMlomDU6qBaaXa
-	Kq/vjVb+P86fyV3WnHhxXoxDxppJuXVVCxv/ViftWKph4pXFUDjDXCto5sbvm0wlPrK/P7dn
-	R4y8B/8L7/Ld7icO3HE9muqVKCeeLtOulvfwwdadrDsWt5w6I99u56vKLX3hyvW/bcoGjh3S
-	u55q9NZ3nwi6cfH4u4sCO4/On9Vf4/Ul7UEXw6k1S4+ntdt5qH7cyrPzru706i/aPb+nJv57
-	fksrNuzUsZxU9kU3rm+KPdw7x3LhrK7ynNkTxPgybO+L+sduLQoz4LLa/VWDZ5fj4+1Mh+UT
-	p5SonvU/fbUoY3G2jOSVFZ3MPsyibNPDwn9c3cGmXH9yjd5F4ZBD8StuqxZ0bOlz1/p1Uoml
-	OCPRUIu5qDgRALv5SLY4AwAA
-X-CMS-MailID: 20240215010345epcas1p2948d76b10a1f990b50f14aed7a9322f0
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20240213051332epcas1p1f45d02dc34d1b95ea5608ab779d6b6cc
-References: <CGME20240213051332epcas1p1f45d02dc34d1b95ea5608ab779d6b6cc@epcas1p1.samsung.com>
-	<20240213051716.6596-1-sh043.lee@samsung.com>
-	<CAPDyKFrjZ4jRHAfXsvrEvezuHTxbA3SAniF8CuObyLuW=AUoeA@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-> -----Original Message-----
-> From: Ulf Hansson <ulf.hansson=40linaro.org>
-> Sent: Wednesday, February 14, 2024 8:27 PM
-> To: Seunghui Lee <sh043.lee=40samsung.com>
-> Cc: linux-mmc=40vger.kernel.org; linux-kernel=40vger.kernel.org;
-> gregkh=40linuxfoundation.org; avri.altman=40wdc.com; grant.jung=40samsung=
-.com;
-> jt77.jang=40samsung.com; dh0421.hwang=40samsung.com; junwoo80.lee=40samsu=
-ng.com;
-> jangsub.yi=40samsung.com; cw9316.lee=40samsung.com; sh8267.baek=40samsung=
-.com;
-> wkon.kim=40samsung.com
-> Subject: Re: =5BPATCH=5D mmc: sd: Add a variable to check a faulty device
->=20
-> On Tue, 13 Feb 2024 at 06:13, Seunghui Lee <sh043.lee=40samsung.com> wrot=
-e:
-> >
-> > In mobile devices, suspend/resume situations are frequent.
-> > In the case of a defective SD card in which initialization fails,
-> > unnecessary initialization time is consumed for each resume.
-> > A field is needed to check that SD card initialization has failed on
-> > the host. It could be used to remove unnecessary initialization.
->=20
-> It's not clear to me, under what circumstance you want to optimize for.
->=20
-> Is the SD card ever getting properly initialized during boot?
->=20
-> Kind regards
-> Uffe
->=20
-We receive a lot of reports about SD card issues in the market.
-There was no problem with the first time at the time of use, and there are =
-many cases where people recognize that it is not recognized later on. In mo=
-st cases, this is a problem with the SD card itself.
+Hi Jens,
 
-SD card users cannot determine whether or not an SD card is a problem, so t=
-hey should be guided in this regard.
-It is necessary to distinguish whether the SD card is inserted but unrecogn=
-ized or the SD card itself is not inserted, and if there is a field that ca=
-n check for initialization failure, it will facilitate guidance, so we cons=
-idered the patch.
+this series converts all "simple" blk-mq drivers that don't have complex
+internal layering or other oddities to pass the queue_limits to
+blk_mq_alloc_disk.  None of these drivers updates the limits at runtime.
 
-The variable's usage is expected to be used through the sysfs node in the v=
-endor module.
-> >
-> > Signed-off-by: Seunghui Lee <sh043.lee=40samsung.com>
-> > ---
-> >  drivers/mmc/core/sd.c        =7C 12 +++++++++++-
-> >  drivers/mmc/core/slot-gpio.c =7C  1 +
-> >  include/linux/mmc/host.h     =7C  1 +
-> >  3 files changed, 13 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
-> > c3e554344c99..f0eb3864dc24 100644
-> > --- a/drivers/mmc/core/sd.c
-> > +++ b/drivers/mmc/core/sd.c
-> > =40=40 -1410,6 +1410,7 =40=40 static int mmc_sd_init_card(struct mmc_ho=
-st *host,
-> u32 ocr,
-> >         bool v18_fixup_failed =3D false;
-> >
-> >         WARN_ON(=21host->claimed);
-> > +       host->init_failed =3D false;
-> >  retry:
-> >         err =3D mmc_sd_get_cid(host, ocr, cid, &rocr);
-> >         if (err)
-> > =40=40 -1752,6 +1753,8 =40=40 static int _mmc_sd_resume(struct mmc_host=
- *host)
-> >
-> >         mmc_power_up(host, host->card->ocr);
-> >         err =3D mmc_sd_init_card(host, host->card->ocr, host->card);
-> > +       if (err)
-> > +               host->init_failed =3D true;
-> >         mmc_card_clr_suspended(host->card);
-> >
-> >  out:
-> > =40=40 -1803,8 +1806,12 =40=40 static int mmc_sd_runtime_resume(struct
-> > mmc_host *host)
-> >
-> >  static int mmc_sd_hw_reset(struct mmc_host *host)  =7B
-> > +       int err;
-> >         mmc_power_cycle(host, host->card->ocr);
-> > -       return mmc_sd_init_card(host, host->card->ocr, host->card);
-> > +       err =3D mmc_sd_init_card(host, host->card->ocr, host->card);
-> > +       if (err)
-> > +               host->init_failed =3D true;
-> > +       return err;
-> >  =7D
-> >
-> >  static const struct mmc_bus_ops mmc_sd_ops =3D =7B =40=40 -1891,5 +189=
-8,8 =40=40
-> > int mmc_attach_sd(struct mmc_host *host)
-> >         pr_err(=22%s: error %d whilst initialising SD card=5Cn=22,
-> >                 mmc_hostname(host), err);
-> >
-> > +       if (err)
-> > +               host->init_failed =3D true;
-> > +
-> >         return err;
-> >  =7D
-> > diff --git a/drivers/mmc/core/slot-gpio.c
-> > b/drivers/mmc/core/slot-gpio.c index 2a2d949a9344..93d081c7dd53 100644
-> > --- a/drivers/mmc/core/slot-gpio.c
-> > +++ b/drivers/mmc/core/slot-gpio.c
-> > =40=40 -33,6 +33,7 =40=40 static irqreturn_t mmc_gpio_cd_irqt(int irq, =
-void
-> *dev_id)
-> >         struct mmc_gpio *ctx =3D host->slot.handler_priv;
-> >
-> >         host->trigger_card_event =3D true;
-> > +       host->init_failed =3D false;
-> >         mmc_detect_change(host,
-> > msecs_to_jiffies(ctx->cd_debounce_delay_ms));
-> >
-> >         return IRQ_HANDLED;
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h index
-> > 2f445c651742..1d75cfdbf981 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > =40=40 -467,6 +467,7 =40=40 struct mmc_host =7B
-> >         struct timer_list       retune_timer;   /* for periodic re-tuni=
-ng */
-> >
-> >         bool                    trigger_card_event; /* card_event neces=
-sary */
-> > +       bool                    init_failed;    /* check if failed to
-> initialize */
-> >
-> >         struct mmc_card         *card;          /* device attached to t=
-his host
-> */
-> >
-> > --
-> > 2.29.0
-> >
 
+Diffstat:
+ arch/um/drivers/ubd_kern.c          |    8 +-
+ drivers/block/aoe/aoeblk.c          |   15 ++---
+ drivers/block/floppy.c              |    6 +-
+ drivers/block/mtip32xx/mtip32xx.c   |   13 ++--
+ drivers/block/nbd.c                 |   13 ++--
+ drivers/block/ps3disk.c             |   17 +++---
+ drivers/block/rbd.c                 |   29 +++++-----
+ drivers/block/rnbd/rnbd-clt.c       |   64 +++++++++--------------
+ drivers/block/sunvdc.c              |   18 +++---
+ drivers/block/ublk_drv.c            |   90 +++++++++++++++------------------
+ drivers/cdrom/gdrom.c               |   14 ++---
+ drivers/memstick/core/ms_block.c    |   14 ++---
+ drivers/memstick/core/mspro_block.c |   15 ++---
+ drivers/mmc/core/queue.c            |   97 +++++++++++++++++++-----------------
+ drivers/mtd/mtd_blkdevs.c           |   12 ++--
+ drivers/mtd/ubi/block.c             |    6 +-
+ drivers/s390/block/scm_blk.c        |   17 +++---
+ 17 files changed, 222 insertions(+), 226 deletions(-)
