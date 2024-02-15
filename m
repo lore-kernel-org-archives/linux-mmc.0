@@ -1,112 +1,114 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6024B12FF88
-	for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 13:28:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EA9112D74D
+	for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 14:06:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708003704; cv=none; b=H7XFayKdQRILVVKS5LoCzUTM8ZgJti5gUWgW0rNv3maw6cEHHFrXBjUqA0Q1Zs3YEcVKoawVUdJkk5HSQkUK9OpLOYZwbLpLqpAQfmcoC0MxmIji95lPtCWsJfTm4b3girBdQuIZ3e83tIGXYMQkW4cVIUdO98EyyU2/5Kty6gQ=
+	t=1708006020; cv=none; b=fWKJrw3OQWESb1RwIScfPsePrRdI57XMvOYVPpKM7JmpNAWekEbVzopqd1qJuTpY7aB/8V7Iq4t6WNWqh9iCLn39hZVZfgqQAaOCBBoeleAV9UcLczby5YcrM2wKsjx2XEfnWgRroo1B8KhfCrGU0YpXE5HLcFL855U4CAQlMG4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708003704; c=relaxed/simple;
-	bh=NDRU3SvsOKVtvQqpAlVw8yPhgNVYLrkJEzuQZxhYqkw=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=uWC/23FKyHoaR2vO5BtuFbRpw2KC8PWMMqHX0U8kCXg+NRy7doCsLX2jMMzsWPYkpt0zWazqNBTsPny1qEQG+Iwam1wkGY3LKjX4G/wPoSkriMHjJEizOSVLDDELINmuG45vMip1cT5PQOV3xVx9GtouQW1RsF57V2tvz3uEepE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=MtkpY+IA; arc=none smtp.client-ip=209.85.167.53
+	s=arc-20240116; t=1708006020; c=relaxed/simple;
+	bh=O49GmFBEFJw1evYJI71geRk1H8X54jjO+we1/8XpdBk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=LoKBhQgBb60fceYOXUkk+jckBl7jDkYw5YQe18Bv03dCj6MqybvzBym0kkjHSt/KRnoIzYWrj80Q+BaVOO7a65v/v5Hu02AC+n0IZGwVE6guSLv2M5vJeqgItjwZzjfqkkUJX17ko2GH9JSHNPzLhk0zyCGa1U0+BMOjin4lFZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=d071UX7X; arc=none smtp.client-ip=209.85.128.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MtkpY+IA"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5128881b155so543980e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 05:28:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="d071UX7X"
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-6078c4cadd7so9585857b3.2
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Feb 2024 06:06:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1708003700; x=1708608500; darn=vger.kernel.org;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=7RUHNxptrkwdfRQ2tUig0h21GrxlTsZC6Hmm6HrBNjY=;
-        b=MtkpY+IAUlgwYTCkblG7qJcJh8Frcji7zB/8uyTA9Bagrm8fN067jpMRaVWyh5V1MP
-         2OZdVOyrHkLZrP+M7STcIidQSAe/fFW2uma9eGWBngToui3ZcJQTzfzvm6nuuTrNbkGH
-         h2p01lJloUANQ6aXXlv+9CtUs6LkM2s09LtnL+VFaCn1QOtic8iMD3Z4B1A9QyDkR6+I
-         hExo4Qp5jY5xLbBHeci4M4eaAl5gM+Q09MRj4tqFx/jGDyVAmt73rdevsDC5P6/rdgvY
-         pf5u5NRibgjGnDm+9qLJVc2P/sDZxuy2LVrr2yJ+vDuNuZ26Sk53i4s8Lx0cc2IU3A52
-         yXHg==
+        d=linaro.org; s=google; t=1708006017; x=1708610817; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=wTyKyvN/7Akhe2ktPgbpToPejagjmVZVc+5gYu9vRkA=;
+        b=d071UX7Xg0ToRIkXmdEfvMWlLFMfqAtuegKd4cAB2DIm7E5UpIbvtIa1HwcObDfY8W
+         vNq7WO7uK1ALcZ4zncRd/n3WjG4xl8BAy+XJe7MOzoDdemlF24NEF9Wrnc6fAAYQtNYW
+         bghu4/aXZBr0pKh1MvJBFNGyH1VCGqdvIQMDh+o69MAmtB9S+eyQScjl1jAc2xcQDe7F
+         fnWqibBCMjtASRTh4V7QzD/rAmVr7CsqKK68tk1HejgOnDkbCkSwmnWrNTWdQrZfEpHd
+         KPRacKfI+OfpAjIIidGAETYc3tE6rcYGkahLFSvJEB7x37y9985IrDWHBvkfE1/xgohK
+         qW8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708003700; x=1708608500;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1708006017; x=1708610817;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=7RUHNxptrkwdfRQ2tUig0h21GrxlTsZC6Hmm6HrBNjY=;
-        b=gPsHwaZCFvkIIQ6VT1nCgWvR24T+iqXO5N+OTCFs+HdIhJ5dVp5I99+A3Yp/Ze+M0f
-         IemjRDfg43xzKIleW0gdjWkEw+VYMME2cWcXId+bNJpu/d5e8GywOjs6aMPbblnnqK4Y
-         a6ui1VQ8vUQmeuYMfKs7DuV5glcOLUKu2KoTr5YL82ae2BSAFMjI+u98s19qE1wqCHmb
-         u2qFz75NzS0vSOwMeHFYpzoVS9U4NY5VjbHQWSE3wwfpYYMsUe0Hx+qNK6+r4rYa5ri9
-         yJZeNy1KnyIi4pi20JhWFtRcMqks/RzZjtnsgu+asyT0wZeVrbWVCDJn+ujPJiQFMZhi
-         DxrA==
-X-Gm-Message-State: AOJu0YxvgarUdhiwuHWU2+unxAky23XD7YMir77f9lzf1enMg+Xk61wD
-	qdtm2zUyRVt4JrzgJjkaO7aRKTnXDiWmIhUolpJMVFx4rEi8DQatnaBGkwyBFOE=
-X-Google-Smtp-Source: AGHT+IEd60AisevbOE5eZnC0HOXGkWUZE9qbvQCw0nnb1bbK/p/0LPvkDdq3Ih6/6myP/SovA233kg==
-X-Received: by 2002:a19:7710:0:b0:511:ad09:288f with SMTP id s16-20020a197710000000b00511ad09288fmr501272lfc.10.1708003700374;
-        Thu, 15 Feb 2024 05:28:20 -0800 (PST)
-Received: from [127.0.1.1] ([85.235.12.238])
-        by smtp.gmail.com with ESMTPSA id j21-20020a19f515000000b005128a8f4bf3sm179333lfb.217.2024.02.15.05.28.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 Feb 2024 05:28:19 -0800 (PST)
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Thu, 15 Feb 2024 14:28:18 +0100
-Subject: [PATCH] mmc: davinci_mmc: Drop dangling variable
+        bh=wTyKyvN/7Akhe2ktPgbpToPejagjmVZVc+5gYu9vRkA=;
+        b=DPONYgCukz5Ie3O6hBSycQkxG6vv/LR/rqgBQ5IgWfAjOPriHVeGdxhOAGcfN05Bxo
+         PcazFZLoA52zfPd0r7hweUWNjXNvfDmoCbUbbcmQM4wjwOoeQxWW9AuofY4jvM2LNkED
+         riVhCm8HJRgXXNeoBGcuG94eoobSNRhoOXjehWnlZx89ilxRIhARYBuolwLxQhH1zJCS
+         aG2AJrT/0dVaNpGBbv9fK6b+jXYBUF0ahTruQWJt6CNb2BFXU/V9mN+0NT0nO8CjHu5g
+         +M8UyNKv5s0VB2PhmbBj5yK2y3X/rUQV/zqngFrurQnb4f64q8piB4qDC5HpJs6YmkKn
+         qSUQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVOkVpZY8lXFb51obOWT2DHrmhU7k7cOgwSRXOJ6yq/zAIciG2RVKEedLtdaMY4nSpiAgcSqu772refuEdGsnNog34F1e64EIHQ
+X-Gm-Message-State: AOJu0YyLaZvfLJSFNxkno0dLpoZvaWapjtE7KqEAA0Og1S3e3r91S5jH
+	TjiX5SFgKHJ+JZvxMHMWCInMQROQNpTpsxN4n7NTJ82lznpbyb3YPCn4PeAaoTBjeUAgDgm9b+/
+	esxBECVFLGKIKdMVJ+fUTFQ5N9TW7qer6yZ9dxQ==
+X-Google-Smtp-Source: AGHT+IEiCyF+JHk89EqcWCFh5S3vbjma3++fudpcHT+C0/fUt25LrhjmSlnQIO9axgVL4SJNSoiB2WRkw8PviOUyl5A=
+X-Received: by 2002:a0d:dd94:0:b0:603:c656:5e31 with SMTP id
+ g142-20020a0ddd94000000b00603c6565e31mr1893830ywe.28.1708006017260; Thu, 15
+ Feb 2024 06:06:57 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20240215-mmc-fix-davinci-v1-1-a593678ca7bf@linaro.org>
-X-B4-Tracking: v=1; b=H4sIAHIRzmUC/x2MywqAIBAAf0X23EJKD+tXooPpVnvIQiGC8N9bO
- g7DzAuZElOGUb2Q6ObMZxTQlQK/u7gRchAGU5umNrrF4/C48oPB3Rw94xJcby1Zom4Aqa5Eov/
- jNJfyAaWXSvphAAAA
-To: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>, 
- Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, kernel test robot <lkp@intel.com>, 
- Linus Walleij <linus.walleij@linaro.org>
-X-Mailer: b4 0.12.4
+References: <20240215-mmc-fix-davinci-v1-1-a593678ca7bf@linaro.org>
+In-Reply-To: <20240215-mmc-fix-davinci-v1-1-a593678ca7bf@linaro.org>
+From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Date: Thu, 15 Feb 2024 15:06:46 +0100
+Message-ID: <CACMJSevp-xG74Z2sfzmyXibHfh1zZa3AHuL14OKKO8HANrwHiw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: davinci_mmc: Drop dangling variable
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
+	kernel test robot <lkp@intel.com>
+Content-Type: text/plain; charset="UTF-8"
 
-The sg_miter conversion left a dangling unused variable.
-Drop it.
+On Thu, 15 Feb 2024 at 14:28, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> The sg_miter conversion left a dangling unused variable.
+> Drop it.
+>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Closes: https://lore.kernel.org/oe-kbuild-all/202402142042.vg0lnLdb-lkp@intel.com/
+> Fixes: ed01d210fd91 ("mmc: davinci_mmc: Use sg_miter for PIO")
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/host/davinci_mmc.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index c46577305138..8bd938919687 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -211,7 +211,6 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
+>                                         unsigned int n)
+>  {
+>         struct sg_mapping_iter *sgm = &host->sg_miter;
+> -       size_t sglen;
+>         u8 *p;
+>         unsigned int i;
+>
+> @@ -224,7 +223,6 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
+>                 return;
+>         }
+>         p = sgm->addr;
+> -       sglen = sgm->length;
+>
+>         /* NOTE:  we never transfer more than rw_threshold bytes
+>          * to/from the fifo here; there's no I/O overlap.
+>
+> ---
+> base-commit: 26d7d52b6253574d5b6fec16a93e1110d1489cef
+> change-id: 20240215-mmc-fix-davinci-bda788e8ee69
+>
+> Best regards,
+> --
+> Linus Walleij <linus.walleij@linaro.org>
+>
 
-Reported-by: kernel test robot <lkp@intel.com>
-Closes: https://lore.kernel.org/oe-kbuild-all/202402142042.vg0lnLdb-lkp@intel.com/
-Fixes: ed01d210fd91 ("mmc: davinci_mmc: Use sg_miter for PIO")
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/davinci_mmc.c | 2 --
- 1 file changed, 2 deletions(-)
+Good catch
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index c46577305138..8bd938919687 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -211,7 +211,6 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
- 					unsigned int n)
- {
- 	struct sg_mapping_iter *sgm = &host->sg_miter;
--	size_t sglen;
- 	u8 *p;
- 	unsigned int i;
- 
-@@ -224,7 +223,6 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
- 		return;
- 	}
- 	p = sgm->addr;
--	sglen = sgm->length;
- 
- 	/* NOTE:  we never transfer more than rw_threshold bytes
- 	 * to/from the fifo here; there's no I/O overlap.
-
----
-base-commit: 26d7d52b6253574d5b6fec16a93e1110d1489cef
-change-id: 20240215-mmc-fix-davinci-bda788e8ee69
-
-Best regards,
--- 
-Linus Walleij <linus.walleij@linaro.org>
-
+Acked-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
