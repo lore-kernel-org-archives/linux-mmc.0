@@ -1,37 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16C7B28E2B;
-	Fri, 16 Feb 2024 21:02:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D119139595;
+	Fri, 16 Feb 2024 21:02:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708117351; cv=none; b=f0X90drFMuAgfIOkEk4lFIJzMYnwBhJ6/TVCljKAXmcxQqXGQ1HwTX4GPe9k6yePry4wlf5D2AbieBCU8XVzHf7Dg82AsBofqopawZh2KRlW7iscQECORShllfj6bPrGUgt6F67PJP/LQ490CDJMKOcSY7xUINeiVTEVbAGu6iY=
+	t=1708117351; cv=none; b=HM7a0WogB+4q0sqeLwEhiOdSKqcNdbNa5JGlcHL0pG7SRpvxFCJI38dMYaxN5ZIx12M35xT4pa+iVJN18oXDSGHQH1p0TTTsZUAsNpU91AI+YfprT+X0QKKtTpNWdzhwarD5YhIVPeONXe3b9Dus/AxHLqkBb3WoG6E73mjJ8YY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1708117351; c=relaxed/simple;
-	bh=251ik0E4UMYsyQZjqLcLSBwBl/7/YEYssrk8/HM+5OQ=;
+	bh=7wSPhtESvVsFi3grbeSFiB3p/8T4CFcFBTX2JailsS8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=fi75Y3ZpIJh79m35PlJd+C/YmdOnuDkZX1Rsc0CK5pZ0d08fJTTIP1YDyrY41z1x1imeVjsCZeT0NVRQ4OND/NbBae9FZpDFu3wswdCjTlA0KVP8m7OFq066RLytW4qwe//TAnhSqgDoZAAxoem6sTeLMOm813mETauko4VsyeM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C7wSmqHn; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=Rp+DglkIwJQ+o+qMaGbLRvgY/jEF4+B8TvzA2EU2hDBktCeNj6giNuKHihAzW1c0PLCe9xtOeVGMX0zyDIzISokeq/FfsqiIHGCw3UrXQDJRiKj8Gkfrf5KhIN+aH3BMGs8NDrjZ6F8IPyJcP0yPVDihkRFGcTVgu81s5ew4XA4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HWGva+Ah; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C7wSmqHn"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 9D439C433F1;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HWGva+Ah"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id BD7C8C43330;
 	Fri, 16 Feb 2024 21:02:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1708117350;
-	bh=251ik0E4UMYsyQZjqLcLSBwBl/7/YEYssrk8/HM+5OQ=;
+	bh=7wSPhtESvVsFi3grbeSFiB3p/8T4CFcFBTX2JailsS8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=C7wSmqHnsv5IiDjdq+TE8zlsl0DMgdYVyhwAdVbzEiXEhm7E3Gbuo3OADK+dFsgW1
-	 hGCX5+ATbdiOggs6U3t42N8BhrfnoL4i9yfMnr1yjNlPdV0rHPY5vFA0etJu9SKzyo
-	 BOLQbNRDuARVJXwNXA2PBGL55wIUmK7VzRkx/4co6mR4cRD/L52FvN4K1xdbz41VEY
-	 IGzQtiJgBSrbfHmGMlO1sYdPlVIkawvWWON2HrE4wwKJVN7AdCgAF0ZspWgi0HQAWZ
-	 dvabrZFXuqPUaGkaq9H77aEQP6LilHG44M+UDrVHm3r23SDngS+h/JuUfDY7QISTr3
-	 D9ubQWOMHsZsA==
+	b=HWGva+AhgQgN3WM79d+JUUrTY0bdho4bZEb42ic2RFGDHqZmuLoDFn5ADWHyHSRPV
+	 hXyyRpq0Zc29v6A64/K+4xehE4mn31wqQbDxRQAPX9SAG7J+l/aBtxXQ/afhSPpaOS
+	 5Jp3TW9BkmMtJl7UyEYKC7V3hjGx4oRT6qhP3kGOeFvvYMJ/SERY/fblevvas6duBY
+	 LOaBuOwIsT9yXvwJkV6WnaU4KB9brhozNqxoBDakQ81BfVbTeRzECllnMA8aAznXxX
+	 7C0DfjQWph65+hRHIOLlyocC/D5Nrbr46ZoDAR1rCyRv4l9RWVrfYD/yqfulO8GDr5
+	 BmkTtD2vmE+og==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 817EDC48BF5;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E61FC48BF6;
 	Fri, 16 Feb 2024 21:02:30 +0000 (UTC)
 From: Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>
-Date: Sat, 17 Feb 2024 05:02:29 +0800
-Subject: [PATCH v3 1/4] mmc: dw_mmc-hi3798cv200: remove MODULE_ALIAS()
+Date: Sat, 17 Feb 2024 05:02:32 +0800
+Subject: [PATCH v3 4/4] dt-bindings: mmc: hisilicon,hi3798cv200-dw-mshc:
+ rename to hisilicon,hi3798-dw-mshc
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +41,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20240217-b4-mmc-hi3798mv200-v3-1-f15464176947@outlook.com>
+Message-Id: <20240217-b4-mmc-hi3798mv200-v3-4-f15464176947@outlook.com>
 References: <20240217-b4-mmc-hi3798mv200-v3-0-f15464176947@outlook.com>
 In-Reply-To: <20240217-b4-mmc-hi3798mv200-v3-0-f15464176947@outlook.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, 
@@ -52,11 +53,11 @@ Cc: Igor Opaniuk <igor.opaniuk@linaro.org>,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
  devicetree@vger.kernel.org, Yang Xiwen <forbidden405@outlook.com>
 X-Mailer: b4 0.12.4
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1708117349; l=655;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1708117349; l=2257;
  i=forbidden405@outlook.com; s=20230724; h=from:subject:message-id;
- bh=0u4f62e9siRMTmdM+MOND3wWH1hfTQP0NQvb4G8fUgo=;
- b=3xlUuW1Y11g1UK4Yaj2znDnXt85TDhRWfDC2//ie6OgQBYKxmsIOKHyffOlhpwNaX6L9k8ysz
- 8XNqrnxU/X0Ct8z0LvQOoKf3p5/uEj3DT7dR5ynMjrmxOhDqDtEmjYo
+ bh=4kflwEv+WJmP2PPOQXUMuL9kHf3tVBCROKzZLHhxoCg=;
+ b=De+GKfRljIWbAimat2RWpwDanhxiSTNmKJ/2FK/BfGDLvIyapvRs6Ka9et6HFD8QKfOqhoi1p
+ YEL4HsJRGaJDvGo93lsCAaT86slCgcRumVlLqwlyYeFC/5ZuUgMpLKI
 X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
  pk=qOD5jhp891/Xzc+H/PZ8LWVSWE3O/XCQnAg+5vdU2IU=
 X-Endpoint-Received:
@@ -66,22 +67,73 @@ Reply-To: <forbidden405@outlook.com>
 
 From: Yang Xiwen <forbidden405@outlook.com>
 
-The alias is not used and should be removed.
+Add binding and an extra property for Hi3798MV200 DWMMC specific extension.
 
 Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 ---
- drivers/mmc/host/dw_mmc-hi3798cv200.c | 1 -
- 1 file changed, 1 deletion(-)
+ ...-dw-mshc.yaml => hisilicon,hi3798-dw-mshc.yaml} | 23 ++++++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
-index e9470c50a348..61923a518369 100644
---- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
-+++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
-@@ -201,4 +201,3 @@ module_platform_driver(dw_mci_hi3798cv200_driver);
+diff --git a/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798-dw-mshc.yaml
+similarity index 73%
+rename from Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
+rename to Documentation/devicetree/bindings/mmc/hisilicon,hi3798-dw-mshc.yaml
+index f3dc973cb490..26d7f4be965b 100644
+--- a/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
++++ b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798-dw-mshc.yaml
+@@ -1,10 +1,10 @@
+ # SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+ %YAML 1.2
+ ---
+-$id: http://devicetree.org/schemas/mmc/hisilicon,hi3798cv200-dw-mshc.yaml#
++$id: http://devicetree.org/schemas/mmc/hisilicon,hi3798-dw-mshc.yaml#
+ $schema: http://devicetree.org/meta-schemas/core.yaml#
  
- MODULE_DESCRIPTION("HiSilicon Hi3798CV200 Specific DW-MSHC Driver Extension");
- MODULE_LICENSE("GPL v2");
--MODULE_ALIAS("platform:dwmmc_hi3798cv200");
+-title: Hisilicon Hi3798CV200 SoC specific extensions to the Synopsys DWMMC controller
++title: Hisilicon HiSTB SoCs specific extensions to the Synopsys DWMMC controller
+ 
+ maintainers:
+   - Yang Xiwen <forbidden405@outlook.com>
+@@ -13,6 +13,7 @@ properties:
+   compatible:
+     enum:
+       - hisilicon,hi3798cv200-dw-mshc
++      - hisilicon,hi3798mv200-dw-mshc
+ 
+   reg:
+     maxItems: 1
+@@ -34,6 +35,12 @@ properties:
+       - const: ciu-sample
+       - const: ciu-drive
+ 
++  hisilicon,sap-dll-reg:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description:
++      A phandle points to the sample delay-locked-loop(DLL)
++      syscon node, used for tuning.
++
+ required:
+   - compatible
+   - reg
+@@ -44,6 +51,18 @@ required:
+ allOf:
+   - $ref: synopsys-dw-mshc-common.yaml#
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: hisilicon,hi3798mv200-dw-mshc
++    then:
++      required:
++        - hisilicon,sap-dll-reg
++    else:
++      properties:
++        hisilicon,sap-dll-reg: false
++
+ unevaluatedProperties: false
+ 
+ examples:
 
 -- 
 2.43.0
