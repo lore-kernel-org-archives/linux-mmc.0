@@ -1,37 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 764595024B;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7649C50264;
 	Fri, 16 Feb 2024 10:38:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708079897; cv=none; b=Nay488cUUdlDALR9NVDSDwK4tWWihLPs2lcoWHS0OhuHU9vcj2+EXgUCFBqEAyTYvblCP6TFpI4W56ujR72my2/1vmLhVBQUzlhT6TCYP7HEoz1ZOPqSGWoG7SVMK2brJ8hl8GUSnOo9RmL7ybJJdG7G5SviaJufdx4vrCkG1Dg=
+	t=1708079897; cv=none; b=IXW5BzHF9Va3Rjd/T0PdfDpqXwWPX23ZxLwJu24zo1WcpoPzuvmlsqwNnc5Br3FeUfiBAy0l4wACh1oSLlIGM550EoqIIwbANnwaLiGLilYswU4SyOHLGGMizY0dBQOfwPyZy00MJ9mP6JtsEB0sFjB/0a2yK1DY1+GFSTzRNEs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1708079897; c=relaxed/simple;
-	bh=9w2bI+hdTEUkHwmJZgqnNrTm3dF8JO/74q7G3Kshnzg=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=ayuCIDlZO2jtlAQobO+xgV9c0C8GHmZh08WoeAsF0yDG/VStXm5LulLbpNDO59TketrHZoepdwhitoRzBhZDlOCaw7RL6Qg4kwVth1kb7jnRDiM2qYL5aZ1UFAMRPUPACIucBgYNZcj+CkGgV1W/LiBPZvUUx/NvnDIeboJHKfw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bPzBMoqw; arc=none smtp.client-ip=10.30.226.201
+	bh=i+Vuj43hsVEPzoGgz4a3Q8F7l2DMBvqiA2pf0UdwPck=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=IvRq7+duozHVo8MWimq7GnLE8LSx4cl1TrWNZ+kx6C2kUmH14QjolOxdTz2vlSa9Ke4UWiqFWc3YgfXM5MaAGbjd2kCEyQkfbQa+7rFay3/JlAVRtmkq51K53bkKc+eQ6hY9WIpNj/+/UyNlxmDXDWN8+Ky/wq05Fy7BPY+fEM4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sB7i8Ce5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bPzBMoqw"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id EB2EAC43390;
-	Fri, 16 Feb 2024 10:38:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sB7i8Ce5"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 1E323C433A6;
+	Fri, 16 Feb 2024 10:38:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1708079897;
-	bh=9w2bI+hdTEUkHwmJZgqnNrTm3dF8JO/74q7G3Kshnzg=;
-	h=From:Subject:Date:To:Cc:Reply-To:From;
-	b=bPzBMoqw+0+RGoWMMXGH+sZy9gF86vpad0FvBYFg40+uCw7fQZqLZxxigctYBc2MB
-	 kD5WGbnx4gXWsTdC72CYWhiPsmgD02mwxvwwh5K55VrTdVCDtMvAYaWW43KRC9grej
-	 KloAmA/tIWzQvGa3YXo+FKVXr9avBeYbOHQFc1/9Yv8ihUCiT3Xnk7KQ+1A+9Ec2gN
-	 sgxzFRY8GGBN+MVQbvqB2NCBh7+udQsEzudNYEMBH3EecPFlvdDKx+wHkIKvVZ5zRN
-	 HPU8FU0BSGTZv/s2I5eFMAqNtIGSMGP5r+A2hbR4Ekf5SUn3wsCcTXUg3RbuScEUxp
-	 rBj+26qoDAnsw==
+	bh=i+Vuj43hsVEPzoGgz4a3Q8F7l2DMBvqiA2pf0UdwPck=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=sB7i8Ce5UUgG9ucieupKaEFItFfnzHNTCPkTa2rGWHRGq7AmjN7yjDaFiJ3J6p7uw
+	 1ZMR1CXehjtluTmUymbqksOtTFIehqF+ASDec7gL1FE79Nf6e56vPM4SLUhDejw++1
+	 f+RJrYYAxfpm4E30yL08PpKbEoOd1UcV2BD8SjSQec1HctCNnCr88KJu7VbiVenWpZ
+	 T809n7gqrkNnnZDKKPMyfbRXvG+S3Vhtma0Wl624OhlzpCLQf/W0kL0B/mQKJoB+Do
+	 36liCZ1uW1EsQk6JlZ7cHEa1mXlLYX8bMZsLvbUrTXCixWhzZlfaMG64RqI7h1o13S
+	 a017nFdFnhQsw==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7984C48260;
-	Fri, 16 Feb 2024 10:38:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05343C48BF3;
+	Fri, 16 Feb 2024 10:38:17 +0000 (UTC)
 From: Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>
-Subject: [PATCH v2 0/4] mmc: add hi3798mv200 specific extensions of DWMMC
-Date: Fri, 16 Feb 2024 18:37:58 +0800
-Message-Id: <20240216-b4-mmc-hi3798mv200-v2-0-010d63e6a1d5@outlook.com>
+Date: Fri, 16 Feb 2024 18:38:01 +0800
+Subject: [PATCH v2 3/4] dt-bindings: mmc: dw-mshc-hi3798cv200: convert to
+ YAML
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,10 +41,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAAY7z2UC/22Nyw6CMBBFf8XM2jHtUB668j8MC2iLTLTUtNhoC
- P9uxa3Lc5J77gLRBrYRTrsFgk0c2U8ZaL8DPXbT1SKbzECClJAksVfonMaRi/rYuERCYFfWhbB
- mkEQa8vAR7MCvLXppM48cZx/e20eSX/vLkaz+5ZJEgbVRlekbVXa2OvvnfPf+dtDeQbuu6wel1
- ClqtgAAAA==
+Message-Id: <20240216-b4-mmc-hi3798mv200-v2-3-010d63e6a1d5@outlook.com>
+References: <20240216-b4-mmc-hi3798mv200-v2-0-010d63e6a1d5@outlook.com>
+In-Reply-To: <20240216-b4-mmc-hi3798mv200-v2-0-010d63e6a1d5@outlook.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, 
  Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, 
  Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
@@ -53,11 +53,11 @@ Cc: Igor Opaniuk <igor.opaniuk@linaro.org>,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
  devicetree@vger.kernel.org, Yang Xiwen <forbidden405@outlook.com>
 X-Mailer: b4 0.12.4
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1708079892; l=1790;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1708079892; l=4548;
  i=forbidden405@outlook.com; s=20230724; h=from:subject:message-id;
- bh=9w2bI+hdTEUkHwmJZgqnNrTm3dF8JO/74q7G3Kshnzg=;
- b=GVrFnTkcI2ByMKXvsctj030QF9pOAZcH1VUk/BLXeBrS/jKXbM2IJzv8YHTt6Q+PNh5oH4MYT
- zh4EJIa0HHBCk5BmMP1L1yDacgy6TQK6dnyRUkiswHr5UAdADAao5i5
+ bh=MhYnP89qf0tfDgyE6N4KsU2Wv7bDRFW26kU5gL/YxOg=;
+ b=WE4X6hv6ceAvBU3ol3qST43ErtQX4Hb5LOCHmHe0PqYeriaJbNN3CxfiAaBGQJywnIMnGMY1X
+ C8dHZX2ugsbBLaahrlTe2M5+loTh8mDaee+eFleO/sNUQfv5VuVlH9B
 X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
  pk=qOD5jhp891/Xzc+H/PZ8LWVSWE3O/XCQnAg+5vdU2IU=
 X-Endpoint-Received:
@@ -65,43 +65,143 @@ X-Endpoint-Received:
 X-Original-From: Yang Xiwen <forbidden405@outlook.com>
 Reply-To: <forbidden405@outlook.com>
 
-it's modified from hi3798cv200 driver, but quite a lot of code gets
-rewritten because of the hardware differences. Actually cv200 DWMMC core
-is called HIMCIV200 while mv200 DWMMC core is called HIMCIV300 in
-downstream.
+From: Yang Xiwen <forbidden405@outlook.com>
 
-Pending on:
-[PATCH] mmc: host: replace 1st argument to struct device * for mmc_of_parse_clk_phase():
-	https://lore.kernel.org/all/20240215-mmc_phase-v1-1-f27644ee13e4@outlook.com/
+convert the legacy txt binding to modern YAML and rename to
+hisilicon,hi3798cv200-dw-mshc.yaml. No semantic change.
 
 Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 ---
-Changes in v2:
-- dw_mmc-hi3798mv200: use dev_err_probe() helper - Suggested by Krzysztof Kozlowski.
-- dw_mmc-hi3798mv200: add missing err=0;
-- dw_mmc-hi3798c(m)v200: remove unused MODULE_ALIAS() - Suggested by Krzysztof Kozlowski.
-- binding: rename the binding, a lot of tweaks suggested by Krzysztof Kozlowski.
-- Link to v1: https://lore.kernel.org/r/20240216-b4-mmc-hi3798mv200-v1-0-7d46db845ae6@outlook.com
+ .../bindings/mmc/hi3798cv200-dw-mshc.txt           | 40 ------------
+ .../mmc/hisilicon,hi3798cv200-dw-mshc.yaml         | 73 ++++++++++++++++++++++
+ 2 files changed, 73 insertions(+), 40 deletions(-)
 
----
-Yang Xiwen (4):
-      mmc: dw_mmc-hi3798cv200: remove MODULE_ALIAS()
-      mmc: dw_mmc: add support for hi3798mv200
-      dt-bindings: mmc: dw-mshc-hi3798cv200: convert to YAML
-      dt-bindings: mmc: hisilicon,hi3798cv200-dw-mshc: rename to hisilicon,hi3798-dw-mshc
+diff --git a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
+deleted file mode 100644
+index a0693b7145f2..000000000000
+--- a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
++++ /dev/null
+@@ -1,40 +0,0 @@
+-* Hisilicon Hi3798CV200 specific extensions to the Synopsys Designware Mobile
+-  Storage Host Controller
+-
+-Read synopsys-dw-mshc.txt for more details
+-
+-The Synopsys designware mobile storage host controller is used to interface
+-a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+-differences between the core Synopsys dw mshc controller properties described
+-by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
+-specific extensions to the Synopsys Designware Mobile Storage Host Controller.
+-
+-Required Properties:
+-- compatible: Should contain "hisilicon,hi3798cv200-dw-mshc".
+-- clocks: A list of phandle + clock-specifier pairs for the clocks listed
+-  in clock-names.
+-- clock-names: Should contain the following:
+-	"ciu" - The ciu clock described in synopsys-dw-mshc.txt.
+-	"biu" - The biu clock described in synopsys-dw-mshc.txt.
+-	"ciu-sample" - Hi3798CV200 extended phase clock for ciu sampling.
+-	"ciu-drive"  - Hi3798CV200 extended phase clock for ciu driving.
+-
+-Example:
+-
+-	emmc: mmc@9830000 {
+-		compatible = "hisilicon,hi3798cv200-dw-mshc";
+-		reg = <0x9830000 0x10000>;
+-		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&crg HISTB_MMC_CIU_CLK>,
+-			 <&crg HISTB_MMC_BIU_CLK>,
+-			 <&crg HISTB_MMC_SAMPLE_CLK>,
+-			 <&crg HISTB_MMC_DRV_CLK>;
+-		clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
+-		fifo-depth = <256>;
+-		clock-frequency = <200000000>;
+-		cap-mmc-highspeed;
+-		mmc-ddr-1_8v;
+-		mmc-hs200-1_8v;
+-		non-removable;
+-		bus-width = <8>;
+-	};
+diff --git a/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
+new file mode 100644
+index 000000000000..9db85a0fa41c
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
+@@ -0,0 +1,73 @@
++# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/hisilicon,hi3798cv200-dw-mshc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Hisilicon Hi3798CV200 SoC specific extensions to the Synopsys DWMMC controller
++
++maintainers:
++  - Yang Xiwen <forbidden405@outlook.com>
++
++properties:
++  compatible:
++    enum:
++      - hisilicon,hi3798cv200-dw-mshc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 4
++
++  clock-names:
++    items:
++      - const: ciu
++      - const: biu
++      - const: ciu-sample
++        description: card output sampling phase clock
++      - const: ciu-drive
++        description: card input driving phase clock
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++
++allOf:
++  - $ref: synopsys-dw-mshc-common.yaml#
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/histb-clock.h>
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++
++    mmc@9830000 {
++        compatible = "hisilicon,hi3798cv200-dw-mshc";
++        reg = <0x9830000 0x10000>;
++        interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
++        clocks = <&crg HISTB_MMC_CIU_CLK>,
++                 <&crg HISTB_MMC_BIU_CLK>,
++                 <&crg HISTB_MMC_SAMPLE_CLK>,
++                 <&crg HISTB_MMC_DRV_CLK>;
++        clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
++        resets = <&crg 0xa0 4>;
++        reset-names = "reset";
++        pinctrl-names = "default";
++        pinctrl-0 = <&emmc_pins_1 &emmc_pins_2
++                     &emmc_pins_3 &emmc_pins_4>;
++        fifo-depth = <256>;
++        clock-frequency = <200000000>;
++        cap-mmc-highspeed;
++        mmc-ddr-1_8v;
++        mmc-hs200-1_8v;
++        non-removable;
++        bus-width = <8>;
++    };
 
- .../bindings/mmc/hi3798cv200-dw-mshc.txt           |  40 ----
- .../bindings/mmc/hisilicon,hi3798-dw-mshc.yaml     |  92 ++++++++
- drivers/mmc/host/Kconfig                           |   9 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/dw_mmc-hi3798cv200.c              |   1 -
- drivers/mmc/host/dw_mmc-hi3798mv200.c              | 235 +++++++++++++++++++++
- 6 files changed, 337 insertions(+), 41 deletions(-)
----
-base-commit: 8d3dea210042f54b952b481838c1e7dfc4ec751d
-change-id: 20240121-b4-mmc-hi3798mv200-a5730edf122c
-
-Best regards,
 -- 
-Yang Xiwen <forbidden405@outlook.com>
+2.43.0
 
