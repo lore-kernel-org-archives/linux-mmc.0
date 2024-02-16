@@ -1,59 +1,47 @@
-Received: from mail-ed1-f53.google.com (mail-ed1-f53.google.com [209.85.208.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2828E18B1A
-	for <linux-mmc@vger.kernel.org>; Fri, 16 Feb 2024 08:21:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCAB017BC4;
+	Fri, 16 Feb 2024 08:28:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708071679; cv=none; b=E76jEZav+HyGs07lX8MnEzJz+eNEoNLv9YJ9HlEG8VdEFi//liKCnDxsMVypfCZSzut5D/30MKhWm6FJT5cTGN1824i6OjLJOD4N7sRp78yLGv+w7L+y4v/xGXuQ3ev3orXgP8+7/Y+QLM3p2ooi4NRsv76McP/All8kMuAKwOk=
+	t=1708072117; cv=none; b=AWResvZ+Z7S9LHnSleHxhCf85Ws6MQc7yK7FtROKbTmIvI3RNknJmJJMVB/0szIXfGV0SCI6PSP08wbsOI8ua+LyUEInXELa5mLcHPsAF/O3scG9z50QkgFJ2dOdZA1CVPYpqFW0IbRELq82hZGxVG9M6vh21N31qqfql/Wg390=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708071679; c=relaxed/simple;
-	bh=wNvH8irpVIRGBM1PyLQ/DV1p5gcS7Gn8xxWO4Z4gyY0=;
+	s=arc-20240116; t=1708072117; c=relaxed/simple;
+	bh=3dRzrnpFg8YfYOSvDA85fQuaVmzQ9vV/C38TKb1GY0k=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=IS9tmtoCp4JyxC3ueskC8DKXocxafnfnVlPaUHX/uGuNh+W5SgKWhi1CZGsWfBP3Dw4Me0QdG8q1xq7gjWli1ePTs1mpAwW4FvWg/7tiA3J5nFa4Hm1WkVlgB7v2mP/zcZ7S78TvqczisHjHYCo/GNTU/3wpDn5BOhGer7OiNA0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=qLTEdWL2; arc=none smtp.client-ip=209.85.208.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 In-Reply-To:Content-Type; b=QhCGIpvaPBk9C8QjuAkKVrIiw8v9C/7B43+XcVTwk7kFjAOKs6tV+NJvvcQ1MOVRt6eBjR8N1tW5TnbMkdS2ci+q4UQfSMfVF4ayBa4Tl/IBzOzSgcytksXWhwA4B2zVnXhSAhS3SojQ3TXlNyIIACH88iJXOU0vJ1NoA/QUjcs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=L4T6HANt; arc=none smtp.client-ip=198.175.65.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qLTEdWL2"
-Received: by mail-ed1-f53.google.com with SMTP id 4fb4d7f45d1cf-561587ce966so3419180a12.1
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Feb 2024 00:21:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1708071675; x=1708676475; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=BHQjCM3MJVOw9z8k4SHGf+NLiuXZ/198hcpHesrOvd0=;
-        b=qLTEdWL20yhzYw2xKZlYoRiugT/xod3sb4H3NkxRm+AISOyY6fzKZrlwRaSxp8WSby
-         NovXtneJhWHlxzr/RZgaalYZcaRfS7wN0qLll+7Ncj7KclX/nMI2qTRwAqRHi1SaLUox
-         aow/ulXMR84VY01oVOXxf7bqEbTjxW9sPsITBI2CYdLcbQFKUy5Jis0tSNT/iYgi+MFJ
-         OLz6Asf+yJcHjOVEHPJy58Skf7DKnjQmtQ+mwtJvWecWZREnZpdZPRNbHo7cJHlGY1Bc
-         HFiLzMU65qPxgT9s09J5sEDmELNW9lXScSdetwB/vM130yBmXjx4r6gWug5UBarqJhJt
-         5xgw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708071675; x=1708676475;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
-         :to:content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=BHQjCM3MJVOw9z8k4SHGf+NLiuXZ/198hcpHesrOvd0=;
-        b=iDo4tB69rowuiY7OWn0AJ6XbnLnb0l3qLDzXd94QUFAOaEiGawFORGEXSiCizrmaBk
-         PXHcNTV4x7a3sSprLIGCJlNWslEC3HPGuE+llVqduYtfoLwOBoHuGipDqREgsgHpKUDo
-         T7vkDhHA0hvHqZJ+E0snhQm5zJChIEVsa+hm9PP3WeLJyh3truQyQChBCOY+x1ssDkwE
-         Wgs2y9JOc92IQsFRZ088M3SM68DKk2PFhOVH/QovpDiZt8KCxUcpPJUrh1BtrRnEG9kW
-         5r1USmnFL8cGIiUE9ysBfnfEaDPr6rCTFWdRNw0pKKPZUIB8FiQuEKdyLH1/MyiH9sDx
-         dQ8Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXXKcrashnMaFNi7785P8G5jU4b/SU8rFQwq3xCrXh5KZPJEFl0SsCm/tfW+GHipc/f14ciQ21v5bVWp6Zg9J6/F95ppd38M8Ct
-X-Gm-Message-State: AOJu0YxYIjD7jhV8XDtgX7H0ixkhSrUQTrHR7YDqId2b8FJMb3pZk3RC
-	MEA73guCjvek08D6kXdzT5JcX5WsvPwR8ttQAlWLQsc67SwGVUAhEZBk7iVcdjQ=
-X-Google-Smtp-Source: AGHT+IH1Jfr/rQ1P5UV32a4Ha00bRrmflv3srEDsiA+9qsOqq+vnNMHgHuIPfy/dNY4jLcDdbsJGoQ==
-X-Received: by 2002:a05:6402:500f:b0:561:fc2:bec0 with SMTP id p15-20020a056402500f00b005610fc2bec0mr7425286eda.4.1708071675397;
-        Fri, 16 Feb 2024 00:21:15 -0800 (PST)
-Received: from [192.168.0.22] ([78.10.207.130])
-        by smtp.gmail.com with ESMTPSA id j22-20020aa7c0d6000000b0055f0b3ec5d8sm1287138edp.36.2024.02.16.00.21.14
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 16 Feb 2024 00:21:14 -0800 (PST)
-Message-ID: <36450b1e-7a80-4d6b-9046-9a57b7c845e2@linaro.org>
-Date: Fri, 16 Feb 2024 09:21:13 +0100
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="L4T6HANt"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1708072115; x=1739608115;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=3dRzrnpFg8YfYOSvDA85fQuaVmzQ9vV/C38TKb1GY0k=;
+  b=L4T6HANtSsno1ALN71APWI0fB4a/vpds4/l5tGZryk5K6Lb1Zr7DUj/6
+   rPCO5R0EAfthCQGy5LrjZvEv1uSni5yg7kTOwldLvQu+9WiQ4zkBFt2Nu
+   E8POJR8Uukgfl74mO3RTbFeFDfPZr+LwDS7wO/QTAGB8KD3tLY+eviWNw
+   lrXa3DKlq6C8CGPIVRY5bmAfas/90y1VOyL1TIDEZuj+WC8UI6fmoEdBm
+   gQt2CZmFA+qi7hAhwNi8V5ZJCETOBLiFt7r0RF2je1YJljNFAsWuyY01L
+   6d9lZzgwNLr8UQrQiloSGlbisgs2C9x0ivYlYgiZMbZ43kJ8yvIWDd9of
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10985"; a="24658491"
+X-IronPort-AV: E=Sophos;i="6.06,164,1705392000"; 
+   d="scan'208";a="24658491"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Feb 2024 00:28:34 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10985"; a="912324991"
+X-IronPort-AV: E=Sophos;i="6.06,164,1705392000"; 
+   d="scan'208";a="912324991"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.220.122])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Feb 2024 00:28:31 -0800
+Message-ID: <36f99696-d7ca-4390-a263-dbb72d5c9ae6@intel.com>
+Date: Fri, 16 Feb 2024 10:28:28 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,216 +49,86 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/3] dt-bindings: mmc: dw-mshc-hi3798cv200: rename to
- dw-mshc-histb
+Subject: Re: [EXT] Re: [PATCH v2 0/2] Fix PHY init timeout issues
 Content-Language: en-US
-To: forbidden405@outlook.com, Ulf Hansson <ulf.hansson@linaro.org>,
- Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>
-Cc: Igor Opaniuk <igor.opaniuk@linaro.org>,
- tianshuliang <tianshuliang@hisilicon.com>, David Yang <mmyangfl@gmail.com>,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org
-References: <20240216-b4-mmc-hi3798mv200-v1-0-7d46db845ae6@outlook.com>
- <20240216-b4-mmc-hi3798mv200-v1-3-7d46db845ae6@outlook.com>
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20240216-b4-mmc-hi3798mv200-v1-3-7d46db845ae6@outlook.com>
+To: Elad Nachman <enachman@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "huziji@marvell.com" <huziji@marvell.com>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <20240215161613.1736051-1-enachman@marvell.com>
+ <CAPDyKFpNL_zFgzSNgaSRqaH8tDNjwB16ZD1YGwqM64vcQ2oxtA@mail.gmail.com>
+ <BN9PR18MB4251FD4F9BD9915477823316DB4D2@BN9PR18MB4251.namprd18.prod.outlook.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <BN9PR18MB4251FD4F9BD9915477823316DB4D2@BN9PR18MB4251.namprd18.prod.outlook.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 15/02/2024 18:46, Yang Xiwen via B4 Relay wrote:
-> From: Yang Xiwen <forbidden405@outlook.com>
+On 15/02/24 19:01, Elad Nachman wrote:
 > 
-> Add binding for Hi3798MV200 DWMMC specific extension.
 > 
-> Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
-> ---
->  ...hi3798cv200-dw-mshc.yaml => histb-dw-mshc.yaml} | 60 +++++++++++++++++++---
->  1 file changed, 52 insertions(+), 8 deletions(-)
+>> -----Original Message-----
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>> Sent: Thursday, February 15, 2024 6:51 PM
+>> To: Elad Nachman <enachman@marvell.com>
+>> Cc: huziji@marvell.com; adrian.hunter@intel.com; linux-
+>> mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+>> Subject: [EXT] Re: [PATCH v2 0/2] Fix PHY init timeout issues
+>>
+>> External Email
+>>
+>> ----------------------------------------------------------------------
+>> On Thu, 15 Feb 2024 at 17:16, Elad Nachman <enachman@marvell.com>
+>> wrote:
+>>>
+>>> From: Elad Nachman <enachman@marvell.com>
+>>>
+>>> Fix PHY init timeout issues:
+>>>
+>>> 1. Clock Stability issue causing PHY timeout
+>>>
+>>> 2. Timeout taking longer than needed on AC5X.
+>>>    Solve by constantly testing the PHY init bit
+>>>    until it toggles, but up to 100X timeout factor.
+>>>
+>>> v2:
+>>>     1) convert polling loop to read_poll_timeout()
+>>>        for both patches.
+>>>
+>>> Elad Nachman (2):
+>>>   mmc: xenon: fix PHY init clock stability
+>>>   mmc: xenon: add timeout for PHY init complete
+>>>
+>>>  drivers/mmc/host/sdhci-xenon-phy.c | 48
+>>> ++++++++++++++++++++++++------
+>>>  1 file changed, 39 insertions(+), 9 deletions(-)
+>>>
+>>
+>> The series looks good to me. Although, I assume we should tag this for stable
+>> kernels too and possibly add a fixes tag?
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml
-> similarity index 57%
-> rename from Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.yaml
-> rename to Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml
-> index 5db99cd94b90..d2f5b7bb7a58 100644
-> --- a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml
-> @@ -1,11 +1,11 @@
->  # SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
->  %YAML 1.2
->  ---
-> -$id: http://devicetree.org/schemas/mmc/hi3798cv200-dw-mshc.yaml#
-> +$id: http://devicetree.org/schemas/mmc/histb-dw-mshc.yaml#
+> No problem.
 
-Really, one wrong filename into another...
+Presumably:
 
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title:
-> -  Hisilicon Hi3798CV200 SoC specific extensions to the Synopsys DWMMC controller
-> +  Hisilicon HiSTB SoCs specific extensions to the Synopsys DWMMC controller
->  
->  maintainers:
->    - Yang Xiwen <forbidden405@outlook.com>
-> @@ -14,16 +14,14 @@ description:
->    The Synopsys designware mobile storage host controller is used to interface
->    a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
->    differences between the core Synopsys dw mshc controller properties described
-> -  by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
-> -  specific extensions to the Synopsys Designware Mobile Storage Host Controller.
+Fixes: 06c8b667ff5b ("mmc: sdhci-xenon: Add support to PHYs of Marvell Xenon SDHC")
 
-Just drop this sentence in previous/conversion patch. It's useless.
+FWIW:
 
-> -
-> -allOf:
-> -  - $ref: synopsys-dw-mshc-common.yaml#
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Put it in correct place in the first time. Don't needlessly shuffle the
-code right after previous patch.
-
-
-> +  by synopsys-dw-mshc.txt and the properties used by the Hisilicon HiSTB specific
-> +  extensions to the Synopsys Designware Mobile Storage Host Controller.
->  
->  properties:
->    compatible:
->      enum:
->        - hisilicon,hi3798cv200-dw-mshc
-> +      - hisilicon,hi3798mv200-dw-mshc
->  
->    reg:
->      maxItems: 1
-> @@ -48,6 +46,12 @@ properties:
->        control the clock phases, "ciu-sample" is required for tuning
->        high speed modes.
->  
-> +  hisilicon,sap-dll-reg:
-> +    $ref: /schemas/types.yaml#/definitions/phandle
-> +    description:
-> +      A phandle points to the sample delay-locked-loop(DLL)
-> +      syscon node, used for tuning.
-
-Does hi3798cv200 have it?
-
-> +
->  required:
->    - compatible
->    - reg
-> @@ -55,13 +59,25 @@ required:
->    - clocks
->    - clock-names
->  
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
-> +
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: hisilicon,hi3798mv200-dw-mshc
-> +    then:
-> +      required:
-> +        - hisilicon,sap-dll-reg
-> +
->  unevaluatedProperties: false
->  
->  examples:
->    - |
->      #include <dt-bindings/clock/histb-clock.h>
->      #include <dt-bindings/interrupt-controller/arm-gic.h>
-> -    emmc: mmc@9830000 {
-> +    mmc@9830000 {
-
-???
-
->        compatible = "hisilicon,hi3798cv200-dw-mshc";
->        reg = <0x9830000 0x10000>;
->        interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
-> @@ -84,3 +100,31 @@ examples:
->        bus-width = <8>;
->        status = "okay";
->      };
-> +  - |
-> +    #include <dt-bindings/clock/histb-clock.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    mmc@9830000 {
-> +      compatible = "hisilicon,hi3798mv200-dw-mshc";
-
-No need for new example.
-
-> +      reg = <0x9830000 0x10000>;
-> +      interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
-> +      clocks = <&crg HISTB_MMC_CIU_CLK>,
-> +               <&crg HISTB_MMC_BIU_CLK>,
-> +               <&crg HISTB_MMC_SAMPLE_CLK>,
-> +               <&crg HISTB_MMC_DRV_CLK>;
-> +      clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
-> +      resets = <&crg 0xa0 4>;
-> +      reset-names = "reset";
-> +      pinctrl-names = "default";
-> +      pinctrl-0 = <&emmc_pins>;
-> +      fifo-depth = <256>;
-> +      clock-frequency = <50000000>;
-> +      max-frequency = <150000000>;
-> +      cap-mmc-highspeed;
-> +      mmc-ddr-1_8v;
-> +      mmc-hs200-1_8v;
-> +      mmc-hs400-1_8v;
-> +      non-removable;
-> +      bus-width = <8>;
-> +      hisilicon,sap-dll-reg = <&emmc_sap_dll_reg>;
-> +      status = "okay";
-
-No, really...
-
-> +    };
 > 
-
-Best regards,
-Krzysztof
+>>
+>> Moreover, it would be nice to get an ack from Hu Ziji.
+> 
+> He does not longer work with Marvell, so this email is invalid, I tried also to send an e-mail manually as well and got:
+> huziji@marvell.com
+> Remote Server returned '550 5.1.1 RESOLVER.ADR.RecipNotFound; not found'
+> 
+> Could not locate him via google search either.
+> 
+>>
+>> Kind regards
+>> Uffe
 
