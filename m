@@ -1,209 +1,148 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D15913A253;
-	Fri, 16 Feb 2024 21:02:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC3CF1CD26
+	for <linux-mmc@vger.kernel.org>; Sat, 17 Feb 2024 08:18:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708117351; cv=none; b=uv4NrML19DiYgjzx8pAFLtpP80V/UfCcUGZw93PS9wkglDiaU87MLz56dnwt+lHYy3JhgwiTQhIsK5CjKQXqduEGSQh1Jk8Ro7xfy6d8jdvEu5BEQfKFHNFGHTqXq/UL5RN0Ps4CxT1iVZSRdDyr6BySnsGHJzedFlRZt/OqDq0=
+	t=1708157919; cv=none; b=L3XsX5w8qNBw8l61oM0RSP2SZ+p/QglUzms2E6rILVkaNOaBbUl4dDEoFc7iA7yHFXr7CLdLzGv1sVXDYaeD+w6M45AHDb6xFHH59RmJkG1fsVup4w8NQOr15nTb9bc1UvI/hhvGpAcsK1R+oB/bA1rFVnV/iPC7tX6tG+n1Qlg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708117351; c=relaxed/simple;
-	bh=kE1iyc4ikKEePbnss5tHCv37+9gy1c6VUZo9PtTp2VA=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Sft8clUTRvFd0OIwR7wwzKYb3cfY3hNYwTvjWYRzU/SOnLfY3s0Qm1jIApzx0OnZiHM40j0FupzY/7SdFJ8NRiQwvzWmX6LGU3+elXNO3Lq6jrXG0fOsCYKkZc+JjAsGwwImk7WtQkV8d+Hvu3Airk1N6UOr+gZ3DiLXGk5ESUc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C07eQKQu; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708157919; c=relaxed/simple;
+	bh=untqbsXfV/q5gbhBPVY8vCVosKgckyU7n01PP+UkTRk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=uwAiRwEeJUmwjVi+kEZ+f/I0dccKso1Orwupkl9qfnxXuO///0J0jq++FqzvbuDS0YndL3Ue0TaOy/j8EMdNxRXv4UL302FfT+CjvWVwHz4Vh+ZJvoIWdiC507JR2hyWCXVCkN9qg4muvZJcTU0/kVPRNLbuQXIQY0IQKrpDpnY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SkPMYUqm; arc=none smtp.client-ip=209.85.218.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C07eQKQu"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id AECC5C43390;
-	Fri, 16 Feb 2024 21:02:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708117350;
-	bh=kE1iyc4ikKEePbnss5tHCv37+9gy1c6VUZo9PtTp2VA=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=C07eQKQuKatfj2Ac8JpK08JodsOWphQ4g5sN/WEGrnqZdH2QsknZASQZf7c2Huajg
-	 lhsjswgwz8TIF9siW9rQmz5/ZhnZgqhReVScmKvDJ9ZJsyBFRW5VD3IvyBdZTlkXhA
-	 DwaW8Xxrk9mUvqgfiNk7AVcICubKuQe2j6vcptlWCWDgs68sVNyzwXjHGTO1hatPkK
-	 +4AVJYz84KuhOvSUDb9qPXzpZEFFePoa/LtINMOgUvtR3zZ+P5iuZUnuhEwO2bQ6Cs
-	 BjJAlZY42117iy6FVZVmX4Oh2i/lGG1EWxu8mL+p2vafApPprjUt8QnCUIa8Z8WRan
-	 24/TMCBiulcfQ==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9453BC48BF7;
-	Fri, 16 Feb 2024 21:02:30 +0000 (UTC)
-From: Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>
-Date: Sat, 17 Feb 2024 05:02:31 +0800
-Subject: [PATCH v3 3/4] dt-bindings: mmc: dw-mshc-hi3798cv200: convert to
- YAML
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SkPMYUqm"
+Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-a3d002bc6f7so264562166b.3
+        for <linux-mmc@vger.kernel.org>; Sat, 17 Feb 2024 00:18:37 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1708157916; x=1708762716; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=SyO5gKPS/KGhH7O6zjJaTYW2WsaQ3OFqgSJ+qkTClHk=;
+        b=SkPMYUqmH5FwktdbVvWBdPQjbUAjt7kbSAyrD5a7Cnuo/avztjvfnDjgEl+YauhNjQ
+         rG3JvHWlwL9hJ9XzgXvVThNavpVfe7f9QFZfk0PIDXU4RLHqy9NUbsBkrm3ZRjoOyQse
+         ijYcdZ5MMFChD0zomHuCg9uKCVV9tRxVqto95bAclJQmLy2zrhfDAMx/aIaUk5utCb4v
+         qMLfk4bDVbSswPuRiKDFh8zDgtOKq3CjiRuB7SF2s+VNkvXd5RWXZk0MZj3+qVBylD5k
+         7Fn1AHIJgilyxX1fB1Nu3vEM3teqkl+WPbPY3jJ0OLoa2ity39Y2AJiX+ztaeMdqIPPX
+         CzGg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708157916; x=1708762716;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
+         :to:content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=SyO5gKPS/KGhH7O6zjJaTYW2WsaQ3OFqgSJ+qkTClHk=;
+        b=i6GAi6VWawPv1YveRhl5A6//OP1nJJn8CG8DDRU8f0ub3zZOWuGLW84yCJIbYRphQa
+         kPVow3RqxJ8mXqvgq3Kri7CyvTau54Q0vG3a2XDv5fVPkGg/PVooFGRZ2lWyame9jckI
+         xASwCVl0mT+/HOtkZXyDIB4lY0M0cIwNPLXtanjSFygarrNjyuwCURHXbycr6lxjZX0b
+         /6GaHE9KuvzSI2e7KDKso40Vlk2x9MX6r5nH/oi3tFZIpmSL6HruJXvfr/cdMIEteIK4
+         Yyj0wU3ck5n3fAFvAvI48DeuRe707wwUyiOr2H3+LZcpwhyF2HU0YUch8zFWM1DJC64E
+         yU+g==
+X-Forwarded-Encrypted: i=1; AJvYcCWQNNIaG381MAy7QH9C5LhikYtmnQivSbqh84HVY9ofeEWmEDzy1LuaAUMoaLP3RhTbBeUhJzfz+xZq6eZc3NaBPDBzg++Z+QWK
+X-Gm-Message-State: AOJu0YwWNkI26M99N1hI8YWf1EZChtQ2qoFziMp8TjSgaeelk5xQsAnR
+	WcOiZRGWXQIWdXiAnF8rw/VC+DG/EXUe3BtXgLJbW3OUkZ7sRwsWde69wVnXJro=
+X-Google-Smtp-Source: AGHT+IG7VonUcs6rEJcjK7mLjd2eWBOWIIBXH2IJRm2UzIxSTYRdMRM3jrPGrmbpvFin8OzEETjeXQ==
+X-Received: by 2002:a17:906:395b:b0:a3c:36ae:6c96 with SMTP id g27-20020a170906395b00b00a3c36ae6c96mr5135632eje.42.1708157916365;
+        Sat, 17 Feb 2024 00:18:36 -0800 (PST)
+Received: from [192.168.0.22] ([78.10.207.130])
+        by smtp.gmail.com with ESMTPSA id th7-20020a1709078e0700b00a3e059c5c5fsm757086ejc.188.2024.02.17.00.18.34
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 17 Feb 2024 00:18:35 -0800 (PST)
+Message-ID: <668c1511-4ee6-4fad-9b7e-7783b6853988@linaro.org>
+Date: Sat, 17 Feb 2024 09:18:33 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 2/4] dt-bindings: net: fec: add iommus property
+Content-Language: en-US
+To: Frank Li <Frank.li@nxp.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>,
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+ Conor Dooley <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
+ Sascha Hauer <s.hauer@pengutronix.de>,
+ Pengutronix Kernel Team <kernel@pengutronix.de>,
+ Fabio Estevam <festevam@gmail.com>, NXP Linux Team <linux-imx@nxp.com>,
+ Wei Fang <wei.fang@nxp.com>, Shenwei Wang <shenwei.wang@nxp.com>,
+ Clark Wang <xiaoning.wang@nxp.com>, "David S. Miller" <davem@davemloft.net>,
+ Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
+ Paolo Abeni <pabeni@redhat.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-kernel@vger.kernel.org, netdev@vger.kernel.org, imx@lists.linux.dev
+References: <20240201-8qm_smmu-v2-0-3d12a80201a3@nxp.com>
+ <20240201-8qm_smmu-v2-2-3d12a80201a3@nxp.com>
+ <49dbd0a2-a4b9-4c05-bb10-44f267672374@linaro.org>
+ <Zc+2EitZrVzLsA03@lizhi-Precision-Tower-5810>
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
+ 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
+ D2GYIS41Kv4Isx2dEFh+/Q==
+In-Reply-To: <Zc+2EitZrVzLsA03@lizhi-Precision-Tower-5810>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Message-Id: <20240217-b4-mmc-hi3798mv200-v3-3-f15464176947@outlook.com>
-References: <20240217-b4-mmc-hi3798mv200-v3-0-f15464176947@outlook.com>
-In-Reply-To: <20240217-b4-mmc-hi3798mv200-v3-0-f15464176947@outlook.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, 
- Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, 
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
- Conor Dooley <conor+dt@kernel.org>
-Cc: Igor Opaniuk <igor.opaniuk@linaro.org>, 
- tianshuliang <tianshuliang@hisilicon.com>, David Yang <mmyangfl@gmail.com>, 
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
- devicetree@vger.kernel.org, Yang Xiwen <forbidden405@outlook.com>
-X-Mailer: b4 0.12.4
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1708117349; l=4642;
- i=forbidden405@outlook.com; s=20230724; h=from:subject:message-id;
- bh=2gvcPOcC0W9JjDo7uuJyb8+Jf0I4Z6n3x2BDfI4hOUA=;
- b=XQLOvaUzbqwudm3uFoDFpaPXJ74fVzy8FO5758AmTMQ5ydj2UwcnG5gkaFV8xtWgmuQ8n6bdB
- 7IXYLHTxOSvAYTbQeGJbgmbRh5aI1LtH8q/KibB5viAWCr9MLt+UmZz
-X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
- pk=qOD5jhp891/Xzc+H/PZ8LWVSWE3O/XCQnAg+5vdU2IU=
-X-Endpoint-Received:
- by B4 Relay for forbidden405@outlook.com/20230724 with auth_id=67
-X-Original-From: Yang Xiwen <forbidden405@outlook.com>
-Reply-To: <forbidden405@outlook.com>
 
-From: Yang Xiwen <forbidden405@outlook.com>
+On 16/02/2024 20:22, Frank Li wrote:
+> On Fri, Feb 02, 2024 at 09:23:37AM +0100, Krzysztof Kozlowski wrote:
+>> On 01/02/2024 21:22, Frank Li wrote:
+>>> iMX8QM have iommu. Add proerty 'iommus'.
+>>>
+>>> Signed-off-by: Frank Li <Frank.Li@nxp.com>
+>>> ---
+>>
+>> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> 
+> Other 3 patches already been linux-next. Who will pick this one?
 
-convert the legacy txt binding to modern YAML and rename to
-hisilicon,hi3798cv200-dw-mshc.yaml. No semantic change.
+Resend it to net-next (with proper title).
 
-Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
----
- .../bindings/mmc/hi3798cv200-dw-mshc.txt           | 40 ------------
- .../mmc/hisilicon,hi3798cv200-dw-mshc.yaml         | 75 ++++++++++++++++++++++
- 2 files changed, 75 insertions(+), 40 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-deleted file mode 100644
-index a0693b7145f2..000000000000
---- a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-+++ /dev/null
-@@ -1,40 +0,0 @@
--* Hisilicon Hi3798CV200 specific extensions to the Synopsys Designware Mobile
--  Storage Host Controller
--
--Read synopsys-dw-mshc.txt for more details
--
--The Synopsys designware mobile storage host controller is used to interface
--a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
--differences between the core Synopsys dw mshc controller properties described
--by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
--specific extensions to the Synopsys Designware Mobile Storage Host Controller.
--
--Required Properties:
--- compatible: Should contain "hisilicon,hi3798cv200-dw-mshc".
--- clocks: A list of phandle + clock-specifier pairs for the clocks listed
--  in clock-names.
--- clock-names: Should contain the following:
--	"ciu" - The ciu clock described in synopsys-dw-mshc.txt.
--	"biu" - The biu clock described in synopsys-dw-mshc.txt.
--	"ciu-sample" - Hi3798CV200 extended phase clock for ciu sampling.
--	"ciu-drive"  - Hi3798CV200 extended phase clock for ciu driving.
--
--Example:
--
--	emmc: mmc@9830000 {
--		compatible = "hisilicon,hi3798cv200-dw-mshc";
--		reg = <0x9830000 0x10000>;
--		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&crg HISTB_MMC_CIU_CLK>,
--			 <&crg HISTB_MMC_BIU_CLK>,
--			 <&crg HISTB_MMC_SAMPLE_CLK>,
--			 <&crg HISTB_MMC_DRV_CLK>;
--		clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
--		fifo-depth = <256>;
--		clock-frequency = <200000000>;
--		cap-mmc-highspeed;
--		mmc-ddr-1_8v;
--		mmc-hs200-1_8v;
--		non-removable;
--		bus-width = <8>;
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
-new file mode 100644
-index 000000000000..f3dc973cb490
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
-@@ -0,0 +1,75 @@
-+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/hisilicon,hi3798cv200-dw-mshc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Hisilicon Hi3798CV200 SoC specific extensions to the Synopsys DWMMC controller
-+
-+maintainers:
-+  - Yang Xiwen <forbidden405@outlook.com>
-+
-+properties:
-+  compatible:
-+    enum:
-+      - hisilicon,hi3798cv200-dw-mshc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    items:
-+      - description: bus interface unit clock
-+      - description: card interface unit clock
-+      - description: card input sample phase clock
-+      - description: controller output drive phase clock
-+
-+  clock-names:
-+    items:
-+      - const: ciu
-+      - const: biu
-+      - const: ciu-sample
-+      - const: ciu-drive
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+allOf:
-+  - $ref: synopsys-dw-mshc-common.yaml#
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/clock/histb-clock.h>
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+
-+    mmc@9830000 {
-+        compatible = "hisilicon,hi3798cv200-dw-mshc";
-+        reg = <0x9830000 0x10000>;
-+        interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
-+        clocks = <&crg HISTB_MMC_CIU_CLK>,
-+                 <&crg HISTB_MMC_BIU_CLK>,
-+                 <&crg HISTB_MMC_SAMPLE_CLK>,
-+                 <&crg HISTB_MMC_DRV_CLK>;
-+        clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
-+        resets = <&crg 0xa0 4>;
-+        reset-names = "reset";
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&emmc_pins_1 &emmc_pins_2
-+                     &emmc_pins_3 &emmc_pins_4>;
-+        fifo-depth = <256>;
-+        clock-frequency = <200000000>;
-+        cap-mmc-highspeed;
-+        mmc-ddr-1_8v;
-+        mmc-hs200-1_8v;
-+        non-removable;
-+        bus-width = <8>;
-+    };
-
--- 
-2.43.0
+Best regards,
+Krzysztof
 
