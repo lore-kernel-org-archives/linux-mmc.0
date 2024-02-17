@@ -1,153 +1,90 @@
-Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0900A1CAA5;
-	Sat, 17 Feb 2024 10:02:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC9E03DBBB;
+	Sat, 17 Feb 2024 13:01:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708164141; cv=none; b=FiUetxSgwnh40kk5iPKrzaLHK1t0eR9m7b7eREoYqzFnqTwiE+eXsQ5f8tS+hqPr8/RCAp3OJxmSzIe18MkMFv2zoenKMuUxfXXZg2pxIXfL300B/VBcmLZW2CXgxnRQqeCD3ArnLIt2Oqc47es3+QLfiLuzFAiKKgedKm3URao=
+	t=1708174881; cv=none; b=B1b3SQNIlSMV6bdJw8V+4g56+sr5cwdos8goFIYSe5VQWXkz580JGA3g7pPzDNKZRqe2BHazJEafjJuPq5qWqwD/hq4DCc2s7NBAmUZOmRisSV2kaRO/JYfe2umXcBU6UGcGyqbV1YtzE+OC9MkT+O8KFwB4fMPiEp8pkEp3eA4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708164141; c=relaxed/simple;
-	bh=c7c1Q3/20PbpOtZUY4apUCKgz6BG6WLPvFsA+YNlXP0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Jl0Uysgbcbh6mJaLATJsqqSin5AqanPilkkA4GeEAwRIXMTTw8Ggprienc0DYSkG+QGMxRAU8o8DNPL04FYi4a6pXHTc8BfWdGAiMueavDPyMDFo1syqI0ZGjAyZ06HtgcRcO1UZe1vAQH+GoUivjfRhMguUYb3G0EydlwJ/eCw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=UIIUWUCS; arc=none smtp.client-ip=209.85.218.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
+	s=arc-20240116; t=1708174881; c=relaxed/simple;
+	bh=uiy23fzx9AJKJeZCc+CpWKPnHutJKS8U/tiBSjzkWs4=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=k2+ucRSNiKfWPeT9V5czKtzBBcp70yyRjfjBvVQ74Mk2BVVUa/2+vZlcqBbdLJQF2kTDp6w08v4qZ9LC8ZI79cdk6XvIgpG602Sy1wt7hLJPRSR67DrsqhtT/QXFHqFDVvbggE8yWNGXMmJhg0fzAVRghM6ytlumRmeKtLCdh0Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M6XWPE/C; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="UIIUWUCS"
-Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-a2f79e79f0cso426924766b.2;
-        Sat, 17 Feb 2024 02:02:15 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20230601; t=1708164134; x=1708768934; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nqfx68Stq1v6Qf4tIPhse4R7f6lQzjIJhU0OnU94194=;
-        b=UIIUWUCSQLDGpM2qU+d8pfLd7YjfRehKfr7N11eQc5S3EHfZNMejDfQqutXuGRr9Om
-         WfOl/OFU6g4nS7cRT6ewI2a1qdF+FvTKuP56z8d+eyGFJ8hn99YIIkia2GL/Pgf468p3
-         peijXMuXCLiLJ16E9P2j2uf/UQH7FPKeVgH5eRolokWUJMumE+hmzODJNvQzbHv9ARKy
-         eRMftZ23e+TzWk8rOtRaFYK0zk5Z/blIb6BsFx0mgZnFC5lrjkmNQOK6ALPeKANQvbZM
-         0oaRKkKW/hVSqfqvN4Vw3koOiOKi/VsC/O9N5XvLct6S8o/fTw+bop/lSIHDxv0b1kcz
-         6INA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708164134; x=1708768934;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=nqfx68Stq1v6Qf4tIPhse4R7f6lQzjIJhU0OnU94194=;
-        b=r60UKr7KBgDwbx5T/N38CeX+iI06uSJ1rd8sycb02b3JebPj46qvyWPPexSNa6EPQe
-         HwjVXl+U/fpK+jZdF1KRCXkLj7QLpmAz1xWKR7lPHvrEpCnRE6maq/moqE7fgl8LsT3r
-         oja205CW0jyn+b5QgzLkvI1yI1Ux8jQM7NdV+z7XYBkKHrab5btBjaZVqFzwnzXqM7HZ
-         OW7xI6RFs5zBg81nd6G5PZ6M0W40Wi2aU5uIpua7ON0kUE6dVIvFREj8kB1cOAtO+Tpn
-         MJYaaUDrQi1J/3W8MvvIT6+D84qe6kH7FOUt3yW2mukN7x05jEfwZBw64wvLIWcRCL2x
-         DdkA==
-X-Forwarded-Encrypted: i=1; AJvYcCV/+aTxZZfvppDlPpx8lgW2CYG44n1DMeWFMtw25rFvHhqOEYqxn7RmE1uaPtiOezU1Tzph2l75fNw3nB6o9AuypvJBrdTIrZcLMZspICyjtol3mPHB+kifiaBPxKKdfvJdzUm0Vy0v
-X-Gm-Message-State: AOJu0YzxOjt4byl8W8Wpj/qQf4GwgEgwRfLSNf/7Extwdl0joz86oKGW
-	u5D5/qLBbljMyrtgvSrtOLwPnbLueqAgDffN4kwLbC+gx32xVUKK
-X-Google-Smtp-Source: AGHT+IEb82KoWpU5FoV1SEo4/+fKxZ4+uJYz6Hsw8ouQNl0/LXhPOmil04C+qDwX+A36tj5/j83VzA==
-X-Received: by 2002:a17:906:694b:b0:a3d:590:195e with SMTP id c11-20020a170906694b00b00a3d0590195emr6136810ejs.4.1708164134317;
-        Sat, 17 Feb 2024 02:02:14 -0800 (PST)
-Received: from localhost.localdomain (dynamic-2a01-0c23-c18b-3d00-0000-0000-0000-0e63.c23.pool.telefonica.de. [2a01:c23:c18b:3d00::e63])
-        by smtp.googlemail.com with ESMTPSA id vu2-20020a170907a64200b00a3d2e690abfsm832444ejc.122.2024.02.17.02.02.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 17 Feb 2024 02:02:13 -0800 (PST)
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-To: linux-amlogic@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	ulf.hansson@linaro.org
-Cc: linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH v1 2/2] mmc: meson-mx-sdhc: Remove .card_hw_reset callback
-Date: Sat, 17 Feb 2024 11:02:00 +0100
-Message-ID: <20240217100200.1494980-3-martin.blumenstingl@googlemail.com>
-X-Mailer: git-send-email 2.43.2
-In-Reply-To: <20240217100200.1494980-1-martin.blumenstingl@googlemail.com>
-References: <20240217100200.1494980-1-martin.blumenstingl@googlemail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M6XWPE/C"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 92F19C433C7;
+	Sat, 17 Feb 2024 13:01:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708174881;
+	bh=uiy23fzx9AJKJeZCc+CpWKPnHutJKS8U/tiBSjzkWs4=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=M6XWPE/CJ/2hlwW69ATq3fqpxb7P56tKpuB2LexT0HGjqxTiy5/bfK27l5GMbAbcA
+	 rUgEyNm2L4IIrJqwcPKxP3FSb1pLxzP3K+wQGovS5EuHMXX9l5VQUTLA7zRhf4ADhg
+	 I5ENZaOetAG0hF4i/mkJR57ToYqfyNuIkQ5AKi5OlyvcSjlkty2pZKhrb9bxhb9G0o
+	 ARev8ZEOSs7hcd/933PjS6taTneizlfsdMf3SAGp22SR7S7uwwcsQF7C196hJ1O2Hp
+	 n4HHenkD12SKmkaOuxMe7axQuuIpIM+7ccj62XfWqlhhIqqaasE51ngUY4SW2Px0EY
+	 4LdVb8LCe2chw==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79BC8C5475B;
+	Sat, 17 Feb 2024 13:01:21 +0000 (UTC)
+From: Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>
+Date: Sat, 17 Feb 2024 21:00:54 +0800
+Subject: [PATCH v4 1/4] mmc: dw_mmc-hi3798cv200: remove MODULE_ALIAS()
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20240217-b4-mmc-hi3798mv200-v4-1-0fdd9bd48532@outlook.com>
+References: <20240217-b4-mmc-hi3798mv200-v4-0-0fdd9bd48532@outlook.com>
+In-Reply-To: <20240217-b4-mmc-hi3798mv200-v4-0-0fdd9bd48532@outlook.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, 
+ Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, 
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
+ Conor Dooley <conor+dt@kernel.org>
+Cc: Igor Opaniuk <igor.opaniuk@linaro.org>, 
+ tianshuliang <tianshuliang@hisilicon.com>, David Yang <mmyangfl@gmail.com>, 
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+ devicetree@vger.kernel.org, Yang Xiwen <forbidden405@outlook.com>, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+X-Mailer: b4 0.12.4
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1708174876; l=722;
+ i=forbidden405@outlook.com; s=20230724; h=from:subject:message-id;
+ bh=MzqKbWX8E5l9h/hzBiWtMINHXtoCtQN0jkOqsqOv7OM=;
+ b=p0Ru/9B0Gk5E2CLKrQbhOKHda9ywTxh0drWAf+iaFC5vAIAFNgoKlj+svGoazn/8OR2LKjXQm
+ tbUpbM/Cn74D3Pkr29ca8stVMRbgFhJxfLx6P32i2mmrRFadbIBH/ob
+X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
+ pk=qOD5jhp891/Xzc+H/PZ8LWVSWE3O/XCQnAg+5vdU2IU=
+X-Endpoint-Received:
+ by B4 Relay for forbidden405@outlook.com/20230724 with auth_id=67
+X-Original-From: Yang Xiwen <forbidden405@outlook.com>
+Reply-To: <forbidden405@outlook.com>
 
-Commit 32f18e596141 ("mmc: improve API to make clear hw_reset callback
-is for cards") made it clear that the hw_reset callback is intended for
-resetting the card. Remove the .card_hw_reset callback from the
-meson-mx-sdhc-mmc driver because it's purpose is to reset the SDHC
-controller (FIFOs, PHY, DMA interface, ...).
+From: Yang Xiwen <forbidden405@outlook.com>
 
-While here also rename and change the argument of meson_mx_sdhc_hw_reset
-so it cannot be called by accident as a replacement for card_hw_reset in
-the future.
+The alias is not used and should be removed.
 
-Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 ---
- drivers/mmc/host/meson-mx-sdhc-mmc.c | 13 +++++--------
- 1 file changed, 5 insertions(+), 8 deletions(-)
+ drivers/mmc/host/dw_mmc-hi3798cv200.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/mmc/host/meson-mx-sdhc-mmc.c b/drivers/mmc/host/meson-mx-sdhc-mmc.c
-index 1ed9731e77ef..31f750301dc1 100644
---- a/drivers/mmc/host/meson-mx-sdhc-mmc.c
-+++ b/drivers/mmc/host/meson-mx-sdhc-mmc.c
-@@ -65,10 +65,8 @@ static const struct regmap_config meson_mx_sdhc_regmap_config = {
- 	.max_register = MESON_SDHC_CLK2,
- };
+diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+index e9470c50a348..61923a518369 100644
+--- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
++++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+@@ -201,4 +201,3 @@ module_platform_driver(dw_mci_hi3798cv200_driver);
  
--static void meson_mx_sdhc_hw_reset(struct mmc_host *mmc)
-+static void meson_mx_sdhc_reset(struct meson_mx_sdhc_host *host)
- {
--	struct meson_mx_sdhc_host *host = mmc_priv(mmc);
--
- 	regmap_write(host->regmap, MESON_SDHC_SRST, MESON_SDHC_SRST_MAIN_CTRL |
- 		     MESON_SDHC_SRST_RXFIFO | MESON_SDHC_SRST_TXFIFO |
- 		     MESON_SDHC_SRST_DPHY_RX | MESON_SDHC_SRST_DPHY_TX |
-@@ -116,7 +114,7 @@ static void meson_mx_sdhc_wait_cmd_ready(struct mmc_host *mmc)
- 		dev_warn(mmc_dev(mmc),
- 			 "Failed to poll for CMD_BUSY while processing CMD%d\n",
- 			 host->cmd->opcode);
--		meson_mx_sdhc_hw_reset(mmc);
-+		meson_mx_sdhc_reset(host);
- 	}
- 
- 	ret = regmap_read_poll_timeout(host->regmap, MESON_SDHC_ESTA, esta,
-@@ -127,7 +125,7 @@ static void meson_mx_sdhc_wait_cmd_ready(struct mmc_host *mmc)
- 		dev_warn(mmc_dev(mmc),
- 			 "Failed to poll for ESTA[13:11] while processing CMD%d\n",
- 			 host->cmd->opcode);
--		meson_mx_sdhc_hw_reset(mmc);
-+		meson_mx_sdhc_reset(host);
- 	}
- }
- 
-@@ -495,7 +493,6 @@ static int meson_mx_sdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- }
- 
- static const struct mmc_host_ops meson_mx_sdhc_ops = {
--	.card_hw_reset			= meson_mx_sdhc_hw_reset,
- 	.request			= meson_mx_sdhc_request,
- 	.set_ios			= meson_mx_sdhc_set_ios,
- 	.card_busy			= meson_mx_sdhc_card_busy,
-@@ -618,7 +615,7 @@ static irqreturn_t meson_mx_sdhc_irq_thread(int irq, void *irq_data)
- 	}
- 
- 	if (cmd->error == -EIO || cmd->error == -ETIMEDOUT)
--		meson_mx_sdhc_hw_reset(host->mmc);
-+		meson_mx_sdhc_reset(host);
- 	else if (cmd->data)
- 		/*
- 		 * Clear the FIFOs after completing data transfers to prevent
-@@ -728,7 +725,7 @@ static void meson_mx_sdhc_init_hw(struct mmc_host *mmc)
- {
- 	struct meson_mx_sdhc_host *host = mmc_priv(mmc);
- 
--	meson_mx_sdhc_hw_reset(mmc);
-+	meson_mx_sdhc_reset(host);
- 
- 	regmap_write(host->regmap, MESON_SDHC_CTRL,
- 		     FIELD_PREP(MESON_SDHC_CTRL_RX_PERIOD, 0xf) |
+ MODULE_DESCRIPTION("HiSilicon Hi3798CV200 Specific DW-MSHC Driver Extension");
+ MODULE_LICENSE("GPL v2");
+-MODULE_ALIAS("platform:dwmmc_hi3798cv200");
+
 -- 
-2.43.2
+2.43.0
 
