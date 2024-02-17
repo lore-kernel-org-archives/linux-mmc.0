@@ -1,31 +1,30 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B38457CF1D;
-	Sat, 17 Feb 2024 14:55:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 744257B3D0;
+	Sat, 17 Feb 2024 15:01:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708181705; cv=none; b=G9ldsHhD/PGDiz6SNCYEigVnR2ONnxtNjvj1zfm6CCrtQx/L1zBfRfKh2uHrdF7fP5JW0SK7J/ibhvUlaPQwMUe6pJ5ulqqEIjU631L5Lp8F+gsMREdHzInWmDqjy3brCl9N+Y6EK6iBJxUIg9CkDPWazqQEJj/eepffMgqE3Zc=
+	t=1708182084; cv=none; b=hX2EO9niyacKZhh6gwaZ6pGAYdt0ESrwSxWAkfvnQtF0kSeDIl7Q/g28VyKQhRQ8FATaVRdIFOhnMshjqShb3LnHy8851dr2dYFS0tjUXNnmx1goAhwq91umhXyOJqADk4FxoqTtWNb1ecOA+8uY2rLTYl7EYgxxPQukry8xmGU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708181705; c=relaxed/simple;
-	bh=ys4TWpRFySfLoe5m+6WVvOTSYfT8WMPoyAdTVT2ja0s=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=AkirlzgBNj92mgH7jAIZog88TsUTeiWpeAwGOSCtX+vZGF9RSMVS6ZQIsNUpH+33AjDo8B1cc9CFWzprI6tYUkpfuGB0uDE93w4J8CagaW1UgGjvaBBy1B7573z1ZbQ6vWJ560PWx4Upv3mZQh60CAyGzgJVVG/Ft7A+9E507bc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LJT39okk; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708182084; c=relaxed/simple;
+	bh=IojVOTkkmUgO8R4R5BC+JvxU3MusAnoRWz5cmE/Gqjc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ROUHKwGG1uS7o5CcSzRkLZJni/Ly4zwLMsv7lflI9CxMqQZ3sYR9gBye91pM3SE3A2QwVlai3F2nNnQgBRllIilkPVBUttQyxGOsRw/XlfsYNO+EyrRLwMuLA6MLRTrWT0j9MmzSyavFXQI/PAJaqKKCGF21+kJ2EI8IRfpDgv4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CtrUsh6b; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LJT39okk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 97691C43390;
-	Sat, 17 Feb 2024 14:55:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CtrUsh6b"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4AD4EC433F1;
+	Sat, 17 Feb 2024 15:01:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708181705;
-	bh=ys4TWpRFySfLoe5m+6WVvOTSYfT8WMPoyAdTVT2ja0s=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=LJT39okkBvRkB1/rfvHLipvVVJ0i1wilmBrRd93A11ax8hXVitJc+PYS7CRKvMvt1
-	 c/77ZMqL6wZjxQvyPQ3WiRt7y3R6MFkguN3SxokHm4ERsj+1GYOgxtw5jB2zLyWvGE
-	 8n5uwkVlM/ubCBZcsIarjoEGsUj9qxxINnz1XIRuOxEt4SkXr6Kv01CbzLcqByc242
-	 IvspNiJL+QoWyWjxEzQKDLhWAJXW5edfp40Qw66cGc2mVjRynYg2trkzyYtUIUPt+X
-	 TMsOFESG+D+IJAfA1CMUfbPxaGXhSthdasfx3yLSCLsvRm72e0Fhw2dv6yeaK0SyPO
-	 EntMh0Cl77qUA==
+	s=k20201202; t=1708182083;
+	bh=IojVOTkkmUgO8R4R5BC+JvxU3MusAnoRWz5cmE/Gqjc=;
+	h=From:To:Cc:Subject:Date:From;
+	b=CtrUsh6bwVqhdBGdyOuDk0xtJef3k8N8vCn7a3CH5JXonVHQxfPDLMFYZdVsQDVWk
+	 +bjGkaUhzstRRxhqn8KOlfclvoHzFFGzo67TuaoxpU8lmWHjta9QxHjyN8o/C3jf0y
+	 PjMVYo4N6IeVR9dOnA/e47OtlC4ClvurnxM7fFTS6D0nfUzgLPukjzTlGm1O7ag76A
+	 lhj0tWdeUNi2x9yXHIeHYzB/mKh4DraVWbyGjO4sUL83gBliNF7T4BXhGmXzHVrEli
+	 ZU4VJRgjOqQiF9rXK/MXwDUC8+TcX1EnGeGiIYuYkoK0ndebkMu2qVS/x4TZ/z42ey
+	 OkyO12z0GoLKQ==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh+dt@kernel.org>,
@@ -36,12 +35,10 @@ Cc: linux-mmc@vger.kernel.org,
 	devicetree@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	linux-riscv@lists.infradead.org
-Subject: [PATCH 2/2] mmc: sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002
-Date: Sat, 17 Feb 2024 22:42:02 +0800
-Message-ID: <20240217144202.3808-3-jszhang@kernel.org>
+Subject: [PATCH RFC] riscv: dts: sophgo: add sdcard support for milkv duo
+Date: Sat, 17 Feb 2024 22:48:26 +0800
+Message-ID: <20240217144826.3944-1-jszhang@kernel.org>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20240217144202.3808-1-jszhang@kernel.org>
-References: <20240217144202.3808-1-jszhang@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,119 +47,78 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add support for the mmc controller in the Sophgo CV1800B and SG2002
-with corresponding new compatible strings. Implement custom sdhci_ops.
+Add sdhci dt node in SoC dtsi and enable it in milkv duo dts.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/sdhci-of-dwcmshc.c | 66 +++++++++++++++++++++++++++++
- 1 file changed, 66 insertions(+)
+Since cv1800b's clk support isn't in, this patch uses fixed dummy clk
+and just RFC, I will send formal patch after clk support is ready.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index a1f57af6acfb..ab4b964d4058 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -52,6 +52,20 @@
- #define AT_CTRL_SWIN_TH_VAL_MASK	GENMASK(31, 24) /* bits [31:24] */
- #define AT_CTRL_SWIN_TH_VAL		0x9  /* sampling window threshold */
- 
-+/* Sophgo CV18XX specific Registers */
-+#define CV18XX_SDHCI_MSHC_CTRL			0x00
-+#define  CV18XX_EMMC_FUNC_EN			BIT(0)
-+#define  CV18XX_LATANCY_1T			BIT(1)
-+#define CV18XX_SDHCI_PHY_TX_RX_DLY		0x40
-+#define  CV18XX_PHY_TX_DLY_MSK			GENMASK(6, 0)
-+#define  CV18XX_PHY_TX_SRC_MSK			GENMASK(9, 8)
-+#define  CV18XX_PHY_TX_SRC_INVERT_CLK_TX	0x1
-+#define  CV18XX_PHY_RX_DLY_MSK			GENMASK(22, 16)
-+#define  CV18XX_PHY_RX_SRC_MSK			GENMASK(25, 24)
-+#define  CV18XX_PHY_RX_SRC_INVERT_RX_CLK	0x1
-+#define CV18XX_SDHCI_PHY_CONFIG			0x4c
-+#define  CV18XX_PHY_TX_BPS			BIT(0)
-+
- /* Rockchip specific Registers */
- #define DWCMSHC_EMMC_DLL_CTRL		0x800
- #define DWCMSHC_EMMC_DLL_RXCLK		0x804
-@@ -642,6 +656,35 @@ static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	}
- }
- 
-+static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 val, emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
-+
-+	sdhci_reset(host, mask);
-+
-+	if ((host->mmc->caps2 & emmc_caps) == emmc_caps) {
-+		val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-+		val |= CV18XX_EMMC_FUNC_EN;
-+		sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-+	}
-+
-+	val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-+	val |= CV18XX_LATANCY_1T;
-+	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-+
-+	val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_CONFIG);
-+	val |= CV18XX_PHY_TX_BPS;
-+	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_CONFIG);
-+
-+	val =  (FIELD_PREP(CV18XX_PHY_TX_DLY_MSK, 0) |
-+		FIELD_PREP(CV18XX_PHY_TX_SRC_MSK, CV18XX_PHY_TX_SRC_INVERT_CLK_TX) |
-+		FIELD_PREP(CV18XX_PHY_RX_DLY_MSK, 0) |
-+		FIELD_PREP(CV18XX_PHY_RX_SRC_MSK, CV18XX_PHY_RX_SRC_INVERT_RX_CLK));
-+	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
-+}
-+
- static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.set_clock		= sdhci_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
-@@ -671,6 +714,15 @@ static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
- 	.platform_execute_tuning = &th1520_execute_tuning,
+ .../riscv/boot/dts/sophgo/cv1800b-milkv-duo.dts |  8 ++++++++
+ arch/riscv/boot/dts/sophgo/cv18xx.dtsi          | 17 +++++++++++++++++
+ 2 files changed, 25 insertions(+)
+
+diff --git a/arch/riscv/boot/dts/sophgo/cv1800b-milkv-duo.dts b/arch/riscv/boot/dts/sophgo/cv1800b-milkv-duo.dts
+index 3af9e34b3bc7..94e64ddce8fa 100644
+--- a/arch/riscv/boot/dts/sophgo/cv1800b-milkv-duo.dts
++++ b/arch/riscv/boot/dts/sophgo/cv1800b-milkv-duo.dts
+@@ -33,6 +33,14 @@ &osc {
+ 	clock-frequency = <25000000>;
  };
  
-+static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
-+	.set_clock		= sdhci_set_clock,
-+	.set_bus_width		= sdhci_set_bus_width,
-+	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
-+	.get_max_clock		= dwcmshc_get_max_clock,
-+	.reset			= cv18xx_sdhci_reset,
-+	.adma_write_desc	= dwcmshc_adma_write_desc,
++&sdhci0 {
++	status = "okay";
++	bus-width = <4>;
++	no-1-8-v;
++	no-mmc;
++	no-sdio;
 +};
 +
- static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
- 	.ops = &sdhci_dwcmshc_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-@@ -700,6 +752,12 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ &uart0 {
+ 	status = "okay";
  };
+diff --git a/arch/riscv/boot/dts/sophgo/cv18xx.dtsi b/arch/riscv/boot/dts/sophgo/cv18xx.dtsi
+index 2d6f4a4b1e58..405f4ba18392 100644
+--- a/arch/riscv/boot/dts/sophgo/cv18xx.dtsi
++++ b/arch/riscv/boot/dts/sophgo/cv18xx.dtsi
+@@ -4,6 +4,7 @@
+  * Copyright (C) 2023 Inochi Amaoto <inochiama@outlook.com>
+  */
  
-+static const struct sdhci_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
-+	.ops = &sdhci_dwcmshc_cv18xx_ops,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+};
++#include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/interrupt-controller/irq.h>
+ 
+ / {
+@@ -45,6 +46,13 @@ osc: oscillator {
+ 		#clock-cells = <0>;
+ 	};
+ 
++	sdhci_clk: sdhci-clock {
++		compatible = "fixed-clock";
++		clock-frequency = <375000000>;
++		clock-output-names = "sdhci_clk";
++		#clock-cells = <0>;
++	};
 +
- static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
- {
- 	int err;
-@@ -768,6 +826,14 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
- 		.compatible = "snps,dwcmshc-sdhci",
- 		.data = &sdhci_dwcmshc_pdata,
- 	},
-+	{
-+		.compatible = "sophgo,cv1800b-dwcmshc",
-+		.data = &sdhci_dwcmshc_cv18xx_pdata,
-+	},
-+	{
-+		.compatible = "sophgo,sg2002-dwcmshc",
-+		.data = &sdhci_dwcmshc_cv18xx_pdata,
-+	},
- 	{
- 		.compatible = "thead,th1520-dwcmshc",
- 		.data = &sdhci_dwcmshc_th1520_pdata,
+ 	soc {
+ 		compatible = "simple-bus";
+ 		interrupt-parent = <&plic>;
+@@ -175,6 +183,15 @@ uart4: serial@41c0000 {
+ 			status = "disabled";
+ 		};
+ 
++		sdhci0: mmc@4310000 {
++			compatible = "sophgo,cv1800b-dwcmshc";
++			reg = <0x4310000 0x1000>;
++			interrupts = <36 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&sdhci_clk>;
++			clock-names = "core";
++			status = "disabled";
++		};
++
+ 		plic: interrupt-controller@70000000 {
+ 			reg = <0x70000000 0x4000000>;
+ 			interrupts-extended = <&cpu0_intc 11>, <&cpu0_intc 9>;
 -- 
 2.43.0
 
