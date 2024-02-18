@@ -1,103 +1,145 @@
-Received: from szxga04-in.huawei.com (szxga04-in.huawei.com [45.249.212.190])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B168C376;
-	Sun, 18 Feb 2024 02:33:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.190
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88091DDB8;
+	Sun, 18 Feb 2024 08:05:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708223624; cv=none; b=oNeenRmQY5GwG9LKRoQ9mPpXBFwHGxaxAgGOdl0IP+jUCI+I3YhBezGD5LIPNLzEG1qJt2u19iud6wKikytooFr468YdOKeTCpL6TKdAh2AjHIFuUxlXA7xnT5cADbFFnV+N2eUvaIUPsljzefn9P4ilaXV42ZmxCrED+EK4ODk=
+	t=1708243554; cv=none; b=SxCng3/ejDxLyWvtAbjB06lWEkzcdE6RqDirKIsGGSDKawoVNGc8RmQSzQBMDdVWOz0f9o+PLpPWMyIH5j6ocHzHNiq9InlAOE4UqZIupjffQvuMr7wHLp6/njUmiWCUYXP1gIb6Srwdv/SZyysFNvJkjBqcfPjgc2da6UMzWiY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708223624; c=relaxed/simple;
-	bh=k1CAJJG7cwRcOmzPDTOHpD65ijwN1N1laTyLUY8E9mE=;
-	h=Subject:To:CC:References:From:Message-ID:Date:MIME-Version:
-	 In-Reply-To:Content-Type; b=ujKiJyO5NhpbVtviaD+TTudLfCaP8fREDm5+VQg2Lt39DJhYRcZwgvc+3wZqkLBF2ucFz9R7R1m+DAO0WkaKoMZtC+EACvnwFZt83iYhjd7hcDI+a6zZTCXlZ3CSeynwa96Skte7Mo2yMYFLbIqzr8nN5hjjvSxbKj5jdp/slTo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.190
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
-Received: from mail.maildlp.com (unknown [172.19.88.234])
-	by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4TcqSj2TRzz1xmkD;
-	Sun, 18 Feb 2024 10:32:21 +0800 (CST)
-Received: from kwepemm600013.china.huawei.com (unknown [7.193.23.68])
-	by mail.maildlp.com (Postfix) with ESMTPS id 546CF1400CC;
-	Sun, 18 Feb 2024 10:33:40 +0800 (CST)
-Received: from [10.174.178.46] (10.174.178.46) by
- kwepemm600013.china.huawei.com (7.193.23.68) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Sun, 18 Feb 2024 10:33:38 +0800
-Subject: Re: [PATCH 14/17] ubiblock: pass queue_limits to blk_mq_alloc_disk
-To: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
-CC: Richard Weinberger <richard@nod.at>, Anton Ivanov
-	<anton.ivanov@cambridgegreys.com>, Johannes Berg <johannes@sipsolutions.net>,
-	Justin Sanders <justin@coraid.com>, Denis Efremov <efremov@linux.com>, Josef
- Bacik <josef@toxicpanda.com>, Geoff Levand <geoff@infradead.org>, Ilya
- Dryomov <idryomov@gmail.com>, "Md. Haris Iqbal" <haris.iqbal@ionos.com>, Jack
- Wang <jinpu.wang@ionos.com>, Ming Lei <ming.lei@redhat.com>, Maxim Levitsky
-	<maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Miquel Raynal <miquel.raynal@bootlin.com>, Vignesh
- Raghavendra <vigneshr@ti.com>, Vineeth Vijayan <vneethv@linux.ibm.com>,
-	<linux-block@vger.kernel.org>, <nbd@other.debian.org>,
-	<ceph-devel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-	<linux-mtd@lists.infradead.org>, <linux-s390@vger.kernel.org>
-References: <20240215070300.2200308-1-hch@lst.de>
- <20240215070300.2200308-15-hch@lst.de>
-From: Zhihao Cheng <chengzhihao1@huawei.com>
-Message-ID: <6b559ea2-944e-c5f6-f7ce-1119c5369a48@huawei.com>
-Date: Sun, 18 Feb 2024 10:33:37 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.5.0
+	s=arc-20240116; t=1708243554; c=relaxed/simple;
+	bh=ttnZGnH/KEDMCu9kI5+L2dr0PEX11yWRxMG0Mkdt0AQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=m33UPgIuTx/Xgm0LfPi2V23jL3/akuToiCHZ8RqfnJTjng7A9ak692rkDZPJpo29j+QTKo9P3cdLjWO+dBA/rRxqUuox+fvmB+BDoxjhJr/R0dqpBDAVFIjd5TxWUQ80mhBcNUHOgtkFs94kiRiOyNJG28+6LsEB1tTZrwxAZ7M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=enSBJw6Y; arc=none smtp.client-ip=192.198.163.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="enSBJw6Y"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1708243552; x=1739779552;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=ttnZGnH/KEDMCu9kI5+L2dr0PEX11yWRxMG0Mkdt0AQ=;
+  b=enSBJw6YmZZQELyM4/Hnsfl2eo2X4GBb+Ei+dzQlIs9NGkhOifNPSp7q
+   qRAMr/ky6WYuCBl4n1W0KIoeU8n/aQTL0q/YEArgdJFSQCF5TYX7xH2R9
+   8Eg9xw7qH168oWLMCf/ut2DF7NV4KkHl6lOPP4yJhtVuErLw6LjPqcgmu
+   zA9wE472PQSG/qYZLs+Do19CKZNDyIb8Szu3m3pjT12N4xNQ7Y/0WCGNZ
+   DD/ey3RcHDUe+blAFWyg3nlLhQ1ExQgKgVL5kGexfoJaMOsJ8/BhzIChC
+   8dKxdG1uWDPkO7RijInQROJv5sIUEjfZOwfzdjnH+8Umtr7EUG3cZvUVo
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10987"; a="6109381"
+X-IronPort-AV: E=Sophos;i="6.06,168,1705392000"; 
+   d="scan'208";a="6109381"
+Received: from orviesa004.jf.intel.com ([10.64.159.144])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Feb 2024 00:05:51 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.06,168,1705392000"; 
+   d="scan'208";a="8904608"
+Received: from lkp-server02.sh.intel.com (HELO 3c78fa4d504c) ([10.239.97.151])
+  by orviesa004.jf.intel.com with ESMTP; 18 Feb 2024 00:05:46 -0800
+Received: from kbuild by 3c78fa4d504c with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1rbcAR-0002sq-05;
+	Sun, 18 Feb 2024 08:05:10 +0000
+Date: Sun, 18 Feb 2024 16:03:00 +0800
+From: kernel test robot <lkp@intel.com>
+To: Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>
+Cc: oe-kbuild-all@lists.linux.dev, Igor Opaniuk <igor.opaniuk@linaro.org>,
+	tianshuliang <tianshuliang@hisilicon.com>,
+	David Yang <mmyangfl@gmail.com>, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	Yang Xiwen <forbidden405@outlook.com>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: add support for hi3798mv200
+Message-ID: <202402181540.H4Ose96P-lkp@intel.com>
+References: <20240216-b4-mmc-hi3798mv200-v1-1-7d46db845ae6@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20240215070300.2200308-15-hch@lst.de>
-Content-Type: text/plain; charset="gbk"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
- kwepemm600013.china.huawei.com (7.193.23.68)
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240216-b4-mmc-hi3798mv200-v1-1-7d46db845ae6@outlook.com>
 
-ÔÚ 2024/2/15 15:02, Christoph Hellwig Ð´µÀ:
-> Pass the few limits ubiblock imposes directly to blk_mq_alloc_disk
-> instead of setting them one at a time.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->   drivers/mtd/ubi/block.c | 6 ++++--
->   1 file changed, 4 insertions(+), 2 deletions(-)
+Hi Yang,
 
-Reviewed-by: Zhihao Cheng <chengzhihao1@huawei.com>
-> 
-> diff --git a/drivers/mtd/ubi/block.c b/drivers/mtd/ubi/block.c
-> index 9be87c231a2eba..5c8fdcc088a0df 100644
-> --- a/drivers/mtd/ubi/block.c
-> +++ b/drivers/mtd/ubi/block.c
-> @@ -348,6 +348,9 @@ static int calc_disk_capacity(struct ubi_volume_info *vi, u64 *disk_capacity)
->   
->   int ubiblock_create(struct ubi_volume_info *vi)
->   {
-> +	struct queue_limits lim = {
-> +		.max_segments		= UBI_MAX_SG_COUNT,
-> +	};
->   	struct ubiblock *dev;
->   	struct gendisk *gd;
->   	u64 disk_capacity;
-> @@ -393,7 +396,7 @@ int ubiblock_create(struct ubi_volume_info *vi)
->   
->   
->   	/* Initialize the gendisk of this ubiblock device */
-> -	gd = blk_mq_alloc_disk(&dev->tag_set, NULL, dev);
-> +	gd = blk_mq_alloc_disk(&dev->tag_set, &lim, dev);
->   	if (IS_ERR(gd)) {
->   		ret = PTR_ERR(gd);
->   		goto out_free_tags;
-> @@ -416,7 +419,6 @@ int ubiblock_create(struct ubi_volume_info *vi)
->   	dev->gd = gd;
->   
->   	dev->rq = gd->queue;
-> -	blk_queue_max_segments(dev->rq, UBI_MAX_SG_COUNT);
->   
->   	list_add_tail(&dev->list, &ubiblock_devices);
->   
-> 
+kernel test robot noticed the following build errors:
 
+[auto build test ERROR on 8d3dea210042f54b952b481838c1e7dfc4ec751d]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Yang-Xiwen-via-B4-Relay/mmc-dw_mmc-add-support-for-hi3798mv200/20240216-014744
+base:   8d3dea210042f54b952b481838c1e7dfc4ec751d
+patch link:    https://lore.kernel.org/r/20240216-b4-mmc-hi3798mv200-v1-1-7d46db845ae6%40outlook.com
+patch subject: [PATCH 1/3] mmc: dw_mmc: add support for hi3798mv200
+config: parisc-allyesconfig (https://download.01.org/0day-ci/archive/20240218/202402181540.H4Ose96P-lkp@intel.com/config)
+compiler: hppa-linux-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240218/202402181540.H4Ose96P-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202402181540.H4Ose96P-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+   drivers/mmc/host/dw_mmc-hi3798mv200.c: In function 'dw_mci_hi3798mv200_init':
+>> drivers/mmc/host/dw_mmc-hi3798mv200.c:178:36: error: passing argument 1 of 'mmc_of_parse_clk_phase' from incompatible pointer type [-Werror=incompatible-pointer-types]
+     178 |         mmc_of_parse_clk_phase(host->dev, &priv->phase_map);
+         |                                ~~~~^~~~~
+         |                                    |
+         |                                    struct device *
+   In file included from drivers/mmc/host/dw_mmc-hi3798mv200.c:11:
+   include/linux/mmc/host.h:542:46: note: expected 'struct mmc_host *' but argument is of type 'struct device *'
+     542 | void mmc_of_parse_clk_phase(struct mmc_host *host,
+         |                             ~~~~~~~~~~~~~~~~~^~~~
+   cc1: some warnings being treated as errors
+
+
+vim +/mmc_of_parse_clk_phase +178 drivers/mmc/host/dw_mmc-hi3798mv200.c
+
+   168	
+   169	static int dw_mci_hi3798mv200_init(struct dw_mci *host)
+   170	{
+   171		struct dw_mci_hi3798mv200_priv *priv;
+   172		struct device_node *np = host->dev->of_node;
+   173	
+   174		priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+   175		if (!priv)
+   176			return -ENOMEM;
+   177	
+ > 178		mmc_of_parse_clk_phase(host->dev, &priv->phase_map);
+   179	
+   180		priv->sample_clk = devm_clk_get_enabled(host->dev, "ciu-sample");
+   181		if (IS_ERR(priv->sample_clk)) {
+   182			dev_err(host->dev, "failed to get enabled ciu-sample clock\n");
+   183			return PTR_ERR(priv->sample_clk);
+   184		}
+   185	
+   186		priv->drive_clk = devm_clk_get_enabled(host->dev, "ciu-drive");
+   187		if (IS_ERR(priv->drive_clk)) {
+   188			dev_err(host->dev, "failed to get enabled ciu-drive clock\n");
+   189			return PTR_ERR(priv->drive_clk);
+   190		}
+   191	
+   192		priv->sap_dll_reg = syscon_regmap_lookup_by_phandle(np, "hisilicon,sap-dll-reg");
+   193		if (IS_ERR(priv->sap_dll_reg)) {
+   194			dev_err(host->dev, "failed to get sap-dll-reg\n");
+   195			return PTR_ERR(priv->sap_dll_reg);
+   196		}
+   197	
+   198		host->priv = priv;
+   199		return 0;
+   200	}
+   201	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
