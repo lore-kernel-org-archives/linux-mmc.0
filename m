@@ -1,170 +1,193 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2843B21103;
-	Mon, 19 Feb 2024 12:27:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B647C2D05D;
+	Mon, 19 Feb 2024 12:43:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708345640; cv=none; b=YRMaWyfc8YN5i0R0VIcquD+NdrBIfssBNj3RPHtiJDgb8TlxgLvkaVDYOVqlCKRlkc9SJmtR/FUigmA1aCBJgzfaTsKUGLGvJhQNGZ6CVnS4i7Kq3cpBJ3w4KGeqJF8WtyJYEwgmn8bla7YawotWK3r5lQPLz9l606P1mk0zjks=
+	t=1708346599; cv=none; b=TGi2Zpf+bNqIDzzZP065nu1oNmYzKNxxumPCWmHDVFof62CZvQQFLdFIHOn1VI5hPK3pkt6OM6DaEnbgqpYiN0CElkZ2Tl08kgAQY09h7lr5N3mU1CEp8ZkyhaP+GYq1qBqfbFCEkbLaoDb8Xh7/v631O+c05J81Jf/b/iYhDu4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708345640; c=relaxed/simple;
-	bh=wjZw+mWJBR/kGq3Uc+1DZLRkxqifdShqnWAT4YCy3W8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=PnV+35/l1FdPhDJ7/lp6B0vg5LKhTFtrbkrICSvjcDtSpkdXDcubGy3AzLS5n3FZnxENgbfmYfGV3lyZjl7XqE9462jyeElEtGHN/zNSjSwjv8HJtn84POh7Rttl5Fo6M9hWcuL4/hUDq/dqISKCrqopo8mXGrERiiFdo+DM4ng=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=taKnRuL1; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708346599; c=relaxed/simple;
+	bh=Zs9XwXfin6vsvyZ0Tkvtj1y1nmSBKNq0xIOxwIjWzyM=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=YTJoZ8EbcZ+7CBnl21imVDg5A17m41Ein7P4lHojD4b3ofAg9W07nNbnVXZ6cfNsjJ2I9cqgsORO98ny7eEUayV0R0RrvXpcfoxXbelTC67VCKtKf6DpQcg9JwI1K5zZfMQntl37vZ3F1yIkmpmfkpYuok3FOcQDjJxtANK+AAw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=marliere.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=marliere.net header.i=@marliere.net header.b=EyWdc7sc; arc=none smtp.client-ip=209.85.214.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=marliere.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="taKnRuL1"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE9CFC433F1;
-	Mon, 19 Feb 2024 12:27:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708345639;
-	bh=wjZw+mWJBR/kGq3Uc+1DZLRkxqifdShqnWAT4YCy3W8=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=taKnRuL1BdTEPmcAkix1YrJfWe0NSXrx1QPP3+hwp0hsKkylMuo4/QMRgZnrlM5qH
-	 FLbKpFGDGbfVykoqDJ3b/2XtdUe5KdgI0khlGlGIl481RFuL1gJn4y7EAJWoOfNADk
-	 VXTacMjtmP6iUsMIw1dwzV1xTNWdUzQDDYkyNIk7NjcZx3+ogVSy0Va+i6whO04BFW
-	 vs5kgZ6YGRESnLD0S/wzTDYo94fZ5PKDxCzsV8Uokdh+zRgjXDTgA3ad2Lte+Jg+f3
-	 jQDEkIOBAaPhL3Z3waxc7PaZ78gvjI6jr7SC9qOo8iH7KvZ7MVaV29xO9yXg9piKNQ
-	 yQ2KCXuit0Hyw==
-Message-ID: <956ebf94-62ef-4e67-893e-86586a980883@kernel.org>
-Date: Mon, 19 Feb 2024 13:27:09 +0100
+	dkim=pass (2048-bit key) header.d=marliere.net header.i=@marliere.net header.b="EyWdc7sc"
+Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-1dba177c596so21737645ad.0;
+        Mon, 19 Feb 2024 04:43:17 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708346597; x=1708951397;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:dkim-signature:from:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=81C9/qYgaM7+uTbMn1Q+DPCJE1ow0PPCxUFOn05+/9E=;
+        b=BXh05nLq4ZAwiiAhDPEZREniCQcMZ12fHTSxdUiJUTIWEB1UXpKj5oYCZtw8Ad8i40
+         Axl3JPnCCkNhjDF93nfqLNo833Fp1l/qniG9FHLc4d6VH8hYPbYc5a25495qaHv2AEAo
+         1/CUPIvU/vFfAd79e0+vlMoc5oOad311wafs8WBoE+YflnUaArwo6f0f82DjccZeXXSs
+         2esxTigin/bUaUYcIvzHrZWi6zjNUauYVzfWHC4Xj97feyDCUUc9g83L7gC/KqUPa0SY
+         SmJAM3KMSSpW6EBLKGtKdBiMjhanr1AhDGqAZleDG+PJZft507pB6QdC/lvGVDkQll+T
+         rD4w==
+X-Forwarded-Encrypted: i=1; AJvYcCWfkqtjnR3YAjgO/DFdVH3b70gatTZ8EMeLWirTRNwBYKwM+Migu6K6hU3oGBNya2SuzmNzoalHY0E2P/LW4iWi3dzVm0/eh6DmBuHL
+X-Gm-Message-State: AOJu0YzcytFF1fFN5a7/1V+UE7diKcbkSvP9kQCfJqB8FNMkXzuoBQ20
+	SZskhQEyMtWH2Oige6VO2dWPGUq41QH2pZcEAnqT9tbn1PcnSuMcnwQXpozOZwQ+/Q==
+X-Google-Smtp-Source: AGHT+IFQZO85RawS9N/GVLt7CKZ2Nc56+OWGJeihEfPdmFPM26vz9zhNukHu0h491d1y4B0JgOf0Lg==
+X-Received: by 2002:a17:902:c402:b0:1d9:30e3:ea84 with SMTP id k2-20020a170902c40200b001d930e3ea84mr18763047plk.2.1708346596888;
+        Mon, 19 Feb 2024 04:43:16 -0800 (PST)
+Received: from mail.marliere.net ([24.199.118.162])
+        by smtp.gmail.com with ESMTPSA id y12-20020a170903010c00b001d974ffa1fcsm4325840plc.173.2024.02.19.04.43.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 19 Feb 2024 04:43:16 -0800 (PST)
+From: "Ricardo B. Marliere" <ricardo@marliere.net>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marliere.net;
+	s=2024; t=1708346594;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=81C9/qYgaM7+uTbMn1Q+DPCJE1ow0PPCxUFOn05+/9E=;
+	b=EyWdc7scphkQr3bgEmgzEcABO8mh0xDJgwJFz1daVDpM2LDssZ+DHj8aPcKj6rOYZHRYJT
+	bnGq+A91wOz9lQQSVJfNX3pcvgvmjE+hsnHguwuMDt1i1dSdjDrf+GFaIupCHRGonWz5KP
+	hWabEyF3QxgufHBQCMRQ0d2PIO36ZJJ9YhTEj4Ls7aOsT6wgh3nWtk+5xGo9V1TQYSpYFk
+	senLvpgdhx3msNDjWO/+bS/eJl4sujDMou1WSe178Tg5x3C/wtkuimMYHCq7vrTK5KkiQL
+	2b3+ENFI+UEO3bFcHNMphUnmi3csnUJWHexUm37d3XGdE54QE90+fEZ/88h4Hg==
+Authentication-Results: ORIGINATING;
+	auth=pass smtp.auth=ricardo@marliere.net smtp.mailfrom=ricardo@marliere.net
+Date: Mon, 19 Feb 2024 09:43:57 -0300
+Subject: [PATCH] mmc: core: constify the struct device_type usage
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/3] mmc: dw_mmc: add support for hi3798mv200
-Content-Language: en-US
-To: Yang Xiwen <forbidden405@outlook.com>, kernel test robot <lkp@intel.com>,
- Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>,
- Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung
- <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, Igor Opaniuk <igor.opaniuk@linaro.org>,
- tianshuliang <tianshuliang@hisilicon.com>, David Yang <mmyangfl@gmail.com>,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org
-References: <20240216-b4-mmc-hi3798mv200-v1-1-7d46db845ae6@outlook.com>
- <202402181540.H4Ose96P-lkp@intel.com>
- <SEZPR06MB695945299705B6E8BF0E326296522@SEZPR06MB6959.apcprd06.prod.outlook.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <SEZPR06MB695945299705B6E8BF0E326296522@SEZPR06MB6959.apcprd06.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+Message-Id: <20240219-device_cleanup-mmc-v1-1-1910e283cf5a@marliere.net>
+X-B4-Tracking: v=1; b=H4sIAAxN02UC/x2MQQqAIBAAvxJ7TlDrUl+JCFu3WkgTpQiiv7d0H
+ JiZBwplpgJ99UCmiwsfUcDUFeDm4kqKvTBYbVttTae8SEgT7uTimVQIqHRrjZ4RG985kDBlWvj
+ +p8P4vh8Z+m4kZAAAAA==
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+ "Ricardo B. Marliere" <ricardo@marliere.net>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3388; i=ricardo@marliere.net;
+ h=from:subject:message-id; bh=Zs9XwXfin6vsvyZ0Tkvtj1y1nmSBKNq0xIOxwIjWzyM=;
+ b=owEBbQKS/ZANAwAKAckLinxjhlimAcsmYgBl000RePCeBs1bWiwAl9LosSaNviJ82I1W3PzrM
+ Ut4tb+obZeJAjMEAAEKAB0WIQQDCo6eQk7jwGVXh+HJC4p8Y4ZYpgUCZdNNEQAKCRDJC4p8Y4ZY
+ poVXD/wLI4sBidqgdBxJQs4zMVBekU1VwhcVmqngHoYLP8wfbq7ynHP2WJwmm+hYDGFAApbP+l0
+ AJaksMcgVN0sZ1aQXzV7bYWH6l7Dq4IJ33wXoO1firTHC9r0Yt8t9q+C24wJOyBwEZL4MRCYfyV
+ 4GlifwrH+Xh53LAhkL/E3Mhntv2r8iTlKmblJOEDONlSOpGDvg+PiYxaku/D6iHM8GLc1jrXl4G
+ sVLBGoYayikC1F2NIFAkMCKhI1yPGCNJ5oDQjSqDeVrknAkIZmzAevyiJLmU5Y/+esoHkX3Tfx4
+ dYopAaTp28OwDLUkVGivJlZ1Vm1cJcJToStPbv1D/5pAf2KUS5wTuuItJPtNXosdmWp+j5iUKn8
+ +w+2425qZL3TSRnDWFo+NCH67cirRA9CX+NOBvgLxRxiZzkQXN8bGC5ekoftGLJblPRxPygw69u
+ Ndjk8TaQtxVi6LNf4erqpwN1zKtv4sktWHUsUMPgH/D2phwt2rI0jFGt76XeoKkQ/TEAwWaMDEM
+ DWofQvP5AO/oklARoOeEWxbaamZThs/5SeDMCgX1DjdlRSQtyFiVsqny3wVRhEuwgXcSn/vlgQP
+ bUE5HALCacooKRMyMIH2Jp+jMv3KQjluPXzvxQJHq7+RNGZzaq6BcaUzqmHvZSnRPbxcU1HVwgk
+ O96BMcM9739e+tA==
+X-Developer-Key: i=ricardo@marliere.net; a=openpgp;
+ fpr=030A8E9E424EE3C0655787E1C90B8A7C638658A6
 
-On 18/02/2024 09:21, Yang Xiwen wrote:
-> On 2/18/2024 4:03 PM, kernel test robot wrote:
->> Hi Yang,
->>
->> kernel test robot noticed the following build errors:
->>
->> [auto build test ERROR on 8d3dea210042f54b952b481838c1e7dfc4ec751d]
->>
->> url:    https://github.com/intel-lab-lkp/linux/commits/Yang-Xiwen-via-B4-Relay/mmc-dw_mmc-add-support-for-hi3798mv200/20240216-014744
->> base:   8d3dea210042f54b952b481838c1e7dfc4ec751d
->> patch link:    https://lore.kernel.org/r/20240216-b4-mmc-hi3798mv200-v1-1-7d46db845ae6%40outlook.com
->> patch subject: [PATCH 1/3] mmc: dw_mmc: add support for hi3798mv200
->> config: parisc-allyesconfig (https://download.01.org/0day-ci/archive/20240218/202402181540.H4Ose96P-lkp@intel.com/config)
->> compiler: hppa-linux-gcc (GCC) 13.2.0
->> reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240218/202402181540.H4Ose96P-lkp@intel.com/reproduce)
->>
->> If you fix the issue in a separate patch/commit (i.e. not just a new version of
->> the same patch/commit), kindly add following tags
->> | Reported-by: kernel test robot <lkp@intel.com>
->> | Closes: https://lore.kernel.org/oe-kbuild-all/202402181540.H4Ose96P-lkp@intel.com/
->>
->> All errors (new ones prefixed by >>):
->>
->>     drivers/mmc/host/dw_mmc-hi3798mv200.c: In function 'dw_mci_hi3798mv200_init':
->>>> drivers/mmc/host/dw_mmc-hi3798mv200.c:178:36: error: passing argument 1 of 'mmc_of_parse_clk_phase' from incompatible pointer type [-Werror=incompatible-pointer-types]
->>       178 |         mmc_of_parse_clk_phase(host->dev, &priv->phase_map);
->>           |                                ~~~~^~~~~
->>           |                                    |
->>           |                                    struct device *
->>     In file included from drivers/mmc/host/dw_mmc-hi3798mv200.c:11:
->>     include/linux/mmc/host.h:542:46: note: expected 'struct mmc_host *' but argument is of type 'struct device *'
->>       542 | void mmc_of_parse_clk_phase(struct mmc_host *host,
->>           |                             ~~~~~~~~~~~~~~~~~^~~~
->>     cc1: some warnings being treated as errors
->>
->>
->> vim +/mmc_of_parse_clk_phase +178 drivers/mmc/host/dw_mmc-hi3798mv200.c
->>
->>     168	
->>     169	static int dw_mci_hi3798mv200_init(struct dw_mci *host)
->>     170	{
->>     171		struct dw_mci_hi3798mv200_priv *priv;
->>     172		struct device_node *np = host->dev->of_node;
->>     173	
->>     174		priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->>     175		if (!priv)
->>     176			return -ENOMEM;
->>     177	
->>   > 178		mmc_of_parse_clk_phase(host->dev, &priv->phase_map);
-> 
-> Please note that this patch is depending on another patch[1].
-> 
-> [1]: 
-> https://lore.kernel.org/linux-mmc/ae876e697ba16ba2925ec217c6b4e3d8ffea4ab3.camel@codeconstruct.com.au/T/#t
-> 
+Since commit aed65af1cc2f ("drivers: make device_type const"), the driver
+core can properly handle constant struct device_type. Move the sdio_type,
+sd_type and mmc_type variables to be constant structures as well, placing
+it into read-only memory which can not be modified at runtime.
 
-You did not provide any links to dependencies in cover letter nor in
-patch changelog. You included on purpose, which is nice and correct, the
-base commit:
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Ricardo B. Marliere <ricardo@marliere.net>
+---
+ drivers/mmc/core/bus.c  | 2 +-
+ drivers/mmc/core/bus.h  | 2 +-
+ drivers/mmc/core/mmc.c  | 2 +-
+ drivers/mmc/core/sd.c   | 2 +-
+ drivers/mmc/core/sd.h   | 2 +-
+ drivers/mmc/core/sdio.c | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
 
-	base-commit: 8d3dea210042f54b952b481838c1e7dfc4ec751d
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 48daeafdff7a..0ddaee0eae54 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -272,7 +272,7 @@ static void mmc_release_card(struct device *dev)
+ /*
+  * Allocate and initialise a new MMC card structure.
+  */
+-struct mmc_card *mmc_alloc_card(struct mmc_host *host, struct device_type *type)
++struct mmc_card *mmc_alloc_card(struct mmc_host *host, const struct device_type *type)
+ {
+ 	struct mmc_card *card;
+ 
+diff --git a/drivers/mmc/core/bus.h b/drivers/mmc/core/bus.h
+index 3996b191b68d..cfd0d02d3420 100644
+--- a/drivers/mmc/core/bus.h
++++ b/drivers/mmc/core/bus.h
+@@ -23,7 +23,7 @@ static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *a
+ static DEVICE_ATTR(name, S_IRUGO, mmc_##name##_show, NULL)
+ 
+ struct mmc_card *mmc_alloc_card(struct mmc_host *host,
+-	struct device_type *type);
++				const struct device_type *type);
+ int mmc_add_card(struct mmc_card *card);
+ void mmc_remove_card(struct mmc_card *card);
+ 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 58ed7193a3ca..5b2f7c285461 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -883,7 +883,7 @@ static struct attribute *mmc_std_attrs[] = {
+ };
+ ATTRIBUTE_GROUPS(mmc_std);
+ 
+-static struct device_type mmc_type = {
++static const struct device_type mmc_type = {
+ 	.groups = mmc_std_groups,
+ };
+ 
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index c3e554344c99..1c8148cdda50 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -805,7 +805,7 @@ static const struct attribute_group sd_std_group = {
+ };
+ __ATTRIBUTE_GROUPS(sd_std);
+ 
+-struct device_type sd_type = {
++const struct device_type sd_type = {
+ 	.groups = sd_std_groups,
+ };
+ 
+diff --git a/drivers/mmc/core/sd.h b/drivers/mmc/core/sd.h
+index 1af5a038bae9..fe6dd46927a4 100644
+--- a/drivers/mmc/core/sd.h
++++ b/drivers/mmc/core/sd.h
+@@ -4,7 +4,7 @@
+ 
+ #include <linux/types.h>
+ 
+-extern struct device_type sd_type;
++extern const struct device_type sd_type;
+ 
+ struct mmc_host;
+ struct mmc_card;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 5914516df2f7..4fb247fde5c0 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -66,7 +66,7 @@ static struct attribute *sdio_std_attrs[] = {
+ };
+ ATTRIBUTE_GROUPS(sdio_std);
+ 
+-static struct device_type sdio_type = {
++static const struct device_type sdio_type = {
+ 	.groups = sdio_std_groups,
+ };
+ 
 
-which does not include above commit apparently.
-
-How anyone can guess it and test your patches?
-
-Please send with proper dependencies marked.
+---
+base-commit: 25e69172db8a31ef8564ce1cf755ac5cb8374daa
+change-id: 20240219-device_cleanup-mmc-04210bcc3d9a
 
 Best regards,
-Krzysztof
+-- 
+Ricardo B. Marliere <ricardo@marliere.net>
 
