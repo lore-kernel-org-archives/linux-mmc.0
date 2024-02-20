@@ -1,156 +1,132 @@
-Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx3.molgen.mpg.de (mx3.molgen.mpg.de [141.14.17.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5315D6A03E
-	for <linux-mmc@vger.kernel.org>; Tue, 20 Feb 2024 13:22:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4C9576C87;
+	Tue, 20 Feb 2024 17:17:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.14.17.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708435325; cv=none; b=fXYcjFFkBnfn66XtiV63DA+N3QScBete5FUzWsSTuS3pcXt/91Pdhbp6tiC6rUV+HsKXt/NwcVYEkZTmxCNBT1oMJyiNilV0w/+zmf+8oshlHBvp/7UNFUhlZfR2KkuA1vKwI9p0bICEo3PhADx1MAUuvxk7NnDMQW63/1eglkI=
+	t=1708449454; cv=none; b=IalLkhV+gIvnpPT2YqgDONOxvZiDDquIEF6OcIawAbJDpq3E98qPr4pIBgTImnkeMyxw53qzqivOwvMfguBfBUJScdKqLHp+/oEcv2BP3+w2jVJgEiUbSOzCW43LOSe2wUWkyizeP/AGR/ecTXuiiKTrQmb7D2FAkXztCtL+gqk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708435325; c=relaxed/simple;
-	bh=NGXD1jHINHNZY+mCOyyB934Anjl+YnZ1Y0xUYO0JiJ8=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=TKsKV6EZt8AkJqKrehho9XqkdJ4VefKhiH9WLkkeCMDNcouqFSORoCfBLcI2qeGoujcw/pzqUMw8a2q8i36pFNuJAL7Gm7oig0Zev1IG0AKadzlYpdCZ+NUtIfjA92Ce9uewITkbpCaaHwRnbo8mW2lpVyX0jYUOcZo9PLr5Ui0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=U4EaD3gb; arc=none smtp.client-ip=209.85.214.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="U4EaD3gb"
-Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-1db8f32cae5so7457285ad.1
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Feb 2024 05:22:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1708435323; x=1709040123; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ARy7Q4Eliz2JX6LXysl5nmstDWlOnwvyUH57xirN7sY=;
-        b=U4EaD3gbkDBssxO23P5k9vYtIYEhIf/7RWMIA0K30JHBiHYjnmCXphVpHLwEe0RYuu
-         PLzwDZ0QX3j4RQxdV0pKFXkFG0QpnJ69U4mSTvfaXW7465QPoscfQWVXcZC+cf4FLRyk
-         Cqfdd3RiGggLxQIqNw6vV5cbullvrNrcWH4s3YyJPn1pzXppZOd+ps6ShdohcPnc6SeX
-         eSeiRreP8WFwSAB8EL/0rxp3RV06rJ4XKpbCqX9IfIArcoQrgB13pyR/saOCvhTbp9WD
-         LETmRR5PYENeqmYcHarveOLZLgFe29nsuXMO3VkrLRNlF3Bsms8GX4PmHAujSQPawG8z
-         2rbA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708435323; x=1709040123;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ARy7Q4Eliz2JX6LXysl5nmstDWlOnwvyUH57xirN7sY=;
-        b=KTb/sgkCsyqO2eWeGUVLm0i8+aoeHG8cbkdqkyiuFUuhBTd9a61v/1wGTcFT2pFHR1
-         cX25SnQwQHfFf1naT9RyZiTlO3RkH5q+Z8NMNmezdQVkV8UBhKEvjnR27Iz1butHI6eB
-         fMUByu8ghJm5cR/6Sf9t/N02LMnMEvAXTTOZ3KLNSk+aMYe5SGAZVxnC6iuDOA0r3RXy
-         WT6W97EX1StJrwlKoBvum+V6Xb3njmMQENABACeBgN43yQMEFmu2CNMVEV9aHsuhdQfT
-         JhyavcDnP2Rimv7fd6iD4YUg9cIjU1BLaq4oDVupanUmvTXfb95H6hN/Z1enqG2QTY4y
-         lU7Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWqDO47QGDnXxQOjHmb7uTamceOhXU4RSgHwiWzL7PyPgu2J5TJjX9nYhT0Z9CUF6M8OIWwIXGKPP1/pBkXHOpB6fWoMHKc2GKs
-X-Gm-Message-State: AOJu0Yx9JGvtg6h/+u5mMWFA2XgaF0BNgB9Y5+8U9IqtLU7EeEUUDZ/n
-	UetxU7cI3cRUc5t1M8KMqWl1hJaDJebvYy9r0ch0nR2l+adK2n2H4umNVowvT4o=
-X-Google-Smtp-Source: AGHT+IFDzsxf+QvkIBQ6Yn25tgbgykQJpLVIKvsCINFaIpP2CqGk59RWuZcUGoZYhYkVR41rTlrzkA==
-X-Received: by 2002:a17:902:b113:b0:1dc:e32:d0b7 with SMTP id q19-20020a170902b11300b001dc0e32d0b7mr3120302plr.0.1708435323550;
-        Tue, 20 Feb 2024 05:22:03 -0800 (PST)
-Received: from [127.0.0.1] ([198.8.77.194])
-        by smtp.gmail.com with ESMTPSA id iw11-20020a170903044b00b001db5e807cd2sm6188911plb.82.2024.02.20.05.22.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Feb 2024 05:22:02 -0800 (PST)
-From: Jens Axboe <axboe@kernel.dk>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Richard Weinberger <richard@nod.at>, 
- Anton Ivanov <anton.ivanov@cambridgegreys.com>, 
- Johannes Berg <johannes@sipsolutions.net>, 
- Justin Sanders <justin@coraid.com>, Denis Efremov <efremov@linux.com>, 
- Josef Bacik <josef@toxicpanda.com>, Geoff Levand <geoff@infradead.org>, 
- Ilya Dryomov <idryomov@gmail.com>, 
- "Md. Haris Iqbal" <haris.iqbal@ionos.com>, Jack Wang <jinpu.wang@ionos.com>, 
- Ming Lei <ming.lei@redhat.com>, Maxim Levitsky <maximlevitsky@gmail.com>, 
- Alex Dubov <oakad@yahoo.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
- Miquel Raynal <miquel.raynal@bootlin.com>, 
- Vignesh Raghavendra <vigneshr@ti.com>, 
- Vineeth Vijayan <vneethv@linux.ibm.com>, linux-block@vger.kernel.org, 
- nbd@other.debian.org, ceph-devel@vger.kernel.org, linux-mmc@vger.kernel.org, 
- linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org
-In-Reply-To: <20240215070300.2200308-1-hch@lst.de>
-References: <20240215070300.2200308-1-hch@lst.de>
-Subject: Re: pass queue_limits to blk_mq_alloc_disk for simple drivers
-Message-Id: <170843532172.4095460.11560055671499890721.b4-ty@kernel.dk>
-Date: Tue, 20 Feb 2024 06:22:01 -0700
+	s=arc-20240116; t=1708449454; c=relaxed/simple;
+	bh=96ksfqWINydkRiMCjGad2oGhzIwnfo2QrZw43uLx3is=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ogfO68XttrSf5yiHGSn+y5MiRtrCWVBuB4/WQaY5rEqLC4D4To6LaGf3o0A5Fkl1vGF2p23srbzh+aXBcRL2Y9t8EMKpNt1dhz1yDGtaBNuzHs+njYjWM36xW78T1iCu0IbhHkBaL9T11hifwUr8dtrMUJmd8oJHyZu64zEhn6o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=molgen.mpg.de; spf=pass smtp.mailfrom=molgen.mpg.de; arc=none smtp.client-ip=141.14.17.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=molgen.mpg.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=molgen.mpg.de
+Received: from [141.14.220.34] (g34.guest.molgen.mpg.de [141.14.220.34])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: pmenzel)
+	by mx.molgen.mpg.de (Postfix) with ESMTPSA id 2098E61E5FE01;
+	Tue, 20 Feb 2024 18:16:40 +0100 (CET)
+Message-ID: <26acdacd-e63b-494f-bf7d-215b8643a0c5@molgen.mpg.de>
+Date: Tue, 20 Feb 2024 18:16:37 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: host: replace 1st argument to struct device * for
+ mmc_of_parse_clk_phase()
+Content-Language: en-US
+To: Yang Xiwen <forbidden405@outlook.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+ Andrew Jeffery <andrew@codeconstruct.com.au>,
+ Adrian Hunter <adrian.hunter@intel.com>, Joel Stanley <joel@jms.id.au>,
+ linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
+ linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org
+References: <20240215-mmc_phase-v1-1-f27644ee13e4@outlook.com>
+From: Paul Menzel <pmenzel@molgen.mpg.de>
+In-Reply-To: <20240215-mmc_phase-v1-1-f27644ee13e4@outlook.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.12.5-dev-2aabd
+
+Dear Yang,
 
 
-On Thu, 15 Feb 2024 08:02:43 +0100, Christoph Hellwig wrote:
-> this series converts all "simple" blk-mq drivers that don't have complex
-> internal layering or other oddities to pass the queue_limits to
-> blk_mq_alloc_disk.  None of these drivers updates the limits at runtime.
+Thank you very much for your patch. Some nits from my side.
+
+For the summary, I suggest:
+
+ > mmc: host: mmc_of_parse_clk_phase(): Pass struct device * instead of 
+mmc_host *
+
+Am 15.02.24 um 12:03 schrieb Yang Xiwen via B4 Relay:
+> From: Yang Xiwen <forbidden405@outlook.com>
 > 
-> Diffstat:
->  arch/um/drivers/ubd_kern.c          |    8 +-
->  drivers/block/aoe/aoeblk.c          |   15 ++---
->  drivers/block/floppy.c              |    6 +-
->  drivers/block/mtip32xx/mtip32xx.c   |   13 ++--
->  drivers/block/nbd.c                 |   13 ++--
->  drivers/block/ps3disk.c             |   17 +++---
->  drivers/block/rbd.c                 |   29 +++++-----
->  drivers/block/rnbd/rnbd-clt.c       |   64 +++++++++--------------
->  drivers/block/sunvdc.c              |   18 +++---
->  drivers/block/ublk_drv.c            |   90 +++++++++++++++------------------
->  drivers/cdrom/gdrom.c               |   14 ++---
->  drivers/memstick/core/ms_block.c    |   14 ++---
->  drivers/memstick/core/mspro_block.c |   15 ++---
->  drivers/mmc/core/queue.c            |   97 +++++++++++++++++++-----------------
->  drivers/mtd/mtd_blkdevs.c           |   12 ++--
->  drivers/mtd/ubi/block.c             |    6 +-
->  drivers/s390/block/scm_blk.c        |   17 +++---
->  17 files changed, 222 insertions(+), 226 deletions(-)
+> Parsing dt usaully happens very early, sometimes even bofore struct
+
+1.  us*ua*lly
+2.  b*e*fore
+
+> mmc_host is allocated (e.g. dw_mci_probe() and dw_mci_parse_dt() in
+> dw_mmc.c). Looking at the source of mmc_of_parse_clk_phase(), it's
+> actually not mandatory to have a initialized mmc_host first, instead we
+
+a*n*
+
+> can pass struct device * to it directly.
 > 
-> [...]
+> Also fix the only current user (sdhci-of-aspeed.c).
+> 
+> Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
+> ---
+>   drivers/mmc/core/host.c            | 4 +---
+>   drivers/mmc/host/sdhci-of-aspeed.c | 2 +-
+>   include/linux/mmc/host.h           | 2 +-
+>   3 files changed, 3 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index cf396e8f34e9..8b2844ac5dc5 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -234,10 +234,8 @@ static void mmc_of_parse_timing_phase(struct device *dev, const char *prop,
+>   }
+>   
+>   void
+> -mmc_of_parse_clk_phase(struct mmc_host *host, struct mmc_clk_phase_map *map)
+> +mmc_of_parse_clk_phase(struct device *dev, struct mmc_clk_phase_map *map)
+>   {
+> -	struct device *dev = host->parent;
+> -
+>   	mmc_of_parse_timing_phase(dev, "clk-phase-legacy",
+>   				  &map->phase[MMC_TIMING_LEGACY]);
+>   	mmc_of_parse_timing_phase(dev, "clk-phase-mmc-hs",
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> index 42d54532cabe..430c1f90037b 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -435,7 +435,7 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
+>   		goto err_sdhci_add;
+>   
+>   	if (dev->phase_desc)
+> -		mmc_of_parse_clk_phase(host->mmc, &dev->phase_map);
+> +		mmc_of_parse_clk_phase(&pdev->dev, &dev->phase_map);
+>   
+>   	ret = sdhci_add_host(host);
+>   	if (ret)
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 2f445c651742..5894bf912f7b 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -539,7 +539,7 @@ struct mmc_host *devm_mmc_alloc_host(struct device *dev, int extra);
+>   int mmc_add_host(struct mmc_host *);
+>   void mmc_remove_host(struct mmc_host *);
+>   void mmc_free_host(struct mmc_host *);
+> -void mmc_of_parse_clk_phase(struct mmc_host *host,
+> +void mmc_of_parse_clk_phase(struct device *dev,
+>   			    struct mmc_clk_phase_map *map);
+>   int mmc_of_parse(struct mmc_host *host);
+>   int mmc_of_parse_voltage(struct mmc_host *host, u32 *mask);
 
-Applied, thanks!
-
-[01/17] ubd: pass queue_limits to blk_mq_alloc_disk
-        commit: 5d6789ce33a97718564d0b8d2ea34e03d650e624
-[02/17] aoe: pass queue_limits to blk_mq_alloc_disk
-        commit: 9999200f583107f7e244e50935d480433b7d8a3b
-[03/17] floppy: pass queue_limits to blk_mq_alloc_disk
-        commit: 48bc8c7ba6fb39a4325b07f3abe8fe5a77361c7e
-[04/17] mtip: pass queue_limits to blk_mq_alloc_disk
-        commit: 68c3135fb5fbd85c7b2ca851184f30f54433a9d3
-[05/17] nbd: pass queue_limits to blk_mq_alloc_disk
-        commit: 9a0d4970288de29191fa45bf0ab4d8398bfa3a01
-[06/17] ps3disk: pass queue_limits to blk_mq_alloc_disk
-        commit: a7f18b74dbe171625afc2751942a92f71a4dd4ba
-[07/17] rbd: pass queue_limits to blk_mq_alloc_disk
-        commit: 24f30b770c0f450346f1c99120427b2e938cdfd0
-[08/17] rnbd-clt: pass queue_limits to blk_mq_alloc_disk
-        commit: e6ed9892f10d7195d621ede1cedc41421f1ca607
-[09/17] sunvdc: pass queue_limits to blk_mq_alloc_disk
-        commit: d0fa9a8b0af71b69cf3dec10feaebe19d55a72cf
-[10/17] gdrom: pass queue_limits to blk_mq_alloc_disk
-        commit: a339cf2bbfbe6e16ead79276d608912d36065884
-[11/17] ms_block: pass queue_limits to blk_mq_alloc_disk
-        commit: f93b43ae3feafedc5777099ca1a0e05352b92671
-[12/17] mspro_block: pass queue_limits to blk_mq_alloc_disk
-        commit: 9f633ecd43046659e3345bc4a4404e1d2ba67463
-[13/17] mtd_blkdevs: pass queue_limits to blk_mq_alloc_disk
-        commit: 3ec44e52bfce60f6da65165bc86eb382462d173d
-[14/17] ubiblock: pass queue_limits to blk_mq_alloc_disk
-        commit: 21b700c0812b6aa8f794c36b971772b2b08dab9a
-[15/17] scm_blk: pass queue_limits to blk_mq_alloc_disk
-        commit: 066be10aef5a7ddd8ad537db7a5145c6d79d4ea2
-[16/17] ublk: pass queue_limits to blk_mq_alloc_disk
-        commit: 494ea040bcb5f4cc78c37dc53c7915752c24f739
-[17/17] mmc: pass queue_limits to blk_mq_alloc_disk
-        commit: 616f8766179277324393f7b77e07f14cb3503825
-
-Best regards,
--- 
-Jens Axboe
+Reviewed-by: Paul Menzel <pmenzel@molgen.mpg.de>
 
 
+Kind regards,
 
+Paul
