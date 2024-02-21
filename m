@@ -1,136 +1,133 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69C1D627F3;
-	Wed, 21 Feb 2024 09:50:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0B8F47A7C;
+	Wed, 21 Feb 2024 12:45:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708509037; cv=none; b=YJVnFa+VjOjXrsaEogTsFWejDr+zGCHNm2qnda3OJ6zdFS60N3LjpF/A0ZiS+B39KJNEBYcNRoF5i2fBkS3qZMkLtLRCFsHNxhghzPFhqiFQwjomrya2IyWGv/KI9DPYk19f6CyadLYh6lZdmaYWsajQjbXjwbUHqfBTVqzo72U=
+	t=1708519547; cv=none; b=oEPIKjGrKBPxS91jhE6jss4plwm0JYOU9wFZXMUUm/3g6NKXosL4uD30YA8aDr855eomTOJyLOb8ExYsXYgSakgnxhSYBTTLaOj+d/TFjrHW1VCP/mh38/FAUSMuVNgiKoRHlZiJZlug/thanIoI5kuYia8VEINaF7k87BDGkeU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708509037; c=relaxed/simple;
-	bh=l0w5pmYRrOPkhcpKfMC4HaFIRK3kaxhmE3uyDOQg1uI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=vAr8Nzv6Ny9gWAtVL5UlLVES626P0YVf64oyUR4w+cLIquXNkwij/ctXhDTK+9db6btu+SdMYoXWrpMHYa4RMdBhVewMy76MA5539k22PNJYMoNwu9uCFCNrJWktpoWjsRo8gmXDa5sEJw/NabbLxq/UfZUm6QepunnR8S5QLPU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-607f8482b88so48091567b3.0;
-        Wed, 21 Feb 2024 01:50:35 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708509033; x=1709113833;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=6K6KfUK6UGxSBqRQLdjgANnoggkUhjVRWn4dxIyu/w0=;
-        b=cSnqyXw2rB0j2/EwCFmXXbu7Bli3SzD57djaGnAubI94Bo418ryB519HPWJUeAwzhV
-         GvcOR9Bcf9BC7BFHYdnHuewPY+OdYhBaEZAO97iMixDLa6S+u1PFq/S+cFpV1jKzKIZs
-         X/cQ7Kt2i6GmDgEo+7wVnxY9MqspdjmT4I33zXmtIF6VDu89qfiJqS8kID1YkUP0WwHm
-         A+R9IvBaFIgNHRt6/OfSDE60P88GJaRo9+W1KGR7LkzUTczJjzctn6BSi7bA2tX4TzlH
-         V9wA3hTw6uDrPpRSDOcZ6nyBjbeuYrCE70dwVyjEUFxXBC/Z6NDC/t9UApnNaDUFgOMm
-         jX5g==
-X-Forwarded-Encrypted: i=1; AJvYcCXGgaH42fcvCZXhgGE+V5Zw0XiupXPyNUoirMDYt2UkzG9qCu8WinxLictTqmN1x12XeivBuGbk/Us5zVPBXG1XUK4WxRIS4iUv24/avAiqRWLP/btPgir6zu7VUau+EODcYM9V0ZbUI8d70KJeOKrm8+4quOWLPEg2xZRi9eoM++mjAbzUFwhNTaTdBVL/nAhb8inbG1YqYAnkW/Acvz27ebu0ATg=
-X-Gm-Message-State: AOJu0YzkMtx4HHhxMTI2x3G+ZOJskB1l+tx7TTR1PxRlBI5t0nhLc7cH
-	NW5SLxl8M9hOJ7/oL9wFGyPzC/E5bZyZDHKNWEgT//fmBUtC7MPNTACgy0dhd30=
-X-Google-Smtp-Source: AGHT+IELfkHruk8SJrgkNQMURvLpsZm6/qQnoKWk3zsivCcBYeIsn95WbfIAKukImCcFhSIwu+bmlQ==
-X-Received: by 2002:a81:494b:0:b0:608:6e94:9855 with SMTP id w72-20020a81494b000000b006086e949855mr3400171ywa.26.1708509032748;
-        Wed, 21 Feb 2024 01:50:32 -0800 (PST)
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com. [209.85.128.170])
-        by smtp.gmail.com with ESMTPSA id h11-20020a81b64b000000b00607f8df2097sm2451657ywk.104.2024.02.21.01.50.31
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 21 Feb 2024 01:50:31 -0800 (PST)
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-60869c68926so16167047b3.3;
-        Wed, 21 Feb 2024 01:50:31 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUqfG7HunQ4lJjDOoGPmBE5VWnYy6sIoI2cKxuASkuPbQu2Bp6t1zHyEGRoJ4MkhrM1CAC1xwo1d6wzuj0rWKO0XexjnvaUBRwghLXiTYHJZS38h9UOzEWm2Q2LV4SavvPbFjIjOLoYXPUKzqcBm18A8oDaeBUqZRWCWSLHTeYe/zmA+cHfzbLiJaaXRvNmx/Sx2lWLC9dO4iQBznjLkXRZwXLKiFM=
-X-Received: by 2002:a25:f903:0:b0:dc6:c617:7ca with SMTP id
- q3-20020a25f903000000b00dc6c61707camr16048280ybe.29.1708509031694; Wed, 21
- Feb 2024 01:50:31 -0800 (PST)
+	s=arc-20240116; t=1708519547; c=relaxed/simple;
+	bh=TB84W7Tu2siA4tIKu3yesEUxKHpCOYUqZbf+Veml5KM=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=DhPi9gkgpS7i7x5bkRjS/CvLI72tGRX07CYxG3Ht4mVg+5ok0Vc8/PE7VKUh+5EMZ6kdJEjctD4c3nnbVrmVBAeAqmPh0O3w1axFd0sFjBXkflLdQLkStqz0lNj+XGkqghfdKfS7JOYteNIQCfoU2XeZVa5Dky+uuaVQ4A+Ik60=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JnpJNOWU; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JnpJNOWU"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 891FEC433C7;
+	Wed, 21 Feb 2024 12:45:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708519546;
+	bh=TB84W7Tu2siA4tIKu3yesEUxKHpCOYUqZbf+Veml5KM=;
+	h=From:Subject:Date:To:Cc:Reply-To:From;
+	b=JnpJNOWUVTYBFT+i+XagwsGgIK7/A0MhPqyfyu6xjZoR2HUyLZiiheZfOrGf/OtXF
+	 LARvs2ThlNDs31G+0/6CCrZPzGm8ux5whyvtVY8thhdLOWRo4bbIvB0B4P+ilWVx6g
+	 NYEKpxCxYA4WHfxuwyfzyU1oXvMh5imvtpNpfXRpkVEIsXSXNpW+LeqnZlZM7qjjsX
+	 7K79qyTZQGy/5+C+aGB5FuNZKlA6z7eVC5OVvABCU2jBUs1Ou0t5ULCekysLgACvKG
+	 VMITxPQuRDNe1beHRwX92Yk04SR6g9h9hB6P1G+ibuNo/rjw8B4MX+VqYxgGVdkeTU
+	 O9ZWbpePocR3A==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7006FC48BF6;
+	Wed, 21 Feb 2024 12:45:46 +0000 (UTC)
+From: Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>
+Subject: [PATCH v6 0/5] mmc: add hi3798mv200 specific extensions of DWMMC
+Date: Wed, 21 Feb 2024 20:45:02 +0800
+Message-Id: <20240221-b4-mmc-hi3798mv200-v6-0-bc41bf6a9769@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240127-mmc-proper-kmap-v2-0-d8e732aa97d1@linaro.org>
- <20240127-mmc-proper-kmap-v2-9-d8e732aa97d1@linaro.org> <7f40cb40-1a1-532-75fc-d3376ed27a@linux-m68k.org>
- <CACRpkdZpyefnTyKEJXru_HZG8xcJF66Eb2pZhbk+HVvfzdh4yw@mail.gmail.com>
-In-Reply-To: <CACRpkdZpyefnTyKEJXru_HZG8xcJF66Eb2pZhbk+HVvfzdh4yw@mail.gmail.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Wed, 21 Feb 2024 10:50:20 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdWwuH-mPm1TJTfvf3FXSd_zj+yP7OL6uB=-TrqNOT+W_Q@mail.gmail.com>
-Message-ID: <CAMuHMdWwuH-mPm1TJTfvf3FXSd_zj+yP7OL6uB=-TrqNOT+W_Q@mail.gmail.com>
-Subject: Re: [PATCH v2 9/9] mmc: sh_mmcif: Use sg_miter for PIO
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>, 
-	Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Pitre <nico@fluxnic.net>, 
-	Aaro Koskinen <aaro.koskinen@iki.fi>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Angelo Dureghello <angelo.dureghello@timesys.com>, linux-mmc@vger.kernel.org, 
-	linux-block@vger.kernel.org, linux-omap@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAE7w1WUC/4XOTU7DMBAF4KtUXmPkGc/YCSvugbpI/EMsSI2S1
+ gJVuTtO2RQlUpdvpPneu4o5TCnM4uVwFVMoaU75VIN5Ogg3dKf3IJOvWaBCUoAge5Lj6OSQtG2
+ bsaBSsmOrVfAREJ2oj19TiOn7hr4dax7SfM7Tz62jwHr94xDMHldAKmk9Gd83xF0wr/ly/sz54
+ 9nlUaxgwccIVkSB8kYH04HnLaLvEbuL6IpEYDIE1rRktwg9RmhdEr1ve08Na9wifIeg2kV4XcL
+ KOObYBNL/kWVZfgEVSG0DygEAAA==
+To: Ulf Hansson <ulf.hansson@linaro.org>, 
+ Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, 
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+ Andrew Jeffery <andrew@codeconstruct.com.au>, Joel Stanley <joel@jms.id.au>
+Cc: Igor Opaniuk <igor.opaniuk@linaro.org>, 
+ tianshuliang <tianshuliang@hisilicon.com>, David Yang <mmyangfl@gmail.com>, 
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+ devicetree@vger.kernel.org, linux-aspeed@lists.ozlabs.org, 
+ openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, 
+ Yang Xiwen <forbidden405@outlook.com>, Paul Menzel <pmenzel@molgen.mpg.de>, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+X-Mailer: b4 0.12.4
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1708519512; l=2922;
+ i=forbidden405@outlook.com; s=20230724; h=from:subject:message-id;
+ bh=TB84W7Tu2siA4tIKu3yesEUxKHpCOYUqZbf+Veml5KM=;
+ b=FFPZK/QxMFGsqomSktavHt+7L+NWbqTXJM+fy71PZsxVFDZLZIyPHvLXWS5hJF2X7Q3PP38nV
+ rqA/zqDDt8rBYiA4jDMV7TVqFW6E2R7dUq4li2T1s9fN4Xd0gWjq8OO
+X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
+ pk=qOD5jhp891/Xzc+H/PZ8LWVSWE3O/XCQnAg+5vdU2IU=
+X-Endpoint-Received:
+ by B4 Relay for forbidden405@outlook.com/20230724 with auth_id=67
+X-Original-From: Yang Xiwen <forbidden405@outlook.com>
+Reply-To: <forbidden405@outlook.com>
 
-Hi Linus,
+it's modified from hi3798cv200 driver, but quite a lot of code gets
+rewritten because of the hardware differences. Actually cv200 DWMMC core
+is called HIMCIV200 while mv200 DWMMC core is called HIMCIV300 in
+downstream.
 
-On Wed, Feb 21, 2024 at 12:01=E2=80=AFAM Linus Walleij <linus.walleij@linar=
-o.org> wrote:
-> On Tue, Feb 20, 2024 at 10:03=E2=80=AFPM Geert Uytterhoeven
-> <geert@linux-m68k.org> wrote:
->
-> >      sh_mobile_sdhi ee120000.mmc: mmc1 base at 0xee120000, max clock ra=
-te 12 MHz
-> >      mmc2: new high speed MMC card at address 0001
-> >      sh_mobile_sdhi ee100000.mmc: mmc0 base at 0xee100000, max clock ra=
-te 88 MHz
-> >      mmcblk2: mmc2:0001 MMC08G 7.33 GiB
->
-> Hey it reads some blocks...
->
-> >      BUG: sleeping function called from invalid context at kernel/workq=
-ueue.c:3347
-> >      in_atomic(): 1, irqs_disabled(): 0, non_block: 0, pid: 35, name: i=
-rq/151-ee20000
-> (...)
-> >       __might_resched from __flush_work+0x20c/0x2e4
-> >       __flush_work from __cancel_work_timer+0x118/0x198
-> >       __cancel_work_timer from sh_mmcif_irqt+0x38/0x8f8
-> >       sh_mmcif_irqt from irq_thread_fn+0x1c/0x58
->
-> Actually that is the thread so the message is a bit confusing, the irq th=
-read
-> isn't atomic.
->
-> I wonder if it is caused by this:
->
-> > > +     sg_miter_start(&host->sg_miter, data->sg, data->sg_len,
-> > > +                    SG_MITER_ATOMIC | SG_MITER_TO_SG);
->
-> ...because I don't need to ask for atomic miter here, since the poll
-> functions are actually called in process context.
->
-> I've sent a patch, can you test?
-> https://lore.kernel.org/linux-mmc/20240220-fix-sh-mmcif-v1-1-b9d08a787c1f=
-@linaro.org/T/#u
+Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
+---
+Changes in v6:
+- apply the comments to the first patch, add their trailers
+- Link to v5: https://lore.kernel.org/r/20240220-b4-mmc-hi3798mv200-v5-0-f506c55f8e43@outlook.com
 
-While that patch fixes the BUG, it does not make the eMMC work fully.
-It spews:
+Changes in v5:
+- pick the dependant patch: https://lore.kernel.org/all/20240215-mmc_phase-v1-1-f27644ee13e4@outlook.com/
+  to fix the bot build error.
+- edit the semantic meaning of hisilicon,sap-dll-reg property (Rob Herring)
+  The suggestion is from the CRG driver side:
+  https://lore.kernel.org/all/20240218205741.GA1561527-robh@kernel.org/
+- Link to v4: https://lore.kernel.org/r/20240217-b4-mmc-hi3798mv200-v4-0-0fdd9bd48532@outlook.com
 
-    sh_mmcif ee200000.mmc: Timeout waiting for 2 on CMD18
+Changes in v4:
+- rename dw_mmc-hi3798 back to hi3798cv200 - Suggested by Krzysztof Kozlowski.
+- add r-bs to patch 1 and 2 - Reviewed by Krzysztof Kozlowski.
+- Link to v3: https://lore.kernel.org/r/20240217-b4-mmc-hi3798mv200-v3-0-f15464176947@outlook.com
 
-and no or limited data is read ("hd /dev/mmcblk..." blocks after no
-or two lines of output).
+Changes in v3:
+- dw_mmc-hi3798: fix bot error (Rob Herring)
+- Link to v2: https://lore.kernel.org/r/20240216-b4-mmc-hi3798mv200-v2-0-010d63e6a1d5@outlook.com
 
-I still need to revert 27b57277d9ba to restore proper operation.
+Changes in v2:
+- dw_mmc-hi3798mv200: use dev_err_probe() helper - Suggested by Krzysztof Kozlowski.
+- dw_mmc-hi3798mv200: add missing err=0;
+- dw_mmc-hi3798c(m)v200: remove unused MODULE_ALIAS() - Suggested by Krzysztof Kozlowski.
+- binding: rename the binding, a lot of tweaks suggested by Krzysztof Kozlowski.
+- Link to v1: https://lore.kernel.org/r/20240216-b4-mmc-hi3798mv200-v1-0-7d46db845ae6@outlook.com
 
-Gr{oetje,eeting}s,
+---
+Yang Xiwen (5):
+      mmc: host: mmc_of_parse_clk_phase(): Pass struct device * instead of mmc_host *
+      mmc: dw_mmc-hi3798cv200: remove MODULE_ALIAS()
+      mmc: dw_mmc: add support for hi3798mv200
+      dt-bindings: mmc: dw-mshc-hi3798cv200: convert to YAML
+      dt-bindings: mmc: hisilicon,hi3798cv200-dw-mshc: add Hi3798MV200 binding
 
-                        Geert
+ .../bindings/mmc/hi3798cv200-dw-mshc.txt           |  40 ----
+ .../mmc/hisilicon,hi3798cv200-dw-mshc.yaml         |  97 +++++++++
+ drivers/mmc/core/host.c                            |   4 +-
+ drivers/mmc/host/Kconfig                           |   9 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/dw_mmc-hi3798cv200.c              |   1 -
+ drivers/mmc/host/dw_mmc-hi3798mv200.c              | 239 +++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-aspeed.c                 |   2 +-
+ include/linux/mmc/host.h                           |   2 +-
+ 9 files changed, 349 insertions(+), 46 deletions(-)
+---
+base-commit: 8d3dea210042f54b952b481838c1e7dfc4ec751d
+change-id: 20240121-b4-mmc-hi3798mv200-a5730edf122c
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
+Best regards,
+-- 
+Yang Xiwen <forbidden405@outlook.com>
 
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
