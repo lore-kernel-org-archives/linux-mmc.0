@@ -1,53 +1,57 @@
-Received: from mx0b-0016f401.pphosted.com (mx0a-0016f401.pphosted.com [67.231.148.174])
+Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E22414B832;
-	Thu, 22 Feb 2024 20:32:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.148.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBF3F14B832;
+	Thu, 22 Feb 2024 21:22:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.156.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708633933; cv=none; b=Jd7uywvZMey/3RwM59TqIr4rGTw4wEdxxGAznmt3hlRagOWavzoWJz3AqmgS9qiEC8PVosy7jaSCRVL8Tijr8bOu2eQcoCeUDiotiT3C/gxOHIWOs1jF5N4n+rvUcRQmYrRVFRUOfD1OP/Obcurv1huilD5aiEX+Iza26qWKZIs=
+	t=1708636940; cv=none; b=KjECv/kgUGUxPECtgXPqJxhtH9//evjoaoEsX5OjQaNKua3CEIMn1RGcJoS9GEPNrOC9Yy/sse2rlO8yJLOr2dkZrQPqGCbf6NtCGanAh/hhbKA1c9CNcyO48d+P2bgylTo6mz+qWU7dHD3kDEC3c3GhJzjBR9F+Mg+nlMpVtZc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708633933; c=relaxed/simple;
+	s=arc-20240116; t=1708636940; c=relaxed/simple;
 	bh=OEjaR8q/hH/zJzrJq00dzosvg9sB+rc7P5n3BrRx+nE=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=oIRhFWoF41PUqXxay3aKUXP9jkkWF2l/efPLXjnYekXoNObBe2ry5Gl5tZXCTDw6X8dAOKGj3NqcKxI+lLi/xh0k2qDfAmu09YvMeQzgUd0cGtD8fGbHP7XEz0Idsshu3yhWLkvaQvmV8x+KawUN79hbT7ZJoCPF0imp8Wu9MOo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com; spf=none smtp.helo=mx0b-0016f401.pphosted.com; dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b=HF+7ZUtK; arc=none smtp.client-ip=67.231.148.174
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=mh0Srk989n+37nkqsiN1d/epeUiqpAzTdhUiznzrYXk31BhdPdePsO6boBXXGM1QsyvFeGBAG7Qh4ux28UCvHhYquJauTyoq4iN3l4oYSMGHUa3I7m++hG6QUUJpACol7FC3s/ceeHJK+zpv6XzHRC/NcbWKO64pNMYxzE2ONEQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com; spf=none smtp.helo=mx0b-0016f401.pphosted.com; dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b=G28T/Rh/; arc=none smtp.client-ip=67.231.156.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mx0b-0016f401.pphosted.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b="HF+7ZUtK"
-Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
-	by mx0a-0016f401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 41MK2gHO021857;
-	Thu, 22 Feb 2024 12:32:10 -0800
+	dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b="G28T/Rh/"
+Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
+	by mx0b-0016f401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 41ML8XqH001858;
+	Thu, 22 Feb 2024 13:22:10 -0800
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=
-	from:to:cc:subject:date:message-id:mime-version
-	:content-transfer-encoding:content-type; s=pfpt0220; bh=y6gHklRy
-	6mgfq/+kDFgxdQdIm96X6dvMx3GA+sAwVL0=; b=HF+7ZUtKWvSxLkooNf2EBlfT
-	NROoRQYyNGdKVVsf5rcihgLluq4TJc665/AEa+xMQhmXGefMhNvGn7QMPf5qn7Q0
-	ZECbKqCbjOzSnfonDu8MzU40Efb/KINg9vWCePjF2F8QoYoYtuCastUnO1ae7Z0T
-	sfy3QrN8z145GReJsAbBOR0n5QnXerQSOX1Ihd9nOw3yq64/5lGRyX+gykIFyR/5
-	XdOQ5t9YdBOU7dD4c2J1J6XuKeHSzvZPi2putvz3e6HFVitdWLhXj7PcEYkDd/RV
-	5zCBgRSk+aZymMqE0HJ2MrZc790FNCe3a/LtvgSuwjvqtvQHzzXIwwLOK1pdbA==
-Received: from dc5-exch01.marvell.com ([199.233.59.181])
-	by mx0a-0016f401.pphosted.com (PPS) with ESMTPS id 3we3dwau65-1
+	from:to:cc:subject:date:message-id:in-reply-to:references
+	:mime-version:content-transfer-encoding:content-type; s=
+	pfpt0220; bh=y6gHklRy6mgfq/+kDFgxdQdIm96X6dvMx3GA+sAwVL0=; b=G28
+	T/Rh/5lpdK2wQ58rXcKy496aSLJn+3ZySP09j9o/U7PeJx8eYNp4tz31OXS8N/zv
+	ct6EW5YoW8JOBoLupWif90oLn8oQ+Hz9636tzo36G2o3awYFuoakYVWCSR9H1xXj
+	g+eUfMMRHrdZxtiKJEp2qQ48R2DMWRfqOWBLCfe+EtapT7PjNWOcnvH++vHdq58e
+	4oPaTHdrK7t+H9m/4y+t6CrrOUhaQ5sXEufeJ3CqBLgRi9vqCdYrdikANxmQgHYz
+	X3Bwfy4CrWEZFsfMaW6r7W8hg8Qaw0sVreGOQkqGfd100kmlEwGE/g0L7C6LZ8Kw
+	iWUgiqyF10HGuMVND2Q==
+Received: from dc5-exch02.marvell.com ([199.233.59.182])
+	by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3wedwxg1bd-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-	Thu, 22 Feb 2024 12:32:10 -0800 (PST)
-Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Thu, 22 Feb
- 2024 12:32:08 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
- Transport; Thu, 22 Feb 2024 12:32:08 -0800
+	Thu, 22 Feb 2024 13:22:09 -0800 (PST)
+Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Thu, 22 Feb
+ 2024 13:22:07 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
+ Transport; Thu, 22 Feb 2024 13:22:07 -0800
 Received: from dc3lp-swdev041.marvell.com (dc3lp-swdev041.marvell.com [10.6.60.191])
-	by maili.marvell.com (Postfix) with ESMTP id F0E443F7167;
-	Thu, 22 Feb 2024 12:07:20 -0800 (PST)
+	by maili.marvell.com (Postfix) with ESMTP id 794AE3F719F;
+	Thu, 22 Feb 2024 11:17:23 -0800 (PST)
 From: Elad Nachman <enachman@marvell.com>
 To: <huziji@marvell.com>, <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
         <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
 CC: <enachman@marvell.com>, <stable@vger.kernel.org>
 Subject: [PATCH v3 1/2] mmc: xenon: fix PHY init clock stability
-Date: Thu, 22 Feb 2024 22:07:11 +0200
-Message-ID: <20240222200712.1274919-2-enachman@marvell.com>
+Date: Thu, 22 Feb 2024 21:17:13 +0200
+Message-ID: <20240222191714.1216470-2-enachman@marvell.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20240222191714.1216470-1-enachman@marvell.com>
+References: <20240222191714.1216470-1-enachman@marvell.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -56,8 +60,8 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-Proofpoint-GUID: 9uFZkJciaEAtuSdtVM4mZlXdp_mAVaEV
-X-Proofpoint-ORIG-GUID: 9uFZkJciaEAtuSdtVM4mZlXdp_mAVaEV
+X-Proofpoint-GUID: bYNSWMlj2hCJ90jrCB0PWeMEwubrjedi
+X-Proofpoint-ORIG-GUID: bYNSWMlj2hCJ90jrCB0PWeMEwubrjedi
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
  definitions=2024-02-22_15,2024-02-22_01,2023-05-22_02
