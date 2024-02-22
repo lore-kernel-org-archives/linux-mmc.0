@@ -1,140 +1,99 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
+Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E8EC23747
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Feb 2024 08:40:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D440723747;
+	Thu, 22 Feb 2024 09:19:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708591257; cv=none; b=uO02YCHDUO2L4sdTPMJoBVxZlUG5ktN/ORTYnffhQtDuY+puo8EKiO+TqE+eAh2m3EQ550/Rle2C2j1WkwPkkNX/PETMiEdVK0v+kxTf0r85C8W+Gcu6swdjj8PdSAighYz8583ooPAoPSSgmHFZ0xGFRlQY3qR/1i8ZRrORJfg=
+	t=1708593559; cv=none; b=aCGEhpnysoEtO9RdCRWI/UViaE8f+8rf0AuNWyimmp00spsBSZ6cVTbBcU5568DJsL8h7srrnZZJXQLPKhXRhrJg4qCrxV+Si03jc/YqcTZKRoXR8CBU3ChMFKdOI4RQ26U2emMgPgn9uY5R10vZdgf1AM5ALZdQcW2cj/dtNnU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708591257; c=relaxed/simple;
-	bh=QG+OmgY7mYbpQ1oWM11KvSRvcwxIZwxtrgMk3rPo0TE=;
+	s=arc-20240116; t=1708593559; c=relaxed/simple;
+	bh=Vymc4gK6nDb5Dw0fXiG3ef7wKVL5g7oOlzWlxmMt1Pw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nAzoL67vvpT0A9m39eKOh1A9+boyB8PhalaaNMnQ0c1zAH9o4BTyJ1g8ijJO95OZopmbGbGQVBwaD+J9qXC/WwgpcckFEI88SmpNBsWQa2kRaJ4KWI1jE8jski7lf06j6QUjQOuRMKLHUAsp6NMfrulpsKZkJZfAKnKP/8B2O+c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Y3K1V9Pn; arc=none smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Y3K1V9Pn"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-608959cfcbfso7213357b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Feb 2024 00:40:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1708591254; x=1709196054; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ONX/cRLpGhG3VcUXaaPPJHsfB/ReM56mHSTk718aLLk=;
-        b=Y3K1V9PnxoACFcA60bnS2hMpX2BH/R0FyJ7FLbLd7DwesgBWBAtbn6H9bvWOE+Ai/E
-         tKgDGBfo7A6oMzBfdidPo3NueRZLewCr3DGYvRI46BQH7K8KdpAscNE42m+vBKIfdIBW
-         vsql8OfhP09JMPUNWBl3gQr0X2W4mg/wgwQmsCN6I8pvqvLFiBuMW1sUx4uc3EH5geao
-         OGSE+dZFuytgdnHfMeSWULoac0pzlyeNM9UKPNzFjqRdrLFT/toheH2xfgEGehIAqOej
-         nHPAccb/k5c5Vte5SlTcUsesJIYPwPpERXvjJTf750PDso0rVHAbBLjXBjRFsSxP89Mt
-         gAlQ==
+	 To:Cc:Content-Type; b=AGk0xJM6ncMYpYfKLMCbaiIYiU6HBaETcsOtNqpZ0q+yBW+4cMirhGh6ikbHCWmEzNBuwpW7M4K0hbhWe4FlvxmYyRreCuKNoKWqRQMbZZWGHZxcO9KzhyigDQSDjiLLz41B4lS2AL5gchI3P5TYYJcR21hW/iFTUVT99VeqTFQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-60495209415so74606477b3.3;
+        Thu, 22 Feb 2024 01:19:16 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708591254; x=1709196054;
+        d=1e100.net; s=20230601; t=1708593555; x=1709198355;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=ONX/cRLpGhG3VcUXaaPPJHsfB/ReM56mHSTk718aLLk=;
-        b=WaLQmWdAfJofy6Lr+fQOR5IY7Sj8B1wmT+BG8LKOUtDTFNEz7b1GrrK6JLI7mZTyaZ
-         BCp9/f0STbeQc5xKMxqgkC1zgnK3MkyPCLFJmuk4d6Bzfvca0G2cW8dby2yaTMgOApg8
-         P1yhNkxqNNfZxX3JznUNh1/V1j415HDpQM1UWs2hSb86uEzg6FgDxPLsFrbBryxScXpn
-         KDOEdGjn906b54r0IojvN4qhWs0V3cJRC7JxL7y4ftJ0o2phurGXz8nOes+IedRtyEf7
-         VgE8DrhhfcqOBbZVdTA8Asgwvl01OBLYmQq0c4CsKB1mawP7HandBrz0GT2CJpkF1Q+S
-         ED1w==
-X-Forwarded-Encrypted: i=1; AJvYcCUe/UgnOzr812F5kiaVphd3DSoVIS87W6Ci51D7zKikFUzmSwOrqVqIxrR6iPR0T9wGj3y/1yv8nlkaBYK20te1wPOrSmzkJAWX
-X-Gm-Message-State: AOJu0YyNF+bRtkx2PluuOCFwG1ENlvHn3qVlmD1qrAYga5kLNitAKkVP
-	yHgfTO8jv0nfv6gf/R8f5HN7en5c7x6jzpQTNTQTkn2CnmdM/CV5ZvP8mHamds4r6Czgb9NwRXf
-	GTLGDvUBk/zq6NAbdjm7jy3kcjBo7Jry1blhLqA==
-X-Google-Smtp-Source: AGHT+IF0+pctPujVQu0LVe7ScBfGdOsq3NcKfQaySHqo5zw5hoIIWfezHwJzQmsp5Fa+gVs5PoWFFlcP4OjiCgyPyxU=
-X-Received: by 2002:a81:bd14:0:b0:608:20fe:dc28 with SMTP id
- b20-20020a81bd14000000b0060820fedc28mr13536558ywi.37.1708591254348; Thu, 22
- Feb 2024 00:40:54 -0800 (PST)
+        bh=OYC4j1AtfwI6qrp3pWynlDebhFoOBwjNL7JXQ2Z+8a0=;
+        b=hHNJPMyguEIZHrqosL9GQSfSKn5bfIjhLoGyrgFD9IZDTv1ysmLE5qW+Vi1hdSLfGj
+         xHF2AC0f+n4E4kRgxathcnG1w9m/n85w6J7MgOMKW3/4sQ6msIIz43fv9ju8XafQBu/5
+         jztcITkTXdkr1wAGhivPmDsTM+0s11LEqpasObVCfF2kgQki6r242TOMZf2Z06gw2W0R
+         jI4tNL4EykUdSlQmS0Sk+PtJ0xacHzbX1QaxrX3WdZo2Bluw51+d8ecr2Iz9aSXl26zM
+         8UBVdBWODnClM901UV4kokqrzB/G9FzHapEaztfb96F4mqKHQQe5eMPA0Gvj23KCvphP
+         aGBg==
+X-Forwarded-Encrypted: i=1; AJvYcCU/eoVg+VHNy9EuO2+ZGNEkbOw0NRleinRKBoOep8q3TuKUFN0h5nFjCFQ2un9YiQxG5/SbbPf37Aizt7aPDPdP2h3GQFnN4Sdqu5QmwYvylO6h4ZUgh0EHASZ/XEOUk3tl13hIMyjo
+X-Gm-Message-State: AOJu0YzoNP5xBVgtiT/TG766VGP2zT51/jNTqPtkKgMYdleoMilQdEip
+	rOwS5n4K/5iUVAsTP15XHR/nW7Mbgsnq/pBSyj2FpBr75cRu+V0dr2vneZrtw7o=
+X-Google-Smtp-Source: AGHT+IF36fcXGdxTUDjJA5Bms1PHDJA7bhCM+s8jxxgSboOu/y9jbupcMwBIBt/gmjy2LNG3IdQM5A==
+X-Received: by 2002:a05:6902:1361:b0:dbe:a688:8ab8 with SMTP id bt1-20020a056902136100b00dbea6888ab8mr1859333ybb.0.1708593555542;
+        Thu, 22 Feb 2024 01:19:15 -0800 (PST)
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com. [209.85.128.182])
+        by smtp.gmail.com with ESMTPSA id y14-20020a056902052e00b00dc74d5e3ff7sm2654126ybs.31.2024.02.22.01.19.15
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 22 Feb 2024 01:19:15 -0800 (PST)
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-60495209415so74606377b3.3;
+        Thu, 22 Feb 2024 01:19:15 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUBz76rZwwlUWSXvKuNMEOxTQyj5pCXpUtlUiadprj8qYkwnZozoKiTJDE55peKsupFmvuMGMIni8gGOjHeXiXqfWXUdNrp7oDxTX+i+YQvc/fxKX7OaimmTCxMAn0IwrwtgbAnRZMH
+X-Received: by 2002:a05:690c:86:b0:607:d9f7:e884 with SMTP id
+ be6-20020a05690c008600b00607d9f7e884mr21602878ywb.4.1708593555213; Thu, 22
+ Feb 2024 01:19:15 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240222-fix-sdhci-esdhc-mcf-v1-1-fb87e04ca575@linaro.org> <5c88e3f7-22e7-44d1-bf2e-5440e4de3b12@intel.com>
-In-Reply-To: <5c88e3f7-22e7-44d1-bf2e-5440e4de3b12@intel.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Thu, 22 Feb 2024 09:40:42 +0100
-Message-ID: <CACRpkdaRHz5LE_TpD7xkitX5ohafEvqOACx8PrEUuD-6oz-pUg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-mcf: Flag if the sg_miter is atomic
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Angelo Dureghello <angelo.dureghello@timesys.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
-	Chunyan Zhang <zhang.lyra@gmail.com>, linux-mmc@vger.kernel.org
+References: <20240221-fix-sh-mmcif-v2-0-5e521eb25ae4@linaro.org> <20240221-fix-sh-mmcif-v2-1-5e521eb25ae4@linaro.org>
+In-Reply-To: <20240221-fix-sh-mmcif-v2-1-5e521eb25ae4@linaro.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Thu, 22 Feb 2024 10:19:03 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdUJi3khMmRXRquwKNF1ezEAokLs+n46O2JDDap6t9v=tQ@mail.gmail.com>
+Message-ID: <CAMuHMdUJi3khMmRXRquwKNF1ezEAokLs+n46O2JDDap6t9v=tQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: sh_mmcif: sg_miter does not need to be atomic
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Feb 22, 2024 at 7:22=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
-> On 22/02/24 02:00, Linus Walleij wrote:
-> > The sg_miter used to loop over the returned sglist from a
-> > transfer in the esdhc subdriver for SDHCI needs to know if
-> > it is being used in process or atomic context.
-> >
-> > This creates a problem because we cannot unconditionally
-> > add SG_MITER_ATOMIC to the miter, as that can create
-> > scheduling while atomic dmesg splats.
-> >
-> > Bit the bullet and make the .request_done() callback in
-> > struct sdhci_ops aware of whether it is called from atomic
-> > context or not, and only add the flag when actually called
-> > from atomic context.
-> >
-> > sdhci_request_done() is always called from process context,
-> > either as a work or as part of the threaded interrupt handler,
-> > so this will pass false for is_atomic, and the one case when
-> > we are actually calling .request_done() from an atomic context
-> > is in sdhci_irq().
-> >
-> > Fixes: e8a167b84886 ("mmc: sdhci-esdhc-mcf: Use sg_miter for swapping")
+Hi Linus,
+
+On Wed, Feb 21, 2024 at 10:23=E2=80=AFPM Linus Walleij <linus.walleij@linar=
+o.org> wrote:
+> All the sglist iterations happen in the *threaded* interrupt handler
+> and that context is not atomic, so don't request an atomic
+> sglist miter. Using an atomic miter results in "BUG: scheduling while
+> atomic" splats.
 >
-> I notice, in fact, that the driver is already using a bounce
-> buffer always:
->
-> static int sdhci_esdhc_mcf_probe(struct platform_device *pdev)
-> ...
->         if (!host->bounce_buffer) {
->                 dev_err(&pdev->dev, "bounce buffer not allocated");
->                 err =3D -ENOMEM;
->                 goto cleanup;
->         }
-> ...
->
-> Doesn't that mean the original patch is not needed?
+> Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>
+> Fixes: 27b57277d9ba ("mmc: sh_mmcif: Use sg_miter for PIO")
+> Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> Hi Geert, it'd be great if you could test this!
 
-TBH I just followed the pattern to handle sglists everywhere the same
-way.
+Done before (see the Tb above ;-)
 
-I looked closer at it: on the write path what you say is definately correct=
-:
-we copy the data to the bounce buffer and byte swap it in
-esdhc_mcf_copy_to_bounce_buffer() and that buffer is a GFP_KERNEL
-allocation so it will be in lowmem.
+You probably still want to s/does not need to/must not/?
+(sorry, I miswrote that previously)
 
-As we can see in sdhci_pre_dma_transfer() this is however as the name
-suggests only copying *to* the bounce buffer on mem->device transfers
-using DMA, i.e. when writing blocks. (Small writes is where we saw the
-big win with this bounce buffer when we wrote the code.)
+Gr{oetje,eeting}s,
 
-In the case of incoming data, reading blocks, DMA will read data into the
-sglist locations, which are some physical memory. This could very well
-be in highmem, especially for prefetching. Then at the end of a read
-esdhc_mcf_request_done() is called to byteswap incoming data, and
-if that is in highmem we need this sg miter walking code.
+                        Geert
 
-So I think this code is needed, at least theoretically.
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
-Then whether ColdFire m5441x will use highmem is another
-question. I don't know anything about the ColdFire memory configurations
-so I converted it on a "better safe than sorry"-basis.
-arch/m68k/include/asm/mcf_pgalloc.h makes an effort to avoid putting
-page tables into highmem, and I suppose that is for a reason so this device
-can actually have highmem?
-
-Yours,
-Linus Walleij
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
