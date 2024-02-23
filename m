@@ -1,127 +1,67 @@
-Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F14FD73F20;
-	Thu, 22 Feb 2024 22:12:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.156.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 652D77F;
+	Fri, 23 Feb 2024 00:12:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708639938; cv=none; b=V2oCFtMb9QbHBEFKekuTGIgldCMj8AjJQSv2vArGrhZluE3y6sh0zyUR0NH6/q+3aNFWnBKkk8DeAmTjwNk+tMRKqb/CTpg+/dPfXr0p8GvfYDnc/InB2FaZTOTrMhfCgM6HTACgBHUoNpJ/vg0/jJ7JckRIP590tU2pAf74w7o=
+	t=1708647144; cv=none; b=jK86iSaueoOVLLjptvmhprgv+9y34m9UPDfwPPnjGYPnTGgJcquWKU6nX95dV/l7hOX8jMmJMaLf6IyFIolJqjxfvm2cBJRkeIMb9YEi67J0KN8JVIPURn5Ivu4tnSoCVqDOP6o8VkJj2MJNNH0DgtpXLcfewLr6wVt9LqGszeE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708639938; c=relaxed/simple;
-	bh=OEjaR8q/hH/zJzrJq00dzosvg9sB+rc7P5n3BrRx+nE=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=oxWmN8hKLAG6O2QSbdxJR9xILmEUYExD+A1QHdxFcpSP23osuPPGN8/eK1d4MEGkyczAN1gnYN1+RmKzicIgTyEyIiPDLrA2GgAYgMGxqBZgecMESXov2350zmbCAVV3p9jArzVA2P/HD1shf1BmcZd/nxvaV8I34iNircw3aBI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com; spf=none smtp.helo=mx0b-0016f401.pphosted.com; dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b=c9kPgATR; arc=none smtp.client-ip=67.231.156.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=marvell.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mx0b-0016f401.pphosted.com
+	s=arc-20240116; t=1708647144; c=relaxed/simple;
+	bh=YRwttCxCPNuyMaZfgHM2hvPQ53QIesQu46wUC6N/G2o=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jCtSmi+ht/HRcW+UCK2N7/RdTnt0M+7ZsK8ZBMm+wwhVAu70/GOaHgY66IjPETq4uMjuOn1U1JYeOflFKSNAGcyvw8HfSDd2ro60Sw+gyGSD6aG27e/5f0BLHRYROHOI3NH2NxTDa0jd6XRWR0FRh5l+TCIboFfIxW9qd/a1Wto=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FAy7ixHd; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=marvell.com header.i=@marvell.com header.b="c9kPgATR"
-Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
-	by mx0b-0016f401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 41ML8Xtm001858;
-	Thu, 22 Feb 2024 14:12:14 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=
-	from:to:cc:subject:date:message-id:mime-version
-	:content-transfer-encoding:content-type; s=pfpt0220; bh=y6gHklRy
-	6mgfq/+kDFgxdQdIm96X6dvMx3GA+sAwVL0=; b=c9kPgATRBaAkorffM3JBrXZu
-	JiSZ77CYf1mkHC4JSlijR3S6i+cXxCFkUFUfLhpo4jjsn3zFJVwIx7XM+wIc9b8j
-	RyEnFYtReEnCSEHMOUtzs7h2pzbah9gUED2AAo5DiqiQjubzgP6AvU/IVJFMTtzU
-	eKTbCyNsSozfA5VK+KbdwTlGl+ZyNVXHO96NbSsxNND1jnuFEc9F3WCoPEEkW31d
-	39vG/d8EIBBkmrI+reGw8c/j1cotViJTiMOH7Fj86F50Nfcrx9tYi2lWoAJ4lIrB
-	8sDkkzLW1kW5MJHCGaPsP+AO7w0DLpIqBZ8/VWwfW+Lrtdg6jA6rOcEw5I4EuQ==
-Received: from dc5-exch01.marvell.com ([199.233.59.181])
-	by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3wedwxg5qs-2
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-	Thu, 22 Feb 2024 14:12:14 -0800 (PST)
-Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.48; Thu, 22 Feb
- 2024 14:12:12 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.48 via Frontend
- Transport; Thu, 22 Feb 2024 14:12:12 -0800
-Received: from dc3lp-swdev041.marvell.com (dc3lp-swdev041.marvell.com [10.6.60.191])
-	by maili.marvell.com (Postfix) with ESMTP id 5752E3F7210;
-	Thu, 22 Feb 2024 12:09:39 -0800 (PST)
-From: Elad Nachman <enachman@marvell.com>
-To: <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-CC: <enachman@marvell.com>, <stable@vger.kernel.org>
-Subject: [PATCH v3 1/2] mmc: xenon: fix PHY init clock stability
-Date: Thu, 22 Feb 2024 22:09:30 +0200
-Message-ID: <20240222200930.1277665-1-enachman@marvell.com>
-X-Mailer: git-send-email 2.25.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FAy7ixHd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01E03C433F1;
+	Fri, 23 Feb 2024 00:12:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708647143;
+	bh=YRwttCxCPNuyMaZfgHM2hvPQ53QIesQu46wUC6N/G2o=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=FAy7ixHdddECoyUfN2VpbbdcDCw0BiohRI+V4sPJ4tPu81UAFTO8u4Xw9aiRybw/y
+	 mERvY0NoN0tOnaZLsjZLzkHPgZGIsPP8DK88ZIPtSftTilExNavNQzh8OnMMtqQuPa
+	 36lL5KirvSPpRaLsfc43gjVueu8wXBosyb0Ax5VyvGFA5SU4v21g/8fWHJgyDTdMEz
+	 cP4FeCfEkJ9qKepTFs5i5m5h3xaUjb69qxnCLJG0/yXtTOQB0sl+rn01enzf6rs14t
+	 Pj+Zv/jSyJoyu648mn4qKtTHmvACXXdm55QRaK+vMRt0fuzYoAiVXeawXquG+m0x6i
+	 R9Mell2A8+4Fg==
+Date: Thu, 22 Feb 2024 17:12:18 -0700
+From: Rob Herring <robh@kernel.org>
+To: Yang Xiwen <forbidden405@outlook.com>
+Cc: Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+	David Yang <mmyangfl@gmail.com>,
+	Igor Opaniuk <igor.opaniuk@linaro.org>,
+	tianshuliang <tianshuliang@hisilicon.com>,
+	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+Subject: Re: [PATCH v4 4/4] dt-bindings: mmc: hisilicon,hi3798cv200-dw-mshc:
+ rename to hisilicon,hi3798-dw-mshc
+Message-ID: <170864713779.3856761.3190661011256742030.robh@kernel.org>
+References: <20240217-b4-mmc-hi3798mv200-v4-0-0fdd9bd48532@outlook.com>
+ <20240217-b4-mmc-hi3798mv200-v4-4-0fdd9bd48532@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Proofpoint-GUID: JdPCkikJJ_yuG4mu4kOEIp3h1iOolA97
-X-Proofpoint-ORIG-GUID: JdPCkikJJ_yuG4mu4kOEIp3h1iOolA97
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-02-22_15,2024-02-22_01,2023-05-22_02
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240217-b4-mmc-hi3798mv200-v4-4-0fdd9bd48532@outlook.com>
 
-From: Elad Nachman <enachman@marvell.com>
 
-Each time SD/mmc phy is initialized, at times, in some of
-the attempts, phy fails to completes its initialization
-which results into timeout error. Per the HW spec, it is
-a pre-requisite to ensure a stable SD clock before a phy
-initialization is attempted.
+On Sat, 17 Feb 2024 21:00:57 +0800, Yang Xiwen wrote:
+> Add binding and an extra property for Hi3798MV200 DWMMC specific extension.
+> 
+> Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
+> ---
+>  .../bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml | 21 ++++++++++++++++++++-
+>  1 file changed, 20 insertions(+), 1 deletion(-)
+> 
 
-Fixes: 06c8b667ff5b ("mmc: sdhci-xenon: Add support to PHYs of Marvell Xenon SDHC")
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Cc: stable@vger.kernel.org
-Signed-off-by: Elad Nachman <enachman@marvell.com>
----
- drivers/mmc/host/sdhci-xenon-phy.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-index 8cf3a375de65..c3096230a969 100644
---- a/drivers/mmc/host/sdhci-xenon-phy.c
-+++ b/drivers/mmc/host/sdhci-xenon-phy.c
-@@ -11,6 +11,7 @@
- #include <linux/slab.h>
- #include <linux/delay.h>
- #include <linux/ktime.h>
-+#include <linux/iopoll.h>
- #include <linux/of_address.h>
- 
- #include "sdhci-pltfm.h"
-@@ -216,6 +217,19 @@ static int xenon_alloc_emmc_phy(struct sdhci_host *host)
- 	return 0;
- }
- 
-+static int xenon_check_stability_internal_clk(struct sdhci_host *host)
-+{
-+	u32 reg;
-+	int err;
-+
-+	err = read_poll_timeout(sdhci_readw, reg, reg & SDHCI_CLOCK_INT_STABLE,
-+				1100, 20000, false, host, SDHCI_CLOCK_CONTROL);
-+	if (err)
-+		dev_err(mmc_dev(host->mmc), "phy_init: Internal clock never stabilized.\n");
-+
-+	return err;
-+}
-+
- /*
-  * eMMC 5.0/5.1 PHY init/re-init.
-  * eMMC PHY init should be executed after:
-@@ -232,6 +246,11 @@ static int xenon_emmc_phy_init(struct sdhci_host *host)
- 	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	struct xenon_emmc_phy_regs *phy_regs = priv->emmc_phy_regs;
- 
-+	int ret = xenon_check_stability_internal_clk(host);
-+
-+	if (ret)
-+		return ret;
-+
- 	reg = sdhci_readl(host, phy_regs->timing_adj);
- 	reg |= XENON_PHY_INITIALIZAION;
- 	sdhci_writel(host, reg, phy_regs->timing_adj);
--- 
-2.25.1
+Reviewed-by: Rob Herring <robh@kernel.org>
 
