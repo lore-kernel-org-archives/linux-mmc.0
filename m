@@ -1,70 +1,82 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42678B65F;
-	Fri, 23 Feb 2024 02:26:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A40C881AC6;
+	Fri, 23 Feb 2024 15:20:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708655208; cv=none; b=U+mooghm/tZcHQtT7TjuFYOWaux94rTycIEogW9FwHfcdWWx4RVIB3L5ywmqAyPNwEPL6BZwxogP9oFNqM+jWwQljAfzMlphtgV6g7LDZHQm4L1nZYGGHXqZEJeU8zTvXzXxAS/5QUYGH1gT5osC9BEXbtVlr4DyQD4CFC+hI1k=
+	t=1708701602; cv=none; b=GbIHosWtYkcVaarDhG05Jf+58RJnG8f8oVRpgjkD+yZEogo0HSRRXBL2rXfIRn0ePZJYUPs9LGnEmRYHvNwmSnhYKBypjJwR6l622zcyGvYNBwngoZ/6uGs8HTFFHvSNZ+GG3bnZ80iLjRCcdVs0L008OmBRvB5CLNq57dAAXFI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708655208; c=relaxed/simple;
-	bh=FfB3YRREbFuYqSFz36Fp0dGvfYiKsiNrIfqiet9iU+U=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=rxoPExRQRBU4LnDaSITkgsOlYMqxPN1gimmhOQbTYurCeFMudAf9p28mywc9axfQa4FIxXrRVWZ53e/YeIoN1EbkxJPiUR8CB6FDF8HFF09eWvIsXXsAxJ6ApBkZtfEd5nBRrBBXm5M9vY3LqIpqpOMqwyidwq3LFGUPUUlHNW4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p3RQ5BCe; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708701602; c=relaxed/simple;
+	bh=LTGuP5mwgDes1iDc674SKmGbovpo1+4tFu8cnR0ZZFg=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=awSj1ZUAmDP0y10VS1wJiX7Y+URMvQkP+2A3WCGfbJSKQYtaME8JXOVfO1E8rr6AwojXjZ4xi8AiaOA7uldn8z0Cn0eI2Q7JWSHt5Qe63NkP0mtNHAo0lMmY+zGzlf2Z1QiEdh53X19wIxQ2OH6T7HXz3IfDeo261YlC8gjDwmo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Vc7r6UhM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p3RQ5BCe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9C065C433C7;
-	Fri, 23 Feb 2024 02:26:46 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Vc7r6UhM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C901AC43390;
+	Fri, 23 Feb 2024 15:20:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708655207;
-	bh=FfB3YRREbFuYqSFz36Fp0dGvfYiKsiNrIfqiet9iU+U=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-	b=p3RQ5BCe5Ho1ikWdoNCRqn19P3mVWBp7VBT0sPAzzXjjjUgXJsEnKLcGFN6jz1pAI
-	 +eVKg1hpxo8px6qEyx5jYH9qGQw83FxJeeL8WCVqVabWr1v30n/1hQZ1AAvy8vmo6W
-	 BZKkrm4GxoWxg18xongmk9Q7wVB1ivBnrjdSZ8lkkwbMTbZd0YyFCuUa6HzRYM1TSY
-	 FCAW5AjE+9M2KQTbHuUCw+RW3OfoIKINhTGdiRHFLIgz2Dd1sd6VpeSp7WXelzmzi/
-	 8gRnO5Xs7EpBkMtVS1w+sYcTBSjqoHh7TF9qGE3fBFA+U6hBOWJHPUozkid9mCzKA8
-	 Aeqx8QwggE/Uw==
-Date: Thu, 22 Feb 2024 18:26:45 -0800
-From: Jakub Kicinski <kuba@kernel.org>
-To: Shawn Guo <shawnguo2@yeah.net>
-Cc: Frank Li <Frank.Li@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob
- Herring <robh+dt@kernel.org>, Krzysztof Kozlowski
- <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>,
- Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>,
- Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam
- <festevam@gmail.com>, NXP Linux Team <linux-imx@nxp.com>, Wei Fang
- <wei.fang@nxp.com>, Shenwei Wang <shenwei.wang@nxp.com>, Clark Wang
- <xiaoning.wang@nxp.com>, "David S. Miller" <davem@davemloft.net>, Eric
- Dumazet <edumazet@google.com>, Paolo Abeni <pabeni@redhat.com>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- netdev@vger.kernel.org, imx@lists.linux.dev
-Subject: Re: [PATCH v2 0/4] Add 8qm SMMU information
-Message-ID: <20240222182645.16f0d3bf@kernel.org>
-In-Reply-To: <Zdf96y7q4298dkmG@dragon>
-References: <20240201-8qm_smmu-v2-0-3d12a80201a3@nxp.com>
-	<20240202110511.135d26b7@kernel.org>
-	<ZcIPCxgO3Gxc/aXh@dragon>
-	<20240206074151.577d33f1@kernel.org>
-	<Zdf96y7q4298dkmG@dragon>
+	s=k20201202; t=1708701602;
+	bh=LTGuP5mwgDes1iDc674SKmGbovpo1+4tFu8cnR0ZZFg=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=Vc7r6UhMjw6tOffkYu/nSuOneuQKW3B34b0TZdfdc3TTLoU9rHgTbTi4ahBzCyAs+
+	 LWGx9Qm/T6lhL6dH5bpphrtEJEOu+5WpxLVdggwgfACcZuYraP48QKr9r12h5pfPaE
+	 cplw6LDQEmTB5lgWia4mJcYaThHX9xYL/ajxYOz6U7zaNQH594QFqUNlLYWCvxLm+V
+	 7vro2yg5hlcO8FBJrGIUnRoY/+D9syFqIp853hPqQnLjkV3eHdCuf7CeudLSf8xl5o
+	 t63WHI05Z6+99MAW9RjcCqBAUAwiDIgGrzKU//tfYXxPpZ46EsqzJK3W1YXLsQhSLH
+	 A3fStTR3JMGxQ==
+From: Lee Jones <lee@kernel.org>
+To: linux-renesas-soc@vger.kernel.org, 
+ Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Lee Jones <lee@kernel.org>, linux-arm-kernel@lists.infradead.org, 
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+ linux-sh@vger.kernel.org
+In-Reply-To: <20240213220221.2380-8-wsa+renesas@sang-engineering.com>
+References: <20240213220221.2380-8-wsa+renesas@sang-engineering.com>
+Subject: Re: [PATCH v2 0/6] mfd: tmio: simplify header and move to
+ platform_data
+Message-Id: <170870160052.1698319.4712751560931025638.b4-ty@kernel.org>
+Date: Fri, 23 Feb 2024 15:20:00 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+X-Mailer: b4 0.12.4
 
-On Fri, 23 Feb 2024 10:07:39 +0800 Shawn Guo wrote:
-> On Tue, Feb 06, 2024 at 07:41:51AM -0800, Jakub Kicinski wrote:
-> > I said DTB.  
+On Tue, 13 Feb 2024 23:02:19 +0100, Wolfram Sang wrote:
+> Changes since v1:
 > 
-> If the DTB here means Device Tree Blob which is generated by DTC (Device
-> Tree Compiler) taking DTS (Device Tree Source) as input, it's a build
-> result and so neither of us could take.
+> * rebased to rc4
+> * collected all needed acks (Thanks!)
+> * capitalized first letter in commit subject
+> 
+> The MFD parts of the TMIO have been removed by Arnd, so that only the
+> SD/MMC related functionality is left. Remove the outdated remains in the
+> public header file and then move it to platform_data as the data is now
+> specific for the SD/MMC part.
+> 
+> [...]
 
-I see, thanks for the explainer, I was referring to DeviceTree/Bindings.
-I'll say binding next time.
+Applied, thanks!
+
+[1/6] mfd: tmio: Remove obsolete platform_data
+      commit: 58d6d15662e4039fab7d786f0426843befa77ad4
+[2/6] mfd: tmio: Remove obsolete io accessors
+      commit: e927d7bac109d8ca1729dda47a8dbc220efdb50e
+[3/6] mmc: tmio/sdhi: Fix includes
+      commit: bed05c68aa8f078206143700cd37e42a0084155f
+[4/6] mfd: tmio: Update include files
+      commit: 3ef94c41db82573dc1e1dd6c259aec8ef6caaaf3
+[5/6] mfd: tmio: Sanitize comments
+      commit: 2d417dda59123b9523a19ce75fea3fd1056c3b4c
+[6/6] mfd: tmio: Move header to platform_data
+      commit: 858b29729c9d319b9cd1441646cc3af246d3c3f9
+
+--
+Lee Jones [李琼斯]
+
