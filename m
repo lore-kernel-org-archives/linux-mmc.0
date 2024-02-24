@@ -1,82 +1,110 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A40C881AC6;
-	Fri, 23 Feb 2024 15:20:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22ED779E4
+	for <linux-mmc@vger.kernel.org>; Sat, 24 Feb 2024 10:32:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708701602; cv=none; b=GbIHosWtYkcVaarDhG05Jf+58RJnG8f8oVRpgjkD+yZEogo0HSRRXBL2rXfIRn0ePZJYUPs9LGnEmRYHvNwmSnhYKBypjJwR6l622zcyGvYNBwngoZ/6uGs8HTFFHvSNZ+GG3bnZ80iLjRCcdVs0L008OmBRvB5CLNq57dAAXFI=
+	t=1708770746; cv=none; b=Rlu9R430prjHhiGJWpfaSGHiBCCoiJekIJZ78XmVHY4R9qpoxbJmb6kwwnns5oGWdjYkyNBbeZ40RXMkkZ+0cPRSFr0hMU5fYW5eFLd7piIIQgvYibvEBSEEeNsdlIqDzgqLU/mKXUuPXqb9g/eDxs+90wbQCxs1+9AMcUz8F5s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708701602; c=relaxed/simple;
-	bh=LTGuP5mwgDes1iDc674SKmGbovpo1+4tFu8cnR0ZZFg=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=awSj1ZUAmDP0y10VS1wJiX7Y+URMvQkP+2A3WCGfbJSKQYtaME8JXOVfO1E8rr6AwojXjZ4xi8AiaOA7uldn8z0Cn0eI2Q7JWSHt5Qe63NkP0mtNHAo0lMmY+zGzlf2Z1QiEdh53X19wIxQ2OH6T7HXz3IfDeo261YlC8gjDwmo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Vc7r6UhM; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708770746; c=relaxed/simple;
+	bh=x9r7CRx4jY65j4gFQg8sFsz8Qe/T6qpZJHjEEsvZU3o=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=MhR1a6FJIRZZmFu+T9cMvGUEJl7WAKfEhlm25/oWJD4gt0l2WQk1oTRUBmihEdsiDjW4aoCxOX0uJ4lsuF9RhBZ9G4g162FB2iI9dveXXPISPp4FsRuOvirvb5rr4bwHg0yx8VX1QbG2SX4EwtixeZqkEZiaS55No5ZeYk9VV1o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Wa0rR6QR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Vc7r6UhM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C901AC43390;
-	Fri, 23 Feb 2024 15:20:00 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Wa0rR6QR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 473E8C433C7;
+	Sat, 24 Feb 2024 10:32:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708701602;
-	bh=LTGuP5mwgDes1iDc674SKmGbovpo1+4tFu8cnR0ZZFg=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-	b=Vc7r6UhMjw6tOffkYu/nSuOneuQKW3B34b0TZdfdc3TTLoU9rHgTbTi4ahBzCyAs+
-	 LWGx9Qm/T6lhL6dH5bpphrtEJEOu+5WpxLVdggwgfACcZuYraP48QKr9r12h5pfPaE
-	 cplw6LDQEmTB5lgWia4mJcYaThHX9xYL/ajxYOz6U7zaNQH594QFqUNlLYWCvxLm+V
-	 7vro2yg5hlcO8FBJrGIUnRoY/+D9syFqIp853hPqQnLjkV3eHdCuf7CeudLSf8xl5o
-	 t63WHI05Z6+99MAW9RjcCqBAUAwiDIgGrzKU//tfYXxPpZ46EsqzJK3W1YXLsQhSLH
-	 A3fStTR3JMGxQ==
-From: Lee Jones <lee@kernel.org>
-To: linux-renesas-soc@vger.kernel.org, 
- Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Lee Jones <lee@kernel.org>, linux-arm-kernel@lists.infradead.org, 
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
- linux-sh@vger.kernel.org
-In-Reply-To: <20240213220221.2380-8-wsa+renesas@sang-engineering.com>
-References: <20240213220221.2380-8-wsa+renesas@sang-engineering.com>
-Subject: Re: [PATCH v2 0/6] mfd: tmio: simplify header and move to
- platform_data
-Message-Id: <170870160052.1698319.4712751560931025638.b4-ty@kernel.org>
-Date: Fri, 23 Feb 2024 15:20:00 +0000
+	s=k20201202; t=1708770746;
+	bh=x9r7CRx4jY65j4gFQg8sFsz8Qe/T6qpZJHjEEsvZU3o=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=Wa0rR6QRTfVHn3o8wvnva+PpJ7OjTyT1UW+YyZZBnvJBkQ7sZbYLn6rU+euLwmDvE
+	 JJwL2TPDVjGyjZH7Bdx5DFL/Xr3asezaytPqrkQoycNGTRuIMNaJQ6SgR/F+4E0xum
+	 j93wVfZMPUTevb95OlAmJ1YkcX/pQ00YpOQSCFkQO345VizubRiQaOUST80LSbKBLg
+	 RprvTfXhC+yT3sT9bYycmg0RiiiMMAVB/Dt16NLjaLwUlexYH5XII+DxVw8pbpK3ak
+	 Uz4lvCGhfrPhr41JRNfIvD90TFzy/+AR91vnvvfBvWJ8JzssFW8pJIcn+kMNZ0dryf
+	 g+BQX525ozYnw==
+Message-ID: <cbc2bbd3-a6f3-475a-9a1b-cf1a419b1978@kernel.org>
+Date: Sat, 24 Feb 2024 11:32:22 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-X-Mailer: b4 0.12.4
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-mmc: Document the required
+ clocks
+Content-Language: en-US
+To: Fabio Estevam <festevam@gmail.com>, ulf.hansson@linaro.org
+Cc: robh@kernel.org, krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.or,
+ Fabio Estevam <festevam@denx.de>
+References: <20240222143656.978759-1-festevam@gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20240222143656.978759-1-festevam@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Tue, 13 Feb 2024 23:02:19 +0100, Wolfram Sang wrote:
-> Changes since v1:
+On 22/02/2024 15:36, Fabio Estevam wrote:
+> From: Fabio Estevam <festevam@denx.de>
 > 
-> * rebased to rc4
-> * collected all needed acks (Thanks!)
-> * capitalized first letter in commit subject
+> The fsl-imx-mmc hardware needs two clocks to operate: ipg and per.
 > 
-> The MFD parts of the TMIO have been removed by Arnd, so that only the
-> SD/MMC related functionality is left. Remove the outdated remains in the
-> public header file and then move it to platform_data as the data is now
-> specific for the SD/MMC part.
+> Document these required clocks.
 > 
-> [...]
+> This fixes the following schema warning:
 
-Applied, thanks!
+Mistake in DT list address, so this won't be tested by automation.
 
-[1/6] mfd: tmio: Remove obsolete platform_data
-      commit: 58d6d15662e4039fab7d786f0426843befa77ad4
-[2/6] mfd: tmio: Remove obsolete io accessors
-      commit: e927d7bac109d8ca1729dda47a8dbc220efdb50e
-[3/6] mmc: tmio/sdhi: Fix includes
-      commit: bed05c68aa8f078206143700cd37e42a0084155f
-[4/6] mfd: tmio: Update include files
-      commit: 3ef94c41db82573dc1e1dd6c259aec8ef6caaaf3
-[5/6] mfd: tmio: Sanitize comments
-      commit: 2d417dda59123b9523a19ce75fea3fd1056c3b4c
-[6/6] mfd: tmio: Move header to platform_data
-      commit: 858b29729c9d319b9cd1441646cc3af246d3c3f9
+Please resend with correct DT list. In case you already did it: feel
+free to ignore this email. :)
 
---
-Lee Jones [李琼斯]
+Best regards,
+Krzysztof
 
