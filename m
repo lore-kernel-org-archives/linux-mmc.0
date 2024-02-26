@@ -1,59 +1,58 @@
-Received: from mail-ed1-f48.google.com (mail-ed1-f48.google.com [209.85.208.48])
+Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B92941C68D
-	for <linux-mmc@vger.kernel.org>; Mon, 26 Feb 2024 08:02:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6615C208B4
+	for <linux-mmc@vger.kernel.org>; Mon, 26 Feb 2024 09:00:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708934554; cv=none; b=cfetm3c7yH4DBH/2k6PTYiXk2ZlbAEfYkJRPCRHFBemhFmVwfeklBFGFMrgBb122Vm32L5SQhejeOuz7vShc1761rGiANTIh+PbLUWAMlnO7A/fCZ9xX8rg+/0piRZuNGunPixA3f2qzCIbHbf2+mjDDkY/6sZojgU3cwEpCPdU=
+	t=1708938032; cv=none; b=EWCD6tlVaCc1wlsEbexTQK7TJWnjn6HkAjtOdifYTklls68UnkWj+hus8nzVEKB4m0TQRx4SQJ4F3ItyeZAk4iB04oo77J1co2tUPtyzyzC53vTOuBVR72Bt2NA69S29tB+n0dnPaOOv1IQRJVLixcaPx+lcXPrKqxuzGYTAcPo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708934554; c=relaxed/simple;
-	bh=9xnOGx7WaP5Uc/baHSuN5Bk6KWOKBbWKDo3XN7jsqD4=;
+	s=arc-20240116; t=1708938032; c=relaxed/simple;
+	bh=9V2AFmilNvzCrulJV+j73tkCiNzv4smYL3KnoDNu9uc=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AS2Li7lS056YSFIQshuTvuQAtV0MVIvD5CbOTQbbAraRX0BrMSEWVIW3WOZdz7+svnHU419/ftBgamO6F1rD7fFN+5m90I+BfYYwmVCq+Z4RDN81cIHNT1ZGhqWDQuDQyFev1KIHHDiEOiNyh84Sq+9w1sFnUkgSs+9rjz5itdo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ame78ELc; arc=none smtp.client-ip=209.85.208.48
+	 In-Reply-To:Content-Type; b=FWdh8LHWJzzUAElzgEur1Mg5pbMbz097IfTRmL40BY6gv4CN4pJk2iTb460pQORyuJ2C6tty21kJE5jHjdFhxsnxTF2kxWRVrvzxQBkZLyhbM+rO1y70KRzlq+FNioWsTEIaF7ztsizq9dpLz0EpA6XvrGXo9R9XTgTLD5VmrT0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IvJjuswm; arc=none smtp.client-ip=209.85.218.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ame78ELc"
-Received: by mail-ed1-f48.google.com with SMTP id 4fb4d7f45d1cf-55a035669d5so4813075a12.2
-        for <linux-mmc@vger.kernel.org>; Mon, 26 Feb 2024 00:02:32 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IvJjuswm"
+Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-a3e85a76fa8so245656266b.1
+        for <linux-mmc@vger.kernel.org>; Mon, 26 Feb 2024 01:00:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1708934551; x=1709539351; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1708938029; x=1709542829; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=soC8CX2j/bFMKsGTx220hrOgW/KeIshjACOSeQIT7LA=;
-        b=ame78ELc6+wskDyFtknqxwaN4vrM03lWrDYrtjPBSf+oy+t94vpJPQa6xdpmCe2Bid
-         GJuiCPzS/cWm+FAZv/d3iIqd6+VFpSI8g5uRizMkDt57O/6ejWIyxpnx66ynYFU1G3/t
-         jJd4CAQETxC0wg9z4slS/UMoePaZVnuYGcT8Vw0CNHB/OJ5ID6qRSpPbF7TwnIB3DPp/
-         gS8ZGwEvmVAOPB1OVy2e1MopmtGWR95bOD9czuw2icteEjoH/Ko/eRdiD6k0CclIz7q5
-         lOM5bLuw+YGYp7y8RWoDg9MbO3ccSCT/xfyd+AePtHVEtUHmj3a6qRbaE1E0DbzJ/iaP
-         t9UQ==
+        bh=hDRedho3haZDo/Nx5M8yeWElkI8dvH0YoUsslnddoTo=;
+        b=IvJjuswmFnvUjSDKkgklv0ts8SuJM3evdceRZG3eOuvg1opAW6lneO/KuIpl7v0Rfx
+         RDNzjLjsh2LGy/ptxnJ4ZgQK2JfIrB8Xm7HKBLKCjesmnk0+v14OhPXdsZRHntaBAGIb
+         VUa1XZZeg9opJj2EVi0M8rjlaNGiOyxqelZJb3cpdqwIWGsdvJBBdyd14aCtrjeDc/Fk
+         zo/irtQ0G0jkBQ9Y5T86V60KUEdigXp2wDT25PtHUWgUZbsRFhDSgXX4cL8TGFyLr6KT
+         1zhpALhiiylhoMa8aHfQN3WMMl0l/jBO+yPOsCN1bLaEu0IDqzr9+AjB+7vNMyYdlkX8
+         P6ug==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708934551; x=1709539351;
+        d=1e100.net; s=20230601; t=1708938029; x=1709542829;
         h=content-transfer-encoding:in-reply-to:autocrypt:from:references:cc
          :to:content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=soC8CX2j/bFMKsGTx220hrOgW/KeIshjACOSeQIT7LA=;
-        b=c+cZ7qOgTk6/GR3eWbbogX0zOUac1g0t3zxIlozbg8EyoMWuoiVyoXF70uoBUcYQlw
-         Ra6MI70McHVqwJeQ074C9yVcpHTcex19vn6M2I8AvuPTc/hi6XE5+l3B99sAifcmZOq5
-         HVeOJKBDH0kdBrTaV+sI895h1VnlXhOnkXpTGiopkP91KBIOVAP42svEoDPo8UU1rbK0
-         1uI9eRzZAHB+TeDkXmTv2G/WQRDP+eJkKi66JID1mfA1/QcvCx7t7s0cleri3Ab/J7Cy
-         TepIGhHxo6wCuAMmtX7BsfE7GlmiH809Ob3UcqBRCrP6p7EJWGYyqO/emtxkJ/lhjkDg
-         /cbw==
-X-Forwarded-Encrypted: i=1; AJvYcCX9LxYu034fq27czkk0p2mtw+/uzZyH+uq+Evb+008YckMOQHjEQ9w+JXLAYf/H1MzleUqGzsv/EKvJtjvADhwxDi9Vr/iEmMz2
-X-Gm-Message-State: AOJu0YzpfmMZxY1hg8twgjBWl3pfZzr3dcn+m1nOgR5LZfhn1AR2b1jp
-	h+0T6mFrb7+OI5KtzHmU9DL4ryx6GHlpKSCm8jYSBirEdCasInJ7A1lReZ9YDfY=
-X-Google-Smtp-Source: AGHT+IEh4UoHibcStiR2cVowrevnnxMHPxi9MVSf2WTOPhUAqfsiazAQnXiDCUH/mINyxIH+oEDvgQ==
-X-Received: by 2002:aa7:dd12:0:b0:565:7c8d:5790 with SMTP id i18-20020aa7dd12000000b005657c8d5790mr3906095edv.4.1708934551235;
-        Mon, 26 Feb 2024 00:02:31 -0800 (PST)
+        bh=hDRedho3haZDo/Nx5M8yeWElkI8dvH0YoUsslnddoTo=;
+        b=Xz6MBInZ2GNIYcShN8ct1ljGBzvC/nG1+TUKG11MEFE2RXGuK8bw8t2E2735UAV6G8
+         SE+lbY0mDUPVTupcxQBoTlebgJjyzZHt4zKa75Cpj2aXaDvgaIPxi/PSI2FrLeRFZMG0
+         vUqLLODPk9VB846s3N/KtLoXdVXYWEyrn6IKQTvWrENN8mwArnisMKZ0x07iOrMRSj6T
+         bcxtRH9KNeghSt9alwNsFerY9rYrT3fOzK3UWCos6f8rf1CRk7k0MTkHulA30REqG1rw
+         GLzgLTofFEdXvhAUszS9MS1x6RJZXAaOdOTFYJ+LI8wax43KwecK35q0Mlin4iPvSgSQ
+         IE/g==
+X-Gm-Message-State: AOJu0YwQwAM7bnc4uxC8CLVjUuidW9kJeOa7lOMbZGvYGWP3yexlFHNJ
+	KNfugPVyfpPOwH92iJ5B2Z3bPLUKs7naHYHAe1ZGTimBGpfmcwag+dch66cQLzE=
+X-Google-Smtp-Source: AGHT+IEBf/ngs7MGcJAMCFz3rjCT5Z2cqQ2XgrGnm7gh+wIH+vLOPhUgZIMn8Ikmat1ZUW6nzLyLsg==
+X-Received: by 2002:a17:906:15c1:b0:a43:72d6:f1fe with SMTP id l1-20020a17090615c100b00a4372d6f1femr544201ejd.77.1708938028839;
+        Mon, 26 Feb 2024 01:00:28 -0800 (PST)
 Received: from [192.168.1.20] ([178.197.222.116])
-        by smtp.gmail.com with ESMTPSA id r22-20020aa7cfd6000000b0056536eed484sm2102206edy.35.2024.02.26.00.02.29
+        by smtp.gmail.com with ESMTPSA id 7-20020a170906308700b00a3e799969aesm2178043ejv.119.2024.02.26.01.00.27
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 26 Feb 2024 00:02:30 -0800 (PST)
-Message-ID: <5a4a597e-8d5b-42a7-ad9e-226daf4126e8@linaro.org>
-Date: Mon, 26 Feb 2024 09:02:29 +0100
+        Mon, 26 Feb 2024 01:00:28 -0800 (PST)
+Message-ID: <c9ff7541-ed51-4f59-884c-b63577cad834@linaro.org>
+Date: Mon, 26 Feb 2024 10:00:26 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,19 +60,16 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 4/4] dt-bindings: mmc: hisilicon,hi3798cv200-dw-mshc:
- rename to hisilicon,hi3798-dw-mshc
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: add default and 100mhz
+ state
 Content-Language: en-US
-To: forbidden405@outlook.com, Ulf Hansson <ulf.hansson@linaro.org>,
- Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>,
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
- Conor Dooley <conor+dt@kernel.org>
-Cc: Igor Opaniuk <igor.opaniuk@linaro.org>,
- tianshuliang <tianshuliang@hisilicon.com>, David Yang <mmyangfl@gmail.com>,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org
-References: <20240217-b4-mmc-hi3798mv200-v4-0-0fdd9bd48532@outlook.com>
- <20240217-b4-mmc-hi3798mv200-v4-4-0fdd9bd48532@outlook.com>
+To: Marco Felsch <m.felsch@pengutronix.de>, ulf.hansson@linaro.org,
+ robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org,
+ shawnguo@kernel.org, kernel@pengutronix.de, festevam@gmail.com,
+ linux-imx@nxp.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org
+References: <20240221184602.3639619-1-m.felsch@pengutronix.de>
 From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -119,19 +115,16 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20240217-b4-mmc-hi3798mv200-v4-4-0fdd9bd48532@outlook.com>
+In-Reply-To: <20240221184602.3639619-1-m.felsch@pengutronix.de>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 17/02/2024 14:00, Yang Xiwen via B4 Relay wrote:
-> From: Yang Xiwen <forbidden405@outlook.com>
+On 21/02/2024 19:46, Marco Felsch wrote:
+> Some devices support only the default and the 100MHz case, add the
+> support for this to the binding to avoid warnings.
 > 
-> Add binding and an extra property for Hi3798MV200 DWMMC specific extension.
-> 
-> Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
+> Signed-off-by: Marco Felsch <m.felsch@pengutronix.de>
 > ---
->  .../bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml | 21 ++++++++++++++++++++-
->  1 file changed, 20 insertions(+), 1 deletion(-)
 
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
