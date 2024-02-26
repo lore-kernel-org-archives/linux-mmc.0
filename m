@@ -1,127 +1,164 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f178.google.com (mail-lj1-f178.google.com [209.85.208.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEA0B1DA37;
-	Mon, 26 Feb 2024 11:49:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C460F12C520;
+	Mon, 26 Feb 2024 17:33:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708948184; cv=none; b=fRLDPGmEwOQ7Z764LR12ehD941heY9eOmfN/7aQbZMkIRCJpAmkuu+GKDTh8G2gthv6crPh0m3349yFhCm6jrEt+nj5q/z4yGUtz9cc1B5KdIm1vCb15WOfha0Y+QCqxJe5rA9wkonJ+pA4XkWYQvhAc0skjXGq9xUqSjwK12lc=
+	t=1708968809; cv=none; b=g7h4E0+XAnkrmLRHhZjNsNVYbAYgyDqX5GqFBTSRSeJyqqiw9/P3Kvj0A3k9wHf8K9HexBr47bi+/bzDbJlcl5GrS55RoFBX39/Pje7DY8KXHLr3tTG6UyJ5ZwYfc5RjtBSADQeKZv3M5cjF62r/WRzSzI3Ci8eUDMOFwLUhufo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708948184; c=relaxed/simple;
-	bh=XDVR6cUnSSDPnKY5yPTZWPfRyY9FP26xvfynU2Sa91A=;
-	h=From:Date:To:cc:Subject:In-Reply-To:Message-ID:References:
-	 MIME-Version:Content-Type; b=seaWdjGHeqvn0LesYda3ZWQxcFkjRivmtuAbhCXNVlpSWTdwXb6H6P5+v5V9a1Qo43iTjnKgOq6ohSVFsqJ2AS/WryUyMI4XfwslG8TCaJXvdsmA3GaVlas5ozKIvL7cqthtiCpqG+8Qc3xdctAnRr0Y36bAhS+cjqKfwxlHBvc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=FIYdPJD8; arc=none smtp.client-ip=198.175.65.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1708968809; c=relaxed/simple;
+	bh=L9Tf97QS/Z2NcZn7vpgB9d+a2GHv2SM+ZBIc4L1I76Q=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=RixKa/4AN+8ZQfvhOK9SDVJ/QoMzWOddRAq9eBG5yJt/eKXu5xvBK42KMvz0PUeqFqK25eHIpuyKxG0z+CtoKChqwVtN0+NuKW9A+c/LeTxToqhxwlsAcHIx3BWruLaz7v7Fut4cJHfejaJIsYGiUoVHBNTd68HB7pmNbjKJepc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CBTtGJne; arc=none smtp.client-ip=209.85.208.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FIYdPJD8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1708948183; x=1740484183;
-  h=from:date:to:cc:subject:in-reply-to:message-id:
-   references:mime-version;
-  bh=XDVR6cUnSSDPnKY5yPTZWPfRyY9FP26xvfynU2Sa91A=;
-  b=FIYdPJD8xgpDHi8jNyFTM13HGtcC37xUoTJMe/o7L4MnMf7TIvnj7pTo
-   /hz3kG7CtyTP6egioOUb6sUPEEwujf3Nw5IJpC5wY5f9bi3DgxROxzvZv
-   EOhCpZqkGM7awIxqA6bND1zor7cH/L40s/FsWRoaZ9JgRQCopzuajja8S
-   0hO5Pgn8dIksEjRQhq76hiSjDocRgrRvu2dR2iyg6sveQKd62XAcSTWvZ
-   4bAdFgCPD8CNWn+zKPhWBKI8q9hDGMGTBz/q+2xuVSHFHhtTfZwAvzzsH
-   G9aQh/7DC5MxOnjn7TGjl7UODQ2rdBRGKoHjxgWE8py//CsKO/JPhdVQ4
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10995"; a="7032128"
-X-IronPort-AV: E=Sophos;i="6.06,185,1705392000"; 
-   d="scan'208";a="7032128"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Feb 2024 03:49:42 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.06,185,1705392000"; 
-   d="scan'208";a="6634988"
-Received: from ijarvine-desk1.ger.corp.intel.com (HELO localhost) ([10.246.48.12])
-  by fmviesa010-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Feb 2024 03:49:40 -0800
-From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
-Date: Mon, 26 Feb 2024 13:49:34 +0200 (EET)
-To: Mathias De Weerdt <mathias.de.weerdt@gmail.com>
-cc: Bjorn Helgaas <helgaas@kernel.org>, ben.chuang@genesyslogic.com.tw, 
-    johnsonm@danlj.org, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org, 
-    linux-pm@vger.kernel.org, "Maciej W. Rozycki" <macro@orcam.me.uk>
-Subject: Re: Bug Report: Delayed Wake from Suspend with Genesys Logic GL9755
- SD Host Controller
-In-Reply-To: <CAKfmkPK+T0887-uQORxOzbcz-ZxBY+wKLYPRoiQiUfNhffQBEg@mail.gmail.com>
-Message-ID: <0aa430ff-c60d-b2c6-bb1c-e352ae7be020@linux.intel.com>
-References: <CAKfmkPKW=cD88D-cYJUaoN0A6i91C5ukiy6AYYWpNbW8VBQaGA@mail.gmail.com> <20240225233117.GA182018@bhelgaas> <CAKfmkPK+T0887-uQORxOzbcz-ZxBY+wKLYPRoiQiUfNhffQBEg@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CBTtGJne"
+Received: by mail-lj1-f178.google.com with SMTP id 38308e7fff4ca-2d180d6bd32so49002791fa.1;
+        Mon, 26 Feb 2024 09:33:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1708968806; x=1709573606; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=beWsM29gMRJcRF7iuTDVrHljWW5n6TmO03OyS7o80Zo=;
+        b=CBTtGJneCLZjbstda3knsAtSVNehRACoEdhgbDgSvU6tvuNOo6OayCkiUcz0JxZhIA
+         8QVJWTVQJQ+y8dzlkt+MciJ5ne6nMdGEsiJvqQ17yGF2gdWQOnUhr4UOZqItmfElm4/A
+         mo27ozS9MTdnU7egyXy3cNJLsysRd2HfaRCmr+MN+kGZ0Gh8FQPjOTpxZR+nwTt4VXDh
+         02erwD6IsSz8VZ0zj+cQCNAOJy1+dkKbINHtfu65ge1QaPDIH2BVQCMyknHoeIztSBr8
+         r7kD27sBjBicZOe88OxG6LPw8uBpfDtVM5xb/9RL2WhpbedhLw7uvHXWNddnxb/wklGm
+         bRyg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708968806; x=1709573606;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=beWsM29gMRJcRF7iuTDVrHljWW5n6TmO03OyS7o80Zo=;
+        b=qQ+Ggvl2mYOLRjwu/i+glOrtXEKuMJ094TRHalmZQ8D4iGwBPH3WTihAGD/RBmQIz4
+         ejalt693Q9OU+AKxSTZFl/25UXIEf8A+DNz3tXb5BicWhpKRscTj0PHKDSW684qHo4HS
+         gOCsaAKuygWLwG7m+iQUReLTmcAkDGiF8D4aXT20eYnqEZi9fHmM1I1nbbzGujhjgnJR
+         ffMCifAg2ffS9qSwvUeIGFnd9MrW35LMEMvmubzh2SxJR6dl6lgBptWVbC/sraor2JTN
+         pm6o5Yh3hm50+C8MfwZ7cubobdKuI2oa8W3smDvR4G3KRH5DDp+/gxagvSTOst3TlQm9
+         fiJQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUqqQ/9QqaIi7XckL1DlsdL6ECO9+SN6aksS/tf2ihy7ZDhx75ZhRictIkSOj+7sgzy9sbH751woijbCwlU5qlFuy2lSu7ss1GeNjK9E0/Jm2lALj2v1LjmX0omlSSfbSDM0ewoABx3NihK6l1fT+e14/06LHYFWQ2M0CvMTUs=
+X-Gm-Message-State: AOJu0YxYtxwy1qZwIgNobaTKFK0Bp9F2V9rZkM2UFIFgc4/AurSzjRYe
+	OXiXuyuxOIf4q6DpBfozM1Z2pe+k5g9nH+aOYGSY1PCgKyJELolmYHEFArZ1CbHavPvUCCSC2AJ
+	ZNumXhLCCat+Mgr5x6tznUTTRFlQ=
+X-Google-Smtp-Source: AGHT+IHiJbdfFHQ/BZKnrZSYBSDiKtY7SKjNcV5qa/oMXNaxzf738m1BTOuRymI2x4+iOrVhHsr5qt0VFgzS/i+ceoc=
+X-Received: by 2002:a05:6512:2e8:b0:512:b25a:dfdb with SMTP id
+ m8-20020a05651202e800b00512b25adfdbmr4557141lfq.27.1708968805600; Mon, 26 Feb
+ 2024 09:33:25 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+References: <CAKfmkPKW=cD88D-cYJUaoN0A6i91C5ukiy6AYYWpNbW8VBQaGA@mail.gmail.com>
+ <20240225233117.GA182018@bhelgaas> <CAKfmkPK+T0887-uQORxOzbcz-ZxBY+wKLYPRoiQiUfNhffQBEg@mail.gmail.com>
+ <0aa430ff-c60d-b2c6-bb1c-e352ae7be020@linux.intel.com>
+In-Reply-To: <0aa430ff-c60d-b2c6-bb1c-e352ae7be020@linux.intel.com>
+From: Mathias De Weerdt <mathias.de.weerdt@gmail.com>
+Date: Mon, 26 Feb 2024 18:33:11 +0100
+Message-ID: <CAKfmkPJUSVZgGSrD4qNnxHDK7zE-S119L-HR2asDSGhnsCEU6Q@mail.gmail.com>
+Subject: Re: Bug Report: Delayed Wake from Suspend with Genesys Logic GL9755
+ SD Host Controller
+To: =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+Cc: Bjorn Helgaas <helgaas@kernel.org>, ben.chuang@genesyslogic.com.tw, johnsonm@danlj.org, 
+	linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-pm@vger.kernel.org, "Maciej W. Rozycki" <macro@orcam.me.uk>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 26 Feb 2024, Mathias De Weerdt wrote:
+Hi Ilpo
 
-> Hi Bjorn
-> 
-> This has indeed never worked. I have even tried plenty of older
-> kernels and now also the latest mainline.
-> 
-> I collected the data you requested on the following kernel (Latest
-> mainline as of yesterday)
-> Linux core-arch 6.8.0-rc5-1-mainline #1 SMP PREEMPT_DYNAMIC Sun, 25
-> Feb 2024 21:59:28 +0000 x86_64 GNU/Linux
-> 
-> After booting the laptop I put it to sleep and woke it up and
-> collected the dmesg and lspci logs. (They have been attached)
-> 
-> Thanks for your quick response.
-> If you need anything else please let me know.
-> 
-> Kinds regards
-> Mathias
-> 
-> On Mon, 26 Feb 2024 at 00:31, Bjorn Helgaas <helgaas@kernel.org> wrote:
+That worked! I can now wake almost instantly from suspension.
+
+Thanks for the quick responses!
+
+On Mon, 26 Feb 2024 at 12:49, Ilpo J=C3=A4rvinen
+<ilpo.jarvinen@linux.intel.com> wrote:
+>
+> On Mon, 26 Feb 2024, Mathias De Weerdt wrote:
+>
+> > Hi Bjorn
 > >
-> > On Sun, Feb 25, 2024 at 11:38:35PM +0100, Mathias De Weerdt wrote:
-> > > Hi
-> > >
-> > > I am writing to report a potential bug in the Linux kernel related to
-> > > waking from suspend on a system(Laptop) with a Genesys Logic GL9755 SD
-> > > Host Controller. Below are the details of the issue:
+> > This has indeed never worked. I have even tried plenty of older
+> > kernels and now also the latest mainline.
 > >
-> > Hi Mathias, thanks very much for this report.  A few questions below.
+> > I collected the data you requested on the following kernel (Latest
+> > mainline as of yesterday)
+> > Linux core-arch 6.8.0-rc5-1-mainline #1 SMP PREEMPT_DYNAMIC Sun, 25
+> > Feb 2024 21:59:28 +0000 x86_64 GNU/Linux
 > >
-> > > Issue Description:
-> > > After suspending the system, waking it up takes an extended amount of
-> > > time, typically 1 to 2 minutes. The delay occurs consistently and is
-> > > observed in the dmesg logs.
+> > After booting the laptop I put it to sleep and woke it up and
+> > collected the dmesg and lspci logs. (They have been attached)
+> >
+> > Thanks for your quick response.
+> > If you need anything else please let me know.
+> >
+> > Kinds regards
+> > Mathias
+> >
+> > On Mon, 26 Feb 2024 at 00:31, Bjorn Helgaas <helgaas@kernel.org> wrote:
 > > >
+> > > On Sun, Feb 25, 2024 at 11:38:35PM +0100, Mathias De Weerdt wrote:
+> > > > Hi
+> > > >
+> > > > I am writing to report a potential bug in the Linux kernel related =
+to
+> > > > waking from suspend on a system(Laptop) with a Genesys Logic GL9755=
+ SD
+> > > > Host Controller. Below are the details of the issue:
 > > >
-> > > System Information:
-> > > - OS: Arch Linux x86_64
-> > > - Kernel: 6.7.5-arch1-1 and 6.7.6-arch1-1
-> > > - SD Host Controller: Genesys Logic GL9755 SD Host Controller (PCI ID:
-> > > 17a0:9755)
+> > > Hi Mathias, thanks very much for this report.  A few questions below.
 > > >
-> > > Observed Logs (dmesg):
-> > > [ 642.483972] sdhci-pci 0000:2f:00.0: not ready 1023ms after resume; waiting
-> > > [ 643.537370] sdhci-pci 0000:2f:00.0: not ready 2047ms after resume; waiting
-> > > [ 645.724028] sdhci-pci 0000:2f:00.0: not ready 4095ms after resume; waiting
-> > > [ 649.990655] sdhci-pci 0000:2f:00.0: not ready 8191ms after resume; waiting
-> > > [ 658.310658] sdhci-pci 0000:2f:00.0: not ready 16383ms after resume; waiting
-> > > [ 675.590673] sdhci-pci 0000:2f:00.0: not ready 32767ms after resume; waiting
-> > > [ 709.723965] sdhci-pci 0000:2f:00.0: not ready 65535ms after resume; giving up
-> > > [ 709.724183] sdhci-pci 0000:2f:00.0: Unable to change power state
-> > > from D3cold to D0, device inaccessible
-
-Hi Mathias,
-
-In your dmesg, there's the Target Speed quirk triggering. Please try these 
-two patches, they should fix the logic bug that causes the long delay you 
-see:
-
-https://lore.kernel.org/linux-pci/alpine.DEB.2.21.2402092125070.2376@angie.orcam.me.uk/T/#t
-
-(They won't help to the link not coming up issue though).
-
--- 
- i.
+> > > > Issue Description:
+> > > > After suspending the system, waking it up takes an extended amount =
+of
+> > > > time, typically 1 to 2 minutes. The delay occurs consistently and i=
+s
+> > > > observed in the dmesg logs.
+> > > >
+> > > >
+> > > > System Information:
+> > > > - OS: Arch Linux x86_64
+> > > > - Kernel: 6.7.5-arch1-1 and 6.7.6-arch1-1
+> > > > - SD Host Controller: Genesys Logic GL9755 SD Host Controller (PCI =
+ID:
+> > > > 17a0:9755)
+> > > >
+> > > > Observed Logs (dmesg):
+> > > > [ 642.483972] sdhci-pci 0000:2f:00.0: not ready 1023ms after resume=
+; waiting
+> > > > [ 643.537370] sdhci-pci 0000:2f:00.0: not ready 2047ms after resume=
+; waiting
+> > > > [ 645.724028] sdhci-pci 0000:2f:00.0: not ready 4095ms after resume=
+; waiting
+> > > > [ 649.990655] sdhci-pci 0000:2f:00.0: not ready 8191ms after resume=
+; waiting
+> > > > [ 658.310658] sdhci-pci 0000:2f:00.0: not ready 16383ms after resum=
+e; waiting
+> > > > [ 675.590673] sdhci-pci 0000:2f:00.0: not ready 32767ms after resum=
+e; waiting
+> > > > [ 709.723965] sdhci-pci 0000:2f:00.0: not ready 65535ms after resum=
+e; giving up
+> > > > [ 709.724183] sdhci-pci 0000:2f:00.0: Unable to change power state
+> > > > from D3cold to D0, device inaccessible
+>
+> Hi Mathias,
+>
+> In your dmesg, there's the Target Speed quirk triggering. Please try thes=
+e
+> two patches, they should fix the logic bug that causes the long delay you
+> see:
+>
+> https://lore.kernel.org/linux-pci/alpine.DEB.2.21.2402092125070.2376@angi=
+e.orcam.me.uk/T/#t
+>
+> (They won't help to the link not coming up issue though).
+>
+> --
+>  i.
