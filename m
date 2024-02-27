@@ -1,55 +1,57 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00BC714534F
-	for <linux-mmc@vger.kernel.org>; Tue, 27 Feb 2024 15:31:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9ECA5645E
+	for <linux-mmc@vger.kernel.org>; Tue, 27 Feb 2024 15:31:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709047905; cv=none; b=JXpLdrQBuLyT/Tiat741Hr2Ejs19oLWgPVJqn2ZBGKvJGIpHV/Bo8hXUBnLuh/u8Ev4qkF1AAMLLMmU2X9ylKpNDYoFG5BOvY/pBKG8uQswtfpTyIA/ualBLQwAhV31lX2IPFa2sBiCzjti69fztYNPCZthQbIyaOqDLnkoojyc=
+	t=1709047907; cv=none; b=hKSX7jNAEDLHWtwmCytir7kNCTR4lSfoIwfR4PYT4YVaRHPMJldFwq5qSZw7TISaOgRkl/56cdebWjfdkQJEns1LH0o9DX8BR2ckP8GZSkSguulYJOuR2PS57QJzSjL0A/yepaIyNCG6f6YrQa0TbP29b6Q95VsIw1kFecjVQBg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709047905; c=relaxed/simple;
-	bh=v6yybQAjFJ2C3zsbW/Boip9BqVfFpCyinrgWkMgqJaQ=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=cmJ5LqBbMqp9poXsZSykfa21N+4QjicP8YI5YY2hzGjREt2sdm+pZPYECiJvplZXJBBouHnUQYaVsXzhzwZtf6/lBORhiXETVmI7sNXIC3J546zXuI8Jo4pfXy0IUZ58fQz5XFjGNTg4cP6PXypOJFnR0ia1Ty9szBQvp8+QJq8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YKUVIYfB; arc=none smtp.client-ip=209.85.167.53
+	s=arc-20240116; t=1709047907; c=relaxed/simple;
+	bh=oMSihfIj6FVmvPDkRomrwbKv5TGKvQOpMPNohnzgfc8=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=pnALbGWBSDqE4o4IJkW2wNpn/VRXY7jlWV3H2MMJs0joa83A2l3A0SELxxfbonzgN4bFy6GTFRFtrqhIM4cZr1i8ARnfcEPnz8JdndWbtUEKLmYNKpsseWgTw9AQdU+W29uyyxRxrKaL8tfkhjh88qXlL792G5fzEFhwhpjplVY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bSgxG3Fe; arc=none smtp.client-ip=209.85.167.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YKUVIYfB"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-513143d3c42so553554e87.3
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Feb 2024 07:31:42 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bSgxG3Fe"
+Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-512e1991237so3726370e87.1
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Feb 2024 07:31:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1709047901; x=1709652701; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=/QqPwg+3i18/ioCqaGI7I8uzwIulXGfxqfDO8uVoxw8=;
-        b=YKUVIYfBSVeAGdMInBjkz/newNIRmogr0RtEo+tHNdHbuak2PlXf2BZO3CQ5dQ+hS/
-         fbkRkVdVK0vv7NjUAPlFtMU0+z74PtqSrHahSFtwwJ6kUe0qCDTcmFLriAAURkcp7lXO
-         jeDIghntJVuOANQT9ESrdJzhIxybTjhLc5MKAP/icu5ZZuV0jXCcqUMVA2I7y26KKQrV
-         Ky4WQjBiIcoiwZw+hZFFgHn6sHXZVM1nYIalf1L8F0Ozg7wCd1R+Ds8J3dHwB4IAtJLk
-         oR691TfiKAvQlaxvO7Vq3y4AXEHyoAfKCFaLxG+FIxc+ztpHSy6FMuwT0GPg/VPTD5rn
-         c8kA==
+        d=linaro.org; s=google; t=1709047903; x=1709652703; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+dYQ25wm3dbT15Vm3VFxEMhYinQk55qyc79JzeugeO0=;
+        b=bSgxG3FePRzcFFhMjnN3afi0RkwZ+1Q6wV1nHkcberk5jSf9RLKM9maMaIzVAqpK9o
+         rqhQekEPDY9stlGOaGCERiPfJhUGXa8r6Ei7N9O+OPFp0Joeoo0c+4Pl1FDUyyrLhmP1
+         1wrSjCW3+aOgIeRuHG8nFPv0xSSPJTDK23xDHy4xmeBe2E9/LOY8HWhMhQl8zLG8sI81
+         AeoaudO9j4stQRlPTPwCYAKp1FrckKIvBeK6MWcSGOg6jhrC90CvimdbAbzE02XwsvLs
+         HjmfMkXrFbDYbjL8ndEFDe+DaihQT9hzoYSESKXnfw+KLQ3qYuhYr4FOkbOUKEOBRuIx
+         JUpg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709047901; x=1709652701;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=/QqPwg+3i18/ioCqaGI7I8uzwIulXGfxqfDO8uVoxw8=;
-        b=eY1wBpHCtQchZHWZpiBEnRWeuF+W2MxBWlHuwQ97G5IW2SSDywZAClIo7mUs1DbXXk
-         vWh8kf6MCoERo7gkYxgHgE4gQDCi31fOOhwC3QIagDHlnmhrlsib63aAkjtOsVu/JQK+
-         Sgechh2cN6rRSTavfQkAMSoUE7o1/Izvpa4GkTr0L6xeXbmDYG9552FFvqXEB7pm3Npc
-         rMdgjYLjfF3gV/ZAEGhxBVQDuWPpIdrVBJnnGopoaCLRlCzJ2M8T1RrXLMHeAINKINc3
-         IufOUhyElJHgrRnUetgdJEDfIK/Dut1hwRndosS9A3SCydFZ/I2dJXLBbq/Q01wqO2Xm
-         GxHg==
-X-Forwarded-Encrypted: i=1; AJvYcCX4YsnGSGfmNITweqEYSA6HRN7AnGVCg2fjrxjwxWmPQMBG3V/Bzmi6sjD1ef8r8CudjXHVdmurU8dcFkIyBBTGAHB7vwjihgjE
-X-Gm-Message-State: AOJu0Yz+vszckdz9cmU1C5xfGT+k15ezB7cSMm6BJpKHCoy6oeZkSMmd
-	Jip7TkBOQoJNY+Rv+LQLVvaLixYB7jqQGbh0lGi0NCiCiPR0aPyW3KOxZSONP2E=
-X-Google-Smtp-Source: AGHT+IEDSSiCUlmzoKgRQY8s7Pefw6eYs9eb8X4BYTdKNJWvCvgFckZVp7kIYiwX3e9kXw9nvzmzlA==
-X-Received: by 2002:a05:6512:33cd:b0:512:f650:d968 with SMTP id d13-20020a05651233cd00b00512f650d968mr5995411lfg.42.1709047901175;
-        Tue, 27 Feb 2024 07:31:41 -0800 (PST)
+        d=1e100.net; s=20230601; t=1709047903; x=1709652703;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+dYQ25wm3dbT15Vm3VFxEMhYinQk55qyc79JzeugeO0=;
+        b=rexly6iMWrsADUO4wqLQWACmmBJC8DPs7ibDKJhc8aG0TersYltaaQJkolQQ0//+Lh
+         RLAne9XBa0G0bKQzB0gEGiL8NDgL9Cnw6AHVtboeo7QfXhbK3C1/x6gJ2PJ0F/RLUd7q
+         q447LOjor4NWpOCalWJBdou5+2gKhwl7W2mfzlld4KFuaZ10JPP3Ft7zEEiMlJhnzCL8
+         Np21RIQJ19zDPedDZ8cbX/lMFclsIRniBBM41Id799f4L6Bm7mxV0oGSg5aykfqrodeL
+         0k3XB3O/TReKOINqhO2IUjPS2In0pIWAuIkxEMtd/ipaDVTJV5VVzWNb/JLJuU11tmjS
+         pwOg==
+X-Forwarded-Encrypted: i=1; AJvYcCW2nQuWyhnrg/5DlhQobO/YA7JiqeZ7VqjWfWS4OUIS7Sht7ZiQbUUMKtv1/sm1FEwGYMipZIyYsg8WL0HTeU9kWdDv/YkEJpIu
+X-Gm-Message-State: AOJu0YyzHs4/kevOMKWhmT8sYs3QkTDIF3CM+feYz9ezPy42GXqbTfvq
+	/5rZrKZJOoMhHYSAE+78Z/OgtJLF0Clwr7OmQNSy4lOm4wYJ89v/Zhf5YTkwjRM=
+X-Google-Smtp-Source: AGHT+IE8Ns3gYpPnl9bo2oebKXHf5AHVjLuWkNH+BVHYwH6x0yEoCk9Z0m+McWyzgIet8qHWpczGNg==
+X-Received: by 2002:a05:6512:2096:b0:513:1332:ddc7 with SMTP id t22-20020a056512209600b005131332ddc7mr493630lfr.25.1709047903009;
+        Tue, 27 Feb 2024 07:31:43 -0800 (PST)
 Received: from localhost.localdomain (h-217-31-164-171.A175.priv.bahnhof.se. [217.31.164.171])
-        by smtp.gmail.com with ESMTPSA id h18-20020a19ca52000000b00513003b8ebesm586969lfj.135.2024.02.27.07.31.39
+        by smtp.gmail.com with ESMTPSA id h18-20020a19ca52000000b00513003b8ebesm586969lfj.135.2024.02.27.07.31.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Feb 2024 07:31:40 -0800 (PST)
+        Tue, 27 Feb 2024 07:31:42 -0800 (PST)
 From: Jens Wiklander <jens.wiklander@linaro.org>
 To: linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org,
@@ -64,11 +66,15 @@ Cc: Shyam Saini <shyamsaini@linux.microsoft.com>,
 	Ard Biesheuvel <ardb@kernel.org>,
 	Arnd Bergmann <arnd@arndb.de>,
 	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Jens Wiklander <jens.wiklander@linaro.org>
-Subject: [PATCH v3 0/3] Replay Protected Memory Block (RPMB) subsystem
-Date: Tue, 27 Feb 2024 16:31:29 +0100
-Message-Id: <20240227153132.2611499-1-jens.wiklander@linaro.org>
+	Jens Wiklander <jens.wiklander@linaro.org>,
+	Tomas Winkler <tomas.winkler@intel.com>,
+	=?UTF-8?q?Alex=20Benn=C3=A9e?= <alex.bennee@linaro.org>
+Subject: [PATCH v3 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+Date: Tue, 27 Feb 2024 16:31:30 +0100
+Message-Id: <20240227153132.2611499-2-jens.wiklander@linaro.org>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20240227153132.2611499-1-jens.wiklander@linaro.org>
+References: <20240227153132.2611499-1-jens.wiklander@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -78,108 +84,556 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hi,
+A number of storage technologies support a specialised hardware
+partition designed to be resistant to replay attacks. The underlying
+HW protocols differ but the operations are common. The RPMB partition
+cannot be accessed via standard block layer, but by a set of specific
+RPMB commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
+partition provides authenticated and replay protected access, hence
+suitable as a secure storage.
 
-This patch set introduces a new RPMB subsystem, based on patches from [1],
-[2], and [3]. The RPMB subsystem aims at providing access to RPMB
-partitions to other kernel drivers, in particular the OP-TEE driver. A new
-user space ABI isn't needed, we can instead continue using the already
-present ABI when writing the RPMB key during production.
+The initial aim of this patch is to provide a simple RPMB driver
+interface which can be accessed by the optee driver to facilitate early
+RPMB access to OP-TEE OS (secure OS) during the boot time.
 
-I've added and removed things to keep only what is needed by the OP-TEE
-driver. Since the posting of [3], there has been major changes in the MMC
-subsystem so "mmc: block: register RPMB partition with the RPMB subsystem"
-is in practice completely rewritten.
+A TEE device driver can claim the RPMB interface, for example, via
+rpmb_interface_register() or rpmb_dev_find_device(). The RPMB driver
+provides a callback to route RPMB frames to the RPMB device accessible
+via rpmb_route_frames().
 
-With this OP-TEE can access RPMB during early boot instead of having to
-wait for user space to become available as in the current design [4].
-This will benefit the efi variables [5] since we wont rely on userspace as
-well as some TPM issues [6] that were solved.
+The detailed operation of implementing the access is left to the TEE
+device driver itself.
 
-The OP-TEE driver finds the correct RPMB device to interact with by
-iterating over available devices until one is found with a programmed
-authentication matching the one OP-TEE is using. This enables coexisting
-users of other RPMBs since the owner can be determined by who knows the
-authentication key.
-
-I've put myself as a maintainer for the RPMB subsystem as I have an
-interest in the OP-TEE driver to keep this in good shape. However, if you'd
-rather see someone else taking the maintainership that's fine too. I'll
-help keep the subsystem updated regardless.
-
-[1] https://lore.kernel.org/lkml/20230722014037.42647-1-shyamsaini@linux.microsoft.com/
-[2] https://lore.kernel.org/lkml/20220405093759.1126835-2-alex.bennee@linaro.org/
-[3] https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-tomas.winkler@intel.com/
-[4] https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#rpmb-secure-storage
-[5] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c44b6be62e8dd4ee0a308c36a70620613e6fc55f
-[6] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=7269cba53d906cf257c139d3b3a53ad272176bca
-
-Thanks,
-Jens
-
-Changes since v2:
-* "rpmb: add Replay Protected Memory Block (RPMB) subsystem"
-  - Fixing documentation issues
-  - Adding a "depends on MMC" in the Kconfig
-  - Removed the class-device and the embedded device, struct rpmb_dev now
-    relies on the parent device for reference counting as requested
-  - Removed the now unneeded rpmb_ops get_resources() and put_resources()
-    since references are already taken in mmc_blk_alloc_rpmb_part() before
-    rpmb_dev_register() is called
-  - Added rpmb_interface_{,un}register() now that
-    class_interface_{,un}register() can't be used ay longer
-* "mmc: block: register RPMB partition with the RPMB subsystem"
-  - Adding the missing error cleanup in alloc_idata()
-  - Taking the needed reference to md->disk in mmc_blk_alloc_rpmb_part()
-    instead of in mmc_rpmb_chrdev_open() and rpmb_op_mmc_get_resources()
-* "optee: probe RPMB device using RPMB subsystem"
-  - Registering to get a notification when an RPMB device comes online
-  - Probes for RPMB devices each time an RPMB device comes online, until
-    a usable device is found
-  - When a usable RPMB device is found, call
-    optee_enumerate_devices(PTA_CMD_GET_DEVICES_RPMB)
-  - Pass type of rpmb in return value from OPTEE_RPC_CMD_RPMB_PROBE_NEXT
-
-Changes since Shyam's RFC:
-* Removed the remaining leftover rpmb_cdev_*() function calls
-* Refactored the struct rpmb_ops with all the previous ops replaced, in
-  some sense closer to [3] with the route_frames() op
-* Added rpmb_route_frames()
-* Added struct rpmb_frame, enum rpmb_op_result, and enum rpmb_type from [3]
-* Removed all functions not needed in the OP-TEE use case
-* Added "mmc: block: register RPMB partition with the RPMB subsystem", based
-  on the commit with the same name in [3]
-* Added "optee: probe RPMB device using RPMB subsystem" for integration
-  with OP-TEE
-* Moved the RPMB driver into drivers/misc/rpmb-core.c
-* Added my name to MODULE_AUTHOR() in rpmb-core.c
-* Added an rpmb_mutex to serialize access to the IDA
-* Removed the target parameter from all rpmb_*() functions since it's
-  currently unused
-
-Jens Wiklander (3):
-  rpmb: add Replay Protected Memory Block (RPMB) subsystem
-  mmc: block: register RPMB partition with the RPMB subsystem
-  optee: probe RPMB device using RPMB subsystem
-
- MAINTAINERS                       |   7 +
- drivers/misc/Kconfig              |  10 ++
- drivers/misc/Makefile             |   1 +
- drivers/misc/rpmb-core.c          | 258 ++++++++++++++++++++++++++++++
- drivers/mmc/core/block.c          | 153 +++++++++++++++++-
- drivers/tee/optee/core.c          |  55 +++++++
- drivers/tee/optee/ffa_abi.c       |   7 +
- drivers/tee/optee/optee_private.h |  16 ++
- drivers/tee/optee/optee_rpc_cmd.h |  35 ++++
- drivers/tee/optee/rpc.c           | 233 +++++++++++++++++++++++++++
- drivers/tee/optee/smc_abi.c       |   6 +
- include/linux/rpmb.h              | 195 ++++++++++++++++++++++
- 12 files changed, 974 insertions(+), 2 deletions(-)
+Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+Signed-off-by: Alex Bennée <alex.bennee@linaro.org>
+Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
+Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+---
+ MAINTAINERS              |   7 ++
+ drivers/misc/Kconfig     |  10 ++
+ drivers/misc/Makefile    |   1 +
+ drivers/misc/rpmb-core.c | 258 +++++++++++++++++++++++++++++++++++++++
+ include/linux/rpmb.h     | 195 +++++++++++++++++++++++++++++
+ 5 files changed, 471 insertions(+)
  create mode 100644 drivers/misc/rpmb-core.c
  create mode 100644 include/linux/rpmb.h
 
-
-base-commit: 41bccc98fb7931d63d03f326a746ac4d429c1dd3
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 8999497011a2..e83152c42499 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -19012,6 +19012,13 @@ T:	git git://linuxtv.org/media_tree.git
+ F:	Documentation/devicetree/bindings/media/allwinner,sun8i-a83t-de2-rotate.yaml
+ F:	drivers/media/platform/sunxi/sun8i-rotate/
+ 
++RPMB SUBSYSTEM
++M:	Jens Wiklander <jens.wiklander@linaro.org>
++L:	linux-kernel@vger.kernel.org
++S:	Supported
++F:	drivers/misc/rpmb-core.c
++F:	include/linux/rpmb.h
++
+ RPMSG TTY DRIVER
+ M:	Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
+ L:	linux-remoteproc@vger.kernel.org
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 4fb291f0bf7c..dbff9e8c3a03 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -104,6 +104,16 @@ config PHANTOM
+ 	  If you choose to build module, its name will be phantom. If unsure,
+ 	  say N here.
+ 
++config RPMB
++	tristate "RPMB partition interface"
++	depends on MMC
++	help
++	  Unified RPMB unit interface for RPMB capable devices such as eMMC and
++	  UFS. Provides interface for in-kernel security controllers to access
++	  RPMB unit.
++
++	  If unsure, select N.
++
+ config TIFM_CORE
+ 	tristate "TI Flash Media interface support"
+ 	depends on PCI
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index ea6ea5bbbc9c..8af058ad1df4 100644
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -15,6 +15,7 @@ obj-$(CONFIG_LKDTM)		+= lkdtm/
+ obj-$(CONFIG_TIFM_CORE)       	+= tifm_core.o
+ obj-$(CONFIG_TIFM_7XX1)       	+= tifm_7xx1.o
+ obj-$(CONFIG_PHANTOM)		+= phantom.o
++obj-$(CONFIG_RPMB)		+= rpmb-core.o
+ obj-$(CONFIG_QCOM_COINCELL)	+= qcom-coincell.o
+ obj-$(CONFIG_QCOM_FASTRPC)	+= fastrpc.o
+ obj-$(CONFIG_SENSORS_BH1770)	+= bh1770glc.o
+diff --git a/drivers/misc/rpmb-core.c b/drivers/misc/rpmb-core.c
+new file mode 100644
+index 000000000000..e0003b039e9f
+--- /dev/null
++++ b/drivers/misc/rpmb-core.c
+@@ -0,0 +1,258 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright(c) 2015 - 2019 Intel Corporation. All rights reserved.
++ * Copyright(c) 2021 - 2024 Linaro Ltd.
++ */
++#include <linux/device.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/list.h>
++#include <linux/module.h>
++#include <linux/mutex.h>
++#include <linux/rpmb.h>
++#include <linux/slab.h>
++
++static struct list_head rpmb_dev_list;
++static struct list_head rpmb_intf_list;
++static DEFINE_MUTEX(rpmb_mutex);
++
++/**
++ * rpmb_dev_get() - increase rpmb device ref counter
++ * @rdev: rpmb device
++ */
++struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev)
++{
++	if (rdev)
++		get_device(rdev->parent_dev);
++	return rdev;
++}
++EXPORT_SYMBOL_GPL(rpmb_dev_get);
++
++/**
++ * rpmb_dev_put() - decrease rpmb device ref counter
++ * @rdev: rpmb device
++ */
++void rpmb_dev_put(struct rpmb_dev *rdev)
++{
++	if (rdev)
++		put_device(rdev->parent_dev);
++}
++EXPORT_SYMBOL_GPL(rpmb_dev_put);
++
++/**
++ * rpmb_route_frames() - route rpmb frames to rpmb device
++ * @rdev:	rpmb device
++ * @req:	rpmb request frames
++ * @req_len:	length of rpmb request frames in bytes
++ * @rsp:	rpmb response frames
++ * @rsp_len:	length of rpmb response frames in bytes
++ *
++ * Returns: < 0 on failure
++ */
++int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
++		      unsigned int req_len, u8 *rsp, unsigned int rsp_len)
++{
++	struct rpmb_frame *frm = (struct rpmb_frame *)req;
++	u16 req_type;
++	bool write;
++
++	if (!req || req_len < sizeof(*frm) || !rsp || !rsp_len)
++		return -EINVAL;
++
++	req_type = be16_to_cpu(frm->req_resp);
++	switch (req_type) {
++	case RPMB_PROGRAM_KEY:
++		if (req_len != sizeof(struct rpmb_frame) ||
++		    rsp_len != sizeof(struct rpmb_frame))
++			return -EINVAL;
++		write = true;
++		break;
++	case RPMB_GET_WRITE_COUNTER:
++		if (req_len != sizeof(struct rpmb_frame) ||
++		    rsp_len != sizeof(struct rpmb_frame))
++			return -EINVAL;
++		write = false;
++		break;
++	case RPMB_WRITE_DATA:
++		if (req_len % sizeof(struct rpmb_frame) ||
++		    rsp_len != sizeof(struct rpmb_frame))
++			return -EINVAL;
++		write = true;
++		break;
++	case RPMB_READ_DATA:
++		if (req_len != sizeof(struct rpmb_frame) ||
++		    rsp_len % sizeof(struct rpmb_frame))
++			return -EINVAL;
++		write = false;
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	return rdev->ops->route_frames(rdev->parent_dev, write,
++				       req, req_len, rsp, rsp_len);
++}
++EXPORT_SYMBOL_GPL(rpmb_route_frames);
++
++/**
++ * rpmb_dev_find_device() - return first matching rpmb device
++ * @data: data for the match function
++ * @match: the matching function
++ *
++ * Returns: a matching rpmb device or NULL on failure
++ */
++struct rpmb_dev *rpmb_dev_find_device(const void *data,
++				      const struct rpmb_dev *start,
++				      int (*match)(struct rpmb_dev *rdev,
++						   const void *data))
++{
++	struct rpmb_dev *rdev;
++	struct list_head *pos;
++
++	mutex_lock(&rpmb_mutex);
++	if (start)
++		pos = start->list_node.next;
++	else
++		pos = rpmb_dev_list.next;
++
++	while (pos != &rpmb_dev_list) {
++		rdev = container_of(pos, struct rpmb_dev, list_node);
++		if (match(rdev, data)) {
++			rpmb_dev_get(rdev);
++			goto out;
++		}
++		pos = pos->next;
++	}
++	rdev = NULL;
++
++out:
++	mutex_unlock(&rpmb_mutex);
++
++	return rdev;
++}
++
++/**
++ * rpmb_dev_unregister() - unregister RPMB partition from the RPMB subsystem
++ * @rdev: the rpmb device to unregister
++ *
++ * Returns: < 0 on failure
++ */
++int rpmb_dev_unregister(struct rpmb_dev *rdev)
++{
++	if (!rdev)
++		return -EINVAL;
++
++	mutex_lock(&rpmb_mutex);
++	list_del(&rdev->list_node);
++	mutex_unlock(&rpmb_mutex);
++	kfree(rdev->dev_id);
++	kfree(rdev);
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(rpmb_dev_unregister);
++
++/**
++ * rpmb_dev_register - register RPMB partition with the RPMB subsystem
++ * @dev: storage device of the rpmb device
++ * @ops: device specific operations
++ *
++ * While registering the RPMB partition extract needed device information
++ * while needed resources are available.
++ *
++ * Returns: a pointer to a 'struct rpmb_dev' or an ERR_PTR on failure
++ */
++struct rpmb_dev *rpmb_dev_register(struct device *dev,
++				   const struct rpmb_ops *ops)
++{
++	struct rpmb_dev *rdev;
++	struct rpmb_interface *intf;
++	int ret;
++
++	if (!dev || !ops || !ops->route_frames || !ops->set_dev_info)
++		return ERR_PTR(-EINVAL);
++
++	rdev = kzalloc(sizeof(*rdev), GFP_KERNEL);
++	if (!rdev)
++		return ERR_PTR(-ENOMEM);
++
++	mutex_lock(&rpmb_mutex);
++	list_add_tail(&rdev->list_node, &rpmb_dev_list);
++	mutex_unlock(&rpmb_mutex);
++
++	rdev->ops = ops;
++
++	rdev->parent_dev = dev;
++
++	ret = ops->set_dev_info(dev, rdev);
++	if (ret)
++		goto exit;
++
++	dev_dbg(rdev->parent_dev, "registered device\n");
++
++	mutex_lock(&rpmb_mutex);
++	list_for_each_entry(intf, &rpmb_intf_list, list_node)
++		if (intf->add_rdev)
++			intf->add_rdev(intf, rdev);
++	mutex_unlock(&rpmb_mutex);
++
++	return rdev;
++
++exit:
++	mutex_lock(&rpmb_mutex);
++	list_del(&rdev->list_node);
++	mutex_unlock(&rpmb_mutex);
++	kfree(rdev);
++	return ERR_PTR(ret);
++}
++EXPORT_SYMBOL_GPL(rpmb_dev_register);
++
++/**
++ * rpmb_interface_register() - register for new device notifications
++ *
++ * @intf : pointer to interface struct with a notification callback
++ */
++void rpmb_interface_register(struct rpmb_interface *intf)
++{
++	struct rpmb_dev *rdev;
++
++	mutex_lock(&rpmb_mutex);
++	list_add_tail(&intf->list_node, &rpmb_intf_list);
++	if (intf->add_rdev)
++		list_for_each_entry(rdev, &rpmb_dev_list, list_node)
++			intf->add_rdev(intf, rdev);
++	mutex_unlock(&rpmb_mutex);
++}
++EXPORT_SYMBOL_GPL(rpmb_interface_register);
++
++/**
++ * rpmb_interface_unregister() - unregister from new device notifications
++ *
++ * @intf : pointer to previously registered interface struct
++ */
++void rpmb_interface_unregister(struct rpmb_interface *intf)
++{
++	mutex_lock(&rpmb_mutex);
++	list_del(&intf->list_node);
++	mutex_unlock(&rpmb_mutex);
++}
++EXPORT_SYMBOL_GPL(rpmb_interface_unregister);
++
++static int __init rpmb_init(void)
++{
++	INIT_LIST_HEAD(&rpmb_dev_list);
++	INIT_LIST_HEAD(&rpmb_intf_list);
++	return 0;
++}
++
++static void __exit rpmb_exit(void)
++{
++	mutex_destroy(&rpmb_mutex);
++}
++
++subsys_initcall(rpmb_init);
++module_exit(rpmb_exit);
++
++MODULE_AUTHOR("Jens Wiklander <jens.wiklander@linaro.org>");
++MODULE_DESCRIPTION("RPMB class");
++MODULE_LICENSE("GPL");
+diff --git a/include/linux/rpmb.h b/include/linux/rpmb.h
+new file mode 100644
+index 000000000000..c4b13dad10c4
+--- /dev/null
++++ b/include/linux/rpmb.h
+@@ -0,0 +1,195 @@
++/* SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0 */
++/*
++ * Copyright (C) 2015-2019 Intel Corp. All rights reserved
++ * Copyright (C) 2021-2022 Linaro Ltd
++ */
++#ifndef __RPMB_H__
++#define __RPMB_H__
++
++#include <linux/types.h>
++#include <linux/device.h>
++
++/**
++ * struct rpmb_frame - rpmb frame as defined by specs
++ *
++ * @stuff        : stuff bytes
++ * @key_mac      : The authentication key or the message authentication
++ *                 code (MAC) depending on the request/response type.
++ *                 The MAC will be delivered in the last (or the only)
++ *                 block of data.
++ * @data         : Data to be written or read by signed access.
++ * @nonce        : Random number generated by the host for the requests
++ *                 and copied to the response by the RPMB engine.
++ * @write_counter: Counter value for the total amount of the successful
++ *                 authenticated data write requests made by the host.
++ * @addr         : Address of the data to be programmed to or read
++ *                 from the RPMB. Address is the serial number of
++ *                 the accessed block (half sector 256B).
++ * @block_count  : Number of blocks (half sectors, 256B) requested to be
++ *                 read/programmed.
++ * @result       : Includes information about the status of the write counter
++ *                 (valid, expired) and result of the access made to the RPMB.
++ * @req_resp     : Defines the type of request and response to/from the memory.
++ */
++struct rpmb_frame {
++	u8     stuff[196];
++	u8     key_mac[32];
++	u8     data[256];
++	u8     nonce[16];
++	__be32 write_counter;
++	__be16 addr;
++	__be16 block_count;
++	__be16 result;
++	__be16 req_resp;
++} __packed;
++
++#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Authentication Key */
++#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write counter */
++#define RPMB_WRITE_DATA        0x3    /* Write data to RPMB partition */
++#define RPMB_READ_DATA         0x4    /* Read data from RPMB partition */
++#define RPMB_RESULT_READ       0x5    /* Read result request  (Internal) */
++
++#define RPMB_REQ2RESP(_OP) ((_OP) << 8)
++#define RPMB_RESP2REQ(_OP) ((_OP) >> 8)
++
++/**
++ * enum rpmb_op_result - rpmb operation results
++ *
++ * @RPMB_ERR_OK      : operation successful
++ * @RPMB_ERR_GENERAL : general failure
++ * @RPMB_ERR_AUTH    : mac doesn't match or ac calculation failure
++ * @RPMB_ERR_COUNTER : counter doesn't match or counter increment failure
++ * @RPMB_ERR_ADDRESS : address out of range or wrong address alignment
++ * @RPMB_ERR_WRITE   : data, counter, or result write failure
++ * @RPMB_ERR_READ    : data, counter, or result read failure
++ * @RPMB_ERR_NO_KEY  : authentication key not yet programmed
++ *
++ * @RPMB_ERR_COUNTER_EXPIRED:  counter expired
++ */
++enum rpmb_op_result {
++	RPMB_ERR_OK      = 0x0000,
++	RPMB_ERR_GENERAL = 0x0001,
++	RPMB_ERR_AUTH    = 0x0002,
++	RPMB_ERR_COUNTER = 0x0003,
++	RPMB_ERR_ADDRESS = 0x0004,
++	RPMB_ERR_WRITE   = 0x0005,
++	RPMB_ERR_READ    = 0x0006,
++	RPMB_ERR_NO_KEY  = 0x0007,
++
++	RPMB_ERR_COUNTER_EXPIRED = 0x0080
++};
++
++/**
++ * enum rpmb_type - type of underlying storage technology
++ *
++ * @RPMB_TYPE_EMMC  : emmc (JESD84-B50.1)
++ * @RPMB_TYPE_UFS   : UFS (JESD220)
++ * @RPMB_TYPE_NVME  : NVM Express
++ */
++enum rpmb_type {
++	RPMB_TYPE_EMMC,
++	RPMB_TYPE_UFS,
++	RPMB_TYPE_NVME,
++};
++
++/**
++ * struct rpmb_dev - device which can support RPMB partition
++ *
++ * @parent_dev       : parent device
++ * @list_node        : linked list node
++ * @ops              : operation exported by rpmb
++ * @dev_id           : unique device identifier read from the hardware
++ * @dev_id_len       : length of unique device identifier
++ * @reliable_wr_count: number of sectors that can be written in one access
++ * @capacity         : capacity of the device in units of 128K
++ */
++struct rpmb_dev {
++	struct device *parent_dev;
++	struct list_head list_node;
++	const struct rpmb_ops *ops;
++	u8 *dev_id;
++	size_t dev_id_len;
++	u16 reliable_wr_count;
++	u16 capacity;
++};
++
++/**
++ * struct rpmb_ops - RPMB ops to be implemented by underlying block device
++ *
++ * @type          : block device type
++ * @route_frames  : routes frames to and from the RPMB device
++ * @set_dev_info  : extracts device info from the RPMB device
++ */
++struct rpmb_ops {
++	enum rpmb_type type;
++	int (*set_dev_info)(struct device *dev, struct rpmb_dev *rdev);
++	int (*route_frames)(struct device *dev, bool write,
++			    u8 *req, unsigned int req_len,
++			    u8 *resp, unsigned int resp_len);
++};
++
++/**
++ * struct rpmb_interface - subscribe to new RPMB devices
++ *
++ * @list_node     : linked list node
++ * @add_rdev      : notifies that a new RPMB device has been found
++ */
++struct rpmb_interface {
++	struct list_head list_node;
++	void (*add_rdev)(struct rpmb_interface *intf, struct rpmb_dev *rdev);
++};
++
++#if IS_ENABLED(CONFIG_RPMB)
++struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev);
++void rpmb_dev_put(struct rpmb_dev *rdev);
++struct rpmb_dev *rpmb_dev_find_device(const void *data,
++				      const struct rpmb_dev *start,
++				      int (*match)(struct rpmb_dev *rdev,
++						   const void *data));
++struct rpmb_dev *rpmb_dev_register(struct device *dev,
++				   const struct rpmb_ops *ops);
++int rpmb_dev_unregister(struct rpmb_dev *rdev);
++
++int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
++		      unsigned int req_len, u8 *resp, unsigned int resp_len);
++
++void rpmb_interface_register(struct rpmb_interface *intf);
++void rpmb_interface_unregister(struct rpmb_interface *intf);
++#else
++static inline struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev)
++{
++	return NULL;
++}
++
++static inline void rpmb_dev_put(struct rpmb_dev *rdev) { }
++
++static inline struct rpmb_dev *
++rpmb_dev_find_device(const void *data, const struct rpmb_dev *start,
++		     int (*match)(struct rpmb_dev *rdev, const void *data))
++{
++	return NULL;
++}
++
++static inline struct rpmb_dev *
++rpmb_dev_register(struct device *dev, const struct rpmb_ops *ops)
++{
++	return NULL;
++}
++
++static inline int rpmb_dev_unregister(struct rpmb_dev *dev)
++{
++	return 0;
++}
++
++static inline int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
++				    unsigned int req_len, u8 *resp,
++				    unsigned int resp_len)
++{
++	return -EOPNOTSUPP;
++}
++
++static inline void rpmb_interface_register(struct rpmb_interface *intf) { }
++static inline void rpmb_interface_unregister(struct rpmb_interface *intf) { }
++#endif /* CONFIG_RPMB */
++
++#endif /* __RPMB_H__ */
 -- 
 2.34.1
 
