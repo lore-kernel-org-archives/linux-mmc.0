@@ -1,99 +1,129 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.20])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1980149DE2
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Feb 2024 13:04:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A2D11E493;
+	Wed, 28 Feb 2024 13:21:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709125485; cv=none; b=uOAEKNNfDutr+QnDQrBbvMhNwOTYIS9LizmFWBfI3INWC/5RBS2MpdY+BiCxPs5J9y6WaB7/uyY4uge0gnW1u4iJm/hZgXFf6Sb9qG8iWZ14aXBCFCU6Q0ftoFjn5kKa5AAmmc85d2xRu6XyCUduxXAzEGff1yRGeuVMSv90VF8=
+	t=1709126515; cv=none; b=VmNRH1+w+DCisSP+Od64ourI/k51AjReKmOe44aNogOzi6N7VFLFODm0rVBYkARW6m8xVk3KUj7zx5zv5q8s3NuqonDswBqLi6vb+kpheR0mk73l/tJzQ8r9Mh/Muajgv0RwkYMASS8PjKmYsz+Hk1j8BtKrC+UZQg8Qjq2XbNQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709125485; c=relaxed/simple;
-	bh=g5w1gGHFGXzzZmJpBKtp41q1p8eh1BbfF3BwNq/rhXA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IskYv5wQrURIhGdN+i0RAjKGnCc0UDlcciJJNXR2fM/JoBO19CztnP/cH87hiz1Piij/5sw2yoPDMR4EiyPkTQxWFzr//b0pubMG+xlEZaU8A+pqpJ6L+Kh42jcnj5p/oZAL96Q6fBGrwZa6ncudpwPTppHTjlkgjTbwBqsrSn8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ttpAR/AR; arc=none smtp.client-ip=209.85.128.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1709126515; c=relaxed/simple;
+	bh=7r4vZZPJYXmHBCI3JedHoQntu3Jc2TVJ9jZ97EA73XI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Y76yEyeMAnl/rfyJTPk5XewsGMIyQ6YTJn/zSQlux8i/1ikMLvuHVlmbsNoOOQUatnFMUNWsRnPUeRwB38ZreDwMKaNA0dhum0dTKc+w4oO7FWT1XOTRJ6mdT0/WmBp1d6USaxaN7s9t2w1lZVNT4x3aQ2FHirUKr6dyPH1qGhI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=G2CrOEQD; arc=none smtp.client-ip=198.175.65.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ttpAR/AR"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-6093247d1acso14270447b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Feb 2024 05:04:43 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1709125482; x=1709730282; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=w5k6h2ShXlgJ8U8BtYrte9gH1UhDVvYBcQOgkCuTu28=;
-        b=ttpAR/ARviixgzkkCHBHR3KHtgkCERr/ruNIwtNQu2c5762egIs+QvywmkvNC84KOf
-         zq35A0sbZHivGrbeCn/G2RYA8/3fYq7GxwpZ4YbGYBH/JvRPhDW0eQ8tG9dLTFh/uemY
-         GzMjlagmmmOJn5O3QEuyRCec9DWjBl0lAF0bM7rkdtcIHEcduUBlGSFckpktzyKyJhB/
-         /UnKo+oj0y9zFkToPzL6VSve5AKXwdyIcaK88dW1ewuUuVR9oPI9tCUpA//u2WiR1AC6
-         mmZwacev8xntQSR45qL/7kVLsghGzz2VqyxakpIHR9kfbWJvNLPZIsntpg+xCniqaf2c
-         A7bA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709125482; x=1709730282;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=w5k6h2ShXlgJ8U8BtYrte9gH1UhDVvYBcQOgkCuTu28=;
-        b=Ib8EwntP6UmHR+mFR4TtbpLEuWCqMzbRZ3x/lJCvW37jqu0GgNz4Bfn4Mg1dlHVk5g
-         XfQx5i91OAjbRJUwY71jTyOaJm16VtBkJdVJkoSlODlP4tdtq/iLibFWUHRWz5hhV8Nt
-         mgjD396ejAC74X/kxzWtnnxvpe+qztn6/JpSo8RAzmWEFVqUnMKHxorYQzjnW0vGB2xo
-         5+cGpAHb8VHSfLxcDlb6vYxbg5i0O8u7V6yDoiNgUb1ejZLd+YxIvC5cJKm4yUQmWQ/5
-         yAKhmcvrq65yZ+Y1AqqmuhFEzW/fAjCpfFyeYaRAlbIlcafwCR/zjy9BSFCOUdBLz5gJ
-         Qupg==
-X-Forwarded-Encrypted: i=1; AJvYcCUXEsrGboHnApreDjLU1870sH2HN5il1PJmWBLcBpkEzaPdejd+bOkJ7Nnru0zbKl54xJ8HMAxVo+y6HyvjnyEPcoK9RM/Xewss
-X-Gm-Message-State: AOJu0YxvLJltO0sIjfWkzABgzxwvDTryuq9f8IpJGwIG7zXX2IrUAdzX
-	DXdphTLfzg+XlJhhZoqncHfEq1Vuh2WU5WzlhwUmQ17RWpNEid0fYzvsM2BbQyRGUZgKj4dPGri
-	PqjhwBha6L/YQsmFz4WjkkQztFbhFFw/pCmmP8Q==
-X-Google-Smtp-Source: AGHT+IHVy/3/U+YFr3kDL8D7Mz6ygkKj0BjotcensF7V9yJpyKFtEeqWYvz9KPVlNZA2YO6O8H78qdPvaSlu5PUCWr4=
-X-Received: by 2002:a25:4c89:0:b0:dc7:4951:5f8 with SMTP id
- z131-20020a254c89000000b00dc7495105f8mr2637726yba.22.1709125481162; Wed, 28
- Feb 2024 05:04:41 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="G2CrOEQD"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1709126514; x=1740662514;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=7r4vZZPJYXmHBCI3JedHoQntu3Jc2TVJ9jZ97EA73XI=;
+  b=G2CrOEQDv8QAdfJahVysEP0tZc2Q/r4MwPP9oGg25Q9OUGz4Y4EX6zfb
+   XC75PTcDxHm8FBAeDcd5y6q79Wp6ZF2awZBs+0juQSeC/4ORfHkLmWHfN
+   51uGrvCgGjc3g+oMncTIzR2KDv2QQJD01qkzmYrdX2weziGxD/LxSBCLE
+   ACCZ4AZAw1FepQ2lxuZJOs+8qiw01L5KsxeTTXx87hIOcNE501+rM6HnI
+   OHeZwnzA+oK6lcXoT6cudNjbmh93wHVtFPMMVOBy1JJ07Ajl+WV647i1m
+   aI732vnXm9u2TcpkAM6byPPY8amWoZgkxt0052oJuXtey+w4S5FoGroH8
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10996"; a="3398010"
+X-IronPort-AV: E=Sophos;i="6.06,190,1705392000"; 
+   d="scan'208";a="3398010"
+Received: from orviesa004.jf.intel.com ([10.64.159.144])
+  by orvoesa112.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Feb 2024 05:21:53 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.06,190,1705392000"; 
+   d="scan'208";a="12100689"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.50.3])
+  by orviesa004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Feb 2024 05:21:51 -0800
+Message-ID: <4618f19d-0b7d-4844-83f7-ff2f4be083d9@intel.com>
+Date: Wed, 28 Feb 2024 15:21:46 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240222191714.1216470-1-enachman@marvell.com>
-In-Reply-To: <20240222191714.1216470-1-enachman@marvell.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 28 Feb 2024 14:04:05 +0100
-Message-ID: <CAPDyKFrG2JwHMesMiLfHJBxmWTB7c0wSJzxH7hceUBgH4mKfng@mail.gmail.com>
-Subject: Re: [PATCH v3 0/2] Fix PHY init timeout issues
-To: Elad Nachman <enachman@marvell.com>
-Cc: huziji@marvell.com, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 1/7] mmc: sdhci_am654: Add tuning algorithm for delay
+ chain
+Content-Language: en-US
+To: Judith Mendez <jm@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ Ulf Hansson <ulf.hansson@linaro.org>
+References: <20240207011520.3128382-1-jm@ti.com>
+ <20240207011520.3128382-2-jm@ti.com>
+ <461a19cd-36ce-4c34-890e-655a05a81c58@intel.com>
+ <6d939482-9a3a-4923-b74b-ceb31b0ba7e9@ti.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <6d939482-9a3a-4923-b74b-ceb31b0ba7e9@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Thu, 22 Feb 2024 at 20:17, Elad Nachman <enachman@marvell.com> wrote:
->
-> From: Elad Nachman <enachman@marvell.com>
->
-> Fix PHY init timeout issues:
->
-> 1. Clock Stability issue causing PHY timeout
->
-> 2. Timeout taking longer than needed on AC5X.
->    Solve by constantly testing the PHY init bit
->    until it toggles, but up to 100X timeout factor.
->
-> v2:
->     1) convert polling loop to read_poll_timeout()
->        for both patches.
->
-> v3:
->     1) Add Acked-by, Fixes and CC for stable
->
-> Elad Nachman (2):
->   mmc: xenon: fix PHY init clock stability
->   mmc: xenon: add timeout for PHY init complete
->
->  drivers/mmc/host/sdhci-xenon-phy.c | 48 ++++++++++++++++++++++++------
->  1 file changed, 39 insertions(+), 9 deletions(-)
->
+On 20/02/24 22:10, Judith Mendez wrote:
+> On 2/16/24 11:09 AM, Adrian Hunter wrote:
+>> On 7/02/24 03:15, Judith Mendez wrote:
+>>> +
+>>> +    if (!num_fails)
+>>> +        return ITAPDLY_LAST_INDEX >> 1;
+>>> +
+>>> +    if (fail_window->length == ITAPDLY_LENGTH) {
+>>> +        dev_err(dev, "No passing ITAPDLY, return 0\n");
+>>> +        return 0;
+>>> +    }
+>>> +
+>>> +    first_fail_start = fail_window->start;
+>>> +    last_fail_end = fail_window[num_fails - 1].end;
+>>> +
+>>> +    for (i = 0; i < num_fails; i++) {
+>>> +        start_fail = fail_window[i].start;
+>>> +        end_fail = fail_window[i].end;
+>>> +        pass_length = start_fail - (prev_fail_end + 1);
+>>> +
+>>> +        if (pass_length > pass_window.length) {
+>>> +            pass_window.start = prev_fail_end + 1;
+>>> +            pass_window.length = pass_length;
+>>> +        }
+>>> +        prev_fail_end = end_fail;
+>>> +    }
+>>> +
+>>> +    if (!circular_buffer)
+>>> +        pass_length = ITAPDLY_LAST_INDEX - last_fail_end;
+>>> +    else
+>>> +        pass_length = ITAPDLY_LAST_INDEX - last_fail_end + first_fail_start;
+>>> +
+>>> +    if (pass_length > pass_window.length) {
+>>> +        pass_window.start = last_fail_end + 1;
+>>> +        pass_window.length = pass_length;
+>>> +    }
+>>> +
+>>> +    if (!circular_buffer)
+>>> +        itap = pass_window.start + (pass_window.length >> 1);
+>>> +    else
+>>> +        itap = (pass_window.start + (pass_window.length >> 1)) % ITAPDLY_LENGTH;
+>>> +
+>>> +    return (itap < 0 || itap > ITAPDLY_LAST_INDEX ? 0 : itap);
+>>
+>> Parentheses are not needed where they are but putting
+>> them around the condition would make it more readable e.g.
+>>
+>>     return (itap < 0 || itap > ITAPDLY_LAST_INDEX) ? 0 : itap;
+>>
+>> However (itap < 0) is not possible because itap is an unsigned type
+>> and if (itap > ITAPDLY_LAST_INDEX) then maybe it would be better
+>> to return ITAPDLY_LAST_INDEX
+> 
+> You are right about itap < 0, thanks will fix.
+> 
+> About itap > ITAPDLY_LAST_INDEX, this is an error. Why
+> return ITAPDLY_LAST_INDEX instead of 0?
 
-Applied for fixes, thanks!
+It doesn't matter.  Just if a value has a better chance to work
+if the calculation fails, like maybe ITAPDLY_LAST_INDEX / 2, but
+presumably it should not fail.
 
-Kind regards
-Uffe
