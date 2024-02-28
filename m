@@ -1,89 +1,99 @@
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AAC2364BF
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Feb 2024 10:04:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47C41148FFC
+	for <linux-mmc@vger.kernel.org>; Wed, 28 Feb 2024 13:03:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709114648; cv=none; b=fuEk5RJf0sujxtbDCd8QGCZrobIBo0yK5fswBtTzbzSN0hdadBSdUPJ4aImIT5bjDQmS2mUxqJyB5hSvocJoHOMlxM/cscrGXgoV5Dht4GM1NNRStnjJW4sH2NSCrLSqYQ01XopvApbQX2cix1EE+8lkSl8Zv/C8zRAG01Ls2IU=
+	t=1709125439; cv=none; b=OFGIu9pv6GjSS4iVp166ToKVAWS4b2nWd8x7Q63wUQVJdqzksojYu1OP3YK+5etDl4pWQZ7gemLMg5gOy+af1sPBzHzQ7blpPrtmrKTbUnNje2e+pcwrLZAZ3bWgm+3GZhfxIP7Nws9A9VQpTKWBxz6gZCmnZ4uqor9MdVHiIrA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709114648; c=relaxed/simple;
-	bh=KQzzUhLT/q9KbVtq8OAn3e60tMLMhyaDIKLmaNMeNN4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bwqVF+Vp7wHyIahQgsKKi/P8VrAYd6JHNXM9vJLvqdnkNYRKP1KwnMk3ojl/uXKfCcpC+FLgvl8SFd2pywyo/BrgBQfAzQqEQXHIViHB7ZoWipYCP3dO7x4yzg9WCCD8r3nZKTEUY5O3VHhQRVReUkQoeniZHyaZUmjLmNVNgkQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=N7XJfSGv; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1709125439; c=relaxed/simple;
+	bh=3qgWyPf10iKebqhB2KICc7DLId+eIxc5dDrve2noQgc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=DHHB3sYS42FMQLVNQgSYMwRsIwqMaTyp2czRJbMPVd1e2YQLaUk2CKKo8efq6UAUnp3Puc08AhKFsO6mZjACvTUEdACUVzi4LuJimMWqBM0nMfL+TaCXwpQ1AAuTjczxq+ekdBCeQDUF1Ua/YE2r5NP3ZjEgYfyOKrJetYfTnGM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Pw+6PQb4; arc=none smtp.client-ip=209.85.219.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="N7XJfSGv"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=from:to:cc:subject:date:message-id
-	:mime-version:content-transfer-encoding; s=k1; bh=rDq91xwkdeBq+p
-	oVwEnDTvivychr45vA3bZxWuSbk7g=; b=N7XJfSGvkmJmWbKxaWscPZOpHc4+QO
-	6D3dbNNONjAyvRDPFam8H2yUdSC4/afPOW0KWMmYfX9wEc+E7wnIvyNRlrWzWxZb
-	wytxOaen9+3EeuLvKwkhGfgzivPanwwU0IKmZVbwkvWrBo/+tmPTuQ6671MxFn8S
-	mbC3nPZqN+HBy/vW+9EfSmn1+y2sgoDwSSnfJ8WPTQ2CotaHbbWuO14LWRGRk5cQ
-	Pdd3y5Qpqlvk5LgJYrVsl5tvApAkhjDYyJrysnDn+GowpscN+Y6Ts2VpY/jgwqKl
-	M5xdYJw747B/9HN/Vx3M8l97pUBPfslRtdgCitq/CWI8olUTGqHKQ9zQ==
-Received: (qmail 1906275 invoked from network); 28 Feb 2024 11:04:02 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Feb 2024 11:04:02 +0100
-X-UD-Smtp-Session: l3s3148p1@nlEfQ24SbIMgAwDPXyvUACsbJ+4rxOVH
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: linux-renesas-soc@vger.kernel.org
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Dirk Behme <dirk.behme@de.bosch.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH RFT] mmc: tmio: avoid concurrent runs of mmc_request_done()
-Date: Wed, 28 Feb 2024 11:03:45 +0100
-Message-ID: <20240228100354.3285-2-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Pw+6PQb4"
+Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-dcc84ae94c1so5059078276.1
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Feb 2024 05:03:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1709125437; x=1709730237; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=VX2u2nL7Gqt0bJC0pWxjYsm9zcaPhxS427Aecf5U9kI=;
+        b=Pw+6PQb4V6zNwJYfN9XvITTrrlfyb3FJHM16E4FA6XiaZh9A+yI++2JXTUTTfLJrms
+         u6t9/8USpx5sKhX+2EpRenrezExwxzdhQURkeoK8pdpBSUfX5fEKNP4aUpAlmrI3FYBD
+         gtcVXw1eEnE/Ar1MFhyV84YbUdDIbo2RFuDoLCk5gI2gPqAbn4MmIetAWtKxtqEUX5Kg
+         0P3zqmXyMHGBkU7eh1OORFu4jvft58JlEF0e413qRQGv7Qy9tNQK0OqlRT1w3WpdlxGQ
+         5yANQ8Zv4/z3vpWzNkRa1QA/y68Q7eLVPnxfee/IgWWPp9hFsjke+sL6VG4lCxCHNfTX
+         1oOQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709125437; x=1709730237;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VX2u2nL7Gqt0bJC0pWxjYsm9zcaPhxS427Aecf5U9kI=;
+        b=i0BqquVFptUi50rhjHZnUMlxdvZo87veWOHKzFYjEqThzDG6lDBU1ReGZwxPPTYs4t
+         MJCArXs2sObaJEKzDFvA7z/IWx62okks5nSo+KGT+Qx7MWy3ddFpgAwogQKfWVSv9Gn9
+         HEyuMWRDaFSUZvDJq7K3kVcUYRqU/Vjq5+ldhSTcYotwzl54XzFyiUkqhZYFnzHncHec
+         +1I6HCoyIopysQY6ZNBPhBPeD9mBI+4/ODWzzNllEceSjhvhy8UIW4j/htrE6m9X8aGg
+         eIhYi95fYp9219eQ/E24PhDgVWSDND3ZTs9Q9XnlNKmIStqsE1zRJIRjTnYbPoYVp25d
+         gleg==
+X-Forwarded-Encrypted: i=1; AJvYcCWeSy8pnfOh8j8SrvlWySO/MvvBzRNmfEggkDU1F55osaRZE+7Jc3Gdg919vPu8PFwNu4jqsTIqxoAieodbEXqWgjoFiqRsh+m/
+X-Gm-Message-State: AOJu0YzaclcQvK/9pdtllM+i+N8PK3E6mDOu6juzKw0kevR9dWN1WNoZ
+	F4O2n4HN7s4sunLEl3OZbl49yX5w7nGa+9EUw7RRr9V5A0blFJnQGmZBAHDVmRQO12tIvU23Whv
+	HdWbUDxVLuKx6O7IOQdN5YeWiYrFEEWUX+t7+EA==
+X-Google-Smtp-Source: AGHT+IGb0wKrNLfu+onaUcRz1WakEHJECK+0R1Q9sc80YpD8cv6nB87hp1e+C6g9lbDPslASPWL18AGsU0obol0veCI=
+X-Received: by 2002:a05:6902:2486:b0:dc7:423c:b8aa with SMTP id
+ ds6-20020a056902248600b00dc7423cb8aamr2408268ybb.12.1709125437091; Wed, 28
+ Feb 2024 05:03:57 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20240217100200.1494980-1-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20240217100200.1494980-1-martin.blumenstingl@googlemail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 28 Feb 2024 14:03:20 +0100
+Message-ID: <CAPDyKFqGWm3pFr5KOEc6c_n+b+NJe9PV_T65bU5udRQPZX72QA@mail.gmail.com>
+Subject: Re: [PATCH v1 0/2] mmc: meson-mx-sdhc: two small cleanups
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-With the to-be-fixed commit, the reset_work handler cleared 'host->mrq'
-outside of the spinlock protected critical section. That leaves a small
-race window during execution of 'tmio_mmc_reset()' where the done_work
-handler could grab a pointer to the now invalid 'host->mrq'. Both would
-use it to call mmc_request_done() causing problems (see Link).
+On Sat, 17 Feb 2024 at 11:02, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+>
+> Hello Ulf,
+>
+> here are two small cleanups for the meson-mx-sdhc driver.
+>
+> The first one is resolves a TODO comment from when the driver was
+> originally introduced where devm_clk_hw_get_clk() was not available
+> yet. Nowadays it is and we can and should use it.
+>
+> The second one removes an incorrect .card_hw_reset callback from the
+> driver's mmc_host_ops. This part has never been correct as we're
+> resetting the host controller, not the card. It didn't seem to cause
+> any issues so far, which is why I don't think that it's -stable
+> material.
+>
+>
+>
+> Martin Blumenstingl (2):
+>   mmc: meson-mx-sdhc: Use devm_clk_hw_get_clk() for clock retrieval
+>   mmc: meson-mx-sdhc: Remove .card_hw_reset callback
+>
+>  drivers/mmc/host/meson-mx-sdhc-clkc.c | 43 ++++++++++++++-------------
+>  drivers/mmc/host/meson-mx-sdhc-mmc.c  | 13 ++++----
+>  2 files changed, 28 insertions(+), 28 deletions(-)
 
-However, 'host->mrq' cannot simply be cleared earlier inside the
-critical section. That would allow new mrqs to come in asynchronously
-while the actual reset of the controller still needs to be done. So,
-like 'tmio_mmc_set_ios()', an ERR_PTR is used to prevent new mrqs from
-coming in but still avoiding concurrency between work handlers.
+Applied for next, thanks!
 
-Reported-by: Dirk Behme <dirk.behme@de.bosch.com>
-Closes: https://lore.kernel.org/all/20240220061356.3001761-1-dirk.behme@de.bosch.com/
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Fixes: df3ef2d3c92c ("mmc: protect the tmio_mmc driver against a theoretical race")
----
-
-Dirk: could you get this tested on your affected setups? I am somewhat
-optimistic that this is already enough. For sure, it is a needed first
-step.
-
- drivers/mmc/host/tmio_mmc_core.c | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index be7f18fd4836..c253d176db69 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -259,6 +259,8 @@ static void tmio_mmc_reset_work(struct work_struct *work)
- 	else
- 		mrq->cmd->error = -ETIMEDOUT;
- 
-+	/* No new calls yet, but disallow concurrent tmio_mmc_done_work() */
-+	host->mrq = ERR_PTR(-EBUSY);
- 	host->cmd = NULL;
- 	host->data = NULL;
- 
--- 
-2.43.0
-
+Kind regards
+Uffe
