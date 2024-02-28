@@ -1,117 +1,89 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD7AD1EB22
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Feb 2024 09:41:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AAC2364BF
+	for <linux-mmc@vger.kernel.org>; Wed, 28 Feb 2024 10:04:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709113318; cv=none; b=TyoT1gPRRqsV2t8mFwCwBmIn1uq1yqFPRxWRHv7q4EHzztNyNl+/VwFqZTjC1VhQfvHI2crUgVxKRVvo1PQ9B8UPyhHpLXxZGTQgyzGthI9n0S9UFIAFR+bVLd1I4uWu7bFLDk0GOKXryFHTYpGX9I0m/rtP5TjbTskqzEXukGg=
+	t=1709114648; cv=none; b=fuEk5RJf0sujxtbDCd8QGCZrobIBo0yK5fswBtTzbzSN0hdadBSdUPJ4aImIT5bjDQmS2mUxqJyB5hSvocJoHOMlxM/cscrGXgoV5Dht4GM1NNRStnjJW4sH2NSCrLSqYQ01XopvApbQX2cix1EE+8lkSl8Zv/C8zRAG01Ls2IU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709113318; c=relaxed/simple;
-	bh=LmuCXpjwIioKqpwpQZrGLyp71XEGueiwG6E3fSCVAyU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RaTg2ugRupgzTNfQv6Dpr+5OXZb5YR6o0UPxNyZR2uuTn/8kRJp3b0UDG08KiCs0W/l1yWWgc0Lk6sLfK1WsrJ++tDOHp87izct6et+9IfRzQkSq+sjaiQAJWMWzh+Kn1tcMkG4Fz8S+FHTtv56nnKYbmY/UjJmer5U0Wd2VYN0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dPDJnFbm; arc=none smtp.client-ip=198.175.65.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1709114648; c=relaxed/simple;
+	bh=KQzzUhLT/q9KbVtq8OAn3e60tMLMhyaDIKLmaNMeNN4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bwqVF+Vp7wHyIahQgsKKi/P8VrAYd6JHNXM9vJLvqdnkNYRKP1KwnMk3ojl/uXKfCcpC+FLgvl8SFd2pywyo/BrgBQfAzQqEQXHIViHB7ZoWipYCP3dO7x4yzg9WCCD8r3nZKTEUY5O3VHhQRVReUkQoeniZHyaZUmjLmNVNgkQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=N7XJfSGv; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dPDJnFbm"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1709113317; x=1740649317;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=LmuCXpjwIioKqpwpQZrGLyp71XEGueiwG6E3fSCVAyU=;
-  b=dPDJnFbmyameatmBdtXI8X3gSBIADG72bOx+W/MNRn49uCG2F1sFSYnX
-   6PeLztm/61adj+Skczo/+a/e+o4x/5Syfo2/VVkh1B3yl9ZLGmmsdARNo
-   iFV9/s48voqUE4a0zapuqg+tCOra3eXBWWsQnpF+RADnt5Zx9A1I11gcX
-   SgDeRAvmHOa5b6gB9VZgeR3vhzwYQDqr0q6KtQCnckc9lPlI5V5syAizF
-   s57mjHlFx2QslMc5KXfqKU7NB/pGxtVd4Jq51pcrrSwebFeWaZCtZ1Sfs
-   d5o9N5IQL0mntMMwiiz5bhL4jGPxtvzr5JWX5WhDluBJBNlPb1A+65MtF
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10996"; a="3621596"
-X-IronPort-AV: E=Sophos;i="6.06,190,1705392000"; 
-   d="scan'208";a="3621596"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Feb 2024 01:41:56 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.06,190,1705392000"; 
-   d="scan'208";a="7409605"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.50.3])
-  by orviesa009-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Feb 2024 01:41:54 -0800
-Message-ID: <fffdd2a1-317e-436e-95f6-e0d6da39ccdd@intel.com>
-Date: Wed, 28 Feb 2024 11:41:49 +0200
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="N7XJfSGv"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=from:to:cc:subject:date:message-id
+	:mime-version:content-transfer-encoding; s=k1; bh=rDq91xwkdeBq+p
+	oVwEnDTvivychr45vA3bZxWuSbk7g=; b=N7XJfSGvkmJmWbKxaWscPZOpHc4+QO
+	6D3dbNNONjAyvRDPFam8H2yUdSC4/afPOW0KWMmYfX9wEc+E7wnIvyNRlrWzWxZb
+	wytxOaen9+3EeuLvKwkhGfgzivPanwwU0IKmZVbwkvWrBo/+tmPTuQ6671MxFn8S
+	mbC3nPZqN+HBy/vW+9EfSmn1+y2sgoDwSSnfJ8WPTQ2CotaHbbWuO14LWRGRk5cQ
+	Pdd3y5Qpqlvk5LgJYrVsl5tvApAkhjDYyJrysnDn+GowpscN+Y6Ts2VpY/jgwqKl
+	M5xdYJw747B/9HN/Vx3M8l97pUBPfslRtdgCitq/CWI8olUTGqHKQ9zQ==
+Received: (qmail 1906275 invoked from network); 28 Feb 2024 11:04:02 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Feb 2024 11:04:02 +0100
+X-UD-Smtp-Session: l3s3148p1@nlEfQ24SbIMgAwDPXyvUACsbJ+4rxOVH
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Dirk Behme <dirk.behme@de.bosch.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH RFT] mmc: tmio: avoid concurrent runs of mmc_request_done()
+Date: Wed, 28 Feb 2024 11:03:45 +0100
+Message-ID: <20240228100354.3285-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-mcf: Flag the sg_miter as atomic
-Content-Language: en-US
-To: Linus Walleij <linus.walleij@linaro.org>,
- Angelo Dureghello <angelo.dureghello@timesys.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Orson Zhai <orsonzhai@gmail.com>,
- Baolin Wang <baolin.wang@linux.alibaba.com>,
- Chunyan Zhang <zhang.lyra@gmail.com>
-Cc: linux-mmc@vger.kernel.org
-References: <20240228-fix-sdhci-esdhc-mcf-2-v2-1-4ebb3fd691ea@linaro.org>
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240228-fix-sdhci-esdhc-mcf-2-v2-1-4ebb3fd691ea@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 28/02/24 11:07, Linus Walleij wrote:
-> The sg_miter used to loop over the returned sglist from a
-> transfer in the esdhc subdriver for SDHCI can be called
-> from atomic context so the miter needs to be atomic.
-> 
-> sdhci_request_done() is always called from process context,
-> either as a work or as part of the threaded interrupt handler,
-> but the one case when we are actually calling .request_done()
-> from an atomic context is in sdhci_irq().
-> 
-> Fix this by flaggig the miter atomic so we always use
+With the to-be-fixed commit, the reset_work handler cleared 'host->mrq'
+outside of the spinlock protected critical section. That leaves a small
+race window during execution of 'tmio_mmc_reset()' where the done_work
+handler could grab a pointer to the now invalid 'host->mrq'. Both would
+use it to call mmc_request_done() causing problems (see Link).
 
-flaggig -> flagging
+However, 'host->mrq' cannot simply be cleared earlier inside the
+critical section. That would allow new mrqs to come in asynchronously
+while the actual reset of the controller still needs to be done. So,
+like 'tmio_mmc_set_ios()', an ERR_PTR is used to prevent new mrqs from
+coming in but still avoiding concurrency between work handlers.
 
-> kmap_atomic().
-> 
-> Fixes: e8a167b84886 ("mmc: sdhci-esdhc-mcf: Use sg_miter for swapping")
-> Reported-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+Reported-by: Dirk Behme <dirk.behme@de.bosch.com>
+Closes: https://lore.kernel.org/all/20240220061356.3001761-1-dirk.behme@de.bosch.com/
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Fixes: df3ef2d3c92c ("mmc: protect the tmio_mmc driver against a theoretical race")
+---
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Dirk: could you get this tested on your affected setups? I am somewhat
+optimistic that this is already enough. For sure, it is a needed first
+step.
 
-> ---
-> Changes in v2:
-> - Do the simpler fix and just use an atomic iterator, it
->   will work fine since esdhc_mcf_buffer_swap32() doesn't sleep.
-> - Link to v1: https://lore.kernel.org/r/20240222-fix-sdhci-esdhc-mcf-v1-1-fb87e04ca575@linaro.org
-> ---
->  drivers/mmc/host/sdhci-esdhc-mcf.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
-> index 1909a11fd065..c97363e2d86c 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-mcf.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
-> @@ -313,7 +313,7 @@ static void esdhc_mcf_request_done(struct sdhci_host *host,
->  	 * transfer endiannes. A swap after the transfer is needed.
->  	 */
->  	sg_miter_start(&sgm, mrq->data->sg, mrq->data->sg_len,
-> -		       SG_MITER_TO_SG | SG_MITER_FROM_SG);
-> +		       SG_MITER_ATOMIC | SG_MITER_TO_SG | SG_MITER_FROM_SG);
->  	while (sg_miter_next(&sgm)) {
->  		buffer = sgm.addr;
->  		esdhc_mcf_buffer_swap32(buffer, sgm.length);
-> 
-> ---
-> base-commit: 20af1ca418d2c0b11bc2a1fe8c0c88f67bcc2a7e
-> change-id: 20240228-fix-sdhci-esdhc-mcf-2-539cf338c3a3
-> 
-> Best regards,
+ drivers/mmc/host/tmio_mmc_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index be7f18fd4836..c253d176db69 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -259,6 +259,8 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ 	else
+ 		mrq->cmd->error = -ETIMEDOUT;
+ 
++	/* No new calls yet, but disallow concurrent tmio_mmc_done_work() */
++	host->mrq = ERR_PTR(-EBUSY);
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+ 
+-- 
+2.43.0
 
