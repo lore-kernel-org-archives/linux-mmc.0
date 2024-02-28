@@ -1,48 +1,48 @@
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
+Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04DFE15AAAC;
-	Wed, 28 Feb 2024 15:38:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C25CB15E5BE;
+	Wed, 28 Feb 2024 15:40:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.249
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709134725; cv=none; b=PSCsluoawcmWBp2NY2tlyFqeM5bW8bDZ/FibpA2i0YQbRM3ZH7v217XTaj8BHxJn4BqnvNZRUKl0eoZGnh3RNod6FQwYJvwHNrcGYxHmbVFZHQ+8PJypsT+sIDHzB2jqDO+X0ev4xMW+JPlPJwCPdrbjcDxdYKsNNMcZEsJY35Y=
+	t=1709134838; cv=none; b=jlIobV6X1evQhQv5nlbYgCGuF9b7fLj5+oiEy4jHDPelnanCriKD0BFxYdrdvqb6fYXtKfd9OFCA+kpSbd9lbnj6b1SCuSAXP5TcejXKdpwc/a9eLHGvR6G1XGzpwzVdS4xEkmWafBQTiQsHG6iEabEy5tml0mP3t3uaj9lZA5g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709134725; c=relaxed/simple;
-	bh=iJeUJi/luH9JIXda5+DINsauQvK/VukwffetB/vSorc=;
+	s=arc-20240116; t=1709134838; c=relaxed/simple;
+	bh=zyIIWb0GCEnzMyCT8n8PGJZ9AoaWZ7Oll+935gGnsNk=;
 	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=fodKHBC/DjA7fi7x4ktv90jMGkMwqB/k4rlqvmNzqQ4jac7fuo6SHniInGVaOxYrHeB2N9ZORSoVpBOiH3IMpbzsPVIUkLg4yfr74z/jc3eYPPmQPSYFqTzmdQF/Z8bHmhQIQboJatvG76SeebImk4ztPUlthHk2ige9RLmLyTs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=g49UoDnh; arc=none smtp.client-ip=198.47.19.141
+	 In-Reply-To:Content-Type; b=QY3CfzyRU4bjYufwe2S1rCOPlwEti+1wWzzyFfs19uiz+TyvdorjsowXBjzfg2NTTxmb4nVSZrAiJFYtR8VZAFWJA8IUesAaNKBIu8LjzolqThcdAkusqt+2Cwuda0718+/szF1fUzADhZ7TEC0fHl3VDA5qyk/SqXO+RNieqkM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=H1B1Gfz7; arc=none smtp.client-ip=198.47.23.249
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="g49UoDnh"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="H1B1Gfz7"
 Received: from fllv0035.itg.ti.com ([10.64.41.0])
-	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 41SFce6j119434;
-	Wed, 28 Feb 2024 09:38:40 -0600
+	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 41SFeYlB066187;
+	Wed, 28 Feb 2024 09:40:34 -0600
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1709134720;
-	bh=dwlqjsbOKohax9+3cUFztzE/P5qLwn8+RnjCD3aEjVo=;
+	s=ti-com-17Q1; t=1709134834;
+	bh=1BBQ7G18oMa6KhbFSSaEGSGl2+04hap3uYZJbm/Bzqc=;
 	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=g49UoDnhEETvI2UULxrMYz325EE1mjiTwQLcxbMZYDgK5Mq8IbMh+5ZULyTkY1O2K
-	 5pDeKfPWBHsw9EvB7bd6HTy7b4+jVtyIpiO+Udi10XQSasvYgq+9G/EZ+QKDEExFhm
-	 mEPxz6sv8mzlj7g5QdMGziiusjTE4NHtqDY3o20o=
-Received: from DLEE105.ent.ti.com (dlee105.ent.ti.com [157.170.170.35])
-	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 41SFceN0076040
+	b=H1B1Gfz7+tw/DNrbs4+e0G+TcpVW63vITREhCTEHcsmIBx6/JiOPrhgevKKuG/eJB
+	 55lmPZHOss2VjwOF3A4gJOnQENcQqpPpMQgh3iQta3vWBnQX03zKFmYlI9H8rYMdKD
+	 RPpP4+hiA0A3BPWw5GxYFA9N7SnFLHXiHLhha7kg=
+Received: from DLEE115.ent.ti.com (dlee115.ent.ti.com [157.170.170.26])
+	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 41SFeYd7077920
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 28 Feb 2024 09:38:40 -0600
-Received: from DLEE109.ent.ti.com (157.170.170.41) by DLEE105.ent.ti.com
- (157.170.170.35) with Microsoft SMTP Server (version=TLS1_2,
+	Wed, 28 Feb 2024 09:40:34 -0600
+Received: from DLEE107.ent.ti.com (157.170.170.37) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 28
- Feb 2024 09:38:39 -0600
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE109.ent.ti.com
- (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
+ Feb 2024 09:40:33 -0600
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE107.ent.ti.com
+ (157.170.170.37) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Wed, 28 Feb 2024 09:38:39 -0600
+ Frontend Transport; Wed, 28 Feb 2024 09:40:33 -0600
 Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 41SFcdwR055557;
-	Wed, 28 Feb 2024 09:38:39 -0600
-Message-ID: <1f5c1533-5c9f-4cc2-b40b-6e9b22374640@ti.com>
-Date: Wed, 28 Feb 2024 09:38:39 -0600
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 41SFeXwb122716;
+	Wed, 28 Feb 2024 09:40:33 -0600
+Message-ID: <34864935-2cf0-4a9f-aa52-bc6dd89da26b@ti.com>
+Date: Wed, 28 Feb 2024 09:40:33 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,92 +50,85 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/7] mmc: sdhci_am654: Add tuning algorithm for delay
- chain
+Subject: Re: [PATCH v2 2/7] mmc: sdhci_am654: Write ITAPDLY for DDR52 timing
+Content-Language: en-US
 To: Adrian Hunter <adrian.hunter@intel.com>
 CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         Ulf Hansson
 	<ulf.hansson@linaro.org>
 References: <20240207011520.3128382-1-jm@ti.com>
- <20240207011520.3128382-2-jm@ti.com>
- <461a19cd-36ce-4c34-890e-655a05a81c58@intel.com>
- <6d939482-9a3a-4923-b74b-ceb31b0ba7e9@ti.com>
- <4618f19d-0b7d-4844-83f7-ff2f4be083d9@intel.com>
-Content-Language: en-US
+ <20240207011520.3128382-3-jm@ti.com>
+ <82463a28-822b-4612-aed5-1be21c13acf4@intel.com>
+ <b8b9a7d2-6b1c-4cb1-a41e-55a2e31c25f5@ti.com>
+ <00d4a5fe-2a9d-41c6-8f40-df657fd277d8@intel.com>
 From: Judith Mendez <jm@ti.com>
-In-Reply-To: <4618f19d-0b7d-4844-83f7-ff2f4be083d9@intel.com>
+In-Reply-To: <00d4a5fe-2a9d-41c6-8f40-df657fd277d8@intel.com>
 Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-Hello Adrian,
+Hi Adrian,
 
 On 2/28/24 7:21 AM, Adrian Hunter wrote:
-> On 20/02/24 22:10, Judith Mendez wrote:
+> On 20/02/24 23:05, Judith Mendez wrote:
+>> Hi Adrian,
+>>
 >> On 2/16/24 11:09 AM, Adrian Hunter wrote:
 >>> On 7/02/24 03:15, Judith Mendez wrote:
->>>> +
->>>> +    if (!num_fails)
->>>> +        return ITAPDLY_LAST_INDEX >> 1;
->>>> +
->>>> +    if (fail_window->length == ITAPDLY_LENGTH) {
->>>> +        dev_err(dev, "No passing ITAPDLY, return 0\n");
->>>> +        return 0;
->>>> +    }
->>>> +
->>>> +    first_fail_start = fail_window->start;
->>>> +    last_fail_end = fail_window[num_fails - 1].end;
->>>> +
->>>> +    for (i = 0; i < num_fails; i++) {
->>>> +        start_fail = fail_window[i].start;
->>>> +        end_fail = fail_window[i].end;
->>>> +        pass_length = start_fail - (prev_fail_end + 1);
->>>> +
->>>> +        if (pass_length > pass_window.length) {
->>>> +            pass_window.start = prev_fail_end + 1;
->>>> +            pass_window.length = pass_length;
->>>> +        }
->>>> +        prev_fail_end = end_fail;
->>>> +    }
->>>> +
->>>> +    if (!circular_buffer)
->>>> +        pass_length = ITAPDLY_LAST_INDEX - last_fail_end;
->>>> +    else
->>>> +        pass_length = ITAPDLY_LAST_INDEX - last_fail_end + first_fail_start;
->>>> +
->>>> +    if (pass_length > pass_window.length) {
->>>> +        pass_window.start = last_fail_end + 1;
->>>> +        pass_window.length = pass_length;
->>>> +    }
->>>> +
->>>> +    if (!circular_buffer)
->>>> +        itap = pass_window.start + (pass_window.length >> 1);
->>>> +    else
->>>> +        itap = (pass_window.start + (pass_window.length >> 1)) % ITAPDLY_LENGTH;
->>>> +
->>>> +    return (itap < 0 || itap > ITAPDLY_LAST_INDEX ? 0 : itap);
+>>>> For DDR52 timing, DLL is enabled but tuning is not carried
+>>>> out, therefore the ITAPDLY value in PHY CTRL 4 register is
+>>>> not correct. Fix this by writing ITAPDLY after enabling DLL.
+>>>>
+>>>> Fixes: a161c45f2979 ("mmc: sdhci_am654: Enable DLL only for some speed modes")
 >>>
->>> Parentheses are not needed where they are but putting
->>> them around the condition would make it more readable e.g.
+>>> Note that the Fixes tags make a different ordering
+>>> than the patch order i.e.
 >>>
->>>      return (itap < 0 || itap > ITAPDLY_LAST_INDEX) ? 0 : itap;
+>>> Patch    Fixes        in version
+>>> 1     13ebeae68ac9     v5.10-rc1
+>>> 2     a161c45f2979     v5.7-rc1
+>>> 3     8ee5fc0e0b3b     v5.7-rc1
+>>> 4     8ee5fc0e0b3b     v5.7-rc1
+>>> 4     a0a62497f6aa     v5.10-rc1
+>>> 5     fe52e2fbc6ef     v5.9-rc1
+>>> 6     1accbced1c32     v5.3-rc1
+>>> 7     a161c45f2979     v5.7-rc1
 >>>
->>> However (itap < 0) is not possible because itap is an unsigned type
->>> and if (itap > ITAPDLY_LAST_INDEX) then maybe it would be better
->>> to return ITAPDLY_LAST_INDEX
+>>> That might make backporting these patches more challenging.
 >>
->> You are right about itap < 0, thanks will fix.
->>
->> About itap > ITAPDLY_LAST_INDEX, this is an error. Why
->> return ITAPDLY_LAST_INDEX instead of 0?
+>> Are you suggesting to remove the fixes tag here?
 > 
-> It doesn't matter.  Just if a value has a better chance to work
-> if the calculation fails, like maybe ITAPDLY_LAST_INDEX / 2, but
-> presumably it should not fail.
+> No, it is just something to think about if you intend to
+> backport these patches to older kernels.
 
-Ok, ITAPDLY_LAST_INDEX / sounds good to me, I will add this instead.
+Thanks, Ill keep this in mind for v3.
 
-Thanks,
-~ Judith
-
+> 
+>>
+>>>
+>>>> Signed-off-by: Judith Mendez <jm@ti.com>
+>>>> ---
+>>>> Changelog:
+>>>> v1->v2:
+>>>> - Call sdhci_am654_write_itapdly() in sdhci_am654_set_clock()
+>>>>    instead of sdhci_am654_setup_dll()
+>>>> ---
+>>>>    drivers/mmc/host/sdhci_am654.c | 1 +
+>>>>    1 file changed, 1 insertion(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+>>>> index 2c66a965c225..b50db5d4a452 100644
+>>>> --- a/drivers/mmc/host/sdhci_am654.c
+>>>> +++ b/drivers/mmc/host/sdhci_am654.c
+>>>> @@ -299,6 +299,7 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>>          if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+>>>>            sdhci_am654_setup_dll(host, clock);
+>>>> +        sdhci_am654_write_itapdly(sdhci_am654, sdhci_am654->itap_del_sel[timing]);
+>>>>            sdhci_am654->dll_enable = true;
+>>>>        } else {
+>>>>            sdhci_am654_setup_delay_chain(sdhci_am654, timing);
+>>>
+>>
+>> ~ Judith
+> 
 
