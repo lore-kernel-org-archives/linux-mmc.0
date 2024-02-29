@@ -1,166 +1,86 @@
-Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2059.outbound.protection.outlook.com [40.107.22.59])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E1953C082;
-	Thu, 29 Feb 2024 06:21:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.22.59
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709187681; cv=fail; b=KJe/2bDR7nsBMfEv2s0/TAluk3KaPgilwS9C9eX+nA6KGj/J6NigW11gJymH+atNaayo21YYvruD/vih2VMedU16iuL5f2IhQNDb8DEiYULxNZIuQ2o9a5RcJYa2r5lWqGeeMhyLs8UI8O+x1k0TTBhAVbjEofpphRhfJDEFbgk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709187681; c=relaxed/simple;
-	bh=ctY//bObQWLoTnnmI6nEj0F3mggYqvr1fPOLW6wadKg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=O/sD4KsSb6n9YvUuat6aWH9l08EVi3wpD5CrCI57qcRWOK+jcGYtgHiusnnhwATNtj72W9MZBfyT7R5Mh6ch7gm3OnkotiQ7+ak8faHqYuc0QgvZvJtZjCnyvu+UjVcDgUgrgJrnHm3wundfDwiE0EJN4WwJnYEQ9Q+9VIHxO+g=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=de.bosch.com; spf=pass smtp.mailfrom=de.bosch.com; dkim=pass (2048-bit key) header.d=de.bosch.com header.i=@de.bosch.com header.b=s6MWtBdM; arc=fail smtp.client-ip=40.107.22.59
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=de.bosch.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=de.bosch.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=de.bosch.com header.i=@de.bosch.com header.b="s6MWtBdM"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=QddHIJKA1GntAWvtfi7+lWZUy+sdmxtWYrt3zMS51jJ/6VNrx3603k3IlzNbzHksOXPqSF5VGUdNbZahJZHHEcE8fh2RqTm3Z3ytg5QiMCY1LDN43kgTZPhP5wpSRKcjdcDar9V4dJgESFcnlYM1FvzXozLUGJAZcHwL2We3kzADZOckvwNQqdFumraYTa3S9YnsFlpz9Eazo3DwFy3VyD8hD16ybE7Qek8hWgolj0CG2Zh7cb2bNPJ0G5SJcm9ql+eHwwmjzyqaajp6PRLRK8417ceuV8ZqP1akN6cVb/hGnMMJ73rVvrZztrfAqMVJvAq3S7efYEU438l+upodtw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=5XTEvQTEsjymUj0tk035YIpbk98YR/cFKyNzstRqmcc=;
- b=S9+j77ZSEf2ZlZ+Zg2GdOsuG1/lx9JNgFEsFwW0A9Du/iVhX94N9o2a5oIKl5mOdq+p4KXdH2OgKPKdj8Ev9DehdvQJAxWPQCli+zYWDEXk9Z42q9E6SHrcLwuc8yJS9aempd8in2NVM3o+GpKonML87nokGbgsOYMYc9SBGFXoLancS5/mEq+SRGaAxcXFHf1C5ujPzjGD8lM+o9elaYfnp4hnkwyZUsA8ZBhtE18grdCbDKlyFuIuf6ox3snfqe56MOiNS77KZ8RX9RUJVCy2BX0LhWtQMwtLdmO0efqSZ8GMT4YeqQDaCv+5y5EQK21TfLEKx5yzfoHdvCMYhww==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 139.15.153.203) smtp.rcpttodomain=sang-engineering.com
- smtp.mailfrom=de.bosch.com; dmarc=pass (p=reject sp=none pct=100) action=none
- header.from=de.bosch.com; dkim=none (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=de.bosch.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=5XTEvQTEsjymUj0tk035YIpbk98YR/cFKyNzstRqmcc=;
- b=s6MWtBdM8Y4Rq+Xh1Gkx5WSlDAknMwRhSeolBdyiZMiOEWHaMZcJmzHYWKqcoW9HqQO5mnXlX2LkshoYa/ZLylqxhS9tMF249VF0+EznbLWmwau3hSWqhFlIORy6OtoQ94Ie8qbUBSFk7VkXqS6g29Jt/m8tMZJg1HzE+5cL7PJNQnAG72DTLu1QQsb6tMc/1T78m+rLGpFoaAijSsGz5xPqf3PpqSGod9rb3vnQyED0dxzXEDpxhgM3sBX4yRUBtohsMaiJN0BL3CsHRV07uym/NOTU5pcLhvZaCYJExGBEP1mkTbzaPOFXY/edGiTkYDA9eHRP/8BXokuK4mWyAg==
-Received: from DB7PR02CA0003.eurprd02.prod.outlook.com (2603:10a6:10:52::16)
- by GV1PR10MB5985.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:150:5c::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7316.36; Thu, 29 Feb
- 2024 06:21:12 +0000
-Received: from DU2PEPF00028D0B.eurprd03.prod.outlook.com
- (2603:10a6:10:52:cafe::bb) by DB7PR02CA0003.outlook.office365.com
- (2603:10a6:10:52::16) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7339.29 via Frontend
- Transport; Thu, 29 Feb 2024 06:21:12 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 139.15.153.203)
- smtp.mailfrom=de.bosch.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=de.bosch.com;
-Received-SPF: Pass (protection.outlook.com: domain of de.bosch.com designates
- 139.15.153.203 as permitted sender) receiver=protection.outlook.com;
- client-ip=139.15.153.203; helo=eop.bosch-org.com; pr=C
-Received: from eop.bosch-org.com (139.15.153.203) by
- DU2PEPF00028D0B.mail.protection.outlook.com (10.167.242.171) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.7292.25 via Frontend Transport; Thu, 29 Feb 2024 06:21:12 +0000
-Received: from FE-EXCAS2000.de.bosch.com (10.139.217.199) by eop.bosch-org.com
- (139.15.153.203) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.35; Thu, 29 Feb
- 2024 07:21:15 +0100
-Received: from [10.34.222.178] (10.139.217.196) by FE-EXCAS2000.de.bosch.com
- (10.139.217.199) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.1.2507.35; Thu, 29 Feb
- 2024 07:21:09 +0100
-Message-ID: <331084d4-2802-4d1d-b978-6660f546ea2d@de.bosch.com>
-Date: Thu, 29 Feb 2024 07:21:02 +0100
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A41C5446AD;
+	Thu, 29 Feb 2024 06:41:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1709188881; cv=none; b=qP6jUAGCyYZuCxOqreevuXCwcdjPwRpYcHxt5UdO2Lhg0THAjG5t25KM2kH4VHMW8vKdotS7Ag4ol4G6IsyPTRbkPQ/rKnLywJEfNr0sDqPuCSiroKkEWdlgFE7X0yuur3HDQ3BGudC0o706jTC0oxCzH7ccw5yNti8I14Vk+Wc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1709188881; c=relaxed/simple;
+	bh=prKiSSjyhUGOagxC+vKA6DCu75QOgGg4v1JitF2fgN4=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=FeVuzRNBtxdLUNncVXlX2ig5RuOMy+p1OygKJy3O4nxKDAXQ8oWBu77eK5Sr2WsHH7QHA/jlMLkhksl/jgIjHvZgQVR6ZcYBYa+WrOBey2FChQGEUpJOjxyGR1xPlrnQp7ilprYK8CcgR/i/a8bvuo1yNth+x0ZGDL9/D0iwMgk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 41T6efJsB1197851, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 41T6efJsB1197851
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 29 Feb 2024 14:40:42 +0800
+Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2375.32; Thu, 29 Feb 2024 14:40:41 +0800
+Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
+ RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Thu, 29 Feb 2024 14:40:40 +0800
+Received: from RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f]) by
+ RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f%7]) with mapi id
+ 15.01.2507.035; Thu, 29 Feb 2024 14:40:40 +0800
+From: Ping-Ke Shih <pkshih@realtek.com>
+To: Fiona Klute <fiona.klute@gmx.de>,
+        "linux-wireless@vger.kernel.org"
+	<linux-wireless@vger.kernel.org>
+CC: "kvalo@kernel.org" <kvalo@kernel.org>,
+        "ulf.hansson@linaro.org"
+	<ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>,
+        "pavel@ucw.cz" <pavel@ucw.cz>, "megi@xff.cz"
+	<megi@xff.cz>
+Subject: RE: [PATCH v2 0/9] rtw88: Add support for RTL8723CS/RTL8703B
+Thread-Topic: [PATCH v2 0/9] rtw88: Add support for RTL8723CS/RTL8703B
+Thread-Index: AQHaadiBpVQLHkii4E2ByhEDok10+bEg35uw
+Date: Thu, 29 Feb 2024 06:40:40 +0000
+Message-ID: <61980d74cdb24dd38a2f2e12c79125e2@realtek.com>
+References: <20240227235507.781615-1-fiona.klute@gmx.de>
+In-Reply-To: <20240227235507.781615-1-fiona.klute@gmx.de>
+Accept-Language: en-US, zh-TW
+Content-Language: zh-TW
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RFT] mmc: tmio: avoid concurrent runs of
- mmc_request_done()
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	<linux-renesas-soc@vger.kernel.org>
-CC: Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>
-References: <20240228100354.3285-2-wsa+renesas@sang-engineering.com>
-Content-Language: en-US
-From: Dirk Behme <dirk.behme@de.bosch.com>
-In-Reply-To: <20240228100354.3285-2-wsa+renesas@sang-engineering.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DU2PEPF00028D0B:EE_|GV1PR10MB5985:EE_
-X-MS-Office365-Filtering-Correlation-Id: 38bd4641-d60d-49a0-bbdb-08dc38eea086
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info:
-	HMuJhOaiTBwgOGsFpbOrhMDN+ha3CSsjuPZZtsSBAtdxh/9JbHGscJ1gadFZ1ExjwBsn5fZzxvgPURC7O66F82TAPlNDu1dNUuUpj5AqL9LozQlU5CibP7QyTxhQuGdsgxXImPlVY23U9OcbKqXYx1zwhDxEpIRweLxFpFJQa8OODS3A6fkavzbEnNg1DiH5ScO/nGg+xy1Q+TzQ14vlce1B853KMG6MoL0LG/sozCFKAAEpdfBMD87iX4pvuVYaUWQ7o+F0D2BK4EArt0tPFbtjZTA7fpHHV87cLUk/IsRBk666ov/mW+UL2bGuRE/MWiHh6q7lGHQlZpntZm6eUgruvGQsTPzOdyEB57M+QSiGGP+CLYv0G1YYxxz6I3CHYfLmeHPW2YjSPEknpACkB99uiXyROY0uGhxOr2/qZIAeX/Kh/Ph4eeHLC9ZnF6nNYq4EX+jK7dMVUs1bmFIGN1yHLPGoEk5WweA5aFgDUuHOmVG7WPl6hm0ZYnvEbEA5qBRHGJqa0SMuILntsXSVOJuX1AFD/Je2vCN9ElnEzDASU1qRQZDnWpSf0KSmemgD/a+DLdo34COdRA3DcsaA9+6Q9jDdLx190zeaf7gMFvdkEYuxcQby732SSaXpZtAyZdtGUIbLbAdcV2m58GH7S0ilD+EAfik4Qgpk0usmkmeTfl7oFUAp9Y+5ODroX5HDl3sivbRyZITv9Pn+6kijZtDdeUbGuF5rPku4+qo67P0=
-X-Forefront-Antispam-Report:
-	CIP:139.15.153.203;CTRY:DE;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:eop.bosch-org.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230031)(82310400014)(36860700004);DIR:OUT;SFP:1101;
-X-OriginatorOrg: de.bosch.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Feb 2024 06:21:12.5074
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 38bd4641-d60d-49a0-bbdb-08dc38eea086
-X-MS-Exchange-CrossTenant-Id: 0ae51e19-07c8-4e4b-bb6d-648ee58410f4
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=0ae51e19-07c8-4e4b-bb6d-648ee58410f4;Ip=[139.15.153.203];Helo=[eop.bosch-org.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	DU2PEPF00028D0B.eurprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: GV1PR10MB5985
+X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-Hi Wolfram,
-
-On 28.02.2024 11:03, Wolfram Sang wrote:
-> With the to-be-fixed commit, the reset_work handler cleared 'host->mrq'
-> outside of the spinlock protected critical section. That leaves a small
-> race window during execution of 'tmio_mmc_reset()' where the done_work
-> handler could grab a pointer to the now invalid 'host->mrq'. Both would
-> use it to call mmc_request_done() causing problems (see Link).
-> 
-> However, 'host->mrq' cannot simply be cleared earlier inside the
-> critical section. That would allow new mrqs to come in asynchronously
-> while the actual reset of the controller still needs to be done. So,
-> like 'tmio_mmc_set_ios()', an ERR_PTR is used to prevent new mrqs from
-> coming in but still avoiding concurrency between work handlers.
-> 
-> Reported-by: Dirk Behme <dirk.behme@de.bosch.com>
-> Closes: https://lore.kernel.org/all/20240220061356.3001761-1-dirk.behme@de.bosch.com/
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Fixes: df3ef2d3c92c ("mmc: protect the tmio_mmc driver against a theoretical race")
-
-Tested-by: Dirk Behme <dirk.behme@de.bosch.com>
-Reviewed-by: Dirk Behme <dirk.behme@de.bosch.com>
-
-> ---
-> 
-> Dirk: could you get this tested on your affected setups? I am somewhat
-> optimistic that this is already enough. For sure, it is a needed first
-> step.
-
-Testing looks good :) Many thanks!
-
-At least the issues we observed before are not seen any more. As we are 
-not exactly sure on the root cause, of course this is not a 100% proof. 
-But as the change looks good, looks like it won't break something and 
-the system behaves good with it I would say we are good to go.
-
-I think we could add anything like
-
-Cc: stable@vger.kernel.org # 3.0+
-
-?
-
->   drivers/mmc/host/tmio_mmc_core.c | 2 ++
->   1 file changed, 2 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index be7f18fd4836..c253d176db69 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -259,6 +259,8 @@ static void tmio_mmc_reset_work(struct work_struct *work)
->   	else
->   		mrq->cmd->error = -ETIMEDOUT;
->   
-> +	/* No new calls yet, but disallow concurrent tmio_mmc_done_work() */
-> +	host->mrq = ERR_PTR(-EBUSY);
->   	host->cmd = NULL;
->   	host->data = NULL;
-Thanks again!
-
-Dirk
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogRmlvbmEgS2x1dGUgPGZp
+b25hLmtsdXRlQGdteC5kZT4NCj4gU2VudDogV2VkbmVzZGF5LCBGZWJydWFyeSAyOCwgMjAyNCA3
+OjU1IEFNDQo+IFRvOiBsaW51eC13aXJlbGVzc0B2Z2VyLmtlcm5lbC5vcmc7IFBpbmctS2UgU2hp
+aCA8cGtzaGloQHJlYWx0ZWsuY29tPg0KPiBDYzogRmlvbmEgS2x1dGUgPGZpb25hLmtsdXRlQGdt
+eC5kZT47IGt2YWxvQGtlcm5lbC5vcmc7IHVsZi5oYW5zc29uQGxpbmFyby5vcmc7IGxpbnV4LW1t
+Y0B2Z2VyLmtlcm5lbC5vcmc7DQo+IHBhdmVsQHVjdy5jejsgbWVnaUB4ZmYuY3oNCj4gU3ViamVj
+dDogW1BBVENIIHYyIDAvOV0gcnR3ODg6IEFkZCBzdXBwb3J0IGZvciBSVEw4NzIzQ1MvUlRMODcw
+M0INCj4gDQoNClsuLi5dDQoNCj4gDQo+IHYyOg0KPiAgICogUGFyc2UgUEhZIHN0YXR1cyB1c2lu
+ZyBzdHJ1Y3QgaW5zdGVhZCBvZiBtYWNyb3MNCj4gICAqIFByZWZlciBNQUMgZnJvbSBFRlVTRSBp
+ZiBhdmFpbGFibGUsIG1vdmUgcmV0cmlldmluZyBNQUMgZnJvbSBEVCB0bw0KPiAgICAgYSBzZXBh
+cmF0ZSBmdW5jdGlvbg0KPiAgICogVGlkeSB1cCB3YWl0IGZvciBJUUsgdG8gYmUgZG9uZSwgcmVw
+bGFjZSBtZGVsYXkgbG9vcCB3aXRoDQo+ICAgICByZWFkX3BvbGxfdGltZW91dA0KPiAgICogU2V0
+IGR1YWwgYXV0aG9yIGZvciBydHc4OF84NzIzeA0KPiAgICogQWRkIG1pc3NpbmcgInN0YXRpYyIg
+dG8gcnR3ODcyM3ggZnVuY3Rpb24gZGVjbGFyYXRpb25zLCBmaXhlcw0KPiAgICAgYnVpbGQgZmFp
+bHVyZSB3aGVuIG5vdCBidWlsdCBhcyBhIG1vZHVsZQ0KPiAgICogVmFyaW91cyBzdHlsZSBmaXhl
+cw0KDQpZb3UgaGF2ZSBzb21lIGNoYW5nZXMgYnkgdjIsIHNvIEkgdGhpbmsgeW91IGRvbid0IG5l
+ZWQgdG8gdGFrZSBteSBhY2stYnkgZm9yDQp0aG9zZSBwYXRjaGVzLiBUaGVuLCBpdCB3aWxsIGJl
+IGVhc2llciBmb3IgbWUgdG8gcmV2aWV3IHBhdGNoZXMgeW91IGhhdmUNCmNoYW5nZWQuIA0KDQpB
+bnl3YXksIGNvdWxkIHlvdSBwb2ludCBvdXQgcGF0Y2hlcyBJIHNob3VsZCBwYXkgYXR0ZW50aW9u
+PyBPciBJIHdpbGwgcmV2aWV3DQplbnRpcmUgcGF0Y2hzZXQgb25lLWJ5LW9uZS4gDQoNClBpbmct
+S2UNCg0K
