@@ -1,38 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 436942E405;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 763572E83F;
 	Thu, 29 Feb 2024 01:36:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709170617; cv=none; b=tNEFhZ690PXGipgGyhb4amGjOAK4Ee33DwWxaY6SZOcWJ9wCvTkVq+hbDfWsHMHMsDGCyUQU/4xdwyNL9LozR2atXDGMoNMH0TocIE1JNgnzymDQZg/mAGMQ3ibzJ10/rZQkDWgg2fMck6O/3tWHd+BHxIIebZ+ypJlaUT/hWsE=
+	t=1709170617; cv=none; b=TaEJOX9ipum/y91j3IjnoJTi9xf2bLtsngkjGHUtJKNM60FPE7XRrmk0GqZiYxH26wMXudbbCPiB+wGTsBYWx0vPzogDZetARavTOx3sneKN5ne+TyyB2Ku06BCho2WIdGMfqrajXoM4i/IgOe7dSGDJI5Zx6YBN5NqRlNswJ+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1709170617; c=relaxed/simple;
-	bh=ZAX9Em2I3TtnHcZcltf0TchJ6NPlrQE8PyBaCkDKCT0=;
+	bh=YUcU2ZhEFEYWclZFxROe8UP8gM0z6Vfb9RKwTGJgyiQ=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=U5dgxdDA7kzZgFDz0Profv3mOqSvtCoy5i28g8jaE0s8moiVkxvf9KBuRPj3Q4KTs/fdB2ZQS444yFapZHb2tU+jrj0E9rF6Zzw0oKKzpWlDZRWU3w4/Sf2iLWMyKwiQXiOnZBw87RPYv95CUYLXUOaacrcKx8AXT4OdNImMptU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fJfE2cpV; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=Oj8MhtNvx3vzAzANM3XeeXyL35d/QEbzGQ2FNLKFS0/FXyZSeF4eP0mpmXJUSqhHh0rUCl+SoYxVntJWQdYiHthqG/6/wn94Ja8ru4EhDysuBn23GBvoEl6N0++w4D0OG9oNyc8Lw3Usy3pUhZu0qtUtIAzAviJAgexhRSXygic=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EHwnekVl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fJfE2cpV"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id DBC2BC433B2;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EHwnekVl"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id EF524C43601;
 	Thu, 29 Feb 2024 01:36:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1709170617;
-	bh=ZAX9Em2I3TtnHcZcltf0TchJ6NPlrQE8PyBaCkDKCT0=;
+	bh=YUcU2ZhEFEYWclZFxROe8UP8gM0z6Vfb9RKwTGJgyiQ=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=fJfE2cpVEv1aeWqnrwcrBCiXfVeXoJr1Ghu5XQPrnDCiL9ZrkmyE6d1bKmEKHZiIm
-	 E5x2f8SMzHYv2Ww9py8mhD6do31O3vcUjIa9yz70zEJnveGNTlz6vb4sooZsbHrbHO
-	 cwXRJ7TuHftHZYYOrHc8AYw6yjO1O7pFmR3l1BXA8QWmTY923UlAdlgq9rN+q7wqPX
-	 f6tqgf/2jlP+cg9F6D6Fgy+cF6ZwGdlc31jaOK6H6YNJJoy/MiP0YiQ2QZpDtzNIyk
-	 M7AEC8tRUr68CFqVp90pB6LtQkCRZVmKEaPhfn1Uz6hA+17gsXxpdAqUWQgE583ln/
-	 0U3oieBm8cueA==
+	b=EHwnekVlskefdqzJAYp3o2rTZOHjA/NGA5fYdJ8Doml5SKhH+zeWlTbkKcnnjJdEv
+	 uJ+TvukgiLWM9i0javzT3qV80Sq0QcOCbLKfjKwwc6Dv+XxE60Il1J2UnHCkITTJOg
+	 Z/kJnCtdxaj3CPVuZCZXI7axjRr8neGxalWyYGrwV9iEZY4dFtseyS66+nOpTmDV/K
+	 zS71XKAwa4BDy5RePFoi9luizDXvnHZCx6WFpMSRwMsN1An5sMGeV3zTjeIkkvD+Jg
+	 qq4bXH1nv2eDvKjRfWM7LEWCW4k7edfsmHXsvKecw5QM92DlgwfNSSIm1HKfVEbMAL
+	 oI2fa7U0V+IDQ==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBF22C54E58;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D16C5C54E5A;
 	Thu, 29 Feb 2024 01:36:56 +0000 (UTC)
 From: Yang Xiwen via B4 Relay <devnull+forbidden405.outlook.com@kernel.org>
-Date: Thu, 29 Feb 2024 09:36:21 +0800
-Subject: [PATCH v7 3/5] dt-bindings: mmc: dw-mshc-hi3798cv200: convert to
- YAML
+Date: Thu, 29 Feb 2024 09:36:23 +0800
+Subject: [PATCH v7 5/5] mmc: dw_mmc: add support for hi3798mv200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -41,7 +40,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20240229-b4-mmc-hi3798mv200-v7-3-10c03f316285@outlook.com>
+Message-Id: <20240229-b4-mmc-hi3798mv200-v7-5-10c03f316285@outlook.com>
 References: <20240229-b4-mmc-hi3798mv200-v7-0-10c03f316285@outlook.com>
 In-Reply-To: <20240229-b4-mmc-hi3798mv200-v7-0-10c03f316285@outlook.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, 
@@ -54,14 +53,13 @@ Cc: Igor Opaniuk <igor.opaniuk@linaro.org>,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
  devicetree@vger.kernel.org, linux-aspeed@lists.ozlabs.org, 
  openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, 
- Yang Xiwen <forbidden405@outlook.com>, 
- Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+ Yang Xiwen <forbidden405@outlook.com>
 X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1709170614; l=4709;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1709170614; l=9381;
  i=forbidden405@outlook.com; s=20240228; h=from:subject:message-id;
- bh=z5/cBD8zJzGgT2WFAWSZ2rRYPe9PGIgRVLWNL1lYtXo=;
- b=rrz0p4sOIrPNdi1gVfnAyczCSjjccKIOPM/v2Yyb5PUYvEd3TPkyAtFBFTRgEn3Zwn/rFDB/e
- EBC4BW3ON6VA9BQ8beQAiDIwAF+tBxcYmafgpcR73ft2y85RS+TDR34
+ bh=l1QU5v7Qf5o+OmSIM/7ivy6EVIvGeKsjJJerx6WG9b4=;
+ b=kZ4EhV+glGbE2yGj5U39ISDm2+XrJfh5M6XfvtJ0RWo9c27CXU/JPjreBkzFompsA0DQPYDx9
+ L4J8uiPiDw8A0c47TYGD8mG9cMV7gsYuROafTHWB+tqtX+bC7Fa6mZp
 X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
  pk=KAWv6ZzFsT54MGllOczJgFiWB+DuayEmyn24iiVVThU=
 X-Endpoint-Received:
@@ -71,143 +69,304 @@ Reply-To: <forbidden405@outlook.com>
 
 From: Yang Xiwen <forbidden405@outlook.com>
 
-convert the legacy txt binding to modern YAML and rename to
-hisilicon,hi3798cv200-dw-mshc.yaml. No semantic change.
+Add support for Hi3798MV200 specific extension.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 ---
- .../bindings/mmc/hi3798cv200-dw-mshc.txt           | 40 ------------
- .../mmc/hisilicon,hi3798cv200-dw-mshc.yaml         | 75 ++++++++++++++++++++++
- 2 files changed, 75 insertions(+), 40 deletions(-)
+ drivers/mmc/host/Kconfig              |   9 ++
+ drivers/mmc/host/Makefile             |   1 +
+ drivers/mmc/host/dw_mmc-hi3798mv200.c | 251 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 261 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-deleted file mode 100644
-index a0693b7145f2..000000000000
---- a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-+++ /dev/null
-@@ -1,40 +0,0 @@
--* Hisilicon Hi3798CV200 specific extensions to the Synopsys Designware Mobile
--  Storage Host Controller
--
--Read synopsys-dw-mshc.txt for more details
--
--The Synopsys designware mobile storage host controller is used to interface
--a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
--differences between the core Synopsys dw mshc controller properties described
--by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
--specific extensions to the Synopsys Designware Mobile Storage Host Controller.
--
--Required Properties:
--- compatible: Should contain "hisilicon,hi3798cv200-dw-mshc".
--- clocks: A list of phandle + clock-specifier pairs for the clocks listed
--  in clock-names.
--- clock-names: Should contain the following:
--	"ciu" - The ciu clock described in synopsys-dw-mshc.txt.
--	"biu" - The biu clock described in synopsys-dw-mshc.txt.
--	"ciu-sample" - Hi3798CV200 extended phase clock for ciu sampling.
--	"ciu-drive"  - Hi3798CV200 extended phase clock for ciu driving.
--
--Example:
--
--	emmc: mmc@9830000 {
--		compatible = "hisilicon,hi3798cv200-dw-mshc";
--		reg = <0x9830000 0x10000>;
--		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&crg HISTB_MMC_CIU_CLK>,
--			 <&crg HISTB_MMC_BIU_CLK>,
--			 <&crg HISTB_MMC_SAMPLE_CLK>,
--			 <&crg HISTB_MMC_DRV_CLK>;
--		clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
--		fifo-depth = <256>;
--		clock-frequency = <200000000>;
--		cap-mmc-highspeed;
--		mmc-ddr-1_8v;
--		mmc-hs200-1_8v;
--		non-removable;
--		bus-width = <8>;
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 81f2c4e05287..aebc587f77a7 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -798,6 +798,15 @@ config MMC_DW_HI3798CV200
+ 	  Synopsys DesignWare Memory Card Interface driver. Select this option
+ 	  for platforms based on HiSilicon Hi3798CV200 SoC.
+ 
++config MMC_DW_HI3798MV200
++	tristate "Hi3798MV200 specific extensions for Synopsys DW Memory Card Interface"
++	depends on MMC_DW
++	select MMC_DW_PLTFM
++	help
++	  This selects support for HiSilicon Hi3798MV200 SoC specific extensions to the
++	  Synopsys DesignWare Memory Card Interface driver. Select this option
++	  for platforms based on HiSilicon Hi3798MV200 SoC.
++
+ config MMC_DW_K3
+ 	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
+ 	depends on MMC_DW
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index d0be4465f3ec..f53f86d200ac 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -51,6 +51,7 @@ obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
+ obj-$(CONFIG_MMC_DW_BLUEFIELD)	+= dw_mmc-bluefield.o
+ obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
+ obj-$(CONFIG_MMC_DW_HI3798CV200) += dw_mmc-hi3798cv200.o
++obj-$(CONFIG_MMC_DW_HI3798MV200) += dw_mmc-hi3798mv200.o
+ obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+ obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+ obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
+diff --git a/drivers/mmc/host/dw_mmc-hi3798mv200.c b/drivers/mmc/host/dw_mmc-hi3798mv200.c
 new file mode 100644
-index 000000000000..f3dc973cb490
+index 000000000000..989ae8dda722
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
-@@ -0,0 +1,75 @@
-+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/hisilicon,hi3798cv200-dw-mshc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
++++ b/drivers/mmc/host/dw_mmc-hi3798mv200.c
+@@ -0,0 +1,251 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Modified from dw_mmc-hi3798cv200.c
++ *
++ * Copyright (c) 2024 Yang Xiwen <forbidden405@outlook.com>
++ * Copyright (c) 2018 HiSilicon Technologies Co., Ltd.
++ */
 +
-+title: Hisilicon Hi3798CV200 SoC specific extensions to the Synopsys DWMMC controller
++#include <linux/clk.h>
++#include <linux/mfd/syscon.h>
++#include <linux/mmc/host.h>
++#include <linux/module.h>
++#include <linux/of_address.h>
++#include <linux/platform_device.h>
++#include <linux/regmap.h>
 +
-+maintainers:
-+  - Yang Xiwen <forbidden405@outlook.com>
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
 +
-+properties:
-+  compatible:
-+    enum:
-+      - hisilicon,hi3798cv200-dw-mshc
++#define SDMMC_TUNING_CTRL	0x118
++#define SDMMC_TUNING_FIND_EDGE	BIT(5)
 +
-+  reg:
-+    maxItems: 1
++#define ALL_INT_CLR		0x1ffff
 +
-+  interrupts:
-+    maxItems: 1
++/* DLL ctrl reg */
++#define SAP_DLL_CTRL_DLLMODE	BIT(16)
 +
-+  clocks:
-+    items:
-+      - description: bus interface unit clock
-+      - description: card interface unit clock
-+      - description: card input sample phase clock
-+      - description: controller output drive phase clock
++struct dw_mci_hi3798mv200_priv {
++	struct clk *sample_clk;
++	struct clk *drive_clk;
++	struct regmap *crg_reg;
++	u32 sap_dll_offset;
++	struct mmc_clk_phase_map phase_map;
++};
 +
-+  clock-names:
-+    items:
-+      - const: ciu
-+      - const: biu
-+      - const: ciu-sample
-+      - const: ciu-drive
++static void dw_mci_hi3798mv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	struct dw_mci_hi3798mv200_priv *priv = host->priv;
++	struct mmc_clk_phase phase = priv->phase_map.phase[ios->timing];
++	u32 val;
 +
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
++	val = mci_readl(host, ENABLE_SHIFT);
++	if (ios->timing == MMC_TIMING_MMC_DDR52
++	    || ios->timing == MMC_TIMING_UHS_DDR50)
++		val |= SDMMC_ENABLE_PHASE;
++	else
++		val &= ~SDMMC_ENABLE_PHASE;
++	mci_writel(host, ENABLE_SHIFT, val);
 +
-+allOf:
-+  - $ref: synopsys-dw-mshc-common.yaml#
++	val = mci_readl(host, DDR_REG);
++	if (ios->timing == MMC_TIMING_MMC_HS400)
++		val |= SDMMC_DDR_HS400;
++	else
++		val &= ~SDMMC_DDR_HS400;
++	mci_writel(host, DDR_REG, val);
 +
-+unevaluatedProperties: false
++	if (clk_set_rate(host->ciu_clk, ios->clock))
++		dev_warn(host->dev, "Failed to set rate to %u\n", ios->clock);
++	else
++		/*
++		 * CLK_MUX_ROUND_NEAREST is enabled for this clock
++		 * The actual clock rate is not what we set, but a rounded value
++		 * so we should get the rate once again
++		 */
++		host->bus_hz = clk_get_rate(host->ciu_clk);
 +
-+examples:
-+  - |
-+    #include <dt-bindings/clock/histb-clock.h>
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
++	if (phase.valid) {
++		clk_set_phase(priv->drive_clk, phase.out_deg);
++		clk_set_phase(priv->sample_clk, phase.in_deg);
++	} else {
++		dev_warn(host->dev,
++			 "The phase entry for timing mode %d is missing in device tree.\n",
++			 ios->timing);
++	}
++}
 +
-+    mmc@9830000 {
-+        compatible = "hisilicon,hi3798cv200-dw-mshc";
-+        reg = <0x9830000 0x10000>;
-+        interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
-+        clocks = <&crg HISTB_MMC_CIU_CLK>,
-+                 <&crg HISTB_MMC_BIU_CLK>,
-+                 <&crg HISTB_MMC_SAMPLE_CLK>,
-+                 <&crg HISTB_MMC_DRV_CLK>;
-+        clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
-+        resets = <&crg 0xa0 4>;
-+        reset-names = "reset";
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&emmc_pins_1 &emmc_pins_2
-+                     &emmc_pins_3 &emmc_pins_4>;
-+        fifo-depth = <256>;
-+        clock-frequency = <200000000>;
-+        cap-mmc-highspeed;
-+        mmc-ddr-1_8v;
-+        mmc-hs200-1_8v;
-+        non-removable;
-+        bus-width = <8>;
-+    };
++static inline int dw_mci_hi3798mv200_enable_tuning(struct dw_mci_slot *slot)
++{
++	struct dw_mci_hi3798mv200_priv *priv = slot->host->priv;
++
++	return regmap_clear_bits(priv->crg_reg, priv->sap_dll_offset, SAP_DLL_CTRL_DLLMODE);
++}
++
++static inline int dw_mci_hi3798mv200_disable_tuning(struct dw_mci_slot *slot)
++{
++	struct dw_mci_hi3798mv200_priv *priv = slot->host->priv;
++
++	return regmap_set_bits(priv->crg_reg, priv->sap_dll_offset, SAP_DLL_CTRL_DLLMODE);
++}
++
++static int dw_mci_hi3798mv200_execute_tuning_mix_mode(struct dw_mci_slot *slot,
++					     u32 opcode)
++{
++	static const int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
++	struct dw_mci *host = slot->host;
++	struct dw_mci_hi3798mv200_priv *priv = host->priv;
++	int raise_point = -1, fall_point = -1, mid;
++	int err, prev_err = -1;
++	int found = 0;
++	int regval;
++	int i;
++	int ret;
++
++	ret = dw_mci_hi3798mv200_enable_tuning(slot);
++	if (ret < 0)
++		return ret;
++
++	for (i = 0; i < ARRAY_SIZE(degrees); i++) {
++		clk_set_phase(priv->sample_clk, degrees[i]);
++		mci_writel(host, RINTSTS, ALL_INT_CLR);
++
++		/*
++		 * HiSilicon implemented a tuning mechanism.
++		 * It needs special interaction with the DLL.
++		 *
++		 * Treat edge(flip) found as an error too.
++		 */
++		err = mmc_send_tuning(slot->mmc, opcode, NULL);
++		regval = mci_readl(host, TUNING_CTRL);
++		if (err || (regval & SDMMC_TUNING_FIND_EDGE))
++			err = 1;
++		else
++			found = 1;
++
++		if (i > 0) {
++			if (err && !prev_err)
++				fall_point = i - 1;
++			if (!err && prev_err)
++				raise_point = i;
++		}
++
++		if (raise_point != -1 && fall_point != -1)
++			goto tuning_out;
++
++		prev_err = err;
++		err = 0;
++	}
++
++tuning_out:
++	ret = dw_mci_hi3798mv200_disable_tuning(slot);
++	if (ret < 0)
++		return ret;
++
++	if (found) {
++		if (raise_point == -1)
++			raise_point = 0;
++		if (fall_point == -1)
++			fall_point = ARRAY_SIZE(degrees) - 1;
++		if (fall_point < raise_point) {
++			if ((raise_point + fall_point) >
++			    (ARRAY_SIZE(degrees) - 1))
++				mid = fall_point / 2;
++			else
++				mid = (raise_point + ARRAY_SIZE(degrees) - 1) / 2;
++		} else {
++			mid = (raise_point + fall_point) / 2;
++		}
++
++		/*
++		 * We don't care what timing we are tuning for,
++		 * simply use the same phase for all timing needs tuning.
++		 */
++		priv->phase_map.phase[MMC_TIMING_MMC_HS200].in_deg = degrees[mid];
++		priv->phase_map.phase[MMC_TIMING_MMC_HS400].in_deg = degrees[mid];
++		priv->phase_map.phase[MMC_TIMING_UHS_SDR104].in_deg = degrees[mid];
++
++		clk_set_phase(priv->sample_clk, degrees[mid]);
++		dev_dbg(host->dev, "Tuning clk_sample[%d, %d], set[%d]\n",
++			raise_point, fall_point, degrees[mid]);
++		ret = 0;
++	} else {
++		dev_err(host->dev, "No valid clk_sample shift!\n");
++		ret = -EINVAL;
++	}
++
++	mci_writel(host, RINTSTS, ALL_INT_CLR);
++
++	return ret;
++}
++
++static int dw_mci_hi3798mv200_init(struct dw_mci *host)
++{
++	struct dw_mci_hi3798mv200_priv *priv;
++	struct device_node *np = host->dev->of_node;
++	int ret;
++
++	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv)
++		return -ENOMEM;
++
++	mmc_of_parse_clk_phase(host->dev, &priv->phase_map);
++
++	priv->sample_clk = devm_clk_get_enabled(host->dev, "ciu-sample");
++	if (IS_ERR(priv->sample_clk))
++		return dev_err_probe(host->dev, PTR_ERR(priv->sample_clk),
++				     "failed to get enabled ciu-sample clock\n");
++
++	priv->drive_clk = devm_clk_get_enabled(host->dev, "ciu-drive");
++	if (IS_ERR(priv->drive_clk))
++		return dev_err_probe(host->dev, PTR_ERR(priv->drive_clk),
++				     "failed to get enabled ciu-drive clock\n");
++
++	priv->crg_reg = syscon_regmap_lookup_by_phandle(np, "hisilicon,sap-dll-reg");
++	if (IS_ERR(priv->crg_reg))
++		return dev_err_probe(host->dev, PTR_ERR(priv->crg_reg),
++				     "failed to get CRG reg\n");
++
++	ret = of_property_read_u32_index(np, "hisilicon,sap-dll-reg", 1, &priv->sap_dll_offset);
++	if (ret)
++		return dev_err_probe(host->dev, ret, "failed to get sample DLL register offset\n");
++
++	host->priv = priv;
++	return 0;
++}
++
++static const struct dw_mci_drv_data hi3798mv200_data = {
++	.common_caps = MMC_CAP_CMD23,
++	.init = dw_mci_hi3798mv200_init,
++	.set_ios = dw_mci_hi3798mv200_set_ios,
++	.execute_tuning = dw_mci_hi3798mv200_execute_tuning_mix_mode,
++};
++
++static const struct of_device_id dw_mci_hi3798mv200_match[] = {
++	{ .compatible = "hisilicon,hi3798mv200-dw-mshc" },
++	{},
++};
++
++static int dw_mci_hi3798mv200_probe(struct platform_device *pdev)
++{
++	return dw_mci_pltfm_register(pdev, &hi3798mv200_data);
++}
++
++static void dw_mci_hi3798mv200_remove(struct platform_device *pdev)
++{
++	dw_mci_pltfm_remove(pdev);
++}
++
++MODULE_DEVICE_TABLE(of, dw_mci_hi3798mv200_match);
++static struct platform_driver dw_mci_hi3798mv200_driver = {
++	.probe = dw_mci_hi3798mv200_probe,
++	.remove_new = dw_mci_hi3798mv200_remove,
++	.driver = {
++		.name = "dwmmc_hi3798mv200",
++		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
++		.of_match_table = dw_mci_hi3798mv200_match,
++	},
++};
++module_platform_driver(dw_mci_hi3798mv200_driver);
++
++MODULE_DESCRIPTION("HiSilicon Hi3798MV200 Specific DW-MSHC Driver Extension");
++MODULE_LICENSE("GPL");
 
 -- 
 2.43.0
