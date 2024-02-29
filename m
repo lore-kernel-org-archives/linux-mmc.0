@@ -1,86 +1,139 @@
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A41C5446AD;
-	Thu, 29 Feb 2024 06:41:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAC0145949
+	for <linux-mmc@vger.kernel.org>; Thu, 29 Feb 2024 07:33:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709188881; cv=none; b=qP6jUAGCyYZuCxOqreevuXCwcdjPwRpYcHxt5UdO2Lhg0THAjG5t25KM2kH4VHMW8vKdotS7Ag4ol4G6IsyPTRbkPQ/rKnLywJEfNr0sDqPuCSiroKkEWdlgFE7X0yuur3HDQ3BGudC0o706jTC0oxCzH7ccw5yNti8I14Vk+Wc=
+	t=1709192008; cv=none; b=uAzcCQw66c11EqEn0tiVnTui6oS9iXRjCx7PFgXWfne7+kAeNhRNA3nCPuNpr6rTN8om/v9GSw/2qmdoT/Grf8dzY710bRUNwcGS13etTedOKRcHeGJOZl3WHhqVniqTP5oJ5BRrJN6lmrEGRZeZLR4++5dvG4avRFixbDseHIY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709188881; c=relaxed/simple;
-	bh=prKiSSjyhUGOagxC+vKA6DCu75QOgGg4v1JitF2fgN4=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=FeVuzRNBtxdLUNncVXlX2ig5RuOMy+p1OygKJy3O4nxKDAXQ8oWBu77eK5Sr2WsHH7QHA/jlMLkhksl/jgIjHvZgQVR6ZcYBYa+WrOBey2FChQGEUpJOjxyGR1xPlrnQp7ilprYK8CcgR/i/a8bvuo1yNth+x0ZGDL9/D0iwMgk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; arc=none smtp.client-ip=211.75.126.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 41T6efJsB1197851, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 41T6efJsB1197851
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 29 Feb 2024 14:40:42 +0800
-Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2375.32; Thu, 29 Feb 2024 14:40:41 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Thu, 29 Feb 2024 14:40:40 +0800
-Received: from RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f]) by
- RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f%7]) with mapi id
- 15.01.2507.035; Thu, 29 Feb 2024 14:40:40 +0800
-From: Ping-Ke Shih <pkshih@realtek.com>
-To: Fiona Klute <fiona.klute@gmx.de>,
-        "linux-wireless@vger.kernel.org"
-	<linux-wireless@vger.kernel.org>
-CC: "kvalo@kernel.org" <kvalo@kernel.org>,
-        "ulf.hansson@linaro.org"
-	<ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>,
-        "pavel@ucw.cz" <pavel@ucw.cz>, "megi@xff.cz"
-	<megi@xff.cz>
-Subject: RE: [PATCH v2 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-Thread-Topic: [PATCH v2 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-Thread-Index: AQHaadiBpVQLHkii4E2ByhEDok10+bEg35uw
-Date: Thu, 29 Feb 2024 06:40:40 +0000
-Message-ID: <61980d74cdb24dd38a2f2e12c79125e2@realtek.com>
-References: <20240227235507.781615-1-fiona.klute@gmx.de>
-In-Reply-To: <20240227235507.781615-1-fiona.klute@gmx.de>
-Accept-Language: en-US, zh-TW
-Content-Language: zh-TW
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	s=arc-20240116; t=1709192008; c=relaxed/simple;
+	bh=MXMlJN6n572oFcdDsuVeCkTGLCDCZh4tRdRct4X1LNM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=TfQqd+Kz9RqqgLXJA6CF73TozEP63p7kXOBKy6T/lpit+5Utdu5I/1yWxZei1N+eXQ1n9zMCTbmAeqGEVHK1YK0ktztLZ2zYy93aa2cypn1HoRE7NiVsCmpxahyXIxkPEayb1egNpFplLtVl41micpHgY3owY+WYw+A2xjiO2dE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=h+v8C5k6; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="h+v8C5k6"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=n9Fl
+	5xfpB997/ASvKk+rVPrNQztesazR12o5BkzzxIU=; b=h+v8C5k6ZI0JN2q2gIVe
+	w4bZmwOiluKFcplFOVoqhaw7xAdtYEPJIZ8aAIRAnRdZWY11AgTkEQkJCtAWWoxN
+	AdEURR6iuxWkBGaCgEp9bydl0zhrdx4PbN0g5n/PrUbykLTlSn8LmA0/dEN0gxiZ
+	hMcb7g5TKrBlClTztwNIA4Aed/Ko2zGLBh32uEmL8DKUepaSME0FRJ32gTWCwp2U
+	jC5UepkWQpEcc3NCWOkh32qux2AGFnSGIdST/QMDndRxVz829No12PN4njp/NX62
+	5f5ypq2U4kD42A+JkLUdfbCxgQgQ9BeLK8Tz28zd1W/IfrFjZoiO6U1FExklq8Cj
+	nQ==
+Received: (qmail 2212258 invoked from network); 29 Feb 2024 08:33:13 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 29 Feb 2024 08:33:13 +0100
+X-UD-Smtp-Session: l3s3148p1@0KWgRYAS0JcujnuA
+Date: Thu, 29 Feb 2024 08:33:13 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Dirk Behme <dirk.behme@de.bosch.com>
+Cc: linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH RFT] mmc: tmio: avoid concurrent runs of
+ mmc_request_done()
+Message-ID: <ZeAzOUN-8QEl4U2n@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Dirk Behme <dirk.behme@de.bosch.com>,
+	linux-renesas-soc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+References: <20240228100354.3285-2-wsa+renesas@sang-engineering.com>
+ <331084d4-2802-4d1d-b978-6660f546ea2d@de.bosch.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="yXWwMvQMGXoOVewE"
+Content-Disposition: inline
+In-Reply-To: <331084d4-2802-4d1d-b978-6660f546ea2d@de.bosch.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogRmlvbmEgS2x1dGUgPGZp
-b25hLmtsdXRlQGdteC5kZT4NCj4gU2VudDogV2VkbmVzZGF5LCBGZWJydWFyeSAyOCwgMjAyNCA3
-OjU1IEFNDQo+IFRvOiBsaW51eC13aXJlbGVzc0B2Z2VyLmtlcm5lbC5vcmc7IFBpbmctS2UgU2hp
-aCA8cGtzaGloQHJlYWx0ZWsuY29tPg0KPiBDYzogRmlvbmEgS2x1dGUgPGZpb25hLmtsdXRlQGdt
-eC5kZT47IGt2YWxvQGtlcm5lbC5vcmc7IHVsZi5oYW5zc29uQGxpbmFyby5vcmc7IGxpbnV4LW1t
-Y0B2Z2VyLmtlcm5lbC5vcmc7DQo+IHBhdmVsQHVjdy5jejsgbWVnaUB4ZmYuY3oNCj4gU3ViamVj
-dDogW1BBVENIIHYyIDAvOV0gcnR3ODg6IEFkZCBzdXBwb3J0IGZvciBSVEw4NzIzQ1MvUlRMODcw
-M0INCj4gDQoNClsuLi5dDQoNCj4gDQo+IHYyOg0KPiAgICogUGFyc2UgUEhZIHN0YXR1cyB1c2lu
-ZyBzdHJ1Y3QgaW5zdGVhZCBvZiBtYWNyb3MNCj4gICAqIFByZWZlciBNQUMgZnJvbSBFRlVTRSBp
-ZiBhdmFpbGFibGUsIG1vdmUgcmV0cmlldmluZyBNQUMgZnJvbSBEVCB0bw0KPiAgICAgYSBzZXBh
-cmF0ZSBmdW5jdGlvbg0KPiAgICogVGlkeSB1cCB3YWl0IGZvciBJUUsgdG8gYmUgZG9uZSwgcmVw
-bGFjZSBtZGVsYXkgbG9vcCB3aXRoDQo+ICAgICByZWFkX3BvbGxfdGltZW91dA0KPiAgICogU2V0
-IGR1YWwgYXV0aG9yIGZvciBydHc4OF84NzIzeA0KPiAgICogQWRkIG1pc3NpbmcgInN0YXRpYyIg
-dG8gcnR3ODcyM3ggZnVuY3Rpb24gZGVjbGFyYXRpb25zLCBmaXhlcw0KPiAgICAgYnVpbGQgZmFp
-bHVyZSB3aGVuIG5vdCBidWlsdCBhcyBhIG1vZHVsZQ0KPiAgICogVmFyaW91cyBzdHlsZSBmaXhl
-cw0KDQpZb3UgaGF2ZSBzb21lIGNoYW5nZXMgYnkgdjIsIHNvIEkgdGhpbmsgeW91IGRvbid0IG5l
-ZWQgdG8gdGFrZSBteSBhY2stYnkgZm9yDQp0aG9zZSBwYXRjaGVzLiBUaGVuLCBpdCB3aWxsIGJl
-IGVhc2llciBmb3IgbWUgdG8gcmV2aWV3IHBhdGNoZXMgeW91IGhhdmUNCmNoYW5nZWQuIA0KDQpB
-bnl3YXksIGNvdWxkIHlvdSBwb2ludCBvdXQgcGF0Y2hlcyBJIHNob3VsZCBwYXkgYXR0ZW50aW9u
-PyBPciBJIHdpbGwgcmV2aWV3DQplbnRpcmUgcGF0Y2hzZXQgb25lLWJ5LW9uZS4gDQoNClBpbmct
-S2UNCg0K
+
+--yXWwMvQMGXoOVewE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Dirk,
+
+> > With the to-be-fixed commit, the reset_work handler cleared 'host->mrq'
+> > outside of the spinlock protected critical section. That leaves a small
+> > race window during execution of 'tmio_mmc_reset()' where the done_work
+> > handler could grab a pointer to the now invalid 'host->mrq'. Both would
+> > use it to call mmc_request_done() causing problems (see Link).
+> >=20
+> > However, 'host->mrq' cannot simply be cleared earlier inside the
+> > critical section. That would allow new mrqs to come in asynchronously
+> > while the actual reset of the controller still needs to be done. So,
+> > like 'tmio_mmc_set_ios()', an ERR_PTR is used to prevent new mrqs from
+> > coming in but still avoiding concurrency between work handlers.
+> >=20
+> > Reported-by: Dirk Behme <dirk.behme@de.bosch.com>
+> > Closes: https://lore.kernel.org/all/20240220061356.3001761-1-dirk.behme=
+@de.bosch.com/
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > Fixes: df3ef2d3c92c ("mmc: protect the tmio_mmc driver against a theore=
+tical race")
+>=20
+> Tested-by: Dirk Behme <dirk.behme@de.bosch.com>
+> Reviewed-by: Dirk Behme <dirk.behme@de.bosch.com>
+
+Awesome! Thanks for the super-fast tags!
+
+> At least the issues we observed before are not seen any more. As we are n=
+ot
+> exactly sure on the root cause, of course this is not a 100% proof. But as
+> the change looks good, looks like it won't break something and the system
+> behaves good with it I would say we are good to go.
+
+I agree. We don't know if it is all you need. But there definitely was a
+race window and closing it removes some observed anomalies. Let's hope
+all of them :) I looked many times at the code and, to the best of my
+knowledge, don't see side effects. 'host->mrq' stays non-NULL, so new
+mrqs won't be added like before. Changing it to an ERR_PTR will only
+affect the check in the done_work handler which is what we want. But, of
+course, more eyes are always welcome.
+
+> I think we could add anything like
+>=20
+> Cc: stable@vger.kernel.org # 3.0+
+
+Yes, we should definitely have that. I would have added it once your
+testing got good results. This affects every Renesas SDHI or Uniphier SD
+instance since 3.0 (12 years). Wow! So, thanks a ton for your report and
+assistance in debugging it. Very much appreciated! And, phew, I am happy
+that this solution does not make the locking more complex \o/
+
+All the best,
+
+   Wolfram
+
+
+--yXWwMvQMGXoOVewE
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmXgMzUACgkQFA3kzBSg
+KbbIwA/8C0nJicwAl4j00mETzzdiC36BY6uQzoqil257N2l/QOBBGo3PdjzdLW41
+KOggdi2aX+xRmGPuIIevXbKDYfu0GJUcTMwY3cqJ5Y+oQLC2s2e/ZSVUqc34vxv/
+sNbJYcLwJE+cTN2H0GMzYnUoZS96Nq0JSr1qhMCWUOWWQ9jAlBTw/7bK07i3YWO5
+6eP/6GaoxE2TJwnsrjgGflCIAtL0/VQV6VWjgGfWXMUSO3+LSBrbNITWUgUcCncj
+YwLgPKZEoweyIWJ13TrpODyxxXyTu7NZlj5zkIfDSrKnobO6oN2970NVeM0fTkS7
+eInBGie7rXRuADOxureLRkn+ElEZ6rlPyq4jDU5ycYbwEXNYW9+enAK7ns9ce9M6
+EqjuPS0okYZpoOpvDvwjxJ5Pc0CBFPP6iVq2yYtbZPbSZElKDKeh12lwmtdGaar/
+fTbt47paI8LMsKtroDeY/q5eBzh7l2Gu0SeOLHERBKN9wLfROglQ5X56qr73iaaC
+QuQ4DGr8bphvbiJpBbQ65e9uy0Ti8AqClb6JgkIiAbyYcFfmRL5T7d81yZtS1PHE
+27jtIjqJ2mCZavq2aAxNfTHNEpr8hSlJtLrLNoOgalww9gPbZMCNsJU+RGNgLo+y
+esVZRoTz70+es1cBmUAuvXc8yInLWope+JNK3GhIOSGK6rRmOy4=
+=4Qja
+-----END PGP SIGNATURE-----
+
+--yXWwMvQMGXoOVewE--
