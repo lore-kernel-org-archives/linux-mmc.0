@@ -1,38 +1,38 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.19])
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A71783A1D7;
-	Fri,  1 Mar 2024 16:54:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C195D16FF21;
+	Fri,  1 Mar 2024 17:15:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709312095; cv=none; b=GmWlIJcRlMIuOzWOSmEGUaIr+IondJ2fPs9upy0hkii8mNcIg+Mty3Dkcl/OVdzsa2+5jBFgrt3R28hGAtNqOCqOrDsXINahoKM5Pa1b9ziIHAHp43A7SwlnQdBr2kEjiTKinp39/ucF65D9zZoxYvNgcIJincgzAkfo6yWnTNo=
+	t=1709313357; cv=none; b=PE8kwuFTa8tGwIWw+tLQBHwzrCky28UepDqf4MFnEVUdkwx+W5EPqvGUluFGs84mwPJE8HvQQCurfDBHy0bNAptl18Y/myDHRT3DDvQ1Z4XWSGwnu0yRqrvWoYnnmKKKRkW4JemD/juiMjPS5n/5TImNZchjxTSL2YKBhGht8XQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709312095; c=relaxed/simple;
-	bh=f8/rMyUg9FuVECy3YwsX+FGC9fVnlTu+TOaoGeIh/9s=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LjyjkWMtjfGNLQaXs8bJkQWa7zjdIiRztOxrTMZR3WbsYdoZg8pnDSadLlLrPVVrTSAkhy2LojlP329bYVqt1e1TijK4813DQF1497hAXy6X32B5of5V1u4CLixNn4R8YOa0XY6u3WeWKglCqItARC4b88X2aqeZWO+uzXckTVI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=Cf9qg9p7; arc=none smtp.client-ip=212.227.15.19
+	s=arc-20240116; t=1709313357; c=relaxed/simple;
+	bh=kWp3++pMZYSW5hCzQ3OAsPTyxM4LoDUTJmw1JMeCKew=;
+	h=Message-ID:Date:MIME-Version:Subject:From:To:Cc:References:
+	 In-Reply-To:Content-Type; b=aK8g0wRJADOCA0tFQkweaTRbADVrZ/2aNP7x/BwBTZ/NPe1WR8GuQoMBU3Dltxi8s2zLCe+2Qpys9W1An3Bh72n8tandfePEDqirMOm8xjDhUz2PfvN4eoJdZurYmpMiobJdqXlV709st1g6mIC7pjX8w3Xn4jvCVOBJ0jEYA58=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=B11MW7PV; arc=none smtp.client-ip=212.227.17.21
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="Cf9qg9p7"
+	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="B11MW7PV"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.de; s=s31663417;
-	t=1709312078; x=1709916878; i=fiona.klute@gmx.de;
-	bh=f8/rMyUg9FuVECy3YwsX+FGC9fVnlTu+TOaoGeIh/9s=;
-	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
+	t=1709313340; x=1709918140; i=fiona.klute@gmx.de;
+	bh=kWp3++pMZYSW5hCzQ3OAsPTyxM4LoDUTJmw1JMeCKew=;
+	h=X-UI-Sender-Class:Date:Subject:From:To:Cc:References:
 	 In-Reply-To;
-	b=Cf9qg9p7fen1dtghoz94OvVPQ6hbed96M4hrNdYXDg6UzXvCRGeBxdw28PdTcBAh
-	 zC05VMzdytOmXaYZiPNJSqagh8CNSd8AG9rTywPFAJWIF6Dqc4bE7HS9qBudJNILD
-	 ahRpVRtp03urEhNnZKNOhY3qwbaahKE20QwMOZKwfp1NEeu22zZmxI/uLiWWn82lp
-	 iK0Mt/yvaPnAUx6ZGRZ5gIGsX0O6r131ySLsqg6EsGQ1L1XyHLVSp0mD3fcF0zmdy
-	 zx6O0a3RYDJZqfHREd3L3aWn98eHqaGYp9NV+YoWpqnRYA0LgZcXChX7YKk4gGCg4
-	 i/6D7Pa0O4H0xkAqbw==
+	b=B11MW7PVHAtQEcGcSTbPS2v4u3e5OgEmtPG/40ESqnh17Y5rVJ4fQ30AqQ3s8D2v
+	 hmn9ymRsnpVmTjaI4yO+7tbALalLxLGlO41XvUeRpYsjPz/brTW3RGK68ewrGMjJH
+	 3qUfj5tNR0z8546NLGINyUlPzIFbHrfgQiphd/9r6MYzezdxCl2zamSATwtujN3dt
+	 i9lDC5auw0Nbbtol43qoZideXjpUSmp/TIMix46NfKVU/PzsLn836Cb+2Yk7l1z3C
+	 lp6t5EOzpc8Ys1tvgLhaSqsS+nu/hakm9hnaoftnuy6bTAdLbR728umACsjxYxWA2
+	 hxii+rmTqaFxD/q2mQ==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.7.2] ([85.22.26.244]) by mail.gmx.net (mrgmx005
- [212.227.17.190]) with ESMTPSA (Nemesis) id 1MyKHm-1qxDjm0LV6-00yhxo; Fri, 01
- Mar 2024 17:54:38 +0100
-Message-ID: <7b860e34-705b-43d9-9e61-cefdd768ccd1@gmx.de>
-Date: Fri, 1 Mar 2024 17:54:37 +0100
+Received: from [192.168.7.2] ([85.22.26.244]) by mail.gmx.net (mrgmx104
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1MPokN-1rSiUh29Pn-00MpM1; Fri, 01
+ Mar 2024 18:15:40 +0100
+Message-ID: <5f505604-7bf1-471d-9e36-d9712daa9064@gmx.de>
+Date: Fri, 1 Mar 2024 18:15:39 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,8 +40,9 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 5/9] wifi: rtw88: Add rtw8703b.c
+Subject: Re: [PATCH v2 4/9] wifi: rtw88: Add rtw8703b.h
 Content-Language: de-DE, en-US
+From: Fiona Klute <fiona.klute@gmx.de>
 To: Ping-Ke Shih <pkshih@realtek.com>,
  "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
 Cc: "kvalo@kernel.org" <kvalo@kernel.org>,
@@ -49,10 +50,9 @@ Cc: "kvalo@kernel.org" <kvalo@kernel.org>,
  "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
  "pavel@ucw.cz" <pavel@ucw.cz>, "megi@xff.cz" <megi@xff.cz>
 References: <20240227235507.781615-1-fiona.klute@gmx.de>
- <20240227235507.781615-6-fiona.klute@gmx.de>
- <3805850d51334319984bc304ca1dc3c4@realtek.com>
- <4fc45b4289d747dd80f76dcacef3c54d@realtek.com>
-From: Fiona Klute <fiona.klute@gmx.de>
+ <20240227235507.781615-5-fiona.klute@gmx.de>
+ <368ebc04c2ec436791a27b5661189783@realtek.com>
+ <db9e7f0d-a60f-467b-82df-da6170d02151@gmx.de>
 Autocrypt: addr=fiona.klute@gmx.de; keydata=
  xsFNBFrLsicBEADA7Px5KipL9zM7AVkZ6/U4QaWQyxhqim6MX88TxZ6KnqFiTSmevecEWbls
  ppqPES8FiSl+M00Xe5icsLsi4mkBujgbuSDiugjNyqeOH5iqtg69xTd/r5DRMqt0K93GzmIj
@@ -96,67 +96,80 @@ Autocrypt: addr=fiona.klute@gmx.de; keydata=
  MCTaUC2HWAAsiG90beT7JkkKKgMLS9DxmX9BN5Cm18Azckexy+vMg79LCcfw/gocQ4+lQn4/
  3BjqSuHfj+dXG+qcQ9pgB5+4/812hHog78dKT2r8l3ax3mHZCDTAC9Ks3LQU9/pMBm6K6nnL
  a4ASpGZSg2zLGIT0gnzi5h8EcIu9J1BFq6zRPZIjxBlhswF6J0BXjlDVe/3JzmeTTts=
-In-Reply-To: <4fc45b4289d747dd80f76dcacef3c54d@realtek.com>
+In-Reply-To: <db9e7f0d-a60f-467b-82df-da6170d02151@gmx.de>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:+X5ub84Ek1IUhOL2LGiGFvucBqpRvmgsm4QcmUvrnCacPZMIBlC
- Owtrq1IyPzNn9bNLSiM79YzGnrfg2arcgp1PKmE9cswPCDno1+EMV+hxukKNK9mrUtCfa18
- VdkAecNt16Vz7FziEZZbuCdTWBeDEt2ylgInaMRUEszrDJdFvO9lmbUxXR4UCXp7w7ZJt1x
- NhrRaqm5G6XfUJPgVh/wA==
+X-Provags-ID: V03:K1:oBc/9sJlAJ9BjaP7BJSlBLNdXkjr1+CXPGS+/N9ZlDRsBaPhbnC
+ 8rBREzksiKnLGVOabO9IUClXt9+sQZf4jIyuPsgQB7q0mtkgd6i9ImMlgKeFleBDiLXZw0k
+ jqJSuhm4EIxkZHO4E3FS/x7mJxhwzK1gnwDKN7KieegryS9dmtByMbRhz73YH1lJEsowioD
+ 9SFZTsK8Aw+8iJ9n7nuKg==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:mtEZIwzA0a8=;Q2O80z9l2Lkl7qp5XTsQKfdWarX
- IFL9Cz7aZBdBTIBFWKmb/dO6sLaqJMhNNUqLA7+lIBEhN+I6gEHhzs5/DuhwlEesR0gB++dDA
- TAB8qO4HG4/JKyih40wbHuh3gpqfB2klHHM7YNVSz01urHQl1xR7jqyUugfEIG7XRzJBrC5KR
- mhDQBe6Fmu35L+5Mmi3bVR0GNQ7YnlMhYjux0EqKjFl3b4jRVtj2+NW/D+Vmew4uQLMGJU8vx
- G1ZVMqnbryRq7fB0eX5SFLOsFlqLgrzXKwi5bc9SIbebmpveTMRhVoJ3cjp7sy/ouWlIx/QlD
- zJZMnG2t00c+NUYWYlP0GWAggvY+MEjmRs7JTRPt8/DMabZFla+oZs4FWjgJMglCmWS4/wsYY
- MOL2L/XjyXcem6XR2ZWkRFJUloEzG0TOwnjkXuq3m20HHr6oHr4BpWEejPLu+7ZW6O1c0oFqs
- kRaM1Zd9vMGaRtZKq4M8WiLFYnNU4D6227SbcmxV+plRpT4fQ9xiOD/WAg1mfIjsOsUx8aQrD
- N07j0WGfKALn421o4yQudIidm1fl8ftHcrIHrcQjAvRktHnf9TKWa0Mfzhnl3KbhIIIbn215C
- ARi3nP1nHvRkCV3pbC6l/RbFHVDiXbpmn4BH5/ELAitMKTE32WI6nEWc5+XJ5qIrNzTpjWjAV
- 8tgDT8TNY646FMF4hNVdQ2XB7dvEvWVf28j9d9UAGJ+Rck9D/91KVUkXfvn2lOkdy/0RWINvi
- sZ8/Fjs8ELjReIWGAGKiLWHzqfRfO7EadQfSb/9504dzadVDV0Q1/nCyJ0+NN9WJd9o58o5iV
- +wZvGEOFGbj0+1p0nkVBj1OWkaCoiFFFXUiEQivgao3Oo=
+UI-OutboundReport: notjunk:1;M01:P0:aWtxkTefEKo=;UfjjvKDI4U4cHpSbJKyIAVYwLHI
+ qxcUOLvinek+jDolIMIqrCF6Blo0l3KfMyALyihFUTpBLFgXDBovnKEyYvbwgu9NAFz7tD4Fg
+ /g5Hms4zj19WpBSOaGMyeB6FtvUb1piXZDaBQsjHN7yqTa8uFqAsQqpZ8xGd+axr949kMm5Q9
+ 6qSi/k85czlNhheU2Is0lcGqMqnoft2FGUJanl/wTPVxAKRCBMPJ3BSVvTdwFUdGw1rPWrmvB
+ tBS1ryUffq0xHJFrLCrMBhD0CUsgpNduLLY1wbn+gD7ET42KRDApvWXFlsxmydIBDyu1BdauM
+ l0QebPKPJr0NDqe/aVSNH+zGOFxV2SelJ1eyngmxFQ40Ugf/u8fRbIAiTX3S9TZUnuOAb3OKC
+ cAD+kAr5dqjz4/HEQRFIKLD2Y8lWXaGUYngvghKSw4uR3Q895FO0AGUeg4pK2dwz+QJWDgJB3
+ +OY/5Ffb1lB5nXStsVFY91Jr5la12yOQB04RjZ5+zCWo0lD7xLAb6rjnplAe9UCfijzXy7sLO
+ iIe1XGw8ajK8rg34K4cdyRHOhQE7eR3hvpVz4Dy55bGK8aaeS4ZdlVsFIBeR7hHVO5OcwxW+g
+ OjTbDxbVr+kqLEZzjc6sFKkNNKbfA/CVF1FglabCK+mwypAGUb4GW0aUrW+OsFV/gT9itZocp
+ EWZVVQKKwBNKbipFvjCoAOVvAvbJfjJHh9XsnkbbW98z9htbayNV8KD6knj1o8a/06Oqruc7a
+ 02/Xz38aX7Vm4coNT0Bqla1Me9omOghzAvSo6al9nPfH7jef4r1oq/1u+qwdb4p+4Qbefi7fa
+ dtQ+YZ6KF35hktD7UJwrLB4MfbViby5Ce5Bcmff0HctsY=
 
-Am 01.03.24 um 05:36 schrieb Ping-Ke Shih:
->> -----Original Message-----
->> From: Ping-Ke Shih <pkshih@realtek.com>
->> Sent: Friday, March 1, 2024 10:33 AM
->> To: Fiona Klute <fiona.klute@gmx.de>; linux-wireless@vger.kernel.org
->> Cc: kvalo@kernel.org; ulf.hansson@linaro.org; linux-mmc@vger.kernel.org=
-; pavel@ucw.cz; megi@xff.cz
->> Subject: RE: [PATCH v2 5/9] wifi: rtw88: Add rtw8703b.c
->>
->>
->>
+Am 01.03.24 um 17:35 schrieb Fiona Klute:
+> Am 01.03.24 um 03:09 schrieb Ping-Ke Shih:
 >>> -----Original Message-----
 >>> From: Fiona Klute <fiona.klute@gmx.de>
 >>> Sent: Wednesday, February 28, 2024 7:55 AM
 >>> To: linux-wireless@vger.kernel.org; Ping-Ke Shih <pkshih@realtek.com>
->>> Cc: Fiona Klute <fiona.klute@gmx.de>; kvalo@kernel.org; ulf.hansson@li=
-naro.org;
->> linux-mmc@vger.kernel.org;
+>>> Cc: Fiona Klute <fiona.klute@gmx.de>; kvalo@kernel.org;
+>>> ulf.hansson@linaro.org; linux-mmc@vger.kernel.org;
 >>> pavel@ucw.cz; megi@xff.cz
->>> Subject: [PATCH v2 5/9] wifi: rtw88: Add rtw8703b.c
+>>> Subject: [PATCH v2 4/9] wifi: rtw88: Add rtw8703b.h
 >>>
+>>> This is the main header for the new rtw88_8703b chip driver.
+>>>
+>>> Acked-by: Ping-Ke Shih <pkshih@realtek.com>
+>>> Tested-by: Pavel Machek <pavel@ucw.cz>
+>>> Signed-off-by: Fiona Klute <fiona.klute@gmx.de>
+>>> ---
+>>> =C2=A0 drivers/net/wireless/realtek/rtw88/rtw8703b.h | 103 +++++++++++=
++++++++
+>>> =C2=A0 1 file changed, 103 insertions(+)
+>>> =C2=A0 create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8703b.=
+h
+>>>
+>>> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8703b.h
+>>> b/drivers/net/wireless/realtek/rtw88/rtw8703b.h
+>>> new file mode 100644
+>>> index 00000000000..69dac101d33
+>>> --- /dev/null
+>>> +++ b/drivers/net/wireless/realtek/rtw88/rtw8703b.h
+>>> @@ -0,0 +1,103 @@
+>>> +/* SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause */
+>>> +/* Copyright Fiona Klute <fiona.klute@gmx.de> */
 >>> +
->>> +#define TRANS_SEQ_END                  \
->>> +       {0xFFFF,                        \
->>> +        RTW_PWR_CUT_ALL_MSK,           \
->>> +        RTW_PWR_INTF_ALL_MSK,          \
->>> +        0,                             \
->>> +        RTW_PWR_CMD_END, 0, 0}
+>>> +#ifndef __RTW8703B_H__
+>>> +#define __RTW8703B_H__
+>>> +
+>>> +#include <linux/types.h>
+>>> +#include <linux/compiler_attributes.h>
 >>
->> Move this macro to main.h along with RTW_PWR_CUT_ALL_MSK.
+>> Removing these two headers can still compiled pass in my side. Please
+>> check why
+>> you need them.
 >
-> Think of this again, I prefer removing braces
-> #define TRANS_SEQ_END			\
-> 	 0xFFFF,			\
-> 	 RTW_PWR_CUT_ALL_MSK,		\
-> 	 RTW_PWR_INTF_ALL_MSK,		\
-> 	 0,				\
-> 	 RTW_PWR_CMD_END, 0, 0
+> If I remove them whether the code compiles depends on the order of
+> #includes. If some other header that includes those two is included
+> before rtw8703b.h it works, otherwise it will break. I don't think
+> that's desirable, though other rtw88 headers already behave that way
+> (e.g. main.h must be included before the others). Also, clangd will
+> complain about undefined types (u8, s8), which is less important but
+> still annoying when working on the code. So I'd prefer to keep the
+> includes.
 
-Okay, will do that. And it gets rid of the odd "tab plus space" indent
-for most of the definition. :-)
+Correction: Only the linux/types.h is needed for that, I can definitely
+remove the linux/compiler_attributes.h one.
 
