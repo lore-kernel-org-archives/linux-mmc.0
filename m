@@ -1,135 +1,171 @@
-Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 003D113F447;
-	Thu, 29 Feb 2024 20:29:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EFA22916;
+	Fri,  1 Mar 2024 00:45:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709238573; cv=none; b=agpULMY/5nE7y0dTHv04TkiMif9hY9fBR1diPfAjYXPQv+2OoqnhX9kJbuAYq61mmdcq7Wd0yGOGHlbA0NQkEtugoeuKjT4+YFqoEf7UbRcUq40r5JokW6RLM4RFhHYr+Z80WAvUOOuEUlNgj6vEGGLEcwhazmpEF8ioKYc/rhM=
+	t=1709253928; cv=none; b=smlClwzCAkXwaJy90AqwdNBIxblADk7vOTE9Cmcp0MOXmS4/VVZ1mKfW3DIHB0X7WnqK0EX5zVsk99XAwfNFy521kCLr3Pg35RyPaWNGnCJhoSk/ZFxbAgiuEyOjF51B5DA5QIoZn/qdB+N+p2/aBZzzX39dzwxtPAB5VESuvfE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709238573; c=relaxed/simple;
-	bh=wDnbbqB5aUHpb6fJcebChgfzTyYFaOf22lmLVESnSNw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=g/LyAcZT6b2vRZJHlp3m4xnKMLer2+Dqzb0L2rs0/pL2YDO5iRqYQFbYbltSc0r11eBiZeCdzrUH8OSX1eNHZXEUxMgDu2ADoxl599asIHyIkY6n0+vnTjEs6No0S3ymTgIkwocklbusSECdE6g098bc4UClV0wQi6dIDU0z+cQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iqTpmYdv; arc=none smtp.client-ip=209.85.214.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1709253928; c=relaxed/simple;
+	bh=iPFfVjiyS+z+zX5CZ63M9OT2EsMyB1aIKrlPflSfew0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=P9pxCWItSae3qO+wKPXdu3wDiemo7FJdaaUcHLO5/r4FEH1uJiWTBVKFACRkS+fBK62kKxLR0xOWYoXSX2zvTEy48AChdclbuFOAcmiKo6bi+txWeLiWqVd0SD10wXllDPWqj9FdWZqIN0BC2XmaSRBE2T8OZ75s0BkwKcFjJkM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=glzy6rzq; arc=none smtp.client-ip=212.227.17.22
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iqTpmYdv"
-Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-1db6e0996ceso11501605ad.2;
-        Thu, 29 Feb 2024 12:29:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1709238571; x=1709843371; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=xSz/dUHpTksrWDau7UTGPuG7xxZjtedv1CB25dUHJFg=;
-        b=iqTpmYdvp+NG9qIiDF/WH1KQVbK++HHWcuO+hdchIRnpptzJDDtDwwcYt0298AJO1d
-         CxaE8cwtEdk5cLvRjdotRVUmWK2ReeoBdsmmtc+5vTel8ksmRhVyB8ZF5FtIbPPnEqMF
-         VH2Otyzw4+p8Hyts/aJKQhQfAw8+RMKdCjC4ssPsXmEj2U0X2/aVZojMscMPYTZZ+Dkc
-         /bgc1bZkp6Kqb/IHfm/bXISSaI81t51CTr9VzZoBPt9VY+4OYL1vovJ/o6P+oWYNW+EB
-         6btPOfsIZOWeZ80JdkYKcKAEbDBujprcqtryBNcnbd/cNJPwHDP9CxD7FB/u2pRrjGdS
-         ukFg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709238571; x=1709843371;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=xSz/dUHpTksrWDau7UTGPuG7xxZjtedv1CB25dUHJFg=;
-        b=X3x1Rh5hPsWdBzeV9xNpowxNAtb9jUpeP0+DDxJzrF35b/f0eptKIAzYbdVgR52VQI
-         wElMk8NYJudQ/5Ml113IFCVXx4dJFyqh1mrrL7R3us1no8qxoRHMY79EPwGKCjaDf6qu
-         Q7vsEVrLDY/dlO8h86HTwL0pDO9XKoQhsv9wh5WeupP7hUC2SWhteCA8kL4bIIkbDdvc
-         r30e6yjvvBMd3/7r08ozkQlLOM3sF7aCkOnMeMziwbrMV7la52TSoA7T6fpZD1W5Worc
-         bF9LW+4T3f9JK0Rj2qZ558gseHoafzn3CzDIYk9Ow/f929Pkm/JPTOmZ9eEwkZxWVZmC
-         Q9rg==
-X-Forwarded-Encrypted: i=1; AJvYcCWbop5Pgh6RP1aYbET+O0t9VKQJzNEB/XZXBzzHvWBqG7WHZxt1DYx2q0GPaBW1J47s1yKByGbxYl0cbfG/JIkSDaAy4UVLZFPFFfTRLW1J2gaMDwIqX4WYjs8jgKnzcCPqO8sbL3xr/2qlPlD4CL77m3yjJ9HESmDFdM9Cn7Q8QI9osdiHX9Q30nt4aBOR3wy5XttVP7zFj5eZMw==
-X-Gm-Message-State: AOJu0YynPHGr+J8QDwq1O01gKLDYveqAXk9DdgQR2KPK054JrxVPZQBW
-	AGhhDNeDFGUiMaJWnRA/91prsn/eC/2k/p37lVyUe9YqkDuz1dP/bbdGpNo/m5o=
-X-Google-Smtp-Source: AGHT+IEl3W5R3KIqZYg3g66+tVVU2vPgDmNnOp/Ux0a8p2pYOCsVOCjZol70UqtEdVEfLXXhxBd/8A==
-X-Received: by 2002:a17:903:1208:b0:1d8:f129:a0bc with SMTP id l8-20020a170903120800b001d8f129a0bcmr3441334plh.13.1709238571238;
-        Thu, 29 Feb 2024 12:29:31 -0800 (PST)
-Received: from localhost ([2620:10d:c090:400::5:8305])
-        by smtp.gmail.com with ESMTPSA id kx4-20020a170902f94400b001d9aa663282sm1926375plb.266.2024.02.29.12.29.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 29 Feb 2024 12:29:30 -0800 (PST)
-Sender: Tejun Heo <htejun@gmail.com>
-Date: Thu, 29 Feb 2024 10:29:29 -1000
-From: Tejun Heo <tj@kernel.org>
-To: Xiongwei Song <xiongwei.song@windriver.com>
-Cc: longman@redhat.com, lizefan.x@bytedance.com, hannes@cmpxchg.org,
-	corbet@lwn.net, vbabka@suse.cz, yosryahmed@google.com,
-	rostedt@goodmis.org, cl@linux.com, chengming.zhou@linux.dev,
-	zhengyejian1@huawei.com, cgroups@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] cgroup/cpuset: Mark memory_spread_slab as obsolete
-Message-ID: <ZeDpKRX3mQqcoFJx@slm.duckdns.org>
-References: <20240229142007.1278610-1-xiongwei.song@windriver.com>
- <20240229142007.1278610-2-xiongwei.song@windriver.com>
+	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="glzy6rzq"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.de; s=s31663417;
+	t=1709253909; x=1709858709; i=fiona.klute@gmx.de;
+	bh=iPFfVjiyS+z+zX5CZ63M9OT2EsMyB1aIKrlPflSfew0=;
+	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
+	 In-Reply-To;
+	b=glzy6rzqBxlSyZPTxw2OMqIib6HPouZDMyti9ffdQESB78Ix8lz897CkZP0UxPKI
+	 079/Ahuq4rtJAW89FGH1vh1Uqhl4uhfL7jcRGJTCDnlYzepbfj8l+FvljeFC21Fnb
+	 8hvhOdHI9lvRPoahhfrLBWtWCf7WfbKyubZqFTGC+3SeBq2SD8i/vBH2A6oAPz/lP
+	 VCL9oa0yX3YS4HnTDy8zSZdXAdH89QtTCGrAf9feLAIqcqBLWWGc3UfGsY2Il5yiS
+	 ycaPuXcsGRFaTqpG2JPhcoAcf2JuQkPmwoe1nMCUvLkMb5l2xPK69PEKm+1dDHBO5
+	 JW3W3XsNwhb/QDvhfA==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [192.168.7.2] ([85.22.24.88]) by mail.gmx.net (mrgmx104
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1MeCtj-1r8AMd3TTb-00bLT5; Fri, 01
+ Mar 2024 01:45:08 +0100
+Message-ID: <31dd8a43-0df0-4f1b-905d-67b1a63fab0e@gmx.de>
+Date: Fri, 1 Mar 2024 01:45:07 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240229142007.1278610-2-xiongwei.song@windriver.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 0/9] rtw88: Add support for RTL8723CS/RTL8703B
+To: Ping-Ke Shih <pkshih@realtek.com>,
+ "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
+Cc: "kvalo@kernel.org" <kvalo@kernel.org>,
+ "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "pavel@ucw.cz" <pavel@ucw.cz>, "megi@xff.cz" <megi@xff.cz>
+References: <20240227235507.781615-1-fiona.klute@gmx.de>
+ <61980d74cdb24dd38a2f2e12c79125e2@realtek.com>
+Content-Language: de-DE, en-US
+From: Fiona Klute <fiona.klute@gmx.de>
+Autocrypt: addr=fiona.klute@gmx.de; keydata=
+ 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
+In-Reply-To: <61980d74cdb24dd38a2f2e12c79125e2@realtek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:6PcTm6Fh8aYDLmh74+2lb1msevuTwX2ZP2YMNnEAOMmjth0L9ib
+ +YKc93qxRv8SoiSfxLbijeyUMhQnfx/IIkdKj+5V7ujrv4VPNsA8IRZ/WvsMEsniAUMcVEb
+ e5jq77kkK0qEThtbeLQtmTo8O+qTrdgHkpKSteXqLerYkABZPDRSiz7v8CCotrvh9fbDbEo
+ SY1O4iYpTUQrOtXkg5GxA==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:E9b/1G2qFNA=;qhuHNpW6hAC/u2uHTq1IJbW1Y7D
+ ogxomcqGdaoFCHHNhb3WvFFzpxLJdg49DakKHDrD2MOi5BnQKPJ3d8n7KTJ/4mSHALVxTM54L
+ yoWKt4gTatOk/QClK9YYV5HcwocOxgJcYfSMmtops4V7F4W0AleUiamBTz3qNqafN6H1G+miX
+ 95rRU0kTkUzG4zqaP8nqvgCdlUEha3Nkw///XNAsMGb7lskuV5Es4UL/zeKQ3XauhdPvPmJ61
+ oAAvmeOjYEPXha0tH0IXzOSs/GETe+md3MOAZkFaG62NYOMXOE3qc5DlhpChu6pX/iz46wsfW
+ Q7viF9yELFqlOC2cFgtcoBwltgRAUSboGWYph9sUSGov6mkmX8oqsXF287J0cbnBr2tmH/KpY
+ 0v5O0HsUH3JGNojaTTKv9jMvBHuBqbEas8Gqq5+7TVQa6RxsJH40yzcnwU93EQo3H9yxfjosg
+ c1vSWJAznjY8l3tjH57vFGufxnkbW3SxkBUlNV44iE8LqmhplXGlXfoKXbw+kRBvoFuovuzJH
+ QIUDRlqJ0GZMnaCez0qUBZ2Wcf4boYmbQ8BhD3t/XWv2OaQFjYrvb90ydgOH+608icWQLC0H+
+ PiacYBnb85hDPOgMdOL3W7FYzjzyM3WPv8lDKIXPzZi7i6l13Y+/ERybrbOfn5ouZrvkUpEBL
+ YW+nn13B0XGD21rayfT0ZXcfDO3MNcZs1nu1wmGFzTZjquv/5HTx1cOvI4NLFxjbFlpXWjHdU
+ 5j3bIObjL1PTZ3YCRW+P2JdGBNANx9koBBBsKGoICp/v+2BCYzmWypDwH4vzYmT2hchF1rcGo
+ FVqHA1HrZJV3WqybVWXCULdqa2nNqlDOpGItord7FlYfw=
 
-Hello,
+Am 29.02.24 um 07:40 schrieb Ping-Ke Shih:
+>
+>
+>> -----Original Message-----
+>> From: Fiona Klute <fiona.klute@gmx.de>
+>> Sent: Wednesday, February 28, 2024 7:55 AM
+>> To: linux-wireless@vger.kernel.org; Ping-Ke Shih <pkshih@realtek.com>
+>> Cc: Fiona Klute <fiona.klute@gmx.de>; kvalo@kernel.org; ulf.hansson@lin=
+aro.org; linux-mmc@vger.kernel.org;
+>> pavel@ucw.cz; megi@xff.cz
+>> Subject: [PATCH v2 0/9] rtw88: Add support for RTL8723CS/RTL8703B
+>>
+>
+> [...]
+>
+>>
+>> v2:
+>>    * Parse PHY status using struct instead of macros
+>>    * Prefer MAC from EFUSE if available, move retrieving MAC from DT to
+>>      a separate function
+>>    * Tidy up wait for IQK to be done, replace mdelay loop with
+>>      read_poll_timeout
+>>    * Set dual author for rtw88_8723x
+>>    * Add missing "static" to rtw8723x function declarations, fixes
+>>      build failure when not built as a module
+>>    * Various style fixes
+>
+> You have some changes by v2, so I think you don't need to take my ack-by=
+ for
+> those patches. Then, it will be easier for me to review patches you have
+> changed.
 
-Applied to cgroup/for-6.9 with some adjustments.
+Sorry, I thought I was supposed to keep them unless I make larger, not
+requested changes.
 
-Thanks.
+> Anyway, could you point out patches I should pay attention? Or I will re=
+view
+> entire patchset one-by-one.
 
------ 8< -----
-From 3ab67a9ce82ff22447b1dad53b49a91d1abbf1ff Mon Sep 17 00:00:00 2001
-From: Xiongwei Song <xiongwei.song@windriver.com>
-Date: Thu, 29 Feb 2024 22:20:07 +0800
-Subject: [PATCH] cgroup/cpuset: Mark memory_spread_slab as obsolete
+The bigger changes are all in rtw8703b.h (patch 4; the PHY status struct
+instead of macros) and rtw8703b.c (patch 5; PHY status parsing, MAC
+address retrieval, and IKQ done wait). The PHY status struct is
+basically the same as in the vendor driver, I just resolved some macro
+detours for big/little endian detection and spelled out "reserved" in
+field names.
 
-We've removed the SLAB allocator, cpuset_do_slab_mem_spread() and
-SLAB_MEM_SPREAD, memory_spread_slab is a no-op now. We can mark
-memory_spread_slab as obsolete in case someone still wants to use it after
-cpuset_do_slab_mem_spread() removed. For more details, please check [1].
+Changes in the other patches are minimal: additional MODULE_AUTHOR in
+rtw8723x.c, missing "static"s in rtw8723x.c and rtw8723x.h, formatting,
+and using rtw_read8_mask in the firmware reset (patch 6).
 
-[1] https://lore.kernel.org/lkml/32bc1403-49da-445a-8c00-9686a3b0d6a3@redhat.com/T/#m8e292e21b00f95a4bb8086371fa7387fa4ea8f60
-
-tj: Description and cosmetic updates.
-
-Signed-off-by: Xiongwei Song <xiongwei.song@windriver.com>
-Acked-by: Waiman Long <longman@redhat.com>
-Signed-off-by: Tejun Heo <tj@kernel.org>
----
- Documentation/admin-guide/cgroup-v1/cpusets.rst | 2 +-
- kernel/cgroup/cpuset.c                          | 1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/Documentation/admin-guide/cgroup-v1/cpusets.rst b/Documentation/admin-guide/cgroup-v1/cpusets.rst
-index ae646d621a8a..7d3415eea05d 100644
---- a/Documentation/admin-guide/cgroup-v1/cpusets.rst
-+++ b/Documentation/admin-guide/cgroup-v1/cpusets.rst
-@@ -179,7 +179,7 @@ containing (on top of the standard cgroup files) the following
-  - cpuset.mem_hardwall flag:  is memory allocation hardwalled
-  - cpuset.memory_pressure: measure of how much paging pressure in cpuset
-  - cpuset.memory_spread_page flag: if set, spread page cache evenly on allowed nodes
-- - cpuset.memory_spread_slab flag: if set, spread slab cache evenly on allowed nodes
-+ - cpuset.memory_spread_slab flag: OBSOLETE. Doesn't have any function.
-  - cpuset.sched_load_balance flag: if set, load balance within CPUs on that cpuset
-  - cpuset.sched_relax_domain_level: the searching range when migrating tasks
- 
-diff --git a/kernel/cgroup/cpuset.c b/kernel/cgroup/cpuset.c
-index ba36c073304a..c940cf01b148 100644
---- a/kernel/cgroup/cpuset.c
-+++ b/kernel/cgroup/cpuset.c
-@@ -3897,6 +3897,7 @@ static struct cftype legacy_files[] = {
- 	},
- 
- 	{
-+		/* obsolete, may be removed in the future */
- 		.name = "memory_spread_slab",
- 		.read_u64 = cpuset_read_u64,
- 		.write_u64 = cpuset_write_u64,
--- 
-2.43.2
+Best regards,
+Fiona
 
