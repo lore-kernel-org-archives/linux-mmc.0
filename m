@@ -1,38 +1,59 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37AA710E5;
-	Sat,  2 Mar 2024 00:57:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 379483D0B9;
+	Mon,  4 Mar 2024 14:30:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709341054; cv=none; b=QAA1aCb4v1xYPmfeyT15ibOlsckXjmqI5ozhdIwV8pwkUkL/j00i/tS/Kqm75fyL3Wupq/c8o3Wsz3OuAMs8oE3qTro0tkKXo/qWbA4wEyjwfBsT6IrLfKiXnU7zJPI2hOm7ShqOH1Etb467652bK/qijHcZG2ATBycPwZdp6zY=
+	t=1709562611; cv=none; b=bMMDBnZAOsZhKw868cSmFJSvB5ggtS1W/AUA/iGAvonYa+e7u/mLaFbYnDTEv1VvBCC0LC5SuU9qzOoJ/7LyhgYeXuuyDugDPLE1q8KhfHlAaarappB0OQaWBqgeKY+IPg9mi7rzaY7zXxZ3mmexYqzclyj89KZiKI5n6sznCZ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709341054; c=relaxed/simple;
-	bh=HdjjSZHkIvezioP3p22iivT1Q2zoquV3UXNTsY218Lc=;
+	s=arc-20240116; t=1709562611; c=relaxed/simple;
+	bh=nTO2OCoo9G+3aqJUlUJAn6Le+vn7Wle4pGPdiba3p3A=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=KaHSewNQHdMHukDeaFhU6TA6uJRayEwAqUA/0ZWzvTXwtEo3jqtVFh5EvV6k2O+QIgJCwPDq7r2rgNt9JFBD9hx8pszf07b2bST5MJHPa/rYOxj39qiq6jqkB3aRKTrbxioAKfTZCNXUQlzFP715/4vfDn95kAs8Wd8zoPWSZwY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=MWCI2s7w; arc=none smtp.client-ip=212.227.17.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
+	 In-Reply-To:Content-Type; b=f9avIWf+GHF+l66ULdIHUNMmDEmxKkvNgLIZupdUi/Hhj+wJcPwo99r+iGjYXZZzs5r/McfwBGm3K9qqgKUBlLfwjE5umfy/BttiRIYrbSz33EIBPIqRNUSOoVhG3nGtVDM7XHyQ2zN5DDKYiKjkWdsp2iTTagV2K5gSldQNasw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MC3i64YA; arc=none smtp.client-ip=209.85.167.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="MWCI2s7w"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.de; s=s31663417;
-	t=1709341036; x=1709945836; i=fiona.klute@gmx.de;
-	bh=HdjjSZHkIvezioP3p22iivT1Q2zoquV3UXNTsY218Lc=;
-	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
-	 In-Reply-To;
-	b=MWCI2s7wg+n6j7NQP/zVJbNyR8XX5NsPO24CBFPr16esADJ7TD5VGJa7eSmxbVOP
-	 Y9FN5jOD5uoFDNSdnjkFaPZ8a/MIO5u/Atm6aQQsr1X5n48DLkgim0bA6nxzMWgcL
-	 ZBKibpj7a8aDZCB9TDVqc5dvmZnZcQR7isDbwymJGxyWjz2EczZSG2npLqUyB/Ndu
-	 QPjfm17Mwc0TUtstdbKjdsN1ZX7HsZaK6P0l7PJPmKvA784dWeMMHsEaw0/bi2reD
-	 59GaziX10bNzp8tqWp1hC/oWKeGI1d6wVidWbJ3MoCa4y+XiSKdNeLOwwaPBG0C8M
-	 o5XgBDpCQjF63lT9YA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.7.2] ([85.22.26.244]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MGz1f-1rbUit06L5-00E8UO; Sat, 02
- Mar 2024 01:57:16 +0100
-Message-ID: <66a094b4-da4a-4211-ad9e-8c21cabe32cc@gmx.de>
-Date: Sat, 2 Mar 2024 01:57:14 +0100
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MC3i64YA"
+Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-512f54fc2dbso3739278e87.1;
+        Mon, 04 Mar 2024 06:30:08 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1709562607; x=1710167407; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=b96Fa0n7lJYYYfYP8LJufQCu8NcjICu5pK/smx6fPJ4=;
+        b=MC3i64YAwvzMNjcVRJnJG9+QSBvWrboUXZeuoVqel9XI4q4BSa41Ge2BE5b0BxLsvQ
+         nx7inrC0K1TdOuIuoHD79+XpRodCiJs5AtcTuAGF3xvTMaAR3ImOq2YvZhqpC1t/LzUn
+         elwzCHbaBZ3PDK17Y5hYUVUpFMJvSBRohijGEekXnD+/e8TDVxahKT7n0uHdexugD/3N
+         SM9klu4yt8yjFep+svQnbearjEbBuQaIXO1eGem74vXgwoqjRbdbNgoTbxLURAnbCMVM
+         owuK7z3ajoOcmxB8qs5uBZ2yB71qwi2yObwut0eexx32BuhCTXnurRVBvVn51i5rDSl3
+         leoQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709562607; x=1710167407;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=b96Fa0n7lJYYYfYP8LJufQCu8NcjICu5pK/smx6fPJ4=;
+        b=XGl2B16vEBYY+KNS74N3FQEJiyOBstd17NSvPYI4z4ThLzAA+kifEriUlmlqsNP4Oj
+         LBC3HkTjAymNy7ANCJZFSmu6k9nLtDscsW4R68sX9xnBKu5x5V8s4C4kiVIiFWB170+r
+         QR9JyXJ3NXKfsDTD5D+wEZzodK5qWWzfBREwBu9Qx/9b57bckFBZRD5omVnIRO4AY3Ud
+         Kr/YlT0aS0EHca2vXfo2HlAafeIIK2L4iDc71txiguOt5U9zEIksdW+xiRUZQFCjzunz
+         KRlrjQa3qCpEPWsA3Bk4N7BSd77a0R5wYJ4a5Jj/RbFYr/xrgKlKTEcvCEibn/tu5dHq
+         XWhA==
+X-Forwarded-Encrypted: i=1; AJvYcCWQuIXegl1iaY4YYxscHnzOe9mLrppL4tN5sjDU5idUqha0oYJj97q7wmvbawivQbA2KR2ntw7JFIzNS2D3kDnrf8QC/2Az1S3S
+X-Gm-Message-State: AOJu0YzYVIaWkN6hHtfmw34ViopUx0xG00jw//efgYgNRkngLjzwf1LS
+	5nxPwph8VuvE9s4OiI4iITwaggw6Kk3nxpB8B0Tv0bGz+OCitY7z
+X-Google-Smtp-Source: AGHT+IEI67EwIKKimur0K9NcYcnCRXIA/XCA16okEDStPcTssLZxiZcSCdG0p4qTedWtdUaCnY4mRA==
+X-Received: by 2002:ac2:4102:0:b0:512:a943:a0c3 with SMTP id b2-20020ac24102000000b00512a943a0c3mr5219080lfi.57.1709562607091;
+        Mon, 04 Mar 2024 06:30:07 -0800 (PST)
+Received: from [172.17.59.219] (avpn01.yadro.com. [89.207.88.243])
+        by smtp.gmail.com with ESMTPSA id be15-20020a056512250f00b005131cafecc0sm1746986lfb.25.2024.03.04.06.30.06
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 04 Mar 2024 06:30:06 -0800 (PST)
+Message-ID: <72c67d56-ea70-4348-b1a0-895c319b3aef@gmail.com>
+Date: Mon, 4 Mar 2024 17:30:05 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,152 +61,326 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 4/9] wifi: rtw88: Add rtw8703b.h
-To: Ping-Ke Shih <pkshih@realtek.com>,
- "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
-Cc: "kvalo@kernel.org" <kvalo@kernel.org>,
- "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
- "pavel@ucw.cz" <pavel@ucw.cz>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- "megi@xff.cz" <megi@xff.cz>
-References: <20240227235507.781615-1-fiona.klute@gmx.de>
- <20240227235507.781615-5-fiona.klute@gmx.de>
- <368ebc04c2ec436791a27b5661189783@realtek.com>
- <db9e7f0d-a60f-467b-82df-da6170d02151@gmx.de>
- <613176601db939f6e078b398c4207b6cd279b120.camel@realtek.com>
-Content-Language: de-DE, en-US
-From: Fiona Klute <fiona.klute@gmx.de>
-Autocrypt: addr=fiona.klute@gmx.de; keydata=
- xsFNBFrLsicBEADA7Px5KipL9zM7AVkZ6/U4QaWQyxhqim6MX88TxZ6KnqFiTSmevecEWbls
- ppqPES8FiSl+M00Xe5icsLsi4mkBujgbuSDiugjNyqeOH5iqtg69xTd/r5DRMqt0K93GzmIj
- 7ipWA+fomAMyX9FK3cHLBgoSLeb+Qj28W1cH94NGmpKtBxCkKfT+mjWvYUEwVdviMymdCAJj
- Iabr/QJ3KVZ7UPWr29IJ9Dv+SwW7VRjhXVQ5IwSBMDaTnzDOUILTxnHptB9ojn7t6bFhub9w
- xWXJQCsNkp+nUDESRwBeNLm4G5D3NFYVTg4qOQYLI/k/H1N3NEgaDuZ81NfhQJTIFVx+h0eT
- pjuQ4vATShJWea6N7ilLlyw7K81uuQoFB6VcG5hlAQWMejuHI4UBb+35r7fIFsy95ZwjxKqE
- QVS8P7lBKoihXpjcxRZiynx/Gm2nXm9ZmY3fG0fuLp9PQK9SpM9gQr/nbqguBoRoiBzONM9H
- pnxibwqgskVKzunZOXZeqyPNTC63wYcQXhidWxB9s+pBHP9FR+qht//8ivI29aTukrj3WWSU
- Q2S9ejpSyELLhPT9/gbeDzP0dYdSBiQjfd5AYHcMYQ0fSG9Tb1GyMsvh4OhTY7QwDz+1zT3x
- EzB0I1wpKu6m20C7nriWnJTCwXE6XMX7xViv6h8ev+uUHLoMEwARAQABzSBGaW9uYSBLbHV0
- ZSA8ZmlvbmEua2x1dGVAZ214LmRlPsLBlAQTAQgAPgIbIwULCQgHAwUVCgkICwUWAgMBAAIe
- AQIXgBYhBOTTE4/i2fL6gVL9ke6nJs4hI1pYBQJkNTaZBQkNK+tyAAoJEO6nJs4hI1pY3qwQ
- AKdoJJHZpRu+C0hd10k6bcn5dr8ibqgsMHBJtFJuGylEsgF9ipWz1rMDWDbGVrL1jXywfwpR
- WSeFzCleJq4D0hZ5n+u+zb3Gy8fj/o3K/bXriam9kR4GfMVUATG5m9lBudrrWAdI1qlWxnmP
- WUvRSlAlA++de7mw15guDiYlIl0QvWWFgY+vf0lR2bQirmra645CDlnkrEVJ3K/UZGB0Yx67
- DfIGQswEQhnKlyv0t2VAXj96MeYmz5a7WxHqw+/8+ppuT6hfNnO6p8dUCJGx7sGGN0hcO0jN
- kDmX7NvGTEpGAbSQuN2YxtjYppKQYF/macmcwm6q17QzXyoQahhevntklUsXH9VWX3Q7mIli
- jMivx6gEa5s9PsXSYkh9e6LhRIAUpnlqGtedpozaAdfzUWPz2qkMSdaRwvsQ27z5oFZ0dCOV
- Od39G1/bWlY+104Dt7zECn3NBewzJvhHAqmAoIRKbYqRGkwTTAVNzAgx+u72PoO5/SaOrTqd
- PIsW5+d/qlrQ49LwwxG8YYdynNZfqlgc90jls+n+l3tf35OQiehVYvXFqbY7RffUk39JtjwC
- MfKqZgBTjNAHYgb+dSa7oWI8q6l26hdjtqZG+OmOZEQIZp+qLNnb0j781S59NhEVBYwZAujL
- hLJgYGgcQ/06orkrVJl7DICPoCU/bLUO8dbfzsFNBGQ1Nr0BEADTlcWyLC5GoRfQoYsgyPgO
- Z4ANz31xoQf4IU4i24b9oC7BBFDE+WzfsK5hNUqLADeSJo5cdTCXw5Vw3eSSBSoDP0Q9OUdi
- PNEbbblZ/tSaLadCm4pyh1e+/lHI4j2TjKmIO4vw0K59Kmyv44mW38KJkLmGuZDg5fHQrA9G
- 4oZLnBUBhBQkPQvcbwImzWWuyGA+jDEoE2ncmpWnMHoc4Lzpn1zxGNQlDVRUNnRCwkeclm55
- Dz4juffDWqWcC2NrY5KkjZ1+UtPjWMzRKlmItYlHF1vMqdWAskA6QOJNE//8TGsBGAPrwD7G
- cv4RIesk3Vl2IClyZWgJ67pOKbLhu/jz5x6wshFhB0yleOp94I/MY8OmbgdyVpnO7F5vqzb1
- LRmfSPHu0D8zwDQyg3WhUHVaKQ54TOmZ0Sjl0cTJRZMyOmwRZUEawel6ITgO+QQS147IE7uh
- Wa6IdWKNQ+LGLocAlTAi5VpMv+ne15JUsMQrHTd03OySOqtEstZz2FQV5jSS1JHivAmfH0xG
- fwxY6aWLK2PIFgyQkdwWJHIaacj0Vg6Kc1/IWIrM0m3yKQLJEaL5WsCv7BRfEtd5SEkl9wDI
- pExHHdTplCI9qoCmiQPYaZM5uPuirA5taUCJEmW9moVszl6nCdBesG2rgH5mvgPCMAwsPOz9
- 7n+uBiMk0ZSyTQARAQABwsF8BBgBCAAmFiEE5NMTj+LZ8vqBUv2R7qcmziEjWlgFAmQ1Nr0C
- GwwFCQPCZwAACgkQ7qcmziEjWlgY/w//Y4TYQCWQ5eWuIbGCekeXFy8dSuP+lhhvDRpOCqKt
- Wd9ywr4j6rhxdS7FIcaSLZa6IKrpypcURLXRG++bfqm9K+0HDnDHEVpaVOn7SfLaPUZLD288
- y8rOce3+iW3x50qtC7KCS+7mFaWN+2hrAFkLSkHWIywiNfkys0QQ+4pZxKovIORun+HtsZFr
- pBfZzHtXx1K9KsPq9qVjRbKdCQliRvAukIeTXxajOKHloi8yJosVMBWoIloXALjwCJPR1pBK
- E9lDhI5F5y0YEd1E8Hamjsj35yS44zCd/NMnYUMUm+3IGvX1GT23si0H9wI/e4p3iNU7n0MM
- r9aISP5j5U+qUz+HRrLLJR7pGut/kprDe2r3b00/nttlWyuRSm+8+4+pErj8l7moAMNtKbIX
- RQTOT31dfRQRDQM2E35nXMh0Muw2uUJrldrBBPwjK2YQKklpTPTomxPAnYRY8LVVCwwPy8Xx
- MCTaUC2HWAAsiG90beT7JkkKKgMLS9DxmX9BN5Cm18Azckexy+vMg79LCcfw/gocQ4+lQn4/
- 3BjqSuHfj+dXG+qcQ9pgB5+4/812hHog78dKT2r8l3ax3mHZCDTAC9Ks3LQU9/pMBm6K6nnL
- a4ASpGZSg2zLGIT0gnzi5h8EcIu9J1BFq6zRPZIjxBlhswF6J0BXjlDVe/3JzmeTTts=
-In-Reply-To: <613176601db939f6e078b398c4207b6cd279b120.camel@realtek.com>
+Subject: Re: [PATCH v5 2/2] mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+Content-Language: en-US
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+ Shawn Lin <shawn.lin@rock-chips.com>, Jyan Chou <jyanchou@realtek.com>
+References: <20231231144619.758290-1-serghox@gmail.com>
+ <20231231144619.758290-3-serghox@gmail.com>
+ <8eecede9-23b6-48dd-90e2-68e1f2722830@intel.com>
+From: Sergey Khimich <serghox@gmail.com>
+In-Reply-To: <8eecede9-23b6-48dd-90e2-68e1f2722830@intel.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:VbOVg0wjykTRwnN+1uyG4R7eIQOAAifA84Ajlr7vjqMW8/Xtxxn
- teGIFbCdPYbS1gYO3nLfNFkvpaRK4jrhMHgUSQ0E5kOLE1iuJA2OpxZOx6ytkQ1ZqSLEb1i
- qikeeR0gj/GDjDiAToD6NR8hVDcomdXbOdhO4I7bhb7RWKt9V/sTaX3tJZh2uQmAuMxcsZN
- oCe6iOLaZDimFWR/Kch2w==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:iobTZX3IJn4=;ZQCqfKybbpJtLyrK3/du4VFL5FQ
- wnqF5ipVT3CW7IjcWEhX3MZfwjywj8bO/sBVttyhBgRnYvZcJ2xIuR1n6qqf9u9ALBUT4vc4b
- QtMQDdQMCavYA1+rkf+MYEjyhMyoVqnFqY0YuP/eOQmOZRYJt+s1adryUnRF7TQ1BdfFQ1hT2
- xf1arIuMcUZbVBCbD2QVPpSfwg0XRjk6vakBrt4zCaiRZoRmtSUBdsNEEXiKDuIAPZ+MzfUqh
- dBN4Hk8btJYp5BSQBtFFIUJ6iuxVKgYY0VSClQ81XSkjSGXXjd4A3qnNwTLoQ7pTRQ/EpshLx
- ir0hGo2rfZDLvUxXEIqM4bekBm/jCuCXW9eOETBj7EL93ss1YBqEB0hCT9t+Fz0OIOkrniLKi
- M43+8jhHSlEcSo1w4DVrYThkK6kJFASWCzsZmHLmuY596crbkuU6gjwDU5vjd+RDq8PsIwz1L
- lCFtJmKkTzHMdah1wzNuAFJA0Zg3isHk6jqs/jaLf+3+MuJ/pyiZLiolkfA7grotWbWmJNjS7
- XZhLVD1Q1S7VVMzrVLAGIviqG+rI9+XIyIsmnhRdGn5VxwtxXJ4F/FPpTwUV8ik8K5mIY8jl3
- yiRRnQ1IUlHwPMYnJ1LWLWxwN9ZfgE5q2NR7wwRATZ7+b2orBWNOAhRS6z8qUf119l1NgyvXM
- G2Jp2V86C72Is4wfhAg0R2Wltu+wPWX17K5WI/KSjwcai4PWXXuCf/ply4GdpVr5lCiGc+x84
- w51Q9QYeYJPj6bTeIKTNNboDsYwSPKLSC1wf6aHR2HJsUK5T8dw76h0pek/8iD1kY62k3iLEj
- U9ynou9tIJw1sevBLk9ve3tn6LmVg+cYpM0eoN6WdB13c=
+Content-Transfer-Encoding: 7bit
 
-Am 02.03.24 um 01:33 schrieb Ping-Ke Shih:
-> On Fri, 2024-03-01 at 17:35 +0100, Fiona Klute wrote:
+Hello Adrian!
+
+Sorry for the late reply. Thanks for the comments - I`ll fix the next 
+patch set version.
+
+On 03.01.2024 21:52, Adrian Hunter wrote:
+> On 31/12/23 16:46, Sergey Khimich wrote:
+>> From: Sergey Khimich <serghox@gmail.com>
 >>
->> Am 01.03.24 um 03:09 schrieb Ping-Ke Shih:
->>>> +++ b/drivers/net/wireless/realtek/rtw88/rtw8703b.h
->>>> @@ -0,0 +1,103 @@
->>>> +/* SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause */
->>>> +/* Copyright Fiona Klute <fiona.klute@gmx.de> */
->>>> +
->>>> +#ifndef __RTW8703B_H__
->>>> +#define __RTW8703B_H__
->>>> +
->>>> +#include <linux/types.h>
->>>> +#include <linux/compiler_attributes.h>
->>>
->>> Removing these two headers can still compiled pass in my side. Please =
-check why
->>> you need them.
+>> For enabling CQE support just set 'supports-cqe' in your DevTree file
+>> for appropriate mmc node.
 >>
->> If I remove them whether the code compiles depends on the order of
->> #includes. If some other header that includes those two is included
->> before rtw8703b.h it works, otherwise it will break. I don't think
->> that's desirable, though other rtw88 headers already behave that way
->> (e.g. main.h must be included before the others). Also, clangd will
->> complain about undefined types (u8, s8), which is less important but
->> still annoying when working on the code. So I'd prefer to keep the incl=
-udes.
+>> Signed-off-by: Sergey Khimich <serghox@gmail.com>
+>> ---
+>>   drivers/mmc/host/Kconfig            |   1 +
+>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 181 +++++++++++++++++++++++++++-
+>>   2 files changed, 180 insertions(+), 2 deletions(-)
 >>
->>> By the way, rtw8723d.h does
->>>      #include "rtw8723x.h"
->>>
->>> Can we use the same stuff?
->>
->> I don't think so. The vendor driver has different code paths: With 8723=
-D
->> it takes one for "PHYSTS_2ND_TYPE_IC" [1], with 8703B the one for
->> "ODM_IC_11N_SERIES" a few lines below. For those "2nd type" ICs there
->> are different structs depending on the page number
->> (phy_sts_rpt_jgr2_type[0-2]), while the "11N series" ones always use
->> phy_status_rpt_8192cd (all defined in [2]).
->>
->> However, the mainline rtlwifi driver has an equivalent struct called
->> "phy_status_rpt" in
->> drivers/net/wireless/realtek/rtlwifi/rtl8723be/trx.h. I don't know if
->> sharing such definitions between different drivers is desirable. If yes=
-,
->> please let me know where the header should go.
->>
->> [1]
->> https://xff.cz/git/linux/tree/drivers/staging/rtl8723cs/hal/phydm/phydm=
-_phystatus.c?h=3Dorange-pi-6.7#n3142
->> [2]
->> https://xff.cz/git/linux/tree/drivers/staging/rtl8723cs/hal/phydm/phydm=
-_phystatus.h?h=3Dorange-pi-6.7
->>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 58bd5fe4cd25..f7594705b013 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -233,6 +233,7 @@ config MMC_SDHCI_OF_DWCMSHC
+>>   	depends on MMC_SDHCI_PLTFM
+>>   	depends on OF
+>>   	depends on COMMON_CLK
+>> +	select MMC_CQHCI
+>>   	help
+>>   	  This selects Synopsys DesignWare Cores Mobile Storage Controller
+>>   	  support.
+>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>> index 3a3bae6948a8..0ba1df4bcf36 100644
+>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>> @@ -20,6 +20,7 @@
+>>   #include <linux/sizes.h>
+>>   
+>>   #include "sdhci-pltfm.h"
+>> +#include "cqhci.h"
+>>   
+>>   #define SDHCI_DWCMSHC_ARG2_STUFF	GENMASK(31, 16)
+>>   
+>> @@ -36,6 +37,9 @@
+>>   #define DWCMSHC_ENHANCED_STROBE		BIT(8)
+>>   #define DWCMSHC_EMMC_ATCTRL		0x40
+>>   
+>> +/* DWC IP vendor area 2 pointer */
+>> +#define DWCMSHC_P_VENDOR_AREA2		0xea
+>> +
+>>   /* Rockchip specific Registers */
+>>   #define DWCMSHC_EMMC_DLL_CTRL		0x800
+>>   #define DWCMSHC_EMMC_DLL_RXCLK		0x804
+>> @@ -75,6 +79,11 @@
+>>   #define BOUNDARY_OK(addr, len) \
+>>   	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+>>   
+>> +#define DWCMSHC_SDHCI_CQE_TRNS_MODE	(SDHCI_TRNS_MULTI | \
+>> +					 SDHCI_TRNS_BLK_CNT_EN | \
+>> +					 SDHCI_TRNS_DMA)
+>> +
+>> +
+>>   enum dwcmshc_rk_type {
+>>   	DWCMSHC_RK3568,
+>>   	DWCMSHC_RK3588,
+>> @@ -90,7 +99,9 @@ struct rk35xx_priv {
+>>   
+>>   struct dwcmshc_priv {
+>>   	struct clk	*bus_clk;
+>> -	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
+>> +	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA1 reg */
+>> +	int vendor_specific_area2; /* P_VENDOR_SPECIFIC_AREA2 reg */
+>> +
+>>   	void *priv; /* pointer to SoC private stuff */
+>>   };
+>>   
+>> @@ -210,6 +221,90 @@ static void dwcmshc_hs400_enhanced_strobe(struct mmc_host *mmc,
+>>   	sdhci_writel(host, vendor, reg);
+>>   }
+>>   
+>> +static int dwcmshc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>> +{
+>> +	int err = sdhci_execute_tuning(mmc, opcode);
+>> +	struct sdhci_host *host = mmc_priv(mmc);
+>> +
+>> +	if (err)
+>> +		return err;
+>> +
+>> +	/*
+>> +	 * Tuning can leave the IP in an active state (Buffer Read Enable bit
+>> +	 * set) which prevents the entry to low power states (i.e. S0i3). Data
+>> +	 * reset will clear it.
+>> +	 */
+>> +	sdhci_reset(host, SDHCI_RESET_DATA);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static u32 dwcmshc_cqe_irq_handler(struct sdhci_host *host, u32 intmask)
+>> +{
+>> +	int cmd_error = 0;
+>> +	int data_error = 0;
+>> +
+>> +	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>> +		return intmask;
+>> +
+>> +	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static void dwcmshc_sdhci_cqe_enable(struct mmc_host *mmc)
+>> +{
+>> +	struct sdhci_host *host = mmc_priv(mmc);
+>> +	u8 ctrl;
+>> +
+>> +	sdhci_writew(host, DWCMSHC_SDHCI_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
+>> +
+>> +	sdhci_cqe_enable(mmc);
+>> +
+>> +	/*
+>> +	 * The "DesignWare Cores Mobile Storage Host Controller
+>> +	 * DWC_mshc / DWC_mshc_lite Databook" says:
+>> +	 * when Host Version 4 Enable" is 1 in Host Control 2 register,
+>> +	 * SDHCI_CTRL_ADMA32 bit means ADMA2 is selected.
+>> +	 * Selection of 32-bit/64-bit System Addressing:
+>> +	 * either 32-bit or 64-bit system addressing is selected by
+>> +	 * 64-bit Addressing bit in Host Control 2 register.
+>> +	 *
+>> +	 * On the other hand the "DesignWare Cores Mobile Storage Host
+>> +	 * Controller DWC_mshc / DWC_mshc_lite User Guide" says, that we have to
+>> +	 * set DMA_SEL to ADMA2 _only_ mode in the Host Control 2 register.
+>> +	 */
+>> +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>> +	ctrl &= ~SDHCI_CTRL_DMA_MASK;
+>> +	ctrl |= SDHCI_CTRL_ADMA32;
+>> +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>> +}
+>> +
+>> +static void dwcmshc_set_tran_desc(struct cqhci_host *cq_host, u8 **desc,
+>> +				  dma_addr_t addr, int len, bool end, bool dma64)
+>> +{
+>> +	int tmplen, offset;
+>> +
+>> +	if (likely(!len || BOUNDARY_OK(addr, len))) {
+>> +		cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+>> +		return;
+>> +	}
+>> +
+>> +	offset = addr & (SZ_128M - 1);
+>> +	tmplen = SZ_128M - offset;
+>> +	cqhci_set_tran_desc(*desc, addr, tmplen, false, dma64);
+>> +
+>> +	addr += tmplen;
+>> +	len -= tmplen;
+>> +	*desc += cq_host->trans_desc_len;
+>> +	cqhci_set_tran_desc(*desc, addr, len, end, dma64);
+>> +}
+>> +
+>> +static void dwcmshc_cqhci_dumpregs(struct mmc_host *mmc)
+>> +{
+>> +	sdhci_dumpregs(mmc_priv(mmc));
+>> +}
+>> +
+>>   static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock)
+>>   {
+>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> @@ -345,6 +440,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+>>   	.get_max_clock		= dwcmshc_get_max_clock,
+>>   	.reset			= sdhci_reset,
+>>   	.adma_write_desc	= dwcmshc_adma_write_desc,
+>> +	.irq			= dwcmshc_cqe_irq_handler,
+>>   };
+>>   
+>>   static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
+>> @@ -379,6 +475,71 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+>>   		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>>   };
+>>   
+>> +static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
+>> +	.enable		= dwcmshc_sdhci_cqe_enable,
+>> +	.disable	= sdhci_cqe_disable,
+>> +	.dumpregs	= dwcmshc_cqhci_dumpregs,
+>> +	.set_tran_desc	= dwcmshc_set_tran_desc,
+>> +};
+>> +
+>> +static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *pdev)
+>> +{
+>> +	struct cqhci_host *cq_host;
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>> +	bool dma64 = false;
+>> +	u16 clk;
+>> +	int err;
+>> +
+>> +	host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+>> +	cq_host = devm_kzalloc(&pdev->dev, sizeof(*cq_host), GFP_KERNEL);
+>> +	if (!cq_host) {
+>> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: not enough memory\n");
+>> +		return;
+>> +	}
+>> +
+>> +	/*
+>> +	 * For dwcmshc host controller we have to enable internal clock
+>> +	 * before access to some registers from Vendor Specific Aria 2.
+> Aria -> Area
 >
-> Sorry for confusing. I meant to remove
->     #include <linux/types.h>
->     #include <linux/compiler_attributes.h>
-> and to add
->     #include "rtw8723x.h"
-> like rtw8723d.h does after this patchset, not reference to vendor driver=
-.
-
-Oh yes, that makes sense. Thanks for the clarification, I'll do that.
-
-Best regards,
-Fiona
-
+>> +	 */
+>> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>> +	clk |= SDHCI_CLOCK_INT_EN;
+>> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>> +	if (!(clk & SDHCI_CLOCK_INT_EN)) {
+>> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: internal clock enable error\n");
+>> +		goto free_cq_host;
+>> +	}
+>> +
+>> +	cq_host->mmio = host->ioaddr + priv->vendor_specific_area2;
+>> +	cq_host->ops = &dwcmshc_cqhci_ops;
+>> +
+>> +	/* Enable using of 128-bit task descriptors */
+>> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+>> +	if (dma64) {
+>> +		dev_dbg(mmc_dev(host->mmc), "128-bit task descriptors\n");
+>> +		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+>> +	}
+>> +	err = cqhci_init(cq_host, host->mmc, dma64);
+>> +	if (err) {
+>> +		dev_err(mmc_dev(host->mmc), "Unable to setup CQE: error %d\n", err);
+>> +		goto int_clock_disable;
+>> +	}
+>> +
+>> +	dev_dbg(mmc_dev(host->mmc), "CQE init done\n");
+>> +
+>> +	return;
+>> +
+>> +int_clock_disable:
+>> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>> +	clk &= ~SDHCI_CLOCK_INT_EN;
+>> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>> +
+>> +free_cq_host:
+>> +	devm_kfree(&pdev->dev, cq_host);
+>> +}
+>> +
+>> +
+>>   static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+>>   {
+>>   	int err;
+>> @@ -471,7 +632,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>   	struct rk35xx_priv *rk_priv = NULL;
+>>   	const struct sdhci_pltfm_data *pltfm_data;
+>>   	int err;
+>> -	u32 extra;
+>> +	u32 extra, caps;
+>>   
+>>   	pltfm_data = device_get_match_data(&pdev->dev);
+>>   	if (!pltfm_data) {
+>> @@ -519,9 +680,12 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>   
+>>   	priv->vendor_specific_area1 =
+>>   		sdhci_readl(host, DWCMSHC_P_VENDOR_AREA1) & DWCMSHC_AREA1_MASK;
+>> +	priv->vendor_specific_area2 =
+>> +		sdhci_readw(host, DWCMSHC_P_VENDOR_AREA2);
+> Is this OK for all IPs? ie. do they all have DWCMSHC_P_VENDOR_AREA2 register?
+Good question. Actually I can't guarantee that all dwcmshc-like IPs have 
+DWCMSHC_P_VENDOR_AREA2 register,
+because I`ve tested my patch only on my pre-selicon FPGA prototype.
+But on the other hand according to the documentation I have, CQE-related 
+registers are placed within this
+vendor2 block register. And thanks to Shawn Lin we know, Rockchip SoCs 
+with this IP also have this reg.
+As I understand CQE for dwcmshc-like IPs will not work without 
+DWCMSHC_P_VENDOR_AREA2.
+>
+>>   
+>>   	host->mmc_host_ops.request = dwcmshc_request;
+>>   	host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
+>> +	host->mmc_host_ops.execute_tuning = dwcmshc_execute_tuning;
+>>   
+>>   	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
+>>   		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
+>> @@ -547,6 +711,10 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>   		sdhci_enable_v4_mode(host);
+>>   #endif
+>>   
+>> +	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+>> +	if (caps & SDHCI_CAN_64BIT_V4)
+>> +		sdhci_enable_v4_mode(host);
+>> +
+>>   	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>>   
+>>   	pm_runtime_get_noresume(dev);
+>> @@ -557,6 +725,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>   	if (err)
+>>   		goto err_rpm;
+>>   
+>> +	/* Setup Command Queue Engine if enabled */
+>> +	if (device_property_read_bool(&pdev->dev, "supports-cqe")) {
+>> +		if (caps & SDHCI_CAN_64BIT_V4)
+>> +			dwcmshc_cqhci_init(host, pdev);
+>> +		else
+>> +			dev_warn(dev, "Cannot enable CQE without V4 mode support\n");
+>> +	}
+>> +
+>> +
+> Double blank line.
+>
+>>   	if (rk_priv)
+>>   		dwcmshc_rk35xx_postinit(host, priv);
+>>   
