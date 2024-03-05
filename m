@@ -1,117 +1,96 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9BD5662160
-	for <linux-mmc@vger.kernel.org>; Mon,  4 Mar 2024 20:12:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3291E55E58
+	for <linux-mmc@vger.kernel.org>; Tue,  5 Mar 2024 10:44:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709583146; cv=none; b=HBQAnjhSBHRtTNppFEJd9Z1e7jgCVknxfT7Vf6LY9HgYk6XHvKVqVd423B33ES/cmtJZmem4Ip7TU0Q6Gj7xKvE+siZrlfsDFLmoZa2O7JNn/ujqEyWvlCyjt5w94dre/EdzN+76Ns7SnT897wdhINMqRJpY0iDeM7oRy+k3zN4=
+	t=1709635484; cv=none; b=Go6FqL+GNdUwnrpFjmACcK43M1KrXjYZIsH+XZ6RUOQy5zBLDc9BQi2FZAjrKWbDNN3qIh4GFKcQGT6s/snvVQcP3LBNMTvRTBEnfUL50MOuS7AXaU1kvEfajx8oma2e7v792MbgAWXHt73yVeJ6aaGUgjaTU7PU6NYM8kYOzu8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709583146; c=relaxed/simple;
-	bh=9e1w14lVhFmrPtPSUWZqcNue3UJPDbsF7j742qbsVu4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PXB1RoTfCsXxgyJiPWJ+eO5ydbZbfmVF7xiOY4j0q+0J53aVj/7L990FSwePAi+lmrKBA8jP4a/bdz4iBcbe9WtkkO3Z2HHQZq4P7GVABfGGkJIF6AJGGMBvukaa+xMExxPDDH1vbeoqHXf7tn0aV4qaKCBNuSRwAQDXnxdu+o4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JmKDPuZd; arc=none smtp.client-ip=209.85.219.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1709635484; c=relaxed/simple;
+	bh=QeHrKsgsTP2nrj7upJ4BboKEwdaU/NwMM1tn9hOgY5w=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=eFX1ZVKjkc1eK7Z41079FcqystDGwV04GWCOwofyhJV6i4I441JMpdMzLKq7BrFUBf+3Uu5q2Yo3oa99WN1KhplBka2B3Jzn/dS6fF0LDkkycKNFRMEM7IC4ZQYXDs41DvwX12Wnt0dWmOMVjJ7jZABuuvV9dKuwKOE5gvpHnME=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=k94ZMr/X; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JmKDPuZd"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-db3a09e96daso4331813276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Mar 2024 12:12:24 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1709583143; x=1710187943; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IAiT61kggRPd5YDuiyv4v5ZMae/k0uuT4kkoEq4NmCU=;
-        b=JmKDPuZdkUWp65KnSpv+MevYQv7eI0Yc74bY4zjpl44bdDZRCCWZH4hcq/1WBcSCa2
-         KHoMBEVM6w6wWILhtMEWU57DVieWgKXcpETKgsfPOiAmTAsjtTu5InqbRRy2aPq2IX7b
-         jktsmts4LCGkTELXlCDqzrrb1Z353AVpXg21lT0H13XThZMGYKRwO2v1YPo2CL7jJx0E
-         NGhwvQcaJ7XPRQrUBf3lYND916eaqV1ai95g2IFpiDLDarzA9aUACOZm2Ym+MH2l53Ma
-         P08i6rPvY5PbMpCjbaXF8D0Ooo4lM56wjFqaRVGj8wElyDSUa4ls4VeVhpXc1bup/kEK
-         yjvg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709583143; x=1710187943;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=IAiT61kggRPd5YDuiyv4v5ZMae/k0uuT4kkoEq4NmCU=;
-        b=pjBg+72SUgQyGsDCi7nU2PSl71UQoRJXxR88sU3fgdHrIIEx8tWRBbhRuSbaYBc8eU
-         E8tU9ef2EfB58vejcY52vXJLXVmr25QPHY5Najf4EeXLQgCl7bAm92oqDKoI11Tgxi2e
-         j/7PdHFeftVM54/xtqeul5KuiPqHuq9jusSAlHdToQtibTau6CEdmFY9OdWryIH9Vpw8
-         QZOIA5yqcbv/sFZLmE+ZOrCiCkZ3e4xYxsif6Yym6yamZ7q5Hqcm6BZRslveWCrWmHg4
-         FTeuuiOaGaHQEcfBtzQXsxIGKFw7/g6g/BbADbnVQzp2jt/SKqt4tTRDeBGI+kJwBVEb
-         M12Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXYrVNlXuyagxn2GM1U9XKRVmpTbCSKqxgoRKOJG5YA4PhociIVW+E7/HEk01envqvYv9+iUIgtSgyf+hj/BYp2XgehBq7Fwq0Q
-X-Gm-Message-State: AOJu0YwyNA4aYUAvPvegnlT54RIymZ9JfbUftOFjH7eTgwH7F+yRrQtQ
-	s1MUZpRqNPutQvmC4d91LHWg06VfzyOg1IkWEEf/2kbrUvrilH1UW2S2a+aQNwJs1UqLT5LcuVw
-	sTqAYuK2JN/FempDiIEQJSvu2wC4zSTAA/feYQg==
-X-Google-Smtp-Source: AGHT+IEqPJr4eKDnDYSeNoerMYFKAQrjzVTavb++7VXTSjtLAfm4FVFMvf/uNcNvjlfalWRr+qEPl3nwmkUNiNJTO9E=
-X-Received: by 2002:a25:5f51:0:b0:dc6:be64:cfd1 with SMTP id
- h17-20020a255f51000000b00dc6be64cfd1mr7740725ybm.36.1709583143696; Mon, 04
- Mar 2024 12:12:23 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="k94ZMr/X"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=from:to:cc:subject:date:message-id
+	:mime-version:content-transfer-encoding; s=k1; bh=kgcjcX6n1YPrYY
+	QV0p8f+mPuuBgvuJhzdYh16iDnb6A=; b=k94ZMr/XRFWNL0orq+NEkPMuA8wz7o
+	+zr4AFlGnFpMsrWa7oA4Huzgh2ayeBeV88149SiQgRrynirm7cBwabv4ATcLbp5R
+	JK3plXuEZyXgs3TLYS3SWXTiUa1rzEGF7jOMlA0cHa1IA9bPD/JKUKaXSot40UVs
+	O22+u1K+n3qo9FyTPGdEsha3zCak58CaIBZBRdgZxAetUk3OKqxQ4Xmewf9Zu1wo
+	XjYNR5DO5JU4xNZCKzZTTvZCJ0S4CiKT8MneGiuaoFBU/rx9mEYFcdSc2eFa2yX+
+	FXcOV69z8zoDkyg76d7bIGauOOgYkWE8Xcw1jrP4R0VuCc1slpVmsDCw==
+Received: (qmail 3843203 invoked from network); 5 Mar 2024 11:44:32 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 5 Mar 2024 11:44:32 +0100
+X-UD-Smtp-Session: l3s3148p1@OPH+hucS0sggAwDPXyskAOYD60938Lkb
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Dirk Behme <dirk.behme@de.bosch.com>,
+	stable@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Chris Ball <cjb@laptop.org>,
+	Guennadi Liakhovetski <g.liakhovetski@gmx.de>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: tmio: avoid concurrent runs of mmc_request_done()
+Date: Tue,  5 Mar 2024 11:42:56 +0100
+Message-ID: <20240305104423.3177-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240304175606.1200076-1-andriy.shevchenko@linux.intel.com>
-In-Reply-To: <20240304175606.1200076-1-andriy.shevchenko@linux.intel.com>
-From: Sam Protsenko <semen.protsenko@linaro.org>
-Date: Mon, 4 Mar 2024 14:12:12 -0600
-Message-ID: <CAPLW+4nqhMdiVNjZ+HJykBN6pSrZmwaeG6CHxfBTZ=-zwheVJA@mail.gmail.com>
-Subject: Re: [PATCH v1 1/1] mmc: dw_mmc: Remove unused of_gpio.h
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Yangtao Li <frank.li@vivo.com>, linux-mmc@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, 
-	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Mon, Mar 4, 2024 at 11:56=E2=80=AFAM Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
->
-> of_gpio.h is deprecated and subject to remove.
-> The driver doesn't use it, simply remove the unused header.
->
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
+With the to-be-fixed commit, the reset_work handler cleared 'host->mrq'
+outside of the spinlock protected critical section. That leaves a small
+race window during execution of 'tmio_mmc_reset()' where the done_work
+handler could grab a pointer to the now invalid 'host->mrq'. Both would
+use it to call mmc_request_done() causing problems (see link below).
 
-Reviewed-by: Sam Protsenko <semen.protsenko@linaro.org>
+However, 'host->mrq' cannot simply be cleared earlier inside the
+critical section. That would allow new mrqs to come in asynchronously
+while the actual reset of the controller still needs to be done. So,
+like 'tmio_mmc_set_ios()', an ERR_PTR is used to prevent new mrqs from
+coming in but still avoiding concurrency between work handlers.
 
->  drivers/mmc/host/dw_mmc-exynos.c | 1 -
->  drivers/mmc/host/dw_mmc.c        | 1 -
->  2 files changed, 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-e=
-xynos.c
-> index 698408e8bad0..6dc057718d2c 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -11,7 +11,6 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/of.h>
-> -#include <linux/of_gpio.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/slab.h>
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 829af2c98a44..8e2d676b9239 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -35,7 +35,6 @@
->  #include <linux/bitops.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/of.h>
-> -#include <linux/of_gpio.h>
->  #include <linux/mmc/slot-gpio.h>
->
->  #include "dw_mmc.h"
-> --
-> 2.43.0.rc1.1.gbec44491f096
->
->
+Reported-by: Dirk Behme <dirk.behme@de.bosch.com>
+Closes: https://lore.kernel.org/all/20240220061356.3001761-1-dirk.behme@de.bosch.com/
+Fixes: df3ef2d3c92c ("mmc: protect the tmio_mmc driver against a theoretical race")
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Dirk Behme <dirk.behme@de.bosch.com>
+Reviewed-by: Dirk Behme <dirk.behme@de.bosch.com>
+Cc: stable@vger.kernel.org # 3.0+
+---
+
+Change since v1/RFT: added Dirk's tags and stable tag
+
+@Ulf: this is nasty, subtle stuff. Would be awesome to have it in 6.8
+already!
+
+ drivers/mmc/host/tmio_mmc_core.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index be7f18fd4836..c253d176db69 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -259,6 +259,8 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ 	else
+ 		mrq->cmd->error = -ETIMEDOUT;
+ 
++	/* No new calls yet, but disallow concurrent tmio_mmc_done_work() */
++	host->mrq = ERR_PTR(-EBUSY);
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+ 
+-- 
+2.43.0
+
