@@ -1,107 +1,110 @@
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60E9485C58;
-	Tue,  5 Mar 2024 13:48:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04C6F86122
+	for <linux-mmc@vger.kernel.org>; Tue,  5 Mar 2024 14:16:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709646510; cv=none; b=gekcDNBEhdXdPqRrk+7jJ4f6Isla7GeAxuB7g4XpsV5qW5a5wadyoCpK0BbKDAtXA4dHzePPA87pFf0zLF7Ef0eJI4bKtFAs314R/+w0tvwgOVlY9mJJc+794GqyAw3G7pQk7SpljPOBccBMlc7/Z5RLZgNquokZJqkxfXnHgFE=
+	t=1709648208; cv=none; b=N0cWDNcF3gNlCJNbR20p1/tB3BIwdOo+mvE4v88qxJ3i4Qp8X2tN34A4HoUaZi7nuHUvuZm8cU6/srEYLqwYncsAYrKJlBG3ajhs2dGVoffSyYYF9vneMz8dxLkaQ7DNmYG/qAvEfccdoe1vy5GzhUCrRgnlX0WO7bT4UHYIsdA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709646510; c=relaxed/simple;
-	bh=Kf2biJnuyrvpVTL0uTyY/d1ul1jGIFCNbllznSFarhk=;
+	s=arc-20240116; t=1709648208; c=relaxed/simple;
+	bh=5e8RyFZB6uK5xAt4LzJ2CHaCyI7HgnYjNdG/wsdLGUY=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ThJLqD6V+HqbPrLJs7TamG+mNHiC+A6BAlienHTyymCNTdZPvcmwbjsEId7Bf0KhJsk2F3lnsSx4TbZAtgXAd3BWZjqe0QtHjX3kr6uRodA2yLcB7qluVrnh7RvilaMiMBP5tEBbLPE0vBZNq2ysPGYrBAc1gRf1DuIQCI+Nle0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.219.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-dc74e33fe1bso5406124276.0;
-        Tue, 05 Mar 2024 05:48:28 -0800 (PST)
+	 To:Cc:Content-Type; b=sq7Mp4kFLM6C5mEghG0tGU/lYlHKB9IlaEUoX5dMRqT5+BAu0XHbfs8CPTTsxRq7NVZtLZN0OJxo2tG9ZqtQ+gw2gArT0R/oeZ1juIUMAYVoLlThJwxJJ9T/N4FpojWRwpQdPTC+vN3RgVITGjtUWN9Blq2xwsO9wM+2kdOgXDE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XnihEjqw; arc=none smtp.client-ip=209.85.219.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XnihEjqw"
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-dc74e33fe1bso5446082276.0
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Mar 2024 06:16:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1709648206; x=1710253006; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2pH6ao14eXyStRIsXpQqXQUUaYQVBQF/CrmMchFPm6Y=;
+        b=XnihEjqwoNincZDOGc7DDbRrAG+oiem+1EXxR1OumtK6iUVjcpJhAY9mYx10W/JICj
+         nmLE9KqCx7bySQd1IvWLT8CqVACTiB1hHr0Jtr68uQdpn0POcA/MWO99EpI++G2/TcAS
+         2wSvhQ16/jGfYQe2VZnuBtahW4ipNRpkeBvuKLq/ZMOeaoAher8AS4gZBLnO4nYVN5O5
+         1MmnNh7tXNFRRmZR1GUznkJ58eA1y+j/9K6hMdKVHvidAQ5WBdL2PLVTEyOxDO+L0il/
+         C2PWb4qaQP/9glmeMO4TAAhxKDZt86mrCOilDNmwPPZ8nEWClx9Y2p0b6vnos4zb1SIn
+         TSkg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709646506; x=1710251306;
+        d=1e100.net; s=20230601; t=1709648206; x=1710253006;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=xa6eXUUE0pChqHQpQRAEU0D+PWfnG0pG7bmLlZjpoqU=;
-        b=m1AO4TWlnLC7zItMuwRpjmwseo1UFB/1+wwu6umX+/mfuScXIc/roKmb/ZI1vNi3W5
-         2wm1wgcNVIlyhQK5PQZLhVqGVNnQcfz+vI1hQhjgdtk/pTcGxaMN0QEVBMXl+eUV8BlD
-         YDMC3FHKKqzElLAgqh5vrCupWtZ/rMnhd6D+UVlLtQTULRG88NpGdJW7UzZeN/DaZ1ZW
-         0+atKmk45O3Oh8cd+p60/LVinYeMRk+tkBQjFIR9y3FGOom4ah4WUKrXdvOQ/9F2H5MT
-         PhWgNHHJAImlSP+KqgKwo9oDGzsugdnBDc3aqeRE+AUeQ2BfgkO+TXeSQRBTvEDGPfdO
-         kf5g==
-X-Forwarded-Encrypted: i=1; AJvYcCVZKRG6YqTSNH8AA9ZHLqUZUEkf+3S0mWQQGVKziGFCQpm2p0MM4c6Chtjem6p52wmHztm624784ygNxZlc+oO0l2CC7RO0hykO2Gd3oeJKfmpGVWmqHUmRdWEe97sIOwM8Iz7FSFaxo+T8cdZByyEx8NmDBOsFmlDjZixEuWiF
-X-Gm-Message-State: AOJu0YwmDl7oZmy3YJ//kxPvbW+OSdqirLDQw/KS/ORmwe3Uakzfd+Gq
-	iMI/ZTLjiayXs4B02TMWIAcsZcgoDr7ztGaiEPfaRL7Q7OoQQ2djZBpTzdrzqyU=
-X-Google-Smtp-Source: AGHT+IEQy6GGHoGqLk6uwk8ZNW45BRZT3ywA20T6HVZbUPu/S1lIdBnk0x2oO9lDy6GmpV8iOhS5Lw==
-X-Received: by 2002:a25:d614:0:b0:dcc:3a3:9150 with SMTP id n20-20020a25d614000000b00dcc03a39150mr9622468ybg.22.1709646506286;
-        Tue, 05 Mar 2024 05:48:26 -0800 (PST)
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com. [209.85.128.180])
-        by smtp.gmail.com with ESMTPSA id g1-20020a259341000000b00dc6a0898efasm2583054ybo.15.2024.03.05.05.48.25
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 05 Mar 2024 05:48:26 -0800 (PST)
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-608ccac1899so60551187b3.1;
-        Tue, 05 Mar 2024 05:48:25 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCXXsLNAptFE3QxHu1GTuhf/xv+YKoec3ceF8yAwPjwargLz5+FzFHjscXwR8Qm8POuxKEO/rz40JY169h+L7MXPzCU8FLpAIkdNhJonQj3dyT6xl6dQkoe/vZspes63xIXv7iF+rPZDIsAPLVm8mNeY5s/6ycyMnNs+UfCq0AHW
-X-Received: by 2002:a25:6a86:0:b0:dcc:f5d4:8b43 with SMTP id
- f128-20020a256a86000000b00dccf5d48b43mr8483801ybc.9.1709646505511; Tue, 05
- Mar 2024 05:48:25 -0800 (PST)
+        bh=2pH6ao14eXyStRIsXpQqXQUUaYQVBQF/CrmMchFPm6Y=;
+        b=jARbZ/S++T6cBdyLW6PguNDHkioXcyyfCygqcFUEbC9MmrYFpEEUnEpi1RmxGC+85S
+         3xptN2quGzgWZgxS+QigSl60v6A+TifDcnE/lNKj+jeTt/6G7mF4RODBJZiwe9D23EJR
+         rJ+fM/zU14PtZfXBLIgajGdTZy279aUVZNuPHKzPK7qfOpg3OzJSgyWXPnYm6bnOltlg
+         dmgFeNM6tKK/RG07DLMCkFoA7ezx9UQtINzG6nnGIw9IXlYiABQJbc1oJ/jrML6H/0qX
+         3G64R03ApFmjs3UlIYFs7OZ5rTLjHYzcFFg4uZJ8UUXPVIyJLxt8uS7UTE6wbsl95Rcn
+         2OnQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVLZ8xTTo5G31CNJI+ACLxu5fC8yE5zF2lH0cJ8rwr1zJf2KblJ+TljriSEV5QUJ1Q4v+FWFLVuRkgwqPxSjubTNmdq/tWaMv6e
+X-Gm-Message-State: AOJu0YympCETIu4GGjad0hgOcJs4wpGCikBsc38u47A/ZUnr9sHyY2kI
+	5HV6ySs3niqidCbIy8HnybJ6dgI9DwR6TuwFbI/mj7dr+0kWM4U9WI64iNeFK4BlauW2rgEwCwy
+	IttPoINsU3VGbk1anb0E2DZVJQlxXgw2XdHCISg==
+X-Google-Smtp-Source: AGHT+IF0QE2eCgnKzPX7Lzulyl8LNxaoMkz8j136SkagCThiX4WET+LmP/hJRSwK65wX3P+LcjLSWXZvzp6Wx9/mLO0=
+X-Received: by 2002:a05:6902:250d:b0:dcd:5187:a032 with SMTP id
+ dt13-20020a056902250d00b00dcd5187a032mr10587042ybb.43.1709648205832; Tue, 05
+ Mar 2024 06:16:45 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240305104423.3177-2-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20240305104423.3177-2-wsa+renesas@sang-engineering.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Tue, 5 Mar 2024 14:48:12 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdV-PTyydtuMjP0dFkAGSKT2av7Vn5s-xJE8u=SkqrNkDw@mail.gmail.com>
-Message-ID: <CAMuHMdV-PTyydtuMjP0dFkAGSKT2av7Vn5s-xJE8u=SkqrNkDw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: tmio: avoid concurrent runs of mmc_request_done()
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, 
-	stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+References: <20240227153132.2611499-1-jens.wiklander@linaro.org>
+ <20240227153132.2611499-2-jens.wiklander@linaro.org> <CACRpkdbhhZ9+Jy_tvWy1RSnyZMjqUhh0ARpS+WRtgWTH3AYCPw@mail.gmail.com>
+ <PH7PR11MB7605493349915A168A80CDD8E5222@PH7PR11MB7605.namprd11.prod.outlook.com>
+In-Reply-To: <PH7PR11MB7605493349915A168A80CDD8E5222@PH7PR11MB7605.namprd11.prod.outlook.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Tue, 5 Mar 2024 15:16:34 +0100
+Message-ID: <CACRpkdaOnbUmk1q_BBWkPYGriNHfZBUmGxtH+sQmw6U0rxicMg@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To: "Winkler, Tomas" <tomas.winkler@intel.com>
+Cc: Jens Wiklander <jens.wiklander@linaro.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
+	"op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Mar 5, 2024 at 11:54=E2=80=AFAM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> With the to-be-fixed commit, the reset_work handler cleared 'host->mrq'
-> outside of the spinlock protected critical section. That leaves a small
-> race window during execution of 'tmio_mmc_reset()' where the done_work
-> handler could grab a pointer to the now invalid 'host->mrq'. Both would
-> use it to call mmc_request_done() causing problems (see link below).
+On Tue, Mar 5, 2024 at 1:54=E2=80=AFPM Winkler, Tomas <tomas.winkler@intel.=
+com> wrote:
+
+> > On Tue, Feb 27, 2024 at 4:31=E2=80=AFPM Jens Wiklander <jens.wiklander@=
+linaro.org>
+> > wrote:
+> >
+> > > +struct rpmb_frame {
+> > > +       u8     stuff[196];
+> > > +       u8     key_mac[32];
+> > > +       u8     data[256];
+> > > +       u8     nonce[16];
+> > > +       __be32 write_counter;
+> > > +       __be16 addr;
+> > > +       __be16 block_count;
+> > > +       __be16 result;
+> > > +       __be16 req_resp;
+> > > +} __packed;
+> >
+> > I didn't quite get why these things are encoded big-endian?
 >
-> However, 'host->mrq' cannot simply be cleared earlier inside the
-> critical section. That would allow new mrqs to come in asynchronously
-> while the actual reset of the controller still needs to be done. So,
-> like 'tmio_mmc_set_ios()', an ERR_PTR is used to prevent new mrqs from
-> coming in but still avoiding concurrency between work handlers.
->
-> Reported-by: Dirk Behme <dirk.behme@de.bosch.com>
-> Closes: https://lore.kernel.org/all/20240220061356.3001761-1-dirk.behme@d=
-e.bosch.com/
-> Fixes: df3ef2d3c92c ("mmc: protect the tmio_mmc driver against a theoreti=
-cal race")
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Tested-by: Dirk Behme <dirk.behme@de.bosch.com>
-> Reviewed-by: Dirk Behme <dirk.behme@de.bosch.com>
-> Cc: stable@vger.kernel.org # 3.0+
+> By the spec.
 
-Thanks, I gave it a boot run on all boards in my farm, no issues seen.
-Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
+So a kerneldoc comment above the struct with a reference to the spec
+it is mirroring should be appropriate?
 
-Gr{oetje,eeting}s,
+As it stands now it will be misunderstood by people like me as "just some
+other Linux struct".
 
-                        Geert
-
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+Yours,
+Linus Walleij
