@@ -1,55 +1,55 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FF695A119
-	for <linux-mmc@vger.kernel.org>; Tue,  5 Mar 2024 12:24:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 007185B681
+	for <linux-mmc@vger.kernel.org>; Tue,  5 Mar 2024 12:29:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709641457; cv=none; b=uX2zW4LW4H1Oi93R7rpxye6hb0KAfD+c8gbKAiYaSSBKmwDK4RamCJgMzBN6PBsVNRYHhI6vC5KU0Kq5OMu+i22A8eYxTJGL+m1V5KxF3Bt9KRgxQy0kuChCBwgdnz3MnoOd4JCLSdf2AE5Q+8sjo3SMpntkOQWuEtk9kpK8LY8=
+	t=1709641791; cv=none; b=gYmZMDHOKO1VjSOcMwrr3fRi9yksCOq1Rbk5JvwTtzDhY8xumDS0wzTHRgxfALlzaETGkyGXRfTcn971jABUPVv/VhF31ai8bSHKI+ElTW+bAf79WmgGqfgPcaP1wmFxQsNUoM302LwwQG0hm7lnGaOOVmgjF7DsTn0voFfesLs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709641457; c=relaxed/simple;
-	bh=CS3p1MBudwYKblcteI/2NOPXI4ddkTXb99n7xdy/Gb4=;
+	s=arc-20240116; t=1709641791; c=relaxed/simple;
+	bh=ayZBI8lVp/BWzkFGNvW228CHOibWeTInhSFUMyfIloA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jHvno4eZwRVUp9bORdfsi1q6dzitaWSAGSBA2aCMub6flNjHCc7HkcNJdS7/ZfaOoZwI8mlsZoLEQPPIpJPVH8NvZ/2498cri36hRIpp9dapNAOZxk/PK/MMN8Xr5jLBztVx82qWOwDeTuk4+Uz3emPVhWjpqbDA8QhGE/t3PKQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XQJHsty3; arc=none smtp.client-ip=209.85.128.176
+	 To:Cc:Content-Type; b=Twu2PpcREVZKKHku2kND4cPVkJ4Ob0SOSX9uci/pTnkVhrcXDn0XDilnCqL80s5QhNnCNMlxhk/cLClbl+OXPKZ6eRnSaR+TfhemaqaHNiKur6x6T6FJZGfLII/hdRVcFkVY2BB308iQFWNV1yCOKT1pkDGi8Wz5+nr2IIHZpFU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=J650lcTV; arc=none smtp.client-ip=209.85.128.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XQJHsty3"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-60978479651so51357147b3.3
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Mar 2024 04:24:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="J650lcTV"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-6098ba9959aso6801177b3.2
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Mar 2024 04:29:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1709641454; x=1710246254; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1709641789; x=1710246589; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=CgWnngIT/gJ2CN/6Q6lG/bumlZMowmI03npuEMQCBAM=;
-        b=XQJHsty32one0Z/DC+DOsBj888PoIR9MgaSaINszUAU6nMN/yoYHrQZJ0BUbKiJO2+
-         hMycc3VXUJsXbYnmIenlWBjNLs7UmNNcP5yOkcu/+4347xOz1bdwiEuJZZqmFdUAAQV3
-         A3xE0EPQWIqki7bGqVUlzV65K3RrC7BZAAYvn1Hpk4RhX5Z20Z3RKL5AZcMdU++uuqdF
-         GQ1O/ERZnoA2J70Z5231Hvh9GpBgLWFgEXgngK/xbXJ7z7TA1M7OaVOb7vKQKQ+UegeY
-         9AJxiHMIa2FRToAF9RZFM6rONYsELFxPUtHehJqEqGLT18+c24vkuI1J1vCnsJnN75eM
-         vQdw==
+        bh=yO3n6KYXo33Xsc4SiWnMfOg3kui2ahdzf5GeukwEkgI=;
+        b=J650lcTVlIeVhgUhJI/JBPMK+n0QTKo3PLXOqYptaAO/Tj//CwEWpGDgvDSlrs4OFl
+         qeOWRzumc4qQv6V+K9vbQJsjPh+OcBmpXMASYYubkZpEUz0RBV4xC4LUPcgnI8gGvNPK
+         U3Tg7zUvg8UuH8H7I2VXnrm0kn9Vy+PhYLMr2tlWG2FbmdPpANjiGZvLTINuchdsd2q+
+         JZeXJTxpoxkT14/lKSCIkwSwb+EA2lg/bjLr7L5YIJXN6DZyE//v/CRUuZ18cxigHEcq
+         Tj1T8XS5b1CUAHfmBZFYR2aqFKYbTZ4TiZJzTsaByE1HzO0PtJ2sRqjCrK0ic4VkJsBL
+         uf1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709641454; x=1710246254;
+        d=1e100.net; s=20230601; t=1709641789; x=1710246589;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=CgWnngIT/gJ2CN/6Q6lG/bumlZMowmI03npuEMQCBAM=;
-        b=OIBGsJNEGBqrHfAb5y/2rXgaUD79uHw8V9j9xjtVCf6aXRLUx46a23XJBvsy+T19ea
-         8aDdk/xofrvgdDjGr3yRBoO7bTaBwmvefHdcmdvaRhcFMYwNYXX53Whw8ll0n2OUQCc1
-         r4lz0/3tjol7RO90VBjJWoOcgcCqQo4iNz3ySiJjKZh1l8CixTGJq997ciHuHqP0ebQy
-         6Y6D6LmpjlL2FHjI3qiqw4veZc4YprdUmksXUZXqbB8hDiT+HkDQtWiwO9eE/xEqi072
-         +OPnow7Dv560sfKw3Jt34RYXtzFf99T69B6Aadx4sK9EWVoyfed15EPcCUSWvI28mY2x
-         PWNA==
-X-Forwarded-Encrypted: i=1; AJvYcCV/1BoZyVPXKW49+14536/UyYetZzf3lwo5FI5lfbMfJy4bQz9DhnVyCfgayA3r7e3AUxk7OT3YY37zGhc7ykTMGdQOcqSFDdsu
-X-Gm-Message-State: AOJu0Yy1iRjVGu0Xn0bDsYk5Me0wJ3J28KhygGFbNObNbb7SWGsELP3u
-	3Za7zwjAA4sW+IgsIyQw8jLrR+SddCC4SqhQxu1DkOTydFvmZ3A28bGEHVJDnTV8HBMfy2d0x65
-	PyBX5bWkwoQPfYToDD4Fs8ce4RrrbUqZe6mb9Wg==
-X-Google-Smtp-Source: AGHT+IHUBgwcmPr3wx5OxoHWv1ZUZdP1ZVL1rLQBhjwJNL8fZY5l0lFsxJWNgG2Iv1hIDyeVJFsQ1t3tYOxVyeL6KpA=
-X-Received: by 2002:a81:720a:0:b0:609:2104:3cf8 with SMTP id
- n10-20020a81720a000000b0060921043cf8mr12997879ywc.41.1709641454552; Tue, 05
- Mar 2024 04:24:14 -0800 (PST)
+        bh=yO3n6KYXo33Xsc4SiWnMfOg3kui2ahdzf5GeukwEkgI=;
+        b=GXGUaa8z3XvS4tSyXRPaBG9MpBdxe/yNt0Jbrd40uCjVrEgmK9Zq2ZTlL9Y7ByLW4T
+         SGVVYVU7QicfpAzL09sFIspd5jRAZ+H4ayhL4XQcUnmnc+/56PiI36nKzUDp7oHYKmJt
+         wki2w/2CN2XH9Wx6NVHC8yX3moUyhUB/wsCgW27c1GPfdJqhE4R9UFTfI4BtAufAq7J+
+         rHWSjAZxMd+WpQ3MvU1BDiCf+iU+Xd5iHrPVTzFi3h8yDc8Jn2HJPGgP2E46WGvvTVqq
+         ybyL+92QvhuKgKknMRw8kXwBsYTFtVPAv8MJb318nJzjOKJjaRdEq88IA5SfloeaVbMO
+         2UGw==
+X-Forwarded-Encrypted: i=1; AJvYcCUXGW4kKZSSUEjAkVQJ59JLOjR3dBgccymTkxzKI85BtMEaZoXsdtN5O/TaAGWqFUUaU2oiwDAPjhRRBJZhnP4lEsDOCWX8Qswz
+X-Gm-Message-State: AOJu0YwVevOord+KFgv+/JSIHNQz7gLir/O1NiViRZPBoWAw9LMDsB76
+	n0dnhiVg327B9Oq1GlrzCl28zJw2V3eACFlR4Urg806pNMw3C+GjIeyBOCHQqkpKd+aI9kRDeaw
+	8SgbN4eEOaLuuu7+wIrDVZmEgZqWjbjzY7Wb4PA==
+X-Google-Smtp-Source: AGHT+IES79nKtjDjJy0DwVl+WQtVsPxU80jy4bvuMiIhxKvWN0DlT/brykHbuV+yjoP8FSDcXh2IbYP96l8rw9Enznk=
+X-Received: by 2002:a81:6c92:0:b0:609:b582:bb24 with SMTP id
+ h140-20020a816c92000000b00609b582bb24mr4517291ywc.26.1709641788976; Tue, 05
+ Mar 2024 04:29:48 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -59,8 +59,8 @@ MIME-Version: 1.0
 References: <20240227153132.2611499-1-jens.wiklander@linaro.org> <20240227153132.2611499-2-jens.wiklander@linaro.org>
 In-Reply-To: <20240227153132.2611499-2-jens.wiklander@linaro.org>
 From: Linus Walleij <linus.walleij@linaro.org>
-Date: Tue, 5 Mar 2024 13:24:02 +0100
-Message-ID: <CACRpkdZBWBio8kvKuVzj2CknCb4eS=VB2EqUsAK-vf4e328icg@mail.gmail.com>
+Date: Tue, 5 Mar 2024 13:29:38 +0100
+Message-ID: <CACRpkdbhhZ9+Jy_tvWy1RSnyZMjqUhh0ARpS+WRtgWTH3AYCPw@mail.gmail.com>
 Subject: Re: [PATCH v3 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
 To: Jens Wiklander <jens.wiklander@linaro.org>
 Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
@@ -76,49 +76,32 @@ Content-Transfer-Encoding: quoted-printable
 
 Hi Jens,
 
-thanks for your patch!
+I realized there is one thing I wonder about:
 
 On Tue, Feb 27, 2024 at 4:31=E2=80=AFPM Jens Wiklander
 <jens.wiklander@linaro.org> wrote:
 
-> A number of storage technologies support a specialised hardware
-> partition designed to be resistant to replay attacks. The underlying
-> HW protocols differ but the operations are common. The RPMB partition
-> cannot be accessed via standard block layer, but by a set of specific
-> RPMB commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
-> partition provides authenticated and replay protected access, hence
-> suitable as a secure storage.
->
-> The initial aim of this patch is to provide a simple RPMB driver
-> interface which can be accessed by the optee driver to facilitate early
-> RPMB access to OP-TEE OS (secure OS) during the boot time.
->
-> A TEE device driver can claim the RPMB interface, for example, via
-> rpmb_interface_register() or rpmb_dev_find_device(). The RPMB driver
-> provides a callback to route RPMB frames to the RPMB device accessible
-> via rpmb_route_frames().
->
-> The detailed operation of implementing the access is left to the TEE
-> device driver itself.
->
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> Signed-off-by: Alex Benn=C3=A9e <alex.bennee@linaro.org>
-> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
-> Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+> +struct rpmb_frame {
+> +       u8     stuff[196];
+> +       u8     key_mac[32];
+> +       u8     data[256];
+> +       u8     nonce[16];
+> +       __be32 write_counter;
+> +       __be16 addr;
+> +       __be16 block_count;
+> +       __be16 result;
+> +       __be16 req_resp;
+> +} __packed;
 
-I would mention in the commit that the subsystem is currently
-only used with eMMC but is designed to be used also by UFS
-and NVME. Nevertheless, no big deal so:
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+I didn't quite get why these things are encoded big-endian?
 
-> +config RPMB
-> +       tristate "RPMB partition interface"
-> +       depends on MMC
+As on the producer side (the eMMC backend) it seems we are anyway
+calling cpu_to_be* to convert them into this format.
 
-depends on MMC || SCSI_UFSHCD || NVME_CORE
-?
-
-Or do we want to hold it off until we implement the backends?
+If this is a requirement on the consumer side (such as TEE) I think
+the consumer should swap the bytes rather than the producer,
+but I guess that kind of assumes that we foresee there will be other
+consumers in the first place.
 
 Yours,
 Linus Walleij
