@@ -1,103 +1,98 @@
-Received: from mail-oo1-f51.google.com (mail-oo1-f51.google.com [209.85.161.51])
+Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E1774C6E;
-	Wed,  6 Mar 2024 12:00:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D542173185
+	for <linux-mmc@vger.kernel.org>; Wed,  6 Mar 2024 13:03:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709726424; cv=none; b=TpF2l0jIgs5707BtbUxK/jmiJLm1uIESoYtnKUz3IXz6BFzlnBf7RGtda22MmCtPEW0DbuDMjeVVzdk/joGuDC7nKbL/ek5Gu79RzDOO6CoN8wtORdYTbRQiChhyRP3JjLPfXvgr3lOTserdeh+DVQUWfvSVf18c4WgKrHMB7eg=
+	t=1709730241; cv=none; b=NCBfcJT5pqerPYnZkTMr6AqLKLxOnlIM736LGqp7TQnhDSDoKePKSTvOXg+aW4ZIa06tC4LG7ZT4FiXPIQvEiTxX/2yhNp47pXBpqkKtD69QlOo92j84qXaBIGfypuhWaLyeEqIrBN4ORJMKO6yWukaELK8ausVFPh6i7h7FWcY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709726424; c=relaxed/simple;
-	bh=rll++81RHnPmXCpMgw5gtpQoU4SBkDZyM2rirVvZ/08=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=CMSfV5ItK2d6jAI5jPsMG0MdsyGyXIbmTGSvKZ2CcV7jcXV6dzafJZZjYJTCEoqsbVFWtEDtEoOHKzvn0brscSw4E2z4S89HuP+z3TDPwQeGgV54pdRbjtQa/yHt1VMvn4i1Lla9C+vinXk7M/EQKdv5bgKvvM2AR6vsrw8ZXfA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=marliere.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=marliere.net header.i=@marliere.net header.b=FXBPB4TJ; arc=none smtp.client-ip=209.85.161.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=marliere.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1709730241; c=relaxed/simple;
+	bh=0SzVCSc+6IVgdLQjBVikpTpZ5IdNQX3I6EMVPlgDMbA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=psE/oHcL6iGjfoY/mfNZPFi+Hrfx1/y2ufb5K2J4PhD/boLc3t6SLjhO1ju6Q6F3LtcLPKWA1CXCLMKnz6+zoP/Bq2dS2BMsESjX223/IWF5uicI9Mtw4ZfS4y3KYAdKhWLARzkQfMpwVkdwbxC359mouphjUzhKVXYgYpUEtV4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=D7rLAIdH; arc=none smtp.client-ip=209.85.219.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=marliere.net header.i=@marliere.net header.b="FXBPB4TJ"
-Received: by mail-oo1-f51.google.com with SMTP id 006d021491bc7-5a1a0550015so25911eaf.0;
-        Wed, 06 Mar 2024 04:00:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D7rLAIdH"
+Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-dc742543119so6893791276.0
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Mar 2024 05:03:59 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1709730239; x=1710335039; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=gBiDejV3EtOMJmuMxDeh773rkjpBFgTE/mtHVi8J4f4=;
+        b=D7rLAIdH2G5/jUCqjM1rkWiWQLQ/DgFRDS9MXjPcuiXudanm5mQJErhiDT5dmExSbV
+         YujPOOJFWTrri1ZrgDugdTp6kok3Jc7fGS5TcSmbmxxfu+c1TlZS/0fbmjTGG0/NF4uE
+         PGLF47GjeV8T6C8YUAwrigc6HoRj4s+Ow31mBHqkPse3AL603YBp9PsJbNZ7fpiWAZSS
+         HZ9kiUiEEZhbWoxZI48MgycEXqAItAvM4T4sh/9sccibVTRGhcqVCEqhcaCVXylpHQVr
+         R7/4OheYnaRSRi10ygpsaWTl4xwYL8x3FJKYpw1X5bTl4CyE2tQIhszFnZsGzNtByWZv
+         dCSQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709726422; x=1710331222;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:dkim-signature:date:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=NCSfg79XSg8gxcqeq6qiMLqlWj175rfDfcVyginmxjA=;
-        b=t4tN1K2M3OROq9xDaVMqmdX9z0wagDU+zQhYSMm5j8VVXkluU61GbkJnpj+QEj9S2/
-         KRTmwAZ9mqZx4Jos4KS1wqIfVlXPnYH2hFhEIpZY06OAttZnJibwYoTiHu/o34ChS9qe
-         bmS0y81OVLOzdHerRRvOFMkLjWZg8lbHNf+w5uPNUV6aJ6+TgZbyFP2vd6+6fr35Bya2
-         lRtqP5cGcxD2aZ4lcA+bgA7I3T4zjUxKpTTdNb0Nii6Cc9cR69pPDs4/IxwL29TZFbCi
-         u7x/0yy/BmepCz737qqKmgHnAeYnBI1a0N1iPo+QerrnPa9LyuWlSZXtJ1eQEJFnHjbY
-         GL4A==
-X-Forwarded-Encrypted: i=1; AJvYcCWSMjqY9LGshAQwnNZyhECWnxBo1lRthra7QExr9TVtLDHkNQ+oUld4JGorEdgrjlsV5BLdtLm2UIdk1ka9aB7jB6KRvB3uGCOhtNsflDIoxoSM+M238/Iv196tSsXAQsW19vCM09zzAx2cquNuyNQQywhOUnIfOMSRGG/aTyzNqmfiiLy+eaSKjAsK9MnWFjpT0crFmt7H0r+9P1mbX/YI
-X-Gm-Message-State: AOJu0Yw7tfHGwOucApQD2iK2vMcGR1E7T89+r3HGUB6LdImhLr6h84M/
-	YTzck+TzY0kq68dln4Fxgxa91+s85clds8yaLsLS7rmseLweFKyF
-X-Google-Smtp-Source: AGHT+IEQ00k2DZVL5LGzpnrYPcbL6NwbJtSjRk3MkAoox6RlfPwTN9DHzGp7XV1L0dSoMfJn7Oy2+A==
-X-Received: by 2002:a05:6870:458e:b0:21f:f8a9:e892 with SMTP id y14-20020a056870458e00b0021ff8a9e892mr5089973oao.53.1709726422067;
-        Wed, 06 Mar 2024 04:00:22 -0800 (PST)
-Received: from mail.marliere.net ([24.199.118.162])
-        by smtp.gmail.com with ESMTPSA id w3-20020aa79a03000000b006e54f344e14sm10661253pfj.22.2024.03.06.04.00.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Mar 2024 04:00:21 -0800 (PST)
-Date: Wed, 6 Mar 2024 09:00:12 -0300
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marliere.net;
-	s=2024; t=1709726420;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=NCSfg79XSg8gxcqeq6qiMLqlWj175rfDfcVyginmxjA=;
-	b=FXBPB4TJRJV0G7bT2ecrH06o/RrcdzzhrudVqUO+CsIODDh+1wGZMQH9a48CN76l6m74Pr
-	1WryduNUxVTTZoXakdH7219RsWARB5p4pyaZGlpkdv3h8oiu8atxqqB+gLzezexp24y7v4
-	T1Ks4RAOlVkQLIYFE/+0Jxl3tarNj9NUhtseqh0y+0hhPqkDYIXWE48sUhIW0RiHtMr4Wd
-	v3CgT9eg9wSYmz9zQnRedvJpNNBOCHIcdqRt7RUfM/LWaAdZSLbRMpgRqEvghyEPkomEyC
-	aJ8FY0YNCKp6mYlaEgWVgdOkQ9h17yKETLpAHTyLjNkVEeBB12ZUmab0a+/cOg==
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=ricardo@marliere.net smtp.mailfrom=ricardo@marliere.net
-From: "Ricardo B. Marliere" <ricardo@marliere.net>
-To: Daniel Golle <daniel@makrotopia.org>
-Cc: Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, Dave Chinner <dchinner@redhat.com>, 
-	Jan Kara <jack@suse.cz>, Thomas =?utf-8?Q?Wei=C3=9Fschuh?= <linux@weissschuh.net>, 
-	Christian Brauner <brauner@kernel.org>, Li Lingfeng <lilingfeng3@huawei.com>, 
-	Damien Le Moal <dlemoal@kernel.org>, Min Li <min15.li@samsung.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Hannes Reinecke <hare@suse.de>, 
-	Christian Loehle <CLoehle@hyperstone.com>, Avri Altman <avri.altman@wdc.com>, Bean Huo <beanhuo@micron.com>, 
-	Yeqi Fu <asuk4.q@gmail.com>, Victor Shih <victor.shih@genesyslogic.com.tw>, 
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-block@vger.kernel.org, Diping Zhang <diping.zhang@gl-inet.com>, 
-	Jianhui Zhao <zhaojh329@gmail.com>, Jieying Zeng <jieying.zeng@gl-inet.com>, 
-	Chad Monroe <chad.monroe@adtran.com>, Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>
-Subject: Re: [RFC PATCH v2 4/8] block: implement NVMEM provider
-Message-ID: <palxzjqvvteqajsajrdgdvncq3eka65pq7de4jnwyhpfs3xrac@c34xcdxctbcq>
-References: <cover.1709667858.git.daniel@makrotopia.org>
- <6061aa4201030b9bb2f8d03ef32a564fdb786ed1.1709667858.git.daniel@makrotopia.org>
+        d=1e100.net; s=20230601; t=1709730239; x=1710335039;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=gBiDejV3EtOMJmuMxDeh773rkjpBFgTE/mtHVi8J4f4=;
+        b=lGZGSqFVc8Fh7RPVAcQgn6giH0qj4yekdHjty0vbDu8Z/al4SW+iOiQmCkl3mcU712
+         WtmLOvtNhxTt5x98SuKzL/KLjLB5XuCTlelee6LqCBB2QuyLpzhPO1okCNt6Z9dmjhL4
+         6BMDqv7ys5kH/mGM/aqGicbV944XMoDoponA6Mowz0A/j/u3tykxG5CiUp6VOE8bK1Ou
+         1Q/07G25asyVslkVcsDmChCYU4Rzv9OADzaiByGwpReAibZYO/SB+PgUzAnKvwIpzw53
+         AWkd1kkHpHpI1PLqumCsgLP5erY5gX5vvawfi41gxEZjz43+bTB5o6cQ9+YT3hzqgij+
+         f4YA==
+X-Forwarded-Encrypted: i=1; AJvYcCVnUx+k9LndMu0KrLqNYyDaYtw8seSwbLNEZF1jcCpmuCmZ6rV8yEHKWepiye+C28lq2GmSRG4245VWAjFimm9m43uw+FBOvZdp
+X-Gm-Message-State: AOJu0YxOA3aShDYgekreifgzneQKgnzUZzvcVYm+ULlS4lBEAjKAqIgt
+	Lpn126CT1X6NwKrqfuzd6AJHPxeRQAMP06sROF8hY01sy9o8/VsmTynJmKLVmpqhVxX2t32Posw
+	lVef8NOTLKqSWVRcZJdiOGFcVsbhZcDYLCe5Spg==
+X-Google-Smtp-Source: AGHT+IGoznzaO9Xw4qNyGRElOSvHFz7f8QVovTmZFfDUeysoa5V9mZ6cAUmshhXwf2lLcYtw5uLKyTLOhjYMd2NX47k=
+X-Received: by 2002:a25:290:0:b0:dcc:2da:e44e with SMTP id 138-20020a250290000000b00dcc02dae44emr10903650ybc.61.1709730238839;
+ Wed, 06 Mar 2024 05:03:58 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6061aa4201030b9bb2f8d03ef32a564fdb786ed1.1709667858.git.daniel@makrotopia.org>
+References: <20240306-mmc-partswitch-v1-1-bf116985d950@codewreck.org> <Zegx5PCtg6hs8zyp@trax>
+In-Reply-To: <Zegx5PCtg6hs8zyp@trax>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Wed, 6 Mar 2024 14:03:47 +0100
+Message-ID: <CACRpkdYS-5mDjNP2zJ2J=_k_uboyVGK61Z1XWHcUh26HT6WKmQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: part_switch: fixes switch on gp3 partition
+To: "Jorge Ramirez-Ortiz, Foundries" <jorge@foundries.io>
+Cc: Dominique Martinet <asmadeus@codewreck.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Dominique Martinet <dominique.martinet@atmark-techno.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Daniel,
+On Wed, Mar 6, 2024 at 10:05=E2=80=AFAM Jorge Ramirez-Ortiz, Foundries
+<jorge@foundries.io> wrote:
 
-On  5 Mar 20:23, Daniel Golle wrote:
-> static int __init blk_nvmem_init(void)
-> {
-> 	int ret;
->  
-> 	ret = class_interface_register(&blk_nvmem_bus_interface);
-> 	if (ret)
-> 		return ret;
->  
-> 	return 0;
+> That looked strange as there should be support for 4 GP but this code
+> kind of convinced me of the opposite.
+>
+>         if (idata->rpmb) {
+>                 /* Support multiple RPMB partitions */
+>                 target_part =3D idata->rpmb->part_index;
+>                 target_part |=3D EXT_CSD_PART_CONFIG_ACC_RPMB;
+>         }
+>
+> So if we apply the fix that you propose, how are multiple RPMB
+> partitions (ie, 4) going to be identified as RPMB? Unless there can't be
+> more than 3?
 
-Just an idea, why not just:
+Sorry for writing bad code comments.
 
-return class_interface_register(&blk_nvmem_bus_interface);
+This comment means:
 
+"support multiple RPMB partitions [on the same Linux system]"
+
+not:
+
+"support multiple RPMB partitions [on the same eMMC device]"
+
+Yours,
+Linus Walleij
