@@ -1,146 +1,132 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB4685C907
-	for <linux-mmc@vger.kernel.org>; Wed,  6 Mar 2024 07:32:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F4915D49E
+	for <linux-mmc@vger.kernel.org>; Wed,  6 Mar 2024 08:03:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709710380; cv=none; b=G2MhJ6BK5QBHuW3R1bXt+1qHMq0gbUUqvggFFI+Y9wPDf7foQDDq9uIlfOYFOU7GP4aTAt0RSVHsFRZ6weDXb1P5yS7w9+bKVX+Hx7zAlYMT5MYv5eQo7iJ8rJk5H+51dfq6y6WCDk2+fJJdG7svgF+uvXpz7kKrwvKcX2ffZPw=
+	t=1709712239; cv=none; b=OtW0cJeODUpLzl3cSVimWWCmv6J7kRIHAcJ3as8qTidGCkTPiCq/S+LpwzbniiESOwmQEYQ5LjaifUZ6qSo1l4hcJdYXuFCqzg1teRHNQbWqvfsRZAEQOV2aOckJHC0ChUZK4hRG7naLCkzzTwtOKAE1psK4gYKOMXevRasL22I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709710380; c=relaxed/simple;
-	bh=cLInQDVMZTj/TRvrVUxK3BV4HHYY/+2PdbjgF+Wk5CE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=N1TJWAFdRfsboA8FSb0AUVqinCEfHjxwOnv2lbJbQrkkeCOcJxMKPoCKLHeh9OfPfk5nx6aW6x0TLli2jOj1xEbZ4iorqGULuL5S6E5P8NwwzJXFdy6XUv3oY5TMSZDLqxQ/rS677z3pszBLNVMHt4m1ZvkQF6iXmFHwKGjHFTc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <sha@pengutronix.de>)
-	id 1rhllH-0000M9-Dp; Wed, 06 Mar 2024 08:32:23 +0100
-Received: from [2a0a:edc0:2:b01:1d::c5] (helo=pty.whiteo.stw.pengutronix.de)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <sha@pengutronix.de>)
-	id 1rhllF-004hY8-2M; Wed, 06 Mar 2024 08:32:21 +0100
-Received: from sha by pty.whiteo.stw.pengutronix.de with local (Exim 4.96)
-	(envelope-from <sha@pengutronix.de>)
-	id 1rhllE-004oYv-35;
-	Wed, 06 Mar 2024 08:32:20 +0100
-Date: Wed, 6 Mar 2024 08:32:20 +0100
-From: Sascha Hauer <s.hauer@pengutronix.de>
-To: Daniel Golle <daniel@makrotopia.org>
-Cc: Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
-	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
-	Thomas =?iso-8859-15?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-	Christian Brauner <brauner@kernel.org>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Damien Le Moal <dlemoal@kernel.org>, Min Li <min15.li@samsung.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Hannes Reinecke <hare@suse.de>,
-	Christian Loehle <CLoehle@hyperstone.com>,
-	Avri Altman <avri.altman@wdc.com>, Bean Huo <beanhuo@micron.com>,
-	Yeqi Fu <asuk4.q@gmail.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-	"Ricardo B. Marliere" <ricardo@marliere.net>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-	Diping Zhang <diping.zhang@gl-inet.com>,
-	Jianhui Zhao <zhaojh329@gmail.com>,
-	Jieying Zeng <jieying.zeng@gl-inet.com>,
-	Chad Monroe <chad.monroe@adtran.com>,
-	Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>
-Subject: Re: [RFC PATCH v2 1/8] dt-bindings: block: add basic bindings for
- block devices
-Message-ID: <ZegcBGE2xp-oUL2q@pengutronix.de>
-References: <cover.1709667858.git.daniel@makrotopia.org>
- <f70bb480aef6f55228a25ce20ff0e88e670e1b70.1709667858.git.daniel@makrotopia.org>
- <ZegZ0zJ1OT7ikrE8@pengutronix.de>
+	s=arc-20240116; t=1709712239; c=relaxed/simple;
+	bh=jodEnASZyLUgeoSk8Z4M/Y1uTQ6Xpxy5XIGxKW5nvb4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=k3wMc6rmlvlFuTmF/RTii2/0VCU6J6/qCQfc8MARL0GWhuq7GH+YoAs0RPSdz9X1Dnhuc8PrQWT2VPUvU2rU6ah4mUM/5AwONSPqlaerqwqcGuYTzw8bF9jS5MGi/0U3MRcGgKZ3pwgDmkitSv+2GhEZqH+DnxFPVVBn7lAY5fI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=E7rujQUV; arc=none smtp.client-ip=209.85.128.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="E7rujQUV"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-6096ff3e4abso51941367b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Mar 2024 00:03:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1709712237; x=1710317037; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pNCmhehLL35vXsU0wn+FY52cOQ04rVxtOxTd7hBwrYk=;
+        b=E7rujQUVYeoWx/m8hA9hkx0GDzR3BTMLukF0Jetc4sxIjRUFr6uPVE06y91p4nHvTy
+         MqWqVXe+IUth9hJkCY1x1pYmXZIWtHH+74c7y3vhSnPaSMqS+7lYUmWF4rkd/P6wgQ6b
+         xTFexi7tpMcBqZpQyzn4p8ALXP/NWcpiXE9smPbzk7id/o2A97ZJv7jUjowBmxlhaJTr
+         dAU0nDl4js4tgC2r3suA3rxW8+M+HhRzj+Sp4sPEPegi1yk8IqlUyF4IxWnfcm/MKK2H
+         t4fOQegPJPTLNJ+E8EUUj2utc00LiRk0R6YtP6FIY0rY50QcsVy0s8VIo20hvpPPXtcI
+         Xdwg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709712237; x=1710317037;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=pNCmhehLL35vXsU0wn+FY52cOQ04rVxtOxTd7hBwrYk=;
+        b=H38nUWqDr85kocLzat8CQkRniyniqm84o1jiKaY2aq0f1X65NQKd67uzCN1cqvbQhL
+         z6pFVIMAcURSNKyuo0Tas6IY21b/jfeEDpdliqPhnJUZ1gBNM9MjPzuTb+XRoElSPlRx
+         A/uKs3hIR293Kjeyse9DLeoGAT8rhVsVliV3Gk+VZfPrUe/kDuedJyj1FH9cFpDyGnfp
+         VlrUgXw0vLB1PEtFL0MsiIhu7kPnIw1hN4jc/aP9kgS3/y6QxS7+lnRhjtVrrtgxvhPm
+         AbcPrJoCeEsRRLyBVBV48IlnyIq2BhUtZHUZm8V+WWk4OoFy69dnTHfs2B27UFvEPqR+
+         2I1w==
+X-Forwarded-Encrypted: i=1; AJvYcCXCkU2DVFtTcYFbfyV/tAj6Dus2vtR2O/VuIOjVy9hSXzXkZg/n20AGP3gXXiW0qyrq3C6xipYe+Wr6CTDC132C/i9xRlIDBN3k
+X-Gm-Message-State: AOJu0Yx1KTI2VLTLr+QHcYwSXU4Elc1d7tq2euAK4eUN/xD3MUjAv9Cy
+	2asuObB77NO35XjQRMYEN8HnF9IzobnFgLkvpXUxUn1eQbJMeZ8msS4o2oAqcnASYzQ+T4JCZ2B
+	3Vw7uIASwnPY4/XGFj0bu5Fs6sG9UcUf73kpV1w==
+X-Google-Smtp-Source: AGHT+IFiiALvEe20+2jMao6XZwL3rpAKDRZLIqrCiLCGFKth5eRWTowg8OI5xSsdhVEX4ZwNnmupsmHGl44khhJoAAI=
+X-Received: by 2002:a25:aa8b:0:b0:dcf:b5b7:c72 with SMTP id
+ t11-20020a25aa8b000000b00dcfb5b70c72mr11184681ybi.0.1709712236941; Wed, 06
+ Mar 2024 00:03:56 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZegZ0zJ1OT7ikrE8@pengutronix.de>
-X-Sent-From: Pengutronix Hildesheim
-X-URL: http://www.pengutronix.de/
-X-Accept-Language: de,en
-X-Accept-Content-Type: text/plain
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: sha@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <20240306-mmc-partswitch-v1-1-bf116985d950@codewreck.org>
+In-Reply-To: <20240306-mmc-partswitch-v1-1-bf116985d950@codewreck.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Wed, 6 Mar 2024 09:03:45 +0100
+Message-ID: <CACRpkda4pVotd9Fc2Qn0Ae=89sZR7-rXDiZ7OdHE3eDvO=049Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: part_switch: fixes switch on gp3 partition
+To: Dominique Martinet <asmadeus@codewreck.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jorge Ramirez-Ortiz <jorge@foundries.io>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Dominique Martinet <dominique.martinet@atmark-techno.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Mar 06, 2024 at 08:22:59AM +0100, Sascha Hauer wrote:
-> Hi Daniel,
-> 
-> On Tue, Mar 05, 2024 at 08:23:20PM +0000, Daniel Golle wrote:
-> > diff --git a/Documentation/devicetree/bindings/block/partition.yaml b/Documentation/devicetree/bindings/block/partition.yaml
-> > new file mode 100644
-> > index 0000000000000..df561dd33cbc9
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/block/partition.yaml
-> > @@ -0,0 +1,51 @@
-> > +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-> > +%YAML 1.2
-> > +---
-> > +$id: http://devicetree.org/schemas/block/partition.yaml#
-> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > +
-> > +title: Partition on a block device
-> > +
-> > +description: |
-> > +  This binding describes a partition on a block storage device.
-> > +  Partitions may be matched by a combination of partition number, name,
-> > +  and UUID.
-> > +
-> > +maintainers:
-> > +  - Daniel Golle <daniel@makrotopia.org>
-> > +
-> > +properties:
-> > +  $nodename:
-> > +    pattern: '^block-partition-.+$'
-> > +
-> > +  partnum:
-> > +    $ref: /schemas/types.yaml#/definitions/uint32
-> > +    description:
-> > +      Matches partition by number if present.
-> > +
-> > +  partname:
-> > +    $ref: /schemas/types.yaml#/definitions/string
-> > +    description:
-> > +      Matches partition by PARTNAME if present.
-> 
-> In the mtd world we originally had the partition nodes directly under
-> the hardware device node as well. That was changed to put a
-> partitions subnode between the hardware device node and the partitions.
-> 
-> From fe2585e9c29a ("doc: dt: mtd: support partitions in a special
-> 'partitions' subnode"):
-> 
->     To avoid conflict with other drivers using subnodes of the mtd device
->     create only one ofpart-specific node rather than any number of
->     arbitrary partition subnodes.
-> 
-> Does it make sense to do the same for block devices?
+On Wed, Mar 6, 2024 at 2:45=E2=80=AFAM Dominique Martinet
+<asmadeus@codewreck.org> wrote:
 
-Hm, looking at the example in 5/8 it seems you've already done that. I
-think I have misread the binding.
+> From: Dominique Martinet <dominique.martinet@atmark-techno.com>
+>
+> Commit e7794c14fd73 ("mmc: rpmb: fixes pause retune on all RPMB
+> partitions.") added a mask check for 'part_type', but the mask used was
+> wrong leading to the code intended for rpmb also being executed for GP3.
+>
+> On some MMCs (but not all) this would make gp3 partition inaccessible:
+> armadillo:~# head -c 1 < /dev/mmcblk2gp3
+> head: standard input: I/O error
+> armadillo:~# dmesg -c
+> [  422.976583] mmc2: running CQE recovery
+> [  423.058182] mmc2: running CQE recovery
+> [  423.137607] mmc2: running CQE recovery
+> [  423.137802] blk_update_request: I/O error, dev mmcblk2gp3, sector 0 op=
+ 0x0:(READ) flags 0x80700 phys_seg 4 prio class 0
+> [  423.237125] mmc2: running CQE recovery
+> [  423.318206] mmc2: running CQE recovery
+> [  423.397680] mmc2: running CQE recovery
+> [  423.397837] blk_update_request: I/O error, dev mmcblk2gp3, sector 0 op=
+ 0x0:(READ) flags 0x0 phys_seg 1 prio class 0
+> [  423.408287] Buffer I/O error on dev mmcblk2gp3, logical block 0, async=
+ page read
+>
+> the part_type values of interest here are defined as follow:
+> main  0
+> boot0 1
+> boot1 2
+> rpmb  3
+> gp0   4
+> gp1   5
+> gp2   6
+> gp3   7
+>
+> so mask with EXT_CSD_PART_CONFIG_ACC_MASK (7) to correctly identify rpmb
+>
+> Fixes: e7794c14fd73 ("mmc: rpmb: fixes pause retune on all RPMB partition=
+s.")
+> Cc: stable@vger.kernel.org
+> Cc: Jorge Ramirez-Ortiz <jorge@foundries.io>
+> Signed-off-by: Dominique Martinet <dominique.martinet@atmark-techno.com>
 
-Sascha
+The patch:
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
+> A couple of notes:
+> - this doesn't fail on all eMMCs, I can still access gp3 on some models
+>   but it seems to fail reliably with micron's "G1M15L"
+> - I've encountered this on the 5.10 backport (in 5.10.208), so that'll
+>   need to be backported everywhere the fix was taken...
 
--- 
-Pengutronix e.K.                           |                             |
-Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
-31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Which device is this?
+
+I have never seen an eMMC using the GP:s in my life.
+
+Or did you create the GP manually?
+
+Yours,
+Linus Walleij
