@@ -1,16 +1,16 @@
 Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E802E5C907
-	for <linux-mmc@vger.kernel.org>; Wed,  6 Mar 2024 07:24:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB4685C907
+	for <linux-mmc@vger.kernel.org>; Wed,  6 Mar 2024 07:32:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709709844; cv=none; b=pJ/MhgWVx20GknslNNo94bbZujES2IhCuMMZPQTI8+QIbjfKM8R3tl+vjQNgpfXIBSW4v0bqQVgjcYLgELIRvkV1QxA16AKslF45aiVjBA4Oyfxt0zRQ2wzXe+2tM0OiVuDDj/T29X95ziXXy9DVkY0BkBuX3QKGfOnhmRNahhg=
+	t=1709710380; cv=none; b=G2MhJ6BK5QBHuW3R1bXt+1qHMq0gbUUqvggFFI+Y9wPDf7foQDDq9uIlfOYFOU7GP4aTAt0RSVHsFRZ6weDXb1P5yS7w9+bKVX+Hx7zAlYMT5MYv5eQo7iJ8rJk5H+51dfq6y6WCDk2+fJJdG7svgF+uvXpz7kKrwvKcX2ffZPw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709709844; c=relaxed/simple;
-	bh=+B0TJc/kRe/wrIincWxLSZ37rVccCTI1iUTwH/ns59w=;
+	s=arc-20240116; t=1709710380; c=relaxed/simple;
+	bh=cLInQDVMZTj/TRvrVUxK3BV4HHYY/+2PdbjgF+Wk5CE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tLSkixLCmlBCeaVvGpKO0QLYbq1owU90LYBt0spvCqMhVOXP7ZFl1LM9SLJDKzHjzXQ8ZdE2Nt7u+7Kudi6CzP3xhVQ3Brc28N5gyTjsj/5H/U2LNcjtXVFUBksWgj/CivA0WkW4m57Y7SUAtTsnOxqh/khvGZOdd+YUalY1n1E=
+	 Content-Type:Content-Disposition:In-Reply-To; b=N1TJWAFdRfsboA8FSb0AUVqinCEfHjxwOnv2lbJbQrkkeCOcJxMKPoCKLHeh9OfPfk5nx6aW6x0TLli2jOj1xEbZ4iorqGULuL5S6E5P8NwwzJXFdy6XUv3oY5TMSZDLqxQ/rS677z3pszBLNVMHt4m1ZvkQF6iXmFHwKGjHFTc=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
@@ -18,17 +18,17 @@ Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
 	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
 	(Exim 4.92)
 	(envelope-from <sha@pengutronix.de>)
-	id 1rhlcM-0006zE-L4; Wed, 06 Mar 2024 08:23:10 +0100
+	id 1rhllH-0000M9-Dp; Wed, 06 Mar 2024 08:32:23 +0100
 Received: from [2a0a:edc0:2:b01:1d::c5] (helo=pty.whiteo.stw.pengutronix.de)
 	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 	(Exim 4.94.2)
 	(envelope-from <sha@pengutronix.de>)
-	id 1rhlcC-004hXC-0n; Wed, 06 Mar 2024 08:23:00 +0100
+	id 1rhllF-004hY8-2M; Wed, 06 Mar 2024 08:32:21 +0100
 Received: from sha by pty.whiteo.stw.pengutronix.de with local (Exim 4.96)
 	(envelope-from <sha@pengutronix.de>)
-	id 1rhlcB-004oTB-2t;
-	Wed, 06 Mar 2024 08:22:59 +0100
-Date: Wed, 6 Mar 2024 08:22:59 +0100
+	id 1rhllE-004oYv-35;
+	Wed, 06 Mar 2024 08:32:20 +0100
+Date: Wed, 6 Mar 2024 08:32:20 +0100
 From: Sascha Hauer <s.hauer@pengutronix.de>
 To: Daniel Golle <daniel@makrotopia.org>
 Cc: Rob Herring <robh@kernel.org>,
@@ -58,9 +58,10 @@ Cc: Rob Herring <robh@kernel.org>,
 	Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>
 Subject: Re: [RFC PATCH v2 1/8] dt-bindings: block: add basic bindings for
  block devices
-Message-ID: <ZegZ0zJ1OT7ikrE8@pengutronix.de>
+Message-ID: <ZegcBGE2xp-oUL2q@pengutronix.de>
 References: <cover.1709667858.git.daniel@makrotopia.org>
  <f70bb480aef6f55228a25ce20ff0e88e670e1b70.1709667858.git.daniel@makrotopia.org>
+ <ZegZ0zJ1OT7ikrE8@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,7 +70,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f70bb480aef6f55228a25ce20ff0e88e670e1b70.1709667858.git.daniel@makrotopia.org>
+In-Reply-To: <ZegZ0zJ1OT7ikrE8@pengutronix.de>
 X-Sent-From: Pengutronix Hildesheim
 X-URL: http://www.pengutronix.de/
 X-Accept-Language: de,en
@@ -79,59 +80,64 @@ X-SA-Exim-Mail-From: sha@pengutronix.de
 X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
 X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Hi Daniel,
+On Wed, Mar 06, 2024 at 08:22:59AM +0100, Sascha Hauer wrote:
+> Hi Daniel,
+> 
+> On Tue, Mar 05, 2024 at 08:23:20PM +0000, Daniel Golle wrote:
+> > diff --git a/Documentation/devicetree/bindings/block/partition.yaml b/Documentation/devicetree/bindings/block/partition.yaml
+> > new file mode 100644
+> > index 0000000000000..df561dd33cbc9
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/block/partition.yaml
+> > @@ -0,0 +1,51 @@
+> > +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+> > +%YAML 1.2
+> > +---
+> > +$id: http://devicetree.org/schemas/block/partition.yaml#
+> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > +
+> > +title: Partition on a block device
+> > +
+> > +description: |
+> > +  This binding describes a partition on a block storage device.
+> > +  Partitions may be matched by a combination of partition number, name,
+> > +  and UUID.
+> > +
+> > +maintainers:
+> > +  - Daniel Golle <daniel@makrotopia.org>
+> > +
+> > +properties:
+> > +  $nodename:
+> > +    pattern: '^block-partition-.+$'
+> > +
+> > +  partnum:
+> > +    $ref: /schemas/types.yaml#/definitions/uint32
+> > +    description:
+> > +      Matches partition by number if present.
+> > +
+> > +  partname:
+> > +    $ref: /schemas/types.yaml#/definitions/string
+> > +    description:
+> > +      Matches partition by PARTNAME if present.
+> 
+> In the mtd world we originally had the partition nodes directly under
+> the hardware device node as well. That was changed to put a
+> partitions subnode between the hardware device node and the partitions.
+> 
+> From fe2585e9c29a ("doc: dt: mtd: support partitions in a special
+> 'partitions' subnode"):
+> 
+>     To avoid conflict with other drivers using subnodes of the mtd device
+>     create only one ofpart-specific node rather than any number of
+>     arbitrary partition subnodes.
+> 
+> Does it make sense to do the same for block devices?
 
-On Tue, Mar 05, 2024 at 08:23:20PM +0000, Daniel Golle wrote:
-> diff --git a/Documentation/devicetree/bindings/block/partition.yaml b/Documentation/devicetree/bindings/block/partition.yaml
-> new file mode 100644
-> index 0000000000000..df561dd33cbc9
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/block/partition.yaml
-> @@ -0,0 +1,51 @@
-> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/block/partition.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Partition on a block device
-> +
-> +description: |
-> +  This binding describes a partition on a block storage device.
-> +  Partitions may be matched by a combination of partition number, name,
-> +  and UUID.
-> +
-> +maintainers:
-> +  - Daniel Golle <daniel@makrotopia.org>
-> +
-> +properties:
-> +  $nodename:
-> +    pattern: '^block-partition-.+$'
-> +
-> +  partnum:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      Matches partition by number if present.
-> +
-> +  partname:
-> +    $ref: /schemas/types.yaml#/definitions/string
-> +    description:
-> +      Matches partition by PARTNAME if present.
-
-In the mtd world we originally had the partition nodes directly under
-the hardware device node as well. That was changed to put a
-partitions subnode between the hardware device node and the partitions.
-
-From fe2585e9c29a ("doc: dt: mtd: support partitions in a special
-'partitions' subnode"):
-
-    To avoid conflict with other drivers using subnodes of the mtd device
-    create only one ofpart-specific node rather than any number of
-    arbitrary partition subnodes.
-
-Does it make sense to do the same for block devices?
+Hm, looking at the example in 5/8 it seems you've already done that. I
+think I have misread the binding.
 
 Sascha
+
 
 -- 
 Pengutronix e.K.                           |                             |
