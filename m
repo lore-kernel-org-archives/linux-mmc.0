@@ -1,67 +1,82 @@
 Received: from madrid.collaboradmins.com (madrid.collaboradmins.com [46.235.227.194])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E7BA85295;
-	Thu,  7 Mar 2024 12:24:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B30711B94D;
+	Thu,  7 Mar 2024 14:49:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.235.227.194
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709814294; cv=none; b=eJnnnAWuHf6W5QHq+AwVXlZ+trX1y74YPvRaajiVX1T9nmxEgby9qyASySXQ36B0pAe1zdEZ7M/K3c5CocUg9B78GnHy3po2iMWhuiunRYQJYXHIDIHH3lmspJk3/or4Aa9sgWc3cOZx9k+IoJHfwjdgnQlNPDyFNYO41HhM3qM=
+	t=1709822998; cv=none; b=OfELjcdkE6G/wBTcZ2PLx8ac/q/qu+YGJZVcP17TaSjvLW4rQS0g5jCUA4IX4oo3rA3+aPuZuoS9+lulKCm2fXCV2J48xPrjiYUCZ/RGun+NER0tznUw65KMyI8IvZf/T4Uu6p+vINKV/47vhglqiBUXVDrv9KH3K47tUR8ej0k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709814294; c=relaxed/simple;
-	bh=GeDCv05FUk6VAu26Fny7eeNMfK1OboweY8V19O6PpB4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kMmnoXFcsLNkCiC/SgzX74GOfV9a5xHFQ1jFg9p2VVodyzmYkbnFkS1slOt4LcebBfPm5t9LxuoKilhGS/ejydPVQw5E8zOzVphfkl8f69Jjqxz0aPI+yR1G/S95t3aCvlapXNYK3Ad+zEB2DvByli7jW1wsOfijM/ZvPYk0lGA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=GSVwWOHm; arc=none smtp.client-ip=46.235.227.194
+	s=arc-20240116; t=1709822998; c=relaxed/simple;
+	bh=m7rJ+0egJzJtARHOsYtJ2DtjkXer4oCX2aD/B5er6ws=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=gDo+rlk38MB0cm36Um08FxHrkmXaMUqFpeFxHU8C2s1XtPrEh2l9fI89+6TTR4XXeI/eT0TVVU7hbx9rmf7YajBWUhrmCIfJq6MUJF5T2aNl9/5lqZjt9lT5qyAA5+cSRQNGaJUIRK62TvoVRHDgu/PJsPbRbzMRZX1nLtaMq9Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=SIOLXPmq; arc=none smtp.client-ip=46.235.227.194
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=collabora.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="GSVwWOHm"
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="SIOLXPmq"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1709814290;
-	bh=GeDCv05FUk6VAu26Fny7eeNMfK1OboweY8V19O6PpB4=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=GSVwWOHm1IqBMye0E00ZbYyzFuL0x15cxeZJrv4iV43R3f965Wct9hDsk4aZj7zDO
-	 q5UuPnHeUfW7ebTAGrGrxVvPeNyU3i8Fprj+qJz0y84epD2ChxdzE9pIB3QE/FbPF1
-	 pNtLgt8WHCFaDkpGfp6DV7is7ZTUX0llyH/0qYrAeKonxxSK8kju4axz7vcDuVioPf
-	 LvKAg5VFe9zQY4b1aqCA45o9qUVybpHGnMj2/9ytOTfTXSDBFWVw9rAj5PolElFXHg
-	 hMc4dyrwnNho6vJ2iX1wXRm26pA0qiXEUcuOBI4nxi9nXsGS7bH87DLJ6q0GdxLj/o
-	 2/ltSSof8dbcA==
-Received: from [100.113.186.2] (cola.collaboradmins.com [195.201.22.229])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	s=mail; t=1709822994;
+	bh=m7rJ+0egJzJtARHOsYtJ2DtjkXer4oCX2aD/B5er6ws=;
+	h=From:To:Cc:Subject:Date:From;
+	b=SIOLXPmqlTB70ND8BsPLGSLGfYA5mqSbmj9DKqb7/LD/nM5YLUUVR3ChCcuYr7Mxt
+	 cfN0gc8t2z6aAJihuUIi4pRI82RNIoCGutJJv6rwVJ1IuMJ71ryILSSLi2lbtIh5vr
+	 RdmsRCDa6/wbO6fhjctv0VIUE2EBNZjFO3lsBTkDO6QRKdKsWwyDTGvJFOsDYjMdK8
+	 iR1MVYmcoNIrx/Jxcjg9MYGrhiPXqN/QxXeQeWrgNEfwjMFBScCwf4LA5t1DbYoot3
+	 SY/sPFn+Agnxz3Z4KVI8Bpt1MH0LxqeOAHtUcr0Uty+jhr/YX16vk7LX5OFiqJ2PHD
+	 yTAkhiFlrVr2g==
+Received: from localhost.localdomain (broslavsky.collaboradmins.com [68.183.210.73])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by madrid.collaboradmins.com (Postfix) with ESMTPSA id 34F5837810CD;
-	Thu,  7 Mar 2024 12:24:50 +0000 (UTC)
-Message-ID: <b5bbfeba-1da7-4a27-a793-fb8170fca6bd@collabora.com>
-Date: Thu, 7 Mar 2024 13:24:49 +0100
+	(Authenticated sender: usama.anjum)
+	by madrid.collaboradmins.com (Postfix) with ESMTPSA id 4C5FE37820DA;
+	Thu,  7 Mar 2024 14:49:51 +0000 (UTC)
+From: Muhammad Usama Anjum <usama.anjum@collabora.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	tianshuliang <tianshuliang@hisilicon.com>,
+	Shawn Guo <shawn.guo@linaro.org>,
+	Jiancheng Xue <xuejiancheng@hisilicon.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Muhammad Usama Anjum <usama.anjum@collabora.com>,
+	kernel@collabora.com,
+	kernel-janitors@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: dw_mmc: remove unneeded assignment
+Date: Thu,  7 Mar 2024 19:50:13 +0500
+Message-Id: <20240307145013.2721326-1-usama.anjum@collabora.com>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: dw_mmc: remove unneeded assignment
-Content-Language: en-US
-To: Muhammad Usama Anjum <usama.anjum@collabora.com>,
- Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Yang Xiwen <forbidden405@outlook.com>
-Cc: kernel@collabora.com, kernel-janitors@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20240307122129.2359553-1-usama.anjum@collabora.com>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20240307122129.2359553-1-usama.anjum@collabora.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-Il 07/03/24 13:21, Muhammad Usama Anjum ha scritto:
-> The err is being set to 0 and replaced every time after this
-> assignment. Remove this assignment as it is extraneous.
-> 
-> Fixes: 25d043841db1 ("mmc: dw_mmc: add support for hi3798mv200")
-> Signed-off-by: Muhammad Usama Anjum <usama.anjum@collabora.com>
+The err is being set to 0 and replaced every time after this
+assignment. Remove this assignment as it is extraneous.
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Fixes: e382ab741252 ("mmc: dw_mmc: add support for hi3798cv200 specific extensions of dw-mshc")
+Signed-off-by: Muhammad Usama Anjum <usama.anjum@collabora.com>
+---
+ drivers/mmc/host/dw_mmc-hi3798cv200.c | 1 -
+ 1 file changed, 1 deletion(-)
 
+diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+index 61923a5183693..6099756e59b3c 100644
+--- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
++++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+@@ -87,7 +87,6 @@ static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
+ 			goto tuning_out;
+ 
+ 		prev_err = err;
+-		err = 0;
+ 	}
+ 
+ tuning_out:
+-- 
+2.39.2
 
