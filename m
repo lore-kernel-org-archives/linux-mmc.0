@@ -1,102 +1,111 @@
-Received: from mx1.t-argos.ru (mx1.t-argos.ru [109.73.34.58])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A1BB1A29A;
-	Thu,  7 Mar 2024 08:53:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=109.73.34.58
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC4FD839F6
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Mar 2024 10:57:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709801629; cv=none; b=KAfWoEzzes8lcVkhShTNGtWQZvBhyVXxB4Y4BjHYnQBSysdIv1vFjZBgg1sh/Vx3PrUamOu3yC1jk7bX6mdpIdQhqPYr98iePf2y/VP550D5qlk7xuk7oAa0gT6AhNXz3Ow0h/wKmFxEi5kz4xU1NiuwQeuRxG+ThRac2ZLuNKY=
+	t=1709809075; cv=none; b=Ol68CiahKMPnugrHZ4jD3vwtuBQtdKWFKXJ5FMjww9cwQATsFjtyGqOtXBPYG1VeEL21xHiRnGWQ4moRVnFtyB0frlN8WNDw8vB47RVWSWUO2OKJ9tg7V4jxxlWnaFmBzyVlY+ilg8PCaoSv37fFqit7Wa6XjlJOYgH6+cUxQwQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709801629; c=relaxed/simple;
-	bh=apfVStlB67TMYQsd9dI7ItflrhUjMPLZgwzzdIWFtL0=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=JeQC9y7NwTGi93dj53b00McRUMHXNAj1DMjGYNm78kv8ngDN38HnuD2GVUaM71UXm2MOEHbvsb1cjV5WdnG9JbaEWaIissl5AiRlvhaQEKtq9Z5SJGfHE8Tc3wXUJQuEJwrcgWOW0NZ+7J9qm73Kcop+S5u3JYK/mJ283rZpdfc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=t-argos.ru; spf=pass smtp.mailfrom=t-argos.ru; dkim=pass (2048-bit key) header.d=t-argos.ru header.i=@t-argos.ru header.b=rMyCNR0z; arc=none smtp.client-ip=109.73.34.58
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=t-argos.ru
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=t-argos.ru
+	s=arc-20240116; t=1709809075; c=relaxed/simple;
+	bh=/fiBZaDVI8D+68biIo4CAt/ib/Y3X7aN1Tu1p+7XeA4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=egSMAeDqOv5sbB0OvxP2YbV7amd7BAp/6OxAW0gUodiwrtBkdIrmiTdV+2nxyTrquAwgf3Z4sdkahVhanM1Ff7lMvGUCSIxB3nSho7U/0jQHbs70yQfwYjPjQJdE/mxz6gUFOzkV35/WAgdNBfwa0OBnvl6Uh31mJ/AvDvmrutY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=potKs36F; arc=none smtp.client-ip=209.85.219.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=t-argos.ru header.i=@t-argos.ru header.b="rMyCNR0z"
-Received: from mx1.t-argos.ru (localhost [127.0.0.1])
-	by mx1.t-argos.ru (Postfix) with ESMTP id 36461100003;
-	Thu,  7 Mar 2024 11:53:26 +0300 (MSK)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=t-argos.ru; s=mail;
-	t=1709801606; bh=IYuDKE6wcngSlBLZHMJobm5rVJjSjgr3vxQlOD53g1c=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type;
-	b=rMyCNR0zFhyLlOc2MRl+YKdk76rC3tIWU7SmtOaCalG+XTYZw/8E5Y4bzYfcd8WlG
-	 OUvmt2zp7eW1m7MFCjrx5F5enQo4rgjRUFmOobF+4jIiyUx9DcWDaLeJX11EFZ82rY
-	 5QBR+mPzNK5EbxL4jIaAOC+Ms8dDSJzs2KFMcfYjytLm8ySjeT62Sw53ypmwQy4VsG
-	 KtxFpJAFHha6QTsp7YjJb6OI7btwFvsaihxwappOwcDH0bDHgajQoRhMlXR/7SUirP
-	 e8qOCOHEtPGj2eN8b27A+rVgYo6UQU2HU2LkXTer6jFOwgQEcIapgGZjWA2rSS4e/K
-	 XfPUchdodPZTQ==
-Received: from mx1.t-argos.ru.ru (mail.t-argos.ru [172.17.13.212])
-	by mx1.t-argos.ru (Postfix) with ESMTP;
-	Thu,  7 Mar 2024 11:52:45 +0300 (MSK)
-Received: from localhost.localdomain (172.17.215.6) by ta-mail-02
- (172.17.13.212) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.4; Thu, 7 Mar 2024
- 11:51:53 +0300
-From: Aleksandr Mishin <amishin@t-argos.ru>
-To: Jaehoon Chung <jh80.chung@samsung.com>
-CC: Aleksandr Mishin <amishin@t-argos.ru>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Wen Zhiwei <wenzhiwei@kylinos.cn>,
-	<linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<lvc-project@linuxtesting.org>
-Subject: [PATCH] mmc: dw_mmc: Fix potential null pointer risk
-Date: Thu, 7 Mar 2024 11:51:35 +0300
-Message-ID: <20240307085135.16245-1-amishin@t-argos.ru>
-X-Mailer: git-send-email 2.30.2
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="potKs36F"
+Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dc742543119so708567276.0
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Mar 2024 02:57:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1709809073; x=1710413873; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZNxbMXYwIPnmt8O7zwgRdhBxxDwkUuvEtABz+BytD3g=;
+        b=potKs36FdQiGFwxfytailT+Lu0noLufeLXha3aRGfKtkhnTwieaGFB/pg9SlT7GznM
+         MyDgILKuOCzHPja4SkFVZ2cl0GrK+Rg6mSAiTs6MZ2z/F6t8AibQyoqSkP2PnEVgfZQu
+         kc18sRW6RjvQNMMQ1kVg7uk50bKDEu6lldroabwit4Jgs/i0ZVwM7muRepVtTV8u6134
+         LRYRhaCrWpQlin94RwpuoyV5/pvCjwGDXLkSWjkw7rInz/utmy2IdES9+0qdIT6U+/Kp
+         adV4ctS6miq3eOX5NOUNz697Um8mRklyV7uzqZ+tb7v9CpWSdj2fOHhrUOOkMIRVQdug
+         Lxbg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709809073; x=1710413873;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ZNxbMXYwIPnmt8O7zwgRdhBxxDwkUuvEtABz+BytD3g=;
+        b=GMdP3KwPKP6F/n4lWdocHBNa9Yj/wZLC5NltD2rykZgXkWfxOYpnEdvEYCOHh1Xu0J
+         LPR3t2Nfl8thjcwPENFZoUaj7Tw16oXE5t/dCUur/2KHZ5KbulW/dZnHKD1RbgVAfPaF
+         Xmfb9A3BvrrswOOt7OT1f3QMXn7ey54Sz6eQAzf35D65XYGTRBcbY2juokwi8IfhAD7r
+         J+PjdAtcBeJk+SCQldC/hWI45WOXZ1pPXaYVfjAPClYgcjQT2iw4Tr+flYOgDtiiCS3h
+         /8yhAJQqqprrk+cLEsIuzvCkwbhFyNKz6/zHwcKErVuUR8Xe3oXuAXUzkW4iR5Mwtrhf
+         Bbrw==
+X-Forwarded-Encrypted: i=1; AJvYcCWpi55tRDrlMwmdIFPwhHxKUZm3U3BKUdYhdcfhpX48aEN4Tg7JuR5KiMfJ4k6JY9Vg2XlBMZCudfBq4ka0jogoaNTiw1nCNPL+
+X-Gm-Message-State: AOJu0YxESZMHVCLiBr9wAaMRuQDqVDj8xe5kqELXj6Xp+P3MmQ0ZfX9v
+	8j619byWVdIi6UG/7txAdtslKPrJcJjZHfsBU1ENQX++kURYnbZxRaYuwgJ2TzGaO/jZrBS2kGC
+	dSEW/lDXhqfwXr624lvALamLBk18GuJD6zcpiLA==
+X-Google-Smtp-Source: AGHT+IEI8kispC//A1bCKjmVv5onGnRwEMCzuKG8Vfr/1UKLJdm/uHCFvoMXjzgrc6VtDDnVDrYtTnGU/SyINCrOfrc=
+X-Received: by 2002:a25:83cd:0:b0:dd0:453b:485e with SMTP id
+ v13-20020a2583cd000000b00dd0453b485emr9701343ybm.58.1709809072881; Thu, 07
+ Mar 2024 02:57:52 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: ta-mail-02.ta.t-argos.ru (172.17.13.212) To ta-mail-02
- (172.17.13.212)
-X-KSMG-Rule-ID: 1
-X-KSMG-Message-Action: clean
-X-KSMG-AntiSpam-Lua-Profiles: 184022 [Mar 07 2024]
-X-KSMG-AntiSpam-Version: 6.1.0.3
-X-KSMG-AntiSpam-Envelope-From: amishin@t-argos.ru
-X-KSMG-AntiSpam-Rate: 0
-X-KSMG-AntiSpam-Status: not_detected
-X-KSMG-AntiSpam-Method: none
-X-KSMG-AntiSpam-Auth: dkim=none
-X-KSMG-AntiSpam-Info: LuaCore: 9 0.3.9 e923e63e431b6489f12901471775b2d1b59df0ba, {Tracking_from_domain_doesnt_match_to}, 127.0.0.199:7.1.2;mx1.t-argos.ru.ru:7.1.1;t-argos.ru:7.1.1;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1, FromAlignment: s
-X-MS-Exchange-Organization-SCL: -1
-X-KSMG-AntiSpam-Interceptor-Info: scan successful
-X-KSMG-AntiPhishing: Clean, bases: 2024/03/07 07:53:00
-X-KSMG-AntiVirus: Kaspersky Secure Mail Gateway, version 1.1.2.30, bases: 2024/03/07 06:26:00 #24026065
-X-KSMG-AntiVirus-Status: Clean, skipped
+References: <20240307085135.16245-1-amishin@t-argos.ru>
+In-Reply-To: <20240307085135.16245-1-amishin@t-argos.ru>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 7 Mar 2024 11:57:16 +0100
+Message-ID: <CAPDyKFoYRT=P+4L+5ciNPxEHcS7hoXPef__NQoodxkSy=39Teg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix potential null pointer risk
+To: Aleksandr Mishin <amishin@t-argos.ru>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Wen Zhiwei <wenzhiwei@kylinos.cn>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	lvc-project@linuxtesting.org
+Content-Type: text/plain; charset="UTF-8"
 
-In dw_mci_runtime_resume() 'host->slot' could be null, but check is not cover all corresponding code.
-Fix this bug by changing check place.
+On Thu, 7 Mar 2024 at 09:53, Aleksandr Mishin <amishin@t-argos.ru> wrote:
+>
+> In dw_mci_runtime_resume() 'host->slot' could be null, but check is not cover all corresponding code.
+> Fix this bug by changing check place.
 
-Found by Linux Verification Center (linuxtesting.org) with SVACE.
+In fact host->slot can never be NULL in dw_mci_runtime_resume() or in
+dw_mci_runtime_suspend().
 
-Fixes: 4a835afd808a (mmc: dw_mmc: Fix potential null pointer risk)
-Signed-off-by: Aleksandr Mishin <amishin@t-argos.ru>
----
- drivers/mmc/host/dw_mmc.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+A better fix would thus be to remove the redundant checks.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 829af2c98a44..a4f124452abc 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3570,8 +3570,10 @@ int dw_mci_runtime_resume(struct device *dev)
- 		   DW_MCI_ERROR_FLAGS);
- 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
- 
-+	if (!host->slot)
-+		goto err;
- 
--	if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
-+	if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
- 		dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
- 
- 	/* Force setup bus to guarantee available clock output */
--- 
-2.30.2
+Kind regards
+Uffe
 
+>
+> Found by Linux Verification Center (linuxtesting.org) with SVACE.
+>
+> Fixes: 4a835afd808a (mmc: dw_mmc: Fix potential null pointer risk)
+> Signed-off-by: Aleksandr Mishin <amishin@t-argos.ru>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 829af2c98a44..a4f124452abc 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3570,8 +3570,10 @@ int dw_mci_runtime_resume(struct device *dev)
+>                    DW_MCI_ERROR_FLAGS);
+>         mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+>
+> +       if (!host->slot)
+> +               goto err;
+>
+> -       if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+> +       if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+>                 dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
+>
+>         /* Force setup bus to guarantee available clock output */
+> --
+> 2.30.2
+>
+>
