@@ -1,199 +1,102 @@
-Received: from wfout3-smtp.messagingengine.com (wfout3-smtp.messagingengine.com [64.147.123.146])
+Received: from mx1.t-argos.ru (mx1.t-argos.ru [109.73.34.58])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 943B06310B;
-	Thu,  7 Mar 2024 07:52:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.146
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A1BB1A29A;
+	Thu,  7 Mar 2024 08:53:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=109.73.34.58
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709797978; cv=none; b=nbL/wYOzqPspGAbhJyagmYxezPzrY7Orxc13fYaRguDzvaONrHvzdgRZFmxGVgTe9H3eesr+rcO12B6u8SMaQ16fEM6AWW97Fk8F3EWU8enRfzkNdiNaZEnA5AuTLkVXLnaN6frT16Ynlov+16Tyr9VGZRuGS7ia/zBfMiXAMeE=
+	t=1709801629; cv=none; b=KAfWoEzzes8lcVkhShTNGtWQZvBhyVXxB4Y4BjHYnQBSysdIv1vFjZBgg1sh/Vx3PrUamOu3yC1jk7bX6mdpIdQhqPYr98iePf2y/VP550D5qlk7xuk7oAa0gT6AhNXz3Ow0h/wKmFxEi5kz4xU1NiuwQeuRxG+ThRac2ZLuNKY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709797978; c=relaxed/simple;
-	bh=2fjs0v2lhXf14YMF73sZlJKN1KHNF0BScIknj0t3qLY=;
-	h=MIME-Version:Message-Id:In-Reply-To:References:Date:From:To:Cc:
-	 Subject:Content-Type; b=EsxNCSoj0W4zuRbqJUcf0BdZv5JZVw5EdduOqjZgw1Ur44/3+PcdrUqO5Had3HBb8TsDC7bGlxnwWLhjLSTXu0kuImiz73Zh4N/inI8M6V4KwSxvVYQSu91CT16MsUaQF0KEecDz3hkyluPGatdMwPEeikc8zAgOEhQnWK77mus=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=O67iqBrZ; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=S2cjqQWy; arc=none smtp.client-ip=64.147.123.146
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	s=arc-20240116; t=1709801629; c=relaxed/simple;
+	bh=apfVStlB67TMYQsd9dI7ItflrhUjMPLZgwzzdIWFtL0=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=JeQC9y7NwTGi93dj53b00McRUMHXNAj1DMjGYNm78kv8ngDN38HnuD2GVUaM71UXm2MOEHbvsb1cjV5WdnG9JbaEWaIissl5AiRlvhaQEKtq9Z5SJGfHE8Tc3wXUJQuEJwrcgWOW0NZ+7J9qm73Kcop+S5u3JYK/mJ283rZpdfc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=t-argos.ru; spf=pass smtp.mailfrom=t-argos.ru; dkim=pass (2048-bit key) header.d=t-argos.ru header.i=@t-argos.ru header.b=rMyCNR0z; arc=none smtp.client-ip=109.73.34.58
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=t-argos.ru
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=t-argos.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="O67iqBrZ";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="S2cjqQWy"
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-	by mailfout.west.internal (Postfix) with ESMTP id 46B471C0005B;
-	Thu,  7 Mar 2024 02:52:54 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute5.internal (MEProxy); Thu, 07 Mar 2024 02:52:55 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-type:content-type:date:date:from:from:in-reply-to
-	:in-reply-to:message-id:mime-version:references:reply-to:subject
-	:subject:to:to; s=fm3; t=1709797973; x=1709884373; bh=afyLY/l9R7
-	0gs9c2KrRiUpws6jfz5mx+nYl8UbTp5B8=; b=O67iqBrZKpaHV9f/a0eC5OlCA0
-	kvni3QdUEAKVVe49BScYaENsrH2cr0ILUtEbLWtwItOaWdbJblTaesgY9AHlQ/95
-	y8oI0WINk+NBdahQDvNEGkPZU1+CGSeIIaXYLEGCtpdZKApnTdZ+/4kyfY4kt/k0
-	5RAG2PbqLlJ65xtBsAUCpk84uBcQ9HpNaRukIRnurUTYiHs/Eu3EwftCOHQlP9DD
-	jnuYLZZCqOM4wIoGMZviymtb5Xl4LPsbcKqtoX+aT9FVpfeRSFSVz1aVZc8NCZvc
-	IvdkvpAoQWPYnJFwVf/U71/Xmrtu+Yg8Jla/5bIloQ5L1dCoiOpr5KJ3hgnw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-type:content-type:date:date
-	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-	:message-id:mime-version:references:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-	fm1; t=1709797973; x=1709884373; bh=afyLY/l9R70gs9c2KrRiUpws6jfz
-	5mx+nYl8UbTp5B8=; b=S2cjqQWyS0Z1vUaCffjTUB4Af2LcwLMQ7UgF1khKCljU
-	pi/W0f58t5OKenZmRPdONVXFqjC+U6GrIbrEfxbg3LNA+wzcEmCHMLs8FvMV0I6Q
-	I1PGAMVhL8QT6Mr7dy/UcPJ1p9NkX2UWLKssTrAa4Bvj8ZBD/VPQ9QxWgnJdJLkD
-	6ZA8l0a0eoev7HliGWgpHGlKsO8C9Gg9rn6hhIam9wDVoSvt3JeUES8ogBHYGg5X
-	F2Y8z6+/vsJ/Kb4fkOL1IPshidNsbQORjiBaf+mH9O0v4jRa4+cp3/NX/HrYWIK/
-	xGRmNQEl/oZ89qsO7AyeqT7QT4j6ugA/UUQ5PhaHAQ==
-X-ME-Sender: <xms:VHLpZd67YGruW1Bk9nU_QnbfKrNMW43go98P3uV1LrB_EEqChHtdeA>
-    <xme:VHLpZa6NlzCjV-v276oagp-PJRYdhbZAAgLAK6C-6VDwedRSa4-7UUF7nF7MinW-8
-    9vyPUQWMysqZrqPgXw>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledriedvgdduudduucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
-    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
-    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
-    hrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:VHLpZUf_mVG7eglPqsXPeRpiRs4l4Amse2apiXIb5OApW0gNP5VgHg>
-    <xmx:VHLpZWLnQkaqTHWNduucbgPZr_IbCK13YEyIeetiALQOCdJChSLD-w>
-    <xmx:VHLpZRJV-ozFC3xj3XF-Q5SW0cRy1YKofRek_6VA71mWTzRPsXnEHg>
-    <xmx:VXLpZa6uxoGRkGneynLHOLw9bClFEiDKqksPaqouNdWlCTu2vCJhC34ogSI>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-	id 91795B6008D; Thu,  7 Mar 2024 02:52:52 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.11.0-alpha0-251-g8332da0bf6-fm-20240305.001-g8332da0b
+	dkim=pass (2048-bit key) header.d=t-argos.ru header.i=@t-argos.ru header.b="rMyCNR0z"
+Received: from mx1.t-argos.ru (localhost [127.0.0.1])
+	by mx1.t-argos.ru (Postfix) with ESMTP id 36461100003;
+	Thu,  7 Mar 2024 11:53:26 +0300 (MSK)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=t-argos.ru; s=mail;
+	t=1709801606; bh=IYuDKE6wcngSlBLZHMJobm5rVJjSjgr3vxQlOD53g1c=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type;
+	b=rMyCNR0zFhyLlOc2MRl+YKdk76rC3tIWU7SmtOaCalG+XTYZw/8E5Y4bzYfcd8WlG
+	 OUvmt2zp7eW1m7MFCjrx5F5enQo4rgjRUFmOobF+4jIiyUx9DcWDaLeJX11EFZ82rY
+	 5QBR+mPzNK5EbxL4jIaAOC+Ms8dDSJzs2KFMcfYjytLm8ySjeT62Sw53ypmwQy4VsG
+	 KtxFpJAFHha6QTsp7YjJb6OI7btwFvsaihxwappOwcDH0bDHgajQoRhMlXR/7SUirP
+	 e8qOCOHEtPGj2eN8b27A+rVgYo6UQU2HU2LkXTer6jFOwgQEcIapgGZjWA2rSS4e/K
+	 XfPUchdodPZTQ==
+Received: from mx1.t-argos.ru.ru (mail.t-argos.ru [172.17.13.212])
+	by mx1.t-argos.ru (Postfix) with ESMTP;
+	Thu,  7 Mar 2024 11:52:45 +0300 (MSK)
+Received: from localhost.localdomain (172.17.215.6) by ta-mail-02
+ (172.17.13.212) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.4; Thu, 7 Mar 2024
+ 11:51:53 +0300
+From: Aleksandr Mishin <amishin@t-argos.ru>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+CC: Aleksandr Mishin <amishin@t-argos.ru>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Wen Zhiwei <wenzhiwei@kylinos.cn>,
+	<linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<lvc-project@linuxtesting.org>
+Subject: [PATCH] mmc: dw_mmc: Fix potential null pointer risk
+Date: Thu, 7 Mar 2024 11:51:35 +0300
+Message-ID: <20240307085135.16245-1-amishin@t-argos.ru>
+X-Mailer: git-send-email 2.30.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Message-Id: <8896bcc5-09b1-4886-9081-c8ce0afc1c40@app.fastmail.com>
-In-Reply-To: <20240306232052.21317-1-semen.protsenko@linaro.org>
-References: <20240306232052.21317-1-semen.protsenko@linaro.org>
-Date: Thu, 07 Mar 2024 08:52:31 +0100
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "Sam Protsenko" <semen.protsenko@linaro.org>,
- "Jaehoon Chung" <jh80.chung@samsung.com>,
- "Ulf Hansson" <ulf.hansson@linaro.org>, "Christoph Hellwig" <hch@lst.de>
-Cc: "Chris Ball" <cjb@laptop.org>, "Will Newton" <will.newton@gmail.com>,
- "Matt Fleming" <matt@console-pimps.org>,
- "Christian Brauner" <brauner@kernel.org>, "Jens Axboe" <axboe@kernel.dk>,
- "Sumit Semwal" <sumit.semwal@linaro.org>,
- "Dan Carpenter" <dan.carpenter@linaro.org>,
- "Anders Roxell" <anders.roxell@linaro.org>,
- "Naresh Kamboju" <naresh.kamboju@linaro.org>,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- linux-block <linux-block@vger.kernel.org>, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K
+Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
+X-ClientProxiedBy: ta-mail-02.ta.t-argos.ru (172.17.13.212) To ta-mail-02
+ (172.17.13.212)
+X-KSMG-Rule-ID: 1
+X-KSMG-Message-Action: clean
+X-KSMG-AntiSpam-Lua-Profiles: 184022 [Mar 07 2024]
+X-KSMG-AntiSpam-Version: 6.1.0.3
+X-KSMG-AntiSpam-Envelope-From: amishin@t-argos.ru
+X-KSMG-AntiSpam-Rate: 0
+X-KSMG-AntiSpam-Status: not_detected
+X-KSMG-AntiSpam-Method: none
+X-KSMG-AntiSpam-Auth: dkim=none
+X-KSMG-AntiSpam-Info: LuaCore: 9 0.3.9 e923e63e431b6489f12901471775b2d1b59df0ba, {Tracking_from_domain_doesnt_match_to}, 127.0.0.199:7.1.2;mx1.t-argos.ru.ru:7.1.1;t-argos.ru:7.1.1;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1, FromAlignment: s
+X-MS-Exchange-Organization-SCL: -1
+X-KSMG-AntiSpam-Interceptor-Info: scan successful
+X-KSMG-AntiPhishing: Clean, bases: 2024/03/07 07:53:00
+X-KSMG-AntiVirus: Kaspersky Secure Mail Gateway, version 1.1.2.30, bases: 2024/03/07 06:26:00 #24026065
+X-KSMG-AntiVirus-Status: Clean, skipped
 
-On Thu, Mar 7, 2024, at 00:20, Sam Protsenko wrote:
-> Commit 616f87661792 ("mmc: pass queue_limits to blk_mq_alloc_disk") [1]
-> revealed the long living issue in dw_mmc.c driver, existing since the
-> time when it was first introduced in commit f95f3850f7a9 ("mmc: dw_mmc:
-> Add Synopsys DesignWare mmc host driver."), also making kernel boot
-> broken on platforms using dw_mmc driver with 16K or 64K pages enabled,
-> with this message in dmesg:
->
->     mmcblk: probe of mmc0:0001 failed with error -22
->
-> That's happening because mmc_blk_probe() fails when it calls
-> blk_validate_limits() consequently, which returns the error due to
-> failed max_segment_size check in this code:
->
->     /*
->      * The maximum segment size has an odd historic 64k default that
->      * drivers probably should override.  Just like the I/O size we
->      * require drivers to at least handle a full page per segment.
->      */
->     ...
->     if (WARN_ON_ONCE(lim->max_segment_size < PAGE_SIZE))
->         return -EINVAL;
->
-> In case when IDMAC (Internal DMA Controller) is used, dw_mmc.c always
-> sets .max_seg_size to 4 KiB:
->
->     mmc->max_seg_size = 0x1000;
->
-> The comment in the code above explains why it's incorrect. Arnd
-> suggested setting .max_seg_size to .max_req_size to fix it, which is
-> also what some other drivers are doing:
->
->    $ grep -rl 'max_seg_size.*=.*max_req_size' drivers/mmc/host/ | \
->      wc -l
->    18
+In dw_mci_runtime_resume() 'host->slot' could be null, but check is not cover all corresponding code.
+Fix this bug by changing check place.
 
-Nice summary!
+Found by Linux Verification Center (linuxtesting.org) with SVACE.
 
-> This change is not only fixing the boot with 16K/64K pages, but also
-> leads to a better MMC performance. The linear write performance was
-> tested on E850-96 board (eMMC only), before commit [1] (where it's
-> possible to boot with 16K/64K pages without this fix, to be able to do
-> a comparison). It was tested with this command:
->
->     # dd if=/dev/zero of=somefile bs=1M count=500 oflag=sync
->
-> Test results are as follows:
->
->   - 4K pages,  .max_seg_size = 4 KiB:                   94.2 MB/s
->   - 4K pages,  .max_seg_size = .max_req_size = 512 KiB: 96.9 MB/s
->   - 16K pages, .max_seg_size = 4 KiB:                   126 MB/s
->   - 16K pages, .max_seg_size = .max_req_size = 2 MiB:   128 MB/s
->   - 64K pages, .max_seg_size = 4 KiB:                   138 MB/s
->   - 64K pages, .max_seg_size = .max_req_size = 8 MiB:   138 MB/s
+Fixes: 4a835afd808a (mmc: dw_mmc: Fix potential null pointer risk)
+Signed-off-by: Aleksandr Mishin <amishin@t-argos.ru>
+---
+ drivers/mmc/host/dw_mmc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Thanks for sharing these results. From what I can see here, the
-performance changes significantly with the page size, but barely
-with the max_seg_size, so this does not have the effect I was
-hoping for. On a more positive note this likely means that we
-don't have to urgently backport your fix.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 829af2c98a44..a4f124452abc 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3570,8 +3570,10 @@ int dw_mci_runtime_resume(struct device *dev)
+ 		   DW_MCI_ERROR_FLAGS);
+ 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+ 
++	if (!host->slot)
++		goto err;
+ 
+-	if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
++	if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+ 		dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
+ 
+ 	/* Force setup bus to guarantee available clock output */
+-- 
+2.30.2
 
-This could mean that either there is not much coalescing across
-pages after all, or that the bottleneck is somewhere else.
-
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 8e2d676b9239..cccd5633ff40 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2951,8 +2951,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
->  	if (host->use_dma == TRANS_MODE_IDMAC) {
->  		mmc->max_segs = host->ring_size;
->  		mmc->max_blk_size = 65535;
-> -		mmc->max_seg_size = 0x1000;
-> -		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
-> +		mmc->max_req_size = DW_MCI_DESC_DATA_LENGTH * host->ring_size;
-> +		mmc->max_seg_size = mmc->max_req_size;
-
-The change looks good to me.
-
-I see that the host->ring_size depends on PAGE_SIZE as well:
-
-#define DESC_RING_BUF_SZ        PAGE_SIZE
-host->ring_size = DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
-host->sg_cpu = dmam_alloc_coherent(host->dev,
-               DESC_RING_BUF_SZ, &host->sg_dma, GFP_KERNEL);
-
-I don't see any reason for the ring buffer size to be tied to
-PAGE_SIZE at all, it was probably picked as a reasonable
-default in the initial driver but isn't necessarily ideal.
-
-From what I can see, the number of 4KB elements in the
-ring can be as small as 128 (4KB pages, 64-bit addresses)
-or as big as 4096 (64KB pages, 32-bit addresses), which is
-quite a difference. If you are still motivated to drill
-down into this, could you try changing DESC_RING_BUF_SZ
-to a fixed size of either 4KB or 64KB and test again
-with the opposite page size, to see if that changes the
-throughput?
-
-If a larger ring buffer gives us significantly better
-throughput, we may want to always use a higher number
-independent of page size. On the other hand, if the
-64KB number (the 138MB/s) does not change with a smaller
-ring, we may as well reduce that in order to limit the
-maximum latency that is caused by a single I/O operation.
-
-     Arnd
