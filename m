@@ -1,54 +1,57 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC69C12A17C;
-	Thu,  7 Mar 2024 11:46:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F393782891;
+	Thu,  7 Mar 2024 12:19:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709811966; cv=none; b=MUVE8aTyW7+35bDhl5dL5AbFZSsYgpkgFRyDM2iSfkxGkXUo2i+MMmMq+z81SO8aHvYNUouFUq+b8Q29lcCCUwdAzl6fRjek5n3zaNHp003sarDeXVBm8Od4xbMzd9SkuFO3J9yMZYBdiCbrFIsUauZzJnZKVm7z2BSm/V8Ha0U=
+	t=1709813958; cv=none; b=muYLZan/6hTR83yIIEhTeEMeSAv7dhIMARyo3DOcBPQcjhbQWBDHAvGow8jRPcBOL/qyLiyCjUfGbwNMOzTzuNEKJge28nzuabAoEAevH4IHx9wZllve+IfBcfu7YFMip3ownf6JFpmt2AlUhziRbUe7rNTAMSznocHNeNfZ9P4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709811966; c=relaxed/simple;
-	bh=k0dfvN+tJI0XvVJH0dc1wQ6kuOATkinoihSnqNDjaq4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LYh3mAoFx0eeC4XCOJxNTR/Bcp2tAkGTqLg/xzhhxjTe9nb8oOOSM/Kv+xo7jflt5pLQlEQVmn3ja7qtW7D8aeWyXuGG8TQ10xnjbxEUUz1OZ9lZ1GTKNNoJ6yZdgontuPZg9merMEpjAyxkpKXU9RFGyhte2+7w/vQj8VxXzSs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=O1ACLfxR; arc=none smtp.client-ip=192.198.163.11
+	s=arc-20240116; t=1709813958; c=relaxed/simple;
+	bh=/+IFJS/KcSf7DigBEvxed/q/2MkAOrk0j7DkIz+cw78=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=KR5t1vBdFyNqjxHmIfdweDuMRlX3Ka264z/ckVoBvdP4OG2hMs8GT0EFWsBKamXrDOgCJnKUUuvrhnS8ewUlZTOLVfOaUZ9haBZgL4nmpQRrAA3YHfLs22N4rnYYsa58yY5OQXCnv9pgt1ShaL1ryWfLIbu2i4h42Af8YJ2pjz0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=IyV5mjcO; arc=none smtp.client-ip=192.198.163.17
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="O1ACLfxR"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="IyV5mjcO"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1709811965; x=1741347965;
+  t=1709813957; x=1741349957;
   h=from:to:cc:subject:date:message-id:mime-version:
    content-transfer-encoding;
-  bh=k0dfvN+tJI0XvVJH0dc1wQ6kuOATkinoihSnqNDjaq4=;
-  b=O1ACLfxRcBOZUd+n3Ssm6ds1k436dSiyN7fUkpb6mAtDGDwab5KXURh6
-   83io97IFAvKKI2p0Z8HK2K8zxHayEOuxaSZbRXfJMOjQPOGjj5yCROZPw
-   ybFQI0AwTsAoLD78RaAPFuiW+a+96USGLKT4Z1VZ2CZEn9JCZYOF1Llua
-   TBO8pjh5EYKDA2PYZBROg/gdAeu1p43O1IvDPs9XHa0HLqg9H2NqK7zsg
-   idCxY7AdAWe7Qq8+20xKrRMenYEXU4+8jLSJEfm2xk16FRaNJEBjO2eDx
-   e52mbBeDJfsB1Zuo8asbUrkF6jMzajcP/IXlfmENzFqqFdfwpsE5s8Udy
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,11005"; a="15120154"
+  bh=/+IFJS/KcSf7DigBEvxed/q/2MkAOrk0j7DkIz+cw78=;
+  b=IyV5mjcOx+DY33afnUgopBNTdYCTmpLcWOZJNI1Ao3Nx3kP/WDmtRg1m
+   wtEF7X+cv1v/aLn8XTK2el75A7iXJbWfhtgAnTrPVH2ZQ/IE3VNtzORCb
+   NA4Kg0Di6LJU26heAFXomFrmpDn5eNK9w6SD2E9FwDdY4SHV8wMLCgEmt
+   XKj3M3b6TaaUVLRV/fqtuCR7KGUt5YAoq/PN8RW8s9KElZDH/IQEhmxh8
+   PUIY+pPNY9Gwp6/Hqssz6SOiOMkszIO4nJ3M+XXWJIq9cHk8pZ5Me4haF
+   vgvzPLEkV6fMaBj4yG/n1B1TevUlnm2d6/qyPO/EdsBwwUpuHyjePMfsH
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,11005"; a="4342809"
 X-IronPort-AV: E=Sophos;i="6.07,211,1708416000"; 
-   d="scan'208";a="15120154"
+   d="scan'208";a="4342809"
 Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2024 03:46:04 -0800
+  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2024 04:19:16 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,11005"; a="937045884"
+X-IronPort-AV: E=McAfee;i="6600,9927,11005"; a="937045962"
 X-IronPort-AV: E=Sophos;i="6.07,211,1708416000"; 
-   d="scan'208";a="937045884"
+   d="scan'208";a="937045962"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga001.fm.intel.com with ESMTP; 07 Mar 2024 03:46:03 -0800
+  by fmsmga001.fm.intel.com with ESMTP; 07 Mar 2024 04:19:14 -0800
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-	id B11BD193; Thu,  7 Mar 2024 13:46:01 +0200 (EET)
+	id 370B9193; Thu,  7 Mar 2024 14:19:13 +0200 (EET)
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1 1/1] mmc: core: Remove unused of_gpio.h
-Date: Thu,  7 Mar 2024 13:46:00 +0200
-Message-ID: <20240307114600.3643948-1-andriy.shevchenko@linux.intel.com>
+Cc: Ben Dooks <ben-linux@fluff.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 1/1] mmc: sdhci-s3c: Replace deprecated of_get_named_gpio()
+Date: Thu,  7 Mar 2024 14:19:12 +0200
+Message-ID: <20240307121912.3676850-1-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.43.0.rc1.1.gbec44491f096
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -58,26 +61,44 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-of_gpio.h is deprecated and subject to remove.
-The driver doesn't use it, simply remove the unused header.
+It seems the of_get_named_gpio() is solely used to check
+if the GPIO is present in DT as the function can return 0
+if and only if it's present and it becomes in the global
+number space 0. But this quite likely shows that the code
+wasn't ever been tested on the systems when no GPIO is provided.
+In any case, the proper test is just to call of_property_present()
+without any attempts in requesting GPIO (as we haven't saved the
+number or descriptor anywhere in the code).
 
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/core/host.c | 1 -
- 1 file changed, 1 deletion(-)
+ drivers/mmc/host/sdhci-s3c.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 8f8781d6c25e..48bda70145ee 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -13,7 +13,6 @@
- #include <linux/err.h>
- #include <linux/idr.h>
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 0e8a8ac14e56..6493b0edba34 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -17,10 +17,8 @@
+ #include <linux/slab.h>
+ #include <linux/clk.h>
+ #include <linux/io.h>
+-#include <linux/gpio.h>
+ #include <linux/module.h>
  #include <linux/of.h>
 -#include <linux/of_gpio.h>
- #include <linux/pagemap.h>
- #include <linux/pm_wakeup.h>
- #include <linux/export.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+ 
+@@ -446,7 +444,7 @@ static int sdhci_s3c_parse_dt(struct device *dev,
+ 		return 0;
+ 	}
+ 
+-	if (of_get_named_gpio(node, "cd-gpios", 0))
++	if (of_property_present(node, "cd-gpios"))
+ 		return 0;
+ 
+ 	/* assuming internal card detect that will be configured by pinctrl */
 -- 
 2.43.0.rc1.1.gbec44491f096
 
