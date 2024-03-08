@@ -1,42 +1,32 @@
-Received: from mx1.t-argos.ru (mx1.t-argos.ru [109.73.34.58])
+Received: from out30-124.freemail.mail.aliyun.com (out30-124.freemail.mail.aliyun.com [115.124.30.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD4BC136675;
-	Thu,  7 Mar 2024 19:06:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=109.73.34.58
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7725139E;
+	Fri,  8 Mar 2024 00:56:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709838399; cv=none; b=AOpnAFdKt6oO5xyWnXXulCflS/m67RApz0Xq/XXzPaVDRu4M1MCcMH0FVyt50/HqMvYv4jHgNxqy8On+SzZWFvtBVtphLxecB9XzOyRYp5Qi5wFV5bOL1ZascmQKLSrwrscmsrx9YvjSCC/sQM2g0aWQEjqgbUya4dRqpwFFUcU=
+	t=1709859414; cv=none; b=InFFxAFXWM6wPEYdgAY+W5Frc5PObMRq/yBb/SiQZ57SPwTyA1FpFdWjRZatrLa6QMfFcM1XuDudRA49RUCMRX9+nD+FZOegAzz8BfHjUnUv3EP0LJvjzpSDTKA2In0a333gveQ/z4zxdfPddDAsKMwMVMnhZV2qL8YLrHpYeZQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709838399; c=relaxed/simple;
-	bh=jF6iduJGIE+O3Bkq9YrSC7eRZxghqOnr34T4ybioEe4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=m7zxx9YX6JagZPfZ12XHdp4sXt82iFQ0vpRKNwgtm0NJaj7NFZnrGJN13f4kOR4RNFrAOVsBczZ7Jun/VzD49Pc2yVdb/+hNGFcteb6Ia0DRs3qrR2raJORJ99ywi8fXSGYJG4cFkKC/HgdKTbONeIFfqrtCLl9Jq4svxRA5H3g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=t-argos.ru; spf=pass smtp.mailfrom=t-argos.ru; dkim=pass (2048-bit key) header.d=t-argos.ru header.i=@t-argos.ru header.b=qWS5xXLl; arc=none smtp.client-ip=109.73.34.58
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=t-argos.ru
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=t-argos.ru
+	s=arc-20240116; t=1709859414; c=relaxed/simple;
+	bh=SWG3S1OZuOH20AGyfh9tG4DkZfmkAUgGLb06Mf7VwI0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=mRD4PZvlKCaMzz0pugMJa4UIwU1GHalHUfWFlQLP3gznsg8JglFcoYvyOgK+DSTjeyaafMbJUpTJmMwEtGlylEX4qc5MtZLNqOq0k12dwW0ow7jJpNwTJMjksWNqqItj4tHyQ5m9kySD9ZVFoGs8mZDRZbFGEkCe0XrrxI6hDRo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=eGmaD0Bm; arc=none smtp.client-ip=115.124.30.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=t-argos.ru header.i=@t-argos.ru header.b="qWS5xXLl"
-Received: from mx1.t-argos.ru (localhost [127.0.0.1])
-	by mx1.t-argos.ru (Postfix) with ESMTP id 31C0E100003;
-	Thu,  7 Mar 2024 22:06:15 +0300 (MSK)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=t-argos.ru; s=mail;
-	t=1709838375; bh=CAvOEPtPFq6+eIgzAFJWMtkJyr4bIU2xSPDi8uBAnuY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
-	b=qWS5xXLl/V8vg8BJGHCJyaCIZChoxxuFF7FxrzEvzeFH7qBluOf1TpBh2p61QagHe
-	 QFgXChfsedVWvDwmgLQh5zYwXjbeaQ09meG5lx0yPk/8DYTdMtk1U2hQ+4Oclpcux7
-	 vxf8Grtn+KaP5xBq2DQiTw9txrm1YZrrKGYZr63Vay/oaSvok+yMN4e1w9qkCqbzRe
-	 we4SS4Yu2ZmKCb1uEOndz5xevCCdxCMdemI4O/1qlE21Nxe+5CAP1pcB1+G+zAnLgX
-	 JeVf411fPOff5qZVTzQq+DT/95W4N2qV0GSIU8kAPYDTH/g1Y/p5WjAso/yitCXX5k
-	 lFlLRjjnHU0iQ==
-Received: from mx1.t-argos.ru.ru (mail.t-argos.ru [172.17.13.212])
-	by mx1.t-argos.ru (Postfix) with ESMTP;
-	Thu,  7 Mar 2024 22:05:33 +0300 (MSK)
-Received: from [172.17.214.6] (172.17.214.6) by ta-mail-02 (172.17.13.212)
- with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.4; Thu, 7 Mar 2024
- 22:05:13 +0300
-Message-ID: <98dea36b-41dc-4d2e-aec6-56c849e1d58b@t-argos.ru>
-Date: Thu, 7 Mar 2024 22:02:56 +0300
+	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="eGmaD0Bm"
+DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=linux.alibaba.com; s=default;
+	t=1709859409; h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
+	bh=iReoZfK/zkr+2bld/rPURGTuIP+W1I5bWYMybRMeyRU=;
+	b=eGmaD0Bm0whEuyhV5CedG29+eVYb6kO+FOTG6dyUN/jDzNXsJpToDLL9V2HraNwuzFf6zsG+wwDGx/bVsjzqZ8CUPYy0Ku60ACyOzDf3LtirIQEdaOuygTcdzjXzOecr7AlA+Lb5z60zP+MsiuBnUSWlz4kvhXFpswSupxkg21w=
+X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R701e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045168;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0W20rC5y_1709859407;
+Received: from 30.97.56.62(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0W20rC5y_1709859407)
+          by smtp.aliyun-inc.com;
+          Fri, 08 Mar 2024 08:56:48 +0800
+Message-ID: <ec328b25-1ba7-4f28-a30e-d0ea9f25a263@linux.alibaba.com>
+Date: Fri, 8 Mar 2024 08:56:47 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -44,92 +34,43 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: dw_mmc: Fix potential null pointer risk
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Jaehoon Chung <jh80.chung@samsung.com>, Wen Zhiwei <wenzhiwei@kylinos.cn>,
-	<linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<lvc-project@linuxtesting.org>
-References: <20240307085135.16245-1-amishin@t-argos.ru>
- <CAPDyKFoYRT=P+4L+5ciNPxEHcS7hoXPef__NQoodxkSy=39Teg@mail.gmail.com>
-Content-Language: ru
-From: Aleksandr Mishin <amishin@t-argos.ru>
-In-Reply-To: <CAPDyKFoYRT=P+4L+5ciNPxEHcS7hoXPef__NQoodxkSy=39Teg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Subject: Re: [PATCH v1 1/1] mmc: sdhci-sprd: Remove unused of_gpio.h
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Wenchao Chen
+ <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai
+ <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>
+References: <20240307114500.3643489-1-andriy.shevchenko@linux.intel.com>
+From: Baolin Wang <baolin.wang@linux.alibaba.com>
+In-Reply-To: <20240307114500.3643489-1-andriy.shevchenko@linux.intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: ta-mail-02.ta.t-argos.ru (172.17.13.212) To ta-mail-02
- (172.17.13.212)
-X-KSMG-Rule-ID: 1
-X-KSMG-Message-Action: clean
-X-KSMG-AntiSpam-Lua-Profiles: 184049 [Mar 07 2024]
-X-KSMG-AntiSpam-Version: 6.1.0.3
-X-KSMG-AntiSpam-Envelope-From: amishin@t-argos.ru
-X-KSMG-AntiSpam-Rate: 0
-X-KSMG-AntiSpam-Status: not_detected
-X-KSMG-AntiSpam-Method: none
-X-KSMG-AntiSpam-Auth: dkim=none
-X-KSMG-AntiSpam-Info: LuaCore: 9 0.3.9 e923e63e431b6489f12901471775b2d1b59df0ba, {Tracking_from_domain_doesnt_match_to}, mx1.t-argos.ru.ru:7.1.1;d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;127.0.0.199:7.1.2;t-argos.ru:7.1.1, FromAlignment: s
-X-MS-Exchange-Organization-SCL: -1
-X-KSMG-AntiSpam-Interceptor-Info: scan successful
-X-KSMG-AntiPhishing: Clean, bases: 2024/03/07 17:51:00
-X-KSMG-AntiVirus: Kaspersky Secure Mail Gateway, version 1.1.2.30, bases: 2024/03/07 17:21:00 #24036814
-X-KSMG-AntiVirus-Status: Clean, skipped
 
 
 
-07.03.2024 13:57, Ulf Hansson wrote:
-> On Thu, 7 Mar 2024 at 09:53, Aleksandr Mishin <amishin@t-argos.ru> wrote:
->>
->> In dw_mci_runtime_resume() 'host->slot' could be null, but check is not cover all corresponding code.
->> Fix this bug by changing check place.
+On 2024/3/7 19:45, Andy Shevchenko wrote:
+> of_gpio.h is deprecated and subject to remove.
+> The driver doesn't use it, simply remove the unused header.
 > 
-> In fact host->slot can never be NULL in dw_mci_runtime_resume() or in
-> dw_mci_runtime_suspend().
-> 
-> A better fix would thus be to remove the redundant checks.
-> 
-> Kind regards
-> Uffe
-> 
->>
->> Found by Linux Verification Center (linuxtesting.org) with SVACE.
->>
->> Fixes: 4a835afd808a (mmc: dw_mmc: Fix potential null pointer risk)
->> Signed-off-by: Aleksandr Mishin <amishin@t-argos.ru>
->> ---
->>   drivers/mmc/host/dw_mmc.c | 4 +++-
->>   1 file changed, 3 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 829af2c98a44..a4f124452abc 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -3570,8 +3570,10 @@ int dw_mci_runtime_resume(struct device *dev)
->>                     DW_MCI_ERROR_FLAGS);
->>          mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
->>
->> +       if (!host->slot)
->> +               goto err;
->>
->> -       if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
->> +       if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
->>                  dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
->>
->>          /* Force setup bus to guarantee available clock output */
->> --
->> 2.30.2
->>
->>
-> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-At the same time there are few checks such as "if (host->slot)" in 
-dw_mci_runtime_resume() and commit 
-4a835afd808a3dbbac44bb399a902b822dc7445c message contains: "we 
-previously assumed 'host->slot' could be null, null pointer judgment 
-should be added" and replaces "if (host->slot->mmc->pm_flags & 
-MMC_PM_KEEP_POWER)" with "if (host->slot && host->slot->mmc->pm_flags & 
-MMC_PM_KEEP_POWER)"
-So where is the truth?
+Thanks.
+Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
 
--- 
-Kind regadrds
-Aleksandr
+> ---
+>   drivers/mmc/host/sdhci-sprd.c | 1 -
+>   1 file changed, 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index bed57a1c64b5..685b1c648901 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -13,7 +13,6 @@
+>   #include <linux/mmc/mmc.h>
+>   #include <linux/module.h>
+>   #include <linux/of.h>
+> -#include <linux/of_gpio.h>
+>   #include <linux/pinctrl/consumer.h>
+>   #include <linux/platform_device.h>
+>   #include <linux/pm_runtime.h>
