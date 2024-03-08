@@ -1,76 +1,95 @@
-Received: from out30-124.freemail.mail.aliyun.com (out30-124.freemail.mail.aliyun.com [115.124.30.124])
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7725139E;
-	Fri,  8 Mar 2024 00:56:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28849210EC;
+	Fri,  8 Mar 2024 00:57:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709859414; cv=none; b=InFFxAFXWM6wPEYdgAY+W5Frc5PObMRq/yBb/SiQZ57SPwTyA1FpFdWjRZatrLa6QMfFcM1XuDudRA49RUCMRX9+nD+FZOegAzz8BfHjUnUv3EP0LJvjzpSDTKA2In0a333gveQ/z4zxdfPddDAsKMwMVMnhZV2qL8YLrHpYeZQ=
+	t=1709859471; cv=none; b=CZvd/upKcLYzBezabgKy5WsXZlBzWSnzJZ/zhOdoewM8JEemMiUfLq9yzhP/jauLTDUxRee+YitEjBLLOMk3NziPXS5c0P8Wng1hpM0GrBb8f3oDUcrvXQ24ul2mhX+suk9RjhDTv4/MEc8whm+q9HLlUcOvwUOt/ZrHS/Gs8UM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709859414; c=relaxed/simple;
-	bh=SWG3S1OZuOH20AGyfh9tG4DkZfmkAUgGLb06Mf7VwI0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=mRD4PZvlKCaMzz0pugMJa4UIwU1GHalHUfWFlQLP3gznsg8JglFcoYvyOgK+DSTjeyaafMbJUpTJmMwEtGlylEX4qc5MtZLNqOq0k12dwW0ow7jJpNwTJMjksWNqqItj4tHyQ5m9kySD9ZVFoGs8mZDRZbFGEkCe0XrrxI6hDRo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b=eGmaD0Bm; arc=none smtp.client-ip=115.124.30.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
+	s=arc-20240116; t=1709859471; c=relaxed/simple;
+	bh=m7cPWm7CHyHyZ/scoazHYD/a9psgq8E48J3G7q+lIWA=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=hjwxTAvz+569jbxAR4dbFNRKet4oJbiBBJOXdrUCcW+iMNQjbbH4GrSfUiKO6GKHFkk2LoMUCpyrZ2F+que6uzMAG0C0p/Jzk07ytjbd05ZvH+EDss0um6ADINmsAHnWR4kXcNNBC3Ss02iU48jiLxp7bZE+bGL0Uu7wgDNxVq0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=IovuuGIg; arc=none smtp.client-ip=198.47.23.248
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.alibaba.com header.i=@linux.alibaba.com header.b="eGmaD0Bm"
-DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=linux.alibaba.com; s=default;
-	t=1709859409; h=Message-ID:Date:MIME-Version:Subject:To:From:Content-Type;
-	bh=iReoZfK/zkr+2bld/rPURGTuIP+W1I5bWYMybRMeyRU=;
-	b=eGmaD0Bm0whEuyhV5CedG29+eVYb6kO+FOTG6dyUN/jDzNXsJpToDLL9V2HraNwuzFf6zsG+wwDGx/bVsjzqZ8CUPYy0Ku60ACyOzDf3LtirIQEdaOuygTcdzjXzOecr7AlA+Lb5z60zP+MsiuBnUSWlz4kvhXFpswSupxkg21w=
-X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R701e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045168;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0W20rC5y_1709859407;
-Received: from 30.97.56.62(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0W20rC5y_1709859407)
-          by smtp.aliyun-inc.com;
-          Fri, 08 Mar 2024 08:56:48 +0800
-Message-ID: <ec328b25-1ba7-4f28-a30e-d0ea9f25a263@linux.alibaba.com>
-Date: Fri, 8 Mar 2024 08:56:47 +0800
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="IovuuGIg"
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 4280vk57130646;
+	Thu, 7 Mar 2024 18:57:46 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1709859466;
+	bh=+3heyIuVkeci1TwGq7t6Bc47L5KCC1fix4g7mu12P6w=;
+	h=From:To:CC:Subject:Date:In-Reply-To:References;
+	b=IovuuGIgaur0A2VTBOOgaRxMiH3xh3GVdCanmuMm5Y3Tos5kRYJTumvcbOiRQPOcB
+	 NutNeZ+a9D2acJ+PCT+par4O/9jv2Ca+1sCvC7Nikz3avPJC6S2GUyeXe61H9cKqSd
+	 uGQ8Jv4Fwaf73t0ygBNsb948AqbvkaVmQx052v+U=
+Received: from DFLE115.ent.ti.com (dfle115.ent.ti.com [10.64.6.36])
+	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 4280vkD6122489
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Thu, 7 Mar 2024 18:57:46 -0600
+Received: from DFLE105.ent.ti.com (10.64.6.26) by DFLE115.ent.ti.com
+ (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 7
+ Mar 2024 18:57:46 -0600
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE105.ent.ti.com
+ (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Thu, 7 Mar 2024 18:57:46 -0600
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 4280vkjV055151;
+	Thu, 7 Mar 2024 18:57:46 -0600
+From: Judith Mendez <jm@ti.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>
+CC: Andrew Davis <afd@ti.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v3 4/7] mmc: sdhci_am654: Fix itapdly/otapdly array type
+Date: Thu, 7 Mar 2024 18:57:43 -0600
+Message-ID: <20240308005746.1059813-5-jm@ti.com>
+X-Mailer: git-send-email 2.43.2
+In-Reply-To: <20240308005746.1059813-1-jm@ti.com>
+References: <20240308005746.1059813-1-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-sprd: Remove unused of_gpio.h
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Wenchao Chen
- <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Orson Zhai
- <orsonzhai@gmail.com>, Chunyan Zhang <zhang.lyra@gmail.com>
-References: <20240307114500.3643489-1-andriy.shevchenko@linux.intel.com>
-From: Baolin Wang <baolin.wang@linux.alibaba.com>
-In-Reply-To: <20240307114500.3643489-1-andriy.shevchenko@linux.intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
+While integer type works, the otap_del_sel and itap_del_sel
+arrays are manipulated as u32, so change array types to u32.
 
+Signed-off-by: Judith Mendez <jm@ti.com>
+---
+Changelog:
+v2->v3:
+- Remove fixes tags when not needed
+---
+ drivers/mmc/host/sdhci_am654.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-On 2024/3/7 19:45, Andy Shevchenko wrote:
-> of_gpio.h is deprecated and subject to remove.
-> The driver doesn't use it, simply remove the unused header.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index e7ff6b841c4d..75f55b07bae9 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -141,8 +141,8 @@ static const struct timing_data td[] = {
+ 
+ struct sdhci_am654_data {
+ 	struct regmap *base;
+-	int otap_del_sel[ARRAY_SIZE(td)];
+-	int itap_del_sel[ARRAY_SIZE(td)];
++	u32 otap_del_sel[ARRAY_SIZE(td)];
++	u32 itap_del_sel[ARRAY_SIZE(td)];
+ 	u32 itap_del_ena[ARRAY_SIZE(td)];
+ 	int clkbuf_sel;
+ 	int trm_icp;
+-- 
+2.43.2
 
-Thanks.
-Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
-
-> ---
->   drivers/mmc/host/sdhci-sprd.c | 1 -
->   1 file changed, 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index bed57a1c64b5..685b1c648901 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -13,7 +13,6 @@
->   #include <linux/mmc/mmc.h>
->   #include <linux/module.h>
->   #include <linux/of.h>
-> -#include <linux/of_gpio.h>
->   #include <linux/pinctrl/consumer.h>
->   #include <linux/platform_device.h>
->   #include <linux/pm_runtime.h>
