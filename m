@@ -1,247 +1,251 @@
-Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6E85E3DBA8
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Mar 2024 12:58:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 126213FE23
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Mar 2024 14:00:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710161892; cv=none; b=njj2R0JJQIT7xOTors18Ymx/829WuC+fOwyXVv/0jwj7Hu1TNiSJajHgjR2UGEIY/DeLZhHnJjsZPi85+8W+E1p1azpZ2t5anSN8YeLkvxtBW1QxEr7NzaSXGOAYfpbb3hgZe267Ba2cfA0KZxetk0sqQ3Htx7aPOAqITWGVmog=
+	t=1710165604; cv=none; b=rLBF47v2QypjaWhr1NWzWPvRpZ8OS6oHzxoi2UYzNeGwhMvDO94mP2fE5aQcnk7Gw8FGtOv0V+bb367gYjRT8dUQpgHRhQbgESh/38vp3yVHyHdf1+81iptTS8k36FRd9qdNLl0GoTEeJVUMq/HoFmpd5DPInZJNNmVM+7X0PYM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710161892; c=relaxed/simple;
-	bh=p6LCC/tBik0/9mAMc6Pwphe/GopEuw3WpqTixgT1xTM=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=MeDHLx+I4Cm65hqzTOgY+WY0CnKzF8MdyOOJhhYdxg1Iwh6NEPagam95bfr+xo/E0Cr200Qwy/kIsli8X1FjhpaAOR5livMOcVMQzeDC3OmHjRfJkKUrB3/VqjPkhTEuXWJZ/TYIhQ5pcAMfvVcqyh5qbNElljPY3xQ2ITzERVA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=eup7EDIa; arc=none smtp.client-ip=209.85.167.43
+	s=arc-20240116; t=1710165604; c=relaxed/simple;
+	bh=DTrDqxNbMAu/D/nMTy8YgQo/jk+CtmqofIeEFgRafRU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=BLXMsLHC7iNSQ7d7ixNmoh5aZH5RD/K1vOXdJjegUgoHACEEVXIyi1bKPtI4lw+sjnBqgUlIFQkH77406A5pD0Dedl1eGZGApIRfX6CcaYKHpcEOgjnbqeU6LU/stp9J/5Qv4uk9kn/UYBEGyM8cQGlF1wcvI9h6LisnYnFPMSo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rXlKGA6B; arc=none smtp.client-ip=209.85.167.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eup7EDIa"
-Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-51321e71673so4658945e87.2
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Mar 2024 05:58:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rXlKGA6B"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-513b022a238so679700e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Mar 2024 07:00:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1710161888; x=1710766688; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=9gsILAMkZyT/jOCqdttMoT4+7ymZlaW0eKqPLkCqhEQ=;
-        b=eup7EDIaDPKD8DFKYO4Yq2RiaAq2eUlPBnVbFVIKkSty+CG4dTRsunoSZ8DljRi96T
-         YL5gPFac3tOZXasfl9AtEqALjL3Kq/W+VOWuROyBtlzux6SzMBNQlyrApil2xFCoeqhN
-         +tH0yJrq4pnQz5FSl3kaWq7H+kg7Un58WfiG9JSEVfKBoMwOEiabzhr56TPp0oFlVkhn
-         dwwSPmGtdaLad6tYt3aucCM7/XPfX1So42Xzm/5zWb/OpzKSM8MXiq3cvDcPZthL8LLi
-         xaT7kBkV6FJv+GD8xrmExmHO6UF/dpdplE4Nlre1rjcUqolq7wUqrdrMWK1j8kaY3Pk7
-         TFpA==
+        d=linaro.org; s=google; t=1710165600; x=1710770400; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=xs+OJ5JvGn0slYZQ04UyEkvHdxXEWetAxpEwAq3DCdQ=;
+        b=rXlKGA6Bu6drPfp7M2MI4xTfe8jjx0FuZADUfwpla5wOEIWbhSA42whCY0dzFQi2Ga
+         y/UWUem5TDGYkXHGjkzXOD7WZeQVfoXJYGYmW0ATGlyaaLJ1i4hcUYpgPNOFZWT/ngsV
+         lXrTn5F91Jh1dbT4Z2Y+7x0pfTe39iFqCotsfLatasPOx+snR56hCQ+mtfbAPp2nVRUo
+         KiDSzJjq5zCfeFcCF04We0l1glTwxa7HIDZZTfx8+gcCcbnR84s8cqlVC4b2CgBb9D/b
+         eUXkhfY8V2HNAXCR2E2tfAGJ2rQeB9CgphrC4XRngmuvhnVWI5oscf0wknhWAOeCgrQ6
+         VVzg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710161888; x=1710766688;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=9gsILAMkZyT/jOCqdttMoT4+7ymZlaW0eKqPLkCqhEQ=;
-        b=LsfxBb44NFmXVl1xPZzkHd4lK3T8reZEgNdprfgiNb8iog46CPYReAflMukMud1zOf
-         zFUo/TSKA2hJkFY/GU9m7EF0FPJWdU2DVRGUUgJmFID2mojQauIWfzD/ChwfJRQvJIiO
-         wj642A1XS2xfltlgG+5QXVCMZtAZWAgHJdNEr8ZkVn9hLkepseYZVheplQKBM2oZ/iub
-         +kr08dodugbB7mNi2SGdbR8YXROyZDcIhBDKk1lN6/Kmy7Dj3eBzg3qwQLBU3KvE22VU
-         XBtGeuq6TsvGcF868HbHJsWkTW4SrcCiauMKMpxBjuQq1OrRCmV6IXHpBlSa3wwZbBBd
-         D2Cg==
-X-Forwarded-Encrypted: i=1; AJvYcCXxOwAK1FNCsRwAsrpwc2xil/ZhmDhMQqnj+QuUfHv6tSQpDfT1YZIIRlI+ZZUAc7Ll2h0CWU2tVQdZFCTflTCeGiebe44bgvbG
-X-Gm-Message-State: AOJu0YzLe4sULHtyet8i6SIfTgebQDwneJRUe5EfK1EOy3SLa3odMhVc
-	Om4O5s1/Zb+e4cFpvMb6Yjg2kqR9Ks6wFUBpdhmSqirCLnTFN+U6ItUho+6mGiM=
-X-Google-Smtp-Source: AGHT+IGBFNOnfAhWD4IhxZRO/ZVCYIAdLRAdq1JZMugz0zM/FHTnEMov1PCGhZV9OgK1ej+HOoVO2A==
-X-Received: by 2002:ac2:5bdc:0:b0:513:df6:dcd3 with SMTP id u28-20020ac25bdc000000b005130df6dcd3mr4451573lfn.48.1710161888496;
-        Mon, 11 Mar 2024 05:58:08 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id er26-20020a05651248da00b00513a1fe7767sm800946lfb.209.2024.03.11.05.58.07
+        d=1e100.net; s=20230601; t=1710165600; x=1710770400;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=xs+OJ5JvGn0slYZQ04UyEkvHdxXEWetAxpEwAq3DCdQ=;
+        b=GcwMlhqkRg0UmfYe7l0Qc/zM1LvBFG7LpW8JQNk5sbdUhu6gptq8YGOg0AZF2P3blh
+         BtII/MTEZBTyRNokTfWHAJ+dS4IdCi6Z3qKNFy5bf7M0/XQPhSRxNbwxDFuTqMl7Zn/l
+         hc8gQpjRKNbPd9RKK4Q2/CoMiXPDcBDDIuory2RY1fxOmnQodjxKK9A8+7/mWcTu6EH1
+         U0/mEEs64gp3WAw0O8ykV7Sp1qejvBT6jTXSGJbteqnlFdpOEebfE8KZjx/ba9KSO1hY
+         CO+o9IraIS6Pd9ZpWIRlV1O45F+61ev8gTp1B23bBJCMXBzzqOIEvY8H2cEQPBANiik2
+         OaOA==
+X-Forwarded-Encrypted: i=1; AJvYcCWCcEGYB2zcaj6M7Qd5OS6N4z7pjwgMTfzTxxLDSnpGfnZmZY+gO3BbO7pCsZxLidr4MyO1SyDGiTF6F5Vy6N11E2XdoAxclSOf
+X-Gm-Message-State: AOJu0YyDnej/UHt5XrbbhuxKdVHi6H/FiKPohJ4he4i45KpNoQNMBAcP
+	KhvX3qwvDYqE36g7k9uPJkZGsoozZgsrGGyW9RkbzEgFeKWWVtUxO1SpG+K+lTliPTxOpR7bkjv
+	HMgA=
+X-Google-Smtp-Source: AGHT+IEOF9mQ2gCts1aticz9p5w/fwMWiXs+d4TgEjXmMh5yioUa+y6qyI97N0RVbGVlGlENpgrKWA==
+X-Received: by 2002:ac2:5145:0:b0:513:a05d:7e9a with SMTP id q5-20020ac25145000000b00513a05d7e9amr3380998lfd.45.1710165600078;
+        Mon, 11 Mar 2024 07:00:00 -0700 (PDT)
+Received: from nuoska (87-100-245-199.bb.dnainternet.fi. [87.100.245.199])
+        by smtp.gmail.com with ESMTPSA id cf34-20020a056512282200b005132fc23e92sm1087099lfb.147.2024.03.11.06.59.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Mar 2024 05:58:08 -0700 (PDT)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK updates for v6.9
-Date: Mon, 11 Mar 2024 13:58:07 +0100
-Message-Id: <20240311125807.1143937-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        Mon, 11 Mar 2024 06:59:59 -0700 (PDT)
+Date: Mon, 11 Mar 2024 15:59:57 +0200
+From: Mikko Rapeli <mikko.rapeli@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Avri Altman <avri.altman@wdc.com>, linux-mmc@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Daniil Lunev <dlunev@google.com>,
+	Asutosh Das <quic_asutoshd@quicinc.com>
+Subject: Re: [PATCH v4] mmc: core: Use mrq.sbc in close-ended ffu
+Message-ID: <Ze8OXcCA_BCN2MVE@nuoska>
+References: <20231129092535.3278-1-avri.altman@wdc.com>
+ <CAPDyKFqsyp=isawJKH0Q7Qqxqtkx=gmPZru9NnK-ndV20VRmFA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqsyp=isawJKH0Q7Qqxqtkx=gmPZru9NnK-ndV20VRmFA@mail.gmail.com>
 
-Hi Linus,
+Hi,
 
-Here's the pull-request for MMC and MEMSTICK for v6.9. Details about the
-highlights are as usual found in the signed tag.
+On Thu, Nov 30, 2023 at 11:36:10AM +0100, Ulf Hansson wrote:
+> On Wed, 29 Nov 2023 at 10:25, Avri Altman <avri.altman@wdc.com> wrote:
+> >
+> > Field Firmware Update (ffu) may use close-ended or open ended sequence.
+> > Each such sequence is comprised of a write commands enclosed between 2
+> > switch commands - to and from ffu mode. So for the close-ended case, it
+> > will be: cmd6->cmd23-cmd25-cmd6.
+> >
+> > Some host controllers however, get confused when multi-block rw is sent
+> > without sbc, and may generate auto-cmd12 which breaks the ffu sequence.
+> > I encountered  this issue while testing fwupd (github.com/fwupd/fwupd)
+> > on HP Chromebook x2, a qualcomm based QC-7c, code name - strongbad.
+> >
+> > Instead of a quirk, or hooking the request function of the msm ops,
+> > it would be better to fix the ioctl handling and make it use mrq.sbc
+> > instead of issuing SET_BLOCK_COUNT separately.
+> >
+> > Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> 
+> Applied for next (to get it tested a bit more) and by adding a stable
+> tag, thanks!
 
-Please pull this in!
+This change is causing RPMB breakage in 6.6.13 and also 6.6.20. rockpi4b and
+synquacer arm64 boards with u-boot, optee 4.1.0 and firmware TPM (fTPM) fail to
+access RPMB via kernel and tee-supplicant 4.1.0.
 
-Kind regards
-Ulf Hansson
+More details in https://bugzilla.kernel.org/show_bug.cgi?id=218587
 
+I've tried to identify what exactly is going wrong but failed so far. Reverting
+this changes is the only working solution so far. This also triggered a kernel crash
+on error path https://bugzilla.kernel.org/show_bug.cgi?id=218542 which is
+now fixed/queued.
 
-The following changes since commit 09e23823ae9a3e2d5d20f2e1efe0d6e48cef9129:
+If you have any hints how to debug this further or patches to try, I'd be happy to
+try those out.
 
-  mmc: sdhci-xenon: add timeout for PHY init complete (2024-02-28 13:41:35 +0100)
+Cheers,
 
-are available in the Git repository at:
+-Mikko
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.9
-
-for you to fetch changes up to faf3b8014c357d71c7a9414302e217a1dd1679af:
-
-  mmc: core: make mmc_host_class constant (2024-03-06 23:36:29 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Drop the use of BLK_BOUNCE_HIGH
- - Fix partition switch for GP3
- - Remove usage of the deprecated ida_simple API
-
-MMC host:
- - cqhci: Update bouncing email-addresses in MAINTAINERS
- - davinci_mmc: Use sg_miter for PIO
- - dw_mmc-hi3798cv200: Convert the DT bindings to YAML
- - dw_mmc-hi3798mv200: Add driver for the new dw_mmc variant
- - fsl-imx-esdhc: A couple of corrections/updates to the DT bindings
- - meson-mx-sdhc: Drop use of the ->card_hw_reset() callback
- - moxart-mmc: Use sg_miter for PIO
- - moxart-mmc: Fix accounting for DMA transfers
- - mvsdio: Use sg_miter for PIO
- - mxcmmc: Use sg_miter for PIO
- - omap: Use sg_miter for PIO
- - renesas,sdhi: Add support for R-Car V4M variant
- - sdhci-esdhc-mcf: Use sg_miter for swapping
- - sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002 variants
- - sh_mmcif: Use sg_miter for PIO
- - tmio: Avoid concurrent runs of mmc_request_done()
-
-----------------------------------------------------------------
-Andy Shevchenko (2):
-      mmc: dw_mmc: Remove unused of_gpio.h
-      mmc: mmc_spi: Don't mention DMA direction
-
-Christophe JAILLET (2):
-      mmc: core: Remove usage of the deprecated ida_simple_xx() API
-      mmc: wmt-sdmmc: remove an incorrect release_mem_region() call in the .remove function
-
-Colin Ian King (1):
-      mmc: wbsd: remove redundant assignment to variable id
-
-Dominique Martinet (1):
-      mmc: core: Fix switch on gp3 partition
-
-Fabio Estevam (1):
-      dt-bindings: mmc: fsl-imx-mmc: Document the required clocks
-
-Frank Li (1):
-      dt-bindings: mmc: fsl-imx-esdhc: add iommus property
-
-Geert Uytterhoeven (1):
-      dt-bindings: mmc: renesas,sdhi: Document R-Car V4M support
-
-Jeffrey Hugo (1):
-      MAINTAINERS: Update bouncing @codeaurora addresses for EMMC CMDQ
-
-Jisheng Zhang (2):
-      dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo CV1800B and SG2002 support
-      mmc: sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002
-
-Krzysztof Kozlowski (1):
-      mmc: renesas_sdhi: use typedef for dma_filter_fn
-
-Linus Walleij (14):
-      mmc: core Drop BLK_BOUNCE_HIGH
-      mmc: davinci_mmc: Use sg_miter for PIO
-      mmc: moxart-mmc: Factor out moxart_use_dma() helper
-      mmc: moxart-mmc: Fix accounting in DMA transfer
-      mmc: moxart-mmc: Use sg_miter for PIO
-      mmc: mvsdio: Use sg_miter for PIO
-      mmc: mxcmmc: Use sg_miter for PIO
-      mmc: omap: Use sg_miter for PIO
-      mmc: sdhci-esdhc-mcf: Use sg_miter for swapping
-      mmc: sh_mmcif: Use sg_miter for PIO
-      mmc: davinci_mmc: Drop dangling variable
-      mmc: sdhci-esdhc-mcf: Flag the sg_miter as atomic
-      mmc: sh_mmcif: sg_miter must not be atomic
-      mmc: sh_mmcif: Advance sg_miter before reading blocks
-
-Marco Felsch (1):
-      dt-bindings: mmc: fsl-imx-esdhc: add default and 100mhz state
-
-Martin Blumenstingl (2):
-      mmc: meson-mx-sdhc: Use devm_clk_hw_get_clk() for clock retrieval
-      mmc: meson-mx-sdhc: Remove .card_hw_reset callback
-
-Peng Fan (1):
-      dt-bindings: mmc: fsl-imx-esdhc: add i.MX95 compatible string
-
-Ricardo B. Marliere (6):
-      mmc: core: make mmc_rpmb_bus_type const
-      mmc: core: make mmc_bus_type const
-      mmc: core: make sdio_bus_type const
-      memstick: core: make memstick_bus_type const
-      mmc: core: constify the struct device_type usage
-      mmc: core: make mmc_host_class constant
-
-Ulf Hansson (5):
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-
-Wolfram Sang (2):
-      mmc: tmio: avoid concurrent runs of mmc_request_done()
-      mmc: tmio: comment the ERR_PTR usage in this driver
-
-Yang Xiwen (5):
-      mmc: core: Use a struct device* as in-param to mmc_of_parse_clk_phase()
-      mmc: dw_mmc-hi3798cv200: remove MODULE_ALIAS()
-      dt-bindings: mmc: dw-mshc-hi3798cv200: convert to YAML
-      dt-bindings: mmc: hisilicon,hi3798cv200-dw-mshc: add Hi3798MV200 binding
-      mmc: dw_mmc: add support for hi3798mv200
-
- .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |  11 +-
- .../devicetree/bindings/mmc/fsl-imx-mmc.yaml       |  12 +
- .../bindings/mmc/hi3798cv200-dw-mshc.txt           |  40 ----
- .../mmc/hisilicon,hi3798cv200-dw-mshc.yaml         |  97 ++++++++
- .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   1 +
- .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |   2 +
- MAINTAINERS                                        |   4 +-
- drivers/memstick/core/memstick.c                   |   2 +-
- drivers/mmc/core/block.c                           |  24 +-
- drivers/mmc/core/bus.c                             |   4 +-
- drivers/mmc/core/bus.h                             |   2 +-
- drivers/mmc/core/host.c                            |  11 +-
- drivers/mmc/core/mmc.c                             |   2 +-
- drivers/mmc/core/queue.c                           |   2 -
- drivers/mmc/core/sd.c                              |   2 +-
- drivers/mmc/core/sd.h                              |   2 +-
- drivers/mmc/core/sdio.c                            |   2 +-
- drivers/mmc/core/sdio_bus.c                        |   2 +-
- drivers/mmc/host/Kconfig                           |   9 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/davinci_mmc.c                     |  59 +++--
- drivers/mmc/host/dw_mmc-exynos.c                   |   1 -
- drivers/mmc/host/dw_mmc-hi3798cv200.c              |   1 -
- drivers/mmc/host/dw_mmc-hi3798mv200.c              | 251 +++++++++++++++++++++
- drivers/mmc/host/dw_mmc.c                          |   1 -
- drivers/mmc/host/meson-mx-sdhc-clkc.c              |  43 ++--
- drivers/mmc/host/meson-mx-sdhc-mmc.c               |  13 +-
- drivers/mmc/host/mmc_spi.c                         |  30 ++-
- drivers/mmc/host/moxart-mmc.c                      |  90 ++++----
- drivers/mmc/host/mvsdio.c                          |  71 ++++--
- drivers/mmc/host/mxcmmc.c                          |  53 +++--
- drivers/mmc/host/omap.c                            |  53 ++---
- drivers/mmc/host/renesas_sdhi.h                    |   3 +-
- drivers/mmc/host/sdhci-esdhc-mcf.c                 |  12 +-
- drivers/mmc/host/sdhci-of-aspeed.c                 |   2 +-
- drivers/mmc/host/sdhci-of-dwcmshc.c                |  66 ++++++
- drivers/mmc/host/sh_mmcif.c                        | 114 ++++++----
- drivers/mmc/host/tmio_mmc_core.c                   |   6 +-
- drivers/mmc/host/wbsd.c                            |   2 -
- drivers/mmc/host/wmt-sdmmc.c                       |   4 -
- include/linux/mmc/host.h                           |   2 +-
- 41 files changed, 791 insertions(+), 318 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml
- create mode 100644 drivers/mmc/host/dw_mmc-hi3798mv200.c
+> Kind regards
+> Uffe
+> 
+> 
+> > ---
+> >
+> > Changelog:
+> > v3--v4:
+> >         check sbc.error as well
+> > v2--v3:
+> >         Adopt Adrian's proposal
+> > v1--v2:
+> >         remove redundant reference of reliable write
+> > ---
+> >  drivers/mmc/core/block.c | 46 +++++++++++++++++++++++++++++++++++++---
+> >  1 file changed, 43 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index f9a5cffa64b1..892e74e611a0 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -400,6 +400,10 @@ struct mmc_blk_ioc_data {
+> >         struct mmc_ioc_cmd ic;
+> >         unsigned char *buf;
+> >         u64 buf_bytes;
+> > +       unsigned int flags;
+> > +#define MMC_BLK_IOC_DROP       BIT(0)  /* drop this mrq */
+> > +#define MMC_BLK_IOC_SBC        BIT(1)  /* use mrq.sbc */
+> > +
+> >         struct mmc_rpmb_data *rpmb;
+> >  };
+> >
+> > @@ -465,7 +469,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
+> >  }
+> >
+> >  static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+> > -                              struct mmc_blk_ioc_data *idata)
+> > +                              struct mmc_blk_ioc_data **idatas, int i)
+> >  {
+> >         struct mmc_command cmd = {}, sbc = {};
+> >         struct mmc_data data = {};
+> > @@ -475,10 +479,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+> >         unsigned int busy_timeout_ms;
+> >         int err;
+> >         unsigned int target_part;
+> > +       struct mmc_blk_ioc_data *idata = idatas[i];
+> > +       struct mmc_blk_ioc_data *prev_idata = NULL;
+> >
+> >         if (!card || !md || !idata)
+> >                 return -EINVAL;
+> >
+> > +       if (idata->flags & MMC_BLK_IOC_DROP)
+> > +               return 0;
+> > +
+> > +       if (idata->flags & MMC_BLK_IOC_SBC)
+> > +               prev_idata = idatas[i - 1];
+> > +
+> >         /*
+> >          * The RPMB accesses comes in from the character device, so we
+> >          * need to target these explicitly. Else we just target the
+> > @@ -532,7 +544,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+> >                         return err;
+> >         }
+> >
+> > -       if (idata->rpmb) {
+> > +       if (idata->rpmb || prev_idata) {
+> >                 sbc.opcode = MMC_SET_BLOCK_COUNT;
+> >                 /*
+> >                  * We don't do any blockcount validation because the max size
+> > @@ -540,6 +552,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+> >                  * 'Reliable Write' bit here.
+> >                  */
+> >                 sbc.arg = data.blocks | (idata->ic.write_flag & BIT(31));
+> > +               if (prev_idata)
+> > +                       sbc.arg = prev_idata->ic.arg;
+> >                 sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
+> >                 mrq.sbc = &sbc;
+> >         }
+> > @@ -557,6 +571,15 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+> >         mmc_wait_for_req(card->host, &mrq);
+> >         memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
+> >
+> > +       if (prev_idata) {
+> > +               memcpy(&prev_idata->ic.response, sbc.resp, sizeof(sbc.resp));
+> > +               if (sbc.error) {
+> > +                       dev_err(mmc_dev(card->host), "%s: sbc error %d\n",
+> > +                                                       __func__, sbc.error);
+> > +                       return sbc.error;
+> > +               }
+> > +       }
+> > +
+> >         if (cmd.error) {
+> >                 dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
+> >                                                 __func__, cmd.error);
+> > @@ -1032,6 +1055,20 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+> >         md->reset_done &= ~type;
+> >  }
+> >
+> > +static void mmc_blk_check_sbc(struct mmc_queue_req *mq_rq)
+> > +{
+> > +       struct mmc_blk_ioc_data **idata = mq_rq->drv_op_data;
+> > +       int i;
+> > +
+> > +       for (i = 1; i < mq_rq->ioc_count; i++) {
+> > +               if (idata[i - 1]->ic.opcode == MMC_SET_BLOCK_COUNT &&
+> > +                   mmc_op_multi(idata[i]->ic.opcode)) {
+> > +                       idata[i - 1]->flags |= MMC_BLK_IOC_DROP;
+> > +                       idata[i]->flags |= MMC_BLK_IOC_SBC;
+> > +               }
+> > +       }
+> > +}
+> > +
+> >  /*
+> >   * The non-block commands come back from the block layer after it queued it and
+> >   * processed it with all other requests and then they get issued in this
+> > @@ -1059,11 +1096,14 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+> >                         if (ret)
+> >                                 break;
+> >                 }
+> > +
+> > +               mmc_blk_check_sbc(mq_rq);
+> > +
+> >                 fallthrough;
+> >         case MMC_DRV_OP_IOCTL_RPMB:
+> >                 idata = mq_rq->drv_op_data;
+> >                 for (i = 0, ret = 0; i < mq_rq->ioc_count; i++) {
+> > -                       ret = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+> > +                       ret = __mmc_blk_ioctl_cmd(card, md, idata, i);
+> >                         if (ret)
+> >                                 break;
+> >                 }
+> > --
+> > 2.42.0
+> >
