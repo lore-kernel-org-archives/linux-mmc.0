@@ -1,73 +1,137 @@
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 577F4C8DD;
-	Tue, 12 Mar 2024 09:00:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B74CD79B75
+	for <linux-mmc@vger.kernel.org>; Tue, 12 Mar 2024 11:30:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710234052; cv=none; b=OCCaJ6Wpiy8gmI7ddfEMA/v7jbAS3gk054PTkFqFYd5bjoNROQhFeu1gSzMmwqeaUN1vOOlyCGoHZ6r8ejioIc2R1y3AZyqDEnbtZW5iilu6uxUDUYmQ3yVbHF1QnSDcwzJykNIB3TrEDBNAwbWDBq7dvtA3m5Dgo7axuQbQfrI=
+	t=1710243023; cv=none; b=ooa1aMwnHd68M6TBQebhw6boXHuvV3iGYHz+kMEQLdeDbG6BmQ1YQ5iIZVyE7mbAZiBhHbCm4p2k2KHlHoviq//lKZ7kxAtylXpZKKHQWkqaOg7fm3Wq87HW3CKxQwsaZZVRdObj7iRbam+malE44vQgICwbBGWV52F294EWZ7M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710234052; c=relaxed/simple;
-	bh=liCt9vEPzADuRhCwLdH5GsdPKWKLGTOcnnozfCA2GEI=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=T1Mh5WoFoFYGgYebUdVK3+BuAF3Q25QSSAIehKSl7N0MveXGCxw/NnReZxfLPckfKx1hVdr5HZNvkCakH601lk4sxGEtF5/+eqxtlTHJErCKOYDuqVqyfvfIOd3JQMK4zZrE4lS3xQnkOrBVq3fd0HJoFgsK4se+fZnuEBYef2E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; arc=none smtp.client-ip=211.75.126.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 42C90PvtC4145030, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
-	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 42C90PvtC4145030
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 12 Mar 2024 17:00:25 +0800
-Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
- RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Tue, 12 Mar 2024 17:00:25 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Tue, 12 Mar 2024 17:00:25 +0800
-Received: from RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f]) by
- RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f%7]) with mapi id
- 15.01.2507.035; Tue, 12 Mar 2024 17:00:24 +0800
-From: Ping-Ke Shih <pkshih@realtek.com>
-To: "pavel@ucw.cz" <pavel@ucw.cz>
-CC: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-        "kvalo@kernel.org" <kvalo@kernel.org>, "megi@xff.cz" <megi@xff.cz>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "fiona.klute@gmx.de"
-	<fiona.klute@gmx.de>
-Subject: Re: [PATCH v4 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-Thread-Topic: [PATCH v4 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-Thread-Index: AQHac6A1Psbdiic/Xku5IpChPAWGprEzakIQ///a9ACAAASaAA==
-Date: Tue, 12 Mar 2024 09:00:24 +0000
-Message-ID: <6c73784ecc04cadbcaae3f7e073ffb120e13853c.camel@realtek.com>
-References: <20240311103735.615541-1-fiona.klute@gmx.de>
-	 <e540243c657043f9a6d0a8d5314191d3@realtek.com>
-	 <ZfAVlEhsMwYMq9BY@amd.ucw.cz>
-In-Reply-To: <ZfAVlEhsMwYMq9BY@amd.ucw.cz>
-Accept-Language: en-US, zh-TW
-Content-Language: zh-TW
-user-agent: Evolution 3.36.1-2 
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <337C7FD1B2E2B54581DC849DC7A8F2E7@realtek.com>
-Content-Transfer-Encoding: base64
+	s=arc-20240116; t=1710243023; c=relaxed/simple;
+	bh=l2WdSNUP4K3SIKsekSGXnuJXGSgpdVPTEVsLPobE8NU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=tmX2XiQrbOYlDH5lk+irsRTMTcOmk4sqDYa9h2+phCwUDfG+86fvvxX+WmJEvqd2QYIDwZfH9VKLFFwj9wNiUaUGeUZcIoPnhmYnTgCwy1XgcElKFiX3hTU7Tl1PdcCr/L3MXYROn2baJtw4RZgDnECEq8ObxkhP6bUbm5l/kxU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=suy3Kme3; arc=none smtp.client-ip=209.85.208.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="suy3Kme3"
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-564647bcdbfso4388776a12.2
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Mar 2024 04:30:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1710243018; x=1710847818; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=CupxoLbqDAw0iGT/Dkpjp3a8L1C7qew16mx6r26LNOI=;
+        b=suy3Kme3GoTwvuDvCo7FxdJ4a+X0G2nZQEYnirOqW84ejLh0FNsdIG/IdeyWsJwlFX
+         D7PNR2xUj0GR783+HAHnN7+hHCRMgjBIInIpLdwnMdGTyCIy0biLlg9ycPQ+C9pTbhG7
+         cRMhWL7iAUiWrhJNIC/aM7XMio4TxArzO1LvhDAQfOmTE+tcf3g7e89yzg3Kk6ileFgn
+         fuchibVdIeFlJ0GcoP/jE8/vPo2mWCd5eaR38R7eyGJ2WJFoJpRxt3tD2PLWHrjjJeHY
+         m4CIB/9GbXBcjcCJq4JQpGegS15S67nS7e58TjUSuj8Ft/+fg2noDGObneizeWuQ/uK/
+         INoQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1710243018; x=1710847818;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=CupxoLbqDAw0iGT/Dkpjp3a8L1C7qew16mx6r26LNOI=;
+        b=QgIxaYxqk0u0yqLLx7VLeKpSE9SMr3+uyQZNeWKKeSrxGwon4dLfI/xiPVe+PVazHw
+         citvHsps3G5xkZCFhuBvTMq1gUHcPL0ZLQCtZEEcDNpSGwWRF0ooAnQnWz+u/TlUouQs
+         ThMamaPKLQlKBtQ30nf+MBpkRiHpzNMg4hvBihQ6ls1QRuBsXTiDxjUFcb2TfrdY/3jW
+         XSPJlmdJaMWG3E9VrKhGUkeXypWVT4q/n9x6EXxVjAz8PQAUpDu2+S7Gn+3YtQJrMc0q
+         xKSP98c2uT4nayBrN6TX7KAGeE+zHrK6k8NkwiA2Dq8TVUmGuuUOCudvJwfckDck4xyN
+         4bnw==
+X-Forwarded-Encrypted: i=1; AJvYcCV9KTqVs1IoxeIAiGN64YMTOJbAmHc/5cWpUqxXGLIam8oKbQWQUdHcQz5Dtd5pbPTUaqgKfyv69AeE7dfqYEbY9SM7FNcBBJJ0
+X-Gm-Message-State: AOJu0Yxl/IO5vCVlTMBHAQH9s1C1Se6eQ27T5McGbNAbIPnHzEYbHsyX
+	rExlt8JmUqZUrPzV7D6QSkpp5/ZCZPwaf/tT3y4qnqgnqXjbHmildr6clotU9UnxBv40ORBCmxe
+	/XSt3upcG2wybdR/Zlv7ITfxBf0NMgYHfQWEsYQ==
+X-Google-Smtp-Source: AGHT+IFHD9Ak/IwOC1zEHFPh2Kddo7eOh7ziL0ulLzgGW/R32C6TAxkb/xc28APd4ASLmM4PwNUPmk3IAYvFtC5rG5o=
+X-Received: by 2002:a50:9e24:0:b0:565:1460:8447 with SMTP id
+ z33-20020a509e24000000b0056514608447mr1438863ede.28.1710243018038; Tue, 12
+ Mar 2024 04:30:18 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <20240307085135.16245-1-amishin@t-argos.ru> <CAPDyKFoYRT=P+4L+5ciNPxEHcS7hoXPef__NQoodxkSy=39Teg@mail.gmail.com>
+ <98dea36b-41dc-4d2e-aec6-56c849e1d58b@t-argos.ru>
+In-Reply-To: <98dea36b-41dc-4d2e-aec6-56c849e1d58b@t-argos.ru>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 12 Mar 2024 12:29:40 +0100
+Message-ID: <CAPDyKFrJmoHA+HsfdC_VjJpah=8Pqi1zGbj0oABMn01go7CrbA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix potential null pointer risk
+To: Aleksandr Mishin <amishin@t-argos.ru>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Wen Zhiwei <wenzhiwei@kylinos.cn>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	lvc-project@linuxtesting.org
+Content-Type: text/plain; charset="UTF-8"
 
-T24gVHVlLCAyMDI0LTAzLTEyIGF0IDA5OjQzICswMTAwLCBQYXZlbCBNYWNoZWsgd3JvdGU6DQo+
-IEhpIQ0KPiANCj4gPiA+IHY0Og0KPiA+ID4gICAqIE1vdmUgZGVmaW5pdGlvbiBvZiBHRVRfUlhf
-REVTQ19CVyBmcm9tIHJ0dzg3MDNiLmMgdG8gcnguaCAobm93IGluDQo+ID4gPiAgICAgcGF0Y2gg
-My85ICJ3aWZpOiBydHc4ODogQWRkIGRlZmluaXRpb25zIGZvciA4NzAzYiBjaGlwIikNCj4gPiAN
-Cj4gPiB2NCBsb29rcyBnb29kIHRvIG1lLiBUaGFua3MgZm9yIHRoZSBncmVhdCB3b3JrISANCj4g
-PiANCj4gPiBJIGFsc28gaGF2ZSBydW4gc3BhcnNlL3NtYXRjaCB3aXRoIHY0LCBubyB3YXJuaW5n
-L2Vycm9yLg0KPiANCj4gRG9lcyBpdCBtZWFuIHlvdSBxdWV1ZWQgdGhlIHBhdGNoLCBvciBpcyBz
-b21lb25lIGVsc2UgZXhwZWN0ZWQgdG8gZG8NCj4gdGhhdD8NCj4gDQoNCkkgbWVhbiB0aGlzIHBh
-dGNoc2V0IGlzIG9rYXkgdG8gbWUsIGFuZCBLYWxsZSB3aWxsIGhlbHAgdG8gYXBwbHkgdGhpcw0K
-cGF0Y2hzZXQgdG8gd2lyZWxlc3MtbmV4dCB0cmVlLiBJIHN1cHBvc2UgbmV4dCBuZXh0IGtlcm5l
-bCB2Ni4xMCB3aWxsDQpoYXZlIHRoaXMuIA0KDQpQaW5nLUtlIA0KDQoNCg0KDQo=
+On Thu, 7 Mar 2024 at 20:07, Aleksandr Mishin <amishin@t-argos.ru> wrote:
+>
+>
+>
+> 07.03.2024 13:57, Ulf Hansson wrote:
+> > On Thu, 7 Mar 2024 at 09:53, Aleksandr Mishin <amishin@t-argos.ru> wrote:
+> >>
+> >> In dw_mci_runtime_resume() 'host->slot' could be null, but check is not cover all corresponding code.
+> >> Fix this bug by changing check place.
+> >
+> > In fact host->slot can never be NULL in dw_mci_runtime_resume() or in
+> > dw_mci_runtime_suspend().
+> >
+> > A better fix would thus be to remove the redundant checks.
+> >
+> > Kind regards
+> > Uffe
+> >
+> >>
+> >> Found by Linux Verification Center (linuxtesting.org) with SVACE.
+> >>
+> >> Fixes: 4a835afd808a (mmc: dw_mmc: Fix potential null pointer risk)
+> >> Signed-off-by: Aleksandr Mishin <amishin@t-argos.ru>
+> >> ---
+> >>   drivers/mmc/host/dw_mmc.c | 4 +++-
+> >>   1 file changed, 3 insertions(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >> index 829af2c98a44..a4f124452abc 100644
+> >> --- a/drivers/mmc/host/dw_mmc.c
+> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >> @@ -3570,8 +3570,10 @@ int dw_mci_runtime_resume(struct device *dev)
+> >>                     DW_MCI_ERROR_FLAGS);
+> >>          mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+> >>
+> >> +       if (!host->slot)
+> >> +               goto err;
+> >>
+> >> -       if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+> >> +       if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+> >>                  dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
+> >>
+> >>          /* Force setup bus to guarantee available clock output */
+> >> --
+> >> 2.30.2
+> >>
+> >>
+> >
+>
+> At the same time there are few checks such as "if (host->slot)" in
+> dw_mci_runtime_resume() and commit
+> 4a835afd808a3dbbac44bb399a902b822dc7445c message contains: "we
+> previously assumed 'host->slot' could be null, null pointer judgment
+> should be added" and replaces "if (host->slot->mmc->pm_flags &
+> MMC_PM_KEEP_POWER)" with "if (host->slot && host->slot->mmc->pm_flags &
+> MMC_PM_KEEP_POWER)"
+> So where is the truth?
+
+It looks to me that the runtime PM callbacks are prevented from being
+called, unless we have a host->slot assigned.
+
+Just adding checks because it looks like the code could need it, isn't
+always the correct thing to do. I would rather try to remove the
+checks altogether and give it some tests to see how it plays.
+
+Kind regards
+Uffe
