@@ -1,87 +1,73 @@
-Received: from jabberwock.ucw.cz (jabberwock.ucw.cz [46.255.230.98])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF18D76EEA;
-	Tue, 12 Mar 2024 08:43:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.255.230.98
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 577F4C8DD;
+	Tue, 12 Mar 2024 09:00:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710232987; cv=none; b=WXgoUcZxL9hdP6LV5tBUyQAxutE/fD+peYQgREQMw8PSAUZeQTIeAiCEWEAzIFKYjqHKmKJCwJE3KB7vzulGoGRLIbfdxgEyp+Nn5YkxfxHvI6V7Zf3zEardNsl14HZkSzlTitYTiwFzcAVXsCMs/zanXK2Na0uohzJ9KIxhKv4=
+	t=1710234052; cv=none; b=OCCaJ6Wpiy8gmI7ddfEMA/v7jbAS3gk054PTkFqFYd5bjoNROQhFeu1gSzMmwqeaUN1vOOlyCGoHZ6r8ejioIc2R1y3AZyqDEnbtZW5iilu6uxUDUYmQ3yVbHF1QnSDcwzJykNIB3TrEDBNAwbWDBq7dvtA3m5Dgo7axuQbQfrI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710232987; c=relaxed/simple;
-	bh=8PTC3st//TZQtxJV2dNX9uPD5gJj55Zs3j0hF1eyaUs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=p7hvP3s95CPX+zUiZtLkL2FeIJheLC+UVE/NbykN3N+a3WuFePjfK+w3hrinx9q6VGrPnfJvHU8XamsBk2e5Tlihhx5+TZZhTZW7C/ThmrcMqP4LlinLtOdmj1lfWT3M4C/j6l/2jSyAZ39MaWTotEskrLh4Oxq1Ab9947uByL8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ucw.cz; spf=pass smtp.mailfrom=ucw.cz; dkim=pass (1024-bit key) header.d=ucw.cz header.i=@ucw.cz header.b=loRvjQAW; arc=none smtp.client-ip=46.255.230.98
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ucw.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ucw.cz
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ucw.cz header.i=@ucw.cz header.b="loRvjQAW"
-Received: by jabberwock.ucw.cz (Postfix, from userid 1017)
-	id 890651C007F; Tue, 12 Mar 2024 09:43:01 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ucw.cz; s=gen1;
-	t=1710232981;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=v91wZVSG1tHVmRuWN1qiVImveP0XzlTDO1nWD46gUJo=;
-	b=loRvjQAWm3P3Jo8q7qb64psvBgHTz2l4iOi+wkuoMPvD5KHCVIvAYLTytKtc93Oflj04B6
-	6GlIJztqjIjMFEQdY7u0TolPubSTIgPtYDWCgNgkuTowvNjqRLsxyYgAOiHBoUHG6/3aGJ
-	JiJcjbHg2kqDYPQD4oPrVSR54LWq20o=
-Date: Tue, 12 Mar 2024 09:43:00 +0100
-From: Pavel Machek <pavel@ucw.cz>
-To: Ping-Ke Shih <pkshih@realtek.com>
-Cc: Fiona Klute <fiona.klute@gmx.de>,
-	"linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-	Kalle Valo <kvalo@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	=?utf-8?Q?Ond=C5=99ej?= Jirman <megi@xff.cz>
+	s=arc-20240116; t=1710234052; c=relaxed/simple;
+	bh=liCt9vEPzADuRhCwLdH5GsdPKWKLGTOcnnozfCA2GEI=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=T1Mh5WoFoFYGgYebUdVK3+BuAF3Q25QSSAIehKSl7N0MveXGCxw/NnReZxfLPckfKx1hVdr5HZNvkCakH601lk4sxGEtF5/+eqxtlTHJErCKOYDuqVqyfvfIOd3JQMK4zZrE4lS3xQnkOrBVq3fd0HJoFgsK4se+fZnuEBYef2E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 42C90PvtC4145030, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 42C90PvtC4145030
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 12 Mar 2024 17:00:25 +0800
+Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Tue, 12 Mar 2024 17:00:25 +0800
+Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
+ RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Tue, 12 Mar 2024 17:00:25 +0800
+Received: from RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f]) by
+ RTEXMBS04.realtek.com.tw ([fe80::c9b7:82a9:7e98:fa7f%7]) with mapi id
+ 15.01.2507.035; Tue, 12 Mar 2024 17:00:24 +0800
+From: Ping-Ke Shih <pkshih@realtek.com>
+To: "pavel@ucw.cz" <pavel@ucw.cz>
+CC: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
+        "kvalo@kernel.org" <kvalo@kernel.org>, "megi@xff.cz" <megi@xff.cz>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "fiona.klute@gmx.de"
+	<fiona.klute@gmx.de>
 Subject: Re: [PATCH v4 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-Message-ID: <ZfAVlEhsMwYMq9BY@amd.ucw.cz>
+Thread-Topic: [PATCH v4 0/9] rtw88: Add support for RTL8723CS/RTL8703B
+Thread-Index: AQHac6A1Psbdiic/Xku5IpChPAWGprEzakIQ///a9ACAAASaAA==
+Date: Tue, 12 Mar 2024 09:00:24 +0000
+Message-ID: <6c73784ecc04cadbcaae3f7e073ffb120e13853c.camel@realtek.com>
 References: <20240311103735.615541-1-fiona.klute@gmx.de>
- <e540243c657043f9a6d0a8d5314191d3@realtek.com>
+	 <e540243c657043f9a6d0a8d5314191d3@realtek.com>
+	 <ZfAVlEhsMwYMq9BY@amd.ucw.cz>
+In-Reply-To: <ZfAVlEhsMwYMq9BY@amd.ucw.cz>
+Accept-Language: en-US, zh-TW
+Content-Language: zh-TW
+user-agent: Evolution 3.36.1-2 
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <337C7FD1B2E2B54581DC849DC7A8F2E7@realtek.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="oJG9/PmtjpM3J0ZL"
-Content-Disposition: inline
-In-Reply-To: <e540243c657043f9a6d0a8d5314191d3@realtek.com>
 
-
---oJG9/PmtjpM3J0ZL
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi!
-
-> > v4:
-> >   * Move definition of GET_RX_DESC_BW from rtw8703b.c to rx.h (now in
-> >     patch 3/9 "wifi: rtw88: Add definitions for 8703b chip")
->=20
-> v4 looks good to me. Thanks for the great work!=20
->=20
-> I also have run sparse/smatch with v4, no warning/error.
-
-Does it mean you queued the patch, or is someone else expected to do
-that?
-
-Best regards,
-								Pavel
---=20
-People of Russia, stop Putin before his war on Ukraine escalates.
-
---oJG9/PmtjpM3J0ZL
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iF0EABECAB0WIQRPfPO7r0eAhk010v0w5/Bqldv68gUCZfAVlAAKCRAw5/Bqldv6
-8spzAJwIiOlVNcksyRfJ9gr5uv+xyAzkZgCgj7iw0ScQtCNbuHqRwDrnwDyzo5E=
-=Lmem
------END PGP SIGNATURE-----
-
---oJG9/PmtjpM3J0ZL--
+T24gVHVlLCAyMDI0LTAzLTEyIGF0IDA5OjQzICswMTAwLCBQYXZlbCBNYWNoZWsgd3JvdGU6DQo+
+IEhpIQ0KPiANCj4gPiA+IHY0Og0KPiA+ID4gICAqIE1vdmUgZGVmaW5pdGlvbiBvZiBHRVRfUlhf
+REVTQ19CVyBmcm9tIHJ0dzg3MDNiLmMgdG8gcnguaCAobm93IGluDQo+ID4gPiAgICAgcGF0Y2gg
+My85ICJ3aWZpOiBydHc4ODogQWRkIGRlZmluaXRpb25zIGZvciA4NzAzYiBjaGlwIikNCj4gPiAN
+Cj4gPiB2NCBsb29rcyBnb29kIHRvIG1lLiBUaGFua3MgZm9yIHRoZSBncmVhdCB3b3JrISANCj4g
+PiANCj4gPiBJIGFsc28gaGF2ZSBydW4gc3BhcnNlL3NtYXRjaCB3aXRoIHY0LCBubyB3YXJuaW5n
+L2Vycm9yLg0KPiANCj4gRG9lcyBpdCBtZWFuIHlvdSBxdWV1ZWQgdGhlIHBhdGNoLCBvciBpcyBz
+b21lb25lIGVsc2UgZXhwZWN0ZWQgdG8gZG8NCj4gdGhhdD8NCj4gDQoNCkkgbWVhbiB0aGlzIHBh
+dGNoc2V0IGlzIG9rYXkgdG8gbWUsIGFuZCBLYWxsZSB3aWxsIGhlbHAgdG8gYXBwbHkgdGhpcw0K
+cGF0Y2hzZXQgdG8gd2lyZWxlc3MtbmV4dCB0cmVlLiBJIHN1cHBvc2UgbmV4dCBuZXh0IGtlcm5l
+bCB2Ni4xMCB3aWxsDQpoYXZlIHRoaXMuIA0KDQpQaW5nLUtlIA0KDQoNCg0KDQo=
