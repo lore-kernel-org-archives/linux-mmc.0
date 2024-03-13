@@ -1,117 +1,192 @@
-Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
+Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11CB820313
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 09:30:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04A6B374F6
+	for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 10:20:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710322257; cv=none; b=aJ38LyrgFeHDQSVE2bQB9ZATEW3eF7j+zyhamvTrs022nfndBqNDBOIImCFEB3sc+ZC1b6uPzs1dYf0j4mBf4kuhZBEZKVkn8jdzUiAIVLb6qqZwcybeBeI+amGEHRB/WvWanKv8E1iUaCRYnW7F4b1mEz4a+d+XLQYyML8dapo=
+	t=1710325223; cv=none; b=BEwj8DsvGZCl4n6Q/pVcFiXdoHy94y+UUj51ptCNTdNVF2frm6RKbxGU9UK82Bu7MWpF07LsnXWc3MoYMlRmv/26c2ej+yqKV9I0fw6LSQZz1Pt+hHPX0xZbBwp2pwECahw4uOBIkAFmuXy+Vu17LdOZk/bRCjm58F31t5Ox7X0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710322257; c=relaxed/simple;
-	bh=YF7fTtdvfzFITVVZ7CSzpov04FdfNLIQqExickCxZeY=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=kPAcs25CeadCRaLPws4+xhgMT9OpL3X9em3YJdWx+qGVTZ+ovf+nalKSKXfVh/BOV2exQCAu+nigFrPJuuNcSO13l04xSJZayy7AsFzzr6Nc8z1dNUJksZXMsVTXQf3uvOSc2keq6cdTW8IaDpjNFspjzLc0Z4TudjYeETLIIhM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=RETG+2Ov; arc=none smtp.client-ip=209.85.221.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
+	s=arc-20240116; t=1710325223; c=relaxed/simple;
+	bh=54ISWejEc7g43gLJbaA6kw3tAbDUhEEnqU4SOmf5mdo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=TRrK8PeLTxlFylpCDqtUAVaZYOcNbVUaJDLAauQ9wPBz5H4dLiqauHGXHX4ORzUQqesCEhWDkHxaAVpEW6cN551JRtTMHSaVoGM366wy3SmeTMfB18UbNi+bFf1JB5CSAaBYheJs21X0gsuF47JGMS++xKOqltUlYfrbUvca7gY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=R0nCg18E; arc=none smtp.client-ip=209.85.219.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="RETG+2Ov"
-Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-33e99b62e01so2325872f8f.0
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 02:30:54 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="R0nCg18E"
+Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-dd161eb03afso800195276.0
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 03:20:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1710322253; x=1710927053; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=/iaQ6hYyfIjuTV/f0JHvHCFbfoBb3uN3YSYBT/944sI=;
-        b=RETG+2Ovv1zAj9PIIkkOw5sRzu14cdI8VB2AIPUtjnjlay1wYb+w2gB5GYSr3ujWPl
-         XXt4nmVXrgjwTtqsPi56MmocNydKDqQOmpeP4ldMLiT7dJz+tn6bDxyYEZrRdg63DApX
-         IBOqpbv2eu2lkFwiPWIesFtM7P5qJ6RnSJ5g4tt++/UhQY5JufHzhEmRz/o/82hjsUXd
-         tpC9Pm/0JdT5xnIORBITPwrkx4aLuZkffAuCFYkDHghtge0R04AbSL9+IR0VTChRJT7/
-         dQZ5KsgMQpzbFbqxNsizT0NoNpWAdwzJxYpKHVMMzn+dC6/9iTmd44//QWse+zCIb/zj
-         2fow==
+        d=linaro.org; s=google; t=1710325221; x=1710930021; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=54ISWejEc7g43gLJbaA6kw3tAbDUhEEnqU4SOmf5mdo=;
+        b=R0nCg18EO1pW9zayhsTn8LQj7M3+tiyyIwN4VB23GEi3NQitBZ7czlmYPgZD9vk+tE
+         1siPpPrsZbCZzW8KpscjM7/rWYkTIds9ia/8k+pclKiEqcjsPCghD4OXM7h4bamAp1ub
+         qGUGm6rG03fdKia17bjrSjhUBqBFW05+SQlK8vyXTjcKRFTazpiuG03NfV1GO6g6dDqx
+         4wXVWMKHqt8TmpUDjfksl7fe/u7A6wt+HPq4L/o+b8Wez97PUM5yuLzIY4+LKXJlIeSW
+         hIVzvYo0Gknfe4kbcp06LD0WOiPjIBdf4q1yQOEdMsMauyYomnOeDZ4oM/GIz0afO8c8
+         yKJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710322253; x=1710927053;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1710325221; x=1710930021;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=/iaQ6hYyfIjuTV/f0JHvHCFbfoBb3uN3YSYBT/944sI=;
-        b=C/bumarF8T+RUfJN6oJWhYtpHygjJk2t86vEMOKaB9RDbah7bUlbGPPD29l+B3gVWx
-         fczCQo9DIULwhGHJwz9tUHnLuE6JjZeqN1++gZtta3ILohNHfwYoA+WYATqMtG38xUdn
-         oc1TGSqCJSiaInUN4vlDgpk2i15xsHSVffcTBAbbYefAZ+YqELm5OOw4Dv/klRSngScB
-         8fNXz9aYDzLbFfOkDsGdvbuzZEK/dIXevW7DYPzstgirlpA9wyPD1Y8Igtu0Kt9DtEWs
-         McwhrX3S3DKxTSThXRHUb+hLMwnt2apvGpmj6bGEAzAJ6tk7mSn9zEmkKwl8er3e04Rn
-         +U+Q==
-X-Gm-Message-State: AOJu0Yy2V39a7eam2K7LOUH42eWXC+w4Brb7nJ4bNvcdHF6cqVkvLNrx
-	fohsS0/dNTnCIUD43rSXq6hcMDkRYrygfrLl1NaQyQugZ/Vl/TG8Fi6shJPg8Oq4MBlci1sP66m
-	J
-X-Google-Smtp-Source: AGHT+IHOxW2fc6sifUNboDvsgW2TAK2bJxYdUATmykFu8/IURNo6dLiw5NA23jNocx0yffVbPmsmHw==
-X-Received: by 2002:a5d:6189:0:b0:33d:269e:132a with SMTP id j9-20020a5d6189000000b0033d269e132amr1388116wru.15.1710322252904;
-        Wed, 13 Mar 2024 02:30:52 -0700 (PDT)
-Received: from claudiu-X670E-Pro-RS.. ([82.78.167.38])
-        by smtp.gmail.com with ESMTPSA id q18-20020adf9dd2000000b0033e90e98886sm8630674wre.71.2024.03.13.02.30.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Mar 2024 02:30:52 -0700 (PDT)
-From: Claudiu <claudiu.beznea@tuxon.dev>
-X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
-To: wsa+renesas@sang-engineering.com,
-	ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	claudiu.beznea@tuxon.dev,
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>,
-	Hien Huynh <hien.huynh.px@renesas.com>
-Subject: [PATCH] mmc: renesas_sdhi: Set the SDBUF after reset
-Date: Wed, 13 Mar 2024 11:30:31 +0200
-Message-Id: <20240313093031.3507979-1-claudiu.beznea.uj@bp.renesas.com>
-X-Mailer: git-send-email 2.39.2
+        bh=54ISWejEc7g43gLJbaA6kw3tAbDUhEEnqU4SOmf5mdo=;
+        b=E7iosvwcJ1ngiyAD7p3jArb47LRoydK/rdW4Kk6BxVoSUkv91V6Kxdz82JayZ+5BNu
+         b5oWAGARtbCGh4RNdlr7gaiqh9BJGLB71es/AD8j0FDb+EDWMGnYVTp/Zjp9i7B5bpni
+         eEKZe9cn6BYPB9OcTPqedWyKI19fWMDB5gfFqC1PRbgwF9VQqvZvXRTr7fX3KoU0VBc/
+         zXIxVixEiouZ2Y5Adq3GVwYzAAUPhgT1MIIlJUDzBqyFHfpAEw7rHKiN7HQPekxWTkiA
+         TEaZQkgDNvKvvEexwE69QbhHuXTw0ZCe99U4WlSyq9k3KrGxL8QenPpl8WeMjy9h1I6M
+         6vCg==
+X-Forwarded-Encrypted: i=1; AJvYcCUV+ZtxoMgvXrrRXh9vNCXVwjrMZnnnCHkF8OKp9yXv24R0lrKfFpR9emfCTL2eP8Dbs+8/a1pE/TD2HXYKkgBWIbemLQpBWVdh
+X-Gm-Message-State: AOJu0YyCIviUNBjTx6WcMu+d0Anxv/6xu/rq+iFD2P3if3UyjSm03wBr
+	oj5ZSyOf2s0kyP4SYZHooAlKhTPtJqAQEtGNpJ+FSTwEkVYprU5yCzLvoALHGxtEY3De1zfPF1Y
+	ROXmRj6BhVpAL5jyAJI6wZOJG/zjSM7r09eeYbg==
+X-Google-Smtp-Source: AGHT+IFm+nd9UQ/qBzI3QBLuuQiXvE1fxdsTpFm/8S45FQPW7ia2y7pgMtQG7PtBRgpPtevnZAjJUXHxcwo/XGYvOcw=
+X-Received: by 2002:a25:2c3:0:b0:dc2:2e01:4ff0 with SMTP id
+ 186-20020a2502c3000000b00dc22e014ff0mr2046178ybc.45.1710325221040; Wed, 13
+ Mar 2024 03:20:21 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1709667858.git.daniel@makrotopia.org> <CAPDyKFpQfue5Fi0fFSnqHNg2ytCxAYfORVP_Y86ucz2k5HRuDA@mail.gmail.com>
+ <ZfBK5qT_GO_FgtQP@makrotopia.org> <CAPDyKFr7mMEZE5n=6kxxsj9P3oLjLyVx20O9q0-pmyXzXYk52A@mail.gmail.com>
+ <ZfBUoc5IjzxbEj7B@makrotopia.org>
+In-Reply-To: <ZfBUoc5IjzxbEj7B@makrotopia.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 13 Mar 2024 11:19:44 +0100
+Message-ID: <CAPDyKFqd=JF6LP4-U2_JNg6Et_PBHFMisnhnUqndK68ZeZ29fg@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 0/8] nvmem: add block device NVMEM provider
+To: Daniel Golle <daniel@makrotopia.org>
+Cc: Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Jens Axboe <axboe@kernel.dk>, Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>, 
+	=?UTF-8?Q?Thomas_Wei=C3=9Fschuh?= <linux@weissschuh.net>, 
+	Christian Brauner <brauner@kernel.org>, Li Lingfeng <lilingfeng3@huawei.com>, 
+	Damien Le Moal <dlemoal@kernel.org>, Min Li <min15.li@samsung.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Hannes Reinecke <hare@suse.de>, 
+	Christian Loehle <CLoehle@hyperstone.com>, Avri Altman <avri.altman@wdc.com>, 
+	Bean Huo <beanhuo@micron.com>, Yeqi Fu <asuk4.q@gmail.com>, 
+	Victor Shih <victor.shih@genesyslogic.com.tw>, 
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>, 
+	"Ricardo B. Marliere" <ricardo@marliere.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, 
+	Diping Zhang <diping.zhang@gl-inet.com>, Jianhui Zhao <zhaojh329@gmail.com>, 
+	Jieying Zeng <jieying.zeng@gl-inet.com>, Chad Monroe <chad.monroe@adtran.com>, 
+	Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>
+Content-Type: text/plain; charset="UTF-8"
 
-From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+On Tue, 12 Mar 2024 at 14:12, Daniel Golle <daniel@makrotopia.org> wrote:
+>
+> On Tue, Mar 12, 2024 at 01:57:39PM +0100, Ulf Hansson wrote:
+> > On Tue, 12 Mar 2024 at 13:30, Daniel Golle <daniel@makrotopia.org> wrote:
+> > >
+> > > Hi Ulf,
+> > >
+> > > On Tue, Mar 12, 2024 at 01:22:49PM +0100, Ulf Hansson wrote:
+> > > > On Tue, 5 Mar 2024 at 21:23, Daniel Golle <daniel@makrotopia.org> wrote:
+> > > > >
+> > > > > On embedded devices using an eMMC it is common that one or more (hw/sw)
+> > > > > partitions on the eMMC are used to store MAC addresses and Wi-Fi
+> > > > > calibration EEPROM data.
+> > > > >
+> > > > > Implement an NVMEM provider backed by block devices as typically the
+> > > > > NVMEM framework is used to have kernel drivers read and use binary data
+> > > > > from EEPROMs, efuses, flash memory (MTD), ...
+> > > > >
+> > > > > In order to be able to reference hardware partitions on an eMMC, add code
+> > > > > to bind each hardware partition to a specific firmware subnode.
+> > > > >
+> > > > > This series is meant to open the discussion on how exactly the device
+> > > > > tree schema for block devices and partitions may look like, and even
+> > > > > if using the block layer to back the NVMEM device is at all the way to
+> > > > > go -- to me it seemed to be a good solution because it will be reuable
+> > > > > e.g. for (normal, software GPT or MBR) partitions of an NVMe SSD.
+> > > > >
+> > > > > This series has previously been submitted on July 19th 2023[1] and most of
+> > > > > the basic idea did not change since.
+> > > > >
+> > > > > However, the recent introduction of bdev_file_open_by_dev() allow to
+> > > > > get rid of most use of block layer internals which supposedly was the
+> > > > > main objection raised by Christoph Hellwig back then.
+> > > > >
+> > > > > Most of the other comments received for in the first RFC have also
+> > > > > been addressed, however, what remains is the use of class_interface
+> > > > > (lacking an alternative way to get notifications about addition or
+> > > > > removal of block devices from the system). As this has been criticized
+> > > > > in the past I'm specifically interested in suggestions on how to solve
+> > > > > this in another way -- ideally without having to implement a whole new
+> > > > > way for in-kernel notifications of appearing or disappearing block
+> > > > > devices...
+> > > > >
+> > > > > And, in a way just like in case of MTD and UBI, I believe acting as an
+> > > > > NVMEM provider *is* a functionality which belongs to the block layer
+> > > > > itself and, other than e.g. filesystems, is inconvenient to implement
+> > > > > elsewhere.
+> > > >
+> > > > I don't object to the above, however to keep things scalable at the
+> > > > block device driver level, such as the MMC subsystem, I think we
+> > > > should avoid having *any* knowledge about the binary format at these
+> > > > kinds of lower levels.
+> > > >
+> > > > Even if most of the NVMEM format is managed elsewhere, the support for
+> > > > NVMEM partitions seems to be dealt with from the MMC subsystem too.
+> > >
+> > > In an earlier iteration of this RFC it was requested to make NVMEM
+> > > support opt-in (instead of opt-out for mtdblock and ubiblock, which
+> > > already got their own NVMEM provider implementation).
+> > > Hence at least a change to opt-in for NVMEM support is required in the
+> > > MMC subsystem, together with making sure that MMC devices have their
+> > > fwnode assigned.
+> >
+> > So, the NVMEM support needs to be turned on (opt-in) for each and
+> > every block device driver?
+> >
+> > It's not a big deal for me - and I would be happy to apply such a
+> > change. On the other hand, it is just some binary data that is stored
+> > on the flash, why should MMC have to opt-in or opt-out at all? It
+> > should be the upper layers who decide what to store on the flash, not
+> > the MMC subsystem, if you get my point.
+> >
+>
+> I agree, and that's exactly how I originally wrote it. However, in the
+> first round of rewiew it was requested to be in that way (ie. opt-in
+> for each subsystem; rather than opt-out for subsystems already
+> providing NVMEM in another way, such as MTD or UBI), see here:
+>
+> https://patchwork.kernel.org/comment/25432948/
 
-For development purpose, renesas_sdhi_probe() could be called w/
-dma_ops = NULL to force the usage of PIO mode. In this case the
-renesas_sdhi_enable_dma() will not be called before transferring data.
+Okay, got it, thanks!
 
-If renesas_sdhi_enable_dma() is not called, renesas_sdhi_clk_enable()
-call from renesas_sdhi_probe() will configure SDBUF by calling the
-renesas_sdhi_sdbuf_width() function, but then SDBUF will be reseted in
-tmio_mmc_host_probe() when calling tmio_mmc_reset() though host->reset().
-If SDBUF is zero the data transfer will not work in PIO mode for RZ/G3S.
+>
+> > >
+> > > > Why can't NVMEM partitions be managed the usual way via the MBR/GPT?
+> > >
+> > > Absolutely, maybe my wording was not clear, but that's exactly what
+> > > I'm suggesting here. There are no added parsers nor any knowledge
+> > > about binary formats in this patchset.
+> >
+> > Right, but there are new DT bindings added in the $subject series that
+> > allows us to describe NVMEM partitions for an eMMC. Why isn't that
+> > parsed from the MBR/GPT, etc, rather than encoded in DT?
+>
+> The added dt-bindings merely allow to **identify** the partition by
+> it's PARTNAME, PARTNO or PARTUUID, so we can reference them in DT.
+> We'd still rely on MBR or GPT to do the actual parsing of the on-disk
+> format.
 
-To fix this call again the renesas_sdhi_sdbuf_width(host, 16); in
-renesas_sdhi_reset(). The call of renesas_sdhi_sdbuf_width() was not
-removed from renesas_sdhi_clk_enable() as the host->reset() is optional.
+Thanks for clarifying!
 
-Co-developed-by: Hien Huynh <hien.huynh.px@renesas.com>
-Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
-Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
----
- drivers/mmc/host/renesas_sdhi_core.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+So, it looks like this all relies on what DT maintainers think then.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index c675dec587ef..b51e04fa5445 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -589,6 +589,12 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host, bool preserve)
- 			sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
- 			priv->needs_adjust_hs400 = false;
- 			renesas_sdhi_set_clock(host, host->clk_cache);
-+
-+			/*
-+			 * In case the controller works in PIO mode the SDBUF needs to be set as its
-+			 * reset value is zero.
-+			 */
-+			renesas_sdhi_sdbuf_width(host, 16);
- 		} else if (priv->scc_ctl) {
- 			renesas_sdhi_scc_reset(host, priv);
- 		}
--- 
-2.39.2
+[...]
 
+Kind regards
+Uffe
