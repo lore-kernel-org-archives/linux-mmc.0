@@ -1,192 +1,266 @@
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04A6B374F6
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 10:20:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D2663F8F4
+	for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 11:46:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710325223; cv=none; b=BEwj8DsvGZCl4n6Q/pVcFiXdoHy94y+UUj51ptCNTdNVF2frm6RKbxGU9UK82Bu7MWpF07LsnXWc3MoYMlRmv/26c2ej+yqKV9I0fw6LSQZz1Pt+hHPX0xZbBwp2pwECahw4uOBIkAFmuXy+Vu17LdOZk/bRCjm58F31t5Ox7X0=
+	t=1710330411; cv=none; b=ekR3jD9y8xR/Era6JEVd1XYLDhAUkqWE5OkKluP9dUutxFENpkM0Pi3bBnccmI5LiA4rchQjhM7+A/Cy7nBU4vEUK2+DBO5hPm3UyVzIVNbPkImwbMFrmgDQw9UuvHVYelNAkGxV3XUrADd01EYaObmf0tkI48OM/G97ZE65l4Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710325223; c=relaxed/simple;
-	bh=54ISWejEc7g43gLJbaA6kw3tAbDUhEEnqU4SOmf5mdo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=TRrK8PeLTxlFylpCDqtUAVaZYOcNbVUaJDLAauQ9wPBz5H4dLiqauHGXHX4ORzUQqesCEhWDkHxaAVpEW6cN551JRtTMHSaVoGM366wy3SmeTMfB18UbNi+bFf1JB5CSAaBYheJs21X0gsuF47JGMS++xKOqltUlYfrbUvca7gY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=R0nCg18E; arc=none smtp.client-ip=209.85.219.174
+	s=arc-20240116; t=1710330411; c=relaxed/simple;
+	bh=bf5u4niR/fxRfBTdEPHkaa81VpRplKSi5Qjc1OqtSW0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=h2ynZjR1Blh7KAiIdqpfYtCxIfvzTNXtUta9M2JmM2E6rHM/0m7jYRkSpdyFsNyqjH5284P58h/HtinOuQmhcz/iVlj2dsH4aClqDCw4g7fR6Hjb3gkIxxdFSXdndzGQDRx0K47eS3zTpIvu1Q5BjB958geBef0DAxGv9PYqPN0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=KqQfqI0r; arc=none smtp.client-ip=209.85.167.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="R0nCg18E"
-Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-dd161eb03afso800195276.0
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 03:20:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KqQfqI0r"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-513c53ed3d8so1041937e87.3
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 04:46:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1710325221; x=1710930021; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=54ISWejEc7g43gLJbaA6kw3tAbDUhEEnqU4SOmf5mdo=;
-        b=R0nCg18EO1pW9zayhsTn8LQj7M3+tiyyIwN4VB23GEi3NQitBZ7czlmYPgZD9vk+tE
-         1siPpPrsZbCZzW8KpscjM7/rWYkTIds9ia/8k+pclKiEqcjsPCghD4OXM7h4bamAp1ub
-         qGUGm6rG03fdKia17bjrSjhUBqBFW05+SQlK8vyXTjcKRFTazpiuG03NfV1GO6g6dDqx
-         4wXVWMKHqt8TmpUDjfksl7fe/u7A6wt+HPq4L/o+b8Wez97PUM5yuLzIY4+LKXJlIeSW
-         hIVzvYo0Gknfe4kbcp06LD0WOiPjIBdf4q1yQOEdMsMauyYomnOeDZ4oM/GIz0afO8c8
-         yKJg==
+        d=linaro.org; s=google; t=1710330407; x=1710935207; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=Sbwx9dfEziliV/89SgDp+Lh5N2uRdyFDXcCaHRpuvlE=;
+        b=KqQfqI0rT2jYItlfzDd9WZO7nSy5L3lVVWVZpmQFoCRcqoV4CazAUH3I6eb6M6e+SI
+         isTbGwbEVAZLeqTU4peDy45kC0GZr78HWQgXTkGA6d9Zd7BP/YvaTif2+haWwfiodiK2
+         TmYtZdUaUttvqzKSP2Xs5tmtVDd2w8eQpC1oRbLo874w+PkottuIoHwR6cgHAxChAJ9F
+         JTSh7lqkufoY9yiEAcZzL9GVstlWA4/baBz9ve7qJW9bosVWp63mzWtvMnQMsNfgW4oy
+         ZRAHcvizTzbMhzgdlNh2ZlObcQ7ytgPvpaQJlxKTA7DJvl555OTxqVMycg9O+v6WYApa
+         N6rg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710325221; x=1710930021;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=54ISWejEc7g43gLJbaA6kw3tAbDUhEEnqU4SOmf5mdo=;
-        b=E7iosvwcJ1ngiyAD7p3jArb47LRoydK/rdW4Kk6BxVoSUkv91V6Kxdz82JayZ+5BNu
-         b5oWAGARtbCGh4RNdlr7gaiqh9BJGLB71es/AD8j0FDb+EDWMGnYVTp/Zjp9i7B5bpni
-         eEKZe9cn6BYPB9OcTPqedWyKI19fWMDB5gfFqC1PRbgwF9VQqvZvXRTr7fX3KoU0VBc/
-         zXIxVixEiouZ2Y5Adq3GVwYzAAUPhgT1MIIlJUDzBqyFHfpAEw7rHKiN7HQPekxWTkiA
-         TEaZQkgDNvKvvEexwE69QbhHuXTw0ZCe99U4WlSyq9k3KrGxL8QenPpl8WeMjy9h1I6M
-         6vCg==
-X-Forwarded-Encrypted: i=1; AJvYcCUV+ZtxoMgvXrrRXh9vNCXVwjrMZnnnCHkF8OKp9yXv24R0lrKfFpR9emfCTL2eP8Dbs+8/a1pE/TD2HXYKkgBWIbemLQpBWVdh
-X-Gm-Message-State: AOJu0YyCIviUNBjTx6WcMu+d0Anxv/6xu/rq+iFD2P3if3UyjSm03wBr
-	oj5ZSyOf2s0kyP4SYZHooAlKhTPtJqAQEtGNpJ+FSTwEkVYprU5yCzLvoALHGxtEY3De1zfPF1Y
-	ROXmRj6BhVpAL5jyAJI6wZOJG/zjSM7r09eeYbg==
-X-Google-Smtp-Source: AGHT+IFm+nd9UQ/qBzI3QBLuuQiXvE1fxdsTpFm/8S45FQPW7ia2y7pgMtQG7PtBRgpPtevnZAjJUXHxcwo/XGYvOcw=
-X-Received: by 2002:a25:2c3:0:b0:dc2:2e01:4ff0 with SMTP id
- 186-20020a2502c3000000b00dc22e014ff0mr2046178ybc.45.1710325221040; Wed, 13
- Mar 2024 03:20:21 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1710330407; x=1710935207;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Sbwx9dfEziliV/89SgDp+Lh5N2uRdyFDXcCaHRpuvlE=;
+        b=rpBRGE90lM05FMF7pi+9QXMAtd80dQPFH1h66RGtOhtyw8yhXlJmpR65s+b/yzGtxh
+         GtD7BeKSUUgpS3MP1GgrpFuZvDFk5soD6jZLv443J7+g2iuU2mkP5KgKX5G5qEtoSD4y
+         sYn/ZbqMP/DYqDwyKsyTc8Kdi1lrVZUHzWBqzDDXCJEll/LxwgMC+o7YUbV0kxJ6lRS/
+         Fwh3s7iPaf5yMOSlWanS1RikpodlAeeLr3AhjgLapuMRdqxQo9wk5uh9hHBzZ1hpVM2M
+         cHQEkDLYpv4c/EezzGv0SrvrOjFFAUfBdwE2zmqhyeAezwVWhX0aXTwvqn/bmWFfCLYh
+         V4bg==
+X-Forwarded-Encrypted: i=1; AJvYcCWMp2jT0dFMI5fL5FpDdx27be1kmd+DiGzxSG6O3GNnGYa8nsxvO898UPrjuNRaHDPBHhGG1rK0wkhbOEIksHmp2W7bUSJca1bV
+X-Gm-Message-State: AOJu0Yzg8wGMXenp5PTXQIRqBh3Di9tniIS4dObKWNEHEUaQVMTZV4aP
+	MgDJ1TR43JowEyLSfiqAx/GDDn+DPK8eO5hEpeLXiX1n3CEzUpWKkVJPpVcGZ/I=
+X-Google-Smtp-Source: AGHT+IGrifXBUaSu4ytZ+qn2OPigkgvfGBbZWRmkEMzgxHnYAQx+khMgSrAhsfZineoFLATAIZThXg==
+X-Received: by 2002:ac2:4e90:0:b0:513:c8b8:aad2 with SMTP id o16-20020ac24e90000000b00513c8b8aad2mr953949lfr.57.1710330407194;
+        Wed, 13 Mar 2024 04:46:47 -0700 (PDT)
+Received: from nuoska (drt4d6yywjht56pm8q3st-3.rev.dnainternet.fi. [2001:14ba:7430:3d00:1239:a19d:315c:6ddf])
+        by smtp.gmail.com with ESMTPSA id f17-20020ac25331000000b00513c290f892sm571426lfh.257.2024.03.13.04.46.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 13 Mar 2024 04:46:46 -0700 (PDT)
+Date: Wed, 13 Mar 2024 13:46:44 +0200
+From: Mikko Rapeli <mikko.rapeli@linaro.org>
+To: Jens Wiklander <jens.wiklander@linaro.org>
+Cc: Avri Altman <Avri.Altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Daniil Lunev <dlunev@google.com>,
+	Asutosh Das <quic_asutoshd@quicinc.com>
+Subject: Re: [PATCH v4] mmc: core: Use mrq.sbc in close-ended ffu
+Message-ID: <ZfGSJBuBdzkoooYs@nuoska>
+References: <20231129092535.3278-1-avri.altman@wdc.com>
+ <CAPDyKFqsyp=isawJKH0Q7Qqxqtkx=gmPZru9NnK-ndV20VRmFA@mail.gmail.com>
+ <Ze8OXcCA_BCN2MVE@nuoska>
+ <DM6PR04MB65751092AB94DDC87FE9505EFC242@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <Ze8eYFW4yZKcWxdo@nuoska>
+ <CAHUa44Eptk+Mvf+vWReCACq6DLCSry0wT2U4aewq==4Q2Z1HCA@mail.gmail.com>
+ <Ze8mICZ_22mV4jGQ@nuoska>
+ <DM6PR04MB657544B8D60209776E674156FC242@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <CAHUa44E9qgFrdORQ4zdnHdqb1Dpo8ODk1ioquXNe8tJA86fWrA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1709667858.git.daniel@makrotopia.org> <CAPDyKFpQfue5Fi0fFSnqHNg2ytCxAYfORVP_Y86ucz2k5HRuDA@mail.gmail.com>
- <ZfBK5qT_GO_FgtQP@makrotopia.org> <CAPDyKFr7mMEZE5n=6kxxsj9P3oLjLyVx20O9q0-pmyXzXYk52A@mail.gmail.com>
- <ZfBUoc5IjzxbEj7B@makrotopia.org>
-In-Reply-To: <ZfBUoc5IjzxbEj7B@makrotopia.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 13 Mar 2024 11:19:44 +0100
-Message-ID: <CAPDyKFqd=JF6LP4-U2_JNg6Et_PBHFMisnhnUqndK68ZeZ29fg@mail.gmail.com>
-Subject: Re: [RFC PATCH v2 0/8] nvmem: add block device NVMEM provider
-To: Daniel Golle <daniel@makrotopia.org>
-Cc: Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Jens Axboe <axboe@kernel.dk>, Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>, 
-	=?UTF-8?Q?Thomas_Wei=C3=9Fschuh?= <linux@weissschuh.net>, 
-	Christian Brauner <brauner@kernel.org>, Li Lingfeng <lilingfeng3@huawei.com>, 
-	Damien Le Moal <dlemoal@kernel.org>, Min Li <min15.li@samsung.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Hannes Reinecke <hare@suse.de>, 
-	Christian Loehle <CLoehle@hyperstone.com>, Avri Altman <avri.altman@wdc.com>, 
-	Bean Huo <beanhuo@micron.com>, Yeqi Fu <asuk4.q@gmail.com>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>, 
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>, 
-	"Ricardo B. Marliere" <ricardo@marliere.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, 
-	Diping Zhang <diping.zhang@gl-inet.com>, Jianhui Zhao <zhaojh329@gmail.com>, 
-	Jieying Zeng <jieying.zeng@gl-inet.com>, Chad Monroe <chad.monroe@adtran.com>, 
-	Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHUa44E9qgFrdORQ4zdnHdqb1Dpo8ODk1ioquXNe8tJA86fWrA@mail.gmail.com>
 
-On Tue, 12 Mar 2024 at 14:12, Daniel Golle <daniel@makrotopia.org> wrote:
->
-> On Tue, Mar 12, 2024 at 01:57:39PM +0100, Ulf Hansson wrote:
-> > On Tue, 12 Mar 2024 at 13:30, Daniel Golle <daniel@makrotopia.org> wrote:
-> > >
-> > > Hi Ulf,
-> > >
-> > > On Tue, Mar 12, 2024 at 01:22:49PM +0100, Ulf Hansson wrote:
-> > > > On Tue, 5 Mar 2024 at 21:23, Daniel Golle <daniel@makrotopia.org> wrote:
-> > > > >
-> > > > > On embedded devices using an eMMC it is common that one or more (hw/sw)
-> > > > > partitions on the eMMC are used to store MAC addresses and Wi-Fi
-> > > > > calibration EEPROM data.
-> > > > >
-> > > > > Implement an NVMEM provider backed by block devices as typically the
-> > > > > NVMEM framework is used to have kernel drivers read and use binary data
-> > > > > from EEPROMs, efuses, flash memory (MTD), ...
-> > > > >
-> > > > > In order to be able to reference hardware partitions on an eMMC, add code
-> > > > > to bind each hardware partition to a specific firmware subnode.
-> > > > >
-> > > > > This series is meant to open the discussion on how exactly the device
-> > > > > tree schema for block devices and partitions may look like, and even
-> > > > > if using the block layer to back the NVMEM device is at all the way to
-> > > > > go -- to me it seemed to be a good solution because it will be reuable
-> > > > > e.g. for (normal, software GPT or MBR) partitions of an NVMe SSD.
-> > > > >
-> > > > > This series has previously been submitted on July 19th 2023[1] and most of
-> > > > > the basic idea did not change since.
-> > > > >
-> > > > > However, the recent introduction of bdev_file_open_by_dev() allow to
-> > > > > get rid of most use of block layer internals which supposedly was the
-> > > > > main objection raised by Christoph Hellwig back then.
-> > > > >
-> > > > > Most of the other comments received for in the first RFC have also
-> > > > > been addressed, however, what remains is the use of class_interface
-> > > > > (lacking an alternative way to get notifications about addition or
-> > > > > removal of block devices from the system). As this has been criticized
-> > > > > in the past I'm specifically interested in suggestions on how to solve
-> > > > > this in another way -- ideally without having to implement a whole new
-> > > > > way for in-kernel notifications of appearing or disappearing block
-> > > > > devices...
-> > > > >
-> > > > > And, in a way just like in case of MTD and UBI, I believe acting as an
-> > > > > NVMEM provider *is* a functionality which belongs to the block layer
-> > > > > itself and, other than e.g. filesystems, is inconvenient to implement
-> > > > > elsewhere.
-> > > >
-> > > > I don't object to the above, however to keep things scalable at the
-> > > > block device driver level, such as the MMC subsystem, I think we
-> > > > should avoid having *any* knowledge about the binary format at these
-> > > > kinds of lower levels.
-> > > >
-> > > > Even if most of the NVMEM format is managed elsewhere, the support for
-> > > > NVMEM partitions seems to be dealt with from the MMC subsystem too.
-> > >
-> > > In an earlier iteration of this RFC it was requested to make NVMEM
-> > > support opt-in (instead of opt-out for mtdblock and ubiblock, which
-> > > already got their own NVMEM provider implementation).
-> > > Hence at least a change to opt-in for NVMEM support is required in the
-> > > MMC subsystem, together with making sure that MMC devices have their
-> > > fwnode assigned.
-> >
-> > So, the NVMEM support needs to be turned on (opt-in) for each and
-> > every block device driver?
-> >
-> > It's not a big deal for me - and I would be happy to apply such a
-> > change. On the other hand, it is just some binary data that is stored
-> > on the flash, why should MMC have to opt-in or opt-out at all? It
-> > should be the upper layers who decide what to store on the flash, not
-> > the MMC subsystem, if you get my point.
-> >
->
-> I agree, and that's exactly how I originally wrote it. However, in the
-> first round of rewiew it was requested to be in that way (ie. opt-in
-> for each subsystem; rather than opt-out for subsystems already
-> providing NVMEM in another way, such as MTD or UBI), see here:
->
-> https://patchwork.kernel.org/comment/25432948/
+Hi,
 
-Okay, got it, thanks!
+With help from Jens we turned tee-opplicant in userspace to single threaded with:
 
->
-> > >
-> > > > Why can't NVMEM partitions be managed the usual way via the MBR/GPT?
-> > >
-> > > Absolutely, maybe my wording was not clear, but that's exactly what
-> > > I'm suggesting here. There are no added parsers nor any knowledge
-> > > about binary formats in this patchset.
-> >
-> > Right, but there are new DT bindings added in the $subject series that
-> > allows us to describe NVMEM partitions for an eMMC. Why isn't that
-> > parsed from the MBR/GPT, etc, rather than encoded in DT?
->
-> The added dt-bindings merely allow to **identify** the partition by
-> it's PARTNAME, PARTNO or PARTUUID, so we can reference them in DT.
-> We'd still rely on MBR or GPT to do the actual parsing of the on-disk
-> format.
+--- a/tee-supplicant/src/tee_supplicant.c
++++ b/tee-supplicant/src/tee_supplicant.c
+@@ -588,6 +588,8 @@ static bool spawn_thread(struct thread_arg *arg)
+        int e = 0;
+        pthread_t tid;
+ 
++       return true;
++
+        memset(&tid, 0, sizeof(tid));
+ 
+        DMSG("Spawning a new thread");
 
-Thanks for clarifying!
 
-So, it looks like this all relies on what DT maintainers think then.
+but RPMB access still fails, so issue is not in userspace concurrency.
+I added debug prints to this commit and the failures seem to come from
+this first check idata->flags & MMC_BLK_IOC_DROP, second hunk in this patch:
 
-[...]
+@@ -475,10 +479,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+        unsigned int busy_timeout_ms;
+        int err;
+        unsigned int target_part;
++       struct mmc_blk_ioc_data *idata = idatas[i];
++       struct mmc_blk_ioc_data *prev_idata = NULL;
 
-Kind regards
-Uffe
+        if (!card || !md || !idata)
+                return -EINVAL;
+
++       if (idata->flags & MMC_BLK_IOC_DROP)
++               return 0;
++
++       if (idata->flags & MMC_BLK_IOC_SBC)
++               prev_idata = idatas[i - 1];
++   
+        /*
+         * The RPMB accesses comes in from the character device, so we
+         * need to target these explicitly. Else we just target the
+ 
+
+Debug prints:
+
+@@ -485,11 +485,19 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+        if (!card || !md || !idata)
+                return -EINVAL;
+ 
+-       if (idata->flags & MMC_BLK_IOC_DROP)
++       pr_err("%s: DEBUG0:\n", __func__ );
++
++       if (idata->flags & MMC_BLK_IOC_DROP) {
++               pr_err("%s: DEBUG1: idata->flags & MMC_BLK_IOC_DROP: flags = 0x%x, returning 0\n",
++                                                       __func__, idata->flags );
+                return 0;
++       }
+ 
+-       if (idata->flags & MMC_BLK_IOC_SBC)
++       if (idata->flags & MMC_BLK_IOC_SBC && i > 0) {
++               pr_err("%s: DEBUG2: idata->flags & MMC_BLK_IOC_SBC && i > 0, flags = 0x%x\n",
++                                                       __func__, idata->flags);
+                prev_idata = idatas[i - 1];
++       }
+ 
+        /*
+         * The RPMB accesses comes in from the character device, so we
+
+And the logs show that "idata->flags & MMC_BLK_IOC_DROP" is always true for the RPMB
+ioctls.
+
+https://ledge.validation.linaro.org/scheduler/job/83101
+
+[   33.505035] __mmc_blk_ioctl_cmd: DEBUG0:
+[   33.505426] __mmc_blk_ioctl_cmd: DEBUG1: idata->flags & MMC_BLK_IOC_DROP: flags = 0x5f797469, returning 0
+[   33.506283] __mmc_blk_ioctl_cmd: DEBUG0:
+[   33.506639] __mmc_blk_ioctl_cmd: DEBUG2: idata->flags & MMC_BLK_IOC_SBC && i > 0, flags = 0x702e796e
+[   33.507447] __mmc_blk_ioctl_cmd: DEBUG2.1: RPMB
+[   33.511746] __mmc_blk_ioctl_cmd: DEBUG3: copying to prev_idata
+[   43.564084] mmc0: Card stuck being busy! __mmc_poll_for_busy
+
+https://ledge.validation.linaro.org/scheduler/job/83102
+
+[  143.124673] __mmc_blk_ioctl_cmd: DEBUG2: idata->flags & MMC_BLK_IOC_SBC && i > 0, flags = 0x485fb78a
+[  143.133854] __mmc_blk_ioctl_cmd: DEBUG2.1: RPMB
+[  143.138886] __mmc_blk_ioctl_cmd: DEBUG3: copying to prev_idata
+...
+[  153.166684] mmc0: Card stuck being busy! __mmc_poll_for_busy
+
+This commit added uint flags to mmc_blk_ioc_data struct but it is only initialized for
+MMC_DRV_OP_IOCTL code path and for MMC_DRV_OP_IOCTL_RPMB it is uninialized and happens to
+be matching "& MMC_BLK_IOC_DROP" in all cases at runtime thus breaking RPMB ioctls.
+
+Fix will be to initialize mmc_blk_ioc_data->flags in all cases. Would this be fine as
+a catch all initialization for mmc_blk_ioc_data?
+
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -413,7 +413,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
+        struct mmc_blk_ioc_data *idata;
+        int err;
+ 
+-       idata = kmalloc(sizeof(*idata), GFP_KERNEL);
++       idata = kzalloc(sizeof(*idata), GFP_KERNEL);
+        if (!idata) {
+                err = -ENOMEM;
+                goto out;
+
+I think this is a sensible and future proof way to go.
+
+Then, the second flags check for MMC_BLK_IOC_SBC is accessing array using
+index i - 1, but is not checking if i == 0 which results in data[-1] access.
+I think this should be fixed with something like:
+
+-       if (idata->flags & MMC_BLK_IOC_SBC)
++       if (idata->flags & MMC_BLK_IOC_SBC && i > 0) {
+
+Would you be fine with this?
+
+With both of these changes in place (and debug logging) test runs on rockpi4b and synquacer
+arm64 boards are now ok and firmware TPM devices with RPMB storage works again and optee fTPM TA does
+not panic, though there is at least on TPM eventlog read test failing later on (a different kernel or
+firmware bug, perhaps).
+
+https://ledge.validation.linaro.org/scheduler/job/83094
+
++ tee-supplicant -d --rpmb-cid 7001004d33323530385212b201dea300
++ sleep 10
++ modprobe tpm_ftpm_tee
+...
++ tpm2_createprimary -Q --hierarchy=o --key-context=prim.ctx
+...
++ tpm2_loadexternal --key-algorithm=rsa --hierarchy=o --public=signing_key_public.pem --key-context=signing_key.ctx --name=signing_key.name
++ tpm2_startauthsession --session=session.ctx
++ tpm2_policyauthorize --session=session.ctx --policy=authorized.policy --name=signing_key.name
++ tpm2_flushcontext session.ctx
++ cat /tmp/rand_key
++ tpm2_create --hash-algorithm=sha256 --public=auth_pcr_seal_key.pub --private=auth_pcr_seal_key.priv --sealing-input=- --parent-context=prim.ctx --policy=authorized.policy
+...
++ tpm2_load -Q --parent-context=prim.ctx --public=auth_pcr_seal_key.pub --private=auth_pcr_seal_key.priv --name=seal.name --key-context=seal.ctx
++ tpm2_evictcontrol -Q -C o -c 0x8100000a
+...
++ cryptsetup -q --type luks2 --cipher aes-xts-plain --hash sha256 --use-random --uuid=6091b3a4-ce08-3020-93a6-f755a22ef03b luksFormat /dev/sda2 --key-file /tmp/rand_key --label otaroot
++ echo 'Creating encrypted filesystem ...'
+Creating encrypted filesystem ...
++ cryptsetup luksOpen --key-file /tmp/rand_key /dev/sda2 rootfs
+...
+
+https://ledge.validation.linaro.org/scheduler/job/83096
+
++ modprobe tpm_ftpm_tee
+...
++ rngd
+...
++ tpm2_dictionarylockout -c
++ tpm2-abrmd --allow-root
+...
++ tpm2_seal_password /tmp/rand_key
++ local passfilename=/tmp/rand_key
+...
++ tpm2_createprimary -Q --hierarchy=o --key-context=prim.ctx
+...
++ tpm2_loadexternal --key-algorithm=rsa --hierarchy=o --public=signing_key_public.pem --key-context=signing_key.ctx --name=signing_key.name
++ tpm2_startauthsession --session=session.ctx
++ tpm2_policyauthorize --session=session.ctx --policy=authorized.policy --name=signing_key.name
++ tpm2_flushcontext session.ctx
+...
++ tpm2_create --hash-algorithm=sha256 --public=auth_pcr_seal_key.pub --private=auth_pcr_seal_key.priv --sealing-input=- --parent-context=prim.ctx --policy=authorized.policy
+...
++ tpm2_load -Q --parent-context=prim.ctx --public=auth_pcr_seal_key.pub --private=auth_pcr_seal_key.priv --name=seal.name --key-context=seal.ctx
++ tpm2_evictcontrol -Q -C o -c 0x8100000a
++ tpm2_evictcontrol --hierarchy=o --object-context=seal.ctx 0x8100000a
+...
++ cryptsetup -q --type luks2 --cipher aes-xts-plain --hash sha256 --use-random --uuid=6091b3a4-ce08-3020-93a6-f755a22ef03b luksFormat /dev/mmcblk1p7 --key-file /tmp/rand_key --label otaroot
+...
+Creating encrypted filesystem ...
++ cryptsetup luksOpen --key-file /tmp/rand_key /dev/mmcblk1p7 rootfs
+...
++ mount /dev/mapper/rootfs /rootfs -o rw,noatime,iversion
+[  171.018740] EXT4-fs (dm-0): mounted filesystem 89ae0ee0-b27c-4a66-ac0c-098c7ccd7a3c r/w with ordered data mode. Quota mode: disabled.
+...
+
+Cheers,
+
+-Mikko
