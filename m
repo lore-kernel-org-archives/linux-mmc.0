@@ -1,108 +1,63 @@
-Received: from mail.kapsi.fi (mail.kapsi.fi [91.232.154.25])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43DB741238;
-	Wed, 13 Mar 2024 14:29:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.232.154.25
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F28D45E088;
+	Wed, 13 Mar 2024 19:28:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710340149; cv=none; b=Vt0/x3mWNX4cpj2Uzc+B03O1rE5HEvV625AowrXPjhaTBX6WF0Eh/hXFySA9Qw2/GgpZhP7Rgm6pjkrwbSSNrEm7WkgvKf1U4wUocfAU714n4vw/siXTiQC89lNWy5l1aOEX/gZVYMa5aHu5ryqaajPFrELhackxicuIrjkglFw=
+	t=1710358095; cv=none; b=aORD6cmeWnIuERkBL1zub09Hjo1arAh2oGvkuB7+QddEjZNQ/H/Xy4t+3aZoO3ZUyjaM/i6A6NMrN3yNmbNdqzT+5DR1O+ANCR7Fueoom29jkAiffA6jl9wYzaJih8TGRtRxR+4mIjFAWQdwCTuT1AtG6ZUwZ6yUIHe3XiykRKc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710340149; c=relaxed/simple;
-	bh=+SzE9YhmbZq0ZkHDLA2Is5ynCd9pXgBS2FEXqZp09Ms=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=p8l2EierqsmZej5Ljia9c6daZXVUr9xC8cdhJvhy6OkmgsnzSsui1grg8yxFEjUV5Or7D+AjrOwP/OGKSh7WNTFmqn653x07qAiefXf1eQ5cN2ROJ1yzE1qZSdy6FcS8LCzZCSpAnd/fp4VGaH8ZOBHie0DxVxwHS+Bj4YE59A8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=lakka.kapsi.fi; arc=none smtp.client-ip=91.232.154.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lakka.kapsi.fi
-Received: from kapsi.fi ([2001:67c:1be8::11] helo=lakka.kapsi.fi)
-	by mail.kapsi.fi with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.96)
-	(envelope-from <mcfrisk@lakka.kapsi.fi>)
-	id 1rkP6Q-007fpl-1T;
-	Wed, 13 Mar 2024 15:57:06 +0200
-Received: from mcfrisk by lakka.kapsi.fi with local (Exim 4.94.2)
-	(envelope-from <mcfrisk@lakka.kapsi.fi>)
-	id 1rkP6Q-00AVj1-6D; Wed, 13 Mar 2024 15:57:06 +0200
-From: mikko.rapeli@linaro.org
-To: linux-mmc@vger.kernel.org
-Cc: Mikko Rapeli <mikko.rapeli@linaro.org>,
-	Avri Altman <avri.altman@wdc.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	stable@vger.kernel.org
-Subject: [PATCH 2/2] mmc core block.c: avoid negative index with array access
-Date: Wed, 13 Mar 2024 15:37:44 +0200
-Message-Id: <20240313133744.2405325-2-mikko.rapeli@linaro.org>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20240313133744.2405325-1-mikko.rapeli@linaro.org>
-References: <20240313133744.2405325-1-mikko.rapeli@linaro.org>
+	s=arc-20240116; t=1710358095; c=relaxed/simple;
+	bh=ihtaLkhmNaVJnaWYn0hgDfF/u8EHUhpmfotySFdTckw=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=WXIrSfMqYAkovILjT0PPWE28LZ/Bij9MKXnyBAFZoqMLh1H61Kx7/Z+HQcEC5XSnbHkcVymo37e0VkQ2ae6c3Urw/rt9cvGfaxu5RdN70TpSn6D8ZoRWPDl8EHltWRcbFZkuYHqOmlnRifRyxaKrj4URebMmQQdngcnv4TCMwUc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BeYukPKX; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BeYukPKX"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id D703FC433C7;
+	Wed, 13 Mar 2024 19:28:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1710358094;
+	bh=ihtaLkhmNaVJnaWYn0hgDfF/u8EHUhpmfotySFdTckw=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+	b=BeYukPKXHRSj2fe3Ri0s9pT03vV216FX9hkbldfBGExyfGPVFA8swtMappjP9jocX
+	 +sS/V/dBeaDo02x8SseCdSYW3haH3g+kk2Uk2bg46STxeOfNd9GEPPh9OgeB0zgmhb
+	 AmRVXX5aNIPkvnpp1fPv7ASqLS14ETF0P+FuJI8umvhkmNlcp2GHhiFjGgh7UC5ob4
+	 s118++UAIjWJh21ofi0AffS5FSrhlt1Il3x3GkUUJ+oHCBa2rVFvyA+FRXZUv4JR9W
+	 662zhuMsjC/g2OOrpcMsN5V0mkJlNoqqwVuBz9kriLAxw7VSXGlxu2NWEqpn6PKf0q
+	 jmOr82RP2saLw==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id C30D1D95054;
+	Wed, 13 Mar 2024 19:28:14 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC and MEMSTICK updates for v6.9
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20240311125807.1143937-1-ulf.hansson@linaro.org>
+References: <20240311125807.1143937-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20240311125807.1143937-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.9
+X-PR-Tracked-Commit-Id: faf3b8014c357d71c7a9414302e217a1dd1679af
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 245b6f3239d9a4fe72f6fc78fc9a005fff2726c5
+Message-Id: <171035809479.9850.15382472080130248602.pr-tracker-bot@kernel.org>
+Date: Wed, 13 Mar 2024 19:28:14 +0000
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Rspam-Score: -1.4 (-)
-X-Rspam-Report: Action: no action
- Symbol: FROM_NEQ_ENVFROM(0.00)
- Symbol: RCVD_COUNT_TWO(0.00)
- Symbol: MID_CONTAINS_FROM(1.00)
- Symbol: BAYES_HAM(-3.00)
- Symbol: TO_MATCH_ENVRCPT_ALL(0.00)
- Symbol: RCVD_TLS_LAST(0.00)
- Symbol: DMARC_POLICY_SOFTFAIL(0.10)
- Symbol: MIME_GOOD(-0.10)
- Symbol: FUZZY_BLOCKED(0.00)
- Symbol: R_DKIM_NA(0.00)
- Symbol: R_SPF_ALLOW(-0.20)
- Symbol: ARC_NA(0.00)
- Symbol: ASN(0.00)
- Symbol: FROM_NO_DN(0.00)
- Symbol: MIME_TRACE(0.00)
- Symbol: TO_DN_SOME(0.00)
- Symbol: FORGED_SENDER(0.30)
- Symbol: NEURAL_SPAM(0.00)
- Symbol: RCPT_COUNT_FIVE(0.00)
- Symbol: R_MISSING_CHARSET(0.50)
- Message-ID: 20240313133744.2405325-2-mikko.rapeli@linaro.org
-X-SA-Exim-Connect-IP: 2001:67c:1be8::11
-X-SA-Exim-Mail-From: mcfrisk@lakka.kapsi.fi
-X-SA-Exim-Scanned: No (on mail.kapsi.fi); SAEximRunCond expanded to false
 
-From: Mikko Rapeli <mikko.rapeli@linaro.org>
+The pull request you sent on Mon, 11 Mar 2024 13:58:07 +0100:
 
-Commit "mmc: core: Use mrq.sbc in close-ended ffu" assigns
-prev_idata = idatas[i - 1] but doesn't check that int iterator
-i is greater than zero. Add the check.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.9
 
-Fixes: 4d0c8d0aef63 ("mmc: core: Use mrq.sbc in close-ended ffu")
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/245b6f3239d9a4fe72f6fc78fc9a005fff2726c5
 
-Link: https://lore.kernel.org/all/20231129092535.3278-1-avri.altman@wdc.com/
+Thank you!
 
-Cc: Avri Altman <avri.altman@wdc.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: stable@vger.kernel.org
-Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
----
- drivers/mmc/core/block.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 0df627de9cee..7f275b4ca9fa 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -488,7 +488,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	if (idata->flags & MMC_BLK_IOC_DROP)
- 		return 0;
- 
--	if (idata->flags & MMC_BLK_IOC_SBC)
-+	if (idata->flags & MMC_BLK_IOC_SBC && i > 0)
- 		prev_idata = idatas[i - 1];
- 
- 	/*
 -- 
-2.34.1
-
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
