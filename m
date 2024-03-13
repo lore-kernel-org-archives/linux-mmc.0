@@ -1,91 +1,117 @@
-Received: from mail-lj1-f173.google.com (mail-lj1-f173.google.com [209.85.208.173])
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9F8B7CF09;
-	Tue, 12 Mar 2024 16:09:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11CB820313
+	for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 09:30:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710259777; cv=none; b=m1CgDC9jPQWWJGt/DEmyK6bmsGqm3WRyeN4FDelg3TboCbQDH/Gt4/kr41GcoMihxWt6pJ08+oKO0Ro55zkWu1PJBjmEHf1L82HFzsp5x8Bd2n4xL+QzvI5AxNi1//l6q0mm9WYrIacYjCYREvmVhbMZnO9Dq1bIcevChUqAL78=
+	t=1710322257; cv=none; b=aJ38LyrgFeHDQSVE2bQB9ZATEW3eF7j+zyhamvTrs022nfndBqNDBOIImCFEB3sc+ZC1b6uPzs1dYf0j4mBf4kuhZBEZKVkn8jdzUiAIVLb6qqZwcybeBeI+amGEHRB/WvWanKv8E1iUaCRYnW7F4b1mEz4a+d+XLQYyML8dapo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710259777; c=relaxed/simple;
-	bh=cDyDRHryGPqpj5GSXxvbgaqrkmOHvBYWafXLeSXan9s=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=EBIhUDOdkJ/dqvljxfVc+CggIPXK6coQCuqAQyih6+4uQL1ZudrecVrPQ8rmZzPWyhqlXFDBzJdPi/4plts2HUFL4udkSKKtKOQ5VR4Jsa9fDvnbcG+SEhRs3cryfkfFfUbR0TYvTVLWAMcPP2sd/sJl6IieJqgxsx0rxnqp+h0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lwfinger.net; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.208.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lwfinger.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-2d28e465655so88633051fa.0;
-        Tue, 12 Mar 2024 09:09:34 -0700 (PDT)
+	s=arc-20240116; t=1710322257; c=relaxed/simple;
+	bh=YF7fTtdvfzFITVVZ7CSzpov04FdfNLIQqExickCxZeY=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=kPAcs25CeadCRaLPws4+xhgMT9OpL3X9em3YJdWx+qGVTZ+ovf+nalKSKXfVh/BOV2exQCAu+nigFrPJuuNcSO13l04xSJZayy7AsFzzr6Nc8z1dNUJksZXMsVTXQf3uvOSc2keq6cdTW8IaDpjNFspjzLc0Z4TudjYeETLIIhM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=RETG+2Ov; arc=none smtp.client-ip=209.85.221.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="RETG+2Ov"
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-33e99b62e01so2325872f8f.0
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2024 02:30:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1710322253; x=1710927053; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=/iaQ6hYyfIjuTV/f0JHvHCFbfoBb3uN3YSYBT/944sI=;
+        b=RETG+2Ovv1zAj9PIIkkOw5sRzu14cdI8VB2AIPUtjnjlay1wYb+w2gB5GYSr3ujWPl
+         XXt4nmVXrgjwTtqsPi56MmocNydKDqQOmpeP4ldMLiT7dJz+tn6bDxyYEZrRdg63DApX
+         IBOqpbv2eu2lkFwiPWIesFtM7P5qJ6RnSJ5g4tt++/UhQY5JufHzhEmRz/o/82hjsUXd
+         tpC9Pm/0JdT5xnIORBITPwrkx4aLuZkffAuCFYkDHghtge0R04AbSL9+IR0VTChRJT7/
+         dQZ5KsgMQpzbFbqxNsizT0NoNpWAdwzJxYpKHVMMzn+dC6/9iTmd44//QWse+zCIb/zj
+         2fow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710259773; x=1710864573;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=1em0UiU249DrHLeNzLIJml8irT8PKoy/CdEqSjvk3lI=;
-        b=WLsHnGmMcLWDpfzNiDdJ7DstxhgTN1c5wVEOkL6wCM/5uN/lVyeU0EUK3AYvourF5z
-         aXVHXSn76yrE0q2PuguPyae75A1BqRc3vI3fnfoEm+3UpensUr6TnfFWyNum7yZrORwd
-         gNnUbF4O8FxSSWiyeeXdiY/AskvV9jcyUikTGe0TAEoJlk2GQvPOY6QlBquDolBPla+Q
-         4NU0p1WNnE8fxlk19RFZvVi8y92E2LtENxMFrDyf3dDpDYFqwz2O7mq5Za/8iWVQdZkG
-         QfNCLi6RhaidaCqmu/hbTV5DQN4tllTpTPSJctyi1jG+vvpPRxBYIVlPuq8JSLjmzQnz
-         1GkA==
-X-Forwarded-Encrypted: i=1; AJvYcCVexvfKEv+l8L+HIIiTGzKcrn8nVi5UAAVYwnQljilpewuTz32T1Grq3XkP4h2gLCAJqS5Z2Rj+lDxL4uEVCcQztiQrSAVQtPAQ12jgb7m+WtlxIcRiI2ymWTxjxXVwCLcCFHrmZ2yigu8=
-X-Gm-Message-State: AOJu0YyY9JQmhYDG7G+aF9pKYHtL+4HkvQTIv2TW4mv0wsa86lkdvPPO
-	B20eQnNlaLZDntptcf29xN+fpss4DJfT6m+On39eXt+2wGzrXVWxtEOWZQZmZxomf/CU7bZ4hmU
-	ofNHFH0LRFfAVG9S31PFQLKw6xH8=
-X-Google-Smtp-Source: AGHT+IFn4yvJ3wdeK2JRTYDdajOpz3X1T5HkNFOVvAAPj0sw1Er1amaiiwNIwxU60pyeaOTe7OqlmP4wfAHZVO8m9sE=
-X-Received: by 2002:a2e:9e19:0:b0:2d2:6608:3d05 with SMTP id
- e25-20020a2e9e19000000b002d266083d05mr6193541ljk.52.1710259772949; Tue, 12
- Mar 2024 09:09:32 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1710322253; x=1710927053;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=/iaQ6hYyfIjuTV/f0JHvHCFbfoBb3uN3YSYBT/944sI=;
+        b=C/bumarF8T+RUfJN6oJWhYtpHygjJk2t86vEMOKaB9RDbah7bUlbGPPD29l+B3gVWx
+         fczCQo9DIULwhGHJwz9tUHnLuE6JjZeqN1++gZtta3ILohNHfwYoA+WYATqMtG38xUdn
+         oc1TGSqCJSiaInUN4vlDgpk2i15xsHSVffcTBAbbYefAZ+YqELm5OOw4Dv/klRSngScB
+         8fNXz9aYDzLbFfOkDsGdvbuzZEK/dIXevW7DYPzstgirlpA9wyPD1Y8Igtu0Kt9DtEWs
+         McwhrX3S3DKxTSThXRHUb+hLMwnt2apvGpmj6bGEAzAJ6tk7mSn9zEmkKwl8er3e04Rn
+         +U+Q==
+X-Gm-Message-State: AOJu0Yy2V39a7eam2K7LOUH42eWXC+w4Brb7nJ4bNvcdHF6cqVkvLNrx
+	fohsS0/dNTnCIUD43rSXq6hcMDkRYrygfrLl1NaQyQugZ/Vl/TG8Fi6shJPg8Oq4MBlci1sP66m
+	J
+X-Google-Smtp-Source: AGHT+IHOxW2fc6sifUNboDvsgW2TAK2bJxYdUATmykFu8/IURNo6dLiw5NA23jNocx0yffVbPmsmHw==
+X-Received: by 2002:a5d:6189:0:b0:33d:269e:132a with SMTP id j9-20020a5d6189000000b0033d269e132amr1388116wru.15.1710322252904;
+        Wed, 13 Mar 2024 02:30:52 -0700 (PDT)
+Received: from claudiu-X670E-Pro-RS.. ([82.78.167.38])
+        by smtp.gmail.com with ESMTPSA id q18-20020adf9dd2000000b0033e90e98886sm8630674wre.71.2024.03.13.02.30.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 13 Mar 2024 02:30:52 -0700 (PDT)
+From: Claudiu <claudiu.beznea@tuxon.dev>
+X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
+To: wsa+renesas@sang-engineering.com,
+	ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	claudiu.beznea@tuxon.dev,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>,
+	Hien Huynh <hien.huynh.px@renesas.com>
+Subject: [PATCH] mmc: renesas_sdhi: Set the SDBUF after reset
+Date: Wed, 13 Mar 2024 11:30:31 +0200
+Message-Id: <20240313093031.3507979-1-claudiu.beznea.uj@bp.renesas.com>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240311103735.615541-1-fiona.klute@gmx.de> <e540243c657043f9a6d0a8d5314191d3@realtek.com>
- <ZfAVlEhsMwYMq9BY@amd.ucw.cz> <6c73784ecc04cadbcaae3f7e073ffb120e13853c.camel@realtek.com>
-In-Reply-To: <6c73784ecc04cadbcaae3f7e073ffb120e13853c.camel@realtek.com>
-From: Larry Finger <Larry.Finger@lwfinger.net>
-Date: Tue, 12 Mar 2024 11:09:21 -0500
-Message-ID: <CAP71bdXhOTY83ODqJjb6Qjt=8HZqwx-YFbwcvWzXx5WMBFtT9Q@mail.gmail.com>
-Subject: Re: [PATCH v4 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-To: Ping-Ke Shih <pkshih@realtek.com>
-Cc: "pavel@ucw.cz" <pavel@ucw.cz>, 
-	"linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "kvalo@kernel.org" <kvalo@kernel.org>, 
-	"megi@xff.cz" <megi@xff.cz>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "fiona.klute@gmx.de" <fiona.klute@gmx.de>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-Those patches have been merged with
-https://github.com/lwfinger/rtw88.git. If you have an rtw8723ds, you
-can access the new driver now.
+From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-On Tue, Mar 12, 2024 at 4:01=E2=80=AFAM Ping-Ke Shih <pkshih@realtek.com> w=
-rote:
->
-> On Tue, 2024-03-12 at 09:43 +0100, Pavel Machek wrote:
-> > Hi!
-> >
-> > > > v4:
-> > > >   * Move definition of GET_RX_DESC_BW from rtw8703b.c to rx.h (now =
-in
-> > > >     patch 3/9 "wifi: rtw88: Add definitions for 8703b chip")
-> > >
-> > > v4 looks good to me. Thanks for the great work!
-> > >
-> > > I also have run sparse/smatch with v4, no warning/error.
-> >
-> > Does it mean you queued the patch, or is someone else expected to do
-> > that?
-> >
->
-> I mean this patchset is okay to me, and Kalle will help to apply this
-> patchset to wireless-next tree. I suppose next next kernel v6.10 will
-> have this.
->
-> Ping-Ke
->
->
->
->
+For development purpose, renesas_sdhi_probe() could be called w/
+dma_ops = NULL to force the usage of PIO mode. In this case the
+renesas_sdhi_enable_dma() will not be called before transferring data.
+
+If renesas_sdhi_enable_dma() is not called, renesas_sdhi_clk_enable()
+call from renesas_sdhi_probe() will configure SDBUF by calling the
+renesas_sdhi_sdbuf_width() function, but then SDBUF will be reseted in
+tmio_mmc_host_probe() when calling tmio_mmc_reset() though host->reset().
+If SDBUF is zero the data transfer will not work in PIO mode for RZ/G3S.
+
+To fix this call again the renesas_sdhi_sdbuf_width(host, 16); in
+renesas_sdhi_reset(). The call of renesas_sdhi_sdbuf_width() was not
+removed from renesas_sdhi_clk_enable() as the host->reset() is optional.
+
+Co-developed-by: Hien Huynh <hien.huynh.px@renesas.com>
+Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
+Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index c675dec587ef..b51e04fa5445 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -589,6 +589,12 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host, bool preserve)
+ 			sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+ 			priv->needs_adjust_hs400 = false;
+ 			renesas_sdhi_set_clock(host, host->clk_cache);
++
++			/*
++			 * In case the controller works in PIO mode the SDBUF needs to be set as its
++			 * reset value is zero.
++			 */
++			renesas_sdhi_sdbuf_width(host, 16);
+ 		} else if (priv->scc_ctl) {
+ 			renesas_sdhi_scc_reset(host, priv);
+ 		}
+-- 
+2.39.2
+
