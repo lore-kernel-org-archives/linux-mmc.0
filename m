@@ -1,135 +1,129 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
+Received: from esa6.hc1455-7.c3s2.iphmx.com (esa6.hc1455-7.c3s2.iphmx.com [68.232.139.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B5EB6BB45;
-	Thu, 14 Mar 2024 09:02:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA3C226AD6;
+	Thu, 14 Mar 2024 09:15:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.139.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710406948; cv=none; b=SBjqOqJ1WaMgdGltnARJC1Udyv0+gkwOLif+/UCEHWWxnkIWpqju73mH4zHjo2xWGXDlncmudgd+P7+H3jESbZv1yU3utYYvUkJg+hCU4WYJ7X3YWwNUi9e0Hfrg7WkkueZvcrNX4AhNZu93pjTIxiFu4OfaYq3yTXuT8PX5Hz0=
+	t=1710407734; cv=none; b=D+fozOlvYTzpcpneowIfmWArKjmEZH6IDi1mRPJeCSsDuIZM9AfRbL6yOFMZIBZHO2pkEryXlhzuiUPE6+ftwvrTTmu240H/9yQiG50luSZa9yyG2sz1gP8DmJrcs8Ogc4WMwQjo7uak9Kf29P6RH3ejlM000jLbsDsbUJsxNrg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710406948; c=relaxed/simple;
-	bh=9TkzJHwQvqGY2QMDScZZ+MsjsfGwgb2RbE4BeRY1nsY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=j553Qus7NjTKWl4WtBfLjKnCZYR/fBKlgTad+oyhbczEQQCvIrkFvrAJLanTaqS6toQzKfvlcBKzl8fZtJTnry233QUeusyQM1y70jWB9JqKRCQRyGf49/EsO0d1AxezJb288VzfhatH+nRpYcTEjygYBlAC7HpUPu8791wWpPg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b=C2p1C5nj; arc=none smtp.client-ip=212.227.15.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
+	s=arc-20240116; t=1710407734; c=relaxed/simple;
+	bh=uApUjC5YdwCr0tkc9ThyODjdMT/+nu/W6brBLQ7RlsE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=cRXzY9qhAWqUPJpLAEImcN4ye+Z8iTs1Va4PW1syQyH72SBO27IjIKrHd1PPXem78QP43Q8mZnPeNi8ju0+4acf3Paet2pksf1SVvXoI4zI0xCSAi5p4N9Yha92b+/CxSJBaobmyfJNahg8t5T5plRfHix6vXKQe/18CZ9jQHNg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=IJCZ1lEd; arc=none smtp.client-ip=68.232.139.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.de header.i=fiona.klute@gmx.de header.b="C2p1C5nj"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.de;
-	s=s31663417; t=1710406934; x=1711011734; i=fiona.klute@gmx.de;
-	bh=9TkzJHwQvqGY2QMDScZZ+MsjsfGwgb2RbE4BeRY1nsY=;
-	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
-	 In-Reply-To;
-	b=C2p1C5njGDodbNLtCGAYAYIsemlQ4nRvmpqj05OqdtbvUJNkKMhcqi06W50Tvwy5
-	 qDF3YwyGuBgAMI1PzwtWsvm6NZMcbZNyXqa7AlHPMM59sHmLs1Ca9PmzxG3gpwOf3
-	 FtxrCCLMNMU2zCNLee4io+s06iuqVb0RGRxpj/HQYqgogkyKJjFky4A3hzBnrwn8h
-	 yiihgy05h5AHfHOa91S5iN/fUX1ZKvHb6IdF7zdr7xXSBZYdFW9jbsg+0MLeYmnMg
-	 FbCtYXtAG1D4aN5ejWbol57Qjco6DQR22gq8j0u+v83m3fh0f5l3SqVmMfKsddZ0B
-	 fsAZOEkCwXE7Oj3dgg==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.7.2] ([85.22.114.134]) by mail.gmx.net (mrgmx004
- [212.227.17.190]) with ESMTPSA (Nemesis) id 1MJmKh-1rVcy71GP3-00K7gR; Thu, 14
- Mar 2024 10:02:14 +0100
-Message-ID: <454c22b3-bea0-4df7-81b6-3541795bc53e@gmx.de>
-Date: Thu, 14 Mar 2024 10:02:12 +0100
+	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="IJCZ1lEd"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
+  t=1710407733; x=1741943733;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=uApUjC5YdwCr0tkc9ThyODjdMT/+nu/W6brBLQ7RlsE=;
+  b=IJCZ1lEd9afcaX66LRRjynDbbURulgyo3ifMiRe23vDhY1a9vY3Xhndp
+   ByW/ANd6DETcADEWXGMncWf7XxI6Z4UyjoepVi1iX85e4E/WA83A0UvD3
+   iB1wUKswTlhKHVqgrTdDA0vpUKfEfhAQ0qzjeu7rTOxWKztqatJhLEr31
+   yXCdq7Gq7WqfFshnZV3RCWU3+PqunhZ26Gy0CB7NcZWHUBKwe9WrRVDaC
+   5Rs18EGGsfT1khkDKoG20AKChTqaKbut9U/G3ZY0FaY1MShxjPn/T8mvx
+   LIqMIef+sHnDOhFrMIhSHy8tco36k6n76ZSUb31WgDjCItPZlYJhCxtZ9
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,11012"; a="154095754"
+X-IronPort-AV: E=Sophos;i="6.07,124,1708354800"; 
+   d="scan'208";a="154095754"
+Received: from unknown (HELO oym-r4.gw.nic.fujitsu.com) ([210.162.30.92])
+  by esa6.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2024 18:15:24 +0900
+Received: from oym-m3.gw.nic.fujitsu.com (oym-nat-oym-m3.gw.nic.fujitsu.com [192.168.87.60])
+	by oym-r4.gw.nic.fujitsu.com (Postfix) with ESMTP id 3A4B5C32E2;
+	Thu, 14 Mar 2024 18:15:21 +0900 (JST)
+Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
+	by oym-m3.gw.nic.fujitsu.com (Postfix) with ESMTP id 691B6B0D79;
+	Thu, 14 Mar 2024 18:15:20 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 016546B4C5;
+	Thu, 14 Mar 2024 18:15:20 +0900 (JST)
+Received: from localhost.localdomain (unknown [10.167.226.45])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id 80F291A006B;
+	Thu, 14 Mar 2024 17:15:19 +0800 (CST)
+From: Li Zhijian <lizhijian@fujitsu.com>
+To: linux-kernel@vger.kernel.org
+Cc: Li Zhijian <lizhijian@fujitsu.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: core: Convert sprintf/snprintf to sysfs_emit
+Date: Thu, 14 Mar 2024 17:15:12 +0800
+Message-Id: <20240314091512.1323650-1-lizhijian@fujitsu.com>
+X-Mailer: git-send-email 2.31.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 0/9] rtw88: Add support for RTL8723CS/RTL8703B
-To: Ping-Ke Shih <pkshih@realtek.com>, "pavel@ucw.cz" <pavel@ucw.cz>
-Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
- "kvalo@kernel.org" <kvalo@kernel.org>, "megi@xff.cz" <megi@xff.cz>,
- "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-References: <20240311103735.615541-1-fiona.klute@gmx.de>
- <e540243c657043f9a6d0a8d5314191d3@realtek.com> <ZfAVlEhsMwYMq9BY@amd.ucw.cz>
- <6c73784ecc04cadbcaae3f7e073ffb120e13853c.camel@realtek.com>
- <38fc27be-0e46-4677-bbe3-c0b9689dfbd5@gmx.de>
- <063926329b2507ce4073dd05fdfc47929f3bb038.camel@realtek.com>
-Content-Language: de-DE, en-US
-From: Fiona Klute <fiona.klute@gmx.de>
-Autocrypt: addr=fiona.klute@gmx.de; keydata=
- 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
-In-Reply-To: <063926329b2507ce4073dd05fdfc47929f3bb038.camel@realtek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:4qlg5w9wH5FMIoKpVgA4PznusRMhHIFdzmFdVdDLE4B1luWXMMq
- 9vsVmKnf81MKy/KwkYT9tnCiBHZ5Ybnnkk7/Md6kWtg0A5C+DFGbu10bt5EbP5xDzeOKJsp
- abm29f9HDfB8miDiN85nS6nOB+XaL5U5EEm17SNwW6IALpWgU/MdJc6cVUQ6oSyts5MqGUH
- Mv86CSmYR08qUYZxRqhhQ==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:IMoVLnfgkKI=;YLrwAMQlBUOVBHt2tvav4SJxQIb
- jChAWRJWaHAdFiDnHeQSSOihpWfL8HAxfFqzckNumRMaMGkWCNlTIpDKesdH1GTVaRfD4MP2T
- 2dmr7REBikZYC+TW3R9wf16bUYOpYbj5Sa0Ld8hbf7pppD2oWiPzmGljjB1njtrZWWM7esk34
- kjTR6zlMCnGAuAzdSJESumePLo5r/zKcuVeW1aFuxvxbg/Y8fq3uOsdn/t/An4qkkpVSU/rhX
- P2YTNz0zZ6mtHjMyYO1pUfBiX/lCJu1XWDTJuUzK3UCuhbmEJ6j4Yqc6yMBQkGICnzmcdFRR3
- D359KW0TyyoF1zevxOLStofEC0HCc5cJ33SbN+HpFYsBCZOLekmKSs7hcatigCrhfOOalTsCM
- sKWbZAThFnwcGVnYffeuALFQBNCX8gUcaaUZ2c2kyptFyTuqetnsysRxtu4aUrmDl+zaKTpdr
- l2S2kbVROpd1cPkrnADhkcjmeUmnl7MSKXathqk2j5g8sBybOfmR/cHiWj6g10EqZEgbJet5i
- 8ynfSinA1UeDnNsym7+oja6NMELoCMZlDwldZ8Lk0DlTBK8fA4lmmCSuAViC2XO1W+iw0CMHB
- ++0m3suXdZZ0PslfSv9ZRf8IEBCbD3bGvkXAmeoELvWx7KC6cbglJQy0cnL1YnBT7vHzvuwrt
- vhOtBVsuR3tmgLYK6nLMFX1MlqK7jSFNXwQhWkYd7Q8Veg/zfdmi5Ct2Gja9YjdYF5yXe9G2k
- 8ZmUwrDrp95MbApeJUNSZmsLMBmGvZR9aHCqI68X0yJWweDPhftjc+hECTajNkyJQhBdzz6uW
- gJFXVlVlfl0v8G+Sj89ksDEM5Paaf/Md2Y9oengbs235w=
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28250.006
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28250.006
+X-TMASE-Result: 10--6.925300-10.000000
+X-TMASE-MatchedRID: 84oovQVhL8E4ibokZ3+Q0CoiRKlBVkYIBXngI6jFvpfDqO6/8R69QE8U
+	roFNOGp7a6aAZTOwtJmRloiW1Kgftd2ZdKe8BPbSrMZ+BqQt2NpBHuVYxc8DW3hh5KUdlgWiKqF
+	q1hn3Eb3d+/nM3Koh0iaTw03n/wYO0ekSi+00U24ReM8i8p3vgEyQ5fRSh265uBsk5njfgGwHBN
+	wMIojZclkG0yevELlY5nGjEm4IlfpEY+rVKhaSwJ4CIKY/Hg3AaZGo0EeYG96m4/3ODjvukSq2r
+	l3dzGQ1bvsoMHHm4Yje41SHp05NwSTlv00df6MuF3aCMgMiMs9sOKrFPGAUQA==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
-Am 14.03.24 um 01:18 schrieb Ping-Ke Shih:
->
->>
->> Is there anything I still need to do to get the firmware into
->> linux-firmware?
->>
->
-> Please send me a firmware patch again. In case I send wrong firmware to
-> liunx-firmware.
+Per filesystems/sysfs.rst, show() should only use sysfs_emit()
+or sysfs_emit_at() when formatting the value to be returned to user space.
 
-I've just sent it. Thanks for taking care of this!
+coccinelle complains that there are still a couple of functions that use
+snprintf(). Convert them to sysfs_emit().
 
-Fiona
+sprintf() will be converted as weel if they have.
 
+Generally, this patch is generated by
+make coccicheck M=<path/to/file> MODE=patch \
+COCCI=scripts/coccinelle/api/device_attr_show.cocci
+
+No functional change intended
+
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: linux-mmc@vger.kernel.org
+Signed-off-by: Li Zhijian <lizhijian@fujitsu.com>
+---
+This is a part of the work "Fix coccicheck device_attr_show warnings"[1]
+Split them per subsystem so that the maintainer can review it easily
+[1] https://lore.kernel.org/lkml/20240116041129.3937800-1-lizhijian@fujitsu.com/
+---
+ drivers/mmc/core/block.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 64a3492e8002..1e1e136d9e72 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -234,7 +234,7 @@ static ssize_t power_ro_lock_show(struct device *dev,
+ 	else if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_EN)
+ 		locked = 1;
+ 
+-	ret = snprintf(buf, PAGE_SIZE, "%d\n", locked);
++	ret = sysfs_emit(buf, "%d\n", locked);
+ 
+ 	mmc_blk_put(md);
+ 
+@@ -296,9 +296,9 @@ static ssize_t force_ro_show(struct device *dev, struct device_attribute *attr,
+ 	int ret;
+ 	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+ 
+-	ret = snprintf(buf, PAGE_SIZE, "%d\n",
+-		       get_disk_ro(dev_to_disk(dev)) ^
+-		       md->read_only);
++	ret = sysfs_emit(buf, "%d\n",
++			 get_disk_ro(dev_to_disk(dev)) ^
++			 md->read_only);
+ 	mmc_blk_put(md);
+ 	return ret;
+ }
+-- 
+2.29.2
 
