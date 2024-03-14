@@ -1,59 +1,65 @@
-Received: from esa6.hc1455-7.c3s2.iphmx.com (esa6.hc1455-7.c3s2.iphmx.com [68.232.139.139])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA3C226AD6;
-	Thu, 14 Mar 2024 09:15:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.139.139
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0042D5811C;
+	Thu, 14 Mar 2024 14:14:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710407734; cv=none; b=D+fozOlvYTzpcpneowIfmWArKjmEZH6IDi1mRPJeCSsDuIZM9AfRbL6yOFMZIBZHO2pkEryXlhzuiUPE6+ftwvrTTmu240H/9yQiG50luSZa9yyG2sz1gP8DmJrcs8Ogc4WMwQjo7uak9Kf29P6RH3ejlM000jLbsDsbUJsxNrg=
+	t=1710425686; cv=none; b=gajxxpH2VyVDTY3mySWqNjTNZ8UX3t3BJIg8/nxhi//xOQNLCzmS4idqtFs48e+jjyy83fuUyKes0eks/PN8/HSAtSBD9Tm+WAwurYdPPg2vGy4Gt/Hx0yB6kNGbqgqZL2L9y3U79V0jk6HLBl/s7RHJO4kgYYCxj0kpszjnGBI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710407734; c=relaxed/simple;
-	bh=uApUjC5YdwCr0tkc9ThyODjdMT/+nu/W6brBLQ7RlsE=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=cRXzY9qhAWqUPJpLAEImcN4ye+Z8iTs1Va4PW1syQyH72SBO27IjIKrHd1PPXem78QP43Q8mZnPeNi8ju0+4acf3Paet2pksf1SVvXoI4zI0xCSAi5p4N9Yha92b+/CxSJBaobmyfJNahg8t5T5plRfHix6vXKQe/18CZ9jQHNg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=IJCZ1lEd; arc=none smtp.client-ip=68.232.139.139
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
+	s=arc-20240116; t=1710425686; c=relaxed/simple;
+	bh=x5CVPbF28WQ1DpJCoL+U1c14mF1GOV9N6BoJa/JW2Ig=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=YXwTpPWDkVtkMZcrKJjobzMorMFHmcoVgIr84+eL+/wZBFxkUQ/CPkjHtBSrUksVWSb8E3iRQY/3wSQnQraFtYtwgcqRw2JuSTMPEHEc5IcwMC7Vu/X2dpZ7Fb+jJ/d+fU4EsRBZ5zqMYtslB56F0B5pX5VH1I6waDvKI32JpTk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZJsd3Zb3; arc=none smtp.client-ip=209.85.167.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="IJCZ1lEd"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
-  t=1710407733; x=1741943733;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=uApUjC5YdwCr0tkc9ThyODjdMT/+nu/W6brBLQ7RlsE=;
-  b=IJCZ1lEd9afcaX66LRRjynDbbURulgyo3ifMiRe23vDhY1a9vY3Xhndp
-   ByW/ANd6DETcADEWXGMncWf7XxI6Z4UyjoepVi1iX85e4E/WA83A0UvD3
-   iB1wUKswTlhKHVqgrTdDA0vpUKfEfhAQ0qzjeu7rTOxWKztqatJhLEr31
-   yXCdq7Gq7WqfFshnZV3RCWU3+PqunhZ26Gy0CB7NcZWHUBKwe9WrRVDaC
-   5Rs18EGGsfT1khkDKoG20AKChTqaKbut9U/G3ZY0FaY1MShxjPn/T8mvx
-   LIqMIef+sHnDOhFrMIhSHy8tco36k6n76ZSUb31WgDjCItPZlYJhCxtZ9
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,11012"; a="154095754"
-X-IronPort-AV: E=Sophos;i="6.07,124,1708354800"; 
-   d="scan'208";a="154095754"
-Received: from unknown (HELO oym-r4.gw.nic.fujitsu.com) ([210.162.30.92])
-  by esa6.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2024 18:15:24 +0900
-Received: from oym-m3.gw.nic.fujitsu.com (oym-nat-oym-m3.gw.nic.fujitsu.com [192.168.87.60])
-	by oym-r4.gw.nic.fujitsu.com (Postfix) with ESMTP id 3A4B5C32E2;
-	Thu, 14 Mar 2024 18:15:21 +0900 (JST)
-Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
-	by oym-m3.gw.nic.fujitsu.com (Postfix) with ESMTP id 691B6B0D79;
-	Thu, 14 Mar 2024 18:15:20 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 016546B4C5;
-	Thu, 14 Mar 2024 18:15:20 +0900 (JST)
-Received: from localhost.localdomain (unknown [10.167.226.45])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id 80F291A006B;
-	Thu, 14 Mar 2024 17:15:19 +0800 (CST)
-From: Li Zhijian <lizhijian@fujitsu.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZJsd3Zb3"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-5131a9b3d5bso1328461e87.0;
+        Thu, 14 Mar 2024 07:14:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1710425683; x=1711030483; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=PAAoGUwJhKHSM53yVC1A2s8QbjT/aWBxy9la5JymCLA=;
+        b=ZJsd3Zb3knbapts/qUS1n8+Cr1zJDrfYyAWKjpEnRQBXAf11lwv0PPrE6T1SEiFVI2
+         RIQAEWtMQpVQl6Z8g0ETLEet2rrkcbkpuB7XSob9s7KuiAcSROVIJVKO2IPuqfh7QnwG
+         oNGRnCc123z/E2P77r3bVzLMxDIOEu9av83BGjJzjAzAQl39H+nV6RZKZILS2Tls1DCg
+         /iKKqScJIbqxut19j52uNvr/YYR3z0pTXtAaG4ii+kuZBwj2rjBAdMWmSxASI5SdNaXN
+         jGNW3VR8ORfiVDqf0P7VZA8pq9eO52fxLEEv7nsFY0D/4Tjn7xhlEWWc3KlXP15OCvun
+         z6wg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1710425683; x=1711030483;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PAAoGUwJhKHSM53yVC1A2s8QbjT/aWBxy9la5JymCLA=;
+        b=b+NDUPDZgVBqg2155TwPuUGMnp2PSCmmCVvLtPeZBlQ/lOdAqNGrdfSVYcCvKPseFp
+         FD2u1CGYNOYqMV1z9FHfU56d53VMoSTP1k3TxrimONQ6ZXJ6Ws6PRMBQ9WcTlWhUacLM
+         U6E0Oa6ThoLLKkvhYklazPsuz+jY098y1QV/Ov+6er1ER0Xu/xmVzPF7J2Xcf5r7cQpw
+         4yMsGhDrNe53XJsanQHu6q7//o6J0xMPviAGwfnW9i8LKr4XvEYDv130/QcQsOojniyR
+         vrDHIUDQZU5sZelJSuOgY3/ZUMfzCo61scp99dnW0NH6WxFUL7w2KmE+bTRh+IHJ6XSw
+         X+cw==
+X-Gm-Message-State: AOJu0YyPqsT0ZIt7T/lhhIdMki3t8rdJbzGDiH3sTp0Gg2zBQM6juwE/
+	dB/uSmLdLA+HvGz8wlEe8uH5VwRj6Lp83OmJG7JuWzGyo0igEyugdg4YXAv9uRk=
+X-Google-Smtp-Source: AGHT+IHthsBH5+FP1OlF3bK3BRi/RkDevyBhf348milcB9Hjy3iU8bN00i0ea1eQVxPIyvEfUPJFvA==
+X-Received: by 2002:ac2:598c:0:b0:513:a732:4878 with SMTP id w12-20020ac2598c000000b00513a7324878mr1346057lfn.41.1710425682283;
+        Thu, 14 Mar 2024 07:14:42 -0700 (PDT)
+Received: from skhimich.dev.yadro.com (avpn01.yadro.com. [89.207.88.243])
+        by smtp.gmail.com with ESMTPSA id a19-20020ac25e73000000b005135bd71d6fsm286538lfr.276.2024.03.14.07.14.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 Mar 2024 07:14:41 -0700 (PDT)
+From: Sergey Khimich <serghox@gmail.com>
 To: linux-kernel@vger.kernel.org
-Cc: Li Zhijian <lizhijian@fujitsu.com>,
+Cc: linux-mmc@vger.kernel.org,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Subject: [PATCH] mmc: core: Convert sprintf/snprintf to sysfs_emit
-Date: Thu, 14 Mar 2024 17:15:12 +0800
-Message-Id: <20240314091512.1323650-1-lizhijian@fujitsu.com>
-X-Mailer: git-send-email 2.31.1
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Jyan Chou <jyanchou@realtek.com>
+Subject: [PATCH v6 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
+Date: Thu, 14 Mar 2024 17:14:38 +0300
+Message-Id: <20240314141440.3305802-1-serghox@gmail.com>
+X-Mailer: git-send-email 2.30.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,69 +67,79 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28250.006
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28250.006
-X-TMASE-Result: 10--6.925300-10.000000
-X-TMASE-MatchedRID: 84oovQVhL8E4ibokZ3+Q0CoiRKlBVkYIBXngI6jFvpfDqO6/8R69QE8U
-	roFNOGp7a6aAZTOwtJmRloiW1Kgftd2ZdKe8BPbSrMZ+BqQt2NpBHuVYxc8DW3hh5KUdlgWiKqF
-	q1hn3Eb3d+/nM3Koh0iaTw03n/wYO0ekSi+00U24ReM8i8p3vgEyQ5fRSh265uBsk5njfgGwHBN
-	wMIojZclkG0yevELlY5nGjEm4IlfpEY+rVKhaSwJ4CIKY/Hg3AaZGo0EeYG96m4/3ODjvukSq2r
-	l3dzGQ1bvsoMHHm4Yje41SHp05NwSTlv00df6MuF3aCMgMiMs9sOKrFPGAUQA==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
-Per filesystems/sysfs.rst, show() should only use sysfs_emit()
-or sysfs_emit_at() when formatting the value to be returned to user space.
+Hello!
 
-coccinelle complains that there are still a couple of functions that use
-snprintf(). Convert them to sysfs_emit().
+This is implementation of SDHCI CQE support for sdhci-of-dwcmshc driver.
+For enabling CQE support just set 'supports-cqe' in your DevTree file
+for appropriate mmc node.
 
-sprintf() will be converted as weel if they have.
+Also, while implementing CQE support for the driver, I faced with a problem
+which I will describe below.
+According to the IP block documentation CQE works only with "AMDA-2 only"
+mode which is activated only with v4 mode enabled. I see in dwcmshc_probe()
+function that v4 mode gets enabled only for 'sdhci_dwcmshc_bf3_pdata'
+platform data.
 
-Generally, this patch is generated by
-make coccicheck M=<path/to/file> MODE=patch \
-COCCI=scripts/coccinelle/api/device_attr_show.cocci
+So my question is: is it correct to enable v4 mode for all platform data
+if 'SDHCI_CAN_64BIT_V4' bit is set in hw?
 
-No functional change intended
+Because I`m afraid that enabling v4 mode for some platforms could break
+them down. On the other hand, if host controller says that it can do v4
+(caps & SDHCI_CAN_64BIT_V4), lets do v4 or disable it manualy by some
+quirk. Anyway - RFC.
 
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: linux-mmc@vger.kernel.org
-Signed-off-by: Li Zhijian <lizhijian@fujitsu.com>
----
-This is a part of the work "Fix coccicheck device_attr_show warnings"[1]
-Split them per subsystem so that the maintainer can review it easily
-[1] https://lore.kernel.org/lkml/20240116041129.3937800-1-lizhijian@fujitsu.com/
----
- drivers/mmc/core/block.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 64a3492e8002..1e1e136d9e72 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -234,7 +234,7 @@ static ssize_t power_ro_lock_show(struct device *dev,
- 	else if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_EN)
- 		locked = 1;
- 
--	ret = snprintf(buf, PAGE_SIZE, "%d\n", locked);
-+	ret = sysfs_emit(buf, "%d\n", locked);
- 
- 	mmc_blk_put(md);
- 
-@@ -296,9 +296,9 @@ static ssize_t force_ro_show(struct device *dev, struct device_attribute *attr,
- 	int ret;
- 	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
- 
--	ret = snprintf(buf, PAGE_SIZE, "%d\n",
--		       get_disk_ro(dev_to_disk(dev)) ^
--		       md->read_only);
-+	ret = sysfs_emit(buf, "%d\n",
-+			 get_disk_ro(dev_to_disk(dev)) ^
-+			 md->read_only);
- 	mmc_blk_put(md);
- 	return ret;
- }
+v2:
+ - Added dwcmshc specific cqe_disable hook to prevent losing
+   in-flight cmd when an ioctl is issued and cqe_disable is called;
+
+ - Added processing 128Mb boundary for the host memory data buffer size
+   and the data buffer. For implementing this processing an extra
+   callback is added to the struct 'sdhci_ops'.
+
+ - Fixed typo.
+
+v3:
+ - Fix warning reported by kernel test robot:
+        | Reported-by: kernel test robot <lkp@intel.com>
+        | Closes: https://lore.kernel.org/oe-kbuild-all/202309270807.VoVn81m6-lkp@intel.com/
+        | Closes: https://lore.kernel.org/oe-kbuild-all/202309300806.dcR19kcE-lkp@intel.com/
+
+v4:
+ - Data reset moved to custom driver tuning hook.
+ - Removed unnecessary dwcmshc_sdhci_cqe_disable() func
+ - Removed unnecessary dwcmshc_cqhci_set_tran_desc. Export and use
+   cqhci_set_tran_desc() instead.
+ - Provide a hook for cqhci_set_tran_desc() instead of cqhci_prep_tran_desc().
+ - Fix typo: int_clok_disable --> int_clock_disable
+
+v5:
+ - Fix warning reported by kernel test robot:
+	| Reported-by: kernel test robot <lkp@intel.com>
+	| Closes: https://lore.kernel.org/oe-kbuild-all/202312301130.itEZhhI5-lkp@intel.com/
+
+v6:
+ - Rebase to master branch
+ - Fix typo;
+ - Fix double blank line;
+ - Add cqhci_suspend() and cqhci_resume() functions
+   to support mmc suspend-to-ram (s2r);
+ - Move reading DWCMSHC_P_VENDOR_AREA2 register under "supports-cqe"
+   condition as not all IPs have that register;
+ - Remove sdhci V4 mode from the list of prerequisites to init cqhci.
+
+
+Sergey Khimich (2):
+  mmc: cqhci: Add cqhci set_tran_desc() callback
+  mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
+
+ drivers/mmc/host/Kconfig            |   1 +
+ drivers/mmc/host/cqhci-core.c       |  11 +-
+ drivers/mmc/host/cqhci.h            |   4 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 188 +++++++++++++++++++++++++++-
+ 4 files changed, 199 insertions(+), 5 deletions(-)
+
 -- 
-2.29.2
+2.30.2
 
