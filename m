@@ -1,156 +1,131 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A31CE1BC26
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Mar 2024 10:55:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3CCB59B72
+	for <linux-mmc@vger.kernel.org>; Fri, 15 Mar 2024 23:44:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710500148; cv=none; b=unEcdXupgvKC+SeOGlW+vqf8jqUToXk0zrplQTH25p/QleTpx/F1oQDIzXX0bIMrJ2/bxm+DTK9F+7Pr3h4ixSqaDpjaaD8Lcno/qLR8JrwEDfoQr5/v7BdI53xnmSsvfRlSN+rHMebiqRKXgI4AAN2oPnbAowGpt8dQEi4okbI=
+	t=1710546294; cv=none; b=EHIUCRdSf9ruGVToZnUevrrfdfGpHXNhJD/Wb49YhHSfCuU2a5CZ0GwkUJ8V1fCqxxRJGk/BHGYd3+3Ea0OSIFQZwXQykE+hrnrBsEkWvP0tQAlMJs8XPtwS3evZI+vsJ61ER3xGK9NL5YzSiEW4JJNKauLtslttPYT1YZzjCYM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710500148; c=relaxed/simple;
-	bh=gKHklsfF2gox13da7B8q8n6TDTbEdarDO5cbu28yMxc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=vDW2Y/T9O2R15GyDszi7VAHF95E82zzf4cxSkv1Hb8l6Zj4WZrd8Y9FBN2HGrl6tMY5SKbyWA0DXRTuGX3oY2TYCPEilxubUS7Ttc8wzWTOFuZ08ex5wZ3LHG2hB+T9i4t9KWAp7ve8+9OteBH3MTowOz/0WVSDAt0G7/LcNBTY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=chSEqUNx; arc=none smtp.client-ip=209.85.219.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1710546294; c=relaxed/simple;
+	bh=MmM47lInEbxUE+Xs0ZvIBvo1dAR3CChJVvovySqI22A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=czSNqdEkk8TLrrVdMNNM65AaAukuUYzym+4j1dx+SVBGcShmSLDUG/V5IFFhEPgmdpmy+yuzcB7iway7c0Gv/WBxJWmknfcyO/GTUU9YrD7/PsDE3vism9QbpwVlLgu18am9HWRwLicdC32xPBzL6JAJV2SBErQTzoi0qjz8FDo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr; spf=pass smtp.mailfrom=smile.fr; dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b=QNZZoOmg; arc=none smtp.client-ip=209.85.128.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=smile.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="chSEqUNx"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-dcd7c526cc0so1786416276.1
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Mar 2024 03:55:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b="QNZZoOmg"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-41400332550so12271225e9.1
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Mar 2024 16:44:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1710500146; x=1711104946; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=aYCVB7vuASjmLwIHPiyxNRZapV4SHyBblFxELE1dC1U=;
-        b=chSEqUNxoaFiGa5ivgsGoFfAX9NRw9sBPQlCwTGbp86pz8IhQGbYQzvWlTW2I/z516
-         McMxoFVxHbE4TW5b3+k/9di3rOte1D3Hp+ocXMWRmTjYfgkfKG+WbqaE0Q/QbRQt4OIc
-         ECsPWWSHYBccfVfruIMTJsSjaeBZxNldtNbobKE6g0PDNzLWwAfjvS5EjuZArb+NpRdH
-         duMYCx1q0yRHMfqO3Sm3AYjesOW5sd4GI6q+ivaxiuio+lH0qwAZZVRYIbgu7oKXo1PJ
-         0cvwj+aTY1f4x7AqpMuFJi6dgnzPstUygqXug/v5iKnbnGhXP8t7jYcryf5Wiob4DeMG
-         wiYQ==
+        d=smile-fr.20230601.gappssmtp.com; s=20230601; t=1710546288; x=1711151088; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=BVmxbXF18KhLtCJxujdzruV9hT1pxQUGaGhkgdeENs8=;
+        b=QNZZoOmgrapgf1HRw7TXhzcO9xw3ByQWqR51q+soT6BqR4G1Xpx0qOtk8y/owJcRQs
+         XaMpD3+mz4XRA3UW7fcMlIuLeYjz3joNaC93xMuFAsuL8AYu4zWT35LKWsCDmWPsoJYj
+         oK/wvSjJKerVgge6oLFHcVNL9UbqN55w1s5r+FuFb50tZdJAUMhDYeEg6MTXFAMkNQTR
+         NsDFkhODAmRH8G5Km1dnzU0eHxEhQjHqxZFe7wctLzzWzcJtpY7tCYIUDgxNi7LYd9Ag
+         FwGoRiCdDpyXnfB+ZVx6kmes3SLfr2Mx6K6mOr1LYHPegv54pyTymiWaHqTeRqyg32Yq
+         hp/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710500146; x=1711104946;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1710546288; x=1711151088;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=aYCVB7vuASjmLwIHPiyxNRZapV4SHyBblFxELE1dC1U=;
-        b=oe0Trm6gOInrqPSe8SOxNlvxGnTzzGy+Q4bAzaIXi5iSqqGPyy00gYxMC4KUn25iEO
-         NexfwbONdIJNxQeNQXuO+3PzVc+nSpY0FGDGinXSP4WjQXRsW6A2x7/saU6+x6P9Y8+H
-         46M64gIv0aak+kMeW4QsGb+dClkBWnXhA9iKAgk1wbFSkn6ByQ9lLDfdBl0pQPdDZ8Ya
-         AZznC/0X/hBbwukz7avm8MOiY2h7k60urYIwVdQWsHy+mU7qCeF+iI2BjG5lY3o5449u
-         9FeQd85585KALWMJXtn7cTON5oJkPccMncmWDykNCpnvD91Ib9GBhO/FGSXBjMHWNCN8
-         Fdmg==
-X-Forwarded-Encrypted: i=1; AJvYcCVx9E2A3bXqQ2agDCD57PmLPjSExDzKBFJhbGIkMYFOdr8LEEN/MTJ1MpVkkqlY8R3zXCNKyh49BRH+Hx10vOk8CzMpBTyJV6iP
-X-Gm-Message-State: AOJu0YxBFJZSYNmEQuwlPaJmhmOKmoAy0ZPeBxDbi45xVF/G1tdeWJ3M
-	M93w3ik/LASeEV2bxBO3idVcrMlOIANUA90MgGwXedoE9ZWWBA8J2WekOiXgDvC+xskC2fS6Dla
-	ID/ExXfjq5F7MTvWIkX8XkZl3SLdcWHVjcxUnSg==
-X-Google-Smtp-Source: AGHT+IEzehH2Yynt/EG5y4VxYs6FaPKWMrio4WVEdwJ7MoEI0eL7E+yiQcbwFj15WntgERZ8J5uQ0goEuQvfH5QlLNA=
-X-Received: by 2002:a25:2e47:0:b0:dcc:4cdc:e98e with SMTP id
- b7-20020a252e47000000b00dcc4cdce98emr4286555ybn.5.1710500145700; Fri, 15 Mar
- 2024 03:55:45 -0700 (PDT)
+        bh=BVmxbXF18KhLtCJxujdzruV9hT1pxQUGaGhkgdeENs8=;
+        b=mfbXDr7dCk6gyDv+IF0paUPzdfW3i4Qh4jLuf1ruRUQ37FgHOLa8c27l/eZyGeiew+
+         mITbRYt1YAKeaeYq5tI5M0gI4kcmRLQsUQjJTLmf3PupqfREFXpuAqKe/xJhwjPWBiKW
+         58gfDt/f/VH8qId6xWi4pez21tlPOeyO6FBYughw+biSwl6KqYxct9TVpG2m9vPSAAsa
+         nJpb8KO9lzvUiLjFzDUKCwFwGVakcj6DBi2X+WRfKWqd7csojtveV1AGBNBjGGHhzFFi
+         kQVlP9kB5eJkx6fRYpwPUkyYncxn9a7m2dYxDTm5rxlRkSiJKAiUyS5eCgHSQShFASQV
+         FpcA==
+X-Forwarded-Encrypted: i=1; AJvYcCVxXXZldhHEK3ECmYsYzehHOJXeCT/IdbemvUnZx/e8NqspLyRrSBvoRdyq7yr5LCdXTjIUNhqa+/2+YZpZWCqil+VVvoi7xntd
+X-Gm-Message-State: AOJu0YxaP1j6xkGBLyrSJ1VUaW5YKtlL+sli3ssmfaqt+YS0khoriqQJ
+	7WNxBMpQgfHJmRLhvNU4fJQrIH807Fq/bY54KQeBtWl2gW1l/VeAJGiOhB2drD4=
+X-Google-Smtp-Source: AGHT+IGkUKbH9dcDV0TFp+qGZCLNv8sEMp/V5fl/wA3PdB+ddlfhzVfSdudzvyJlDhc2N493tjsIOw==
+X-Received: by 2002:a05:600c:458f:b0:412:e59e:da2c with SMTP id r15-20020a05600c458f00b00412e59eda2cmr412790wmo.37.1710546287986;
+        Fri, 15 Mar 2024 16:44:47 -0700 (PDT)
+Received: from P-NTS-Evian.home (2a01cb05945b7e009bdc688723a24f31.ipv6.abo.wanadoo.fr. [2a01:cb05:945b:7e00:9bdc:6887:23a2:4f31])
+        by smtp.gmail.com with ESMTPSA id by1-20020a056000098100b0033e18421618sm556093wrb.17.2024.03.15.16.44.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 Mar 2024 16:44:47 -0700 (PDT)
+From: Romain Naour <romain.naour@smile.fr>
+To: linux-omap@vger.kernel.org
+Cc: vigneshr@ti.com,
+	adrian.hunter@intel.com,
+	ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org,
+	tony@atomide.com,
+	Romain Naour <romain.naour@skf.com>
+Subject: [PATCH] mmc: sdhci-omap: re-tuning is needed after a pm transition to support emmc HS200 mode
+Date: Sat, 16 Mar 2024 00:44:44 +0100
+Message-ID: <20240315234444.816978-1-romain.naour@smile.fr>
+X-Mailer: git-send-email 2.43.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240314141440.3305802-1-serghox@gmail.com>
-In-Reply-To: <20240314141440.3305802-1-serghox@gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 15 Mar 2024 11:55:09 +0100
-Message-ID: <CAPDyKFrP1XgJo_zDDunpzb6g8QWo4k3Ye1dJCWBGVvhdprCCkg@mail.gmail.com>
-Subject: Re: [PATCH v6 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
-To: Sergey Khimich <serghox@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, 
-	Jyan Chou <jyanchou@realtek.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Thu, 14 Mar 2024 at 15:14, Sergey Khimich <serghox@gmail.com> wrote:
->
-> Hello!
->
-> This is implementation of SDHCI CQE support for sdhci-of-dwcmshc driver.
-> For enabling CQE support just set 'supports-cqe' in your DevTree file
-> for appropriate mmc node.
->
-> Also, while implementing CQE support for the driver, I faced with a problem
-> which I will describe below.
-> According to the IP block documentation CQE works only with "AMDA-2 only"
-> mode which is activated only with v4 mode enabled. I see in dwcmshc_probe()
-> function that v4 mode gets enabled only for 'sdhci_dwcmshc_bf3_pdata'
-> platform data.
->
-> So my question is: is it correct to enable v4 mode for all platform data
-> if 'SDHCI_CAN_64BIT_V4' bit is set in hw?
->
-> Because I`m afraid that enabling v4 mode for some platforms could break
-> them down. On the other hand, if host controller says that it can do v4
-> (caps & SDHCI_CAN_64BIT_V4), lets do v4 or disable it manualy by some
-> quirk. Anyway - RFC.
->
+From: Romain Naour <romain.naour@skf.com>
 
-We have just updated the bouncing addresses in MAINTAINERS for Asutosh
-Das and Ritesh Harjani, that also helps maintain cqhci. Would you mind
-re-submitting to allow them to have a look at this too?
-Asutosh Das <quic_asutoshd@quicinc.com>
-Ritesh Harjani <ritesh.list@gmail.com>
+"PM runtime functions" has been added in sdhci-omap driver in 5.16
+f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions") along
+with "card power off and enable aggressive PM" 3edf588e7fe0
+("mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM").
 
-Kind regards
-Uffe
+Since then, the sdhci-omap driver doesn't work using mmc-hs200 mode
+due to the tuning values being lost during a pm transition.
+See the report on the linux-omap mailing list [1].
 
->
-> v2:
->  - Added dwcmshc specific cqe_disable hook to prevent losing
->    in-flight cmd when an ioctl is issued and cqe_disable is called;
->
->  - Added processing 128Mb boundary for the host memory data buffer size
->    and the data buffer. For implementing this processing an extra
->    callback is added to the struct 'sdhci_ops'.
->
->  - Fixed typo.
->
-> v3:
->  - Fix warning reported by kernel test robot:
->         | Reported-by: kernel test robot <lkp@intel.com>
->         | Closes: https://lore.kernel.org/oe-kbuild-all/202309270807.VoVn81m6-lkp@intel.com/
->         | Closes: https://lore.kernel.org/oe-kbuild-all/202309300806.dcR19kcE-lkp@intel.com/
->
-> v4:
->  - Data reset moved to custom driver tuning hook.
->  - Removed unnecessary dwcmshc_sdhci_cqe_disable() func
->  - Removed unnecessary dwcmshc_cqhci_set_tran_desc. Export and use
->    cqhci_set_tran_desc() instead.
->  - Provide a hook for cqhci_set_tran_desc() instead of cqhci_prep_tran_desc().
->  - Fix typo: int_clok_disable --> int_clock_disable
->
-> v5:
->  - Fix warning reported by kernel test robot:
->         | Reported-by: kernel test robot <lkp@intel.com>
->         | Closes: https://lore.kernel.org/oe-kbuild-all/202312301130.itEZhhI5-lkp@intel.com/
->
-> v6:
->  - Rebase to master branch
->  - Fix typo;
->  - Fix double blank line;
->  - Add cqhci_suspend() and cqhci_resume() functions
->    to support mmc suspend-to-ram (s2r);
->  - Move reading DWCMSHC_P_VENDOR_AREA2 register under "supports-cqe"
->    condition as not all IPs have that register;
->  - Remove sdhci V4 mode from the list of prerequisites to init cqhci.
->
->
-> Sergey Khimich (2):
->   mmc: cqhci: Add cqhci set_tran_desc() callback
->   mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
->
->  drivers/mmc/host/Kconfig            |   1 +
->  drivers/mmc/host/cqhci-core.c       |  11 +-
->  drivers/mmc/host/cqhci.h            |   4 +
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 188 +++++++++++++++++++++++++++-
->  4 files changed, 199 insertions(+), 5 deletions(-)
->
-> --
-> 2.30.2
->
+As for the sdhci_am654 driver, request a new tuning sequence before
+suspend (sdhci_omap_runtime_suspend()), othwerwise the device will
+thigger cache flush errors:
+
+  mmc1: cache flush error -110 (ETIMEDOUT)
+  mmc1: error -110 doing aggressive suspend
+
+followed by I/O errors produced by fdisk -l /dev/mmcblk1boot1:
+
+  I/O error, dev mmcblk1boot0, sector 64384 op 0x0:(READ) flags 0x80700 phys_seg 1
+  prio class 2
+  I/O error, dev mmcblk1boot1, sector 64384 op 0x0:(READ) flags 0x80700 phys_seg 1
+  prio class 2
+  I/O error, dev mmcblk1boot1, sector 64384 op 0x0:(READ) flags 0x0 phys_seg 1
+  prio class 2
+  Buffer I/O error on dev mmcblk1boot1, logical block 8048, async page read
+  I/O error, dev mmcblk1boot0, sector 64384 op 0x0:(READ) flags 0x0 phys_seg 1
+  prio class 2
+  Buffer I/O error on dev mmcblk1boot0, logical block 8048, async page read
+
+Don't re-tune if auto retuning is supported in HW (when SDHCI_TUNING_MODE_3
+is available).
+
+[1] https://lore.kernel.org/all/2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr
+
+Fixes: f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions")
+Signed-off-by: Romain Naour <romain.naour@skf.com>
+---
+ drivers/mmc/host/sdhci-omap.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index e78faef67d7a..94076b095571 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -1439,6 +1439,9 @@ static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+ 
++	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
++		mmc_retune_needed(host->mmc);
++
+ 	if (omap_host->con != -EINVAL)
+ 		sdhci_runtime_suspend_host(host);
+ 
+-- 
+2.43.2
+
