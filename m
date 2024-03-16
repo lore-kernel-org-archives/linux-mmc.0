@@ -1,260 +1,423 @@
-Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21D1C3D55D
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Mar 2024 23:49:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C2F61B948
+	for <linux-mmc@vger.kernel.org>; Sat, 16 Mar 2024 15:37:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710546591; cv=none; b=Cn6MAxZ0roIDhGbVdTgCb7nVJJYSMSPiS9jvYqolFRCXAPhjsAuqXOLeK6rifWd+9dgxkK6fdwTvsIH5R4qpTr6Ds/7hOhlUvKsmzdNkofaNBowRL2vpLX78PitOPYpaCK1p2sEgqQgE4v36WEX1Z304ekQX/RYu9rwzt8PZ8HM=
+	t=1710603477; cv=none; b=Dff5AKpF4baJYqfOwso4A2AOKCgX5fvgD4rXrj9PsXNWYrUWN1QPu99CrGiNzR71qSvlN6CIIre1mT2P1P6TjXE47+3pdFLzBsXbSVpNnibRQCvs/SWj7LCuwjllVC05HYjNuvQNNcp+zzUFOx6QN6jQ/XBb2Zkvwce4GzazviM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710546591; c=relaxed/simple;
-	bh=/XK98HFXj35Lv18XRALdxFVOB5+q1nE4U2dC2YCUWlM=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:Cc:References:
-	 In-Reply-To:Content-Type; b=rD93391GFJEpYZTzANETphD+XrjaaJnXF1J4zht02cAp5ZUOZQFanxDNunp6/9WJddifce3oq78Ot4PZ4mNeoGHeR9SiOIP+ZlhrO3JAabt+hmWOy+K4TXMh+sp8nWwGUpYFftNTDci8yBrcIFzLdz7z2ywjlKsCfI4+YVfBzus=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr; spf=pass smtp.mailfrom=smile.fr; dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b=vyg2nzbO; arc=none smtp.client-ip=209.85.221.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=smile.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=smile.fr
+	s=arc-20240116; t=1710603477; c=relaxed/simple;
+	bh=zquvH7/ESG9bl0Bqav7u659MuRYAKIe1ZNHH2UmU+Ek=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hmyJSE6xbk7WjmawOniyyWGquGdBtISvQ3OoJMnutguARA6mmWHlawHrcnwPYrZ46fYhiVh9zOygDFfEMfw+LKJK6k9UqQFH1WjJCkruItksz9vKfZiZkejs19jBtIaq6vPhc/+KDCEsaXK+HKXZ6wjecAydEzYGYHrUUcWtQ0s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=p5vxDf2S; arc=none smtp.client-ip=68.232.141.245
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=smile-fr.20230601.gappssmtp.com header.i=@smile-fr.20230601.gappssmtp.com header.b="vyg2nzbO"
-Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-33ec8aa8b6bso1669960f8f.3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Mar 2024 16:49:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=smile-fr.20230601.gappssmtp.com; s=20230601; t=1710546585; x=1711151385; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Y4s4dO616F1QYCFpo/Po8MQD2h0JzaDaFmkOaoyiP2U=;
-        b=vyg2nzbOKC63nxlHcup1o/zZWDbMH4lrMUt+PY9WhSOR2BbGI4K8E6vJ4LYf7puc5q
-         KDaGQAbaPmoAwO4toOn0f/hFAaaOgsX0BmlvGf9ZNKOe2uwNtyR6qF+Sed1r6GSkN3ZY
-         h0qjkhh/wlfAgw65OFxSU4hmXH+x/F0ilNBjPSrOlMhrBTMS6RiDVEzqMQKp/EkfZ3H2
-         xY9DA7lh6Sry4MXfiRGltu3rTKIl9VN17YM271BjN0Of2Q8G6sxTUl0jQc/Bmi+sxC9c
-         AXhQG/8IR0NVyN8jCjgDDYkNjqpDzyzcjneemIrPgMmem6r3QQ0RTD8FMKYUc7NG0BK2
-         4IQw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710546585; x=1711151385;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Y4s4dO616F1QYCFpo/Po8MQD2h0JzaDaFmkOaoyiP2U=;
-        b=W23Gbg3AjCtcyAIbwAA+25zXPh8PFeqQ6b9qA9GrNiGfmnZMhDtUeuKBHIdpt2EDJl
-         lIuAtHWUKO2z0K1LOM+sLH/jYurDjTzYrwUKf7s/fayLmPw7iycmGwNKGXm+vlakG8ye
-         odJEGXtzy5pbRwxYlC3n4mOrajUCihZGPN+esC+2L+/0SSBfOcwd6TKCQn8KyWBlt709
-         RfxCd5hT/i9tOAAO7kfqoHShrh1L2lhbTfy7R7wP0U/18eDZmnQyxAcpR59NZmv6CTzL
-         rD1TXYXnD2pCvr+yAgudKPTvu6MQBGLwTeSiWBiEQt7ZtBaWaNOj9m089opAy2rs2mT6
-         So5A==
-X-Forwarded-Encrypted: i=1; AJvYcCUZXjpE+LKZKNYvk7uO0r8J/h939tN2DtXOIZLwe0M2BXHoSbyYpJ2y4zEQ/32aulFWcZ1b70La1Hh1aefgHlxVZpcvBK/uRY9n
-X-Gm-Message-State: AOJu0Yz3p+iPUl6v9eCHEHdQSG/rcSt/VNsL3dWTMHSBEa9M6EqT2OSu
-	UJ6HrrIWC8/SslOAcuIBN+bMR8rmyO1z/b1L7SCFMnLku1TiO7xt8bhLzKAL/D0=
-X-Google-Smtp-Source: AGHT+IGSlHjjm2UFu+XV6+pWp7JbkRxyv7SGMe5mm9Xi8C5SugPXdN/3VHIwCwSSYRDerS5Xk7CZFA==
-X-Received: by 2002:adf:dd8f:0:b0:33d:70da:8325 with SMTP id x15-20020adfdd8f000000b0033d70da8325mr286563wrl.66.1710546585434;
-        Fri, 15 Mar 2024 16:49:45 -0700 (PDT)
-Received: from ?IPV6:2a01:cb05:945b:7e00:9bdc:6887:23a2:4f31? (2a01cb05945b7e009bdc688723a24f31.ipv6.abo.wanadoo.fr. [2a01:cb05:945b:7e00:9bdc:6887:23a2:4f31])
-        by smtp.gmail.com with ESMTPSA id dz18-20020a0560000e9200b0033e73c58678sm4203090wrb.15.2024.03.15.16.49.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 15 Mar 2024 16:49:45 -0700 (PDT)
-Message-ID: <3093e021-e240-4cbd-8fb6-aa59d188434b@smile.fr>
-Date: Sat, 16 Mar 2024 00:49:44 +0100
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="p5vxDf2S"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1710603474; x=1742139474;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=zquvH7/ESG9bl0Bqav7u659MuRYAKIe1ZNHH2UmU+Ek=;
+  b=p5vxDf2SOm5TlYdw4YUuTgpF1Lv6EMVS72sFmNr+3xGCjvL8SqtqAuDc
+   echQkLd07+twCiJ3l10vPfsw/zHrXIrExqyqCJRxlykMmrbO8YKTc76qQ
+   nA/29rSUE5oEDJW9BteuczJj4qdFRB2z++2Xks/gozPSmgfyUpV7AIakT
+   WLN4gzkAN7Z4g5bmb5RuyMTeX5nuvEsGnM26ImSVi6juZBlAB6qZi0NDg
+   Cy2PfqgfzIS9IMdvkdlhV8jE4Pg5DPbh6/4IVYChuMS/l5/6J06PLZdEE
+   IK3qNyDwqy0v5ESssTPEmmgBPsxaw3og1/BEQCRBtZZvgEMwiIm3+FCTz
+   g==;
+X-CSE-ConnectionGUID: WNRf6rlVRGSPjQsKK0UBzQ==
+X-CSE-MsgGUID: vBE2YCSwRUmSIaQtuUoxqQ==
+X-IronPort-AV: E=Sophos;i="6.07,130,1708358400"; 
+   d="scan'208";a="12009384"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 16 Mar 2024 23:36:44 +0800
+IronPort-SDR: qJa55RydhfsbxL+e7IlYP8vwp2sAjx15YY+6tP6N+Mt0SdZWHXeEefmNZhrCgBFUQheajnXUAJ
+ +Uw4yp+0I/dg==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 16 Mar 2024 07:45:41 -0700
+IronPort-SDR: ywC9VqrqF/5f2w/e0OBm2lIEaX+qt9OTE+qO9uTAaIM/KfZOf+u2Zd51Uie1ILDPk56p8zADQz
+ lyaQO/tt2Ceg==
+WDCIronportException: Internal
+Received: from 5cg1443s5d.ad.shared (HELO BXYGM33.ad.shared) ([10.225.32.191])
+  by uls-op-cesaip02.wdc.com with ESMTP; 16 Mar 2024 08:36:40 -0700
+From: Avri Altman <avri.altman@wdc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH] mmc-utils: man 1 mmc-utils
+Date: Sat, 16 Mar 2024 17:36:36 +0200
+Message-ID: <20240316153636.30814-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.42.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: sdhci-omap: issues with PM features since 5.16
-Content-Language: fr
-From: Romain Naour <romain.naour@smile.fr>
-To: Tony Lindgren <tony@atomide.com>
-Cc: Linux-OMAP <linux-omap@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
- linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
- Adrian Hunter <adrian.hunter@intel.com>
-References: <2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr>
- <20240127044851.GW5185@atomide.com>
- <d09925b3-83e6-4c52-878f-4c1db7670543@smile.fr>
- <20240129111733.GX5185@atomide.com>
- <f80b5390-8bfa-43d8-80ce-70b069aef947@smile.fr>
- <7d72f3ee-bcfe-4197-b492-857dc49b2788@smile.fr>
- <20240131103050.GZ5185@atomide.com>
- <519f7e2e-4df2-4b3c-90e2-2383b6b34562@smile.fr>
- <20240202043601.GA5185@atomide.com>
- <6eced20a-6454-4824-a149-ee331ebb7eec@smile.fr>
-In-Reply-To: <6eced20a-6454-4824-a149-ee331ebb7eec@smile.fr>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hello Tony,
+I have put together a draft man page for mmc-utils.  The contents are
+from mmc-utils help documents and edited for brevity.  The point is not
+to replace the existing docmentation, but to serve as a quick reference.
 
-Le 08/02/2024 à 12:29, Romain Naour a écrit :
-> Le 02/02/2024 à 05:36, Tony Lindgren a écrit :
->> * Romain Naour <romain.naour@smile.fr> [240201 09:04]:
->>> Le 31/01/2024 à 11:30, Tony Lindgren a écrit :
->>>> * Romain Naour <romain.naour@smile.fr> [240130 11:20]:
->>>>> Le 29/01/2024 à 18:42, Romain Naour a écrit :
->>>>>> Le 29/01/2024 à 12:17, Tony Lindgren a écrit :
->>>>>>> So I'm still guessing your issue is with emmc not getting reinitialized
->>>>>>> properly as there's no mmc-pwrseq-emmc configured. Can you give it a
->>>>>>> try? See am5729-beagleboneai.dts for an example.
->>>>>
->>>>> I can't add such mmc-pwrseq-emmc on the custom board, there is no gpio available
->>>>> to reset the emmc device.
->>>>>
->>>>> To resume:
->>>>> - the emmc doesn't work with mmc-hs200-1_8v mode with PM runtime enabled
->>>>> - the emmc works with mmc-hs200-1_8v mode without PM runtime (patch series reverted)
->>>>> - the emmc works with mmc-ddr-1_8v mode with PM runtime enabled
->>>>>
->>>>> AFAIU the hs200 mode requires some pin iodelay tuning (SDHCI_OMAP_REQUIRE_IODELAY)
->>>>> is sdhci_omap_runtime_{suspend,resume} needs to take care of that?
->>
->> On PM runtime resume, sdhci_omap_runtime_resume() gets called and calls
->> sdhci_runtime_resume_host(), and calls mmc->ops->set_ios().
->>
->> Then sdhci_omap_set_ios() calls sdhci_omap_set_timing() to set the iodelay.
->> Maybe add some printk to sdhci_omap_set_timing() to verify the right modes
->> get set on PM runtime resume?
->>
->>>>> The mmc2 clock seems idle when mmc-hs200-1_8v and PM runtime are used.
->>>>>
->>>>> omapconf dump prcm l3init
->>>>>
->>>>> (mmc2 clock idle)
->>>>> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01070000 |
->>>>>
->>>>> (mmc2 clock running)
->>>>> | CM_L3INIT_MMC2_CLKCTRL           | 0x4A009330   | 0x01040002 |
->>>>>
->>>>> Thoughts?
->>
->> For the clocks above, that is as expected. The clocks get idled when the
->> MMC controller is idle.
->>
->>>> OK so if the emmc reset gpio is not available, seems we should do something
->>>> like the following patch to not set MMC_CAP_POWER_OFF_CARD unless the
->>>> cap-power-off-card devicetree property is set.
->>>>
->>>> Care to give it a try and see if it helps?
->>>
->>> Same problem without MMC_CAP_POWER_OFF_CARD flag (even by removing
->>> MMC_CAP_AGGRESSIVE_PM too).
->>>
->>> I did some test with mmc capabilities mask but no progress so far.
->>
->> OK. So this issue seems to be related to the PM runtime resume not
->> restoring something properly as you suggested earlier.
-> 
-> Adding your PM reply with the mailing list in Cc:
-> 
-> Le 06/02/2024 à 09:25, Tony Lindgren a écrit :
->> * Tony Lindgren <tony@atomide.com> [240202 10:30]:
-> [...]
->>
->> When you get a chance, maybe give the following debug patch a try.
->> I'm mostly seeing value of 2 and sometimes 0, but that could be
->> for a different mmc controller instance as I just used pr_info.
->> So you may need to tweak the debug patch to use dev_dbg to leave
->> out other controllers.
->>
->> #define MMC_POWER_OFF           0
->> #define MMC_POWER_UP            1
->> #define MMC_POWER_ON            2
->> #define MMC_POWER_UNDEFINED     3
->>
->> So on MMC_POWER_OFF, in sdhci_runtime_resume_host() the flag
->> host->reinit_uhs = true does not get set, and maybe with hs200
->> that causes the failure?
-> 
-> With the debug line added, I don't see any MMC_POWER_OFF for the emmc but only
-> MMC_POWER_ON lines:
-> 
-> XXX sdhci_runtime_resume_host: mmc->ios.power_mode: 2
-> 
->>
->> If you're seeing MMC_POWER_OFF values, maybe also try changing
->> sdhci_omap_runtime_resume() to call sdhci_runtime_resume_host(host, 1)
->> and see if that helps as requesting a soft reset causes sdhci_init() to
->> set host->reinit_uhs = true.. That change feels like a workaround
->> though.
-> 
-> I tried anyway with soft reset, the cache flush error is gone but now I have
-> this dump in dmesg each time the emmc is reset:
-> 
-> [ 3978.852783] mmc1: Reset 0x6 never completed.
-> [ 3978.852783] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [ 3978.852783] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00003302
-> [ 3978.852813] mmc1: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-> [ 3978.852813] mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
-> [ 3978.852813] mmc1: sdhci: Present:   0x01f00000 | Host ctl: 0x00000000
-> [ 3978.852813] mmc1: sdhci: Power:     0x00000000 | Blk gap:  0x00000000
-> [ 3978.852813] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000000
-> [ 3978.852844] mmc1: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
-> [ 3978.852844] mmc1: sdhci: Int enab:  0x00000000 | Sig enab: 0x00000000
-> [ 3978.852844] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> [ 3978.852844] mmc1: sdhci: Caps:      0x24e90080 | Caps_1:   0x00000f77
-> [ 3978.852844] mmc1: sdhci: Cmd:       0x00000000 | Max curr: 0x00000000
-> [ 3978.852874] mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-> [ 3978.852874] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> [ 3978.852874] mmc1: sdhci: Host ctl2: 0x00000000
-> [ 3978.852874] mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
-> [ 3978.852874] mmc1: sdhci: ============================================
-> 
-> With sdhci soft reset enabled, there are some MMC_POWER_OFF in dmesg
-> 
-> [ 3978.852905] XXX sdhci_runtime_resume_host: mmc->ios.power_mode: 0
-> [ 3982.217590] XXX sdhci_runtime_resume_host: mmc->ios.power_mode: 2
-> 
-> The iodelay pin setting is still applied after the emmc is reset:
-> 
-> # omapconf dump 0x4A00348c 0x4A0034ac
-> |----------------------------|
-> | Address (hex) | Data (hex) |
-> |----------------------------|
-> | 0x4A00348C    | 0x00070101 |
-> | 0x4A003490    | 0x00070101 |
-> | 0x4A003494    | 0x00070101 |
-> | 0x4A003498    | 0x00070101 |
-> | 0x4A00349C    | 0x00060101 |
-> | 0x4A0034A0    | 0x00070101 |
-> | 0x4A0034A4    | 0x00070101 |
-> | 0x4A0034A8    | 0x00070101 |
-> | 0x4A0034AC    | 0x00070101 |
-> |----------------------------|
+Signed-off-by: Avri Altman <avri.altman@wdc.com>
+---
+ Makefile |   9 +-
+ mmc.1    | 302 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 306 insertions(+), 5 deletions(-)
+ create mode 100644 mmc.1
 
-I finally had some time to rework on this issue and it seems I found something :)
-
-https://lore.kernel.org/linux-omap/20240315234444.816978-1-romain.naour@smile.fr/T/#u
-
-Best regards,
-Romain
-
-
-> 
->>
->> Regards,
->>
->> Tony
->>
->> 8< ------
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -3848,6 +3848,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host,
-> int soft_reset)
->>  	}
->>
->>  	sdhci_init(host, soft_reset);
->> +	pr_info("XXX %s: mmc->ios.power_mode: %i\n", __func__, mmc->ios.power_mode);
->>
->>  	if (mmc->ios.power_mode != MMC_POWER_UNDEFINED &&
->>  	    mmc->ios.power_mode != MMC_POWER_OFF) {
-> 
-> 
-> Best regards,
-> Romain
-> 
-> 
->>
->> Regards,
->>
->> Tony
-> 
+diff --git a/Makefile b/Makefile
+index 10b78ab..a890833 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,6 +21,7 @@ prefix ?= /usr/local
+ bindir = $(prefix)/bin
+ LIBS=
+ RESTORE_LIBS=
++mandir = /usr/share/man
+ 
+ progs = mmc
+ 
+@@ -29,7 +30,7 @@ ifdef C
+ 	check = sparse $(CHECKFLAGS)
+ endif
+ 
+-all: $(progs) manpages
++all: $(progs)
+ 
+ .c.o:
+ ifdef C
+@@ -43,16 +44,14 @@ mmc: $(objects)
+ manpages:
+ 	$(MAKE) -C man
+ 
+-install-man:
+-	$(MAKE) -C man install
+-
+ clean:
+ 	rm -f $(progs) $(objects)
+ 	$(MAKE) -C man clean
+ 
+-install: $(progs) install-man
++install: $(progs)
+ 	$(INSTALL) -m755 -d $(DESTDIR)$(bindir)
+ 	$(INSTALL) $(progs) $(DESTDIR)$(bindir)
++	$(INSTALL) -m 644 mmc.1 $(DESTDIR)$(mandir)/man1
+ 
+ -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
+ 
+diff --git a/mmc.1 b/mmc.1
+new file mode 100644
+index 0000000..b40bdf4
+--- /dev/null
++++ b/mmc.1
+@@ -0,0 +1,302 @@
++.TH mmc\-utils 1 "April 2024" "User Manual"
++.SH NAME
++mmc \-  a tool for configuring MMC storage devices
++.SH SYNOPSIS
++.B mmc
++[\fIoptions\fR] [\ mmc\-block\-device\fR]...
++.SH DESCRIPTION
++.B mmc-utils
++is a single-threaded tool that will perform a particular type of mmc action as specified by the user.
++.br
++The typical use of mmc-utils is to access the mmc device either for configuring or reading its configuration registers.
++.SH OPTIONS
++.TP
++.BI extcsd " " read " " \fIdevice\fR
++Read and prints the extended csd register
++.TP
++.BI extcsd " " write " " \fIoffset\fR " " \fIvalue\fR " " \fIdevice\fR
++Write \fIvalue\fR at \fIoffset\fR to the device's extcsd
++.TP
++.BI writeprotect " " boot " " get " " \fIdevice\fR
++Print the boot partitions write protect status
++.TP
++.BI writeprotect " " boot " " set " " \fIdevice\fR " " [\fInumber\fR]
++Set the boot partition write protect status for the device.
++.br
++If \fInumber\fR is passed (0 or 1), only protect that particular eMMC boot partition, otherwise protect both.
++.br
++It will be write-protected until the next boot.
++.TP
++.BI writeprotect " " user " " set " " \fItype\fR " " \fIstart\-block\fR " " \fIblocks\fR " " \fIdevice\fR
++Set the write protect configuration for the specified region of the user area for the device.
++.br
++\fIstart\-block\fR specifies the first block of the protected area.
++.br
++\fIblocks\fR specifies the size of the protected area in blocks.
++.br
++NOTE! The area must start and end on Write Protect Group boundries, Use the "writeprotect user get" command to get the Write Protect Group size.
++ \fItype\fR is one of the following:
++.RS
++.RS
++.TP
++.B none
++Clear temporary write protection.
++.TP
++.B temp
++Set temporary write protection.
++.TP
++.B pwron
++Set write protection until the next poweron.
++.RE
++.RE
++.TP
++.BI writeprotect " " user " " get " " \fIdevice\fR
++Print the user areas write protect configuration for the device.
++.TP
++.BI disable " " 512B " " emulation " " \fIdevice\fR
++Set the eMMC data sector size to 4KB by disabling emulation on the device.
++.TP
++.BI gp " " create " " \fIdry\-run\fR " " \fIlength\-KiB\fR " " \fIpartition\fR  " " \fIenh\-attr\fR " " \fIext\-attr\fR " " \fIdevice\fR
++Create general purpose partition for the the device.
++.br
++NOTE!  This is a one-time programmable (unreversible) change.
++.br
++To set enhanced attribute to general partition being created set \fIenh\-attr\fR to 1 else set it to 0.
++.br
++To set extended attribute to general partition set \fIenh\-attr\fR to 1,2 else set it to 0.
++.br
++\fIdry\-run\fR is one of the following:
++.RS
++.RS
++.TP
++.B \-y
++PARTITION_SETTING_COMPLETED in the extcsd will get set and the partisioning operation will take effect and finalized.
++.TP
++.B \-c
++more partitioning settings are still to come - partisioning operation will not take effect.
++.TP
++.B otherwise
++These changes will not take effect neither now nor after a power cycle.
++.RE
++.RE
++.TP
++.BI enh_area " " set " " \fIdry\-run\fR " " \fIstart\-KiB\fR " " \fIlength\-KiB\fR " " \fIdevice\fR
++Enable the enhanced user area for the device.
++.br
++NOTE!  This is a one-time programmable (unreversible) change.
++\fIdry\-run\fR is as above.
++.TP
++.BI write_reliability " " set " " " \fIdry\-run\fR " " \fIpartition\fR " " \fIdevice\fR
++Enable write reliability per partition for the device.
++.br
++NOTE!  This is a one-time programmable (unreversible) change.
++\fIdry\-run\fR is as above.
++.TP
++.BI status " " get " " \fIdevice\fR
++Print the response to STATUS_SEND (CMD13).
++.TP
++.BI bootpart " " enable " " \fIboot\-partition\fR " " \fIsend\-ackn\fR " " \fIdevice\fR
++Enable the boot partition for the device.
++Disable the boot partition for the device if is \fIboot\-partition\fR set to 0.
++.br
++To receive acknowledgment of boot from the card set \fIsend\-ackn\fR to 1, else set it to 0.
++.TP
++.BI bootbus " " set " " \fIboot\-mode\fR " " \fIreset\-boot\-bus\-conditions\fR " " \fIboot\-bus\-width\fR " " \fIdevice\fR
++Set Boot Bus Conditions.
++.br
++\fIboot\-mode\fR is one of the following: single_backward, single_hs, or dual.
++.br
++\fIreset\-boot\-bus\-conditions\fR is one of the following: x1 or retain.
++.br
++\fIboot\-bus\-width\fR is one of the following: x1, x4, or x8.
++.TP
++.BI bkops_en " " \fImode\fR " " \fIdevice\fR
++Enable the eMMC BKOPS feature on the device.
++The auto (AUTO_EN) setting is only supported on eMMC 5.0 or newer.
++.br
++NOTE!  Setting manual (MANUAL_EN) is one-time programmable (unreversible) change.
++.br
++\fImode\fR is one of the following:
++.RS
++.RS
++.TP
++.B auto
++Auto backops is set
++.TP
++.B manual
++Manual bkops is set
++.RE
++.RE
++.TP
++.BI hwreset " " enable " " \fIdevice\fR
++Permanently enable the eMMC H/W Reset feature on the device.
++.br
++NOTE!  This is a one-time programmable (unreversible) change.
++.TP
++.BI hwreset " " disable " " \fIdevice\fR
++Permanently disable the eMMC H/W Reset feature on the device.
++.br
++NOTE!  This is a one-time programmable (unreversible) change.
++.TP
++.BI sanitize " " \fIdevice\fR " " \fI[timeout_ms]\fR
++Send Sanitize command to the device.
++This will delete the unmapped memory region of the device.
++.TP
++.BI rpmb " " write\-key " " \fIrpmb\-device\fR " " \fIkey\-file\fR
++Program authentication key which is 32 bytes length and stored in the specified file.
++.br
++Also you can specify '-' instead of key file path to read the key from stdin.
++.br
++NOTE!  This is a one-time programmable (unreversible) change.
++.TP
++.BI rpmb " " read\-counter " " \fIrpmb\-device\fR
++Counter value for the \fIrpmb\-device\fR will be read to stdout.
++.TP
++.BI rpmb " " read\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " " \fIblocks-\count\fR " " \fIoutput-\file\fR " " [\fIkey\-file\fR]
++Blocks of 256 bytes will be read from \fIrpmb\-device\fR to output
++file or stdout if '-' is specified. If key is specified - read
++data will be verified.
++.TP
++.BI rpmb " " write\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " "  \fI256\-byte\-data\-file\fR " " \fIkey\-file\fR
++Block of 256 bytes will be written from data file to
++\fIrpmb\-device\fR. 
++.br
++Also you can specify '-' instead of key file path or data file to read the data from stdin.
++.TP
++.BI cache " " enable " " \fIdevice\fR
++Enable the eMMC cache feature on the device.
++.br
++NOTE! The cache is an optional feature on devices >= eMMC4.5.
++.TP
++.BI cache disable " " \fIdevice\fR
++Disable the eMMC cache feature on the device.
++.br
++NOTE! The cache is an optional feature on devices >= eMMC4.5.
++.TP
++.BI csd " " read " " \fidevice\-path\fR
++Print CSD data from \fIdevice\-path\fR.
++The device path should specify the csd sysfs file directory.
++.TP
++.BI cid " " read " " \fIdevice\-path\fR
++Print CID data from \fIdevice\-path\fR.
++The device path should specify the cid sysfs file directory.
++.TP
++.BI scr " " read " " \fIdevice\-path\fR
++Print SCR data from \fIdevice\-path\fR.
++The device path should specify the scr sysfs file directory.
++.TP
++.BI ffu " " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
++Run Field Firmware Update with \fIimage\-file\-name\fR on the device.
++.br
++[\fIchunk\-bytes\fR] is optional and defaults to its max - 512k. should be in decimal bytes and sector aligned.
++.br
++if [\fIchunk\-bytes\fR] is omitted, mmc-utils will try to run ffu using the largest possible chunks: max(image-file, 512k).
++.TP
++.BI erase " " \fItype\fR " " \fIstart-address\fR " " \fIend\-address\fR " " \fIdevice\fR
++Send Erase CMD38 with specific argument to the device.
++.br
++NOTE!: This will delete all user data in the specified region of the device.
++.br
++\fItype\fR is one of the following: legacy, discard, secure-erase, secure-trim1, secure-trim2, or trim.
++.TP
++.BI gen_cmd " " read " \fidevice\fR [\fIarg\fR]
++Send GEN_CMD (CMD56) to read vendor-specific format/meaning data from the device.
++.br
++NOTE!: [\fIarg\fR] is optional and defaults to 0x1. If [\fIarg\fR] is specified, then [\fIarg\fR]
++must be a 32-bit hexadecimal number, prefixed with 0x/0X. And bit0 in [\fIarg\fR] must be 1.
++Normally this command is aimed to extract a device-health info from the device.
++.TP
++.BI softreset " " \fIdevice\fR
++Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works
++.TP
++.BI boot_operation " " \fIboot\-data\-file\fR " " \fIdevice\fR
++ Does the alternative boot operation and writes the specified starting blocks of boot data into the requested file.
++Note some limitations:
++.RS
++.RS
++.TP
++.B 1)
++The boot operation must be configured first, e.g. via bootbus and/or bootpart commands
++.TP
++.B 2) 
++The MMC must currently be running at the bus mode that is configured for the boot operation (HS200 and HS400 not supported at all).
++.TP
++.B 3)
++Only up to 512K bytes of boot data will be transferred.
++.TP
++.B 4)
++The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.
++.RE
++.RE
++.TP
++.BI \-\-help " " | " " help " " | " " \-h
++Show the help
++.TP
++.BI \fIcmd\fR " " \-\-help
++Show detailed help for that specific \fIcmd\fR or subset of commands.
++.SH "RPMB COMMANDS"
++The RPMB partition on the eMMC devices is a special area used for storing cryptographically safe information signed by a
++special secret key. To write and read records from this special area, authentication is needed.
++The RPMB area is *only* and *exclusively* accessed using ioctl()s from userspace.
++RPMB commands are send using the mmc multi-ioctl, thus ensures that the atomic nature of the rpmb access operation.
++The rpmb device given as a parameter to the rpmb commands is not a block device but a char device.
++This was done to help the mmc driver to account for some of the rpmb peculiarities.
++.SH "EXAMPLES"
++.RE
++.P
++.B RPMB examples
++.RS
++Program rpmb key using the stdin option:
++.RS
++.P
++$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb write-key /dev/mmcblk0rpmb -
++.RE
++.P
++Read 2 blocks starting address 2 and output the recieved content to stdout. Verify the recieved frames using the key (not mandatory):
++.RS
++.P
++$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 -
++.RE
++.P
++Read 2 blocks without verfication starting address 2 and output the recieved content to /tmp/block:
++.RS
++.P
++$mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 /tmp/block
++.RE
++.P
++Write a string of 'a's to address 2. both the input and key uses stdin interface:
++.RS
++.P
++$ (awk 'BEGIN {while (c++<256) printf "a"}' | echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH) | mmc rpmb write-block /dev/mmcblk0rpmb 0x02 - -
++.RE
++.P
++.RE
++.P
++.B Field Firmware Update (ffu) examples
++.RS
++Do ffu using max-possible chunk size:  If the fluf size < 512k, it will be flushed in a single write sequence.
++.RS
++.P
++$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0
++.RE
++.P
++Same as above, this time use a 4k chunks:
++.RS
++.P
++$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0 4096
++.RE
++.P
++.RE
++.SH AUTHORS
++.B mmc-utils
++was written by Chris Ball <cjb@laptop.org> and <chris@printf.net>.
++.br
++It is currently maintained by Ulf Hansson <ulf.hansson@linaro.org>.
++.SH "REPORTING BUGS"
++Report bugs to the \fBmmc\fR mailing list <linux-mmc@vger.kernel.org>.
++.SH "SEE ALSO"
++For further documentation see \fBREADME\fR.
++.br
++A short intro - https://docs.kernel.org/driver-api/mmc/mmc-tools.html
++.br
++official git tree - https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
+-- 
+2.42.0
 
