@@ -1,45 +1,45 @@
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 489B856463;
-	Mon, 18 Mar 2024 19:11:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2772C5645C;
+	Mon, 18 Mar 2024 19:11:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.142
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710789108; cv=none; b=hcFibhqzMBXYRNGXslEcI0ZV/EYbZ/+Lsz4xDVoIXcYW1afH09ibebXD2K3sDzFjAhdlGVwA+G7BclSU5eh/MOfuW0Vkl2XoMAYbiMh4aoogaQdnkDZTBvZIatlwH3mkBNjD73fcceuBv8dmEFQTu3ylhakxcB4sar2eIwFZgNs=
+	t=1710789108; cv=none; b=dGgXDpYIYd6GRxWImMJS803HDkp6WhVClPpexZYih98Cvg0e4r2anOPmQfv2yIvr0E6hSZgTK7eNTcY+mv7oqwHdFgWV6GjqEPlNhlAH5LeyyniFbjgOalLXCpNwYxNxWT7OkBOeSs9K/+Ux5Ifiz1EX1j6FzkQkFU2QQ3jg85E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1710789108; c=relaxed/simple;
-	bh=U87dA6MIbpg032jZoEv+6LSoxOya5+XwhE1oUX/810s=;
+	bh=+6AYu3VSjMWeJ4/aWw+ZCPZ6MHhaJcTcGflGaxMZwwA=;
 	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=oUKUWYhJBlOO5Bx8WvK2ktRg4WiRCnELDsEOuAKmXqogDhnafBYstcOVXwLnEJnPnp3CqLAP2q4Ru52mZ036JyuT7/j27lB4arzXQKDrNZNNCMR9Suka0JNOt1rhaDxTXiXaZt0Dz9hhDibqZZNmJwxF32XmYDSaUAC/pSMab2A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=m0iKQeUf; arc=none smtp.client-ip=198.47.23.248
+	 MIME-Version:Content-Type; b=aQcLrt5GIlg3+GSLY1FSJBp9eDRZCXJ8HvH5tebCKVKbFVFLL7KiL+FHO6wLxODwBbFXbDm/ZCGLCexwyXn7025YzJODJ28QJZW5lJaS+FTpC+idJutMkqXZdAu6KJMaCZvBkUNSMZV8f62Oa8gPbXUwwq0mkLeIpsTNF5GGges=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=gHmndzmh; arc=none smtp.client-ip=198.47.19.142
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="m0iKQeUf"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="gHmndzmh"
 Received: from fllv0035.itg.ti.com ([10.64.41.0])
-	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42IJBhqg011607;
+	by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42IJBheE029408;
 	Mon, 18 Mar 2024 14:11:43 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
 	s=ti-com-17Q1; t=1710789103;
-	bh=DJaVQGg+UoAiX6uyyVayXQ64RTqYH76iuF67zkFhsjQ=;
+	bh=eyEIxDMsW+MuxVXJp2sBNjoeesZk+uP80xq4OnZBbZM=;
 	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=m0iKQeUfWGT5q8HTAQCW2c1isfx9j8MFR21peyTRibpOoFk26fEySLAHy4KZ01XrV
-	 iGS2aSrpWzO3SOivLeBM4Qao/fHaYX9OUbxzCCYdsbEurqazVTDwwQFeQcLZTRsd3P
-	 XbasKjK+/v1mwuRQ2DLuv+ACn9FtYOeMgdrLd25M=
-Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
-	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42IJBhHI052297
+	b=gHmndzmhgf571nWl83cy2dQwTYgO+VTCJ4NVF1rXNESn9/chGty8DoyGzcmsPAuOA
+	 MRcHhfcijLqMthlc7QKfN20InQG4E3TZ2xMWLUF6Sqsvx131e5TUeqF/8mwOXd7Dao
+	 nKK8J8NKzU2Fjz3XKMY+o+hZzQWyPdc+47sBhBOc=
+Received: from DFLE115.ent.ti.com (dfle115.ent.ti.com [10.64.6.36])
+	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42IJBhmo052300
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
 	Mon, 18 Mar 2024 14:11:43 -0500
-Received: from DLEE108.ent.ti.com (157.170.170.38) by DLEE112.ent.ti.com
- (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
+Received: from DFLE104.ent.ti.com (10.64.6.25) by DFLE115.ent.ti.com
+ (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 18
  Mar 2024 14:11:43 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE108.ent.ti.com
- (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE104.ent.ti.com
+ (10.64.6.25) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
  Frontend Transport; Mon, 18 Mar 2024 14:11:43 -0500
 Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42IJBhc7077624;
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42IJBhcC077624;
 	Mon, 18 Mar 2024 14:11:43 -0500
 From: Judith Mendez <jm@ti.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
@@ -47,9 +47,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	<adrian.hunter@intel.com>
 CC: Andrew Davis <afd@ti.com>, <linux-mmc@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>
-Subject: [PATCH v4 2/7] mmc: sdhci_am654: Write ITAPDLY for DDR52 timing
-Date: Mon, 18 Mar 2024 14:11:37 -0500
-Message-ID: <20240318191143.27638-3-jm@ti.com>
+Subject: [PATCH v4 7/7] mmc: sdhci_am654: Fix ITAPDLY for HS400 timing
+Date: Mon, 18 Mar 2024 14:11:42 -0500
+Message-ID: <20240318191143.27638-8-jm@ti.com>
 X-Mailer: git-send-email 2.43.2
 In-Reply-To: <20240318191143.27638-1-jm@ti.com>
 References: <20240318191143.27638-1-jm@ti.com>
@@ -63,34 +63,54 @@ Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-For DDR52 timing, DLL is enabled but tuning is not carried
-out, therefore the ITAPDLY value in PHY CTRL 4 register is
-not correct. Fix this by writing ITAPDLY after enabling DLL.
+While STRB is currently used for DATA and CRC responses, the CMD
+responses from the device to the host still require ITAPDLY for
+HS400 timing.
+
+Currently what is stored for HS400 is the ITAPDLY from High Speed
+mode which is incorrect. The ITAPDLY for HS400 speed mode should
+be the same as ITAPDLY as HS200 timing after tuning is executed.
+Add the functionality to save ITAPDLY from HS200 tuning and save
+as HS400 ITAPDLY.
 
 Fixes: a161c45f2979 ("mmc: sdhci_am654: Enable DLL only for some speed modes")
 Signed-off-by: Judith Mendez <jm@ti.com>
-Reviewed-by: Andrew Davis <afd@ti.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
 Changelog:
 v3->v4:
 - Add acked-by
 ---
- drivers/mmc/host/sdhci_am654.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci_am654.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index fb802bf7ad1c..d079b25ef4c9 100644
+index 887808db830f..f9bd27c09fc7 100644
 --- a/drivers/mmc/host/sdhci_am654.c
 +++ b/drivers/mmc/host/sdhci_am654.c
-@@ -300,6 +300,7 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+@@ -301,6 +301,12 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
  	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
  		sdhci_am654_setup_dll(host, clock);
  		sdhci_am654->dll_enable = true;
-+		sdhci_am654_write_itapdly(sdhci_am654, sdhci_am654->itap_del_sel[timing]);
++
++		if (timing == MMC_TIMING_MMC_HS400) {
++			sdhci_am654->itap_del_ena[timing] = 0x1;
++			sdhci_am654->itap_del_sel[timing] = sdhci_am654->itap_del_sel[timing - 1];
++		}
++
+ 		sdhci_am654_write_itapdly(sdhci_am654, sdhci_am654->itap_del_sel[timing],
+ 					  sdhci_am654->itap_del_ena[timing]);
  	} else {
- 		sdhci_am654_setup_delay_chain(sdhci_am654, timing);
- 	}
+@@ -530,6 +536,9 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+ 
+ 	sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
+ 
++	/* Save ITAPDLY */
++	sdhci_am654->itap_del_sel[timing] = itap;
++
+ 	return 0;
+ }
+ 
 -- 
 2.43.2
 
