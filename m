@@ -1,284 +1,96 @@
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D8224D11F;
-	Mon, 18 Mar 2024 14:04:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.142
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91BF34AEDD;
+	Mon, 18 Mar 2024 15:17:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710770670; cv=none; b=slZKqdNGYnXJPMOINUHhVljJ/G3gemj/Uf/sk8yI3dkmjDz/9S8l3/SSbWRE22c6g4LaunWn6q/86Pph3ZUOUPGS3Y9FpTz1WSks2zbQ1AsQxploJf/7AZtxbOqkKfkfuF0TqDQQMzpmg9aU4bnNJNSm6YVBCrjmNVK8ba5gGPo=
+	t=1710775053; cv=none; b=oVDBkO2DhZnlyHaWrPX0hJyMz69Hl4rQwQZTOO73ugWr1Z4UujnEfmijyxBM/zy2wFzDl+0jX+V0JMrOEzpBTU9yS1leQId9oMcuod17CtQm5pcUJRnTNeO0H790CsWVJ0DEsBpWH9AcEXDuGv/buTFOuOLoQbD5qhrXH3MWaWU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710770670; c=relaxed/simple;
-	bh=MT+8lBT8cJcpk+YXvh52HjX2o1Sl9MZSarUXgdolC9A=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=F1r3HWBASR2z5S5cg9FM2nbb2SZ0uJ3HW5x9ZR3zXREZNgQDx24uwG9HejKnlNOwkp9Fgx+lsjzTxESBRR4rxFppjG9maSTpY/j4lS139YVq8uDVE1v5+fd6MAgIgW1RT4YmIkwZ4LHM+jfAuMUZOnyAck6WD9rLe7tFyJxS4eg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=mof7LKvn; arc=none smtp.client-ip=198.47.19.142
+	s=arc-20240116; t=1710775053; c=relaxed/simple;
+	bh=w2n75A/kj3J/4IBH2cC2pSlyikWeeKJ87ThFP0+iN6Y=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=KsErf2lPCKukrLLthWVf+4kYFgP4xka7pepLBRLGwiq2AoqOBar3X8HXz+Hz1MJGedcBxF7Ye5TXkPEcv2QFCIY6Kc+a5qvdWsTY3y4lDqCG8qjTEQ5R/HwI3okDPfxO8x5897o04BVHDM4bDEjTtzUx4n77p3Co0KMEHpBuiXs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=LsA889O1; arc=none smtp.client-ip=198.47.23.248
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="mof7LKvn"
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42IE4NJG070166;
-	Mon, 18 Mar 2024 09:04:23 -0500
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="LsA889O1"
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42IFHCwl088234;
+	Mon, 18 Mar 2024 10:17:12 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1710770663;
-	bh=gKn3j6OpVrtOVzh71kMc8b65L9lfAR4ky93dJ+Ff/GU=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=mof7LKvn1YwbKBuli1EKIVLDxkHlVjUkSscK75EoIwheuq+nKEepWJLuHYuzMOAXe
-	 7AQziJiZiZU4tB64TRFRw3SYS+sHsMAypUauvXFHcLKGifkDU5VXCDaSkw/Es3BxOY
-	 vGEwFGdRHlfk8ZBSQqNdGCOEXPNpnvuL5ZOeL6AM=
-Received: from DFLE111.ent.ti.com (dfle111.ent.ti.com [10.64.6.32])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42IE4Nxi116926
+	s=ti-com-17Q1; t=1710775032;
+	bh=M0aS16XjNekktHyawIldzzdU9h0bG+8UksAGhO2RXOc=;
+	h=From:To:CC:Subject:Date;
+	b=LsA889O1oMYe0v4pMtoY1zRB/UJDAaNp1ZMfpsEeyMQJbRovGqQ1YAMgLp7IGnM8B
+	 1JwCxivPkssEdbeEPr6BlVylA11KPo+8BZiNTxt6dt2Ki8u8K5fdEYWQ26vJtnscon
+	 9trR8YAQx7mXUmYMNHrL4a1EMG871b88om+ihr6k=
+Received: from DFLE101.ent.ti.com (dfle101.ent.ti.com [10.64.6.22])
+	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42IFHC7Q031746
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Mon, 18 Mar 2024 09:04:23 -0500
-Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE111.ent.ti.com
- (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+	Mon, 18 Mar 2024 10:17:12 -0500
+Received: from DFLE106.ent.ti.com (10.64.6.27) by DFLE101.ent.ti.com
+ (10.64.6.22) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 18
- Mar 2024 09:04:23 -0500
-Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE107.ent.ti.com
- (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ Mar 2024 10:17:11 -0500
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE106.ent.ti.com
+ (10.64.6.27) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Mon, 18 Mar 2024 09:04:22 -0500
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42IE4MVm128606;
-	Mon, 18 Mar 2024 09:04:22 -0500
-Message-ID: <8e8edccd-49d4-4157-b92d-8dd0630d52ac@ti.com>
-Date: Mon, 18 Mar 2024 09:04:22 -0500
+ Frontend Transport; Mon, 18 Mar 2024 10:17:12 -0500
+Received: from dhruva.dhcp.ti.com (dhruva.dhcp.ti.com [172.24.227.68])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42IFH8GR095329;
+	Mon, 18 Mar 2024 10:17:09 -0500
+From: Dhruva Gole <d-gole@ti.com>
+To: "Rafael J . Wysocki" <rafael@kernel.org>
+CC: Tony Lindgren <tony@atomide.com>, Len Brown <len.brown@intel.com>,
+        Pavel
+ Machek <pavel@ucw.cz>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>, <theo.lebrun@bootlin.com>,
+        Dhruva
+ Gole <d-gole@ti.com>, <linux-pm@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+Subject: [PATCH V2 0/2] PM: wakeup: make device_wakeup_disable return void
+Date: Mon, 18 Mar 2024 20:46:30 +0530
+Message-ID: <20240318151631.1621881-1-d-gole@ti.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/7] mmc: sdhci_am654: Add tuning algorithm for delay
- chain
-To: Adrian Hunter <adrian.hunter@intel.com>
-CC: Andrew Davis <afd@ti.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-References: <20240308005746.1059813-1-jm@ti.com>
- <20240308005746.1059813-2-jm@ti.com>
- <e0ae65bf-9cca-4dd7-9915-dd9ad67cfb35@intel.com>
-Content-Language: en-US
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <e0ae65bf-9cca-4dd7-9915-dd9ad67cfb35@intel.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-Hi Adrian,
+This is a follow up patch based on discussions with Rafael[0] on a previous
+patch I sent to propagate return value from device_wakeup_disable
+further upward inside device_init_wakeup
 
-On 3/14/24 9:18 AM, Adrian Hunter wrote:
-> On 8/03/24 02:57, Judith Mendez wrote:
->> Currently the sdhci_am654 driver only supports one tuning
->> algorithm which should be used only when DLL is enabled. The
->> ITAPDLY is selected from the largest passing window and the
->> buffer is viewed as a circular buffer.
->>
->> The new algorithm should be used when the delay chain
->> is enabled. The ITAPDLY is selected from the largest passing
->> window and the buffer is not viewed as a circular buffer.
->>
->> This implementation is based off of the following paper: [1].
->>
->> Also add support for multiple failing windows.
->>
->> [1] https://www.ti.com/lit/an/spract9/spract9.pdf
->>
->> Fixes: 13ebeae68ac9 ("mmc: sdhci_am654: Add support for software tuning")
->> Signed-off-by: Judith Mendez <jm@ti.com>
-> 
-> One question further below, and one cosmetic change, but resolve
-> those and you may add to all patches in this patch set:
+However, it doesn't seem like today any return values from
+device_wakeup_disable are very useful to the caller.
 
-Appreciate your review, thanks.
+I could only spot one caller of this function that was actually
+propagating the return value upward other than the PM core calls. I have
+tried to update sdhci-pci-core to work with the new changes
 
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
->> ---
->> Changelog:
->> v2->v3:
->> - Fix return for tuning algorithm
->> - Fix ITAPDLY_LAST_INDEX
->> - Use reverse fir tree order for variable declarations
->> - Remove unnecessary parenthesis
->> ---
->>   drivers/mmc/host/sdhci_am654.c | 112 +++++++++++++++++++++++++++------
->>   1 file changed, 92 insertions(+), 20 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->> index d659c59422e1..d11b0d769e6c 100644
->> --- a/drivers/mmc/host/sdhci_am654.c
->> +++ b/drivers/mmc/host/sdhci_am654.c
->> @@ -149,10 +149,17 @@ struct sdhci_am654_data {
->>   	int strb_sel;
->>   	u32 flags;
->>   	u32 quirks;
->> +	bool dll_enable;
->>   
->>   #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->>   };
->>   
->> +struct window {
->> +	u8 start;
->> +	u8 end;
->> +	u8 length;
->> +};
->> +
->>   struct sdhci_am654_driver_data {
->>   	const struct sdhci_pltfm_data *pdata;
->>   	u32 flags;
->> @@ -290,10 +297,12 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
->>   
->>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
->>   
->> -	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ)
->> +	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
->>   		sdhci_am654_setup_dll(host, clock);
->> -	else
->> +		sdhci_am654->dll_enable = true;
->> +	} else {
->>   		sdhci_am654_setup_delay_chain(sdhci_am654, timing);
-> 
-> V2 patch had here:
-> 
-> 		sdhci_am654->dll_enable = false;
-> 
-> Was its removal intended?
+[0] https://lore.kernel.org/all/CAJZ5v0jbHwiZemtNAoM-jmgB_58VqmKUkqv4P7qrPkxWzBzMyQ@mail.gmail.com/
 
-I did remove on purpose since it did not seem to be necessary.
+Changelog:
 
-> 
->> +	}
->>   
->>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL5, CLKBUFSEL_MASK,
->>   			   sdhci_am654->clkbuf_sel);
->> @@ -408,39 +417,102 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
->>   	return 0;
->>   }
->>   
->> -#define ITAP_MAX	32
->> +#define ITAPDLY_LENGTH 32
->> +#define ITAPDLY_LAST_INDEX (ITAPDLY_LENGTH - 1)
->> +
->> +static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
->> +			  *fail_window, u8 num_fails, bool circular_buffer)
->> +{
->> +	u8 itap = 0, start_fail = 0, end_fail = 0, pass_length = 0;
->> +	u8 first_fail_start = 0, last_fail_end = 0;
->> +	struct device *dev = mmc_dev(host->mmc);
->> +	struct window pass_window = {0, 0, 0};
->> +	int prev_fail_end = -1;
->> +
-> 
-> Unnecessary blank line
+v1 --> v2:
+* Squashed the mmc fix into first patch [Rafael]
 
-Will remove for v4.
+Dhruva Gole (2):
+  PM: wakeup: make device_wakeup_disable return void
+  PM: wakeup: Remove unnecessary else from device_init_wakeup
 
-> 
->> +	u8 i;
->> +
->> +	if (!num_fails)
->> +		return ITAPDLY_LAST_INDEX >> 1;
->> +
->> +	if (fail_window->length == ITAPDLY_LENGTH) {
->> +		dev_err(dev, "No passing ITAPDLY, return 0\n");
->> +		return 0;
->> +	}
->> +
->> +	first_fail_start = fail_window->start;
->> +	last_fail_end = fail_window[num_fails - 1].end;
->> +
->> +	for (i = 0; i < num_fails; i++) {
->> +		start_fail = fail_window[i].start;
->> +		end_fail = fail_window[i].end;
->> +		pass_length = start_fail - (prev_fail_end + 1);
->> +
->> +		if (pass_length > pass_window.length) {
->> +			pass_window.start = prev_fail_end + 1;
->> +			pass_window.length = pass_length;
->> +		}
->> +		prev_fail_end = end_fail;
->> +	}
->> +
->> +	if (!circular_buffer)
->> +		pass_length = ITAPDLY_LAST_INDEX - last_fail_end;
->> +	else
->> +		pass_length = ITAPDLY_LAST_INDEX - last_fail_end + first_fail_start;
->> +
->> +	if (pass_length > pass_window.length) {
->> +		pass_window.start = last_fail_end + 1;
->> +		pass_window.length = pass_length;
->> +	}
->> +
->> +	if (!circular_buffer)
->> +		itap = pass_window.start + (pass_window.length >> 1);
->> +	else
->> +		itap = (pass_window.start + (pass_window.length >> 1)) % ITAPDLY_LENGTH;
->> +
->> +	return (itap > ITAPDLY_LAST_INDEX) ? ITAPDLY_LAST_INDEX >> 1 : itap;
->> +}
->> +
->>   static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
->>   					       u32 opcode)
->>   {
->>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->> -	int cur_val, prev_val = 1, fail_len = 0, pass_window = 0, pass_len;
->> -	u32 itap;
->> +	struct window fail_window[ITAPDLY_LENGTH];
->> +	u8 curr_pass, itap;
->> +	u8 fail_index = 0;
->> +	u8 prev_pass = 1;
->> +
->> +	memset(fail_window, 0, sizeof(fail_window));
->>   
->>   	/* Enable ITAPDLY */
->>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPDLYENA_MASK,
->>   			   1 << ITAPDLYENA_SHIFT);
->>   
->> -	for (itap = 0; itap < ITAP_MAX; itap++) {
->> +	for (itap = 0; itap < ITAPDLY_LENGTH; itap++) {
->>   		sdhci_am654_write_itapdly(sdhci_am654, itap);
->>   
->> -		cur_val = !mmc_send_tuning(host->mmc, opcode, NULL);
->> -		if (cur_val && !prev_val)
->> -			pass_window = itap;
->> +		curr_pass = !mmc_send_tuning(host->mmc, opcode, NULL);
->>   
->> -		if (!cur_val)
->> -			fail_len++;
->> +		if (!curr_pass && prev_pass)
->> +			fail_window[fail_index].start = itap;
->>   
->> -		prev_val = cur_val;
->> +		if (!curr_pass) {
->> +			fail_window[fail_index].end = itap;
->> +			fail_window[fail_index].length++;
->> +		}
->> +
->> +		if (curr_pass && !prev_pass)
->> +			fail_index++;
->> +
->> +		prev_pass = curr_pass;
->>   	}
->> -	/*
->> -	 * Having determined the length of the failing window and start of
->> -	 * the passing window calculate the length of the passing window and
->> -	 * set the final value halfway through it considering the range as a
->> -	 * circular buffer
->> -	 */
->> -	pass_len = ITAP_MAX - fail_len;
->> -	itap = (pass_window + (pass_len >> 1)) % ITAP_MAX;
->> +
->> +	if (fail_window[fail_index].length != 0)
->> +		fail_index++;
->> +
->> +	itap = sdhci_am654_calculate_itap(host, fail_window, fail_index,
->> +					  sdhci_am654->dll_enable);
->> +
->>   	sdhci_am654_write_itapdly(sdhci_am654, itap);
->>   
->>   	return 0;
-> 
+ drivers/base/power/wakeup.c       | 11 +++++++----
+ drivers/mmc/host/sdhci-pci-core.c |  2 +-
+ include/linux/pm_wakeup.h         | 12 +++++-------
+ 3 files changed, 13 insertions(+), 12 deletions(-)
+
+-- 
+2.34.1
 
