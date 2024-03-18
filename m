@@ -1,96 +1,284 @@
-Received: from mail-oi1-f179.google.com (mail-oi1-f179.google.com [209.85.167.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 09A4C482F2;
-	Mon, 18 Mar 2024 13:52:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D8224D11F;
+	Mon, 18 Mar 2024 14:04:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.142
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710769935; cv=none; b=r166SRhPRAO7ZX61KlwKpeyXgqnz/AvPZ0Mu2+1ii7cLy5dwhb9Rnha+d09EcqMl4RxgeMghzRARj+a62vdIpYR8DipXjT1QReJHqXv/0B1XSaOrL+QMPm5qVytCq1N/lOqguqeiwJIgMlHTFS96EF2Httq9NFST0VfQPtti5dI=
+	t=1710770670; cv=none; b=slZKqdNGYnXJPMOINUHhVljJ/G3gemj/Uf/sk8yI3dkmjDz/9S8l3/SSbWRE22c6g4LaunWn6q/86Pph3ZUOUPGS3Y9FpTz1WSks2zbQ1AsQxploJf/7AZtxbOqkKfkfuF0TqDQQMzpmg9aU4bnNJNSm6YVBCrjmNVK8ba5gGPo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710769935; c=relaxed/simple;
-	bh=PookXp4bPOX0npWy6gd5rk2aO3Vm9Zf52HsOGP+Nz4k=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=iFWbJtbKxjkoD3PeVECr/6ddTU6ms+v3cYaGFcpQPphv02HUNekgo22rOOv3kwW9j4r+6u+Kj9vmWlDXANNBm6v1sX7hRZ/zlTInm0DaIv/P8bkyl9JEbYn6LVddSQG2uEbiLyNuyijhK/giYgNYTtAZwPJSuBcjOV6mPEbUAnA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.167.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-oi1-f179.google.com with SMTP id 5614622812f47-3c380e99582so583082b6e.1;
-        Mon, 18 Mar 2024 06:52:13 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710769933; x=1711374733;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=w7ebsFZDfZ8wRGX/ymUxLQCpYnUCXb5v3M/6qeGcR2k=;
-        b=hjfS2nO8SHKLtE/PoUkK8lSjYBwP/CENXlm/UFFmQ7Tom+pK1QMakkn4zD1SrWAI3G
-         th6tHu/kjjMre5ZzW8Y7qw+zoGINfA4N/Dv8qSMCVPzaz/qt3r2t7aX/GWVbL783DYvT
-         CrTWsteHGzyGiDZSw7FAte4PxrKo1M5j4dYWm5vRwbtDix7sSyYIwBYM6pxLDfsCwRc2
-         CgYS2ooHk+gJUyDjhpNGjiGvJQ2nYRTyIYH0z2GUmb5F9t58p7vSik6HEYCRIe8oNfNs
-         yhw2YoKZLFW4cZfcLSKeRzHzV1llRPt2NlCvDM2cuYf3w1a5gVJg6HnIlZkG/wRyLcwT
-         Z1Pg==
-X-Forwarded-Encrypted: i=1; AJvYcCWMATI41fj60/ceIxox66L1642dnYoWGPmP5sDwV4EJdGCdKIo0fgtTgGhl/pEEGtZpD/3yFbE15qgMwjJ7UZdiBv1HctRRUKfs/91ZnDD9MYmWJbJY38LXc51It1B9WrkJLpzf5A6/ZlOf17Kxte1x49WaM2rzOWQNnOfaIW2FobE=
-X-Gm-Message-State: AOJu0YzM5NqZ8U8xepE7ccV/Q3Xv8Hkd7w/J3BFNstG0cTQH3ehw80nh
-	P3+A/JcFszTo7a+iGd6/y5xmyabtdaBhW8993uUmzHIynjEQjGliOFYXwtNNHEZ15PUVRCf9KEH
-	jzPLnQ08dm/G5qJkUO+H8rLICAbE=
-X-Google-Smtp-Source: AGHT+IFkp+fjhly6fcg9naTNI6FjwK6V6nEo8JqRLqLJlYLU9NJHzdhKUmIPMkqXB5aEfMpA4Kog4/1ILyL5IzDJNzk=
-X-Received: by 2002:a05:6820:d02:b0:5a4:5630:93d6 with SMTP id
- ej2-20020a0568200d0200b005a4563093d6mr9713906oob.1.1710769933182; Mon, 18 Mar
- 2024 06:52:13 -0700 (PDT)
+	s=arc-20240116; t=1710770670; c=relaxed/simple;
+	bh=MT+8lBT8cJcpk+YXvh52HjX2o1Sl9MZSarUXgdolC9A=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=F1r3HWBASR2z5S5cg9FM2nbb2SZ0uJ3HW5x9ZR3zXREZNgQDx24uwG9HejKnlNOwkp9Fgx+lsjzTxESBRR4rxFppjG9maSTpY/j4lS139YVq8uDVE1v5+fd6MAgIgW1RT4YmIkwZ4LHM+jfAuMUZOnyAck6WD9rLe7tFyJxS4eg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=mof7LKvn; arc=none smtp.client-ip=198.47.19.142
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="mof7LKvn"
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+	by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42IE4NJG070166;
+	Mon, 18 Mar 2024 09:04:23 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1710770663;
+	bh=gKn3j6OpVrtOVzh71kMc8b65L9lfAR4ky93dJ+Ff/GU=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=mof7LKvn1YwbKBuli1EKIVLDxkHlVjUkSscK75EoIwheuq+nKEepWJLuHYuzMOAXe
+	 7AQziJiZiZU4tB64TRFRw3SYS+sHsMAypUauvXFHcLKGifkDU5VXCDaSkw/Es3BxOY
+	 vGEwFGdRHlfk8ZBSQqNdGCOEXPNpnvuL5ZOeL6AM=
+Received: from DFLE111.ent.ti.com (dfle111.ent.ti.com [10.64.6.32])
+	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42IE4Nxi116926
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Mon, 18 Mar 2024 09:04:23 -0500
+Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE111.ent.ti.com
+ (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 18
+ Mar 2024 09:04:23 -0500
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE107.ent.ti.com
+ (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Mon, 18 Mar 2024 09:04:22 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42IE4MVm128606;
+	Mon, 18 Mar 2024 09:04:22 -0500
+Message-ID: <8e8edccd-49d4-4157-b92d-8dd0630d52ac@ti.com>
+Date: Mon, 18 Mar 2024 09:04:22 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240318055054.1564696-1-d-gole@ti.com> <20240318055054.1564696-3-d-gole@ti.com>
-In-Reply-To: <20240318055054.1564696-3-d-gole@ti.com>
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Date: Mon, 18 Mar 2024 14:52:02 +0100
-Message-ID: <CAJZ5v0hP0TR1zVc1hNMw+SnqCw7hJUcFM-J5Y6Mtgh-tnrrdEw@mail.gmail.com>
-Subject: Re: [PATCH 2/3] PM: wakeup: Remove unnecessary else from device_init_wakeup
-To: Dhruva Gole <d-gole@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Tony Lindgren <tony@atomide.com>, 
-	Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Viresh Kumar <viresh.kumar@linaro.org>, 
-	theo.lebrun@bootlin.com, linux-pm@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 1/7] mmc: sdhci_am654: Add tuning algorithm for delay
+ chain
+To: Adrian Hunter <adrian.hunter@intel.com>
+CC: Andrew Davis <afd@ti.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+References: <20240308005746.1059813-1-jm@ti.com>
+ <20240308005746.1059813-2-jm@ti.com>
+ <e0ae65bf-9cca-4dd7-9915-dd9ad67cfb35@intel.com>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <e0ae65bf-9cca-4dd7-9915-dd9ad67cfb35@intel.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-On Mon, Mar 18, 2024 at 6:55=E2=80=AFAM Dhruva Gole <d-gole@ti.com> wrote:
->
-> Checkpatch warns that else is generally not necessary after a return
-> condition which exists in the if part of this function. Hence, just to
-> abide by what checkpatch recommends, follow it's guidelines.
->
-> Signed-off-by: Dhruva Gole <d-gole@ti.com>
-> ---
->  include/linux/pm_wakeup.h | 7 +++----
->  1 file changed, 3 insertions(+), 4 deletions(-)
->
-> diff --git a/include/linux/pm_wakeup.h b/include/linux/pm_wakeup.h
-> index 428803eed798..76cd1f9f1365 100644
-> --- a/include/linux/pm_wakeup.h
-> +++ b/include/linux/pm_wakeup.h
-> @@ -234,11 +234,10 @@ static inline int device_init_wakeup(struct device =
-*dev, bool enable)
->         if (enable) {
->                 device_set_wakeup_capable(dev, true);
->                 return device_wakeup_enable(dev);
-> -       } else {
-> -               device_wakeup_disable(dev);
-> -               device_set_wakeup_capable(dev, false);
-> -               return 0;
->         }
-> +       device_wakeup_disable(dev);
-> +       device_set_wakeup_capable(dev, false);
-> +       return 0;
->  }
->
->  #endif /* _LINUX_PM_WAKEUP_H */
-> --
+Hi Adrian,
 
-This one is fine with me, but not 6.9-rc material.
+On 3/14/24 9:18 AM, Adrian Hunter wrote:
+> On 8/03/24 02:57, Judith Mendez wrote:
+>> Currently the sdhci_am654 driver only supports one tuning
+>> algorithm which should be used only when DLL is enabled. The
+>> ITAPDLY is selected from the largest passing window and the
+>> buffer is viewed as a circular buffer.
+>>
+>> The new algorithm should be used when the delay chain
+>> is enabled. The ITAPDLY is selected from the largest passing
+>> window and the buffer is not viewed as a circular buffer.
+>>
+>> This implementation is based off of the following paper: [1].
+>>
+>> Also add support for multiple failing windows.
+>>
+>> [1] https://www.ti.com/lit/an/spract9/spract9.pdf
+>>
+>> Fixes: 13ebeae68ac9 ("mmc: sdhci_am654: Add support for software tuning")
+>> Signed-off-by: Judith Mendez <jm@ti.com>
+> 
+> One question further below, and one cosmetic change, but resolve
+> those and you may add to all patches in this patch set:
 
-Thanks!
+Appreciate your review, thanks.
+
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+>> ---
+>> Changelog:
+>> v2->v3:
+>> - Fix return for tuning algorithm
+>> - Fix ITAPDLY_LAST_INDEX
+>> - Use reverse fir tree order for variable declarations
+>> - Remove unnecessary parenthesis
+>> ---
+>>   drivers/mmc/host/sdhci_am654.c | 112 +++++++++++++++++++++++++++------
+>>   1 file changed, 92 insertions(+), 20 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+>> index d659c59422e1..d11b0d769e6c 100644
+>> --- a/drivers/mmc/host/sdhci_am654.c
+>> +++ b/drivers/mmc/host/sdhci_am654.c
+>> @@ -149,10 +149,17 @@ struct sdhci_am654_data {
+>>   	int strb_sel;
+>>   	u32 flags;
+>>   	u32 quirks;
+>> +	bool dll_enable;
+>>   
+>>   #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+>>   };
+>>   
+>> +struct window {
+>> +	u8 start;
+>> +	u8 end;
+>> +	u8 length;
+>> +};
+>> +
+>>   struct sdhci_am654_driver_data {
+>>   	const struct sdhci_pltfm_data *pdata;
+>>   	u32 flags;
+>> @@ -290,10 +297,12 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>>   
+>>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
+>>   
+>> -	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ)
+>> +	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+>>   		sdhci_am654_setup_dll(host, clock);
+>> -	else
+>> +		sdhci_am654->dll_enable = true;
+>> +	} else {
+>>   		sdhci_am654_setup_delay_chain(sdhci_am654, timing);
+> 
+> V2 patch had here:
+> 
+> 		sdhci_am654->dll_enable = false;
+> 
+> Was its removal intended?
+
+I did remove on purpose since it did not seem to be necessary.
+
+> 
+>> +	}
+>>   
+>>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL5, CLKBUFSEL_MASK,
+>>   			   sdhci_am654->clkbuf_sel);
+>> @@ -408,39 +417,102 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>>   	return 0;
+>>   }
+>>   
+>> -#define ITAP_MAX	32
+>> +#define ITAPDLY_LENGTH 32
+>> +#define ITAPDLY_LAST_INDEX (ITAPDLY_LENGTH - 1)
+>> +
+>> +static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
+>> +			  *fail_window, u8 num_fails, bool circular_buffer)
+>> +{
+>> +	u8 itap = 0, start_fail = 0, end_fail = 0, pass_length = 0;
+>> +	u8 first_fail_start = 0, last_fail_end = 0;
+>> +	struct device *dev = mmc_dev(host->mmc);
+>> +	struct window pass_window = {0, 0, 0};
+>> +	int prev_fail_end = -1;
+>> +
+> 
+> Unnecessary blank line
+
+Will remove for v4.
+
+> 
+>> +	u8 i;
+>> +
+>> +	if (!num_fails)
+>> +		return ITAPDLY_LAST_INDEX >> 1;
+>> +
+>> +	if (fail_window->length == ITAPDLY_LENGTH) {
+>> +		dev_err(dev, "No passing ITAPDLY, return 0\n");
+>> +		return 0;
+>> +	}
+>> +
+>> +	first_fail_start = fail_window->start;
+>> +	last_fail_end = fail_window[num_fails - 1].end;
+>> +
+>> +	for (i = 0; i < num_fails; i++) {
+>> +		start_fail = fail_window[i].start;
+>> +		end_fail = fail_window[i].end;
+>> +		pass_length = start_fail - (prev_fail_end + 1);
+>> +
+>> +		if (pass_length > pass_window.length) {
+>> +			pass_window.start = prev_fail_end + 1;
+>> +			pass_window.length = pass_length;
+>> +		}
+>> +		prev_fail_end = end_fail;
+>> +	}
+>> +
+>> +	if (!circular_buffer)
+>> +		pass_length = ITAPDLY_LAST_INDEX - last_fail_end;
+>> +	else
+>> +		pass_length = ITAPDLY_LAST_INDEX - last_fail_end + first_fail_start;
+>> +
+>> +	if (pass_length > pass_window.length) {
+>> +		pass_window.start = last_fail_end + 1;
+>> +		pass_window.length = pass_length;
+>> +	}
+>> +
+>> +	if (!circular_buffer)
+>> +		itap = pass_window.start + (pass_window.length >> 1);
+>> +	else
+>> +		itap = (pass_window.start + (pass_window.length >> 1)) % ITAPDLY_LENGTH;
+>> +
+>> +	return (itap > ITAPDLY_LAST_INDEX) ? ITAPDLY_LAST_INDEX >> 1 : itap;
+>> +}
+>> +
+>>   static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>>   					       u32 opcode)
+>>   {
+>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+>> -	int cur_val, prev_val = 1, fail_len = 0, pass_window = 0, pass_len;
+>> -	u32 itap;
+>> +	struct window fail_window[ITAPDLY_LENGTH];
+>> +	u8 curr_pass, itap;
+>> +	u8 fail_index = 0;
+>> +	u8 prev_pass = 1;
+>> +
+>> +	memset(fail_window, 0, sizeof(fail_window));
+>>   
+>>   	/* Enable ITAPDLY */
+>>   	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPDLYENA_MASK,
+>>   			   1 << ITAPDLYENA_SHIFT);
+>>   
+>> -	for (itap = 0; itap < ITAP_MAX; itap++) {
+>> +	for (itap = 0; itap < ITAPDLY_LENGTH; itap++) {
+>>   		sdhci_am654_write_itapdly(sdhci_am654, itap);
+>>   
+>> -		cur_val = !mmc_send_tuning(host->mmc, opcode, NULL);
+>> -		if (cur_val && !prev_val)
+>> -			pass_window = itap;
+>> +		curr_pass = !mmc_send_tuning(host->mmc, opcode, NULL);
+>>   
+>> -		if (!cur_val)
+>> -			fail_len++;
+>> +		if (!curr_pass && prev_pass)
+>> +			fail_window[fail_index].start = itap;
+>>   
+>> -		prev_val = cur_val;
+>> +		if (!curr_pass) {
+>> +			fail_window[fail_index].end = itap;
+>> +			fail_window[fail_index].length++;
+>> +		}
+>> +
+>> +		if (curr_pass && !prev_pass)
+>> +			fail_index++;
+>> +
+>> +		prev_pass = curr_pass;
+>>   	}
+>> -	/*
+>> -	 * Having determined the length of the failing window and start of
+>> -	 * the passing window calculate the length of the passing window and
+>> -	 * set the final value halfway through it considering the range as a
+>> -	 * circular buffer
+>> -	 */
+>> -	pass_len = ITAP_MAX - fail_len;
+>> -	itap = (pass_window + (pass_len >> 1)) % ITAP_MAX;
+>> +
+>> +	if (fail_window[fail_index].length != 0)
+>> +		fail_index++;
+>> +
+>> +	itap = sdhci_am654_calculate_itap(host, fail_window, fail_index,
+>> +					  sdhci_am654->dll_enable);
+>> +
+>>   	sdhci_am654_write_itapdly(sdhci_am654, itap);
+>>   
+>>   	return 0;
+> 
+
