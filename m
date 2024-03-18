@@ -1,166 +1,147 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
+Received: from mail-oa1-f51.google.com (mail-oa1-f51.google.com [209.85.160.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA86A2D04A;
-	Mon, 18 Mar 2024 09:40:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16419249EB;
+	Mon, 18 Mar 2024 13:47:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710754823; cv=none; b=fDWLtdgqiHO9nCr8/EmZte/Y34zf3g6cLoN0xvi0mTzntNOA+9Nytjb2uVcv1OzKs4xgl+jhxq75JvsHvL8OrgMleNDa2LP6n++b8b16I+HaXqGz9hW4ekA6Prtsj+3Cl+Sxo+fOCweXURuMKEVa3xN/fIbjy0TxSTtaBKHPFdQ=
+	t=1710769679; cv=none; b=lRE97jMpWVeBPYCGJyB6h3r7CyNIPhfmPynMR8QSHvbCsy2PEB71AwqtYobiNbfOf0T6fHJFXEOCq9B/WJXppgZIlB4jQYmox7n/JBUZi/PB5ibN7zlyoOUhHffWQvMSnPWXyssKr18DJL8FI1FUpWpdKzbLRbvOtfi6WNBA4R4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710754823; c=relaxed/simple;
-	bh=bEznuMA+1zD98Hw8ywoN0Uc2fkSmDNXf8LAQqCKlFzc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=BvOAxM8cCTsDuESVBgIowg+hOwtLkwGZDrn2NSm8aCUIpgyw8HbG7sUbv7LvauZ95Zxgmjjyz45xXNL+m8gXFxEbCJCljZwSCJYarPmsf4R4s1yYElh9iDGc6hoPSQiCJ55hiXbFknvRWHPLqleJ3m1sH39wrp3a+xHELKc36hs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fZon5mgq; arc=none smtp.client-ip=209.85.167.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+	s=arc-20240116; t=1710769679; c=relaxed/simple;
+	bh=5Skdb5Ea92mVl7TGZULbUxUWfzAoFJQETlY3oyw2PcI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=cNG3xDEjnb4IfXY1Fxr71oqnDYsgire8/alSc0m8Xxo2SaUhIX2NSBcX/8EZfwxc8xE8/aOYv3SXBPtGB+PWp2WW1OFwo+HRq77IsL8V3l8nhnHXAH4wVkIIsJNr/15ussFQ+lKp2mk/xQtbAAQ5JRcqbLAJrDhQQOLhTWekeqo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.160.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fZon5mgq"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-513d599dbabso4397194e87.1;
-        Mon, 18 Mar 2024 02:40:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1710754820; x=1711359620; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=zIQCJ/OsqAraYCUqvyhok/Yclx8bJxWBxE1EUszmreg=;
-        b=fZon5mgq/B6QeWk9JqdBTBqlaDEVV0sL2sWqAT2Wu0dnGUNXXghIw5eeGfDhpmy5Sj
-         S42j6bR3JQmiavJtKU+Yb/yEFUMQWhXX1geC/SqeGhBj2S5L5Sa4nmfOUexDPJ6QhVp1
-         MLRFwU3AAfVqv9N6dzVxHbs/DlLF24IhEEn4IqKxeSjmr/KFkzd4TVqjhMmzphHmlPls
-         nesDoX4tyEbRZXwkVlOXuc2SAoAaNdvnkTOTtAZ86yDFvFPoEjnnSackpvHJXB6i1CPr
-         YxkECemU0z2tSlOR2uQlaG08OcIbLGVv1C6zBTGd8BzNLpEhgmn7HWr0JeezITwQxsTI
-         uUyA==
+Received: by mail-oa1-f51.google.com with SMTP id 586e51a60fabf-2219edd959dso969639fac.0;
+        Mon, 18 Mar 2024 06:47:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710754820; x=1711359620;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=zIQCJ/OsqAraYCUqvyhok/Yclx8bJxWBxE1EUszmreg=;
-        b=UsbMp7ClHBHaRD9FfLlZ5bWyKnY0odwQdExClOlX/KGSVT5uj4rbfX45gsqbNQEUOV
-         unIZ8z9GhJ0G3AAaBdsUccq2ERWvi3s1wVC32UvmyJqa/08DAUQebJkVtGTN7zNRNS1P
-         66ZA9qkRhCrVUJgUhHCm5+iA+X8I5cFHY8S/OVlEt+Zfjfvr9xEBR4/waU4+Rb8xr1Iw
-         ns73PLrLQPfeimv9dbcxZwh3uubq2i1fqe0jLPVaze4T3PvLm4/05GW74m+VWb4hOLZZ
-         FkqV/FS17lBvZ5dRIZcN+ANF8ddglnwi6YqTaKv7Z/zPSN9qpfw9sZQSaHlPQd+NbpCr
-         1zLw==
-X-Forwarded-Encrypted: i=1; AJvYcCXAG0pN0au4C/DiuTmgr8a1LGTAatIgOre/8ABmVI3MUPOVwgMjfu8waMy6aCYBj2NUJgI8t6sTPIvN3zoGQRNPasmM84WgClHd
-X-Gm-Message-State: AOJu0YxzYg/UlNH22tOd+jsq2BcVet8WN6itI0zJbmkXefTSAS9N+NUP
-	mPNk5Xv68zIEcs0CFyi29FUsK9LzAiR+KBYgr+KrAj658c7dNmvw
-X-Google-Smtp-Source: AGHT+IHlG0jLb8/d60aF+YVkDif9YyCdRn4xn2S1BdwgErAiuJn3lQxqfCp3rdZ2sH2Uxw9A/Ucnjg==
-X-Received: by 2002:a05:6512:32b7:b0:513:c9d2:e1e1 with SMTP id q23-20020a05651232b700b00513c9d2e1e1mr7591669lfe.66.1710754819778;
-        Mon, 18 Mar 2024 02:40:19 -0700 (PDT)
-Received: from [192.168.1.68] (79-139-148-139.dynamic.spd-mgts.ru. [79.139.148.139])
-        by smtp.gmail.com with ESMTPSA id x23-20020ac24897000000b00513d3c1c7c7sm1370328lfc.191.2024.03.18.02.40.18
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 18 Mar 2024 02:40:19 -0700 (PDT)
-Message-ID: <56fe9e1c-80a5-47a4-b5e5-610c694db152@gmail.com>
-Date: Mon, 18 Mar 2024 12:40:17 +0300
+        d=1e100.net; s=20230601; t=1710769677; x=1711374477;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=tOakJZuItJeZn6wLR+x/UlhCnYwyTT+eEj3X3hD9lPo=;
+        b=hK9mIBJGDuErwrG6h33ESMIxKFU3Jfv8zS/59wp+qWOHsFp0yV2Ih5UF8V9ryozADq
+         RarpZE+PNqXInXFn8sJ/LHfx/2U6s7UKWlX0ZI83kc0lmXa+iq41lOfMWMnp5hVvgPb5
+         /mrwMLJYvwq5iuOoZn42H+CR4lgR9XQDfVZTpAy7tlsE6syLKUz5+12GjQE7wbR8pAkG
+         D4uLiVhsId0zJvH4c/8npaoqJBriWFeCmPLeVGLWJQy9e4LpCPZNXDutbj/tmrzJvShI
+         iqwUw/yPUPcPUU5qYRYZsG1yZ04/nVSm+OvB18zqU2GPA4u1rMQLIxoe5uubxL4NW9A4
+         8Z4w==
+X-Forwarded-Encrypted: i=1; AJvYcCX3B8x1MyHL8lsWcjJAz/GiOCuztLouuZj/IrA5+Ikf5i+bDOeN06lQl7iCphBeSFYHzrCBQQAMHqL2ExqsGjrrbAjsuRqqkqGbLCf/qKi1ULrpsXY459WZGWPghqRoFi9ci3F6g+/bL2bLIJCHWk9eN8fZjEbx8xcmHO6tBrWmRj0=
+X-Gm-Message-State: AOJu0YytJxCISTGERBgLXtlSL80lL28KepO1A3leBxLHCflnQv8Iubqs
+	VrcyS+L8RfUvzVi0L4b9hRADYRsZy6CV6dHBjiNgwoNC8cle5BH/beFR3wLhad6XxxoW5hXAq1C
+	S2IkzGb+fXrVfOUno/b/iygCW/Pg=
+X-Google-Smtp-Source: AGHT+IFoSB4pNMjT9eDWxlv9et7vQdUvZO/ohJsDwLmjTJ7nGFl6EeMS2OOdzuevk8LMxXSz61oACRUuzh5y2kPvKi4=
+X-Received: by 2002:a05:6871:58a4:b0:221:cb1b:cc05 with SMTP id
+ ok36-20020a05687158a400b00221cb1bcc05mr13208337oac.0.1710769677154; Mon, 18
+ Mar 2024 06:47:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin
- <shawn.lin@rock-chips.com>, Jyan Chou <jyanchou@realtek.com>
-References: <20240314141440.3305802-1-serghox@gmail.com>
- <CAPDyKFrP1XgJo_zDDunpzb6g8QWo4k3Ye1dJCWBGVvhdprCCkg@mail.gmail.com>
-Content-Language: en-US
-From: Sergey Khimich <serghox@gmail.com>
-In-Reply-To: <CAPDyKFrP1XgJo_zDDunpzb6g8QWo4k3Ye1dJCWBGVvhdprCCkg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20240318055054.1564696-1-d-gole@ti.com> <20240318055054.1564696-2-d-gole@ti.com>
+In-Reply-To: <20240318055054.1564696-2-d-gole@ti.com>
+From: "Rafael J. Wysocki" <rafael@kernel.org>
+Date: Mon, 18 Mar 2024 14:47:45 +0100
+Message-ID: <CAJZ5v0giafbnGFHgT7pZm+o6KzKznxVDJvc04K6XvP1ShG2YKw@mail.gmail.com>
+Subject: Re: [PATCH 1/3] PM: wakeup: make device_wakeup_disable return void
+To: Dhruva Gole <d-gole@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Tony Lindgren <tony@atomide.com>, 
+	Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Viresh Kumar <viresh.kumar@linaro.org>, 
+	theo.lebrun@bootlin.com, linux-pm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hello, Uffe!
-
-Thanks for the info! I'll update mailing list in the next v7 version of 
-my patch set. I'll send it anyway to fix last comments from Adrian Hunter.
-
-On 15.03.2024 13:55, Ulf Hansson wrote:
-> On Thu, 14 Mar 2024 at 15:14, Sergey Khimich <serghox@gmail.com> wrote:
->> Hello!
->>
->> This is implementation of SDHCI CQE support for sdhci-of-dwcmshc driver.
->> For enabling CQE support just set 'supports-cqe' in your DevTree file
->> for appropriate mmc node.
->>
->> Also, while implementing CQE support for the driver, I faced with a problem
->> which I will describe below.
->> According to the IP block documentation CQE works only with "AMDA-2 only"
->> mode which is activated only with v4 mode enabled. I see in dwcmshc_probe()
->> function that v4 mode gets enabled only for 'sdhci_dwcmshc_bf3_pdata'
->> platform data.
->>
->> So my question is: is it correct to enable v4 mode for all platform data
->> if 'SDHCI_CAN_64BIT_V4' bit is set in hw?
->>
->> Because I`m afraid that enabling v4 mode for some platforms could break
->> them down. On the other hand, if host controller says that it can do v4
->> (caps & SDHCI_CAN_64BIT_V4), lets do v4 or disable it manualy by some
->> quirk. Anyway - RFC.
->>
-> We have just updated the bouncing addresses in MAINTAINERS for Asutosh
-> Das and Ritesh Harjani, that also helps maintain cqhci. Would you mind
-> re-submitting to allow them to have a look at this too?
-> Asutosh Das <quic_asutoshd@quicinc.com>
-> Ritesh Harjani <ritesh.list@gmail.com>
+On Mon, Mar 18, 2024 at 6:55=E2=80=AFAM Dhruva Gole <d-gole@ti.com> wrote:
 >
-> Kind regards
-> Uffe
+> The device_wakeup_disable call only returns an error if no dev exists
+> however there's not much a user can do at that point.
+> Rather make this function return void.
 >
->> v2:
->>   - Added dwcmshc specific cqe_disable hook to prevent losing
->>     in-flight cmd when an ioctl is issued and cqe_disable is called;
->>
->>   - Added processing 128Mb boundary for the host memory data buffer size
->>     and the data buffer. For implementing this processing an extra
->>     callback is added to the struct 'sdhci_ops'.
->>
->>   - Fixed typo.
->>
->> v3:
->>   - Fix warning reported by kernel test robot:
->>          | Reported-by: kernel test robot <lkp@intel.com>
->>          | Closes: https://lore.kernel.org/oe-kbuild-all/202309270807.VoVn81m6-lkp@intel.com/
->>          | Closes: https://lore.kernel.org/oe-kbuild-all/202309300806.dcR19kcE-lkp@intel.com/
->>
->> v4:
->>   - Data reset moved to custom driver tuning hook.
->>   - Removed unnecessary dwcmshc_sdhci_cqe_disable() func
->>   - Removed unnecessary dwcmshc_cqhci_set_tran_desc. Export and use
->>     cqhci_set_tran_desc() instead.
->>   - Provide a hook for cqhci_set_tran_desc() instead of cqhci_prep_tran_desc().
->>   - Fix typo: int_clok_disable --> int_clock_disable
->>
->> v5:
->>   - Fix warning reported by kernel test robot:
->>          | Reported-by: kernel test robot <lkp@intel.com>
->>          | Closes: https://lore.kernel.org/oe-kbuild-all/202312301130.itEZhhI5-lkp@intel.com/
->>
->> v6:
->>   - Rebase to master branch
->>   - Fix typo;
->>   - Fix double blank line;
->>   - Add cqhci_suspend() and cqhci_resume() functions
->>     to support mmc suspend-to-ram (s2r);
->>   - Move reading DWCMSHC_P_VENDOR_AREA2 register under "supports-cqe"
->>     condition as not all IPs have that register;
->>   - Remove sdhci V4 mode from the list of prerequisites to init cqhci.
->>
->>
->> Sergey Khimich (2):
->>    mmc: cqhci: Add cqhci set_tran_desc() callback
->>    mmc: sdhci-of-dwcmshc: Implement SDHCI CQE support
->>
->>   drivers/mmc/host/Kconfig            |   1 +
->>   drivers/mmc/host/cqhci-core.c       |  11 +-
->>   drivers/mmc/host/cqhci.h            |   4 +
->>   drivers/mmc/host/sdhci-of-dwcmshc.c | 188 +++++++++++++++++++++++++++-
->>   4 files changed, 199 insertions(+), 5 deletions(-)
->>
->> --
->> 2.30.2
->>
+> Signed-off-by: Dhruva Gole <d-gole@ti.com>
+> ---
+>  drivers/base/power/wakeup.c | 11 +++++++----
+>  include/linux/pm_wakeup.h   |  5 ++---
+>  2 files changed, 9 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/base/power/wakeup.c b/drivers/base/power/wakeup.c
+> index a917219feea6..752b417e8129 100644
+> --- a/drivers/base/power/wakeup.c
+> +++ b/drivers/base/power/wakeup.c
+> @@ -451,16 +451,15 @@ static struct wakeup_source *device_wakeup_detach(s=
+truct device *dev)
+>   * Detach the @dev's wakeup source object from it, unregister this wakeu=
+p source
+>   * object and destroy it.
+>   */
+> -int device_wakeup_disable(struct device *dev)
+> +void device_wakeup_disable(struct device *dev)
+>  {
+>         struct wakeup_source *ws;
+>
+>         if (!dev || !dev->power.can_wakeup)
+> -               return -EINVAL;
+> +               return;
+>
+>         ws =3D device_wakeup_detach(dev);
+>         wakeup_source_unregister(ws);
+> -       return 0;
+>  }
+>  EXPORT_SYMBOL_GPL(device_wakeup_disable);
+>
+> @@ -502,7 +501,11 @@ EXPORT_SYMBOL_GPL(device_set_wakeup_capable);
+>   */
+>  int device_set_wakeup_enable(struct device *dev, bool enable)
+>  {
+> -       return enable ? device_wakeup_enable(dev) : device_wakeup_disable=
+(dev);
+> +       if (enable)
+> +               return device_wakeup_enable(dev);
+> +
+> +       device_wakeup_disable(dev);
+> +       return 0;
+>  }
+>  EXPORT_SYMBOL_GPL(device_set_wakeup_enable);
+>
+> diff --git a/include/linux/pm_wakeup.h b/include/linux/pm_wakeup.h
+> index 6eb9adaef52b..428803eed798 100644
+> --- a/include/linux/pm_wakeup.h
+> +++ b/include/linux/pm_wakeup.h
+> @@ -107,7 +107,7 @@ extern void wakeup_sources_read_unlock(int idx);
+>  extern struct wakeup_source *wakeup_sources_walk_start(void);
+>  extern struct wakeup_source *wakeup_sources_walk_next(struct wakeup_sour=
+ce *ws);
+>  extern int device_wakeup_enable(struct device *dev);
+> -extern int device_wakeup_disable(struct device *dev);
+> +extern void device_wakeup_disable(struct device *dev);
+
+This change will introduce a build error in sdhci-pci-core.c AFAICS,
+so you need to modify this file in the same patch to avoid bisection
+breakage.
+
+>  extern void device_set_wakeup_capable(struct device *dev, bool capable);
+>  extern int device_set_wakeup_enable(struct device *dev, bool enable);
+>  extern void __pm_stay_awake(struct wakeup_source *ws);
+> @@ -154,10 +154,9 @@ static inline int device_wakeup_enable(struct device=
+ *dev)
+>         return 0;
+>  }
+>
+> -static inline int device_wakeup_disable(struct device *dev)
+> +static inline void device_wakeup_disable(struct device *dev)
+>  {
+>         dev->power.should_wakeup =3D false;
+> -       return 0;
+>  }
+>
+>  static inline int device_set_wakeup_enable(struct device *dev, bool enab=
+le)
+> --
+> 2.34.1
+>
