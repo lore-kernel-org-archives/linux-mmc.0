@@ -1,104 +1,93 @@
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0524D59B5B;
-	Mon, 18 Mar 2024 19:11:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A430553E3B;
+	Tue, 19 Mar 2024 06:35:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710789113; cv=none; b=sm4Z7LZAPFDAeeSjb7Gj7YxR0XHq+FMDEGjhXy7q1LIhL1hmsoUUXhIQHHRAphbOxRLgZ4OCnQgAXBoJiFhcG7jdGQCnhwc8i21PfNE/q56RBOWzCdK4ywNFpu0Q9PvZjd5ojqn87mAlUnoiunrEP1Ex4NxYgpZylP/mPnGGHgY=
+	t=1710830120; cv=none; b=PPSxUlQAniKl1SqNkJs6PcFbU71pClcDQIOPhKLkuW9n8eUBWjUof0tPuTmj9msOFjGWSsxN/lG8Z27MwSHS63wf3XmQhZSLqxomp+TIL/O8xn4IW0A2hk5HUjm0YeT3boZTrepfsb+St2eabuv4V9VoDrGr80iuZ1VqvuCFZKQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710789113; c=relaxed/simple;
-	bh=w+U8dd24WK1O+NzyyQAzyJz36Ga+IMWO8GLVjDe9OFs=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=YE+2+p4vmsqZCEN8Pcj1kXCe8RE9jqeIjcRXE3JVGvZjkaXfUorcMTXmjNE1Qfp7XjCsNeD2FyR3qcwC0sD3U7QJvSUQQqQNrgLsoqUPX6DRBras1X8OgruVptLQ5VWapJOwyW+A1f7t1TcRc/jIo/jWtNS2RNGtl+xbBAu/3i0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=axCbMvJP; arc=none smtp.client-ip=198.47.23.248
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1710830120; c=relaxed/simple;
+	bh=6At5zdtZjau/wMd/lI8rbtFMSApBoONr9bvcK65Phl8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=fR4+bDudojM8eK1oKhEd6YCf9qU0nLvaZGa54YrCx5JJFu77FGbjxoBxqm+N6RrrL36FJlLxfH8lybihcP+EVduuyzLnttaRXsDLHoHAJje/T6cGpc0TOW8HAwBNKLQAKv4OYa+pGUG/rB3tNdvnVe3CyxAz+I2m/2nIiie4CSg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Unb7/JgK; arc=none smtp.client-ip=192.198.163.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="axCbMvJP"
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42IJBhGe011619;
-	Mon, 18 Mar 2024 14:11:43 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1710789103;
-	bh=Sjnv3EHyIk3g36tJhda/Ig6DJdjN+/yL0V89SeofzHo=;
-	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=axCbMvJP7O3hoiYoKOb3PVtZv5tLJd1tEcyoZh1LeOK2pnrJ2HeoUyO5BtU+5YXBo
-	 KJkgiiOX5keNhoEmCUHViFtdK4I4T2hfmCasbyX4vVMCFt690xh1ajOcM49Y06Ds79
-	 BPa9hu8FPdF1OcrdujVMEY+kJH3n/ng23qAKnpCY=
-Received: from DFLE115.ent.ti.com (dfle115.ent.ti.com [10.64.6.36])
-	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42IJBhE5021311
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Mon, 18 Mar 2024 14:11:43 -0500
-Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE115.ent.ti.com
- (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 18
- Mar 2024 14:11:43 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE107.ent.ti.com
- (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Mon, 18 Mar 2024 14:11:43 -0500
-Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42IJBhcA077624;
-	Mon, 18 Mar 2024 14:11:43 -0500
-From: Judith Mendez <jm@ti.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>
-CC: Andrew Davis <afd@ti.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: [PATCH v4 5/7] mmc: sdhci_am654: Update comments in sdhci_am654_set_clock
-Date: Mon, 18 Mar 2024 14:11:40 -0500
-Message-ID: <20240318191143.27638-6-jm@ti.com>
-X-Mailer: git-send-email 2.43.2
-In-Reply-To: <20240318191143.27638-1-jm@ti.com>
-References: <20240318191143.27638-1-jm@ti.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Unb7/JgK"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1710830117; x=1742366117;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=6At5zdtZjau/wMd/lI8rbtFMSApBoONr9bvcK65Phl8=;
+  b=Unb7/JgK/JDmMePgj9jPCnk/FTvZCbqEknWTYdkA8/H542gWJYSAKAN6
+   VbmAglcx5uua4mL4cesuKmgaqCJePt1fiiHVtSGqaei8e50litqZhstbG
+   SkUCI+jWMgZcyiksJj+Xncs5zM+uq6nLXyYBqdaxUZibmDL7lPHbPFYwz
+   kyRtIQ2O21yANpHAFHhWjlExCcjIUzklr9YWtcMKPvmHos526UWUNSu0w
+   E1Mu87p+SepT8fnB3LDOrZOhj0oCj7JzyQA9T7RkmEMxavn2IrTOiQT5Z
+   xRfNrqjlcQjQXJFOI9MjXGI3t12Fp6v6Cr98J2lN8hC7UXO0WkVZhG0/B
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,11017"; a="5527368"
+X-IronPort-AV: E=Sophos;i="6.07,136,1708416000"; 
+   d="scan'208";a="5527368"
+Received: from orviesa005.jf.intel.com ([10.64.159.145])
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Mar 2024 23:35:17 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.07,136,1708416000"; 
+   d="scan'208";a="18405790"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.47.203])
+  by orviesa005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Mar 2024 23:35:15 -0700
+Message-ID: <f4392550-bbec-4c26-a5de-ce29e9f34551@intel.com>
+Date: Tue, 19 Mar 2024 08:35:10 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 1/7] mmc: sdhci_am654: Add tuning algorithm for delay
+ chain
+To: Judith Mendez <jm@ti.com>
+Cc: Andrew Davis <afd@ti.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+References: <20240308005746.1059813-1-jm@ti.com>
+ <20240308005746.1059813-2-jm@ti.com>
+ <e0ae65bf-9cca-4dd7-9915-dd9ad67cfb35@intel.com>
+ <8e8edccd-49d4-4157-b92d-8dd0630d52ac@ti.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <8e8edccd-49d4-4157-b92d-8dd0630d52ac@ti.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-The sdhci_am654_set_clock function is also used to enable
-delay chain, therefore fix comments to be more generic in
-case we are not enabling DLL.
+On 18/03/24 16:04, Judith Mendez wrote:
+> On 3/14/24 9:18 AM, Adrian Hunter wrote:
+>> On 8/03/24 02:57, Judith Mendez wrote:
+>>> @@ -290,10 +297,12 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>         regmap_update_bits(sdhci_am654->base, PHY_CTRL4, mask, val);
+>>>   -    if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ)
+>>> +    if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+>>>           sdhci_am654_setup_dll(host, clock);
+>>> -    else
+>>> +        sdhci_am654->dll_enable = true;
+>>> +    } else {
+>>>           sdhci_am654_setup_delay_chain(sdhci_am654, timing);
+>>
+>> V2 patch had here:
+>>
+>>         sdhci_am654->dll_enable = false;
+>>
+>> Was its removal intended?
+> 
+> I did remove on purpose since it did not seem to be necessary.
 
-Signed-off-by: Judith Mendez <jm@ti.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
-Changelog:
-v3->v4:
-- Add acked-by
----
- drivers/mmc/host/sdhci_am654.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index db25efda60f5..076229887d0b 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -279,7 +279,7 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
- 
- 	sdhci_set_clock(host, clock);
- 
--	/* Setup DLL Output TAP delay */
-+	/* Setup Output TAP delay */
- 	otap_del_sel = sdhci_am654->otap_del_sel[timing];
- 
- 	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
-@@ -321,7 +321,7 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
- 	u32 itap_del_ena;
- 	u32 mask, val;
- 
--	/* Setup DLL Output TAP delay */
-+	/* Setup Output TAP delay */
- 	otap_del_sel = sdhci_am654->otap_del_sel[timing];
- 
- 	mask = OTAPDLYENA_MASK | OTAPDLYSEL_MASK;
--- 
-2.43.2
+I suspect it is necessary because ->set_clock() can be called in
+when the timing has changed (e.g. recovery resets and reinitializes
+the card device, or the card changes etc.) but it seems like
+dll_enable would be stuck as always true once it is set to true.
 
