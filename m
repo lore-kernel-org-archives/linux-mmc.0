@@ -1,44 +1,45 @@
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB0968562E;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97CBA52F78;
 	Wed, 20 Mar 2024 22:38:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710974323; cv=none; b=GBlbxI1q0p/6jwowyujzGOb9wO3j70Zwpyw5VpXdp1/1nb9/c2WAwkhoWzm2gS25OKUtWE+Otom7NkZ/mJRw4Cx7S2EjmuBvOd1u3tnQdpseWsT6UvfV/rNwdeWI9ViQQ/JRO/IlHxcmmPasFQgwPaeGfhJBpzITMKVys7Zc9wY=
+	t=1710974323; cv=none; b=siN1b6D0Q8gBKW2Cg6uI6vUBDPYlIxwykzKx8c+lmcKfkQfqfBwX2FT13CwreH5g5R8nI/1PeWE92a+mnqboOFXwMzyB5Za4G4LsCBvCYFAv0hIBaj2sOhSETHutcu9a0WTqmAicAX31cIESkiS7lNBhzdUs6ltjbxtwHnUlio4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1710974323; c=relaxed/simple;
-	bh=tpyWdyjSsP+daxF6OoB1lyBOWSFqopLKhrW8aYpDHR4=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=SyDpr6wj1j9Yo538z+j5AuuQ8VwNlUq7SGVW/sD94k8GfMCf+WIUTx9RwLaud1+Hok8tMOvkF7bCT1hr3EdM3v/TXEw3o50Z7u1+BnGh0nJem4JOxnCANfZqtEIUpO5ZJDaKQrGZURrmLs7x7PnG1tELpDSXUCUAatNS+WG/2Ek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=jgtcbWn1; arc=none smtp.client-ip=198.47.19.141
+	bh=+oSZjiV/rn+bztRHpNPom/rCiqAa/dwbIndt7BsaMW4=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=jDlPW86gRGc2zyAIRjEeDuDYP/zbjjUzds3nmCYfI5QFRnrmCFgw3R03PrhRQon+t+8WPfBATt1byFJvoB6Ye5Xm7naBcVTyFL+OdeW4+ccbArbJlkVwT3xDvDUz+Xy52MTQ3sXPl4mg+mV7lCmDJmVCFxGs5rPDy1runueSMeY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=YgctnJxh; arc=none smtp.client-ip=198.47.23.248
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="jgtcbWn1"
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42KMcbwL010266;
-	Wed, 20 Mar 2024 17:38:37 -0500
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="YgctnJxh"
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 42KMccWQ116563;
+	Wed, 20 Mar 2024 17:38:38 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1710974317;
-	bh=mDiYRNcI/MhcHCQFcwYplc0w//g18+WYtTLi9NZcXxo=;
-	h=From:To:CC:Subject:Date;
-	b=jgtcbWn1Dr0Wp3waS/61fxTEik2ZVS2bZQnSeDiyPXtpR6J+ugMp6l0dPkEfMI+yT
-	 OlUK8Xkknf6TdtFd3Yn+sWQqxbCVaTCKkoLgTGQIPk5qy5A3jJtQKRRAzsY7HGgCyL
-	 skgUKNikVllMTv2ldpH6FNMXDOyswISCAaqs3RFc=
-Received: from DFLE110.ent.ti.com (dfle110.ent.ti.com [10.64.6.31])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42KMcbu7053636
+	s=ti-com-17Q1; t=1710974318;
+	bh=MOFbFAb+PkojO+IOIdSXsHvKaFjx1VeEQtLJ4dJV7to=;
+	h=From:To:CC:Subject:Date:In-Reply-To:References;
+	b=YgctnJxhLJH8kG4LIV8C513KP/7F8bfNC/x7YHd5tk9zbrSvQpOMYDpdaWMoMDAme
+	 zhRINnCJCiS0jLS3Se4rSURBwinZY6hkEfMc0xPeBhre0V73wqfTJmXPmjZx5Xgbq2
+	 gtEFb73nRstLQ2tbKmOnKHu4e6ThgJ9FMYvm+JIw=
+Received: from DFLE114.ent.ti.com (dfle114.ent.ti.com [10.64.6.35])
+	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 42KMccel102547
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 20 Mar 2024 17:38:37 -0500
-Received: from DFLE111.ent.ti.com (10.64.6.32) by DFLE110.ent.ti.com
- (10.64.6.31) with Microsoft SMTP Server (version=TLS1_2,
+	Wed, 20 Mar 2024 17:38:38 -0500
+Received: from DFLE102.ent.ti.com (10.64.6.23) by DFLE114.ent.ti.com
+ (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 20
  Mar 2024 17:38:37 -0500
-Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE111.ent.ti.com
- (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE102.ent.ti.com
+ (10.64.6.23) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
  Frontend Transport; Wed, 20 Mar 2024 17:38:37 -0500
 Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42KMcbum036138;
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 42KMcbut036138;
 	Wed, 20 Mar 2024 17:38:37 -0500
 From: Judith Mendez <jm@ti.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
@@ -46,10 +47,12 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	<adrian.hunter@intel.com>
 CC: Andrew Davis <afd@ti.com>, <linux-mmc@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>
-Subject: [PATCH v5 0/7] Add tuning algorithm for delay chain
-Date: Wed, 20 Mar 2024 17:38:30 -0500
-Message-ID: <20240320223837.959900-1-jm@ti.com>
+Subject: [PATCH v5 7/7] mmc: sdhci_am654: Fix ITAPDLY for HS400 timing
+Date: Wed, 20 Mar 2024 17:38:37 -0500
+Message-ID: <20240320223837.959900-8-jm@ti.com>
 X-Mailer: git-send-email 2.43.2
+In-Reply-To: <20240320223837.959900-1-jm@ti.com>
+References: <20240320223837.959900-1-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -60,58 +63,54 @@ Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-This patch series introduces a new tuning algorithm for
-mmc. The new algorithm should be used when delay chain is
-enabled. The ITAPDLY is selected from the largest passing
-window and the buffer is not viewed as a circular buffer.
-The new tuning algorithm is implemented as per the paper
-published here [0] and has been tested on the following
-platforms: AM62x SK, AM62A SK, AM62p SK, AM64x SK, and AM64x
-EVM.
+While STRB is currently used for DATA and CRC responses, the CMD
+responses from the device to the host still require ITAPDLY for
+HS400 timing.
 
-The series also includes a few fixes in the sdhci_am654
-driver on OTAPDLYEN/ITAPDLYEN and ITAPDELSEL.
+Currently what is stored for HS400 is the ITAPDLY from High Speed
+mode which is incorrect. The ITAPDLY for HS400 speed mode should
+be the same as ITAPDLY as HS200 timing after tuning is executed.
+Add the functionality to save ITAPDLY from HS200 tuning and save
+as HS400 ITAPDLY.
 
+Fixes: a161c45f2979 ("mmc: sdhci_am654: Enable DLL only for some speed modes")
+Signed-off-by: Judith Mendez <jm@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
 Changelog:
 v4->v5:
-- Add dll_enable = false
-v3->v4:
-- Add acked-by
-- Remove extra newline
-v2->v3:
-- Remove fixes tags when not needed
-- Fix return for tuning algorithm
-- Fix ITAPDLY_LAST_INDEX
-- Use reverse fir tree order for variable declarations
-- Save all ITAPDLYENA changes in itap_del_ena[]
-- Remove unnecessary parenthesis
-- Remove unnecessary variables
-- Save itapdlyena for HS400 timing
-v1->v2:
-- Remove unnecessary indentations and if/else in
- sdhci_am654_calculate_itap
-- Optimize sdhci_am654_calculate_itap()
-- Call sdhci_am654_write_itapdly() in sdhci_am654_set_clock()
- instead of sdhci_am654_setup_dll()
-- Change otap_del_sel[], itap_del_sel[], and itap_del_ena[]
- to type u32
-- Revert unnecessary reformating in sdhci_am654_set_clock()
- and sdhci_j721e_4bit_set_clock()
+- no change
+---
+ drivers/mmc/host/sdhci_am654.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-Judith Mendez (7):
-  mmc: sdhci_am654: Add tuning algorithm for delay chain
-  mmc: sdhci_am654: Write ITAPDLY for DDR52 timing
-  mmc: sdhci_am654: Add OTAP/ITAP delay enable
-  mmc: sdhci_am654: Fix itapdly/otapdly array type
-  mmc: sdhci_am654: Update comments in sdhci_am654_set_clock
-  mmc: sdhci_am654: Add ITAPDLYSEL in sdhci_j721e_4bit_set_clock
-  mmc: sdhci_am654: Fix ITAPDLY for HS400 timing
-
- drivers/mmc/host/sdhci_am654.c | 176 ++++++++++++++++++++++++++-------
- 1 file changed, 138 insertions(+), 38 deletions(-)
-
-
-base-commit: faf3b8014c357d71c7a9414302e217a1dd1679af
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 53d538b767ac..ba36123e4ccc 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -301,6 +301,12 @@ static void sdhci_am654_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	if (timing > MMC_TIMING_UHS_SDR25 && clock >= CLOCK_TOO_SLOW_HZ) {
+ 		sdhci_am654_setup_dll(host, clock);
+ 		sdhci_am654->dll_enable = true;
++
++		if (timing == MMC_TIMING_MMC_HS400) {
++			sdhci_am654->itap_del_ena[timing] = 0x1;
++			sdhci_am654->itap_del_sel[timing] = sdhci_am654->itap_del_sel[timing - 1];
++		}
++
+ 		sdhci_am654_write_itapdly(sdhci_am654, sdhci_am654->itap_del_sel[timing],
+ 					  sdhci_am654->itap_del_ena[timing]);
+ 	} else {
+@@ -531,6 +537,9 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+ 
+ 	sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
+ 
++	/* Save ITAPDLY */
++	sdhci_am654->itap_del_sel[timing] = itap;
++
+ 	return 0;
+ }
+ 
 -- 
 2.43.2
 
