@@ -1,60 +1,60 @@
-Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
+Received: from mail-lj1-f177.google.com (mail-lj1-f177.google.com [209.85.208.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FB1E131748
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 17:52:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6DC1133419
+	for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 17:53:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711043561; cv=none; b=fBqzQ91rOksGaqTMFRZoyAt4pAZPb81PVhv5c+1n3vBZWCiAtlCUiB0RO8wADGxyfrgDi5/iTIQaepe7YW/mjQQ7NnvqkdulQx+B7naIjsL0qfW6cB/3uI1iJu7A7CqLf8Ss1Ra6c/dXi7QjFxGWjst79JNaPD9fGdDfZPb+dOI=
+	t=1711043622; cv=none; b=AjITnRkNwThlpxWai/J3tfe/Lf22UyWIXukHds81wk5A5dxA4IIVo0L8fROrSfYrV2F+attFKrLcpd/y9S/KU++E8xHeRrAU9Dq/5r0BA/lfYLjolHAmaeN3Z7Fzw7aaeUy4hGb8YNm2eVh+wKCd0FnX34qQzlMT+rgUii3rDlA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711043561; c=relaxed/simple;
-	bh=dEorxwaEpRkmnK/FE7L/B1lCuXyDhcYdMUd4QUK0lFk=;
+	s=arc-20240116; t=1711043622; c=relaxed/simple;
+	bh=bF8QrpzwQGgX8su9aJVHy7LJKwzxezOd8U7dVZd/t0A=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MAOxXVVvKzhHcHNeIMY9cmyfPddbf0BurUrsee0ZZkdQ/IwMf58zy/aZ0uG91sopThrJnNDwkPfKTn4p7UVcERC6Fj35bE5v7QS7ZmUpdo8dr4azc7TgZglE4POMJge5R9HVJOONczEgBmqCgRpP7G3HEH15gLXMpmT0E2Bd91Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=OdYYRvV/; arc=none smtp.client-ip=209.85.218.53
+	 In-Reply-To:Content-Type; b=Z35Ni8USn6u646C/UZUF0EObkj1VpweT7DWT8HbnFraWLDhVNH7g3zP/Y6LMj2WfAjklQ3CBFie3MhHEJT3/0KWj1hz3wqV/bYKZ+Z5RRvxw2mgM/kOK+klsYoZGs+8hzzuV4j+gXD1YfKTcWz2hCwItFAOc9dJLfJDw9w5Pf2c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=wpdVb1kH; arc=none smtp.client-ip=209.85.208.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="OdYYRvV/"
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-a46ba938de0so184133166b.3
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 10:52:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wpdVb1kH"
+Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-2d6a1ad08b8so15228971fa.1
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 10:53:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1711043558; x=1711648358; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1711043618; x=1711648418; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=bLPdg5m2309S6AMRu1XaQxbj3FlZZTAOencomDh/QvY=;
-        b=OdYYRvV/SEO3RYPJXCo5uZku48+V11aZUDWJKobd6XuNSnDcdoiKMW7K7mN35VEo4F
-         7fLhYSpOvlHV/8AiGCNeVFzn1iKTfx12oMxEHuV7aqJwK/QCVqCZK+DwpJedD768zbQi
-         /vjMkSKzpf/jzE31hwgIHv6R22kgcz4SRnmhc3WKLpBjQaqgHL2rXt42yAuGScOJOQ0x
-         FflolsgPl8zSKViTkrVTuy8Rjd3BRzM24WsfADAk49/JAV7TYykJey3HG1VuFd25mQ1/
-         rQURAp8i9W9CHYXNmX50M8/6krg0gryjBdu/AXpDorcHRQee213FO8NpvPKl6su0MB1I
-         tV/g==
+        bh=WfLcNILKMVKH6IqH6h/LG+TRykq0kNVLgBulVnZ4zQ0=;
+        b=wpdVb1kHZRdQaK9RJxt6HhXEO+ZpEpfU+XOyTlbWkxbxfqugkBq1pGSuKtpB0fgsrj
+         99ReSUQRx6A+gOQkOVoPffIcWutHF3qNxOnOz8zZKG+OkIKq9PDXQDYK2SsTm0yBV33u
+         /2c2NLHexvUPaCLrgXlJvuqy0X14fMwCftqBlb47n33VeqNrAyDf/rhBvJcJRWOAHGZt
+         ieHxduI5gZbSbJfkdB3qILK0hhoE6pWKf0hW7bXnVEkqxS2Vl+24NqrIIQ56yBf+Kgi+
+         4GcHB1ypV5u36TepNSmf/+ApksmyB64phFtvqD8EsDykQRBd99JOxrLCbrp11QhXYo59
+         Uy9Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711043558; x=1711648358;
+        d=1e100.net; s=20230601; t=1711043618; x=1711648418;
         h=content-transfer-encoding:in-reply-to:autocrypt:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bLPdg5m2309S6AMRu1XaQxbj3FlZZTAOencomDh/QvY=;
-        b=SbGR+n1B7uf/J7114BbnA7i3TKL0J/ieDFdJfcnqTsiNc2/dB7WHEZpIvHw1h2ZrBm
-         G2Pqbda9LSU0fZQq720aNBfRL9/wX2cIk2LCftb2iqHBWZjB2AuAojLpM1QrlRejBuJ+
-         OoFPvjcCV/qM3UTRy35NIPUp6e5Z4vaVHAm4CakylA3LMWS1XWKg8dbdImZDbH9/JP2W
-         0uwyyrYnqxogi04JJfuVgxFUCnho383NAuAVVtzK5UQP0krGa6Gyih+go3y9tv+cmVbY
-         gEQC8GI9xh5IRKCB/n2icRs0c4GERExMBw/HeRWBQM4rn5Wn6P11DOvkRmjr4yj70H4r
-         jHdg==
-X-Forwarded-Encrypted: i=1; AJvYcCVnWaFDXqeqD/qm5zjprFYoq5WNARxCE2tQyGbWL/H/7JMQCVE70RVyGGFBZoGme3oshMhDQ19gW7pOePwjtxyhJiicpxEueezE
-X-Gm-Message-State: AOJu0YxFPok9XuwFJCG3C+YPKonFzzqz71QkPdYQRNPDYAcizmXAtNkV
-	i1/JdIBPV8SMCpcjKXLkkzKSDwV5ukmZS8D9sAsvzRZRifFI3ixlSBE1XPIIrJE=
-X-Google-Smtp-Source: AGHT+IHIOt/fsqbrW1JuBHKnXYYqK++34N8ONBHL5RUctpniW7PkUxhDrI/SSKb3Hw8mzjfCtaZDJA==
-X-Received: by 2002:a17:906:b0c6:b0:a46:617e:d3a7 with SMTP id bk6-20020a170906b0c600b00a46617ed3a7mr85393ejb.60.1711043557833;
-        Thu, 21 Mar 2024 10:52:37 -0700 (PDT)
+        bh=WfLcNILKMVKH6IqH6h/LG+TRykq0kNVLgBulVnZ4zQ0=;
+        b=O3wUz3q0WqvY5XK5bj0ty5ql3MBdb7lC5ljLe1twRi2moI2OA9lMLggR0jERR8RHd2
+         V4JVUUawK7VkRhGFnrOmNLiCV1jJZuxPg6EbeeR3k0hKhQQlU07a85ayKi4gc9+AUhoo
+         Mpd4WYn8sreFuhSb3yirFmNBeIKRvnRWXIZ2cHO6wZDlJskIf5Ki27C4qkjQtkx8LS4t
+         a7Dgav3cd6weK8xuHCuMnsrc63gau+qGLxA/oiMIVm2/0Ctf0CJwaYXC6uh7h0M9SJsf
+         Dml0P9Zqqfh05M+8gpHY68+qTJtl9O0JT2o+k8BeaOVdq5XNhbz9hZMdqiJPANatwMpY
+         HMxg==
+X-Forwarded-Encrypted: i=1; AJvYcCXrq8GJQZmbd9YGdcQ1jQqWQf8uZvQOMC74x1pDHyZa3yTzV8/Hk7NH9Dn1GxLE9RNcYVGjJGhF5T0KbPJAWhD5PApRxLUSHFxD
+X-Gm-Message-State: AOJu0YxkbaqBnEV7v0Bw/0YpUvGcn/9DXPioV2Las+iwwN1bRLWQpSYQ
+	MccUyFPIf5eS+q39dB5TmeLYsWB3WpveM9iumICQxAbUwrNQkM/CbcWkV+5MGpI=
+X-Google-Smtp-Source: AGHT+IEgLpwbnVgSnpxQTIOpQab94kvnZWJf7XczPmv9vUiAZoOrKbqCvLR7HxrAOTIShSszLroQ+Q==
+X-Received: by 2002:a19:c212:0:b0:515:8568:bb67 with SMTP id l18-20020a19c212000000b005158568bb67mr70197lfc.27.1711043617842;
+        Thu, 21 Mar 2024 10:53:37 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.222.97])
-        by smtp.gmail.com with ESMTPSA id bz22-20020a1709070ab600b00a472688a9ffsm23857ejc.219.2024.03.21.10.52.34
+        by smtp.gmail.com with ESMTPSA id la8-20020a170906ad8800b00a46e92e583bsm151110ejb.149.2024.03.21.10.53.34
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 21 Mar 2024 10:52:37 -0700 (PDT)
-Message-ID: <f3490f17-9324-4461-bd18-b2ec9379d1a0@linaro.org>
-Date: Thu, 21 Mar 2024 18:52:33 +0100
+        Thu, 21 Mar 2024 10:53:37 -0700 (PDT)
+Message-ID: <00174dc3-65a7-4a2e-b48d-a974336a3f18@linaro.org>
+Date: Thu, 21 Mar 2024 18:53:34 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,8 +62,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 2/4] dt-bindings: serial: fsl-linflexuart: add
- compatible for S32G3
+Subject: Re: [PATCH v3 3/4] dt-bindings: mmc: fsl-imx-esdhc: add NXP S32G3
+ support
 To: Wadim Mueller <wafgo01@gmail.com>
 Cc: Rob Herring <robh+dt@kernel.org>,
  Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -77,16 +77,19 @@ Cc: Rob Herring <robh+dt@kernel.org>,
  Matthias Brugger <mbrugger@suse.com>, NXP S32 Linux Team <s32@nxp.com>,
  Tim Harvey <tharvey@gateworks.com>, Marco Felsch <m.felsch@pengutronix.de>,
  Gregor Herburger <gregor.herburger@ew.tq-group.com>,
- Marek Vasut <marex@denx.de>, Hugo Villeneuve <hvilleneuve@dimonoff.com>,
+ Marek Vasut <marex@denx.de>,
+ Joao Paulo Goncalves <joao.goncalves@toradex.com>,
  Markus Niebel <Markus.Niebel@ew.tq-group.com>,
  Matthias Schiffer <matthias.schiffer@tq-group.com>,
  Stefan Wahren <stefan.wahren@chargebyte.com>,
- Bjorn Helgaas <bhelgaas@google.com>, Josua Mayer <josua@solid-run.com>,
- Li Yang <leoyang.li@nxp.com>, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-serial@vger.kernel.org
+ Bjorn Helgaas <bhelgaas@google.com>,
+ Philippe Schenker <philippe.schenker@toradex.com>,
+ Yannic Moog <y.moog@phytec.de>, Li Yang <leoyang.li@nxp.com>,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-serial@vger.kernel.org
 References: <20240321154108.146223-1-wafgo01@gmail.com>
- <20240321154108.146223-3-wafgo01@gmail.com>
+ <20240321154108.146223-4-wafgo01@gmail.com>
 Content-Language: en-US
 From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
@@ -133,32 +136,42 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20240321154108.146223-3-wafgo01@gmail.com>
+In-Reply-To: <20240321154108.146223-4-wafgo01@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 21/03/2024 16:41, Wadim Mueller wrote:
-> Add a compatible string for the uart binding of NXP S32G3 platforms. Here
-> we use "s32v234-linflexuart" as fallback since the current linflexuart
-> driver can still work on S32G3.
+> Add a compatible string for the SDHC binding of NXP S32G3 platforms. Here
+> we use "nxp,s32g2-usdhc" as fallback since the s32g2-usdhc
+> driver works also on S32G3 platforms.
 > 
 > Signed-off-by: Wadim Mueller <wafgo01@gmail.com>
 > ---
->  .../devicetree/bindings/serial/fsl,s32-linflexuart.yaml        | 3 +++
->  1 file changed, 3 insertions(+)
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml b/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml
-> index 7a105551fa6a..f8eb92c9a8d9 100644
-> --- a/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml
-> +++ b/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml
-> @@ -25,6 +25,9 @@ properties:
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index 82eb7a24c857..b42b4368fa4e 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -35,6 +35,7 @@ properties:
+>            - fsl,imx8mm-usdhc
+>            - fsl,imxrt1050-usdhc
+>            - nxp,s32g2-usdhc
+> +          - nxp,s32g3-usdhc
 >        - items:
->            - const: nxp,s32g2-linflexuart
->            - const: fsl,s32v234-linflexuart
+>            - const: fsl,imx50-esdhc
+>            - const: fsl,imx53-esdhc
+> @@ -90,6 +91,9 @@ properties:
+>            - enum:
+>                - fsl,imxrt1170-usdhc
+>            - const: fsl,imxrt1050-usdhc
 > +      - items:
-> +          - const: nxp,s32g3-linflexuart
+> +          - const: nxp,s32g3-usdhc
+> +          - const: nxp,s32g2-usdhc
 
-Combine it with previous entry as enum.
+No, that's just wrong. G3 is not and is compatible with G2? There is no
+dualism here. Either it is or it is not. Not both.
 
 Best regards,
 Krzysztof
