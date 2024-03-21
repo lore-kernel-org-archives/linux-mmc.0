@@ -1,172 +1,147 @@
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B115200D3
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 10:05:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.125.188.122
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C8735731E;
+	Thu, 21 Mar 2024 11:09:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711015557; cv=none; b=QWxCDVhGyG4f3/rwfz1kUwvvCdzn/rSk1fDAtHjteMCSDqgI0BHJAFvRrk/9feNTRSlV3ltQycqdaTH4fs5UdpV0GzNpbXpiee4zaRtMAEZGtQP2fDdurzSz4QRf/HCBLSeh4vL4F7CCDLhXAlQU7YwS75V6rJaOIceRm3OsgF0=
+	t=1711019356; cv=none; b=Qd21sXDolnNkmyd5kxLloGJmeOnS6YmHEn4KPuGKFhpIlOxBOXS3OJWCngkguK042i3j+4O10ws2t9z2byrVX8CMj7KVpNC9ZCMTz9YFPkscibhVHi2N1VDna4+A5YGQzL+RrNewsUh7pEhvPtId3S8LkEzwKhVHLAWvy47Ktz4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711015557; c=relaxed/simple;
-	bh=b+rciItgQ63I1Dae55rZN3j6shbZla46y8wJCZTU0VU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VqjaNUYdIhBzv0eiD4kQs5Dl1BepgkcXFUU11JXTKc8Obgol/0uK3Q2Epvtgon51KvudnOlL/IFCQyt4iZ5oW+i37GC8WgVSkceenQavTKA3mJExi6eJtJOsQjFvwy6D0KD8XJxuDdbyzr3/LheIljepYh7TQNe35amOkDG7tAc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com; spf=pass smtp.mailfrom=canonical.com; dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b=PHl8whJM; arc=none smtp.client-ip=185.125.188.122
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
+	s=arc-20240116; t=1711019356; c=relaxed/simple;
+	bh=JcYwKHfZIlb0nbaP16Hc4ovkmhVJHbn5ZMwI1T16S/o=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=C+YL+VAs44K+a7RP194R08du+uq6HR4tJN4HJxWICJYzWrG389ZsxnTYuWBOUNFnMaLWtiXzs00vVKBwvNB0UbCJu4usbL3UY5nnahDNkCVL8jVI/bnidi8lU1VN83z9qYErG+tEu7Lvw4iGo5PHULegM8fRygnWFxyJdGsHuxY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=JUYw31G2; arc=none smtp.client-ip=198.175.65.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="PHl8whJM"
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 19E6B3F460
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 10:05:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20210705; t=1711015547;
-	bh=e84nSgZoWpw76jwjDEWwNR7Z6OMjBRZ4GtKdgKTzihs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type;
-	b=PHl8whJMHQY9xPCcCOega4Y4EIaqZ0ha5XaLdF9ggddndAQ6TWvXcZKl8IP2sFO3x
-	 W5VmnpFwqqZD/hsELo7Pu8vj6VpBhZpzSKYCwDuuM6LdIQkYZVXeoeWDwt5gI5o2kW
-	 Vc/VtXAGKj0r5NnaL9d4Z/vw0cIJ/++FwulpFQhz1T1Ok7KAN8qcLXrGw8+OK9bD2z
-	 6pinBgxZjtqGDqWGZCwoSoeF2HIJgKuk+if8zIoNt0YNSIg+FLR6PpOBsE4QyNNsth
-	 6fUJiZTis6DHGm7vnl+P3DN6icyNWwhG+8CMi20ioEyuLVDRW4yfmRiCC1Wm3LNFhC
-	 wsBA+0xipQSFA==
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-29e06733018so604553a91.0
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 03:05:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711015545; x=1711620345;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=e84nSgZoWpw76jwjDEWwNR7Z6OMjBRZ4GtKdgKTzihs=;
-        b=sUOvTrTFOCy9ksD9AJz/IO3GqSB/kez8VCoCKol7469ZgFMNhIALd5Z7/HdCWk0s3w
-         M6eFvtz3ipwTRt0/qmNuW38pCWzu0SUcK10fndBZ0yUvHqzX6CbROEAQuNnyMvwjgPgh
-         NuQebn6Xz6spTwhFIkAxETM/CFn/akG9D3o+R6ZJkoBAzYhwq8NyelZ+UqV0ritoz/5N
-         YPOF223xA1U17bohW/o7D3r2GZx8o7rMLNOzfKU8EYn5pqpzVdBrvi6hAQbQtnqHKvlG
-         joOFu8+UcRZBIjDKU13HYKyd0PsaJSc/n2zcrjG8I7ihJ7ysjsleQBz5z0PcWAjIxHEz
-         K6vw==
-X-Forwarded-Encrypted: i=1; AJvYcCWejzkq+5e7pIsmf/rbCKIcxY8EYmsyeucdHkuXorP6qTWvGxX/q5a9xoiHKyWEOuE71NZpF3AXx7EHZZ8Ywz0YQhJ6xzf+OyPL
-X-Gm-Message-State: AOJu0YzCR9x0QDLIT212/6u/UJNzFqNnUxtqJR6NafLZ9TxRU1ueHUME
-	aBLDxiydR4Zp+tSZ5wnUqYxCd8YxJ+PCXLc6gjaC+F28l6Y3+tbrUiXN56wWqaHdeHKmMNBsM5U
-	r0y85Oo7B+N5KPLXkq3SV6j2v1e5MOpTbqBwOsy9TlN/jpGPez4XYSUCCH3bLa3WHWkyNEKxuiF
-	LVAASkHef5lXbNpWu8QiATuY6WmQgNhYqzwfZD2ql2T8wWHGFH
-X-Received: by 2002:a17:90a:bf06:b0:2a0:2113:cc0a with SMTP id c6-20020a17090abf0600b002a02113cc0amr1043392pjs.23.1711015545623;
-        Thu, 21 Mar 2024 03:05:45 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFvBvGXaXr0P5krxIvz8tQQaSdycxIth7mnlhCsjV2v5phh35HrXd5sbHMNMt9wjyHtuxnggObbV1Fkd7tkpWw=
-X-Received: by 2002:a17:90a:bf06:b0:2a0:2113:cc0a with SMTP id
- c6-20020a17090abf0600b002a02113cc0amr1043368pjs.23.1711015545196; Thu, 21 Mar
- 2024 03:05:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="JUYw31G2"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1711019354; x=1742555354;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=JcYwKHfZIlb0nbaP16Hc4ovkmhVJHbn5ZMwI1T16S/o=;
+  b=JUYw31G27rVUOzXzYSus7MtJx7vIn2LOuTBsA5tHoAaHorn7POwVlYmd
+   IivGe9tDtDkW3lTznfHTnj0j8qCe2qnhwGPHwM1D+tG4sdcayYPoF9FCr
+   q7y8M66r8GGSi8k7dAlLXvXdT4fPROIjQOB8eOxRx9A4LNwdciLnzK/EH
+   IKoGwXv4H+wHNZ7PMek7NqltxHP4vK8/7tUXIe2AxQ7k09FTrQxas+a28
+   SXpVkBMeFDNXaUrvr2HHRw6FaJ2aqdBdpZm/1bbRKRHLh4S4zC3QOgVX2
+   agP9NqPIrgaUthxB6Egms0XIF9+032VuSX+5dLo/xRAiYjgOWSg1lcOAq
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,11019"; a="6124968"
+X-IronPort-AV: E=Sophos;i="6.07,142,1708416000"; 
+   d="scan'208,217";a="6124968"
+Received: from fmviesa007.fm.intel.com ([10.60.135.147])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Mar 2024 04:09:03 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.07,142,1708416000"; 
+   d="scan'208,217";a="14450383"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.210.179])
+  by fmviesa007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Mar 2024 04:09:01 -0700
+Message-ID: <d506a7de-b1d6-4d41-8aae-cd0679126e0c@intel.com>
+Date: Thu, 21 Mar 2024 13:08:56 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAAd53p6qE76QjJmjr5ei0mU8xcSNE32hJMOE9Frwz-BuC3gDkA@mail.gmail.com>
- <20240119224053.GA187501@bhelgaas>
-In-Reply-To: <20240119224053.GA187501@bhelgaas>
-From: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Date: Thu, 21 Mar 2024 18:05:33 +0800
-Message-ID: <CAAd53p52fi_wr3Js9Rqct+i1D3rjrnVZ6tBN=uHqThM7UvzXQA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
- timer timeout during suspend
-To: Bjorn Helgaas <helgaas@kernel.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>, Ben Chuang <benchuanggli@gmail.com>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sdhci-omap: re-tuning is needed after a pm
+ transition to support emmc HS200 mode
+To: Romain Naour <romain.naour@smile.fr>, linux-omap@vger.kernel.org
+Cc: vigneshr@ti.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+ tony@atomide.com, Romain Naour <romain.naour@skf.com>
+References: <20240315234444.816978-1-romain.naour@smile.fr>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240315234444.816978-1-romain.naour@smile.fr>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi Bjorn,
+On 16/03/24 01:44, Romain Naour wrote:
+> From: Romain Naour <romain.naour@skf.com>
+> 
+> "PM runtime functions" has been added in sdhci-omap driver in 5.16
+> f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions") along
+> with "card power off and enable aggressive PM" 3edf588e7fe0
 
-Sorry for the belated response.
+checkpatch expects "commit" before commit numbers i.e.
 
-On Sat, Jan 20, 2024 at 6:41=E2=80=AFAM Bjorn Helgaas <helgaas@kernel.org> =
-wrote:
->
-> On Thu, Jan 18, 2024 at 02:40:50PM +0800, Kai-Heng Feng wrote:
-> > On Sat, Jan 13, 2024 at 1:37=E2=80=AFAM Bjorn Helgaas <helgaas@kernel.o=
-rg> wrote:
-> > > On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
-> > > > On Sat, Jan 6, 2024 at 5:19=E2=80=AFAM Bjorn Helgaas <helgaas@kerne=
-l.org> wrote:
-> > > > > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote:
-> > > > > > Spamming `lspci -vv` can still observe the replay timer timeout=
- error
-> > > > > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Ma=
-sk the
-> > > > > > replay timer timeout of AER"), albeit with a lower reproduce ra=
-te.
-> > > > >
-> > > > > I'm not sure what this is telling me.  By "spamming `lspci -vv`, =
-do
-> > > > > you mean that if you run lspci continually, you still see Replay =
-Timer
-> > > > > Timeout logged, e.g.,
-> > > > >
-> > > > >   CESta:        ... Timeout+
-> > > >
-> > > > Yes it's logged and the AER IRQ is raised.
-> > >
-> > > IIUC the AER IRQ is the important thing.
-> > >
-> > > Neither 015c9cbcf0ad nor this patch affects logging in
-> > > PCI_ERR_COR_STATUS, so the lspci output won't change and mentioning i=
-t
-> > > here doesn't add useful information.
-> >
-> > You are right. That's just a way to access config space to reproduce
-> > the issue.
->
-> Oh, I think I completely misunderstood you!  I thought you were saying
-> that suspending the device caused the PCI_ERR_COR_REP_TIMER error, and
-> you happened to see that it was logged when you ran lspci.
+ERROR: Please use git commit description style 'commit <12+ chars of sha1> ("<title line>")' - ie: 'commit f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions")'
+#9: 
+f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions") along
 
-Both running lspci and suspending the device can observe the error,
-because both are accessing the config space.
+ERROR: Please use git commit description style 'commit <12+ chars of sha1> ("<title line>")' - ie: 'commit 3edf588e7fe0 ("mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM")'
+#10: 
+with "card power off and enable aggressive PM" 3edf588e7fe0
 
->
-> But I guess you mean that running lspci actually *causes* the error?
-> I.e., lspci does a config access while we're suspending the device
-> causes the error, and the config access itself causes the error, which
-> causes the ERR_COR message and ultimately the AER interrupt, and that
-> interrupt prevents the system suspend.
+> ("mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM").
+> 
+> Since then, the sdhci-omap driver doesn't work using mmc-hs200 mode
+> due to the tuning values being lost during a pm transition.
+> See the report on the linux-omap mailing list [1].
+> 
+> As for the sdhci_am654 driver, request a new tuning sequence before
+> suspend (sdhci_omap_runtime_suspend()), othwerwise the device will
 
-My point was that any kind of PCI config access can cause the error.
-Using lspci is just make the error more easier to reproduce.
+othwerwise -> otherwise
 
->
-> If that's the case, I wonder if this is a generic problem that could
-> happen with *any* device, not just GL975x.
+> thigger cache flush errors:
 
-For now, it's just GL975x.
+thigger -> trigger
 
->
-> What power state do we put the GL975x in during system suspend?
-> D3hot?  D3cold?  Is there anything that prevents config access while
-> we suspend it?
+> 
+>   mmc1: cache flush error -110 (ETIMEDOUT)
+>   mmc1: error -110 doing aggressive suspend
+> 
+> followed by I/O errors produced by fdisk -l /dev/mmcblk1boot1:
+> 
+>   I/O error, dev mmcblk1boot0, sector 64384 op 0x0:(READ) flags 0x80700 phys_seg 1
+>   prio class 2
+>   I/O error, dev mmcblk1boot1, sector 64384 op 0x0:(READ) flags 0x80700 phys_seg 1
+>   prio class 2
+>   I/O error, dev mmcblk1boot1, sector 64384 op 0x0:(READ) flags 0x0 phys_seg 1
+>   prio class 2
+>   Buffer I/O error on dev mmcblk1boot1, logical block 8048, async page read
+>   I/O error, dev mmcblk1boot0, sector 64384 op 0x0:(READ) flags 0x0 phys_seg 1
+>   prio class 2
+>   Buffer I/O error on dev mmcblk1boot0, logical block 8048, async page read
+> 
+> Don't re-tune if auto retuning is supported in HW (when SDHCI_TUNING_MODE_3
+> is available).
+> 
+> [1] https://lore.kernel.org/all/2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr
+> 
+> Fixes: f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions")
 
-The target device state is D3hot.
-However, the issue happens when the devices is in D0, when the PCI
-core is saving the device's config space.
+Cc stable?
 
-So I think the issue isn't related to the device state.
+> Signed-off-by: Romain Naour <romain.naour@skf.com>
 
->
-> We do have dev->block_cfg_access, and there's a comment that says
-> "we're required to prevent config accesses during D-state
-> transitions," but I don't see it being used during D-state
-> transitions.
+Minor cosmetics, otherwise:
 
-Yes, there isn't any D-state change happens here.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Kai-Heng
+> ---
+>  drivers/mmc/host/sdhci-omap.c | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> index e78faef67d7a..94076b095571 100644
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -1439,6 +1439,9 @@ static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+>  
+> +	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> +		mmc_retune_needed(host->mmc);
+> +
+>  	if (omap_host->con != -EINVAL)
+>  		sdhci_runtime_suspend_host(host);
+>  
 
->
-> Also, it doesn't seem suitable for preventing config accesses during
-> suspend because pci_wait_cfg() just busy-waits and never returns an
-> error.
->
-> Bjorn
