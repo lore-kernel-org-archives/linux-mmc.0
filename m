@@ -1,107 +1,237 @@
-Received: from mail-oi1-f175.google.com (mail-oi1-f175.google.com [209.85.167.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BE252E41C
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 06:39:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF3A64DA10;
+	Thu, 21 Mar 2024 06:40:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711003175; cv=none; b=rtom8x5rAL9l4gqjnyzs1daa1LBtCxPL4R5n3Qxo0dZl65BI4S60C9UfkPsYeYevRcUJKJpxHTrduhUcookE9l5QG6nvsAJyl75JNSA5F4g6IOqcjoeJbk04g7Jr03CmBZJLMo3TJdWLmzzcqlw2DAiqXtYSj+JPIuIBlxHX42U=
+	t=1711003216; cv=none; b=i+wuGhYsRJsDHlBYi6IVpSauQwZNyo4m3VJA5YN21ygw+1vJmqddS6la7NKlKCbBLMayXH3VMV4waNVykqlQHD5fG97PPPrxKuZyD1LXNvJaerSznO0cshc9lxmAW21h/uZMn0jk6yPh9RXR5+Xx9lTzvkt/qzkRaHkLd9BZ5hw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711003175; c=relaxed/simple;
-	bh=IWzoRyiIq34RmhOn0iDV7qym3hPufd8Mn7S0DjBmBYA=;
-	h=From:To:Subject:Message-ID:Date:MIME-Version:Content-Type; b=e+jGs5789zaioYNnx69HGqcDNwaIx7Es9SrsLQDzKLSVvbB5pOn9bSs2WU39rhCa3bXKjo0Vc/ZWGKmwuhm/Rbz7NMLR5ta/Qrblakb6krytrMtuBEew53gCa6TLgcWv5WmTaflzUFt2aSZYi1rMW7lu5wadwOKkAl5Xh7Tr+Ks=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eol7zw7k; arc=none smtp.client-ip=209.85.167.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1711003216; c=relaxed/simple;
+	bh=CHxCCG3lNujh8NKNGLSpylXtQrM9drveE37uO6wOlvQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=RcMBu0NL70HH4UfgIoE0VMpG3feqCyna5Te9UYIzg9fitxwaypHTqy1bPOLK3qSEj/Qw42NIDRPx5jFlHarCmwXYIkghhvCPigT/A4drW98OOS0/9m2l9WKLB7VsJ3whOYMggnaFbtx9jzWm0DXQ7BIURGqDhniarAUR+zo31kA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=P0qS/0ZT; arc=none smtp.client-ip=192.198.163.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eol7zw7k"
-Received: by mail-oi1-f175.google.com with SMTP id 5614622812f47-3c38eced701so412938b6e.1
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Mar 2024 23:39:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1711003173; x=1711607973; darn=vger.kernel.org;
-        h=content-language:content-transfer-encoding:mime-version:user-agent
-         :date:message-id:subject:to:from:reply-to:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pUEt2Z97b8lEWwJktqHAAwXS3vj2uI9IohvvSbiYwx0=;
-        b=eol7zw7kJ3H0Ceo6iRB1UPi1Wa+z0/vbDyiDocoIhj1nCdIdgTBxlYdtoFroxVXeho
-         6RcNoIx0cH8CmTtQGjwLsHIkdiFXmMgBkpyxrzSNDbx9oRvrGdKW2qxaCytqpQwWA4yx
-         n6iXE5JOAKi62zfzzakQ6Xi7TWaoMIAbMQfRRFfEW4SMXN2LbDHMOvw5EfviSEKiZV3P
-         /S/jLnL08JtzHNMRchNlGr6oSgAqNkZK2TG8Bf0u4pwI2LTE83UFa3CnruiraXT341G+
-         YPLHWCm1s8KR1XAUO3nvfKW03IgB5wsZbV3r7VZqNCnPNTbeMGp/IZdmkZ2i3QNGhiuo
-         1p3A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711003173; x=1711607973;
-        h=content-language:content-transfer-encoding:mime-version:user-agent
-         :date:message-id:subject:to:from:reply-to:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=pUEt2Z97b8lEWwJktqHAAwXS3vj2uI9IohvvSbiYwx0=;
-        b=eMGeqB+4cZOKjTIZIJEF3ckbvCNf/lQi4hqUfsfcJ34L24ztvGln81Uu2aRjB6e8zG
-         c+JzKSYnpM7EvlCT+Kh7giUx0Dga4420aV+PSkNwy+3YMvo2D42Hq6QnTYwdTjSMR2YM
-         uMYDf0/uyipcgy3xhyPK8ZI8yC8R8xxQHPVBREH36ihbi0wHjZRpPPn2d01fvPs0Msxt
-         5GvFeAk8etJEffdzDDYUX6rLqpxtu2XAQFQMaoKE3kb2i1441/mZu2u9tj/tCIg3hkGs
-         cYoiC9BhJxDhJIt4UJjYYcxSp/+AgCz/puD7P1wwiMU7L11D+a7M4DExlNdcdx364qRB
-         8n5A==
-X-Gm-Message-State: AOJu0YzSIspYJt3D5k1nz0TR20eax3GkcwAIKtoq5QjU3eDtEN8zK+KR
-	9eGUyrGL1vG9EQbiiWKgyWI22h5juRvwczYTV/Q1Tf5ze+lWTUTokQfMAhkF
-X-Google-Smtp-Source: AGHT+IG7FIji/E/jAw67SCf1NYHIL+l6fY8ymudhJKpzx3d9A4mk5XCfbTePe8zj76fRDopw9kOC3w==
-X-Received: by 2002:a05:6a20:d80c:b0:1a3:5c61:159 with SMTP id iv12-20020a056a20d80c00b001a35c610159mr1285748pzb.53.1711002744550;
-        Wed, 20 Mar 2024 23:32:24 -0700 (PDT)
-Received: from ?IPv6:2409:4063:6c85:f395:d58f:6b15:5165:7028? ([2409:4063:6c85:f395:d58f:6b15:5165:7028])
-        by smtp.gmail.com with ESMTPSA id m1-20020a170902db0100b001dddeb10d83sm12862593plx.223.2024.03.20.23.32.23
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 20 Mar 2024 23:32:24 -0700 (PDT)
-Reply-To: businesssolutionsrocks23@gmail.com
-From: Raju Kumar <rajukumarkorav@gmail.com>
-To: linux-mmc@vger.kernel.org
-Subject: RE:Mobile App Development || Web App Development
-Message-ID: <f5f502ef-33ec-9a8c-9e46-7d1fd316e11e@gmail.com>
-Date: Thu, 21 Mar 2024 12:02:19 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="P0qS/0ZT"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1711003213; x=1742539213;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=CHxCCG3lNujh8NKNGLSpylXtQrM9drveE37uO6wOlvQ=;
+  b=P0qS/0ZTuVZ/D3qxoaBappd1orLvgs3fB3BPmjRpF9s9NIjL/DFBhLc6
+   tvSj2aAzFXRsEGd1CGkyF1DF3T1tF7Mhw3TOU14wIaOGC6JQCnkkOUaow
+   PB0+oE8qZExuniiUnCmMwQbUujSEj87Z+bTnIqbTOzZqMPzmJzgKyMLid
+   Pi2wfYdgIsXRV/VPIy7at1pHmLNne4K6WfofK6Qy4M5xvTq8uFxjMkr3G
+   Ht1YQ//P8SEMne2oRhIuD0MtA8lWjF/t0b6HZN6K4qdesWXOMDSIFPFWb
+   NQEcydsQxqyfPq4erYJDEHaR5kq74YEEEspa8Vsm4ZNxnCeV6sJwX0/Bv
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,11019"; a="16705046"
+X-IronPort-AV: E=Sophos;i="6.07,142,1708416000"; 
+   d="scan'208";a="16705046"
+Received: from orviesa003.jf.intel.com ([10.64.159.143])
+  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Mar 2024 23:40:13 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.07,142,1708416000"; 
+   d="scan'208";a="19127605"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.210.179])
+  by ORVIESA003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Mar 2024 23:40:11 -0700
+Message-ID: <6e67269f-88a4-466a-ac34-430b82fac4ff@intel.com>
+Date: Thu, 21 Mar 2024 08:40:05 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-GB
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v7 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
+To: Maxim Kiselev <bigunclemax@gmail.com>, serghox@gmail.com
+Cc: jyanchou@realtek.com, open list <linux-kernel@vger.kernel.org>,
+ linux-mmc@vger.kernel.org, quic_asutoshd@quicinc.com, ritesh.list@gmail.com,
+ shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>
+References: <CALHCpMiUfa0j46HcorZGPDPV5Zg5ZFdWukT+5jTediuKJuoB5w@mail.gmail.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CALHCpMiUfa0j46HcorZGPDPV5Zg5ZFdWukT+5jTediuKJuoB5w@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi,
+On 20/03/24 12:36, Maxim Kiselev wrote:
+> Subject: [PATCH v7 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
+> 
+> Hi Sergey, Adrian!
+> 
+> First of all I want to thank Sergey for supporting the CQE feature
+> on the DWC MSHC controller.
+> 
+> I tested this series on the LicheePi 4A board (TH1520 SoC).
+> It has the DWC MSHC IP too and according to the T-Head datasheet
+> it also supports the CQE feature.
+> 
+>> Supports Command Queuing Engine (CQE) and compliant with eMMC CQ HCI.
+> 
+> So, to enable CQE on LicheePi 4A need to set a prop in DT
+> and add a IRQ handler to th1520_ops:
+>> .irq = dwcmshc_cqe_irq_handler,
+> 
+> And the CQE will work for th1520 SoC too.
+> 
+> But, when I enabled the CQE, I was faced with a strange effect.
+> 
+> The fio benchmark shows that emmc works ~2.5 slower with enabled CQE.
+> 219MB/s w/o CQE vs 87.4MB/s w/ CQE. I'll put logs below.
+> 
+> I would be very appreciative if you could point me where to look for
+> the bottleneck.
 
-Just checking with you if you got a chance to see my previous email.
+Some things you could try:
 
-Please let us know if you have MOBILE APP or WEB APP DEVELOPMENT 
-requirements; we can schedule a quick call to discuss further in detail.
+ Check for any related kernel messages.
 
-Kindly suggest a good time to connect also best number to reach you.
+ Have a look at /sys/kernel/debug/mmc*/err_stats
 
-Thank you
-Raju Kumar
+ See if disabling runtime PM for the host controller has any effect.
 
-  On Tuesday 28 November 2023 5:43 PM, Raju Kumar wrote:
+ Enable mmc dynamic debug messages and see if anything looks different.
 
+> 
+> Without CQE:
+> 
+> # cat /sys/kernel/debug/mmc0/ios
+> clock:          198000000 Hz
+> actual clock:   198000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    10 (mmc HS400 enhanced strobe)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> 
+> # fio --filename=/dev/mmcblk0 --direct=1 --rw=randread --bs=1M
+> --ioengine=sync --iodepth=256 --size=4G --numjobs=1 --group_reporting
+> --name=iops-test-job --eta-newline=1 --readonly
+> iops-test-job: (g=0): rw=randread, bs=(R) 1024KiB-1024KiB, (W)
+> 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=sync, iodepth=256
+> fio-3.34
+> Starting 1 process
+> note: both iodepth >= 1 and synchronous I/O engine are selected, queue
+> depth will be capped at 1
+> Jobs: 1 (f=1): [r(1)][15.0%][r=209MiB/s][r=209 IOPS][eta 00m:17s]
+> Jobs: 1 (f=1): [r(1)][25.0%][r=208MiB/s][r=208 IOPS][eta 00m:15s]
+> Jobs: 1 (f=1): [r(1)][35.0%][r=207MiB/s][r=207 IOPS][eta 00m:13s]
+> Jobs: 1 (f=1): [r(1)][47.4%][r=208MiB/s][r=208 IOPS][eta 00m:10s]
+> Jobs: 1 (f=1): [r(1)][52.6%][r=209MiB/s][r=208 IOPS][eta 00m:09s]
+> Jobs: 1 (f=1): [r(1)][63.2%][r=208MiB/s][r=208 IOPS][eta 00m:07s]
+> Jobs: 1 (f=1): [r(1)][68.4%][r=208MiB/s][r=207 IOPS][eta 00m:06s]
+> Jobs: 1 (f=1): [r(1)][78.9%][r=207MiB/s][r=207 IOPS][eta 00m:04s]
+> Jobs: 1 (f=1): [r(1)][89.5%][r=209MiB/s][r=209 IOPS][eta 00m:02s]
+> Jobs: 1 (f=1): [r(1)][100.0%][r=209MiB/s][r=209 IOPS][eta 00m:00s]
+> iops-test-job: (groupid=0, jobs=1): err= 0: pid=132: Thu Jan  1 00:03:44 1970
+>   read: IOPS=208, BW=208MiB/s (219MB/s)(4096MiB/19652msec)
+>     clat (usec): min=3882, max=11557, avg=4778.37, stdev=238.26
+>      lat (usec): min=3883, max=11559, avg=4779.93, stdev=238.26
+>     clat percentiles (usec):
+>      |  1.00th=[ 4359],  5.00th=[ 4555], 10.00th=[ 4555], 20.00th=[ 4621],
+>      | 30.00th=[ 4621], 40.00th=[ 4686], 50.00th=[ 4752], 60.00th=[ 4817],
+>      | 70.00th=[ 4883], 80.00th=[ 4948], 90.00th=[ 5014], 95.00th=[ 5145],
+>      | 99.00th=[ 5473], 99.50th=[ 5538], 99.90th=[ 5932], 99.95th=[ 6915],
+>      | 99.99th=[11600]
+>    bw (  KiB/s): min=208896, max=219136, per=100.00%, avg=213630.77,
+> stdev=1577.33, samples=39
+>    iops        : min=  204, max=  214, avg=208.56, stdev= 1.55, samples=39
+>   lat (msec)   : 4=0.39%, 10=99.58%, 20=0.02%
+>   cpu          : usr=0.38%, sys=13.04%, ctx=4132, majf=0, minf=275
+>   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+>      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+>      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+>      issued rwts: total=4096,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+>      latency   : target=0, window=0, percentile=100.00%, depth=256
+> 
+> Run status group 0 (all jobs):
+>    READ: bw=208MiB/s (219MB/s), 208MiB/s-208MiB/s (219MB/s-219MB/s),
+> io=4096MiB (4295MB), run=19652-19652msec
+> 
+> Disk stats (read/write):
+>   mmcblk0: ios=8181/0, merge=0/0, ticks=25682/0, in_queue=25682, util=99.66%
+> 
+> 
+> With CQE:
 
-Hi,
+Was output from "cat /sys/kernel/debug/mmc0/ios" the same?
 
-We are a leading IT & Non-IT Staffing services company.
-We design and develop web and mobile applications for our clients 
-worldwide, focusing on outstanding user experience.
+> 
+> fio --filename=/dev/mmcblk1 --direct=1 --rw=randread --bs=1M --ioengine=sync -
+> -iodepth=256 --size=4G --numjobs=1 --group_reporting --name=iops-test-job --eta-
+> newline=1 --readonly
+> iops-test-job: (g=0): rw=randread, bs=(R) 1024KiB-1024KiB, (W)
+> 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioeng
+> ine=sync, iodepth=256
+> fio-3.34
+> Starting 1 process
+> note: both iodepth >= 1 and synchronous I/O engine are selected, queue
+> depth will be capped at 1
+> Jobs: 1 (f=1): [r(1)][5.8%][r=83.1MiB/s][r=83 IOPS][eta 00m:49s]
+> Jobs: 1 (f=1): [r(1)][10.0%][r=84.0MiB/s][r=84 IOPS][eta 00m:45s]
+> Jobs: 1 (f=1): [r(1)][14.0%][r=83.1MiB/s][r=83 IOPS][eta 00m:43s]
+> Jobs: 1 (f=1): [r(1)][18.0%][r=83.1MiB/s][r=83 IOPS][eta 00m:41s]
+> Jobs: 1 (f=1): [r(1)][22.4%][r=84.1MiB/s][r=84 IOPS][eta 00m:38s]
+> Jobs: 1 (f=1): [r(1)][26.5%][r=83.1MiB/s][r=83 IOPS][eta 00m:36s]
+> Jobs: 1 (f=1): [r(1)][30.6%][r=83.1MiB/s][r=83 IOPS][eta 00m:34s]
+> Jobs: 1 (f=1): [r(1)][34.7%][r=84.1MiB/s][r=84 IOPS][eta 00m:32s]
+> Jobs: 1 (f=1): [r(1)][38.8%][r=83.1MiB/s][r=83 IOPS][eta 00m:30s]
+> Jobs: 1 (f=1): [r(1)][42.9%][r=83.1MiB/s][r=83 IOPS][eta 00m:28s]
+> Jobs: 1 (f=1): [r(1)][46.9%][r=84.1MiB/s][r=84 IOPS][eta 00m:26s]
+> Jobs: 1 (f=1): [r(1)][51.0%][r=83.0MiB/s][r=83 IOPS][eta 00m:24s]
+> Jobs: 1 (f=1): [r(1)][55.1%][r=83.0MiB/s][r=83 IOPS][eta 00m:22s]
+> Jobs: 1 (f=1): [r(1)][59.2%][r=84.1MiB/s][r=84 IOPS][eta 00m:20s]
+> Jobs: 1 (f=1): [r(1)][63.3%][r=83.0MiB/s][r=83 IOPS][eta 00m:18s]
+> Jobs: 1 (f=1): [r(1)][67.3%][r=83.1MiB/s][r=83 IOPS][eta 00m:16s]
+> Jobs: 1 (f=1): [r(1)][71.4%][r=84.1MiB/s][r=84 IOPS][eta 00m:14s]
+> Jobs: 1 (f=1): [r(1)][75.5%][r=83.0MiB/s][r=83 IOPS][eta 00m:12s]
+> Jobs: 1 (f=1): [r(1)][79.6%][r=83.0MiB/s][r=83 IOPS][eta 00m:10s]
+> Jobs: 1 (f=1): [r(1)][83.7%][r=84.0MiB/s][r=84 IOPS][eta 00m:08s]
+> Jobs: 1 (f=1): [r(1)][87.8%][r=83.1MiB/s][r=83 IOPS][eta 00m:06s]
+> Jobs: 1 (f=1): [r(1)][91.8%][r=83.0MiB/s][r=83 IOPS][eta 00m:04s]
+> Jobs: 1 (f=1): [r(1)][95.9%][r=84.0MiB/s][r=84 IOPS][eta 00m:02s]
+> Jobs: 1 (f=1): [r(1)][100.0%][r=83.0MiB/s][r=83 IOPS][eta 00m:00s]
+> iops-test-job: (groupid=0, jobs=1): err= 0: pid=134: Thu Jan  1 00:02:19 1970
+>   read: IOPS=83, BW=83.3MiB/s (87.4MB/s)(4096MiB/49154msec)
+>     clat (usec): min=11885, max=14840, avg=11981.37, stdev=61.89
+>      lat (usec): min=11887, max=14843, avg=11983.00, stdev=61.92
+>     clat percentiles (usec):
+>      |  1.00th=[11863],  5.00th=[11994], 10.00th=[11994], 20.00th=[11994],
+>      | 30.00th=[11994], 40.00th=[11994], 50.00th=[11994], 60.00th=[11994],
+>      | 70.00th=[11994], 80.00th=[11994], 90.00th=[11994], 95.00th=[11994],
+>      | 99.00th=[12125], 99.50th=[12256], 99.90th=[12387], 99.95th=[12387],
+>      | 99.99th=[14877]
+>    bw (  KiB/s): min=83800, max=86016, per=100.00%, avg=85430.61,
+> stdev=894.16, samples=98
+>    iops        : min=   81, max=   84, avg=83.22, stdev= 0.89, samples=98
+>   lat (msec)   : 20=100.00%
+>   cpu          : usr=0.00%, sys=5.44%, ctx=4097, majf=0, minf=274
+>   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+>      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+>      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+>      issued rwts: total=4096,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+>      latency   : target=0, window=0, percentile=100.00%, depth=256
+> 
+> Run status group 0 (all jobs):
+>    READ: bw=83.3MiB/s (87.4MB/s), 83.3MiB/s-83.3MiB/s
+> (87.4MB/s-87.4MB/s), io=4096MiB (4295MB), run=49154-
+> 49154msec
+> 
+> Disk stats (read/write):
+>   mmcblk1: ios=8181/0, merge=0/0, ticks=69682/0, in_queue=69682, util=99.96%
+> 
+> 
+> Best regards,
+> Maksim
 
-We help companies leverage technological capabilities by developing 
-cutting-edge mobile applications with excellent UX (User Experience) 
-across multiple platforms.
-
-iOS App Development
-Android App Development
-Cross-platform App Development
-Web App Development
-
-Can we schedule a quick call with one of senior consultants so we can 
-discuss this further in detail?
-Please suggest a day and time and also share the best number to reach you.
-
-Thank you
-Raju Kumar
