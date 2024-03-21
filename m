@@ -1,60 +1,60 @@
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com [209.85.218.44])
+Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A5F184A28
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 17:52:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FB1E131748
+	for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 17:52:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711043529; cv=none; b=TJooRXMjbfBFBinXWpSD4YUOzXb5aBQXsmR4aOrIXZwuQV0C1zF5w7LL6z75Xk3fdAshcUsEdX6zzbg7ll3FDBE7eu+oG+B+STYLFzpqMDEa3F/2FfVGfD6ALYgQcxANhKeGbEv+HkPBrDDeD3N/MVEIpEPxPX2FWsmyqMYZVdk=
+	t=1711043561; cv=none; b=fBqzQ91rOksGaqTMFRZoyAt4pAZPb81PVhv5c+1n3vBZWCiAtlCUiB0RO8wADGxyfrgDi5/iTIQaepe7YW/mjQQ7NnvqkdulQx+B7naIjsL0qfW6cB/3uI1iJu7A7CqLf8Ss1Ra6c/dXi7QjFxGWjst79JNaPD9fGdDfZPb+dOI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711043529; c=relaxed/simple;
-	bh=hpym4Ko12Q6kLulQl2rpkYItjutok6446U7ykm3mysw=;
+	s=arc-20240116; t=1711043561; c=relaxed/simple;
+	bh=dEorxwaEpRkmnK/FE7L/B1lCuXyDhcYdMUd4QUK0lFk=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RYRo7eavhpYajeRKib5FDangHJBUDezXhpjm3/YhlIOSqQv4mHLWxYYjKYuCYDo5AGZXtyCgC33sbOh2D+XjRQg0QVVqCK4U0hO2GWtnJsXIR4xyQdLdV4xx172H6LXxzPCuOuQ+3g7OFr/hdtuKoaGJ2LJMO/QdeusAf39T8r0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Xfm9d30x; arc=none smtp.client-ip=209.85.218.44
+	 In-Reply-To:Content-Type; b=MAOxXVVvKzhHcHNeIMY9cmyfPddbf0BurUrsee0ZZkdQ/IwMf58zy/aZ0uG91sopThrJnNDwkPfKTn4p7UVcERC6Fj35bE5v7QS7ZmUpdo8dr4azc7TgZglE4POMJge5R9HVJOONczEgBmqCgRpP7G3HEH15gLXMpmT0E2Bd91Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=OdYYRvV/; arc=none smtp.client-ip=209.85.218.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Xfm9d30x"
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-a466fc8fcccso175693366b.1
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 10:52:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="OdYYRvV/"
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-a46ba938de0so184133166b.3
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Mar 2024 10:52:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1711043526; x=1711648326; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1711043558; x=1711648358; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=hpym4Ko12Q6kLulQl2rpkYItjutok6446U7ykm3mysw=;
-        b=Xfm9d30xodkSmEN3xI9pzT8i9h70RGESB2rM6IEQtWYB4ZX0VlaSfExL0T/yXdWBAT
-         IH3jsuw8D4EdHb/Qgr8BtO90dfgmlZm/e3CkiTi8u2OR/voXIH7190tbtVqKs6+IIz6m
-         hqDZlwhO2Pg4OQytkouflSmBxdO4k068JSq70J1INO9ZO5bcLC6yJMz6ccFBpoC+oewv
-         9Uy8q3z/OZ6VIRdiIDp6xq+1skPQziXAo76QcbvbgYq6JTFdQeOQ4aMTYJ2IBnzgxkA4
-         ebhMXsFq8yaeZbmokcHCG0r1K4wdy2HQtYcUhn2hlkQElEcgIkXIrFz/25HVQEDO0XsJ
-         Uy9A==
+        bh=bLPdg5m2309S6AMRu1XaQxbj3FlZZTAOencomDh/QvY=;
+        b=OdYYRvV/SEO3RYPJXCo5uZku48+V11aZUDWJKobd6XuNSnDcdoiKMW7K7mN35VEo4F
+         7fLhYSpOvlHV/8AiGCNeVFzn1iKTfx12oMxEHuV7aqJwK/QCVqCZK+DwpJedD768zbQi
+         /vjMkSKzpf/jzE31hwgIHv6R22kgcz4SRnmhc3WKLpBjQaqgHL2rXt42yAuGScOJOQ0x
+         FflolsgPl8zSKViTkrVTuy8Rjd3BRzM24WsfADAk49/JAV7TYykJey3HG1VuFd25mQ1/
+         rQURAp8i9W9CHYXNmX50M8/6krg0gryjBdu/AXpDorcHRQee213FO8NpvPKl6su0MB1I
+         tV/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711043526; x=1711648326;
+        d=1e100.net; s=20230601; t=1711043558; x=1711648358;
         h=content-transfer-encoding:in-reply-to:autocrypt:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=hpym4Ko12Q6kLulQl2rpkYItjutok6446U7ykm3mysw=;
-        b=IalytmJJ7tnyIeMO2iIkN1fvi0qQaDDJ1s5g9EZ3NEK1em2WfRkwZ7L9tNvpn8WaSu
-         kAj1zOd04ATwt6qoNBciJYTMWX7r+8u/FlE4WfpzUoLO0clGIQaddQ/yxEuFmVZ7Dl0j
-         GjndE0JHJuBh5qsqcpAoIFkkbXqYWcOE2PfUmsxw1tnJPpFZ+ZhMSsMTbYCeI4H8ZIxh
-         MUeNrqHAk+HWxKV0kUjARbSjGcVvgaavlSWFLGTH/UwcIGq15E4UXNEAHTuKs7mGJysA
-         W0D/C0Ftl/ZV5VNdx+jcu+bdRKDcSKNFznVUMJBz+EmGoysXrDGKqEp1sa0RsEo9tj7T
-         3AFA==
-X-Forwarded-Encrypted: i=1; AJvYcCV0ERx0nGQDmuVjkv6nRAyPppdjxuzooXPl1sD4BgGNqhNukLkLTg57v2kyErwfC36SAgaHczWKFjZdhRMxe9U8R9kjyEJAP7Tv
-X-Gm-Message-State: AOJu0YxxCjchHvRQzewMV0pnt+cDP9pHD0EMecin3qj4DKCzeruPUvvY
-	TNY/kpEzk5xnHymRDy1DzX3roBjEKhL4MJGKYjzr4xwEfsVsI2hHclZ+7tUsQqI=
-X-Google-Smtp-Source: AGHT+IFz1VBOsZ5KYnpLjv5s8XxJ2PFZC1A5nzDlvRLAG03tAZB7bZ30DT9F9wmvTQEQE4+UmBzwaQ==
-X-Received: by 2002:a17:906:fb06:b0:a46:5dc4:dab9 with SMTP id lz6-20020a170906fb0600b00a465dc4dab9mr115802ejb.38.1711043526591;
-        Thu, 21 Mar 2024 10:52:06 -0700 (PDT)
+        bh=bLPdg5m2309S6AMRu1XaQxbj3FlZZTAOencomDh/QvY=;
+        b=SbGR+n1B7uf/J7114BbnA7i3TKL0J/ieDFdJfcnqTsiNc2/dB7WHEZpIvHw1h2ZrBm
+         G2Pqbda9LSU0fZQq720aNBfRL9/wX2cIk2LCftb2iqHBWZjB2AuAojLpM1QrlRejBuJ+
+         OoFPvjcCV/qM3UTRy35NIPUp6e5Z4vaVHAm4CakylA3LMWS1XWKg8dbdImZDbH9/JP2W
+         0uwyyrYnqxogi04JJfuVgxFUCnho383NAuAVVtzK5UQP0krGa6Gyih+go3y9tv+cmVbY
+         gEQC8GI9xh5IRKCB/n2icRs0c4GERExMBw/HeRWBQM4rn5Wn6P11DOvkRmjr4yj70H4r
+         jHdg==
+X-Forwarded-Encrypted: i=1; AJvYcCVnWaFDXqeqD/qm5zjprFYoq5WNARxCE2tQyGbWL/H/7JMQCVE70RVyGGFBZoGme3oshMhDQ19gW7pOePwjtxyhJiicpxEueezE
+X-Gm-Message-State: AOJu0YxFPok9XuwFJCG3C+YPKonFzzqz71QkPdYQRNPDYAcizmXAtNkV
+	i1/JdIBPV8SMCpcjKXLkkzKSDwV5ukmZS8D9sAsvzRZRifFI3ixlSBE1XPIIrJE=
+X-Google-Smtp-Source: AGHT+IHIOt/fsqbrW1JuBHKnXYYqK++34N8ONBHL5RUctpniW7PkUxhDrI/SSKb3Hw8mzjfCtaZDJA==
+X-Received: by 2002:a17:906:b0c6:b0:a46:617e:d3a7 with SMTP id bk6-20020a170906b0c600b00a46617ed3a7mr85393ejb.60.1711043557833;
+        Thu, 21 Mar 2024 10:52:37 -0700 (PDT)
 Received: from [192.168.1.20] ([178.197.222.97])
-        by smtp.gmail.com with ESMTPSA id gt32-20020a1709072da000b00a46ee5b9aa1sm155532ejc.90.2024.03.21.10.52.03
+        by smtp.gmail.com with ESMTPSA id bz22-20020a1709070ab600b00a472688a9ffsm23857ejc.219.2024.03.21.10.52.34
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 21 Mar 2024 10:52:06 -0700 (PDT)
-Message-ID: <3a3bf0ef-61d6-4b4c-8259-277b15394c98@linaro.org>
-Date: Thu, 21 Mar 2024 18:52:02 +0100
+        Thu, 21 Mar 2024 10:52:37 -0700 (PDT)
+Message-ID: <f3490f17-9324-4461-bd18-b2ec9379d1a0@linaro.org>
+Date: Thu, 21 Mar 2024 18:52:33 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,7 +62,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/4] dt-bindings: arm: fsl: Document NXP S32G3 board
+Subject: Re: [PATCH v3 2/4] dt-bindings: serial: fsl-linflexuart: add
+ compatible for S32G3
 To: Wadim Mueller <wafgo01@gmail.com>
 Cc: Rob Herring <robh+dt@kernel.org>,
  Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -74,23 +75,18 @@ Cc: Rob Herring <robh+dt@kernel.org>,
  Jiri Slaby <jirislaby@kernel.org>, Chester Lin <chester62515@gmail.com>,
  =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>,
  Matthias Brugger <mbrugger@suse.com>, NXP S32 Linux Team <s32@nxp.com>,
- Tim Harvey <tharvey@gateworks.com>,
- Alexander Stein <alexander.stein@ew.tq-group.com>,
- Marek Vasut <marex@denx.de>,
+ Tim Harvey <tharvey@gateworks.com>, Marco Felsch <m.felsch@pengutronix.de>,
  Gregor Herburger <gregor.herburger@ew.tq-group.com>,
- Joao Paulo Goncalves <joao.goncalves@toradex.com>,
- Marco Felsch <m.felsch@pengutronix.de>,
+ Marek Vasut <marex@denx.de>, Hugo Villeneuve <hvilleneuve@dimonoff.com>,
  Markus Niebel <Markus.Niebel@ew.tq-group.com>,
  Matthias Schiffer <matthias.schiffer@tq-group.com>,
  Stefan Wahren <stefan.wahren@chargebyte.com>,
- Bjorn Helgaas <bhelgaas@google.com>,
- Philippe Schenker <philippe.schenker@toradex.com>,
- Yannic Moog <y.moog@phytec.de>, Li Yang <leoyang.li@nxp.com>,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-serial@vger.kernel.org
+ Bjorn Helgaas <bhelgaas@google.com>, Josua Mayer <josua@solid-run.com>,
+ Li Yang <leoyang.li@nxp.com>, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-serial@vger.kernel.org
 References: <20240321154108.146223-1-wafgo01@gmail.com>
- <20240321154108.146223-2-wafgo01@gmail.com>
+ <20240321154108.146223-3-wafgo01@gmail.com>
 Content-Language: en-US
 From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
@@ -137,42 +133,32 @@ Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
  KQ06ztUMRrj8eVtpImjsWCd0bDWRaaR4vqhCHvAG9iWXZu4qh3ipie2Y0oSJygcZT7H3UZxq
  fyYKiqEmRuqsvv6dcbblD8ZLkz1EVZL6djImH5zc5x8qpVxlA0A0i23v5QvN00m6G9NFF0Le
  D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20240321154108.146223-2-wafgo01@gmail.com>
+In-Reply-To: <20240321154108.146223-3-wafgo01@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 21/03/2024 16:41, Wadim Mueller wrote:
-> The NXP S32G3 Reference Design Board 3 (S32G-VNP-RDB3) [1]
-> is not documented.
+> Add a compatible string for the uart binding of NXP S32G3 platforms. Here
+> we use "s32v234-linflexuart" as fallback since the current linflexuart
+> driver can still work on S32G3.
+> 
+> Signed-off-by: Wadim Mueller <wafgo01@gmail.com>
+> ---
+>  .../devicetree/bindings/serial/fsl,s32-linflexuart.yaml        | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml b/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml
+> index 7a105551fa6a..f8eb92c9a8d9 100644
+> --- a/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml
+> +++ b/Documentation/devicetree/bindings/serial/fsl,s32-linflexuart.yaml
+> @@ -25,6 +25,9 @@ properties:
+>        - items:
+>            - const: nxp,s32g2-linflexuart
+>            - const: fsl,s32v234-linflexuart
+> +      - items:
+> +          - const: nxp,s32g3-linflexuart
 
-Is not documented, so it means that you document existing board from
-DTS? I think not, so please describe what you are doing accurately. Use
-imperative mood. See longer explanation here:
-https://elixir.bootlin.com/linux/v5.17.1/source/Documentation/process/submitting-patches.rst#L95
-
-"Document foo bar".
-Or "Add bindings for foo bar"
-
-No need to resend just to fix this, that's generic comment.
-
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-
----
-
-This is an automated instruction, just in case, because many review tags
-are being ignored. If you know the process, you can skip it (please do
-not feel offended by me posting it here - no bad intentions intended).
-If you do not know the process, here is a short explanation:
-
-Please add Acked-by/Reviewed-by/Tested-by tags when posting new
-versions, under or above your Signed-off-by tag. Tag is "received", when
-provided in a message replied to you on the mailing list. Tools like b4
-can help here. However, there's no need to repost patches *only* to add
-the tags. The upstream maintainer will do that for tags received on the
-version they apply.
-
-https://elixir.bootlin.com/linux/v6.5-rc3/source/Documentation/process/submitting-patches.rst#L577
+Combine it with previous entry as enum.
 
 Best regards,
 Krzysztof
