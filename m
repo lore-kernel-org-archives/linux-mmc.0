@@ -1,90 +1,97 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 76E174652D;
-	Fri, 22 Mar 2024 14:07:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C6E647F6C
+	for <linux-mmc@vger.kernel.org>; Fri, 22 Mar 2024 14:28:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711116460; cv=none; b=pnSmE/KKZhji4tIhlqjTW7vldCm31tQdu8Yg+lOscCgijSJr9ByQaTDZHPNAvWLI3LsW6AkxgEgYy8HzDKuvrrWkhA8OtwxH6CYZdjv+8BVKz0tdCxM6p/+qvrfRhcZCkRl2Yu01ZQy9Hr/GsqlmXDsBImxJjx1D/B1HBde8KKc=
+	t=1711117701; cv=none; b=mlJf8z07/b8tx1KcqVz7+AxcqxY/HS5pRV7crMulWCJDhe2q976Gxx1cq9a+EkWtnKrbypI34MjLHafBD6hLbW/aqK3GxvU+g9/nWbcMWD/xVsoxiQnzryvlNaq097yNlVmEscNinf5fsCijj0YguLbL5u1d0FMqr5YpIkUaSG0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711116460; c=relaxed/simple;
-	bh=z1Cr+EJ5/KwlaRetChwu63heoXdWVRo7U/kJnQ2pDc0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=eUmiCl/YvsiT9hRht/8hY/2THDqfj5fI3MIpbF5zBgxbgpiA+IV+zXJtsR0m2Tx3a4uWNovavD1Rl0Q6fbRCeCjKaIYqo9U7iL9BJ+diRCY1uHgUiq4+l9WmW47mdtH/Ax/FJnVPrEgB3noZfLThCc9k798r9HJDgIW8Kd7Nlek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 7AC001007;
-	Fri, 22 Mar 2024 07:08:09 -0700 (PDT)
-Received: from [10.1.27.56] (e133047.arm.com [10.1.27.56])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id D140E3F762;
-	Fri, 22 Mar 2024 07:07:31 -0700 (PDT)
-Message-ID: <32608c6b-df94-4dc8-be66-97a90b6eeac4@arm.com>
-Date: Fri, 22 Mar 2024 14:07:29 +0000
+	s=arc-20240116; t=1711117701; c=relaxed/simple;
+	bh=BSRa5G43mi7MP+cPzwPAx8XvxMHOExGKnRxZJXFXEKM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=tJrzsyNnvMXycGkgY6k0KI06tJ34RAmXALXDG3N8Pv2gDB1nSbReUMsIWMvVaB9CLTBgLMlC2kt1pq83QyK0RIaBO6QtXEKOwiFO1I/nSPFQNDIJs/9GIm5/9JR/HLEdET7VxQAEkKBoi4vafPfPWh3z4mqKLsNp/9LyLaSvaoY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vLeuuvT6; arc=none smtp.client-ip=209.85.128.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vLeuuvT6"
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-609408d4b31so22314547b3.0
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Mar 2024 07:28:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1711117698; x=1711722498; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BSRa5G43mi7MP+cPzwPAx8XvxMHOExGKnRxZJXFXEKM=;
+        b=vLeuuvT6G/phlZZtOpqaDnbCp9AccDlki47Zwz9z3aR3LKtZGvC27XHwGs8G3K55jb
+         yEjNFKfd8ssFprZGPoooshMwt8d6W8FqrvjaPwaT25NoODY0gbnLHdP58OHFIJw5AKlp
+         Kl6IkkkPB1KwmaVm+oQHUkKidldOPVzYGzspNZrMDwzQDXp77y0s4ukF4h/Zj59/Jz1J
+         iw6qeS1m2Ij6W+yRuqIyQ1kJqULDwYj/vfuYtC9IqgQuZkJ+qBqMXk5M0QLLIGsyYsDm
+         30aPtY4Z+j9JdUaRUvZYA5DztLaKrXtX2yhC83KCfVxaFe0KdRz4UpPhvpTL/Y22P1YO
+         C8WA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1711117698; x=1711722498;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=BSRa5G43mi7MP+cPzwPAx8XvxMHOExGKnRxZJXFXEKM=;
+        b=SId8dAFiaxpeRu4j+RIrtnjtFTzzcQSic2OBPDtW/TR1j3E/v1OpEJJ7P/uHzn4eWY
+         GeSK2FUwKBV8jo2+G+SbTbTMjD6RmQuzsrEJmkKdPjY1k7JQ71xtiCBQYq0ZmAr8Sutp
+         Wrp8N+XWJhij+BlS0sqSeHsGqZYsTsihdRqcZRx3hHVnz/bfWZp/0BL4mOl/ArW77cgN
+         XQEjr0TXAVnBA669uNusYUDiYV7trgeBjKMRk+jqkjFjV4yJ2F5tyAhGYX87tFH3Qpf6
+         R6oaRYsHxPf9C/T8Jotstpz7ccGbWrYxmpmPGmeD8qhJ5kSRMyLdBPixqkWbatwJEp35
+         8k3A==
+X-Forwarded-Encrypted: i=1; AJvYcCUeolXIHERS5QXp6uJm8Q01zji3QH3BEdA8z5jHRjas4tNtFphTQM4KnCt/3LnAh1UM9cXJ3P64kYiOlxWsSnD9LNPnlvEiWCGb
+X-Gm-Message-State: AOJu0YxxovBTXVBrw00B2aHuxXqUirx7hAqjbUR3TWpFenOheIsTJ0s4
+	AocUD0vXov6Hi9/Tz9ihPzIu9erFTSlZTo8+B9jJkSghmoWwhLHsh0RI68/U05D4lwvm1RnxE/7
+	1O6uWkjRF9wKjZv1EM2OCTRnEXKKrr2yHYs3adQ==
+X-Google-Smtp-Source: AGHT+IGqQVjMZHkKIJlkFsR4RJeZUKLo2QeeLI2k4huSnpcBnZUsNA0a45bgAtTQ7oz24BVUerld1XlhOi12G93O+Ho=
+X-Received: by 2002:a25:83c1:0:b0:dcb:fb49:cb96 with SMTP id
+ v1-20020a2583c1000000b00dcbfb49cb96mr2127472ybm.31.1711117697064; Fri, 22 Mar
+ 2024 07:28:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v7 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
-Content-Language: en-US
-To: Maxim Kiselev <bigunclemax@gmail.com>, serghox@gmail.com
-Cc: adrian.hunter@intel.com, jyanchou@realtek.com,
- open list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org,
- quic_asutoshd@quicinc.com, ritesh.list@gmail.com, shawn.lin@rock-chips.com,
- Ulf Hansson <ulf.hansson@linaro.org>
-References: <CALHCpMiUfa0j46HcorZGPDPV5Zg5ZFdWukT+5jTediuKJuoB5w@mail.gmail.com>
-From: Christian Loehle <christian.loehle@arm.com>
-In-Reply-To: <CALHCpMiUfa0j46HcorZGPDPV5Zg5ZFdWukT+5jTediuKJuoB5w@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <CAN-StX1HqWqi+YW=t+V52-38Mfp5fAz7YHx4aH-CQjgyNiKx3g@mail.gmail.com>
+ <36198864-579e-41f0-baf6-917f0a7f4bfa@intel.com> <5767438.DvuYhMxLoT@kreacher>
+ <5770245.DvuYhMxLoT@kreacher>
+In-Reply-To: <5770245.DvuYhMxLoT@kreacher>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Fri, 22 Mar 2024 15:28:05 +0100
+Message-ID: <CACRpkdby5dY7j9=r_dq+at_sqFduJWo15zt4tj4fvhY-KgCUYg@mail.gmail.com>
+Subject: Re: Bug report: probe of AMDI0040:00 failed with error -16
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Francisco Ayala Le Brun <francisco@videowindow.eu>, Adrian Hunter <adrian.hunter@intel.com>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	ulf.hansson@linaro.org, Linux ACPI <linux-acpi@vger.kernel.org>, 
+	Thomas Gleixner <tglx@linutronix.de>, Mario Limonciello <mario.limonciello@amd.com>, 
+	"Rafael J. Wysocki" <rafael@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 20/03/2024 10:36, Maxim Kiselev wrote:
-> Subject: [PATCH v7 0/2] mmc: sdhci-of-dwcmshc: Add CQE support
-> 
-> Hi Sergey, Adrian!
-> 
-> First of all I want to thank Sergey for supporting the CQE feature
-> on the DWC MSHC controller.
-> 
-> I tested this series on the LicheePi 4A board (TH1520 SoC).
-> It has the DWC MSHC IP too and according to the T-Head datasheet
-> it also supports the CQE feature.
-> 
->> Supports Command Queuing Engine (CQE) and compliant with eMMC CQ HCI.
-> 
-> So, to enable CQE on LicheePi 4A need to set a prop in DT
-> and add a IRQ handler to th1520_ops:
->> .irq = dwcmshc_cqe_irq_handler,
-> 
-> And the CQE will work for th1520 SoC too.
-> 
-> But, when I enabled the CQE, I was faced with a strange effect.
-> 
-> The fio benchmark shows that emmc works ~2.5 slower with enabled CQE.
-> 219MB/s w/o CQE vs 87.4MB/s w/ CQE. I'll put logs below.
-> 
-> I would be very appreciative if you could point me where to look for
-> the bottleneck.
-> 
-> Without CQE:
+On Thu, Mar 21, 2024 at 5:33=E2=80=AFPM Rafael J. Wysocki <rjw@rjwysocki.ne=
+t> wrote:
 
-I would also suspect some bus issues here, either read out ios or ext_csd
-after enabling CQE, it could be helpful.
-OTOH the CQE could just be limiting the frequency, which you wouldn't be
-able to see without a scope. Does the TRM say anything about that?
+> We actually can get away without defining a new IRQ flag, as in
+> the patch below.
+>
+> It is not super-clean, but should do the work.
+>
+> Linus, what do you think?
 
-Are you limited to <100MB/s with CQE for HS400(non-ES) and HS200, too?
+Uhhh I rather not, the other approach will cover the invariably recurring
+instances of this, it will not be the last time we see something like this.
 
-What about sequential reads but smaller bs? like 256K sequential?
+We need tglx input on this, I could merge the patch below with some
+big TODO to fix it properly if the discussion about the proper solution
+takes too much time.
 
-FWIW your fio call should be on par with non-CQE performance-wise at best,
-as you just have one IO in-flight, i.e. no CQE performance improvement
-possible, see your warning:
+But I rather not hack around with IRQs without tglx (or marcz, but he
+got overloaded) input.
 
-> both iodepth >= 1 and synchronous I/O engine are selected, queue
-> depth will be capped at 1
-
-Kind Regards,
-Christian
+Yours,
+Linus Walleij
