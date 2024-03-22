@@ -1,123 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from 008.lax.mailroute.net (008.lax.mailroute.net [199.89.1.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 330655674C;
-	Fri, 22 Mar 2024 16:43:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 804D5604A6;
+	Fri, 22 Mar 2024 17:50:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711125794; cv=none; b=Kgas2Cm9THhMG8S4d2p5Uy54u+aP88ZVzLrUBfghxI273oouLJbEFcDecsQPrKZOLPN46DjQpzsSxPIE9WGYGK++x5vtx72EFBnfga4XBEVUavdK5CunaIX29XNd6XVTNK5UxwJw6GPjbxf36j+m9xRnSnldPft5RPL2sKNNdyA=
+	t=1711129811; cv=none; b=E36O6beB75Cz2TVsAV/6FjcJUlVgAns/PbxEZYNLLZ2NboFWGmKzNME8GGLWYCQMiOvrs+m9GcS/02xloLSGBNQJxCTJEdcPfQwlUHgZ8+cF3qeXleat3xGXsdvoE4mEqucnLgMQ6hHC0Lq8r8JvpCmuKwX3AMk27xQxq6LNhrI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711125794; c=relaxed/simple;
-	bh=VuocNDwkIO/NqUPaVerRx9GiFh5vSB4EkmPbTc3m5P8=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To; b=UHLj5CcnMntYzCI2XPD2ZrkKK6d8Cml7pWj68Ghra+1s45PWA0wMjM5INpuKISZ9EGUfVTClS5yHU8xTXCDM/W+gCbEE3N9nEosQeV39VTKF/lntQJlvIKEDHdsX9bLbziFuVlUUCSVopDqC7LtBTbBy7Q50AfRQAo0ZbQ3fuA8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oPA1yJx4; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1711129811; c=relaxed/simple;
+	bh=tlaxGcQqSo4rsMaZE0sbNHeXStqfwgVpWciJkli4y+E=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=pUdmeTAQO5IdjmOQ9QU9XcsGdDjoTvA6OADnPdZRhI4Lr4xzq23GpEGoGCR81dpjPu+FHn93Cz7d1ClkNDpWQ43cyvHjLvXo00BnHdy2YHqAJpT+0WTIpPIlDcYwV9Hj4MrPIAsPQP9/pzIvFP7GwZ00tUENYPEfyYFI+MG5cNs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=Qpsv8DC7; arc=none smtp.client-ip=199.89.1.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oPA1yJx4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8FCCEC43390;
-	Fri, 22 Mar 2024 16:43:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711125793;
-	bh=VuocNDwkIO/NqUPaVerRx9GiFh5vSB4EkmPbTc3m5P8=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:From;
-	b=oPA1yJx4tt7uBYrLaNo2kW7jdVdhUCJH2XoywWZL4ShvqfpfpJOEm/TmkND1Edwdm
-	 OGG/Q8wXCOdBEW8Y2YpaakstbBrYAWFoX0uiltj1yRqD1qDausjseyvfWd8AJDdOIa
-	 O9BlXNp1isnLtYWZ2d6fUWwEHg2wxpMyCgMhv/Jnmh2rpC0yCjZTnFj5Q3C9CmYign
-	 YvD5U5lBpc4bUk2AkZd48qjsUvBZsX5v1xk8UihB+QeWg5pczBEGlQ2XqJCPKpBkVG
-	 AxaUSymYuH1e2JgcvHstK0+WA7SzbrojQELz7/btdi9yVgduS0uE589Zdkp088mZAx
-	 Zl+GTEMCDr3TQ==
-Date: Fri, 22 Mar 2024 11:43:11 -0500
-From: Bjorn Helgaas <helgaas@kernel.org>
-To: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
- timer timeout during suspend
-Message-ID: <20240322164311.GA1367151@bhelgaas>
+	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="Qpsv8DC7"
+Received: from localhost (localhost [127.0.0.1])
+	by 008.lax.mailroute.net (Postfix) with ESMTP id 4V1VGR4j9Yz6Cnk95;
+	Fri, 22 Mar 2024 17:50:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:content-type:content-type:in-reply-to
+	:from:from:references:content-language:subject:subject
+	:user-agent:mime-version:date:date:message-id:received:received;
+	 s=mr01; t=1711129797; x=1713721798; bh=afZlcm9O07bvpHWZp13m44cg
+	Mjqanzjz1tGTAZQ/1YM=; b=Qpsv8DC7mL/Qcs4xoiwBfXcBY4Y5RAIaatVQz7e0
+	NmTdbhx1Xsns+fOdYL4hRE0TSmqH/tkSqTJUfxTbNyGRIE37amKlWJ4sOG/4J9Rq
+	E1OlRyafw/bvMN6lPbKPVjJOARn9tI5lwiLNOWFpPp3xY18La+U79Q21j3TRjlFW
+	lTuANy7O79bywNMmr3DDk5u73ZNtChsWQ2S637Yrcdw2tU2esITNy61wtZSVyDwF
+	auUIvSZmBhD9AD/zmrt+L8xNEeGCgA27jur2s4MC/uU795KGEP3p1XkAOuDP9PvO
+	6b4Q0VUPCVm6smHq/cZwoEBSZdEwWvG4HyveTE0u6aEm8g==
+X-Virus-Scanned: by MailRoute
+Received: from 008.lax.mailroute.net ([127.0.0.1])
+ by localhost (008.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id WDCEdahPUwBV; Fri, 22 Mar 2024 17:49:57 +0000 (UTC)
+Received: from [100.96.154.173] (unknown [104.132.1.77])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 008.lax.mailroute.net (Postfix) with ESMTPSA id 4V1VG64fZqz6Cnk8t;
+	Fri, 22 Mar 2024 17:49:50 +0000 (UTC)
+Message-ID: <7027ccdc-878a-420e-a7ea-5156e1d67b8a@acm.org>
+Date: Fri, 22 Mar 2024 10:49:48 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAAd53p52fi_wr3Js9Rqct+i1D3rjrnVZ6tBN=uHqThM7UvzXQA@mail.gmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 3/8] block: add new genhd flag GENHD_FL_NVMEM
+Content-Language: en-US
+To: Daniel Golle <daniel@makrotopia.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+ Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Jens Axboe <axboe@kernel.dk>, Dave Chinner <dchinner@redhat.com>,
+ Jan Kara <jack@suse.cz>, =?UTF-8?Q?Thomas_Wei=C3=9Fschuh?=
+ <linux@weissschuh.net>, Damien Le Moal <dlemoal@kernel.org>,
+ Li Lingfeng <lilingfeng3@huawei.com>, Christian Brauner
+ <brauner@kernel.org>, Christian Heusel <christian@heusel.eu>,
+ Min Li <min15.li@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>,
+ Avri Altman <avri.altman@wdc.com>, Hannes Reinecke <hare@suse.de>,
+ Christian Loehle <CLoehle@hyperstone.com>, Bean Huo <beanhuo@micron.com>,
+ Yeqi Fu <asuk4.q@gmail.com>, Victor Shih <victor.shih@genesyslogic.com.tw>,
+ Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+ Dominique Martinet <dominique.martinet@atmark-techno.com>,
+ "Ricardo B. Marliere" <ricardo@marliere.net>, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-block@vger.kernel.org
+References: <cover.1711048433.git.daniel@makrotopia.org>
+ <89abd9ab93783da0e8934ebc03d66559f78f6060.1711048433.git.daniel@makrotopia.org>
+From: Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <89abd9ab93783da0e8934ebc03d66559f78f6060.1711048433.git.daniel@makrotopia.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Thu, Mar 21, 2024 at 06:05:33PM +0800, Kai-Heng Feng wrote:
-> On Sat, Jan 20, 2024 at 6:41 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > On Thu, Jan 18, 2024 at 02:40:50PM +0800, Kai-Heng Feng wrote:
-> > > On Sat, Jan 13, 2024 at 1:37 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > > > On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
-> > > > > On Sat, Jan 6, 2024 at 5:19 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > > > > > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote:
-> > > > > > > Spamming `lspci -vv` can still observe the replay timer timeout error
-> > > > > > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
-> > > > > > > replay timer timeout of AER"), albeit with a lower reproduce rate.
-> > > > > >
-> > > > > > I'm not sure what this is telling me.  By "spamming `lspci -vv`, do
-> > > > > > you mean that if you run lspci continually, you still see Replay Timer
-> > > > > > Timeout logged, e.g.,
-> > > > > >
-> > > > > >   CESta:        ... Timeout+
-> > > > >
-> > > > > Yes it's logged and the AER IRQ is raised.
-> > > >
-> > > > IIUC the AER IRQ is the important thing.
-> > > >
-> > > > Neither 015c9cbcf0ad nor this patch affects logging in
-> > > > PCI_ERR_COR_STATUS, so the lspci output won't change and mentioning it
-> > > > here doesn't add useful information.
-> > >
-> > > You are right. That's just a way to access config space to reproduce
-> > > the issue.
-> >
-> > Oh, I think I completely misunderstood you!  I thought you were saying
-> > that suspending the device caused the PCI_ERR_COR_REP_TIMER error, and
-> > you happened to see that it was logged when you ran lspci.
+On 3/21/24 12:33, Daniel Golle wrote:
+> Add new flag to destinguish block devices which may act as an NVMEM
+> provider.
 > 
-> Both running lspci and suspending the device can observe the error,
-> because both are accessing the config space.
+> Signed-off-by: Daniel Golle <daniel@makrotopia.org>
+> ---
+>   include/linux/blkdev.h | 2 ++
+>   1 file changed, 2 insertions(+)
 > 
-> > But I guess you mean that running lspci actually *causes* the error?
-> > I.e., lspci does a config access while we're suspending the device
-> > causes the error, and the config access itself causes the error, which
-> > causes the ERR_COR message and ultimately the AER interrupt, and that
-> > interrupt prevents the system suspend.
-> 
-> My point was that any kind of PCI config access can cause the error.
-> Using lspci is just make the error more easier to reproduce.
-> 
-> > If that's the case, I wonder if this is a generic problem that could
-> > happen with *any* device, not just GL975x.
-> 
-> For now, it's just GL975x.
-> 
-> > What power state do we put the GL975x in during system suspend?
-> > D3hot?  D3cold?  Is there anything that prevents config access while
-> > we suspend it?
-> 
-> The target device state is D3hot.
-> However, the issue happens when the devices is in D0, when the PCI
-> core is saving the device's config space.
-> 
-> So I think the issue isn't related to the device state.
-> 
-> > We do have dev->block_cfg_access, and there's a comment that says
-> > "we're required to prevent config accesses during D-state
-> > transitions," but I don't see it being used during D-state
-> > transitions.
-> 
-> Yes, there isn't any D-state change happens here.
+> diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+> index c3e8f7cf96be9..f2c4f280d7619 100644
+> --- a/include/linux/blkdev.h
+> +++ b/include/linux/blkdev.h
+> @@ -81,11 +81,13 @@ struct partition_meta_info {
+>    * ``GENHD_FL_NO_PART``: partition support is disabled.  The kernel will not
+>    * scan for partitions from add_disk, and users can't add partitions manually.
+>    *
+> + * ``GENHD_FL_NVMEM``: the block device should be considered as NVMEM provider.
+>    */
+>   enum {
+>   	GENHD_FL_REMOVABLE			= 1 << 0,
+>   	GENHD_FL_HIDDEN				= 1 << 1,
+>   	GENHD_FL_NO_PART			= 1 << 2,
+> +	GENHD_FL_NVMEM				= 1 << 3,
+>   };
 
-So the timeout happens sometimes on any config accesses to the device,
-no matter what the power state is?  If that's the case, why do the
-masking in the suspend/resume callbacks?
+What would break if this flag wouldn't exist?
 
-If it's not related to a power state change, it sounds like something
-that should be a quirk or done at probe time.
+Thanks,
 
-Bjorn
+Bart.
+
