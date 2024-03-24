@@ -1,96 +1,124 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04DC41759E
-	for <linux-mmc@vger.kernel.org>; Sun, 24 Mar 2024 11:40:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3539219BCA;
+	Sun, 24 Mar 2024 16:18:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711280434; cv=none; b=Jf8u7R50WjHbSG2wpYcHfDRCKrzqo4Ypi55xcFJrpb+y7o7CKYziaA+/mVKNuWF45Awb3C1U07npSsdsci7crH8fsMTOQxavpJTbt4TCCvgsKcNzesq4qjMHUOJ2yG4G6ntYlCvmHkeMB3tXnQEFUxGFbjRtpxVXC0rLwmhRki4=
+	t=1711297094; cv=none; b=Kop7oxH5Vzxzh430AjFXksn0G+K+bhkIzY0kXYFQHZXqAp/lNxbpH4vJwy3LgdjXuS6U2VwnLfvVLJXZJn1zaytUaYzT4RSqNTaE+8857ibay86G+QnLBoXdii1mYwOUVEOa1kmdIEnnMVaPcBc39swBOlAGcgMv54Etaz2J4CA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711280434; c=relaxed/simple;
-	bh=eWA1KsQbyFsxavGLt/r1WcVfv5RPxFSgRbK0beCUjbc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=i0DExCLIlc3gI5poPGrmbduRQZsEbQ4ARSDZrgTIEbw3by/4glLBh+oJEpUPfR6nNsvAqwPvUe1PlOzwadjsqZq0hLUr4HRy+oLPKLMXjcJh+ZtHksJRP/3VN52bgL7BEhnTUQzrMu5i37cDl8NEMUcDCWVHIMcQX49HGXtiRy0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1roMDD-00050i-6Y; Sun, 24 Mar 2024 12:40:27 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1roMDC-008DGj-Gc; Sun, 24 Mar 2024 12:40:26 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.96)
-	(envelope-from <ukl@pengutronix.de>)
-	id 1roMDC-00AMY4-1N;
-	Sun, 24 Mar 2024 12:40:26 +0100
-From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kbuild@vger.kernel.org,
-	kernel@pengutronix.de
-Subject: [PATCH] mmc: davinci: Don't strip remove function when driver is builtin
-Date: Sun, 24 Mar 2024 12:40:17 +0100
-Message-ID: <20240324114017.231936-2-u.kleine-koenig@pengutronix.de>
-X-Mailer: git-send-email 2.43.0
+	s=arc-20240116; t=1711297094; c=relaxed/simple;
+	bh=da0xwxHOEUl8MbjtnHFjZ63pq5vlQZIOS/22Z53tAPM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aQAudmLkg1ZPwroJiEANFbmpf9OhQMqsDlpWpF2Wz5yPpU05DlNIPa/jnZzJ6iuxr5QOe2Rzz6tSoocGjXSe7t3+I2+5t3eW+9dM/ViKV+kQa+zGea5TZB98uQCnQrve/VC4G+Ej951UmwgZdYxXczzgBSs0+mCcpcKNdIV1hNU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=ttqxiaN3; arc=none smtp.client-ip=217.194.8.81
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="ttqxiaN3"
+Received: from francesco-nb (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
+	by mail11.truemail.it (Postfix) with ESMTPA id 7553D21597;
+	Sun, 24 Mar 2024 17:17:59 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
+	s=default; t=1711297079;
+	bh=5zPfziSq49x7m+PLqbCGYVxMES21d9abyRHewSFqJ50=; h=From:To:Subject;
+	b=ttqxiaN3wmVSj85ZgRUShYIVNdd7NKf86PCCrhsxc9UwodbnB5qKyXsK1Sc6AhP2S
+	 70yxpbzfBRnlC+fMnQAA1FUx4MA+1osliLoiiqQgbvZJNSCRxD9xmWtE1OLXF6qg3W
+	 5nY5pA9BU2PBp3agvj6P4Lys6M8JCDBAw1VEjXZ3jcm6noF6WnC+HJIfSEWI9ArBnl
+	 XLPdU3LoA1ifNKOqcQrU0pBOGwJATjfTuLA6HYJwvVjs0IvpaX3zGaQtbritf5gHqE
+	 Lz3UrAjLlWT7y9zudr2SeYPtKfjg1uqCa6askzRsxBHcN8xT8rm7NhEYO2tSaU6LgI
+	 43ONjCzLty+Ow==
+Date: Sun, 24 Mar 2024 17:17:55 +0100
+From: Francesco Dolcini <francesco@dolcini.it>
+To: mikko.rapeli@linaro.org, Avri Altman <avri.altman@wdc.com>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>, stable@vger.kernel.org
+Subject: Re: [PATCH 2/2] mmc core block.c: avoid negative index with array
+ access
+Message-ID: <20240324161755.GA52910@francesco-nb>
+References: <20240313133744.2405325-1-mikko.rapeli@linaro.org>
+ <20240313133744.2405325-2-mikko.rapeli@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1670; i=u.kleine-koenig@pengutronix.de; h=from:subject; bh=eWA1KsQbyFsxavGLt/r1WcVfv5RPxFSgRbK0beCUjbc=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBmABEiGfPhWHdGW1KXxwS7Szv+JX/yU0gSB5Jfx IjLqDd4mMuJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCZgARIgAKCRCPgPtYfRL+ TrHMCACCwXNSIYYedv7CVLnH1c5zSvxdr0y1J4+XayZ4hoDnWvVcio5RtODwtc8v4kurQC6Wi1V Q2BlQoVPSsQDd8dKMMkWatMr924TpHUjV1rTrxOiAIa/59/BTzcykQEipUQhkMvnwq5pceFSF8a u45bHN2vsasEdF4L/8k8bajj+ylybgbjPAGXTtLps1+yneTdiOQ7V8PiNMqIW3XZG92UH1QrR9l MdctMx2vi1yLnw7Wk3jlZqw+bnR6zHWqggggAGZ+kRpx0EWNEOcsYUQ14mkSOoyC9DtO4ZrsYzV 8XCE7IZ7HlDmt8wkDGBd+ROx9Yt6q6c+9noMXzeQSc1JerpE
-X-Developer-Key: i=u.kleine-koenig@pengutronix.de; a=openpgp; fpr=0D2511F322BFAB1C1580266BE2DCDD9132669BD6
-Content-Transfer-Encoding: 8bit
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240313133744.2405325-2-mikko.rapeli@linaro.org>
 
-Using __exit for the remove function results in the remove callback
-being discarded with CONFIG_MMC_DAVINCI=y. When such a device gets
-unbound (e.g. using sysfs or hotplug), the driver is just removed
-without the cleanup being performed. This results in resource leaks. Fix
-it by compiling in the remove callback unconditionally.
+Hello Mikko and Avri,
 
-This also fixes a W=1 modpost warning:
+On Wed, Mar 13, 2024 at 03:37:44PM +0200, mikko.rapeli@linaro.org wrote:
+> From: Mikko Rapeli <mikko.rapeli@linaro.org>
+> 
+> Commit "mmc: core: Use mrq.sbc in close-ended ffu" assigns
+> prev_idata = idatas[i - 1] but doesn't check that int iterator
+> i is greater than zero. Add the check.
+> 
+> Fixes: 4d0c8d0aef63 ("mmc: core: Use mrq.sbc in close-ended ffu")
+> 
+> Link: https://lore.kernel.org/all/20231129092535.3278-1-avri.altman@wdc.com/
+> 
+> Cc: Avri Altman <avri.altman@wdc.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
 
-	WARNING: modpost: drivers/mmc/host/davinci_mmc: section mismatch in reference: davinci_mmcsd_driver+0x10 (section: .data) -> davinci_mmcsd_remove (section: .exit.text)
+I just had the following Oops
 
-Fixes: b4cff4549b7a ("DaVinci: MMC: MMC/SD controller driver for DaVinci family")
-Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
----
- drivers/mmc/host/davinci_mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+[   31.377291] Unable to handle kernel paging request at virtual address 0000fffffc386a14
+[   31.385348] Mem abort info:
+[   31.388136]   ESR = 0x0000000096000006
+[   31.392338]   EC = 0x25: DABT (current EL), IL = 32 bits
+[   31.397681]   SET = 0, FnV = 0
+[   31.400730]   EA = 0, S1PTW = 0
+[   31.405397]   FSC = 0x06: level 2 translation fault
+[   31.410355] Data abort info:
+[   31.413245]   ISV = 0, ISS = 0x00000006
+[   31.417086]   CM = 0, WnR = 0
+[   31.420049] user pgtable: 4k pages, 48-bit VAs, pgdp=0000000084f89000
+[   31.426552] [0000fffffc386a14] pgd=0800000084af2003, p4d=0800000084af2003, pud=0800000083ec0003, pmd=0000000000000000
+[   31.437393] Internal error: Oops: 0000000096000006 [#1] PREEMPT SMP
+[   31.443657] Modules linked in: crct10dif_ce ti_k3_r5_remoteproc virtio_rpmsg_bus rpmsg_ns rtc_ti_k3 ti_k3_m4_remoteproc ti_k3_common tidss drm_dma_helper mcrc sa2ul lontium_lt8912b tc358768 display_connector drm_kms_helper ina2xx syscopyarea sysfillrect sysimgblt fb_sys_fops spi_omap2_mcspi pwm_tiehrpwm drm lm75 drm_panel_orientation_quirks optee_rng rng_core
+[   31.475530] CPU: 0 PID: 8 Comm: kworker/0:0H Not tainted 6.1.80+git.ba628d222cde #1
+[   31.483179] Hardware name: Toradex Verdin AM62 on Verdin Development Board (DT)
+[   31.490480] Workqueue: kblockd blk_mq_run_work_fn
+[   31.495216] pstate: 60000005 (nZCv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+[   31.502172] pc : __mmc_blk_ioctl_cmd+0x12c/0x590
+[   31.506795] lr : __mmc_blk_ioctl_cmd+0x2cc/0x590
+[   31.511408] sp : ffff8000092a39e0
+[   31.514717] x29: ffff8000092a3b50 x28: ffff8000092a3d28 x27: 0000000000000000
+[   31.521853] x26: ffff80000a5a3cf0 x25: ffff000018bbb400 x24: 0000fffffc386a08
+[   31.528989] x23: ffff000018a8b808 x22: 0000000000000000 x21: 00000000ffffffff
+[   31.536124] x20: ffff000018a8b800 x19: ffff0000048c6680 x18: 0000000000000000
+[   31.543260] x17: 0000000000000000 x16: 0000000000000000 x15: 0000146d78b52ba4
+[   31.550394] x14: 0000000000000206 x13: 0000000000000001 x12: 0000000000000000
+[   31.557529] x11: 0000000000000000 x10: 00000000000009b0 x9 : 0000000000000651
+[   31.564664] x8 : ffff8000092a3ad8 x7 : 0000000000000000 x6 : 0000000000000000
+[   31.571800] x5 : 0000000000000200 x4 : 0000000000000000 x3 : 00000000000003e8
+[   31.578935] x2 : 0000000000000000 x1 : 000000000000001d x0 : 0000000000000017
+[   31.586071] Call trace:
+[   31.588513]  __mmc_blk_ioctl_cmd+0x12c/0x590
+[   31.592782]  mmc_blk_mq_issue_rq+0x50c/0x920
+[   31.597049]  mmc_mq_queue_rq+0x118/0x2ac
+[   31.600970]  blk_mq_dispatch_rq_list+0x1a8/0x8b0
+[   31.605588]  __blk_mq_sched_dispatch_requests+0xb8/0x164
+[   31.610898]  blk_mq_sched_dispatch_requests+0x3c/0x80
+[   31.615946]  __blk_mq_run_hw_queue+0x68/0xa0
+[   31.620215]  blk_mq_run_work_fn+0x20/0x30
+[   31.624223]  process_one_work+0x1d0/0x320
+[   31.628238]  worker_thread+0x14c/0x444
+[   31.631989]  kthread+0x10c/0x110
+[   31.635219]  ret_from_fork+0x10/0x20
+[   31.638801] Code: 12010000 2a010000 b90137e0 b4000078 (b9400f00)
+[   31.644888] ---[ end trace 0000000000000000 ]---
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 8bd938919687..d7427894e0bc 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -1337,7 +1337,7 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
- 	return ret;
- }
- 
--static void __exit davinci_mmcsd_remove(struct platform_device *pdev)
-+static void davinci_mmcsd_remove(struct platform_device *pdev)
- {
- 	struct mmc_davinci_host *host = platform_get_drvdata(pdev);
- 
-@@ -1392,7 +1392,7 @@ static struct platform_driver davinci_mmcsd_driver = {
- 		.of_match_table = davinci_mmc_dt_ids,
- 	},
- 	.probe		= davinci_mmcsd_probe,
--	.remove_new	= __exit_p(davinci_mmcsd_remove),
-+	.remove_new	= davinci_mmcsd_remove,
- 	.id_table	= davinci_mmc_devtype,
- };
- 
+From a quick look I assume that this is the exact same issue you are
+fixing here, correct?
 
-base-commit: 70293240c5ce675a67bfc48f419b093023b862b3
--- 
-2.43.0
+Francesco
 
