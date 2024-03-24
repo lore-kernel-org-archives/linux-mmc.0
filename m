@@ -1,100 +1,96 @@
-Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 34E067A702;
-	Fri, 22 Mar 2024 20:07:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04DC41759E
+	for <linux-mmc@vger.kernel.org>; Sun, 24 Mar 2024 11:40:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711138033; cv=none; b=g5LDyg1ta8XemldQKr475+OcupeOTgXtxpMsQwbk6Y9cj84eVPIv4UUedD34vhLpsSuZEC37nhmC6t7mTf7HSDpCWfeZdtyxB5l5Ug0SEQ8gj4+ieuMLYGuePDcJWQr0SvjshjPxVlESWQXwg0pNdwKwmLByIDqTI1PGOwgSpiI=
+	t=1711280434; cv=none; b=Jf8u7R50WjHbSG2wpYcHfDRCKrzqo4Ypi55xcFJrpb+y7o7CKYziaA+/mVKNuWF45Awb3C1U07npSsdsci7crH8fsMTOQxavpJTbt4TCCvgsKcNzesq4qjMHUOJ2yG4G6ntYlCvmHkeMB3tXnQEFUxGFbjRtpxVXC0rLwmhRki4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711138033; c=relaxed/simple;
-	bh=Vvp33QqtqJ8Tn5uFYVU4oVtsQ5/b4IC2R0vLU+XGt9Q=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=U4rWuwb3kytZXOptqW4+cTZGz6/wlVu5DpEhjcAA4sykWrBuQxk4WvEjp071KB2GfQSiCifKLG6NmPCkocOMLiv6tiRA7iy8ZY/O29hRC00zC/Z/7jNtgeFJE6w50Ec0g0FJcN0oKlD6NpsuDWIMlW7v5BBxxKFIsFVY+fcrRoQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=p86UHy59; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=mf2GQc6o; arc=none smtp.client-ip=193.142.43.55
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="p86UHy59";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="mf2GQc6o"
-From: Thomas Gleixner <tglx@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1711138030;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=/I7GIcd1orvJ1YDttKy3zNKHrkJSEPzRDkmOWSa/qAA=;
-	b=p86UHy59deAJphoKo4e8ExAKwzLzqZuVoRo7Wgw263tq7c4FV2x2A+nvGw13hy6emlETfC
-	F8iFd8vUPMCjmV/vzx9z3V+020ZdR42dvAg/vSElJgpiwAJlgVsm8EhGPWKAcbtBXSMxEM
-	xYJt8ap/U8b+cMT5J5i/U+6d7FmMK3YI1BpmBn0F++5o64BbUXM5U0LTkE7zkB5FppFCfH
-	V+pjfo/XuO2tMea9a35qQ/u0o/O5OKnfjVaLRsenaH9ULHINw3tO0upwBEXQvPPnwQSara
-	CaxuuBlYlywBQmS6vnXe3iCpNC18oheuKWmw3ExWetWLiYmg5IKxlgvNHnHVGQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1711138030;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=/I7GIcd1orvJ1YDttKy3zNKHrkJSEPzRDkmOWSa/qAA=;
-	b=mf2GQc6o+t6tJaFsnRrk8n3ofsR6kPIvtr2gJke6DlSEAn7zHOx9dPqj/celfpP/MG1yAS
-	SZDd6tyCO0kyOoAQ==
-To: "Rafael J. Wysocki" <rafael@kernel.org>, Linus Walleij
- <linus.walleij@linaro.org>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Francisco Ayala Le Brun
- <francisco@videowindow.eu>, Adrian Hunter <adrian.hunter@intel.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- ulf.hansson@linaro.org, Linux ACPI <linux-acpi@vger.kernel.org>, Mario
- Limonciello <mario.limonciello@amd.com>, "Rafael J. Wysocki"
- <rafael@kernel.org>
-Subject: Re: Bug report: probe of AMDI0040:00 failed with error -16
-In-Reply-To: <CAJZ5v0hgWGWneAgqCxZ2L85nrM_7J7H1g042sA5tzz234BNUGw@mail.gmail.com>
-References: <CAN-StX1HqWqi+YW=t+V52-38Mfp5fAz7YHx4aH-CQjgyNiKx3g@mail.gmail.com>
- <36198864-579e-41f0-baf6-917f0a7f4bfa@intel.com>
- <5767438.DvuYhMxLoT@kreacher> <5770245.DvuYhMxLoT@kreacher>
- <CACRpkdby5dY7j9=r_dq+at_sqFduJWo15zt4tj4fvhY-KgCUYg@mail.gmail.com>
- <CAJZ5v0hgWGWneAgqCxZ2L85nrM_7J7H1g042sA5tzz234BNUGw@mail.gmail.com>
-Date: Fri, 22 Mar 2024 21:07:09 +0100
-Message-ID: <87frwighea.ffs@tglx>
+	s=arc-20240116; t=1711280434; c=relaxed/simple;
+	bh=eWA1KsQbyFsxavGLt/r1WcVfv5RPxFSgRbK0beCUjbc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=i0DExCLIlc3gI5poPGrmbduRQZsEbQ4ARSDZrgTIEbw3by/4glLBh+oJEpUPfR6nNsvAqwPvUe1PlOzwadjsqZq0hLUr4HRy+oLPKLMXjcJh+ZtHksJRP/3VN52bgL7BEhnTUQzrMu5i37cDl8NEMUcDCWVHIMcQX49HGXtiRy0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <ukl@pengutronix.de>)
+	id 1roMDD-00050i-6Y; Sun, 24 Mar 2024 12:40:27 +0100
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <ukl@pengutronix.de>)
+	id 1roMDC-008DGj-Gc; Sun, 24 Mar 2024 12:40:26 +0100
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.96)
+	(envelope-from <ukl@pengutronix.de>)
+	id 1roMDC-00AMY4-1N;
+	Sun, 24 Mar 2024 12:40:26 +0100
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kbuild@vger.kernel.org,
+	kernel@pengutronix.de
+Subject: [PATCH] mmc: davinci: Don't strip remove function when driver is builtin
+Date: Sun, 24 Mar 2024 12:40:17 +0100
+Message-ID: <20240324114017.231936-2-u.kleine-koenig@pengutronix.de>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1670; i=u.kleine-koenig@pengutronix.de; h=from:subject; bh=eWA1KsQbyFsxavGLt/r1WcVfv5RPxFSgRbK0beCUjbc=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBmABEiGfPhWHdGW1KXxwS7Szv+JX/yU0gSB5Jfx IjLqDd4mMuJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCZgARIgAKCRCPgPtYfRL+ TrHMCACCwXNSIYYedv7CVLnH1c5zSvxdr0y1J4+XayZ4hoDnWvVcio5RtODwtc8v4kurQC6Wi1V Q2BlQoVPSsQDd8dKMMkWatMr924TpHUjV1rTrxOiAIa/59/BTzcykQEipUQhkMvnwq5pceFSF8a u45bHN2vsasEdF4L/8k8bajj+ylybgbjPAGXTtLps1+yneTdiOQ7V8PiNMqIW3XZG92UH1QrR9l MdctMx2vi1yLnw7Wk3jlZqw+bnR6zHWqggggAGZ+kRpx0EWNEOcsYUQ14mkSOoyC9DtO4ZrsYzV 8XCE7IZ7HlDmt8wkDGBd+ROx9Yt6q6c+9noMXzeQSc1JerpE
+X-Developer-Key: i=u.kleine-koenig@pengutronix.de; a=openpgp; fpr=0D2511F322BFAB1C1580266BE2DCDD9132669BD6
+Content-Transfer-Encoding: 8bit
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-On Fri, Mar 22 2024 at 15:49, Rafael J. Wysocki wrote:
-> On Fri, Mar 22, 2024 at 3:28=E2=80=AFPM Linus Walleij <linus.walleij@lina=
-roorg> wrote:
->> Uhhh I rather not, the other approach will cover the invariably recurring
->> instances of this, it will not be the last time we see something like th=
-is.
->
-> I'm not actually sure how likely this is.
->
-> The ACPI SCI is generally heavy-wieght, so it is not shared very often
-> (and I believe that there is a particular reason for sharing it with a
-> GPIO chip) and this very well may be an exception.
->
->> We need tglx input on this, I could merge the patch below with some
->> big TODO to fix it properly if the discussion about the proper solution
->> takes too much time.
->>
->> But I rather not hack around with IRQs without tglx (or marcz, but he
->> got overloaded) input.
->
-> Fair enough.
->
-> I guess I'll post the first patch with a proper changelog next week
-> and we'll see.
+Using __exit for the remove function results in the remove callback
+being discarded with CONFIG_MMC_DAVINCI=y. When such a device gets
+unbound (e.g. using sysfs or hotplug), the driver is just removed
+without the cleanup being performed. This results in resource leaks. Fix
+it by compiling in the remove callback unconditionally.
 
-Yes please. The COND flag makes a lot of sense. Hacking around it in the
-driver is just a bandaid.
+This also fixes a W=1 modpost warning:
 
-Thanks,
+	WARNING: modpost: drivers/mmc/host/davinci_mmc: section mismatch in reference: davinci_mmcsd_driver+0x10 (section: .data) -> davinci_mmcsd_remove (section: .exit.text)
 
-        tglx
+Fixes: b4cff4549b7a ("DaVinci: MMC: MMC/SD controller driver for DaVinci family")
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ drivers/mmc/host/davinci_mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 8bd938919687..d7427894e0bc 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -1337,7 +1337,7 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
+ 	return ret;
+ }
+ 
+-static void __exit davinci_mmcsd_remove(struct platform_device *pdev)
++static void davinci_mmcsd_remove(struct platform_device *pdev)
+ {
+ 	struct mmc_davinci_host *host = platform_get_drvdata(pdev);
+ 
+@@ -1392,7 +1392,7 @@ static struct platform_driver davinci_mmcsd_driver = {
+ 		.of_match_table = davinci_mmc_dt_ids,
+ 	},
+ 	.probe		= davinci_mmcsd_probe,
+-	.remove_new	= __exit_p(davinci_mmcsd_remove),
++	.remove_new	= davinci_mmcsd_remove,
+ 	.id_table	= davinci_mmc_devtype,
+ };
+ 
+
+base-commit: 70293240c5ce675a67bfc48f419b093023b862b3
+-- 
+2.43.0
 
