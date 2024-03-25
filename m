@@ -1,80 +1,125 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 942095D731;
-	Mon, 25 Mar 2024 12:06:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4FCE199BC
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 13:18:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711368387; cv=none; b=amN3wMMKBM6R7th5n2yqIs7xKudbaP/lPS2NJ6+05zXzdRQDp2V9fISJoalpEYyA/4kRmPIlrTg5TozilRXHQnMnc2sq6kufB7h2OQ6qk1XYqjINN8CdBgVGEU5V5zoVvem5mxoSesjA2fad/h/Z/8CuNfyuHU+UKdhNRDrk0T0=
+	t=1711372724; cv=none; b=kNVyq80XAoh9YnNHYN/ZOf8oJfpXEvIrYLDEmgXUnJkDOrTWsQJfJnC5ktKjNh8+402icFIlsT6F1Wd3ZQCjaUCUS5pAqPcN+bgmA1IAiEte1mDTHTQwQZhvdc89bcdzDSLlW45kWGA/ytqZ3xX21lQcrjUYAFzBIc8/u7xU3zA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711368387; c=relaxed/simple;
-	bh=yPtmna4ptGgXfkbENYERn+NKzVLez4o/N3DCc/GmLKI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=h72srGKs/T4g7uwvsBa8cWauYTkJoEsvPUqtLGVWP/voNF6jNcFcOXWb13JclTySmn/7BljPaz8umAXfbRgEM/SI+3KI/dW6hVrFDnh4JxAg9v3xo5OHDBPr4rL9iW/BFX/Ngu0MsUtbNuk+W8Kiqu8McWKbelaNkm/9SUnXTGU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 347BF1FB;
-	Mon, 25 Mar 2024 05:06:55 -0700 (PDT)
-Received: from [10.1.25.33] (e133047.arm.com [10.1.25.33])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 330623F67D;
-	Mon, 25 Mar 2024 05:06:18 -0700 (PDT)
-Message-ID: <de1eba3c-2453-4c5c-bd80-dd7d7b33f60d@arm.com>
-Date: Mon, 25 Mar 2024 12:06:16 +0000
+	s=arc-20240116; t=1711372724; c=relaxed/simple;
+	bh=jUHFT7GHBABnNWhUUsb9TaH8zDV3pnOGgOcdjdlYdbA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=G1nw8Cdfumoa5ShvmwaZBXrmjYWVa7dzpOpi9iEKyUZh1xOVgOB1n4Cqw9xBJ1DA9Bg0vhUI9YZqLUAQKqTCUzb2g4Nt0lQYsW2uLVdCyRrF3aOGthRVD1VUszp81gYivuF08MXlr/MdX+aHz988pCjYU7oQJPZRVICYH+KiMDE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ktSRhk1D; arc=none smtp.client-ip=209.85.219.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ktSRhk1D"
+Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-dccb1421bdeso3794200276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 06:18:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1711372721; x=1711977521; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=ceL10kuUzc1VTmaQNsfHwRb5WEw70QYvCvwFrHJHCrg=;
+        b=ktSRhk1DyPESD79xLJ+UcPqL6I7+rnbBOSDUkhSa+NMBab4kt1sALOp+3BD+MB1YZJ
+         yUbEudMW/Thf0F4e44sKdHj6aubuDJhK4LQKrTx4SMERFg1mHzm1UD3cwuejvn9pWmv0
+         t220Y07NLgyYTRKS/NCe4iX9UQdry/SNhdpOLXe3f/hJemO9MM5ceOecBlUz333g+x1J
+         qb+Scu+SSOech5A5AFGE70zjL59hTCnLBl2Ca9LSpqTsha49ugm7s7ljZgbN23zDBkPO
+         hu00o/POG1PjJ3quMT2TK+BUpTsn1LXasKs8wEfhuI6R+eAq7cKfN//Ljl7j2zwbkUDx
+         m9AQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1711372721; x=1711977521;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ceL10kuUzc1VTmaQNsfHwRb5WEw70QYvCvwFrHJHCrg=;
+        b=nDzHOeLqsM0BDg6JaYN+Ztkco/AiOSoxV1Er9dmGMd+2/VNR1pRXeG7uhRNwJXSCGZ
+         LiLnpHheh+rh2f+iyyqmw5AobkvLICVcgPR9A1qgPWdNcU4RU9ulM/t8HFvUl0t+qq1U
+         NhC9OwhfpssMJCRAfBL107yx5yDb/X2EXO/qaBfb2modYICuW+eM06rGAVoxvXGdIU4W
+         i7YBaTjC3Vph1Pa4EBGJC73fj7L2G/sXkXWmYsp7Vf5PABR2A+DuQDj2LKkmGacGI2jG
+         bC4psIX5kQQ3sF53cFZQnWpkwIgfri4tU7h8KEUjCB6NuUJXgZgyMRguJcCAcvJvsfaI
+         3v0g==
+X-Gm-Message-State: AOJu0YyDsORNSClUeTBkIPa+ZARA7TqUC71TlG2wNe6LSxj6dg43oMtY
+	azP0DpvAVPW6HXfrYSwDhdHEeacrCZJfJ5S2UJZ5bckYv1SJ0HggmtVzCbN7N5svP+2Lz+9H1oH
+	JCaamu7sMLV4cNDKarQkkGQ42+p9ZIGX8XKV66g==
+X-Google-Smtp-Source: AGHT+IHBAtsETDpFdGmDQMqeFq/C1HWpnkyJwmkgZqhewbdaKt4PCmaqUyLetMdO7RYqpCQvGSwJSK7+UJmmFu9aNpM=
+X-Received: by 2002:a25:aea0:0:b0:dda:c5ca:c21b with SMTP id
+ b32-20020a25aea0000000b00ddac5cac21bmr3873894ybj.37.1711372721646; Mon, 25
+ Mar 2024 06:18:41 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH 0/2] Introduce per-task io utilization boost
-Content-Language: en-US
-To: Bart Van Assche <bvanassche@acm.org>, Qais Yousef <qyousef@layalina.io>
-Cc: linux-kernel@vger.kernel.org, peterz@infradead.org,
- juri.lelli@redhat.com, mingo@redhat.com, rafael@kernel.org,
- dietmar.eggemann@arm.com, vschneid@redhat.com, vincent.guittot@linaro.org,
- Johannes.Thumshirn@wdc.com, adrian.hunter@intel.com, ulf.hansson@linaro.org,
- andres@anarazel.de, asml.silence@gmail.com, linux-pm@vger.kernel.org,
- linux-block@vger.kernel.org, io-uring@vger.kernel.org,
- linux-mmc@vger.kernel.org
-References: <20240304201625.100619-1-christian.loehle@arm.com>
- <86f0af00-8765-4481-9245-1819fb2c6379@acm.org>
- <0dc6a839-2922-40ac-8854-2884196da9b9@arm.com>
- <c5b7fc1f-f233-4d25-952b-539607c2a0cc@acm.org>
- <2784c093-eea1-4b73-87da-1a45f14013c8@arm.com>
- <20240321123935.zqscwi2aom7lfhts@airbuntu>
- <1ff973fc-66a4-446e-8590-ec655c686c90@arm.com>
- <2ed2dadc-bdc4-4a21-8aca-a2aac0c6479a@acm.org>
-From: Christian Loehle <christian.loehle@arm.com>
-In-Reply-To: <2ed2dadc-bdc4-4a21-8aca-a2aac0c6479a@acm.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240313133744.2405325-1-mikko.rapeli@linaro.org>
+In-Reply-To: <20240313133744.2405325-1-mikko.rapeli@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 25 Mar 2024 14:18:05 +0100
+Message-ID: <CAPDyKFpkz=LeVR_8z0-jh9QGwdXp1GUZ+VFPdDwKChBNFHyEGg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc core block.c: initialize mmc_blk_ioc_data
+To: mikko.rapeli@linaro.org
+Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@wdc.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, stable@vger.kernel.org, 
+	Francesco Dolcini <francesco@dolcini.it>
+Content-Type: text/plain; charset="UTF-8"
 
-On 21/03/2024 19:52, Bart Van Assche wrote:
-> On 3/21/24 10:57, Christian Loehle wrote:
->> In the long-term it looks like for UFS the problem will disappear as we are
->> expected to get one queue/hardirq per CPU (as Bart mentioned), on NVMe that
->> is already the case.
-> 
-> Why the focus on storage controllers with a single completion interrupt?
-> It probably won't take long (one year?) until all new high-end
-> smartphones may have support for multiple completion interrupts.
-> 
-> Thanks,
-> 
-> Bart.
-> 
++ Francesco Dolcini
 
-Apart from going to "This patch shows significant performance improvements on
-hardware that runs mainline today" to "This patch will have significant
-performance improvements on devices running mainline in a couple years"
-nothing in particular.
-I'm fine with leaving it with having acknowledged the problem.
-Maybe I would just gate the task placement on the task having been in
-UFS (with multiple completion interrupts) or NVMe submission recently to
-avoid regressions to current behavior in future versions. I did have that
-already at some point, although it was a bit hacky.
-Anyway, thank you for your input on that, it is what I wanted to hear!
+On Wed, 13 Mar 2024 at 14:57, <mikko.rapeli@linaro.org> wrote:
+>
+> From: Mikko Rapeli <mikko.rapeli@linaro.org>
+>
+> Commit "mmc: core: Use mrq.sbc in close-ended ffu" adds flags uint to
+> struct mmc_blk_ioc_data but it does not get initialized for RPMB ioctls
+> which now fail.
+>
+> Fix this by always initializing the struct and flags to zero.
+>
+> Fixes access to RPMB storage.
+>
+> Fixes: 4d0c8d0aef63 ("mmc: core: Use mrq.sbc in close-ended ffu")
+>
+> Closes: https://bugzilla.kernel.org/show_bug.cgi?id=218587
+>
+> Link: https://lore.kernel.org/all/20231129092535.3278-1-avri.altman@wdc.com/
+>
+> Cc: Avri Altman <avri.altman@wdc.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
 
-Kind Regards,
-Christian
+Both patch1 and patch2 applied fixes, thanks!
+
+I took the liberty of updating the commit messages a bit and dropped
+some of the unessarry newlines.
+
+Kind regards
+Uffe
+
+
+
+> ---
+>  drivers/mmc/core/block.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 32d49100dff5..0df627de9cee 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -413,7 +413,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
+>         struct mmc_blk_ioc_data *idata;
+>         int err;
+>
+> -       idata = kmalloc(sizeof(*idata), GFP_KERNEL);
+> +       idata = kzalloc(sizeof(*idata), GFP_KERNEL);
+>         if (!idata) {
+>                 err = -ENOMEM;
+>                 goto out;
+> --
+> 2.34.1
+>
