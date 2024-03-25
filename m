@@ -1,77 +1,80 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06FCC180B99;
-	Mon, 25 Mar 2024 09:31:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 942095D731;
+	Mon, 25 Mar 2024 12:06:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711359086; cv=none; b=EgRQaspg7qPTjTGqsT0eY9fgu3/hFJ9IkaUUtFG+hUJAtkSg6YvnUnKyrsmjonXcMqKad7vM1vTio2cIKlOn4xnSksMsg2ywCxknV+fdKCWPdgXXBcexoRNXCxah9y6NF3Y0DzUI17etKSNx3AomDSp/O6n1vvZuNRFUynnh8ac=
+	t=1711368387; cv=none; b=amN3wMMKBM6R7th5n2yqIs7xKudbaP/lPS2NJ6+05zXzdRQDp2V9fISJoalpEYyA/4kRmPIlrTg5TozilRXHQnMnc2sq6kufB7h2OQ6qk1XYqjINN8CdBgVGEU5V5zoVvem5mxoSesjA2fad/h/Z/8CuNfyuHU+UKdhNRDrk0T0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711359086; c=relaxed/simple;
-	bh=KQGRm43bE3L3xwmGGbOrt02HPI+IV/E4JEYCnarpe/Q=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eKCECPFPtq29O+HVdJu6inw2b23PFKQSBQupTMTcqBEiBk1eG8O6N5vU4iimzaEUlSdrXvpJFa9ZhA9gzpZYV+yIC4w7KGJvti8vp5wvUnYFXlzUTOmPFTiI0hTWpl1LG6iAKuZ5/KvdirIDZVCfCqyQqlGUJ0LXTdwl3rEISSc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=vb5HdJF0; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="vb5HdJF0"
-Received: from francesco-nb (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
-	by mail11.truemail.it (Postfix) with ESMTPA id 9E9CC20313;
-	Mon, 25 Mar 2024 10:31:21 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1711359081;
-	bh=RqCHlux3BXSBH8WfjK7YiZFQfbZIsOiaTbXVVkYin8A=; h=From:To:Subject;
-	b=vb5HdJF0Keio6EXkMphx6ZUlYOqwaQp79GhqO9t382nXW6Pu61rmvoFa21dI0bXun
-	 TvVQ83rdV9mUIqOIUU31X7Qx01/Ci710cjKjU0pZ93+6+LP+cZNmxvbaiwrql01rka
-	 COvCxQaPtWFwuIkTbCNhtRaCo4+yPp6S8Sp0/Ef8qPqXtqo600spRa0AUP8+SAwHqh
-	 5zqnUq8KIbQ+ILF7GIx0baVu8u9HZg2ue6THDusTrci9suuwtjLRAxDWMoqESuN2at
-	 zm2PkwAXh0UI+8jyNtouHRdUc2fVjpT+POpY0tzKg3FBQK6daIIn/h3Onyh99eHDd8
-	 NnJjz1ADP1VUg==
-Date: Mon, 25 Mar 2024 10:31:20 +0100
-From: Francesco Dolcini <francesco@dolcini.it>
-To: mikko.rapeli@linaro.org
-Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@wdc.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>, stable@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc core block.c: avoid negative index with array
- access
-Message-ID: <20240325093120.GB136833@francesco-nb>
-References: <20240313133744.2405325-1-mikko.rapeli@linaro.org>
- <20240313133744.2405325-2-mikko.rapeli@linaro.org>
+	s=arc-20240116; t=1711368387; c=relaxed/simple;
+	bh=yPtmna4ptGgXfkbENYERn+NKzVLez4o/N3DCc/GmLKI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=h72srGKs/T4g7uwvsBa8cWauYTkJoEsvPUqtLGVWP/voNF6jNcFcOXWb13JclTySmn/7BljPaz8umAXfbRgEM/SI+3KI/dW6hVrFDnh4JxAg9v3xo5OHDBPr4rL9iW/BFX/Ngu0MsUtbNuk+W8Kiqu8McWKbelaNkm/9SUnXTGU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 347BF1FB;
+	Mon, 25 Mar 2024 05:06:55 -0700 (PDT)
+Received: from [10.1.25.33] (e133047.arm.com [10.1.25.33])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 330623F67D;
+	Mon, 25 Mar 2024 05:06:18 -0700 (PDT)
+Message-ID: <de1eba3c-2453-4c5c-bd80-dd7d7b33f60d@arm.com>
+Date: Mon, 25 Mar 2024 12:06:16 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240313133744.2405325-2-mikko.rapeli@linaro.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH 0/2] Introduce per-task io utilization boost
+Content-Language: en-US
+To: Bart Van Assche <bvanassche@acm.org>, Qais Yousef <qyousef@layalina.io>
+Cc: linux-kernel@vger.kernel.org, peterz@infradead.org,
+ juri.lelli@redhat.com, mingo@redhat.com, rafael@kernel.org,
+ dietmar.eggemann@arm.com, vschneid@redhat.com, vincent.guittot@linaro.org,
+ Johannes.Thumshirn@wdc.com, adrian.hunter@intel.com, ulf.hansson@linaro.org,
+ andres@anarazel.de, asml.silence@gmail.com, linux-pm@vger.kernel.org,
+ linux-block@vger.kernel.org, io-uring@vger.kernel.org,
+ linux-mmc@vger.kernel.org
+References: <20240304201625.100619-1-christian.loehle@arm.com>
+ <86f0af00-8765-4481-9245-1819fb2c6379@acm.org>
+ <0dc6a839-2922-40ac-8854-2884196da9b9@arm.com>
+ <c5b7fc1f-f233-4d25-952b-539607c2a0cc@acm.org>
+ <2784c093-eea1-4b73-87da-1a45f14013c8@arm.com>
+ <20240321123935.zqscwi2aom7lfhts@airbuntu>
+ <1ff973fc-66a4-446e-8590-ec655c686c90@arm.com>
+ <2ed2dadc-bdc4-4a21-8aca-a2aac0c6479a@acm.org>
+From: Christian Loehle <christian.loehle@arm.com>
+In-Reply-To: <2ed2dadc-bdc4-4a21-8aca-a2aac0c6479a@acm.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Wed, Mar 13, 2024 at 03:37:44PM +0200, mikko.rapeli@linaro.org wrote:
-> From: Mikko Rapeli <mikko.rapeli@linaro.org>
+On 21/03/2024 19:52, Bart Van Assche wrote:
+> On 3/21/24 10:57, Christian Loehle wrote:
+>> In the long-term it looks like for UFS the problem will disappear as we are
+>> expected to get one queue/hardirq per CPU (as Bart mentioned), on NVMe that
+>> is already the case.
 > 
-> Commit "mmc: core: Use mrq.sbc in close-ended ffu" assigns
-> prev_idata = idatas[i - 1] but doesn't check that int iterator
-> i is greater than zero. Add the check.
+> Why the focus on storage controllers with a single completion interrupt?
+> It probably won't take long (one year?) until all new high-end
+> smartphones may have support for multiple completion interrupts.
 > 
-> Fixes: 4d0c8d0aef63 ("mmc: core: Use mrq.sbc in close-ended ffu")
+> Thanks,
 > 
-No empty new line here.
-
-> Link: https://lore.kernel.org/all/20231129092535.3278-1-avri.altman@wdc.com/
+> Bart.
 > 
-No empty new line here.
 
-> Cc: Avri Altman <avri.altman@wdc.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
+Apart from going to "This patch shows significant performance improvements on
+hardware that runs mainline today" to "This patch will have significant
+performance improvements on devices running mainline in a couple years"
+nothing in particular.
+I'm fine with leaving it with having acknowledged the problem.
+Maybe I would just gate the task placement on the task having been in
+UFS (with multiple completion interrupts) or NVMe submission recently to
+avoid regressions to current behavior in future versions. I did have that
+already at some point, although it was a bit hacky.
+Anyway, thank you for your input on that, it is what I wanted to hear!
 
-Tested-by: Francesco Dolcini <francesco.dolcini@toradex.com>
-
-Francesco
-
+Kind Regards,
+Christian
