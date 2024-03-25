@@ -1,103 +1,109 @@
-Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
+Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30510172BCA
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 13:18:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28AC713DBBC
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 13:19:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711372740; cv=none; b=RpPiX2/x2+A13l6NVQDsGA3GJow3HnbI2nspTEBgkP7+jRuzzzNnEFAfBbRJvpvZFcrL2jtN1plmGAec5gWToyX7LYq7VMm2Ew8jyizgl4iUB7tYWqRmTk1ODjUKylK3OwAH6Qm7/1Rnh+Fu4WqO5M3Yuh4NAI0i5o3E24VHGZ8=
+	t=1711372754; cv=none; b=AZAf5mLDvFOPPv+UhjI0Dzs19/4BY1CKbrACfR1JtdeK1Xi7RImJMxBI6+ma3iZTAeVYfsM9y7a574h8zyiayB4n2/1XlMddXdFPE5R0VpVQL7AjHUj67juBLNtuKQCxjurZxoSCY/SJTULU7K051rtx1PcoTBpCBMuc+euVcQ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711372740; c=relaxed/simple;
-	bh=+g6l24R7iYlT3jLfuSklU+YCcpUZzJymv4Cy8kThrH0=;
+	s=arc-20240116; t=1711372754; c=relaxed/simple;
+	bh=gAXmZJZ7JPBYyLYvwXEjCgYPbJ+nziJz1EoVZFfYBxI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VWCYh5ss/IpZ/PaOpMIUt/aawvmguZrYImp+B08WvO8j+2M9xH3AoK7ACvEoHLMa4KcIsC9bfBvaaXxQ4KAbHnF4IVJLTOIyz3lfu5hLwUhlvr2dOGAShCnkyC8mcYFzf7kJaTZ7c5ktagJpyAynJE0LuOXs75dFG2Po+k03N3A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=d7HpHQXk; arc=none smtp.client-ip=209.85.219.182
+	 To:Cc:Content-Type; b=QYHmYC6Mv/UnE0ctLA/YIL5ynNyT45cCUj//ugQTzblOjPOyOPIi7u7IH0vmEx2j2AJyFdCvEQi8koMlM1FUeKnjZ78EB6GHxZVa2UqXHKAsD2MPlDilP5RcGIrw0SVzP5EQpdqNZ0Mac4E9hqU0ZfUhyM0CAaAIapo/akkwWfI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bEDmjmWO; arc=none smtp.client-ip=209.85.219.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="d7HpHQXk"
-Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-dcbf82cdf05so3852326276.2
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 06:18:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bEDmjmWO"
+Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-dd045349d42so3694451276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 06:19:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1711372738; x=1711977538; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1711372751; x=1711977551; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=qc+iVsnT1Xzqqiyad328U5HjkOGFMt7G5z0pWYZra+o=;
-        b=d7HpHQXkpBc4q1z6AF2GvvML3HuI9q/Uf0epEpxw4diM8f7yvQPuW2vrWGUS4Z/qHp
-         4dK6DCBA9gXxTfivY+qARHI92rLbNTwuv+fq4iHF9YlS6iRz5wLgzowlMsZk81yzPPtl
-         KLWcGtUhLIMvR0bl9KfifT/wGBfInkgyQumbEU+IPTvbIp7dc46IihrwpL/hUMAnwn3/
-         AXQbbzZiuxzFK0uErN6ptFqKOIYCMniVlb4FW8PrJV6QUzZxpS69WDrRSy851QhocAeq
-         CIKusO9PIHW2alRk4wffOlddKnO9zi1AJqGizexsz9knu9m3BXFnzch1FZ+VECf9VFHY
-         ag5A==
+        bh=FRJs/xxex33QkTbsCV8od3MYvkVpVGCKzchYiYGgxF4=;
+        b=bEDmjmWOdFzt6qmzyF5yUupxP98K9Zf3Bj3n0pI3jJ7D1ApN4kNu44xnKJ3uI6UqzP
+         4iCHOduFs85wWvPc389bDbwu5TsY/hmJ2XmoyIn0/QcMw3tzc8I+zMujUVRBwH5PsRAD
+         UHjUAip5pUFiChSfpU+i/3fRedVjOSQCxWCgfjYZj+i7NlvaJFHcdtVDD8iLVeBOhCp0
+         ctEB6gcSmb0keG/4TWFivGKAgvbxT+yRFoU694g4jO0CUdJJtgHi2EBb8jo1/JqIdsn1
+         WPZvvjwDyS7SWosnesE4l/hoCDMo7KUd24JuyZ/f2PF4SqCkhm2rvBsNI/OgFe8m7nAa
+         S3nw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711372738; x=1711977538;
+        d=1e100.net; s=20230601; t=1711372751; x=1711977551;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=qc+iVsnT1Xzqqiyad328U5HjkOGFMt7G5z0pWYZra+o=;
-        b=g7k0tytKj6seYk37qyaLOJzlI+F93bpb4maCdDDCflaJt9fGcAPzVlnlw37oRgzljl
-         JqSGaN4TUhmTkS7W3ds7xdw+cSdHxbTLPcQqQTw+KR+WCkaRqr3SEUXxkV4s+IjVP1tf
-         mj07PiCEItkCbtBFYUEkdeNfAJnHXhRyEX6OjzPEXKFus1yi5wNt/hXaHGEB2cJtazQn
-         /dAkuNPEYuKEZELOawF+HXpwXZIfq8dCqkjb3pCD9PFA4qmDOMEWas4Q9VXBepg0K/8l
-         zFCGBdk/juqYWVPegBSeBE1A0b4nnAhzntTEIuRshCwkwAxyNsGpwMcIgsyOsI6rLWX0
-         zyAw==
-X-Forwarded-Encrypted: i=1; AJvYcCX9gb/Y33vKPxt9srKKrrxQOaDRv/dweu65ZAVoBSBqZKlkK35tg+DPPjqvIQ+HvKasnVSdspYdRWxu0TsOVNz0DaHLtZuKzfRb
-X-Gm-Message-State: AOJu0YzQG+fx+zWDjyJD4ivWz6qcvQBZFQFNaacOTsNIqwpGbp3M/kfM
-	th4FXuCLvbJQm6G77pLGL5XU6x1V3J6FZcRaFmB2H5fu/UEEZdTtnIPuC05aG1zqo1f4IYIvxFw
-	q3dRfmtOu7/sW1vGvsthKJCmRx5YoCaft2KIOmw==
-X-Google-Smtp-Source: AGHT+IEMz2pveieTRzatmvaD78PaHp+oiu25iulyM43bTmQBBxO8fIlfqLirkAWS82Cw+Pwqx/Nargo85AIivPxTPnk=
-X-Received: by 2002:a25:8042:0:b0:dcc:5aa1:7ac3 with SMTP id
- a2-20020a258042000000b00dcc5aa17ac3mr5037282ybn.2.1711372738228; Mon, 25 Mar
- 2024 06:18:58 -0700 (PDT)
+        bh=FRJs/xxex33QkTbsCV8od3MYvkVpVGCKzchYiYGgxF4=;
+        b=k/qkluKNK/oFLhF9Kdl5E2s/SxrouMR3vlN+pzxQmAlOtLa7FLb2tN4pI/7pj/ATW5
+         xzuuYuMe3625PP57upV384DpDX5iVe0Ht+KWe7dML5DWc2D+vKW2SJ2XhM/C48rIMy5t
+         Q7HmGCBwsEF55oj8IUQmN2ROVTjWT93yJjsdtOQNO+2sl970GSrzAbys2bPkCtPnLjxc
+         JVIU+BQGR11gL6PFiXBAJxurwOs4+1xekReB/Tcl7cOmIGF87Fcc+Mjn1+U4quIZW+hg
+         cOXCNpHKBQaKIyuBLb8pK6STgT1xhQaU+T1JU9uf1otvzl7Zb7ly9Q70UxdJHj6UQzQ5
+         G+IQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXVLiDAy/+hW5xYMIB3TlJnUkycffwPlMN/VRMjZ5sM9U5AUscim08AbEdcjaaLnQ4re65ZPW69jJFsNuvSGj0ovm+MVdKQ14rp
+X-Gm-Message-State: AOJu0Yx5hPunbmuV010bXi2jYB9he4CPK+4GFzDn6j73Eg4pIKwle1W4
+	obeFcQa2SfS1GFjD2E0LwleMBRhDgKLL3eoZjb66pW3YU/K5+Am4twet5B72/qyD7GMVFf5yh8u
+	YGpKwTOxCrV2dM8dzlfvSx1noMeYQf8FDJY8ZWg==
+X-Google-Smtp-Source: AGHT+IG2xBt6Vvh6SED5qGZRekkF3bhfFw7W0QPkk8DRIa7/EdrIKglIsJQC7D4muCETLEynNq4MclW5IGDlO/oijkU=
+X-Received: by 2002:a25:8381:0:b0:dcc:ebb4:fdc0 with SMTP id
+ t1-20020a258381000000b00dccebb4fdc0mr4315085ybk.65.1711372751176; Mon, 25 Mar
+ 2024 06:19:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240307114500.3643489-1-andriy.shevchenko@linux.intel.com>
-In-Reply-To: <20240307114500.3643489-1-andriy.shevchenko@linux.intel.com>
+References: <20240307145013.2721326-1-usama.anjum@collabora.com>
+In-Reply-To: <20240307145013.2721326-1-usama.anjum@collabora.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 25 Mar 2024 14:18:22 +0100
-Message-ID: <CAPDyKFpf4TEtee7bUsKEkmwzOcffXQWTH9xZz+JBk8WE1Fb5RA@mail.gmail.com>
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-sprd: Remove unused of_gpio.h
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Wenchao Chen <wenchao.chen@unisoc.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
-	Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
-	Chunyan Zhang <zhang.lyra@gmail.com>
+Date: Mon, 25 Mar 2024 14:18:34 +0100
+Message-ID: <CAPDyKFqE1bEPfye7PSLXALE29XoTT3Y4UyMLDUWorLuKCbSG5w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: remove unneeded assignment
+To: Muhammad Usama Anjum <usama.anjum@collabora.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, tianshuliang <tianshuliang@hisilicon.com>, 
+	Shawn Guo <shawn.guo@linaro.org>, Jiancheng Xue <xuejiancheng@hisilicon.com>, 
+	Shawn Lin <shawn.lin@rock-chips.com>, kernel@collabora.com, 
+	kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 7 Mar 2024 at 12:45, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
+On Thu, 7 Mar 2024 at 15:49, Muhammad Usama Anjum
+<usama.anjum@collabora.com> wrote:
 >
-> of_gpio.h is deprecated and subject to remove.
-> The driver doesn't use it, simply remove the unused header.
+> The err is being set to 0 and replaced every time after this
+> assignment. Remove this assignment as it is extraneous.
 >
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> Fixes: e382ab741252 ("mmc: dw_mmc: add support for hi3798cv200 specific extensions of dw-mshc")
 
-Applied for next, thanks!
+I don't think we need a fixes tag here, so I have dropped it.
+
+> Signed-off-by: Muhammad Usama Anjum <usama.anjum@collabora.com>
+
+Applied for next and by amending the commit message prefix to "mmc:
+dw_mmc-hi3798cv200", thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-sprd.c | 1 -
+>  drivers/mmc/host/dw_mmc-hi3798cv200.c | 1 -
 >  1 file changed, 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index bed57a1c64b5..685b1c648901 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -13,7 +13,6 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> -#include <linux/of_gpio.h>
->  #include <linux/pinctrl/consumer.h>
->  #include <linux/platform_device.h>
->  #include <linux/pm_runtime.h>
+> diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> index 61923a5183693..6099756e59b3c 100644
+> --- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> +++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
+> @@ -87,7 +87,6 @@ static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
+>                         goto tuning_out;
+>
+>                 prev_err = err;
+> -               err = 0;
+>         }
+>
+>  tuning_out:
 > --
-> 2.43.0.rc1.1.gbec44491f096
+> 2.39.2
 >
