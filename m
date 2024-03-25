@@ -1,99 +1,168 @@
-Received: from 009.lax.mailroute.net (009.lax.mailroute.net [199.89.1.12])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 735166CDCC;
-	Mon, 25 Mar 2024 17:23:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 145FADDBC;
+	Mon, 25 Mar 2024 19:02:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711387404; cv=none; b=GkXciYHRrv1Sqq2nKK42MOGBbOuYds5ZtOiGygl8SK+NBrQNHzFD1U304qzM1XW7huswDUSht9aI0M5HlHRLkm9nLrNUrfrPFhl7/X/fjovfdNDMq2qGnrMHkgHdbK0lLEZvHweuwK+QR/93dNvol//1Xn+i9DxoK06XQByt+Zc=
+	t=1711393338; cv=none; b=H6oY03KHmZx+pR7wRcTC5B53rPlYzbqj4rL3gcazgNSb8TycY8qy/ZHvvUt+NH5k8uKsH/gR9MAxWHu/wJRPZAB0pR+ggPHB//AqpQ/l4fOyxSS+A7MRgM9TgQtI55BaaHl8SZDHHR+k1DcgcQSiiZt8+4GytCUSF1H8eDb1rEg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711387404; c=relaxed/simple;
-	bh=1v8JTa2zwLY//oKs5JI1dBbv595ztN7DvLPvVEJBkpo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=hMqvBNmlcFPGR9f4+fHmW3CUfN+DCBO03jk8cnkHSPaCzniFoXYzA0HV+xbjV0AdQtb6E99hPBL2nq6yGwBsPBCJNNEfRgriPDq2mdeZw+o/lpR2E0bB5IdbpcuZL5nRqW5V0UThgTjlU8MZBSXcSzjaTwtfIDhRGzx1nSQjIfo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=H0iseS6v; arc=none smtp.client-ip=199.89.1.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=acm.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
+	s=arc-20240116; t=1711393338; c=relaxed/simple;
+	bh=GLL++iIYDEWpgztGZ5piaYOxhSeKwTJJ0ra4vN2sXR8=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=C/Ksqy63nDMEJrLYq7nxeuhJwcPp0AcYwyH2keF30q4Jcp3vLxzITGvHeGHrOLInsIJrpMz9lSyRfNHAv9hdyF1syAFkL82kEAdzEyurgzJSOSxXnYgiEus7bTTUZtrRf9c3Bg2EI+tIoJLapW3N0gEFSWoGaxSgehHiTb2zBWo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OWP1T6dD; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="H0iseS6v"
-Received: from localhost (localhost [127.0.0.1])
-	by 009.lax.mailroute.net (Postfix) with ESMTP id 4V3KX44rJvzlgVnN;
-	Mon, 25 Mar 2024 17:23:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
-	content-transfer-encoding:content-type:content-type:in-reply-to
-	:from:from:references:content-language:subject:subject
-	:user-agent:mime-version:date:date:message-id:received:received;
-	 s=mr01; t=1711387390; x=1713979391; bh=Fv7kCUT2BWY6M9OW2MD8hESk
-	Xk9W04pTKWY7feKrcos=; b=H0iseS6vqhPg02EIP/7y4FKrmC142fEYuF4FWSqO
-	ohcF4zANaSNf7Rx6TmIXcT1aMsdHTuIuH7MiUEEipMqk/ezAOAO+gMaJItvTluep
-	Cc2W2D+VUaDZYOgUEHtfxjXsXMNDlHaZ3VA6QYtN0dRY8Me0Aj5V4oLG5+H62YHl
-	90A0d96tyOIzqBzCwAs0RrEbXZH9KszAIqNnIXtbp/R97cf4F2d20EvcmSnPr455
-	a43uNRWr7ATSRTZuanQ5SJdFJY4tkrnnd3qyRygoPWFxdBXQKQYT4CvhDVU4qwDx
-	0q53ruY9j445njY1bAp7dRyVJOfySxMyZxv2hHlTdH32XQ==
-X-Virus-Scanned: by MailRoute
-Received: from 009.lax.mailroute.net ([127.0.0.1])
- by localhost (009.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id i0PMQCDUazuH; Mon, 25 Mar 2024 17:23:10 +0000 (UTC)
-Received: from [100.96.154.173] (unknown [104.132.1.77])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: bvanassche@acm.org)
-	by 009.lax.mailroute.net (Postfix) with ESMTPSA id 4V3KWw2sLbzlgTGW;
-	Mon, 25 Mar 2024 17:23:08 +0000 (UTC)
-Message-ID: <787fe4b7-a5af-4cd1-a7e8-8b9bad3be7d9@acm.org>
-Date: Mon, 25 Mar 2024 10:23:07 -0700
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OWP1T6dD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B42A2C433C7;
+	Mon, 25 Mar 2024 19:02:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1711393337;
+	bh=GLL++iIYDEWpgztGZ5piaYOxhSeKwTJJ0ra4vN2sXR8=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:From;
+	b=OWP1T6dD58yWsqJfiVwxEwcWwcEng+TbnXwAymG/8evfTUKba/BMjS3oDSrVYwODW
+	 WZv4QENXh9gB16A3bH8F1xvBkMQHqIx+SU6NGyEwXjWtOUxQ/8qRkf2HUp8lOnquVA
+	 jIiKg+AiQeUadVuUB9AEp4f5iLmvbgprJrMoQ2E4rC120V96AoYGfUUv14NJbTrn3y
+	 Vqvl3CEhBGiNHgPkHZsZcjSjfo2L7ur/r7JmuZEsmw97z7vNWw/aGxRdxQXghdVn7X
+	 pZyheFUPFew88xhkryjRcD4SnH2CpVeVTRAoXEyUtLKaOjGLNy3yb0bH+aGs+bLjbK
+	 4KnQ61SGv2rrQ==
+Date: Mon, 25 Mar 2024 14:02:16 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+To: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
+ timer timeout during suspend
+Message-ID: <20240325190216.GA1445191@bhelgaas>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH 0/2] Introduce per-task io utilization boost
-Content-Language: en-US
-To: Christian Loehle <christian.loehle@arm.com>,
- Qais Yousef <qyousef@layalina.io>
-Cc: linux-kernel@vger.kernel.org, peterz@infradead.org,
- juri.lelli@redhat.com, mingo@redhat.com, rafael@kernel.org,
- dietmar.eggemann@arm.com, vschneid@redhat.com, vincent.guittot@linaro.org,
- Johannes.Thumshirn@wdc.com, adrian.hunter@intel.com, ulf.hansson@linaro.org,
- andres@anarazel.de, asml.silence@gmail.com, linux-pm@vger.kernel.org,
- linux-block@vger.kernel.org, io-uring@vger.kernel.org,
- linux-mmc@vger.kernel.org
-References: <20240304201625.100619-1-christian.loehle@arm.com>
- <86f0af00-8765-4481-9245-1819fb2c6379@acm.org>
- <0dc6a839-2922-40ac-8854-2884196da9b9@arm.com>
- <c5b7fc1f-f233-4d25-952b-539607c2a0cc@acm.org>
- <2784c093-eea1-4b73-87da-1a45f14013c8@arm.com>
- <20240321123935.zqscwi2aom7lfhts@airbuntu>
- <1ff973fc-66a4-446e-8590-ec655c686c90@arm.com>
- <2ed2dadc-bdc4-4a21-8aca-a2aac0c6479a@acm.org>
- <de1eba3c-2453-4c5c-bd80-dd7d7b33f60d@arm.com>
-From: Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <de1eba3c-2453-4c5c-bd80-dd7d7b33f60d@arm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAAd53p53NjYsYctrb6oknXVTMEq919nfVvrK17EBXwsGCxvtbA@mail.gmail.com>
 
-On 3/25/24 05:06, Christian Loehle wrote:
-> On 21/03/2024 19:52, Bart Van Assche wrote:
->> On 3/21/24 10:57, Christian Loehle wrote:
->>> In the long-term it looks like for UFS the problem will disappear as we are
->>> expected to get one queue/hardirq per CPU (as Bart mentioned), on NVMe that
->>> is already the case.
->>
->> Why the focus on storage controllers with a single completion interrupt?
->> It probably won't take long (one year?) until all new high-end
->> smartphones may have support for multiple completion interrupts.
+On Mon, Mar 25, 2024 at 10:02:27AM +0800, Kai-Heng Feng wrote:
+> On Sat, Mar 23, 2024 at 12:43 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > On Thu, Mar 21, 2024 at 06:05:33PM +0800, Kai-Heng Feng wrote:
+> > > On Sat, Jan 20, 2024 at 6:41 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > > > On Thu, Jan 18, 2024 at 02:40:50PM +0800, Kai-Heng Feng wrote:
+> > > > > On Sat, Jan 13, 2024 at 1:37 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > > > > > On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
+> > > > > > > On Sat, Jan 6, 2024 at 5:19 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > > > > > > > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote:
+> > > > > > > > > Spamming `lspci -vv` can still observe the replay timer timeout error
+> > > > > > > > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750: Mask the
+> > > > > > > > > replay timer timeout of AER"), albeit with a lower reproduce rate.
+> > > > > > > >
+> > > > > > > > I'm not sure what this is telling me.  By "spamming `lspci -vv`, do
+> > > > > > > > you mean that if you run lspci continually, you still see Replay Timer
+> > > > > > > > Timeout logged, e.g.,
+> > > > > > > >
+> > > > > > > >   CESta:        ... Timeout+
+> > > > > > >
+> > > > > > > Yes it's logged and the AER IRQ is raised.
+> > > > > >
+> > > > > > IIUC the AER IRQ is the important thing.
+> > > > > >
+> > > > > > Neither 015c9cbcf0ad nor this patch affects logging in
+> > > > > > PCI_ERR_COR_STATUS, so the lspci output won't change and mentioning it
+> > > > > > here doesn't add useful information.
+> > > > >
+> > > > > You are right. That's just a way to access config space to reproduce
+> > > > > the issue.
+> > > >
+> > > > Oh, I think I completely misunderstood you!  I thought you were saying
+> > > > that suspending the device caused the PCI_ERR_COR_REP_TIMER error, and
+> > > > you happened to see that it was logged when you ran lspci.
+> > >
+> > > Both running lspci and suspending the device can observe the error,
+> > > because both are accessing the config space.
+> > >
+> > > > But I guess you mean that running lspci actually *causes* the error?
+> > > > I.e., lspci does a config access while we're suspending the device
+> > > > causes the error, and the config access itself causes the error, which
+> > > > causes the ERR_COR message and ultimately the AER interrupt, and that
+> > > > interrupt prevents the system suspend.
+> > >
+> > > My point was that any kind of PCI config access can cause the error.
+> > > Using lspci is just make the error more easier to reproduce.
+> > >
+> > > > If that's the case, I wonder if this is a generic problem that could
+> > > > happen with *any* device, not just GL975x.
+> > >
+> > > For now, it's just GL975x.
+> > >
+> > > > What power state do we put the GL975x in during system suspend?
+> > > > D3hot?  D3cold?  Is there anything that prevents config access while
+> > > > we suspend it?
+> > >
+> > > The target device state is D3hot.
+> > > However, the issue happens when the devices is in D0, when the PCI
+> > > core is saving the device's config space.
+> > >
+> > > So I think the issue isn't related to the device state.
+> > >
+> > > > We do have dev->block_cfg_access, and there's a comment that says
+> > > > "we're required to prevent config accesses during D-state
+> > > > transitions," but I don't see it being used during D-state
+> > > > transitions.
+> > >
+> > > Yes, there isn't any D-state change happens here.
+> >
+> > So the timeout happens sometimes on any config accesses to the device,
+> > no matter what the power state is?
 > 
-> Apart from going to "This patch shows significant performance improvements on
-> hardware that runs mainline today" to "This patch will have significant
-> performance improvements on devices running mainline in a couple years"
-> nothing in particular.
+> Yes.
+> 
+> > If that's the case, why do the
+> > masking in the suspend/resume callbacks?
+> 
+> Because there's no functional impact when the error happens, other
+> than suspend/resume.
 
-That doesn't make sense to me. Smartphones with UFSHCI 4.0 controllers
-are available from multiple vendors. See also 
-https://en.wikipedia.org/wiki/Universal_Flash_Storage. See also
-https://www.gsmarena.com/samsung_galaxy_s24-12773.php.
+Oh, I think I see.  Is this accurate?
 
-Bart.
+  Due to a hardware defect in GL975x, config accesses when ASPM is
+  enabled frequently cause Replay Timer Timeouts in the Port leading
+  to the device.
+
+  These are Correctable Errors, so the Downstream Port logs it in its
+  PCI_ERR_COR_STATUS and, when the error is not masked, sends an
+  ERR_COR message upstream.  The message terminates at a Root Port,
+  which may generate an AER interrupt so the OS can log it.
+
+  The Correctable Error logging is an annoyance but normally not a
+  major issue.  But when the AER interrupt happens during suspend, it
+  can prevent the system from suspending.
+
+> > If it's not related to a power state change, it sounds like something
+> > that should be a quirk or done at probe time.
+> 
+> Sure, I'll change that to be done at probe time.
+
+In general, we want to log Correctable Errors because they give an
+indication of link integrity.  But I'm guessing that since this is
+related to a GL975x defect, the errors occur pretty frequently and on
+all systems, so they aren't an indication of poor link quality and
+they only break suspend, annoy users, and cause problem reports.
+
+Masking them at suspend time would avoid the suspend/resume problem,
+but we would still have the annoying logging and get the problem
+reports.
+
+If this is all true, I think masking via a quirk is probably the right
+thing.  That way we won't get reports that "lspci causes errors" even
+when the sdhci driver is not loaded.
+
+I think we should log a hint in dmesg that we're masking
+PCI_ERR_COR_REP_TIMER because the error will still be logged in the
+PCI_ERR_COR_STATUS register, and that will be visible via lspci, and a
+dmesg hint will save debugging time when people report that.
+
+Bjorn
