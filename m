@@ -1,74 +1,82 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B5C612AAD1
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 13:18:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A714714D42C
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 13:18:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711372729; cv=none; b=fV/4cxgAu8P49FWRzE3agZ2kRFXc9wqJhp/oDxoAdNhov5nTwi1Lf2eDxa01oXoe6Hd/Q19l61wrOdrtRA8tKfiF8pzZQJ0EOK8jB6oIucd8ysWFLq4iwTiWQtshvge/XlikM3/LSOJDuMIjarAkBkipgwREz2YG0xhDiXldgB4=
+	t=1711372732; cv=none; b=tod5V/4o3+vXTK2f5ca5MAPzHuDVHQIztoi7N4lMc7BOBvgeaOtaMtmlcQyEwSuhCdQzlbAYiLu95gi09qikO3hO++lDkynZ+zStVam3x2/R0Bg2m5o63Wf7FlznoJ+YtQql8KzmJvgdRMU4Z/aLk6rWSLqcGAE6cj5zTegg0LY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711372729; c=relaxed/simple;
-	bh=/jRdDNHwSEGE3CvNzenljKZrdw33DtVzFmmgraXk5cY=;
+	s=arc-20240116; t=1711372732; c=relaxed/simple;
+	bh=n3k0iYRKHsrgv7l06dQ8fzZi31Diqx4FQuGjvbP0wXo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=tQ0vkVbktIHvMDta5fuhl9ESfEsrRDucQedDDjMXtLNtOO0j/oJC/4Ad9hY+ztaXEAGWlQ1fCTz3n4c5I7X05l66Uzk67F+Z0Uh3ySI5PeT4z/fS99gtb4N1zUIrtyfeqI+CxTrI7DEqVUXVJpie+E3MKvIEEfIu8ByDMyjE0vw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=wp5VY1Wf; arc=none smtp.client-ip=209.85.219.171
+	 To:Cc:Content-Type; b=Md1JJBk9slWkxVXQcW3/V1tKLYkIabWKv4ZTsJG0N6TOJrVkNnWL43bhMwH/+8xoMV0cr+XkTRCo0k7xzGWm/bZigVFE2S1t9dOVen2GMlU3s2DIs/+vjwjiRHfhq9R5GpPAWA/IPIbt1eJzmU37iAIdKE3EjyAhtjS4gH61pdk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xcZYgWo6; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wp5VY1Wf"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-dc25e12cc63so4740185276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 06:18:47 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xcZYgWo6"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-61130dd21c1so21368317b3.2
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 06:18:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1711372726; x=1711977526; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1711372729; x=1711977529; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=NYNXzQvnM81GzIL8Aewj9RD25qOiiYInoW3gilEhTKQ=;
-        b=wp5VY1Wfm70k4P17Tw+z04AGasIDMo8le8mXybAqh7q05xF6b43soDEJche7GjyrGk
-         ZdVTSLKAdhBfd51jqnssMcnm+YmiMOpF9E0L7M1ub951czdx2t8RepjY8Hl1c1NsL7ut
-         kQOW9b2X9J+Luf8uRCqfF96Esywug2hJIrN5lnGqtYVI6nl4fxeOD7gl6uaPAFsSivzZ
-         CGahPOSapX95UdRhxHxq7qbRv/rz+nAAgnKeMp/lWkt+Cm+Z1djEt23gyIINv9ihsnO/
-         0+TeRZvfqYnf5EeWVAAS27varXrirHOfVkmmY1d6Saahrf6VjxdAydZdhHoV8gbT0qsO
-         PSCg==
+        bh=cvgUqXkNCnMPYOL9pmGocb12/7B31f9lQJOhAhiYpoM=;
+        b=xcZYgWo6bFyKOMzWgEUGG3/sFecmMBKxoFxiAd3K4/yUdLmWOIESgUcK364taDGv/q
+         MjDUsnkbyx+PW5GYwADd6dRIg9o8lSUumNgNo14QnjbhCDgB4Z4nMoOKFCt8g1s0eRMt
+         HmihjWsKu0GMCJA9AxLIlKbjj0WwnSoVVcWQk+NBBXF8TYeY6MLvYtNHz97Kp1nc2zSO
+         nVzXVsYn/sA2APofDGdJKMZDQoK2Mn12eoHS26xPqxvcoykdm86ijF4yv4Pon/vk08iq
+         Q7ChWGMgXgxdL2g9a4VJR9Qe+us+7Xt8BeG7ZibOFKG+5v0YTdxkC0euCPxI0SPsaV78
+         9FEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711372726; x=1711977526;
+        d=1e100.net; s=20230601; t=1711372729; x=1711977529;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=NYNXzQvnM81GzIL8Aewj9RD25qOiiYInoW3gilEhTKQ=;
-        b=hBkHYMNJ0e8+UH7NqynUIo9DUmdbDA8mFr/aVH/M/aGQdrm5bX0FNcVbvFDoz57BWJ
-         SXK4irwGtLTXMUrQJ3i7KxxJdncuE8mh+NshYT2bJV0F/Ffp8cRAz9V+N0MxXNuTPO8K
-         GtrOyR6U1UVRNNUQEm//rXijI02zctaeinmtx6cWZf6cgZ1NTMrV/uXK8SFPxJ0yY0aK
-         F7Cxi+e/ytO9APmTmJLEOVkOWvdgu6+jwOBQhxiqOEK7Ai3SsuIsHYm1/pKwBJCrajnS
-         oxzAnBET5DA+YTGDqFmKywJv3Cmg28Aq0Uy1WA/RCzq+fB6CaXBINrSlWKhCU4qyfhvN
-         L57A==
-X-Gm-Message-State: AOJu0YyKX6Gfmrcel/3c1UJHHY8wo2n9pu5zBeys9Zy3YJzLq48j93ln
-	6ImeZBXot7pUIQp+Y6ok8jf9mCPSeymbKFlKHMke+Xqs/lx1P1heOtOklSA6qg/qh1P/3hScdon
-	im8JCjqXm2LCykrrrBGmcKoC5Wv4iNnFBnqTmog==
-X-Google-Smtp-Source: AGHT+IGozDfzk/PpYVV3Podxdbcg3FDTwqthJMX3zLNj8qanWGweFd7Xrq4deF/MtbEaepC9/bmv1+SARlRLK2BDQog=
-X-Received: by 2002:a5b:5c9:0:b0:dc6:ab85:ba89 with SMTP id
- w9-20020a5b05c9000000b00dc6ab85ba89mr2862877ybp.25.1711372726409; Mon, 25 Mar
- 2024 06:18:46 -0700 (PDT)
+        bh=cvgUqXkNCnMPYOL9pmGocb12/7B31f9lQJOhAhiYpoM=;
+        b=VfkqLJKMHC5ctNftJjZpBQBYs8bc1o0lKvW6TKS3YXuHrqK8LK859TNDRoJKgdj9QR
+         +nUUWU66TikapPwvC3xScQxnXfps8l3tZFkTSqHRrPpl18j82BV3luiKI+ImUhUCoquS
+         358rkIiZqiqP9y/n8qabFZhv6W4F6Q4/DOBMI+CTnIDAD1GcVvKELqlgrAPyHx/fh/PG
+         pnqXt7zh3PdSVJKqesgK/bVYkSPOjX/APRWoSUN2cFtqMOwaHPt6SyX6PT7WM35DCms8
+         mrnrL0AH2z4KVZBx58ERj4LHonvofHG3J1n6GcCVHFOF+4pyctZ+9OSZfaVGm03NbR/S
+         Nf6Q==
+X-Gm-Message-State: AOJu0YzJtEl0M98OYj5XJ3RMlMGrivTGuDCWdBAhP6kRj+8x/bvVS1aM
+	QnhsKTYasObY8n7U8BMvX6YfeTmwlwfIUGIYL7Scb6R3WbXM4LBGvCF/NU1qCjokRzzA5uPyJqh
+	vp2/uPEGYHs8XtvxdrIf+nVGFVJPssyWt+6eciA==
+X-Google-Smtp-Source: AGHT+IHZVBThr1gKl1PUGSzyaGohCWnTiHIIdzOXuyMY7iKKwFdfPBat5kQW50jTwj/J1exaj8/EfpqCHQHzicLEWPk=
+X-Received: by 2002:a25:2e0c:0:b0:dc2:470b:887e with SMTP id
+ u12-20020a252e0c000000b00dc2470b887emr4783512ybu.21.1711372729682; Mon, 25
+ Mar 2024 06:18:49 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240307114600.3643948-1-andriy.shevchenko@linux.intel.com>
-In-Reply-To: <20240307114600.3643948-1-andriy.shevchenko@linux.intel.com>
+References: <20240307121912.3676850-1-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20240307121912.3676850-1-andriy.shevchenko@linux.intel.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 25 Mar 2024 14:18:10 +0100
-Message-ID: <CAPDyKFrKBiR7vnqPj_0iaAcQu9v0hdn0FHdGLgeCS3ZVYPdodg@mail.gmail.com>
-Subject: Re: [PATCH v1 1/1] mmc: core: Remove unused of_gpio.h
+Date: Mon, 25 Mar 2024 14:18:14 +0100
+Message-ID: <CAPDyKFpyF2OAQGP+RYmzYCh-ZFk+T+9w0A3AkJSdODEy5rHLJQ@mail.gmail.com>
+Subject: Re: [PATCH v1 1/1] mmc: sdhci-s3c: Replace deprecated of_get_named_gpio()
 To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 7 Mar 2024 at 12:46, Andy Shevchenko
+On Thu, 7 Mar 2024 at 13:19, Andy Shevchenko
 <andriy.shevchenko@linux.intel.com> wrote:
 >
-> of_gpio.h is deprecated and subject to remove.
-> The driver doesn't use it, simply remove the unused header.
+> It seems the of_get_named_gpio() is solely used to check
+> if the GPIO is present in DT as the function can return 0
+> if and only if it's present and it becomes in the global
+> number space 0. But this quite likely shows that the code
+> wasn't ever been tested on the systems when no GPIO is provided.
+> In any case, the proper test is just to call of_property_present()
+> without any attempts in requesting GPIO (as we haven't saved the
+> number or descriptor anywhere in the code).
 >
 > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
@@ -79,21 +87,33 @@ Uffe
 
 
 > ---
->  drivers/mmc/core/host.c | 1 -
->  1 file changed, 1 deletion(-)
+>  drivers/mmc/host/sdhci-s3c.c | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 8f8781d6c25e..48bda70145ee 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -13,7 +13,6 @@
->  #include <linux/err.h>
->  #include <linux/idr.h>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 0e8a8ac14e56..6493b0edba34 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -17,10 +17,8 @@
+>  #include <linux/slab.h>
+>  #include <linux/clk.h>
+>  #include <linux/io.h>
+> -#include <linux/gpio.h>
+>  #include <linux/module.h>
 >  #include <linux/of.h>
 > -#include <linux/of_gpio.h>
->  #include <linux/pagemap.h>
->  #include <linux/pm_wakeup.h>
->  #include <linux/export.h>
+>  #include <linux/pm.h>
+>  #include <linux/pm_runtime.h>
+>
+> @@ -446,7 +444,7 @@ static int sdhci_s3c_parse_dt(struct device *dev,
+>                 return 0;
+>         }
+>
+> -       if (of_get_named_gpio(node, "cd-gpios", 0))
+> +       if (of_property_present(node, "cd-gpios"))
+>                 return 0;
+>
+>         /* assuming internal card detect that will be configured by pinctrl */
 > --
 > 2.43.0.rc1.1.gbec44491f096
 >
