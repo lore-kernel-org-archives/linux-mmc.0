@@ -1,130 +1,141 @@
-Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
+Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B775E13B2BC
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 13:19:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A49FD1741C6
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 13:19:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711372766; cv=none; b=QdaBYUDBhHLTvlMJPnSvAVtCkEdRoE40TtT/J1aqRMEPPogzkay5kaPNHfyeJjlm5MS98LtYqWJS8FH2m8jMPt/dnR0xYN3Ux5etFyVPDfn9AFWAFQYHLEx4MceF2H4eo5gnz+rplrYTjXL2OQRCmGypr/zaZVfbsuz7L4rM35o=
+	t=1711372772; cv=none; b=cdj7ZyHwL++CAWVP70IkYooe+9kfU6H9cFgr1MFjCDtDi0VAHu6+uFiR/6q0f5CK0A8LX9NxG5pDxgW+P8NCXcG1jHO3WbS/IkSfZ0pQ9NHR5tcrKwLi0orW+BDtq/6clnPABST93NAHlnsifgFLJ5fqpna1bMfDFO6TpaLmw48=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711372766; c=relaxed/simple;
-	bh=4GQ/Ylb2FAdVLwbqTrN8fDxpWE6cYSu4yrX6gxUbEvY=;
+	s=arc-20240116; t=1711372772; c=relaxed/simple;
+	bh=S3ztrWHVVK9UHcsRBhMut8Zbxy+B9Pd1ajbC1PF1CI8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=F9Hl1fwjhbdmM2eb/YtS+8SWKMXtVSxvtFpWYLOMW5ey5daW51rU58hY9jP0t/dBHYUxYDRXuRFL9y33IOCpGgTOeV7jrc4ShWoMTSA9L8Bi9+DtUMPMbECv8APXU72caMishzpLpXzcWpx3wUFvaHiQ0y5u3PXA8WWB7oisfLg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=HltJQNYA; arc=none smtp.client-ip=209.85.219.182
+	 To:Cc:Content-Type; b=lr5mGcw9WKASn0H9kEkFCUochJmG71/yo/vnmy5bhSeow3B866T+pOxJXkjq98/F3zi24S2Gt4ult6DmG5miOn+smJpWZy6fAdXii+f/Jn+FCWvkK54TNX3/5qNhhn1NRu5eXlHWm8zMAwVZzJFtkzkoJbhDzlU11m/GKZtetjI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Ud1uag50; arc=none smtp.client-ip=209.85.219.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HltJQNYA"
-Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-dcbcea9c261so4232310276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 06:19:24 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ud1uag50"
+Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-dd161eb03afso3606531276.0
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 06:19:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1711372764; x=1711977564; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1711372769; x=1711977569; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=CoulX7BQpsTOmyIdZQqRavCOlGmEyy57qcbpihkH62Y=;
-        b=HltJQNYA9TVjxtCnpDxj1n8RV0zHicIHy4HWWycnSapxLlYgRsvJvw6Z7nd3/RAKB+
-         oLwDbHXi4Wa/tqqAeDardvh7pqmUAlecjQ2GM1idOrGDZs7M6A3So1x0iZ3llEL1DnqJ
-         6PMKkVPqoOqzsbmgi/413NCAaHXNUSStoxobtCD08fTxEjF9gcaab52J6TAc4jRF8nP+
-         /Je7x3zHp0Bteg3jEVObchC38sxazNchdZuX7mDy3/+G/hOjUo0XTFZxbyHuf0KhTef9
-         r7aAT+L/4qbbjhhi4CjIZoC8XItMcTEJQIptFNQU+BhAx2Lv5ostxEOUXLhrG7S0QrOE
-         31Mg==
+        bh=zaHJM1cQ4tk4RAJvAvOT50AuQfeiLRm02aKBJ6onQM8=;
+        b=Ud1uag50VCxwTFw+mzAl/L62GNxJYJA4YCKjenCYXG2LqOibS4QZpn8jbCUh4WfryE
+         64FOZZ1JGLeh8ecKjaCe2zMzafqXJZTuylo7T5EczLJAkQV0EUwyK4bfItz+QA+qq5Kz
+         8y5vAoOhxgkShuOstzHIe1XTxeb4XPcDZFHfhJjZ8JLYRRFGfa6lq7AYHViskhv1ONAF
+         kN9RnGa1TDGFrn5yEtOx1RIR/hTVTI9IxkWd4m8q3VXmp0m+jP3ngTgcJr8ar5anwe0r
+         3bNbtsw3Arf2fi2gLy3XRvV6DeMm6EZ3HEfUaFycEe05S8viLEnPA3AarXrC4+8oYn5t
+         bmow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711372764; x=1711977564;
+        d=1e100.net; s=20230601; t=1711372769; x=1711977569;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=CoulX7BQpsTOmyIdZQqRavCOlGmEyy57qcbpihkH62Y=;
-        b=jgXX4YaNiNS2l3OR10vmerwneOPR4/agSNsWTlcIFmaOzvCichNisxrBMyALJ7W3gh
-         rzZygL0P7WxMWUlkKWSQ40Wvl7h795NhnuWX96hDOYQaz08Nf2xnaOoUMBNUho/eDlzg
-         2koKB9Qm/BYRzgrguPTvvRchOUaJdQc9BqcIrcUr0vtorVZ2SHj71fD1rNnvI7LByZRW
-         znhJlOSyfqBrm6VUghJ/Hc1XVcXDGoaSvxVM+/zpxbj+cR0H0TYmCWz7PC0FfE3zQj8a
-         hhM3AOazgLuoH858wXQ7VYDjpQVeJC0b8EIoVxtDIZ5Hn4B7h8x+n4sfdv61fRlkVInD
-         n1jA==
-X-Forwarded-Encrypted: i=1; AJvYcCUIRXWRIc//4Y6A9RZCLbtNdQQZ1n3xLnBHO5/MsQ/UdOFlnJ2QRMskzYm7HTNb+m2XZaIe+v3Vy6OgYFiphtVAx3iYyQv6ymH2
-X-Gm-Message-State: AOJu0YzouuOrp900pCh9MXr7HE8wpT8YCrpIyxiBAYDnYPHKGeNhxQd3
-	0z0ioOiAXKd0r7FzbvtCMNLG+3LP8d6S5NveR8s0ArrHQ7TxkZTuGR+xSpPaIPtuhvxJc1KHUiy
-	xhXai4koBDk/AyC9QnmbSjljImVMZF8dCp30xubNQHklDXfoI
-X-Google-Smtp-Source: AGHT+IG4OvqTknR9DVrYyeqEXmiomNARQe3hEQWymLFVrJHFKfkQfsJL+lxdF5P7pIC5YjMQJ4trm2o+KsiTYahSeZI=
-X-Received: by 2002:a25:4d03:0:b0:dc7:48f8:ce2e with SMTP id
- a3-20020a254d03000000b00dc748f8ce2emr3956500ybb.37.1711372763830; Mon, 25 Mar
- 2024 06:19:23 -0700 (PDT)
+        bh=zaHJM1cQ4tk4RAJvAvOT50AuQfeiLRm02aKBJ6onQM8=;
+        b=pD008P1r8S1NxW71pmX6qffVoXmDHB4EZJj4URhk0nIPM1NID980GPytTsKYq0FNWj
+         rP4bNtOd8A08rZZUllOPW0i404VHj9Z/ugaZc5KMDFdnHZdUAZzr9V9npKZXbi232Sjz
+         BCLP5SxsX1e8B8v5uzOF49fXIqu6Le/ymEtsrUL2AD83BJ1MO3OVpfzxl8HR0AgdHmxO
+         vi0vkNe0z8hcL9nkPUXJ5AujaQ6Et8lh8JTctGWWGN9boMcB2HmIMIfQWTpqaLZVgJuL
+         ISv1VANTiBEl++gjzYXtwxwWvRaG7sr+rAXanS2YYkc7pQPIsheXTEXSMXXC3jC7kV5/
+         jdlg==
+X-Forwarded-Encrypted: i=1; AJvYcCXITqBA6K7WNyfgF1ZmILkcO7zsrKajhbJuO6kAbJC1cAhiPUCMGxSRupW6kYrCin0M98FePU5hpV6ykxDwT0096Rs8qkRRlUM3
+X-Gm-Message-State: AOJu0Ywhvm4hNzb548AUGUrewb+vCnIicfKo6CrjBrkGtI4vHVu+q4Ew
+	31+eK64rs5dOnHjGgUbT+M21IZp86opZBUgEXJrju6ZLJV9wsrO6+ZX9z8DFBdLwTAAJj4JoSpY
+	HNU6HJ0aTrvkuqwZSNS/bwhXIY/vF6BDAMWCWcA==
+X-Google-Smtp-Source: AGHT+IEwL1Fzz+y6yDYUEA+s73WQ4xdBgsBLV+YWEgiHPVayo2OyLpJbCdfSahU/DqAW5XvVE7dU1KLGKxOSlg6MF6Q=
+X-Received: by 2002:a25:ef07:0:b0:dcd:40fa:7bd0 with SMTP id
+ g7-20020a25ef07000000b00dcd40fa7bd0mr5024611ybd.3.1711372769640; Mon, 25 Mar
+ 2024 06:19:29 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240314091512.1323650-1-lizhijian@fujitsu.com>
-In-Reply-To: <20240314091512.1323650-1-lizhijian@fujitsu.com>
+References: <20240315234444.816978-1-romain.naour@smile.fr>
+In-Reply-To: <20240315234444.816978-1-romain.naour@smile.fr>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 25 Mar 2024 14:18:47 +0100
-Message-ID: <CAPDyKFo_D7cCoMMr3LQ6c=G-fVnaCU==_v0n9Dq_0biAaytqhg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Convert sprintf/snprintf to sysfs_emit
-To: Li Zhijian <lizhijian@fujitsu.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Date: Mon, 25 Mar 2024 14:18:53 +0100
+Message-ID: <CAPDyKFqzCwTJzRniLNMRPs_rSvrsCTMOdDXC=APfKg7Zpnz4YA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-omap: re-tuning is needed after a pm
+ transition to support emmc HS200 mode
+To: Romain Naour <romain.naour@smile.fr>
+Cc: linux-omap@vger.kernel.org, vigneshr@ti.com, adrian.hunter@intel.com, 
+	linux-mmc@vger.kernel.org, tony@atomide.com, 
+	Romain Naour <romain.naour@skf.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 14 Mar 2024 at 10:15, Li Zhijian <lizhijian@fujitsu.com> wrote:
+On Sat, 16 Mar 2024 at 00:44, Romain Naour <romain.naour@smile.fr> wrote:
 >
-> Per filesystems/sysfs.rst, show() should only use sysfs_emit()
-> or sysfs_emit_at() when formatting the value to be returned to user space.
+> From: Romain Naour <romain.naour@skf.com>
 >
-> coccinelle complains that there are still a couple of functions that use
-> snprintf(). Convert them to sysfs_emit().
+> "PM runtime functions" has been added in sdhci-omap driver in 5.16
+> f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions") along
+> with "card power off and enable aggressive PM" 3edf588e7fe0
+> ("mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM").
 >
-> sprintf() will be converted as weel if they have.
+> Since then, the sdhci-omap driver doesn't work using mmc-hs200 mode
+> due to the tuning values being lost during a pm transition.
+> See the report on the linux-omap mailing list [1].
 >
-> Generally, this patch is generated by
-> make coccicheck M=<path/to/file> MODE=patch \
-> COCCI=scripts/coccinelle/api/device_attr_show.cocci
+> As for the sdhci_am654 driver, request a new tuning sequence before
+> suspend (sdhci_omap_runtime_suspend()), othwerwise the device will
+> thigger cache flush errors:
 >
-> No functional change intended
+>   mmc1: cache flush error -110 (ETIMEDOUT)
+>   mmc1: error -110 doing aggressive suspend
 >
-> CC: Ulf Hansson <ulf.hansson@linaro.org>
-> CC: linux-mmc@vger.kernel.org
-> Signed-off-by: Li Zhijian <lizhijian@fujitsu.com>
+> followed by I/O errors produced by fdisk -l /dev/mmcblk1boot1:
+>
+>   I/O error, dev mmcblk1boot0, sector 64384 op 0x0:(READ) flags 0x80700 phys_seg 1
+>   prio class 2
+>   I/O error, dev mmcblk1boot1, sector 64384 op 0x0:(READ) flags 0x80700 phys_seg 1
+>   prio class 2
+>   I/O error, dev mmcblk1boot1, sector 64384 op 0x0:(READ) flags 0x0 phys_seg 1
+>   prio class 2
+>   Buffer I/O error on dev mmcblk1boot1, logical block 8048, async page read
+>   I/O error, dev mmcblk1boot0, sector 64384 op 0x0:(READ) flags 0x0 phys_seg 1
+>   prio class 2
+>   Buffer I/O error on dev mmcblk1boot0, logical block 8048, async page read
+>
+> Don't re-tune if auto retuning is supported in HW (when SDHCI_TUNING_MODE_3
+> is available).
+>
+> [1] https://lore.kernel.org/all/2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr
+>
+> Fixes: f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions")
+> Signed-off-by: Romain Naour <romain.naour@skf.com>
 
-Applied for next, thanks!
+Applied for fixes and by fixing the comments Adrian pointed out in his
+reply, thanks!
+
+Note that, I have also tagged this for stable kernels.
 
 Kind regards
 Uffe
 
 
 > ---
-> This is a part of the work "Fix coccicheck device_attr_show warnings"[1]
-> Split them per subsystem so that the maintainer can review it easily
-> [1] https://lore.kernel.org/lkml/20240116041129.3937800-1-lizhijian@fujitsu.com/
-> ---
->  drivers/mmc/core/block.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/sdhci-omap.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 64a3492e8002..1e1e136d9e72 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -234,7 +234,7 @@ static ssize_t power_ro_lock_show(struct device *dev,
->         else if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_EN)
->                 locked = 1;
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> index e78faef67d7a..94076b095571 100644
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -1439,6 +1439,9 @@ static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
 >
-> -       ret = snprintf(buf, PAGE_SIZE, "%d\n", locked);
-> +       ret = sysfs_emit(buf, "%d\n", locked);
+> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> +               mmc_retune_needed(host->mmc);
+> +
+>         if (omap_host->con != -EINVAL)
+>                 sdhci_runtime_suspend_host(host);
 >
->         mmc_blk_put(md);
->
-> @@ -296,9 +296,9 @@ static ssize_t force_ro_show(struct device *dev, struct device_attribute *attr,
->         int ret;
->         struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
->
-> -       ret = snprintf(buf, PAGE_SIZE, "%d\n",
-> -                      get_disk_ro(dev_to_disk(dev)) ^
-> -                      md->read_only);
-> +       ret = sysfs_emit(buf, "%d\n",
-> +                        get_disk_ro(dev_to_disk(dev)) ^
-> +                        md->read_only);
->         mmc_blk_put(md);
->         return ret;
->  }
 > --
-> 2.29.2
+> 2.43.2
 >
