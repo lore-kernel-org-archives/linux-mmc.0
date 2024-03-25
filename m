@@ -1,185 +1,109 @@
-Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62F2714D28A
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 02:02:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.125.188.123
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11502153568;
+	Mon, 25 Mar 2024 02:13:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711332174; cv=none; b=HFnmonnV6QiO8H7be9l1f8oMtGImswbyfchmCY2Pr3tcmMBFQN0SoWUCVjHWyyHwJkma21ZMzyfkxkNFP/mcDc1RzT4F3D9u87jA7HMRHx7zKrCMqENDmLM6vTBm5GmR6dlRkznhwGCTsCcI4TH1vsD8w86HzvdrqTrB2RI4RJw=
+	t=1711332789; cv=none; b=u7REQ7lAzJE27FtSPJ1eSaA5qN0mvEhGELx5KLu7mFDtGkmiWdlIWfp21k78JdllIhO//sDXhPAUsfbh/vMkGt+dQGEXXgrUdx41IkRb3wCemAJnrlLDvob0Dfn42azqF+4jn3mVSMq6+MYtJGIMuO5JDf6RhBDkk/o2r9S0UbU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711332174; c=relaxed/simple;
-	bh=r9B98m2a8dZ0bmDDC3obEW4AWL7V1A9bqVt8onHT71A=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=oiWXF0GeVW+KlK1rsvqCn/D1Ji+os36vr3I/mIsvp8QcKcXd6vyLOom3Uh2Tv/KNdFVlV/6CTDNO8tk+UFbajZNR8B8ehnrnIHaAOe61hDET7NgPbUcQG79vOMwn/VVgHR8J3QyUejK3WRQtJloVdH/GZHi4QV/DmILER0HImtQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com; spf=pass smtp.mailfrom=canonical.com; dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b=BMoL2ktH; arc=none smtp.client-ip=185.125.188.123
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
+	s=arc-20240116; t=1711332789; c=relaxed/simple;
+	bh=OQ6DaWqLtLK0mHL2i6HS0EPqyqAvookaS2ecZGz/nWM=;
+	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc; b=g43doJD1Zwd+SjGFr2tDawQRyGxaqDWtHOLzHbbPbdlZEifs5MViBVSEdcqAq4MXmI+EdlTb8RCW8B/c0Gl7UUu7O5d1K+qyZXe2jCfHGN1ApxYSjBtyyzvY+nuAnF/lYyilRgmLDNgJoFct7k0iusd1Lr+w+/W9TO8YCmiI934=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IW3oS+vk; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="BMoL2ktH"
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 402843F630
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2024 02:02:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20210705; t=1711332163;
-	bh=+mIvzsZciY5ySPQ+G6tsFtbRNob9H1jOM+O8s2gDVJ4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type;
-	b=BMoL2ktH1qx7snnVhmYWji0Igw5QkyvgLAs6L+u10zr/JeWW9J9K4yS3ZsnHzTkj6
-	 caNWBaSC/9c4hAhFT8GQD+iPLKqVElHfjLkxrisr7+AvTI1RVJr0LN1B8t/azrZH30
-	 LHmnmsPtm4rbCuzPijUOTo6RBHob7FJDt4uJtqW7vquBJWlY/TwtaTsiJAgEwclexT
-	 giwQ90DGHLaImtJq/uxNvDU1bWj0HlbYwoGjYABkV+SxZVnUTahe4Gxf6skfeCvLVF
-	 Oj99E7aElot9ASgSt/oOwd4fmB+LDgcRXvi3FPTwW2RyzwB6MEGOSpy+KwY6NraJ8m
-	 dt60nWaFfGkhw==
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-29f820081easo3463382a91.3
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Mar 2024 19:02:43 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711332160; x=1711936960;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+mIvzsZciY5ySPQ+G6tsFtbRNob9H1jOM+O8s2gDVJ4=;
-        b=nge1MSPx5fJK4mgZFshKxtml3fisSclo07dYGhC+kdR+GwvgRvF9bDwYkC/ykg5Wmq
-         hu3IQYbFxzFqFZV2CT5ROYpQHSJOl99+HXPKXrW1IAkjkumv2/nBOTzWWsfO0zOQNdlB
-         gMFhR67pr/XpSTp132Vcw6yECtYYhj00CS/hoKaruwrKkudYMNNa6GDTJOYkk70w9wb9
-         SKzNbg1UNdYHxC0/Cl3tp9Lb4o/RqxJQpoiYwRdzH74ExLcwvnicBzKlYU33yIK2GNiM
-         W0EGWg6IfMy4Ci6yBPs7WDjPlVdu4lxEQqrOyniXls7GwQ76rHZaXQgt2lJ+jZRuUF8f
-         GqJQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXXCkL6dY0Xq7Rzgd1sdKxPrU2VuWZl6Ho/o/Sm9f4tirFUEFSWeo7RdtJL4EwAWtgmpAgTrf48Gd+CmJOoTEDMTA5WGZ37kxA3
-X-Gm-Message-State: AOJu0Yy+jFXls7m4j3wpmauPjH6+gLo92Ra+XeAUHyU13DlzsJkGS+Ss
-	Vxo750anwDousyJKB1qP8X2D8fsW5rbdjfKBAFYqKfzzQp00kyn+7J/9/au7a4DGy5+U6VvFXQb
-	sOLFwj41y8GLur0Ly5pCgOVOv3gF6CfU33VnaeHdAisBRrU8QRC9PRkU5bAXx+Pv/va0zOY/m8+
-	KY4x2pX/z8l5Y3zEQUb9/02fn+GMWhFJWNDtCfvQJ0/UEyph5I
-X-Received: by 2002:a17:90a:f305:b0:29d:e004:f8ce with SMTP id ca5-20020a17090af30500b0029de004f8cemr4659463pjb.6.1711332159844;
-        Sun, 24 Mar 2024 19:02:39 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGdgo5FDJzC6NeqQqpgbGFtMGSoVZp9BqWYX8x2dG/6JMT5Lw6ZI0PR/TgTb83gGW2BD44epryd1XgAsZ7KfBs=
-X-Received: by 2002:a17:90a:f305:b0:29d:e004:f8ce with SMTP id
- ca5-20020a17090af30500b0029de004f8cemr4659443pjb.6.1711332159386; Sun, 24 Mar
- 2024 19:02:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IW3oS+vk"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id A56A5C4166B;
+	Mon, 25 Mar 2024 02:13:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1711332787;
+	bh=OQ6DaWqLtLK0mHL2i6HS0EPqyqAvookaS2ecZGz/nWM=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
+	b=IW3oS+vkvE1rg2omkWdnXg451W2R8QWxmUug1tn/Bg6l3cfmeu1XEIle4W9BtNPp4
+	 0oal/S4apZS+BzY3gBaCjlntTY0jgQlz1t3PTdy9XjaTcskT+il7ElSZAp+JWMzJPx
+	 t4H/ihZGECuHFrRbX8V87SXD5ftRGwC5bn6CdPejAvtWiLKQtnbNuipuyb5sBYBBYm
+	 r76u6K1eEb3PqAdmigNT4nSlFA/s5U3UgALZVL8Mu6HumRAnW3tR7xT39q806nrvhq
+	 m7JZPsTIIGWptqQY1qCZ3jSIb5cnxMaBAWbnn/lCp4J/k3we+Ge3Bv+ms0rQoNcWaw
+	 NOIkisLFJZphg==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 90BCDD2D0E3;
+	Mon, 25 Mar 2024 02:13:07 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAAd53p52fi_wr3Js9Rqct+i1D3rjrnVZ6tBN=uHqThM7UvzXQA@mail.gmail.com>
- <20240322164311.GA1367151@bhelgaas>
-In-Reply-To: <20240322164311.GA1367151@bhelgaas>
-From: Kai-Heng Feng <kai.heng.feng@canonical.com>
-Date: Mon, 25 Mar 2024 10:02:27 +0800
-Message-ID: <CAAd53p53NjYsYctrb6oknXVTMEq919nfVvrK17EBXwsGCxvtbA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
- timer timeout during suspend
-To: Bjorn Helgaas <helgaas@kernel.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>, Ben Chuang <benchuanggli@gmail.com>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH v3 00/32] spi: get rid of some legacy macros
+From: patchwork-bot+chrome-platform@kernel.org
+Message-Id: 
+ <171133278756.9916.16032493309661657935.git-patchwork-notify@kernel.org>
+Date: Mon, 25 Mar 2024 02:13:07 +0000
+References: <cover.1707324793.git.u.kleine-koenig@pengutronix.de>
+In-Reply-To: <cover.1707324793.git.u.kleine-koenig@pengutronix.de>
+To: =?utf-8?q?Uwe_Kleine-K=C3=B6nig_=3Cu=2Ekleine-koenig=40pengutronix=2Ede=3E?=@ci.codeaurora.org
+Cc: broonie@kernel.org, kernel@pengutronix.de, mdf@kernel.org,
+ hao.wu@intel.com, yilun.xu@intel.com, trix@redhat.com,
+ linux-fpga@vger.kernel.org, linux-kernel@vger.kernel.org,
+ alex.aring@gmail.com, stefan@datenfreihafen.org, miquel.raynal@bootlin.com,
+ davem@davemloft.net, edumazet@google.com, kuba@kernel.org, pabeni@redhat.com,
+ linux-wpan@vger.kernel.org, netdev@vger.kernel.org, lars@metafoo.de,
+ Michael.Hennerich@analog.com, jic23@kernel.org, linux-iio@vger.kernel.org,
+ dmitry.torokhov@gmail.com, Jonathan.Cameron@huawei.com,
+ linux-input@vger.kernel.org, gregkh@linuxfoundation.org,
+ andriy.shevchenko@linux.intel.com, ulf.hansson@linaro.org,
+ martin.tuma@digiteqautomotive.com, mchehab@kernel.org,
+ linux-media@vger.kernel.org, serjk@netup.ru, arnd@arndb.de,
+ yangyingliang@huawei.com, linux-mmc@vger.kernel.org, richard@nod.at,
+ vigneshr@ti.com, robh@kernel.org, amit.kumar-mahapatra@amd.com,
+ alsa-devel@alsa-project.org, linux-mtd@lists.infradead.org, horms@kernel.org,
+ ronald.wahl@raritan.com, bleung@chromium.org, tzungbi@kernel.org,
+ groeck@chromium.org, chrome-platform@lists.linux.dev, michal.simek@amd.com,
+ jcmvbkbc@gmail.com, linux-spi@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, andersson@kernel.org,
+ konrad.dybcio@linaro.org, linux-arm-msm@vger.kernel.org,
+ matthias.bgg@gmail.com, angelogioacchino.delregno@collabora.com,
+ linux-mediatek@lists.infradead.org, tzimmermann@suse.de, javierm@redhat.com,
+ sam@ravnborg.org, dri-devel@lists.freedesktop.org,
+ linux-fbdev@vger.kernel.org, linux-staging@lists.linux.dev,
+ vireshk@kernel.org, rmfrfs@gmail.com, johan@kernel.org, elder@kernel.org,
+ greybus-dev@lists.linaro.org, peterhuewe@gmx.de, jarkko@kernel.org,
+ jgg@ziepe.ca, linux-integrity@vger.kernel.org, herve.codina@bootlin.com,
+ krzysztof.kozlowski@linaro.org, linux-usb@vger.kernel.org, deller@gmx.de,
+ dario.binacchi@amarulasolutions.com, kvalo@kernel.org, dmantipov@yandex.ru,
+ libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org,
+ corbet@lwn.net, bhelgaas@google.com, james.clark@arm.com,
+ linux-doc@vger.kernel.org
 
-On Sat, Mar 23, 2024 at 12:43=E2=80=AFAM Bjorn Helgaas <helgaas@kernel.org>=
- wrote:
->
-> On Thu, Mar 21, 2024 at 06:05:33PM +0800, Kai-Heng Feng wrote:
-> > On Sat, Jan 20, 2024 at 6:41=E2=80=AFAM Bjorn Helgaas <helgaas@kernel.o=
-rg> wrote:
-> > > On Thu, Jan 18, 2024 at 02:40:50PM +0800, Kai-Heng Feng wrote:
-> > > > On Sat, Jan 13, 2024 at 1:37=E2=80=AFAM Bjorn Helgaas <helgaas@kern=
-el.org> wrote:
-> > > > > On Fri, Jan 12, 2024 at 01:14:42PM +0800, Kai-Heng Feng wrote:
-> > > > > > On Sat, Jan 6, 2024 at 5:19=E2=80=AFAM Bjorn Helgaas <helgaas@k=
-ernel.org> wrote:
-> > > > > > > On Thu, Dec 21, 2023 at 11:21:47AM +0800, Kai-Heng Feng wrote=
-:
-> > > > > > > > Spamming `lspci -vv` can still observe the replay timer tim=
-eout error
-> > > > > > > > even after commit 015c9cbcf0ad ("mmc: sdhci-pci-gli: GL9750=
-: Mask the
-> > > > > > > > replay timer timeout of AER"), albeit with a lower reproduc=
-e rate.
-> > > > > > >
-> > > > > > > I'm not sure what this is telling me.  By "spamming `lspci -v=
-v`, do
-> > > > > > > you mean that if you run lspci continually, you still see Rep=
-lay Timer
-> > > > > > > Timeout logged, e.g.,
-> > > > > > >
-> > > > > > >   CESta:        ... Timeout+
-> > > > > >
-> > > > > > Yes it's logged and the AER IRQ is raised.
-> > > > >
-> > > > > IIUC the AER IRQ is the important thing.
-> > > > >
-> > > > > Neither 015c9cbcf0ad nor this patch affects logging in
-> > > > > PCI_ERR_COR_STATUS, so the lspci output won't change and mentioni=
-ng it
-> > > > > here doesn't add useful information.
-> > > >
-> > > > You are right. That's just a way to access config space to reproduc=
-e
-> > > > the issue.
-> > >
-> > > Oh, I think I completely misunderstood you!  I thought you were sayin=
-g
-> > > that suspending the device caused the PCI_ERR_COR_REP_TIMER error, an=
-d
-> > > you happened to see that it was logged when you ran lspci.
-> >
-> > Both running lspci and suspending the device can observe the error,
-> > because both are accessing the config space.
-> >
-> > > But I guess you mean that running lspci actually *causes* the error?
-> > > I.e., lspci does a config access while we're suspending the device
-> > > causes the error, and the config access itself causes the error, whic=
-h
-> > > causes the ERR_COR message and ultimately the AER interrupt, and that
-> > > interrupt prevents the system suspend.
-> >
-> > My point was that any kind of PCI config access can cause the error.
-> > Using lspci is just make the error more easier to reproduce.
-> >
-> > > If that's the case, I wonder if this is a generic problem that could
-> > > happen with *any* device, not just GL975x.
-> >
-> > For now, it's just GL975x.
-> >
-> > > What power state do we put the GL975x in during system suspend?
-> > > D3hot?  D3cold?  Is there anything that prevents config access while
-> > > we suspend it?
-> >
-> > The target device state is D3hot.
-> > However, the issue happens when the devices is in D0, when the PCI
-> > core is saving the device's config space.
-> >
-> > So I think the issue isn't related to the device state.
-> >
-> > > We do have dev->block_cfg_access, and there's a comment that says
-> > > "we're required to prevent config accesses during D-state
-> > > transitions," but I don't see it being used during D-state
-> > > transitions.
-> >
-> > Yes, there isn't any D-state change happens here.
->
-> So the timeout happens sometimes on any config accesses to the device,
-> no matter what the power state is?
+Hello:
 
-Yes.
+This patch was applied to chrome-platform/linux.git (for-next)
+by Mark Brown <broonie@kernel.org>:
 
-> If that's the case, why do the
-> masking in the suspend/resume callbacks?
+On Wed,  7 Feb 2024 19:40:14 +0100 you wrote:
+> Changes since v2
+> (https://lore.kernel.org/linux-spi/cover.1705944943.git.u.kleine-koenig@pengutronix.de):
+> 
+>  - Drop patch "mtd: rawnand: fsl_elbc: Let .probe retry if local bus is
+>    missing" which doesn't belong into this series.
+>  - Fix a build failure noticed by the kernel build bot in
+>    drivers/spi/spi-au1550.c. (I failed to catch this because this driver
+>    is mips only, but not enabled in a mips allmodconfig. That's a bit
+>    unfortunate, but not easily fixable.)
+>  - Add the Reviewed-by: and Acked-by: tags I received for v2.
+> 
+> [...]
 
-Because there's no functional impact when the error happens, other
-than suspend/resume.
+Here is the summary with links:
+  - [v3,15/32] platform/chrome: cros_ec_spi: Follow renaming of SPI "master" to "controller"
+    https://git.kernel.org/chrome-platform/c/85ad0ec049a7
 
->
-> If it's not related to a power state change, it sounds like something
-> that should be a quirk or done at probe time.
+You are awesome, thank you!
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
 
-Sure, I'll change that to be done at probe time.
 
-Kai-Heng
-
->
-> Bjorn
