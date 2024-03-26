@@ -1,92 +1,167 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 827771F94D
-	for <linux-mmc@vger.kernel.org>; Tue, 26 Mar 2024 16:48:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11C7A13D884;
+	Tue, 26 Mar 2024 20:24:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711471714; cv=none; b=p+TXy+SuzZam6Lvx+lHC35aUemczG8joF/sGOxJwEaAIxjy3mEQaEOD8SphZ2gwrgznD64E+s3Dq/TnJC3Zrh2tLRNSXvvB/A9zkfVGVCVhttsiUuAhjIKJl05afnzM9NnnrBbtMlMbHw1fUARSiRuK9YCyqnvoYQXI1qfaIzeU=
+	t=1711484692; cv=none; b=ioiA0Pn5qYjYAatDa3k8rBebKMZGkEPNQh4Kx3AA3RYyzhFVuh55xRMjReRFY7sg5u5sIdW2ZqoQGC1Q8xV6wcU1eLq+lAFS9KhSpPDQBwJ839q120r/fIu6xGW4HvzX5V4b9KShZsOiqptu0pSAtWzMux6IIm3JQq6tpgTCfjI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711471714; c=relaxed/simple;
-	bh=UCmlrZz5wIpqDNxx5pcqKcqwMTpJe2YHlubTTGszCI4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YCh85HdqifSTqJ/eKAef8FqyIpRVAeYEQhYyVKnQc00RN/BNp55hT/EgTbidqtKgIZ6FkZNpPxyCf2xo2WLYgtMoPJ3u0LqUuzkX4fNgHlT7gVUvwErB+beydVu4wAd9CnkHffcUg6utfYvrkynUFSJd8vw9EwLgtikaXhwteM0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=NgAbQoFx; arc=none smtp.client-ip=209.85.128.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1711484692; c=relaxed/simple;
+	bh=XBx/8R7L2B6+rjNGoBxN/n8BedOCOXaomAypWF28x3w=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=N2dkW+Kw7ZYE2ENoBF9hLiKgtSlwlzY4NHm3GSLAdbvDQjmO3MFqa/3bhoegPyCKZWFt1XcYO5J9vvd/CvG6SPj9bcZ7FlDjlDGy1K0QKUWto6yBtfWXMpfwyqMP3nI1Pcy4/8OA0dRhsQ49FDb+gmDigDOx8D+PohNm/SIJVyU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p4JFORtz; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="NgAbQoFx"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-41400a9844aso38854795e9.0
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Mar 2024 09:48:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1711471710; x=1712076510; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=UUX0Fe8KaQL1u5v0D+HurQZKsoXBEzxwHFFOyTDa+54=;
-        b=NgAbQoFxb03SX/9WndFalmq1spl8kPkm8Co80Kl/iEiAXQgu9eyXYsR16IuF79Mu2l
-         vVsKzvybRhPPI1UU3TRcCt0OL9LCb88a2HBI7MVAorKO1CwM4V+su/svPPPPBYeQOJU1
-         3W49J3Yw29mAlnwrgIf8CZIfSFnecK/wEuIgg4mrfpUIVJfx9+tfqHKwCU6pgGHkgCIP
-         MExXknojh+gorKZBes63BoF+eVHoc46fecgxFU2kzpkXWFVQlC0XggMLXOwcq3lJGbyo
-         xt81qwfWHd0xPsAztrUHj9mWSHgrfrPe3s52kF+7pKtPGmodTEYiH4UwzBP49SutumUI
-         U/Ow==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711471710; x=1712076510;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=UUX0Fe8KaQL1u5v0D+HurQZKsoXBEzxwHFFOyTDa+54=;
-        b=AObxIV1dPOQJYtpv/AVNrtfK9IImwjYgg0Buhks2DYsgguRJDS6/H5HJA0z9TcvcR0
-         bsjh0x2Fnqh1Fdvab3hASw1LAnhrbZJioaZwGY40ht5c8a/BwK9zG+QiLLiLR0jzacW6
-         DhA1sXZ4PFRG44yzdfRl5pK/cha6EH6aeROzJq4bC/o1sQVcFVTHhC1ieiCLZJ+NJXEI
-         NPIQSVok5je3uK7GXD4CZ1pYwOCnkVj9WM7FgDCG1PmBtVbAZQkqNfffjinBxbPe2Z8t
-         Q5UMDjNQUvJAx+OTiR/inAK914BYsjNktWJ13+B7bKu8Pc9X9ss5THyroePogUeOrJtC
-         KQKg==
-X-Forwarded-Encrypted: i=1; AJvYcCW+ga9ejaG5JrYqAxrEy/+2xoZl5nVifef7bgdPsXjdgFcBUIPamEdSlhSwp0Kr2WmrwqlcIquKEZ7FkK+syc9rvEjKcquWb3lM
-X-Gm-Message-State: AOJu0YxCsqUX7vYHCQDjYasVmJ510ts6xWbvPONCTLC/I3iPsikUSEGZ
-	nrIKaNdObMG/aSzBMHFZuerOiGvFra+AkA/vEQV29/1CHVPbik42b9w34zIe/cAWeKXSCAZHbdw
-	lFHwhpaRD
-X-Google-Smtp-Source: AGHT+IGSD6SX1h+XJYSDCQWy+wNksm/8PaF5+BJG0gN4k4HXxpQXN5S50Qe4XQBW+X7oG57o0CzNiQ==
-X-Received: by 2002:a05:600c:4e14:b0:414:925c:a860 with SMTP id b20-20020a05600c4e1400b00414925ca860mr353338wmq.11.1711471709882;
-        Tue, 26 Mar 2024 09:48:29 -0700 (PDT)
-Received: from yamato.baylibre (alyon-651-1-22-137.w82-122.abo.wanadoo.fr. [82.122.123.137])
-        by smtp.gmail.com with ESMTPSA id f10-20020a05600c4e8a00b00412e5f32591sm12135535wmq.28.2024.03.26.09.48.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Mar 2024 09:48:29 -0700 (PDT)
-From: Angelo Dureghello <adureghello@baylibre.com>
-To: linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Cc: Angelo Dureghello <adureghello@baylibre.com>
-Subject: [PATCH] MAINTAINERS: update Angelo Dureghello e-mail address
-Date: Tue, 26 Mar 2024 17:47:33 +0100
-Message-ID: <20240326164733.15271-1-adureghello@baylibre.com>
-X-Mailer: git-send-email 2.43.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p4JFORtz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5B36FC433C7;
+	Tue, 26 Mar 2024 20:24:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1711484691;
+	bh=XBx/8R7L2B6+rjNGoBxN/n8BedOCOXaomAypWF28x3w=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=p4JFORtzTY4+T0i9CTpyZ5n9Kzv7uBoHhdb2MFuQIi5GSJEHbCgPlIkln4YnP7rLt
+	 DlplLsXo68oHda4f3DZgkPNp3kcXZeuS7zaxvF6nDthF3XESUYT6OmpOxXiiTq4oFz
+	 8jyGdnq9XjjFNxONhHd8h701YNRDQnUCE21xRg0IE+77G0Gsk0SNrCYFpqW9UjswZh
+	 1SNIF805YDoPnHCJsDAlRCEgRYeYageUpcultqZ566QjXKZkMCzAuO7ifkQ5AsXcBv
+	 IW8rcj5oq2HGy0PNo4uK8ehBPPanY74TYpuZql52Rnx9C/rf/EqcOsSw9L8BleGEgg
+	 qaP/o40frckkA==
+Date: Tue, 26 Mar 2024 15:24:49 -0500
+From: Rob Herring <robh@kernel.org>
+To: Daniel Golle <daniel@makrotopia.org>
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
+	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
+	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
+	Damien Le Moal <dlemoal@kernel.org>,
+	Li Lingfeng <lilingfeng3@huawei.com>,
+	Christian Brauner <brauner@kernel.org>,
+	Christian Heusel <christian@heusel.eu>,
+	Min Li <min15.li@samsung.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Avri Altman <avri.altman@wdc.com>, Hannes Reinecke <hare@suse.de>,
+	Christian Loehle <CLoehle@hyperstone.com>,
+	Bean Huo <beanhuo@micron.com>, Yeqi Fu <asuk4.q@gmail.com>,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+	Dominique Martinet <dominique.martinet@atmark-techno.com>,
+	"Ricardo B. Marliere" <ricardo@marliere.net>,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
+Subject: Re: [PATCH 0/8] block: implement NVMEM provider
+Message-ID: <20240326202449.GA3255378-robh@kernel.org>
+References: <cover.1711048433.git.daniel@makrotopia.org>
+ <20240325151046.GA3591150-robh@kernel.org>
+ <ZgGaay6bLFAcCo2E@makrotopia.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZgGaay6bLFAcCo2E@makrotopia.org>
 
-Update my e-mail address to adureghello@baylibre.com.
++boot-architecture list
 
-Signed-off-by: Angelo Dureghello <adureghello@baylibre.com>
----
- MAINTAINERS | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On Mon, Mar 25, 2024 at 03:38:19PM +0000, Daniel Golle wrote:
+> On Mon, Mar 25, 2024 at 10:10:46AM -0500, Rob Herring wrote:
+> > On Thu, Mar 21, 2024 at 07:31:48PM +0000, Daniel Golle wrote:
+> > > On embedded devices using an eMMC it is common that one or more (hw/sw)
+> > > partitions on the eMMC are used to store MAC addresses and Wi-Fi
+> > > calibration EEPROM data.
+> > > 
+> > > Implement an NVMEM provider backed by a block device as typically the
+> > > NVMEM framework is used to have kernel drivers read and use binary data
+> > > from EEPROMs, efuses, flash memory (MTD), ...
+> > > 
+> > > In order to be able to reference hardware partitions on an eMMC, add code
+> > > to bind each hardware partition to a specific firmware subnode.
+> > > 
+> > > Overall, this enables uniform handling across practially all flash
+> > > storage types used for this purpose (MTD, UBI, and now also MMC).
+> > > 
+> > > As part of this series it was necessary to define a device tree schema
+> > > for block devices and partitions on them, which (similar to how it now
+> > > works also for UBI volumes) can be matched by one or more properties.
+> > > 
+> > > ---
+> > > This series has previously been submitted as RFC on July 19th 2023[1]
+> > > and most of the basic idea did not change since. Another round of RFC
+> > > was submitted on March 5th 2024[2] which has received overall positive
+> > > feedback and only minor corrections have been done since (see
+> > > changelog below).
+> > 
+> > I don't recall giving positive feedback.
+> > 
+> > I still think this should use offsets rather than partition specific 
+> > information. Not wanting to have to update the offsets if they change is 
+> > not reason enough to not use them.
+> 
+> Using raw offsets on the block device (rather than the partition)
+> won't work for most existing devices and boot firmware out there. They
+> always reference the partition, usually by the name of a GPT
+> partition (but sometimes also PARTUUID or even PARTNO) which is then
+> used in the exact same way as an MTD partition or UBI volume would be
+> on devices with NOR or NAND flash.
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index aa3b947fb080..c3e365b9d759 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -8512,7 +8512,7 @@ F:	Documentation/devicetree/bindings/crypto/fsl,sec-v4.0*
- F:	drivers/crypto/caam/
- 
- FREESCALE COLDFIRE M5441X MMC DRIVER
--M:	Angelo Dureghello <angelo.dureghello@timesys.com>
-+M:	Angelo Dureghello <adureghello@baylibre.com>
- L:	linux-mmc@vger.kernel.org
- S:	Maintained
- F:	drivers/mmc/host/sdhci-esdhc-mcf.c
--- 
-2.43.1
+MTD normally uses offsets hence why I'd like some alignment. UBI is 
+special because raw NAND is, well, special.
 
+> Just on eMMC we usually use a GPT
+> or MBR partition table rather than defining partitions in DT or cmdline,
+> which is rather rare (for historic reasons, I suppose, but it is what it
+> is now).
+
+Yes, I understand how eMMC works. I don't understand why if you have 
+part #, uuid, or name you can't get to the offset or vice-versa. You 
+need only 1 piece of identification to map partition table entries to DT 
+nodes. Sure, offsets can change, but surely the firmware can handle 
+adjusting the DT? 
+
+An offset would also work for the case of random firmware data on the 
+disk that may or may not have a partition associated with it. There are 
+certainly cases of that. I don't think we have much of a solution for 
+that other than trying to educate vendors to not do that or OS 
+installers only supporting installing to something other than eMMC. This 
+is something EBBR[1] is trying to address.
+
+> Depending on the eMMC chip used, that partition may not even be at the
+> same offset for different batches of the same device and hence I'd
+> like to just do it in the same way vendor firmware does it as well.
+
+Often vendor firmware is not a model to follow...
+
+> Chad of Adtran has previously confirmed that [1], which was the
+> positive feedback I was refering to. Other vendors like GL-iNet or
+> Netgear are doing the exact same thing.
+> 
+> As of now, we support this in OpenWrt by adding a lot of
+> board-specific knowledge to userland, which is ugly and also prevents
+> using things like PXE-initiated nfsroot on those devices.
+> 
+> The purpose of this series is to be able to properly support such devices
+> (ie. practially all consumer-grade routers out there using an eMMC for
+> storing firmware).
+> 
+> Also, those devices have enough resources to run a general purpose
+> distribution like Debian instead of OpenWrt, and all the userland
+> hacks to set MAC addresses and extract WiFi-EEPROM-data in a
+> board-specific ways will most certainly never find their way into
+> Debian. It's just not how embedded Linux works, unless you are looking
+> only at the RaspberryPi which got that data stored in a textfile
+> which is shipped by the distribution -- something very weird and very
+> different from literally all of-the-shelf routers, access-points or
+> switches I have ever seen (and I've seen many). Maybe Felix who has
+> seen even more of them can tell us more about that.
+
+General purpose distros want to partition the disk themselves. Adding 
+anything to the DT for disk partitions would require the installer to be 
+aware of it. There's various distro folks on the boot-arch list, so 
+maybe one of them can comment.
+
+Rob
+
+[1] https://arm-software.github.io/ebbr/index.html#document-chapter4-firmware-media
