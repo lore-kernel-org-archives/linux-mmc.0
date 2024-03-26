@@ -1,133 +1,92 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CDCC13DABE8;
-	Tue, 26 Mar 2024 10:25:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 827771F94D
+	for <linux-mmc@vger.kernel.org>; Tue, 26 Mar 2024 16:48:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711448728; cv=none; b=Q6Fb5gMSUibfDRec98Oqx8fbe848rgDY1DYNu1e3fO80/SbBnGkKXsJBV9x4W2blYEcz2LcIAwHXJ1HUnZ4FbPaGlKgKzpPHDvKimVfxR+g+teXR0Jud++qIoE7JU5/mLrIjhaSFotCbhFdfdawDJq3v8z7tP/QbmLT8Z7pTiaI=
+	t=1711471714; cv=none; b=p+TXy+SuzZam6Lvx+lHC35aUemczG8joF/sGOxJwEaAIxjy3mEQaEOD8SphZ2gwrgznD64E+s3Dq/TnJC3Zrh2tLRNSXvvB/A9zkfVGVCVhttsiUuAhjIKJl05afnzM9NnnrBbtMlMbHw1fUARSiRuK9YCyqnvoYQXI1qfaIzeU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711448728; c=relaxed/simple;
-	bh=apIKmvfoqCCziBUKxRgHaz8L8n5IlOgWUbMMp/ziAZg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=agbHmvOTM96H352vMAmNpNsM4jb3XH35hwkY7unGOxZh0X/OB3JZULaTBa/m81v56PrWcAdPbbCpwhU/osin2vgYvJPIdeV3psQB6iVjxiRF05TGnb5nWrKpXJ5m/dfcF3AhNFbUa4amfiVAZ4DZLP+J46eWS1bqB4q/3DbBgHs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=CjIXOk+I; arc=none smtp.client-ip=192.198.163.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1711471714; c=relaxed/simple;
+	bh=UCmlrZz5wIpqDNxx5pcqKcqwMTpJe2YHlubTTGszCI4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YCh85HdqifSTqJ/eKAef8FqyIpRVAeYEQhYyVKnQc00RN/BNp55hT/EgTbidqtKgIZ6FkZNpPxyCf2xo2WLYgtMoPJ3u0LqUuzkX4fNgHlT7gVUvwErB+beydVu4wAd9CnkHffcUg6utfYvrkynUFSJd8vw9EwLgtikaXhwteM0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=NgAbQoFx; arc=none smtp.client-ip=209.85.128.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="CjIXOk+I"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1711448726; x=1742984726;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=apIKmvfoqCCziBUKxRgHaz8L8n5IlOgWUbMMp/ziAZg=;
-  b=CjIXOk+IqgANgAAZfcbMCl+6qJbiUe6OpFmeltd5XOsKmuuYcFuowZwS
-   uO3kh2V3S6X8ZfsiCcEjPZ0UNEas2Dqtf7LZP9RvIZw52oq16ne4uKYwj
-   K64wzeWYIhTFKZspQX8f+eTSAphbMWcRTF7vfiv770DNIyq4m3GI8EN1h
-   4Hrn7eU+DoSZS8xtRDKxpsFuBJi6xMlOc31ncmrlSusUZdBy+zEtSM9BP
-   X/KVjw0KZQO/P3122DHUiQbwVdb7cHCwSS0hBETt+SV9ho36hIGqXoLg6
-   qLl3ZtwmVpJB1CTQQEFbNwQuNZIsjWOJXX15acSjqJ2N/++9gQYlBw23y
-   g==;
-X-CSE-ConnectionGUID: fKXYkTq4QzeRVtq3Js6oTw==
-X-CSE-MsgGUID: 6+utZfqWRJav+n/wO334Rw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11024"; a="6702712"
-X-IronPort-AV: E=Sophos;i="6.07,156,1708416000"; 
-   d="scan'208";a="6702712"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Mar 2024 03:25:25 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.07,156,1708416000"; 
-   d="scan'208";a="15835316"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.38.215])
-  by fmviesa010-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Mar 2024 03:25:22 -0700
-Message-ID: <2e712cf6-7521-4c0b-b6fd-76bacc309496@intel.com>
-Date: Tue, 26 Mar 2024 12:25:17 +0200
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="NgAbQoFx"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-41400a9844aso38854795e9.0
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Mar 2024 09:48:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1711471710; x=1712076510; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=UUX0Fe8KaQL1u5v0D+HurQZKsoXBEzxwHFFOyTDa+54=;
+        b=NgAbQoFxb03SX/9WndFalmq1spl8kPkm8Co80Kl/iEiAXQgu9eyXYsR16IuF79Mu2l
+         vVsKzvybRhPPI1UU3TRcCt0OL9LCb88a2HBI7MVAorKO1CwM4V+su/svPPPPBYeQOJU1
+         3W49J3Yw29mAlnwrgIf8CZIfSFnecK/wEuIgg4mrfpUIVJfx9+tfqHKwCU6pgGHkgCIP
+         MExXknojh+gorKZBes63BoF+eVHoc46fecgxFU2kzpkXWFVQlC0XggMLXOwcq3lJGbyo
+         xt81qwfWHd0xPsAztrUHj9mWSHgrfrPe3s52kF+7pKtPGmodTEYiH4UwzBP49SutumUI
+         U/Ow==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1711471710; x=1712076510;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=UUX0Fe8KaQL1u5v0D+HurQZKsoXBEzxwHFFOyTDa+54=;
+        b=AObxIV1dPOQJYtpv/AVNrtfK9IImwjYgg0Buhks2DYsgguRJDS6/H5HJA0z9TcvcR0
+         bsjh0x2Fnqh1Fdvab3hASw1LAnhrbZJioaZwGY40ht5c8a/BwK9zG+QiLLiLR0jzacW6
+         DhA1sXZ4PFRG44yzdfRl5pK/cha6EH6aeROzJq4bC/o1sQVcFVTHhC1ieiCLZJ+NJXEI
+         NPIQSVok5je3uK7GXD4CZ1pYwOCnkVj9WM7FgDCG1PmBtVbAZQkqNfffjinBxbPe2Z8t
+         Q5UMDjNQUvJAx+OTiR/inAK914BYsjNktWJ13+B7bKu8Pc9X9ss5THyroePogUeOrJtC
+         KQKg==
+X-Forwarded-Encrypted: i=1; AJvYcCW+ga9ejaG5JrYqAxrEy/+2xoZl5nVifef7bgdPsXjdgFcBUIPamEdSlhSwp0Kr2WmrwqlcIquKEZ7FkK+syc9rvEjKcquWb3lM
+X-Gm-Message-State: AOJu0YxCsqUX7vYHCQDjYasVmJ510ts6xWbvPONCTLC/I3iPsikUSEGZ
+	nrIKaNdObMG/aSzBMHFZuerOiGvFra+AkA/vEQV29/1CHVPbik42b9w34zIe/cAWeKXSCAZHbdw
+	lFHwhpaRD
+X-Google-Smtp-Source: AGHT+IGSD6SX1h+XJYSDCQWy+wNksm/8PaF5+BJG0gN4k4HXxpQXN5S50Qe4XQBW+X7oG57o0CzNiQ==
+X-Received: by 2002:a05:600c:4e14:b0:414:925c:a860 with SMTP id b20-20020a05600c4e1400b00414925ca860mr353338wmq.11.1711471709882;
+        Tue, 26 Mar 2024 09:48:29 -0700 (PDT)
+Received: from yamato.baylibre (alyon-651-1-22-137.w82-122.abo.wanadoo.fr. [82.122.123.137])
+        by smtp.gmail.com with ESMTPSA id f10-20020a05600c4e8a00b00412e5f32591sm12135535wmq.28.2024.03.26.09.48.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Mar 2024 09:48:29 -0700 (PDT)
+From: Angelo Dureghello <adureghello@baylibre.com>
+To: linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Cc: Angelo Dureghello <adureghello@baylibre.com>
+Subject: [PATCH] MAINTAINERS: update Angelo Dureghello e-mail address
+Date: Tue, 26 Mar 2024 17:47:33 +0100
+Message-ID: <20240326164733.15271-1-adureghello@baylibre.com>
+X-Mailer: git-send-email 2.43.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-msm: pervent access to suspended controller
-To: Mantas Pucka <mantas@8devices.com>, Bjorn Andersson
- <andersson@kernel.org>, Konrad Dybcio <konrad.dybcio@linaro.org>,
- Ulf Hansson <ulf.hansson@linaro.org>, Georgi Djakov <djakov@kernel.org>,
- Pramod Gurav <pramod.gurav@linaro.org>,
- Ritesh Harjani <ritesh.list@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- linux-kernel@vger.kernel.org, stable@vger.kernel.org
-References: <20240321-sdhci-mmc-suspend-v1-1-fbc555a64400@8devices.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240321-sdhci-mmc-suspend-v1-1-fbc555a64400@8devices.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 21/03/24 16:30, Mantas Pucka wrote:
-> Generic sdhci code registers LED device and uses host->runtime_suspended
-> flag to protect access to it. The sdhci-msm driver doesn't set this flag,
-> which causes a crash when LED is accessed while controller is runtime
-> suspended. Fix this by setting the flag correctly.
-> 
-> Cc: stable@vger.kernel.org
-> Fixes: 67e6db113c90 ("mmc: sdhci-msm: Add pm_runtime and system PM support")
-> Signed-off-by: Mantas Pucka <mantas@8devices.com>
+Update my e-mail address to adureghello@baylibre.com.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Angelo Dureghello <adureghello@baylibre.com>
+---
+ MAINTAINERS | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> ---
->  drivers/mmc/host/sdhci-msm.c | 16 +++++++++++++++-
->  1 file changed, 15 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 668e0aceeeba..e113b99a3eab 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2694,6 +2694,11 @@ static __maybe_unused int sdhci_msm_runtime_suspend(struct device *dev)
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	unsigned long flags;
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +	host->runtime_suspended = true;
-> +	spin_unlock_irqrestore(&host->lock, flags);
->  
->  	/* Drop the performance vote */
->  	dev_pm_opp_set_rate(dev, 0);
-> @@ -2708,6 +2713,7 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	unsigned long flags;
->  	int ret;
->  
->  	ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
-> @@ -2726,7 +2732,15 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
->  
->  	dev_pm_opp_set_rate(dev, msm_host->clk_rate);
->  
-> -	return sdhci_msm_ice_resume(msm_host);
-> +	ret = sdhci_msm_ice_resume(msm_host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +	host->runtime_suspended = false;
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +	return ret;
->  }
->  
->  static const struct dev_pm_ops sdhci_msm_pm_ops = {
-> 
-> ---
-> base-commit: e8f897f4afef0031fe618a8e94127a0934896aba
-> change-id: 20240321-sdhci-mmc-suspend-34f4af1d0286
-> 
-> Best regards,
+diff --git a/MAINTAINERS b/MAINTAINERS
+index aa3b947fb080..c3e365b9d759 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -8512,7 +8512,7 @@ F:	Documentation/devicetree/bindings/crypto/fsl,sec-v4.0*
+ F:	drivers/crypto/caam/
+ 
+ FREESCALE COLDFIRE M5441X MMC DRIVER
+-M:	Angelo Dureghello <angelo.dureghello@timesys.com>
++M:	Angelo Dureghello <adureghello@baylibre.com>
+ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/sdhci-esdhc-mcf.c
+-- 
+2.43.1
 
