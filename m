@@ -1,167 +1,100 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11C7A13D884;
-	Tue, 26 Mar 2024 20:24:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5403B12AAEF;
+	Tue, 26 Mar 2024 21:19:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711484692; cv=none; b=ioiA0Pn5qYjYAatDa3k8rBebKMZGkEPNQh4Kx3AA3RYyzhFVuh55xRMjReRFY7sg5u5sIdW2ZqoQGC1Q8xV6wcU1eLq+lAFS9KhSpPDQBwJ839q120r/fIu6xGW4HvzX5V4b9KShZsOiqptu0pSAtWzMux6IIm3JQq6tpgTCfjI=
+	t=1711487997; cv=none; b=UKY4sfRk2uZzuEXQg7HMzJYkKMjuFkli4mvSX9AoXU8plaPziMZg7NLMT5beNam6L8L1hQni8hB8hnCUy48ozdCXi0dON5W+ZQvImHHoWPgcWM4/DvlYaHlChPnVlwEhOOI+7wQgwm2XO2SelvS+pBiihrf1xCYhOtiWMrlHfcg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711484692; c=relaxed/simple;
-	bh=XBx/8R7L2B6+rjNGoBxN/n8BedOCOXaomAypWF28x3w=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=N2dkW+Kw7ZYE2ENoBF9hLiKgtSlwlzY4NHm3GSLAdbvDQjmO3MFqa/3bhoegPyCKZWFt1XcYO5J9vvd/CvG6SPj9bcZ7FlDjlDGy1K0QKUWto6yBtfWXMpfwyqMP3nI1Pcy4/8OA0dRhsQ49FDb+gmDigDOx8D+PohNm/SIJVyU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p4JFORtz; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1711487997; c=relaxed/simple;
+	bh=PtcVq2IBfbHwquK1C5LX+o56w7nX57P5Da5pZ9tBVi4=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition:In-Reply-To; b=NwDjZiciGC0vS+acBJk4T5PM9ZGvPY0kcsFB1eZRxA8yyfmR6oyEfEtTN21bS38hWSg8a+g9ST2z2tJbw7b5L/euq1p0jHqs1zpKNvyB4OKjxRP2O1gwIA8gigj9Xr0d7ZS19HywfxjwlzvC99O5tyIt4gzMhh6fDlUL1bRW/Ps=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WLjnCe06; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p4JFORtz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5B36FC433C7;
-	Tue, 26 Mar 2024 20:24:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WLjnCe06"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A07FCC433C7;
+	Tue, 26 Mar 2024 21:19:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711484691;
-	bh=XBx/8R7L2B6+rjNGoBxN/n8BedOCOXaomAypWF28x3w=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=p4JFORtzTY4+T0i9CTpyZ5n9Kzv7uBoHhdb2MFuQIi5GSJEHbCgPlIkln4YnP7rLt
-	 DlplLsXo68oHda4f3DZgkPNp3kcXZeuS7zaxvF6nDthF3XESUYT6OmpOxXiiTq4oFz
-	 8jyGdnq9XjjFNxONhHd8h701YNRDQnUCE21xRg0IE+77G0Gsk0SNrCYFpqW9UjswZh
-	 1SNIF805YDoPnHCJsDAlRCEgRYeYageUpcultqZ566QjXKZkMCzAuO7ifkQ5AsXcBv
-	 IW8rcj5oq2HGy0PNo4uK8ehBPPanY74TYpuZql52Rnx9C/rf/EqcOsSw9L8BleGEgg
-	 qaP/o40frckkA==
-Date: Tue, 26 Mar 2024 15:24:49 -0500
-From: Rob Herring <robh@kernel.org>
-To: Daniel Golle <daniel@makrotopia.org>
-Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
-	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
-	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-	Damien Le Moal <dlemoal@kernel.org>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Christian Brauner <brauner@kernel.org>,
-	Christian Heusel <christian@heusel.eu>,
-	Min Li <min15.li@samsung.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <avri.altman@wdc.com>, Hannes Reinecke <hare@suse.de>,
-	Christian Loehle <CLoehle@hyperstone.com>,
-	Bean Huo <beanhuo@micron.com>, Yeqi Fu <asuk4.q@gmail.com>,
+	s=k20201202; t=1711487996;
+	bh=PtcVq2IBfbHwquK1C5LX+o56w7nX57P5Da5pZ9tBVi4=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:From;
+	b=WLjnCe06KBKhcNOFdNFNqs4vfybWqKE93ou7HRl+Saho6ifNs2lISmzjLYzyoLkRb
+	 25cjyRjdrYukMWjPhk2wzLLm65KCNhbOlxriYthLv3OPnjdrzW8xasw0RvFHvELV5T
+	 Y0Rf4XHyAqFyGWk1R/05DLfjVmfhVZfCePHJHTyOEdmBU+oNjqdiyOmYnNDR4xNEbH
+	 OsuGAO+zBCvwaNCFpv7HSLkt7eA+gQfLZQlXoPh/Di04RVWb+/WUmJ0f/CC304ZJ22
+	 LTroO4nEsHQXizJpb3dvrXnJe9C8gU2uMmWP5YZDIZbI8/WXJQBYrTnBqBqTlUrWRJ
+	 2L77wUMaiSm/g==
+Date: Tue, 26 Mar 2024 16:19:54 -0500
+From: Bjorn Helgaas <helgaas@kernel.org>
+To: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
 	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-	Dominique Martinet <dominique.martinet@atmark-techno.com>,
-	"Ricardo B. Marliere" <ricardo@marliere.net>,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 0/8] block: implement NVMEM provider
-Message-ID: <20240326202449.GA3255378-robh@kernel.org>
-References: <cover.1711048433.git.daniel@makrotopia.org>
- <20240325151046.GA3591150-robh@kernel.org>
- <ZgGaay6bLFAcCo2E@makrotopia.org>
+	Ben Chuang <benchuanggli@gmail.com>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: sdhci-pci-gli: GL975x: Mask rootport's replay
+ timer timeout during suspend
+Message-ID: <20240326211954.GA1497572@bhelgaas>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <ZgGaay6bLFAcCo2E@makrotopia.org>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAAd53p5p=JJ9OOQd=XPzJgW7yib+hMJxZqj7PZFsd2uFtK94xg@mail.gmail.com>
 
-+boot-architecture list
+On Tue, Mar 26, 2024 at 09:52:28AM +0800, Kai-Heng Feng wrote:
+> On Tue, Mar 26, 2024 at 3:02 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > On Mon, Mar 25, 2024 at 10:02:27AM +0800, Kai-Heng Feng wrote:
+> > > On Sat, Mar 23, 2024 at 12:43 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> ...
 
-On Mon, Mar 25, 2024 at 03:38:19PM +0000, Daniel Golle wrote:
-> On Mon, Mar 25, 2024 at 10:10:46AM -0500, Rob Herring wrote:
-> > On Thu, Mar 21, 2024 at 07:31:48PM +0000, Daniel Golle wrote:
-> > > On embedded devices using an eMMC it is common that one or more (hw/sw)
-> > > partitions on the eMMC are used to store MAC addresses and Wi-Fi
-> > > calibration EEPROM data.
-> > > 
-> > > Implement an NVMEM provider backed by a block device as typically the
-> > > NVMEM framework is used to have kernel drivers read and use binary data
-> > > from EEPROMs, efuses, flash memory (MTD), ...
-> > > 
-> > > In order to be able to reference hardware partitions on an eMMC, add code
-> > > to bind each hardware partition to a specific firmware subnode.
-> > > 
-> > > Overall, this enables uniform handling across practially all flash
-> > > storage types used for this purpose (MTD, UBI, and now also MMC).
-> > > 
-> > > As part of this series it was necessary to define a device tree schema
-> > > for block devices and partitions on them, which (similar to how it now
-> > > works also for UBI volumes) can be matched by one or more properties.
-> > > 
-> > > ---
-> > > This series has previously been submitted as RFC on July 19th 2023[1]
-> > > and most of the basic idea did not change since. Another round of RFC
-> > > was submitted on March 5th 2024[2] which has received overall positive
-> > > feedback and only minor corrections have been done since (see
-> > > changelog below).
-> > 
-> > I don't recall giving positive feedback.
-> > 
-> > I still think this should use offsets rather than partition specific 
-> > information. Not wanting to have to update the offsets if they change is 
-> > not reason enough to not use them.
+> > > > If that's the case, why do the
+> > > > masking in the suspend/resume callbacks?
+> > >
+> > > Because there's no functional impact when the error happens, other
+> > > than suspend/resume.
+> >
+> > Oh, I think I see.  Is this accurate?
+> >
+> >   Due to a hardware defect in GL975x, config accesses when ASPM is
+> >   enabled frequently cause Replay Timer Timeouts in the Port leading
+> >   to the device.
+> >
+> >   These are Correctable Errors, so the Downstream Port logs it in its
+> >   PCI_ERR_COR_STATUS and, when the error is not masked, sends an
+> >   ERR_COR message upstream.  The message terminates at a Root Port,
+> >   which may generate an AER interrupt so the OS can log it.
+> >
+> >   The Correctable Error logging is an annoyance but normally not a
+> >   major issue.  But when the AER interrupt happens during suspend, it
+> >   can prevent the system from suspending.
 > 
-> Using raw offsets on the block device (rather than the partition)
-> won't work for most existing devices and boot firmware out there. They
-> always reference the partition, usually by the name of a GPT
-> partition (but sometimes also PARTUUID or even PARTNO) which is then
-> used in the exact same way as an MTD partition or UBI volume would be
-> on devices with NOR or NAND flash.
-
-MTD normally uses offsets hence why I'd like some alignment. UBI is 
-special because raw NAND is, well, special.
-
-> Just on eMMC we usually use a GPT
-> or MBR partition table rather than defining partitions in DT or cmdline,
-> which is rather rare (for historic reasons, I suppose, but it is what it
-> is now).
-
-Yes, I understand how eMMC works. I don't understand why if you have 
-part #, uuid, or name you can't get to the offset or vice-versa. You 
-need only 1 piece of identification to map partition table entries to DT 
-nodes. Sure, offsets can change, but surely the firmware can handle 
-adjusting the DT? 
-
-An offset would also work for the case of random firmware data on the 
-disk that may or may not have a partition associated with it. There are 
-certainly cases of that. I don't think we have much of a solution for 
-that other than trying to educate vendors to not do that or OS 
-installers only supporting installing to something other than eMMC. This 
-is something EBBR[1] is trying to address.
-
-> Depending on the eMMC chip used, that partition may not even be at the
-> same offset for different batches of the same device and hence I'd
-> like to just do it in the same way vendor firmware does it as well.
-
-Often vendor firmware is not a model to follow...
-
-> Chad of Adtran has previously confirmed that [1], which was the
-> positive feedback I was refering to. Other vendors like GL-iNet or
-> Netgear are doing the exact same thing.
+> That's totally the case here.
 > 
-> As of now, we support this in OpenWrt by adding a lot of
-> board-specific knowledge to userland, which is ugly and also prevents
-> using things like PXE-initiated nfsroot on those devices.
+> This brings up another different but related topic  - should the port
+> driver disable AER/DPC IRQ during suspend?
+> We've discussed this many times, I still think that's the right
+> approach to "quiesce" many unexpected errors during system state
+> transition.
+
+Maybe so.  We can continue that in the context of that patch.  Maybe
+it needs to be reposted; I can't remember where it's at right now.
+
+> > I think we should log a hint in dmesg that we're masking
+> > PCI_ERR_COR_REP_TIMER because the error will still be logged in the
+> > PCI_ERR_COR_STATUS register, and that will be visible via lspci, and a
+> > dmesg hint will save debugging time when people report that.
 > 
-> The purpose of this series is to be able to properly support such devices
-> (ie. practially all consumer-grade routers out there using an eMMC for
-> storing firmware).
-> 
-> Also, those devices have enough resources to run a general purpose
-> distribution like Debian instead of OpenWrt, and all the userland
-> hacks to set MAC addresses and extract WiFi-EEPROM-data in a
-> board-specific ways will most certainly never find their way into
-> Debian. It's just not how embedded Linux works, unless you are looking
-> only at the RaspberryPi which got that data stored in a textfile
-> which is shipped by the distribution -- something very weird and very
-> different from literally all of-the-shelf routers, access-points or
-> switches I have ever seen (and I've seen many). Maybe Felix who has
-> seen even more of them can tell us more about that.
+> Sure. Where do you think it's a better place to implement the quirk? I
+> Assume PCI quirk is a better place than driver's probe routine?
 
-General purpose distros want to partition the disk themselves. Adding 
-anything to the DT for disk partitions would require the installer to be 
-aware of it. There's various distro folks on the boot-arch list, so 
-maybe one of them can comment.
+Yes, I think drivers/pci/quirks.c is a better place so we can mask it
+even if the driver isn't loaded.  Users can still run lspci and see
+these errors even if the driver isn't loaded.
 
-Rob
-
-[1] https://arm-software.github.io/ebbr/index.html#document-chapter4-firmware-media
+Bjorn
