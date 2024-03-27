@@ -1,266 +1,163 @@
-Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBDE012FF74;
-	Wed, 27 Mar 2024 17:58:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.50
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711562309; cv=none; b=QvNv6WEUDVfxRRD5o6H6jsUlogP/n8jK9NVQK2lHU2GdBUpY1qR+PCR5uhQmEt2UUAx0umAyEXn0PGTjlGTWrf/pEMXEyVkpu8Weje0fuNFRdVKV34FHpMt3VNTnescBJy6oyG24RLykWTmy4Ueu3StFz2IVglZtK1gKsg0sAcA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711562309; c=relaxed/simple;
-	bh=/LAfZ8Nb5/IISyxpsj9ues9JEim1UydvELJxBBntuTw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gyGMfLASXFa+bBBHqJudNMYrwVHkV9reJT4pkRODxKyQnjkj/Eh6LuaRy+5xr1dNFNTbDohz5jNBuymEbyIr4lKym/IFsrVH9IwwuID2xLgKoN4UnKkJtyCaywc7DukvpyeMPScD+alJN0bDt6tGJLZqNC1U83kvM0dBBz33Lfo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=acm.org; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CjH7+A2i; arc=none smtp.client-ip=209.85.161.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=acm.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AD2812E1ED
+	for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2024 18:43:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.153.141
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1711565039; cv=fail; b=qGWtcNo15gv4mtlJlGj9iHApsZ3KIZWHQ7K2I93ChHjcWI/SJWHc5rO5Qonqrdvxv3BbVn6ONnCPFe1TbvZQ718mteYTQwIiAL7BsI2WWtXuuStBm29L5XcItn8iWq9b73VLVOtKBqBE78g3gsLgcTGYeloaBu/cpOIYN4TZP+U=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1711565039; c=relaxed/simple;
+	bh=01kZ5jMz9+u+G+Y7BjU58fLSujEje0TSHq+abmo1DJY=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=OuNH8db/wWS+sRR6HlZtIoiJaKkGSghWtXVQpNI77Jv6Tq27MtIsgHkr8Tafk1Wx9x/ghayOmXHq+ZR3gPCTKUIhVHwx/u2a3TkPD0DxFSBdDTJpOnk7dBhHY7PXwE/9IIWM2kbDDIojSEKLlXJRw/T99uRkDWxTNabV/2soyyA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Npo7ALp2; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=OtgXfadE; arc=fail smtp.client-ip=216.71.153.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CjH7+A2i"
-Received: by mail-oo1-f50.google.com with SMTP id 006d021491bc7-5a4a14c52fcso35112eaf.1;
-        Wed, 27 Mar 2024 10:58:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Npo7ALp2";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="OtgXfadE"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1711565038; x=1743101038;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=01kZ5jMz9+u+G+Y7BjU58fLSujEje0TSHq+abmo1DJY=;
+  b=Npo7ALp2gfacBTcx43C12MYQpZT0vSyKAt+wiA/iAaPI91EybdS+PSFI
+   mwB2v4ddO0GDONEkIHleUNMVKaiNyzVwAKruoJkLnRFmhOgzXh2bsot2y
+   7XJh5+efEROx59ZrXzFOZbBqF8TN6T63p9Di0J0KGHVNCsCWEO3D9qNCL
+   8SXXg/LC821zcKPsMldIGyF4Q+oPKYWqyTUAild9aJFPHTLk3jcKmpyu3
+   44QzXgW9ARdIx0zgrkzgwzub+d2jXfOFcitobomB2ALIMABLh5AlHDVc0
+   wH48Wxz3cT6NzkmgCtx9UrFYeQ8+4zXhnzy2zDa0UlhWygY7hfluCnljq
+   A==;
+X-CSE-ConnectionGUID: yToTTktOTqeF39E5Yty/+w==
+X-CSE-MsgGUID: YxRkq9zUQiONVWlbEV/tGw==
+X-IronPort-AV: E=Sophos;i="6.07,159,1708358400"; 
+   d="scan'208";a="12473346"
+Received: from mail-dm6nam12lp2168.outbound.protection.outlook.com (HELO NAM12-DM6-obe.outbound.protection.outlook.com) ([104.47.59.168])
+  by ob1.hgst.iphmx.com with ESMTP; 28 Mar 2024 02:43:48 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=WkD9IONqf2IUMuWE55y9cgLHtV5JWHwYyJyYw8J9EXXuOEVqmD73z7rjUL+frb3wPwS7JYMKPiBvpaN4354UjU2YxptKTssYawPW2EyYnFJdwPhZvLbvhgkqT5qKDIcNNSPI8BMtYb63zlTqgATx1zsFpiECPtotKyvDA45KAlS941Oa8S5ZZVIJSPcgsbAzcpbU0h6f9+OXT8VPxNb4RP7UQ6bjxS6JeQDrPjoyX6wISgx3VXtiRNoOPAas8K2jvDwej4CLFPmtFoMi6UVmTM3yc+tppSj5r8b3mKRn9bHcux3PSNl5vrahxggs420ZYtdT3849Qa9FsXqLqm3Emw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=01kZ5jMz9+u+G+Y7BjU58fLSujEje0TSHq+abmo1DJY=;
+ b=IqBWfsAFIos6LbiidAyGOwgjFKnIDIdi5jmCC8aK0L5P39lLiVM+EpHX46lD94L+0gY1FdonfdVc1EdAqfuvCdV8SxNZmq00OKhxFw/xikrDftCVtazcvhSsnIrH/AIRSdoI3uJeDMDX1lWzEUImEobE2ZLbU7ththZaNo05Jp2xXWnk4WSnqTA774Rzj4pCiXYJ2T6mAiUt2X6LmaFJ5/ipPo/dwxD3PWUkeCR/9IKT71jnZnCUgigIQzEwsdY9rjEYSev2zpRrGiaj5PqJq+ilZiX7zHhlRwZCev9ToXROWAGFNl7vDmgt/ENuuJkd/nYwMum0Q6xsViL2x9RPhg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1711562307; x=1712167107; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:reply-to
-         :message-id:subject:cc:to:from:date:sender:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yWR/88ZuStiYrDMS5UWD0VLDt0J6Sqyii5LmdWwCGKc=;
-        b=CjH7+A2iUHNFpc5Ub0yrU/SBj9I1zaJOkzlsM7zo5J9GOmk0X/MDLo+r2ntG0DWp0a
-         4Wm2laCBzMUg+y1PInO9Dhr+OKefCMUQfslxCkJYXzLsoPRP/ZIuZl7ZCPP+jJtrcR3s
-         fyfPsugyYYQIlC5ObV0K9PzEyah0W/JZPY02Ep7Q2ikupHkII2Lew2ojUxGb4NdJiXym
-         wl9T7ckfXW2O7iEubiZWsD9gjzd/RsCTcOxvDxC0eaFjWWuTjcHDaS1qoif9pShg9igE
-         Db6me9cJP+AvLodHAqsPuwpd3Ve6aVfzSKJplXUThl8HqETmkOTJSC3BlBnMhpIkZYf7
-         +1Ew==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711562307; x=1712167107;
-        h=in-reply-to:content-disposition:mime-version:references:reply-to
-         :message-id:subject:cc:to:from:date:sender:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=yWR/88ZuStiYrDMS5UWD0VLDt0J6Sqyii5LmdWwCGKc=;
-        b=dYFdkB2fXDsBFJx8MP3U2dJx3gWSiXioVgT2H1RkhzkCkEFDzlnIYAmq08IH5zteL5
-         0141jAAjdB3FDK2jBd8DVLfsbWF2IcyGufM5I7WHD3IgdbWmeNw7BpQjLwb3a1OJPf/2
-         FS3HVuzNrtIwI1NobV/RTfcDH2NQzEkp4ohY6PSZfiXe9KFgKdXjFgtCyXHWp6jlAkdi
-         sVCejt/myduj9MzdLtp6qdF0qgK0CBPns7EI+++/0sINvuSl0FIvkwZno17nGt1w1qbG
-         NWNNJoHDeJbdavT6x2SY/5cPIxJIMz5INCj6gp19yFWFY14kbaQjeOMneZezuvgsPZGn
-         Fe+Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWSaqYZ+9RmvN6WiP+kGGFyBzvHOWEBUiXySwsh4OAIGIvN+stMJvu93Ze+5FMCwvc+5pvy95LRfTtjmigHzhjtwl7N/nKkXCRkX/BFeGorSoQs3M/My4TrOcvqkIfrrsg5C3PMSizOgAzV2gT3cr/rTW2a8huqE7lW6yluyJ8RL3NW0fiwl2uOKzyzn0hpNGRtdLc+uGMkPOB0QsP1gEZHEKACK814e/iAaGZ6/dPWYLrzQXAfHia/+2+wKCHX35Ebwh6jfbNFLcr/1WeU7udkU4jDxbXXqRgh52NpuRGCmKgfKPDKlIpEXuxYQA+3V9RRl1ts+hmEr75mrxS2R+WGc1t1oEGotGgiQ7IyHbHNfnz45NFd620BqwbeJc/OMgxaCHDUj3sDjXh6R2X4FdZGmpADV5P1MJ39zg8atpFC6vE8ARjuYJObJjOTrXVSgoSAu25gqjkTXDfDnnGyc3+8LJ9xUHE/j0EfSu1eZFRPoTCLxuwUTTuVL2ge9KRVtCehybT9AiDeZS2hRx1A35B06wRSD4Zy6aPUjXR9NW8efFk=
-X-Gm-Message-State: AOJu0YyoTSR7/t3dMCxkTCSMA7VBosr7rFLL1MuzpBdsB16Qtrn+ZEcu
-	/k1Ht/Qi1zshsCobgzpCbB/KZb8u4beaNDx6A5bGz928tKY9JFo=
-X-Google-Smtp-Source: AGHT+IHGFL5Y4vBO4pyfj4PH1IfUYef9kiur/wYx9MERAj7ZhpX+bQrG7CGeqTsmrIqsWvwI+SjvGQ==
-X-Received: by 2002:a05:6820:260f:b0:5a4:ae86:118f with SMTP id cy15-20020a056820260f00b005a4ae86118fmr856230oob.8.1711562306422;
-        Wed, 27 Mar 2024 10:58:26 -0700 (PDT)
-Received: from serve.minyard.net (serve.minyard.net. [2001:470:b8f6:1b::1])
-        by smtp.gmail.com with ESMTPSA id cs2-20020a056820258200b005a1f748f3edsm2445897oob.30.2024.03.27.10.58.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 Mar 2024 10:58:26 -0700 (PDT)
-Sender: Corey Minyard <tcminyard@gmail.com>
-Received: from mail.minyard.net (unknown [IPv6:2001:470:b8f6:1b:ac74:4d5d:21e4:a88a])
-	by serve.minyard.net (Postfix) with ESMTPSA id 6CA7D1800B9;
-	Wed, 27 Mar 2024 17:58:24 +0000 (UTC)
-Date: Wed, 27 Mar 2024 12:58:23 -0500
-From: Corey Minyard <minyard@acm.org>
-To: Allen Pais <apais@linux.microsoft.com>
-Cc: linux-kernel@vger.kernel.org, tj@kernel.org, keescook@chromium.org,
-	vkoul@kernel.org, marcan@marcan.st, sven@svenpeter.dev,
-	florian.fainelli@broadcom.com, rjui@broadcom.com,
-	sbranden@broadcom.com, paul@crapouillou.net,
-	Eugeniy.Paltsev@synopsys.com, manivannan.sadhasivam@linaro.org,
-	vireshk@kernel.org, Frank.Li@nxp.com, leoyang.li@nxp.com,
-	zw@zh-kernel.org, wangzhou1@hisilicon.com, haijie1@huawei.com,
-	shawnguo@kernel.org, s.hauer@pengutronix.de, sean.wang@mediatek.com,
-	matthias.bgg@gmail.com, angelogioacchino.delregno@collabora.com,
-	afaerber@suse.de, logang@deltatee.com, daniel@zonque.org,
-	haojian.zhuang@gmail.com, robert.jarzmik@free.fr,
-	andersson@kernel.org, konrad.dybcio@linaro.org, orsonzhai@gmail.com,
-	baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
-	patrice.chotard@foss.st.com, linus.walleij@linaro.org,
-	wens@csie.org, jernej.skrabec@gmail.com, peter.ujfalusi@gmail.com,
-	kys@microsoft.com, haiyangz@microsoft.com, wei.liu@kernel.org,
-	decui@microsoft.com, jassisinghbrar@gmail.com, mchehab@kernel.org,
-	maintainers@bluecherrydvr.com, aubin.constans@microchip.com,
-	ulf.hansson@linaro.org, manuel.lauss@gmail.com,
-	mirq-linux@rere.qmqm.pl, jh80.chung@samsung.com, oakad@yahoo.com,
-	hayashi.kunihiko@socionext.com, mhiramat@kernel.org,
-	brucechang@via.com.tw, HaraldWelte@viatech.com, pierre@ossman.eu,
-	duncan.sands@free.fr, stern@rowland.harvard.edu, oneukum@suse.com,
-	openipmi-developer@lists.sourceforge.net, dmaengine@vger.kernel.org,
-	asahi@lists.linux.dev, linux-arm-kernel@lists.infradead.org,
-	linux-rpi-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-	imx@lists.linux.dev, linuxppc-dev@lists.ozlabs.org,
-	linux-mediatek@lists.infradead.org,
-	linux-actions@lists.infradead.org, linux-arm-msm@vger.kernel.org,
-	linux-riscv@lists.infradead.org, linux-sunxi@lists.linux.dev,
-	linux-tegra@vger.kernel.org, linux-hyperv@vger.kernel.org,
-	linux-rdma@vger.kernel.org, linux-media@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-s390@vger.kernel.org,
-	netdev@vger.kernel.org, linux-usb@vger.kernel.org
-Subject: Re: [PATCH 6/9] ipmi: Convert from tasklet to BH workqueue
-Message-ID: <ZgRePyo2zC4A1Fp4@mail.minyard.net>
-Reply-To: minyard@acm.org
-References: <20240327160314.9982-1-apais@linux.microsoft.com>
- <20240327160314.9982-7-apais@linux.microsoft.com>
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=01kZ5jMz9+u+G+Y7BjU58fLSujEje0TSHq+abmo1DJY=;
+ b=OtgXfadELlPpu7lsNHwpN9HiWsvGD53o1UBPjisMSg/RVuaiYKDE+7TW/UiCHSWixRVkinkTueujoZGXkewMnUxSgc+UQPZUI2G5YXYXjCt6eGOGub2JUAxX3M1Gd4a6xubVwR8OQWEaWUw1Rn8luH4lSdTN+63+oFjCrea/Pc4=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ DM8PR04MB7958.namprd04.prod.outlook.com (2603:10b6:8:1::22) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7409.33; Wed, 27 Mar 2024 18:43:46 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5395:f1:f080:8605]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5395:f1:f080:8605%3]) with mapi id 15.20.7409.031; Wed, 27 Mar 2024
+ 18:43:46 +0000
+From: Avri Altman <Avri.Altman@wdc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH] mmc-utils: man 1 mmc-utils
+Thread-Topic: [PATCH] mmc-utils: man 1 mmc-utils
+Thread-Index: AQHad7fC3h3I7R7vx0SjpOhzsx6Hr7FLvPcAgABA4VA=
+Date: Wed, 27 Mar 2024 18:43:46 +0000
+Message-ID:
+ <DM6PR04MB6575F71F6A3046BCBA54944BFC342@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20240316153636.30814-1-avri.altman@wdc.com>
+ <CAPDyKFoAntcQRwbTju=x3bYe9S6dfEeyODdFGSVqHfcek=YFhA@mail.gmail.com>
+In-Reply-To:
+ <CAPDyKFoAntcQRwbTju=x3bYe9S6dfEeyODdFGSVqHfcek=YFhA@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|DM8PR04MB7958:EE_
+x-ms-office365-filtering-correlation-id: 61662495-4f11-4c86-4fcf-08dc4e8dd5c2
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ plqroU0UUzUFHagBpABRIDstBzm+6KXqoeoVRpQvqGF0C5K2Bd6NMtOOVOXsCSoEZ0KbGHkElp6opefyxcrOOW7VI2kt1AvaX7vu5wdEVKBqvoRn1eWKYKqc3+MwgD5CbYJjAtlENJJNuevI9gBUHFfbZWT+dvO4NcInY4TxSjGzU6bF5dGllFkZaKJjPMvQEvWEpx/B6V+/5n5lRb4DVK0KkfH7c+uQsMIgKovPVX32fHxvbb6pZcz06Cp4y3KPVwuz4Z/D1H3MtrumijEIs0B7q1FbEYicVp4DHdywxCczq53tyuJzsk/naS+tr+wcwwvTX6cxVV9KUaLTU/NG8Gjs4ZYNBM/rQL2OfX5PhIFsmGuTAiM06P60QbrOni5GY096awloN1jzjh8uuHip/AsK2wkH3l9hudiGc6Zq1FoIz5T4M2VM0aO729dv9MgK/CIafqD4nrtpzWTTDJvdeI9vkVFSFQHECfqOxqxCkNHsQx0ZAdD5ffE7LrXQy/pB6hVppQhiED3ml4ZRBcMP7QUv9QE4OYPKrZ9jK2eNqGtOUtyJdR/faV/PBC4S0BPShnJEPO5N2Wo8gj/39STR2JpUilWTqYywfJVMF3UO9Abak3pGNQrWsPhYCgdLDHZnNU52TdSlngNoS6NZruE4Zua2WWIt8ipfFfqduWvHt2WuzR2VglZWhytP7IvrANX/N6mK+yhjLKf698SxemzdywTQMlFz80nVEgEAuUOy8iM=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(1800799015)(366007)(376005)(38070700009);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?OW43NmZJZHJHREhlZDQ4QlVBVC9jai9FZ2NxUzQxdm5YWFlwa05RS3docXYy?=
+ =?utf-8?B?SmU4ZnFkMkZXN2ZrQlViRG4rOUFibVdCd1BRN0IyR1ZmckNLSElKaEFzNWFD?=
+ =?utf-8?B?OHNlcmhPZSs4aTY0ZENUa3RNeUdLTHA5Q28xZFQ1QTk2T2YrMjZFeFYxV0JT?=
+ =?utf-8?B?TnRia3oyc2k1ZjM3Y2R4ajhuWVJ0cGpJWXZkUGMxRkUzVEFhaTZCWEh4ektP?=
+ =?utf-8?B?L2FueHl3U1ljbWJTRHZWNFJweWE2ZE9wVlViUjdRUFZ3TGVCbkdoNkt5TGRH?=
+ =?utf-8?B?VWhXQ2YwK3BJZjMybHV5NE12VXV5L3ZGNGNJd0ljc1NVamgyREhSK0tZTEJ2?=
+ =?utf-8?B?VkFkMVRid1lQV2ZuUERDUTFvUE0yeHVybmZoaXRXcy9YMFpYTHRqd1VPbFNJ?=
+ =?utf-8?B?RFZTWlVJVEU4VnV5VlJCUHB5dHpWdUZiN00rQ1I3bTNDUmJBSXpPVDI3Mlgx?=
+ =?utf-8?B?RGJaQkRkT1BoeE8wcGVjOHpiUGZhVkczU29PcS9TRTRhMVVmOGJLUWNBTVZU?=
+ =?utf-8?B?OThYQzRQbTZEKzlBSlFBNzdxaUxHeHR2cWphd3BYbzhZdHVsejRHUGtsZmRJ?=
+ =?utf-8?B?RjZNUUNZZ3NCWGFzbUdmM1p2TDZ1SkIzOWh0ZGFSMTZweEVBcys5ODdub3FC?=
+ =?utf-8?B?MStPemRnRUNzd2diaHZqQ0xwVjB1MUduTGMvRm5qaVlZS045OHNnTGdGUDkv?=
+ =?utf-8?B?QktpZzBsT0VxNHpVaENQdSsvN1RiaElxWUFtQmMvT1c2NGtFenJRRUxTUDVW?=
+ =?utf-8?B?bC9TKys0Uk1aWEdyYUFndVBsdGFMT05QY0pPYWNRQ2JXUU94aklJYTQ2dzVW?=
+ =?utf-8?B?bUlEam9DREFuZk8yMy93N2xHa3ZoSDNQbzRtZ2tqR3F0bk8veFQzNmhFYnQ4?=
+ =?utf-8?B?MkFFQmdEekFpQWExbzVRY1ZvTFJqSCs2UWp6Z0FFUlZFTTJ6VVlJUmN0eUM3?=
+ =?utf-8?B?M0xjZytXV2EwN2ZYY1JhVi9obzEwS0dnM0pyMCttbzcxSUhmYWFYMzQ2Rmd1?=
+ =?utf-8?B?WWlYbldsWVRsRVZ1YUMxNUhoaWw3YS9MMUFnSkg4Uk41YVZrSVZVRktSdFp4?=
+ =?utf-8?B?b1lTK2tQbUJ3UktNMUFwaWVkeHl3YStwY2UrM0JMUVVuc0phekRaNmRVV2pq?=
+ =?utf-8?B?bkJIZzBodEN0Q2l4SkZvb0JkaHF6L2NWeWR6UkJ4azllVzJjVjZMSXMyUXp5?=
+ =?utf-8?B?cUYwQm1ESHJpRjFTOTRPeC9wQnZ5dTQzbzVWc1JEODJhNnN2d1VIcnR0RU54?=
+ =?utf-8?B?RDNuRVBnN1ZFUStNemRtSS92UC9zVUdTT1o5ZXZ3QWR0Zlptb2t6Wm1EZ3gx?=
+ =?utf-8?B?Y0xkejNzaDNETjE1NGFCR25ibExqdHhGaUIwOWZYZkxLT1k0Zy9NeHlMUmlp?=
+ =?utf-8?B?RERQbDF1VS8rYllBSEgxaEpCYmlFK1ZIMTlVNkJEZkg1M09VUW1oN012amls?=
+ =?utf-8?B?Y1JITEZtSEtteVI2T0NXWFlmM1BrMmo4MUxKYlYvVlllcSt1TnFlaGlYTDI3?=
+ =?utf-8?B?RnR0dEVHemxtaDU2RkxwK20zbjR5NXNja1lVbzV5SDZ5NUVsMXh2cFYrUzV3?=
+ =?utf-8?B?TjdLeVVsYVk5cmZwTjJsYW1maFVadHo5dzVHdHZGYk9SYzRvQnhjSTRKb044?=
+ =?utf-8?B?NFdJUHFXaGswVHl5cjNIb0lldTRiTUNvRzhsWjFVbVdqNHZLOGF6M2JrWnh5?=
+ =?utf-8?B?STAxdjkxUXh2NCsrdjNEaWk1dlN2dUVFL1gvdzkyNnVEYXZyL2pNSERpTGpU?=
+ =?utf-8?B?Qmp1QlN0d0JTVmgzbEZLSVc4M3A3TDRtZys4NHRtZEUyaE9EbXRPeXRYVkQr?=
+ =?utf-8?B?ZVZ0VmIvWkQ1b1dzS1gybUwxTXRmK0hnSUxlM0VYYkVrNjQzeGVVT2ZPemVO?=
+ =?utf-8?B?K1VZc3dwYWlrT24wSk1VcHUxcFM4UCtsY0x6VkYrYlhLZ1RJWEdUdEc3dS9j?=
+ =?utf-8?B?UWRHTkRqbkNiMzYweXVUbVVkYkhHeDRUS09YUmU1RG5aUHpWdUZRdk5sWHY1?=
+ =?utf-8?B?UTJCQzhjRkwrN3ZDYVhaZlZzK1ppOE00L2NtM3J0UE92S3doZkoxWFREQVlq?=
+ =?utf-8?B?QjV6ZGdDTjhKSUxCbXZRNWZRS0hmMGc0RE4wWGV5blErT1QxTU10amRqeStU?=
+ =?utf-8?Q?wLBLNBnK+JsvKnKFTtLhNiCMK?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240327160314.9982-7-apais@linux.microsoft.com>
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	HTDM7xeanWC62yopR8wSwuf3XQ571GmVCdZj/EQa1pe2tayVCiNgCX7Mw0GiIguH2F3oKhrFyB+s+sME8pJJkS99Alvl0W3bQx4Oml3sETrUO1jfaIzhIy82MlvorgbdXaf50OXOhz7T0nhMCWAeTsiktenHZg40ynuu1rNCOLNtJ0HEdKOIHrFX4NBxcTDUaYnGXs1pBN/szN/K/g7PDsk5N9iwgbPSQHNx5LcG6AaWjp3xe/FyMlge2bVBYT7flayzktoZGopt6yjKRmUQIOiTliVA6RFXWBKeJLbzlCPvYtbqDuyslfsons7WwRKbL8UhbWxvPsj+qEPV4vmDClHH9Z9elG+BX7RVImlLL98h0f4UqZ+xAiYS3X9sI1qEiOgw+NVM+7M6ghDyMekvdebZV7FotVHbFP8JRwyD3hQ7BkwX8/5JRJzaiC8JD/pHH5fxBE2meCTWEl7234cfAPgCSpgp3Jhb/qBYeOHj1Qh0sZphOiQlNSn7is2fVgbTmVF6qRMfx5BsrzcEgNbN5TM++UhZPagDOz3r/n1ZMB0JZ6bScD+SrADaH9EyATgpreUGwKE2VvQbonPRGyMn3nAZUiV77ijuNiCrfcagFRstEwTBqfvlcUNxJNPiBN/p
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 61662495-4f11-4c86-4fcf-08dc4e8dd5c2
+X-MS-Exchange-CrossTenant-originalarrivaltime: 27 Mar 2024 18:43:46.2913
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: bvK2Bv/ihch+Fk06ONuAc3BjKop2PbF1Y/imxGDyOZ2E51SKyQ1ok0w3KZoq+N4sExDRwo5GAvUlWU32SDB8ZA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM8PR04MB7958
 
-On Wed, Mar 27, 2024 at 04:03:11PM +0000, Allen Pais wrote:
-> The only generic interface to execute asynchronously in the BH context is
-> tasklet; however, it's marked deprecated and has some design flaws. To
-> replace tasklets, BH workqueue support was recently added. A BH workqueue
-> behaves similarly to regular workqueues except that the queued work items
-> are executed in the BH context.
-> 
-> This patch converts drivers/infiniband/* from tasklet to BH workqueue.
-
-I think you mean drivers/char/ipmi/* here.
-
-I believe that work queues items are execute single-threaded for a work
-queue, so this should be good.  I need to test this, though.  It may be
-that an IPMI device can have its own work queue; it may not be important
-to run it in bh context.
-
--corey
-
-> 
-> Based on the work done by Tejun Heo <tj@kernel.org>
-> Branch: https://git.kernel.org/pub/scm/linux/kernel/git/tj/wq.git for-6.10
-> 
-> Signed-off-by: Allen Pais <allen.lkml@gmail.com>
-> ---
->  drivers/char/ipmi/ipmi_msghandler.c | 30 ++++++++++++++---------------
->  1 file changed, 15 insertions(+), 15 deletions(-)
-> 
-> diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-> index b0eedc4595b3..fce2a2dbdc82 100644
-> --- a/drivers/char/ipmi/ipmi_msghandler.c
-> +++ b/drivers/char/ipmi/ipmi_msghandler.c
-> @@ -36,12 +36,13 @@
->  #include <linux/nospec.h>
->  #include <linux/vmalloc.h>
->  #include <linux/delay.h>
-> +#include <linux/workqueue.h>
->  
->  #define IPMI_DRIVER_VERSION "39.2"
->  
->  static struct ipmi_recv_msg *ipmi_alloc_recv_msg(void);
->  static int ipmi_init_msghandler(void);
-> -static void smi_recv_tasklet(struct tasklet_struct *t);
-> +static void smi_recv_work(struct work_struct *t);
->  static void handle_new_recv_msgs(struct ipmi_smi *intf);
->  static void need_waiter(struct ipmi_smi *intf);
->  static int handle_one_recv_msg(struct ipmi_smi *intf,
-> @@ -498,13 +499,13 @@ struct ipmi_smi {
->  	/*
->  	 * Messages queued for delivery.  If delivery fails (out of memory
->  	 * for instance), They will stay in here to be processed later in a
-> -	 * periodic timer interrupt.  The tasklet is for handling received
-> +	 * periodic timer interrupt.  The work is for handling received
->  	 * messages directly from the handler.
->  	 */
->  	spinlock_t       waiting_rcv_msgs_lock;
->  	struct list_head waiting_rcv_msgs;
->  	atomic_t	 watchdog_pretimeouts_to_deliver;
-> -	struct tasklet_struct recv_tasklet;
-> +	struct work_struct recv_work;
->  
->  	spinlock_t             xmit_msgs_lock;
->  	struct list_head       xmit_msgs;
-> @@ -704,7 +705,7 @@ static void clean_up_interface_data(struct ipmi_smi *intf)
->  	struct cmd_rcvr  *rcvr, *rcvr2;
->  	struct list_head list;
->  
-> -	tasklet_kill(&intf->recv_tasklet);
-> +	cancel_work_sync(&intf->recv_work);
->  
->  	free_smi_msg_list(&intf->waiting_rcv_msgs);
->  	free_recv_msg_list(&intf->waiting_events);
-> @@ -1319,7 +1320,7 @@ static void free_user(struct kref *ref)
->  {
->  	struct ipmi_user *user = container_of(ref, struct ipmi_user, refcount);
->  
-> -	/* SRCU cleanup must happen in task context. */
-> +	/* SRCU cleanup must happen in work context. */
->  	queue_work(remove_work_wq, &user->remove_work);
->  }
->  
-> @@ -3605,8 +3606,7 @@ int ipmi_add_smi(struct module         *owner,
->  	intf->curr_seq = 0;
->  	spin_lock_init(&intf->waiting_rcv_msgs_lock);
->  	INIT_LIST_HEAD(&intf->waiting_rcv_msgs);
-> -	tasklet_setup(&intf->recv_tasklet,
-> -		     smi_recv_tasklet);
-> +	INIT_WORK(&intf->recv_work, smi_recv_work);
->  	atomic_set(&intf->watchdog_pretimeouts_to_deliver, 0);
->  	spin_lock_init(&intf->xmit_msgs_lock);
->  	INIT_LIST_HEAD(&intf->xmit_msgs);
-> @@ -4779,7 +4779,7 @@ static void handle_new_recv_msgs(struct ipmi_smi *intf)
->  			 * To preserve message order, quit if we
->  			 * can't handle a message.  Add the message
->  			 * back at the head, this is safe because this
-> -			 * tasklet is the only thing that pulls the
-> +			 * work is the only thing that pulls the
->  			 * messages.
->  			 */
->  			list_add(&smi_msg->link, &intf->waiting_rcv_msgs);
-> @@ -4812,10 +4812,10 @@ static void handle_new_recv_msgs(struct ipmi_smi *intf)
->  	}
->  }
->  
-> -static void smi_recv_tasklet(struct tasklet_struct *t)
-> +static void smi_recv_work(struct work_struct *t)
->  {
->  	unsigned long flags = 0; /* keep us warning-free. */
-> -	struct ipmi_smi *intf = from_tasklet(intf, t, recv_tasklet);
-> +	struct ipmi_smi *intf = from_work(intf, t, recv_work);
->  	int run_to_completion = intf->run_to_completion;
->  	struct ipmi_smi_msg *newmsg = NULL;
->  
-> @@ -4866,7 +4866,7 @@ void ipmi_smi_msg_received(struct ipmi_smi *intf,
->  
->  	/*
->  	 * To preserve message order, we keep a queue and deliver from
-> -	 * a tasklet.
-> +	 * a work.
->  	 */
->  	if (!run_to_completion)
->  		spin_lock_irqsave(&intf->waiting_rcv_msgs_lock, flags);
-> @@ -4887,9 +4887,9 @@ void ipmi_smi_msg_received(struct ipmi_smi *intf,
->  		spin_unlock_irqrestore(&intf->xmit_msgs_lock, flags);
->  
->  	if (run_to_completion)
-> -		smi_recv_tasklet(&intf->recv_tasklet);
-> +		smi_recv_work(&intf->recv_work);
->  	else
-> -		tasklet_schedule(&intf->recv_tasklet);
-> +		queue_work(system_bh_wq, &intf->recv_work);
->  }
->  EXPORT_SYMBOL(ipmi_smi_msg_received);
->  
-> @@ -4899,7 +4899,7 @@ void ipmi_smi_watchdog_pretimeout(struct ipmi_smi *intf)
->  		return;
->  
->  	atomic_set(&intf->watchdog_pretimeouts_to_deliver, 1);
-> -	tasklet_schedule(&intf->recv_tasklet);
-> +	queue_work(system_bh_wq, &intf->recv_work);
->  }
->  EXPORT_SYMBOL(ipmi_smi_watchdog_pretimeout);
->  
-> @@ -5068,7 +5068,7 @@ static bool ipmi_timeout_handler(struct ipmi_smi *intf,
->  				       flags);
->  	}
->  
-> -	tasklet_schedule(&intf->recv_tasklet);
-> +	queue_work(system_bh_wq, &intf->recv_work);
->  
->  	return need_timer;
->  }
-> -- 
-> 2.17.1
-> 
-> 
+PiBPbiBTYXQsIDE2IE1hciAyMDI0IGF0IDE2OjM2LCBBdnJpIEFsdG1hbiA8YXZyaS5hbHRtYW5A
+d2RjLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBJIGhhdmUgcHV0IHRvZ2V0aGVyIGEgZHJhZnQgbWFu
+IHBhZ2UgZm9yIG1tYy11dGlscy4gIFRoZSBjb250ZW50cyBhcmUNCj4gPiBmcm9tIG1tYy11dGls
+cyBoZWxwIGRvY3VtZW50cyBhbmQgZWRpdGVkIGZvciBicmV2aXR5LiAgVGhlIHBvaW50IGlzDQo+
+ID4gbm90IHRvIHJlcGxhY2UgdGhlIGV4aXN0aW5nIGRvY21lbnRhdGlvbiwgYnV0IHRvIHNlcnZl
+IGFzIGEgcXVpY2sgcmVmZXJlbmNlLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogQXZyaSBBbHRt
+YW4gPGF2cmkuYWx0bWFuQHdkYy5jb20+DQo+IA0KPiBTZWVtcyBsaWtlIGEgZ29vZCBpZGVhISBX
+aGlsZSByZXZpZXdpbmcsIEkgZm91bmQgYSBjb3VwbGUgb2Ygc3BlbGxpbmcgbWlzdGFrZXMNCj4g
+YW5kIHNvbWV0aW1lcyB3b3JkcyBiZWluZyByZXBlYXRlZC4gQ2FuIHlvdSBwbGVhc2UgcnVuIGEg
+c3BlbGwgY2hlY2tlciBhbmQNCj4gZml4IHRob3NlIHRoaW5ncyBhbmQgcmUtc3VibWl0Pw0KRG9u
+ZS4NCg0KVGhhbmtzLA0KQXZyaQ0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
