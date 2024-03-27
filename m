@@ -1,438 +1,147 @@
-Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6335213049F
-	for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2024 14:51:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 997CA12F399
+	for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2024 15:18:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711551108; cv=none; b=h4a2B8JmBd0rPFOck4yuAxFg/hL3gY4Bdmw3Tux7kg5AP0jW0ihQxysn9LcRANuL9qLyeHBihYAR+cpfoBEYb9MI7HFS/8utd7SycDm6JRLyANu15jVuSsta8uvlVBkanftT+E99P9ImKpT5ybAZt5G+jf5tccVNyQL7r9dFnTU=
+	t=1711552702; cv=none; b=aPTDKThT5BvHQ+y+laI5lllulMrEkpZZ9jDSNWaH8T9M2BsJ7GEkdho73rude/kBNRYwA23EJ2QDUjsE4KCyCTItDjXYApn6GSmNwmZMNcbsRX0pRiMTodIBgaTkkWg7iQ8A3XQyfbxYNTbN1bitCnYjUOIvcj5+6auCLZwxX3I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711551108; c=relaxed/simple;
-	bh=zFEn80fl+GtfHzPRtEWaWu6aT9WZ2azOQa9MhZzo3j4=;
+	s=arc-20240116; t=1711552702; c=relaxed/simple;
+	bh=HoUmdYuyO4TXhHzYOArK1IfW06wpBYBpTZDoyHjEXK8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=oSkkZJ9BkSHoFsqlXEWbzYLRlr0XhXzHUYowqTQMmu9seT/ZmCb5UnhqfNr2rjBZ1H7bJ387e7BOmdgP/h5azfGFjlXu9E7gJ7T/zz1d7LAlM0V0+7+rqA+zY36nJouiBD/rAjSt6YvoEw/m1J8VfI93KFGnvN2X3f3hnD8WyTI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Gyi1rVtv; arc=none smtp.client-ip=209.85.219.177
+	 To:Cc:Content-Type; b=V3yIP5TxZZL4O6IMDrnDfu5y0VlFWOO4Kdda8QaPvuAtATjWWwNpmwQv0MVG1FzOdxlrSaG4w4YQrQfbBtjpqpowWsLciOnPQ3xj056JeAKsBKD0hJX2xIbAj32JaxuYfl7z8U1lZmzdbko16+FR2Nh3wlgTdiQMaXtKedqACbk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xORqEnHL; arc=none smtp.client-ip=209.85.219.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Gyi1rVtv"
-Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dcc7cdb3a98so6875001276.2
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2024 07:51:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xORqEnHL"
+Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-dcbd1d4904dso6908986276.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2024 08:18:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1711551104; x=1712155904; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1711552699; x=1712157499; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=YRavIU/nh8mnnkcr2mJEBFYvhEHsXdnC0UkqYCrWJoM=;
-        b=Gyi1rVtv5zXckyTyqTdHkEMNzrWO+b4jmOXeGt7Zq5/ZZiJ+zsFB4tghs0BJuqrIrp
-         yx54yc9g02Gu8S1Cmi1rF7NZXTbL3AFeODLEXla0ayQzAo7DiTzpELm+8W2ADtf5HomZ
-         ddJsvJh5Ch6a61uSD2pIcKn+WJCnhEOnOh8l1TwPn9f3F4ULR9XBjw5eER7sD3XlTuAD
-         a54BwKrQQTjXFEBI6tTynONomxUHcTNJxBhFotKLHMy1oL2zWHBKLDt2FhAequBGRsuv
-         S6LHrIIbicCp9B2H1bLKFoHYGX0THwNWJkgqEsJZvWAiOa3+drW3HrYvJmPQu7XElIZH
-         rNxg==
+        bh=hJujr9RimFfO2QmiTRr7usgxHtS2vMpREAuBqxXSA/M=;
+        b=xORqEnHL/grCqbSkfRzqkD4cK+nGyyodJjbAQVfzprUeDOe2/fw5+Xan3qzdgFlRCe
+         9H0rmqsYoSlfmIMqKOTJZV3w2NeIqt5boCwEEa7yrz25cDICmbMeidrEHb+NbFS5nswl
+         8UnCOGrXPHCECYey6WLvFgzKN9konNQHb+cV3eUZ3q5YWWudMasU98ULmClLZNreZRAk
+         t5snH3EISOraWPKu3BhhkA63MyODfxyngQhisgG66FwqgMF8oExlSinuNyvYK2VswwXm
+         SI7hEEZdTK4n4tjzJvHb1LDChGc0fEuraWCu0MyT74sPYlKZZHeGNRTPkjN6VM7/jisn
+         ZucQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711551104; x=1712155904;
+        d=1e100.net; s=20230601; t=1711552699; x=1712157499;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=YRavIU/nh8mnnkcr2mJEBFYvhEHsXdnC0UkqYCrWJoM=;
-        b=o8PnH9ezu0DxOnWpWk/HTnprAGoUT0U6aZ+/P6SNSAwQwA0LHEUnv7Qvp5GdZ04C9g
-         T7JCHW6mEshFMWSs7S9vAd5pT1lpvdk8NPkh996c93Pkuty4do/+yUkMLqX5iIAc9QYd
-         uiA3CFxzvHvLydPmEiJa3wItVYxX7+QLCrrbY+GZ2djRlb4OSRXTqWLvIkUciqYwjCrY
-         mDpCSJk+hoVkKZ5fOyp/6UKxQpSIZ/1ZuHUEEpw1c5RBI3lLx3dZ0SShIRibYshAnhMZ
-         67yXykdKH4OFaEdoP909tu5kNV69mKRGInPL8dSPunMhfqCEgjOq8uK4DQWKEMGeYT27
-         0jWQ==
-X-Gm-Message-State: AOJu0YwmflapTmbjiJVDFCUhylcQH5ZYo8OI9/RMWqNjVENdzqcXz4ZL
-	34WpIDz3Ilj9GOEKtzuRMvg+ZP+O9bMlUcUMewAWNf00aQy8tV0OQRq8UCfuc+vjukBpW+nQcSb
-	dQSE3CZdaQbr3NIEJfyb9c0SUQKUpb4+J/I8LppG9GAA27CbHnlk=
-X-Google-Smtp-Source: AGHT+IHsbHIUYyNqabSkYOvEEW4Yng3125fVVmvQSvvvhJnFQmAEtoOpRqaZNd13sKyX2wST+nVt6ZludICGDSN4Tis=
-X-Received: by 2002:a25:848f:0:b0:dda:a550:4e92 with SMTP id
- v15-20020a25848f000000b00ddaa5504e92mr4349093ybk.46.1711551104124; Wed, 27
- Mar 2024 07:51:44 -0700 (PDT)
+        bh=hJujr9RimFfO2QmiTRr7usgxHtS2vMpREAuBqxXSA/M=;
+        b=UaLQZgwyq9fSubJuGAZbimEl7+vYfG6mgD+Q0yj3FMZge7EfL1iJRiyGEKa2zt82Bg
+         88d6A5eJ9V/1iGDhTGjZhRBxO4rfKWCvUvzeWCk+165tvjlhI7yBh1tCmw1D9yLcxcVt
+         3o9Xqmp+XMggxchYnbYu85RKEpq5/4Fi15/oxrVvSu6wa7++nUDTHW3N3HXUYaoPiKiH
+         fEW/cwFLo/LK2le3eYEOsk6lgrfkl0iBhL5PCpTjg97YVr16KzDVhoIJQAVwF7T8UIrH
+         lDwDPFK7ONiqft9pTi0oB+3wB+M2y0/Y6EPdvu98gPAGRFRK3brTdF5LkNFWQxzzAxQF
+         tWXw==
+X-Forwarded-Encrypted: i=1; AJvYcCXSF+UGS2PQV12l/drBM+GVNtQUKrxpMHFh4j4TU8GYaP0fKovqPovYUVK2+7V+LdMYpX8++1OeVPnr6En3ybXsvXSRL4tZeKzX
+X-Gm-Message-State: AOJu0YwB6F+OCbQpX6LSmHIURsvzdr5cKG/gzfb7cLk4caiQL9dPNDJQ
+	VHpum2v6dv5WQLbUut+l45rO4krqcDM86TusruR7qtr+zijqctw4Shx1kESe7KXOSl24gOX+Yv/
+	qEULQxdjHalH3Iog3lE2TKWcj8bDaAGqi2ogdrQ==
+X-Google-Smtp-Source: AGHT+IFbbnNsIwN9QIYafUzgy5PDtN8IbI5jwCbt0izw9mxTrfV6JaCm7Lt4CkK8Bmrp2eixisUNCE/8moYMBJZ2dRg=
+X-Received: by 2002:a5b:509:0:b0:dc7:4859:6f1 with SMTP id o9-20020a5b0509000000b00dc7485906f1mr99707ybp.33.1711552699663;
+ Wed, 27 Mar 2024 08:18:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240316153636.30814-1-avri.altman@wdc.com>
-In-Reply-To: <20240316153636.30814-1-avri.altman@wdc.com>
+References: <20240321-sdhci-mmc-suspend-v1-1-fbc555a64400@8devices.com> <2e712cf6-7521-4c0b-b6fd-76bacc309496@intel.com>
+In-Reply-To: <2e712cf6-7521-4c0b-b6fd-76bacc309496@intel.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 27 Mar 2024 15:51:08 +0100
-Message-ID: <CAPDyKFoAntcQRwbTju=x3bYe9S6dfEeyODdFGSVqHfcek=YFhA@mail.gmail.com>
-Subject: Re: [PATCH] mmc-utils: man 1 mmc-utils
-To: Avri Altman <avri.altman@wdc.com>
-Cc: linux-mmc@vger.kernel.org
+Date: Wed, 27 Mar 2024 16:17:43 +0100
+Message-ID: <CAPDyKFoBgwWDXhcXsbCfBD_nJ=3w1e5eReqHgDQ1BiPf0zJRxw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: pervent access to suspended controller
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Mantas Pucka <mantas@8devices.com>, Bjorn Andersson <andersson@kernel.org>, 
+	Konrad Dybcio <konrad.dybcio@linaro.org>, Georgi Djakov <djakov@kernel.org>, 
+	Pramod Gurav <pramod.gurav@linaro.org>, Ritesh Harjani <ritesh.list@gmail.com>, 
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sat, 16 Mar 2024 at 16:36, Avri Altman <avri.altman@wdc.com> wrote:
+On Tue, 26 Mar 2024 at 11:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> I have put together a draft man page for mmc-utils.  The contents are
-> from mmc-utils help documents and edited for brevity.  The point is not
-> to replace the existing docmentation, but to serve as a quick reference.
+> On 21/03/24 16:30, Mantas Pucka wrote:
+> > Generic sdhci code registers LED device and uses host->runtime_suspended
+> > flag to protect access to it. The sdhci-msm driver doesn't set this flag,
+> > which causes a crash when LED is accessed while controller is runtime
+> > suspended. Fix this by setting the flag correctly.
+> >
+> > Cc: stable@vger.kernel.org
+> > Fixes: 67e6db113c90 ("mmc: sdhci-msm: Add pm_runtime and system PM support")
+> > Signed-off-by: Mantas Pucka <mantas@8devices.com>
 >
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Seems like a good idea! While reviewing, I found a couple of spelling
-mistakes and sometimes words being repeated. Can you please run a
-spell checker and fix those things and re-submit?
+Looks like this problem may exist for other sdhci drivers too. In
+particular for those that enables runtime PM, don't set
+SDHCI_QUIRK_NO_LED and don't use sdhci_runtime|suspend_resume_host().
+
+Don't know if there is a better way to address this, if not on a case
+by case basis. Do you have any thoughts about this?
 
 Kind regards
 Uffe
 
-> ---
->  Makefile |   9 +-
->  mmc.1    | 302 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 306 insertions(+), 5 deletions(-)
->  create mode 100644 mmc.1
 >
-> diff --git a/Makefile b/Makefile
-> index 10b78ab..a890833 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -21,6 +21,7 @@ prefix ?= /usr/local
->  bindir = $(prefix)/bin
->  LIBS=
->  RESTORE_LIBS=
-> +mandir = /usr/share/man
->
->  progs = mmc
->
-> @@ -29,7 +30,7 @@ ifdef C
->         check = sparse $(CHECKFLAGS)
->  endif
->
-> -all: $(progs) manpages
-> +all: $(progs)
->
->  .c.o:
->  ifdef C
-> @@ -43,16 +44,14 @@ mmc: $(objects)
->  manpages:
->         $(MAKE) -C man
->
-> -install-man:
-> -       $(MAKE) -C man install
-> -
->  clean:
->         rm -f $(progs) $(objects)
->         $(MAKE) -C man clean
->
-> -install: $(progs) install-man
-> +install: $(progs)
->         $(INSTALL) -m755 -d $(DESTDIR)$(bindir)
->         $(INSTALL) $(progs) $(DESTDIR)$(bindir)
-> +       $(INSTALL) -m 644 mmc.1 $(DESTDIR)$(mandir)/man1
->
->  -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
->
-> diff --git a/mmc.1 b/mmc.1
-> new file mode 100644
-> index 0000000..b40bdf4
-> --- /dev/null
-> +++ b/mmc.1
-> @@ -0,0 +1,302 @@
-> +.TH mmc\-utils 1 "April 2024" "User Manual"
-> +.SH NAME
-> +mmc \-  a tool for configuring MMC storage devices
-> +.SH SYNOPSIS
-> +.B mmc
-> +[\fIoptions\fR] [\ mmc\-block\-device\fR]...
-> +.SH DESCRIPTION
-> +.B mmc-utils
-> +is a single-threaded tool that will perform a particular type of mmc action as specified by the user.
-> +.br
-> +The typical use of mmc-utils is to access the mmc device either for configuring or reading its configuration registers.
-> +.SH OPTIONS
-> +.TP
-> +.BI extcsd " " read " " \fIdevice\fR
-> +Read and prints the extended csd register
-> +.TP
-> +.BI extcsd " " write " " \fIoffset\fR " " \fIvalue\fR " " \fIdevice\fR
-> +Write \fIvalue\fR at \fIoffset\fR to the device's extcsd
-> +.TP
-> +.BI writeprotect " " boot " " get " " \fIdevice\fR
-> +Print the boot partitions write protect status
-> +.TP
-> +.BI writeprotect " " boot " " set " " \fIdevice\fR " " [\fInumber\fR]
-> +Set the boot partition write protect status for the device.
-> +.br
-> +If \fInumber\fR is passed (0 or 1), only protect that particular eMMC boot partition, otherwise protect both.
-> +.br
-> +It will be write-protected until the next boot.
-> +.TP
-> +.BI writeprotect " " user " " set " " \fItype\fR " " \fIstart\-block\fR " " \fIblocks\fR " " \fIdevice\fR
-> +Set the write protect configuration for the specified region of the user area for the device.
-> +.br
-> +\fIstart\-block\fR specifies the first block of the protected area.
-> +.br
-> +\fIblocks\fR specifies the size of the protected area in blocks.
-> +.br
-> +NOTE! The area must start and end on Write Protect Group boundries, Use the "writeprotect user get" command to get the Write Protect Group size.
-> + \fItype\fR is one of the following:
-> +.RS
-> +.RS
-> +.TP
-> +.B none
-> +Clear temporary write protection.
-> +.TP
-> +.B temp
-> +Set temporary write protection.
-> +.TP
-> +.B pwron
-> +Set write protection until the next poweron.
-> +.RE
-> +.RE
-> +.TP
-> +.BI writeprotect " " user " " get " " \fIdevice\fR
-> +Print the user areas write protect configuration for the device.
-> +.TP
-> +.BI disable " " 512B " " emulation " " \fIdevice\fR
-> +Set the eMMC data sector size to 4KB by disabling emulation on the device.
-> +.TP
-> +.BI gp " " create " " \fIdry\-run\fR " " \fIlength\-KiB\fR " " \fIpartition\fR  " " \fIenh\-attr\fR " " \fIext\-attr\fR " " \fIdevice\fR
-> +Create general purpose partition for the the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-> +.br
-> +To set enhanced attribute to general partition being created set \fIenh\-attr\fR to 1 else set it to 0.
-> +.br
-> +To set extended attribute to general partition set \fIenh\-attr\fR to 1,2 else set it to 0.
-> +.br
-> +\fIdry\-run\fR is one of the following:
-> +.RS
-> +.RS
-> +.TP
-> +.B \-y
-> +PARTITION_SETTING_COMPLETED in the extcsd will get set and the partisioning operation will take effect and finalized.
-> +.TP
-> +.B \-c
-> +more partitioning settings are still to come - partisioning operation will not take effect.
-> +.TP
-> +.B otherwise
-> +These changes will not take effect neither now nor after a power cycle.
-> +.RE
-> +.RE
-> +.TP
-> +.BI enh_area " " set " " \fIdry\-run\fR " " \fIstart\-KiB\fR " " \fIlength\-KiB\fR " " \fIdevice\fR
-> +Enable the enhanced user area for the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-> +\fIdry\-run\fR is as above.
-> +.TP
-> +.BI write_reliability " " set " " " \fIdry\-run\fR " " \fIpartition\fR " " \fIdevice\fR
-> +Enable write reliability per partition for the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-> +\fIdry\-run\fR is as above.
-> +.TP
-> +.BI status " " get " " \fIdevice\fR
-> +Print the response to STATUS_SEND (CMD13).
-> +.TP
-> +.BI bootpart " " enable " " \fIboot\-partition\fR " " \fIsend\-ackn\fR " " \fIdevice\fR
-> +Enable the boot partition for the device.
-> +Disable the boot partition for the device if is \fIboot\-partition\fR set to 0.
-> +.br
-> +To receive acknowledgment of boot from the card set \fIsend\-ackn\fR to 1, else set it to 0.
-> +.TP
-> +.BI bootbus " " set " " \fIboot\-mode\fR " " \fIreset\-boot\-bus\-conditions\fR " " \fIboot\-bus\-width\fR " " \fIdevice\fR
-> +Set Boot Bus Conditions.
-> +.br
-> +\fIboot\-mode\fR is one of the following: single_backward, single_hs, or dual.
-> +.br
-> +\fIreset\-boot\-bus\-conditions\fR is one of the following: x1 or retain.
-> +.br
-> +\fIboot\-bus\-width\fR is one of the following: x1, x4, or x8.
-> +.TP
-> +.BI bkops_en " " \fImode\fR " " \fIdevice\fR
-> +Enable the eMMC BKOPS feature on the device.
-> +The auto (AUTO_EN) setting is only supported on eMMC 5.0 or newer.
-> +.br
-> +NOTE!  Setting manual (MANUAL_EN) is one-time programmable (unreversible) change.
-> +.br
-> +\fImode\fR is one of the following:
-> +.RS
-> +.RS
-> +.TP
-> +.B auto
-> +Auto backops is set
-> +.TP
-> +.B manual
-> +Manual bkops is set
-> +.RE
-> +.RE
-> +.TP
-> +.BI hwreset " " enable " " \fIdevice\fR
-> +Permanently enable the eMMC H/W Reset feature on the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-> +.TP
-> +.BI hwreset " " disable " " \fIdevice\fR
-> +Permanently disable the eMMC H/W Reset feature on the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-> +.TP
-> +.BI sanitize " " \fIdevice\fR " " \fI[timeout_ms]\fR
-> +Send Sanitize command to the device.
-> +This will delete the unmapped memory region of the device.
-> +.TP
-> +.BI rpmb " " write\-key " " \fIrpmb\-device\fR " " \fIkey\-file\fR
-> +Program authentication key which is 32 bytes length and stored in the specified file.
-> +.br
-> +Also you can specify '-' instead of key file path to read the key from stdin.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-> +.TP
-> +.BI rpmb " " read\-counter " " \fIrpmb\-device\fR
-> +Counter value for the \fIrpmb\-device\fR will be read to stdout.
-> +.TP
-> +.BI rpmb " " read\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " " \fIblocks-\count\fR " " \fIoutput-\file\fR " " [\fIkey\-file\fR]
-> +Blocks of 256 bytes will be read from \fIrpmb\-device\fR to output
-> +file or stdout if '-' is specified. If key is specified - read
-> +data will be verified.
-> +.TP
-> +.BI rpmb " " write\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " "  \fI256\-byte\-data\-file\fR " " \fIkey\-file\fR
-> +Block of 256 bytes will be written from data file to
-> +\fIrpmb\-device\fR.
-> +.br
-> +Also you can specify '-' instead of key file path or data file to read the data from stdin.
-> +.TP
-> +.BI cache " " enable " " \fIdevice\fR
-> +Enable the eMMC cache feature on the device.
-> +.br
-> +NOTE! The cache is an optional feature on devices >= eMMC4.5.
-> +.TP
-> +.BI cache disable " " \fIdevice\fR
-> +Disable the eMMC cache feature on the device.
-> +.br
-> +NOTE! The cache is an optional feature on devices >= eMMC4.5.
-> +.TP
-> +.BI csd " " read " " \fidevice\-path\fR
-> +Print CSD data from \fIdevice\-path\fR.
-> +The device path should specify the csd sysfs file directory.
-> +.TP
-> +.BI cid " " read " " \fIdevice\-path\fR
-> +Print CID data from \fIdevice\-path\fR.
-> +The device path should specify the cid sysfs file directory.
-> +.TP
-> +.BI scr " " read " " \fIdevice\-path\fR
-> +Print SCR data from \fIdevice\-path\fR.
-> +The device path should specify the scr sysfs file directory.
-> +.TP
-> +.BI ffu " " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
-> +Run Field Firmware Update with \fIimage\-file\-name\fR on the device.
-> +.br
-> +[\fIchunk\-bytes\fR] is optional and defaults to its max - 512k. should be in decimal bytes and sector aligned.
-> +.br
-> +if [\fIchunk\-bytes\fR] is omitted, mmc-utils will try to run ffu using the largest possible chunks: max(image-file, 512k).
-> +.TP
-> +.BI erase " " \fItype\fR " " \fIstart-address\fR " " \fIend\-address\fR " " \fIdevice\fR
-> +Send Erase CMD38 with specific argument to the device.
-> +.br
-> +NOTE!: This will delete all user data in the specified region of the device.
-> +.br
-> +\fItype\fR is one of the following: legacy, discard, secure-erase, secure-trim1, secure-trim2, or trim.
-> +.TP
-> +.BI gen_cmd " " read " \fidevice\fR [\fIarg\fR]
-> +Send GEN_CMD (CMD56) to read vendor-specific format/meaning data from the device.
-> +.br
-> +NOTE!: [\fIarg\fR] is optional and defaults to 0x1. If [\fIarg\fR] is specified, then [\fIarg\fR]
-> +must be a 32-bit hexadecimal number, prefixed with 0x/0X. And bit0 in [\fIarg\fR] must be 1.
-> +Normally this command is aimed to extract a device-health info from the device.
-> +.TP
-> +.BI softreset " " \fIdevice\fR
-> +Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works
-> +.TP
-> +.BI boot_operation " " \fIboot\-data\-file\fR " " \fIdevice\fR
-> + Does the alternative boot operation and writes the specified starting blocks of boot data into the requested file.
-> +Note some limitations:
-> +.RS
-> +.RS
-> +.TP
-> +.B 1)
-> +The boot operation must be configured first, e.g. via bootbus and/or bootpart commands
-> +.TP
-> +.B 2)
-> +The MMC must currently be running at the bus mode that is configured for the boot operation (HS200 and HS400 not supported at all).
-> +.TP
-> +.B 3)
-> +Only up to 512K bytes of boot data will be transferred.
-> +.TP
-> +.B 4)
-> +The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.
-> +.RE
-> +.RE
-> +.TP
-> +.BI \-\-help " " | " " help " " | " " \-h
-> +Show the help
-> +.TP
-> +.BI \fIcmd\fR " " \-\-help
-> +Show detailed help for that specific \fIcmd\fR or subset of commands.
-> +.SH "RPMB COMMANDS"
-> +The RPMB partition on the eMMC devices is a special area used for storing cryptographically safe information signed by a
-> +special secret key. To write and read records from this special area, authentication is needed.
-> +The RPMB area is *only* and *exclusively* accessed using ioctl()s from userspace.
-> +RPMB commands are send using the mmc multi-ioctl, thus ensures that the atomic nature of the rpmb access operation.
-> +The rpmb device given as a parameter to the rpmb commands is not a block device but a char device.
-> +This was done to help the mmc driver to account for some of the rpmb peculiarities.
-> +.SH "EXAMPLES"
-> +.RE
-> +.P
-> +.B RPMB examples
-> +.RS
-> +Program rpmb key using the stdin option:
-> +.RS
-> +.P
-> +$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb write-key /dev/mmcblk0rpmb -
-> +.RE
-> +.P
-> +Read 2 blocks starting address 2 and output the recieved content to stdout. Verify the recieved frames using the key (not mandatory):
-> +.RS
-> +.P
-> +$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 -
-> +.RE
-> +.P
-> +Read 2 blocks without verfication starting address 2 and output the recieved content to /tmp/block:
-> +.RS
-> +.P
-> +$mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 /tmp/block
-> +.RE
-> +.P
-> +Write a string of 'a's to address 2. both the input and key uses stdin interface:
-> +.RS
-> +.P
-> +$ (awk 'BEGIN {while (c++<256) printf "a"}' | echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH) | mmc rpmb write-block /dev/mmcblk0rpmb 0x02 - -
-> +.RE
-> +.P
-> +.RE
-> +.P
-> +.B Field Firmware Update (ffu) examples
-> +.RS
-> +Do ffu using max-possible chunk size:  If the fluf size < 512k, it will be flushed in a single write sequence.
-> +.RS
-> +.P
-> +$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0
-> +.RE
-> +.P
-> +Same as above, this time use a 4k chunks:
-> +.RS
-> +.P
-> +$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0 4096
-> +.RE
-> +.P
-> +.RE
-> +.SH AUTHORS
-> +.B mmc-utils
-> +was written by Chris Ball <cjb@laptop.org> and <chris@printf.net>.
-> +.br
-> +It is currently maintained by Ulf Hansson <ulf.hansson@linaro.org>.
-> +.SH "REPORTING BUGS"
-> +Report bugs to the \fBmmc\fR mailing list <linux-mmc@vger.kernel.org>.
-> +.SH "SEE ALSO"
-> +For further documentation see \fBREADME\fR.
-> +.br
-> +A short intro - https://docs.kernel.org/driver-api/mmc/mmc-tools.html
-> +.br
-> +official git tree - https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
-> --
-> 2.42.0
+> > ---
+> >  drivers/mmc/host/sdhci-msm.c | 16 +++++++++++++++-
+> >  1 file changed, 15 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> > index 668e0aceeeba..e113b99a3eab 100644
+> > --- a/drivers/mmc/host/sdhci-msm.c
+> > +++ b/drivers/mmc/host/sdhci-msm.c
+> > @@ -2694,6 +2694,11 @@ static __maybe_unused int sdhci_msm_runtime_suspend(struct device *dev)
+> >       struct sdhci_host *host = dev_get_drvdata(dev);
+> >       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> > +     unsigned long flags;
+> > +
+> > +     spin_lock_irqsave(&host->lock, flags);
+> > +     host->runtime_suspended = true;
+> > +     spin_unlock_irqrestore(&host->lock, flags);
+> >
+> >       /* Drop the performance vote */
+> >       dev_pm_opp_set_rate(dev, 0);
+> > @@ -2708,6 +2713,7 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+> >       struct sdhci_host *host = dev_get_drvdata(dev);
+> >       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> > +     unsigned long flags;
+> >       int ret;
+> >
+> >       ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
+> > @@ -2726,7 +2732,15 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+> >
+> >       dev_pm_opp_set_rate(dev, msm_host->clk_rate);
+> >
+> > -     return sdhci_msm_ice_resume(msm_host);
+> > +     ret = sdhci_msm_ice_resume(msm_host);
+> > +     if (ret)
+> > +             return ret;
+> > +
+> > +     spin_lock_irqsave(&host->lock, flags);
+> > +     host->runtime_suspended = false;
+> > +     spin_unlock_irqrestore(&host->lock, flags);
+> > +
+> > +     return ret;
+> >  }
+> >
+> >  static const struct dev_pm_ops sdhci_msm_pm_ops = {
+> >
+> > ---
+> > base-commit: e8f897f4afef0031fe618a8e94127a0934896aba
+> > change-id: 20240321-sdhci-mmc-suspend-34f4af1d0286
+> >
+> > Best regards,
 >
