@@ -1,137 +1,301 @@
-Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10olkn2034.outbound.protection.outlook.com [40.92.41.34])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C4502D606;
-	Wed, 27 Mar 2024 07:44:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.41.34
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711525492; cv=fail; b=mQyIcMXhFb3FGj8Q4SlQ1A/pMY9XXAd9rp3sfvgapXnFjwDng1YS+no+fDxVyUSTNEodnn1tJw1AbYIE4jmzLhBC1x7Lwz8jw9WQXWpRcu7Mhwsm1qT1LiKCQQ9UYUm5Q2dHXvFtXhDH6BSKEdv64m4QkOQ247GKKvbuX/fpRes=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711525492; c=relaxed/simple;
-	bh=qtQZ/5R02Ef7lt9bNIsst/al1pL5VxL5r+X3zwKAAqM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=aEfER8/4GqLpxdE4h/0gjc1u69AQN+j2LWMXuYnpbIcaeRkk8dA+oX6lmHIpX7EM1tSIfUOC56o3LwXkR7HimSTUEU+TqEcYzpotBaL6KnazwLX7SKUwZV5FCRmXpLNKLUIC/DaoGf1hWjj8RY0pEKHfksH/mEIQ5XIhQViC268=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=hQKIS1qe; arc=fail smtp.client-ip=40.92.41.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80182131197;
+	Wed, 27 Mar 2024 12:34:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1711542867; cv=none; b=BLznJS4ZJhs9ecvlhNBQsEWiMCz7nh1MjSYaO6F1P1RIcWTfK1W5MzitgdwLHNW+dyMby/EBp3zZgBrjXNWx+z/aJjmclAV+Zdy3FNlg2GbAirfvnIIxpqwjccIB1W3O3WrKKjk0T4LPUkKNH09c6IBMCjv78AIZ3dkuyffPbOs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1711542867; c=relaxed/simple;
+	bh=8N3t+CDdKY3YFlH7oaNZFASNnUeM1RCAwnipRrhwJuU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=GEusRmpZCL1wWq/9uu0RzKCGRqYlS5pAV8jLolZ/VXMEKxaPOg2/iHvSAtLI8Kn6em1hpukb/LyZk4rourhTqoZDNGbAV7tSOHuuUpv/saR79yzbjSs+h66UH/rEprv5Am7YIKrexqzNjV4kmhLgJb/l2HFu5kH7KoJZx8K0Htg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WHsjI+Fn; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="hQKIS1qe"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=f1IfJvglFeTdBYaQQFgTO5X4lAdBFueLEljDKLJyFQdZoEVpwxLJhSApsdesLQm35CVeCJXPu/Xo1G0AtcdPjuArLxN/15TIRkTwcQpTYnkWOp+wDTBtMh+3kxvRSG+CIyhE1OcslSFw0PxrSjQCO7eOaj+duTOrwtOITZN0UobDLEdZ9qJGS8T8aPc6LlotFnUe2hg3amTl4ucGTtCHAAbxAYBZGW+jSfSpCnEt8RGbFHi5X7o1kRpGp5eI/IRUpt64VVLJHps3Rw2WDshepb8vlpPyiT/xxL4LUDYjjVDKi+unfw8EOtAKAYXxSNjWXDnPUXoFd+UdHKn1E/8HOg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=WUCn0x4ILGUNIkbBmqKlextH6ZrTLFd+PaEcZ+WLomE=;
- b=SM/Q56go08skQ3KvZ3S1cmXweBaonRsN4yn7AIYuE8vlFwmOUT//sTvf7GhkJmNpShHdjHG67n/io7Ev8JSTRbCOzcsJnf2kUuTmXUME5Mw2Icw8Oa8u63De63PPsKeyE/5742HUA20LtIpZmN/crOUsmG5utylwtkUG+4v5Ex3YJWRj+wwcaXRw1gQZzhbB3muYdfms+h6yEM9pq6rCyjGzO67VmoIVw/ZKa9MXOH/N0JqW5amJkxAdCACRLS0sinCrNvXbytsESQmLXYqzJKjzTLzKpTSnpFQUgqaIOTsF+SHT4VBdBy9CPMGock7ehU22hFdNpjAgUlI8ujNuTA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=WUCn0x4ILGUNIkbBmqKlextH6ZrTLFd+PaEcZ+WLomE=;
- b=hQKIS1qehzEDf/q6G6owtFaDYuJib9eoWwAp7BhxKD1iFzyjXPRD+DqFre4ifVaP3iwE6Fe7BpBI9GWiDBdaUGY3thZdXLm++rMi6XXFQnjymXJc7dbtOGjUJCy2AZSQ0kMpqXXvxHRFX9qPaRd7zHa2j6oSnt4H6ELQhkXUYPsIpF5giBp0/Tla66v8SBmDWcGHtl4a7VhAl6Qcw2YjPL8YvUyhFMZC6XA53zyHdHBcdAlMmK4K9RrHA7s41m3klMfAwsYKyuDPQCkDLCjMyGaVYYF9OSNmcuzs0oMttjnWCad5LCo5MUsyylxtVTb3HetA/3A0CprwQ8rS9Uvb4A==
-Received: from IA1PR20MB4953.namprd20.prod.outlook.com (2603:10b6:208:3af::19)
- by IA1PR20MB4875.namprd20.prod.outlook.com (2603:10b6:208:3e5::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7409.26; Wed, 27 Mar
- 2024 07:44:48 +0000
-Received: from IA1PR20MB4953.namprd20.prod.outlook.com
- ([fe80::182f:841b:6e76:b819]) by IA1PR20MB4953.namprd20.prod.outlook.com
- ([fe80::182f:841b:6e76:b819%2]) with mapi id 15.20.7409.026; Wed, 27 Mar 2024
- 07:44:48 +0000
-From: Inochi Amaoto <inochiama@outlook.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh+dt@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Jisheng Zhang <jszhang@kernel.org>
-Cc: Inochi Amaoto <inochiama@outlook.com>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-riscv@lists.infradead.org
-Subject: Re: [PATCH RFC] riscv: dts: sophgo: add sdcard support for milkv duo
-Date: Wed, 27 Mar 2024 15:44:29 +0800
-Message-ID:
- <IA1PR20MB4953436EB1E28CB565BD3F36BB342@IA1PR20MB4953.namprd20.prod.outlook.com>
-X-Mailer: git-send-email 2.44.0
-In-Reply-To: <20240217144826.3944-1-jszhang@kernel.org>
-References: <20240217144826.3944-1-jszhang@kernel.org>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-X-TMN: [h47+O4QdPLnBmwit97l1meqlj3SspzrH7IPqtSEKeps=]
-X-ClientProxiedBy: SI2PR06CA0010.apcprd06.prod.outlook.com
- (2603:1096:4:186::6) To IA1PR20MB4953.namprd20.prod.outlook.com
- (2603:10b6:208:3af::19)
-X-Microsoft-Original-Message-ID:
- <171152545132.1459004.12521619420853775227.b4-ty@outlook.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WHsjI+Fn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE5FEC433C7;
+	Wed, 27 Mar 2024 12:34:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1711542866;
+	bh=8N3t+CDdKY3YFlH7oaNZFASNnUeM1RCAwnipRrhwJuU=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=WHsjI+FniF8Z7sOkWvPE0p9O+aVYavDYf9XPeV+3iciywX8W/lv4HDbwn4U8bXqdu
+	 t9UThFGat5QWDAEEdFSDMdFCP+83xuy0zQYv+kRkzTdAUSUPpaI5Pwo0PcGqXN7Z4h
+	 AiB7QOBGfU1jUIPntJBDlxdKY36aoV9onQus2N40KzBrrZ00RAxG6NPutLTmiTOPev
+	 VeDRcgqc0Urq5VRNUdFh2PRbE0Z4kFog0dNgD+pLz1Iu5FUQyT7hp8s860+MoyZIjp
+	 J5r4PQuj6zm5I8zJ3F8uHkn5Bg43XW56RDrJFuL6Sk0ZKXbDmtENJM2UsCnTU4AlRW
+	 VWyG3wXjQ1waQ==
+Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-2d24a727f78so75601501fa.0;
+        Wed, 27 Mar 2024 05:34:26 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUPwcHeuTqI3GlLvlIDIoabS3WCBMTUbJ3LII8X/g5vUQDySb+fWRA9ya77tfpuYxt/ems9Ky2H+lDYMqueD0pIAPHr+ILruJtthgQpo8oC8BxKRxKOhcLNTKaJa3kFQIZrsFOuJs/7oADqmbEQJ6/U1cWZO9eY3MN24v5XZAvOdiii6MInvWx1g3FKkpzEFau/XDPjckdwBn7GXyYEBKOx
+X-Gm-Message-State: AOJu0YwWZLs/t9gxnH/Fwzc0nHblwnaIU+hvWv2HqaGZ1ygtSv4D31v4
+	i12aME69sRK24vw1MsHkylnxKZMrKMzRkXwxhGG8ViExQT/PMh80eURKzS5u/jfJ5Y1NjD3jT4G
+	QFbhoHHa4LrcRmADsi+wNjz712w==
+X-Google-Smtp-Source: AGHT+IGb/tvDk7BPc5ooPMe3vs21TSV/CGNkWTr1j3kZGhTSowTUtnyhhb9eTVfWHGXwW0jFHOVQ8E43Udn54x9e++k=
+X-Received: by 2002:a2e:9c55:0:b0:2d6:c7e5:34d0 with SMTP id
+ t21-20020a2e9c55000000b002d6c7e534d0mr4128198ljj.41.1711542844882; Wed, 27
+ Mar 2024 05:34:04 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR20MB4953:EE_|IA1PR20MB4875:EE_
-X-MS-Office365-Filtering-Correlation-Id: 65a28d98-bb20-4eac-14fd-08dc4e31c740
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info:
-	XLbpndB91SV6jhdom/SPB1VT+3tbp/oQ61sLHcLuR8+TsXsbPlnF3xvANQloCPLA/fYK3BYf++yxjWCLSsjl7MK4xZyKMBthO+kgCE4AjnlkAoYK6YLislEK9YSSqvtEraLFjYua+vAl5xnfivq+YiijC+eNO9GgXoGqU1VymN/MpxVnMZLSJpwlxnpcUBICViOvjpjNx8YdMvuzmLhX3ECSI8RnNwN5+Rma2/idqE8zBU7kB0hONr4sf3jd64w5JOSVbvCieOQfiFDt67PEWbpDUwlCsBSiPEnRHznrF5sXBtPfbotNOR6ttOtDFX3tH7lWfZRfKBWXTuLZ9FsEHWmyqSqX51LrwtovlAYh2Zb6p1/7nKf4NDK7Ni51n0BvCTwcFbN+urnKGV/L0oHORM7x2uYLUapCtrjIKO2tNCkFfZ/AwTgKfvWoUc+Zp5XzH7khgwBa06YqZ+YjwFN0loPgqpCFDfwaLOwaD7gJGk5o0nGRv9JetCSmMcfK1JUDxKQby7aNwqgIpFxrM5BBTggPuTlPBd2bzDHssgSShTjW3C5Xq/mRxEWMubbytTZ5vL1lWP7o/ycJqwVRRdE+fiAqingtmuMkfRg36JEMdYo3AD7E+FroqJ2jlzOueYAuc6rH+oNrE/FNtn10n13Tjdgs2H962OlVEpNHwtacqS+PO3jwNsH9sRhHSFESDz52
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?MVVOYyt0OVYxcms5ZEtXOXV5N3QrRTF2dmx2QjBkdUgrczhlUHNVdGV4NDIr?=
- =?utf-8?B?cU4wUXZwQWF5RnordXdYZEJrOTJmVmVvL0YvSi9PZWZHSmpDT3BUZWFEdVV0?=
- =?utf-8?B?SVRBWEtiSHQ5aDZ1RFhoT1oyNm1UNm9VM0thNHlnTWtXOGpjYzJUd0EwWDUv?=
- =?utf-8?B?Q2F4bGpNNWI5OVU3OWhpQkxaVnMrRnNzTlpRMDlWYTF1aVRpZk9nenpXSHRq?=
- =?utf-8?B?ZDNiYnJlblZReHlUSUovRGtUZXJvZ3hZRnNxWGFZRGVNYTRmL25vN1d3d2c1?=
- =?utf-8?B?ZFdyTGdaUDU2QldpL0xsTmV5d3QxMXVQSVRiWXVHcURCY0dZdHJLR0kxQ1ZF?=
- =?utf-8?B?QmU5MjlFeEhkV0QrTEplVGk4bDNkZ0Q5bFdtQ1Q2M3VZZ3NrdXdnOTV3dm1N?=
- =?utf-8?B?K2Y0NjFpVmtWVjE4RmRaWmhKU1VDeCtCM0R4cHJXb1ovVzFXdU0yUVZGSjIy?=
- =?utf-8?B?NEwzWm1pYkZiNnZxUndyTGFoSU5QNG9hWkZmaiswNURqMTQ5VDFqdG41RnFs?=
- =?utf-8?B?S2g4ZXNFcnFJTlF6cjltNWZwZ3R2SjlOSnZTNmFwTFJVUXFYbldKVnIxQm5O?=
- =?utf-8?B?cjlKTmxLU1hhVm5HMmpZOHFrNStBSnlUVnhCZVd4M0hORHVkZzVCdllWSFls?=
- =?utf-8?B?Qnk1MWkzaEhuRVltczVKbXhobmZtL0NGbWl6dGphcCsvenpLK3J4U0pydk5Y?=
- =?utf-8?B?V0ZWZ0wxdzR0d0pybUxFdTBVb1poN0F5T0I3cmhRMlFLMi83TmZwcjJMSERj?=
- =?utf-8?B?TlRQNmtqMFlRcWlGT0Z5ZzZDdGgrYU13c3BvTUZJNEFqK3lnTW9jMHZISWhL?=
- =?utf-8?B?RkNWOU9aM2hsYWVYYncyd1RETmE5dGRtRWJkL1duMHYzak9Ya0d5eWpJdmVk?=
- =?utf-8?B?MVZLeTUzVDhkdXhRYmVwTGNiSWtBR3pYamlVWDFnaUJjOTBKSGtUbCtIak1z?=
- =?utf-8?B?NXRRam9PcmZYNFZPU0xNWk5uS1FYZXJZNXg0WCtUWDNLZEo3WGFQb0pJRkVH?=
- =?utf-8?B?YW1ZR25EaHNURlhTcnBVMEN2WFIzYXpYdFpwRUhzT2szY2ZkeHBOamNteGVT?=
- =?utf-8?B?TGNBMHg1WkQ3U0p5T2xsNHQ4VXRhdHpDQmc0SkQ3RVpkYzF6OHRNZ0M0cGpY?=
- =?utf-8?B?YTJ4YzFsbm5UMGx0d3paeUVaOFoxRzN0U3Vlc3lWZmxUbmNIZnRGSHdud1Qx?=
- =?utf-8?B?b2xyQXRjVlZsUVB1K05Ga2xxRDNXN1FrbkFFTUZSdG4vc3A5TnFTWjMyT3k0?=
- =?utf-8?B?VFNpYngyeGFpZEZtUG41ZVJrbW5FS2pxc05SaHlZZmlqSDZsYkJCTmxBNUtQ?=
- =?utf-8?B?RlhveThXeU5xcXQ2bGZIdFJRTXhqV0tCRU9NZGRGUXlqQVVtNWx0Qm1YdHE1?=
- =?utf-8?B?V0w2Y0N1Ynhqa3RrN2ZtdXRCdGpZUkZBcmxFVVB1YjBNdlJTZnRKV3JBT1Jv?=
- =?utf-8?B?ZFZjNG9NOGlHRmF0d0xBRzJDMjBqRUY1bUtYYVpLL1NpdFRSRjZ3TXNZbGcw?=
- =?utf-8?B?QXZWWEpqd1ZDUzBlSU1sbldrVnZkMDBaNUJVTnNsNGJLdS9IRWtaZzB0c21C?=
- =?utf-8?B?cTNBVVZSUTZTczRhZ0VNNGtWVWZLc0RpdXdNQXh1cDFoVHdFaC9mczRDOC9S?=
- =?utf-8?B?QmdmeEpMNlRtVmdrdzNzcy9uUFh1ODRVUGhWcHpJVm5KRk1rVjQzYkZzbWVl?=
- =?utf-8?Q?gxb7uYzH/4GepsFwq8HH?=
-X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 65a28d98-bb20-4eac-14fd-08dc4e31c740
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR20MB4953.namprd20.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Mar 2024 07:44:48.4918
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
-	00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA1PR20MB4875
+References: <cover.1711048433.git.daniel@makrotopia.org> <20240325151046.GA3591150-robh@kernel.org>
+ <ZgGaay6bLFAcCo2E@makrotopia.org> <20240326202449.GA3255378-robh@kernel.org> <ZgM-AR1BFU_FPaXh@makrotopia.org>
+In-Reply-To: <ZgM-AR1BFU_FPaXh@makrotopia.org>
+From: Rob Herring <robh@kernel.org>
+Date: Wed, 27 Mar 2024 07:33:51 -0500
+X-Gmail-Original-Message-ID: <CAL_JsqKkr6Nnfwa5HevMhqmgsHDXvXMzMFSzw8tiu6Zwe353dg@mail.gmail.com>
+Message-ID: <CAL_JsqKkr6Nnfwa5HevMhqmgsHDXvXMzMFSzw8tiu6Zwe353dg@mail.gmail.com>
+Subject: Re: [PATCH 0/8] block: implement NVMEM provider
+To: Daniel Golle <daniel@makrotopia.org>, 
+	Architecture Mailman List <boot-architecture@lists.linaro.org>
+Cc: Diping Zhang <diping.zhang@gl-inet.com>, Jianhui Zhao <zhaojh329@gmail.com>, 
+	Jieying Zeng <jieying.zeng@gl-inet.com>, Chad Monroe <chad.monroe@adtran.com>, 
+	Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>, Felix Fietkau <nbd@nbd.name>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, 
+	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>, 
+	=?UTF-8?Q?Thomas_Wei=C3=9Fschuh?= <linux@weissschuh.net>, 
+	Damien Le Moal <dlemoal@kernel.org>, Li Lingfeng <lilingfeng3@huawei.com>, 
+	Christian Brauner <brauner@kernel.org>, Christian Heusel <christian@heusel.eu>, Min Li <min15.li@samsung.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Avri Altman <avri.altman@wdc.com>, 
+	Hannes Reinecke <hare@suse.de>, Christian Loehle <CLoehle@hyperstone.com>, Bean Huo <beanhuo@micron.com>, 
+	Yeqi Fu <asuk4.q@gmail.com>, Victor Shih <victor.shih@genesyslogic.com.tw>, 
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>, 
+	Dominique Martinet <dominique.martinet@atmark-techno.com>, 
+	"Ricardo B. Marliere" <ricardo@marliere.net>, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-block@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Sat, 17 Feb 2024 22:48:26 +0800, Jisheng Zhang wrote:
-> Add sdhci dt node in SoC dtsi and enable it in milkv duo dts.
-> 
-> 
+On Tue, Mar 26, 2024 at 4:29=E2=80=AFPM Daniel Golle <daniel@makrotopia.org=
+> wrote:
+>
+> Hi Rob,
+>
+> On Tue, Mar 26, 2024 at 03:24:49PM -0500, Rob Herring wrote:
+> > +boot-architecture list
+>
+> Good idea, thank you :)
 
-Applied to sophgo/for-next, thanks!
+Now really adding it. :(
 
-[1/1] riscv: dts: sophgo: add sdcard support for milkv duo
-      https://github.com/sophgo/linux/commit/89a7056ed4f771e689729f7992ef5351e64e26c6
+Will reply to rest later.
 
-Thanks,
-Inochi
-
+> >
+> > On Mon, Mar 25, 2024 at 03:38:19PM +0000, Daniel Golle wrote:
+> > > On Mon, Mar 25, 2024 at 10:10:46AM -0500, Rob Herring wrote:
+> > > > On Thu, Mar 21, 2024 at 07:31:48PM +0000, Daniel Golle wrote:
+> > > > > On embedded devices using an eMMC it is common that one or more (=
+hw/sw)
+> > > > > partitions on the eMMC are used to store MAC addresses and Wi-Fi
+> > > > > calibration EEPROM data.
+> > > > >
+> > > > > Implement an NVMEM provider backed by a block device as typically=
+ the
+> > > > > NVMEM framework is used to have kernel drivers read and use binar=
+y data
+> > > > > from EEPROMs, efuses, flash memory (MTD), ...
+> > > > >
+> > > > > In order to be able to reference hardware partitions on an eMMC, =
+add code
+> > > > > to bind each hardware partition to a specific firmware subnode.
+> > > > >
+> > > > > Overall, this enables uniform handling across practially all flas=
+h
+> > > > > storage types used for this purpose (MTD, UBI, and now also MMC).
+> > > > >
+> > > > > As part of this series it was necessary to define a device tree s=
+chema
+> > > > > for block devices and partitions on them, which (similar to how i=
+t now
+> > > > > works also for UBI volumes) can be matched by one or more propert=
+ies.
+> > > > >
+> > > > > ---
+> > > > > This series has previously been submitted as RFC on July 19th 202=
+3[1]
+> > > > > and most of the basic idea did not change since. Another round of=
+ RFC
+> > > > > was submitted on March 5th 2024[2] which has received overall pos=
+itive
+> > > > > feedback and only minor corrections have been done since (see
+> > > > > changelog below).
+> > > >
+> > > > I don't recall giving positive feedback.
+> > > >
+> > > > I still think this should use offsets rather than partition specifi=
+c
+> > > > information. Not wanting to have to update the offsets if they chan=
+ge is
+> > > > not reason enough to not use them.
+> > >
+> > > Using raw offsets on the block device (rather than the partition)
+> > > won't work for most existing devices and boot firmware out there. The=
+y
+> > > always reference the partition, usually by the name of a GPT
+> > > partition (but sometimes also PARTUUID or even PARTNO) which is then
+> > > used in the exact same way as an MTD partition or UBI volume would be
+> > > on devices with NOR or NAND flash.
+> >
+> > MTD normally uses offsets hence why I'd like some alignment. UBI is
+> > special because raw NAND is, well, special.
+>
+> I get the point and in a way this is also already intended and
+> supported by this series. You can already just add an 'nvmem-layout'
+> node directly to a disk device rather than to a partition and define a
+> layout in this way.
+>
+> Making this useful in practice will require some improvements to the
+> nvmem system in Linux though, because that currently uses signed 32-bit
+> integers as addresses which is not sufficient for the size of the
+> user-part of an eMMC. However, that needs to be done then and should
+> of course not be read as an excuse.
+>
+> >
+> > > Just on eMMC we usually use a GPT
+> > > or MBR partition table rather than defining partitions in DT or cmdli=
+ne,
+> > > which is rather rare (for historic reasons, I suppose, but it is what=
+ it
+> > > is now).
+> >
+> > Yes, I understand how eMMC works. I don't understand why if you have
+> > part #, uuid, or name you can't get to the offset or vice-versa. You
+> > need only 1 piece of identification to map partition table entries to D=
+T
+> > nodes.
+>
+> Yes, either of them (or a combination) is fine. In practise I've mostly
+> seen PARTNAME as identifier used in userland scripts, and only adding
+> this for now will probably cover most devices (and existing boot firmware=
+)
+> out there. Notable exceptions are devices which are using MBR partitions
+> because the BootROM expects the bootloader to be at the same block as
+> we would usually have the primary GPT. In this case we can only use the
+> PARTNO, of course, and it stinks.
+> MediaTek's MT7623A/N is such an example, but it's a slingly outdated
+> and pretty weird niche SoC I admit.
+>
+> > Sure, offsets can change, but surely the firmware can handle
+> > adjusting the DT?
+>
+> Future firmware may be able to do this, of course. Current existing
+> firmware already out there on devices such as the quite popular
+> GL.iNet MT-6000, Netgear's Orbi and Orbi Pro series as well as all
+> Adtran SmartRG devices does not. Updating or changing the boot
+> firmware of devices already out there is not intended and quite
+> challenging, and will make the device incompatible with its vendor
+> firmware. Hence it would be better to support replacing only the
+> Linux-based firmware (eg. with OpenWrt or even Debian or any
+> general-purpose Linux, the eMMC is large enough...) while not having
+> to touch the boot firmware (and risking to brick the device if that
+> goes wrong).
+>
+> Personally, I'm rather burdened and unhappy with vendor attempts to
+> have the boot firmware mess around too much in (highly customized,
+> downstream) DT, it may look like a good solution at the moment, but
+> can totally become an obstacle in an unpredictable future (no offense
+> ASUS...)
+>
+> >
+> > An offset would also work for the case of random firmware data on the
+> > disk that may or may not have a partition associated with it. There are
+> > certainly cases of that. I don't think we have much of a solution for
+> > that other than trying to educate vendors to not do that or OS
+> > installers only supporting installing to something other than eMMC. Thi=
+s
+> > is something EBBR[1] is trying to address.
+>
+> Absolutely. Actually *early* GL-iNet devices did exactly that: Use the
+> eMMC boot hw-partitions to store boot firmware as well as MAC
+> addresses and potentially also Wi-Fi calibration data.
+>
+> The MT-2500 is the example I'm aware of and got sitting on my desk for
+> testing with this very series (which allows to also reference eMMC
+> hardware partitions, see "[7/8] mmc: block: set fwnode of disk
+> devices").
+> Unfortunately later devices such the the flag-ship MT-6000 moved MAC
+> addresses and WiFi-EEPROMs into a GPT partition on the user-part of
+> the eMMC.
+>
+> >
+> > > Depending on the eMMC chip used, that partition may not even be at th=
+e
+> > > same offset for different batches of the same device and hence I'd
+> > > like to just do it in the same way vendor firmware does it as well.
+> >
+> > Often vendor firmware is not a model to follow...
+>
+> I totally agree. However, I don't see a good reason for not supporting
+> those network-appliance-type embedded devices which even ship with
+> (outdated, downstream) Linux by default while going through great
+> lengths for things like broken ACPI tables in many laptops which
+> require lots of work-arounds to have features like suspend-to-disk
+> working, or even be able to run Linux at all.
+>
+> >
+> > > Chad of Adtran has previously confirmed that [1], which was the
+> > > positive feedback I was refering to. Other vendors like GL-iNet or
+> > > Netgear are doing the exact same thing.
+> > >
+> > > As of now, we support this in OpenWrt by adding a lot of
+> > > board-specific knowledge to userland, which is ugly and also prevents
+> > > using things like PXE-initiated nfsroot on those devices.
+> > >
+> > > The purpose of this series is to be able to properly support such dev=
+ices
+> > > (ie. practially all consumer-grade routers out there using an eMMC fo=
+r
+> > > storing firmware).
+> > >
+> > > Also, those devices have enough resources to run a general purpose
+> > > distribution like Debian instead of OpenWrt, and all the userland
+> > > hacks to set MAC addresses and extract WiFi-EEPROM-data in a
+> > > board-specific ways will most certainly never find their way into
+> > > Debian. It's just not how embedded Linux works, unless you are lookin=
+g
+> > > only at the RaspberryPi which got that data stored in a textfile
+> > > which is shipped by the distribution -- something very weird and very
+> > > different from literally all of-the-shelf routers, access-points or
+> > > switches I have ever seen (and I've seen many). Maybe Felix who has
+> > > seen even more of them can tell us more about that.
+> >
+> > General purpose distros want to partition the disk themselves. Adding
+> > anything to the DT for disk partitions would require the installer to b=
+e
+> > aware of it. There's various distro folks on the boot-arch list, so
+> > maybe one of them can comment.
+>
+> Usually the installers are already aware to not touch partitions when
+> unaware of their purpose. Repartitioning the disk from scratch is not
+> what (modern) distributions are doing, at least the EFI System
+> partition is kept, as well as typical rescue/recovery partitions many
+> vendors put on their (Windows, Mac) laptops to allow to "factory
+> reset" them.
+>
+> Installers usually offer to replace (or resize) the "large" partition
+> used by the currently installed OS instead.
+>
+> And well, the DT reference to a partition holding e.g. MAC addresses
+> does make the installer aware of it, obviously.
+>
+>
+> Thank you for the constructive debate!
+>
+>
+> Cheers
+>
+>
+> Daniel
+>
+>
+> >
+> > Rob
+> >
+> > [1] https://arm-software.github.io/ebbr/index.html#document-chapter4-fi=
+rmware-media
