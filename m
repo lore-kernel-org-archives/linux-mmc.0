@@ -1,262 +1,80 @@
-Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D55E21EF1D;
-	Tue, 26 Mar 2024 21:29:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.142.180.65
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB1C117BA6;
+	Wed, 27 Mar 2024 02:46:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711488575; cv=none; b=aKohSaTNrfwkws77JoRMjZyKjq/EWEnnwnKPE5GB8GeQQkHM6t2xOI58BGw+TYIc+L+surC2XT0SZjXIVIh+hyAo5QQ6sm6/8k8aJJhf9e4YBbSWULt/Efvq30rPI79DH+v33hoobqXHWz9cN5mEv17Q/zyHbKcf73HZ3y6jKE4=
+	t=1711507579; cv=none; b=rBuFRLkP9Vkjaf3tXkHdlw9nBCjBGPRcl2loHtEGLU0ihYPbbRMMmABYlxZYCybf0WCS75q529j/HNcVbVkI3zjD9F013FXqBuxA1N1+WEOX+hYk6JuuTfP1LrOVcuH+pfrvGPyV7HaxoUktKEmWpVesdBlHZc8ujaPhjMqojKE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711488575; c=relaxed/simple;
-	bh=62GPZHht6GgI2gK0JfrPxZscKZqKq+v0X1W+kOlbbLg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=k5CmrxEqhw8I7VV2Tr1A08x22nf/eQVDah57zFaVhJom1jllNJPMyh5Ofw+rJn2tnGj2qAYnYmly87ZwD3u+ynRuzu3fFuVGA7gkWLn3q8Enut3BpNzw8eI5QRGrjxmDEy3i0Z5cdR88N82ntYuO5XOeldn1EkpCtgwwkCJAR08=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org; spf=pass smtp.mailfrom=makrotopia.org; arc=none smtp.client-ip=185.142.180.65
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=makrotopia.org
-Received: from local
-	by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
-	 (Exim 4.96.2)
-	(envelope-from <daniel@makrotopia.org>)
-	id 1rpELV-00030a-3A;
-	Tue, 26 Mar 2024 21:28:38 +0000
-Date: Tue, 26 Mar 2024 21:28:33 +0000
-From: Daniel Golle <daniel@makrotopia.org>
-To: Rob Herring <robh@kernel.org>
-Cc: Diping Zhang <diping.zhang@gl-inet.com>,
-	Jianhui Zhao <zhaojh329@gmail.com>,
-	Jieying Zeng <jieying.zeng@gl-inet.com>,
-	Chad Monroe <chad.monroe@adtran.com>,
-	Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>,
-	Felix Fietkau <nbd@nbd.name>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
-	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
-	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-	Damien Le Moal <dlemoal@kernel.org>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Christian Brauner <brauner@kernel.org>,
-	Christian Heusel <christian@heusel.eu>,
-	Min Li <min15.li@samsung.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <avri.altman@wdc.com>, Hannes Reinecke <hare@suse.de>,
-	Christian Loehle <CLoehle@hyperstone.com>,
-	Bean Huo <beanhuo@micron.com>, Yeqi Fu <asuk4.q@gmail.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-	Dominique Martinet <dominique.martinet@atmark-techno.com>,
-	"Ricardo B. Marliere" <ricardo@marliere.net>,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 0/8] block: implement NVMEM provider
-Message-ID: <ZgM-AR1BFU_FPaXh@makrotopia.org>
-References: <cover.1711048433.git.daniel@makrotopia.org>
- <20240325151046.GA3591150-robh@kernel.org>
- <ZgGaay6bLFAcCo2E@makrotopia.org>
- <20240326202449.GA3255378-robh@kernel.org>
+	s=arc-20240116; t=1711507579; c=relaxed/simple;
+	bh=azgjSy85/wUZ8NadfZuqevl4MalJBeHpf6RNHzPsmSo=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=K3VQrN8yev9YcbePnndTlbyj9tB9bevfslrkICq7TdATxR6HNXd799D0IpLAVnNf/p58iT8qV+pOnNOvGoaD2xsCEiZPR+2Kg81P+GyHyB4rJ9hvBKJsisivrpY3ObfHseGK01nSn+QRA8ZK2F63httDUV+WPAmNpA0JPSAogBM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 42R2jqAP3307072, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 42R2jqAP3307072
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 27 Mar 2024 10:45:52 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Wed, 27 Mar 2024 10:45:52 +0800
+Received: from localhost (172.22.81.102) by RTEXMBS01.realtek.com.tw
+ (172.21.6.94) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.1.2507.35; Wed, 27 Mar
+ 2024 10:45:52 +0800
+From: Ricky Wu <ricky_wu@realtek.com>
+To: <ulf.hansson@linaro.org>, <ricky_wu@realtek.com>,
+        <wenchao.chen@unisoc.com>, <ricardo@marliere.net>, <marex@denx.de>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: core: resume not check card exist before powerup
+Date: Wed, 27 Mar 2024 10:45:45 +0800
+Message-ID: <20240327024545.138351-1-ricky_wu@realtek.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240326202449.GA3255378-robh@kernel.org>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: RTEXH36506.realtek.com.tw (172.21.6.27) To
+ RTEXMBS01.realtek.com.tw (172.21.6.94)
+X-KSE-ServerInfo: RTEXMBS01.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-Hi Rob,
+_mmc_sd_resume
+add get_cd before call powerup, make sure the card exist
 
-On Tue, Mar 26, 2024 at 03:24:49PM -0500, Rob Herring wrote:
-> +boot-architecture list
+Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+---
+ drivers/mmc/core/sd.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Good idea, thank you :)
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 1c8148cdda50..35e036672cfb 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1750,6 +1750,9 @@ static int _mmc_sd_resume(struct mmc_host *host)
+ 	if (!mmc_card_suspended(host->card))
+ 		goto out;
+ 
++	if (host->ops->get_cd && !host->ops->get_cd(host))
++		goto out;
++
+ 	mmc_power_up(host, host->card->ocr);
+ 	err = mmc_sd_init_card(host, host->card->ocr, host->card);
+ 	mmc_card_clr_suspended(host->card);
+-- 
+2.25.1
 
-> 
-> On Mon, Mar 25, 2024 at 03:38:19PM +0000, Daniel Golle wrote:
-> > On Mon, Mar 25, 2024 at 10:10:46AM -0500, Rob Herring wrote:
-> > > On Thu, Mar 21, 2024 at 07:31:48PM +0000, Daniel Golle wrote:
-> > > > On embedded devices using an eMMC it is common that one or more (hw/sw)
-> > > > partitions on the eMMC are used to store MAC addresses and Wi-Fi
-> > > > calibration EEPROM data.
-> > > > 
-> > > > Implement an NVMEM provider backed by a block device as typically the
-> > > > NVMEM framework is used to have kernel drivers read and use binary data
-> > > > from EEPROMs, efuses, flash memory (MTD), ...
-> > > > 
-> > > > In order to be able to reference hardware partitions on an eMMC, add code
-> > > > to bind each hardware partition to a specific firmware subnode.
-> > > > 
-> > > > Overall, this enables uniform handling across practially all flash
-> > > > storage types used for this purpose (MTD, UBI, and now also MMC).
-> > > > 
-> > > > As part of this series it was necessary to define a device tree schema
-> > > > for block devices and partitions on them, which (similar to how it now
-> > > > works also for UBI volumes) can be matched by one or more properties.
-> > > > 
-> > > > ---
-> > > > This series has previously been submitted as RFC on July 19th 2023[1]
-> > > > and most of the basic idea did not change since. Another round of RFC
-> > > > was submitted on March 5th 2024[2] which has received overall positive
-> > > > feedback and only minor corrections have been done since (see
-> > > > changelog below).
-> > > 
-> > > I don't recall giving positive feedback.
-> > > 
-> > > I still think this should use offsets rather than partition specific 
-> > > information. Not wanting to have to update the offsets if they change is 
-> > > not reason enough to not use them.
-> > 
-> > Using raw offsets on the block device (rather than the partition)
-> > won't work for most existing devices and boot firmware out there. They
-> > always reference the partition, usually by the name of a GPT
-> > partition (but sometimes also PARTUUID or even PARTNO) which is then
-> > used in the exact same way as an MTD partition or UBI volume would be
-> > on devices with NOR or NAND flash.
-> 
-> MTD normally uses offsets hence why I'd like some alignment. UBI is 
-> special because raw NAND is, well, special.
-
-I get the point and in a way this is also already intended and
-supported by this series. You can already just add an 'nvmem-layout'
-node directly to a disk device rather than to a partition and define a
-layout in this way.
-
-Making this useful in practice will require some improvements to the
-nvmem system in Linux though, because that currently uses signed 32-bit
-integers as addresses which is not sufficient for the size of the
-user-part of an eMMC. However, that needs to be done then and should
-of course not be read as an excuse.
-
-> 
-> > Just on eMMC we usually use a GPT
-> > or MBR partition table rather than defining partitions in DT or cmdline,
-> > which is rather rare (for historic reasons, I suppose, but it is what it
-> > is now).
-> 
-> Yes, I understand how eMMC works. I don't understand why if you have 
-> part #, uuid, or name you can't get to the offset or vice-versa. You 
-> need only 1 piece of identification to map partition table entries to DT 
-> nodes.
-
-Yes, either of them (or a combination) is fine. In practise I've mostly
-seen PARTNAME as identifier used in userland scripts, and only adding
-this for now will probably cover most devices (and existing boot firmware)
-out there. Notable exceptions are devices which are using MBR partitions
-because the BootROM expects the bootloader to be at the same block as
-we would usually have the primary GPT. In this case we can only use the
-PARTNO, of course, and it stinks.
-MediaTek's MT7623A/N is such an example, but it's a slingly outdated
-and pretty weird niche SoC I admit.
-
-> Sure, offsets can change, but surely the firmware can handle 
-> adjusting the DT? 
-
-Future firmware may be able to do this, of course. Current existing
-firmware already out there on devices such as the quite popular
-GL.iNet MT-6000, Netgear's Orbi and Orbi Pro series as well as all
-Adtran SmartRG devices does not. Updating or changing the boot
-firmware of devices already out there is not intended and quite
-challenging, and will make the device incompatible with its vendor
-firmware. Hence it would be better to support replacing only the
-Linux-based firmware (eg. with OpenWrt or even Debian or any
-general-purpose Linux, the eMMC is large enough...) while not having
-to touch the boot firmware (and risking to brick the device if that
-goes wrong).
-
-Personally, I'm rather burdened and unhappy with vendor attempts to
-have the boot firmware mess around too much in (highly customized,
-downstream) DT, it may look like a good solution at the moment, but
-can totally become an obstacle in an unpredictable future (no offense
-ASUS...)
-
-> 
-> An offset would also work for the case of random firmware data on the 
-> disk that may or may not have a partition associated with it. There are 
-> certainly cases of that. I don't think we have much of a solution for 
-> that other than trying to educate vendors to not do that or OS 
-> installers only supporting installing to something other than eMMC. This 
-> is something EBBR[1] is trying to address.
-
-Absolutely. Actually *early* GL-iNet devices did exactly that: Use the
-eMMC boot hw-partitions to store boot firmware as well as MAC
-addresses and potentially also Wi-Fi calibration data.
-
-The MT-2500 is the example I'm aware of and got sitting on my desk for
-testing with this very series (which allows to also reference eMMC
-hardware partitions, see "[7/8] mmc: block: set fwnode of disk
-devices").
-Unfortunately later devices such the the flag-ship MT-6000 moved MAC
-addresses and WiFi-EEPROMs into a GPT partition on the user-part of
-the eMMC.
-
-> 
-> > Depending on the eMMC chip used, that partition may not even be at the
-> > same offset for different batches of the same device and hence I'd
-> > like to just do it in the same way vendor firmware does it as well.
-> 
-> Often vendor firmware is not a model to follow...
-
-I totally agree. However, I don't see a good reason for not supporting
-those network-appliance-type embedded devices which even ship with
-(outdated, downstream) Linux by default while going through great
-lengths for things like broken ACPI tables in many laptops which
-require lots of work-arounds to have features like suspend-to-disk
-working, or even be able to run Linux at all.
-
-> 
-> > Chad of Adtran has previously confirmed that [1], which was the
-> > positive feedback I was refering to. Other vendors like GL-iNet or
-> > Netgear are doing the exact same thing.
-> > 
-> > As of now, we support this in OpenWrt by adding a lot of
-> > board-specific knowledge to userland, which is ugly and also prevents
-> > using things like PXE-initiated nfsroot on those devices.
-> > 
-> > The purpose of this series is to be able to properly support such devices
-> > (ie. practially all consumer-grade routers out there using an eMMC for
-> > storing firmware).
-> > 
-> > Also, those devices have enough resources to run a general purpose
-> > distribution like Debian instead of OpenWrt, and all the userland
-> > hacks to set MAC addresses and extract WiFi-EEPROM-data in a
-> > board-specific ways will most certainly never find their way into
-> > Debian. It's just not how embedded Linux works, unless you are looking
-> > only at the RaspberryPi which got that data stored in a textfile
-> > which is shipped by the distribution -- something very weird and very
-> > different from literally all of-the-shelf routers, access-points or
-> > switches I have ever seen (and I've seen many). Maybe Felix who has
-> > seen even more of them can tell us more about that.
-> 
-> General purpose distros want to partition the disk themselves. Adding 
-> anything to the DT for disk partitions would require the installer to be 
-> aware of it. There's various distro folks on the boot-arch list, so 
-> maybe one of them can comment.
-
-Usually the installers are already aware to not touch partitions when
-unaware of their purpose. Repartitioning the disk from scratch is not
-what (modern) distributions are doing, at least the EFI System
-partition is kept, as well as typical rescue/recovery partitions many
-vendors put on their (Windows, Mac) laptops to allow to "factory
-reset" them.
-
-Installers usually offer to replace (or resize) the "large" partition
-used by the currently installed OS instead.
-
-And well, the DT reference to a partition holding e.g. MAC addresses
-does make the installer aware of it, obviously.
-
-
-Thank you for the constructive debate!
-
-
-Cheers
-
-
-Daniel
-
-
-> 
-> Rob
-> 
-> [1] https://arm-software.github.io/ebbr/index.html#document-chapter4-firmware-media
