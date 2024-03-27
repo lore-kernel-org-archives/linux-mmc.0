@@ -1,301 +1,438 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80182131197;
-	Wed, 27 Mar 2024 12:34:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6335213049F
+	for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2024 14:51:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711542867; cv=none; b=BLznJS4ZJhs9ecvlhNBQsEWiMCz7nh1MjSYaO6F1P1RIcWTfK1W5MzitgdwLHNW+dyMby/EBp3zZgBrjXNWx+z/aJjmclAV+Zdy3FNlg2GbAirfvnIIxpqwjccIB1W3O3WrKKjk0T4LPUkKNH09c6IBMCjv78AIZ3dkuyffPbOs=
+	t=1711551108; cv=none; b=h4a2B8JmBd0rPFOck4yuAxFg/hL3gY4Bdmw3Tux7kg5AP0jW0ihQxysn9LcRANuL9qLyeHBihYAR+cpfoBEYb9MI7HFS/8utd7SycDm6JRLyANu15jVuSsta8uvlVBkanftT+E99P9ImKpT5ybAZt5G+jf5tccVNyQL7r9dFnTU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711542867; c=relaxed/simple;
-	bh=8N3t+CDdKY3YFlH7oaNZFASNnUeM1RCAwnipRrhwJuU=;
+	s=arc-20240116; t=1711551108; c=relaxed/simple;
+	bh=zFEn80fl+GtfHzPRtEWaWu6aT9WZ2azOQa9MhZzo3j4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GEusRmpZCL1wWq/9uu0RzKCGRqYlS5pAV8jLolZ/VXMEKxaPOg2/iHvSAtLI8Kn6em1hpukb/LyZk4rourhTqoZDNGbAV7tSOHuuUpv/saR79yzbjSs+h66UH/rEprv5Am7YIKrexqzNjV4kmhLgJb/l2HFu5kH7KoJZx8K0Htg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WHsjI+Fn; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=oSkkZJ9BkSHoFsqlXEWbzYLRlr0XhXzHUYowqTQMmu9seT/ZmCb5UnhqfNr2rjBZ1H7bJ387e7BOmdgP/h5azfGFjlXu9E7gJ7T/zz1d7LAlM0V0+7+rqA+zY36nJouiBD/rAjSt6YvoEw/m1J8VfI93KFGnvN2X3f3hnD8WyTI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Gyi1rVtv; arc=none smtp.client-ip=209.85.219.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WHsjI+Fn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE5FEC433C7;
-	Wed, 27 Mar 2024 12:34:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711542866;
-	bh=8N3t+CDdKY3YFlH7oaNZFASNnUeM1RCAwnipRrhwJuU=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=WHsjI+FniF8Z7sOkWvPE0p9O+aVYavDYf9XPeV+3iciywX8W/lv4HDbwn4U8bXqdu
-	 t9UThFGat5QWDAEEdFSDMdFCP+83xuy0zQYv+kRkzTdAUSUPpaI5Pwo0PcGqXN7Z4h
-	 AiB7QOBGfU1jUIPntJBDlxdKY36aoV9onQus2N40KzBrrZ00RAxG6NPutLTmiTOPev
-	 VeDRcgqc0Urq5VRNUdFh2PRbE0Z4kFog0dNgD+pLz1Iu5FUQyT7hp8s860+MoyZIjp
-	 J5r4PQuj6zm5I8zJ3F8uHkn5Bg43XW56RDrJFuL6Sk0ZKXbDmtENJM2UsCnTU4AlRW
-	 VWyG3wXjQ1waQ==
-Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-2d24a727f78so75601501fa.0;
-        Wed, 27 Mar 2024 05:34:26 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUPwcHeuTqI3GlLvlIDIoabS3WCBMTUbJ3LII8X/g5vUQDySb+fWRA9ya77tfpuYxt/ems9Ky2H+lDYMqueD0pIAPHr+ILruJtthgQpo8oC8BxKRxKOhcLNTKaJa3kFQIZrsFOuJs/7oADqmbEQJ6/U1cWZO9eY3MN24v5XZAvOdiii6MInvWx1g3FKkpzEFau/XDPjckdwBn7GXyYEBKOx
-X-Gm-Message-State: AOJu0YwWZLs/t9gxnH/Fwzc0nHblwnaIU+hvWv2HqaGZ1ygtSv4D31v4
-	i12aME69sRK24vw1MsHkylnxKZMrKMzRkXwxhGG8ViExQT/PMh80eURKzS5u/jfJ5Y1NjD3jT4G
-	QFbhoHHa4LrcRmADsi+wNjz712w==
-X-Google-Smtp-Source: AGHT+IGb/tvDk7BPc5ooPMe3vs21TSV/CGNkWTr1j3kZGhTSowTUtnyhhb9eTVfWHGXwW0jFHOVQ8E43Udn54x9e++k=
-X-Received: by 2002:a2e:9c55:0:b0:2d6:c7e5:34d0 with SMTP id
- t21-20020a2e9c55000000b002d6c7e534d0mr4128198ljj.41.1711542844882; Wed, 27
- Mar 2024 05:34:04 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Gyi1rVtv"
+Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dcc7cdb3a98so6875001276.2
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2024 07:51:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1711551104; x=1712155904; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=YRavIU/nh8mnnkcr2mJEBFYvhEHsXdnC0UkqYCrWJoM=;
+        b=Gyi1rVtv5zXckyTyqTdHkEMNzrWO+b4jmOXeGt7Zq5/ZZiJ+zsFB4tghs0BJuqrIrp
+         yx54yc9g02Gu8S1Cmi1rF7NZXTbL3AFeODLEXla0ayQzAo7DiTzpELm+8W2ADtf5HomZ
+         ddJsvJh5Ch6a61uSD2pIcKn+WJCnhEOnOh8l1TwPn9f3F4ULR9XBjw5eER7sD3XlTuAD
+         a54BwKrQQTjXFEBI6tTynONomxUHcTNJxBhFotKLHMy1oL2zWHBKLDt2FhAequBGRsuv
+         S6LHrIIbicCp9B2H1bLKFoHYGX0THwNWJkgqEsJZvWAiOa3+drW3HrYvJmPQu7XElIZH
+         rNxg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1711551104; x=1712155904;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=YRavIU/nh8mnnkcr2mJEBFYvhEHsXdnC0UkqYCrWJoM=;
+        b=o8PnH9ezu0DxOnWpWk/HTnprAGoUT0U6aZ+/P6SNSAwQwA0LHEUnv7Qvp5GdZ04C9g
+         T7JCHW6mEshFMWSs7S9vAd5pT1lpvdk8NPkh996c93Pkuty4do/+yUkMLqX5iIAc9QYd
+         uiA3CFxzvHvLydPmEiJa3wItVYxX7+QLCrrbY+GZ2djRlb4OSRXTqWLvIkUciqYwjCrY
+         mDpCSJk+hoVkKZ5fOyp/6UKxQpSIZ/1ZuHUEEpw1c5RBI3lLx3dZ0SShIRibYshAnhMZ
+         67yXykdKH4OFaEdoP909tu5kNV69mKRGInPL8dSPunMhfqCEgjOq8uK4DQWKEMGeYT27
+         0jWQ==
+X-Gm-Message-State: AOJu0YwmflapTmbjiJVDFCUhylcQH5ZYo8OI9/RMWqNjVENdzqcXz4ZL
+	34WpIDz3Ilj9GOEKtzuRMvg+ZP+O9bMlUcUMewAWNf00aQy8tV0OQRq8UCfuc+vjukBpW+nQcSb
+	dQSE3CZdaQbr3NIEJfyb9c0SUQKUpb4+J/I8LppG9GAA27CbHnlk=
+X-Google-Smtp-Source: AGHT+IHsbHIUYyNqabSkYOvEEW4Yng3125fVVmvQSvvvhJnFQmAEtoOpRqaZNd13sKyX2wST+nVt6ZludICGDSN4Tis=
+X-Received: by 2002:a25:848f:0:b0:dda:a550:4e92 with SMTP id
+ v15-20020a25848f000000b00ddaa5504e92mr4349093ybk.46.1711551104124; Wed, 27
+ Mar 2024 07:51:44 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1711048433.git.daniel@makrotopia.org> <20240325151046.GA3591150-robh@kernel.org>
- <ZgGaay6bLFAcCo2E@makrotopia.org> <20240326202449.GA3255378-robh@kernel.org> <ZgM-AR1BFU_FPaXh@makrotopia.org>
-In-Reply-To: <ZgM-AR1BFU_FPaXh@makrotopia.org>
-From: Rob Herring <robh@kernel.org>
-Date: Wed, 27 Mar 2024 07:33:51 -0500
-X-Gmail-Original-Message-ID: <CAL_JsqKkr6Nnfwa5HevMhqmgsHDXvXMzMFSzw8tiu6Zwe353dg@mail.gmail.com>
-Message-ID: <CAL_JsqKkr6Nnfwa5HevMhqmgsHDXvXMzMFSzw8tiu6Zwe353dg@mail.gmail.com>
-Subject: Re: [PATCH 0/8] block: implement NVMEM provider
-To: Daniel Golle <daniel@makrotopia.org>, 
-	Architecture Mailman List <boot-architecture@lists.linaro.org>
-Cc: Diping Zhang <diping.zhang@gl-inet.com>, Jianhui Zhao <zhaojh329@gmail.com>, 
-	Jieying Zeng <jieying.zeng@gl-inet.com>, Chad Monroe <chad.monroe@adtran.com>, 
-	Adam Fox <adam.fox@adtran.com>, John Crispin <john@phrozen.org>, Felix Fietkau <nbd@nbd.name>, 
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, 
-	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>, 
-	=?UTF-8?Q?Thomas_Wei=C3=9Fschuh?= <linux@weissschuh.net>, 
-	Damien Le Moal <dlemoal@kernel.org>, Li Lingfeng <lilingfeng3@huawei.com>, 
-	Christian Brauner <brauner@kernel.org>, Christian Heusel <christian@heusel.eu>, Min Li <min15.li@samsung.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Avri Altman <avri.altman@wdc.com>, 
-	Hannes Reinecke <hare@suse.de>, Christian Loehle <CLoehle@hyperstone.com>, Bean Huo <beanhuo@micron.com>, 
-	Yeqi Fu <asuk4.q@gmail.com>, Victor Shih <victor.shih@genesyslogic.com.tw>, 
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>, 
-	Dominique Martinet <dominique.martinet@atmark-techno.com>, 
-	"Ricardo B. Marliere" <ricardo@marliere.net>, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-block@vger.kernel.org
+References: <20240316153636.30814-1-avri.altman@wdc.com>
+In-Reply-To: <20240316153636.30814-1-avri.altman@wdc.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 27 Mar 2024 15:51:08 +0100
+Message-ID: <CAPDyKFoAntcQRwbTju=x3bYe9S6dfEeyODdFGSVqHfcek=YFhA@mail.gmail.com>
+Subject: Re: [PATCH] mmc-utils: man 1 mmc-utils
+To: Avri Altman <avri.altman@wdc.com>
+Cc: linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Mar 26, 2024 at 4:29=E2=80=AFPM Daniel Golle <daniel@makrotopia.org=
-> wrote:
+On Sat, 16 Mar 2024 at 16:36, Avri Altman <avri.altman@wdc.com> wrote:
 >
-> Hi Rob,
+> I have put together a draft man page for mmc-utils.  The contents are
+> from mmc-utils help documents and edited for brevity.  The point is not
+> to replace the existing docmentation, but to serve as a quick reference.
 >
-> On Tue, Mar 26, 2024 at 03:24:49PM -0500, Rob Herring wrote:
-> > +boot-architecture list
->
-> Good idea, thank you :)
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-Now really adding it. :(
+Seems like a good idea! While reviewing, I found a couple of spelling
+mistakes and sometimes words being repeated. Can you please run a
+spell checker and fix those things and re-submit?
 
-Will reply to rest later.
+Kind regards
+Uffe
 
-> >
-> > On Mon, Mar 25, 2024 at 03:38:19PM +0000, Daniel Golle wrote:
-> > > On Mon, Mar 25, 2024 at 10:10:46AM -0500, Rob Herring wrote:
-> > > > On Thu, Mar 21, 2024 at 07:31:48PM +0000, Daniel Golle wrote:
-> > > > > On embedded devices using an eMMC it is common that one or more (=
-hw/sw)
-> > > > > partitions on the eMMC are used to store MAC addresses and Wi-Fi
-> > > > > calibration EEPROM data.
-> > > > >
-> > > > > Implement an NVMEM provider backed by a block device as typically=
- the
-> > > > > NVMEM framework is used to have kernel drivers read and use binar=
-y data
-> > > > > from EEPROMs, efuses, flash memory (MTD), ...
-> > > > >
-> > > > > In order to be able to reference hardware partitions on an eMMC, =
-add code
-> > > > > to bind each hardware partition to a specific firmware subnode.
-> > > > >
-> > > > > Overall, this enables uniform handling across practially all flas=
-h
-> > > > > storage types used for this purpose (MTD, UBI, and now also MMC).
-> > > > >
-> > > > > As part of this series it was necessary to define a device tree s=
-chema
-> > > > > for block devices and partitions on them, which (similar to how i=
-t now
-> > > > > works also for UBI volumes) can be matched by one or more propert=
-ies.
-> > > > >
-> > > > > ---
-> > > > > This series has previously been submitted as RFC on July 19th 202=
-3[1]
-> > > > > and most of the basic idea did not change since. Another round of=
- RFC
-> > > > > was submitted on March 5th 2024[2] which has received overall pos=
-itive
-> > > > > feedback and only minor corrections have been done since (see
-> > > > > changelog below).
-> > > >
-> > > > I don't recall giving positive feedback.
-> > > >
-> > > > I still think this should use offsets rather than partition specifi=
-c
-> > > > information. Not wanting to have to update the offsets if they chan=
-ge is
-> > > > not reason enough to not use them.
-> > >
-> > > Using raw offsets on the block device (rather than the partition)
-> > > won't work for most existing devices and boot firmware out there. The=
-y
-> > > always reference the partition, usually by the name of a GPT
-> > > partition (but sometimes also PARTUUID or even PARTNO) which is then
-> > > used in the exact same way as an MTD partition or UBI volume would be
-> > > on devices with NOR or NAND flash.
-> >
-> > MTD normally uses offsets hence why I'd like some alignment. UBI is
-> > special because raw NAND is, well, special.
+> ---
+>  Makefile |   9 +-
+>  mmc.1    | 302 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 306 insertions(+), 5 deletions(-)
+>  create mode 100644 mmc.1
 >
-> I get the point and in a way this is also already intended and
-> supported by this series. You can already just add an 'nvmem-layout'
-> node directly to a disk device rather than to a partition and define a
-> layout in this way.
+> diff --git a/Makefile b/Makefile
+> index 10b78ab..a890833 100644
+> --- a/Makefile
+> +++ b/Makefile
+> @@ -21,6 +21,7 @@ prefix ?= /usr/local
+>  bindir = $(prefix)/bin
+>  LIBS=
+>  RESTORE_LIBS=
+> +mandir = /usr/share/man
 >
-> Making this useful in practice will require some improvements to the
-> nvmem system in Linux though, because that currently uses signed 32-bit
-> integers as addresses which is not sufficient for the size of the
-> user-part of an eMMC. However, that needs to be done then and should
-> of course not be read as an excuse.
+>  progs = mmc
 >
-> >
-> > > Just on eMMC we usually use a GPT
-> > > or MBR partition table rather than defining partitions in DT or cmdli=
-ne,
-> > > which is rather rare (for historic reasons, I suppose, but it is what=
- it
-> > > is now).
-> >
-> > Yes, I understand how eMMC works. I don't understand why if you have
-> > part #, uuid, or name you can't get to the offset or vice-versa. You
-> > need only 1 piece of identification to map partition table entries to D=
-T
-> > nodes.
+> @@ -29,7 +30,7 @@ ifdef C
+>         check = sparse $(CHECKFLAGS)
+>  endif
 >
-> Yes, either of them (or a combination) is fine. In practise I've mostly
-> seen PARTNAME as identifier used in userland scripts, and only adding
-> this for now will probably cover most devices (and existing boot firmware=
-)
-> out there. Notable exceptions are devices which are using MBR partitions
-> because the BootROM expects the bootloader to be at the same block as
-> we would usually have the primary GPT. In this case we can only use the
-> PARTNO, of course, and it stinks.
-> MediaTek's MT7623A/N is such an example, but it's a slingly outdated
-> and pretty weird niche SoC I admit.
+> -all: $(progs) manpages
+> +all: $(progs)
 >
-> > Sure, offsets can change, but surely the firmware can handle
-> > adjusting the DT?
+>  .c.o:
+>  ifdef C
+> @@ -43,16 +44,14 @@ mmc: $(objects)
+>  manpages:
+>         $(MAKE) -C man
 >
-> Future firmware may be able to do this, of course. Current existing
-> firmware already out there on devices such as the quite popular
-> GL.iNet MT-6000, Netgear's Orbi and Orbi Pro series as well as all
-> Adtran SmartRG devices does not. Updating or changing the boot
-> firmware of devices already out there is not intended and quite
-> challenging, and will make the device incompatible with its vendor
-> firmware. Hence it would be better to support replacing only the
-> Linux-based firmware (eg. with OpenWrt or even Debian or any
-> general-purpose Linux, the eMMC is large enough...) while not having
-> to touch the boot firmware (and risking to brick the device if that
-> goes wrong).
+> -install-man:
+> -       $(MAKE) -C man install
+> -
+>  clean:
+>         rm -f $(progs) $(objects)
+>         $(MAKE) -C man clean
 >
-> Personally, I'm rather burdened and unhappy with vendor attempts to
-> have the boot firmware mess around too much in (highly customized,
-> downstream) DT, it may look like a good solution at the moment, but
-> can totally become an obstacle in an unpredictable future (no offense
-> ASUS...)
+> -install: $(progs) install-man
+> +install: $(progs)
+>         $(INSTALL) -m755 -d $(DESTDIR)$(bindir)
+>         $(INSTALL) $(progs) $(DESTDIR)$(bindir)
+> +       $(INSTALL) -m 644 mmc.1 $(DESTDIR)$(mandir)/man1
 >
-> >
-> > An offset would also work for the case of random firmware data on the
-> > disk that may or may not have a partition associated with it. There are
-> > certainly cases of that. I don't think we have much of a solution for
-> > that other than trying to educate vendors to not do that or OS
-> > installers only supporting installing to something other than eMMC. Thi=
-s
-> > is something EBBR[1] is trying to address.
+>  -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
 >
-> Absolutely. Actually *early* GL-iNet devices did exactly that: Use the
-> eMMC boot hw-partitions to store boot firmware as well as MAC
-> addresses and potentially also Wi-Fi calibration data.
+> diff --git a/mmc.1 b/mmc.1
+> new file mode 100644
+> index 0000000..b40bdf4
+> --- /dev/null
+> +++ b/mmc.1
+> @@ -0,0 +1,302 @@
+> +.TH mmc\-utils 1 "April 2024" "User Manual"
+> +.SH NAME
+> +mmc \-  a tool for configuring MMC storage devices
+> +.SH SYNOPSIS
+> +.B mmc
+> +[\fIoptions\fR] [\ mmc\-block\-device\fR]...
+> +.SH DESCRIPTION
+> +.B mmc-utils
+> +is a single-threaded tool that will perform a particular type of mmc action as specified by the user.
+> +.br
+> +The typical use of mmc-utils is to access the mmc device either for configuring or reading its configuration registers.
+> +.SH OPTIONS
+> +.TP
+> +.BI extcsd " " read " " \fIdevice\fR
+> +Read and prints the extended csd register
+> +.TP
+> +.BI extcsd " " write " " \fIoffset\fR " " \fIvalue\fR " " \fIdevice\fR
+> +Write \fIvalue\fR at \fIoffset\fR to the device's extcsd
+> +.TP
+> +.BI writeprotect " " boot " " get " " \fIdevice\fR
+> +Print the boot partitions write protect status
+> +.TP
+> +.BI writeprotect " " boot " " set " " \fIdevice\fR " " [\fInumber\fR]
+> +Set the boot partition write protect status for the device.
+> +.br
+> +If \fInumber\fR is passed (0 or 1), only protect that particular eMMC boot partition, otherwise protect both.
+> +.br
+> +It will be write-protected until the next boot.
+> +.TP
+> +.BI writeprotect " " user " " set " " \fItype\fR " " \fIstart\-block\fR " " \fIblocks\fR " " \fIdevice\fR
+> +Set the write protect configuration for the specified region of the user area for the device.
+> +.br
+> +\fIstart\-block\fR specifies the first block of the protected area.
+> +.br
+> +\fIblocks\fR specifies the size of the protected area in blocks.
+> +.br
+> +NOTE! The area must start and end on Write Protect Group boundries, Use the "writeprotect user get" command to get the Write Protect Group size.
+> + \fItype\fR is one of the following:
+> +.RS
+> +.RS
+> +.TP
+> +.B none
+> +Clear temporary write protection.
+> +.TP
+> +.B temp
+> +Set temporary write protection.
+> +.TP
+> +.B pwron
+> +Set write protection until the next poweron.
+> +.RE
+> +.RE
+> +.TP
+> +.BI writeprotect " " user " " get " " \fIdevice\fR
+> +Print the user areas write protect configuration for the device.
+> +.TP
+> +.BI disable " " 512B " " emulation " " \fIdevice\fR
+> +Set the eMMC data sector size to 4KB by disabling emulation on the device.
+> +.TP
+> +.BI gp " " create " " \fIdry\-run\fR " " \fIlength\-KiB\fR " " \fIpartition\fR  " " \fIenh\-attr\fR " " \fIext\-attr\fR " " \fIdevice\fR
+> +Create general purpose partition for the the device.
+> +.br
+> +NOTE!  This is a one-time programmable (unreversible) change.
+> +.br
+> +To set enhanced attribute to general partition being created set \fIenh\-attr\fR to 1 else set it to 0.
+> +.br
+> +To set extended attribute to general partition set \fIenh\-attr\fR to 1,2 else set it to 0.
+> +.br
+> +\fIdry\-run\fR is one of the following:
+> +.RS
+> +.RS
+> +.TP
+> +.B \-y
+> +PARTITION_SETTING_COMPLETED in the extcsd will get set and the partisioning operation will take effect and finalized.
+> +.TP
+> +.B \-c
+> +more partitioning settings are still to come - partisioning operation will not take effect.
+> +.TP
+> +.B otherwise
+> +These changes will not take effect neither now nor after a power cycle.
+> +.RE
+> +.RE
+> +.TP
+> +.BI enh_area " " set " " \fIdry\-run\fR " " \fIstart\-KiB\fR " " \fIlength\-KiB\fR " " \fIdevice\fR
+> +Enable the enhanced user area for the device.
+> +.br
+> +NOTE!  This is a one-time programmable (unreversible) change.
+> +\fIdry\-run\fR is as above.
+> +.TP
+> +.BI write_reliability " " set " " " \fIdry\-run\fR " " \fIpartition\fR " " \fIdevice\fR
+> +Enable write reliability per partition for the device.
+> +.br
+> +NOTE!  This is a one-time programmable (unreversible) change.
+> +\fIdry\-run\fR is as above.
+> +.TP
+> +.BI status " " get " " \fIdevice\fR
+> +Print the response to STATUS_SEND (CMD13).
+> +.TP
+> +.BI bootpart " " enable " " \fIboot\-partition\fR " " \fIsend\-ackn\fR " " \fIdevice\fR
+> +Enable the boot partition for the device.
+> +Disable the boot partition for the device if is \fIboot\-partition\fR set to 0.
+> +.br
+> +To receive acknowledgment of boot from the card set \fIsend\-ackn\fR to 1, else set it to 0.
+> +.TP
+> +.BI bootbus " " set " " \fIboot\-mode\fR " " \fIreset\-boot\-bus\-conditions\fR " " \fIboot\-bus\-width\fR " " \fIdevice\fR
+> +Set Boot Bus Conditions.
+> +.br
+> +\fIboot\-mode\fR is one of the following: single_backward, single_hs, or dual.
+> +.br
+> +\fIreset\-boot\-bus\-conditions\fR is one of the following: x1 or retain.
+> +.br
+> +\fIboot\-bus\-width\fR is one of the following: x1, x4, or x8.
+> +.TP
+> +.BI bkops_en " " \fImode\fR " " \fIdevice\fR
+> +Enable the eMMC BKOPS feature on the device.
+> +The auto (AUTO_EN) setting is only supported on eMMC 5.0 or newer.
+> +.br
+> +NOTE!  Setting manual (MANUAL_EN) is one-time programmable (unreversible) change.
+> +.br
+> +\fImode\fR is one of the following:
+> +.RS
+> +.RS
+> +.TP
+> +.B auto
+> +Auto backops is set
+> +.TP
+> +.B manual
+> +Manual bkops is set
+> +.RE
+> +.RE
+> +.TP
+> +.BI hwreset " " enable " " \fIdevice\fR
+> +Permanently enable the eMMC H/W Reset feature on the device.
+> +.br
+> +NOTE!  This is a one-time programmable (unreversible) change.
+> +.TP
+> +.BI hwreset " " disable " " \fIdevice\fR
+> +Permanently disable the eMMC H/W Reset feature on the device.
+> +.br
+> +NOTE!  This is a one-time programmable (unreversible) change.
+> +.TP
+> +.BI sanitize " " \fIdevice\fR " " \fI[timeout_ms]\fR
+> +Send Sanitize command to the device.
+> +This will delete the unmapped memory region of the device.
+> +.TP
+> +.BI rpmb " " write\-key " " \fIrpmb\-device\fR " " \fIkey\-file\fR
+> +Program authentication key which is 32 bytes length and stored in the specified file.
+> +.br
+> +Also you can specify '-' instead of key file path to read the key from stdin.
+> +.br
+> +NOTE!  This is a one-time programmable (unreversible) change.
+> +.TP
+> +.BI rpmb " " read\-counter " " \fIrpmb\-device\fR
+> +Counter value for the \fIrpmb\-device\fR will be read to stdout.
+> +.TP
+> +.BI rpmb " " read\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " " \fIblocks-\count\fR " " \fIoutput-\file\fR " " [\fIkey\-file\fR]
+> +Blocks of 256 bytes will be read from \fIrpmb\-device\fR to output
+> +file or stdout if '-' is specified. If key is specified - read
+> +data will be verified.
+> +.TP
+> +.BI rpmb " " write\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " "  \fI256\-byte\-data\-file\fR " " \fIkey\-file\fR
+> +Block of 256 bytes will be written from data file to
+> +\fIrpmb\-device\fR.
+> +.br
+> +Also you can specify '-' instead of key file path or data file to read the data from stdin.
+> +.TP
+> +.BI cache " " enable " " \fIdevice\fR
+> +Enable the eMMC cache feature on the device.
+> +.br
+> +NOTE! The cache is an optional feature on devices >= eMMC4.5.
+> +.TP
+> +.BI cache disable " " \fIdevice\fR
+> +Disable the eMMC cache feature on the device.
+> +.br
+> +NOTE! The cache is an optional feature on devices >= eMMC4.5.
+> +.TP
+> +.BI csd " " read " " \fidevice\-path\fR
+> +Print CSD data from \fIdevice\-path\fR.
+> +The device path should specify the csd sysfs file directory.
+> +.TP
+> +.BI cid " " read " " \fIdevice\-path\fR
+> +Print CID data from \fIdevice\-path\fR.
+> +The device path should specify the cid sysfs file directory.
+> +.TP
+> +.BI scr " " read " " \fIdevice\-path\fR
+> +Print SCR data from \fIdevice\-path\fR.
+> +The device path should specify the scr sysfs file directory.
+> +.TP
+> +.BI ffu " " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
+> +Run Field Firmware Update with \fIimage\-file\-name\fR on the device.
+> +.br
+> +[\fIchunk\-bytes\fR] is optional and defaults to its max - 512k. should be in decimal bytes and sector aligned.
+> +.br
+> +if [\fIchunk\-bytes\fR] is omitted, mmc-utils will try to run ffu using the largest possible chunks: max(image-file, 512k).
+> +.TP
+> +.BI erase " " \fItype\fR " " \fIstart-address\fR " " \fIend\-address\fR " " \fIdevice\fR
+> +Send Erase CMD38 with specific argument to the device.
+> +.br
+> +NOTE!: This will delete all user data in the specified region of the device.
+> +.br
+> +\fItype\fR is one of the following: legacy, discard, secure-erase, secure-trim1, secure-trim2, or trim.
+> +.TP
+> +.BI gen_cmd " " read " \fidevice\fR [\fIarg\fR]
+> +Send GEN_CMD (CMD56) to read vendor-specific format/meaning data from the device.
+> +.br
+> +NOTE!: [\fIarg\fR] is optional and defaults to 0x1. If [\fIarg\fR] is specified, then [\fIarg\fR]
+> +must be a 32-bit hexadecimal number, prefixed with 0x/0X. And bit0 in [\fIarg\fR] must be 1.
+> +Normally this command is aimed to extract a device-health info from the device.
+> +.TP
+> +.BI softreset " " \fIdevice\fR
+> +Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works
+> +.TP
+> +.BI boot_operation " " \fIboot\-data\-file\fR " " \fIdevice\fR
+> + Does the alternative boot operation and writes the specified starting blocks of boot data into the requested file.
+> +Note some limitations:
+> +.RS
+> +.RS
+> +.TP
+> +.B 1)
+> +The boot operation must be configured first, e.g. via bootbus and/or bootpart commands
+> +.TP
+> +.B 2)
+> +The MMC must currently be running at the bus mode that is configured for the boot operation (HS200 and HS400 not supported at all).
+> +.TP
+> +.B 3)
+> +Only up to 512K bytes of boot data will be transferred.
+> +.TP
+> +.B 4)
+> +The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.
+> +.RE
+> +.RE
+> +.TP
+> +.BI \-\-help " " | " " help " " | " " \-h
+> +Show the help
+> +.TP
+> +.BI \fIcmd\fR " " \-\-help
+> +Show detailed help for that specific \fIcmd\fR or subset of commands.
+> +.SH "RPMB COMMANDS"
+> +The RPMB partition on the eMMC devices is a special area used for storing cryptographically safe information signed by a
+> +special secret key. To write and read records from this special area, authentication is needed.
+> +The RPMB area is *only* and *exclusively* accessed using ioctl()s from userspace.
+> +RPMB commands are send using the mmc multi-ioctl, thus ensures that the atomic nature of the rpmb access operation.
+> +The rpmb device given as a parameter to the rpmb commands is not a block device but a char device.
+> +This was done to help the mmc driver to account for some of the rpmb peculiarities.
+> +.SH "EXAMPLES"
+> +.RE
+> +.P
+> +.B RPMB examples
+> +.RS
+> +Program rpmb key using the stdin option:
+> +.RS
+> +.P
+> +$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb write-key /dev/mmcblk0rpmb -
+> +.RE
+> +.P
+> +Read 2 blocks starting address 2 and output the recieved content to stdout. Verify the recieved frames using the key (not mandatory):
+> +.RS
+> +.P
+> +$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 -
+> +.RE
+> +.P
+> +Read 2 blocks without verfication starting address 2 and output the recieved content to /tmp/block:
+> +.RS
+> +.P
+> +$mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 /tmp/block
+> +.RE
+> +.P
+> +Write a string of 'a's to address 2. both the input and key uses stdin interface:
+> +.RS
+> +.P
+> +$ (awk 'BEGIN {while (c++<256) printf "a"}' | echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH) | mmc rpmb write-block /dev/mmcblk0rpmb 0x02 - -
+> +.RE
+> +.P
+> +.RE
+> +.P
+> +.B Field Firmware Update (ffu) examples
+> +.RS
+> +Do ffu using max-possible chunk size:  If the fluf size < 512k, it will be flushed in a single write sequence.
+> +.RS
+> +.P
+> +$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0
+> +.RE
+> +.P
+> +Same as above, this time use a 4k chunks:
+> +.RS
+> +.P
+> +$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0 4096
+> +.RE
+> +.P
+> +.RE
+> +.SH AUTHORS
+> +.B mmc-utils
+> +was written by Chris Ball <cjb@laptop.org> and <chris@printf.net>.
+> +.br
+> +It is currently maintained by Ulf Hansson <ulf.hansson@linaro.org>.
+> +.SH "REPORTING BUGS"
+> +Report bugs to the \fBmmc\fR mailing list <linux-mmc@vger.kernel.org>.
+> +.SH "SEE ALSO"
+> +For further documentation see \fBREADME\fR.
+> +.br
+> +A short intro - https://docs.kernel.org/driver-api/mmc/mmc-tools.html
+> +.br
+> +official git tree - https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
+> --
+> 2.42.0
 >
-> The MT-2500 is the example I'm aware of and got sitting on my desk for
-> testing with this very series (which allows to also reference eMMC
-> hardware partitions, see "[7/8] mmc: block: set fwnode of disk
-> devices").
-> Unfortunately later devices such the the flag-ship MT-6000 moved MAC
-> addresses and WiFi-EEPROMs into a GPT partition on the user-part of
-> the eMMC.
->
-> >
-> > > Depending on the eMMC chip used, that partition may not even be at th=
-e
-> > > same offset for different batches of the same device and hence I'd
-> > > like to just do it in the same way vendor firmware does it as well.
-> >
-> > Often vendor firmware is not a model to follow...
->
-> I totally agree. However, I don't see a good reason for not supporting
-> those network-appliance-type embedded devices which even ship with
-> (outdated, downstream) Linux by default while going through great
-> lengths for things like broken ACPI tables in many laptops which
-> require lots of work-arounds to have features like suspend-to-disk
-> working, or even be able to run Linux at all.
->
-> >
-> > > Chad of Adtran has previously confirmed that [1], which was the
-> > > positive feedback I was refering to. Other vendors like GL-iNet or
-> > > Netgear are doing the exact same thing.
-> > >
-> > > As of now, we support this in OpenWrt by adding a lot of
-> > > board-specific knowledge to userland, which is ugly and also prevents
-> > > using things like PXE-initiated nfsroot on those devices.
-> > >
-> > > The purpose of this series is to be able to properly support such dev=
-ices
-> > > (ie. practially all consumer-grade routers out there using an eMMC fo=
-r
-> > > storing firmware).
-> > >
-> > > Also, those devices have enough resources to run a general purpose
-> > > distribution like Debian instead of OpenWrt, and all the userland
-> > > hacks to set MAC addresses and extract WiFi-EEPROM-data in a
-> > > board-specific ways will most certainly never find their way into
-> > > Debian. It's just not how embedded Linux works, unless you are lookin=
-g
-> > > only at the RaspberryPi which got that data stored in a textfile
-> > > which is shipped by the distribution -- something very weird and very
-> > > different from literally all of-the-shelf routers, access-points or
-> > > switches I have ever seen (and I've seen many). Maybe Felix who has
-> > > seen even more of them can tell us more about that.
-> >
-> > General purpose distros want to partition the disk themselves. Adding
-> > anything to the DT for disk partitions would require the installer to b=
-e
-> > aware of it. There's various distro folks on the boot-arch list, so
-> > maybe one of them can comment.
->
-> Usually the installers are already aware to not touch partitions when
-> unaware of their purpose. Repartitioning the disk from scratch is not
-> what (modern) distributions are doing, at least the EFI System
-> partition is kept, as well as typical rescue/recovery partitions many
-> vendors put on their (Windows, Mac) laptops to allow to "factory
-> reset" them.
->
-> Installers usually offer to replace (or resize) the "large" partition
-> used by the currently installed OS instead.
->
-> And well, the DT reference to a partition holding e.g. MAC addresses
-> does make the installer aware of it, obviously.
->
->
-> Thank you for the constructive debate!
->
->
-> Cheers
->
->
-> Daniel
->
->
-> >
-> > Rob
-> >
-> > [1] https://arm-software.github.io/ebbr/index.html#document-chapter4-fi=
-rmware-media
