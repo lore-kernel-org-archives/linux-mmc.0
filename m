@@ -1,420 +1,171 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 5D3B738396
-	for <linux-mmc@vger.kernel.org>; Thu, 28 Mar 2024 08:49:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from fout6-smtp.messagingengine.com (fout6-smtp.messagingengine.com [103.168.172.149])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A118C53E28;
+	Thu, 28 Mar 2024 10:09:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.149
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711615774; cv=none; b=tF10uxWLUboQaENcxJgwMw57sg8oI8wx4Ir7nH3/lgimCA+uowG1h8PoAPd6HWBSO+iLfY0/MzZueTxIieg2/nedG7hQBgjLx0lpu1D4OwHzM7+Op9+dpmEORup4tlyVo/hTxuxwHiQKN21neu5638DztSFBdnvs2bbV6fIrSpQ=
+	t=1711620553; cv=none; b=EnaqEe2QUFIs8TC+WICkGDZbH4V8VpB9vOelr1DsNs9YtqAYOAIa/mBICx9YxJiwnEsxPvQS5vlFEWVUmlAvKQsRXykysudS9WqM7sEUZDvolOSPnv30jAG5PYAtHA2x8d5p0M4iPkY+BywZmg8+n+hp/he8ZVLTlPQr3XoCr1o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711615774; c=relaxed/simple;
-	bh=EBorZXRrWjbuaFvKzTUEoozM5GVNBh/alZ7S9giMa3I=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=mBFEy9YHD0+ceEfNgYjpIbEh9q3ayzFNSBGmF/aXmiMuUlSGWedPQv5ZxYmhpM9LJuQ6tVH3yTo1Ko4htpsL3haqMsTSgjy5OHebuOQYZnrKDTj9JZ1Q/jWDbKPQT4BpzDSHL70GdYX6L60lx4oRk3uRlS+tI/u91JDjdEqjYyA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id BB5932F4;
-	Thu, 28 Mar 2024 01:50:05 -0700 (PDT)
-Received: from [10.1.35.17] (e133047.arm.com [10.1.35.17])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 042E33F7BD;
-	Thu, 28 Mar 2024 01:49:30 -0700 (PDT)
-Message-ID: <3de8a6da-020f-45f1-a228-006db8f925ac@arm.com>
-Date: Thu, 28 Mar 2024 08:49:29 +0000
+	s=arc-20240116; t=1711620553; c=relaxed/simple;
+	bh=rjRj8lT9t8c0kTmFFh6anVK23ZDO/NaAc4KKhIVP/Dg=;
+	h=MIME-Version:Message-Id:In-Reply-To:References:Date:From:To:Cc:
+	 Subject:Content-Type; b=pgza2ybZzsFYyiDRMB00k8z+4gp+4nQ1/S3jErV3GuJ8R3SVhCGZn6iVeaacnIEWLdEE88n1HW1qqaHtFNDNDsP2T97nvLBlcTVTE6YnPn5VsxT50sYycS3D4MZCd64kB66n5ZcCtiHH575KJwjfztDT1XdLN/SnYNC1oghyDb8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=kuMfx8bc; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=E7CyJ3/s; arc=none smtp.client-ip=103.168.172.149
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="kuMfx8bc";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="E7CyJ3/s"
+Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
+	by mailfout.nyi.internal (Postfix) with ESMTP id 93C1413800CC;
+	Thu, 28 Mar 2024 06:09:10 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute5.internal (MEProxy); Thu, 28 Mar 2024 06:09:10 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-type:content-type:date:date:from:from:in-reply-to
+	:in-reply-to:message-id:mime-version:references:reply-to:subject
+	:subject:to:to; s=fm1; t=1711620550; x=1711706950; bh=pYBjGEQadh
+	25rkMc0fkoc5Y7p79L1tP3xKDkS0IogRA=; b=kuMfx8bc1R4WUipcKL3tIzF3N4
+	t3zOBlcnNWDIjDe7ipHZ2vdT8gjFEPI1e+ODQbTkh7dUk5LNLdH719riG/7S23u9
+	309OowkR1D0rX5rjd1oDDkcNZe/zfRVVl/h7s7JfZ0aDU1bPjSm0hIEnzbFG9z5d
+	fZQs/LIhA7ZaDgthlMZZPByr7T+nIaqNafh0zRk/d9JNzTnIwNM75wPeatuGsvJu
+	Vq9S8uOTkkaEMlwp3RXo+JBYMzLwFYLCKo/A1UzzbQWuBCuXekHkJzt6XPQ8TNq0
+	tQYhv/S7h0++y+XLR2ohIzKvK/W4GKBW0sO7O0tHfshYhs7bYX0yHfgvb/2A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm2; t=1711620550; x=1711706950; bh=pYBjGEQadh25rkMc0fkoc5Y7p79L
+	1tP3xKDkS0IogRA=; b=E7CyJ3/sS3/gu76u1633stL9057wQIWYvG9vs6NHo239
+	7KFVH5M+YFwRBpbadfOh0IrOE9j4E7XE2sRBAIPKToAbDSVOK/ax1a0sOrbNo1ee
+	HE2lX3ra68I5G6+wDY65qsdnqLej3HDSJFNyvB6/pL9He2U4fdOMxGYaZ0mva4gx
+	tJF6Lfvk2fEXAm0uFD9oIE3EiQrZhWq8TW2d9nb3vmsns61RTvDrPIxeT4GFvMi/
+	wMG6FliHZtmYgvC6R+hGoAU23GBHUBuECiPfrHriLa5i6tczRd0gr63KSOr/UuG+
+	wWszyTwz22LUBqLfZhgf0rb6euQgm1MTKFDblo6DTg==
+X-ME-Sender: <xms:xEEFZolFPnT81Y-rndenCatO24lANcXwvUAv5AbEcS6B-fVcESzGpg>
+    <xme:xEEFZn3NPqHUVb1AhRyUqb5lXl84u2sw1P5dnDZdhqRie4xQImtwjSJc52BIh0l55
+    tLPsrk9hiHSfeAkQ-U>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledrudduledgudduucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
+    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
+    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
+    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:xEEFZmok-OCemU4JAF5NU7jOeDZ0210zw_dLM7C15bHf57_OfZn3fQ>
+    <xmx:xEEFZkkp-nxlq4w1XAeOI--fNjf8CgUJC5qdXlw0QOLYa6255LvI2g>
+    <xmx:xEEFZm3uKpGPWEVtVjuP0m1GHYswkywEhk7aH97h7ry4lumVs3mO8w>
+    <xmx:xEEFZrsO4DTwAwnWN8Y9emNtvmcbBvklHjtDyl9-an0DJHfoFqkixQ>
+    <xmx:xkEFZk17tDydakQ4cViz-gWKfkvwjCrZ3ZRO6zwIJ5CzvibKhGcP5g>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+	id E6410B6008D; Thu, 28 Mar 2024 06:09:07 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.11.0-alpha0-333-gbfea15422e-fm-20240327.001-gbfea1542
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc-utils: man 1 mmc-utils
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-mmc@vger.kernel.org
-References: <20240327184528.788-1-avri.altman@wdc.com>
-Content-Language: en-US
-From: Christian Loehle <christian.loehle@arm.com>
-In-Reply-To: <20240327184528.788-1-avri.altman@wdc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Message-Id: <2e9257af-c123-406b-a189-eaebeecc1d71@app.fastmail.com>
+In-Reply-To: <ZgUGXTKPVhrA1tam@matsya>
+References: <20240327160314.9982-1-apais@linux.microsoft.com>
+ <20240327160314.9982-3-apais@linux.microsoft.com> <ZgUGXTKPVhrA1tam@matsya>
+Date: Thu, 28 Mar 2024 11:08:47 +0100
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "Vinod Koul" <vkoul@kernel.org>, "Allen Pais" <apais@linux.microsoft.com>
+Cc: linux-kernel@vger.kernel.org, "Tejun Heo" <tj@kernel.org>,
+ "Kees Cook" <keescook@chromium.org>, "Hector Martin" <marcan@marcan.st>,
+ "Sven Peter" <sven@svenpeter.dev>,
+ "Florian Fainelli" <florian.fainelli@broadcom.com>,
+ "Ray Jui" <rjui@broadcom.com>, "Scott Branden" <sbranden@broadcom.com>,
+ "Paul Cercueil" <paul@crapouillou.net>, Eugeniy.Paltsev@synopsys.com,
+ "Manivannan Sadhasivam" <manivannan.sadhasivam@linaro.org>,
+ "Viresh Kumar" <vireshk@kernel.org>, "Frank Li" <Frank.Li@nxp.com>,
+ "Leo Li" <leoyang.li@nxp.com>, zw@zh-kernel.org,
+ "Zhou Wang" <wangzhou1@hisilicon.com>, haijie1@huawei.com,
+ "Shawn Guo" <shawnguo@kernel.org>,
+ "Sascha Hauer" <s.hauer@pengutronix.de>,
+ "Sean Wang" <sean.wang@mediatek.com>,
+ "Matthias Brugger" <matthias.bgg@gmail.com>,
+ "AngeloGioacchino Del Regno" <angelogioacchino.delregno@collabora.com>,
+ =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, logang@deltatee.com,
+ "Daniel Mack" <daniel@zonque.org>,
+ "Haojian Zhuang" <haojian.zhuang@gmail.com>,
+ "Robert Jarzmik" <robert.jarzmik@free.fr>,
+ "Bjorn Andersson" <andersson@kernel.org>,
+ "Konrad Dybcio" <konrad.dybcio@linaro.org>,
+ "Orson Zhai" <orsonzhai@gmail.com>,
+ "Baolin Wang" <baolin.wang@linux.alibaba.com>,
+ "Chunyan Zhang" <zhang.lyra@gmail.com>,
+ "Patrice Chotard" <patrice.chotard@foss.st.com>,
+ "Linus Walleij" <linus.walleij@linaro.org>,
+ "Chen-Yu Tsai" <wens@csie.org>,
+ "Jernej Skrabec" <jernej.skrabec@gmail.com>, peter.ujfalusi@gmail.com,
+ "K. Y. Srinivasan" <kys@microsoft.com>,
+ "Haiyang Zhang" <haiyangz@microsoft.com>, "Wei Liu" <wei.liu@kernel.org>,
+ "Dexuan Cui" <decui@microsoft.com>,
+ "Jassi Brar" <jassisinghbrar@gmail.com>,
+ "Mauro Carvalho Chehab" <mchehab@kernel.org>,
+ maintainers@bluecherrydvr.com, aubin.constans@microchip.com,
+ "Ulf Hansson" <ulf.hansson@linaro.org>,
+ "Manuel Lauss" <manuel.lauss@gmail.com>,
+ =?UTF-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+ "jh80.chung" <jh80.chung@samsung.com>, oakad@yahoo.com,
+ "Kunihiko Hayashi" <hayashi.kunihiko@socionext.com>,
+ "Masami Hiramatsu" <mhiramat@kernel.org>, brucechang@via.com.tw,
+ HaraldWelte@viatech.com, pierre@ossman.eu, duncan.sands@free.fr,
+ "Alan Stern" <stern@rowland.harvard.edu>,
+ "Oliver Neukum" <oneukum@suse.com>,
+ openipmi-developer@lists.sourceforge.net, dmaengine@vger.kernel.org,
+ asahi@lists.linux.dev, linux-arm-kernel@lists.infradead.org,
+ linux-rpi-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
+ imx@lists.linux.dev, linuxppc-dev@lists.ozlabs.org,
+ linux-mediatek@lists.infradead.org, linux-actions@lists.infradead.org,
+ linux-arm-msm@vger.kernel.org, linux-riscv@lists.infradead.org,
+ linux-sunxi@lists.linux.dev, linux-tegra@vger.kernel.org,
+ linux-hyperv@vger.kernel.org, linux-rdma@vger.kernel.org,
+ linux-media@vger.kernel.org,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ Linux-OMAP <linux-omap@vger.kernel.org>,
+ Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+ linux-s390@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
+ linux-usb@vger.kernel.org
+Subject: Re: [PATCH 2/9] dma: Convert from tasklet to BH workqueue
+Content-Type: text/plain
 
-On 27/03/2024 18:45, Avri Altman wrote:
-> I have put together a draft man page for mmc-utils.  The contents are
-> from mmc-utils help documents and edited for brevity.  The point is not
-> to replace the existing docmentation, but to serve as a quick reference.
-> 
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
-> ---
-> 
-> Changelog:
-> v1->v2: Fix some spelling mistakes
-> ---
->  Makefile |   9 +-
->  mmc.1    | 308 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 312 insertions(+), 5 deletions(-)
->  create mode 100644 mmc.1
-> 
-> diff --git a/Makefile b/Makefile
-> index 10b78ab..a890833 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -21,6 +21,7 @@ prefix ?= /usr/local
->  bindir = $(prefix)/bin
->  LIBS=
->  RESTORE_LIBS=
-> +mandir = /usr/share/man
->  
->  progs = mmc
->  
-> @@ -29,7 +30,7 @@ ifdef C
->  	check = sparse $(CHECKFLAGS)
->  endif
->  
-> -all: $(progs) manpages
-> +all: $(progs)
->  
->  .c.o:
->  ifdef C
-> @@ -43,16 +44,14 @@ mmc: $(objects)
->  manpages:
->  	$(MAKE) -C man
->  
-> -install-man:
-> -	$(MAKE) -C man install
-> -
->  clean:
->  	rm -f $(progs) $(objects)
->  	$(MAKE) -C man clean
->  
-> -install: $(progs) install-man
-> +install: $(progs)
->  	$(INSTALL) -m755 -d $(DESTDIR)$(bindir)
->  	$(INSTALL) $(progs) $(DESTDIR)$(bindir)
-> +	$(INSTALL) -m 644 mmc.1 $(DESTDIR)$(mandir)/man1
->  
->  -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
->  
-> diff --git a/mmc.1 b/mmc.1
-> new file mode 100644
-> index 0000000..888b8b6
-> --- /dev/null
-> +++ b/mmc.1
-> @@ -0,0 +1,308 @@
-> +.TH mmc\-utils 1 "April 2024" "User Manual"
-> +.SH NAME
-> +mmc \-  a tool for configuring MMC storage devices
-> +.SH SYNOPSIS
-> +.B mmc
-> +[\fIoptions\fR] [\ mmc\-block\-device\fR]...
-> +.SH DESCRIPTION
-> +.B mmc-utils
-> +is a single-threaded tool that will perform a particular type of mmc action as specified by the user.
-> +.br
-> +The typical use of mmc-utils is to access the mmc device either for configuring or reading its configuration registers.
-> +.SH OPTIONS
-> +.TP
-> +.BI extcsd " " read " " \fIdevice\fR
-> +Read and prints the extended csd register
-> +.TP
-> +.BI extcsd " " write " " \fIoffset\fR " " \fIvalue\fR " " \fIdevice\fR
-> +Write \fIvalue\fR at \fIoffset\fR to the device's extcsd
-> +.TP
-> +.BI writeprotect " " boot " " get " " \fIdevice\fR
-> +Print the boot partitions write protect status
-> +.TP
-> +.BI writeprotect " " boot " " set " " \fIdevice\fR " " [\fInumber\fR]
-> +Set the boot partition write protect status for the device.
-> +.br
-> +If \fInumber\fR is passed (0 or 1), only protect that particular eMMC boot partition, otherwise protect both.
-s/particular/specified/?
-> +.br
-> +It will be write-protected until the next boot.
-> +.TP
-> +.BI writeprotect " " user " " set " " \fItype\fR " " \fIstart\-block\fR " " \fIblocks\fR " " \fIdevice\fR
-> +Set the write protect configuration for the specified region of the user area for the device.
-> +.br
-> +\fIstart\-block\fR specifies the first block of the protected area.
-> +.br
-> +\fIblocks\fR specifies the size of the protected area in blocks.
-> +.br
-> +NOTE! The area must start and end on Write Protect Group boundaries, Use the "writeprotect user get" command to get the Write Protect Group size.
-> + \fItype\fR is one of the following:
-> +.RS
-> +.RS
-> +.TP
-> +.B none
-> +Clear temporary write protection.
-> +.TP
-> +.B temp
-> +Set temporary write protection.
-> +.TP
-> +.B pwron
-> +Set write protection until the next power on.
-> +.RE
-> +.RE
-> +.TP
-> +.BI writeprotect " " user " " get " " \fIdevice\fR
-> +Print the user areas write protect configuration for the device.
-s/areas/area's
-> +.TP
-> +.BI disable " " 512B " " emulation " " \fIdevice\fR
-> +Set the eMMC data sector size to 4KB by disabling emulation on the device.
-> +.TP
-> +.BI gp " " create " " \fIdry\-run\fR " " \fIlength\-KiB\fR " " \fIpartition\fR  " " \fIenh\-attr\fR " " \fIext\-attr\fR " " \fIdevice\fR
-> +Create general purpose partition for the the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-> +.br
-> +To set enhanced attribute to general partition being created set \fIenh\-attr\fR to 1 else set it to 0.
-> +.br
-> +To set extended attribute to general partition set \fIenh\-attr\fR to 1,2 else set it to 0.
-> +.br
-> +\fIdry\-run\fR is one of the following:
-> +.RS
-> +.RS
-> +.TP
-> +.B \-y
-> +PARTITION_SETTING_COMPLETED in the extcsd will get set and the partisioning operation will take effect and finalized.
-s/partisioning/partitioning
-s/and finalized/and be finalized/?
-> +.TP
-> +.B \-c
-> +more partitioning settings are still to come - partitioning operation will not take effect.
-> +.TP
-> +.B otherwise
-> +These changes will not take effect neither now nor after a power cycle.
-> +.RE
-> +.RE
-> +.TP
-> +.BI enh_area " " set " " \fIdry\-run\fR " " \fIstart\-KiB\fR " " \fIlength\-KiB\fR " " \fIdevice\fR
-> +Enable the enhanced user area for the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-s/unreversible/irreversible
-> +\fIdry\-run\fR is as above.
-> +.TP
-> +.BI write_reliability " " set " " " \fIdry\-run\fR " " \fIpartition\fR " " \fIdevice\fR
-> +Enable write reliability per partition for the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-s/unreversible/irreversible
-> +\fIdry\-run\fR is as above.
-> +.TP
-> +.BI status " " get " " \fIdevice\fR
-> +Print the response to STATUS_SEND (CMD13).
-> +.TP
-> +.BI bootpart " " enable " " \fIboot\-partition\fR " " \fIsend\-ackn\fR " " \fIdevice\fR
-> +Enable the boot partition for the device.
-> +Disable the boot partition for the device if is \fIboot\-partition\fR set to 0.
-> +.br
-> +To receive acknowledgment of boot from the card set \fIsend\-ackn\fR to 1, else set it to 0.
-> +.TP
-> +.BI bootbus " " set " " \fIboot\-mode\fR " " \fIreset\-boot\-bus\-conditions\fR " " \fIboot\-bus\-width\fR " " \fIdevice\fR
-> +Set Boot Bus Conditions.
-> +.br
-> +\fIboot\-mode\fR is one of the following: single_backward, single_hs, or dual.
-> +.br
-> +\fIreset\-boot\-bus\-conditions\fR is one of the following: x1 or retain.
-> +.br
-> +\fIboot\-bus\-width\fR is one of the following: x1, x4, or x8.
-> +.TP
-> +.BI bkops_en " " \fImode\fR " " \fIdevice\fR
-> +Enable the eMMC BKOPS feature on the device.
-> +The auto (AUTO_EN) setting is only supported on eMMC 5.0 or newer.
-> +.br
-> +NOTE!  Setting manual (MANUAL_EN) is one-time programmable (unreversible) change.
-s/unreversible/irreversible
-> +.br
-> +\fImode\fR is one of the following:
-> +.RS
-> +.RS
-> +.TP
-> +.B auto
-> +Auto backops is set
-> +.TP
-> +.B manual
-> +Manual bkops is set
-> +.RE
-> +.RE
-> +.TP
-> +.BI hwreset " " enable " " \fIdevice\fR
-> +Permanently enable the eMMC H/W Reset feature on the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-s/unreversible/irreversible
-> +.TP
-> +.BI hwreset " " disable " " \fIdevice\fR
-> +Permanently disable the eMMC H/W Reset feature on the device.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-s/unreversible/irreversible
-> +.TP
-> +.BI sanitize " " \fIdevice\fR " " \fI[timeout_ms]\fR
-> +Send Sanitize command to the device.
-> +This will delete the unmapped memory region of the device.
-> +.TP
-> +.BI rpmb " " write\-key " " \fIrpmb\-device\fR " " \fIkey\-file\fR
-> +Program authentication key which is 32 bytes length and stored in the specified file.
-> +.br
-> +Also you can specify '-' instead of key file path to read the key from stdin.
-> +.br
-> +NOTE!  This is a one-time programmable (unreversible) change.
-s/unreversible/irreversible
-> +.TP
-> +.BI rpmb " " read\-counter " " \fIrpmb\-device\fR
-> +Counter value for the \fIrpmb\-device\fR will be read to stdout.
-> +.TP
-> +.BI rpmb " " read\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " " \fIblocks-\count\fR " " \fIoutput-\file\fR " " [\fIkey\-file\fR]
-> +Blocks of 256 bytes will be read from \fIrpmb\-device\fR to output
-> +file or stdout if '-' is specified. If key is specified - read
-> +data will be verified.
-> +.TP
-> +.BI rpmb " " write\-block " " \fIrpmb\-device\fR " " \fIaddress\fR " "  \fI256\-byte\-data\-file\fR " " \fIkey\-file\fR
-> +Block of 256 bytes will be written from data file to
-> +\fIrpmb\-device\fR. 
-> +.br
-> +Also you can specify '-' instead of key file path or data file to read the data from stdin.
-> +.TP
-> +.BI cache " " enable " " \fIdevice\fR
-> +Enable the eMMC cache feature on the device.
-> +.br
-> +NOTE! The cache is an optional feature on devices >= eMMC4.5.
-> +.TP
-> +.BI cache disable " " \fIdevice\fR
-> +Disable the eMMC cache feature on the device.
-> +.br
-> +NOTE! The cache is an optional feature on devices >= eMMC4.5.
-> +.TP
-> +.BI csd " " read " " \fidevice\-path\fR
-> +Print CSD data from \fIdevice\-path\fR.
-> +The device path should specify the csd sysfs file directory.
-> +.TP
-> +.BI cid " " read " " \fIdevice\-path\fR
-> +Print CID data from \fIdevice\-path\fR.
-> +The device path should specify the cid sysfs file directory.
-> +.TP
-> +.BI scr " " read " " \fIdevice\-path\fR
-> +Print SCR data from \fIdevice\-path\fR.
-> +The device path should specify the scr sysfs file directory.
-> +.TP
-> +.BI ffu " " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
-> +Run Field Firmware Update with \fIimage\-file\-name\fR on the device.
-> +.br
-> +[\fIchunk\-bytes\fR] is optional and defaults to its max - 512k. should be in decimal bytes and sector aligned.
-> +.br
-> +if [\fIchunk\-bytes\fR] is omitted, mmc-utils will try to run ffu using the largest possible chunks: max(image-file, 512k).
-> +.TP
-> +.BI erase " " \fItype\fR " " \fIstart-address\fR " " \fIend\-address\fR " " \fIdevice\fR
-> +Send Erase CMD38 with specific argument to the device.
-> +.br
-> +NOTE!: This will delete all user data in the specified region of the device.
-> +.br
-> +\fItype\fR is one of the following: legacy, discard, secure-erase, secure-trim1, secure-trim2, or trim.
-> +.TP
-> +.BI gen_cmd " " read " \fidevice\fR [\fIarg\fR]
-> +Send GEN_CMD (CMD56) to read vendor-specific format/meaning data from the device.
-> +.br
-> +NOTE!: [\fIarg\fR] is optional and defaults to 0x1. If [\fIarg\fR] is specified, then [\fIarg\fR]
-> +must be a 32-bit hexadecimal number, prefixed with 0x/0X. And bit0 in [\fIarg\fR] must be 1.
-> +Normally this command is aimed to extract a device-health info from the device.
-> +.TP
-> +.BI softreset " " \fIdevice\fR
-> +Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works
-> +.TP
-> +.BI boot_operation " " \fIboot\-data\-file\fR " " \fIdevice\fR
-> + Does the alternative boot operation and writes the specified starting blocks of boot data into the requested file.
-> +Note some limitations:
-> +.RS
-> +.RS
-> +.TP
-> +.B 1)
-> +The boot operation must be configured first, e.g. via bootbus and/or bootpart commands
-> +.TP
-> +.B 2) 
-> +The MMC must currently be running at the bus mode that is configured for the boot operation (HS200 and HS400 not supported at all).
-> +.TP
-> +.B 3)
-> +Only up to 512K bytes of boot data will be transferred.
-> +.TP
-> +.B 4)
-> +The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.
-> +.RE
-> +.RE
-> +.TP
-> +.BI \-\-help " " | " " help " " | " " \-h
-> +Show the help
-> +.TP
-> +.BI \fIcmd\fR " " \-\-help
-> +Show detailed help for that specific \fIcmd\fR or subset of commands.
-> +.SH "RPMB COMMANDS"
-> +The RPMB partition on the eMMC devices is a special area used for storing cryptographically safe information signed by a
-> +special secret key.
-> +.br
-> +To write and read records from this special area, authentication is needed.
-> +.br
-> +The RPMB area is *only* and *exclusively* accessed using ioctl()s from user-space.
-> +.br
-> +RPMB commands are send using the mmc multi-ioctl, thus ensures that the atomic nature of the rpmb access operation.
-> +.br
-> +The rpmb device given as a parameter to the rpmb commands is not a block device but a char device.
-> +.br
-> +This was done to help the mmc driver to account for some of the rpmb peculiarities.
-> +.SH "EXAMPLES"
-> +.RE
-> +.P
-> +.B RPMB examples
-> +.RS
-> +Program rpmb key using the stdin option:
-> +.RS
-> +.P
-> +$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb write-key /dev/mmcblk0rpmb -
-> +.RE
-> +.P
-> +Read 2 blocks starting address 2 and output the received content to stdout. Verify the received frames using the key (not mandatory):
-> +.RS
-> +.P
-> +$ echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 -
-> +.RE
-> +.P
-> +Read 2 blocks without verification starting address 2 and output the received content to /tmp/block:
-> +.RS
-> +.P
-> +$mmc rpmb read-block /dev/mmcblk0rpmb 0x02 2 /tmp/block
-> +.RE
-> +.P
-> +Write a string of 'a's to address 2. both the input and key uses stdin interface:
-> +.RS
-> +.P
-> +$ (awk 'BEGIN {while (c++<256) printf "a"}' | echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH) | mmc rpmb write-block /dev/mmcblk0rpmb 0x02 - -
-> +.RE
-> +.P
-> +.RE
-> +.P
-> +.B Field Firmware Update (ffu) examples
-> +.RS
-> +Do ffu using max-possible chunk size:  If the fluf size < 512k, it will be flushed in a single write sequence.
-> +.RS
-> +.P
-> +$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0
-> +.RE
-> +.P
-> +Same as above, this time use a 4k chunks:
-> +.RS
-> +.P
-> +$ mmc ffu IO4e0aC2056001801M1100042AE1.fluf /dev/mmcblk0 4096
-> +.RE
-> +.P
-> +.RE
-> +.SH AUTHORS
-> +.B mmc-utils
-> +was written by Chris Ball <cjb@laptop.org> and <chris@printf.net>.
-> +.br
-> +It is currently maintained by Ulf Hansson <ulf.hansson@linaro.org>.
-> +.SH "REPORTING BUGS"
-> +Report bugs to the \fBmmc\fR mailing list <linux-mmc@vger.kernel.org>.
-> +.SH "SEE ALSO"
-> +For further documentation see \fBREADME\fR.
-> +.br
-> +A short intro - https://docs.kernel.org/driver-api/mmc/mmc-tools.html
-> +.br
-> +official git tree - https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
+On Thu, Mar 28, 2024, at 06:55, Vinod Koul wrote:
+> On 27-03-24, 16:03, Allen Pais wrote:
+>> The only generic interface to execute asynchronously in the BH context is
+>> tasklet; however, it's marked deprecated and has some design flaws. To
+>> replace tasklets, BH workqueue support was recently added. A BH workqueue
+>> behaves similarly to regular workqueues except that the queued work items
+>> are executed in the BH context.
+>
+> Thanks for conversion, am happy with BH alternative as it helps in
+> dmaengine where we need shortest possible time between tasklet and
+> interrupt handling to maximize dma performance
 
+I still feel that we want something different for dmaengine,
+at least in the long run. As we have discussed in the past,
+the tasklet context in these drivers is what the callbacks
+from the dma client device is run in, and a lot of these probably
+want something other than tasklet context, e.g. just call
+complete() on a client-provided completion structure.
+
+Instead of open-coding the use of the system_bh_wq in each
+dmaengine, how about we start with a custom WQ_BH
+specifically for the dmaengine subsystem and wrap them
+inside of another interface.
+
+Since almost every driver associates the tasklet with the
+dma_chan, we could go one step further and add the
+work_queue structure directly into struct dma_chan,
+with the wrapper operating on the dma_chan rather than
+the work_queue.
+
+      Arnd
