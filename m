@@ -1,125 +1,146 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFC1422075;
-	Fri, 29 Mar 2024 16:39:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36E2385C58
+	for <linux-mmc@vger.kernel.org>; Fri, 29 Mar 2024 17:24:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711730379; cv=none; b=W0SvH0vhQF5Daz/mkL2FjSexSefYH+RudWNOQ9mM9pziEPMGYTFGKxWLV92lKlTFzZ4/ZvBwKl3nsGXRWqGpWwDSP2Cg2gwzkMhgceq7Mn3Bn6E1kxg4/U2K+q/Y68BX4OncRfDy9EueLLmOrqFvagA1GRau7CB9enAwYRmnRGY=
+	t=1711733092; cv=none; b=shCBJJKLg4DZyHZJDzad5uMsmVncijO/sU1t5fC4k0mBx1L7pkbVUtPhdBXxugNaJgPY7vzwp0p/0N3X6GvH8Ff57364kT6P4zAWPjbyvnHDOuMNkiDP+LL4qt/a6lnw61j/5UyUiu71qEnT5nC4LaNUYTutvhhoaS8bIdoGq9U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711730379; c=relaxed/simple;
-	bh=bg+h7PlnfTedz1YBjzApxZkMOAnsBGDd8/EzMTXhZfQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dFqDq9Fg2X0yRxLQCIq4kT74ICYEQkQ9Ig+AV/efNoNp6CpybpsL4e3Jyq4r4aFWahKP8xbk1E4uWsOACZiyzlpiwTBlfGuxlVcBWACjSC8KNy5BpcE1QOlHAXFaic/nr72DLOu7evcB0CXVangeKuZi8wxvigdTvQSTIgSahRQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uW7qxP8y; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1711733092; c=relaxed/simple;
+	bh=eEGxfdcCTYxCSdsfWcOpsv23ZxFAEdyVBf/IME0qEwA=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=lMBOZa5hSiBu7VVyZUhFuIMg3e0dNS39x4QZ2qc4MkUoMSOHGoP81U8+rddmny3szTytr0vg+WnvSIPKIZxUQ4gBkVkX7jscW51oDp/ckR9n1WltxC89xklTQQp1bdDoHM3mZKSad0edzba1V0lhN2vujhYg6hMJZ5s42zCnlrg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FxsR5jrj; arc=none smtp.client-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uW7qxP8y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B4D9DC433C7;
-	Fri, 29 Mar 2024 16:39:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711730378;
-	bh=bg+h7PlnfTedz1YBjzApxZkMOAnsBGDd8/EzMTXhZfQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=uW7qxP8y8ACgUR891lLqNXK4nRCSSexkXmk3NVlX/43RdUbJKhMUBo+3F7ImHHCLd
-	 EgMy3VnFONlXXBX8N/84xV65QgEoe3byfIcVSoYOnvkYvas222h0lZkI0ts/7GK5dK
-	 RXDBa+pCTcdJsCx5bNqP+0NeWpjfPDjTw0LzbJBD2TGFbdPiUtd9S2xCHSf/YkWg3h
-	 LkeVRnbJmAa4tPbrg134PWkZdQ7HBQC4t3veXbL+goDjmVnDap5Tj4fOkvn8ClJwbk
-	 uuZW1rzs8wZhLpPlp2dMwsOxB3VXY8Xf/XxfLnuX/VdqMAE2Sw5BpezoMJa9uZRiGz
-	 dYTGMY6Ps7ZVQ==
-Date: Fri, 29 Mar 2024 22:09:34 +0530
-From: Vinod Koul <vkoul@kernel.org>
-To: Allen <allen.lkml@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Allen Pais <apais@linux.microsoft.com>,
-	linux-kernel@vger.kernel.org, Tejun Heo <tj@kernel.org>,
-	Kees Cook <keescook@chromium.org>, Hector Martin <marcan@marcan.st>,
-	Sven Peter <sven@svenpeter.dev>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-	Paul Cercueil <paul@crapouillou.net>, Eugeniy.Paltsev@synopsys.com,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Viresh Kumar <vireshk@kernel.org>, Frank Li <Frank.Li@nxp.com>,
-	Leo Li <leoyang.li@nxp.com>, zw@zh-kernel.org,
-	Zhou Wang <wangzhou1@hisilicon.com>, haijie1@huawei.com,
-	Shawn Guo <shawnguo@kernel.org>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Sean Wang <sean.wang@mediatek.com>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
-	logang@deltatee.com, Daniel Mack <daniel@zonque.org>,
-	Haojian Zhuang <haojian.zhuang@gmail.com>,
-	Robert Jarzmik <robert.jarzmik@free.fr>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konrad.dybcio@linaro.org>,
-	Orson Zhai <orsonzhai@gmail.com>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Chunyan Zhang <zhang.lyra@gmail.com>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Chen-Yu Tsai <wens@csie.org>,
-	Jernej Skrabec <jernej.skrabec@gmail.com>, peter.ujfalusi@gmail.com,
-	"K. Y. Srinivasan" <kys@microsoft.com>,
-	Haiyang Zhang <haiyangz@microsoft.com>,
-	Wei Liu <wei.liu@kernel.org>, Dexuan Cui <decui@microsoft.com>,
-	Jassi Brar <jassisinghbrar@gmail.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	maintainers@bluecherrydvr.com, aubin.constans@microchip.com,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Manuel Lauss <manuel.lauss@gmail.com>,
-	=?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-	"jh80.chung" <jh80.chung@samsung.com>, oakad@yahoo.com,
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>, brucechang@via.com.tw,
-	HaraldWelte@viatech.com, pierre@ossman.eu, duncan.sands@free.fr,
-	Alan Stern <stern@rowland.harvard.edu>,
-	Oliver Neukum <oneukum@suse.com>,
-	openipmi-developer@lists.sourceforge.net, dmaengine@vger.kernel.org,
-	asahi@lists.linux.dev, linux-arm-kernel@lists.infradead.org,
-	linux-rpi-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-	imx@lists.linux.dev, linuxppc-dev@lists.ozlabs.org,
-	linux-mediatek@lists.infradead.org,
-	linux-actions@lists.infradead.org, linux-arm-msm@vger.kernel.org,
-	linux-riscv@lists.infradead.org, linux-sunxi@lists.linux.dev,
-	linux-tegra@vger.kernel.org, linux-hyperv@vger.kernel.org,
-	linux-rdma@vger.kernel.org, linux-media@vger.kernel.org,
-	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-	Linux-OMAP <linux-omap@vger.kernel.org>,
-	Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-	linux-s390@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
-	linux-usb@vger.kernel.org
-Subject: Re: [PATCH 2/9] dma: Convert from tasklet to BH workqueue
-Message-ID: <ZgbuxmxncU0-0jhA@matsya>
-References: <20240327160314.9982-1-apais@linux.microsoft.com>
- <20240327160314.9982-3-apais@linux.microsoft.com>
- <ZgUGXTKPVhrA1tam@matsya>
- <2e9257af-c123-406b-a189-eaebeecc1d71@app.fastmail.com>
- <ZgW3j1qkLA-QU4iM@matsya>
- <CAOMdWSKY9D75FM3bswUfXn2o7bGtrei3G5kLt6JdcdOPDXaG8g@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FxsR5jrj"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-4154d24cc77so6253275e9.3
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Mar 2024 10:24:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1711733087; x=1712337887; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=OhpY2/sSxSgf633Uejn3ClbyqlJ5glhXVmlmIc3u9NE=;
+        b=FxsR5jrjAlVAictB0bS3qOHkYFKmufOfVv0drLE6LPbnKyj5nMqPntRk45ov41Pep3
+         v+W9MtaKG4sUEwkQbn7CIvqf4GNeRWvTrIikuT25ZZmdhriJQ1iGeG27BRbD1PM5Bglq
+         fjA+ME18PYlWOruVkwAORrVJ1ONnUzAmfjNZeqBTCWvvj1wItfDyH3vLJCxXvHdenFcc
+         3AaOB176F1fOZw2LZ8Hqt9xs4GV7su+E3zgqmpxPJ2VPPeR2sxHjjPQOpi2PecAtK3mJ
+         lcbVKQ6L3kn9R9M4gnw2CscumeLBmt4KtN2BIxpYzRZW9jBLlE0fWnBahubb8SBPL6TV
+         FR7g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1711733087; x=1712337887;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=OhpY2/sSxSgf633Uejn3ClbyqlJ5glhXVmlmIc3u9NE=;
+        b=E6zQ/wG8BBu56zrjY8Yxd4k+8QvAHlxSBnWY6n1K/3hLpI4t0UwpSlq+f/XNGB+vae
+         /hPNbF2wP278LrhdlIVNapMjYZRm7vI2hWICYszLm7QU+XYh9Bv3gfhdOcctKvXtiq0L
+         wcd8Oj2gclZD5F9p4coougJo8/9DlCmznz7a9EDSPTKLdLtjLprkJh/GbL60lg1ntbUd
+         1Sl/2WqrOUo/0/KRmfOxzSQWz26kX/dPlvamk8LsUr1F9jNG4YDjpN9RDDx+LBS2oP3Q
+         PvfCMu6b2a1rOfBVdkkXZudoSINHC7cICF9Bcj3yBWR4gNIOxDljqO0m7lmrU6oFOVq9
+         FYfA==
+X-Gm-Message-State: AOJu0Yzb3A5nFSBHyq7Z7Nfx2yKbOFbKVwv2H7UD63g9em3yj7OOEH4G
+	Iz0Fhvn0uSObGWG5TXm1c42hXPP353JMa0TWZ53LSq9KS0ekTirPQFYjl/q7t4g=
+X-Google-Smtp-Source: AGHT+IFEO2bOiupeq/1rDtRC/aMhJZXwmO7jnra5I7uHBa3pijFH7CMrdcmvi0s373UtBtHjwOFsDQ==
+X-Received: by 2002:a05:600c:3115:b0:414:8e02:e439 with SMTP id g21-20020a05600c311500b004148e02e439mr2287942wmo.5.1711733087503;
+        Fri, 29 Mar 2024 10:24:47 -0700 (PDT)
+Received: from [127.0.1.1] ([178.197.223.16])
+        by smtp.gmail.com with ESMTPSA id v8-20020a05600c470800b004149543c82fsm8491069wmo.39.2024.03.29.10.24.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 29 Mar 2024 10:24:47 -0700 (PDT)
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 0/7] mmc/wifi/bluetooth: store owner from modules with
+ sdio_register_driver()
+Date: Fri, 29 Mar 2024 18:24:30 +0100
+Message-Id: <20240329-module-owner-sdio-v1-0-e4010b11ccaa@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOMdWSKY9D75FM3bswUfXn2o7bGtrei3G5kLt6JdcdOPDXaG8g@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAE75BmYC/x3MSwqAMAwA0atI1ga0KqJXERfVpBrQVlr8QPHuF
+ pdvMRMhsBcO0GcRPF8SxNmEMs9gXrVdGIWSQRWqLirV4e7o3BjdbdljIHGoJ2qIK1NSW0PqDs9
+ Gnv85jO/7AURoSI9jAAAA
+To: Ulf Hansson <ulf.hansson@linaro.org>, 
+ Marcel Holtmann <marcel@holtmann.org>, 
+ Luiz Augusto von Dentz <luiz.dentz@gmail.com>, 
+ Matthias Brugger <matthias.bgg@gmail.com>, 
+ AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, 
+ Kalle Valo <kvalo@kernel.org>, Jeff Johnson <jjohnson@kernel.org>, 
+ Arend van Spriel <arend.vanspriel@broadcom.com>, 
+ Brian Norris <briannorris@chromium.org>, 
+ =?utf-8?q?J=C3=A9r=C3=B4me_Pouiller?= <jerome.pouiller@silabs.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-bluetooth@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-mediatek@lists.infradead.org, linux-wireless@vger.kernel.org, 
+ ath10k@lists.infradead.org, brcm80211@lists.linux.dev, 
+ brcm80211-dev-list.pdl@broadcom.com, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+X-Mailer: b4 0.13.0
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1784;
+ i=krzysztof.kozlowski@linaro.org; h=from:subject:message-id;
+ bh=eEGxfdcCTYxCSdsfWcOpsv23ZxFAEdyVBf/IME0qEwA=;
+ b=owEBbQKS/ZANAwAKAcE3ZuaGi4PXAcsmYgBmBvlWLp0DJFC/xhyQE8KhK45bNEoEr5kpWe8NA
+ fcOQnb5UbaJAjMEAAEKAB0WIQTd0mIoPREbIztuuKjBN2bmhouD1wUCZgb5VgAKCRDBN2bmhouD
+ 1330D/9XTfkMweODfG2XrR3FLnaH3Zr2uZ/dY2eMyoYxEu0KTLG3NhhtuhezcWz7zl7D2tbB9UK
+ aW6s/NpxvXHUfNdDOxG0VlnsxUBNcaAT2M0vixWp8+ZK8pdJ9Ka/vgijrEUSuspUWTnWhLRWaBe
+ e+QuLQOk1A+uqpAc32pXtZu1WyMlyH8UGC7um0bX/T2d8UjEx9t8iFn6P9d2+YOnbnupzMULOyG
+ OaxRhTTdxY51AfqxDqjpJwQvURBPgP56r0fLdLzbN2EihTvSut00JGGgHYjo7HkOBZYyNHmHkF7
+ a5XAsxk235XYdMgeeXzN03hWgWPyVi6do+UVE6ceJ5Fg4JzCQHdgSdqfEj6hbDcWSo+SDggIU++
+ v7zrmJk7V93QujfnpWpb9tH7Dz32/c1YZpHpeJKMq52lIKVeY1Uu5cbXKV9Z4CKNr1AvuUNe96N
+ yIdYojpfGg5KNOo7u1fI9sWZ5CrbHBK61EYC11w90cdsvcX9gL7gK+1cT96+QLDT9lWD7OcRgQ9
+ gmsRazF1JjIynVJMw4UMCMy+xgQUqJvwaHAFuT+FhyNLTc0tpwH+PHMVB4RU0c0v9XeCZ4ZuDB1
+ Y1ggLd8QLzYOfE8l2GybSOFzwT+5sphcC/0RlIT8n0zrY2rGg/zlk0s0ebD1NnLCTbAFujltFLe
+ qqFVa0e6yTfXaJg==
+X-Developer-Key: i=krzysztof.kozlowski@linaro.org; a=openpgp;
+ fpr=9BD07E0E0C51F8D59677B7541B93437D3B41629B
 
-On 28-03-24, 12:39, Allen wrote:
+Merging
+=======
+All further patches depend on the first patch.  Everything could go via
+one tree, e.g. MMC, or the cleanup patches removing owner would wait a
+cycle.
 
-> > I think that is very great idea. having this wrapped in dma_chan would
-> > be very good way as well
-> >
-> > Am not sure if Allen is up for it :-)
-> 
->  Thanks Arnd, I know we did speak about this at LPC. I did start
-> working on using completion. I dropped it as I thought it would
-> be easier to move to workqueues.
-> 
-> Vinod, I would like to give this a shot and put out a RFC, I would
-> really appreciate review and feedback.
+Description
+===========
+Modules registering driver with sdio_register_driver() might
+forget to set .owner field.
 
-Sounds like a good plan to me
+Solve the problem by moving this task away from the drivers to the core
+code, just like we did for platform_driver in commit 9447057eaff8
+("platform_device: use a macro instead of platform_driver_register").
 
+Best regards,
+Krzysztof
+
+---
+Krzysztof Kozlowski (7):
+      mmc: sdio: store owner from modules with sdio_register_driver()
+      bluetooth: btmrvl_sdio: drop driver owner initialization
+      bluetooth: btmtksdio: drop driver owner initialization
+      wifi: ath10k: sdio: drop driver owner initialization
+      wifi: brcm80211: drop driver owner initialization
+      wifi: marvell: mwifiex: drop driver owner initialization
+      wifi: silabs: wfx: drop driver owner initialization
+
+ drivers/bluetooth/btmrvl_sdio.c                           | 1 -
+ drivers/bluetooth/btmtksdio.c                             | 1 -
+ drivers/mmc/core/sdio_bus.c                               | 9 ++++++---
+ drivers/net/wireless/ath/ath10k/sdio.c                    | 1 -
+ drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c | 1 -
+ drivers/net/wireless/marvell/mwifiex/sdio.c               | 1 -
+ drivers/net/wireless/silabs/wfx/bus_sdio.c                | 1 -
+ include/linux/mmc/sdio_func.h                             | 5 ++++-
+ 8 files changed, 10 insertions(+), 10 deletions(-)
+---
+base-commit: 087c142b2b04898c897aa77938d05a93907150e5
+change-id: 20240329-module-owner-sdio-abd5de3f1d74
+
+Best regards,
 -- 
-~Vinod
+Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
