@@ -1,171 +1,105 @@
-Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
+Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB20F1095A
-	for <linux-mmc@vger.kernel.org>; Mon,  1 Apr 2024 09:44:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB46658AB8;
+	Tue,  2 Apr 2024 09:36:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711964698; cv=none; b=EL7saST+UzpKT3qcGYpy6aIlmrY1c1VuvsoE1x5t4t+v1m46dKwrcNpRNkKW8MaZ9YNVspJvrbfI2PWutOcKVruVK+ADrT1QELU9X+ctqjf1DiRM3cQCw+jXRDXTCnyVQNMULZ2l2Dkv+tehZgeDYauqVAz3H4KxPeYqIRtBLv0=
+	t=1712050565; cv=none; b=S381+2SuxJIiTvVr1BKRCbOxp57bCs6AS/t7+dWMYICzE/dwgb+Ho1WSUd99jH5M3nWuKwlVQ0bg9PqOo5/e1N0+TnFz5ZR8sam/1m8mx1wl/QlSumLqsz4nr3cyKrpNOJo4yAOUZN/l8VGXvjger3OAiO63Mi5CcHpEkJeUk1E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711964698; c=relaxed/simple;
-	bh=qyBtU57NPao8HVv6aPFX8AvzCNq74vDsTKJluz1U3sM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=FufhHi7zH0gMogl0TAuZ5+OezaIhlMBYVbhZRKWZaCY9ryNxAAlSpO0ORKkBExxvFdXVlGBQLlXrYEAP59lympXzEgz0y7B53cPF2Ao2TcCx6rmU8Rwt9ZN4JA7AGFHeb0EGxuP7yEJ5EE9P3iTzgjNcszN3LlP0BwhpdP5w3Ys=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JWz/On4L; arc=none smtp.client-ip=209.85.208.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1712050565; c=relaxed/simple;
+	bh=oo8LCFs0K6UW8PnwVXkDxkA/M8FXv9GgBghk8p1hx9I=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=e04ditFskueelhWvfBii9TQJ2HeymMi6gHtQ0dMeGDmV/VVuIov0SOZ7ALcz1mtuN0qI1Hg4ue41vL0Zc+jgGDupuNDNExhSNUGCfdaBiCKmifynfMvP0q/nzX9SqSkAb0WPAHNCJzkWo/ofmhhBI2H3d8qUoLT6G7TQaI9goTY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bMyvl4Ui; arc=none smtp.client-ip=209.85.167.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JWz/On4L"
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-56829f41f81so5604774a12.2
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Apr 2024 02:44:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bMyvl4Ui"
+Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-515d49a6b92so2128416e87.3;
+        Tue, 02 Apr 2024 02:36:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1711964695; x=1712569495; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=d+diNP0/3LUwNWUT5gbc+2tWQaGcrSkj9S8RpDkHp50=;
-        b=JWz/On4LOKR8y7cckAIXwjFAc0lV/QlqRAn2ZnmNsn9tLHu1iKq8dJF1KFqhKhaIv1
-         ZrqI97MNyLWqqkFLabymPyEIIoi66df3OysyghSK8w5SLs64zwhG20NgYVZ7IjjTfKb1
-         PsVuJ/kztpPzrWOttIFboaVwIy3x4jhts9xvzSPCd60tTZsN9zukELEBQxpbU2gWNsFk
-         U8P3HWsItIy1yzMukbo9KVBwKtu+PJxDWatSC5UtBu/wBhW9jaDS4LmCqf//Q/a3djoJ
-         wbGZQYdP+ONYeWX1jLTCbjqjuRzI3Kr3r3Tu4T4c4SRdiIGGSXm+e2ADMcieb3CiDtk0
-         XeIg==
+        d=gmail.com; s=20230601; t=1712050562; x=1712655362; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=nZV/SsIKkEaQCqdYk9TBykFcJ+oJa9wAg2KtGvwPvy8=;
+        b=bMyvl4UiLB57bRBmrele6GzPt46oPLgaeMLBK1ZUPv2j+jFsaXPPSvaSexYYkKqdw2
+         LV1mkGqFbMxCJuvpFUb60WugSp6XI5bthwt675F+RRu97Xybc+XhlgIuyOwbG8eGA7JU
+         fKwjzXjRhMuz71sGqIlP4znQe4ixcF4DSsrf7iRAOrEwVy4sORq7NVmvgshPy+RUgQqR
+         mrysmN7z22h15nImgKiSxL+Q+v0mp0vHIM+lVvON1+NOWr0cl2zeQjUuoV6dLYsbBul5
+         iQQ6/mVtrYKdXR1AGGHr0aia6FfJsTjR6Db4UgXGXzYqjao5MJMeQ0mJrAZ+9CmaSFvi
+         5pow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711964695; x=1712569495;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=d+diNP0/3LUwNWUT5gbc+2tWQaGcrSkj9S8RpDkHp50=;
-        b=cf2t7iiRGxeo/0Y+ayYwJ+HCd51k5yAloQUtjN5S6RFpIIEHaNTHGpRw7j4xMKHrxJ
-         ixxdyLmo9E9TVSVhIQuQmVyPhREm79iAD3q+FbrBaXqGwtc9LBqgxh/b/JDt7jaPCo8j
-         5sUxRhPGT3K+ZdKHoFL8cVH5YX5sOXsps5t+BdizHINGQO0mOtrXLtbiWuS7bizCK+eR
-         dkJ8PEvtFcQann9cNE10m1QHf7wVJO1hzw1Xt/VbBhwHQKP+Nwf40tWGbPpFm2b0l8hq
-         Z6wiRflKl0RUeMCxkgZWIzbLRhqClqvTXj5FdI7sAQU2KMqHRLY1RLQ2OFEzS0M1fcEE
-         ewww==
-X-Forwarded-Encrypted: i=1; AJvYcCUmA0xtWbZmjiGw/00l+wkEOP6j4uw4ENQ/da4261jZjPOdNEL6zW7VpwfvJCqJ/UNgOh/IChvbKfXUL1SY1RmM7V4AleIyiR8p
-X-Gm-Message-State: AOJu0YwSNlXaC6EorVyCQC4ni/XguboAatHZVO2QwF3rk2Lvl4TM6rhT
-	myljjomrHd3a3BP0kFVEIfXZEz4Ros01R/3vKu8gtJs5SFQRi4TwbHWt+ot9Hnc=
-X-Google-Smtp-Source: AGHT+IHyAxC2Nha5nCXqGrQwGsjBWpEQ/9fhdptsCohMGEbhWFkiXJ6u69AXTVBFM4Ztj6ZVAZZT/A==
-X-Received: by 2002:a17:907:7248:b0:a4e:4350:3b3a with SMTP id ds8-20020a170907724800b00a4e43503b3amr5048203ejc.60.1711964695236;
-        Mon, 01 Apr 2024 02:44:55 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.223.16])
-        by smtp.gmail.com with ESMTPSA id ef14-20020a17090697ce00b00a4e44f724e8sm3060972ejb.186.2024.04.01.02.44.53
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 01 Apr 2024 02:44:54 -0700 (PDT)
-Message-ID: <efae80b6-a0c2-4db4-b42e-83fb61eb74b4@linaro.org>
-Date: Mon, 1 Apr 2024 11:44:52 +0200
+        d=1e100.net; s=20230601; t=1712050562; x=1712655362;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=nZV/SsIKkEaQCqdYk9TBykFcJ+oJa9wAg2KtGvwPvy8=;
+        b=rKSEttXvIPY4fW2bxHTjmt4usZaI+lJG72MrNTWefZe09l8aWJ29owPiADg5Ww2dQo
+         BEwX73hJZpPhw7ZskqJzzy0HLu8ds7bg597XtpFFFG+zBIlIr8l9LMA6AKJblFc7PKJ5
+         PGllgMUK8jebuFYMT5nvU2PmhHGJWIREmStcL7ixpywVSPRNVWYk3Hm9TfpM5z2k7Qvb
+         AXyUNI/Ux4BxPG72+IjW48T5fLKQH2WEIoMKZ2tGDKKoINhMgwcre1WzLiPE6aQKenXq
+         X0apyQgJK3FliT03PffHcDxn2Bk4l2ma0OeNk4zAx/2G8Z27JO/Cwd1tS4QJrLLmp64Q
+         bSTA==
+X-Forwarded-Encrypted: i=1; AJvYcCVMQ6Xgplo7bYw9KOc+QX2m6K9Gbz1yjqXy+emnGNSsOCNFY4slQsBojassM+LjhcCBIT4oymBlMY0iYefluj9LL89ZurCULPucRvLsXCsmZJ5XgypENyNMnI80+xeNPxCcqtxtHJU1
+X-Gm-Message-State: AOJu0YzWxamNhxjkfr+6dJWm8khR9jbmmrxQUzbyZuWk0iqrtAxJ5ABQ
+	8wPjsMpfmsQv7AS1mWzGRcHBzE4kutBVu8Sc9kQxT5k/fAB6BHVG
+X-Google-Smtp-Source: AGHT+IHnOCdQzRsIXq6lSasShgW4dSeETqZam+8LeKGX0mbaLMyqUsarhFySo1aiBOtxxwSvwYzurA==
+X-Received: by 2002:a05:6512:3ba8:b0:515:9652:7f76 with SMTP id g40-20020a0565123ba800b0051596527f76mr9928132lfv.1.1712050561644;
+        Tue, 02 Apr 2024 02:36:01 -0700 (PDT)
+Received: from user-PC.. ([193.176.212.206])
+        by smtp.gmail.com with ESMTPSA id d25-20020a196b19000000b005131544fc6fsm1641379lfa.291.2024.04.02.02.36.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 02 Apr 2024 02:36:01 -0700 (PDT)
+From: Maksim Kiselev <bigunclemax@gmail.com>
+To: 
+Cc: Maksim Kiselev <bigunclemax@gmail.com>,
+	Drew Fustini <drew@pdp7.com>,
+	Xi Ruoyao <xry111@xry111.site>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v1] mmc: sdhci-of-dwcmshc: th1520: Increase tuning loop count to 128
+Date: Tue,  2 Apr 2024 12:35:39 +0300
+Message-Id: <20240402093539.184287-1-bigunclemax@gmail.com>
+X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/7] mmc: sdio: store owner from modules with
- sdio_register_driver()
-To: Francesco Dolcini <francesco@dolcini.it>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
- Marcel Holtmann <marcel@holtmann.org>,
- Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
- Matthias Brugger <matthias.bgg@gmail.com>,
- AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
- Kalle Valo <kvalo@kernel.org>, Jeff Johnson <jjohnson@kernel.org>,
- Arend van Spriel <arend.vanspriel@broadcom.com>,
- Brian Norris <briannorris@chromium.org>,
- =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-bluetooth@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mediatek@lists.infradead.org, linux-wireless@vger.kernel.org,
- ath10k@lists.infradead.org, brcm80211@lists.linux.dev,
- brcm80211-dev-list.pdl@broadcom.com
-References: <20240329-module-owner-sdio-v1-0-e4010b11ccaa@linaro.org>
- <20240329-module-owner-sdio-v1-1-e4010b11ccaa@linaro.org>
- <20240331203729.GC4116@francesco-nb>
-Content-Language: en-US
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <20240331203729.GC4116@francesco-nb>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 31/03/2024 22:37, Francesco Dolcini wrote:
-> Hello Krzysztof,
-> 
-> On Fri, Mar 29, 2024 at 06:24:31PM +0100, Krzysztof Kozlowski wrote:
->> Modules registering driver with sdio_register_driver() might
->> forget to set .owner field.  The field is used by some of other kernel
->                              ^^ double space here
-> 
->> parts for reference counting (try_module_get()), so it is expected that
->> drivers will set it.
->>
->> Solve the problem by moving this task away from the drivers to the core
->> code, just like we did for platform_driver in
->> commit 9447057eaff8 ("platform_device: use a macro instead of
->> platform_driver_register").
->>
->> Since many drivers forget to set the .owner, this effectively will fix
->> them.  Examples of fixed drivers are: ath6kl, b43, btsdio.c, ks7010,
->        ^^ and here
+Fix SD card tuning error by increasing tuning loop count
+from 40(MAX_TUNING_LOOP) to 128.
 
-Which is correct :). Double space is on purpose.
+For some reason the tuning algorithm requires to move through all the taps
+of delay line even if the THRESHOLD_MODE (bit 2 in AT_CTRL_R) is used
+instead of the LARGEST_WIN_MODE.
 
-> 
->> libertas, MediaTek WiFi drivers, Realtek WiFi drivers, rsi, siano,
->> wilc1000, wl1251 and more.
->>
->> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> 
-> My nit comments are irrelevant, but given you did the same twice I felt
-> like letting you know.
-> 
-> Reviewed-by: Francesco Dolcini <francesco.dolcini@toradex.com>
-> 
+Tested-by: Drew Fustini <drew@pdp7.com>
+Tested-by: Xi Ruoyao <xry111@xry111.site>
+Signed-off-by: Maksim Kiselev <bigunclemax@gmail.com>
+---
+Previous discussion was here:
+https://lore.kernel.org/lkml/CALHCpMhc1F5Ue7U_gsDXREHUZRVQJNYRCJxYxoNqbN=-39jf7A@mail.gmail.com/
 
-Best regards,
-Krzysztof
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 8d6cfb648096..1001b6ea1a89 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -706,6 +706,7 @@ static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 
+ 	/* perform tuning */
+ 	sdhci_start_tuning(host);
++	host->tuning_loop_count = 128;
+ 	host->tuning_err = __sdhci_execute_tuning(host, opcode);
+ 	if (host->tuning_err) {
+ 		/* disable auto-tuning upon tuning error */
+-- 
+2.40.1
 
