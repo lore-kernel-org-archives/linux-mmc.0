@@ -1,136 +1,181 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
+Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DBB05FB87
-	for <linux-mmc@vger.kernel.org>; Tue,  2 Apr 2024 10:16:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 363565D749
+	for <linux-mmc@vger.kernel.org>; Tue,  2 Apr 2024 10:34:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712052986; cv=none; b=qP122/XDiOWw/KaggpPYMgroA8uptnRheSyN4ubpZSfg0pTwq0/twkt5YCK3VzcZdV5yDBtQpVw59oDDZQa0f++Vy37gr6tTvaxTlVCc0ky20TuXKpOGmqQTSrZ0HndxLiyhM8hiGaIzA58ISwQXdwqkfOr6L2O0AFeR3mgkIvk=
+	t=1712054061; cv=none; b=i/i/Npb7Mo4DTyNno4zyUX+jnTYQW4Azf03GJ1k77i4sUAvh2ZX+6KGrM/5Q6f7HVVJFxymgNeEy/m2yaE0SZw568xbinZ+uStsJaBkshC/8LoIGYhNSy6gwB+n3yhMnU3O0qHCgH3AoXp/jcMcpRjzLVpbEnra4SfjGjWvhLA0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712052986; c=relaxed/simple;
-	bh=uzac7wtIrnnrBvtOLPs8xaD+ikoHcCxqEerEJoMcBFs=;
+	s=arc-20240116; t=1712054061; c=relaxed/simple;
+	bh=PlKo6d/Y5dHXxCDi1xlJSwnCee6AWwA7XpEZ+abQOzU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jSgveFIfu9orp9RXXglTwqFeqfCO3WFyHK2guOMwc9VrEf/jkpGY1A8Muiq7ST+QLPLuccUdpVvTaoWWN2Mwg8my+l8qiq+E94vmWH1aszsXeOBxxNYRezoDjtenIIzzh9rXA38G5uNb+Ul6vvdRGs1wJWHDIvf25fiiC/ZWLGg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=P/19zu7H; arc=none smtp.client-ip=209.85.219.173
+	 To:Cc:Content-Type; b=Y2Ap1vKFQFh0iyX0r7MBxWxDTD5L0JzO5jsGSR9OGV6cG4apWvpdXgYwBFCfIdTE4KsiV9wC8znhU3PEJm5mMPjLsCFwy0/I4G2xyyKsappTk1o97WEq/4bVlXyzY/6NqGEmtohJHvJwkNoD7rRM8qGXsiAvgw5H1PLKS3C24rs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oBYRLUbk; arc=none smtp.client-ip=209.85.219.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="P/19zu7H"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-dcbd1d4904dso4576657276.3
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Apr 2024 03:16:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oBYRLUbk"
+Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-dcc84ae94c1so4610350276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Apr 2024 03:34:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1712052982; x=1712657782; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=uzac7wtIrnnrBvtOLPs8xaD+ikoHcCxqEerEJoMcBFs=;
-        b=P/19zu7HhxbqaSZ6tddIYer72gYo22iX74gtm9EbTCsCnmBPVJH56wwx8ina7pHQt+
-         p316gGtpPFNSmMfwYWkooiGf4ik567MMKWJ1fJRb+NnesXmt8S3KOmo1hW/O3yH2uIjf
-         F3SkY7DH8iAQRrcIIOMQyR6tAgVMpinRoEFcTiHyz/45wguXP951zWOOFOEZRV1uWbyn
-         hNrtfhYos8BjukR2a9x7YTIu1mvVMtxWlxNTeXM3ZTuCTXqrHvRkpW0RunoXYl2P2zer
-         H5n509H2Aw3xqdmsadb2X73YaIOldxZWd5/O5TrVs5Wt5fl9C6M1vCFRqYXRh0oRA0v7
-         HRhw==
+        d=linaro.org; s=google; t=1712054058; x=1712658858; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wvgn6VECiAz02a9UORG6+tPX9aN15gdUDX8CO7KEUQ4=;
+        b=oBYRLUbkqp6YsZSM2JkIX/Byb+a2onm/oZ4uV8zmfi66BDzjB5zu2sIHzLDb//BqMY
+         9jCGdwiFWSB7Ne74xPFiwk/RMOULt0+EAqKSjNzximpT5bMziiO9LzxxxwijKyrvDIug
+         O7ZG70iL2ESdN5S14eMCOWCt+4nZtUnIC3iFpnuVgPIQt2zwLsr793n57sJ9WXtwdUhV
+         LIbR14DBNI2CJkF0PgLHcG7boJu9uRBmFqNHBaJHsGxOaVA48Frr/A6lVn31L3xDLxwI
+         Zj6TqZbab4yDdRKvLv2DX6/FScFGdECVA9OUOeO6IwdfU+UU21DnbFyP40IVgM7uWVgm
+         Upig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712052982; x=1712657782;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=uzac7wtIrnnrBvtOLPs8xaD+ikoHcCxqEerEJoMcBFs=;
-        b=ea/U83eaLBA5D+nQNfx4/887HS1SYyEmWNQje3Ux86iTblC6yeY9kZlctYEvCIEPjh
-         2wn+EgV7Q3i31d9qZRiuP51PXYEebBGIEvUL2qFS/rsssWfGEjBEMw9xX4gDJ2TAHB8/
-         V01auOTWNZsV74B/EQA0kCWB2ZXfkEsB7qOCbRHYB/lApOA9BTF4ysfNzQCk0Qdo7ZQh
-         eH8ynrdTGTuAZFvfuyYYT2jsndzvYOw7mNsuIn8BI1J6jDbDFbM78ACPz3mEQ2q/Kbaj
-         bZDKWJ72TXDRRS91+pXc8hfJsOLOEX/i38lIs9cySyqC0Tm5cQk/mW+tMb+bCENqDv4G
-         /N1g==
-X-Forwarded-Encrypted: i=1; AJvYcCVKK5gcrXl3CdksOxd3by7A67l1Of/9fMhlzWxtPLyegnR5k7v7OK/CXe4+9w4aefmsGkkVa038C//r2S23bIGysaoyFE2GYtP+
-X-Gm-Message-State: AOJu0Yw8IIuADcYqSzjJ8iHGEGTX6UYFVhswn0b/OxyZDkb+TWIsH5kh
-	+iknez4nv9nDKGoSJtHcsDOrlmlOB3e0vy0+u95ObTfpRghTaHgLMl7NO6+DPPXLm7TcXRXD3nZ
-	jK7Xh/s3RBrhtdDSgxIHEI5d+39oVYRgPFENawA==
-X-Google-Smtp-Source: AGHT+IHzjYx5u+Am4EzQhN6aMsFTdxF/7ehGqP9AXe12JTbN0HclFOy9oE6Q1Tva+ZRKMaaQSSepEoCeBcfLH2AuW+A=
-X-Received: by 2002:a25:b191:0:b0:dcd:b034:b504 with SMTP id
- h17-20020a25b191000000b00dcdb034b504mr9487652ybj.27.1712052982018; Tue, 02
- Apr 2024 03:16:22 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1712054058; x=1712658858;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=wvgn6VECiAz02a9UORG6+tPX9aN15gdUDX8CO7KEUQ4=;
+        b=N0527hilRSo+qK9hajCwirpbLx8hTrZEPWF+dEnuezcOXa0U61apxwubAN1S62Y1bW
+         ck6/HWmmDEuKIC0lmI+kgFTZ0ewqBa9quHTNdFkpefLEbn9OzD9srqb9CmYyGfzlfsVF
+         pFYN2qd2a/SSZVOa6qUV/YV6eqXk54P0xqXgTFl8xcwMTVJ9QuzjlFaiwoPr59WNeNHp
+         LnQ6xdD3okRobG8eOvpQdh9nDrIVaA/1r8N4k6gt6Wa89bPhN15Xny2gBEMv4CgX7eol
+         9IQFsjVecnD+ccYEsp1Kzyiras5uElfz8l5cO2Fz/RyS2m+8olKGWw8kz3J3gCUkeyVZ
+         OaEg==
+X-Forwarded-Encrypted: i=1; AJvYcCXnb9zSEZ3Mw7RjZ2cF574bhNZVB8PYeN3YbaR9WR3TRC9XDQycD5X1SdN3YXTGT1LwCwQA0OtPNCESS7HqYtptW6qBGoXN3yYr
+X-Gm-Message-State: AOJu0Yxpw1UVGdgDj4ktBVUZt0Z+8FAJcH/fCHEtLJGagJbFMwDOJCxF
+	T4stpwugcN4KN+hwXRn2p2sie/cuMiX3zS8U9JPhmZEWIqwXKOf7xZ5Mi+hPSPfpNIxh07w/8Oa
+	ZODZZYpj/wb3jqxgBLPktwAbm69lmvDfrodm3+A==
+X-Google-Smtp-Source: AGHT+IF2vr/abIo7YaQa16taPapiDn+D2f/lvM9TC0lb6RX93CCTumBAM8s6QUV3C0/41/9+axoLWqYjR242zRJ4nJQ=
+X-Received: by 2002:a25:a81:0:b0:dc6:bbbc:80e4 with SMTP id
+ 123-20020a250a81000000b00dc6bbbc80e4mr9519575ybk.4.1712054058273; Tue, 02 Apr
+ 2024 03:34:18 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240327160314.9982-1-apais@linux.microsoft.com>
- <20240327160314.9982-10-apais@linux.microsoft.com> <CAPDyKFpuKadPQv6+61C2pE4x4FE-DUC5W6WCCPu9Nb2DnDB56g@mail.gmail.com>
- <ZgWZDtNU4tCwqyeu@slm.duckdns.org>
-In-Reply-To: <ZgWZDtNU4tCwqyeu@slm.duckdns.org>
+References: <20240327214831.1544595-1-helgaas@kernel.org> <20240327214831.1544595-3-helgaas@kernel.org>
+ <CACT4zj9BFwMLsDSzNQ=wHSBCHqoydggtM-7-7rsfo0pRV2iLEg@mail.gmail.com>
+In-Reply-To: <CACT4zj9BFwMLsDSzNQ=wHSBCHqoydggtM-7-7rsfo0pRV2iLEg@mail.gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 2 Apr 2024 12:15:45 +0200
-Message-ID: <CAPDyKFp5KET0HR+8MwO4cf0O6W2kyFqHoKcVf5jbgBuLuQUcFA@mail.gmail.com>
-Subject: Re: [PATCH 9/9] mmc: Convert from tasklet to BH workqueue
-To: Tejun Heo <tj@kernel.org>
-Cc: Allen Pais <apais@linux.microsoft.com>, linux-kernel@vger.kernel.org, 
-	keescook@chromium.org, vkoul@kernel.org, marcan@marcan.st, sven@svenpeter.dev, 
-	florian.fainelli@broadcom.com, rjui@broadcom.com, sbranden@broadcom.com, 
-	paul@crapouillou.net, Eugeniy.Paltsev@synopsys.com, 
-	manivannan.sadhasivam@linaro.org, vireshk@kernel.org, Frank.Li@nxp.com, 
-	leoyang.li@nxp.com, zw@zh-kernel.org, wangzhou1@hisilicon.com, 
-	haijie1@huawei.com, shawnguo@kernel.org, s.hauer@pengutronix.de, 
-	sean.wang@mediatek.com, matthias.bgg@gmail.com, 
-	angelogioacchino.delregno@collabora.com, afaerber@suse.de, 
-	logang@deltatee.com, daniel@zonque.org, haojian.zhuang@gmail.com, 
-	robert.jarzmik@free.fr, andersson@kernel.org, konrad.dybcio@linaro.org, 
-	orsonzhai@gmail.com, baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com, 
-	patrice.chotard@foss.st.com, linus.walleij@linaro.org, wens@csie.org, 
-	jernej.skrabec@gmail.com, peter.ujfalusi@gmail.com, kys@microsoft.com, 
-	haiyangz@microsoft.com, wei.liu@kernel.org, decui@microsoft.com, 
-	jassisinghbrar@gmail.com, mchehab@kernel.org, maintainers@bluecherrydvr.com, 
-	aubin.constans@microchip.com, manuel.lauss@gmail.com, mirq-linux@rere.qmqm.pl, 
-	jh80.chung@samsung.com, oakad@yahoo.com, hayashi.kunihiko@socionext.com, 
-	mhiramat@kernel.org, brucechang@via.com.tw, HaraldWelte@viatech.com, 
-	pierre@ossman.eu, duncan.sands@free.fr, stern@rowland.harvard.edu, 
-	oneukum@suse.com, openipmi-developer@lists.sourceforge.net, 
-	dmaengine@vger.kernel.org, asahi@lists.linux.dev, 
-	linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, 
-	linux-mips@vger.kernel.org, imx@lists.linux.dev, 
-	linuxppc-dev@lists.ozlabs.org, linux-mediatek@lists.infradead.org, 
-	linux-actions@lists.infradead.org, linux-arm-msm@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, linux-sunxi@lists.linux.dev, 
-	linux-tegra@vger.kernel.org, linux-hyperv@vger.kernel.org, 
-	linux-rdma@vger.kernel.org, linux-media@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, linux-s390@vger.kernel.org, 
-	netdev@vger.kernel.org, linux-usb@vger.kernel.org
+Date: Tue, 2 Apr 2024 12:33:42 +0200
+Message-ID: <CAPDyKFpHuLsYg4=gs_d++u1bSvuAW7uY56kCciTNmD1VBp2AkA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-pci-gli: Use pci_set_power_state(), not
+ direct PMCSR writes
+To: Ben Chuang <benchuanggli@gmail.com>
+Cc: Bjorn Helgaas <helgaas@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Victor Shih <victor.shih@genesyslogic.com.tw>, 
+	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
+	Kai-Heng Feng <kai.heng.geng@canonical.com>, Sven van Ashbrook <svenva@chromium.org>, 
+	Stanislaw Kardach <skardach@google.com>, Brian Norris <briannorris@chromium.org>, 
+	Jason Lai <jasonlai.genesyslogic@gmail.com>, Renius Chen <reniuschengl@gmail.com>, 
+	linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 28 Mar 2024 at 17:21, Tejun Heo <tj@kernel.org> wrote:
+On Thu, 28 Mar 2024 at 02:01, Ben Chuang <benchuanggli@gmail.com> wrote:
 >
-> Hello,
+> On Thu, Mar 28, 2024 at 5:49=E2=80=AFAM Bjorn Helgaas <helgaas@kernel.org=
+> wrote:
+> >
+> > From: Bjorn Helgaas <bhelgaas@google.com>
+> >
+> > d7133797e9e1 ("mmc: sdhci-pci-gli: A workaround to allow GL9750 to ente=
+r
+> > ASPM L1.2") and 36ed2fd32b2c ("mmc: sdhci-pci-gli: A workaround to allo=
+w
+> > GL9755 to enter ASPM L1.2") added writes to the Control register in the
+> > Power Management Capability to put the device in D3hot and back to D0.
+> >
+> > Use the pci_set_power_state() interface instead because these are gener=
+ic
+> > operations that don't need to be driver-specific.  Also, the PCI spec
+> > requires some delays after these power transitions, and
+> > pci_set_power_state() takes care of those, while d7133797e9e1 and
+> > 36ed2fd32b2c did not.
+> >
+> > Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
 >
-> On Thu, Mar 28, 2024 at 01:53:25PM +0100, Ulf Hansson wrote:
-> > At this point we have suggested to drivers to switch to use threaded
-> > irq handlers (and regular work queues if needed too). That said,
-> > what's the benefit of using the BH work queue?
+> Hi Bjorn,
 >
-> BH workqueues should behave about the same as tasklets which have more
-> limited interface and is subtly broken in an expensive-to-fix way (around
-> freeing in-flight work item), so the plan is to replace tasklets with BH
-> workqueues and remove tasklets from the kernel.
-
-Seems like a good approach!
-
+> Thanks. It looks better than the vendor specific.
 >
-> The [dis]advantages of BH workqueues over threaded IRQs or regular threaded
-> workqueues are the same as when you compare them to tasklets. No thread
-> switching overhead, so latencies will be a bit tighter. Wheteher that
-> actually matters really depends on the use case. Here, the biggest advantage
-> is that it's mostly interchangeable with tasklets and can thus be swapped
-> easily.
+> Best regards,
+> Ben Chuang
 
-Right, thanks for clarifying!
+Hi Ben,
 
-However, the main question is then - if/when it makes sense to use the
-BH workqueue for an mmc host driver. Unless there are some HW
-limitations, a threaded irq handler should be sufficient, I think.
-
-That said, moving to threaded irq handlers is a different topic and
-doesn't prevent us from moving to BH workqueues as it seems like a
-step in the right direction.
+I assume I can consider your reply as a reviewed-by tag. If not,
+please let me know.
 
 Kind regards
 Uffe
+
+
+>
+> > ---
+> >  drivers/mmc/host/sdhci-pci-gli.c | 20 ++++----------------
+> >  1 file changed, 4 insertions(+), 16 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
+pci-gli.c
+> > index 3d5543581537..0f81586a19df 100644
+> > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > @@ -25,9 +25,6 @@
+> >  #define   GLI_9750_WT_EN_ON        0x1
+> >  #define   GLI_9750_WT_EN_OFF       0x0
+> >
+> > -#define PCI_GLI_9750_PM_CTRL   0xFC
+> > -#define   PCI_GLI_9750_PM_STATE          GENMASK(1, 0)
+> > -
+> >  #define SDHCI_GLI_9750_CFG2          0x848
+> >  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
+> >  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
+> > @@ -149,9 +146,6 @@
+> >  #define PCI_GLI_9755_MISC          0x78
+> >  #define   PCI_GLI_9755_MISC_SSC_OFF    BIT(26)
+> >
+> > -#define PCI_GLI_9755_PM_CTRL     0xFC
+> > -#define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> > -
+> >  #define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
+> >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT(8)
+> >
+> > @@ -556,11 +550,8 @@ static void gl9750_hw_setting(struct sdhci_host *h=
+ost)
+> >         sdhci_writel(host, value, SDHCI_GLI_9750_CFG2);
+> >
+> >         /* toggle PM state to allow GL9750 to enter ASPM L1.2 */
+> > -       pci_read_config_dword(pdev, PCI_GLI_9750_PM_CTRL, &value);
+> > -       value |=3D PCI_GLI_9750_PM_STATE;
+> > -       pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
+> > -       value &=3D ~PCI_GLI_9750_PM_STATE;
+> > -       pci_write_config_dword(pdev, PCI_GLI_9750_PM_CTRL, value);
+> > +       pci_set_power_state(pdev, PCI_D3hot);
+> > +       pci_set_power_state(pdev, PCI_D0);
+> >
+> >         /* mask the replay timer timeout of AER */
+> >         aer =3D pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
+> > @@ -774,11 +765,8 @@ static void gl9755_hw_setting(struct sdhci_pci_slo=
+t *slot)
+> >         pci_write_config_dword(pdev, PCI_GLI_9755_CFG2, value);
+> >
+> >         /* toggle PM state to allow GL9755 to enter ASPM L1.2 */
+> > -       pci_read_config_dword(pdev, PCI_GLI_9755_PM_CTRL, &value);
+> > -       value |=3D PCI_GLI_9755_PM_STATE;
+> > -       pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+> > -       value &=3D ~PCI_GLI_9755_PM_STATE;
+> > -       pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+> > +       pci_set_power_state(pdev, PCI_D3hot);
+> > +       pci_set_power_state(pdev, PCI_D0);
+> >
+> >         /* mask the replay timer timeout of AER */
+> >         aer =3D pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
+> > --
+> > 2.34.1
+> >
+> >
