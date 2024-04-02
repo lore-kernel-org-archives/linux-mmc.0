@@ -1,33 +1,32 @@
 Received: from mail-177131.yeah.net (mail-177131.yeah.net [123.58.177.131])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id D349612BF1F;
-	Tue,  2 Apr 2024 14:37:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 757E712C544;
+	Tue,  2 Apr 2024 14:45:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=123.58.177.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712068684; cv=none; b=VdG6O29xp0x6kYHXi6WtLPregGIyshtGxvd5mZo4bt3wIrGKEp0VfCnyaSi3LKV2Wu0Wr+PrhbJD5EtK5LdT6tSG0fvZ5TiRrTtIUZbN/RxAM0p7Jd4l6G8bXKPLW7MlJttDo9yEfyM9eEFhRy7sM1SJ/t//6b3u0Dd+0v4Yc08=
+	t=1712069103; cv=none; b=Qo8olfDyVa+tmGWj/zst9hOYCbq6t5Bxuoj8EdrHM6+xDk6C2LEIcgAVszyQfU9rrQ2/S3oWtBU1uDpc700EMoZaASMlPqfSVbOkO2leeXDTj27ltqqynRC8DZPVJZVuzENn21RlMXkr/UyybCOOoqfzmiwBjcX8/5KOUFiPfTg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712068684; c=relaxed/simple;
-	bh=y93sbGXDHyqBedzkpPL4OL5mGT6a0q7FptP2qObJa8k=;
+	s=arc-20240116; t=1712069103; c=relaxed/simple;
+	bh=UoAIQh6T2R5yd03vS3etflEo5KsJFR7Ir5HehSGj0qU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=E0gatRZs1KNf4IakEie3nc8OO9v4sZHIZZmzF9PfDXpSHixmuiInZyzWX5KhnE5UWdzbSJ829WzN3353XXcNsnq3b+pYBgRcP74E/dWYisX4gd/eVO9vyRFo++grxdZGnvLth55eHhSWuC5flc+gmYriwgFwlnunwHTvtpfKkkU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yeah.net; spf=pass smtp.mailfrom=yeah.net; dkim=pass (1024-bit key) header.d=yeah.net header.i=@yeah.net header.b=a0JH/9Zr; arc=none smtp.client-ip=123.58.177.131
+	 Content-Type:Content-Disposition:In-Reply-To; b=I0kOnoH9UXN6za2tjzjus/yr9ubGTrx+ZMTF6DCJrFNTmf90WEYKdNyl9FVD4R2KPHSzjVWn/ldGLWVULwiqltYEXPl1K79WFwBKKCXXFG7iHE7K1GCJKW0voZkRKOBxMz9sK9kVf9+rYzsL9n3YJXoIERnF9MVoUccWPHmXn3Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yeah.net; spf=pass smtp.mailfrom=yeah.net; dkim=pass (1024-bit key) header.d=yeah.net header.i=@yeah.net header.b=I8eFhD78; arc=none smtp.client-ip=123.58.177.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=yeah.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=yeah.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=yeah.net header.i=@yeah.net header.b="a0JH/9Zr"
+	dkim=pass (1024-bit key) header.d=yeah.net header.i=@yeah.net header.b="I8eFhD78"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yeah.net;
 	s=s110527; h=Date:From:Subject:Message-ID:MIME-Version:
-	Content-Type; bh=aJBu59wH8+zyksPlO84AEqktfR6MRWy+q+ZyQLyUzbE=;
-	b=a0JH/9ZrT+x5iocC6DS5MSTBOvXdWlem2GP+brQLVVgQLACfnVD3CRcM1lv5sY
-	uU4MK5GDezWPe+5k+EBe265ojSBrzKRHC0g3xwFMXPP1CwrUfsZclf4a6uFmrosk
-	0wwI5AMleMej8ybrdbMzqe4YCg+QYVO/3Ebim8ALXmFro=
+	Content-Type; bh=sNp+AZXGX0bUEOLXo2ZGNsWH+ua3wPGWHS+AYi2Sy94=;
+	b=I8eFhD78wX/KsGbMXjYCDiOI/4+iFV21AYAWatCGUUr9GlU1h2acMWQGuPSVc+
+	dx/49bGRy+cZNIPU8xEzxUJyuHI1B54xWKQtEVBWlgFH9jKZKfWhBJcVDnNc6yHq
+	oHplaASZd4k0BeDzmHPOoPw7UtMFu9iVBlqw2a1m1zi4I=
 Received: from dragon (unknown [223.68.79.243])
-	by smtp1 (Coremail) with SMTP id ClUQrADnr0R6FwxmkTqmAQ--.46595S3;
-	Tue, 02 Apr 2024 22:34:36 +0800 (CST)
-Date: Tue, 2 Apr 2024 22:34:34 +0800
+	by smtp1 (Coremail) with SMTP id ClUQrADnr0IuGQxm_E+mAQ--.45967S3;
+	Tue, 02 Apr 2024 22:41:51 +0800 (CST)
+Date: Tue, 2 Apr 2024 22:41:50 +0800
 From: Shawn Guo <shawnguo2@yeah.net>
 To: Wadim Mueller <wafgo01@gmail.com>
-Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-	Rob Herring <robh+dt@kernel.org>,
+Cc: Rob Herring <robh+dt@kernel.org>,
 	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
 	Conor Dooley <conor+dt@kernel.org>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
@@ -43,24 +42,24 @@ Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
 	Matthias Brugger <mbrugger@suse.com>,
 	NXP S32 Linux Team <s32@nxp.com>,
 	Tim Harvey <tharvey@gateworks.com>,
-	Alexander Stein <alexander.stein@ew.tq-group.com>,
-	Marek Vasut <marex@denx.de>,
+	Marco Felsch <m.felsch@pengutronix.de>, Marek Vasut <marex@denx.de>,
 	Gregor Herburger <gregor.herburger@ew.tq-group.com>,
 	Hugo Villeneuve <hvilleneuve@dimonoff.com>,
 	Joao Paulo Goncalves <joao.goncalves@toradex.com>,
 	Markus Niebel <Markus.Niebel@ew.tq-group.com>,
-	Marco Felsch <m.felsch@pengutronix.de>,
 	Matthias Schiffer <matthias.schiffer@tq-group.com>,
 	Stefan Wahren <stefan.wahren@chargebyte.com>,
 	Bjorn Helgaas <bhelgaas@google.com>,
+	Philippe Schenker <philippe.schenker@toradex.com>,
 	Josua Mayer <josua@solid-run.com>, Li Yang <leoyang.li@nxp.com>,
 	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
 	linux-serial@vger.kernel.org
-Subject: Re: [PATCH v4 1/4] dt-bindings: arm: fsl: add NXP S32G3 board
-Message-ID: <ZgwXepBYa78FhQaT@dragon>
+Subject: Re: [PATCH v4 4/4] arm64: dts: S32G3: Introduce device tree for
+ S32G-VNP-RDB3
+Message-ID: <ZgwZLkpBf11rHNrG@dragon>
 References: <20240324214329.29988-1-wafgo01@gmail.com>
- <20240324214329.29988-2-wafgo01@gmail.com>
+ <20240324214329.29988-5-wafgo01@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,20 +68,66 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240324214329.29988-2-wafgo01@gmail.com>
-X-CM-TRANSID:ClUQrADnr0R6FwxmkTqmAQ--.46595S3
-X-Coremail-Antispam: 1Uf129KBjDUn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73
-	VFW2AGmfu7bjvjm3AaLaJ3UbIYCTnIWIevJa73UjIFyTuYvjxUxdWFUUUUU
-X-CM-SenderInfo: pvkd40hjxrjqh1hdxhhqhw/1tbiDh+0ZVszYdX9jwAAsu
+In-Reply-To: <20240324214329.29988-5-wafgo01@gmail.com>
+X-CM-TRANSID:ClUQrADnr0IuGQxm_E+mAQ--.45967S3
+X-Coremail-Antispam: 1Uf129KBjvJXoW7Cw1xGry8Zw1DCFWfuryUWrg_yoW5Jr1fpa
+	yrCrZ3GrZ7Gr17Zayaga1kWFyqvws5JFWYkry5ury8tr45Zr9Yqr10krsIgr47Xrn5Aayr
+	CF1F9ryxu3WYy3DanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07j34SrUUUUU=
+X-CM-SenderInfo: pvkd40hjxrjqh1hdxhhqhw/1tbiFRC0ZV6NnBoE+QAAs8
 
-On Sun, Mar 24, 2024 at 10:43:23PM +0100, Wadim Mueller wrote:
-> Add bindings for NXP S32G3 Reference Design Board 3 (S32G-VNP-RDB3) [1]
+On Sun, Mar 24, 2024 at 10:43:26PM +0100, Wadim Mueller wrote:
+> This commit adds device tree support for the NXP S32G3-based
+> S32G-VNP-RDB3 Board [1].
 > 
-> [1]
-> https://www.nxp.com/design/design-center/designs/s32g3-vehicle-networking-reference-design:S32G-VNP-RDB3
+> The S32G3 features an 8-core ARM Cortex-A53 based SoC developed by NXP.
+> 
+> The device tree files are derived from the official NXP downstream
+> Linux tree [2].
+> 
+> This addition encompasses a limited selection of peripherals that
+> are upstream-supported. Apart from the ARM System Modules
+> (GIC, Generic Timer, etc.), the following IPs have been validated:
+> 
+>     * UART: fsl-linflexuart
+>     * SDHC: fsl-imx-esdhc
+> 
+> Clock settings for the chip rely on ATF Firmware [3].
+> Pin control integration into the device tree is pending and currently
+> relies on Firmware/U-Boot settings [4].
+> 
+> These changes were validated using BSP39 Firmware/U-Boot from NXP [5].
+> 
+> The modifications enable booting the official Ubuntu 22.04 from NXP on
+> the RDB3 with default settings from the SD card and eMMC.
+> 
+> [1] https://www.nxp.com/design/design-center/designs/s32g3-vehicle-networking-reference-design:S32G-VNP-RDB3
+> [2] https://github.com/nxp-auto-linux/linux
+> [3] https://github.com/nxp-auto-linux/arm-trusted-firmware
+> [4] https://github.com/nxp-auto-linux/u-boot
+> [5] https://github.com/nxp-auto-linux/auto_yocto_bsp
 > 
 > Signed-off-by: Wadim Mueller <wafgo01@gmail.com>
-> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+>  arch/arm64/boot/dts/freescale/Makefile        |   1 +
+>  arch/arm64/boot/dts/freescale/s32g3.dtsi      | 233 ++++++++++++++++++
+>  .../boot/dts/freescale/s32g399a-rdb3.dts      |  45 ++++
+>  3 files changed, 279 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/freescale/s32g3.dtsi
+>  create mode 100644 arch/arm64/boot/dts/freescale/s32g399a-rdb3.dts
+> 
+> diff --git a/arch/arm64/boot/dts/freescale/Makefile b/arch/arm64/boot/dts/freescale/Makefile
+> index 2cb0212b63c6..e701008dbc7b 100644
+> --- a/arch/arm64/boot/dts/freescale/Makefile
+> +++ b/arch/arm64/boot/dts/freescale/Makefile
+> @@ -252,3 +252,4 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mp-venice-gw74xx-rpidsi.dtb
+>  dtb-$(CONFIG_ARCH_S32) += s32g274a-evb.dtb
+>  dtb-$(CONFIG_ARCH_S32) += s32g274a-rdb2.dtb
+>  dtb-$(CONFIG_ARCH_S32) += s32v234-evb.dtb
+> +dtb-$(CONFIG_ARCH_S32) += s32g399a-rdb3.dtb
 
-Applied, thanks!
+The list is alphabetically sorted, so it should be added before
+s32v234-evb.dtb.  I fixed it up and applied the patch.
+
+Shawn
 
