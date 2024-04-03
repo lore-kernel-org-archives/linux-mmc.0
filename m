@@ -1,394 +1,93 @@
-Received: from mail-oo1-f49.google.com (mail-oo1-f49.google.com [209.85.161.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A12B1494BE
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Apr 2024 14:41:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEB65B66E;
+	Wed,  3 Apr 2024 14:54:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712155285; cv=none; b=pQOqP7sJGmfDfG/ONXF9Ux5AbZXUWEu1+4A0AgXi5s5o+z4A6fW0Iz0tkqfVe4KA5vK4L88X/3HL828o9TqMfWK5C8Z1Qcmr9IbHf+YrAlupuPCYTjnH6sfqf/OI5kbXJYf2rKc37F5CL38EoUDhvb7i0y4WlFjcrIbEuUBq4+E=
+	t=1712156047; cv=none; b=BMubEThR2YiJM8Vcoq5yheNfyntVbBhwojyayXMmJL39DQ7CcWsbPuONKbNk9fe91y6HsWmefwZjOJy/r7Ched01sR7fbvAvvu9UZMQn7qz4Yp03E0XyLyR5mWvh/fEheT9yAhsEJ6s4i3J69cMUX/QiXB9CZrb1j98H5CmGizs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712155285; c=relaxed/simple;
-	bh=p3ECGCX5Ov7HPvSxyf6FtJ+yTzxCh0hPa+JgJL4J+vg=;
+	s=arc-20240116; t=1712156047; c=relaxed/simple;
+	bh=ZdTDkDvhWvcbpl14yhv4Zh3E+B9iU9jq8RS0OPet/qk=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ull5+bM9xK2mRwjWhOXZiIOVHqBM6JA+rZlwZ7oVmVSqwYQ/NLfzcIFgUNkcs2ow1cct8azhqDq5m4cevjME2zKmVo+OQD8O09Pisj1F+aSA2MZMUaFvrHTG4RYi8q4uJEiyqiPZcbw4BkRI4CzFXqMIxNYll41YksOYxYG3nVU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FrHgY7m+; arc=none smtp.client-ip=209.85.161.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=JY0mGNp5b8bVypgRXDGQ/4i+rALUs9d5hwCg1E0YcJg1aAvwKw3GMGfWC8obFPTwxD+Mrkbs+TpWKE4LH0P8JAELfZaqxelqDvAFxnnEdWvcSKRmDl/Rl9w/ABp+nJUcmclAL85p63uAF+9ubnzrMUVoHsXinVhTKqSDHYwXHlo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U/tdlNpT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FrHgY7m+"
-Received: by mail-oo1-f49.google.com with SMTP id 006d021491bc7-5a46abf093cso4261232eaf.2
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Apr 2024 07:41:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1712155282; x=1712760082; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=JJtFX1nTvUEDL8G1NxaJVR0BnuJK5EdCet0i7aU3Qj4=;
-        b=FrHgY7m+yKqCPQ5Z4iWj7GFBy+eXINVd8BQ0jUJeVfvcP5fNdBBVI8VAt0OnQj2P3M
-         XV570181fcftODhQ7AGcXF40fTkFkYcuiPqZpAM94HdKxTkArzX/853xNOQ3aoEagyq9
-         IdZD6CXZ4hReKRawNyJU7kTccyKtPwlSmrQR2OJGwWaLPts0Wcf2kuk2sNIZyRRue8iI
-         0vLoqtEL/AJ7FLpm0KF4grfB6C3pgUWDdDmHDvFpRm/sJEl7cZNy3PfOSYuYKCILJzaU
-         ojivTOIQkTJOzh0GQOc3gapDshm0C3WeIHFVf1YlDDzBDq34uH3134scO15HgjtDRMVh
-         jcRQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712155282; x=1712760082;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=JJtFX1nTvUEDL8G1NxaJVR0BnuJK5EdCet0i7aU3Qj4=;
-        b=bSKhgb+3l1kxseD9/9H0G+iYm3tXXVeJ6BIvUx5l5XWp0xYUf2Q/2CWTvjHJpusqHZ
-         2S7297WrWHGQC78QZ0vuWmwcVixauriWqzRuKjUSZOxQkRA2gp1Z+C6pMtjZUVgPCULr
-         oKxCCZqageKYK2ucF0y/hyJF6Vj+9MnrCtaeDWxYTIVW1JbcOvUh8lhlaAmE3pMSnXFY
-         iBEXV+1Sh5J+P0IawKIxguku5Isw5d3O4rszty5rLeKrEHLMWDn+8k7dk3GWha2Hg2WN
-         FBh2TPz04R8XnhR2CqttkS6YyqMYRyQGKYTIV9uuct6a+BxOn7+lTZQrq5/wK0A5s55+
-         eGkg==
-X-Forwarded-Encrypted: i=1; AJvYcCW6iEBm1wRNmbJEjYSzgfBAExeARx81H68BBhES3rmqnoue8EdobbA+o9KPbnTBEwiZxIwzKS3YEBBs8IYk00K6lNGGwW7fixcO
-X-Gm-Message-State: AOJu0YyOkbgCLMUTrBnW6TCFu2/GI+iZSPlqqQEQyJbUlPssbEhSsAEQ
-	/cb3sRtxINTnriAt3yjOilHGAkAVR7u9vADs0Thn2zjV0XHzTNnWyTcDc0bAHS/5a/EN7Uc73Nw
-	vsjOx7pso6QMqa7bMxdrkAb2HEO/wzcAWfFWXYQ==
-X-Google-Smtp-Source: AGHT+IHQsjqg5qWvk+9Xu9McI5A0GqkJxBRqUIqmvC5/FKAFQGsaqSQ04bBhzDQrmSk4/aeLPcaArwoaYgI4ZFvxfiY=
-X-Received: by 2002:a05:6820:998:b0:5a2:37c9:d91f with SMTP id
- cg24-20020a056820099800b005a237c9d91fmr15336849oob.5.1712155282054; Wed, 03
- Apr 2024 07:41:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U/tdlNpT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6FEC8C43330;
+	Wed,  3 Apr 2024 14:54:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1712156046;
+	bh=ZdTDkDvhWvcbpl14yhv4Zh3E+B9iU9jq8RS0OPet/qk=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=U/tdlNpTBq1FIZNucUpHv1Shfrzlz6A6JDsb3C/dFBS/BPQ/goXG8Wxl37GTR2XZB
+	 DUdQ2DgcVSubHnJSVCKkxowp1zaVQ7BVsQfgBciBAlD0XPmGKsbFFoS4/m+0nY99Ep
+	 g+9pi59J2ZRwRtop3PW6dX7z3gDaYHfN+Z0mgojq0cXg+lGUP7K8aw2RDxt7gWwPYX
+	 Z1/qts9tU9XO5Sp8aKYeDqIQNXXt/DxCSkBFhA7dyEjHDs2AJQsVWTFyEysnPtEB0f
+	 4m4KeT44xmuN2v8xXRKEpj29dhU+pK/BpKI01I7tYNZXDRDjDjHqkBW3HYHvfn/Efm
+	 pm0ICA78yxaiQ==
+Received: by mail-oo1-f42.google.com with SMTP id 006d021491bc7-5a4930d9c48so1260257eaf.1;
+        Wed, 03 Apr 2024 07:54:06 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCXmgSdhCIO7AbhnREeWMbsVF+10KQGTCQQ4D6DnVqcf5d2PWNO+5PZbRgPePk2o4L80/W2CHlssbMpLJcIS84eiaZCgMEJvTbEFhZniOBGZySyh3Rktws30tURRLfwRrG/F0G6RiEMXW4XV0gRyB/c7i7bMU2lqfBc0zwj0Vgggh/0=
+X-Gm-Message-State: AOJu0YwCWneVtsdQNqaUZqqbaikhVZy3l7wbxPybyelPfNX9pf7e0Adu
+	BQCiuJy8ziNCq9BCaKPUVTA3fuuIQX+RW82uSvjt7o6LrYy/O2CTaEiZNAd5eKwEZGJORokXLLL
+	KRNGJr3s/BlG7P43QZZn030V59Eg=
+X-Google-Smtp-Source: AGHT+IFmeAIEBKNUUeBrXb8QHVZbYefZ5snm1WkS62JAtwDxMTixZzYn3yPdg2hhGm/NjUu67k5wzWnJytCmygYN01k=
+X-Received: by 2002:a05:6820:2289:b0:5a4:6e23:e335 with SMTP id
+ ck9-20020a056820228900b005a46e23e335mr18125057oob.0.1712156045715; Wed, 03
+ Apr 2024 07:54:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240227153132.2611499-1-jens.wiklander@linaro.org>
- <20240227153132.2611499-4-jens.wiklander@linaro.org> <CAFA6WYOZQwo1qJWXV+W9t6ZChkWJwzg_0mtAJ2K+viHRdvH2ig@mail.gmail.com>
- <CAHUa44H0sV5yYD6b8vb3b=GvFokxC9xgjFFVkj4Dk0YAVm=X7Q@mail.gmail.com> <CAFA6WYOhFLh7k0XQnA22-92DmuCVqEvfpTSa5kdAqO_hNTztaw@mail.gmail.com>
-In-Reply-To: <CAFA6WYOhFLh7k0XQnA22-92DmuCVqEvfpTSa5kdAqO_hNTztaw@mail.gmail.com>
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Wed, 3 Apr 2024 16:41:11 +0200
-Message-ID: <CAHUa44G4TZUaQQ=GmJaxgq-zYdS69njVza-e7M=5-65r6=RwqQ@mail.gmail.com>
-Subject: Re: [PATCH v3 3/3] optee: probe RPMB device using RPMB subsystem
-To: Sumit Garg <sumit.garg@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	op-tee@lists.trustedfirmware.org, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Jerome Forissier <jerome.forissier@linaro.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+References: <20240318151631.1621881-1-d-gole@ti.com>
+In-Reply-To: <20240318151631.1621881-1-d-gole@ti.com>
+From: "Rafael J. Wysocki" <rafael@kernel.org>
+Date: Wed, 3 Apr 2024 16:53:54 +0200
+X-Gmail-Original-Message-ID: <CAJZ5v0iOEkmE741_hAmprYYxmi5p9WZPrxOu59Y3FqzLM9oJwg@mail.gmail.com>
+Message-ID: <CAJZ5v0iOEkmE741_hAmprYYxmi5p9WZPrxOu59Y3FqzLM9oJwg@mail.gmail.com>
+Subject: Re: [PATCH V2 0/2] PM: wakeup: make device_wakeup_disable return void
+To: Dhruva Gole <d-gole@ti.com>
+Cc: "Rafael J . Wysocki" <rafael@kernel.org>, Tony Lindgren <tony@atomide.com>, Len Brown <len.brown@intel.com>, 
+	Pavel Machek <pavel@ucw.cz>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	Viresh Kumar <viresh.kumar@linaro.org>, theo.lebrun@bootlin.com, linux-pm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Apr 3, 2024 at 2:58=E2=80=AFPM Sumit Garg <sumit.garg@linaro.org> w=
-rote:
+On Mon, Mar 18, 2024 at 4:17=E2=80=AFPM Dhruva Gole <d-gole@ti.com> wrote:
 >
-> On Thu, 28 Mar 2024 at 21:39, Jens Wiklander <jens.wiklander@linaro.org> =
-wrote:
-> >
-> > On Fri, Mar 1, 2024 at 11:28=E2=80=AFAM Sumit Garg <sumit.garg@linaro.o=
-rg> wrote:
-> > >
-> > > Hi Jens,
-> > >
-> > > On Tue, 27 Feb 2024 at 21:01, Jens Wiklander <jens.wiklander@linaro.o=
-rg> wrote:
-> > > >
-> > > > Adds support in the OP-TEE drivers (both SMC and FF-A ABIs) to prob=
-e and
-> > > > use an RPMB device via the RPBM subsystem instead of passing the RP=
-MB
-> > >
-> > > s/RPBM/RPMB/
-> > >
-> > > Here are other places too in this patch-set.
-> > >
-> > > > frames via tee-supplicant in user space. A fallback mechanism is ke=
-pt to
-> > > > route RPMB frames via tee-supplicant if the RPMB subsystem isn't
-> > > > available.
-> > > >
-> > > > The OP-TEE RPC ABI is extended to support iterating over all RPMB
-> > > > devices until one is found with the expected RPMB key already
-> > > > programmed.
-> > >
-> > > I would appreciate it if you could add a link to OP-TEE OS changes in
-> > > the cover-letter although I have found them here [1].
-> > >
-> > > [1] https://github.com/jenswi-linaro/optee_os/commits/rpmb_probe/
-> >
-> > OK, I'll add a link in the coverletter of the next patch set.
-> >
-> > >
-> > > >
-> > > > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
-> > > > ---
-> > > >  drivers/tee/optee/core.c          |  55 +++++++
-> > > >  drivers/tee/optee/ffa_abi.c       |   7 +
-> > > >  drivers/tee/optee/optee_private.h |  16 ++
-> > > >  drivers/tee/optee/optee_rpc_cmd.h |  35 +++++
-> > > >  drivers/tee/optee/rpc.c           | 233 ++++++++++++++++++++++++++=
-++++
-> > > >  drivers/tee/optee/smc_abi.c       |   6 +
-> > > >  6 files changed, 352 insertions(+)
-> > > >
-> > > > diff --git a/drivers/tee/optee/core.c b/drivers/tee/optee/core.c
-> > > > index 3aed554bc8d8..6b32d3e7865b 100644
-> > > > --- a/drivers/tee/optee/core.c
-> > > > +++ b/drivers/tee/optee/core.c
-> > > > @@ -11,6 +11,7 @@
-> > > >  #include <linux/io.h>
-> > > >  #include <linux/mm.h>
-> > > >  #include <linux/module.h>
-> > > > +#include <linux/rpmb.h>
-> > > >  #include <linux/slab.h>
-> > > >  #include <linux/string.h>
-> > > >  #include <linux/tee_drv.h>
-> > > > @@ -80,6 +81,57 @@ void optee_pool_op_free_helper(struct tee_shm_po=
-ol *pool, struct tee_shm *shm,
-> > > >         shm->pages =3D NULL;
-> > > >  }
-> > > >
-> > > > +static void optee_rpmb_scan(struct work_struct *work)
-> > > > +{
-> > > > +       struct optee *optee =3D container_of(work, struct optee, sc=
-an_rpmb_work);
-> > > > +       bool scan_done =3D false;
-> > > > +       u32 res;
-> > > > +
-> > > > +       do {
-> > > > +               mutex_lock(&optee->rpmb_dev_mutex);
-> > > > +               /* No need to rescan if we haven't started scanning=
- yet */
-> > > > +               optee->rpmb_dev_request_rescan =3D false;
-> > > > +               mutex_unlock(&optee->rpmb_dev_mutex);
-> > > > +
-> > > > +               res =3D optee_enumerate_devices(PTA_CMD_GET_DEVICES=
-_RPMB);
-> > > > +               if (res && res !=3D TEE_ERROR_STORAGE_NOT_AVAILABLE=
-)
-> > >
-> > > I suppose this hasn't been tested for a negative case since
-> > > optee_enumerate_devices() won't return this error code (see [2]).
-> > > However, I would prefer to use GP Client error code:
-> > > TEEC_ERROR_ITEM_NOT_FOUND here instead.
-> > >
-> > > [2] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.gi=
-t/tree/drivers/tee/optee/device.c#n43
-> >
-> > I prefer TEE_ERROR_STORAGE_NOT_AVAILABLE since that's the code GP says
-> > a TA should get when storage is unavailable.
-> > TEEC_ERROR_ITEM_NOT_FOUND is less specific. Anyway, I'll need to
-> > translate the code in get_devices().
+> This is a follow up patch based on discussions with Rafael[0] on a previo=
+us
+> patch I sent to propagate return value from device_wakeup_disable
+> further upward inside device_init_wakeup
 >
-> Okay, that's fair.
+> However, it doesn't seem like today any return values from
+> device_wakeup_disable are very useful to the caller.
 >
-> >
-> >
-> > >
-> > > > +                       pr_info("Scanning for RPMB device: res %#x\=
-n", res);
-> > > > +
-> > > > +               mutex_lock(&optee->rpmb_dev_mutex);
-> > > > +               /*
-> > > > +                * If another RPMB device came online while scannin=
-g, scan one
-> > > > +                * more time, unless we have already found an RPBM =
-device.
-> > > > +                */
-> > > > +               scan_done =3D (optee->rpmb_dev ||
-> > >
-> > > I suppose we don't need to check for optee->rpmb_dev here since a
-> > > successful return from
-> > > optee_enumerate_devices(PTA_CMD_GET_DEVICES_RPMB) would ensure that
-> > > the RPMB device has been found.
-> >
-> > That makes sense, I'll check the return value instead.
-> >
-> > >
-> > > > +                            !optee->rpmb_dev_request_rescan);
-> > > > +               optee->rpmb_dev_request_rescan =3D false;
-> > > > +               optee->rpmb_dev_scan_in_progress =3D !scan_done;
-> > > > +               mutex_unlock(&optee->rpmb_dev_mutex);
-> > > > +       } while (!scan_done);
-> > > > +}
-> > > > +
-> > > > +void optee_rpmb_intf_add_rdev(struct rpmb_interface *intf,
-> > > > +                             struct rpmb_dev *rdev)
-> > > > +{
-> > > > +       struct optee *optee =3D container_of(intf, struct optee, rp=
-mb_intf);
-> > > > +       bool queue_work =3D true;
-> > > > +
-> > > > +       mutex_lock(&optee->rpmb_dev_mutex);
-> > > > +       if (optee->rpmb_dev || optee->rpmb_dev_scan_in_progress) {
-> > >
-> > > Can we use work_pending() instead of our custom
-> > > optee->rpmb_dev_scan_in_progress flag?
-> >
-> > That seems racy, or am I missing something?
-> >
+> I could only spot one caller of this function that was actually
+> propagating the return value upward other than the PM core calls. I have
+> tried to update sdhci-pci-core to work with the new changes
 >
-> You are right and even work_busy() is documented to provide unreliable
-> results. So I am rather thinking about just queuing the work and
-> thereby scanning for devices unconditionally. I suppose the extra
-> logic to check if we don't try to register duplicate devices can go
-> under optee_enumerate_devices().
+> [0] https://lore.kernel.org/all/CAJZ5v0jbHwiZemtNAoM-jmgB_58VqmKUkqv4P7qr=
+PkxWzBzMyQ@mail.gmail.com/
 >
-> > >
-> > > > +               queue_work =3D false;
-> > > > +               if (optee->rpmb_dev_scan_in_progress)
-> > > > +                       optee->rpmb_dev_request_rescan =3D true;
-> > > > +       }
-> > > > +       if (queue_work)
-> > > > +               optee->rpmb_dev_scan_in_progress =3D true;
-> > > > +       mutex_unlock(&optee->rpmb_dev_mutex);
-> > > > +
-> > > > +       if (queue_work) {
-> > > > +               INIT_WORK(&optee->scan_rpmb_work, optee_rpmb_scan);
-> > > > +               schedule_work(&optee->scan_rpmb_work);
-> > >
-> > > Can we reuse optee->scan_bus_work rather than introducing a new one h=
-ere?
-> >
-> > No, both may be active at the same time.
+> Changelog:
 >
-> Actually both of them are using system_wq underneath, so it shouldn't
-> be a problem if both are active at the same time as they can be queued
-> simultaneously, right?
+> v1 --> v2:
+> * Squashed the mmc fix into first patch [Rafael]
+>
+> Dhruva Gole (2):
+>   PM: wakeup: make device_wakeup_disable return void
+>   PM: wakeup: Remove unnecessary else from device_init_wakeup
+>
+>  drivers/base/power/wakeup.c       | 11 +++++++----
+>  drivers/mmc/host/sdhci-pci-core.c |  2 +-
+>  include/linux/pm_wakeup.h         | 12 +++++-------
+>  3 files changed, 13 insertions(+), 12 deletions(-)
+>
+> --
 
-I'm sorry, I don't get it.
-Are you suggesting to merge optee_rpmb_scan() and optee_bus_scan()?
-If so, how to tell what to do, that is, if tee-supplicant has become
-available or of we should scan for RPMB devices?
-If not, you can only have one callback at a time in a work_struct.
-
->
-> > We'd have to merge
-> > optee_rpmb_scan() and optee_bus_scan(), but I'm not sure it's worth
-> > it.
-> >
-> > >
-> > > > +       }
-> > > > +}
-> > > > +
-> > > >  static void optee_bus_scan(struct work_struct *work)
-> > > >  {
-> > > >         WARN_ON(optee_enumerate_devices(PTA_CMD_GET_DEVICES_SUPP));
-> > > > @@ -161,6 +213,7 @@ void optee_release_supp(struct tee_context *ctx=
-)
-> > > >
-> > > >  void optee_remove_common(struct optee *optee)
-> > > >  {
-> > > > +       rpmb_interface_unregister(&optee->rpmb_intf);
-> > > >         /* Unregister OP-TEE specific client devices on TEE bus */
-> > > >         optee_unregister_devices();
-> > > >
-> > > > @@ -177,6 +230,8 @@ void optee_remove_common(struct optee *optee)
-> > > >         tee_shm_pool_free(optee->pool);
-> > > >         optee_supp_uninit(&optee->supp);
-> > > >         mutex_destroy(&optee->call_queue.mutex);
-> > > > +       rpmb_dev_put(optee->rpmb_dev);
-> > > > +       mutex_destroy(&optee->rpmb_dev_mutex);
-> > > >  }
-> > > >
-> > > >  static int smc_abi_rc;
-> > > > diff --git a/drivers/tee/optee/ffa_abi.c b/drivers/tee/optee/ffa_ab=
-i.c
-> > > > index ecb5eb079408..befe19ecc30a 100644
-> > > > --- a/drivers/tee/optee/ffa_abi.c
-> > > > +++ b/drivers/tee/optee/ffa_abi.c
-> > > > @@ -7,6 +7,7 @@
-> > > >
-> > > >  #include <linux/arm_ffa.h>
-> > > >  #include <linux/errno.h>
-> > > > +#include <linux/rpmb.h>
-> > > >  #include <linux/scatterlist.h>
-> > > >  #include <linux/sched.h>
-> > > >  #include <linux/slab.h>
-> > > > @@ -934,6 +935,7 @@ static int optee_ffa_probe(struct ffa_device *f=
-fa_dev)
-> > > >         optee_cq_init(&optee->call_queue, 0);
-> > > >         optee_supp_init(&optee->supp);
-> > > >         optee_shm_arg_cache_init(optee, arg_cache_flags);
-> > > > +       mutex_init(&optee->rpmb_dev_mutex);
-> > > >         ffa_dev_set_drvdata(ffa_dev, optee);
-> > > >         ctx =3D teedev_open(optee->teedev);
-> > > >         if (IS_ERR(ctx)) {
-> > > > @@ -955,6 +957,8 @@ static int optee_ffa_probe(struct ffa_device *f=
-fa_dev)
-> > > >         if (rc)
-> > > >                 goto err_unregister_devices;
-> > > >
-> > > > +       optee->rpmb_intf.add_rdev =3D optee_rpmb_intf_add_rdev;
-> > > > +       rpmb_interface_register(&optee->rpmb_intf);
-> > > >         pr_info("initialized driver\n");
-> > > >         return 0;
-> > > >
-> > > > @@ -968,6 +972,9 @@ static int optee_ffa_probe(struct ffa_device *f=
-fa_dev)
-> > > >         teedev_close_context(ctx);
-> > > >  err_rhashtable_free:
-> > > >         rhashtable_free_and_destroy(&optee->ffa.global_ids, rh_free=
-_fn, NULL);
-> > > > +       rpmb_dev_put(optee->rpmb_dev);
-> > > > +       mutex_destroy(&optee->rpmb_dev_mutex);
-> > > > +       rpmb_interface_unregister(&optee->rpmb_intf);
-> > > >         optee_supp_uninit(&optee->supp);
-> > > >         mutex_destroy(&optee->call_queue.mutex);
-> > > >         mutex_destroy(&optee->ffa.mutex);
-> > > > diff --git a/drivers/tee/optee/optee_private.h b/drivers/tee/optee/=
-optee_private.h
-> > > > index 7a5243c78b55..1e4c33baef43 100644
-> > > > --- a/drivers/tee/optee/optee_private.h
-> > > > +++ b/drivers/tee/optee/optee_private.h
-> > > > @@ -8,6 +8,7 @@
-> > > >
-> > > >  #include <linux/arm-smccc.h>
-> > > >  #include <linux/rhashtable.h>
-> > > > +#include <linux/rpmb.h>
-> > > >  #include <linux/semaphore.h>
-> > > >  #include <linux/tee_drv.h>
-> > > >  #include <linux/types.h>
-> > > > @@ -20,11 +21,13 @@
-> > > >  /* Some Global Platform error codes used in this driver */
-> > > >  #define TEEC_SUCCESS                   0x00000000
-> > > >  #define TEEC_ERROR_BAD_PARAMETERS      0xFFFF0006
-> > > > +#define TEEC_ERROR_ITEM_NOT_FOUND      0xFFFF0008
-> > > >  #define TEEC_ERROR_NOT_SUPPORTED       0xFFFF000A
-> > > >  #define TEEC_ERROR_COMMUNICATION       0xFFFF000E
-> > > >  #define TEEC_ERROR_OUT_OF_MEMORY       0xFFFF000C
-> > > >  #define TEEC_ERROR_BUSY                        0xFFFF000D
-> > > >  #define TEEC_ERROR_SHORT_BUFFER                0xFFFF0010
-> > > > +#define TEE_ERROR_STORAGE_NOT_AVAILABLE 0xF0100003
-> > > >
-> > > >  #define TEEC_ORIGIN_COMMS              0x00000002
-> > > >
-> > > > @@ -197,6 +200,8 @@ struct optee_ops {
-> > > >   * @notif:             notification synchronization struct
-> > > >   * @supp:              supplicant synchronization struct for RPC t=
-o supplicant
-> > > >   * @pool:              shared memory pool
-> > > > + * @mutex:             mutex protecting @rpmb_dev
-> > > > + * @rpmb_dev:          current RPMB device or NULL
-> > > >   * @rpc_param_count:   If > 0 number of RPC parameters to make roo=
-m for
-> > > >   * @scan_bus_done      flag if device registation was already done=
-.
-> > > >   * @scan_bus_work      workq to scan optee bus and register optee =
-drivers
-> > > > @@ -215,9 +220,17 @@ struct optee {
-> > > >         struct optee_notif notif;
-> > > >         struct optee_supp supp;
-> > > >         struct tee_shm_pool *pool;
-> > > > +       /* Protects rpmb_dev pointer and rpmb_dev_* */
-> > > > +       struct mutex rpmb_dev_mutex;
-> > >
-> > > Given my comments above, do we really need this mutex?
-> >
-> > I don't see how we can do without the mutex.
->
-> See if it is possible with the above mentioned approach.
-
-I don't follow.
-
-Thanks,
-Jens
-
->
-> -Sumit
+Both patches applied as 6.10 material, thanks!
