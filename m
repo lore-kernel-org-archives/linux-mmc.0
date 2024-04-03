@@ -1,200 +1,134 @@
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
+Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 448F22260B
-	for <linux-mmc@vger.kernel.org>; Tue,  2 Apr 2024 22:43:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A81069302
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Apr 2024 08:54:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712097825; cv=none; b=aFAN1b6JhpfBYi5a7Jf+IKcFdMSVYmA/cWIREdDEhrOlB7ByCymO7Cf7jOWc31q8fp6yS/wFF5QhK1/GOYtedR6Pa3cx5+qPyY2C4WGKT8kd+Ii66TWUC3jL4PfiaepvuSWpysT8D02oIiCWkjGtFPJbmqxkSpECpDiBb6RYGLA=
+	t=1712134458; cv=none; b=nyObh7e6USSI1x8Lspey4fLC9p7N87c0qoW9s1Orz0Df0mapSEIVxtNEEVk9COzVq/YqhSRXIIhNoOVzBbLrQxtNk+QUBJQb1Kfkr9qL4BsRkSz2hGz7PnUFsFqM82rjaDMNo6H86cGZnazc6hsTmB03HsQSW/d1jtYvlr1aiW0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712097825; c=relaxed/simple;
-	bh=GFiAxf8pniOzwSAvuUeMYccfrTRaFyoxF8AIEedOUNk=;
+	s=arc-20240116; t=1712134458; c=relaxed/simple;
+	bh=tphQMlxXfj94sQmU9WvMO9Ly9qqZqs3IYO1KFpzl2dA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=hPMSZtAnlua/xK7+IMyvWNviQO5ADUvYNpesUr7doomFuLUCmdiTVr7Jkz/WuNRiRYYak1Mu/FWGSoa1aWRaxgRqfjAwXwu67O0MoyebXOcPoRRyhgfZcp5pFAjpUUQiaRctnZv0UfDMsakC1n0ey6dHEWx8/LXoIDtnzdzfMXA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JZDYQxIk; arc=none smtp.client-ip=209.85.219.180
+	 To:Cc:Content-Type; b=u1Ebf8ZrBrDsVkpBeGnn8OaHXVAi0cbA2om0VSX0YJ/4NvdGp9F74Nd+FtirGj2Nmmay2oTnS74npT0y1hPXeGfT1HpIrhnigft5Ycdp2IEJ8TAlvXnMeTivelcR1eDXBOkcBMq3KlYwoPdJNflomd+Y0I7XXg7uWOurLBy6I/Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=QK1yOyhq; arc=none smtp.client-ip=209.85.161.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JZDYQxIk"
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-dc236729a2bso5330421276.0
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Apr 2024 15:43:42 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QK1yOyhq"
+Received: by mail-oo1-f50.google.com with SMTP id 006d021491bc7-5a128e202b6so2014742eaf.2
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Apr 2024 01:54:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1712097822; x=1712702622; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1712134454; x=1712739254; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=nhKj52ntP3jIznJn9tpCxnFtv47wZoK6aLt2OwfcE7g=;
-        b=JZDYQxIkc+vY2vBc6EpgU4T1A37Yb7IyxHTd23xr1zhuV4DV4Vyk9+LocUIkjaeoqC
-         8ROSp0XsfS0sS1Q1ZJuD+kh9VHk0lDqjrXyYIuxllxdI3Xy1DAC5Ur373JoFe6i/iFkN
-         BjXbYpr5OQSblBCt6HMpS4oSXesGm6CnShK5U4u8gTRA0WAbOuOs3z38FIjvLLt+mACJ
-         kptdYwYzrlpUhzRUJK1bfkINcb0YK+ZF9MU/+KFs4ukDK7HxI+FFokHFKxKkpIXp1tzQ
-         K9ZPDquP0CmonCUenbC2Eg/rOxllUPhnUYJQMr+GTcCvfhe0BV1gcKtiqH6Dsyh+bsh1
-         U3NQ==
+        bh=vAQoe+KPiy+sOp8T5fmyx200mSrFzvOF6EO15y9FXl8=;
+        b=QK1yOyhqXIcazhXN7djuLQA5Yj8vYNo+eOnoNkoJ+EEt0nqdsYTtxwmCYeOHsch8F6
+         k2zfoME+exX8r4bWq5wa7RMtsU3Ez9PFYkbo6twf6PPbqZtZyCtLj3CO/AEHG8PvmC71
+         6H+0onQMIaW1JMTkNY6ITjXY8ImeSN1UhemPS3UnP865cdLarPdqRTteT4q2OaXAj49v
+         8XEy6diKa+I1bwm+34IYNxZ8RbmI+IDvjoj0fNNTjrqEU9ZzEHehaRmfb0qzCh6J8Iq9
+         P/er7ZHf4uhnTH7Hr+SyhT2m4vmfNcIrUDZe/Bx+DzoU8hcMp1hUwYx82udX6OnHLU0q
+         RyXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712097822; x=1712702622;
+        d=1e100.net; s=20230601; t=1712134454; x=1712739254;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=nhKj52ntP3jIznJn9tpCxnFtv47wZoK6aLt2OwfcE7g=;
-        b=Pwf1ohox0+Q9D+0o1FPabs/4MPWNLJustUWeB8MeGWfngCXGTFTJPgpru8lONA0zq6
-         f60WlgyV00Vo47Kct/vVh2WdYtpIpOyOo/nLGPqCv6nEfRJDlWkO4WnSfM+uPK+Sb1By
-         EvzCgyZ7WNDdNefGVP8blKQZ2OgntncF/1rizHJhdz9GNsm/QBiwcypDaHbBTgrMtuRU
-         qkhF+5t8pxLXj2acbBvt+ADBdLHdxfxEmLHv5cqqkww21ewfX7vANw+wUmEH8XNln0+P
-         0HISaoYJ7IHWqEi3NKkNIwLaJMbXUYFzveRM8vpRvRCs93sr7I/KY2u3+Njx9r+p8495
-         t4tg==
-X-Forwarded-Encrypted: i=1; AJvYcCUdvBEWqjM36iZTmy8uWmrc0Z9jMth9WQbfzwkL6/UL6/X3ZIje6MC1mBxOwXrsiEApEO/icGgnad2SHfvsAJW1sNm5WFXSmkLe
-X-Gm-Message-State: AOJu0Yxx2kFBaDswxciuY1FCjT1mxBAUCXEP8U6QK3PSSWQcDpiG1yo4
-	knQ/2TCb3bF+lghvFZ1Pr0DFdtmw09bnltu4Iba3hdeg2cBrOOnr+EOcVYKfR0pw/8lgsaq5oOZ
-	MILU8e7ZrQxBaxG8SNdP3nPgEswBXVF1buNNmuA==
-X-Google-Smtp-Source: AGHT+IGlgswx8znnfO3JxpaKsCVBFLcxqzWxCF2p/CGD6pZpo4KXa3L3gnmft1HCkz80Blu4QCQq/VSoRuINJuFvafs=
-X-Received: by 2002:a05:6902:f8a:b0:dc6:4d0c:e9de with SMTP id
- ft10-20020a0569020f8a00b00dc64d0ce9demr1276842ybb.0.1712097821924; Tue, 02
- Apr 2024 15:43:41 -0700 (PDT)
+        bh=vAQoe+KPiy+sOp8T5fmyx200mSrFzvOF6EO15y9FXl8=;
+        b=G9qE5ok9YuWqGExdpShw7M1xUJt0ImuDfpRi02xgrKtJWhmHr+BRzRXMqwC8cnE1XB
+         EhMUVV46OiFQ3oeXsvOxSqRAJgIOiL5SfQkYOXZ3ZW4H7QMMeblYFaQmHmCustcHY1iv
+         gdgPm1zm57kxEdR/KhCNRneCYibt5iSC70Y8MC/9iQ27WgB1feiFrNvlLf5QKfOUZGcd
+         HmMQ3INl4+HKVl+WLIV3XNAaQws2up2cjA9RJPNleKhzsBQBd/zvzH3eYCL7spQcCeTF
+         ryyC44MBb/l951Xw+wKkpi6bPgzUt8giclNZA/WB3uL0qTSgF1ql0krJECdvb0Yg9x0R
+         Rvtg==
+X-Forwarded-Encrypted: i=1; AJvYcCVZ/uRKBCxG/F44d4qBD/cW/lMnoIyzYVxGEFauXt1k8oZyYqqJ4zShLVWQneSro38E5LeodruU83GsdztBXOb92QwaBX3s5FRl
+X-Gm-Message-State: AOJu0Yx9kn5U1XWO40m4Aowkd7syXAhU920C/oWItJojEIzTV1aMmkUc
+	6hECGTWkb3YwqS5IvMIdj+N1JKCcOEqGvZcc7Iv3mSOgNouN99jU9+QPDNhQoPxF3m4MJnTHnyr
+	/dBz9IF5b88POC0bf4t1QZHYGTPZeV4W+NaDStg==
+X-Google-Smtp-Source: AGHT+IHkZepq7aTafh0HxBLIxweJZ2fHAPK+jdFkf8SwufI6M0a6JAvbgwUN7+X8k22zqLDhJWsYmWAQpZkuZbn/Dyg=
+X-Received: by 2002:a05:6820:217:b0:5a4:77f2:1c9f with SMTP id
+ bw23-20020a056820021700b005a477f21c9fmr15203421oob.6.1712134454221; Wed, 03
+ Apr 2024 01:54:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240306232052.21317-1-semen.protsenko@linaro.org> <8896bcc5-09b1-4886-9081-c8ce0afc1c40@app.fastmail.com>
-In-Reply-To: <8896bcc5-09b1-4886-9081-c8ce0afc1c40@app.fastmail.com>
-From: Sam Protsenko <semen.protsenko@linaro.org>
-Date: Tue, 2 Apr 2024 17:43:31 -0500
-Message-ID: <CAPLW+4mu3K38_sPnTDj-gkvdsnfN3OKXwfDSBUg_jUj+f122cA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Christoph Hellwig <hch@lst.de>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, 
-	Matt Fleming <matt@console-pimps.org>, Christian Brauner <brauner@kernel.org>, 
-	Jens Axboe <axboe@kernel.dk>, Sumit Semwal <sumit.semwal@linaro.org>, 
-	Dan Carpenter <dan.carpenter@linaro.org>, Anders Roxell <anders.roxell@linaro.org>, 
-	Naresh Kamboju <naresh.kamboju@linaro.org>, 
-	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, 
-	linux-kernel@vger.kernel.org
+References: <20240227153132.2611499-1-jens.wiklander@linaro.org>
+ <20240227153132.2611499-2-jens.wiklander@linaro.org> <CACRpkdZBWBio8kvKuVzj2CknCb4eS=VB2EqUsAK-vf4e328icg@mail.gmail.com>
+In-Reply-To: <CACRpkdZBWBio8kvKuVzj2CknCb4eS=VB2EqUsAK-vf4e328icg@mail.gmail.com>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Wed, 3 Apr 2024 10:54:03 +0200
+Message-ID: <CAHUa44FWRizv39wRJ8ku2v02pDB8_J6BmSk27NrA_UHv4cqNkw@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
+	=?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Mar 7, 2024 at 1:52=E2=80=AFAM Arnd Bergmann <arnd@arndb.de> wrote:
+On Tue, Mar 5, 2024 at 1:24=E2=80=AFPM Linus Walleij <linus.walleij@linaro.=
+org> wrote:
 >
-> On Thu, Mar 7, 2024, at 00:20, Sam Protsenko wrote:
-> > Commit 616f87661792 ("mmc: pass queue_limits to blk_mq_alloc_disk") [1]
-> > revealed the long living issue in dw_mmc.c driver, existing since the
-> > time when it was first introduced in commit f95f3850f7a9 ("mmc: dw_mmc:
-> > Add Synopsys DesignWare mmc host driver."), also making kernel boot
-> > broken on platforms using dw_mmc driver with 16K or 64K pages enabled,
-> > with this message in dmesg:
+> Hi Jens,
+>
+> thanks for your patch!
+>
+> On Tue, Feb 27, 2024 at 4:31=E2=80=AFPM Jens Wiklander
+> <jens.wiklander@linaro.org> wrote:
+>
+> > A number of storage technologies support a specialised hardware
+> > partition designed to be resistant to replay attacks. The underlying
+> > HW protocols differ but the operations are common. The RPMB partition
+> > cannot be accessed via standard block layer, but by a set of specific
+> > RPMB commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
+> > partition provides authenticated and replay protected access, hence
+> > suitable as a secure storage.
 > >
-> >     mmcblk: probe of mmc0:0001 failed with error -22
+> > The initial aim of this patch is to provide a simple RPMB driver
+> > interface which can be accessed by the optee driver to facilitate early
+> > RPMB access to OP-TEE OS (secure OS) during the boot time.
 > >
-> > That's happening because mmc_blk_probe() fails when it calls
-> > blk_validate_limits() consequently, which returns the error due to
-> > failed max_segment_size check in this code:
+> > A TEE device driver can claim the RPMB interface, for example, via
+> > rpmb_interface_register() or rpmb_dev_find_device(). The RPMB driver
+> > provides a callback to route RPMB frames to the RPMB device accessible
+> > via rpmb_route_frames().
 > >
-> >     /*
-> >      * The maximum segment size has an odd historic 64k default that
-> >      * drivers probably should override.  Just like the I/O size we
-> >      * require drivers to at least handle a full page per segment.
-> >      */
-> >     ...
-> >     if (WARN_ON_ONCE(lim->max_segment_size < PAGE_SIZE))
-> >         return -EINVAL;
+> > The detailed operation of implementing the access is left to the TEE
+> > device driver itself.
 > >
-> > In case when IDMAC (Internal DMA Controller) is used, dw_mmc.c always
-> > sets .max_seg_size to 4 KiB:
-> >
-> >     mmc->max_seg_size =3D 0x1000;
-> >
-> > The comment in the code above explains why it's incorrect. Arnd
-> > suggested setting .max_seg_size to .max_req_size to fix it, which is
-> > also what some other drivers are doing:
-> >
-> >    $ grep -rl 'max_seg_size.*=3D.*max_req_size' drivers/mmc/host/ | \
-> >      wc -l
-> >    18
+> > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> > Signed-off-by: Alex Benn=C3=A9e <alex.bennee@linaro.org>
+> > Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
+> > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
 >
-> Nice summary!
+> I would mention in the commit that the subsystem is currently
+> only used with eMMC but is designed to be used also by UFS
+> and NVME. Nevertheless, no big deal so:
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 >
-> > This change is not only fixing the boot with 16K/64K pages, but also
-> > leads to a better MMC performance. The linear write performance was
-> > tested on E850-96 board (eMMC only), before commit [1] (where it's
-> > possible to boot with 16K/64K pages without this fix, to be able to do
-> > a comparison). It was tested with this command:
-> >
-> >     # dd if=3D/dev/zero of=3Dsomefile bs=3D1M count=3D500 oflag=3Dsync
-> >
-> > Test results are as follows:
-> >
-> >   - 4K pages,  .max_seg_size =3D 4 KiB:                   94.2 MB/s
-> >   - 4K pages,  .max_seg_size =3D .max_req_size =3D 512 KiB: 96.9 MB/s
-> >   - 16K pages, .max_seg_size =3D 4 KiB:                   126 MB/s
-> >   - 16K pages, .max_seg_size =3D .max_req_size =3D 2 MiB:   128 MB/s
-> >   - 64K pages, .max_seg_size =3D 4 KiB:                   138 MB/s
-> >   - 64K pages, .max_seg_size =3D .max_req_size =3D 8 MiB:   138 MB/s
+> > +config RPMB
+> > +       tristate "RPMB partition interface"
+> > +       depends on MMC
 >
-> Thanks for sharing these results. From what I can see here, the
-> performance changes significantly with the page size, but barely
-> with the max_seg_size, so this does not have the effect I was
-> hoping for. On a more positive note this likely means that we
-> don't have to urgently backport your fix.
+> depends on MMC || SCSI_UFSHCD || NVME_CORE
+> ?
 >
-> This could mean that either there is not much coalescing across
-> pages after all, or that the bottleneck is somewhere else.
->
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index 8e2d676b9239..cccd5633ff40 100644
-> > --- a/drivers/mmc/host/dw_mmc.c
-> > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -2951,8 +2951,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
-> >       if (host->use_dma =3D=3D TRANS_MODE_IDMAC) {
-> >               mmc->max_segs =3D host->ring_size;
-> >               mmc->max_blk_size =3D 65535;
-> > -             mmc->max_seg_size =3D 0x1000;
-> > -             mmc->max_req_size =3D mmc->max_seg_size * host->ring_size=
-;
-> > +             mmc->max_req_size =3D DW_MCI_DESC_DATA_LENGTH * host->rin=
-g_size;
-> > +             mmc->max_seg_size =3D mmc->max_req_size;
->
-> The change looks good to me.
->
-> I see that the host->ring_size depends on PAGE_SIZE as well:
->
-> #define DESC_RING_BUF_SZ        PAGE_SIZE
-> host->ring_size =3D DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
-> host->sg_cpu =3D dmam_alloc_coherent(host->dev,
->                DESC_RING_BUF_SZ, &host->sg_dma, GFP_KERNEL);
->
-> I don't see any reason for the ring buffer size to be tied to
-> PAGE_SIZE at all, it was probably picked as a reasonable
-> default in the initial driver but isn't necessarily ideal.
->
-> From what I can see, the number of 4KB elements in the
-> ring can be as small as 128 (4KB pages, 64-bit addresses)
-> or as big as 4096 (64KB pages, 32-bit addresses), which is
-> quite a difference. If you are still motivated to drill
-> down into this, could you try changing DESC_RING_BUF_SZ
-> to a fixed size of either 4KB or 64KB and test again
-> with the opposite page size, to see if that changes the
-> throughput?
->
+> Or do we want to hold it off until we implement the backends?
 
-Hi Arnd,
+Correct, I think we should hold it off until then.
 
-Sorry for the late reply. I'm a bit of busy with something else right
-now (trying to enable this same driver for Exynos850 in U-Boot, hehe),
-I'll try to carve out some time later and tinker with
-DESC_RING_BUF_SZ. But for now, can we just apply this patch as is? As
-I understand, it's fixing quite a major issue (at least from what I
-heard), so it would be nice to have it in -next and -stable. Does that
-sound reasonable?
+Thanks,
+Jens
 
-Thanks!
-
-> If a larger ring buffer gives us significantly better
-> throughput, we may want to always use a higher number
-> independent of page size. On the other hand, if the
-> 64KB number (the 138MB/s) does not change with a smaller
-> ring, we may as well reduce that in order to limit the
-> maximum latency that is caused by a single I/O operation.
 >
->      Arnd
+> Yours,
+> Linus Walleij
