@@ -1,221 +1,100 @@
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9825774432
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Apr 2024 09:29:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FC7274437
+	for <linux-mmc@vger.kernel.org>; Thu,  4 Apr 2024 09:31:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712222975; cv=none; b=RbYqk+mn/YJynEVlqbj4hWVvT2Wisz7vMcdwvkx++fDwDZ5K/+oaIynabbGcXj55b9fspgRSRgFjjyy9QSluaca2Gspn94UNvPx+nrTM9y4N/1g9BoPJe4B1+xBtSRaZBDEA9CVy40G/jt7r65KTyQm+3rSj8LQhNiigxsZQDx4=
+	t=1712223094; cv=none; b=hdu6u8SPABg5kEmqU7OQ7buOSQ6hcHuZhuEQZOoim6Ph3bQVFUAisBw0biP+5RQrlzkjrMQ7pcCGvmgMmAB+QNdYQd+uQuhLf4jM6GFoL1HjWu6EyDVfHXwRhNY3WWp0r29MxuY4CVQn0hRuJMQsUN/NniBbVvePvfRTEH5VV7Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712222975; c=relaxed/simple;
-	bh=99E4HG7gzVmYikL3IhYBrGsNdGq09JueIkPk+dyBQHw=;
+	s=arc-20240116; t=1712223094; c=relaxed/simple;
+	bh=eal+hbwuJR0GkxwgPiJg2NCYAvGM7tKiSJzcHq0j6dA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=qxcMBkRaHdkbsYGQF2ZLdXvwYbPceuRFk2bZU5/e0O+dVazPNyOr2JNv2OEBlA5WsHfITmJzGl2idRS4RPw7Wwit8uQ6Cmht/JXEdT8adnMa2wx4zYCwW40vI1RTT/vGP7MEnuMhflSVQW2wofVTQEUX4OdlAoZlohXweCfJU8Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZlkmF29g; arc=none smtp.client-ip=209.85.219.180
+	 To:Cc:Content-Type; b=GGDu39kOOYYBTrgxVuEEeYsSH9NqfXMNATNNl/MffW/sO7CBxulMij+aD6K64wo2qV6NL802O00WeB8dPfbXtmV4kc1xHSOSq9gjJ/rGarkeG1cg6OjQcE2qn0QMciCWyAuylcxB9N0ZNT50RA3/WWEcUYctE+5T2CpuLf4ntt8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IDIQIVuS; arc=none smtp.client-ip=209.85.219.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZlkmF29g"
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-dc74435c428so804253276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2024 02:29:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IDIQIVuS"
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-dcc84ae94c1so883058276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2024 02:31:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1712222972; x=1712827772; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=hOEdb/OWzmz8JqwZJnI/08OTrl5N7pe653ZiOSh3hP4=;
-        b=ZlkmF29g/bdzOvcVW0b0FUTsUAzcLlurbNMRIeiBVsq/rFx7jjwmo5RyzlRt2VJbwF
-         8nSH1NOwZdSd+/FBpouyHqZIyjL/DM2eeMkGWfJ00F+Vq40DU3g3H/mwf6FotVLpt8LE
-         jMscFdcmWc2aAI/Y19M1fnUPTVj5+bm4LQ0Lmzt8HfoKYj2sAW4lSBK1vBd3hw5tsIXi
-         GOujJX8oIQAJ8J5eCIxU3ZCwccSg1EMgaXG4/BsdJSC2whq1EDIXI9PZoBf72Gm+5e3o
-         J8C5AMUfhSJBtaZER8hHDYZZe+bUpjYlSfoS/ijr4dff0HUtO1/u3KubHWsrs5KXfta0
-         crcQ==
+        d=linaro.org; s=google; t=1712223091; x=1712827891; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=QJzdwgYqSiXBG2wAbt+70V3f0hLZ0hXphRY5qJD39hQ=;
+        b=IDIQIVuSWzz/kI90Xib4W+1zCVY4pIjQCEiWSvoH9xAYiIDaC3HmgZPB70q3bF5Zqw
+         J3hlygutFS16HiA6/H5LLfPmfDTCBbjjPvquHBCVt6NyvlAanqlqHijX2yXkcRe3AIla
+         IqkOX86dse2kSa0XxKO16AsIJlq1Nr2gNhAb/1B8szRxoaYtoN5h+HzVlszju4xMaqGH
+         sbsO+JX9Czpr9v77XztS15C4DFvS6264r57pKsESNJeR4wm0QUtUz7x3aG+KgmpY70d1
+         SN7d2gEhfeHJW1sikNgHU/8J+An0bRPLQjOZS+9r+vRbn5mm1Zs4XCvjE4dAnkr+pwwJ
+         5wNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712222972; x=1712827772;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=hOEdb/OWzmz8JqwZJnI/08OTrl5N7pe653ZiOSh3hP4=;
-        b=OMUGUE3Z5qfuVjouAUiMhs51LSRkWvbs+Y3tVERD6ZWXgQnHuUCwQRycB1W4JX+bLb
-         4++0LRuDjk6D3ziY/OzZwQlfTMxzMD0fum2SCfhu8fkYRQHRNHJ1avQOF6qzj6yJW16+
-         NX8cnJ2V1OMaskYmIz0ZvWqIymBqJohZa+zMXYhn4L+84hcAThkYObN5CUuVxmTREzwD
-         Z+4UTI9oahiD6cFro4Wn//hOVGc7mTkn789WmE8ha8i28fkbJrp8s1J/Yy4l81+ld6um
-         lmLch6vAPabTMEi/n7d7ZQRuYMN4ZBhqJ/EmKP2NLFXfF5sLK1QLnNQMnlofyK7HbWfh
-         /FuA==
-X-Forwarded-Encrypted: i=1; AJvYcCUPYCLqx39oOXYKAKKi/dIM78dND5V2TNPFGOUZwAapOfF0R/fH8hpWJo7PxdrxTlxlfe6V0EQIQXEaXBq8tqaB5Bmc4yGE6gt/
-X-Gm-Message-State: AOJu0YwS4kKHSBBaMEfCs9uBYenZ/0LIgzG8rerJOY6XpOL1a4Qhf89T
-	efvciFLgfKFb8jqIUyQju42vU+KLQ1zTdES5mc1v9EiaY0mZE6ZGeuqAkNvLJvrivtBXFm4Vj+B
-	/aR2jWHDERHh+4RfvvCtGqb1JCDH6YAYMelTHcg==
-X-Google-Smtp-Source: AGHT+IEJZ6xOy8uL7K7v48vhoxukNtRZ0YN8Iqho231EFU66OmF4NH8X0iYgBBX9Pgy1/61AdDVdjz5dkHUDRWNwCo8=
-X-Received: by 2002:a25:9111:0:b0:dc7:4f61:5723 with SMTP id
- v17-20020a259111000000b00dc74f615723mr1778216ybl.39.1712222972517; Thu, 04
- Apr 2024 02:29:32 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1712223091; x=1712827891;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=QJzdwgYqSiXBG2wAbt+70V3f0hLZ0hXphRY5qJD39hQ=;
+        b=Fuf9mz/wlLriuEvMuLi+cMGFPwJE0+Mr+Pgs3E8t1ApHnK9OWUjnQ1bvQKMMgM9ryB
+         kj9mQx7pToyWS+A7cD/W0pqwiK+JMC/DzQsC7fZsE8ifdSwbwC/Ah4UxIV9qoxXwLa3j
+         m/AAEC6B3Gkop/3qf486N1qAk+UOBJg9H/pYSAdo/TD3ZabvYpv6y4k4BoyW2kveiuRm
+         g2Q+bcaeS6c6YwPsqID2Ty2pY1fPLIWBNAuOe0SHQVAZKsBUzi1vxZiQP5kR38ZQ7Ndk
+         oQYJGpC9qmuuZ1ZCHeCgr/nzNFsBBVHIokuKlpT134yn3qj6AIkfJX8V0FxKQT77UOXu
+         pBbQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV094RCnWggRwIoLmdouGFpBHP3DJU0gF/O5mzJYzcm2Dg6oXqLlLpEAo3mlfmrrms4DxL7Ig6j8edwtADs4Opm5btLeeWJp4Ga
+X-Gm-Message-State: AOJu0YylNYZMYma5kzZoHhYG0uYMvy1p5htMkGq2Z/D5AjgJFAUqBuCm
+	A947aP6kSf7jRFVFSDZ8qBnTOFlx4aIG1V+ec2eFkkJvOTF+Ns+fN20cE5uvaKxI8kWAwcFlMuP
+	4gX0uAtzJUC+LeURX28ClIyowRywJSm9kywD7oA==
+X-Google-Smtp-Source: AGHT+IHTXtbKZV4PRrgxvlL/R1tUqcSFTjPcwK6//feDtYUO9NjrShijYYET6/+oeV22B9HIEQVjv5iZuw/cw+hBGTs=
+X-Received: by 2002:a25:ac04:0:b0:dc7:423c:b8aa with SMTP id
+ w4-20020a25ac04000000b00dc7423cb8aamr1828891ybi.12.1712223091503; Thu, 04 Apr
+ 2024 02:31:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240306232052.21317-1-semen.protsenko@linaro.org>
- <8896bcc5-09b1-4886-9081-c8ce0afc1c40@app.fastmail.com> <CAPLW+4mu3K38_sPnTDj-gkvdsnfN3OKXwfDSBUg_jUj+f122cA@mail.gmail.com>
-In-Reply-To: <CAPLW+4mu3K38_sPnTDj-gkvdsnfN3OKXwfDSBUg_jUj+f122cA@mail.gmail.com>
+References: <20240403-module-owner-sdio-v2-0-ae46d6b955eb@linaro.org>
+In-Reply-To: <20240403-module-owner-sdio-v2-0-ae46d6b955eb@linaro.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 4 Apr 2024 11:28:55 +0200
-Message-ID: <CAPDyKFoKmOf__GP3tx4fU_qGcDn5je-8cuLoCiCUzGLz=HdoDg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K
-To: Sam Protsenko <semen.protsenko@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Christoph Hellwig <hch@lst.de>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, 
-	Matt Fleming <matt@console-pimps.org>, Christian Brauner <brauner@kernel.org>, 
-	Jens Axboe <axboe@kernel.dk>, Sumit Semwal <sumit.semwal@linaro.org>, 
-	Dan Carpenter <dan.carpenter@linaro.org>, Anders Roxell <anders.roxell@linaro.org>, 
-	Naresh Kamboju <naresh.kamboju@linaro.org>, 
-	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, 
-	linux-kernel@vger.kernel.org
+Date: Thu, 4 Apr 2024 11:30:54 +0200
+Message-ID: <CAPDyKFodTh-KN+=b1B3V+7aNEoR0SPo5-xjFaWu=gYEtsDy1pQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/7] mmc/wifi/bluetooth: store owner from modules with sdio_register_driver()
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: Marcel Holtmann <marcel@holtmann.org>, Luiz Augusto von Dentz <luiz.dentz@gmail.com>, 
+	Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, Kalle Valo <kvalo@kernel.org>, 
+	Jeff Johnson <jjohnson@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, 
+	Brian Norris <briannorris@chromium.org>, Francesco Dolcini <francesco@dolcini.it>, 
+	=?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>, 
+	linux-mmc@vger.kernel.org, linux-bluetooth@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-mediatek@lists.infradead.org, linux-wireless@vger.kernel.org, 
+	ath10k@lists.infradead.org, brcm80211@lists.linux.dev, 
+	brcm80211-dev-list.pdl@broadcom.com, Jeff Johnson <quic_jjohnson@quicinc.com>, 
+	Francesco Dolcini <francesco.dolcini@toradex.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, 3 Apr 2024 at 00:43, Sam Protsenko <semen.protsenko@linaro.org> wro=
-te:
+On Wed, 3 Apr 2024 at 16:17, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> On Thu, Mar 7, 2024 at 1:52=E2=80=AFAM Arnd Bergmann <arnd@arndb.de> wrot=
-e:
-> >
-> > On Thu, Mar 7, 2024, at 00:20, Sam Protsenko wrote:
-> > > Commit 616f87661792 ("mmc: pass queue_limits to blk_mq_alloc_disk") [=
-1]
-> > > revealed the long living issue in dw_mmc.c driver, existing since the
-> > > time when it was first introduced in commit f95f3850f7a9 ("mmc: dw_mm=
-c:
-> > > Add Synopsys DesignWare mmc host driver."), also making kernel boot
-> > > broken on platforms using dw_mmc driver with 16K or 64K pages enabled=
-,
-> > > with this message in dmesg:
-> > >
-> > >     mmcblk: probe of mmc0:0001 failed with error -22
-> > >
-> > > That's happening because mmc_blk_probe() fails when it calls
-> > > blk_validate_limits() consequently, which returns the error due to
-> > > failed max_segment_size check in this code:
-> > >
-> > >     /*
-> > >      * The maximum segment size has an odd historic 64k default that
-> > >      * drivers probably should override.  Just like the I/O size we
-> > >      * require drivers to at least handle a full page per segment.
-> > >      */
-> > >     ...
-> > >     if (WARN_ON_ONCE(lim->max_segment_size < PAGE_SIZE))
-> > >         return -EINVAL;
-> > >
-> > > In case when IDMAC (Internal DMA Controller) is used, dw_mmc.c always
-> > > sets .max_seg_size to 4 KiB:
-> > >
-> > >     mmc->max_seg_size =3D 0x1000;
-> > >
-> > > The comment in the code above explains why it's incorrect. Arnd
-> > > suggested setting .max_seg_size to .max_req_size to fix it, which is
-> > > also what some other drivers are doing:
-> > >
-> > >    $ grep -rl 'max_seg_size.*=3D.*max_req_size' drivers/mmc/host/ | \
-> > >      wc -l
-> > >    18
-> >
-> > Nice summary!
-> >
-> > > This change is not only fixing the boot with 16K/64K pages, but also
-> > > leads to a better MMC performance. The linear write performance was
-> > > tested on E850-96 board (eMMC only), before commit [1] (where it's
-> > > possible to boot with 16K/64K pages without this fix, to be able to d=
-o
-> > > a comparison). It was tested with this command:
-> > >
-> > >     # dd if=3D/dev/zero of=3Dsomefile bs=3D1M count=3D500 oflag=3Dsyn=
-c
-> > >
-> > > Test results are as follows:
-> > >
-> > >   - 4K pages,  .max_seg_size =3D 4 KiB:                   94.2 MB/s
-> > >   - 4K pages,  .max_seg_size =3D .max_req_size =3D 512 KiB: 96.9 MB/s
-> > >   - 16K pages, .max_seg_size =3D 4 KiB:                   126 MB/s
-> > >   - 16K pages, .max_seg_size =3D .max_req_size =3D 2 MiB:   128 MB/s
-> > >   - 64K pages, .max_seg_size =3D 4 KiB:                   138 MB/s
-> > >   - 64K pages, .max_seg_size =3D .max_req_size =3D 8 MiB:   138 MB/s
-> >
-> > Thanks for sharing these results. From what I can see here, the
-> > performance changes significantly with the page size, but barely
-> > with the max_seg_size, so this does not have the effect I was
-> > hoping for. On a more positive note this likely means that we
-> > don't have to urgently backport your fix.
-> >
-> > This could mean that either there is not much coalescing across
-> > pages after all, or that the bottleneck is somewhere else.
-> >
-> > > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > > index 8e2d676b9239..cccd5633ff40 100644
-> > > --- a/drivers/mmc/host/dw_mmc.c
-> > > +++ b/drivers/mmc/host/dw_mmc.c
-> > > @@ -2951,8 +2951,8 @@ static int dw_mci_init_slot(struct dw_mci *host=
-)
-> > >       if (host->use_dma =3D=3D TRANS_MODE_IDMAC) {
-> > >               mmc->max_segs =3D host->ring_size;
-> > >               mmc->max_blk_size =3D 65535;
-> > > -             mmc->max_seg_size =3D 0x1000;
-> > > -             mmc->max_req_size =3D mmc->max_seg_size * host->ring_si=
-ze;
-> > > +             mmc->max_req_size =3D DW_MCI_DESC_DATA_LENGTH * host->r=
-ing_size;
-> > > +             mmc->max_seg_size =3D mmc->max_req_size;
-> >
-> > The change looks good to me.
-> >
-> > I see that the host->ring_size depends on PAGE_SIZE as well:
-> >
-> > #define DESC_RING_BUF_SZ        PAGE_SIZE
-> > host->ring_size =3D DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr)=
-;
-> > host->sg_cpu =3D dmam_alloc_coherent(host->dev,
-> >                DESC_RING_BUF_SZ, &host->sg_dma, GFP_KERNEL);
-> >
-> > I don't see any reason for the ring buffer size to be tied to
-> > PAGE_SIZE at all, it was probably picked as a reasonable
-> > default in the initial driver but isn't necessarily ideal.
-> >
-> > From what I can see, the number of 4KB elements in the
-> > ring can be as small as 128 (4KB pages, 64-bit addresses)
-> > or as big as 4096 (64KB pages, 32-bit addresses), which is
-> > quite a difference. If you are still motivated to drill
-> > down into this, could you try changing DESC_RING_BUF_SZ
-> > to a fixed size of either 4KB or 64KB and test again
-> > with the opposite page size, to see if that changes the
-> > throughput?
-> >
+> Changes in v2:
+> 1. Add "wifi: ath10k: sdio: simplify module initialization" patch, from
+>    my other patchset to avoid conflicts.
+> 2. Add Acks/Rb tags.
+> 3. Drop applied SDIO patch, which was the dependency for the rest
+>    cleanups.
+> 4. Update subjects according to feedback.
+> - Link to v1: https://lore.kernel.org/r/20240329-module-owner-sdio-v1-0-e4010b11ccaa@linaro.org
 >
-> Hi Arnd,
->
-> Sorry for the late reply. I'm a bit of busy with something else right
-> now (trying to enable this same driver for Exynos850 in U-Boot, hehe),
-> I'll try to carve out some time later and tinker with
-> DESC_RING_BUF_SZ. But for now, can we just apply this patch as is? As
-> I understand, it's fixing quite a major issue (at least from what I
-> heard), so it would be nice to have it in -next and -stable. Does that
-> sound reasonable?
+> Merging
+> =======
+> With Acks from Kalle, please take entire set via mmc/sdio.
 
-Ideally, I would prefer it if you could try out Arnd's proposal,
-unless you think that's too far ahead for you, of course? The point
-is, that I would rather avoid us from messing around with these kinds
-of configurations.
+The series applied for next, thanks!
 
->
-> Thanks!
->
-> > If a larger ring buffer gives us significantly better
-> > throughput, we may want to always use a higher number
-> > independent of page size. On the other hand, if the
-> > 64KB number (the 138MB/s) does not change with a smaller
-> > ring, we may as well reduce that in order to limit the
-> > maximum latency that is caused by a single I/O operation.
-> >
-> >      Arnd
+[...]
 
 Kind regards
 Uffe
