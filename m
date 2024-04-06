@@ -1,645 +1,248 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BABDB16C697
-	for <linux-mmc@vger.kernel.org>; Fri,  5 Apr 2024 11:53:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.52
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712318010; cv=none; b=AGbT6yL84K5ZnasMQBb/0ty8UH9NQrlziw75yFofOJm7JHx9gSW+OhZqqA2s+P4cL0GRCYooPGrf90dBCp66IkQXe9qX2xvAFjXu/9dMswVCkIPLqkmIgEJcP2jruAW5Gicqb9/SY77Tkh3s4zClbg2IbBN9wA+FvESHqdLvsqQ=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712318010; c=relaxed/simple;
-	bh=GnMYYODom61ixfvfZOuXtHk7CE7rgdsTMPTvbW/H28Q=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Z3svkHHB4JudbJWQtKZQby1cbFsR8nCnSK4YwwUJy5Lo0m5C+5/TG+GMDEkYtqTpIYZhWvS+bVNaEH8Ja3fEzr1XtQCjHrGlw8HCWKeIPu2+UYFF8HuMSg9xYgE+vPt3DQoJipMjjDD4dgzGPZWZrmffmxqgxdpAh8E4WJ0uwuo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=mH5VGSoy; arc=none smtp.client-ip=209.85.218.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EED5517C8B;
+	Sat,  6 Apr 2024 10:27:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.153.144
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1712399244; cv=fail; b=FcdndiwH2n9jutw3ZKXdDlr3wgo4mzzwBZPsaNDSHKeEW5tSMy+Ev+tiev2CH9lee2WUIXWERpNEgqAptCsNoHewiOS+Po6eqMks5wqTlwoOLvnnYpDFdbB+8Hm3mIQnQ8ZvTB4fokseJnWQ75PeWCyv6qh2beLHp5F71lbIpp0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1712399244; c=relaxed/simple;
+	bh=lvH85RdH+/Av5yjJlLkKUJllfndZewf/DX1gvLevGQU=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=gupHKSRG99iP8A13qEMMXuV9sMo8/KfYSbRxKCJWCEs/3Z0SZ4kiTeoVQkFNjGbzL4rOlYXf/IgCoaJrYgHuTy9JRKPenSVDLHkUKdNOK68Ub1N4vmuocB9+toxDNlLvShL4nTv+kJ8u+cqFzBWBEUpXQkgJmvMLegOAOPh/OIQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=JGhoVXKC; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=iQprUhMh; arc=fail smtp.client-ip=216.71.153.144
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mH5VGSoy"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-a51ad517450so22427266b.2
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Apr 2024 04:53:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="JGhoVXKC";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="iQprUhMh"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1712399243; x=1743935243;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=lvH85RdH+/Av5yjJlLkKUJllfndZewf/DX1gvLevGQU=;
+  b=JGhoVXKC5qHoReOVlDcUB+3rBN5TTkhaxayWe8469hHx6uWIxixnT8M/
+   fKFCUEPkO86PjvqUZHkeKdpmQSNeAihM7VSHt5uFmQS39rZ+thAkwogHM
+   dm7SrKrczaL1BwVIp20g7wuKO0nwdhrVSkKb+p1LtJoLpCkUHdopM+CKt
+   gRwiprZgIBRW20ksMCwcnPmgpQU1dg0xFFp+hv6xAgZKuS25zqrBO0blf
+   CzXE0af+JQYei0cgEPl2+WMWpCaLQoqyk5slwpAnQDc7W+rxPUXyZIQ50
+   C4Wq1UZvd/6+5pvhhPNtrvJ+JbRoo3N0+WqjebCMJVrO7AuTpu4ytUyMp
+   A==;
+X-CSE-ConnectionGUID: eCZtK0b9QgOYMT2PqYIIzg==
+X-CSE-MsgGUID: 1x1U9eV0Qq6z/IjDUAGdcg==
+X-IronPort-AV: E=Sophos;i="6.07,182,1708358400"; 
+   d="scan'208";a="14070134"
+Received: from mail-mw2nam12lp2040.outbound.protection.outlook.com (HELO NAM12-MW2-obe.outbound.protection.outlook.com) ([104.47.66.40])
+  by ob1.hgst.iphmx.com with ESMTP; 06 Apr 2024 18:27:14 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=C6qcBczfnKQmhcOpDoK+KTer4Y0/8O5CTORdknkxUWEsXHXjt9psZE8REV7SE1ntug/Qds9m86wiW88h0dOWXsVZl3RQh2092IPW+Bz7KBSKwe6lL4muP7+5V3k2GkCHu84jr8WgNqaIzYk2AnTXUzwwKzERrg8nuDEocy7vOGikdzealp0vxa+AUu/n/0Hyi3MZrYCFXTah8brbyWy4XyHxxBMrH038x6O7gixzq2cqRYnebnZxyhISLzdlxeyz4hYDFN7U5lGRRre8vP4HpUxgTTpM8XtLW/wEiDGrbm0Kh1fgDuf6Mga5WbYxz/+fr55YEaK+p0ei21mt81lnuA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=lvH85RdH+/Av5yjJlLkKUJllfndZewf/DX1gvLevGQU=;
+ b=TG4ouYMFWov7CEcbTOCxXlLgZK65y2qMcMRSNlZsLjwS4YQWo7GXUq6geO2DwghBejWsf+XWCtrV7W7/Bur0gzI7MKp3EczdFn3zoZdC9Hj++0lHYzPMwVccAxM0u5KeODMNdNh/74tpYp2iCGo8jY7dMhPqBcVpr2d+yVB807fk8/qp779dCFZj4n1QN7Ieosr1kSFzRrAohYOsTa7Ck3voRnGypXEJWiMZYxqp9ro5fRk70LPvgaYsT9u9GAki65D/lOBx1vpPHzOtmRjW4JBFpfspmDRHQFnsVvhrrl4hBWbpFZprDesdfTFa5/c3i1D6WIwlxPBno7SHsG+waQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1712318006; x=1712922806; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=y9+6VEPFFI0DVgqj306o/QWwHpYZI0bZrfiXeNI3fwA=;
-        b=mH5VGSoyt2uWV+U1vNBGLIxwDhs71f0V5MynCjFQu5QRrlYGoTdVk3yAO8w7uxe8Lc
-         s0w5QK0bVwaD54pALHaCR71t+guD+e4QfLJEzdgFs5d6oZZUuP9J5fRt88cZFsMiupp0
-         AuvJx2ig3R8UAFwnBympHzo448+fdlS73VIZUSuU4YAm54IZN7BmrFrT/NMUzFd78Rw2
-         WSomMJLPYlvNCnxyLKAyv60xz+QYtk/Ut9j8f6hqBx4IbAMJKutRo0QM95JoQuo5ULXY
-         tCPmW16WGBiD5Lf+52A/PK6zaBsGKH6sAeVV5hX4QoFay8PHuXdUwiqnvKra6VWiJ0zw
-         hS6g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712318006; x=1712922806;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=y9+6VEPFFI0DVgqj306o/QWwHpYZI0bZrfiXeNI3fwA=;
-        b=S389XoymYu8b8CQKEb8j8a4WZVKIsp2eRG10Q8PmakB/8UtqUL2T3rFashnDxeLYbb
-         tkslTxT3dOaTXjg2dL/fQn1fjrNfZRbcJZ2lWzNeUyey2y7sxrcWGuKW2ybGyKgabjce
-         hfCpff7a8f/C1Yq92D/r0DsPTcL/s43I1oTqefE8QzQ2+rMkXT9C5LKHNI0iMJ9w6k+6
-         4zewfYM7n5yadeU65+25UMtxJ4RwUGFKPSdb1j+GzWA4TjoImuFYRrm7jXiXHVMf+LD8
-         lTA2o5af6uJ3VdwzgbeBGVXANgZ1C2zSnzb3RUb+TaHquYia+C8JZ2epTbvvZ0+IfdRv
-         uudg==
-X-Forwarded-Encrypted: i=1; AJvYcCVptHC4GbxzOntLchJ272iwiYDCPhC1rkBvQrfv+r5LUY4ba/SCmad0labdtMHbklb6BSwa76AB0J4crYSELgXGQxHOS+tjo4X6
-X-Gm-Message-State: AOJu0Yw2xPCi8isGSUejLEcxIlvtjO1Iw77FFEqxtAgpOh8gVowOss0m
-	5lWkcJMmNcetidOwKeYJUeorTRyoORYwEkSTrpdoW6jpITCDSyRqIPtd6diJphc=
-X-Google-Smtp-Source: AGHT+IHjL5yQtnI7Hqjv6pPtakMBUcaBgP4kxCZJ6TBHl8t7GglsrKZaZ+9RDlKaEHAycWwVj4sKdw==
-X-Received: by 2002:a17:906:1c46:b0:a47:52ff:194d with SMTP id l6-20020a1709061c4600b00a4752ff194dmr725348ejg.35.1712318006153;
-        Fri, 05 Apr 2024 04:53:26 -0700 (PDT)
-Received: from rayden.urgonet (h-217-31-164-171.A175.priv.bahnhof.se. [217.31.164.171])
-        by smtp.gmail.com with ESMTPSA id hx12-20020a170906846c00b00a51a9eccf2asm396198ejc.125.2024.04.05.04.53.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 05 Apr 2024 04:53:25 -0700 (PDT)
-From: Jens Wiklander <jens.wiklander@linaro.org>
-To: linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	op-tee@lists.trustedfirmware.org
-Cc: Shyam Saini <shyamsaini@linux.microsoft.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Jerome Forissier <jerome.forissier@linaro.org>,
-	Sumit Garg <sumit.garg@linaro.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Bart Van Assche <bvanassche@acm.org>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Jens Wiklander <jens.wiklander@linaro.org>
-Subject: [PATCH v4 3/3] optee: probe RPMB device using RPMB subsystem
-Date: Fri,  5 Apr 2024 13:53:18 +0200
-Message-Id: <20240405115318.904143-4-jens.wiklander@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20240405115318.904143-1-jens.wiklander@linaro.org>
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=lvH85RdH+/Av5yjJlLkKUJllfndZewf/DX1gvLevGQU=;
+ b=iQprUhMhZq9OBgtGMVwee3CY8A6SOXUvHdRfn/tFeJa6bib6Ax/WS2lFpwJPHbjsXrTTHmac0Rde46VHiX319sfp7RSNEMs3PYmVnvERzws/LYGyQ2sbB+H+gmZaHQMNHPZRBUvSGYWiivIaoVDrdxqi8JsM85pt8YvXr9SxaDc=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ SA3PR04MB8596.namprd04.prod.outlook.com (2603:10b6:806:2f8::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7409.46; Sat, 6 Apr
+ 2024 10:27:10 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5395:f1:f080:8605]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5395:f1:f080:8605%3]) with mapi id 15.20.7409.042; Sat, 6 Apr 2024
+ 10:27:07 +0000
+From: Avri Altman <Avri.Altman@wdc.com>
+To: Jens Wiklander <jens.wiklander@linaro.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "op-tee@lists.trustedfirmware.org"
+	<op-tee@lists.trustedfirmware.org>
+CC: Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Jerome
+ Forissier <jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche
+	<bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel
+	<ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman
+	<gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>,
+	=?utf-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
+Subject: RE: [PATCH v4 1/3] rpmb: add Replay Protected Memory Block (RPMB)
+ subsystem
+Thread-Topic: [PATCH v4 1/3] rpmb: add Replay Protected Memory Block (RPMB)
+ subsystem
+Thread-Index: AQHah0/nox7783sO1E2O3HOOG3CvtbFa/2bQ
+Date: Sat, 6 Apr 2024 10:27:07 +0000
+Message-ID:
+ <DM6PR04MB65757A966792C93334DE4BF1FC022@DM6PR04MB6575.namprd04.prod.outlook.com>
 References: <20240405115318.904143-1-jens.wiklander@linaro.org>
+ <20240405115318.904143-2-jens.wiklander@linaro.org>
+In-Reply-To: <20240405115318.904143-2-jens.wiklander@linaro.org>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|SA3PR04MB8596:EE_
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ MYu3Qk5EATUHl1j3fYqDbodWo57QUm/CW8OkYIonESo+elkzJBhWs9W77F99F8aGa32fMoRn8jkYCIVD3qf0z98jhgHx0/h8t7b0V5qvKmxMf6XyItIacWPwuYKwuDHscjBF7Y8+SKsEHE/b3j6oAw+F2YWA88vKSg0mwi2EVvWtc7svjPUzl97kG0mJ6oWOswW3rTS9qnQ74XzMaoUEFgQ/aNDSEOUmG2SK7NugLYLJB25N23alEGdSIhsats6b1AQg0eDJAF6VcQBOuG50uBPPTeot7pZ59k3vgG8h4oq3PCs4InFyykoMgWVNgLxSf63HaO72YCLVwzGSKjPy41agoehLvxkEBP3A02ew++c1V7bZkvCbOtA3IFElHGggwFE9SKQxgkLnrHekyDZBzfIJK4PbKQPeeGLxVCfcdHrZMSbk1SKeSX8MFCrvn2gXbngXD63HEJVcwq7trVjM2i3tNJ20ebOdtSwJ/C7NYuFWiCazGK9YwaHGFbRW+4QjDf+B2v3x/xcdHrTm8zftl3WGSHIRWt00gCWAeFzl80ErbW+e014iZgweZciyszg0llmyoBLyTmIBJ7EB3J3f2AYUeH+mjg1yt0H/oTzKrTw6boO6GAefw4HWfyeU/7kqbTjxIiDFo0MQYzwTj2GJGT3CddxrqPZXtlwy4Ae8BpM=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366007)(376005)(1800799015)(7416005);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?VWhWelhuKzZOK1VMMnN3bWcyL0hIWVNvME5RTTVxeHNTdC9OejRsVVpWcDlI?=
+ =?utf-8?B?THluVHZOb2tmYlRhMmFIWnpRVmN1ejVxSCtibGt4VTd5c01qbEF4SjhkeHM4?=
+ =?utf-8?B?RTV1Mk80V3dDTUV2dWRIajZzNTNxenl1RXZsZ24vL1MxditDWnJnTFo0WHJ2?=
+ =?utf-8?B?ZlFvTlltVFR2enRuTGpDTzM0NW5TYzdCWFo3TG9Xb2NkYWZzWEI0ck40YWVP?=
+ =?utf-8?B?aUR0MDMvbE1QVUxRcnF6YzVEVDQ5MUFXSmQ0REdmcG93cDlJSWJIR0ZzRXlE?=
+ =?utf-8?B?VW53QVV1WGlENEIyNGpVeDNlSUczRnhwVS84M0pDV1kzMGdmTXhLYzV3MjEx?=
+ =?utf-8?B?c2NVMjhaanBTMFVNVklreHk4SnZudmlUcHliOVp1Si9TWXExaFRTSGYwWTlZ?=
+ =?utf-8?B?WnhKazJTVmJEVmdNZkNqL3hTVEMwTW9KMXEzL25JRFdwYUhuZExVZHNoeTBY?=
+ =?utf-8?B?Slk0dUE0VmJ4VmtwZFNHMHIwREl0MG5IMitnSWZYZWF4WUFHbnU3NnYrbWUv?=
+ =?utf-8?B?M2krTzYxdWROR21rNjFzd0RlQkQweFNxY3IvellHeUlZbE5zNTN1VE5Ba2tr?=
+ =?utf-8?B?WFVzR1ErRXdReHJLQk40YUlmcW9wd1lUaXZjQ0pNUzhwK29QaVViWi8xSjYw?=
+ =?utf-8?B?SmFrWW9Fd2NCNWJMRzFBOEhBekhsakFaeEozdUhwdmhsUHpuRmxnU2EvUUVy?=
+ =?utf-8?B?SUtGWTIwcDBRQXhvTEdQcjh2SDBPVm5EVmdDMkQ0cEpIeCtSNlVMMXhrQ25X?=
+ =?utf-8?B?bVV4dzJhNnl1QllMU1MwaUR5ODA4aEtvci9OekFiYzhpNE9GS21VK3dpcy96?=
+ =?utf-8?B?VmtvSXpTK3lDSVZyM2FuMDJ1WUNING05Zm5IUlpWUjExbGRYMGpJWXA4ZjJW?=
+ =?utf-8?B?ZFFmS3ZBUk1LTXhVczlJcWpPd21Ya2YyTlJPT0JwMkl1Q3BXVG1FYTgvU0lD?=
+ =?utf-8?B?dnNUbGx6K0E4dk5YWXNnTXJuRWhsS1lEcGd2NEhFaEhNZXNyZURNM2MwclhU?=
+ =?utf-8?B?dU9iY0dhSFFqWXZvcnh3WDFIRk1yeVBPLzcrUWczZVp3ZEM2V3BlbFJiT1VV?=
+ =?utf-8?B?M0dwZjJHYUNCTzhKUG9PN2lONTJKZXc1aDdEazVEMHRQS2g5bk5hN3ltV0Jl?=
+ =?utf-8?B?bXdzaTJLTFlLa3JmN1pvTXdvOFpNZzhVYTdTN3c2cHZMK2NJTjNNZ3ZjNDJv?=
+ =?utf-8?B?VE5BN0VsL0tRTGltZkpyaVdUa05tQUFidVAxS1VZcGViNUh3TXBxbCtsbno3?=
+ =?utf-8?B?aUV4bEZtK1NnNVJuckxxeXF6Rkh1S3J0dk9LekFKTnMrVk5qTDRtRzdhV2FR?=
+ =?utf-8?B?NmtoWndnMlBzZkwvT2hzQkp0eGFEYlBJZDd5NHBsOElCd2JOZUxVeG1WWldn?=
+ =?utf-8?B?RzJJaTBwU3ZncXRDUFNQVlBSTERWUzgyaVdFT3phOHQyRTZvMEJ1S1FnQTB3?=
+ =?utf-8?B?Qzd6aUZrNWlwTitmT1VZekNmdlc2cUFoYVF6cjhtSHhJMzVydnBrUVRSR3VM?=
+ =?utf-8?B?cWFkbWNoeGFMaXFUZHFJeTVsdksveHVybFdicWNqeEN5czJpcWhVOXZwZXNI?=
+ =?utf-8?B?dUZGWEVZbnhlTTdqTktIOWZ4VzkxOFc2L2VLN3pjREJ2akVuakFWQU9zOHRI?=
+ =?utf-8?B?RTlWVE1VcCs4OEhTaVVGVkFsaU1JZFJBNDh5K2E1SlRzbWIvbW1uQjI1N29p?=
+ =?utf-8?B?MVdYQkRtVWZRMml3aGZRVTRaeFdhcnZpWE9LYnk4YkRVTzRNMkt1bEd1Z2NC?=
+ =?utf-8?B?alBUdDFzQzNnRU1mSFdTRkFhZU14NTRhTlVpUElIcEZwdVplb3dCUTd0S2lM?=
+ =?utf-8?B?N0lGSVYxZHdQYU5sMThhTXUrR0FCQ0JERGg0WDRMYlhpdUZSWldMTTNZUm5R?=
+ =?utf-8?B?QW5lZ0ZBdk1yQzdMWEdyY2FYNFBZM1d1QW91TjVxWFUzb0NwT3k0Y29oTWZq?=
+ =?utf-8?B?bEE3d2xtaVNYblBpRFRJNmtZVEVrd0xMZWYxZnN6a2paUXlhek1oOWpqa2s1?=
+ =?utf-8?B?Y3pLaHVJQWp2RGFaZmRITncrOVpjWkNWRlM1czk5cEFjRHB4TlZ3WGc5V2gx?=
+ =?utf-8?B?UUNQeU9xS0hWWFFGTVdXSTQ2QUNJb1Q1U2ZKaUZrWnFkakJIK2hRV0dKcWVw?=
+ =?utf-8?Q?01dPaMEEEfH3zCem8vCyK1jsq?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	t1Hqf5osMAAuzIgzpOQ+vMThtXfIGLIISnQNX0N+EfRhZrv5XovYkgiH9IG9F5lTQv4NV971YqRgyKbi2OcJRBNmVNkZeQVaYpdYvtRPN8ASNqsnKiPYGD8Se0zy0lV2/rHcUVkNeOGE8fAYLWIW/d+oGw8h6vUu/xEzzfZYXgn+DS+fji8lKQOnJTxUvM0mtVPfgzl6hCoiup9WGsqlmoQRbQixQ//FHocSYcWlNROFMliaQUuN7KFvMea5hv1ScaN9ycvxIM7CJxX2CwLS/OzDXtE7xVSfDWocfxrkMS8WklCvOUX9ueQQkpo/DZBQ4ohgBi85KAUw0djR0yL76Xi1p7HtzeMh8I0dL/68Qhb26TqQ4+Z1hGEJQiLicnblVFn8PSuTiGQHy+TLVNpXVYdRvjEfPWYWVz6Trcok8rZy5M0hZ8lc64foKFGK9LSM6LVbUmpGEwqUZqQDvZZUWL8Y7mgk/nWHQiHTCctOxCllnJJosuRDCMfbUDsKFYonls1kY6hAjRS9o4rwkacJM7V+ZlP6xQlWHx+i0s/ytEWTqpVMfcP25ZTatQ767eBpPTCYEDsnY1S2w1cmXhYAOIzmox4CeBqLe9KLaLIVXKQ20J+su36hr0FYwTg0pw+H
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8e552e37-28bb-4752-f9c7-08dc56241c94
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Apr 2024 10:27:07.7701
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: bgie1zhWOsZP32PVqYDLDNtGl83ACCfgQydXCVCe1dMGBrLYDMcHAE2bD2z2F3XvSvEMNt1uEvKgzcjOjxigYg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA3PR04MB8596
 
-Adds support in the OP-TEE drivers (both SMC and FF-A ABIs) to probe and
-use an RPMB device via the RPBM subsystem instead of passing the RPMB
-frames via tee-supplicant in user space. A fallback mechanism is kept to
-route RPMB frames via tee-supplicant if the RPMB subsystem isn't
-available.
-
-The OP-TEE RPC ABI is extended to support iterating over all RPMB
-devices until one is found with the expected RPMB key already
-programmed.
-
-Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
----
- drivers/tee/optee/core.c          |  30 ++++
- drivers/tee/optee/device.c        |   7 +
- drivers/tee/optee/ffa_abi.c       |   8 +
- drivers/tee/optee/optee_private.h |  21 ++-
- drivers/tee/optee/optee_rpc_cmd.h |  35 +++++
- drivers/tee/optee/rpc.c           | 233 ++++++++++++++++++++++++++++++
- drivers/tee/optee/smc_abi.c       |   7 +
- 7 files changed, 340 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/tee/optee/core.c b/drivers/tee/optee/core.c
-index 3aed554bc8d8..082691c10a90 100644
---- a/drivers/tee/optee/core.c
-+++ b/drivers/tee/optee/core.c
-@@ -11,6 +11,7 @@
- #include <linux/io.h>
- #include <linux/mm.h>
- #include <linux/module.h>
-+#include <linux/rpmb.h>
- #include <linux/slab.h>
- #include <linux/string.h>
- #include <linux/tee_drv.h>
-@@ -80,6 +81,31 @@ void optee_pool_op_free_helper(struct tee_shm_pool *pool, struct tee_shm *shm,
- 	shm->pages = NULL;
- }
- 
-+void optee_bus_scan_rpmb(struct work_struct *work)
-+{
-+	struct optee *optee = container_of(work, struct optee,
-+					   rpmb_scan_bus_work);
-+	int ret;
-+
-+	if (!optee->rpmb_scan_bus_done) {
-+		ret = optee_enumerate_devices(PTA_CMD_GET_DEVICES_RPMB);
-+		optee->rpmb_scan_bus_done = !ret;
-+		if (ret && ret != -ENODEV)
-+			pr_info("Scanning for RPMB device: ret %d\n", ret);
-+	}
-+}
-+
-+int optee_rpmb_intf_rdev(struct notifier_block *intf, unsigned long action,
-+			 void *data)
-+{
-+	struct optee *optee = container_of(intf, struct optee, rpmb_intf);
-+
-+	if (action == RPMB_NOTIFY_ADD_DEVICE)
-+		schedule_work(&optee->rpmb_scan_bus_work);
-+
-+	return 0;
-+}
-+
- static void optee_bus_scan(struct work_struct *work)
- {
- 	WARN_ON(optee_enumerate_devices(PTA_CMD_GET_DEVICES_SUPP));
-@@ -161,6 +187,8 @@ void optee_release_supp(struct tee_context *ctx)
- 
- void optee_remove_common(struct optee *optee)
- {
-+	rpmb_interface_unregister(&optee->rpmb_intf);
-+	cancel_work_sync(&optee->rpmb_scan_bus_work);
- 	/* Unregister OP-TEE specific client devices on TEE bus */
- 	optee_unregister_devices();
- 
-@@ -177,6 +205,8 @@ void optee_remove_common(struct optee *optee)
- 	tee_shm_pool_free(optee->pool);
- 	optee_supp_uninit(&optee->supp);
- 	mutex_destroy(&optee->call_queue.mutex);
-+	rpmb_dev_put(optee->rpmb_dev);
-+	mutex_destroy(&optee->rpmb_dev_mutex);
- }
- 
- static int smc_abi_rc;
-diff --git a/drivers/tee/optee/device.c b/drivers/tee/optee/device.c
-index 4b1092127694..4274876857c8 100644
---- a/drivers/tee/optee/device.c
-+++ b/drivers/tee/optee/device.c
-@@ -43,6 +43,13 @@ static int get_devices(struct tee_context *ctx, u32 session,
- 	ret = tee_client_invoke_func(ctx, &inv_arg, param);
- 	if ((ret < 0) || ((inv_arg.ret != TEEC_SUCCESS) &&
- 			  (inv_arg.ret != TEEC_ERROR_SHORT_BUFFER))) {
-+		/*
-+		 * TEE_ERROR_STORAGE_NOT_AVAILABLE is returned when getting
-+		 * the list of device TAs that depends on RPMB but a usable
-+		 * RPMB device isn't found.
-+		 */
-+		if (inv_arg.ret == TEE_ERROR_STORAGE_NOT_AVAILABLE)
-+			return -ENODEV;
- 		pr_err("PTA_CMD_GET_DEVICES invoke function err: %x\n",
- 		       inv_arg.ret);
- 		return -EINVAL;
-diff --git a/drivers/tee/optee/ffa_abi.c b/drivers/tee/optee/ffa_abi.c
-index ecb5eb079408..a8dfdb30b4e8 100644
---- a/drivers/tee/optee/ffa_abi.c
-+++ b/drivers/tee/optee/ffa_abi.c
-@@ -7,6 +7,7 @@
- 
- #include <linux/arm_ffa.h>
- #include <linux/errno.h>
-+#include <linux/rpmb.h>
- #include <linux/scatterlist.h>
- #include <linux/sched.h>
- #include <linux/slab.h>
-@@ -934,6 +935,7 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
- 	optee_cq_init(&optee->call_queue, 0);
- 	optee_supp_init(&optee->supp);
- 	optee_shm_arg_cache_init(optee, arg_cache_flags);
-+	mutex_init(&optee->rpmb_dev_mutex);
- 	ffa_dev_set_drvdata(ffa_dev, optee);
- 	ctx = teedev_open(optee->teedev);
- 	if (IS_ERR(ctx)) {
-@@ -955,6 +957,9 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
- 	if (rc)
- 		goto err_unregister_devices;
- 
-+	INIT_WORK(&optee->rpmb_scan_bus_work, optee_bus_scan_rpmb);
-+	optee->rpmb_intf.notifier_call = optee_rpmb_intf_rdev;
-+	rpmb_interface_register(&optee->rpmb_intf);
- 	pr_info("initialized driver\n");
- 	return 0;
- 
-@@ -968,6 +973,9 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
- 	teedev_close_context(ctx);
- err_rhashtable_free:
- 	rhashtable_free_and_destroy(&optee->ffa.global_ids, rh_free_fn, NULL);
-+	rpmb_dev_put(optee->rpmb_dev);
-+	mutex_destroy(&optee->rpmb_dev_mutex);
-+	rpmb_interface_unregister(&optee->rpmb_intf);
- 	optee_supp_uninit(&optee->supp);
- 	mutex_destroy(&optee->call_queue.mutex);
- 	mutex_destroy(&optee->ffa.mutex);
-diff --git a/drivers/tee/optee/optee_private.h b/drivers/tee/optee/optee_private.h
-index 7a5243c78b55..ae72f3dda1d2 100644
---- a/drivers/tee/optee/optee_private.h
-+++ b/drivers/tee/optee/optee_private.h
-@@ -8,6 +8,7 @@
- 
- #include <linux/arm-smccc.h>
- #include <linux/rhashtable.h>
-+#include <linux/rpmb.h>
- #include <linux/semaphore.h>
- #include <linux/tee_drv.h>
- #include <linux/types.h>
-@@ -20,11 +21,13 @@
- /* Some Global Platform error codes used in this driver */
- #define TEEC_SUCCESS			0x00000000
- #define TEEC_ERROR_BAD_PARAMETERS	0xFFFF0006
-+#define TEEC_ERROR_ITEM_NOT_FOUND	0xFFFF0008
- #define TEEC_ERROR_NOT_SUPPORTED	0xFFFF000A
- #define TEEC_ERROR_COMMUNICATION	0xFFFF000E
- #define TEEC_ERROR_OUT_OF_MEMORY	0xFFFF000C
- #define TEEC_ERROR_BUSY			0xFFFF000D
- #define TEEC_ERROR_SHORT_BUFFER		0xFFFF0010
-+#define TEE_ERROR_STORAGE_NOT_AVAILABLE 0xF0100003
- 
- #define TEEC_ORIGIN_COMMS		0x00000002
- 
-@@ -197,6 +200,12 @@ struct optee_ops {
-  * @notif:		notification synchronization struct
-  * @supp:		supplicant synchronization struct for RPC to supplicant
-  * @pool:		shared memory pool
-+ * @mutex:		mutex protecting @rpmb_dev
-+ * @rpmb_dev:		current RPMB device or NULL
-+ * @rpmb_scan_bus_done	flag if device registation of RPMB dependent devices
-+ *			was already done
-+ * @rpmb_scan_bus_work	workq to for an RPMB device and to scan optee bus
-+ *			and register RPMB dependent optee drivers
-  * @rpc_param_count:	If > 0 number of RPC parameters to make room for
-  * @scan_bus_done	flag if device registation was already done.
-  * @scan_bus_work	workq to scan optee bus and register optee drivers
-@@ -215,9 +224,15 @@ struct optee {
- 	struct optee_notif notif;
- 	struct optee_supp supp;
- 	struct tee_shm_pool *pool;
-+	/* Protects rpmb_dev pointer */
-+	struct mutex rpmb_dev_mutex;
-+	struct rpmb_dev *rpmb_dev;
-+	struct notifier_block rpmb_intf;
- 	unsigned int rpc_param_count;
--	bool   scan_bus_done;
-+	bool scan_bus_done;
-+	bool rpmb_scan_bus_done;
- 	struct work_struct scan_bus_work;
-+	struct work_struct rpmb_scan_bus_work;
- };
- 
- struct optee_session {
-@@ -280,8 +295,12 @@ int optee_cancel_req(struct tee_context *ctx, u32 cancel_id, u32 session);
- 
- #define PTA_CMD_GET_DEVICES		0x0
- #define PTA_CMD_GET_DEVICES_SUPP	0x1
-+#define PTA_CMD_GET_DEVICES_RPMB	0x2
- int optee_enumerate_devices(u32 func);
- void optee_unregister_devices(void);
-+void optee_bus_scan_rpmb(struct work_struct *work);
-+int optee_rpmb_intf_rdev(struct notifier_block *intf, unsigned long action,
-+			 void *data);
- 
- int optee_pool_op_alloc_helper(struct tee_shm_pool *pool, struct tee_shm *shm,
- 			       size_t size, size_t align,
-diff --git a/drivers/tee/optee/optee_rpc_cmd.h b/drivers/tee/optee/optee_rpc_cmd.h
-index f3f06e0994a7..f351a8ac69fc 100644
---- a/drivers/tee/optee/optee_rpc_cmd.h
-+++ b/drivers/tee/optee/optee_rpc_cmd.h
-@@ -16,6 +16,14 @@
-  * and sends responses.
-  */
- 
-+/*
-+ * Replay Protected Memory Block access
-+ *
-+ * [in]     memref[0]	    Frames to device
-+ * [out]    memref[1]	    Frames from device
-+ */
-+#define OPTEE_RPC_CMD_RPMB		1
-+
- /*
-  * Get time
-  *
-@@ -103,4 +111,31 @@
- /* I2C master control flags */
- #define OPTEE_RPC_I2C_FLAGS_TEN_BIT	BIT(0)
- 
-+/*
-+ * Reset RPMB probing
-+ *
-+ * Releases an eventually already used RPMB devices and starts over searching
-+ * for RPMB devices. Returns the kind of shared memory to use in subsequent
-+ * OPTEE_RPC_CMD_RPMB_PROBE_NEXT and OPTEE_RPC_CMD_RPMB calls.
-+ *
-+ * [out]    value[0].a	    OPTEE_RPC_SHM_TYPE_*, the parameter for
-+ *			    OPTEE_RPC_CMD_SHM_ALLOC
-+ */
-+#define OPTEE_RPC_CMD_RPMB_PROBE_RESET	22
-+
-+/*
-+ * Probe next RPMB device
-+ *
-+ * [out]    value[0].a	    Type of RPMB device, OPTEE_RPC_RPMB_*
-+ * [out]    value[0].b	    EXT CSD-slice 168 "RPMB Size"
-+ * [out]    value[0].c	    EXT CSD-slice 222 "Reliable Write Sector Count"
-+ * [out]    memref[1]       Buffer with the raw CID
-+ */
-+#define OPTEE_RPC_CMD_RPMB_PROBE_NEXT	23
-+
-+/* Type of RPMB device */
-+#define OPTEE_RPC_RPMB_EMMC		0
-+#define OPTEE_RPC_RPMB_UFS		1
-+#define OPTEE_RPC_RPMB_NVME		2
-+
- #endif /*__OPTEE_RPC_CMD_H*/
-diff --git a/drivers/tee/optee/rpc.c b/drivers/tee/optee/rpc.c
-index e69bc6380683..e211c1c94984 100644
---- a/drivers/tee/optee/rpc.c
-+++ b/drivers/tee/optee/rpc.c
-@@ -7,6 +7,7 @@
- 
- #include <linux/delay.h>
- #include <linux/i2c.h>
-+#include <linux/rpmb.h>
- #include <linux/slab.h>
- #include <linux/tee_drv.h>
- #include "optee_private.h"
-@@ -255,6 +256,229 @@ void optee_rpc_cmd_free_suppl(struct tee_context *ctx, struct tee_shm *shm)
- 	optee_supp_thrd_req(ctx, OPTEE_RPC_CMD_SHM_FREE, 1, &param);
- }
- 
-+static void handle_rpc_func_rpmb_probe_reset(struct tee_context *ctx,
-+					     struct optee *optee,
-+					     struct optee_msg_arg *arg)
-+{
-+	struct tee_param params[1];
-+
-+	if (!IS_ENABLED(CONFIG_RPMB)) {
-+		handle_rpc_supp_cmd(ctx, optee, arg);
-+		return;
-+	}
-+
-+	if (arg->num_params != ARRAY_SIZE(params) ||
-+	    optee->ops->from_msg_param(optee, params, arg->num_params,
-+				       arg->params) ||
-+	    params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT) {
-+		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
-+		return;
-+	}
-+
-+	params[0].u.value.a = OPTEE_RPC_SHM_TYPE_KERNEL;
-+	params[0].u.value.b = 0;
-+	params[0].u.value.c = 0;
-+	if (optee->ops->to_msg_param(optee, arg->params,
-+				     arg->num_params, params)) {
-+		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
-+		return;
-+	}
-+
-+	mutex_lock(&optee->rpmb_dev_mutex);
-+	rpmb_dev_put(optee->rpmb_dev);
-+	optee->rpmb_dev = NULL;
-+	mutex_unlock(&optee->rpmb_dev_mutex);
-+
-+	arg->ret = TEEC_SUCCESS;
-+}
-+
-+static int rpmb_type_to_rpc_type(enum rpmb_type rtype)
-+{
-+	switch (rtype) {
-+	case RPMB_TYPE_EMMC:
-+		return OPTEE_RPC_RPMB_EMMC;
-+	case RPMB_TYPE_UFS:
-+		return OPTEE_RPC_RPMB_UFS;
-+	case RPMB_TYPE_NVME:
-+		return OPTEE_RPC_RPMB_NVME;
-+	default:
-+		return -1;
-+	}
-+}
-+
-+static int rpc_rpmb_match(struct rpmb_dev *rdev, const void *data)
-+{
-+	return rpmb_type_to_rpc_type(rdev->descr.type) >= 0;
-+}
-+
-+static void handle_rpc_func_rpmb_probe_next(struct tee_context *ctx,
-+					    struct optee *optee,
-+					    struct optee_msg_arg *arg)
-+{
-+	struct rpmb_dev *rdev;
-+	struct tee_param params[2];
-+	void *buf;
-+
-+	if (!IS_REACHABLE(CONFIG_RPMB)) {
-+		handle_rpc_supp_cmd(ctx, optee, arg);
-+		return;
-+	}
-+
-+	if (arg->num_params != ARRAY_SIZE(params) ||
-+	    optee->ops->from_msg_param(optee, params, arg->num_params,
-+				       arg->params) ||
-+	    params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT ||
-+	    params[1].attr != TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT) {
-+		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
-+		return;
-+	}
-+	buf = tee_shm_get_va(params[1].u.memref.shm,
-+			     params[1].u.memref.shm_offs);
-+	if (!buf) {
-+		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
-+		return;
-+	}
-+
-+	mutex_lock(&optee->rpmb_dev_mutex);
-+	rdev = rpmb_dev_find_device(NULL, optee->rpmb_dev, rpc_rpmb_match);
-+	rpmb_dev_put(optee->rpmb_dev);
-+	optee->rpmb_dev = rdev;
-+	mutex_unlock(&optee->rpmb_dev_mutex);
-+
-+	if (!rdev) {
-+		arg->ret = TEEC_ERROR_ITEM_NOT_FOUND;
-+		return;
-+	}
-+
-+	if (params[1].u.memref.size < rdev->descr.dev_id_len) {
-+		arg->ret = TEEC_ERROR_SHORT_BUFFER;
-+		return;
-+	}
-+	memcpy(buf, rdev->descr.dev_id, rdev->descr.dev_id_len);
-+	params[1].u.memref.size = rdev->descr.dev_id_len;
-+	params[0].u.value.a = rpmb_type_to_rpc_type(rdev->descr.type);
-+	params[0].u.value.b = rdev->descr.capacity;
-+	params[0].u.value.c = rdev->descr.reliable_wr_count;
-+	if (optee->ops->to_msg_param(optee, arg->params,
-+				     arg->num_params, params)) {
-+		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
-+		return;
-+	}
-+
-+	arg->ret = TEEC_SUCCESS;
-+}
-+
-+/* Request */
-+struct rpmb_req {
-+	u16 cmd;
-+#define RPMB_CMD_DATA_REQ      0x00
-+#define RPMB_CMD_GET_DEV_INFO  0x01
-+	u16 dev_id;
-+	u16 block_count;
-+	/* Optional data frames (rpmb_data_frame) follow */
-+};
-+
-+#define RPMB_REQ_DATA(req) ((void *)((struct rpmb_req *)(req) + 1))
-+
-+#define RPMB_CID_SZ 16
-+
-+/* Response to device info request */
-+struct rpmb_dev_info {
-+	u8 cid[RPMB_CID_SZ];
-+	u8 rpmb_size_mult;	/* EXT CSD-slice 168: RPMB Size */
-+	u8 rel_wr_sec_c;	/* EXT CSD-slice 222: Reliable Write Sector */
-+				/*                    Count */
-+	u8 ret_code;
-+#define RPMB_CMD_GET_DEV_INFO_RET_OK     0x00
-+#define RPMB_CMD_GET_DEV_INFO_RET_ERROR  0x01
-+};
-+
-+static int get_dev_info(struct rpmb_dev *rdev, void *rsp, size_t rsp_size)
-+{
-+	struct rpmb_dev_info *dev_info;
-+
-+	if (rsp_size != sizeof(*dev_info))
-+		return TEEC_ERROR_BAD_PARAMETERS;
-+
-+	dev_info = rsp;
-+	memcpy(dev_info->cid, rdev->descr.dev_id, sizeof(dev_info->cid));
-+	dev_info->rpmb_size_mult = rdev->descr.capacity;
-+	dev_info->rel_wr_sec_c = rdev->descr.reliable_wr_count;
-+	dev_info->ret_code = RPMB_CMD_GET_DEV_INFO_RET_OK;
-+
-+	return TEEC_SUCCESS;
-+}
-+
-+/*
-+ * req is one struct rpmb_req followed by one or more struct rpmb_data_frame
-+ * rsp is either one struct rpmb_dev_info or one or more struct rpmb_data_frame
-+ */
-+static u32 rpmb_process_request(struct optee *optee, struct rpmb_dev *rdev,
-+				void *req, size_t req_size,
-+				void *rsp, size_t rsp_size)
-+{
-+	struct rpmb_req *sreq = req;
-+	int rc;
-+
-+	if (req_size < sizeof(*sreq))
-+		return TEEC_ERROR_BAD_PARAMETERS;
-+
-+	switch (sreq->cmd) {
-+	case RPMB_CMD_DATA_REQ:
-+		rc = rpmb_route_frames(rdev, RPMB_REQ_DATA(req),
-+				       req_size - sizeof(struct rpmb_req),
-+				       rsp, rsp_size);
-+		if (rc)
-+			return TEEC_ERROR_BAD_PARAMETERS;
-+		return TEEC_SUCCESS;
-+	case RPMB_CMD_GET_DEV_INFO:
-+		return get_dev_info(rdev, rsp, rsp_size);
-+	default:
-+		return TEEC_ERROR_BAD_PARAMETERS;
-+	}
-+}
-+
-+static void handle_rpc_func_rpmb(struct tee_context *ctx, struct optee *optee,
-+				 struct optee_msg_arg *arg)
-+{
-+	struct tee_param params[2];
-+	struct rpmb_dev *rdev;
-+	void *p0, *p1;
-+
-+	mutex_lock(&optee->rpmb_dev_mutex);
-+	rdev = rpmb_dev_get(optee->rpmb_dev);
-+	mutex_unlock(&optee->rpmb_dev_mutex);
-+	if (!rdev) {
-+		handle_rpc_supp_cmd(ctx, optee, arg);
-+		return;
-+	}
-+
-+	if (arg->num_params != ARRAY_SIZE(params) ||
-+	    optee->ops->from_msg_param(optee, params, arg->num_params,
-+				       arg->params) ||
-+	    params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT ||
-+	    params[1].attr != TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT) {
-+		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
-+		goto out;
-+	}
-+
-+	p0 = tee_shm_get_va(params[0].u.memref.shm,
-+			    params[0].u.memref.shm_offs);
-+	p1 = tee_shm_get_va(params[1].u.memref.shm,
-+			    params[1].u.memref.shm_offs);
-+	arg->ret = rpmb_process_request(optee, rdev, p0,
-+					params[0].u.memref.size,
-+					p1, params[1].u.memref.size);
-+	if (arg->ret)
-+		goto out;
-+
-+	if (optee->ops->to_msg_param(optee, arg->params,
-+				     arg->num_params, params))
-+		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
-+out:
-+	rpmb_dev_put(rdev);
-+}
-+
- void optee_rpc_cmd(struct tee_context *ctx, struct optee *optee,
- 		   struct optee_msg_arg *arg)
- {
-@@ -271,6 +495,15 @@ void optee_rpc_cmd(struct tee_context *ctx, struct optee *optee,
- 	case OPTEE_RPC_CMD_I2C_TRANSFER:
- 		handle_rpc_func_cmd_i2c_transfer(ctx, arg);
- 		break;
-+	case OPTEE_RPC_CMD_RPMB_PROBE_RESET:
-+		handle_rpc_func_rpmb_probe_reset(ctx, optee, arg);
-+		break;
-+	case OPTEE_RPC_CMD_RPMB_PROBE_NEXT:
-+		handle_rpc_func_rpmb_probe_next(ctx, optee, arg);
-+		break;
-+	case OPTEE_RPC_CMD_RPMB:
-+		handle_rpc_func_rpmb(ctx, optee, arg);
-+		break;
- 	default:
- 		handle_rpc_supp_cmd(ctx, optee, arg);
- 	}
-diff --git a/drivers/tee/optee/smc_abi.c b/drivers/tee/optee/smc_abi.c
-index a37f87087e5c..c23bcf35c8cb 100644
---- a/drivers/tee/optee/smc_abi.c
-+++ b/drivers/tee/optee/smc_abi.c
-@@ -20,6 +20,7 @@
- #include <linux/of_irq.h>
- #include <linux/of_platform.h>
- #include <linux/platform_device.h>
-+#include <linux/rpmb.h>
- #include <linux/sched.h>
- #include <linux/slab.h>
- #include <linux/string.h>
-@@ -1715,6 +1716,7 @@ static int optee_probe(struct platform_device *pdev)
- 	optee->smc.memremaped_shm = memremaped_shm;
- 	optee->pool = pool;
- 	optee_shm_arg_cache_init(optee, arg_cache_flags);
-+	mutex_init(&optee->rpmb_dev_mutex);
- 
- 	platform_set_drvdata(pdev, optee);
- 	ctx = teedev_open(optee->teedev);
-@@ -1769,6 +1771,9 @@ static int optee_probe(struct platform_device *pdev)
- 	if (rc)
- 		goto err_disable_shm_cache;
- 
-+	INIT_WORK(&optee->rpmb_scan_bus_work, optee_bus_scan_rpmb);
-+	optee->rpmb_intf.notifier_call = optee_rpmb_intf_rdev;
-+	rpmb_interface_register(&optee->rpmb_intf);
- 	pr_info("initialized driver\n");
- 	return 0;
- 
-@@ -1782,6 +1787,8 @@ static int optee_probe(struct platform_device *pdev)
- err_close_ctx:
- 	teedev_close_context(ctx);
- err_supp_uninit:
-+	rpmb_dev_put(optee->rpmb_dev);
-+	mutex_destroy(&optee->rpmb_dev_mutex);
- 	optee_shm_arg_cache_uninit(optee);
- 	optee_supp_uninit(&optee->supp);
- 	mutex_destroy(&optee->call_queue.mutex);
--- 
-2.34.1
-
+PiBBIG51bWJlciBvZiBzdG9yYWdlIHRlY2hub2xvZ2llcyBzdXBwb3J0IGEgc3BlY2lhbGlzZWQg
+aGFyZHdhcmUNCj4gcGFydGl0aW9uIGRlc2lnbmVkIHRvIGJlIHJlc2lzdGFudCB0byByZXBsYXkg
+YXR0YWNrcy4gVGhlIHVuZGVybHlpbmcNCj4gSFcgcHJvdG9jb2xzIGRpZmZlciBidXQgdGhlIG9w
+ZXJhdGlvbnMgYXJlIGNvbW1vbi4gVGhlIFJQTUIgcGFydGl0aW9uDQo+IGNhbm5vdCBiZSBhY2Nl
+c3NlZCB2aWEgc3RhbmRhcmQgYmxvY2sgbGF5ZXIsIGJ1dCBieSBhIHNldCBvZiBzcGVjaWZpYw0K
+PiBSUE1CIGNvbW1hbmRzOiBXUklURSwgUkVBRCwgR0VUX1dSSVRFX0NPVU5URVIsIGFuZCBQUk9H
+UkFNX0tFWS4NCldoYXQgYWJvdXQgdGhlIG90aGVyIHJwbWIgb3BlcmF0aW9ucz8NClRoZXJlIGFy
+ZSA3IG9wZXJhdGlvbnMgaW4gZU1NQy4NCg0KLi4uLi4uLi4uLi4uDQoNCj4gKy8qKg0KPiArICog
+cnBtYl9kZXZfZmluZF9kZXZpY2UoKSAtIHJldHVybiBmaXJzdCBtYXRjaGluZyBycG1iIGRldmlj
+ZQ0KPiArICogQGRhdGE6IGRhdGEgZm9yIHRoZSBtYXRjaCBmdW5jdGlvbg0KPiArICogQG1hdGNo
+OiB0aGUgbWF0Y2hpbmcgZnVuY3Rpb24NCj4gKyAqDQo+ICsgKiBJdGVyYXRlIG92ZXIgcmVnaXN0
+ZXJlZCBSUE1CIGRldmljZXMsIGFuZCBjYWxsIEBtYXRjaCgpIGZvciBlYWNoIHBhc3NpbmcNCj4g
+KyAqIGl0IHRoZSBSUE1CIGRldmljZSBhbmQgQGRhdGEuDQo+ICsgKg0KPiArICogVGhlIHJldHVy
+biB2YWx1ZSBvZiBAbWF0Y2goKSBpcyBjaGVja2VkIGZvciBlYWNoIGNhbGwuIElmIGl0IHJldHVy
+bnMNCj4gKyAqIGFueXRoaW5nIG90aGVyIDAsIGJyZWFrIGFuZCByZXR1cm4gdGhlIGZvdW5kIFJQ
+TUIgZGV2aWNlLg0KPiArICoNCj4gKyAqIEl0J3MgdGhlIGNhbGxlcnMgcmVzcG9uc2liaWxpdHkg
+dG8gY2FsbCBycG1iX2Rldl9wdXQoKSBvbiB0aGUgcmV0dXJuZWQNCj4gKyAqIGRldmljZSwgd2hl
+biBpdCdzIGRvbmUgd2l0aCBpdC4NCj4gKyAqDQo+ICsgKiBSZXR1cm5zOiBhIG1hdGNoaW5nIHJw
+bWIgZGV2aWNlIG9yIE5VTEwgb24gZmFpbHVyZQ0KPiArICovDQo+ICtzdHJ1Y3QgcnBtYl9kZXYg
+KnJwbWJfZGV2X2ZpbmRfZGV2aWNlKGNvbnN0IHZvaWQgKmRhdGEsDQo+ICsgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgY29uc3Qgc3RydWN0IHJwbWJfZGV2ICpzdGFydCwNCj4g
+KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpbnQgKCptYXRjaCkoc3RydWN0
+IHJwbWJfZGV2ICpyZGV2LA0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICBjb25zdCB2b2lkICpkYXRhKSkNCj4gK3sNCj4gKyAgICAgICBzdHJ1Y3Qg
+cnBtYl9kZXYgKnJkZXY7DQo+ICsgICAgICAgc3RydWN0IGxpc3RfaGVhZCAqcG9zOw0KPiArDQo+
+ICsgICAgICAgbXV0ZXhfbG9jaygmcnBtYl9tdXRleCk7DQo+ICsgICAgICAgaWYgKHN0YXJ0KQ0K
+PiArICAgICAgICAgICAgICAgcG9zID0gc3RhcnQtPmxpc3Rfbm9kZS5uZXh0Ow0KPiArICAgICAg
+IGVsc2UNCj4gKyAgICAgICAgICAgICAgIHBvcyA9IHJwbWJfZGV2X2xpc3QubmV4dDsNCj4gKw0K
+PiArICAgICAgIHdoaWxlIChwb3MgIT0gJnJwbWJfZGV2X2xpc3QpIHsNCldoeSBub3QganVzdCBs
+aXN0X2Zvcl9lYWNoX2VudHJ5IGluc3RlYWQ/DQoNCj4gKyAgICAgICAgICAgICAgIHJkZXYgPSBj
+b250YWluZXJfb2YocG9zLCBzdHJ1Y3QgcnBtYl9kZXYsIGxpc3Rfbm9kZSk7DQo+ICsgICAgICAg
+ICAgICAgICBpZiAobWF0Y2gocmRldiwgZGF0YSkpIHsNCj4gKyAgICAgICAgICAgICAgICAgICAg
+ICAgcnBtYl9kZXZfZ2V0KHJkZXYpOw0KPiArICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91
+dDsNCj4gKyAgICAgICAgICAgICAgIH0NCj4gKyAgICAgICAgICAgICAgIHBvcyA9IHBvcy0+bmV4
+dDsNCj4gKyAgICAgICB9DQo+ICsgICAgICAgcmRldiA9IE5VTEw7DQo+ICsNCj4gK291dDoNCj4g
+KyAgICAgICBtdXRleF91bmxvY2soJnJwbWJfbXV0ZXgpOw0KPiArDQo+ICsgICAgICAgcmV0dXJu
+IHJkZXY7DQo+ICt9DQoNCi4uLi4uLi4uLi4uLi4uLi4uLi4uLg0KDQo+ICsvKioNCj4gKyAqIHJw
+bWJfZGV2X3JlZ2lzdGVyIC0gcmVnaXN0ZXIgUlBNQiBwYXJ0aXRpb24gd2l0aCB0aGUgUlBNQiBz
+dWJzeXN0ZW0NCj4gKyAqIEBkZXY6IHN0b3JhZ2UgZGV2aWNlIG9mIHRoZSBycG1iIGRldmljZQ0K
+PiArICogQG9wczogZGV2aWNlIHNwZWNpZmljIG9wZXJhdGlvbnMNCj4gKyAqDQo+ICsgKiBXaGls
+ZSByZWdpc3RlcmluZyB0aGUgUlBNQiBwYXJ0aXRpb24gZXh0cmFjdCBuZWVkZWQgZGV2aWNlIGlu
+Zm9ybWF0aW9uDQo+ICsgKiB3aGlsZSBuZWVkZWQgcmVzb3VyY2VzIGFyZSBhdmFpbGFibGUuDQo+
+ICsgKg0KPiArICogUmV0dXJuczogYSBwb2ludGVyIHRvIGEgJ3N0cnVjdCBycG1iX2Rldicgb3Ig
+YW4gRVJSX1BUUiBvbiBmYWlsdXJlDQo+ICsgKi8NCj4gK3N0cnVjdCBycG1iX2RldiAqcnBtYl9k
+ZXZfcmVnaXN0ZXIoc3RydWN0IGRldmljZSAqZGV2LA0KPiArICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgIHN0cnVjdCBycG1iX2Rlc2NyICpkZXNjcikNCj4gK3sNCj4gKyAgICAgICBz
+dHJ1Y3QgcnBtYl9kZXYgKnJkZXY7DQo+ICsNCj4gKyAgICAgICBpZiAoIWRldiB8fCAhZGVzY3Ig
+fHwgIWRlc2NyLT5yb3V0ZV9mcmFtZXMgfHwgIWRlc2NyLT5kZXZfaWQgfHwNCj4gKyAgICAgICAg
+ICAgIWRlc2NyLT5kZXZfaWRfbGVuKQ0KPiArICAgICAgICAgICAgICAgcmV0dXJuIEVSUl9QVFIo
+LUVJTlZBTCk7DQo+ICsNCj4gKyAgICAgICByZGV2ID0ga3phbGxvYyhzaXplb2YoKnJkZXYpLCBH
+RlBfS0VSTkVMKTsNCj4gKyAgICAgICBpZiAoIXJkZXYpDQo+ICsgICAgICAgICAgICAgICByZXR1
+cm4gRVJSX1BUUigtRU5PTUVNKTsNCj4gKyAgICAgICByZGV2LT5kZXNjciA9ICpkZXNjcjsNCj4g
+KyAgICAgICByZGV2LT5kZXNjci5kZXZfaWQgPSBrbWVtZHVwKGRlc2NyLT5kZXZfaWQsIGRlc2Ny
+LT5kZXZfaWRfbGVuLA0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgR0ZQ
+X0tFUk5FTCk7DQpJbiBhZGRpdGlvbiB0byB0aGUgZGV2X2lkLCB3b3VsZG4ndCBpdCBtYWtlIHNl
+bnNlIHRvIGhhdmUgeW91ciBvd24gSURBIGFzIHdlbGw/DQoNCj4gKyAgICAgICBpZiAoIXJkZXYt
+PmRlc2NyLmRldl9pZCkgew0KPiArICAgICAgICAgICAgICAga2ZyZWUocmRldik7DQo+ICsgICAg
+ICAgICAgICAgICByZXR1cm4gRVJSX1BUUigtRU5PTUVNKTsNCj4gKyAgICAgICB9DQo+ICsNCj4g
+KyAgICAgICByZGV2LT5wYXJlbnRfZGV2ID0gZGV2Ow0KPiArDQo+ICsgICAgICAgZGV2X2RiZyhy
+ZGV2LT5wYXJlbnRfZGV2LCAicmVnaXN0ZXJlZCBkZXZpY2VcbiIpOw0KPiArDQo+ICsgICAgICAg
+bXV0ZXhfbG9jaygmcnBtYl9tdXRleCk7DQo+ICsgICAgICAgbGlzdF9hZGRfdGFpbCgmcmRldi0+
+bGlzdF9ub2RlLCAmcnBtYl9kZXZfbGlzdCk7DQo+ICsgICAgICAgYmxvY2tpbmdfbm90aWZpZXJf
+Y2FsbF9jaGFpbigmcnBtYl9pbnRlcmZhY2UsDQo+IFJQTUJfTk9USUZZX0FERF9ERVZJQ0UsDQo+
+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZGV2KTsNCj4gKyAgICAgICBt
+dXRleF91bmxvY2soJnJwbWJfbXV0ZXgpOw0KPiArDQo+ICsgICAgICAgcmV0dXJuIHJkZXY7DQo+
+ICt9DQo+ICtFWFBPUlRfU1lNQk9MX0dQTChycG1iX2Rldl9yZWdpc3Rlcik7DQoNCi4uLi4uLi4u
+Li4uLg0KDQo+IG5ldyBmaWxlIG1vZGUgMTAwNjQ0DQo+IGluZGV4IDAwMDAwMDAwMDAwMC4uMjUx
+ZDZiN2U2ZDE1DQo+IC0tLSAvZGV2L251bGwNCj4gKysrIGIvaW5jbHVkZS9saW51eC9ycG1iLmgN
+Cj4gQEAgLTAsMCArMSwxMzYgQEANCj4gKy8qIFNQRFgtTGljZW5zZS1JZGVudGlmaWVyOiBCU0Qt
+My1DbGF1c2UgT1IgR1BMLTIuMCAqLw0KPiArLyoNCj4gKyAqIENvcHlyaWdodCAoQykgMjAxNS0y
+MDE5IEludGVsIENvcnAuIEFsbCByaWdodHMgcmVzZXJ2ZWQNCj4gKyAqIENvcHlyaWdodCAoQykg
+MjAyMS0yMDIyIExpbmFybyBMdGQNCj4gKyAqLw0KPiArI2lmbmRlZiBfX1JQTUJfSF9fDQo+ICsj
+ZGVmaW5lIF9fUlBNQl9IX18NCj4gKw0KPiArI2luY2x1ZGUgPGxpbnV4L3R5cGVzLmg+DQo+ICsj
+aW5jbHVkZSA8bGludXgvZGV2aWNlLmg+DQo+ICsjaW5jbHVkZSA8bGludXgvbm90aWZpZXIuaD4N
+Cj4gKw0KPiArLyoqDQo+ICsgKiBlbnVtIHJwbWJfdHlwZSAtIHR5cGUgb2YgdW5kZXJseWluZyBz
+dG9yYWdlIHRlY2hub2xvZ3kNCj4gKyAqDQo+ICsgKiBAUlBNQl9UWVBFX0VNTUMgIDogZW1tYyAo
+SkVTRDg0LUI1MC4xKQ0KPiArICogQFJQTUJfVFlQRV9VRlMgICA6IFVGUyAoSkVTRDIyMCkNCj4g
+KyAqIEBSUE1CX1RZUEVfTlZNRSAgOiBOVk0gRXhwcmVzcw0KPiArICovDQo+ICtlbnVtIHJwbWJf
+dHlwZSB7DQo+ICsgICAgICAgUlBNQl9UWVBFX0VNTUMsDQo+ICsgICAgICAgUlBNQl9UWVBFX1VG
+UywNCj4gKyAgICAgICBSUE1CX1RZUEVfTlZNRSwNCj4gK307DQo+ICsNCj4gKy8qKg0KPiArICog
+c3RydWN0IHJwbWJfZGVzY3IgLSBSUE1CIGRlc2NyaXB0b3IgcHJvdmlkZWQgYnkgdGhlIHVuZGVy
+bHlpbmcgYmxvY2sNCj4gZGV2aWNlDQpUaGUgdXNlIG9mIHRoZSB0ZXJtICJycG1iIGRlc2NyaXB0
+b3IiIG1heSBiZSBzbGlnaHRseSBtaXNsZWFkaW5nLg0KVGhpcyBpcyBiZWNhdXNlIGluIFVGUyB0
+aGVyZSBhcmUgdmFyaW91cyBkZXNjcmlwdG9ycyB0aGF0IGlkZW50aWZpZXMgdmFyaW91cyBjaGFy
+YWN0ZXJpc3RpY3MsDQplLmcuIGRldmljZSBkZXNjcmlwdG9yLCBnZW9tZXRyeSBkZXNjcmlwdG9y
+LCB1bml0IGRlc2NyaXB0b3IgZXRjLiwgDQphbmQgcmVjZW50bHkgVUZTNC4wIGludHJvZHVjZWQg
+YSBuZXcgZGVzY3JpcHRvciAtIFJQTUIgZGVzY3JpcHRvci4uLi4NCg0KVGhhbmtzLA0KQXZyaQ0K
