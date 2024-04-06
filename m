@@ -1,79 +1,83 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.19])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CD043987D;
-	Sat,  6 Apr 2024 15:31:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B8D136AF2;
+	Sat,  6 Apr 2024 15:36:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.9
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712417493; cv=fail; b=VXsAIp9RMPXwjrANlTktqgOZydY4KTAkMfw7GEm6Co90MLgB8tt4SPhkd7xBCIfpKR8uYL/Xse+wcTX8HZM6Qgkhqn7GnslU8yNitjKgqrQ0HhtOWvCIGFYJrkS/rFRPGD0MLrGgV+Ucp5nfKoWX5nk1f8XBY0Pt/Q3iGJogJgo=
+	t=1712417798; cv=fail; b=J8xsHJz1EvgZeIyaAkwZliZGemk4ozgTBzjbU5Afq7dus/Kexy9qg1upLVFQN0qAd36sAD1zWISZa0yWoAvxJr6S23NAUyTNISqnkE5VZp3liTJ5tSU65S1Gj+ipdBHYAcIH4P++eyM2/BbfyNH2yVOjIDc7UrWtcOVQMxYx++c=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712417493; c=relaxed/simple;
-	bh=IItLQYkKzaw4kBGAL35X8jNoobqaR2SlFpegYsg7a6c=;
+	s=arc-20240116; t=1712417798; c=relaxed/simple;
+	bh=wUjvhWVW+8qnPAGVPRjUFC8j++QsI2NNVA36iRONCeo=;
 	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=npoiLhTdj2nA3PrgVdOhvk2TjBjlqXHsRo4jD72qrIQId/Jk6jBhILE1gbCvSTJOVKgDZJY2rRPfq2NT4wF8GlKXElhpKJHw08OpwXw0fawTFp8/HSmZ0Bl8Fo54kHI4Dw0ZMUYXXV76MYxldQ2QSw/13zlrRMnJO/k5FoKhxNk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=JIsWvaQ9; arc=fail smtp.client-ip=198.175.65.19
+	 Content-Type:MIME-Version; b=nbPCvxUeHTwqrLKQHH+zquiSkpV40fqHh7LXDQMOSKokcAJt0lW9uPmaQ0Y82+7FTsRef4GJLue//c4DLFn777ssSdrN16NapdjYy+4Z7pikWn1tX9islXeHe8/+L9vA7wbH8IPjXpv1AIuI2XtBA0t3AM5Ed0vqquKMJmQwWWY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=NRYC2N0G; arc=fail smtp.client-ip=198.175.65.9
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="JIsWvaQ9"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="NRYC2N0G"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1712417491; x=1743953491;
+  t=1712417796; x=1743953796;
   h=from:to:cc:subject:date:message-id:references:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=IItLQYkKzaw4kBGAL35X8jNoobqaR2SlFpegYsg7a6c=;
-  b=JIsWvaQ9HB0dE90QpdcOCCi2DZ5ShZ5hphjfByQ9qF0O6Ti9J+hgmDRG
-   vSS5KyIRBvAnfPzrvLN24b2CIxrNExTFQphbMoRmuSWihn0Mu6OLEyE/f
-   ZSsGlvKV/9YVlbfC9ggb3A1rQMi9Tiv0JE+gJqhSROk3YZO9rMzzal0Om
-   UYuDngunFwiPv49m/fOlWWK5D5w3GiDF0FY39si+y4KqcP4IJ7Y6YUIYX
-   RnubENXonzqjd8I2SpC2dYtQvZNztWel47ot3zApDXxRt89SMVi0ODToe
-   QBnjTUmnDKUBpgP7Dx7FKMnlMCECsJ76NSgUSjFPaA6Z3uVBauC/7HvBa
-   g==;
-X-CSE-ConnectionGUID: Soj0JcB/SlO7hEes2zuiew==
-X-CSE-MsgGUID: 8z/0rNYOT72ZD+VBcWqAvw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11036"; a="7595788"
+  bh=wUjvhWVW+8qnPAGVPRjUFC8j++QsI2NNVA36iRONCeo=;
+  b=NRYC2N0GvY3F0KkR/6H0hbIf9XkN4s3XHdtkCCYXt6WIrakvvwaiKvT6
+   dcQQyzgC8VFrjqCbHtTuL8nJ5zEQb5/yvRc2m7JUtC64wFYh9OK6gxDAx
+   LgfU5McE7aqnkM+j3/0PLH0mDP8rffkIhK2UyTewIeSwXnAKjQ2S2vAQ8
+   jO6/aYS4TaI++JqZXHSB25UEcJsoDXXiDcaCiv0qX18vv5GhsYj2LRngT
+   Z1kspUCZ75ZsPG4dMmIkinWsorTFfJyG2QO/Lx0UHz72eAw3xfOZMe+af
+   T+2mrvL+cssm9RVF7Tt4342YEuLAx6932H1BwNfxYInpjO2hKB1wEkehR
+   Q==;
+X-CSE-ConnectionGUID: KtMmTfJqRkappDzJrsDjgw==
+X-CSE-MsgGUID: t2Uz0FbFT0K6oIun3o0uwA==
+X-IronPort-AV: E=McAfee;i="6600,9927,11036"; a="30220683"
 X-IronPort-AV: E=Sophos;i="6.07,183,1708416000"; 
-   d="scan'208";a="7595788"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by orvoesa111.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Apr 2024 08:31:30 -0700
-X-CSE-ConnectionGUID: E12h7OrtStKCUe79DdqNzA==
-X-CSE-MsgGUID: 4FEmX2AUQHqolwCyf47bTg==
+   d="scan'208";a="30220683"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Apr 2024 08:36:35 -0700
+X-CSE-ConnectionGUID: q3O+fauuR/OYBtfDzL5blw==
+X-CSE-MsgGUID: 2rgAq7wITUqr2STRahsK3A==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.07,183,1708416000"; 
-   d="scan'208";a="50660352"
-Received: from orsmsx602.amr.corp.intel.com ([10.22.229.15])
-  by fmviesa001.fm.intel.com with ESMTP/TLS/AES256-GCM-SHA384; 06 Apr 2024 08:31:29 -0700
-Received: from orsmsx610.amr.corp.intel.com (10.22.229.23) by
- ORSMSX602.amr.corp.intel.com (10.22.229.15) with Microsoft SMTP Server
+   d="scan'208";a="50417302"
+Received: from orsmsx603.amr.corp.intel.com ([10.22.229.16])
+  by orviesa002.jf.intel.com with ESMTP/TLS/AES256-GCM-SHA384; 06 Apr 2024 08:36:36 -0700
+Received: from orsmsx611.amr.corp.intel.com (10.22.229.24) by
+ ORSMSX603.amr.corp.intel.com (10.22.229.16) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Sat, 6 Apr 2024 08:31:28 -0700
-Received: from orsedg603.ED.cps.intel.com (10.7.248.4) by
- orsmsx610.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+ 15.1.2507.35; Sat, 6 Apr 2024 08:36:35 -0700
+Received: from orsmsx603.amr.corp.intel.com (10.22.229.16) by
+ ORSMSX611.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35 via Frontend Transport; Sat, 6 Apr 2024 08:31:28 -0700
-Received: from NAM10-MW2-obe.outbound.protection.outlook.com (104.47.55.101)
- by edgegateway.intel.com (134.134.137.100) with Microsoft SMTP Server
+ 15.1.2507.35; Sat, 6 Apr 2024 08:36:34 -0700
+Received: from ORSEDG602.ED.cps.intel.com (10.7.248.7) by
+ orsmsx603.amr.corp.intel.com (10.22.229.16) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.35 via Frontend Transport; Sat, 6 Apr 2024 08:36:34 -0700
+Received: from NAM02-DM3-obe.outbound.protection.outlook.com (104.47.56.40) by
+ edgegateway.intel.com (134.134.137.103) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Sat, 6 Apr 2024 08:31:28 -0700
+ 15.1.2507.35; Sat, 6 Apr 2024 08:35:45 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=KvnPRHm15hRyZYR02HBvvjiup12xUVFIM2k0pnrQHKovB/EYdkdYSmQZiJvCB+UZpcf1iS+UMxUGstYDkoWozKnsAkHr7y6ZzXAiMSdgKVjKBicIeIaEoi+iAZGJp2hIY6V1fTaUvAL2MHzlB8A+1nFCWCGOd9itk+o0xiD4/iYHBEMUQjNb1Xl4Xgi8Az92BqMfJM9fipO2FF5/bgEc+UdPFCcE4rY98iLV8ehdJ4te4cKrxxxHdX9h+rJRguj50bo+07mzr0KCpsLcOjOz9Gz3fPjb74s5SdbioswsYgMANGjME+iEBmpI2fx/6sXeAIJ8FgmeG5u+bZEuH/WBIQ==
+ b=jnx1pTcolYbF/JcztFDBFqlj/Xjpmn9yxaWNTWS9G+den8OQp3oYz0oNI6xBFN/VeoxhwYQL/O8GUUAGdHopIYaYAPVac3A3ph+Pk+j6byrQC4LSoMjK0r+wJd9qlKBlHXC2gZqtmLhdiKvjO1OeA1riwMYbl/DBotBFJwoaAamHE6k6O5ctGD0zXaB5uObgc8+PZX0VuFm+AGGSHbpx/IKan1KSdT3a85G/ljIg/E6wlYE3Xat27QIJhqoJSlvk4lwaMG989YrZQoC6PdTn3AT9W4VHCQSQdRUbNXpIVF1KhoaDjZEvElbpYGLLMIuxXM1YqkbbgrA92g9DN114sg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=g2dJOEgx7UZl/Ows5silAUHM92gfsUp8VtPBuI2SuN0=;
- b=lP9tqBBwWM1Si291agExpy/WSXoda4ZraPyiNqE9wFA+VeBbp70+GwGWS/fkkxpZ6sI8jtA3nv4BEInhbekC+a2aWDlqC3SPgZFia72cZw9WTXQRR867BnTDVhuZxDmlQ1WN8rxixbS+fOQ3Q37T3XVsPBnYiRL1KfG4PM8qlR/aq15feAlHl5/h3Pd0rmOZTB0b6/+Gi1ZqluoLCi2HEw12cbDiE50iGeP+RFZatuQN8D9zPmx7CCZP1WzFLpWaLVoOcJl7zUqrNGyyHT1v0eWgNmottnusjOIs8jd3VNUuxftFRwu7HpCmU5CmeHfQqJExQ51Xjp8ohAXIPx/PPA==
+ bh=wUjvhWVW+8qnPAGVPRjUFC8j++QsI2NNVA36iRONCeo=;
+ b=X4Ts8MFYfZQzMzrz6FSDak8bEG7N9RtIOQU2cKdCRiJ1jNTBQ+jgAhobDrlWkDyy3kOnlLkXUC1xaZT5QML6GfodNA7Zagzn+TjE6lhBZZxrEIwY6uJM0NKkCQvTXtzYzJ9SLvN4EcnaccG2lviqeq2SmU3fOQqOZ5t85WU7GIlAqYzA7GBPSy27g6octdRHIip9BQI8m2vcKRscv0wz6/Xyu8ULIXlMglo3MgeI2cMraBihlk9kz+A5YZvXqg1eZwgnQFgba51LbK1vbIWUKHQtBX9iIGzIDquR4wJrrJ78M7Dn03VSETOMyWkHQniA3arxjfl1SOWbJiHCFTVGGg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Received: from PH7PR11MB7605.namprd11.prod.outlook.com (2603:10b6:510:277::5)
- by PH0PR11MB7524.namprd11.prod.outlook.com (2603:10b6:510:281::18) with
+ by DS0PR11MB8164.namprd11.prod.outlook.com (2603:10b6:8:167::8) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7452.25; Sat, 6 Apr
- 2024 15:31:26 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7452.19; Sat, 6 Apr
+ 2024 15:35:38 +0000
 Received: from PH7PR11MB7605.namprd11.prod.outlook.com
  ([fe80::5144:aca9:5cd9:42bf]) by PH7PR11MB7605.namprd11.prod.outlook.com
  ([fe80::5144:aca9:5cd9:42bf%3]) with mapi id 15.20.7452.019; Sat, 6 Apr 2024
- 15:31:26 +0000
+ 15:35:38 +0000
 From: "Winkler, Tomas" <tomas.winkler@intel.com>
 To: Avri Altman <Avri.Altman@wdc.com>, Jens Wiklander
 	<jens.wiklander@linaro.org>, "linux-kernel@vger.kernel.org"
@@ -86,60 +90,69 @@ CC: Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche
 	<bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel
 	<ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman
-	<gregkh@linuxfoundation.org>, "Usyskin, Alexander"
-	<alexander.usyskin@intel.com>
-Subject: RE: [PATCH v4 2/3] mmc: block: register RPMB partition with the RPMB
+	<gregkh@linuxfoundation.org>, =?utf-8?B?QWxleCBCZW5uw6ll?=
+	<alex.bennee@linaro.org>
+Subject: RE: [PATCH v4 1/3] rpmb: add Replay Protected Memory Block (RPMB)
  subsystem
-Thread-Topic: [PATCH v4 2/3] mmc: block: register RPMB partition with the RPMB
+Thread-Topic: [PATCH v4 1/3] rpmb: add Replay Protected Memory Block (RPMB)
  subsystem
-Thread-Index: AQHah0/iKlz7KaE/+kKJpZ9yXKNnRLFbGrkAgABCs8A=
-Date: Sat, 6 Apr 2024 15:31:26 +0000
-Message-ID: <PH7PR11MB76050B745987B7169C8EDA0EE5022@PH7PR11MB7605.namprd11.prod.outlook.com>
+Thread-Index: AQHah0/hJT2WrDdFbEWpLf8rN6MBt7FbC1OAgABVFEA=
+Date: Sat, 6 Apr 2024 15:35:38 +0000
+Message-ID: <PH7PR11MB7605390056DA5DBA168DEBC7E5022@PH7PR11MB7605.namprd11.prod.outlook.com>
 References: <20240405115318.904143-1-jens.wiklander@linaro.org>
- <20240405115318.904143-3-jens.wiklander@linaro.org>
- <DM6PR04MB657580885C16AE4F5743357EFC022@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB657580885C16AE4F5743357EFC022@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <20240405115318.904143-2-jens.wiklander@linaro.org>
+ <DM6PR04MB65757A966792C93334DE4BF1FC022@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB65757A966792C93334DE4BF1FC022@DM6PR04MB6575.namprd04.prod.outlook.com>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach:
 X-MS-TNEF-Correlator:
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PH7PR11MB7605:EE_|PH0PR11MB7524:EE_
+x-ms-traffictypediagnostic: PH7PR11MB7605:EE_|DS0PR11MB8164:EE_
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: hOFHVJ3DEddhrBvXFm1CfpqzFS9D6fqKI/z/n1M0MjSkToYWW+Zr96ttsRhGfNN6/fI7c4MH4vXA1lAKyO0kzqTr6LJp76WrFB+RP0r4nuAboUNo/MdpAFXg2CDthwmvmavsljLZKUudEpKJkB6slrSt2R97T4dERyY0wTiASX6Ug6KZpT3KsQXZOxZWu/fQU0WgQrllGeoiuNv3/KAbHMtmNuDdtpL0RDMs4AAptq5zHb5QiBHrjclUkChDjFCwAvqLtiPkovOj5i6JNAlly9vE9r5ZiGz3Y2YTmF+n1cRaJwwIUwadyOXAux1SubKI1zcZs0Ocb1mvTyie8xhcEElz5Hu6QQYduERaeVEy1gRLGaAQ7KCd6dslREA4IpvApJUncSob/y0WRghnPCmsmqsLQ0FTGFZyG1G15izDyKiSDLyCD+obt32KwAViFtyrnFLLcY519AKwjEaAeZY8xDZOzagOKnCaZMVO6enJ/39vwVMo+4auk8OQkwAnVKWhgDRTg1zEcvI1iieAI5O9bf3BeNnwwb5B5G2TjRBwHiEpwDrwX3FhyM9PqrSyWVeqXUFwApWU0ClFXqjOin97DlJ4M/52UaEf8YjKNYygO9+QjXoL4MqXfBphpODdBsYcbWk6wG+Q0gmiRc8guO4dOjhTviFtvrNSnmXnd62P450=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR11MB7605.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366007)(376005)(1800799015)(7416005);DIR:OUT;SFP:1102;
+x-microsoft-antispam-message-info: eFi0S7p1PIL9BGnES8e1lBNfB1I4nrljfvrXszz4VzqdjimROQnUP9M5zBl9LpvGM67pQMEO36KdehLJ3lw1wqYUeadOnteRjl7AQN4tYbL56DPFx0l7JfwYpNfcLTHOShGpAg3+9Mwd7QAItwFndQ3mQ/snLodygoS/Fvr44cLaIdCExAHKmuVR1N0RlwPo0Wsnls/WTbTSmKTCjD7CCN7sL52N+aZ73JhJFJj/xU+dfGRxxAbPYrcl3KyNouaT81Iy3aEJUPCxO5yq/yvHKmjtPmi2puFhHPmk9n0OPiZkjf0rQZEy+CPSuxm4XaUXrC1/PGnLvRCxkdoO8lo8P/MtcHZi6Sep7YM/3lRFtwl0fwzNwJdlkj9KtdXOKLI5Is4SMCXjfG92B7HSI9St1UXpc1mvaHwjPvawMLOnYvxYbgCEo94rpqA250efNZ7fwV6I38zNpZXCHhJ0RRPCXvh48T63HqsUS0CSv/B2fUherJUxwQj3CnLUFXru5uN7yk05YWK6vB7IoakLu+S8hBIiEb9oK5K4xyiPN7DjIBRiS/d2Mm1NVM9TaQDKyU5qas/UmT2/Ekw1EJhPClxc/c9CHej+KHS4jWDBXmFLenc0gbcRzzULPZiZsMGWB1NE73qN7Mrrk17QxDmTsdQWNKMDZPkG3+QRPEDkopSZrI4=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR11MB7605.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376005)(7416005)(1800799015)(366007);DIR:OUT;SFP:1102;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?mV1RuPWGE2t6euJJy5/bTbBRBGrCckZKr3YEBy+uDBxx8sZArb+bX2cE6WWf?=
- =?us-ascii?Q?1RBFpbFZwpwgPaM5hsXnEeWqG61ihTWga++ft46zR0PLPXbF3sFoDcIg2VVV?=
- =?us-ascii?Q?+M2h0122OiQ5EXGDN6UFIeedlEoD5TMyDwLZb1ThDtnYe1KmObqkWOPLfQN3?=
- =?us-ascii?Q?RYkdiuFXyZj55S6OfygUzTL0Y8yA99LIu/JwXEmJAytFXas4g2hB9QsphZ5O?=
- =?us-ascii?Q?Njju5YUOkOOwRSOh9tS9n9VTfO+xyHiqN2ybGm0QJVLD3acwQT0OQOvWke2W?=
- =?us-ascii?Q?oXCuXibDLdDDVkqfqIKLnHVrVQIF+xuDsUi0t28ld70XWaaOI7T4aPgwhR1e?=
- =?us-ascii?Q?EBnUG403ZgoMhL8XYuTdAyckoGv9QxUcm1GZ0Z/AFRbJUo5oFxpmojF3an5f?=
- =?us-ascii?Q?ZzNzhiSuWSixQ3rVwP5z09JEPXgJ/gE93WlJmvoFB1wPG9bm/BuVFzHtc+OX?=
- =?us-ascii?Q?tx9qJW6NxD8G2M+6E4tnGhkCuXMHmnFsRY4EGZJF7U8EEenD9H3XFogZDsYH?=
- =?us-ascii?Q?vmkJd+UgaduCqC8FJutJ3KhWKPwf6aqQ2Zdjr83pOK6DETlr+FnsqQmA9Efg?=
- =?us-ascii?Q?HOVtOO0lAzr7899iEA4g4QKq8yH9mxFlm+FEF6Zr32Qsg24rFGHcKYwaZ2X3?=
- =?us-ascii?Q?UuiQ9rEJ6jPKeMo6F3a4aRKNyqxwrBcVZhrmeC7m4EwV6Aq0Dc7wkmKuaJxE?=
- =?us-ascii?Q?8bSXBzHAIEbZ+2VbFqrmBpvlXjUiLAaM97efDZi4AXoqbnRZr51NqYeBXbAv?=
- =?us-ascii?Q?EqxGeAnWxsc6hQP13m0bXJWy6y4GGoC2Z97ymE7OwgyTh3aR6Bc3ZMfbUm9e?=
- =?us-ascii?Q?cdz63BihIGxUu+1vSYDdPII9YfSG9Z1i4gwJyirBn1LIsX0LDvEQJE3MJi8L?=
- =?us-ascii?Q?KWrQ9upF3g7YBgTMb4SoJ9nU1PeoJot13gZ6+V5QSIHrL40YVv1uZVw8a1IW?=
- =?us-ascii?Q?4UeDMuACR9IK9tXW6hzPda9s/bVQK68TTmKyqJqeKcGGtMQnAJBt5CSfFoDs?=
- =?us-ascii?Q?DcfgVLCxbrm+nZHqwJNMOEo97NpiC9uATp25bDq9fkAK7RboasLXWMLPFqRF?=
- =?us-ascii?Q?crqUzNR7P61Eh0borOo4bTpRAeudXVtd1+akUrDkV1agdfQ2Tsvpm2CEI6ef?=
- =?us-ascii?Q?oXgBkgZX2dffsL0Ok2mshZ2GC11g3DlDtlKk7gqqLXm4VX4akNKOrvH6zTuN?=
- =?us-ascii?Q?H1SMrP5cyYcd5dsAcvGviOCX3xLw4hViQjRg6RQ12dgxC50YIuh7Goz25ktx?=
- =?us-ascii?Q?phTJ5cDZbN8H0LiSbSsdzMwvbGdA1HR+DgQjekYUe4wRP/qOqove3cW7OHgs?=
- =?us-ascii?Q?Zsg2MGgaLklpRma+fGuBqkjwQ5r/HmJsc7JsCDcfio3Q0mlZv+O0UXydB2EK?=
- =?us-ascii?Q?m07m2KmACnezoYqSC6q57matY4E4zpUZUheSIzKWMdlpB6uYwtb2Z3zrSXi8?=
- =?us-ascii?Q?F0Tbyxjt8P9jUmKhfMzr2omEqvtkVdbdd/xi3vNSath6Fewr485sooBVamzO?=
- =?us-ascii?Q?SscrQqLldqZwT/aV4ztdzU1gz1aWAFJzeRS0Cu8/AbAh1kfs1ao57cHghjLT?=
- =?us-ascii?Q?0HFqCKEPyk0Cj24DskLL2fD3WwvPhqFn7T2Rqw98?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?aEhha1h1K3NFdm9oaWVsWHFZRHc0d0RmeXo4K3NUdERkcGlYcitYM1gzaE5q?=
+ =?utf-8?B?UU90a0F0MXJGTXV3ZS81QWw4UDJJMy9XdHVkRzhYcHEwK2c1dUxrTit4cURX?=
+ =?utf-8?B?V2lJK1NoWklFL1l4ZEZHVmQ5L3EvZ2ZzT1QrUjlyc2h2Y3ppZGc2enN2ejF4?=
+ =?utf-8?B?VTJhN0RiY1p3K0dBSnU3bjE3Q0hhdGNjNWdFSkxqZWdKTWljMjV2RURHN0dW?=
+ =?utf-8?B?dWVPbWd6TDdNakQxV0poYmZhTVYvU2t6Wk5xd2hta2NrVUN2N0dyUU5OWklh?=
+ =?utf-8?B?dVVnQ2pVcnd0TWRiNE9VVXpwRGNKbGNvbncyT29MMWNjVWpzRFcyVWZOendZ?=
+ =?utf-8?B?UFBZUW5OUk9MZHVLY2ZqbnJCajkydGJkQjNzSEFsR2xWUjZ3MVlabVdQSk9O?=
+ =?utf-8?B?Q2kwcUFPa05wUkxlZFB3K0ovSi9OcEZpU0VYK2svWnBEVXNkQnlRSFBtQ2Yx?=
+ =?utf-8?B?eTJnLzZYenFaV095aVp3b2FJdENKbjRGUDBUQlQzUkljbVU4em5WWEl6aWdl?=
+ =?utf-8?B?ZjNJOHA4dmlOYk0wcHIyWkNOM3RqQWx5MCtkQnY3SEFqOFVYSDBRVlpMNW1S?=
+ =?utf-8?B?MFduWkQxa2p2UDRUVk9KR3NDZHBnaHJwdU9yYllWbjVwcmFWZGNOZTlrSUtQ?=
+ =?utf-8?B?TTlvSlp6Z3Rla0NCclhQY3NMaFVUSmJMUGk3MklFMFpNaXk0Yk1GY3ZQZUVr?=
+ =?utf-8?B?RXhUYjBZQ09DdkcvUXAyTTdSd2pIL043SjYzcnpVblA5aW83dDlzUTRvcnRO?=
+ =?utf-8?B?WGhJdUQyb2FaZDQ0QUhMbi9vVkhrOFNWMyt1WjFSZmZTYmdxM2RGMHBHa0Js?=
+ =?utf-8?B?VnExUkJRTk1EQUVaMXFBb0dRQlB1ampDeGlhVWkvS281TysyUWIxdFlINlBn?=
+ =?utf-8?B?RmVoK3E0S0IxMmYvdmNHWkRCRGhFMlVWWG5lVUMyYTZnSTB4ODRWTHFITk5w?=
+ =?utf-8?B?VlpITGNDa2gvb0VDZ0dtd1BsMEo4UzdrUTBoY2lFSWs1Ny8zaSsxYk5VK0JY?=
+ =?utf-8?B?a0VBdmV2akQ5bUxveVcyUThya3pvTk5LYldKTFk4WTlodEFDUm9weTFlNGh2?=
+ =?utf-8?B?K1VaSU1tblFDL1c2T3pSa1EvWEV0VWlIZTRtS2IwOTJhQkJDd2dXTWl2azYr?=
+ =?utf-8?B?QmtoUU1rcDlOemg4czhkWmcrcENmMVg3VkNEbUNpRGpBUjBnWGxrUmwyd0wz?=
+ =?utf-8?B?d1YxM2FJK1p0TTZJNUpaK2g5Y1I1d096aU52bDUxV2ZlaHBiTDArRkFEbGNl?=
+ =?utf-8?B?T1F4VURSREh4SGRXSnc2dmpmWjh3K20wM1Y4a3I2eHhmMjVMZmY4UUV3SEN4?=
+ =?utf-8?B?R1NYZXpzWjZiZklUNGh1TVk1YjRtSDRTZ1NpMW9ZYnlCbWRXVjhaTWdNSEty?=
+ =?utf-8?B?MUplcVpVNSs0OXhETUY5cmU0a2NHRUxBc3VjcDhIR2hCYVkwVXVZZGxOQktu?=
+ =?utf-8?B?RVZrbFJicXRzY2crMTlsa2xVZWF5MDJabXlCbnNPNTd3MkRneW1oZFY1VjZs?=
+ =?utf-8?B?aGpnK2VvTDZWUVQ0SjRSd3VUalFiY3RNMForNGdUME5WdmMrbnY1RTZhZzZM?=
+ =?utf-8?B?Z2d4MU1WYk1yanp4NmlJVUtSSnZ1ekIxa2xWNDg4QmRjUE96OGgxaDIvS0VL?=
+ =?utf-8?B?RHU5eXdTWVJMcE1raWVEWnZYMUhUMTJhdGpaRHd1QUNuSUZJMHR1YWV5djlI?=
+ =?utf-8?B?cnNDUmNhVitkUlhMY2VrOFF3WURPL2JwODNhYmFIZ0xWTGw3VFZoU1AwaHNz?=
+ =?utf-8?B?cTNvcFdyQlh0SGc0MnIxY2lCUjduUU9xZTJpZ0ZLN0ZmT3cxTWFOeEw3aWtY?=
+ =?utf-8?B?S0s3c1RBRXBjSGxXL0hwRXFkZ1YwcGtnMFNGUWpTZGQ0KzV5bXNQKytWQU8y?=
+ =?utf-8?B?TDNCTVhoZ1I3WXUwNEkzSXpIcFQzYXhTSmRhYzZHMmZ4SG5mSlBxMUdCN0F6?=
+ =?utf-8?B?VUFsRTl4aEdZYUIzRnBQVUt6SjFwWGxoZ0xSdmRWMFN5TzROVWtQQ21BYWlj?=
+ =?utf-8?B?aFExRUxaOWNSbjVnbTJXNVkyU1M5OEIrTTJwb0p2V3lMaVdhRjh1OUNPZ0li?=
+ =?utf-8?B?RlNQN3NtU3VaS1R1bHdtbElvS2NTNG5vTFJTeUtEVHIxb0dhSG83YmtlYkN3?=
+ =?utf-8?Q?+8ZmT4sP9sxOkkx0surrHpzh6?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -148,312 +161,124 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-Exchange-CrossTenant-AuthAs: Internal
 X-MS-Exchange-CrossTenant-AuthSource: PH7PR11MB7605.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1caaca8c-524f-47bf-66c3-08dc564e9faf
-X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Apr 2024 15:31:26.5862
+X-MS-Exchange-CrossTenant-Network-Message-Id: b1f0b84b-3e30-4c3d-e850-08dc564f35ef
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Apr 2024 15:35:38.6816
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: AGJFsZ4SIUaE09VRFwq1G19pXRw11VtKRSL1AGYuEGP1KA5bA6j0reJDwkwgNjQImU+Dk9/7BiXph/NsXh9jiQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR11MB7524
+X-MS-Exchange-CrossTenant-userprincipalname: fZ5v5ztZawz4PDkex9bb+bPs0OZahfzEft2gVc0H1IzTCHmhlu+aOxNTYWPbQjkiUClGPUHVFlALpfNz86QuSg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR11MB8164
 X-OriginatorOrg: intel.com
 
->=20
->=20
-> > +
-> > +#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Authentication
-> You expect the key to be already programmed - so you don't really need th=
-is
-> operation?
-Depends in what manufacturing flow you program the device,  second I believ=
-e in the original series was also a simulation device,
-This is important as the real device can be programmed only once.
->=20
-> > Key */
-> > +#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write counter
-> */
-> > +#define RPMB_WRITE_DATA        0x3    /* Write data to RPMB partition =
-*/
-> > +#define RPMB_READ_DATA         0x4    /* Read data from RPMB partition
-> */
-> > +#define RPMB_RESULT_READ       0x5    /* Read result request  (Interna=
-l)
-> */
-> > +
-> >  static DEFINE_MUTEX(block_mutex);
-> >
-> >  /*
-> > @@ -163,6 +205,7 @@ struct mmc_rpmb_data {
-> >         int id;
-> >         unsigned int part_index;
-> >         struct mmc_blk_data *md;
-> > +       struct rpmb_dev *rdev;
-> >         struct list_head node;
-> >  };
-> >
-> > @@ -2672,7 +2715,6 @@ static int mmc_rpmb_chrdev_open(struct inode
-> > *inode, struct file *filp)
-> >
-> >         get_device(&rpmb->dev);
-> >         filp->private_data =3D rpmb;
-> > -       mmc_blk_get(rpmb->md->disk);
-> Maybe add a comment that this has moved to mmc_blk_alloc_rpmb_part?
-> For those who will look for it.
->=20
-> >
-> >         return nonseekable_open(inode, filp);  } @@ -2682,7 +2724,6 @@
-> > static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *fi=
-lp)
-> >         struct mmc_rpmb_data *rpmb =3D container_of(inode->i_cdev,
-> >                                                   struct
-> > mmc_rpmb_data, chrdev);
-> >
-> > -       mmc_blk_put(rpmb->md);
-> Ditto.
->=20
-> >         put_device(&rpmb->dev);
-> >
-> >         return 0;
-> > @@ -2703,10 +2744,157 @@ static void
-> > mmc_blk_rpmb_device_release(struct
-> > device *dev)  {
-> >         struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev);
-> >
-> > +       rpmb_dev_unregister(rpmb->rdev);
-> > +       mmc_blk_put(rpmb->md);
-> >         ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> >         kfree(rpmb);
-> >  }
-> >
-> > +static void free_idata(struct mmc_blk_ioc_data **idata, unsigned int
-> > +cmd_count) {
-> > +       unsigned int n;
-> > +
-> > +       for (n =3D 0; n < cmd_count; n++)
-> > +               kfree(idata[n]);
-> > +       kfree(idata);
-> > +}
-> > +
-> > +static struct mmc_blk_ioc_data **alloc_idata(struct mmc_rpmb_data
-> *rpmb,
-> > +                                            unsigned int cmd_count) {
-> > +       struct mmc_blk_ioc_data **idata;
-> > +       unsigned int n;
-> > +
-> > +       idata =3D kcalloc(cmd_count, sizeof(*idata), GFP_KERNEL);
-> > +       if (!idata)
-> > +               return NULL;
-> > +
-> > +       for (n =3D 0; n < cmd_count; n++) {
-> > +               idata[n] =3D kcalloc(1, sizeof(**idata), GFP_KERNEL);
-> > +               if (!idata[n]) {
-> > +                       free_idata(idata, n);
-> > +                       return NULL;
-> > +               }
-> > +               idata[n]->rpmb =3D rpmb;
-> > +       }
-> > +
-> > +       return idata;
-> > +}
-> > +
-> > +static void set_idata(struct mmc_blk_ioc_data *idata, u32 opcode,
-> > +                     int write_flag, u8 *buf, unsigned int buf_bytes) =
-{
-> > +       idata->ic.opcode =3D opcode;
-> > +       idata->ic.flags =3D MMC_RSP_R1 | MMC_CMD_ADTC;
-> > +       idata->ic.write_flag =3D write_flag;
-> > +       idata->ic.blksz =3D sizeof(struct rpmb_frame);
-> blksz =3D 512, so maybe add a compile-time check on sizeof(struct
-> rpmb_frame)?
->=20
-> > +       idata->ic.blocks =3D buf_bytes /  idata->ic.blksz;
-> > +       idata->buf =3D buf;
-> > +       idata->buf_bytes =3D buf_bytes;
-> > +}
-> > +
-> > +static int mmc_route_rpmb_frames(struct device *dev, u8 *req,
-> > +                                unsigned int req_len, u8 *resp,
-> > +                                unsigned int resp_len) {
-> > +       struct rpmb_frame *frm =3D (struct rpmb_frame *)req;
-> > +       struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev);
-> > +       struct mmc_blk_data *md =3D rpmb->md;
-> > +       struct mmc_blk_ioc_data **idata;
-> > +       unsigned int cmd_count;
-> > +       struct request *rq;
-> > +       u16 req_type;
-> > +       bool write;
-> > +       int ret;
-> > +
-> > +       if (IS_ERR(md->queue.card))
-> > +               return PTR_ERR(md->queue.card);
-> > +
-> > +       if (req_len < sizeof(*frm))
-> > +               return -EINVAL;
-> > +
-> > +       req_type =3D be16_to_cpu(frm->req_resp);
-> > +       switch (req_type) {
-> > +       case RPMB_PROGRAM_KEY:
-> > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
-> > +                   resp_len !=3D sizeof(struct rpmb_frame))
-> > +                       return -EINVAL;
-> > +               write =3D true;
-> > +               break;
-> > +       case RPMB_GET_WRITE_COUNTER:
-> > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
-> > +                   resp_len !=3D sizeof(struct rpmb_frame))
-> > +                       return -EINVAL;
-> > +               write =3D false;
-> > +               break;
-> > +       case RPMB_WRITE_DATA:
-> > +               if (req_len % sizeof(struct rpmb_frame) ||
-> > +                   resp_len !=3D sizeof(struct rpmb_frame))
-> > +                       return -EINVAL;
-> > +               write =3D true;
-> > +               break;
-> > +       case RPMB_READ_DATA:
-> > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
-> > +                   resp_len % sizeof(struct rpmb_frame))
-> > +                       return -EINVAL;
-> > +               write =3D false;
-> > +               break;
-> > +       default:
-> > +               return -EINVAL;
-> > +       }
-> Looks like the above input validation section can be reduced to is
-> RPMB_WRITE_DATA and default?
->=20
-> > +
-> > +       if (write)
-> > +               cmd_count =3D 3;
-> > +       else
-> > +               cmd_count =3D 2;
-> > +
-> > +       idata =3D alloc_idata(rpmb, cmd_count);
-> > +       if (!idata)
-> > +               return -ENOMEM;
-> > +
-> > +       if (write) {
-> > +               struct rpmb_frame *frm =3D (struct rpmb_frame *)resp;
-> > +
-> > +               /* Send write request frame(s) */
-> > +               set_idata(idata[0], MMC_WRITE_MULTIPLE_BLOCK,
-> > +                         1 | MMC_CMD23_ARG_REL_WR, req, req_len);
-> > +
-> > +               /* Send result request frame */
-> > +               memset(frm, 0, sizeof(*frm));
-> > +               frm->req_resp =3D cpu_to_be16(RPMB_RESULT_READ);
-> > +               set_idata(idata[1], MMC_WRITE_MULTIPLE_BLOCK, 1, resp,
-> > +                         resp_len);
-> > +
-> > +               /* Read response frame */
-> > +               set_idata(idata[2], MMC_READ_MULTIPLE_BLOCK, 0, resp,
-> > resp_len);
-> It is confusing to me that your response is holding 2 frame types:
-> The status frame and the response frame.
-Refer to the spec.=20
-
->=20
->=20
-> > +       } else {
-> > +               /* Send write request frame(s) */
-> > +               set_idata(idata[0], MMC_WRITE_MULTIPLE_BLOCK, 1, req,
-> > + req_len);
-> > +
-> > +               /* Read response frame */
-> > +               set_idata(idata[1], MMC_READ_MULTIPLE_BLOCK, 0, resp,
-> > resp_len);
-> > +       }
-> > +
-> > +       rq =3D blk_mq_alloc_request(md->queue.queue, REQ_OP_DRV_OUT,
-> 0);
-> > +       if (IS_ERR(rq)) {
-> > +               ret =3D PTR_ERR(rq);
-> > +               goto out;
-> > +       }
-> > +
-> > +       req_to_mmc_queue_req(rq)->drv_op =3D
-> MMC_DRV_OP_IOCTL_RPMB;
-> > +       req_to_mmc_queue_req(rq)->drv_op_result =3D -EIO;
-> > +       req_to_mmc_queue_req(rq)->drv_op_data =3D idata;
-> > +       req_to_mmc_queue_req(rq)->ioc_count =3D cmd_count;
-> Maybe have an additional struct mmc_queue_req *mq_rq =3D
-> req_to_mmc_queue_req(rq);
->=20
-> > +       blk_execute_rq(rq, false);
-> > +       ret =3D req_to_mmc_queue_req(rq)->drv_op_result;
-> > +
-> > +       blk_mq_free_request(rq);
-> > +
-> > +out:
-> > +       free_idata(idata, cmd_count);
-> > +       return ret;
-> > +}
-> > +
-> >  static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
-> >                                    struct mmc_blk_data *md,
-> >                                    unsigned int part_index, @@ -2741,6
-> > +2929,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
-> >         rpmb->dev.release =3D mmc_blk_rpmb_device_release;
-> >         device_initialize(&rpmb->dev);
-> >         dev_set_drvdata(&rpmb->dev, rpmb);
-> > +       mmc_blk_get(md->disk);
-> >         rpmb->md =3D md;
-> >
-> >         cdev_init(&rpmb->chrdev, &mmc_rpmb_fileops); @@ -3002,6
-> > +3191,41 @@ static void mmc_blk_remove_debugfs(struct mmc_card
-> *card,
-> >
-> >  #endif /* CONFIG_DEBUG_FS */
-> >
-> > +static void mmc_blk_rpmb_add(struct mmc_card *card) {
-> > +       struct mmc_blk_data *md =3D dev_get_drvdata(&card->dev);
-> > +       struct mmc_rpmb_data *rpmb;
-> > +       struct rpmb_dev *rdev;
-> > +       unsigned int n;
-> > +       u32 cid[4];
-> > +       struct rpmb_descr descr =3D {
-> > +               .type =3D RPMB_TYPE_EMMC,
-> > +               .route_frames =3D mmc_route_rpmb_frames,
-> > +               .reliable_wr_count =3D card->ext_csd.raw_rpmb_size_mult=
-,
-> > +               .capacity =3D card->ext_csd.rel_sectors,
-> The capacity is RPMB_SIZE_MULT and also limited to 16MB?
-> And you also need the region size you are writing to.
-> If I get your intention regarding reliable_wr_count, AFAIK, rpmb can be
-> written either as a single, double, or 32 frames.
-> And this should be induced from card->ext_csd.rel_param, and not card-
-> >ext_csd.rel_sectors.
-This may change in the spec since this patch was written it was few years a=
-go.=20
->=20
-> > +               .dev_id =3D (void *)cid,
-> > +               .dev_id_len =3D sizeof(cid),
-> > +       };
-> > +
-> > +       /*
-> > +        * Provice CID as an octet array. The CID needs to be interpret=
-ed
-> > +        * when used as input to derive the RPMB key since some fields
-> > +        * will change due to firmware updates.
-> > +        */
-> Not sure how the CID register is related to RPMB?
-> Is this something internal to TEE?
-Yes to identify the device.=20
->=20
-> > +       for (n =3D 0; n < 4; n++)
-> > +               cid[n] =3D be32_to_cpu(card->raw_cid[n]);
-> > +
-> > +       list_for_each_entry(rpmb, &md->rpmbs, node) {
-> > +               rdev =3D rpmb_dev_register(&rpmb->dev, &descr);
-> > +               if (IS_ERR(rdev)) {
-> > +                       pr_warn("%s: could not register RPMB device\n",
-> > +                               dev_name(&rpmb->dev));
-> > +                       continue;
-> > +               }
-> > +               rpmb->rdev =3D rdev;
-> > +       }
-> > +}
-> > +
->=20
-> Thanks,
-> Avri
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQXZyaSBBbHRtYW4gPEF2
+cmkuQWx0bWFuQHdkYy5jb20+DQo+IFNlbnQ6IFNhdHVyZGF5LCBBcHJpbCA2LCAyMDI0IDE6Mjcg
+UE0NCj4gVG86IEplbnMgV2lrbGFuZGVyIDxqZW5zLndpa2xhbmRlckBsaW5hcm8ub3JnPjsgbGlu
+dXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7
+IG9wLQ0KPiB0ZWVAbGlzdHMudHJ1c3RlZGZpcm13YXJlLm9yZw0KPiBDYzogU2h5YW0gU2Fpbmkg
+PHNoeWFtc2FpbmlAbGludXgubWljcm9zb2Z0LmNvbT47IFVsZiBIYW5zc29uDQo+IDx1bGYuaGFu
+c3NvbkBsaW5hcm8ub3JnPjsgTGludXMgV2FsbGVpaiA8bGludXMud2FsbGVpakBsaW5hcm8ub3Jn
+PjsgSmVyb21lDQo+IEZvcmlzc2llciA8amVyb21lLmZvcmlzc2llckBsaW5hcm8ub3JnPjsgU3Vt
+aXQgR2FyZw0KPiA8c3VtaXQuZ2FyZ0BsaW5hcm8ub3JnPjsgSWxpYXMgQXBhbG9kaW1hcyA8aWxp
+YXMuYXBhbG9kaW1hc0BsaW5hcm8ub3JnPjsNCj4gQmFydCBWYW4gQXNzY2hlIDxidmFuYXNzY2hl
+QGFjbS5vcmc+OyBSYW5keSBEdW5sYXANCj4gPHJkdW5sYXBAaW5mcmFkZWFkLm9yZz47IEFyZCBC
+aWVzaGV1dmVsIDxhcmRiQGtlcm5lbC5vcmc+OyBBcm5kDQo+IEJlcmdtYW5uIDxhcm5kQGFybmRi
+LmRlPjsgR3JlZyBLcm9haC1IYXJ0bWFuDQo+IDxncmVna2hAbGludXhmb3VuZGF0aW9uLm9yZz47
+IFdpbmtsZXIsIFRvbWFzDQo+IDx0b21hcy53aW5rbGVyQGludGVsLmNvbT47IEFsZXggQmVubsOp
+ZSA8YWxleC5iZW5uZWVAbGluYXJvLm9yZz4NCj4gU3ViamVjdDogUkU6IFtQQVRDSCB2NCAxLzNd
+IHJwbWI6IGFkZCBSZXBsYXkgUHJvdGVjdGVkIE1lbW9yeSBCbG9jaw0KPiAoUlBNQikgc3Vic3lz
+dGVtDQo+IA0KPiA+IEEgbnVtYmVyIG9mIHN0b3JhZ2UgdGVjaG5vbG9naWVzIHN1cHBvcnQgYSBz
+cGVjaWFsaXNlZCBoYXJkd2FyZQ0KPiA+IHBhcnRpdGlvbiBkZXNpZ25lZCB0byBiZSByZXNpc3Rh
+bnQgdG8gcmVwbGF5IGF0dGFja3MuIFRoZSB1bmRlcmx5aW5nDQo+ID4gSFcgcHJvdG9jb2xzIGRp
+ZmZlciBidXQgdGhlIG9wZXJhdGlvbnMgYXJlIGNvbW1vbi4gVGhlIFJQTUIgcGFydGl0aW9uDQo+
+ID4gY2Fubm90IGJlIGFjY2Vzc2VkIHZpYSBzdGFuZGFyZCBibG9jayBsYXllciwgYnV0IGJ5IGEg
+c2V0IG9mIHNwZWNpZmljDQo+ID4gUlBNQiBjb21tYW5kczogV1JJVEUsIFJFQUQsIEdFVF9XUklU
+RV9DT1VOVEVSLCBhbmQNCj4gUFJPR1JBTV9LRVkuDQo+IFdoYXQgYWJvdXQgdGhlIG90aGVyIHJw
+bWIgb3BlcmF0aW9ucz8NCj4gVGhlcmUgYXJlIDcgb3BlcmF0aW9ucyBpbiBlTU1DLg0KDQpUaGVy
+ZSB3ZXJlIG9ubHkgNCBhdCB0aGUgdGltZSwgbm93IHRvdCBzdXJlIHRoZXkgYXJlIHJlbGF0ZWQg
+dG8gVEVFIG5lZWRzLiANCj4gDQo+IC4uLi4uLi4uLi4uLg0KPiANCj4gPiArLyoqDQo+ID4gKyAq
+IHJwbWJfZGV2X2ZpbmRfZGV2aWNlKCkgLSByZXR1cm4gZmlyc3QgbWF0Y2hpbmcgcnBtYiBkZXZp
+Y2UNCj4gPiArICogQGRhdGE6IGRhdGEgZm9yIHRoZSBtYXRjaCBmdW5jdGlvbg0KPiA+ICsgKiBA
+bWF0Y2g6IHRoZSBtYXRjaGluZyBmdW5jdGlvbg0KPiA+ICsgKg0KPiA+ICsgKiBJdGVyYXRlIG92
+ZXIgcmVnaXN0ZXJlZCBSUE1CIGRldmljZXMsIGFuZCBjYWxsIEBtYXRjaCgpIGZvciBlYWNoDQo+
+ID4gK3Bhc3NpbmcNCj4gPiArICogaXQgdGhlIFJQTUIgZGV2aWNlIGFuZCBAZGF0YS4NCj4gPiAr
+ICoNCj4gPiArICogVGhlIHJldHVybiB2YWx1ZSBvZiBAbWF0Y2goKSBpcyBjaGVja2VkIGZvciBl
+YWNoIGNhbGwuIElmIGl0DQo+ID4gK3JldHVybnMNCj4gPiArICogYW55dGhpbmcgb3RoZXIgMCwg
+YnJlYWsgYW5kIHJldHVybiB0aGUgZm91bmQgUlBNQiBkZXZpY2UuDQo+ID4gKyAqDQo+ID4gKyAq
+IEl0J3MgdGhlIGNhbGxlcnMgcmVzcG9uc2liaWxpdHkgdG8gY2FsbCBycG1iX2Rldl9wdXQoKSBv
+biB0aGUNCj4gPiArcmV0dXJuZWQNCj4gPiArICogZGV2aWNlLCB3aGVuIGl0J3MgZG9uZSB3aXRo
+IGl0Lg0KPiA+ICsgKg0KPiA+ICsgKiBSZXR1cm5zOiBhIG1hdGNoaW5nIHJwbWIgZGV2aWNlIG9y
+IE5VTEwgb24gZmFpbHVyZSAgKi8gc3RydWN0DQo+ID4gK3JwbWJfZGV2ICpycG1iX2Rldl9maW5k
+X2RldmljZShjb25zdCB2b2lkICpkYXRhLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgY29uc3Qgc3RydWN0IHJwbWJfZGV2ICpzdGFydCwNCj4gPiArICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIGludCAoKm1hdGNoKShzdHJ1Y3QgcnBtYl9kZXYg
+KnJkZXYsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgY29uc3Qgdm9pZCAqZGF0YSkpDQo+ID4gK3sNCj4gPiArICAgICAgIHN0cnVjdCBycG1i
+X2RldiAqcmRldjsNCj4gPiArICAgICAgIHN0cnVjdCBsaXN0X2hlYWQgKnBvczsNCj4gPiArDQo+
+ID4gKyAgICAgICBtdXRleF9sb2NrKCZycG1iX211dGV4KTsNCj4gPiArICAgICAgIGlmIChzdGFy
+dCkNCj4gPiArICAgICAgICAgICAgICAgcG9zID0gc3RhcnQtPmxpc3Rfbm9kZS5uZXh0Ow0KPiA+
+ICsgICAgICAgZWxzZQ0KPiA+ICsgICAgICAgICAgICAgICBwb3MgPSBycG1iX2Rldl9saXN0Lm5l
+eHQ7DQo+ID4gKw0KPiA+ICsgICAgICAgd2hpbGUgKHBvcyAhPSAmcnBtYl9kZXZfbGlzdCkgew0K
+PiBXaHkgbm90IGp1c3QgbGlzdF9mb3JfZWFjaF9lbnRyeSANClllYWggdGhhdCBtYXkgd29yaw0K
+PiANCj4gPiArICAgICAgICAgICAgICAgcmRldiA9IGNvbnRhaW5lcl9vZihwb3MsIHN0cnVjdCBy
+cG1iX2RldiwgbGlzdF9ub2RlKTsNCj4gPiArICAgICAgICAgICAgICAgaWYgKG1hdGNoKHJkZXYs
+IGRhdGEpKSB7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcnBtYl9kZXZfZ2V0KHJkZXYp
+Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gb3V0Ow0KPiA+ICsgICAgICAgICAg
+ICAgICB9DQo+ID4gKyAgICAgICAgICAgICAgIHBvcyA9IHBvcy0+bmV4dDsNCj4gPiArICAgICAg
+IH0NCj4gPiArICAgICAgIHJkZXYgPSBOVUxMOw0KPiA+ICsNCj4gPiArb3V0Og0KPiA+ICsgICAg
+ICAgbXV0ZXhfdW5sb2NrKCZycG1iX211dGV4KTsNCj4gPiArDQo+ID4gKyAgICAgICByZXR1cm4g
+cmRldjsNCj4gPiArfQ0KPiANCj4gLi4uLi4uLi4uLi4uLi4uLi4uLi4uDQo+IA0KPiA+ICsvKioN
+Cj4gPiArICogcnBtYl9kZXZfcmVnaXN0ZXIgLSByZWdpc3RlciBSUE1CIHBhcnRpdGlvbiB3aXRo
+IHRoZSBSUE1CDQo+ID4gK3N1YnN5c3RlbQ0KPiA+ICsgKiBAZGV2OiBzdG9yYWdlIGRldmljZSBv
+ZiB0aGUgcnBtYiBkZXZpY2UNCj4gPiArICogQG9wczogZGV2aWNlIHNwZWNpZmljIG9wZXJhdGlv
+bnMNCj4gPiArICoNCj4gPiArICogV2hpbGUgcmVnaXN0ZXJpbmcgdGhlIFJQTUIgcGFydGl0aW9u
+IGV4dHJhY3QgbmVlZGVkIGRldmljZQ0KPiA+ICtpbmZvcm1hdGlvbg0KPiA+ICsgKiB3aGlsZSBu
+ZWVkZWQgcmVzb3VyY2VzIGFyZSBhdmFpbGFibGUuDQo+ID4gKyAqDQo+ID4gKyAqIFJldHVybnM6
+IGEgcG9pbnRlciB0byBhICdzdHJ1Y3QgcnBtYl9kZXYnIG9yIGFuIEVSUl9QVFIgb24gZmFpbHVy
+ZQ0KPiA+ICsqLyBzdHJ1Y3QgcnBtYl9kZXYgKnJwbWJfZGV2X3JlZ2lzdGVyKHN0cnVjdCBkZXZp
+Y2UgKmRldiwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHN0cnVjdCBy
+cG1iX2Rlc2NyICpkZXNjcikgew0KPiA+ICsgICAgICAgc3RydWN0IHJwbWJfZGV2ICpyZGV2Ow0K
+PiA+ICsNCj4gPiArICAgICAgIGlmICghZGV2IHx8ICFkZXNjciB8fCAhZGVzY3ItPnJvdXRlX2Zy
+YW1lcyB8fCAhZGVzY3ItPmRldl9pZCB8fA0KPiA+ICsgICAgICAgICAgICFkZXNjci0+ZGV2X2lk
+X2xlbikNCj4gPiArICAgICAgICAgICAgICAgcmV0dXJuIEVSUl9QVFIoLUVJTlZBTCk7DQo+ID4g
+Kw0KPiA+ICsgICAgICAgcmRldiA9IGt6YWxsb2Moc2l6ZW9mKCpyZGV2KSwgR0ZQX0tFUk5FTCk7
+DQo+ID4gKyAgICAgICBpZiAoIXJkZXYpDQo+ID4gKyAgICAgICAgICAgICAgIHJldHVybiBFUlJf
+UFRSKC1FTk9NRU0pOw0KPiA+ICsgICAgICAgcmRldi0+ZGVzY3IgPSAqZGVzY3I7DQo+ID4gKyAg
+ICAgICByZGV2LT5kZXNjci5kZXZfaWQgPSBrbWVtZHVwKGRlc2NyLT5kZXZfaWQsIGRlc2NyLT5k
+ZXZfaWRfbGVuLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHRlBf
+S0VSTkVMKTsNCj4gSW4gYWRkaXRpb24gdG8gdGhlIGRldl9pZCwgd291bGRuJ3QgaXQgbWFrZSBz
+ZW5zZSB0byBoYXZlIHlvdXIgb3duIElEQSBhcw0KPiB3ZWxsPw0KPiANCj4gPiArICAgICAgIGlm
+ICghcmRldi0+ZGVzY3IuZGV2X2lkKSB7DQo+ID4gKyAgICAgICAgICAgICAgIGtmcmVlKHJkZXYp
+Ow0KPiA+ICsgICAgICAgICAgICAgICByZXR1cm4gRVJSX1BUUigtRU5PTUVNKTsNCj4gPiArICAg
+ICAgIH0NCj4gPiArDQo+ID4gKyAgICAgICByZGV2LT5wYXJlbnRfZGV2ID0gZGV2Ow0KPiA+ICsN
+Cj4gPiArICAgICAgIGRldl9kYmcocmRldi0+cGFyZW50X2RldiwgInJlZ2lzdGVyZWQgZGV2aWNl
+XG4iKTsNCj4gPiArDQo+ID4gKyAgICAgICBtdXRleF9sb2NrKCZycG1iX211dGV4KTsNCj4gPiAr
+ICAgICAgIGxpc3RfYWRkX3RhaWwoJnJkZXYtPmxpc3Rfbm9kZSwgJnJwbWJfZGV2X2xpc3QpOw0K
+PiA+ICsgICAgICAgYmxvY2tpbmdfbm90aWZpZXJfY2FsbF9jaGFpbigmcnBtYl9pbnRlcmZhY2Us
+DQo+ID4gUlBNQl9OT1RJRllfQUREX0RFVklDRSwNCj4gPiArICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgcmRldik7DQo+ID4gKyAgICAgICBtdXRleF91bmxvY2soJnJwbWJfbXV0
+ZXgpOw0KPiA+ICsNCj4gPiArICAgICAgIHJldHVybiByZGV2Ow0KPiA+ICt9DQo+ID4gK0VYUE9S
+VF9TWU1CT0xfR1BMKHJwbWJfZGV2X3JlZ2lzdGVyKTsNCj4gDQo+IC4uLi4uLi4uLi4uLg0KPiAN
+Cj4gPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0KPiA+IGluZGV4IDAwMDAwMDAwMDAwMC4uMjUxZDZi
+N2U2ZDE1DQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsrKyBiL2luY2x1ZGUvbGludXgvcnBtYi5o
+DQo+ID4gQEAgLTAsMCArMSwxMzYgQEANCj4gPiArLyogU1BEWC1MaWNlbnNlLUlkZW50aWZpZXI6
+IEJTRC0zLUNsYXVzZSBPUiBHUEwtMi4wICovDQo+ID4gKy8qDQo+ID4gKyAqIENvcHlyaWdodCAo
+QykgMjAxNS0yMDE5IEludGVsIENvcnAuIEFsbCByaWdodHMgcmVzZXJ2ZWQNCj4gPiArICogQ29w
+eXJpZ2h0IChDKSAyMDIxLTIwMjIgTGluYXJvIEx0ZCAgKi8gI2lmbmRlZiBfX1JQTUJfSF9fICNk
+ZWZpbmUNCj4gPiArX19SUE1CX0hfXw0KPiA+ICsNCj4gPiArI2luY2x1ZGUgPGxpbnV4L3R5cGVz
+Lmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9kZXZpY2UuaD4NCj4gPiArI2luY2x1ZGUgPGxpbnV4
+L25vdGlmaWVyLmg+DQo+ID4gKw0KPiA+ICsvKioNCj4gPiArICogZW51bSBycG1iX3R5cGUgLSB0
+eXBlIG9mIHVuZGVybHlpbmcgc3RvcmFnZSB0ZWNobm9sb2d5DQo+ID4gKyAqDQo+ID4gKyAqIEBS
+UE1CX1RZUEVfRU1NQyAgOiBlbW1jIChKRVNEODQtQjUwLjEpDQo+ID4gKyAqIEBSUE1CX1RZUEVf
+VUZTICAgOiBVRlMgKEpFU0QyMjApDQo+ID4gKyAqIEBSUE1CX1RZUEVfTlZNRSAgOiBOVk0gRXhw
+cmVzcw0KPiA+ICsgKi8NCj4gPiArZW51bSBycG1iX3R5cGUgew0KPiA+ICsgICAgICAgUlBNQl9U
+WVBFX0VNTUMsDQo+ID4gKyAgICAgICBSUE1CX1RZUEVfVUZTLA0KPiA+ICsgICAgICAgUlBNQl9U
+WVBFX05WTUUsDQo+ID4gK307DQo+ID4gKw0KPiA+ICsvKioNCj4gPiArICogc3RydWN0IHJwbWJf
+ZGVzY3IgLSBSUE1CIGRlc2NyaXB0b3IgcHJvdmlkZWQgYnkgdGhlIHVuZGVybHlpbmcNCj4gPiAr
+YmxvY2sNCj4gPiBkZXZpY2UNCj4gVGhlIHVzZSBvZiB0aGUgdGVybSAicnBtYiBkZXNjcmlwdG9y
+IiBtYXkgYmUgc2xpZ2h0bHkgbWlzbGVhZGluZy4NCj4gVGhpcyBpcyBiZWNhdXNlIGluIFVGUyB0
+aGVyZSBhcmUgdmFyaW91cyBkZXNjcmlwdG9ycyB0aGF0IGlkZW50aWZpZXMgdmFyaW91cw0KPiBj
+aGFyYWN0ZXJpc3RpY3MsIGUuZy4gZGV2aWNlIGRlc2NyaXB0b3IsIGdlb21ldHJ5IGRlc2NyaXB0
+b3IsIHVuaXQgZGVzY3JpcHRvcg0KPiBldGMuLCBhbmQgcmVjZW50bHkgVUZTNC4wIGludHJvZHVj
+ZWQgYSBuZXcgZGVzY3JpcHRvciAtIFJQTUIgZGVzY3JpcHRvci4uLi4NCg0KTWlnaHQgYmUgb3Zl
+cmxvYWRlZCwgc3VnZ2VzdGlvbnM/IA0KDQoNCg==
