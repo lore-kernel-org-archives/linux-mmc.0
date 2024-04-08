@@ -1,107 +1,92 @@
-Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE8211411EF;
-	Mon,  8 Apr 2024 15:36:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F95D53368
+	for <linux-mmc@vger.kernel.org>; Mon,  8 Apr 2024 19:52:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712590576; cv=none; b=hC7kZX1sFHtlMFpRCc+SKW6Xz/bRWhCvtQYZpSfhhKM7L/K6nXtBOvCU2oAEHpDA+qtaR5Z1ha5m0xlgAfczeURbdmDOuln/FcWx6M3lAq4hg8/xvOHuAejm0Ht7OV8Xt/g+QYeBNd7jdQSlNYLv2i5eAv/CDWSDKtFul9mBYhA=
+	t=1712605976; cv=none; b=TSlom3OymGaDb2QvLAPj4vG7C/LzVZC3a+X3bYE7Mb/C6K71LjLRV56godBVZZm123+cCm179gnxQgWlQnV5R8/cBID938uJ0hBQml3ZpnsqjD8pTckEaDBJsgwDU4MDOlhcdz+ubjROCVdS+8BdrTsgTzhAysvt3E6swKiv88g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712590576; c=relaxed/simple;
-	bh=ElEBboZZmhHmo+fflG6/dLQkwXH+6/Jt3imK/vp90K0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ldwolADAo0QKK4SKMS6EgQPSgiVoqmrlLT2O/j6/qzS6//lb0NrEPNAPYCn2LOy2yNcmY0Gj+5jlD/fsIkJuHRxlcizMO/f1qCz4sWumH+b+Vmrd3nLcC6t5elNVTBOGlXTChNN570OBKTVP7cXG+gCGjzK1gfeLePY5HEEsbKc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=k2UZDhr5; arc=none smtp.client-ip=209.85.218.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1712605976; c=relaxed/simple;
+	bh=3M6oq1qvuCexplvJj1z9ViupZJaEHt17LjMm1wMrd2Y=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=P4R6F007+j1Ucc++pqWPn2FFgpYtfyYoLiG4oYRg7smt8o3wgxm/qk2OjZnQoJAK1C5C/2ZLHgyrXk6m5b3Y5H4gSb2+64GvP8CG9C4LaG8X84gD+HSpUQSxDIHmrJCSzA9mDGWTSxuoMMPlgpy96o2l7L7Bd/1yref2wZbnT7o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZxdCzXHj; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="k2UZDhr5"
-Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-a5199906493so440384866b.1;
-        Mon, 08 Apr 2024 08:36:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1712590573; x=1713195373; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ElEBboZZmhHmo+fflG6/dLQkwXH+6/Jt3imK/vp90K0=;
-        b=k2UZDhr5+O7cPcFCTb3t1ZzHlYT5/XCnO3pAFI4RbrQ10aOGN2vIdO5jPT5Za7aoAf
-         hrMj0ewrN+ZOQ5EaTAD/rxXRwgJ6P2TZnVtB6gAS4YpySxyOsjGci2Li2HUZRcOLmfMd
-         uPJk+SO+jz6og6XuPsDI6G106wqJ9HJ+0UAXGlCBzWQpPmCVy8nO4+33+4p7qlLGZkwQ
-         ppFSUEtKbZMNxwaVWlj1JIGQLaZUgK0GzoByYMMZODilZmDGuNsvRMFT8fDee2ODKBiO
-         t5jxc/fF7BMrdX351KDxz+cqfeMmyRqt5W5qx/OYZ6L/gpWacUkHjUab1Z+Ew59on4jb
-         u1dQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712590573; x=1713195373;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ElEBboZZmhHmo+fflG6/dLQkwXH+6/Jt3imK/vp90K0=;
-        b=f5B0jfa3U/B3U4pqq1i5MFshNvmKdec0rP0Ldy8X6CBdBCntLImLbR1b02VEHv6u9l
-         sjqZYEqFnu2Hffd64/p+znMp+aCoQJZqp64Lg2KEKRw9kE0Oc18LgBKhz7edCTUwrrPO
-         3LY5iitHgRhihmOAXfMQlY+76rLl1aC09UHTLcSq/hKmcz9kre7YQ4oRB7iF34DNV/3Z
-         ThBu/2W7kdAxytdeizkkXLgftO8lCMUd9FblGzmXUIkqs1PhzJQ1kskdZmxaElk+J7t8
-         1GJqbBcHSMz95sQ++BkLbhH4jQ0q9NQfWjMw7eWD13pSCS/3rpuEKW/IDDjkDt4Gs2H8
-         6RSQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUhra7sye9srUsXSUCcGvoBLoHM7ACqErXqRVqisWrQhaRkdo4J0SMRraIDu+z4UaJyOXQrXU7fj3lcqpYmMhoVPnt7oLMaSX5i2uLPXONBU3Yas7M4vGvXSml5e+Vk06Wk9BZstA==
-X-Gm-Message-State: AOJu0Yz1zqUkHUDi370N5dTI1bq7jOrtEc789/XpQJPcJFjU0T5BGbOU
-	qnFREyMqisVzFNVeWile20hcYCbn7mNBAyfgarARv99FW/11WdaYJLZp7yholP4QuWLoM0JO6UB
-	WEI7hT0biL1rjhw2Yslu5jqn3iWw=
-X-Google-Smtp-Source: AGHT+IFVf4lpZN05DBhUUba0o3Qn7pGE/745rbeti1y5rvdlMmYVqhhSf2HIdl3wBA8Ote60ZMibrzXmtZ9XY7qZkGk=
-X-Received: by 2002:a17:907:9708:b0:a51:18cf:b776 with SMTP id
- jg8-20020a170907970800b00a5118cfb776mr8601571ejc.2.1712590572856; Mon, 08 Apr
- 2024 08:36:12 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZxdCzXHj"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1712605974;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=Ehv/GjiuFO6hGgKdrclUMzA+WNbqwYI/WJ2c/pbOSso=;
+	b=ZxdCzXHjS106aoUnUxi1xkxzbkZEIx70Z2rBFRnazDBkVQX7TDDp16YTqvlU5bskuYbRzn
+	BS4e626mbErQx5B7LLRSBobYWK1oX3ZIpb+ri4YwBJt9sLyZJfquHdRYzdxhyQdjO+4UEU
+	8Jl/h6bBiKoqPUmo8CGJpQEFaJJTR7M=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-433-iewW4QW6M72rOoPCWAHiyQ-1; Mon, 08 Apr 2024 15:52:50 -0400
+X-MC-Unique: iewW4QW6M72rOoPCWAHiyQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C787080BCE7;
+	Mon,  8 Apr 2024 19:52:49 +0000 (UTC)
+Received: from shalem.redhat.com (unknown [10.39.192.47])
+	by smtp.corp.redhat.com (Postfix) with ESMTP id C47AF1C06666;
+	Mon,  8 Apr 2024 19:52:48 +0000 (UTC)
+From: Hans de Goede <hdegoede@redhat.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Andy Shevchenko <andy@kernel.org>,
+	Mika Westerberg <mika.westerberg@linux.intel.com>
+Cc: Hans de Goede <hdegoede@redhat.com>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH v2 0/6] mmc: sdhci-acpi: Add some DMI quirks to fix various issues on Bay Trail devices
+Date: Mon,  8 Apr 2024 21:52:38 +0200
+Message-ID: <20240408195244.248280-1-hdegoede@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240407200453.40829-1-hdegoede@redhat.com> <ZhQL7KmvVYgRpz46@smile.fi.intel.com>
- <01494b5d-b7de-48b7-b68b-69a32da9fa5b@redhat.com>
-In-Reply-To: <01494b5d-b7de-48b7-b68b-69a32da9fa5b@redhat.com>
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Date: Mon, 8 Apr 2024 18:35:36 +0300
-Message-ID: <CAHp75VcVdvWux=3rxBjHisMhKC=69Ldhrn-eZiBgMgm0OHs23w@mail.gmail.com>
-Subject: Re: [PATCH 1/6] mmc: core: Add mmc_gpiod_set_cd_config() function
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Andy Shevchenko <andy@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, 
-	linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
 
-On Mon, Apr 8, 2024 at 6:27=E2=80=AFPM Hans de Goede <hdegoede@redhat.com> =
-wrote:
-> On 4/8/24 5:23 PM, Andy Shevchenko wrote:
-> > On Sun, Apr 07, 2024 at 10:04:48PM +0200, Hans de Goede wrote:
-> >> Some mmc host drivers may need to fixup a card-detection GPIO's config
-> >> to e.g. enable the GPIO controllers builtin pull-up resistor on device=
-s
-> >> where the firmware description of the GPIO is broken (e.g. GpioInt wit=
-h
-> >> PullNone instead of PullUp in ACPI DSDT).
-> >>
-> >> Since this is the exception rather then the rule adding a config
-> >> parameter to mmc_gpiod_request_cd() seems undesirable, so instead
-> >> add a new mmc_gpiod_set_cd_config() function. This is simply a wrapper
-> >> to call gpiod_set_config() on the card-detect GPIO acquired through
-> >> mmc_gpiod_request_cd().
-> >
-> > FWIW,
-> > Reviewed-by: Andy Shevchenko <andy@kernel.org>
->
-> for just this patch or for the series ?
+Hi All,
 
-You have no cover-letter, your choice :-)
-(yes, for the series, but really it's better to have a even small
-cover letter, `b4` can use it for good in a few ways, although dunno
-what MMC maintainers use)
+Here is v2 of my series adding DMI quirks to fix various issues on Intel
+Bay Trail tablets.
 
-> > assuming you considered addressing nit-picks.
->
-> Ack will do.
+This v2 addresses a few small remarks from Andy and adds Andy's Reviewed-by
+to all of the patches.
+
+Regards,
+
+Hans
 
 
---=20
-With Best Regards,
-Andy Shevchenko
+Hans de Goede (6):
+  mmc: core: Add mmc_gpiod_set_cd_config() function
+  mmc: sdhci-acpi: Sort DMI quirks alphabetically
+  mmc: sdhci-acpi: Fix Lenovo Yoga Tablet 2 Pro 1380 sdcard slot not
+    working
+  mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo Yoga Tablet 2 series
+    sdcard slot
+  mmc: sdhci-acpi: Disable write protect detection on Toshiba WT10-A
+  mmc: sdhci-acpi: Add quirk to enable pull-up on the card-detect GPIO
+    on Asus T100TA
+
+ drivers/mmc/core/slot-gpio.c  | 20 +++++++++
+ drivers/mmc/host/sdhci-acpi.c | 84 ++++++++++++++++++++++++++++++++---
+ include/linux/mmc/slot-gpio.h |  1 +
+ 3 files changed, 99 insertions(+), 6 deletions(-)
+
+-- 
+2.44.0
+
