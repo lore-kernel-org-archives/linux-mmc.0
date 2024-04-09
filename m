@@ -1,253 +1,163 @@
-Received: from mail-oa1-f51.google.com (mail-oa1-f51.google.com [209.85.160.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02772127B67
-	for <linux-mmc@vger.kernel.org>; Tue,  9 Apr 2024 08:32:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D35B55E55
+	for <linux-mmc@vger.kernel.org>; Tue,  9 Apr 2024 10:37:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712651563; cv=none; b=HwKn87cCCclMht3l8/EPhqjakCQCpnwsUqtUWZ8/mRAGmCfbtOHxyT7brKLWnCnrzsgUWX+tXNHjxc0KJgaVS0dYaXmR/cnK0miOn0BCXB6JmSc2KDUaiWafbs2Wh3eFFIoinajFttpLsyfE9rUmNdw/QIXhd7GMOpJ54m2ZvK4=
+	t=1712659042; cv=none; b=psMp13XkaMP4Nu/+oAFpYR7cJs18Jph+OFFWsrnoILxdbRqf1Tnp/eGA4q/Zf5+hd/gYgdSChmFkXVGy34lYlcPP0X1AdF9O8Vrx7HWZAl+LLqTiy1J/VSYkGyoH7AWB0qultBz+flWVeUF/TkIOl0e/iki1UeA48pj4wAiUS00=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712651563; c=relaxed/simple;
-	bh=Dpn8MR4nhIt8ge/rBHDPkpyx6ABtUHgj9mzhMzWOtGM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=N+3uhzOi/Lw0zLfD+sAZBEIR5smzR5sAp/ZTVpihTy7Bn5NpEgRqmmqNI7WI+bLBwoa06c7Xy3gSSqKebnPwxFznw5cdyXLyHd2JiHncUNZ8XNZnQZT20V5ZKuzDnktQOSKrnm2xsn19fXi6GPw9Oj2+D7b+HX0+skOAtEDAcP0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=idtkfc6M; arc=none smtp.client-ip=209.85.160.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1712659042; c=relaxed/simple;
+	bh=Ke9bTOQSP1jqhM7tYmyiExbpDzCgiAxCwnuBEFwvVcs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=RE0PLgs3oZJobW2YS6hS0OEizEXwbqtTXO4qTTw4DqVHgTmufUr5P4N/sCrSHR1PKdLv3XLw5lGNGMzOxi7ounPiGH5esbOQxdjmtWt0QLGqcRRcT8EIb1+3wexcNi2va+pcCk4Wa/W367Go+YVELAW12CrV52GzD42ehXTpTBE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=mWL22Jn4; arc=none smtp.client-ip=192.198.163.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="idtkfc6M"
-Received: by mail-oa1-f51.google.com with SMTP id 586e51a60fabf-22f32226947so1005486fac.2
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Apr 2024 01:32:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1712651560; x=1713256360; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2uAodPsYjRsPrLmdLzL3BRTckxAm/m9XO5FXRuJnr4o=;
-        b=idtkfc6MGbap+Yl87M3F3GMxHAEavlp0M9fNQsYW9pVPtAK9Pa3U+JLNmk0n75Wyrm
-         gUBEAiXz7mLoyMpvuK/rMhbwJhUspXLwzyTrAnpRI9ti+kSxdoDCy8B7t/5NS0rkPfH5
-         x8ivm61RZ4LI2AVjkJ442lO9JmC31KPu6a2Ko+4O6LNE+0juKxH1pGvDuBkxH3+RkBBL
-         8veFOFUawwXrue3SZiJjWPj7JHTG/Nh98d8io0gSN1ckZSc0W6kY0zAqQeijToRD/HGX
-         3geRuRVjKa0N+ZRujEBXojmI/BMqhCB4N38bFf6IHLDOguSJD9oUIz12vJkpZHjCMORy
-         Slog==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712651560; x=1713256360;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2uAodPsYjRsPrLmdLzL3BRTckxAm/m9XO5FXRuJnr4o=;
-        b=Ufspjs0jfl4QMUl0o7dsKE6fqLvfR7/1gwlnAmUXLApgs18F4gfWHjdZelb/0bJHq+
-         enJfCfDeAa1sRjSriOnTJvhANfw31ogdkTmRjnYI9QkhZX0IdrKvNjEgZtzDw+H6OSr4
-         SUiUv7lP9CjlSZYj0729qiMFn9SjKD4NkAAvswt7RNI3FvRs6PcmdoqLgCTYbVynBZTB
-         xqiSOplAZ1VGngybc9mCOH++XSR5Zn0W2XD8XAXMd4kJNKR6gIqUycYtlgpiDkS3W8qM
-         45a2SmqqUhoZM5pu1EnktP9nvlV1sK0cVJs7lvIjstQ2DBuyCZUVHq4ydNMXHHAkKJog
-         H43A==
-X-Forwarded-Encrypted: i=1; AJvYcCXBgw7aPWPNg4h/biVf5xApFD6n7yZp4AOVFY3dV3f5PG5adjI7YH4R42JItCpkmb0UZcofJxxnLGb6bOgoch9fva1h6zE95XXa
-X-Gm-Message-State: AOJu0YzwngTnwWJZK0ILT5fvZQ3fzvKlFErQ4/NViXGQUCr2BdzjEerR
-	ZmF0ZQ8dspgCZyTd7hrRcbTdI7iDlWQlSEeBhrBNMbuyqoWiQ3EJ52h1BV4w4Miq4bUyNeWfCTR
-	lfAFb3RQy5ul8mqMBkkSOpirFG4MsVEcPvEa/5A==
-X-Google-Smtp-Source: AGHT+IH7JHDXhhK5XHKAYXEHO/Peaa07VhvA3DF/OYJg6/MoyNjNmPTZXZGiO92FclWgq/qAqeYZ6Kc2HK0e9KQDf44=
-X-Received: by 2002:a05:6870:1a8f:b0:229:7f3f:bb6a with SMTP id
- ef15-20020a0568701a8f00b002297f3fbb6amr9084872oab.32.1712651560033; Tue, 09
- Apr 2024 01:32:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="mWL22Jn4"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1712659040; x=1744195040;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=Ke9bTOQSP1jqhM7tYmyiExbpDzCgiAxCwnuBEFwvVcs=;
+  b=mWL22Jn4arUkCHMh88Kz5vcSry89aR02bTap6vDXaXPVhU6OEnrjH18q
+   caq32EwZ5Hs0Eh878wWWYWCEmFBlnuyAO4nCodC6pSZfdYPJUWSjj81Yr
+   9C49do5iy4mqxn13onQpDpW4FZbkeEQ8LlKz1fsuVfHqi7Y9/B8YVYLZ9
+   nlNPG/P6cBSOf9zsfKiAvW7d6zXuBTxNumKy6vTTbl6eyTJcHM91Q3qfl
+   kyIPf3ci2klRhAruAIqY8/BU2XTEF7h/xOQOA+0PQc+HI1XIQMVe2Lj0A
+   ISdbbKWzic28KR9vi4zJO2bfvrYW8OkWrzj6pIWbhCAzIyAIoMDOxQLI2
+   g==;
+X-CSE-ConnectionGUID: /q2yjUpwS9K1kePYQNc4sg==
+X-CSE-MsgGUID: eMLRXeYjSkG93NkuAUnMHQ==
+X-IronPort-AV: E=McAfee;i="6600,9927,11038"; a="11743402"
+X-IronPort-AV: E=Sophos;i="6.07,189,1708416000"; 
+   d="scan'208";a="11743402"
+Received: from orviesa007.jf.intel.com ([10.64.159.147])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Apr 2024 03:37:20 -0700
+X-CSE-ConnectionGUID: xq+V4yW+RNKqRHwjZWFBpw==
+X-CSE-MsgGUID: aTZ5mbUnQmmieyHt566kgA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.07,189,1708416000"; 
+   d="scan'208";a="20629266"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.37.26])
+  by orviesa007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Apr 2024 03:37:18 -0700
+Message-ID: <199bb4aa-c6b5-453e-be37-58bbf468800c@intel.com>
+Date: Tue, 9 Apr 2024 13:37:11 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240405115318.904143-1-jens.wiklander@linaro.org>
- <20240405115318.904143-2-jens.wiklander@linaro.org> <DM6PR04MB65757A966792C93334DE4BF1FC022@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB65757A966792C93334DE4BF1FC022@DM6PR04MB6575.namprd04.prod.outlook.com>
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Tue, 9 Apr 2024 10:32:28 +0200
-Message-ID: <CAHUa44H5q26XjRQnaP4-kAjWT_Pdo2UMsS=xqqOJC6Prra256Q@mail.gmail.com>
-Subject: Re: [PATCH v4 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To: Avri Altman <Avri.Altman@wdc.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
-	Sumit Garg <sumit.garg@linaro.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
-	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
-	=?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 4/6] mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo
+ Yoga Tablet 2 series sdcard slot
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: linux-mmc@vger.kernel.org,
+ Mika Westerberg <mika.westerberg@linux.intel.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Andy Shevchenko <andy@kernel.org>
+References: <20240408195244.248280-1-hdegoede@redhat.com>
+ <20240408195244.248280-5-hdegoede@redhat.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240408195244.248280-5-hdegoede@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Sat, Apr 6, 2024 at 12:27=E2=80=AFPM Avri Altman <Avri.Altman@wdc.com> w=
-rote:
->
-> > A number of storage technologies support a specialised hardware
-> > partition designed to be resistant to replay attacks. The underlying
-> > HW protocols differ but the operations are common. The RPMB partition
-> > cannot be accessed via standard block layer, but by a set of specific
-> > RPMB commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY.
-> What about the other rpmb operations?
-> There are 7 operations in eMMC.
+On 8/04/24 22:52, Hans de Goede wrote:
+> Unlike all other Bay Trail devices I have (quite a few) the BIOS on
+> the Lenovo Yoga Tablet 2 830 / 1050 and Lenovo Yoga Tablet 2 Pro 1380 (8",
+> 10" and 13") models sets the SDHCI_SUPPORT_DDR50 bit in the sdcard slots'
+> SDHCI controller's Caps_1 register which causes Linux to try and use
+> UHS SDR12 / SDR25 and DDR50 modes on UHS cards.
+> 
+> These tablets do have 1.8V signalling implemented in the hw level through
+> the Bay Trail SoC's SD3_1P8EN pin. But trying to use UHS modes leads to
+> lots of errors like these:
+> 
+> [  225.272001] mmc2: Unexpected interrupt 0x04000000.
+> [  225.272024] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [  225.272034] mmc2: sdhci: Sys addr:  0x0712c400 | Version:  0x0000b502
+> [  225.272044] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000007
+> [  225.272054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000023
+> [  225.272064] mmc2: sdhci: Present:   0x01e20002 | Host ctl: 0x00000016
+> [  225.272073] mmc2: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> [  225.272082] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
+> [  225.272092] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000001
+> [  225.272101] mmc2: sdhci: Int enab:  0x03ff000b | Sig enab: 0x03ff000b
+> [  225.272110] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+> [  225.272119] mmc2: sdhci: Caps:      0x076864b2 | Caps_1:   0x00000004
+> [  225.272129] mmc2: sdhci: Cmd:       0x00000c1b | Max curr: 0x00000000
+> [  225.272138] mmc2: sdhci: Resp[0]:   0x00000c00 | Resp[1]:  0x00000000
+> [  225.272147] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000900
+> [  225.272155] mmc2: sdhci: Host ctl2: 0x0000000c
+> [  225.272164] mmc2: sdhci: ADMA Err:  0x00000003 | ADMA Ptr: 0x0712c200
+> [  225.272172] mmc2: sdhci: ============================================
+> 
 
-I'm sorry, I don't have access to the spec currently. Do you have a
-special operation in mind? Is it better to mention no operation since
-UFS has even more operations?
+0x04000000 is so-called "Tuning Error" which oddly the SDHCI driver
+does not support / enable.
 
->
-> ............
->
-> > +/**
-> > + * rpmb_dev_find_device() - return first matching rpmb device
-> > + * @data: data for the match function
-> > + * @match: the matching function
-> > + *
-> > + * Iterate over registered RPMB devices, and call @match() for each pa=
-ssing
-> > + * it the RPMB device and @data.
-> > + *
-> > + * The return value of @match() is checked for each call. If it return=
-s
-> > + * anything other 0, break and return the found RPMB device.
-> > + *
-> > + * It's the callers responsibility to call rpmb_dev_put() on the retur=
-ned
-> > + * device, when it's done with it.
-> > + *
-> > + * Returns: a matching rpmb device or NULL on failure
-> > + */
-> > +struct rpmb_dev *rpmb_dev_find_device(const void *data,
-> > +                                     const struct rpmb_dev *start,
-> > +                                     int (*match)(struct rpmb_dev *rde=
-v,
-> > +                                                  const void *data))
-> > +{
-> > +       struct rpmb_dev *rdev;
-> > +       struct list_head *pos;
-> > +
-> > +       mutex_lock(&rpmb_mutex);
-> > +       if (start)
-> > +               pos =3D start->list_node.next;
-> > +       else
-> > +               pos =3D rpmb_dev_list.next;
-> > +
-> > +       while (pos !=3D &rpmb_dev_list) {
-> Why not just list_for_each_entry instead?
+Could try making the IRQ handler process it and see if that helps:
 
-We want to continue from where we left off last time.
 
->
-> > +               rdev =3D container_of(pos, struct rpmb_dev, list_node);
-> > +               if (match(rdev, data)) {
-> > +                       rpmb_dev_get(rdev);
-> > +                       goto out;
-> > +               }
-> > +               pos =3D pos->next;
-> > +       }
-> > +       rdev =3D NULL;
-> > +
-> > +out:
-> > +       mutex_unlock(&rpmb_mutex);
-> > +
-> > +       return rdev;
-> > +}
->
-> .....................
->
-> > +/**
-> > + * rpmb_dev_register - register RPMB partition with the RPMB subsystem
-> > + * @dev: storage device of the rpmb device
-> > + * @ops: device specific operations
-> > + *
-> > + * While registering the RPMB partition extract needed device informat=
-ion
-> > + * while needed resources are available.
-> > + *
-> > + * Returns: a pointer to a 'struct rpmb_dev' or an ERR_PTR on failure
-> > + */
-> > +struct rpmb_dev *rpmb_dev_register(struct device *dev,
-> > +                                  struct rpmb_descr *descr)
-> > +{
-> > +       struct rpmb_dev *rdev;
-> > +
-> > +       if (!dev || !descr || !descr->route_frames || !descr->dev_id ||
-> > +           !descr->dev_id_len)
-> > +               return ERR_PTR(-EINVAL);
-> > +
-> > +       rdev =3D kzalloc(sizeof(*rdev), GFP_KERNEL);
-> > +       if (!rdev)
-> > +               return ERR_PTR(-ENOMEM);
-> > +       rdev->descr =3D *descr;
-> > +       rdev->descr.dev_id =3D kmemdup(descr->dev_id, descr->dev_id_len=
-,
-> > +                                    GFP_KERNEL);
-> In addition to the dev_id, wouldn't it make sense to have your own IDA as=
- well?
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c79f73459915..746f4cf7ab03 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3439,12 +3439,18 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		host->data->error = -EILSEQ;
+ 		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
+ 			sdhci_err_stats_inc(host, DAT_CRC);
+-	} else if ((intmask & SDHCI_INT_DATA_CRC) &&
++	} else if ((intmask & (SDHCI_INT_DATA_CRC | SDHCI_INT_TUNING_ERROR)) &&
+ 		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
+ 			!= MMC_BUS_TEST_R) {
+ 		host->data->error = -EILSEQ;
+ 		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
+ 			sdhci_err_stats_inc(host, DAT_CRC);
++		if (intmask & SDHCI_INT_TUNING_ERROR) {
++			u16 ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++
++			ctrl2 &= ~SDHCI_CTRL_TUNED_CLK;
++			sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
++		}
+ 	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
+ 		pr_err("%s: ADMA error: 0x%08x\n", mmc_hostname(host->mmc),
+ 		       intmask);
+@@ -3979,7 +3985,7 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+ 	} else
+ 		*cmd_error = 0;
+ 
+-	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
++	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC | SDHCI_INT_TUNING_ERROR)) {
+ 		*data_error = -EILSEQ;
+ 		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
+ 			sdhci_err_stats_inc(host, DAT_CRC);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index a20864fc0641..957c7a917ffb 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -158,6 +158,7 @@
+ #define  SDHCI_INT_BUS_POWER	0x00800000
+ #define  SDHCI_INT_AUTO_CMD_ERR	0x01000000
+ #define  SDHCI_INT_ADMA_ERROR	0x02000000
++#define  SDHCI_INT_TUNING_ERROR	0x04000000
+ 
+ #define  SDHCI_INT_NORMAL_MASK	0x00007FFF
+ #define  SDHCI_INT_ERROR_MASK	0xFFFF8000
+@@ -169,7 +170,7 @@
+ 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
+ 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
+ 		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
+-		SDHCI_INT_BLK_GAP)
++		SDHCI_INT_BLK_GAP | SDHCI_INT_TUNING_ERROR)
+ #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+ 
+ #define SDHCI_CQE_INT_ERR_MASK ( \
 
-Currently, we don't need it.
 
->
-> > +       if (!rdev->descr.dev_id) {
-> > +               kfree(rdev);
-> > +               return ERR_PTR(-ENOMEM);
-> > +       }
-> > +
-> > +       rdev->parent_dev =3D dev;
-> > +
-> > +       dev_dbg(rdev->parent_dev, "registered device\n");
-> > +
-> > +       mutex_lock(&rpmb_mutex);
-> > +       list_add_tail(&rdev->list_node, &rpmb_dev_list);
-> > +       blocking_notifier_call_chain(&rpmb_interface,
-> > RPMB_NOTIFY_ADD_DEVICE,
-> > +                                    rdev);
-> > +       mutex_unlock(&rpmb_mutex);
-> > +
-> > +       return rdev;
-> > +}
-> > +EXPORT_SYMBOL_GPL(rpmb_dev_register);
->
-> ............
->
-> > new file mode 100644
-> > index 000000000000..251d6b7e6d15
-> > --- /dev/null
-> > +++ b/include/linux/rpmb.h
-> > @@ -0,0 +1,136 @@
-> > +/* SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0 */
-> > +/*
-> > + * Copyright (C) 2015-2019 Intel Corp. All rights reserved
-> > + * Copyright (C) 2021-2022 Linaro Ltd
-> > + */
-> > +#ifndef __RPMB_H__
-> > +#define __RPMB_H__
-> > +
-> > +#include <linux/types.h>
-> > +#include <linux/device.h>
-> > +#include <linux/notifier.h>
-> > +
-> > +/**
-> > + * enum rpmb_type - type of underlying storage technology
-> > + *
-> > + * @RPMB_TYPE_EMMC  : emmc (JESD84-B50.1)
-> > + * @RPMB_TYPE_UFS   : UFS (JESD220)
-> > + * @RPMB_TYPE_NVME  : NVM Express
-> > + */
-> > +enum rpmb_type {
-> > +       RPMB_TYPE_EMMC,
-> > +       RPMB_TYPE_UFS,
-> > +       RPMB_TYPE_NVME,
-> > +};
-> > +
-> > +/**
-> > + * struct rpmb_descr - RPMB descriptor provided by the underlying bloc=
-k
-> > device
-> The use of the term "rpmb descriptor" may be slightly misleading.
-> This is because in UFS there are various descriptors that identifies vari=
-ous characteristics,
-> e.g. device descriptor, geometry descriptor, unit descriptor etc.,
-> and recently UFS4.0 introduced a new descriptor - RPMB descriptor....
-
-Would RPMB description be better? Or do you have some other idea?
-
-Thanks,
-Jens
