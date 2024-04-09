@@ -1,210 +1,425 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ot1-f48.google.com (mail-ot1-f48.google.com [209.85.210.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F73A12E1F7
-	for <linux-mmc@vger.kernel.org>; Tue,  9 Apr 2024 11:39:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE0398614B
+	for <linux-mmc@vger.kernel.org>; Tue,  9 Apr 2024 12:00:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712662748; cv=none; b=bucaVMZhYRKdYo6393RH/wIoYgVNG2uE31lDZ64DKxiweBk/TPwVz5B/ucCbFuaeGBxK/Q8CnAPs8yRuXIEKPUeCd1qqeMBqjlLHX8QJVTvgfFmrpsDGWPwzZ0Ud2TlMrvqdWqQWIjsEcODlye98ReAgSUYka2ZNCy+U4F/5geM=
+	t=1712664015; cv=none; b=dK7Df0GHgLkZJPaUwlFspigPcfrggUNI877cWKuquvbkOkeWirKvktKAVy+/QKOKfCuBHgpvJtV54N7P8S9sNvS+wbruU+v6VOuxJbtvv3tfi0CaT/6U5eD9R3zXYCzIdQYwxmoDkY7huC7z9J+lJ67TNmVgfqB3MP1mjAYpCYg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712662748; c=relaxed/simple;
-	bh=DDhUClf4dmuomAJ18tNn1U21AaJ69EHGgLRFmX/f7UU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fseVu9YXsrCYTw9hPHbZX8RyteZKXMsIh3ePzo4rFAuSoU83lArBwlVCcs98tQWSGO44NpoctX1HnU7oyEf+jyUa1qJBjsis+HFsmdI0AgBWKK06FgaMoldxDz1eGNVfHnKVEFDJB3rYCD+HgcC9lFHZn6hEJ2T2OoT9UKhODQA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IEGD60RE; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1712664015; c=relaxed/simple;
+	bh=kSsCJ+neyaD9aFL/tH+VGrh65tQwOtpkOJUoXxdZRIw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qIRSx8sC/67c5KN2OOKhEUGeFRGRQ1LkhnPGentF9XGv+HxfVFbFXEShyVf4obc24WuL57vJbRkES+hUJnGO6skCctL30ltNvos7LYcC9I2Om+GoCJd1JwdUgbL7yCJpjh87dZHErqQG/3nIPxnM4WF3ISWUPcy3aWra4vP3eLo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SxtNfeMn; arc=none smtp.client-ip=209.85.210.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IEGD60RE"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1712662746;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=iITUPaMv9HBGNHWvKkhcI+BSldwWtbGOLOTOQg2Kbfw=;
-	b=IEGD60REQ1XrzEz1BEw+8HgTvxauGLlM6KuFwl/7+Mzo4QBxPTByUA8xF9elvtwRsOTo9T
-	Py5uVvluGO524bt3IH2V1ZgVrnmzAJLRqJBrLaZJYOmf2oKSOo3QeZMaaym7s9qhBdsUac
-	SiW3YUPqpFA0GQ/6tFs3NtKG6zs0y3k=
-Received: from mail-lj1-f200.google.com (mail-lj1-f200.google.com
- [209.85.208.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-611-HkgJ_FjAOTGT7ENIkNCSnw-1; Tue, 09 Apr 2024 07:39:04 -0400
-X-MC-Unique: HkgJ_FjAOTGT7ENIkNCSnw-1
-Received: by mail-lj1-f200.google.com with SMTP id 38308e7fff4ca-2d86787efa3so31260691fa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Apr 2024 04:39:04 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SxtNfeMn"
+Received: by mail-ot1-f48.google.com with SMTP id 46e09a7af769-6ea23720da9so427565a34.2
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Apr 2024 05:00:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1712664013; x=1713268813; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=g57FLG2DYtjB7l2/AdccliiuJIB7I5F3g9Z2XQHJM60=;
+        b=SxtNfeMnx8ugip7seohFAs3z+mqBfWay0QS0SA7zoPBf839XfoWfRF7gqhcc8MRDLN
+         QNsdbbp+qIogI/Zc3sYP/hLzZfi6z20FHVkB7XcnrGJ22fyAjGpYGrHV3VXyhKn1LIol
+         97dBRxJbf4MXaptisSg1+KyUq8wf7zwiz5ppIlVLbLPXIpXy0QQkTBG5DMOjLlooOpAB
+         GdJiRZAsvwviKvdBcvCqvxBtQfVw69OnBZRuo8QkP9O4sHTBQie2VPKjcrqx0rvsgrdb
+         GCg0V6bSQTC/SVFvKX4MKuIMT2H1/lrwk42c3aMb56mOcMWFpRDhSG2XX8l8nxBnMKjI
+         oHWQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712662743; x=1713267543;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=iITUPaMv9HBGNHWvKkhcI+BSldwWtbGOLOTOQg2Kbfw=;
-        b=hccHNXFgXrmFLh88wIOuyxyhN9MSJcduJrGHv8PmC9ejllCBRZQkCePV3dvAJI3o2Q
-         tHf94UGxrFl5esmI/N/vuhZF7NfOHoASnzwyjAZXX+CKeuGCyQC46SyOg8iW9C5KpwUa
-         bgTVi+269MGhpS/oxKKEDbvw6yIAE/z2aTJGF+XWWWZxqeS2XRhiZYHoNGrZaDimR3qM
-         QWgnBgFywRoXAkPemKYBmIzRxPa2QfOHE19gowshmj73REYuBpKZ2HCqyU4GBYyKv86E
-         CQsuoQ3ZSZSY93MQjB1fNZMzkUa/ZnTBPkRjkzxw3yefckauN6B6uF400q35Qews5GAz
-         jQPQ==
-X-Gm-Message-State: AOJu0Ywi8253EDcY40aBiRNk+xNmTDs5uDghdk+gQ+W1kZP3WDsBmW/V
-	gfYvXpHPJNTzsXSQPEyk1hdaGZhtDcqRtUVhtCjx0h9vF1odtxQ47sXKfkiGNQpOr1zhWRHT3wf
-	HCYXJl2lWjszeSnjYNLBewHw6UIzKa2ZinMX9PKwtJZHsTzNepqRnduEuuw==
-X-Received: by 2002:a2e:b011:0:b0:2d6:8e88:5a8b with SMTP id y17-20020a2eb011000000b002d68e885a8bmr10094458ljk.32.1712662743073;
-        Tue, 09 Apr 2024 04:39:03 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG3c9RZTMmoCjJgRmfLDFiam1CQZD9x4sBMQqCRBt4Yoc+185vkiR3m5OP/zE9kRlkr8mz4tg==
-X-Received: by 2002:a2e:b011:0:b0:2d6:8e88:5a8b with SMTP id y17-20020a2eb011000000b002d68e885a8bmr10094444ljk.32.1712662742662;
-        Tue, 09 Apr 2024 04:39:02 -0700 (PDT)
-Received: from ?IPV6:2001:1c00:c32:7800:5bfa:a036:83f0:f9ec? (2001-1c00-0c32-7800-5bfa-a036-83f0-f9ec.cable.dynamic.v6.ziggo.nl. [2001:1c00:c32:7800:5bfa:a036:83f0:f9ec])
-        by smtp.gmail.com with ESMTPSA id z16-20020a17090665d000b00a4e9cb0b620sm5607581ejn.158.2024.04.09.04.39.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 09 Apr 2024 04:39:02 -0700 (PDT)
-Message-ID: <5c53854a-9a16-427b-ac63-41c34cb323b2@redhat.com>
-Date: Tue, 9 Apr 2024 13:39:01 +0200
+        d=1e100.net; s=20230601; t=1712664013; x=1713268813;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=g57FLG2DYtjB7l2/AdccliiuJIB7I5F3g9Z2XQHJM60=;
+        b=gPb95We4zaaU2lmorlCHB3NvWzqHeKqiCn0HGC4QeaGb6zIymWE66PKWfEbb9tdUOk
+         CHVvQgC0ASgMiD/H83QGi37nuWNZIF4nRX2qdGHFj39KhUQdKeUpRT7/d0VWfxo7gjQk
+         Y3K+MatsR3rsR3MmyCKdFywD1fYdXRE0ONdceuYHBnFonbC95jDXSFokFW2FmSiEnB7x
+         h4SOKgPkB7+4XTMrbOSZ5JNrmMRocoCGJt5jqBrWdc1lcbkAxY000cSCCKCD2qP2kL+I
+         gP2g4xJDGyrGbH66XyHeSLhNjAihs3/L/fOWjSHt20bhwjKgEVZ0apqETJcM8gh0Un5l
+         zEXQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUnZF6/G8H0Owq3u3m4pN3t2CzzUnrwd58d+l/tEiksBvGva9Henzr56z15/wJqq5q4L76yGNAI8txm84O6UBSW3XDMvWMJI+AG
+X-Gm-Message-State: AOJu0YzTteaXt+iaHWOcmawChlSSzghZpI+xs50xIRMM0sL+aP4sye0o
+	mzkzxG121mwM7DgN11IVKQ1vJB6wpLssVi5/sc+uPUV7SdPkNaGx8ZiYL8saEkXlmw33h61EMdD
+	T6aW+QkysBJCKPRp0HMTob9OnSwRFmBKwyvjlBA==
+X-Google-Smtp-Source: AGHT+IE3c2YTtnw4w6o839yJoZUr2rWNziP6CqA0KFHn0n5VcRiKCHbRofYfnpb6PovupHKtTrD7cYlAEoCdrliikBE=
+X-Received: by 2002:a05:6808:14a:b0:3c5:f35b:163a with SMTP id
+ h10-20020a056808014a00b003c5f35b163amr5649657oie.22.1712664012608; Tue, 09
+ Apr 2024 05:00:12 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 4/6] mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo
- Yoga Tablet 2 series sdcard slot
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org,
- Mika Westerberg <mika.westerberg@linux.intel.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Andy Shevchenko <andy@kernel.org>
-References: <20240408195244.248280-1-hdegoede@redhat.com>
- <20240408195244.248280-5-hdegoede@redhat.com>
- <199bb4aa-c6b5-453e-be37-58bbf468800c@intel.com>
-Content-Language: en-US, nl
-From: Hans de Goede <hdegoede@redhat.com>
-In-Reply-To: <199bb4aa-c6b5-453e-be37-58bbf468800c@intel.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240405115318.904143-1-jens.wiklander@linaro.org>
+ <20240405115318.904143-3-jens.wiklander@linaro.org> <DM6PR04MB657580885C16AE4F5743357EFC022@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <PH7PR11MB76050B745987B7169C8EDA0EE5022@PH7PR11MB7605.namprd11.prod.outlook.com>
+In-Reply-To: <PH7PR11MB76050B745987B7169C8EDA0EE5022@PH7PR11MB7605.namprd11.prod.outlook.com>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Tue, 9 Apr 2024 14:00:01 +0200
+Message-ID: <CAHUa44EfLjZkeS0HFTf4gvBiwZj3682t0JSWx_=rb9xfagbWLQ@mail.gmail.com>
+Subject: Re: [PATCH v4 2/3] mmc: block: register RPMB partition with the RPMB subsystem
+To: "Winkler, Tomas" <tomas.winkler@intel.com>
+Cc: Avri Altman <Avri.Altman@wdc.com>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
+	"op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
+	Sumit Garg <sumit.garg@linaro.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	"Usyskin, Alexander" <alexander.usyskin@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Adrian,
+On Sat, Apr 6, 2024 at 5:31=E2=80=AFPM Winkler, Tomas <tomas.winkler@intel.=
+com> wrote:
+>
+> >
+> >
+> > > +
+> > > +#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Authentication
+> > You expect the key to be already programmed - so you don't really need =
+this
+> > operation?
+> Depends in what manufacturing flow you program the device,  second I beli=
+eve in the original series was also a simulation device,
+> This is important as the real device can be programmed only once.
 
-On 4/9/24 12:37 PM, Adrian Hunter wrote:
-> On 8/04/24 22:52, Hans de Goede wrote:
->> Unlike all other Bay Trail devices I have (quite a few) the BIOS on
->> the Lenovo Yoga Tablet 2 830 / 1050 and Lenovo Yoga Tablet 2 Pro 1380 (8",
->> 10" and 13") models sets the SDHCI_SUPPORT_DDR50 bit in the sdcard slots'
->> SDHCI controller's Caps_1 register which causes Linux to try and use
->> UHS SDR12 / SDR25 and DDR50 modes on UHS cards.
->>
->> These tablets do have 1.8V signalling implemented in the hw level through
->> the Bay Trail SoC's SD3_1P8EN pin. But trying to use UHS modes leads to
->> lots of errors like these:
->>
->> [  225.272001] mmc2: Unexpected interrupt 0x04000000.
->> [  225.272024] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
->> [  225.272034] mmc2: sdhci: Sys addr:  0x0712c400 | Version:  0x0000b502
->> [  225.272044] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000007
->> [  225.272054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000023
->> [  225.272064] mmc2: sdhci: Present:   0x01e20002 | Host ctl: 0x00000016
->> [  225.272073] mmc2: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
->> [  225.272082] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
->> [  225.272092] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000001
->> [  225.272101] mmc2: sdhci: Int enab:  0x03ff000b | Sig enab: 0x03ff000b
->> [  225.272110] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
->> [  225.272119] mmc2: sdhci: Caps:      0x076864b2 | Caps_1:   0x00000004
->> [  225.272129] mmc2: sdhci: Cmd:       0x00000c1b | Max curr: 0x00000000
->> [  225.272138] mmc2: sdhci: Resp[0]:   0x00000c00 | Resp[1]:  0x00000000
->> [  225.272147] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000900
->> [  225.272155] mmc2: sdhci: Host ctl2: 0x0000000c
->> [  225.272164] mmc2: sdhci: ADMA Err:  0x00000003 | ADMA Ptr: 0x0712c200
->> [  225.272172] mmc2: sdhci: ============================================
->>
-> 
-> 0x04000000 is so-called "Tuning Error" which oddly the SDHCI driver
-> does not support / enable.
-> 
-> Could try making the IRQ handler process it and see if that helps:
+This isn't strictly needed, this is the only "nice to have" feature
+I've kept because it's easy enough and can be useful. I can remove it
+if it's important.
 
-Thank you. I'll give this a try when I've some time.
+> >
+> > > Key */
+> > > +#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write counter
+> > */
+> > > +#define RPMB_WRITE_DATA        0x3    /* Write data to RPMB partitio=
+n */
+> > > +#define RPMB_READ_DATA         0x4    /* Read data from RPMB partiti=
+on
+> > */
+> > > +#define RPMB_RESULT_READ       0x5    /* Read result request  (Inter=
+nal)
+> > */
+> > > +
+> > >  static DEFINE_MUTEX(block_mutex);
+> > >
+> > >  /*
+> > > @@ -163,6 +205,7 @@ struct mmc_rpmb_data {
+> > >         int id;
+> > >         unsigned int part_index;
+> > >         struct mmc_blk_data *md;
+> > > +       struct rpmb_dev *rdev;
+> > >         struct list_head node;
+> > >  };
+> > >
+> > > @@ -2672,7 +2715,6 @@ static int mmc_rpmb_chrdev_open(struct inode
+> > > *inode, struct file *filp)
+> > >
+> > >         get_device(&rpmb->dev);
+> > >         filp->private_data =3D rpmb;
+> > > -       mmc_blk_get(rpmb->md->disk);
+> > Maybe add a comment that this has moved to mmc_blk_alloc_rpmb_part?
+> > For those who will look for it.
 
-Note though that the factory Android OS actually also sets
-(hardcodes) the SDHCI_QUIRK2_NO_1_8_V quirk2 flag for the external
-microsd slot and as I mentioned I've not seen any other Bay Trail
-device (and I have quite a few) enable UHS modes on their external
-sdcard slot. The datasheet for the Bay Trail SoC claims UHS modes
-should work, but it seems that in practice the hw-enablement work
-for this was never done.
+Such a comment seems odd. Those looking for mmc_blk_get() should be
+able to find it easily. I'll add the comment if it's important.
 
-As I mentioned below the cut-off I have even contemplated to
-always set SDHCI_QUIRK2_NO_1_8_V on the external sd slot for
-all Bay Trail devices because of this. So I'm wondering if
-it would not be safer to just disable UHS modes on Bay Trail
-devices and leave things at that ?
+> >
+> > >
+> > >         return nonseekable_open(inode, filp);  } @@ -2682,7 +2724,6 @=
+@
+> > > static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *=
+filp)
+> > >         struct mmc_rpmb_data *rpmb =3D container_of(inode->i_cdev,
+> > >                                                   struct
+> > > mmc_rpmb_data, chrdev);
+> > >
+> > > -       mmc_blk_put(rpmb->md);
+> > Ditto.
 
-Part of my thinking here is that given both that it is only
-enabled in the first place on these 3 models as well as how old
-these tablets are that it might be better to spend time elsewhere?
+See my answer above.
 
-Regards,
+> >
+> > >         put_device(&rpmb->dev);
+> > >
+> > >         return 0;
+> > > @@ -2703,10 +2744,157 @@ static void
+> > > mmc_blk_rpmb_device_release(struct
+> > > device *dev)  {
+> > >         struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev);
+> > >
+> > > +       rpmb_dev_unregister(rpmb->rdev);
+> > > +       mmc_blk_put(rpmb->md);
+> > >         ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> > >         kfree(rpmb);
+> > >  }
+> > >
+> > > +static void free_idata(struct mmc_blk_ioc_data **idata, unsigned int
+> > > +cmd_count) {
+> > > +       unsigned int n;
+> > > +
+> > > +       for (n =3D 0; n < cmd_count; n++)
+> > > +               kfree(idata[n]);
+> > > +       kfree(idata);
+> > > +}
+> > > +
+> > > +static struct mmc_blk_ioc_data **alloc_idata(struct mmc_rpmb_data
+> > *rpmb,
+> > > +                                            unsigned int cmd_count) =
+{
+> > > +       struct mmc_blk_ioc_data **idata;
+> > > +       unsigned int n;
+> > > +
+> > > +       idata =3D kcalloc(cmd_count, sizeof(*idata), GFP_KERNEL);
+> > > +       if (!idata)
+> > > +               return NULL;
+> > > +
+> > > +       for (n =3D 0; n < cmd_count; n++) {
+> > > +               idata[n] =3D kcalloc(1, sizeof(**idata), GFP_KERNEL);
+> > > +               if (!idata[n]) {
+> > > +                       free_idata(idata, n);
+> > > +                       return NULL;
+> > > +               }
+> > > +               idata[n]->rpmb =3D rpmb;
+> > > +       }
+> > > +
+> > > +       return idata;
+> > > +}
+> > > +
+> > > +static void set_idata(struct mmc_blk_ioc_data *idata, u32 opcode,
+> > > +                     int write_flag, u8 *buf, unsigned int buf_bytes=
+) {
+> > > +       idata->ic.opcode =3D opcode;
+> > > +       idata->ic.flags =3D MMC_RSP_R1 | MMC_CMD_ADTC;
+> > > +       idata->ic.write_flag =3D write_flag;
+> > > +       idata->ic.blksz =3D sizeof(struct rpmb_frame);
+> > blksz =3D 512, so maybe add a compile-time check on sizeof(struct
+> > rpmb_frame)?
 
-Hans
+That makes sense, I'll add it.
 
+> >
+> > > +       idata->ic.blocks =3D buf_bytes /  idata->ic.blksz;
+> > > +       idata->buf =3D buf;
+> > > +       idata->buf_bytes =3D buf_bytes;
+> > > +}
+> > > +
+> > > +static int mmc_route_rpmb_frames(struct device *dev, u8 *req,
+> > > +                                unsigned int req_len, u8 *resp,
+> > > +                                unsigned int resp_len) {
+> > > +       struct rpmb_frame *frm =3D (struct rpmb_frame *)req;
+> > > +       struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev);
+> > > +       struct mmc_blk_data *md =3D rpmb->md;
+> > > +       struct mmc_blk_ioc_data **idata;
+> > > +       unsigned int cmd_count;
+> > > +       struct request *rq;
+> > > +       u16 req_type;
+> > > +       bool write;
+> > > +       int ret;
+> > > +
+> > > +       if (IS_ERR(md->queue.card))
+> > > +               return PTR_ERR(md->queue.card);
+> > > +
+> > > +       if (req_len < sizeof(*frm))
+> > > +               return -EINVAL;
+> > > +
+> > > +       req_type =3D be16_to_cpu(frm->req_resp);
+> > > +       switch (req_type) {
+> > > +       case RPMB_PROGRAM_KEY:
+> > > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> > > +                   resp_len !=3D sizeof(struct rpmb_frame))
+> > > +                       return -EINVAL;
+> > > +               write =3D true;
+> > > +               break;
+> > > +       case RPMB_GET_WRITE_COUNTER:
+> > > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> > > +                   resp_len !=3D sizeof(struct rpmb_frame))
+> > > +                       return -EINVAL;
+> > > +               write =3D false;
+> > > +               break;
+> > > +       case RPMB_WRITE_DATA:
+> > > +               if (req_len % sizeof(struct rpmb_frame) ||
+> > > +                   resp_len !=3D sizeof(struct rpmb_frame))
+> > > +                       return -EINVAL;
+> > > +               write =3D true;
+> > > +               break;
+> > > +       case RPMB_READ_DATA:
+> > > +               if (req_len !=3D sizeof(struct rpmb_frame) ||
+> > > +                   resp_len % sizeof(struct rpmb_frame))
+> > > +                       return -EINVAL;
+> > > +               write =3D false;
+> > > +               break;
+> > > +       default:
+> > > +               return -EINVAL;
+> > > +       }
+> > Looks like the above input validation section can be reduced to is
+> > RPMB_WRITE_DATA and default?
 
+RPMB_GET_WRITE_COUNTER and RPMB_READ_DATA have different checks for resp_le=
+n.
 
+> >
+> > > +
+> > > +       if (write)
+> > > +               cmd_count =3D 3;
+> > > +       else
+> > > +               cmd_count =3D 2;
+> > > +
+> > > +       idata =3D alloc_idata(rpmb, cmd_count);
+> > > +       if (!idata)
+> > > +               return -ENOMEM;
+> > > +
+> > > +       if (write) {
+> > > +               struct rpmb_frame *frm =3D (struct rpmb_frame *)resp;
+> > > +
+> > > +               /* Send write request frame(s) */
+> > > +               set_idata(idata[0], MMC_WRITE_MULTIPLE_BLOCK,
+> > > +                         1 | MMC_CMD23_ARG_REL_WR, req, req_len);
+> > > +
+> > > +               /* Send result request frame */
+> > > +               memset(frm, 0, sizeof(*frm));
+> > > +               frm->req_resp =3D cpu_to_be16(RPMB_RESULT_READ);
+> > > +               set_idata(idata[1], MMC_WRITE_MULTIPLE_BLOCK, 1, resp=
+,
+> > > +                         resp_len);
+> > > +
+> > > +               /* Read response frame */
+> > > +               set_idata(idata[2], MMC_READ_MULTIPLE_BLOCK, 0, resp,
+> > > resp_len);
+> > It is confusing to me that your response is holding 2 frame types:
+> > The status frame and the response frame.
+> Refer to the spec.
+>
+> >
+> >
+> > > +       } else {
+> > > +               /* Send write request frame(s) */
+> > > +               set_idata(idata[0], MMC_WRITE_MULTIPLE_BLOCK, 1, req,
+> > > + req_len);
+> > > +
+> > > +               /* Read response frame */
+> > > +               set_idata(idata[1], MMC_READ_MULTIPLE_BLOCK, 0, resp,
+> > > resp_len);
+> > > +       }
+> > > +
+> > > +       rq =3D blk_mq_alloc_request(md->queue.queue, REQ_OP_DRV_OUT,
+> > 0);
+> > > +       if (IS_ERR(rq)) {
+> > > +               ret =3D PTR_ERR(rq);
+> > > +               goto out;
+> > > +       }
+> > > +
+> > > +       req_to_mmc_queue_req(rq)->drv_op =3D
+> > MMC_DRV_OP_IOCTL_RPMB;
+> > > +       req_to_mmc_queue_req(rq)->drv_op_result =3D -EIO;
+> > > +       req_to_mmc_queue_req(rq)->drv_op_data =3D idata;
+> > > +       req_to_mmc_queue_req(rq)->ioc_count =3D cmd_count;
+> > Maybe have an additional struct mmc_queue_req *mq_rq =3D
+> > req_to_mmc_queue_req(rq);
 
+Sure, I'll add it.
 
+> >
+> > > +       blk_execute_rq(rq, false);
+> > > +       ret =3D req_to_mmc_queue_req(rq)->drv_op_result;
+> > > +
+> > > +       blk_mq_free_request(rq);
+> > > +
+> > > +out:
+> > > +       free_idata(idata, cmd_count);
+> > > +       return ret;
+> > > +}
+> > > +
+> > >  static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
+> > >                                    struct mmc_blk_data *md,
+> > >                                    unsigned int part_index, @@ -2741,=
+6
+> > > +2929,7 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
+> > >         rpmb->dev.release =3D mmc_blk_rpmb_device_release;
+> > >         device_initialize(&rpmb->dev);
+> > >         dev_set_drvdata(&rpmb->dev, rpmb);
+> > > +       mmc_blk_get(md->disk);
+> > >         rpmb->md =3D md;
+> > >
+> > >         cdev_init(&rpmb->chrdev, &mmc_rpmb_fileops); @@ -3002,6
+> > > +3191,41 @@ static void mmc_blk_remove_debugfs(struct mmc_card
+> > *card,
+> > >
+> > >  #endif /* CONFIG_DEBUG_FS */
+> > >
+> > > +static void mmc_blk_rpmb_add(struct mmc_card *card) {
+> > > +       struct mmc_blk_data *md =3D dev_get_drvdata(&card->dev);
+> > > +       struct mmc_rpmb_data *rpmb;
+> > > +       struct rpmb_dev *rdev;
+> > > +       unsigned int n;
+> > > +       u32 cid[4];
+> > > +       struct rpmb_descr descr =3D {
+> > > +               .type =3D RPMB_TYPE_EMMC,
+> > > +               .route_frames =3D mmc_route_rpmb_frames,
+> > > +               .reliable_wr_count =3D card->ext_csd.raw_rpmb_size_mu=
+lt,
+> > > +               .capacity =3D card->ext_csd.rel_sectors,
+> > The capacity is RPMB_SIZE_MULT and also limited to 16MB?
 
-> 
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c79f73459915..746f4cf7ab03 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3439,12 +3439,18 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  		host->data->error = -EILSEQ;
->  		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
->  			sdhci_err_stats_inc(host, DAT_CRC);
-> -	} else if ((intmask & SDHCI_INT_DATA_CRC) &&
-> +	} else if ((intmask & (SDHCI_INT_DATA_CRC | SDHCI_INT_TUNING_ERROR)) &&
->  		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
->  			!= MMC_BUS_TEST_R) {
->  		host->data->error = -EILSEQ;
->  		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
->  			sdhci_err_stats_inc(host, DAT_CRC);
-> +		if (intmask & SDHCI_INT_TUNING_ERROR) {
-> +			u16 ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +
-> +			ctrl2 &= ~SDHCI_CTRL_TUNED_CLK;
-> +			sdhci_writew(host, ctrl2, SDHCI_HOST_CONTROL2);
-> +		}
->  	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
->  		pr_err("%s: ADMA error: 0x%08x\n", mmc_hostname(host->mmc),
->  		       intmask);
-> @@ -3979,7 +3985,7 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
->  	} else
->  		*cmd_error = 0;
->  
-> -	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
-> +	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC | SDHCI_INT_TUNING_ERROR)) {
->  		*data_error = -EILSEQ;
->  		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
->  			sdhci_err_stats_inc(host, DAT_CRC);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index a20864fc0641..957c7a917ffb 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -158,6 +158,7 @@
->  #define  SDHCI_INT_BUS_POWER	0x00800000
->  #define  SDHCI_INT_AUTO_CMD_ERR	0x01000000
->  #define  SDHCI_INT_ADMA_ERROR	0x02000000
-> +#define  SDHCI_INT_TUNING_ERROR	0x04000000
->  
->  #define  SDHCI_INT_NORMAL_MASK	0x00007FFF
->  #define  SDHCI_INT_ERROR_MASK	0xFFFF8000
-> @@ -169,7 +170,7 @@
->  		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
->  		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
->  		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
-> -		SDHCI_INT_BLK_GAP)
-> +		SDHCI_INT_BLK_GAP | SDHCI_INT_TUNING_ERROR)
->  #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
->  
->  #define SDHCI_CQE_INT_ERR_MASK ( \
-> 
-> 
+Thanks for noticing this, I'll fix it. Yes, the spec says it's limited to 1=
+6MB.
 
+> > And you also need the region size you are writing to.
+> > If I get your intention regarding reliable_wr_count, AFAIK, rpmb can be
+> > written either as a single, double, or 32 frames.
+> > And this should be induced from card->ext_csd.rel_param, and not card-
+> > >ext_csd.rel_sectors.
+> This may change in the spec since this patch was written it was few years=
+ ago.
+
+Thanks, I'll fix it.
+
+> >
+> > > +               .dev_id =3D (void *)cid,
+> > > +               .dev_id_len =3D sizeof(cid),
+> > > +       };
+> > > +
+> > > +       /*
+> > > +        * Provice CID as an octet array. The CID needs to be interpr=
+eted
+> > > +        * when used as input to derive the RPMB key since some field=
+s
+> > > +        * will change due to firmware updates.
+> > > +        */
+> > Not sure how the CID register is related to RPMB?
+> > Is this something internal to TEE?
+> Yes to identify the device.
+
++1
+
+Thanks,
+Jens
+
+> >
+> > > +       for (n =3D 0; n < 4; n++)
+> > > +               cid[n] =3D be32_to_cpu(card->raw_cid[n]);
+> > > +
+> > > +       list_for_each_entry(rpmb, &md->rpmbs, node) {
+> > > +               rdev =3D rpmb_dev_register(&rpmb->dev, &descr);
+> > > +               if (IS_ERR(rdev)) {
+> > > +                       pr_warn("%s: could not register RPMB device\n=
+",
+> > > +                               dev_name(&rpmb->dev));
+> > > +                       continue;
+> > > +               }
+> > > +               rpmb->rdev =3D rdev;
+> > > +       }
+> > > +}
+> > > +
+> >
+> > Thanks,
+> > Avri
