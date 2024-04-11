@@ -1,183 +1,431 @@
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3930B13B2A8;
-	Thu, 11 Apr 2024 09:39:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.132.182.106
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3460145323
+	for <linux-mmc@vger.kernel.org>; Thu, 11 Apr 2024 10:57:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.249.201.71
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712828386; cv=none; b=PusHeacMlNx8UuWmN4NbKIVMZcoaG4BKdYp/SRlPNHPaGq7Rwb+PW/8TeXzmByAFPL92qZzyKbEJcOZ4NenJa5ad2MTA0JAHKNKLmsVfQq50PurIT2O6Ec5W45O9pDBU34ahT4O7JZEVWwZkM5L1RPSqmMbfk9KKMxTPd13di5U=
+	t=1712833034; cv=none; b=FwCCYWZmlGr0oU171TlRNRn/aB1HDAhiJMkgpTS8SitUlvgIdtFDqyW9nuOhvWgxDdSm15rc7mSYe4bclGGy5xzTrSMkSfnaWbLidGLbmBn+gQJ94ZLn5Go/s0BVUwYzSOwrL8nPSfTyddDWhESonvX0fpG5mzeV2JxwOPh6xp8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712828386; c=relaxed/simple;
-	bh=wanp9p18Kaf0ShHZ0lGWcX4M0b7lk+ryk6Qlal5cEOU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=V6pVbqzfPJc7ZepFHHLG6R+/HQ+5hm4Dc0FsZoEHB3Hc68T4bRN5eJ70O2/BbP32elGL92pHfIMI7/c/cL3fCAZO/Gp+YmlWgbpxnSo7s7CkOgg+2cwxg9N81U08ZmXL4G3l725gJxlw0bjioDZYAED3jKQCnnonw4a5+zdEqZ4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foss.st.com; spf=pass smtp.mailfrom=foss.st.com; dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b=RH23LTku; arc=none smtp.client-ip=185.132.182.106
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foss.st.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foss.st.com
+	s=arc-20240116; t=1712833034; c=relaxed/simple;
+	bh=6/CZ8Td3ZUruKgLNYjKXVkztppdTkKraFPNdni3InJM=;
+	h=To:Subject:MIME-Version:From:Content-Type:Message-Id:Date; b=Ls/EGRJD+fgBbWG9PENBd/3ELC1sxH0xgiHp79is3RXjsDc9aoHpMbKfFzwU673iErwj0AhvS+GbbfCfO2g/BzetWo2EOWjMt7w/bdZ/a7JM25nGn6BYZ5h7he/4k4cE4ff+J4bIYeiViBDp5cedc0QX/tLLLaxxT170x/LD+dg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com; spf=pass smtp.mailfrom=musicianspage.com; dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b=BQ3H6tES; arc=none smtp.client-ip=170.249.201.71
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=musicianspage.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b="RH23LTku"
-Received: from pps.filterd (m0369458.ppops.net [127.0.0.1])
-	by mx07-00178001.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 43B7Pfi7029833;
-	Thu, 11 Apr 2024 11:38:52 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-	message-id:date:mime-version:subject:to:cc:references:from
-	:in-reply-to:content-type:content-transfer-encoding; s=
-	selector1; bh=6rfS5zPiSmzZMMxQ4v6y7X7sH1FVnmMas6q+NGiPbP0=; b=RH
-	23LTkuSOQZgrLqSQPcyDWEaHansF0FyzusSDHHejYeeQubA/RF03+Fcw0JO1uxMG
-	vxF1TpPcpGgm0D5a22KTGFQ7B10VA0NGWF7kWPIuCEes6xP+vVpTvGT3WcMqMrto
-	D4vR5lrxgA/glhjYfqpRe5c0L23nsZVK7DVfPfG0lEV5OCEp0AXAts6p2Sz8Eqn+
-	pfNDTysrxZZj3w6etWkPop5DdColzGvEkh0mS5oMq1L4D7HeqW1uQ1DiKhu8ho9x
-	WWExS/Zmj9aq87LkaFiH+L0wv8VNYlPBEg0uHS/sXlEIu+kMGooWvN+/JWrTbuwL
-	XfW02l4cyVpCxpiEPg5w==
-Received: from beta.dmz-ap.st.com (beta.dmz-ap.st.com [138.198.100.35])
-	by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3xbfy12h6s-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 11 Apr 2024 11:38:51 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-	by beta.dmz-ap.st.com (STMicroelectronics) with ESMTP id D322A4002D;
-	Thu, 11 Apr 2024 11:38:34 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
-	by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 906DE2132CA;
-	Thu, 11 Apr 2024 11:37:27 +0200 (CEST)
-Received: from [10.48.86.79] (10.48.86.79) by SHFDAG1NODE1.st.com
- (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.27; Thu, 11 Apr
- 2024 11:37:25 +0200
-Message-ID: <ee47d2e8-763f-4451-b9f3-b46ded4c1b97@foss.st.com>
-Date: Thu, 11 Apr 2024 11:37:24 +0200
+	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="BQ3H6tES"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
+	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
+	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
+	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
+	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
+	List-Archive; bh=hxg146BoDHN9rzFx0bQm/j7hNvlqBnDeZUJYywUsNBQ=; b=BQ3H6tESr1GG
+	I3bFa22nrdnyZDss1kKFt/TiILCxtNBWbUVrzSOA77ZCvxBT7b9an3GrqFRMo8CnUuUbHPQ/f9Fc8
+	7/ns5ZfJ/YNwGo2A3iq+afCJrQwg3spoJUQ5vJnKkyQVTbo476DXDld33nNJPwWEw7T7Sw04GoLIg
+	/xmxM=;
+Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
+	(envelope-from <no-reply@musicianspage.com>)
+	id 1rus76-0001Ui-IT
+	for linux-mmc@vger.kernel.org; Thu, 11 Apr 2024 03:57:04 -0700
+To: linux-mmc@vger.kernel.org
+Subject: Music News and Site Updates (April 11, 2024)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v9 00/13] Introduce STM32 Firewall framework
-To: Rob Herring <robh+dt@kernel.org>
-CC: Gatien Chevallier <gatien.chevallier@foss.st.com>,
-        <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
-        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
-        <krzysztof.kozlowski+dt@linaro.org>, <conor+dt@kernel.org>,
-        <vkoul@kernel.org>, <jic23@kernel.org>, <olivier.moysan@foss.st.com>,
-        <arnaud.pouliquen@foss.st.com>, <mchehab@kernel.org>,
-        <fabrice.gasnier@foss.st.com>, <andi.shyti@kernel.org>,
-        <ulf.hansson@linaro.org>, <edumazet@google.com>, <kuba@kernel.org>,
-        <pabeni@redhat.com>, <hugues.fruchet@foss.st.com>, <lee@kernel.org>,
-        <will@kernel.org>, <catalin.marinas@arm.com>, <arnd@kernel.org>,
-        <richardcochran@gmail.com>, Frank Rowand <frowand.list@gmail.com>,
-        <peng.fan@oss.nxp.com>, <lars@metafoo.de>, <rcsekar@samsung.com>,
-        <wg@grandegger.com>, <mkl@pengutronix.de>,
-        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
-        <dmaengine@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
-        <linux-iio@vger.kernel.org>, <alsa-devel@alsa-project.org>,
-        <linux-media@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <netdev@vger.kernel.org>, <linux-phy@lists.infradead.org>,
-        <linux-serial@vger.kernel.org>, <linux-spi@vger.kernel.org>,
-        <linux-usb@vger.kernel.org>
-References: <20240105130404.301172-1-gatien.chevallier@foss.st.com>
- <61608010-fbce-46c6-a83d-94c04d0f000d@foss.st.com>
- <CAL_JsqJTiBK3qzdMzL-ZuARosKGqnf_PjyCj13_H=V415y9sHQ@mail.gmail.com>
-Content-Language: en-US
-From: Alexandre TORGUE <alexandre.torgue@foss.st.com>
-In-Reply-To: <CAL_JsqJTiBK3qzdMzL-ZuARosKGqnf_PjyCj13_H=V415y9sHQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: EQNCAS1NODE3.st.com (10.75.129.80) To SHFDAG1NODE1.st.com
- (10.75.129.69)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-04-11_03,2024-04-09_01,2023-05-22_02
+From: Musicians Page <newsletter@musicianspage.com>
+Reply-To: Musicians Page <newsletter@musicianspage.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <E1rus76-0001Ui-IT@list.virtualsheetmusic.com>
+Date: Thu, 11 Apr 2024 03:57:04 -0700
 
-Hi Rob
+Dear Musician and Music Lover,
 
-On 4/9/24 19:13, Rob Herring wrote:
-> On Mon, Apr 8, 2024 at 3:44 AM Alexandre TORGUE
-> <alexandre.torgue@foss.st.com> wrote:
->>
->> Hi Gatien,
->>
->> On 1/5/24 14:03, Gatien Chevallier wrote:
->>> Introduce STM32 Firewall framework for STM32MP1x and STM32MP2x
->>> platforms. STM32MP1x(ETZPC) and STM32MP2x(RIFSC) Firewall controllers
->>> register to the framework to offer firewall services such as access
->>> granting.
->>>
->>> This series of patches is a new approach on the previous STM32 system
->>> bus, history is available here:
->>> https://lore.kernel.org/lkml/20230127164040.1047583/
->>>
->>> The need for such framework arises from the fact that there are now
->>> multiple hardware firewalls implemented across multiple products.
->>> Drivers are shared between different products, using the same code.
->>> When it comes to firewalls, the purpose mostly stays the same: Protect
->>> hardware resources. But the implementation differs, and there are
->>> multiple types of firewalls: peripheral, memory, ...
->>>
->>> Some hardware firewall controllers such as the RIFSC implemented on
->>> STM32MP2x platforms may require to take ownership of a resource before
->>> being able to use it, hence the requirement for firewall services to
->>> take/release the ownership of such resources.
->>>
->>> On the other hand, hardware firewall configurations are becoming
->>> more and more complex. These mecanisms prevent platform crashes
->>> or other firewall-related incoveniences by denying access to some
->>> resources.
->>>
->>> The stm32 firewall framework offers an API that is defined in
->>> firewall controllers drivers to best fit the specificity of each
->>> firewall.
->>>
->>> For every peripherals protected by either the ETZPC or the RIFSC, the
->>> firewall framework checks the firewall controlelr registers to see if
->>> the peripheral's access is granted to the Linux kernel. If not, the
->>> peripheral is configured as secure, the node is marked populated,
->>> so that the driver is not probed for that device.
->>>
->>> The firewall framework relies on the access-controller device tree
->>> binding. It is used by peripherals to reference a domain access
->>> controller. In this case a firewall controller. The bus uses the ID
->>> referenced by the access-controller property to know where to look
->>> in the firewall to get the security configuration for the peripheral.
->>> This allows a device tree description rather than a hardcoded peripheral
->>> table in the bus driver.
->>>
->>> The STM32 ETZPC device is responsible for filtering accesses based on
->>> security level, or co-processor isolation for any resource connected
->>> to it.
->>>
->>> The RIFSC is responsible for filtering accesses based on Compartment
->>> ID / security level / privilege level for any resource connected to
->>> it.
->>>
->>> STM32MP13/15/25 SoC device tree files are updated in this series to
->>> implement this mecanism.
->>>
->>
->> ...
->>
->> After minor cosmetic fixes, series applied on stm32-next.
->> Seen with Arnd: it will be part on my next PR and will come through
->> arm-soc tree.
-> 
-> And there's some new warnings in next with it:
-> 
->        1  venc@480e0000: 'access-controllers' does not match any of the
-> regexes: 'pinctrl-[0-9]+'
->        1  vdec@480d0000: 'access-controllers' does not match any of the
-> regexes: 'pinctrl-[0-9]+'
+Here is the Newsletter from Musicians Page website:
 
-Yes I noticed it to my colleague. YAML update has been sent for VEND/VDENC.
+http://www.musicianspage.com
 
-https://lore.kernel.org/lkml/171276671618.403884.13818480350194550959.robh@kernel.org/T/
+As you have requested. Read on...
 
-As soon as it is acked I could merge it in my tree.
-
-Alex
-
-> 
-> Rob
+(If you are no longer interested in subscribing to this newsletter, you can=
+ unsubscribe by clicking the link at the bottom of this newsletter. Thanks!=
+)
 
 
 
+
+---------------------------------------------------------------------------=
+-
+
+If you are not yet registered as a Musician or Band/Ensemble, be sure to si=
+gn-up from the following page (it's free!):
+
+https://www.musicianspage.com/signup.php?email=3Dlinux-mmc@vger.kernel.org
+
+---------------------------------------------------------------------------=
+-
+
+
+
+
+Consider to join with a Standard or Pro Membership
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Either if you are a Musician or a Music Employer, have a look at our Member=
+ship Plans and sign up for the one that best fits your needs:
+
+
+http://www.musicianspage.com/membership.html
+
+
+A Standard or Pro Membership gives you the ability to upload unlimited audi=
+o, video, and sheet music files to your profile; as well as a more complete=
+ resume (or service/company info if you are an employer) and a creative pag=
+e with media content. If you are a musician, you will also have the chance =
+to get featured on the new Musicians Page radio:
+
+http://www.musicianspage.com/music/radio/
+
+
+Musicians Page gives you a professional space on the web to showcase your t=
+alent to potential employers or, for employers, to have a professional and =
+targeted space on the web where to showcase your products or services to po=
+tential prospects. Musicians Page gives you the chance to differentiate you=
+rself from other musicians or the competition who only use amateur channels=
+ such as MySpace, FaceBook, YouTube, or other free sites.
+
+Also, do you know that your profile on Musicians Page is Google optimized?
+
+This means that employers, other musicians or prospects can easily find you=
+ via Google. Our system automatically optimizes every Musician's profile to=
+ appear at the top of Google results for relevant keywords. Just another re=
+ason to take full advantage of all that the Standard and Pro Memberships ha=
+ve to offer, and not rely solely on free social networks that won't optimiz=
+e your profile for others to see at the top of the list!
+
+With a Standard or Pro Membership, you'll also be able to find and apply fo=
+r external jobs Musicians Page finds for you on the web (if you are a music=
+ian) and, with a Pro Membership, be notified via email as soon as a new ext=
+ernal jobs, matching your profile, are found. Or, if you are an employer, b=
+e featured prominently on any webpage of our site to over 2,000 unique user=
+s daily.
+
+Musicians Page is a network for professional musicians and music employers,=
+ built and planned to grow based on professional musicians' and music emplo=
+yers' needs. Don't miss the opportunity to jump on the band wagon from the =
+beginning.
+
+Membership fees are likely to be increased in the coming weeks, so join Mus=
+icians Page today and start networking the right way!
+
+https://www.musicianspage.com/signup.php
+
+
+
+
+Are you looking for musicians, a song writer, a lyricist, a composer?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If so, please post your music job or project on Musicians Page.
+To post a job/project is completely free and takes 5 minutes:
+
+http://www.musicianspage.com/login/panel.php?yourjobs=3D1&postnew=3D1
+
+
+REMEMBER: you can post a job even for a FREE project you need musicians for=
+!
+
+
+
+
+Latest Posted Jobs on Musicians Page
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Trio or Quartet for  Sihanoukville
+http://www.musicianspage.com/jobs/7730/
+
+Hammond B3 Organ Player
+http://www.musicianspage.com/jobs/7729/
+
+Guitarist Wanted
+http://www.musicianspage.com/jobs/7728/
+
+New Woodwind orchestra
+http://www.musicianspage.com/jobs/7727/
+
+Female singer,rapper to Collab Remotely
+http://www.musicianspage.com/jobs/7724/
+
+Music Duo
+http://www.musicianspage.com/jobs/7721/
+
+Guitarist needed in Mexico for rock and roll music
+http://www.musicianspage.com/jobs/7720/
+
+STEEL PAN SOLOIST FOR CRUISE SHIPS URGENT
+http://www.musicianspage.com/jobs/7715/
+
+Lauren Daigle Cover Singer
+http://www.musicianspage.com/jobs/7716/
+
+Violinist Wanted
+http://www.musicianspage.com/jobs/7717/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest External Jobs or Opportunities (found on the web)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Metal guitarist looking to join or form band
+http://www.musicianspage.com/extjobs/1267624/
+
+Looking for a female vocalist
+http://www.musicianspage.com/extjobs/1267623/
+
+Seeking Funk/R&amp;B Male Vocalist
+http://www.musicianspage.com/extjobs/1267622/
+
+Guitarist/Keys/Banjo player 67 yrs old looking for jam band blues country r=
+ock
+http://www.musicianspage.com/extjobs/1267621/
+
+Guitarist looking for metal drummer and/or other musicians.
+http://www.musicianspage.com/extjobs/1267620/
+
+Guitar needed in the Vein of Failure/HUM/Quicksand Shoegaze, Post HC
+http://www.musicianspage.com/extjobs/1267619/
+
+Looking for bassist and drummer!
+http://www.musicianspage.com/extjobs/1267618/
+
+GUITARIST WANTED FOR METALCORE/POST-HXC PROJECT
+http://www.musicianspage.com/extjobs/1267617/
+
+Drummer Wanted For Original Metal/Industrial/%%@!
+http://www.musicianspage.com/extjobs/1267616/
+
+Looking for guitarist for PRO Metal band
+http://www.musicianspage.com/extjobs/1267615/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest Forum Topics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Joe Hisaishi-You&#039;re in Love(Howl&#039;s Moving Castle OST), Piano - by=
+ Luis Afonso Andre
+posted on the Soundtrack/Film Music forum
+http://www.musicianspage.com/forums/music/soundtrack/9047/
+
+
+William Baulch - Glissaccatura, Guitar (Grade 4) - by Luis Afonso Andre
+posted on the Classical Music forum
+http://www.musicianspage.com/forums/music/classicalmusic/9046/
+
+
+New Release - by KonstantinDobriak
+posted on the General Forum forum
+http://www.musicianspage.com/forums/general/general/9045/
+
+
+More forum topics:
+http://www.musicianspage.com/forums/
+
+
+
+
+Latest Uploaded Audio Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While There&#039;s Still time by Jeremiah Minahan (added by Jeremiah Minaha=
+n)
+Genre: Christian
+http://www.musicianspage.com/musicians/54000/audiofile/22980/
+
+
+You Are The Blessed by Jeremiah Minahan (added by Jeremiah Minahan)
+Genre: Christian
+http://www.musicianspage.com/musicians/54000/audiofile/22979/
+
+
+Read The Book by Jeremiah Minahan (added by Jeremiah Minahan)
+Genre: Christian
+http://www.musicianspage.com/musicians/54000/audiofile/22978/
+
+
+More audio files:
+http://www.musicianspage.com/audio/
+
+
+We are waiting for your comments and if you have any, please upload your
+own audio files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addaudiofiles=3D1
+
+
+
+
+Latest Uploaded Video Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Limehouse Blues by mikewarmblood (added by Thomas Jacques)
+Genre: Classical/Contemporary
+http://www.musicianspage.com/musicians/53997/videofile/21230/
+
+
+Mr Sandman by mikewarmblood (added by Thomas Jacques)
+Genre: Classical/Contemporary
+http://www.musicianspage.com/musicians/53997/videofile/21229/
+
+
+symphonic Orchestra.. by George G (added by Greg Rangel)
+Genre: Classical/Contemporary
+http://www.musicianspage.com/musicians/53990/videofile/21228/
+
+
+More video files:
+http://www.musicianspage.com/video/
+
+
+We are waiting for your comments and if you have any, please upload your
+own video files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addvideofiles=3D1
+
+
+
+
+Latest Uploaded Sheet Music Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Along the Danube by Joe Sinha Semple (added by Joe Sinha Semple)
+Genre: Classical/Contemporary
+http://www.musicianspage.com/musicians/53961/sheetmusic/3286/
+
+
+Respighi. Vetrate di Chiesa. Parts by Ottorino Respighi (added by Grechaniv=
+sky)
+Genre: Classical/Contemporary
+http://www.musicianspage.com/musicians/9640/sheetmusic/3282/
+
+
+XLIII Memoriam Vivere by Marisol Jimenez (added by Marisol Jimenez)
+Genre: Contemporary
+http://www.musicianspage.com/musicians/11620/sheetmusic/3278/
+
+
+More sheet music files:
+http://www.musicianspage.com/sheetmusic/
+
+
+We are waiting for your comments and if you have any, please upload your
+own sheet music files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addsheetmusic=3D1
+
+
+
+
+Earn money with your website, FaceBook, YouTube or MySpace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you own a website or simply an account on FaceBook, YouTube, MySpace or =
+Twitter, be sure to check out the Virtual Sheet Music's Affiliate Program w=
+hich entitles you to earn 30% commission on any referred sale.
+
+It is completely free to join:
+
+https://affiliates.virtualsheetmusic.com/
+
+
+and once you have an account, start referring users using a special code to=
+ put on your website or social account (FaceBook, Twitter, etc).
+
+For any further questions, please reply to this email, we will be glad to h=
+elp you step by step.
+
+
+
+
+Join us on the major Social Networks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stay updated with our latest news on:
+
+1. on FaceBook:
+http://www.facebook.com/MusiciansPage
+
+2. on Twitter:
+http://twitter.com/MusiciansPage
+
+
+
+
+---------------------------------------------------------------------------=
+-----
+
+FEATURE YOURSELF ON MUSICIANS PAGE:
+=20
+If you have an upcoming concert, CD release, special Event, or just want to=
+ promote yourself and your activity, remember you can feature yourself in f=
+ront of thousands of musicians, music lovers, and music employers (includin=
+g music agents, artist management companies, etc.) by exclusively putting y=
+our picture and name on every page of Musicians Page, starting at just $10 =
+(that's right, just 10 bucks!):
+=20
+https://www.musicianspage.com/login/panel.php?featureyourself=3D1
+=20
+Your ad will be displayed exclusively for the duration of your campaign, gi=
+ving you maximum exposure to the Musicians Page community. Musicians Page i=
+s visited by thousands of musicians and people working in the music busines=
+s every day, so consider putting yourself in front of this specialized audi=
+ence.
+
+This is your chance to make new contacts and seize exciting opportunities i=
+n minutes! Don't miss this opportunity now!
+
+---------------------------------------------------------------------------=
+-----
+
+
+
+
+Please feel free to pass this Newsletter along to friends and other musicia=
+ns who might find this content valuable in the same way you do, and be sure=
+ to send us your ideas and thoughts by either replying to this email or by =
+posting your comments and feedback on the dedicated forum below:
+
+http://www.musicianspage.com/forums/general/feedback/
+
+Thank you!
+
+All the best,
+Fabrizio Ferrari, CEO
+Musicians Page
+http://www.musicianspage.com
+Virtual Sheet Music Inc.
+http://www.virtualsheetmusic.com
+29911 Niguel Road, #6992
+Laguna Niguel, CA 92677 (USA)
+Fax: +1 800 717 1876 or +1 973 273 2171
+----------------------------------------------
+This message was sent from Musicians Page
+http://www.musicianspage.com
+To unsubscribe, please go to:
+http://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
+=2Eorg
