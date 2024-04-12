@@ -1,120 +1,123 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40D1914C587;
-	Fri, 12 Apr 2024 17:13:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27CC014F9D7;
+	Fri, 12 Apr 2024 18:47:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712941998; cv=none; b=CcXnUgu0scB0Qo3cxjHUErN1GQa0NXYvfpifzCA2jfCzjwTm1gTgpqUUrrGh4xXzLjARAhbnVxzm5aUgwXptUxUCLbrKd8V6pbt/hyMMA099mgHeVvLoAg2YVG0t3l/AAnroxdkkQubGD4aX9sdI8na3CW3s+UCU+wQC36Mutzw=
+	t=1712947679; cv=none; b=YPKogkPU0//Nhw43SiV+sUB/9xS9QEg85paA/HsFRTxo9vVrxH85jDi7eFk5z2nl9vvYIYxUUCYiQlSAgweBhAj/ulbJ8PrYY4569gmk/SFEi1S87xuBY1L0pkz5Mprz75dWkFIbuMJCDpTqyJZxjWCfPtvvcWcwZlJA4fTO18M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712941998; c=relaxed/simple;
-	bh=4UoIP/1W3kW58dM139lhbm7r21YqNAAgoi4JWZnZCAo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LVsi5J7TiF1tDWnxgcwx5crVfQ8KZakU3piYIyxkovEeW3YvJz6SemLNy+p4ORECzfs3wbI5YXZN8gaI8v0UAR41XSkvw8KcVYTfqxotl7HWnF284iBaGOHjPiojRJ1yaBJDJUp3rbaM1YrUzs8+bTQbu1P4ldhEWQ4Wa9AmKwM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=YhH8Bgsq; arc=none smtp.client-ip=198.175.65.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1712947679; c=relaxed/simple;
+	bh=qNwaH9FoWBTAdA5ghiLL6X1/WsUFM5GWDUFnPLH5qSM=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=DPlEI5AZSH+RB3n01HlXImGluT2ePqSR9u3uknA+xQTkxLNMB0NFr75IUfBvLb8DS2HIiekNjBmVJ1ZO3si71quav1tliwm/SZZaHK4zLRQDtCofbXZWyAmGa4N+OkwmrUxGeEpAfXnHjp/w48s4tfk0o7btkM7DT9MDLtwbQis=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=PvsD2jfB; arc=none smtp.client-ip=198.175.65.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="YhH8Bgsq"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="PvsD2jfB"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1712941997; x=1744477997;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=4UoIP/1W3kW58dM139lhbm7r21YqNAAgoi4JWZnZCAo=;
-  b=YhH8BgsqTx7UYMdqjRXeMjruzU8tLFXz9aKf3PW94xKyl4qsJm6ADnug
-   92wd0FuLDwxebSuH2kWSvqS+/ebIEAPHYVKjmDOv4Vfc0PmmDI2Kl7nzw
-   urC5otZfibEBYrWnPSan3jJI0Zj3t21IrKCAfoDdpQa99+iWkxFmySCeK
-   OuadC19afCqZ9vXwRwkHy9wLbiaVoNuMb8Isvn9yt8Mk8hGW1q/LBxJ7i
-   WW3UpZH6gzcvmUqEEXvcS5acCFW86RHOtlsZ1ZpJ+lritZNbsiWJOjCzS
-   gE6JR2VpvVMoxINOuMTCPCs1UMgmGsxy5EWuSP1lCmgZ3p0x0Xivfqizt
-   w==;
-X-CSE-ConnectionGUID: pS0ex5w8QxCpQVlwl+TB9Q==
-X-CSE-MsgGUID: MaQFp8enT3Sii3mTp8RTMw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11042"; a="12255781"
+  t=1712947678; x=1744483678;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=qNwaH9FoWBTAdA5ghiLL6X1/WsUFM5GWDUFnPLH5qSM=;
+  b=PvsD2jfBBcSBZchkQThnlaBrdmCkIpO0X4Yg4BSZKB/wFUjN2SB9h0Ow
+   8TqQMpoWWnYeXJ2yRIEEaUgJYhGFS12HOe0AgZNH3sHlrlPHPkNp+D0IF
+   18keApwAKWEO/uBUTFU3uNNaEXwLcsrmcKMOKsNVw9meZ4D31RgnYE6D4
+   IFgj8SIHEKqzj11ZXvZiW5+crkJWYxsvGERPn39EK77BIXPbt+tNQ94hB
+   iSM3Uq40oLYgtNFFpvk3rKh7D496c/wVgXvU0GswSphEIlTz6HZhPFR1U
+   m0AJGk8uKwUzkIPJOSJXScv6Zg/5n1+QO1gytFmbsomTCdGfRMw4lQNFa
+   g==;
+X-CSE-ConnectionGUID: ptA1TsM4SsSXPZqRh27TbQ==
+X-CSE-MsgGUID: H2yytqZWRWm7AWjf2wr83A==
+X-IronPort-AV: E=McAfee;i="6600,9927,11042"; a="8333189"
 X-IronPort-AV: E=Sophos;i="6.07,196,1708416000"; 
-   d="scan'208";a="12255781"
-Received: from fmviesa009.fm.intel.com ([10.60.135.149])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Apr 2024 10:13:16 -0700
-X-CSE-ConnectionGUID: Rht0oWlqT06azeRvHQjy8A==
-X-CSE-MsgGUID: bWwS+aMMSCS7WI9M9p3kyQ==
+   d="scan'208";a="8333189"
+Received: from fmviesa003.fm.intel.com ([10.60.135.143])
+  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Apr 2024 11:47:58 -0700
+X-CSE-ConnectionGUID: pj9FaUm4SIWVi/UmnAvSsw==
+X-CSE-MsgGUID: 8U1PKzKvTKmf/o+lukE73A==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.07,196,1708416000"; 
-   d="scan'208";a="21359946"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.215.136])
-  by fmviesa009-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Apr 2024 10:13:14 -0700
-Message-ID: <ee5ef043-289d-4cb3-b125-30f7d92543ad@intel.com>
-Date: Fri, 12 Apr 2024 20:13:08 +0300
+   d="scan'208";a="25856201"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by fmviesa003.fm.intel.com with ESMTP; 12 Apr 2024 11:47:56 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1003)
+	id 249612BE; Fri, 12 Apr 2024 21:47:55 +0300 (EEST)
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH v1 2/2] mmc: sdhci-acpi: Use devm_platform_ioremap_resource()
+Date: Fri, 12 Apr 2024 21:46:21 +0300
+Message-ID: <20240412184706.366879-4-andriy.shevchenko@linux.intel.com>
+X-Mailer: git-send-email 2.43.0.rc1.1336.g36b5255a03ac
+In-Reply-To: <20240412184706.366879-2-andriy.shevchenko@linux.intel.com>
+References: <20240412184706.366879-2-andriy.shevchenko@linux.intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-acpi: Add some DMI quirks to fix
- various issues on Bay Trail devices
-To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andy Shevchenko <andy@kernel.org>,
- Mika Westerberg <mika.westerberg@linux.intel.com>,
- linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org
-References: <20240410191639.526324-1-hdegoede@redhat.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240410191639.526324-1-hdegoede@redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 10/04/24 22:16, Hans de Goede wrote:
-> Hi All,
-> 
-> Here is v3 of my series adding DMI quirks to fix various issues on Intel
-> Bay Trail tablets.
-> 
-> Changes in v3:
-> - Replace "mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo Yoga
->   Tablet 2 series sdcard slot" with a new patch from Adrian which
->   actually fixes these modes:
->   "[PATCH v3 2/6] mmc: sdhci: Add support for "Tuning Error" interrupts"
-> 
->   Note this is missing a Signed-off-by from Adrian since this started out
->   as a quick test patch from Adrian.
->   Adrian, can you provide your S-o-b for this patch?
-> 
-> Changes in v2:
-> - Address a few small remarks from Andy and adds Andy's Reviewed-by
->   to the patches
-> 
-> Regards,
-> 
-> Hans
-> 
-> 
-> Adrian Hunter (1):
->   mmc: sdhci: Add support for "Tuning Error" interrupts
-> 
-> Hans de Goede (5):
->   mmc: core: Add mmc_gpiod_set_cd_config() function
->   mmc: sdhci-acpi: Sort DMI quirks alphabetically
->   mmc: sdhci-acpi: Fix Lenovo Yoga Tablet 2 Pro 1380 sdcard slot not
->     working
->   mmc: sdhci-acpi: Disable write protect detection on Toshiba WT10-A
->   mmc: sdhci-acpi: Add quirk to enable pull-up on the card-detect GPIO
->     on Asus T100TA
-> 
->  drivers/mmc/core/slot-gpio.c  | 20 ++++++++++++
->  drivers/mmc/host/sdhci-acpi.c | 61 +++++++++++++++++++++++++++++++----
->  drivers/mmc/host/sdhci.c      | 10 ++++--
->  drivers/mmc/host/sdhci.h      |  3 +-
->  include/linux/mmc/slot-gpio.h |  1 +
->  5 files changed, 86 insertions(+), 9 deletions(-)
-> 
+The struct resource is not used for anything else, so we can simplify
+the code a bit by using the helper function.
 
-For all:
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/host/sdhci-acpi.c | 20 +++-----------------
+ 1 file changed, 3 insertions(+), 17 deletions(-)
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-Note also patch 2 needs my Signed-off-by
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 32ae6f763c1d..b9c8eb87a01a 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -779,8 +779,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	struct acpi_device *device;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+-	struct resource *iomem;
+-	resource_size_t len;
+ 	size_t priv_size;
+ 	int quirks = 0;
+ 	int err;
+@@ -801,17 +799,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (sdhci_acpi_byt_defer(dev))
+ 		return -EPROBE_DEFER;
+ 
+-	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (!iomem)
+-		return -ENOMEM;
+-
+-	len = resource_size(iomem);
+-	if (len < 0x100)
+-		dev_err(dev, "Invalid iomem size!\n");
+-
+-	if (!devm_request_mem_region(dev, iomem->start, len, dev_name(dev)))
+-		return -ENOMEM;
+-
+ 	priv_size = slot ? slot->priv_size : 0;
+ 	host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host) + priv_size);
+ 	if (IS_ERR(host))
+@@ -833,10 +820,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 		goto err_free;
+ 	}
+ 
+-	host->ioaddr = devm_ioremap(dev, iomem->start,
+-					    resource_size(iomem));
+-	if (host->ioaddr == NULL) {
+-		err = -ENOMEM;
++	host->ioaddr = devm_platform_ioremap_resource(pdev, 0);
++	if (IS_ERR(host->ioaddr)) {
++		err = PTR_ERR(host->ioaddr);
+ 		goto err_free;
+ 	}
+ 
+-- 
+2.43.0.rc1.1336.g36b5255a03ac
 
