@@ -1,56 +1,56 @@
-Received: from mail-oa1-f45.google.com (mail-oa1-f45.google.com [209.85.160.45])
+Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AA75134725
-	for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 15:45:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F9B313475B
+	for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 15:53:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713109516; cv=none; b=Z9XoYUI4lwZsDgTFllxgwJhhAAU+akIHAxYSKW7DtpiDU3UT4qjAdJjEmiKOjHKqtd7XdKXZ7huMbZLqm4VH70VubUh2OLAIIP8RnfEIo223buPmWQorhxpcDkJevENv2WdkTr8CTzPiou0TNFqK/yMTP6btwg5xWs3ong0hN7I=
+	t=1713110020; cv=none; b=YhvJGcOMZNK7LRAjSyahGX/PrD8SHduF78biQpg1rDubmVhIUZzrvrc7XqL9YT3bkLMk893cztrtT093FSo2oixlc4gty50u8L9tvljGrrTGb+UUnKLbUCrWJryufluJt3v6TgJcO3EFayCWPy9HCcocrjRPepSqqaqZO6ZK5jo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713109516; c=relaxed/simple;
-	bh=GMhAfAIt4Hbjs0k+6absebFIGPrC5wfja2+hQiYCQvY=;
+	s=arc-20240116; t=1713110020; c=relaxed/simple;
+	bh=YBiHyZ424/858egRhqVk9VDFfRbuy6+p7lmhtEBkpXU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=kbg7RyiSKFXa6V3dEg/4Fmj0zzTp148i68ugdUisGucDvB6qiG7GPkSJvgPSOE44IkwVekK8LUxJ/u3zJNt12/X1WmGgKwPK+duxm0GFlcPpyKexC+wmFjPhGYtqzmWC4M7Ek/gdFoKZ54c1SgwOTxd6LJnB7zT60XpnGvbmb4g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=BIYEVgAd; arc=none smtp.client-ip=209.85.160.45
+	 In-Reply-To:Content-Type; b=nwcW1d6+ch+ckp47aq3Pw/p0G2T5ZWMpy1znOA91QE9inSBVjD8Z1UthqkXsNnKx47ywZWrvULjzcLPvsFzjwd67soNTTIdKelTRX/mDlnZVojyxTEp3SeE/FMTC/HQ5GzpsXCuxpAmk/1naAaY7DJekJdZrFQiwT2Dt2Rv+fIc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=EwopFwdD; arc=none smtp.client-ip=209.85.210.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="BIYEVgAd"
-Received: by mail-oa1-f45.google.com with SMTP id 586e51a60fabf-2348116ceb0so289421fac.0
-        for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 08:45:14 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="EwopFwdD"
+Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-6ecff9df447so2528805b3a.1
+        for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 08:53:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1713109513; x=1713714313; darn=vger.kernel.org;
+        d=broadcom.com; s=google; t=1713110018; x=1713714818; darn=vger.kernel.org;
         h=in-reply-to:autocrypt:from:references:to:subject:user-agent
          :mime-version:date:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=CP09YOKosu6wie7svUvPNiguhIRIWffaW9a5fri7Mns=;
-        b=BIYEVgAdjD/fe7toi2EqU8U1drS58tdyhpMHZbCYWz4D6w4tE2KmMQo+0ZV6dfzUd0
-         jocBMbK08P19nEynTJhjMXRSIXNN6XdgbGHKHs/0BXEvlNVTfpS4eeSeoz8JYycaaGJj
-         XUW7Mh1FtxkLxPHDHz0+LdQh5czIccwELrQmY=
+        bh=V8DGJMICyNsoLa4yVkz8RIGSlNfZ5WPzp0Iq9dzktF0=;
+        b=EwopFwdDiM2bJdwbfrIHR/AP5FhWv6BSifF1mpElBmu7n1bbhzXm/LywxVofKrOZD/
+         yx/nOOiBqTKJvcd5F32FxN7pM+uucFd+0/NQ4+pASIN5aiBur9efnVLMZTIba2QWCYoz
+         3CdlbO9kFVNAhiPi1qgfvjNDQwPMh+V+oqAWk=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713109513; x=1713714313;
+        d=1e100.net; s=20230601; t=1713110018; x=1713714818;
         h=in-reply-to:autocrypt:from:references:to:subject:user-agent
          :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=CP09YOKosu6wie7svUvPNiguhIRIWffaW9a5fri7Mns=;
-        b=NOPrFqLjwHL9/hbjvNptFgLxLkad/xbuylFKjhCTJaLtbz90O8jpmsBKGyZ+98PDE7
-         Vv30evKy0VZkatC6n/VIL06RwpBBbgi3/d6dsjUjON988sWkQ2GmSB2ahhUPR6b8qcsp
-         KxqP8uXUlQDOOxgTTLZ/BOKVz/MD/0vhsICtuUs9XoBBgg3f+sb4XiJlaYhoTncKpoAR
-         ASRbsJNBeBSjE0AZiMOjj6DlRGqOPAiAlJhNczXLSBp2+DWNANpYBBgTMMYEYNgtAGRa
-         1TS/qX2RttqyH1wDHw6cx9FiKjlTZZeHhj6aRe3Ew/yYdhe3Q/PDgi8te1LtVwzMolG6
-         wFrA==
-X-Forwarded-Encrypted: i=1; AJvYcCU+u4jMwNE8PvB6ERluxwDRkv/OqWN7MIWSqQA3JM16FDHwymcAFRu/7T1qC5tdzypDpg06Pba0hw1kysPSGU8BU6GO/Z8rScK2
-X-Gm-Message-State: AOJu0YxeyIZRQ9kDToWYIOZ25cGZM0M9+L3HIpep87YFGw4ZC30tOXZ7
-	cpPzv2oCnWOD6olRPN2gQVtZB9yYzQ/bKH3wlnwY51VFp0QPbMRiE8nOjWwnKA==
-X-Google-Smtp-Source: AGHT+IGef64XBAsBgkfNWJu7tZdsIvG1R9p8nGTV2yY4dPAh702uD6D9389J+VOEi8V1ym/GC2/1jg==
-X-Received: by 2002:a05:6870:330b:b0:221:8dd0:9920 with SMTP id x11-20020a056870330b00b002218dd09920mr10210589oae.47.1713109513373;
-        Sun, 14 Apr 2024 08:45:13 -0700 (PDT)
+        bh=V8DGJMICyNsoLa4yVkz8RIGSlNfZ5WPzp0Iq9dzktF0=;
+        b=V8+n2ORIM4IqGc15bf3mxpJCTkPUqzaxPOR+IE8/7+8ViWGykFsqDmCshsEjaVPkeT
+         Kq0Ks29dcMjjzJRu93et9fQ9gY8JEMgeL1wGvvxTJqxBrSQktn5/5dqfMp6wCkrof1ty
+         114uggvNJSwJF9CWtrg1qrqrBErOFAevyDdhhRX8JrTl2rDf2d5fto9eCVtpi4Ztwxrt
+         8GDUJlMN/ORIM6+ogRVfl+KeslOLM+L0hheEEaJ4SMDurP5pOXTdd09Bn7I+KzXuUr1G
+         L7OWaRUk6ooBDgE7ahdZZHEZxB4icqDTaamaNfopb8Rnlek0gGBEEAb0ZsmhGUwr4KY9
+         dkwg==
+X-Forwarded-Encrypted: i=1; AJvYcCWebzCyIEscAvEqkRAZ87PBB9navLctjnfu62+UKj/q46q2bQkPZyNycbRnu4Gl7p1Iu2SNkiWddoAki7rVBYnL8ltATcxtNvk9
+X-Gm-Message-State: AOJu0Ywah2FOzrEz5pY3prcZF3WuEuvT3YgKR3nV5udmzlYMb7irkVx1
+	eaAINiSwKq7zb98/AOu4Uwe5WX88NZOhAWZ8f8iK1DjqBOG6zQMtGkxni/0iyA==
+X-Google-Smtp-Source: AGHT+IHmbLMbqt296B3lrYLDx5qYsg67BZ2jWBC3+PUzMvUHacAVUwjVoMhyoI/kXFSWHHMxxoeHLQ==
+X-Received: by 2002:a05:6a20:3209:b0:1a7:1e1c:3031 with SMTP id hl9-20020a056a20320900b001a71e1c3031mr8824475pzc.36.1713110017597;
+        Sun, 14 Apr 2024 08:53:37 -0700 (PDT)
 Received: from [10.230.29.214] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id p12-20020aa7860c000000b006eae2d9298esm5692768pfn.194.2024.04.14.08.45.07
+        by smtp.gmail.com with ESMTPSA id z76-20020a63334f000000b005dc87f5dfcfsm5616241pgz.78.2024.04.14.08.53.33
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 14 Apr 2024 08:45:09 -0700 (PDT)
-Message-ID: <f6601f73-cb22-4ba3-88c5-241be8421fc3@broadcom.com>
-Date: Sun, 14 Apr 2024 08:45:06 -0700
+        Sun, 14 Apr 2024 08:53:36 -0700 (PDT)
+Message-ID: <60e3fefc-1600-47f8-8bd5-b92dac56be2d@broadcom.com>
+Date: Sun, 14 Apr 2024 08:53:32 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -58,8 +58,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/6] dt-bindings: pinctrl: Add support for BCM2712 pin
- controller
+Subject: Re: [PATCH 5/6] mmc: sdhci-brcmstb: Add BCM2712 support
 To: Andrea della Porta <andrea.porta@suse.com>,
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -74,7 +73,7 @@ To: Andrea della Porta <andrea.porta@suse.com>,
  linux-gpio@vger.kernel.org, Jonathan Bell <jonathan@raspberrypi.com>,
  Phil Elwell <phil@raspberrypi.com>
 References: <cover.1713036964.git.andrea.porta@suse.com>
- <2d1272cad92ad618297a6683e9264e31b8f2df73.1713036964.git.andrea.porta@suse.com>
+ <7a75876def65f6282b7b3ca17ef8008c305d6c32.1713036964.git.andrea.porta@suse.com>
 From: Florian Fainelli <florian.fainelli@broadcom.com>
 Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
  xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
@@ -108,11 +107,11 @@ Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
  MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
  7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
  95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
-In-Reply-To: <2d1272cad92ad618297a6683e9264e31b8f2df73.1713036964.git.andrea.porta@suse.com>
+In-Reply-To: <7a75876def65f6282b7b3ca17ef8008c305d6c32.1713036964.git.andrea.porta@suse.com>
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-	boundary="0000000000000608e106161064e7"
+	boundary="00000000000016370b06161082eb"
 
---0000000000000608e106161064e7
+--00000000000016370b06161082eb
 Content-Language: en-US
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
@@ -120,35 +119,237 @@ Content-Transfer-Encoding: 7bit
 
 
 On 4/13/2024 3:14 PM, Andrea della Porta wrote:
+> Broadcom BCM2712 SoC has an SDHCI card controller using the SDIO CFG
+> register block present on other STB chips. Add support for BCM2712
+> SD capabilities of this chipset.
+> The silicon is SD Express capable but this driver port does not currently
+> include that feature yet.
+> Based on downstream driver by raspberry foundation maintained kernel.
+> 
 > Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
 > ---
->   .../pinctrl/brcm,bcm2712-pinctrl.yaml         | 99 +++++++++++++++++++
->   1 file changed, 99 insertions(+)
->   create mode 100644 Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml
+>   drivers/mmc/host/sdhci-brcmstb.c | 130 +++++++++++++++++++++++++++++++
+>   1 file changed, 130 insertions(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml
-> new file mode 100644
-> index 000000000000..2908dfe99f3e
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml
-> @@ -0,0 +1,99 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/pinctrl/brcm,bcm2712-pinctrl.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+> index 9053526fa212..907a4947abe5 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -12,6 +12,8 @@
+>   #include <linux/of.h>
+>   #include <linux/bitops.h>
+>   #include <linux/delay.h>
+> +#include <linux/pinctrl/consumer.h>
+> +#include <linux/regulator/consumer.h>
+>   
+>   #include "sdhci-cqhci.h"
+>   #include "sdhci-pltfm.h"
+> @@ -30,15 +32,31 @@
+>   
+>   #define SDHCI_ARASAN_CQE_BASE_ADDR		0x200
+>   
+> +#define SDIO_CFG_CTRL				0x0
+> +#define  SDIO_CFG_CTRL_SDCD_N_TEST_EN		BIT(31)
+> +#define  SDIO_CFG_CTRL_SDCD_N_TEST_LEV		BIT(30)
 > +
-> +title: Broadcom BCM2712 pin controller
+> +#define SDIO_CFG_SD_PIN_SEL			0x44
+> +#define  SDIO_CFG_SD_PIN_SEL_MASK		0x3
+> +#define  SDIO_CFG_SD_PIN_SEL_SD			BIT(1)
+> +#define  SDIO_CFG_SD_PIN_SEL_MMC		BIT(0)
+> +
+> +#define SDIO_CFG_MAX_50MHZ_MODE			0x1ac
+> +#define  SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE	BIT(31)
+> +#define  SDIO_CFG_MAX_50MHZ_MODE_ENABLE		BIT(0)
+> +
+>   struct sdhci_brcmstb_priv {
+>   	void __iomem *cfg_regs;
+>   	unsigned int flags;
+>   	struct clk *base_clk;
+>   	u32 base_freq_hz;
+> +	struct pinctrl *pinctrl;
+> +	struct pinctrl_state *pins_default;
+>   };
+>   
+>   struct brcmstb_match_priv {
+>   	void (*hs400es)(struct mmc_host *mmc, struct mmc_ios *ios);
+> +	void (*cfginit)(struct sdhci_host *host);
+>   	struct sdhci_ops *ops;
+>   	const unsigned int flags;
+>   };
+> @@ -124,6 +142,42 @@ static void sdhci_brcmstb_hs400es(struct mmc_host *mmc, struct mmc_ios *ios)
+>   	writel(reg, host->ioaddr + SDHCI_VENDOR);
+>   }
+>   
+> +static void sdhci_bcm2712_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	u16 clk;
+> +	u32 reg;
+> +	bool is_emmc_rate = false;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_brcmstb_priv *brcmstb_priv = sdhci_pltfm_priv(pltfm_host);
 
-This is not strictly speaking BCM2712 specific, the pin controller you 
-describe is a Broadcom STB product line pin controller.
+Reverse christmas tree declaration please, longest lines first and 
+shortest lines next.
 
-Please describe it as such as and make BCM2712 a specific instance of 
-the chip using that pin controller, see more comments on patch #4.
+> +
+> +	host->mmc->actual_clock = 0;
+> +
+> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +
+> +	switch (host->mmc->ios.timing) {
+> +	case MMC_TIMING_MMC_HS400:
+> +	case MMC_TIMING_MMC_HS200:
+> +	case MMC_TIMING_MMC_DDR52:
+> +	case MMC_TIMING_MMC_HS:
+> +	is_emmc_rate = true;
+> +	break;
+
+Both lines are mis-aligned and requiren an additional tab.
+
+> +	}
+> +
+> +	reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_SD_PIN_SEL);
+> +	reg &= ~SDIO_CFG_SD_PIN_SEL_MASK;
+> +	if (is_emmc_rate)
+> +		reg |= SDIO_CFG_SD_PIN_SEL_MMC;
+> +	else
+> +		reg |= SDIO_CFG_SD_PIN_SEL_SD;
+> +	writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_SD_PIN_SEL);
+> +
+> +	if (clock == 0)
+> +		return;
+> +
+> +	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+> +	sdhci_enable_clk(host, clk);
+> +}
+> +
+>   static void sdhci_brcmstb_set_clock(struct sdhci_host *host, unsigned int clock)
+>   {
+>   	u16 clk;
+> @@ -139,6 +193,17 @@ static void sdhci_brcmstb_set_clock(struct sdhci_host *host, unsigned int clock)
+>   	sdhci_enable_clk(host, clk);
+>   }
+>   
+> +static void sdhci_brcmstb_set_power(struct sdhci_host *host, unsigned char mode,
+> +				  unsigned short vdd)
+> +{
+> +	if (!IS_ERR(host->mmc->supply.vmmc)) {
+> +		struct mmc_host *mmc = host->mmc;
+> +
+> +		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+> +	}
+> +	sdhci_set_power_noreg(host, mode, vdd);
+> +}
+> +
+>   static void sdhci_brcmstb_set_uhs_signaling(struct sdhci_host *host,
+>   					    unsigned int timing)
+>   {
+> @@ -168,6 +233,36 @@ static void sdhci_brcmstb_set_uhs_signaling(struct sdhci_host *host,
+>   	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+>   }
+>   
+> +static void sdhci_brcmstb_cfginit_2712(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_brcmstb_priv *brcmstb_priv = sdhci_pltfm_priv(pltfm_host);
+> +	u32 uhs_mask = (MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104);
+> +	u32 hsemmc_mask = (MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS200_1_2V_SDR |
+> +			   MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V);
+> +	u32 reg;
+> +
+> +	/*
+> +	* If we support a speed that requires tuning,
+> +	* then select the delay line PHY as the clock source.
+> +	*/
+> +	if ((host->mmc->caps & uhs_mask) || (host->mmc->caps2 & hsemmc_mask)) {
+> +		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
+> +		reg &= ~SDIO_CFG_MAX_50MHZ_MODE_ENABLE;
+> +		reg |= SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE;
+> +		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
+> +	}
+> +
+> +	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
+> +	    (host->mmc->caps & MMC_CAP_NEEDS_POLL)) {
+> +		/* Force presence */
+> +		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
+> +		reg &= ~SDIO_CFG_CTRL_SDCD_N_TEST_LEV;
+> +		reg |= SDIO_CFG_CTRL_SDCD_N_TEST_EN;
+> +		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
+> +	}
+> +}
+> +
+>   static void sdhci_brcmstb_dumpregs(struct mmc_host *mmc)
+>   {
+>   	sdhci_dumpregs(mmc_priv(mmc));
+> @@ -200,6 +295,14 @@ static struct sdhci_ops sdhci_brcmstb_ops = {
+>   	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>   };
+>   
+> +static struct sdhci_ops sdhci_brcmstb_ops_2712 = {
+> +	.set_clock = sdhci_bcm2712_set_clock,
+> +	.set_power = sdhci_brcmstb_set_power,
+> +	.set_bus_width = sdhci_set_bus_width,
+> +	.reset = sdhci_reset,
+> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +};
+> +
+>   static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
+>   	.set_clock = sdhci_brcmstb_set_clock,
+>   	.set_bus_width = sdhci_set_bus_width,
+> @@ -237,7 +340,13 @@ static struct brcmstb_match_priv match_priv_74165b0 = {
+>   	.ops = &sdhci_brcmstb_ops_74165b0,
+>   };
+>   
+> +static const struct brcmstb_match_priv match_priv_2712 = {
+> +	.cfginit = sdhci_brcmstb_cfginit_2712,
+> +	.ops = &sdhci_brcmstb_ops_2712,
+> +};
+> +
+>   static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
+> +	{ .compatible = "brcm,bcm2712-sdhci", .data = &match_priv_2712 },
+>   	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
+>   	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
+>   	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
+> @@ -314,11 +423,16 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>   	struct sdhci_brcmstb_priv *priv;
+>   	u32 actual_clock_mhz;
+>   	struct sdhci_host *host;
+> +	bool no_pinctrl = false;
+>   	struct clk *clk;
+>   	struct clk *base_clk = NULL;
+>   	int res;
+>   
+>   	match = of_match_node(sdhci_brcm_of_match, pdev->dev.of_node);
+> +	if (!match) {
+> +		dev_err(&pdev->dev, "fail to get matching of_match struct\n");
+> +		return -EINVAL;
+> +	}
+>   	match_priv = match->data;
+>   
+>   	dev_dbg(&pdev->dev, "Probe found match for %s\n",  match->compatible);
+> @@ -354,6 +468,19 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>   	if (res)
+>   		goto err;
+>   
+> +	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
+> +	if (IS_ERR(priv->pinctrl)) {
+> +			no_pinctrl = true;
+
+One too many tabs here.
+
+> +	}
+> +	priv->pins_default = pinctrl_lookup_state(priv->pinctrl, "default");
+> +	if (IS_ERR(priv->pins_default)) {
+> +			dev_dbg(&pdev->dev, "No pinctrl default state\n");
+> +			no_pinctrl = true;
+
+One too many tabs here.
+
+Please just run checkpatch on your patches, thanks.
 -- 
 Florian
 
---0000000000000608e106161064e7
+--00000000000016370b06161082eb
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -219,14 +420,14 @@ kNGap1mHJ+JngGzZCz+dDiHRQKGpXLxkHX0BvEDZLW6LGOJ83ImrW38YMOo3ZYnCYNHA9qDOakiw
 NxADYvcRBA0ySL6sZpj8BIIhWiXiuusuBmt2Mak2eEv0xDbovE6Z6hYyl/ZnRadbgK/ClgbY3w+O
 AfUXEZ0xggJtMIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52
 LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgwT
-/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIMSmQN4KkikXVto0
-YQLHZHrKm+PccUdjrg0A6aAkXIoWMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
-AQkFMQ8XDTI0MDQxNDE1NDUxM1owaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
+/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIM/ZziCrbwHNKXg5
+85Z68G46ruWuf8L2ygaY4pfNfuMHMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
+AQkFMQ8XDTI0MDQxNDE1NTMzOFowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
 AWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEH
-MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQDcCUo+HMxcg9KE6CdGJ7FFi3mD8EQZhAt5
-wAgGX94CofZwzxYFQuP0PnGyNAlCo/QuHYXtJzIrSzGxXQ+ZSCqMXPIXuR8FzMJso3SahMVtqGoI
-MnjNShaaLF+YBgkHp68+WxVKsgzu8Latnujd65/3t7sxzK2umYb7sC/MKKWZ6zQy9rZOUuL7E3G9
-HxqVgkrBgvoUlDasCP18uMUGk6ro7zFO2mtasQavtXIRFyj6YOb5H22bKc6oTWCmmFjDVmdyZEG4
-7S2Nf6NTQKLjrpJXF24pGvtiXiFyfn/zDHASJ9d0iLwywqxjDcLK0NEX3an5JjoB1TGf1mXORzzG
-ayWr
---0000000000000608e106161064e7--
+MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQDhAMCwd1/e7LHJc9MxdgQKrxbGQ8dwWx/V
+nBYtYBa/3TPRU2AdrdOsfx1sHokzJQny1wVfOOvYS1q8JPvZt7AlpABwhzkwH8qsxy1J6/dLHMjd
+W2MTu/vtGwvB2g/HUrXJvW+JPWKxF3kPOpEINed+PDbnbdAaZQ3gCw6FqVwIboQprmUhooLhCUeH
+tSoQ/U3SgkOwOnZXVWhPqABZ4PSpMJcY5ItV8etPsaibRtzO80osJhHBAL2OHjC3rEVaDxCVovJo
+sdCu/xPSagOxS4xFlUhI3qV43gn2X2VnLh+CHIwPTLbBeaAOWBarPXiGECLo1XW7SSGNCAM9VNuw
+/+Dy
+--00000000000016370b06161082eb--
