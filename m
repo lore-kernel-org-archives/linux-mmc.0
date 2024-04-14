@@ -1,57 +1,56 @@
-Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 528235CDE6
-	for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 15:56:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85922134CC7
+	for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 16:00:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713110162; cv=none; b=AFb/9ye5l2lEGc3msnmTl5ZvL4ZY/wkTxgsXBrP8SIFm/IeDP7tQnoqFl7vzwmjikoZ4KaaKNfpAjUu90Vy/mmB7em75bXGijgfYcgcNo1UAu+ij+bamzWCHImlo1+6p91qkecmnRF/HobYv5r6LCa7vcg7avR86yy/VTGlk+S0=
+	t=1713110449; cv=none; b=APiG15DEVDTGKfj9+uXBAUBhtXhB8EW/9TIivHD6i9CXwTVdNKjeTNj8WKXSnyC3KXUDaiHDZYM3JoYxyr6ckK1uaivwqkj/ltvac9L5NthAXaclUvfOE/kSi1wzPglBii+3NCpU7IJ9Z87YjMgZi7utLyzS7diiIyLsPruRhQ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713110162; c=relaxed/simple;
-	bh=xHx4qkEffRMpHH1rzVktiPX/otW8newh52s13NjGIsA=;
+	s=arc-20240116; t=1713110449; c=relaxed/simple;
+	bh=H5Cj7djRNMJXzrKedFbwbZrAAcGLEAuaLOvIduszWv4=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=tY1zM7gWthhFKnSKMHBDI8t15DUjZ8DZANJaNSFsQE7ZirQUAd+NO4vESsVXsBumJqzRJPt1MmnWJYfprVOhV1FSj+VEVfbNVB9c6q6aCHAlMTd9QuBB8nie5imKv7t4HKG8m4NGFM7vH1l/0rzLCA72l225IYAaGb+VhdU9J9M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=NlG6igF0; arc=none smtp.client-ip=209.85.216.54
+	 In-Reply-To:Content-Type; b=Bxy7vIEuBZ2E3E0rVHvn5twPMyg+y58VbBQPsFtVCynj6Gh+RLNuMws3qeGy9n9pjef7VezUII16VftKuRKeqwyHB3oPeMnn+2iS579Ccm1vi50yNQSchK8ifOiJAlxEP6rLvcVTS39UMaaENXp2IZthD+tjH1P7uZo+xPoSeno=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=QTiZjnnz; arc=none smtp.client-ip=209.85.214.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="NlG6igF0"
-Received: by mail-pj1-f54.google.com with SMTP id 98e67ed59e1d1-2a2474f2595so2005737a91.1
-        for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 08:56:00 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="QTiZjnnz"
+Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-1e65b29f703so1367905ad.3
+        for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2024 09:00:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1713110160; x=1713714960; darn=vger.kernel.org;
+        d=broadcom.com; s=google; t=1713110447; x=1713715247; darn=vger.kernel.org;
         h=in-reply-to:autocrypt:from:references:to:subject:user-agent
          :mime-version:date:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=bnXGWbsNJAVd5x1GBe+UgzPPOH2qc4GWNDMtcjx24Uo=;
-        b=NlG6igF0xpQh1Gvlm4P+gLp3gFUwC9Gv/oAvvKO+onUqNOwQpcAGwakDntWDtyzcN+
-         t3nu2Sezj0yKJBNhnFRx7Y3bkUMbCRwSo5IR1NEB6e2SCMb+yC3NVpY6N6G2SRwuyT5D
-         cNUbGKX4+73Nq9SeOFS7RQKr0Fu8Fd8XFGKQY=
+        bh=cg/bfDvUl/qNKgDI6rlxiF0vih9J7OSFcacJAR8uVsY=;
+        b=QTiZjnnzy3SGSzBOawJDosvGvZSJbKiNLbzByTvHWKZKoJWyD9rPe819sWFZY8f+M4
+         3AOnfYvFVhLAOThULhJazvXM5UH2zrueSJWyE3dKZICTH2oykjFZZ2qNvfbHkmYUM81h
+         wDeP8yN5Rjyfzu+GvIecfxme7EekvJ3zoG6kc=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713110160; x=1713714960;
+        d=1e100.net; s=20230601; t=1713110447; x=1713715247;
         h=in-reply-to:autocrypt:from:references:to:subject:user-agent
          :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=bnXGWbsNJAVd5x1GBe+UgzPPOH2qc4GWNDMtcjx24Uo=;
-        b=lpLlYha2TF1cjvMOSjf8rZcAM4KqhpQKDpXq7yjKrUAuCcugDvVCd4Y+bEsCPFtbWl
-         dzvEGE/bc9C4TAamAjKLsdMJGV2iwjrO2m7HKOVi9H/ntS41HEA/vLHtAGyf6AcyKnFO
-         A5BRZd0K8SlgjN9wMxcBUBVhQEgnIG8/pfFAYy8W6TWZoGpwN/xXmPjQfdx3O3XqXQ2u
-         S3hJskL3aPf2s/NzCDceL0a0VfvRrZzWBu2sMlvlJk+Q/+0aHoq+TjZEyYlKyuQEKQ9W
-         tBIefBKxJWiNsWAgNNAZnrUBbnLvXfsqu4OMz5k6WYKakGNRJMtOazFKfUJ/z4VElWV6
-         CXrg==
-X-Forwarded-Encrypted: i=1; AJvYcCUWmcTaN/7UjiJlSD1k4yk+Zn9eGPrhrDw7GdiLcs7R/vA9l6wHa9g3teaKVfw0h72BqQIteWdbmNvnG5+PuHa/oBYaHdFZjUyp
-X-Gm-Message-State: AOJu0YyeK3HHS6LzKXyHXYcTE8gYiBGuyCfKrFYMCgpAlLp+hLJ4Tou2
-	DHja4OmxQxiCqAbIx/q7CohmP5I7h598mxGK8IcDyTIb/apyT6B5QPZ4N7CIcMV4WwM0VhTHvO4
-	=
-X-Google-Smtp-Source: AGHT+IFTLEyQCsNfLTYmfW/5h667jPaTgg4fw1gXrMajK0bj3lKKItGf4q0CSZ1V5YvEoXpV9fQyIg==
-X-Received: by 2002:a17:902:ea12:b0:1e3:dfdc:6972 with SMTP id s18-20020a170902ea1200b001e3dfdc6972mr10830307plg.9.1713110159588;
-        Sun, 14 Apr 2024 08:55:59 -0700 (PDT)
+        bh=cg/bfDvUl/qNKgDI6rlxiF0vih9J7OSFcacJAR8uVsY=;
+        b=EA99yKZ2i4NJTGbkWKhYgKcsSGZmqyg6XN9g8vTeA9JMGD0t4XW4R5UVTmUQp1UslO
+         jEz6QNXQO71ALc7iLrYYUbil5LJGQw3N92PBRy9IYVvGRuXaDhilZfKCL1w4Iv3+m/cY
+         VRWnCRsBU/HGHOnOCufDwUZa2hKx/lpYe1pgIqU8FxznoGj0SGhnCgNcTHb7rFXy3OyW
+         OwJsY03UoiDnRX+ZJVM97SgG4Fg8wgHPADOriJoigtkSLfcHq6Aj7QFzI+v16Sh72Q20
+         D4erHmgma9ZGZ31045P4GiqBXfRuIo7Bt9G4qbv2Ug4kRX7WSilbOXH/Rh9em5QIhdUd
+         hzbQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV84eICGEkpbTVQJ+J33tZ9vnQm4wHzmpj1ZL6nGuP9iQ/Z8hP1cFbbt07gRiT8UBntfDCJ3mHBggP2/TdGpZ0ydzZZCIiOJdx8
+X-Gm-Message-State: AOJu0Ywp+Df1q0ZUs+WVfuWm3U6Zfg7Rvbqm5/uEJS9vBvzYupeXPfgl
+	eLb3DXkAZj/0xhuVjLSBGk6LY/kisHJEngPO6GXjYDnAV8jiec8iW83j8jLOHQ==
+X-Google-Smtp-Source: AGHT+IE+aYlepE2WEZxw5VP1H9YnpvF6J2iJYDioptTsHe9IcfUEPOUdN2s7ZETVSKaO+PPMgfJuuQ==
+X-Received: by 2002:a17:902:9a48:b0:1e5:4f49:4036 with SMTP id x8-20020a1709029a4800b001e54f494036mr6645050plv.66.1713110446724;
+        Sun, 14 Apr 2024 09:00:46 -0700 (PDT)
 Received: from [10.230.29.214] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id j5-20020a170903024500b001e120a9e964sm6133138plh.126.2024.04.14.08.55.54
+        by smtp.gmail.com with ESMTPSA id l6-20020a170902d34600b001def175bbbfsm6176609plk.251.2024.04.14.09.00.42
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 14 Apr 2024 08:55:58 -0700 (PDT)
-Message-ID: <a4cff2fb-dd5e-49a1-ad85-752b6b698293@broadcom.com>
-Date: Sun, 14 Apr 2024 08:55:54 -0700
+        Sun, 14 Apr 2024 09:00:45 -0700 (PDT)
+Message-ID: <d6ab66cf-09ac-4f53-9102-11f207d16db5@broadcom.com>
+Date: Sun, 14 Apr 2024 09:00:39 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -59,8 +58,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/6] dt-bindings: mmc: Add support for BCM2712 SD host
- controller
+Subject: Re: [PATCH 4/6] pinctrl: bcm: Add pinconf/pinmux controller driver
+ for BCM2712
 To: Andrea della Porta <andrea.porta@suse.com>,
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -75,7 +74,7 @@ To: Andrea della Porta <andrea.porta@suse.com>,
  linux-gpio@vger.kernel.org, Jonathan Bell <jonathan@raspberrypi.com>,
  Phil Elwell <phil@raspberrypi.com>
 References: <cover.1713036964.git.andrea.porta@suse.com>
- <ad96fff723675c2d65a5e3328da9b09f2781cbcd.1713036964.git.andrea.porta@suse.com>
+ <8fb5dde9404875777587c867e7bdb4f691ab83f2.1713036964.git.andrea.porta@suse.com>
 From: Florian Fainelli <florian.fainelli@broadcom.com>
 Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
  xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
@@ -109,11 +108,11 @@ Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
  MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
  7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
  95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
-In-Reply-To: <ad96fff723675c2d65a5e3328da9b09f2781cbcd.1713036964.git.andrea.porta@suse.com>
+In-Reply-To: <8fb5dde9404875777587c867e7bdb4f691ab83f2.1713036964.git.andrea.porta@suse.com>
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-	boundary="0000000000008cecb80616108a9d"
+	boundary="000000000000aaa2d50616109b15"
 
---0000000000008cecb80616108a9d
+--000000000000aaa2d50616109b15
 Content-Language: en-US
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
@@ -121,106 +120,260 @@ Content-Transfer-Encoding: 7bit
 
 
 On 4/13/2024 3:14 PM, Andrea della Porta wrote:
+> Add a pincontrol driver for BCM2712. BCM2712 allows muxing GPIOs
+> and setting configuration on pads.
+> 
+> Originally-by: Jonathan Bell <jonathan@raspberrypi.com>
+> Originally-by: Phil Elwell <phil@raspberrypi.com>
+
+Is that a new tag in a comment message? Signed-off-by maybe?
+
 > Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
 > ---
->   .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 51 ++++++++++++++++++-
->   1 file changed, 50 insertions(+), 1 deletion(-)
+
+Was not pinctrl-single usable somehow that we had to go through a 
+dedicated pinctrl driver?
+
+>   drivers/pinctrl/bcm/Kconfig           |    9 +
+>   drivers/pinctrl/bcm/Makefile          |    1 +
+>   drivers/pinctrl/bcm/pinctrl-bcm2712.c | 1247 +++++++++++++++++++++++++
+>   3 files changed, 1257 insertions(+)
+>   create mode 100644 drivers/pinctrl/bcm/pinctrl-bcm2712.c
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> index cbd3d6c6c77f..6aa137d78e4f 100644
-> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> @@ -13,6 +13,7 @@ maintainers:
->   properties:
->     compatible:
->       oneOf:
-> +      - const: brcm,bcm2712-sdhci
->         - items:
->             - enum:
->                 - brcm,bcm7216-sdhci
-> @@ -26,12 +27,16 @@ properties:
->             - const: brcm,sdhci-brcmstb
+> diff --git a/drivers/pinctrl/bcm/Kconfig b/drivers/pinctrl/bcm/Kconfig
+> index 35b51ce4298e..62ede44460bc 100644
+> --- a/drivers/pinctrl/bcm/Kconfig
+> +++ b/drivers/pinctrl/bcm/Kconfig
+> @@ -3,6 +3,15 @@
+>   # Broadcom pinctrl drivers
+>   #
 >   
->     reg:
-> -    maxItems: 2
-> +    minItems: 2
-> +    maxItems: 4
->   
->     reg-names:
-> +    minItems: 2
->       items:
->         - const: host
->         - const: cfg
-> +      - const: busisol
-> +      - const: lcpll
->   
->     interrupts:
->       maxItems: 1
-> @@ -60,6 +65,7 @@ properties:
->       description: Specifies that controller should use auto CMD12
->   
->   allOf:
-> +  - $ref: sdhci-common.yaml
->     - $ref: mmc-controller.yaml#
->     - if:
->         properties:
-> @@ -71,6 +77,28 @@ allOf:
->         required:
->           - clock-frequency
->   
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: brcm,bcm2712-sdhci
-> +
-> +    then:
-> +      properties:
-> +        reg:
-> +          maxItems: 4
-> +        clock-names:
-> +         const: "sw_sdio"
-> +
-> +    else:
-> +      properties:
-> +        reg:
-> +          minItems: 2
-> +          maxItems: 2
-> +        reg-names:
-> +          minItems: 2
-> +          maxItems: 2
-> +
->   required:
->     - compatible
->     - reg
-> @@ -114,3 +142,24 @@ examples:
->         clocks = <&scmi_clk 245>;
->         clock-names = "sw_sdio";
->       };
-> +
-> +  - |
-> +    soc {
-> +      #address-cells = <2>;
-> +      #size-cells = <2>;
-> +
-> +      mmc@fff000 {
-> +        compatible = "brcm,bcm2712-sdhci";
-> +        reg = <0x10 0x00fff000  0x0 0x260>,
-> +              <0x10 0x00fff400  0x0 0x200>,
-> +              <0x10 0x015040b0  0x0 0x4>,  // Bus isolation control
+> +config PINCTRL_BCM2712
+> +	bool "Broadcom BCM2712 PINCONF driver"
+> +	depends on OF && (ARCH_BCM2835 || ARCH_BRCMSTB || COMPILE_TEST)
+> +	select PINMUX
+> +	select PINCONF
+> +	select GENERIC_PINCONF
 
-That should be a syscon, not under direct management of the driver 
-because there are other bits in that register that are relevant here.
+Rename to PINCTRL_BRCMSTB sicne this is not BCM2712 specific at all.
 
-> +              <0x10 0x015200f0  0x0 0x24>; // LCPLL control misc0-8
+> +	help
+> +	  Say Y here to enable the Broadcom BCM2712 PINCONF driver.
+> +
+>   config PINCTRL_BCM281XX
+>   	bool "Broadcom BCM281xx pinctrl driver"
+>   	depends on OF && (ARCH_BCM_MOBILE || COMPILE_TEST)
+> diff --git a/drivers/pinctrl/bcm/Makefile b/drivers/pinctrl/bcm/Makefile
+> index 82b868ec1471..d298e4785829 100644
+> --- a/drivers/pinctrl/bcm/Makefile
+> +++ b/drivers/pinctrl/bcm/Makefile
+> @@ -1,6 +1,7 @@
+>   # SPDX-License-Identifier: GPL-2.0
+>   # Broadcom pinctrl support
+>   
+> +obj-$(CONFIG_PINCTRL_BCM2712)		+= pinctrl-bcm2712.o
 
-And likewise, this should be a clock provider, or the firmware could add 
-support for configuring the LCPLL since there are other things going on 
-there.
+Likewise.
+
+>   obj-$(CONFIG_PINCTRL_BCM281XX)		+= pinctrl-bcm281xx.o
+>   obj-$(CONFIG_PINCTRL_BCM2835)		+= pinctrl-bcm2835.o
+>   obj-$(CONFIG_PINCTRL_BCM4908)		+= pinctrl-bcm4908.o
+> diff --git a/drivers/pinctrl/bcm/pinctrl-bcm2712.c b/drivers/pinctrl/bcm/pinctrl-bcm2712.c
+> new file mode 100644
+> index 000000000000..f9359e9eff14
+> --- /dev/null
+> +++ b/drivers/pinctrl/bcm/pinctrl-bcm2712.c
+> @@ -0,0 +1,1247 @@
+> +// SPDX-License-Identifier: GPL-2.0+
+> +/*
+> + * Driver for Broadcom BCM2712 GPIO units (pinctrl only)
+> + *
+> + * Copyright (C) 2021-3 Raspberry Pi Ltd.
+> + * Copyright (C) 2012 Chris Boot, Simon Arlott, Stephen Warren
+> + *
+> + * Based heavily on the BCM2835 GPIO & pinctrl driver, which was inspired by:
+> + * pinctrl-nomadik.c, please see original file for copyright information
+> + * pinctrl-tegra.c, please see original file for copyright information
+> + */
+> +
+> +#include <linux/bitmap.h>
+> +#include <linux/bug.h>
+> +#include <linux/delay.h>
+> +#include <linux/device.h>
+> +#include <linux/err.h>
+> +#include <linux/io.h>
+> +#include <linux/init.h>
+> +#include <linux/interrupt.h>
+> +#include <linux/of_address.h>
+> +#include <linux/of.h>
+> +#include <linux/pinctrl/consumer.h>
+> +#include <linux/pinctrl/machine.h>
+> +#include <linux/pinctrl/pinconf.h>
+> +#include <linux/pinctrl/pinctrl.h>
+> +#include <linux/pinctrl/pinmux.h>
+> +#include <linux/pinctrl/pinconf-generic.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/seq_file.h>
+> +#include <linux/slab.h>
+> +#include <linux/spinlock.h>
+> +#include <linux/types.h>
+> +
+> +#define MODULE_NAME "pinctrl-bcm2712"
+> +
+> +/* Register offsets */
+> +
+> +#define BCM2712_PULL_NONE	0
+> +#define BCM2712_PULL_DOWN	1
+> +#define BCM2712_PULL_UP		2
+> +#define BCM2712_PULL_MASK	0x3
+> +
+> +#define BCM2712_FSEL_COUNT 9
+> +#define BCM2712_FSEL_MASK  0xf
+> +
+> +#define FUNC(f) \
+> +	[func_##f] = #f
+> +#define PIN(i, f1, f2, f3, f4, f5, f6, f7, f8) \
+> +	[i] = { \
+> +		.funcs = { \
+> +			func_##f1, \
+> +			func_##f2, \
+> +			func_##f3, \
+> +			func_##f4, \
+> +			func_##f5, \
+> +			func_##f6, \
+> +			func_##f7, \
+> +			func_##f8, \
+> +		}, \
+> +	}
+> +
+> +#define MUX_BIT_VALID	0x8000
+> +#define REG_BIT_INVALID	0xffff
+> +
+> +#define BIT_TO_REG(b) (((b) >> 5) << 2)
+> +#define BIT_TO_SHIFT(b) ((b) & 0x1f)
+> +
+> +#define MUX_BIT(mr, mb) (MUX_BIT_VALID + ((mr)*4)*8 + (mb)*4)
+> +#define GPIO_REGS(n, mr, mb, pr, pb) \
+> +	[n] = { MUX_BIT(mr, mb), ((pr)*4)*8 + (pb)*2 }
+> +
+> +#define EMMC_REGS(n, pr, pb) \
+> +	[n] = { 0, ((pr)*4)*8 + (pb)*2 }
+> +
+> +#define AGPIO_REGS(n, mr, mb, pr, pb) \
+> +	[n] = { MUX_BIT(mr, mb), ((pr)*4)*8 + (pb)*2 }
+> +
+> +#define SGPIO_REGS(n, mr, mb) \
+> +	[n+32] = { MUX_BIT(mr, mb), REG_BIT_INVALID }
+> +
+> +#define GPIO_PIN(a) PINCTRL_PIN(a, "gpio" #a)
+> +#define AGPIO_PIN(a) PINCTRL_PIN(a, "aon_gpio" #a)
+> +#define SGPIO_PIN(a) PINCTRL_PIN(a+32, "aon_sgpio" #a)
+> +
+> +struct pin_regs {
+> +	u16 mux_bit;
+> +	u16 pad_bit;
+> +};
+> +
+> +struct bcm2712_pinctrl {
+> +	struct device *dev;
+> +	void __iomem *base;
+> +	struct pinctrl_dev *pctl_dev;
+> +	struct pinctrl_desc pctl_desc;
+> +	const struct pin_regs *pin_regs;
+> +	const struct bcm2712_pin_funcs *pin_funcs;
+> +	const char *const *gpio_groups;
+> +	struct pinctrl_gpio_range gpio_range;
+> +	spinlock_t lock;
+> +};
+
+Please s/bcm2712/brcmstb/ throughout the driver's structures and any 
+declaration that is not inherently 2712 specific and just make 2712 the 
+first instance using this driver.
+
+> +
+> +struct bcm_plat_data {
+> +	const struct pinctrl_desc *pctl_desc;
+> +	const struct pinctrl_gpio_range *gpio_range;
+> +	const struct pin_regs *pin_regs;
+> +	const struct bcm2712_pin_funcs *pin_funcs;
+> +};
+> +
+> +struct bcm2712_pin_funcs {
+> +	u8 funcs[BCM2712_FSEL_COUNT - 1];
+> +};
+> +
+
+[snip]
+
+> +static int bcm2712_pinctrl_probe(struct platform_device *pdev)
+> +{
+> +	struct device *dev = &pdev->dev;
+> +	//struct device_node *np = dev->of_node;
+> +	const struct bcm_plat_data *pdata;
+> +	//const struct of_device_id *match;
+> +	struct bcm2712_pinctrl *pc;
+> +	const char **names;
+> +	int num_pins, i;
+> +
+> +	pdata = device_get_match_data(&pdev->dev);
+> +	if (!pdata)
+> +		return -EINVAL;
+> +
+> +	pc = devm_kzalloc(dev, sizeof(*pc), GFP_KERNEL);
+> +	if (!pc)
+> +		return -ENOMEM;
+> +
+> +	platform_set_drvdata(pdev, pc);
+> +	pc->dev = dev;
+> +	spin_lock_init(&pc->lock);
+> +
+> +	//pc->base = devm_of_iomap(dev, np, 0, NULL);
+
+Remove stray commented lines.
+
+> +	pc->base = devm_platform_ioremap_resource(pdev, 0);
+> +	if (WARN_ON(IS_ERR(pc->base))) {
+> +		//dev_err(dev, "could not get IO memory\n");
+> +		return PTR_ERR(pc->base);
+> +	}
+> +
+> +	pc->pctl_desc = *pdata->pctl_desc;
+> +	num_pins = pc->pctl_desc.npins;
+> +	names = devm_kmalloc_array(dev, num_pins, sizeof(const char *),
+> +				   GFP_KERNEL);
+> +	if (!names)
+> +		return -ENOMEM;
+> +	for (i = 0; i < num_pins; i++)
+> +		names[i] = pc->pctl_desc.pins[i].name;
+> +	pc->gpio_groups = names;
+> +	pc->pin_regs = pdata->pin_regs;
+> +	pc->pin_funcs = pdata->pin_funcs;
+> +	pc->pctl_dev = devm_pinctrl_register(dev, &pc->pctl_desc, pc);
+> +	if (IS_ERR(pc->pctl_dev))
+> +		return PTR_ERR(pc->pctl_dev);
+> +
+> +	pc->gpio_range = *pdata->gpio_range;
+> +	pinctrl_add_gpio_range(pc->pctl_dev, &pc->gpio_range);
+> +
+> +	return 0;
+> +}
+> +
+> +static struct platform_driver bcm2712_pinctrl_driver = {
+> +	.probe = bcm2712_pinctrl_probe,
+> +	.driver = {
+> +		.name = MODULE_NAME,
+> +		.of_match_table = bcm2712_pinctrl_match,
+> +		.suppress_bind_attrs = true,
+> +	},
+> +};
+> +builtin_platform_driver(bcm2712_pinctrl_driver);
+
+There is no MODULE_LICENSE(), MODULE_AUTHOR() or MODULE_DESCRIPTION(), 
+please provide some.
 -- 
 Florian
 
---0000000000008cecb80616108a9d
+--000000000000aaa2d50616109b15
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -291,14 +444,14 @@ kNGap1mHJ+JngGzZCz+dDiHRQKGpXLxkHX0BvEDZLW6LGOJ83ImrW38YMOo3ZYnCYNHA9qDOakiw
 NxADYvcRBA0ySL6sZpj8BIIhWiXiuusuBmt2Mak2eEv0xDbovE6Z6hYyl/ZnRadbgK/ClgbY3w+O
 AfUXEZ0xggJtMIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52
 LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgwT
-/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEICRL3aTlmAb6531C
-3lGTypKzQgeO2RZJQKZ2seNomv6hMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
-AQkFMQ8XDTI0MDQxNDE1NTYwMFowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
+/D/YSkVckoN0L+QwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIP8a9Dct0ldn/FSo
+eTI8IodWg2I488InZnKpOlORuOAnMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
+AQkFMQ8XDTI0MDQxNDE2MDA0N1owaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
 AWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEH
-MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQDbntLekF5Al8tWkuzN8WQchOx6vTdNF30T
-IRw58fZoXdc+pX4f8XW2/EC4BnUYfApZlkoSLIc6DLX9nB/TIXr++/l4Ddi6S/czZfolAj3RAaIj
-2oL3Z2uInMOhg2zA+OKUURE8e81jlKv+V0mRu2JrpmDm4tEMQ6yo2vSIisqNBAMDmEPmZ3gHRuIr
-/XAtbbbaVLivARbP2zCrvXwDEZQAhkLLnCLSN1/HfWWcu6rVfct44UzzJ9dgurHon6U+IGIBjle9
-JLutBQKu2ki+IwOPQmwIyJK14T7fXtxFhbCZv7sUKWEQVFtNEx6+5CjeTDMkw+szS5T1AUItZGYn
-mZa8
---0000000000008cecb80616108a9d--
+MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQAH5ICHl3mupWuoftnxxN7R7VkK6+AKeI+o
+b6scf8to2Fw8hirvJmXb1FPgTjlNmOvEuhhFldY5pg1NavHPYS29CFDoqDTfK3JerryyIFj23jA9
+ExYpDh5359kQ+muf9oTCNNiLVPstU9aAcsLo+vc8CAyZEpLY2XadWQyWpBtey27YDLO7GXHakKZz
+uC6ZplkrIZyuU0zxtvqDW+povBX5WTs6l+e3cuENgkinyKOBlWc7XAH4F+Key8aQZk/I/gguvYsM
+0+zyYlC47AGeEuUxBAW7L/U/s+bskiVncTXguK5QLCKkrqGAwOWFPFXh10OC50H6VnQDTQCQ+Yxy
+6Y0U
+--000000000000aaa2d50616109b15--
