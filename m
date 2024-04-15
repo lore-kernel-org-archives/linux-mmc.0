@@ -1,126 +1,160 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FE493FB99;
-	Mon, 15 Apr 2024 09:35:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF8125D477
+	for <linux-mmc@vger.kernel.org>; Mon, 15 Apr 2024 10:43:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713173724; cv=none; b=B0ctOp7hmkvb2BtPp8AvIMJZjE7FzB4Q9AT1TE8tYsTzfgKoXYVgMuvYcu51AkkUa9QPetLIqbj8tpBR8VB5GvsUsyDM8PjuvVFLg0c8CoeJCyt8fuSeVjEf0mR0qZIyst+/BJas7cLni6Myp4mC7sm7U0eu/nUW3xKuFZ7nI0M=
+	t=1713177830; cv=none; b=e0twdVT9Pq+wQnRPkJhjwpf1HFve2VGx0NwkFDwQU/dXMLpzAJ0cBWmePOhsM3dlDaV4f5jZmL0n6f7+Aj49gWSpBXyjlI6L2eo+eWOGQhYym5o3F8+GaBcPpnYDrpLQc6oYDqRqZdbx/iDlZ8P/LiA9TYzbtA1P90EXLnXg4cE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713173724; c=relaxed/simple;
-	bh=wBSd5Y+TxWHD4LOFHSfb4cgjJpmNUSVnhOraR697swQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=sL7jBQcTSXvxiHJ3DW5lnm5LdfaTNbapQAqT5Ec/65vyyeGKmy3MPYwlz/9NQEu1mM8QKwZ+nX0CIo4ilp/WCLCQat3/lIOVOAzcPUweuc1WEARS8qwh3YDwbaH6GdIRATqHidw8/BS9g220/QGkJsqhkh3pM8oBuk5F37B6Wbs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=f2Kqu/nS; arc=none smtp.client-ip=192.198.163.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1713177830; c=relaxed/simple;
+	bh=GoyZ2K2uSZ2QiRtBlva3t0vKVlGk4PFbZEXKavMcgzQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ocmZn/n93XZiArnzYGDS7MQmtliU9RYpxFcqD7cOIL+bJSyCZ3og2M2OPdAo+qBCvhBMlFsiPdZCd4q+hBBpk1OvfCt1Bd161cqoaVJitF6g3IwiDEemuf68LAIiBlbCRDIah7gip8RGeIkoHLAcpQxzi1dr75cP7pEVpx8OKUg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=kwsPJ/Nz; arc=none smtp.client-ip=209.85.219.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="f2Kqu/nS"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1713173723; x=1744709723;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=wBSd5Y+TxWHD4LOFHSfb4cgjJpmNUSVnhOraR697swQ=;
-  b=f2Kqu/nSbHxB8YNuz6SC2yWQhFN+yPcROnOCgzZr4G/II6QeEAX5TBmm
-   TrGAr6jh3kq43DbNLGr5PVDyxr7QToBMwc1Sw/gqWEXwiAPbG2/r1o5Cf
-   QzhPgsqJjc61/vBvdNyj71yH78om99Qiw9QO/2F0pVLc60AK5E69Tf2mi
-   VdFlSan0oy5uh52kTfwYS2AqWpK4iDFlBdUyTuUUFntPSXjbAagwOuWqV
-   ZxAbrSSZgVeQB8uziZXCx3vGbY5IVD1FHaB1jd15SrBobNuUMSkEncaQm
-   yWM2pNak0xKRdwtStkSKxgZQpHJvMDPoPKkpqfBmlKHyc7BHBPFsHRkgk
-   A==;
-X-CSE-ConnectionGUID: 2JGKiuuwTkSZ17MqBdHPTg==
-X-CSE-MsgGUID: mElYACCuSS+NXX44BZzKdw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11044"; a="19945547"
-X-IronPort-AV: E=Sophos;i="6.07,202,1708416000"; 
-   d="scan'208";a="19945547"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2024 02:35:22 -0700
-X-CSE-ConnectionGUID: GnbRCkgnSgGpFl3/1d/tYw==
-X-CSE-MsgGUID: tS21odWISD2AIiblLYPrkA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.07,202,1708416000"; 
-   d="scan'208";a="52807041"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.38.19])
-  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2024 02:35:19 -0700
-Message-ID: <ba32a2ca-e482-45c2-b381-f8371b8da4be@intel.com>
-Date: Mon, 15 Apr 2024 12:35:14 +0300
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="kwsPJ/Nz"
+Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-dd10ebcd702so2777599276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Apr 2024 03:43:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=raspberrypi.com; s=google; t=1713177827; x=1713782627; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=27uQNyY7fO/Nb/RX2/X38PRpC7aDcHGBuUgugg3/cGA=;
+        b=kwsPJ/NzN64f/2F4mnXYQKsbwrrnP76Ln7lVwzKvpSgpviLju6VFwR/9M1I3EIbQY7
+         Y/7rTawW9x8MHBCiJ2yDvOvKOr1mPha0n0ojkRU2gK8XU6awYdAjM/5+xRhp0Ra8qwad
+         xk5XraNFIEkfHQMTFdcuht6hQ7pAOTdQ7baiTr/lw1g84gBvXTd69KCIrrRkGZvAvRVY
+         0XtuWooCRL8iHkyR3PbzhZME1xNnPfUOm/LI70zeohky9LCshTFxUQ0RL+vm6xwIW2m7
+         RCnG1EQIbQgQ9Ftc/1ta7WquZPIqPPAgoO2RTrlAAnJ13v40TXi9UZAvpHBUAGbNfFZe
+         xYXw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1713177827; x=1713782627;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=27uQNyY7fO/Nb/RX2/X38PRpC7aDcHGBuUgugg3/cGA=;
+        b=YUuafXQ2vIlGF7aPUBk3PWTGDg/gl9BSPWF73JoFgUwoe+ldn2bTLPHqoH1au/emAH
+         TECwZVVBDCgs9kB/OvJXmoXm6MY007ca+9Xbb4dzX21C3OPJZDW+1c+fHI3QDM7MH36I
+         uj89SX3rdKfnw3JXSh5BO9bJE44KRMkMsGbaA3MjAt+HEveQ5dAp4n2gsCMJ4WBAdocb
+         aYZerkOLoylACbiMmb0O/76ZeCnATP+0VCuhxA4pVetFPCdEj15Xgx8CNGEahA2gggk5
+         F4ub4X2BvMdMBNTjc0VMgv4yw6kWlEeBU77EPu5p0k1oieg9unYaOBXyspLJdGCynOSj
+         pPKQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUKMcoetKa+IFXq0R5/Xx0rDeLXerJAHR5qZ1HloVbgTwXGsREp6Aai7ODoErs6qfHjnbnDbdn0F0hlIGHEpZ5f8QKHXhjkG5X6
+X-Gm-Message-State: AOJu0Yz+NJY+Q/7o0e4eDWZox3i+lOW2SyhgO/xBqIm8ozkxpAMsW/0b
+	fT8uCP57W+DLYIsojbnG44KidprgnQctlcCTx43R00vogv1O0fhorqjSeBBr5ltTZ301PHF5hB7
+	YgBfy7RJsq+QsNbSy3NvcO/484dQvqn84mvHSeA==
+X-Google-Smtp-Source: AGHT+IFrOOR02QEeiB0o7nLAcKpgP8IOe7tPByIwJHmAYVK7O1a2uf5Kx5Rt6k7mrlkD/2rXueP7BDyR08YEqnXXSyc=
+X-Received: by 2002:a25:6846:0:b0:dcd:1854:9f43 with SMTP id
+ d67-20020a256846000000b00dcd18549f43mr7756878ybc.3.1713177826892; Mon, 15 Apr
+ 2024 03:43:46 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] sdhci: Fix SD card detection issue
-To: richard clark <richard.xnu.clark@gmail.com>,
- Thierry Reding <thierry.reding@gmail.com>, Jon Hunter <jonathanh@nvidia.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-References: <20240415070620.133143-1-richard.xnu.clark@gmail.com>
- <52c08a01-8357-44dd-b727-a06438ec6c30@intel.com>
- <CAJNi4rOyuXdHOifib6kX0Wdb5O5LXPEm9nsvEMe-jbCz9GyQww@mail.gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAJNi4rOyuXdHOifib6kX0Wdb5O5LXPEm9nsvEMe-jbCz9GyQww@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <cover.1713036964.git.andrea.porta@suse.com> <0ab5a768d686cb634f7144da266c9246e9e90cb4.1713036964.git.andrea.porta@suse.com>
+ <d7b884dd-9b70-41c3-ac2a-66b54c26d08a@gmx.net> <CAMEGJJ2R-WEqs+LgqMwDQJ_QHF840RYAqVGkbWxBs70anv6M4w@mail.gmail.com>
+ <48414875-187d-4afe-ae87-6431b845eaca@gmx.net>
+In-Reply-To: <48414875-187d-4afe-ae87-6431b845eaca@gmx.net>
+From: Phil Elwell <phil@raspberrypi.com>
+Date: Mon, 15 Apr 2024 11:43:36 +0100
+Message-ID: <CAMEGJJ1xGNx0r1T_-WyoAnFtZZxxWfxudVorBu=ZVWQFnKwDEQ@mail.gmail.com>
+Subject: Re: [PATCH 3/6] arm64: dts: broadcom: Add support for BCM2712
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Andrea della Porta <andrea.porta@suse.com>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Florian Fainelli <florian.fainelli@broadcom.com>, Linus Walleij <linus.walleij@linaro.org>, 
+	Jonathan Bell <jonathan@raspberrypi.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, linux-kernel@vger.kernel.org, 
+	Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org, 
+	Kamal Dasu <kamal.dasu@broadcom.com>, linux-arm-kernel@lists.infradead.org, 
+	devicetree@vger.kernel.org, linux-gpio@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-+Nvidia guys
+Stefan,
 
-On 15/04/24 11:11, richard clark wrote:
-> On Mon, Apr 15, 2024 at 3:18 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 15/04/24 10:06, Richard Clark wrote:
->>> The mmc_gpio_get_cd(...) will return 0 called from sdhci_get_cd(...), which means
->>> the card is not present. Actually, the card detection pin is active low by default
->>> according to the SDHCI psec, thus the card detection result is not correct, more
->>
->> SDHCI spec covers the SDHCI lines.  GPIO is separate.
->>
->>> specificly below if condition is true in mmc_rescan(...):
->>>       ...
->>>       if (mmc_card_is_removable(host) && host->ops->get_cd &&
->>>               host->ops->get_cd(host) == 0) {
->>>               ...
->>>               goto out;
->>>       }
->>> The SD card device will have no chance to be created.
->>>
->>> This commit fixes this detection issue via the MMC_CAP2_CD_ACTIVE_HIGH cap2 flag,
->>> parsed from the 'cd-inverted' property of DT.
->>
->> What hardware / driver is it?
-> sdhci-tegra on Orin.
->>>
->>> Signed-off-by: Richard Clark <richard.xnu.clark@gmail.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 3 +++
->>>  1 file changed, 3 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index c79f73459915..79f33a161ca8 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -2483,6 +2483,9 @@ static int sdhci_get_cd(struct mmc_host *mmc)
->>>        * Try slot gpio detect, if defined it take precedence
->>>        * over build in controller functionality
->>>        */
->>> +     if (!(mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH))
->>> +             gpio_cd = !gpio_cd;
->>
->> MMC_CAP2_CD_ACTIVE_HIGH is already handled in
->> mmc_gpiod_request_cd(), and this turns an error (gpio_cd < 0)
->> into 0, which is not right.
-> 
-> But in case of 'cd-inverted' is not specified, the gpio CD pin return
-> 0 which will be explained as card is not present.
->>
->>> +
->>>       if (gpio_cd >= 0)
->>>               return !!gpio_cd;
->>>
->>
+On Mon, 15 Apr 2024 at 10:06, Stefan Wahren <wahrenst@gmx.net> wrote:
+>
+> Hi Phil,
+>
+> Am 15.04.24 um 10:52 schrieb Phil Elwell:
+> > Stefan,
+> >
+> >
+> > On Mon, 15 Apr 2024 at 09:20, Stefan Wahren <wahrenst@gmx.net> wrote:
+> >> Hi Phil,
+> >>
+> >> Am 14.04.24 um 00:14 schrieb Andrea della Porta:
+> >>> Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
+> >>> ---
+> >>>    arch/arm64/boot/dts/broadcom/Makefile         |   1 +
+> >>>    .../boot/dts/broadcom/bcm2712-rpi-5-b.dts     | 313 +++++++
+> >>>    arch/arm64/boot/dts/broadcom/bcm2712-rpi.dtsi |  81 ++
+> >>>    arch/arm64/boot/dts/broadcom/bcm2712.dtsi     | 841 ++++++++++++++++++
+> >>>    4 files changed, 1236 insertions(+)
+> >>>    create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
+> >>>    create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712-rpi.dtsi
+> >>>    create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712.dtsi
+> >>>
+> >>> diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
+> >>> index 8b4591ddd27c..92565e9781ad 100644
+> >>> --- a/arch/arm64/boot/dts/broadcom/Makefile
+> >>> +++ b/arch/arm64/boot/dts/broadcom/Makefile
+> >>> @@ -6,6 +6,7 @@ DTC_FLAGS := -@
+> >>>    dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-400.dtb \
+> >>>                              bcm2711-rpi-4-b.dtb \
+> >>>                              bcm2711-rpi-cm4-io.dtb \
+> >>> +                           bcm2712-rpi-5-b.dtb \
+> >>>                              bcm2837-rpi-3-a-plus.dtb \
+> >>>                              bcm2837-rpi-3-b.dtb \
+> >>>                              bcm2837-rpi-3-b-plus.dtb \
+> >>> diff --git a/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts b/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
+> >>> new file mode 100644
+> >>> index 000000000000..2ce180a54e5b
+> >>> --- /dev/null
+> >>> +++ b/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
+> >>> @@ -0,0 +1,313 @@
+> >>> +// SPDX-License-Identifier: GPL-2.0
+> >>> +/dts-v1/;
+> >>> +
+> >>> +#include <dt-bindings/gpio/gpio.h>
+> >>> +#include <dt-bindings/interrupt-controller/irq.h>
+> >>> +#include <dt-bindings/pwm/pwm.h>
+> >>> +#include <dt-bindings/reset/raspberrypi,firmware-reset.h>
+> >>> +
+> >>> +#define spi0 _spi0
+> >>> +#define uart0 _uart0
+> >>> +
+> >>> +#include "bcm2712.dtsi"
+> >>> +
+> >>> +#undef spi0
+> >>> +#undef uart0
+> >>> +
+> >>> +/ {
+> >>> +     compatible = "raspberrypi,5-model-b", "brcm,bcm2712";
+> >>> +     model = "Raspberry Pi 5";
+> >>> +
+> >>>
+> >> according to this downstream commit [1] it's just called "Raspberry Pi
+> >> 5" without Model B, but the filename and the compatible says something
+> >> different. Is there still a chance to get this consistent or is it too
+> >> late because the firmware expect the compatible?
+> >>
+> >> [1] -
+> >> https://github.com/raspberrypi/linux/commit/99e359d2f2da2c820fd2a30b1ad08b32c9549adb
+> > Nothing cares about the compatible string, but the product name was
+> > changed too late for the firmware, which expects the current DTB file
+> > name.
+> should i send a pull request to address the compatible? This would avoid
+> a little bit confusion in the upstreaming process, because
+> devicetree/bindings/arm/bcm/bcm2835.yaml needs to be updated as well.
 
+You think it is better to have the compatible string different to the
+file name, rather than just the human-readable model string being
+different? I don't agree.
+
+Phil
