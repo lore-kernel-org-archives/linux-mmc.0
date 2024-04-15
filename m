@@ -1,40 +1,50 @@
-Received: from smtp.smtpout.orange.fr (smtp-16.smtpout.orange.fr [80.12.242.16])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C19AFDDA0;
-	Mon, 15 Apr 2024 05:22:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.12.242.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A220F4F1;
+	Mon, 15 Apr 2024 06:07:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713158527; cv=none; b=FHoa7X5V2Hp5K/O+IbhL9blFJJFl3bBBzJ77QsL+mS4dJ3zTQM7OZnVzy7nZpcN1c+vB6zo8AE87RBewtglXgS/NdBniw6gDyhWehYqAziNGXKdMLKTndJ0g4gBHNOyzo6gJulMdts+1KNEquO6C32yiw0oqxZULh8mzEjWwnBs=
+	t=1713161257; cv=none; b=DrgrUEsSJ7S6rlTmxPBeokNgp/KQblgLIoKF3D7s1gnKtiwcNnliv6TXNd0t2rTpaZEX1bvky4gTtuuVeynTx3NDPRh3BGSlxAV92DAOjdE5+bnP6RhjIEmYxp8pcyq826eQ/fDov4j30QLB7R895w5KISc5mo9YkoJ30abG1JU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713158527; c=relaxed/simple;
-	bh=af+vCRXyspSi9MJ0pzGRGuEN+y5mi6S+Gs2cHujIqH4=;
+	s=arc-20240116; t=1713161257; c=relaxed/simple;
+	bh=UkDaGbQnkg8kX1gcuWyQClwKdbr1way3lHGmOYrBPaM=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Uq5qY4iHQM69oOQig+oecpltCbgbKSgnk75wk5+LJNz7Bclz3hu8L7SrfIms1EyjGIlsLqxqhdiHKs9JrXHdImHQEvEygLI0bKiObz3o46rCgkkJN75p7rUtWLSd1Uh2LgDZcXNvuhsCl690IS2e57U1Z/3y1XOojzo4vWzcJdc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=eBcGSnfF; arc=none smtp.client-ip=80.12.242.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wanadoo.fr
+	 In-Reply-To:Content-Type; b=VudU3HAbUIRP4vQlQ2SdvpIjsD/WX0zIaRMFYff6CZ+yXrdZIdoJZ3Ynw1UW+CN1C4tH8kuJVWU1cWja70N1zJ6yON88I9gornSQFu/gYtzDMyFsxl9o51oB59SasjPqsDeUc/2sGNkpohQl1WPz2+xgSMYkHst/EGF2UboFCfc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=CfDQdSBW; arc=none smtp.client-ip=198.175.65.17
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="eBcGSnfF"
-Received: from [192.168.1.18] ([86.243.17.157])
-	by smtp.orange.fr with ESMTPA
-	id wEltrhWOB6xfSwEltr3EP3; Mon, 15 Apr 2024 07:20:51 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
-	s=t20230301; t=1713158451;
-	bh=e+coi2XuyVt27S+sawO0+ct4WY40vRADSePAuZ4om2Q=;
-	h=Message-ID:Date:MIME-Version:Subject:To:From;
-	b=eBcGSnfFRZpQCrq0tFRGpc9UskSnQVSvwdaDbTHmuLJHlDyal1yldoi0VkObbgki1
-	 GfRoj8hxjcXuNnKYQDGw9t0aI/mRTzSdlNft8YE8QylB4pyGuEEtqgMcQ/i0dxs3XS
-	 CgQ1cdzkJ2+x0IpIq4WCmqsGSx195jgU5vkjRBFPaQKsFhKSwtgzA/uapMQN8XosBa
-	 eipJ7EVDkOhzsqQi7N8JxCssgUEjPV907amEfqah4BtAtPJdC6pd9Cjwdpmka7CxFZ
-	 hW+BlngWFO8c/9Ou12h7fTO+ldRbWg0gCIHEA53748cuoMEi97a4YiTImxlW/criqt
-	 EJ2pcsUINSuxg==
-X-ME-Helo: [192.168.1.18]
-X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
-X-ME-Date: Mon, 15 Apr 2024 07:20:51 +0200
-X-ME-IP: 86.243.17.157
-Message-ID: <b8751b8d-f42d-4121-836d-f21b91df1b7e@wanadoo.fr>
-Date: Mon, 15 Apr 2024 07:20:49 +0200
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="CfDQdSBW"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1713161255; x=1744697255;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=UkDaGbQnkg8kX1gcuWyQClwKdbr1way3lHGmOYrBPaM=;
+  b=CfDQdSBWKZU5F7OxvRLGvzHxIL/V+EkPZlFUsUYmP2LyZO1ZX/+ePWWa
+   9g/5URH5GmsXQp5HmRnvSn49yFX3MKNJM0ZK8Af/Wyb7i2k8nbsULGHHe
+   6fzsR397VVU1ObjSXPaQDaKzeFSI32XbASJ8ty0D3O3+Gzn9hjQ36br8u
+   m8LNUDbuRL59PPfPDwNahjEDDFLQuQB8ZkkguL30hCUcQxL5FVbsDSqXz
+   1Vnp3ysbCw44+QcVMuGz/Ek4wqPG4Z8S26PlKn0FkVmAQAJXuK/TlVpS3
+   UKM6NVu/fnX7JI8ggkM8EM4p79iYLJBvvUugOQ7WM5r63wbf+5QEX0iov
+   w==;
+X-CSE-ConnectionGUID: 749Gbwt8SAmuqHeAo7Rb9g==
+X-CSE-MsgGUID: Ek8KQpa5SVKzMnrVz9m7EQ==
+X-IronPort-AV: E=McAfee;i="6600,9927,11044"; a="8642253"
+X-IronPort-AV: E=Sophos;i="6.07,202,1708416000"; 
+   d="scan'208";a="8642253"
+Received: from fmviesa006.fm.intel.com ([10.60.135.146])
+  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Apr 2024 23:07:34 -0700
+X-CSE-ConnectionGUID: ApDhLxBQQiiI8N17BUq/pw==
+X-CSE-MsgGUID: 6yxzghOST7i4yhVu5wDk3Q==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.07,202,1708416000"; 
+   d="scan'208";a="21844525"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.38.19])
+  by fmviesa006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Apr 2024 23:07:30 -0700
+Message-ID: <9b628524-0576-44c0-becf-ea76119b4577@intel.com>
+Date: Mon, 15 Apr 2024 09:07:26 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -42,80 +52,58 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 2/2] mmc: sdhci-acpi: Use
- devm_platform_ioremap_resource()
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
- Ulf Hansson <ulf.hansson@linaro.org>
-References: <20240412184706.366879-2-andriy.shevchenko@linux.intel.com>
- <20240412184706.366879-4-andriy.shevchenko@linux.intel.com>
-Content-Language: en-MW
-From: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-In-Reply-To: <20240412184706.366879-4-andriy.shevchenko@linux.intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH v2 0/5] mmc: Constify struct sdhci_ops
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+ Angelo Dureghello <adureghello@baylibre.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Vignesh Raghavendra <vigneshr@ti.com>,
+ Orson Zhai <orsonzhai@gmail.com>, Baolin Wang
+ <baolin.wang@linux.alibaba.com>, Chunyan Zhang <zhang.lyra@gmail.com>,
+ Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20240414-mmc-const-sdhci-ops-v2-0-262f81faadac@kernel.org>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240414-mmc-const-sdhci-ops-v2-0-262f81faadac@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Le 12/04/2024 à 20:46, Andy Shevchenko a écrit :
-> The struct resource is not used for anything else, so we can simplify
-> the code a bit by using the helper function.
+On 14/04/24 17:07, Krzysztof Kozlowski wrote:
+> Hi,
 > 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> Changes in v2:
+> - Patch 5 - sdhci-s3c: add __maybe_unused, reported by kernel test
+>   robot.
+> - Link to v1: https://lore.kernel.org/r/20240414-mmc-const-sdhci-ops-v1-0-178539d68093@kernel.org
+> 
+> The local struct sdhci_ops can be made const for code safety.
+> No dependencies.
+> 
+> Best regards,
+> Krzysztof
+> 
 > ---
->   drivers/mmc/host/sdhci-acpi.c | 20 +++-----------------
->   1 file changed, 3 insertions(+), 17 deletions(-)
+> Krzysztof Kozlowski (5):
+>       mmc: sdhci-esdhc-mcf: Constify struct sdhci_ops
+>       mmc: sdhci-omap: Constify struct sdhci_ops
+>       mmc: sdhci-sprd: Constify struct sdhci_ops
+>       mmc: sdhci_am654: Constify struct sdhci_ops
+>       mmc: sdhci-s3c: Choose sdhci_ops based on variant
 > 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 32ae6f763c1d..b9c8eb87a01a 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -779,8 +779,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->   	struct acpi_device *device;
->   	struct sdhci_acpi_host *c;
->   	struct sdhci_host *host;
-> -	struct resource *iomem;
-> -	resource_size_t len;
->   	size_t priv_size;
->   	int quirks = 0;
->   	int err;
-> @@ -801,17 +799,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->   	if (sdhci_acpi_byt_defer(dev))
->   		return -EPROBE_DEFER;
->   
-> -	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> -	if (!iomem)
-> -		return -ENOMEM;
-> -
-> -	len = resource_size(iomem);
-> -	if (len < 0x100)
-> -		dev_err(dev, "Invalid iomem size!\n");
+>  drivers/mmc/host/sdhci-esdhc-mcf.c |  2 +-
+>  drivers/mmc/host/sdhci-omap.c      |  2 +-
+>  drivers/mmc/host/sdhci-s3c.c       | 31 +++++++++++++++++--------------
+>  drivers/mmc/host/sdhci-sprd.c      |  2 +-
+>  drivers/mmc/host/sdhci_am654.c     |  6 +++---
+>  5 files changed, 23 insertions(+), 20 deletions(-)
+> ---
+> base-commit: f67245b3062cdc225b37003085bdb2916e1670b6
+> change-id: 20240414-mmc-const-sdhci-ops-c85762883004
+> 
+> Best regards,
 
-HI,
+For all:
 
-Was this test useful?
-Should it be mentioned in the commit message?
-
-CJ
-
-> -
-> -	if (!devm_request_mem_region(dev, iomem->start, len, dev_name(dev)))
-> -		return -ENOMEM;
-> -
->   	priv_size = slot ? slot->priv_size : 0;
->   	host = sdhci_alloc_host(dev, sizeof(struct sdhci_acpi_host) + priv_size);
->   	if (IS_ERR(host))
-> @@ -833,10 +820,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->   		goto err_free;
->   	}
->   
-> -	host->ioaddr = devm_ioremap(dev, iomem->start,
-> -					    resource_size(iomem));
-> -	if (host->ioaddr == NULL) {
-> -		err = -ENOMEM;
-> +	host->ioaddr = devm_platform_ioremap_resource(pdev, 0);
-> +	if (IS_ERR(host->ioaddr)) {
-> +		err = PTR_ERR(host->ioaddr);
->   		goto err_free;
->   	}
->   
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
