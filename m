@@ -1,223 +1,108 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C81F2940F;
-	Mon, 15 Apr 2024 06:58:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C19521171C;
+	Mon, 15 Apr 2024 07:06:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713164319; cv=none; b=Et41jJ/8iuRyDU/CsMhg8mwIc6UJ9ljMniHvHrOGeykLOv4UwMBm64TQepKgvSUC5G4jWPgyrnHxapabsP4sjg50tkztzTTvQQABvJTzzwcutmXFQTbOXLbJQyopQzPsnyCTGSpqkipPg/Hj+c6WddsTSIrY/vLRPkUrKgi07v0=
+	t=1713164810; cv=none; b=AWzqQth+qSRjUV9k0UkraUuYxKKZE1E55OY0ZU8B4z8beyh/ROqonA9GEDHL/Qkl5aPL8E1ctiTzziNRqU+Cocu0tiAY9a1JWuomWYqTCPz/xuyNAd/Kb07pVE/hC5syqhImzIzZZMmuZC5TyO583EpYHwiHBt2kqMgrEl7UOng=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713164319; c=relaxed/simple;
-	bh=MjpXaim/P8mM167opCuJ1D7Qz1gNtJb4q3g3a6eERx8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=d4qWpj22lMHTydYlUXBmhiIW1Syl/vFKZeJdMTGvLek3kQzl13SBdrfIzCzSaOquOXuSVrAhYti8A3nDM9zg5vOUKyfeBqfyOKDagwCB48zxUSooHfP//ZBNgLAmkSEuTCedo5GhrkcvrVxFRibrHUS9MVqQX9PVhNttRgAmth8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=EcUdgbnE; arc=none smtp.client-ip=198.175.65.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1713164810; c=relaxed/simple;
+	bh=YKuJfRTjciZPhyxgyG6DA7n6YZ2TLld0CbjLQtdO4Ds=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=GtIljTr9oL5fP0bzGMObBzjNnOoC3qvIkpfrw0Wmhh1ujMzn6NL7C6vD+M/WipBPBQATzSrB0Q+H6zifesSDvFxRRZq8cpNYUWa7ATCVuggf6TiQ9Jd0ztvQveAkQxyBUQP2Yn/dSREKpwdnfJUQF2UwceCXjCUVN5XgWL7DFis=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HHmzOfbV; arc=none smtp.client-ip=209.85.214.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="EcUdgbnE"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1713164318; x=1744700318;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=MjpXaim/P8mM167opCuJ1D7Qz1gNtJb4q3g3a6eERx8=;
-  b=EcUdgbnEjfFMn+TWuQXeQh+cfvCX6gWIRJ28EddqDEDXTWT7AGkNa6sN
-   /gqsZmdIRzlmwmbOuH469w3C7m0j5G40d/BV1h5yJkYAArMlhV4UgaB0K
-   XDhkVhCHak3TcaXo0N6z7og5jxawgswu+RqIubuQ+OEL5BXrz4q7HqyTm
-   WVyyq6LLssu0UNss6+glWA/y/WvTw0y2bxAPGYn6jTieT3SgoDidg2C1I
-   HOhcVyLWC3td3zceOQXUrWByohQrzWEZEJ+lBO6u0fTufwxwJX3bcjJyy
-   n2Mqk/YFlphe2fWniuISwbGtBDIx2CDgKH1KGqIKScAR8+RDCyIT81LlV
-   A==;
-X-CSE-ConnectionGUID: 9YgG5YTVS42JvNi2y78zNg==
-X-CSE-MsgGUID: XnoQWXhfSQuKsUoEo9R3Rw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11044"; a="31016424"
-X-IronPort-AV: E=Sophos;i="6.07,202,1708416000"; 
-   d="scan'208";a="31016424"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Apr 2024 23:58:38 -0700
-X-CSE-ConnectionGUID: ZvTG74JWSrGYcMRo7Rha4w==
-X-CSE-MsgGUID: cW8sPqsJSry5fDpGGROAeA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.07,202,1708416000"; 
-   d="scan'208";a="26620492"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.38.19])
-  by orviesa005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Apr 2024 23:58:36 -0700
-Message-ID: <c6c041d4-d9ed-46bb-9e6e-b53dc9ac0002@intel.com>
-Date: Mon, 15 Apr 2024 09:58:31 +0300
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HHmzOfbV"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-1e40042c13eso19350405ad.2;
+        Mon, 15 Apr 2024 00:06:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1713164808; x=1713769608; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=2kB+FGGZ1O8+acAP7LbuhoplMsezAErVFwb8wVQ9L3g=;
+        b=HHmzOfbVyW6a3+1fBS9ODQwhBFWX/KiiKEfrsW0uk3aJqojMw+4vDwH8ryo0XjOT4f
+         Sonak0UC31pKaA0d/NYGfm4Hqc9YNBOEWEjomB83npLVIBmGjXoqvbZH2Aitjf3ZCqLU
+         TO3vs7YCrMpDwsteU4dnYM9h7Zp/8UOfU/O39dO5HMooHC3NklpMFnV+vEcuu93pW3wO
+         pqpdQ17wIkonSdsQ3NfTu1yOWZRNN0oPRgzInro4hxb4sMz3Rrh4qKXN7dXauQzVSzmR
+         ddjJxtSDq2GHggHyixcsJRPNpp19+7CdlnzoSc5kM59ikL5yxFZfvvt5iC1WTH6M87Ro
+         wJXg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1713164808; x=1713769608;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=2kB+FGGZ1O8+acAP7LbuhoplMsezAErVFwb8wVQ9L3g=;
+        b=cd4HWo09ZQ9jNL64cVcLg3AmNcyD2skBpkRcbUJQlzJU2cQ90w2sxQhyNd2d+alMMA
+         m5e3iQ76XZTBj6fT453Uv2PFWTtgiJT0pXl8uoPAPxGJL8Kc1u3S3Mz1h3l+xe9y/4R5
+         4c89VGa096Q99eyHTt0UE4X1b7TxN+OFRlvpLtexAaZrpmtgpPYsB1/LD2CLIBPktwwp
+         /ErwYx/f7yiYP5pUqSvCX0/AQBtUqSW6UB9SkECFydqqNg6oRffTeKGrtwDr3VLiLfy+
+         GsDOrPdljK15ysbLREcrheqScYSsx+h8NJzHGowokaTx+Jw1krbOtTa47obVnunIp0Vg
+         c+DQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXOn7qPzijFFJblfR5vmL5p1tZzkYIgqqW5Id/ebR/jTq60fBxdqXKnc0uXbVuLu9zunioKWTiP/KExOCc2kJhTojNkwBRwEtfh9u7Q
+X-Gm-Message-State: AOJu0YywlUmsJxEwFxLkBeBGPy4UikKgk6wo71WAV8XIEdpzmIsz55uH
+	3Ja0moBh1+4F9+4cWamBrY9pQ2JV7LL1A/uVoRpYQ2mETFXjIV9GFkmLhQ==
+X-Google-Smtp-Source: AGHT+IHbW9V0dfDw+DWClhgSHiLxrom5pEzPyCvBJsgmCR1dx0pvZ9ygwXh0Tta3KFvhhHZ2Iw0gkw==
+X-Received: by 2002:a17:902:6909:b0:1e4:9c2f:d4f7 with SMTP id j9-20020a170902690900b001e49c2fd4f7mr7161372plk.28.1713164808070;
+        Mon, 15 Apr 2024 00:06:48 -0700 (PDT)
+Received: from den-build.fareast.nevint.com ([116.228.68.226])
+        by smtp.gmail.com with ESMTPSA id d5-20020a170902c18500b001e503c555afsm7200909pld.97.2024.04.15.00.06.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 15 Apr 2024 00:06:47 -0700 (PDT)
+From: Richard Clark <richard.xnu.clark@gmail.com>
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	richard.xnu.clark@gmail.com
+Subject: [PATCH] sdhci: Fix SD card detection issue
+Date: Mon, 15 Apr 2024 15:06:20 +0800
+Message-Id: <20240415070620.133143-1-richard.xnu.clark@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Add tuning support for Sophgo
- CV1800B and SG200X
-To: Jisheng Zhang <jszhang@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20240414164112.2732-1-jszhang@kernel.org>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240414164112.2732-1-jszhang@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 14/04/24 19:41, Jisheng Zhang wrote:
-> Implement the .platform_execute_tuning for Sophgo CV1800B and SG200X.
-> Some code is borrowed from sdhci-esdhc-imx.c. The tuning result is
-> similar as the one of SoC vendor's SDK.
-> 
-> Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+The mmc_gpio_get_cd(...) will return 0 called from sdhci_get_cd(...), which means
+the card is not present. Actually, the card detection pin is active low by default
+according to the SDHCI psec, thus the card detection result is not correct, more
+specificly below if condition is true in mmc_rescan(...):
+	...
+	if (mmc_card_is_removable(host) && host->ops->get_cd &&
+		host->ops->get_cd(host) == 0) {
+		...
+		goto out;
+	}
+The SD card device will have no chance to be created.
 
-One comment, otherwise:
+This commit fixes this detection issue via the MMC_CAP2_CD_ACTIVE_HIGH cap2 flag,
+parsed from the 'cd-inverted' property of DT.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Richard Clark <richard.xnu.clark@gmail.com>
+---
+ drivers/mmc/host/sdhci.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 112 ++++++++++++++++++++++++++++
->  1 file changed, 112 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index ab4b964d4058..7b55acd9830c 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -66,6 +66,10 @@
->  #define CV18XX_SDHCI_PHY_CONFIG			0x4c
->  #define  CV18XX_PHY_TX_BPS			BIT(0)
->  
-> +#define CV18XX_TUNE_MAX				128
-> +#define CV18XX_TUNE_STEP			1
-> +#define CV18XX_RETRY_TUNING_MAX			50
-> +
->  /* Rockchip specific Registers */
->  #define DWCMSHC_EMMC_DLL_CTRL		0x800
->  #define DWCMSHC_EMMC_DLL_RXCLK		0x804
-> @@ -685,6 +689,113 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
->  }
->  
-> +static void cv18xx_sdhci_set_tap(struct sdhci_host *host, int tap)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u16 clk;
-> +	u32 val;
-> +
-> +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	clk &= ~SDHCI_CLOCK_CARD_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +	val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-> +	val &= ~CV18XX_LATANCY_1T;
-> +	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-> +
-> +	val =  (FIELD_PREP(CV18XX_PHY_TX_DLY_MSK, 0) |
-> +		FIELD_PREP(CV18XX_PHY_TX_SRC_MSK, CV18XX_PHY_TX_SRC_INVERT_CLK_TX) |
-> +		FIELD_PREP(CV18XX_PHY_RX_DLY_MSK, tap));
-> +	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
-> +
-> +	sdhci_writel(host, 0, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_CONFIG);
-> +
-> +	clk |= SDHCI_CLOCK_CARD_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +	mdelay(1);
-
-Did you consider usleep_range() instead of mdelay()?
-
-> +}
-> +
-> +static int cv18xx_retry_tuning(struct mmc_host *mmc, u32 opcode, int *cmd_error)
-> +{
-> +	int ret, retry = 0;
-> +
-> +	while (retry < CV18XX_RETRY_TUNING_MAX) {
-> +		ret = mmc_send_tuning(mmc, opcode, NULL);
-> +		if (ret)
-> +			return ret;
-> +		retry++;
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +static void cv18xx_sdhci_post_tuning(struct sdhci_host *host)
-> +{
-> +	u32 val;
-> +
-> +	val = sdhci_readl(host, SDHCI_INT_STATUS);
-> +	val |= SDHCI_INT_DATA_AVAIL;
-> +	sdhci_writel(host, val, SDHCI_INT_STATUS);
-> +
-> +	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-> +}
-> +
-> +static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +	int min, max, avg, ret;
-> +	int win_length, target_min, target_max, target_win_length;
-> +
-> +	min = max = 0;
-> +	target_win_length = 0;
-> +
-> +	sdhci_reset_tuning(host);
-> +
-> +	while (max < CV18XX_TUNE_MAX) {
-> +		/* find the mininum delay first which can pass tuning */
-> +		while (min < CV18XX_TUNE_MAX) {
-> +			cv18xx_sdhci_set_tap(host, min);
-> +			if (!cv18xx_retry_tuning(host->mmc, opcode, NULL))
-> +				break;
-> +			min += CV18XX_TUNE_STEP;
-> +		}
-> +
-> +		/* find the maxinum delay which can not pass tuning */
-> +		max = min + CV18XX_TUNE_STEP;
-> +		while (max < CV18XX_TUNE_MAX) {
-> +			cv18xx_sdhci_set_tap(host, max);
-> +			if (cv18xx_retry_tuning(host->mmc, opcode, NULL)) {
-> +				max -= CV18XX_TUNE_STEP;
-> +				break;
-> +			}
-> +			max += CV18XX_TUNE_STEP;
-> +		}
-> +
-> +		win_length = max - min + 1;
-> +		/* get the largest pass window */
-> +		if (win_length > target_win_length) {
-> +			target_win_length = win_length;
-> +			target_min = min;
-> +			target_max = max;
-> +		}
-> +
-> +		/* continue to find the next pass window */
-> +		min = max + CV18XX_TUNE_STEP;
-> +	}
-> +
-> +	cv18xx_sdhci_post_tuning(host);
-> +
-> +	/* use average delay to get the best timing */
-> +	avg = (target_min + target_max) / 2;
-> +	cv18xx_sdhci_set_tap(host, avg);
-> +	ret = mmc_send_tuning(host->mmc, opcode, NULL);
-> +
-> +	dev_dbg(mmc_dev(host->mmc), "tuning %s at 0x%x ret %d\n",
-> +		ret ? "failed" : "passed", avg, ret);
-> +
-> +	return ret;
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
-> @@ -721,6 +832,7 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
->  	.get_max_clock		= dwcmshc_get_max_clock,
->  	.reset			= cv18xx_sdhci_reset,
->  	.adma_write_desc	= dwcmshc_adma_write_desc,
-> +	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c79f73459915..79f33a161ca8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2483,6 +2483,9 @@ static int sdhci_get_cd(struct mmc_host *mmc)
+ 	 * Try slot gpio detect, if defined it take precedence
+ 	 * over build in controller functionality
+ 	 */
++	if (!(mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH))
++		gpio_cd = !gpio_cd;
++
+ 	if (gpio_cd >= 0)
+ 		return !!gpio_cd;
+ 
+-- 
+2.34.1
 
