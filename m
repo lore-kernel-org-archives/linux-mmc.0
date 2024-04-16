@@ -1,133 +1,100 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5150312C491;
-	Tue, 16 Apr 2024 14:28:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
+Received: from m16.mail.126.com (m16.mail.126.com [220.197.31.8])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 9517712F5BE
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Apr 2024 15:14:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.8
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713277691; cv=none; b=LV9/3PLpoHwMNB0tngx79i1p0bgdvu/v5ZedTjztiY1dW796HJPS4F7DYBiyoeyQO4cPL89tCrWNgDN0zecR3F+q/i85v/OuGaF9lmnUlZxD/Vp7aIUTbhjLFdky1nih98+fW+Fu+Q1SS0fhtvTpmTBNlOlyWPcp+kJFPLOiuBw=
+	t=1713280489; cv=none; b=ZpkZXDYI70qMy4RvnhwoY/EhZbPVX5DLcxhkCyWzQFzh2T54i2ijYGVc1q6BhDDyZesFpMH9lA8u65Bqx/wzGYL8R2KvlmZOxGrhuf1eRm6zbtSfDn6MTRTYNWU922fI2TqrYzPq0t7Aj/Ea+hzN1Dz2pE38lc6zsD/ZJoRnmcs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713277691; c=relaxed/simple;
-	bh=phn+BucdZGMtnw8g08k3T7d/QfnKj5WDeUf8Ocjk1JY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=j5UFwMkM38yam7yN3uy8k9efHYPn6yOKzxFY2X+Iu+uORyvqXonwq20mGxOTeK5BpnBYOUuiWBlmV80Hd2ih9ZAjYfoUWl3mp7x2IUJbN6DqVzZ4Z/xtEPhdR5Z5If6mcUJzG8E8abp2sNPD8f62J26dT2mLkZIk8aYH4WXXBnY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=FwtwHAbf; arc=none smtp.client-ip=192.198.163.8
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1713280489; c=relaxed/simple;
+	bh=x2E8ogT+mYhPFtUxiSoqoy9197FO+1ZvBBItFkjXVNc=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=JxqVX1O0GQZ1Di5+3uLlJx1KWWZVuRGO6Ul6K8K0LT8azcCW1QTfqf/4pclocJbOALIJBD0zffWUO22g44wn62MKH18SoNKEc2XK+6ge9kU0QPmoVojyR26NdafrZz2iKST9Zj0ZyyKwg+69pewV6OlXqW7vGbjz7Cay6+U/osA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=126.com; spf=pass smtp.mailfrom=126.com; dkim=pass (1024-bit key) header.d=126.com header.i=@126.com header.b=hY2OthoQ; arc=none smtp.client-ip=220.197.31.8
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=126.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=126.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FwtwHAbf"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1713277689; x=1744813689;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=phn+BucdZGMtnw8g08k3T7d/QfnKj5WDeUf8Ocjk1JY=;
-  b=FwtwHAbfywuNEXWR7o2hpXzjIM/KvtPxguG9MIOMCswO2L2hbrYNRR9I
-   voP+cCPOKUqn646a9EcB2Xnt7Z8afZtrdK5UnLZIcc5TbpIJ63V+6SthZ
-   m+CPMIxZV73TcJaTUKFur7399ertCagVuury+tvTteezEEkyMkDI3hXyQ
-   wluu4UXYopz7MDyic7LohZZkDmcvSKkvlVNZVTnARvfrtwcytSUfycutw
-   CJOP7xwSYK92Uqq5mfvA6H0JEvLTOKVfnCFYmDh1nSveEStI2CQVZpeqH
-   5RqEJ0CDo+7LmIP+bA6qrqplYI3DhbK0LCZ5/WbadZxxPAUmkU7/zHZyA
-   A==;
-X-CSE-ConnectionGUID: ZoLKFnWuQ7aG3B/KIjrrUw==
-X-CSE-MsgGUID: gyrDM8lORMmVfoYR/b49ZQ==
-X-IronPort-AV: E=McAfee;i="6600,9927,11046"; a="26230017"
-X-IronPort-AV: E=Sophos;i="6.07,206,1708416000"; 
-   d="scan'208";a="26230017"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Apr 2024 07:28:08 -0700
-X-CSE-ConnectionGUID: R7U1Jg+RT8SzMByYQVm9WA==
-X-CSE-MsgGUID: r203CmhBQwC3cSYiuuMJEQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.07,206,1708416000"; 
-   d="scan'208";a="53257458"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.239])
-  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Apr 2024 07:28:04 -0700
-Message-ID: <0bba3454-ba8a-4c4e-8c17-725b6334b0d6@intel.com>
-Date: Tue, 16 Apr 2024 17:27:59 +0300
+	dkim=pass (1024-bit key) header.d=126.com header.i=@126.com header.b="hY2OthoQ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=126.com;
+	s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=iJ/aZ
+	Ls0HvdPE7ZuxzfdP95VtdfXBWrgMrVHUkU4Wgc=; b=hY2OthoQJLZgQ883aZGNn
+	tgoqOg2AT+z55CQtiAQRJbCMAE5TC9/qpj2T7PNsxcF/CdnrF0zTJrph5V/mWBUn
+	jurWSH2hW3W1G1T8PgTrZV/xFTBui0zsRS9v+pA9inSk63Ot4AHzTdHnYakl9mFR
+	dS6SvucaP86vOJ8iBoD9WY=
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by gzga-smtp-mta-g0-0 (Coremail) with SMTP id _____wDnr7NHkh5mDag6BA--.51692S2;
+	Tue, 16 Apr 2024 22:59:21 +0800 (CST)
+From: Felix Qin <xiaokeqinhealth@126.com>
+To: ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org
+Cc: Felix Qin <xiaokeqinhealth@126.com>
+Subject: [PATCH] mmc: core: increase the number of retries of the ACMD41
+Date: Tue, 16 Apr 2024 22:59:12 +0800
+Message-Id: <20240416145912.114409-1-xiaokeqinhealth@126.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-msm: pervent access to suspended controller
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mantas Pucka <mantas@8devices.com>, Bjorn Andersson
- <andersson@kernel.org>, Konrad Dybcio <konrad.dybcio@linaro.org>,
- Georgi Djakov <djakov@kernel.org>, Pramod Gurav <pramod.gurav@linaro.org>,
- Ritesh Harjani <ritesh.list@gmail.com>, linux-mmc@vger.kernel.org,
- linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
- stable@vger.kernel.org, Thierry Reding <thierry.reding@gmail.com>,
- Liming Sun <limings@nvidia.com>,
- Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20240321-sdhci-mmc-suspend-v1-1-fbc555a64400@8devices.com>
- <2e712cf6-7521-4c0b-b6fd-76bacc309496@intel.com>
- <CAPDyKFoBgwWDXhcXsbCfBD_nJ=3w1e5eReqHgDQ1BiPf0zJRxw@mail.gmail.com>
- <5bce008a-8354-4ccd-af1f-b7f2b2caf3bc@intel.com>
- <77d76e3b-549e-4d26-834c-a59b91fbb2a0@intel.com>
- <CAPDyKFrx3OdQqzfUvfi_tsoA0Am2rf6HKSrzL1qg77p50BZ3Lw@mail.gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAPDyKFrx3OdQqzfUvfi_tsoA0Am2rf6HKSrzL1qg77p50BZ3Lw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:_____wDnr7NHkh5mDag6BA--.51692S2
+X-Coremail-Antispam: 1Uf129KBjvJXoW7WrWrGF4DurWrtr18WF17Jrb_yoW8XFWxpr
+	45WryjkFnrJay3AFyxGa1q9343W3WIkFWUKrykZw10vF15u3s8WrZrAFW5tFyUZayUuFZa
+	qF9Iqw13GFya9r7anT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x0pNLvKcUUUUU=
+X-CM-SenderInfo: 50ld0yhhtl0xhhdo3xa6rslhhfrp/1tbimgnC1WVLa6ZAMwAAsU
 
-On 5/04/24 00:13, Ulf Hansson wrote:
-> On Thu, 4 Apr 2024 at 20:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 28/03/24 16:20, Adrian Hunter wrote:
->>> On 27/03/24 17:17, Ulf Hansson wrote:
->>>> On Tue, 26 Mar 2024 at 11:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>
->>>>> On 21/03/24 16:30, Mantas Pucka wrote:
->>>>>> Generic sdhci code registers LED device and uses host->runtime_suspended
->>>>>> flag to protect access to it. The sdhci-msm driver doesn't set this flag,
->>>>>> which causes a crash when LED is accessed while controller is runtime
->>>>>> suspended. Fix this by setting the flag correctly.
->>>>>>
->>>>>> Cc: stable@vger.kernel.org
->>>>>> Fixes: 67e6db113c90 ("mmc: sdhci-msm: Add pm_runtime and system PM support")
->>>>>> Signed-off-by: Mantas Pucka <mantas@8devices.com>
->>>>>
->>>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>>>
->>>> Looks like this problem may exist for other sdhci drivers too. In
->>>> particular for those that enables runtime PM, don't set
->>>> SDHCI_QUIRK_NO_LED and don't use sdhci_runtime|suspend_resume_host().
->>>>
->>>> Don't know if there is a better way to address this, if not on a case
->>>> by case basis. Do you have any thoughts about this?
->>>
->>> Yes probably case by case, but I will look at it.
->>
->> There seem to be 3 that use runtime pm but not
->> sdhci_runtime_suspend_host():
->>
->> 1. dwcmshc_runtime_suspend() : only turns off the card clock
->> via SDHCI_CLOCK_CONTROL register, so registers are presumably
->> still accessible
->>
->> 2. gl9763e_runtime_suspend() : ditto
->>
->> 3. sdhci_tegra_runtime_suspend() : disables the functional
->> clock via clk_disable_unprepare(), so registers are presumably
->> still accessible
->>
->> sdhci_msm_runtime_suspend() is different because it also turns
->> off the interface clock.
->>
->> But it looks like there are no similar cases.
-> 
-> Not sure we should care, but it still looks a bit fragile to me. We
-> may also have a power-domain hooked up to the device, that could get
-> power gated too, in which case it's likely affecting the access to
-> registers.
+Extensive testing has shown that a few specific SD cards require
+an increase in the number of command retries to successfully
+initialize.
 
-Thought some more about this, but there isn't an easy way to know
-if drivers are catering for SDIO card interrupt or SD card detect
-interrupt.
+Signed-off-by: Felix Qin <xiaokeqinhealth@126.com>
+---
+ drivers/mmc/core/sd_ops.c | 4 ++--
+ drivers/mmc/core/sd_ops.h | 8 ++++++++
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index a59cd592f06e..b3b6e8725b80 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -127,7 +127,7 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 		cmd.arg = ocr;
+ 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+ 
+-	for (i = 100; i; i--) {
++	for (i = SD_APP_OP_COND_RETRIES; i; i--) {
+ 		err = mmc_wait_for_app_cmd(host, NULL, &cmd);
+ 		if (err)
+ 			break;
+@@ -147,7 +147,7 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 
+ 		err = -ETIMEDOUT;
+ 
+-		mmc_delay(10);
++		mmc_delay(SD_APP_OP_COND_INTERVAL);
+ 	}
+ 
+ 	if (!i)
+diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+index 7667fc223b74..80c5c836ccd1 100644
+--- a/drivers/mmc/core/sd_ops.h
++++ b/drivers/mmc/core/sd_ops.h
+@@ -10,6 +10,14 @@
+ 
+ #include <linux/types.h>
+ 
++/*
++ * Extensive testing has shown that a few specific SD cards require
++ * an increase in the number of command retries to successfully
++ * initialize.
++ */
++#define SD_APP_OP_COND_RETRIES  200
++#define SD_APP_OP_COND_INTERVAL 10	/* millisecond */
++
+ struct mmc_card;
+ struct mmc_host;
+ 
+-- 
+2.34.1
 
