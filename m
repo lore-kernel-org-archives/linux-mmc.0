@@ -1,225 +1,208 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A83E91553A7;
-	Mon, 15 Apr 2024 18:47:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 737EC629;
+	Tue, 16 Apr 2024 00:29:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713206858; cv=none; b=PD2XWsCIxRdYxqSx3VhKhshp0ls0L8O3v0kjumXfwRbrZiiuNmAF13lBNAJrL0FumAQlvFipKqZSrWGaQVL0ULkvDBB9/TFTIrvybdx/IHRjzQXafZi7G1v73cuStxUf8ZIaktDCMYTP1DaUDvd94VLQGBM1OVDu2GMnmNbskW8=
+	t=1713227378; cv=none; b=iq6v0mDQ7FBfmmBVIVO7ro3f+h7VJCduu4S+t05r6VtyFJOr0NpTiVQSiFz3CgwUdUqhSsbGqBntzLGVa2pNsyWlGOJCCHHxq+H4yJUkNEjaol9ZqUqsbA71iL+oZll4dd4UqLqdzYHdUEoqhCIV+wLJTzLwUKiLfaIuqukNERA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713206858; c=relaxed/simple;
-	bh=2OGJ9ttvYvJtrtHTPN9UHZlm1FINmbiG6UwTRsEKCwY=;
-	h=Date:Content-Type:MIME-Version:From:To:Cc:In-Reply-To:References:
-	 Message-Id:Subject; b=h903Ug9tXns8gjQMCOzro51k2VSjQZ0hUBCRjYxrmdT6G40YQnWrz2Lp4s+uh/6LE5FLxlDbEpgpgLksbcYLr4ztq3M8f4VBwsXzPCWAAdJMpXu8zEQNEi351XVD9Tr2qNiQptYpGyE4eauBdPou3t1Pc85kuSrll1R7RvSyQX0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TVVe6C0T; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1713227378; c=relaxed/simple;
+	bh=HfHk3WuIcIudmtsoBPGASPAMjayRcL28OAR0jozp9jU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hmIWYs7Iwz36ECJ7CL3gFQyG1i2VTrK+JBkoY733QAk3fUhhvz5hlxlbOwI+Yq4r4SptucICyT6t1dH/e2gJ2a0d4g0I5iGVRQheMpncshb55pWupqhaK87+5WNg4sf0cah3NTmLQsNvbUl6vWl9TAn6Dt1zUSvfRGQiONPgeuA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m8L/8s+u; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TVVe6C0T"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8ACC0C113CC;
-	Mon, 15 Apr 2024 18:47:37 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m8L/8s+u"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FF6BC113CC;
+	Tue, 16 Apr 2024 00:29:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1713206858;
-	bh=2OGJ9ttvYvJtrtHTPN9UHZlm1FINmbiG6UwTRsEKCwY=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=TVVe6C0TZfGjrqFc49A5vdHYU/TB9a3PMk2qLa/pdg6RHdkCNSEIPe7T3BWSBFJsZ
-	 3PUalLE6BXc9YrCjjSs6mXAl9NdLpSuXme1Xil5s14EpxBWTRdnRQhMsIXPD24J3oD
-	 RmCH7xlbZKRaKdIe4GTUkbnybbFuTjZbbFPPAEuXnOEO0BYStsasSAcUW6DgP6Ve5s
-	 RJhySHpfXnjObY/CBZ1wZNlOD79jeFQ0pCpNHS57DhNjpOljzSf/AHTPiJ3itTQ8id
-	 SvXnVh47+iEmslJ+a/t6LBKFcSHi1gInQF5+JPR51EtXWmqBhSAaYgtTwKfZkImDpI
-	 5JO45vJj4wBkg==
-Date: Mon, 15 Apr 2024 13:47:35 -0500
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+	s=k20201202; t=1713227378;
+	bh=HfHk3WuIcIudmtsoBPGASPAMjayRcL28OAR0jozp9jU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=m8L/8s+u8C3+FTyXdYyV5d+CU8/uXOC6PQLwrfZHDYBbQo6P0BrPAQDUhsoRh7z57
+	 w4KUVqNZjv87vp/5ph1BtLdpnnvgf50wFXqQPZomWV8aXyLUomZ66T0qmkmRCwk9kE
+	 4xeqSl5MbazN9RwGgATWJnc5nPNp2ZOHrDQD5eW5uQrhEoencltmA/YtkvMNn6dV37
+	 Z3RCstCDuOzJF1vPiv9oEkh0tcPko8+ehvysJzaBwGbQtYGQviTt/+M6zZvqFjkcYc
+	 V5TUvWIZe+oSrDcTb3tD4NKud/NLbRZXECUj99wmdjhkQIMmu0cOZYHPpxShJl/EIb
+	 iY7R8ZCryu5mw==
+Date: Tue, 16 Apr 2024 08:16:14 +0800
+From: Jisheng Zhang <jszhang@kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Add tuning support for Sophgo
+ CV1800B and SG200X
+Message-ID: <Zh3DTkc60d-lYnSI@xhacker>
+References: <20240414164112.2732-1-jszhang@kernel.org>
+ <c6c041d4-d9ed-46bb-9e6e-b53dc9ac0002@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Rob Herring <robh@kernel.org>
-To: Andrea della Porta <andrea.porta@suse.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, devicetree@vger.kernel.org, 
- Conor Dooley <conor+dt@kernel.org>, 
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
- Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
- Phil Elwell <phil@raspberrypi.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
- Jonathan Bell <jonathan@raspberrypi.com>, 
- Florian Fainelli <florian.fainelli@broadcom.com>, 
- Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, 
- linux-arm-kernel@lists.infradead.org, linux-gpio@vger.kernel.org, 
- Kamal Dasu <kamal.dasu@broadcom.com>, Al Cooper <alcooperx@gmail.com>, 
- linux-kernel@vger.kernel.org
-In-Reply-To: <cover.1713036964.git.andrea.porta@suse.com>
-References: <cover.1713036964.git.andrea.porta@suse.com>
-Message-Id: <171320635602.5208.10027482544965026256.robh@kernel.org>
-Subject: Re: [PATCH 0/6] Add support for BCM2712 SD card controller
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <c6c041d4-d9ed-46bb-9e6e-b53dc9ac0002@intel.com>
 
+On Mon, Apr 15, 2024 at 09:58:31AM +0300, Adrian Hunter wrote:
+> On 14/04/24 19:41, Jisheng Zhang wrote:
+> > Implement the .platform_execute_tuning for Sophgo CV1800B and SG200X.
+> > Some code is borrowed from sdhci-esdhc-imx.c. The tuning result is
+> > similar as the one of SoC vendor's SDK.
+> > 
+> > Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+> 
+> One comment, otherwise:
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+> > ---
+> >  drivers/mmc/host/sdhci-of-dwcmshc.c | 112 ++++++++++++++++++++++++++++
+> >  1 file changed, 112 insertions(+)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> > index ab4b964d4058..7b55acd9830c 100644
+> > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> > @@ -66,6 +66,10 @@
+> >  #define CV18XX_SDHCI_PHY_CONFIG			0x4c
+> >  #define  CV18XX_PHY_TX_BPS			BIT(0)
+> >  
+> > +#define CV18XX_TUNE_MAX				128
+> > +#define CV18XX_TUNE_STEP			1
+> > +#define CV18XX_RETRY_TUNING_MAX			50
+> > +
+> >  /* Rockchip specific Registers */
+> >  #define DWCMSHC_EMMC_DLL_CTRL		0x800
+> >  #define DWCMSHC_EMMC_DLL_RXCLK		0x804
+> > @@ -685,6 +689,113 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+> >  	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
+> >  }
+> >  
+> > +static void cv18xx_sdhci_set_tap(struct sdhci_host *host, int tap)
+> > +{
+> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> > +	u16 clk;
+> > +	u32 val;
+> > +
+> > +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > +	clk &= ~SDHCI_CLOCK_CARD_EN;
+> > +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> > +
+> > +	val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
+> > +	val &= ~CV18XX_LATANCY_1T;
+> > +	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
+> > +
+> > +	val =  (FIELD_PREP(CV18XX_PHY_TX_DLY_MSK, 0) |
+> > +		FIELD_PREP(CV18XX_PHY_TX_SRC_MSK, CV18XX_PHY_TX_SRC_INVERT_CLK_TX) |
+> > +		FIELD_PREP(CV18XX_PHY_RX_DLY_MSK, tap));
+> > +	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
+> > +
+> > +	sdhci_writel(host, 0, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_CONFIG);
+> > +
+> > +	clk |= SDHCI_CLOCK_CARD_EN;
+> > +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> > +	mdelay(1);
+> 
+> Did you consider usleep_range() instead of mdelay()?
 
-On Sun, 14 Apr 2024 00:14:22 +0200, Andrea della Porta wrote:
-> Hi,
-> 
-> This patchset adds support for the SDHCI controller on Broadcom BCM2712
-> SoC in order to make it possible to boot (particularly) Raspberry Pi 5
-> from SD card. This work is heavily based on downstream contributions.
-> 
-> Patch #1 and 2: introduce the dt binding definitions for, respectively,
-> the new pin cfg/mux controller and the SD host controller as a preparatory
-> step for the upcoming dts.
-> 
-> Patch #3: add a somewhat reasonable (*almost* bare-minimum) dts to be used
-> to boot Rpi5 boards. Since till now there was no support at all for any
-> 2712 based chipset, both the SoC and board dts plus definitions for the
-> new Pin and SD host controller have been added.
-> 
-> Patch #4: the driver supporting the pin controller. Based on [1] and
-> successive fix commits.
-> 
-> Patch #5: add SDHCI support. Based on [2] and the next 2 fix commits.
-> Drop the SD Express implementation for now, that will be added by patch
-> #6.
-> 
-> Patch #6: this patch offers SD Express support and can be considered totally
-> optional. The callback plumbing is slightly different w.r.t. the downstream
-> approach (see [3]), as explained in the patch comment. Not sure what is the best,
-> any comment is highly appreciated.
-> 
-> Tested succesfully on Raspberry Pi 5 using an SDxC card as the boot device.
-> 
-> Still untested:
-> - SD Express due to the lack of an Express capable card.
->   Also, it will need PCIe support first.
-> - card detection pin, since the sd was the booting and root fs device.
-> 
-> Many thanks,
-> Andrea
-> 
-> Links:
-> [1] - https://github.com/raspberrypi/linux/commit/d9b655314a826724538867bf9b6c229d04c25d84
-> [2] - https://github.com/raspberrypi/linux/commit/e3aa070496e840e72a4dc384718690ea4125fa6a
-> [3] - https://github.com/raspberrypi/linux/commit/eb1df34db2a9a5b752eba40ee298c4ae87e26e87
-> 
-> Andrea della Porta (6):
->   dt-bindings: pinctrl: Add support for BCM2712 pin controller
->   dt-bindings: mmc: Add support for BCM2712 SD host controller
->   arm64: dts: broadcom: Add support for BCM2712
->   pinctrl: bcm: Add pinconf/pinmux controller driver for BCM2712
->   mmc: sdhci-brcmstb: Add BCM2712 support
->   mmc: sdhci-brcmstb: Add BCM2712 SD Express support
-> 
->  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      |   51 +-
->  .../pinctrl/brcm,bcm2712-pinctrl.yaml         |   99 ++
->  arch/arm64/boot/dts/broadcom/Makefile         |    1 +
->  .../boot/dts/broadcom/bcm2712-rpi-5-b.dts     |  313 +++++
->  arch/arm64/boot/dts/broadcom/bcm2712-rpi.dtsi |   81 ++
->  arch/arm64/boot/dts/broadcom/bcm2712.dtsi     |  841 +++++++++++
->  drivers/mmc/host/Kconfig                      |    1 +
->  drivers/mmc/host/sdhci-brcmstb.c              |  275 ++++
->  drivers/pinctrl/bcm/Kconfig                   |    9 +
->  drivers/pinctrl/bcm/Makefile                  |    1 +
->  drivers/pinctrl/bcm/pinctrl-bcm2712.c         | 1247 +++++++++++++++++
->  11 files changed, 2918 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml
->  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
->  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712-rpi.dtsi
->  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712.dtsi
->  create mode 100644 drivers/pinctrl/bcm/pinctrl-bcm2712.c
-> 
-> --
-> 2.35.3
-> 
-> 
-> 
+Good idea, will test and send out a v2.
 
-
-My bot found new DTB warnings on the .dts files added or changed in this
-series.
-
-Some warnings may be from an existing SoC .dtsi. Or perhaps the warnings
-are fixed by another series. Ultimately, it is up to the platform
-maintainer whether these warnings are acceptable or not. No need to reply
-unless the platform maintainer has comments.
-
-If you already ran DT checks and didn't see these error(s), then
-make sure dt-schema is up to date:
-
-  pip3 install dtschema --upgrade
-
-
-New warnings running 'make CHECK_DTBS=y broadcom/bcm2712-rpi-5-b.dtb' for cover.1713036964.git.andrea.porta@suse.com:
-
-arch/arm64/boot/dts/broadcom/bcm2712.dtsi:554.26-565.5: Warning (interrupt_provider): /soc/gpio@7d517c00: '#interrupt-cells' found, but node is not an interrupt provider
-  also defined at arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts:201.10-206.3
-  also defined at arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts:259.10-288.3
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: Warning (interrupt_map): Failed prerequisite 'interrupt_provider'
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /: failed to match any schema with compatible: ['raspberrypi,5-model-b', 'brcm,bcm2712']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /: failed to match any schema with compatible: ['raspberrypi,5-model-b', 'brcm,bcm2712']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: thermal-zones: cpu-thermal:trips:phandle: [[43]] is not of type 'object'
-	from schema $id: http://devicetree.org/schemas/thermal/thermal-zones.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: soc: firmware: {'compatible': ['raspberrypi,bcm2835-firmware', 'simple-mfd'], '#address-cells': [[1]], '#size-cells': [[1]], 'mboxes': [[15]], 'dma-ranges': True, 'phandle': [[16]], 'clocks': {'compatible': ['raspberrypi,firmware-clocks'], '#clock-cells': [[1]], 'phandle': [[95]]}, 'reset': {'compatible': ['raspberrypi,firmware-reset'], '#reset-cells': [[1]], 'phandle': [[96]]}} should not be valid under {'type': 'object'}
-	from schema $id: http://devicetree.org/schemas/simple-bus.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: soc: power: {'compatible': ['raspberrypi,bcm2835-power'], 'firmware': [[16]], '#power-domain-cells': [[1]], 'phandle': [[97]]} should not be valid under {'type': 'object'}
-	from schema $id: http://devicetree.org/schemas/simple-bus.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: soc: fixedregulator_3v3: {'compatible': ['regulator-fixed'], 'regulator-always-on': True, 'regulator-max-microvolt': [[3300000]], 'regulator-min-microvolt': [[3300000]], 'regulator-name': ['3v3'], 'phandle': [[98]]} should not be valid under {'type': 'object'}
-	from schema $id: http://devicetree.org/schemas/simple-bus.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: soc: fixedregulator_5v0: {'compatible': ['regulator-fixed'], 'regulator-always-on': True, 'regulator-max-microvolt': [[5000000]], 'regulator-min-microvolt': [[5000000]], 'regulator-name': ['5v0'], 'phandle': [[99]]} should not be valid under {'type': 'object'}
-	from schema $id: http://devicetree.org/schemas/simple-bus.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/timer@7c003000: failed to match any schema with compatible: ['brcm,bcm2835-system-timer']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/local_intc@7cd00000: failed to match any schema with compatible: ['brcm,bcm2836-l1-intc']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/i2s@7d003000: failed to match any schema with compatible: ['brcm,bcm2835-i2s']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/spi@7d004000: failed to match any schema with compatible: ['brcm,bcm2835-spi']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/spi@7d004000/spidev@0: failed to match any schema with compatible: ['spidev']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/spi@7d004600: failed to match any schema with compatible: ['brcm,bcm2835-spi']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/spi@7d004800: failed to match any schema with compatible: ['brcm,bcm2835-spi']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/spi@7d004a00: failed to match any schema with compatible: ['brcm,bcm2835-spi']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/spi@7d004c00: failed to match any schema with compatible: ['brcm,bcm2835-spi']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: pwm@7d00c000: 'assigned-clocks' is a dependency of 'assigned-clock-rates'
-	from schema $id: http://devicetree.org/schemas/clock/clock.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: pwm@7d00c800: 'assigned-clocks' is a dependency of 'assigned-clock-rates'
-	from schema $id: http://devicetree.org/schemas/clock/clock.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/cprman@7d202000: failed to match any schema with compatible: ['brcm,bcm2711-cprman']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: intc@7d503000: $nodename:0: 'intc@7d503000' does not match '^interrupt-controller(@[0-9a-f,]+)*$'
-	from schema $id: http://devicetree.org/schemas/interrupt-controller/brcm,l2-intc.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: intc@7d508380: $nodename:0: 'intc@7d508380' does not match '^interrupt-controller(@[0-9a-f,]+)*$'
-	from schema $id: http://devicetree.org/schemas/interrupt-controller/brcm,l2-intc.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: intc@7d508400: $nodename:0: 'intc@7d508400' does not match '^interrupt-controller(@[0-9a-f,]+)*$'
-	from schema $id: http://devicetree.org/schemas/interrupt-controller/brcm,l2-intc.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: gpio@7d508500: compatible:0: 'brcm,brcmstb-gpio' is not one of ['brcm,bcm7445-gpio']
-	from schema $id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: gpio@7d508500: compatible: ['brcm,brcmstb-gpio'] is too short
-	from schema $id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: gpio@7d508500: 'brcm,gpio-direct', 'gpio-line-names' do not match any of the regexes: 'pinctrl-[0-9]+'
-	from schema $id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: intc@7d517000: $nodename:0: 'intc@7d517000' does not match '^interrupt-controller(@[0-9a-f,]+)*$'
-	from schema $id: http://devicetree.org/schemas/interrupt-controller/brcm,l2-intc.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: pwm@7d517a80: #pwm-cells:0:0: 2 was expected
-	from schema $id: http://devicetree.org/schemas/pwm/brcm,bcm7038-pwm.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: intc@7d517ac0: $nodename:0: 'intc@7d517ac0' does not match '^interrupt-controller(@[0-9a-f,]+)*$'
-	from schema $id: http://devicetree.org/schemas/interrupt-controller/brcm,l2-intc.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: intc@7d517b00: $nodename:0: 'intc@7d517b00' does not match '^interrupt-controller(@[0-9a-f,]+)*$'
-	from schema $id: http://devicetree.org/schemas/interrupt-controller/brcm,l2-intc.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: gpio@7d517c00: compatible:0: 'brcm,brcmstb-gpio' is not one of ['brcm,bcm7445-gpio']
-	from schema $id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: gpio@7d517c00: compatible: ['brcm,brcmstb-gpio'] is too short
-	from schema $id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: gpio@7d517c00: 'brcm,gpio-direct', 'gpio-line-names' do not match any of the regexes: 'pinctrl-[0-9]+'
-	from schema $id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/avs-monitor@7d542000: failed to match any schema with compatible: ['brcm,bcm2711-avs-monitor', 'syscon', 'simple-mfd']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: firmware: '#address-cells', '#size-cells', 'dma-ranges' do not match any of the regexes: 'pinctrl-[0-9]+'
-	from schema $id: http://devicetree.org/schemas/arm/bcm/raspberrypi,bcm2835-firmware.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc/power: failed to match any schema with compatible: ['raspberrypi,bcm2835-power']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: l3-cache: 'cache-unified' is a dependency of 'cache-size'
-	from schema $id: http://devicetree.org/schemas/cache.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: l3-cache: 'cache-unified' is a dependency of 'cache-sets'
-	from schema $id: http://devicetree.org/schemas/cache.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: l3-cache: 'cache-unified' is a dependency of 'cache-line-size'
-	from schema $id: http://devicetree.org/schemas/cache.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: l3-cache: 'cache-unified' is a required property
-	from schema $id: http://devicetree.org/schemas/cache.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: l3-cache: Unevaluated properties are not allowed ('cache-level', 'cache-line-size', 'cache-sets', 'cache-size' were unexpected)
-	from schema $id: http://devicetree.org/schemas/cache.yaml#
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: pwr_button: 'pwr' does not match any of the regexes: '^(button|event|key|switch|(button|event|key|switch)-[a-z0-9-]+|[a-z0-9-]+-(button|event|key|switch))$', 'pinctrl-[0-9]+'
-	from schema $id: http://devicetree.org/schemas/input/gpio-keys.yaml#
-
-
-
-
-
+> 
+> > +}
+> > +
+> > +static int cv18xx_retry_tuning(struct mmc_host *mmc, u32 opcode, int *cmd_error)
+> > +{
+> > +	int ret, retry = 0;
+> > +
+> > +	while (retry < CV18XX_RETRY_TUNING_MAX) {
+> > +		ret = mmc_send_tuning(mmc, opcode, NULL);
+> > +		if (ret)
+> > +			return ret;
+> > +		retry++;
+> > +	}
+> > +
+> > +	return 0;
+> > +}
+> > +
+> > +static void cv18xx_sdhci_post_tuning(struct sdhci_host *host)
+> > +{
+> > +	u32 val;
+> > +
+> > +	val = sdhci_readl(host, SDHCI_INT_STATUS);
+> > +	val |= SDHCI_INT_DATA_AVAIL;
+> > +	sdhci_writel(host, val, SDHCI_INT_STATUS);
+> > +
+> > +	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> > +}
+> > +
+> > +static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
+> > +{
+> > +	int min, max, avg, ret;
+> > +	int win_length, target_min, target_max, target_win_length;
+> > +
+> > +	min = max = 0;
+> > +	target_win_length = 0;
+> > +
+> > +	sdhci_reset_tuning(host);
+> > +
+> > +	while (max < CV18XX_TUNE_MAX) {
+> > +		/* find the mininum delay first which can pass tuning */
+> > +		while (min < CV18XX_TUNE_MAX) {
+> > +			cv18xx_sdhci_set_tap(host, min);
+> > +			if (!cv18xx_retry_tuning(host->mmc, opcode, NULL))
+> > +				break;
+> > +			min += CV18XX_TUNE_STEP;
+> > +		}
+> > +
+> > +		/* find the maxinum delay which can not pass tuning */
+> > +		max = min + CV18XX_TUNE_STEP;
+> > +		while (max < CV18XX_TUNE_MAX) {
+> > +			cv18xx_sdhci_set_tap(host, max);
+> > +			if (cv18xx_retry_tuning(host->mmc, opcode, NULL)) {
+> > +				max -= CV18XX_TUNE_STEP;
+> > +				break;
+> > +			}
+> > +			max += CV18XX_TUNE_STEP;
+> > +		}
+> > +
+> > +		win_length = max - min + 1;
+> > +		/* get the largest pass window */
+> > +		if (win_length > target_win_length) {
+> > +			target_win_length = win_length;
+> > +			target_min = min;
+> > +			target_max = max;
+> > +		}
+> > +
+> > +		/* continue to find the next pass window */
+> > +		min = max + CV18XX_TUNE_STEP;
+> > +	}
+> > +
+> > +	cv18xx_sdhci_post_tuning(host);
+> > +
+> > +	/* use average delay to get the best timing */
+> > +	avg = (target_min + target_max) / 2;
+> > +	cv18xx_sdhci_set_tap(host, avg);
+> > +	ret = mmc_send_tuning(host->mmc, opcode, NULL);
+> > +
+> > +	dev_dbg(mmc_dev(host->mmc), "tuning %s at 0x%x ret %d\n",
+> > +		ret ? "failed" : "passed", avg, ret);
+> > +
+> > +	return ret;
+> > +}
+> > +
+> >  static const struct sdhci_ops sdhci_dwcmshc_ops = {
+> >  	.set_clock		= sdhci_set_clock,
+> >  	.set_bus_width		= sdhci_set_bus_width,
+> > @@ -721,6 +832,7 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
+> >  	.get_max_clock		= dwcmshc_get_max_clock,
+> >  	.reset			= cv18xx_sdhci_reset,
+> >  	.adma_write_desc	= dwcmshc_adma_write_desc,
+> > +	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
+> >  };
+> >  
+> >  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+> 
