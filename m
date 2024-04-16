@@ -1,208 +1,125 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 737EC629;
-	Tue, 16 Apr 2024 00:29:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C9EBAD55;
+	Tue, 16 Apr 2024 02:16:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713227378; cv=none; b=iq6v0mDQ7FBfmmBVIVO7ro3f+h7VJCduu4S+t05r6VtyFJOr0NpTiVQSiFz3CgwUdUqhSsbGqBntzLGVa2pNsyWlGOJCCHHxq+H4yJUkNEjaol9ZqUqsbA71iL+oZll4dd4UqLqdzYHdUEoqhCIV+wLJTzLwUKiLfaIuqukNERA=
+	t=1713233771; cv=none; b=JGfxD5MEpuOIOIDyEmb6xgxPulqUwsfbNW3HNi5LJkrZxnm8No/5H//Xy+KsCeQfcFsffr7I3tAuCa6Bmo5zwip0i+eTSUEZtSMev67thkd5Yo17xjNnoUFWGZj0vrZ+Cva/HKbyYUvXFU/nM9+0WLgKk8QBp6xIhjEStC+zII0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713227378; c=relaxed/simple;
-	bh=HfHk3WuIcIudmtsoBPGASPAMjayRcL28OAR0jozp9jU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hmIWYs7Iwz36ECJ7CL3gFQyG1i2VTrK+JBkoY733QAk3fUhhvz5hlxlbOwI+Yq4r4SptucICyT6t1dH/e2gJ2a0d4g0I5iGVRQheMpncshb55pWupqhaK87+5WNg4sf0cah3NTmLQsNvbUl6vWl9TAn6Dt1zUSvfRGQiONPgeuA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m8L/8s+u; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1713233771; c=relaxed/simple;
+	bh=QrXgwbe0NdYDpBlQ3uOZu0s/fNclISOYfAUWixmFQ9I=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=uWQujZdxsn7ZcvW5ywQU+BLoUN7/MrKcqmaD11t8/uTuR5xzdCV3DXwZQGzSVcm8BJ2EgVS7cNNsDHB6PZhhz13MpiXfU9Qn/7L/R6lMJOXMvQBbK0cd1XcZbK5nuafX8mgg5B/dZQT0ia7wAFfjZIhe3Ai7Ecg2skGneV/peEU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KEHJIIIK; arc=none smtp.client-ip=209.85.128.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m8L/8s+u"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FF6BC113CC;
-	Tue, 16 Apr 2024 00:29:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1713227378;
-	bh=HfHk3WuIcIudmtsoBPGASPAMjayRcL28OAR0jozp9jU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=m8L/8s+u8C3+FTyXdYyV5d+CU8/uXOC6PQLwrfZHDYBbQo6P0BrPAQDUhsoRh7z57
-	 w4KUVqNZjv87vp/5ph1BtLdpnnvgf50wFXqQPZomWV8aXyLUomZ66T0qmkmRCwk9kE
-	 4xeqSl5MbazN9RwGgATWJnc5nPNp2ZOHrDQD5eW5uQrhEoencltmA/YtkvMNn6dV37
-	 Z3RCstCDuOzJF1vPiv9oEkh0tcPko8+ehvysJzaBwGbQtYGQviTt/+M6zZvqFjkcYc
-	 V5TUvWIZe+oSrDcTb3tD4NKud/NLbRZXECUj99wmdjhkQIMmu0cOZYHPpxShJl/EIb
-	 iY7R8ZCryu5mw==
-Date: Tue, 16 Apr 2024 08:16:14 +0800
-From: Jisheng Zhang <jszhang@kernel.org>
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Add tuning support for Sophgo
- CV1800B and SG200X
-Message-ID: <Zh3DTkc60d-lYnSI@xhacker>
-References: <20240414164112.2732-1-jszhang@kernel.org>
- <c6c041d4-d9ed-46bb-9e6e-b53dc9ac0002@intel.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KEHJIIIK"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-417f5268b12so34102525e9.1;
+        Mon, 15 Apr 2024 19:16:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1713233767; x=1713838567; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+OsBMHLE1GlLux45lTQMk2XlrRux1EVi8/1F5HxUcNI=;
+        b=KEHJIIIKiOVCFPqmMWQN9NxFLVXi/3T0hfp9jNkL5prj1uvVpUv5b4Pe2vlpO+NdIx
+         BGytfaMmQjL1G06LTgmoRompgcjazYhtbS/02ySwf53IeCtX/H7OsBJyUsMkfdzpS4Ug
+         KGSD8072OTjC7QQSNSGjQ7EwDndxyaQBAN/y9aPv7Ca2Xi51Wa4lut37ZpTbHIBz1/Rm
+         LUDL/r9oy2c4XlqJNgreaatdKJeIilpmHL2a/KY/md/pZkNQl8+3tMTA9LvkZTBnn/Gk
+         zH7pFevKB42GP6unoJBh7Ld2HAgErZoYcDAdi6tW5ZW2kK1PVBDWyJkrLIv9NF8Oauzg
+         VFbw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1713233767; x=1713838567;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+OsBMHLE1GlLux45lTQMk2XlrRux1EVi8/1F5HxUcNI=;
+        b=BYoCQkHiRtiZ93PQARb23/JdOQtX7xiEgvWKHDIpbWNOO54sTsX8CiIbKBmqFm2mES
+         XR3bL7D7268SD1zXSXCm7TanYMLGEz8WISduXpgiLRduZr7WeN3xNnmEA9n2Zd0colQR
+         YpcqmkpscNkFr+nZZtzkumsjSYmCjPuJ08pdaDyx8JEEPqAlo5kD+W0rB2X72YKD9k1+
+         oGoiOug8m5rZwnQWjapHmVz470PElTgBD/zPf/aAc0Y1Sqd+chJsh1WRzzzQ3l7Ckpji
+         Eiveq6nESQlTrEiEkqxeJcyns5y8sgfvXK3X0tZ2EWFB8qG289gIWM9y+ci/OhJIrQpS
+         su3w==
+X-Forwarded-Encrypted: i=1; AJvYcCWrqA2i2KYnB1h7+PvP6XDGJ2bqLkmzVhyyzjxXf1Fj7WoUG02tLg2CFhE2+0BqzuJ41WmeqOoe0hDEhj1pD3/aVmhlRH/2NYu0lAOJTphjWWMoSMRZ/ecthFIzA6Lfo84dFyQhEYo+
+X-Gm-Message-State: AOJu0YxBqOnqswLAsl9SaNWfEgE2fIF4mYWQp4jH2Ulr4W0U/7GBiPsj
+	oDxtFRIxo0ooFzYtrsmnjKqEToZjDtUwAofMmEXNhh8TZWeQ/rYuH2qbWZ+iIoXRnrKlcKRU/9o
+	EK+JbAXhbcTKwk3R3UXXSOvoSv/o=
+X-Google-Smtp-Source: AGHT+IF9XuMWnWIt8S+ove2KmhsFIhFjD01Sjo3IWJRcFZe/vNtbUrsppZRB29xdom0zZ4Tivy1HRToWmbHCu/TwWdY=
+X-Received: by 2002:a5d:4f84:0:b0:346:66d8:f7ac with SMTP id
+ d4-20020a5d4f84000000b0034666d8f7acmr10382591wru.31.1713233767310; Mon, 15
+ Apr 2024 19:16:07 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <c6c041d4-d9ed-46bb-9e6e-b53dc9ac0002@intel.com>
+References: <20240415070620.133143-1-richard.xnu.clark@gmail.com>
+ <52c08a01-8357-44dd-b727-a06438ec6c30@intel.com> <ZhzVmmndefd5zDFh@shell.armlinux.org.uk>
+ <CAJNi4rO16FDmRUCWyK=+DF5TbfryJLsX3VUN3j1mAeas7Rh84w@mail.gmail.com> <Zhzj7+nm8q03+p4g@shell.armlinux.org.uk>
+In-Reply-To: <Zhzj7+nm8q03+p4g@shell.armlinux.org.uk>
+From: richard clark <richard.xnu.clark@gmail.com>
+Date: Tue, 16 Apr 2024 10:15:55 +0800
+Message-ID: <CAJNi4rNbhGZyap6pdk+aKojs7Nh-Qb0BtCFWSitxd4YiSp8xRg@mail.gmail.com>
+Subject: Re: [PATCH] sdhci: Fix SD card detection issue
+To: "Russell King (Oracle)" <linux@armlinux.org.uk>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Apr 15, 2024 at 09:58:31AM +0300, Adrian Hunter wrote:
-> On 14/04/24 19:41, Jisheng Zhang wrote:
-> > Implement the .platform_execute_tuning for Sophgo CV1800B and SG200X.
-> > Some code is borrowed from sdhci-esdhc-imx.c. The tuning result is
-> > similar as the one of SoC vendor's SDK.
-> > 
-> > Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
-> 
-> One comment, otherwise:
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> > ---
-> >  drivers/mmc/host/sdhci-of-dwcmshc.c | 112 ++++++++++++++++++++++++++++
-> >  1 file changed, 112 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > index ab4b964d4058..7b55acd9830c 100644
-> > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > @@ -66,6 +66,10 @@
-> >  #define CV18XX_SDHCI_PHY_CONFIG			0x4c
-> >  #define  CV18XX_PHY_TX_BPS			BIT(0)
-> >  
-> > +#define CV18XX_TUNE_MAX				128
-> > +#define CV18XX_TUNE_STEP			1
-> > +#define CV18XX_RETRY_TUNING_MAX			50
-> > +
-> >  /* Rockchip specific Registers */
-> >  #define DWCMSHC_EMMC_DLL_CTRL		0x800
-> >  #define DWCMSHC_EMMC_DLL_RXCLK		0x804
-> > @@ -685,6 +689,113 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
-> >  	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
-> >  }
-> >  
-> > +static void cv18xx_sdhci_set_tap(struct sdhci_host *host, int tap)
-> > +{
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> > +	u16 clk;
-> > +	u32 val;
-> > +
-> > +	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > +	clk &= ~SDHCI_CLOCK_CARD_EN;
-> > +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > +
-> > +	val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-> > +	val &= ~CV18XX_LATANCY_1T;
-> > +	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-> > +
-> > +	val =  (FIELD_PREP(CV18XX_PHY_TX_DLY_MSK, 0) |
-> > +		FIELD_PREP(CV18XX_PHY_TX_SRC_MSK, CV18XX_PHY_TX_SRC_INVERT_CLK_TX) |
-> > +		FIELD_PREP(CV18XX_PHY_RX_DLY_MSK, tap));
-> > +	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
-> > +
-> > +	sdhci_writel(host, 0, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_CONFIG);
-> > +
-> > +	clk |= SDHCI_CLOCK_CARD_EN;
-> > +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > +	mdelay(1);
-> 
-> Did you consider usleep_range() instead of mdelay()?
+On Mon, Apr 15, 2024 at 4:23=E2=80=AFPM Russell King (Oracle)
+<linux@armlinux.org.uk> wrote:
+>
+> On Mon, Apr 15, 2024 at 04:17:14PM +0800, richard clark wrote:
+> > On Mon, Apr 15, 2024 at 3:22=E2=80=AFPM Russell King (Oracle)
+> > <linux@armlinux.org.uk> wrote:
+> > >
+> > > On Mon, Apr 15, 2024 at 10:18:39AM +0300, Adrian Hunter wrote:
+> > > > On 15/04/24 10:06, Richard Clark wrote:
+> > > > > The mmc_gpio_get_cd(...) will return 0 called from sdhci_get_cd(.=
+..), which means
+> > > > > the card is not present. Actually, the card detection pin is acti=
+ve low by default
+> > > > > according to the SDHCI psec, thus the card detection result is no=
+t correct, more
+> > > >
+> > > > SDHCI spec covers the SDHCI lines.  GPIO is separate.
+> > >
+> > > ... and the key bit of information that should be mentioned is in the
+> > > case of a GPIO, the GPIO library can be told if a GPIO is active-high
+> > > or active-low in either firmware or via the GPIO lookup data, and thi=
+s
+> > > should be used instead of drivers inventing their own "quirking".
+> > >
+> > Agree! But unfortunately, it seems I can't find the right place to
+> > handle this from either firmware or via the GPIO lookup data. Will be
+> > appreciated if any suggestion about that?!
+>
+> If you're using DT, then, for example:
+>
+>         cd-gpios =3D <&gpio1 4 GPIO_ACTIVE_LOW>;
+>
+> is all it takes. If you are using firmware then GPIO lookup data isn't
+> what you should be using. I'm afraid I don't know the ACPI bindings for
+> SDHCI.
+>
+Ah, this seems to be a bug of the Nvidia DT, its cd-gpios=3D<... 0x00>
+meaning the GPIO_ACTIVE_HIGH, but the CD gpio value is 0 when the card
+is inserted. In the kernel v5.10, the sdhci-tegra use below logic as
+the card present indicator:
 
-Good idea, will test and send out a v2.
+if (!host->mmc->cd_cap_invert)
+        host->mmc->rem_card_present =3D (mmc_gpio_get_cd(host->mmc) =3D=3D =
+0);
 
-> 
-> > +}
-> > +
-> > +static int cv18xx_retry_tuning(struct mmc_host *mmc, u32 opcode, int *cmd_error)
-> > +{
-> > +	int ret, retry = 0;
-> > +
-> > +	while (retry < CV18XX_RETRY_TUNING_MAX) {
-> > +		ret = mmc_send_tuning(mmc, opcode, NULL);
-> > +		if (ret)
-> > +			return ret;
-> > +		retry++;
-> > +	}
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +static void cv18xx_sdhci_post_tuning(struct sdhci_host *host)
-> > +{
-> > +	u32 val;
-> > +
-> > +	val = sdhci_readl(host, SDHCI_INT_STATUS);
-> > +	val |= SDHCI_INT_DATA_AVAIL;
-> > +	sdhci_writel(host, val, SDHCI_INT_STATUS);
-> > +
-> > +	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-> > +}
-> > +
-> > +static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-> > +{
-> > +	int min, max, avg, ret;
-> > +	int win_length, target_min, target_max, target_win_length;
-> > +
-> > +	min = max = 0;
-> > +	target_win_length = 0;
-> > +
-> > +	sdhci_reset_tuning(host);
-> > +
-> > +	while (max < CV18XX_TUNE_MAX) {
-> > +		/* find the mininum delay first which can pass tuning */
-> > +		while (min < CV18XX_TUNE_MAX) {
-> > +			cv18xx_sdhci_set_tap(host, min);
-> > +			if (!cv18xx_retry_tuning(host->mmc, opcode, NULL))
-> > +				break;
-> > +			min += CV18XX_TUNE_STEP;
-> > +		}
-> > +
-> > +		/* find the maxinum delay which can not pass tuning */
-> > +		max = min + CV18XX_TUNE_STEP;
-> > +		while (max < CV18XX_TUNE_MAX) {
-> > +			cv18xx_sdhci_set_tap(host, max);
-> > +			if (cv18xx_retry_tuning(host->mmc, opcode, NULL)) {
-> > +				max -= CV18XX_TUNE_STEP;
-> > +				break;
-> > +			}
-> > +			max += CV18XX_TUNE_STEP;
-> > +		}
-> > +
-> > +		win_length = max - min + 1;
-> > +		/* get the largest pass window */
-> > +		if (win_length > target_win_length) {
-> > +			target_win_length = win_length;
-> > +			target_min = min;
-> > +			target_max = max;
-> > +		}
-> > +
-> > +		/* continue to find the next pass window */
-> > +		min = max + CV18XX_TUNE_STEP;
-> > +	}
-> > +
-> > +	cv18xx_sdhci_post_tuning(host);
-> > +
-> > +	/* use average delay to get the best timing */
-> > +	avg = (target_min + target_max) / 2;
-> > +	cv18xx_sdhci_set_tap(host, avg);
-> > +	ret = mmc_send_tuning(host->mmc, opcode, NULL);
-> > +
-> > +	dev_dbg(mmc_dev(host->mmc), "tuning %s at 0x%x ret %d\n",
-> > +		ret ? "failed" : "passed", avg, ret);
-> > +
-> > +	return ret;
-> > +}
-> > +
-> >  static const struct sdhci_ops sdhci_dwcmshc_ops = {
-> >  	.set_clock		= sdhci_set_clock,
-> >  	.set_bus_width		= sdhci_set_bus_width,
-> > @@ -721,6 +832,7 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
-> >  	.get_max_clock		= dwcmshc_get_max_clock,
-> >  	.reset			= cv18xx_sdhci_reset,
-> >  	.adma_write_desc	= dwcmshc_adma_write_desc,
-> > +	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
-> >  };
-> >  
-> >  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-> 
+But the newer version kernel removes the 'rem_card_present', and the
+CD gpio still value 0 will be interpreted as the card is not present,
+thus the issue happens...
+
+> --
+> RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
+> FTTP is here! 80Mbps down 10Mbps up. Decent connectivity at last!
