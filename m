@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6ACC1311B4;
-	Tue, 16 Apr 2024 15:50:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 778AB2EAF9;
+	Tue, 16 Apr 2024 16:44:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713282653; cv=none; b=cIgrQQGoS3wk1a0liJ44Ny6zBYyuVDYHQ1Gg3pybyucdeJ94/8VG2ZdYMIb7G/SOpbTVnaYEoHhuDrLoGDARZVAfPpXQHKLzFhcsviXJQGfPk7xTG7NVhPGel38mbQGElxQkZsnHC5BA4eL641Jpva/KwAwuqr1Rfn+SEZBEqXE=
+	t=1713285895; cv=none; b=Ubw0eGpGHCUcHPUWrExNCS8bA8uCL1jWj/Pcsd3BZTAwZG8scskd4ejISZ68f5NnH4lXYSqpX8IP/N0B+pAMZJ53Vs7Ly2rtSGa0ikOvGw4bby23wJSg+jCR+r1KO0ighKJwKVRVqvXY0bqHAX1PzRIJ8+DJ5f1IBCzRXUcjBKQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713282653; c=relaxed/simple;
-	bh=wE/1nQW03EOW2WjxRav5KhI1biPyJvYQafxlZ0n0QgY=;
+	s=arc-20240116; t=1713285895; c=relaxed/simple;
+	bh=WFbKwxX8WMuQfW+cB0Y60i7L1vzoyLXTtdrcolu9Gbw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=m5N6nYzwTmhib6mQcDVA9xWmt+wihdrLGUppQYvIweZ+JNmEA2HIM8VmcnOkXjg3wo2JGcYzeOdEnjZchYrX7Ia+qvtPRkr+ed79T8IweCqpRmzJJH6PMS/PL+IqFCyfmrcIzj1JHrmyzsuudIlUKuUWEgG7J+Fnczl4Y3nZsMk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bwzGbiMo; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=GxDD2VjIF3xLckXP653mvGr7yekTYSWAzowSDuzm/+49yLBKj9m0JzCI/G46IHGNx3HCi0hxtqM2OJAyJ4a9171k0UwPI6crWNR5nuF+ku8s/N0TWbW0q2tPoS0YBdawsov5sfAtacvC22689t9vUM50XaP7odxR3D+N+bnZabU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WeHRO+SC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bwzGbiMo"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57ED3C113CE;
-	Tue, 16 Apr 2024 15:50:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WeHRO+SC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1573FC113CE;
+	Tue, 16 Apr 2024 16:44:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1713282652;
-	bh=wE/1nQW03EOW2WjxRav5KhI1biPyJvYQafxlZ0n0QgY=;
+	s=k20201202; t=1713285895;
+	bh=WFbKwxX8WMuQfW+cB0Y60i7L1vzoyLXTtdrcolu9Gbw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=bwzGbiMo8w/Nh/4Nrlp02t8ZIxpU1s16/LVWkVMivNOFKZt6GWHPxrTcVYMmu0Vh0
-	 pR0OYwF7Pedi8E5biwG6+xiq6b9MRmdEPItHRtphbobBcpO3L6Lp3e9J6XQ3IgIiBI
-	 LnSurHWuqKEsPtQpbLS4g917/g4T4/EMZ5QIyp/bybMTLQFqfmR+Gfo1dbin1Ls8B2
-	 w42jZEHEhO/a5IE0s3O4i5h4bPAxLjRC8B6FYwHiqXndS4PrnHxAOklM3Pnokz0GMN
-	 7dVKNBJWV3nPJgFVhejsZPF/QBt6se0aCkmstJ9+cGGOCKYC96CXwCEdcF42WHMMFO
-	 PgUI+iwjPTOiw==
-Date: Tue, 16 Apr 2024 23:37:23 +0800
-From: Jisheng Zhang <jszhang@kernel.org>
+	b=WeHRO+SCyFOm2lrN9+zZTmXWsbUPJELegE9c39+uTW+nLXLSzamhs5IfwqkA+a6B6
+	 Imhs4el6W1gohJ8crDSFfRT+CbcC287m/o8+qtxv8NSOJ83MvJ8CNQ5yVxn1XCD7ju
+	 HH8VYsaEnVDRMHLSOqje9X8tDJ7A0WU40EgDZYQsuMl8hsG5Ds48ERNiijWgpQJPhr
+	 0BgekzClovYy4FWHFNn5G9BXvJ/lbopZnmR/QMdngL3MBt88qYThcx0FNS+2aOwAX1
+	 sGGuVhZ8PaH/t3ISr5UgWSXqw1CeyO+2NrV5V8YVbMsJsie54xtDQ3+l7KevVqdimA
+	 nrjcKEKNv1mRg==
+Date: Tue, 16 Apr 2024 17:44:48 +0100
+From: Conor Dooley <conor@kernel.org>
 To: Chen Wang <unicornxw@gmail.com>
 Cc: adrian.hunter@intel.com, aou@eecs.berkeley.edu, conor+dt@kernel.org,
-	guoren@kernel.org, inochiama@outlook.com,
+	guoren@kernel.org, inochiama@outlook.com, jszhang@kernel.org,
 	krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
 	paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
 	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -38,296 +38,164 @@ Cc: adrian.hunter@intel.com, aou@eecs.berkeley.edu, conor+dt@kernel.org,
 	chao.wei@sophgo.com, haijiao.liu@sophgo.com,
 	xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com,
 	Chen Wang <unicorn_wang@outlook.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci-of-dwcmshc: Add support for Sophgo SG2042
-Message-ID: <Zh6bM2EQnAFYFhiV@xhacker>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo
+ SG2042 support
+Message-ID: <20240416-pretext-cognitive-295526072596@spud>
 References: <cover.1713258948.git.unicorn_wang@outlook.com>
- <e5aa1338d74504e141ba833b484d588cafb7ab38.1713258948.git.unicorn_wang@outlook.com>
+ <032c06642b01f06c86ba8bcd2108d18c005b57eb.1713258948.git.unicorn_wang@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="Oj7/7BmivF9LBeQt"
 Content-Disposition: inline
-In-Reply-To: <e5aa1338d74504e141ba833b484d588cafb7ab38.1713258948.git.unicorn_wang@outlook.com>
+In-Reply-To: <032c06642b01f06c86ba8bcd2108d18c005b57eb.1713258948.git.unicorn_wang@outlook.com>
 
-On Tue, Apr 16, 2024 at 05:50:57PM +0800, Chen Wang wrote:
+
+--Oj7/7BmivF9LBeQt
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Apr 16, 2024 at 05:50:37PM +0800, Chen Wang wrote:
 > From: Chen Wang <unicorn_wang@outlook.com>
-> 
-> Add support for the mmc controller of Sophgo SG2042.
-> 
-> SG2042 uses Synopsys PHY the same as TH1520 so we reuse the tuning
-> logic from TH1520. Besides this, this patch implement some SG2042
-> specific work, such as clocks and reset ops.
-> 
+>=20
+> SG2042 use Synopsys dwcnshc IP for SD/eMMC controllers.
+>=20
+> SG2042 defines 3 clocks for SD/eMMC controllers.
+> - AXI_EMMC/AXI_SD for aclk/hclk(Bus interface clocks in DWC_mshc)
+>   and blck(Core Base Clock in DWC_mshc), these 3 clocks share one
+>   source, so reuse existing "core".
+> - 100K_EMMC/100K_SD for cqetmclk(Timer clocks in DWC_mshc), so reuse
+>   existing "timer" which was added for rockchip specified.
+> - EMMC_100M/SD_100M for cclk(Card clocks in DWC_mshc), add new "card".
+>=20
+> Adding some examples.
+>=20
 > Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 173 ++++++++++++++++++++++++++--
->  1 file changed, 166 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 1a0b7ded7f9f..432ce0398163 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -106,12 +106,13 @@
->  #define DWC_MSHC_PTR_PHY_R	0x300
->  
->  /* PHY general configuration */
-> -#define PHY_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x00)
-> -#define PHY_CNFG_RSTN_DEASSERT	0x1  /* Deassert PHY reset */
-> -#define PHY_CNFG_PAD_SP_MASK	GENMASK(19, 16) /* bits [19:16] */
-> -#define PHY_CNFG_PAD_SP		0x0c /* PMOS TX drive strength */
-> -#define PHY_CNFG_PAD_SN_MASK	GENMASK(23, 20) /* bits [23:20] */
-> -#define PHY_CNFG_PAD_SN		0x0c /* NMOS TX drive strength */
-> +#define PHY_CNFG_R			(DWC_MSHC_PTR_PHY_R + 0x00)
-> +#define PHY_CNFG_RSTN_DEASSERT		0x1  /* Deassert PHY reset */
-> +#define PHY_CNFG_PHY_PWRGOOD_MASK	BIT_MASK(1) /* bit [1] */
-> +#define PHY_CNFG_PAD_SP_MASK		GENMASK(19, 16) /* bits [19:16] */
-> +#define PHY_CNFG_PAD_SP			0x0c /* PMOS TX drive strength */
-> +#define PHY_CNFG_PAD_SN_MASK		GENMASK(23, 20) /* bits [23:20] */
-> +#define PHY_CNFG_PAD_SN			0x0c /* NMOS TX drive strength */
->  
->  /* PHY command/response pad settings */
->  #define PHY_CMDPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x04)
-> @@ -143,7 +144,8 @@
->  
->  /* PHY CLK delay line settings */
->  #define PHY_SDCLKDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x1d)
-> -#define PHY_SDCLKDL_CNFG_UPDATE	BIT(4) /* set before writing to SDCLKDL_DC */
-> +#define PHY_SDCLKDL_CNFG_EXTDLY_EN	BIT(0)
-> +#define PHY_SDCLKDL_CNFG_UPDATE		BIT(4) /* set before writing to SDCLKDL_DC */
->  
->  /* PHY CLK delay line delay code */
->  #define PHY_SDCLKDL_DC_R		(DWC_MSHC_PTR_PHY_R + 0x1e)
-> @@ -151,6 +153,9 @@
->  #define PHY_SDCLKDL_DC_DEFAULT		0x32 /* default delay code */
->  #define PHY_SDCLKDL_DC_HS400		0x18 /* delay code for HS400 mode */
->  
-> +#define PHY_SMPLDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x20)
-> +#define PHY_SMPLDL_CNFG_BYPASS_EN	BIT(1)
+>  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 67 ++++++++++++++-----
+>  1 file changed, 51 insertions(+), 16 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yam=
+l b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> index 4d3031d9965f..a04ccae216cf 100644
+> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> @@ -21,6 +21,7 @@ properties:
+>        - snps,dwcmshc-sdhci
+>        - sophgo,cv1800b-dwcmshc
+>        - sophgo,sg2002-dwcmshc
+> +      - sophgo,sg2042-dwcmshc
+>        - thead,th1520-dwcmshc
+> =20
+>    reg:
+> @@ -30,23 +31,36 @@ properties:
+>      maxItems: 1
+> =20
+>    clocks:
+> -    minItems: 1
+> -    items:
+> -      - description: core clock
+> -      - description: bus clock for optional
+> -      - description: axi clock for rockchip specified
+> -      - description: block clock for rockchip specified
+> -      - description: timer clock for rockchip specified
+> -
+> +    anyOf:
+> +      - minItems: 1
+> +        items:
+> +          - description: core clock
+> +          - description: bus clock for optional
+> +          - description: axi clock for rockchip specified
+> +          - description: block clock for rockchip specified
+> +          - description: timer clock for rockchip specified
 > +
->  /* PHY drift_cclk_rx delay line configuration setting */
->  #define PHY_ATDL_CNFG_R			(DWC_MSHC_PTR_PHY_R + 0x21)
->  #define PHY_ATDL_CNFG_INPSEL_MASK	GENMASK(3, 2) /* bits [3:2] */
-> @@ -194,6 +199,11 @@ struct rk35xx_priv {
->  	u8 txclk_tapnum;
->  };
->  
-> +#define SG2042_MAX_CLKS 2
+> +      - minItems: 1
 
-I don't think "bulk" is suitable here for max 2 clks, no?
+I don't think this minItems is needed, this is for one device which has
+all 3, no?
 
-> +struct sg2042_priv {
-> +	struct clk_bulk_data clks[SG2042_MAX_CLKS];
+I also think this combination should only be permitted for the sg2042,
+since it is not valid for the existing devices.
 
-useless either
+Cheers,
+Conor.
 
-> +};
+> +        items:
+> +          - description: core clock
+> +          - description: timer clock
+> +          - description: card clock
+> =20
+>    clock-names:
+> -    minItems: 1
+> -    items:
+> -      - const: core
+> -      - const: bus
+> -      - const: axi
+> -      - const: block
+> -      - const: timer
+> +    anyOf:
+> +      - minItems: 1
+> +        items:
+> +          - const: core
+> +          - const: bus
+> +          - const: axi
+> +          - const: block
+> +          - const: timer
 > +
->  struct dwcmshc_priv {
->  	struct clk	*bus_clk;
->  	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA reg */
-> @@ -690,6 +700,76 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
->  }
->  
-> +static inline void sg2042_sdhci_phy_init(struct sdhci_host *host)
-> +{
-> +	u32 val;
-> +
-> +	/* Asset phy reset & set tx drive strength */
-> +	val = sdhci_readl(host, PHY_CNFG_R);
-> +	val &= ~PHY_CNFG_RSTN_DEASSERT;
-> +	val |= FIELD_PREP(PHY_CNFG_PHY_PWRGOOD_MASK, 1);
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, 9);
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, 8);
-> +	sdhci_writel(host, val, PHY_CNFG_R);
-> +
-> +	/* Configure phy pads */
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, 3);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, 2);
-> +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> +
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, 3);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, 2);
-> +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> +
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, 3);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, 2);
-> +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> +
-> +	/* Configure delay line */
-> +	/* Enable fixed delay */
-> +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_EXTDLY_EN, PHY_SDCLKDL_CNFG_R);
-> +	/*
-> +	 * Set delay line.
-> +	 * Its recommended that bit UPDATE_DC[4] is 1 when SDCLKDL_DC is being written.
-> +	 * Ensure UPDATE_DC[4] is '0' when not updating code.
-> +	 */
-> +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> +	val |= PHY_SDCLKDL_CNFG_UPDATE;
-> +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> +	/* Add 10 * 70ps = 0.7ns for output delay */
-> +	sdhci_writeb(host, 10, PHY_SDCLKDL_DC_R);
-> +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
-> +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> +
-> +	/* Set SMPLDL_CNFG, Bypass */
-> +	sdhci_writeb(host, PHY_SMPLDL_CNFG_BYPASS_EN, PHY_SMPLDL_CNFG_R);
-> +
-> +	/* Set ATDL_CNFG, tuning clk not use for init */
-> +	val = FIELD_PREP(PHY_ATDL_CNFG_INPSEL_MASK, 2);
-
-magic "2" needs a meaningful macro definition.
-
-> +	sdhci_writeb(host, val, PHY_ATDL_CNFG_R);
-> +
-> +	/* Deasset phy reset */
-> +	val = sdhci_readl(host, PHY_CNFG_R);
-> +	val |= PHY_CNFG_RSTN_DEASSERT;
-> +	sdhci_writel(host, val, PHY_CNFG_R);
-> +}
-> +
-> +static void sg2042_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	sdhci_reset(host, mask);
-> +
-> +	if (mask & SDHCI_RESET_ALL)
-> +		sg2042_sdhci_phy_init(host);
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
-> @@ -728,6 +808,16 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
->  	.adma_write_desc	= dwcmshc_adma_write_desc,
->  };
->  
-> +static const struct sdhci_ops sdhci_dwcmshc_sg2042_ops = {
-> +	.set_clock              = sdhci_set_clock,
-> +	.set_bus_width          = sdhci_set_bus_width,
-> +	.set_uhs_signaling      = dwcmshc_set_uhs_signaling,
-> +	.get_max_clock		= dwcmshc_get_max_clock,
-> +	.platform_execute_tuning = th1520_execute_tuning,
-> +	.reset                  = sg2042_sdhci_reset,
-> +	.adma_write_desc        = dwcmshc_adma_write_desc,
-> +};
-> +
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
->  	.ops = &sdhci_dwcmshc_ops,
->  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> @@ -763,6 +853,13 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
->  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->  };
->  
-> +static const struct sdhci_pltfm_data sdhci_dwcmshc_sg2042_pdata = {
-> +	.ops = &sdhci_dwcmshc_sg2042_ops,
-> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-> +		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT,
-
-is "wp-inverted" property better?
-
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +};
-> +
->  static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
->  {
->  	/*
-> @@ -882,6 +979,58 @@ static int dwcmshc_th1520_init(struct device *dev,
->  	return 0;
->  }
->  
-> +static int dwcmshc_sg2042_clks_enable(struct dwcmshc_priv *dwc_priv)
-> +{
-> +	int ret = 0;
-> +	struct sg2042_priv *soc = dwc_priv->priv;
-> +
-> +	if (soc)
-> +		ret = clk_bulk_prepare_enable(SG2042_MAX_CLKS, soc->clks);
-> +	return ret;
-> +}
-> +
-> +static void dwcmshc_sg2042_clks_disable(struct dwcmshc_priv *dwc_priv)
-> +{
-> +	struct sg2042_priv *soc = dwc_priv->priv;
-> +
-> +	if (soc)
-> +		clk_bulk_disable_unprepare(SG2042_MAX_CLKS,
-> +					   soc->clks);
-> +}
-> +
-> +static int dwcmshc_sg2042_init(struct device *dev,
-> +			       struct sdhci_host *host,
-> +			       struct dwcmshc_priv *dwc_priv)
-> +{
-> +	int err;
-> +	struct sg2042_priv *soc = NULL;
-> +
-> +	soc = devm_kzalloc(dev, sizeof(struct sg2042_priv), GFP_KERNEL);
-> +	if (!soc)
-> +		return -ENOMEM;
-> +
-> +	soc->clks[0].id = "card";
-> +	soc->clks[1].id = "timer";
-
-Interesting, only "card" and "timer", so which clk is for clk input of the ip?
-
-> +	err = devm_clk_bulk_get_optional(mmc_dev(host->mmc), SG2042_MAX_CLKS,
-> +					 soc->clks);
-> +	if (err) {
-> +		dev_err(mmc_dev(host->mmc), "failed to get clocks %d\n", err);
-> +		return err;
-> +	}
-> +
-> +	err = clk_bulk_prepare_enable(SG2042_MAX_CLKS, soc->clks);
-> +	if (err) {
-> +		dev_err(mmc_dev(host->mmc), "failed to enable clocks %d\n", err);
-> +		return err;
-> +	}
-> +
-> +	dwc_priv->priv = soc;
-> +	dwc_priv->soc_clks_enable = dwcmshc_sg2042_clks_enable;
-> +	dwc_priv->soc_clks_disable = dwcmshc_sg2042_clks_disable;
-> +
-> +	return 0;
-> +}
-> +
->  static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->  	{
->  		.compatible = "rockchip,rk3588-dwcmshc",
-> @@ -907,6 +1056,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->  		.compatible = "thead,th1520-dwcmshc",
->  		.data = &sdhci_dwcmshc_th1520_pdata,
->  	},
-> +	{
-> +		.compatible = "sophgo,sg2042-dwcmshc",
-> +		.data = &sdhci_dwcmshc_sg2042_pdata,
-> +	},
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
-> @@ -994,6 +1147,12 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  			goto err_clk;
->  	}
->  
-> +	if (pltfm_data == &sdhci_dwcmshc_sg2042_pdata) {
-> +		err = dwcmshc_sg2042_init(dev, host, priv);
-> +		if (err)
-> +			goto err_clk;
-> +	}
-> +
->  #ifdef CONFIG_ACPI
->  	if (pltfm_data == &sdhci_dwcmshc_bf3_pdata)
->  		sdhci_enable_v4_mode(host);
-> -- 
+> +      - minItems: 1
+> +        items:
+> +          - const: core
+> +          - const: timer
+> +          - const: card
+> =20
+>    resets:
+>      maxItems: 5
+> @@ -96,5 +110,26 @@ examples:
+>        #address-cells =3D <1>;
+>        #size-cells =3D <0>;
+>      };
+> -
+> +  - |
+> +    mmc@bb0000 {
+> +      compatible =3D "snps,dwcmshc-sdhci";
+> +      reg =3D <0xbb000 0x1000>;
+> +      interrupts =3D <0 25 0x4>;
+> +      clocks =3D <&cru 17>;
+> +      clock-names =3D "core";
+> +      bus-width =3D <8>;
+> +      #address-cells =3D <1>;
+> +      #size-cells =3D <0>;
+> +    };
+> +  - |
+> +    mmc@cc0000 {
+> +      compatible =3D "snps,dwcmshc-sdhci";
+> +      reg =3D <0xcc000 0x1000>;
+> +      interrupts =3D <0 25 0x4>;
+> +      clocks =3D <&cru 17>, <&cru 18>, <&cru 19>;
+> +      clock-names =3D "core", "timer", "card";
+> +      bus-width =3D <8>;
+> +      #address-cells =3D <1>;
+> +      #size-cells =3D <0>;
+> +    };
+>  ...
+> --=20
 > 2.25.1
-> 
+>=20
+
+--Oj7/7BmivF9LBeQt
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZh6rAAAKCRB4tDGHoIJi
+0qoyAQCTaZUNTGi76+cefoQMna0yBcbNZZK6zaaeA6hNVqADngD+LinzXBk8I+hU
+Bdhb0V7rfjXZ7RK2SnqiZSWXNVclQAY=
+=+oDk
+-----END PGP SIGNATURE-----
+
+--Oj7/7BmivF9LBeQt--
