@@ -1,170 +1,102 @@
-Received: from mail-ot1-f52.google.com (mail-ot1-f52.google.com [209.85.210.52])
+Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1B343FE2A;
-	Tue, 16 Apr 2024 09:51:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A3B31E48A
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Apr 2024 12:59:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713261092; cv=none; b=JXr8O4ueJIFcTKHo7jTdcH5wroUgo8hvzfrNaAnMtC9VNk43NrdEJXQY7xQ5I0a7zpYNbKDfB+fZf0wS5/7aphMjm4Mhwc+Yj2D4xruKWuirAA3v0W0WYkTAFWCam1JHneeD6dSWMxqunuPpHbiImB0Wl0AO6NCbF6Huoc+ortQ=
+	t=1713272383; cv=none; b=f49swibAeYJum6G0VF5DSm9ssL8RdEvRsJogoGVGxrvB9gwRhrdb2CZjKvP4sqyOVqsH+smba4njvqKc8IkWlvHb4bjA6xnDKdqYboaaAmO76JvXyPbVuWJw4gwXnnpqhwans8e//i/Q4WrRwHgt6puTXCHjwUriys+hZRiMOEY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713261092; c=relaxed/simple;
-	bh=xpvoI8aRsr4RIndXSsQx0e1Xx+6a2BKP0J1OQSqC7CU=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=g3c/kW6VKiyd0E1cgnO2TINh2Wg9uH1WtzOnyS25RQPiy+wjvKZMNOdvByk3OjF52FZLhzuMbZYnm04UPkgux95g0wN53mPmLT/UX2vTVrm7vzMWpB1sUUMw9jS/7NDBRRHI1t+Ufa6Dz8IF/nB7HgYPJTPTdzJ9WdEjp58gSmY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kKp3pUIk; arc=none smtp.client-ip=209.85.210.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1713272383; c=relaxed/simple;
+	bh=9vivecuqLxpWcVVbWBg8R8WXEJKMUnErDIemeKW5USE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=i7rh/at/GPgllnMOZkogf4PfdUbnuAGnD/PsrGHbFzR0BAJLyDIACBkjFj9K6LSxvAtBncnof6Oyv2rXo0USpRCGf1l3Nqv12gw/bf7LAMj/lkGcC3/Lp71o6ZrIkwumrlKcstyAMN5BSK7QIUeVAsSbolq1OGsjPZWT5zK9PJg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Bf56ET9v; arc=none smtp.client-ip=209.85.219.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kKp3pUIk"
-Received: by mail-ot1-f52.google.com with SMTP id 46e09a7af769-6eb8ea5ac95so405990a34.2;
-        Tue, 16 Apr 2024 02:51:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Bf56ET9v"
+Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-ddaebc9d6c9so3946781276.0
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Apr 2024 05:59:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1713261090; x=1713865890; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1713272379; x=1713877179; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=dKVl3O7EHtWd97mA3oU7jwLqrHCbe1j887QmZeXMuow=;
-        b=kKp3pUIk67n3XTnGMmLlMBRUOugfR67E1lXgFZrAw+0cESZUr5UNrH4ZtvsicXljwt
-         i8i2tDXhh7lpH1RddUNg564E+GENleQZ4Dr6ldlJKRgFbRRu9e6ZWtTNu/puOd6TSiWF
-         f5sCYwKY5wmkP2O4J0GeiXylbjQkPRMVqR5g7UOhiqixCjg/bXIhzq/msW03/zhmYB1X
-         s2dsC0lUcK5EOZKT1ZsATrbDPFMEV726YASG+sMGgSuVkdEYDtL4sYgXSjevf2L1IlJh
-         ZIvwMr8GiqpZ995QUSxMu9ZT87jt5s3yLLc3g5Az8SHZd+B1BOXDqCu8LNhqdldddGtM
-         5EiQ==
+        bh=9vivecuqLxpWcVVbWBg8R8WXEJKMUnErDIemeKW5USE=;
+        b=Bf56ET9vzemNftn06WexwwlQik2rNcSpAG78C+8luGrHqPR2CFDo40mpQlDn3EswOl
+         9ZosYnW4niLBTuO8hpunvgS6hDKmsDd8ZsKI78aOJmN9rI8RtxangNi0G/ML9dxZg3Hz
+         3X0ro0/V2rbTOJN4PpWrAuwn8SFclUKq3EB/V3ZDPdrLNbCAl78rSST2OBWzNzRThusS
+         /5sdFqa/7zje6ZVFWtfiFpQdwm2cV0AKBIOcOx32r109HK3woj+MiHFXeJuMnkImv9sn
+         PE5Sf0fyZWBN46sd0W0yI2+krs/5fpS1zwS4xliavQCzZOh7c/xJQhL60goB1IpXz5x5
+         C92A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713261090; x=1713865890;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20230601; t=1713272379; x=1713877179;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=dKVl3O7EHtWd97mA3oU7jwLqrHCbe1j887QmZeXMuow=;
-        b=SRg5IX0kPL5DkowAPHco5Hxh7RXvD05wRffc1rpLXKfunrYqqGSByYwJs++n9kFuLi
-         ciUZ/bDTTgCKHzvpfl7EpdZ40ETDh3dJV5zs2g26gM9v9mEcLaOg5leP/FNBKn3lEkEp
-         0W2qCukiS4RypkkdTnqWBzXRuiQ/43UTg0GR51cacaJ1P6jhp1Mcin8z61woXOmARq2x
-         mWjHzP9W4F9YGMTTj/EcRGUhzNYh3Ski1Db+wuuZwBfuMG3L0nzdUr+qpJAW/vEoQVSU
-         hYWIePRvPDuMmc5c2f9Jc6rVH/YrBiTCllX6IzqKCI+mmW3wk6hsGzEy7HE7DT8cUt4N
-         p7rA==
-X-Forwarded-Encrypted: i=1; AJvYcCXe0dUp4zoLHLcr1VYGY2/qYoYTpg5agruoT/JtQ57emaQX+m5ayylbO3DhfrjQH49TViLNRy3Gf5sc0qPh2v4YhHZR4WlWIgtcvhFteKC/zyd7DV9E62z/kTxmZAEzzuquRapETLcpE5KE7oZ5PKh1XXGEATTPWXLWJLYQ4vFS3qcLTQ==
-X-Gm-Message-State: AOJu0YwTLH/vcLycfMdhohLfsHFnQ6GnF6ifpSRR6kzA9ywlrhiZpwva
-	Gm6aGgpBHj9uIDPuSfvqxIOagikfwDde8KeOM6gfAvn8Z44hTJ7t
-X-Google-Smtp-Source: AGHT+IHl5acEs2pYbrqTh5iHgq44xiaQV4kYEp3Vhk+eWUjXxy/E4raAKDXC5MVfqMp/9gtwJB7ODA==
-X-Received: by 2002:a9d:6b09:0:b0:6ea:2b0b:6171 with SMTP id g9-20020a9d6b09000000b006ea2b0b6171mr14412997otp.5.1713261089960;
-        Tue, 16 Apr 2024 02:51:29 -0700 (PDT)
-Received: from localhost.localdomain ([122.8.183.87])
-        by smtp.gmail.com with ESMTPSA id h13-20020a9d600d000000b006ea23d8fcaasm2190528otj.32.2024.04.16.02.51.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 16 Apr 2024 02:51:29 -0700 (PDT)
-From: Chen Wang <unicornxw@gmail.com>
-To: adrian.hunter@intel.com,
-	aou@eecs.berkeley.edu,
-	conor+dt@kernel.org,
-	guoren@kernel.org,
-	inochiama@outlook.com,
-	jszhang@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org,
-	palmer@dabbelt.com,
-	paul.walmsley@sifive.com,
-	robh@kernel.org,
-	ulf.hansson@linaro.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-riscv@lists.infradead.org,
-	chao.wei@sophgo.com,
-	haijiao.liu@sophgo.com,
-	xiaoguang.xing@sophgo.com,
-	tingzhu.wang@sophgo.com
-Cc: Chen Wang <unicorn_wang@outlook.com>
-Subject: [PATCH 3/3] riscv: dts: add mmc controllers for Sophgo SG2042 SoC
-Date: Tue, 16 Apr 2024 17:51:17 +0800
-Message-Id: <05f55d1c83b1dd6b810ec1710b38771c03112876.1713258948.git.unicorn_wang@outlook.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1713258948.git.unicorn_wang@outlook.com>
-References: <cover.1713258948.git.unicorn_wang@outlook.com>
+        bh=9vivecuqLxpWcVVbWBg8R8WXEJKMUnErDIemeKW5USE=;
+        b=M5sAcr4mpzJhYXjX1q9U5gkxFbeboymmbbK2G7ZzZdK+obTt+dMVXMqMdW6UslRK6/
+         qoRAG5yGpuc610zbCi3hN0O2HhHUv6NSogC7xwSxw4MwLc/KJWmuuq5Rya0u81vkhhVr
+         IQWiqbPyIhL57C1sfy2quhSg95T+4RfE3a3zuJ8eBJ0H6WvdWScP7BG230c6uMJuhHR1
+         xTlcmCPScVyK9n2b+6JxVUCg98zLEgzYt42WiLkvpMQ+/P05nnJIgzcevscHYigy7l7N
+         upTGvOJCMIMFcCE+lCaitBEkgTCGquXnmFlSaFQNSJPrtHfGI+CRseLgbXD4QascKznl
+         qghQ==
+X-Forwarded-Encrypted: i=1; AJvYcCW/srW199mnPB8zTtDMenh7OAMVNEYBg4BCOtSZ6lQrYmp93opaG6uZO0NaKe9vfeMry3J1nR7GdlTh64UOUVD/yVsbDwZFwJ+s
+X-Gm-Message-State: AOJu0Yx9F0fLS01am6dpinhtcVEKpxH+Yes4m45tqARGjhnriChsYEN2
+	8Y7LIRVJaWlH0RVXitsE+mUSzCTmTa3jsh2w/4iM67840hz+upDp2YYfASK+uuHL0om7C/P2GBU
+	ZceV7rlnspV2gkGVXCgBIOYkSkgBnaX4+hMFSUQ==
+X-Google-Smtp-Source: AGHT+IER4ET7tjdY7MFE9y9iXSWpKZRx6QzxZXviRVDxpgAQBBJ7zwMk5n1oREBP04xnwa9enbl+aCjWdoQ+zs8fiNU=
+X-Received: by 2002:a25:2747:0:b0:dd1:ebc:ca2d with SMTP id
+ n68-20020a252747000000b00dd10ebcca2dmr11141827ybn.52.1713272379300; Tue, 16
+ Apr 2024 05:59:39 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1713036964.git.andrea.porta@suse.com> <2d1272cad92ad618297a6683e9264e31b8f2df73.1713036964.git.andrea.porta@suse.com>
+ <f6601f73-cb22-4ba3-88c5-241be8421fc3@broadcom.com>
+In-Reply-To: <f6601f73-cb22-4ba3-88c5-241be8421fc3@broadcom.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Tue, 16 Apr 2024 14:59:27 +0200
+Message-ID: <CACRpkdbGFpFM3WKXeAy8nfXUf46GKPNBM8sfi3X-WWQJ=A9nhA@mail.gmail.com>
+Subject: Re: [PATCH 1/6] dt-bindings: pinctrl: Add support for BCM2712 pin controller
+To: Florian Fainelli <florian.fainelli@broadcom.com>
+Cc: Andrea della Porta <andrea.porta@suse.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
+	Conor Dooley <conor+dt@kernel.org>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Kamal Dasu <kamal.dasu@broadcom.com>, 
+	Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-gpio@vger.kernel.org, Jonathan Bell <jonathan@raspberrypi.com>, 
+	Phil Elwell <phil@raspberrypi.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Chen Wang <unicorn_wang@outlook.com>
+On Sun, Apr 14, 2024 at 5:45=E2=80=AFPM Florian Fainelli
+<florian.fainelli@broadcom.com> wrote:
+> On 4/13/2024 3:14 PM, Andrea della Porta wrote:
+> > Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
 
-SG2042 has two MMC controller, one for emmc, another for sd-card.
+> > +++ b/Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.ya=
+ml
+(...)
+> > +$id: http://devicetree.org/schemas/pinctrl/brcm,bcm2712-pinctrl.yaml#
+(...)
+> > +title: Broadcom BCM2712 pin controller
+>
+> This is not strictly speaking BCM2712 specific, the pin controller you
+> describe is a Broadcom STB product line pin controller.
+>
+> Please describe it as such as and make BCM2712 a specific instance of
+> the chip using that pin controller, see more comments on patch #4.
 
-Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
----
- .../boot/dts/sophgo/sg2042-milkv-pioneer.dts  | 15 +++++++++
- arch/riscv/boot/dts/sophgo/sg2042.dtsi        | 32 +++++++++++++++++++
- 2 files changed, 47 insertions(+)
+So also the name of the bindings namespace should not be this one
+controller IMO but the name of the family, bcm-stb-pinctrl.yaml or
+so.
 
-diff --git a/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts b/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-index 80cb017974d8..c4037eff5c97 100644
---- a/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-+++ b/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-@@ -26,6 +26,21 @@ &cgi_dpll1 {
- 	clock-frequency = <25000000>;
- };
- 
-+&emmc {
-+	bus-width = <4>;
-+	no-sdio;
-+	no-sd;
-+	non-removable;
-+	status = "okay";
-+};
-+
-+&sd {
-+	bus-width = <4>;
-+	no-sdio;
-+	no-mmc;
-+	status = "okay";
-+};
-+
- &uart0 {
- 	status = "okay";
- };
-diff --git a/arch/riscv/boot/dts/sophgo/sg2042.dtsi b/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-index 8aab027cf730..0b176712a43c 100644
---- a/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-+++ b/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-@@ -393,5 +393,37 @@ uart0: serial@7040000000 {
- 			resets = <&rstgen RST_UART0>;
- 			status = "disabled";
- 		};
-+
-+		emmc: mmc@704002a000 {
-+			compatible = "sophgo,sg2042-dwcmshc";
-+			reg = <0x70 0x4002A000 0x0 0x1000>;
-+			interrupt-parent = <&intc>;
-+			interrupts = <134 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks =
-+				<&clkgen GATE_CLK_AXI_EMMC>,
-+				<&clkgen GATE_CLK_100K_EMMC>,
-+				<&clkgen GATE_CLK_EMMC_100M>;
-+			clock-names =
-+				"core",
-+				"timer",
-+				"card";
-+			status = "disabled";
-+		};
-+
-+		sd: mmc@704002b000 {
-+			compatible = "sophgo,sg2042-dwcmshc";
-+			reg = <0x70 0x4002B000 0x0 0x1000>;
-+			interrupt-parent = <&intc>;
-+			interrupts = <136 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks =
-+				<&clkgen GATE_CLK_AXI_SD>,
-+				<&clkgen GATE_CLK_100K_SD>,
-+				<&clkgen GATE_CLK_SD_100M>;
-+			clock-names =
-+				"core",
-+				"timer",
-+				"card";
-+			status = "disabled";
-+		};
- 	};
- };
--- 
-2.25.1
-
+Yours,
+Linus Walleij
