@@ -1,120 +1,290 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54BFD12B170
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Apr 2024 09:10:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A631016FF4E;
+	Wed, 17 Apr 2024 16:57:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713345026; cv=none; b=tkjBGbbZ+BzX7GWogabkUqE724b4lpRCXB7JRoE4mXqvlDo/Y1W9V9MdPlBHDJ0LtvhxA0nu/CSBSvNirUQzgs4LUYaUhGqeJxX06SC7EOirWx+R1+Heb+SkQiwpwjALdDD2Q+g2yLnllesVoh6ngtWIZLR05WX2ZB+WlCqk/Cs=
+	t=1713373037; cv=none; b=rcF1xcvJOmLoZq7pNvidiqqsCAiYhRZAWa4qYqrnv1CyyJQ+LbthzuKfOO4PSnB0ZjlBqSCMvcji6qbz7+8vuLkKDg8GVFDjE214beYm6SoeTeS8LTKRnefQtaTkAMyqshRA1N7wQUBmQrSTsNh8eZXLb3IokqcpxHisSSphQ4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713345026; c=relaxed/simple;
-	bh=+QeEIqFP1x7pjxGVBLX2oJJ3QMIreSoze6Axcpun5SQ=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=K0Lr2SY/kjwW+vY4JeDTdVwiSy4wn0R3zoBD5TeZPDFNE5k8cNAwOwYCMEYjGtSxh4tCcoau2JCBpsQYqcQO1vIsawsRYnfqiTjEsJ/6LIKGy4fDRQJXYTNUcz7VsfjaUXlUnYFo7JzwT7/UKk0G4FsdR/ZHhCLqo0Dnt56IXQw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=kSsB5pTZ; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	s=arc-20240116; t=1713373037; c=relaxed/simple;
+	bh=LgEyY0Dj0n+E/eaUiquIJNb89lvSKKm6xtvAVSaZUK8=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=CISmBBgSRUJujB/VkoYWTV/zbzs+5CsksbqyM5xMp5n/GyAZjKy0kXEk6XNXbH1qJfUZYJgeKOSclT/bj4SynlgkoNurTtmt2DpwFZwLje2v2I4of4xXGdGsh1Mb6Zt99RUw99iyJxItYJ6MIfbfcv4MTJ0JWnb8RPmiC+9Aj08=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=LaiGxc55; arc=none smtp.client-ip=198.175.65.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="kSsB5pTZ"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="LaiGxc55"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1713373035; x=1744909035;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=LgEyY0Dj0n+E/eaUiquIJNb89lvSKKm6xtvAVSaZUK8=;
+  b=LaiGxc55bQD2yP4++8CG0809exrgIxTvclvv5WrJ6HhOxZ7Ft5OwT/gr
+   h0DGmyuHhqDvm6r8jvQ2lrU6mMIcQy22qFzSIydsu1QoruJGf/+EXvAQ4
+   VJrUcM3dSiQ0ssKWcoDT+WDQb0EjstkRJJlZttuZhbUlk5ZfVktp3pBus
+   ANTugvd+4sOzeD9ewmn4tYIJpRO8P8Jt4xAxt0bXQFskVYueDBcsnQm9s
+   imlqvrCbbtWKhl3i0/rXd5TgdnT+W4wxGPqSQ0fyxQ7+eE+mczGcbCpwh
+   Wk/+Mm49fl96/EfO+XHehpm+cTxSo0YBUrquAx+pzi8/P7oEQWJOyFjNZ
+   g==;
+X-CSE-ConnectionGUID: i5G4lYLERAOVYa1N5xXakw==
+X-CSE-MsgGUID: mVy314HmTsCr7yM5sugQNQ==
+X-IronPort-AV: E=McAfee;i="6600,9927,11046"; a="20026881"
+X-IronPort-AV: E=Sophos;i="6.07,209,1708416000"; 
+   d="scan'208";a="20026881"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Apr 2024 09:57:15 -0700
+X-CSE-ConnectionGUID: 4FR48OaCTi+ghTGOOPRKog==
+X-CSE-MsgGUID: tOtKEfcRQfKK5M+maqD5Tw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.07,209,1708416000"; 
+   d="scan'208";a="22766943"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by fmviesa009.fm.intel.com with ESMTP; 17 Apr 2024 09:57:12 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1003)
+	id ACB48491; Wed, 17 Apr 2024 19:57:11 +0300 (EEST)
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org
+Cc: Aubin Constans <aubin.constans@microchip.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>
+Subject: [PATCH v1 3/5] mmc: atmel-mci: Replace platform device pointer by generic one
+Date: Wed, 17 Apr 2024 19:55:15 +0300
+Message-ID: <20240417165708.2965612-4-andriy.shevchenko@linux.intel.com>
+X-Mailer: git-send-email 2.43.0.rc1.1336.g36b5255a03ac
+In-Reply-To: <20240417165708.2965612-1-andriy.shevchenko@linux.intel.com>
+References: <20240417165708.2965612-1-andriy.shevchenko@linux.intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1713345021;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JPZOh8qgnWmEGT/5r73g/lb1+OERAT2Q0obHNfTKROY=;
-	b=kSsB5pTZ8PrcAFeIaXtZysBriUEPjEGbqjSGoGeYysW0V3B7wOFUsU9mb9yQXUSLPUq1GX
-	L2Oe/9s31xZQM3/dM/xecDr9iSja+CVp5XuiFFu9ocJMaMGQmaY2vhu8thob4YAebRouP1
-	ViHOdEDs6tuDmFW0B0BfKNWVG29UcPb3xXp/cC+110R1MOzamJdP25wICzRBNtF67R7ILK
-	Wy5Iv4g326nPuJhEsszkt4SanAb7jo22HJK1AyeFqRW0hQFx2/Si7MDeeZiYlxuQBXwaZj
-	AvITYffspzVxEKOrm2Jq1427xMrTjBKIfIDzMwGei1f0ksfIeevorj+nFSKkLw==
-Date: Wed, 17 Apr 2024 11:10:20 +0200
-From: Dragan Simic <dsimic@manjaro.org>
-To: Felix Qin <xiaokeqinhealth@126.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Avri.Altman@wdc.com
-Subject: Re: [PATCH v2 1/1] mmc: core: increase the number of retries of the
- ACMD41
-In-Reply-To: <20240417084500.152486-1-xiaokeqinhealth@126.com>
-References: <20240417084500.152486-1-xiaokeqinhealth@126.com>
-Message-ID: <a440b197809c7c86913ff5aaf0dee69c@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
+Content-Transfer-Encoding: 8bit
 
-On 2024-04-17 10:45, Felix Qin wrote:
-> Extensive testing has shown that a few specific SD cards require
-> an increase in the number of command retries to successfully
-> initialize.
-> 
-> More info:
-> Platform: Rockchip SoC + DW Multimedia host Controller
-> SD card: Xvv microSD CMH34A17TMA12 (Made in Korea)
-> Note: The SD card is custom-made by the customer in collaboration
-> with the wafer foundry.
-> 
-> Signed-off-by: Felix Qin <xiaokeqinhealth@126.com>
-> Acked-by: Avri Altman <avri.altman@wdc.com>
+There no need to keep a pointer to a platform device as it's not
+used outside of ->probe() and ->remove() callbacks.
 
-Looking good to me.  Thanks for including the additional details.
+Replace platform device pointer by generic one in host structure.
 
-Reviewed-by: Dragan Simic <dsimic@manjaro.org>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/host/atmel-mci.c | 44 ++++++++++++++++++------------------
+ 1 file changed, 22 insertions(+), 22 deletions(-)
 
-> ---
-> v2: Add more info
-> ---
-> ---
->  drivers/mmc/core/sd_ops.c | 4 ++--
->  drivers/mmc/core/sd_ops.h | 8 ++++++++
->  2 files changed, 10 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index a59cd592f06e..b3b6e8725b80 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -127,7 +127,7 @@ int mmc_send_app_op_cond(struct mmc_host *host,
-> u32 ocr, u32 *rocr)
->  		cmd.arg = ocr;
->  	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
-> 
-> -	for (i = 100; i; i--) {
-> +	for (i = SD_APP_OP_COND_RETRIES; i; i--) {
->  		err = mmc_wait_for_app_cmd(host, NULL, &cmd);
->  		if (err)
->  			break;
-> @@ -147,7 +147,7 @@ int mmc_send_app_op_cond(struct mmc_host *host,
-> u32 ocr, u32 *rocr)
-> 
->  		err = -ETIMEDOUT;
-> 
-> -		mmc_delay(10);
-> +		mmc_delay(SD_APP_OP_COND_INTERVAL);
->  	}
-> 
->  	if (!i)
-> diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-> index 7667fc223b74..80c5c836ccd1 100644
-> --- a/drivers/mmc/core/sd_ops.h
-> +++ b/drivers/mmc/core/sd_ops.h
-> @@ -10,6 +10,14 @@
-> 
->  #include <linux/types.h>
-> 
-> +/*
-> + * Extensive testing has shown that a few specific SD cards require
-> + * an increase in the number of command retries to successfully
-> + * initialize.
-> + */
-> +#define SD_APP_OP_COND_RETRIES  200
-> +#define SD_APP_OP_COND_INTERVAL 10	/* millisecond */
-> +
->  struct mmc_card;
->  struct mmc_host;
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index c4dfd4c7785f..3aed57c392fa 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -296,7 +296,7 @@ struct atmel_mci_dma {
+  *	rate and timeout calculations.
+  * @mapbase: Physical address of the MMIO registers.
+  * @mck: The peripheral bus clock hooked up to the MMC controller.
+- * @pdev: Platform device associated with the MMC controller.
++ * @dev: Device associated with the MMC controller.
+  * @slot: Slots sharing this MMC controller.
+  * @caps: MCI capabilities depending on MCI version.
+  * @prepare_data: function to setup MCI before data transfer which
+@@ -373,7 +373,7 @@ struct atmel_mci {
+ 	unsigned long		bus_hz;
+ 	unsigned long		mapbase;
+ 	struct clk		*mck;
+-	struct platform_device	*pdev;
++	struct device		*dev;
+ 
+ 	struct atmel_mci_slot	*slot[ATMCI_MAX_NR_SLOTS];
+ 
+@@ -526,7 +526,7 @@ static void atmci_show_status_reg(struct seq_file *s,
+ static int atmci_regs_show(struct seq_file *s, void *v)
+ {
+ 	struct atmel_mci	*host = s->private;
+-	struct device		*dev = &host->pdev->dev;
++	struct device		*dev = host->dev;
+ 	u32			*buf;
+ 	int			ret = 0;
+ 
+@@ -726,7 +726,7 @@ static inline unsigned int atmci_convert_chksize(struct atmel_mci *host,
+ static void atmci_timeout_timer(struct timer_list *t)
+ {
+ 	struct atmel_mci *host = from_timer(host, t, timer);
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 
+ 	dev_dbg(dev, "software timeout\n");
+ 
+@@ -846,7 +846,7 @@ static u32 atmci_prepare_command(struct mmc_host *mmc,
+ static void atmci_send_command(struct atmel_mci *host,
+ 		struct mmc_command *cmd, u32 cmd_flags)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 	unsigned int timeout_ms = cmd->busy_timeout ? cmd->busy_timeout :
+ 		ATMCI_CMD_TIMEOUT_MS;
+ 
+@@ -863,7 +863,7 @@ static void atmci_send_command(struct atmel_mci *host,
+ 
+ static void atmci_send_stop_cmd(struct atmel_mci *host, struct mmc_data *data)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 
+ 	dev_dbg(dev, "send stop command\n");
+ 	atmci_send_command(host, data->stop, host->stop_cmdr);
+@@ -937,8 +937,8 @@ static void atmci_pdc_set_both_buf(struct atmel_mci *host, int dir)
+  */
+ static void atmci_pdc_cleanup(struct atmel_mci *host)
+ {
+-	struct device		*dev = &host->pdev->dev;
+ 	struct mmc_data         *data = host->data;
++	struct device		*dev = host->dev;
+ 
+ 	if (data)
+ 		dma_unmap_sg(dev, data->sg, data->sg_len, mmc_get_dma_dir(data));
+@@ -951,7 +951,7 @@ static void atmci_pdc_cleanup(struct atmel_mci *host)
+  */
+ static void atmci_pdc_complete(struct atmel_mci *host)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 	int transfer_size = host->data->blocks * host->data->blksz;
+ 	int i;
+ 
+@@ -989,8 +989,8 @@ static void atmci_dma_cleanup(struct atmel_mci *host)
+ static void atmci_dma_complete(void *arg)
+ {
+ 	struct atmel_mci	*host = arg;
+-	struct device		*dev = &host->pdev->dev;
+ 	struct mmc_data		*data = host->data;
++	struct device		*dev = host->dev;
+ 
+ 	dev_vdbg(dev, "DMA complete\n");
+ 
+@@ -1079,7 +1079,7 @@ static u32 atmci_prepare_data(struct atmel_mci *host, struct mmc_data *data)
+ static u32
+ atmci_prepare_data_pdc(struct atmel_mci *host, struct mmc_data *data)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 	u32 iflags, tmp;
+ 	int i;
+ 
+@@ -1231,7 +1231,7 @@ atmci_submit_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 
+ static void atmci_stop_transfer(struct atmel_mci *host)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 
+ 	dev_dbg(dev, "(%s) set pending xfer complete\n", __func__);
+ 	atmci_set_pending(host, EVENT_XFER_COMPLETE);
+@@ -1249,7 +1249,7 @@ static void atmci_stop_transfer_pdc(struct atmel_mci *host)
+ static void atmci_stop_transfer_dma(struct atmel_mci *host)
+ {
+ 	struct dma_chan *chan = host->data_chan;
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 
+ 	if (chan) {
+ 		dmaengine_terminate_all(chan);
+@@ -1269,7 +1269,7 @@ static void atmci_stop_transfer_dma(struct atmel_mci *host)
+ static void atmci_start_request(struct atmel_mci *host,
+ 		struct atmel_mci_slot *slot)
+ {
+-	struct device		*dev = &host->pdev->dev;
++	struct device		*dev = host->dev;
+ 	struct mmc_request	*mrq;
+ 	struct mmc_command	*cmd;
+ 	struct mmc_data		*data;
+@@ -1364,7 +1364,7 @@ static void atmci_start_request(struct atmel_mci *host,
+ static void atmci_queue_request(struct atmel_mci *host,
+ 		struct atmel_mci_slot *slot, struct mmc_request *mrq)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 
+ 	dev_vdbg(&slot->mmc->class_dev, "queue request: state=%d\n",
+ 			host->state);
+@@ -1385,7 +1385,7 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
+ 	struct atmel_mci	*host = slot->host;
+-	struct device		*dev = &host->pdev->dev;
++	struct device		*dev = host->dev;
+ 	struct mmc_data		*data;
+ 
+ 	WARN_ON(slot->mrq);
+@@ -1599,7 +1599,7 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
+ {
+ 	struct atmel_mci_slot	*slot = NULL;
+ 	struct mmc_host		*prev_mmc = host->cur_slot->mmc;
+-	struct device		*dev = &host->pdev->dev;
++	struct device		*dev = host->dev;
+ 
+ 	WARN_ON(host->cmd || host->data);
+ 
+@@ -1760,9 +1760,9 @@ static void atmci_detect_change(struct timer_list *t)
+ static void atmci_tasklet_func(struct tasklet_struct *t)
+ {
+ 	struct atmel_mci        *host = from_tasklet(host, t, tasklet);
+-	struct device		*dev = &host->pdev->dev;
+ 	struct mmc_request	*mrq = host->mrq;
+ 	struct mmc_data		*data = host->data;
++	struct device		*dev = host->dev;
+ 	enum atmel_mci_state	state = host->state;
+ 	enum atmel_mci_state	prev_state;
+ 	u32			status;
+@@ -2108,7 +2108,7 @@ static void atmci_sdio_interrupt(struct atmel_mci *host, u32 status)
+ static irqreturn_t atmci_interrupt(int irq, void *dev_id)
+ {
+ 	struct atmel_mci	*host = dev_id;
+-	struct device		*dev = &host->pdev->dev;
++	struct device		*dev = host->dev;
+ 	u32			status, mask, pending;
+ 	unsigned int		pass_count = 0;
+ 
+@@ -2253,7 +2253,7 @@ static int atmci_init_slot(struct atmel_mci *host,
+ 		struct mci_slot_pdata *slot_data, unsigned int id,
+ 		u32 sdc_reg, u32 sdio_irq)
+ {
+-	struct device			*dev = &host->pdev->dev;
++	struct device			*dev = host->dev;
+ 	struct mmc_host			*mmc;
+ 	struct atmel_mci_slot		*slot;
+ 	int ret;
+@@ -2377,7 +2377,7 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 
+ static int atmci_configure_dma(struct atmel_mci *host)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 
+ 	host->dma.chan = dma_request_chan(dev, "rxtx");
+ 	if (IS_ERR(host->dma.chan))
+@@ -2403,7 +2403,7 @@ static int atmci_configure_dma(struct atmel_mci *host)
+  */
+ static void atmci_get_cap(struct atmel_mci *host)
+ {
+-	struct device *dev = &host->pdev->dev;
++	struct device *dev = host->dev;
+ 	unsigned int version;
+ 
+ 	version = atmci_get_version(host);
+@@ -2481,7 +2481,7 @@ static int atmci_probe(struct platform_device *pdev)
+ 	if (!host)
+ 		return -ENOMEM;
+ 
+-	host->pdev = pdev;
++	host->dev = dev;
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
+-- 
+2.43.0.rc1.1336.g36b5255a03ac
+
