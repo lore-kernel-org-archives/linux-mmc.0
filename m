@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DA5B17107D;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0DFD171090;
 	Wed, 17 Apr 2024 16:57:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713373038; cv=none; b=IjPWv+KjTzChhFXY81m/h0AFjj3woGZK/Jy3WotWpnCt2AoOxnUVHEtG++uUqesQw5EgkFIYWFqXW9hG9MU2CtbNPzwcvNpniZdEh+MtDoNsAyp5YmS/VQWxLKZq6RRdYF8b2vr3yQI+PilAVkTRF1dwxunxzeDOgEDRbLQG1hQ=
+	t=1713373039; cv=none; b=k/onGsZ8kxK3tPOQ+n22OwGo8m0MBSRbSFIJUpVitCIjdM9oaBVLIB7qxvWFRSS06oAYQdPMrUX5g+e85dWNeFSZYtlzY0WTr5/779Jn3qjKELJ7BVMzPGGoU5x7tmD38TqV+gnjnyz3uKhYOecsUMdGoYijAES1sfGkcabaqAM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713373038; c=relaxed/simple;
-	bh=EY0oW8gWzFx+UyQ5mI7eQESReZJaeFrBusZVAd3sm0g=;
+	s=arc-20240116; t=1713373039; c=relaxed/simple;
+	bh=pK7D94zlVsLtPfGLt8vrs3Ch7+HDx4astTv2fWve5w8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CwBFbaqSPTTqe2Jp+RBrMQXIBTsK4cXMcBmzGiSCPeINYOuI4jpIb5l2OEOdNws4fVdhdnMGeK3C7EjUt6YTbAkj/fNLVh4BWEupqC9jyReuHYchKxsRT+5Ik4sWvYARqECGBLiA30tAZ45BupBfmZ6eEHCgClgYkbLyaxlpCZA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=XvWzwf5I; arc=none smtp.client-ip=192.198.163.17
+	 MIME-Version; b=rs9MTZa9XgXFfg8GkLrxqw/IMsyJ+ZbHo8KNwu60uaop0s95tw060qtW9fXPKSzGdrJB19CxZATQLP1q/mTYn09gejyrB7SMwD695NUEU4vUNoTM34R/m6IGHJRLw21O2h9oJq1y4kwsfHy+Ui7oHv4CYF6PHCgHTtHrt8Pq93w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=MTxUR4ie; arc=none smtp.client-ip=192.198.163.17
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="XvWzwf5I"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="MTxUR4ie"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
   t=1713373038; x=1744909038;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=EY0oW8gWzFx+UyQ5mI7eQESReZJaeFrBusZVAd3sm0g=;
-  b=XvWzwf5I9K4/KN9xVy0nLaCVDKtQM+5grCyoMPoCTToi39Oc9vCztft/
-   DrYMEWm1Nrw1XT4Ivnb4GHHVwPkqA/AQES+V9LYAAhQdiwQBSF87WFFn4
-   ygazXgy9YkWGL2OTZWUa8+1K6qBU9gCpn1MH2FQ1kEk6RJmElpNCFYxeP
-   nKb3F4IzU+3Tmw45XS0q1rHA20NixlCHS8euPH1AaUouXg4dnvTKH2UsJ
-   nRQoNJHi9AdCch6s7Y+jMPYX8zXz8wux2gr2oFUKw30k2qf27guZUwwtU
-   QOOQ1DyO0QCrHF3I6mbvEXYT+vg9eGJRwQzKuc6JcZdCq09oV60OYgok8
-   w==;
-X-CSE-ConnectionGUID: FF9hUofhQRaaHP6HHtmR2w==
-X-CSE-MsgGUID: ZafO1nk8TJaLmTz/3lj1bQ==
-X-IronPort-AV: E=McAfee;i="6600,9927,11046"; a="8737012"
+  bh=pK7D94zlVsLtPfGLt8vrs3Ch7+HDx4astTv2fWve5w8=;
+  b=MTxUR4ieqys0PURky3p0D9VsfEj7tkLpaG8+/x1riIqVw33e53lx4oNB
+   dzX2/fUDeSMRwxzNQ2x89ALpVwuMfILVCQ4oTYBylLpNe1tDqSMgOdtBJ
+   r0Uge/wZ01jeulbb+sMWg2/1sU6wSWJvSyBhzCoRqkwuQdLYnWBHemZPa
+   UjJbk43i54hp6TYqX7HUXqSAjIJ5U+fEin7mEK4g3OgZsTU/fK0vIRZgF
+   ts5zRNSFKN4OPDZqUqhsuz5vmttex6t43lp/X1PQZcnz+YrN78jEbtiYW
+   NT4n37OWsJ6o+e8j7Y3uXyLquCjG17ZewzALNvSzRJ+4qch24MrO1T7NH
+   Q==;
+X-CSE-ConnectionGUID: I9PmHNzuR/WJQmgR89yrmw==
+X-CSE-MsgGUID: Ck4lVCD3R3uz7QryKHau7A==
+X-IronPort-AV: E=McAfee;i="6600,9927,11046"; a="8737018"
 X-IronPort-AV: E=Sophos;i="6.07,209,1708416000"; 
-   d="scan'208";a="8737012"
+   d="scan'208";a="8737018"
 Received: from orviesa010.jf.intel.com ([10.64.159.150])
   by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Apr 2024 09:57:15 -0700
-X-CSE-ConnectionGUID: U7LXLfYBRfqoKFFlXjA0RA==
-X-CSE-MsgGUID: KuzNvTAhTWiD4ahfD3nqEw==
+X-CSE-ConnectionGUID: OSdbcZcdSumVhBGEq8jZLA==
+X-CSE-MsgGUID: qPYy91wCTsWZZdH0C22tGQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.07,209,1708416000"; 
-   d="scan'208";a="22571635"
+   d="scan'208";a="22571638"
 Received: from black.fi.intel.com ([10.237.72.28])
   by orviesa010.jf.intel.com with ESMTP; 17 Apr 2024 09:57:13 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-	id 95DCA68; Wed, 17 Apr 2024 19:57:11 +0300 (EEST)
+	id B650C60B; Wed, 17 Apr 2024 19:57:11 +0300 (EEST)
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
 	linux-mmc@vger.kernel.org,
@@ -55,9 +55,9 @@ Cc: Aubin Constans <aubin.constans@microchip.com>,
 	Nicolas Ferre <nicolas.ferre@microchip.com>,
 	Alexandre Belloni <alexandre.belloni@bootlin.com>,
 	Claudiu Beznea <claudiu.beznea@tuxon.dev>
-Subject: [PATCH v1 1/5] mmc: atmel-mci: Get rid of platform data leftovers
-Date: Wed, 17 Apr 2024 19:55:13 +0300
-Message-ID: <20240417165708.2965612-2-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 4/5] mmc: atmel-mci: Incapsulate used to be a platform data into host structure
+Date: Wed, 17 Apr 2024 19:55:16 +0300
+Message-ID: <20240417165708.2965612-5-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.43.0.rc1.1336.g36b5255a03ac
 In-Reply-To: <20240417165708.2965612-1-andriy.shevchenko@linux.intel.com>
 References: <20240417165708.2965612-1-andriy.shevchenko@linux.intel.com>
@@ -69,109 +69,173 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The commit d2c6d518c21d ("mmc: atmel-mci: move atmel MCI header file")
-made sure that there is no in-kernel user of the platform data. But
-at the same time it hadn't removed the code around that data structure.
-Finish the job here and remove a dead code.
+After platform data is gone, we always allocate memory for the slot
+information. Incapsulate the array of the latter into the host structure,
+so we allocate memory only once. This makes code simpler.
 
-Fixes: d2c6d518c21d ("mmc: atmel-mci: move atmel MCI header file")
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/host/atmel-mci.c | 43 +++++-------------------------------
- 1 file changed, 6 insertions(+), 37 deletions(-)
+ drivers/mmc/host/atmel-mci.c | 66 ++++++++++++++----------------------
+ 1 file changed, 25 insertions(+), 41 deletions(-)
 
 diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index dba826db739a..87c2855f64c2 100644
+index 3aed57c392fa..3ae17b8584a2 100644
 --- a/drivers/mmc/host/atmel-mci.c
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -226,13 +226,9 @@ struct mci_slot_pdata {
- 
- /**
-  * struct mci_platform_data - board-specific MMC/SDcard configuration
-- * @dma_slave: DMA slave interface to use in data transfers.
-- * @dma_filter: Filtering function to filter the DMA channel
-  * @slot: Per-slot configuration data.
-  */
- struct mci_platform_data {
--	void			*dma_slave;
--	dma_filter_fn		dma_filter;
- 	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
+@@ -224,14 +224,6 @@ struct mci_slot_pdata {
+ 	bool			non_removable;
  };
  
-@@ -626,7 +622,6 @@ static void atmci_init_debugfs(struct atmel_mci_slot *slot)
- 			   &host->completed_events);
- }
+-/**
+- * struct mci_platform_data - board-specific MMC/SDcard configuration
+- * @slot: Per-slot configuration data.
+- */
+-struct mci_platform_data {
+-	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
+-};
+-
+ struct atmel_mci_caps {
+ 	bool    has_dma_conf_reg;
+ 	bool    has_pdc;
+@@ -375,6 +367,7 @@ struct atmel_mci {
+ 	struct clk		*mck;
+ 	struct device		*dev;
  
--#if defined(CONFIG_OF)
- static const struct of_device_id atmci_dt_ids[] = {
- 	{ .compatible = "atmel,hsmci" },
- 	{ /* sentinel */ }
-@@ -700,13 +695,6 @@ atmci_of_init(struct platform_device *pdev)
++	struct mci_slot_pdata	pdata[ATMCI_MAX_NR_SLOTS];
+ 	struct atmel_mci_slot	*slot[ATMCI_MAX_NR_SLOTS];
  
- 	return pdata;
- }
--#else /* CONFIG_OF */
--static inline struct mci_platform_data*
--atmci_of_init(struct platform_device *dev)
--{
--	return ERR_PTR(-EINVAL);
--}
--#endif
+ 	struct atmel_mci_caps   caps;
+@@ -630,22 +623,16 @@ static const struct of_device_id atmci_dt_ids[] = {
  
- static inline unsigned int atmci_get_version(struct atmel_mci *host)
+ MODULE_DEVICE_TABLE(of, atmci_dt_ids);
+ 
+-static struct mci_platform_data *atmci_of_init(struct device *dev)
++static int atmci_of_init(struct atmel_mci *host)
  {
-@@ -2388,23 +2376,6 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
- static int atmci_configure_dma(struct atmel_mci *host)
- {
- 	host->dma.chan = dma_request_chan(&host->pdev->dev, "rxtx");
--
--	if (PTR_ERR(host->dma.chan) == -ENODEV) {
--		struct mci_platform_data *pdata = host->pdev->dev.platform_data;
--		dma_cap_mask_t mask;
--
--		if (!pdata || !pdata->dma_filter)
--			return -ENODEV;
--
--		dma_cap_zero(mask);
--		dma_cap_set(DMA_SLAVE, mask);
--
--		host->dma.chan = dma_request_channel(mask, pdata->dma_filter,
--						     pdata->dma_slave);
--		if (!host->dma.chan)
--			host->dma.chan = ERR_PTR(-ENODEV);
++	struct device *dev = host->dev;
+ 	struct device_node *np = dev->of_node;
+ 	struct device_node *cnp;
+-	struct mci_platform_data *pdata;
+ 	u32 slot_id;
+ 	int err;
+ 
+-	if (!np) {
+-		dev_err(dev, "device node not found\n");
+-		return ERR_PTR(-EINVAL);
 -	}
 -
- 	if (IS_ERR(host->dma.chan))
- 		return PTR_ERR(host->dma.chan);
+-	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+-	if (!pdata)
+-		return ERR_PTR(-ENOMEM);
++	if (!np)
++		return dev_err_probe(dev, -EINVAL, "device node not found\n");
  
-@@ -2492,13 +2463,11 @@ static int atmci_probe(struct platform_device *pdev)
- 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!regs)
- 		return -ENXIO;
--	pdata = pdev->dev.platform_data;
--	if (!pdata) {
--		pdata = atmci_of_init(pdev);
--		if (IS_ERR(pdata)) {
--			dev_err(&pdev->dev, "platform data not available\n");
--			return PTR_ERR(pdata);
--		}
-+
-+	pdata = atmci_of_init(pdev);
-+	if (IS_ERR(pdata)) {
-+		dev_err(&pdev->dev, "platform data not available\n");
-+		return PTR_ERR(pdata);
+ 	for_each_child_of_node(np, cnp) {
+ 		if (of_property_read_u32(cnp, "reg", &slot_id)) {
+@@ -661,38 +648,38 @@ static struct mci_platform_data *atmci_of_init(struct device *dev)
+ 		}
+ 
+ 		if (of_property_read_u32(cnp, "bus-width",
+-		                         &pdata->slot[slot_id].bus_width))
+-			pdata->slot[slot_id].bus_width = 1;
++					 &host->pdata[slot_id].bus_width))
++			host->pdata[slot_id].bus_width = 1;
+ 
+-		pdata->slot[slot_id].detect_pin =
++		host->pdata[slot_id].detect_pin =
+ 			devm_fwnode_gpiod_get(dev, of_fwnode_handle(cnp),
+ 					      "cd", GPIOD_IN, "cd-gpios");
+-		err = PTR_ERR_OR_ZERO(pdata->slot[slot_id].detect_pin);
++		err = PTR_ERR_OR_ZERO(host->pdata[slot_id].detect_pin);
+ 		if (err) {
+ 			if (err != -ENOENT) {
+ 				of_node_put(cnp);
+-				return ERR_PTR(err);
++				return err;
+ 			}
+-			pdata->slot[slot_id].detect_pin = NULL;
++			host->pdata[slot_id].detect_pin = NULL;
+ 		}
+ 
+-		pdata->slot[slot_id].non_removable =
++		host->pdata[slot_id].non_removable =
+ 			of_property_read_bool(cnp, "non-removable");
+ 
+-		pdata->slot[slot_id].wp_pin =
++		host->pdata[slot_id].wp_pin =
+ 			devm_fwnode_gpiod_get(dev, of_fwnode_handle(cnp),
+ 					      "wp", GPIOD_IN, "wp-gpios");
+-		err = PTR_ERR_OR_ZERO(pdata->slot[slot_id].wp_pin);
++		err = PTR_ERR_OR_ZERO(host->pdata[slot_id].wp_pin);
+ 		if (err) {
+ 			if (err != -ENOENT) {
+ 				of_node_put(cnp);
+-				return ERR_PTR(err);
++				return err;
+ 			}
+-			pdata->slot[slot_id].wp_pin = NULL;
++			host->pdata[slot_id].wp_pin = NULL;
+ 		}
  	}
  
+-	return pdata;
++	return 0;
+ }
+ 
+ static inline unsigned int atmci_get_version(struct atmel_mci *host)
+@@ -2456,7 +2443,6 @@ static void atmci_get_cap(struct atmel_mci *host)
+ static int atmci_probe(struct platform_device *pdev)
+ {
+ 	struct device			*dev = &pdev->dev;
+-	struct mci_platform_data	*pdata;
+ 	struct atmel_mci		*host;
+ 	struct resource			*regs;
+ 	unsigned int			nr_slots;
+@@ -2467,12 +2453,6 @@ static int atmci_probe(struct platform_device *pdev)
+ 	if (!regs)
+ 		return -ENXIO;
+ 
+-	pdata = atmci_of_init(dev);
+-	if (IS_ERR(pdata)) {
+-		dev_err(dev, "platform data not available\n");
+-		return PTR_ERR(pdata);
+-	}
+-
  	irq = platform_get_irq(pdev, 0);
-@@ -2701,7 +2670,7 @@ static struct platform_driver atmci_driver = {
- 	.driver		= {
- 		.name		= "atmel_mci",
- 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
--		.of_match_table	= of_match_ptr(atmci_dt_ids),
-+		.of_match_table	= atmci_dt_ids,
- 		.pm		= &atmci_dev_pm_ops,
- 	},
- };
+ 	if (irq < 0)
+ 		return irq;
+@@ -2485,6 +2465,10 @@ static int atmci_probe(struct platform_device *pdev)
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
++	ret = atmci_of_init(host);
++	if (ret)
++		return dev_err_probe(dev, ret, "Slot information not available\n");
++
+ 	host->mck = devm_clk_get(dev, "mci_clk");
+ 	if (IS_ERR(host->mck))
+ 		return PTR_ERR(host->mck);
+@@ -2544,16 +2528,16 @@ static int atmci_probe(struct platform_device *pdev)
+ 	/* We need at least one slot to succeed */
+ 	nr_slots = 0;
+ 	ret = -ENODEV;
+-	if (pdata->slot[0].bus_width) {
+-		ret = atmci_init_slot(host, &pdata->slot[0],
++	if (host->pdata[0].bus_width) {
++		ret = atmci_init_slot(host, &host->pdata[0],
+ 				0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
+ 		if (!ret) {
+ 			nr_slots++;
+ 			host->buf_size = host->slot[0]->mmc->max_req_size;
+ 		}
+ 	}
+-	if (pdata->slot[1].bus_width) {
+-		ret = atmci_init_slot(host, &pdata->slot[1],
++	if (host->pdata[1].bus_width) {
++		ret = atmci_init_slot(host, &host->pdata[1],
+ 				1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
+ 		if (!ret) {
+ 			nr_slots++;
 -- 
 2.43.0.rc1.1336.g36b5255a03ac
 
