@@ -1,118 +1,98 @@
-Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E97C1286AF;
-	Thu, 18 Apr 2024 22:52:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.142.180.65
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D775663E;
+	Fri, 19 Apr 2024 06:53:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713480770; cv=none; b=lsV2BjQrMUSqcZaXbGrlyaGSWb6QTUhEZzT8kLYG0ihz9MWiUrsDePGT0mJu+CCYMGRnBS5CmvvdXZJezP157c6jgVyR1q0uiYzFOGXvmg9qaDA3XsRRgYbK4ADhIWNlLMEGO83MjaCVhn5dSoKRwAQlacb9hjkfUVQncVXAVkA=
+	t=1713509625; cv=none; b=m1iET2V89g78yaoR3TAyr74uhzmh0z4owmb1W5V5JWyvpdAK5d1/pjwAv9lnRjhyNGVrFWiXG/tKtsH52NNEvo3uNpq5zCrN0+YKdr/qqDmCvFnA72iFPypOBoyW2UewyCdznvzmOv3CCtWg62J2wrC54zsLBtkoB+h3o5aTqhc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713480770; c=relaxed/simple;
-	bh=e9cfJN8rNWU9caYstywKsUUR/GDFScyvCazNhCJrrfM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DJKPagMNalECQMf7/jSH/lsHSIheoSKhc7bd4GCjYiKNOVuehlnO/AV7eOHFtP93jBq+BTSCEGYnEYzzTPX3MHIW3kGTz78zxuvQzfGFzidLnSTLJCQi3cDBKA5MKn/cbaxJHwaSWKetc48ofIG8J/9Xm85h71Wo2G8n3f5jQqc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org; spf=pass smtp.mailfrom=makrotopia.org; arc=none smtp.client-ip=185.142.180.65
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=makrotopia.org
-Received: from local
-	by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
-	 (Exim 4.96.2)
-	(envelope-from <daniel@makrotopia.org>)
-	id 1rxabl-00033c-35;
-	Thu, 18 Apr 2024 22:51:58 +0000
-Date: Thu, 18 Apr 2024 23:51:49 +0100
-From: Daniel Golle <daniel@makrotopia.org>
-To: Bart Van Assche <bvanassche@acm.org>
-Cc: Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
-	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
-	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
-	Damien Le Moal <dlemoal@kernel.org>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Christian Brauner <brauner@kernel.org>,
-	Christian Heusel <christian@heusel.eu>,
-	Min Li <min15.li@samsung.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <avri.altman@wdc.com>, Hannes Reinecke <hare@suse.de>,
-	Christian Loehle <CLoehle@hyperstone.com>,
-	Bean Huo <beanhuo@micron.com>, Yeqi Fu <asuk4.q@gmail.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-	Dominique Martinet <dominique.martinet@atmark-techno.com>,
-	"Ricardo B. Marliere" <ricardo@marliere.net>,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 3/8] block: add new genhd flag GENHD_FL_NVMEM
-Message-ID: <ZiGkBXIXfFP0pv_N@makrotopia.org>
-References: <cover.1711048433.git.daniel@makrotopia.org>
- <89abd9ab93783da0e8934ebc03d66559f78f6060.1711048433.git.daniel@makrotopia.org>
- <7027ccdc-878a-420e-a7ea-5156e1d67b8a@acm.org>
- <Zf3I6DDqqyd924Ks@makrotopia.org>
- <192acb8f-47b8-426c-bcc9-ef214a797f26@acm.org>
+	s=arc-20240116; t=1713509625; c=relaxed/simple;
+	bh=vO6jtl95JtCYDR2yKdhkHYFHamW52HJiQ3BpdOR+C0c=;
+	h=From:To:CC:Subject:Date:Message-ID:References:Content-Type:
+	 MIME-Version; b=GpFqajwtdUIeVoJUwnKm/HpqkiNQCXWtQf0GZUuV1afLPtqU3xn0JBB2VwnOUUrCF6JTnE2ZsJUNRXsMQy34TEu5hA7cXolfo4uUmOyEd05GxCTUyF9+XnMV5WyLAvfxnG5EhIb6mv0puJy+nJocBR+qSDJoKiy+LqEKYeb4srQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 43J6rGOU11095324, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 43J6rGOU11095324
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 19 Apr 2024 14:53:16 +0800
+Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Fri, 19 Apr 2024 14:53:17 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Fri, 19 Apr 2024 14:53:16 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::d5b2:56ba:6b47:9975]) by
+ RTEXMBS01.realtek.com.tw ([fe80::d5b2:56ba:6b47:9975%5]) with mapi id
+ 15.01.2507.035; Fri, 19 Apr 2024 14:53:16 +0800
+From: Ricky WU <ricky_wu@realtek.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: "wenchao.chen@unisoc.com" <wenchao.chen@unisoc.com>,
+        "ricardo@marliere.net" <ricardo@marliere.net>,
+        "marex@denx.de"
+	<marex@denx.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH] mmc: core: resume not check card exist before powerup
+Thread-Topic: [PATCH] mmc: core: resume not check card exist before powerup
+Thread-Index: AQHaf/Di2MMAmClaHUaVpFhOVxydUrFMk6cAgAHWPUCAIOE18A==
+Date: Fri, 19 Apr 2024 06:53:16 +0000
+Message-ID: <8b966794f2bb4fda8cc7d3e111bfef70@realtek.com>
+References: <20240327024545.138351-1-ricky_wu@realtek.com>
+ <CAPDyKFo3dkzDDEU7Lk14zH0td0AP=z2RJQibj8SP6JeUuz=iFA@mail.gmail.com> 
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <192acb8f-47b8-426c-bcc9-ef214a797f26@acm.org>
+X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-On Fri, Mar 22, 2024 at 12:22:32PM -0700, Bart Van Assche wrote:
-> On 3/22/24 11:07, Daniel Golle wrote:
-> > On Fri, Mar 22, 2024 at 10:49:48AM -0700, Bart Van Assche wrote:
-> > > On 3/21/24 12:33, Daniel Golle wrote:
-> > > >    enum {
-> > > >    	GENHD_FL_REMOVABLE			= 1 << 0,
-> > > >    	GENHD_FL_HIDDEN				= 1 << 1,
-> > > >    	GENHD_FL_NO_PART			= 1 << 2,
-> > > > +	GENHD_FL_NVMEM				= 1 << 3,
-> > > >    };
-> > > 
-> > > What would break if this flag wouldn't exist?
-> > 
-> > As both, MTD and UBI already act as NVMEM providers themselves, once
-> > the user creates a ubiblock device or got CONFIG_MTD_BLOCK=y set in their
-> > kernel configuration, we would run into problems because both, the block
-> > layer as well as MTD or UBI would try to be an NVMEM provider for the same
-> > device tree node.
-> 
-> Why would both MTD and UBI try to be an NVMEM provider for the same
-> device tree node?
-
-I didn't mean that both MTD and UBI would **simultanously** try to act
-as NVMEM providers for the same device tree node. What I meant was
-that either of them can act as an NVMEM provider while at the same time
-also providing an emulated block device (mtdblock xor ubiblock).
-
-Hence those emulated block devices will have to be excluded from acting
-as NVMEM providers. In this patch I suggest to do this by opt-in of
-block drivers which should potentially provide NVMEM (typically mmcblk).
-
-I apologize for the confusion and assume that wasn't clear from the
-wording I've used. I hope it's more clear now.
-
-Alternatively it could also be solved via opt-out of ubiblock and
-mtdblock devices using the inverted flag (GENHD_FL_NO_NVMEM) --
-however, this has previously been criticized and I was asked to rather
-make it opt-in.[1]
-
-
-> Why can't this patch series be implemented such that
-> a partition UUID occurs in the device tree and such that other code
-> scans for that partition UUID?
-
-This is actually one way this very series allows one to handle this:
-by identifying a partition using its partuuid.
-
-However, it's also quite common that the MMC boot **hardware**
-partitions are used to store MAC addresses and/or Wi-Fi calibration
-data. In this case there is no partition table and the NVMEM provider
-has to act directly on the whole disk device (which is only a few
-megabytes in size in case of those mmcblkXbootY devices and never has
-a partition table).
-
-[1]: https://patchwork.kernel.org/comment/25432948/
+U29mdCByZW1pbmRlcg0KDQpJZiB0aGlzIHNvbHV0aW9uLCB5b3Ugc3RpbGwgaGF2ZSBjb25jZXJ0
+IG9uIHNkLmMuDQpjYW4gd2UganVzdCBkbyB0aGlzIGNoZWNrIGNhcmQgZmxvdyBpbiBtbWMgaG9z
+dCBwb3dlciB1cCBjYWxsX2JhY2s/IA0KDQo+ID4gPg0KPiA+ID4gX21tY19zZF9yZXN1bWUNCj4g
+PiA+IGFkZCBnZXRfY2QgYmVmb3JlIGNhbGwgcG93ZXJ1cCwgbWFrZSBzdXJlIHRoZSBjYXJkIGV4
+aXN0DQo+ID4NCj4gPiBQbGVhc2UgZWxhYm9yYXRlIG1vcmUgb24gd2hhdCBwcm9ibGVtIHlvdSBh
+cmUgdHJ5aW5nIHRvIHNvbHZlLCB0aGUNCj4gPiBhYm92ZSBkb2Vzbid0IG1ha2UgbXVjaCBzZW5z
+ZSB0byBtZSwgc29ycnkuDQo+ID4NCj4gPiBZZXMsIHRoZSBjYXJkIG1heSBiZSByZW1vdmVkIHdo
+aWxlIHRoZSBzeXN0ZW0gaXMgc3VzcGVuZGVkLiBUaGVuLCBldmVuDQo+ID4gaWYgLT5nZXRfY2Qo
+KSBpbmRpY2F0ZXMgdGhhdCB0aGVyZSBpcyBubyBjYXJkIGluc2VydGVkIGluIHRoZQ0KPiA+IFNE
+LWNhcmQtc2xvdCwgd2UgbWF5IHN0aWxsIGhhdmUgdGhlIGNhcmQgYmVpbmcgcmVnaXN0ZXJlZCAt
+IGFuZCB0aGVuDQo+ID4gd2UgbmVlZCB0byB1bnJlZ2lzdGVyIGl0Lg0KPiA+IFRoYXQgc2FpZCwg
+d2UgbmVlZCB0byBjYWxsIG1tY19wb3dlcl91cCgpIGluIG9yZGVyIHRvIHRyeSB0bw0KPiA+IGNv
+bW11bmljYXRlIHdpdGggdGhlIGNhcmQgYWdhaW4uIEF0IGxlYXN0IHRoYXQgaXMgd2hhdCB0aGUN
+Cj4gPiBtbWNfcmVzY2FuKCkgd29yayBhc3N1bWVzIHdoZW4gaXQgcnVucyB0aGUgYnVzX29wcy0+
+ZGV0ZWN0KCkgY2FsbGJhY2sNCj4gPiBhdCBzb21lIHBvaW50IGxhdGVyIGluIHRpbWUuDQo+ID4N
+Cj4gDQo+IFdlIHNhdyB0aGUgcG93ZXIgdXAgaW4gYSBzaG9ydCB0aW1lIGZyb20gd2F2ZWZvcm0g
+d2hlbiByZW1vdmluZyB0aGUgY2FyZCwNCj4gU28gd2Ugc2F3IG1tY19zZF9yZXN1bWUgY2FsbCB0
+aGUgcG93ZXIgdXAgZGlkIG5vdCBjaGVjayB0aGUgY2FyZCBleGlzdC4NCj4gDQo+IFdlIHRoaW5r
+IHRoaXMgdGhlIHNob3J0IHRpbWUgcG93ZXIgdXAgbWF5YmUgY2F1c2UgT0NQIGlmIG5vIGNhcmQg
+ZXhpc3QuDQo+IEFuZCB0aGlzIHBvd2VyIHVwIHdlIHRoaW5rIGlzIHVubmVjZXNzYXJ5IHdoZW4g
+bm8gY2FyZCBleGlzdC4NCj4gDQo+IA0KPiA+ID4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IFJpY2t5
+IFd1IDxyaWNreV93dUByZWFsdGVrLmNvbT4NCj4gPiA+IC0tLQ0KPiA+ID4gIGRyaXZlcnMvbW1j
+L2NvcmUvc2QuYyB8IDMgKysrDQo+ID4gPiAgMSBmaWxlIGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygr
+KQ0KPiA+ID4NCj4gPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL3NkLmMgYi9kcml2
+ZXJzL21tYy9jb3JlL3NkLmMgaW5kZXgNCj4gPiA+IDFjODE0OGNkZGE1MC4uMzVlMDM2NjcyY2Zi
+IDEwMDY0NA0KPiA+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9zZC5jDQo+ID4gPiArKysgYi9k
+cml2ZXJzL21tYy9jb3JlL3NkLmMNCj4gPiA+IEBAIC0xNzUwLDYgKzE3NTAsOSBAQCBzdGF0aWMg
+aW50IF9tbWNfc2RfcmVzdW1lKHN0cnVjdCBtbWNfaG9zdA0KPiA+ICpob3N0KQ0KPiA+ID4gICAg
+ICAgICBpZiAoIW1tY19jYXJkX3N1c3BlbmRlZChob3N0LT5jYXJkKSkNCj4gPiA+ICAgICAgICAg
+ICAgICAgICBnb3RvIG91dDsNCj4gPiA+DQo+ID4gPiArICAgICAgIGlmIChob3N0LT5vcHMtPmdl
+dF9jZCAmJiAhaG9zdC0+b3BzLT5nZXRfY2QoaG9zdCkpDQo+ID4gPiArICAgICAgICAgICAgICAg
+Z290byBvdXQ7DQo+ID4gPiArDQo+ID4gPiAgICAgICAgIG1tY19wb3dlcl91cChob3N0LCBob3N0
+LT5jYXJkLT5vY3IpOw0KPiA+ID4gICAgICAgICBlcnIgPSBtbWNfc2RfaW5pdF9jYXJkKGhvc3Qs
+IGhvc3QtPmNhcmQtPm9jciwgaG9zdC0+Y2FyZCk7DQo+ID4gPiAgICAgICAgIG1tY19jYXJkX2Ns
+cl9zdXNwZW5kZWQoaG9zdC0+Y2FyZCk7DQo+ID4gPiAtLQ0KPiA+ID4gMi4yNS4xDQo+ID4gPg0K
+PiA+DQo+ID4gS2luZCByZWdhcmRzDQo+ID4gVWZmZQ0K
