@@ -1,98 +1,198 @@
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D775663E;
-	Fri, 19 Apr 2024 06:53:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ECE5A48;
+	Sat, 20 Apr 2024 02:28:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713509625; cv=none; b=m1iET2V89g78yaoR3TAyr74uhzmh0z4owmb1W5V5JWyvpdAK5d1/pjwAv9lnRjhyNGVrFWiXG/tKtsH52NNEvo3uNpq5zCrN0+YKdr/qqDmCvFnA72iFPypOBoyW2UewyCdznvzmOv3CCtWg62J2wrC54zsLBtkoB+h3o5aTqhc=
+	t=1713580092; cv=none; b=Yg+JOBtY5VVvSSd/koNSjmcktJtSas7xkA3d367XoT3mE6kTfWTnfD4m4UH9PuzVrIguFV9lucW3dmottrcS5gHfpN2WpfAG0aDeelBt3seABS82cYYw6SygRjfbvea37GrCni4h7eLe2Laf4679nA31VBSCbdhsGsq30XkejJ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713509625; c=relaxed/simple;
-	bh=vO6jtl95JtCYDR2yKdhkHYFHamW52HJiQ3BpdOR+C0c=;
-	h=From:To:CC:Subject:Date:Message-ID:References:Content-Type:
-	 MIME-Version; b=GpFqajwtdUIeVoJUwnKm/HpqkiNQCXWtQf0GZUuV1afLPtqU3xn0JBB2VwnOUUrCF6JTnE2ZsJUNRXsMQy34TEu5hA7cXolfo4uUmOyEd05GxCTUyF9+XnMV5WyLAvfxnG5EhIb6mv0puJy+nJocBR+qSDJoKiy+LqEKYeb4srQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; arc=none smtp.client-ip=211.75.126.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=realtek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 43J6rGOU11095324, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-	by rtits2.realtek.com.tw (8.15.2/2.95/5.92) with ESMTPS id 43J6rGOU11095324
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 19 Apr 2024 14:53:16 +0800
-Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Fri, 19 Apr 2024 14:53:17 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Fri, 19 Apr 2024 14:53:16 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::d5b2:56ba:6b47:9975]) by
- RTEXMBS01.realtek.com.tw ([fe80::d5b2:56ba:6b47:9975%5]) with mapi id
- 15.01.2507.035; Fri, 19 Apr 2024 14:53:16 +0800
-From: Ricky WU <ricky_wu@realtek.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: "wenchao.chen@unisoc.com" <wenchao.chen@unisoc.com>,
-        "ricardo@marliere.net" <ricardo@marliere.net>,
-        "marex@denx.de"
-	<marex@denx.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH] mmc: core: resume not check card exist before powerup
-Thread-Topic: [PATCH] mmc: core: resume not check card exist before powerup
-Thread-Index: AQHaf/Di2MMAmClaHUaVpFhOVxydUrFMk6cAgAHWPUCAIOE18A==
-Date: Fri, 19 Apr 2024 06:53:16 +0000
-Message-ID: <8b966794f2bb4fda8cc7d3e111bfef70@realtek.com>
-References: <20240327024545.138351-1-ricky_wu@realtek.com>
- <CAPDyKFo3dkzDDEU7Lk14zH0td0AP=z2RJQibj8SP6JeUuz=iFA@mail.gmail.com> 
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	s=arc-20240116; t=1713580092; c=relaxed/simple;
+	bh=atRv+zO/mRRsiO7tIIVfGQHQTa/K+esm4/iPRWLJy/w=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Qld6bPRP1NuIeP8EINaqt2bLy4PBXnF0uQmXO9wxljBYLZnnIvbMM2TQx7kSS07dbRlex/jGv3LZlHpwQTM2eqXWbfsePYIuPIBhokXWSbgK/mnrjAE1rXy0WPcPEQXxcQO6BcIG1q/H7lfac/x9hvuX2KyrKtNbSnz8L2vysqs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rsVti900; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rsVti900"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC479C072AA;
+	Sat, 20 Apr 2024 02:28:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1713580091;
+	bh=atRv+zO/mRRsiO7tIIVfGQHQTa/K+esm4/iPRWLJy/w=;
+	h=From:To:Cc:Subject:Date:From;
+	b=rsVti900ZclvH0L02kj+OMVKhDTtPkXgCQ02JSPaOPheBectKrUbaRJwBcesHuYXS
+	 neDVeHhBV7zZcVL9om6r+D9+F5w8zqBfbs2FRUtODnXIcHf9oOO8/BPYlPPMSYJ0HB
+	 ZJl+hS7raFOrwuYi/j7UAvY70Nh5d1nxpVdKK8hSC3vHPRWr2rU1rO68P69Uj1NSq2
+	 /sgA4tF6g85KDp4RVOyWCSg30JL3Q/wL8O2HugcK792zoUg/fNtzcxpWY4evXF4jZf
+	 c8qKtFFk5ZvIwLaONuiFpUyOiEEcHo5+rUQ2R53pER13iiCpvwEbQlzez3h8Ur6OaV
+	 MUA7o5OVhI5wA==
+From: Jisheng Zhang <jszhang@kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: sdhci-of-dwcmshc: Add tuning support for Sophgo CV1800B and SG200X
+Date: Sat, 20 Apr 2024 10:14:29 +0800
+Message-ID: <20240420021429.454-1-jszhang@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+Content-Transfer-Encoding: 8bit
 
-U29mdCByZW1pbmRlcg0KDQpJZiB0aGlzIHNvbHV0aW9uLCB5b3Ugc3RpbGwgaGF2ZSBjb25jZXJ0
-IG9uIHNkLmMuDQpjYW4gd2UganVzdCBkbyB0aGlzIGNoZWNrIGNhcmQgZmxvdyBpbiBtbWMgaG9z
-dCBwb3dlciB1cCBjYWxsX2JhY2s/IA0KDQo+ID4gPg0KPiA+ID4gX21tY19zZF9yZXN1bWUNCj4g
-PiA+IGFkZCBnZXRfY2QgYmVmb3JlIGNhbGwgcG93ZXJ1cCwgbWFrZSBzdXJlIHRoZSBjYXJkIGV4
-aXN0DQo+ID4NCj4gPiBQbGVhc2UgZWxhYm9yYXRlIG1vcmUgb24gd2hhdCBwcm9ibGVtIHlvdSBh
-cmUgdHJ5aW5nIHRvIHNvbHZlLCB0aGUNCj4gPiBhYm92ZSBkb2Vzbid0IG1ha2UgbXVjaCBzZW5z
-ZSB0byBtZSwgc29ycnkuDQo+ID4NCj4gPiBZZXMsIHRoZSBjYXJkIG1heSBiZSByZW1vdmVkIHdo
-aWxlIHRoZSBzeXN0ZW0gaXMgc3VzcGVuZGVkLiBUaGVuLCBldmVuDQo+ID4gaWYgLT5nZXRfY2Qo
-KSBpbmRpY2F0ZXMgdGhhdCB0aGVyZSBpcyBubyBjYXJkIGluc2VydGVkIGluIHRoZQ0KPiA+IFNE
-LWNhcmQtc2xvdCwgd2UgbWF5IHN0aWxsIGhhdmUgdGhlIGNhcmQgYmVpbmcgcmVnaXN0ZXJlZCAt
-IGFuZCB0aGVuDQo+ID4gd2UgbmVlZCB0byB1bnJlZ2lzdGVyIGl0Lg0KPiA+IFRoYXQgc2FpZCwg
-d2UgbmVlZCB0byBjYWxsIG1tY19wb3dlcl91cCgpIGluIG9yZGVyIHRvIHRyeSB0bw0KPiA+IGNv
-bW11bmljYXRlIHdpdGggdGhlIGNhcmQgYWdhaW4uIEF0IGxlYXN0IHRoYXQgaXMgd2hhdCB0aGUN
-Cj4gPiBtbWNfcmVzY2FuKCkgd29yayBhc3N1bWVzIHdoZW4gaXQgcnVucyB0aGUgYnVzX29wcy0+
-ZGV0ZWN0KCkgY2FsbGJhY2sNCj4gPiBhdCBzb21lIHBvaW50IGxhdGVyIGluIHRpbWUuDQo+ID4N
-Cj4gDQo+IFdlIHNhdyB0aGUgcG93ZXIgdXAgaW4gYSBzaG9ydCB0aW1lIGZyb20gd2F2ZWZvcm0g
-d2hlbiByZW1vdmluZyB0aGUgY2FyZCwNCj4gU28gd2Ugc2F3IG1tY19zZF9yZXN1bWUgY2FsbCB0
-aGUgcG93ZXIgdXAgZGlkIG5vdCBjaGVjayB0aGUgY2FyZCBleGlzdC4NCj4gDQo+IFdlIHRoaW5r
-IHRoaXMgdGhlIHNob3J0IHRpbWUgcG93ZXIgdXAgbWF5YmUgY2F1c2UgT0NQIGlmIG5vIGNhcmQg
-ZXhpc3QuDQo+IEFuZCB0aGlzIHBvd2VyIHVwIHdlIHRoaW5rIGlzIHVubmVjZXNzYXJ5IHdoZW4g
-bm8gY2FyZCBleGlzdC4NCj4gDQo+IA0KPiA+ID4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IFJpY2t5
-IFd1IDxyaWNreV93dUByZWFsdGVrLmNvbT4NCj4gPiA+IC0tLQ0KPiA+ID4gIGRyaXZlcnMvbW1j
-L2NvcmUvc2QuYyB8IDMgKysrDQo+ID4gPiAgMSBmaWxlIGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygr
-KQ0KPiA+ID4NCj4gPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL3NkLmMgYi9kcml2
-ZXJzL21tYy9jb3JlL3NkLmMgaW5kZXgNCj4gPiA+IDFjODE0OGNkZGE1MC4uMzVlMDM2NjcyY2Zi
-IDEwMDY0NA0KPiA+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9zZC5jDQo+ID4gPiArKysgYi9k
-cml2ZXJzL21tYy9jb3JlL3NkLmMNCj4gPiA+IEBAIC0xNzUwLDYgKzE3NTAsOSBAQCBzdGF0aWMg
-aW50IF9tbWNfc2RfcmVzdW1lKHN0cnVjdCBtbWNfaG9zdA0KPiA+ICpob3N0KQ0KPiA+ID4gICAg
-ICAgICBpZiAoIW1tY19jYXJkX3N1c3BlbmRlZChob3N0LT5jYXJkKSkNCj4gPiA+ICAgICAgICAg
-ICAgICAgICBnb3RvIG91dDsNCj4gPiA+DQo+ID4gPiArICAgICAgIGlmIChob3N0LT5vcHMtPmdl
-dF9jZCAmJiAhaG9zdC0+b3BzLT5nZXRfY2QoaG9zdCkpDQo+ID4gPiArICAgICAgICAgICAgICAg
-Z290byBvdXQ7DQo+ID4gPiArDQo+ID4gPiAgICAgICAgIG1tY19wb3dlcl91cChob3N0LCBob3N0
-LT5jYXJkLT5vY3IpOw0KPiA+ID4gICAgICAgICBlcnIgPSBtbWNfc2RfaW5pdF9jYXJkKGhvc3Qs
-IGhvc3QtPmNhcmQtPm9jciwgaG9zdC0+Y2FyZCk7DQo+ID4gPiAgICAgICAgIG1tY19jYXJkX2Ns
-cl9zdXNwZW5kZWQoaG9zdC0+Y2FyZCk7DQo+ID4gPiAtLQ0KPiA+ID4gMi4yNS4xDQo+ID4gPg0K
-PiA+DQo+ID4gS2luZCByZWdhcmRzDQo+ID4gVWZmZQ0K
+Implement the .platform_execute_tuning for Sophgo CV1800B and SG200X.
+Some code is borrowed from sdhci-esdhc-imx.c. The tuning result is
+similar as the one of SoC vendor's SDK.
+
+Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+
+Since v1:
+ - use usleep_range() instead of mdelay() as suggested by Adrian
+
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 112 ++++++++++++++++++++++++++++
+ 1 file changed, 112 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index ab4b964d4058..7b55acd9830c 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -66,6 +66,10 @@
+ #define CV18XX_SDHCI_PHY_CONFIG			0x4c
+ #define  CV18XX_PHY_TX_BPS			BIT(0)
+ 
++#define CV18XX_TUNE_MAX				128
++#define CV18XX_TUNE_STEP			1
++#define CV18XX_RETRY_TUNING_MAX			50
++
+ /* Rockchip specific Registers */
+ #define DWCMSHC_EMMC_DLL_CTRL		0x800
+ #define DWCMSHC_EMMC_DLL_RXCLK		0x804
+@@ -685,6 +689,113 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
+ }
+ 
++static void cv18xx_sdhci_set_tap(struct sdhci_host *host, int tap)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	u16 clk;
++	u32 val;
++
++	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	clk &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
++	val &= ~CV18XX_LATANCY_1T;
++	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
++
++	val =  (FIELD_PREP(CV18XX_PHY_TX_DLY_MSK, 0) |
++		FIELD_PREP(CV18XX_PHY_TX_SRC_MSK, CV18XX_PHY_TX_SRC_INVERT_CLK_TX) |
++		FIELD_PREP(CV18XX_PHY_RX_DLY_MSK, tap));
++	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
++
++	sdhci_writel(host, 0, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_CONFIG);
++
++	clk |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++	usleep_range(1000, 2000);
++}
++
++static int cv18xx_retry_tuning(struct mmc_host *mmc, u32 opcode, int *cmd_error)
++{
++	int ret, retry = 0;
++
++	while (retry < CV18XX_RETRY_TUNING_MAX) {
++		ret = mmc_send_tuning(mmc, opcode, NULL);
++		if (ret)
++			return ret;
++		retry++;
++	}
++
++	return 0;
++}
++
++static void cv18xx_sdhci_post_tuning(struct sdhci_host *host)
++{
++	u32 val;
++
++	val = sdhci_readl(host, SDHCI_INT_STATUS);
++	val |= SDHCI_INT_DATA_AVAIL;
++	sdhci_writel(host, val, SDHCI_INT_STATUS);
++
++	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
++}
++
++static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
++{
++	int min, max, avg, ret;
++	int win_length, target_min, target_max, target_win_length;
++
++	min = max = 0;
++	target_win_length = 0;
++
++	sdhci_reset_tuning(host);
++
++	while (max < CV18XX_TUNE_MAX) {
++		/* find the mininum delay first which can pass tuning */
++		while (min < CV18XX_TUNE_MAX) {
++			cv18xx_sdhci_set_tap(host, min);
++			if (!cv18xx_retry_tuning(host->mmc, opcode, NULL))
++				break;
++			min += CV18XX_TUNE_STEP;
++		}
++
++		/* find the maxinum delay which can not pass tuning */
++		max = min + CV18XX_TUNE_STEP;
++		while (max < CV18XX_TUNE_MAX) {
++			cv18xx_sdhci_set_tap(host, max);
++			if (cv18xx_retry_tuning(host->mmc, opcode, NULL)) {
++				max -= CV18XX_TUNE_STEP;
++				break;
++			}
++			max += CV18XX_TUNE_STEP;
++		}
++
++		win_length = max - min + 1;
++		/* get the largest pass window */
++		if (win_length > target_win_length) {
++			target_win_length = win_length;
++			target_min = min;
++			target_max = max;
++		}
++
++		/* continue to find the next pass window */
++		min = max + CV18XX_TUNE_STEP;
++	}
++
++	cv18xx_sdhci_post_tuning(host);
++
++	/* use average delay to get the best timing */
++	avg = (target_min + target_max) / 2;
++	cv18xx_sdhci_set_tap(host, avg);
++	ret = mmc_send_tuning(host->mmc, opcode, NULL);
++
++	dev_dbg(mmc_dev(host->mmc), "tuning %s at 0x%x ret %d\n",
++		ret ? "failed" : "passed", avg, ret);
++
++	return ret;
++}
++
+ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+ 	.set_clock		= sdhci_set_clock,
+ 	.set_bus_width		= sdhci_set_bus_width,
+@@ -721,6 +832,7 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
+ 	.get_max_clock		= dwcmshc_get_max_clock,
+ 	.reset			= cv18xx_sdhci_reset,
+ 	.adma_write_desc	= dwcmshc_adma_write_desc,
++	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+-- 
+2.43.0
+
