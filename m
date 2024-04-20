@@ -1,198 +1,233 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oa1-f51.google.com (mail-oa1-f51.google.com [209.85.160.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ECE5A48;
-	Sat, 20 Apr 2024 02:28:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD357625
+	for <linux-mmc@vger.kernel.org>; Sat, 20 Apr 2024 03:15:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713580092; cv=none; b=Yg+JOBtY5VVvSSd/koNSjmcktJtSas7xkA3d367XoT3mE6kTfWTnfD4m4UH9PuzVrIguFV9lucW3dmottrcS5gHfpN2WpfAG0aDeelBt3seABS82cYYw6SygRjfbvea37GrCni4h7eLe2Laf4679nA31VBSCbdhsGsq30XkejJ8=
+	t=1713582905; cv=none; b=FMJzhaTCHJd5emHY9OwcO2/MMUdewGY6KWaHmn1dABY7GtQtaOQc5cwVoq0hdQN8lPOSNyT43U8CoVaxBDgykHsWStSXf3nY28Y7tWSmzxCEPLGRwRZ1NGHQbPCTFHChuAy+Pn3USqxp+OfQH2D6KGgV2r7T+722+cbf3Ic0++c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713580092; c=relaxed/simple;
-	bh=atRv+zO/mRRsiO7tIIVfGQHQTa/K+esm4/iPRWLJy/w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Qld6bPRP1NuIeP8EINaqt2bLy4PBXnF0uQmXO9wxljBYLZnnIvbMM2TQx7kSS07dbRlex/jGv3LZlHpwQTM2eqXWbfsePYIuPIBhokXWSbgK/mnrjAE1rXy0WPcPEQXxcQO6BcIG1q/H7lfac/x9hvuX2KyrKtNbSnz8L2vysqs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rsVti900; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1713582905; c=relaxed/simple;
+	bh=DpBm8PfBIfjsF3qa5TDyJENVA7c8i6H5hq3Uye6mumY=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=WuiKCnWm77UV7cdMdgenMlucCjt/l7idFpAaJhBFJ5Q5KnUm8mYGJAvljiq9H8xmHIXM1ao6WoC24CRI48qhllMs6cRr1uQw47qRLCZozEkKOIAFhzmUmET0CwwgvEnFZdx89POujkTejGCITPazxw9bambE5HeRHAMNu7W8V80=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VdnMMyUF; arc=none smtp.client-ip=209.85.160.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rsVti900"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC479C072AA;
-	Sat, 20 Apr 2024 02:28:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1713580091;
-	bh=atRv+zO/mRRsiO7tIIVfGQHQTa/K+esm4/iPRWLJy/w=;
-	h=From:To:Cc:Subject:Date:From;
-	b=rsVti900ZclvH0L02kj+OMVKhDTtPkXgCQ02JSPaOPheBectKrUbaRJwBcesHuYXS
-	 neDVeHhBV7zZcVL9om6r+D9+F5w8zqBfbs2FRUtODnXIcHf9oOO8/BPYlPPMSYJ0HB
-	 ZJl+hS7raFOrwuYi/j7UAvY70Nh5d1nxpVdKK8hSC3vHPRWr2rU1rO68P69Uj1NSq2
-	 /sgA4tF6g85KDp4RVOyWCSg30JL3Q/wL8O2HugcK792zoUg/fNtzcxpWY4evXF4jZf
-	 c8qKtFFk5ZvIwLaONuiFpUyOiEEcHo5+rUQ2R53pER13iiCpvwEbQlzez3h8Ur6OaV
-	 MUA7o5OVhI5wA==
-From: Jisheng Zhang <jszhang@kernel.org>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2] mmc: sdhci-of-dwcmshc: Add tuning support for Sophgo CV1800B and SG200X
-Date: Sat, 20 Apr 2024 10:14:29 +0800
-Message-ID: <20240420021429.454-1-jszhang@kernel.org>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VdnMMyUF"
+Received: by mail-oa1-f51.google.com with SMTP id 586e51a60fabf-238fd648224so1388561fac.2
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Apr 2024 20:15:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1713582902; x=1714187702; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=2Flcg6riqC/Et/prq76MPGW31K0079MYubQPPOvdUlE=;
+        b=VdnMMyUFkN/QZ8Em2/e8nK5ohG9hpaloDDo0nctZoFjcFHNfzO2aZw5NhgaMH9Ol/u
+         IgbHJEpw9LVYG+UmDDpdx8LTZzJOtjsS66B4RlwD7WMb96wlX2AD11uriiQD7UW1RQ91
+         ZAuvOcmAE9IptDYGy6s1pNKOuSPb5CWSNhJvG8B7OR5nEPOrXnrY9aja6PIPsCwGbW71
+         oDDShRfe5lYate2chRwK4Bfm0D1s8K+A3wiGRZPVFtLg1EU+vk0GBOJmNqs4Yxw9Jjnw
+         5f/bLJ3Bjh2MckA5+RADQGF1vdTW1Qzy1qn22LVZ5ABuxWXPe43/oqKkbpNMfvDTDkiq
+         G11A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1713582902; x=1714187702;
+        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=2Flcg6riqC/Et/prq76MPGW31K0079MYubQPPOvdUlE=;
+        b=GXrytdSstZt1alvQJ7Usx8amY7s6qs4TDrNOf8Sstg6BcuYn5wrnrk1Jv/o2/fjpEj
+         7lRi+BpB3RFkB0wmzy5tMOIWzrSOO07a6kCj+KC6x4IWJfXU0MAQvw2Nzk0UArO04ZQ6
+         Q9NzOdyuDgTlMFf08Nz0D1Nqu28y4XNoXrlx+dlOinyzp4Ek6wMtIGSkDZfb5f9PHqTo
+         cTykKDQs4zENPsLuNDlw3dcsiacWq+8Q58YtWexERjkdn3vIrJluxGJyeOMFAwuxku2Y
+         Uh/Ipua9NfdKfAXHTkflMPuN+UTtu1XwVHHVO/vqHUhBjuWD9BMZtw4Q+5bOKNt5SiN2
+         T2ig==
+X-Gm-Message-State: AOJu0Yx0ic2DReseBKe2kyf/1u5/AyLTn+HtgHyojDR4krUYy7qojxag
+	21u/gU71YInU0swC/AM5Ta2JgWwWO2reII5K3ZSJBRhDvS1R5aHp45bWYrP7RSc3jzOIl7K/Bii
+	umBVZ6wDAtkN+dmfH9xbpd1ScMYM6T+mm
+X-Google-Smtp-Source: AGHT+IEVrs1cFcoCpCKCeviHjVAYa6AZRXi2nE6D68ffzcs5DzyTF02GnrcMJTCKlQrWyuo7XCUGK531/3Cu2hFAUvA=
+X-Received: by 2002:a05:6870:4592:b0:229:ec0e:7348 with SMTP id
+ y18-20020a056870459200b00229ec0e7348mr4959326oao.46.1713582902401; Fri, 19
+ Apr 2024 20:15:02 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Zhan Liu <liuzhanjobs@gmail.com>
+Date: Fri, 19 Apr 2024 20:14:26 -0700
+Message-ID: <CABqN7BxTNMFz5hxPePYV0sM02XwRsv+g7Siw-ZKZ7_X++H0JtQ@mail.gmail.com>
+Subject: [PATCH v1] mmc-utils: FFU Status check for device without FW install support
+To: linux-mmc@vger.kernel.org
+Cc: Avri Altman <Avri.Altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 
-Implement the .platform_execute_tuning for Sophgo CV1800B and SG200X.
-Some code is borrowed from sdhci-esdhc-imx.c. The tuning result is
-similar as the one of SoC vendor's SDK.
+ [PATCH v1] mmc-utils: FFU Status check for device without FW install support
 
-Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+From: Zhan Liu <liuzhanjobs@gmail.com>
+
+Problem and my changes
+
+               ffu:also check ffu status for FW install not support
+device to catch the possible error of FW download error
+(FFU_STATUS[0x26] = 0x12), which is not captured by current mmc-utils.
+current mmc-utils simple ask user to reboot, which give the user false
+impression that the FW update is successful. they will only found it
+is not after they check the FW version with extcsd read command and
+have not idea what is wrong since at this time the FFU_STATUS has been
+reset to 0x00. With this patch, user will know that FW download is
+failed.
+
+when check the devce don't support FW install, read extcsd and check
+the FFU_STATUS value. If it is 0x00, ask user to reboot. If not, print
+the error message and exit.
+
+
+
 ---
 
-Since v1:
- - use usleep_range() instead of mdelay() as suggested by Adrian
+Signed-off-by:  Zhan Liu <liuzhanjobs@gmail.com>
 
- drivers/mmc/host/sdhci-of-dwcmshc.c | 112 ++++++++++++++++++++++++++++
- 1 file changed, 112 insertions(+)
+---
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index ab4b964d4058..7b55acd9830c 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -66,6 +66,10 @@
- #define CV18XX_SDHCI_PHY_CONFIG			0x4c
- #define  CV18XX_PHY_TX_BPS			BIT(0)
- 
-+#define CV18XX_TUNE_MAX				128
-+#define CV18XX_TUNE_STEP			1
-+#define CV18XX_RETRY_TUNING_MAX			50
-+
- /* Rockchip specific Registers */
- #define DWCMSHC_EMMC_DLL_CTRL		0x800
- #define DWCMSHC_EMMC_DLL_RXCLK		0x804
-@@ -685,6 +689,113 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
- }
- 
-+static void cv18xx_sdhci_set_tap(struct sdhci_host *host, int tap)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u16 clk;
-+	u32 val;
-+
-+	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	clk &= ~SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-+	val &= ~CV18XX_LATANCY_1T;
-+	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-+
-+	val =  (FIELD_PREP(CV18XX_PHY_TX_DLY_MSK, 0) |
-+		FIELD_PREP(CV18XX_PHY_TX_SRC_MSK, CV18XX_PHY_TX_SRC_INVERT_CLK_TX) |
-+		FIELD_PREP(CV18XX_PHY_RX_DLY_MSK, tap));
-+	sdhci_writel(host, val, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_TX_RX_DLY);
-+
-+	sdhci_writel(host, 0, priv->vendor_specific_area1 + CV18XX_SDHCI_PHY_CONFIG);
-+
-+	clk |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+	usleep_range(1000, 2000);
-+}
-+
-+static int cv18xx_retry_tuning(struct mmc_host *mmc, u32 opcode, int *cmd_error)
-+{
-+	int ret, retry = 0;
-+
-+	while (retry < CV18XX_RETRY_TUNING_MAX) {
-+		ret = mmc_send_tuning(mmc, opcode, NULL);
-+		if (ret)
-+			return ret;
-+		retry++;
-+	}
-+
-+	return 0;
-+}
-+
-+static void cv18xx_sdhci_post_tuning(struct sdhci_host *host)
-+{
-+	u32 val;
-+
-+	val = sdhci_readl(host, SDHCI_INT_STATUS);
-+	val |= SDHCI_INT_DATA_AVAIL;
-+	sdhci_writel(host, val, SDHCI_INT_STATUS);
-+
-+	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+}
-+
-+static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	int min, max, avg, ret;
-+	int win_length, target_min, target_max, target_win_length;
-+
-+	min = max = 0;
-+	target_win_length = 0;
-+
-+	sdhci_reset_tuning(host);
-+
-+	while (max < CV18XX_TUNE_MAX) {
-+		/* find the mininum delay first which can pass tuning */
-+		while (min < CV18XX_TUNE_MAX) {
-+			cv18xx_sdhci_set_tap(host, min);
-+			if (!cv18xx_retry_tuning(host->mmc, opcode, NULL))
-+				break;
-+			min += CV18XX_TUNE_STEP;
-+		}
-+
-+		/* find the maxinum delay which can not pass tuning */
-+		max = min + CV18XX_TUNE_STEP;
-+		while (max < CV18XX_TUNE_MAX) {
-+			cv18xx_sdhci_set_tap(host, max);
-+			if (cv18xx_retry_tuning(host->mmc, opcode, NULL)) {
-+				max -= CV18XX_TUNE_STEP;
-+				break;
-+			}
-+			max += CV18XX_TUNE_STEP;
-+		}
-+
-+		win_length = max - min + 1;
-+		/* get the largest pass window */
-+		if (win_length > target_win_length) {
-+			target_win_length = win_length;
-+			target_min = min;
-+			target_max = max;
-+		}
-+
-+		/* continue to find the next pass window */
-+		min = max + CV18XX_TUNE_STEP;
-+	}
-+
-+	cv18xx_sdhci_post_tuning(host);
-+
-+	/* use average delay to get the best timing */
-+	avg = (target_min + target_max) / 2;
-+	cv18xx_sdhci_set_tap(host, avg);
-+	ret = mmc_send_tuning(host->mmc, opcode, NULL);
-+
-+	dev_dbg(mmc_dev(host->mmc), "tuning %s at 0x%x ret %d\n",
-+		ret ? "failed" : "passed", avg, ret);
-+
-+	return ret;
-+}
-+
- static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.set_clock		= sdhci_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
-@@ -721,6 +832,7 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
- 	.get_max_clock		= dwcmshc_get_max_clock,
- 	.reset			= cv18xx_sdhci_reset,
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
-+	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
- };
- 
- static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
--- 
-2.43.0
+diff --git a/mmc.h b/mmc.h
 
+index 6f1bf3e..5b06410 100644
+
+--- a/mmc.h
+
++++ b/mmc.h
+
+@@ -229,6 +229,14 @@
+
+#define EXT_CSD_SEC_GB_CL_EN                         (1<<4)
+
+#define EXT_CSD_SEC_ER_EN                  (1<<0)
+
+
+
++/*
+
++ * FFU status definition
+
++ */
+
++#define EXT_CSD_FFU_SUCCESS
+             (0x00)
+
++#define EXT_CSD_FFU_GENERAL_ERROR                                        (0x10)
+
++#define EXT_CSD_FFU_FIWMWARE_INSTALL_ERROR                   (0x11)
+
++#define EXT_CSD_FFU_FIWMWARE_DOWNLOAD_ERROR                         (0x12)
+
++
+
+
+
+ /* From kernel linux/mmc/core.h */
+
+#define MMC_RSP_NONE          0
+ /* no response */
+
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+
+index 936e0c5..10bdb94 100644
+
+--- a/mmc_cmds.c
+
++++ b/mmc_cmds.c
+
+@@ -2962,9 +2962,38 @@ do_retry:
+
+              * if not then skip checking number of sectors programmed
+after install
+
+              */
+
+             if (!ext_csd[EXT_CSD_FFU_FEATURES]) {
+
+-                           fprintf(stderr, "Please reboot to complete
+firmware installation on %s\n", device);
+
+-                           ret = 0;
+
+-                           goto out;
+
++                           ret = read_extcsd(dev_fd, ext_csd); //get
+the current extcsd after FW download
+
++                           if (ret) {
+
++                                         fprintf(stderr, "Could not
+read EXT_CSD from %s\n", device);
+
++                                         goto out;
+
++                           }
+
++
+
++                           switch (ext_csd[EXT_CSD_FFU_STATUS]) {
+
++                           case EXT_CSD_FFU_SUCCESS:
+
++                                         fprintf(stderr, "Please
+reboot to complete firmware installation on %s\n", device);
+
++                                         ret = 0;
+
++                                         goto out;
+
++
+
++                           case EXT_CSD_FFU_GENERAL_ERROR:
+
++                                         fprintf(stderr, "FFU General
+Error on %s\n", device);
+
++                                         ret = 0;
+
++                                         goto out;
+
++
+
++                           case EXT_CSD_FFU_FIWMWARE_INSTALL_ERROR:
+//may never happen since we have not install firmware
+
++                                         fprintf(stderr, "FFU Install
+Error on %s\n", device);
+
++                                         ret = 0;
+
++                                         goto out;
+
++
+
++                           case EXT_CSD_FFU_FIWMWARE_DOWNLOAD_ERROR:
+//main purpose is to check this since it will be cleared after power
+cycle
+
++                                         fprintf(stderr, "FFU FW
+Download Error on %s\n", device);
+
++                                         ret = 0;
+
++                                         goto out;
+
++
+
++                           default:
+
++                                         fprintf(stderr, "Unknown FFU
+Status on %s\n", device);
+
++                                         ret = 0;
+
++                                         goto out;
+
++                           }
+
+             }
+
+
+
+              ret = read_extcsd(dev_fd, ext_csd);
