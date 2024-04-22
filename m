@@ -1,116 +1,122 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+Received: from mail-wr1-f50.google.com (mail-wr1-f50.google.com [209.85.221.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01703152197
-	for <linux-mmc@vger.kernel.org>; Mon, 22 Apr 2024 17:56:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46A1620DFC;
+	Mon, 22 Apr 2024 21:30:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713808602; cv=none; b=PbFGjAZda1yT39AGHCX/WQEMHbuLbQT61RUaYPgWLApKn+Guc8NvkQQ27LQS05nYAVxxP/8jG9m8jm1GzOzg+tzSnPrZARlv4gTd5Fd/6gw6HSIxzdfAKdlBDe6I0YDbN0EMPWR1gqaVJrs4qiz/vfaiWK4dwWV+zOnRR4QV0H8=
+	t=1713821433; cv=none; b=FcPKAo/NYYn66BTjrV+mTkWrV2WDGJK2fG9zZcjXMwFWzg6+rGjbw/WvyPnCN1J0M0EFVij/fNv0kNN2bcyqXnSTbK1Kqz5H0/PgmcJDvPPm9GfQYB5hzCPZFbDPzdg4Wnh8tI6B1leGfxdtDb9nMvnIuqsmmUr8iKcgt8JKPNE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713808602; c=relaxed/simple;
-	bh=CeDKuqZpRK5NjHJewgOWK37JtlkW9wLhfxLAr0U/bcc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=uQ4IO+MQ/jpdz/rlYG97K+4auDvnXE1yMUOHhZzKUWbln5/E8r7KjO+vSCN6EQ+cUfmPM5+kA+K7iJGX/H56NCcaQBZc9/Ku/VGnUL5lB6YVk91ALyeoBLrs5D7AekZ4FODa8P1zacqGeIqf/xEBP6gZyHaE/oW3G3kCpGbmGew=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=c3KXTOR7; arc=none smtp.client-ip=209.85.219.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1713821433; c=relaxed/simple;
+	bh=D6H6tgVKSoF5+PVtpugRnr+fZR4mp5814z+JC7PQDsI=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=UdpduQP1MS7G3MbmKvpwb9A2rxxhwpjuvdiZgNOq/TnYZ1L03YsTXqlQL4CZdqdVtHB9EnnGLEPqX9SihC/x2QHPQgcLvTcCkqQMh6G1/nQHkCgzmgSpaiJRgf9+ahiVtZIc8aC7OqE7oHKdmv2yBB3pUiLxr/cfNFVwHgGnNLI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YcmzcP3t; arc=none smtp.client-ip=209.85.221.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="c3KXTOR7"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-de528effbfbso1313140276.2
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Apr 2024 10:56:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YcmzcP3t"
+Received: by mail-wr1-f50.google.com with SMTP id ffacd0b85a97d-34b029296f5so1587290f8f.2;
+        Mon, 22 Apr 2024 14:30:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1713808600; x=1714413400; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=hSNE12RwAhLSsb0j0icuv+XwFCbPVvOY1VkFNRGWJ0k=;
-        b=c3KXTOR73lfzDHYyGvNTs4GWd6b4r3wWVjwvBjGvNDUwEdQhT9E2qfj3VLYN38PFMM
-         fSmBvu1c81FLcLtPwim3S9+x+L/7xrgtoCLbH2YLVZaG8Xtz9cfE2YLkiyNgW75gjCtU
-         KwX99FwVqlg9KEYDPuXTs/ivE0RgntXsCOrYfbYs9eWkFUCOCOv7oRzehoc/gjYIIbJY
-         UvjhD/Hxwh3UWNoWJ1tWhC9R2QHqjaHpuVCsmLd+xHWgwreaDNgjYG8ss7vPchFeZLJM
-         CGn3uuJfQjBuQK8TEcmawjkL75+V2vJg5gLaTgBoFkyEpzTPxODH0psiUKG3V1Yy8PqV
-         jNGQ==
+        d=gmail.com; s=20230601; t=1713821430; x=1714426230; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=tKESjTucK4nTxwa5vtEgiHlzXe4qJMLDNifUugI6ya0=;
+        b=YcmzcP3tJnyfKULNFvHRbYUlOyBWXXBwbiXxha8i0JexMMfcSQOXzwxkVT4SgeJ/zV
+         uLJ36CMKEP+STluW+yugGbrGbuHaPVXLGtcxhapSPM/CZg8E4ozAmwqXlMYIA4ohARVy
+         kMV05s4RmqtkRjrK0j6X5RXerfNrX41DZBm+jhdDaN/hNA1CaI44rXDqxfmEVF3oE5SW
+         Ez16A7HfCookZUr2umBDemTLwVveSmcjAFC7miIQdFRVR5kWEnLREENkJfOqJydve8Cf
+         JYrYPG50fFG2CFf9YAqhkh8vLLdPb8+1F2l31z6xc+7gZbcqvv7CejmJRpZb4RpOyV3Y
+         +hAw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713808600; x=1714413400;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=hSNE12RwAhLSsb0j0icuv+XwFCbPVvOY1VkFNRGWJ0k=;
-        b=g23k18ZkA7shGJQGd5admlv5LZ+ypQlsCmkgJJcszzUnyY8hnqE4yxi6V1AjVO5kD8
-         yj4Lv2I3ErnG1ERjm3vXeFO7WlLQU3sJb/T0GKnAFcwsq5zMio9zhcyAVri6Tjt+h5Hn
-         xOQttzJdia9Z2PIf1xmCbNTXQSngh2v5XHKhhUYxBbmvK2OSBlXoFRdgV4h7UfqTB/1C
-         EEdUADLToiuqHD2Hz+xeFU+cbnBdaiWkNQfOr393UyibNkQwdqQ5BAXP+TWLNXGGIFwx
-         hv9nYpH9SIsANsNS0JkoBZd2sJ0Aey4ev1knDyI3FtW5cTFRNMbmvfEry1RrA9tk7PJ0
-         UyKw==
-X-Gm-Message-State: AOJu0YzRPhply0cdYkx2YwtOBHvYx0fWc/OUbalou3XeSn8OeFK8AR/a
-	/MDWQQEDamzyfUFLmIqThrUwsZhOhHJndrJBntNgGJIt1CFyvJpcqcapBFmhUMyjO2f8eht4XdR
-	aUWhvZ1NaoeCXx60JP/89yz5jJmoMYwhT8xypBuAWdxhXDZdV
-X-Google-Smtp-Source: AGHT+IHh+dL0ZbMEEZYwmSys0EHDkrAGlP1eanWndxqE2I8DK1sRBuCxrIUDoHPepVykUJYdVg1mxxd/7dT8rQ+SUJk=
-X-Received: by 2002:a25:83ca:0:b0:dcd:13ba:cdd6 with SMTP id
- v10-20020a2583ca000000b00dcd13bacdd6mr9918017ybm.47.1713808600074; Mon, 22
- Apr 2024 10:56:40 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1713821430; x=1714426230;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=tKESjTucK4nTxwa5vtEgiHlzXe4qJMLDNifUugI6ya0=;
+        b=xBW7lZVl3LTb1/TC3zNAENLhsPLo3cAIHEY4q6XuIkT76lgbAdfHqZtTSVoFOreDq2
+         VCZ47k/wLOZ2iQecvdBjXhDE5jTPPxg3LGJLlnWlID/EGMrGreyKm8MDcRgmZKwzB6Q3
+         2q+sQ1eRTjH5qUpvaAzbbIEi8Cr/f3EgRUGSUY0lDVJa6L7PXoqQ8cLIwHEek3BlkPT9
+         JtSGk5kB9AvBPsypW/npy1Di/jjy6zzVINrMnFLwcu8J+8Yd4nrHq0Ewu3fqrO/jXOSP
+         ppvN2hE7PMnN2actQokuZidUfQFCFtRIOE6Yok6lD4Tlkta13v5BW2d86a3ihFjjsh3g
+         cDsw==
+X-Forwarded-Encrypted: i=1; AJvYcCWXA7DBNZHcQksDwrACgWGF/lYzM1n6Cf5kTESbFpBKMbvqEW4ijuH1sIO11mQGto+F+4ofO8JSJsWrUpVRvz4DakXQ52l3QNP5zB1gcOFl83oCT+J7lkEzoakYWLiVmgd182PtFk3kQ1uBC+ja0PwBGJ11p3af/sU24tFkKzIKdGhHUeeUs0T8g/8=
+X-Gm-Message-State: AOJu0Yzhc66vHywoUG5r/BMqtnM6HpsME5VwS772Zg7oT/VwnPyzSpGw
+	lEyctuj+r6UNTnh6F1OU/Seq4ilbK3maj54HqqXf6l8QF+CfLZVm
+X-Google-Smtp-Source: AGHT+IHuRAue9uGWc3s6NyDnrcLPENmSmNVL0IO6/th4i9Gy47INXau0cr5w+D4R4JVSEOqckTWstg==
+X-Received: by 2002:a05:6000:181c:b0:34a:481e:b1ea with SMTP id m28-20020a056000181c00b0034a481eb1eamr8579038wrh.18.1713821430263;
+        Mon, 22 Apr 2024 14:30:30 -0700 (PDT)
+Received: from prasmi.home ([2a00:23c8:2500:a01:ab0d:124:447c:bf37])
+        by smtp.gmail.com with ESMTPSA id n4-20020a5d4844000000b00349f098f4a6sm12886793wrs.53.2024.04.22.14.30.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 22 Apr 2024 14:30:29 -0700 (PDT)
+From: Prabhakar <prabhakar.csengg@gmail.com>
+X-Google-Original-From: Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+To: Geert Uytterhoeven <geert+renesas@glider.be>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Prabhakar <prabhakar.csengg@gmail.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH 0/6] Update compat strings for SD/MMC nodes on RZ/{G2L (family), G3S, V2M} SoCs
+Date: Mon, 22 Apr 2024 22:30:00 +0100
+Message-Id: <20240422213006.505576-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240422153607.963672-1-saproj@gmail.com>
-In-Reply-To: <20240422153607.963672-1-saproj@gmail.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Mon, 22 Apr 2024 19:56:29 +0200
-Message-ID: <CACRpkdYoLjXHwN2EKsxZz8FdxNQ8beuqSO6EX9CjZmE0nX3tUw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: moxart: fix handling of sgm->consumed, otherwise
- WARN_ON triggers
-To: Sergei Antonov <saproj@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Mon, Apr 22, 2024 at 5:36=E2=80=AFPM Sergei Antonov <saproj@gmail.com> w=
-rote:
+From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-> When e.g. 8 bytes are to be read, sgm->consumed equals 8 immediately afte=
-r
-> sg_miter_next() call. The driver then increments it as bytes are read,
-> so sgm->consumed becomes 16 and this warning triggers in sg_miter_stop():
-> WARN_ON(miter->consumed > miter->length);
->
-> WARNING: CPU: 0 PID: 28 at lib/scatterlist.c:925 sg_miter_stop+0x2c/0x10c
-> CPU: 0 PID: 28 Comm: kworker/0:2 Tainted: G        W          6.9.0-rc5-d=
-irty #249
-> Hardware name: Generic DT based system
-> Workqueue: events_freezable mmc_rescan
-> Call trace:.
->  unwind_backtrace from show_stack+0x10/0x14
->  show_stack from dump_stack_lvl+0x44/0x5c
->  dump_stack_lvl from __warn+0x78/0x16c
->  __warn from warn_slowpath_fmt+0xb0/0x160
->  warn_slowpath_fmt from sg_miter_stop+0x2c/0x10c
->  sg_miter_stop from moxart_request+0xb0/0x468
->  moxart_request from mmc_start_request+0x94/0xa8
->  mmc_start_request from mmc_wait_for_req+0x60/0xa8
->  mmc_wait_for_req from mmc_app_send_scr+0xf8/0x150
->  mmc_app_send_scr from mmc_sd_setup_card+0x1c/0x420
->  mmc_sd_setup_card from mmc_sd_init_card+0x12c/0x4dc
->  mmc_sd_init_card from mmc_attach_sd+0xf0/0x16c
->  mmc_attach_sd from mmc_rescan+0x1e0/0x298
->  mmc_rescan from process_scheduled_works+0x2e4/0x4ec
->  process_scheduled_works from worker_thread+0x1ec/0x24c
->  worker_thread from kthread+0xd4/0xe0
->  kthread from ret_from_fork+0x14/0x38
->
-> This patch adds initial zeroing of sgm->consumed. It is then incremented
-> as bytes are read or written.
->
-> Signed-off-by: Sergei Antonov <saproj@gmail.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Fixes: 3ee0e7c3e67c ("mmc: moxart-mmc: Use sg_miter for PIO")
+Hi All,
 
-Oh it was that simple.
+- RZ/G2UL and RZ/Five ("r9a07g043")
+- RZ/G2L(C) ("r9a07g044")
+- RZ/V2L ("r9a07g054")
+- RZ/G3S ("r9a08g045")
+- RZ/V2M ("r9a09g011")
 
-Thanks for fixing this Sergei!
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+The SD/MMC Interface in the above listed SoCs is not identical to that of
+R-Car Gen3. These SoCs have HS400 disabled and use fixed address mode.
+Therefore, we need to apply fixed_addr_mode and hs400_disabled quirks.
+'renesas,rzg2l-sdhi' is introduced as a generic compatible string for the
+above SoCs where fixed_addr_mode and hs400_disabled quirks will be applied.
 
-Yours,
-Linus Walleij
+Cheers,
+Prabhakar
+
+Lad Prabhakar (6):
+  dt-bindings: mmc: renesas,sdhi: Drop 'items' keyword
+  dt-bindings: mmc: renesas,sdhi: Document RZ/G2L family compatibility
+  mmc: renesas_sdhi: Add compatible string for RZ/G2L family, RZ/G3S,
+    and RZ/V2M SoCs
+  arm64: dts: renesas: r9a09g011: Update fallback string for SDHI nodes
+  arm64: dts: renesas: rzg2l-family: Update fallback string for SDHI
+    nodes
+  arm64: dts: renesas: r9a08g045: Update fallback string for SDHI nodes
+
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml | 38 ++++++++-----------
+ arch/arm64/boot/dts/renesas/r9a07g043.dtsi    |  4 +-
+ arch/arm64/boot/dts/renesas/r9a07g044.dtsi    |  4 +-
+ arch/arm64/boot/dts/renesas/r9a07g054.dtsi    |  4 +-
+ arch/arm64/boot/dts/renesas/r9a08g045.dtsi    |  6 +--
+ arch/arm64/boot/dts/renesas/r9a09g011.dtsi    |  6 +--
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  8 ++--
+ 7 files changed, 31 insertions(+), 39 deletions(-)
+
+-- 
+2.34.1
+
