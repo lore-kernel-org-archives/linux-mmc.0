@@ -1,153 +1,122 @@
-Received: from IND01-MAX-obe.outbound.protection.outlook.com (mail-maxind01olkn2068.outbound.protection.outlook.com [40.92.102.68])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC9DF14A4C6;
-	Mon, 22 Apr 2024 12:53:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.102.68
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713790391; cv=fail; b=ZBYwHsmMM/4W/05qizMULDJa72HGRq01X4yF7kiiBIJxK+tVmUT7d2buYUxFqN3Z+IuMVqPpuOzI3oOPTUK1Af9w6+4zp/gDIOnJ8PnBIkqwPVYGfv2CBOrHlDNRWmiof0cXn2vUQiT51UaO0UjxGMCHyFek2PT21Kv8ZqU70+s=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713790391; c=relaxed/simple;
-	bh=aa1N4gkq5dVcIJLJx4M6AIi+YSbAaKcE/lKrV67/o1s=;
-	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=h3jstR+Hw83EGyiqlSAUUl5lAhXaUXXf4v1WPJPcVJVMesKxMPFuTy5slo+x7F3WuwbZWuuShP2EUzyxkLU/ic3C4xFSh0tnEgUkZxvpquSU922ohlD5ZwtaotweG/ShbHthnxyHSPvKjrA5gRjAqBO0pgltUWcFSXr9qYSL7X8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=qhkzo3FX; arc=fail smtp.client-ip=40.92.102.68
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF6D7224D5;
+	Mon, 22 Apr 2024 15:36:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1713800173; cv=none; b=nhHgYurnJcA8FkxU7czQgO/bNmmDubrXBXSaQoxTrBxhUxjnA6GjDQCW2SwoDJ2AKAaBATg1ejS9qts5jeE/Gu6xqji0x+zfWuHOqxocGLfYW6npTEAIMwkYoPPnsH67InOg9BiJSYbrq6u667liduvFEtk/duye94iai024thI=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1713800173; c=relaxed/simple;
+	bh=u9HCdteMB+HMYRjR4arnujnff9oEN5NosNpH3UJ9++w=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=B/BgzMMDL9sZ/f+Zbo46JYu4W2MaTo2lw207EWO3GPPc37533HL36TxnrAc67eMhats+SUwiJnmR1WXVHBfKVS8kyJMdXTJdb5rWft0prrpqwKVo8plHOkZXHr8zEnoc6de4XpQskSdf6DsEoCODCUYJhA+9qAxTT6VP9JXXncQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jb8bYD4R; arc=none smtp.client-ip=209.85.167.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="qhkzo3FX"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=XNdFjSfNRBEmm4CSNRZu5KxEkZl7PwE2r2WEMYEFpbBj7TlBKOA+kpc050CiAogs73V/jtGgcm8ZqNFVILDSri2BOqIysndRm1MB0qPoYs52rKZ+FVDRR7ohyc7vP6kbsKZ+R6Pk+BISWB9GuEaEQ2dRlW/sMu7u7VafOm0IETi5o1bWASSDU++uLeuGedUecFCATFdBE8TCRqgQYOvxN20jmjI4vsCgiJqpm70ZPLLNTxghGAMVcKpB2iehBEqd314sYCHbv15FHRflGtUkxa3Ch5TPEYAdvAiCeqW7v5fzCW+HiW97otYFZPIJBgkz0SPIB4VkwDAs1IGg8mODsg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=CaMNNUhN4dSzA3vRwBMboWXc91HlLIAIfzErRNbAYrE=;
- b=aR627ze/7U5JBAqtSIAlUfpPSqr0Cu+9ECZ7y83oFkFdrn7rVHtqHJYgBxh1DHHX0QCVnvBelsRl0/5hBrwjDwVdY8CP+gz5rF3Ql4AWc2clyGJBxXidyvSdTiCb20cuKroT5f/NiESYf0u/CwcstXOsy78DcAbWNrwTzaeltZGQx2dG7x/0J0QODBX820+1G2LZyNwGDmTIYdKrPHuVs3vhz8vsXoLydqWnnEMQrbiMl/kzD/y3XsG1nm3CRUCPCG70a/+9GlqLDmxeIbbeum5DAlfFljowOLOQBA3RDHQbD1BFZLlTE6k/Y2PT+nIllTtnbgD4psl+1UjZFwONiA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=CaMNNUhN4dSzA3vRwBMboWXc91HlLIAIfzErRNbAYrE=;
- b=qhkzo3FXruihOy6l0/QIcvXgAvmzn5DHSmHGh1duK1usb3BeOZIGrk9ZWymwyFDKNCZK9KgTJPIePfhtyeVW17WP+gdJZ7+3iYAphMQmANuY4+l9jZUZE9xjwwOfVteBe7DuEfkhZKfNr5UXzgmvjglTmwz8ZjMkBRX2sMWgTQULsoVBnuIPLjni8DmUqkQlJTezMi+KbeR6k5zOzrscRrhtsEQfgNe9OZrpA/vAsturaXp7SJNCuPTLdJkTMwq0VG9qPOp3wBOvqE3QeEV+PnwY6fXV+IeJtfaVXlWpH2dqXIctXaAVwUtH8H/1SR2MhfSxxKXvpaJ7tz5jqzBF5A==
-Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:138::5)
- by PN2P287MB0366.INDP287.PROD.OUTLOOK.COM (2603:1096:c01:dd::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7472.44; Mon, 22 Apr
- 2024 12:52:58 +0000
-Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
- ([fe80::664:2ecc:c36:1f2c]) by MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
- ([fe80::664:2ecc:c36:1f2c%3]) with mapi id 15.20.7472.044; Mon, 22 Apr 2024
- 12:52:58 +0000
-Message-ID:
- <MA0P287MB2822A7ECF08B587C2842A9D9FE122@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
-Date: Mon, 22 Apr 2024 20:52:54 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/1] mmc: sdhci-of-dwcmshc: enhance framework
-To: Adrian Hunter <adrian.hunter@intel.com>, Chen Wang <unicornxw@gmail.com>,
- ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, jszhang@kernel.org, dfustini@baylibre.com,
- yifeng.zhao@rock-chips.com, shawn.lin@rock-chips.com, chao.wei@sophgo.com,
- haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com,
- guoren@kernel.org, inochiama@outlook.com
-References: <cover.1713257181.git.unicorn_wang@outlook.com>
- <MA0P287MB28226B9C954F3DBD9B5E29A5FE122@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
- <d39ab4b9-ad43-4d4a-9fc6-3133d761c79b@intel.com>
-From: Chen Wang <unicorn_wang@outlook.com>
-In-Reply-To: <d39ab4b9-ad43-4d4a-9fc6-3133d761c79b@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-TMN: [b+H84ra4AIaBB9msZUeG104FKJ8k/sAa]
-X-ClientProxiedBy: SI2P153CA0019.APCP153.PROD.OUTLOOK.COM
- (2603:1096:4:190::10) To MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
- (2603:1096:a01:138::5)
-X-Microsoft-Original-Message-ID:
- <7295eb07-f6f7-4c29-a682-e389abb4a375@outlook.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jb8bYD4R"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-518a3e0d2ecso6819077e87.3;
+        Mon, 22 Apr 2024 08:36:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1713800170; x=1714404970; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=4Pvm+9Ih6B15UM0NoHUWNBzlKXdp28/1dMYo2uad5Ts=;
+        b=jb8bYD4Rl+pG+Hg2GLGvFcOj2N+1/TbGc6Bh5O/fiVYwq+AaguJLrTlPqhP/VTVxJr
+         7BbMgz0QPDygSc3BUK3cJPeBmkMK+Fba0q3XZCTAbDQ7Wy1v8o5wLhZrPAj45PM31kxk
+         PbBwvjinufHrW/gUjLwcbSPkJBORZg9QFJNKwuXkrHH1GtnHJ5WE9VlWxhX+/IWt0Fjr
+         ksDjAEGqBNpPJXcMDjDeJ7jDKqyVgBG1Z59xmT0UGcI1jIJzJj9iTs+oPuxqivSX0UIB
+         HkU+rLRCkKjYAMrAqXxkDprCW4CFgc8Thn1IZaN3QyehFMZEBHxpMO3D9RvLbNtQ8wKA
+         +N0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1713800170; x=1714404970;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4Pvm+9Ih6B15UM0NoHUWNBzlKXdp28/1dMYo2uad5Ts=;
+        b=laiBG133WfwXkm+DyY0HIwmCujGiilsgvg83UMGd9Cs2JzFgiX0R0RzpxFv/TseQ+7
+         uV+z0GZgn2BBot9gvadbeYbnCoNdupAj3ub46du9Af94LWK6cfRJvEeth3lEsWAK42Tn
+         XmP/x340U1FbVzrnXpEoBGD2/TBuUjc21FhvzasUQfCu6wVML+8J3Y6+s6PSuDbhpUOU
+         qy04UNCfYFi3KnTbvrCdL9GQ1z0PTj3D8Q8T1PZ1k5n/jrodhCCT10pCnFyRAbC5KO84
+         H8rCQEJXbzxlWFXpdkW4gWI6DrBEnXyyh+9mR0symC0V8Sm5OKlDYKHLqGBBEjGFr86W
+         vNNg==
+X-Forwarded-Encrypted: i=1; AJvYcCVirAZX3rXLLUsQHfC1CvYUR4qIo+/dhVqJZGFoKVvIzV9BFNr7RiqKTQEs7vqZD+Z8hRTT50whRyIhGw9o6rQmh9zsU9akM/4ZgJw=
+X-Gm-Message-State: AOJu0YwMusVQu8qwfdxllth2X5FuSLI3QdjpY1cFy8VWezrM8fhkzrgz
+	92uXjKhnd3G9zVlFgOqE/h/yopATYD8v5zwf4UKKx/YDsBbTa3eztPWzBQ==
+X-Google-Smtp-Source: AGHT+IH8oYNV+froVxZZBfVcUz0Gswh4HvKplEEaUMXLrUNqo0BUjkfbera210zCHANfwadlpH/y4Q==
+X-Received: by 2002:a05:6512:3d24:b0:51a:df97:cc8d with SMTP id d36-20020a0565123d2400b0051adf97cc8dmr9213871lfv.26.1713800169781;
+        Mon, 22 Apr 2024 08:36:09 -0700 (PDT)
+Received: from saproj-Latitude-5501.yandex.net ([2a02:6b8:0:51e:bc0d:8fdc:ab42:84e7])
+        by smtp.gmail.com with ESMTPSA id k8-20020a192d08000000b0051ac9a297aasm1269612lfj.141.2024.04.22.08.36.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 22 Apr 2024 08:36:09 -0700 (PDT)
+From: Sergei Antonov <saproj@gmail.com>
+To: linux-mmc@vger.kernel.org,
+	linux-block@vger.kernel.org
+Cc: linus.walleij@linaro.org,
+	Sergei Antonov <saproj@gmail.com>
+Subject: [PATCH] mmc: moxart: fix handling of sgm->consumed, otherwise WARN_ON triggers
+Date: Mon, 22 Apr 2024 18:36:07 +0300
+Message-Id: <20240422153607.963672-1-saproj@gmail.com>
+X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: MA0P287MB2822:EE_|PN2P287MB0366:EE_
-X-MS-Office365-Filtering-Correlation-Id: 630e37fe-a9d4-4cda-287e-08dc62cb2315
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info:
-	w25C1FtJ6nspUWr3Cb0W1RUJzvGnEsvcfWW37aw/69STHalV7Bkgu8FKelYH1s51No64M6kodRO4wItvDNqTQqG4Z0EawZt1RMNLSINLsEeUGmBUPSx81fvkfBFkfhPmghLC6QrE5N1QGOQqf9xl1yD8FdC3hSCELdHcywU6lTKWJuD+LXSRqEKMfAxPHGNlUGd7fRxuJhxB4YWR6FZ0CUcM2RHrSxs3YJ37+QPlz7js9vv3CXj9/f99P0jfZglu18TDHzgb1vHZOCY0+WwEjAwXe9tNg/gfw/guszsxZCbmxnjNO60sTeL0rNdtvLVbnIjHxBLFs2dxJu9af/ia1tcGdQ3b74CKcheteRLwkwf8hdHzzR4ssCP1tAWgClmfaizbwJ4cmZFrw+mBQdmForG60LuqZpQPacjF/9BeEdg8o87vMdQ96XaKE13hZjbTzTlmaNoasS+5is2EOQGjH/IPf02933tSiQ02mEgCd5CD5KbPi3XB/+n6zTpTL42nkrLncRPb/hiUi81Cbv0Ai0x77hqY+yP57LT/e4gbrfu+PclL701I0wv1FWHVMe5YOaWPhaG9MRzLIYTQnTv5O+1jP9LORSX/74tHGBRYpShVZtLUAWZ4LWjeZWAmduKxNBidQ7HYCiSdlvA3zB8uSkY6hBMu0e2PU++k8ciLlcAFIqW8qcQSjo0CjwKCRTYJlFJ761Uc3qNL9GAFdgmI5g==
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?S3g5NThTVWhoci9XTFpXUkx5eWNTcVF4TlZnUHRqTkpxWTZBbTNoV081c0J5?=
- =?utf-8?B?Q0VHM0lETUxiRmh2VVpKcks5aHZEQVFMVk8xTE9xZzh5cnlqRklrTmpJclB1?=
- =?utf-8?B?eFdrZkZJaXJvbFhlSEtiekZZRS9TSnMxQUd1MWVZWEdjMHJxa3FLRGc2OG1h?=
- =?utf-8?B?SUNPR3pXRkdWMlF5K0tGQU44cjh3UVR2c1ZYMTlXNFNGemx4WG4zTzdWU3ll?=
- =?utf-8?B?KzNmWEFXZlNVeENDdnFlMTNIQTBmaTQ5SU9zbDAzNGVvOG1YNlJKMUo3S2x2?=
- =?utf-8?B?bWwrWDB5Vm9tOE5Xa0tJSzhZUFVZMnQvdXIvNS83R1RYemR6OGhrKzQ4TXNo?=
- =?utf-8?B?dHluaVhSdjl6dm5TK2J5bndvQTlic3cvb1d3SVplVjIvUENQVkY0aEpUSUYx?=
- =?utf-8?B?NitHd1MyWFluZ0NVN1VtZGRKakpiMkp0c2FOdk5GZjNhUHpac2ZhYlBWUi9i?=
- =?utf-8?B?dnEvREpKcmhwSm1ZbVlJcDFNK3hUYWhmRVJnRHcyN0V6TUJoVGptZWpmS2FQ?=
- =?utf-8?B?TlZBTmt4Y0R0OTBpODFyb3dkMXdsbWYxY3BKZmdyeWJ3eVVNY2tWNUlzWVhS?=
- =?utf-8?B?RGZCS3dBVnlOSktwMEU2U1RUNzVoYVdtanhXU3FyREpnZjBSYWo1UGEzQ3Nx?=
- =?utf-8?B?OWkwOG9rWmpOQ2ZJL3AvTXFIUmxncU5IbFpwTG1xYmhXK2xVbHV3dnFwVkYw?=
- =?utf-8?B?NWZocWRHZUJQVjVCVFBCWTFObC81ZXRsSDFMbnZzc1dwVG1XQnVtOHVXNllB?=
- =?utf-8?B?dGRURDloajJRMklVc1pWSjJaL1F3cDc4ZVhnTjVWQnpvQTBPdXVtSDl0UlB1?=
- =?utf-8?B?ZEtWMmJxeERrYkZGNlV3VGl6aWNwc1FUNlZtMHV3aG55Z2wza1BDWmtpYTh3?=
- =?utf-8?B?dVp4VUJYaEN0WW1lcTZJVi9nVG1CM08zYnQ5bms3ZnVpTVd1NXk5M3Bkc2hv?=
- =?utf-8?B?WEh0VklYZUQwR01Ea0pGNjExOFEvOWtFcEMwU2llWXVxaTRIZU9vVWZQRFdD?=
- =?utf-8?B?TXJsd2Z3c0t6UmNtY1N4ZUNVTVlUQlRVelgxUTY5UlllZXNYUkZZTmFBbTVa?=
- =?utf-8?B?N1l2WlJ6bGpJeEI3c2QxRnJlcndLV1MrOGZPYUQ4S0FxTnlDSlB4RVRrUjg2?=
- =?utf-8?B?VUk3aW0xZlc0NHZuUktEL1cyUlEvMHVKMnNpUGQvak94b2ttRUFGZW9tUDQ4?=
- =?utf-8?B?Mm8vbnMxaTNoYXRQeXVEYkNjMFhLalRyVmNMZXNCZUpuYjJPaFBSVTYxam9K?=
- =?utf-8?B?bnRINVBHM2pjU3NVZi9lY3YwR0hhN0lkMFk2T0JTWkZCdmd5cVYwSU9KVGMv?=
- =?utf-8?B?SXVvWlFQQkV2SmZTMkJOL0YwZCsvSTZORnJ4Ni8zSlFHc29TdWIxSXRTR2Iy?=
- =?utf-8?B?SmFlSkFmd0w4VmdzWkx6NUlPTm0zcnQ0SDVKcUZxZkhVT0p2bjJVK00yU0lH?=
- =?utf-8?B?SFYyYlVQNVRMcmZuYVA5d2ZVcWdzR2V2eGR6YXdMU1hhbjRzT3JiVFJMSW1Z?=
- =?utf-8?B?TzhoRGk3K3lwRkNNbnFVWm1DazV6b1pBcWNXNzRSK2FidFlwSkhCb3pIeFcr?=
- =?utf-8?B?bWFBaU9QME5xU2J2L1FLTmdjbU5pMzR6UjZUcUJ2VTRHNUVyUDVwUmtCUUxW?=
- =?utf-8?B?KzFoaEJ5cFVTQVNqNjNMMjk2cVNqRWtXWkpNSHpqVnBhU2FubWhKcFVjckRU?=
- =?utf-8?Q?MML1/6TJDIx9JcIV+ZJg?=
-X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 630e37fe-a9d4-4cda-287e-08dc62cb2315
-X-MS-Exchange-CrossTenant-AuthSource: MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 22 Apr 2024 12:52:58.8136
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
-	00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PN2P287MB0366
+Content-Transfer-Encoding: 8bit
 
+When e.g. 8 bytes are to be read, sgm->consumed equals 8 immediately after
+sg_miter_next() call. The driver then increments it as bytes are read,
+so sgm->consumed becomes 16 and this warning triggers in sg_miter_stop():
+WARN_ON(miter->consumed > miter->length);
 
-On 2024/4/22 18:44, Adrian Hunter wrote:
-> On 22/04/24 12:01, Chen Wang wrote:
->> hi， any comments on this patch?
->>
->> Another patch [1] has dependency on this one, so I would hope someone can review and comment this one first, thanks.
-> Does not apply.  Please re-base on mmc 'next' branch of:
->
-> 	git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
-ok
->> Link：https://lore.kernel.org/linux-riscv/cover.1713258948.git.unicorn_wang@outlook.com/ [1]
->>
->> On 2024/4/16 17:43, Chen Wang wrote:
->>> From: Chen Wang <unicorn_wang@outlook.com>
->>>
->>> When I tried to add a new soc to sdhci-of-dwcmshc, I found that the
->>> existing driver code could be optimized to facilitate expansion for
->>> the new soc.
->>>
->>> Thanks,
->>> Chen
->>>
->>> ---
->>>
->>> Chen Wang (1):
->>>     mmc: sdhci-of-dwcmshc: add callback framework for expansion
->>>
->>>    drivers/mmc/host/sdhci-of-dwcmshc.c | 185 ++++++++++++++++------------
->>>    1 file changed, 107 insertions(+), 78 deletions(-)
->>>
->>>
->>> base-commit: 4cece764965020c22cff7665b18a012006359095
+WARNING: CPU: 0 PID: 28 at lib/scatterlist.c:925 sg_miter_stop+0x2c/0x10c
+CPU: 0 PID: 28 Comm: kworker/0:2 Tainted: G        W          6.9.0-rc5-dirty #249
+Hardware name: Generic DT based system
+Workqueue: events_freezable mmc_rescan
+Call trace:.
+ unwind_backtrace from show_stack+0x10/0x14
+ show_stack from dump_stack_lvl+0x44/0x5c
+ dump_stack_lvl from __warn+0x78/0x16c
+ __warn from warn_slowpath_fmt+0xb0/0x160
+ warn_slowpath_fmt from sg_miter_stop+0x2c/0x10c
+ sg_miter_stop from moxart_request+0xb0/0x468
+ moxart_request from mmc_start_request+0x94/0xa8
+ mmc_start_request from mmc_wait_for_req+0x60/0xa8
+ mmc_wait_for_req from mmc_app_send_scr+0xf8/0x150
+ mmc_app_send_scr from mmc_sd_setup_card+0x1c/0x420
+ mmc_sd_setup_card from mmc_sd_init_card+0x12c/0x4dc
+ mmc_sd_init_card from mmc_attach_sd+0xf0/0x16c
+ mmc_attach_sd from mmc_rescan+0x1e0/0x298
+ mmc_rescan from process_scheduled_works+0x2e4/0x4ec
+ process_scheduled_works from worker_thread+0x1ec/0x24c
+ worker_thread from kthread+0xd4/0xe0
+ kthread from ret_from_fork+0x14/0x38
+
+This patch adds initial zeroing of sgm->consumed. It is then incremented
+as bytes are read or written.
+
+Signed-off-by: Sergei Antonov <saproj@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Fixes: 3ee0e7c3e67c ("mmc: moxart-mmc: Use sg_miter for PIO")
+---
+ drivers/mmc/host/moxart-mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+index b88d6dec209f..9a5f75163aca 100644
+--- a/drivers/mmc/host/moxart-mmc.c
++++ b/drivers/mmc/host/moxart-mmc.c
+@@ -300,6 +300,7 @@ static void moxart_transfer_pio(struct moxart_host *host)
+ 	remain = sgm->length;
+ 	if (remain > host->data_len)
+ 		remain = host->data_len;
++	sgm->consumed = 0;
+ 
+ 	if (data->flags & MMC_DATA_WRITE) {
+ 		while (remain > 0) {
+-- 
+2.40.1
+
