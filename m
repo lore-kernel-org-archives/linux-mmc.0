@@ -1,140 +1,96 @@
-Received: from mail-vk1-f171.google.com (mail-vk1-f171.google.com [209.85.221.171])
+Received: from mail-oo1-f52.google.com (mail-oo1-f52.google.com [209.85.161.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 028D845BE6;
-	Tue, 23 Apr 2024 07:21:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4D1B4644E
+	for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2024 07:29:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713856908; cv=none; b=iIynaCi5vtAaqPeS0BJj7YMPy3MVEL5ijazIhemEnlFnLhuqHIM81m+fPt0B1DHiXp9+/a3DV2hBGLHH8AFMXBZ2I9RKVLgEyjVGuXrRW09ryrtDcnHqrubJ46vnK0CqcpzeRexdIuHUfk0X7ixURXidsw0G/b6YmDpdqRIKYtQ=
+	t=1713857354; cv=none; b=Wxru1EQyTq8pUiVaJFWoo0CJjz0/K4Gm3Zw9OvII7eYspmv5HUDbEZ1PbgG6/7IkgaLNGpNnB1aMr8BahrItrP31MVVj43qlFD6bwcmQjD32asgpj9O+onXsXI62sk+LWl5oatSZGC/D/iYomuTc8MrNJ2xg9AzJp2pR/lIXzow=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713856908; c=relaxed/simple;
-	bh=DZwvJBUuMA47kEE0aDP5oilaNQckPgJ5T7HKSFYvLKs=;
+	s=arc-20240116; t=1713857354; c=relaxed/simple;
+	bh=8J9g8lnEZxWWfzBBFOCzCi6lqmw+2v5kQ0AaUn49+uo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JOdk+BYCQAaWBTrtH+yqYr8CYaBA9ej6wWDskmdYU1GgwVn8942Qe+OTyGsLEVaD3IfhvypusUVnYAgmzb31Fh+NT47S1yG55fVEJbWr6vr6gHpAF3FynBPt6GYJXMjJBrf8Let4YRMwCuE3nDdz9ClYqJRwLMgWpifHHp+aT/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=E6m3P02R; arc=none smtp.client-ip=209.85.221.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=Mmv0TjizUZ8kqJHBBVelok4go3aJQ82KPVo/tKo1mLzlvY26N14n3LKYKVbC5WkN7oHaPI8Z6OEWyd0gcEMfG3Q76dJVr2m8lrdnM7km4BzRQVZ4IRk7SpmxqrjAHi3wEuBWx4vmdzZH1JZE5C/E/taX4fkkjwViNynIeFOTlfk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FUz2DoXo; arc=none smtp.client-ip=209.85.161.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E6m3P02R"
-Received: by mail-vk1-f171.google.com with SMTP id 71dfb90a1353d-4daa8e14afbso1536908e0c.3;
-        Tue, 23 Apr 2024 00:21:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FUz2DoXo"
+Received: by mail-oo1-f52.google.com with SMTP id 006d021491bc7-5aa17c29ba0so3105732eaf.3
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2024 00:29:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1713856906; x=1714461706; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1713857352; x=1714462152; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=nGcido0Tu+sqPBnY3rW0RLBhQu5+ta+3ZIsULRMIDXI=;
-        b=E6m3P02R9Yh9Nwzh9FkZQD1Nra36wlp0e2WTtJYdTw+rr8uMJCFh3BqCvsbWNxQole
-         dD1cLWRMAer09b54JkMKP2PR2rqQszQVWkWOt2+IwtddCxxlQfeQBWBV697nMvIgEBwx
-         dcH4vj5ZkvtK/h6Gesh7FB7Rpz4pzempgPgQoAx1do6WaGvcaJAoytCTfwtHyiujuGHq
-         orDRjJ5wGyvL4sE0SO7QlOd35kJbU9N+dy9sYGiHJikUL/yD9mt1x6avC95Ue5uITbbN
-         9roC4LCqBM1F0qAsYB1USB1KEOyBYOSv071E9vTHncgeYqdSB6O1rA2KNWnNkmOhAbNH
-         LyKA==
+        bh=8J9g8lnEZxWWfzBBFOCzCi6lqmw+2v5kQ0AaUn49+uo=;
+        b=FUz2DoXoag7u3+egnkPVb61u5dTRmTG59Eh5ULYoABTNEvgm8spBYQgjOYi6ofgkjg
+         z7Y15aMtiMY0CQMdv0KfjerjjDKVdNFm1BK6k3nIS8iAF8zEl79JnL2sFj0oYkaxo5o3
+         mdFRpOHo7tHhT1oEApnrx9ShsLhFwrkFxIlxT4R/iW7yYBRrLIX/AIgqwC0ntDDd++AF
+         Im08HgmH3rcaCoR9Sb8GtE+R7JpBjO1NwHWz4gtdjSWEAA14kbHFN4U0UjZYlloAQe9G
+         SXg1+qWt9ym40M10289wxzkMzeqV1bzGgOUtFubyC5Q4nIUorv6iw9fEKsvh0gNXz9VX
+         yXPg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713856906; x=1714461706;
+        d=1e100.net; s=20230601; t=1713857352; x=1714462152;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=nGcido0Tu+sqPBnY3rW0RLBhQu5+ta+3ZIsULRMIDXI=;
-        b=B+LG4SfL/tt66Ze7HmyfD9kOtgEE7r/4vq/ckyi9JYIsWV5YgSRlJ463ohUQm8wb3T
-         H8LF9xOQDNWqw2l3nWpvn/HoM7Pf0nQ+YWNWoQmCZgerSRMRp8bifsEantUQgF1+9tFR
-         UFhXUBXCJ5elGqqSsC0O1J1e7eCRTADzkF+RE51i5JY7E4XT3ktMMfPz7eQv8swd/ojJ
-         PraIVvmz1bUmbaKnm536xqAjz4X6lMFPyTqM0CSRHMBHZj6a6zFjeb0S0raKAhKZ2p0m
-         0PXhLyjMF8vNKZWAwmqki5NHZa+YYNuSUlN5acYFPUZFYCu7oH6r6wsKNn49MMkMH4+R
-         vvfw==
-X-Forwarded-Encrypted: i=1; AJvYcCUJBjC8fpRq1JeGaVUziIw0bFNyEW2yaV8MzUNg/Cg6XcdXW1AgcktJo0tnNr2GX2zhKLg/RwNQK+gDWXhWq75A9FrdED0IPe01ymEqp2WEII3kEwIaudgTNLDi0+ZD2TNrC4nmskd1v0bAHnT4EbMPQHpZUoKLJNZlEYuW7ffJZPodSNXhpLG7qRuwjnMguAjFcIYYaLTaZAis1O17UqbAhGCtguwU
-X-Gm-Message-State: AOJu0Yx8TC6ZE8k1IwaA7KHFt53aOTE/4j3V6wdmM55MYpe3RiRkdRMs
-	YSnyab01KD1V5whXmHnR2bOlfWHNO0adN28YGPZc9UcehcwnEvwMjeSBMvDtgpQ+dsuCmOiC1Zy
-	ZPHG+XkkJnmSUn/PU0EzFW7XZRMw=
-X-Google-Smtp-Source: AGHT+IEyHdKoSjSmv5SMk26d8PY4/GPGiTFy/VyKs/OO8cHM21g6iqyz3G7fRKdiqOyBXWm0NB+BCIqWy8c5R5GLtyU=
-X-Received: by 2002:a05:6122:ca5:b0:4da:e777:a8e6 with SMTP id
- ba37-20020a0561220ca500b004dae777a8e6mr14730429vkb.14.1713856905886; Tue, 23
- Apr 2024 00:21:45 -0700 (PDT)
+        bh=8J9g8lnEZxWWfzBBFOCzCi6lqmw+2v5kQ0AaUn49+uo=;
+        b=RCKfDUsZCuoZqTWVyNJ5HHkBrdS3UV3lbkg6RWDx2wLLylDkBYRTHo3xo4iAm798Hb
+         Rf/5wwqICFKzuiTFuybj+u8nKREwUkabpdoOrTUDHP+0B/R9PxzTPHsWkR3Tq1sx8MNw
+         jnuvgl3SF25XApzkz4XQU8Lqb49kqRySYPDyujOubbsg3Q1Way7iQAKwLcValHgKgteO
+         T79TL4Gu4pX+fwhSoeKidui2XkPOJQZj7N8SFFYoUaTa2H01ZiN7oTtpwdxtpytLzMcj
+         yY+aiZHtFZf1a3QGgOdyKg96n3092pbTUPukGwtJ0mO/wgDd7wftcfO1D3m9oA+p/2QB
+         EO2g==
+X-Forwarded-Encrypted: i=1; AJvYcCXLXd6VFHzc+zj5XKqc8odh6EJZCSXoUwul7kOLrD3c+BYH21na5DyChfRl458jEa0+5yOi4pvc7SfPKMZhHlWKc+CyZDCq8xDp
+X-Gm-Message-State: AOJu0YzhP/Kri1lBPak56wkKah/S+0Cncd/hUn0xn/ZE78KiOPwF8vms
+	MwqOejZtPMzoOrnMVF1xXpmKOM2WMYF06pvjZHFi3j0MJUvIr/xmRUXZdjRO/15r9/XSV4EOlBr
+	vXCFdIkiWjwKb/rWEZ5EfnwRMub+i1qe+0Gi27g==
+X-Google-Smtp-Source: AGHT+IFR3tYO6BNlXgy56Tiz5e6rKgyLWYt2S9u0tnGHKee8gkVG/fWs/GiBy8pvObkdn3U5DOykXwfqRWSTNmFY9Ck=
+X-Received: by 2002:a4a:5406:0:b0:5aa:5252:6efc with SMTP id
+ t6-20020a4a5406000000b005aa52526efcmr14273463ooa.9.1713857351936; Tue, 23 Apr
+ 2024 00:29:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240422213006.505576-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240422213006.505576-2-prabhakar.mahadev-lad.rj@bp.renesas.com> <2b422e9f-bd80-4c57-a3e1-8b463b25c834@kernel.org>
-In-Reply-To: <2b422e9f-bd80-4c57-a3e1-8b463b25c834@kernel.org>
-From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Tue, 23 Apr 2024 08:21:10 +0100
-Message-ID: <CA+V-a8s1xDT7sGMpz_n45v9QzhpWUdJv9eXmUJoxPaJ69MiY7A@mail.gmail.com>
-Subject: Re: [PATCH 1/6] dt-bindings: mmc: renesas,sdhi: Drop 'items' keyword
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20240422091936.3714381-1-jens.wiklander@linaro.org> <DM6PR04MB6575CE5A70F2C733DF40E54CFC112@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB6575CE5A70F2C733DF40E54CFC112@DM6PR04MB6575.namprd04.prod.outlook.com>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Tue, 23 Apr 2024 09:29:00 +0200
+Message-ID: <CAHUa44EzMpRbhJ=-h4hJifgtrMsvDZj=Zt4C3JkDxjKE4gz=7A@mail.gmail.com>
+Subject: Re: [PATCH v5 0/3] Replay Protected Memory Block (RPMB) subsystem
+To: Avri Altman <Avri.Altman@wdc.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
+	"op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
+	Sumit Garg <sumit.garg@linaro.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Hi Krzysztof,
+On Tue, Apr 23, 2024 at 8:42=E2=80=AFAM Avri Altman <Avri.Altman@wdc.com> w=
+rote:
+>
+> > The OP-TEE driver finds the correct RPMB device to interact with by
+> > iterating over available devices until one is found with a programmed
+> > authentication matching the one OP-TEE is using. This enables coexistin=
+g
+> > users of other RPMBs since the owner can be determined by who knows the
+> > authentication key.
+> Devices in plural?
+> I am unaware of any board with multi eMMC devices soldered.
+> Can you refer me to such a platform?
 
-Thank you for the review.
-
-On Tue, Apr 23, 2024 at 7:29=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.or=
-g> wrote:
->
-> On 22/04/2024 23:30, Prabhakar wrote:
-> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> >
-> > Drop 'items' keyword from compatible list which have single const value=
-.
-> >
-> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > ---
-> >  .../devicetree/bindings/mmc/renesas,sdhi.yaml  | 18 ++++++------------
-> >  1 file changed, 6 insertions(+), 12 deletions(-)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/=
-Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > index 29f2400247eb..90c8b1b727a8 100644
-> > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > @@ -12,16 +12,11 @@ maintainers:
-> >  properties:
-> >    compatible:
-> >      oneOf:
-> > -      - items:
-> > -          - const: renesas,sdhi-sh73a0  # R-Mobile APE6
-> > -      - items:
-> > -          - const: renesas,sdhi-r7s72100 # RZ/A1H
-> > -      - items:
-> > -          - const: renesas,sdhi-r7s9210 # SH-Mobile AG5
-> > -      - items:
-> > -          - const: renesas,sdhi-r8a73a4 # R-Mobile APE6
-> > -      - items:
-> > -          - const: renesas,sdhi-r8a7740 # R-Mobile A1
-> > +      - const: renesas,sdhi-sh73a0  # R-Mobile APE6
-> > +      - const: renesas,sdhi-r7s72100 # RZ/A1H
-> > +      - const: renesas,sdhi-r7s9210 # SH-Mobile AG5
-> > +      - const: renesas,sdhi-r8a73a4 # R-Mobile APE6
-> > +      - const: renesas,sdhi-r8a7740 # R-Mobile A1
->
-> That's just an enum.
->
-Are you suggesting to group them into a single enum instead...?
-
-> >        - items:
-> >            - enum:
-> >                - renesas,sdhi-r8a7778 # R-Car M1
-> > @@ -40,8 +35,7 @@ properties:
-> >                - renesas,sdhi-r8a7793  # R-Car M2-N
-> >                - renesas,sdhi-r8a7794  # R-Car E2
-> >            - const: renesas,rcar-gen2-sdhi # R-Car Gen2 and RZ/G1
-> > -      - items:
-> > -          - const: renesas,sdhi-mmc-r8a77470 # RZ/G1C (SDHI/MMC IP)
-> > +      - const: renesas,sdhi-mmc-r8a77470 # RZ/G1C (SDHI/MMC IP)
->
-> This as well
-... including this?
+I'm testing with a Hikey960 (HiSilicon Kirin 620)
+https://www.96boards.org/product/hikey
+It has one soldered eMMC and one removable eMMC.
 
 Cheers,
-Prabhakar
+Jens
