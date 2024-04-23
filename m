@@ -1,116 +1,147 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+Received: from mail-oo1-f41.google.com (mail-oo1-f41.google.com [209.85.161.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4FBF12FF94
-	for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2024 11:32:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63BCD13DDA4
+	for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2024 17:03:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713871958; cv=none; b=oNBZki1+qeSsduqXxna8vJH12SLfRMUHEMf5OdWZaV50UHOJDqpUwMlFiVTGUFk9a8CkcPgeNoLxHypvNRhAGKxbo/ohuacwV7RzAwZ2D2Sl9gwhT67roKW2eomfeMHV9JYygq0jdvwKpWzmVXmymD+9ApODHWVbp4/WnUNLcWk=
+	t=1713891788; cv=none; b=cNsCM7+2dd6kZr/CQDTcJe7MeHOvvmTjK2/7DwbJeSZ4yemLQRss3n4d/un7ybHY5AFffwjvC/Es52CfK4l2mMSZIkp4dFmaFyDYV9Bvvw+OeH8fahEfMB8e8WNopnTtmrOyiS6VCHJoE7EU8vNSv7qncGOgucTFHGL6idajzNs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713871958; c=relaxed/simple;
-	bh=6JSkXikC9phwVSWaDiu6ynYlQdgKUl8cQ/ISIuFOuMk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=muBp8D8rbGqDyGGIrVDH3XOx+0v2gh0nSC3a3nh4egPQhEl3J9VTnqw0YoZ1iPPUiTxmL7OHS3Vhocf8pvrE3ciqJMtySkc/eOlDKjTmJPAuQ/6bmSMzqjI65FfveUlvqO+L50LwcsGLTpTEKsKjJIQkkkKIB3Cful42JP0L0Z8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=QJ162+XQ; arc=none smtp.client-ip=209.85.219.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1713891788; c=relaxed/simple;
+	bh=9+K+P97GCUdZWHwzPxP/an13HvsoRPLj4WBuLAa0Wmg=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Content-Type; b=efCfUAMPfP9DH/PsHasXOhea2q7zOsoQjV0BqHvMs4+j/eJvM+glWZ6fZOmA2lST0GrEoHbFxK5g5nMVyS1YMeOeTbD/mnqm8MzOY+yUT7HUGiLBNqCe2dpuz+0om0ttUt4XgNoQ6xt1p8rWNBB00/B11Ga6KgNNGKm6DLGNLE4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=DuSLS2yj; arc=none smtp.client-ip=209.85.161.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QJ162+XQ"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-de45dba15feso5585400276.3
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2024 04:32:36 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="DuSLS2yj"
+Received: by mail-oo1-f41.google.com with SMTP id 006d021491bc7-5af3035825eso34956eaf.0
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2024 10:03:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1713871956; x=1714476756; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Et2zyWRxhdaNlGPfinvNaQNk16nd2FcOtU6ILlCc+p4=;
-        b=QJ162+XQCqw0xvvc45kuuTzIwsIphznuO/ordGGF1GRQjMit9e5Y059OC6cFdhNp/u
-         CavBITt0a9dCs57H9gsBm8x5vPBrK8sthTDf7nF5uWvw1hRpcNTIjRX2Ou9G7sfF5m3W
-         A1y2MwXMuz+wzGqLX/9/rDXOxRLSrwFm83DZ4JXxWWKUkk+UG0cGzjp51srPLGlWvJsf
-         9qXI2rwm6fwO47Y83KKgNI5BJIu7u7yNlkr9dGsRd4qTQ2ylj9bOj2geSlVxFnz8Tt8d
-         JwjRlsxi2qhQuGowVqR/ArGlEqX5dJpEQof4dhjF6ydAqY+y6LvnFR8TiYFPBuNH5gsh
-         +EpA==
+        d=broadcom.com; s=google; t=1713891785; x=1714496585; darn=vger.kernel.org;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=9+K+P97GCUdZWHwzPxP/an13HvsoRPLj4WBuLAa0Wmg=;
+        b=DuSLS2yj8Lut/xWej8eB04qdHi9vkGEegfGdzueFyMwNjr0kt/ZeHrH6roXBqDOFaT
+         OxzDWLcbG07qUxHjwSBRZxq00vDofrp9MM3vCFtrucZMiBszy9lOr7Eq1yzqhMzxaFqt
+         GVyhfJjEQnREaYsjg+CwDi44XrnJsHPvd+O9Y=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713871956; x=1714476756;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Et2zyWRxhdaNlGPfinvNaQNk16nd2FcOtU6ILlCc+p4=;
-        b=nSZvcWRC9Mx9Mf7iJaFzW1UZ/DPaPtmmMJmcISUgmstVwaBkjQNCazOHh3Nyu9uTfr
-         dobKEGyII0pTiqtuVoeOn3GEDP7UP7QdVlSKV8Pt8ImHsouYHgsRqxZfoH2TFNzKqC4f
-         1cza6P6aPL9mjbk+ItnZKb8F0xSynWpPAopc3/N5M/aruGqh/nTs481PbAD9U60S5cHI
-         BIM05z/0443SAioD473Vka4r/WM9abewHUwPAq6DX4y8nAWczzEcZqwdI+i039r0m+qw
-         etwYph91Bm4dC7MaVN5yfGdpE/+zNbgaSHzkfp9QPsy3uetRDEAi6ZHp9iCWcGWSLtlW
-         NTRg==
-X-Gm-Message-State: AOJu0YwFQF1WlznEhS10P6BL+6+FnDsAvHoqPOO2JbNFAVlHQNW9c+sr
-	df8D7h35OZIdkLES7YXqIa2qRKRfy7ubX0po2DoWUV89p5zydgAqeI/663ofTOAFxxQ2QeDs2p6
-	DJJxTqtXDqnhGzFAkthUD24LxWE8fnijIu7N5LcmnGvcRsSePsLg=
-X-Google-Smtp-Source: AGHT+IE/RhH9VTMneQ8oGJ5LGvjil8CRg8sdcJNNohAvUzNf0okh3mIY6SjCpEh/jV76cheiXYuSl8nPr0m0lpgji7c=
-X-Received: by 2002:a25:9c05:0:b0:de4:5cfe:855a with SMTP id
- c5-20020a259c05000000b00de45cfe855amr11710868ybo.33.1713871955742; Tue, 23
- Apr 2024 04:32:35 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1713891785; x=1714496585;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=9+K+P97GCUdZWHwzPxP/an13HvsoRPLj4WBuLAa0Wmg=;
+        b=gMHyQvzX+6mc9zAsLFUMa1SYUlwGpxVqbtN41M9dBXOWx+QJkmagNLpNdsBJpaSvWV
+         cE7LwX0KAEX5j9tmZsQRlBPIceqH/NFSc0TGkmpjxD6UqGVSH3AR5loZGV0nZJy3cx/k
+         ElaTuIDUPGa8WuWC/Vdqw6Wn+m/11eSepvWo8bILh6WJTYAVrmM4y78yZCo3GpbOfHiL
+         8oemVp2B6ejUPOaxnErhQZrG5OjY91GvcApS0GDgdcNSMVKivbpkrN3dzns2PFc10MRa
+         3MSY0zdR0gWacNLnmQ9LcYbUgMYygbky01QBZqd8zm2wWjk7uQyYTtjwEeaDvRkr+WY3
+         Z10w==
+X-Gm-Message-State: AOJu0YxIxC1IYhIeQ1qxI10i8lLpmt713kb3n8zTOCD4w5a2DGrhwj7C
+	iLKP3xhXs7hvb/XgmEOESBtBAYmoQ2UXeGsFc0pNRQAyJkCAaT5wKAfDtm/ZH3HK/CpSCJE4eU3
+	p2PBkVSIpFCoTzMd9xbqNoZoGH2NIzOIEj/RrrIZrWqf/nIQ=
+X-Google-Smtp-Source: AGHT+IGmTfpul08AVlwvJMv/QPdRyhAfXTSCp4N3ie5Mucc1sM+x5dm89d7MsjFsCkHFmFgZAYW20olXFah69pI/lxw=
+X-Received: by 2002:a05:6870:b623:b0:229:ece6:80b0 with SMTP id
+ cm35-20020a056870b62300b00229ece680b0mr1378065oab.11.1713891785245; Tue, 23
+ Apr 2024 10:03:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CABikg9z9NqFwJ5VGtHhtZY9_gNAAoSbAfmAnTHcbp2=b0M3LcA@mail.gmail.com>
- <CACRpkdbGQkVcUC920soft_CLSNiAjHd1QUfv5T=9Wvd3noAuLw@mail.gmail.com> <CABikg9zHfiTX3gR2qUWRTaeuu1FG4rvc7qhJWEj59ukns_-dDg@mail.gmail.com>
-In-Reply-To: <CABikg9zHfiTX3gR2qUWRTaeuu1FG4rvc7qhJWEj59ukns_-dDg@mail.gmail.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Tue, 23 Apr 2024 13:32:24 +0200
-Message-ID: <CACRpkdY60cQYOC_-dbs7xgW5OH7oCRO2Y5PEDgiS-9V=4pBj_A@mail.gmail.com>
-Subject: Re: breaking commit: mmc: moxart-mmc: Use sg_miter for PIO
-To: Sergei Antonov <saproj@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+Date: Tue, 23 Apr 2024 13:02:29 -0400
+Message-ID: <CAKekbethb2dCxMjyVuz3TicHhzLkuY-UfvWKE4sguwfzwAysvw@mail.gmail.com>
+Subject: subscribe to linux-mmc mailing list
+To: linux-mmc@vger.kernel.org
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+	boundary="0000000000000f48b10616c687ab"
+
+--0000000000000f48b10616c687ab
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Apr 23, 2024 at 1:14=E2=80=AFPM Sergei Antonov <saproj@gmail.com> w=
-rote:
-> On Mon, 22 Apr 2024 at 20:55, Linus Walleij <linus.walleij@linaro.org> wr=
-ote:
-> > On Sat, Apr 20, 2024 at 10:38=E2=80=AFPM Sergei Antonov <saproj@gmail.c=
-om> wrote:
-> >
-> > > [    7.018270] BUG: scheduling while atomic: kworker/0:1/9/0x00000002
-> > (...)
-> > > [    7.057443] CPU: 0 PID: 9 Comm: kworker/0:1 Not tainted 6.8.0-rc4+=
- #225
-> > > [    7.064527] Hardware name: Generic DT based system
-> > > [    7.069677] Workqueue: events_freezable mmc_rescan
-> > > [    7.075121]  unwind_backtrace from show_stack+0x10/0x14
-> > > [    7.080930]  show_stack from dump_stack_lvl+0x34/0x44
-> > > [    7.086576]  dump_stack_lvl from __schedule_bug+0x64/0x84
-> > > [    7.092608]  __schedule_bug from __schedule+0x58/0x594
-> > > [    7.098320]  __schedule from schedule+0x74/0xa8
-> > > [    7.103368]  schedule from schedule_timeout+0xd4/0x108
-> > > [    7.109070]  schedule_timeout from __wait_for_common+0x94/0x120
-> > > [    7.115547]  __wait_for_common from moxart_request+0x278/0x468
-> > > [    7.121980]  moxart_request from mmc_start_request+0x94/0xa8
-> >
-> > moxart_transfer_pio() is called from the interrupt handler and
-> > should be properly atomic right, so the flags to sg_miter should
-> > be fine.
->
-> The stack in my message does not include moxart_irq() or
-> moxart_transfer_pio(). It is not an IRQ.
->
-> As a result of commit 3ee0e7c3e67cab83ffbbe7707b43df8d41c9fe47
-> SG_MITER_ATOMIC is used in the context of moxart_request():
-> moxart_request() -> moxart_prepare_data() -> sg_miter_start(,,,SG_MITER_A=
-TOMIC)
-> and in the same context down in the code a
-> wait_for_completion_interruptible_timeout() is called.
+Subscribe to linux-mmc mailing list
 
-This puzzles me since sg_miter_start() isn't doing anything
-that is atomic, such as kmap_atomic(), which is only done in
-sg_miter_next(). It doesn't even look at the flags, just assign it
-to __flags in struct sg_mapping_iter.
+Kamal
 
-I.e. calling sg_miter_start(,,,SG_MITER_ATOMIC) does not
-need to happen in an atomic context.
+--0000000000000f48b10616c687ab
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
 
-Yours,
-Linus Walleij
+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
+DxuNuBlySpn/GYqPcDcRZd8EENWqnZrjtjHMk0j7ZfrPGXq8sQkbG3OX+DOwSaefPRq1pLGWBZaZ
+YuUo5O7CNHo7h7Hc9GgjiW+6X9BjKAzSaDy8jwIDAQABo4IB2DCCAdQwDgYDVR0PAQH/BAQDAgWg
+MIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
+LmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUFBzABhjVo
+dHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAyMDBNBgNV
+HSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xvYmFsc2ln
+bi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRwOi8vY3Js
+Lmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAiBgNVHREEGzAZ
+gRdrYW1hbC5kYXN1QGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAfBgNVHSMEGDAW
+gBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUcRYSWvAVyA3hgTrQ2c4AFquBsG0wDQYJ
+KoZIhvcNAQELBQADggEBAIKB2IOweF2sIYGBZTDm+Hwmhga+sjekM167Sk/KwxxvQFwZYP6i0SnR
+7aR59vbfVQVaAiZH/a+35EYxP/sXaIM4+E3bFykBuXwcGEnYyEn6MceiOCkjkWQq1Co2JyOdNvkP
+nAxyPoWlsJtr+N/MF1EYKGpYMdPM7S2T/gujjO9N56BCGu9yJElszWcXHmBl5IsaQqMS36vhsV0b
+NxffjNkeAdgfN/SS9S9Rj4WXD7pF1M0Xq8gPLCLyXrx1i2KkYOYJsj0PWlC6VRg6E1xXkYDte0VL
+fAAG4QsETU27E1HBNQyp5zF1PoPCPvq3EnWQnbLgYk+Jz2iwIUwiqwr/bDgxggJtMIICaQIBATBr
+MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
+YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgw89WX2Pp7ue922QVkwDQYJYIZI
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIDBlcDu31VeSjPV4P9R/Fv0ixHiYVYPu1XM8jLX+
+zZHwMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI0MDQyMzE3MDMw
+NVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
+hkiG9w0BAQEFAASCAQBvDZN7ZXbuIAWMTc5aHOk1qfqJd2uo7nGd7QjlYkYY7/KJ0heapLM/0K3D
+Q4XyuPMQ6f9BXS88cbGmsY+y63UTuNmVdEtJlUTRc4Nt/9jQQc0uvkVzuCtlB/K07EhjVIxw+rTs
+Dtw+FSx2QAV0MoZUi7piEwxA1+clEMk22NzPsxpNRrlERIk5arTivvKKKOazTK7aoPUDatx/hGkq
+khtn07s3uYfsnoNgIy2x2HPoJObYrkApjdE1fynbu1oi/a+4EvbYTmrtocUbTx26w+uJQyVZ8uG9
+746mGU/tfLbkebE8qxBvNU1p1wgZrOa82DmhW23frRmmflgn2+YrYMdX
+--0000000000000f48b10616c687ab--
