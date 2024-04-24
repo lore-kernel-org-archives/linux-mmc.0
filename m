@@ -1,167 +1,96 @@
-Received: from mx08-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D52D15821F;
-	Wed, 24 Apr 2024 13:21:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.207.212.93
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72ABD15ECD7;
+	Wed, 24 Apr 2024 14:40:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713964883; cv=none; b=eWx/va08RijE0fPY1x0ILTO1MwyyblCirvl51fbm5DuyW6BcSHb/7NpUi5/MTOxYRcee7vJPMoTXUNarlMqg7H0YCX3mCHU7Wt4SOPTmEEcYzCjFWXIWspq3atFmwPka1geqTe3dfqzR/6lc56cSnfVDVEDEimbOsOyHjM9xiX0=
+	t=1713969636; cv=none; b=dKJr2d9nDrtAeWpJb02pnIzVNHSoQrjH4zz6GwVh/7i/+89eYWvUiTCRhn2yMmZPaLCaMCMvNTchVZ8iF5SpyhAP7ID+btSA7+r+xHodDYubaRHvMwNRbDSQ8GImsZdlqW+4vTGW/X4PSU/UeWEHuaUfDcACG1i5Tb2nawsHc6w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713964883; c=relaxed/simple;
-	bh=bABuUtxtwMiaDJEDth6yYKqkY4fMD7xJ78zqRkijgc0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=d+f4eerOeh8o2zWpWiktseCsT9DvruN4cxFpblOXYXB9DCsdEaaAdx/kWcBep+qEnEvYTfc2fbtVTooam0Jelh8mtpOIYlaWvck60V6+LsabgCQ4dcLASXLNsT3CzG0N0MqC5XXf7PDA1MyMyQGMaJAlfbyUygRyQg+qrJDvMw4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foss.st.com; spf=pass smtp.mailfrom=foss.st.com; dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b=oPBxCIqj; arc=none smtp.client-ip=91.207.212.93
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=foss.st.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=foss.st.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=foss.st.com header.i=@foss.st.com header.b="oPBxCIqj"
-Received: from pps.filterd (m0369457.ppops.net [127.0.0.1])
-	by mx07-00178001.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 43OC4omW029734;
-	Wed, 24 Apr 2024 14:20:40 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=
-	message-id:date:mime-version:subject:to:cc:references:from
-	:in-reply-to:content-type:content-transfer-encoding; s=
-	selector1; bh=hkSUB26Hij3YoH4d4gONssMZiD9lhMIi9MYuoDahbc0=; b=oP
-	BxCIqjZqjU5yIPdolezp3gucfYE43BpO2moF0boJpv1s74317nNrf8tTbYX5usOd
-	rlKx/FhS1Qy6Jkjea82P6nnIhij2k6RtqQ72RGkfOKHZzW/rYU1jige7eN6glRBm
-	Gr/fYnvQ0nI1FFIhwyV+FpQcOob58VqnssUOpcpR/bfBeTjXY5MTu8NY0VN5oLNt
-	baPC6vo+Z6OwTORIZk9BIz6pJZyBiWpxinx+vs127hpTMIh3Q7+NTYQB11bqSkWu
-	wTRZ/tTR1dd1WWC/yQviBRPlU7NtgpxHp9kyOZz9PzdXYOFqZatkp9e4ugAKrRJ2
-	ZAcLVNQAQ/E+lH5KwgDw==
-Received: from beta.dmz-ap.st.com (beta.dmz-ap.st.com [138.198.100.35])
-	by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3xmrnj5npa-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 24 Apr 2024 14:20:39 +0200 (MEST)
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-	by beta.dmz-ap.st.com (STMicroelectronics) with ESMTP id 16FD54002D;
-	Wed, 24 Apr 2024 14:20:30 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
-	by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 0C4C621A91F;
-	Wed, 24 Apr 2024 14:19:21 +0200 (CEST)
-Received: from [10.48.86.79] (10.48.86.79) by SHFDAG1NODE1.st.com
- (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.35; Wed, 24 Apr
- 2024 14:19:18 +0200
-Message-ID: <a0bd94ce-3ddb-4448-ada9-7070323cc98f@foss.st.com>
-Date: Wed, 24 Apr 2024 14:19:18 +0200
+	s=arc-20240116; t=1713969636; c=relaxed/simple;
+	bh=/P16XX5iWdneekJXphwtShIEaCyHH6GK3VIZXrRz/bw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=smptyZ9Qyq3/s7tcW5hrPTYqoFzMpW7yGMIgWWPVaQxNS/UeNuvcTzu8Nb6MD+AKbyhRSIFhZHF0vZTawev5G3cPxzBjjoAMRf6WobqUb9CzLIVzOTERWzh23xd8V+0qJ11pQ6CtPlWejefceS9OO7oMhIyo1vEolFLHhkOQsdo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.219.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-dbed179f0faso806660276.1;
+        Wed, 24 Apr 2024 07:40:35 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1713969634; x=1714574434;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=1n3iR6ddwYoKM5lE0EM8akCCCwsZIPBSCjAQL1WN9kE=;
+        b=TBRVPnu6iFoXPeDs7mZpzcQjfqp+5bBrRWn36jqIyKlUMJ5zbhj33zypuF2Pv4a/vI
+         4yb1ZsUOGEaiAnPLK1iBpilekzL/y5e/8yOOz8q7SfvOyMVodvRXVs81KIbuOiDi6mYe
+         44AvJwoboZBYor8IQ7pJT3ibdX2d1RrmAS313Nl2lK9HP2SKNOPs/XiIj5HdHBEbr8+B
+         VWgKafTTteoWx0U1rfMSYf7m6lcFgVN/Xoin/7f249gHE5dvaPOghr1kGl3JJGshTUnW
+         2kFPpZ7yJNRGG+Cph4DW9HFRVVnUKBixVonO6sv1zLjv0hwS5U3LXq/5cpXhbPZxUI4n
+         NOzg==
+X-Forwarded-Encrypted: i=1; AJvYcCW/b2i5ML2/vHWDkAHlnLyYYakavjHjQwEB6GjmKUV9BH/WWhumqOwB71twAbrn5fAFGTfmKQ1Inn9qqbFE/MVBtYL1FlunLWaH0vB26cGlmG+/DA0x97BrD5G0uCTiBgovptJ4H4biQNJM/fqSMrl6Ud7EPOYvHQR8d2r9/+xB64w5VMDzR27m7pv8n4mXNNJ8aAVlV5QQ0bQlOOxOP0OUmm5hz3Fb
+X-Gm-Message-State: AOJu0YxtU+/L/lbO9u1XdceYd3CTS27p573Biq20iMdnzDQOGI5my4Ci
+	i5A/vvbs7pOiAzNMqRkcMaPztv1CSqbSCNcNXPm467FMaHsArwwghwGiUd98kPs=
+X-Google-Smtp-Source: AGHT+IGu1PqjQjvdPGqkbcXJMFXwmMORdq/2N41Fl/yBcVCPkL8oIYEDBkguAcFui59/tCtapstS4Q==
+X-Received: by 2002:a05:6902:c0f:b0:dd1:6cad:8fd3 with SMTP id fs15-20020a0569020c0f00b00dd16cad8fd3mr2305063ybb.27.1713969634164;
+        Wed, 24 Apr 2024 07:40:34 -0700 (PDT)
+Received: from mail-yb1-f172.google.com (mail-yb1-f172.google.com. [209.85.219.172])
+        by smtp.gmail.com with ESMTPSA id y6-20020a056902052600b00dcc234241c4sm3126656ybs.55.2024.04.24.07.40.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 24 Apr 2024 07:40:34 -0700 (PDT)
+Received: by mail-yb1-f172.google.com with SMTP id 3f1490d57ef6-dbed179f0faso806646276.1;
+        Wed, 24 Apr 2024 07:40:33 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVSB1BFwr2JlZjajEJ6NqaPKZBv6oKMFBJtXMJwjgo9WsJ3XF94E0DyQBILFLjBrFqXUpWllxUkQW3ALaxzScSIPR2rl15DqJ4yvSQld1mfha8DUUES49L7qkTk0N9Ps52/wSErpuNbdClQJKoRVC6xW0q/CjiHhl1cEwvlJL7TMqGxsdb68EPU3Np4n86ymA5+6rNic6LFrErZsQlPJUiRwTRA8gPo
+X-Received: by 2002:a25:8485:0:b0:dc6:16b7:7d6f with SMTP id
+ v5-20020a258485000000b00dc616b77d6fmr2151264ybk.10.1713969633810; Wed, 24 Apr
+ 2024 07:40:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v9 06/13] of: property: fw_devlink: Add support for
- "access-controller"
-To: Saravana Kannan <saravanak@google.com>,
-        Gatien Chevallier
-	<gatien.chevallier@foss.st.com>
-CC: <Oleksii_Moisieiev@epam.com>, <gregkh@linuxfoundation.org>,
-        <herbert@gondor.apana.org.au>, <davem@davemloft.net>,
-        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <conor+dt@kernel.org>, <vkoul@kernel.org>, <jic23@kernel.org>,
-        <olivier.moysan@foss.st.com>, <arnaud.pouliquen@foss.st.com>,
-        <mchehab@kernel.org>, <fabrice.gasnier@foss.st.com>,
-        <andi.shyti@kernel.org>, <ulf.hansson@linaro.org>,
-        <edumazet@google.com>, <kuba@kernel.org>, <pabeni@redhat.com>,
-        <hugues.fruchet@foss.st.com>, <lee@kernel.org>, <will@kernel.org>,
-        <catalin.marinas@arm.com>, <arnd@kernel.org>,
-        <richardcochran@gmail.com>, Frank Rowand <frowand.list@gmail.com>,
-        <peng.fan@oss.nxp.com>, <lars@metafoo.de>, <rcsekar@samsung.com>,
-        <wg@grandegger.com>, <mkl@pengutronix.de>,
-        <linux-crypto@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
-        <dmaengine@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
-        <linux-iio@vger.kernel.org>, <alsa-devel@alsa-project.org>,
-        <linux-media@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <netdev@vger.kernel.org>, <linux-phy@lists.infradead.org>,
-        <linux-serial@vger.kernel.org>, <linux-spi@vger.kernel.org>,
-        <linux-usb@vger.kernel.org>, Rob Herring <robh@kernel.org>
-References: <20240105130404.301172-1-gatien.chevallier@foss.st.com>
- <20240105130404.301172-7-gatien.chevallier@foss.st.com>
- <CAGETcx8HdnspNfDEJP+cqShJPsDryzGkOVq6B99cFQzkZi3dMg@mail.gmail.com>
-Content-Language: en-US
-From: Alexandre TORGUE <alexandre.torgue@foss.st.com>
-In-Reply-To: <CAGETcx8HdnspNfDEJP+cqShJPsDryzGkOVq6B99cFQzkZi3dMg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: SHFCAS1NODE1.st.com (10.75.129.72) To SHFDAG1NODE1.st.com
- (10.75.129.69)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1011,Hydra:6.0.650,FMLib:17.11.176.26
- definitions=2024-04-24_10,2024-04-23_02,2023-05-22_02
+References: <20240422213006.505576-1-prabhakar.mahadev-lad.rj@bp.renesas.com> <20240422213006.505576-5-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20240422213006.505576-5-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Wed, 24 Apr 2024 16:40:22 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdX_cUiBTv4UDp9kvbkqKxULsW98iE3dxHxfvuuP14vKhQ@mail.gmail.com>
+Message-ID: <CAMuHMdX_cUiBTv4UDp9kvbkqKxULsW98iE3dxHxfvuuP14vKhQ@mail.gmail.com>
+Subject: Re: [PATCH 4/6] arm64: dts: renesas: r9a09g011: Update fallback
+ string for SDHI nodes
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	Biju Das <biju.das.jz@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Saravana
+On Mon, Apr 22, 2024 at 11:30=E2=80=AFPM Prabhakar <prabhakar.csengg@gmail.=
+com> wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+>
+> Use 'renesas,rzg2l-sdhi' as a fallback string for SDHI nodes, where
+> hs400_disabled and fixed_addr_mode quirks are applied.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-On 4/24/24 07:57, Saravana Kannan wrote:
-> On Fri, Jan 5, 2024 at 5:03 AM Gatien Chevallier
-> <gatien.chevallier@foss.st.com> wrote:
->>
->> Allows tracking dependencies between devices and their access
->> controller.
->>
->> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
->> Acked-by: Rob Herring <robh@kernel.org>
-> 
-> Please cc me on fw_devlink patches. Also, this patch is breaking the
-> norm below. Please send a fix up patch.
-> 
->> ---
->> Changes in V9:
->>          - Added Rob's review tag
->>
->> Changes in V6:
->>          - Renamed access-controller to access-controllers
->>
->> Changes in V5:
->>          - Rename feature-domain* to access-control*
->>
->> Patch not present in V1
->>
->>   drivers/of/property.c | 2 ++
->>   1 file changed, 2 insertions(+)
->>
->> diff --git a/drivers/of/property.c b/drivers/of/property.c
->> index afdaefbd03f6..7f737eac91b2 100644
->> --- a/drivers/of/property.c
->> +++ b/drivers/of/property.c
->> @@ -1268,6 +1268,7 @@ DEFINE_SIMPLE_PROP(leds, "leds", NULL)
->>   DEFINE_SIMPLE_PROP(backlight, "backlight", NULL)
->>   DEFINE_SIMPLE_PROP(panel, "panel", NULL)
->>   DEFINE_SIMPLE_PROP(msi_parent, "msi-parent", "#msi-cells")
->> +DEFINE_SIMPLE_PROP(access_controllers, "access-controllers", "#access-controller-cells")
->>   DEFINE_SUFFIX_PROP(regulators, "-supply", NULL)
->>   DEFINE_SUFFIX_PROP(gpio, "-gpio", "#gpio-cells")
->>
->> @@ -1363,6 +1364,7 @@ static const struct supplier_bindings of_supplier_bindings[] = {
->>          { .parse_prop = parse_regulators, },
->>          { .parse_prop = parse_gpio, },
->>          { .parse_prop = parse_gpios, },
->> +       { .parse_prop = parse_access_controllers, },
-> 
-> All the simple properties are listed before the suffix ones as the
-> suffix checks are more expensive. So, you should have inserted this
-> right before the suffix properties. Also, there's a merge conflict in
-> linux-next. So make sure you take that into account when sending the
-> fix up and picking the order.
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-I'm fixing the stm32-next branch by inserting
+Gr{oetje,eeting}s,
 
-         { .parse_prop = parse_access_controllers, },
-just before
+                        Geert
 
-	{ .parse_prop = parse_regulators, },
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
-
-> 
-> -Saravana
-> 
->>          {}
->>   };
-> 
->>
->> --
->> 2.35.3
->>
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
