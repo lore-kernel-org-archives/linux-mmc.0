@@ -1,149 +1,150 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f171.google.com (mail-qt1-f171.google.com [209.85.160.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6709613CFAD;
-	Wed, 24 Apr 2024 05:42:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1266215687B
+	for <linux-mmc@vger.kernel.org>; Wed, 24 Apr 2024 05:58:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713937372; cv=none; b=qnb0P1C1VJgJzzqns8rtJIlprurlkKKGGIlShpWI6UHBQRrfnlxU6/XZetNa+cWhhLIEJrXOfzmsUxxW/uGXaUJ4tEgZItVOz2mno+0w3W/PN0TI48yYYvoZAy2N9O16e/s+9ic9wj3Cg+iGGAtt/up6rG/kE0fcqvbE8G5Z5Yo=
+	t=1713938300; cv=none; b=fm3ETT5+wL0y73y8GKUgCye7C6eMoWRVQ/aWfgJuxK2kp9ExiheDIlWWRNAMCKKRM3PqS2MUqjMHrPG8F4dFXY/cWSEFw0uxVOo4WJHAVGta0pbDsIBwY767Y0hziEKtL+e076CF35AHwMxBUmRH3TAvQXH2ARbsue/geRblydo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713937372; c=relaxed/simple;
-	bh=cROuNLbeki5Gd9BgCdNRN+Wlj5pUWw5rtrCSyV3YY6E=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Q4H9Uy31RPd6sStIwCkx1KjFqcAkwP3v7fDNYoyHLUJFkwYREZGZcWJOnnri3B+Y9RdYin7uag60m8CnM1U6rIC2dn+Nz+wc0zxdlHc8kIVN68vPNMTIAmxiGgSjN/DogZT+Bq6GLNwJMNDrKbMEYxr0mECtSHAisYKs0yTXS1U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=teMtBQW4; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1713938300; c=relaxed/simple;
+	bh=ukWXJGkwDRwc3UcBBER5J5oFKEGGzue+iwnJ1u/Jr7w=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=JIYNQ0KxYKJNSRHmzLmieMEBWhdG2vIIKfFKHlTuPapq0ISWv7m+OmUk+UwA5UFaE0Ftz+vgjx3Aiv6mMR65/Kv13UbGpDj2dHFn4cRZGOMbZ+xBQG/vt1QQQOUjMgMz2d7AP9mVnLnQg1Xer8ODjqmxH/R5sibCPjWf/JDDSr8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=AeQfblBI; arc=none smtp.client-ip=209.85.160.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="teMtBQW4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1808BC2BD11;
-	Wed, 24 Apr 2024 05:42:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1713937371;
-	bh=cROuNLbeki5Gd9BgCdNRN+Wlj5pUWw5rtrCSyV3YY6E=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=teMtBQW4kd5WLbV5Fdi/aI72LaRFrp+461u8eT36iUd1pwmgNBX90KxrEcNjK9404
-	 jbZBB+8muf/801f1IW+CoXY4JjEvYA4hFlaVifokOrt370JJ6xD1Y/n8Hj7xuSxTxD
-	 Sts3RciR4DQ22bWya07lOgfXR7+y0SuO0WhJrXRnqbsu4cYXgY37ZxH4tPO+QADSPl
-	 Wy5dZCanMBBU+fD0ZRfP8HUta6AxytSIvvdCXO1o5gVCJEMmK5jBeVpCOkZbNhrYYF
-	 tmmx4DRIB/Xwcba8p28nUI4mPXOCzywK3/g+Zg4eXpTjRJpEJvaJbk1lQRTq3LhUy9
-	 dTkuXNb3ImWMg==
-Message-ID: <7a3d4b8a-e89e-499e-92b7-9f63fbc84011@kernel.org>
-Date: Wed, 24 Apr 2024 07:42:44 +0200
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="AeQfblBI"
+Received: by mail-qt1-f171.google.com with SMTP id d75a77b69052e-434ffc2b520so122571cf.0
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2024 22:58:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1713938298; x=1714543098; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=X/W5HSMGzNKRFvroL7XEIB583TE1U/at3BEuUXdJmYE=;
+        b=AeQfblBIYDNskyZoINXVuzyw1cDfCp5Ul1CEWRhAk7HhtMpFeqAPZ5YETS7XNZALgj
+         p0KKkpaLRMJPQYK8KDoldGgklt5qesLTh2sE5r8zfeZxvnY2nY2cwYS5HspFiFtlMLmY
+         OdY6tg1RwbsqEFt4TqrY8UVHS22GfO11PqIM/e4HV2sQrL9v9FX5lJGLbOJ9tgScFhAH
+         +GKNrjCUPaSgraWb+EIpAeZ7M2RBhHCX10ETvmMO8tcTn/edvhUH3eDQg6EN3JtRzqgR
+         V/nqggQfsLk2e3z1xXvhn5Z0+jVYLRj91Jd6U6YPluiayupZPG4JAtllDfcsqUvj9JPc
+         lcXA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1713938298; x=1714543098;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=X/W5HSMGzNKRFvroL7XEIB583TE1U/at3BEuUXdJmYE=;
+        b=Xpm/yYZ1l+40lzbcHICWjtyvNi9fynj+Ggg/lyzF2kixTKObVKe6LP1dlyMBRfQrh+
+         6+EDckTalLWGIedMzCFmsHcdH3D0GwWEFMqYIFtXi2DTbZk+e9gaGPQtcGrJoltpT0ie
+         XGOzkYDM3BSEQ2TwHvbSHMkuUPGioOBLfXycHOfffbDakoCKOZ/qBMaAJGferzIOx47N
+         ZPqqy+WzfUJDOOW6f33ryqPTRRf3IklgZx7ghBWCRbTgar4VJMeZmfJqWIMCavM4FtGq
+         jRw19J+PgAIxhKEVweqOe+f3qKn+SYEl9uKum+q54NCZ3fHTy23B2cVD+onpHevvKf/z
+         LHpQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWlhe2wHeKoQ3Hi5gbiwlVvdnrqShCiairiVLeqJ2xCY1i+JA9GheuRTd4+CsZ93JKiO4jPCXPeVvjYN9yfx8k+v3CW+EjqjLbI
+X-Gm-Message-State: AOJu0Ywa6M2SPQbeazP7s4Ytrn62SLvlFKekd5xDBSnGjTQz8nM4xiZV
+	BYfZZwDuts+u4191saIa6uhYO71jWnyzAnDR0aW7EbIlCJs7CDyJDi0jrEVSEGT4GDd2nHlPOyL
+	4/MY6IWUwPRBA7x396MMaDBANA61GSQD070mJ
+X-Google-Smtp-Source: AGHT+IFtH+TdYnY/R2NkKd7EY8OhaQPa4uA2hOiV9IhRrDt+9zqEvKh32061ELbCkTI4QNocIDZCt4lHutO/oQbF8iw=
+X-Received: by 2002:ac8:6e81:0:b0:437:c89e:245b with SMTP id
+ c1-20020ac86e81000000b00437c89e245bmr130751qtv.15.1713938297863; Tue, 23 Apr
+ 2024 22:58:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: renesas,sdhi: Group single const
- value items into an enum list
-To: Prabhakar <prabhakar.csengg@gmail.com>,
- Geert Uytterhoeven <geert+renesas@glider.be>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Magnus Damm <magnus.damm@gmail.com>,
- Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>,
- Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
- Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-References: <20240423182428.704159-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240423182428.704159-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <20240423182428.704159-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240105130404.301172-1-gatien.chevallier@foss.st.com> <20240105130404.301172-7-gatien.chevallier@foss.st.com>
+In-Reply-To: <20240105130404.301172-7-gatien.chevallier@foss.st.com>
+From: Saravana Kannan <saravanak@google.com>
+Date: Tue, 23 Apr 2024 22:57:40 -0700
+Message-ID: <CAGETcx8HdnspNfDEJP+cqShJPsDryzGkOVq6B99cFQzkZi3dMg@mail.gmail.com>
+Subject: Re: [PATCH v9 06/13] of: property: fw_devlink: Add support for "access-controller"
+To: Gatien Chevallier <gatien.chevallier@foss.st.com>
+Cc: Oleksii_Moisieiev@epam.com, gregkh@linuxfoundation.org, 
+	herbert@gondor.apana.org.au, davem@davemloft.net, robh+dt@kernel.org, 
+	krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, 
+	alexandre.torgue@foss.st.com, vkoul@kernel.org, jic23@kernel.org, 
+	olivier.moysan@foss.st.com, arnaud.pouliquen@foss.st.com, mchehab@kernel.org, 
+	fabrice.gasnier@foss.st.com, andi.shyti@kernel.org, ulf.hansson@linaro.org, 
+	edumazet@google.com, kuba@kernel.org, pabeni@redhat.com, 
+	hugues.fruchet@foss.st.com, lee@kernel.org, will@kernel.org, 
+	catalin.marinas@arm.com, arnd@kernel.org, richardcochran@gmail.com, 
+	Frank Rowand <frowand.list@gmail.com>, peng.fan@oss.nxp.com, lars@metafoo.de, 
+	rcsekar@samsung.com, wg@grandegger.com, mkl@pengutronix.de, 
+	linux-crypto@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-stm32@st-md-mailman.stormreply.com, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org, 
+	linux-iio@vger.kernel.org, alsa-devel@alsa-project.org, 
+	linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	netdev@vger.kernel.org, linux-phy@lists.infradead.org, 
+	linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, 
+	linux-usb@vger.kernel.org, Rob Herring <robh@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 23/04/2024 20:24, Prabhakar wrote:
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> 
-> Group single const value items into an enum list.
-> 
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+On Fri, Jan 5, 2024 at 5:03=E2=80=AFAM Gatien Chevallier
+<gatien.chevallier@foss.st.com> wrote:
+>
+> Allows tracking dependencies between devices and their access
+> controller.
+>
+> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+> Acked-by: Rob Herring <robh@kernel.org>
+
+Please cc me on fw_devlink patches. Also, this patch is breaking the
+norm below. Please send a fix up patch.
+
 > ---
-> v1->v2
-> - Updated commit message
-> - Grouped single const value items into an enum list. 
-> ---
->  .../devicetree/bindings/mmc/renesas,sdhi.yaml  | 18 +++++++-----------
->  1 file changed, 7 insertions(+), 11 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index 29f2400247eb..2bf90095742b 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -13,15 +13,13 @@ properties:
->    compatible:
->      oneOf:
->        - items:
-> -          - const: renesas,sdhi-sh73a0  # R-Mobile APE6
-> -      - items:
-> -          - const: renesas,sdhi-r7s72100 # RZ/A1H
-> -      - items:
-> -          - const: renesas,sdhi-r7s9210 # SH-Mobile AG5
-> -      - items:
-> -          - const: renesas,sdhi-r8a73a4 # R-Mobile APE6
-> -      - items:
-> -          - const: renesas,sdhi-r8a7740 # R-Mobile A1
-> +          - enum:
+> Changes in V9:
+>         - Added Rob's review tag
+>
+> Changes in V6:
+>         - Renamed access-controller to access-controllers
+>
+> Changes in V5:
+>         - Rename feature-domain* to access-control*
+>
+> Patch not present in V1
+>
+>  drivers/of/property.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/of/property.c b/drivers/of/property.c
+> index afdaefbd03f6..7f737eac91b2 100644
+> --- a/drivers/of/property.c
+> +++ b/drivers/of/property.c
+> @@ -1268,6 +1268,7 @@ DEFINE_SIMPLE_PROP(leds, "leds", NULL)
+>  DEFINE_SIMPLE_PROP(backlight, "backlight", NULL)
+>  DEFINE_SIMPLE_PROP(panel, "panel", NULL)
+>  DEFINE_SIMPLE_PROP(msi_parent, "msi-parent", "#msi-cells")
+> +DEFINE_SIMPLE_PROP(access_controllers, "access-controllers", "#access-co=
+ntroller-cells")
+>  DEFINE_SUFFIX_PROP(regulators, "-supply", NULL)
+>  DEFINE_SUFFIX_PROP(gpio, "-gpio", "#gpio-cells")
+>
+> @@ -1363,6 +1364,7 @@ static const struct supplier_bindings of_supplier_b=
+indings[] =3D {
+>         { .parse_prop =3D parse_regulators, },
+>         { .parse_prop =3D parse_gpio, },
+>         { .parse_prop =3D parse_gpios, },
+> +       { .parse_prop =3D parse_access_controllers, },
 
-You wanted to drop the items, but I still see it here.
+All the simple properties are listed before the suffix ones as the
+suffix checks are more expensive. So, you should have inserted this
+right before the suffix properties. Also, there's a merge conflict in
+linux-next. So make sure you take that into account when sending the
+fix up and picking the order.
 
-> +              - renesas,sdhi-sh73a0  # R-Mobile APE6
-> +              - renesas,sdhi-r7s72100 # RZ/A1H
-> +              - renesas,sdhi-r7s9210 # SH-Mobile AG5
-> +              - renesas,sdhi-r8a73a4 # R-Mobile APE6
-> +              - renesas,sdhi-r8a7740 # R-Mobile A1
-> +              - renesas,sdhi-mmc-r8a77470 # RZ/G1C
+-Saravana
 
-Keep list alphabetically ordered.
+>         {}
+>  };
 
-
-
-Best regards,
-Krzysztof
-
+>
+> --
+> 2.35.3
+>
