@@ -1,124 +1,137 @@
-Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BA2314D2BF
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 16:22:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88A2414D2A7
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 16:22:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714062133; cv=none; b=mGV+9hIC56VDiyL6NBtSXJaKtygKMDSYlcNQi1C7u+kbbucLM1RXXjJ406PLJ1IkCTj45CsU2kbSaYlyT+v7xk96AuDneYeQ8tt9qKpGCNFA4I87D9rQ/Xu8emLMP2X+oQiSDUVFJLFz+rPXmJYWLCG8wmbPeOxKEATjSnygWxw=
+	t=1714062140; cv=none; b=NjMC7Pl2wOAlYIPsrfLlql0WMCjCbWz6313y16C6zuMRD1/GMFhvoQxPCTb0wkxQKfeplADaU4tjsQ1BhLm7GwbL5ni9y5co10hTZEYxPim//Vf5lrdtemC1CFSu9Dl+DfoSntfOed4Yp5bNm1kmdx7iQzkJWxYdbaVqgf5plCM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714062133; c=relaxed/simple;
-	bh=NPYIUp6jIY9PQ8ikjnrRZ5j4GlWdfxLCMFcklaEhFsA=;
+	s=arc-20240116; t=1714062140; c=relaxed/simple;
+	bh=ieQm+pX9ecLlYdE6XA9WVavDiEeCE981RVxr7pvK7dE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=qN8Aluv3PCHPtZKZjX5icDt2X+RyZBmhbAiyrkk3P8sYeL9ufZzdgQp/oZsbMeB35GYPZKVzhDwKX4vZjmKQqGW92FMtyOctVx609d35uGf1tJINnYos9MD82zh8mQv83kBdmcFLwvdBc1zQ36De/JQvqs1rsKrHrH8QDZ+VtSo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZTCznw8G; arc=none smtp.client-ip=209.85.219.177
+	 To:Cc:Content-Type; b=HoDca1ja55J5jjbsuz7vrND+d5hQXGraFW4mYGOJMks4DUzjNADFeH93cmx/eoqkW4AJsHlAxM3Jo74BJYqrsDwjwUGfOQeW78H10AR2gLIJnY0SOsrNfqbnnBYPhun3Scn7rZLjN7r9SAJe4R4BnOUtNLbsc7zKZP8aCw3O3q0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=uOAxSmAM; arc=none smtp.client-ip=209.85.219.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZTCznw8G"
-Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dcd7c526cc0so1329026276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 09:22:11 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uOAxSmAM"
+Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-de59d7f2928so459245276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 09:22:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1714062131; x=1714666931; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1714062137; x=1714666937; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=K79KBPtPcWztYHUIKemEI+PZGidRnE/fUHigN04mppg=;
-        b=ZTCznw8GsHnp7hHBfjbBz8jknzxjMtkyvarKDbzRh9pqCAcrQ5/xBIZcZ+YhRjNWiy
-         yUPQpy88EzErkdx+xaX+YUEfCAULtD9ChgO7qc+OJ94KgMR3vB46blqQBr5z/nyafcca
-         ihsXC1NRBFIpDX9aGEwXnWf8gpAbsFtOQFQXBIm1+bqZYZeWhto0KqDfBa7DHokbq8m6
-         BxeEvZhx+LGpbB8kSDCg7IBWi00vxm1xWfcekTkr1sDcSa/hCBhrT4c/JHjdIBdvqGfU
-         Eog76v/w4B33ClbeDrp/2XOTDKM0QN5rqP+gPVP2j4EJw3e7grold3jIe47z9+nE1hPH
-         /pZw==
+        bh=rT8CtB6u0TXgJ8oVknrhHpM21jHgaIduXHq4luZbdGI=;
+        b=uOAxSmAMIf5P0Bh2TTi1QvHnOHZx8YQ+p22It6c/7xS3zUVej5a6Fu+TgaF8LHbahL
+         OVThoZ/2s5urHC6fZhKo3dTDHg60LmhJInS3W781fTkpHkPz6+ySC4wIfY/MYQU7sQVZ
+         J8HJAishJ2x1qufq7wF75kQqKF3ajiK7ifoKs4Bhri51qwqaEfutx5xrCi9P4Sc82TQb
+         8rX0Z01ksCp9uSAEAW4iz8X1+eiiZymceyPzcQ6oYE1775kK0hQS8zTCIdipqGqw5oyg
+         gUdPUc4kf4C4t5ir++xAqvZAJeZQAsRrDtOdoKt0YXFVpvD+SWtyUKA/8gzdNowjnlZ1
+         A+5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714062131; x=1714666931;
+        d=1e100.net; s=20230601; t=1714062137; x=1714666937;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=K79KBPtPcWztYHUIKemEI+PZGidRnE/fUHigN04mppg=;
-        b=uwrYUZ9SroLn3ahwxcFbInHhCM5OvB5/xdXVHcm7CqAeOIhyNZZm+v0cxva9zR8pKv
-         EsZhU2mRa1uNql8Y1lWeKbjov5BaUZ6U9yRJjy3HHiFIQCqt5itmgneJ3MaSuEHGgXMR
-         VA2T0C8aJ8j9TEw8p5btdkVld9RL8jJCG0sJvi7YuAakTIz37H5VlG7VVepCT98dGlOW
-         P4sDqCOjkkuJXeHMTiJ/Gjrt17QyI4rDiFdz5lvUkvyYsJ/JUJOr2zhxv0s7cu6v2euZ
-         HDoRlJ+GQslgTHS2vVEILdwhCNlfOX+OIocCeMZFKYQOYR+h2DgwbEiwCzMcOM5RwjQg
-         5+PQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWl63AhOgVsaGTpe8Jn75byP4OyjC2FX8+kCXNeEW80QAt5j70ia4uS1UCebHSwF5kO1juRzY0uS4NNOWfM/aicTGuKDazT9pMW
-X-Gm-Message-State: AOJu0Yx40E4lUcBJL6A2o8361HDA4AiQYJD3ghWO3u+r9tHhdSPC7gza
-	2xp5zYVlbJfAE+4oeaIeBtR2co4M2+tJsIKGnJbXkMAG8tA/ow45CifxeHs2hU2iXHJBl5XIcxB
-	pck0DpVHLWpqmBe3Ho8FM2lx9k4y/Hrj6fmouxg==
-X-Google-Smtp-Source: AGHT+IFTSx051iBTZTJNLHS0foAg1b72fhkCwf0yB6aJjwxbuYymy6qMskwcGJTMlGgNNfy8taVX4tPWEDKUY757x1c=
-X-Received: by 2002:a25:850d:0:b0:de5:5a84:7640 with SMTP id
- w13-20020a25850d000000b00de55a847640mr150794ybk.19.1714062131045; Thu, 25 Apr
- 2024 09:22:11 -0700 (PDT)
+        bh=rT8CtB6u0TXgJ8oVknrhHpM21jHgaIduXHq4luZbdGI=;
+        b=uB3YeNLZU5FeY/CVfKjulLodBDBetSVCPPKRxpr9MTufy85Q7Wk8ptIlAUlc0d+XuB
+         mEnaBn30L3u9qB/5soGbD0iwg1dJcIhgqrOzuqM5tkh1hjlMCZLoOCA744Xmf8lG9wI/
+         7hzr43MH55t7UnH7wMJST9CZJcj0M6rDsHanv+0I2VoR1eJzOt4RAot/ra40lPpJ9xSH
+         xo40mtrKJUNu15MIYVPl11T6LK3DEeoOn6TQqZW3aO91Lq787B6VkkkJDS8rW/DIotsb
+         O9JfNr3633SLVBQf7WFqiXFkBmk+iI+mgeehZxDixxxClY9GZFxGWj1GpfR+ZIAA0GRT
+         RCGA==
+X-Forwarded-Encrypted: i=1; AJvYcCUWCqxMdln1xM8gugkEJ6zBkT5/ZIcfojI7Hp9U7LYCgJ05fJg4paV4OuHKDHNfqirk6lolJowWf7eVs4muRdW4EYUBqMMO7jgG
+X-Gm-Message-State: AOJu0Yx2nlt4/dPvjrLYZea86w9lpWz1hMUcOGEvsY6qwuJ4XW8C7Hwz
+	Ahx7afSNvGmXPMR90QTEFig/a4tEIDO08i6DrZfzoaKnhxziEnQTdpPY7ZWe34922XiWAm5RhDj
+	4OeDU8o5WfnJ+13KdcDPXiH4OJ+L64mlPm3exTQ==
+X-Google-Smtp-Source: AGHT+IFGFpz8NUcmngKe2j/efRClh3UKrfm6xwT5VVEWp2uX1W5JdiP8Rvm3CEsEcWTSAQExtQt3FdMEpkaO1GcsGc8=
+X-Received: by 2002:a05:6902:546:b0:dd1:40cf:942b with SMTP id
+ z6-20020a056902054600b00dd140cf942bmr119986ybs.48.1714062137592; Thu, 25 Apr
+ 2024 09:22:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240410191639.526324-1-hdegoede@redhat.com>
-In-Reply-To: <20240410191639.526324-1-hdegoede@redhat.com>
+References: <20240410195618.1632778-1-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20240410195618.1632778-1-andriy.shevchenko@linux.intel.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 25 Apr 2024 18:21:35 +0200
-Message-ID: <CAPDyKFrkPm=JEaiwTcVdqtG0hePEu-D76ec89nzFiF2MxYOwgw@mail.gmail.com>
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-acpi: Add some DMI quirks to fix
- various issues on Bay Trail devices
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andy@kernel.org>, 
-	Mika Westerberg <mika.westerberg@linux.intel.com>, linux-mmc@vger.kernel.org, 
-	linux-gpio@vger.kernel.org
+Date: Thu, 25 Apr 2024 18:21:41 +0200
+Message-ID: <CAPDyKFoHQos4=+JUE-+=Sgr-GiVyF3HWiEHrCrdKNtcEsTPEGA@mail.gmail.com>
+Subject: Re: [PATCH v1 1/1] mmc: slot-gpio: Use irq_handler_t type
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Alexander Stein <alexander.stein@ew.tq-group.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 10 Apr 2024 at 21:16, Hans de Goede <hdegoede@redhat.com> wrote:
+On Wed, 10 Apr 2024 at 21:56, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
 >
-> Hi All,
+> The irq_handler_t is already defined globally, let's use it
+> in slot-gpio code.
 >
-> Here is v3 of my series adding DMI quirks to fix various issues on Intel
-> Bay Trail tablets.
->
-> Changes in v3:
-> - Replace "mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo Yoga
->   Tablet 2 series sdcard slot" with a new patch from Adrian which
->   actually fixes these modes:
->   "[PATCH v3 2/6] mmc: sdhci: Add support for "Tuning Error" interrupts"
->
->   Note this is missing a Signed-off-by from Adrian since this started out
->   as a quick test patch from Adrian.
->   Adrian, can you provide your S-o-b for this patch?
->
-> Changes in v2:
-> - Address a few small remarks from Andy and adds Andy's Reviewed-by
->   to the patches
->
-> Regards,
->
-> Hans
->
->
-> Adrian Hunter (1):
->   mmc: sdhci: Add support for "Tuning Error" interrupts
->
-> Hans de Goede (5):
->   mmc: core: Add mmc_gpiod_set_cd_config() function
->   mmc: sdhci-acpi: Sort DMI quirks alphabetically
->   mmc: sdhci-acpi: Fix Lenovo Yoga Tablet 2 Pro 1380 sdcard slot not
->     working
->   mmc: sdhci-acpi: Disable write protect detection on Toshiba WT10-A
->   mmc: sdhci-acpi: Add quirk to enable pull-up on the card-detect GPIO
->     on Asus T100TA
->
->  drivers/mmc/core/slot-gpio.c  | 20 ++++++++++++
->  drivers/mmc/host/sdhci-acpi.c | 61 +++++++++++++++++++++++++++++++----
->  drivers/mmc/host/sdhci.c      | 10 ++++--
->  drivers/mmc/host/sdhci.h      |  3 +-
->  include/linux/mmc/slot-gpio.h |  1 +
->  5 files changed, 86 insertions(+), 9 deletions(-)
->
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-The series applied for next, thanks!
-
-I assume some/all these patches may deserve to get backported to
-stable kernels, but it looks like that may be better for you to manage
-by yourself!?
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/core/slot-gpio.c  | 5 ++---
+>  include/linux/mmc/slot-gpio.h | 5 ++---
+>  2 files changed, 4 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index 39f45c2b6de8..8e4750558101 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -19,7 +19,7 @@
+>  struct mmc_gpio {
+>         struct gpio_desc *ro_gpio;
+>         struct gpio_desc *cd_gpio;
+> -       irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
+> +       irq_handler_t cd_gpio_isr;
+>         char *ro_label;
+>         char *cd_label;
+>         u32 cd_debounce_delay_ms;
+> @@ -162,8 +162,7 @@ EXPORT_SYMBOL(mmc_gpio_set_cd_wake);
+>  /* Register an alternate interrupt service routine for
+>   * the card-detect GPIO.
+>   */
+> -void mmc_gpio_set_cd_isr(struct mmc_host *host,
+> -                        irqreturn_t (*isr)(int irq, void *dev_id))
+> +void mmc_gpio_set_cd_isr(struct mmc_host *host, irq_handler_t isr)
+>  {
+>         struct mmc_gpio *ctx = host->slot.handler_priv;
+>
+> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+> index 5d3d15e97868..3e4d4836a2bb 100644
+> --- a/include/linux/mmc/slot-gpio.h
+> +++ b/include/linux/mmc/slot-gpio.h
+> @@ -8,8 +8,8 @@
+>  #ifndef MMC_SLOT_GPIO_H
+>  #define MMC_SLOT_GPIO_H
+>
+> +#include <linux/interrupt.h>
+>  #include <linux/types.h>
+> -#include <linux/irqreturn.h>
+>
+>  struct mmc_host;
+>
+> @@ -21,8 +21,7 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+>                          unsigned int debounce);
+>  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+>                          unsigned int idx, unsigned int debounce);
+> -void mmc_gpio_set_cd_isr(struct mmc_host *host,
+> -                        irqreturn_t (*isr)(int irq, void *dev_id));
+> +void mmc_gpio_set_cd_isr(struct mmc_host *host, irq_handler_t isr);
+>  int mmc_gpio_set_cd_wake(struct mmc_host *host, bool on);
+>  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+>  bool mmc_can_gpio_cd(struct mmc_host *host);
+> --
+> 2.43.0.rc1.1336.g36b5255a03ac
+>
