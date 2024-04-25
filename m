@@ -1,138 +1,247 @@
-Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22A2014D718
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 16:59:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75F4414D715;
+	Thu, 25 Apr 2024 17:09:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714064401; cv=none; b=mdzCN3yLN8KnGRqFdQEuCeic0m9VIJafluQhvY49gpc7M5o/TB62I2W7eBUV312ShPO1Lglp8UdY6WTZTPCtsKVfvbykqO/pfukZDowoBB6w8/qjj23kRijPqfseluLam542+vsssCBwt8LkDZy46NUeHmg0NIYGD5K4SGroNOM=
+	t=1714064947; cv=none; b=ppdsEuy3XlavmuvgaruTRkYHwd6OK+PGxdlNr+eBLn3maxSVnYS2nFAxQGn5sLdG4bHGB9g3+aWHXHFEwuguTMMopvTe1ql5TnTVArXYr5wVmX593LKLCz8CKJG9I5BM961PyN/2jHz5oIwi+YIV3atl6mRUqyKHnM3kqRcPybw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714064401; c=relaxed/simple;
-	bh=qg8SZwpUN3b6LrPjOtHyorXHH1MH2warGErNjkgQBM8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Huny2kukFUWNapWNHZe2IUxaLltZGPG8SuOIqsbBRfJ9w79g2XNOfVOwblBcnevkdCWE5I0Dx4Z0a4dlKtHh+ziI0GiIHAk580/4fSG9bretPbYWUWboY7ryjoQ/D2bAyCRNUPvYLG9LdjDNqwrKCGFFqbqOcJzwx5pJtuTrH0M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GYaFQU/G; arc=none smtp.client-ip=209.85.219.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1714064947; c=relaxed/simple;
+	bh=6/9sO9GFWOtUcX+qVb91FNhPTDtt7A0IxEGeFO8MRB4=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=iO1+xY/6Tw9reBz+O2f5k9X7mx0CfWPjTutbimMSQCnnU8MEIAt9ezd+Jv3TUd65V3wwSFabh5BbF78GXYLhPkOnQLkkOYLMlzkgjhKoQCzXcM3MDJSJ7B95E3kB/qt/hLVNnedW4NMIa//0cvJTRisWXkm07raqijUcy2OkHVE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=G0wJE4FD; arc=none smtp.client-ip=192.198.163.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GYaFQU/G"
-Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-de59d7f2928so508187276.3
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 09:59:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1714064399; x=1714669199; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=5abisNcD/ouIsr1NPEiIQ0iyqWHLbaxlL3KzDHmL5pg=;
-        b=GYaFQU/GPcag7Args3242vwOwSAIgS5F+azZOMhlh1ZOqpk66Ld9ccJlar2JtMVgss
-         2+YPMpts8R5lV3JUQLNKV2LjtAP7rMuvjWo4VKFlVV7r8bI/7BRWQ+Sh9c+DkWI65u1t
-         d+CbpiWem4C/6+u11CIpdRrNg0chrBQBBAmPB/n+R56+6woSfhqEBRac6PNZqpruyX0M
-         P6ZqScqxBIB34jnPcT45GTIOSV5Fh4wf2e4Shp5x/IhrGH4zmkhRTnXwBLA1jC1Ihthb
-         Ne3EumkCjymhbnUyTtSJMSLdW8z+uzJD+4mSrBOEnSjfUjl1vk0K4WnMDzlUuXZ7x59+
-         41mQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714064399; x=1714669199;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=5abisNcD/ouIsr1NPEiIQ0iyqWHLbaxlL3KzDHmL5pg=;
-        b=XQlJLC8k/L77DXWMXN31DWiVNBRyI8NLFIz7aM0Spvvwy92bCUOj9pVTq+emB5VOFO
-         yXN0Yog/Tlt9418WaYiHJVDMGS9cB6a14LsyRFulaG/hgf3FqtvupUcShH25anG01Zs2
-         4OCRs1DVD48iizpjv9SEgcDaCHmB9YiN8BacVMYiK6hGLXvcypOMldaXMAbqnEw6keXM
-         d+PPZzjwIMruJtPhFsN15ro2Fb3F1jLdZT/y/XA8cH0VVyfkOhzjgebjcoJFf2Z1GBDi
-         A8Xbuc+L7hB7FHQxndoTgTx2c3cEvIq8LvqKKKix9SAAcvJ7QF6X+8eTpksvAQd31/eb
-         rwdw==
-X-Forwarded-Encrypted: i=1; AJvYcCXPmotPL/WV9v3ASQ1C8FFWJteqYjnkVu2M4Hi2K6uV6jcUb544sxIJi4Jp4Z0yc4r2yYT7GIsk3OGgHpYturqsueKHDKWuhft5
-X-Gm-Message-State: AOJu0YxpAL2oCdIWBSuTPR/GhOVYvcSBRmTBlS1+0Znhmkb5zJPQ1ChM
-	ppR+n/Rej/FGnlQ8ZRFkMiM9whvEJ05ym/lQ5ziKyPKJY/l0AUAvpUviDAcfniA11gOxpQTW4bL
-	Lir+K99kgYVkavT85pAk7gKdnNolfGyMswJWViA==
-X-Google-Smtp-Source: AGHT+IHkKcKP3Xkl9RLGgzMddUnSxCUtH/hPFybh4i6xbbQ5alH6FHv7MLw6RQGyZBUoFY7dwUsvAuMfUe7ru3m+fmg=
-X-Received: by 2002:a05:6902:2b01:b0:de5:9b53:614f with SMTP id
- fi1-20020a0569022b0100b00de59b53614fmr309834ybb.38.1714064399145; Thu, 25 Apr
- 2024 09:59:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="G0wJE4FD"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1714064945; x=1745600945;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=6/9sO9GFWOtUcX+qVb91FNhPTDtt7A0IxEGeFO8MRB4=;
+  b=G0wJE4FD/ivUUbPUSvKijy1PWJvCvYf7Mc661OYLS/lh01XTOlb0RjKe
+   VX0VcRuVFrNcikS8f1fMP8OUbgCNO0dJQD7nz1BdQa49p5y8z2W5cVHom
+   FNsplYaerm+9itDGmJTzZqlpakszKMDFWcnRp/DBaCNxTGGpbb2rL4kdQ
+   VlbyCklkQdpDmPNpqgqieLHbOYFBd2QmY/9TTU1m3O8pj2LL2DMHQpLt1
+   1k6r/uNhJwHsR68j6JE59D6jaEGwz++xfjkkx8cyAV0DOZuaZ72w1WaMC
+   zlRh3aGTzecBuQMGLkBYZgl+yBcGxFQydHIZR33tH/XDLHemoGUOnH9Ij
+   A==;
+X-CSE-ConnectionGUID: gitWnEPmQf+5QA7n+6KKpA==
+X-CSE-MsgGUID: aDIIDwXeRkuNFOkdhTHA4A==
+X-IronPort-AV: E=McAfee;i="6600,9927,11055"; a="13554447"
+X-IronPort-AV: E=Sophos;i="6.07,230,1708416000"; 
+   d="scan'208";a="13554447"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Apr 2024 10:09:04 -0700
+X-CSE-ConnectionGUID: A7RDrk70SrC9wW9Ti6eYng==
+X-CSE-MsgGUID: b3d9/hPPTBuJlM+wJhImhQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.07,230,1708416000"; 
+   d="scan'208";a="29595990"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by fmviesa005.fm.intel.com with ESMTP; 25 Apr 2024 10:09:02 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1003)
+	id 8343787; Thu, 25 Apr 2024 20:09:01 +0300 (EEST)
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org
+Cc: Aubin Constans <aubin.constans@microchip.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>
+Subject: [PATCH v2 1/2] mmc: atmel-mci: Incapsulate used to be a platform data into host structure
+Date: Thu, 25 Apr 2024 20:08:44 +0300
+Message-ID: <20240425170900.3767990-2-andriy.shevchenko@linux.intel.com>
+X-Mailer: git-send-email 2.43.0.rc1.1336.g36b5255a03ac
+In-Reply-To: <20240425170900.3767990-1-andriy.shevchenko@linux.intel.com>
+References: <20240425170900.3767990-1-andriy.shevchenko@linux.intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240327024545.138351-1-ricky_wu@realtek.com> <CAPDyKFo3dkzDDEU7Lk14zH0td0AP=z2RJQibj8SP6JeUuz=iFA@mail.gmail.com>
- <8b966794f2bb4fda8cc7d3e111bfef70@realtek.com>
-In-Reply-To: <8b966794f2bb4fda8cc7d3e111bfef70@realtek.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 25 Apr 2024 18:59:22 +0200
-Message-ID: <CAPDyKFp=prNyPE8hT_9irx0DyFCboF8Ms6uh4Euxe0oyPq79fg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: resume not check card exist before powerup
-To: Ricky WU <ricky_wu@realtek.com>
-Cc: "wenchao.chen@unisoc.com" <wenchao.chen@unisoc.com>, "ricardo@marliere.net" <ricardo@marliere.net>, 
-	"marex@denx.de" <marex@denx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Fri, 19 Apr 2024 at 08:53, Ricky WU <ricky_wu@realtek.com> wrote:
->
-> Soft reminder
->
-> If this solution, you still have concert on sd.c.
-> can we just do this check card flow in mmc host power up call_back?
->
-> > > >
-> > > > _mmc_sd_resume
-> > > > add get_cd before call powerup, make sure the card exist
-> > >
-> > > Please elaborate more on what problem you are trying to solve, the
-> > > above doesn't make much sense to me, sorry.
-> > >
-> > > Yes, the card may be removed while the system is suspended. Then, even
-> > > if ->get_cd() indicates that there is no card inserted in the
-> > > SD-card-slot, we may still have the card being registered - and then
-> > > we need to unregister it.
-> > > That said, we need to call mmc_power_up() in order to try to
-> > > communicate with the card again. At least that is what the
-> > > mmc_rescan() work assumes when it runs the bus_ops->detect() callback
-> > > at some point later in time.
-> > >
-> >
-> > We saw the power up in a short time from waveform when removing the card,
-> > So we saw mmc_sd_resume call the power up did not check the card exist.
+After platform data is gone, we always allocate memory for the slot
+information. Incapsulate the array of the latter into the host structure,
+so we allocate memory only once. This makes code simpler.
 
-Well, that doesn't really tell me if that is a problem or not?
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/host/atmel-mci.c | 61 ++++++++++++++----------------------
+ 1 file changed, 24 insertions(+), 37 deletions(-)
 
-Doesn't the first command sent to the SD card (that has been removed)
-fail if there is no card inserted anyway?
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 3aed57c392fa..9ae3ce14db50 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -224,14 +224,6 @@ struct mci_slot_pdata {
+ 	bool			non_removable;
+ };
+ 
+-/**
+- * struct mci_platform_data - board-specific MMC/SDcard configuration
+- * @slot: Per-slot configuration data.
+- */
+-struct mci_platform_data {
+-	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
+-};
+-
+ struct atmel_mci_caps {
+ 	bool    has_dma_conf_reg;
+ 	bool    has_pdc;
+@@ -297,6 +289,7 @@ struct atmel_mci_dma {
+  * @mapbase: Physical address of the MMIO registers.
+  * @mck: The peripheral bus clock hooked up to the MMC controller.
+  * @dev: Device associated with the MMC controller.
++ * @pdata: Per-slot configuration data.
+  * @slot: Slots sharing this MMC controller.
+  * @caps: MCI capabilities depending on MCI version.
+  * @prepare_data: function to setup MCI before data transfer which
+@@ -375,6 +368,7 @@ struct atmel_mci {
+ 	struct clk		*mck;
+ 	struct device		*dev;
+ 
++	struct mci_slot_pdata	pdata[ATMCI_MAX_NR_SLOTS];
+ 	struct atmel_mci_slot	*slot[ATMCI_MAX_NR_SLOTS];
+ 
+ 	struct atmel_mci_caps   caps;
+@@ -630,11 +624,11 @@ static const struct of_device_id atmci_dt_ids[] = {
+ 
+ MODULE_DEVICE_TABLE(of, atmci_dt_ids);
+ 
+-static struct mci_platform_data *atmci_of_init(struct device *dev)
++static int atmci_of_init(struct atmel_mci *host)
+ {
++	struct device *dev = host->dev;
+ 	struct device_node *np = dev->of_node;
+ 	struct device_node *cnp;
+-	struct mci_platform_data *pdata;
+ 	u32 slot_id;
+ 	int err;
+ 
+@@ -643,10 +637,6 @@ static struct mci_platform_data *atmci_of_init(struct device *dev)
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 
+-	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+-	if (!pdata)
+-		return ERR_PTR(-ENOMEM);
+-
+ 	for_each_child_of_node(np, cnp) {
+ 		if (of_property_read_u32(cnp, "reg", &slot_id)) {
+ 			dev_warn(dev, "reg property is missing for %pOF\n", cnp);
+@@ -661,38 +651,38 @@ static struct mci_platform_data *atmci_of_init(struct device *dev)
+ 		}
+ 
+ 		if (of_property_read_u32(cnp, "bus-width",
+-		                         &pdata->slot[slot_id].bus_width))
+-			pdata->slot[slot_id].bus_width = 1;
++					 &host->pdata[slot_id].bus_width))
++			host->pdata[slot_id].bus_width = 1;
+ 
+-		pdata->slot[slot_id].detect_pin =
++		host->pdata[slot_id].detect_pin =
+ 			devm_fwnode_gpiod_get(dev, of_fwnode_handle(cnp),
+ 					      "cd", GPIOD_IN, "cd-gpios");
+-		err = PTR_ERR_OR_ZERO(pdata->slot[slot_id].detect_pin);
++		err = PTR_ERR_OR_ZERO(host->pdata[slot_id].detect_pin);
+ 		if (err) {
+ 			if (err != -ENOENT) {
+ 				of_node_put(cnp);
+-				return ERR_PTR(err);
++				return err;
+ 			}
+-			pdata->slot[slot_id].detect_pin = NULL;
++			host->pdata[slot_id].detect_pin = NULL;
+ 		}
+ 
+-		pdata->slot[slot_id].non_removable =
++		host->pdata[slot_id].non_removable =
+ 			of_property_read_bool(cnp, "non-removable");
+ 
+-		pdata->slot[slot_id].wp_pin =
++		host->pdata[slot_id].wp_pin =
+ 			devm_fwnode_gpiod_get(dev, of_fwnode_handle(cnp),
+ 					      "wp", GPIOD_IN, "wp-gpios");
+-		err = PTR_ERR_OR_ZERO(pdata->slot[slot_id].wp_pin);
++		err = PTR_ERR_OR_ZERO(host->pdata[slot_id].wp_pin);
+ 		if (err) {
+ 			if (err != -ENOENT) {
+ 				of_node_put(cnp);
+-				return ERR_PTR(err);
++				return err;
+ 			}
+-			pdata->slot[slot_id].wp_pin = NULL;
++			host->pdata[slot_id].wp_pin = NULL;
+ 		}
+ 	}
+ 
+-	return pdata;
++	return 0;
+ }
+ 
+ static inline unsigned int atmci_get_version(struct atmel_mci *host)
+@@ -2456,7 +2446,6 @@ static void atmci_get_cap(struct atmel_mci *host)
+ static int atmci_probe(struct platform_device *pdev)
+ {
+ 	struct device			*dev = &pdev->dev;
+-	struct mci_platform_data	*pdata;
+ 	struct atmel_mci		*host;
+ 	struct resource			*regs;
+ 	unsigned int			nr_slots;
+@@ -2467,12 +2456,6 @@ static int atmci_probe(struct platform_device *pdev)
+ 	if (!regs)
+ 		return -ENXIO;
+ 
+-	pdata = atmci_of_init(dev);
+-	if (IS_ERR(pdata)) {
+-		dev_err(dev, "platform data not available\n");
+-		return PTR_ERR(pdata);
+-	}
+-
+ 	irq = platform_get_irq(pdev, 0);
+ 	if (irq < 0)
+ 		return irq;
+@@ -2485,6 +2468,10 @@ static int atmci_probe(struct platform_device *pdev)
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
++	ret = atmci_of_init(host);
++	if (ret)
++		return dev_err_probe(dev, ret, "Slot information not available\n");
++
+ 	host->mck = devm_clk_get(dev, "mci_clk");
+ 	if (IS_ERR(host->mck))
+ 		return PTR_ERR(host->mck);
+@@ -2544,16 +2531,16 @@ static int atmci_probe(struct platform_device *pdev)
+ 	/* We need at least one slot to succeed */
+ 	nr_slots = 0;
+ 	ret = -ENODEV;
+-	if (pdata->slot[0].bus_width) {
+-		ret = atmci_init_slot(host, &pdata->slot[0],
++	if (host->pdata[0].bus_width) {
++		ret = atmci_init_slot(host, &host->pdata[0],
+ 				0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
+ 		if (!ret) {
+ 			nr_slots++;
+ 			host->buf_size = host->slot[0]->mmc->max_req_size;
+ 		}
+ 	}
+-	if (pdata->slot[1].bus_width) {
+-		ret = atmci_init_slot(host, &pdata->slot[1],
++	if (host->pdata[1].bus_width) {
++		ret = atmci_init_slot(host, &host->pdata[1],
+ 				1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
+ 		if (!ret) {
+ 			nr_slots++;
+-- 
+2.43.0.rc1.1336.g36b5255a03ac
 
-> >
-> > We think this the short time power up maybe cause OCP if no card exist.
-
-OCP?
-
-> > And this power up we think is unnecessary when no card exist.
-
-It may not be necessary, but in what way does it hurt?
-
-> >
-> >
-> > > >
-> > > > Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> > > > ---
-> > > >  drivers/mmc/core/sd.c | 3 +++
-> > > >  1 file changed, 3 insertions(+)
-> > > >
-> > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
-> > > > 1c8148cdda50..35e036672cfb 100644
-> > > > --- a/drivers/mmc/core/sd.c
-> > > > +++ b/drivers/mmc/core/sd.c
-> > > > @@ -1750,6 +1750,9 @@ static int _mmc_sd_resume(struct mmc_host
-> > > *host)
-> > > >         if (!mmc_card_suspended(host->card))
-> > > >                 goto out;
-> > > >
-> > > > +       if (host->ops->get_cd && !host->ops->get_cd(host))
-> > > > +               goto out;
-> > > > +
-> > > >         mmc_power_up(host, host->card->ocr);
-> > > >         err = mmc_sd_init_card(host, host->card->ocr, host->card);
-> > > >         mmc_card_clr_suspended(host->card);
-> > > > --
-
-Kind regards
-Uffe
