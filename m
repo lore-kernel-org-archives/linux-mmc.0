@@ -1,433 +1,197 @@
-Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 461C11772F
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 10:57:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.249.201.71
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21BD714A0A0
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 13:30:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714042634; cv=none; b=Qwx21uFq6YyuVDTyAvho8slXwhQMEpiAoR6wPhLu9RAQ0p9zuElgeKYYjq/ZbUmiSyRiYbl+n2wJzc0MBs6ClVC+nsm4/bus6aNfX7OzGmYvtoIrQv4H4iuWntOdjm1VLgGxk96pZidthQIbIwVCSZHRVyUkSW+G/mm9NStD0Oo=
+	t=1714051846; cv=none; b=YfBb47P77hWuiGf+yuxY37unYa0LlpqFb7/d4rOxTS/lQ0F1UER5swQgBVfbf2y6kSzq6jKJW5QDGRkGH8Af6cVOFjiXpsbtY3JoJSnee2bmMDWQGC3eMcVx4wwacXeRyDrk+m2N9ANuEImYvDhx7SxdETfuEdBD4OrmY1oDCgw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714042634; c=relaxed/simple;
-	bh=MrJjwXhzZ0wKnODmvPZPQW35erhvAg9vN6XO8Nk9sHI=;
-	h=To:Subject:MIME-Version:From:Content-Type:Message-Id:Date; b=f/rTPMOIMp2XV963kTRYU3pFdEPzFweYf6HiBMCga1FOxBZl81KVRUFTTUDxrreefgxVvuJw4GT6ZeIgLCRAKWCz7eGA8mmk+VIGTee804LPO2INmRSiO69qODkFiX9EvmXFD6kKtnzP9xrZalDCYM7fBUicDBdtiC2iEsRyryM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com; spf=pass smtp.mailfrom=musicianspage.com; dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b=C+7/oE11; arc=none smtp.client-ip=170.249.201.71
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=musicianspage.com
+	s=arc-20240116; t=1714051846; c=relaxed/simple;
+	bh=EoWMxLo5INoQqLvX5iNLGZoSAD+nAVTybp3fuwGirrE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=e2HZTAaucSGtSgtExOTylLnshTmEmDfsW9WKlGa6ZPEEz+i1wzQd3HAvZbEwHrTb3IJ9mYITlaH4W+I9v59t826g9fBye9ZgFSyFhoByTXCF+YHKe2IVxOfHU3ONIOlky0kfjIH9vMGo8Ldo5TJfWR3a3NssSBX64VBg4VRWOs8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Po6YliNx; arc=none smtp.client-ip=209.85.167.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="C+7/oE11"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
-	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
-	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
-	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
-	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
-	List-Archive; bh=vxNbSN+zA6A48+v/QTWgTjZTwzKJdueqB9yxpiuIi6k=; b=C+7/oE112Hvx
-	FMXI527By9aJxD88VjjqdL4yLZ+VUUlFJAQlVdHGWPRCgZCu20vbw5NzO5kl8nFyu3H5dJMRnyJba
-	QkjO3Zdw2k6776RN1qyOHq9biC4yea/9Xa//z8xJv5O/q84tz8GU5FEylwWTTc9sC70o3ZCnPrVs6
-	ktaVc=;
-Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
-	(envelope-from <no-reply@musicianspage.com>)
-	id 1rzwmm-0004VZ-4x
-	for linux-mmc@vger.kernel.org; Thu, 25 Apr 2024 03:57:04 -0700
-To: linux-mmc@vger.kernel.org
-Subject: Music News and Site Updates (April 25, 2024)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Po6YliNx"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-51c66cc680aso393631e87.1
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 06:30:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1714051843; x=1714656643; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=5+tdO/UIC3b/X5P2tckJN1J8odXZjxVoO/7WKXxrhTE=;
+        b=Po6YliNx4sOHGUOCS5UlWCtEjYK7iEp2uGm45NmS9TZ7L23SRADPiNRPheFQnlv+OS
+         mPHO8WJiSXa3R0WdOYf11PiNkAKCiEAp5lKIyjt/kqdk0tenTrFn/HweRP/v7gMzA9ls
+         Lo20Awy3AXJfRrqJc9w6tNcrSV72eFKEgMn4+9DkWZs2Iicm/AQgZtmtGkA29mjvTThP
+         q7RyetBUGuFLsAPptVfuCovySlC2a3zGkkAmXjjqx1Zt16rFEWxBW8R9rWNxmxnidPwH
+         JbM3MMdG414dthEZPUApiNkJTkp4XdOadC7oJfTFyQT8ZbqeysGRoD4dLKtVe587sK1b
+         HmkA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1714051843; x=1714656643;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=5+tdO/UIC3b/X5P2tckJN1J8odXZjxVoO/7WKXxrhTE=;
+        b=KVW/rkQ4xKw3A1z8BR0ZQVfGE3rU8v88bDv+3Bq6oz2V7oi4o4T8mwqunFlVycGhTl
+         JGFfqDgrnrabfykP+9IV8Xc3okQ6K44+8rzKwxOpqgf/psROCCkXMrZZS75oAVA+eHP3
+         llchYG43d3LqScJu4N6+tQhwdQU+VN7p0PKyeOtDCLgsYoehMsHqk9pQl/S/z02WxVoV
+         5TcWe/w5dI4Tq3xzL0O5RGIPFqFKNRoHOLbQ3ajaBFcQrQOzEGm3jJ2HJnvjJu53AHTN
+         KCJCi1FnmFqFjt1DrTJnK+qs0UHQd+eK0fLaacLgOTAR0NW38lqyivFZnAECy024sxwL
+         CLgQ==
+X-Gm-Message-State: AOJu0YzbgRbEcO48fzj+ifToMw2cxAvkEw8vpbT+IaeLQ71qgo8H0tes
+	77rOh67m7aXCJRiqnc+WgLbRQ6elT3XSLjn306ORcblr5ZPlRLKKQHi7RVp+vnVew0t8ji8Lfqs
+	b
+X-Google-Smtp-Source: AGHT+IEW0aa8yBIv50goI4Mi10vAgRT8hVO2OmLTeiao6aGSd1rPtqW6Jiouo17uZuM1PLgR6UjHbQ==
+X-Received: by 2002:a05:6512:60f:b0:51b:ae4c:f20a with SMTP id b15-20020a056512060f00b0051bae4cf20amr1002286lfe.28.1714051842896;
+        Thu, 25 Apr 2024 06:30:42 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id g2-20020a19e042000000b0051884ea2a32sm2856052lfj.31.2024.04.25.06.30.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 25 Apr 2024 06:30:42 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Avri Altman <avri.altman@wdc.com>,
+	Felix Qin <xiaokeqinhealth@126.com>,
+	Dragan Simic <dsimic@manjaro.org>,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: core: Convert to use __mmc_poll_for_busy() SD_APP_OP_COND too
+Date: Thu, 25 Apr 2024 15:30:34 +0200
+Message-Id: <20240425133034.79599-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Musicians Page <newsletter@musicianspage.com>
-Reply-To: Musicians Page <newsletter@musicianspage.com>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <E1rzwmm-0004VZ-4x@list.virtualsheetmusic.com>
-Date: Thu, 25 Apr 2024 03:57:04 -0700
+Content-Transfer-Encoding: 8bit
 
-Dear Musician and Music Lover,
+Similar to what has already been changed for eMMC and the MMC_SEND_OP_COND
+(CMD1), let's convert the SD_APP_OP_COND (ACMD41) for SD cards to use the
+common __mmc_poll_for_busy() too.
 
-Here is the Newsletter from Musicians Page website:
+This change means the initial delay period, that starts as 10ms will now
+increase for every loop when being busy. The total accepted timeout for
+being busy is 1s, which is according to the SD spec.
 
-http://www.musicianspage.com
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/sd_ops.c | 77 +++++++++++++++++++++++++--------------
+ 1 file changed, 50 insertions(+), 27 deletions(-)
 
-As you have requested. Read on...
-
-(If you are no longer interested in subscribing to this newsletter, you can=
- unsubscribe by clicking the link at the bottom of this newsletter. Thanks!=
-)
-
-
-
-
----------------------------------------------------------------------------=
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index a59cd592f06e..3ce1ff336826 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -19,6 +19,15 @@
+ #include "sd_ops.h"
+ #include "mmc_ops.h"
+ 
++#define SD_APP_OP_COND_PERIOD_US	(10 * 1000) /* 10ms */
++#define SD_APP_OP_COND_TIMEOUT_MS	1000 /* 1s */
++
++struct sd_app_op_cond_busy_data {
++	struct mmc_host *host;
++	u32 ocr;
++	struct mmc_command *cmd;
++};
++
+ int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+ {
+ 	int err;
+@@ -115,10 +124,44 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width)
+ 	return mmc_wait_for_app_cmd(card->host, card, &cmd);
+ }
+ 
++static int sd_app_op_cond_cb(void *cb_data, bool *busy)
++{
++	struct sd_app_op_cond_busy_data *data = cb_data;
++	struct mmc_host *host = data->host;
++	struct mmc_command *cmd = data->cmd;
++	u32 ocr = data->ocr;
++	int err;
++	*busy = false;
++
++	err = mmc_wait_for_app_cmd(host, NULL, cmd);
++	if (err)
++		return err;
++
++	/* If we're just probing, do a single pass. */
++	if (ocr == 0)
++		return 0;
++
++	/* Wait until reset completes. */
++	if (mmc_host_is_spi(host)) {
++		if (!(cmd->resp[0] & R1_SPI_IDLE))
++			return 0;
++	} else if (cmd->resp[0] & MMC_CARD_BUSY) {
++		return 0;
++	}
++
++	*busy = true;
++	return 0;
++}
++
+ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ {
+ 	struct mmc_command cmd = {};
+-	int i, err = 0;
++	struct sd_app_op_cond_busy_data cb_data = {
++		.host = host,
++		.ocr = ocr,
++		.cmd = &cmd
++	};
++	int err;
+ 
+ 	cmd.opcode = SD_APP_OP_COND;
+ 	if (mmc_host_is_spi(host))
+@@ -127,36 +170,16 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 		cmd.arg = ocr;
+ 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+ 
+-	for (i = 100; i; i--) {
+-		err = mmc_wait_for_app_cmd(host, NULL, &cmd);
+-		if (err)
+-			break;
 -
-
-If you are not yet registered as a Musician or Band/Ensemble, be sure to si=
-gn-up from the following page (it's free!):
-
-https://www.musicianspage.com/signup.php?email=3Dlinux-mmc@vger.kernel.org
-
----------------------------------------------------------------------------=
+-		/* if we're just probing, do a single pass */
+-		if (ocr == 0)
+-			break;
 -
+-		/* otherwise wait until reset completes */
+-		if (mmc_host_is_spi(host)) {
+-			if (!(cmd.resp[0] & R1_SPI_IDLE))
+-				break;
+-		} else {
+-			if (cmd.resp[0] & MMC_CARD_BUSY)
+-				break;
+-		}
+-
+-		err = -ETIMEDOUT;
+-
+-		mmc_delay(10);
+-	}
+-
+-	if (!i)
+-		pr_err("%s: card never left busy state\n", mmc_hostname(host));
++	err = __mmc_poll_for_busy(host, SD_APP_OP_COND_PERIOD_US,
++				  SD_APP_OP_COND_TIMEOUT_MS, &sd_app_op_cond_cb,
++				  &cb_data);
++	if (err)
++		return err;
+ 
+ 	if (rocr && !mmc_host_is_spi(host))
+ 		*rocr = cmd.resp[0];
+ 
+-	return err;
++	return 0;
+ }
+ 
+ static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8 pcie_bits,
+-- 
+2.34.1
 
-
-
-
-Consider to join with a Standard or Pro Membership
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Either if you are a Musician or a Music Employer, have a look at our Member=
-ship Plans and sign up for the one that best fits your needs:
-
-
-http://www.musicianspage.com/membership.html
-
-
-A Standard or Pro Membership gives you the ability to upload unlimited audi=
-o, video, and sheet music files to your profile; as well as a more complete=
- resume (or service/company info if you are an employer) and a creative pag=
-e with media content. If you are a musician, you will also have the chance =
-to get featured on the new Musicians Page radio:
-
-http://www.musicianspage.com/music/radio/
-
-
-Musicians Page gives you a professional space on the web to showcase your t=
-alent to potential employers or, for employers, to have a professional and =
-targeted space on the web where to showcase your products or services to po=
-tential prospects. Musicians Page gives you the chance to differentiate you=
-rself from other musicians or the competition who only use amateur channels=
- such as MySpace, FaceBook, YouTube, or other free sites.
-
-Also, do you know that your profile on Musicians Page is Google optimized?
-
-This means that employers, other musicians or prospects can easily find you=
- via Google. Our system automatically optimizes every Musician's profile to=
- appear at the top of Google results for relevant keywords. Just another re=
-ason to take full advantage of all that the Standard and Pro Memberships ha=
-ve to offer, and not rely solely on free social networks that won't optimiz=
-e your profile for others to see at the top of the list!
-
-With a Standard or Pro Membership, you'll also be able to find and apply fo=
-r external jobs Musicians Page finds for you on the web (if you are a music=
-ian) and, with a Pro Membership, be notified via email as soon as a new ext=
-ernal jobs, matching your profile, are found. Or, if you are an employer, b=
-e featured prominently on any webpage of our site to over 2,000 unique user=
-s daily.
-
-Musicians Page is a network for professional musicians and music employers,=
- built and planned to grow based on professional musicians' and music emplo=
-yers' needs. Don't miss the opportunity to jump on the band wagon from the =
-beginning.
-
-Membership fees are likely to be increased in the coming weeks, so join Mus=
-icians Page today and start networking the right way!
-
-https://www.musicianspage.com/signup.php
-
-
-
-
-Are you looking for musicians, a song writer, a lyricist, a composer?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If so, please post your music job or project on Musicians Page.
-To post a job/project is completely free and takes 5 minutes:
-
-http://www.musicianspage.com/login/panel.php?yourjobs=3D1&postnew=3D1
-
-
-REMEMBER: you can post a job even for a FREE project you need musicians for=
-!
-
-
-
-
-Latest Posted Jobs on Musicians Page
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Hammond B3 Organ Player
-http://www.musicianspage.com/jobs/7729/
-
-Guitarist Wanted
-http://www.musicianspage.com/jobs/7728/
-
-New Woodwind orchestra
-http://www.musicianspage.com/jobs/7727/
-
-Female singer,rapper to Collab Remotely
-http://www.musicianspage.com/jobs/7724/
-
-Music Duo
-http://www.musicianspage.com/jobs/7721/
-
-Guitarist needed in Mexico for rock and roll music
-http://www.musicianspage.com/jobs/7720/
-
-STEEL PAN SOLOIST FOR CRUISE SHIPS URGENT
-http://www.musicianspage.com/jobs/7715/
-
-Lauren Daigle Cover Singer
-http://www.musicianspage.com/jobs/7716/
-
-Violinist Wanted
-http://www.musicianspage.com/jobs/7717/
-
-Power rock/pop trio for cruises
-http://www.musicianspage.com/jobs/7713/
-
-
-More jobs:
-http://www.musicianspage.com/jobs/
-
-
-
-
-Latest External Jobs or Opportunities (found on the web)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Lead Singer needed
-http://www.musicianspage.com/extjobs/1268977/
-
-Seeking an original, innovative, experienced Lead Singer.
-http://www.musicianspage.com/extjobs/1268976/
-
-Looking for a violinist, 1hr, 8/18/24
-http://www.musicianspage.com/extjobs/1268975/
-
-Keyboardist wanted for UFO tribute
-http://www.musicianspage.com/extjobs/1268974/
-
-Lead guitarist wanted for open mic gig
-http://www.musicianspage.com/extjobs/1268973/
-
-Seeking  lead Guitar player , For 80's hard Rock - Original's
-http://www.musicianspage.com/extjobs/1268972/
-
-Drummer needed for 80's cover band
-http://www.musicianspage.com/extjobs/1268971/
-
-Alt/indie/shoegaze band looking for drummer/bass
-http://www.musicianspage.com/extjobs/1268970/
-
-Guitarist looking to join or make band (rock, pop punk, alt, etc.)
-http://www.musicianspage.com/extjobs/1268969/
-
-Chill jam session; looking for guitar and/or vocals on 4/25
-http://www.musicianspage.com/extjobs/1268968/
-
-
-More jobs:
-http://www.musicianspage.com/jobs/
-
-
-
-
-Latest Forum Topics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-New Release - by KonstantinDobriak
-posted on the General Forum forum
-http://www.musicianspage.com/forums/general/general/9051/
-
-
-Red Hot Chili Peppers-Under the Bridge (Guitar and Piano) - by Luis Afonso =
-Andre
-posted on the Rock Music forum
-http://www.musicianspage.com/forums/music/rockmusic/9049/
-
-
-Joe Hisaishi-You&#039;re in Love(Howl&#039;s Moving Castle OST), Piano - by=
- Luis Afonso Andre
-posted on the Soundtrack/Film Music forum
-http://www.musicianspage.com/forums/music/soundtrack/9047/
-
-
-More forum topics:
-http://www.musicianspage.com/forums/
-
-
-
-
-Latest Uploaded Audio Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-5/4 RE DE LAMIREMI by LIONHELL VONTICH (added by Fontich Lionel)
-Genre: Rock
-http://www.musicianspage.com/musicians/54008/audiofile/22981/
-
-
-While There&#039;s Still time by Jeremiah Minahan (added by Jeremiah Minaha=
-n)
-Genre: Christian
-http://www.musicianspage.com/musicians/54000/audiofile/22980/
-
-
-You Are The Blessed by Jeremiah Minahan (added by Jeremiah Minahan)
-Genre: Christian
-http://www.musicianspage.com/musicians/54000/audiofile/22979/
-
-
-More audio files:
-http://www.musicianspage.com/audio/
-
-
-We are waiting for your comments and if you have any, please upload your
-own audio files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addaudiofiles=3D1
-
-
-
-
-Latest Uploaded Video Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Lucas e Karina: Projeto Primavera #LIVE | Parte 2 - Flashback by Lucas e Ka=
-rina (added by Lucas e Karina)
-Genre: Pop
-http://www.musicianspage.com/musicians/44677/videofile/21232/
-
-
-Lucas e Karina by Lucas e Karina (added by Lucas e Karina)
-Genre: Pop
-http://www.musicianspage.com/musicians/44677/videofile/21231/
-
-
-Limehouse Blues by mikewarmblood (added by Thomas Jacques)
-Genre: Classical/Contemporary
-http://www.musicianspage.com/musicians/53997/videofile/21230/
-
-
-More video files:
-http://www.musicianspage.com/video/
-
-
-We are waiting for your comments and if you have any, please upload your
-own video files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addvideofiles=3D1
-
-
-
-
-Latest Uploaded Sheet Music Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Rodrigo. Concierto de Aranjuez. Parts. by Joaquin Rodrigo (added by Grechan=
-ivsky)
-Genre: Other...
-http://www.musicianspage.com/musicians/9640/sheetmusic/3287/
-
-
-Along the Danube by Joe Sinha Semple (added by Joe Sinha Semple)
-Genre: Classical/Contemporary
-http://www.musicianspage.com/musicians/53961/sheetmusic/3286/
-
-
-Respighi. Vetrate di Chiesa. Parts by Ottorino Respighi (added by Grechaniv=
-sky)
-Genre: Classical/Contemporary
-http://www.musicianspage.com/musicians/9640/sheetmusic/3282/
-
-
-More sheet music files:
-http://www.musicianspage.com/sheetmusic/
-
-
-We are waiting for your comments and if you have any, please upload your
-own sheet music files from the page below (you must register first):
-
-https://www.musicianspage.com/login/panel.php?addsheetmusic=3D1
-
-
-
-
-Earn money with your website, FaceBook, YouTube or MySpace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you own a website or simply an account on FaceBook, YouTube, MySpace or =
-Twitter, be sure to check out the Virtual Sheet Music's Affiliate Program w=
-hich entitles you to earn 30% commission on any referred sale.
-
-It is completely free to join:
-
-https://affiliates.virtualsheetmusic.com/
-
-
-and once you have an account, start referring users using a special code to=
- put on your website or social account (FaceBook, Twitter, etc).
-
-For any further questions, please reply to this email, we will be glad to h=
-elp you step by step.
-
-
-
-
-Join us on the major Social Networks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Stay updated with our latest news on:
-
-1. on FaceBook:
-http://www.facebook.com/MusiciansPage
-
-2. on Twitter:
-http://twitter.com/MusiciansPage
-
-
-
-
----------------------------------------------------------------------------=
------
-
-FEATURE YOURSELF ON MUSICIANS PAGE:
-=20
-If you have an upcoming concert, CD release, special Event, or just want to=
- promote yourself and your activity, remember you can feature yourself in f=
-ront of thousands of musicians, music lovers, and music employers (includin=
-g music agents, artist management companies, etc.) by exclusively putting y=
-our picture and name on every page of Musicians Page, starting at just $10 =
-(that's right, just 10 bucks!):
-=20
-https://www.musicianspage.com/login/panel.php?featureyourself=3D1
-=20
-Your ad will be displayed exclusively for the duration of your campaign, gi=
-ving you maximum exposure to the Musicians Page community. Musicians Page i=
-s visited by thousands of musicians and people working in the music busines=
-s every day, so consider putting yourself in front of this specialized audi=
-ence.
-
-This is your chance to make new contacts and seize exciting opportunities i=
-n minutes! Don't miss this opportunity now!
-
----------------------------------------------------------------------------=
------
-
-
-
-
-Please feel free to pass this Newsletter along to friends and other musicia=
-ns who might find this content valuable in the same way you do, and be sure=
- to send us your ideas and thoughts by either replying to this email or by =
-posting your comments and feedback on the dedicated forum below:
-
-http://www.musicianspage.com/forums/general/feedback/
-
-Thank you!
-
-All the best,
-Fabrizio Ferrari, CEO
-Musicians Page
-http://www.musicianspage.com
-Virtual Sheet Music Inc.
-http://www.virtualsheetmusic.com
-29911 Niguel Road, #6992
-Laguna Niguel, CA 92677 (USA)
-Fax: +1 800 717 1876 or +1 973 273 2171
-----------------------------------------------
-This message was sent from Musicians Page
-http://www.musicianspage.com
-To unsubscribe, please go to:
-http://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
-=2Eorg
