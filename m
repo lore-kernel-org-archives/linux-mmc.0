@@ -1,151 +1,146 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A607E14EC44;
-	Thu, 25 Apr 2024 17:11:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6527514BF87
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 17:26:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714065094; cv=none; b=iR/+peHALLnuMQLbV+CRGZuhdTXy8i0+pENWclcGLXpqLVmI1sJ2Rzj5YVhodH/e/0z/1EL607Kv093qKrkIwOt6XAjW6Qz81nQarduJ4p+koCQVOvzZrG3AK2BhpQfMh8cZhYOI3rBu84z9EtQvarowY/gpwvznWMh69ZPPURQ=
+	t=1714065989; cv=none; b=ULuHOceUbnpt3DujUH9IHE1t32OM3QQnhSz9art2Z6XS+NqVQTTrBP1cclbrfSjJ+CknMnwFsZUSYinLT7RoojTg4gS2DFIJDv0FhSby13rEZJdUEpbstVIz6pTav8/nU27IYxk2LnFJTnKbRoStJR3JPVe6fz2n9VaBZ9JnIzE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714065094; c=relaxed/simple;
-	bh=/ZZJ5dz0J/wesEssyoep7KtF9+Y3JDVVqC4thZF7R1w=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=P9KhRP3/kYv4SZEiVNHNAN1n4P0iweRVz/4vtuT/ZWLV9FvFi2AIKZCsOACeMm840ojHctuEyrDZ9Bve3xhIFhIV8AcP3WxYNjDZs3hqewThLlwWLx1TdH+juuqKLgmkoYMwnWGERNkR9kZT91yqU4UUSo500isSmaCFigthwGE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-6164d7a02d2so14789947b3.3;
-        Thu, 25 Apr 2024 10:11:31 -0700 (PDT)
+	s=arc-20240116; t=1714065989; c=relaxed/simple;
+	bh=Po1ljQ7eoWzq/WDxwP6FdJhliggBW98Ff7CLurYurCA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=K8wgOJosQG89o5+n7qtTqa6uxuF+yLmZb8vrMMuC6tQ77r/1fAaLHN57a9tf9kN3aftPri6I+rninpf8Q0L3s6Ww+IQlxvj5nPWnN0YV8vMi0XH1ySzjP66hjf2hrO3DBX79bdQ4SPDD7fwfMaw/8wVXpa93LR5L9UbH6dkaf88=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=f73AH+Uv; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="f73AH+Uv"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1714065987;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=I/w6o0gJnQBhi5RHHs3mWoMd83fjHst48Us5ZNZk3kM=;
+	b=f73AH+UvLm4VFJMZe0Cj11UXTz3s56EyQB/+TApTBUJNm7MbELbdIv9wLEEJ6hYAYvVBol
+	RwD4DdYpC62RglXVBV1qXUbe2uRVMreLey6a99Ud+s58cKO4m0mP9iTA2mmAFG4JiFfJLa
+	Wn66J41Lq67AJ/UfBbu+nF+DBosU6aI=
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
+ [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-634-gHOLe3HgNHWR1VrjS0Fm_g-1; Thu, 25 Apr 2024 13:26:25 -0400
+X-MC-Unique: gHOLe3HgNHWR1VrjS0Fm_g-1
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-a5564a2e3a5so94393566b.1
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 10:26:25 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714065090; x=1714669890;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=MgCSDQ05EYWH1Axl0jxdSLHbjqm9MhNQY8JA68iKsT8=;
-        b=vZfCb1E1KvTaTJBNpfFsIbn8yZjKQ9fpQwHbuYbWG03c3Da8auyjLwvF+DeEXmt1NF
-         fwF/joYRFZK+cfQCABsuqcEoZS2D8Kx9JGUbELmDVDn6GEcwek25sfwx9EkVEa1weo9a
-         6m1u2M5OnYJLbre+zrXnqNkuD1sl2GBDe5b0umnReKhNxHqPBxJLprLaJmITjes14aLj
-         cONgl2NBbzXkHGgaD7kGF7Ol410MNfFw79NDIr+mwVOBUHQoPOqzPYuETYzmWENfUOwp
-         Yha5MQpeqExG8zEkffl0q3QQBQv9u6gTKzDfBbyTBxe2GR7DXwNHmmops4zV5HUuPccU
-         rLpA==
-X-Forwarded-Encrypted: i=1; AJvYcCVN/NpnPwIBILLKoRjo/S4V2qSJHPZ6lbjFNDXhaSkVbWFOhYMMWHvmF27QGNDj54ynXbnlxPzqrapcNNmD+B9oVipe7kZRpMMnjoijvNLXFjDqdM7kgrrgI0tTJ9b9FQD1EKZJizbyZiWnREVREQYtukyzjhZT7k94Yy1RtzRfyl6M4Ejalvh3aJ8+gczjcrbMkdYDh1wkmIzInBNuEFuXdM6DPjL/
-X-Gm-Message-State: AOJu0Yxgi/SY338vpDDJtph5VmjAtXp8k05lV3hx2fC6dAPb+qoGyh3v
-	j4rmzdxI112KXYD8CxN7pA0r29yCofU+5ijy9OLiNXBgXsA957WeqMi8wGZ9
-X-Google-Smtp-Source: AGHT+IHdxhRM1FFGt0DaDC1sce6bEtzJWJgDD5SD8xZszeeKNNi+i8n6mbRvwniGWU8gTJpCNWR6XA==
-X-Received: by 2002:a25:81d1:0:b0:de5:568a:9a9 with SMTP id n17-20020a2581d1000000b00de5568a09a9mr282456ybm.38.1714065090145;
-        Thu, 25 Apr 2024 10:11:30 -0700 (PDT)
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com. [209.85.219.180])
-        by smtp.gmail.com with ESMTPSA id m3-20020a252603000000b00de55b3bde0csm1406672ybm.42.2024.04.25.10.11.29
+        d=1e100.net; s=20230601; t=1714065984; x=1714670784;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=I/w6o0gJnQBhi5RHHs3mWoMd83fjHst48Us5ZNZk3kM=;
+        b=XKTF3V2fKWHaJVsJcUB0lBNq2KXlRRY9iQTom7O5yynOPJsDaTImaC+dCKyrl1ATny
+         f5XYNymtAvt5mIxbZQwKYCP3OkaFqQs/F/f+q1ULCB4S5aT3pwCkJFTGqSX/SF8IyBpe
+         fKM8zHrb4i+XhT+fP5Gd5QWnvskYDK3zIaoyFqUs58DMADOfe0ZlxoIFf1GPPeYXe3yg
+         6oGEF9JP2E6UhjWLNlQcUcQ9wJGV5B2cGSmQYuBD0rV20ydeGpF3Ecc9GPSiGGU7yVGv
+         mzBwA4G6R1GGP1Dwnsm8KQymukbc5+O1CS4tw2iG439zTQkff8ex6Q23fu9AxwbJUlqi
+         dEVw==
+X-Forwarded-Encrypted: i=1; AJvYcCVVX20QDahU1c1fW93kzOZlOXR9acKz51ITw70PaxBZwxj0vRcXnVRjJ/6vLkNc4JZVa657y9wF2+dLhO+bF1wncU8m4Tv6yWBt
+X-Gm-Message-State: AOJu0Yxgv6VXF10bXC/Z7hDRY6DZzp/c7z5AE0Rjh/+ZydHmtBCaj0AT
+	8uUA5zNCgdCySiOVb/ow2rwEyEVQPXcCkuuxpxAkccTlx3aET0VgvnNq6M0qF6baYAVKarahk6y
+	oOm5+iVzdMTmX9BURqWErHszrjTXUFt+ET0dYCIjxPwaK52laEkK7JQaymg==
+X-Received: by 2002:a17:906:2b86:b0:a55:3f2f:4b40 with SMTP id m6-20020a1709062b8600b00a553f2f4b40mr231111ejg.68.1714065984563;
+        Thu, 25 Apr 2024 10:26:24 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEweaKuz3eMwWJrng0edjEF9B1AvNbWdzDA8QCL2mjjgLRa4aJ38bLsqghjMCXy4lRNldi1Pw==
+X-Received: by 2002:a17:906:2b86:b0:a55:3f2f:4b40 with SMTP id m6-20020a1709062b8600b00a553f2f4b40mr231087ejg.68.1714065984195;
+        Thu, 25 Apr 2024 10:26:24 -0700 (PDT)
+Received: from ?IPV6:2001:1c00:c32:7800:5bfa:a036:83f0:f9ec? (2001-1c00-0c32-7800-5bfa-a036-83f0-f9ec.cable.dynamic.v6.ziggo.nl. [2001:1c00:c32:7800:5bfa:a036:83f0:f9ec])
+        by smtp.gmail.com with ESMTPSA id a4-20020a1709062b0400b00a58bf7c8de8sm472026ejg.201.2024.04.25.10.26.23
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 25 Apr 2024 10:11:29 -0700 (PDT)
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-de596c078c2so776318276.0;
-        Thu, 25 Apr 2024 10:11:29 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCXi/CcJ3eOYoEbXwLX+WRdAN6dikI6wcOriubgLKu/U0F9LCcf5p/SVDmLksuwkK2fnsA/o1lXtFktFjTTxRMk7vMdXFQsIxjHjxY+YRz4Msb7xj9rn6dF3jUJYj0JCHBbOkMLhh5HVWIdcV/6nlv7gs7v1EHEAwry9kZv8Ng3YbEzJuFfi2MVB3/EtlVicyqN1/SluP9p881l/78fqMIyfwObRcula
-X-Received: by 2002:a25:c70a:0:b0:de5:852f:6afe with SMTP id
- w10-20020a25c70a000000b00de5852f6afemr297083ybe.30.1714065089010; Thu, 25 Apr
- 2024 10:11:29 -0700 (PDT)
+        Thu, 25 Apr 2024 10:26:23 -0700 (PDT)
+Message-ID: <5ff49965-1e8b-409c-8110-1782143c908c@redhat.com>
+Date: Thu, 25 Apr 2024 19:26:22 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240423182428.704159-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240423182428.704159-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <7a3d4b8a-e89e-499e-92b7-9f63fbc84011@kernel.org> <CA+V-a8uz0OrsM1AxqtpeHB0f1+F6aEqHGp_t3_OPhh0ZqJ26HQ@mail.gmail.com>
-In-Reply-To: <CA+V-a8uz0OrsM1AxqtpeHB0f1+F6aEqHGp_t3_OPhh0ZqJ26HQ@mail.gmail.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 25 Apr 2024 19:11:16 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdV=CTUQNm6OZN0Ck-nXKme8vZ2Ld2rDxHfQZkP2VdnNeQ@mail.gmail.com>
-Message-ID: <CAMuHMdV=CTUQNm6OZN0Ck-nXKme8vZ2Ld2rDxHfQZkP2VdnNeQ@mail.gmail.com>
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: renesas,sdhi: Group single const
- value items into an enum list
-To: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 0/6] mmc: sdhci-acpi: Add some DMI quirks to fix
+ various issues on Bay Trail devices
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko
+ <andy@kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>,
+ linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org
+References: <20240410191639.526324-1-hdegoede@redhat.com>
+ <CAPDyKFrkPm=JEaiwTcVdqtG0hePEu-D76ec89nzFiF2MxYOwgw@mail.gmail.com>
+Content-Language: en-US, nl
+From: Hans de Goede <hdegoede@redhat.com>
+In-Reply-To: <CAPDyKFrkPm=JEaiwTcVdqtG0hePEu-D76ec89nzFiF2MxYOwgw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi Prabhakar,
+Hi,
 
-On Thu, Apr 25, 2024 at 5:44=E2=80=AFPM Lad, Prabhakar
-<prabhakar.csengg@gmail.com> wrote:
-> On Wed, Apr 24, 2024 at 6:42=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.=
-org> wrote:
-> > On 23/04/2024 20:24, Prabhakar wrote:
-> > > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > >
-> > > Group single const value items into an enum list.
-> > >
-> > > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com=
->
-> > > ---
-> > > v1->v2
-> > > - Updated commit message
-> > > - Grouped single const value items into an enum list.
-> > > ---
-> > >  .../devicetree/bindings/mmc/renesas,sdhi.yaml  | 18 +++++++---------=
---
-> > >  1 file changed, 7 insertions(+), 11 deletions(-)
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml =
-b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > > index 29f2400247eb..2bf90095742b 100644
-> > > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > > @@ -13,15 +13,13 @@ properties:
-> > >    compatible:
-> > >      oneOf:
-> > >        - items:
-> > > -          - const: renesas,sdhi-sh73a0  # R-Mobile APE6
-> > > -      - items:
-> > > -          - const: renesas,sdhi-r7s72100 # RZ/A1H
-> > > -      - items:
-> > > -          - const: renesas,sdhi-r7s9210 # SH-Mobile AG5
-> > > -      - items:
-> > > -          - const: renesas,sdhi-r8a73a4 # R-Mobile APE6
-> > > -      - items:
-> > > -          - const: renesas,sdhi-r8a7740 # R-Mobile A1
-> > > +          - enum:
-> >
-> > You wanted to drop the items, but I still see it here.
-> >
-> Ah, I missed that.
->
-> > > +              - renesas,sdhi-sh73a0  # R-Mobile APE6
-> > > +              - renesas,sdhi-r7s72100 # RZ/A1H
-> > > +              - renesas,sdhi-r7s9210 # SH-Mobile AG5
-> > > +              - renesas,sdhi-r8a73a4 # R-Mobile APE6
-> > > +              - renesas,sdhi-r8a7740 # R-Mobile A1
-> > > +              - renesas,sdhi-mmc-r8a77470 # RZ/G1C
-> >
-> > Keep list alphabetically ordered.
-> >
-> This list is sorted based on SoC, I will sort it  alphabetically.
->
-> Geert is that OK with you?
+On 4/25/24 6:21 PM, Ulf Hansson wrote:
+> On Wed, 10 Apr 2024 at 21:16, Hans de Goede <hdegoede@redhat.com> wrote:
+>>
+>> Hi All,
+>>
+>> Here is v3 of my series adding DMI quirks to fix various issues on Intel
+>> Bay Trail tablets.
+>>
+>> Changes in v3:
+>> - Replace "mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo Yoga
+>>   Tablet 2 series sdcard slot" with a new patch from Adrian which
+>>   actually fixes these modes:
+>>   "[PATCH v3 2/6] mmc: sdhci: Add support for "Tuning Error" interrupts"
+>>
+>>   Note this is missing a Signed-off-by from Adrian since this started out
+>>   as a quick test patch from Adrian.
+>>   Adrian, can you provide your S-o-b for this patch?
+>>
+>> Changes in v2:
+>> - Address a few small remarks from Andy and adds Andy's Reviewed-by
+>>   to the patches
+>>
+>> Regards,
+>>
+>> Hans
+>>
+>>
+>> Adrian Hunter (1):
+>>   mmc: sdhci: Add support for "Tuning Error" interrupts
+>>
+>> Hans de Goede (5):
+>>   mmc: core: Add mmc_gpiod_set_cd_config() function
+>>   mmc: sdhci-acpi: Sort DMI quirks alphabetically
+>>   mmc: sdhci-acpi: Fix Lenovo Yoga Tablet 2 Pro 1380 sdcard slot not
+>>     working
+>>   mmc: sdhci-acpi: Disable write protect detection on Toshiba WT10-A
+>>   mmc: sdhci-acpi: Add quirk to enable pull-up on the card-detect GPIO
+>>     on Asus T100TA
+>>
+>>  drivers/mmc/core/slot-gpio.c  | 20 ++++++++++++
+>>  drivers/mmc/host/sdhci-acpi.c | 61 +++++++++++++++++++++++++++++++----
+>>  drivers/mmc/host/sdhci.c      | 10 ++++--
+>>  drivers/mmc/host/sdhci.h      |  3 +-
+>>  include/linux/mmc/slot-gpio.h |  1 +
+>>  5 files changed, 86 insertions(+), 9 deletions(-)
+>>
+> 
+> The series applied for next, thanks!
+> 
+> I assume some/all these patches may deserve to get backported to
+> stable kernels, but it looks like that may be better for you to manage
+> by yourself!?
 
-Usually we sort alphabetically by compatible value.
+From my pov the entire series is suitable for stable, so if you can mark
+them all for stable that would be great.
 
-(FTR, sh73a0 is sometimes called r8a73a0).
+Regards,
 
-Gr{oetje,eeting}s,
+Hans
 
-                        Geert
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
