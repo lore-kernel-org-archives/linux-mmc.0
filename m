@@ -1,50 +1,49 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A309B14D719;
-	Thu, 25 Apr 2024 17:09:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3064B14D712;
+	Thu, 25 Apr 2024 17:09:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714064947; cv=none; b=kG252/c4TlpSkeF3cjsVSDCtAMnMCyXFkqUeNbkM+XZRGaHjPdBtuYgFanWnXOqXTgSVSChjhhzvr8EBwoofZz92XzJYsMPaoy6OQ6c4sVT4xn8n1n3T9ha6Lzbg/Qz2GnivmzsJ9we36wJRAoibDaLDhvaAnctBJdn1o31Qgi0=
+	t=1714064948; cv=none; b=u59ZO5tMxAWaLT35zFBLW/nmHBM4r1tx67byVkfOHSu1lkB8IrJ4t8aAbxK0HLVPtO4fedocRBw1pWMG2UL31Ecxvs/bvAV4yAqfba6XpMKageoLBkE45Au0TmkPVkDQA78PKe5OQ4Vkm5D6i4RL3Ks9mun7INsv0RAMS4nc1IY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714064947; c=relaxed/simple;
-	bh=Poecu4f5dpmnBhjDNs+GIeQe2EIjAchr4YDeOe285sY=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=FTNAsaWlHisZFKz/qK/kuqXEX2tqNH+FHZtT2D4GKBGZdHvfXxcnHrWQELxAMsA1CksBOnTk7wJw61WxymbM21lH2V+Dd5uCwkRDgM8QBJZFi8gYENebngJ0G8JFrrGFRlOEo/bH2D+rvok6AeLVVsZlaveMeHgY8uQhNdkkq7g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=jkWbr/6p; arc=none smtp.client-ip=192.198.163.18
+	s=arc-20240116; t=1714064948; c=relaxed/simple;
+	bh=LUmBuiTPCpuoP9GA3Fh0URX/lzsRO0Lx/ToLVC7HoAM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Jh8gb4USs73/UZRJbRrPO9ASbmkBSFDyVYtQCofoQJVWYtmtiGX4cRDRDC2BPMka/9yGPg9hGXA1ohZ4gQqiPEDCNSIAfqMVUAVCMReO2AbW/V48uc4vUd3ueUUqW5PCaa8u/2ZoTGXhM86bKBhNDzv4kmwoRl4iPSOWAsIJ2nU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=gBjKE466; arc=none smtp.client-ip=192.198.163.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jkWbr/6p"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="gBjKE466"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1714064945; x=1745600945;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=Poecu4f5dpmnBhjDNs+GIeQe2EIjAchr4YDeOe285sY=;
-  b=jkWbr/6pVf+q7nDAdAkQ5Sbbg7NIYIansS9XocwBXSe6K+BBUmJwfB+U
-   0AIDbs6iXFHtJC8zY8dtEdBlCBT9LM6OB5T8Yp3EPRvPRD4LKrwDbEC8T
-   9HV/vZ6rgGIkkRYQua1T0hzG498ygeQa6CIGAbNOIWXs3+0TsvacqcyNv
-   wctkMNaJacGCQBKkUt6nm/D/Q/1vRQR7erPRGS4+cpMHHa59nIZr4qwss
-   ouxI2oSm8YubxN89h0q7opeuqweooH+I36oMoA17pTtAjq/zrK7A/pKrR
-   Rv+T40HpDAFmdzuiMMVW8zJI2k2tA3N+4KnNTvtm5WqTk4pDImBlIEfZz
+  t=1714064947; x=1745600947;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=LUmBuiTPCpuoP9GA3Fh0URX/lzsRO0Lx/ToLVC7HoAM=;
+  b=gBjKE466sikYlw77vRuQFNG64NIMegdDvN6UfdxCPTNz62FtPwgONg+B
+   oEyj4UCoDAWZUMXcveH40o20WzngEMBplv+w8ERlzncFFy8u4az3d2u9k
+   KEqW5c4Lsw6CfTf/Et73dEcu/Nzn5lmpLjzzkoiE4QccMzDyT7Eav8A3C
+   InXHlVMeG/DeIvOfHhII8FA/D7chIkoOxobiqNHhNUHtbRyFh2SUOviv+
+   ge0EYMfiT+8QLzdrHk8igCV31sRz1OfK+biP20wQlsbHyTcs77yZ2R1b8
+   DJ7RGKdJP7d/jcgaG5ZaL2USDEaQEwy6Yx+aezUXSVEZBSUwFalOHJCvP
    w==;
-X-CSE-ConnectionGUID: dXvqx40WQyCbbmFekygugw==
-X-CSE-MsgGUID: 0Sqye04VRG+EEohv0dpnyw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11055"; a="9618905"
+X-CSE-ConnectionGUID: slri80CvTjWNB8b0r8X+cw==
+X-CSE-MsgGUID: qItOAcdwSNG+l8j5lNiV7A==
+X-IronPort-AV: E=McAfee;i="6600,9927,11055"; a="13554454"
 X-IronPort-AV: E=Sophos;i="6.07,230,1708416000"; 
-   d="scan'208";a="9618905"
-Received: from orviesa004.jf.intel.com ([10.64.159.144])
-  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Apr 2024 10:09:04 -0700
-X-CSE-ConnectionGUID: LqkwhMLARgq9KjVdNaAqPw==
-X-CSE-MsgGUID: X+Lavs6MTwqvEI8THCiJtg==
+   d="scan'208";a="13554454"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Apr 2024 10:09:05 -0700
+X-CSE-ConnectionGUID: UcbMNhXLSkGenNFAfdS2QA==
+X-CSE-MsgGUID: 7vPWFdT8RT2VDXptYaxVLA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.07,230,1708416000"; 
-   d="scan'208";a="29945986"
+   d="scan'208";a="29595991"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa004.jf.intel.com with ESMTP; 25 Apr 2024 10:09:03 -0700
+  by fmviesa005.fm.intel.com with ESMTP; 25 Apr 2024 10:09:02 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-	id 8B5E75B2; Thu, 25 Apr 2024 20:09:01 +0300 (EEST)
+	id 6FFA5136; Thu, 25 Apr 2024 20:09:01 +0300 (EEST)
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
 	linux-mmc@vger.kernel.org,
@@ -55,12 +54,10 @@ Cc: Aubin Constans <aubin.constans@microchip.com>,
 	Nicolas Ferre <nicolas.ferre@microchip.com>,
 	Alexandre Belloni <alexandre.belloni@bootlin.com>,
 	Claudiu Beznea <claudiu.beznea@tuxon.dev>
-Subject: [PATCH v2 2/2] mmc: atmel-mci: Switch to use dev_err_probe()
-Date: Thu, 25 Apr 2024 20:08:45 +0300
-Message-ID: <20240425170900.3767990-3-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v2 0/2] mmc: atmel-mci: Get rid of leftovers and clean up
+Date: Thu, 25 Apr 2024 20:08:43 +0300
+Message-ID: <20240425170900.3767990-1-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.43.0.rc1.1336.g36b5255a03ac
-In-Reply-To: <20240425170900.3767990-1-andriy.shevchenko@linux.intel.com>
-References: <20240425170900.3767990-1-andriy.shevchenko@linux.intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,50 +66,22 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Switch to use dev_err_probe() to simplify the error path and
-unify a message template.
+I used to have some patches against the driver, but it appears that part
+of it has been applied (in different form as done by someone else).
+However, there is still room to improve, hence this spring cleanup series.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/mmc/host/atmel-mci.c | 11 ++++-------
- 1 file changed, 4 insertions(+), 7 deletions(-)
+In v2:
+- dropped applied patches
+- fixed kernel-doc issue (LKP)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 9ae3ce14db50..8199d9620075 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -632,10 +632,8 @@ static int atmci_of_init(struct atmel_mci *host)
- 	u32 slot_id;
- 	int err;
- 
--	if (!np) {
--		dev_err(dev, "device node not found\n");
--		return ERR_PTR(-EINVAL);
--	}
-+	if (!np)
-+		return dev_err_probe(dev, -EINVAL, "device node not found\n");
- 
- 	for_each_child_of_node(np, cnp) {
- 		if (of_property_read_u32(cnp, "reg", &slot_id)) {
-@@ -2551,7 +2549,7 @@ static int atmci_probe(struct platform_device *pdev)
- 	}
- 
- 	if (!nr_slots) {
--		dev_err(dev, "init failed: no slot defined\n");
-+		dev_err_probe(dev, ret, "init failed: no slot defined\n");
- 		goto err_init_slot;
- 	}
- 
-@@ -2560,8 +2558,7 @@ static int atmci_probe(struct platform_device *pdev)
- 		                                  &host->buf_phys_addr,
- 						  GFP_KERNEL);
- 		if (!host->buffer) {
--			ret = -ENOMEM;
--			dev_err(dev, "buffer allocation failed\n");
-+			ret = dev_err_probe(dev, -ENOMEM, "buffer allocation failed\n");
- 			goto err_dma_alloc;
- 		}
- 	}
+Andy Shevchenko (2):
+  mmc: atmel-mci: Incapsulate used to be a platform data into host
+    structure
+  mmc: atmel-mci: Switch to use dev_err_probe()
+
+ drivers/mmc/host/atmel-mci.c | 72 ++++++++++++++----------------------
+ 1 file changed, 28 insertions(+), 44 deletions(-)
+
 -- 
 2.43.0.rc1.1336.g36b5255a03ac
 
