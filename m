@@ -1,65 +1,33 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6527514BF87
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 17:26:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA07335280;
+	Thu, 25 Apr 2024 18:35:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714065989; cv=none; b=ULuHOceUbnpt3DujUH9IHE1t32OM3QQnhSz9art2Z6XS+NqVQTTrBP1cclbrfSjJ+CknMnwFsZUSYinLT7RoojTg4gS2DFIJDv0FhSby13rEZJdUEpbstVIz6pTav8/nU27IYxk2LnFJTnKbRoStJR3JPVe6fz2n9VaBZ9JnIzE=
+	t=1714070125; cv=none; b=JEK/ZDBIJiwdVGnFOVU4wkh7Rzu8CsrGr6uGGs8ROgLEiIlioWUupUY2w+O2JgFO6oHQwmpnyaTboKDuCXMdhMBU6naow07HiMaq2LPXKY074JefbBrdyJOMdCbs7rFFEJMTOL+caBXGzMK7yja/wriiBUbPop1UQl+GAXThPPY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714065989; c=relaxed/simple;
-	bh=Po1ljQ7eoWzq/WDxwP6FdJhliggBW98Ff7CLurYurCA=;
+	s=arc-20240116; t=1714070125; c=relaxed/simple;
+	bh=Gn88odIypI2Ikg7RZchNDFyeKbAbgU61axWYS83v+6g=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=K8wgOJosQG89o5+n7qtTqa6uxuF+yLmZb8vrMMuC6tQ77r/1fAaLHN57a9tf9kN3aftPri6I+rninpf8Q0L3s6Ww+IQlxvj5nPWnN0YV8vMi0XH1ySzjP66hjf2hrO3DBX79bdQ4SPDD7fwfMaw/8wVXpa93LR5L9UbH6dkaf88=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=f73AH+Uv; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 In-Reply-To:Content-Type; b=oS2iE4QDDMkECnOf3EaHmGYh+v1O6bZrxP4tzxut7vUh403coh59mLC431qilufh9ppP8lX3i7gXC5/NIj6LjURE2g6w2eNIIWvXnwyByGgEVPaI5DM4fepqBcrZnQVgWXfLGm/H0RThJTvC+HVAxSuAmkx5gqUTpECFlwNn2Hk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZAbPlPRQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="f73AH+Uv"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1714065987;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=I/w6o0gJnQBhi5RHHs3mWoMd83fjHst48Us5ZNZk3kM=;
-	b=f73AH+UvLm4VFJMZe0Cj11UXTz3s56EyQB/+TApTBUJNm7MbELbdIv9wLEEJ6hYAYvVBol
-	RwD4DdYpC62RglXVBV1qXUbe2uRVMreLey6a99Ud+s58cKO4m0mP9iTA2mmAFG4JiFfJLa
-	Wn66J41Lq67AJ/UfBbu+nF+DBosU6aI=
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
- [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-634-gHOLe3HgNHWR1VrjS0Fm_g-1; Thu, 25 Apr 2024 13:26:25 -0400
-X-MC-Unique: gHOLe3HgNHWR1VrjS0Fm_g-1
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-a5564a2e3a5so94393566b.1
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 10:26:25 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714065984; x=1714670784;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=I/w6o0gJnQBhi5RHHs3mWoMd83fjHst48Us5ZNZk3kM=;
-        b=XKTF3V2fKWHaJVsJcUB0lBNq2KXlRRY9iQTom7O5yynOPJsDaTImaC+dCKyrl1ATny
-         f5XYNymtAvt5mIxbZQwKYCP3OkaFqQs/F/f+q1ULCB4S5aT3pwCkJFTGqSX/SF8IyBpe
-         fKM8zHrb4i+XhT+fP5Gd5QWnvskYDK3zIaoyFqUs58DMADOfe0ZlxoIFf1GPPeYXe3yg
-         6oGEF9JP2E6UhjWLNlQcUcQ9wJGV5B2cGSmQYuBD0rV20ydeGpF3Ecc9GPSiGGU7yVGv
-         mzBwA4G6R1GGP1Dwnsm8KQymukbc5+O1CS4tw2iG439zTQkff8ex6Q23fu9AxwbJUlqi
-         dEVw==
-X-Forwarded-Encrypted: i=1; AJvYcCVVX20QDahU1c1fW93kzOZlOXR9acKz51ITw70PaxBZwxj0vRcXnVRjJ/6vLkNc4JZVa657y9wF2+dLhO+bF1wncU8m4Tv6yWBt
-X-Gm-Message-State: AOJu0Yxgv6VXF10bXC/Z7hDRY6DZzp/c7z5AE0Rjh/+ZydHmtBCaj0AT
-	8uUA5zNCgdCySiOVb/ow2rwEyEVQPXcCkuuxpxAkccTlx3aET0VgvnNq6M0qF6baYAVKarahk6y
-	oOm5+iVzdMTmX9BURqWErHszrjTXUFt+ET0dYCIjxPwaK52laEkK7JQaymg==
-X-Received: by 2002:a17:906:2b86:b0:a55:3f2f:4b40 with SMTP id m6-20020a1709062b8600b00a553f2f4b40mr231111ejg.68.1714065984563;
-        Thu, 25 Apr 2024 10:26:24 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEweaKuz3eMwWJrng0edjEF9B1AvNbWdzDA8QCL2mjjgLRa4aJ38bLsqghjMCXy4lRNldi1Pw==
-X-Received: by 2002:a17:906:2b86:b0:a55:3f2f:4b40 with SMTP id m6-20020a1709062b8600b00a553f2f4b40mr231087ejg.68.1714065984195;
-        Thu, 25 Apr 2024 10:26:24 -0700 (PDT)
-Received: from ?IPV6:2001:1c00:c32:7800:5bfa:a036:83f0:f9ec? (2001-1c00-0c32-7800-5bfa-a036-83f0-f9ec.cable.dynamic.v6.ziggo.nl. [2001:1c00:c32:7800:5bfa:a036:83f0:f9ec])
-        by smtp.gmail.com with ESMTPSA id a4-20020a1709062b0400b00a58bf7c8de8sm472026ejg.201.2024.04.25.10.26.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 25 Apr 2024 10:26:23 -0700 (PDT)
-Message-ID: <5ff49965-1e8b-409c-8110-1782143c908c@redhat.com>
-Date: Thu, 25 Apr 2024 19:26:22 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZAbPlPRQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A6014C113CC;
+	Thu, 25 Apr 2024 18:35:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1714070124;
+	bh=Gn88odIypI2Ikg7RZchNDFyeKbAbgU61axWYS83v+6g=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=ZAbPlPRQ9ExkilsAiDqf9QalfmqoRCWezm6Ezl++payZJB+8+2rByYc2rfylZoLvq
+	 Fb6fTjqDE2mQNBkG1o1zMjARHnhwNgaVeZ9uQuQKQdpVinmz4givGfTLKegiW7vGPe
+	 x5Yqsz89k4ZyzABHLpqdXn7mgz4+vLMhuyWBbsw2lEhqbeFm/xGD7xgEdqPMtpBU51
+	 vw6cUiCYKZrr9u4rFyY6nHpVqBHwkVYHotS4ZYGmFzbxefJRTy6OCStQ1hwH2Mhksb
+	 keb4ky4tsOV4lDrZ9SpwmuYt9MDaALc3Ed2b2ER3zXH/mzfjxDrYS9FcLg9ug3qQdA
+	 11VD3TzEWTuow==
+Message-ID: <cec3a862-82a9-4f79-985a-d29816e520c2@kernel.org>
+Date: Thu, 25 Apr 2024 20:35:17 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -67,80 +35,95 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-acpi: Add some DMI quirks to fix
- various issues on Bay Trail devices
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko
- <andy@kernel.org>, Mika Westerberg <mika.westerberg@linux.intel.com>,
- linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org
-References: <20240410191639.526324-1-hdegoede@redhat.com>
- <CAPDyKFrkPm=JEaiwTcVdqtG0hePEu-D76ec89nzFiF2MxYOwgw@mail.gmail.com>
-Content-Language: en-US, nl
-From: Hans de Goede <hdegoede@redhat.com>
-In-Reply-To: <CAPDyKFrkPm=JEaiwTcVdqtG0hePEu-D76ec89nzFiF2MxYOwgw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: renesas,sdhi: Group single const
+ value items into an enum list
+To: Geert Uytterhoeven <geert@linux-m68k.org>,
+ "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Magnus Damm <magnus.damm@gmail.com>,
+ Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>,
+ Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+ Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20240423182428.704159-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20240423182428.704159-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <7a3d4b8a-e89e-499e-92b7-9f63fbc84011@kernel.org>
+ <CA+V-a8uz0OrsM1AxqtpeHB0f1+F6aEqHGp_t3_OPhh0ZqJ26HQ@mail.gmail.com>
+ <CAMuHMdV=CTUQNm6OZN0Ck-nXKme8vZ2Ld2rDxHfQZkP2VdnNeQ@mail.gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
+ cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
+ JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
+ gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
+ J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
+ NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
+ BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
+ vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
+ Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
+ TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
+ S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
+ FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJgPO8PBQkUX63hAAoJEBuTQ307
+ QWKbBn8P+QFxwl7pDsAKR1InemMAmuykCHl+XgC0LDqrsWhAH5TYeTVXGSyDsuZjHvj+FRP+
+ gZaEIYSw2Yf0e91U9HXo3RYhEwSmxUQ4Fjhc9qAwGKVPQf6YuQ5yy6pzI8brcKmHHOGrB3tP
+ /MODPt81M1zpograAC2WTDzkICfHKj8LpXp45PylD99J9q0Y+gb04CG5/wXs+1hJy/dz0tYy
+ iua4nCuSRbxnSHKBS5vvjosWWjWQXsRKd+zzXp6kfRHHpzJkhRwF6ArXi4XnQ+REnoTfM5Fk
+ VmVmSQ3yFKKePEzoIriT1b2sXO0g5QXOAvFqB65LZjXG9jGJoVG6ZJrUV1MVK8vamKoVbUEe
+ 0NlLl/tX96HLowHHoKhxEsbFzGzKiFLh7hyboTpy2whdonkDxpnv/H8wE9M3VW/fPgnL2nPe
+ xaBLqyHxy9hA9JrZvxg3IQ61x7rtBWBUQPmEaK0azW+l3ysiNpBhISkZrsW3ZUdknWu87nh6
+ eTB7mR7xBcVxnomxWwJI4B0wuMwCPdgbV6YDUKCuSgRMUEiVry10xd9KLypR9Vfyn1AhROrq
+ AubRPVeJBf9zR5UW1trJNfwVt3XmbHX50HCcHdEdCKiT9O+FiEcahIaWh9lihvO0ci0TtVGZ
+ MCEtaCE80Q3Ma9RdHYB3uVF930jwquplFLNF+IBCn5JRzsFNBFVDXDQBEADNkrQYSREUL4D3
+ Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
+ MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
+ OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
+ GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
+ 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
+ YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
+ 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
+ BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
+ JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
+ 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
+ YpsFAmA872oFCRRflLYACgkQG5NDfTtBYpvScw/9GrqBrVLuJoJ52qBBKUBDo4E+5fU1bjt0
+ Gv0nh/hNJuecuRY6aemU6HOPNc2t8QHMSvwbSF+Vp9ZkOvrM36yUOufctoqON+wXrliEY0J4
+ ksR89ZILRRAold9Mh0YDqEJc1HmuxYLJ7lnbLYH1oui8bLbMBM8S2Uo9RKqV2GROLi44enVt
+ vdrDvo+CxKj2K+d4cleCNiz5qbTxPUW/cgkwG0lJc4I4sso7l4XMDKn95c7JtNsuzqKvhEVS
+ oic5by3fbUnuI0cemeizF4QdtX2uQxrP7RwHFBd+YUia7zCcz0//rv6FZmAxWZGy5arNl6Vm
+ lQqNo7/Poh8WWfRS+xegBxc6hBXahpyUKphAKYkah+m+I0QToCfnGKnPqyYIMDEHCS/RfqA5
+ t8F+O56+oyLBAeWX7XcmyM6TGeVfb+OZVMJnZzK0s2VYAuI0Rl87FBFYgULdgqKV7R7WHzwD
+ uZwJCLykjad45hsWcOGk3OcaAGQS6NDlfhM6O9aYNwGL6tGt/6BkRikNOs7VDEa4/HlbaSJo
+ 7FgndGw1kWmkeL6oQh7wBvYll2buKod4qYntmNKEicoHGU+x91Gcan8mCoqhJkbqrL7+nXG2
+ 5Q/GS5M9RFWS+nYyJh+c3OcfKqVcZQNANItt7+ULzdNJuhvTRRdC3g9hmCEuNSr+CLMdnRBY fv0=
+In-Reply-To: <CAMuHMdV=CTUQNm6OZN0Ck-nXKme8vZ2Ld2rDxHfQZkP2VdnNeQ@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-Hi,
-
-On 4/25/24 6:21 PM, Ulf Hansson wrote:
-> On Wed, 10 Apr 2024 at 21:16, Hans de Goede <hdegoede@redhat.com> wrote:
+On 25/04/2024 19:11, Geert Uytterhoeven wrote:
 >>
->> Hi All,
+>>>> +              - renesas,sdhi-sh73a0  # R-Mobile APE6
+>>>> +              - renesas,sdhi-r7s72100 # RZ/A1H
+>>>> +              - renesas,sdhi-r7s9210 # SH-Mobile AG5
+>>>> +              - renesas,sdhi-r8a73a4 # R-Mobile APE6
+>>>> +              - renesas,sdhi-r8a7740 # R-Mobile A1
+>>>> +              - renesas,sdhi-mmc-r8a77470 # RZ/G1C
+>>>
+>>> Keep list alphabetically ordered.
+>>>
+>> This list is sorted based on SoC, I will sort it  alphabetically.
 >>
->> Here is v3 of my series adding DMI quirks to fix various issues on Intel
->> Bay Trail tablets.
->>
->> Changes in v3:
->> - Replace "mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo Yoga
->>   Tablet 2 series sdcard slot" with a new patch from Adrian which
->>   actually fixes these modes:
->>   "[PATCH v3 2/6] mmc: sdhci: Add support for "Tuning Error" interrupts"
->>
->>   Note this is missing a Signed-off-by from Adrian since this started out
->>   as a quick test patch from Adrian.
->>   Adrian, can you provide your S-o-b for this patch?
->>
->> Changes in v2:
->> - Address a few small remarks from Andy and adds Andy's Reviewed-by
->>   to the patches
->>
->> Regards,
->>
->> Hans
->>
->>
->> Adrian Hunter (1):
->>   mmc: sdhci: Add support for "Tuning Error" interrupts
->>
->> Hans de Goede (5):
->>   mmc: core: Add mmc_gpiod_set_cd_config() function
->>   mmc: sdhci-acpi: Sort DMI quirks alphabetically
->>   mmc: sdhci-acpi: Fix Lenovo Yoga Tablet 2 Pro 1380 sdcard slot not
->>     working
->>   mmc: sdhci-acpi: Disable write protect detection on Toshiba WT10-A
->>   mmc: sdhci-acpi: Add quirk to enable pull-up on the card-detect GPIO
->>     on Asus T100TA
->>
->>  drivers/mmc/core/slot-gpio.c  | 20 ++++++++++++
->>  drivers/mmc/host/sdhci-acpi.c | 61 +++++++++++++++++++++++++++++++----
->>  drivers/mmc/host/sdhci.c      | 10 ++++--
->>  drivers/mmc/host/sdhci.h      |  3 +-
->>  include/linux/mmc/slot-gpio.h |  1 +
->>  5 files changed, 86 insertions(+), 9 deletions(-)
->>
+>> Geert is that OK with you?
 > 
-> The series applied for next, thanks!
-> 
-> I assume some/all these patches may deserve to get backported to
-> stable kernels, but it looks like that may be better for you to manage
-> by yourself!?
+> Usually we sort alphabetically by compatible value.
 
-From my pov the entire series is suitable for stable, so if you can mark
-them all for stable that would be great.
+BTW, it is also fine if you keep some other sorting rule there, which is
+in general known to interested parties. Although I would argue that most
+people adding new entries are not aware of such rules, thus they add
+things to the end increasing the chances for conflicts.
 
-Regards,
-
-Hans
-
+Best regards,
+Krzysztof
 
