@@ -1,105 +1,124 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4A2F14D290
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 16:22:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BA2314D2BF
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 16:22:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714062124; cv=none; b=WKNLnBHNxAvlw9dinaetfGxtuUjETGo6bqcnM6C+sNPA12t0VOUG6dwM0KYI9c/mTPBuscZwVxwGj0TEtUTZzB8+U1BfrOC1kbE8zI/2cOzq6p7lZ4EDoN0Rh381ug5F5YV/LarvRR5kr+n52DOS+y6Sun1VRkj4B3XKUyqUj4s=
+	t=1714062133; cv=none; b=mGV+9hIC56VDiyL6NBtSXJaKtygKMDSYlcNQi1C7u+kbbucLM1RXXjJ406PLJ1IkCTj45CsU2kbSaYlyT+v7xk96AuDneYeQ8tt9qKpGCNFA4I87D9rQ/Xu8emLMP2X+oQiSDUVFJLFz+rPXmJYWLCG8wmbPeOxKEATjSnygWxw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714062124; c=relaxed/simple;
-	bh=/BJezWf4e46PL8G6qGv9NS2seGXW/HjeqGqtrsDYyV4=;
+	s=arc-20240116; t=1714062133; c=relaxed/simple;
+	bh=NPYIUp6jIY9PQ8ikjnrRZ5j4GlWdfxLCMFcklaEhFsA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=uL4kZeY1lDRN1mN//q3Phx4xc2csZiSZEn3ZlN22FmMe/WQEWQXxRCSZhpe0UK9eAs3orbmIV5vDLIhjk8Z/1NAC6VriF9bHPbYOb4Z7C9YtBeEQg1cUj6WZ4xoMAUVVmyhBIDKz5dJgnn4KJ1erak3xEvQDTV4U4I4eKaKGs3g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XsGGCR+O; arc=none smtp.client-ip=209.85.219.171
+	 To:Cc:Content-Type; b=qN8Aluv3PCHPtZKZjX5icDt2X+RyZBmhbAiyrkk3P8sYeL9ufZzdgQp/oZsbMeB35GYPZKVzhDwKX4vZjmKQqGW92FMtyOctVx609d35uGf1tJINnYos9MD82zh8mQv83kBdmcFLwvdBc1zQ36De/JQvqs1rsKrHrH8QDZ+VtSo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZTCznw8G; arc=none smtp.client-ip=209.85.219.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XsGGCR+O"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-dc236729a2bso1209376276.0
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 09:22:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZTCznw8G"
+Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-dcd7c526cc0so1329026276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 09:22:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1714062122; x=1714666922; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=450cETtePbIzFtnBgqpbAAvZVlAXASIsvHnqkeRgfUc=;
-        b=XsGGCR+OsjItS0w0pVL8wuWLvW8LYPRujj1KZSmjfEUapxtZdvEj8jifLxFu3qlJPU
-         iDLp51Jfwr1c66zKCVjr+hE8bsrOJiPfgzmcklFQTdJFtPHkmqugL6VaZi3xn7p0IM2j
-         j2hneQta/7l3e+5xqjej+itloBzH6vqCnI0WjP7SQQp2h/gtGzdnpkmg1HRH8EBIoO7r
-         Dg5IWWGiYanIJ2a+4h0uwNBIL1FzYb3Heeam8ZCR5U2OZV1/9sNISX6lf6pxZtfHtRKw
-         dbu3zfoYgdp6cMA7y1uH5qGKpoh3NFEzHn0JasqagXcUXDCFzTz0PcJCPdI5pbrQ7W03
-         StCQ==
+        d=linaro.org; s=google; t=1714062131; x=1714666931; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=K79KBPtPcWztYHUIKemEI+PZGidRnE/fUHigN04mppg=;
+        b=ZTCznw8GsHnp7hHBfjbBz8jknzxjMtkyvarKDbzRh9pqCAcrQ5/xBIZcZ+YhRjNWiy
+         yUPQpy88EzErkdx+xaX+YUEfCAULtD9ChgO7qc+OJ94KgMR3vB46blqQBr5z/nyafcca
+         ihsXC1NRBFIpDX9aGEwXnWf8gpAbsFtOQFQXBIm1+bqZYZeWhto0KqDfBa7DHokbq8m6
+         BxeEvZhx+LGpbB8kSDCg7IBWi00vxm1xWfcekTkr1sDcSa/hCBhrT4c/JHjdIBdvqGfU
+         Eog76v/w4B33ClbeDrp/2XOTDKM0QN5rqP+gPVP2j4EJw3e7grold3jIe47z9+nE1hPH
+         /pZw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714062122; x=1714666922;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=450cETtePbIzFtnBgqpbAAvZVlAXASIsvHnqkeRgfUc=;
-        b=QgvXQT1ROBS9ce+Dk8fxIO32xhY60evRWSTWGn6tinxommpp/Baw+WYAR0osPSrd2W
-         MffywbT7QMX5qCzKzT/zT4U14rqiVdvuOTmTkwVjaKiQXUn1Y9VeVqGs1ohRqxNR1dbG
-         O7tVLFOBp4kk8W4L4/AGbM9qwqAG0DTauyYIt5KovhUgGd1mnsW3oStKKA1xGl3sZtIQ
-         6w6Sgx8YK22HyGv37fmuqklWR+2ez9cbLCLgaCLhYLEkWRvW4pmanxlffZNwnmfNq5yE
-         Ah8eelcdY8OhsBtXB4BYk9Abn36JEmLAX/muIA8W+SV/jKIpE8Uv+1T6cNMgGsFrwK+z
-         hFJg==
-X-Forwarded-Encrypted: i=1; AJvYcCUPy1EB3NvjxVW3ExkCsbWIFSgES7/Tvr/N2kiBnay8PNS3B+14WETLVeFomjmcctRbnyVNN/zNQU7p/GyAOfaFUTxCJSN5Jd1u
-X-Gm-Message-State: AOJu0YzUt+6c4eiSv/Wc0VwwhL6Xf085zJljUa3iGrjuT6xCMTR10UD7
-	HsxiqfGBOOZHrG86ELh3jjMwnGmkEaaTswwzv2LYgbTS2tEAm3+G3m7fz7sPWQWrHootm9RwHg6
-	ufv7yqmXsJB9wKxobhJd9nZXFfU4eshh0EuT2oHhHrO+QPMdF
-X-Google-Smtp-Source: AGHT+IHsG8sOX+WEM/DoCeWBuYZYXfvv+few4ykMeW0zvDFtHXXNKa2GVvb/k/dFJo58xurRemLXIdiAoSF+q/fPATg=
-X-Received: by 2002:a25:bccd:0:b0:de5:53a9:253f with SMTP id
- l13-20020a25bccd000000b00de553a9253fmr133982ybm.15.1714062121878; Thu, 25 Apr
- 2024 09:22:01 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1714062131; x=1714666931;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=K79KBPtPcWztYHUIKemEI+PZGidRnE/fUHigN04mppg=;
+        b=uwrYUZ9SroLn3ahwxcFbInHhCM5OvB5/xdXVHcm7CqAeOIhyNZZm+v0cxva9zR8pKv
+         EsZhU2mRa1uNql8Y1lWeKbjov5BaUZ6U9yRJjy3HHiFIQCqt5itmgneJ3MaSuEHGgXMR
+         VA2T0C8aJ8j9TEw8p5btdkVld9RL8jJCG0sJvi7YuAakTIz37H5VlG7VVepCT98dGlOW
+         P4sDqCOjkkuJXeHMTiJ/Gjrt17QyI4rDiFdz5lvUkvyYsJ/JUJOr2zhxv0s7cu6v2euZ
+         HDoRlJ+GQslgTHS2vVEILdwhCNlfOX+OIocCeMZFKYQOYR+h2DgwbEiwCzMcOM5RwjQg
+         5+PQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWl63AhOgVsaGTpe8Jn75byP4OyjC2FX8+kCXNeEW80QAt5j70ia4uS1UCebHSwF5kO1juRzY0uS4NNOWfM/aicTGuKDazT9pMW
+X-Gm-Message-State: AOJu0Yx40E4lUcBJL6A2o8361HDA4AiQYJD3ghWO3u+r9tHhdSPC7gza
+	2xp5zYVlbJfAE+4oeaIeBtR2co4M2+tJsIKGnJbXkMAG8tA/ow45CifxeHs2hU2iXHJBl5XIcxB
+	pck0DpVHLWpqmBe3Ho8FM2lx9k4y/Hrj6fmouxg==
+X-Google-Smtp-Source: AGHT+IFTSx051iBTZTJNLHS0foAg1b72fhkCwf0yB6aJjwxbuYymy6qMskwcGJTMlGgNNfy8taVX4tPWEDKUY757x1c=
+X-Received: by 2002:a25:850d:0:b0:de5:5a84:7640 with SMTP id
+ w13-20020a25850d000000b00de55a847640mr150794ybk.19.1714062131045; Thu, 25 Apr
+ 2024 09:22:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1712757795.git.u.kleine-koenig@pengutronix.de>
-In-Reply-To: <cover.1712757795.git.u.kleine-koenig@pengutronix.de>
+References: <20240410191639.526324-1-hdegoede@redhat.com>
+In-Reply-To: <20240410191639.526324-1-hdegoede@redhat.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 25 Apr 2024 18:21:26 +0200
-Message-ID: <CAPDyKFoMp_tUM5wLMF00RcQogAVQSjm7e5_WQp5AE=+uNiTyMA@mail.gmail.com>
-Subject: Re: [PATCH 0/3] memstick: Convert to platform remove callback
- returning void
-To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, linux-mmc@vger.kernel.org, 
-	kernel@pengutronix.de
+Date: Thu, 25 Apr 2024 18:21:35 +0200
+Message-ID: <CAPDyKFrkPm=JEaiwTcVdqtG0hePEu-D76ec89nzFiF2MxYOwgw@mail.gmail.com>
+Subject: Re: [PATCH v3 0/6] mmc: sdhci-acpi: Add some DMI quirks to fix
+ various issues on Bay Trail devices
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andy@kernel.org>, 
+	Mika Westerberg <mika.westerberg@linux.intel.com>, linux-mmc@vger.kernel.org, 
+	linux-gpio@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, 10 Apr 2024 at 16:05, Uwe Kleine-K=C3=B6nig
-<u.kleine-koenig@pengutronix.de> wrote:
+On Wed, 10 Apr 2024 at 21:16, Hans de Goede <hdegoede@redhat.com> wrote:
 >
-> Hello,
+> Hi All,
 >
-> this series converts all platform drivers below drivers/memstick/ to not
-> use struct platform_device::remove() any more. See commit 5c5a7680e67b
-> ("platform: Provide a remove callback that returns no value") for an
-> extended explanation and the eventual goal.
+> Here is v3 of my series adding DMI quirks to fix various issues on Intel
+> Bay Trail tablets.
 >
-> All conversations are trivial, because the driver's .remove() callbacks
-> returned zero unconditionally.
+> Changes in v3:
+> - Replace "mmc: sdhci-acpi: Disable UHS/1.8V modes on Lenovo Yoga
+>   Tablet 2 series sdcard slot" with a new patch from Adrian which
+>   actually fixes these modes:
+>   "[PATCH v3 2/6] mmc: sdhci: Add support for "Tuning Error" interrupts"
 >
-> There are no interdependencies between these patches, so they can be
-> applied independently if needed. This is merge window material.
+>   Note this is missing a Signed-off-by from Adrian since this started out
+>   as a quick test patch from Adrian.
+>   Adrian, can you provide your S-o-b for this patch?
 >
-> Best regards
-> Uwe
+> Changes in v2:
+> - Address a few small remarks from Andy and adds Andy's Reviewed-by
+>   to the patches
 >
-> Uwe Kleine-K=C3=B6nig (3):
->   memstick: rtsx_pci_ms: Drop if block with always false condition
->   memstick: rtsx_pci_ms: Convert to platform remove callback returning
->     void
->   memstick: rtsx_usb_ms: Convert to platform remove callback returning
->     void
+> Regards,
 >
->  drivers/memstick/host/rtsx_pci_ms.c | 9 ++-------
->  drivers/memstick/host/rtsx_usb_ms.c | 6 ++----
->  2 files changed, 4 insertions(+), 11 deletions(-)
+> Hans
+>
+>
+> Adrian Hunter (1):
+>   mmc: sdhci: Add support for "Tuning Error" interrupts
+>
+> Hans de Goede (5):
+>   mmc: core: Add mmc_gpiod_set_cd_config() function
+>   mmc: sdhci-acpi: Sort DMI quirks alphabetically
+>   mmc: sdhci-acpi: Fix Lenovo Yoga Tablet 2 Pro 1380 sdcard slot not
+>     working
+>   mmc: sdhci-acpi: Disable write protect detection on Toshiba WT10-A
+>   mmc: sdhci-acpi: Add quirk to enable pull-up on the card-detect GPIO
+>     on Asus T100TA
+>
+>  drivers/mmc/core/slot-gpio.c  | 20 ++++++++++++
+>  drivers/mmc/host/sdhci-acpi.c | 61 +++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/sdhci.c      | 10 ++++--
+>  drivers/mmc/host/sdhci.h      |  3 +-
+>  include/linux/mmc/slot-gpio.h |  1 +
+>  5 files changed, 86 insertions(+), 9 deletions(-)
+>
 
 The series applied for next, thanks!
+
+I assume some/all these patches may deserve to get backported to
+stable kernels, but it looks like that may be better for you to manage
+by yourself!?
 
 Kind regards
 Uffe
