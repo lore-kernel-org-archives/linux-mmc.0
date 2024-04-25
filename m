@@ -1,163 +1,105 @@
 Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1123014D2AB
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 16:19:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4A2F14D290
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 16:22:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714061947; cv=none; b=kHyfAROKpuq2GM+9jcIY0BVDrGGnrr+4t1OUXOdZBm8WST8xjXC8DVTrgl3XHRDCYt2/x+QKA5tTcXSRltaeCRphzIc4z0pW+Xs30TJsO/DBwKoCR96tLE1JypGUpw7fTjoknsEmRBYazeV7rQL6r1+zJYyXJl1YDA/sA3+jvM0=
+	t=1714062124; cv=none; b=WKNLnBHNxAvlw9dinaetfGxtuUjETGo6bqcnM6C+sNPA12t0VOUG6dwM0KYI9c/mTPBuscZwVxwGj0TEtUTZzB8+U1BfrOC1kbE8zI/2cOzq6p7lZ4EDoN0Rh381ug5F5YV/LarvRR5kr+n52DOS+y6Sun1VRkj4B3XKUyqUj4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714061947; c=relaxed/simple;
-	bh=EgyZj3aBfYfNaDWanxnneaI1mNImgpynJTcCnngx//I=;
+	s=arc-20240116; t=1714062124; c=relaxed/simple;
+	bh=/BJezWf4e46PL8G6qGv9NS2seGXW/HjeqGqtrsDYyV4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BaH9+ZV6cAOjztYbrPvZH9uslefyPoN3tQptnAs0l7HmFnyoX/Obb3JZ6JuFTYjz6pM66bCbBZyNKNJLvx5bjpLex/FiG5ILATU/Sehp3HYhQ2htDrAZ65yooS73jhkPCyNSpOqu6lsgRJvrBbHQC65G8pEzWNMLP6RzcEajgng=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=o79iJOP6; arc=none smtp.client-ip=209.85.219.171
+	 To:Cc:Content-Type; b=uL4kZeY1lDRN1mN//q3Phx4xc2csZiSZEn3ZlN22FmMe/WQEWQXxRCSZhpe0UK9eAs3orbmIV5vDLIhjk8Z/1NAC6VriF9bHPbYOb4Z7C9YtBeEQg1cUj6WZ4xoMAUVVmyhBIDKz5dJgnn4KJ1erak3xEvQDTV4U4I4eKaKGs3g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XsGGCR+O; arc=none smtp.client-ip=209.85.219.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="o79iJOP6"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-db4364ecd6aso1341530276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 09:19:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XsGGCR+O"
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-dc236729a2bso1209376276.0
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2024 09:22:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1714061945; x=1714666745; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=8z0q8mIvifH3C42ApHD6waFmd6qh9hC9jh6KXdsJmXw=;
-        b=o79iJOP6+sTZoh9Xr4MliDZg4lYAleiFQEXDB8eaian7C/Cvg+OP/fPL48qscRFFMO
-         naXNP5vmGSRZxb9ktpT5TcSbmFOFy0fWA7btHYboGhoU6ZgxMMxR6reU67f+RIb615vz
-         voROTbQ/6eyuiWJsL6dnkPu3WG5WCY9PAinV6khj89RBOdYIbKiO1LwUTt3s+YYKy9HW
-         LFjxk+IcPIXqCOv2GrDc9zldNzKTyeUxayymSPT0SW6raRUsLPOyeZ9Ym4QofcTyF7iI
-         lv9MeGg5VSgvQ9+C8+qm6eomdtuI5eMUiHvn5dzJ2ITO35qlzybXfO6RxGAjgqFwnADq
-         lTjg==
+        d=linaro.org; s=google; t=1714062122; x=1714666922; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=450cETtePbIzFtnBgqpbAAvZVlAXASIsvHnqkeRgfUc=;
+        b=XsGGCR+OsjItS0w0pVL8wuWLvW8LYPRujj1KZSmjfEUapxtZdvEj8jifLxFu3qlJPU
+         iDLp51Jfwr1c66zKCVjr+hE8bsrOJiPfgzmcklFQTdJFtPHkmqugL6VaZi3xn7p0IM2j
+         j2hneQta/7l3e+5xqjej+itloBzH6vqCnI0WjP7SQQp2h/gtGzdnpkmg1HRH8EBIoO7r
+         Dg5IWWGiYanIJ2a+4h0uwNBIL1FzYb3Heeam8ZCR5U2OZV1/9sNISX6lf6pxZtfHtRKw
+         dbu3zfoYgdp6cMA7y1uH5qGKpoh3NFEzHn0JasqagXcUXDCFzTz0PcJCPdI5pbrQ7W03
+         StCQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714061945; x=1714666745;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=8z0q8mIvifH3C42ApHD6waFmd6qh9hC9jh6KXdsJmXw=;
-        b=JKwxpKQSf+zlYdwl42RUBRTWtA0cld36GCSUOMMiwCnmotx1b2XI1t9h+cVhsJ/2Yu
-         ac+Ccf9IPSlTgrW51HtizLk/xC1ldyuVTYja1V0E27E4+Cc97hNWObRCARs2ZpxkzaMj
-         LwVr5T74MoOieHqT/IibAvvOxQlX334R9V0blG8J3XNfboUeEYGxudKOiBOWuB6W1hAk
-         UvVMXo6YlKQMq5MGMjEyu3aZ34+zl6+L4qw44NFf14jI6Pgjzn07ACGrkJZKaIBbasH0
-         pwIHCEy6eKvUeo9DoAZRx4hWyyZBjrtnqLAYCIT7FF59iCqTINgNk5bw1f2pnc8izJM5
-         2Spw==
-X-Forwarded-Encrypted: i=1; AJvYcCVr2OmpfVh+QLsW9XtJl7bRkazSqWcVwxw3EOCrYPILZi7ZApUy7yjTPvBZTuNNddP9DEmHQXOiTejNfJDEpmAGPzm2PIcdDMtV
-X-Gm-Message-State: AOJu0YxP0QwUiMm+r6tkXdcrWxdDYYsx6ga5xRiQMCxwyCxA7mqcJ77s
-	xyKPdiQAxz5NiZYuy0sR3iLqRSovpNg6vPoZijU6RTY/oNthnnp5QVfxaOBaWxG7ymi2YbQ6juh
-	y2b3zoRCQuorjR/CLIZ8HRMVdvryHjn+CSMGoqQ==
-X-Google-Smtp-Source: AGHT+IHClPFipV6dbakb7PT4dxjuTSB5dRykOr2Z828W2wE1uQV5lKTgHH5rXaVt+Bj1NgGztCRPoTA6BIqw/4uYK5U=
-X-Received: by 2002:a05:6902:2413:b0:dcc:2f09:4742 with SMTP id
- dr19-20020a056902241300b00dcc2f094742mr88397ybb.51.1714061945033; Thu, 25 Apr
- 2024 09:19:05 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1714062122; x=1714666922;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=450cETtePbIzFtnBgqpbAAvZVlAXASIsvHnqkeRgfUc=;
+        b=QgvXQT1ROBS9ce+Dk8fxIO32xhY60evRWSTWGn6tinxommpp/Baw+WYAR0osPSrd2W
+         MffywbT7QMX5qCzKzT/zT4U14rqiVdvuOTmTkwVjaKiQXUn1Y9VeVqGs1ohRqxNR1dbG
+         O7tVLFOBp4kk8W4L4/AGbM9qwqAG0DTauyYIt5KovhUgGd1mnsW3oStKKA1xGl3sZtIQ
+         6w6Sgx8YK22HyGv37fmuqklWR+2ez9cbLCLgaCLhYLEkWRvW4pmanxlffZNwnmfNq5yE
+         Ah8eelcdY8OhsBtXB4BYk9Abn36JEmLAX/muIA8W+SV/jKIpE8Uv+1T6cNMgGsFrwK+z
+         hFJg==
+X-Forwarded-Encrypted: i=1; AJvYcCUPy1EB3NvjxVW3ExkCsbWIFSgES7/Tvr/N2kiBnay8PNS3B+14WETLVeFomjmcctRbnyVNN/zNQU7p/GyAOfaFUTxCJSN5Jd1u
+X-Gm-Message-State: AOJu0YzUt+6c4eiSv/Wc0VwwhL6Xf085zJljUa3iGrjuT6xCMTR10UD7
+	HsxiqfGBOOZHrG86ELh3jjMwnGmkEaaTswwzv2LYgbTS2tEAm3+G3m7fz7sPWQWrHootm9RwHg6
+	ufv7yqmXsJB9wKxobhJd9nZXFfU4eshh0EuT2oHhHrO+QPMdF
+X-Google-Smtp-Source: AGHT+IHsG8sOX+WEM/DoCeWBuYZYXfvv+few4ykMeW0zvDFtHXXNKa2GVvb/k/dFJo58xurRemLXIdiAoSF+q/fPATg=
+X-Received: by 2002:a25:bccd:0:b0:de5:53a9:253f with SMTP id
+ l13-20020a25bccd000000b00de553a9253fmr133982ybm.15.1714062121878; Thu, 25 Apr
+ 2024 09:22:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240423200234.21480-1-kamal.dasu@broadcom.com>
-In-Reply-To: <20240423200234.21480-1-kamal.dasu@broadcom.com>
+References: <cover.1712757795.git.u.kleine-koenig@pengutronix.de>
+In-Reply-To: <cover.1712757795.git.u.kleine-koenig@pengutronix.de>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 25 Apr 2024 18:18:28 +0200
-Message-ID: <CAPDyKFqLqbRx3gWCqT4G6mUVeMDWyA_f8T2_iYt07r_Ffqaaow@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: core: check R1_STATUS for erase/trim/discard
-To: Kamal Dasu <kamal.dasu@broadcom.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	ludovic.barre@st.com, f.fainelli@gmail.com, 
-	bcm-kernel-feedback-list@broadcom.com, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, Adrian Hunter <adrian.hunter@intel.com>
+Date: Thu, 25 Apr 2024 18:21:26 +0200
+Message-ID: <CAPDyKFoMp_tUM5wLMF00RcQogAVQSjm7e5_WQp5AE=+uNiTyMA@mail.gmail.com>
+Subject: Re: [PATCH 0/3] memstick: Convert to platform remove callback
+ returning void
+To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, linux-mmc@vger.kernel.org, 
+	kernel@pengutronix.de
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-+ Wolfram, Adrian (to see if they have some input)
-
-On Tue, 23 Apr 2024 at 22:02, Kamal Dasu <kamal.dasu@broadcom.com> wrote:
+On Wed, 10 Apr 2024 at 16:05, Uwe Kleine-K=C3=B6nig
+<u.kleine-koenig@pengutronix.de> wrote:
 >
-> When erase/trim/discard completion was converted to mmc_poll_for_busy(),
-> optional ->card_busy() host ops support was added. sdhci card->busy()
-> could return busy for long periods to cause mmc_do_erase() to block during
-> discard operation as shown below during mkfs.f2fs :
+> Hello,
 >
-> Info: [/dev/mmcblk1p9] Discarding device
-> [   39.597258] sysrq: Show Blocked State
-> [   39.601183] task:mkfs.f2fs       state:D stack:0     pid:1561  tgid:1561  ppid:1542   flags:0x0000000d
-> [   39.610609] Call trace:
-> [   39.613098]  __switch_to+0xd8/0xf4
-> [   39.616582]  __schedule+0x440/0x4f4
-> [   39.620137]  schedule+0x2c/0x48
-> [   39.623341]  schedule_hrtimeout_range_clock+0xe0/0x114
-> [   39.628562]  schedule_hrtimeout_range+0x10/0x18
-> [   39.633169]  usleep_range_state+0x5c/0x90
-> [   39.637253]  __mmc_poll_for_busy+0xec/0x128
-> [   39.641514]  mmc_poll_for_busy+0x48/0x70
-> [   39.645511]  mmc_do_erase+0x1ec/0x210
-> [   39.649237]  mmc_erase+0x1b4/0x1d4
-> [   39.652701]  mmc_blk_mq_issue_rq+0x35c/0x6ac
-> [   39.657037]  mmc_mq_queue_rq+0x18c/0x214
-> [   39.661022]  blk_mq_dispatch_rq_list+0x3a8/0x528
-> [   39.665722]  __blk_mq_sched_dispatch_requests+0x3a0/0x4ac
-> [   39.671198]  blk_mq_sched_dispatch_requests+0x28/0x5c
-> [   39.676322]  blk_mq_run_hw_queue+0x11c/0x12c
-> [   39.680668]  blk_mq_flush_plug_list+0x200/0x33c
-> [   39.685278]  blk_add_rq_to_plug+0x68/0xd8
-> [   39.689365]  blk_mq_submit_bio+0x3a4/0x458
-> [   39.693539]  __submit_bio+0x1c/0x80
-> [   39.697096]  submit_bio_noacct_nocheck+0x94/0x174
-> [   39.701875]  submit_bio_noacct+0x1b0/0x22c
-> [   39.706042]  submit_bio+0xac/0xe8
-> [   39.709424]  blk_next_bio+0x4c/0x5c
-> [   39.712973]  blkdev_issue_secure_erase+0x118/0x170
-> [   39.717835]  blkdev_common_ioctl+0x374/0x728
-> [   39.722175]  blkdev_ioctl+0x8c/0x2b0
-> [   39.725816]  vfs_ioctl+0x24/0x40
-> [   39.729117]  __arm64_sys_ioctl+0x5c/0x8c
-> [   39.733114]  invoke_syscall+0x68/0xec
-> [   39.736839]  el0_svc_common.constprop.0+0x70/0xd8
-> [   39.741609]  do_el0_svc+0x18/0x20
-> [   39.744981]  el0_svc+0x68/0x94
-> [   39.748107]  el0t_64_sync_handler+0x88/0x124
-> [   39.752455]  el0t_64_sync+0x168/0x16c
-
-Thanks for the detailed log!
-
+> this series converts all platform drivers below drivers/memstick/ to not
+> use struct platform_device::remove() any more. See commit 5c5a7680e67b
+> ("platform: Provide a remove callback that returns no value") for an
+> extended explanation and the eventual goal.
 >
-> Fix skips the card->busy() and uses MMC_SEND_STATUS and R1_STATUS
-> check for MMC_ERASE_BUSY busy_cmd case in the mmc_busy_cb() function.
+> All conversations are trivial, because the driver's .remove() callbacks
+> returned zero unconditionally.
 >
-> Fixes: 0d84c3e6a5b2 ("mmc: core: Convert to mmc_poll_for_busy() for erase/trim/discard")
-> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
-> ---
->  drivers/mmc/core/mmc_ops.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+> There are no interdependencies between these patches, so they can be
+> applied independently if needed. This is merge window material.
 >
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 3b3adbddf664..603fbd78c342 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -464,7 +464,8 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
->         u32 status = 0;
->         int err;
+> Best regards
+> Uwe
 >
-> -       if (data->busy_cmd != MMC_BUSY_IO && host->ops->card_busy) {
-> +       if (data->busy_cmd != MMC_BUSY_IO &&
-> +           data->busy_cmd != MMC_BUSY_ERASE && host->ops->card_busy) {
->                 *busy = host->ops->card_busy(host);
->                 return 0;
->         }
+> Uwe Kleine-K=C3=B6nig (3):
+>   memstick: rtsx_pci_ms: Drop if block with always false condition
+>   memstick: rtsx_pci_ms: Convert to platform remove callback returning
+>     void
+>   memstick: rtsx_usb_ms: Convert to platform remove callback returning
+>     void
+>
+>  drivers/memstick/host/rtsx_pci_ms.c | 9 ++-------
+>  drivers/memstick/host/rtsx_usb_ms.c | 6 ++----
+>  2 files changed, 4 insertions(+), 11 deletions(-)
 
-So it seems like the ->card_busy() callback is broken in for your mmc
-host-driver and platform. Can you perhaps provide the information
-about what HW/driver you are using?
-
-The point with using the ->card_busy() callback, is to avoid sending
-the CMD13. Ideally it should be cheaper/faster and in most cases it
-translates to a read of a register. For larger erases, we would
-probably end up sending the CMD13 periodically every 32-64 ms, which
-shouldn't be a problem. However, for smaller erases and discards, we
-may want the benefit the ->card_busy() callback provides us.
-
-I would suggest that we first try to fix the implementation of the
-->card_busy() callback for your HW. If that isn't possible or fails,
-then let's consider the approach you have taken in the $subject patch.
+The series applied for next, thanks!
 
 Kind regards
 Uffe
