@@ -1,55 +1,55 @@
-Received: from mail-oa1-f50.google.com (mail-oa1-f50.google.com [209.85.160.50])
+Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BE6D13A41D
-	for <linux-mmc@vger.kernel.org>; Fri, 26 Apr 2024 13:08:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E2C614534D
+	for <linux-mmc@vger.kernel.org>; Fri, 26 Apr 2024 13:24:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714136902; cv=none; b=NDPoKkgGGdITQwMHwGDgFqbs5QJ6o5IILIZxHctX0HYVNFWSee/4OUtRQgIwTd0lja/wvXiJ5LvYVT+OEaCuN1rzFS1o0f2buvjcZnWUX3UuN2ZgpXAsP3w2HleEK41CpgzYhjunvdUURQ5CDcx4Q2mTOEIzQlIK8Tv02zXMD6k=
+	t=1714137878; cv=none; b=PCBt9/HLzmLDJ/D8gG41qa7cLClGxahGpgoq5TcGRLbNqYNdP9YPRbh/TEa0BH9xU56bcSUEFqxWebvvPbQe9XCTVl1WLpgN+CKgyVYut3cNj6/fiBS7cgrvk0w4sQ+Dzbf4beyBvWQ6kMDhxGGhVV3tvmVRNQr4m+krDdo+RKc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714136902; c=relaxed/simple;
-	bh=9QscQIeNlQOp6FRyOQTocCE1OoKiIXfMF2HncBHOV0U=;
+	s=arc-20240116; t=1714137878; c=relaxed/simple;
+	bh=jbcAHDiaTrHxMVyZRUpcW1QK1AMqtrKf4Idd/G1q1D8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JV54cAQ4JQq+sdU/I8Yu2oaDwfC58UsERjRoJWo79ZJTmtBFi13u5A2oOl4HyA6M/Eszbo36q3KlgWmqrGn3oNUcxhBSvIdYiG0hw3K41fBIR3lFUv93BPWWNA1oBAqpUxRCXmzufpUtdCQj9K4trRru6to07JXpXiwkjoWbdJw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=X+N6Y1Zh; arc=none smtp.client-ip=209.85.160.50
+	 To:Cc:Content-Type; b=CEeYe75H+RLDytH4mHBOBko7DRf52o4TEsguFNniKaHGlDOPpHqdy6AMx1+GJl4c7Ofw6Nqe6rpdLB2bYgotnVIb5pASwuSEd5iDVX7B528/bU3ClhWGUvITXfnU4BvjuM/qqWkQb0xx71XlV+O7dWnFpeh9w33T05ySjoVe7hM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oOwhrkb0; arc=none smtp.client-ip=209.85.167.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X+N6Y1Zh"
-Received: by mail-oa1-f50.google.com with SMTP id 586e51a60fabf-23981fd7947so1240439fac.3
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Apr 2024 06:08:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oOwhrkb0"
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-516d4d80d00so2865286e87.0
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Apr 2024 06:24:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1714136898; x=1714741698; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1714137874; x=1714742674; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=BKDqJ2Iy67r0/04McLSBQtbg7QGH++8ZK48LUb4Ai+8=;
-        b=X+N6Y1ZhWIrUBGqd52+UPfnYcBpeZqVfUFZ7iH8W3JUvNAw8iLi5o2Bwq600803KKZ
-         tXSeEGyEYfrw6V1RSXKS0x/nMTyHph1bwPlOrD9Uu0KwWKG0iYacZwcHFZ4UzjRaHkNt
-         MIKFGKVH+5BSAvCrDgd3m9tMHF7+OYQHftbj/oIAeC2nnlKrTmpK5lh0W+j044BzZDjy
-         TNzKOdgDEDkEyv6W8snFH09bu8rP7Q/hjcFAmTe87lrekzVxKSrhl6PatzdaNWjvaJrQ
-         NPqczcnmgm5fkF0R6D+l36XU3f9HZVu6lQTmmp4HtH6E5bOAugaVd0UMmgKaxY5U31TE
-         3voA==
+        bh=O0Bi6gVXsIuX31dHLMHLC1PBbtKVJLJWgT+esEKInv0=;
+        b=oOwhrkb0do8zR+EfU+BtoXpitJJDV3ugjbow3kQ02nJRP1Hj/f3H+YU7gh12dhIy3Y
+         NJRVnmGHke4JU1f0Ev+Kdjs7rBjZDXxVVD2A95YwgNyTAIt8H0MYOgYuMkdEw5V6rOmi
+         jrrd1oUr/QeYH+Q1EKXu+79FsxjBwgEWF9sCdhgwjHE7Lzx8CHOHBX5NGpclZMtQn7yd
+         P0NkkBLFcpBTFq5wUykrgIH4bdlCuJvj49b8bVBHO+7Ab4ca43BR6xIIOOuz5hATX9sd
+         +rlymuIzfwKJu/EuljSUgU78snIVzsiT0IRuhpAA5Pg0Kr80bZ3Wtf4n5f3jEX5IhWla
+         ygTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714136898; x=1714741698;
+        d=1e100.net; s=20230601; t=1714137874; x=1714742674;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=BKDqJ2Iy67r0/04McLSBQtbg7QGH++8ZK48LUb4Ai+8=;
-        b=PhPeDeiEhr1eEEiDNMjzc5YZ2Tks7dZC+3V1Zz7K1BJI3CeCfC8JYHa5WdZff2tLVp
-         fOf9EiPQhvNbWoIpLVdcb7laOjWkyGJBH9ODdXg5KivWFe/eIyxT/orW7HED2mtPUw53
-         Qrn5PbibZ6O9BUOzCQpXk8njk0kY9pW2F3v0HblpY9srchHJqtFdSQAxaJeWqUwZsYJb
-         03qTvkPQt4fH38o5L1v9aIbmwcXb9FDN8a0b7ixeU2hmfss0eGlvUrKCVJYNptr5bxCB
-         nhR1WVcYuTSxGCist4Of2qvDywxKP4wKhlUgYxVA0QxQ0nsxiJgtBt2xhEo9+e3TkxJb
-         SXHA==
-X-Forwarded-Encrypted: i=1; AJvYcCUJtDa2z/CswUvVJXeFQKhmZyFtW3WzwNuWFxG5r3LZHje5PQKClnNwQ0QheAW3w4Mymp/t2STU6iI0SCgjT1h60UTYwgJmRrWY
-X-Gm-Message-State: AOJu0YyiU8fcDlDYulfsWrz+dkZElTXYkC+w5ddgJDPboCKUZw7trZrf
-	y+eLtLIhmGiiVmvPSAHMsLZ+zTvYDxVUcWir02N2gqIJUFL+/0pwVlUsa094ZNCJAXf5pXv9LNu
-	sFx4iU1PffQlls7o0zRaPFW2e7MjErZ9zbJDodg==
-X-Google-Smtp-Source: AGHT+IEKq/8GFPYIuqy4rBivIIKKIIu3DhQ+5ZeHZXiraP9KB/rXTGQYaO0n0mtwRCfjOLqG8pL22JCKugRO8+NE1bw=
-X-Received: by 2002:a05:6870:558c:b0:239:726:7460 with SMTP id
- qj12-20020a056870558c00b0023907267460mr2706578oac.30.1714136898414; Fri, 26
- Apr 2024 06:08:18 -0700 (PDT)
+        bh=O0Bi6gVXsIuX31dHLMHLC1PBbtKVJLJWgT+esEKInv0=;
+        b=DfDKtXjoRVcUMEMDbUySABjK9/frRri6ZeIt+6j797RfDwdnAH4YZNCl+9Ybr7BDog
+         mIhmgwYqkxBUUcov9Tn3KbG+BWmJrmbhqHQyD2kk7KQtc+Gote3fOd4wxtZfmp1hRwvq
+         6Gi9fQPqujrdNHfwz2sPeQetHqzP7yEOpuLoSr29vrXcl8YFCoTtOKPR4e8eGCeium43
+         Esw3T+1ah123lMNJ+Hs5P+DZVVUjN8+vwvChcbp10g6tWkYt5rKq+FLPFurvC8WSUcHs
+         TOTjT/vIqM682+4oNe4k0EKCIyivMS3Nu8ZZoqIwhSRNIMywh6UrGoH4n3XoNvjAnaV1
+         1UJg==
+X-Forwarded-Encrypted: i=1; AJvYcCVf8gHJ3B9c5RMggbAAZBkR9gAHSmPABUl2GiVaxMyAwzvC/7RzK63eYEu+u32OVj/n+hNSh8J7OqxF7QiSBgg1StEfCOhNBT1V
+X-Gm-Message-State: AOJu0Yz2OPe6bbDN/dEQqgkZIeejF8xCbrxdUtdIW+0qjpQJTDgNVI+S
+	WVI0qWeJbDOTQtDMbq9UpU+5e53X4kOqVHmq0JmJTbc50Mre2DmaScOXn/E3fq0dw0W4M4wn/tP
+	HoxXxeOUg2gD8tovxkMe/zC2ujxR7WSdvAGN7uQ==
+X-Google-Smtp-Source: AGHT+IHPfuxG9pOejD1ZKXKtqG/5pabtZoHlEQcSq1hk+hdHhJo+p7Q0A0wddj7FCls7ewydYqC9LME1vMp1yED8vpE=
+X-Received: by 2002:a19:e015:0:b0:516:d259:245e with SMTP id
+ x21-20020a19e015000000b00516d259245emr1727155lfg.9.1714137873732; Fri, 26 Apr
+ 2024 06:24:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,12 +57,12 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20240422091936.3714381-1-jens.wiklander@linaro.org>
- <20240422091936.3714381-2-jens.wiklander@linaro.org> <ZioWLgVJ7Ky4nUxC@mecka.net>
-In-Reply-To: <ZioWLgVJ7Ky4nUxC@mecka.net>
+ <20240422091936.3714381-3-jens.wiklander@linaro.org> <ZioXkvnIw5V5MXBU@mecka.net>
+In-Reply-To: <ZioXkvnIw5V5MXBU@mecka.net>
 From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Fri, 26 Apr 2024 15:08:07 +0200
-Message-ID: <CAHUa44EsO9rr2_KsmNcwoUuL_OAO-Oh8gqepUn5Bmo1dfP_LUA@mail.gmail.com>
-Subject: Re: [PATCH v5 1/3] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+Date: Fri, 26 Apr 2024 15:24:21 +0200
+Message-ID: <CAHUa44Fojanryuc+ciJrVZUopRLcTt2teS_pC4BBjt1Wmy240A@mail.gmail.com>
+Subject: Re: [PATCH v5 2/3] mmc: block: register RPMB partition with the RPMB subsystem
 To: Manuel Traut <manut@mecka.net>
 Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
 	op-tee@lists.trustedfirmware.org, 
@@ -72,225 +72,217 @@ Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
 	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
 	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
 	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
-	=?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
+	Alexander Usyskin <alexander.usyskin@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Apr 25, 2024 at 10:37=E2=80=AFAM Manuel Traut <manut@mecka.net> wro=
+On Thu, Apr 25, 2024 at 10:43=E2=80=AFAM Manuel Traut <manut@mecka.net> wro=
 te:
 >
-> On Mon, Apr 22, 2024 at 11:19:34AM +0200, Jens Wiklander wrote:
-> > A number of storage technologies support a specialised hardware
-> > partition designed to be resistant to replay attacks. The underlying
-> > HW protocols differ but the operations are common. The RPMB partition
-> > cannot be accessed via standard block layer, but by a set of specific
-> > RPMB commands. Such a partition provides authenticated and replay
-> > protected access, hence suitable as a secure storage.
+> On Mon, Apr 22, 2024 at 11:19:35AM +0200, Jens Wiklander wrote:
+> > Register eMMC RPMB partition with the RPMB subsystem and provide
+> > an implementation for the RPMB access operations abstracting
+> > the actual multi step process.
 > >
-> > The initial aim of this patch is to provide a simple RPMB driver
-> > interface which can be accessed by the optee driver to facilitate early
-> > RPMB access to OP-TEE OS (secure OS) during the boot time.
+> > Add a callback to extract the needed device information at registration
+> > to avoid accessing the struct mmc_card at a later stage as we're not
+> > holding a reference counter for this struct.
 > >
-> > A TEE device driver can claim the RPMB interface, for example, via
-> > rpmb_interface_register() or rpmb_dev_find_device(). The RPMB driver
-> > provides a callback to route RPMB frames to the RPMB device accessible
-> > via rpmb_route_frames().
-> >
-> > The detailed operation of implementing the access is left to the TEE
-> > device driver itself.
+> > Taking the needed reference to md->disk in mmc_blk_alloc_rpmb_part()
+> > instead of in mmc_rpmb_chrdev_open(). This is needed by the
+> > route_frames() function pointer in struct rpmb_ops.
 > >
 > > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> > Signed-off-by: Alex Benn=C3=A9e <alex.bennee@linaro.org>
-> > Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
+> > Signed-off-by: Alexander Usyskin <alexander.usyskin@intel.com>
 > > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
-> > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 > > ---
-> >  MAINTAINERS              |   7 ++
-> >  drivers/misc/Kconfig     |  10 ++
-> >  drivers/misc/Makefile    |   1 +
-> >  drivers/misc/rpmb-core.c | 232 +++++++++++++++++++++++++++++++++++++++
-> >  include/linux/rpmb.h     | 136 +++++++++++++++++++++++
-> >  5 files changed, 386 insertions(+)
-> >  create mode 100644 drivers/misc/rpmb-core.c
-> >  create mode 100644 include/linux/rpmb.h
+> >  drivers/mmc/core/block.c | 241 ++++++++++++++++++++++++++++++++++++++-
+> >  1 file changed, 239 insertions(+), 2 deletions(-)
 > >
-> > diff --git a/MAINTAINERS b/MAINTAINERS
-> > index 8999497011a2..e83152c42499 100644
-> > --- a/MAINTAINERS
-> > +++ b/MAINTAINERS
-> > @@ -19012,6 +19012,13 @@ T:   git git://linuxtv.org/media_tree.git
-> >  F:   Documentation/devicetree/bindings/media/allwinner,sun8i-a83t-de2-=
-rotate.yaml
-> >  F:   drivers/media/platform/sunxi/sun8i-rotate/
-> >
-> > +RPMB SUBSYSTEM
-> > +M:   Jens Wiklander <jens.wiklander@linaro.org>
-> > +L:   linux-kernel@vger.kernel.org
-> > +S:   Supported
-> > +F:   drivers/misc/rpmb-core.c
-> > +F:   include/linux/rpmb.h
-> > +
-> >  RPMSG TTY DRIVER
-> >  M:   Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
-> >  L:   linux-remoteproc@vger.kernel.org
-> > diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
-> > index 4fb291f0bf7c..dbff9e8c3a03 100644
-> > --- a/drivers/misc/Kconfig
-> > +++ b/drivers/misc/Kconfig
-> > @@ -104,6 +104,16 @@ config PHANTOM
-> >         If you choose to build module, its name will be phantom. If uns=
-ure,
-> >         say N here.
-> >
-> > +config RPMB
-> > +     tristate "RPMB partition interface"
-> > +     depends on MMC
-> > +     help
-> > +       Unified RPMB unit interface for RPMB capable devices such as eM=
-MC and
-> > +       UFS. Provides interface for in-kernel security controllers to a=
-ccess
-> > +       RPMB unit.
-> > +
-> > +       If unsure, select N.
-> > +
-> >  config TIFM_CORE
-> >       tristate "TI Flash Media interface support"
-> >       depends on PCI
-> > diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
-> > index ea6ea5bbbc9c..8af058ad1df4 100644
-> > --- a/drivers/misc/Makefile
-> > +++ b/drivers/misc/Makefile
-> > @@ -15,6 +15,7 @@ obj-$(CONFIG_LKDTM)         +=3D lkdtm/
-> >  obj-$(CONFIG_TIFM_CORE)              +=3D tifm_core.o
-> >  obj-$(CONFIG_TIFM_7XX1)              +=3D tifm_7xx1.o
-> >  obj-$(CONFIG_PHANTOM)                +=3D phantom.o
-> > +obj-$(CONFIG_RPMB)           +=3D rpmb-core.o
-> >  obj-$(CONFIG_QCOM_COINCELL)  +=3D qcom-coincell.o
-> >  obj-$(CONFIG_QCOM_FASTRPC)   +=3D fastrpc.o
-> >  obj-$(CONFIG_SENSORS_BH1770) +=3D bh1770glc.o
-> > diff --git a/drivers/misc/rpmb-core.c b/drivers/misc/rpmb-core.c
-> > new file mode 100644
-> > index 000000000000..5479469c26f3
-> > --- /dev/null
-> > +++ b/drivers/misc/rpmb-core.c
-> > @@ -0,0 +1,232 @@
-> > +// SPDX-License-Identifier: GPL-2.0
-> > +/*
-> > + * Copyright(c) 2015 - 2019 Intel Corporation. All rights reserved.
-> > + * Copyright(c) 2021 - 2024 Linaro Ltd.
-> > + */
-> > +#include <linux/device.h>
-> > +#include <linux/init.h>
-> > +#include <linux/kernel.h>
-> > +#include <linux/list.h>
-> > +#include <linux/module.h>
-> > +#include <linux/mutex.h>
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index 32d49100dff5..a7f126fbc605 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -33,6 +33,7 @@
+> >  #include <linux/cdev.h>
+> >  #include <linux/mutex.h>
+> >  #include <linux/scatterlist.h>
+> > +#include <linux/string.h>
+> >  #include <linux/string_helpers.h>
+> >  #include <linux/delay.h>
+> >  #include <linux/capability.h>
+> > @@ -40,6 +41,7 @@
+> >  #include <linux/pm_runtime.h>
+> >  #include <linux/idr.h>
+> >  #include <linux/debugfs.h>
 > > +#include <linux/rpmb.h>
-> > +#include <linux/slab.h>
-> > +
-> > +static struct list_head rpmb_dev_list;
-> > +static DEFINE_MUTEX(rpmb_mutex);
-> > +static struct blocking_notifier_head rpmb_interface =3D
-> > +     BLOCKING_NOTIFIER_INIT(rpmb_interface);
-> > +
+> >
+> >  #include <linux/mmc/ioctl.h>
+> >  #include <linux/mmc/card.h>
+> > @@ -76,6 +78,48 @@ MODULE_ALIAS("mmc:block");
+> >  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
+> >  #define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
+> >
 > > +/**
-> > + * rpmb_dev_get() - increase rpmb device ref counter
-> > + * @rdev: rpmb device
-> > + */
-> > +struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev)
-> > +{
-> > +     if (rdev)
-> > +             get_device(rdev->parent_dev);
-> > +     return rdev;
-> > +}
-> > +EXPORT_SYMBOL_GPL(rpmb_dev_get);
-> > +
-> > +/**
-> > + * rpmb_dev_put() - decrease rpmb device ref counter
-> > + * @rdev: rpmb device
-> > + */
-> > +void rpmb_dev_put(struct rpmb_dev *rdev)
-> > +{
-> > +     if (rdev)
-> > +             put_device(rdev->parent_dev);
-> > +}
-> > +EXPORT_SYMBOL_GPL(rpmb_dev_put);
-> > +
-> > +/**
-> > + * rpmb_route_frames() - route rpmb frames to rpmb device
-> > + * @rdev:    rpmb device
-> > + * @req:     rpmb request frames
-> > + * @req_len: length of rpmb request frames in bytes
-> > + * @rsp:     rpmb response frames
-> > + * @rsp_len: length of rpmb response frames in bytes
+> > + * struct rpmb_frame - rpmb frame as defined by eMMC 5.1 (JESD84-B51)
 > > + *
-> > + * Returns: < 0 on failure
-> > + */
-> > +int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
-> > +                   unsigned int req_len, u8 *rsp, unsigned int rsp_len=
-)
-> > +{
-> > +     if (!req || !req_len || !rsp || !rsp_len)
-> > +             return -EINVAL;
-> > +
-> > +     return rdev->descr.route_frames(rdev->parent_dev, req, req_len,
-> > +                                     rsp, rsp_len);
-> > +}
-> > +EXPORT_SYMBOL_GPL(rpmb_route_frames);
-> > +
-> > +/**
-> > + * rpmb_dev_find_device() - return first matching rpmb device
-> > + * @data: data for the match function
-> > + * @match: the matching function
-> > + *
-> > + * Iterate over registered RPMB devices, and call @match() for each pa=
-ssing
-> > + * it the RPMB device and @data.
-> > + *
-> > + * The return value of @match() is checked for each call. If it return=
+> > + * @stuff        : stuff bytes
+> > + * @key_mac      : The authentication key or the message authenticatio=
+n
+> > + *                 code (MAC) depending on the request/response type.
+> > + *                 The MAC will be delivered in the last (or the only)
+> > + *                 block of data.
+> > + * @data         : Data to be written or read by signed access.
+> > + * @nonce        : Random number generated by the host for the request=
 s
-> > + * anything other 0, break and return the found RPMB device.
+> > + *                 and copied to the response by the RPMB engine.
+> > + * @write_counter: Counter value for the total amount of the successfu=
+l
+> > + *                 authenticated data write requests made by the host.
+> > + * @addr         : Address of the data to be programmed to or read
+> > + *                 from the RPMB. Address is the serial number of
+> > + *                 the accessed block (half sector 256B).
+> > + * @block_count  : Number of blocks (half sectors, 256B) requested to =
+be
+> > + *                 read/programmed.
+> > + * @result       : Includes information about the status of the write =
+counter
+> > + *                 (valid, expired) and result of the access made to t=
+he RPMB.
+> > + * @req_resp     : Defines the type of request and response to/from th=
+e memory.
 > > + *
-> > + * It's the callers responsibility to call rpmb_dev_put() on the retur=
-ned
-> > + * device, when it's done with it.
-> > + *
-> > + * Returns: a matching rpmb device or NULL on failure
+> > + * The stuff bytes and big-endian properties are modeled to fit to the=
+ spec.
 > > + */
-> > +struct rpmb_dev *rpmb_dev_find_device(const void *data,
-> > +                                   const struct rpmb_dev *start,
-> > +                                   int (*match)(struct rpmb_dev *rdev,
-> > +                                                const void *data))
-> > +{
+> > +struct rpmb_frame {
+> > +     u8     stuff[196];
+> > +     u8     key_mac[32];
+> > +     u8     data[256];
+> > +     u8     nonce[16];
+> > +     __be32 write_counter;
+> > +     __be16 addr;
+> > +     __be16 block_count;
+> > +     __be16 result;
+> > +     __be16 req_resp;
+> > +} __packed;
+> > +
+> > +#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Authentication K=
+ey */
+> > +#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write counter */
+> > +#define RPMB_WRITE_DATA        0x3    /* Write data to RPMB partition =
+*/
+> > +#define RPMB_READ_DATA         0x4    /* Read data from RPMB partition=
+ */
+> > +#define RPMB_RESULT_READ       0x5    /* Read result request  (Interna=
+l) */
+> > +
+> >  static DEFINE_MUTEX(block_mutex);
+> >
+> >  /*
+> > @@ -163,6 +207,7 @@ struct mmc_rpmb_data {
+> >       int id;
+> >       unsigned int part_index;
+> >       struct mmc_blk_data *md;
 > > +     struct rpmb_dev *rdev;
-> > +     struct list_head *pos;
+> >       struct list_head node;
+> >  };
+> >
+> > @@ -2672,7 +2717,6 @@ static int mmc_rpmb_chrdev_open(struct inode *ino=
+de, struct file *filp)
+> >
+> >       get_device(&rpmb->dev);
+> >       filp->private_data =3D rpmb;
+> > -     mmc_blk_get(rpmb->md->disk);
+> >
+> >       return nonseekable_open(inode, filp);
+> >  }
+> > @@ -2682,7 +2726,6 @@ static int mmc_rpmb_chrdev_release(struct inode *=
+inode, struct file *filp)
+> >       struct mmc_rpmb_data *rpmb =3D container_of(inode->i_cdev,
+> >                                                 struct mmc_rpmb_data, c=
+hrdev);
+> >
+> > -     mmc_blk_put(rpmb->md);
+> >       put_device(&rpmb->dev);
+> >
+> >       return 0;
+> > @@ -2703,10 +2746,165 @@ static void mmc_blk_rpmb_device_release(struct=
+ device *dev)
+> >  {
+> >       struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev);
+> >
+> > +     rpmb_dev_unregister(rpmb->rdev);
+> > +     mmc_blk_put(rpmb->md);
+> >       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> >       kfree(rpmb);
+> >  }
+> >
+> > +static void free_idata(struct mmc_blk_ioc_data **idata, unsigned int c=
+md_count)
+> > +{
+> > +     unsigned int n;
 > > +
-> > +     mutex_lock(&rpmb_mutex);
-> > +     if (start)
-> > +             pos =3D start->list_node.next;
-> > +     else
-> > +             pos =3D rpmb_dev_list.next;
-> > +
-> > +     while (pos !=3D &rpmb_dev_list) {
-> > +             rdev =3D container_of(pos, struct rpmb_dev, list_node);
-> > +             if (match(rdev, data)) {
-> > +                     rpmb_dev_get(rdev);
-> > +                     goto out;
-> > +             }
-> > +             pos =3D pos->next;
-> > +     }
-> > +     rdev =3D NULL;
-> > +
-> > +out:
-> > +     mutex_unlock(&rpmb_mutex);
-> > +
-> > +     return rdev;
+> > +     for (n =3D 0; n < cmd_count; n++)
+> > +             kfree(idata[n]);
+> > +     kfree(idata);
 > > +}
+> > +
+> > +static struct mmc_blk_ioc_data **alloc_idata(struct mmc_rpmb_data *rpm=
+b,
+> > +                                          unsigned int cmd_count)
+> > +{
+> > +     struct mmc_blk_ioc_data **idata;
+> > +     unsigned int n;
+> > +
+> > +     idata =3D kcalloc(cmd_count, sizeof(*idata), GFP_KERNEL);
+> > +     if (!idata)
+> > +             return NULL;
+> > +
+> > +     for (n =3D 0; n < cmd_count; n++) {
+> > +             idata[n] =3D kcalloc(1, sizeof(**idata), GFP_KERNEL);
+> > +             if (!idata[n]) {
+> > +                     free_idata(idata, n);
+> > +                     return NULL;
+> > +             }
+> > +             idata[n]->rpmb =3D rpmb;
+> > +     }
+> > +
+> > +     return idata;
+> > +}
+> > +
+> > +static void set_idata(struct mmc_blk_ioc_data *idata, u32 opcode,
+> > +                   int write_flag, u8 *buf, unsigned int buf_bytes)
+> > +{
+> > +     /*
+> > +      * The size of an RPMB frame must match what's expected by the
+> > +      * hardware.
+> > +      */
+> > +     BUILD_BUG_ON(sizeof(struct rpmb_frame) !=3D 512);
+> > +
+> > +     idata->ic.opcode =3D opcode;
+> > +     idata->ic.flags =3D MMC_RSP_R1 | MMC_CMD_ADTC;
+> > +     idata->ic.write_flag =3D write_flag;
+> > +     idata->ic.blksz =3D sizeof(struct rpmb_frame);
+> > +     idata->ic.blocks =3D buf_bytes /  idata->ic.blksz;
+> > +     idata->buf =3D buf;
 >
-> EXPORT_SYMBOL_GPL missing?
+> I tested the series on a i.MX8MM with a eMMC connected via the imx-sdhci
+> controller. Reading from RPMB does not work. It ends in timeouts due to
+> no response from the SDHCI controller.
+>
+> If idata->buf is allocated here with kmalloc(buf_bytes, GFP_KERNEL) and
+> the content of buf is copied to the new allocated area, transfers succeed=
+.
+>
+> Is it possible that idata->buf is not DMA capable? Any other ideas?
 
-You're right, I'll add it.
+Thanks for testing. I don't know, the idata->buf is allocated using
+alloc_pages_exact(nr_pages * PAGE_SIZE, GFP_KERNEL | __GFP_ZERO); in
+optee_pool_op_alloc_helper(). Alternatively, it's from the memory
+range mapped using memremap() in optee_config_shm_memremap(), but
+that's only if you don't have "dynamic shared memory is enabled" in
+the boot log.
 
 Thanks,
 Jens
