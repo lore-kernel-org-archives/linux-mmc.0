@@ -1,60 +1,60 @@
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
+Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B225E4085C
-	for <linux-mmc@vger.kernel.org>; Sat, 27 Apr 2024 10:55:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7925244C7A
+	for <linux-mmc@vger.kernel.org>; Sat, 27 Apr 2024 11:02:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714215360; cv=none; b=HFUWdo2CLbt1qcJhYlmSQzpemNBSq1Qkxax30pb8UqGZVvxq7B34X4/zG+lZ/TOL1XOjA2qe+aSBWH1xDoyIGCtq+gga1pmlaAQhZVlNhzm53bLNBlVxKtlmeDX9kAZWwB6+oWKs1MkYEnXhJ9008lnr/KLuhpxF0nZIiVpYXbk=
+	t=1714215762; cv=none; b=lBWWqVnyayNqjAPw6vnRMdlv9RVoNKfno+ghBHzcrKtOsDq6X9kqhasEzP3YnpFcVilnwpvyUzzU8M9EcOmYhs52aCc2mUbV3CfG64SQu+KTHiBX00Dxxov6g4ZOkSxb3Tpx1hqA5qeW5RxHJPs1QUR146sOiyVWSAsANbyjsv0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714215360; c=relaxed/simple;
-	bh=30Y0vDFTIC+GZ4kILAnfrxpQKyxIfE0SN088Unsl+Ao=;
+	s=arc-20240116; t=1714215762; c=relaxed/simple;
+	bh=SdVWyGuDCcQrIJ7fzWwR31HxNpM16sH3dH4YrTuBW6s=;
 	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=A6i5VRD5WPyXksyFcHK9CMKs41V+2xPQUoprPkhKGKpOAYuLhvT72u3J7j4qEP0N32I/0UD9LdFW6m+Amt7U0Jt9yZh5QUqX5GHYJd4n/1am8LSpJcxzV5HmFWyJm9iDBsw2oAZj5Jbu5N1T25JKZU8SN8mf4OPI8Ta500bTs7Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=M4KUxJ7U; arc=none smtp.client-ip=209.85.167.47
+	 Content-Type:Content-Disposition:In-Reply-To; b=MJDLTkYfCnCT7OcU1fFeqXtq0bX/JePXaFrmgfPmXjNzhhIKL1ktIu0ZouhpezUpsf3jXW18NF7Fj5583fgzRdEzD78JzlcgcX4W0sppvVXx3FET6CtyGkaro9bV4gOIEtz84XTyBAVGLX1zmcafNuReRGionn7TRSyptBZQY4Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=L8Jv+9da; arc=none smtp.client-ip=209.85.218.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="M4KUxJ7U"
-Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-518a56cdbcfso4681955e87.2
-        for <linux-mmc@vger.kernel.org>; Sat, 27 Apr 2024 03:55:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="L8Jv+9da"
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-a519e1b0e2dso409785966b.2
+        for <linux-mmc@vger.kernel.org>; Sat, 27 Apr 2024 04:02:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1714215357; x=1714820157; darn=vger.kernel.org;
+        d=suse.com; s=google; t=1714215759; x=1714820559; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references
          :mail-followup-to:message-id:subject:cc:to:date:from:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=AVy+Y3fQ+ZL5eTtoRlGJR4TNBIR1UBCGRhefmZftvMw=;
-        b=M4KUxJ7UOZz4VX2NoiS+se6iptl8tDexJH5RdwaGrt9ANLLx+HwZ7ECBLS8UdKGbL3
-         mdFVDsXRI6Unub6iyvenM5bt0lnOKrzQCl21RPGMmrUgC7xJeljhZhCYsHkAVntbRkTd
-         01o3ncEnSLrlZLxROFkYSpSo8JdCMKBepg3O+Zd3aoFuLrhW2M6MWMROh28/HuSTTj5f
-         OlAPQNV4XrzxKM9uhyd4VsmF1ItZHbiH+AyraT9twOAyFa31Xlmm+wdQuP+i65IwAxKz
-         CU5AtVkDxBgMVX4DcNlxmNo1EkxBJrwiM4hidscO2IXdeQF6avCBuA1ivjeJlJSEf3Qw
-         0X1g==
+        bh=Vw7YIWRgewiIjaQbILnrrX2snAdB7TalnWcaho2WU3o=;
+        b=L8Jv+9daB332PLjvd4UFkr+9PNEDKLJtxZf85f4qL6T0VNvTHsQylSdlFHM/Wc0vva
+         D/21lb9dpPSTM+DfwM2sdIY95boCtHze3kggayx0ysSeyg3Ylq6PNW1q4uQVVdc7LSxz
+         R0tToW1r65zDtuswtPAXYhT2im59oTsVU2tvM55KGQAec6GNkZGD2rQczSjvPNcBW/ra
+         YNQPLGpL3RO7fAPPWw8SvyXVcmgLIZF8ASmJy4/lvyK9S41pTif5VnAL6PHTTaK0m5/H
+         vkGdOTIb6VMo8/+HBYYcZkILELGSh/BOQEEHeccfyX/Isvq01+MLMYCsefpdZuGCSFT0
+         zrMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714215357; x=1714820157;
+        d=1e100.net; s=20230601; t=1714215759; x=1714820559;
         h=in-reply-to:content-disposition:mime-version:references
          :mail-followup-to:message-id:subject:cc:to:date:from
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=AVy+Y3fQ+ZL5eTtoRlGJR4TNBIR1UBCGRhefmZftvMw=;
-        b=Lk+dOotmPR3ozbmKtoyuNEzloU1g8FcEqCJ3z8aNmseKI3setjd5OCTDRO2sZwCfTM
-         xnu04RHe83yz6sV48OkE2GWPCsJfasTaebVYSo7qhsJ9sB6FJnDOjulhXZL/4FcVM0WP
-         y2GoMxWJbxOQUGC5i/cLisc7NSXh7VVghzMmL4hhM+gznERCPGJAkGez7EQ8lSY/Ju42
-         nxQ10jDf6M+fykVHQQWprDfYQxZ3SYxCgQMynZ3YT2FVSz8DQUxcMb0veQXkc8spCcAP
-         nMwzCyfLxj+xL42Dw8MoEoMIALh48u+7CTkn3Yi9XoFNRlc6fCoziAKA7Dfsu7js8KCq
-         vSdg==
-X-Forwarded-Encrypted: i=1; AJvYcCVqCPbfjot6r0Z6v1ygrLwufx+DnRJwr9o5sWzv/hTFUikOyNPNqGoWjhNIYbQ2S4FzPGMJkPaXR72a3uGSkVA3tt8LjU0Eh4HE
-X-Gm-Message-State: AOJu0Yx3d9gakr4aneCB+HCTk00nPY7xOKG20v6eTobj72vZDa/63Akg
-	r36plMJuZZlzP0p7r0UaQ+6PLGcT7p09Ejwq1p/yAs8qBzCaIDigJL7FPRI8PIY=
-X-Google-Smtp-Source: AGHT+IFbYDgaYUGXxbXGJ4orAbrnlEp+fN+SYD4kxVugbNaLRY0H7Dzfacf9J7Mf14vZwL/Y6Mmgew==
-X-Received: by 2002:a05:6512:329c:b0:51c:778f:b569 with SMTP id p28-20020a056512329c00b0051c778fb569mr4049642lfe.29.1714215356833;
-        Sat, 27 Apr 2024 03:55:56 -0700 (PDT)
+        bh=Vw7YIWRgewiIjaQbILnrrX2snAdB7TalnWcaho2WU3o=;
+        b=B8IMV5f2Zdl/L4284wfn7RAol9g5khXYp8Q3TqEfZoF7k1NaWfgW+MaFf2CAkdegA+
+         1m5ElwbHcvuhmkA280HqyBaRtWuP1siKc1ZoiJLv8GxKrpWOuJIeOJ2zaeLTOdqDFaZm
+         x+nx1Ey0zfTwFlICR4wWlIAvkAZLog/z0m4IrbuO2mOsTAKttPEXC1+SAwRA/TmYZjIb
+         M0ZpWTRCtu0q7DCggJ12/AIcpTAZTuFF9CAyCiRkV2Ott93L2mYWSHYm0gCuC14IcBP7
+         Kq4mDd6Gm8xO6C/MWsokOkyddA/IsUOi4rVVoD/ekV6tVECJ3v53yIEXEXx9NFGlWSVv
+         fBaQ==
+X-Forwarded-Encrypted: i=1; AJvYcCU3b5H2D4ygTCKu2cWi809k9DXzo6U0//Qy9dImFg9Eyze4GneeK4X/xL3wsHcPoF33i6jkAuTN99pDmWqy5eX7yXfwFSGXUAZo
+X-Gm-Message-State: AOJu0YzzeCZna1cAXNU+Duzr7z6jaNawG3dH7lZzW90GB3P4t1rbfmyY
+	Ui5nKh5gBNs8V/0Y0l1k2WKirpqpTYMwOAhPbowxaZ31cYPzMOTabySdg9IPb+c=
+X-Google-Smtp-Source: AGHT+IGD03B2i7PKMy6HkJBPlBDJAzn/QclUOnQKtoK3JDSXtq9G1ETAVHvABI1pCX1NQAJQ0I3ePA==
+X-Received: by 2002:a17:906:1759:b0:a58:7f48:18c4 with SMTP id d25-20020a170906175900b00a587f4818c4mr3406243eje.68.1714215758684;
+        Sat, 27 Apr 2024 04:02:38 -0700 (PDT)
 Received: from localhost (host-87-1-234-99.retail.telecomitalia.it. [87.1.234.99])
-        by smtp.gmail.com with ESMTPSA id i13-20020a170906090d00b00a588dab605dsm4285140ejd.88.2024.04.27.03.55.56
+        by smtp.gmail.com with ESMTPSA id le23-20020a170906ae1700b00a4e4c944e77sm11516281ejb.40.2024.04.27.04.02.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 27 Apr 2024 03:55:56 -0700 (PDT)
+        Sat, 27 Apr 2024 04:02:38 -0700 (PDT)
 From: Andrea della Porta <andrea.porta@suse.com>
 X-Google-Original-From: Andrea della Porta <aporta@suse.de>
-Date: Sat, 27 Apr 2024 12:55:58 +0200
+Date: Sat, 27 Apr 2024 13:02:39 +0200
 To: Florian Fainelli <florian.fainelli@broadcom.com>
 Cc: Andrea della Porta <andrea.porta@suse.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
@@ -69,9 +69,8 @@ Cc: Andrea della Porta <andrea.porta@suse.com>,
 	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org,
 	Jonathan Bell <jonathan@raspberrypi.com>,
 	Phil Elwell <phil@raspberrypi.com>
-Subject: Re: [PATCH 1/6] dt-bindings: pinctrl: Add support for BCM2712 pin
- controller
-Message-ID: <ZizZvpv3yomm0L3i@apocalypse>
+Subject: Re: [PATCH 3/6] arm64: dts: broadcom: Add support for BCM2712
+Message-ID: <ZizbT4Qo0XFB2m4A@apocalypse>
 Mail-Followup-To: Florian Fainelli <florian.fainelli@broadcom.com>,
 	Andrea della Porta <andrea.porta@suse.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
@@ -87,8 +86,8 @@ Mail-Followup-To: Florian Fainelli <florian.fainelli@broadcom.com>,
 	Jonathan Bell <jonathan@raspberrypi.com>,
 	Phil Elwell <phil@raspberrypi.com>
 References: <cover.1713036964.git.andrea.porta@suse.com>
- <2d1272cad92ad618297a6683e9264e31b8f2df73.1713036964.git.andrea.porta@suse.com>
- <f6601f73-cb22-4ba3-88c5-241be8421fc3@broadcom.com>
+ <0ab5a768d686cb634f7144da266c9246e9e90cb4.1713036964.git.andrea.porta@suse.com>
+ <198793bf-5ec8-4f33-aae7-75c635f900ec@broadcom.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -97,45 +96,27 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f6601f73-cb22-4ba3-88c5-241be8421fc3@broadcom.com>
+In-Reply-To: <198793bf-5ec8-4f33-aae7-75c635f900ec@broadcom.com>
 
-On 08:45 Sun 14 Apr     , Florian Fainelli wrote:
+On 09:01 Sun 14 Apr     , Florian Fainelli wrote:
 > 
 > 
 > On 4/13/2024 3:14 PM, Andrea della Porta wrote:
 > > Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
-> > ---
-> >   .../pinctrl/brcm,bcm2712-pinctrl.yaml         | 99 +++++++++++++++++++
-> >   1 file changed, 99 insertions(+)
-> >   create mode 100644 Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml
-> > 
-> > diff --git a/Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml
-> > new file mode 100644
-> > index 000000000000..2908dfe99f3e
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/pinctrl/brcm,bcm2712-pinctrl.yaml
-> > @@ -0,0 +1,99 @@
-> > +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> > +%YAML 1.2
-> > +---
-> > +$id: http://devicetree.org/schemas/pinctrl/brcm,bcm2712-pinctrl.yaml#
-> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > +
-> > +title: Broadcom BCM2712 pin controller
 > 
-> This is not strictly speaking BCM2712 specific, the pin controller you
-> describe is a Broadcom STB product line pin controller.
-> 
-> Please describe it as such as and make BCM2712 a specific instance of the
-> chip using that pin controller, see more comments on patch #4.
+> No commit message given the amount of lines changed?
 
-Ack. It turned out that the pin controller is not strictly need for a bare minimum
-support of sd card booting, so it will be drop in patchset V2. A future patchset 
-will re-introduce it when needed.
+Ack. Patchset V2 will have a commit message.
+
+> 
+> Please split this patch into multiple series that add basic 2712 support to
+> the mainline kernel.
+
+Please, can you elaborate a bit further on this?
 
 Many thanks,
 Andrea
- 
+
 > -- 
 > Florian
 
