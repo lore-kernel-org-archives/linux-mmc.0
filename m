@@ -1,151 +1,263 @@
-Received: from IND01-BMX-obe.outbound.protection.outlook.com (mail-bmxind01olkn2062.outbound.protection.outlook.com [40.92.103.62])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D82EB10F9;
-	Mon, 29 Apr 2024 08:31:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.103.62
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714379517; cv=fail; b=UYRxiBFmowoOKY6GASOmWJUOBg8q0Mg/TzMs7AEpbm1LG8QV507+DNO+8kvgRINzmlgelUZ4Qtdg1puolrZYlqZlVQJ33jtCKaF0Pt2vn3guUS9db5TyypC1uy89MEb+x2qa6+z2/5r6P+x+OP9sdXWs9yfZVUUK9a0juXGAN+8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714379517; c=relaxed/simple;
-	bh=TsbdTsQdSXnve6cLvczwd7XT4WT8beGbLcMkiBxOdis=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=X3z4QvwRYkGpHaZybW0eBmcEcVyBlNo021OjWDD3fg3WCALcFNcWe21uf14lmgYlFVpisa14hfg5YK5fTppU8GPgyH/TYLdcWzn0YsQmESjwvRnIJ+NqpZEsG/hbrxbpyW6cVS8JQlQ8oUkwLkhB2prViU1MLJAV+kDusuRYST0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=gF75SC2O; arc=fail smtp.client-ip=40.92.103.62
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
+Received: from mecka.net (mecka.net [159.69.159.214])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id A4735171C9;
+	Mon, 29 Apr 2024 09:41:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.69.159.214
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1714383677; cv=none; b=a5Ee6MnHM4msHMIJNSB9an83QJOjPUPQXcywW0la7YMRQks3Kx3UCCz7Nn/fEKJ6WvFP9G8z2b+4w3rBC7wgxHg14LnBI8JNBOA7pCEBPhWnb+9zQrvEMfi+8mCmryUGaDZx5OctXPvejlJ9p+mDoEMR96+ckCh9yfWBTDjkyHo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1714383677; c=relaxed/simple;
+	bh=lOtwTB1hQGTZTb9sPzIaDFMAGjapJfjC6odRs5U7n1g=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=cr0h5EWGSH9+yQuD/oL4doxmVkDyKl8Uz2Z9TUJ5vpHeMhwy2MqscuyBRmjdYVwcQHQgtjygSjyWE1s4dEsbGzajScrB1Q3Ddtj2DFloduzT32q7WeIwGTcRP9/vgKrUVR4GPi84xPMwhwEf6mjoBhw/GY52eOmdlse9ReI/LkY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mecka.net; spf=pass smtp.mailfrom=mecka.net; dkim=fail (0-bit key) header.d=mecka.net header.i=@mecka.net header.b=j/+AENdG reason="key not found in DNS"; arc=none smtp.client-ip=159.69.159.214
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mecka.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mecka.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="gF75SC2O"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=KpEjOCXn6CYJR+eQbNNvY5T0jDyuhdL0HCC/c77bv+zerN6w94A0iTLAb6sWz6/0Dhzt8zyLF7CrpjBYC5BMoE/lZB5ocVzXwp/TLcSnUqcXvlqgoDNw4UmlrQ+p0rxaTfh23Ng4IugeykS2CMoDE0D3wSpnylBKpD81FmqrezbWBqCJx3fTwjAwVLMjmXX6G2tRnO6vYjQvcWzO5K9sZkAoOVD2om/0rGxXjY8RPgfPpnAETaccR58TY8dWs02pw7dbNZpo/ycZ8Etr7MpRjpg0apqtdsRX6eb81aBXTiMOWKy+xZfOmQ+l4joyZSJGbDhChiH1RnURiJscL/phtw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=GL3J9NiLN2qFoH330fCipDH80wpkACQNdzREk8Z7bAY=;
- b=JSavV3ttsQff/3RBBor59YFHBJDzxcIptIzHfJSswyxzlAR34gVWGeJ7NCvOuJK2iZMBegPQ7IMQ8fLpMdfNmQ5y32jzyekq3AqLS2VP9fG+rpKo3zfB9k8VANbUp0l4oq+7e23PLoeZMQGhQO+Yax3QBtm/T3Xv0z8GgOgHDfil5gEnqXjQmw+0bDyrdtYHo+cE32ovnXDZoEi/1mlZdr/JE0Qf9stGhWocvFmGFPCMQ6cS1qow2jMMfRgVuHt0NIHoq03/GX6K3MXHOzGlvsv8BP1i1UzmxuMFSU97NqFYMX0rrqGvvBgrtTj8clQrGA1f/FbWdEk5ujxju584Vg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=GL3J9NiLN2qFoH330fCipDH80wpkACQNdzREk8Z7bAY=;
- b=gF75SC2O62PkWtZD5AFQxXh1nJ8RpSDqA9JGEHjCTgV3RELx76TZMEKZoqankKR4N8X4g8m6zMvA/Bs6ttYLDPFSEU4o2vYqNR2E+KI+iFiaHL0U53kM2DkwGeMGnOUyROb917p1H0yQty82BZ6FdGRpGp2sXtp3l44M2NQ36tX5JJdJ0ntx8JjNZu5LYu3sQ9dhD2Q2DZ0zkjIgAYRr9jTipHbgla7Qeoah701cmhroDqRahvSDyAStlKiDpK2/7bsvB2572NKpx8+NDew01xXmHxrGmtIiVVtm4sGrhWE7GJ0Gvp1DwzJWicuRWxlzCnNbTzP1Xf8sJw6bLekaDQ==
-Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:138::5)
- by PN2P287MB0270.INDP287.PROD.OUTLOOK.COM (2603:1096:c01:ed::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7519.34; Mon, 29 Apr
- 2024 08:31:49 +0000
-Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
- ([fe80::664:2ecc:c36:1f2c]) by MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
- ([fe80::664:2ecc:c36:1f2c%3]) with mapi id 15.20.7519.031; Mon, 29 Apr 2024
- 08:31:48 +0000
-Message-ID:
- <MA0P287MB282270D8DBF5F2B329221C6CFE1B2@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
-Date: Mon, 29 Apr 2024 16:31:44 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/1] mmc: sdhci-of-dwcmshc: add callback functions for
- dwcmshc_priv
-To: Drew Fustini <dfustini@tenstorrent.com>, Chen Wang <unicornxw@gmail.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jszhang@kernel.org,
- dfustini@baylibre.com, yifeng.zhao@rock-chips.com, shawn.lin@rock-chips.com,
- chao.wei@sophgo.com, haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com,
- tingzhu.wang@sophgo.com, guoren@kernel.org, inochiama@outlook.com
-References: <cover.1714270290.git.unicorn_wang@outlook.com>
- <5bb708cc830684676dede5f44ee22c7fd03300b7.1714270290.git.unicorn_wang@outlook.com>
- <Zi76efedrI6Uv3f3@x1>
-From: Chen Wang <unicorn_wang@outlook.com>
-In-Reply-To: <Zi76efedrI6Uv3f3@x1>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-TMN: [ccTazVnQYD6IKYtPCMq5kfQL2mo2Z/VF]
-X-ClientProxiedBy: SI2PR02CA0047.apcprd02.prod.outlook.com
- (2603:1096:4:196::14) To MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
- (2603:1096:a01:138::5)
-X-Microsoft-Original-Message-ID:
- <b81c78a9-23ff-4638-bb21-a5a1c50449a3@outlook.com>
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mecka.net header.i=@mecka.net header.b="j/+AENdG"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=mecka.net; s=2016.11;
+	t=1714383666; bh=lOtwTB1hQGTZTb9sPzIaDFMAGjapJfjC6odRs5U7n1g=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=j/+AENdGEJgLUzRuxmAVjBTu1Dv7L3DB6tnXIZ3HyfHC7UrUrIh4UQVnGzelkpl64
+	 wcBXG5etvmD5mw+PRGuUlvV324jyhFDyBddwaEipT/1KFeHzTPH6pFkQRJSft1Nq14
+	 R/kpWApQ845bATayE4z0UunU1RL5zfTgQiUY5PUEm78yBXX9V8U3E65vy1QuXDO+tO
+	 G6JC637ROQOHIqbLByCbzNG3hp/mqqzTNlbnlEO2v/qxZjZNHzxts/8hbt9v8rEs/e
+	 +dIbTG4P6ajgKN1qRXi+//d5+hjhrxROHbgsDGnjsW+JYmS3ckCIQVyWU3KAoDyuhe
+	 sDW3z+9n3gGVA==
+Received: from mecka.net (unknown [185.147.11.134])
+	by mecka.net (Postfix) with ESMTPSA id 5191747C02B;
+	Mon, 29 Apr 2024 11:41:05 +0200 (CEST)
+Date: Mon, 29 Apr 2024 11:40:59 +0200
+From: Manuel Traut <manut@mecka.net>
+To: Jens Wiklander <jens.wiklander@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	op-tee@lists.trustedfirmware.org,
+	Shyam Saini <shyamsaini@linux.microsoft.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	Jerome Forissier <jerome.forissier@linaro.org>,
+	Sumit Garg <sumit.garg@linaro.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Bart Van Assche <bvanassche@acm.org>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Tomas Winkler <tomas.winkler@intel.com>,
+	Alexander Usyskin <alexander.usyskin@intel.com>
+Subject: Re: [PATCH v5 2/3] mmc: block: register RPMB partition with the RPMB
+ subsystem
+Message-ID: <Zi9rKzz8u8z7cIy0@mecka.net>
+References: <20240422091936.3714381-1-jens.wiklander@linaro.org>
+ <20240422091936.3714381-3-jens.wiklander@linaro.org>
+ <ZioXkvnIw5V5MXBU@mecka.net>
+ <CAHUa44Fojanryuc+ciJrVZUopRLcTt2teS_pC4BBjt1Wmy240A@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: MA0P287MB2822:EE_|PN2P287MB0270:EE_
-X-MS-Office365-Filtering-Correlation-Id: 211cece6-4423-45e9-30db-08dc6826cfe2
-X-Microsoft-Antispam: BCL:0;ARA:14566002|461199019|440099019|3412199016;
-X-Microsoft-Antispam-Message-Info:
-	dcroClaXyvDvsDIaRmJmOx6TALXfZnHeAJagupQOpD2QTkcWtT6xe/s31S+WC9916WCA84loz3TZAaUt1V0XFhfKmUZaSb5BfNZ22gIvLxoeTq5cNCTcPvqsIkBepGgDcW9tGVR+3C38TXQZJ+nn29wa0/APKKy/nVQx4NyUF8KhqmtbXFkNxAS7yMYncP061p7fT5OrLgn25n7fmmxylwKMZb1EwEI1qCGXgc0reqzwwBtZzvCPEThooWJ0p1nl5A+epVtANS1XVyR/hE5ZTdVxY4pLP37nT3CL1kgJyGV1yGOU49ucAK3kpwvBNEinf2Kt/v8TjLbtM1mRjI7ddtUfGh/CQMkGzq2wz9MBZUV4ql/D8Ogj8hpAUyp1JQaWrvatEIRGMynFW4XyDIs7q/co/fmV9swfcEWvsnLNnAM8TNM0PjPaP4TRAD9Bhk9tdRBRSrIUupNhCajZuW4KWRO9wHygBAA5J7YQi0o5F7vyM54eZ8ihEkDGqvTzThvvGC9xz+BcI2qjEJKRpywQbTPZWaeAU040bkkL8hNL/6Hai3/DaGtfbUU2LnKIWkud
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?TFZOK24ycUxUZHBXKzl3T09TcE1TRmdqcmM5TU9QNjBrdjdLRXlUWWZScUl6?=
- =?utf-8?B?T2xSVzhqY1BEMHJBdmt5UndXSVJzVmpLNVJBbUE3TGRPVWloeEo4M2w4ZGlK?=
- =?utf-8?B?azV3T3FqSTZvdXVUK3Y4dU9NTldmZVdQRXBucGdzVjFSSmczK3lqWEh2ZTkz?=
- =?utf-8?B?MXdIKy90RUk3STl3eDVOQXBRT0ZvY1N0cWpVSk1iQmYyQXdtWUtYOTJhNWcw?=
- =?utf-8?B?ZkhsSkZheC9QUDNMVnY0d3l1T1VSR2ZkY2pjWERnVFBPZDA0QU9Icko4bk5B?=
- =?utf-8?B?dHhYRTFHcWxMRnFuT0Fyems5aURUdUUwVWxoNmFZcnczTDFVQ0dQazViRjhr?=
- =?utf-8?B?KzhKeEx0Qko2Qk9UUXRGWlE1TUlJSEk3bVhOd21FZ0VmS3JUOWlkL1JVeFF4?=
- =?utf-8?B?dWZGSExPc2ZkMVZJUGpqN2s4anJXcFRnK2ZqcFBYWEhIdzBWdW1aTSt2YTE3?=
- =?utf-8?B?clZBNFIzMnJQdXN0dkY4K29PSlZpcHJUdEVvTlFFSEQ4WXU3Unk1K01UQ29D?=
- =?utf-8?B?eTE4MVRuZnlYRFZpSFBJaFc4VExubjdTOU9RK1JvV2I2OFFlUG82VDFrWkd6?=
- =?utf-8?B?MHhIdlZrMkh5bm5ZWUZPYWhVblRZelpyMUVodDJHb2l2YThRKytuZFBJcW1t?=
- =?utf-8?B?SHBVZjZuS0RrNytsTXpZQ2NxQ29oc2lyVWtkT01TM1d5YXozaXhCcmE4WHA4?=
- =?utf-8?B?ckxCM3hoa3Fwb1N0TWRZUWYyekcrcVpmVTVKZjQ0dWM3NFIyaW0zYnJjaW42?=
- =?utf-8?B?ai9uVlQrL0FkTnVNNFVUOEVBSG5TR2NEZDlwZkU3SS9keitocHQwSGdodVpG?=
- =?utf-8?B?bjdvU3lWeGdqbk5iSnhOV1ppNHlnK2VoL2ZPb2l1YnNWZnZyeGQ5eEIvdURN?=
- =?utf-8?B?ekRPK1B0VFVrc0dqRG80QURaNkZFWGpnWDdRMUJiRFIzVkJWbWZzeXVNNjV3?=
- =?utf-8?B?WVF5MUNGcCs3YmNkMEtZT0NzV1JMVm5wcUd0dnpHVys3UmsxL210MzhpdHVL?=
- =?utf-8?B?S2N3RHRIK0c1aEVWUUNQUXpua2tlbzFDb0x1ekx6dlprOEp4VkdLQ2o4RWx5?=
- =?utf-8?B?RnlUdUQ4NWZ0UGJNVTBoZi9TbmJ1MWpydUZRdlhDZjQraEJsN0ZUNk9Edlo4?=
- =?utf-8?B?S2pZcHQ3enRkMHhNNlJBVnNQUjJLNlVPZ3JVRzc4ZldXMTE5VHdDQzNNclFP?=
- =?utf-8?B?WGMwbkZLdllmRjRvRVZVZmppWUt3MWlBNThNUkRHVEc4RWs4NXBwQk5VNnZU?=
- =?utf-8?B?bDJMM1BaWndyTm9EZW14VlZLaUY3R254R2k0ZzJMMFpPaWhQblZDRElnTGR4?=
- =?utf-8?B?Ty9qL3dEK0pWbGhOOFdORVZKNktqY3FOWmYzUDVaQVFJWUtoM3MxTWtMeUd6?=
- =?utf-8?B?UFdmNit6OXI0SzJ5dnkyR0hLbFFXbHB1eXYxK1U3bnlidWJHTkxLOUhhRHpH?=
- =?utf-8?B?UDFpSVAyQUg5QklvUkNXWTZwbWl1d2d0VDFTUHlzNHdVcElRcDBsRG8xMFYv?=
- =?utf-8?B?YXNmRlNWd0hpeTJlVUI0Y2EyWXBsZ0hRdWM4bzlrajEySWthNUlPcm1NODdL?=
- =?utf-8?B?Y0ZBaTQyajVpR1h0dVRreUdWSzVuT3BDVEZoL1FJWlJ0ZmZnTTdrU2ZHMDFD?=
- =?utf-8?B?ZzAvTnkraGlJS2NUcE93K3U3U2JodWRQUFNaQnYyNythTUVoU2lDZnRjK3JH?=
- =?utf-8?Q?NO0DK3FsQiJ81RnlEghA?=
-X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 211cece6-4423-45e9-30db-08dc6826cfe2
-X-MS-Exchange-CrossTenant-AuthSource: MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Apr 2024 08:31:48.8087
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
-	00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PN2P287MB0270
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAHUa44Fojanryuc+ciJrVZUopRLcTt2teS_pC4BBjt1Wmy240A@mail.gmail.com>
 
-Thank you Drew.
+On Fri, Apr 26, 2024 at 03:24:21PM +0200, Jens Wiklander wrote:
+> On Thu, Apr 25, 2024 at 10:43 AM Manuel Traut <manut@mecka.net> wrote:
+> >
+> > On Mon, Apr 22, 2024 at 11:19:35AM +0200, Jens Wiklander wrote:
+> > > Register eMMC RPMB partition with the RPMB subsystem and provide
+> > > an implementation for the RPMB access operations abstracting
+> > > the actual multi step process.
+> > >
+> > > Add a callback to extract the needed device information at registration
+> > > to avoid accessing the struct mmc_card at a later stage as we're not
+> > > holding a reference counter for this struct.
+> > >
+> > > Taking the needed reference to md->disk in mmc_blk_alloc_rpmb_part()
+> > > instead of in mmc_rpmb_chrdev_open(). This is needed by the
+> > > route_frames() function pointer in struct rpmb_ops.
+> > >
+> > > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> > > Signed-off-by: Alexander Usyskin <alexander.usyskin@intel.com>
+> > > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+> > > ---
+> > >  drivers/mmc/core/block.c | 241 ++++++++++++++++++++++++++++++++++++++-
+> > >  1 file changed, 239 insertions(+), 2 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > > index 32d49100dff5..a7f126fbc605 100644
+> > > --- a/drivers/mmc/core/block.c
+> > > +++ b/drivers/mmc/core/block.c
+> > > @@ -33,6 +33,7 @@
+> > >  #include <linux/cdev.h>
+> > >  #include <linux/mutex.h>
+> > >  #include <linux/scatterlist.h>
+> > > +#include <linux/string.h>
+> > >  #include <linux/string_helpers.h>
+> > >  #include <linux/delay.h>
+> > >  #include <linux/capability.h>
+> > > @@ -40,6 +41,7 @@
+> > >  #include <linux/pm_runtime.h>
+> > >  #include <linux/idr.h>
+> > >  #include <linux/debugfs.h>
+> > > +#include <linux/rpmb.h>
+> > >
+> > >  #include <linux/mmc/ioctl.h>
+> > >  #include <linux/mmc/card.h>
+> > > @@ -76,6 +78,48 @@ MODULE_ALIAS("mmc:block");
+> > >  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
+> > >  #define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
+> > >
+> > > +/**
+> > > + * struct rpmb_frame - rpmb frame as defined by eMMC 5.1 (JESD84-B51)
+> > > + *
+> > > + * @stuff        : stuff bytes
+> > > + * @key_mac      : The authentication key or the message authentication
+> > > + *                 code (MAC) depending on the request/response type.
+> > > + *                 The MAC will be delivered in the last (or the only)
+> > > + *                 block of data.
+> > > + * @data         : Data to be written or read by signed access.
+> > > + * @nonce        : Random number generated by the host for the requests
+> > > + *                 and copied to the response by the RPMB engine.
+> > > + * @write_counter: Counter value for the total amount of the successful
+> > > + *                 authenticated data write requests made by the host.
+> > > + * @addr         : Address of the data to be programmed to or read
+> > > + *                 from the RPMB. Address is the serial number of
+> > > + *                 the accessed block (half sector 256B).
+> > > + * @block_count  : Number of blocks (half sectors, 256B) requested to be
+> > > + *                 read/programmed.
+> > > + * @result       : Includes information about the status of the write counter
+> > > + *                 (valid, expired) and result of the access made to the RPMB.
+> > > + * @req_resp     : Defines the type of request and response to/from the memory.
+> > > + *
+> > > + * The stuff bytes and big-endian properties are modeled to fit to the spec.
+> > > + */
+> > > +struct rpmb_frame {
+> > > +     u8     stuff[196];
+> > > +     u8     key_mac[32];
+> > > +     u8     data[256];
+> > > +     u8     nonce[16];
+> > > +     __be32 write_counter;
+> > > +     __be16 addr;
+> > > +     __be16 block_count;
+> > > +     __be16 result;
+> > > +     __be16 req_resp;
+> > > +} __packed;
+> > > +
+> > > +#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Authentication Key */
+> > > +#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write counter */
+> > > +#define RPMB_WRITE_DATA        0x3    /* Write data to RPMB partition */
+> > > +#define RPMB_READ_DATA         0x4    /* Read data from RPMB partition */
+> > > +#define RPMB_RESULT_READ       0x5    /* Read result request  (Internal) */
+> > > +
+> > >  static DEFINE_MUTEX(block_mutex);
+> > >
+> > >  /*
+> > > @@ -163,6 +207,7 @@ struct mmc_rpmb_data {
+> > >       int id;
+> > >       unsigned int part_index;
+> > >       struct mmc_blk_data *md;
+> > > +     struct rpmb_dev *rdev;
+> > >       struct list_head node;
+> > >  };
+> > >
+> > > @@ -2672,7 +2717,6 @@ static int mmc_rpmb_chrdev_open(struct inode *inode, struct file *filp)
+> > >
+> > >       get_device(&rpmb->dev);
+> > >       filp->private_data = rpmb;
+> > > -     mmc_blk_get(rpmb->md->disk);
+> > >
+> > >       return nonseekable_open(inode, filp);
+> > >  }
+> > > @@ -2682,7 +2726,6 @@ static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *filp)
+> > >       struct mmc_rpmb_data *rpmb = container_of(inode->i_cdev,
+> > >                                                 struct mmc_rpmb_data, chrdev);
+> > >
+> > > -     mmc_blk_put(rpmb->md);
+> > >       put_device(&rpmb->dev);
+> > >
+> > >       return 0;
+> > > @@ -2703,10 +2746,165 @@ static void mmc_blk_rpmb_device_release(struct device *dev)
+> > >  {
+> > >       struct mmc_rpmb_data *rpmb = dev_get_drvdata(dev);
+> > >
+> > > +     rpmb_dev_unregister(rpmb->rdev);
+> > > +     mmc_blk_put(rpmb->md);
+> > >       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> > >       kfree(rpmb);
+> > >  }
+> > >
+> > > +static void free_idata(struct mmc_blk_ioc_data **idata, unsigned int cmd_count)
+> > > +{
+> > > +     unsigned int n;
+> > > +
+> > > +     for (n = 0; n < cmd_count; n++)
+> > > +             kfree(idata[n]);
+> > > +     kfree(idata);
+> > > +}
+> > > +
+> > > +static struct mmc_blk_ioc_data **alloc_idata(struct mmc_rpmb_data *rpmb,
+> > > +                                          unsigned int cmd_count)
+> > > +{
+> > > +     struct mmc_blk_ioc_data **idata;
+> > > +     unsigned int n;
+> > > +
+> > > +     idata = kcalloc(cmd_count, sizeof(*idata), GFP_KERNEL);
+> > > +     if (!idata)
+> > > +             return NULL;
+> > > +     for (n = 0; n < cmd_count; n++) {
+> > > +             idata[n] = kcalloc(1, sizeof(**idata), GFP_KERNEL);
+> > > +             if (!idata[n]) {
+> > > +                     free_idata(idata, n);
+> > > +                     return NULL;
+> > > +             }
+> > > +             idata[n]->rpmb = rpmb;
+> > > +     }
+> > > +
+> > > +     return idata;
+> > > +}
+> > > +
+> > > +static void set_idata(struct mmc_blk_ioc_data *idata, u32 opcode,
+> > > +                   int write_flag, u8 *buf, unsigned int buf_bytes)
+> > > +{
+> > > +     /*
+> > > +      * The size of an RPMB frame must match what's expected by the
+> > > +      * hardware.
+> > > +      */
+> > > +     BUILD_BUG_ON(sizeof(struct rpmb_frame) != 512);
+> > > +
+> > > +     idata->ic.opcode = opcode;
+> > > +     idata->ic.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> > > +     idata->ic.write_flag = write_flag;
+> > > +     idata->ic.blksz = sizeof(struct rpmb_frame);
+> > > +     idata->ic.blocks = buf_bytes /  idata->ic.blksz;
+> > > +     idata->buf = buf;
+> >
+> > I tested the series on a i.MX8MM with a eMMC connected via the imx-sdhci
+> > controller. Reading from RPMB does not work. It ends in timeouts due to
+> > no response from the SDHCI controller.
+> >
+> > If idata->buf is allocated here with kmalloc(buf_bytes, GFP_KERNEL) and
+> > the content of buf is copied to the new allocated area, transfers succeed.
+> >
+> > Is it possible that idata->buf is not DMA capable? Any other ideas?
+> 
+> Thanks for testing. I don't know, the idata->buf is allocated using
+> alloc_pages_exact(nr_pages * PAGE_SIZE, GFP_KERNEL | __GFP_ZERO); in
+> optee_pool_op_alloc_helper().
 
-FYI, as per some inputs from Adrian, I will try to imrove the code and 
-send a new patch.
+Is this really true for idata->buf or isnt the complete RPMB frame memory
+allocated like this and therefore idata->buf not page aligned?
 
-On 2024/4/29 9:40, Drew Fustini wrote:
-> On Sun, Apr 28, 2024 at 10:32:41AM +0800, Chen Wang wrote:
->> From: Chen Wang <unicorn_wang@outlook.com>
->>
->> The current framework is not easily extended to support new SOCs.
->> For example, in the current code we see that the SOC-level
->> structure `rk35xx_priv` and related logic are distributed in
->> functions such as dwcmshc_probe/dwcmshc_remove/dwcmshc_suspend/......,
->> which is inappropriate.
->>
->> The solution is to abstract some possible common operations of soc
->> into virtual members of `dwcmshc_priv`. Each soc implements its own
->> corresponding callback function and registers it in init function.
->> dwcmshc framework is responsible for calling these callback functions
->> in those dwcmshc_xxx functions.
->>
->> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
-> I have tested this with the eMMC and microSD on the Lichee Pi 4a which
-> has the T-Head TH1520 SoC.
->
-> Tested-by: Drew Fustini <dfustini@tenstorrent.com> # TH1520
->
-> Thanks,
-> Drew
+For RPMB via tee-supplicant the idata->buf is allocated within memdup_user
+and therefore page aligned.
+
+> Alternatively, it's from the memory
+> range mapped using memremap() in optee_config_shm_memremap(), but
+> that's only if you don't have "dynamic shared memory is enabled" in
+> the boot log.
+
+"dynamic shared memory is enabled" is in the bootlog, ..
+
+Thanks for your comments,
+Manuel
