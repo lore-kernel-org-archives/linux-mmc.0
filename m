@@ -1,358 +1,213 @@
-Received: from mecka.net (mecka.net [159.69.159.214])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id B97A456B6C;
-	Mon, 29 Apr 2024 13:13:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.69.159.214
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714396409; cv=none; b=oIs3Z2+sPQogpRgHu/mofilPeYomEsbTYfvsMts69/xkrfFZ75laJBFThnW1e5DYYEqqzp7SwKuOaPSMyE4bjfAQVvapzQwf6fYC7hksbXWuZxurhwbS0KVndG427/ySV62nWMP5gqExE2r0nJI9Ba8ThgwZVPqj03iurXZYobM=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714396409; c=relaxed/simple;
-	bh=YNvHKbWQBKLRWKYjiA3q32glgi/UXTGAiT+SMegCFvc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uLcFf12gN1PQzFWwmf9hLC46wX7a0NFkuu7z6FLDjuhDrfyjNsR+dwSZ3Aor+e05girpjHfsMc4GpXBw901Q4SffzRhz+2NzEo39jFRKKvsTxuKUg1olZT3Asv/lNw/Wyb+l1jtKNRmx0qJjidJuPjaoAvXPrzYsykcARptcFXY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mecka.net; spf=pass smtp.mailfrom=mecka.net; dkim=fail (0-bit key) header.d=mecka.net header.i=@mecka.net header.b=eEIHrt4u reason="key not found in DNS"; arc=none smtp.client-ip=159.69.159.214
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mecka.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mecka.net
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4372839FD;
+	Mon, 29 Apr 2024 19:37:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1714419477; cv=fail; b=IhvwRVBY3/bcNZypj4e56LgsrBblEZSLNgLHV9hQMYaPF+w6P0pMtSOFgIk8wAlBs6Bmatv68sthVgC1jGZGtPMz7tJf7NqmE3P4nf2Sd0wrVVJmtHEtkEGakjB+RxVwXOOt/oh2uBlG6DFlIB2zO0mTWhEhfSqw8pkOzhkhBcA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1714419477; c=relaxed/simple;
+	bh=86mQsfYJ30u8Tt1N6JKNurxz4i2hF7gOFyFzPXiMY3g=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=ZvoAXcS7gfV/mcdDmesXiMwsmJlFMOyE9uGaJPvgoIUz8c4z/XyjEHHd8w19jTqJ1J3h6VutaniDXUkxvtK9tx/NwsHxZXjkmjeFx4wxC+IR0AUp0FyBtQxPX+kzulikV2vjF/19lvTk17XVnkXjAQBkiru/nJ3UBQV9ZsUNcHI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=fqKkUfeT; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=zcBnGKH8; arc=fail smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mecka.net header.i=@mecka.net header.b="eEIHrt4u"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=mecka.net; s=2016.11;
-	t=1714396403; bh=YNvHKbWQBKLRWKYjiA3q32glgi/UXTGAiT+SMegCFvc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=eEIHrt4u9F3HysDN/PTMXkfZjjc6psPVnZN36SlD+9Ys7hbiAQ09ncSWE9i8OoaTZ
-	 HC+Nq0coGl6PGUdLXzqQCgi1sVkf3z0SZTqAABx4lskNdutXytyuTvIJX3jWwJ41Sy
-	 gIIxDBJpy87vvN5ilUChWA8ZBWocaVlmxTJMItHB1mM2saVdAsEYI5GCUwlkcJzZQc
-	 13LwarwwfawdRrvyLGHTC5aqrPHlwzHQgU9Lk9OrhtkPXH/tUKl+3W+O4N/oGw5a26
-	 g1PlQ1NuC71NzBq7uM40Ii011JSa566t0b4j6j+xtnLHSEw1orVsKcDEZSXXTV+Lhs
-	 P5Q2dTQ1prcxA==
-Received: from mecka.net (unknown [185.147.11.134])
-	by mecka.net (Postfix) with ESMTPSA id 1B9DB47C50C;
-	Mon, 29 Apr 2024 15:13:23 +0200 (CEST)
-Date: Mon, 29 Apr 2024 15:13:13 +0200
-From: Manuel Traut <manut@mecka.net>
-To: Jens Wiklander <jens.wiklander@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	op-tee@lists.trustedfirmware.org,
-	Shyam Saini <shyamsaini@linux.microsoft.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Jerome Forissier <jerome.forissier@linaro.org>,
-	Sumit Garg <sumit.garg@linaro.org>,
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-	Bart Van Assche <bvanassche@acm.org>,
-	Randy Dunlap <rdunlap@infradead.org>,
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Tomas Winkler <tomas.winkler@intel.com>,
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="fqKkUfeT";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="zcBnGKH8"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1714419475; x=1745955475;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=86mQsfYJ30u8Tt1N6JKNurxz4i2hF7gOFyFzPXiMY3g=;
+  b=fqKkUfeTV8pz5gI/iFzjjHGQa8lJBy+KPRtFmvN2ISKbdJoWhlQQnJbq
+   aMGzRoXfJ55ppBI6U9Q0BO+xM8ACIPoFHmqFFMEFWzKbNSVfxKNl3n3SC
+   XFB+C1xDTcnRjE3EQm5tAQxpi3Gs5XHKdQbp5HOGOoLztl1CwTuFesn4A
+   BRg3/d1u4l2D4Zk61OuFBxlFM5lNdr03W9YtsimsWQxk7H1YFqwx2uyZZ
+   Xtd7lyuAKCO+yUJwxJ9I0YIP0DEMhfnJNxAD6STecU1GpHep2FzfyiKws
+   QSozntIL7E/h4ce27jU4afUcpmsTZX67xCKuMPVQy0Jiie3r9qnTLdX6Z
+   Q==;
+X-CSE-ConnectionGUID: +fr0igQaTE+L0cgEfcTZpA==
+X-CSE-MsgGUID: S3v4u69sQmqm8I4+7gMt6w==
+X-IronPort-AV: E=Sophos;i="6.07,240,1708358400"; 
+   d="scan'208";a="14530778"
+Received: from mail-co1nam11lp2169.outbound.protection.outlook.com (HELO NAM11-CO1-obe.outbound.protection.outlook.com) ([104.47.56.169])
+  by ob1.hgst.iphmx.com with ESMTP; 30 Apr 2024 03:36:46 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=azvbLiCMnTDFqy1WUJqVv4ewOowVUBQvjp6+j6E8/SqbHsUItFFkA0uTAj9rSus/9sa427nEolI8s4tnOXMz937nJK40g78VsyOucOpfxdl7AzwVu7Xi2M0zzFSc06Vo5S/Vwlql1i/Hl09Duw8Co9Y0boE3OEgQ42GlIkWdZGYKpFX6wp8hQipObUX2fhu4MmIbWej82LkDuRagBSV950F782jDnA8FNAQXWyzPegvfDV2k2/zPi5K3RkdMbDkdj37he5r2n44m2/xIMM308r1d5XQEcgDD8kNuiUCjrh5Cnt7YF2KBn27uKn6ZgFpR38cWt2K6/Pgwxcya2GeGBA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=86mQsfYJ30u8Tt1N6JKNurxz4i2hF7gOFyFzPXiMY3g=;
+ b=exWIs4EqtbYmR2GlGx8x/n0BHmawv15ic0/Bz0Y4nWTx5bPxz63oBxh5eEPVvSby201pmvj+zj4t0STUU+oZ/VZ3giKJ0lbpz7T+7dB1ZM4+ywTUnxfJkWYbbbHqpU9uZ307olXwL379JWmOVG3l1rHbVbIOLrRL1EQIEwOVD0jH8ghaQkfX3TdBPlQg6IPWjFXkDY7FEbMNomcP2RWimGmCEyT4bL9TDF6LTPxhdb6AISZvtoCpogGZ0nDVvqs1B1C9ENN5pBJVnj7rmYhNyPI8dd/Pfe1i06jGw1ED2fXrTmQ1AUzg2Ov/6OZAZRPZcP4aPqFyN0MLRp6/w1ERNA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=86mQsfYJ30u8Tt1N6JKNurxz4i2hF7gOFyFzPXiMY3g=;
+ b=zcBnGKH89+HBEfD50lLJIjATpJKAXNMlJXGdNo7llnFhEBDAzFaM/kCeiJrX006WW0l4dnXFBwBPm7X+tTrwiqIuMsGX3g1ppQM7cBi6b2UIy0e6WWI3a4B1aIEmNri21w41/8Vt6T0bacTVVOuj2I6vsQW45+cynesBHpTqA5c=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ BN8PR04MB6372.namprd04.prod.outlook.com (2603:10b6:408:dd::11) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7519.35; Mon, 29 Apr 2024 19:36:44 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5395:f1:f080:8605]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5395:f1:f080:8605%3]) with mapi id 15.20.7519.035; Mon, 29 Apr 2024
+ 19:36:44 +0000
+From: Avri Altman <Avri.Altman@wdc.com>
+To: Jens Wiklander <jens.wiklander@linaro.org>, Manuel Traut <manut@mecka.net>
+CC: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>, Shyam
+ Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier
+	<jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, Ilias
+ Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche
+	<bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel
+	<ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman
+	<gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>,
 	Alexander Usyskin <alexander.usyskin@intel.com>
-Subject: Re: [PATCH v5 2/3] mmc: block: register RPMB partition with the RPMB
+Subject: RE: [PATCH v5 2/3] mmc: block: register RPMB partition with the RPMB
  subsystem
-Message-ID: <Zi-c6QXySx78JoJ_@mecka.net>
+Thread-Topic: [PATCH v5 2/3] mmc: block: register RPMB partition with the RPMB
+ subsystem
+Thread-Index: AQHalJZBAWmedfkP9UyAX8ZNIG7ZZrF4r/kAgAHg8oCABHiXgIAAB8KAgACeLfA=
+Date: Mon, 29 Apr 2024 19:36:44 +0000
+Message-ID:
+ <DM6PR04MB6575AC5DEB3A46D1AE11705FFC1B2@DM6PR04MB6575.namprd04.prod.outlook.com>
 References: <20240422091936.3714381-1-jens.wiklander@linaro.org>
  <20240422091936.3714381-3-jens.wiklander@linaro.org>
  <ZioXkvnIw5V5MXBU@mecka.net>
  <CAHUa44Fojanryuc+ciJrVZUopRLcTt2teS_pC4BBjt1Wmy240A@mail.gmail.com>
  <Zi9rKzz8u8z7cIy0@mecka.net>
  <CAHUa44HHtcaYXhcWg5zL5EQ8pEP7aEDKS+yjpaMJH8vTtF3xFw@mail.gmail.com>
- <Zi93_0aCq9mQ_6cD@mecka.net>
- <CAHUa44FG3ge3nyQVStKjfpeJvpjuQjNiZsxHjyRz+CUjHwkS=g@mail.gmail.com>
- <CAHUa44EecehfyzE97z49e=-qA513um21JyJz_CNKweuctp=HoQ@mail.gmail.com>
+In-Reply-To:
+ <CAHUa44HHtcaYXhcWg5zL5EQ8pEP7aEDKS+yjpaMJH8vTtF3xFw@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|BN8PR04MB6372:EE_
+x-ms-office365-filtering-correlation-id: f0fec506-e8f8-4fb1-5a91-08dc6883b3bf
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230031|376005|7416005|1800799015|366007|38070700009;
+x-microsoft-antispam-message-info:
+ =?utf-8?B?eXNaTktuT1dYK3FJV0UxSnhXZHhzekQ1SHdwV0FSdURsZDYyUXlTamZjTUhN?=
+ =?utf-8?B?TGlma00xazV2Q3kwOE4wWDJaakl0QWRHRDhNSUpySklwV29UelBSTVhjWlI2?=
+ =?utf-8?B?VGhkMklBU2RqSFp6ZDBNQ2dkODFoSGJBMFpqditYZFFENUlNSWdiMnh5cXhT?=
+ =?utf-8?B?dGdaZWpHNEJlbzl4TTUvNVJvT01SZTN2NnhmZUtiVk5ualJVOW5hTGhrKzRl?=
+ =?utf-8?B?endBOVRhUW5qQlNyRnlZMEdMUnVyaGV0UXRYUURPR1lDaisrN3YvQUJvKzJo?=
+ =?utf-8?B?dzBUN3hzcElEUngyV1NxcmEzY2xqSzRpZzltYk51SWc3eWNFS1Q0OWhKRlFv?=
+ =?utf-8?B?dk9MVWZsbjl6bm5TSmhqQ2lXWHdVU3hvY1JYNHlubHN2NVNxamhQYktJcmlC?=
+ =?utf-8?B?THVSdlc1UTBubHRLUmJVQTM0ZmVZU2tZb1RZbXNKancyWS90SzdwUkhhWlE1?=
+ =?utf-8?B?M05HSjI0OFBVeTkySnFBWmtEamtqb0pTaktPRWl4TEtjUGdpd0JRTEkzZUox?=
+ =?utf-8?B?c0IrUXROenhCNlJKeEF0ZnpQMXhhaDM2WGlGaCtUbXJaOTV2SnBvL3NqZlN5?=
+ =?utf-8?B?bnZRbmlDeTQvcitXSFBPRVFqdUVvRjQ4MFF0cURzN1c5T2l0NmNQWXR5NXNJ?=
+ =?utf-8?B?bFF0QTVJT2ExUkh2czZtMFFFMlJjWEc3QVI1QS9rQzRwTExRTU9sdlVraHZh?=
+ =?utf-8?B?bTZodUVSemFXanM4ckcxVVZDNjR6Z08zR01lWEp5U0k3QjQraS8wTHIrZFNR?=
+ =?utf-8?B?YllVRkZYTFh1VFIzWkZKNDJWMG9CNjdKdFhOOVlHenk4V3lzQWZNaU96Qkxz?=
+ =?utf-8?B?bzN4QkV5bkR5ekVnVnRIQ1BhNXlwcHNnS3VRZGtxUUpaWWFhVFdiNG1xdHU1?=
+ =?utf-8?B?TGFaV3Fua0RFWVJpWkdmL1c2dy9oaDhyR05MYTc5dHpJK1ZDS3IxZlhFRlRN?=
+ =?utf-8?B?bGJFR0N2NTBnM2RLYUFMSXJjUklKTE90bzUwdzJWNUVJQ2Vlc3J1TWJpdTRi?=
+ =?utf-8?B?cmxvVGhnSnlBbVJLWno4dmJvV1JzcXUwWFAvRzdESHlqVlJNWW1hUkY3NkpS?=
+ =?utf-8?B?ZmVKdXlCQngxS2NKYTFNTHJoeDlTVFFRUXFPL0hsTkx3NmxYVW5aQVRuQ1pn?=
+ =?utf-8?B?WFZBYk9FOWtmaVpRZURqU2llWVF5R3lBa1lVSGlYb1E2bGsrUUVYK1hUeFVs?=
+ =?utf-8?B?eVBIT3g5Rm5zUXFvbXJTcHIrYWpuMEFCTHNYTDFqVTlmemVidmIveWY0dGtT?=
+ =?utf-8?B?bWpTNUo2a2ZuRndiSnNuZW44WFduL0U4SG0wZThqNzhkQjRYcHFjZWdNNTZP?=
+ =?utf-8?B?elF5L3pCNWcvdUVqKzNZMGZkM1hSNE12cWd3MDIyeVlpTk5naFBHZzErUW0z?=
+ =?utf-8?B?WHN3eFZ2QkhOS3NGKzlUTkZEOW1ZQ3RzMHdIclBkZGljbVRBTTdKUWxESG95?=
+ =?utf-8?B?U0dHQTArYlgrVXZ3SkJXNFQrR21uWi9OS2JYT1k4emp6UkE5TE4vZXRwOWNy?=
+ =?utf-8?B?NHh0WU12ZlJmeWtKVjZEMHRvTUpacWVRd3dIb0RBRlVQaWpZT2U2dlNFak9x?=
+ =?utf-8?B?S2hLYnp1L1J4WkRWUTdFRWdYOWx0VG9iWC9JbFZTdUdCMXNrZEhicXRoTXFS?=
+ =?utf-8?B?RVU5emlReGxleTBkekVES09HZjEremluL0lqSmk3QUg0Y3NyQmZaR0JzUEdZ?=
+ =?utf-8?B?SWhkZWxHZG93WFBQL05rT3BvckxTUXFhQmNaZWFxMnZXZllLRnNnb1ZFdVdm?=
+ =?utf-8?B?QnR0bzR3MWpycUxZMGFIYzVTSmY2ay9nR05hNmJ0OFhtSmNXYVpRT3d0ck45?=
+ =?utf-8?B?dTR1Q1JKOENxeEw4ZEVvZz09?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376005)(7416005)(1800799015)(366007)(38070700009);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?MkRkcGpZcVpqUTVabU16eVV2RnZhSEVJRktTaHlaMzdaalUyb3FYcVVTaXlT?=
+ =?utf-8?B?WWwyN3B5QmZaekx0cWgwbnR2SVJ4bXF3cXdNNjFtbDF3NTRHaGVwazIxYnhy?=
+ =?utf-8?B?bkpva1dlV0gvSnNEc3VFejY0UzNyczY0bFJETU9lWDRrbkgzVUJqWSticFhr?=
+ =?utf-8?B?cUJ4NXREWGU1NEhkTkVtNXFsSTFaU0xLMHZ4RW41WlkxUDNjNTZsQUlNZ3ZJ?=
+ =?utf-8?B?U1FqV3lHUWtWd21zY2NHYTJYK2Zuemh4Yi9kOW50L2FzQ0tsNDBheDNPejJU?=
+ =?utf-8?B?THhka2p0OW1mSUdmNFR3Zmg2b0Y4c1E4Sk9hM1pkQUtvN1M1RFJ3cEtCRzFo?=
+ =?utf-8?B?K0lEdGhXS0hCazdSSUZqaGpnbkVqblNzRmJwU1hoL0NtUFd5RkxablFVZHJT?=
+ =?utf-8?B?dXdTWk81ZDdqclJkejNEU1ZpSHh1aTZDdVVsN0E4aWtWYk0xalNqTDM1N3Vm?=
+ =?utf-8?B?VkxUYkVlVVVIT3BYKzVLT2Jyem55VDI2OUlMZ1h2cEYvMmlRc2t2N3VYR0ha?=
+ =?utf-8?B?am9wVWFUUzRRQ0oyaEhDd3NlWWplZHB1ZVBNd3I1THVaVjUrSmhGWndRUjVL?=
+ =?utf-8?B?WnNuNnlJTUw0ejY4NUdTZGdGMURSb1ROejJGT3JscnZEMkw5aE93VjQrTFo4?=
+ =?utf-8?B?YStxSEtWdEFVRDQwczFhditicmFmemJWVEhNTEJSUE9RNTJpWWFPdTM2ck5o?=
+ =?utf-8?B?cGhpdlhFWWkxZVc2L29tblA5M2lsT2NrMGgrNXUxK1pSUkVaNGEvRDJkSTkr?=
+ =?utf-8?B?VWdrRklwTnVYNUN0eUR5NmhoYytNaGJoVTZFNWtiU3BtVFMxV3BPamN2eWVO?=
+ =?utf-8?B?bGtPTUNWb3F3eXlHcVU2NlhtQlpLaEVReXZ4SlcrN3d2NFJ3cnUyNWVoU2pC?=
+ =?utf-8?B?TlFHazdwbitSaldiNU5VM1hDU0pScnR2OE9IL1FWd3RXa1hDTUR6M1lKNWV5?=
+ =?utf-8?B?YTJPQlFuZ3p2UnJaZGx3OHpXSW1td3BwaFVSejBYSlpBTHgyZzBSdWpVcXRG?=
+ =?utf-8?B?NWRaR3ZWVVYrcU8xOG5BSnZlWS9ualNEU2wzcjJjNmxZcmF4Ty9sMjRYbnFW?=
+ =?utf-8?B?cTNmbEt3ZGZtU2Z2VWpxdDE5d2NrMGJHQk96RHdDdjd6bmxmZzlWUlRPaUdW?=
+ =?utf-8?B?dFQ5RUFBRi9sc2NRTUdyd2tkaUNRT2JDSkVmT1Y2Nll0akNHNXNwdEtRRmox?=
+ =?utf-8?B?bjcrcmdESXNJRE92MC85SUZneW9HT0FCTTlDbzJrR21ndHNsRkZZc0FLdTVO?=
+ =?utf-8?B?aGdONTFweElzTHUzRmdrVTViaDhaK2lyTlNwMXF4aUp4OXBEK1VFT01oY0w0?=
+ =?utf-8?B?SWR6djd0MWhObG9ueS9hS01ud0ZzY1A1Z1ZlL2d4d1dYT2Z4ODdiV3NtWmdI?=
+ =?utf-8?B?YlFxL0hJSS92R3R0eUc0Qkg4My9GdmZtdEtUS0JyY0dRU2huT2VUYTQwQjRq?=
+ =?utf-8?B?bWtXc0Q3V29ESGNOaTZvQnR5ZkdMaFg5bEV3YS81cGFsSUdoWHZBbUxScVNM?=
+ =?utf-8?B?T2RaM25tbVhucFM3Sm9uRkJPZmM0cjFTMkZTSGg3dDhua3dac21qdjQ4MW5J?=
+ =?utf-8?B?bnlaZkVGeUVBc1A4clU2QXROM3ZISFB6T3BIUFBYUjhidlpHMUxiTllKekJF?=
+ =?utf-8?B?UngrRmlJSjZkclk0bVkxZHlhbytrOHFrODlKZTZwMzZWNm13MUVua0p5YWVK?=
+ =?utf-8?B?bHJ6Q0ZmMERRbGg3V3RnKzNLRGp1VE1xYkQ5anAvdVFNSTFtZ1hUZVdaMmpn?=
+ =?utf-8?B?bFZ6K3NqMjVHY1c2ZURMeExBcndhemZtaFBkRzVkVWYyVlpCeW1DUW5FN0t3?=
+ =?utf-8?B?Q1VWMkYxSFZDMTF3WENsM0ZpK2MxWG9TdFlGNnVCNjVjTGpOWjhuU2h4OW5S?=
+ =?utf-8?B?RTlsSE1vWGlsYlJIRG01aHViblhTRjBia0ZsLzlGZkppQ212Q3B2Tzc5cm45?=
+ =?utf-8?B?Vlo2WnI1SEs4YkxYS2hZbFVWOU5nOUo2dWQ5bm1IVGpIZS9xMFZteDRZbGY2?=
+ =?utf-8?B?NWFuRmNCVmltQ3ptbElKSndFU2ZGSGJhc3BFVm5EM2dsM0lDNmkvM1YzWmpo?=
+ =?utf-8?B?Q3JKMzJtTTFoNHN3bFhjUHV0aEpUNk5IRzZ1Ti9Ma1FlWGFiSnM5cThCN283?=
+ =?utf-8?Q?pgl0zE0U9neLjTaHiDYFrOFaU?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAHUa44EecehfyzE97z49e=-qA513um21JyJz_CNKweuctp=HoQ@mail.gmail.com>
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	IDRcuM86Z5sM5wrA7r1B9f7UgtAlAQA5ahj+MsHWOISx47SFs5/CSHUXe0sHLR5QiVI4jbh9stmdGvfD3Pm41n+PQ6NKnJ5M9QJizNNoWde8dAwuVl9cGzn1rEVmkpuuKv+V8S3UGhun/Q1heeEolv/hvnKTcw+OaXIWrrXnKgr4lzQ9MeSMncL+GVDf8xEet2qmYkyyju6eKeHReZJJaAFPSQlq9YaG7pO9VSggzTnyC+tsT+cv0KJgRNhoBNUODUeRTqWqw3oKIdvymnN292WYtCE9qm2bO8dAu2tCDasj6NK60skrTDPamLjxR6GgrE7TFh/xZqT/PZhqfkZrCD+vLWu1M4YAJ1jbYr30UueJ9muoeFd8MSbVV2dMoibg3julCQA35V2PKvLxgvdoxh2By/kDmf6VG/iMMHVznZeV7e5AvH+rM1oXze3CWPEjVfcJyIMQe3+zwBdygC29plzy2EjLUA4P2ipmpT+kGUyk8pbSpv12e7K77Kc8gMX+FRcGeFNccTAhgRNdHpbZ4PkPM5RtU+NO0du+CMWGEipkes2XEaA0+aRuKhEeRo+UPOOc8tRPNpD2wyMdwBgEeYnNfn3C373/aZwL9kH1+o9kSwd5uVOmtKXU+H8E6W4g
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: f0fec506-e8f8-4fb1-5a91-08dc6883b3bf
+X-MS-Exchange-CrossTenant-originalarrivaltime: 29 Apr 2024 19:36:44.5027
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: H3a3eZFfQFPaLjH4IVIO10v3HClLMTG3fEG/JCdYKRa0jH4L65unpvsn3I+9+shWjBT/IfTY7RdGG2lfiSUo5A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN8PR04MB6372
 
-On Mon, Apr 29, 2024 at 01:13:58PM +0200, Jens Wiklander wrote:
-> On Mon, Apr 29, 2024 at 12:45 PM Jens Wiklander
-> <jens.wiklander@linaro.org> wrote:
-> >
-> > On Mon, Apr 29, 2024 at 12:35 PM Manuel Traut <manut@mecka.net> wrote:
-> > >
-> > > On Mon, Apr 29, 2024 at 12:08:45PM +0200, Jens Wiklander wrote:
-> > > > On Mon, Apr 29, 2024 at 11:41 AM Manuel Traut <manut@mecka.net> wrote:
-> > > > >
-> > > > > On Fri, Apr 26, 2024 at 03:24:21PM +0200, Jens Wiklander wrote:
-> > > > > > On Thu, Apr 25, 2024 at 10:43 AM Manuel Traut <manut@mecka.net> wrote:
-> > > > > > >
-> > > > > > > On Mon, Apr 22, 2024 at 11:19:35AM +0200, Jens Wiklander wrote:
-> > > > > > > > Register eMMC RPMB partition with the RPMB subsystem and provide
-> > > > > > > > an implementation for the RPMB access operations abstracting
-> > > > > > > > the actual multi step process.
-> > > > > > > >
-> > > > > > > > Add a callback to extract the needed device information at registration
-> > > > > > > > to avoid accessing the struct mmc_card at a later stage as we're not
-> > > > > > > > holding a reference counter for this struct.
-> > > > > > > >
-> > > > > > > > Taking the needed reference to md->disk in mmc_blk_alloc_rpmb_part()
-> > > > > > > > instead of in mmc_rpmb_chrdev_open(). This is needed by the
-> > > > > > > > route_frames() function pointer in struct rpmb_ops.
-> > > > > > > >
-> > > > > > > > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> > > > > > > > Signed-off-by: Alexander Usyskin <alexander.usyskin@intel.com>
-> > > > > > > > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
-> > > > > > > > ---
-> > > > > > > >  drivers/mmc/core/block.c | 241 ++++++++++++++++++++++++++++++++++++++-
-> > > > > > > >  1 file changed, 239 insertions(+), 2 deletions(-)
-> > > > > > > >
-> > > > > > > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> > > > > > > > index 32d49100dff5..a7f126fbc605 100644
-> > > > > > > > --- a/drivers/mmc/core/block.c
-> > > > > > > > +++ b/drivers/mmc/core/block.c
-> > > > > > > > @@ -33,6 +33,7 @@
-> > > > > > > >  #include <linux/cdev.h>
-> > > > > > > >  #include <linux/mutex.h>
-> > > > > > > >  #include <linux/scatterlist.h>
-> > > > > > > > +#include <linux/string.h>
-> > > > > > > >  #include <linux/string_helpers.h>
-> > > > > > > >  #include <linux/delay.h>
-> > > > > > > >  #include <linux/capability.h>
-> > > > > > > > @@ -40,6 +41,7 @@
-> > > > > > > >  #include <linux/pm_runtime.h>
-> > > > > > > >  #include <linux/idr.h>
-> > > > > > > >  #include <linux/debugfs.h>
-> > > > > > > > +#include <linux/rpmb.h>
-> > > > > > > >
-> > > > > > > >  #include <linux/mmc/ioctl.h>
-> > > > > > > >  #include <linux/mmc/card.h>
-> > > > > > > > @@ -76,6 +78,48 @@ MODULE_ALIAS("mmc:block");
-> > > > > > > >  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
-> > > > > > > >  #define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
-> > > > > > > >
-> > > > > > > > +/**
-> > > > > > > > + * struct rpmb_frame - rpmb frame as defined by eMMC 5.1 (JESD84-B51)
-> > > > > > > > + *
-> > > > > > > > + * @stuff        : stuff bytes
-> > > > > > > > + * @key_mac      : The authentication key or the message authentication
-> > > > > > > > + *                 code (MAC) depending on the request/response type.
-> > > > > > > > + *                 The MAC will be delivered in the last (or the only)
-> > > > > > > > + *                 block of data.
-> > > > > > > > + * @data         : Data to be written or read by signed access.
-> > > > > > > > + * @nonce        : Random number generated by the host for the requests
-> > > > > > > > + *                 and copied to the response by the RPMB engine.
-> > > > > > > > + * @write_counter: Counter value for the total amount of the successful
-> > > > > > > > + *                 authenticated data write requests made by the host.
-> > > > > > > > + * @addr         : Address of the data to be programmed to or read
-> > > > > > > > + *                 from the RPMB. Address is the serial number of
-> > > > > > > > + *                 the accessed block (half sector 256B).
-> > > > > > > > + * @block_count  : Number of blocks (half sectors, 256B) requested to be
-> > > > > > > > + *                 read/programmed.
-> > > > > > > > + * @result       : Includes information about the status of the write counter
-> > > > > > > > + *                 (valid, expired) and result of the access made to the RPMB.
-> > > > > > > > + * @req_resp     : Defines the type of request and response to/from the memory.
-> > > > > > > > + *
-> > > > > > > > + * The stuff bytes and big-endian properties are modeled to fit to the spec.
-> > > > > > > > + */
-> > > > > > > > +struct rpmb_frame {
-> > > > > > > > +     u8     stuff[196];
-> > > > > > > > +     u8     key_mac[32];
-> > > > > > > > +     u8     data[256];
-> > > > > > > > +     u8     nonce[16];
-> > > > > > > > +     __be32 write_counter;
-> > > > > > > > +     __be16 addr;
-> > > > > > > > +     __be16 block_count;
-> > > > > > > > +     __be16 result;
-> > > > > > > > +     __be16 req_resp;
-> > > > > > > > +} __packed;
-> > > > > > > > +
-> > > > > > > > +#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Authentication Key */
-> > > > > > > > +#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write counter */
-> > > > > > > > +#define RPMB_WRITE_DATA        0x3    /* Write data to RPMB partition */
-> > > > > > > > +#define RPMB_READ_DATA         0x4    /* Read data from RPMB partition */
-> > > > > > > > +#define RPMB_RESULT_READ       0x5    /* Read result request  (Internal) */
-> > > > > > > > +
-> > > > > > > >  static DEFINE_MUTEX(block_mutex);
-> > > > > > > >
-> > > > > > > >  /*
-> > > > > > > > @@ -163,6 +207,7 @@ struct mmc_rpmb_data {
-> > > > > > > >       int id;
-> > > > > > > >       unsigned int part_index;
-> > > > > > > >       struct mmc_blk_data *md;
-> > > > > > > > +     struct rpmb_dev *rdev;
-> > > > > > > >       struct list_head node;
-> > > > > > > >  };
-> > > > > > > >
-> > > > > > > > @@ -2672,7 +2717,6 @@ static int mmc_rpmb_chrdev_open(struct inode *inode, struct file *filp)
-> > > > > > > >
-> > > > > > > >       get_device(&rpmb->dev);
-> > > > > > > >       filp->private_data = rpmb;
-> > > > > > > > -     mmc_blk_get(rpmb->md->disk);
-> > > > > > > >
-> > > > > > > >       return nonseekable_open(inode, filp);
-> > > > > > > >  }
-> > > > > > > > @@ -2682,7 +2726,6 @@ static int mmc_rpmb_chrdev_release(struct inode *inode, struct file *filp)
-> > > > > > > >       struct mmc_rpmb_data *rpmb = container_of(inode->i_cdev,
-> > > > > > > >                                                 struct mmc_rpmb_data, chrdev);
-> > > > > > > >
-> > > > > > > > -     mmc_blk_put(rpmb->md);
-> > > > > > > >       put_device(&rpmb->dev);
-> > > > > > > >
-> > > > > > > >       return 0;
-> > > > > > > > @@ -2703,10 +2746,165 @@ static void mmc_blk_rpmb_device_release(struct device *dev)
-> > > > > > > >  {
-> > > > > > > >       struct mmc_rpmb_data *rpmb = dev_get_drvdata(dev);
-> > > > > > > >
-> > > > > > > > +     rpmb_dev_unregister(rpmb->rdev);
-> > > > > > > > +     mmc_blk_put(rpmb->md);
-> > > > > > > >       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> > > > > > > >       kfree(rpmb);
-> > > > > > > >  }
-> > > > > > > >
-> > > > > > > > +static void free_idata(struct mmc_blk_ioc_data **idata, unsigned int cmd_count)
-> > > > > > > > +{
-> > > > > > > > +     unsigned int n;
-> > > > > > > > +
-> > > > > > > > +     for (n = 0; n < cmd_count; n++)
-> > > > > > > > +             kfree(idata[n]);
-> > > > > > > > +     kfree(idata);
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +static struct mmc_blk_ioc_data **alloc_idata(struct mmc_rpmb_data *rpmb,
-> > > > > > > > +                                          unsigned int cmd_count)
-> > > > > > > > +{
-> > > > > > > > +     struct mmc_blk_ioc_data **idata;
-> > > > > > > > +     unsigned int n;
-> > > > > > > > +
-> > > > > > > > +     idata = kcalloc(cmd_count, sizeof(*idata), GFP_KERNEL);
-> > > > > > > > +     if (!idata)
-> > > > > > > > +             return NULL;
-> > > > > > > > +     for (n = 0; n < cmd_count; n++) {
-> > > > > > > > +             idata[n] = kcalloc(1, sizeof(**idata), GFP_KERNEL);
-> > > > > > > > +             if (!idata[n]) {
-> > > > > > > > +                     free_idata(idata, n);
-> > > > > > > > +                     return NULL;
-> > > > > > > > +             }
-> > > > > > > > +             idata[n]->rpmb = rpmb;
-> > > > > > > > +     }
-> > > > > > > > +
-> > > > > > > > +     return idata;
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +static void set_idata(struct mmc_blk_ioc_data *idata, u32 opcode,
-> > > > > > > > +                   int write_flag, u8 *buf, unsigned int buf_bytes)
-> > > > > > > > +{
-> > > > > > > > +     /*
-> > > > > > > > +      * The size of an RPMB frame must match what's expected by the
-> > > > > > > > +      * hardware.
-> > > > > > > > +      */
-> > > > > > > > +     BUILD_BUG_ON(sizeof(struct rpmb_frame) != 512);
-> > > > > > > > +
-> > > > > > > > +     idata->ic.opcode = opcode;
-> > > > > > > > +     idata->ic.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> > > > > > > > +     idata->ic.write_flag = write_flag;
-> > > > > > > > +     idata->ic.blksz = sizeof(struct rpmb_frame);
-> > > > > > > > +     idata->ic.blocks = buf_bytes /  idata->ic.blksz;
-> > > > > > > > +     idata->buf = buf;
-> > > > > > >
-> > > > > > > I tested the series on a i.MX8MM with a eMMC connected via the imx-sdhci
-> > > > > > > controller. Reading from RPMB does not work. It ends in timeouts due to
-> > > > > > > no response from the SDHCI controller.
-> > > > > > >
-> > > > > > > If idata->buf is allocated here with kmalloc(buf_bytes, GFP_KERNEL) and
-> > > > > > > the content of buf is copied to the new allocated area, transfers succeed.
-> > > > > > >
-> > > > > > > Is it possible that idata->buf is not DMA capable? Any other ideas?
-> > > > > >
-> > > > > > Thanks for testing. I don't know, the idata->buf is allocated using
-> > > > > > alloc_pages_exact(nr_pages * PAGE_SIZE, GFP_KERNEL | __GFP_ZERO); in
-> > > > > > optee_pool_op_alloc_helper().
-> > > > >
-> > > > > Is this really true for idata->buf or isnt the complete RPMB frame memory
-> > > > > allocated like this and therefore idata->buf not page aligned?
-> > > >
-> > > > You're right.
-> > > >
-> > > > >
-> > > > > For RPMB via tee-supplicant the idata->buf is allocated within memdup_user
-> > > > > and therefore page aligned.
-> > > >
-> > > > Yes, that's a difference. Have you tested with page-aligned buffers to
-> > > > see if it helps?
-> > >
-> > > Yes, this helps. I tested with the following patch, but probably it can also
-> > > be solved during frame allocation in optee?
-> >
-> > Great, thanks for confirming. Yes, we should fix that in the secure world.
-> 
-> I've pushed an update to
-> https://github.com/jenswi-linaro/optee_os/tree/rpmb_probe
-
-Thanks for taking care. I applied the additional patch
-
-https://github.com/OP-TEE/optee_os/commit/cdbe8d149f1eed62bc8ef9137d208858bb7691d8.patch
-
-to optee_os and removed the kmalloc dynalloc hack mentioned before from the
-kernel.
-
-The issue persists, please see below.
-
-Thanks for your support
-Manuel
-
-E/TC:? 0
-E/TC:? 0 TA panicked with code 0xffff0006
-[   18.661761] mmc0: Timeout waiting for hardware interrupt.
-[   18.661776] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-E/LD:  Status of TA bc50d971-d4c9-42c4-82cb-343fb7f37896
-E/LD:   arch: arm
-E/LD:  region  0: va 0x40005000 pa 0xbe81b000 size 0x002000 flags rw-s (ldelf)
-E/LD:  region  1: va 0x40007000 pa 0xbe81d000 size 0x008000 flags r-xs (ldelf)
-E/LD:  region  2: va 0x4000f000 pa 0xbe825000 size 0x001000 flags rw-s (ldelf)
-E/LD:  region  3: va 0x40010000 pa 0xbe826000 size 0x004000 flags rw-s (ldelf)
-E/LD:  region  4: va 0x40014000 pa 0xbe82a000 size 0x001000 flags r--s
-E/LD:  region  5: va 0x40015000 pa 0xbe88b000 size 0x011000 flags rw-s (stack)
-E/LD:  region  6: va 0x40026000 pa 0x534f8000 size 0x002000 flags rw-- (param)
-E/LD:  region  7: va 0x40035000 pa 0x00001000 size 0x042000 flags r-xs [0]
-E/LD:  region  8: va 0x40077000 pa 0x00043000 size 0x01e000 flags rw-s [0]
-E/LD:   [0] bc50d971-d4c9-42c4-82cb-343fb7f37896 @ 0x40035000
-E/LD:  Call stack:
-E/LD:   0x40064d48
-E/LD:   0x40060c17
-E/LD:   0x40037d81
-E/LD:   0x40038223
-E/LD:   0x4004d343
-E/LD:   0x4005d52d
-E/LD:   0x4003885f
-E/LD:   0x40064cd9
-E/LD:   0x4006a8a3
-E/LD:   0x4005d68c
-[   18.661782] mmc0: sdhci: Sys addr:  0x00000008 | Version:  0x00000002
-[   18.661790] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000006
-[   18.661796] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0000003b
-[   18.661802] mmc0: sdhci: Present:   0x01088a8e | Host ctl: 0x00000031
-[   18.661808] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-[   18.661814] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-[   18.661820] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-[   18.661825] mmc0: sdhci: Int enab:  0x117f100b | Sig enab: 0x117f100b
-[   18.661831] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
-[   18.661837] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x0000b407
-[   18.661842] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00ffffff
-[   18.661848] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
-[   18.661856] mmc0: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00000900
-[   18.661862] mmc0: sdhci: Host ctl2: 0x00000008
-[   18.661868] mmc0: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0x412c0200
-[   18.661874] mmc0: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS DUMP =========
-[   18.661879] mmc0: sdhci-esdhc-imx: cmd debug status:  0x2120
-[   18.661885] mmc0: sdhci-esdhc-imx: data debug status:  0x22d0
-[   18.661893] mmc0: sdhci-esdhc-imx: trans debug status:  0x23c0
-[   18.661900] mmc0: sdhci-esdhc-imx: dma debug status:  0x2400
-[   18.661907] mmc0: sdhci-esdhc-imx: adma debug status:  0x25b4
-[   18.661915] mmc0: sdhci-esdhc-imx: fifo debug status:  0x2650
-[   18.661922] mmc0: sdhci-esdhc-imx: async fifo debug status:  0x2760
-[   18.661929] mmc0: sdhci: ============================================
-[   18.662615] sdhci-esdhc-imx 30b40000.mmc: __mmc_blk_ioctl_cmd: data error -110
-[   18.772374] tpm tpm0: ftpm_tee_tpm_op_send: SUBMIT_COMMAND invoke error: 0xffff3024
-[   18.772393] tpm tpm0: tpm_try_transmit: send(): error -53212
-[   18.772447] tpm tpm0: ftpm_tee_tpm_op_send: SUBMIT_COMMAND invoke error: 0xffff3024
-[   18.772455] tpm tpm0: tpm_try_transmit: send(): error -53212
-[   18.772465] ftpm-tee tpm: ftpm_tee_probe: tpm_chip_register failed with rc=-53212
-[   18.772545] ftpm-tee: probe of tpm failed with error -53212
-[   19.430011] caam_jr 30902000.jr: 20000254: CCB: desc idx 2: RNG: Not instantiated
-[   28.901794] mmc0: Timeout waiting for hardware interrupt.
-[  *** ] (1 of 2) Job dev-tpmrm0.device/start running (37s / 1min 30s)
-[ ***  ] (2 of 2) Job dev-tpm0.device/start running (47s / 1min 30s)
-[ ***  ] (2 of 2) Job dev-tpm0.device/start
-
+PiA+ID4gPg0KPiA+ID4gPiBJcyBpdCBwb3NzaWJsZSB0aGF0IGlkYXRhLT5idWYgaXMgbm90IERN
+QSBjYXBhYmxlPyBBbnkgb3RoZXIgaWRlYXM/DQo+ID4gPg0KPiA+ID4gVGhhbmtzIGZvciB0ZXN0
+aW5nLiBJIGRvbid0IGtub3csIHRoZSBpZGF0YS0+YnVmIGlzIGFsbG9jYXRlZCB1c2luZw0KPiA+
+ID4gYWxsb2NfcGFnZXNfZXhhY3QobnJfcGFnZXMgKiBQQUdFX1NJWkUsIEdGUF9LRVJORUwgfCBf
+X0dGUF9aRVJPKTsgaW4NCj4gPiA+IG9wdGVlX3Bvb2xfb3BfYWxsb2NfaGVscGVyKCkuDQo+ID4N
+Cj4gPiBJcyB0aGlzIHJlYWxseSB0cnVlIGZvciBpZGF0YS0+YnVmIG9yIGlzbnQgdGhlIGNvbXBs
+ZXRlIFJQTUIgZnJhbWUNCj4gPiBtZW1vcnkgYWxsb2NhdGVkIGxpa2UgdGhpcyBhbmQgdGhlcmVm
+b3JlIGlkYXRhLT5idWYgbm90IHBhZ2UgYWxpZ25lZD8NCj4gDQo+IFlvdSdyZSByaWdodC4NCk1h
+eWJlIGFkZCBhbiBhc3NlcnQgb2YgUEFHRV9BTElHTkVEKGlkYXRhLT5idWYpPw0KDQpUaGFua3Ms
+DQpBdnJpDQoNCj4gDQo+ID4NCj4gPiBGb3IgUlBNQiB2aWEgdGVlLXN1cHBsaWNhbnQgdGhlIGlk
+YXRhLT5idWYgaXMgYWxsb2NhdGVkIHdpdGhpbg0KPiA+IG1lbWR1cF91c2VyIGFuZCB0aGVyZWZv
+cmUgcGFnZSBhbGlnbmVkLg0KPiANCj4gWWVzLCB0aGF0J3MgYSBkaWZmZXJlbmNlLiBIYXZlIHlv
+dSB0ZXN0ZWQgd2l0aCBwYWdlLWFsaWduZWQgYnVmZmVycyB0byBzZWUgaWYgaXQNCj4gaGVscHM/
+DQo=
