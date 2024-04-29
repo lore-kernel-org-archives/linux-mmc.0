@@ -1,421 +1,99 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0791DEED4;
-	Mon, 29 Apr 2024 07:08:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 296D36FCB
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Apr 2024 07:09:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714374496; cv=none; b=VyLEdclmXUGSvqA1W6+cBt22ii9thrFI/hK7h6//UC2x0Q28hjzGJUN7y5Tn9whHa7sM7sibMsPCfBPo3OFhPz9vZudKNCXt0Rdm7heXIcbmlMKJlDlWV0wnvB1R16ND+pqxliQPBXT7xnwuE4rwX0ke/JynQkQq9rC7SO6u3+c=
+	t=1714374554; cv=none; b=a3SrJh21axs5wsjlvZ80BoFn31rjALGbLVS81NpoZ+1jOOTT55Q5RSfGs3+kJTv7ydTOAWVmZ3jFppO+s0Asths7eiFlQuy4jlK9QOXPdrPH4dimqNuI2pZsW6rTJVTQrmCmn3Jy3CdFDbNH+4yQ3i2jAZQRo5k6f2uPvbTsXgA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714374496; c=relaxed/simple;
-	bh=C2BxIS0N3dmWzQ9cgH+7pz/lzpzb+iCAx2gAwbADPHY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=hC1nvpFcUzSmfEreWQ3MvbNdOhhw8WdJYDDBIC5uo5E7yVwySXbINEvVt+VUPEwozZlrMitjJLSI/S8wMaA0UXamG1cEMIahZLljAN5xVW5js3FpmcCSjbPd1iiaquwM7ZDMzy4Z6IsWx/Nei+Pq8kDuWTIjkd5e6Tx6PuWUdBY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Lc/I3oyZ; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1714374554; c=relaxed/simple;
+	bh=oBwI1sD+Fose8cRRx5ZE+F88sYAmiYTA1ItXxBYLO9w=;
+	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
+	 Message-ID:Content-Type; b=Z4Vh4QIPwlseah0EQx92dnSyjx3F0MmSGvTsXPiA7M41rK8ftFPR6RQsfKAb/VFonon+8st0Gy/xra/3W4MXO0/ZP/ed0/okXjrJdROCUvE3PdfAabFaaf3Ji8U2mINCBNsquamqiBRLjp4o2/27C56fvpgnWVS7PHVsMf07Lb4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=m52dl93g; arc=none smtp.client-ip=116.203.91.91
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Lc/I3oyZ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1714374494; x=1745910494;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=C2BxIS0N3dmWzQ9cgH+7pz/lzpzb+iCAx2gAwbADPHY=;
-  b=Lc/I3oyZH5tCb57cPVvBlKgGbySUDYNXrS7Pfm/hgb6ZIcpQ8JTGTFPg
-   JvUIpguLnvqQak+9h7SiDP5S7chdyuLm9S1Z01NOvxL9YTWcuvMoSwHpd
-   fmvRQur0BedGPIMDjmDu23x4XL4YBeJeM+tCINWfGfdFprO4HT5g/BKr2
-   796f0nypTEnIq00g5w+VGL531AHqpTxes426yakCWCFBPqSo3Kn3Qu/RZ
-   hXjoz+MNhNa3IM8RprwIBeJlAEPi1PsmY3/s1RIwmVW415QZHfiUAUDhm
-   u+KtOqRhbnKzh9FfsBCyG4Bp2Z0jCZTN0r6XEPc3F4P+BjE4vKientiHZ
-   w==;
-X-CSE-ConnectionGUID: QKMksg49RzqKDnoeKSDOvQ==
-X-CSE-MsgGUID: xU+aLn5SRpigVnaxbyrktw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11057"; a="27475166"
-X-IronPort-AV: E=Sophos;i="6.07,239,1708416000"; 
-   d="scan'208";a="27475166"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Apr 2024 00:08:13 -0700
-X-CSE-ConnectionGUID: FYnyvPCcR1mW/gt0AA+Tog==
-X-CSE-MsgGUID: tjGHuoAcSHqLPE0fsKe/vQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.07,239,1708416000"; 
-   d="scan'208";a="26022810"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.208.71])
-  by fmviesa007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Apr 2024 00:08:07 -0700
-Message-ID: <ed900af1-f090-49a9-bc7e-363a28a4ac2b@intel.com>
-Date: Mon, 29 Apr 2024 10:08:04 +0300
+	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="m52dl93g"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/1] mmc: sdhci-of-dwcmshc: add callback functions for
- dwcmshc_priv
-To: Chen Wang <unicornxw@gmail.com>, ulf.hansson@linaro.org,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jszhang@kernel.org,
- dfustini@baylibre.com, yifeng.zhao@rock-chips.com, shawn.lin@rock-chips.com,
- chao.wei@sophgo.com, haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com,
- tingzhu.wang@sophgo.com, guoren@kernel.org, inochiama@outlook.com,
- unicorn_wang@outlook.com
-References: <cover.1714270290.git.unicorn_wang@outlook.com>
- <5bb708cc830684676dede5f44ee22c7fd03300b7.1714270290.git.unicorn_wang@outlook.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <5bb708cc830684676dede5f44ee22c7fd03300b7.1714270290.git.unicorn_wang@outlook.com>
-Content-Type: text/plain; charset=UTF-8
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
+	t=1714374550;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Sn/F6ybE1nxOiK0RADlCSlfvvLYyScRFZdtuB3RdW/U=;
+	b=m52dl93g+kItg0EmEIhGpwA0gMT/npJ5RUVUgPr1//NKCHmYzuQPfgxBoUnLJkSAzMAipL
+	dBsp6Dki843qY7Ms/p31oneuYdHaYoeb3zejeXxj/0+t8crse0K/NpUQm9eemw1LrYFDNk
+	yjoWL71tJxLyyZ0CQdsihIUUcTPOF+HwICV2zhuJKAdjrGqcjU2pExb2T/acNe/K7YR4zY
+	np4ksM/N9S2icV2Q+7jTZ76AzodVQjaUAdn/4a9oSvu9ubx24DTRy6UpwqBeoUYgdBTSCm
+	Njb4oHFISGrp62pTfypzV4/v+8ZAMKoen86BArgn7fpGnDGdahkQmLKCqxG2UQ==
+Date: Mon, 29 Apr 2024 09:09:09 +0200
+From: Dragan Simic <dsimic@manjaro.org>
+To: Felix Qin <xiaokeqinhealth@126.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Avri Altman
+ <avri.altman@wdc.com>
+Subject: Re: [PATCH v3 1/1] mmc: core: increase the timeout period of the
+ ACMD41 command.
+In-Reply-To: <20240429063847.162247-1-xiaokeqinhealth@126.com>
+References: <20240429063847.162247-1-xiaokeqinhealth@126.com>
+Message-ID: <a8d9ed3ae3b6d884235594e31baa28ff@manjaro.org>
+X-Sender: dsimic@manjaro.org
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
 Content-Transfer-Encoding: 7bit
+Authentication-Results: ORIGINATING;
+	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
 
-On 28/04/24 05:32, Chen Wang wrote:
-> From: Chen Wang <unicorn_wang@outlook.com>
+Hello Felix,
+
+On 2024-04-29 08:38, Felix Qin wrote:
+> Extensive testing has shown that some specific SD cards require an
+> increased command timeout to be successfully initialized.
 > 
-> The current framework is not easily extended to support new SOCs.
-> For example, in the current code we see that the SOC-level
-> structure `rk35xx_priv` and related logic are distributed in
-> functions such as dwcmshc_probe/dwcmshc_remove/dwcmshc_suspend/......,
-> which is inappropriate.
+> More info:
+> Platform: Rockchip SoC + DW Multimedia host Controller
+> SD card: Xvv microSD CMH34A17TMA12 (Made in Korea)
+> Note: The SD card is custom-made by the customer in collaboration
+> with the wafer foundry.
 > 
-> The solution is to abstract some possible common operations of soc
-> into virtual members of `dwcmshc_priv`. Each soc implements its own
-> corresponding callback function and registers it in init function.
-> dwcmshc framework is responsible for calling these callback functions
-> in those dwcmshc_xxx functions.
-> 
-> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
+> Signed-off-by: Felix Qin <xiaokeqinhealth@126.com>
+> Acked-by: Avri Altman <avri.altman@wdc.com>
+> Reviewed-by: Dragan Simic <dsimic@manjaro.org>
+
+Huh, the v3 looks nowhere like the v2, so please consider
+my Reviewed-by tag revoked until I get some time to check what
+actually happened to the patch.
+
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 152 +++++++++++++++++-----------
->  1 file changed, 91 insertions(+), 61 deletions(-)
+> v2: Add more info
+> v3: Based on the __mmc_poll_for_busy API for modification
+> ---
+>  drivers/mmc/core/sd_ops.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 39edf04fedcf..525f954bcb65 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -214,6 +214,10 @@ struct dwcmshc_priv {
->  	void *priv; /* pointer to SoC private stuff */
->  	u16 delay_line;
->  	u16 flags;
-> +
-> +	void (*soc_postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
-> +	int (*soc_clks_enable)(struct dwcmshc_priv *dwc_priv);
-> +	void (*soc_clks_disable)(struct dwcmshc_priv *dwc_priv);
-
-Normally the ops would be part of platform data.  For example,
-sdhci-of-arasan.c has:
-
-	struct sdhci_arasan_of_data {
-		const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
-		const struct sdhci_pltfm_data *pdata;
-		const struct sdhci_arasan_clk_ops *clk_ops;
-	};
-
-And then:
-
-	static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
-		.soc_ctl_map = &rk3399_soc_ctl_map,
-		.pdata = &sdhci_arasan_cqe_pdata,
-		.clk_ops = &arasan_clk_ops,
-	};
-	etc
-
-	static const struct of_device_id sdhci_arasan_of_match[] = {
-		/* SoC-specific compatible strings w/ soc_ctl_map */
-		{
-			.compatible = "rockchip,rk3399-sdhci-5.1",
-			.data = &sdhci_arasan_rk3399_data,
-		},
-		etc
-
-So, say:
-
-struct dwcmshc_pltfm_data {
-	const struct sdhci_pltfm_data *pltfm_data;
-	void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
-	int  (*clks_enable)(struct dwcmshc_priv *dwc_priv);
-	void (*clks_disable)(struct dwcmshc_priv *dwc_priv);
-}
-
-Or if the ops are mostly the same, it might be more convenient to
-have them in their own structure:
-
-struct dwcmshc_pltfm_data {
-	const struct sdhci_pltfm_data *pltfm_data;
-	const struct dwcmshc_ops *ops;
-}
-
->  };
->  
->  /*
-> @@ -1033,10 +1037,40 @@ static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *
->  	host->mmc->caps2 &= ~(MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD);
->  }
->  
-> -static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-> +static int dwcmshc_rk35xx_clks_enable(struct dwcmshc_priv *dwc_priv)
->  {
-> -	int err;
->  	struct rk35xx_priv *priv = dwc_priv->priv;
-> +	int ret = 0;
-> +
-> +	if (priv)
-> +		ret = clk_bulk_prepare_enable(RK35xx_MAX_CLKS, priv->rockchip_clks);
-> +	return ret;
-> +}
-> +
-> +static void dwcmshc_rk35xx_clks_disable(struct dwcmshc_priv *dwc_priv)
-> +{
-> +	struct rk35xx_priv *priv = dwc_priv->priv;
-> +
-> +	if (priv)
-> +		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
-> +					   priv->rockchip_clks);
-> +}
-> +
-> +static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
-
-Avoid forward declarations if possible.  If necessary, it is
-preferable to move the function definition.
-
-> +static int dwcmshc_rk35xx_init(struct device *dev,
-> +			       struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-
-This patch looks like it might be doing too much.  Please consider
-splitting it so reorganising the code is separate from adding the
-callbacks.
-
-> +{
-> +	int err;
-> +	struct rk35xx_priv *priv;
-> +
-> +	priv = devm_kzalloc(dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
-> +	if (!priv)
-> +		return -ENOMEM;
-> +
-> +	if (of_device_is_compatible(dev->of_node, "rockchip,rk3588-dwcmshc"))
-> +		priv->devtype = DWCMSHC_RK3588;
-> +	else
-> +		priv->devtype = DWCMSHC_RK3568;
->  
->  	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
->  	if (IS_ERR(priv->reset)) {
-> @@ -1071,6 +1105,11 @@ static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
->  	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
->  	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
->  
-> +	dwc_priv->priv = priv;
-> +	dwc_priv->soc_postinit = dwcmshc_rk35xx_postinit;
-> +	dwc_priv->soc_clks_enable = dwcmshc_rk35xx_clks_enable;
-> +	dwc_priv->soc_clks_disable = dwcmshc_rk35xx_clks_disable;
-> +
->  	return 0;
->  }
->  
-> @@ -1088,6 +1127,35 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
->  	}
->  }
->  
-> +static int dwcmshc_th1520_init(struct device *dev,
-> +			       struct sdhci_host *host,
-> +			       struct dwcmshc_priv *dwc_priv)
-> +{
-> +	dwc_priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> +
-> +	if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
-> +	    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
-> +	    device_property_read_bool(dev, "mmc-hs400-1_8v"))
-> +		dwc_priv->flags |= FLAG_IO_FIXED_1V8;
-> +	else
-> +		dwc_priv->flags &= ~FLAG_IO_FIXED_1V8;
-> +
-> +	/*
-> +	 * start_signal_voltage_switch() will try 3.3V first
-> +	 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
-> +	 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> +	 * in sdhci_start_signal_voltage_switch().
-> +	 */
-> +	if (dwc_priv->flags & FLAG_IO_FIXED_1V8) {
-> +		host->flags &= ~SDHCI_SIGNALING_330;
-> +		host->flags |=  SDHCI_SIGNALING_180;
-> +	}
-> +
-> +	sdhci_enable_v4_mode(host);
-> +
-> +	return 0;
-> +}
-> +
->  static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->  	{
->  		.compatible = "rockchip,rk3588-dwcmshc",
-> @@ -1134,7 +1202,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_host *host;
->  	struct dwcmshc_priv *priv;
-> -	struct rk35xx_priv *rk_priv = NULL;
->  	const struct sdhci_pltfm_data *pltfm_data;
->  	int err;
->  	u32 extra, caps;
-> @@ -1191,46 +1258,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	host->mmc_host_ops.execute_tuning = dwcmshc_execute_tuning;
->  
->  	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
-> -		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
-> -		if (!rk_priv) {
-> -			err = -ENOMEM;
-> -			goto err_clk;
-> -		}
-> -
-> -		if (of_device_is_compatible(pdev->dev.of_node, "rockchip,rk3588-dwcmshc"))
-> -			rk_priv->devtype = DWCMSHC_RK3588;
-> -		else
-> -			rk_priv->devtype = DWCMSHC_RK3568;
-> -
-> -		priv->priv = rk_priv;
-> -
-> -		err = dwcmshc_rk35xx_init(host, priv);
-> +		err = dwcmshc_rk35xx_init(dev, host, priv);
->  		if (err)
->  			goto err_clk;
->  	}
->  
->  	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-> -		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> -
-> -		if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
-> -		    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
-> -		    device_property_read_bool(dev, "mmc-hs400-1_8v"))
-> -			priv->flags |= FLAG_IO_FIXED_1V8;
-> -		else
-> -			priv->flags &= ~FLAG_IO_FIXED_1V8;
-> -
-> -		/*
-> -		 * start_signal_voltage_switch() will try 3.3V first
-> -		 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
-> -		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> -		 * in sdhci_start_signal_voltage_switch().
-> -		 */
-> -		if (priv->flags & FLAG_IO_FIXED_1V8) {
-> -			host->flags &= ~SDHCI_SIGNALING_330;
-> -			host->flags |=  SDHCI_SIGNALING_180;
-> -		}
-> -
-> -		sdhci_enable_v4_mode(host);
-> +		err = dwcmshc_th1520_init(dev, host, priv);
-> +		if (err)
-> +			goto err_clk;
->  	}
->  
->  #ifdef CONFIG_ACPI
-> @@ -1260,8 +1296,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  		dwcmshc_cqhci_init(host, pdev);
->  	}
->  
-> -	if (rk_priv)
-> -		dwcmshc_rk35xx_postinit(host, priv);
-> +	if (priv->soc_postinit)
-> +		priv->soc_postinit(host, priv);
->  
->  	err = __sdhci_add_host(host);
->  	if (err)
-> @@ -1279,9 +1315,9 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  err_clk:
->  	clk_disable_unprepare(pltfm_host->clk);
->  	clk_disable_unprepare(priv->bus_clk);
-> -	if (rk_priv)
-> -		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
-> -					   rk_priv->rockchip_clks);
-> +	if (priv->soc_clks_disable)
-> +		priv->soc_clks_disable(priv);
-> +
->  free_pltfm:
->  	sdhci_pltfm_free(pdev);
->  	return err;
-> @@ -1303,7 +1339,6 @@ static void dwcmshc_remove(struct platform_device *pdev)
->  	struct sdhci_host *host = platform_get_drvdata(pdev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -	struct rk35xx_priv *rk_priv = priv->priv;
->  
->  	pm_runtime_get_sync(&pdev->dev);
->  	pm_runtime_disable(&pdev->dev);
-> @@ -1315,9 +1350,9 @@ static void dwcmshc_remove(struct platform_device *pdev)
->  
->  	clk_disable_unprepare(pltfm_host->clk);
->  	clk_disable_unprepare(priv->bus_clk);
-> -	if (rk_priv)
-> -		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
-> -					   rk_priv->rockchip_clks);
-> +	if (priv->soc_clks_disable)
-> +		priv->soc_clks_disable(priv);
-> +
->  	sdhci_pltfm_free(pdev);
->  }
->  
-> @@ -1327,7 +1362,6 @@ static int dwcmshc_suspend(struct device *dev)
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -	struct rk35xx_priv *rk_priv = priv->priv;
->  	int ret;
->  
->  	pm_runtime_resume(dev);
-> @@ -1346,9 +1380,8 @@ static int dwcmshc_suspend(struct device *dev)
->  	if (!IS_ERR(priv->bus_clk))
->  		clk_disable_unprepare(priv->bus_clk);
->  
-> -	if (rk_priv)
-> -		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
-> -					   rk_priv->rockchip_clks);
-> +	if (priv->soc_clks_disable)
-> +		priv->soc_clks_disable(priv);
->  
->  	return ret;
->  }
-> @@ -1358,7 +1391,6 @@ static int dwcmshc_resume(struct device *dev)
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -	struct rk35xx_priv *rk_priv = priv->priv;
->  	int ret;
->  
->  	ret = clk_prepare_enable(pltfm_host->clk);
-> @@ -1371,29 +1403,27 @@ static int dwcmshc_resume(struct device *dev)
->  			goto disable_clk;
->  	}
->  
-> -	if (rk_priv) {
-> -		ret = clk_bulk_prepare_enable(RK35xx_MAX_CLKS,
-> -					      rk_priv->rockchip_clks);
-> +	if (priv->soc_clks_enable) {
-> +		ret = priv->soc_clks_enable(priv);
->  		if (ret)
->  			goto disable_bus_clk;
->  	}
->  
->  	ret = sdhci_resume_host(host);
->  	if (ret)
-> -		goto disable_rockchip_clks;
-> +		goto disable_soc_clks;
->  
->  	if (host->mmc->caps2 & MMC_CAP2_CQE) {
->  		ret = cqhci_resume(host->mmc);
->  		if (ret)
-> -			goto disable_rockchip_clks;
-> +			goto disable_soc_clks;
->  	}
->  
->  	return 0;
->  
-> -disable_rockchip_clks:
-> -	if (rk_priv)
-> -		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
-> -					   rk_priv->rockchip_clks);
-> +disable_soc_clks:
-> +	if (priv->soc_clks_disable)
-> +		priv->soc_clks_disable(priv);
->  disable_bus_clk:
->  	if (!IS_ERR(priv->bus_clk))
->  		clk_disable_unprepare(priv->bus_clk);
-
+> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+> index 3ce1ff336826..a1c028303ba7 100644
+> --- a/drivers/mmc/core/sd_ops.c
+> +++ b/drivers/mmc/core/sd_ops.c
+> @@ -19,8 +19,13 @@
+>  #include "sd_ops.h"
+>  #include "mmc_ops.h"
+> 
+> +/*
+> + * Extensive testing has shown that some specific SD cards
+> + * require an increased command timeout to be successfully
+> + * initialized.
+> + */
+>  #define SD_APP_OP_COND_PERIOD_US	(10 * 1000) /* 10ms */
+> -#define SD_APP_OP_COND_TIMEOUT_MS	1000 /* 1s */
+> +#define SD_APP_OP_COND_TIMEOUT_MS	2000 /* 2s */
+> 
+>  struct sd_app_op_cond_busy_data {
+>  	struct mmc_host *host;
